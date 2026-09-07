@@ -9,11 +9,11 @@
 regex — mà ở `MOI` hai nhóm ấy là cặp số **CA**. Cặp số **đột biến** nằm ngoài nhóm bắt nên **không
 bao giờ được nhìn tới**. Đo 17:45Z 06-09-2026 trên `1b3caa1`, gọi thẳng hàm:
 
-| đầu vào (nền Linux) | hôm nay | đúng ra |
+| đầu vào (nền Linux; mẫu `pretooluse` đòi cả dòng kết `TONG: DAT` — bản đầu của bảng bỏ dòng ấy nên hai hàng đầu thật ra trả `False`, finding P2 `issue-chep-nham-du-lieu-va-chan-doan-cu` lượt 6) | hôm nay | đúng ra |
 |---|---|---|
-| `TONG: CA 39/39 dat · DOT BIEN 34/34 bi giet` | `True` | `True` |
-| `TONG: CA 39/39 dat · DOT BIEN 0/0 bi giet` | **`True`** ⛔ | `False` |
-| `TONG: CA 0/39 dat · DOT BIEN 34/34 bi giet` | `False` | `False` |
+| `TONG: CA 39/39 dat · DOT BIEN 34/34 bi giet` + `TONG: DAT` | `True` | `True` |
+| `TONG: CA 39/39 dat · DOT BIEN 0/0 bi giet` + `TONG: DAT` | **`True`** ⛔ | `False` |
+| `TONG: CA 0/39 dat · DOT BIEN 34/34 bi giet` + `TONG: DAT` | `False` | `False` |
 
 `DOT BIEN 0/0 bi giet` là đúng hình dạng *"tập rỗng thoả `not song`"* mà bài học **#319** sinh ra để
 chặn. Lỗ có sẵn **từ trước** #456: #456 bịt phía **Windows** và **cố ý không** bịt phía Linux vì M4
@@ -69,15 +69,22 @@ Không formatter hiện có in ca nào trong năm ca ấy.
 
 Ca 5000 chữ số nay có **tiêu chí A9** riêng: `chay_moi` phải trả `1` và **không ném ngoại lệ**, số mục
 được xét = 8. Lý do là ngoại lệ không bắt **giết cả bộ** ⇒ mất phán quyết của 7 định dạng còn lại.
-Nói cho đúng mức: đó là **fail-closed** (`rc=1` ⇒ cổng ĐỎ), **không** phải cổng vắng mặt — trên cây
-hiện tại (BASE) cùng chuỗi ấy cho `chay_moi` trả `1` mà **không ném gì**.
+Nói cho đúng mức: đó là **fail-closed** (`rc=1` ⇒ cổng ĐỎ), **không** phải cổng vắng mặt. **Đính chính
+theo finding P2 `a9-khai-sai-base-ngoai-le` (lượt 6):** BASE cũng gọi `int()` trên nhóm bắt, nên số
+5000 chữ số nằm ở cặp **CA** làm BASE ném `ValueError` y hệt H (reviewer đo cả hai vế: `BASE=H=ValueError`);
+BASE chỉ trả `1` mà không ném khi số dài nằm ở cặp **đột biến** — vùng BASE không nhìn tới. A9 vì vậy là
+tiêu chí chẩn đoán cho H, không phải một hồi quy so với BASE.
 
 ## Phạm vi
 
 **1 tệp**: `.claude/dev/ci_dang_ky_test.py`. `rg -n 'bang_chung_xanh'` ngoài tệp ấy ⇒ **0** kết quả.
-**Không sửa một ký tự nào trong `MOI`/`MOI_WINDOWS`** — giữ nguyên chúng là thứ giữ được hai chốt
-`p456-mau-linux-KHONG-DOI-so-voi-base` và `p456-linux-A-B-tung-dau-vao-khop-base` do cross-review
-#456 sinh ra. Ca `p456-linux-nhan-0-tren-0-Y-HET-base` phải **đảo chiều và đổi tên**, không bị xoá.
+**`MOI`/`MOI_WINDOWS` theo đúng thiết kế H của đặc tả** (bản đầu của Issue viết *"không sửa một ký tự nào"* —
+trái với chính đặc tả, finding P1 `issue-lo-giu-rang-buoc-cu` lượt 6): **chuỗi regex `SPAN` giữ NGUYÊN
+VĂN 8/8**, còn **kiểu giá trị đổi** thành cặp `(SPAN, TONG)` (mục *"Thiết kế H"* luật 1–2). Ba chốt của
+cross-review #456 được **neo lại** theo mục *"Ca đang khoá"* của đặc tả: `p456-mau-linux-KHONG-DOI-so-voi-base`
+so phần `SPAN` (`MOI[_P456][0] == _MAU_BASE456`) + hằng canonical của `TONG`;
+`p456-linux-A-B-tung-dau-vao-khop-base` khai đúng ba giá trị mới thay vì `is` bằng nhau; ca
+`p456-linux-nhan-0-tren-0-Y-HET-base` **đảo chiều và đổi tên**, không bị xoá.
 
 ## Ràng buộc
 
@@ -89,10 +96,14 @@ hiện tại (BASE) cùng chuỗi ấy cho `chay_moi` trả `1` mà **không né
 
 ## HAI ĐIỀU KIỆN CHƯA THOẢ — đọc trước khi cấp lease
 
-**(1) Chưa có `cross_approved`.** Lượt cross-review thứ 5 **chết năm lần** vì hạ tầng: proxy egress
-của container remote **không cho `WebSocket upgrades`** (khai thẳng trong tài liệu proxy), mà đó là
-đường tái kết nối của `codex`. `assurance` vẫn dừng ở **lượt 4**: `changes_requested`, **1 P1 / 0 P2
-/ 1 P3**. P1 `span-rong-nuot-ti-le-vo-can` **coi như VẪN MỞ**. Biên bản đầy đủ:
+**(1) Chưa có `cross_approved`.** Lượt 5 **chết năm lần** vì hạ tầng — chữ ký `Connection refused (os error 111)` trên đường tái kết nối WebSocket của `codex`. **Đính chính 03:55Z 07-09-2026:** chẩn đoán *"proxy không cho `WebSocket upgrades`"* ở bản đầu là **SAI** (`codex doctor`: handshake `HTTP 101`, codex không đi qua proxy egress); nguyên nhân thật **CHƯA BIẾT**, đường codex **mở nhưng chập chờn**. Lượt 6 (07-09-2026, phóng có giám sát) đã chạy trọn. Kết quả lượt 6 trên
+`reviewed_sha` `2adb681`: `changes_requested`, 7 P1 / 4 P2. Cho packet này: P1 cũ
+`span-rong-nuot-ti-le-vo-can` xếp **VÁ HỜ về nghĩa vụ xác nhận** — reviewer tự dựng **1213 ca, 0 đỏ giả /
+0 bỏ sót** (Đ1 = 0 trên bộ ấy), Đ2 `0/6` bản in xanh thật bị bác, 2 bản in chưa đo được trong sandbox;
+giữ P1 vì hồ sơ **thiếu hiện vật để tái tính** (bộ 311 hàng, `do_h.py`, `law7.json`, `prior131.json`
+không có trong kho) chứ **không** vì tìm được phản chứng H mới. P3 `uoc-kich-thuoc-lo-con-tinh-nhan-ac`
+**ĐÃ VÁ THẬT**. Verdict: `ops/reviews/pr468-hoso-4-packet-review-6-codex-verdict.md`; bộ ca + harness
++ bản in của reviewer nằm TRONG KHO ở `ops/reviews/pr468-hoso-4-packet-review-6-codex/`. Biên bản lượt 5:
 `ops/reviews/GHI-NHAN-CROSS-REVIEW-LUOT5-KHONG-HOAN-TAT.md`.
 
 **(2) Tiền nhiệm còn giữ write set.** Đo **03:15Z 07-09-2026**:
@@ -119,6 +130,7 @@ nó nhìn thấy.
 ---
 
 **Đặc tả đóng băng:** `ops/specs/LO-319-LINUX-BANG-CHUNG-XANH.md` @ `b743f1798aba12615f903a11bd451c87e404814e`
-**`spec_sha256`:** `3aafd766abd1fdcfa55a23e2f2716efbcbd8dc2505ddf9fe6dc878074a675067`
+**`spec_sha256`:** `730033f0f534fb325598182e08068861e12033dcbf5e32484c4962b23b542caf`
 **`review_class`:** `sensitive` · **`base_sha`:** `1b3caa1` · **`depends_on`:** `GATE-TACH-JOB-CAT-CHI-PHI`
-**Lease nháp:** `ops/leases/lo-319-linux-bang-chung-xanh-exec-1-claude-20260906.yaml.nhap` (6 ô null)
+**Lease nháp:** `ops/leases/lo-319-linux-bang-chung-xanh-exec-1-claude-20260906.yaml.nhap` (5 ô null —
+`packet_issue` đã điền `464`; bản đầu ghi 6)

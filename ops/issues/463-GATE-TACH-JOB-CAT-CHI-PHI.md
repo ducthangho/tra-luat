@@ -77,17 +77,35 @@ QUẢ ĐO**, không phải thất bại — và phải ghi như vậy.
 
 ## HAI ĐIỀU KIỆN CHƯA THOẢ
 
-**(1) Chưa có `cross_approved`.** Lượt 5 chết năm lần vì hạ tầng (proxy không cho `WebSocket
-upgrades`). `assurance` dừng ở **lượt 4**: `changes_requested`, 1 P1 / 0 P2 / 1 P3. Biên bản:
+**(1) Chưa có `cross_approved`.** Lượt 5 chết năm lần vì hạ tầng (chữ ký `Connection refused (os
+error 111)` trên đường tái kết nối của `codex`; chẩn đoán "proxy không cho `WebSocket upgrades`" ở bản
+đầu là **SAI** — đính chính 03:55Z 07-09-2026, nguyên nhân thật **CHƯA BIẾT**). **Lượt 6** (Codex
+`gpt-6-astra`, 07-09-2026, phóng có giám sát, chạy trọn 1851 s) trên `reviewed_sha` `2adb681`:
+`changes_requested`, **7 P1 / 4 P2**, P3 cũ đóng; P1 cũ `span-rong-nuot-ti-le-vo-can` xếp **VÁ HỜ về
+nghĩa vụ xác nhận** (1213 ca / 0 đỏ giả / 0 bỏ sót, nhưng hồ sơ thiếu hiện vật để tái tính). Verdict:
+`ops/reviews/pr468-hoso-4-packet-review-6-codex-verdict.md`. Biên bản lượt 5:
 `ops/reviews/GHI-NHAN-CROSS-REVIEW-LUOT5-KHONG-HOAN-TAT.md`.
 
-**(2) Write set — đo 03:15Z 07-09-2026:** `ai-dang-giu .github/workflows/ci.yml` ⇒ **`NGƯỜI_GIỮ 0`**.
-Phép canh hai nguồn ref chạy trước: máy chủ **299** / cục bộ **299**, `comm -23` **rỗng** ⇒ không mù.
-Packet này **không bị chặn**, và nó là packet duy nhất trong bốn packet không bị chặn.
+**(2) Write set — đo trên CẢ HAI đường dẫn của lease, 05:52Z 07-09-2026** (bản đầu của mục này chỉ đo
+`ci.yml` rồi kết luận "không bị chặn" — finding P1 `issue-kiem-lease-sai-write-set` lượt 6):
+
+```
+ai-dang-giu .github/workflows/ci.yml          ⇒ NGƯỜI_GIỮ 1: gate-tach-job-cat-chi-phi-exec-1-claude-20260906
+ai-dang-giu .claude/dev/ci_dang_ky_test.py    ⇒ NGƯỜI_GIỮ 2: gate-tach-…  +  mutant-khong-chay-tren-windows-…
+```
+
+Bản lease #456 **trên `master`** chưa có bia mộ (bia mộ chỉ nằm trên nhánh của PR này), nên packet
+**BỊ CHẶN** cho tới khi PR #468 merge hoặc lease #456 hết hạn tự nhiên lúc `14:30:07Z 07-09-2026`.
+Phép canh hai nguồn ref chạy trước: máy chủ 299 ⊆ cục bộ 300 (`comm -23` rỗng) ⇒ không mù.
 
 ---
 
 **Đặc tả đóng băng:** `ops/specs/GATE-TACH-JOB-CAT-CHI-PHI.md` @ `b743f1798aba12615f903a11bd451c87e404814e`
 **`spec_sha256`:** `8cca700cba9c2312d05bf64eee3d4a5bda5317cb45e244ed22161b4ddcc83c62`
-**`base_sha`:** `1b3caa1` · **đi TRƯỚC** `LO-319` · `2A` · `2B`
-**Lease nháp:** `ops/leases/gate-tach-job-cat-chi-phi-exec-1-claude-20260906.yaml.nhap` (6 ô null)
+**`base_sha`:** `1b3caa1` lúc soạn; **ba mỏ neo trong lease đo lại lúc cấp = `d28c4b1`** (head `master`
+03:37:33Z 07-09-2026) · **đi TRƯỚC** `LO-319` · `2A` · `2B`
+**Lease ĐÃ CẤP:** `ops/leases/gate-tach-job-cat-chi-phi-exec-1-claude-20260906.yaml` (0 ô null; cấp
+03:37:33Z 07-09, hạn 03:37:33Z 08-09, uỷ quyền neo Mission #467)
+**Nền A1/A5 tái lập được TRONG KHO:** `ops/reviews/pr468-hoso-4-packet-review-6-codex/nen-a1-a5/`
+(13 run · 26 job · 1140 bước, `job.tsv` + `buoc.tsv` + `tinh.py`, đo 03:54Z 07-09-2026) — thay cho
+`buoc_master.tsv` mà đặc tả nhắc nhưng không có trong kho (finding P1 `thieu-hien-vat-quyet-dinh-h-va-chi-phi`).

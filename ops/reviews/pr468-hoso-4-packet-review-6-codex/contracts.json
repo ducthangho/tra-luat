@@ -1,0 +1,110 @@
+{
+  "measured_utc": "2026-09-07T06:26:32.079092+00:00",
+  "issue464_literal_samples": [
+    {
+      "input": "TONG: CA 39/39 dat · DOT BIEN 34/34 bi giet",
+      "claimed": true,
+      "base_actual": false,
+      "H_actual": false,
+      "base_with_terminator": true,
+      "H_with_terminator": true
+    },
+    {
+      "input": "TONG: CA 39/39 dat · DOT BIEN 0/0 bi giet",
+      "claimed": true,
+      "base_actual": false,
+      "H_actual": false,
+      "base_with_terminator": true,
+      "H_with_terminator": false
+    },
+    {
+      "input": "TONG: CA 0/39 dat · DOT BIEN 34/34 bi giet",
+      "claimed": false,
+      "base_actual": false,
+      "H_actual": false,
+      "base_with_terminator": false,
+      "H_with_terminator": false
+    }
+  ],
+  "issue465_wrong_path_exists": false,
+  "issue465_true_path_exists": true,
+  "new_MOI_equals_old": {
+    ".claude/dev/chon_reviewer_test.py": false,
+    ".claude/dev/gh_readback_test.py": false,
+    ".claude/dev/mcp_gh_test.py": false,
+    ".claude/dev/mcp_github_doc_test.py": false,
+    ".claude/dev/probe_mang_test.py": false,
+    ".claude/hooks/pretooluse_guard_test.py": false,
+    ".claude/hooks/subagent_ghi_detect_test.py": false,
+    "ops/nhanh_don_duoc_test.py": false
+  },
+  "old_SPAN_preserved": {
+    ".claude/dev/chon_reviewer_test.py": true,
+    ".claude/dev/gh_readback_test.py": true,
+    ".claude/dev/mcp_gh_test.py": true,
+    ".claude/dev/mcp_github_doc_test.py": true,
+    ".claude/dev/probe_mang_test.py": true,
+    ".claude/hooks/pretooluse_guard_test.py": true,
+    ".claude/hooks/subagent_ghi_detect_test.py": true,
+    "ops/nhanh_don_duoc_test.py": true
+  },
+  "ruff_consumer_baseline": [
+    [],
+    3
+  ],
+  "ruff_consumer_split": [
+    [
+      "CI không provision Ruff trước test registry"
+    ],
+    3
+  ],
+  "split_jobs": 3,
+  "split_setup_lengths": {
+    "gate": 9,
+    "gate-registry": 9,
+    "gate-packet-loop": 9
+  },
+  "printed_job_arithmetic": {
+    "11": {
+      "n": 11,
+      "min": 40.2,
+      "max": 50.48,
+      "range": 10.279999999999994,
+      "median": 46.02,
+      "mean": 45.837272727272726,
+      "margin60": 9.520000000000003
+    },
+    "9": {
+      "n": 9,
+      "min": 40.2,
+      "max": 49.62,
+      "range": 9.419999999999995,
+      "median": 45.58,
+      "mean": 45.08111111111111,
+      "margin60": 10.380000000000003
+    }
+  },
+  "printed_split_arithmetic": {
+    "Windows_gate": 15.770000000000003,
+    "Windows_registry": 21.03,
+    "Windows_packet": 13.03,
+    "Windows_sum": 49.83,
+    "Ubuntu_gate": 7.419999999999998,
+    "Ubuntu_registry": 14.31,
+    "Ubuntu_packet": 4.83,
+    "Ubuntu_sum": 26.56,
+    "billing_before": 110.65,
+    "billing_after": 126.22,
+    "longest_job_saved": 22.17,
+    "a1_margin": 3.969999999999999,
+    "split_estimated_percent_change": -51.31944444444445
+  },
+  "D9_H": "ValueError",
+  "D9_BASE": 0,
+  "nhanh_CA": 8,
+  "nhanh_mutants": 10,
+  "gate_acceptance28": {
+    "A1_le25": false,
+    "if_revised_to_estimate_plus_observed_range": true
+  }
+}

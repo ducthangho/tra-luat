@@ -58,6 +58,32 @@ hai phản chứng chạy được (16 ca tổng cụt/tab trong bộ 131 đã g
 đặt lên bàn ở mục *"§12 — bốn lần hỏng"* cùng ba lựa chọn và năm điều kiện đo được; H là ứng viên đã đo,
 **chưa được chọn**.
 
+### ĐÍNH CHÍNH sau cross-review lượt 6 (Codex `gpt-6-astra`, `reviewed_sha` `2adb681`, 07-09-2026) — đọc trước mọi con số bên dưới
+
+Verdict: `ops/reviews/pr468-hoso-4-packet-review-6-codex-verdict.md`. Hiện vật của reviewer nằm **trong kho**:
+`ops/reviews/pr468-hoso-4-packet-review-6-codex/` (`ARTIFACTS.sha256`). Ba điều đổi cách đọc đặc tả này:
+
+1. **Mọi hiện vật đo mà các bản trước dẫn tên — `do_h.py`, `do_h.json`, `do_t2.py`/`do_t2.json`,
+   `law7.json`, `prior131.json`, `review-artifacts-luot3/T.json`, `executor-luot3-va/`, `executor-luot4-va/`,
+   `MANIFEST.sha256`, `goi-y/cay/`, `hint_provenance.json` — KHÔNG có trong kho** và không tái lập được từ
+   bundle này (finding P1 `thieu-hien-vat-quyet-dinh-h-va-chi-phi`). Các số dẫn từ chúng (bộ A/B/C/D
+   **311 hàng**, 49 + 5 ranh giới, 14 đột biến/kill-list, 419 ca lượt 5, băm bảy bản in lịch sử) là **lời
+   khai lịch sử, `KHÔNG TÁI LẬP ĐƯỢC`** — giữ nguyên chữ để không viết lại lịch sử, nhưng **không được dùng
+   làm cổng**. Thứ tái lập được, và là nền cho phiên thi công: bộ ca ĐỘC LẬP của reviewer lượt 6
+   (`attack-h-cases.json`, **1213 hàng, 0 đỏ giả / 0 bỏ sót / 0 ngoại lệ**, oracle hai chiều), `harness.py`
+   ghép H với consumer thật, `h_tong.py`/`h_predicate.py` trích nguyên văn từ hai khối mã của đặc tả (băm
+   trùng), 4 đột biến H đo trên 1213 hàng (`no_positions` 5 đổi màu · `no_unique` 51 · `no_positive` 42 ·
+   `remove_dead_bool` 0 ⇒ `mH13` đúng là mã chết), và bản in thật của 8 formatter (`outputs/`).
+2. **Đ2 đo trên bản in xanh thật:** reviewer thu được 6/8 bản `rc=0` trong sandbox, H bác **0/6**; hai bản
+   còn lại (`mcp_gh_test`, `pretooluse_guard_test`) đỏ vì rig sandbox. Executor chạy lại hai bộ ấy trên cây
+   thật sau lượt 6 — kết quả và băm ghi ở `pr468-hoso-4-packet-review-6-codex/outputs-that/` và
+   `d2-that-results.json`; xem con số ở đó, không suy `0/6` thành `0/8`.
+3. **Lời khai `hint_provenance` 40 hunk / 4 hunk bị bác được RÚT** (mục *"Thiết kế H"* dưới); bề mặt
+   provenance kiểm được chỉ là hai khối mã có băm. **A9** đính chính lời khai về BASE (mục A9).
+
+Kết luận của lượt 6 cho P1 `span-rong-nuot-ti-le-vo-can`: **VÁ HỜ về nghĩa vụ xác nhận** — không tìm được
+phản chứng H mới ngoài ranh giới công khai, nhưng hồ sơ chưa đủ hiện vật để đóng. Câu hỏi `§12` vẫn thuộc chủ kho.
+
 ## Bối cảnh đo được (mọi số kèm thời điểm)
 
 ### Lỗ là gì, đo bằng lời gọi thật
@@ -232,13 +258,17 @@ khi chủ kho chọn.
 
 ### Thiết kế H — phủ VỊ TRÍ cặp trên dòng được chọn (ứng viên, đã đo, CHƯA được chọn)
 
-Nguồn: gói gợi ý của verdict lượt 4 (`goi-y/cay/`, nhãn *"chưa chạy trên cây thật — executor tự áp, tự
-đo, tự chịu trách nhiệm commit"*; `hint_provenance.json` 40 hunk). Executor **tái dẫn xuất từng hunk** và
-**đo lại bằng bộ ca của mình** (`do_h.py`, băm ở `MANIFEST.sha256` của gói `executor-luot4-va/`) — không
-chép số của reviewer. Hai khối mã dưới đây chép **nguyên văn** từ cây gợi ý để băm khối trùng với thứ
-reviewer đã đo (`validate_candidate.py --hint-tree`): bảng `TONG` `c23bcd01…` · vị từ `bde441a0…` (đủ 64
-ký tự trong `do_h.json`, khoá `khoi_ma_sha256_H`) — băm lại nội dung giữa hai hàng rào mà lệch thì thứ được
-đo không phải thứ đang đọc.
+Nguồn: gói gợi ý của verdict lượt 4 (nhãn *"chưa chạy trên cây thật — executor tự áp, tự đo, tự chịu
+trách nhiệm commit"*). **Nói cho đúng mức sau cross-review lượt 6** (finding P1
+`hint-provenance-bon-hunk-khong-co-de-kiem`): gói gợi ý, `hint_provenance.json`, `do_h.py`, `MANIFEST.sha256`
+của `executor-luot4-va/` **không có trong kho** — chúng nằm ở scratchpad của phiên soạn, không tái lập
+được từ bundle này. Vì vậy lời khai *"40 hunk, executor tái dẫn xuất từng hunk, 4 hunk bị bác"* ở các bản
+trước **được RÚT** thành `KHÔNG ĐO ĐƯỢC`; **bề mặt provenance duy nhất kiểm được là hai khối mã ngay dưới
+đây**, định danh bằng băm (kể cả newline cuối trước hàng rào): bảng `TONG`
+`c23bcd019182023496cb3d9817c6553a0074c77bca26c0a0d1f71a4f5104e45c` · vị từ
+`bde441a08d129a962d862fe237003997610238edc8e87b7948d35de875e5f165` (reviewer lượt 6 trích lại và băm trùng).
+Phiên thi công tái dẫn xuất H từ hai khối này và tự khai `hint_provenance` (§7) cho mã mình commit; băm lại
+nội dung giữa hai hàng rào mà lệch thì thứ được đo không phải thứ đang đọc.
 
 **Hợp đồng — 7 luật; luật 2 và luật 7 khác T'** (so với bản lượt 3: luật 1, 3, 4, 6 giữ; luật 5 giữ ý,
 đổi `a == b` thành `int(a) == int(b)`; luật 2 nới bộ chọn; luật 7 viết lại hoàn toàn):
@@ -739,10 +769,13 @@ chữ số). Dưới H, ngoại lệ ấy **lan ra khỏi `chay_moi`**; `main()`
 cho **4** vị trí, không vị trí nào bao `chay_moi`), nên tiến trình chết bằng truy vết, `rc=1`.
 
 **Nói cho ĐÚNG mức, vì bản đầu của mục này viết QUÁ TAY và phép đo bác nó:** `rc=1` là **FAIL-CLOSED
-— cổng ĐỎ**, KHÔNG phải "cổng vắng mặt". Đo trực tiếp trên cây hiện tại (BASE, chưa có H):
-`chay_moi` với cùng chuỗi 5000 chữ số trả **`1`** và **không ném gì** — `ValueError` là thuộc tính
-của vị từ **H**, không phải của mã đang land. Nên đây **KHÔNG** phải lỗ an ninh và **KHÔNG** phải
-điều kiện chặn lease.
+— cổng ĐỎ**, KHÔNG phải "cổng vắng mặt". **Và lời khai so với BASE của bản trước cũng SAI** (finding P2
+`a9-khai-sai-base-ngoai-le`, lượt 6): BASE gọi `int()` trên **nhóm bắt**, nên số 5000 chữ số đặt ở cặp **CA**
+làm BASE ném `ValueError` **y hệt** H (reviewer đo hai fixture `pretooluse`/`nhanh`: `BASE=H=ValueError`,
+`d9-comparison.json` trong gói lượt 6); BASE chỉ trả `1` mà không ném khi số dài nằm ở cặp **đột biến** —
+vùng BASE không nhìn tới (đo 02:5xZ 07-09-2026 chính là ca ấy). Nên A9 là tiêu chí **chẩn đoán cho H**
+(ngoại lệ phải ra `ĐỎ` có lý do ở cả hai vị trí), không phải hồi quy so với BASE; đây **KHÔNG** phải lỗ
+an ninh và **KHÔNG** phải điều kiện chặn lease. Fixture nguyên byte của D9 phải đi kèm cả hai vế khi thi công.
 
 Cái còn lại là thật và đáng một tiêu chí: một ngoại lệ không bắt **giết cả bộ**, nên phán quyết của
 **7 định dạng còn lại bị mất** trong cùng lượt, và người đọc log thấy truy vết chứ không thấy
@@ -810,7 +843,8 @@ hoặc nguồn trích (L5):
    `(\d+)/(\d+)/\d+` ⇒ nhận (`_CAP` không coi `/0` là cặp; SPAN `pretooluse` chặn ca tương đương, `mcp`
    thì không) · `D2` `039/39` ⇒ nhận (so số nguyên; T' bác) · `D3` chữ số Unicode `３９/３９` ⇒ nhận
    (`\d` Unicode) · `D9` số 5000 chữ số ⇒ `ValueError` lan ra `chay_moi` ⇒ `rc≠0` (fail-closed, cổng
-   ĐỎ — **nay có tiêu chí A9**, không còn chỉ là ranh giới khai suông; BASE trả `1` mà KHÔNG ném) · `D12b` `nhanh` `0/0 (xong)` ⇒ nhận. Không formatter hiện có in ca nào trong năm ca ấy.
+   ĐỎ — **nay có tiêu chí A9**, không còn chỉ là ranh giới khai suông; BASE ném y hệt khi số dài ở cặp CA,
+   chỉ trả `1` không ném khi số dài ở cặp đột biến — xem đính chính ở A9) · `D12b` `nhanh` `0/0 (xong)` ⇒ nhận. Không formatter hiện có in ca nào trong năm ca ấy.
    Siết `_CAP` (`[0-9]`, cấm `/` kề cặp) là lựa chọn của phiên thi công; đổi khối mã thì đo lại toàn bộ.
    Đổi formatter ⇒ phải khai lại `TONG` và chạy lại toàn bộ bộ ca; **không** được nới grammar bằng `.*`
    hay bỏ nhóm bắt để "qua" — luật 7 H làm ĐỎ ngay bản in xanh, và đó là kết quả đúng.

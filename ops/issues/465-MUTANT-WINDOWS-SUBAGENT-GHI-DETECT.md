@@ -5,15 +5,20 @@
 
 ## Vấn đề đo được
 
-`.claude/dev/subagent_ghi_detect_test.py` chạy **88 s** đủ, **3 s** khi chỉ chạy nền
-(`NHANH_DON_DUOC_KHONG_DOT_BIEN=1`-tương đương) ⇒ **96,6 %** thời lượng là vòng đột biến. Bộ này có
-**ba kênh đột biến** (22 + 6 + 1) — nhiều hơn `pretooluse` một bậc, vốn chỉ có một.
+`.claude/hooks/subagent_ghi_detect_test.py` (bản đầu của Issue ghi nhầm `.claude/dev/…` — đường ấy
+**không tồn tại**, finding P1 `issue-kiem-lease-sai-write-set` lượt 6) chạy **88 s** đủ, **3 s** khi
+chỉ chạy nền qua seam của bộ (không phải seam `NHANH_DON_DUOC_KHONG_DOT_BIEN` của bộ `nhanh`) ⇒
+**96,6 %** thời lượng là vòng đột biến. Bộ này có **ba kênh đột biến** (22 + 6 + 1) — nhiều hơn
+`pretooluse` một bậc, vốn chỉ có một.
 
 #456 đã chứng minh hình dạng bản vá: **cắt vòng đột biến khỏi chân Windows, giữ bằng chứng dương theo
 nền**. Đo được trên #456: bước `test registry` Windows **44,3 → 17,70** phút.
 
-**Điểm quan sát không đổi:** lượt chạy đủ và lượt chỉ-nền in **CÙNG MỘT BYTE** tại chỗ sổ đăng ký
-đọc (`8/8`, `rc=0`) — nên bản vá **không** làm sổ đăng ký thấy khác đi.
+**Điểm quan sát:** bộ này in `TONG: CA 33/33 dat · DOT BIEN 22/22 bi giet` + `TONG: DAT` (bản đầu của
+Issue chép nhầm `8/8` của bộ `nhanh` sang đây — finding P2 `issue-chep-nham-du-lieu-va-chan-doan-cu`
+lượt 6). Trên **Linux** hành vi không đổi (M6). Trên **Windows** bản vá in một dòng bằng chứng DƯƠNG
+**riêng**, không mang chữ `bi giet` (M2), và sổ đăng ký chỉ nhận dòng ấy khi nền là Windows (M5) — tức
+sổ đăng ký **có** thấy khác, theo thiết kế; xem đặc tả M2/M5/M6.
 
 ## Vì sao tách làm HAI packet, không gộp
 
@@ -39,9 +44,8 @@ Nợ có tên **`CHUA-CO-PHAN-RA-THOI-GIAN-THEO-BO-TREN-WINDOWS`**.
 
 ## Chưa có `cross_approved`
 
-Lượt cross-review thứ 5 **chết năm lần** vì hạ tầng: proxy egress của container remote **không cho
-`WebSocket upgrades`** (khai thẳng trong tài liệu proxy), mà đó là đường tái kết nối của `codex`.
-`assurance` của cả bốn packet vẫn dừng ở **lượt 4**. Biên bản:
+Lượt 5 **chết năm lần** vì hạ tầng — chữ ký `Connection refused (os error 111)` trên đường tái kết nối WebSocket của `codex`. **Đính chính 03:55Z 07-09-2026:** chẩn đoán *"proxy không cho `WebSocket upgrades`"* ở bản đầu là **SAI** (`codex doctor`: handshake `HTTP 101`, codex không đi qua proxy egress); nguyên nhân thật **CHƯA BIẾT**, đường codex **mở nhưng chập chờn**. Lượt 6 (07-09-2026, phóng có giám sát) đã chạy trọn. Lượt 6: `changes_requested`, 7 P1 / 4 P2 — verdict
+`ops/reviews/pr468-hoso-4-packet-review-6-codex-verdict.md`. Biên bản lượt 5:
 `ops/reviews/GHI-NHAN-CROSS-REVIEW-LUOT5-KHONG-HOAN-TAT.md`.
 
 ---
@@ -49,6 +53,9 @@ Lượt cross-review thứ 5 **chết năm lần** vì hạ tầng: proxy egress
 **Đặc tả đóng băng:** `ops/specs/MUTANT-WINDOWS-SUBAGENT-GHI-DETECT.md` @ `b743f1798aba12615f903a11bd451c87e404814e`
 **`spec_sha256`:** `2abace8588ec2b4e0626c1c77e9c3e0f7e713ecb2ce528b149e6c7f1f0000759`
 **`base_sha`:** `1b3caa1` · **`depends_on`:** `LO-319-LINUX-BANG-CHUNG-XANH`
-**Write set — đo 03:15Z 07-09-2026:** `ai-dang-giu .claude/dev/subagent_ghi_detect_test.py` ⇒
-**`NGƯỜI_GIỮ 0`** (canh hai nguồn ref: máy chủ 299 / cục bộ 299, `comm -23` rỗng ⇒ không mù).
-**Lease nháp:** `ops/leases/mutant-windows-subagent-ghi-detect-exec-1-claude-20260906.yaml.nhap` (6 ô null)
+**Write set — đo trên CẢ HAI đường dẫn của lease nháp, 05:52Z 07-09-2026** (bản đầu đo một đường KHÔNG
+TỒN TẠI `.claude/dev/subagent_ghi_detect_test.py` và bỏ đường sổ đăng ký — finding P1 lượt 6):
+`.claude/hooks/subagent_ghi_detect_test.py` ⇒ `NGƯỜI_GIỮ 0` · `.claude/dev/ci_dang_ky_test.py` ⇒
+**`NGƯỜI_GIỮ 2`** (GATE + #456 chưa bia mộ trên `master`) ⇒ packet **BỊ CHẶN** — đúng thứ tự chuỗi
+`GATE → LO → 2A`. (Canh hai nguồn ref: máy chủ 299 ⊆ cục bộ 300, `comm -23` rỗng ⇒ không mù.)
+**Lease nháp:** `ops/leases/mutant-windows-subagent-ghi-detect-exec-1-claude-20260906.yaml.nhap` (5 ô null)

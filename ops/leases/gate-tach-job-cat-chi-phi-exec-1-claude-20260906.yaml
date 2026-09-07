@@ -69,12 +69,14 @@ depends_on: []
 branch: claude/gate-tach-job-cat-chi-phi
 branch_ownership: exclusive
 target_branch_neu_land: master
-# 3 MỎ NEO (base_sha · start_from_sha · reviewed_sha_required) — chỗ giữ, KHÔNG phải giá trị cấp.
-# Packet đi đầu chuỗi nên không chờ tiền nhiệm, nhưng vẫn phải ĐO LẠI CẢ 3 tại lúc cấp bằng `git ls-remote origin master` (master có thể trôi vì lý
-# do khác). Ba trường cùng một giá trị, cùng đo một lần.
-base_sha: 1b3caa11df3e339bcfdb52be903884b5b99b9f77
-start_from_sha: 1b3caa11df3e339bcfdb52be903884b5b99b9f77
-reviewed_sha_required: 1b3caa11df3e339bcfdb52be903884b5b99b9f77
+# 3 MỎ NEO (base_sha · start_from_sha · reviewed_sha_required) — ĐÃ ĐO LẠI theo finding P1
+# `lease-gate-cap-that-con-ho-so-nhap` (cross-review lượt 6): bản cấp 03:37:33Z giữ nguyên chỗ giữ
+# `1b3caa1` của lúc soạn. Head `master` tại giờ cấp = `d28c4b1` (commit 01:50:09Z 07-09-2026, không
+# commit nào sau đó tới lúc cấp — đo `git log origin/master` 06:0xZ 07-09-2026); `1b3caa1..d28c4b1`
+# chạm cả hai tệp write set (+8 dòng ci.yml / +1 dòng ci_dang_ky_test.py). Ba trường cùng một giá trị.
+base_sha: d28c4b1062e8505cbdaaf0237fcbe3f9b8ee4705
+start_from_sha: d28c4b1062e8505cbdaaf0237fcbe3f9b8ee4705
+reviewed_sha_required: d28c4b1062e8505cbdaaf0237fcbe3f9b8ee4705
 
 authority_basis: '§2 — start/pause/resume/reroute/override/authorize thuộc chủ kho'
 recorded_by: claude-session
@@ -83,6 +85,12 @@ recorder_is_dispatcher: false
 # `run_minutes` = độ dài HẠN LEASE tính bằng phút (1440 = 24 giờ), KHÔNG phải trần một run —
 # trần ấy là `max_run_minutes: 90` của `PROTOCOL §12`; một lease 24 giờ chứa nhiều run 90 phút.
 run_minutes: 1440
+# Ba trường theo `PROTOCOL §4` (bổ sung theo finding lượt 6): `write_set_hash` = sha256 của các đường dẫn
+# write_set đã sort, nối bằng LF, có LF cuối; `heartbeat_at` = mốc cấp (chưa có heartbeat nào của executor
+# — executor chưa bắt tay vì A9 chưa đạt); `lease_until` = `lease_expires_at_utc` (cùng một mốc, hai tên).
+write_set_hash: 0f7b869da648e9b21023e461925efd0d45bca58fb308a8fcc82bc55ad9f66ef0
+heartbeat_at: '2026-09-07T03:37:33Z'
+lease_until: '2026-09-08T03:37:33Z'
 heartbeat_required_minutes: 30
 attempts_used: 0
 attempts_limit: 3
@@ -166,9 +174,10 @@ dieu_kien_dung:
      không có dấu nội suy) — đã có đặc tả đóng băng `ops/specs/CI-FASTPATH-THEO-DIFF.md` và bản
      triển khai ĐÃ BỊ BỎ (PR #247 đóng, không merge). Kho đã trả giá HAI lần cho logic điều kiện
      của workflow. Tách job là thêm JOB, không thêm ĐIỀU KIỆN.'
-  - 'Đụng bất kỳ hàm nào khác `loi_ruff_ci` trong `.claude/dev/ci_dang_ky_test.py`
-     (`bang_chung_xanh`, `MOI`, `MOI_WINDOWS`, `chay_moi`) — đó là của LO-319 và hai packet
-     mutant-Windows, đi sau.'
+  - 'Đụng bất kỳ hàm nào trong `.claude/dev/ci_dang_ky_test.py` NGOÀI `loi_ruff_ci` và phản chứng của
+     nó (các ca A7 thêm vào `phan_chung()` — đặc tả `write_set` #2 và A7 cho phép; bản đầu của dòng này
+     cấm cả `phan_chung`, trái đặc tả — finding P2 `gate-lease-cam-sua-phan-chung` lượt 6):
+     `bang_chung_xanh`, `MOI`, `MOI_WINDOWS`, `chay_moi` là của LO-319 và hai packet mutant-Windows, đi sau.'
   - 'Song song hoá TRONG `test registry` — nợ có tên SONG-SONG-HOA-TRONG-TEST-REGISTRY; trần
      song song trên Linux là −32,5 % (400 s tuần tự, bộ dài nhất 270 s) và con số ấy KHÔNG đổi
      sau hai packet mutant-Windows vì chúng giữ nguyên vòng đột biến trên Linux.'

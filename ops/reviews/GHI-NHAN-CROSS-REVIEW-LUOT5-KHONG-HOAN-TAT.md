@@ -220,3 +220,13 @@ kết luận thực hành đã rút ra từ chúng — **ghi kết quả ra đĩ
 Điều **KHÔNG** còn đứng: khuyến nghị *"phải mang sang máy ngoài proxy này"*. Đường codex ở đây
 **mở**; nó chỉ **chập chờn**. Cách đối phó đúng với một đường chập chờn là **phóng lại có giám
 sát**, không phải đổi máy.
+
+---
+
+# LƯỢT 6 ĐÃ CHẠY TRỌN — 07-09-2026, phóng có giám sát
+
+`reviewed_sha` `2adb681` (merge `origin/master` `d28c4b1` vào nhánh này). Codex `gpt-6-astra`, effort xhigh,
+**1851 s, chạy trọn ngay lần đầu** (vòng phóng sẵn `codex exec resume`, không cần dùng). Verdict
+`changes_requested` — 7 P1 / 4 P2, P3 cũ ĐÃ VÁ THẬT, P1 cũ VÁ HỜ về nghĩa vụ xác nhận:
+`pr468-hoso-4-packet-review-6-codex-verdict.md` + biên nhận `.receipt.yaml`; hiện vật reviewer (1213 ca, harness, bản in, log)
+ở `pr468-hoso-4-packet-review-6-codex/`. Bản vá theo verdict nằm ở commit kế trên nhánh này.

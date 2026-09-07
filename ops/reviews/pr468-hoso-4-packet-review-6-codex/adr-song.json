@@ -1,0 +1,11 @@
+{
+  "name": "adr-song",
+  "command": [
+    "/usr/local/bin/python",
+    ".claude/dev/packet_loop.py",
+    "adr-song"
+  ],
+  "start_utc": "2026-09-07T06:17:56.855101+00:00",
+  "seconds": 0.2713920459999599,
+  "rc": 0
+}

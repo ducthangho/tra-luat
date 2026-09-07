@@ -163,3 +163,60 @@ Thứ bắt được nó **không** phải mã thoát mà là **kích thước �
 doctrine của kho — *"cổng xanh nhờ `rc=0` là cổng CÓ THỂ BỊ LỪA; phải đòi BẰNG CHỨNG DƯƠNG
 (`N/N` với hai số BẰNG NHAU)"* — và đúng họ với ca `param([string[]]$Args)` ở `r244`:
 `rc=0` + output rỗng. Bảng trên vì vậy in **cả hai số** của mỗi suite, không in mã thoát suông.
+
+---
+
+# ĐÍNH CHÍNH 03:55Z 07-09-2026 — CHẨN ĐOÁN "PROXY CHẶN WEBSOCKET" Ở TRÊN LÀ **SAI**
+
+Mọi câu phía trên quy nguyên nhân năm cú chết cho *"proxy egress không cho `WebSocket upgrades`"*
+đều **SAI**. Phép đo bác nó, và phép đo ấy có sẵn trong chính công cụ đang hỏng:
+
+```
+$ codex doctor
+  ✓ websocket    connected (HTTP 101 Switching Protocols) · 15s timeout
+      endpoint                 wss://chatgpt.com/backend-api/<redacted>
+      supports websockets      true
+      handshake result         HTTP 101 Switching Protocols
+      respect system proxy     disabled
+      proxy env vars present   HTTPS_PROXY, NO_PROXY, https_proxy, no_proxy
+```
+
+Hai điều giết chẩn đoán cũ:
+
+1. **WS handshake tới ĐÚNG endpoint ấy THÀNH CÔNG** — `HTTP 101 Switching Protocols`. Không có
+   chuyện đường bị chặn.
+2. **`respect system proxy: disabled`** — codex **không đi qua** proxy egress kia. Nên câu
+   *"Not supported through the proxy"* trong `/root/.ccr/README.md` **không áp cho codex**; nó nói
+   về một đường mà codex không dùng.
+
+⇒ `Connection refused (os error 111)` là **CHẬP CHỜN**. **Nguyên nhân thật: CHƯA BIẾT.**
+
+## Vì sao cái sai này đáng ghi hơn con số nó làm hỏng
+
+Tôi kết luận "chính sách chặn" từ **một tài liệu** cộng **một đường hỏng**, và không thử client
+thứ hai — trong khi `CLAUDE.md` của chính kho có nguyên một mục dạy đúng chuyện đó:
+
+> *"Một công cụ thất bại chưa phải một đường bị chặn; phải thử ít nhất hai client trước khi gọi
+> đó là chính sách."*
+
+Mục ấy được viết sau khi một phiên đọc `curl` trả `CONNECT tunnel failed, response 403` rồi kết
+luận `api.githubcopilot.com` bị chặn — trong khi `urllib` gọi cùng host, cùng lúc, trả HTTP 200.
+Lần này client thứ hai là **`codex doctor`**, nó nằm sẵn trong cùng cái CLI đang hỏng, và tôi
+không chạy nó suốt năm lượt chết.
+
+Nặng hơn: tôi **hành động** theo chẩn đoán sai. Tôi khuyến nghị chủ kho mang sandbox sang máy khác,
+và tôi ghi cái sai ấy vào **Mission Issue #467** (đã đăng public), vào thân **PR #468**, và vào
+prompt giao việc của phiên executor #463. Một chẩn đoán sai trong doctrine tệ hơn không có chẩn
+đoán nào — đúng câu mục *"Workflow có `paths:`"* của `CLAUDE.md` đã nói.
+
+## Cái vẫn ĐÚNG, không rút
+
+Phép đo thì không sai, chỉ phần GIẢI THÍCH sai. Giữ nguyên: năm lượt chết với chữ ký
+`Connection refused (os error 111)` trên đường tái kết nối; sống được 3–10 phút; probe ngắn
+`turn.completed` `rc=0`; không OOM (15,4 GB trống); không hết đĩa; không `flagged`. Và giữ nguyên
+kết luận thực hành đã rút ra từ chúng — **ghi kết quả ra đĩa NGAY, đừng dồn tới cuối** — vì nó
+đúng bất kể nguyên nhân là gì.
+
+Điều **KHÔNG** còn đứng: khuyến nghị *"phải mang sang máy ngoài proxy này"*. Đường codex ở đây
+**mở**; nó chỉ **chập chờn**. Cách đối phó đúng với một đường chập chờn là **phóng lại có giám
+sát**, không phải đổi máy.

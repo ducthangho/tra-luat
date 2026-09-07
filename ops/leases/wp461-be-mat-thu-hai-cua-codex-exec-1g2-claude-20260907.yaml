@@ -31,8 +31,16 @@
 # cũ ghi") — phiên ghi lease đọc cả hai rồi KHÔNG nâng thành việc phải làm. Hai reviewer độc lập
 # hội tụ vào cùng một chỗ mà vẫn lọt: đó là lý do mục này được chép nguyên vào đây thay vì tóm tắt.
 #
-# KHÔNG đổi `spec_hash`: `generation` là trường của LEASE, không nằm trong spec (đã kiểm:
-# `grep generation ops/specs/wp461-…md` -> rỗng). Nên đây KHÔNG phải revision r3; `spec_ban` vẫn r2.
+# VÌ SAO GIỮ `revision: 2`, KHÔNG lên r3. Bản đầu của dòng này biện minh bằng `grep generation`
+# trên tệp spec — cross-review lượt 3 nhận kết luận nhưng BÁC căn cứ: một phép grep không phải
+# một luận cứ quy phạm. Căn cứ ĐÚNG nằm ở văn bản:
+#   · §3.2 liệt kê ĐÚNG NĂM trường phái sinh nằm trong `spec_hash` — `change_policy_sha` ·
+#     `effective_write_set` · `required_checks` · `land_obligations` · `effective_review_class`.
+#     KHÔNG có `generation` trong đó.
+#   · `generation` được liệt kê ở §4 như trường của LEASE, và §4 cho reroute tăng generation
+#     mà KHÔNG mặc nhiên sinh revision mới.
+# Nên `spec_hash` không đổi, `spec_ban` vẫn r2. Điều này KHÔNG miễn trừ: lần đổi hợp đồng r1→r2
+# vẫn phải thu hồi r2 và cấp token mới — đó chính là việc tệp này làm.
 
 schema_version: 2
 event: executor_lease_granted
@@ -134,14 +142,46 @@ dieu_kien_ready_DA_THOA:
   truong_S4: 'write_set_hash · heartbeat_at · lease_until — ĐỦ, kèm công thức tính'
   cross_review: '2 lượt trên 6635379; verdict lượt 2 `blocked`, hai P1 đã được chủ kho xử lý ở #470'
   duyet_khac_danh_tinh: 'notebyme88 (COLLABORATOR) APPROVED trên 6635379, run cong 34100901608 success'
+  gate_master_tren_base_sha: >-
+    ĐO ĐƯỢC 2026-09-07T10:27Z: run `34106235804`, branch=master, event=push, sha=`b416830`,
+    completed, conclusion=**success**, 09:28:46Z -> 10:17:31Z (~49 phút, khớp chân Windows ~48ph).
+    Phải tải cả trang 40 lượt rồi lọc tại chỗ vì công cụ MCP KHÔNG áp được bộ lọc branch/event —
+    ghi ra đây vì đó là lý do lượt soạn đầu phải khai KHÔNG ĐO ĐƯỢC.
 
 dieu_kien_ready_CHUA_DO_DUOC:
-  gate_master_tren_base_sha: >-
-    Lượt gate master cho `b416830` CHƯA đo được lúc soạn tệp này (chân Windows ~48 phút; công cụ
-    liệt kê workflow trong container KHÔNG áp được bộ lọc branch/event nên không tách được lượt).
-    Đây là KHÔNG ĐO ĐƯỢC, KHÔNG phải "xanh". Phải xác nhận XANH trước khi executor bắt đầu.
-    Mốc đã biết xanh của nhánh này: run 34074288203 trên `d28c4b1` (ubuntu 27ph37s + windows
-    48ph00s, cả hai success) — `b416830` là merge commit của #471 lên đúng `d28c4b1` ấy.
+  hoi_tu_nguoi_giu: >-
+    `ai-dang-giu` HIỆN trả NGƯỜI_GIỮ 2, và merge lease này KHÔNG tự làm nó về 1 — xem khoá
+    `hoi_tu_nguoi_giu_doi_thao_tac` bên dưới. Chừng nào chưa đo được 1 trên CẢ BỐN đường thì
+    executor CHƯA được bắt đầu.
+
+hoi_tu_nguoi_giu_doi_thao_tac:
+  finding: >-
+    `r2-van-giu-sau-merge` [P1], cross-review lượt 3 trên `010a6f3` (codex gpt-6-astra xhigh),
+    verdict `changes_requested`, `VERDICT.md` sha256 378743defbb709efdeee3d2c2f7ccbfe02dba97c9d7d5f7cca08125574f2cd51.
+  no_bac_cai_gi: >-
+    Phiên soạn khai "NGƯỜI_GIỮ 2 chỉ là cửa sổ giữa lúc commit và lúc merge", hàm ý merge xong là
+    về 1. SAI. Bản r2 CHƯA có bia mộ nằm trên HAI ref, không phải một:
+    `refs/remotes/origin/master` và `refs/remotes/origin/ops/cap-lease-461` (nhánh của PR #471,
+    VẪN CÒN sau khi merge). Merge chỉ thay bản trên master; bản trên nhánh cũ sống nguyên, còn hạn
+    tới 2026-09-08T05:27:42Z.
+  phan_chung_A_B: >-
+    Tự tái hiện trong kho CÔ LẬP (bare + working copy trong scratchpad; kho thật không bị chạm),
+    A/B đúng MỘT biến —
+    CA A: merge g2, nhánh `ops/cap-lease-461` VẪN CÒN  -> NGƯỜI_GIỮ **2**;
+    CA B: merge g2, ĐÃ XOÁ nhánh ấy                    -> NGƯỜI_GIỮ **1** trên cả bốn đường.
+  thao_tac_con_thieu: >-
+    Xoá nhánh `ops/cap-lease-461` trên máy chủ. Nó ĐỦ ĐIỀU KIỆN theo `ops-don-ref.yml`:
+    `git merge-base --is-ancestor 6635379 origin/master` -> rc 0, tức `behind_by = 0` — mọi commit
+    của nó đã nằm trong master, xoá không làm commit nào thành không-tra-được.
+    Phiên web KHÔNG xoá được ref (403 do proxy egress) nên phải gọi tay `ops-don-ref.yml`
+    (`workflow_dispatch`, gõ `XOA`) — thao tác phá huỷ, cần chủ kho duyệt.
+  chua_xong_cho_toi_khi: >-
+    Đo lại `ai-dang-giu` trên CẢ BỐN đường write set và nhận NGƯỜI_GIỮ 1. Trước mốc đó, lease này
+    KHÔNG được coi là độc quyền và executor KHÔNG được bắt đầu.
+  no_nen: >-
+    Gốc của chuyện này là `lenh_ai_dang_giu` xét bia mộ theo TỪNG BẢN blob, nên một bản cũ trên một
+    ref lịch sử có thể "hồi sinh" một lease_id đã bị thu hồi. Quy tắc hợp nhất/thu hồi bền thuộc
+    nợ #473, KHÔNG thuộc write set wp461.
 
 hinh_dang_ban_va_da_dong_bang:
   noi_dat_hang_moi: '_PROVIDER_NGOAI_CLI'

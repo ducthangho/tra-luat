@@ -275,3 +275,15 @@ reviewer không tái đo được lời khai "302/302 ref" — đúng §8, revie
 đủ ref + `ls-remote` (tên+OID) tại giờ readback + phép so tập. Hai P2 hồ sơ (receipt 10 thiếu trailer session/khung giờ chép nhầm;
 receipt 11/GHI-NHAN gán sai commit vá 19 tệp rig/, "5 giây" không nguồn) vá ở `df0800c`. Verdict `pr468-hoso-4-packet-review-12-codex-verdict.md`,
 hiện vật `pr468-hoso-4-packet-review-12-codex/`.
+
+# LƯỢT 13 — 07-09-2026, `reviewed_sha` `f77f198` (sau lượt 12 + readback sau hạn của phiên kia) — **APPROVE**
+
+Chạy SAU 14:30:07Z, một phiên duy nhất. Sandbox dựng lại đúng theo P1 `mirror-thieu-ref` của lượt 12: `git clone --mirror` THẬT từ GitHub,
+`ls-remote --heads` (tên+OID) tại 20:45:09Z và phép so tập với `for-each-ref` (303/303, thiếu 0, thừa 0) giao kèm cho reviewer; readback
+`ai-dang-giu` của executor 20:45Z giao nguyên văn. Codex `gpt-6-astra`, xhigh, **1035 s, chạy trọn ngay lần đầu**. **`approve` — 0 P1 / 0 P2
+/ 1 P3.** Bốn finding lượt 12 đóng bằng phép đo độc lập của reviewer: mirror đủ ref (303/303, OID khớp); bia mộ #456 đóng bằng THỜI GIAN
+(CLI thật 20:50Z: cả hai đường write set `NGƯỜI_GIỮ 1` = exec-1r4; #456 chỉ `HẾT_HẠN`; blob cũ trên 11 nhánh, bia mộ trên 1 — cơ chế
+`_kiem_bia_mo` CHƯA sửa, ngoài phạm vi PR); hai P2 hồ sơ đúng tại `df0800c`. P3: EVIDENCE thiếu phương pháp trích số và giới hạn bộ lọc
+(§8) — nhận, áp cho EVIDENCE lượt kế. Reviewer nói rõ: approve cho HỒ SƠ PR thuần `ops/` tại exact SHA, không phải merge authorization,
+không phải nghiệm thu bốn packet. Verdict `pr468-hoso-4-packet-review-13-codex-verdict.md`, hiện vật `pr468-hoso-4-packet-review-13-codex/`.
+Còn ngoài tay executor để merge: review từ danh tính khác tác giả (cổng `cong`).

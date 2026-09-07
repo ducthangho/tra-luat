@@ -304,9 +304,9 @@ Mỗi dòng ghi thời điểm đo hoặc nguồn trích (L5):
 1. **Chi phí bộ này trên Windows chưa ai đo** — cùng nợ
    `CHUA-CO-PHAN-RA-THOI-GIAN-THEO-BO-TREN-WINDOWS`. `33`/`34 s` là Linux; `test registry` chỉ báo
    một con số cho cả tám bộ. Hệ số "gấp ba" là nội suy (xem `2A` `chua_do_duoc` #1) — và nội suy
-   ấy nay **đo được là SAI theo cả hai chiều**: trên 9 lượt master (00:47Z 07-09-2026) tỉ lệ
+   ấy nay **đo được là SAI theo cả hai chiều**: trên 11 lượt master (02:49Z 07-09-2026) tỉ lệ
    Windows/ubuntu **cùng bước, cùng head** trải `1,07×` – `9,74×`, job trọn `gate` trung vị
-   `1,68×`, `test registry` trung vị `1,21×`. Bảng đủ ở `GATE-TACH-JOB-CAT-CHI-PHI` mục *"Hệ số nền
+   `1,73×`, `test registry` trung vị `1,20×` (nguồn ghi theo GIÂY ⇒ mỗi tỉ lệ là một DẢI). Bảng đủ ở `GATE-TACH-JOB-CAT-CHI-PHI` mục *"Hệ số nền
    KHÔNG phải một con số"*. Nợ VẪN MỞ: không bước nào đo được là một vòng đột biến, nên đó là
    **proxy**, không phải phép đo thay. `A7` vẫn là phép đo trả lời.
 2. **Bộ này spawn `git archive` + `tar` cho mỗi đột biến.** `tar` có trên `windows-latest` nhưng

@@ -87,19 +87,17 @@ cho một bước và sai cho job — verdict lượt 1, P2):
 
 ⇒ **nhiễu runner cỡ `1`–`2,3` phút ở mức job là có thật**, và mọi ngưỡng ở `nghiem_thu` phải chừa
 biên cho nó. Hai lượt là **hai điểm dữ liệu** — **và câu ấy đã HẾT HẠN sau 6 giờ**: phép đo
-00:45Z 07-09-2026 ngay dưới đây có **chín** lượt master chạy trọn (xem `chua_do_duoc` #3).
+02:49Z 07-09-2026 ngay dưới đây có **mười một** lượt master chạy trọn (xem `chua_do_duoc` #3).
 
 Đó là lý do bảng này tách khỏi bảng trên thay vì dùng chung. **Phiên thi công phải ĐO LẠI cả hai
 bảng** — đây là số của 06-09-2026, và `L5` nói con số đúng lúc viết vẫn sai lúc người khác đọc.
 
-### ĐO LẠI 00:45Z 07-09-2026 — chín lượt master, và trần 60 ĐÃ BỊ CHẠM THẬT
+### ĐO LẠI 2026-09-07 02:49:51 UTC — mười một lượt master, và trần 60 ĐÃ BỊ CHẠM THẬT
 
-Hai bảng trên viết lúc 18:10Z 06-09-2026 khi chỉ có **hai** lượt master chạy trọn. Sáu tiếng sau,
-master đã nhận thêm **bảy** lượt `ci.yml`. Đo lại toàn bộ, cùng một đường
-(`actions_list` · `list_workflow_runs(ci.yml, branch=master, perPage=30)` rồi `list_workflow_jobs`
-cho từng run), đọc **00:45Z 07-09-2026**:
+Hai bảng trên viết lúc 18:10Z 06-09-2026 khi chỉ có **hai** lượt master chạy trọn. Bảng này là
+phép đo thứ ba, và **chính nó đã hết hạn một lần trong lúc đang soạn** — xem hộp *"nền trôi" ngay dưới.
 
-| head | job `gate (windows-latest)` | `bien-nhan v2 selftest` (Windows) | mục liệt kê / `skipped` | run |
+| head | job `gate (windows-latest)` | `bien-nhan v2 selftest` (Windows) | mục / `skipped` | run |
 |---|---:|---:|---:|---|
 | `8ce02fd` | **40,20 p** | 5,18 | 44 / 6 | `34068433781` |
 | `82e01a4` | **41,65 p** | 5,33 | 44 / 5 | `34058508426` |
@@ -108,65 +106,86 @@ cho từng run), đọc **00:45Z 07-09-2026**:
 | `28cb898` | **45,58 p** | 5,30 | 44 / 6 | `34060879398` |
 | `b912e5f` | **46,02 p** | 2,13 | 44 / 5 | `34049592719` |
 | `cacaba3` | **47,18 p** | 5,57 | 44 / 6 | `34055467808` |
+| `d28c4b1` | **48,00 p** | 7,12 | 44 / 6 | `34074288203` |
 | `62a6385` | **49,37 p** | 7,63 | 44 / 6 | `34062997697` |
 | `771c6ed` | **49,62 p** | 7,25 | 44 / 6 | `34065779670` |
+| `0c3405f` | **50,48 p** | 7,30 | 44 / 6 | `34070122978` |
 
-**n = 9** job Windows `success` trên master. Đơn vị: **phút tường của job**, từ `started_at` tới
-`completed_at` do GitHub ghi.
+**n = 11** job Windows `success` trên master. Đơn vị: **phút tường của job**, từ `started_at` tới
+`completed_at` do GitHub ghi — **độ phân giải nguồn là GIÂY**, nên mọi số phút ở đây là giây/60.
 
-- **min `40,20` · max `49,62` · biên độ `9,42` phút · trung vị `45,58` · trung bình `45,08`.**
-- **Biên dưới trần 60: từ `19,80` xuống `10,38` phút.** Con số `17,72` ở bảng master phía trên là
-  **một điểm trong dải ấy**, không phải "biên hiện nay".
-- ubuntu cùng kỳ (n = 16 job `success`): `20,93` – `28,17`, trung vị `26,52`.
+- **min `40,20` · max `50,48` · biên độ `10,28` phút · trung vị `46,02` · trung bình `45,84`.**
+- **Biên dưới trần 60: từ `19,80` xuống `9,52` phút.**
+- ubuntu cùng kỳ (n = 19 job `success`): `20,93` – `28,42`, trung vị `26,52`.
 
-**Biên độ `9,42` phút LỚN HƠN mọi khoản tiết kiệm mà bảng "cái giá của việc tách job" hứa cho một
-bước đơn lẻ.** Ngưỡng nào ở `nghiem_thu` chừa dưới `9,42` phút thì đang đo nhiễu chứ không đo bản vá.
+**Biên độ `10,28` phút LỚN HƠN mọi khoản tiết kiệm mà bảng "cái giá của việc tách job" hứa cho
+một bước đơn lẻ.** Ngưỡng nào ở `nghiem_thu` chừa dưới `10,28` phút thì đang đo nhiễu chứ không đo bản vá.
 
-#### Trần 60 KHÔNG còn là rủi ro suy diễn — nó đã bị chạm, trên master, cùng ngày
+#### Nền TRÔI nhanh hơn tốc độ viết đặc tả — đo hai lần, cách nhau 2 giờ 4 phút
+
+| | 00:45:22Z 07-09 | 02:49:51Z 07-09 | đổi |
+|---|---:|---:|---|
+| `n` job Windows `success` | 9 | **11** | +2 head mới (`d28c4b1`, `0c3405f`) |
+| max | 49,62 | **50,48** | +0,86 |
+| **biên độ** | 9,42 | **10,28** | **+0,86** |
+| trung vị | 45,58 | **46,02** | +0,44 |
+| **biên dưới trần 60** | 10,38 | **9,52** | **−0,86** |
+
+Không con số nào ở trên sai lúc viết; chúng **hết hạn**, và hết hạn theo chiều XẤU ĐI. Đó chính là
+`L5` phát biểu bằng dữ liệu: *con số đúng lúc viết vẫn sai lúc người khác đọc*. Hệ quả thực hành cho
+phiên thi công: **đừng trích bảng này**, chạy lại `buoc_master.tsv` rồi tự tính. Kết luận của mục này
+(*biên độ lớn hơn khoản tiết kiệm; trần đã bị chạm; hệ số nền không phải một con số*) **bền qua cả hai**
+phép đo và mạnh lên ở phép đo sau — chỉ các con số minh hoạ là trôi.
+
+#### Trần 60 KHÔNG còn là rủi ro suy diễn — nó đã bị chạm, trên master
 
 Run `34048229370`, head `4cd80c5`, `gate (windows-latest)`: **60,17 phút**, `conclusion: cancelled`,
-`17:19:32Z → 18:19:42Z` 06-09-2026. Bước đang chạy lúc bị cắt là **`test registry`**, đã tiêu
-**45,30 phút** trong chính bước ấy; **26 / 44** mục còn `skipped`. Job ubuntu của cùng run =
-`success` `26,42 p`.
+**26 / 44** mục còn `skipped`.
+Job ubuntu của cùng run = `success` `26,42 p`.
 
 Ghi thẳng hình dạng ấy vì nó dễ đọc nhầm: **run** `cancelled` mà **một job** `success` là ngữ nghĩa
 bình thường của GitHub (kết luận run là tổng hợp), **không** phải hai tầng mâu thuẫn. Đây là phép đo
-**chạm trần**, không phải một dị thường cần điều tra.
+**chạm trần**, không phải dị thường cần điều tra.
 
 #### Hệ số nền KHÔNG phải một con số — đo theo TỪNG BƯỚC, cùng head, cả hai nền
 
-`ty_le = phút Windows / phút ubuntu` của **cùng một bước** trên **cùng một head**; chỉ lấy cặp mà cả
-hai nền đều `success`. Đo 00:47Z 07-09-2026:
+`tỉ lệ = giây Windows / giây ubuntu` của **cùng một bước** trên **cùng một head**; chỉ lấy cặp mà cả
+hai nền **và** cả hai bước đều `success`. Nguồn ghi theo GIÂY, nên mỗi tỉ lệ có một **DẢI**, không phải
+một điểm: cột cuối cho dải của chính giá trị trung vị khi mỗi số mang sai số ±0,5 giây.
 
-| bước | n cặp | thấp nhất | cao nhất | trung vị |
-|---|---:|---:|---:|---:|
-| `test registry (phạm vi + các bộ chưa được nối)` | 9 | 1,07× | 1,71× | **1,21×** |
-| `tl selftest (co bang chung exact-identity)` | 6 | 1,41× | 2,26× | **2,01×** |
-| `packet-loop selftest` | 9 | 1,88× | 2,89× | **2,35×** |
-| `G5 kiem ban ke cong cu + T1..T8` | 9 | 1,91× | 3,09× | **2,40×** |
-| `lease-publish selftest` | 9 | 2,42× | 3,84× | **2,94×** |
-| `bien-nhan v2 selftest` | 8 | 7,07× | 9,74× | **8,01×** |
-| **job trọn `gate`** | 9 | 1,52× | 2,36× | **1,68×** |
+| bước | n cặp | thấp nhất | cao nhất | trung vị | dải làm tròn của trung vị |
+|---|---:|---:|---:|---:|---|
+| `test registry` | 11 | 1,07× | 1,71× | **1,20×** | `1,19×`–`1,20×` |
+| `tl selftest` | 11 | 1,41× | 2,26× | **1,83×** | `1,82×`–`1,84×` |
+| `packet-loop selftest` | 11 | 1,88× | 2,89× | **2,35×** | `2,34×`–`2,36×` |
+| `G5 kiem ban ke` | 11 | 1,91× | 3,09× | **2,39×** | `2,37×`–`2,42×` |
+| `lease-publish selftest` | 11 | 2,42× | 3,84× | **2,94×** | `2,91×`–`2,97×` |
+| `bien-nhan v2 selftest` | 10 | 7,07× | 9,74× | **7,56×** | `7,48×`–`7,65×` (n chẵn) |
+| **job trọn `gate`** | 11 | 1,52× | 2,36× | **1,73×** | — |
 
-**Kết luận đổi hướng một giả định mà cả bốn đặc tả đang dựa vào.** Hệ số "Windows đắt gấp ~3" —
+**Kết luận đổi hướng một giả định mà cả bốn đặc tả đang dựa vào.** Hệ số *"Windows đắt gấp ~3"* —
 khai là **nội suy** ở `MUTANT-WINDOWS-SUBAGENT-GHI-DETECT` `chua_do_duoc` #1 — nay đo được, và nó
-**không phải một con số**: trải từ `1,07×` tới `9,74×` tuỳ bước, và ở mức **job trọn** thì trung vị
-chỉ `1,68×`. Nói cách khác `~3` **quá CAO** cho job trọn và **quá THẤP** hơn hai lần cho một bước
-selftest python nặng. Một hệ số duy nhất không dùng được cho cả hai đơn vị; phải nói rõ đang nhân
-cho **bước nào**.
+**không phải một con số**: trải từ `1,07×` tới `9,74×` tuỳ bước, và ở mức **job trọn** trung vị chỉ
+`1,73×`. Nói cách khác `~3` **quá CAO** cho job trọn và **quá THẤP** hơn hai lần cho một bước
+selftest python nặng. Một hệ số duy nhất không dùng được cho cả hai đơn vị; phải nói rõ đang nhân cho **bước nào**.
 
-**Cảnh báo về chính bảng này, ba mục, để không ai đọc rộng hơn phép đo:**
+**Bốn cảnh báo về chính bảng này, để không ai đọc rộng hơn phép đo:**
 
-1. `bien-nhan v2 selftest` là bước **MỚI NHẤT** (do #455 thêm) và đang trôi: `2,13` phút ở
-   `b912e5f` rồi `5,18`–`7,63` ở tám head sau. Trung vị `8,01×` là của bước ấy **hôm nay**, không
-   phải hằng số của nền.
-2. Không bước nào trong bảng là **vòng đột biến** — thứ mà `MUTANT-WINDOWS-*` thật sự cần nhân. Đây
-   là **proxy gần nhất đo được** (selftest python, cùng runner, cùng head), không phải phép đo thay.
+1. `bien-nhan v2 selftest` là bước **MỚI NHẤT** (do #455 thêm) và đang trôi: `2,13` phút ở `b912e5f` rồi
+   `5,18`–`7,63` ở các head sau. Trung vị của nó là của bước ấy **hôm nay**, không phải hằng số của nền.
+2. Không bước nào trong bảng là **vòng đột biến** — thứ mà `MUTANT-WINDOWS-*` thật sự cần nhân. Đây là
+   **proxy gần nhất đo được** (selftest python, cùng runner, cùng head), không phải phép đo thay.
    `chua_do_duoc` #1 của hai đặc tả ấy **vẫn mở**.
-3. Ba bước có `n` nhỏ hơn 9 vì bước bị `skipped` ở một số lượt; `n` ghi theo từng dòng chứ không gộp.
+3. `n` ghi theo TỪNG DÒNG chứ không gộp — một bước `skipped` ở lượt nào thì lượt ấy rụng khỏi dòng đó.
+4. Mẫu là **mọi lượt master trong ~9,6 giờ** — **mẫu tiện tay**, không phải mẫu thiết kế. Nó không nói gì
+   về nền ở giờ cao điểm của GitHub, về runner ở vùng khác, hay về cây sau khi ba packet mutant land.
 
-Hiện vật: `so-lieu-master-0907.txt` · `tyle-buoc-0907.md` · `mruns_all.tsv` trong scratchpad phiên
-này — **KHÔNG** trong kho, nên phiên thi công phải chạy lại phép đo chứ không trích chúng.
+**Hiện vật để TÁI TÍNH — đây là bản vá cho một lỗi của bản trước.** Bản 00:45Z chỉ giao
+`mruns_all.tsv` (9 cột: chỉ thời lượng JOB + `bien_nhan_phut`), nên bảng tỉ lệ theo BƯỚC ở trên
+**không tái tính được** từ hiện vật — reviewer bị đòi kiểm một bảng mà không được cho dữ liệu để kiểm
+(cross-review lượt 5 mảnh C bắt được). Nay hiện vật là **`buoc_master.tsv`**: 12 cột, **một hàng mỗi
+BƯỚC** (2062 hàng), giây thô, `KHONG_DO_DUOC` fail-close cho run không đọc được (lượt này: 0).
+Nó **KHÔNG** trong kho — phiên thi công phải chạy lại phép đo, không trích số ở đây.
 
 ### Chi phí nằm ở đâu — phân rã theo bước, run `34045664423` (lượt nhánh)
 
@@ -576,14 +595,16 @@ Bản đầu viết *"ba mục nay đóng được"* trong khi bảng của chí
    hai phép đo trả lời câu ấy — và nếu chúng ĐỎ thì đó là kết quả, không phải thất bại.
 2. **Không có đường đo Windows tại chỗ.** Container Linux. Mọi khẳng định về Windows đi qua CI.
    Kế thừa nguyên vẹn từ #456 `chua_do_duoc` #4.
-3. **ĐÃ ĐÓNG MỘT PHẦN — nay có CHÍN lượt, nhưng phương sai lớn hơn ngưỡng A1.** Bản đầu của mục
-   này viết *"chỉ có HAI lượt chạy trọn"*, và nó hết hạn sau 6 giờ: phép đo 00:45Z 07-09-2026 có
-   **9** job Windows `success` trên master, `40,20`–`49,62` phút, **biên độ `9,42` phút**. Cái đóng
-   được: nhiễu không còn suy từ hai điểm. Cái KHÔNG đóng được, và nó nghiêm trọng hơn: ngưỡng
-   `≤ 25,00` ở A1 chừa `~4` phút, mà **biên độ quan sát được là `9,42`** — tức A1 có thể ĐỎ hoặc
-   XANH thuần vì runner. Phiên thi công **phải** đo lại dải này trước khi tin A1, và nếu dải chưa
-   hẹp lại thì ngưỡng A1 phải nới theo phương sai ĐO ĐƯỢC, không theo con số viết sẵn ở đây. Chín
-   điểm vẫn là mẫu tiện tay (mọi lượt master trong ~7,5 giờ), không phải mẫu thiết kế.
+3. **ĐÃ ĐÓNG MỘT PHẦN — nay có MƯỜI MỘT lượt, nhưng phương sai LỚN HƠN ngưỡng A1 và đang NỚI RA.**
+   Bản đầu viết *"chỉ có HAI lượt chạy trọn"*; nó hết hạn sau 6 giờ. Bản thứ hai viết *"chín lượt,
+   biên độ 9,42"*; nó hết hạn sau **2 giờ 4 phút**. Đo 02:49:51Z 07-09-2026: **11** job Windows
+   `success`, `40,20`–`50,48` phút, **biên độ `10,28`**, biên dưới trần 60 còn **`9,52`** phút.
+   Cái đóng được: nhiễu không còn suy từ hai điểm. Cái KHÔNG đóng được, và nó nghiêm trọng hơn:
+   ngưỡng `≤ 25,00` ở A1 chừa `~4` phút, mà **biên độ quan sát được là `10,28`** — tức A1 có thể ĐỎ
+   hoặc XANH thuần vì runner, và khoảng cách ấy **rộng ra** giữa hai phép đo, không hẹp lại. Phiên
+   thi công **phải** đo lại dải này trước khi tin A1; nếu dải chưa hẹp, ngưỡng A1 phải nới theo
+   phương sai ĐO ĐƯỢC, không theo con số viết sẵn ở đây. Mười một điểm vẫn là **mẫu tiện tay** (mọi
+   lượt master trong ~9,6 giờ), không phải mẫu thiết kế.
 4. **Thứ tự nay CỐ ĐỊNH, nên nền của packet này đứng yên — nhưng nền của ba packet sau thì
    không.** GATE đi đầu ⇒ A1/A2/A5 đo trên cây chưa bị ba packet mutant-Windows đổi; đổi lại, ba
    packet ấy phải đo A7 của mình trên bố cục ĐÃ TÁCH (`gate-registry`), và đặc tả của chúng đã viết

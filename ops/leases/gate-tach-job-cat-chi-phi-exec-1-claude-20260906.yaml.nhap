@@ -47,8 +47,8 @@ assurance_target: cross_approved
 access: read-write
 
 spec_path: ops/specs/GATE-TACH-JOB-CAT-CHI-PHI.md
-spec_sha256: 7c9d8d4dc1fee6e7389b46a42275fc6edc71f5a6531951827560035495ce7632
-spec_hash: 7c9d8d4dc1fee6e7389b46a42275fc6edc71f5a6531951827560035495ce7632
+spec_sha256: 8cca700cba9c2312d05bf64eee3d4a5bda5317cb45e244ed22161b4ddcc83c62
+spec_hash: 8cca700cba9c2312d05bf64eee3d4a5bda5317cb45e244ed22161b4ddcc83c62
 
 # Hai tệp (verdict lượt 1, P1 `write-set-thieu-noi-doc-job-registry`): `loi_ruff_ci` trong tệp #2
 # khoá cứng `jobs.gate`; tách job mà không sửa nó thì bước `test registry` tự đỏ — đo 19:33Z

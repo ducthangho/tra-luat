@@ -732,6 +732,29 @@ ca nào trong ba ⇒ `phan_chung()` dưới `N/N`.
   ĐƯỢC ở lượt này (ràng buộc chủ kho)**; full-gate cuối sau khi hết P1 trả lời.
 Đơn vị: **số mục bị `chay_moi` đếm là ĐỎ**.
 
+**A9 — bằng chứng DỊ DẠNG phải ra `ĐỎ` CÓ LÝ DO, không ra TRUY VẾT PYTHON.**
+Ca `D9` (cặp `9…9/9…9`, **5000 chữ số**) làm `int()` ném `ValueError` (Python 3.11 trần **4300**
+chữ số). Dưới H, ngoại lệ ấy **lan ra khỏi `chay_moi`**; `main()` ở `:542` gọi
+`ok = chay_moi() == 0 and ok` **không** bọc `try` (đo 02:5xZ 07-09-2026: `grep -n except` trên tệp
+cho **4** vị trí, không vị trí nào bao `chay_moi`), nên tiến trình chết bằng truy vết, `rc=1`.
+
+**Nói cho ĐÚNG mức, vì bản đầu của mục này viết QUÁ TAY và phép đo bác nó:** `rc=1` là **FAIL-CLOSED
+— cổng ĐỎ**, KHÔNG phải "cổng vắng mặt". Đo trực tiếp trên cây hiện tại (BASE, chưa có H):
+`chay_moi` với cùng chuỗi 5000 chữ số trả **`1`** và **không ném gì** — `ValueError` là thuộc tính
+của vị từ **H**, không phải của mã đang land. Nên đây **KHÔNG** phải lỗ an ninh và **KHÔNG** phải
+điều kiện chặn lease.
+
+Cái còn lại là thật và đáng một tiêu chí: một ngoại lệ không bắt **giết cả bộ**, nên phán quyết của
+**7 định dạng còn lại bị mất** trong cùng lượt, và người đọc log thấy truy vết chứ không thấy
+`ĐỎ: <lý do>`. Đó là **thiệt hại kèm theo + khả năng chẩn đoán**, không phải bằng chứng giả.
+
+Trị phải đạt sau thi công: `chay_moi(moi={P: MOI[P]}, chay_mot=lambda _: (0, D9))` ⇒ trả **`1`**
+và **không** ném ngoại lệ; **7** định dạng còn lại vẫn được phán quyết trong cùng lượt (đếm số mục
+đã xét = **8**). Đơn vị: **số mục bị đếm là ĐỎ** và **số mục được xét**. Phép làm ĐỎ: gỡ chốt
+chiều-dài/`try` ra ⇒ ngoại lệ lan ⇒ số mục được xét tụt xuống **< 8**. Cách đạt là lựa chọn của
+phiên thi công (so chuỗi chữ số đã bỏ số 0 đầu thay vì `int()`, hoặc chặn theo độ dài, hoặc bọc
+`try` trả `False`); đặc tả **không** chỉ định cách, chỉ chỉ định TRỊ.
+
 **A7 — không đụng hành vi nào khác.** `git diff --numstat` chỉ hiện đúng **1** đường dẫn.
 
 **A8 — tiền nhiệm không còn giữ TRƯỚC khi bắt tay, đo trên MỌI bản, bằng `ai-dang-giu` chứ không
@@ -786,8 +809,8 @@ hoặc nguồn trích (L5):
    · **5 ranh giới mới của H** (bộ D, 00:15Z 07-09-2026): `D1` chuỗi `54/54/0` khi tác giả grammar khai
    `(\d+)/(\d+)/\d+` ⇒ nhận (`_CAP` không coi `/0` là cặp; SPAN `pretooluse` chặn ca tương đương, `mcp`
    thì không) · `D2` `039/39` ⇒ nhận (so số nguyên; T' bác) · `D3` chữ số Unicode `３９/３９` ⇒ nhận
-   (`\d` Unicode) · `D9` số 5000 chữ số ⇒ `ValueError` lan ra `chay_moi` ⇒ `rc≠0` (ồn ào, không xanh;
-   BASE y hệt) · `D12b` `nhanh` `0/0 (xong)` ⇒ nhận. Không formatter hiện có in ca nào trong năm ca ấy.
+   (`\d` Unicode) · `D9` số 5000 chữ số ⇒ `ValueError` lan ra `chay_moi` ⇒ `rc≠0` (fail-closed, cổng
+   ĐỎ — **nay có tiêu chí A9**, không còn chỉ là ranh giới khai suông; BASE trả `1` mà KHÔNG ném) · `D12b` `nhanh` `0/0 (xong)` ⇒ nhận. Không formatter hiện có in ca nào trong năm ca ấy.
    Siết `_CAP` (`[0-9]`, cấm `/` kề cặp) là lựa chọn của phiên thi công; đổi khối mã thì đo lại toàn bộ.
    Đổi formatter ⇒ phải khai lại `TONG` và chạy lại toàn bộ bộ ca; **không** được nới grammar bằng `.*`
    hay bỏ nhóm bắt để "qua" — luật 7 H làm ĐỎ ngay bản in xanh, và đó là kết quả đúng.

@@ -45,6 +45,17 @@ KHO="${3-$(pwd)}"
 REMOTE=$(git -C "$KHO" remote get-url origin)
 mkdir -p "$R"
 
+# ---- 0. TU CHOI TAI DUNG vao mot goi DA DUNG — kiem TRUOC MOI thao tac ghi/xoa ----
+# Khong xoa bo cai cu => dung lai cung `$R` se TICH LUY: cross-review #477 luot 4 do ba lan
+# dung cung R, manifest tang 2142 -> 2154 -> 2166 (+12 tep, +7.385.648 byte moi lan).
+# Chot nay phai o DAY chu khong o buoc cong cu: dat muon thi script da `rm -rf` va clone lai
+# `kho.git`/`cay-kho` roi moi tu choi, lam HONG manifest cua lan dung truoc (do duoc: 1520/2136).
+# KHONG xoa gi — `$R` khong thuoc so huu cua script; nguoi goi phai dung mot `$R` MOI.
+for cu in "$R"/cong-cu/actionlint.?????? "$R"/ARTIFACTS.sha256; do
+  [ -e "$cu" ] || continue
+  loi 4 "goi da duoc dung truoc (thay '$cu') — dung mot \$R MOI. Script khong xoa thu muc no khong tao ra."
+done
+
 GIO=$(date -u +%FT%TZ)
 printf '%s\n' "$GIO" > "$R/gio-chup-ref.txt"
 

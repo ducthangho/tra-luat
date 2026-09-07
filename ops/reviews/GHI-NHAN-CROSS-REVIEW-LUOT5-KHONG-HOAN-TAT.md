@@ -230,3 +230,10 @@ sát**, không phải đổi máy.
 `changes_requested` — 7 P1 / 4 P2, P3 cũ ĐÃ VÁ THẬT, P1 cũ VÁ HỜ về nghĩa vụ xác nhận:
 `pr468-hoso-4-packet-review-6-codex-verdict.md` + biên nhận `.receipt.yaml`; hiện vật reviewer (1213 ca, harness, bản in, log)
 ở `pr468-hoso-4-packet-review-6-codex/`. Bản vá theo verdict nằm ở commit kế trên nhánh này.
+
+# LƯỢT 7 — 07-09-2026, `reviewed_sha` `b2ea0f2` (sau bản vá lượt 6)
+
+Codex `gpt-6-astra`, xhigh, **1576 s, chạy trọn ngay lần đầu**. `changes_requested` — **4 P1 / 2 P2**. ĐỐI CHIẾU 11 finding
+lượt 6: 6 ĐÃ VÁ THẬT · 2 VÁ HỜ · 1 VÁ SINH LỖI MỚI (`a9-khai-sai-base-ngoai-le`) · 2 CHƯA VÁ (`bia-mo-…` chờ hết hạn/dọn ref,
+`bien-do-…` trong đặc tả GATE đóng băng). Finding mới P1 `issue-lo-neo-commit-cu-kem-bam-moi`. Verdict `pr468-hoso-4-packet-review-7-codex-verdict.md`,
+hiện vật `pr468-hoso-4-packet-review-7-codex/`. Bản vá theo verdict ở commit kế.

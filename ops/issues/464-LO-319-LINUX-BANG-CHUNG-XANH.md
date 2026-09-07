@@ -72,8 +72,9 @@ Ca 5000 chữ số nay có **tiêu chí A9** riêng: `chay_moi` phải trả `1`
 Nói cho đúng mức: đó là **fail-closed** (`rc=1` ⇒ cổng ĐỎ), **không** phải cổng vắng mặt. **Đính chính
 theo finding P2 `a9-khai-sai-base-ngoai-le` (lượt 6):** BASE cũng gọi `int()` trên nhóm bắt, nên số
 5000 chữ số nằm ở cặp **CA** làm BASE ném `ValueError` y hệt H (reviewer đo cả hai vế: `BASE=H=ValueError`);
-BASE chỉ trả `1` mà không ném khi số dài nằm ở cặp **đột biến** — vùng BASE không nhìn tới. A9 vì vậy là
-tiêu chí chẩn đoán cho H, không phải một hồi quy so với BASE.
+khi số dài nằm ở cặp **đột biến** — vùng BASE không nhìn tới — BASE **không ném và nhận xanh** (`chay_moi`
+trả `0`; lượt 7 đo: `BASE=0, H=ValueError` — bản trước của câu này viết "trả `1`", SAI, finding P2 lượt 7).
+A9 vì vậy là tiêu chí chẩn đoán cho H, không phải một hồi quy so với BASE.
 
 ## Phạm vi
 
@@ -130,7 +131,7 @@ nó nhìn thấy.
 ---
 
 **Đặc tả đóng băng:** `ops/specs/LO-319-LINUX-BANG-CHUNG-XANH.md` @ `b743f1798aba12615f903a11bd451c87e404814e`
-**`spec_sha256`:** `730033f0f534fb325598182e08068861e12033dcbf5e32484c4962b23b542caf`
+**`spec_sha256`:** `0257a690d058b643b182516486cdf1856d0632be54797458123c88e8ef06378c`
 **`review_class`:** `sensitive` · **`base_sha`:** `1b3caa1` · **`depends_on`:** `GATE-TACH-JOB-CAT-CHI-PHI`
 **Lease nháp:** `ops/leases/lo-319-linux-bang-chung-xanh-exec-1-claude-20260906.yaml.nhap` (5 ô null —
 `packet_issue` đã điền `464`; bản đầu ghi 6)

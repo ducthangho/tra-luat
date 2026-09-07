@@ -50,6 +50,17 @@ GIÂY nên mỗi tỉ lệ là một **DẢI**, không phải một điểm.
 | `bien-nhan v2 selftest` | 10 | 7,07× | 9,74× | **7,56×** |
 | **job trọn `gate`** | 11 | 1,52× | 2,36× | **1,73×** |
 
+**Đính chính sau lượt 7 (finding P1 `thieu-hien-vat-quyet-dinh-h-va-chi-phi`):** bảng trên chép từ đặc tả GATE
+ĐÃ ĐÓNG BĂNG (lease đã cấp), tính từ `buoc_master.tsv` **không có trong kho**. Tái tính từ nguồn TRONG KHO
+(`ops/reviews/pr468-hoso-4-packet-review-6-codex/nen-a1-a5/buoc.tsv`, cùng 11 run, cùng bộ lọc) cho **4/7
+trung vị lệch**: `test registry` **1,21×** (khai 1,20) · `packet-loop selftest` **2,37×** (2,35) · `G5` **2,40×**
+(2,39) · `bien-nhan v2 selftest` **7,79×** (7,56 — ngoài cả dải làm tròn đã khai `7,48–7,65`); `n`/min/max
+khớp. Và **11 run ấy KHÔNG đều là master**: 5 `master/push` + 6 run nhánh khác (`pull_request`/`workflow_dispatch`),
+1 head 39 bước + 10 head 40 bước — tức biên độ `10,28` gộp cả khác tải lẫn khác nhánh (finding P2
+`bien-do-khac-head-khong-phai-nhieu-runner`). Bảng trong đặc tả đóng băng vì vậy là **lời khai lịch sử**; con số
+dùng được là con số tính lại được từ `buoc.tsv`. Đồng bộ lại đặc tả GATE đòi **revision có thẩm quyền chủ kho**
+(đổi băm ⇒ lease cấp lại), chưa làm ở PR này.
+
 Nội suy *"Windows đắt gấp ~3"* mà hai packet `MUTANT-WINDOWS-*` dựa vào là **sai theo cả hai chiều**:
 quá CAO cho job trọn (`1,73×`), quá THẤP hơn hai lần cho một selftest python nặng (`7,56×`).
 Dải toàn bộ `1,07×` – `9,74×`. **Một hệ số duy nhất không dùng được** — phải nói rõ đang nhân cho
@@ -96,6 +107,12 @@ ai-dang-giu .claude/dev/ci_dang_ky_test.py    ⇒ NGƯỜI_GIỮ 2: gate-tach-�
 
 Bản lease #456 **trên `master`** chưa có bia mộ (bia mộ chỉ nằm trên nhánh của PR này), nên packet
 **BỊ CHẶN** cho tới khi PR #468 merge hoặc lease #456 hết hạn tự nhiên lúc `14:30:07Z 07-09-2026`.
+Nói cho đúng mức theo lượt 7 (finding P1 `bia-mo-mot-ref-khong-thu-hoi-moi-ban`): "merge là hết chặn" chỉ
+đúng khi **mọi ref** còn giữ blob cũ được cập nhật/dọn — `ai-dang-giu` đếm mọi `(blob, path)` trên mọi ref.
+Trên máy chủ lúc 07:4xZ 07-09-2026 (`git ls-remote --heads`) **không** có nhánh `claude/gate-tach-job-cat-chi-phi`;
+ref ấy trong snapshot của reviewer là nhánh cục bộ của phiên executor (bằng `d28c4b1`) lọt vào mirror qua chuỗi
+clone. Executor sẽ chỉ đẩy nhánh packet sau khi rebase lên cây có bia mộ, và **đo lại `ai-dang-giu` sau fetch đủ
+ref trước khi bắt tay** — không suy từ merge.
 Phép canh hai nguồn ref chạy trước: máy chủ 299 ⊆ cục bộ 300 (`comm -23` rỗng) ⇒ không mù.
 
 ---

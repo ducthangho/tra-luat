@@ -772,8 +772,11 @@ cho **4** vị trí, không vị trí nào bao `chay_moi`), nên tiến trình c
 — cổng ĐỎ**, KHÔNG phải "cổng vắng mặt". **Và lời khai so với BASE của bản trước cũng SAI** (finding P2
 `a9-khai-sai-base-ngoai-le`, lượt 6): BASE gọi `int()` trên **nhóm bắt**, nên số 5000 chữ số đặt ở cặp **CA**
 làm BASE ném `ValueError` **y hệt** H (reviewer đo hai fixture `pretooluse`/`nhanh`: `BASE=H=ValueError`,
-`d9-comparison.json` trong gói lượt 6); BASE chỉ trả `1` mà không ném khi số dài nằm ở cặp **đột biến** —
-vùng BASE không nhìn tới (đo 02:5xZ 07-09-2026 chính là ca ấy). Nên A9 là tiêu chí **chẩn đoán cho H**
+`d9-comparison.json` trong gói lượt 6); khi số dài nằm ở cặp **đột biến** — vùng BASE không nhìn tới — BASE
+**không ném và NHẬN XANH** (`chay_moi` trả **0** mục đỏ; reviewer lượt 7 đo bốn fixture nguyên byte:
+CA `pretooluse`/`nhanh` ⇒ `BASE=H=ValueError`, cặp đột biến `pretooluse`/`mcp` ⇒ `BASE=0, H=ValueError`,
+`do-review7/static.json`). Bản lượt 6 của câu này viết "BASE trả `1`" — SAI (finding P2
+`a9-khai-sai-base-ngoai-le`, lượt 7): không đọc một vùng không làm BASE tự đếm vùng ấy là đỏ. Nên A9 là tiêu chí **chẩn đoán cho H**
 (ngoại lệ phải ra `ĐỎ` có lý do ở cả hai vị trí), không phải hồi quy so với BASE; đây **KHÔNG** phải lỗ
 an ninh và **KHÔNG** phải điều kiện chặn lease. Fixture nguyên byte của D9 phải đi kèm cả hai vế khi thi công.
 
@@ -843,8 +846,8 @@ hoặc nguồn trích (L5):
    `(\d+)/(\d+)/\d+` ⇒ nhận (`_CAP` không coi `/0` là cặp; SPAN `pretooluse` chặn ca tương đương, `mcp`
    thì không) · `D2` `039/39` ⇒ nhận (so số nguyên; T' bác) · `D3` chữ số Unicode `３９/３９` ⇒ nhận
    (`\d` Unicode) · `D9` số 5000 chữ số ⇒ `ValueError` lan ra `chay_moi` ⇒ `rc≠0` (fail-closed, cổng
-   ĐỎ — **nay có tiêu chí A9**, không còn chỉ là ranh giới khai suông; BASE ném y hệt khi số dài ở cặp CA,
-   chỉ trả `1` không ném khi số dài ở cặp đột biến — xem đính chính ở A9) · `D12b` `nhanh` `0/0 (xong)` ⇒ nhận. Không formatter hiện có in ca nào trong năm ca ấy.
+   ĐỎ — **nay có tiêu chí A9**, không còn chỉ là ranh giới khai suông; BASE ném y hệt khi số dài ở cặp CA;
+   ở cặp đột biến BASE không ném và NHẬN XANH (`0` mục đỏ) — xem đính chính ở A9) · `D12b` `nhanh` `0/0 (xong)` ⇒ nhận. Không formatter hiện có in ca nào trong năm ca ấy.
    Siết `_CAP` (`[0-9]`, cấm `/` kề cặp) là lựa chọn của phiên thi công; đổi khối mã thì đo lại toàn bộ.
    Đổi formatter ⇒ phải khai lại `TONG` và chạy lại toàn bộ bộ ca; **không** được nới grammar bằng `.*`
    hay bỏ nhóm bắt để "qua" — luật 7 H làm ĐỎ ngay bản in xanh, và đó là kết quả đúng.

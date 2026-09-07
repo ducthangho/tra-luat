@@ -1,0 +1,606 @@
+{
+  "rc": 0,
+  "equal": {
+    "buoc.tsv": true,
+    "tom_tat.md": true,
+    "job.tsv": true,
+    "khong_do_duoc.txt": true,
+    "tinh.py": true
+  },
+  "runs": 13,
+  "jobs": 26,
+  "steps": 1140,
+  "job_columns": 14,
+  "step_columns": 9,
+  "conclusions": {
+    "success": 25,
+    "cancelled": 1
+  },
+  "branch_count": {
+    "master": 5,
+    "claude/priceless-volhard-329577": 1,
+    "claude/tra-luat-process-review-o4d7kb": 6,
+    "claude/cap-nhat-trang-thai-pr-taxzax": 1
+  },
+  "summary": {
+    "ubuntu-master-success": {
+      "n": 5,
+      "min": 23.8,
+      "max": 27.683333333333334,
+      "range": 3.883333333333333,
+      "median": 26.516666666666666,
+      "mean": 25.91
+    },
+    "ubuntu-all-success": {
+      "n": 13,
+      "min": 20.933333333333334,
+      "max": 27.683333333333334,
+      "range": 6.75,
+      "median": 26.516666666666666,
+      "mean": 25.866666666666667
+    },
+    "windows-master-success": {
+      "n": 5,
+      "min": 40.2,
+      "max": 48.0,
+      "range": 7.799999999999997,
+      "median": 45.583333333333336,
+      "mean": 44.65
+    },
+    "windows-all-success": {
+      "n": 12,
+      "min": 40.2,
+      "max": 50.483333333333334,
+      "range": 10.283333333333331,
+      "median": 45.8,
+      "mean": 45.61805555555556
+    }
+  },
+  "eleven": [
+    {
+      "head": "8ce02fd",
+      "run": "34068433781",
+      "branch": "master",
+      "event": "push",
+      "minutes": "40.20",
+      "steps": 40,
+      "receipt_v2": true
+    },
+    {
+      "head": "82e01a4",
+      "run": "34058508426",
+      "branch": "claude/priceless-volhard-329577",
+      "event": "pull_request",
+      "minutes": "41.65",
+      "steps": 40,
+      "receipt_v2": true
+    },
+    {
+      "head": "1b3caa1",
+      "run": "34048685345",
+      "branch": "master",
+      "event": "push",
+      "minutes": "42.28",
+      "steps": 39,
+      "receipt_v2": false
+    },
+    {
+      "head": "c0f18ac",
+      "run": "34052910676",
+      "branch": "claude/tra-luat-process-review-o4d7kb",
+      "event": "pull_request",
+      "minutes": "43.83",
+      "steps": 40,
+      "receipt_v2": true
+    },
+    {
+      "head": "28cb898",
+      "run": "34060879398",
+      "branch": "master",
+      "event": "push",
+      "minutes": "45.58",
+      "steps": 40,
+      "receipt_v2": true
+    },
+    {
+      "head": "b912e5f",
+      "run": "34049592719",
+      "branch": "claude/tra-luat-process-review-o4d7kb",
+      "event": "pull_request",
+      "minutes": "46.02",
+      "steps": 40,
+      "receipt_v2": true
+    },
+    {
+      "head": "cacaba3",
+      "run": "34055467808",
+      "branch": "master",
+      "event": "push",
+      "minutes": "47.18",
+      "steps": 40,
+      "receipt_v2": true
+    },
+    {
+      "head": "d28c4b1",
+      "run": "34074288203",
+      "branch": "master",
+      "event": "push",
+      "minutes": "48.00",
+      "steps": 40,
+      "receipt_v2": true
+    },
+    {
+      "head": "62a6385",
+      "run": "34062997697",
+      "branch": "claude/tra-luat-process-review-o4d7kb",
+      "event": "workflow_dispatch",
+      "minutes": "49.37",
+      "steps": 40,
+      "receipt_v2": true
+    },
+    {
+      "head": "771c6ed",
+      "run": "34065779670",
+      "branch": "claude/tra-luat-process-review-o4d7kb",
+      "event": "workflow_dispatch",
+      "minutes": "49.62",
+      "steps": 40,
+      "receipt_v2": true
+    },
+    {
+      "head": "0c3405f",
+      "run": "34070122978",
+      "branch": "claude/tra-luat-process-review-o4d7kb",
+      "event": "workflow_dispatch",
+      "minutes": "50.48",
+      "steps": 40,
+      "receipt_v2": true
+    }
+  ],
+  "eleven_stats": {
+    "n": 11,
+    "min": 40.2,
+    "max": 50.483333333333334,
+    "range": 10.283333333333331,
+    "median": 46.016666666666666,
+    "mean": 45.837878787878786
+  },
+  "eleven_master_count": 5,
+  "split_costs": {
+    "ubuntu": {
+      "job": 24.25,
+      "step_sum": 24.2,
+      "setup1_10": 1.1833333333333333,
+      "setup2_10": 1.1666666666666667,
+      "registry": 13.133333333333333,
+      "packet_loop": 3.65,
+      "remaining": 7.416666666666666,
+      "split_registry": 14.316666666666666,
+      "split_packet": 4.833333333333333,
+      "total_steps": 26.566666666666666
+    },
+    "windows": {
+      "job": 43.2,
+      "step_sum": 43.166666666666664,
+      "setup1_10": 3.3333333333333335,
+      "setup2_10": 3.316666666666667,
+      "registry": 17.7,
+      "packet_loop": 9.7,
+      "remaining": 15.766666666666666,
+      "split_registry": 21.03333333333333,
+      "split_packet": 13.033333333333333,
+      "total_steps": 49.83333333333333
+    }
+  },
+  "ratios": {
+    "test registry": {
+      "n": 11,
+      "min": 1.0679501698754248,
+      "max": 1.7070866141732284,
+      "range": 0.6391364442978036,
+      "median": 1.2125435540069687,
+      "mean": 1.2499042113497771,
+      "pairs": [
+        {
+          "head": "8ce02fd",
+          "ubuntu": 749,
+          "windows": 927
+        },
+        {
+          "head": "82e01a4",
+          "ubuntu": 869,
+          "windows": 968
+        },
+        {
+          "head": "1b3caa1",
+          "ubuntu": 860,
+          "windows": 1028
+        },
+        {
+          "head": "c0f18ac",
+          "ubuntu": 869,
+          "windows": 1024
+        },
+        {
+          "head": "28cb898",
+          "ubuntu": 883,
+          "windows": 943
+        },
+        {
+          "head": "b912e5f",
+          "ubuntu": 867,
+          "windows": 1113
+        },
+        {
+          "head": "cacaba3",
+          "ubuntu": 742,
+          "windows": 989
+        },
+        {
+          "head": "d28c4b1",
+          "ubuntu": 872,
+          "windows": 975
+        },
+        {
+          "head": "62a6385",
+          "ubuntu": 635,
+          "windows": 1084
+        },
+        {
+          "head": "771c6ed",
+          "ubuntu": 861,
+          "windows": 1044
+        },
+        {
+          "head": "0c3405f",
+          "ubuntu": 823,
+          "windows": 1071
+        }
+      ],
+      "rounding_lower": 1.2112594312246083,
+      "rounding_upper": 1.2138291690877396
+    },
+    "tl selftest": {
+      "n": 11,
+      "min": 1.4054054054054055,
+      "max": 2.2577319587628866,
+      "range": 0.8523265533574811,
+      "median": 1.8305084745762712,
+      "mean": 1.8314963953304,
+      "pairs": [
+        {
+          "head": "8ce02fd",
+          "ubuntu": 111,
+          "windows": 156
+        },
+        {
+          "head": "82e01a4",
+          "ubuntu": 116,
+          "windows": 171
+        },
+        {
+          "head": "1b3caa1",
+          "ubuntu": 117,
+          "windows": 246
+        },
+        {
+          "head": "c0f18ac",
+          "ubuntu": 118,
+          "windows": 182
+        },
+        {
+          "head": "28cb898",
+          "ubuntu": 119,
+          "windows": 215
+        },
+        {
+          "head": "b912e5f",
+          "ubuntu": 118,
+          "windows": 210
+        },
+        {
+          "head": "cacaba3",
+          "ubuntu": 108,
+          "windows": 226
+        },
+        {
+          "head": "d28c4b1",
+          "ubuntu": 118,
+          "windows": 216
+        },
+        {
+          "head": "62a6385",
+          "ubuntu": 97,
+          "windows": 219
+        },
+        {
+          "head": "771c6ed",
+          "ubuntu": 118,
+          "windows": 227
+        },
+        {
+          "head": "0c3405f",
+          "ubuntu": 116,
+          "windows": 224
+        }
+      ],
+      "rounding_lower": 1.8185654008438819,
+      "rounding_upper": 1.8425531914893618
+    },
+    "packet-loop selftest": {
+      "n": 11,
+      "min": 1.8775510204081634,
+      "max": 2.893854748603352,
+      "range": 1.0163037281951885,
+      "median": 2.3692946058091287,
+      "mean": 2.3654846950250774,
+      "pairs": [
+        {
+          "head": "8ce02fd",
+          "ubuntu": 207,
+          "windows": 451
+        },
+        {
+          "head": "82e01a4",
+          "ubuntu": 245,
+          "windows": 460
+        },
+        {
+          "head": "1b3caa1",
+          "ubuntu": 239,
+          "windows": 562
+        },
+        {
+          "head": "c0f18ac",
+          "ubuntu": 238,
+          "windows": 464
+        },
+        {
+          "head": "28cb898",
+          "ubuntu": 243,
+          "windows": 578
+        },
+        {
+          "head": "b912e5f",
+          "ubuntu": 236,
+          "windows": 587
+        },
+        {
+          "head": "cacaba3",
+          "ubuntu": 211,
+          "windows": 586
+        },
+        {
+          "head": "d28c4b1",
+          "ubuntu": 241,
+          "windows": 571
+        },
+        {
+          "head": "62a6385",
+          "ubuntu": 179,
+          "windows": 518
+        },
+        {
+          "head": "771c6ed",
+          "ubuntu": 240,
+          "windows": 551
+        },
+        {
+          "head": "0c3405f",
+          "ubuntu": 230,
+          "windows": 566
+        }
+      ],
+      "rounding_lower": 2.36231884057971,
+      "rounding_upper": 2.3762993762993765
+    },
+    "G5 kiem ban ke": {
+      "n": 11,
+      "min": 1.9137931034482758,
+      "max": 3.0930232558139537,
+      "range": 1.1792301523656779,
+      "median": 2.396551724137931,
+      "mean": 2.447311565388704,
+      "pairs": [
+        {
+          "head": "8ce02fd",
+          "ubuntu": 51,
+          "windows": 111
+        },
+        {
+          "head": "82e01a4",
+          "ubuntu": 58,
+          "windows": 111
+        },
+        {
+          "head": "1b3caa1",
+          "ubuntu": 57,
+          "windows": 138
+        },
+        {
+          "head": "c0f18ac",
+          "ubuntu": 59,
+          "windows": 129
+        },
+        {
+          "head": "28cb898",
+          "ubuntu": 60,
+          "windows": 140
+        },
+        {
+          "head": "b912e5f",
+          "ubuntu": 56,
+          "windows": 145
+        },
+        {
+          "head": "cacaba3",
+          "ubuntu": 50,
+          "windows": 141
+        },
+        {
+          "head": "d28c4b1",
+          "ubuntu": 60,
+          "windows": 143
+        },
+        {
+          "head": "62a6385",
+          "ubuntu": 43,
+          "windows": 133
+        },
+        {
+          "head": "771c6ed",
+          "ubuntu": 58,
+          "windows": 139
+        },
+        {
+          "head": "0c3405f",
+          "ubuntu": 56,
+          "windows": 146
+        }
+      ],
+      "rounding_lower": 2.3675213675213675,
+      "rounding_upper": 2.4260869565217393
+    },
+    "lease-publish selftest": {
+      "n": 11,
+      "min": 2.4166666666666665,
+      "max": 3.843137254901961,
+      "range": 1.4264705882352944,
+      "median": 2.9420289855072466,
+      "mean": 2.9381524487381636,
+      "pairs": [
+        {
+          "head": "8ce02fd",
+          "ubuntu": 57,
+          "windows": 147
+        },
+        {
+          "head": "82e01a4",
+          "ubuntu": 70,
+          "windows": 170
+        },
+        {
+          "head": "1b3caa1",
+          "ubuntu": 69,
+          "windows": 208
+        },
+        {
+          "head": "c0f18ac",
+          "ubuntu": 72,
+          "windows": 174
+        },
+        {
+          "head": "28cb898",
+          "ubuntu": 71,
+          "windows": 187
+        },
+        {
+          "head": "b912e5f",
+          "ubuntu": 69,
+          "windows": 203
+        },
+        {
+          "head": "cacaba3",
+          "ubuntu": 58,
+          "windows": 191
+        },
+        {
+          "head": "d28c4b1",
+          "ubuntu": 71,
+          "windows": 190
+        },
+        {
+          "head": "62a6385",
+          "ubuntu": 51,
+          "windows": 196
+        },
+        {
+          "head": "771c6ed",
+          "ubuntu": 68,
+          "windows": 220
+        },
+        {
+          "head": "0c3405f",
+          "ubuntu": 66,
+          "windows": 215
+        }
+      ],
+      "rounding_lower": 2.9136690647482015,
+      "rounding_upper": 2.9708029197080292
+    },
+    "bien-nhan v2 selftest": {
+      "n": 10,
+      "min": 7.066666666666666,
+      "max": 9.74468085106383,
+      "range": 2.6780141843971634,
+      "median": 7.792929292929292,
+      "mean": 8.10748348601652,
+      "pairs": [
+        {
+          "head": "8ce02fd",
+          "ubuntu": 37,
+          "windows": 311
+        },
+        {
+          "head": "82e01a4",
+          "ubuntu": 45,
+          "windows": 320
+        },
+        {
+          "head": "c0f18ac",
+          "ubuntu": 45,
+          "windows": 343
+        },
+        {
+          "head": "28cb898",
+          "ubuntu": 45,
+          "windows": 318
+        },
+        {
+          "head": "b912e5f",
+          "ubuntu": 14,
+          "windows": 128
+        },
+        {
+          "head": "cacaba3",
+          "ubuntu": 37,
+          "windows": 334
+        },
+        {
+          "head": "d28c4b1",
+          "ubuntu": 57,
+          "windows": 427
+        },
+        {
+          "head": "62a6385",
+          "ubuntu": 47,
+          "windows": 458
+        },
+        {
+          "head": "771c6ed",
+          "ubuntu": 58,
+          "windows": 435
+        },
+        {
+          "head": "0c3405f",
+          "ubuntu": 55,
+          "windows": 438
+        }
+      ],
+      "rounding_lower": 7.7051777051777055,
+      "rounding_upper": 7.882486341614267
+    },
+    "job": {
+      "n": 11,
+      "min": 1.523780487804878,
+      "max": 2.3582802547770703,
+      "range": 0.8344997669721923,
+      "median": 1.7267041901188243,
+      "mean": 1.7798048382197824
+    }
+  },
+  "billing_estimate": {
+    "before": 110.65,
+    "after": 126.23333333333332
+  }
+}

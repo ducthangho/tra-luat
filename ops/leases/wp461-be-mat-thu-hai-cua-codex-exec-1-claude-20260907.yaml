@@ -1,0 +1,178 @@
+# Lease EXECUTOR — `wp461` (Issue #461), lượt 1. Neo spec_hash e74812cf…
+
+schema_version: 2
+event: executor_lease_granted
+packet_issue: 461
+packet_id: wp461
+packet_ten: WP461-BE-MAT-THU-HAI-CUA-CODEX
+revision: 1
+generation: 1
+lease_id: wp461-be-mat-thu-hai-cua-codex-exec-1-claude-20260907
+role: executor
+provider: claude
+executor: claude
+model: opus-5
+effort: xhigh
+environment: cloud
+assurance_target: cross_approved
+access: read-write
+
+spec_path: ops/specs/wp461-be-mat-thu-hai-cua-codex.md
+spec_sha256: e74812cf1082daa39226ad3eae74c061afbbf65922b3f886adf3a84ac422df63
+spec_hash: e74812cf1082daa39226ad3eae74c061afbbf65922b3f886adf3a84ac422df63
+
+write_set:
+  - .claude/dev/launcher.py
+  - ops/KE_HOACH_THI_CONG_DA_PROVIDER.md
+  - ops/bien_nhan_v2_test.py
+  - CHANGELOG.md
+
+branch: agent/wp461-g1-claude
+branch_ownership: exclusive
+target_branch_neu_land: master
+base_sha: d28c4b1062e8505cbdaaf0237fcbe3f9b8ee4705
+start_from_sha: d28c4b1062e8505cbdaaf0237fcbe3f9b8ee4705
+reviewed_sha_required: d28c4b1062e8505cbdaaf0237fcbe3f9b8ee4705
+
+granted_by: ducthangho
+granted_on_instruction: 'direct, in-session, 2026-09-07 — chủ kho nói "cấp lease cho wp461 đi", rồi chốt ba trong bốn quyết định của §3 đặc tả qua câu hỏi trực tiếp: Q1 = `codex_service` · Q3 = GIỮ VÔ HƯỚNG, thêm hàng (KHÔNG đổi arity) · Q2 = 12 receipt lịch sử ĐÚNG, không đụng, không caveat.'
+authority_basis: '§2 — start/pause/resume/reroute/override/authorize thuộc chủ kho'
+recorded_by: claude-session
+recorder_is_dispatcher: false
+recorder_ghi_chu: >-
+  Phiên ghi lease này CŨNG là phiên đã land PR #460 — tức packet sinh ra finding `F05` mà
+  wp461 kế thừa. Cái đỡ được: đặc tả đóng băng TRƯỚC (băm neo trong Issue #461 từ 21:52Z
+  06-09, trước khi #460 merge), reviewer khác nhà cung cấp, và ba quyết định do chủ kho chốt
+  chứ không do phiên này suy.
+
+leased_at_utc: '2026-09-07T03:05:00Z'
+lease_expires_at_utc: '2026-09-08T03:05:00Z'
+run_minutes: 1440
+heartbeat_required_minutes: 30
+attempts_used: 0
+attempts_limit: 3
+
+reviewer_provider: codex
+review_class: sensitive
+effective_review_class: sensitive
+review_class_ghi_chu: >-
+  `sensitive` vì write set chạm `_TRANSPORT_CONTRACTS` — nguồn hợp đồng mà `ops/bien_nhan_v2.py`
+  BẮT BUỘC đọc để quyết nhận/từ chối mọi biên nhận. Phân theo HẬU QUẢ, không theo vị trí.
+
+dieu_kien_ready_DA_THOA:
+  depends_on_460: >-
+    #460 đã merge bằng MERGE COMMIT `d28c4b1` (2 cha: 8ce02fd + 0c3405f), đo lúc 02:00Z
+    07-09. `c44` tầng (b) — thứ wp461 phải sửa — nay có trên master.
+  gate_master_xanh: >-
+    run 34074288203 trên `d28c4b1`: gate(ubuntu) success 27ph37s · gate(windows) success
+    48ph00s, chạy trọn 41 bước, KHÔNG chạm trần 60. Bước 38 `release-verify strict (lane
+    LAND)` — leg chỉ có trên master — cũng success. Kèm `launcher (Windows thật)` run
+    34074288165 success cả hai job.
+  spec_dong_bang: >-
+    `sha256sum` trên đĩa VÀ `git show origin/master:…` cho CÙNG `e74812cf1082daa3…`,
+    5801 byte. Băm này khớp băm Issue #461 khai.
+  write_set_khong_ai_giu: >-
+    `ops/lease_publish.py ai-dang-giu` quét TOÀN KHO cho cả 4 đường: `NGƯỜI_GIỮ 0` cả bốn,
+    rc=0 cả bốn. `launcher.py` có 9 lease chạm nó nhưng CẢ 9 đều `HẾT_HẠN`.
+  ref_hai_nguon_khop: >-
+    `git ls-remote --heads origin` 299 tên · `for-each-ref refs/remotes/origin` 299 tên ·
+    `comm -23` RỖNG ⇒ không có nhánh nào trên máy chủ mà cục bộ chưa thấy. Không mù.
+
+bon_quyet_dinh_da_chot:
+  Q1_ten_be_mat_thu_hai: 'codex_service'
+  Q1_ly_do: >-
+    Khớp nguyên văn §2 ("`codex_cli` hoặc Codex service") và khớp cách 13 verdict tự mô tả
+    ("Codex service/API"). Không phải bịa tên mới.
+  Q2_12_receipt_lich_su: 'ĐÚNG — không sửa hiện vật, KHÔNG thêm caveat'
+  Q2_ly_do: >-
+    Cả 12 đi qua `codex exec`, tức đường CLI thật, nên `codex_cli` đúng cho ĐƯỜNG GỌI.
+    Hệ quả kiểm được: tiêu chí nghiệm thu "12 receipt: 0 vi phạm" phải thoả TỰ NHIÊN sau
+    thay đổi. Nếu chúng hoá ra ĐỎ thì đó là bằng chứng bản vá sai, KHÔNG phải cớ để thêm
+    miễn trừ.
+  Q3_arity_cot_surface: 'GIỮ VÔ HƯỚNG — thêm HÀNG, không đổi arity'
+  Q3_ly_do: >-
+    Đo được lợi ích cụ thể: PR #447 (`codex/wp433-r13-runtime-closure`, đang mở) có HAI chỗ
+    giải nén bộ 4 từ `_TRANSPORT_CONTRACTS`
+    (`for provider, command_names, _surface, _transport in …`). Giữ arity ⇒ hai chỗ ấy vẫn
+    chạy. Đổi sang TẬP sẽ làm hỏng chúng và một trong hai bên phải sửa lại.
+    Kèm: `_LUOC_DO_BANG` và mọi ca `c28` về arity KHÔNG phải sửa.
+  Q4_S2_may_doc_duoc: 'CHƯA được chủ kho trả lời trực tiếp — xem `vung_chua_quyet` bên dưới'
+
+do_va_cham_da_lam_TRUOC_khi_cap:
+  ghi_chu: >-
+    Lease chỉ thấy thứ ĐÃ KHAI. Nên ngoài `ai-dang-giu`, đã quét thêm 11 PR đang mở xem có
+    PR nào sửa cùng write set mà KHÔNG giữ lease.
+  ket_qua:
+    - 'BA PR đang mở sửa `.claude/dev/launcher.py` mà không giữ lease nào: #447 (+1014/−85),
+       #435 (+25/−3), #394 (+56/−4).'
+    - '#459 sửa `CHANGELOG.md`.'
+    - 'KHÔNG PR nào sửa `ops/bien_nhan_v2_test.py` hay `ops/KE_HOACH_THI_CONG_DA_PROVIDER.md`.'
+  danh_gia: >-
+    Chỉ #447 chạm VÙNG của wp461, và chỉ ở hai chỗ ĐỌC. Đo thẳng: #447 KHÔNG sửa khối định
+    nghĩa `_TRANSPORT_CONTRACTS = (` — nó chỉ thêm hai chỗ giải nén. Với Q3 đã chốt là giữ
+    arity, va chạm tụt xuống mức VĂN BẢN trong cùng tệp, không phải mức hợp đồng.
+  viec_cua_executor: >-
+    Đây là cảnh báo, KHÔNG phải quyền. wp461 không được sửa gì trong #447 và không được
+    "dọn hộ". Nếu merge master về mà xung đột ở `launcher.py` thì giải bằng merge, KHÔNG
+    rebase, KHÔNG force-push.
+
+viec_trong_lease:
+  - 'Thêm hàng `("openai_codex", <tên lệnh>, "codex_service", <transport>)` vào nguồn hợp đồng
+     sao cho một biên nhận khai TRUNG THỰC `codex_service` được NHẬN với danh sách lỗi RỖNG.'
+  - 'Sửa §2 `ops/KE_HOACH_THI_CONG_DA_PROVIDER.md` hàng Codex để ô surface hết lập lờ — đối
+     chiếu được Ô, không phải đoán từ văn xuôi.'
+  - 'Gỡ nhánh ngoại lệ `bang(prov == "openai_codex", …)` khỏi `c44` tầng (b); mọi hàng §2 phải
+     đối chiếu được CẢ BA cột.'
+  - 'Thêm đột biến rút `codex_service` khỏi hợp đồng, và ĐỌC NGUYÊN VĂN thông báo giết để
+     chứng minh nó chết đúng CHỐT — `giet_that` chỉ nói đúng CA.'
+  - 'CHANGELOG.md: mục ★ kèm ĐIỀU KIỆN ĐO của mọi con số.'
+
+vung_chua_quyet:
+  - id: 'Q4-S2-may-doc-duoc'
+    noi_dung: >-
+      Chủ kho chưa chốt §2 có mọc khối máy đọc được hay giữ prose + oracle chép tay gánh.
+      Với Q1/Q3 đã chốt thì đường TỐI THIỂU là giữ prose và làm ô surface của hàng Codex
+      đối chiếu được — nhưng đó là SUY LUẬN của phiên ghi lease, không phải lời chủ kho.
+      Executor làm theo đường tối thiểu ấy thì phải KHAI THẲNG trong PR rằng Q4 chưa được
+      trả lời trực tiếp. Muốn làm khối máy đọc được thì phải hỏi chủ kho TRƯỚC.
+  - id: 'MOT-PROVIDER-MOT-CONTRACT'
+    noi_dung: >-
+      Chú thích ngay trên `_TRANSPORT_CONTRACTS` khai bất biến "Một provider chỉ có MỘT
+      contract vận chuyển". Thêm hàng thứ hai cho `openai_codex` PHÁ bất biến ấy. Và bảng
+      còn dùng để tra TÊN LỆNH → provider, trong khi một dịch vụ không có tên lệnh nào.
+      Bảng `_PROVIDER_NGOAI_CLI` (provider, surface, transport — không tên lệnh) có HÌNH
+      DẠNG đúng hơn cho một bề mặt không đi qua CLI, nhưng chú thích của NÓ lại khai
+      "không bao giờ chứa" provider có đi qua CLI. Hai chú thích cùng cấm chỗ ta cần đặt.
+      ĐÂY LÀ VÙNG SPEC KHÔNG PHỦ. Executor phải chọn và NÊU LÝ DO trong PR; nếu lối ra đòi
+      sửa `ops/bien_nhan_v2.py` thì đó là verdict `blocked` + revision mới, đúng §3.2 —
+      KHÔNG tự mở write set.
+
+dieu_kien_dung:
+  - 'Chạm bất kỳ đường dẫn nào ngoài BỐN đường đã khai — đặc biệt `ops/bien_nhan_v2.py`.
+     Spec khai thẳng nó CỐ Ý ngoài write set; phải sửa sản phẩm nghĩa là spec THIẾU ⇒
+     verdict `blocked`, revision mới.'
+  - 'Sửa bất kỳ hiện vật nào trong `ops/reviews/*.md` hoặc `*.receipt.yaml` — chúng neo băm.
+     Q2 đã chốt là 12 receipt ĐÚNG, nên không có việc gì phải đụng chúng.'
+  - 'Đổi arity `_TRANSPORT_CONTRACTS` — Q3 đã chốt NGƯỢC LẠI. Làm thế là bỏ qua quyết định
+     của chủ kho VÀ làm hỏng hai chỗ đọc của PR #447.'
+  - 'Thêm miễn trừ / danh sách bỏ qua để 12 receipt lịch sử khỏi đỏ. Nếu chúng đỏ thì bản vá
+     SAI — đó là tín hiệu, không phải chướng ngại. Cùng lớp "lỗi ĐO thành lỗi DỮ LIỆU" kho
+     đã trả giá bốn lần.'
+  - 'Biến câu hỏi (2) thành một phép đo giả. Không có cách nào từ trong kho xác định một
+     lượt chạy LỊCH SỬ đi qua bề mặt nào — `codex` không phát `modelUsage`. Đó là QUYẾT ĐỊNH,
+     và nó đã được quyết; đừng dựng bằng chứng cho nó.'
+  - 'Sửa `ops/reviews/README.md`. Không nằm trong write set. (Và nếu có lý do chính đáng phải
+     sửa thì BẮT BUỘC chạy lại `ops/lease_publish_test.py` — `t26`/`t27` đọc chính tệp ấy,
+     một khối chèn giữa bảng CẮT bảng mà mắt không thấy — `R9-F01`, đã trả giá ở `fa3f282`.)'
+
+tieu_chi_nghiem_thu_kiem_duoc:
+  - 'Biên nhận khai `surface: codex_service` được nhận với danh sách lỗi RỖNG — không phải
+     "không có chữ surface" (`R9-F04`); khai sai bị từ chối vì ĐÚNG cột surface.'
+  - '`c44` tầng (b) không còn nhánh ngoại lệ; mọi hàng §2 đối chiếu được cả ba cột.'
+  - 'Đột biến rút `codex_service` làm ca đích ĐỎ, kèm nguyên văn thông báo giết.'
+  - '12 receipt lịch sử: 0 vi phạm, không miễn trừ mới.'
+  - '`ops/bien_nhan_v2.py --root .` rc=0 (đọc rc THẬT, không phải rc của `tail`).'
+  - '`ops/lease_publish_test.py` không thêm ca đỏ so nền.'
+  - '`launcher_test.py` delta so nền = 0, dựng CẢ HAI vế trong MỘT lệnh. Nhớ `181/181` cần
+     mạng + venv; offline là `173/173` bỏ qua 9 (`R9-F08`) — sai khác đó là BẰNG CHỨNG, không
+     phải hồi quy.'

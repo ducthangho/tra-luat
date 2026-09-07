@@ -1,0 +1,26 @@
+{
+  "receipt10": {
+    "session_anchor_count": 1,
+    "time_anchor_count": 1,
+    "changed_top_level_fields": [
+      "github_submitter_identity",
+      "KHONG_do_duoc"
+    ],
+    "reviewer_identity_unchanged": true,
+    "verdict_hash_and_anchor_unchanged": true,
+    "assurance_unchanged": true,
+    "source_session": "https://claude.ai/code/session_0186nh13XYsStVs1usBCsx5Y"
+  },
+  "receipt11": {
+    "header_anchor_count": 1,
+    "description_anchor_count": 1,
+    "changed_top_level_fields": [
+      "evidence_url_ghi_chu"
+    ],
+    "identity_assurance_verdict_unchanged": true
+  },
+  "incident_note": {
+    "unique_anchors": 2,
+    "correction_direction": "Ghi thứ tự commit đã đo, bỏ độ chênh push chưa có log; tách 19 tệp tại17c6901 và billing tại4c18cb2; giữ mô tả hai phiên độc lập."
+  }
+}

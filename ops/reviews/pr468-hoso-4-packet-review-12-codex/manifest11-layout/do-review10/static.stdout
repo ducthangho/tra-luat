@@ -1,0 +1,193 @@
+{
+  "utc": "2026-09-07T11:37:58.336896+00:00",
+  "head": "c43347d1e2c2f76bb21dc2d9d28bd6bfa153d355",
+  "tree": "799a4b2549d68c6a3ad44cc70f9257e794cd1db8",
+  "status": "",
+  "abbrev": "7",
+  "shallow": "false",
+  "remote": "https://github.com/ducthangho/tra-luat",
+  "diffs": {
+    "since9": {
+      "patch_matches": true,
+      "numstat_matches": true,
+      "files": 141,
+      "additions": 34464,
+      "deletions": 23,
+      "outside_ops": []
+    },
+    "full": {
+      "patch_matches": true,
+      "numstat_matches": true,
+      "files": 350,
+      "additions": 90207,
+      "deletions": 0,
+      "outside_ops": []
+    }
+  },
+  "snapshot_blob_path_pairs": 90,
+  "chain_current_tree": [
+    {
+      "lease_id": "mutant-khong-chay-tren-windows-exec-1-claude-20260906",
+      "replaces": null,
+      "tombstone": "gate-tach-job-cat-chi-phi-exec-1-claude-20260906",
+      "bidirectional": true
+    },
+    {
+      "lease_id": "gate-tach-job-cat-chi-phi-exec-1-claude-20260906",
+      "replaces": [
+        "mutant-khong-chay-tren-windows-exec-1-claude-20260906"
+      ],
+      "tombstone": "gate-tach-job-cat-chi-phi-exec-1r2-claude-20260906",
+      "bidirectional": true
+    },
+    {
+      "lease_id": "gate-tach-job-cat-chi-phi-exec-1r2-claude-20260906",
+      "replaces": [
+        "gate-tach-job-cat-chi-phi-exec-1-claude-20260906"
+      ],
+      "tombstone": "gate-tach-job-cat-chi-phi-exec-1r3-claude-20260906",
+      "bidirectional": true
+    },
+    {
+      "lease_id": "gate-tach-job-cat-chi-phi-exec-1r3-claude-20260906",
+      "replaces": [
+        "gate-tach-job-cat-chi-phi-exec-1r2-claude-20260906"
+      ],
+      "tombstone": "gate-tach-job-cat-chi-phi-exec-1r4-claude-20260906",
+      "bidirectional": true
+    },
+    {
+      "lease_id": "gate-tach-job-cat-chi-phi-exec-1r4-claude-20260906",
+      "replaces": [
+        "gate-tach-job-cat-chi-phi-exec-1r3-claude-20260906"
+      ],
+      "tombstone": null,
+      "bidirectional": null
+    }
+  ],
+  "model_all_456_copies_tombstoned": {
+    ".github/workflows/ci.yml": {
+      "count": 1,
+      "active_blobs": [
+        {
+          "ref": "refs/heads/claude/soan-spec-3-viec-treo-20260906",
+          "blob": "f4afed9fd7d4d258eb8c12b58d86f54cf1e89cc7",
+          "path": "ops/leases/gate-tach-job-cat-chi-phi-exec-1r4-claude-20260906.yaml",
+          "lease_id": "gate-tach-job-cat-chi-phi-exec-1r4-claude-20260906"
+        }
+      ]
+    },
+    ".claude/dev/ci_dang_ky_test.py": {
+      "count": 1,
+      "active_blobs": [
+        {
+          "ref": "refs/heads/claude/soan-spec-3-viec-treo-20260906",
+          "blob": "f4afed9fd7d4d258eb8c12b58d86f54cf1e89cc7",
+          "path": "ops/leases/gate-tach-job-cat-chi-phi-exec-1r4-claude-20260906.yaml",
+          "lease_id": "gate-tach-job-cat-chi-phi-exec-1r4-claude-20260906"
+        }
+      ]
+    }
+  },
+  "master_old_blob": "8b2103c06687546379a17f6deafc97f1fe0173fd"
+}
+holders: {'2026-09-07T11:37:58.336896+00:00': {'.github/workflows/ci.yml': 1, '.claude/dev/ci_dang_ky_test.py': 2}, '2026-09-07T14:30:06+00:00': {'.github/workflows/ci.yml': 1, '.claude/dev/ci_dang_ky_test.py': 2}, '2026-09-07T14:30:07+00:00': {'.github/workflows/ci.yml': 1, '.claude/dev/ci_dang_ky_test.py': 1}, '2026-09-07T14:30:08+00:00': {'.github/workflows/ci.yml': 1, '.claude/dev/ci_dang_ky_test.py': 1}}
+anchors: [
+  {
+    "issue": 463,
+    "lease": "gate-tach-job-cat-chi-phi-exec-1r4-claude-20260906.yaml",
+    "revision": 4,
+    "issue_commit": "1a330305e20a0667fff4954f8542aadd5e375b50",
+    "hash_actual": "4c542f6b931f62687edd6dca0c5f22c0399ad41f4e80b48e29cdfcd519289cd8",
+    "hash_declared": "4c542f6b931f62687edd6dca0c5f22c0399ad41f4e80b48e29cdfcd519289cd8",
+    "hash_alias": "4c542f6b931f62687edd6dca0c5f22c0399ad41f4e80b48e29cdfcd519289cd8",
+    "issue_blob_hash": "4c542f6b931f62687edd6dca0c5f22c0399ad41f4e80b48e29cdfcd519289cd8",
+    "hash_in_issue": true,
+    "copies_equal": true,
+    "null_keys": [],
+    "grant": "https://github.com/ducthangho/tra-luat/issues/463#issuecomment-5568696936"
+  },
+  {
+    "gate_lease_fields": {
+      "leased_at_utc": "2026-09-07T10:17:12Z",
+      "lease_expires_at_utc": "2026-09-08T10:17:12Z",
+      "heartbeat_at": "2026-09-07T10:17:12Z",
+      "lease_until": "2026-09-08T10:17:12Z",
+      "run_minutes": 1440,
+      "base_sha": "d28c4b1062e8505cbdaaf0237fcbe3f9b8ee4705",
+      "start_from_sha": "d28c4b1062e8505cbdaaf0237fcbe3f9b8ee4705",
+      "reviewed_sha_required": "d28c4b1062e8505cbdaaf0237fcbe3f9b8ee4705",
+      "write_set": [
+        ".github/workflows/ci.yml",
+        ".claude/dev/ci_dang_ky_test.py"
+      ],
+      "write_set_hash": "0f7b869da648e9b21023e461925efd0d45bca58fb308a8fcc82bc55ad9f66ef0",
+      "thay_the_cho": [
+        "gate-tach-job-cat-chi-phi-exec-1r3-claude-20260906"
+      ]
+    },
+    "duration_minutes": 1440.0,
+    "write_hash_actual": "0f7b869da648e9b21023e461925efd0d45bca58fb308a8fcc82bc55ad9f66ef0"
+  },
+  {
+    "issue": 464,
+    "lease": "lo-319-linux-bang-chung-xanh-exec-1-claude-20260906.yaml.nhap",
+    "revision": 1,
+    "issue_commit": "1a330305e20a0667fff4954f8542aadd5e375b50",
+    "hash_actual": "66dcb20d7bc044cc3185074b56152f0f7f737ac2d1a49c225c29a29b144b4917",
+    "hash_declared": "66dcb20d7bc044cc3185074b56152f0f7f737ac2d1a49c225c29a29b144b4917",
+    "hash_alias": "66dcb20d7bc044cc3185074b56152f0f7f737ac2d1a49c225c29a29b144b4917",
+    "issue_blob_hash": "66dcb20d7bc044cc3185074b56152f0f7f737ac2d1a49c225c29a29b144b4917",
+    "hash_in_issue": true,
+    "copies_equal": true,
+    "null_keys": [
+      "mission_issue",
+      "granted_by",
+      "granted_on_instruction",
+      "leased_at_utc",
+      "lease_expires_at_utc"
+    ],
+    "grant": null
+  },
+  {
+    "issue": 465,
+    "lease": "mutant-windows-subagent-ghi-detect-exec-1-claude-20260906.yaml.nhap",
+    "revision": 1,
+    "issue_commit": "b743f1798aba12615f903a11bd451c87e404814e",
+    "hash_actual": "2abace8588ec2b4e0626c1c77e9c3e0f7e713ecb2ce528b149e6c7f1f0000759",
+    "hash_declared": "2abace8588ec2b4e0626c1c77e9c3e0f7e713ecb2ce528b149e6c7f1f0000759",
+    "hash_alias": "2abace8588ec2b4e0626c1c77e9c3e0f7e713ecb2ce528b149e6c7f1f0000759",
+    "issue_blob_hash": "2abace8588ec2b4e0626c1c77e9c3e0f7e713ecb2ce528b149e6c7f1f0000759",
+    "hash_in_issue": true,
+    "copies_equal": true,
+    "null_keys": [
+      "mission_issue",
+      "granted_by",
+      "granted_on_instruction",
+      "leased_at_utc",
+      "lease_expires_at_utc"
+    ],
+    "grant": null
+  },
+  {
+    "issue": 466,
+    "lease": "mutant-windows-nhanh-don-duoc-exec-1-claude-20260906.yaml.nhap",
+    "revision": 1,
+    "issue_commit": "b743f1798aba12615f903a11bd451c87e404814e",
+    "hash_actual": "417dce16227687cbb1e642284f39d2f847a617b2d730f7f52aaa58f33c936521",
+    "hash_declared": "417dce16227687cbb1e642284f39d2f847a617b2d730f7f52aaa58f33c936521",
+    "hash_alias": "417dce16227687cbb1e642284f39d2f847a617b2d730f7f52aaa58f33c936521",
+    "issue_blob_hash": "417dce16227687cbb1e642284f39d2f847a617b2d730f7f52aaa58f33c936521",
+    "hash_in_issue": true,
+    "copies_equal": true,
+    "null_keys": [
+      "mission_issue",
+      "granted_by",
+      "granted_on_instruction",
+      "leased_at_utc",
+      "lease_expires_at_utc"
+    ],
+    "grant": null
+  }
+]
+receipt: {'schema': 2, 'reviewed_sha': '0bc6e56e1a1fd21cedfc18557320941d51db866c', 'declared_bytes': 29806, 'actual_bytes': 29806, 'declared_hash': 'fa11cdcfb3fa43d5b54eca50cffd2d8ddf1e8e988db8b778f991a0b924589ec0', 'actual_hash': 'fa11cdcfb3fa43d5b54eca50cffd2d8ddf1e8e988db8b778f991a0b924589ec0', 'anchor_commit': '1a330305e20a0667fff4954f8542aadd5e375b50', 'anchor_blob_matches': True, 'copy_equal': True}

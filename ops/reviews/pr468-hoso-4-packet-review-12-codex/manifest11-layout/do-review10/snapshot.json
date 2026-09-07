@@ -1,0 +1,273 @@
+{
+  "utc": "2026-09-07T11:37:58.336896+00:00",
+  "head": "c43347d1e2c2f76bb21dc2d9d28bd6bfa153d355",
+  "tree": "799a4b2549d68c6a3ad44cc70f9257e794cd1db8",
+  "status": "",
+  "abbrev": "7",
+  "shallow": "false",
+  "remote": "https://github.com/ducthangho/tra-luat",
+  "diffs": {
+    "since9": {
+      "patch_matches": true,
+      "numstat_matches": true,
+      "files": 141,
+      "additions": 34464,
+      "deletions": 23,
+      "outside_ops": []
+    },
+    "full": {
+      "patch_matches": true,
+      "numstat_matches": true,
+      "files": 350,
+      "additions": 90207,
+      "deletions": 0,
+      "outside_ops": []
+    }
+  },
+  "snapshot_blob_path_pairs": 90,
+  "chain_current_tree": [
+    {
+      "lease_id": "mutant-khong-chay-tren-windows-exec-1-claude-20260906",
+      "replaces": null,
+      "tombstone": "gate-tach-job-cat-chi-phi-exec-1-claude-20260906",
+      "bidirectional": true
+    },
+    {
+      "lease_id": "gate-tach-job-cat-chi-phi-exec-1-claude-20260906",
+      "replaces": [
+        "mutant-khong-chay-tren-windows-exec-1-claude-20260906"
+      ],
+      "tombstone": "gate-tach-job-cat-chi-phi-exec-1r2-claude-20260906",
+      "bidirectional": true
+    },
+    {
+      "lease_id": "gate-tach-job-cat-chi-phi-exec-1r2-claude-20260906",
+      "replaces": [
+        "gate-tach-job-cat-chi-phi-exec-1-claude-20260906"
+      ],
+      "tombstone": "gate-tach-job-cat-chi-phi-exec-1r3-claude-20260906",
+      "bidirectional": true
+    },
+    {
+      "lease_id": "gate-tach-job-cat-chi-phi-exec-1r3-claude-20260906",
+      "replaces": [
+        "gate-tach-job-cat-chi-phi-exec-1r2-claude-20260906"
+      ],
+      "tombstone": "gate-tach-job-cat-chi-phi-exec-1r4-claude-20260906",
+      "bidirectional": true
+    },
+    {
+      "lease_id": "gate-tach-job-cat-chi-phi-exec-1r4-claude-20260906",
+      "replaces": [
+        "gate-tach-job-cat-chi-phi-exec-1r3-claude-20260906"
+      ],
+      "tombstone": null,
+      "bidirectional": null
+    }
+  ],
+  "chain_snapshot": [
+    {
+      "ref": "refs/heads/claude/soan-spec-3-viec-treo-20260906",
+      "path": "ops/leases/gate-tach-job-cat-chi-phi-exec-1-claude-20260906.yaml",
+      "blob": "de30af933a090b91cbd7eff73f517f68a17cdd59",
+      "lease_id": "gate-tach-job-cat-chi-phi-exec-1-claude-20260906",
+      "replaces": [
+        "mutant-khong-chay-tren-windows-exec-1-claude-20260906"
+      ],
+      "tombstone": "gate-tach-job-cat-chi-phi-exec-1r2-claude-20260906",
+      "status": "CÒN_HẠN",
+      "bidirectional": true
+    },
+    {
+      "ref": "refs/heads/claude/soan-spec-3-viec-treo-20260906",
+      "path": "ops/leases/gate-tach-job-cat-chi-phi-exec-1r2-claude-20260906.yaml",
+      "blob": "3bb7c461cd9ca994c4b3ccd3445e1e96ef2ce345",
+      "lease_id": "gate-tach-job-cat-chi-phi-exec-1r2-claude-20260906",
+      "replaces": [
+        "gate-tach-job-cat-chi-phi-exec-1-claude-20260906"
+      ],
+      "tombstone": "gate-tach-job-cat-chi-phi-exec-1r3-claude-20260906",
+      "status": "CÒN_HẠN",
+      "bidirectional": true
+    },
+    {
+      "ref": "refs/heads/claude/soan-spec-3-viec-treo-20260906",
+      "path": "ops/leases/gate-tach-job-cat-chi-phi-exec-1r3-claude-20260906.yaml",
+      "blob": "cad296dd4b573793d960a34f45deba8dedff5567",
+      "lease_id": "gate-tach-job-cat-chi-phi-exec-1r3-claude-20260906",
+      "replaces": [
+        "gate-tach-job-cat-chi-phi-exec-1r2-claude-20260906"
+      ],
+      "tombstone": "gate-tach-job-cat-chi-phi-exec-1r4-claude-20260906",
+      "status": "CÒN_HẠN",
+      "bidirectional": true
+    },
+    {
+      "ref": "refs/heads/claude/soan-spec-3-viec-treo-20260906",
+      "path": "ops/leases/gate-tach-job-cat-chi-phi-exec-1r4-claude-20260906.yaml",
+      "blob": "f4afed9fd7d4d258eb8c12b58d86f54cf1e89cc7",
+      "lease_id": "gate-tach-job-cat-chi-phi-exec-1r4-claude-20260906",
+      "replaces": [
+        "gate-tach-job-cat-chi-phi-exec-1r3-claude-20260906"
+      ],
+      "tombstone": null,
+      "status": "CÒN_HẠN",
+      "bidirectional": null
+    },
+    {
+      "ref": "refs/heads/claude/soan-spec-3-viec-treo-20260906",
+      "path": "ops/leases/mutant-khong-chay-tren-windows-exec-1-claude-20260906.yaml",
+      "blob": "1f9504281c3415f7194e124eb7b2702c34c8efd1",
+      "lease_id": "mutant-khong-chay-tren-windows-exec-1-claude-20260906",
+      "replaces": null,
+      "tombstone": "gate-tach-job-cat-chi-phi-exec-1-claude-20260906",
+      "status": "CÒN_HẠN",
+      "bidirectional": true
+    },
+    {
+      "ref": "refs/remotes/origin/claude/gate-tach-job-cat-chi-phi",
+      "path": "ops/leases/mutant-khong-chay-tren-windows-exec-1-claude-20260906.yaml",
+      "blob": "8b2103c06687546379a17f6deafc97f1fe0173fd",
+      "lease_id": "mutant-khong-chay-tren-windows-exec-1-claude-20260906",
+      "replaces": null,
+      "tombstone": null,
+      "status": "CÒN_HẠN",
+      "bidirectional": null
+    }
+  ],
+  "holders": {
+    "2026-09-07T11:37:58.336896+00:00": {
+      ".github/workflows/ci.yml": {
+        "count": 1,
+        "active_blobs": [
+          {
+            "ref": "refs/heads/claude/soan-spec-3-viec-treo-20260906",
+            "blob": "f4afed9fd7d4d258eb8c12b58d86f54cf1e89cc7",
+            "path": "ops/leases/gate-tach-job-cat-chi-phi-exec-1r4-claude-20260906.yaml",
+            "lease_id": "gate-tach-job-cat-chi-phi-exec-1r4-claude-20260906"
+          }
+        ]
+      },
+      ".claude/dev/ci_dang_ky_test.py": {
+        "count": 2,
+        "active_blobs": [
+          {
+            "ref": "refs/heads/claude/soan-spec-3-viec-treo-20260906",
+            "blob": "f4afed9fd7d4d258eb8c12b58d86f54cf1e89cc7",
+            "path": "ops/leases/gate-tach-job-cat-chi-phi-exec-1r4-claude-20260906.yaml",
+            "lease_id": "gate-tach-job-cat-chi-phi-exec-1r4-claude-20260906"
+          },
+          {
+            "ref": "refs/remotes/origin/claude/gate-tach-job-cat-chi-phi",
+            "blob": "8b2103c06687546379a17f6deafc97f1fe0173fd",
+            "path": "ops/leases/mutant-khong-chay-tren-windows-exec-1-claude-20260906.yaml",
+            "lease_id": "mutant-khong-chay-tren-windows-exec-1-claude-20260906"
+          }
+        ]
+      }
+    },
+    "2026-09-07T14:30:06+00:00": {
+      ".github/workflows/ci.yml": {
+        "count": 1,
+        "active_blobs": [
+          {
+            "ref": "refs/heads/claude/soan-spec-3-viec-treo-20260906",
+            "blob": "f4afed9fd7d4d258eb8c12b58d86f54cf1e89cc7",
+            "path": "ops/leases/gate-tach-job-cat-chi-phi-exec-1r4-claude-20260906.yaml",
+            "lease_id": "gate-tach-job-cat-chi-phi-exec-1r4-claude-20260906"
+          }
+        ]
+      },
+      ".claude/dev/ci_dang_ky_test.py": {
+        "count": 2,
+        "active_blobs": [
+          {
+            "ref": "refs/heads/claude/soan-spec-3-viec-treo-20260906",
+            "blob": "f4afed9fd7d4d258eb8c12b58d86f54cf1e89cc7",
+            "path": "ops/leases/gate-tach-job-cat-chi-phi-exec-1r4-claude-20260906.yaml",
+            "lease_id": "gate-tach-job-cat-chi-phi-exec-1r4-claude-20260906"
+          },
+          {
+            "ref": "refs/remotes/origin/claude/gate-tach-job-cat-chi-phi",
+            "blob": "8b2103c06687546379a17f6deafc97f1fe0173fd",
+            "path": "ops/leases/mutant-khong-chay-tren-windows-exec-1-claude-20260906.yaml",
+            "lease_id": "mutant-khong-chay-tren-windows-exec-1-claude-20260906"
+          }
+        ]
+      }
+    },
+    "2026-09-07T14:30:07+00:00": {
+      ".github/workflows/ci.yml": {
+        "count": 1,
+        "active_blobs": [
+          {
+            "ref": "refs/heads/claude/soan-spec-3-viec-treo-20260906",
+            "blob": "f4afed9fd7d4d258eb8c12b58d86f54cf1e89cc7",
+            "path": "ops/leases/gate-tach-job-cat-chi-phi-exec-1r4-claude-20260906.yaml",
+            "lease_id": "gate-tach-job-cat-chi-phi-exec-1r4-claude-20260906"
+          }
+        ]
+      },
+      ".claude/dev/ci_dang_ky_test.py": {
+        "count": 1,
+        "active_blobs": [
+          {
+            "ref": "refs/heads/claude/soan-spec-3-viec-treo-20260906",
+            "blob": "f4afed9fd7d4d258eb8c12b58d86f54cf1e89cc7",
+            "path": "ops/leases/gate-tach-job-cat-chi-phi-exec-1r4-claude-20260906.yaml",
+            "lease_id": "gate-tach-job-cat-chi-phi-exec-1r4-claude-20260906"
+          }
+        ]
+      }
+    },
+    "2026-09-07T14:30:08+00:00": {
+      ".github/workflows/ci.yml": {
+        "count": 1,
+        "active_blobs": [
+          {
+            "ref": "refs/heads/claude/soan-spec-3-viec-treo-20260906",
+            "blob": "f4afed9fd7d4d258eb8c12b58d86f54cf1e89cc7",
+            "path": "ops/leases/gate-tach-job-cat-chi-phi-exec-1r4-claude-20260906.yaml",
+            "lease_id": "gate-tach-job-cat-chi-phi-exec-1r4-claude-20260906"
+          }
+        ]
+      },
+      ".claude/dev/ci_dang_ky_test.py": {
+        "count": 1,
+        "active_blobs": [
+          {
+            "ref": "refs/heads/claude/soan-spec-3-viec-treo-20260906",
+            "blob": "f4afed9fd7d4d258eb8c12b58d86f54cf1e89cc7",
+            "path": "ops/leases/gate-tach-job-cat-chi-phi-exec-1r4-claude-20260906.yaml",
+            "lease_id": "gate-tach-job-cat-chi-phi-exec-1r4-claude-20260906"
+          }
+        ]
+      }
+    }
+  },
+  "model_all_456_copies_tombstoned": {
+    ".github/workflows/ci.yml": {
+      "count": 1,
+      "active_blobs": [
+        {
+          "ref": "refs/heads/claude/soan-spec-3-viec-treo-20260906",
+          "blob": "f4afed9fd7d4d258eb8c12b58d86f54cf1e89cc7",
+          "path": "ops/leases/gate-tach-job-cat-chi-phi-exec-1r4-claude-20260906.yaml",
+          "lease_id": "gate-tach-job-cat-chi-phi-exec-1r4-claude-20260906"
+        }
+      ]
+    },
+    ".claude/dev/ci_dang_ky_test.py": {
+      "count": 1,
+      "active_blobs": [
+        {
+          "ref": "refs/heads/claude/soan-spec-3-viec-treo-20260906",
+          "blob": "f4afed9fd7d4d258eb8c12b58d86f54cf1e89cc7",
+          "path": "ops/leases/gate-tach-job-cat-chi-phi-exec-1r4-claude-20260906.yaml",
+          "lease_id": "gate-tach-job-cat-chi-phi-exec-1r4-claude-20260906"
+        }
+      ]
+    }
+  },
+  "master_old_blob": "8b2103c06687546379a17f6deafc97f1fe0173fd"
+}

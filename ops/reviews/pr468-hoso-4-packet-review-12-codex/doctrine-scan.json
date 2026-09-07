@@ -1,0 +1,17 @@
+{
+  "command": [
+    "python3",
+    "-B",
+    ".claude/dev/packet_loop.py",
+    "doctrine-scan",
+    "--root",
+    "."
+  ],
+  "cwd": "cay-kho",
+  "started_utc": "2026-09-07T13:17:11.514167+00:00",
+  "ended_utc": "2026-09-07T13:17:11.665412+00:00",
+  "elapsed_seconds": 0.15123807800000577,
+  "rc": 0,
+  "stdout_bytes": 69,
+  "stderr_bytes": 0
+}

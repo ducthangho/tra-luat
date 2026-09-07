@@ -1,0 +1,36 @@
+{
+  "turn6": {
+    "rc": 0,
+    "listed": 62,
+    "matched": 62
+  },
+  "turn7": {
+    "rc": 0,
+    "listed": 66,
+    "matched": 66
+  },
+  "turn8": {
+    "rc": 0,
+    "listed": 69,
+    "matched": 69
+  },
+  "turn9_regular_files": 111,
+  "turn9_symlinks": [],
+  "turn9_artifact_repair": {
+    "rc": 1,
+    "listed": 69,
+    "matched": 50
+  },
+  "turn9_original_claim": {
+    "listed": 69,
+    "present": 50,
+    "recoverable": 69,
+    "original_rc": 1,
+    "repaired_copy_rc": 0
+  },
+  "model_repaired_turn9": {
+    "rc": 0,
+    "listed": 69,
+    "matched": 69
+  }
+}

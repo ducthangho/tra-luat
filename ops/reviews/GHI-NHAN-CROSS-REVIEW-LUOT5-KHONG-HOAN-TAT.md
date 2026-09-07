@@ -256,10 +256,11 @@ mục khi chép). Verdict `pr468-hoso-4-packet-review-9-codex-verdict.md`, hiệ
 Hai phiên Claude cùng nhận chỉ thị "tiếp tục vòng lặp vá, cross-review tới khi hết P1" và cùng phóng Codex trên cùng head mà không
 biết nhau — lỗi điều phối (một nhánh, hai writer), không phải lỗi reviewer. Lượt **10** do phiên kia vận chuyển (`17c6901`, 1 P1 / 1 P2);
 lượt **11** là lượt của phiên này, reviewer được giao dưới tên "lượt 10" (VERDICT.md giữ nguyên byte, nói "lượt 10"), đánh số lại 11
-khi vận chuyển vì lượt 10 kia đã lên nhánh trước 5 giây (`DOC-MANIFEST.md` trong gói ghi rõ).
+khi vận chuyển vì lượt 10 kia đã lên nhánh trước: commit `17c6901` 11:50:33Z đi trước `4c18cb2` 12:17:11Z theo thứ tự commit;
+chênh thời điểm PUSH không đo được (không có log push) — bản đầu viết "trước 5 giây" không có nguồn, lượt 12 P2 bắt (`DOC-MANIFEST.md` trong gói giải thích việc đổi tên).
 
 Lượt 11: Codex `gpt-6-astra`, xhigh, **939 s, chạy trọn**. `changes_requested` — **1 P1 / 2 P2**. Đối chiếu 5 finding lượt 9: 2 VÁ THẬT
 (A2, quyết định H) · 1 VÁ HỜ (lease r4 còn câu "đối chiếu nhiễu") · 1 VÁ SINH LỖI MỚI (gói lượt 9 thiếu 19 tệp `rig/` đã phục dựng —
 cả hai lượt cùng bắt) · 1 CHƯA VÁ (bia mộ #456, chờ 14:30:07Z — P1 duy nhất, tự đóng theo hạn; cả hai lượt chạy trước mốc, chỉ mô
-phỏng). Hai P2 vá ngay trong commit chứa verdict lượt 11. Verdict `pr468-hoso-4-packet-review-11-codex-verdict.md`, hiện vật
+phỏng). P2 billing vá ở `4c18cb2` (commit chứa verdict lượt 11); P2 19 tệp `rig/` đã được phiên kia vá ở `17c6901`, `4c18cb2` chỉ đo lại 69/69. Verdict `pr468-hoso-4-packet-review-11-codex-verdict.md`, hiện vật
 `pr468-hoso-4-packet-review-11-codex/`. Lượt kế: chạy SAU 14:30:07Z để readback thật thay mô phỏng — và chỉ MỘT phiên phóng.

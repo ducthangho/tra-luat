@@ -1,0 +1,14 @@
+{
+  "yaml_changed_leaves": [
+    {
+      "path": "/viec_trong_lease/4",
+      "old": "ĐO và CÔNG BỐ phút tính tiền; ngưỡng ≤ 135,00 phút tính tiền, nền lượt nhánh 34045664423 = 110,65 (lượt master 34048685345 = 111,08 để đối chiếu nhiễu). Công bố kèm thời gian đầu-cuối của workflow, không đặt ngưỡng vì chưa có nền.",
+      "new": "ĐO và CÔNG BỐ phút tính tiền; ngưỡng ≤ 135,00 phút tính tiền, nền lượt nhánh 34045664423 = 110,65 (lượt master 34048685345 = 111,08 chỉ là ĐỐI CHIẾU LỊCH SỬ: cùng tree, khác event/lane — `workflow_dispatch` trên nhánh so `push` trên master, WORKER so LAND — nên KHÔNG tách được phần nhiễu runner; biên A1/A5 là biên THIẾT KẾ, không nới theo chênh ấy — đồng bộ với spec r4 §\"Bối cảnh hai run\"/§\"Biên thiết kế\"). Công bố kèm thời gian đầu-cuối của workflow, không đặt ngưỡng vì chưa có nền."
+    }
+  ],
+  "check_rc": 0,
+  "check_positive": true,
+  "projection_equal": true,
+  "old_yaml_keys": 52,
+  "new_yaml_keys": 52
+}

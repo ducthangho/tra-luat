@@ -25,11 +25,11 @@ event: executor_lease_granted
 #                   chặn rc=8 khi thiếu `lease_expires_at_utc` (đo 19:35Z). `--expires-utc` của
 #                   `record-lease` phải khớp đúng giá trị điền ở đây.
 packet_issue: 463
-mission_issue:
-granted_by:
-granted_on_instruction:
-leased_at_utc:
-lease_expires_at_utc:
+mission_issue: 467
+granted_by: ducthangho
+granted_on_instruction: 'https://github.com/ducthangho/tra-luat/issues/467'
+leased_at_utc: '2026-09-07T03:37:33Z'
+lease_expires_at_utc: '2026-09-08T03:37:33Z'
 # ───────────────────────────────────────────────────────────────────────────────────
 
 packet_id: GATE-TACH-JOB-CAT-CHI-PHI
@@ -39,8 +39,14 @@ lease_id: gate-tach-job-cat-chi-phi-exec-1-claude-20260906
 role: executor
 provider: claude
 executor: claude
-model: opus-5
+model: fable-5.1
 effort: xhigh
+# Cấu hình do chủ kho chỉ định (Mission #467): executor Claude `claude-fable-5-1` mức high/xhigh;
+# reviewer Codex `gpt-6-astra` mức high→max, CÓ hint patch. `reviewer_model`/`reviewer_effort` là
+# trường KHAI BÁO — packet_loop không đọc chúng; chúng ghi ý định để phiên review neo theo.
+reviewer_model: gpt-6-astra
+reviewer_effort: xhigh
+reviewer_hint_patch: true
 environment: cloud
 risk: sensitive
 assurance_target: cross_approved
@@ -99,7 +105,8 @@ effective_review_class: sensitive
 # cập nhật/dọn, readback `ai-dang-giu` ⇒ 0 dòng CÒN_HẠN của tiền nhiệm — thủ tục ở spec LO-319 mục
 # "Lease đang giữ" (b). Chọn đường nào ghi vào granted_on_instruction. Trước khi bắt tay, A8/A9 đo
 # bằng `ai-dang-giu` trên MỌI đường write set, không bằng check.
-thay_the_cho: []
+thay_the_cho:
+  - mutant-khong-chay-tren-windows-exec-1-claude-20260906
 
 ly_do_cap: >-
   Nợ do chính `ci.yml:63` tự khai: "NÂNG TRẦN KHÔNG CHỮA NGUYÊN NHÂN: gate 22 phút và đang

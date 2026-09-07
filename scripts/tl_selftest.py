@@ -21274,20 +21274,28 @@ def run() -> int:
         return ok1 and ok2 and ok3 and ok4
     _t110("r291_docs_ngoai_goi", _c291_docs_ngoai_goi)
     def _c357_agents_ngoai_goi():
-        # r357 — `.agents/` là ANH EM THỨ BA của `.claude`/`.codex`: vị trí adapter phía Codex mà
-        # `docs/adr/0019-ba-skill-adapter-hai-agent-mot-protocol.md` thiết kế, và
-        # `docs/KE_HOACH_TRIEN_KHAI_PROTOCOL_DA_PHIEN.md:273` khai thẳng "phải bị loại khỏi release
-        # bundle". Trước r357 nó chỉ tồn tại untracked trên đĩa người giữ nên chưa ai đo.
+        # r357 — `.agents/` la ANH EM THU BA cua `.claude`/`.codex`: vi tri adapter phia Codex ma
+        # `docs/adr/0019-ba-skill-adapter-hai-agent-mot-protocol.md` thiet ke, va
+        # `docs/KE_HOACH_TRIEN_KHAI_PROTOCOL_DA_PHIEN.md:273` khai thang "phai bi loai khoi release
+        # bundle". Tran goi la 200 tep CUNG (goi dang 180).
         #
-        # ĐO TRƯỚC KHI VÁ (06-09-2026): chép `.agents/` (10 tệp) vào cây rồi hỏi
-        # `_release_should_include` ⇒ **10/10 SẼ VÀO GÓI**, tức 180 → 190, ăn 10 trong 20 khe còn lại
-        # dưới trần 200 CỨNG. Cùng hình dạng với ca `.codex` (r331) — khác đúng một điều: lần này bắt
-        # được TRƯỚC khi tệp vào git, chứ không phải sau khi gate đã đỏ ở mọi lượt chạy từ main checkout.
+        # DO TRUOC KHI VA (06-09-2026): chep mot cay `.agents/` 10 tep vao kho roi hoi
+        # `_release_should_include` => 10/10 SE VAO GOI, tuc 180 -> 190, an 10 trong 20 khe con lai.
+        # Cung hinh dang ca `.codex` (r331), khac dung mot dieu: bat duoc TRUOC khi tep vao git.
         #
-        # Bốn vế lấy từ BỐN nguồn khác nhau, để không vế nào chứng minh chính nó — y khuôn r291:
-        #   (1) hằng chính sách · (2) sản phẩm manifest · (3) số đo ratchet · (4) CÂY THẬT.
-        # Vế (4) là phản chứng chống XANH-GIẢ: "vắng khỏi gói" có thể do .gitignore, do suffix, do tên
-        # bị loại — nên phải chứng minh chúng vắng ĐÚNG VÌ khoá `.agents`, và vẫn CÒN trên đĩa.
+        # VI SAO KHONG DO CAY THAT CUA KHO. `.agents/` CO Y khong nam trong kho: noi dung hien co la
+        # ban thay-chuoi-mu va con hong (22 tham chieu `.Codex/dev/*.py` tro thu muc khong ton tai,
+        # `--executor Codex` sai allowlist `PROVIDERS`, mot lenh Claude CLI bi doi ten thanh `Codex`)
+        # — de packet rieng. Neu ve nay soi `root/".agents"` thi cay rong => `all()` tren danh sach
+        # rong DUNG VO DIEU KIEN => "co MAT ma khong DO", dung benh `t24`.
+        #
+        # VA MOT LOI KHAI DA BI BAC NGAY TRONG LUOT VIET CA NAY, ghi lai vi no la cai bay that:
+        # ban nhap dung DUONG DAN TONG HOP (khong tao tep) va chu thich khai `_release_should_include`
+        # "thuan path, khong stat tep". SAI — dong cuoi cua ham la `return path.is_file()`
+        # (`release.py:593`). Duong dan khong ton tai luon tra False, nen ve "go khoa phai quay lai
+        # vao goi" KHONG THE do => ca se xanh ma khong co rang. Do duoc: go khoa ra van cho False.
+        # Nay dung CAY TAM voi TEP THAT, va lay chinh thu muc tam lam `root`.
+        import tempfile as _tf357
         root = _ROOT209
         ok1 = ".agents" in _rel209._RELEASE_EXCLUDE_DIRS
         mf = root / "RELEASE_MANIFEST.json"
@@ -21296,16 +21304,27 @@ def run() -> int:
         j = _j209.loads(mf.read_text(encoding="utf-8"))
         paths = [str(x.get("path") or "") for x in (j.get("files") or [])]
         ok2 = not [p for p in paths if p.startswith(".agents/")]
-        # RATCHET: gói giữ 180 sau r357 — thêm `.agents/` KHÔNG được nhúc nhích con số này. Nếu đỏ ở
-        # đây thì có tệp RUNTIME được thêm, phải kê khai slot CÓ CHỦ ĐÍCH như các khối r291 ở trên.
+        # RATCHET: goi giu 180. Do o day => co tep RUNTIME duoc them, phai ke khai slot CO CHU DICH.
         ok3 = int(j.get("file_count") or 0) == len(paths) and len(paths) == 180
-        d = root / ".agents"
-        tren_dia = sorted(q for q in d.rglob("*") if q.is_file()) if d.is_dir() else []
-        # Cây rời (bản sao không có `.agents/`) thì không có gì để đo — nhưng KHÔNG được tha im lặng:
-        # ba vế trên vẫn phải đúng, và vế này chỉ bỏ khi thư mục thật sự vắng.
-        ok4 = (all(not _rel209._release_should_include(q, root) for q in tren_dia)
-               and all(set(q.relative_to(root).parts) & _rel209._RELEASE_EXCLUDE_DIRS == {".agents"}
-                       for q in tren_dia))
+        # RANG HAI CHIEU tren CAY TAM: khoa VAO => loai; go khoa RA => phai QUAY LAI vao goi.
+        # Khong co ve thu hai thi ca chi chung minh "hang co chua chuoi", khong chung minh hang ay
+        # CO HIEU LUC — va mot phep kiem khong the do thi khong phai bang chung.
+        with _tf357.TemporaryDirectory() as _td:
+            troot = Path(_td)
+            mau = [troot / ".agents" / "skills" / "cross-review" / "SKILL.md",
+                   troot / ".agents" / "skills" / "grill-me" / "LICENSE"]
+            for q in mau:
+                q.parent.mkdir(parents=True, exist_ok=True)
+                q.write_text("x\n", encoding="utf-8")
+            loai = all(not _rel209._release_should_include(q, troot) for q in mau)
+            goc = set(_rel209._RELEASE_EXCLUDE_DIRS)
+            try:
+                _rel209._RELEASE_EXCLUDE_DIRS.discard(".agents")
+                quay_lai = all(_rel209._release_should_include(q, troot) for q in mau)
+            finally:
+                _rel209._RELEASE_EXCLUDE_DIRS.clear()
+                _rel209._RELEASE_EXCLUDE_DIRS.update(goc)
+        ok4 = loai and quay_lai and ".agents" in _rel209._RELEASE_EXCLUDE_DIRS
         return ok1 and ok2 and ok3 and ok4
     _t110("r357_agents_ngoai_goi", _c357_agents_ngoai_goi)
     def _c307_changelog_mot_version_mot_dot():

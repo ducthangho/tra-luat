@@ -38,7 +38,9 @@ prompt/phiên không reset, chạm trần ⇒ Review Rescue Checkpoint. r4 rút 
 lại** (r4 là sản phẩm: adapter nguồn, bootstrap có biên riêng, C không đích); (b) trần mới **đã được chủ kho chốt và neo**:
 comment `https://github.com/ducthangho/tra-luat/pull/475#issuecomment-5575587924` (tài khoản chủ kho, ghi hộ theo chỉ thị
 trong phiên, đã readback): **trần 6 lượt** cho PR #475; dừng khi hết P1 hoặc chạm 6 ⇒ checkpoint kế; (c) mọi bộ đếm/ID
-finding giữ nguyên, tách slice không reset. Comment ấy KHÔNG cấp lease, KHÔNG kích hoạt sổ.
+finding giữ nguyên, tách slice không reset. Comment ấy KHÔNG cấp lease, KHÔNG kích hoạt sổ. **Lời gọi 6/6:** reviewer 4b
+khuyến nghị dừng packet để chốt ADR nguồn tin cậy trước; chủ kho chốt trong phiên (~22:1xZ 07-09) **dùng lời gọi 6 trên r5**
+(S1/S2 đã đóng bằng hai lớp tận cùng); còn P1 sau lượt này ⇒ checkpoint kế + ADR, không tự nới.
 
 ### 0.1 Delta r3 → r4 theo finding lượt 3
 

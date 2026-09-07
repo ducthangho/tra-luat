@@ -1,0 +1,80 @@
+  ok   t1_khong_ghi_thi_clean                               khong ghi -> clean (mong doi clean)
+  ok   t2_ghi_tep_theo_doi_thi_changed                      ghi tep moi -> changed (mong doi changed)
+  ok   t3_ghi_tep_BI_IGNORE_van_changed                     ghi vao thu muc BI IGNORE -> changed (mong doi changed)
+  ok   t4_sua_tep_da_theo_doi_thi_changed                   sua tep -> changed (mong doi changed)
+  ok   t4b_XOA_tep_da_theo_doi_thi_changed                  xoa tep da theo doi -> changed (mong doi changed)
+  ok   t4c_DOI_TEN_tep_da_theo_doi_thi_changed              doi ten tep da theo doi -> changed (mong doi changed)
+  ok   t4d_STAGE_thay_doi_thi_changed                       stage thay doi -> changed (mong doi changed)
+  ok   t5_thieu_anh_chup_la_UNKNOWN_khong_phai_clean        Stop khong co Start -> unknown (mong doi unknown)
+  ok   t6_cwd_khong_phai_git_la_UNKNOWN                     cwd khong phai git -> unknown (mong doi unknown)
+  ok   t7_agent_ngoai_tap_khong_bi_ap_luat                  agent ngoai tap -> ket_qua=None rc=0 anh_chup=0 (mong doi None/0/0)
+  ok   t8_ca_hai_agent_deu_duoc_do                          2 agent x ghi -> changed 2/2
+  ok   t9_trung_khoa_agent_id_la_UNKNOWN                    Start trung agent_id -> unknown (mong doi unknown)
+  ok   t10_agent_id_doc_hai_bi_tu_choi                      agent_id doc hai -> unknown 4/4
+  ok   t11_sieu_du_lieu_lech_la_UNKNOWN                     cwd lech Start/Stop -> unknown (mong doi unknown)
+  ok   t11b_agent_type_lech_tren_CUNG_cay_la_UNKNOWN        agent_type lech tren cung cay -> unknown (mong doi unknown)
+  ok   t12_anh_chup_KHONG_nam_trong_cay_dang_do             anh chup trong cay=0 (mong doi 0) · ket_qua=clean
+  ok   t13_index_byte_khong_doi_khi_chi_DOC                 index byte doi=False (mong doi False)
+  ok   t14_D1_chi_TO_CAO_khong_chan                         changed -> rc=0 (mong doi 0), ket_qua=changed
+  ok   t15_bao_cao_KHAI_TEN_vung_MU                         bao cao khai 3 vung MU (mong doi >= 3): ['ghi ngoai git top-level', 'tac dung phu MANG', 'ghi roi hoan tac trong cung mot luot']
+  ok   t16_delta_neu_ten_tep_NGUYEN_VAN_khong_phai_so_dem   bao cao co NEU TEN tep da doi
+  ok   t17_anh_chup_bi_don_sau_khi_dung                     anh chup truoc Stop=1 sau Stop=0 (mong doi 1 -> 0)
+  ok   t18_HEAD_doi_giua_Start_va_Stop_la_UNKNOWN           HEAD doi -> unknown (mong doi unknown — khong the so hai anh khac nen)
+  ok   t19_de_len_tep_DA_CO_TRUOC_Start_van_changed         de len tep ignored da co -> changed (mong doi changed)
+  ok   t19b_de_len_tep_UNTRACKED_da_co_van_changed          de len tep untracked da co -> changed (mong doi changed)
+  ok   t20_duong_KHONG_bam_duoc_thi_UNKNOWN_khong_phai_clean tep vuot tran -> unknown · khong_bam_duoc=['to.bin (qua tran 8388608 byte)'] (mong doi unknown + co ten duong)
+  ok   t21_lenh_hook_chay_duoc_khi_CLAUDE_PROJECT_DIR_KHONG_DAT lenh hook chay duoc o 2 su kien x 2 nen -> dung 4/4
+  ok   t22_cham_diem_dot_bien_CO_RANG                       phep cham diem dung o 5 chieu
+  ok   t22b_fixture_KHONG_an_cau_hinh_git_ngoai             cat duoc CA BA nguon cau hinh git
+  ok   t23_doi_ten_anh_chup_la_UNKNOWN                      Stop tren anh chup DOI TEN -> unknown (mong doi unknown) sieu du lieu lech giua Start va Stop
+  ok   t24_index_cua_LINKED_WORKTREE_van_duoc_dinh_vi       linked worktree: van_tay_index='43efbeedd7d4a1ba' mu_index=[]
+  ok   t25a_git_doc_byte_utf8_khong_phu_thuoc_locale        utf8='C:/tmp/Qu\u1ed1c h\u1ed9i\n'; byte-loi='bad-\udcff\n'
+  ok   t25b_stdin_doc_byte_utf8_khong_phu_thuoc_locale      utf8_dung=True; invalid_rc=0; _chup=[]
+  ok   t25_duong_dan_NGOAI_ASCII_van_bam_duoc_noi_dung      ca hai lop ky tu: bam noi dung > 0, 0 duong MU
+--- DOT BIEN ---
+  GIET m23_git_tro_lai_text_True          lam DO: t25a_git_doc_byte_utf8_khong_phu_thuoc_locale
+  GIET m24_stdin_tro_lai_json_load        lam DO: t25b_stdin_doc_byte_utf8_khong_phu_thuoc_locale
+  GIET m25_git_doi_surrogateescape_thanh_strict lam DO: t25a_git_doc_byte_utf8_khong_phu_thuoc_locale
+  GIET m26_stdin_doi_strict_thanh_surrogateescape lam DO: t25b_stdin_doc_byte_utf8_khong_phu_thuoc_locale
+  GIET m1_bo_co_ignored                   lam DO: t19_de_len_tep_DA_CO_TRUOC_Start_van_changed, t25_duong_dan_NGOAI_ASCII_van_bam_duoc_noi_dung, t3_ghi_tep_BI_IGNORE_van_changed
+  GIET m2_bo_no_optional_locks            lam DO: t13_index_byte_khong_doi_khi_chi_DOC
+  GIET m3_thieu_anh_doc_thanh_clean       lam DO: t5_thieu_anh_chup_la_UNKNOWN_khong_phai_clean
+  GIET m4_cho_agent_id_doc_hai            lam DO: t10_agent_id_doc_hai_bi_tu_choi
+  GIET m5_bo_kiem_trung_khoa              lam DO: t9_trung_khoa_agent_id_la_UNKNOWN
+  GIET m6_bo_kiem_HEAD                    lam DO: t18_HEAD_doi_giua_Start_va_Stop_la_UNKNOWN
+  GIET m7_bo_kiem_sieu_du_lieu            lam DO: t11b_agent_type_lech_tren_CUNG_cay_la_UNKNOWN, t23_doi_ten_anh_chup_la_UNKNOWN
+  GIET m8_bo_khai_vung_MU                 lam DO: t15_bao_cao_KHAI_TEN_vung_MU
+  GIET m9_anh_chup_vao_TRONG_cay          lam DO: t17_anh_chup_bi_don_sau_khi_dung, t23_doi_ten_anh_chup_la_UNKNOWN, t24_index_cua_LINKED_WORKTREE_van_duoc_dinh_vi
+  GIET m10_bien_to_cao_thanh_CHAN         lam DO: t14_D1_chi_TO_CAO_khong_chan
+  GIET m11_rong_tap_agent                 lam DO: t7_agent_ngoai_tap_khong_bi_ap_luat
+  GIET m12_bo_don_anh_chup                lam DO: t17_anh_chup_bi_don_sau_khi_dung
+  GIET m14_bo_bam_noi_dung                lam DO: t19_de_len_tep_DA_CO_TRUOC_Start_van_changed, t19b_de_len_tep_UNTRACKED_da_co_van_changed, t20_duong_KHONG_bam_duoc_thi_UNKNOWN_khong_phai_clean
+  GIET m15_bo_so_sanh_noi_dung            lam DO: t19_de_len_tep_DA_CO_TRUOC_Start_van_changed, t19b_de_len_tep_UNTRACKED_da_co_van_changed
+  GIET m16_duong_MU_doc_thanh_clean       lam DO: t20_duong_KHONG_bam_duoc_thi_UNKNOWN_khong_phai_clean
+  GIET m13_delta_rut_ve_so_dem            lam DO: t16_delta_neu_ten_tep_NGUYEN_VAN_khong_phai_so_dem
+  GIET m17_bo_rang_buoc_agent_id          lam DO: t23_doi_ten_anh_chup_la_UNKNOWN
+  GIET m18_index_ghep_chuoi_top_git_index lam DO: t24_index_cua_LINKED_WORKTREE_van_duoc_dinh_vi
+--- DOT BIEN NHAM BO TEST ---
+  GIET mt1_giet_khong_loai_do_san         lam DO: t22_cham_diem_dot_bien_CO_RANG (SAI: ['`giet_duoc` khong loai ca DA DO o nen'])
+  GIET mt2_cong_bo_du_NEN_DO              lam DO: t22_cham_diem_dot_bien_CO_RANG (SAI: ['nen DO ma van cho cong bo'])
+  GIET mt3_bo_cat_kenh_pham_vi_lenh       lam DO: t22b_fixture_KHONG_an_cau_hinh_git_ngoai (cau hinh PHAM VI LENH van lot: rc=128)
+  GIET subagent_missing_gnu_bash_output_conjunct lam DO: t21_lenh_hook_chay_duoc_khi_CLAUDE_PROJECT_DIR_KHONG_DAT (fixture resolver da chap nhan bash co mat nhung khong chay d)
+  GIET subagent_missing_bash_c_conjunct   lam DO: t21_lenh_hook_chay_duoc_khi_CLAUDE_PROJECT_DIR_KHONG_DAT (fixture resolver da chap nhan bash co mat nhung khong chay d)
+  GIET subagent_present_unusable_bash_is_accepted lam DO: t21_lenh_hook_chay_duoc_khi_CLAUDE_PROJECT_DIR_KHONG_DAT (fixture resolver da chap nhan bash co mat nhung khong chay d)
+--- DOT BIEN NHAM settings.json ---
+  GIET ms1_bo_nhanh_du_phong_project_dir  lam DO: t21_lenh_hook_chay_duoc_khi_CLAUDE_PROJECT_DIR_KHONG_DAT (lenh hook chay duoc o 2 su kien x 2 nen -> dung 2/4; SAI: [")
+TONG: CA 33/33 dat · DOT BIEN 22/22 bi giet
+TONG: DAT
+A10 : hieu luc cua `SubagentStop` exit 2 tren nen — KHONG DO DUOC trong bo nay.
+      Bo nay do DETECTOR bang payload tong hop; no KHONG chung minh hook that su
+      duoc nen goi, cung khong chung minh ma thoat 2 co tac dung. Muon do phai
+      phong mot subagent THAT. D1 (CHI TO CAO) chon chinh vi phep do ay chua co.
+NO  : `snapshot-ngoai-cay-KHONG-co-bien-toan-ven` — anh chup nam NGOAI cay nhung
+      subagent VAN ghi de duoc no. `agent_id` nay da nam TRONG anh chup (t23),
+      nhung do la chot chong DOI TEN, khong phai bien toan ven: ke sua duoc tep
+      thi sua duoc ca truong ay. Bien toan ven that doi mot KHOA ma subagent
+      khong doc duoc, va D1 khong co thu ay. Khong va bang bam dai hon.
+NO  : `A3/A8/A11-chua-co-ca-dong` — `install`, `tl nlm-reconcile`, ghi NGOAI kho,
+      mo phong mang: bo nay dung payload TONG HOP nen khong dieu khien duoc mot
+      agent THAT lam nhung viec ay. Ba dang GHI cua A4 (xoa · doi ten · staged)
+      DA co ca rieng tu luot 3 — xem t4b/t4c/t4d.

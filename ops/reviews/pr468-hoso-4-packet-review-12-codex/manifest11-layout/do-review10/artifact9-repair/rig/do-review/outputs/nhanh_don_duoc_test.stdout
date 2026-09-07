@@ -1,0 +1,137 @@
+CASE T1: DO — rc=128: git commit -m A
+
+error: Debug: Namespace set to "git" (ignored)
+Debug: Key file set to "/home/claude/.ssh/commit_signing_key.pub" (ignored, using server key)
+MCP server request failed (attempt 1/3), retrying in 122.149414ms: failed to send request: Post "http://127.0.0.1:45823/mcp": dial tcp 127.0.0.1:45823: socket: operation not permitted
+MCP server request failed (attempt 2/3), retrying in 253.363425ms: failed to send request: Post "http://127.0.0.1:45823/mcp": dial tcp 127.0.0.1:45823: socket: operation not permitted
+Error: failed to call MCP server: MCP server request failed after 2 retries: failed to send request: Post "http://127.0.0.1:45823/mcp": dial tcp 127.0.0.1:45823: socket: operation not permitted
+Usage:
+  environment-runner code-sign [flags]
+
+Flags:
+  -h, --help   help for code-sign
+
+Error: failed to call MCP server: MCP server request failed after 2 retries: failed to send request: Post "http://127.0.0.1:45823/mcp": dial tcp 127.0.0.1:45823: socket: operation not permitted
+
+fatal: failed to write commit object
+
+CASE T2: DO — rc=128: git commit -m A
+
+error: Debug: Namespace set to "git" (ignored)
+Debug: Key file set to "/home/claude/.ssh/commit_signing_key.pub" (ignored, using server key)
+MCP server request failed (attempt 1/3), retrying in 124.631199ms: failed to send request: Post "http://127.0.0.1:45823/mcp": dial tcp 127.0.0.1:45823: socket: operation not permitted
+MCP server request failed (attempt 2/3), retrying in 206.363076ms: failed to send request: Post "http://127.0.0.1:45823/mcp": dial tcp 127.0.0.1:45823: socket: operation not permitted
+Error: failed to call MCP server: MCP server request failed after 2 retries: failed to send request: Post "http://127.0.0.1:45823/mcp": dial tcp 127.0.0.1:45823: socket: operation not permitted
+Usage:
+  environment-runner code-sign [flags]
+
+Flags:
+  -h, --help   help for code-sign
+
+Error: failed to call MCP server: MCP server request failed after 2 retries: failed to send request: Post "http://127.0.0.1:45823/mcp": dial tcp 127.0.0.1:45823: socket: operation not permitted
+
+fatal: failed to write commit object
+
+CASE T3: DO — rc=128: git commit -m A
+
+error: Debug: Namespace set to "git" (ignored)
+Debug: Key file set to "/home/claude/.ssh/commit_signing_key.pub" (ignored, using server key)
+MCP server request failed (attempt 1/3), retrying in 111.88444ms: failed to send request: Post "http://127.0.0.1:45823/mcp": dial tcp 127.0.0.1:45823: socket: operation not permitted
+MCP server request failed (attempt 2/3), retrying in 251.707188ms: failed to send request: Post "http://127.0.0.1:45823/mcp": dial tcp 127.0.0.1:45823: socket: operation not permitted
+Error: failed to call MCP server: MCP server request failed after 2 retries: failed to send request: Post "http://127.0.0.1:45823/mcp": dial tcp 127.0.0.1:45823: socket: operation not permitted
+Usage:
+  environment-runner code-sign [flags]
+
+Flags:
+  -h, --help   help for code-sign
+
+Error: failed to call MCP server: MCP server request failed after 2 retries: failed to send request: Post "http://127.0.0.1:45823/mcp": dial tcp 127.0.0.1:45823: socket: operation not permitted
+
+fatal: failed to write commit object
+
+CASE T4: DO — rc=128: git commit -m A
+
+error: Debug: Namespace set to "git" (ignored)
+Debug: Key file set to "/home/claude/.ssh/commit_signing_key.pub" (ignored, using server key)
+MCP server request failed (attempt 1/3), retrying in 100.380476ms: failed to send request: Post "http://127.0.0.1:45823/mcp": dial tcp 127.0.0.1:45823: socket: operation not permitted
+MCP server request failed (attempt 2/3), retrying in 250.034242ms: failed to send request: Post "http://127.0.0.1:45823/mcp": dial tcp 127.0.0.1:45823: socket: operation not permitted
+Error: failed to call MCP server: MCP server request failed after 2 retries: failed to send request: Post "http://127.0.0.1:45823/mcp": dial tcp 127.0.0.1:45823: socket: operation not permitted
+Usage:
+  environment-runner code-sign [flags]
+
+Flags:
+  -h, --help   help for code-sign
+
+Error: failed to call MCP server: MCP server request failed after 2 retries: failed to send request: Post "http://127.0.0.1:45823/mcp": dial tcp 127.0.0.1:45823: socket: operation not permitted
+
+fatal: failed to write commit object
+
+CASE T5: DO — rc=128: git commit -m A
+
+error: Debug: Namespace set to "git" (ignored)
+Debug: Key file set to "/home/claude/.ssh/commit_signing_key.pub" (ignored, using server key)
+MCP server request failed (attempt 1/3), retrying in 117.715209ms: failed to send request: Post "http://127.0.0.1:45823/mcp": dial tcp 127.0.0.1:45823: socket: operation not permitted
+MCP server request failed (attempt 2/3), retrying in 220.548313ms: failed to send request: Post "http://127.0.0.1:45823/mcp": dial tcp 127.0.0.1:45823: socket: operation not permitted
+Error: failed to call MCP server: MCP server request failed after 2 retries: failed to send request: Post "http://127.0.0.1:45823/mcp": dial tcp 127.0.0.1:45823: socket: operation not permitted
+Usage:
+  environment-runner code-sign [flags]
+
+Flags:
+  -h, --help   help for code-sign
+
+Error: failed to call MCP server: MCP server request failed after 2 retries: failed to send request: Post "http://127.0.0.1:45823/mcp": dial tcp 127.0.0.1:45823: socket: operation not permitted
+
+fatal: failed to write commit object
+
+CASE T6: DO — rc=128: git commit -m A
+
+error: Debug: Namespace set to "git" (ignored)
+Debug: Key file set to "/home/claude/.ssh/commit_signing_key.pub" (ignored, using server key)
+MCP server request failed (attempt 1/3), retrying in 128.497826ms: failed to send request: Post "http://127.0.0.1:45823/mcp": dial tcp 127.0.0.1:45823: socket: operation not permitted
+MCP server request failed (attempt 2/3), retrying in 220.360928ms: failed to send request: Post "http://127.0.0.1:45823/mcp": dial tcp 127.0.0.1:45823: socket: operation not permitted
+Error: failed to call MCP server: MCP server request failed after 2 retries: failed to send request: Post "http://127.0.0.1:45823/mcp": dial tcp 127.0.0.1:45823: socket: operation not permitted
+Usage:
+  environment-runner code-sign [flags]
+
+Flags:
+  -h, --help   help for code-sign
+
+Error: failed to call MCP server: MCP server request failed after 2 retries: failed to send request: Post "http://127.0.0.1:45823/mcp": dial tcp 127.0.0.1:45823: socket: operation not permitted
+
+fatal: failed to write commit object
+
+CASE T7: DO — rc=128: git commit -m A
+
+error: Debug: Namespace set to "git" (ignored)
+Debug: Key file set to "/home/claude/.ssh/commit_signing_key.pub" (ignored, using server key)
+MCP server request failed (attempt 1/3), retrying in 125.980302ms: failed to send request: Post "http://127.0.0.1:45823/mcp": dial tcp 127.0.0.1:45823: socket: operation not permitted
+MCP server request failed (attempt 2/3), retrying in 225.622954ms: failed to send request: Post "http://127.0.0.1:45823/mcp": dial tcp 127.0.0.1:45823: socket: operation not permitted
+Error: failed to call MCP server: MCP server request failed after 2 retries: failed to send request: Post "http://127.0.0.1:45823/mcp": dial tcp 127.0.0.1:45823: socket: operation not permitted
+Usage:
+  environment-runner code-sign [flags]
+
+Flags:
+  -h, --help   help for code-sign
+
+Error: failed to call MCP server: MCP server request failed after 2 retries: failed to send request: Post "http://127.0.0.1:45823/mcp": dial tcp 127.0.0.1:45823: socket: operation not permitted
+
+fatal: failed to write commit object
+
+CASE T8: DO — rc=128: git commit -m A
+
+error: Debug: Namespace set to "git" (ignored)
+Debug: Key file set to "/home/claude/.ssh/commit_signing_key.pub" (ignored, using server key)
+MCP server request failed (attempt 1/3), retrying in 113.406724ms: failed to send request: Post "http://127.0.0.1:45823/mcp": dial tcp 127.0.0.1:45823: socket: operation not permitted
+MCP server request failed (attempt 2/3), retrying in 255.195353ms: failed to send request: Post "http://127.0.0.1:45823/mcp": dial tcp 127.0.0.1:45823: socket: operation not permitted
+Error: failed to call MCP server: MCP server request failed after 2 retries: failed to send request: Post "http://127.0.0.1:45823/mcp": dial tcp 127.0.0.1:45823: socket: operation not permitted
+Usage:
+  environment-runner code-sign [flags]
+
+Flags:
+  -h, --help   help for code-sign
+
+Error: failed to call MCP server: MCP server request failed after 2 retries: failed to send request: Post "http://127.0.0.1:45823/mcp": dial tcp 127.0.0.1:45823: socket: operation not permitted
+
+fatal: failed to write commit object
+
+0/8

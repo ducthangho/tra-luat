@@ -81,3 +81,11 @@ ghi_chu_dang: >-
   CHƯA BIẾT — đừng chế ra). Chữa bằng commit này: đẩy lên nhánh ĐÃ TỒN TẠI, cùng bộ lọc, cùng
   thư mục — đường đã có bằng chứng chạy. Ghi lại vì triệu chứng mới là thứ đáng nhớ: một
   workflow ta trông cậy có thể VẮNG MẶT đúng lần đẩy đầu, và vắng mặt trông y hệt xanh.
+
+# BIA MỘ — thu hồi sớm. Packet #456 đã LAND (`1b3caa1`) nhưng lease này còn giữ
+# `.claude/dev/ci_dang_ky_test.py` tới 14:30:07Z 07-09-2026, chặn cả bốn packet kế nhiệm
+# (#463/#464/#465/#466 đều có đường dẫn ấy trong write_set). Uỷ quyền: Mission Issue #467.
+# Chốt `_kiem_bia_mo` đòi HAI CHIỀU: lease mới khai `thay_the_cho`, tệp này khai `da_bi_thay_the`.
+da_bi_thay_the: gate-tach-job-cat-chi-phi-exec-1-claude-20260906
+da_bi_thay_the_luc_utc: '2026-09-07T03:40:00Z'
+da_bi_thay_the_theo: 'https://github.com/ducthangho/tra-luat/issues/467'

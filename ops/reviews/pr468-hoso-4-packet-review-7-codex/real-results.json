@@ -1,0 +1,28 @@
+[
+  {
+    "name": "pretooluse",
+    "command": [
+      "/usr/local/bin/python3",
+      "-B",
+      ".claude/hooks/pretooluse_guard_test.py"
+    ],
+    "start_utc": "2026-09-07T07:08:23.421032+00:00",
+    "seconds": 435.033,
+    "rc": 1,
+    "bytes": 9490,
+    "sha256": "00bb4b944b12cca20b33fd8ce77ba8280e1becd4249e41aced15803ecab44004"
+  },
+  {
+    "name": "mcp-gh",
+    "command": [
+      "/usr/local/bin/python3",
+      "-B",
+      ".claude/dev/mcp_gh_test.py"
+    ],
+    "start_utc": "2026-09-07T07:15:38.454794+00:00",
+    "seconds": 0.115,
+    "rc": 1,
+    "bytes": 718,
+    "sha256": "ab5eefde5db37e2f429a1dc418cf30893763ade21fc1dce9af5f7a77a649ec7e"
+  }
+]

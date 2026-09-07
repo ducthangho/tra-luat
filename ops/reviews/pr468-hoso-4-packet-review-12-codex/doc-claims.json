@@ -1,0 +1,17 @@
+{
+  "command": [
+    "python3",
+    "-B",
+    "scripts/tl.py",
+    "doc-claims-check",
+    "--strict",
+    "--json"
+  ],
+  "cwd": "cay-kho",
+  "started_utc": "2026-09-07T13:17:11.809585+00:00",
+  "ended_utc": "2026-09-07T13:17:15.520097+00:00",
+  "elapsed_seconds": 3.7105093639997904,
+  "rc": 0,
+  "stdout_bytes": 70861,
+  "stderr_bytes": 0
+}

@@ -1,0 +1,2647 @@
+{
+  "turn6": {
+    "rc": 0,
+    "listed": 62,
+    "matched": 62,
+    "missing": [],
+    "rows": [
+      {
+        "path": "README.md",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "e63effa407477256395f81921a9f16033e169af7ba6643e46b886472f5708913"
+      },
+      {
+        "path": "adr-song.json",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "d4657ae5b8169709b55b6956fec9986c30bc53a7d0803aa009b97268c4ebf8b9"
+      },
+      {
+        "path": "adr-song.log",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "751fa693b8d22f3c7d0089ad96461c3ccb88887a847c5bca3e08ff24ec3a07aa"
+      },
+      {
+        "path": "attack-h-cases.json",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "72dac0275ce51256d766aad3c542e98058c2ce0312ae0a6be92b4327231a6df6"
+      },
+      {
+        "path": "attack-h-summary.json",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "50868677536846a02bbf99434233a3d4d6e3b28eabbe6876d46b63d0b733a745"
+      },
+      {
+        "path": "attack_h.py",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "672b5b24ebf25918459cd2184dfcba22022e32bee5d76319eac1017e4b97b400"
+      },
+      {
+        "path": "audit_static.py",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "e804678bc5d9bad3a25075492f53e28334064a3a09f628fa71d3c26752b7062f"
+      },
+      {
+        "path": "block-HEAD-0.py",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "c23bcd019182023496cb3d9817c6553a0074c77bca26c0a0d1f71a4f5104e45c"
+      },
+      {
+        "path": "block-HEAD-1.py",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "bde441a08d129a962d862fe237003997610238edc8e87b7948d35de875e5f165"
+      },
+      {
+        "path": "block-e5ab4b7-0.py",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "545dedc70cf5ea3b8d00543ccd9a5211120141576799cd85f6a1a5a447a03984"
+      },
+      {
+        "path": "block-e5ab4b7-1.py",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "11fb6d150c005936ad7aaf7bb83abed7077171894b50fc3459af3595c9e9e8d1"
+      },
+      {
+        "path": "ci-dang-ky.json",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "ce4cc00bfcaa3479d201cbf2a24d399bd0ebef0940e1c53a94c8b92e6d6e526a"
+      },
+      {
+        "path": "ci-dang-ky.log",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "d31de5aefad408c8fb7562e18856c79a201e2bd2fbedbbd1c8b13929dabe5089"
+      },
+      {
+        "path": "contracts.json",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "795f42ed6fe951cd998c46399c1a5dda51526d6a97940cdc2e10b6506a710c30"
+      },
+      {
+        "path": "count_spawn.log",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "5bc1b634fdd3ca56d7cd741cf3e5a9986cbe18b7da198190d86eeeb6d937392e"
+      },
+      {
+        "path": "count_spawn.py",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "b4c71b6b5965c8c9ae67ce85a47fd1aa3aa2d5094385bd594c0dca74b1a44b28"
+      },
+      {
+        "path": "d9-comparison.json",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "248ba87b4283a718b728bcf28fa7cea75f5e65b7ef36a6293878c67ead5761dc"
+      },
+      {
+        "path": "doc-claims.json",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "932e3dfc94af619a16a52699633028da485204d99027ac3ab1b74929e583808e"
+      },
+      {
+        "path": "doc-claims.log",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "b9001f390f47286930965480160e62b23da1e47354acc0e9172b94a48d758286"
+      },
+      {
+        "path": "doctrine-scan.json",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "9d57c06fb66bcacbe7fd5835c5558459f89680de88e059a3ba2d35aa603a7d55"
+      },
+      {
+        "path": "doctrine-scan.log",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "9ee1866d82544445d0b015d90aaeb90aead5e9ebf0ffa8ae6556f3ca2963f5cb"
+      },
+      {
+        "path": "empty",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "path": "extra-checks.json",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "f807d6da02cfc43f151c82a86e92833ed7bd721f7066003a0a5ed6514dae74c7"
+      },
+      {
+        "path": "extra_checks.py",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "24e2ee335f05a6d9b441e4dac2d57d0f756ac6531f1a9dd9119acea26eaa87dd"
+      },
+      {
+        "path": "final-check.json",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "e7391f4aa0f2ac0b033307d448b153d8728d04f52e9c06be67b670161a274ebc"
+      },
+      {
+        "path": "finalize_verdict.py",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "b4bb31745f4d3ab26c2e3e92fac8ec16e98291ad360f43ceab8b8db06effe351"
+      },
+      {
+        "path": "h_predicate.py",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "bde441a08d129a962d862fe237003997610238edc8e87b7948d35de875e5f165"
+      },
+      {
+        "path": "h_tong.py",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "c23bcd019182023496cb3d9817c6553a0074c77bca26c0a0d1f71a4f5104e45c"
+      },
+      {
+        "path": "harness.py",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "6d896573ccd0392cd38f3f2f7b9d5ba32f19891047a10e9840dc32efad6a125d"
+      },
+      {
+        "path": "lease-check.json",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "293aea3f55732c768b8b59a3dbb810d58fc7d771d2ff1eff0873ca740d465c28"
+      },
+      {
+        "path": "lease-check.log",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "4072b3a1aa14e163d019c49302372584ad4683bc4ebac1247e427b5298040211"
+      },
+      {
+        "path": "lease-holder-ci.json",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "238ef76ba226c6f5a1a9a3c6feab82239b7c6845230f43410a0be9c5f5619199"
+      },
+      {
+        "path": "lease-holder-ci.log",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "08e8b085bdb9e0bd2f51a8e7791252a2aac2d04bc9dcc35f8db35e8908851454"
+      },
+      {
+        "path": "lease-holder-registry.json",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "ad49766957961353e5b453ed10303734dd9d1b4a4b2dad5a2a8447db1721ba91"
+      },
+      {
+        "path": "lease-holder-registry.log",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "08e8b085bdb9e0bd2f51a8e7791252a2aac2d04bc9dcc35f8db35e8908851454"
+      },
+      {
+        "path": "nhanh-base.stdout",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "d20f40dd2fbf9bf1688f0a4d79d2e764866069d3edf6fac0644ebb6a4d89c082"
+      },
+      {
+        "path": "nhanh-mutants.stdout",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "eaac4c111a1afad6c8563bfe1053962b6c4eb9036c455677e27ecdc97328734d"
+      },
+      {
+        "path": "nhanh-rerun.json",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "b51c3f1dab6beeab4f44a976178f212b5e9b675f3bc0efc02414a605ca317044"
+      },
+      {
+        "path": "outputs/chon_reviewer_test.stdout",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "a58070829bf0732f81f9e4fa601196637467cea0528ed7e362ed8da48a82ede7"
+      },
+      {
+        "path": "outputs/gh_readback_test.stdout",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "0a476a97ea3c334220ff9bee8485d720a8ab62acc17eb1e4a59e3d33c67f2cc2"
+      },
+      {
+        "path": "outputs/mcp_gh_test.stdout",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "ab5eefde5db37e2f429a1dc418cf30893763ade21fc1dce9af5f7a77a649ec7e"
+      },
+      {
+        "path": "outputs/mcp_github_doc_test.stdout",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "82f89e9d5170cc190c941b9b5e247c69623d98f135217d8c8495c806074f033b"
+      },
+      {
+        "path": "outputs/nhanh_don_duoc_test.rerun.stdout",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "366795e45727a70aa7e6ed4ee64c6a1f0bd952dc1191b901c5d40479c722ad96"
+      },
+      {
+        "path": "outputs/nhanh_don_duoc_test.stdout",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "25b731689d77defb724e479c460730a53cf8a3e419c1131039f4dfcf017e8f66"
+      },
+      {
+        "path": "outputs/pretooluse_guard_test.stdout",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "00bb4b944b12cca20b33fd8ce77ba8280e1becd4249e41aced15803ecab44004"
+      },
+      {
+        "path": "outputs/probe_mang_test.stdout",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "c9997dac6d36e60d76b48d5b71e1b87fd60f0c387682061d09382d0585fd54a1"
+      },
+      {
+        "path": "outputs/subagent_ghi_detect_test.stdout",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "56f4f998bed4b71e294e8d159fc624e6313d5102778838778d097a6d45026573"
+      },
+      {
+        "path": "real-results.json",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "08b42a013c8b539ef72b420a33510be6dc5bd066fe135ce0c079c98aa0c2854e"
+      },
+      {
+        "path": "recheck_contracts.py",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "fc4add5589014ea1cd02185e18d0200f499fcda14c68aada8c3491c0912a1f44"
+      },
+      {
+        "path": "rerun_nhanh.log",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "8fb985173eec1d3f13b698eab38326d370fa83ed887dcac0eed694cb8a717b58"
+      },
+      {
+        "path": "rerun_nhanh.py",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "9c5f3153e65672f2fbc241f5b638d71cb8f54c7f61e0438160b4c61f428411d8"
+      },
+      {
+        "path": "run_gates.log",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "3d0512677ad60b46b1d6880700b3ce03749a4ade92913d6499a131e44dd372de"
+      },
+      {
+        "path": "run_gates.py",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "9ab63fb4bb42d2c5d50dd845b6813883df91b422c0a0519316468da8f687c8aa"
+      },
+      {
+        "path": "run_real.log",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "6f46792fa4873f8fd458756ebbd3dae52d3e5b793351de5033042457fc678438"
+      },
+      {
+        "path": "run_real.py",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "693d01d1f555b4218afd280bc4eb2875d711b6819f175f0076fba931cd0a1932"
+      },
+      {
+        "path": "sha256sum.log",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "536ab5b952e101f4a4765c66ea2e606822a6138aee7f46a2487167732596bf2d"
+      },
+      {
+        "path": "spawn-counts.json",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "4b67a81a730528946c88e4eba8476d9a00695cb6f2dcc7f33794c25e03c6e627"
+      },
+      {
+        "path": "static-audit.json",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "cf3847c3f3d5b65499c3f11b976383b7f091d0e2223081964c7a6dac9d10bb5b"
+      },
+      {
+        "path": "static-audit.log",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "cf3847c3f3d5b65499c3f11b976383b7f091d0e2223081964c7a6dac9d10bb5b"
+      },
+      {
+        "path": "subagent-base.stdout",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "path": "subagent-empty.stdout",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "1860d49b742ebb2697d8f93386cf56422ea702609c7c90eca3b3e485128dc6a8"
+      },
+      {
+        "path": "update_verdict.py",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "0d5608a146362a5e068efdc7e44dd8f4f7ba1d846b4b57fc8b16972e19c75706"
+      }
+    ]
+  },
+  "turn7": {
+    "rc": 0,
+    "listed": 66,
+    "matched": 66,
+    "missing": [],
+    "rows": [
+      {
+        "path": "README.md",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "76ff38cc9c545f38b70bc4fd766318a60454d0985351d450ede0c74557854549"
+      },
+      {
+        "path": "adr-song.stderr",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "path": "adr-song.stdout",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "751fa693b8d22f3c7d0089ad96461c3ccb88887a847c5bca3e08ff24ec3a07aa"
+      },
+      {
+        "path": "attack_h.log",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "50868677536846a02bbf99434233a3d4d6e3b28eabbe6876d46b63d0b733a745"
+      },
+      {
+        "path": "bien-nhan-v2.stderr",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "path": "bien-nhan-v2.stdout",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "0a5eb4ef9e94a25cf5dd0aadf3be87c8d25122ef9b75bc9f798482187c9dd828"
+      },
+      {
+        "path": "build_verdict.py",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "543b674f84629ad8b8fc563289e547c12479f55b3b885e8134f92254f041fc6c"
+      },
+      {
+        "path": "ci-dang-ky.stderr",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "path": "ci-dang-ky.stdout",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "d31de5aefad408c8fb7562e18856c79a201e2bd2fbedbbd1c8b13929dabe5089"
+      },
+      {
+        "path": "doc-claims.stderr",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "path": "doc-claims.stdout",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "b9001f390f47286930965480160e62b23da1e47354acc0e9172b94a48d758286"
+      },
+      {
+        "path": "doctrine-scan.stderr",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "path": "doctrine-scan.stdout",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "9ee1866d82544445d0b015d90aaeb90aead5e9ebf0ffa8ae6556f3ca2963f5cb"
+      },
+      {
+        "path": "extra_checks.py.rerun.log",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "25b90acd3ebf8353c3c07f3ff0e5b1ef730629df1f8bc909cbc36b84f8f31ff3"
+      },
+      {
+        "path": "final-check.json",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "25912f5cacc67a0136063822a0a4b6d66f07683e8288649e1b9a73517382de58"
+      },
+      {
+        "path": "gates-results.json",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "3758386bc208abab99c6cedf409285bea1760ba4d85660692cf2656bfba53f39"
+      },
+      {
+        "path": "harness-direct.log",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "1d734f1dc4431a5299fec57317953e669d8d7589b7f242d7e3c0c79b980c048e"
+      },
+      {
+        "path": "harness.log",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "6678fb19ef5de4dc52a4249031423a60b0dd4cf373a9ead88643492aeb52b657"
+      },
+      {
+        "path": "initial.json",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "e50fd275a514e1ff673a8bb1eba658e8cb9358b1d6a111e7fa8e6968b001ed46"
+      },
+      {
+        "path": "issue-anchor-fix-check.json",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "fc98c5d13431e0812275652c8efff11433856416a321cb5aa84f2c51f8b457ac"
+      },
+      {
+        "path": "lease-check.stderr",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "path": "lease-check.stdout",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "fd8a0c3ecc31024f852bb71dd7ee0614e255ac01069b805546defc1d1aac21fc"
+      },
+      {
+        "path": "lease-publish-test-rerun.stderr",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "11f0d363bf3a5f400d90975601037fb8b0f4319a0147a3e1f08a95ff6ccec96a"
+      },
+      {
+        "path": "lease-publish-test-rerun.stdout",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "2e203f5c2ca762653a7d72dadb5e495f5890d1e9e1ccddb6e1efb96f49a41373"
+      },
+      {
+        "path": "lease-publish-test.stderr",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "11f0d363bf3a5f400d90975601037fb8b0f4319a0147a3e1f08a95ff6ccec96a"
+      },
+      {
+        "path": "lease-publish-test.stdout",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "361cd9d80b0c535020e918d3e8eb11ecb3a4de48faa2508ebc3764cacbbe744f"
+      },
+      {
+        "path": "lease-rerun-results.json",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "219c3ff7fb7bec3d5d50f7d277eb362f85f2e3189c64369b59f07e58835d4a75"
+      },
+      {
+        "path": "manifest-check.log",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "227bd29977953485b5b30af9834e25267d69a7a2675e85f505bad6c0f90f2d7c"
+      },
+      {
+        "path": "mcp-gh.stderr",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "path": "mcp-gh.stdout",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "ab5eefde5db37e2f429a1dc418cf30893763ade21fc1dce9af5f7a77a649ec7e"
+      },
+      {
+        "path": "measure_costs.py",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "e5fdb244934f605546fbfca9cade4e76523c17fb9bbedf93137f79afed871a08"
+      },
+      {
+        "path": "nen-a1-a5/buoc.tsv",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "c51cf52e809babab1b0ff6944c711ce9d3c09101526378a7b66c2d9be7864c60"
+      },
+      {
+        "path": "nen-a1-a5/job.tsv",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "06c78b8ace81116bb9c86f1e8e6a79d245dc58fc0bc7c8a0c5a9a4b850574c4d"
+      },
+      {
+        "path": "nen-a1-a5/khong_do_duoc.txt",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "path": "nen-a1-a5/raw/jobs.txt",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "84c797f15c0593113985d014fb95d1829843b859ecfdb14b89e2bd3d1845948b"
+      },
+      {
+        "path": "nen-a1-a5/raw/runs.json",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "fa9ab9a0821217121d9b04b2e305391c42a59111487977447673e7a0177b961d"
+      },
+      {
+        "path": "nen-a1-a5/tinh.py",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "4e13e7903f0511a1440b5e8af9a160fae6a1a91fe588acf33f8e894b220276d2"
+      },
+      {
+        "path": "nen-a1-a5/tom_tat.md",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "8309012b11ad03959ac420f64e5f7ffc84f4532653fb15a6d84c90976e8920d2"
+      },
+      {
+        "path": "nen-measurements.json",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "4ab6f70796a4f90d00cd8936fcb2d6255f35d86d152d86372466f10c5f255d51"
+      },
+      {
+        "path": "nen-measurements.log",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "340bd4ebc56e6c83a6e532bd616e613810df7a2575698a702939ea1ff1c15cf6"
+      },
+      {
+        "path": "nen-replay.log",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "8309012b11ad03959ac420f64e5f7ffc84f4532653fb15a6d84c90976e8920d2"
+      },
+      {
+        "path": "package-rerun.json",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "f98005e6a89142ff29a85a566c4f0e92df28e4157bf0b455c3ff907e59ce93bc"
+      },
+      {
+        "path": "pretooluse.stderr",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "path": "pretooluse.stdout",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "00bb4b944b12cca20b33fd8ce77ba8280e1becd4249e41aced15803ecab44004"
+      },
+      {
+        "path": "real-results.json",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "ce5106e768fbd78ae861fe59d086846511d5f213298b87d02ce3b5358d5cff84"
+      },
+      {
+        "path": "replay/attack-h-cases.json",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "72dac0275ce51256d766aad3c542e98058c2ce0312ae0a6be92b4327231a6df6"
+      },
+      {
+        "path": "replay/attack-h-summary.json",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "50868677536846a02bbf99434233a3d4d6e3b28eabbe6876d46b63d0b733a745"
+      },
+      {
+        "path": "replay/extra-checks.json",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "f807d6da02cfc43f151c82a86e92833ed7bd721f7066003a0a5ed6514dae74c7"
+      },
+      {
+        "path": "replay/h_predicate.py",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "bde441a08d129a962d862fe237003997610238edc8e87b7948d35de875e5f165"
+      },
+      {
+        "path": "replay/h_tong.py",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "c23bcd019182023496cb3d9817c6553a0074c77bca26c0a0d1f71a4f5104e45c"
+      },
+      {
+        "path": "replay/nhanh-rerun.json",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "b51c3f1dab6beeab4f44a976178f212b5e9b675f3bc0efc02414a605ca317044"
+      },
+      {
+        "path": "replay/outputs/chon_reviewer_test.stdout",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "a58070829bf0732f81f9e4fa601196637467cea0528ed7e362ed8da48a82ede7"
+      },
+      {
+        "path": "replay/outputs/gh_readback_test.stdout",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "0a476a97ea3c334220ff9bee8485d720a8ab62acc17eb1e4a59e3d33c67f2cc2"
+      },
+      {
+        "path": "replay/outputs/mcp_gh_test.stdout",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "ab5eefde5db37e2f429a1dc418cf30893763ade21fc1dce9af5f7a77a649ec7e"
+      },
+      {
+        "path": "replay/outputs/mcp_github_doc_test.stdout",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "82f89e9d5170cc190c941b9b5e247c69623d98f135217d8c8495c806074f033b"
+      },
+      {
+        "path": "replay/outputs/nhanh_don_duoc_test.rerun.stdout",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "366795e45727a70aa7e6ed4ee64c6a1f0bd952dc1191b901c5d40479c722ad96"
+      },
+      {
+        "path": "replay/outputs/nhanh_don_duoc_test.stdout",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "25b731689d77defb724e479c460730a53cf8a3e419c1131039f4dfcf017e8f66"
+      },
+      {
+        "path": "replay/outputs/pretooluse_guard_test.stdout",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "00bb4b944b12cca20b33fd8ce77ba8280e1becd4249e41aced15803ecab44004"
+      },
+      {
+        "path": "replay/outputs/probe_mang_test.stdout",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "c9997dac6d36e60d76b48d5b71e1b87fd60f0c387682061d09382d0585fd54a1"
+      },
+      {
+        "path": "replay/outputs/subagent_ghi_detect_test.stdout",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "56f4f998bed4b71e294e8d159fc624e6313d5102778838778d097a6d45026573"
+      },
+      {
+        "path": "replay/real-results.json",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "08b42a013c8b539ef72b420a33510be6dc5bd066fe135ce0c079c98aa0c2854e"
+      },
+      {
+        "path": "replay_package.py",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "5062995f8b19a5cf0d54653572a2e1bfa57f9e057641a2d99a2cac93295c303e"
+      },
+      {
+        "path": "run_measurements.py",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "a01e0fb583a54f036488c5b38606103c56ead077280bf56c73ad88222ae99ee5"
+      },
+      {
+        "path": "static.json",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "0b2daf8cfd074cb7a8a031f223a4216fd663496bb98fe8cda66936c900fd0def"
+      },
+      {
+        "path": "static.log",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "5c1bfe11ec5866906396387a3c3622a9c16a79dbd649e26578ab7b35ec747650"
+      },
+      {
+        "path": "static_checks.py",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "8eb6916afcd7cd788bfaab0694b0582411175f5bfc5129def7d28423407e1a78"
+      }
+    ]
+  },
+  "turn8": {
+    "rc": 0,
+    "listed": 69,
+    "matched": 69,
+    "missing": [],
+    "rows": [
+      {
+        "path": "adr-song.json",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "78e851bba5482dbc3dc9ea39f1f64d0ce82d1d02295e30a11b5f9399bc3b5bda"
+      },
+      {
+        "path": "adr-song.stderr",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "path": "adr-song.stdout",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "751fa693b8d22f3c7d0089ad96461c3ccb88887a847c5bca3e08ff24ec3a07aa"
+      },
+      {
+        "path": "attack_h.py.log",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "50868677536846a02bbf99434233a3d4d6e3b28eabbe6876d46b63d0b733a745"
+      },
+      {
+        "path": "bien-nhan-v2.json",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "5811c530171d49365bc0d36c3fdc3f54258552f0a586be7c71c3d46b34feff0b"
+      },
+      {
+        "path": "bien-nhan-v2.stderr",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "path": "bien-nhan-v2.stdout",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "b35265571e55e9493b476675698a3adf8cd5fa29eb95f7e645321b89ece3f24c"
+      },
+      {
+        "path": "build_verdict.py",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "c02b220be22cbfb1e0e48a205c096cd6fd776a5a10bdc1afff568259edb6544b"
+      },
+      {
+        "path": "ci-dang-ky.json",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "593c7c6e61c0cb6b24913c0823ca307f11c5d5da977ccffdacf737c039f49ddb"
+      },
+      {
+        "path": "ci-dang-ky.stderr",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "path": "ci-dang-ky.stdout",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "d31de5aefad408c8fb7562e18856c79a201e2bd2fbedbbd1c8b13929dabe5089"
+      },
+      {
+        "path": "contract-checks.json",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "acdfb4e63a0c4d77c693cb51ec2c55066c41f827cecfacb0cad9c4fb43087292"
+      },
+      {
+        "path": "contract_checks.py",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "430e7aabe0b6623181e0ba3422eac33880dae68aa9ba75ef797ec559e5ebb756"
+      },
+      {
+        "path": "costs.json",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "098554c9ef30bfd9a5607f3168c47a267c83c009a566149819ddeaf7cbb7904f"
+      },
+      {
+        "path": "doc-claims.json",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "52177cff3494536f076dcd65cd9933ade7077cbd4c00705027f0760317d01831"
+      },
+      {
+        "path": "doc-claims.stderr",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "path": "doc-claims.stdout",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "b9001f390f47286930965480160e62b23da1e47354acc0e9172b94a48d758286"
+      },
+      {
+        "path": "doctrine-scan.json",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "4d1e506462da60170e61dd160f917bfe3fd3c7376774f45c0307de6e4d9c62f6"
+      },
+      {
+        "path": "doctrine-scan.stderr",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "path": "doctrine-scan.stdout",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "9ee1866d82544445d0b015d90aaeb90aead5e9ebf0ffa8ae6556f3ca2963f5cb"
+      },
+      {
+        "path": "extra_checks.py.log",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "25b90acd3ebf8353c3c07f3ff0e5b1ef730629df1f8bc909cbc36b84f8f31ff3"
+      },
+      {
+        "path": "final-check.json",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "178084d965ef37b7d53011246a75c9b26b1c297674e1fb4eca259799fbb721e3"
+      },
+      {
+        "path": "followup-checks.json",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "21e7e0ea57db0a570b2a5eae45f3eab469ffe69c6814ec6d776ef610ecb16716"
+      },
+      {
+        "path": "followup_checks.py",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "a744461323ae6c31e4d1032a9333babc64e06eefe2c5e09ccebe751ef44d0333"
+      },
+      {
+        "path": "harness.py.log",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "6678fb19ef5de4dc52a4249031423a60b0dd4cf373a9ead88643492aeb52b657"
+      },
+      {
+        "path": "lease-check.json",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "06ab31af29e75fa43b9660a9eeea79c78104030d45f996e3b2523df11bed04dc"
+      },
+      {
+        "path": "lease-check.stderr",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "path": "lease-check.stdout",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "27924ee14325f81d7590c1c22bc3c78ecfd3dca155f1fdce3f93396425229717"
+      },
+      {
+        "path": "lease-publish-test.json",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "d3ec3ff3f95f113053e66a8ad4b3d625566f7de1a3d283e251f029053b486022"
+      },
+      {
+        "path": "lease-publish-test.stderr",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "11f0d363bf3a5f400d90975601037fb8b0f4319a0147a3e1f08a95ff6ccec96a"
+      },
+      {
+        "path": "lease-publish-test.stdout",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "9d3f3e46cd0ba25f7c7bd19f6505704d928baae39138e80539e275b64d8e6c7d"
+      },
+      {
+        "path": "measure_costs.py",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "4068823de53d028999e64b6b72f7d9b7d69ae5ddace50f2b3c5f6ba7c1eff671"
+      },
+      {
+        "path": "nen-a1-a5/buoc.tsv",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "c51cf52e809babab1b0ff6944c711ce9d3c09101526378a7b66c2d9be7864c60"
+      },
+      {
+        "path": "nen-a1-a5/job.tsv",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "06c78b8ace81116bb9c86f1e8e6a79d245dc58fc0bc7c8a0c5a9a4b850574c4d"
+      },
+      {
+        "path": "nen-a1-a5/khong_do_duoc.txt",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "path": "nen-a1-a5/raw/jobs.txt",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "84c797f15c0593113985d014fb95d1829843b859ecfdb14b89e2bd3d1845948b"
+      },
+      {
+        "path": "nen-a1-a5/raw/runs.json",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "fa9ab9a0821217121d9b04b2e305391c42a59111487977447673e7a0177b961d"
+      },
+      {
+        "path": "nen-a1-a5/tinh.py",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "4e13e7903f0511a1440b5e8af9a160fae6a1a91fe588acf33f8e894b220276d2"
+      },
+      {
+        "path": "nen-a1-a5/tom_tat.md",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "8309012b11ad03959ac420f64e5f7ffc84f4532653fb15a6d84c90976e8920d2"
+      },
+      {
+        "path": "nen-replay.log",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "8309012b11ad03959ac420f64e5f7ffc84f4532653fb15a6d84c90976e8920d2"
+      },
+      {
+        "path": "notes.md",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "7f10bc75fcd6d22efc26e7b426c8e03fa2dddbc812602ccd4d32938ce114e433"
+      },
+      {
+        "path": "pretooluse-replay.json",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "5165c82e8dbd3a191e7d48807cf29769329f898121fd9c4aee53f6992b21acc7"
+      },
+      {
+        "path": "pretooluse.json",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "39582c556d95c49fd71e19df434735bb8b1f77a6201d4188550eb8aefc38a527"
+      },
+      {
+        "path": "pretooluse.stderr",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "path": "pretooluse.stdout",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "69878c4f9efb24a6666d1cf0e4dea99d1ac87fa0aa904e28c6d397fd08cb7991"
+      },
+      {
+        "path": "replay-h.json",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "cd1f5d3c675f5862629f5722f65fa9d5f0fd304531508ff0e46e58965c10634a"
+      },
+      {
+        "path": "replay_h.py",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "57c42e7d089f533c830353bfd7348eb3dc01a27dc4341c2581ac4f52739be7ed"
+      },
+      {
+        "path": "rig/do-review/attack-h-cases.json",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "72dac0275ce51256d766aad3c542e98058c2ce0312ae0a6be92b4327231a6df6"
+      },
+      {
+        "path": "rig/do-review/attack-h-summary.json",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "50868677536846a02bbf99434233a3d4d6e3b28eabbe6876d46b63d0b733a745"
+      },
+      {
+        "path": "rig/do-review/extra-checks.json",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "f807d6da02cfc43f151c82a86e92833ed7bd721f7066003a0a5ed6514dae74c7"
+      },
+      {
+        "path": "rig/do-review/h_predicate.py",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "bde441a08d129a962d862fe237003997610238edc8e87b7948d35de875e5f165"
+      },
+      {
+        "path": "rig/do-review/h_tong.py",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "c23bcd019182023496cb3d9817c6553a0074c77bca26c0a0d1f71a4f5104e45c"
+      },
+      {
+        "path": "rig/do-review/nhanh-rerun.json",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "b51c3f1dab6beeab4f44a976178f212b5e9b675f3bc0efc02414a605ca317044"
+      },
+      {
+        "path": "rig/do-review/outputs/chon_reviewer_test.stdout",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "a58070829bf0732f81f9e4fa601196637467cea0528ed7e362ed8da48a82ede7"
+      },
+      {
+        "path": "rig/do-review/outputs/gh_readback_test.stdout",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "0a476a97ea3c334220ff9bee8485d720a8ab62acc17eb1e4a59e3d33c67f2cc2"
+      },
+      {
+        "path": "rig/do-review/outputs/mcp_gh_test.stdout",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "ab5eefde5db37e2f429a1dc418cf30893763ade21fc1dce9af5f7a77a649ec7e"
+      },
+      {
+        "path": "rig/do-review/outputs/mcp_github_doc_test.stdout",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "82f89e9d5170cc190c941b9b5e247c69623d98f135217d8c8495c806074f033b"
+      },
+      {
+        "path": "rig/do-review/outputs/nhanh_don_duoc_test.rerun.stdout",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "366795e45727a70aa7e6ed4ee64c6a1f0bd952dc1191b901c5d40479c722ad96"
+      },
+      {
+        "path": "rig/do-review/outputs/nhanh_don_duoc_test.stdout",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "25b731689d77defb724e479c460730a53cf8a3e419c1131039f4dfcf017e8f66"
+      },
+      {
+        "path": "rig/do-review/outputs/pretooluse_guard_test.stdout",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "00bb4b944b12cca20b33fd8ce77ba8280e1becd4249e41aced15803ecab44004"
+      },
+      {
+        "path": "rig/do-review/outputs/probe_mang_test.stdout",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "c9997dac6d36e60d76b48d5b71e1b87fd60f0c387682061d09382d0585fd54a1"
+      },
+      {
+        "path": "rig/do-review/outputs/subagent_ghi_detect_test.stdout",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "56f4f998bed4b71e294e8d159fc624e6313d5102778838778d097a6d45026573"
+      },
+      {
+        "path": "rig/do-review/real-results.json",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "08b42a013c8b539ef72b420a33510be6dc5bd066fe135ce0c079c98aa0c2854e"
+      },
+      {
+        "path": "rig/source/attack_h.py",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "672b5b24ebf25918459cd2184dfcba22022e32bee5d76319eac1017e4b97b400"
+      },
+      {
+        "path": "rig/source/extra_checks.py",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "24e2ee335f05a6d9b441e4dac2d57d0f756ac6531f1a9dd9119acea26eaa87dd"
+      },
+      {
+        "path": "rig/source/harness.py",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "6d896573ccd0392cd38f3f2f7b9d5ba32f19891047a10e9840dc32efad6a125d"
+      },
+      {
+        "path": "run_command.py",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "4dd8c29f8f84b5aa3de271bc10ca4c02f9b9f7bdf6b6cb14d3633ed051f14b52"
+      },
+      {
+        "path": "static.json",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "0fa6efe1963b8a69abc66010f01191387cf4c4ca267d52e704bb6dd6b7cd35a1"
+      },
+      {
+        "path": "static_checks.py",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "c836634d4f59756d36e8e8f9dd85ed601b7b4f614049b56a54d18a194bb9ad43"
+      }
+    ]
+  },
+  "turn9_regular_files": 111,
+  "turn9_symlinks": [],
+  "turn9_artifact_repair": {
+    "rc": 1,
+    "listed": 69,
+    "matched": 50,
+    "missing": [
+      {
+        "path": "rig/do-review/attack-h-cases.json",
+        "present": false,
+        "symlink": false,
+        "matches": false,
+        "expected": "72dac0275ce51256d766aad3c542e98058c2ce0312ae0a6be92b4327231a6df6"
+      },
+      {
+        "path": "rig/do-review/attack-h-summary.json",
+        "present": false,
+        "symlink": false,
+        "matches": false,
+        "expected": "50868677536846a02bbf99434233a3d4d6e3b28eabbe6876d46b63d0b733a745"
+      },
+      {
+        "path": "rig/do-review/extra-checks.json",
+        "present": false,
+        "symlink": false,
+        "matches": false,
+        "expected": "f807d6da02cfc43f151c82a86e92833ed7bd721f7066003a0a5ed6514dae74c7"
+      },
+      {
+        "path": "rig/do-review/h_predicate.py",
+        "present": false,
+        "symlink": false,
+        "matches": false,
+        "expected": "bde441a08d129a962d862fe237003997610238edc8e87b7948d35de875e5f165"
+      },
+      {
+        "path": "rig/do-review/h_tong.py",
+        "present": false,
+        "symlink": false,
+        "matches": false,
+        "expected": "c23bcd019182023496cb3d9817c6553a0074c77bca26c0a0d1f71a4f5104e45c"
+      },
+      {
+        "path": "rig/do-review/nhanh-rerun.json",
+        "present": false,
+        "symlink": false,
+        "matches": false,
+        "expected": "b51c3f1dab6beeab4f44a976178f212b5e9b675f3bc0efc02414a605ca317044"
+      },
+      {
+        "path": "rig/do-review/outputs/chon_reviewer_test.stdout",
+        "present": false,
+        "symlink": false,
+        "matches": false,
+        "expected": "a58070829bf0732f81f9e4fa601196637467cea0528ed7e362ed8da48a82ede7"
+      },
+      {
+        "path": "rig/do-review/outputs/gh_readback_test.stdout",
+        "present": false,
+        "symlink": false,
+        "matches": false,
+        "expected": "0a476a97ea3c334220ff9bee8485d720a8ab62acc17eb1e4a59e3d33c67f2cc2"
+      },
+      {
+        "path": "rig/do-review/outputs/mcp_gh_test.stdout",
+        "present": false,
+        "symlink": false,
+        "matches": false,
+        "expected": "ab5eefde5db37e2f429a1dc418cf30893763ade21fc1dce9af5f7a77a649ec7e"
+      },
+      {
+        "path": "rig/do-review/outputs/mcp_github_doc_test.stdout",
+        "present": false,
+        "symlink": false,
+        "matches": false,
+        "expected": "82f89e9d5170cc190c941b9b5e247c69623d98f135217d8c8495c806074f033b"
+      },
+      {
+        "path": "rig/do-review/outputs/nhanh_don_duoc_test.rerun.stdout",
+        "present": false,
+        "symlink": false,
+        "matches": false,
+        "expected": "366795e45727a70aa7e6ed4ee64c6a1f0bd952dc1191b901c5d40479c722ad96"
+      },
+      {
+        "path": "rig/do-review/outputs/nhanh_don_duoc_test.stdout",
+        "present": false,
+        "symlink": false,
+        "matches": false,
+        "expected": "25b731689d77defb724e479c460730a53cf8a3e419c1131039f4dfcf017e8f66"
+      },
+      {
+        "path": "rig/do-review/outputs/pretooluse_guard_test.stdout",
+        "present": false,
+        "symlink": false,
+        "matches": false,
+        "expected": "00bb4b944b12cca20b33fd8ce77ba8280e1becd4249e41aced15803ecab44004"
+      },
+      {
+        "path": "rig/do-review/outputs/probe_mang_test.stdout",
+        "present": false,
+        "symlink": false,
+        "matches": false,
+        "expected": "c9997dac6d36e60d76b48d5b71e1b87fd60f0c387682061d09382d0585fd54a1"
+      },
+      {
+        "path": "rig/do-review/outputs/subagent_ghi_detect_test.stdout",
+        "present": false,
+        "symlink": false,
+        "matches": false,
+        "expected": "56f4f998bed4b71e294e8d159fc624e6313d5102778838778d097a6d45026573"
+      },
+      {
+        "path": "rig/do-review/real-results.json",
+        "present": false,
+        "symlink": false,
+        "matches": false,
+        "expected": "08b42a013c8b539ef72b420a33510be6dc5bd066fe135ce0c079c98aa0c2854e"
+      },
+      {
+        "path": "rig/source/attack_h.py",
+        "present": false,
+        "symlink": false,
+        "matches": false,
+        "expected": "672b5b24ebf25918459cd2184dfcba22022e32bee5d76319eac1017e4b97b400"
+      },
+      {
+        "path": "rig/source/extra_checks.py",
+        "present": false,
+        "symlink": false,
+        "matches": false,
+        "expected": "24e2ee335f05a6d9b441e4dac2d57d0f756ac6531f1a9dd9119acea26eaa87dd"
+      },
+      {
+        "path": "rig/source/harness.py",
+        "present": false,
+        "symlink": false,
+        "matches": false,
+        "expected": "6d896573ccd0392cd38f3f2f7b9d5ba32f19891047a10e9840dc32efad6a125d"
+      }
+    ],
+    "rows": [
+      {
+        "path": "adr-song.json",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "78e851bba5482dbc3dc9ea39f1f64d0ce82d1d02295e30a11b5f9399bc3b5bda"
+      },
+      {
+        "path": "adr-song.stderr",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "path": "adr-song.stdout",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "751fa693b8d22f3c7d0089ad96461c3ccb88887a847c5bca3e08ff24ec3a07aa"
+      },
+      {
+        "path": "attack_h.py.log",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "50868677536846a02bbf99434233a3d4d6e3b28eabbe6876d46b63d0b733a745"
+      },
+      {
+        "path": "bien-nhan-v2.json",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "5811c530171d49365bc0d36c3fdc3f54258552f0a586be7c71c3d46b34feff0b"
+      },
+      {
+        "path": "bien-nhan-v2.stderr",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "path": "bien-nhan-v2.stdout",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "b35265571e55e9493b476675698a3adf8cd5fa29eb95f7e645321b89ece3f24c"
+      },
+      {
+        "path": "build_verdict.py",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "c02b220be22cbfb1e0e48a205c096cd6fd776a5a10bdc1afff568259edb6544b"
+      },
+      {
+        "path": "ci-dang-ky.json",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "593c7c6e61c0cb6b24913c0823ca307f11c5d5da977ccffdacf737c039f49ddb"
+      },
+      {
+        "path": "ci-dang-ky.stderr",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "path": "ci-dang-ky.stdout",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "d31de5aefad408c8fb7562e18856c79a201e2bd2fbedbbd1c8b13929dabe5089"
+      },
+      {
+        "path": "contract-checks.json",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "acdfb4e63a0c4d77c693cb51ec2c55066c41f827cecfacb0cad9c4fb43087292"
+      },
+      {
+        "path": "contract_checks.py",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "430e7aabe0b6623181e0ba3422eac33880dae68aa9ba75ef797ec559e5ebb756"
+      },
+      {
+        "path": "costs.json",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "098554c9ef30bfd9a5607f3168c47a267c83c009a566149819ddeaf7cbb7904f"
+      },
+      {
+        "path": "doc-claims.json",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "52177cff3494536f076dcd65cd9933ade7077cbd4c00705027f0760317d01831"
+      },
+      {
+        "path": "doc-claims.stderr",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "path": "doc-claims.stdout",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "b9001f390f47286930965480160e62b23da1e47354acc0e9172b94a48d758286"
+      },
+      {
+        "path": "doctrine-scan.json",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "4d1e506462da60170e61dd160f917bfe3fd3c7376774f45c0307de6e4d9c62f6"
+      },
+      {
+        "path": "doctrine-scan.stderr",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "path": "doctrine-scan.stdout",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "9ee1866d82544445d0b015d90aaeb90aead5e9ebf0ffa8ae6556f3ca2963f5cb"
+      },
+      {
+        "path": "extra_checks.py.log",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "25b90acd3ebf8353c3c07f3ff0e5b1ef730629df1f8bc909cbc36b84f8f31ff3"
+      },
+      {
+        "path": "final-check.json",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "178084d965ef37b7d53011246a75c9b26b1c297674e1fb4eca259799fbb721e3"
+      },
+      {
+        "path": "followup-checks.json",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "21e7e0ea57db0a570b2a5eae45f3eab469ffe69c6814ec6d776ef610ecb16716"
+      },
+      {
+        "path": "followup_checks.py",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "a744461323ae6c31e4d1032a9333babc64e06eefe2c5e09ccebe751ef44d0333"
+      },
+      {
+        "path": "harness.py.log",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "6678fb19ef5de4dc52a4249031423a60b0dd4cf373a9ead88643492aeb52b657"
+      },
+      {
+        "path": "lease-check.json",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "06ab31af29e75fa43b9660a9eeea79c78104030d45f996e3b2523df11bed04dc"
+      },
+      {
+        "path": "lease-check.stderr",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "path": "lease-check.stdout",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "27924ee14325f81d7590c1c22bc3c78ecfd3dca155f1fdce3f93396425229717"
+      },
+      {
+        "path": "lease-publish-test.json",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "d3ec3ff3f95f113053e66a8ad4b3d625566f7de1a3d283e251f029053b486022"
+      },
+      {
+        "path": "lease-publish-test.stderr",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "11f0d363bf3a5f400d90975601037fb8b0f4319a0147a3e1f08a95ff6ccec96a"
+      },
+      {
+        "path": "lease-publish-test.stdout",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "9d3f3e46cd0ba25f7c7bd19f6505704d928baae39138e80539e275b64d8e6c7d"
+      },
+      {
+        "path": "measure_costs.py",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "4068823de53d028999e64b6b72f7d9b7d69ae5ddace50f2b3c5f6ba7c1eff671"
+      },
+      {
+        "path": "nen-a1-a5/buoc.tsv",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "c51cf52e809babab1b0ff6944c711ce9d3c09101526378a7b66c2d9be7864c60"
+      },
+      {
+        "path": "nen-a1-a5/job.tsv",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "06c78b8ace81116bb9c86f1e8e6a79d245dc58fc0bc7c8a0c5a9a4b850574c4d"
+      },
+      {
+        "path": "nen-a1-a5/khong_do_duoc.txt",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "path": "nen-a1-a5/raw/jobs.txt",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "84c797f15c0593113985d014fb95d1829843b859ecfdb14b89e2bd3d1845948b"
+      },
+      {
+        "path": "nen-a1-a5/raw/runs.json",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "fa9ab9a0821217121d9b04b2e305391c42a59111487977447673e7a0177b961d"
+      },
+      {
+        "path": "nen-a1-a5/tinh.py",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "4e13e7903f0511a1440b5e8af9a160fae6a1a91fe588acf33f8e894b220276d2"
+      },
+      {
+        "path": "nen-a1-a5/tom_tat.md",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "8309012b11ad03959ac420f64e5f7ffc84f4532653fb15a6d84c90976e8920d2"
+      },
+      {
+        "path": "nen-replay.log",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "8309012b11ad03959ac420f64e5f7ffc84f4532653fb15a6d84c90976e8920d2"
+      },
+      {
+        "path": "notes.md",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "7f10bc75fcd6d22efc26e7b426c8e03fa2dddbc812602ccd4d32938ce114e433"
+      },
+      {
+        "path": "pretooluse-replay.json",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "5165c82e8dbd3a191e7d48807cf29769329f898121fd9c4aee53f6992b21acc7"
+      },
+      {
+        "path": "pretooluse.json",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "39582c556d95c49fd71e19df434735bb8b1f77a6201d4188550eb8aefc38a527"
+      },
+      {
+        "path": "pretooluse.stderr",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "path": "pretooluse.stdout",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "69878c4f9efb24a6666d1cf0e4dea99d1ac87fa0aa904e28c6d397fd08cb7991"
+      },
+      {
+        "path": "replay-h.json",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "cd1f5d3c675f5862629f5722f65fa9d5f0fd304531508ff0e46e58965c10634a"
+      },
+      {
+        "path": "replay_h.py",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "57c42e7d089f533c830353bfd7348eb3dc01a27dc4341c2581ac4f52739be7ed"
+      },
+      {
+        "path": "rig/do-review/attack-h-cases.json",
+        "present": false,
+        "symlink": false,
+        "matches": false,
+        "expected": "72dac0275ce51256d766aad3c542e98058c2ce0312ae0a6be92b4327231a6df6"
+      },
+      {
+        "path": "rig/do-review/attack-h-summary.json",
+        "present": false,
+        "symlink": false,
+        "matches": false,
+        "expected": "50868677536846a02bbf99434233a3d4d6e3b28eabbe6876d46b63d0b733a745"
+      },
+      {
+        "path": "rig/do-review/extra-checks.json",
+        "present": false,
+        "symlink": false,
+        "matches": false,
+        "expected": "f807d6da02cfc43f151c82a86e92833ed7bd721f7066003a0a5ed6514dae74c7"
+      },
+      {
+        "path": "rig/do-review/h_predicate.py",
+        "present": false,
+        "symlink": false,
+        "matches": false,
+        "expected": "bde441a08d129a962d862fe237003997610238edc8e87b7948d35de875e5f165"
+      },
+      {
+        "path": "rig/do-review/h_tong.py",
+        "present": false,
+        "symlink": false,
+        "matches": false,
+        "expected": "c23bcd019182023496cb3d9817c6553a0074c77bca26c0a0d1f71a4f5104e45c"
+      },
+      {
+        "path": "rig/do-review/nhanh-rerun.json",
+        "present": false,
+        "symlink": false,
+        "matches": false,
+        "expected": "b51c3f1dab6beeab4f44a976178f212b5e9b675f3bc0efc02414a605ca317044"
+      },
+      {
+        "path": "rig/do-review/outputs/chon_reviewer_test.stdout",
+        "present": false,
+        "symlink": false,
+        "matches": false,
+        "expected": "a58070829bf0732f81f9e4fa601196637467cea0528ed7e362ed8da48a82ede7"
+      },
+      {
+        "path": "rig/do-review/outputs/gh_readback_test.stdout",
+        "present": false,
+        "symlink": false,
+        "matches": false,
+        "expected": "0a476a97ea3c334220ff9bee8485d720a8ab62acc17eb1e4a59e3d33c67f2cc2"
+      },
+      {
+        "path": "rig/do-review/outputs/mcp_gh_test.stdout",
+        "present": false,
+        "symlink": false,
+        "matches": false,
+        "expected": "ab5eefde5db37e2f429a1dc418cf30893763ade21fc1dce9af5f7a77a649ec7e"
+      },
+      {
+        "path": "rig/do-review/outputs/mcp_github_doc_test.stdout",
+        "present": false,
+        "symlink": false,
+        "matches": false,
+        "expected": "82f89e9d5170cc190c941b9b5e247c69623d98f135217d8c8495c806074f033b"
+      },
+      {
+        "path": "rig/do-review/outputs/nhanh_don_duoc_test.rerun.stdout",
+        "present": false,
+        "symlink": false,
+        "matches": false,
+        "expected": "366795e45727a70aa7e6ed4ee64c6a1f0bd952dc1191b901c5d40479c722ad96"
+      },
+      {
+        "path": "rig/do-review/outputs/nhanh_don_duoc_test.stdout",
+        "present": false,
+        "symlink": false,
+        "matches": false,
+        "expected": "25b731689d77defb724e479c460730a53cf8a3e419c1131039f4dfcf017e8f66"
+      },
+      {
+        "path": "rig/do-review/outputs/pretooluse_guard_test.stdout",
+        "present": false,
+        "symlink": false,
+        "matches": false,
+        "expected": "00bb4b944b12cca20b33fd8ce77ba8280e1becd4249e41aced15803ecab44004"
+      },
+      {
+        "path": "rig/do-review/outputs/probe_mang_test.stdout",
+        "present": false,
+        "symlink": false,
+        "matches": false,
+        "expected": "c9997dac6d36e60d76b48d5b71e1b87fd60f0c387682061d09382d0585fd54a1"
+      },
+      {
+        "path": "rig/do-review/outputs/subagent_ghi_detect_test.stdout",
+        "present": false,
+        "symlink": false,
+        "matches": false,
+        "expected": "56f4f998bed4b71e294e8d159fc624e6313d5102778838778d097a6d45026573"
+      },
+      {
+        "path": "rig/do-review/real-results.json",
+        "present": false,
+        "symlink": false,
+        "matches": false,
+        "expected": "08b42a013c8b539ef72b420a33510be6dc5bd066fe135ce0c079c98aa0c2854e"
+      },
+      {
+        "path": "rig/source/attack_h.py",
+        "present": false,
+        "symlink": false,
+        "matches": false,
+        "expected": "672b5b24ebf25918459cd2184dfcba22022e32bee5d76319eac1017e4b97b400"
+      },
+      {
+        "path": "rig/source/extra_checks.py",
+        "present": false,
+        "symlink": false,
+        "matches": false,
+        "expected": "24e2ee335f05a6d9b441e4dac2d57d0f756ac6531f1a9dd9119acea26eaa87dd"
+      },
+      {
+        "path": "rig/source/harness.py",
+        "present": false,
+        "symlink": false,
+        "matches": false,
+        "expected": "6d896573ccd0392cd38f3f2f7b9d5ba32f19891047a10e9840dc32efad6a125d"
+      },
+      {
+        "path": "run_command.py",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "4dd8c29f8f84b5aa3de271bc10ca4c02f9b9f7bdf6b6cb14d3633ed051f14b52"
+      },
+      {
+        "path": "static.json",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "0fa6efe1963b8a69abc66010f01191387cf4c4ca267d52e704bb6dd6b7cd35a1"
+      },
+      {
+        "path": "static_checks.py",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "c836634d4f59756d36e8e8f9dd85ed601b7b4f614049b56a54d18a194bb9ad43"
+      }
+    ]
+  },
+  "turn9_original_claim": {
+    "listed": 69,
+    "present": 50,
+    "missing": 19,
+    "recoverable": 69,
+    "original_rc": 1,
+    "repaired_copy_rc": 0
+  },
+  "missing_recoverable_in_turn8": [
+    {
+      "path": "rig/do-review/attack-h-cases.json",
+      "expected": "72dac0275ce51256d766aad3c542e98058c2ce0312ae0a6be92b4327231a6df6",
+      "source": "ops/reviews/pr468-hoso-4-packet-review-8-codex/rig/do-review/attack-h-cases.json",
+      "matches": true
+    },
+    {
+      "path": "rig/do-review/attack-h-summary.json",
+      "expected": "50868677536846a02bbf99434233a3d4d6e3b28eabbe6876d46b63d0b733a745",
+      "source": "ops/reviews/pr468-hoso-4-packet-review-8-codex/rig/do-review/attack-h-summary.json",
+      "matches": true
+    },
+    {
+      "path": "rig/do-review/extra-checks.json",
+      "expected": "f807d6da02cfc43f151c82a86e92833ed7bd721f7066003a0a5ed6514dae74c7",
+      "source": "ops/reviews/pr468-hoso-4-packet-review-8-codex/rig/do-review/extra-checks.json",
+      "matches": true
+    },
+    {
+      "path": "rig/do-review/h_predicate.py",
+      "expected": "bde441a08d129a962d862fe237003997610238edc8e87b7948d35de875e5f165",
+      "source": "ops/reviews/pr468-hoso-4-packet-review-8-codex/rig/do-review/h_predicate.py",
+      "matches": true
+    },
+    {
+      "path": "rig/do-review/h_tong.py",
+      "expected": "c23bcd019182023496cb3d9817c6553a0074c77bca26c0a0d1f71a4f5104e45c",
+      "source": "ops/reviews/pr468-hoso-4-packet-review-8-codex/rig/do-review/h_tong.py",
+      "matches": true
+    },
+    {
+      "path": "rig/do-review/nhanh-rerun.json",
+      "expected": "b51c3f1dab6beeab4f44a976178f212b5e9b675f3bc0efc02414a605ca317044",
+      "source": "ops/reviews/pr468-hoso-4-packet-review-8-codex/rig/do-review/nhanh-rerun.json",
+      "matches": true
+    },
+    {
+      "path": "rig/do-review/outputs/chon_reviewer_test.stdout",
+      "expected": "a58070829bf0732f81f9e4fa601196637467cea0528ed7e362ed8da48a82ede7",
+      "source": "ops/reviews/pr468-hoso-4-packet-review-8-codex/rig/do-review/outputs/chon_reviewer_test.stdout",
+      "matches": true
+    },
+    {
+      "path": "rig/do-review/outputs/gh_readback_test.stdout",
+      "expected": "0a476a97ea3c334220ff9bee8485d720a8ab62acc17eb1e4a59e3d33c67f2cc2",
+      "source": "ops/reviews/pr468-hoso-4-packet-review-8-codex/rig/do-review/outputs/gh_readback_test.stdout",
+      "matches": true
+    },
+    {
+      "path": "rig/do-review/outputs/mcp_gh_test.stdout",
+      "expected": "ab5eefde5db37e2f429a1dc418cf30893763ade21fc1dce9af5f7a77a649ec7e",
+      "source": "ops/reviews/pr468-hoso-4-packet-review-8-codex/rig/do-review/outputs/mcp_gh_test.stdout",
+      "matches": true
+    },
+    {
+      "path": "rig/do-review/outputs/mcp_github_doc_test.stdout",
+      "expected": "82f89e9d5170cc190c941b9b5e247c69623d98f135217d8c8495c806074f033b",
+      "source": "ops/reviews/pr468-hoso-4-packet-review-8-codex/rig/do-review/outputs/mcp_github_doc_test.stdout",
+      "matches": true
+    },
+    {
+      "path": "rig/do-review/outputs/nhanh_don_duoc_test.rerun.stdout",
+      "expected": "366795e45727a70aa7e6ed4ee64c6a1f0bd952dc1191b901c5d40479c722ad96",
+      "source": "ops/reviews/pr468-hoso-4-packet-review-8-codex/rig/do-review/outputs/nhanh_don_duoc_test.rerun.stdout",
+      "matches": true
+    },
+    {
+      "path": "rig/do-review/outputs/nhanh_don_duoc_test.stdout",
+      "expected": "25b731689d77defb724e479c460730a53cf8a3e419c1131039f4dfcf017e8f66",
+      "source": "ops/reviews/pr468-hoso-4-packet-review-8-codex/rig/do-review/outputs/nhanh_don_duoc_test.stdout",
+      "matches": true
+    },
+    {
+      "path": "rig/do-review/outputs/pretooluse_guard_test.stdout",
+      "expected": "00bb4b944b12cca20b33fd8ce77ba8280e1becd4249e41aced15803ecab44004",
+      "source": "ops/reviews/pr468-hoso-4-packet-review-8-codex/rig/do-review/outputs/pretooluse_guard_test.stdout",
+      "matches": true
+    },
+    {
+      "path": "rig/do-review/outputs/probe_mang_test.stdout",
+      "expected": "c9997dac6d36e60d76b48d5b71e1b87fd60f0c387682061d09382d0585fd54a1",
+      "source": "ops/reviews/pr468-hoso-4-packet-review-8-codex/rig/do-review/outputs/probe_mang_test.stdout",
+      "matches": true
+    },
+    {
+      "path": "rig/do-review/outputs/subagent_ghi_detect_test.stdout",
+      "expected": "56f4f998bed4b71e294e8d159fc624e6313d5102778838778d097a6d45026573",
+      "source": "ops/reviews/pr468-hoso-4-packet-review-8-codex/rig/do-review/outputs/subagent_ghi_detect_test.stdout",
+      "matches": true
+    },
+    {
+      "path": "rig/do-review/real-results.json",
+      "expected": "08b42a013c8b539ef72b420a33510be6dc5bd066fe135ce0c079c98aa0c2854e",
+      "source": "ops/reviews/pr468-hoso-4-packet-review-8-codex/rig/do-review/real-results.json",
+      "matches": true
+    },
+    {
+      "path": "rig/source/attack_h.py",
+      "expected": "672b5b24ebf25918459cd2184dfcba22022e32bee5d76319eac1017e4b97b400",
+      "source": "ops/reviews/pr468-hoso-4-packet-review-8-codex/rig/source/attack_h.py",
+      "matches": true
+    },
+    {
+      "path": "rig/source/extra_checks.py",
+      "expected": "24e2ee335f05a6d9b441e4dac2d57d0f756ac6531f1a9dd9119acea26eaa87dd",
+      "source": "ops/reviews/pr468-hoso-4-packet-review-8-codex/rig/source/extra_checks.py",
+      "matches": true
+    },
+    {
+      "path": "rig/source/harness.py",
+      "expected": "6d896573ccd0392cd38f3f2f7b9d5ba32f19891047a10e9840dc32efad6a125d",
+      "source": "ops/reviews/pr468-hoso-4-packet-review-8-codex/rig/source/harness.py",
+      "matches": true
+    }
+  ],
+  "model_repaired_turn9": {
+    "rc": 0,
+    "listed": 69,
+    "matched": 69,
+    "missing": [],
+    "rows": [
+      {
+        "path": "adr-song.json",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "78e851bba5482dbc3dc9ea39f1f64d0ce82d1d02295e30a11b5f9399bc3b5bda"
+      },
+      {
+        "path": "adr-song.stderr",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "path": "adr-song.stdout",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "751fa693b8d22f3c7d0089ad96461c3ccb88887a847c5bca3e08ff24ec3a07aa"
+      },
+      {
+        "path": "attack_h.py.log",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "50868677536846a02bbf99434233a3d4d6e3b28eabbe6876d46b63d0b733a745"
+      },
+      {
+        "path": "bien-nhan-v2.json",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "5811c530171d49365bc0d36c3fdc3f54258552f0a586be7c71c3d46b34feff0b"
+      },
+      {
+        "path": "bien-nhan-v2.stderr",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "path": "bien-nhan-v2.stdout",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "b35265571e55e9493b476675698a3adf8cd5fa29eb95f7e645321b89ece3f24c"
+      },
+      {
+        "path": "build_verdict.py",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "c02b220be22cbfb1e0e48a205c096cd6fd776a5a10bdc1afff568259edb6544b"
+      },
+      {
+        "path": "ci-dang-ky.json",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "593c7c6e61c0cb6b24913c0823ca307f11c5d5da977ccffdacf737c039f49ddb"
+      },
+      {
+        "path": "ci-dang-ky.stderr",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "path": "ci-dang-ky.stdout",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "d31de5aefad408c8fb7562e18856c79a201e2bd2fbedbbd1c8b13929dabe5089"
+      },
+      {
+        "path": "contract-checks.json",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "acdfb4e63a0c4d77c693cb51ec2c55066c41f827cecfacb0cad9c4fb43087292"
+      },
+      {
+        "path": "contract_checks.py",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "430e7aabe0b6623181e0ba3422eac33880dae68aa9ba75ef797ec559e5ebb756"
+      },
+      {
+        "path": "costs.json",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "098554c9ef30bfd9a5607f3168c47a267c83c009a566149819ddeaf7cbb7904f"
+      },
+      {
+        "path": "doc-claims.json",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "52177cff3494536f076dcd65cd9933ade7077cbd4c00705027f0760317d01831"
+      },
+      {
+        "path": "doc-claims.stderr",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "path": "doc-claims.stdout",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "b9001f390f47286930965480160e62b23da1e47354acc0e9172b94a48d758286"
+      },
+      {
+        "path": "doctrine-scan.json",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "4d1e506462da60170e61dd160f917bfe3fd3c7376774f45c0307de6e4d9c62f6"
+      },
+      {
+        "path": "doctrine-scan.stderr",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "path": "doctrine-scan.stdout",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "9ee1866d82544445d0b015d90aaeb90aead5e9ebf0ffa8ae6556f3ca2963f5cb"
+      },
+      {
+        "path": "extra_checks.py.log",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "25b90acd3ebf8353c3c07f3ff0e5b1ef730629df1f8bc909cbc36b84f8f31ff3"
+      },
+      {
+        "path": "final-check.json",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "178084d965ef37b7d53011246a75c9b26b1c297674e1fb4eca259799fbb721e3"
+      },
+      {
+        "path": "followup-checks.json",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "21e7e0ea57db0a570b2a5eae45f3eab469ffe69c6814ec6d776ef610ecb16716"
+      },
+      {
+        "path": "followup_checks.py",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "a744461323ae6c31e4d1032a9333babc64e06eefe2c5e09ccebe751ef44d0333"
+      },
+      {
+        "path": "harness.py.log",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "6678fb19ef5de4dc52a4249031423a60b0dd4cf373a9ead88643492aeb52b657"
+      },
+      {
+        "path": "lease-check.json",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "06ab31af29e75fa43b9660a9eeea79c78104030d45f996e3b2523df11bed04dc"
+      },
+      {
+        "path": "lease-check.stderr",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "path": "lease-check.stdout",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "27924ee14325f81d7590c1c22bc3c78ecfd3dca155f1fdce3f93396425229717"
+      },
+      {
+        "path": "lease-publish-test.json",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "d3ec3ff3f95f113053e66a8ad4b3d625566f7de1a3d283e251f029053b486022"
+      },
+      {
+        "path": "lease-publish-test.stderr",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "11f0d363bf3a5f400d90975601037fb8b0f4319a0147a3e1f08a95ff6ccec96a"
+      },
+      {
+        "path": "lease-publish-test.stdout",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "9d3f3e46cd0ba25f7c7bd19f6505704d928baae39138e80539e275b64d8e6c7d"
+      },
+      {
+        "path": "measure_costs.py",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "4068823de53d028999e64b6b72f7d9b7d69ae5ddace50f2b3c5f6ba7c1eff671"
+      },
+      {
+        "path": "nen-a1-a5/buoc.tsv",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "c51cf52e809babab1b0ff6944c711ce9d3c09101526378a7b66c2d9be7864c60"
+      },
+      {
+        "path": "nen-a1-a5/job.tsv",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "06c78b8ace81116bb9c86f1e8e6a79d245dc58fc0bc7c8a0c5a9a4b850574c4d"
+      },
+      {
+        "path": "nen-a1-a5/khong_do_duoc.txt",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "path": "nen-a1-a5/raw/jobs.txt",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "84c797f15c0593113985d014fb95d1829843b859ecfdb14b89e2bd3d1845948b"
+      },
+      {
+        "path": "nen-a1-a5/raw/runs.json",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "fa9ab9a0821217121d9b04b2e305391c42a59111487977447673e7a0177b961d"
+      },
+      {
+        "path": "nen-a1-a5/tinh.py",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "4e13e7903f0511a1440b5e8af9a160fae6a1a91fe588acf33f8e894b220276d2"
+      },
+      {
+        "path": "nen-a1-a5/tom_tat.md",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "8309012b11ad03959ac420f64e5f7ffc84f4532653fb15a6d84c90976e8920d2"
+      },
+      {
+        "path": "nen-replay.log",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "8309012b11ad03959ac420f64e5f7ffc84f4532653fb15a6d84c90976e8920d2"
+      },
+      {
+        "path": "notes.md",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "7f10bc75fcd6d22efc26e7b426c8e03fa2dddbc812602ccd4d32938ce114e433"
+      },
+      {
+        "path": "pretooluse-replay.json",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "5165c82e8dbd3a191e7d48807cf29769329f898121fd9c4aee53f6992b21acc7"
+      },
+      {
+        "path": "pretooluse.json",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "39582c556d95c49fd71e19df434735bb8b1f77a6201d4188550eb8aefc38a527"
+      },
+      {
+        "path": "pretooluse.stderr",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "path": "pretooluse.stdout",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "69878c4f9efb24a6666d1cf0e4dea99d1ac87fa0aa904e28c6d397fd08cb7991"
+      },
+      {
+        "path": "replay-h.json",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "cd1f5d3c675f5862629f5722f65fa9d5f0fd304531508ff0e46e58965c10634a"
+      },
+      {
+        "path": "replay_h.py",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "57c42e7d089f533c830353bfd7348eb3dc01a27dc4341c2581ac4f52739be7ed"
+      },
+      {
+        "path": "rig/do-review/attack-h-cases.json",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "72dac0275ce51256d766aad3c542e98058c2ce0312ae0a6be92b4327231a6df6"
+      },
+      {
+        "path": "rig/do-review/attack-h-summary.json",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "50868677536846a02bbf99434233a3d4d6e3b28eabbe6876d46b63d0b733a745"
+      },
+      {
+        "path": "rig/do-review/extra-checks.json",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "f807d6da02cfc43f151c82a86e92833ed7bd721f7066003a0a5ed6514dae74c7"
+      },
+      {
+        "path": "rig/do-review/h_predicate.py",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "bde441a08d129a962d862fe237003997610238edc8e87b7948d35de875e5f165"
+      },
+      {
+        "path": "rig/do-review/h_tong.py",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "c23bcd019182023496cb3d9817c6553a0074c77bca26c0a0d1f71a4f5104e45c"
+      },
+      {
+        "path": "rig/do-review/nhanh-rerun.json",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "b51c3f1dab6beeab4f44a976178f212b5e9b675f3bc0efc02414a605ca317044"
+      },
+      {
+        "path": "rig/do-review/outputs/chon_reviewer_test.stdout",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "a58070829bf0732f81f9e4fa601196637467cea0528ed7e362ed8da48a82ede7"
+      },
+      {
+        "path": "rig/do-review/outputs/gh_readback_test.stdout",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "0a476a97ea3c334220ff9bee8485d720a8ab62acc17eb1e4a59e3d33c67f2cc2"
+      },
+      {
+        "path": "rig/do-review/outputs/mcp_gh_test.stdout",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "ab5eefde5db37e2f429a1dc418cf30893763ade21fc1dce9af5f7a77a649ec7e"
+      },
+      {
+        "path": "rig/do-review/outputs/mcp_github_doc_test.stdout",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "82f89e9d5170cc190c941b9b5e247c69623d98f135217d8c8495c806074f033b"
+      },
+      {
+        "path": "rig/do-review/outputs/nhanh_don_duoc_test.rerun.stdout",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "366795e45727a70aa7e6ed4ee64c6a1f0bd952dc1191b901c5d40479c722ad96"
+      },
+      {
+        "path": "rig/do-review/outputs/nhanh_don_duoc_test.stdout",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "25b731689d77defb724e479c460730a53cf8a3e419c1131039f4dfcf017e8f66"
+      },
+      {
+        "path": "rig/do-review/outputs/pretooluse_guard_test.stdout",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "00bb4b944b12cca20b33fd8ce77ba8280e1becd4249e41aced15803ecab44004"
+      },
+      {
+        "path": "rig/do-review/outputs/probe_mang_test.stdout",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "c9997dac6d36e60d76b48d5b71e1b87fd60f0c387682061d09382d0585fd54a1"
+      },
+      {
+        "path": "rig/do-review/outputs/subagent_ghi_detect_test.stdout",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "56f4f998bed4b71e294e8d159fc624e6313d5102778838778d097a6d45026573"
+      },
+      {
+        "path": "rig/do-review/real-results.json",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "08b42a013c8b539ef72b420a33510be6dc5bd066fe135ce0c079c98aa0c2854e"
+      },
+      {
+        "path": "rig/source/attack_h.py",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "672b5b24ebf25918459cd2184dfcba22022e32bee5d76319eac1017e4b97b400"
+      },
+      {
+        "path": "rig/source/extra_checks.py",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "24e2ee335f05a6d9b441e4dac2d57d0f756ac6531f1a9dd9119acea26eaa87dd"
+      },
+      {
+        "path": "rig/source/harness.py",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "6d896573ccd0392cd38f3f2f7b9d5ba32f19891047a10e9840dc32efad6a125d"
+      },
+      {
+        "path": "run_command.py",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "4dd8c29f8f84b5aa3de271bc10ca4c02f9b9f7bdf6b6cb14d3633ed051f14b52"
+      },
+      {
+        "path": "static.json",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "0fa6efe1963b8a69abc66010f01191387cf4c4ca267d52e704bb6dd6b7cd35a1"
+      },
+      {
+        "path": "static_checks.py",
+        "present": true,
+        "symlink": false,
+        "matches": true,
+        "expected": "c836634d4f59756d36e8e8f9dd85ed601b7b4f614049b56a54d18a194bb9ad43"
+      }
+    ]
+  }
+}

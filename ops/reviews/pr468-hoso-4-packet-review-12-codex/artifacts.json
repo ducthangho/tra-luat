@@ -1,0 +1,23 @@
+[
+  {
+    "name": "manifest8",
+    "rc": 0,
+    "listed": 69,
+    "ok": 69,
+    "all_regular": true
+  },
+  {
+    "name": "manifest9-artifact-repair",
+    "rc": 0,
+    "listed": 69,
+    "ok": 69,
+    "all_regular": true
+  },
+  {
+    "name": "manifest11",
+    "rc": 0,
+    "listed": 128,
+    "ok": 128,
+    "all_regular": true
+  }
+]

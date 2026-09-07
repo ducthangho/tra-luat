@@ -1,0 +1,24 @@
+PHẠM_VI: quét refs/heads/*; nhánh cục bộ tụt sau origin/<cùng tên> sẽ bị CHẶN
+HẾT_HẠN	ci-cai-jsonschema-exec-1-claude-20260829	refs/heads/master:ops/leases/ci-cai-jsonschema-exec-1-claude-20260829.yaml
+HẾT_HẠN	ci-cai-jsonschema-exec-1r2-claude-20260829	refs/heads/master:ops/leases/ci-cai-jsonschema-exec-1r2-claude-20260829.yaml
+HẾT_HẠN	ci-cai-jsonschema-exec-1r3-claude-20260829	refs/heads/master:ops/leases/ci-cai-jsonschema-exec-1r3-claude-20260829.yaml
+HẾT_HẠN	ci-noi-bang-vao-gate-exec-1-claude-20260822	refs/heads/master:ops/leases/ci-noi-bang-vao-gate-exec-1-claude-20260822.yaml
+HẾT_HẠN	ci-noi-bang-vao-gate-exec-1r2-claude-20260823	refs/heads/master:ops/leases/ci-noi-bang-vao-gate-exec-1r2-claude-20260823.yaml
+HẾT_HẠN	plat-x4-exec-1-claude-20260820	refs/heads/master:ops/leases/plat-x4-exec-1-claude-20260820.yaml
+HẾT_HẠN	plat-x5-exec-1-codex-20260820	refs/heads/master:ops/leases/plat-x5-exec-1-codex-20260820.yaml
+HẾT_HẠN	plat-x5-exec-1r2-codex-20260820	refs/heads/master:ops/leases/plat-x5-exec-1r2-codex-20260820.yaml
+HẾT_HẠN	plat-x5-exec-1r3-codex-20260820	refs/heads/master:ops/leases/plat-x5-exec-1r3-codex-20260820.yaml
+CÒN_HẠN · ĐÃ_BỊ_THAY_THẾ	gate-tach-job-cat-chi-phi-exec-1-claude-20260906	refs/remotes/origin/claude/soan-spec-3-viec-treo-20260906:ops/leases/gate-tach-job-cat-chi-phi-exec-1-claude-20260906.yaml
+CÒN_HẠN · ĐÃ_BỊ_THAY_THẾ	gate-tach-job-cat-chi-phi-exec-1r2-claude-20260906	refs/remotes/origin/claude/soan-spec-3-viec-treo-20260906:ops/leases/gate-tach-job-cat-chi-phi-exec-1r2-claude-20260906.yaml
+CÒN_HẠN · ĐÃ_BỊ_THAY_THẾ	gate-tach-job-cat-chi-phi-exec-1r3-claude-20260906	refs/remotes/origin/claude/soan-spec-3-viec-treo-20260906:ops/leases/gate-tach-job-cat-chi-phi-exec-1r3-claude-20260906.yaml
+CÒN_HẠN	gate-tach-job-cat-chi-phi-exec-1r4-claude-20260906	refs/remotes/origin/claude/soan-spec-3-viec-treo-20260906:ops/leases/gate-tach-job-cat-chi-phi-exec-1r4-claude-20260906.yaml
+HẾT_HẠN	ci-cong-idiom-ba-ten-exec-1-claude-20260827	refs/remotes/origin/ops/cap-lease-ci-idiom-20260827:ops/leases/ci-cong-idiom-ba-ten-exec-1-claude-20260827.yaml
+HẾT_HẠN	ci-cong-idiom-ba-ten-exec-1r2-claude-20260827	refs/remotes/origin/ops/cap-lease-ci-idiom-20260827:ops/leases/ci-cong-idiom-ba-ten-exec-1r2-claude-20260827.yaml
+HẾT_HẠN	wp427-n9-ci-manifest-lane-g1-claude-20260831	refs/remotes/origin/ops/cap-lease-n9-ci-manifest-lane:ops/leases/wp427-n9-ci-manifest-lane-g1-claude-20260831.yaml
+HẾT_HẠN	cong-ngoai-write-set-exec-1-codex-20260828	refs/remotes/origin/ops/cap-lease-tach-314:ops/leases/cong-ngoai-write-set-exec-1-codex-20260828.yaml
+HẾT_HẠN	cong-ngoai-write-set-exec-1r2-codex-20260828	refs/remotes/origin/ops/cap-lease-tach-314:ops/leases/cong-ngoai-write-set-exec-1r2-codex-20260828.yaml
+HẾT_HẠN	cong-ngoai-write-set-exec-1r3-codex-20260828	refs/remotes/origin/ops/cap-lease-tach-314:ops/leases/cong-ngoai-write-set-exec-1r3-codex-20260828.yaml
+HẾT_HẠN	cong-ngoai-write-set-exec-1r4-codex-20260828	refs/remotes/origin/ops/cap-lease-tach-314:ops/leases/cong-ngoai-write-set-exec-1r4-codex-20260828.yaml
+HẾT_HẠN	cong-ngoai-write-set-exec-1r5-codex-20260828	refs/remotes/origin/ops/cap-lease-tach-314:ops/leases/cong-ngoai-write-set-exec-1r5-codex-20260828.yaml
+HẾT_HẠN	plat-x2-exec-3-claude-20260820	refs/remotes/origin/ops/lease-dong-so-20260820:ops/leases/plat-x2-exec-3-claude-20260820.yaml
+NGƯỜI_GIỮ 1: gate-tach-job-cat-chi-phi-exec-1r4-claude-20260906

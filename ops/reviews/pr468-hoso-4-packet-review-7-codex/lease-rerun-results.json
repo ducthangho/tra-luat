@@ -1,0 +1,15 @@
+[
+  {
+    "name": "lease-publish-test-rerun",
+    "command": [
+      "/usr/local/bin/python3",
+      "-B",
+      "ops/lease_publish_test.py"
+    ],
+    "start_utc": "2026-09-07T07:12:01.724151+00:00",
+    "seconds": 85.109,
+    "rc": 0,
+    "bytes": 8649,
+    "sha256": "2e203f5c2ca762653a7d72dadb5e495f5890d1e9e1ccddb6e1efb96f49a41373"
+  }
+]

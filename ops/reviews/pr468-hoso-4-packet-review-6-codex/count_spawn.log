@@ -1,0 +1,4 @@
+{"phase": "subagent-base", "Popen": 438, "seconds": 5.881038026999931, "result": "[True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True]"}
+{"phase": "subagent-empty", "Popen": 438, "seconds": 5.724607578999894, "result": "1"}
+{"phase": "nhanh-base", "Popen": 136, "seconds": 1.760150676000194, "result": "[]"}
+{"phase": "nhanh-mutants", "Popen": 35, "seconds": 18.616754507999985, "result": "10"}

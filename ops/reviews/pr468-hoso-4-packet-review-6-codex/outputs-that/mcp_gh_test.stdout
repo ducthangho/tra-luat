@@ -1,0 +1,37 @@
+CA         : 42/42 đạt · 0 đỏ · ĐẠT
+ĐỘT BIẾN   : đã đo 54/54 tập giết · ĐẠT
+D8(a) đích nằm trong tập giết: ĐẠT
+D8(b) không tập giết rỗng: ĐẠT
+D8(c) mọi ca có đột biến canh: ĐẠT
+GIAO PHẠM VI:
+| đột biến | đích | ca ngoài đích bị giết |
+|---|---|---|
+| b6_bo_chot_init | B6 | D6 |
+| b7_bo_xoa_pyc | B7-xoa | D12-duy-nhat, D13-duy-nhat-toan-bang |
+| b7_bo_cam_ghi | B7-khong-ghi | B7-xoa, D12-duy-nhat, D13-duy-nhat-toan-bang |
+| b7_bo_invalidate | B7-cache | D12-duy-nhat, D13-duy-nhat-toan-bang |
+| b7_trung_ten | B7-ten | D12-duy-nhat, D13-duy-nhat-toan-bang |
+| c1_cho_so_ca_rong | C1 | D12-duy-nhat, D13-duy-nhat-toan-bang |
+| c2_cho_so_db_rong | C2 | D12-duy-nhat, D13-duy-nhat-toan-bang |
+| c3_cho_ca_hai_rong | C3 | D12-duy-nhat, D13-duy-nhat-toan-bang |
+| c4_khong_goi_ca | C4 | D12-duy-nhat, D13-duy-nhat-toan-bang |
+| d7_cong_khong_xanh | D7 | D11-gate, D12-duy-nhat, D13-duy-nhat-toan-bang |
+| d7b_dem_khi_nen_do | D7b | D12-duy-nhat, D13-duy-nhat-toan-bang |
+| d8_bo_dieu_kien_a | D8 | D12-duy-nhat, D13-duy-nhat-toan-bang |
+| d8_bo_dieu_kien_b | D8 | D12-duy-nhat, D13-duy-nhat-toan-bang |
+| d8_bo_dieu_kien_c | D8 | D12-duy-nhat, D13-duy-nhat-toan-bang |
+| d9_dem_ca_dong_trang | D9 | D12-duy-nhat, D13-duy-nhat-toan-bang |
+| d9_vuot_ngan_sach | D9 | D12-duy-nhat, D13-duy-nhat-toan-bang |
+| d10_main_luon_xanh | D10-main | D11-gate, D12-duy-nhat, D13-duy-nhat-toan-bang |
+| d11_ep_rc_xanh | D11-gate | D10-main, D12-duy-nhat, D13-duy-nhat-toan-bang |
+| d11_phan_dinh_xanh | D11-gate | D10-main, D12-duy-nhat, D13-duy-nhat-toan-bang |
+| d11_xoa_d8 | D11-gate | D12-duy-nhat, D13-duy-nhat-toan-bang |
+| d11_xoa_tong | D11-gate | D12-duy-nhat, D13-duy-nhat-toan-bang |
+| d11_xoa_ban_in | D11-gate | D12-duy-nhat, D13-duy-nhat-toan-bang |
+| d11_bo_than_ca | D11-gate | D10-main, D12-duy-nhat, D13-duy-nhat-toan-bang |
+| d11_hau_to_dot_bien_xanh | D11-gate | D12-duy-nhat, D13-duy-nhat-toan-bang |
+| d11_hau_to_ca_xanh | D11-gate | D12-duy-nhat, D13-duy-nhat-toan-bang |
+| d12_bo_khoi_phuc | D12-duy-nhat | D13-duy-nhat-toan-bang |
+| d12_bo_chot_duy_nhat | D12-duy-nhat | D13-duy-nhat-toan-bang |
+| d13_bo_chot_duy_nhat | D13-duy-nhat-toan-bang | D12-duy-nhat |
+TỔNG: ĐẠT

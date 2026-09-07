@@ -1,0 +1,71 @@
+# BIÊN NHẬN GIAO HÀNG — cross-review LƯỢT 10 của PR #468 (hồ sơ bốn packet treo sau #456), KHÁC NỀN (codex).
+#
+# Lượt 10 do MỘT PHIÊN KHÁC phóng và vận chuyển (commit 17c6901, 11:50:33Z 07-09-2026), song song với lượt 11 của phiên
+# này trên cùng head c43347d. Phiên ấy đăng verdict + gói hiện vật nhưng KHÔNG đăng biên nhận, làm `t27` đỏ trên gate PR
+# (run 34121309671). Biên nhận này do phiên lượt 11 soạn để hồ sơ đủ hình dạng: mọi trường đo được từ verdict/gói thì
+# điền; thread/run id/thời lượng/băm prompt KHÔNG có trong gói ⇒ khai `KHONG_do_duoc`, KHÔNG bịa. Nếu phiên kia đăng biên
+# nhận của chính nó thì bản ấy có thẩm quyền, thay bản này.
+# Verdict: changes_requested — 1 P1 / 1 P2 / 0 P3 (P1 bia mộ #456; P2 gói lượt 9 thiếu 19 tệp rig/, vá ngay ở 17c6901).
+
+schema_version: 2
+receipt_id: pr468-hoso-4-packet-review-10-codex-20260907-phien-khac
+kind: review_delivery_receipt
+packet_id: 'PR468-HOSO-4-PACKET-TREO-SAU-456'
+lease_id: khong-co-lease
+phase_key: HOSO-4-PACKET-TREO-SAU-456
+luot: 10
+role: reviewer
+provider: codex
+executor_provider: claude
+cross_provider: true
+assurance: review_deferred
+assurance_ghi_chu: >-
+  KHÔNG khai cross_approved: không có bằng chứng máy về phiên độc lập (run.json/thread) trong gói của phiên kia — chỉ có lời
+  khai trong verdict. Cùng head c43347d đã có lượt 11 với attestation đầy đủ (thread 01a07ba6-…, launcher run a25fea88); mức
+  assurance của head lấy từ lượt 11.
+verdict: changes_requested
+verdict_path: ops/reviews/pr468-hoso-4-packet-review-10-codex-verdict.md
+verdict_sha256: 5e22088b996a4b6e4f564159703ed311bba2c0cf6b137cb9a0614bc9c7476672
+verdict_bytes: 25294
+reviewed_sha: c43347d1e2c2f76bb21dc2d9d28bd6bfa153d355
+evidence_url: https://github.com/ducthangho/tra-luat/blob/17c6901348749c7f0e25f1f2c992b8c790e214af/ops/reviews/pr468-hoso-4-packet-review-10-codex-verdict.md
+evidence_url_ghi_chu: >-
+  blob ghim commit ĐẦU TIÊN chứa tệp verdict trên nhánh hồ sơ #468 (commit của phiên kia chứa verdict lượt 10 + bản vá P2 manifest); PR: https://github.com/ducthangho/tra-luat/pull/468
+
+model_reviewer_identity:
+  provider: openai_codex
+  surface: codex_cli
+  model_yeu_cau: gpt-6-astra
+  model_da_chay: KHÔNG ĐO ĐƯỢC
+  model_bang_chung: >-
+    verdict tự khai "Reviewer: Codex / OpenAI, phiên độc lập qua API, shell cục bộ"; gói do-review10/ không chứa
+    run.json, tệp session hay đối số phóng. Mission #467 chỉ định reviewer `gpt-6-astra` xhigh; không có bằng chứng
+    máy trong gói cho model đã chạy.
+  KHONG_do_duoc: >-
+    session_run_id, thread_id, prompt_sha256, thoi_luong_giay, ma_thoat, stdout_byte — lượt do phiên khác phóng
+    (commit 17c6901); phiên soạn biên nhận này không có transcript/run.json của phiên ấy. Verdict tự khai
+    `so_lan_luot_nay_bi_chet_va_phong_lai: 0`.
+  neo_boi_launcher: KHÔNG ĐO ĐƯỢC — không có run.json trong gói.
+
+github_submitter_identity:
+  actor: ducthangho
+  la_tac_gia_PR: true
+  ghi_chu: >-
+    `ADR-0040`: biên nhận và verdict do tài khoản tác giả PR vận chuyển KHÔNG thành required check hay merge
+    authorization (cổng `duyet khac danh tinh` vẫn đỏ). Trường này ghi AI VẬN CHUYỂN.
+  phien_van_chuyen: >-
+    verdict/gói: phiên khác — trailer `Claude-Session` TỰ KHAI trong commit 17c6901: https://claude.ai/code/session_0186nh13XYsStVs1usBCsx5Y
+    (URL phiên vận chuyển, KHÔNG phải danh tính reviewer đã xác thực); biên nhận này: https://claude.ai/code/session_013F2m3uJw7X9bFvDqJ7Q63b
+
+anchor:
+  loai: canonical_ancestry
+  cuong_do: trung_binh
+  mo_ta: >-
+    reviewed_sha c43347d đã push (verdict lượt 10 lên nhánh ở 17c6901, do phiên khác) lên `refs/heads/claude/soan-spec-3-viec-treo-20260906`; verdict và gói hiện vật
+    commit ngay sau head ấy trên cùng nhánh. Chưa có tag `luu-tru/*`; nhánh có thể bị xoá sau land.
+
+KHONG_do_duoc:
+  - 'Danh tính model/phiên/thời lượng của lượt này — không có run.json trong gói; chỉ có lời khai trong verdict.'
+  - 'GitHub trực tiếp từ sandbox; head master đúng giây cấp lease; branch protection; Windows thật; hoá đơn; runner jitter.'
+  - 'Trạng thái blob #456 trên master SAU 14:30:07Z 07-09-2026 — lượt này chạy TRƯỚC mốc ấy: mốc lưu trong gói do-review10/ là launch 11:24:25Z, phép đo 11:26Z/11:29Z, final-check 11:47:28Z; thời lượng launcher chính xác KHÔNG ĐO ĐƯỢC (bản đầu chép nhầm khung 11:35–11:50Z của lượt 11 — lượt 12 P2 bắt). Mô phỏng 14:30:06/07/08Z cho registry 2/1/1.'
+  - 'Nội dung/quyền comment r3 và sự kiện cấp lease r4 trên GitHub; receipt lượt 9 chỉ qua schema/băm/neo blob.'

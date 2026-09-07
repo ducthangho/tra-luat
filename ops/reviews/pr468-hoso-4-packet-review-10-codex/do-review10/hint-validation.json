@@ -1,0 +1,10 @@
+{
+  "rc": 0,
+  "ok": 69,
+  "restored": 19,
+  "included_files": 72,
+  "all_output_hashes_match": true,
+  "all_source_hashes_match": true,
+  "all_base_hashes_match": true,
+  "changed_hunks_mapped": true
+}

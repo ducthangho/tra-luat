@@ -1,0 +1,474 @@
+{
+  "command": "python3 -B do-review13/claims_inventory.py",
+  "method": "git diff --unified=0 02b0b86..f77f198 over six edited receipt/README/incident/readback documents; select added lines containing a digit; manual classification afterwards",
+  "limits": "Digit filter also matches SHA/date/IDs and misses numbers written as words, unchanged historical prose, omitted raw evidence, and semantics. Historical immutable artifacts are checked by hashes separately. Every omitted issue found by reviewer still counts as a finding.",
+  "paths": [
+    "ops/reviews/pr468-hoso-4-packet-review-10-codex-verdict.receipt.yaml",
+    "ops/reviews/pr468-hoso-4-packet-review-11-codex-verdict.receipt.yaml",
+    "ops/reviews/pr468-hoso-4-packet-review-12-codex-verdict.receipt.yaml",
+    "ops/reviews/README.md",
+    "ops/reviews/GHI-NHAN-CROSS-REVIEW-LUOT5-KHONG-HOAN-TAT.md",
+    "ops/reviews/DOC-READBACK-SAU-HAN-456.md"
+  ],
+  "candidate_count": 90,
+  "candidates": [
+    {
+      "path": "ops/reviews/pr468-hoso-4-packet-review-10-codex-verdict.receipt.yaml",
+      "line": 57,
+      "text": "    verdict/gói: phiên khác — trailer `Claude-Session` TỰ KHAI trong commit 17c6901: https://claude.ai/code/session_0186nh13XYsStVs1usBCsx5Y"
+    },
+    {
+      "path": "ops/reviews/pr468-hoso-4-packet-review-10-codex-verdict.receipt.yaml",
+      "line": 58,
+      "text": "    (URL phiên vận chuyển, KHÔNG phải danh tính reviewer đã xác thực); biên nhận này: https://claude.ai/code/session_013F2m3uJw7X9bFvDqJ7Q63b"
+    },
+    {
+      "path": "ops/reviews/pr468-hoso-4-packet-review-10-codex-verdict.receipt.yaml",
+      "line": 70,
+      "text": "  - 'Trạng thái blob #456 trên master SAU 14:30:07Z 07-09-2026 — lượt này chạy TRƯỚC mốc ấy: mốc lưu trong gói do-review10/ là launch 11:24:25Z, phép đo 11:26Z/11:29Z, final-check 11:47:28Z; thời lượng launcher chính xác KHÔNG ĐO ĐƯỢC (bản đầu chép nhầm khung 11:35–11:50Z của lượt 11 — lượt 12 P2 bắt). Mô phỏng 14:30:06/07/08Z cho registry 2/1/1.'"
+    },
+    {
+      "path": "ops/reviews/pr468-hoso-4-packet-review-11-codex-verdict.receipt.yaml",
+      "line": 6,
+      "text": "# 1 VÁ SINH LỖI MỚI · 1 CHƯA VÁ (bia mộ #456, chờ hết hạn 14:30:07Z — P1 duy nhất còn lại). P2 câu billing trong lease r4 vá ở"
+    },
+    {
+      "path": "ops/reviews/pr468-hoso-4-packet-review-11-codex-verdict.receipt.yaml",
+      "line": 7,
+      "text": "# commit chứa verdict này (4c18cb2); P2 gói lượt 9 thiếu 19 tệp rig/ đã được phiên kia vá ở 17c6901 (chép theo băm), 4c18cb2 chỉ đo"
+    },
+    {
+      "path": "ops/reviews/pr468-hoso-4-packet-review-11-codex-verdict.receipt.yaml",
+      "line": 8,
+      "text": "# lại 69/69 — không thay tệp nào (bản đầu ghi \"cả hai vá ở commit này\", lượt 12 P2 bắt)."
+    },
+    {
+      "path": "ops/reviews/pr468-hoso-4-packet-review-11-codex-verdict.receipt.yaml",
+      "line": 29,
+      "text": "  blob ghim commit ĐẦU TIÊN chứa tệp verdict trên nhánh hồ sơ #468 (commit chứa verdict lượt 11 + bản vá P2 billing lease r4; P2 19 tệp rig/ đã vá ở 17c6901 của phiên kia); PR: https://github.com/ducthangho/tra-luat/pull/468"
+    },
+    {
+      "path": "ops/reviews/pr468-hoso-4-packet-review-12-codex-verdict.receipt.yaml",
+      "line": 1,
+      "text": "# BIÊN NHẬN GIAO HÀNG — cross-review LƯỢT 12 của PR #468 (hồ sơ bốn packet treo sau #456), KHÁC NỀN (codex)."
+    },
+    {
+      "path": "ops/reviews/pr468-hoso-4-packet-review-12-codex-verdict.receipt.yaml",
+      "line": 3,
+      "text": "# Lượt 12 review head 02b0b86 = c43347d + lượt 10 (phiên khác) + lượt 11 + biên nhận lượt 10 + mốc thu hồi #456. Phóng CÓ GIÁM SÁT"
+    },
+    {
+      "path": "ops/reviews/pr468-hoso-4-packet-review-12-codex-verdict.receipt.yaml",
+      "line": 4,
+      "text": "# qua `launcher.py run`; chạy trọn ở LẦN PHÓNG THỨ 3 (hai lần đầu launcher chặn rc=11: cây sandbox thiếu remote GitHub — lỗi dựng"
+    },
+    {
+      "path": "ops/reviews/pr468-hoso-4-packet-review-12-codex-verdict.receipt.yaml",
+      "line": 5,
+      "text": "# sandbox của executor, sửa remote rồi phóng lại; reviewer chưa từng chạy ở hai lần ấy): 1166,9 s. Verdict: changes_requested —"
+    },
+    {
+      "path": "ops/reviews/pr468-hoso-4-packet-review-12-codex-verdict.receipt.yaml",
+      "line": 6,
+      "text": "# 2 P1 / 2 P2. Đối chiếu lượt 11: 2 VÁ THẬT · 1 CHƯA VÁ VỀ MÁY (bia mộ #456, chờ 14:30:07Z). P1 mới: bundle chỉ giao 3 ref nên"
+    },
+    {
+      "path": "ops/reviews/pr468-hoso-4-packet-review-12-codex-verdict.receipt.yaml",
+      "line": 7,
+      "text": "# không tái đo được lời khai 302/302 (lỗi năng lực đo của bundle, §8). Hai P2 hồ sơ vá ở commit chứa verdict này (df0800c)."
+    },
+    {
+      "path": "ops/reviews/pr468-hoso-4-packet-review-12-codex-verdict.receipt.yaml",
+      "line": 9,
+      "text": "schema_version: 2"
+    },
+    {
+      "path": "ops/reviews/pr468-hoso-4-packet-review-12-codex-verdict.receipt.yaml",
+      "line": 10,
+      "text": "receipt_id: pr468-hoso-4-packet-review-12-codex-20260907-8d2e0018"
+    },
+    {
+      "path": "ops/reviews/pr468-hoso-4-packet-review-12-codex-verdict.receipt.yaml",
+      "line": 12,
+      "text": "packet_id: 'PR468-HOSO-4-PACKET-TREO-SAU-456'"
+    },
+    {
+      "path": "ops/reviews/pr468-hoso-4-packet-review-12-codex-verdict.receipt.yaml",
+      "line": 14,
+      "text": "phase_key: HOSO-4-PACKET-TREO-SAU-456"
+    },
+    {
+      "path": "ops/reviews/pr468-hoso-4-packet-review-12-codex-verdict.receipt.yaml",
+      "line": 15,
+      "text": "luot: 12"
+    },
+    {
+      "path": "ops/reviews/pr468-hoso-4-packet-review-12-codex-verdict.receipt.yaml",
+      "line": 22,
+      "text": "verdict_path: ops/reviews/pr468-hoso-4-packet-review-12-codex-verdict.md"
+    },
+    {
+      "path": "ops/reviews/pr468-hoso-4-packet-review-12-codex-verdict.receipt.yaml",
+      "line": 23,
+      "text": "verdict_sha256: b4b2671d5d053785232486460251a519b6efd47cff196e672260f3258228d0bd"
+    },
+    {
+      "path": "ops/reviews/pr468-hoso-4-packet-review-12-codex-verdict.receipt.yaml",
+      "line": 24,
+      "text": "verdict_bytes: 23631"
+    },
+    {
+      "path": "ops/reviews/pr468-hoso-4-packet-review-12-codex-verdict.receipt.yaml",
+      "line": 25,
+      "text": "reviewed_sha: 02b0b86bf64a89b561a75ff060164332792fb73d"
+    },
+    {
+      "path": "ops/reviews/pr468-hoso-4-packet-review-12-codex-verdict.receipt.yaml",
+      "line": 26,
+      "text": "evidence_url: https://github.com/ducthangho/tra-luat/blob/df0800c1b02f156925f22ec14584a754f2aea142/ops/reviews/pr468-hoso-4-packet-review-12-codex-verdict.md"
+    },
+    {
+      "path": "ops/reviews/pr468-hoso-4-packet-review-12-codex-verdict.receipt.yaml",
+      "line": 28,
+      "text": "  blob ghim commit ĐẦU TIÊN chứa tệp verdict trên nhánh hồ sơ #468 (commit chứa verdict lượt 12 + bản vá 2 P2 hồ sơ); PR: https://github.com/ducthangho/tra-luat/pull/468"
+    },
+    {
+      "path": "ops/reviews/pr468-hoso-4-packet-review-12-codex-verdict.receipt.yaml",
+      "line": 33,
+      "text": "  model_yeu_cau: gpt-6-astra"
+    },
+    {
+      "path": "ops/reviews/pr468-hoso-4-packet-review-12-codex-verdict.receipt.yaml",
+      "line": 34,
+      "text": "  model_da_chay: gpt-6-astra"
+    },
+    {
+      "path": "ops/reviews/pr468-hoso-4-packet-review-12-codex-verdict.receipt.yaml",
+      "line": 36,
+      "text": "    tệp session của codex (~/.codex/sessions, thread 01a07bff-4592-7833-92c4-26c4c4b324cc) ghi `\"model\":\"gpt-6-astra\"` 6/6 mục;"
+    },
+    {
+      "path": "ops/reviews/pr468-hoso-4-packet-review-12-codex-verdict.receipt.yaml",
+      "line": 37,
+      "text": "    đối số phóng `-m gpt-6-astra -c model_reasoning_effort=\"xhigh\"`."
+    },
+    {
+      "path": "ops/reviews/pr468-hoso-4-packet-review-12-codex-verdict.receipt.yaml",
+      "line": 38,
+      "text": "  session_run_id: 8d2e0018"
+    },
+    {
+      "path": "ops/reviews/pr468-hoso-4-packet-review-12-codex-verdict.receipt.yaml",
+      "line": 39,
+      "text": "  thread_id: 01a07bff-4592-7833-92c4-26c4c4b324cc"
+    },
+    {
+      "path": "ops/reviews/pr468-hoso-4-packet-review-12-codex-verdict.receipt.yaml",
+      "line": 40,
+      "text": "  prompt_sha256: 1ab4c26b0eb0320fce75ea33b08a9768e40fd2981d6d5761bad4ab7bd243b49c"
+    },
+    {
+      "path": "ops/reviews/pr468-hoso-4-packet-review-12-codex-verdict.receipt.yaml",
+      "line": 42,
+      "text": "  thoi_luong_giay: 1166.934"
+    },
+    {
+      "path": "ops/reviews/pr468-hoso-4-packet-review-12-codex-verdict.receipt.yaml",
+      "line": 43,
+      "text": "  ma_thoat: 0"
+    },
+    {
+      "path": "ops/reviews/pr468-hoso-4-packet-review-12-codex-verdict.receipt.yaml",
+      "line": 44,
+      "text": "  stdout_byte: 536028"
+    },
+    {
+      "path": "ops/reviews/pr468-hoso-4-packet-review-12-codex-verdict.receipt.yaml",
+      "line": 47,
+      "text": "    --prompt-file PROMPT.md --expected-prompt-sha256 <băm> --deadline-utc +75m` bọc `codex exec`;"
+    },
+    {
+      "path": "ops/reviews/pr468-hoso-4-packet-review-12-codex-verdict.receipt.yaml",
+      "line": 54,
+      "text": "    `ADR-0040`: biên nhận và verdict do tài khoản tác giả PR vận chuyển KHÔNG thành required check hay merge"
+    },
+    {
+      "path": "ops/reviews/pr468-hoso-4-packet-review-12-codex-verdict.receipt.yaml",
+      "line": 56,
+      "text": "  phien_van_chuyen: https://claude.ai/code/session_013F2m3uJw7X9bFvDqJ7Q63b"
+    },
+    {
+      "path": "ops/reviews/pr468-hoso-4-packet-review-12-codex-verdict.receipt.yaml",
+      "line": 62,
+      "text": "    reviewed_sha 02b0b86 đã push lên `refs/heads/claude/soan-spec-3-viec-treo-20260906`; verdict và gói hiện vật"
+    },
+    {
+      "path": "ops/reviews/pr468-hoso-4-packet-review-12-codex-verdict.receipt.yaml",
+      "line": 67,
+      "text": "  - 'Trạng thái blob #456 trên master SAU 14:30:07Z 07-09-2026 — lượt này chạy 13:12–13:31Z, trước mốc ấy; mô phỏng 14:30:06/07/08Z cho registry 2/1/1. Bundle chỉ có 3 ref (P1 mirror-thieu-ref) — lượt kế giao mirror đủ ref.'"
+    },
+    {
+      "path": "ops/reviews/pr468-hoso-4-packet-review-12-codex-verdict.receipt.yaml",
+      "line": 68,
+      "text": "  - 'Nội dung/quyền comment r3 và sự kiện cấp lease r4 trên GitHub; receipt lượt 9 chỉ qua schema/băm/neo blob.'"
+    },
+    {
+      "path": "ops/reviews/README.md",
+      "line": 269,
+      "text": "| [`pr468-hoso-4-packet-review-12-codex-verdict.md`](pr468-hoso-4-packet-review-12-codex-verdict.md) | [`.receipt.yaml`](pr468-hoso-4-packet-review-12-codex-verdict.receipt.yaml) | *(không có lease — PR hồ sơ)* | **`changes_requested`** · lượt **12** của PR #468, head `02b0b86b` (c43347d + lượt 10/11 + biên nhận lượt 10 + mốc thu hồi #456), khác nền (`codex`, `gpt-6-astra`, xhigh, 1167 s, chạy trọn ở lần phóng thứ 3 — hai lần đầu launcher chặn vì sandbox thiếu remote, lỗi executor). **P1 2 · P2 2.** ĐỐI CHIẾU lượt 11: **2 VÁ THẬT · 1 CHƯA VÁ VỀ MÁY** (bia mộ #456, chờ 14:30:07Z; chủ kho đã thu hồi bằng comment, công cụ không đọc comment). P1 mới `mirror-thieu-ref-khong-du-do-a9`: bundle chỉ giao 3 ref nên không tái đo được lời khai 302/302 (lỗi năng lực đo §8 — lượt kế giao mirror đủ ref + ls-remote). P2: receipt lượt 10 bỏ sót trailer Claude-Session của `17c6901` và chép nhầm khung giờ lượt 11; receipt lượt 11/GHI-NHAN gán 19 tệp `rig/` cho `4c18cb2` (thật ra `17c6901`) và \"trước 5 giây\" không nguồn — cả hai vá ở `df0800c`. Hiện vật ở [`pr468-hoso-4-packet-review-12-codex/`](pr468-hoso-4-packet-review-12-codex/) (manifest reviewer 178/178). | `02b0b86b` | 23631 |"
+    },
+    {
+      "path": "ops/reviews/GHI-NHAN-CROSS-REVIEW-LUOT5-KHONG-HOAN-TAT.md",
+      "line": 259,
+      "text": "khi vận chuyển vì lượt 10 kia đã lên nhánh trước: commit `17c6901` 11:50:33Z đi trước `4c18cb2` 12:17:11Z theo thứ tự commit;"
+    },
+    {
+      "path": "ops/reviews/GHI-NHAN-CROSS-REVIEW-LUOT5-KHONG-HOAN-TAT.md",
+      "line": 260,
+      "text": "chênh thời điểm PUSH không đo được (không có log push) — bản đầu viết \"trước 5 giây\" không có nguồn, lượt 12 P2 bắt (`DOC-MANIFEST.md` trong gói giải thích việc đổi tên)."
+    },
+    {
+      "path": "ops/reviews/GHI-NHAN-CROSS-REVIEW-LUOT5-KHONG-HOAN-TAT.md",
+      "line": 265,
+      "text": "phỏng). P2 billing vá ở `4c18cb2` (commit chứa verdict lượt 11); P2 19 tệp `rig/` đã được phiên kia vá ở `17c6901`, `4c18cb2` chỉ đo lại 69/69. Verdict `pr468-hoso-4-packet-review-11-codex-verdict.md`, hiện vật"
+    },
+    {
+      "path": "ops/reviews/GHI-NHAN-CROSS-REVIEW-LUOT5-KHONG-HOAN-TAT.md",
+      "line": 268,
+      "text": "# LƯỢT 12 — 07-09-2026, `reviewed_sha` `02b0b86` (sau lượt 10/11 + biên nhận lượt 10 + mốc thu hồi #456)"
+    },
+    {
+      "path": "ops/reviews/GHI-NHAN-CROSS-REVIEW-LUOT5-KHONG-HOAN-TAT.md",
+      "line": 270,
+      "text": "Chạy TRƯỚC 14:30:07Z theo chỉ thị \"vá tiếp và review tiếp\". Codex `gpt-6-astra`, xhigh, **1167 s**, chạy trọn ở lần phóng thứ 3"
+    },
+    {
+      "path": "ops/reviews/GHI-NHAN-CROSS-REVIEW-LUOT5-KHONG-HOAN-TAT.md",
+      "line": 271,
+      "text": "(hai lần đầu `launcher.py run` chặn rc=11 — cây sandbox clone qua mirror cục bộ nên thiếu remote GitHub; lỗi dựng sandbox của executor,"
+    },
+    {
+      "path": "ops/reviews/GHI-NHAN-CROSS-REVIEW-LUOT5-KHONG-HOAN-TAT.md",
+      "line": 272,
+      "text": "reviewer chưa chạy). `changes_requested` — **2 P1 / 2 P2**. Đối chiếu lượt 11: 2 VÁ THẬT (billing r4, manifest) · 1 CHƯA VÁ VỀ MÁY"
+    },
+    {
+      "path": "ops/reviews/GHI-NHAN-CROSS-REVIEW-LUOT5-KHONG-HOAN-TAT.md",
+      "line": 273,
+      "text": "(bia mộ #456). **P1 mới `mirror-thieu-ref-khong-du-do-a9`**: bundle chỉ giao 3 ref (bare `--no-local` từ clone chỉ mang local heads) nên"
+    },
+    {
+      "path": "ops/reviews/GHI-NHAN-CROSS-REVIEW-LUOT5-KHONG-HOAN-TAT.md",
+      "line": 274,
+      "text": "reviewer không tái đo được lời khai \"302/302 ref\" — đúng §8, reviewer phải được cấp năng lực ĐO LẠI; lượt kế giao `git clone --mirror`"
+    },
+    {
+      "path": "ops/reviews/GHI-NHAN-CROSS-REVIEW-LUOT5-KHONG-HOAN-TAT.md",
+      "line": 275,
+      "text": "đủ ref + `ls-remote` (tên+OID) tại giờ readback + phép so tập. Hai P2 hồ sơ (receipt 10 thiếu trailer session/khung giờ chép nhầm;"
+    },
+    {
+      "path": "ops/reviews/GHI-NHAN-CROSS-REVIEW-LUOT5-KHONG-HOAN-TAT.md",
+      "line": 276,
+      "text": "receipt 11/GHI-NHAN gán sai commit vá 19 tệp rig/, \"5 giây\" không nguồn) vá ở `df0800c`. Verdict `pr468-hoso-4-packet-review-12-codex-verdict.md`,"
+    },
+    {
+      "path": "ops/reviews/GHI-NHAN-CROSS-REVIEW-LUOT5-KHONG-HOAN-TAT.md",
+      "line": 277,
+      "text": "hiện vật `pr468-hoso-4-packet-review-12-codex/`."
+    },
+    {
+      "path": "ops/reviews/DOC-READBACK-SAU-HAN-456.md",
+      "line": 1,
+      "text": "# READBACK SAU HẠN — lease #456 hết hiệu lực lúc 14:30:07Z"
+    },
+    {
+      "path": "ops/reviews/DOC-READBACK-SAU-HAN-456.md",
+      "line": 3,
+      "text": "Mục đích: cung cấp đúng thứ verdict lượt 12 nói là còn thiếu."
+    },
+    {
+      "path": "ops/reviews/DOC-READBACK-SAU-HAN-456.md",
+      "line": 5,
+      "text": "> `bia-mo-mot-ref-khong-thu-hoi-moi-ban` [P1] … **Đây chưa phải readback sau hạn hoặc quét đủ máy chủ**"
+    },
+    {
+      "path": "ops/reviews/DOC-READBACK-SAU-HAN-456.md",
+      "line": 6,
+      "text": "> — `ops/reviews/pr468-hoso-4-packet-review-12-codex-verdict.md`, dòng 14"
+    },
+    {
+      "path": "ops/reviews/DOC-READBACK-SAU-HAN-456.md",
+      "line": 8,
+      "text": "Reviewer đo lúc `2026-09-07T13:15:45.214989Z`, tức **TRƯỚC** hạn, nên chỉ mô phỏng được. Bản ghi"
+    },
+    {
+      "path": "ops/reviews/DOC-READBACK-SAU-HAN-456.md",
+      "line": 13,
+      "text": "P1 `bia-mo-mot-ref-khong-thu-hoi-moi-ban` **ĐÃ ĐÓNG**, đóng bằng THỜI GIAN đúng như dự báo,"
+    },
+    {
+      "path": "ops/reviews/DOC-READBACK-SAU-HAN-456.md",
+      "line": 14,
+      "text": "không phải bằng bản vá. Không ai đặt bia mộ; lease #456 đơn giản là hết hạn."
+    },
+    {
+      "path": "ops/reviews/DOC-READBACK-SAU-HAN-456.md",
+      "line": 18,
+      "text": "Giờ đo: `2026-09-07T14:39:17Z` — sau hạn `2026-09-07T14:30:07Z` **9 phút 10 giây**."
+    },
+    {
+      "path": "ops/reviews/DOC-READBACK-SAU-HAN-456.md",
+      "line": 24,
+      "text": "| A | `git ls-remote --heads origin` | **303** |"
+    },
+    {
+      "path": "ops/reviews/DOC-READBACK-SAU-HAN-456.md",
+      "line": 25,
+      "text": "| B | `git for-each-ref refs/remotes/origin` (bỏ symref `HEAD`) | **303** |"
+    },
+    {
+      "path": "ops/reviews/DOC-READBACK-SAU-HAN-456.md",
+      "line": 27,
+      "text": "`comm -3 A B` ⇒ **0 dòng**. So như TẬP HỢP, không so `wc -l`. Lệch ⇒ ĐỎ; ở đây không lệch."
+    },
+    {
+      "path": "ops/reviews/DOC-READBACK-SAU-HAN-456.md",
+      "line": 28,
+      "text": "Tổng ref được `ai-dang-giu` quét (`refs/heads` + `refs/remotes/origin`): **306**."
+    },
+    {
+      "path": "ops/reviews/DOC-READBACK-SAU-HAN-456.md",
+      "line": 30,
+      "text": "Ghi chú phép đo: lần chạy đầu B ra **304** vì `%(refname:short)` của `refs/remotes/origin/HEAD`"
+    },
+    {
+      "path": "ops/reviews/DOC-READBACK-SAU-HAN-456.md",
+      "line": 38,
+      "text": "| `.claude/dev/ci_dang_ky_test.py` | **1** | `gate-tach-job-cat-chi-phi-exec-1r4-claude-20260906` | 11 |"
+    },
+    {
+      "path": "ops/reviews/DOC-READBACK-SAU-HAN-456.md",
+      "line": 39,
+      "text": "| `.claude/hooks/pretooluse_guard_test.py` | **0** | không có | 0 |"
+    },
+    {
+      "path": "ops/reviews/DOC-READBACK-SAU-HAN-456.md",
+      "line": 40,
+      "text": "| `.github/workflows/ci.yml` | **1** | `gate-tach-job-cat-chi-phi-exec-1r4-claude-20260906` | 11 |"
+    },
+    {
+      "path": "ops/reviews/DOC-READBACK-SAU-HAN-456.md",
+      "line": 42,
+      "text": "`rc=11` nghĩa là CÓ người giữ, không phải lỗi."
+    },
+    {
+      "path": "ops/reviews/DOC-READBACK-SAU-HAN-456.md",
+      "line": 44,
+      "text": "### Bằng chứng dương rằng #456 hết hạn chứ không phải biến mất"
+    },
+    {
+      "path": "ops/reviews/DOC-READBACK-SAU-HAN-456.md",
+      "line": 46,
+      "text": "`ai-dang-giu .claude/dev/ci_dang_ky_test.py` vẫn in **2** dòng mang tên"
+    },
+    {
+      "path": "ops/reviews/DOC-READBACK-SAU-HAN-456.md",
+      "line": 47,
+      "text": "`mutant-khong-chay-tren-windows-exec-1-claude-20260906`; trạng thái của cả hai là **`HẾT_HẠN`**,"
+    },
+    {
+      "path": "ops/reviews/DOC-READBACK-SAU-HAN-456.md",
+      "line": 52,
+      "text": "Sai đơn vị. `_quet_lease_toan_kho` (`ops/lease_publish.py:523–536`) **khử trùng theo cặp"
+    },
+    {
+      "path": "ops/reviews/DOC-READBACK-SAU-HAN-456.md",
+      "line": 53,
+      "text": "`(blob, đường dẫn)`** và chỉ giữ **một ref đại diện** cho mỗi cặp. Vậy 2 dòng = **2 cặp"
+    },
+    {
+      "path": "ops/reviews/DOC-READBACK-SAU-HAN-456.md",
+      "line": 54,
+      "text": "`(blob, path)` phân biệt**, KHÔNG phải 2 ref. Không được suy số ref từ số dòng."
+    },
+    {
+      "path": "ops/reviews/DOC-READBACK-SAU-HAN-456.md",
+      "line": 56,
+      "text": "Số ref thật, đo riêng bằng `git cat-file --batch-check` trên toàn bộ 303 nhánh máy chủ lúc"
+    },
+    {
+      "path": "ops/reviews/DOC-READBACK-SAU-HAN-456.md",
+      "line": 57,
+      "text": "**`14:42:17Z`** (mốc khác với readback `14:39:17Z` ở trên, không thay thế nó):"
+    },
+    {
+      "path": "ops/reviews/DOC-READBACK-SAU-HAN-456.md",
+      "line": 61,
+      "text": "| `8b2103c` | **11** | KHÔNG |"
+    },
+    {
+      "path": "ops/reviews/DOC-READBACK-SAU-HAN-456.md",
+      "line": 62,
+      "text": "| `1f95042` | **1** | có |"
+    },
+    {
+      "path": "ops/reviews/DOC-READBACK-SAU-HAN-456.md",
+      "line": 64,
+      "text": "Tổng **12** tên nhánh, không phải 2. Ca khoá của lỗi này: hai blob nằm trên ba ref trở lên vẫn chỉ"
+    },
+    {
+      "path": "ops/reviews/DOC-READBACK-SAU-HAN-456.md",
+      "line": 69,
+      "text": "| mốc | reviewer mô phỏng (13:15:45Z) | đo thật (14:39:17Z) | khớp? |"
+    },
+    {
+      "path": "ops/reviews/DOC-READBACK-SAU-HAN-456.md",
+      "line": 71,
+      "text": "| registry sau 14:30:07Z | **1** | **1** | có |"
+    },
+    {
+      "path": "ops/reviews/DOC-READBACK-SAU-HAN-456.md",
+      "line": 72,
+      "text": "| `ci.yml` sau 14:30:07Z | **1** | **1** | có |"
+    },
+    {
+      "path": "ops/reviews/DOC-READBACK-SAU-HAN-456.md",
+      "line": 81,
+      "text": "- Không đóng P1 còn lại `mirror-thieu-ref-khong-du-do-a9`. Bundle giao cho reviewer chỉ mang"
+    },
+    {
+      "path": "ops/reviews/DOC-READBACK-SAU-HAN-456.md",
+      "line": 82,
+      "text": "  **3** tên nhánh, nên reviewer vẫn không tự tái đo được khẳng định 303/303 ở trên. Muốn đóng"
+    },
+    {
+      "path": "ops/reviews/DOC-READBACK-SAU-HAN-456.md",
+      "line": 83,
+      "text": "  P1 ấy phải sửa cách dựng gói hiện vật, không phải chờ thêm."
+    },
+    {
+      "path": "ops/reviews/DOC-READBACK-SAU-HAN-456.md",
+      "line": 84,
+      "text": "- Không đóng hai P2 hồ sơ của lượt 12."
+    },
+    {
+      "path": "ops/reviews/DOC-READBACK-SAU-HAN-456.md",
+      "line": 85,
+      "text": "- Cùng lỗ hổng đang tái diễn ở packet `wp461`: hai lease CÒN HẠN cùng giữ y hệt bốn đường ghi,"
+    },
+    {
+      "path": "ops/reviews/DOC-READBACK-SAU-HAN-456.md",
+      "line": 86,
+      "text": "  chạy tới `2026-09-08`. Đã lập phiên riêng để bổ sung cơ chế chủ kho thu hồi lease và cấp lại"
+    }
+  ],
+  "examples_not_listed_in_evidence": {
+    "178/178": true,
+    "23631": true,
+    "536028": true,
+    "1166.934": true
+  },
+  "evidence_declares_extraction_method": false,
+  "evidence_declares_coverage_omissions": false
+}

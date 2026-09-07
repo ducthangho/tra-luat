@@ -1,0 +1,6 @@
+cidk rc=0 giay=0 out=2934B
+ploop rc=0 giay=207 out=8752B
+lease rc=1 giay=58 out=8971B
+doctrine-scan rc=0 out=69B
+adr-song rc=0 out=113B
+doc-claims-check rc=0 out=70861B

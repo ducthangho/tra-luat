@@ -1,0 +1,315 @@
+{
+  "measured_at_utc": "2026-09-07T11:29:38.358192+00:00",
+  "scope": "Exact functions/main from reviewed tree; GOI_GIT rewrites ls-remote origin to sandbox kho.git and excludes materialized refs/heads/HEAD from this comparator only, matching scanner exclusion of */HEAD. Local-ref completeness and stale-branch checks otherwise enabled. HEAD retained in separate census. No server readback.",
+  "commands": {
+    "registry": {
+      "args": [
+        "ai-dang-giu",
+        ".claude/dev/ci_dang_ky_test.py",
+        "--root",
+        "/tmp/claude-0/-home-user/fbace9af-dba2-5564-96ad-cc29ca23dc03/scratchpad/rv10/cay-kho"
+      ],
+      "rc": 11,
+      "stdout": "PHẠM_VI: quét refs/heads/*; nhánh cục bộ tụt sau origin/<cùng tên> sẽ bị CHẶN\nHẾT_HẠN\tkhong-do-duoc-phai-do-exec-1-claude-20260829\trefs/heads/master:ops/leases/khong-do-duoc-phai-do-exec-1-claude-20260829.yaml\nHẾT_HẠN\tkhong-do-duoc-phai-do-exec-1r2-claude-20260829\trefs/heads/master:ops/leases/khong-do-duoc-phai-do-exec-1r2-claude-20260829.yaml\nCÒN_HẠN\tmutant-khong-chay-tren-windows-exec-1-claude-20260906\trefs/heads/master:ops/leases/mutant-khong-chay-tren-windows-exec-1-claude-20260906.yaml\nCÒN_HẠN · ĐÃ_BỊ_THAY_THẾ\tgate-tach-job-cat-chi-phi-exec-1-claude-20260906\trefs/remotes/origin/claude/soan-spec-3-viec-treo-20260906:ops/leases/gate-tach-job-cat-chi-phi-exec-1-claude-20260906.yaml\nCÒN_HẠN · ĐÃ_BỊ_THAY_THẾ\tgate-tach-job-cat-chi-phi-exec-1r2-claude-20260906\trefs/remotes/origin/claude/soan-spec-3-viec-treo-20260906:ops/leases/gate-tach-job-cat-chi-phi-exec-1r2-claude-20260906.yaml\nCÒN_HẠN · ĐÃ_BỊ_THAY_THẾ\tgate-tach-job-cat-chi-phi-exec-1r3-claude-20260906\trefs/remotes/origin/claude/soan-spec-3-viec-treo-20260906:ops/leases/gate-tach-job-cat-chi-phi-exec-1r3-claude-20260906.yaml\nCÒN_HẠN\tgate-tach-job-cat-chi-phi-exec-1r4-claude-20260906\trefs/remotes/origin/claude/soan-spec-3-viec-treo-20260906:ops/leases/gate-tach-job-cat-chi-phi-exec-1r4-claude-20260906.yaml\nCÒN_HẠN · ĐÃ_BỊ_THAY_THẾ\tmutant-khong-chay-tren-windows-exec-1-claude-20260906\trefs/remotes/origin/claude/soan-spec-3-viec-treo-20260906:ops/leases/mutant-khong-chay-tren-windows-exec-1-claude-20260906.yaml\nHẾT_HẠN\tcong-ngoai-write-set-exec-1-codex-20260828\trefs/remotes/origin/ops/cap-lease-tach-314:ops/leases/cong-ngoai-write-set-exec-1-codex-20260828.yaml\nHẾT_HẠN\tcong-ngoai-write-set-exec-1r2-codex-20260828\trefs/remotes/origin/ops/cap-lease-tach-314:ops/leases/cong-ngoai-write-set-exec-1r2-codex-20260828.yaml\nHẾT_HẠN\tcong-ngoai-write-set-exec-1r3-codex-20260828\trefs/remotes/origin/ops/cap-lease-tach-314:ops/leases/cong-ngoai-write-set-exec-1r3-codex-20260828.yaml\nHẾT_HẠN\tcong-ngoai-write-set-exec-1r4-codex-20260828\trefs/remotes/origin/ops/cap-lease-tach-314:ops/leases/cong-ngoai-write-set-exec-1r4-codex-20260828.yaml\nHẾT_HẠN\tcong-ngoai-write-set-exec-1r5-codex-20260828\trefs/remotes/origin/ops/cap-lease-tach-314:ops/leases/cong-ngoai-write-set-exec-1r5-codex-20260828.yaml\nNGƯỜI_GIỮ 2: gate-tach-job-cat-chi-phi-exec-1r4-claude-20260906, mutant-khong-chay-tren-windows-exec-1-claude-20260906\n",
+      "stderr": ""
+    },
+    "workflow": {
+      "args": [
+        "ai-dang-giu",
+        ".github/workflows/ci.yml",
+        "--root",
+        "/tmp/claude-0/-home-user/fbace9af-dba2-5564-96ad-cc29ca23dc03/scratchpad/rv10/cay-kho"
+      ],
+      "rc": 11,
+      "stdout": "PHẠM_VI: quét refs/heads/*; nhánh cục bộ tụt sau origin/<cùng tên> sẽ bị CHẶN\nHẾT_HẠN\tci-cai-jsonschema-exec-1-claude-20260829\trefs/heads/master:ops/leases/ci-cai-jsonschema-exec-1-claude-20260829.yaml\nHẾT_HẠN\tci-cai-jsonschema-exec-1r2-claude-20260829\trefs/heads/master:ops/leases/ci-cai-jsonschema-exec-1r2-claude-20260829.yaml\nHẾT_HẠN\tci-cai-jsonschema-exec-1r3-claude-20260829\trefs/heads/master:ops/leases/ci-cai-jsonschema-exec-1r3-claude-20260829.yaml\nHẾT_HẠN\tci-noi-bang-vao-gate-exec-1-claude-20260822\trefs/heads/master:ops/leases/ci-noi-bang-vao-gate-exec-1-claude-20260822.yaml\nHẾT_HẠN\tci-noi-bang-vao-gate-exec-1r2-claude-20260823\trefs/heads/master:ops/leases/ci-noi-bang-vao-gate-exec-1r2-claude-20260823.yaml\nHẾT_HẠN\tplat-x4-exec-1-claude-20260820\trefs/heads/master:ops/leases/plat-x4-exec-1-claude-20260820.yaml\nHẾT_HẠN\tplat-x5-exec-1-codex-20260820\trefs/heads/master:ops/leases/plat-x5-exec-1-codex-20260820.yaml\nHẾT_HẠN\tplat-x5-exec-1r2-codex-20260820\trefs/heads/master:ops/leases/plat-x5-exec-1r2-codex-20260820.yaml\nHẾT_HẠN\tplat-x5-exec-1r3-codex-20260820\trefs/heads/master:ops/leases/plat-x5-exec-1r3-codex-20260820.yaml\nCÒN_HẠN · ĐÃ_BỊ_THAY_THẾ\tgate-tach-job-cat-chi-phi-exec-1-claude-20260906\trefs/remotes/origin/claude/soan-spec-3-viec-treo-20260906:ops/leases/gate-tach-job-cat-chi-phi-exec-1-claude-20260906.yaml\nCÒN_HẠN · ĐÃ_BỊ_THAY_THẾ\tgate-tach-job-cat-chi-phi-exec-1r2-claude-20260906\trefs/remotes/origin/claude/soan-spec-3-viec-treo-20260906:ops/leases/gate-tach-job-cat-chi-phi-exec-1r2-claude-20260906.yaml\nCÒN_HẠN · ĐÃ_BỊ_THAY_THẾ\tgate-tach-job-cat-chi-phi-exec-1r3-claude-20260906\trefs/remotes/origin/claude/soan-spec-3-viec-treo-20260906:ops/leases/gate-tach-job-cat-chi-phi-exec-1r3-claude-20260906.yaml\nCÒN_HẠN\tgate-tach-job-cat-chi-phi-exec-1r4-claude-20260906\trefs/remotes/origin/claude/soan-spec-3-viec-treo-20260906:ops/leases/gate-tach-job-cat-chi-phi-exec-1r4-claude-20260906.yaml\nHẾT_HẠN\tci-cong-idiom-ba-ten-exec-1-claude-20260827\trefs/remotes/origin/ops/cap-lease-ci-idiom-20260827:ops/leases/ci-cong-idiom-ba-ten-exec-1-claude-20260827.yaml\nHẾT_HẠN\tci-cong-idiom-ba-ten-exec-1r2-claude-20260827\trefs/remotes/origin/ops/cap-lease-ci-idiom-20260827:ops/leases/ci-cong-idiom-ba-ten-exec-1r2-claude-20260827.yaml\nHẾT_HẠN\twp427-n9-ci-manifest-lane-g1-claude-20260831\trefs/remotes/origin/ops/cap-lease-n9-ci-manifest-lane:ops/leases/wp427-n9-ci-manifest-lane-g1-claude-20260831.yaml\nHẾT_HẠN\tcong-ngoai-write-set-exec-1-codex-20260828\trefs/remotes/origin/ops/cap-lease-tach-314:ops/leases/cong-ngoai-write-set-exec-1-codex-20260828.yaml\nHẾT_HẠN\tcong-ngoai-write-set-exec-1r2-codex-20260828\trefs/remotes/origin/ops/cap-lease-tach-314:ops/leases/cong-ngoai-write-set-exec-1r2-codex-20260828.yaml\nHẾT_HẠN\tcong-ngoai-write-set-exec-1r3-codex-20260828\trefs/remotes/origin/ops/cap-lease-tach-314:ops/leases/cong-ngoai-write-set-exec-1r3-codex-20260828.yaml\nHẾT_HẠN\tcong-ngoai-write-set-exec-1r4-codex-20260828\trefs/remotes/origin/ops/cap-lease-tach-314:ops/leases/cong-ngoai-write-set-exec-1r4-codex-20260828.yaml\nHẾT_HẠN\tcong-ngoai-write-set-exec-1r5-codex-20260828\trefs/remotes/origin/ops/cap-lease-tach-314:ops/leases/cong-ngoai-write-set-exec-1r5-codex-20260828.yaml\nHẾT_HẠN\tplat-x2-exec-3-claude-20260820\trefs/remotes/origin/ops/lease-dong-so-20260820:ops/leases/plat-x2-exec-3-claude-20260820.yaml\nNGƯỜI_GIỮ 1: gate-tach-job-cat-chi-phi-exec-1r4-claude-20260906\n",
+      "stderr": ""
+    },
+    "check": {
+      "args": [
+        "check",
+        "/tmp/claude-0/-home-user/fbace9af-dba2-5564-96ad-cc29ca23dc03/scratchpad/rv10/cay-kho/ops/leases/gate-tach-job-cat-chi-phi-exec-1r4-claude-20260906.yaml",
+        "--root",
+        "/tmp/claude-0/-home-user/fbace9af-dba2-5564-96ad-cc29ca23dc03/scratchpad/rv10/cay-kho"
+      ],
+      "rc": 0,
+      "stdout": "LỆNH check KHÔNG CHẠY hai lớp GitHub: đo ISSUE/PR và dò comment; dùng `kiem-github`\nlease gate-tach-job-cat-chi-phi-exec-1r4-claude-20260906 ĐĂNG ĐƯỢC — issue #463, neo d28c4b1062e8, hết hạn 2026-09-08T10:17:12Z\n",
+      "stderr": ""
+    }
+  },
+  "blob_path_pairs": 288,
+  "states": {
+    "2026-09-07T11:29:38.358192+00:00": {
+      ".claude/dev/ci_dang_ky_test.py": {
+        "count": 2,
+        "names": [
+          "gate-tach-job-cat-chi-phi-exec-1r4-claude-20260906",
+          "mutant-khong-chay-tren-windows-exec-1-claude-20260906"
+        ],
+        "broken_tombstones": []
+      },
+      ".github/workflows/ci.yml": {
+        "count": 1,
+        "names": [
+          "gate-tach-job-cat-chi-phi-exec-1r4-claude-20260906"
+        ],
+        "broken_tombstones": []
+      }
+    },
+    "2026-09-07T14:30:06+00:00": {
+      ".claude/dev/ci_dang_ky_test.py": {
+        "count": 2,
+        "names": [
+          "gate-tach-job-cat-chi-phi-exec-1r4-claude-20260906",
+          "mutant-khong-chay-tren-windows-exec-1-claude-20260906"
+        ],
+        "broken_tombstones": []
+      },
+      ".github/workflows/ci.yml": {
+        "count": 1,
+        "names": [
+          "gate-tach-job-cat-chi-phi-exec-1r4-claude-20260906"
+        ],
+        "broken_tombstones": []
+      }
+    },
+    "2026-09-07T14:30:07+00:00": {
+      ".claude/dev/ci_dang_ky_test.py": {
+        "count": 1,
+        "names": [
+          "gate-tach-job-cat-chi-phi-exec-1r4-claude-20260906"
+        ],
+        "broken_tombstones": []
+      },
+      ".github/workflows/ci.yml": {
+        "count": 1,
+        "names": [
+          "gate-tach-job-cat-chi-phi-exec-1r4-claude-20260906"
+        ],
+        "broken_tombstones": []
+      }
+    },
+    "2026-09-07T14:30:08+00:00": {
+      ".claude/dev/ci_dang_ky_test.py": {
+        "count": 1,
+        "names": [
+          "gate-tach-job-cat-chi-phi-exec-1r4-claude-20260906"
+        ],
+        "broken_tombstones": []
+      },
+      ".github/workflows/ci.yml": {
+        "count": 1,
+        "names": [
+          "gate-tach-job-cat-chi-phi-exec-1r4-claude-20260906"
+        ],
+        "broken_tombstones": []
+      }
+    }
+  },
+  "old456_blob": "8b2103c06687546379a17f6deafc97f1fe0173fd",
+  "old456_yaml": {
+    "schema_version": 2,
+    "event": "executor_lease_granted",
+    "packet_issue": 456,
+    "packet_id": "MUTANT-KHONG-CHAY-TREN-WINDOWS",
+    "revision": 1,
+    "generation": 1,
+    "lease_id": "mutant-khong-chay-tren-windows-exec-1-claude-20260906",
+    "role": "executor",
+    "provider": "claude",
+    "executor": "claude",
+    "model": "opus-5",
+    "effort": "xhigh",
+    "environment": "cloud",
+    "assurance_target": "cross_approved",
+    "access": "read-write",
+    "spec_path": "ops/specs/MUTANT-KHONG-CHAY-TREN-WINDOWS.md",
+    "spec_sha256": "8c5d3653790a85025fcd3a70914c4dd51c107ccafd8edfb1e2ddd65840dbea53",
+    "spec_hash": "8c5d3653790a85025fcd3a70914c4dd51c107ccafd8edfb1e2ddd65840dbea53",
+    "write_set": [
+      ".claude/hooks/pretooluse_guard_test.py",
+      ".claude/dev/ci_dang_ky_test.py"
+    ],
+    "branch": "claude/cap-nhat-trang-thai-pr-taxzax",
+    "branch_ownership": "exclusive",
+    "target_branch_neu_land": "master",
+    "base_sha": "4f6d42ad7a54aead89fedaaf89a408ff4557ea54",
+    "start_from_sha": "4f6d42ad7a54aead89fedaaf89a408ff4557ea54",
+    "reviewed_sha_required": "4f6d42ad7a54aead89fedaaf89a408ff4557ea54",
+    "granted_by": "ducthangho",
+    "granted_on_instruction": "direct, in-session, 2026-09-06 — chủ kho duyệt mở packet (\"tạo issue + lease mới để rút ngắn test, tách job, nới timeout\"), rồi chốt hướng qua ba vòng chất vấn: Q8=(a) giữ bằng chứng dương có điều kiện theo nền · Q9=(i) chỉ pretooluse_guard_test · Q10 Windows QUAY LẠI CI.",
+    "authority_basis": "§2 — start/pause/resume/reroute/override/authorize thuộc chủ kho",
+    "recorded_by": "claude-session",
+    "recorder_is_dispatcher": false,
+    "leased_at_utc": "2026-09-06T14:30:07Z",
+    "lease_expires_at_utc": "2026-09-07T14:30:07Z",
+    "run_minutes": 1440,
+    "heartbeat_required_minutes": 30,
+    "attempts_used": 0,
+    "attempts_limit": 3,
+    "reviewer_provider": "codex",
+    "review_class": "sensitive",
+    "effective_review_class": "sensitive",
+    "ly_do_cap": "gate (windows-latest) trên master LUÔN hết giờ: 60.3 phút, conclusion=cancelled, đo trên HAI commit master liên tiếp (3500369 và 4f6d42a). Master không có chân Windows nào chạy trọn, và tình trạng ấy không tự khỏi. Đo được chi phí: test registry 44.3p trên Windows so 14.6p ubuntu; trong đó pretooluse_guard_test chiếm 346/496 giây (70%) trên Linux, và tách nền/đột biến trên BẢN SAO cho 10s nền so 346s đầy đủ — tức đột biến là 97% chi phí bộ ấy. Đột biến đo BỘ TEST CÓ RĂNG KHÔNG, là tính chất của logic test chứ không của nền, nên chạy nó trên Windows là đo lại cùng một sự thật với giá gấp ba.",
+    "viec_trong_lease": [
+      "Trên Windows: KHÔNG chạy vòng lặp đột biến; ca nền vẫn chạy đủ.",
+      "Trên Windows: in dòng bằng chứng DƯƠNG riêng, tự khai đột biến không đo ở đây và đo ở đâu.",
+      "Sổ đăng ký chấp nhận dòng ấy CHỈ khi nền là Windows; hai chiều đều phải có phản chứng.",
+      "Linux giữ nguyên tuyệt đối: vẫn 34 đột biến, vẫn dòng `DOT BIEN x/y bi giet`.",
+      "Chạy workflow_dispatch ci.yml trên nhánh packet để ĐO chân Windows thật (A5)."
+    ],
+    "dieu_kien_dung": [
+      "Chạm bất kỳ đường dẫn nào ngoài HAI đường đã khai — đổi revision, KHÔNG tự mở write set.",
+      "Nâng `timeout-minutes` trong ci.yml — hình dạng ấy đã hỏng BA lần (25→45→60) và ci.yml:63 tự kết luận \"NÂNG TRẦN KHÔNG CHỮA NGUYÊN NHÂN\". Lần thứ tư là điều kiện DỪNG.",
+      "Làm chốt `len(DOT_BIEN) > 0` im trên Windows thay vì thay bằng chốt tương đương — đó là xoá bằng chứng dương để mua cổng xanh (bài học #319 \"tập rỗng thoả not song\").",
+      "Bỏ qua ca nền trên Windows — chỉ đột biến được cắt, ca nền là thứ THẬT SỰ cần Windows.",
+      "Sửa `.github/workflows/ci.yml`: CỐ Ý ngoài write set. Tổng Windows thật chưa đo (60.2p là số BỊ CẮT, bước 19→43 chưa từng chạy). Thiếu chỗ thì mở packet kế, đừng sửa cổng theo đoán.",
+      "A5 ĐỎ (job Windows vẫn cancelled) là KẾT QUẢ ĐO, không phải thất bại — báo chủ kho, đừng tự nới trần để ép nó xanh."
+    ],
+    "ghi_chu_dang": "Lần đẩy TẠO nhánh `ops/cap-lease-456` (`537afd0`, 2026-09-06) KHÔNG kích hoạt `ops-publish-lease.yml`: đo qua `actions_list` lọc `head_branch`, ra ĐÚNG 1 lượt và nó là `ops — mở PR bằng git` (skipped). Khớp ca đã ghi trong CLAUDE.md (đo 21-08-2026, nguyên nhân CHƯA BIẾT — đừng chế ra). Chữa bằng commit này: đẩy lên nhánh ĐÃ TỒN TẠI, cùng bộ lọc, cùng thư mục — đường đã có bằng chứng chạy. Ghi lại vì triệu chứng mới là thứ đáng nhớ: một workflow ta trông cậy có thể VẮNG MẶT đúng lần đẩy đầu, và vắng mặt trông y hệt xanh."
+  },
+  "snapshot_branch_count": 303,
+  "old456_branches": [
+    "HEAD",
+    "claude/agents-ngoai-goi",
+    "claude/cap-nhat-trang-thai-pr-taxzax",
+    "claude/elegant-bun-cd554f",
+    "claude/priceless-volhard-329577",
+    "claude/r356-bien-nhan-cross-review",
+    "claude/tra-luat-process-review-o4d7kb",
+    "master",
+    "ops/cap-lease-456",
+    "ops/cap-lease-461",
+    "ops/lease-wp461-g2"
+  ],
+  "other456_branches": [
+    {
+      "ref": "refs/heads/claude/soan-spec-3-viec-treo-20260906",
+      "blob": "1f9504281c3415f7194e124eb7b2702c34c8efd1"
+    }
+  ],
+  "branches_vs_claim": {
+    "omitted": [
+      "HEAD",
+      "ops/lease-wp461-g2"
+    ],
+    "not_found": []
+  },
+  "grant_history": [
+    {
+      "revision": 3,
+      "commit": "3ef7d2a37d833ae62ff8d2848e146a945360e64d",
+      "commit_metadata": "3ef7d2a37d833ae62ff8d2848e146a945360e64d 2026-09-07T09:44:52+00:00 ops: revision 3 đặc tả GATE (A2 neo nền cùng base/cùng event) + lease exec-1r3 (bia mộ r2); đồng bộ quyết định §12; verdict + hiện vật lượt 8",
+      "present_at_base": true,
+      "leased_at_utc": "2026-09-07T09:44:51Z",
+      "expires": "2026-09-08T09:44:51Z",
+      "lease_id": "gate-tach-job-cat-chi-phi-exec-1r3-claude-20260906",
+      "thay_the_cho": [
+        "gate-tach-job-cat-chi-phi-exec-1r2-claude-20260906"
+      ],
+      "model_scope": "grant commit tree + known old456 blob; not live server state at historical instant",
+      "states": {
+        ".claude/dev/ci_dang_ky_test.py": {
+          "count": 2,
+          "names": [
+            "gate-tach-job-cat-chi-phi-exec-1r3-claude-20260906",
+            "mutant-khong-chay-tren-windows-exec-1-claude-20260906"
+          ],
+          "broken_tombstones": []
+        },
+        ".github/workflows/ci.yml": {
+          "count": 1,
+          "names": [
+            "gate-tach-job-cat-chi-phi-exec-1r3-claude-20260906"
+          ],
+          "broken_tombstones": []
+        }
+      }
+    },
+    {
+      "revision": 4,
+      "commit": "1a330305e20a0667fff4954f8542aadd5e375b50",
+      "commit_metadata": "1a330305e20a0667fff4954f8542aadd5e375b50 2026-09-07T10:17:12+00:00 ops: revision 4 đặc tả GATE (chữ \"nhiễu\"/\"hai lượt master\"/bảng thứ tự) + lease exec-1r4 (bia mộ r3); LO-319 hết câu \"chưa chọn\"; gói lượt 8 đủ 69/69; verdict + hiện vật lượt 9",
+      "present_at_base": false,
+      "leased_at_utc": "2026-09-07T10:17:12Z",
+      "expires": "2026-09-08T10:17:12Z",
+      "lease_id": "gate-tach-job-cat-chi-phi-exec-1r4-claude-20260906",
+      "thay_the_cho": [
+        "gate-tach-job-cat-chi-phi-exec-1r3-claude-20260906"
+      ],
+      "model_scope": "grant commit tree + known old456 blob; not live server state at historical instant",
+      "states": {
+        ".claude/dev/ci_dang_ky_test.py": {
+          "count": 2,
+          "names": [
+            "gate-tach-job-cat-chi-phi-exec-1r4-claude-20260906",
+            "mutant-khong-chay-tren-windows-exec-1-claude-20260906"
+          ],
+          "broken_tombstones": []
+        },
+        ".github/workflows/ci.yml": {
+          "count": 1,
+          "names": [
+            "gate-tach-job-cat-chi-phi-exec-1r4-claude-20260906"
+          ],
+          "broken_tombstones": []
+        }
+      }
+    }
+  ],
+  "current_chain": [
+    {
+      "lease_id": "mutant-khong-chay-tren-windows-exec-1-claude-20260906",
+      "revision": 1,
+      "generation": 1,
+      "thay_the_cho": null,
+      "da_bi_thay_the": "gate-tach-job-cat-chi-phi-exec-1-claude-20260906",
+      "leased_at_utc": "2026-09-06T14:30:07Z",
+      "lease_expires_at_utc": "2026-09-07T14:30:07Z"
+    },
+    {
+      "lease_id": "gate-tach-job-cat-chi-phi-exec-1-claude-20260906",
+      "revision": 1,
+      "generation": 1,
+      "thay_the_cho": [
+        "mutant-khong-chay-tren-windows-exec-1-claude-20260906"
+      ],
+      "da_bi_thay_the": "gate-tach-job-cat-chi-phi-exec-1r2-claude-20260906",
+      "leased_at_utc": "2026-09-07T03:37:33Z",
+      "lease_expires_at_utc": "2026-09-08T03:37:33Z"
+    },
+    {
+      "lease_id": "gate-tach-job-cat-chi-phi-exec-1r2-claude-20260906",
+      "revision": 2,
+      "generation": 1,
+      "thay_the_cho": [
+        "gate-tach-job-cat-chi-phi-exec-1-claude-20260906"
+      ],
+      "da_bi_thay_the": "gate-tach-job-cat-chi-phi-exec-1r3-claude-20260906",
+      "leased_at_utc": "2026-09-07T07:50:35Z",
+      "lease_expires_at_utc": "2026-09-08T07:50:35Z"
+    },
+    {
+      "lease_id": "gate-tach-job-cat-chi-phi-exec-1r3-claude-20260906",
+      "revision": 3,
+      "generation": 1,
+      "thay_the_cho": [
+        "gate-tach-job-cat-chi-phi-exec-1r2-claude-20260906"
+      ],
+      "da_bi_thay_the": "gate-tach-job-cat-chi-phi-exec-1r4-claude-20260906",
+      "leased_at_utc": "2026-09-07T09:44:51Z",
+      "lease_expires_at_utc": "2026-09-08T09:44:51Z"
+    },
+    {
+      "lease_id": "gate-tach-job-cat-chi-phi-exec-1r4-claude-20260906",
+      "revision": 4,
+      "generation": 1,
+      "thay_the_cho": [
+        "gate-tach-job-cat-chi-phi-exec-1r3-claude-20260906"
+      ],
+      "da_bi_thay_the": null,
+      "leased_at_utc": "2026-09-07T10:17:12Z",
+      "lease_expires_at_utc": "2026-09-08T10:17:12Z"
+    }
+  ],
+  "transport_git_calls": 2877
+}

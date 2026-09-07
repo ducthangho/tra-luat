@@ -1,0 +1,11 @@
+{
+  "finished_utc": "2026-09-07T06:43:56.644483+00:00",
+  "findings": 11,
+  "P1": 7,
+  "P2": 4,
+  "git_clean": true,
+  "head": "2adb6819caee0225d7b7e4f0c4e8c16f2faa7e73",
+  "tree": "c3c7bdaba867463ca33123025d7ac999b58fb6a3",
+  "verdict_sha256": "f71403696471aaabefebc01a72be72f07682e9ebeb41f067dcddd2797f149036",
+  "last_line": "verdict: changes_requested"
+}

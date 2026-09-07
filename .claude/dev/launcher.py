@@ -148,6 +148,49 @@ _TRANSPORT_CONTRACTS = (
     ("openai_api", ("llm",), "llm_cli", "machine"),
 )
 
+# Provider KHÔNG đi qua một CLI của launcher, nên `_TRANSPORT_CONTRACTS` không bao giờ
+# chứa chúng — nhưng chúng vẫn là provider hợp lệ của kho, và bộ kiểm biên nhận
+# (`ops/bien_nhan_v2.py`) cần một nguồn CÓ CẤU TRÚC để đọc.
+#
+# VÌ SAO Ở ĐÂY, và vì sao là BẢNG chứ không phải văn xuôi: cross-review PR #455 đo được
+# hai lần liên tiếp rằng một danh sách CHO PHÉP rút từ VĂN BẢN TỰ DO thì nới được bằng
+# văn bản tự do — đầu tiên là một dòng chú thích bất kỳ trong tệp này, rồi (sau khi siết
+# vào AST) là chính chuỗi `vi_sao` mô tả của một mục `CONG_CU`. Đổi NGUỒN mà giữ nguyên
+# HÌNH DẠNG (đọc prose) thì cái lỗ chỉ đổi chỗ. Bảng này là hình dạng đúng: thêm một
+# provider phải là một phép sửa CẤU TRÚC, không phải một câu chữ.
+#
+# (provider, execution_surface, transport) — cùng ba trường với `_TRANSPORT_CONTRACTS`,
+# trừ tên lệnh vì không có lệnh nào.
+_PROVIDER_NGOAI_CLI = (
+    # `machine/local`, KHÔNG phải `machine` — chép đúng `ops/KE_HOACH_THI_CONG_DA_PROVIDER.md`
+    # §2 hàng "Google Antigravity". Cross-review PR #460 đo được hàng này LỆCH nguồn, và lệch
+    # theo chiều CHẶN NHẦM: một biên nhận Antigravity khai TRUNG THỰC `machine/local` bị cổng
+    # TỪ CHỐI, còn khai SAI `machine` thì ĐƯỢC NHẬN — validation đảo ngược. Cùng LỚP với
+    # `R7-02` (chặn quá rộng theo một hằng chép tay lệch nguồn). `anthropic_claude` trong
+    # `_TRANSPORT_CONTRACTS` vốn đã dùng `machine/local`, nên dạng giá trị này được hỗ trợ sẵn
+    # và Antigravity là hàng DUY NHẤT còn lệch.
+    ("google_antigravity", "antigravity", "machine/local"),
+    ("openai_chatgpt", "chatgpt_web", "human_mediated"),
+    # Human Auditor — bộ ba chép từ bảng provider chuyển tiếp
+    # (`ops/KE_HOACH_THI_CONG_DA_PROVIDER.md` §2, hàng "Human Auditor"). Cross-review PR #455
+    # lượt 7 (`R7-02`) đo được: `human` từng bị bộ kiểm biên nhận chép tay vào tập "KHÔNG hợp
+    # đồng" nên bị cấm cả `human_audited` — mức `PROTOCOL §8` dành ĐÚNG cho người audit.
+    # Vận chuyển là `human`, KHÔNG phải `human_mediated`: ở đây người LÀ reviewer, không phải
+    # người chuyển tiếp đầu ra của một mô hình. Cột ấy là thứ bộ kiểm dùng để phân vùng mức
+    # assurance người/mô hình, nên đừng đổi nó khi "dọn cho gọn".
+    ("human", "manual_audit", "human"),
+)
+
+# BÍ DANH LỊCH SỬ → tên chính tắc. Hiện vật cũ của kho khai `anthropic` và
+# `claude_code_cli`; giữ được đọc, nhưng phải CHUẨN HOÁ TRƯỚC mọi phép kiểm theo provider,
+# kẻo bí danh thành đường lách quanh chính ràng buộc của tên chính tắc.
+_PROVIDER_BI_DANH = (
+    ("anthropic", "anthropic_claude"),
+)
+_BE_MAT_BI_DANH = (
+    ("claude_code_cli", "claude_code"),
+)
+
 
 def _dinh_danh_van_chuyen(lenh: list[str]) -> dict:
     """Trả contract transport canonical và băm của chính contract ấy."""

@@ -6429,7 +6429,31 @@ def r345_cac_phep_do_cuc_bo_van_dung():
         ca_ds = [
             ("ban thoa",                   "pypdf>=3.0\n", 0),
             ("lech ban",                   "pypdf>=4.0\n", 1),
-            ("marker khong khop",          'pywin32; sys_platform == "win32"\n', 0),
+            # r356 — KY VONG CUA FIXTURE KHONG DUOC PHU THUOC NEN CHAY.
+            # Ban truoc viet 'pywin32; sys_platform == "win32"' va mong 0. Marker ay DUNG
+            # tren windows-latest, nen pywin32 THAT SU bi doi, venv khong co no => 1. Ca
+            # nay xanh tren Ubuntu va do tren Windows THEO THIET KE CUA FIXTURE, khong
+            # phai theo loi san pham: master do lien tuc tu khi #449 land (run
+            # 34023635438, 34025725347) va tai hien duoc tai cho tren Windows.
+            # Nay dung mot MENH DE MAU THUAN — SAI theo CAU TAO, khong phu thuoc gia tri
+            # cua bien — va DUNG goi
+            # `khong_he_ton_tai_r345` nhu hang "goi thieu han" ngay duoi. Hai hang ay khac
+            # nhau DUNG MOT BIEN: cai marker. Nen go phep loc marker la hang nay lat
+            # 0 -> 1 tren CA HAI nen — dot bien khoa dieu do o
+            # `r345_dot_bien_ba_phep_do_cuc_bo_lam_ca_dich_DO`.
+            # r356b — cross-review lượt 1 (codex) P1-01: sentinel VẪN có một giá trị làm
+            # marker ĐÚNG. Đo được: `evaluate({"sys_platform": "khong_he_co"})` -> True.
+            # Đường override ấy KHÔNG do caller của hook cung cấp (dòng 369 gọi
+            # `evaluate()` KHÔNG đối số), và CHƯA chứng minh được lỗi reachable trong đường
+            # hook thật đã đo. KHÔNG khẳng định "rủi ro bằng 0" cho mọi môi trường — lượt 2
+            # (codex) đo: `evaluate()` không đối số KHÔNG chứng minh `sys.platform` bất biến;
+            # sửa `sys.platform` ngay trong interpreter thì sentinel CŨ cho True kể cả khi
+            # không đối số, còn mâu thuẫn MỚI vẫn False. Đổi, vì một MÂU THUẪN đúng theo
+            # CẤU TẠO mạnh hơn một sentinel chỉ đúng chừng nào chưa ai đặt tên nền như vậy
+            # — đúng nếp "đảo danh sách CẤM thành danh sách CHO PHÉP" của kho. Đo lại cả bốn:
+            #   mac_dinh=False · ep khong_he_co=False · ep win32=False · ep linux=False
+            ("marker khong khop",
+             'khong_he_ton_tai_r345; sys_platform == "win32" and sys_platform != "win32"\n', 0),
             ("marker chua dau thang",      'pypdf; os_name == "posix#x"\n', 0),
             ("chu thich sau khoang trang", "pypdf>=3.0  # ghi chu\n", 0),
             ("URL tran toi host chet",     "http://127.0.0.1:9/x-1.0-py3-none-any.whl\n", 0),
@@ -6471,15 +6495,24 @@ def r345_lop_tham_import_van_co_rang():
 
 
 @ca
-def r345_dot_bien_hai_phep_do_cuc_bo_lam_ca_dich_DO():
-    """Hai đột biến, mỗi cái nhắm một phép đo cục bộ. Không có chúng thì ca trên đo gì?"""
+def r345_dot_bien_ba_phep_do_cuc_bo_lam_ca_dich_DO():
+    """Ba đột biến, mỗi cái nhắm một phép đo cục bộ. Không có chúng thì ca trên đo gì?
+
+    r356 thêm cái thứ ba — phép lọc environment marker. Trước đó hàng "marker khong khop"
+    KHÔNG có đột biến nào, và đó chính là cách nó trôi thành một kỳ vọng phụ thuộc nền mà
+    không ai thấy: hàng ấy xanh trên Ubuntu vì marker SAI ở đó, chứ không vì hook lọc đúng.
+    Hai lý do khác nhau cho cùng một con số trên MỘT nền — chỉ nền KIA tách được chúng, và
+    không có đột biến thì không tách được ở đâu cả.
+    """
     than = _r338_than_hook()
     if not than:
         return "bo qua ban sao roi (khong co session-start.sh)"
     neo_ban = "            if not thoa:"
     neo_vang = '                hong.append(f"{_r.name}: VANG MAT (khong co metadata)")'
+    neo_marker = "            if _r.marker is not None and not _r.marker.evaluate():"
     bang(than.count(neo_ban) == 1, f"R345_ANCHOR_BAN:{than.count(neo_ban)}")
     bang(than.count(neo_vang) == 1, f"R345_ANCHOR_VANG:{than.count(neo_vang)}")
+    bang(than.count(neo_marker) == 1, f"R345_ANCHOR_MARKER:{than.count(neo_marker)}")
     with tempfile.TemporaryDirectory() as td:
         d = Path(td)
         py = _r345_venv(d)
@@ -6492,6 +6525,14 @@ def r345_dot_bien_hai_phep_do_cuc_bo_lam_ca_dich_DO():
                         "definitely_not_installed_r345 @ http://127.0.0.1:9/x.whl\n",
                         "--kiem-ban") == 0,
              "dot bien bo phep kiem VANG MAT VAN DO — ca vang mat khong do phep kiem ay")
+        # r356 — RANG cho hang "marker khong khop". Go phep loc marker thi goi VANG MAT
+        # phai lo ra => 1. Hang ay va hang "goi thieu han" dung CHUNG mot goi vang mat,
+        # nen bien duy nhat con lai la cai marker: dot bien nay do DUNG phep loc ay chu
+        # khong do thu gi khac. Ca hai ve deu doc lap voi nen, nen no DO tren CA HAI nen.
+        bang(_r345_chay(py, d, than.replace(neo_marker, "            if False:"),
+                        'khong_he_ton_tai_r345; sys_platform == "win32" and sys_platform != "win32"\n',
+                        "--kiem-ban") == 1,
+             "dot bien bo phep loc marker VAN XANH — ca marker khong do phep loc ay")
 
 
 # r347 — hai lỗ CỤ THỂ của r345, cộng một LỜI KHAI bị thu hẹp.

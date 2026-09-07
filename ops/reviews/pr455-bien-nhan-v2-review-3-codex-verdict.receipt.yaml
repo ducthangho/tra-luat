@@ -1,0 +1,107 @@
+# BIEN NHAN v2 — cross-review luot 3 cua PR #455, reviewer codex, tren head cb21284.
+#
+# LUOT DAU TIEN CUA PR NAY KHONG CON P1. Hai P2 con lai deu ve PHEP DO, khong ve san
+# pham: chot doi chung do luot truoc them chay SAU khoi `finally` (tuc tren cong DA
+# KHOI PHUC), va ba nhanh mo neo moi go duoc ma toan suite van 25/25 · 16/16.
+
+schema_version: 2
+receipt_id: pr455-bien-nhan-v2-review-3-codex-20260906-32fca339
+kind: review_delivery_receipt
+packet_id: 'PR455-BIEN-NHAN-V2'
+lease_id: khong-co-lease
+phase_key: PR455-CONG-LUOC-DO-BIEN-NHAN-V2
+luot: 3
+role: reviewer
+provider: codex
+executor_provider: claude
+cross_provider: true
+assurance: cross_approved
+verdict: approve_with_findings
+verdict_path: ops/reviews/pr455-bien-nhan-v2-review-3-codex-verdict.md
+verdict_sha256: 9f3c781842913fbffedd9198d88a1e2be2a6eb80a905f293223659a19a7a398c
+verdict_bytes: 21089
+reviewed_sha: cb212847375c2319fe0ccad3f7c00c90b870e3ba
+
+model_reviewer_identity:
+  provider: openai_codex
+  surface: codex_cli
+  session_run_id: 32fca3390491423c83e84d37f9904a3b
+  prompt_sha256: 24e1f261d991a41c119bb2dcbcb87ae73e866f27b497b8bb7ec239dee6ec447a
+  prompt_kin_hoan_toan: true
+  thoi_luong_giay: 468.582
+  ma_thoat: 0
+  neo_boi_launcher: >-
+    launcher.py run boc codex exec trong CLONE ROI, detached dung reviewed_sha,
+    --require-clean (worktree_sach: true, so_muc_ban: 0), prompt truyen qua bien
+    PROMPT_FILE nen con doc BAN CHUP BAT BIEN. Probe workspace DAT (.git la thu muc),
+    probe ghi DAT.
+  KHONG_do_duoc: >-
+    ID MODEL CU THE va phien ban cua no. Khai openai_codex/codex_cli la muc chinh xac
+    nhat do duoc. run.json khong mang truong modelUsage cho duong codex.
+
+github_submitter_identity:
+  actor: ducthangho
+  la_tac_gia_PR: true
+  ghi_chu: >-
+    ADR-0040: bien nhan do tai khoan tac gia dang KHONG thanh required check hay merge
+    authorization.
+
+anchor:
+  loai: canonical_ancestry
+  cuong_do: trung_binh
+  mo_ta: >-
+    Neo bang verdict_sha256 + commit DAU TIEN chua tep verdict (0c46443a). GHIM O
+    COMMIT SAU vi mot commit khong chua duoc bam cua chinh no — cung ly do bon bien
+    nhan v2 chuan cua kho lam hai buoc.
+evidence_url: https://github.com/ducthangho/tra-luat/blob/0c46443a12e0cb3c8114c16e861df69d3841579e/ops/reviews/pr455-bien-nhan-v2-review-3-codex-verdict.md
+authoritative_source: repo_file
+evidence_channel: repo_file
+
+phat_hien_chinh: >-
+  KHONG CON P1. Reviewer xac nhan R2-01 da va that tren cac phan chung cu (replay script
+  vong 2 trich tu chinh verdict vong 2).
+  R3-01 (P2): chot doi chung chay SAU khoi `finally`, tuc tren cong DA KHOI PHUC — mot dot
+  bien "tu choi tat ca" van linh tin dung CO RANG; `_kiem` vut thong ke di nen "doi chung
+  xanh" khong chung minh phep xac minh con chay (duoi m9 cu, c18 van `qua` trong khi `kiem`
+  tra MOT muc `chua_do`); va m13 doi hang o tien trinh CHA trong khi child nap lai tep tu
+  dia ⇒ ca do vi ORACLE sai.
+  R3-02 (P2): ba nhanh mo neo moi go duoc ma toan suite van 25/25 · 16/16 — nhanh hai loai
+  anchor chua co duong do, nhanh tu choi non-ancestor, nhanh trang thai thu ba cua
+  merge-base. Ly do cau truc: moi ca cu deu dung canonical_ancestry.
+
+verdict_nguon: >-
+  launcher.py run boc codex exec trong clone roi day du, detached dung cb21284, worktree
+  sach, prompt neo sha256 24e1f261.
+verdict_doi_chieu: >-
+  CHUNG MINH: prompt nao chay tren head nao, cay sach, luot chay lam viec that (468,6 giay,
+  verdict 21.089 byte, stderr 687.075 byte). Ban trong kho BYTE-EXACT (cmp rc=0, sha256
+  9f3c7818). Reviewer TU TRICH script vong 2 tu verdict vong 2 roi replay, va TU KHAI mot
+  luot replay rc=1 la "hong gian do do neo cu stale", khong tinh la test san pham that bai —
+  do la phan biet dung ma tep nay dan. KHONG CHUNG MINH: identity model. KHONG DO DUOC.
+
+verdict_usage_caveats:
+  - id: HAI-P2-VONG-3-DA-VA-nhung-VA-CAN-REVIEW-LAI
+    noi_dung: >-
+      Ca hai P2 vong 3 da duoc va trong cung PR, nhung BAN VA CHUA duoc review. Lan thu TU
+      lien tiep trong mot PR ma ban va sinh ra phat hien moi — va lan nay chinh CHOT DOI
+      CHUNG VUA SIET da bat duoc mot loi cua GIAN DO (ban sao dot bien dat phang trong /tmp
+      lam PROVIDER_CHO_PHEP tut ve {anthropic, human}, khien ba dot bien that bi bao oan la
+      "pha ca cong"). Dung doc "da va" thanh "da dong". Chua dong.
+  - id: approve_with_findings-KHONG-phai-du-dieu-kien-LAND
+    noi_dung: >-
+      Reviewer noi thang: "Khong tao cross_approved, approval GitHub hoac land authorization
+      bang bao cao nay", va liet ke not_run: selftest day du, workflow-audit/golden/
+      determinism, release-bundle, parity Windows/CRLF, readback CI tu xa, LIVE, merge/deploy.
+      Day la review MOT BAN VA, khong phai xac nhan du dieu kien land.
+  - id: cross_approved-dua-tren-PROVIDER-khong-phai-MODEL
+    noi_dung: >-
+      Nhu cac luot truoc: muc cross_approved phan biet PROVIDER, do duoc bang launcher.py run.
+      Thu KHONG do duoc la MODEL nao trong provider ay.
+  - id: phan-cong-CAM-tu-soan-phan-chung
+    noi_dung: >-
+      Nhu cac luot truoc: cam reviewer tu soan chuoi tan cong. Do phu hep hon mot luot khong
+      rang buoc.
+
+delivered: true
+delivered_by: claude-session
+recorder_cung_la_nguoi_thi_cong: true

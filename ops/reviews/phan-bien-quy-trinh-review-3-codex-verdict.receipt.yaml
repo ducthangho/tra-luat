@@ -9,6 +9,7 @@
 # truoc. Phien dieu phoi DO LAI DOC LAP toan bo so cua N1 va N2 — khop tung so.
 
 schema_version: 2
+receipt_id: phan-bien-quy-trinh-review-3-codex-20260906-4f5341d4
 kind: review_delivery_receipt
 packet_id: 'PR452-PHAN-BIEN-QUY-TRINH'
 lease_id: khong-co-lease
@@ -24,6 +25,39 @@ verdict_path: ops/reviews/phan-bien-quy-trinh-review-3-codex-verdict.md
 verdict_sha256: 93b4c862f219f35a7e6d51ce941e206c1260950de7dbc285bdeb5fea5fe05ae1
 verdict_bytes: 20339
 reviewed_sha: 76318fa106019611fbd5ea9ec6e2553bb7773faf
+
+model_reviewer_identity:
+  provider: openai_codex
+  surface: codex_cli
+  session_run_id: 4f5341d473c8442380dc2182f9cde013
+  prompt_sha256: d0e56f1a0ce68702c8d0bf8c5feff31ebad79e813e19b8d8a2af6779705e7a53
+  prompt_kin_hoan_toan: true
+  thoi_luong_giay: 645.553
+  ma_thoat: 0
+  neo_boi_launcher: >-
+    `launcher.py run` bọc `codex exec` trong CLONE RỜI, detached đúng `reviewed_sha`,
+    `--require-clean`, prompt truyền qua `{PROMPT_FILE}` nên con đọc BẢN CHỤP BẤT BIẾN.
+    Launcher TỪ CHỐI chạy nếu lệch ⇒ ba thứ ấy đo được, KHÔNG phải lời khai.
+  KHONG_do_duoc: >-
+    ID MODEL CỤ THỂ và phiên bản của nó. `codex-cli` không trả model đang phục vụ, và không
+    có biên nhận độc lập nào chứng thực. Khai `openai_codex/codex_cli` là mức chính xác nhất
+    đo được; đừng đọc trường này thành bằng chứng về model.
+
+github_submitter_identity:
+  actor: ducthangho
+  la_tac_gia_PR: true
+  ghi_chu: >-
+    `ADR-0040`: biên nhận do tài khoản tác giả đăng KHÔNG thành required check hay merge
+    authorization. Trường này ghi AI VẬN CHUYỂN, không cấp thẩm quyền.
+
+anchor:
+  loai: canonical_ancestry
+  cuong_do: trung_binh
+  mo_ta: >-
+    Neo bằng `verdict_sha256` + commit ĐẦU TIÊN chứa tệp verdict (`2fb43fc8`), đã đo
+    là byte-identical với bản hôm nay. KHÔNG tag `luu-tru/*`, KHÔNG protected ref, KHÔNG check
+    object ⇒ mỏ neo TRUNG BÌNH: nó chết nếu lịch sử bị viết lại. Phiên web không đẩy được
+    `refs/tags/*` (đo 16-08-2026: 403 do proxy egress), nên nâng lên mức MẠNH cần đường khác.
 
 run_neo:
   run_id: 4f5341d473c8442380dc2182f9cde013
@@ -68,7 +102,11 @@ verdict_doi_chieu: >-
   thai dung la KHONG DO DUOC.
 authoritative_source: repo_file
 evidence_channel: repo_file
-evidence_url: https://github.com/ducthangho/tra-luat/pull/452
+evidence_url: https://github.com/ducthangho/tra-luat/blob/2fb43fc8e3fd6dacd6bb9e42731e751d3de2e262/ops/reviews/phan-bien-quy-trinh-review-3-codex-verdict.md
+evidence_url_ghi_chu: >-
+  ĐÃ GHIM theo commit `2fb43fc8` — commit ĐẦU TIÊN chứa tệp verdict; đã đo bản tại
+  commit ấy khớp từng byte với bản hôm nay. Bản trước trỏ URL PR, là mỏ neo TRÔI: `t26` chỉ
+  kiểm hình dạng `https://` nên URL nào cũng qua — cổng không phân biệt bền với trôi.
 
 verdict_usage_caveats:
   - id: cross-approved-KHONG-phai-da-duyet-noi-dung

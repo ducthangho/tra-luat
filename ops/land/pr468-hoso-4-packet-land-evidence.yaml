@@ -1,0 +1,126 @@
+# LAND EVIDENCE — hồ sơ bốn packet treo sau #456 (Mission #467 / PR #468).
+#
+# VÌ SAO TỆP NÀY TỒN TẠI: `ADR-0045` đòi mỗi lần dùng phải để lại VẾT ĐỌC ĐƯỢC BẰNG MÁY. Một dòng
+# "chủ kho đã merge" trong chat KHÔNG phải vết ấy. Tệp này ghi việc đã làm và — quan trọng không
+# kém — ghi những gì KHÔNG đo được từ phiên điều phối.
+#
+# CẢNH BÁO PHẠM VI, đọc trước: đây là land evidence thứ HAI của kho (tệp đầu là
+# `plat-x8-land-evidence.yaml`). Chưa bộ kiểm nào chạy trên tệp land evidence — đừng đọc
+# "cổng xanh" thành "land evidence đã được validate".
+
+schema_version: 1
+mission_id: gh-467
+generation: 1
+provider: claude
+role: land_operator_ghi_ho
+session_id: fbace9af-dba2-5564-96ad-cc29ca23dc03
+input_packet_generations: [1]
+
+authorized_head_sha: 17f4a1b85b8d5146c5e6dddbdc40f11111a659f7
+approver: notebyme88
+authorization_url: https://github.com/ducthangho/tra-luat/pull/468#pullrequestreview-5135718329
+authorization_ghi_chu: >-
+  Duyệt KHÁC DANH TÍNH có vết bền trên GitHub, khác hẳn tiền lệ `plat-x8` (uỷ quyền miệng, URL null).
+  Người duyệt `notebyme88` ≠ tác giả PR `ducthangho`. Có HAI review `APPROVED` trên cùng head
+  `17f4a1b`: `#pullrequestreview-5135633830` lúc 22:54:28Z và `#pullrequestreview-5135718329` lúc
+  23:15:00Z. Trường này neo cái SAU. Lý do có hai: sau lần duyệt đầu `mergeable_state` vẫn `blocked`
+  suốt ~5 phút theo dõi, nên chủ kho duyệt lại.
+  TRƯỚC ĐÓ hai phê duyệt đã bị HUỶ (`DISMISSED`) tại `203a636` và `922956a` — cả hai đều do
+  CHÍNH PHIÊN ĐIỀU PHỐI đẩy commit mới lên sau khi được duyệt. Đó là lỗi vận hành của điều phối,
+  ghi lại để không lặp: mỗi commit đẩy lên sau phê duyệt đều huỷ phê duyệt ấy.
+
+merge_method: merge
+merge_commit: 802fc01b5db866478459dbc4a65d008a38619898
+land_operator: ducthangho
+land_operator_ghi_chu: >-
+  Chủ kho tự bấm Merge trên giao diện GitHub lúc `2026-09-07T23:21:22Z`. Phiên điều phối KHÔNG
+  thực hiện thao tác merge: lệnh `merge_pull_request` bị classifier chế độ auto từ chối, và
+  phiên không tìm đường vòng. Tệp này do điều phối GHI HỘ sau khi đo, không phải người land tự ghi.
+
+# --- CROSS-REVIEW: 15 lượt, khác nền (executor claude / reviewer codex gpt-6-astra xhigh) ---
+cross_review:
+  so_luot: 15
+  reviewer_provider: codex
+  executor_provider: claude
+  p1_theo_luot: {7: 4, 8: 3, 9: 1, 10: 1, 11: 2, 12: 2, 13: 0, 14: 0, 15: 0}
+  luot_cuoi:
+    so: 15
+    reviewed_sha: 745d8889d0d6468785f26003876ba823c8b2db99
+    verdict: approve
+    p1: 0
+    p2: 0
+    p3: 1
+  ghi_chu_head: >-
+    GIỚI HẠN PHẢI ĐỌC: lượt 15 review `745d888`, KHÔNG phải head đã merge `17f4a1b`. Giữa hai SHA
+    là commit `17f4a1b` — vá nốt P3 duy nhất còn lại của lượt 15, gồm 2 tệp, `+55/−12`, toàn bộ
+    trong `ops/reviews/`, 0 tệp mã chạy được. Tức **head được merge chưa qua một lượt cross-review
+    nào**. Đây là nợ thật, không phải chi tiết kỹ thuật.
+
+# --- PHÉP ĐO TRƯỚC MERGE (do điều phối chạy) ---
+pre_merge_checks:
+  - ten: 'full-gate chạy MỘT lần theo chỉ thị chủ kho'
+    ket_qua: >-
+      Nền `b416830` so sau `f77f198`. DELTA = 0 trên bốn cặp tệp thực sự lưu. Sáu bộ:
+      cidk 0/0 · ploop 0/0 · lease 1/1 · doctrine-scan 0/0 · adr-song 0/0 · doc-claims-check 0/0.
+      Không bộ nào `out=0B`. Hiện vật ở `ops/reviews/full-gate-pr468-20260907/`.
+    gioi_han: >-
+      `lease rc=1` ở CẢ HAI vế vì container thiếu `actionlint` — fail-close ĐÚNG, không phải hồi quy.
+      Ca `t33` ĐÃ CHẠY và ĐỎ ở tiền điều kiện; thứ chưa chạy là thao tác lint workflow bên trong.
+      Chỉ 1/6 kích thước stdout tự đếm lại được từ hiện vật; phần còn lại là lời khai đọc từ log.
+
+# --- PHÉP ĐO SAU MERGE (chạy trên master `802fc01`, 2026-09-08) ---
+post_merge_checks:
+  - ten: 'head đã vào master'
+    ket_qua: '`git merge-base --is-ancestor 17f4a1b origin/master` ⇒ ĐÚNG. master = `802fc01`, hai cha = `b416830` + `17f4a1b`.'
+  - ten: 'nhánh không còn commit ngoài master'
+    ket_qua: '`rev-list --count origin/master..claude/soan-spec-3-viec-treo-20260906` ⇒ **0**'
+  - ten: 'bộ lease trên master, có actionlint đúng bản ghim'
+    ket_qua: '`rc=0` · **121/121 đạt; đã chạy=121, bỏ qua=0** · 71 s · out 8649 B. actionlint 1.7.7 cài bằng `ops/cai_actionlint.sh`.'
+    ghi_chu: >-
+      Đây là lần `t33_workflow_dang_lease_phai_qua_actionlint` được ĐO THẬT trên master. Trong
+      full-gate trước merge nó ĐỎ vì thiếu công cụ, nên suite khi ấy là 120/121.
+  - ten: 'doc-claims-check trên master'
+    ket_qua: '`rc=0`, `ok: true`, out 70861 B'
+  - ten: 'mọi manifest trong ops/reviews trên master'
+    ket_qua: >-
+      13 manifest, **0 hỏng**. Chi tiết: 9 gói kiểm trực tiếp `rc=0`; lượt 12 và 13 kiểm theo ánh xạ
+      `DOC-MANIFEST.md` ⇒ **178/178** và **48/48**; lượt 11 kiểm qua `manifest11-layout/` của gói 12
+      ⇒ **128/128**; `bundle-PROMPT.sha256` là băm trần không có tên tệp nên `sha256sum -c` không
+      phân tích được — so trực tiếp với `bundle-PROMPT.md` ⇒ KHỚP `e60c376a…`.
+    canh_bao_doc_ket_qua: >-
+      Chạy `sha256sum -c` từ chính thư mục manifest cho 4 gói ra `OK=0/N`. Đó KHÔNG phải hỏng:
+      các manifest ấy ghi bố cục SANDBOX của reviewer (`VERDICT.md`, `do-review13/…`), còn trong kho
+      tệp đã đổi tên và làm phẳng. Phiên điều phối đã một lần suýt báo kho hỏng vì phép kiểm sai này.
+
+# --- KHÔNG ĐO ĐƯỢC — phải nói, không được lấp ---
+khong_do_duoc:
+  - muc: 'Trạng thái CI của PR và của merge commit'
+    ly_do: >-
+      Bộ công cụ GitHub của phiên chỉ có **44 tool**, KHÔNG có nhóm workflow/actions. `get_status`
+      chỉ trả API status cũ (`total_count: 0`, `statuses: []`), không phải check-run của Actions.
+    hau_qua: >-
+      Tiền lệ `plat-x8` đo được `gate (ubuntu-latest)` và `gate (windows-latest)` theo JOB trên cả
+      exact head lẫn merge commit. Lần land này KHÔNG có phép đo tương đương. Không ai được đọc
+      "0 P1" hay "manifest sạch" thành "CI xanh".
+  - muc: 'Vì sao `mergeable_state` giữ `blocked` sau phê duyệt đầu'
+    ly_do: 'Theo dõi ~5 phút vẫn `blocked`/`mergeable: None`; không đọc được check-run để biết cái nào chặn.'
+  - muc: 'Head `17f4a1b` chưa qua cross-review'
+    ly_do: 'Lượt 15 neo `745d888`. Đã nêu ở `cross_review.ghi_chu_head`.'
+
+bookkeeping:
+  - >-
+    Lỗ hổng gốc `_kiem_bia_mo` dùng `any(...)` trong `ops/lease_publish.py` VẪN NGUYÊN. PR này là
+    hồ sơ, không chạm mã điều phối. Đặc tả `ops/specs/THU-HOI-LEASE-VA-CAP-LAI.md` (revision 3) đang
+    chờ chủ kho cấp lease; phiên riêng `session_01Vt7NfNpABHfSWpxvx4aJGE` xử lý.
+  - >-
+    Câu A9 treo từ lượt 10 CHƯA AI CHỐT: bốn revision GATE (`exec-1` → `r2` → `r3` → `r4`) đều được
+    cấp trong lúc lease #456 còn giữ; mỗi revision mang `spec_hash` KHÁC NHAU nhưng `generation` đều
+    = 1. Verdict lượt 13 nói *"không hồi tố hợp lệ hoá việc cấp trước hạn"* nhưng không kết luận có
+    phải ghi nợ hay không.
+  - >-
+    P1 `bia-mo-mot-ref-khong-thu-hoi-moi-ban` đóng bằng THỜI GIAN, không bằng bản vá: lease #456 hết
+    hạn `14:30:07Z 07-09-2026`. Readback sau hạn ở `ops/reviews/DOC-READBACK-SAU-HAN-456.md`.
+  - >-
+    Bốn Packet Issue #463–#466 và Mission #467 đều còn `open`; PR này KHÔNG nghiệm thu chúng.
+  - >-
+    PR #477 (`ops/dung_goi_review.sh` + bản ghi t33) đang chạy vòng vá/cross-review riêng, chưa merge.

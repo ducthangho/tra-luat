@@ -1,4 +1,4 @@
-# ĐO t33 SAU KHI CÀI actionlint, và vá tận gốc việc dựng gói review
+# ĐO t33 SAU KHI CÀI actionlint, và chuẩn hoá việc dựng gói review
 
 Ngày `2026-09-07`. Vá hai nợ còn lại sau khi PR #468 đạt verdict `approve`.
 
@@ -41,16 +41,22 @@ CI **đã** cài `actionlint` từ trước (`ci.yml:98`, `duyet-phan-chung.yml:
 `ops-publish-lease.yml`). Nên đây chưa bao giờ là lỗ hổng của kho — chỉ là container chạy gate
 thiếu công cụ. Nợ nằm ở chỗ dựng môi trường đo, và mục 2 vá đúng chỗ đó.
 
-## 2. `ops/dung_goi_review.sh` — vá tận gốc, không vá triệu chứng
+## 2. `ops/dung_goi_review.sh` — chuẩn hoá việc dựng gói
 
-Ba lỗi liên tiếp có **cùng một gốc**: việc dựng gói hiện vật cho reviewer nằm rải rác trong
-scratchpad từng phiên, không phải một thứ chạy được trong kho.
+Việc dựng gói hiện vật trước nay nằm rải rác trong scratchpad từng phiên, không phải một thứ
+chạy được trong kho. Đưa nó vào một script kiểm được và chạy lại được là **lựa chọn thiết kế**
+có lý — nhưng đó không phải kết luận về nguyên nhân.
 
-| lỗi | biểu hiện | gốc |
+**GIỚI HẠN PHẢI ĐỌC.** Bản đầu của mục này viết *"vá tận gốc"* và *"ba lỗi liên tiếp có **cùng
+một gốc**"*. Cả hai đều khai mạnh hơn bằng chứng: hiện vật lịch sử của ba sự cố **không còn**,
+nên không ai kiểm được từng ca đã xảy ra thế nào, và **không chứng minh được chúng chung nguyên
+nhân**. Bảng dưới là **danh sách động cơ** viết script này, không phải chẩn đoán đã xác thực.
+
+| sự cố | biểu hiện | động cơ viết script (**chưa xác thực là nguyên nhân**) |
 |---|---|---|
 | P1 lượt 12 `mirror-thieu-ref-khong-du-do-a9` | gói chỉ mang 3 tên nhánh | **CHƯA XÁC THỰC ĐƯỢC** (hiện vật lượt 12 không còn) — xem ĐÍNH CHÍNH bên dưới |
 | P3 lượt 13 `evidence-thieu-phuong-phap-trich-va-gioi-han-bao-phu` | `EVIDENCE.md` không khai cách trích số và phần bỏ sót | viết tay mỗi lượt |
-| `t33` không đo được | container thiếu `actionlint` | không có bước cài công cụ trước khi đo |
+| `t33` **ĐỎ** ở tiền điều kiện | container thiếu `actionlint`; hàm đã chạy, thao tác lint bên trong thì chưa | không có bước cài công cụ trước khi đo |
 
 Script làm cả ba: clone mirror **đủ mọi ref**, **vật chất hoá** từng nhánh thành `refs/heads/*`,
 cài công cụ bắt buộc bằng bản ghim của kho, sinh `EVIDENCE.md` **tự khai cách trích và phần bỏ

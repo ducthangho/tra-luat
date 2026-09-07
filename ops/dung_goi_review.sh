@@ -1,8 +1,13 @@
 #!/usr/bin/env bash
 # Dung GOI HIEN VAT cho reviewer khac nen — DU REF, DU CONG CU, DU TU KHAI.
 #
-# VI SAO CO TEP NAY. Ba lan lien tiep cung mot hinh dang loi, deu vi viec dung goi
-# nam RAI RAC trong scratchpad cua tung phien chu khong phai mot thu chay duoc trong kho:
+# VI SAO CO TEP NAY. Viec dung goi hien vat truoc nay nam RAI RAC trong scratchpad tung phien
+# chu khong phai mot thu chay duoc trong kho. Chuan hoa no vao mot script co the KIEM va CHAY LAI
+# la mot cai thien co ly — nhung do la LUA CHON THIET KE, khong phai ket luan nguyen nhan.
+#
+# GIOI HAN PHAI DOC: ba su co duoi day KHONG duoc chung minh la chung mot nguyen nhan. Hien vat
+# lich su cua chung khong con, nen khong ai kiem duoc tung ca xay ra the nao. Doc day nhu DANH
+# SACH DONG CO viet tep nay, khong phai nhu chan doan da xac thuc:
 #
 #   PR #468 luot 12, P1 `mirror-thieu-ref-khong-du-do-a9`
 #       goi chi mang 3 ten nhanh. Reviewer khong tai do duoc khang dinh toan kho.

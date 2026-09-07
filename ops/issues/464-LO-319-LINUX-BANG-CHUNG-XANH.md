@@ -130,7 +130,7 @@ nó nhìn thấy.
 
 ---
 
-**Đặc tả đóng băng:** `ops/specs/LO-319-LINUX-BANG-CHUNG-XANH.md` @ `b743f1798aba12615f903a11bd451c87e404814e`
+**Đặc tả đóng băng:** `ops/specs/LO-319-LINUX-BANG-CHUNG-XANH.md` @ `2a80dcc1cdc868adcc302cf3a5c11ff7a6a3b25d` (commit ĐẦU TIÊN chứa bản có băm dưới đây; `b743f17` là bản trước đính chính lượt 6–7, băm `3aafd766…` — finding P1 `issue-lo-neo-commit-cu-kem-bam-moi` lượt 7)
 **`spec_sha256`:** `0257a690d058b643b182516486cdf1856d0632be54797458123c88e8ef06378c`
 **`review_class`:** `sensitive` · **`base_sha`:** `1b3caa1` · **`depends_on`:** `GATE-TACH-JOB-CAT-CHI-PHI`
 **Lease nháp:** `ops/leases/lo-319-linux-bang-chung-xanh-exec-1-claude-20260906.yaml.nhap` (5 ô null —

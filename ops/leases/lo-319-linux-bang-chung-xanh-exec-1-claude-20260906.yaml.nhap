@@ -25,7 +25,7 @@ event: executor_lease_granted
 packet_issue: 464
 mission_issue:
 granted_by:
-granted_on_instruction:
+granted_on_instruction:   # khi cấp: neo https://github.com/ducthangho/tra-luat/issues/464#issuecomment-5567158069 (chủ kho đã chọn §12 = tiếp H, 07-09-2026)
 leased_at_utc:
 lease_expires_at_utc:
 # ───────────────────────────────────────────────────────────────────────────────────
@@ -45,8 +45,8 @@ assurance_target: cross_approved
 access: read-write
 
 spec_path: ops/specs/LO-319-LINUX-BANG-CHUNG-XANH.md
-spec_sha256: 0257a690d058b643b182516486cdf1856d0632be54797458123c88e8ef06378c
-spec_hash: 0257a690d058b643b182516486cdf1856d0632be54797458123c88e8ef06378c
+spec_sha256: 4db18266746e220b5745a341faa1307a105b1ace457e31c6af5dcf461d3c86ae
+spec_hash: 4db18266746e220b5745a341faa1307a105b1ace457e31c6af5dcf461d3c86ae
 
 write_set:
   - .claude/dev/ci_dang_ky_test.py

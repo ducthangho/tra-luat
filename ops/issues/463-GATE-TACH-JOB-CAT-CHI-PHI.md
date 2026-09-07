@@ -118,11 +118,11 @@ Phép canh hai nguồn ref chạy trước: máy chủ 299 ⊆ cục bộ 300 (`
 ---
 
 **Đặc tả đóng băng:** `ops/specs/GATE-TACH-JOB-CAT-CHI-PHI.md` @ `b743f1798aba12615f903a11bd451c87e404814e`
-**`spec_sha256`:** `8cca700cba9c2312d05bf64eee3d4a5bda5317cb45e244ed22161b4ddcc83c62`
+**`spec_sha256`:** `bda86f128c220b868e9c103c919d213d8aba5ed1753962b0898ea1ce1852812c` (**revision 2**, 07-09-2026 — chỉ thị https://github.com/ducthangho/tra-luat/issues/463#issuecomment-5567157629; revision 1 = `8cca700cba9c2312d05bf64eee3d4a5bda5317cb45e244ed22161b4ddcc83c62`)
 **`base_sha`:** `1b3caa1` lúc soạn; **ba mỏ neo trong lease đo lại lúc cấp = `d28c4b1`** (head `master`
 03:37:33Z 07-09-2026) · **đi TRƯỚC** `LO-319` · `2A` · `2B`
-**Lease ĐÃ CẤP:** `ops/leases/gate-tach-job-cat-chi-phi-exec-1-claude-20260906.yaml` (0 ô null; cấp
-03:37:33Z 07-09, hạn 03:37:33Z 08-09, uỷ quyền neo Mission #467)
+**Lease ĐÃ CẤP (revision 2):** `ops/leases/gate-tach-job-cat-chi-phi-exec-1r2-claude-20260906.yaml` (0 ô null; cấp 2026-09-07T07:50:35Z, hạn 2026-09-08T07:50:35Z, `thay_the_cho` exec-1,
+uỷ quyền neo https://github.com/ducthangho/tra-luat/issues/463#issuecomment-5567157629); lease `exec-1` (cấp 03:37:33Z 07-09, Mission #467) mang bia mộ `da_bi_thay_the`.
 **Nền A1/A5 tái lập được TRONG KHO:** `ops/reviews/pr468-hoso-4-packet-review-6-codex/nen-a1-a5/`
 (13 run · 26 job · 1140 bước, `job.tsv` + `buoc.tsv` + `tinh.py`, đo 03:54Z 07-09-2026) — thay cho
 `buoc_master.tsv` mà đặc tả nhắc nhưng không có trong kho (finding P1 `thieu-hien-vat-quyet-dinh-h-va-chi-phi`).

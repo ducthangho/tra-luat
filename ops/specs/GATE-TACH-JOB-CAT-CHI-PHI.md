@@ -1,4 +1,4 @@
-# Đặc tả packet — GATE-TACH-JOB-CAT-CHI-PHI
+# Đặc tả packet — GATE-TACH-JOB-CAT-CHI-PHI (revision 2)
 
 - `packet_id`: **GATE-TACH-JOB-CAT-CHI-PHI** (bí danh chữ; ID bền theo `PROTOCOL §3.2` là
   `wp<packet_issue>`, suy ra được ngay khi có số Issue — tiền lệ #456 giữ bí danh ở `packet_id`,
@@ -7,8 +7,15 @@
 - `mission_issue`: **(để trống — chủ kho cấp.)** `§3.2` đòi; lease #456 không có, và không có
   mission nào đang mở cho lane này. Khuyến nghị: mở MỘT Mission Issue cho cả bốn packet
   (`GATE` · `LO` · `2A` · `2B`); nếu không, ghi số Issue của `#456` và nói rõ đó là thay thế.
-- `revision`: 1 · `generation`: 1 — giữ 1 có chủ ý (nháp thứ ba của revision 1, chưa có Issue nên
-  chưa đóng băng; lý do đầy đủ và quy ước `lease_id …-exec-1rN-…` đo được ở `LO-319` dòng `revision`)
+- `revision`: **2** · `generation`: 1 — revision 2 mở theo chỉ thị chủ kho 07-09-2026 (dấu vết bền: https://github.com/ducthangho/tra-luat/issues/463#issuecomment-5567157629) sau
+  cross-review lượt 6–7 của PR #468. Đổi so với revision 1 (băm `8cca700c…`): (a) bảng *"Hệ số nền"* tính lại từ nguồn
+  TRONG KHO `ops/reviews/pr468-hoso-4-packet-review-6-codex/nen-a1-a5/buoc.tsv` — 4/7 trung vị đổi (`test registry`
+  `1,20→1,21` · `packet-loop` `2,35→2,37` · `G5` `2,39→2,40` · `bien-nhan v2` `7,56→7,79`), thay cho `buoc_master.tsv` không có
+  trong kho; (b) mười một run được gọi đúng tên: **5 `master/push` + 6 run nhánh khác** (`pull_request`/`workflow_dispatch`),
+  1 head 39 bước + 10 head 40 bước — không phải "mười một lượt master"; (c) gỡ mâu thuẫn *"A1 ≤ 25,00 nhưng nới theo phương
+  sai"*: **A1 giữ ≤ 25,00**, biên độ quan sát KHÔNG phải phương sai và KHÔNG là giấy phép nới; (d) run `34048229370`
+  (60,17 phút, `cancelled`) là `workflow_dispatch` trên nhánh, không phải master. Mọi số khác giữ nguyên chữ của revision 1.
+  Quy ước `lease_id …-exec-1rN-…` đo được ở `LO-319` dòng `revision`.
 - `executor`: claude · `environment`: cloud
 - `risk`: **sensitive** · `review_class`: **sensitive** (`.github/workflows/` — `PROTOCOL §8` loại
   trừ tường minh khỏi patch-as-hint; đây là ĐỊNH NGHĨA của cổng, không phải mã dưới cổng)
@@ -92,7 +99,7 @@ biên cho nó. Hai lượt là **hai điểm dữ liệu** — **và câu ấy �
 Đó là lý do bảng này tách khỏi bảng trên thay vì dùng chung. **Phiên thi công phải ĐO LẠI cả hai
 bảng** — đây là số của 06-09-2026, và `L5` nói con số đúng lúc viết vẫn sai lúc người khác đọc.
 
-### ĐO LẠI 2026-09-07 02:49:51 UTC — mười một lượt master, và trần 60 ĐÃ BỊ CHẠM THẬT
+### ĐO LẠI 2026-09-07 02:49:51 UTC — mười một lượt (5 master + 6 nhánh khác), và trần 60 ĐÃ BỊ CHẠM THẬT
 
 Hai bảng trên viết lúc 18:10Z 06-09-2026 khi chỉ có **hai** lượt master chạy trọn. Bảng này là
 phép đo thứ ba, và **chính nó đã hết hạn một lần trong lúc đang soạn** — xem hộp *"nền trôi" ngay dưới.
@@ -111,7 +118,9 @@ phép đo thứ ba, và **chính nó đã hết hạn một lần trong lúc đa
 | `771c6ed` | **49,62 p** | 7,25 | 44 / 6 | `34065779670` |
 | `0c3405f` | **50,48 p** | 7,30 | 44 / 6 | `34070122978` |
 
-**n = 11** job Windows `success` trên master. Đơn vị: **phút tường của job**, từ `started_at` tới
+**n = 11** job Windows `success` — revision 2 nói cho đúng (lượt 7 bắt): **5 `master/push`** (`8ce02fd` `1b3caa1` `28cb898` `cacaba3`
+`d28c4b1`) **+ 6 run nhánh** `claude/tra-luat-process-review-o4d7kb` / `claude/priceless-volhard-329577` (`pull_request` hoặc
+`workflow_dispatch`); 1 head 39 bước (`1b3caa1`, chưa có `bien-nhan v2 selftest`) + 10 head 40 bước. Đơn vị: **phút tường của job**, từ `started_at` tới
 `completed_at` do GitHub ghi — **độ phân giải nguồn là GIÂY**, nên mọi số phút ở đây là giây/60.
 
 - **min `40,20` · max `50,48` · biên độ `10,28` phút · trung vị `46,02` · trung bình `45,84`.**
@@ -119,7 +128,9 @@ phép đo thứ ba, và **chính nó đã hết hạn một lần trong lúc đa
 - ubuntu cùng kỳ (n = 19 job `success`): `20,93` – `28,42`, trung vị `26,52`.
 
 **Biên độ `10,28` phút LỚN HƠN mọi khoản tiết kiệm mà bảng "cái giá của việc tách job" hứa cho
-một bước đơn lẻ.** Ngưỡng nào ở `nghiem_thu` chừa dưới `10,28` phút thì đang đo nhiễu chứ không đo bản vá.
+một bước đơn lẻ.** Nhưng — revision 2 nói cho đúng mức — biên độ ấy **gộp cả khác tải lẫn khác nhánh** (5 master + 6
+nhánh, 39 so 40 bước), **không** phải nhiễu runner thuần và **không** phải phương sai; nó là lý do để ĐỌC kết quả A1 thận
+trọng, không phải giấy phép nới A1. A1 giữ `≤ 25,00`; nếu A1 ĐỎ thì báo chủ kho (A1 đã nói: đó là KẾT QUẢ ĐO).
 
 #### Nền TRÔI nhanh hơn tốc độ viết đặc tả — đo hai lần, cách nhau 2 giờ 4 phút
 
@@ -137,7 +148,7 @@ phiên thi công: **đừng trích bảng này**, chạy lại `buoc_master.tsv`
 (*biên độ lớn hơn khoản tiết kiệm; trần đã bị chạm; hệ số nền không phải một con số*) **bền qua cả hai**
 phép đo và mạnh lên ở phép đo sau — chỉ các con số minh hoạ là trôi.
 
-#### Trần 60 KHÔNG còn là rủi ro suy diễn — nó đã bị chạm, trên master
+#### Trần 60 KHÔNG còn là rủi ro suy diễn — nó đã bị chạm (run `workflow_dispatch` trên nhánh, revision 2 sửa chữ "trên master")
 
 Run `34048229370`, head `4cd80c5`, `gate (windows-latest)`: **60,17 phút**, `conclusion: cancelled`,
 **26 / 44** mục còn `skipped`.
@@ -155,13 +166,17 @@ một điểm: cột cuối cho dải của chính giá trị trung vị khi m�
 
 | bước | n cặp | thấp nhất | cao nhất | trung vị | dải làm tròn của trung vị |
 |---|---:|---:|---:|---:|---|
-| `test registry` | 11 | 1,07× | 1,71× | **1,20×** | `1,19×`–`1,20×` |
+| `test registry` | 11 | 1,07× | 1,71× | **1,21×** | `1,21×`–`1,21×` |
 | `tl selftest` | 11 | 1,41× | 2,26× | **1,83×** | `1,82×`–`1,84×` |
-| `packet-loop selftest` | 11 | 1,88× | 2,89× | **2,35×** | `2,34×`–`2,36×` |
-| `G5 kiem ban ke` | 11 | 1,91× | 3,09× | **2,39×** | `2,37×`–`2,42×` |
+| `packet-loop selftest` | 11 | 1,88× | 2,89× | **2,37×** | `2,36×`–`2,38×` |
+| `G5 kiem ban ke` | 11 | 1,91× | 3,09× | **2,40×** | `2,37×`–`2,43×` |
 | `lease-publish selftest` | 11 | 2,42× | 3,84× | **2,94×** | `2,91×`–`2,97×` |
-| `bien-nhan v2 selftest` | 10 | 7,07× | 9,74× | **7,56×** | `7,48×`–`7,65×` (n chẵn) |
+| `bien-nhan v2 selftest` | 10 | 7,07× | 9,74× | **7,79×** | `7,71×`–`7,88×` (n chẵn) |
 | **job trọn `gate`** | 11 | 1,52× | 2,36× | **1,73×** | — |
+
+(Revision 2: tính lại từ `nen-a1-a5/buoc.tsv` TRONG KHO, cùng 11 run, cùng bộ lọc *cả hai nền `success`*, `tl selftest`
+khớp theo tiền tố tên vì lane PR/master in hai tên khác nhau; revision 1 khai `1,20 · 2,35 · 2,39 · 7,56` từ một TSV không
+có trong kho — reviewer lượt 7 đo lệch 4/7, executor tính lại độc lập ra cùng số.)
 
 **Kết luận đổi hướng một giả định mà cả bốn đặc tả đang dựa vào.** Hệ số *"Windows đắt gấp ~3"* —
 khai là **nội suy** ở `MUTANT-WINDOWS-SUBAGENT-GHI-DETECT` `chua_do_duoc` #1 — nay đo được, và nó
@@ -180,12 +195,11 @@ selftest python nặng. Một hệ số duy nhất không dùng được cho c�
 4. Mẫu là **mọi lượt master trong ~9,6 giờ** — **mẫu tiện tay**, không phải mẫu thiết kế. Nó không nói gì
    về nền ở giờ cao điểm của GitHub, về runner ở vùng khác, hay về cây sau khi ba packet mutant land.
 
-**Hiện vật để TÁI TÍNH — đây là bản vá cho một lỗi của bản trước.** Bản 00:45Z chỉ giao
-`mruns_all.tsv` (9 cột: chỉ thời lượng JOB + `bien_nhan_phut`), nên bảng tỉ lệ theo BƯỚC ở trên
-**không tái tính được** từ hiện vật — reviewer bị đòi kiểm một bảng mà không được cho dữ liệu để kiểm
-(cross-review lượt 5 mảnh C bắt được). Nay hiện vật là **`buoc_master.tsv`**: 12 cột, **một hàng mỗi
-BƯỚC** (2062 hàng), giây thô, `KHONG_DO_DUOC` fail-close cho run không đọc được (lượt này: 0).
-Nó **KHÔNG** trong kho — phiên thi công phải chạy lại phép đo, không trích số ở đây.
+**Hiện vật để TÁI TÍNH — nay ở TRONG KHO.** Revision 1 dẫn `buoc_master.tsv` (2062 hàng) nằm ở scratchpad phiên soạn —
+**không có trong kho, không tái lập được** (finding P1 `thieu-hien-vat-quyet-dinh-h-va-chi-phi`, lượt 6–7). Nguồn có thẩm
+quyền từ revision 2: `ops/reviews/pr468-hoso-4-packet-review-6-codex/nen-a1-a5/` — `job.tsv` (26 job), `buoc.tsv` (1140 bước,
+giây thô, một hàng mỗi bước), `tinh.py` (tái sinh `tom_tat.md` khớp byte), `raw/` (phản hồi API đã chép), đo 03:54Z
+07-09-2026 qua `list_workflow_jobs`. Phiên thi công đo lại A1/A5 bằng cùng cách, không trích số ở đây.
 
 ### Chi phí nằm ở đâu — phân rã theo bước, run `34045664423` (lượt nhánh)
 
@@ -595,16 +609,13 @@ Bản đầu viết *"ba mục nay đóng được"* trong khi bảng của chí
    hai phép đo trả lời câu ấy — và nếu chúng ĐỎ thì đó là kết quả, không phải thất bại.
 2. **Không có đường đo Windows tại chỗ.** Container Linux. Mọi khẳng định về Windows đi qua CI.
    Kế thừa nguyên vẹn từ #456 `chua_do_duoc` #4.
-3. **ĐÃ ĐÓNG MỘT PHẦN — nay có MƯỜI MỘT lượt, nhưng phương sai LỚN HƠN ngưỡng A1 và đang NỚI RA.**
-   Bản đầu viết *"chỉ có HAI lượt chạy trọn"*; nó hết hạn sau 6 giờ. Bản thứ hai viết *"chín lượt,
-   biên độ 9,42"*; nó hết hạn sau **2 giờ 4 phút**. Đo 02:49:51Z 07-09-2026: **11** job Windows
-   `success`, `40,20`–`50,48` phút, **biên độ `10,28`**, biên dưới trần 60 còn **`9,52`** phút.
-   Cái đóng được: nhiễu không còn suy từ hai điểm. Cái KHÔNG đóng được, và nó nghiêm trọng hơn:
-   ngưỡng `≤ 25,00` ở A1 chừa `~4` phút, mà **biên độ quan sát được là `10,28`** — tức A1 có thể ĐỎ
-   hoặc XANH thuần vì runner, và khoảng cách ấy **rộng ra** giữa hai phép đo, không hẹp lại. Phiên
-   thi công **phải** đo lại dải này trước khi tin A1; nếu dải chưa hẹp, ngưỡng A1 phải nới theo
-   phương sai ĐO ĐƯỢC, không theo con số viết sẵn ở đây. Mười một điểm vẫn là **mẫu tiện tay** (mọi
-   lượt master trong ~9,6 giờ), không phải mẫu thiết kế.
+3. **ĐÃ ĐÓNG MỘT PHẦN — có mười một lượt (5 master + 6 nhánh), biên độ `10,28` phút; A1 GIỮ NGUYÊN `≤ 25,00`.**
+   Bản đầu viết *"chỉ có HAI lượt chạy trọn"*, bản hai *"chín lượt, biên độ 9,42"*, bản ba *"mười một lượt master,
+   phương sai… ngưỡng A1 phải nới theo phương sai ĐO ĐƯỢC"*. Revision 2 (lượt 7, P2 `bien-do-khac-head-khong-phai-nhieu-runner`)
+   rút câu cuối: biên độ là **khoảng biến thiên của một mẫu tiện tay gộp khác tải và khác nhánh**, không phải phương sai
+   và không đo được nhiễu runner riêng. Hệ quả: **A1 đứng nguyên `≤ 25,00`**; kết quả thật được BÁO đúng như đo (A1 đã
+   nói ĐỎ là KẾT QUẢ ĐO); muốn ngưỡng khác thì revision có thẩm quyền, không nới tại chỗ. Cái chưa đóng: chưa có phép so
+   **cùng head, cùng tập bước, cùng event** để tách nhiễu runner khỏi tải — nợ có tên `NHIEU-RUNNER-CHUA-TACH-KHOI-TAI`.
 4. **Thứ tự nay CỐ ĐỊNH, nên nền của packet này đứng yên — nhưng nền của ba packet sau thì
    không.** GATE đi đầu ⇒ A1/A2/A5 đo trên cây chưa bị ba packet mutant-Windows đổi; đổi lại, ba
    packet ấy phải đo A7 của mình trên bố cục ĐÃ TÁCH (`gate-registry`), và đặc tả của chúng đã viết

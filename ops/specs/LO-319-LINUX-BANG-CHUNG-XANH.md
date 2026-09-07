@@ -252,9 +252,10 @@ thì H **không đủ** và packet chuyển sang lựa chọn 2 hoặc 3, không
 | Đ4 | additions runtime | `git diff --numstat`, cột additions, trên `ci_dang_ky_test.py`, đo trước review | **> 300** ⇒ dừng (`ADR-0044`); không cắt ca, không nâng trần |
 | Đ5 | `phan_chung()` sau thi công | `N/N` với `N ≥ 51 + số ca mới A1–A6` (A5) | **< N/N** ⇒ chưa đủ; không tính là lần thứ năm nếu nguyên nhân là ca mới viết sai |
 
-**Đặc tả này không khai `§12` đã xong.** Thứ nó khai là: H đã đo (mục kế), ba lựa chọn và năm điều kiện
-ở trên, và bộ đếm bốn lần. Lease nháp giữ `thay_the_cho: []` và sáu ô trống — không ai bắt tay cho tới
-khi chủ kho chọn.
+**QUYẾT ĐỊNH CHỦ KHO — 07-09-2026: lựa chọn (1), tiếp H trong write set hiện tại**, kèm năm điều kiện Đ1–Đ5 làm chốt tự
+động chuyển sang (2)/(3) nếu chạm ngưỡng. Nguyên văn chỉ thị *"§12 chọn tiếp H"*; dấu vết bền: https://github.com/ducthangho/tra-luat/issues/464#issuecomment-5567158069 —
+khi cấp lease LO-319, `granted_on_instruction` neo vào đó. Các bản trước của đặc tả không tự trả lời `§12`; câu trả lời
+là của chủ kho và nay đã có. Lease nháp giữ `thay_the_cho: []` và các ô chủ kho trống cho tới lúc cấp.
 
 ### Thiết kế H — phủ VỊ TRÍ cặp trên dòng được chọn (ứng viên, đã đo, CHƯA được chọn)
 

@@ -11,13 +11,15 @@
    "ghi_chu": "bản in xanh thật (rc=0) trên cây thật; H đọc qua harness của reviewer lượt 6"
   },
   ".claude/hooks/pretooluse_guard_test.py": {
-   "rc": 1,
-   "bytes": 9490,
-   "sha256": "00bb4b944b12cca20b33fd8ce77ba8280e1becd4249e41aced15803ecab44004",
-   "H_do": null,
-   "BASE_do": null,
-   "KHONG_DO_DUOC": "bộ đỏ sẵn 3 ca môi trường trên cây thật (t11 lo_336, t15 --kiem-bang rc=4, t33 cong_hoi_RUNTIME rc=4; TONG: CA 36/39) — y hệt sandbox reviewer. Nguồn xanh duy nhất là log CI (`test registry` in nguyên bản in): API get_job_logs chỉ trả 5000 dòng cuối, zip log bị proxy 403. Đ2 cho formatter này = KHÔNG ĐO ĐƯỢC trong môi trường này."
+   "rc": 0,
+   "bytes": 9995,
+   "sha256": "69878c4f9efb24a6666d1cf0e4dea99d1ac87fa0aa904e28c6d397fd08cb7991",
+   "H_do": 0,
+   "BASE_do": 0,
+   "ghi_chu": "bản in xanh thật (rc=0) trên cây thật SAU khi đặt /usr/local/bin (ruff 0.15.15) trước /root/.local/bin (ruff 0.15.8) trên PATH — nguyên nhân 3 ca đỏ t11/t15/t33 là Ruff sai bản, không phải bộ test; bản đỏ cũ giữ ở pretooluse_guard_test.DO-rc1.stdout",
+   "do_luc_utc": "2026-09-07T07:52:03Z",
+   "ruff": "0.15.15"
   }
  },
- "tom_tat": "Đ2 cộng dồn: reviewer 0/6 bị bác (6 bản xanh) + executor mcp_gh 0/1 ⇒ 0/7 bị bác; pretooluse KHÔNG ĐO ĐƯỢC (1/8 còn thiếu)"
+ "tom_tat": "Đ2 cộng dồn: reviewer 0/6 + executor mcp_gh 0/1 + pretooluse 0/1 ⇒ 0/8 bản in xanh thật bị H bác — ĐỦ 8/8"
 }

@@ -50,7 +50,7 @@ lỗi xuất hiện lần thứ ba bắt buộc xem lại có nên tiếp tục 
 write set 1 tệp · (2) mở revision đổi **bên IN**, 9 tệp, vượt trần `sensitive` `ADR-0044` · (3) dừng
 packet và tách lại — kèm **năm điều kiện đo được Đ1–Đ5** (`:221-227`) làm chốt tự động chuyển hướng.
 
-**Chủ kho chọn, và ghi câu trả lời vào `granted_on_instruction` của lease.**
+**Chủ kho ĐÃ CHỌN 07-09-2026: lựa chọn (1) — tiếp H.** Dấu vết bền: https://github.com/ducthangho/tra-luat/issues/464#issuecomment-5567158069; khi cấp lease, `granted_on_instruction` neo vào đó.
 
 ## Bằng chứng cho H — và giới hạn của bằng chứng ấy
 
@@ -100,7 +100,7 @@ so phần `SPAN` (`MOI[_P456][0] == _MAU_BASE456`) + hằng canonical của `TON
 **(1) Chưa có `cross_approved`.** Lượt 5 **chết năm lần** vì hạ tầng — chữ ký `Connection refused (os error 111)` trên đường tái kết nối WebSocket của `codex`. **Đính chính 03:55Z 07-09-2026:** chẩn đoán *"proxy không cho `WebSocket upgrades`"* ở bản đầu là **SAI** (`codex doctor`: handshake `HTTP 101`, codex không đi qua proxy egress); nguyên nhân thật **CHƯA BIẾT**, đường codex **mở nhưng chập chờn**. Lượt 6 (07-09-2026, phóng có giám sát) đã chạy trọn. Kết quả lượt 6 trên
 `reviewed_sha` `2adb681`: `changes_requested`, 7 P1 / 4 P2. Cho packet này: P1 cũ
 `span-rong-nuot-ti-le-vo-can` xếp **VÁ HỜ về nghĩa vụ xác nhận** — reviewer tự dựng **1213 ca, 0 đỏ giả /
-0 bỏ sót** (Đ1 = 0 trên bộ ấy), Đ2 `0/6` bản in xanh thật bị bác, 2 bản in chưa đo được trong sandbox;
+0 bỏ sót** (Đ1 = 0 trên bộ ấy), Đ2 `0/6` bản in xanh thật bị bác ở lượt 6; executor bổ sung `mcp_gh` (0/1) và — sau khi đặt đúng Ruff 0.15.15 lên PATH — `pretooluse` xanh thật (`CA 39/39 · DOT BIEN 34/34`, rc=0, 0/1) ⇒ **Đ2 = 0/8** (`d2-that-results.json` trong gói lượt 6);
 giữ P1 vì hồ sơ **thiếu hiện vật để tái tính** (bộ 311 hàng, `do_h.py`, `law7.json`, `prior131.json`
 không có trong kho) chứ **không** vì tìm được phản chứng H mới. P3 `uoc-kich-thuoc-lo-con-tinh-nhan-ac`
 **ĐÃ VÁ THẬT**. Verdict: `ops/reviews/pr468-hoso-4-packet-review-6-codex-verdict.md`; bộ ca + harness
@@ -131,7 +131,7 @@ nó nhìn thấy.
 ---
 
 **Đặc tả đóng băng:** `ops/specs/LO-319-LINUX-BANG-CHUNG-XANH.md` @ `2a80dcc1cdc868adcc302cf3a5c11ff7a6a3b25d` (commit ĐẦU TIÊN chứa bản có băm dưới đây; `b743f17` là bản trước đính chính lượt 6–7, băm `3aafd766…` — finding P1 `issue-lo-neo-commit-cu-kem-bam-moi` lượt 7)
-**`spec_sha256`:** `0257a690d058b643b182516486cdf1856d0632be54797458123c88e8ef06378c`
+**`spec_sha256`:** `4db18266746e220b5745a341faa1307a105b1ace457e31c6af5dcf461d3c86ae`
 **`review_class`:** `sensitive` · **`base_sha`:** `1b3caa1` · **`depends_on`:** `GATE-TACH-JOB-CAT-CHI-PHI`
 **Lease nháp:** `ops/leases/lo-319-linux-bang-chung-xanh-exec-1-claude-20260906.yaml.nhap` (5 ô null —
 `packet_issue` đã điền `464`; bản đầu ghi 6)

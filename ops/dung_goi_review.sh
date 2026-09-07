@@ -6,8 +6,14 @@
 #
 #   PR #468 luot 12, P1 `mirror-thieu-ref-khong-du-do-a9`
 #       goi chi mang 3 ten nhanh. Reviewer khong tai do duoc khang dinh toan kho.
-#       Nguyen nhan: `git clone` mac dinh + `ai-dang-giu` CHI QUET `refs/heads/*`, nen
-#       remote-tracking ref KHONG duoc dem. Checkout du noi dung tai HEAD != du ref.
+#       DINH CHINH (cross-review PR #477, P3): ban dau tep nay ghi nguyen nhan la
+#       "`ai-dang-giu` CHI QUET refs/heads/*". DIEU DO SAI. `_cac_ref_cuc_bo`
+#       (`ops/lease_publish.py:307-321`) chay `for-each-ref refs/heads refs/remotes` va
+#       tinh ten tu CA `refs/remotes/origin/*`; `_quet_lease_toan_kho` doc het danh sach ay.
+#       Banner CLI (`:937`) in "quet refs/heads/*" nen de tin nham — do la loi doc banner
+#       thay vi doc ma. Nguyen nhan THAT cua goi 3 ref la kieu clone (bare/hep), khong phai
+#       pham vi quet. Buoc materialize duoi day van giu, nhung vi ly do KHAC: de goi khong
+#       phu thuoc ten remote va de doi chieu tap ten truc tiep.
 #
 #   PR #468 luot 13, P3 `evidence-thieu-phuong-phap-trich-va-gioi-han-bao-phu`
 #       EVIDENCE.md khong khai CACH TRICH tung so va PHAN BO SOT, nen nguoi doc khong
@@ -51,7 +57,9 @@ rm -rf "$R/kho.git"
 git clone --mirror -q "$REMOTE" "$R/kho.git" || loi 3 "clone mirror that bai"
 
 # ---- 3. Cay lam viec, roi VAT CHAT HOA moi nhanh thanh refs/heads/* ----
-#    `ai-dang-giu` chi quet refs/heads/*; khong buoc nay thi goi lai thieu ref.
+#    LY DO DUNG (khong phai "ai-dang-giu chi quet refs/heads" — xem DINH CHINH o dau tep):
+#    de goi KHONG PHU THUOC ten remote, va de doi chieu tap ten truc tiep giua ba nguon.
+#    Scanner doc ca refs/remotes, nen buoc nay khong phai de "duoc dem".
 rm -rf "$R/cay-kho"
 git clone -q --no-single-branch "$R/kho.git" "$R/cay-kho" || loi 5 "clone cay lam viec that bai"
 git -C "$R/cay-kho" checkout -q --detach "$HEAD_SHA" || loi 5 "khong checkout duoc $HEAD_SHA"
@@ -60,8 +68,13 @@ git -C "$R/cay-kho" for-each-ref --format='%(refname)%09%(objectname)%09%(symref
   | awk -F'\t' '$3==""{sub(/^refs\/remotes\/origin\//,"",$1); print $1"\t"$2}' \
   | while IFS=$'\t' read -r ten oid; do git -C "$R/cay-kho" update-ref "refs/heads/$ten" "$oid"; done
 # Remote `origin` phai la URL that: launcher kiem `--expected-repo`. Nguon object van la mirror.
-git -C "$R/cay-kho" remote rename origin mirror-cuc-bo 2>/dev/null || true
-git -C "$R/cay-kho" remote add origin "$REMOTE" 2>/dev/null || true
+# KHONG `|| true`: git template co san remote `mirror-cuc-bo` lam rename that bai, roi
+# `add origin` cung that bai vi origin cu con do -> origin TRO SAI ma script van rc=0.
+# Cross-review PR #477 tai hien duoc bang template that.
+git -C "$R/cay-kho" remote rename origin mirror-cuc-bo || loi 5 "khong doi ten duoc remote origin"
+git -C "$R/cay-kho" remote add origin "$REMOTE" || loi 5 "khong them duoc remote origin"
+thuc_te=$(git -C "$R/cay-kho" remote get-url origin) || loi 5 "khong doc lai duoc origin"
+[ "$thuc_te" = "$REMOTE" ] || loi 5 "origin SAI: mong doi '$REMOTE', thuc te '$thuc_te'"
 
 # ---- 4. Doi chieu ba nguon nhu TAP HOP (ten+OID), khong so `wc -l` ----
 for cap in "kho.git:refs/heads:mirror" "cay-kho:refs/heads:cay-kho"; do
@@ -75,19 +88,39 @@ comm -3 "$R/nguon-refs.tsv" "$R/cay-kho-refs.tsv" > "$R/refs-lech-cay-kho.tsv"
 N_MIRROR=$(wc -l < "$R/mirror-refs.tsv"); N_CAY=$(wc -l < "$R/cay-kho-refs.tsv")
 N_L1=$(wc -l < "$R/refs-lech-mirror.tsv");  N_L2=$(wc -l < "$R/refs-lech-cay-kho.tsv")
 
-# ---- 5. Cong cu bat buoc: CAI TRUOC khi do, dung ban ghim cua kho ----
+# ---- 5. Cong cu bat buoc: LUON goi installer ghim, KHONG tin PATH ----
+#    `ops/cai_actionlint.sh:14` viet ro: "KHONG co nhanh thoat som `da co actionlint tren
+#    PATH thi thoi`: co mat != dung ban." Ban dau tep nay CO nhanh ay -> cross-review PR #477
+#    do duoc bon ca `wrong-version`/`invalid-pin`/`empty-pin`/`broken-binary` deu rc=0.
+#    Nen: luon cai ban ghim, va bat rc bang ASSIGNMENT chu khong trong doi so `printf`
+#    (rc trong command substitution KHONG lam `printf` that bai, `set -e` khong cuu duoc).
+# `${VAR:-...}` thay ca khi RONG — the la nuot mot ban ghim rong thanh mac dinh.
+# Dung `${VAR-...}` (chi khi CHUA DAT), roi chan tuong minh neu dat ma rong.
+AL_VER="${AL_VER-1.7.7}"
+[ -n "$AL_VER" ] || loi 4 "AL_VER duoc dat nhung RONG — khong tu thay bang mac dinh"
+AL_DICH="$R/cong-cu/actionlint"
+AL_VER="$AL_VER" AL_DICH="$AL_DICH" bash "$KHO/ops/cai_actionlint.sh" > "$R/cai-actionlint.log" 2>&1 \
+  || loi 4 "cai actionlint (ban ghim $AL_VER) that bai — xem $R/cai-actionlint.log"
+PATH="$AL_DICH:$PATH"; export PATH
+
 : > "$R/cong-cu.txt"
-if ! command -v actionlint >/dev/null 2>&1; then
-  if AL_VER="${AL_VER:-1.7.7}" AL_DICH="$R/cong-cu/actionlint" bash "$KHO/ops/cai_actionlint.sh" >>"$R/cong-cu.txt" 2>&1; then
-    export PATH="$R/cong-cu/actionlint:$PATH"
-  else
-    loi 4 "thieu \`actionlint\` va cai khong duoc — xem $R/cong-cu.txt"
+# Bat rc that su cho tung cong cu bat buoc. THIEU hoac KHONG CHAY DUOC deu la CHAN.
+for c in actionlint shellcheck git python3; do
+  duong=$(command -v "$c" 2>/dev/null) || loi 4 "thieu cong cu bat buoc: $c"
+  [ -n "$duong" ] || loi 4 "thieu cong cu bat buoc: $c"
+  if ! ban=$("$c" --version 2>&1 | head -1); then
+    loi 4 "cong cu bat buoc khong chay duoc: $c ($duong)"
   fi
-fi
-{ printf 'actionlint\t%s\t%s\n' "$(command -v actionlint)" "$(actionlint --version 2>/dev/null | head -1)"
-  for c in shellcheck rg git python3; do
-    printf '%s\t%s\t%s\n' "$c" "$(command -v "$c" || echo THIEU)" "$("$c" --version 2>/dev/null | head -1)"
-  done; } >> "$R/cong-cu.txt"
+  [ -n "$ban" ] || loi 4 "cong cu bat buoc khong khai duoc phien ban: $c ($duong)"
+  printf '%s\t%s\t%s\n' "$c" "$duong" "$ban" >> "$R/cong-cu.txt"
+done
+# `actionlint` bo luat SC* TRONG IM LANG khi thieu `shellcheck`, nen shellcheck nam trong
+# danh sach BAT BUOC o tren, khong phai "ghi THIEU roi di tiep".
+al_ban=$(awk -F'\t' '$1=="actionlint"{print $3}' "$R/cong-cu.txt")
+case "$al_ban" in
+  *"$AL_VER"*) : ;;
+  *) loi 4 "actionlint SAI BAN: can $AL_VER, do duoc '$al_ban'" ;;
+esac
 
 # ---- 6. EVIDENCE: khai CACH TRICH va PHAN BO SOT, khong chi khai ket qua ----
 cat > "$R/EVIDENCE.md" <<EOF
@@ -128,8 +161,10 @@ Lech mirror: **$N_L1** dong. Lech cay lam viec: **$N_L2** dong.
 EOF
 
 # ---- 7. Manifest: loai DUNG manifest goc, khong loai theo ten co so moi cap ----
-( cd "$R" && find . -type f -print0 | sort -z | xargs -0 sha256sum \
-    | grep -v '  \./ARTIFACTS\.sha256$' > ARTIFACTS.sha256 )
+# Loc theo DUONG DAN DAY DU. Khong dung `! -name` (loai theo ten co so o MOI cap) va
+# khong loc hau to tren dong bam (thu muc ten `nested  .` lam dong con khop hau to).
+( cd "$R" && find . -type f ! -path './ARTIFACTS.sha256' -print0 | sort -z \
+    | xargs -0 sha256sum > ARTIFACTS.sha256 )
 
 printf 'ref: nguon=%s mirror=%s cay-kho=%s; lech=%s/%s\n' "$N_NGUON" "$N_MIRROR" "$N_CAY" "$N_L1" "$N_L2"
 if [ "$N_L1" -ne 0 ] || [ "$N_L2" -ne 0 ]; then

@@ -1,0 +1,11 @@
+# rc va moi truong cua lan do t33
+nen_sha=b416830ef2a509d60203d55552ce17950afcf67c
+sau_sha=f77f19895e00835d71644d82f1c54e9b519ccfe6
+lenh=python3 -B ops/lease_publish_test.py
+nen_rc=0
+sau_rc=0
+nen_out_byte=8649
+sau_out_byte=8649
+actionlint_ban=1.7.7
+actionlint_cai_bang=ops/cai_actionlint.sh AL_VER=1.7.7
+shellcheck_ban=version: 0.9.0

@@ -138,26 +138,54 @@ def loi_launcher_windows(source=None):
     return [message for ok, message in checks if not ok], len(checks)
 
 
+_RUFF_CAI = re.compile(r"pip install\b[^\n]*\bruff\b")
+
+
 def loi_ruff_ci(source=None):
+    """Hợp đồng Ruff của CI, đọc MỌI job — packet #463 tách `test registry` khỏi `jobs.gate`.
+
+    Ba chốt, cùng số với bản trước (`RUFF CI: n/3` không đổi nghĩa):
+      1. mọi job có bước cài Ruff đều ghim `ruff==0.15.15`;
+      2. mọi job có bước cài Ruff đều in probe `ruff --version` (dòng riêng);
+      3. đúng MỘT job chạy `ci_dang_ky_test.py --chay`, và Ruff được cài trong CÙNG job ấy,
+         TRƯỚC bước đó — không job nào có bước ⇒ lỗi.
+    Vì sao 1–2 đo trên MỌI job cài Ruff chứ không chỉ job registry: hai phản chứng
+    `ruff-pin-required`/`ruff-version-probe-required` đột biến bản Ruff ĐẦU TIÊN trong tệp
+    (`replace(..., 1)`), tức bản ở `gate`; nếu chỉ soi job registry thì cả hai LỌT — đo được
+    trên YAML tách trong bộ nhớ khi soạn packet #463.
+    Tương thích lùi: `ci.yml` chưa tách (mọi thứ trong `gate`) vẫn trả `[]`.
+    """
     source = CI_WORKFLOW.read_text(encoding="utf-8") if source is None else source
     try:
         data = yaml.safe_load(source) or {}
     except yaml.YAMLError as e:
         return [f"CI YAML lỗi khi kiểm Ruff: {e}"], 1
-    steps = (((data.get("jobs") or {}).get("gate") or {}).get("steps") or [])
-    runs = [s.get("run", "") for s in steps if isinstance(s, dict)]
-    joined = "\n".join(x for x in runs if isinstance(x, str))
-    ruff_i = next((i for i, x in enumerate(runs) if "ruff==0.15.15" in x), -1)
-    gate_i = next((i for i, x in enumerate(runs)
-                   if "ci_dang_ky_test.py --chay" in x), -1)
+    jobs = {k: v for k, v in ((data.get("jobs") or {}).items()) if isinstance(v, dict)}
+    runs_theo_job = {
+        jn: [s.get("run", "") if isinstance(s.get("run", ""), str) else ""
+             for s in (j.get("steps") or []) if isinstance(s, dict)]
+        for jn, j in jobs.items()}
+    job_cai_ruff = {jn: runs for jn, runs in runs_theo_job.items()
+                    if any(_RUFF_CAI.search(x) for x in runs)}
+    job_registry = [jn for jn, runs in runs_theo_job.items()
+                    if any("ci_dang_ky_test.py --chay" in x for x in runs)]
+    thieu_ghim = [jn for jn, runs in job_cai_ruff.items()
+                  if not any("ruff==0.15.15" in x for x in runs)]
+    thieu_probe = [jn for jn, runs in job_cai_ruff.items()
+                   if not re.search(r"(?m)^\s*ruff --version\s*$", "\n".join(runs))]
+    truoc = False
+    if len(job_registry) == 1:
+        runs = runs_theo_job[job_registry[0]]
+        ruff_i = next((i for i, x in enumerate(runs) if "ruff==0.15.15" in x), -1)
+        gate_i = next((i for i, x in enumerate(runs) if "ci_dang_ky_test.py --chay" in x), -1)
+        truoc = 0 <= ruff_i < gate_i
     checks = [
-        ("ruff==0.15.15" in joined, "CI không ghim Ruff 0.15.15"),
-        (bool(re.search(r"(?m)^\s*ruff --version\s*$", joined)),
-         "CI không in probe Ruff --version"),
-        (0 <= ruff_i < gate_i, "CI không provision Ruff trước test registry"),
+        (job_cai_ruff and not thieu_ghim, f"CI không ghim Ruff 0.15.15 (job: {thieu_ghim or 'không job nào cài Ruff'})"),
+        (job_cai_ruff and not thieu_probe, f"CI không in probe Ruff --version (job: {thieu_probe or 'không job nào cài Ruff'})"),
+        (truoc, "CI không provision Ruff trước test registry trong cùng job "
+                f"(job chạy test registry: {job_registry or 'KHÔNG CÓ'})"),
     ]
     return [message for ok, message in checks if not ok], len(checks)
-
 
 def giet_windows_311_launcher_workflow(source):
     anchor = "'3.13'"
@@ -488,6 +516,26 @@ def phan_chung():
                       ci_source.replace("ruff --version", "ruff --help", 1))[0])]
     except OSError:
         cases += [False, False, False, False]
+    # A7 packet #463 — `loi_ruff_ci` đọc MỌI job: bốn fixture của đặc tả + hai ca biên.
+    # YAML tối thiểu dựng tại chỗ, không đọc tệp, để ca không đổi màu theo bố cục `ci.yml` hôm nay.
+    _ruff = {"name": "cài Ruff 0.15.15 và in probe dương",
+             "run": "python -m pip install --quiet ruff==0.15.15\nruff --version\n"}
+    _reg = {"name": "test registry", "run": "python .claude/dev/ci_dang_ky_test.py --chay"}
+    _khac = {"name": "khác", "run": "python x.py"}
+    def _wf(jobs): return yaml.safe_dump({"on": "push", "jobs": jobs}, sort_keys=False)
+    _ruff_fx = [
+        (_wf({"gate": {"steps": [_ruff, _khac, _reg]}}), 0),                                   # chưa tách
+        (_wf({"gate": {"steps": [_ruff, _khac]}, "gate-registry": {"steps": [_ruff, _reg]}}), 0),  # tách đúng ← ca đổi màu
+        (_wf({"gate": {"steps": [_ruff, _khac]}, "gate-registry": {"steps": [_reg]}}), 1),     # thiếu Ruff
+        (_wf({"gate": {"steps": [_ruff, _khac]}, "gate-registry": {"steps": [_reg, _ruff]}}), 1),  # Ruff sau
+        (_wf({"gate": {"steps": [_ruff, _khac]}}), 1),                                          # không job nào
+        (_wf({"gate": {"steps": [_ruff, _reg]}, "gate-registry": {"steps": [_ruff, _reg]}}), 1),   # hai job
+    ]
+    cases += [(len(loi_ruff_ci(s)[0]) == 0) if n == 0 else (len(loi_ruff_ci(s)[0]) >= 1)
+              for s, n in _ruff_fx]
+    names += ["ruff-ci-chua-tach-tuong-thich-lui", "ruff-ci-da-tach-dung",
+              "ruff-ci-da-tach-thieu-ruff", "ruff-ci-da-tach-ruff-sau-registry",
+              "ruff-ci-khong-job-nao-chay-registry", "ruff-ci-hai-job-chay-registry"]
     names += ["a-cach-ly-thieu-slug", "r4-thieu-moi-truong", "r5-moi-truong-sai-tap",
               "r5-comment-gia-loi-goi", "r5-step-if-false", "r5-job-if-false",
               "r5-step-if-literal-expr", "r5-normal-step", "b-cach-ly-chuyen-xanh",

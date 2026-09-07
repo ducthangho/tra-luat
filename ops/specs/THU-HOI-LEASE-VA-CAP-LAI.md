@@ -33,9 +33,10 @@ reviewer đối chiếu `docs/PROTOCOL_DA_PHIEN.md:806–816` và §8:579: trầ
 prompt/phiên không reset, chạm trần ⇒ Review Rescue Checkpoint. r4 rút câu ấy. Trạng thái đúng: PR #475 đã dùng **3**
 lượt; lượt 2–3 chạy theo chỉ thị trực tiếp của chủ kho trong phiên (*"hãy lặp … cho tới khi hết P1"*) — chỉ thị ấy có
 hiệu lực cho các lượt đã chạy, **không** là neo bền cho lượt kế tiếp. **Checkpoint của r4:** (a) quyết định = **thiết kế
-lại** (r4 là sản phẩm: adapter nguồn, bootstrap có biên riêng, C không đích); (b) **không gọi lượt 4 cho tới khi chủ kho
-neo bền** một trần mới có phạm vi (Q14) — bằng comment trên PR #475 do tài khoản chủ kho tạo, readback được; (c) mọi bộ
-đếm/ID finding giữ nguyên, tách slice không reset.
+lại** (r4 là sản phẩm: adapter nguồn, bootstrap có biên riêng, C không đích); (b) trần mới **đã được chủ kho chốt và neo**:
+comment `https://github.com/ducthangho/tra-luat/pull/475#issuecomment-5575587924` (tài khoản chủ kho, ghi hộ theo chỉ thị
+trong phiên, đã readback): **trần 6 lượt** cho PR #475; dừng khi hết P1 hoặc chạm 6 ⇒ checkpoint kế; (c) mọi bộ đếm/ID
+finding giữ nguyên, tách slice không reset. Comment ấy KHÔNG cấp lease, KHÔNG kích hoạt sổ.
 
 ### 0.1 Delta r3 → r4 theo finding lượt 3
 
@@ -139,8 +140,10 @@ Giữ `thay_the_cho: [X, …]`. **Hai chế độ, một mã** (R4):
 - Tập so = closure bắc cầu tính từ `write_set` khai báo theo **policy canonical đã ghim** (`change_policy_sha` trong
   spec/lease theo §3.2); `effective_write_set` trong YAML lease **không được dùng** để thu hẹp — có mặt thì phải **bằng
   tập** closure tính lại, lệch ⇒ 8, vắng thì không sao. Raw set phải ⊆ closure. Thiếu policy/provenance để tính ⇒ 12,
-  **không** fallback raw. Đo: `.github/coordination/change-impact.v1.json` và `schemas/change-impact.v1.schema.json`
-  **vắng** (`schemas/` chỉ có `review_verdict.v1.schema.json`) ⇒ kích hoạt đòi #473 land **hoặc** ngoại lệ Q13.
+  **không** fallback raw tự do. Đo: `.github/coordination/change-impact.v1.json` và
+  `.github/coordination/schemas/change-impact.v1.schema.json` **vắng** (`schemas/` chỉ có `review_verdict.v1.schema.json`)
+  ⇒ áp **ngoại lệ Q13 đã chốt** (comment `5575587924`): closure = tập khai báo + giải symlink theo cây OID; ngoại lệ
+  ghi vào Packet Issue + `spec_hash` A1; không có neo ⇒ 12.
 - Chuẩn hoá §5: separator `/`; từ chối tuyệt đối/`.`/`..`/thoát repo (lease `CÒN_HẠN` ⇒ 12); NFC + case-fold **chỉ làm
   khoá so va chạm**, tra Git tree bằng tên thật; `normpath`; kết thúc `/` = prefix; `planned:` bỏ nhãn.
 - **Symlink (R7):** giải theo **Git tree của từng occurrence OID** của cặp lease (không khử trùng trước khi giữ nguồn),
@@ -360,9 +363,10 @@ Thiếu ⇒ cờ `False`.
 ❓ **Q12 — ready từng slice.** ➡️ Issue + `spec_hash`/revision/generation; phái sinh + policy SHA do dispatcher dẫn xuất
 (không kế thừa miễn trừ `b416830`); base đã nhận slice trước; hợp đồng adapter/nguồn symlink/danh sách lịch sử/bootstrap
 trước ready A0. Thiếu hợp đồng ⇒ `proposed`; thiếu facts ⇒ chưa kích hoạt.
-❓ **Q13 — closure khi policy chưa có.** ➡️ Hai lối, chủ kho chọn: (i) #473 land trước A1 (khuyến nghị nếu #473 dưới 1
-tuần); (ii) ngoại lệ có phạm vi, neo bền (Issue comment): "cho tới khi policy canonical có, closure = tập khai báo +
-symlink, không nhận tự khai" — và ngoại lệ ấy ghi vào `spec_hash` của A1.
-❓ **Q14 — trần review (R10).** ➡️ PR #475 đã dùng 3 lượt codex; §12 không có ngoại lệ cho spec. Để có lượt 4, chủ kho
-đăng comment trên PR #475: phạm vi (review đặc tả THU-HOI-LEASE-VA-CAP-LAI), **trần mới** (khuyến nghị **6** lượt),
-điều kiện dừng (hết P1 hoặc chạm trần ⇒ checkpoint kế). Chưa có comment ⇒ **không phóng lượt 4**.
+✅ **Q13 — closure khi policy chưa có — ĐÃ CHỐT (comment `5575587924` trên PR #475):** lối (ii) — ngoại lệ có phạm vi:
+cho tới khi policy canonical `.github/coordination/change-impact.v1.json` tồn tại, closure = tập khai báo + giải symlink
+theo cây OID, KHÔNG nhận `effective_write_set` tự khai; ngoại lệ phải được ghi vào Packet Issue và `spec_hash` của A1.
+Hệ quả cho Q3: nhánh "policy vắng ⇒ 12" đổi thành "policy vắng ⇒ dùng ngoại lệ Q13 (có neo) ⇒ closure = khai báo + symlink";
+không có neo ⇒ 12. Lối (i) (#473 land trước A1) không chọn.
+✅ **Q14 — trần review (R10) — ĐÃ CHỐT:** comment `5575587924` trên PR #475: phạm vi = review đặc tả này; **trần 6
+lượt**; dừng khi hết P1 hoặc chạm 6 ⇒ checkpoint kế, không tự nới. Lượt 4 phóng trên bản này.

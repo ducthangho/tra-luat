@@ -8,6 +8,14 @@ packet_ten: WP461-BE-MAT-THU-HAI-CUA-CODEX
 revision: 1
 generation: 1
 lease_id: wp461-be-mat-thu-hai-cua-codex-exec-1-claude-20260907
+da_bi_thay_the: wp461-be-mat-thu-hai-cua-codex-exec-1r2-claude-20260907
+da_bi_thay_the_ly_do: >-
+  THU HOI SOM, khong doi het han. Cross-review luot 1 cua PR #469 ra `blocked` voi 4 P1;
+  hai trong so do cham thang dac ta (`spec-chua-chot-hop-dong`, `uy-quyen-khong-co-neo-ben`)
+  nen §3.2 doi di qua revision moi. Lease nay neo `spec_hash` cua ban r1 (e74812cf…) nay
+  da bi thay the boi r2 (db4980e3…), va no con khai SAI mot phep do: #447 CO sua khoi dinh
+  nghia `_TRANSPORT_CONTRACTS` (them hang `github`). Chu kho quyet dong PR #469 va cap lease
+  moi — Mission https://github.com/ducthangho/tra-luat/issues/470
 role: executor
 provider: claude
 executor: claude

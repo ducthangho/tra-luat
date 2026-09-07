@@ -123,6 +123,13 @@ clone. Executor sẽ chỉ đẩy nhánh packet sau khi rebase lên cây có bia
 ref trước khi bắt tay** — không suy từ merge.
 Phép canh hai nguồn ref chạy trước: máy chủ 299 ⊆ cục bộ 300 (`comm -23` rỗng) ⇒ không mù.
 
+**Cập nhật 13:01Z 07-09-2026 — chủ kho THU HỒI SỚM lease #456 bằng comment** https://github.com/ducthangho/tra-luat/issues/456#issuecomment-5570971814
+(12:57:06Z, "hiệu lực ngay", căn cứ PR #457 đã merge + 6/6 nghiệm thu). Uỷ quyền là đủ về THẨM QUYỀN, nhưng A9 là phép đo
+bằng `ai-dang-giu`, và công cụ chỉ đọc YAML trên ref (`da_bi_thay_the` + hạn) — comment không phải đầu vào của nó. Đo lại
+sau khi fetch đủ 302/302 ref (`comm -23` rỗng): `ci.yml` ⇒ NGƯỜI_GIỮ 1 (exec-1r4) · `ci_dang_ky_test.py` ⇒ **vẫn NGƯỜI_GIỮ 2**
+(blob #456 chưa bia mộ `8b2103c` còn trên `master` + 9 nhánh). Nên executor **chưa bắt tay**; mốc máy đo được là
+`14:30:07Z` (hạn danh nghĩa), đo lại rồi mới `init`. Comment thu hồi được ghi ở đây làm dấu vết bền của quyết định.
+
 ---
 
 **Đặc tả đóng băng (revision 4):** `ops/specs/GATE-TACH-JOB-CAT-CHI-PHI.md` @ `1a330305e20a0667fff4954f8542aadd5e375b50` (commit ĐẦU TIÊN chứa bản có băm dưới đây; revision 1 @ `b743f17`, băm `8cca700c…`)

@@ -24,7 +24,7 @@ event: executor_lease_granted
 #                   ấy là SỰ KIỆN cấp, không có mặc định (verdict lượt 1, P2). Để trống: `check`
 #                   chặn rc=8 khi thiếu `lease_expires_at_utc` (đo 19:35Z). `--expires-utc` của
 #                   `record-lease` phải khớp đúng giá trị điền ở đây.
-packet_issue:
+packet_issue: 463
 mission_issue:
 granted_by:
 granted_on_instruction:

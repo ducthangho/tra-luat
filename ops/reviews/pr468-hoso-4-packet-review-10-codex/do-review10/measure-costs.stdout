@@ -1,0 +1,53 @@
+{
+  "original_rows": 2062,
+  "original_runs": 30,
+  "event_counts": {
+    "push": 5,
+    "pull_request": 3,
+    "workflow_dispatch": 3
+  },
+  "branch_counts": {
+    "master": 5,
+    "branch": 6
+  },
+  "yaml_steps_counts": {
+    "40": 10,
+    "39": 1
+  },
+  "windows": {
+    "n": 11,
+    "min": 40.2,
+    "max": 50.483333333333334,
+    "median": 46.016666666666666,
+    "mean": 45.837878787878786,
+    "range": 10.283333333333331
+  },
+  "archived_seconds_diffs": [],
+  "archived_jobs_diffs": [],
+  "arithmetic": {
+    "before": 110.65,
+    "after_raw": 126.23333333333332,
+    "longest_windows": 21.03333333333333,
+    "after_display_rounded_inputs": 126.22,
+    "display_after_by_platform": {
+      "ubuntu": 26.56,
+      "windows": 49.83
+    },
+    "relative_increase_raw": 0.14083446302153924
+  },
+  "original_ubuntu_success": {
+    "n": 19,
+    "min": 20.933333333333334,
+    "max": 28.416666666666668,
+    "median": 26.516666666666666,
+    "mean": 25.88684210526316,
+    "range": 7.483333333333334
+  }
+}
+test registry ['11', '1,07', '1,71', '1,21'] ['1,21', '1,21'] True True
+tl selftest ['11', '1,41', '2,26', '1,83'] ['1,82', '1,84'] True True
+packet-loop selftest ['11', '1,88', '2,89', '2,37'] ['2,36', '2,38'] True True
+G5 kiem ban ke ['11', '1,91', '3,09', '2,40'] ['2,37', '2,43'] True True
+lease-publish selftest ['11', '2,42', '3,84', '2,94'] ['2,91', '2,97'] True True
+bien-nhan v2 selftest ['10', '7,07', '9,74', '7,79'] ['7,71', '7,88'] True True
+job trọn ['11', '1,52', '2,36', '1,73'] ['1,73', '1,73'] True True

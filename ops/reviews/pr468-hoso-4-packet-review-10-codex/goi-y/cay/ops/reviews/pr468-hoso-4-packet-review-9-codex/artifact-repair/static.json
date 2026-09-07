@@ -1,0 +1,269 @@
+{
+  "utc": "2026-09-07T09:21:30.927918+00:00",
+  "head": "4d0ead5591a58463423754cc93a84ce744c3a50b",
+  "tree": "168f575ffafd05f6a81f3119c33f21fcf4391860",
+  "initial_status": "",
+  "diffs": {
+    "since7": {
+      "patch_matches": true,
+      "numstat_matches": true,
+      "files": 80,
+      "additions": 22338,
+      "deletions": 65,
+      "outside_ops": []
+    },
+    "full": {
+      "patch_matches": true,
+      "numstat_matches": true,
+      "files": 162,
+      "additions": 47149,
+      "deletions": 0,
+      "outside_ops": []
+    }
+  },
+  "leases": [
+    {
+      "issue": 463,
+      "lease": "gate-tach-job-cat-chi-phi-exec-1r2-claude-20260906.yaml",
+      "revision": 2,
+      "spec": "GATE-TACH-JOB-CAT-CHI-PHI.md",
+      "hash_actual": "bda86f128c220b868e9c103c919d213d8aba5ed1753962b0898ea1ce1852812c",
+      "hash_declared": "bda86f128c220b868e9c103c919d213d8aba5ed1753962b0898ea1ce1852812c",
+      "hash_alias": "bda86f128c220b868e9c103c919d213d8aba5ed1753962b0898ea1ce1852812c",
+      "issue_commit": "d85365463259615537c4fb96acd2408d917d9bd2",
+      "issue_blob_hash": "bda86f128c220b868e9c103c919d213d8aba5ed1753962b0898ea1ce1852812c",
+      "issue_hash": true,
+      "copy_equal": true,
+      "granted_on_instruction": "https://github.com/ducthangho/tra-luat/issues/463#issuecomment-5567157629",
+      "null_keys": [],
+      "write_set": [
+        ".github/workflows/ci.yml",
+        ".claude/dev/ci_dang_ky_test.py"
+      ]
+    },
+    {
+      "issue": 464,
+      "lease": "lo-319-linux-bang-chung-xanh-exec-1-claude-20260906.yaml.nhap",
+      "revision": 1,
+      "spec": "LO-319-LINUX-BANG-CHUNG-XANH.md",
+      "hash_actual": "4db18266746e220b5745a341faa1307a105b1ace457e31c6af5dcf461d3c86ae",
+      "hash_declared": "4db18266746e220b5745a341faa1307a105b1ace457e31c6af5dcf461d3c86ae",
+      "hash_alias": "4db18266746e220b5745a341faa1307a105b1ace457e31c6af5dcf461d3c86ae",
+      "issue_commit": "d85365463259615537c4fb96acd2408d917d9bd2",
+      "issue_blob_hash": "4db18266746e220b5745a341faa1307a105b1ace457e31c6af5dcf461d3c86ae",
+      "issue_hash": true,
+      "copy_equal": true,
+      "granted_on_instruction": null,
+      "null_keys": [
+        "mission_issue",
+        "granted_by",
+        "granted_on_instruction",
+        "leased_at_utc",
+        "lease_expires_at_utc"
+      ],
+      "write_set": [
+        ".claude/dev/ci_dang_ky_test.py"
+      ]
+    },
+    {
+      "issue": 465,
+      "lease": "mutant-windows-subagent-ghi-detect-exec-1-claude-20260906.yaml.nhap",
+      "revision": 1,
+      "spec": "MUTANT-WINDOWS-SUBAGENT-GHI-DETECT.md",
+      "hash_actual": "2abace8588ec2b4e0626c1c77e9c3e0f7e713ecb2ce528b149e6c7f1f0000759",
+      "hash_declared": "2abace8588ec2b4e0626c1c77e9c3e0f7e713ecb2ce528b149e6c7f1f0000759",
+      "hash_alias": "2abace8588ec2b4e0626c1c77e9c3e0f7e713ecb2ce528b149e6c7f1f0000759",
+      "issue_commit": "b743f1798aba12615f903a11bd451c87e404814e",
+      "issue_blob_hash": "2abace8588ec2b4e0626c1c77e9c3e0f7e713ecb2ce528b149e6c7f1f0000759",
+      "issue_hash": true,
+      "copy_equal": true,
+      "granted_on_instruction": null,
+      "null_keys": [
+        "mission_issue",
+        "granted_by",
+        "granted_on_instruction",
+        "leased_at_utc",
+        "lease_expires_at_utc"
+      ],
+      "write_set": [
+        ".claude/hooks/subagent_ghi_detect_test.py",
+        ".claude/dev/ci_dang_ky_test.py"
+      ]
+    },
+    {
+      "issue": 466,
+      "lease": "mutant-windows-nhanh-don-duoc-exec-1-claude-20260906.yaml.nhap",
+      "revision": 1,
+      "spec": "MUTANT-WINDOWS-NHANH-DON-DUOC.md",
+      "hash_actual": "417dce16227687cbb1e642284f39d2f847a617b2d730f7f52aaa58f33c936521",
+      "hash_declared": "417dce16227687cbb1e642284f39d2f847a617b2d730f7f52aaa58f33c936521",
+      "hash_alias": "417dce16227687cbb1e642284f39d2f847a617b2d730f7f52aaa58f33c936521",
+      "issue_commit": "b743f1798aba12615f903a11bd451c87e404814e",
+      "issue_blob_hash": "417dce16227687cbb1e642284f39d2f847a617b2d730f7f52aaa58f33c936521",
+      "issue_hash": true,
+      "copy_equal": true,
+      "granted_on_instruction": null,
+      "null_keys": [
+        "mission_issue",
+        "granted_by",
+        "granted_on_instruction",
+        "leased_at_utc",
+        "lease_expires_at_utc"
+      ],
+      "write_set": [
+        "ops/nhanh_don_duoc_test.py",
+        ".claude/dev/ci_dang_ky_test.py"
+      ]
+    }
+  ],
+  "gate": {
+    "anchors": {
+      "base_sha": "d28c4b1062e8505cbdaaf0237fcbe3f9b8ee4705",
+      "start_from_sha": "d28c4b1062e8505cbdaaf0237fcbe3f9b8ee4705",
+      "reviewed_sha_required": "d28c4b1062e8505cbdaaf0237fcbe3f9b8ee4705"
+    },
+    "write_set_hash_actual": "0f7b869da648e9b21023e461925efd0d45bca58fb308a8fcc82bc55ad9f66ef0",
+    "write_set_hash_declared": "0f7b869da648e9b21023e461925efd0d45bca58fb308a8fcc82bc55ad9f66ef0",
+    "leased": "2026-09-07T07:50:35Z",
+    "heartbeat": "2026-09-07T07:50:35Z",
+    "until": "2026-09-08T07:50:35Z",
+    "expires": "2026-09-08T07:50:35Z",
+    "duration_minutes": 1440.0
+  },
+  "snapshot_blob_path_pairs": 86,
+  "chain": [
+    {
+      "ref": "refs/heads/claude/soan-spec-3-viec-treo-20260906",
+      "path": "ops/leases/gate-tach-job-cat-chi-phi-exec-1-claude-20260906.yaml",
+      "blob": "de30af933a090b91cbd7eff73f517f68a17cdd59",
+      "lease_id": "gate-tach-job-cat-chi-phi-exec-1-claude-20260906",
+      "thay_the_cho": [
+        "mutant-khong-chay-tren-windows-exec-1-claude-20260906"
+      ],
+      "da_bi_thay_the": "gate-tach-job-cat-chi-phi-exec-1r2-claude-20260906",
+      "status": "CÒN_HẠN",
+      "bidirectional": true
+    },
+    {
+      "ref": "refs/heads/claude/soan-spec-3-viec-treo-20260906",
+      "path": "ops/leases/gate-tach-job-cat-chi-phi-exec-1r2-claude-20260906.yaml",
+      "blob": "65c1678e5733057be854872ceca9b20082389cf8",
+      "lease_id": "gate-tach-job-cat-chi-phi-exec-1r2-claude-20260906",
+      "thay_the_cho": [
+        "gate-tach-job-cat-chi-phi-exec-1-claude-20260906"
+      ],
+      "da_bi_thay_the": null,
+      "status": "CÒN_HẠN",
+      "bidirectional": null
+    },
+    {
+      "ref": "refs/heads/claude/soan-spec-3-viec-treo-20260906",
+      "path": "ops/leases/mutant-khong-chay-tren-windows-exec-1-claude-20260906.yaml",
+      "blob": "1f9504281c3415f7194e124eb7b2702c34c8efd1",
+      "lease_id": "mutant-khong-chay-tren-windows-exec-1-claude-20260906",
+      "thay_the_cho": null,
+      "da_bi_thay_the": "gate-tach-job-cat-chi-phi-exec-1-claude-20260906",
+      "status": "CÒN_HẠN",
+      "bidirectional": true
+    },
+    {
+      "ref": "refs/remotes/origin/claude/gate-tach-job-cat-chi-phi",
+      "path": "ops/leases/mutant-khong-chay-tren-windows-exec-1-claude-20260906.yaml",
+      "blob": "8b2103c06687546379a17f6deafc97f1fe0173fd",
+      "lease_id": "mutant-khong-chay-tren-windows-exec-1-claude-20260906",
+      "thay_the_cho": null,
+      "da_bi_thay_the": null,
+      "status": "CÒN_HẠN",
+      "bidirectional": null
+    }
+  ],
+  "holders": {
+    "2026-09-07T09:21:30.927918+00:00": {
+      ".github/workflows/ci.yml": [
+        "gate-tach-job-cat-chi-phi-exec-1r2-claude-20260906"
+      ],
+      ".claude/dev/ci_dang_ky_test.py": [
+        "gate-tach-job-cat-chi-phi-exec-1r2-claude-20260906",
+        "mutant-khong-chay-tren-windows-exec-1-claude-20260906"
+      ],
+      ".claude/hooks/subagent_ghi_detect_test.py": [],
+      "ops/nhanh_don_duoc_test.py": []
+    },
+    "2026-09-07T14:30:06+00:00": {
+      ".github/workflows/ci.yml": [
+        "gate-tach-job-cat-chi-phi-exec-1r2-claude-20260906"
+      ],
+      ".claude/dev/ci_dang_ky_test.py": [
+        "gate-tach-job-cat-chi-phi-exec-1r2-claude-20260906",
+        "mutant-khong-chay-tren-windows-exec-1-claude-20260906"
+      ],
+      ".claude/hooks/subagent_ghi_detect_test.py": [],
+      "ops/nhanh_don_duoc_test.py": []
+    },
+    "2026-09-07T14:30:07+00:00": {
+      ".github/workflows/ci.yml": [
+        "gate-tach-job-cat-chi-phi-exec-1r2-claude-20260906"
+      ],
+      ".claude/dev/ci_dang_ky_test.py": [
+        "gate-tach-job-cat-chi-phi-exec-1r2-claude-20260906"
+      ],
+      ".claude/hooks/subagent_ghi_detect_test.py": [],
+      "ops/nhanh_don_duoc_test.py": []
+    }
+  },
+  "refs": [
+    "refs/heads/claude/soan-spec-3-viec-treo-20260906 4d0ead5591a58463423754cc93a84ce744c3a50b",
+    "refs/remotes/origin/HEAD 4d0ead5591a58463423754cc93a84ce744c3a50b",
+    "refs/remotes/origin/claude/gate-tach-job-cat-chi-phi d28c4b1062e8505cbdaaf0237fcbe3f9b8ee4705",
+    "refs/remotes/origin/claude/soan-spec-3-viec-treo-20260906 4d0ead5591a58463423754cc93a84ce744c3a50b",
+    "refs/remotes/origin/master d28c4b1062e8505cbdaaf0237fcbe3f9b8ee4705",
+    "refs/tags/archive/codex-gate-lifecycle-ec8d08c ec8d08cf2158c6f4e14b0dee749287100862e1f5",
+    "refs/tags/archive/rasoat-design-docs-2026-07-26 3f86257d2aace0f5860ebcb5d92b33cd5fe2c383",
+    "refs/tags/luu-tru/238-verdict-1 5a4fcc21de8bd3f7978acb54dc25c462743a8b65",
+    "refs/tags/luu-tru/238-verdict-2 9729f5f0720fa045e52785844e70cf511ca831a7",
+    "refs/tags/luu-tru/238-verdict-3 a0ab3b88f08be7fccbba4d9f8e0374dff2a1d8cc",
+    "refs/tags/luu-tru/doctor-github-mcp-verdict-6 4920113a639d81385c0f98b1488c0f497776d2ff",
+    "refs/tags/luu-tru/doctor-github-mcp-verdict-9 de86c2475c1410f73874fb3f75f233ee3eecc962",
+    "refs/tags/luu-tru/tao-tag-luu-tru-verdict-1 9d3e3e9e399397ee958e0f87c1af60f8cf2621fb",
+    "refs/tags/luu-tru/verdict/moi-truong-review-1-verdict f40d7f41596ba857c1e8f3a6f519b5a11dca69f1",
+    "refs/tags/luu-tru/verdict/moi-truong-review-10-verdict 180be3ce5968ba3791579d5d2efcfd56ba05579b",
+    "refs/tags/luu-tru/verdict/moi-truong-review-2-verdict c2f8acf370c011cda28d7cd9079a830d4f0d7135",
+    "refs/tags/luu-tru/verdict/moi-truong-review-3-verdict 0239f90e8978ef7c14068b0f349276e0be8f56ac",
+    "refs/tags/luu-tru/verdict/moi-truong-review-4-verdict 5e0b0d34a48cb1abd6c8d69629423baa2f058da4",
+    "refs/tags/luu-tru/verdict/moi-truong-review-6-verdict ad5cae25ea5d9c3c9783efa049ad0b2645810e25",
+    "refs/tags/luu-tru/verdict/moi-truong-review-7-verdict 8b9108d6583510f5348c2262009c964e80316584",
+    "refs/tags/luu-tru/verdict/moi-truong-review-8-verdict 0b78bd8d8a50ebc321b5915b817dd2ae2fa77bd4",
+    "refs/tags/luu-tru/verdict/moi-truong-review-9-verdict a13f26ca4dc2bea315175013b8f458ca7d3746f8",
+    "refs/tags/luu-tru/verdict/plat-x4-ho-so-review-1-2-3 21c30dba5298277451625022fe95e9d248c762bf",
+    "refs/tags/luu-tru/verdict/wp55-r2-review-5-verdict 58d826b9a743b744d89869605259c22abe160edc",
+    "refs/tags/luu-tru/verdict/wp55-r3-review-10-verdict 096fb080ef4f210c953a21acdd55072c16365ff7",
+    "refs/tags/luu-tru/verdict/wp55-r3-review-11-verdict 6fcbd82be2b9cc9b44de481b3ae512e6678cf879",
+    "refs/tags/luu-tru/verdict/wp55-r3-review-9-verdict dde229e8d947b1fe6d6151cf5f47fd627293a292",
+    "refs/tags/luu-tru/verdict/wp55-verdict-6 f511da6c0df48272b1d38dc0896bba02094c7376",
+    "refs/tags/v1.29.7 ef909d137b59539ca6bb39b5eb8baaa42faf07c5",
+    "refs/tags/v1.33.0 c4417eecdf1833229164fb509d235d00a7878966",
+    "refs/tags/v1.33.1 f43997b65c37666a307944a1da52e6129cdf7bf6",
+    "refs/tags/v1.33.10 0e234e9a79138102a24f33e3f037803438cec25a",
+    "refs/tags/v1.33.11 31ea4610e5c2ce015e7265da820dd50462ba26cd",
+    "refs/tags/v1.33.12 985c262a4d4a4fba60e59aa8db24548c054aa7c3",
+    "refs/tags/v1.33.13 526493a7421bf5af268919b27cebb0cd4de1d030",
+    "refs/tags/v1.33.14 294c50a73dc5fbc7585402527f145d7be0d0b0b2",
+    "refs/tags/v1.33.2 969d5aeadfa149fb7654890c099e2b599b1e19d0",
+    "refs/tags/v1.33.3 c41d24cdcbc77c4c9f1f7e53c0954d5770ca4230",
+    "refs/tags/v1.33.4 2b4376ab8db1fd7790a0610d7429dabfcc840481",
+    "refs/tags/v1.33.5 3abedd28c1e026227ebb28aba5a6edc5b47179ff",
+    "refs/tags/v1.33.6 7f4de7d2af0a1a96dc6ab721abc20a53a6af8ead",
+    "refs/tags/v1.33.7 06ac2f034342b7673532012f0220aeb9848c2e3c",
+    "refs/tags/v1.33.8 34f76ac8994948384bcb3ec7493fce19b42edbc0",
+    "refs/tags/v1.33.9 590f9f6fd2bbf51a2cf7652783cf05859f352d47"
+  ],
+  "consumer_copy_equal": true,
+  "receipt": {
+    "schema": 2,
+    "reviewed_sha": "b2ea0f24576275014e8124bfd3e0b6a16c3ca8b5",
+    "declared_bytes": 45842,
+    "bytes": 45842,
+    "declared_hash": "c3c454a867e859a4214f3574be147d8237ad0f798f21d38cb2763a20252c44c6",
+    "hash": "c3c454a867e859a4214f3574be147d8237ad0f798f21d38cb2763a20252c44c6"
+  }
+}

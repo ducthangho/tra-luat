@@ -117,7 +117,7 @@ Phép canh hai nguồn ref chạy trước: máy chủ 299 ⊆ cục bộ 300 (`
 
 ---
 
-**Đặc tả đóng băng:** `ops/specs/GATE-TACH-JOB-CAT-CHI-PHI.md` @ `b743f1798aba12615f903a11bd451c87e404814e`
+**Đặc tả đóng băng (revision 2):** `ops/specs/GATE-TACH-JOB-CAT-CHI-PHI.md` @ `d85365463259615537c4fb96acd2408d917d9bd2` (commit ĐẦU TIÊN chứa bản có băm dưới đây; revision 1 @ `b743f17`, băm `8cca700c…`)
 **`spec_sha256`:** `bda86f128c220b868e9c103c919d213d8aba5ed1753962b0898ea1ce1852812c` (**revision 2**, 07-09-2026 — chỉ thị https://github.com/ducthangho/tra-luat/issues/463#issuecomment-5567157629; revision 1 = `8cca700cba9c2312d05bf64eee3d4a5bda5317cb45e244ed22161b4ddcc83c62`)
 **`base_sha`:** `1b3caa1` lúc soạn; **ba mỏ neo trong lease đo lại lúc cấp = `d28c4b1`** (head `master`
 03:37:33Z 07-09-2026) · **đi TRƯỚC** `LO-319` · `2A` · `2B`

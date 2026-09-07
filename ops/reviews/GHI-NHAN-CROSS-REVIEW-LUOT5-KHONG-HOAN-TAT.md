@@ -264,3 +264,14 @@ Lượt 11: Codex `gpt-6-astra`, xhigh, **939 s, chạy trọn**. `changes_reque
 cả hai lượt cùng bắt) · 1 CHƯA VÁ (bia mộ #456, chờ 14:30:07Z — P1 duy nhất, tự đóng theo hạn; cả hai lượt chạy trước mốc, chỉ mô
 phỏng). P2 billing vá ở `4c18cb2` (commit chứa verdict lượt 11); P2 19 tệp `rig/` đã được phiên kia vá ở `17c6901`, `4c18cb2` chỉ đo lại 69/69. Verdict `pr468-hoso-4-packet-review-11-codex-verdict.md`, hiện vật
 `pr468-hoso-4-packet-review-11-codex/`. Lượt kế: chạy SAU 14:30:07Z để readback thật thay mô phỏng — và chỉ MỘT phiên phóng.
+
+# LƯỢT 12 — 07-09-2026, `reviewed_sha` `02b0b86` (sau lượt 10/11 + biên nhận lượt 10 + mốc thu hồi #456)
+
+Chạy TRƯỚC 14:30:07Z theo chỉ thị "vá tiếp và review tiếp". Codex `gpt-6-astra`, xhigh, **1167 s**, chạy trọn ở lần phóng thứ 3
+(hai lần đầu `launcher.py run` chặn rc=11 — cây sandbox clone qua mirror cục bộ nên thiếu remote GitHub; lỗi dựng sandbox của executor,
+reviewer chưa chạy). `changes_requested` — **2 P1 / 2 P2**. Đối chiếu lượt 11: 2 VÁ THẬT (billing r4, manifest) · 1 CHƯA VÁ VỀ MÁY
+(bia mộ #456). **P1 mới `mirror-thieu-ref-khong-du-do-a9`**: bundle chỉ giao 3 ref (bare `--no-local` từ clone chỉ mang local heads) nên
+reviewer không tái đo được lời khai "302/302 ref" — đúng §8, reviewer phải được cấp năng lực ĐO LẠI; lượt kế giao `git clone --mirror`
+đủ ref + `ls-remote` (tên+OID) tại giờ readback + phép so tập. Hai P2 hồ sơ (receipt 10 thiếu trailer session/khung giờ chép nhầm;
+receipt 11/GHI-NHAN gán sai commit vá 19 tệp rig/, "5 giây" không nguồn) vá ở `df0800c`. Verdict `pr468-hoso-4-packet-review-12-codex-verdict.md`,
+hiện vật `pr468-hoso-4-packet-review-12-codex/`.

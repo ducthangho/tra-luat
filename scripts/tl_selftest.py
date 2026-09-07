@@ -21273,6 +21273,41 @@ def run() -> int:
                        for q in tren_dia))
         return ok1 and ok2 and ok3 and ok4
     _t110("r291_docs_ngoai_goi", _c291_docs_ngoai_goi)
+    def _c357_agents_ngoai_goi():
+        # r357 — `.agents/` là ANH EM THỨ BA của `.claude`/`.codex`: vị trí adapter phía Codex mà
+        # `docs/adr/0019-ba-skill-adapter-hai-agent-mot-protocol.md` thiết kế, và
+        # `docs/KE_HOACH_TRIEN_KHAI_PROTOCOL_DA_PHIEN.md:273` khai thẳng "phải bị loại khỏi release
+        # bundle". Trước r357 nó chỉ tồn tại untracked trên đĩa người giữ nên chưa ai đo.
+        #
+        # ĐO TRƯỚC KHI VÁ (06-09-2026): chép `.agents/` (10 tệp) vào cây rồi hỏi
+        # `_release_should_include` ⇒ **10/10 SẼ VÀO GÓI**, tức 180 → 190, ăn 10 trong 20 khe còn lại
+        # dưới trần 200 CỨNG. Cùng hình dạng với ca `.codex` (r331) — khác đúng một điều: lần này bắt
+        # được TRƯỚC khi tệp vào git, chứ không phải sau khi gate đã đỏ ở mọi lượt chạy từ main checkout.
+        #
+        # Bốn vế lấy từ BỐN nguồn khác nhau, để không vế nào chứng minh chính nó — y khuôn r291:
+        #   (1) hằng chính sách · (2) sản phẩm manifest · (3) số đo ratchet · (4) CÂY THẬT.
+        # Vế (4) là phản chứng chống XANH-GIẢ: "vắng khỏi gói" có thể do .gitignore, do suffix, do tên
+        # bị loại — nên phải chứng minh chúng vắng ĐÚNG VÌ khoá `.agents`, và vẫn CÒN trên đĩa.
+        root = _ROOT209
+        ok1 = ".agents" in _rel209._RELEASE_EXCLUDE_DIRS
+        mf = root / "RELEASE_MANIFEST.json"
+        if not mf.exists():
+            return ok1
+        j = _j209.loads(mf.read_text(encoding="utf-8"))
+        paths = [str(x.get("path") or "") for x in (j.get("files") or [])]
+        ok2 = not [p for p in paths if p.startswith(".agents/")]
+        # RATCHET: gói giữ 180 sau r357 — thêm `.agents/` KHÔNG được nhúc nhích con số này. Nếu đỏ ở
+        # đây thì có tệp RUNTIME được thêm, phải kê khai slot CÓ CHỦ ĐÍCH như các khối r291 ở trên.
+        ok3 = int(j.get("file_count") or 0) == len(paths) and len(paths) == 180
+        d = root / ".agents"
+        tren_dia = sorted(q for q in d.rglob("*") if q.is_file()) if d.is_dir() else []
+        # Cây rời (bản sao không có `.agents/`) thì không có gì để đo — nhưng KHÔNG được tha im lặng:
+        # ba vế trên vẫn phải đúng, và vế này chỉ bỏ khi thư mục thật sự vắng.
+        ok4 = (all(not _rel209._release_should_include(q, root) for q in tren_dia)
+               and all(set(q.relative_to(root).parts) & _rel209._RELEASE_EXCLUDE_DIRS == {".agents"}
+                       for q in tren_dia))
+        return ok1 and ok2 and ok3 and ok4
+    _t110("r357_agents_ngoai_goi", _c357_agents_ngoai_goi)
     def _c307_changelog_mot_version_mot_dot():
         # r307 — SỔ: MỘT version phải ứng ĐÚNG MỘT số đợt. Lớp này trước nay KHÔNG cổng nào soi:
         # merge PR #6 (`dfb9418`) đi qua CI xanh + gate local 8/8 xanh mà vẫn khai 15 số version

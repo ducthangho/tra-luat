@@ -97,6 +97,13 @@ so phần `SPAN` (`MOI[_P456][0] == _MAU_BASE456`) + hằng canonical của `TON
 
 ## HAI ĐIỀU KIỆN CHƯA THOẢ — đọc trước khi cấp lease
 
+> **⚠ ĐÍNH CHÍNH 09:3xZ 07-09-2026 — câu nói về `WebSocket` ngay dưới đây là SAI.**
+> `codex doctor` đo trực tiếp: WS handshake tới đúng endpoint ấy **THÀNH CÔNG** (`HTTP 101
+> Switching Protocols`), và `respect system proxy: disabled` ⇒ codex **không đi qua** proxy kia.
+> `Connection refused (os error 111)` là **CHẬP CHỜN**, nguyên nhân **chưa biết** — không phải
+> chính sách chặn. Cross-review lượt 6 VÀ lượt 7 đều đã chạy được ở đúng môi trường này.
+> Chi tiết + tự phê: `ops/reviews/GHI-NHAN-CROSS-REVIEW-LUOT5-KHONG-HOAN-TAT.md` mục ĐÍNH CHÍNH.
+
 **(1) Chưa có `cross_approved`.** Lượt 5 **chết năm lần** vì hạ tầng — chữ ký `Connection refused (os error 111)` trên đường tái kết nối WebSocket của `codex`. **Đính chính 03:55Z 07-09-2026:** chẩn đoán *"proxy không cho `WebSocket upgrades`"* ở bản đầu là **SAI** (`codex doctor`: handshake `HTTP 101`, codex không đi qua proxy egress); nguyên nhân thật **CHƯA BIẾT**, đường codex **mở nhưng chập chờn**. Lượt 6 (07-09-2026, phóng có giám sát) đã chạy trọn. Kết quả lượt 6 trên
 `reviewed_sha` `2adb681`: `changes_requested`, 7 P1 / 4 P2. Cho packet này: P1 cũ
 `span-rong-nuot-ti-le-vo-can` xếp **VÁ HỜ về nghĩa vụ xác nhận** — reviewer tự dựng **1213 ca, 0 đỏ giả /

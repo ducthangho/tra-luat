@@ -88,6 +88,13 @@ QUẢ ĐO**, không phải thất bại — và phải ghi như vậy.
 
 ## HAI ĐIỀU KIỆN CHƯA THOẢ
 
+> **⚠ ĐÍNH CHÍNH 09:3xZ 07-09-2026 — câu nói về `WebSocket` ngay dưới đây là SAI.**
+> `codex doctor` đo trực tiếp: WS handshake tới đúng endpoint ấy **THÀNH CÔNG** (`HTTP 101
+> Switching Protocols`), và `respect system proxy: disabled` ⇒ codex **không đi qua** proxy kia.
+> `Connection refused (os error 111)` là **CHẬP CHỜN**, nguyên nhân **chưa biết** — không phải
+> chính sách chặn. Cross-review lượt 6 VÀ lượt 7 đều đã chạy được ở đúng môi trường này.
+> Chi tiết + tự phê: `ops/reviews/GHI-NHAN-CROSS-REVIEW-LUOT5-KHONG-HOAN-TAT.md` mục ĐÍNH CHÍNH.
+
 **(1) Chưa có `cross_approved`.** Lượt 5 chết năm lần vì hạ tầng (chữ ký `Connection refused (os
 error 111)` trên đường tái kết nối của `codex`; chẩn đoán "proxy không cho `WebSocket upgrades`" ở bản
 đầu là **SAI** — đính chính 03:55Z 07-09-2026, nguyên nhân thật **CHƯA BIẾT**). **Lượt 6** (Codex

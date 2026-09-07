@@ -48,7 +48,7 @@ scratchpad từng phiên, không phải một thứ chạy được trong kho.
 
 | lỗi | biểu hiện | gốc |
 |---|---|---|
-| P1 lượt 12 `mirror-thieu-ref-khong-du-do-a9` | gói chỉ mang 3 tên nhánh | kiểu clone (bare/hẹp) — xem ĐÍNH CHÍNH bên dưới |
+| P1 lượt 12 `mirror-thieu-ref-khong-du-do-a9` | gói chỉ mang 3 tên nhánh | **CHƯA XÁC THỰC ĐƯỢC** (hiện vật lượt 12 không còn) — xem ĐÍNH CHÍNH bên dưới |
 | P3 lượt 13 `evidence-thieu-phuong-phap-trich-va-gioi-han-bao-phu` | `EVIDENCE.md` không khai cách trích số và phần bỏ sót | viết tay mỗi lượt |
 | `t33` không đo được | container thiếu `actionlint` | không có bước cài công cụ trước khi đo |
 
@@ -108,8 +108,9 @@ rc=0
 | thiếu tham số | `rc=2` | **`rc=2`** |
 | `--single-branch` thay `--mirror` | `rc=6` | **`rc=6`** — `nguon=305 mirror=1 cay-kho=1; lech=304/304` |
 
-Ca thứ hai tái hiện **đúng lỗi lịch sử** đã sinh ra P1 lượt 12: nếu ai đó dựng gói bằng clone
-một nhánh, script chặn ngay thay vì giao một gói mà reviewer không tái đo được.
+Ca thứ hai **KHÔNG** tái hiện lỗi lịch sử — hiện vật lượt 12 không còn nên không ai kiểm được
+chuyện đã xảy ra thế nào. Nó chỉ chứng minh một điều hẹp hơn và vẫn có ích: nếu ai đó dựng gói
+bằng clone một nhánh, script chặn ngay thay vì giao một gói mà reviewer không tái đo được.
 
 ### Log gốc của phép đo t33
 
@@ -166,3 +167,34 @@ Phản chứng tự đo sau khi vá:
 
 Ca cuối là bằng chứng trực tiếp cho P1: trước khi vá, nhánh `command -v` sẽ nhận bản giả rồi
 báo gói "ĐỦ ĐỂ TÁI ĐO".
+
+## Cross-review #477 lượt 2 và 3 — hai lần bản vá của tôi tự sinh lỗi
+
+| lượt | slug | kết luận | ghi chú |
+|---|---|---|---|
+| 2 | `actionlint-co-mat-khong-phai-dung-ban` | VÁ HỜ | `command -v` vẫn dính `export -f`; `case *"$AL_VER"*` khớp chuỗi con |
+| 2 | `shellcheck-thieu-van-giao-goi-xanh` | **VÁ SINH LỖI MỚI** | prepend `$AL_DICH` làm tệp trong đó che lệnh hệ thống |
+| 3 | `actionlint-co-mat-khong-phai-dung-ban` | **ĐÃ ĐÓNG** | gọi binary bằng đường dẫn tuyệt đối, so bằng nhau |
+| 3 | `xoa-al-dich-di-theo-symlink-ra-ngoai-goi` | **P1 MỚI** | `rm -rf` tôi thêm ở lượt 2 đi theo symlink, **xoá dữ liệu ngoài gói** |
+| 3 | `remote-doi-ten-loi-van-khai-url-that` · `manifest-loc-hau-to-bo-sot-tep-con` · `so-do-lich-su-thieu-hien-vat-tai-tinh` | ĐÃ ĐÓNG | |
+
+P1 mới ở lượt 3 là loại nguy hiểm nhất trong cả chuỗi: `$R` do người gọi chọn, nên nếu
+`$R/cong-cu` là symlink tới thư mục dùng chung thì `rm -rf "$R/cong-cu/actionlint"` **đi qua
+thành phần symlink ở giữa** và xoá sạch ở đích. Reviewer đo A/B trên cùng nguồn: bản `3d2ac9b`
+giữ sentinel, bản `a6a5222` **xoá** sentinel, cả hai `rc=0`. Hậu quả thứ hai: nó xoá luôn archive
+offline mà người gọi đặt sẵn — tức bản vá của tôi phá đường air-gapped, và tôi đã đoán sai rằng
+thủ phạm là việc bỏ prepend PATH.
+
+Vá: **không xoá gì cả.** Từ chối `cong-cu` là symlink, rồi tạo thư mục cài mới bằng `mktemp -d`.
+Hai `rm -rf` cũ (`kho.git`, `cay-kho`) cũng được chặn symlink cho nhất quán, dù reviewer không
+quy chúng là nguyên nhân.
+
+Phản chứng tự đo sau khi vá:
+
+| ca | trước khi vá | sau khi vá |
+|---|---|---|
+| `cong-cu` là symlink ra ngoài | `rc=0`, sentinel **MẤT** | **`rc=4`**, sentinel **CÒN** |
+| archive offline người gọi đặt sẵn | `rc=4`, archive **MẤT** | **`rc=0`**, archive **CÒN** |
+| `shellcheck` giả đặt sẵn trong `cong-cu` | — | `rc=0`, chọn `/usr/bin/shellcheck` |
+| `actionlint(){ echo 1.7.70; }; export -f` | — | `rc=0`, ghi `1.7.7` |
+| đường xanh | — | `rc=0`, `306/306/306` |

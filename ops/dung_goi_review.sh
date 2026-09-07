@@ -56,6 +56,8 @@ N_NGUON=$(wc -l < "$R/nguon-refs.tsv")
 [ "$N_NGUON" -gt 0 ] || loi 6 "ls-remote khong tra ve ref nao"
 
 # ---- 2. Mirror DU MOI REF: khong --single-branch, khong --depth ----
+# Cung lop rui ro voi `cong-cu` (xem #477 luot 3): symlink lam `rm -rf` xoa ra ngoai goi.
+[ -L "$R/kho.git" ] && loi 3 "\$R/kho.git la symlink — tu choi de khong xoa ra ngoai goi"
 rm -rf "$R/kho.git"
 git clone --mirror -q "$REMOTE" "$R/kho.git" || loi 3 "clone mirror that bai"
 
@@ -63,6 +65,8 @@ git clone --mirror -q "$REMOTE" "$R/kho.git" || loi 3 "clone mirror that bai"
 #    LY DO DUNG (khong phai "ai-dang-giu chi quet refs/heads" — xem DINH CHINH o dau tep):
 #    de goi KHONG PHU THUOC ten remote, va de doi chieu tap ten truc tiep giua ba nguon.
 #    Scanner doc ca refs/remotes, nen buoc nay khong phai de "duoc dem".
+# Cung lop rui ro voi `cong-cu` (xem #477 luot 3): symlink lam `rm -rf` xoa ra ngoai goi.
+[ -L "$R/cay-kho" ] && loi 3 "\$R/cay-kho la symlink — tu choi de khong xoa ra ngoai goi"
 rm -rf "$R/cay-kho"
 git clone -q --no-single-branch "$R/kho.git" "$R/cay-kho" || loi 5 "clone cay lam viec that bai"
 git -C "$R/cay-kho" checkout -q --detach "$HEAD_SHA" || loi 5 "khong checkout duoc $HEAD_SHA"
@@ -102,11 +106,19 @@ N_L1=$(wc -l < "$R/refs-lech-mirror.tsv");  N_L2=$(wc -l < "$R/refs-lech-cay-kho
 AL_VER="${AL_VER-1.7.7}"
 [ -n "$AL_VER" ] || loi 4 "AL_VER duoc dat nhung RONG — khong tu thay bang mac dinh"
 
-# Thu muc cai phai MOI. Cross-review #477 luot 2 do duoc: neu AL_DICH con tep cu
-# (`shellcheck`, `sha256sum`...), buoc prepend PATH lam chung CHE lenh he thong — script
-# 3d2ac9b chon stub trong AL_DICH trong khi 14dab5e chon /usr/bin/shellcheck.
-AL_DICH="$R/cong-cu/actionlint"
-rm -rf "$AL_DICH"
+# Thu muc cai phai MOI — nhung TUYET DOI KHONG dat duoc bang `rm -rf`.
+# Cross-review #477 luot 3 do duoc hai hau qua cua `rm -rf "$R/cong-cu/actionlint"`:
+#   1. MAT DU LIEU NGOAI GOI: `$R` do caller chon. Neu `$R/cong-cu` la symlink toi mot thu
+#      muc dung chung, `rm -rf` di qua thanh phan symlink O GIUA va xoa sach `actionlint` o
+#      DICH. A/B tren cung nguon: 3d2ac9b giu sentinel, a6a5222 XOA sentinel, ca hai rc=0.
+#   2. PHA DUONG OFFLINE: caller dat archive tai `$R/cong-cu/actionlint/cache.tar.gz` thi
+#      `rm` xoa chinh dau vao TRUOC khi installer doc no.
+# Nen: TU CHOI symlink, roi tao thu muc cai MOI bang `mktemp -d`. Khong xoa gi.
+CONG_CU="$R/cong-cu"
+[ -L "$CONG_CU" ] && loi 4 "\$R/cong-cu la symlink — tu choi de khong ghi/xoa ra ngoai goi"
+mkdir -p "$CONG_CU" || loi 4 "khong tao duoc $CONG_CU"
+[ -L "$CONG_CU" ] && loi 4 "\$R/cong-cu la symlink — tu choi de khong ghi/xoa ra ngoai goi"
+AL_DICH=$(mktemp -d "$CONG_CU/actionlint.XXXXXX") || loi 4 "khong tao duoc thu muc cai actionlint"
 AL_VER="$AL_VER" AL_DICH="$AL_DICH" bash "$KHO/ops/cai_actionlint.sh" > "$R/cai-actionlint.log" 2>&1 \
   || loi 4 "cai actionlint (ban ghim $AL_VER) that bai — xem $R/cai-actionlint.log"
 

@@ -45,8 +45,24 @@ rút gọn thành `origin` chứ không phải `HEAD`, nên bộ lọc `grep -v 
 
 `ai-dang-giu .claude/dev/ci_dang_ky_test.py` vẫn in **2** dòng mang tên
 `mutant-khong-chay-tren-windows-exec-1-claude-20260906`; trạng thái của cả hai là **`HẾT_HẠN`**,
-tập trạng thái phân biệt = `{HẾT_HẠN}`, không có `CÒN_HẠN`. Tệp lease vẫn nằm trên hai ref —
-nó rụng khỏi phép đếm vì hạn, không vì bị xoá hay bị bia mộ.
+tập trạng thái phân biệt = `{HẾT_HẠN}`, không có `CÒN_HẠN`. Lease rụng khỏi phép đếm vì **hạn**,
+không vì bị xoá hay bị bia mộ.
+
+**ĐƠN VỊ — sửa một lỗi trong chính bản ghi này.** Bản đầu viết *"Tệp lease vẫn nằm trên hai ref"*.
+Sai đơn vị. `_quet_lease_toan_kho` (`ops/lease_publish.py:523–536`) **khử trùng theo cặp
+`(blob, đường dẫn)`** và chỉ giữ **một ref đại diện** cho mỗi cặp. Vậy 2 dòng = **2 cặp
+`(blob, path)` phân biệt**, KHÔNG phải 2 ref. Không được suy số ref từ số dòng.
+
+Số ref thật, đo riêng bằng `git cat-file --batch-check` trên toàn bộ 303 nhánh máy chủ lúc
+**`14:42:17Z`** (mốc khác với readback `14:39:17Z` ở trên, không thay thế nó):
+
+| blob | số nhánh mang | bia mộ |
+|---|---:|---|
+| `8b2103c` | **11** | KHÔNG |
+| `1f95042` | **1** | có |
+
+Tổng **12** tên nhánh, không phải 2. Ca khoá của lỗi này: hai blob nằm trên ba ref trở lên vẫn chỉ
+in hai dòng — muốn biết số ref thì phải đếm ref, không đếm dòng.
 
 ### Đối chiếu với mô phỏng của reviewer
 

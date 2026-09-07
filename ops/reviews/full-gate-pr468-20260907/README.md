@@ -25,16 +25,31 @@ Tức **1/6** kích thước stdout tự đếm lại được. Phần còn lạ
 log tổng hợp**, không phải tái tính. Không suy từ đó rằng các số ấy sai — chỉ là gói này không đủ
 để kiểm.
 
-Cách trích từng dòng (áp cho phần đọc lại được):
+Cách trích từng dòng, **kèm loại nguồn đúng**:
 
 | số | trích bằng | loại nguồn |
 |---|---|---|
-| `rc` từng bộ | trường thứ 2 của `nen.rc` / `sau.rc` | **đo lại được** — chạy `fullgate.sh` |
-| `out_byte` | `wc -c` trên stdout mỗi bộ, ghi sẵn trong `*.rc` | **đo lại được** |
-| số giây | `date +%s` trước/sau mỗi bộ | **đo lại được**, nhiễu ±5 s |
-| `51/51`, `TỔNG: ĐẠT` | `tail -5` stdout, lưu ở `*.tail.txt` | **đo lại được** |
-| `31 đột biến, 0 cái ĐỎ=[]` | `grep -c 'đột biến'` và `grep -c 'ĐỎ=\[\]'` trên `*.lease.norm.out` | **đo lại được** |
-| `50/50 dòng` sau chuẩn hoá | `diff` hai tệp `*.lease.norm.out` | **đo lại được** |
+| `rc` từng bộ | trường thứ 2 của `nen.rc` / `sau.rc` | **chỉ đọc log tổng hợp** — không tái lập được |
+| `out_byte` | ghi sẵn trong `*.rc` | **chỉ đọc log tổng hợp** (trừ `doc-claims`, xem bảng trên) |
+| số giây | ghi sẵn trong `*.rc` | **chỉ đọc log tổng hợp** |
+| `51/51`, `TỔNG: ĐẠT` | `tail -5` stdout, lưu ở `*.tail.txt` | tự đếm lại được **từ tail** |
+| `31 đột biến, 0 cái ĐỎ=[]` | `grep -c 'đột biến'` và `grep -c 'ĐỎ=\[\]'` trên `*.lease.norm.out` | tự đếm lại được |
+| `50/50 dòng` sau chuẩn hoá | `diff` hai tệp `*.lease.norm.out` | tự đếm lại được |
+
+Ba dòng đầu **không** phải phép đo tái lập được: chúng là giá trị đã tổng hợp sẵn trong `*.rc`.
+Bản đầu xếp chúng là "đo lại được — chạy `fullgate.sh`", và điều đó **sai hai lần**: (a) đọc một
+con số đã ghi không phải tái tính; (b) **`fullgate.sh` không có trong gói này và cũng không nằm
+trong kho** (`git ls-files '*fullgate.sh'` ⇒ **0**), nên không ai chạy lại được nó từ đây. Con số
+nhiễu "±5 s" cũng bị bỏ: không có căn cứ nào trong hiện vật.
+
+## Danh sách khẳng định được lập thế nào
+
+Không có bộ lọc tự động. Danh sách các số trong tài liệu này được lập **thủ công** từ ba nguồn:
+`*.rc`, dòng tổng kết trong `*.tail.txt` / `*.lease.norm.out`, và bảng trong `KẾT QUẢ`. Cách chọn
+ấy có hai điểm yếu phải nói: nó bỏ sót số viết bằng chữ, và nó phụ thuộc việc tôi nhớ ra từng chỗ.
+
+**Một mục bị bỏ sót vẫn tính là finding.** Nếu người đọc tìm được số nào trong tài liệu mà không
+xuất hiện ở bảng phân loại trên, đó là lỗi của tài liệu, không phải ngoại lệ được miễn.
 
 Bộ lọc và phần bỏ sót — nêu để không ai tưởng bảng này phủ hết:
 

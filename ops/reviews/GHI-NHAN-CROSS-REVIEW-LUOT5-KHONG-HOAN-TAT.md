@@ -126,3 +126,40 @@ Toàn bộ ở scratchpad phiên `session_0186nh13XYsStVs1usBCsx5Y`, **KHÔNG tr
 số đo, không phải nguồn có thẩm quyền): `rv5/run-luot-chet-5{,b}/` · `rv5/luot-chet-5-artifacts/` ·
 `rv5/phan-{A,B,C}/VERDICT-{A,B,C}.md` · `rv5/phan-{A,B,C}/review-*/` · `buoc_master.tsv` ·
 `so-lieu-trich-may-v5.tsv` · `do_buoc_v2.py` · `tinh_lai.py`.
+
+## Phụ lục — FULL-GATE, chạy ĐÚNG MỘT LẦN ở cuối, đo DELTA
+
+Chủ kho đặt: *"đừng chạy gate dài cho tới khi hết P1; chỉ chạy full-gate 1 lần ở cuối."* P1 chưa
+hết (lượt 5 không kết luận), nên phép đo này trả lời câu hẹp hơn và nói rõ như vậy: **bản vá tài
+liệu có làm hỏng cổng nào không** — đo **DELTA so `origin/master`**, không đòi `rc=0` tuyệt đối.
+
+Hai vế dựng trong **MỘT lệnh, hai vòng lặp, cùng các bước, chạy liền nhau** (bài học *"rig tự đẻ
+hồi quy không tồn tại"*): `nen = origin/master = d28c4b1` · `sau = HEAD = 7eb1145`.
+
+| cổng | nền `d28c4b1` | sau `7eb1145` | delta |
+|---|---|---|---|
+| `ci_dang_ky_test` | `rc=0` · **51/51** phản chứng | `rc=0` · **51/51** | **0** |
+| `packet_loop_test` | `rc=0` · **78/78** lớp lách · 219 s | `rc=0` · **78/78** · 204 s | **0** |
+| `lease_publish_test` | `rc=1` · **120/121**, chạy 121 bỏ qua 0 | `rc=1` · **120/121** | **0** |
+| `doctrine-scan` | `rc=0` | `rc=0` | **0** |
+| `adr-song` | `rc=0` 46/46 | `rc=0` 46/46 | **0** |
+| `doc-claims-check --strict` | `rc=0` `"ok": true` 106 tệp | `rc=0` `"ok": true` 106 tệp | **0** |
+
+`lease_publish_test rc=1` là **ĐỎ SẴN trên master**, không phải hồi quy: cùng một ca
+`t33_workflow_dang_lease_phai_qua_actionlint`, cùng `120/121`, cùng 29 dòng đỏ ở cả hai vế.
+`diff` hai bản in cho 34 dòng lệch; sau khi chuẩn hoá tên thư mục tạm ngẫu nhiên (`lp_XXXXXXXX`)
+còn **0 dòng** ⇒ toàn bộ là nhiễu của rig.
+
+`doc-claims-check` `advisory_count` **367 → 363**: bản vá **bớt** 4 advisory, `ok: true` cả hai vế.
+
+### Lượt chạy full-gate ĐẦU TIÊN là một CỔNG XANH GIẢ — ghi lại vì nó đắt
+
+Script bản đầu bọc mỗi suite bằng `/usr/bin/time -f ... -o ...`. Nhị phân ấy **không có** trong
+container ⇒ cả sáu lượt trả `rc=127`, **suite chưa từng chạy**, và vì `rc` hai vế **giống hệt
+nhau** nên phép so DELTA in ra *"khớp từng dòng"*. Nếu dừng ở mã thoát thì đã kết luận
+"full-gate sạch" trong khi **không một dòng test nào chạy**.
+
+Thứ bắt được nó **không** phải mã thoát mà là **kích thước đầu ra**: `out=0B` cho cả sáu. Đúng
+doctrine của kho — *"cổng xanh nhờ `rc=0` là cổng CÓ THỂ BỊ LỪA; phải đòi BẰNG CHỨNG DƯƠNG
+(`N/N` với hai số BẰNG NHAU)"* — và đúng họ với ca `param([string[]]$Args)` ở `r244`:
+`rc=0` + output rỗng. Bảng trên vì vậy in **cả hai số** của mỗi suite, không in mã thoát suông.

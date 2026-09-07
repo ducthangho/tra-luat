@@ -250,3 +250,16 @@ Verdict `pr468-hoso-4-packet-review-8-codex-verdict.md`, hiện vật `pr468-hos
 Codex `gpt-6-astra`, xhigh, **1171 s, chạy trọn**. `changes_requested` — **1 P1 / 4 P2**: P1 A2 hạ xuống P2 (phép so đã đúng, còn hàng
 bảng thứ tự); P1 còn lại `bia-mo-…` (chờ 14:30:07Z); ba P2 câu chữ + P2 gói lượt 8 thiếu 19 tệp `rig/do-review/` (executor bỏ thư
 mục khi chép). Verdict `pr468-hoso-4-packet-review-9-codex-verdict.md`, hiện vật `pr468-hoso-4-packet-review-9-codex/`. Bản vá + **revision 4** ở commit kế.
+
+# LƯỢT 10 và LƯỢT 11 — 07-09-2026, cùng `reviewed_sha` `c43347d`, HAI phiên phóng SONG SONG (11:34–11:50Z)
+
+Hai phiên Claude cùng nhận chỉ thị "tiếp tục vòng lặp vá, cross-review tới khi hết P1" và cùng phóng Codex trên cùng head mà không
+biết nhau — lỗi điều phối (một nhánh, hai writer), không phải lỗi reviewer. Lượt **10** do phiên kia vận chuyển (`17c6901`, 1 P1 / 1 P2);
+lượt **11** là lượt của phiên này, reviewer được giao dưới tên "lượt 10" (VERDICT.md giữ nguyên byte, nói "lượt 10"), đánh số lại 11
+khi vận chuyển vì lượt 10 kia đã lên nhánh trước 5 giây (`DOC-MANIFEST.md` trong gói ghi rõ).
+
+Lượt 11: Codex `gpt-6-astra`, xhigh, **939 s, chạy trọn**. `changes_requested` — **1 P1 / 2 P2**. Đối chiếu 5 finding lượt 9: 2 VÁ THẬT
+(A2, quyết định H) · 1 VÁ HỜ (lease r4 còn câu "đối chiếu nhiễu") · 1 VÁ SINH LỖI MỚI (gói lượt 9 thiếu 19 tệp `rig/` đã phục dựng —
+cả hai lượt cùng bắt) · 1 CHƯA VÁ (bia mộ #456, chờ 14:30:07Z — P1 duy nhất, tự đóng theo hạn; cả hai lượt chạy trước mốc, chỉ mô
+phỏng). Hai P2 vá ngay trong commit chứa verdict lượt 11. Verdict `pr468-hoso-4-packet-review-11-codex-verdict.md`, hiện vật
+`pr468-hoso-4-packet-review-11-codex/`. Lượt kế: chạy SAU 14:30:07Z để readback thật thay mô phỏng — và chỉ MỘT phiên phóng.

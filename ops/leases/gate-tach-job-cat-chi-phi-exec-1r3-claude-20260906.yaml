@@ -201,3 +201,8 @@ dieu_kien_dung:
   - 'Bắt tay khi `ai-dang-giu .claude/dev/ci_dang_ky_test.py` còn một dòng của lease #456 thiếu
      `ĐÃ_BỊ_THAY_THẾ`/`HẾT_HẠN` — đó là cửa sổ hai writer theo định nghĩa của công cụ.'
   - 'A1 hoặc A5 ĐỎ là KẾT QUẢ ĐO, không phải thất bại thiết kế — báo chủ kho, đừng nới gì.'
+
+# BIA MỘ — thay bởi lease revision 4 (chỉ thị chủ kho https://github.com/ducthangho/tra-luat/issues/463#issuecomment-5568696936); `_kiem_bia_mo` đòi hai chiều.
+da_bi_thay_the: gate-tach-job-cat-chi-phi-exec-1r4-claude-20260906
+da_bi_thay_the_luc_utc: '2026-09-07T10:17:12Z'
+da_bi_thay_the_theo: 'https://github.com/ducthangho/tra-luat/issues/463#issuecomment-5568696936'

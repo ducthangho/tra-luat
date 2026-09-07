@@ -53,10 +53,10 @@ regex"* (lượt 3) → **H** *"phủ VỊ TRÍ cặp trên dòng được chọ
 ý, executor tái dẫn xuất từng hunk và **đo lại bằng bộ ca của mình**, mục *"Thiết kế H"*). Slug
 `span-rong-nuot-ti-le-vo-can` hỏng **bốn lượt liên tiếp**; bản lượt 3 viết *"không có thiết kế thứ tư"* và
 trả lời `PROTOCOL §12` bằng *"hợp đồng T đúng, chỉ gỡ mâu thuẫn"* — verdict lượt 4 bác câu trả lời ấy bằng
-hai phản chứng chạy được (16 ca tổng cụt/tab trong bộ 131 đã giao; countermodel của luật 7). Bản này
-**không khai `§12` đã xong**: câu hỏi *"có nên tiếp tục cách làm này không"* là quyết định của **chủ kho**,
-đặt lên bàn ở mục *"§12 — bốn lần hỏng"* cùng ba lựa chọn và năm điều kiện đo được; H là ứng viên đã đo,
-**chưa được chọn**.
+hai phản chứng chạy được (16 ca tổng cụt/tab trong bộ 131 đã giao; countermodel của luật 7). Các bản lượt 4–7
+**không tự khai `§12` đã xong**: câu hỏi *"có nên tiếp tục cách làm này không"* là quyết định của **chủ kho**,
+đặt lên bàn ở mục *"§12 — bốn lần hỏng"* cùng ba lựa chọn và năm điều kiện đo được. **Từ 07-09-2026 chủ kho ĐÃ
+CHỌN lựa chọn (1) — tiếp H** (dấu vết bền ở mục §12); thi công chưa bắt đầu, lease chưa cấp, Đ1–Đ5 còn ràng buộc.
 
 ### ĐÍNH CHÍNH sau cross-review lượt 6 (Codex `gpt-6-astra`, `reviewed_sha` `2adb681`, 07-09-2026) — đọc trước mọi con số bên dưới
 
@@ -154,7 +154,7 @@ bị đếm đỏ) và **bỏ sót** (bản ghi tổng mang `0/0`, `n ≠ m`, ha
 | **B-thật** — siết từng mẫu thành `[1-9]\d*/[1-9]\d*` | 2 | 3 | chỉ cho 2 mẫu ấy | 0 | không đọc tổng TRÙNG | không đủ |
 | **T** (lượt 2) — bản ghi TỔNG theo từng định dạng, nhưng prototype còn lấy số từ nhóm `SPAN`, và grammar `probe` #1 có `(?: .*)?` | 0 chuỗi regex | ≥ 3 (A5) | CÓ ở bản ghi · **KHÔNG** ở đuôi wildcard | **7 / 66** (reviewer lượt 3, 22:10Z) · **8 / 137** (đo lại 22:33Z, bộ ca lượt 3) | **1 / 66** · **5 / 137** | **bác ở lượt 3** |
 | **T'** (lượt 3) — T với luật 5 viết lại (số CHỈ từ dòng tổng) + luật 7 **đếm hằng trong mã regex** | 0 chuỗi regex (đổi KIỂU giá trị `MOI`) | ≥ 3 (A5) | CÓ ở bản ghi · **KHÔNG** khi hằng nằm ở nhánh regex không tham gia match | **0 / 137** (22:33Z 06-09) · **0 / 131** bộ verdict lượt 3 (đo lại 00:15Z 07-09) · luật 7 **3 / 11** ca `law7` | **0 / 137** · **16 / 131** (tổng cụt/tab — bộ chọn đòi dấu cách/payload) · luật 7 **5 / 11** | **bác ở lượt 4** |
-| **H** (bản này) — bộ chọn nhận NHÃN độc lập payload; hằng cũng là nhóm bắt; đối chiếu **DANH SÁCH VỊ TRÍ** cặp trên dòng với vị trí nhóm trong match | 0 chuỗi regex (đổi KIỂU giá trị `MOI`, `ngoai_pham_vi` #1) | ≥ 3 (A5) | CÓ, kể cả khi grammar có lỗ — grammar lỗ làm ĐỎ ngay bản in xanh | **0 / 131** · **0 / 137** · **0 / 32** ca tấn công mới (00:15Z 07-09-2026) | **0 / 131** · **0 / 137** · **0 / 32** · `law7` **0 lệch / 11** theo hợp đồng H | **ứng viên — chưa chọn** (`§12` thuộc chủ kho) |
+| **H** (bản này) — bộ chọn nhận NHÃN độc lập payload; hằng cũng là nhóm bắt; đối chiếu **DANH SÁCH VỊ TRÍ** cặp trên dòng với vị trí nhóm trong match | 0 chuỗi regex (đổi KIỂU giá trị `MOI`, `ngoai_pham_vi` #1) | ≥ 3 (A5) | CÓ, kể cả khi grammar có lỗ — grammar lỗ làm ĐỎ ngay bản in xanh | **0 / 131** · **0 / 137** · **0 / 32** ca tấn công mới (00:15Z 07-09-2026) | **0 / 131** · **0 / 137** · **0 / 32** · `law7` **0 lệch / 11** theo hợp đồng H | **chủ kho CHỌN 07-09-2026 — lựa chọn 1** (mục §12; thi công chưa bắt đầu) |
 
 A-c bị bác ở HAI chiều, cả hai reviewer lượt 2 dựng được và tôi đo lại 21:07Z 06-09-2026 qua
 chính `chay_moi` trên bản in THẬT:

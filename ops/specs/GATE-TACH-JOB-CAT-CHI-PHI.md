@@ -1,4 +1,4 @@
-# Đặc tả packet — GATE-TACH-JOB-CAT-CHI-PHI (revision 3)
+# Đặc tả packet — GATE-TACH-JOB-CAT-CHI-PHI (revision 4)
 
 - `packet_id`: **GATE-TACH-JOB-CAT-CHI-PHI** (bí danh chữ; ID bền theo `PROTOCOL §3.2` là
   `wp<packet_issue>`, suy ra được ngay khi có số Issue — tiền lệ #456 giữ bí danh ở `packet_id`,
@@ -7,7 +7,12 @@
 - `mission_issue`: **(để trống — chủ kho cấp.)** `§3.2` đòi; lease #456 không có, và không có
   mission nào đang mở cho lane này. Khuyến nghị: mở MỘT Mission Issue cho cả bốn packet
   (`GATE` · `LO` · `2A` · `2B`); nếu không, ghi số Issue của `#456` và nói rõ đó là thay thế.
-- `revision`: **3** · `generation`: 1 — **revision 3** mở theo chỉ thị chủ kho 07-09-2026 (dấu vết bền: https://github.com/ducthangho/tra-luat/issues/463#issuecomment-5568696936) sau
+- `revision`: **4** · `generation`: 1 — **revision 4** theo chỉ thị chủ kho 07-09-2026 (*"Vá xong thì mở r3 luôn, không cần hỏi lại"* + *"Tiếp tục vòng lặp vá, cross-review tới khi hết P1"*; dấu vết bền: https://github.com/ducthangho/tra-luat/issues/463#issuecomment-5568696936 — comment riêng cho r4 executor chưa đăng được, chủ kho có thể bổ sung) sau cross-review lượt 9 (`reviewed_sha` `0bc6e56`, ba P2 câu chữ):
+  (g) câu *"nhiễu runner cỡ 1–2,3 phút là có thật"* và các chỗ A1/A5 gọi chênh giữa hai lượt là "nhiễu" viết lại cho đúng: hai lượt ấy cùng
+  tree nhưng KHÁC event/lane (`workflow_dispatch` nhánh so `push` master ⇒ 4 bộ ba thêm/4 mất do release-verify lane), phần do runner
+  KHÔNG tách được (nợ `NHIEU-RUNNER-CHUA-TACH-KHOI-TAI`); biên `~4` phút của A1 và `~9` của A5 là **biên thiết kế**, không phải nhiễu đo được;
+  (h) *"hai lượt master"* ⇒ một lượt nhánh/dispatch + một lượt master/push; (i) hàng *"số đo của GATE (A1/A2/A5)"* trong bảng chọn thứ tự
+  hết xác nhận nền A2 cũ. Revision 3 mở theo chỉ thị chủ kho 07-09-2026 (dấu vết bền: https://github.com/ducthangho/tra-luat/issues/463#issuecomment-5568696936) sau
   cross-review lượt 8 (`reviewed_sha` `4d0ead5`): (e) **A2** không neo run `34048685345` (`1b3caa1`, 39 bước) nữa — nền so tập phải
   là lượt **cùng base của lease, cùng event/lane** (P1 `a2-neo-nen-cu-trai-write-set-hien-tai`); (f) gỡ nốt hai câu "mười một/mọi
   lượt master" ở phần bối cảnh (P2 `bien-do-khac-head-khong-phai-nhieu-runner`, VÁ HỜ ở r2). Revision 2 (băm `bda86f12…`) mở theo chỉ thị chủ kho 07-09-2026 (dấu vết bền: https://github.com/ducthangho/tra-luat/issues/463#issuecomment-5567157629) sau
@@ -95,8 +100,11 @@ cho một bước và sai cho job — verdict lượt 1, P2):
 | job `gate (ubuntu-latest)` | 24,25 | 26,52 | **2,27** |
 | job `gate (windows-latest)` | 43,20 | 42,28 | **0,92** |
 
-⇒ **nhiễu runner cỡ `1`–`2,3` phút ở mức job là có thật**, và mọi ngưỡng ở `nghiem_thu` phải chừa
-biên cho nó. Hai lượt là **hai điểm dữ liệu** — **và câu ấy đã HẾT HẠN sau 6 giờ**: phép đo
+⇒ **chênh `0,92`–`2,27` phút ở mức job giữa hai lượt cùng tree là có thật — nhưng hai lượt ấy KHÁC event/lane**
+(`workflow_dispatch` trên nhánh so `push` trên master: lane `release-verify` WORKER/LAND đổi 4 bộ ba thêm / 4 mất dù `ci.yml`
+bằng byte — reviewer lượt 9 đo), nên **phần do runner KHÔNG tách được** từ hai lượt này (revision 4; nợ có tên
+`NHIEU-RUNNER-CHUA-TACH-KHOI-TAI`, `chua_do_duoc` #3). Ngưỡng ở `nghiem_thu` chừa biên là **quyết định thiết kế**, không phải
+phép đo nhiễu. Hai lượt là **hai điểm dữ liệu** — **và câu ấy đã HẾT HẠN sau 6 giờ**: phép đo
 02:49Z 07-09-2026 ngay dưới đây có **mười một** lượt chạy trọn — 5 master + 6 nhánh (xem `chua_do_duoc` #3).
 
 Đó là lý do bảng này tách khỏi bảng trên thay vì dùng chung. **Phiên thi công phải ĐO LẠI cả hai
@@ -104,7 +112,7 @@ bảng** — đây là số của 06-09-2026, và `L5` nói con số đúng lúc
 
 ### ĐO LẠI 2026-09-07 02:49:51 UTC — mười một lượt (5 master + 6 nhánh khác), và trần 60 ĐÃ BỊ CHẠM THẬT
 
-Hai bảng trên viết lúc 18:10Z 06-09-2026 khi chỉ có **hai** lượt master chạy trọn. Bảng này là
+Hai bảng trên viết lúc 18:10Z 06-09-2026 khi chỉ có **hai** lượt chạy trọn (một `workflow_dispatch` trên nhánh `34045664423`, một `push` master `34048685345` — revision 4 sửa chữ "hai lượt master"). Bảng này là
 phép đo thứ ba, và **chính nó đã hết hạn một lần trong lúc đang soạn** — xem hộp *"nền trôi" ngay dưới.
 
 | head | job `gate (windows-latest)` | `bien-nhan v2 selftest` (Windows) | mục / `skipped` | run |
@@ -384,7 +392,7 @@ bốn packet **nối tiếp**, không song song như bản đầu khai. Hai th�
 | tiêu chí | GATE đầu (`GATE → LO → 2A → 2B`) | GATE cuối (`LO → 2A → 2B → GATE`) |
 |---|---|---|
 | số tệp / trần `ADR-0044` | 2 / 3 — như nhau | 2 / 3 |
-| số đo của GATE (A1/A2/A5) | đo trên cây **chưa đổi** — nền `34045664423`/`34048685345` còn đúng | nền trôi sau ba packet cắt `test registry` (41 % chi phí Windows) ⇒ đo lại cả bảng |
+| số đo của GATE (A1/A2/A5) | đo trên cây **chưa đổi**: nền so tập A2 là lượt `workflow_dispatch` TRƯỚC tách tại `start_from_sha` (r3); hai run 39 bước `34045664423`/`34048685345` chỉ còn là đối chiếu lịch sử cho A1/A5 (revision 4) | nền trôi sau ba packet cắt `test registry` (41 % chi phí Windows) ⇒ đo lại cả bảng |
 | A7 của 2A/2B (bước `test registry` trên Windows) | viết MỘT LẦN theo bố cục sau tách (`gate-registry`) — đóng finding `acceptance-phu-thuoc-job-packet-khac-doi` bằng cấu trúc | phải viết "tìm bước theo job tại đúng head" và giữ hai trường hợp |
 | giá mỗi lượt `workflow_dispatch` Windows của ba packet sau | job dài nhất ≈ `21` phút (ước) | `43,20` phút |
 | phần sửa ở tệp #2 | `loi_ruff_ci` — rời `bang_chung_xanh`; ba packet sau rebase không đụng | như nhau |
@@ -444,8 +452,9 @@ lại 20:59Z: `ls-remote` **298** · `for-each-ref` **298** · `comm -23` rỗng
 
 **A1 (M1) — job dài nhất giảm, đo bằng PHÚT TƯỜNG CỦA JOB, kèm đầu-cuối của WORKFLOW.**
 `workflow_dispatch` `ci.yml` trên nhánh packet. Đòi: `max(thời lượng job)` trên `windows-latest`
-**≤ 25,00 phút**. Ngưỡng ấy suy từ số học `21,03` cộng `~4` phút biên cho nhiễu runner (chênh job
-đo được giữa hai lượt: `0,92`–`2,27`).
+**≤ 25,00 phút**. Ngưỡng ấy suy từ số học `21,03` cộng `~4` phút **biên thiết kế** (revision 4: chênh job `0,92`–`2,27`
+giữa hai lượt cùng tree KHÁC event/lane không tách được phần runner — không gọi là nhiễu đo được; nợ
+`NHIEU-RUNNER-CHUA-TACH-KHOI-TAI`).
 Đơn vị: **`completed_at − started_at` của JOB**, đọc qua `actions_list` +
 `method: list_workflow_jobs`; lấy `max` trên tất cả job của lượt, không lấy tổng.
 **Kèm, công bố nhưng không đặt ngưỡng** (chưa có nền): thời gian đầu-cuối của cả lượt
@@ -528,9 +537,9 @@ Phép làm ĐỎ: `grep -c 'timeout-minutes: 60'` phải bằng **số job**, v�
 Tính `Σ(thời lượng job × hệ số nền)` với hệ số `windows = 2`, `ubuntu = 1`, cho lượt TRƯỚC và
 lượt SAU trên cùng bộ bước.
 Nền: lượt **nhánh** `34045664423` = **110,65** (bảng phân rã theo bước chỉ có cho lượt này, nên
-mọi số "sau" suy từ nó); lượt **master** `34048685345` = **111,08** (để đối chiếu nhiễu). Ước sau:
+mọi số "sau" suy từ nó); lượt **master** `34048685345` = **111,08** (để đối chiếu — cùng tree, khác event/lane). Ước sau:
 **126,22** (**+14,1 %**) từ lượt nhánh. Đòi: số đo thật **≤ 135,00** phút tính tiền
-(`126,22 + ~9` biên, tức `~7 %` — rộng hơn nhiễu job đo được `2,27` nhân hệ số).
+(`126,22 + ~9` **biên thiết kế**, tức `~7 %` — rộng hơn chênh job `2,27` giữa hai lượt khác lane nhân hệ số; revision 4).
 Đơn vị: **phút tính tiền** = Σ phút tường của job × hệ số nền. Đo lại cả hai nền tại lúc thi công.
 Phép làm ĐỎ: vượt `135,00` ⇒ ĐỎ ⇒ tách job đắt hơn dự kiến ⇒ báo chủ kho.
 **Tiêu chí này KHÔNG được bỏ dù A1 xanh.** Packet này mua wall clock bằng billing; một lượt đo

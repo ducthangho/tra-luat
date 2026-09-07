@@ -244,3 +244,9 @@ Codex `gpt-6-astra`, xhigh, **1405 s, chạy trọn ngay lần đầu**. `change
 4 ĐÃ VÁ THẬT (`span-rong-…` **đóng**: 1213/0/0, Đ2 8/8 · `thieu-hien-vat-…` · `issue-lo-neo-…` · `a9-…`) · 1 VÁ HỜ (`bien-do-…`) ·
 1 CHƯA VÁ (`bia-mo-…`, chờ 14:30:07Z). Mới: P1 `a2-neo-nen-cu-trai-write-set-hien-tai`, P2 `quyet-dinh-tiep-h-con-bi-phu-dinh`.
 Verdict `pr468-hoso-4-packet-review-8-codex-verdict.md`, hiện vật `pr468-hoso-4-packet-review-8-codex/`. Bản vá + **revision 3** ở commit kế (chỉ thị chủ kho https://github.com/ducthangho/tra-luat/issues/463#issuecomment-5568696936).
+
+# LƯỢT 9 — 07-09-2026, `reviewed_sha` `0bc6e56` (sau revision 3 + merge phiên soạn)
+
+Codex `gpt-6-astra`, xhigh, **1171 s, chạy trọn**. `changes_requested` — **1 P1 / 4 P2**: P1 A2 hạ xuống P2 (phép so đã đúng, còn hàng
+bảng thứ tự); P1 còn lại `bia-mo-…` (chờ 14:30:07Z); ba P2 câu chữ + P2 gói lượt 8 thiếu 19 tệp `rig/do-review/` (executor bỏ thư
+mục khi chép). Verdict `pr468-hoso-4-packet-review-9-codex-verdict.md`, hiện vật `pr468-hoso-4-packet-review-9-codex/`. Bản vá + **revision 4** ở commit kế.

@@ -126,11 +126,11 @@ Phép canh hai nguồn ref chạy trước: máy chủ 299 ⊆ cục bộ 300 (`
 ---
 
 **Đặc tả đóng băng (revision 3):** `ops/specs/GATE-TACH-JOB-CAT-CHI-PHI.md` @ `3ef7d2a37d833ae62ff8d2848e146a945360e64d` (commit ĐẦU TIÊN chứa bản có băm dưới đây; revision 1 @ `b743f17`, băm `8cca700c…`)
-**`spec_sha256`:** `37800aa6b33afb8caf3296440bd0ac49dbd6b4300fe59f832e11ae629cc1ffb2` (**revision 3**, 07-09-2026 — chỉ thị https://github.com/ducthangho/tra-luat/issues/463#issuecomment-5568696936; revision 2 = `bda86f128c220b868e9c103c919d213d8aba5ed1753962b0898ea1ce1852812c`; revision 1 = `8cca700cba9c2312d05bf64eee3d4a5bda5317cb45e244ed22161b4ddcc83c62`)
+**`spec_sha256`:** `4c542f6b931f62687edd6dca0c5f22c0399ad41f4e80b48e29cdfcd519289cd8` (**revision 4**, 07-09-2026 — chỉ thị https://github.com/ducthangho/tra-luat/issues/463#issuecomment-5568696936 và "tiếp tục vòng lặp vá tới khi hết P1"; revision 3 = `37800aa6b33afb8caf3296440bd0ac49dbd6b4300fe59f832e11ae629cc1ffb2`; revision 2 = `bda86f128c220b868e9c103c919d213d8aba5ed1753962b0898ea1ce1852812c`; revision 1 = `8cca700cba9c2312d05bf64eee3d4a5bda5317cb45e244ed22161b4ddcc83c62`)
 **`base_sha`:** `1b3caa1` lúc soạn; **ba mỏ neo trong lease đo lại lúc cấp = `d28c4b1`** (head `master`
 03:37:33Z 07-09-2026) · **đi TRƯỚC** `LO-319` · `2A` · `2B`
-**Lease ĐÃ CẤP (revision 3):** `ops/leases/gate-tach-job-cat-chi-phi-exec-1r3-claude-20260906.yaml` (0 ô null; cấp 2026-09-07T09:44:51Z, hạn 2026-09-08T09:44:51Z, `thay_the_cho` exec-1r2,
-uỷ quyền neo https://github.com/ducthangho/tra-luat/issues/463#issuecomment-5568696936); chuỗi `#456 → exec-1 → exec-1r2 → exec-1r3`, mỗi mắt mang bia mộ `da_bi_thay_the` hai chiều.
+**Lease ĐÃ CẤP (revision 4):** `ops/leases/gate-tach-job-cat-chi-phi-exec-1r4-claude-20260906.yaml` (0 ô null; cấp 2026-09-07T10:17:12Z, hạn 2026-09-08T10:17:12Z, `thay_the_cho` exec-1r3,
+uỷ quyền neo https://github.com/ducthangho/tra-luat/issues/463#issuecomment-5568696936); chuỗi `#456 → exec-1 → exec-1r2 → exec-1r3 → exec-1r4`, mỗi mắt mang bia mộ `da_bi_thay_the` hai chiều.
 **Nền A1/A5 tái lập được TRONG KHO:** `ops/reviews/pr468-hoso-4-packet-review-6-codex/nen-a1-a5/`
 (13 run · 26 job · 1140 bước, `job.tsv` + `buoc.tsv` + `tinh.py`, đo 03:54Z 07-09-2026) — thay cho
 `buoc_master.tsv` mà đặc tả nhắc nhưng không có trong kho (finding P1 `thieu-hien-vat-quyet-dinh-h-va-chi-phi`).

@@ -45,8 +45,8 @@ assurance_target: cross_approved
 access: read-write
 
 spec_path: ops/specs/LO-319-LINUX-BANG-CHUNG-XANH.md
-spec_sha256: 399a9e8162dbe6a59c8bee3514a725e796c82787aa6dfffba6d42f1eb76973c0
-spec_hash: 399a9e8162dbe6a59c8bee3514a725e796c82787aa6dfffba6d42f1eb76973c0
+spec_sha256: 66dcb20d7bc044cc3185074b56152f0f7f737ac2d1a49c225c29a29b144b4917
+spec_hash: 66dcb20d7bc044cc3185074b56152f0f7f737ac2d1a49c225c29a29b144b4917
 
 write_set:
   - .claude/dev/ci_dang_ky_test.py

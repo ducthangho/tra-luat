@@ -156,32 +156,62 @@ dieu_kien_ready_CHUA_DO_DUOC:
 
 hoi_tu_nguoi_giu_doi_thao_tac:
   finding: >-
-    `r2-van-giu-sau-merge` [P1], cross-review lượt 3 trên `010a6f3` (codex gpt-6-astra xhigh),
-    verdict `changes_requested`, `VERDICT.md` sha256 378743defbb709efdeee3d2c2f7ccbfe02dba97c9d7d5f7cca08125574f2cd51.
-  no_bac_cai_gi: >-
+    `r2-van-giu-sau-merge` [P1] — nêu ở cross-review lượt 3 (`010a6f3`), và lượt 4 (`3c4c587`,
+    verdict sha256 421135f404d0316329191d10d9bed96ed44b490b8f8e157dba539d0f6659721f) giữ nó ở
+    mức VÁ HỜ vì PHƯƠNG ÁN của lượt 3 cũng sai. Cả hai lượt đều `changes_requested`.
+  loi_khai_da_bi_bac_LAN_MOT: >-
     Phiên soạn khai "NGƯỜI_GIỮ 2 chỉ là cửa sổ giữa lúc commit và lúc merge", hàm ý merge xong là
-    về 1. SAI. Bản r2 CHƯA có bia mộ nằm trên HAI ref, không phải một:
-    `refs/remotes/origin/master` và `refs/remotes/origin/ops/cap-lease-461` (nhánh của PR #471,
-    VẪN CÒN sau khi merge). Merge chỉ thay bản trên master; bản trên nhánh cũ sống nguyên, còn hạn
-    tới 2026-09-08T05:27:42Z.
-  phan_chung_A_B: >-
-    Tự tái hiện trong kho CÔ LẬP (bare + working copy trong scratchpad; kho thật không bị chạm),
-    A/B đúng MỘT biến —
-    CA A: merge g2, nhánh `ops/cap-lease-461` VẪN CÒN  -> NGƯỜI_GIỮ **2**;
-    CA B: merge g2, ĐÃ XOÁ nhánh ấy                    -> NGƯỜI_GIỮ **1** trên cả bốn đường.
-  thao_tac_con_thieu: >-
-    Xoá nhánh `ops/cap-lease-461` trên máy chủ. Nó ĐỦ ĐIỀU KIỆN theo `ops-don-ref.yml`:
-    `git merge-base --is-ancestor 6635379 origin/master` -> rc 0, tức `behind_by = 0` — mọi commit
-    của nó đã nằm trong master, xoá không làm commit nào thành không-tra-được.
-    Phiên web KHÔNG xoá được ref (403 do proxy egress) nên phải gọi tay `ops-don-ref.yml`
-    (`workflow_dispatch`, gõ `XOA`) — thao tác phá huỷ, cần chủ kho duyệt.
-  chua_xong_cho_toi_khi: >-
-    Đo lại `ai-dang-giu` trên CẢ BỐN đường write set và nhận NGƯỜI_GIỮ 1. Trước mốc đó, lease này
-    KHÔNG được coi là độc quyền và executor KHÔNG được bắt đầu.
-  no_nen: >-
-    Gốc của chuyện này là `lenh_ai_dang_giu` xét bia mộ theo TỪNG BẢN blob, nên một bản cũ trên một
-    ref lịch sử có thể "hồi sinh" một lease_id đã bị thu hồi. Quy tắc hợp nhất/thu hồi bền thuộc
-    nợ #473, KHÔNG thuộc write set wp461.
+    về 1. SAI — bản r2 chưa bia mộ còn nằm trên ref khác ngoài master.
+  loi_khai_da_bi_bac_LAN_HAI: >-
+    Bản vá lần một khai "HAI ref" và đưa A/B trong đó vế B (xoá `ops/cap-lease-461` ⇒ NGƯỜI_GIỮ 1)
+    được coi là phương án đóng. CŨNG SAI. Thực tế có BA ref, và vế B KHÔNG tái lập được.
+    Ghi cả hai lời khai sai NGUYÊN VĂN ở đây thay vì xoá đi: một hiện vật thẩm quyền mà chỉ giữ
+    kết luận cuối thì người sau không thấy được đường nào đã bị loại và vì sao.
+  vi_sao_dem_SOT: >-
+    Ref cục bộ của nhánh thứ ba đã CŨ lúc liệt kê, và phép so hai nguồn `comm` chạy ngay trước đó
+    KHÔNG cứu được: nó so TẬP TÊN, nên một ref có tên đúng mà trỏ commit cũ đi qua sạch.
+    Phép ấy bắt ref THIẾU/THỪA, KHÔNG bắt ref CŨ — đừng dùng nó như chứng nhận độ tươi.
+  ba_ref_mang_r2_chua_bia_mo:
+    do_luc: '2026-09-07T12:16Z, sau `git fetch --prune`'
+    blob_chung: 26f07b4fe49964034c710864f350402fe5bf55c3
+    ref:
+      - 'refs/remotes/origin/master                                head b416830'
+      - 'refs/remotes/origin/ops/cap-lease-461                     head 6635379'
+      - 'refs/remotes/origin/claude/soan-spec-3-viec-treo-20260906 head 17c6901'
+    ghi_chu_bo_quet: >-
+      `_quet_lease_toan_kho` khử trùng theo (blob, path) rồi in MỘT ref đại diện — nên một dòng
+      output KHÔNG liệt kê mọi ref mang cùng blob. Muốn kiểm kê đủ phải duyệt từng ref.
+  vi_sao_KHONG_xoa_duoc_nhanh_thu_ba: >-
+    `claude/soan-spec-3-viec-treo-20260906` là nhánh ĐANG SỐNG của PR #468. Đo:
+    `git merge-base --is-ancestor <nhánh> origin/master` -> rc **1**, và **28** commit chỉ có ở đó.
+    `ops-don-ref.yml` chặn đúng ca này bằng `behind_by != 0`. Xoá là mất 28 commit — CẤM.
+    (Nhánh `ops/cap-lease-461` thì rc **0**, xoá được — nhưng xoá một mình KHÔNG đủ.)
+  vi_sao_day_la_CAU_TRUC_khong_phai_su_co: >-
+    BẤT KỲ nhánh nào merge master trong khoảng giữa lúc r2 land (#471) và lúc lease này land đều
+    mang theo bản r2 chưa bia mộ. Bia mộ là DỮ LIỆU trong một tệp được quét trên MỌI ref; nó không
+    đuổi kịp các bản sao. Số ref mang r2 sống có thể còn TĂNG trước khi packet này land.
+  ba_duong_ra:
+    a_het_han: >-
+      Không làm gì: r2 hết hạn 2026-09-08T05:27:42Z. Hội tụ bằng HẾT HẠN, không bằng thu hồi.
+      Đây là thứ dù sao cũng xảy ra nếu không ai làm gì.
+    b_merge_lai: >-
+      Sau khi lease này land, để PR #468 merge master lần nữa — nhánh ấy khi đó mang bản r2 ĐÃ CÓ
+      bia mộ. Reviewer lượt 4 dựng ca C trên ảnh chụp và đo: cả bốn đường về 1, giữ nguyên lịch sử.
+      Không phá huỷ. NHƯNG là việc của chủ PR #468 — packet này KHÔNG được tự đẩy lên nhánh người
+      khác, và ca C là bằng chứng khả thi chứ không phải uỷ quyền.
+    c_sua_chinh_sach: >-
+      Nợ #473: cho bia mộ tính theo `lease_id` trên toàn kho thay vì theo từng blob. Đóng cả lớp
+      lỗi. Là packet thẩm quyền riêng, KHÔNG thuộc write set wp461.
+    khuyen_nghi: 'b + c, với a là lưới an toàn.'
+  dieu_kien_dung: >-
+    Chưa đo được NGƯỜI_GIỮ 1 trên CẢ BỐN đường write set thì lease này KHÔNG độc quyền và executor
+    KHÔNG được bắt đầu.
+  dieu_kien_dung_KHONG_CO_RANG: >-
+    Nói thẳng vì reviewer lượt 4 đã đo và đúng: KHÔNG có consumer nào của khoá này trong mã cổng.
+    `ops/lease_publish.py` không đọc nó; `check` vẫn rc=0 khi khoá vắng. Đây là chỉ thị cho người
+    và agent tuân thủ quy trình, KHÔNG phải chốt máy. Đừng đọc nó mạnh hơn thế.
+    Hệ quả: bằng chứng gỡ chốt phải là phép ĐỌC LẠI refs/holder do bên có thẩm quyền chạy, không
+    phải một dòng trong chính tệp này đổi từ "chưa" sang "đã".
 
 hinh_dang_ban_va_da_dong_bang:
   noi_dat_hang_moi: '_PROVIDER_NGOAI_CLI'

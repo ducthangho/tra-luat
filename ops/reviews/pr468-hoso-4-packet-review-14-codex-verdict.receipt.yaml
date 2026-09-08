@@ -44,9 +44,16 @@ model_reviewer_identity:
   model_yeu_cau: gpt-6-astra
   model_da_chay: gpt-6-astra
   model_bang_chung: >-
-    Đối số phóng `-m gpt-6-astra -c model_reasoning_effort=xhigh` trong script giám sát, ghi lại ở
-    `run.json` kèm trong gói. KHÔNG ĐO ĐƯỢC từ tệp session của codex: không trích được trường
-    `"model"` từ stdout, chỉ có `thread_id`. Đây là lời khai YẾU HƠN bằng chứng trực tiếp, ghi đúng mức.
+    ĐÍNH CHÍNH. Bản đầu của biên nhận này viết rằng đối số `-m gpt-6-astra -c
+    model_reasoning_effort=xhigh` "được ghi lại ở `run.json` kèm trong gói". **SAI** — `run.json`
+    của lượt này CHỈ có `lenh.chuong_trinh: codex`, `lenh.so_doi_so: 12` và
+    `lenh.van_tay: 3b3c068b45bbcdac`. Nó **KHÔNG** lưu argv, tên model, effort hay `thread_id`.
+    Gói cũng không kèm stdout/session/script phóng để kiểm ba trường ấy.
+    Vậy `model_yeu_cau`, `model_da_chay`, effort và `thread_id` dưới đây là **ATTESTATION CỦA
+    ĐIỀU PHỐI**, không có nguồn trong gói để reviewer đối chiếu. Cross-review #478 lượt 3 bắt được
+    (`bien-nhan-14-15-gan-doi-so-model-vao-run-json`).
+    Lưu ý: tệp `receipt.json` trong gói lượt 14 KHÔNG phải nguồn cho lượt 14 — nó đang audit
+    biên nhận lượt **13** (`parsed.luot: 13`).
   session_run_id: 229ddb14
   thread_id: 01a07df4-01f7-78e3-8928-8976fa4e4fb3
   prompt_sha256: 4a0ee1dcabdb370213730daf9cc1bc80d144111b6e3dd9d8fe43b28f70076a01
@@ -89,6 +96,20 @@ github_submitter_identity:
     merge authorization. Trường này ghi AI VẬN CHUYỂN. Lượt này KHÔNG có comment bản chiếu trên #468.
   phien_van_chuyen: https://claude.ai/code/session_0186nh13XYsStVs1usBCsx5Y
 
+anchor:
+  loai: canonical_ancestry
+  cuong_do: trung_binh
+  mo_ta: >-
+    `evidence_url` neo blob tại `8f7becb` — commit ĐẦU TIÊN chứa tệp verdict, trên nhánh
+    `claude/land-468-20260908` (PR #478). Lúc lập biên nhận, `8f7becb` là TỔ TIÊN của head PR đang
+    được kiểm, nhưng CHƯA vào `master`. Không có tag `luu-tru/*`, không có bằng chứng ref được bảo
+    vệ hay chính sách giữ object. Nếu PR #478 được squash/rebase thì neo này PHẢI được lập lại từ
+    nguồn thật, không được giữ nguyên URL cũ.
+  gioi_han: >-
+    Cổng chỉ kiểm quan hệ ancestry với HEAD đang validate. Nó KHÔNG chứng minh server coi commit ấy
+    là canonical, cũng không chứng minh GitHub sẽ giữ object. Neo YẾU HƠN các lượt 6–13 vốn còn có
+    comment bản chiếu trên PR #468 làm neo thứ hai; hai lượt này KHÔNG có comment ấy.
+
 khong_do_duoc:
-  - 'Model đã chạy: chỉ có đối số phóng và thread_id, không trích được trường "model" từ stdout.'
+  - 'Model/effort/thread_id đã chạy: KHÔNG có nguồn nào trong gói. run.json chỉ giữ vân tay lệnh.'
   - 'Biên nhận lập muộn hơn lượt review một ngày; không có comment GitHub làm neo độc lập.'

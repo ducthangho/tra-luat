@@ -1,0 +1,231 @@
+{
+  "pairs": {
+    "cidk.tail.txt": {
+      "bytes": [
+        206,
+        206
+      ],
+      "lines": [
+        5,
+        5
+      ],
+      "equal_bytes": true,
+      "sha256": [
+        "97f344a49903d6858fb78a99ff3403872d6931802c017852f9cb0fdce9746b68",
+        "97f344a49903d6858fb78a99ff3403872d6931802c017852f9cb0fdce9746b68"
+      ]
+    },
+    "ploop.tail.txt": {
+      "bytes": [
+        96,
+        96
+      ],
+      "lines": [
+        5,
+        5
+      ],
+      "equal_bytes": true,
+      "sha256": [
+        "2c78cc8ca2a0404dfab79029729b3ebf41979ee29ec450026f5c9f9b274e67db",
+        "2c78cc8ca2a0404dfab79029729b3ebf41979ee29ec450026f5c9f9b274e67db"
+      ]
+    },
+    "lease.norm.out": {
+      "bytes": [
+        8827,
+        8827
+      ],
+      "lines": [
+        50,
+        50
+      ],
+      "equal_bytes": true,
+      "sha256": [
+        "90d4256b5c0fa91be59ffa595798343761260110509b51bb52b211e0498a12dd",
+        "90d4256b5c0fa91be59ffa595798343761260110509b51bb52b211e0498a12dd"
+      ],
+      "logs": [
+        {
+          "mutations": 31,
+          "empty_red_markers": 0,
+          "line48": "  ĐỎ  t33_workflow_dang_lease_phai_qua_actionlint: KHÔNG ĐO ĐƯỢC: thiếu `actionlint`. PyYAML không thay được nó — nó không biết luật của GitHub. Cài: go install github.com/rhysd/actionlint/cmd/actionlint@latest (hoặc `brew install actionlint`, hoặc tải bản dựng sẵn từ releases).",
+          "line50": "lease_publish: 120/121 đạt; đã chạy=121, bỏ qua=0"
+        },
+        {
+          "mutations": 31,
+          "empty_red_markers": 0,
+          "line48": "  ĐỎ  t33_workflow_dang_lease_phai_qua_actionlint: KHÔNG ĐO ĐƯỢC: thiếu `actionlint`. PyYAML không thay được nó — nó không biết luật của GitHub. Cài: go install github.com/rhysd/actionlint/cmd/actionlint@latest (hoặc `brew install actionlint`, hoặc tải bản dựng sẵn từ releases).",
+          "line50": "lease_publish: 120/121 đạt; đã chạy=121, bỏ qua=0"
+        }
+      ]
+    },
+    "doc-claims.json": {
+      "bytes": [
+        70861,
+        70861
+      ],
+      "lines": [
+        2708,
+        2708
+      ],
+      "equal_bytes": true,
+      "sha256": [
+        "b9001f390f47286930965480160e62b23da1e47354acc0e9172b94a48d758286",
+        "b9001f390f47286930965480160e62b23da1e47354acc0e9172b94a48d758286"
+      ],
+      "json_valid": true
+    }
+  },
+  "recorded_rc": {
+    "nen": [
+      {
+        "suite": "cidk",
+        "rc": 0,
+        "seconds": 0,
+        "out_bytes": 2934
+      },
+      {
+        "suite": "ploop",
+        "rc": 0,
+        "seconds": 207,
+        "out_bytes": 8752
+      },
+      {
+        "suite": "lease",
+        "rc": 1,
+        "seconds": 58,
+        "out_bytes": 8971
+      },
+      {
+        "suite": "doctrine-scan",
+        "rc": 0,
+        "seconds": null,
+        "out_bytes": 69
+      },
+      {
+        "suite": "adr-song",
+        "rc": 0,
+        "seconds": null,
+        "out_bytes": 113
+      },
+      {
+        "suite": "doc-claims-check",
+        "rc": 0,
+        "seconds": null,
+        "out_bytes": 70861
+      }
+    ],
+    "sau": [
+      {
+        "suite": "cidk",
+        "rc": 0,
+        "seconds": 1,
+        "out_bytes": 2934
+      },
+      {
+        "suite": "ploop",
+        "rc": 0,
+        "seconds": 205,
+        "out_bytes": 8752
+      },
+      {
+        "suite": "lease",
+        "rc": 1,
+        "seconds": 63,
+        "out_bytes": 8971
+      },
+      {
+        "suite": "doctrine-scan",
+        "rc": 0,
+        "seconds": null,
+        "out_bytes": 69
+      },
+      {
+        "suite": "adr-song",
+        "rc": 0,
+        "seconds": null,
+        "out_bytes": 113
+      },
+      {
+        "suite": "doc-claims-check",
+        "rc": 0,
+        "seconds": null,
+        "out_bytes": 70861
+      }
+    ]
+  },
+  "full_directory_inventory": [
+    "ARTIFACTS.sha256",
+    "README.md",
+    "nen.cidk.tail.txt",
+    "nen.doc-claims.json",
+    "nen.lease.norm.out",
+    "nen.ploop.tail.txt",
+    "nen.rc",
+    "neo.txt",
+    "sau.cidk.tail.txt",
+    "sau.doc-claims.json",
+    "sau.lease.norm.out",
+    "sau.ploop.tail.txt",
+    "sau.rc"
+  ],
+  "stdout_size_recountable_suites": {
+    "doc-claims-check": true,
+    "cidk": false,
+    "ploop": false,
+    "lease": false,
+    "doctrine-scan": false,
+    "adr-song": false
+  },
+  "old_labels_still_present": [
+    {
+      "line": 32,
+      "text": "| `rc` từng bộ | trường thứ 2 của `nen.rc` / `sau.rc` | **đo lại được** — chạy `fullgate.sh` |"
+    },
+    {
+      "line": 33,
+      "text": "| `out_byte` | `wc -c` trên stdout mỗi bộ, ghi sẵn trong `*.rc` | **đo lại được** |"
+    },
+    {
+      "line": 34,
+      "text": "| số giây | `date +%s` trước/sau mỗi bộ | **đo lại được**, nhiễu ±5 s |"
+    },
+    {
+      "line": 35,
+      "text": "| `51/51`, `TỔNG: ĐẠT` | `tail -5` stdout, lưu ở `*.tail.txt` | **đo lại được** |"
+    },
+    {
+      "line": 36,
+      "text": "| `31 đột biến, 0 cái ĐỎ=[]` | `grep -c 'đột biến'` và `grep -c 'ĐỎ=\\[\\]'` trên `*.lease.norm.out` | **đo lại được** |"
+    },
+    {
+      "line": 37,
+      "text": "| `50/50 dòng` sau chuẩn hoá | `diff` hai tệp `*.lease.norm.out` | **đo lại được** |"
+    }
+  ],
+  "delta_lines": [
+    {
+      "line": 59,
+      "text": "**DELTA = 0**, nhưng nêu rõ phạm vi: phép so byte thật chỉ chạy trên **bốn cặp tệp** thực sự"
+    },
+    {
+      "line": 62,
+      "text": "hoá tên thư mục tạm ngẫu nhiên. DELTA của `doctrine-scan` và `adr-song` chỉ dựa vào `rc` và kích"
+    }
+  ],
+  "fullgate_sh_in_git": {
+    "command": [
+      "git",
+      "ls-files",
+      "*fullgate.sh"
+    ],
+    "cwd": "cay-kho",
+    "rc": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  "bundle_prompt_digest": {
+    "recorded": "e60c376ab385ccc9b3cc8d2cdd87620b2110c8a68e607c879a6100c6b3f9958c",
+    "actual": "e60c376ab385ccc9b3cc8d2cdd87620b2110c8a68e607c879a6100c6b3f9958c"
+  }
+}

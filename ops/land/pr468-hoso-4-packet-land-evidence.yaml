@@ -12,7 +12,8 @@ schema_version: 1
 mission_id: gh-467
 generation: 1
 provider: claude
-role: land_operator_ghi_ho
+role: land_operator
+recorded_by: claude   # phiên điều phối GHI HỘ; xem `ghi_chu_nguoi_ghi`
 session_id: fbace9af-dba2-5564-96ad-cc29ca23dc03
 input_packet_generations: [1]
 
@@ -31,18 +32,43 @@ authorization_ghi_chu: >-
 
 merge_method: merge
 merge_commit: 802fc01b5db866478459dbc4a65d008a38619898
-land_operator: ducthangho
-land_operator_ghi_chu: >-
-  Chủ kho tự bấm Merge trên giao diện GitHub lúc `2026-09-07T23:21:22Z`. Phiên điều phối KHÔNG
-  thực hiện thao tác merge: lệnh `merge_pull_request` bị classifier chế độ auto từ chối, và
-  phiên không tìm đường vòng. Tệp này do điều phối GHI HỘ sau khi đo, không phải người land tự ghi.
+land_operator: notebyme88
+land_operator_neo:
+  nguon: 'GitHub PR API — `pull_request_read(get)` trên PR #468, trường `merged_by.login`'
+  gia_tri: notebyme88
+  merged_at: '2026-09-07T23:21:22Z'
+  git_object: >-
+    `git show -s --format=fuller 802fc01` ⇒ author `notebyme88`, committer `GitHub`.
+    Git author KHÔNG tự chứng minh ai bấm nút; trường này neo vào `merged_by` của API,
+    và Git object chỉ là bằng chứng phụ trợ khớp hướng.
+ghi_chu_nguoi_ghi: >-
+  ĐÍNH CHÍNH so với bản đầu của chính tệp này. Bản đầu khai `land_operator: ducthangho` và
+  "chủ kho tự bấm Merge trên giao diện". **SAI** — `merged_by` của PR #468 là `notebyme88`,
+  cùng tài khoản đã APPROVED. Điều phối suy danh tính người merge từ ngữ cảnh hội thoại thay vì
+  đọc trường `merged_by`; cross-review #478 lượt 1 bắt được (`land-operator-khong-co-neo`).
+  Phiên điều phối KHÔNG thực hiện merge: lệnh `merge_pull_request` bị classifier chế độ auto
+  từ chối và phiên không tìm đường vòng. Tệp này do điều phối (`claude`) GHI HỘ sau khi đo.
 
 # --- CROSS-REVIEW: 15 lượt, khác nền (executor claude / reviewer codex gpt-6-astra xhigh) ---
 cross_review:
   so_luot: 15
   reviewer_provider: codex
   executor_provider: claude
-  p1_theo_luot: {7: 4, 8: 3, 9: 1, 10: 1, 11: 2, 12: 2, 13: 0, 14: 0, 15: 0}
+  p1_theo_luot: {7: 4, 8: 2, 9: 1, 10: 1, 11: 1, 12: 2, 13: 0, 14: 0, 15: 0}
+  p1_theo_luot_nguon: >-
+    Đếm `^### … [P1]` trên chính tệp verdict của từng lượt, đối chiếu câu tổng kết trong verdict.
+    ĐÍNH CHÍNH: bản đầu khai `8: 3` và `11: 2` — SAI, verdict gốc ghi 2 và 1. Cross-review #478
+    lượt 1 bắt được (`sai-p1-theo-luot`). Verdict lượt 14 và 15 nay đã vào kho cùng PR này
+    (`ops/reviews/pr468-hoso-4-packet-review-1[45]-codex-verdict.md`), nên hai số 0 cuối cũng
+    kiểm được từ nguồn thay vì chỉ là lời khai — trước đó chúng KHÔNG có hiện vật trong kho.
+  hien_vat_verdict:
+    trong_kho: 'lượt 6–13 đã có trên master; lượt 14 và 15 vào kho CÙNG PR này'
+    duong_dan: 'ops/reviews/pr468-hoso-4-packet-review-{14,15}-codex-verdict.md + thư mục hiện vật cùng tên'
+    manifest: 'lượt 14 ⇒ 59/59 rc=0 · lượt 15 ⇒ 45/45 rc=0'
+    dinh_chinh: >-
+      Bản đầu tệp này trình bày kết quả lượt 14/15 như đã xác minh, trong khi kho KHÔNG có verdict
+      của hai lượt ấy — `git rev-list --objects --all` không có path nào khớp. Cross-review #478
+      lượt 1 bắt được (`cross-review-14-15-thieu-hien-vat`). Nay đã kèm hiện vật.
   luot_cuoi:
     so: 15
     reviewed_sha: 745d8889d0d6468785f26003876ba823c8b2db99
@@ -52,7 +78,7 @@ cross_review:
     p3: 1
   ghi_chu_head: >-
     GIỚI HẠN PHẢI ĐỌC: lượt 15 review `745d888`, KHÔNG phải head đã merge `17f4a1b`. Giữa hai SHA
-    là commit `17f4a1b` — vá nốt P3 duy nhất còn lại của lượt 15, gồm 2 tệp, `+55/−12`, toàn bộ
+    là commit `17f4a1b` — vá nốt P3 duy nhất còn lại của lượt 15, gồm 2 tệp, `+23/−8`, toàn bộ
     trong `ops/reviews/`, 0 tệp mã chạy được. Tức **head được merge chưa qua một lượt cross-review
     nào**. Đây là nợ thật, không phải chi tiết kỹ thuật.
 
@@ -70,6 +96,28 @@ pre_merge_checks:
 
 # --- PHÉP ĐO SAU MERGE (chạy trên master `802fc01`, 2026-09-08) ---
 post_merge_checks:
+  - ten: 'CI đo THEO JOB — trên exact head và trên merge commit'
+    ket_qua: >-
+      **XANH CẢ HAI NỀN trên merge commit.** Run `34169756563` (`push`, `802fc01`):
+      `gate (ubuntu-latest)` = `success` (44 bước, **0 hỏng**, 4 skipped) ·
+      `gate (windows-latest)` = `success` (43 bước, **0 hỏng**, 4 skipped).
+      Trên exact head `17f4a1b`: run `34168159148` (`pull_request`) = `success`,
+      `gate (ubuntu-latest)` 44 bước, 0 hỏng, 3 skipped.
+    canh_bao_doc_ket_qua: >-
+      Lượt `pull_request` trên `17f4a1b` chỉ có **MỘT job** (ubuntu). Nên "PR xanh" KHÔNG nói gì
+      về Windows — đúng cái bẫy `plat-x8-land-evidence.yaml` đã ghi. Windows chỉ được đo lần đầu
+      trên lượt `push` của merge commit, tức SAU khi merge. Đây là phép đo MỚI, không phải phép
+      đo trên head đã được uỷ quyền.
+    dinh_chinh: >-
+      Bản đầu của tệp này khai CI **KHÔNG ĐO ĐƯỢC**, lý do "bộ công cụ GitHub của phiên chỉ có
+      44 tool, không có nhóm workflow/actions". **SAI, và sai theo đúng lớp lỗi mà `CLAUDE.md`
+      đã ghi thành luật**: *"Đếm SỰ CÓ MẶT của một đường thay vì KHẢ NĂNG của nó"* và *"Một công
+      cụ thất bại chưa phải một đường bị chặn; phải thử ít nhất HAI client trước khi gọi đó là
+      chính sách."* `CLAUDE.md:583` nêu thẳng đường thứ hai: `/mcp/` có 44 công cụ, còn
+      `/mcp/x/actions` là endpoint RIÊNG. Điều phối chưa thử đường ấy đã tuyên không đo được.
+      Probe sau đó: `/mcp/x/actions` trả **4 công cụ** (`actions_get`, `actions_list`,
+      `actions_run_trigger`, `get_job_logs`) và mọi số trong mục này đo bằng chính nó.
+      Cross-review #478 lượt 1 bắt được (`ly-do-khong-do-ci-bo-sot-duong-actions`).
   - ten: 'head đã vào master'
     ket_qua: '`git merge-base --is-ancestor 17f4a1b origin/master` ⇒ ĐÚNG. master = `802fc01`, hai cha = `b416830` + `17f4a1b`.'
   - ten: 'nhánh không còn commit ngoài master'
@@ -94,24 +142,28 @@ post_merge_checks:
 
 # --- KHÔNG ĐO ĐƯỢC — phải nói, không được lấp ---
 khong_do_duoc:
-  - muc: 'Trạng thái CI của PR và của merge commit'
-    ly_do: >-
-      Bộ công cụ GitHub của phiên chỉ có **44 tool**, KHÔNG có nhóm workflow/actions. `get_status`
-      chỉ trả API status cũ (`total_count: 0`, `statuses: []`), không phải check-run của Actions.
-    hau_qua: >-
-      Tiền lệ `plat-x8` đo được `gate (ubuntu-latest)` và `gate (windows-latest)` theo JOB trên cả
-      exact head lẫn merge commit. Lần land này KHÔNG có phép đo tương đương. Không ai được đọc
-      "0 P1" hay "manifest sạch" thành "CI xanh".
   - muc: 'Vì sao `mergeable_state` giữ `blocked` sau phê duyệt đầu'
     ly_do: 'Theo dõi ~5 phút vẫn `blocked`/`mergeable: None`; không đọc được check-run để biết cái nào chặn.'
   - muc: 'Head `17f4a1b` chưa qua cross-review'
-    ly_do: 'Lượt 15 neo `745d888`. Đã nêu ở `cross_review.ghi_chu_head`.'
+    ly_do: >-
+      Lượt 15 neo `745d888`. Đã nêu ở `cross_review.ghi_chu_head`. Việc CI xanh cả hai nền trên
+      merge commit KHÔNG đóng nợ này: CI không thay cross-review.
+  - muc: 'Người bấm nút merge — cách thức thao tác (UI hay API)'
+    ly_do: >-
+      `merged_by` cho biết DANH TÍNH (`notebyme88`) nhưng không cho biết thao tác qua giao diện
+      hay qua API. Bản đầu tệp này khẳng định "tự bấm Merge trên giao diện" — lời ấy đã rút.
 
 bookkeeping:
   - >-
     Lỗ hổng gốc `_kiem_bia_mo` dùng `any(...)` trong `ops/lease_publish.py` VẪN NGUYÊN. PR này là
-    hồ sơ, không chạm mã điều phối. Đặc tả `ops/specs/THU-HOI-LEASE-VA-CAP-LAI.md` (revision 3) đang
-    chờ chủ kho cấp lease; phiên riêng `session_01Vt7NfNpABHfSWpxvx4aJGE` xử lý.
+    hồ sơ, không chạm mã điều phối. Đặc tả `ops/specs/THU-HOI-LEASE-VA-CAP-LAI.md` trên nhánh
+    `claude/spec-thu-hoi-lease-va-cap-lai-20260907` (tip `2aee80a2ff6a088ff39a2a8bc882db978df64c75`,
+    commit `2026-09-07T22:53:12Z`) nay ở **revision 6**, KHÔNG phải revision 3 như bản đầu tệp này
+    khai. Trạng thái đúng: r6 **chưa được review xác nhận**, `packet_issue: CHƯA CÓ`, trần 6/6 lời
+    gọi review đã hết, và bước chặn kế là **Review Rescue Checkpoint thuộc chủ kho** (§12) —
+    KHÔNG phải "chờ cấp lease". Cross-review #478 lượt 1 bắt được (`bookkeeping-spec-thu-hoi-da-cu`).
+    Mốc `22:53:12Z` là timestamp commit, không phải thời điểm push; ảnh chụp ref của gói review
+    lúc `23:43:30Z`.
   - >-
     Câu A9 treo từ lượt 10 CHƯA AI CHỐT: bốn revision GATE (`exec-1` → `r2` → `r3` → `r4`) đều được
     cấp trong lúc lease #456 còn giữ; mỗi revision mang `spec_hash` KHÁC NHAU nhưng `generation` đều

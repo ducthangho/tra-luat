@@ -1,0 +1,62 @@
+{
+  "doc-claims": {
+    "command": [
+      "python3",
+      "-B",
+      "scripts/tl.py",
+      "doc-claims-check",
+      "--strict",
+      "--json"
+    ],
+    "rc": 0,
+    "seconds": 4.315,
+    "stdout_bytes": 70854,
+    "stderr_bytes": 0,
+    "positive": {
+      "ok": true,
+      "files_scanned": 106,
+      "claims_flagged": 367,
+      "advisory_count": 367,
+      "layers_skipped": {}
+    },
+    "flags_count": 0,
+    "roots": [
+      "CHANGELOG.md",
+      "SKILL.md",
+      "CLAUDE.md",
+      "CONTEXT.md",
+      "references",
+      "docs"
+    ]
+  },
+  "doctrine-scan": {
+    "command": [
+      "python3",
+      "-B",
+      ".claude/dev/packet_loop.py",
+      "doctrine-scan",
+      "--root",
+      "."
+    ],
+    "rc": 0,
+    "seconds": 0.228,
+    "stdout_bytes": 69,
+    "stderr_bytes": 0,
+    "positive": "doctrine-scan: sạch — đã quét 7 tệp, 0 chỗ chép doctrine"
+  },
+  "adr-song": {
+    "command": [
+      "python3",
+      "-B",
+      ".claude/dev/packet_loop.py",
+      "adr-song",
+      "--root",
+      "."
+    ],
+    "rc": 0,
+    "seconds": 0.14,
+    "stdout_bytes": 113,
+    "stderr_bytes": 0,
+    "positive": "adr-song: sạch — 46 ADR trên đĩa, 46 dòng trong §20, khớp 1–1 (tha thiếu trạng thái: ['0016'])"
+  }
+}

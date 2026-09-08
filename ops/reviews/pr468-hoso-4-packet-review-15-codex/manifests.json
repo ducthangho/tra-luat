@@ -1,0 +1,229 @@
+[
+  {
+    "manifest": "full-gate-pr468-20260907/ARTIFACTS.sha256",
+    "mapping_doc": null,
+    "entries": 12,
+    "unique_targets": 12,
+    "ok": 12,
+    "rc": 0,
+    "uncovered_in_folder": [
+      "ARTIFACTS.sha256"
+    ],
+    "command": [
+      "sha256sum",
+      "-c",
+      "do-review15/manifest-01.mapped.sha256"
+    ],
+    "stderr": ""
+  },
+  {
+    "manifest": "pr468-hoso-4-packet-review-10-codex/goi-y/cay/ops/reviews/pr468-hoso-4-packet-review-9-codex/artifact-repair/ARTIFACTS.sha256",
+    "mapping_doc": null,
+    "entries": 69,
+    "unique_targets": 69,
+    "ok": 69,
+    "rc": 0,
+    "uncovered_in_folder": [
+      "ARTIFACTS.sha256",
+      "README.md"
+    ],
+    "command": [
+      "sha256sum",
+      "-c",
+      "do-review15/manifest-02.mapped.sha256"
+    ],
+    "stderr": ""
+  },
+  {
+    "manifest": "pr468-hoso-4-packet-review-11-codex/ARTIFACTS.sha256",
+    "mapping_doc": "pr468-hoso-4-packet-review-11-codex/DOC-MANIFEST.md",
+    "entries": 128,
+    "unique_targets": 128,
+    "ok": 128,
+    "rc": 0,
+    "uncovered_in_folder": [
+      "ARTIFACTS.sha256",
+      "DOC-MANIFEST.md"
+    ],
+    "command": [
+      "sha256sum",
+      "-c",
+      "do-review15/manifest-03.mapped.sha256"
+    ],
+    "stderr": ""
+  },
+  {
+    "manifest": "pr468-hoso-4-packet-review-11-codex/artifact9-repair/ARTIFACTS.sha256",
+    "mapping_doc": null,
+    "entries": 69,
+    "unique_targets": 69,
+    "ok": 69,
+    "rc": 0,
+    "uncovered_in_folder": [
+      "ARTIFACTS.sha256"
+    ],
+    "command": [
+      "sha256sum",
+      "-c",
+      "do-review15/manifest-04.mapped.sha256"
+    ],
+    "stderr": ""
+  },
+  {
+    "manifest": "pr468-hoso-4-packet-review-12-codex/ARTIFACTS.sha256",
+    "mapping_doc": "pr468-hoso-4-packet-review-12-codex/DOC-MANIFEST.md",
+    "entries": 178,
+    "unique_targets": 178,
+    "ok": 178,
+    "rc": 0,
+    "uncovered_in_folder": [
+      "ARTIFACTS.sha256",
+      "DOC-MANIFEST.md"
+    ],
+    "command": [
+      "sha256sum",
+      "-c",
+      "do-review15/manifest-05.mapped.sha256"
+    ],
+    "stderr": ""
+  },
+  {
+    "manifest": "pr468-hoso-4-packet-review-12-codex/manifest11-layout/ARTIFACTS.sha256",
+    "mapping_doc": null,
+    "entries": 128,
+    "unique_targets": 128,
+    "ok": 128,
+    "rc": 0,
+    "uncovered_in_folder": [
+      "ARTIFACTS.sha256"
+    ],
+    "command": [
+      "sha256sum",
+      "-c",
+      "do-review15/manifest-06.mapped.sha256"
+    ],
+    "stderr": ""
+  },
+  {
+    "manifest": "pr468-hoso-4-packet-review-12-codex/manifest11-layout/do-review10/artifact9-repair/ARTIFACTS.sha256",
+    "mapping_doc": null,
+    "entries": 69,
+    "unique_targets": 69,
+    "ok": 69,
+    "rc": 0,
+    "uncovered_in_folder": [
+      "ARTIFACTS.sha256"
+    ],
+    "command": [
+      "sha256sum",
+      "-c",
+      "do-review15/manifest-07.mapped.sha256"
+    ],
+    "stderr": ""
+  },
+  {
+    "manifest": "pr468-hoso-4-packet-review-13-codex/ARTIFACTS.sha256",
+    "mapping_doc": "pr468-hoso-4-packet-review-13-codex/DOC-MANIFEST.md",
+    "entries": 48,
+    "unique_targets": 48,
+    "ok": 48,
+    "rc": 0,
+    "uncovered_in_folder": [
+      "ARTIFACTS.sha256",
+      "DOC-MANIFEST.md",
+      "bundle-EVIDENCE.md",
+      "bundle-PROMPT.md",
+      "bundle-PROMPT.sha256",
+      "bundle-ai-dang-giu-readback.txt",
+      "bundle-ls-remote-heads.txt",
+      "bundle-ref-coverage.txt"
+    ],
+    "command": [
+      "sha256sum",
+      "-c",
+      "do-review15/manifest-08.mapped.sha256"
+    ],
+    "stderr": ""
+  },
+  {
+    "manifest": "pr468-hoso-4-packet-review-6-codex/ARTIFACTS.sha256",
+    "mapping_doc": null,
+    "entries": 62,
+    "unique_targets": 62,
+    "ok": 62,
+    "rc": 0,
+    "uncovered_in_folder": [
+      "ARTIFACTS.sha256",
+      "d2-ci-results.json",
+      "d2-that-results.json",
+      "nen-a1-a5/buoc.tsv",
+      "nen-a1-a5/job.tsv",
+      "nen-a1-a5/khong_do_duoc.txt",
+      "nen-a1-a5/raw/jobs.txt",
+      "nen-a1-a5/raw/runs.json",
+      "nen-a1-a5/tinh.py",
+      "nen-a1-a5/tom_tat.md",
+      "outputs-that/mcp_gh_test.stdout",
+      "outputs-that/pretooluse_guard_test.DO-rc1.stdout",
+      "outputs-that/pretooluse_guard_test.stdout"
+    ],
+    "command": [
+      "sha256sum",
+      "-c",
+      "do-review15/manifest-09.mapped.sha256"
+    ],
+    "stderr": ""
+  },
+  {
+    "manifest": "pr468-hoso-4-packet-review-7-codex/ARTIFACTS.sha256",
+    "mapping_doc": null,
+    "entries": 66,
+    "unique_targets": 66,
+    "ok": 66,
+    "rc": 0,
+    "uncovered_in_folder": [
+      "ARTIFACTS.sha256"
+    ],
+    "command": [
+      "sha256sum",
+      "-c",
+      "do-review15/manifest-10.mapped.sha256"
+    ],
+    "stderr": ""
+  },
+  {
+    "manifest": "pr468-hoso-4-packet-review-8-codex/ARTIFACTS.sha256",
+    "mapping_doc": null,
+    "entries": 69,
+    "unique_targets": 69,
+    "ok": 69,
+    "rc": 0,
+    "uncovered_in_folder": [
+      "ARTIFACTS.sha256",
+      "verdict-format-check.json"
+    ],
+    "command": [
+      "sha256sum",
+      "-c",
+      "do-review15/manifest-11.mapped.sha256"
+    ],
+    "stderr": ""
+  },
+  {
+    "manifest": "pr468-hoso-4-packet-review-9-codex/artifact-repair/ARTIFACTS.sha256",
+    "mapping_doc": null,
+    "entries": 69,
+    "unique_targets": 69,
+    "ok": 69,
+    "rc": 0,
+    "uncovered_in_folder": [
+      "ARTIFACTS.sha256"
+    ],
+    "command": [
+      "sha256sum",
+      "-c",
+      "do-review15/manifest-12.mapped.sha256"
+    ],
+    "stderr": ""
+  }
+]

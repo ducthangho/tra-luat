@@ -28,8 +28,10 @@
 #       phan biet duoc so nao da bam/dem lai va so nao chi la loi khai.
 #
 #   full-gate 2026-09-07, `t33_workflow_dang_lease_phai_qua_actionlint`
-#       chay trong container THIEU `actionlint` -> `KHONG DO DUOC` -> bo lease rc=1.
-#       Khong do va khong xanh: no KHONG CHAY. Cong cu phai duoc cai TRUOC khi do.
+#       chay trong container THIEU `actionlint` -> bo lease rc=1. Noi cho chinh xac: ca t33
+#       DA CHAY va DO o tien dieu kien (assertion o lease_publish_test.py:1359-1363 ban TRUOC
+#       subprocess.run dong 1364). Thu CHUA CHAY la thao tac LINT WORKFLOW ben trong ham.
+#       Cong cu phai duoc cai TRUOC khi do.
 #
 # Nen chua o TANG: hanh vi dung goi nam trong MOT script chay duoc, tu do va tu khai
 # gioi han, thay vi mot doan lenh chep tay moi luot.

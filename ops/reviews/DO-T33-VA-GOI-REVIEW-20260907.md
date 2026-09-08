@@ -4,9 +4,15 @@ Ngày `2026-09-07`. Vá hai nợ còn lại sau khi PR #468 đạt verdict `appr
 
 ## 1. `t33_workflow_dang_lease_phai_qua_actionlint` — nay ĐÃ ĐO
 
-Full-gate ngày `2026-09-07` cho `lease rc=1` ở **cả hai vế**. Tôi đã ghi đúng rằng đó là
-fail-close chứ không phải hồi quy, nhưng phải nói thêm một điều quan trọng: **ca `t33` khi ấy
-không đỏ, cũng không xanh — nó KHÔNG CHẠY.**
+Full-gate ngày `2026-09-07` cho `lease rc=1` ở **cả hai vế**. Đó là fail-close chứ không phải
+hồi quy. Nhưng nói cho chính xác: **ca `t33` khi ấy ĐÃ CHẠY và ĐỎ** ở tiền điều kiện thiếu
+`actionlint` — assertion tại `ops/lease_publish_test.py:1359–1363` bắn **trước** `subprocess.run`
+ở dòng 1364. Thứ **chưa chạy** là **thao tác lint workflow** bên trong hàm, không phải bản thân ca.
+
+> Bản đầu của tài liệu này viết *"không đỏ, cũng không xanh — nó KHÔNG CHẠY"*. Sai, và bị chính
+> log trong `ops/reviews/log-t33-20260907/` bác: `ĐỎ t33` cùng `đã chạy=121, bỏ qua=0`.
+> Cross-review #477 lượt 6 (`t33-khong-chay-van-con-o-mo-dau`) bắt được rằng bảng đã sửa nhưng
+> lời mở đầu thì chưa.
 
 `ops/lease_publish_test.py:1338` nói rõ chủ ý: *"`actionlint` phải XANH … và THIẾU công cụ là
 ĐỎ."* Vậy `rc=1` là hành vi ĐÚNG, không phải lỗi mã. Cách đóng là **cài công cụ rồi đo**, không
@@ -204,3 +210,47 @@ Phản chứng tự đo sau khi vá:
 | `shellcheck` giả đặt sẵn trong `cong-cu` | — | `rc=0`, chọn `/usr/bin/shellcheck` |
 | `actionlint(){ echo 1.7.70; }; export -f` | — | `rc=0`, ghi `1.7.7` |
 | đường xanh | — | `rc=0`, `306/306/306` |
+
+## GIỚI HẠN CỦA `ops/dung_goi_review.sh` — hợp đồng đầu vào, tự khai
+
+Cross-review #477 lượt 6 (`gioi-han-dung-goi-chua-tu-khai`) chỉ ra tài liệu này thiếu phần tự khai
+điều kiện môi trường và quyền sở hữu thư mục đầu ra. Bổ sung, kèm phép đo tự chạy lại.
+
+### Chỉ `actionlint` được ghim — ba công cụ còn lại TIN VÀO PATH ĐẦU VÀO
+
+`actionlint` luôn được cài bằng `ops/cai_actionlint.sh` (bản ghim + đối chiếu băm) và gọi bằng
+đường dẫn tuyệt đối. Nhưng `shellcheck`, `git`, `python3` chỉ được resolve bằng `type -P` trên
+`$PATH` người gọi đưa vào. `type -P` bỏ qua function/alias/builtin — nó **không** xác thực nguồn gốc.
+
+Đo được: đặt một `shellcheck` giả đầu PATH ⇒ script **`rc=0`**, `cong-cu.txt` ghi
+`version: 9.9.9` từ bản giả. Nói cách khác: **PATH đầu vào là đầu vào TIN CẬY của hợp đồng.**
+Người gọi phải cấp môi trường sạch; script không thay được việc đó.
+
+### `$R` là thư mục CHUYÊN DỤNG, và script CÓ XOÁ trong đó
+
+Câu *"không xoá gì cả"* ở mục vá `rm -rf` chỉ đúng cho **thư mục cài công cụ**. Script vẫn
+`rm -rf "$R/kho.git"` và `rm -rf "$R/cay-kho"` — đó là hành vi có từ bản đầu, không phải hồi quy.
+
+Các chốt symlink chỉ nhìn **thành phần con** (`$R/cong-cu`, `$R/kho.git`, `$R/cay-kho`).
+Chúng **KHÔNG** nhìn `$R` chính nó, cũng không nhìn các thành phần cha.
+
+Đo được: `$R` là symlink tới một đích **đã có** `kho.git/` và `cay-kho/` chứa dữ liệu ⇒ script
+`rc=0`, dựng gói bình thường, và **hai sentinel trong hai thư mục ấy BỊ XOÁ**; sentinel ở thư mục
+không liên quan còn nguyên. Gọi thẳng vào đích (không qua symlink) cho **cùng kết quả** — nên đây
+là hành vi ghi đè theo TÊN đầu ra, không phải lỗi riêng do symlink.
+
+**Hợp đồng đầu vào, nói thẳng:** người gọi phải đưa một `$R` **mới, chuyên dụng**, mà cả nó lẫn
+đường dẫn cha đều đáng tin và **không chứa dữ liệu cần giữ**. Script không bảo vệ được thư mục
+của người gọi.
+
+### Nền đã đo, và nền chưa đo
+
+Mọi số trong tài liệu này đo trên **Linux + Bash** trong container của phiên. **Chưa có** phép đo
+nào trên macOS hay Windows native. Ngoài ra, lần dựng đầu trong container này **đỏ vì `tar` không
+đổi được owner** — cần `TAR_OPTIONS` phù hợp; đó là điều kiện môi trường, không phải lỗi script.
+
+### Chưa xử lý
+
+- Đua (race) khi symlink bị đổi giữa hai lần kiểm.
+- Quyền sở hữu đầy đủ của thư mục đầu ra.
+Hai việc này thuộc phạm vi mở rộng hợp đồng đầu vào, là **packet riêng** nếu chủ kho muốn làm.

@@ -1,10 +1,11 @@
-# ĐẶC TẢ PACKET — `THU-HOI-LEASE-VA-CAP-LAI`, **revision 6** (sau lời gọi review cuối 6/6 — CHƯA ĐƯỢC REVIEW)
+# ĐẶC TẢ PACKET — `THU-HOI-LEASE-VA-CAP-LAI`, **revision 7** (kế toán checkpoint thứ hai `5578460203` + ADR-0047; nội dung kỹ thuật = r6, lời gọi 7 đang review r6)
 
 ```yaml
 packet_id: THU-HOI-LEASE-VA-CAP-LAI
 packet_issue: CHƯA CÓ          # KHÔNG đăng: còn P1 chưa được reviewer xác nhận đóng (§3.2/§12)
-revision: 6
-thay_the: 23a7deaf60af17aea2fa3b027d08fb8c187b6f03499f34540822ab7b9c3b1672   # sha256 r5, review lượt 5 (lời gọi 6/6)
+revision: 7
+thay_the: f78135cff428f0744476d7f27426f459d926578c4bac4a4339928330c4a0d6a5   # sha256 r6 — bản lời gọi 7 (lượt 6) đang đọc; r7 chỉ đổi §0/ngoai_pham_vi/Q14/chua_do_duoc
+thay_the_r5: 23a7deaf60af17aea2fa3b027d08fb8c187b6f03499f34540822ab7b9c3b1672
 thay_the_r4: 415ce35db32aa370ce43315c1ff6d4db7b59005e6288538e72705ce4caed4d0e
 thay_the_r3: ef9b3700514921d4cabe95947f86937fc36f4aecf2f4e2e39587cafe88a9bb20
 thay_the_r2: 9e775a154dd83741fd4e7af85aaeae1f5693ceabc5c5763cf6890ff4f2606c80
@@ -35,9 +36,12 @@ base_sha: b416830ef2a509d60203d55552ce17950afcf67c   # origin/master lúc đóng
 
 **R10 — trần review §12 KHÔNG có ngoại lệ cho "review đặc tả".** r3 §0 suy một ngoại lệ từ nhãn "spec trước Issue" —
 reviewer đối chiếu `docs/PROTOCOL_DA_PHIEN.md:806–816` và §8:579: trần **hai** lượt codex tính **theo PR**, đổi
-prompt/phiên không reset, chạm trần ⇒ Review Rescue Checkpoint. r4 rút câu ấy. Trạng thái đúng: PR #475 đã dùng **6/6** lời gọi
-(3 lượt + 4a chết + 4b + 5); **trần đã hết**. r6 là bản vá theo hint lượt 5, **chưa được lượt review nào xác nhận** ⇒
-không đăng Packet Issue; checkpoint kế thuộc chủ kho (ADR nguồn tin cậy + trần mới, hoặc dừng). Lượt 2–3 chạy theo chỉ thị trực tiếp trong phiên; từ lượt 4 có neo bền. **Checkpoint của r4:** (a) quyết định = **thiết kế
+prompt/phiên không reset, chạm trần ⇒ Review Rescue Checkpoint. r4 rút câu ấy. Trần 6 (comment `5575587924`) đã dùng hết
+ở lượt 5 (3 lượt + 4a chết + 4b + 5) ⇒ checkpoint `5576397733` (packet `blocked`, chờ ADR). **Checkpoint thứ hai — quyết định
+chủ kho 08-09-2026, comment `5578460203`:** reroute của human theo §12 — tiếp tục vòng vá/review **tới hết P1**, không đặt
+trần số, **bộ đếm KHÔNG reset** (lời gọi kế = 7), ID finding giữ nguyên; hết P1 ⇒ Packet Issue rồi DỪNG xin lease; không sửa
+mã khi chưa có lease. Chủ kho cũng duyệt **soạn ADR-0047** (`docs/adr/0047-nguon-tin-cay-cho-cong-doc-lease.md`, Proposed,
+cùng PR) — xem `ngoai_pham_vi`. Lượt 2–3 chạy theo chỉ thị trực tiếp trong phiên; từ lượt 4 có neo bền. **Checkpoint của r4:** (a) quyết định = **thiết kế
 lại** (r4 là sản phẩm: adapter nguồn, bootstrap có biên riêng, C không đích); (b) trần mới **đã được chủ kho chốt và neo**:
 comment `https://github.com/ducthangho/tra-luat/pull/475#issuecomment-5575587924` (tài khoản chủ kho, ghi hộ theo chỉ thị
 trong phiên, đã readback): **trần 6 lượt** cho PR #475; dừng khi hết P1 hoặc chạm 6 ⇒ checkpoint kế; (c) mọi bộ đếm/ID
@@ -306,7 +310,7 @@ sẽ nhận, catalog ca độc lập (A12), khoảng giữ đóng, OID A0 sau la
 | thứ | vì sao |
 |---|---|
 | Tạo policy closure §5 / cổng phái sinh tổng quát | nợ #473; kích hoạt cần **policy hợp lệ HOẶC descriptor ngoại lệ Q13** (không đòi cả hai); không miễn nghĩa vụ điền/xác minh phái sinh |
-| ADR "nguồn tin cậy cho cổng đọc" | hình dạng đã chạm **5** lần (lượt 5: S1 miền giá trị/profile, S2 cạnh đồ thị/object-store) ⇒ theo chính r4/r5: **`blocked`, ADR trước**. r6 đóng bằng profile digest ghim + object-store cô lập + cạnh từ bytes; hợp đồng Q4.1/Q4.5 là hạt ADR — chủ kho quyết ADR + trần mới |
+| ADR "nguồn tin cậy cho cổng đọc" — **ĐÃ SOẠN**: `ADR-0047` (Proposed, cùng PR #475, dòng §20 PROTOCOL, `adr-song` 47/47) | hình dạng đã chạm **5** lần ⇒ chủ kho duyệt soạn (08-09-2026, AskUserQuestion trong phiên 2). ADR giữ BẤT BIẾN ba lớp + ba luật; chi tiết allowlist/digest/tập gốc object vẫn ở Q4.1/Q4.5 của spec này. Promote `Accepted` = A0 land với A2/A6 đỏ đúng ca — không thuộc write set slice nào |
 | Bước đọc receipt M9 trong `land-packets` | dependency `LAND-DOC-RECEIPT-THU-HOI`, phải land trước kích hoạt (S5) |
 | Fencing máy; `land-packets` đọc sổ | Q11; nợ `LAND-DOC-SO-THU-HOI` |
 | Sửa `ops-publish-lease.yml` · xoá nhánh cũ · `timeout-minutes` · `CHANGELOG.md` · chữ ký `web-flow` · di trú #456 · ruleset ngoài kho | như r3 |
@@ -433,7 +437,7 @@ khai đã đóng.
 5. Transport/proxy thật của executor với adapter — đo profile hợp lệ ở A1/B; REST 403 không suy Git hỏng.
 6. Object Q8 — chưa tồn tại (nay là lệnh **không đích**).
 7. Mốc A0 / `BIA_MO_LICH_SU` — readback sau A0.
-8. Codex `Connection refused` — chưa gặp qua 3 lượt.
+8. Codex `Connection refused` — chưa gặp qua 6 lượt (lời gọi 1–7); nguyên nhân nếu gặp: chưa biết, không đổ cho proxy.
 9. **Ca âm S1/S2** (env bẩn, executable giả, bytes cache lệch OID) — thuộc lớp reviewer bị cấm tự soạn; **điều phối dựng**
    ở A0, chưa có.
 10. **Check-run của workflow mới gắn với H** — suy từ phép đo trên `duyet-khac-danh-tinh.yml` (cùng event); phải đo lại
@@ -464,5 +468,6 @@ cho tới khi policy canonical `.github/coordination/change-impact.v1.json` tồ
 theo cây OID, KHÔNG nhận `effective_write_set` tự khai; ngoại lệ phải được ghi vào Packet Issue và `spec_hash` của A1.
 Hệ quả cho Q3: nhánh "policy vắng ⇒ 12" đổi thành "policy vắng ⇒ dùng ngoại lệ Q13 (có neo) ⇒ closure = khai báo + symlink";
 không có neo ⇒ 12. Lối (i) (#473 land trước A1) không chọn.
-✅ **Q14 — trần review (R10) — ĐÃ CHỐT:** comment `5575587924` trên PR #475: phạm vi = review đặc tả này; **trần 6
-lượt**; dừng khi hết P1 hoặc chạm 6 ⇒ checkpoint kế, không tự nới. Lượt 4 phóng trên bản này.
+✅ **Q14 — trần review (R10) — ĐÃ CHỐT hai lần:** (1) comment `5575587924`: trần 6 lời gọi — đã dùng hết ở lượt 5 (kế toán:
+lời gọi 1–6 = lượt 1, 2, 3, 4a chết, 4b, 5); (2) comment `5578460203` (08-09-2026, checkpoint thứ hai): **tới hết P1**, bộ đếm
+không reset, lời gọi 7 = lượt 6 trên r6. Còn P1 sau một lượt ⇒ vá rồi gọi tiếp; **không** tự đặt trần số, không tự dừng.

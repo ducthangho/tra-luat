@@ -1,0 +1,139 @@
+# LAND EVIDENCE — chuẩn hoá dựng gói review + đo thật t33 (PR #477).
+#
+# Land evidence thứ BA của kho (sau `plat-x8` và `pr468-hoso-4-packet`).
+# `PROTOCOL §20` xếp `ADR-0045` vào ô **0 cổng**: không bộ kiểm nào cưỡng chế tệp này.
+# Một land evidence sai thì chỉ cross-review bắt được. Đọc nó như đọc LỜI KHAI.
+
+schema_version: 1
+mission_id: pr-477
+generation: 1
+provider: claude
+role: land_operator
+recorded_by: claude
+input_packet_generations: [1]
+
+authorized_head_sha: 75fe4c43c47c9e2a0495f7de46942c9e26320a92
+approver: notebyme88
+authorization_url: https://github.com/ducthangho/tra-luat/pull/477#pullrequestreview-5136229055
+authorization_ghi_chu: >-
+  Duyệt KHÁC DANH TÍNH có vết bền: `notebyme88` ≠ tác giả PR `ducthangho`, APPROVED lúc
+  `2026-09-08T00:54:34Z` trên ĐÚNG head `75fe4c4` — cùng SHA mà cross-review lượt 6 đã review.
+  Trước đó một phê duyệt tại `14dab5e` đã bị `DISMISSED` vì phiên điều phối đẩy thêm bốn commit
+  sau khi được duyệt. Đó là lỗi vận hành của điều phối, lặp lại lần thứ ba trong phiên.
+
+merge_method: merge
+merge_commit: 585c7d510e026b4ea5a2b395c69581f24c1d8fa0
+merged_at: '2026-09-08T01:22:39Z'
+land_operator: ducthangho
+land_operator_neo:
+  loai_nguon: 'attestation của điều phối — gói KHÔNG kèm JSON thô PR để reviewer đối chiếu'
+  nguon: 'GitHub PR API — `pull_request_read(get)` trên PR #477, trường `merged_by.login`'
+  gia_tri: ducthangho
+  canh_bao_phai_doc: >-
+    `merged_by` ghi `ducthangho`, NHƯNG thao tác merge do **phiên điều phối (claude) gọi API**
+    bằng `GITHUB_PAT` của chủ kho, KHÔNG phải chủ kho tự bấm nút. GitHub quy công cho chủ sở hữu
+    PAT, nên trường này KHÔNG phân biệt được người với phiên. Ghi ra để không ai đọc nhầm thành
+    "chủ kho đích thân thao tác".
+    Uỷ quyền: chỉ thị trực tiếp của chủ kho trong phiên — nguyên văn *"#477: merge và land, các
+    finding cho sang PR riêng"*. Không có URL bền cho chỉ thị ấy; vết của nó là chính tệp này.
+  khac_voi_468: >-
+    Ở PR #468, `merge_pull_request` bị classifier chế độ auto TỪ CHỐI và chủ kho phải tự bấm.
+    Lần này lệnh chạy được. Điều phối không tìm đường vòng ở cả hai lần.
+
+cross_review:
+  so_luot: 6
+  reviewer_provider: codex
+  executor_provider: claude
+  model: gpt-6-astra
+  effort: xhigh
+  p1_theo_luot: {1: 1, 2: 1, 3: 1, 4: 0, 5: 0, 6: 0}
+  p1_theo_luot_nguon: >-
+    Đếm `^### … [P1]` trên verdict từng lượt. Lượt 3 có một heading `[P1]` mang nhãn ĐÃ ĐÓNG cộng
+    một P1 mới; lượt 4 có một heading `[P1]` ĐÃ ĐÓNG và 0 P1 mở.
+  luot_cuoi:
+    so: 6
+    reviewed_sha: 75fe4c43c47c9e2a0495f7de46942c9e26320a92
+    verdict: approve
+    p1: 0
+    p2: 0
+    p3: 2
+  khop_head_da_merge: true
+  ghi_chu_head: >-
+    KHÁC PR #468: lượt cuối review ĐÚNG head được merge. Không có nợ "head chưa qua cross-review".
+  chuoi_loi_dang_ghi_lai: >-
+    SÁU lần bản vá của executor tự sinh lỗi mới trong chuỗi này: prepend PATH ⇒ che lệnh hệ thống ·
+    `rm -rf` ⇒ đi theo symlink XOÁ DỮ LIỆU NGOÀI GÓI và phá đường offline · `mktemp -d` ⇒ tích luỹ
+    (manifest 2142→2154→2166) · chốt đặt sai chỗ ⇒ hỏng manifest lần dựng trước (`OK=1520/2136`) ·
+    (ở PR #478) thêm verdict thiếu mục lục+biên nhận ⇒ ĐỎ `t27` · vá xong `t27` lại ĐỎ cổng
+    receipt v2. Ghi lại vì đây là đặc điểm của lần land này, không phải chi tiết bên lề.
+
+pre_merge_checks:
+  - ten: 'bộ lease trên head, có actionlint đúng bản ghim'
+    ket_qua: '`rc=0` · **121/121 đạt; đã chạy=121, bỏ qua=0**'
+  - ten: 'shellcheck trên script mới'
+    ket_qua: '`rc=0`'
+  - ten: 'CI trên exact head 75fe4c4'
+    ket_qua: 'run `34171856469` (`pull_request`) = `success`; `gate (ubuntu-latest)` 44 bước, **0 hỏng**, 3 skipped'
+    canh_bao_doc_ket_qua: >-
+      Lượt `pull_request` chỉ có MỘT job (ubuntu) — cùng cái bẫy `plat-x8-land-evidence.yaml` ghi.
+      "PR xanh" KHÔNG nói gì về Windows. Ngoài ra lượt `pull_request` chạy trên cây MERGE TỔNG HỢP,
+      không phải commit `75fe4c4`, nên đây không phải bằng chứng CI của exact head.
+
+post_merge_checks:
+  - ten: 'head đã vào master'
+    ket_qua: '`merge-base --is-ancestor 75fe4c4 origin/master` ⇒ ĐÚNG. master = `585c7d5`.'
+  - ten: 'nhánh không còn commit ngoài master'
+    ket_qua: '`rev-list --count` ⇒ **0**'
+  - ten: 'bộ lease trên master 585c7d5'
+    ket_qua: '`rc=0` · **121/121 đạt; đã chạy=121, bỏ qua=0**'
+  - ten: 'bien_nhan_v2 trên master'
+    ket_qua: '**0 vi phạm**, 28 ĐẠT v2, 11/11 miễn trừ legacy, 42 nợ đóng băng, tổng 81 · TỔNG: ĐẠT'
+  - ten: 'shellcheck trên ops/dung_goi_review.sh đã land'
+    ket_qua: '`rc=0`'
+  - ten: 'script CHẠY ĐƯỢC từ master'
+    ket_qua: '`bash ops/dung_goi_review.sh <R mới> 585c7d5` ⇒ `rc=0`, **307/307/307** ref, 0 lệch; manifest `sha256sum -c` **3010/3010** `rc=0`'
+  - ten: 'CI trên merge commit 585c7d5'
+    ket_qua: >-
+      MỘT PHẦN. Run `34176439015` (`push`, `585c7d5`): `gate (ubuntu-latest)` = **`success`**
+      (44 bước, **0 hỏng**, 4 skipped). `gate (windows-latest)` vẫn **`in_progress`** sau ~20 phút
+      (43 bước, 0 hỏng, 1 skipped tại thời điểm đọc).
+    phai_lam_tiep: >-
+      Đọc lại job `gate (windows-latest)` của run `34176439015` qua `/mcp/x/actions` và ghi kết
+      quả vào tệp này. Đây là lần đo Windows ĐẦU TIÊN của merge commit — lượt `pull_request`
+      không có job Windows. **KHÔNG** được coi land này là đã xác minh CI đầy đủ cho tới khi có
+      kết quả ấy. Nhắc: packet GATE tồn tại chính vì chân Windows chạm trần thời gian, nên kết
+      quả `cancelled` do hết giờ là khả năng THẬT, không phải giả định.
+
+khong_do_duoc:
+  - muc: 'CI Windows trên merge commit'
+    ly_do: >-
+      `gate (windows-latest)` còn `in_progress` lúc lập tệp. ubuntu đã `success`.
+      Xem `post_merge_checks` mục cuối để biết phải làm gì tiếp.
+  - muc: 'Người thao tác merge là người hay là phiên'
+    ly_do: >-
+      `merged_by` chỉ ghi chủ sở hữu PAT. Thao tác thật do phiên điều phối gọi API. Không có
+      trường nào của GitHub phân biệt được hai thứ đó.
+  - muc: 'Nguồn thô cho các số CI và merge'
+    ly_do: 'Gói không kèm JSON thô của run/job/PR; mọi số là attestation của điều phối.'
+  - muc: 'Nền macOS/Windows native cho `ops/dung_goi_review.sh`'
+    ly_do: 'Mọi phép đo chạy trên Linux+Bash. Đã tự khai trong `ops/reviews/DO-T33-VA-GOI-REVIEW-20260907.md`.'
+
+bookkeeping:
+  - >-
+    Hai P3 của lượt 6 KHÔNG vá trong #477 — chúng sang **PR #479** riêng, theo chỉ thị chủ kho.
+    Lý do: #477 đã được duyệt trên đúng head, mỗi commit đẩy thêm sẽ huỷ phê duyệt ấy.
+    `t33-khong-chay-van-con-o-mo-dau` (lời mở đầu còn phủ nhận ca đã chạy và đỏ) ·
+    `gioi-han-dung-goi-chua-tu-khai` (thiếu tự khai hợp đồng đầu vào).
+  - >-
+    Giới hạn ĐÃ BIẾT của `ops/dung_goi_review.sh` vừa land, đo được và nay tự khai ở PR #479:
+    chỉ `actionlint` được ghim — `shellcheck`/`git`/`python3` tin PATH đầu vào (đặt bản giả đầu
+    PATH ⇒ `rc=0`, ghi `version: 9.9.9`); script VẪN `rm -rf` `$R/kho.git` và `$R/cay-kho`, và
+    chốt symlink KHÔNG nhìn `$R` chính nó (đo: `$R` là symlink tới đích có sẵn hai thư mục ấy ⇒
+    sentinel trong cả hai BỊ XOÁ).
+  - >-
+    Lỗ hổng `_kiem_bia_mo` dùng `any(...)` trong `ops/lease_publish.py` VẪN NGUYÊN — ngoài phạm vi
+    PR này. Đặc tả `THU-HOI-LEASE-VA-CAP-LAI` ở revision 6, trần 6/6 lời gọi review đã hết, bước
+    chặn kế là Review Rescue Checkpoint thuộc chủ kho.
+  - >-
+    Nợ A9 (bốn lease GATE cấp trước hạn #456; `spec_hash` khác nhau, `generation` giữ 1, lệch
+    `ADR-0034`) vẫn chờ quyết định xử lý của chủ kho.

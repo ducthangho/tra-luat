@@ -143,15 +143,50 @@ post_merge_checks:
     loai_nguon: 'attestation của điều phối, KHÔNG phải phép đo reviewer tự chạy'
     ket_qua: >-
       Run `34169756563` (`push`, `802fc01`): `gate (ubuntu-latest)` = `success` (44 bước, 0 hỏng) ·
-      `gate (windows-latest)` = `success` (43 bước, 0 hỏng).
+      `gate (windows-latest)` = `success` (44 bước, 0 hỏng — bản trước ghi 43, xem `mau_thuan_da_giai`).
       Run `34168159148` (`pull_request`, gắn head `17f4a1b`): `gate (ubuntu-latest)` = `success`
       (44 bước, 0 hỏng). Đọc qua endpoint `/mcp/x/actions`.
-    mau_thuan_chua_giai: >-
-      Điều phối đọc `4 skipped` cho job Windows trên `802fc01`. Phân tích tĩnh `.github/workflows/ci.yml`
-      của cross-review #478 lượt 2 đếm **6** bước có `if` sai trên tổ hợp push/master/windows
-      (PR EOL-base check · don-nhanh selftest · cgroup Linux · tl selftest PR · ci-phamvi selftest ·
-      release-verify WORKER). **Chưa giải được** chênh 4 vs 6: có thể runner thêm bước, có thể điều phối
-      đọc sai. Không suy CI đỏ từ chênh lệch này; cũng KHÔNG đổi 4 thành 6 rồi gọi 6 là số đo API.
+    mau_thuan_da_giai: >-
+      ĐÃ GIẢI — reviewer ĐÚNG, điều phối SAI. Bản trước để mục `mau_thuan_chua_giai`: điều phối đọc
+      Windows `43 bước / 4 skipped` trên `802fc01`, còn phân tích tĩnh `.github/workflows/ci.yml`
+      của cross-review #478 lượt 2 đếm **6** bước có `if` sai trên tổ hợp push/master/windows.
+      Đo lại chính job ấy khi đã `completed` (2026-09-08, run `34169756563`, qua `/mcp/x/actions`,
+      HAI client — công cụ MCP và JSON-RPC dựng thẳng — cho cùng một số): `gate (windows-latest)` =
+      `status: completed`, `conclusion: success`, **44 bước · 6 skipped · 0 bước còn
+      `conclusion: null`**. Sáu bước skipped ĐÚNG sáu bước reviewer liệt kê: PR EOL-base check ·
+      don-nhanh selftest · cgroup Linux · tl selftest PR · ci-phamvi selftest · release-verify WORKER.
+      Số đúng là **6**; `4` là phép đo SAI của điều phối. Không đổi kết luận CI: job vẫn `success`.
+    nguyen_nhan: >-
+      Đếm `skipped` trên một job còn `in_progress` là phép đo **SAI**, không phải phép đo THIẾU:
+      bước chưa chạy tới thì `conclusion` còn `null`, nên phép đếm `conclusion == "skipped"` giữa
+      chừng cho số THẤP HƠN thực tế, và danh sách bước cũng chưa có bước cuối `Complete job`
+      (43 thay vì 44). Cơ chế đo được trên một run KHÁC, bằng cặp đọc trước/sau của CÙNG một job
+      (run `34176439015`, merge commit `585c7d5` của PR #477): lúc `in_progress` ⇒ **43 bước,
+      1 skipped**; lúc `completed` ⇒ **44 bước, 6 skipped**.
+      Khớp với ca này, tái dựng từ mốc thời gian của chính run `34169756563`: sáu bước skipped của
+      Windows kết thúc lần lượt lúc `23:24:39Z · 00:04:14Z · 00:04:14Z · 00:04:53Z · 00:11:17Z ·
+      00:11:22Z`, nên có ĐÚNG MỘT cửa sổ — `00:04:53Z → 00:11:17Z`, dài **6,4 phút** — mà một lần
+      đọc job Windows trả về `4 skipped`. Trong cửa sổ ấy job còn chạy (xong `00:11:33Z`), tức khớp
+      luôn cả con số `43 bước`.
+    gia_thuyet_da_loai: >-
+      "Điều phối đọc nhầm sang job Ubuntu" — LOẠI, và loại bằng PHÉP ĐO chứ không bằng lý lẽ.
+      Ubuntu trên cùng run có ĐÚNG `4 skipped` (PR EOL-base · gate lifecycle · tl selftest PR ·
+      release-verify WORKER), nên nó giải thích trọn vẹn con số `4` và là giả thuyết cạnh tranh
+      thật. Nhưng Ubuntu `completed` lúc `23:48:57Z` với **44 bước**, trong khi điều phối ghi **43**.
+      Giả thuyết đọc-nhầm dự đoán 44; dữ liệu là 43 ⇒ bác. Chỉ giả thuyết đọc-giữa-chừng khớp CẢ HAI
+      con số cùng lúc.
+    con_lai_khong_do_duoc: >-
+      Thời điểm điều phối thực sự gọi API KHÔNG được ghi ở đâu, nên "đọc trong cửa sổ 6,4 phút ấy"
+      là giả thuyết KHỚP TỪNG CON SỐ, không phải sự việc đã quan sát. Mệnh đề "danh sách bước của
+      job `in_progress` thiếu bước `Complete job`" lấy từ cặp đo của run `34176439015`; ở run
+      `34169756563` job đã xong nên KHÔNG đo lại được. Ghi đúng mức: đủ căn cứ để ĐÓNG mâu thuẫn,
+      chưa đủ để nói là đã chứng kiến.
+    bai_hoc: >-
+      Chỉ đọc số bước và số `skipped` khi `status == "completed"`; job `in_progress` phải trả
+      KHÔNG ĐO ĐƯỢC, không được trả một con số. Cùng họ bài học "cổng VẮNG MẶT trông giống cổng
+      XANH" của `CLAUDE.md`, đổi đối tượng: một phép đo CHƯA XONG trông giống một phép đo ĐÃ XONG,
+      vì cả hai đều trả về một con số hợp lệ. Chốt rẻ và luôn dùng được: đếm luôn số bước có
+      `conclusion: null` và đòi nó bằng **0** — trong ca này nó khác 0 và tự tố cáo phép đo.
     rut_lai_mot_khang_dinh: >-
       Bản trước ghi run `pull_request` là phép đo trên **exact head** `17f4a1b`. **Rút.**
       Lượt `pull_request` chạy trên cây MERGE TỔNG HỢP, không phải commit `17f4a1b`; run gắn nhãn head

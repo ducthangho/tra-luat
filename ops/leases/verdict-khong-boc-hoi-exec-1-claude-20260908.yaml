@@ -1,0 +1,105 @@
+# LEASE — packet VERDICT-KHONG-BOC-HOI, executor lượt 1.
+# Thẩm quyền cấp: chủ kho `ducthangho`, chỉ thị bền ở `granted_on_instruction`.
+# Hồ sơ do phiên điều phối (`claude`) SOẠN theo chỉ thị; phiên KHÔNG tự cấp cho mình.
+schema_version: 2
+event: executor_lease_granted
+
+packet_issue: 483
+mission_issue: 481
+granted_by: ducthangho
+granted_on_instruction: 'https://github.com/ducthangho/tra-luat/issues/483#issuecomment-5578686866'
+leased_at_utc: '2026-09-08T03:32:58Z'
+lease_expires_at_utc: '2026-09-09T03:32:58Z'
+
+packet_id: VERDICT-KHONG-BOC-HOI
+revision: 1
+generation: 1
+lease_id: verdict-khong-boc-hoi-exec-1-claude-20260908
+role: executor
+provider: claude
+executor: claude
+model: fable-5.1
+effort: xhigh
+reviewer_model: gpt-6-astra
+reviewer_effort: xhigh
+reviewer_hint_patch: true
+environment: cloud
+risk: sensitive
+assurance_target: cross_approved
+access: read-write
+
+spec_path: ops/specs/VERDICT-KHONG-BOC-HOI.md
+spec_sha256: 745019291634c92346b4edf306c09e75ddcf062ee63fa767562e9dd33455e335
+spec_hash: 745019291634c92346b4edf306c09e75ddcf062ee63fa767562e9dd33455e335
+
+# Write set giao 0 đường với packet #482 ⇒ hai packet chạy SONG SONG.
+# `.claude/skills/cross-review/SKILL.md` thuộc packet NÀY; nợ SKILL-MD-COMM-CHI-PHU-HEADS
+# (đoạn `comm` trong tệp ấy cũng chỉ phủ `--heads`) do packet này đồng bộ, KHÔNG phải #482.
+# `ai-dang-giu` trên cả ba đường, 2026-09-08: NGƯỜI_GIỮ 0.
+write_set:
+  - .claude/dev/packet_loop.py
+  - .claude/dev/packet_loop_test.py
+  - .claude/skills/cross-review/SKILL.md
+depends_on: []
+
+branch: claude/verdict-khong-boc-hoi
+branch_ownership: exclusive
+target_branch_neu_land: master
+
+base_sha: 585c7d510e026b4ea5a2b395c69581f24c1d8fa0
+start_from_sha: 585c7d510e026b4ea5a2b395c69581f24c1d8fa0
+reviewed_sha_required: 585c7d510e026b4ea5a2b395c69581f24c1d8fa0
+
+authority_basis: '§2 — start/pause/resume/reroute/override/authorize thuộc chủ kho'
+recorded_by: claude-session
+recorder_is_dispatcher: false
+
+run_minutes: 1440
+write_set_hash: bed01c45fa3f87978c3d64a3e6348591ef7a7983fb068e417b805fc8ad718e82
+heartbeat_at: '2026-09-08T03:32:58Z'
+lease_until: '2026-09-09T03:32:58Z'
+heartbeat_required_minutes: 30
+attempts_used: 0
+attempts_limit: 3
+
+reviewer_provider: codex
+review_class: sensitive
+effective_review_class: sensitive
+
+thay_the_cho: []
+
+ly_do_cap: >-
+  `.claude/skills/cross-review/SKILL.md` đã tự khai hậu quả — "Không có bước này thì lượt review
+  KHÔNG TỒN TẠI với ai ngoài phiên đang chạy" — nhưng đó là LỜI DẶN, không phải cổng.
+  Đo 2026-09-08: lượt 1–3 của PR #478 CÓ XẢY RA (ba commit `8f7becb`/`260f7c6`/`5a4dd85` nói rõ
+  "cross-review #478 lượt 1/2/3") mà KHÔNG để lại hiện vật ở cả hai chỗ có thể có — PR trả 0
+  comment, và `git rev-list --objects --all` cho 0 đường dẫn khớp `pr478`. Cùng bệnh ở PR #468:
+  quét toàn kho (309 nhánh + 62 tag) chỉ ra 10 verdict đánh số 6–15; lượt 1–4 không hiện vật,
+  lượt 5 có hiện vật TỰ PHỦ ĐỊNH. Tổng ≥ 8 lượt không verdict bền — và đó là cận DƯỚI.
+  Cổng hiện có không chặn: `record-review` nhận `--packet --provider --verdict --reviewed-sha
+  --finding-id --finding-desc`, KHÔNG trường nào trỏ tới hiện vật, nên nó đếm một lượt vào
+  `assurance` mà không đòi bằng chứng rằng verdict còn tra được.
+  Đúng họ "đếm SỰ CÓ MẶT thay vì KHẢ NĂNG" — ở đây là khả năng TRA LẠI.
+
+viec_trong_lease:
+  - '`record-review` ĐÒI con trỏ verdict BỀN và fail-close khi thiếu; con trỏ hợp lệ là đường dẫn
+     hiện vật CÓ trong git, hoặc định danh comment đã đăng — và phải KIỂM ĐƯỢC, không chỉ khai.'
+  - 'BA trạng thái: `có con trỏ kiểm được` · `thiếu` · `có khai mà KHÔNG kiểm được`; trạng thái
+     thứ ba fail-close với mã thoát RIÊNG, không gộp vào `thiếu`.'
+  - 'Ca "hiện vật RỖNG 0 byte ⇒ CHẶN" — có tệp KHÁC có nội dung.'
+  - 'Cập nhật `SKILL.md` theo cú pháp mới, VÀ đồng bộ nợ SKILL-MD-COMM-CHI-PHU-HEADS bằng cách
+     TRỎ sang bộ kiểm của packet #482, không chép lại doctrine (chép ⇒ `doctrine-scan` đỏ).'
+  - 'Tương thích ngược: mọi lời gọi `record-review` hiện có phải còn chạy, HOẶC liệt kê đủ chỗ
+     cần sửa kèm SỐ đếm bằng `rg`.'
+  - 'Ba đột biến răng B9–B11; phân hạng tín dụng giả bằng lớp ngoại lệ riêng + neo TÊN CA, KHÔNG
+     bằng chuỗi `AssertionError` — một `except Exception ... raise AssertionError` trên đường đi
+     sẽ giả mạo được tín hiệu ấy (bài học #355/#359).'
+
+dieu_kien_dung:
+  - 'Cho `packet_loop.py` gọi mạng để xác minh comment id — cổng phụ thuộc mạng là cổng tự tắt.'
+  - 'Nới chốt để lời gọi cũ khỏi sửa; đắt thì KHAI SỐ chỗ phải sửa và báo chủ kho.'
+  - 'Dựng lại verdict đã mất của 8 lượt — không khôi phục được; bịa lại là làm hỏng hồ sơ.'
+  - 'Chạm `CLAUDE.md` — chồng lấn write set với #482.'
+  - 'Đổi ba giá trị canonical của `--verdict`.'
+  - 'Đếm một lượt là hợp lệ chỉ vì `record-review` trả rc=0 — packet này tồn tại vì `rc=0` từng
+     không đảm bảo gì.'

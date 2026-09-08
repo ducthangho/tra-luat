@@ -1,0 +1,105 @@
+# LEASE — packet MU-REF-KHONG-PHU-TAG, executor lượt 1.
+# Thẩm quyền cấp: chủ kho `ducthangho`, chỉ thị bền ở `granted_on_instruction`.
+# Hồ sơ do phiên điều phối (`claude`) SOẠN theo chỉ thị; phiên KHÔNG tự cấp cho mình —
+# `ops/lease_publish.py:107` chỉ nhận `ducthangho`, và TỪ CHỐI mọi tên provider.
+schema_version: 2
+event: executor_lease_granted
+
+packet_issue: 482
+mission_issue: 481
+granted_by: ducthangho
+granted_on_instruction: 'https://github.com/ducthangho/tra-luat/issues/482#issuecomment-5578684940'
+leased_at_utc: '2026-09-08T03:32:58Z'
+lease_expires_at_utc: '2026-09-09T03:32:58Z'
+
+packet_id: MU-REF-KHONG-PHU-TAG
+revision: 1
+generation: 1
+lease_id: mu-ref-khong-phu-tag-exec-1-claude-20260908
+role: executor
+provider: claude
+executor: claude
+model: fable-5.1
+effort: xhigh
+reviewer_model: gpt-6-astra
+reviewer_effort: xhigh
+reviewer_hint_patch: true
+environment: cloud
+risk: sensitive
+assurance_target: cross_approved
+access: read-write
+
+spec_path: ops/specs/MU-REF-KHONG-PHU-TAG.md
+spec_sha256: 211ea1aea1698d87a1ab4d5d58d15fe467b87507cee7083d0e9bf53a6141d46c
+spec_hash: 211ea1aea1698d87a1ab4d5d58d15fe467b87507cee7083d0e9bf53a6141d46c
+
+# Write set giao 0 đường với packet #483 (VERDICT-KHONG-BOC-HOI) ⇒ hai packet chạy SONG SONG.
+# `.claude/skills/cross-review/SKILL.md` CỐ Ý KHÔNG nằm ở đây dù nó mang cùng khuyết tật —
+# nó thuộc #483. Nợ có tên: SKILL-MD-COMM-CHI-PHU-HEADS.
+# `ai-dang-giu` trên cả ba đường, 2026-09-08: NGƯỜI_GIỮ 0.
+write_set:
+  - CLAUDE.md
+  - ops/kiem_mu_ref.py
+  - ops/kiem_mu_ref_test.py
+depends_on: []
+
+branch: claude/mu-ref-khong-phu-tag
+branch_ownership: exclusive
+target_branch_neu_land: master
+
+# Ba mỏ neo = head `master` tại giờ cấp (đo `git rev-parse origin/master` lúc 03:32Z 08-09-2026).
+base_sha: 585c7d510e026b4ea5a2b395c69581f24c1d8fa0
+start_from_sha: 585c7d510e026b4ea5a2b395c69581f24c1d8fa0
+reviewed_sha_required: 585c7d510e026b4ea5a2b395c69581f24c1d8fa0
+
+authority_basis: '§2 — start/pause/resume/reroute/override/authorize thuộc chủ kho'
+recorded_by: claude-session
+recorder_is_dispatcher: false
+
+run_minutes: 1440
+# sha256 của các đường write_set đã sort, nối bằng LF, có LF cuối.
+write_set_hash: 0dda81f2b67d89a7f46b9fa19caf0b53fdbaebfa8bd5b9306e8dae78e1b7a1c8
+heartbeat_at: '2026-09-08T03:32:58Z'
+lease_until: '2026-09-09T03:32:58Z'
+heartbeat_required_minutes: 30
+attempts_used: 0
+attempts_limit: 3
+
+reviewer_provider: codex
+review_class: sensitive
+effective_review_class: sensitive
+
+# Không thay thế lease nào — `ai-dang-giu` cho NGƯỜI_GIỮ 0 trên cả ba đường tại giờ cấp.
+thay_the_cho: []
+
+ly_do_cap: >-
+  Phép canh mù mà `CLAUDE.md` quy định CHỈ phủ `refs/heads` — cả hai vế của phép so hai nguồn
+  đều không đọc `refs/tags`. Đo 2026-09-08: lệnh doctrine cho 307/307, MU = 0 (tuyên SẠCH), trong
+  khi cùng kho cùng lúc thiếu 23 tag (62 máy chủ / 39 cục bộ), 20 trong đó thuộc `luu-tru/*` —
+  đúng loại ref mà chính `CLAUDE.md` gọi là "ref BỀN duy nhất giữ các commit công bố verdict".
+  Hậu quả đo được, không phải suy luận: `doc-claims-check --strict` cho rc=0 ở CẢ HAI vế nhưng
+  stdout lệch 7 byte (70861 B thiếu tag / 70854 B đủ tag), vì SHA `1835b46` chỉ tra được qua tag
+  `archive/dlbrut-ke-hoach-dau` — kho thiếu tag phân loại nó `SHA_NOT_A_COMMIT`, kho đủ tag phân
+  loại `SHA_NOT_REACHABLE`. `rc` KHÔNG phân biệt được hai môi trường ấy.
+  Cùng họ bài học "cổng VẮNG MẶT trông giống cổng XANH", đổi đối tượng: một namespace ref không
+  được canh trông giống một kho đầy đủ.
+
+viec_trong_lease:
+  - 'Viết `ops/kiem_mu_ref.py`: so HAI NGUỒN trên CẢ `refs/heads` LẪN `refs/tags`, so bằng TẬP
+     TÊN (không `wc -l`), BA trạng thái `đủ`/`mù`/`KHÔNG ĐO ĐƯỢC` với mã thoát RIÊNG từng loại.'
+  - 'Bộ kiểm chỉ ĐO và BÁO — KHÔNG tự fetch để "chữa" cái nó đang đo.'
+  - 'Sửa đoạn doctrine trong `CLAUDE.md` để phủ tag, nêu thẳng lý do (`luu-tru/*` giữ verdict).'
+  - 'Viết `ops/kiem_mu_ref_test.py` ≥ 8 ca, gồm ca "lực lượng BẰNG NHAU mà TẬP LỆCH" và ca
+     "thừa cục bộ ⇒ vô hại".'
+  - 'Ba đột biến răng A9–A11, mỗi cái phải làm ca ĐÍCH đỏ; phân hạng tín dụng giả bằng tín hiệu
+     mã triển khai KHÔNG giả được (lớp ngoại lệ riêng + neo TÊN CA), không bằng chuỗi
+     `AssertionError`.'
+
+dieu_kien_dung:
+  - 'Bộ kiểm TỰ FETCH để chữa cái mù — nó phải đo và báo, không sửa trạng thái đang đo.'
+  - 'So bằng `wc -l` ở bất kỳ đâu — doctrine cấm, ca A8 sinh ra để bắt đúng việc ấy.'
+  - 'Gộp `KHÔNG ĐO ĐƯỢC` vào `mù` hoặc `đủ` — ba trạng thái phải phân biệt bằng mã thoát.'
+  - 'Chạm `.claude/skills/cross-review/SKILL.md` — chồng lấn write set với #483.'
+  - 'Chạm `ops/lease_publish.py` hay `ops/dung_goi_review.sh` — ngoài phạm vi, nợ nhãn riêng.'
+  - 'Đổi ngưỡng/nội dung `doc-claims-check` để làm số 7 byte biến mất — đó là BẰNG CHỨNG.'
+  - 'Chép doctrine từ `CLAUDE.md` sang adapter — `doctrine-scan` sẽ đỏ.'

@@ -1,8 +1,17 @@
 # LAND EVIDENCE — hồ sơ bốn packet treo sau #456 (Mission #467 / PR #468).
 #
-# VÌ SAO TỆP NÀY TỒN TẠI: `ADR-0045` đòi mỗi lần dùng phải để lại VẾT ĐỌC ĐƯỢC BẰNG MÁY. Một dòng
-# "chủ kho đã merge" trong chat KHÔNG phải vết ấy. Tệp này ghi việc đã làm và — quan trọng không
-# kém — ghi những gì KHÔNG đo được từ phiên điều phối.
+# VÌ SAO TỆP NÀY TỒN TẠI: `ADR-0034:17-20` đòi mọi transition quan trọng có evidence trên GitHub, và
+# nói thẳng phần land phải ghi "Approver, authorization, operator, merge commit, post-merge gate và
+# bookkeeping" — đúng sáu thứ tệp này ghi. Khung trường lấy theo mẫu land evidence ở
+# `docs/PROTOCOL_DA_PHIEN.md:466-488`. Một dòng "chủ kho đã merge" trong chat KHÔNG phải vết ấy.
+# Tệp này ghi việc đã làm và — quan trọng không kém — ghi những gì KHÔNG đo được từ phiên điều phối.
+#
+# ĐÍNH CHÍNH CĂN CỨ (cross-review #478 lượt 4, `land-evidence-dan-adr-sai-pham-vi`): bản trước dẫn
+# `ADR-0045` làm căn cứ. SAI PHẠM VI. Câu "mỗi lần dùng phải để lại vết đọc được bằng máy" của
+# ADR-0045 nói về **mỗi lần dùng NGOẠI LỆ ĐẢO VAI** (Codex làm Executor trên packet `sensitive`), và
+# vết nó đòi là **LEASE khai `review_class` + khai đây là ngoại lệ theo §2** — không phải tệp land
+# evidence. Hồ sơ này khai `executor_provider: claude`, tức KHÔNG dùng ngoại lệ ấy, nên ADR-0045
+# không áp. Nghĩa vụ ghi hồ sơ vẫn có thật, chỉ là ở nguồn khác — nêu đúng nguồn ở trên.
 #
 # CẢNH BÁO PHẠM VI, đọc trước: đây là land evidence thứ HAI của kho (tệp đầu là
 # `plat-x8-land-evidence.yaml`). Chưa bộ kiểm nào chạy trên tệp land evidence — đừng đọc
@@ -29,6 +38,13 @@ authorization_ghi_chu: >-
   TRƯỚC ĐÓ hai phê duyệt đã bị HUỶ (`DISMISSED`) tại `203a636` và `922956a` — cả hai đều do
   CHÍNH PHIÊN ĐIỀU PHỐI đẩy commit mới lên sau khi được duyệt. Đó là lỗi vận hành của điều phối,
   ghi lại để không lặp: mỗi commit đẩy lên sau phê duyệt đều huỷ phê duyệt ấy.
+  GIỚI HẠN NGUỒN CHO TOÀN MỤC NÀY: mọi mệnh đề trên — danh tính người duyệt, số review `APPROVED`,
+  hai mốc `22:54:28Z`/`23:15:00Z`, `commit_id` của từng review, hai lần `DISMISSED` và hai SHA của
+  chúng, khoảng ~5 phút `blocked` — đều ĐỌC TỪ GitHub PR API qua phiên điều phối. Gói KHÔNG kèm
+  JSON thô, nên reviewer offline KHÔNG đối chứng lại được mệnh đề nào trong số đó. Đây là
+  ATTESTATION, không phải bằng chứng đã đối chứng độc lập. Cross-review #478 lượt 4 nêu
+  (`land-evidence-gioi-han-chua-phu-het-loi-khai`); bản trước chỉ gắn giới hạn cho nhóm
+  `land_operator_neo`, để nguyên mục này đứng như lời xác nhận.
 
 merge_method: merge
 merge_commit: 802fc01b5db866478459dbc4a65d008a38619898
@@ -55,11 +71,32 @@ ghi_chu_nguoi_ghi: >-
   Phiên điều phối KHÔNG thực hiện merge: lệnh `merge_pull_request` bị classifier chế độ auto
   từ chối và phiên không tìm đường vòng. Tệp này do điều phối (`claude`) GHI HỘ sau khi đo.
 
-# --- CROSS-REVIEW: 15 lượt, khác nền (executor claude / reviewer codex gpt-6-astra xhigh) ---
+# --- CROSS-REVIEW khác nền (executor claude / reviewer codex) ---
+# ĐƠN VỊ CỦA TIÊU ĐỀ: bản trước ghi "15 lượt" trần. Xem `so_luot_don_vi` — 15 là SỐ THỨ TỰ LƯỢT
+# CUỐI, không phải số lượt hoàn tất (đo được: 10). Model/effort của reviewer nêu ở
+# `reviewer_model_ghi_chu` cùng giới hạn nguồn của nó, không nêu trần trong tiêu đề.
 cross_review:
   so_luot: 15
+  so_luot_don_vi: >-
+    ĐƠN VỊ = **số thứ tự của lượt CUỐI**, KHÔNG phải số lượt hoàn tất và KHÔNG phải số lần gọi.
+    Bản trước để `so_luot: 15` trần và tiêu đề ghi "15 lượt", nên đọc thành "15 lượt hoàn tất" —
+    lời khai ấy KHÔNG kiểm được bằng cách đếm. Cross-review #478 lượt 4 bắt
+    (`land-evidence-so-luot-khong-co-don-vi`). Số ĐẾM ĐƯỢC, quét `git rev-list --objects --all`
+    trên toàn kho (307 nhánh + 62 tag, ảnh chụp 2026-09-08):
+    **10** verdict hoàn tất, đánh số **6–15**, đường dẫn `ops/reviews/pr468-hoso-4-packet-review-{6..15}-codex-verdict.md`.
+    Lượt **1–4**: KHÔNG có hiện vật verdict nào trong kho — không kết luận chúng đã hay chưa xảy ra,
+    chỉ khai là KHÔNG CÓ NGUỒN. Lượt **5**: có hiện vật và hiện vật ấy TỰ PHỦ ĐỊNH —
+    `ops/reviews/GHI-NHAN-CROSS-REVIEW-LUOT5-KHONG-HOAN-TAT.md:3` viết
+    "Đây KHÔNG phải verdict và KHÔNG phải biên nhận", không có `*.receipt.yaml` đi kèm.
+    Nên: 15 = chỉ số lượt cuối · 10 = verdict hoàn tất có hiện vật · 5 lượt không có verdict trong kho.
   reviewer_provider: codex
   executor_provider: claude
+  reviewer_model_ghi_chu: >-
+    Reviewer chạy `codex` với `-m gpt-6-astra -c model_reasoning_effort=xhigh`. GIỚI HẠN NGUỒN:
+    đây là ATTESTATION của phiên điều phối về đối số đã truyền, KHÔNG có nguồn độc lập xác nhận
+    model/effort mà nhà cung cấp thực sự phục vụ. `run.json` chỉ ghi `chuong_trinh`, `so_doi_so`,
+    `van_tay` — KHÔNG ghi model. Cùng giới hạn đã khai trong hai biên nhận lượt 14/15; bản trước
+    của tệp này nêu `gpt-6-astra xhigh` trong tiêu đề mà không gắn nhãn ấy.
   p1_theo_luot: {7: 4, 8: 2, 9: 1, 10: 1, 11: 1, 12: 2, 13: 0, 14: 0, 15: 0}
   p1_theo_luot_nguon: >-
     Đếm `^### … [P1]` trên chính tệp verdict của từng lượt, đối chiếu câu tổng kết trong verdict.
@@ -140,6 +177,19 @@ post_merge_checks:
       full-gate trước merge nó ĐỎ vì thiếu công cụ, nên suite khi ấy là 120/121.
   - ten: 'doc-claims-check trên master'
     ket_qua: '`rc=0`, `ok: true`, out 70861 B'
+    dieu_kien_do: >-
+      **CON SỐ BYTE PHỤ THUỘC MÔI TRƯỜNG — đo lại có thể ra khác mà không ai sai.** `70861 B` đo trên
+      kho thiếu 23 tag. Trên kho ĐỦ tag: **70854 B**, lệch đúng 7 byte, `rc=0`/`ok: true` không đổi.
+      Nguyên nhân đã truy: SHA `1835b46` (trong `docs/KE_HOACH_RASOAT_HOSO_ORCHESTRATION.md:39`) nằm
+      trên tag `archive/dlbrut-ke-hoach-dau`. Kho thiếu tag ấy phân loại nó
+      `SHA_NOT_A_COMMIT_IN_HISTORICAL_DOC`; kho đủ tag phân loại `SHA_NOT_REACHABLE_FROM_HEAD` —
+      chuỗi ngắn hơn 7 ký tự. Cả hai vẫn là finding nên `rc` không đổi.
+      Phát hiện khi đối chiếu cổng nền↔sandbox của cross-review #478 lượt 4: `rc` KHỚP ở cả hai vế
+      nhưng output KHÔNG giống hệt byte — tức phép so `rc` một mình KHÔNG phân biệt được hai môi
+      trường. Nêu điều kiện đo ở đây vì một con số không ghi điều kiện thì sẽ trôi mà không ai biết.
+      GHI CHÚ CHO NGƯỜI ĐO LẠI: phép canh mù mà `CLAUDE.md` quy định dùng `ls-remote --heads`, tức
+      **chỉ phủ `refs/heads`** — nó trả "0 mù" trên chính kho đang thiếu 23 tag. Muốn tái lập
+      `70854 B` thì phải fetch cả `refs/tags/*` trước.
   - ten: 'mọi manifest trong ops/reviews trên master'
     ket_qua: >-
       13 manifest, **0 hỏng**. Chi tiết: 9 gói kiểm trực tiếp `rc=0`; lượt 12 và 13 kiểm theo ánh xạ
@@ -147,9 +197,20 @@ post_merge_checks:
       ⇒ **128/128**; `bundle-PROMPT.sha256` là băm trần không có tên tệp nên `sha256sum -c` không
       phân tích được — so trực tiếp với `bundle-PROMPT.md` ⇒ KHỚP `e60c376a…`.
     canh_bao_doc_ket_qua: >-
-      Chạy `sha256sum -c` từ chính thư mục manifest cho 4 gói ra `OK=0/N`. Đó KHÔNG phải hỏng:
-      các manifest ấy ghi bố cục SANDBOX của reviewer (`VERDICT.md`, `do-review13/…`), còn trong kho
-      tệp đã đổi tên và làm phẳng. Phiên điều phối đã một lần suýt báo kho hỏng vì phép kiểm sai này.
+      Chạy `sha256sum -c` từ chính thư mục manifest KHÔNG dùng được cho **4** tệp — nhưng vì
+      **HAI nguyên nhân KHÁC NHAU**, đừng gộp. Không tệp nào là hỏng băm.
+      · **3 tệp** (lượt 11, 12, 13): `-c` phân tích được record rồi báo `OK=0/N` với **N > 0**, vì
+      manifest ghi bố cục SANDBOX của reviewer (`VERDICT.md`, `do-review13/…`) còn trong kho tệp đã
+      đổi tên và làm phẳng. Kiểm theo ánh xạ `DOC-MANIFEST.md` thì ĐẠT (128/128 · 178/178 · 48/48).
+      · **1 tệp** (`pr468-hoso-4-packet-review-13-codex/bundle-PROMPT.sha256`): KHÔNG ra `OK=0/N`
+      chút nào — nó là **băm trần không có tên tệp**, nên `sha256sum -c` không phân tích được
+      record NÀO. Đo được: `rc=1`, stdout RỖNG, stderr
+      `sha256sum: bundle-PROMPT.sha256: no properly formatted checksum lines found`.
+      Đây là lỗi ĐỊNH DẠNG của phép kiểm, không phải lệch bố cục. So trực tiếp ⇒ KHỚP `e60c376a…`.
+      ĐÍNH CHÍNH: bản trước khai cả 4 ra `OK=0/N` và quy cả 4 về nguyên nhân bố cục — sai ở tệp thứ
+      tư, dù THÂN mục `ket_qua` ngay trên đã nhận đúng nó là băm trần. Đúng bệnh "vá phần THÂN, để
+      nguyên KHUNG". Cross-review #478 lượt 4 bắt (`land-evidence-dem-bon-goi-doi-bo-cuc`).
+      Phiên điều phối đã một lần suýt báo kho hỏng vì phép kiểm sai này.
 
 # --- KHÔNG ĐO ĐƯỢC — phải nói, không được lấp ---
 khong_do_duoc:

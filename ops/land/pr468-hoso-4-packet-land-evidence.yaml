@@ -121,9 +121,22 @@ cross_review:
     p3: 1
   ghi_chu_head: >-
     GIỚI HẠN PHẢI ĐỌC: lượt 15 review `745d888`, KHÔNG phải head đã merge `17f4a1b`. Giữa hai SHA
-    là commit `17f4a1b` — vá nốt P3 duy nhất còn lại của lượt 15, gồm 2 tệp, `+23/−8`, toàn bộ
-    trong `ops/reviews/`, 0 tệp mã chạy được. Tức **head được merge chưa qua một lượt cross-review
-    nào**. Đây là nợ thật, không phải chi tiết kỹ thuật.
+    là commit `17f4a1b` — 2 tệp, `+23/−8`, toàn bộ trong `ops/reviews/`, 0 tệp mã chạy được.
+    Tức **head được merge chưa qua một lượt cross-review nào**. Đây là nợ thật, không phải chi
+    tiết kỹ thuật.
+    ĐÍNH CHÍNH MỨC HOÀN TẤT (cross-review #478 lượt 5, `land-evidence-khai-dong-p3-khi-con-sot`):
+    bản trước gọi `17f4a1b` là "vá nốt P3 duy nhất còn lại của lượt 15". **Khai quá mức.**
+    `17f4a1b` vá THẬT phần bảng phân loại nguồn và phần phương pháp, nhưng P3 ấy của verdict 15
+    còn GỘP thêm một mỏ neo nữa mà commit KHÔNG đụng tới: verdict 15 nêu đích danh câu
+    *"muốn đối chiếu byte gốc phải chạy lại"* và đòi nói rõ **chạy lại sinh log MỚI, không khôi
+    phục byte lịch sử đã mất**. Đo tại ảnh chụp này: câu ấy còn NGUYÊN TỪNG CHỮ ở
+    `ops/reviews/full-gate-pr468-20260907/README.md:57`; `git diff 745d888 17f4a1b` trên chính tệp
+    ấy cho 22 thêm / 7 bớt nhưng không chạm câu đó.
+    Trạng thái ĐÚNG: P3 `evidence-thieu-phuong-phap-trich-va-gioi-han-bao-phu` **vá một phần —
+    CHƯA ĐÓNG**. Phần còn lại là một câu văn xuôi trong README hiện hành.
+    CỐ Ý KHÔNG SỬA Ở ĐÂY: sửa README làm lệch băm trong `ARTIFACTS.sha256` của chính gói full-gate
+    (đó là lý do `17f4a1b` phải sửa kèm manifest), nên nó là việc của một commit có đo lại manifest,
+    không phải việc nhét vào hồ sơ land. Ghi làm nợ có địa chỉ thay vì khai đóng.
 
 # --- PHÉP ĐO TRƯỚC MERGE (do điều phối chạy) ---
 pre_merge_checks:
@@ -143,11 +156,19 @@ post_merge_checks:
     loai_nguon: 'attestation của điều phối, KHÔNG phải phép đo reviewer tự chạy'
     ket_qua: >-
       Run `34169756563` (`push`, `802fc01`): `gate (ubuntu-latest)` = `success` (44 bước, 0 hỏng) ·
-      `gate (windows-latest)` = `success` (44 bước, 0 hỏng — bản trước ghi 43, xem `mau_thuan_da_giai`).
+      `gate (windows-latest)` = `success` (44 bước, 0 hỏng — bản trước ghi 43, xem `so_da_dinh_chinh_nguyen_nhan_chua_biet`).
       Run `34168159148` (`pull_request`, gắn head `17f4a1b`): `gate (ubuntu-latest)` = `success`
       (44 bước, 0 hỏng). Đọc qua endpoint `/mcp/x/actions`.
-    mau_thuan_da_giai: >-
-      ĐÃ GIẢI — reviewer ĐÚNG, điều phối SAI. Bản trước để mục `mau_thuan_chua_giai`: điều phối đọc
+    so_da_dinh_chinh_nguyen_nhan_chua_biet: >-
+      HAI KẾT LUẬN KHÁC NHAU, đừng gộp: (1) **con số đã đính chính** — số skipped đúng của
+      `gate (windows-latest)` trên `802fc01` là **6**, không phải 4; (2) **vì sao bản trước ghi
+      `43 bước / 4 skipped` thì CHƯA BIẾT**. Bản trước của khối này đặt tên trường
+      `mau_thuan_da_giai`, viết "ĐÃ GIẢI — reviewer ĐÚNG, điều phối SAI", và tiêu đề commit
+      `9337779` khẳng định thẳng "điều phối đo giữa chừng". Cả ba đều khai đã XÁC LẬP một nguyên
+      nhân mà chính thân bài thừa nhận không quan sát được.
+      Cross-review #478 lượt 5 bắt (`land-evidence-chot-nguyen-nhan-chua-quan-sat`); đổi tên trường
+      vì TÊN TRƯỜNG chính là lời khẳng định, sửa thân mà giữ khung là đúng bệnh kho đã ghi.
+      Phần (1) đứng vững: điều phối đọc
       Windows `43 bước / 4 skipped` trên `802fc01`, còn phân tích tĩnh `.github/workflows/ci.yml`
       của cross-review #478 lượt 2 đếm **6** bước có `if` sai trên tổ hợp push/master/windows.
       Đo lại chính job ấy khi đã `completed` (2026-09-08, run `34169756563`, qua `/mcp/x/actions`,
@@ -156,8 +177,13 @@ post_merge_checks:
       `conclusion: null`**. Sáu bước skipped ĐÚNG sáu bước reviewer liệt kê: PR EOL-base check ·
       don-nhanh selftest · cgroup Linux · tl selftest PR · ci-phamvi selftest · release-verify WORKER.
       Số đúng là **6**; `4` là phép đo SAI của điều phối. Không đổi kết luận CI: job vẫn `success`.
-    nguyen_nhan: >-
-      Đếm `skipped` trên một job còn `in_progress` là phép đo **SAI**, không phải phép đo THIẾU:
+      GIỚI HẠN NGUỒN: con số 6 là ATTESTATION của phiên đọc API — gói review không kèm response
+      thô, nên reviewer offline không đối chứng lại được.
+    gia_thuyet_tuong_thich_chua_duoc_chon: >-
+      ĐÂY LÀ GIẢ THUYẾT, KHÔNG PHẢI NGUYÊN NHÂN ĐÃ XÁC LẬP. Bản trước đặt tên trường `nguyen_nhan`
+      và kết "Chỉ giả thuyết đọc-giữa-chừng khớp CẢ HAI con số cùng lúc" — câu ấy SAI, xem
+      `gia_thuyet_chua_loai` ngay dưới.
+      Nội dung giả thuyết: đếm `skipped` trên một job còn `in_progress` là phép đo **SAI**, không phải phép đo THIẾU:
       bước chưa chạy tới thì `conclusion` còn `null`, nên phép đếm `conclusion == "skipped"` giữa
       chừng cho số THẤP HƠN thực tế, và danh sách bước cũng chưa có bước cuối `Complete job`
       (43 thay vì 44). Cơ chế đo được trên một run KHÁC, bằng cặp đọc trước/sau của CÙNG một job
@@ -168,25 +194,43 @@ post_merge_checks:
       00:11:22Z`, nên có ĐÚNG MỘT cửa sổ — `00:04:53Z → 00:11:17Z`, dài **6,4 phút** — mà một lần
       đọc job Windows trả về `4 skipped`. Trong cửa sổ ấy job còn chạy (xong `00:11:33Z`), tức khớp
       luôn cả con số `43 bước`.
-    gia_thuyet_da_loai: >-
-      "Điều phối đọc nhầm sang job Ubuntu" — LOẠI, và loại bằng PHÉP ĐO chứ không bằng lý lẽ.
-      Ubuntu trên cùng run có ĐÚNG `4 skipped` (PR EOL-base · gate lifecycle · tl selftest PR ·
-      release-verify WORKER), nên nó giải thích trọn vẹn con số `4` và là giả thuyết cạnh tranh
-      thật. Nhưng Ubuntu `completed` lúc `23:48:57Z` với **44 bước**, trong khi điều phối ghi **43**.
-      Giả thuyết đọc-nhầm dự đoán 44; dữ liệu là 43 ⇒ bác. Chỉ giả thuyết đọc-giữa-chừng khớp CẢ HAI
-      con số cùng lúc.
-    con_lai_khong_do_duoc: >-
-      Thời điểm điều phối thực sự gọi API KHÔNG được ghi ở đâu, nên "đọc trong cửa sổ 6,4 phút ấy"
-      là giả thuyết KHỚP TỪNG CON SỐ, không phải sự việc đã quan sát. Mệnh đề "danh sách bước của
-      job `in_progress` thiếu bước `Complete job`" lấy từ cặp đo của run `34176439015`; ở run
-      `34169756563` job đã xong nên KHÔNG đo lại được. Ghi đúng mức: đủ căn cứ để ĐÓNG mâu thuẫn,
-      chưa đủ để nói là đã chứng kiến.
+    gia_thuyet_chua_loai: >-
+      **PHÉP LOẠI CỦA BẢN TRƯỚC KHÔNG ĐỨNG — đây là chỗ lượt 5 chấm P1.** Bản trước đặt tên trường
+      `gia_thuyet_da_loai` và tuyên loại "điều phối đọc nhầm sang job Ubuntu" bằng lập luận:
+      Ubuntu `completed` lúc `23:48:57Z` có **44** bước trong khi điều phối ghi **43**, nên giả
+      thuyết đọc-nhầm dự đoán 44 ⇒ bác.
+      Lập luận ấy chỉ bác được ĐÚNG MỘT mô hình hẹp: *đọc Ubuntu đã completed rồi chép nguyên xi
+      cả hai số trong cùng một lần đọc*. Nó KHÔNG bác được các mô hình khác cũng sinh ra cặp
+      `(43, 4)`. Phản ví dụ số học, reviewer chạy được (`(44,4) + (−1,0) = (43,4)`): đọc Ubuntu
+      `44 bước / 4 skipped` rồi **ghi nhầm số bước 44 thành 43** cũng cho đúng cặp đang xét.
+      Cùng họ: trộn hai lần đọc khác nhau, hoặc chép tay sai một chữ số.
+      Sai lầm phương pháp: bản trước lấy chính con số `43` **đang tranh cãi** làm chuẩn chắc chắn
+      để loại mọi khả năng ghi chép sai. Không có nguồn nào chứng minh `43` được ghi đúng, cũng
+      không có nguồn nào chứng minh hai số đến từ CÙNG một lần đọc.
+      Nói cho đúng mức: phản ví dụ trên là **khả năng logic**, KHÔNG phải lời khai rằng chuyện ấy
+      đã xảy ra. Nên trạng thái đúng là **CHƯA LOẠI ĐƯỢC GIẢ THUYẾT NÀO**, không phải "đã loại".
+    nguyen_nhan_that_su: >-
+      **CHƯA XÁC ĐỊNH.** Các giả thuyết còn sống, không cái nào bị loại: (a) đọc giữa chừng lúc job
+      còn `in_progress`; (b) đọc nhầm sang job Ubuntu kèm một lỗi ghi chép; (c) trộn hai lần đọc;
+      (d) chép tay sai. Thời điểm điều phối thực sự gọi API KHÔNG được ghi ở đâu, nên cửa sổ
+      `00:04:53Z → 00:11:17Z` (384 s = 6,4 phút) chỉ là **khoảng KHỚP TỪNG CON SỐ** cho giả thuyết
+      (a), không phải sự việc đã quan sát. Nó còn giả định thêm rằng thời điểm một bước kết thúc
+      trùng với thời điểm API hiển thị `conclusion` của bước ấy — mệnh đề đó cũng chưa đo.
+      Cặp đo trước/sau của run KHÁC (`34176439015`) chỉ chứng minh **cơ chế (a) có thể xảy ra**,
+      không chứng minh nó đã xảy ra ở run `34169756563`.
+      Đủ căn cứ để ĐÍNH CHÍNH CON SỐ; KHÔNG đủ căn cứ để chốt nguyên nhân. Hai việc khác nhau.
     bai_hoc: >-
       Chỉ đọc số bước và số `skipped` khi `status == "completed"`; job `in_progress` phải trả
       KHÔNG ĐO ĐƯỢC, không được trả một con số. Cùng họ bài học "cổng VẮNG MẶT trông giống cổng
       XANH" của `CLAUDE.md`, đổi đối tượng: một phép đo CHƯA XONG trông giống một phép đo ĐÃ XONG,
       vì cả hai đều trả về một con số hợp lệ. Chốt rẻ và luôn dùng được: đếm luôn số bước có
-      `conclusion: null` và đòi nó bằng **0** — trong ca này nó khác 0 và tự tố cáo phép đo.
+      `conclusion: null` và đòi nó bằng **0**.
+      ĐÃ RÚT một câu ở đây: bản trước kết "trong ca này nó khác 0 và tự tố cáo phép đo". Không có
+      response nào của lần đọc CŨ được lưu, nên **không ai biết lần đọc ấy thấy bao nhiêu bước
+      `null`** — câu đó là suy từ giả thuyết (a) rồi kể lại như dữ liệu.
+      Và bài học THỨ HAI, đắt hơn, rút từ chính khối này: **loại một giả thuyết bằng một con số
+      thuộc chính lời khai đang nghi ngờ là không loại được gì.** Muốn loại (b) thì cần nguồn độc
+      lập về lần đọc cũ — không phải một phép trừ trên số do chính lần đọc ấy sinh ra.
     rut_lai_mot_khang_dinh: >-
       Bản trước ghi run `pull_request` là phép đo trên **exact head** `17f4a1b`. **Rút.**
       Lượt `pull_request` chạy trên cây MERGE TỔNG HỢP, không phải commit `17f4a1b`; run gắn nhãn head
@@ -289,4 +333,13 @@ bookkeeping:
   - >-
     Bốn Packet Issue #463–#466 và Mission #467 đều còn `open`; PR này KHÔNG nghiệm thu chúng.
   - >-
-    PR #477 (`ops/dung_goi_review.sh` + bản ghi t33) đang chạy vòng vá/cross-review riêng, chưa merge.
+    PR #477 (`ops/dung_goi_review.sh` + bản ghi t33) **ĐÃ MERGE**, merge commit
+    `585c7d510e026b4ea5a2b395c69581f24c1d8fa0`, hai cha `802fc01` + `75fe4c4`, và `585c7d5` là
+    `master` tại ảnh chụp gói lượt 5. ĐÍNH CHÍNH: bản trước ghi "đang chạy vòng vá/cross-review
+    riêng, chưa merge" — câu ấy đúng ở ảnh chụp TRƯỚC merge và đã HẾT HIỆU LỰC, nhưng vẫn đứng như
+    hiện hành trong khi CHÍNH TỆP NÀY (khối `4-vs-6`) đã dùng `585c7d5` làm merge commit của #477
+    và lấy run sau merge làm căn cứ. Tức hồ sơ tự mâu thuẫn ở cùng một mức hiện hành.
+    Cross-review #478 lượt 5 bắt (`land-evidence-pr477-chua-merge-trai-nguon-moi`).
+    KHÔNG suy rộng: `merged` KHÔNG phải `landed`. `ADR-0034` tách ba mức, và bookkeeping của #477
+    là PR #480 — tại ảnh chụp này vẫn `draft`, chưa merge. Nợ review/CI kèm theo không bị xoá bởi
+    việc thấy một merge commit trong Git.

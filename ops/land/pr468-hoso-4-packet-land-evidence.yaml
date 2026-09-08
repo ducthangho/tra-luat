@@ -34,8 +34,14 @@ merge_method: merge
 merge_commit: 802fc01b5db866478459dbc4a65d008a38619898
 land_operator: notebyme88
 land_operator_neo:
+  loai_nguon: 'attestation của điều phối — CHƯA có snapshot thô trong gói để reviewer đối chiếu'
   nguon: 'GitHub PR API — `pull_request_read(get)` trên PR #468, trường `merged_by.login`'
   gia_tri: notebyme88
+  gioi_han: >-
+    Gói KHÔNG kèm JSON thô của PR/review/timeline, nên reviewer offline không kiểm được
+    `merged_by.login`, `merged_at`, hay `commit_id` của approval. Đây là LỜI ĐIỀU PHỐI KHAI ĐÃ ĐỌC,
+    không phải bằng chứng đã đối chứng độc lập. Cùng giới hạn áp cho: lý do hai phê duyệt bị
+    `DISMISSED`, khoảng ~5 phút `blocked`, và việc classifier từ chối `merge_pull_request`.
   merged_at: '2026-09-07T23:21:22Z'
   git_object: >-
     `git show -s --format=fuller 802fc01` ⇒ author `notebyme88`, committer `GitHub`.
@@ -96,28 +102,33 @@ pre_merge_checks:
 
 # --- PHÉP ĐO SAU MERGE (chạy trên master `802fc01`, 2026-09-08) ---
 post_merge_checks:
-  - ten: 'CI đo THEO JOB — trên exact head và trên merge commit'
+  - ten: 'CI — số điều phối ĐỌC ĐƯỢC, reviewer offline KHÔNG xác minh lại được'
+    loai_nguon: 'attestation của điều phối, KHÔNG phải phép đo reviewer tự chạy'
     ket_qua: >-
-      **XANH CẢ HAI NỀN trên merge commit.** Run `34169756563` (`push`, `802fc01`):
-      `gate (ubuntu-latest)` = `success` (44 bước, **0 hỏng**, 4 skipped) ·
-      `gate (windows-latest)` = `success` (43 bước, **0 hỏng**, 4 skipped).
-      Trên exact head `17f4a1b`: run `34168159148` (`pull_request`) = `success`,
-      `gate (ubuntu-latest)` 44 bước, 0 hỏng, 3 skipped.
+      Run `34169756563` (`push`, `802fc01`): `gate (ubuntu-latest)` = `success` (44 bước, 0 hỏng) ·
+      `gate (windows-latest)` = `success` (43 bước, 0 hỏng).
+      Run `34168159148` (`pull_request`, gắn head `17f4a1b`): `gate (ubuntu-latest)` = `success`
+      (44 bước, 0 hỏng). Đọc qua endpoint `/mcp/x/actions`.
+    mau_thuan_chua_giai: >-
+      Điều phối đọc `4 skipped` cho job Windows trên `802fc01`. Phân tích tĩnh `.github/workflows/ci.yml`
+      của cross-review #478 lượt 2 đếm **6** bước có `if` sai trên tổ hợp push/master/windows
+      (PR EOL-base check · don-nhanh selftest · cgroup Linux · tl selftest PR · ci-phamvi selftest ·
+      release-verify WORKER). **Chưa giải được** chênh 4 vs 6: có thể runner thêm bước, có thể điều phối
+      đọc sai. Không suy CI đỏ từ chênh lệch này; cũng KHÔNG đổi 4 thành 6 rồi gọi 6 là số đo API.
+    rut_lai_mot_khang_dinh: >-
+      Bản trước ghi run `pull_request` là phép đo trên **exact head** `17f4a1b`. **Rút.**
+      Lượt `pull_request` chạy trên cây MERGE TỔNG HỢP, không phải commit `17f4a1b`; run gắn nhãn head
+      ấy không chứng minh checkout/test đúng commit ấy. Vậy exact head **chưa có** bằng chứng CI riêng.
     canh_bao_doc_ket_qua: >-
-      Lượt `pull_request` trên `17f4a1b` chỉ có **MỘT job** (ubuntu). Nên "PR xanh" KHÔNG nói gì
-      về Windows — đúng cái bẫy `plat-x8-land-evidence.yaml` đã ghi. Windows chỉ được đo lần đầu
-      trên lượt `push` của merge commit, tức SAU khi merge. Đây là phép đo MỚI, không phải phép
-      đo trên head đã được uỷ quyền.
+      Lượt `pull_request` chỉ có **MỘT job** (ubuntu) — đúng cái bẫy `plat-x8-land-evidence.yaml` đã ghi.
+      Windows chỉ xuất hiện trên lượt `push` của merge commit, tức SAU khi merge.
+      CI xanh **KHÔNG** đóng nợ "head `17f4a1b` chưa qua cross-review".
     dinh_chinh: >-
-      Bản đầu của tệp này khai CI **KHÔNG ĐO ĐƯỢC**, lý do "bộ công cụ GitHub của phiên chỉ có
-      44 tool, không có nhóm workflow/actions". **SAI, và sai theo đúng lớp lỗi mà `CLAUDE.md`
-      đã ghi thành luật**: *"Đếm SỰ CÓ MẶT của một đường thay vì KHẢ NĂNG của nó"* và *"Một công
-      cụ thất bại chưa phải một đường bị chặn; phải thử ít nhất HAI client trước khi gọi đó là
-      chính sách."* `CLAUDE.md:583` nêu thẳng đường thứ hai: `/mcp/` có 44 công cụ, còn
-      `/mcp/x/actions` là endpoint RIÊNG. Điều phối chưa thử đường ấy đã tuyên không đo được.
-      Probe sau đó: `/mcp/x/actions` trả **4 công cụ** (`actions_get`, `actions_list`,
-      `actions_run_trigger`, `get_job_logs`) và mọi số trong mục này đo bằng chính nó.
-      Cross-review #478 lượt 1 bắt được (`ly-do-khong-do-ci-bo-sot-duong-actions`).
+      Bản đầu tệp này khai CI **KHÔNG ĐO ĐƯỢC** vì "bộ công cụ chỉ có 44 tool, không có nhóm
+      workflow/actions". SAI, và sai theo đúng lớp lỗi `CLAUDE.md` đã ghi thành luật: *"Đếm SỰ CÓ MẶT
+      của một đường thay vì KHẢ NĂNG của nó"* và *"phải thử ít nhất HAI client trước khi gọi đó là
+      chính sách."* `CLAUDE.md:583` nêu thẳng `/mcp/x/actions` là endpoint RIÊNG; điều phối chưa thử
+      đã tuyên. Probe sau đó trả 4 công cụ.
   - ten: 'head đã vào master'
     ket_qua: '`git merge-base --is-ancestor 17f4a1b origin/master` ⇒ ĐÚNG. master = `802fc01`, hai cha = `b416830` + `17f4a1b`.'
   - ten: 'nhánh không còn commit ngoài master'
@@ -165,10 +176,17 @@ bookkeeping:
     Mốc `22:53:12Z` là timestamp commit, không phải thời điểm push; ảnh chụp ref của gói review
     lúc `23:43:30Z`.
   - >-
-    Câu A9 treo từ lượt 10 CHƯA AI CHỐT: bốn revision GATE (`exec-1` → `r2` → `r3` → `r4`) đều được
-    cấp trong lúc lease #456 còn giữ; mỗi revision mang `spec_hash` KHÁC NHAU nhưng `generation` đều
-    = 1. Verdict lượt 13 nói *"không hồi tố hợp lệ hoá việc cấp trước hạn"* nhưng không kết luận có
-    phải ghi nợ hay không.
+    **NỢ A9 — đã XÁC ĐỊNH, chỉ còn thiếu QUYẾT ĐỊNH XỬ LÝ.** Bản đầu tệp này viết "chưa ai chốt",
+    câu ấy sai mức: verdict lượt 10 đã nêu, và hồ sơ đo được đầy đủ. Số liệu từ bốn lease GATE:
+    `exec-1` cấp `03:37:33Z` · `r2` `07:50:35Z` · `r3` `09:44:51Z` · `r4` `10:17:12Z` — **cả bốn
+    đều trước** khi lease #456 hết hạn `14:30:07Z`, tức mỗi lần cấp đều lặp lại việc cấp khi điều
+    kiện loại trừ chưa đạt. Bốn lease mang **4 `spec_hash` KHÁC NHAU**, `revision` 1/2/3/4, nhưng
+    `generation` giữ nguyên **1**. `ADR-0034` đòi *"Packet đổi contract phải revision + generation
+    mới"* — đây là **lệch có thật so với điều khoản**, không phải câu hỏi mở.
+    Thứ CHƯA có nguồn chốt là **quyết định xử lý**: ghi nợ, hay cấp ngoại lệ, hay hồi tố sửa. Quyết
+    định ấy thuộc chủ kho; gói này không có ngoại lệ nào được khai.
+    Việc lease #456 hết hạn chỉ đóng TRẠNG THÁI SAU HẠN, **không hợp thức hoá** bốn lần cấp sớm.
+    Không có bằng chứng runtime nào cho thấy đã thi công trái phép.
   - >-
     P1 `bia-mo-mot-ref-khong-thu-hoi-moi-ban` đóng bằng THỜI GIAN, không bằng bản vá: lease #456 hết
     hạn `14:30:07Z 07-09-2026`. Readback sau hạn ở `ops/reviews/DOC-READBACK-SAU-HAN-456.md`.

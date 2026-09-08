@@ -94,21 +94,17 @@ post_merge_checks:
     ket_qua: '`bash ops/dung_goi_review.sh <R mới> 585c7d5` ⇒ `rc=0`, **307/307/307** ref, 0 lệch; manifest `sha256sum -c` **3010/3010** `rc=0`'
   - ten: 'CI trên merge commit 585c7d5'
     ket_qua: >-
-      MỘT PHẦN. Run `34176439015` (`push`, `585c7d5`): `gate (ubuntu-latest)` = **`success`**
-      (44 bước, **0 hỏng**, 4 skipped). `gate (windows-latest)` vẫn **`in_progress`** sau ~20 phút
-      (43 bước, 0 hỏng, 1 skipped tại thời điểm đọc).
-    phai_lam_tiep: >-
-      Đọc lại job `gate (windows-latest)` của run `34176439015` qua `/mcp/x/actions` và ghi kết
-      quả vào tệp này. Đây là lần đo Windows ĐẦU TIÊN của merge commit — lượt `pull_request`
-      không có job Windows. **KHÔNG** được coi land này là đã xác minh CI đầy đủ cho tới khi có
-      kết quả ấy. Nhắc: packet GATE tồn tại chính vì chân Windows chạm trần thời gian, nên kết
-      quả `cancelled` do hết giờ là khả năng THẬT, không phải giả định.
-
+      **XANH CẢ HAI NỀN.** Run `34176439015` (`push`, `585c7d5`), đo THEO JOB:
+      `gate (ubuntu-latest)` = **`success`** — 44 bước, **0 hỏng**, 4 skipped,
+      `01:22:44Z` → `01:49:30Z` (**26 phút 46 giây**).
+      `gate (windows-latest)` = **`success`** — 44 bước, **0 hỏng**, 6 skipped,
+      `01:22:45Z` → `02:11:00Z` (**48 phút 15 giây**), bước cuối `Complete job` = `success`.
+    canh_bao_doc_ket_qua: >-
+      Windows chạy **48 phút 15 giây** — dưới trần `timeout-minutes` 60 nhưng **sát**. Đây chính là
+      hiện tượng mà packet GATE (Issue #463 `GATE-TACH-JOB-CAT-CHI-PHI`) sinh ra để giải quyết:
+      cắt wall-clock bằng cách tách job, KHÔNG nâng trần. Lần này chưa chạm trần, nhưng biên an
+      toàn chỉ còn ~11 phút 45 giây — đừng đọc `success` này thành "vấn đề đã hết".
 khong_do_duoc:
-  - muc: 'CI Windows trên merge commit'
-    ly_do: >-
-      `gate (windows-latest)` còn `in_progress` lúc lập tệp. ubuntu đã `success`.
-      Xem `post_merge_checks` mục cuối để biết phải làm gì tiếp.
   - muc: 'Người thao tác merge là người hay là phiên'
     ly_do: >-
       `merged_by` chỉ ghi chủ sở hữu PAT. Thao tác thật do phiên điều phối gọi API. Không có
@@ -117,6 +113,27 @@ khong_do_duoc:
     ly_do: 'Gói không kèm JSON thô của run/job/PR; mọi số là attestation của điều phối.'
   - muc: 'Nền macOS/Windows native cho `ops/dung_goi_review.sh`'
     ly_do: 'Mọi phép đo chạy trên Linux+Bash. Đã tự khai trong `ops/reviews/DO-T33-VA-GOI-REVIEW-20260907.md`.'
+
+# --- GIẢI ĐƯỢC MỘT MÂU THUẪN ĐANG MỞ Ở LAND EVIDENCE CỦA PR #468 ---
+giai_mau_thuan_4_vs_6_skipped:
+  van_de: >-
+    `ops/land/pr468-hoso-4-packet-land-evidence.yaml` (đang ở PR #478) ghi một
+    `mau_thuan_chua_giai`: điều phối đọc **4 skipped** cho job `gate (windows-latest)` trên merge
+    commit `802fc01`, trong khi cross-review #478 lượt 2 phân tích tĩnh `.github/workflows/ci.yml`
+    và đếm **6** bước có `if` sai trên tổ hợp push/master/windows.
+  nay_giai_duoc: >-
+    **Reviewer đúng, điều phối sai — và sai vì ĐỌC GIỮA CHỪNG.** Job Windows của run
+    `34176439015` lúc đang chạy hiển thị `43 bước, 1 skipped`; khi chạy XONG nó là
+    **44 bước, 6 skipped**. Bước chưa chạy tới thì `conclusion` còn `null`, nên phép đếm
+    `conclusion == "skipped"` giữa chừng cho số THẤP HƠN thực tế.
+    Con số **6** khớp đúng phân tích tĩnh của reviewer.
+  bai_hoc: >-
+    Đếm `skipped` trên một job `in_progress` là phép đo SAI, không phải phép đo thiếu. Chỉ đọc
+    số bước/skipped khi `status == "completed"`.
+  viec_phai_lam: >-
+    Sửa `mau_thuan_chua_giai` trong land evidence của #468 (nhánh `claude/land-468-20260908`,
+    PR #478) theo kết quả này. Phiên tiếp nối `session_01C52eS8AgeiwTrDifXGDGYP` đang giữ nhánh
+    ấy — việc thuộc về nó, tệp này chỉ ghi lại phép đo để nó khỏi phải đo lại.
 
 bookkeeping:
   - >-

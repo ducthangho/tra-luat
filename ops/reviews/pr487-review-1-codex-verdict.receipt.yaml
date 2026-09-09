@@ -2,9 +2,11 @@
 #
 # Verdict: changes_requested — 0 P1 / 2 P2 / 6 P3. HẾT P1 ngay lượt đầu.
 #
-# LƯỢT NÀY KHÁC MỌI LƯỢT TRƯỚC Ở ĐỐI TƯỢNG: reviewer soi HỒ SƠ TỰ KHAI CỦA ĐIỀU PHỐI về công việc
-# của chính điều phối — ba biên nhận điều phối tự viết, ba hàng mục lục tự cập nhật, một biên bản đo
-# tự soạn. Không ai kiểm những con số ấy trước lượt này.
+# ĐỐI TƯỢNG của lượt này là HỒ SƠ TỰ KHAI CỦA ĐIỀU PHỐI: ba biên nhận điều phối tự viết, ba hàng
+# mục lục tự cập nhật, một biên bản đo tự soạn. KHÔNG tuyên đây là lượt đầu tiên làm việc ấy —
+# cross-review lượt 2 đưa hai phản chứng: verdict hậu kiểm #486 đã soi hồ sơ/biên nhận/mục lục của
+# điều phối, và verdict #480 lượt 2 đã bắt lời tự kiểm của điều phối. Bản đầu của dòng này viết
+# "khác mọi lượt trước" và "không ai kiểm những con số ấy trước lượt này"; cả hai bị rút.
 #
 # HAI P2 ĐỀU LÀ LỖI CỦA ĐIỀU PHỐI, và một trong đó là GHÉP SAI LƯỢT — thứ `CLAUDE.md` đã ghi thành
 # bài học riêng. Chi tiết ở `hai_p2_deu_la_loi_dieu_phoi` bên dưới.
@@ -103,7 +105,14 @@ nang_luc_do_cua_goi:
   ghi_chu: >-
     Gói dựng bằng `ops/dung_goi_review.sh`, mang thêm hai bảng khẳng định (`BANG-CAU-TRUC.tsv` 317
     lá từ 5 tệp YAML · `BANG-TOKEN.tsv` 14 hit từ biên bản .md) và cả hai script sinh ra chúng.
-  so_ref: 312
+  so_ref: 313
+  so_ref_dinh_chinh: >-
+    Bản đầu ghi 312 ref. SAI: đó là số của gói cross-review ĐẦU TIÊN trong phiên; nhánh
+    `claude/handoff-tra-luat-repo-2ak5th` được đẩy SAU gói ấy nên máy chủ thành 313. Đo lại trên
+    chính gói của lượt này: `git ls-remote --heads origin` ⇒ 313, `for-each-ref refs/heads` trong
+    `cay-kho` ⇒ 313, và `EVIDENCE.md` của gói khai 313/313/313, lệch 0. Cross-review lượt 2 bắt
+    được (`bien-nhan-luot-hai-chep-sai-so-ref`). Đúng bài học `CLAUDE.md`: một bất biến còn đúng
+    (mirror khớp máy chủ) KHÔNG chứng minh các số hạng còn đúng.
   lech: 0
   so_tag: 62
   chua_do_duoc: >-

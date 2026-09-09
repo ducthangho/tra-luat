@@ -1,0 +1,60 @@
+{
+  "ci_on": {
+    "push": {
+      "branches": [
+        "master"
+      ]
+    },
+    "pull_request": "",
+    "workflow_dispatch": ""
+  },
+  "matrix": {
+    "os": "${{ fromJSON( (github.event_name == 'workflow_dispatch' || github.ref == 'refs/heads/master' || contains(github.event.pull_request.labels.*.name, 'windows')) && '[\"ubuntu-latest\",\"windows-latest\"]' || '[\"ubuntu-latest\"]') }}"
+  },
+  "checkouts": [
+    {
+      "uses": "actions/checkout@v4",
+      "with": {
+        "fetch-depth": "0"
+      }
+    }
+  ],
+  "missing_hint_candidates": [],
+  "runtime_candidates": [],
+  "old_hint": "HIỆN VẬT REVIEW cộng HAI BẢN VÁ P3 MÀ CHÍNH REVIEWER ĐỀ XUẤT trong `GOI-VA.md` của gói. Đo được: `diff -u` giữa 2/2 tệp reviewer đề xuất trong `cay/` và 2/2 tệp điều phối áp cho ĐÚNG MỘT hunk khác nhau — câu chữ của P3 CI, điều phối viết CHẶT HƠN (tách hẳn ĐO ĐƯỢC khỏi KHÔNG ĐO ĐƯỢC); phần đổi tên khoá `ba_loi`→`bon_loi` TRÙNG KHỚP hoàn toàn, 0 dòng lệch. Số đo: 8 tệp · +2 189 · −4.",
+  "new_hint": {
+    "head_cross_review_approve": "98ef1f1629a2ac786ff91e352dd02da9b693e81e",
+    "head_da_merge": "efa397eb2515658a1e3e9b4cdfd6e887b492b957",
+    "phan_chenh": "HAI commit: `f7fe802` (verdict lượt 2 + bốn tệp hiện vật đo) và `efa397e` (biên nhận lượt 2 + hàng mục lục + hai bản vá P3).",
+    "phan_them_la_gi": "HIỆN VẬT REVIEW cộng HAI BẢN VÁ P3 MÀ CHÍNH REVIEWER ĐỀ XUẤT trong `GOI-VA.md` của gói.",
+    "phan_them_la_gi_do_duoc": {
+      "nguon": "phép đo Git, tái lập được từ chính kho",
+      "so_do": "8 tệp · thêm 2 189 dòng · bớt 4 dòng, giữa `98ef1f1` và `efa397e`.",
+      "lenh": "`git diff --shortstat 98ef1f1..efa397e`, cộng tay từ `--numstat` cho cùng cặp số."
+    },
+    "phan_them_la_gi_ATTESTATION": {
+      "khai": "`diff -u` giữa 2/2 tệp reviewer đề xuất trong `cay/` và 2/2 tệp điều phối áp cho ĐÚNG MỘT hunk khác nhau — câu chữ của P3 CI, điều phối viết CHẶT HƠN; phần đổi tên khoá `ba_loi`→`bon_loi` TRÙNG KHỚP hoàn toàn, 0 dòng lệch.",
+      "vi_sao_KHONG_phai_do_duoc": "Phép so ấy CÓ CHẠY THẬT, nhưng đầu vào của nó — `GOI-VA.md` và cây `cay/` do reviewer đề xuất — nằm trong gói scratchpad `goi-pr489-luot2b`, KHÔNG vào kho. Người đọc sau KHÔNG tái lập được, nên đây là ATTESTATION của điều phối chứ không phải phép đo. Bản trước gọi nó là \"Đo được\" và gộp chung với số Git ở cùng một câu — làm số tái lập được BẢO LÃNH cho phép so không tái lập được. Cross-review lượt 2 chấm đúng chỗ này (P3 `van-xuoi-do-duoc-van-vuot-nguon`, lần thứ hai của cùng slug), và nó ĐÚNG.",
+      "cach_dong_no_nay": "Hoặc đưa `GOI-VA.md` + cây `cay/` của gói vào kho, hoặc bỏ hẳn lời khai. Không chọn đường thứ ba là giữ lời khai rồi gọi nó là phép đo."
+    },
+    "phe_duyet_cua_nguoi_thi_dung_head": "Phê duyệt của `notebyme88` neo `efa397e` — ĐÚNG head merge. Chỉ lượt cross-review MÁY là neo head trước đó.",
+    "no_review_head_da_merge": {
+      "trang_thai": "NO_CHUA_TRA",
+      "mo_ta": "Head `efa397e` CHƯA có lượt cross-review exact head. Đây là cùng một nợ mà #468 và #487 đã mắc; #487 trả bằng một lượt hậu kiểm trong phiên này, PR này thì CHƯA.",
+      "vi_sao_ghi_thay_vi_chay_ngay": "Nợ chưa trả vì PHẠM VI PHIÊN và vì chủ kho đã quyết dừng chuỗi — KHÔNG phải vì hậu kiểm tự sinh ra mắt xích mới.",
+      "dinh_chinh_ly_do_cu": "Bản trước viết: \"chạy hậu kiểm cho `efa397e` sẽ sinh thêm verdict + biên nhận ⇒ lại đổi head ⇒ lại một mắt xích nữa. Chuỗi này chưa có điều kiện dừng\". Câu ấy GIỮ NGUYÊN tiền đề đệ quy mà chính tệp này vừa rút ở `van_de_da_gay_ra_chuoi`. Hậu kiểm một OID CỐ ĐỊNH không làm OID ấy đổi: `efa397e` vẫn là `efa397e` sau khi được review. Việc ghi hiện vật ở một commit KHÁC không làm lượt hậu kiểm cho `efa397e` hết hiệu lực — chỉ LỰA CHỌN VẬN CHUYỂN (đòi xét lại chính commit vận chuyển) mới tạo vòng lặp, và lựa chọn ấy là cách làm, không phải luật. Để nguyên câu cũ thì người nhận nợ đọc thành \"không thể hậu kiểm nếu không mở lại chuỗi\", tức đúng cái hiểu sai vừa được sửa. Codex chấm đúng chỗ này (P3 `ly-do-hau-kiem-van-tu-sinh-chuoi`) ở lượt 1 trên `9238606`.",
+      "cai_da_co_thay_the": "KHÔNG phải cross-review, và KHÔNG thay thế được nó. Thứ có thật: bốn cổng CỤC BỘ chạy trên CHÍNH `efa397e` trước khi xin duyệt. Bản trước còn viết thêm \"toàn bộ CI của PR xanh trên chính head ấy\" — RÚT, vì đó đúng là lỗi lẫn CẤU HÌNH với CÂY RUNNER mà mục CI ở `pre_merge_checks` vừa cảnh báo; CI của PR chạy trên cây nào thì KHÔNG ĐO ĐƯỢC.",
+      "dieu_kien_cross_review_CHO_HEAD_DA_MERGE": "KHONG_THOA",
+      "khong_duoc_doc_la_da_thoa": "`PROTOCOL:29` ghi thẳng *\"Head đổi làm bằng chứng và ủy quyền cũ hết hiệu lực\"*, và `PROTOCOL:43` cấm Land Operator *\"tự nới điều kiện\"*. Verdict `approve` neo `98ef1f1` vì vậy KHÔNG thoả điều kiện cross-review cho head `efa397e` — nó là bằng chứng CHO MỘT SHA KHÁC, không phải bằng chứng yếu cho SHA này. Mọi bảng tóm tắt của #489 phải ghi điều kiện cross-review là CHƯA THOẢ, không được đánh dấu đã đạt rồi ghi chú ở chỗ khác. Codex connector chấm đúng chỗ này (P1 `Do not count the stale cross-review toward landing`) trên `a48f576`, và nó ĐÚNG. Đây là LẦN THỨ TƯ trong phiên bản TÓM TẮT khai rộng hơn bản CHI TIẾT — cùng một hình dạng lỗi, bốn nạn nhân khác nhau."
+    }
+  },
+  "old_windows": "KHÔNG ĐỌC theo quyết định chủ kho. BỎ CHỜ KHÔNG PHẢI BỎ CHẠY — `ci.yml` khai `on: push`, nên workflow ĐƯỢC CẤU HÌNH để chạy trên lượt master. Đó là CẤU HÌNH đọc được từ tệp; runner có chạy thật hay không thì hồ sơ này KHÔNG ĐO (không đọc, không giữ run JSON) — đừng đọc câu này thành \"lượt ấy đã chạy\". Tiết kiệm là THỜI GIAN CHỜ của phiên, không phải phút runner. Hệ quả: lượt push master là lần đo Windows ĐẦU TIÊN của mã này, nên nếu Windows đỏ thì biết MUỘN HƠN — không phải không biết.",
+  "new_windows": "Bản trước viết: \"lượt push master là lần đo Windows ĐẦU TIÊN của mã này\". ĐÓ LÀ MỘT SUY LUẬN TỪ MA TRẬN, không phải phép đo — và cross-review lượt 2 chấm đúng chỗ này (vế thứ hai của P3 `van-xuoi-do-duoc-van-vuot-nguon`). ĐO ĐƯỢC (đọc `.github/workflows/ci.yml`): ma trận khai `ubuntu-latest` cho `pull_request` thường, và khai CẢ `ubuntu-latest` LẪN `windows-latest` cho lượt `push` trên master; PR này không gắn nhãn `windows` và không ai gọi `workflow_dispatch`. KHÔNG ĐO ĐƯỢC: runner Windows đã chạy lần nào cho mã này hay chưa. Hồ sơ không đọc run nào, không giữ run JSON, và KHÔNG quét lịch sử để tìm một lượt Windows trước đó. Nên câu đúng là: THEO CẤU HÌNH, lượt push master là lần ĐẦU TIÊN Windows được LÊN LỊCH cho mã này — chứ không phải \"lần đo Windows đầu tiên\" như một sự kiện đã xác lập. Hệ quả thực hành không đổi: nếu Windows đỏ thì biết MUỘN HƠN, không phải không biết.",
+  "unsupported_clauses": [
+    "PR này không gắn nhãn windows",
+    "không ai gọi workflow_dispatch",
+    "lượt push master là lần ĐẦU TIÊN Windows được LÊN LỊCH cho mã này",
+    "nếu Windows đỏ thì biết MUỘN HƠN, không phải không biết"
+  ],
+  "server_event_history_verified": false
+}

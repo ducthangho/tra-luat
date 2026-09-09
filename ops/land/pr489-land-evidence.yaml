@@ -59,11 +59,27 @@ land_operator_neo:
     đứng sẵn *"lặp vá, cross-review tới khi approved, merge, CI gate và land"*. GitHub không có
     trường phân biệt NGƯỜI với PHIÊN, nên `merged_by: ducthangho` không chứng minh có người bấm.
   chot_CAS: 'Neo `expectedHeadSha: efa397eb2515658a1e3e9b4cdfd6e887b492b957`.'
-  vi_sao_MERGE_chu_khong_SQUASH: >-
-    ĐO ĐƯỢC: `git diff --name-only f4d74fe..efa397e -- '*.receipt.yaml'` ⇒ **5** biên nhận đổi
-    trong PR này, và **5/5** neo `anchor.loai: canonical_ancestry` tại `efa397e`. Mỗi biên nhận tự
-    ghi `gioi_han: "SQUASH phá quan hệ tổ tiên"`. Squash sẽ làm cả năm neo hỏng cùng lúc. Đây là
-    ràng buộc của hồ sơ, không phải sở thích quy ước.
+  vi_sao_MERGE_chu_khong_SQUASH:
+    dem_dung_doi_tuong: >-
+      Đếm NEO CHƯA NẰM TRONG BASE, KHÔNG đếm receipt đổi. `git diff --name-only
+      f4d74fe..efa397e -- '*.receipt.yaml'` ⇒ **5/5 receipt đổi**, nhưng receipt đổi KHÔNG đồng
+      nghĩa neo của nó mới vào canonical nhờ PR này.
+    do_tung_neo: >-
+      `merge-base --is-ancestor <neo> f4d74fe` trên cả 5: **2/5 ĐÃ** là tổ tiên của base
+      (`a0b154d7` của `pr487-review-1`, `edb288e4` của `pr487-review-2`); **3/5 CHƯA**
+      (`e1fd0a33` của `pr487-hau-kiem-head`, `45bd80e0` của `pr489-review-1`, `f7fe8026` của
+      `pr489-review-2`).
+    ket_luan: >-
+      Chọn MERGE là để giữ **3/5** neo chưa nằm trong base. Lý do ấy đứng vững; con số thì phải là
+      3, không phải 5.
+    dinh_chinh_ban_truoc: >-
+      Bản trước viết "Squash sẽ làm cả năm neo hỏng cùng lúc" — SAI. Một squash commit vẫn có
+      `f4d74fe` làm cha, nên vẫn giữ mọi tổ tiên của cha; **2/5** neo đã nằm sẵn trong base thì
+      squash KHÔNG thể làm mất. Đây là lỗi ĐẾM SAI ĐỐI TƯỢNG: lấy số receipt ĐỔI thay cho số neo
+      MỚI. Cross-review lượt 3 tìm ra bằng cách quét TOÀN TỆP thay vì chỉ kiểm hai vế đã nêu, và
+      nó ĐÚNG. Câu `anchor.gioi_han` được trích ("SQUASH phá quan hệ tổ tiên") là cảnh báo CHUNG
+      của mẫu biên nhận, không phải phép đo tác động cho PR #489 — dẫn nó như bằng chứng là lỗi
+      cùng họ với việc để một số có nguồn bảo lãnh cho mệnh đề bên cạnh.
 
 # --- CROSS-REVIEW ---
 cross_review:
@@ -300,18 +316,27 @@ post_merge_checks:
       runner có chạy thật hay không thì hồ sơ này KHÔNG ĐO (không đọc, không giữ run JSON) —
       đừng đọc câu này thành "lượt ấy đã chạy". Tiết kiệm là THỜI GIAN
       CHỜ của phiên, không phải phút runner.
-    he_qua_windows_la_SUY_TU_CAU_HINH_khong_phai_su_kien: >-
-      Bản trước viết: "lượt push master là lần đo Windows ĐẦU TIÊN của mã này". ĐÓ LÀ MỘT SUY
-      LUẬN TỪ MA TRẬN, không phải phép đo — và cross-review lượt 2 chấm đúng chỗ này (vế thứ hai
-      của P3 `van-xuoi-do-duoc-van-vuot-nguon`).
-      ĐO ĐƯỢC (đọc `.github/workflows/ci.yml`): ma trận khai `ubuntu-latest` cho `pull_request`
-      thường, và khai CẢ `ubuntu-latest` LẪN `windows-latest` cho lượt `push` trên master; PR này
-      không gắn nhãn `windows` và không ai gọi `workflow_dispatch`.
-      KHÔNG ĐO ĐƯỢC: runner Windows đã chạy lần nào cho mã này hay chưa. Hồ sơ không đọc run nào,
-      không giữ run JSON, và KHÔNG quét lịch sử để tìm một lượt Windows trước đó.
-      Nên câu đúng là: THEO CẤU HÌNH, lượt push master là lần ĐẦU TIÊN Windows được LÊN LỊCH cho
-      mã này — chứ không phải "lần đo Windows đầu tiên" như một sự kiện đã xác lập. Hệ quả thực
-      hành không đổi: nếu Windows đỏ thì biết MUỘN HƠN, không phải không biết.
+    ma_tran_windows_CHI_la_cau_hinh:
+      do_duoc: >-
+        Đọc `.github/workflows/ci.yml:43-48`: `matrix.os` giải ra `["ubuntu-latest",
+        "windows-latest"]` khi `github.event_name == 'workflow_dispatch'` HOẶC `github.ref ==
+        'refs/heads/master'` HOẶC nhãn PR chứa `windows`; ngược lại chỉ `["ubuntu-latest"]`.
+        Đó là TOÀN BỘ những gì tệp nói.
+      khong_do_duoc: >-
+        PR này có gắn nhãn `windows` hay không · có ai gọi `workflow_dispatch` hay không · runner
+        Windows đã chạy lần nào cho mã này hay chưa · lượt push master có phải lần ĐẦU TIÊN hay
+        không. Bốn mệnh đề ấy đều nói về LỊCH SỬ SỰ KIỆN; YAML chỉ chứa ĐIỀU KIỆN xét sự kiện,
+        không chứa sự kiện. Hồ sơ này không đọc run nào, không giữ run JSON, không quét lịch sử.
+      dinh_chinh_hai_ban_truoc: >-
+        Bản đầu viết "lượt push master là lần đo Windows ĐẦU TIÊN của mã này". Bản thứ hai đổi
+        "đo" thành "lên lịch" và tưởng thế là đủ — KHÔNG: nó vẫn khẳng định THỨ TỰ ĐẦU TIÊN, và
+        vẫn khai nhãn/dispatch như sự kiện đã biết, ngay sau chữ "ĐO ĐƯỢC". Đổi một động từ không
+        đổi được đối tượng của mệnh đề. Cross-review lượt 3 chấm lại đúng chỗ ấy và nó ĐÚNG —
+        lượt thứ BA liên tiếp của cùng slug `van-xuoi-do-duoc-van-vuot-nguon`.
+      he_qua_thuc_hanh_con_lai: >-
+        Chỉ còn một câu CÓ ĐIỀU KIỆN, không kèm bảo đảm: NẾU lượt push master thật sự chạy VÀ ma
+        trận giải ra như trên, thì kết quả Windows đến SAU thời điểm merge. Hồ sơ không tuyên
+        điều kiện nào trong hai điều kiện ấy đã xảy ra.
     vi_sao_doi_tu_ket_qua_sang_trang_thai: >-
       Bản trước cất sự kiện "không đo" trong khoá `ket_qua`, trong khi CHÍNH TỆP NÀY dùng
       `trang_thai: not_run` ở chỗ khác. Bộ đọc schema thấy một mục hậu kiểm CÓ `ket_qua` sẽ đếm nó

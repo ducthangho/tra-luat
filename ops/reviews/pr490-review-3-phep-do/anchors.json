@@ -1,0 +1,117 @@
+{
+  "rows": [
+    {
+      "path": "ops/reviews/pr487-hau-kiem-head-review-1-codex-verdict.receipt.yaml",
+      "anchor": {
+        "loai": "canonical_ancestry",
+        "cuong_do": "cao",
+        "mo_ta": "Blob verdict trên nhánh `claude/land-480-20260909` (PR #489).",
+        "gioi_han": "Chỉ vững nếu land bằng MERGE hoặc fast-forward; SQUASH phá quan hệ tổ tiên."
+      },
+      "oid": "e1fd0a333109a555af4823fd2b830521d86fafbd",
+      "verdict_path": "ops/reviews/pr487-hau-kiem-head-review-1-codex-verdict.md",
+      "declared_bytes": 37900,
+      "actual_bytes": 37900,
+      "declared_hash": "683488f13c912ece73b249660a3ab7731055b4d401b43eb91f0002d3e0b54bb9",
+      "actual_hash": "683488f13c912ece73b249660a3ab7731055b4d401b43eb91f0002d3e0b54bb9",
+      "blob_matches_head": true,
+      "ancestor_of_base": false,
+      "ancestor_of_head": true,
+      "ancestor_of_merge": true,
+      "base_ancestry_witness": null
+    },
+    {
+      "path": "ops/reviews/pr487-review-1-codex-verdict.receipt.yaml",
+      "anchor": {
+        "loai": "canonical_ancestry",
+        "cuong_do": "cao",
+        "mo_ta": "Blob verdict ghim tại `a0b154d`, trên chính nhánh của PR #487. Không có neo comment thứ hai tại thời điểm viết biên nhận này.",
+        "gioi_han": "Chỉ vững nếu land bằng MERGE hoặc fast-forward; SQUASH thay commit và phá quan hệ tổ tiên."
+      },
+      "oid": "a0b154d7c8e6491fb53825301ace2d6d4e97ac9f",
+      "verdict_path": "ops/reviews/pr487-review-1-codex-verdict.md",
+      "declared_bytes": 43342,
+      "actual_bytes": 43342,
+      "declared_hash": "f1eb4c78c242ebc748b608e2c09696498050ff6b15c00d629e9ac0233dc08edd",
+      "actual_hash": "f1eb4c78c242ebc748b608e2c09696498050ff6b15c00d629e9ac0233dc08edd",
+      "blob_matches_head": true,
+      "ancestor_of_base": true,
+      "ancestor_of_head": true,
+      "ancestor_of_merge": true,
+      "base_ancestry_witness": "f4d74fed59616ecd5a133fc232275a832dcd95bb 7e69b8e9c41a45854d149bc252218aada6df5aa4 3873173094a3e294b069998ed21dc117d8ad659a\n3873173094a3e294b069998ed21dc117d8ad659a edb288e4e95081b83661c94c88addea005d3f121\nedb288e4e95081b83661c94c88addea005d3f121 5c05778219e293ff929e8cb1f1c31aea4120d967\n5c05778219e293ff929e8cb1f1c31aea4120d967 a0b154d7c8e6491fb53825301ace2d6d4e97ac9f\n"
+    },
+    {
+      "path": "ops/reviews/pr487-review-2-codex-verdict.receipt.yaml",
+      "anchor": {
+        "loai": "canonical_ancestry",
+        "cuong_do": "cao",
+        "mo_ta": "Blob verdict trên chính nhánh PR #487; neo comment thứ hai điền sau khi đăng bản chiếu.",
+        "gioi_han": "Chỉ vững nếu land bằng MERGE hoặc fast-forward; SQUASH phá quan hệ tổ tiên."
+      },
+      "oid": "edb288e4e95081b83661c94c88addea005d3f121",
+      "verdict_path": "ops/reviews/pr487-review-2-codex-verdict.md",
+      "declared_bytes": 36009,
+      "actual_bytes": 36009,
+      "declared_hash": "5f4a73aaa006d0e284474870b7b2275a34c53f0a9d6f915ad53b11ab66721f03",
+      "actual_hash": "5f4a73aaa006d0e284474870b7b2275a34c53f0a9d6f915ad53b11ab66721f03",
+      "blob_matches_head": true,
+      "ancestor_of_base": true,
+      "ancestor_of_head": true,
+      "ancestor_of_merge": true,
+      "base_ancestry_witness": "f4d74fed59616ecd5a133fc232275a832dcd95bb 7e69b8e9c41a45854d149bc252218aada6df5aa4 3873173094a3e294b069998ed21dc117d8ad659a\n3873173094a3e294b069998ed21dc117d8ad659a edb288e4e95081b83661c94c88addea005d3f121\n"
+    },
+    {
+      "path": "ops/reviews/pr489-review-1-codex-verdict.receipt.yaml",
+      "anchor": {
+        "loai": "canonical_ancestry",
+        "cuong_do": "cao",
+        "mo_ta": "Blob verdict ghim `45bd80e` trên nhánh `claude/land-480-20260909`.",
+        "gioi_han": "Chỉ vững nếu land bằng MERGE hoặc fast-forward; SQUASH phá quan hệ tổ tiên."
+      },
+      "oid": "45bd80e08c5efdcb9d713e42fe0804f7d9fd3af1",
+      "verdict_path": "ops/reviews/pr489-review-1-codex-verdict.md",
+      "declared_bytes": 54761,
+      "actual_bytes": 54761,
+      "declared_hash": "74aa34c3f384148f3a17682f46da84f8aa52aa9001838a3db04ab68f131924ab",
+      "actual_hash": "74aa34c3f384148f3a17682f46da84f8aa52aa9001838a3db04ab68f131924ab",
+      "blob_matches_head": true,
+      "ancestor_of_base": false,
+      "ancestor_of_head": true,
+      "ancestor_of_merge": true,
+      "base_ancestry_witness": null
+    },
+    {
+      "path": "ops/reviews/pr489-review-2-codex-verdict.receipt.yaml",
+      "anchor": {
+        "loai": "canonical_ancestry",
+        "cuong_do": "cao",
+        "mo_ta": "Blob verdict ghim `f7fe802` trên nhánh `claude/land-480-20260909`.",
+        "gioi_han": "Chỉ vững nếu land bằng MERGE hoặc fast-forward; SQUASH phá quan hệ tổ tiên."
+      },
+      "oid": "f7fe80261779b8d11bf55e9fedd55a6912e29b99",
+      "verdict_path": "ops/reviews/pr489-review-2-codex-verdict.md",
+      "declared_bytes": 32790,
+      "actual_bytes": 32790,
+      "declared_hash": "3f7f8dd6f4d4fcf54d5f367d9049d972db862ac7963e33a39743d97bdb82ffff",
+      "actual_hash": "3f7f8dd6f4d4fcf54d5f367d9049d972db862ac7963e33a39743d97bdb82ffff",
+      "blob_matches_head": true,
+      "ancestor_of_base": false,
+      "ancestor_of_head": true,
+      "ancestor_of_merge": true,
+      "base_ancestry_witness": null
+    }
+  ],
+  "changed_receipts": 5,
+  "canonical_ancestry": 5,
+  "anchors_already_in_base": [
+    "ops/reviews/pr487-review-1-codex-verdict.receipt.yaml",
+    "ops/reviews/pr487-review-2-codex-verdict.receipt.yaml"
+  ],
+  "anchors_not_in_base": [
+    "ops/reviews/pr487-hau-kiem-head-review-1-codex-verdict.receipt.yaml",
+    "ops/reviews/pr489-review-1-codex-verdict.receipt.yaml",
+    "ops/reviews/pr489-review-2-codex-verdict.receipt.yaml"
+  ],
+  "counterexample": "A squash commit with parent f4d74fe preserves all ancestors of that parent. The PR487 review1/review2 anchor OIDs are already in that ancestry. Claim that all five anchors break is false.",
+  "synthetic_commit_created": false
+}

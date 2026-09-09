@@ -2972,7 +2972,10 @@ class _GitKhoGia:
         elif args[:3] == ("worktree", "list", "--porcelain"):
             out = ""
         elif args and args[0] == "ls-tree":
-            out = "".join(f"100644 blob {b}\t{p}\n" for b, p in self.refs.get(args[2], []))
+            # ref = đối số đầu không phải cờ (A0 gọi `ls-tree -r -z <ref> -- <dir>`); `-z` ⇒ NUL thay LF.
+            ref = next((a for a in args[1:] if not a.startswith("-")), "")
+            cuoi = "\0" if "-z" in args else "\n"
+            out = "".join(f"100644 blob {b}\t{p}{cuoi}" for b, p in self.refs.get(ref, []))
         elif args[:2] == ("cat-file", "-p"):
             out = self.blobs[args[2]]
         elif args[:2] == ("rev-parse", "--git-dir"):
@@ -4130,6 +4133,7 @@ def _yaml_bytes(d: dict) -> bytes:
 
 def _them_commit(cay: Path, nhanh: str, tu: str, tep: dict, *, symlink=None, xoa=()) -> str:
     """Tạo nhánh `nhanh` từ `tu`, ghi các tệp (bytes) / symlink / xoá, commit; trả SHA."""
+    _g_a0(cay, "reset", "-q", "--hard")          # cây làm việc sạch trước khi rẽ (mode đổi qua update-index…)
     _g_a0(cay, "checkout", "-q", "-B", nhanh, tu)
     for duong, noi_dung in tep.items():
         p = cay / duong; p.parent.mkdir(parents=True, exist_ok=True); p.write_bytes(noi_dung)
@@ -4260,7 +4264,9 @@ def t129_Q45_reader_object_store_bam_lai_va_canh_tu_bytes():
         cay, (c0, c1, c2) = _kho_do_thi(s)
         kho = mod.KhoObject(cay)
         try:
-            tree2, cha = kho.commit(c2)
+            rc0, kq0 = _ma_chan(mod, kho.commit, c2)
+            chot(rc0 == 0, f"positive control: đọc commit c2 qua object-store đã routing phải 0: {rc0} {kq0}")
+            tree2, cha = kq0
             chot(tree2 == _g_a0(cay, "rev-parse", f"{c2}^{{tree}}") and cha == [c1], f"commit(c2) sai: {tree2} {cha}")
             ds = kho.tree(tree2)
             chot({e[1] for e in ds} == {"README.md", "docs", "ops"}, f"tree(c2) sai: {ds}")
@@ -4412,7 +4418,8 @@ def t131_S8_tam_tran_bound_tru_1_bound_bound_cong_1_va_deadline():
         kho = mod.KhoObject(cay, bay_gio=lambda: 100.0, deadline=100.0)
         try:
             rc, td = _ma_chan(mod, kho.commit, c3)
-            chot(rc == 12 and "trước spawn" in td and kho.memo == {}, f"chạm deadline phải 12 ở lớp TRƯỚC spawn: {rc} {td}")
+            chot(rc == 12 and "deadline" in td and "kill" not in td and kho.memo == {},
+                 f"chạm deadline phải 12 ở lớp TRƯỚC spawn (không phải lớp join-timeout/kill): {rc} {td}")
         finally:
             kho.dong()
         kho = mod.KhoObject(cay, bay_gio=lambda: 100.0, deadline=100.5)
@@ -4519,9 +4526,46 @@ def t133_M4_kiem_thu_hoi_github_receipt_append_only_va_che_do_chua_kich_hoat():
         chot(rc == 12 and "không phải tổ tiên" in e and not rcp.exists(), f"S không tổ tiên H phải 12, không receipt: {rc} {e!r}")
         rc, o, e = m4(H_thu_hoi, S, rcp)
         chot(rc == 12 and "CHƯA KÍCH HOẠT" in e and not rcp.exists(), f"bản ghi thu hồi HỢP LỆ khi inactive phải 12: {rc} {e!r}")
+        # F01/Q13: marker MỚI khi descriptor CHƯA ghim (A0) ⇒ 12, kể cả policy JSON hợp lệ; policy mà không marker ⇒ 12
         rc, o, e = m4(H_meta_policy, S, rcp)
-        d = json.loads(rcp.read_text(encoding="utf-8"))
-        chot(rc == 0 and d["metadata_T"] == [RET] and d["thu_hoi_moi"] == [], f"metadata + policy phải 0: {rc} {e!r} {d.get('metadata_T')}")
+        chot(rc == 12 and "descriptor" in e and not rcp.exists(), f"marker mới ở A0 (descriptor chưa ghim) phải 12: {rc} {e!r}")
+        H_policy_khong_marker = _them_commit(cay, "h-policy-0", S, {POL: b"{}\n"})
+        rc, o, e = m4(H_policy_khong_marker, S)
+        chot(rc == 12 and "thiếu marker" in e, f"policy không marker phải 12 (không grandfather): {rc} {e!r}")
+        # Binding Q13 với descriptor GHIM (tiêm qua thuộc tính module — API nội bộ, không CLI): đúng cả ba ⇒ 0;
+        # sai từng cái ⇒ 12; policy đã có ở S mà marker mới ⇒ 12
+        import hashlib as _h
+        POL_BYTES = b'{"schema": 1}\n'
+        DESC = "c" * 64
+        dung = _metadata_retired(descriptor_sha256=DESC, first_policy_sha256=_h.sha256(POL_BYTES).hexdigest(), base_sha_before_add=S)
+        H_bind_ok = _them_commit(cay, "h-bind-ok", S, {RET: _yaml_bytes(dung), POL: POL_BYTES})
+        H_bind_desc = _them_commit(cay, "h-bind-desc", S, {RET: _yaml_bytes(dict(dung, descriptor_sha256="d" * 64)), POL: POL_BYTES})
+        H_bind_hash = _them_commit(cay, "h-bind-hash", S, {RET: _yaml_bytes(dict(dung, first_policy_sha256="e" * 64)), POL: POL_BYTES})
+        H_bind_base = _them_commit(cay, "h-bind-base", S, {RET: _yaml_bytes(dict(dung, base_sha_before_add=c0)), POL: POL_BYTES})
+        H_bind_pol_hong = _them_commit(cay, "h-bind-hong", S, {RET: _yaml_bytes(dung), POL: b"[1]\n"})
+        H_bind_pol_exec = _them_commit(cay, "h-bind-exec", S, {RET: _yaml_bytes(dung), POL: POL_BYTES})
+        _g_a0(cay, "update-index", "--chmod=+x", POL); _g_a0(cay, "commit", "-qm", "exec"); H_bind_pol_exec = _g_a0(cay, "rev-parse", "HEAD")
+        S_pol = H_policy_khong_marker
+        H_bind_S_co_policy = _them_commit(cay, "h-bind-s-pol", S_pol, {RET: _yaml_bytes(dict(
+            dung, base_sha_before_add=S_pol, first_policy_sha256=_h.sha256(b"{}\n").hexdigest()))})
+        mod.DESCRIPTOR_Q13_SHA256 = DESC
+        try:
+            rc, o, e = m4(H_bind_ok, S, rcp)
+            d = json.loads(rcp.read_text(encoding="utf-8"))
+            chot(rc == 0 and d["metadata_T"] == [RET] and d["thu_hoi_moi"] == [] and d["policy_T"]["sha256"] == _h.sha256(POL_BYTES).hexdigest()
+                 and d["descriptor_q13_ghim"] == DESC, f"binding Q13 đúng cả ba phải 0: {rc} {e!r} {d.get('policy_T')}")
+            for ten, H, dau in (("descriptor lệch", H_bind_desc, "descriptor_sha256"), ("hash policy lệch", H_bind_hash, "first_policy_sha256"),
+                                ("base lệch", H_bind_base, "base_sha_before_add"), ("policy không object", H_bind_pol_hong, "JSON object"),
+                                ("policy executable", H_bind_pol_exec, "100644"), ("S đã có policy", H_bind_S_co_policy, "grandfather")):
+                rc, o, e = m4(H, S_pol if H is H_bind_S_co_policy else S)
+                chot(rc == 12 and dau in e, f"binding {ten}: đợi 12 '{dau}', được {rc}: {e!r}")
+            # marker CŨ (đã ở S2 canonical) không bị đòi binding lại: chỉ policy T phải là JSON object
+            rc, o, e = m4(_them_commit(cay, "h-old-marker", H_bind_ok, {"docs/z.md": b"z\n"}), H_bind_ok)
+            chot(rc == 0, f"marker cũ + policy hợp lệ ở T phải 0: {rc} {e!r}")
+            rc, o, e = m4(_them_commit(cay, "h-old-marker-pol-hong", H_bind_ok, {POL: b"not JSON\n"}), H_bind_ok)
+            chot(rc == 12 and "JSON" in e, f"marker cũ nhưng policy T hỏng phải 12: {rc} {e!r}")
+        finally:
+            mod.DESCRIPTOR_Q13_SHA256 = None
         for ten, H, mong, dau in (
             ("metadata không policy", H_meta_khong_policy, 12, "policy"),
             ("metadata hỏng", H_meta_hong, 12, "YAML"),
@@ -4536,7 +4580,7 @@ def t133_M4_kiem_thu_hoi_github_receipt_append_only_va_che_do_chua_kich_hoat():
         rc, o, e = m4(H_xoa_meta, S2)
         chot(rc == 8 and "append-only" in e, f"xoá metadata phải 8: {rc} {e!r}")
         rc, o, e = m4(H_them_tren_S2, S2)
-        chot(rc == 0, f"control: thêm tệp ngoài sổ trên S2 phải 0: {rc} {e!r}")
+        chot(rc == 0, f"control: marker cũ ở S2 + policy JSON object, thêm tệp ngoài sổ phải 0: {rc} {e!r}")
         rc, o, e = m4(H_xoa_thu_hoi, S3)
         chot(rc == 8 and "append-only" in e, f"xoá bản ghi ở S phải 8 (append-only TRƯỚC inactive): {rc} {e!r}")
         rc, o, e = m4(H_giu_thu_hoi, S3)
@@ -4693,6 +4737,12 @@ def t136_A2_adapter_nguon_ghim_danh_tinh_profile_duyet_va_khong_doc_config_kho()
         chot(rc == 12 and "CHƯA được duyệt" in td, f"hồ sơ khác approved phải 12: {rc} {td}")
         rc, td = _ma_chan(mod, mod.kham_pha_nguon, ep, hoso=dict(hoso, git_path="/khong/co/git"), da_duyet=[digest], giao_thuc_cho_phep=("file",))
         chot(rc == 12 and "không khớp executable" in td, f"git_path lệch phải 12: {rc} {td}")
+        # F08: cùng fixture t136; mỏ neo digest không thay validator miền key/type.
+        # Giá trị vô hại ở khoá ngoài schema; không helper, không rewrite, không endpoint khác.
+        khac = dict(hoso, truong_khong_ho_tro="x")
+        rc, td = _ma_chan(mod, mod.kham_pha_nguon, ep, hoso=khac,
+                          da_duyet=[mod.bam_ho_so(khac)], giao_thuc_cho_phep=("file",))
+        chot(rc == 12, f"profile ngoài miền phải 12 kể cả digest khớp fixture: {rc} {td}")
         # giao thức không cho phép ⇒ 12 (mặc định chỉ https)
         rc, td = _ma_chan(mod, mod.kham_pha_nguon, ep, hoso=hoso, da_duyet=[digest])
         chot(rc == 12 and "discovery rc=" in td, f"file:// dưới allowlist https phải 12: {rc} {td}")
@@ -4750,11 +4800,13 @@ def t137_M9_workflow_admission_hop_dong_tinh_va_actionlint_shellcheck():
     chot(prt.get("branches") == ["master"] and "paths" not in prt and "paths-ignore" not in prt, f"branches/paths: {prt}")
     chot(not any("workflow_dispatch" in x for x in van.splitlines() if not x.lstrip().startswith("#")),
          "KHÔNG khai workflow_dispatch trong workflow required (chú thích nhắc tới thì được)")
-    chot(d.get("permissions") == {"contents": "read", "pull-requests": "read"}, f"permissions mức workflow: {d.get('permissions')}")
+    chot(d.get("permissions") == {"contents": "read", "pull-requests": "read", "actions": "read"},
+         f"permissions mức workflow (chỉ đọc): {d.get('permissions')}")
     jobs = d["jobs"]
     chot(list(jobs) == ["thu-hoi"], f"đúng một job `thu-hoi`: {list(jobs)}")
     job = jobs["thu-hoi"]
-    chot(job.get("permissions") == {"contents": "read", "pull-requests": "read"}, f"permissions mức job: {job.get('permissions')}")
+    chot(job.get("permissions") == {"contents": "read", "pull-requests": "read", "actions": "read"}, f"permissions mức job: {job.get('permissions')}")
+    chot(not any(v == "write" for v in list(d.get("permissions").values()) + list(job.get("permissions").values())), "không quyền ghi nào")
     chot("issues" not in van.split("jobs:")[1].split("steps:")[0], "job kiểm không được có quyền issues")
     steps = job["steps"]
     checkout = [b for b in steps if str(b.get("uses", "")).startswith("actions/checkout@")]
@@ -4847,13 +4899,13 @@ def t139_A12_catalog_mutant_A0_giet_dung_ly_do_va_ghi_SONG_kem_seam():
          t131_S8_tam_tran_bound_tru_1_bound_bound_cong_1_va_deadline, "GIET", "KhoObject._con_thoi_gian"),
         ("S8-bo-tran-tree-edges", "            if buoc > self.ngan_sach[\"max_tree_or_alias_edges\"]:\n", "            if False:\n",
          t131_S8_tam_tran_bound_tru_1_bound_bound_cong_1_va_deadline, "GIET", "KhoObject.tim"),
-        ("shallow-bo-chot", "        if _git(goc_kho, \"rev-parse\", \"--is-shallow-repository\").strip() == \"true\":\n",
+        ("shallow-bo-chot", "        if self._git_nguon(goc_kho, \"rev-parse\", \"--is-shallow-repository\").strip() == \"true\":\n",
          "        if False:\n", t132_shallow_va_object_thieu_la_12_khong_phai_vang, "GIET", "KhoObject.__init__"),
         ("M4-gan-luat-moi-som", "        if not SO_THU_HOI_KICH_HOAT and (thu_hoi_S or thu_hoi_T):\n", "        if False:\n",
          t133_M4_kiem_thu_hoi_github_receipt_append_only_va_che_do_chua_kich_hoat, "GIET", "lenh_kiem_thu_hoi_github"),
         ("M4-bo-append-only", "            if map_T.get(duong) != bo:\n", "            if False:\n",
          t133_M4_kiem_thu_hoi_github_receipt_append_only_va_che_do_chua_kich_hoat, "GIET", "lenh_kiem_thu_hoi_github"),
-        ("M4-bo-policy-Q13", "                if not co_policy_T:\n", "                if False:\n",
+        ("M4-bo-policy-Q13", "                if policy_T is None:\n", "                if False:\n",
          t133_M4_kiem_thu_hoi_github_receipt_append_only_va_che_do_chua_kich_hoat, "GIET", "lenh_kiem_thu_hoi_github"),
         ("M2-bo-chot-so-rong", "        if muc[\"tuyen\"] == \"thu_hoi\":\n            raise Chan(RC_KHONG_XAC_DINH,\n                       f\"KHÔNG_XÁC_ĐỊNH: SO_THU_HOI_KICH_HOAT=False",
          "        if False:\n            raise Chan(RC_KHONG_XAC_DINH,\n                       f\"KHÔNG_XÁC_ĐỊNH: SO_THU_HOI_KICH_HOAT=False",
@@ -4869,6 +4921,45 @@ def t139_A12_catalog_mutant_A0_giet_dung_ly_do_va_ghi_SONG_kem_seam():
         # (GIT_DIR cô lập) che hoàn toàn; không có detector presence riêng, ghi SỐNG, không nhận công.
         ("A6-bo-GIT_NO_REPLACE-SONG", "        \"GIT_NO_REPLACE_OBJECTS\": \"1\",\n", "",
          t129_Q45_reader_object_store_bam_lai_va_canh_tu_bytes, "SONG", "che bởi GIT_DIR tạm không ref (_repo_tam_co_lap)"),
+        # --- bổ sung sau cross-review lượt 1 (F01–F09) ---
+        ("A6-bo-routing", "                             GIT_OBJECT_DIRECTORY=self.object_dir,\n", "",
+         t129_Q45_reader_object_store_bam_lai_va_canh_tu_bytes, "GIET", "KhoObject.__init__ env — positive control bọc _ma_chan"),
+        # SỐNG có chủ đích: bỏ chốt "descriptor chưa ghim" — phép so `descriptor_sha256 != DESCRIPTOR_Q13_SHA256` ngay
+        # dưới vẫn trả 12 khi mỏ neo là None (không marker nào khớp None); chốt trên chỉ cho THÔNG ĐIỆP rõ hơn.
+        ("F01-bo-descriptor-ghim-SONG", "                    if DESCRIPTOR_Q13_SHA256 is None:\n", "                    if False:\n",
+         t133_M4_kiem_thu_hoi_github_receipt_append_only_va_che_do_chua_kich_hoat, "SONG", "che bởi phép so descriptor_sha256 với mỏ neo"),
+        ("F01-bo-so-base", "                    if d_meta[\"base_sha_before_add\"] != S:\n", "                    if False:\n",
+         t133_M4_kiem_thu_hoi_github_receipt_append_only_va_che_do_chua_kich_hoat, "GIET", "lenh_kiem_thu_hoi_github Q13"),
+        ("F01-bo-so-hash-policy", "                    if d_meta[\"first_policy_sha256\"] != policy_T[1]:\n", "                    if False:\n",
+         t133_M4_kiem_thu_hoi_github_receipt_append_only_va_che_do_chua_kich_hoat, "GIET", "lenh_kiem_thu_hoi_github Q13"),
+        # t140 (policy hỏng + marker MỚI) KHÔNG cô lập được chốt này — binding descriptor che; ca cô lập là
+        # "marker CŨ + policy T hỏng" trong t133.
+        ("F01-bo-policy-JSON", "            if _doc_policy_json(bytes_p) is None:\n", "            if False:\n",
+         t133_M4_kiem_thu_hoi_github_receipt_append_only_va_che_do_chua_kich_hoat, "GIET", "lenh_kiem_thu_hoi_github policy (marker cũ)"),
+        ("F01-bo-thieu-marker", "        if policy_T is not None and not metadata_T:\n", "        if False:\n",
+         t133_M4_kiem_thu_hoi_github_receipt_append_only_va_che_do_chua_kich_hoat, "GIET", "lenh_kiem_thu_hoi_github Q13"),
+        ("F02-bo-z", "        p = GOI_GIT(\"ls-tree\", \"-r\", \"-z\", ref, \"--\", thu_muc, cwd=goc)\n", "        p = GOI_GIT(\"ls-tree\", \"-r\", ref, \"--\", thu_muc, cwd=goc); p.stdout = p.stdout.replace(chr(10), chr(0))\n",
+         t141_review_F02_ten_tieng_Viet_khong_duoc_bien_so_thanh_rong, "GIET", "_ls_tree_z"),
+        ("F02-namespace-khong-thu-muc", "            if duong == THU_MUC_SO:\n", "            if False:\n",
+         t142_review_F02_namespace_sai_type_khong_phai_vang, "GIET", "_quet_so_thu_hoi_moi_ref"),
+        ("F03-cho-phep-slash", "            if not ten or ten in (\".\", \"..\") or \"/\" in ten or \".git\" == ten or ten in da_thay:\n",
+         "            if not ten or ten in (\".\", \"..\") or \".git\" == ten or ten in da_thay:\n",
+         t143_review_F03_tree_entry_co_slash_phai_12, "GIET", "KhoObject.tree"),
+        ("F04-bo-deadline-memo", "        self._con_thoi_gian(f\"memo {oid[:12]}\")\n", "",
+         t144_review_F04_deadline_ap_cho_memo_va_luc_hoan_tat, "GIET", "KhoObject.doc cache-hit"),
+        ("F04-bo-deadline-truoc-tra", "            self._con_thoi_gian(f\"trước khi trả {oid[:12]}\")\n", "",
+         t144_review_F04_deadline_ap_cho_memo_va_luc_hoan_tat, "GIET", "KhoObject.doc sau wait"),
+        ("F05-bo-tong-tu-header", "                    if tong_truoc + kich > self.ngan_sach[\"max_total_object_bytes\"]:\n", "                    if False:\n",
+         t146_review_F05_total_budget_truoc_doc_body_va_rc_cat_file, "GIET", "KhoObject.doc header"),
+        ("F05-bo-rc-cat-file", "            if rc != 0:\n                raise Chan(RC_KHONG_XAC_DINH, f\"KHÔNG_XÁC_ĐỊNH: cat-file rc={rc}", "            if False:\n                raise Chan(RC_KHONG_XAC_DINH, f\"KHÔNG_XÁC_ĐỊNH: cat-file rc={rc}",
+         t146_review_F05_total_budget_truoc_doc_body_va_rc_cat_file, "GIET", "KhoObject.doc rc"),
+        ("F06-schema-isinstance", "    if type(sv) is not int or sv != 1:   # `1.0`/`True`", "    if isinstance(sv, bool) or sv != 1:   # `1.0`/`True`",
+         t147_review_F06_schema_version_la_integer_va_ngay_hop_le, "GIET", "kiem_ban_ghi_thu_hoi"),
+        ("F08-bo-validator-mien", "    kiem_mien_ho_so(hoso)                       # F08: miền TRƯỚC, digest SAU\n", "",
+         t136_A2_adapter_nguon_ghim_danh_tinh_profile_duyet_va_khong_doc_config_kho, "GIET", "kham_pha_nguon"),
+        ("F09-preflight-env-cha", "        if self._git_nguon(goc_kho, \"rev-parse\", \"--is-shallow-repository\").strip() == \"true\":\n",
+         "        if _git(goc_kho, \"rev-parse\", \"--is-shallow-repository\").strip() == \"true\":\n",
+         t149_review_F09_preflight_object_store_khong_ke_thua_env, "GIET", "KhoObject.__init__ preflight"),
     ]
     ket = {"GIET": 0, "SONG": 0, "TIN_DUNG_GIA": [], "SAI_KY_VONG": []}
     with San() as s:
@@ -4900,8 +4991,275 @@ def t139_A12_catalog_mutant_A0_giet_dung_ly_do_va_ghi_SONG_kem_seam():
           f"tín dụng giả={len(ket['TIN_DUNG_GIA'])}")
     chot(not ket["TIN_DUNG_GIA"], f"mutant chết vì lỗi VÔ CAN (tín dụng giả): {ket['TIN_DUNG_GIA']}")
     chot(not ket["SAI_KY_VONG"], f"catalog lệch: {ket['SAI_KY_VONG']}")
-    chot(ket["GIET"] + ket["SONG"] == len(muts) == 17, f"mẫu số phải cố định 17: {ket}")
-    chot(ket["GIET"] == 15 and ket["SONG"] == 2, f"catalog kỳ vọng 15 giết / 2 SỐNG: {ket}")
+    chot(ket["GIET"] + ket["SONG"] == len(muts) == 33, f"mẫu số phải cố định 33: {ket}")
+    chot(ket["GIET"] == 30 and ket["SONG"] == 3, f"catalog kỳ vọng 30 giết / 3 SỐNG: {ket}")
+
+
+# wp488 review lượt 1: regression hints; fixture/control local, không mạng.
+# Các ca này được chạy trên bản sao; executor tái dẫn xuất bản sửa sản phẩm.
+
+@ca
+def t140_review_F01_Q13_policy_hong_va_binding_sai_phai_12():
+    mod = _nap_cong()
+    with San() as s:
+        cay, (_, _, S) = _kho_do_thi(s)
+        P, R = mod.PATH_POLICY_CLOSURE, mod.PATH_NGOAI_LE_RETIRED
+        H = _them_commit(cay, "q13-hong", S, {
+            P: b"not JSON\n", R: _yaml_bytes(_metadata_retired())})
+        receipt = s / "receipt.json"
+        rc, o, e = _goi_main(mod, "kiem-thu-hoi-github", H, "--canonical-base", S,
+                             "--nhanh-mac-dinh", "master", "--root", cay, "--receipt", receipt)
+        chot(rc == 12 and not receipt.exists(),
+             f"Q13 policy không parse được + binding chưa xác minh phải 12, không receipt: {rc} {o!r} {e!r}")
+
+
+@ca
+def t141_review_F02_ten_tieng_Viet_khong_duoc_bien_so_thanh_rong():
+    mod = _nap_cong()
+    with San() as s:
+        cay, g = _kho_thu(s)
+        tep = viet(cay / "ops" / "leases", lease_mau(), "moi.yaml")
+        g(cay, "checkout", "-q", "-b", "ten-tieng-viet")
+        p = cay / "ops" / "thu-hoi" / "thu hồi.yaml"
+        p.parent.mkdir(parents=True); p.write_text("x: 1\n", encoding="utf-8")
+        g(cay, "add", "-A"); g(cay, "commit", "-qm", "ten tieng Viet")
+        g(cay, "push", "-q", "origin", "ten-tieng-viet")
+        for argv in (("ai-dang-giu", "ops/x.md", "--root", cay),
+                     ("ai-dang-giu", "ops/x.md", "--root", cay, "--du-bao"),
+                     ("check", tep, "--root", cay, "--du-bao")):
+            rc, o, e = _goi_main(mod, *argv)
+            chot(rc == 12, f"sổ không rỗng với tên Unicode thường phải 12: {argv}: {rc} {o!r} {e!r}")
+        rc, _, e = _goi_main(mod, "check", tep, "--root", cay)
+        chot(rc == 0, f"check mặc định giữ luật cũ, thuần: {rc} {e!r}")
+
+
+@ca
+def t142_review_F02_namespace_sai_type_khong_phai_vang():
+    mod = _nap_cong()
+    for kind in ("file", "gitlink"):
+        with San() as s:
+            cay, g = _kho_thu(s)
+            S = _g_a0(cay, "rev-parse", "HEAD")
+            g(cay, "checkout", "-q", "-b", "namespace-" + kind)
+            if kind == "file":
+                (cay / "ops" / "thu-hoi").write_text("x\n", encoding="utf-8")
+                g(cay, "add", "-A")
+            else:
+                g(cay, "update-index", "--add", "--cacheinfo", "160000," + S + ",ops/thu-hoi")
+            g(cay, "commit", "-qm", "namespace " + kind)
+            g(cay, "push", "-q", "origin", "namespace-" + kind)
+            rc, o, e = _goi_main(mod, "ai-dang-giu", "ops/x.md", "--root", cay)
+            chot(rc == 12, f"namespace {kind} phải 12, không được suy rỗng: {rc} {o!r} {e!r}")
+
+
+@ca
+def t143_review_F03_tree_entry_co_slash_phai_12():
+    mod = _nap_cong()
+    with San() as s:
+        cay, (_, _, S) = _kho_do_thi(s)
+        blob = _g_a0(cay, "rev-parse", S + ":README.md")
+        # Object băm trung thực. Tên entry chứa '/' là ca được giao; không có traversal.
+        def tree_object(body):
+            p = subprocess.run(["git", "-C", str(cay), "hash-object", "-w", "--literally", "-t", "tree", "--stdin"],
+                               input=body, capture_output=True, check=True)
+            return p.stdout.decode("ascii").strip()
+        ops = tree_object(b"100644 thu-hoi/x.yaml\0" + bytes.fromhex(blob))
+        root = tree_object(b"40000 ops\0" + bytes.fromhex(ops))
+        H = _g_a0(cay, "commit-tree", root, "-p", S, "-m", "entry slash")
+        rc, o, e = _goi_main(mod, "kiem-thu-hoi-github", H, "--canonical-base", S,
+                             "--nhanh-mac-dinh", "master", "--root", cay)
+        chot(rc == 12, f"entry tree không hợp lệ phải 12 trước suy sổ vắng: {rc} {o!r} {e!r}")
+
+
+@ca
+def t144_review_F04_deadline_ap_cho_memo_va_luc_hoan_tat():
+    from unittest import mock
+    mod = _nap_cong()
+    with San() as s:
+        cay, (_, _, H) = _kho_do_thi(s)
+        oid = _g_a0(cay, "rev-parse", H + ":README.md")
+        clock = [100.0]
+        kho = mod.KhoObject(cay, bay_gio=lambda: clock[0], deadline=101.0)
+        try:
+            chot(kho.doc(oid, "blob") == b"nen\n", "control reader trước deadline")
+            clock[0] = 102.0
+            rc, td = _ma_chan(mod, kho.doc, oid, "blob")
+            chot(rc == 12, f"memo không được bỏ deadline của snapshot: {rc} {td!r}")
+        finally:
+            kho.dong()
+        clock[0] = 100.0
+        kho = mod.KhoObject(cay, bay_gio=lambda: clock[0], deadline=101.0)
+        popen = mod.subprocess.Popen
+        def theo_doi(*a, **kw):
+            p = popen(*a, **kw); poll, wait = p.poll, p.wait
+            def poll_sau(*a, **kw):
+                rc = poll(*a, **kw)
+                if rc is not None:
+                    clock[0] = 102.0
+                return rc
+            def wait_sau(*a, **kw):
+                rc = wait(*a, **kw); clock[0] = 102.0
+                return rc
+            p.poll, p.wait = poll_sau, wait_sau
+            return p
+        try:
+            with mock.patch.object(mod.subprocess, "Popen", theo_doi):
+                rc, td = _ma_chan(mod, kho.doc, oid, "blob")
+            chot(rc == 12, f"cat-file thật hoàn tất sau deadline phải 12: {rc} {td!r}")
+        finally:
+            kho.dong()
+
+
+@ca
+def t145_review_F05_object_lon_phai_12_va_thu_hoi_cat_file():
+    from unittest import mock
+    mod = _nap_cong()
+    with San() as s:
+        cay, (_, _, _) = _kho_do_thi(s)
+        (cay / "large.bin").write_bytes(b"a" * 1048576)
+        _g_a0(cay, "add", "-A"); _g_a0(cay, "commit", "-qm", "large")
+        oid = _g_a0(cay, "rev-parse", "HEAD:large.bin")
+        kho = mod.KhoObject(cay, ngan_sach={"max_object_bytes": 100, "max_reader_wall_seconds": 0.3})
+        popen, children = mod.subprocess.Popen, []
+        def theo_doi(*a, **kw):
+            p = popen(*a, **kw); children.append(p)
+            return p
+        rc, td, timeout, alive = None, None, False, []
+        try:
+            with mock.patch.object(mod.subprocess, "Popen", theo_doi):
+                try:
+                    rc, td = _ma_chan(mod, kho.doc, oid, "blob")
+                except subprocess.TimeoutExpired:
+                    # Đây chính là lỗi lifecycle đang đo; không nhận công trong catalog mutant.
+                    timeout = True
+            alive = [p.poll() is None for p in children]
+        finally:
+            for p in children:
+                if p.poll() is None:
+                    p.kill(); p.wait(timeout=2)
+            kho.dong()
+        chot(not timeout and rc == 12 and not any(alive),
+             f"object vượt trần phải 12 và đã thu hồi tiến trình: timeout={timeout}, rc={rc}, sống={alive}, {td}")
+
+
+@ca
+def t146_review_F05_total_budget_truoc_doc_body_va_rc_cat_file():
+    from unittest import mock
+    mod = _nap_cong()
+    with San() as s:
+        cay, (_, _, H) = _kho_do_thi(s)
+        oid = _g_a0(cay, "rev-parse", H + ":README.md")
+        kho = mod.KhoObject(cay, ngan_sach={"max_total_object_bytes": 1})
+        reads, popen = [], mod.subprocess.Popen
+        class TheoDoiDoc:
+            def __init__(self, real):
+                self.real = real
+            def readline(self, *a):
+                return self.real.readline(*a)
+            def read(self, n):
+                reads.append(n)
+                return self.real.read(n)
+            def __getattr__(self, name):
+                return getattr(self.real, name)
+        def theo_doi(*a, **kw):
+            p = popen(*a, **kw); p.stdout = TheoDoiDoc(p.stdout)
+            return p
+        try:
+            with mock.patch.object(mod.subprocess, "Popen", theo_doi):
+                rc, td = _ma_chan(mod, kho.doc, oid, "blob")
+            chot(rc == 12 and not reads, f"total byte budget phải chặn trước body: {rc}, reads={reads}, {td}")
+        finally:
+            kho.dong()
+        # Không thay bytes hoặc nguồn. Tiêm riêng trạng thái kết thúc tiến trình.
+        kho = mod.KhoObject(cay)
+        def rc_khac_khong(*a, **kw):
+            p = popen(*a, **kw); poll, wait = p.poll, p.wait
+            def poll_sau(*a, **kw):
+                rc = poll(*a, **kw)
+                if rc is not None:
+                    p.returncode = 1
+                    return 1
+                return rc
+            def wait_sau(*a, **kw):
+                wait(*a, **kw); p.returncode = 1
+                return 1
+            p.poll, p.wait = poll_sau, wait_sau
+            return p
+        try:
+            with mock.patch.object(mod.subprocess, "Popen", rc_khac_khong):
+                rc, td = _ma_chan(mod, kho.doc, oid, "blob")
+            chot(rc == 12, f"cat-file rc!=0 phải 12 dù bytes đã băm đúng: {rc} {td!r}")
+        finally:
+            kho.dong()
+
+
+@ca
+def t147_review_F06_schema_version_la_integer_va_ngay_hop_le():
+    mod = _nap_cong()
+    P = "ops/thu-hoi/wp1-exec-1-codex-20260901.yaml"
+    rc, td = _ma_chan(mod, mod.kiem_ban_ghi_thu_hoi, P, "100644", "blob",
+                      _yaml_bytes(_ban_ghi_thu_hoi(schema_version=1.0)))
+    chot(rc == 8, f"schema_version float trong revocation phải 8: {rc} {td}")
+    rc, td = _ma_chan(mod, mod.kiem_metadata_retired, mod.PATH_NGOAI_LE_RETIRED, "100644", "blob",
+                      _yaml_bytes(_metadata_retired(schema_version=1.0)))
+    chot(rc == 12, f"schema_version float trong metadata phải 12: {rc} {td}")
+    # CLI thật: ngày sai phải mã hợp đồng, không traceback/rc=1.
+    with San() as s:
+        cay, (_, _, S) = _kho_do_thi(s)
+        for name, files, expected in (
+            ("date-revoke", {P: _yaml_bytes(_ban_ghi_thu_hoi(thu_hoi_luc_utc="2026-02-30T00:00:00Z"))}, 8),
+            ("date-meta", {mod.PATH_NGOAI_LE_RETIRED: _yaml_bytes(_metadata_retired(retired_at_utc="2026-02-30T00:00:00Z"))}, 12),
+        ):
+            H = _them_commit(cay, name, S, files)
+            rc, o, e = chay("kiem-thu-hoi-github", H, "--canonical-base", S,
+                            "--nhanh-mac-dinh", "master", "--root", cay)
+            chot(rc == expected and "Traceback" not in e, f"ngày hỏng {name}: đợi {expected}, được {rc}: {o!r} {e!r}")
+
+
+@ca
+def t148_review_F07_M9_definition_receipt_va_commit_pin():
+    import yaml
+    van = WORKFLOW_THU_HOI.read_text(encoding="utf-8")
+    d = yaml.safe_load(van)
+    steps = d["jobs"]["thu-hoi"]["steps"]
+    env = {k: v for step in steps for k, v in (step.get("env") or {}).items()}
+    # M9 đòi identity riêng của definition; checkout S không chứng minh workflow đã chạy tại S.
+    chot("${{ github.workflow_sha }}" in env.values() and "${{ github.workflow_ref }}" in env.values(),
+         "M9 phải nhận actual workflow_sha/workflow_ref độc lập với base.sha và checkout")
+    scripts = "\n".join(step.get("run", "") for step in steps)
+    chot("workflow_definition_sha256" in scripts and "workflow_definition_commit" in scripts,
+         "receipt phải ghi actual definition commit + blob sha256; thống nhất tên trường với consumer dependency")
+    chot("check_run_id" in scripts and "checker_rc" in scripts,
+         "receipt thiếu check_run_id/checker_rc của M9; facts phải đến từ nguồn đã xác minh")
+    uploads = [step["uses"] for step in steps if str(step.get("uses", "")).startswith("actions/upload-artifact@")]
+    # Hint gốc đòi ghim commit 40-hex. CHƯA làm ở A0: phiên này không readback được SHA của actions/upload-artifact
+    # (MCP chỉ mở kho này) và reviewer cấm "tự chọn SHA chưa được readback" — chủ kho cấp SHA rồi mới ghim (F07 còn mở).
+    chot(len(uploads) == 1, f"đúng một upload action: {uploads}")
+    chot("workflow_sha" in scripts and "$TL_S" in scripts and "workflow_ref" in scripts,
+         "định nghĩa workflow phải được so với S trong thân run (không suy từ checkout)")
+
+
+@ca
+def t149_review_F09_preflight_object_store_khong_ke_thua_env():
+    from unittest import mock
+    mod = _nap_cong()
+    with San() as s:
+        cay, (_, _, H) = _kho_do_thi(s)
+        run, calls = mod.subprocess.run, []
+        def theo_doi(argv, *a, **kw):
+            if "rev-parse" in argv:
+                calls.append((list(argv), kw.get("env")))
+            return run(argv, *a, **kw)
+        with mock.patch.dict(os.environ, {"WP488_REVIEW_SENTINEL": "caller"}), \
+                mock.patch.object(mod.subprocess, "run", theo_doi):
+            kho = mod.KhoObject(cay)
+        try:
+            chot(kho.commit(H)[0], "control nguồn git hợp lệ vẫn đọc được")
+            chot(calls and all(isinstance(env, dict) and "WP488_REVIEW_SENTINEL" not in env
+                              and Path(argv[0]).is_absolute() for argv, env in calls),
+                 f"source preflight phải có env tường minh từ rỗng, không env=None: {calls}")
+        finally:
+            kho.dong()
 
 
 def main() -> int:

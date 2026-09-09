@@ -14,7 +14,9 @@ name: thu-hoi
 # CHỈ ĐỌC (`contents: read`, `pull-requests: read`) — job này không ghi Issue/PR/kho.
 #
 # Ba mỏ neo ĐO, không tin lời khai của event:
-#   S — `git rev-parse HEAD` sau checkout phải bằng `base.sha` của event (ancestry S→H tự đi đồ thị).
+#   S — `git rev-parse HEAD` sau checkout phải bằng `base.sha` của event (ancestry S→H tự đi đồ thị);
+#       và ĐỊNH NGHĨA workflow đang chạy (`github.workflow_sha`/`workflow_ref`) cũng phải neo đúng S —
+#       checkout đúng S không chứng minh tệp workflow đã được lấy từ S (finding F07 cross-review A0).
 #   H — fetch `refs/pull/<n>/head` từ endpoint canonical tường minh; OID nhận được phải bằng `head.sha`.
 #   T — tree(H) do bộ kiểm tự lấy từ bytes đã băm; receipt ghi cả ba.
 # KHÔNG `workflow_dispatch` (hợp đồng R5/S5: consumer từ chối mọi event khác kể cả cùng tên).
@@ -28,6 +30,7 @@ on:
 permissions:
   contents: read
   pull-requests: read
+  actions: read      # đọc jobs của chính run này để lấy check_run_url (không ghi gì)
 
 concurrency:
   group: thu-hoi-${{ github.event.pull_request.number }}
@@ -39,6 +42,7 @@ jobs:
     permissions:
       contents: read
       pull-requests: read
+      actions: read
     steps:
       - name: lấy MÃ CANONICAL tại base.sha (S) — không bao giờ head PR
         uses: actions/checkout@v4
@@ -60,6 +64,11 @@ jobs:
           TL_KHO: ${{ github.repository }}
           TL_RUN_ID: ${{ github.run_id }}
           TL_RUN_ATTEMPT: ${{ github.run_attempt }}
+          TL_WF_SHA: ${{ github.workflow_sha }}
+          TL_WF_REF: ${{ github.workflow_ref }}
+          TL_JOB: ${{ github.job }}
+          TL_API: ${{ github.api_url }}
+          TL_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           set -euo pipefail
           # Input đi qua env rồi validate ở shell TRƯỚC khi thành argv — không nội suy biểu thức vào thân script.
@@ -72,6 +81,12 @@ jobs:
           # S: cây đang chạy PHẢI là base.sha của event; lệch là definition chưa chứng minh == S ⇒ 12.
           THUC="$(git rev-parse HEAD)"
           [ "$THUC" = "$TL_S" ] || { echo "checkout HEAD $THUC != base.sha $TL_S" >&2; exit 12; }
+          # Định nghĩa workflow THẬT SỰ đang chạy phải là bản tại S, đúng path, đúng kho — đo riêng, không suy từ checkout.
+          case "$TL_WF_SHA" in *[!0-9a-f]*|"") echo "workflow_sha hỏng: $TL_WF_SHA" >&2; exit 12;; esac
+          [ "$TL_WF_SHA" = "$TL_S" ] || { echo "workflow_sha $TL_WF_SHA != S $TL_S — định nghĩa không neo canonical" >&2; exit 12; }
+          [ "$TL_WF_REF" = "$TL_KHO/.github/workflows/ops-thu-hoi-admission.yml@refs/heads/$TL_NHANH" ] \
+              || { echo "workflow_ref lạ: $TL_WF_REF" >&2; exit 12; }
+          WF_BLOB="$(git rev-parse "$TL_WF_SHA:.github/workflows/ops-thu-hoi-admission.yml")"
           # H: fetch ref PR từ endpoint canonical TƯỜNG MINH (không qua `origin` của checkout), vào ref tạm;
           # OID nhận được phải bằng head.sha của event, nếu không receipt stale ⇒ 12.
           git -c protocol.allow=never -c protocol.https.allow=always \
@@ -84,16 +99,33 @@ jobs:
           python3 ops/lease_publish.py kiem-thu-hoi-github "$TL_H" \
               --canonical-base "$TL_S" --nhanh-mac-dinh "$TL_NHANH" \
               --receipt "$RUNNER_TEMP/thu-hoi-receipt/receipt.json"
-          python3 - "$RUNNER_TEMP/thu-hoi-receipt/receipt.json" "$TL_KHO" "$TL_PR" "$TL_RUN_ID" "$TL_RUN_ATTEMPT" <<'PY'
-          import hashlib, json, sys
-          tep, kho, pr, run_id, attempt = sys.argv[1:6]
+          CHECKER_RC=$?
+          # check_run_id: đọc jobs của ĐÚNG run/attempt này qua API (token chỉ đọc), lấy `check_run_url` của job
+          # tên $TL_JOB — KHÔNG đồng nhất job ID với check-run ID. Không lấy được ⇒ 12 (thiếu/mơ hồ là 12).
+          curl -sS -f -H "Authorization: Bearer $TL_TOKEN" -H "Accept: application/vnd.github+json" \
+              "$TL_API/repos/$TL_KHO/actions/runs/$TL_RUN_ID/attempts/$TL_RUN_ATTEMPT/jobs?per_page=100" \
+              > "$RUNNER_TEMP/jobs.json" || { echo "không đọc được jobs của run $TL_RUN_ID attempt $TL_RUN_ATTEMPT" >&2; exit 12; }
+          python3 - "$RUNNER_TEMP/thu-hoi-receipt/receipt.json" "$RUNNER_TEMP/jobs.json" "$TL_KHO" "$TL_PR" \
+              "$TL_RUN_ID" "$TL_RUN_ATTEMPT" "$TL_WF_SHA" "$TL_WF_REF" "$WF_BLOB" "$TL_JOB" "$CHECKER_RC" <<'PY'
+          import hashlib, json, subprocess, sys
+          tep, tep_jobs, kho, pr, run_id, attempt, wf_sha, wf_ref, wf_blob, ten_job, checker_rc = sys.argv[1:12]
+          jobs = json.load(open(tep_jobs, encoding="utf-8")).get("jobs") or []
+          khop = [j for j in jobs if j.get("name") == ten_job and str(j.get("run_attempt")) == attempt]
+          if len(khop) != 1 or not str(khop[0].get("check_run_url", "")).rstrip("/").split("/")[-1].isdigit():
+              print(f"jobs API không cho đúng MỘT job {ten_job!r} attempt {attempt} có check_run_url: {len(khop)}", file=sys.stderr)
+              sys.exit(12)
+          check_run_id = int(khop[0]["check_run_url"].rstrip("/").split("/")[-1])
+          # sha256 của BLOB định nghĩa tại đúng commit workflow_sha (không phải tệp trong checkout)
+          than = subprocess.run(["git", "cat-file", "blob", wf_blob], capture_output=True, check=True).stdout
           d = json.load(open(tep, encoding="utf-8"))
           d["repository"] = kho; d["pull_request"] = int(pr)
           d["run_id"] = int(run_id); d["run_attempt"] = int(attempt)
-          d["workflow_definition_sha256"] = hashlib.sha256(
-              open(".github/workflows/ops-thu-hoi-admission.yml", "rb").read()).hexdigest()
+          d["check_run_id"] = check_run_id; d["job_id"] = khop[0].get("id"); d["checker_rc"] = int(checker_rc)
+          d["workflow_definition_commit"] = wf_sha; d["workflow_ref"] = wf_ref
+          d["workflow_definition_blob"] = wf_blob; d["workflow_definition_sha256"] = hashlib.sha256(than).hexdigest()
           json.dump(d, open(tep, "w", encoding="utf-8"), ensure_ascii=False, sort_keys=True, indent=1)
-          print("receipt:", d["ket_luan"], "S", d["S"][:12], "H", d["H"][:12], "T", d["T"][:12])
+          print("receipt:", d["ket_luan"], "S", d["S"][:12], "H", d["H"][:12], "T", d["T"][:12],
+                "definition", wf_sha[:12], "check_run", check_run_id)
           PY
 
       # Tên artifact KHÔNG phải danh tính (consumer dùng artifact ID + metadata run sau readback);

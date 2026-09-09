@@ -187,11 +187,15 @@ verdict_usage_caveats:
       Verdict lượt này là `changes_requested` NHƯNG có **0 P1**, và reviewer khai thẳng ở dòng 4 rằng
       nó "không có nghĩa điều kiện 'tới hết P1' của chủ kho chưa đạt". Đừng đọc `changes_requested`
       thành "chưa đủ điều kiện merge"; cũng đừng đọc nó thành `approve`.
-  - id: HET-P1-khong-phai-HET-FINDING-13-con-song
+  - id: HET-P1-khong-phai-HET-FINDING-11-con-song-luc-merge
     canh_bao: >-
-      Lúc PR #491 được merge, **13 finding còn sống** (3 P2 + 10 P3) từ lượt này, cộng **5 P2** của
-      Codex connector bot. Hai P2 nằm trong thân PR đã sửa trước merge; số còn lại là NỢ, mang sang
-      PR kế tiếp. "Hết P1" KHÔNG phải "đã đóng".
+      Verdict này có **13 finding** lúc nó ra đời (3 P2 + 10 P3). **HAI** trong ba P2 nằm trong
+      **thân PR** và được sửa **TRƯỚC merge**, nên số còn sống lúc merge là **11** (1 P2 + 10 P3),
+      không phải 13. **Bản đầu của biên nhận này viết 13 và cross-review PR #493 chấm P1**
+      (`no-luc-merge-dem-ca-hai-p2-da-dong`): hai mệnh đề "13 còn sống lúc merge" và "hai P2 đã sửa
+      trước merge" KHÔNG thể cùng đúng.
+      Năm P2 của Codex connector bot là một **báo cáo RIÊNG**, đếm riêng — trong đó hai cái TRÙNG
+      finding của lượt này, nên **không được cộng 11 + 5**. "Hết P1" KHÔNG phải "đã đóng".
   - id: NAM-FINDING-BOT-la-duong-THU-BA-ba-cai-MOI
     canh_bao: >-
       Ngoài hai lượt `launcher.py run`, Codex connector bot review độc lập cùng head `2ec6171`

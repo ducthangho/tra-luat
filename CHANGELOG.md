@@ -50,11 +50,19 @@ kho, hai tập cò khác nhau; đừng suy từ tệp này sang tệp kia.
 
 ## Cổng duyệt khác danh tính ĐO được đúng thứ nó sinh ra để đo
 
+**Cùng nhãn (b) như mục CI trên** — số run và tên bước đọc qua API, không có response thô trong gói.
 Ba lượt TRƯỚC approve (`34379197442`, `34380996975`, `34382419508`) đều `failure` ở **đúng bước**
 `do nguoi duyet khac nguoi tao PR`; lượt `34382584417` ngay sau approve của `notebyme88` ⇒
 **`success`**. Điều phối KHÔNG merge trong lúc cổng ấy còn đỏ.
 
 ## CI trên merge commit — xanh cả hai nền, và biên Windows HẸP LẠI
+
+**Nhãn nguồn — loại (b), attestation:** mọi số CI dưới đây điều phối đọc qua GitHub API và
+**gói không kèm response thô**, nên chúng KHÔNG cùng hạng với các số Git tự đo lại được. Nguồn có
+nhãn đầy đủ: `ops/land/pr491-r358-ghi-so-land-evidence.yaml`, mục `pre_merge_checks` /
+`post_merge_checks` / `khong_do_duoc`. Bản đầu của đoạn này chép số mà bỏ nhãn — cross-review
+PR #493 chấm P2 (`nhan-attestation-khong-di-cung-ban-tom-tat`), đúng lớp lỗi mà chính r359 đang
+sửa cho r358.
 
 Run `34382762199` (`push`, `00e017a`), đo theo job sau khi `completed`:
 `gate (ubuntu-latest)` **success**, 44 bước, 40 success + 4 skipped, 0 hỏng, 0 null,
@@ -97,17 +105,54 @@ P1 `chuoi-tam-pr-thuc-te-bay` ở trên.
 **Hai P2 khác đã vá TRƯỚC merge**, trong thân PR chứ không trong tệp, nên KHÔNG nằm trong con số
 năm ở trên: `than-pr-van-phu-nhan-t33-da-chay` và `sau-p3-khong-deu-la-bo-sot-bang`.
 
-**Chưa vá: 10 P3 của lượt 2 — và chúng KHÔNG cùng một loại**, đúng cái bẫy vừa bị chấm P2 ở trên,
-nên nói cho chật: **CHÍN** slug `bo-sot-*` về ĐỘ PHỦ của bộ trích khẳng định (`trich_khang_dinh.py`
-lọc theo regex `\d` nên mù với mọi mệnh đề định lượng viết bằng chữ), và **MỘT**
-(`cong-kiem-ke-co-rang-nhung-khong-kiem-su-that`) là **GHI NHẬN DƯƠNG** về giới hạn cổng:
+**Chưa vá: 10 P3 của lượt 2 — và chúng KHÔNG cùng một loại.** Bản đầu của đoạn này chia
+**9 + 1** rồi gọi cả chín là *"giới hạn regex"*; cross-review PR #493 chấm P2
+(`dong-chin-p3-khong-deu-can-bo-trich-moi`) vì chín cái ấy cũng không cùng loại. Phân hoạch đúng là
+**8 + 1 + 1**:
+
+- **TÁM** slug `bo-sot-*` là **giới hạn của bộ lọc**: `trich_khang_dinh.py` giữ mọi dòng có **ít
+  nhất một chữ số** và bỏ dòng không có chữ số nào. Nói *"mù với mọi mệnh đề định lượng viết bằng
+  chữ"* là **quá rộng** — một mệnh đề viết bằng chữ nằm trên dòng có chữ số khác thì vẫn được giữ.
+- **MỘT** (`bo-sot-toan-than-pr`) **KHÔNG phải giới hạn bộ lọc mà là THIẾU ĐẦU VÀO**: thân PR chưa
+  bao giờ được đưa cho script. Reviewer đo: chạy script với thêm hiện vật thân PR sinh thêm hàng
+  chục dòng khẳng định **có chữ số**. Cái này **sửa được ngay bằng script hiện tại** — nó nhận
+  `sys.argv[1:]` — nên gộp nó vào "đợi một công cụ mới" là **hoãn nhầm** một việc đã làm được.
+- **MỘT** (`cong-kiem-ke-co-rang-nhung-khong-kiem-su-that`) là **GHI NHẬN DƯƠNG** về giới hạn cổng:
 `release-verify` **CÓ** răng — reviewer đột biến một byte ⇒ `rc=2`, `failed=[CHANGELOG.md]`,
 `package_hash_match: false` — còn `doc-claims-check` thì **KHÔNG** bắt `1016→1017`.
-Đóng chín cái đầu đòi một bộ trích phủ cả văn xuôi: công cụ mới, cổng riêng, phản chứng riêng ⇒
-việc của một packet, không phải một dòng vá kèm.
+Đóng **tám** cái đầu đòi một bộ trích phủ cả văn xuôi: công cụ mới, cổng riêng, phản chứng riêng ⇒
+việc của một packet. Đóng `bo-sot-toan-than-pr` thì **không** đòi công cụ mới — chỉ cần cấp đủ đầu
+vào cho script hiện có; nó là nợ riêng, hạng nhẹ hơn, và đừng để nó chìm vào phép hoãn của tám cái kia.
 Lưu ý một chỗ dễ đọc nhầm: mục 5 ở trên vá **LỜI KHAI** *"đủ mọi ref"*, còn P3
 `bo-sot-pham-vi-ref-va-vat-chat-hoa` nói **BẢNG TRÍCH bỏ sót** chính câu ấy. Vá cái trước KHÔNG
 đóng cái sau — hai lỗi khác nhau trên cùng một dòng văn bản.
+
+## Cross-review PR #493 lượt 1 — 1 P1 · 4 P2 · 12 P3, và cả năm đều là lời khai của CHÍNH mục này
+
+Hồ sơ vá lời khai sai thì cũng bị soi như mọi thứ khác. Lượt 1 trên `4af7e29` (`codex`, `rc=0`)
+tìm ra **1 P1 + 4 P2**, tất cả nằm trong hiện vật do phiên này vừa viết — không cái nào là lỗi mã.
+
+- **P1 `no-luc-merge-dem-ca-hai-p2-da-dong`** — biên nhận và mục lục khai *"13 finding còn sống lúc
+  merge"* trong khi CHÍNH chúng khai hai P2 đã sửa **trước** merge. `13 − 2 = 11`. Hai mệnh đề
+  không thể cùng đúng. Sửa ở cả `receipt.yaml` lẫn `README.md`, **kể cả `id` của caveat** — `id` cũ
+  mang số `13` nên bản thân cái tên là một lời khai sai; `t27` cưỡng chế `id` phải khớp hai chỗ.
+- **P2 `nhan-nguon-van-va-than-de-nguyen-khung`** — hai lỗi trong một: (a) khối `GIỚI HẠN NGUỒN`
+  khai **hai** loại nguồn còn thân mục dùng **ba** — KHUNG hẹp hơn THÂN, đúng hình dạng *"vá THÂN
+  để nguyên KHUNG"* mà chính mục này liệt kê; (b) nhãn nguồn của bảng cổng dựng gói gắn theo
+  **HÀNG** trong khi hàng đầu gộp **ba ca**, nên *"hai hàng cuối"* / *"bốn hàng còn lại"* sai địa chỉ.
+- **P2 `dong-chin-p3-khong-deu-can-bo-trich-moi`** — gọi cả chín slug `bo-sot-*` là *"giới hạn
+  regex"*; thật ra **một** trong chín (`bo-sot-toan-than-pr`) là **THIẾU ĐẦU VÀO**, sửa được ngay
+  bằng script hiện có. Gộp nó vào phép hoãn *"đợi một packet"* là hoãn nhầm.
+- **P2 `nhan-attestation-khong-di-cung-ban-tom-tat`** — land evidence gắn nhãn attestation cho số
+  CI đầy đủ, nhưng r359 và thân PR **chép số mà bỏ nhãn**. Cùng lớp lỗi đang được sửa cho r358,
+  tái phát ở bản tóm tắt.
+- **P2 `suy-mat-ref-thanh-mat-object-tuc-thi`** — *"không phải tổ tiên"* bị viết thành *"xoá nhánh
+  là số chết"*. Reviewer đo `git for-each-ref --contains` ⇒ vẫn có ref trỏ tới OID ấy. Câu đúng và
+  đủ: **không được bảo đảm tồn tại trong một clone tương lai chỉ lấy lịch sử canonical**.
+
+Bốn trong năm là **lời khai rộng hơn phép đo**; cái thứ năm là **hai lời khai của cùng một hồ sơ
+loại trừ nhau**. Không cổng nào bắt được cái nào — `release-verify`, `doc-claims-check`,
+`lease_publish_test`, `bien_nhan_v2` đều XANH trên bản sai.
 
 ## Một cái giá phải trả trong chính phiên này, ghi vì nó là bài học đã có mà vẫn dẫm
 
@@ -128,8 +173,12 @@ Thứ tự trên là thứ tự MERGE THẬT (`--first-parent`), không phải t
 
 **Không nâng `VERSION`.** Nó đóng băng ở `1.36.68` từ r336; r337→r356 đều không nâng.
 
-**GIỚI HẠN NGUỒN — đọc trước mọi con số bên dưới.** Mục này có hai loại số, và chúng KHÔNG cùng
-hạng. (a) **Tự đo được**: mọi số Git (số tệp, số dòng, số merge, nội dung tệp tại một SHA), số mục
+**GIỚI HẠN NGUỒN — đọc trước mọi con số bên dưới.** Mục này có **BA** loại số, không phải hai —
+bản đầu chỉ khai hai rồi thân mục lại thêm một loại thứ ba ở đoạn `bd32d114…`, tức KHUNG hẹp hơn
+THÂN; cross-review PR #493 chấm P2 (`nhan-nguon-van-va-than-de-nguyen-khung`). Loại thứ ba là
+**(c) bằng chứng ngoài lịch sử canonical**: OID chỉ tra được qua một ref nhánh, không phải tổ tiên
+của commit được ghi sổ, nên **không được bảo đảm tồn tại trong một clone tương lai chỉ lấy lịch sử
+canonical**. Ba loại: (a) **Tự đo được**: mọi số Git (số tệp, số dòng, số merge, nội dung tệp tại một SHA), số mục
 trong `RELEASE_MANIFEST.json`, và kết quả cổng chạy lại tại chỗ — ai đọc cũng tái đo được từ kho.
 (b) **Thuật lại**: mọi sự kiện GitHub (run/job CI, thời lượng, số bước `skipped`, trạng thái PR,
 số lượt và số finding của các lượt cross-review trước). Loại (b) không có response thô trong kho,
@@ -189,16 +238,20 @@ cách trích và phần bỏ sót, lập manifest. Nói cho chật vì mục N�
 `actionlint`** được ghim; `shellcheck`/`git`/`python3` chỉ được *tìm trên `$PATH` đầu vào và kiểm
 chạy được* — "chạy được" KHÔNG phải "đúng phiên bản/đúng nguồn gốc".
 
-Cổng của nó được đo là **CHẶN**, không chỉ được chứng minh xanh. **Nguồn của bảng dưới — BA loại,
-không phải hai** (bản đầu gộp hai hàng cuối vào chung một nhãn "tái đo độc lập", mà chúng khác nhau
-ở chỗ AI đo):
+Cổng của nó được đo là **CHẶN**, không chỉ được chứng minh xanh. **Nguồn phải gắn theo CA, không
+theo HÀNG** — bảng có 6 hàng nhưng hàng đầu gộp **ba ca** (`AL_VER` rỗng · `AL_VER` sai định dạng ·
+thiếu `shellcheck`), nên mọi câu dạng *"hai hàng cuối"* / *"bốn hàng còn lại"* đều sai địa chỉ.
+Bản trước của đoạn này viết đúng như thế và cross-review PR #493 chấm P2
+(`nhan-nguon-van-va-than-de-nguyen-khung`). Nguồn theo CA:
 
-- **thuật lại từ hồ sơ PR #477** — bốn hàng còn lại. Không được tái hiện trong r358.
-- **executor TỰ đo** — `thiếu shellcheck ⇒ 4`, đo 2026-09-09 khi dựng gói review cho chính PR #491
-  trên container thiếu `shellcheck`. Đây là phép đo của **người viết mục này**, nên nó KHÔNG có giá
-  trị đối chứng như phép đo của bên thứ hai.
-- **reviewer chạy ĐỘC LẬP** — `dựng lại vào $R đã dùng ⇒ 4`, cross-review lượt 1 tự tái chạy trong
-  sandbox riêng của họ.
+- **executor TỰ đo (2026-09-09)** — ca *thiếu `shellcheck`* (nằm TRONG hàng đầu, không phải một
+  hàng riêng): đo khi dựng gói review cho chính PR #491 trên container thiếu `shellcheck`. Đây là
+  phép đo của **người viết mục này**, KHÔNG có giá trị đối chứng như phép đo của bên thứ hai.
+- **reviewer chạy ĐỘC LẬP** — ca *dựng lại vào `$R` đã dùng ⇒ 4*, cross-review lượt 1 của PR #491
+  tự tái chạy trong sandbox riêng.
+- **thuật lại từ hồ sơ PR #477** — **mọi ca còn lại**, kể cả hai ca `AL_VER` cùng hàng đầu. Không
+  được tái hiện trong r358. Với các ca probe (PATH giả, symlink/sentinel), thứ đọc lại được hôm nay
+  chỉ là **nội dung mã**; **sự kiện động** thì không có log ⇒ `KHÔNG ĐO ĐƯỢC`.
 
 | ca | mã thoát |
 |---|---|
@@ -275,8 +328,13 @@ KHÔNG chứng minh sự kiện lịch sử kia đã xảy ra theo cơ chế đ�
   lại, hay thẩm quyền của lời gọi thứ 9 — những thứ đó phải hỏi GitHub API, r358 chưa hỏi.
   **VÀ NEO NÀY KHÔNG CÙNG HẠNG với các số Git khác của mục này** (Codex connector bot chấm P2 trên
   PR #491): `bd32d114…` **KHÔNG phải tổ tiên** của commit được ghi sổ — `git merge-base
-  --is-ancestor bd32d114… 2ec6171` trả **SAI**. Nó chỉ tra được chừng nào **ref nhánh còn sống**,
-  mà nhánh `claude/**` là thứ bị xoá sau khi land. Nên khối `GIỚI HẠN NGUỒN` ở đầu mục xếp *"mọi số
+  --is-ancestor bd32d114… 2ec6171` trả **SAI**. Nói cho CHẬT, vì bản đầu viết *"chỉ tra được chừng
+  nào ref nhánh còn sống, nhánh bị xoá thì số chết"* — MẠNH HƠN phép đo, và cross-review PR #493
+  chấm P2 (`suy-mat-ref-thanh-mat-object-tuc-thi`): *"không phải tổ tiên"* KHÔNG chứng minh
+  *"xoá ref là OID lập tức không tra được"* — object có thể còn sống nhờ ref khác, clone khác, hoặc
+  chưa bị thu gom (reviewer đo `git for-each-ref --contains bd32d114…` trong sandbox ⇒ **2** ref còn
+  trỏ tới nó). Điều đo được và đủ để cảnh báo là: OID ấy **không được bảo đảm tồn tại trong một
+  clone tương lai chỉ lấy lịch sử canonical**. Nên khối `GIỚI HẠN NGUỒN` ở đầu mục xếp *"mọi số
   Git"* vào loại (a) là **quá rộng cho riêng đoạn này**: đây là **bằng chứng ngoài lịch sử
   canonical**, một hạng nằm giữa (a) và (b). Muốn nó bền thì phải đưa snapshot vào một hiện vật
   được theo dõi — **chưa làm**, và ghi ra đây thay vì im lặng.

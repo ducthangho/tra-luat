@@ -2,8 +2,9 @@
 #
 # Verdict: changes_requested — 0 P1 / 0 P2 / 1 P3.
 #
-# ĐÂY LÀ LƯỢT ĐÓNG LỚP LỖI LẶP NĂM LƯỢT. Slug `van-xuoi-do-duoc-van-vuot-nguon` bị chấm từ lượt 2
-# tới lượt 6; lượt 7 tuyên nó ĐÃ VÁ THẬT và không còn xuất hiện.
+# ĐÂY LÀ LƯỢT ĐÓNG LỚP LỖI LẶP NĂM LƯỢT. Slug `van-xuoi-do-duoc-van-vuot-nguon` bị chấm ở NĂM lượt
+# 1 · 2 · 3 · 4 · 6 — KHÔNG phải "từ lượt 2 tới lượt 6"; xem `dinh_chinh_cac_luot_bi_cham` bên dưới.
+# Lượt 7 tuyên nó ĐÃ VÁ THẬT và không còn xuất hiện.
 #
 # Biên nhận này viết SAU khi PR #490 đã merge (`8cee941`) — nó là TRẢ NỢ, không phải tiền kiểm.
 # Verdict lượt 7 neo `01e7f77`, đúng head đã merge; nhưng nó KHÔNG được đọc thành "PR #490 đã qua
@@ -36,8 +37,30 @@ so_p3: 1
 
 lop_loi_lap_5_luot_DA_DONG:
   slug: van-xuoi-do-duoc-van-vuot-nguon
-  cac_luot_bi_cham: '2 · 3 · 4 · 5(*) · 6'
-  ghi_chu_luot_5: '(*) lượt 5 cho `approve` 0/0/0 nhưng trên head CŨ; lượt 6 lại tìm ra chỗ mới.'
+  cac_luot_bi_cham: '1 · 2 · 3 · 4 · 6'
+  dinh_chinh_cac_luot_bi_cham:
+    ban_dau_SAI: '2 · 3 · 4 · 5(*) · 6'
+    sai_o_HAI_dau: >-
+      BỎ SÓT lượt 1 và THÊM NHẦM lượt 5. Lượt 5 KHÔNG chấm slug này: nó ghi ĐÃ VÁ THẬT
+      (`pr490-review-5-codex-verdict.md:18`, bảng đối chiếu, `3/3 vị trí`). Chú thích `(*)` cũ
+      — "lượt 5 cho approve 0/0/0 nhưng trên head CŨ" — mô tả một điều KHÁC (head của lượt 5) rồi
+      bị dùng để biện minh cho việc đếm lượt 5 vào danh sách bị chấm. Hai việc khác nhau.
+    phep_do_doc_lap: >-
+      Đếm tiêu đề finding có slug trong từng tệp verdict, KHÔNG đọc lời tóm tắt của lượt nào:
+      lượt 1 = 1/4 · lượt 2 = 1/1 · lượt 3 = 1/1 · lượt 4 = 1/1 · lượt 5 = 0/0 · lượt 6 = 1/1 ·
+      lượt 7 = 0/1. Tổng 5/5 lượt có tiêu đề mang slug, và tập đúng là {1,2,3,4,6}.
+    nguon_cua_cai_sai: >-
+      Chính verdict lượt 7 đã đính chính điều này ở dòng 27 ("xuất hiện ở các lượt 1, 2, 3, 4, 6…
+      Đây là sai số lịch sử trong prompt gói"), và reviewer nói rõ KHÔNG tính nó thành finding của
+      PR. Điều phối đọc verdict rồi vẫn chép lại phạm vi CŨ từ prompt của chính mình vào biên nhận.
+      Codex connector chấm lại ở PR #495 — lần thứ hai cho cùng một con số.
+    vi_sao_KHONG_lo_ra_khi_doc: >-
+      TỔNG vẫn đúng "5 lượt" ở cả hai bản, nên câu văn tự nhất quán: quan hệ ("năm lượt") sống sót
+      trong khi CẢ HAI đầu mút của tập trôi. Đúng lớp lỗi `CLAUDE.md` đã ghi — một bất biến còn
+      đúng KHÔNG chứng minh các số hạng còn đúng — nên phải kiểm SỐ HẠNG, đừng kiểm quan hệ.
+    con_song_trong_lich_su: >-
+      Thông điệp commit `a1c0d0a` và phần thân PR #495 lúc mở còn mang phạm vi cũ; không sửa được,
+      chỉ đính chính. Bản trong kho (biên nhận này + hàng mục lục) là bản có thẩm quyền.
   nguyen_van_luot_7: >-
     "Hai vế P3 lượt 6 đã đóng thật. Các kết quả của 8/8 lệnh được khai đều tái chạy khớp."
   vi_sao_dong_duoc: >-
@@ -143,3 +166,78 @@ khong_do_duoc:
   - '`run.json` không vào kho ⇒ scalar runtime là attestation.'
   - 'Trạng thái GitHub tại thời điểm reviewer đọc: sandbox không mạng.'
   - 'Lượt CI nào ĐÃ chạy thật trên các head của PR #490 — không đọc, không giữ run JSON.'
+
+# ─────────────────────────────────────────────────────────────────────────────
+# HAI CẢNH BÁO DƯỚI ĐÂY DO CODEX CONNECTOR CHẤM TRÊN PR #495 (head `a1c0d0a`),
+# tức trên chính BIÊN NHẬN này chứ không phải trên verdict. Cả hai điều phối đã
+# tự đo lại trước khi nhận. `t27` cưỡng chế chúng phải có mặt ở hàng mục lục.
+# ─────────────────────────────────────────────────────────────────────────────
+
+verdict_usage_caveats:
+  - id: LIEN-KET-TUONG-DOI-TRONG-VERDICT-TRO-RA-NGOAI-KHO
+    muc: P2
+    mo_ta: >-
+      Verdict lượt 7 dẫn hiện vật bằng đường dẫn TƯƠNG ĐỐI dạng `phep-do/<tên>.json`. Tệp verdict
+      nằm ở `ops/reviews/`, nên trong kho chúng giải ra `ops/reviews/phep-do/…` — thư mục KHÔNG
+      TỒN TẠI. Hiện vật thật nằm ở `ops/reviews/pr490-review-7-phep-do/`.
+    phep_do:
+      lan_xuat_hien: 47
+      dich_khac_nhau: 29
+      thu_muc_giai_ra: 'ops/reviews/phep-do — `ls` trả No such file or directory'
+      dich_DA_NHAP_kho: '5/29 — ci-audit.json · delta-claims.json · gates.json · index-audit.json · script-replay.json'
+      dich_KHONG_NHAP_kho: >-
+        24/29 — graph.json · diffs.json · extra-gates.json · reviews.json · positive-evidence.json ·
+        numeric-inventory.json · land-ledger.json · code-scope.json · tree-final.json · status.json ·
+        regression-static.json · refs.json · receipts.json · old-inputs.json · node-source-audit.json ·
+        manifest.json · logs/imported-script.stderr · historical-receipt-topology.json ·
+        environment.json · delta-lines.json · copies.json · commit-messages.json · anchors.json ·
+        README.md. Chúng chỉ tồn tại trong GÓI của reviewer, gói KHÔNG vào kho.
+    vi_sao_KHONG_sua_tai_nguon: >-
+      Verdict là nguyên văn neo băm (`verdict_sha256`, `verdict_bytes`). Sửa một ký tự là phá neo và
+      biến hiện vật review thành thứ điều phối đã biên tập. Cùng lý do `t27` ra đời: chỗ sai trong
+      verdict phải đính chính ở biên nhận + mục lục, không vá tại nguồn.
+    phai_lam_gi_khi_chay_lai: >-
+      ĐỪNG bấm theo liên kết trong verdict. Với 5 đích đã nhập, thay tiền tố `phep-do/` bằng
+      `pr490-review-7-phep-do/`. Với 24 đích còn lại thì KHÔNG có tệp nào để mở — coi như
+      KHÔNG ĐO ĐƯỢC, đừng đọc sự vắng mặt thành hiện vật bị mất.
+
+  - id: NEO-453c6bc-CHUA-CO-TREN-MASTER-SQUASH-SE-PHA
+    muc: P1
+    mo_ta: >-
+      `evidence_url` của biên nhận này neo `453c6bc`, và `anchor.loai` là `canonical_ancestry`. Tại
+      thời điểm viết, `453c6bc` CHƯA nằm trên `master` — nó chỉ là commit thứ nhất của PR #495. Nên
+      lời khai "mỏ neo là tổ tiên" ĐÚNG một cách CÓ ĐIỀU KIỆN: nó chỉ thành sự thật trên `master`
+      nếu PR được land bằng lối GIỮ quan hệ tổ tiên.
+    phep_do_BA_LOI_LAND:
+      merge_commit: 'rc=0 — `merge --no-ff` rồi `merge-base --is-ancestor` ⇒ CÒN là tổ tiên'
+      fast_forward: 'rc=0 — `merge --ff-only` ⇒ CÒN là tổ tiên'
+      squash: >-
+        rc=1 — dựng commit squash (base `c31d8f1` + toàn bộ diff PR thành 1 commit, `74a0a21`) ⇒
+        `453c6bc` KHÔNG còn là tổ tiên, dù object vẫn tồn tại (`cat-file -t` ⇒ commit).
+      cong_tren_ban_squash: >-
+        `python3 ops/bien_nhan_v2.py --root <cây squash>` ⇒ rc=1, `TỔNG: ĐỎ`, `1 vi phạm`, nguyên văn
+        "commit `453c6bcdf8ce…` CÓ THẬT nhưng KHÔNG phải tổ tiên của HEAD". Trên cây thật (chưa land)
+        cùng lệnh cho rc=0, `48 ĐẠT v2`, `0 vi phạm`, `TỔNG: ĐẠT`.
+      ghi_chu_chieu_lech: >-
+        KHÔNG viết "chỉ vững khi land bằng MERGE COMMIT" — đó là lời khai HẸP một chiều đã bị đính
+        chính ở `R9-F06` (mục lục, hàng `neo-canonical-ancestry-chi-dung-khi-land-bang-merge`):
+        fast-forward cũng giữ neo. Thứ phá quan hệ tổ tiên là SQUASH, và chỉ với neo chưa có sẵn
+        trong nhánh đích.
+    duong_HOAN_BIEN_NHAN_bi_CHAN_boi_t27:
+      cach_reviewer_de_xuat: 'land verdict trước, để biên nhận lại cho tới khi `453c6bc` đã ở master.'
+      phep_do: >-
+        Bỏ ĐÚNG tệp biên nhận này, giữ verdict và giữ hàng mục lục, rồi chạy
+        `ops/lease_publish_test.py` ⇒ `t27` ĐỎ, nguyên văn "pr490-review-7-codex-verdict.md: KHÔNG
+        có biên nhận pr490-review-7-codex-verdict.receipt.yaml". Cùng cây khi CÓ biên nhận thì `t27`
+        KHÔNG đỏ.
+      ket_luan: >-
+        Đường hoãn KHÔNG dùng được trong kho này: `t27` (`ops/lease_publish_test.py:1038`) đòi MỌI
+        `*-verdict.md` phải có biên nhận cùng tên. Verdict và biên nhận buộc phải vào cùng một lần
+        land — nên điều kiện tổ tiên KHÔNG thể thoả TRƯỚC lúc land, chỉ có thể thoả BỞI lúc land.
+    phai_lam_gi_khi_chay_lai: >-
+      Land PR #495 bằng MERGE hoặc fast-forward. Nếu ai đó land bằng SQUASH thì biên nhận này thành
+      vi phạm `canonical_ancestry` và `ops/bien_nhan_v2.py` sẽ ĐỎ trên master — chữa bằng cách ghi
+      lại `evidence_url` theo commit squash mới, không phải bằng cách gỡ chốt.
+    KHONG_DO_DUOC: >-
+      Bất biến "kho phải land bằng merge/ff" sống ở nút merge của GitHub, ngoài tầm bộ test — không
+      ca cục bộ nào cưỡng chế được. Đây là cảnh báo cho người bấm nút, không phải một cổng.

@@ -1,0 +1,133 @@
+# BIÊN NHẬN GIAO HÀNG — cross-review LƯỢT 1 của PR #489, KHÁC NỀN (codex).
+#
+# Verdict: changes_requested — 1 P1 / 4 P2 / 6 P3.
+#
+# ĐỐI TƯỢNG: PR bookkeeping (hai land evidence) CỘNG một đính chính lớn mà điều phối vừa tự làm sau
+# khi phát hiện container mình là KHO NÔNG. Prompt kể thẳng chuỗi sai ấy và giao nhiệm vụ chính là
+# KIỂM CHÍNH BẢN SỬA, kèm câu hỏi ngược: "bản sửa có khai vượt theo chiều ngược không?"
+# Reviewer trả lời đúng câu ấy — xem `p2_ban_sua_van_khai_vuot`.
+
+schema_version: 2
+receipt_id: pr489-review-1-codex-20260909-c09dea33
+kind: review_delivery_receipt
+packet_id: 'PR489-BOOKKEEPING-480-487'
+lease_id: khong-co-lease
+phase_key: HO-SO-CROSS-REVIEW-PHIEN-20260909
+luot: 1
+role: reviewer
+provider: codex
+executor_provider: claude
+cross_provider: true
+assurance: cross_reviewed
+verdict: changes_requested
+verdict_path: ops/reviews/pr489-review-1-codex-verdict.md
+verdict_sha256: 74aa34c3f384148f3a17682f46da84f8aa52aa9001838a3db04ab68f131924ab
+verdict_bytes: 54761
+reviewed_sha: 9a99dd8aa137ef118a00671482c29ea2438cbdbb
+evidence_url: https://github.com/ducthangho/tra-luat/blob/45bd80e08c5efdcb9d713e42fe0804f7d9fd3af1/ops/reviews/pr489-review-1-codex-verdict.md
+evidence_url_ghi_chu: >-
+  Neo BLOB ghim `45bd80e` — commit ĐẦU TIÊN chứa tệp verdict, kiểm bằng
+  `git log --diff-filter=A -- <path>`. Lượt trước điều phối khai sai chính trường này
+  (P3 `neo-verdict-khong-phai-commit-them-dau`), nên lần này đo trước khi ghi.
+so_p1: 1
+so_p2: 4
+so_p3: 6
+
+p1_la_loi_dieu_phoi_vua_them:
+  slug: ci-pr-khong-chung-minh-exact-head
+  mo_ta: >-
+    `pre_merge_checks` — mục điều phối MỚI THÊM sau khi codex connector chấm P2 thiếu nó — đặt tên
+    "CI trên exact head đã duyệt". SAI: lượt `pull_request` chạy trên cây MERGE TỔNG HỢP; workflow
+    có 1 bước checkout, không khai `with.ref`.
+  vi_sao_dang_ghi: >-
+    Land evidence CŨ của #477/#478 đã giới hạn ĐÚNG chỗ này. Điều phối vá một finding rồi TÁI TẠO
+    đúng lỗi mà hồ sơ cũ đã tránh — hình dạng "mỗi lượt vá bảo toàn thứ ta NGHĨ TỚI và làm hỏng thứ
+    ta KHÔNG NGHĨ TỚI" mà `CLAUDE.md` cảnh báo, lần thứ hai trong cùng phiên.
+  da_va: true
+
+p2_ban_sua_van_khai_vuot:
+  slug: ket-luan-bac-connector-vuot-phep-do-hau-kiem
+  reviewer_noi: >-
+    Bản sửa rút lời bác ĐÚNG HƯỚNG và các số cổng đã sửa thật (**6/6 commit** sạch). NHƯNG nó tuyên
+    hai rig "khác đúng MỘT biến" mà KHÔNG kèm rig/log, rồi nói môi trường connector không còn cần để
+    phán finding. Vế (a) của connector gồm CẢ cây merge tổng hợp exit 1 LẪN cha exit 0; mới kiểm được
+    phần cha và merge THẬT — object merge tổng hợp được dẫn thì VẮNG trong gói. Gói KHÔNG chứng minh
+    kho nông là nguyên nhân DUY NHẤT của toàn bộ khác biệt.
+  y_nghia: >-
+    Điều phối sai vì khai quá mạnh, rồi SỬA bằng một lời khai cũng quá mạnh theo hướng ngược. Đây
+    đúng thứ prompt đã hỏi trước ("bản sửa có khai vượt theo chiều ngược không?") — và câu trả lời
+    là CÓ. Reviewer cũng nói rõ nó KHÔNG gọi phép A/B của điều phối là sai, chỉ phân loại phần lịch
+    sử ấy là CHƯA ĐỐI CHỨNG vì thiếu log.
+  da_va: true
+
+ba_loi_lich_su_git_dieu_phoi_tu_kiem_lai:
+  - {khai_cu: 'evidence_url neo `1455741` là "commit đầu tiên chứa verdict"', do_lai: '`git log --diff-filter=A` ⇒ `e1fd0a3`', ket: SAI}
+  - {khai_cu: '"commit đầu tiên chứa tệp có `f4d74fe` là tổ tiên"', do_lai: '`pr480-land-evidence.yaml` thêm ở `6db5b6c`, cha `7e69b8e`', ket: SAI}
+  - {khai_cu: 'land evidence "thứ TƯ" và "thứ NĂM"', do_lai: '`git ls-tree f4d74fe ops/land/` ⇒ 4 tệp, head ⇒ 6 tệp', ket: SAI}
+  - {khai_cu: '`PROTOCOL §20` xếp ADR-0034 vào ô "0 cổng"', do_lai: '`docs/PROTOCOL_DA_PHIEN.md:1136` ghi "có nhắc: lease_publish.py×10 · packet_loop.py×11"', ket: SAI}
+
+model_reviewer_identity:
+  provider: openai_codex
+  surface: codex_cli
+  model_yeu_cau: gpt-6-astra
+  model_da_chay: KHONG_DO_DUOC
+  session_run_id: c09dea33
+  run_id_day_du: c09dea3347134239a92cf5f340c6aafd
+  prompt_sha256: 3da85e74b9339f02c1a6e2080bae715d360ae605c9351174d0f027cb08910b69
+  bat_dau_utc: '2026-09-09T13:19:46.854424+00:00'
+  ket_thuc_utc: '2026-09-09T13:45:46.781182+00:00'
+  thoi_luong_giay: 1559.927
+  ma_thoat: 0
+  trang_thai: xong
+  stdout_byte: 648
+  stdout_sha256: be78adef69e903a4a0f782de67ec1f28dc73ee059b4635a98edd28f14f31453b
+  stderr_byte: 1943699
+  stderr_sha256: a4d03330c054a1db9a51ff815ca0ddea27a0e97e56bec107a0317c828d991a6e
+  so_lan_chet_truoc_khi_xong: 0
+  nguon_cac_scalar_tren: 'Đọc từ `run.json` trong scratchpad; tệp ấy KHÔNG vào kho ⇒ ATTESTATION.'
+  neo_boi_launcher: >-
+    `launcher.py run --expected-repo github.com/ducthangho/tra-luat --expected-root-commit
+    394e93468fc8d84ec20938e6df8fb7ab72b2cc37 --expected-head 9a99dd8aa137ef118a00671482c29ea2438cbdbb
+    --require-clean --prompt-file PROMPT.md --expected-prompt-sha256 3da85e74…` bọc `codex exec`.
+
+nang_luc_do_cua_goi:
+  so_ref: 314
+  lech: 0
+  kho_nong: false
+  ghi_chu: >-
+    `cay-kho` KHÔNG nông — chính điều đó cho reviewer đo lại được cả sáu commit và tự xác nhận hay
+    bác từng con số trong đính chính, thay vì chép lại lời điều phối.
+  chua_do_duoc: 'Không mạng: mọi khẳng định về GitHub API là KHÔNG ĐO ĐƯỢC.'
+
+hien_vat_reviewer_vao_kho:
+  duong_dan: ops/reviews/pr489-review-1-do-cuc-bo.json
+  ghi_chu: >-
+    Reviewer đặt tệp này ở `ops/land/`; điều phối đổi sang `ops/reviews/` cho đúng chỗ. Đây là lần
+    ĐẦU trong phiên một lượt cross-review để lại hiện vật đo MÁY ĐỌC ĐƯỢC trong kho — các lượt trước
+    chỉ có verdict văn xuôi.
+
+tuan_thu_cam_cua_reviewer:
+  cay_kho_sach: true
+  commit_them_ngoai_head: 0
+  bang_chung: '`status --porcelain` RỖNG và `log 9a99dd8..HEAD` RỖNG sau khi lượt kết thúc.'
+
+manifest:
+  duong_dan: KHONG_CO_TRONG_KHO
+  ghi_chu: 'Hiện vật gói (mirror 314 ref) CỐ Ý không vào kho; riêng JSON đo cục bộ thì CÓ.'
+
+github_submitter_identity:
+  actor: ducthangho
+  la_tac_gia_PR: true
+  ghi_chu: '`ADR-0040`: verdict do tài khoản tác giả PR vận chuyển KHÔNG là merge authorization.'
+  phien_van_chuyen: https://claude.ai/code/session_01UN8WRS5Bc5pBBzYPDqs9Dx
+
+anchor:
+  loai: canonical_ancestry
+  cuong_do: cao
+  mo_ta: 'Blob verdict ghim `45bd80e` trên nhánh `claude/land-480-20260909`.'
+  gioi_han: 'Chỉ vững nếu land bằng MERGE hoặc fast-forward; SQUASH phá quan hệ tổ tiên.'
+
+khong_do_duoc:
+  - 'Model đã phục vụ và `thread_id`.'
+  - '`run.json` không vào kho ⇒ scalar runtime là attestation.'
+  - 'Trạng thái GitHub tại thời điểm reviewer đọc: sandbox không mạng.'

@@ -114,26 +114,49 @@ khong_do_duoc:
   - muc: 'Nền macOS/Windows native cho `ops/dung_goi_review.sh`'
     ly_do: 'Mọi phép đo chạy trên Linux+Bash. Đã tự khai trong `ops/reviews/DO-T33-VA-GOI-REVIEW-20260907.md`.'
 
-# --- GIẢI ĐƯỢC MỘT MÂU THUẪN ĐANG MỞ Ở LAND EVIDENCE CỦA PR #468 ---
-giai_mau_thuan_4_vs_6_skipped:
+# --- MỘT PHÉP ĐO LIÊN QUAN TỚI MÂU THUẪN 4-vs-6 CỦA PR #468 ---
+# ĐÍNH CHÍNH TOÀN KHỐI. Bản trước đặt tên khoá `giai_mau_thuan_4_vs_6_skipped`, viết
+# "Reviewer đúng, điều phối sai — và sai vì ĐỌC GIỮA CHỪNG", và dặn phiên giữ #478 lan truyền
+# kết luận ấy. Phiên ấy ĐÃ lan truyền, rồi cross-review #478 lượt 5 chấm **P1**
+# (`land-evidence-chot-nguyen-nhan-chua-quan-sat`) và nó bị RÚT. Khối này viết lại cho đúng mức.
+# Tên khoá đổi theo, vì TÊN KHOÁ chính là lời khẳng định.
+so_da_dinh_chinh_nguyen_nhan_chua_biet:
   van_de: >-
-    `ops/land/pr468-hoso-4-packet-land-evidence.yaml` (đang ở PR #478) ghi một
-    `mau_thuan_chua_giai`: điều phối đọc **4 skipped** cho job `gate (windows-latest)` trên merge
-    commit `802fc01`, trong khi cross-review #478 lượt 2 phân tích tĩnh `.github/workflows/ci.yml`
+    `ops/land/pr468-hoso-4-packet-land-evidence.yaml` từng ghi một `mau_thuan_chua_giai`: điều phối
+    đọc **43 bước / 4 skipped** cho job `gate (windows-latest)` trên merge commit `802fc01`
+    (run `34169756563`), trong khi cross-review #478 lượt 2 phân tích tĩnh `.github/workflows/ci.yml`
     và đếm **6** bước có `if` sai trên tổ hợp push/master/windows.
-  nay_giai_duoc: >-
-    **Reviewer đúng, điều phối sai — và sai vì ĐỌC GIỮA CHỪNG.** Job Windows của run
-    `34176439015` lúc đang chạy hiển thị `43 bước, 1 skipped`; khi chạy XONG nó là
-    **44 bước, 6 skipped**. Bước chưa chạy tới thì `conclusion` còn `null`, nên phép đếm
+  so_da_dinh_chinh: >-
+    Số ĐÚNG là **6**. Đọc lại chính job ấy khi đã `completed`: `gate (windows-latest)` =
+    44 bước · **6 skipped** · 0 bước `conclusion: null`. Phần này ĐỨNG VỮNG.
+  co_che_da_do_duoc: >-
+    Cặp đo TRƯỚC/SAU trên CÙNG một job, run `34176439015` (merge commit `585c7d5` của #477):
+    lúc `in_progress` ⇒ **43 bước, 1 skipped**; lúc `completed` ⇒ **44 bước, 6 skipped**.
+    Nó chứng minh CƠ CHẾ có thật: bước chưa chạy tới thì `conclusion` còn `null`, nên đếm
     `conclusion == "skipped"` giữa chừng cho số THẤP HƠN thực tế.
-    Con số **6** khớp đúng phân tích tĩnh của reviewer.
+  nguyen_nhan_cua_lan_doc_43_4: >-
+    **CHƯA XÁC ĐỊNH — đây là chỗ bản trước khai quá mức.** Chứng minh cơ chế TỒN TẠI không phải
+    chứng minh nó đã GÂY RA lần đọc `43/4` ở run `34169756563`. Hai lý do, cả hai đo được:
+    (1) Phản chứng số học của cross-review #478 lượt 5: `(44,4) + (−1,0) = (43,4)` — đọc job
+    **Ubuntu** đã `completed` (`44 bước / 4 skipped`) rồi GHI NHẦM 44 thành 43 cũng sinh đúng cặp
+    `(43,4)`. Bản trước loại giả thuyết đọc-nhầm-Ubuntu bằng lập luận "Ubuntu có 44 bước, điều phối
+    ghi 43" — tức lấy chính con số `43` ĐANG TRANH CÃI làm chuẩn chắc chắn để loại mọi lỗi ghi chép.
+    (2) Mẫu giữa chừng ĐO ĐƯỢC ở đây là **1** skipped, KHÔNG phải 4. Nên cặp trước/sau của run
+    `34176439015` không neo được riêng giá trị `4`; trong khi Ubuntu `completed` khớp `4` chính xác.
+    Điều đó KHÔNG chứng minh giả thuyết đọc-nhầm đúng — nó chỉ cho thấy giả thuyết đọc-giữa-chừng
+    không phải lời giải duy nhất khớp dữ liệu.
+    Thời điểm điều phối thực sự gọi API KHÔNG được ghi ở đâu, nên không phép đo nào phân định được.
   bai_hoc: >-
-    Đếm `skipped` trên một job `in_progress` là phép đo SAI, không phải phép đo thiếu. Chỉ đọc
-    số bước/skipped khi `status == "completed"`.
-  viec_phai_lam: >-
-    Sửa `mau_thuan_chua_giai` trong land evidence của #468 (nhánh `claude/land-468-20260908`,
-    PR #478) theo kết quả này. Phiên tiếp nối `session_01C52eS8AgeiwTrDifXGDGYP` đang giữ nhánh
-    ấy — việc thuộc về nó, tệp này chỉ ghi lại phép đo để nó khỏi phải đo lại.
+    Đứng vững và không phụ thuộc phần trên: chỉ đọc số bước và số `skipped` khi
+    `status == "completed"`; job `in_progress` phải trả KHÔNG ĐO ĐƯỢC chứ không trả một con số.
+    Chốt rẻ: đếm luôn số bước có `conclusion: null` và đòi nó bằng **0**.
+    Bài học THỨ HAI, đắt hơn, rút từ chính khối này: **loại một giả thuyết bằng một con số thuộc
+    chính lời khai đang nghi ngờ là không loại được gì.**
+  trang_thai_o_468: >-
+    ĐÃ XONG, không còn việc cho ai. Phiên `session_01C52eS8AgeiwTrDifXGDGYP` đã sửa land evidence
+    của #468 theo đúng mức này (đổi ba tên khoá, thêm `nguyen_nhan_that_su: CHƯA XÁC ĐỊNH` với bốn
+    giả thuyết còn sống), cross-review #478 lượt 6 xác nhận `ĐÃ VÁ THẬT`, và PR #478 đã merge —
+    merge commit `c87b0679a837055ee4cc33ac48c9adb8d7ad8784`.
 
 bookkeeping:
   - >-

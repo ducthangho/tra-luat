@@ -1,0 +1,134 @@
+# BIÊN NHẬN GIAO HÀNG — cross-review LƯỢT 2 của PR #480 (land evidence cho #477), KHÁC NỀN (codex).
+#
+# Verdict: approve — 0 P1 / 0 P2 / 3 P3. HẾT P1 và HẾT LUÔN P2.
+#
+# ĐỐI CHIẾU LƯỢT 1: 7/8 slug ĐÃ VÁ THẬT · 1/8 VÁ HỜ · 0/8 VÁ SINH LỖI MỚI.
+# Con số cuối đáng ghi: `CLAUDE.md` chép một chuỗi BẢY phát hiện liên tiếp trên cùng một đường,
+# nơi "mỗi lượt vá bảo toàn được thứ ta NGHĨ TỚI và làm hỏng thứ ta KHÔNG NGHĨ TỚI". Lượt này
+# không tái diễn hình dạng ấy.
+#
+# MỘT P3 BẮT LỖI CỦA CHÍNH ĐIỀU PHỐI, và nó đúng — xem `dinh_chinh_loi_tu_kiem` bên dưới.
+
+schema_version: 2
+receipt_id: pr480-land-review-2-codex-20260909-c2f47b7c
+kind: review_delivery_receipt
+packet_id: 'PR480-LAND-EVIDENCE-CHO-477'
+lease_id: khong-co-lease
+phase_key: LAND-EVIDENCE-477
+luot: 2
+role: reviewer
+provider: codex
+executor_provider: claude
+cross_provider: true
+assurance: cross_approved
+verdict: approve
+verdict_path: ops/reviews/pr480-land-review-2-codex-verdict.md
+verdict_sha256: 579fa9bb1e667b48b1924464cdccf43d7361296f299fedc89e4d14d8ccb1cee8
+verdict_bytes: 36408
+reviewed_sha: 5b96ddc91593e9704ac3265b4e0b688059478cc8
+base_da_review_luot_truoc: afddf7efe21e784fd22ed6b5aed399bc9d04a67d
+evidence_url: https://github.com/ducthangho/tra-luat/blob/60d62aa60da45fdd7c79bd71dc17a0d2ffc1e439/ops/reviews/pr480-land-review-2-codex-verdict.md
+evidence_url_ghi_chu: >-
+  Neo BLOB ghim commit `60d62aa` — commit ĐẦU TIÊN chứa tệp verdict, trên nhánh
+  `claude/handoff-tra-luat-repo-2ak5th` (PR #487). Băm trong kho BẰNG băm bản gốc trong gói.
+so_p1: 0
+so_p2: 0
+so_p3: 3
+
+doi_chieu_luot_1:
+  da_va_that: 7
+  va_ho: 1
+  va_sinh_loi_moi: 0
+  chua_va: 0
+  tong_slug: 8
+  don_vi: 'SỐ SLUG, không phải số severity và không phải số mệnh đề — reviewer tự khai đúng điều này.'
+  slug_con_mo: >-
+    `bang-khang-dinh-token-khong-phai-menh-de` — VÁ HỜ. `trich_khang_dinh_v2.py` (parser YAML theo
+    cây) ĐÓNG được lớp scalar/map/bool, nhưng KHÔNG đóng phần mất nghĩa: v2 cắt chuỗi ở 160 ký tự
+    nên mất **6 030 ký tự** trên **18 lá**, trong đó có chính các câu phủ định và giới hạn nguồn
+    vừa được vá ở lượt 1. Đổi parser cải thiện thật nhưng chưa đủ để tuyên hai P3 cũ đều đóng.
+
+dinh_chinh_loi_tu_kiem:
+  finding: doi-chieu-dem-commit-khong-dinh-thoi-diem
+  loi_khai_bi_rut: >-
+    Commit vá `5b96ddc` của điều phối viết: `bản gốc khai "bốn commit", SAI`.
+  vi_sao_sai: >-
+    `git rev-list --count 14dab5e..75fe4c4 ⇒ 5` đo đúng MỘT KHOẢNG GIT. Nhưng câu trong bản gốc là
+    "bốn commit đẩy SAU KHI được duyệt" — một đại lượng có ĐIỀU KIỆN THỜI GIAN. `rev-list` không
+    ghi thời điểm push, không ghi mốc approval/dismiss, và không xác nhận review khi ấy còn nằm
+    trên tip. Nên phép đếm KHÔNG chứng minh lời cũ sai.
+  trang_thai: >-
+    Bản thân tệp YAML xử lý ĐÚNG (nói riêng số commit Git, không suy mốc dismiss), nên P1 không tái
+    mở. Lỗi nằm ở LỜI TỰ KIỂM của điều phối trong commit message `5b96ddc` và trong báo cáo gửi chủ
+    kho — cả hai đã được đính chính ở commit chứa verdict lượt 2.
+  vi_sao_dang_ghi: >-
+    Đây đúng lớp lỗi mà chính hồ sơ này vừa được vá để tránh, và người mắc lần này là điều phối
+    TRONG LÚC kiểm bản vá cho lớp lỗi ấy.
+
+model_reviewer_identity:
+  provider: openai_codex
+  surface: codex_cli
+  model_yeu_cau: gpt-6-astra
+  model_da_chay: KHONG_DO_DUOC
+  model_bang_chung: >-
+    `provider` và `surface` ĐO ĐƯỢC từ `run.json`. `model` thì KHÔNG — `run.json.lenh` không lưu
+    argv, và `codex` không phát `modelUsage`. Nên model/effort là ATTESTATION của điều phối.
+  session_run_id: c2f47b7c
+  run_id_day_du: c2f47b7cae504aee9f07e23dcc5de358
+  thread_id: KHONG_DO_DUOC
+  prompt_sha256: 8293d50d9a490a5b35be20b8042a988fd5745f06eccaaf5a75d0003c22d0f416
+  prompt_kin_hoan_toan: false
+  bat_dau_utc: '2026-09-09T10:07:33.023813+00:00'
+  ket_thuc_utc: '2026-09-09T10:23:01.782067+00:00'
+  thoi_luong_giay: 928.758
+  ma_thoat: 0
+  trang_thai: xong
+  stdout_byte: 584
+  stdout_sha256: dfd310b62df62b192d3def101c8a125437ee12ce94b79db8379c4b45d74f1703
+  stderr_byte: 2338860
+  stderr_sha256: eb5f48ccbfe8decdb6ffa40d6e78b3c483435854d9c9e4cdeef99d5d79206b51
+  so_lan_chet_truoc_khi_xong: 0
+  neo_boi_launcher: >-
+    `launcher.py run --expected-repo github.com/ducthangho/tra-luat --expected-root-commit
+    394e93468fc8d84ec20938e6df8fb7ab72b2cc37 --expected-head
+    5b96ddc91593e9704ac3265b4e0b688059478cc8 --require-clean --prompt-file PROMPT.md
+    --expected-prompt-sha256 8293d50d9a490a5b35be20b8042a988fd5745f06eccaaf5a75d0003c22d0f416
+    --deadline-utc 2026-09-09T10:52:26Z` bọc `codex exec`.
+
+nang_luc_do_cua_goi:
+  ghi_chu: >-
+    Gói dựng bằng `ops/dung_goi_review.sh`. Lượt này gói mang THÊM: `VERDICT-luot1.md`,
+    `diff-sau-luot1.patch`, `numstat-luot1-den-luot2.txt`, HAI bảng khẳng định
+    (`BANG-CAU-TRUC.tsv` 79 lá · `BANG-TOKEN.tsv` 112 hit) và CẢ HAI script sinh ra chúng.
+  so_ref: 312
+  lech: 0
+  so_tag: 62
+  chua_do_duoc: 'Không mạng trong sandbox; mọi khẳng định về GitHub API là KHÔNG ĐO ĐƯỢC.'
+
+tuan_thu_cam_cua_reviewer:
+  cay_kho_sach: true
+  commit_them_ngoai_head: 0
+  bang_chung: '`status --porcelain` RỖNG và `log 5b96ddc..HEAD` RỖNG sau khi lượt kết thúc.'
+
+manifest:
+  duong_dan: KHONG_CO_TRONG_KHO
+  ghi_chu: 'Hiện vật gói (mirror 312 ref + script tự đo của reviewer) CỐ Ý không vào kho.'
+
+github_submitter_identity:
+  actor: ducthangho
+  la_tac_gia_PR: true
+  ghi_chu: '`ADR-0040`: verdict do tài khoản tác giả PR vận chuyển KHÔNG là merge authorization.'
+  phien_van_chuyen: https://claude.ai/code/session_01UN8WRS5Bc5pBBzYPDqs9Dx
+
+anchor:
+  loai: canonical_ancestry
+  cuong_do: cao
+  mo_ta: >-
+    Neo chính là blob ghim `60d62aa`. Neo thứ hai là comment bản chiếu trên PR #480 — xem
+    `comment_ban_chieu`.
+  gioi_han: 'Chỉ vững nếu land bằng MERGE hoặc fast-forward; SQUASH phá quan hệ tổ tiên.'
+
+khong_do_duoc:
+  - 'Model đã phục vụ và `thread_id`.'
+  - 'Hiện vật gói không vào kho — verdict không tái chạy được từ kho.'
+  - 'Trạng thái GitHub tại thời điểm reviewer đọc: sandbox không có mạng.'

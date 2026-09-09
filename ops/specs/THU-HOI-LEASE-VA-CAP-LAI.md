@@ -1,10 +1,11 @@
-# ĐẶC TẢ PACKET — `THU-HOI-LEASE-VA-CAP-LAI`, **revision 8** (vá S1/S3/S5/S6/S7/S8/S9 theo lượt 6 = lời gọi 7; CHƯA được review — lời gọi 8 sẽ đọc bản này)
+# ĐẶC TẢ PACKET — `THU-HOI-LEASE-VA-CAP-LAI`, **revision 9** — BẢN ĐÓNG BĂNG (lượt 7 = lời gọi 8: **0 P1**; r9 = r8 + HINT lượt 7 cho 2 P2 S8/S10, chưa review lại theo lệnh "tới hết P1")
 
 ```yaml
 packet_id: THU-HOI-LEASE-VA-CAP-LAI
-packet_issue: CHƯA CÓ          # KHÔNG đăng: còn P1 chưa được reviewer xác nhận đóng (§3.2/§12)
-revision: 8
-thay_the: 6a0ea66b8e9a53b5be8f3df0ed6e79a9ef5f217ac86e161004fb306ee6845aae   # sha256 r7 (kế toán; kỹ thuật = r6)
+packet_issue: neo ở Issue        # Issue A0 đăng SAU khi đóng băng và trỏ NGƯỢC về sha256 của tệp này (tiền lệ #461/#482) — không ghi số vào đây để băm không đổi
+revision: 9
+thay_the: 48ea894a81b776742ae7152a8ce039d1b46eee3acd0e63a67a77cce5b21effe0   # sha256 r8 — bản lượt 7 (lời gọi 8) đã đọc: 0 P1
+thay_the_r7: 6a0ea66b8e9a53b5be8f3df0ed6e79a9ef5f217ac86e161004fb306ee6845aae
 thay_the_r6: f78135cff428f0744476d7f27426f459d926578c4bac4a4339928330c4a0d6a5   # bản lượt 6 (lời gọi 7) đã đọc
 thay_the_r5: 23a7deaf60af17aea2fa3b027d08fb8c187b6f03499f34540822ab7b9c3b1672
 thay_the_r4: 415ce35db32aa370ce43315c1ff6d4db7b59005e6288538e72705ce4caed4d0e
@@ -35,6 +36,8 @@ base_sha: b416830ef2a509d60203d55552ce17950afcf67c   # origin/master lúc đóng
 | 4b | r4 `415ce35d…` | codex `gpt-6-astra` xhigh, **đổi phân công** (hướng đổi-nguồn chỉ mô tả bằng lời) | 2076,6 s · stderr 743 428 B | `changes_requested` — R2–R10 ĐÓNG, R1 một phần; mới **4 P1 + 2 P2** (S1–S6); verdict `7d3017ec…`, hint `4a0321fd…` |
 | 5 | r5 `23a7deaf…` | codex `gpt-6-astra` xhigh, **lời gọi 6/6** | VERDICT `1596d562…` · HINT `8ca8474b…` · 2394,7 s · rc=0 | `changes_requested` — S4 + mọi R/N/L1 còn lại ĐÓNG; còn **3 P1** (S1, S2 một phần; S3 ĐÓNG SAI) + **2 P2** (S5, S6 một phần); reviewer khai `blocked` theo stop condition |
 | 6 | r6 `f78135cf…` | codex `gpt-6-astra` xhigh, **lời gọi 7** (trần mới `5578460203`), harness dựng lại từ đầu (scratch lượt 1–5 mất theo container) | VERDICT `9090aadd…` · HINT `47fbf8cb…` (7 hunk) · 2889,1 s · stdout 85 B · stderr 4 049 518 B · rc=0 | `changes_requested` — **S2, S4 ĐÓNG**; còn **3 P1** (S1 một phần — nền thực thi/trust chưa duyệt độc lập; S3 một phần — A6 hứa kill ở ca bị lớp khác che; **S7 mới** — tệp retired xung đột schema M1) + **3 P2** (S5, S6 một phần; **S8 mới** — layout/ngân sách object-store) + P3 S9 (kế toán) |
+| 7a | r8 `48ea894a…` | codex — **chết PREFLIGHT** (`refresh_token_invalidated`, 5,4 s, stdout 0 B) | — | **KHÔNG tính** lời gọi (§12: chưa sinh output); xem `luot7a-CHET-preflight.md` |
+| 7 | r8 `48ea894a…` | codex `gpt-6-astra` xhigh, **lời gọi 8** (auth mới qua device-auth), tái dùng scratch lượt 6 | VERDICT `f28b7d0c…` · HINT `95b63772…` (5 hunk) · 1377,1 s · stdout 465 B · stderr 866 272 B · rc=0 | `changes_requested` **chỉ vì 2 P2** — **0 P1**: S1/S3/S5/S6/S7 ĐÓNG, S2/S4 giữ ĐÓNG, S9 ĐÓNG; S8 một phần (phạm vi đếm `max_tree_or_alias_edges`, biên inclusive), **S10 mới** (biên mã lỗi/counter giữa ADR-0047 và spec chưa đồng bộ). Reviewer: *"Không nâng hạng để kéo dài review, không tự mở một vòng P1 khác"* |
 
 **R10 — trần review §12 KHÔNG có ngoại lệ cho "review đặc tả".** r3 §0 suy một ngoại lệ từ nhãn "spec trước Issue" —
 reviewer đối chiếu `docs/PROTOCOL_DA_PHIEN.md:806–816` và §8:579: trần **hai** lượt codex tính **theo PR**, đổi
@@ -99,6 +102,18 @@ khuyến nghị dừng packet để chốt ADR nguồn tin cậy trước; chủ
 | **S7** (P1 mới, không phải nguồn tin cậy) | M1 bắt **mọi** tệp `ops/thu-hoi/` là bản ghi `lease_revoked` ⇒ tệp retired của r6 bị M1 từ chối, thiếu tệp thì Q13 từ chối: PR policy đầu tiên không có biểu diễn hợp lệ | Q3/M1/M4: **đúng một path reserved** `_ngoai-le-closure.retired.yaml` phân tuyến sang schema metadata riêng (`event: closure_exception_retired`, 6 khoá, regular `100644`); mọi path khác vẫn M1; metadata không đếm là thu hồi, không đi Q2; "sổ rỗng" = tập revocation rỗng; A7/A8 thêm ca |
 | **S8** (P2 mới) | `GIT_OBJECT_DIRECTORY=<kho>/.git/objects` literal sai với bare/linked worktree; alternates/pack/partial/shallow chưa nói; trần chi phí không đơn vị | Q4.5: giải gitdir/common dir bằng API Git một lần; hỗ trợ loose+pack+alternates do adapter dựng; partial thiếu object ⇒ 12 (không "sổ vắng"); shallow ⇒ 12; chuẩn bị/fetch trước snapshot rồi chụp lại map; **ngân sách có đơn vị** (8 trần, giá trị mặc định là ĐỀ XUẤT phải đo ở A0) |
 | S9 (P3) | kế toán trần cũ | r7 đã sửa §0/Q14/`ngoai_pham_vi`; r8 sửa nốt `hinh_dang_ke_thua` |
+
+### 0.5 Delta r8 → r9 theo finding lượt 7 (r9 = bản đóng băng; 2 P2 vá theo HINT, chưa review lại)
+
+| finding (P) | r8 thiếu | r9 làm gì |
+|---|---|---|
+| S8 (P2, một phần) | `max_tree_or_alias_edges` không nói đếm trên toàn snapshot hay từng lần resolve (reviewer dựng cây 129 thư mục anh em: tổng 258 cạnh/đường dài 2 ⇒ hai executor cho 12 và 0); biên "chạm trần" chưa nói inclusive hay không; wall deadline chưa nói ai đo | Q4.5: phạm vi đếm từng counter (tree/alias = một lần resolve tại một occurrence OID, cộng cả restart sau symlink; parent = mỗi đường; alternate store/depth theo DAG đã kiểm); **biên inclusive** (n≤bound qua, n>bound ⇒ 12); deadline monotonic do adapter/parent reader giữ, không chờ read/wait vô hạn; A6 thêm ca cây 129 sibling, alternate depth 3/4/5, deadline với subprocess im lặng |
+| **S10** (P2 mới, không phải nguồn tin cậy) | ADR-0047 viết "mọi cổng ⇒ rc=12" gồm cả guard `packet_loop` (thực tế `RC_STATE=8`), "chạm trần ⇒ 12" (mạnh hơn biên inclusive), luật 3 "bất kỳ trường nào … lệch ⇒ 8" quá rộng, approver chỉ ghi chủ kho (spec có uỷ quyền bền) | Spec: mục "Đồng bộ hợp đồng với ADR-0047" (hai biên mã lỗi: reader 12, packet_loop `RC_STATE=8` kèm nguyên nhân; biên inclusive; rc8 chỉ cho claim phái sinh); A10 ghi `reader_rc=12` → `RC_STATE=8`, mutant trả thẳng 12 ⇒ ĐỎ; Q12 đòi đối chiếu ADR cùng revision. **ADR-0047 sửa cùng commit** (§Quyết định, lớp 3, luật 3, approver) — reviewer nói rõ áp HINT không tự sửa ADR |
+
+**Kết luận lượt 7:** không còn P1 ⇒ theo lệnh chủ kho (`5578460203`) và §3.2: **đóng băng r9, đăng Packet Issue cho slice A0
+neo sha256 của tệp này, rồi DỪNG chờ lease.** Hai P2 đã vá theo HINT; bản r9 chưa được reviewer đọc — ghi thẳng, không khai
+"đã đóng". Reviewer lượt 7 khẳng định: phần còn thiếu của S1 là **quyết định/facts chủ kho** (nền thực thi, người duyệt, giá trị
+profile/proxy/CA), không phải finding.
 
 Đính chính số: tổng ước dòng r3 (`885–1285` theo hint lượt 3; r3 viết 725–1055 ở một chỗ và bảng khác ở chỗ khác) —
 r4 ước lại theo slice ở `write_set`.
@@ -315,8 +330,23 @@ bắt đầu do một bên điều phối tuần tự hoá (Q11).
    `max_unique_objects=50000`, `max_object_bytes=8388608`, `max_total_object_bytes=134217728`,
    `max_parent_path_edges=10000`, `max_tree_or_alias_edges=128`, `max_alternate_stores=8`,
    `max_alternate_depth=4`, `max_reader_wall_seconds=60`. Số byte là bytes thô sau giải nén; depth là số cạnh;
-   objects là `(actual_type,OID)` phân biệt, wall time dùng monotonic deadline cho cả reader/subprocess.
-   Vượt bất kỳ trần/timeout/không đo được ⇒12, không cắt graph rồi kết luận vắng. Các giá trị phải được đo trên
+   objects là `(actual_type,OID)` phân biệt. **Đơn vị/phạm vi đếm (S8):** root có depth0;
+   `max_parent_path_edges` là số cạnh trên mỗi đường parent đang duyệt. `max_tree_or_alias_edges` là tổng
+   bước tree-entry + dereference symlink trên **một lần lookup/resolve một đường tại một occurrence OID**;
+   bước do restart sau symlink tiếp tục cộng vào lần resolve đó, không reset. Đây không phải tổng cạnh của
+   toàn snapshot: cây có129 thư mục anh em, mỗi đường dài2 cạnh, không tự vượt trần128. Width vẫn chịu
+   max_unique_objects/max_total_object_bytes/deadline. Mỗi occurrence được giải độc lập rồi hợp kết quả Q3.
+   `max_alternate_stores` đếm canonicalized store phân biệt ngoài primary; primary ở depth0,
+   `max_alternate_depth` đếm cạnh alternate theo đường dài nhất trong DAG store đã kiểm. Vòng alternate⇒12;
+   store trùng qua hai đường không tăng số store nhưng không được che đường sâu hơn. Các counter tree/parent
+   là counter traversal; memo bytes không reset counter của đường đang đi.
+   **Biên số lượng/bytes/depth là inclusive:** n≤bound được tiếp tục nếu mọi điều kiện khác hợp lệ;
+   muốn đọc/đi thêm làm n>bound⇒12. Đến S đúng parent bound được chấp nhận, không từ chối chỉ vì bằng trần.
+   Wall time là deadline monotonic cho cả reader và subprocess từ trước spawn đến khi thu hồi tiến trình;
+   phải còn thời gian để hoàn thành. Hết deadline⇒12; không chờ readline/read/wait vô hạn rồi mới kiểm clock.
+   Reader kiểm byte/object budget trước cấp phát body phía reader; preflight alternate chạy trước khi mở reader.
+   Các counter không lấy được từ cat-file (graph store, đường duyệt, thời gian chờ) do adapter/parent reader giữ.
+   Vượt bất kỳ trần/hết deadline/không đo được ⇒12, không cắt graph rồi kết luận vắng. Các giá trị phải được đo trên
    roots thực của deployment và ghi trong profile/spec_hash trước ready; đổi giá trị qua revision/review, không
    caller tự nới. A6 có bound−1/bound/bound+1 và graph rộng/object lớn ở seam, không chỉ depth.
    Số scan cũ1186object/4.311.029B và closure2622commit thuộc map lượt5 chưa được tái lập exact; lượt6 đo map310ref:
@@ -489,7 +519,12 @@ Catalog ghi mỗi ca: input, expected, seam, mutant đúng một chốt, mọi c
   khác approved profile⇒12; bỏ phép so profile duy nhất⇒0 mới ĐỎ. Nếu còn chốt tương đương thì ghi SỐNG, không nhận công.
   Helper/runtime/trust manifest lệch approved⇒12; negative source fixtures theo phân công điều phối, không tự soạn.
 - Bare/linked worktree/pack/alternate hợp lệ⇒0; partial thiếu object⇒12, chuẩn bị đầy đủ trước snapshot⇒0;
-  shallow⇒12. Bound−1/bound/bound+1 theo từng đơn vị Q4.5, thiếu/timeout⇒12, không cắt graph rồi0.
+  shallow⇒12. Với bảy trần count/byte/depth: bound−1/bound/bound+1⇒0/0/12 khi mọi điều kiện khác hợp lệ.
+  Ca wall deadline dùng clock tiêm: hoàn tất trước deadline⇒0; chạm/sau deadline khi công việc còn chờ⇒12;
+  thêm subprocess im lặng để chứng minh timeout có thể ngắt read/wait, không chỉ kiểm giữa hai object.
+  Alternate-chain depth3/4/5 dưới profile depth4⇒0/0/12; counter mutant bỏ depth phải bị ca5 bắt dù Git đọc được.
+  Cây129 thư mục anh em dài2 cạnh/đường dưới trần128⇒0; mutant cộng toàn snapshot thay từng resolve⇒12.
+  Object/time/unique/byte overflow vẫn⇒12; không cắt graph rồi0. Catalog ghi rõ seam và chốt che từng mutant.
 Chi phí E2E baseline/candidate xen kẽ3cặp cùng ref/map/clock, trung vị tỷ lệ≤2; raw wall seconds, object-body bytes,
 output bytes, số lệnh/phân biệt network, unique objects, visited commits và witness length. Benchmark chỉcat-file
 hoặc chỉhash không chứng nhận E2E. Ghi cả chuẩn bị cache và profile setup khi chúng có chi phí.
@@ -501,7 +536,9 @@ validator toàn T với entry lỗi. Thêm: base trôi / fetch H ≠ event / sai
 up-to-date cùng tree ⇒ xanh. First-policy+metadata hợp lệ0; sửa/xoá marker8; B(P1,R1)→B2(P2 hợp lệ,R1)0 sau binding mới; D(policy vắng,R1)12; không self-pin containing T.
 **A9** — như r3; sau canonical: 0 lời gọi thêm.
 **A10** — 5 cửa × {sống, thu hồi, không đo được, sổ ở ref khác}; `record-lease` ID ứng viên; REST 403 + Git hợp lệ ⇒ đi
-tiếp; Git không đo được ⇒ chặn, state byte-match.
+tiếp; Git không đo được ⇒ **RC_STATE=8**, state byte-match và giữ chẩn đoán nguồn `reader_rc=12`.
+ Ca này tách boundary reader khỏi CLI: trả thẳng12 ở bất kỳ cửa nào là mutant sai mapping và phải ĐỎ;
+ không đổi hằng RC_STATE để khớp một câu tổng quát trong ADR. Thu hồi vẫn lưu stale/event rồi RC_STATE như Q5.
 **A11** — hai vế một lệnh, delta theo tên; nền lịch sử lease_publish121/121(wrapper),packet_loop278/278+81mutant
 chỉ là mốc, phải đo lại đúng ca/môi trường cho candidate. A0: checker canonical rỗng⇒receipt; thêm revocation dù xoá
 test/wrapper/workflow ở PR vẫn12. Consumer dependency fixture đủ trước bootstrap; raw canary của workflow A0 chứng
@@ -513,6 +550,25 @@ attempt không thay thế identity attempt cũ. **Phải có raw receipt/joins A
 thay evidence. doc-claims-check --strict rc0+ok:true; doctrine-scan --path có spec⇒0.
 **A12** — biên nhận đủ trường; **catalog ca kỳ vọng neo độc lập với cây PR**; mutant xoá cả đăng ký lẫn lời gọi không
 được làm mẫu số nhỏ đi; mutant sống ghi sống kèm seam/chốt che theo A6. Lỗi hạ tầng/parser xảy ra trước seam không nhận công mutant; skipped/not_run không là pass.
+
+### Đồng bộ hợp đồng với ADR-0047 (S10)
+
+**Mã lỗi có hai biên:** rc4/8/12 của schema/nguồn dưới đây là mã reader/lease_publish; packet_loop ánh xạ
+mọi lỗi guard sang `RC_STATE=8`, giữ nguyên chẩn đoán nguyên nhân. Workflow/consumer chỉ công nhận receipt0
+và positive evidence, không tự coi mọi nonzero là cùng một trạng thái nghiệp vụ. Ba lớp nguồn không đo được
+⇒ reader12; điều đó không đổi giao diện packet_loop Q5/A10. Bảy trần count/byte/depth dùng biên inclusive Q4.5;
+wall deadline hết thì dừng. Không áp chữ “chạm trần” cho một ancestry đã tới S hợp lệ ở đúng bound.
+
+**Cùng revision, trước ready A0 phải đồng bộ bản Proposed ADR-0047 trên PR** (không sửa runtime hoặc tự
+promote Accepted bằng spec): ở §Quyết định thay câu áp `rc=12` cho mọi cổng bằng “reader/lease_publish trả12;
+wrapper giữ ánh xạ lỗi công khai của mình, packet_loop trả RC_STATE=8 kèm nguyên nhân”; ở lớp3 thay
+“chạm trần ⇒12” bằng “vượt trần count/byte/depth hoặc hết deadline ⇒12; định nghĩa counter/biên ở Q4.5”.
+Luật3 của ADR phải nói rõ rc8 là lỗi claim phái sinh trong lease; descriptor/activation binding nguồn không
+xác minh được theo Q13 trả reader12 rồi ánh xạ tại caller. Không áp câu “bất kỳ trường nào” để biến các input
+khai báo hợp lệ (write_set, timestamp...) thành phái sinh không có producer. Giữ phạm vi approver thống nhất:
+chủ kho hoặc người được chủ kho uỷ quyền bền, có phạm vi, qua commit review; không chọn tên/image thật ở đây.
+ADR giữ bất biến, spec giữ interface/counter cụ thể. Cả hai tệp phải cùng qua đối chiếu; chỉ áp HINT lên SPEC
+không tự tuyên bố ADR đã được sửa. Ca A10 mapping và A6 exact-bound phải có cùng oracle giữa hai tệp.
 
 ## `hinh_dang_ke_thua` (L4)
 
@@ -578,7 +634,8 @@ xuất (không kế thừa miễn trừ `b416830`); **descriptor nguồn closure
 lệ) HOẶC `change_policy_sha: null` + descriptor ngoại lệ Q13 — một trong hai, đóng băng trong `spec_hash`; không giả SHA của
 policy chưa tồn tại; base đã nhận slice trước và mã canonical nơi M9 đòi. **Trước ready A0 đóng băng:** hợp đồng deployment
 profile (producer/approver/manifest bất biến/serialization), object-store layout + availability + ngân sách có đơn vị,
-M1/reserved metadata/Q13 transitions, danh sách lịch sử/bootstrap, publisher/consumer API + retention + dependency. Giá trị
+M1/reserved metadata/Q13 transitions, danh sách lịch sử/bootstrap, publisher/consumer API + retention + dependency;
+đối chiếu ADR-0047 cùng revision về boundary mã lỗi và biên/counter ngân sách (S10/S8). Giá trị
 profile, ngân sách và activation binding phải được **điền ở đúng slice** trước ready/kích hoạt — executor không tự mặc định
 nguồn, không tự nới trần. Thiếu hợp đồng ⇒ `proposed`; thiếu facts rollout ⇒ chưa kích hoạt.
 ✅ **Q13 — closure khi policy chưa có — ĐÃ CHỐT (comment `5575587924` trên PR #475):** lối (ii) — ngoại lệ có phạm vi:
@@ -592,3 +649,4 @@ trình policy/revision/generation. Lối (i) (#473 land trước A1) không ch�
 ✅ **Q14 — trần review (R10) — ĐÃ CHỐT hai lần:** (1) comment `5575587924`: trần 6 lời gọi — đã dùng hết ở lượt 5 (kế toán:
 lời gọi 1–6 = lượt 1, 2, 3, 4a chết, 4b, 5); (2) comment `5578460203` (08-09-2026, checkpoint thứ hai): **tới hết P1**, bộ đếm
 không reset, lời gọi 7 = lượt 6 trên r6. Còn P1 sau một lượt ⇒ vá rồi gọi tiếp; **không** tự đặt trần số, không tự dừng.
+**Lượt 7 (lời gọi 8) trên r8: 0 P1** ⇒ điều kiện dừng đạt; lời gọi 8 là lời gọi cuối của vòng này (lượt 7a chết preflight không tính).

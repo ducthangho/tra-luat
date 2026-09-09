@@ -1,7 +1,7 @@
 # ADR-0047 — Nguồn tin cậy cho CỔNG ĐỌC lease: danh tính ghim, hồ sơ tiến trình, toàn vẹn object
 
 - **Trạng thái:** Proposed (2026-09-08; chủ kho duyệt SOẠN tại Review Rescue Checkpoint của PR #475 — chưa
-  có mã, chưa có phản chứng chạy được ⇒ chưa `Accepted`)
+  có mã, chưa có phản chứng chạy được ⇒ chưa `Accepted`; đồng bộ với spec r9 theo S10 lượt 7, 09-09-2026)
 
 > **Vì sao có ADR này.** Cùng MỘT hình dạng lỗi — *"cổng đọc lease tin một nguồn mà chưa xác minh"* — trúng
 > **5** lượt cross-review liên tiếp của đặc tả `ops/specs/THU-HOI-LEASE-VA-CAP-LAI.md` (PR #475), mỗi lần ở
@@ -19,7 +19,10 @@
 Mọi **cổng đọc lease** — `check` · `ai-dang-giu` · `body` · `kiem-github` · `kiem-thu-hoi-github` trong
 `ops/lease_publish.py`, guard trong `.claude/dev/packet_loop.py`, và workflow tiếp nhận `ops-thu-hoi-admission.yml`
 — chỉ được lấy verdict từ **một** ảnh chụp có đủ BA lớp dưới đây. Thiếu một lớp, hay một lớp *không đo được*,
-thì trạng thái là `KHÔNG ĐO ĐƯỢC` và cổng **ĐỎ** (`rc=12`), không phải "coi như sạch".
+thì trạng thái là `KHÔNG ĐO ĐƯỢC` và cổng **ĐỎ**, không phải "coi như sạch". **Hai biên mã lỗi (S10 lượt 7):**
+reader/`lease_publish` trả `12`; wrapper giữ ánh xạ lỗi công khai của riêng nó — `packet_loop` trả `RC_STATE=8` kèm
+nguyên nhân gốc (`reader_rc=12`) và không đổi state. ADR này giữ bất biến *"không đo được ⇒ đỏ"*; mã lỗi/giao diện cụ
+thể ở spec (Q5/A10).
 
 ### Lớp 1 — DANH TÍNH nguồn ghim trong mã, không trong config
 
@@ -46,7 +49,8 @@ thì trạng thái là `KHÔNG ĐO ĐƯỢC` và cổng **ĐỎ** (`rc=12`), kh�
   profile: scheme/host/port). Không đòi băm đệ quy cả OS: dùng manifest của image/deployment đã xác minh và **giữ
   read-only suốt invocation**.
 - **Producer của manifest độc lập với caller và với cây ứng viên** (bước bootstrap/deployment tin cậy); **approver** của
-  mỏ neo `PROFILE_ADAPTER_DA_DUYET` là chủ kho, qua commit có review. **Cấm** đo profile từ chính deployment tuỳ ý rồi tự
+  mỏ neo `PROFILE_ADAPTER_DA_DUYET` là chủ kho hoặc người được chủ kho **uỷ quyền bền, có phạm vi** (§2 protocol), qua
+  commit có review — executor không tự duyệt. **Cấm** đo profile từ chính deployment tuỳ ý rồi tự
   đăng ký làm "đã duyệt" trong cùng lượt chạy — đó là tự khai, đúng thứ luật 3 dưới đây cấm.
 - Adapter dựng **env con từ RỖNG** (không kế thừa `os.environ`); `GIT_DIR` = repo tạm cô lập do adapter tạo
   (`git init --template=`), `GIT_CONFIG_NOSYSTEM=1`, `GIT_CONFIG_GLOBAL=/dev/null`, `GIT_NO_REPLACE_OBJECTS=1`,
@@ -79,7 +83,9 @@ thì trạng thái là `KHÔNG ĐO ĐƯỢC` và cổng **ĐỎ** (`rc=12`), kh�
 - Với mọi object dùng để quyết định: đọc bytes một lần, băm `sha1("<type> <size>\0" + bytes)` **= OID** rồi mới
   dùng; **mọi cạnh** (entry tree: mode/tên/OID; header `tree`/`parent` của commit) trích từ **bytes đã xác minh** của
   object cha. Không `merge-base`, không revision walker, không `ls-tree` để suy cạnh. Ancestry S→H = tự đi đồ thị
-  parent với visited-set + trần độ sâu (chạm trần ⇒ 12). Memoize theo `(type, OID)` trong một ảnh chụp.
+  parent với visited-set + ngân sách có đơn vị: **vượt** trần count/byte/depth (biên inclusive: n≤bound qua) hoặc hết
+  deadline ⇒ 12 — định nghĩa từng counter và biên ở spec Q4.5, không ở đây. Memoize theo `(expected_type, OID)` trong
+  một ảnh chụp, cache-hit vẫn kiểm actual type.
 - Lời khai *"sổ vắng"* chỉ hợp lệ khi tree cha **đã xác minh** không có entry tương ứng. Lệch băm / thiếu / kiểu
   sai / `rc≠0` ⇒ 12.
 - `refs/replace` của kho nguồn **không thể** áp vì repo tạm không có ref; no-replace là dây đai thứ hai, băm là dây
@@ -91,9 +97,11 @@ thì trạng thái là `KHÔNG ĐO ĐƯỢC` và cổng **ĐỎ** (`rc=12`), kh�
    `None ≠ False`). Không "đệm offline", không cache kết luận qua hai lần đọc.
 2. **MỘT ảnh chụp, MỘT phép tính:** map ref cục bộ chụp **trước** discovery; so **từng tên với cùng SHA40** với
    advertisement; không chụp lại giữa chừng; mọi lệnh đọc dùng chung một hàm trạng thái.
-3. **Trường tự khai không bao giờ THU HẸP thẩm quyền:** `effective_write_set`, `da_bi_thay_the`, hay bất kỳ trường
-   nào trong YAML lease/Issue chỉ được **so** với giá trị tính lại từ nguồn đã xác minh; lệch ⇒ 8. Descriptor ngoại
-   lệ phải **bằng** hằng ghim trong mã đã canonical.
+3. **Claim phái sinh không bao giờ THU HẸP thẩm quyền:** trường phái sinh tự khai trong lease/Issue (`effective_write_set`,
+   `da_bi_thay_the`, …) chỉ được **so** với giá trị tính lại từ nguồn đã xác minh; lệch ⇒ 8 (lỗi claim). Input khai báo
+   hợp lệ (`write_set`, timestamp, …) là đầu vào, không phải phái sinh không producer. Descriptor ngoại lệ / activation
+   binding không xác minh được theo Q13 ⇒ reader 12 rồi ánh xạ tại caller; descriptor phải **bằng** hằng ghim trong mã
+   đã canonical.
 
 ## Phạm vi và giới hạn, nói thẳng
 

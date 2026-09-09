@@ -1,4 +1,4 @@
-# ★ dev-side — r359: land PR #491 + vá 5 finding trong chính mục r358 (2026-09-09)
+# ★ dev-side — r359: land PR #491 + sửa 5 ĐỐI TƯỢNG trong mục r358 (2026-09-09)
 
 `r358` land ở merge commit `00e017af`. Mục này ghi sổ lần land ấy **và tự vá mục r358** theo các
 finding mà ba đường review độc lập tìm ra sau khi nó được viết.
@@ -86,10 +86,21 @@ xu hướng** — nhưng chúng cũng không cho phép đọc `success` thành "
 ## NĂM ĐỐI TƯỢNG được sửa trong mục r358 ở PR này — "được sửa" KHÔNG phải "đã đóng sạch"
 
 Nói cho chật ngay ở tiêu đề, vì bản trước viết *"NĂM finding đã vá"* và cross-review PR #493 chấm
-P2 hai lượt liền: **năm là số ĐỐI TƯỢNG được đụng tới**, không phải số finding đã đóng. Lượt 2
-phân loại **cả năm là `VÁ HỜ`** — mỗi cái sửa được một bản chiếu và để nguyên các bản chiếu khác.
-Danh sách dưới đây giữ nguyên năm đối tượng ấy; trạng thái đóng/chưa đóng đọc ở mục cross-review
-PR #493 bên trên.
+P2 hai lượt liền: **năm là số ĐỐI TƯỢNG được đụng tới**, không phải số finding đã đóng.
+
+**CẢNH BÁO VỀ HAI TẬP CÙNG CÓ NĂM PHẦN TỬ — đừng gán kết quả của tập này cho tập kia.** Bản trước
+của chính đoạn này viết *"lượt 2 phân loại cả năm là `VÁ HỜ`"* ngay dưới tiêu đề *NĂM ĐỐI TƯỢNG
+r358*, và cross-review PR #493 lượt 3 chấm P2 (`tu-thu-tron-hai-tap-nam-finding`). Hai tập KHÁC
+NHAU, chỉ trùng lực lượng:
+
+- **Tập A — năm ĐỐI TƯỢNG trong `r358`** (danh sách ngay dưới): nhãn nguồn · neo `bd32d114…` ·
+  gói/payload · `#490` · phạm vi mirror. Đây là thứ `r359` sửa.
+- **Tập B — năm FINDING của cross-review PR #493 lượt 1** (1 P1 + 4 P2): nợ lúc merge · khung
+  nguồn · phân hoạch P3 · nhãn attestation · suy mất ref. Đây là thứ lượt 2 chấm `VÁ HỜ`.
+
+Hai phần tử không giao: *nợ lúc merge* thuộc B mà không thuộc A; *gói/payload* và *`#490`* thuộc A
+mà không thuộc B. Trạng thái đóng/chưa đóng của **tập B** đọc ở mục cross-review PR #493 **phía
+dưới**; danh sách ngay sau đây là **tập A**.
 
 ### Phép đếm này tự nó suýt sai
 
@@ -141,12 +152,19 @@ Lưu ý một chỗ dễ đọc nhầm: mục 5 ở trên vá **LỜI KHAI** *"�
 `bo-sot-pham-vi-ref-va-vat-chat-hoa` nói **BẢNG TRÍCH bỏ sót** chính câu ấy. Vá cái trước KHÔNG
 đóng cái sau — hai lỗi khác nhau trên cùng một dòng văn bản.
 
-## Cross-review PR #493 — hai lượt, và cả năm bản vá đầu đều là VÁ HỜ
+## Cross-review PR #493 — BA lượt, và hình dạng lỗi lặp lại là VÁ HỜ
 
-Hồ sơ vá lời khai sai thì cũng bị soi như mọi thứ khác. Lượt 1 trên `4af7e29` (`codex`, `rc=0`)
-tìm ra **1 P1 · 4 P2 · 12 P3**; lượt 2 trên `9484970` cho **1 P1 · 4 P2 · 15 P3** và phân loại
-**0 `ĐÃ VÁ THẬT` · 6 `VÁ HỜ` · 11 `CHƯA VÁ`** — nghĩa là **cả năm bản vá của lượt 1 chỉ sửa MỘT
-bản chiếu và để nguyên các bản chiếu khác**. Đó là lần thứ sáu kho gặp đúng hình dạng ấy.
+Hồ sơ vá lời khai sai thì cũng bị soi như mọi thứ khác.
+
+| lượt | head | kết quả | đối chiếu lượt trước |
+|---|---|---|---|
+| 1 | `4af7e29` | `changes_requested` · **1 P1 · 4 P2 · 12 P3** | — |
+| 2 | `9484970` | `changes_requested` · **1 P1 · 4 P2 · 15 P3** | **0 ĐÃ VÁ THẬT · 6 VÁ HỜ · 11 CHƯA VÁ** |
+| 3 | `fae2fb7` | `changes_requested` · **0 P1 · 2 P2 · 15 P3** | **7 ĐÃ VÁ THẬT · 3 VÁ HỜ · 10 CHƯA VÁ** |
+
+Lượt 2 nói thẳng điều đáng nhớ nhất: **cả năm bản vá của lượt 1 chỉ sửa MỘT bản chiếu và để nguyên
+các bản chiếu khác** — lần thứ sáu kho gặp đúng hình dạng ấy. Lượt 3 đóng được P1 và bốn trong năm
+bản vá, sau khi cách vá đổi từ *"sửa chỗ mình nhớ ra"* sang *"liệt kê mọi bản chiếu rồi mới sửa"*.
 
 Chúng nằm rải ở **bốn** hiện vật, không phải "chính mục này": `CHANGELOG.md` ·
 `ops/reviews/README.md` (cả bảng cảnh báo LẪN bảng mục lục) ·
@@ -157,6 +175,12 @@ tôi sửa mục CHANGELOG rồi tưởng đã xong.
 **Bài học rẻ và dùng được ngay:** trước khi gọi một finding là đã vá, `grep` chính câu khẳng định
 ấy trên TOÀN BỘ hiện vật của PR — `CHANGELOG.md`, `ops/**`, và thân PR — chứ đừng sửa chỗ mình
 nhớ ra. Bốn trong năm finding lượt 2 chết đúng vì bước `grep` ấy không được làm.
+
+**Và `grep` một dòng vẫn CHƯA đủ** — lượt 3 chỉ ra một phản ví dụ còn sống mà phép vét bỏ qua, vì
+câu ấy **bị xuống dòng giữa hai chữ** (`mọi số` / `Git`) nên không khớp bất kỳ mẫu một dòng nào.
+Muốn vét thật thì phải nối dòng trước khi khớp, hoặc khớp trên văn bản đã chuẩn hoá khoảng trắng.
+Đây là cùng một họ với bài học *"dấu nháy ngược không phải hàng rào"*: **phép tìm phải làm việc
+trên cùng đơn vị mà nội dung được viết ra**, không phải trên đơn vị mà công cụ mặc định dùng.
 
 - **P1 `no-luc-merge-dem-ca-hai-p2-da-dong`** — biên nhận và mục lục khai *"13 finding còn sống lúc
   merge"* trong khi CHÍNH chúng khai hai P2 đã sửa **trước** merge. `13 − 2 = 11`. Hai mệnh đề
@@ -365,10 +389,11 @@ KHÔNG chứng minh sự kiện lịch sử kia đã xảy ra theo cơ chế đ�
   *"xoá ref là OID lập tức không tra được"* — object có thể còn sống nhờ ref khác, clone khác, hoặc
   chưa bị thu gom (reviewer đo `git for-each-ref --contains bd32d114…` trong sandbox ⇒ **2** ref còn
   trỏ tới nó). Điều đo được và đủ để cảnh báo là: OID ấy **không được bảo đảm tồn tại trong một
-  clone tương lai chỉ lấy lịch sử canonical**. Nên khối `GIỚI HẠN NGUỒN` ở đầu mục xếp *"mọi số
-  Git"* vào loại (a) là **quá rộng cho riêng đoạn này**: đây là **bằng chứng ngoài lịch sử
-  canonical**, một hạng nằm giữa (a) và (b). Muốn nó bền thì phải đưa snapshot vào một hiện vật
-  được theo dõi — **chưa làm**, và ghi ra đây thay vì im lặng.
+  clone tương lai chỉ lấy lịch sử canonical**. Đây là **bằng chứng ngoài lịch sử canonical**, một
+  hạng nằm giữa (a) và (b). **Bản ĐẦU của khối `GIỚI HẠN NGUỒN`** ở đầu mục xếp *"mọi số Git"* vào
+  loại (a), tức quá rộng cho riêng đoạn này — **khối ấy nay đã thu hẹp** và khai đủ ba loại; câu
+  này giữ lại để ghi cái sai, KHÔNG mô tả khung hiện hành. Muốn neo bền thì phải đưa snapshot vào
+  một hiện vật được theo dõi — **chưa làm**, và ghi ra đây thay vì im lặng.
 - **Nợ A9 đã xác định**: bốn lease GATE cấp `03:37:33` · `07:50:35` · `09:44:51` · `10:17:12Z`,
   đều TRƯỚC hạn `14:30:07Z` của #456; bốn `spec_hash` khác nhau, `revision` 1/2/3/4, `generation`
   giữ **1**, lệch `ADR-0034` *"đổi contract phải revision + generation mới"*. Hết hạn KHÔNG hợp

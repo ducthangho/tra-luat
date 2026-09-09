@@ -138,7 +138,8 @@ pre_merge_checks:
   - ten: 'doc-claims-check --strict trên head'
     ket_qua: '`rc=0` · **`ok: true`** · 106 tệp'
   - ten: 'bien_nhan_v2 trên head'
-    ket_qua: '**ĐỎ** 4 vi phạm — đo nền `afddf7e` SẠCH cũng ĐỎ, delta = 0.'
+    ket_qua: '`rc=0` · **`TỔNG: ĐẠT`** · **0 vi phạm** — `28 ĐẠT v2 · 11/11 · 42 nợ · tổng 81` trên `5b96ddc`.'
+    dinh_chinh: 'Bản đầu khai "ĐỎ 4 vi phạm, delta = 0". SAI — xem `DINH_CHINH_TOAN_KHOI` ở `post_merge_checks`.'
   - ten: 'cross-review khác nền, lượt cuối trên đúng head'
     ket_qua: '`approve` · 0 P1 · 0 P2 · 3 P3 trên `5b96ddc` — CÙNG head được duyệt và được merge.'
   - ten: 'CI Windows trên head — KHÔNG CHẠY'
@@ -171,25 +172,32 @@ post_merge_checks:
   - ten: 'shellcheck ops/dung_goi_review.sh trên master'
     ket_qua: '`rc=0`'
   - ten: 'bien_nhan_v2 trên master'
-    ket_qua: >-
-      **ĐỎ** — `29 ĐẠT v2 · 11/11 miễn trừ legacy · 42 nợ đóng băng · 4 vi phạm · 0 KHÔNG ĐO ĐƯỢC ·
-      tổng 86`.
-    vi_sao_khong_chan_land: >-
-      ĐỎ SẴN, DELTA = 0. Nền `origin/master` TRƯỚC merge (`da481f9`) đo được CÙNG bộ số:
-      `29 ĐẠT · 4 vi phạm · tổng 86`. PR #480 sửa đúng một tệp `ops/land/` và không chạm receipt nào,
-      nên không thể đổi cán cân cổng này.
-      Bốn tệp vi phạm — `handoff-264-review-1/2`, `plat-x8-review-4`, `plat-x8b-review-1` — neo ba
-      commit `0fdd70b9` `c69eaf2f` `1d11f250`. Đo trực tiếp: cả ba CÓ THẬT trong kho cục bộ, nằm trên
-      nhánh chưa merge (`claude/bien-nhan-review-s1-exec-1` và cùng họ), và KHÔNG phải tổ tiên của
-      `origin/master`.
-    mau_thuan_chua_giai: >-
-      Điều này MÂU THUẪN với `pr478-land-evidence.yaml`, vốn khai `bien_nhan_v2` trên master
-      `c87b067` cho `rc=0 · 0 vi phạm · TỔNG: ĐẠT`. Một giả thuyết KHỚP dữ liệu: phiên đo lúc ấy chạy
-      trong container CHƯA FETCH các nhánh chứa ba commit đó, nên cổng không thấy chúng — cùng họ bài
-      học `for-each-ref đọc bộ đệm cục bộ`, lần này áp cho `bien_nhan_v2`.
-      **CHƯA CHỨNG MINH.** Không dựng được phản chứng trong phiên này (không có cách xoá object khỏi
-      tầm với mà giữ nguyên phần còn lại), và không đọc được môi trường của phiên cũ. Ghi thành
-      giả thuyết còn sống, KHÔNG ghi thành nguyên nhân.
+    ket_qua: '`rc=0` · **`TỔNG: ĐẠT`** — `33 ĐẠT v2 · 11/11 miễn trừ legacy · 42 nợ đóng băng · **0 vi phạm** · tổng 86`.'
+    DINH_CHINH_TOAN_KHOI: >-
+      **BẢN ĐẦU KHAI SAI: "ĐỎ, 4 vi phạm, đỏ sẵn trên master, delta = 0". CẢ BỐN VẾ ĐỀU SAI.**
+      Bốn vi phạm ấy là TẠO TÁC CỦA KHO NÔNG trong container điều phối, không phải trạng thái kho.
+      Đo được: `git rev-parse --is-shallow-repository` ⇒ `true`, HEAD chỉ có **417** commit tổ tiên.
+      Sau `git fetch --unshallow` ⇒ `false`, **1870** commit tổ tiên, cổng trả `rc=0 · 0 vi phạm · ĐẠT`.
+      CƠ CHẾ: `ops/bien_nhan_v2.py:818` chạy `merge-base --is-ancestor <commit neo> HEAD`. Trong kho
+      NÔNG phép ấy trả SAI cho commit CÓ THẬT — đúng bài học `CLAUDE.md` mục "Cắt độ sâu làm hỏng
+      phép hỏi LỊCH SỬ". `cat-file -e` ở dòng 805 vẫn thấy object nên cổng đi tiếp và kết tội
+      "CÓ THẬT nhưng KHÔNG phải tổ tiên" — câu chỉ đúng trong kho nông.
+      PHÉP A/B ĐÃ CHẠY, cùng commit `3873173`, khác đúng MỘT biến là độ sâu kho:
+      mirror của gói review (`is-shallow=false`, 1858 tổ tiên) ⇒ `38 ĐẠT · 0 vi phạm · ĐẠT`;
+      kho nông của điều phối (`is-shallow=true`, 405 tổ tiên) ⇒ `34 ĐẠT · 4 vi phạm · ĐỎ`.
+      AI TÌM RA: cross-review HẬU KIỂM trên head `3873173`. Nó chạy CLI thật trong mirror và báo
+      `91/91 biên nhận, TỔNG: ĐẠT` — ngược hẳn con số điều phối khai. Chính chỗ ngược ấy buộc phải
+      đo A/B; nếu reviewer chép lại con số của điều phối thì lỗi này còn nguyên.
+    mau_thuan_da_giai_va_no_khong_ton_tai: >-
+      **BẢN ĐẦU DỰNG MỘT MÂU THUẪN KHÔNG CÓ THẬT.** Nó viết: master đỏ `bien_nhan_v2` trong khi
+      `pr478-land-evidence.yaml` khai `0 vi phạm · TỔNG: ĐẠT` trên `c87b067`, rồi treo thành
+      "giả thuyết còn sống".
+      Đo lại sau `--unshallow`, SÁU commit, tất cả `rc=0` và **0 vi phạm**: `c87b067` 30 ĐẠT ·
+      `da481f9` 33 ĐẠT · `5b96ddc` 28 ĐẠT · `7e69b8e` 33 ĐẠT · `3873173` 38 ĐẠT · `f4d74fe` 38 ĐẠT.
+      Nên lời khai của `pr478-land-evidence.yaml` ĐÚNG; thứ sai là phép đo của điều phối.
+      BÀI HỌC ĐẮT HƠN CON SỐ: điều phối dựng một mâu thuẫn từ MỘT phép đo hỏng, viết nó vào HAI land
+      evidence và một comment PR, rồi dùng chính nó làm căn cứ BÁC một finding của reviewer khác.
+      Một phép đo sai không dừng ở chỗ nó sai — nó thành tiền đề cho mọi thứ sau đó.
   - ten: 'CI trên merge commit 7e69b8e — CỐ Ý KHÔNG CHỜ ĐỌC'
     loai_nguon: 'không đo — quyết định của chủ kho'
     ket_qua: 'KHÔNG ĐỌC. Run `34346689704` (`gate`, `push`, `7e69b8e`) vẫn chạy tự động; tệp này không chờ nó.'

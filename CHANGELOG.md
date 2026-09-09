@@ -1,3 +1,115 @@
+# ★ dev-side — r358: ghi sổ chuỗi #468→#489 — 1016 tệp, TẤT CẢ trong `ops/` (2026-09-09)
+
+Quy ước kho ghi sổ cả việc thuần `ops:` vào tệp này (r354, r355, r356 đều vậy). Chuỗi tám PR
+`#468 → #477 → #478 → #480 → #486 → #487 → #489` đã land mà **chưa có mục nào** — đây là mục ấy.
+
+**Không nâng `VERSION`.** Nó đóng băng ở `1.36.68` từ r336; r337→r356 đều không nâng.
+
+## Phạm vi — đo, không ước
+
+```
+git diff --shortstat b416830..c0a5cbe  ⇒  1016 files changed, 247458 insertions(+)
+git diff --name-only  | sed 's#/.*##' | sort -u  ⇒  ops
+```
+
+**Đúng một thư mục cấp 1.** `ops/` bị loại khỏi kiểm kê gói từ r336, nên gói skill không đổi —
+và điều đó được CHỨNG MINH chứ không suy: `tl release-verify RELEASE_MANIFEST.json --deterministic`
+⇒ `ok: true`, `failed: []`, `checked 180/180`, `package_hash_match: true`, `extra_files: []`,
+`missing_from_current_manifest: []`, `required_missing: []`. Số mục `ops/` trong kiểm kê: **0**.
+
+## Chuỗi merge
+
+| merge commit | PR | nội dung |
+|---|---|---|
+| `802fc01` | #468 | bốn đặc tả treo sau #456 + Mission #467 + lease GATE |
+| `585c7d5` | #477 | chuẩn hoá dựng gói review + đo thật `t33` |
+| `c87b067` | #478 | land evidence #468 |
+| `da481f9` | #486 | land evidence #478 |
+| `7e69b8e` | #480 | land evidence #477 |
+| `f4d74fe` | #487 | verdict + biên nhận 5 lượt, vá hậu kiểm #486 |
+| `c0a5cbe` | #489 | bookkeeping #480 và #487, khép `ADR-0034` |
+
+Land evidence sinh ra land evidence: `ops/land/` nay có **6** tệp. Chuỗi đóng ở #490.
+
+## Thứ đáng giữ lại — `ops/dung_goi_review.sh`
+
+Việc dựng gói hiện vật cho reviewer trước nay nằm rải rác trong scratchpad từng phiên. Nay là một
+script chạy được, kiểm được: clone mirror đủ mọi ref, vật chất hoá nhánh thành `refs/heads/*`,
+cài công cụ bằng bản ghim của kho, sinh `EVIDENCE.md` tự khai cách trích và phần bỏ sót, lập manifest.
+
+Cổng của nó được chứng minh **CHẶN**, không chỉ chứng minh đường xanh:
+
+| ca | mã thoát |
+|---|---|
+| `AL_VER` rỗng · sai định dạng · thiếu `shellcheck` | `4` |
+| remote trùng trong git template | `5` |
+| `--single-branch` thay `--mirror` | `6` (`mirror=1`, lệch `304/304`) |
+| `cong-cu` là symlink ra ngoài | `4`, sentinel CÒN |
+| dựng lại vào `$R` đã dùng | `4` chặn sớm, manifest lần trước còn nguyên |
+| `actionlint 0.0.0-GIA` thoát 42 ở đầu PATH | `0`, dùng bản `1.7.7` vừa cài — PATH bị bỏ qua |
+
+## `t33` — từ "không đo được" thành ĐO ĐƯỢC, và một đính chính
+
+Cài `actionlint` bằng `ops/cai_actionlint.sh` (`AL_VER=1.7.7`, đối chiếu băm) ⇒ bộ lease đi từ
+`120/121, rc=1` lên **`121/121 đạt; đã chạy=121, bỏ qua=0`, `rc=0`**.
+
+**ĐÍNH CHÍNH ba lần lặp:** hồ sơ từng viết `t33` *"không chạy"*. Sai — nó **ĐÃ CHẠY và ĐỎ** ở tiền
+điều kiện; assertion tại `ops/lease_publish_test.py:1359–1363` bắn **trước** `subprocess.run` dòng
+1364. Thứ chưa chạy là thao tác **lint workflow** bên trong hàm. Câu sai này được sửa ở một chỗ
+mà sót chỗ khác **ba lượt liền** — bảng sửa rồi, tiêu đề và câu mở đầu vẫn sai.
+
+## CI — và một phép đo SAI đã tự bắt được
+
+Đọc được qua `/mcp/x/actions` (endpoint RIÊNG, khác `/mcp/` 44 công cụ; `CLAUDE.md:583` ghi rõ cả hai).
+
+Merge commit `585c7d5`, đo THEO JOB: `gate (ubuntu-latest)` **success** 44 bước 0 hỏng
+(26 phút 46 giây) · `gate (windows-latest)` **success** 44 bước 0 hỏng (**48 phút 15 giây**).
+
+Windows dưới trần 60 phút nhưng **biên chỉ còn ~11 phút 45 giây** — đúng thứ Issue #463 sinh ra để
+cắt bằng cách TÁCH JOB, không nâng trần. Đừng đọc `success` này thành "vấn đề đã hết".
+
+**Phép đo sai đã tự bắt:** hồ sơ #468 từng ghi `mau_thuan_chua_giai` giữa `4 skipped` (điều phối
+đọc) và `6` (reviewer phân tích tĩnh). Nguyên nhân: job lúc `in_progress` cho **43 bước, 1 skipped**;
+khi `completed` cho **44 bước, 6 skipped**. Bước chưa chạy tới thì `conclusion` còn `null`.
+**Đếm `skipped` trên job `in_progress` là phép đo SAI, không phải phép đo thiếu.**
+
+## NỢ — ghi để không ai tưởng đã xong
+
+- **`_kiem_bia_mo` dùng `any(...)` VẪN NGUYÊN** (`ops/lease_publish.py`): một bản sao có bia mộ là
+  đủ để `check` trả `rc=0`, trong khi `ai-dang-giu` vẫn đếm bản chưa bia mộ trên ref khác.
+  Đặc tả `THU-HOI-LEASE-VA-CAP-LAI` ở **revision 6**, `packet_issue: CHƯA CÓ`, trần 6/6 lời gọi
+  review đã hết; bước chặn kế là **Review Rescue Checkpoint thuộc chủ kho** (§12).
+- **Nợ A9 đã xác định**: bốn lease GATE cấp `03:37:33` · `07:50:35` · `09:44:51` · `10:17:12Z`,
+  đều TRƯỚC hạn `14:30:07Z` của #456; bốn `spec_hash` khác nhau, `revision` 1/2/3/4, `generation`
+  giữ **1**, lệch `ADR-0034` *"đổi contract phải revision + generation mới"*. Hết hạn KHÔNG hợp
+  thức hoá bốn lần cấp sớm. #489 khép phần bookkeeping; quyết định xử lý thuộc chủ kho.
+- **Issue #463–#467 còn `open`** — chuỗi này KHÔNG nghiệm thu chúng.
+- **PR #479 chưa merge**: hai P3 tự khai hợp đồng đầu vào của `ops/dung_goi_review.sh` — chỉ
+  `actionlint` được ghim, ba công cụ còn lại TIN `$PATH` đầu vào (đặt bản giả đầu PATH ⇒ `rc=0`,
+  ghi `version: 9.9.9`); script VẪN `rm -rf` `$R/kho.git` và `$R/cay-kho`, và chốt symlink KHÔNG
+  nhìn `$R` chính nó (đo: `$R` là symlink tới đích có sẵn hai thư mục ấy ⇒ sentinel trong cả hai
+  BỊ XOÁ). Mọi phép đo trên Linux+Bash; **chưa có** phép đo macOS/Windows native.
+
+## Hình dạng lỗi lặp lại — giá trị lớn nhất của chuỗi này
+
+Cross-review bắt **hơn 20 finding**; gần như tất cả là *lời khai sai*, không phải lỗi mã.
+
+1. **Đếm SỰ CÓ MẶT rồi tuyên là đã đo KHẢ NĂNG** — 44 tool ⇒ "CI không đo được" (chưa thử
+   `/mcp/x/actions`); `command -v actionlint` ⇒ bỏ qua installer ghim, trái
+   `ops/cai_actionlint.sh:14` *"co mat != dung ban"*; `sha256sum -c` chạy sai thư mục ⇒ suýt báo
+   kho hỏng. `CLAUDE.md` đã ghi thành luật: *"phải thử ít nhất HAI client trước khi gọi đó là
+   chính sách."*
+2. **Nói rộng hơn bằng chứng** — `"mọi số đo lại được"` khi chỉ **1/6** stdout tự đếm lại được;
+   `land_operator: ducthangho` khi `merged_by` là `notebyme88`.
+3. **Vá phần THÂN, để nguyên KHUNG** — một slug đi qua bốn lượt `VÁ HỜ`/`CHƯA VÁ` chỉ vì tiêu đề
+   và tên cột bảng vẫn khẳng định điều đã rút.
+4. **Bản vá tự sinh lỗi mới — SÁU lần** — prepend PATH ⇒ che lệnh hệ thống; `rm -rf` ⇒ đi theo
+   symlink XOÁ DỮ LIỆU NGOÀI GÓI; `mktemp -d` ⇒ tích luỹ; chốt đặt sai chỗ ⇒ hỏng manifest lần
+   trước; thêm verdict thiếu mục lục+biên nhận ⇒ ĐỎ `t27`; vá xong lại ĐỎ cổng receipt v2.
+5. **Dẫn một nguồn mở đọc được rồi gán cho nó nội dung nó không chứa** — biên nhận viết
+   `-m gpt-6-astra` "được ghi ở `run.json`", trong khi `run.json` chỉ có `chuong_trinh`,
+   `so_doi_so`, `van_tay`.
+
 # ★ dev-side — r356: kỳ vọng của fixture phụ thuộc NỀN CHẠY (2026-09-06)
 
 `launcher-windows.yml` ĐỬe trên `master` liên tục từ khi PR #449 land — run

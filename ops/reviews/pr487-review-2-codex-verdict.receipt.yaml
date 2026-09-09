@@ -44,8 +44,10 @@ doi_chieu_luot_1:
   tong_slug: 8
   don_vi: 'SỐ TRẠNG THÁI SLUG, không phải severity — reviewer tự khai đúng điều này.'
   ba_slug_sinh_loi_moi_va_da_sua_ngay: >-
-    Cả ba là LỆCH NỘI BỘ mức P3 giữa biên nhận và mục lục, và điều phối đã sửa cả ba TRONG chính
-    commit đưa verdict lượt 2 vào kho:
+    Cả ba là lệch nội bộ mức P3. Không sửa hết trong commit đưa verdict `edb288e`: commit ấy
+    sửa hai lệch trong receipt lượt 1; INDEX chỉ sửa ở `3873173`, manifest còn sót tới `1455741`.
+    Bản trước nhận công sai thời điểm; khối này được sửa trong gói gợi ý PR #489 lượt 1.
+    Các việc liên quan:
     (1) `bien-nhan-moi-lai-nang-attestation-thanh-do-doc-lap` — bổ sung `comment_ban_chieu` vào biên
     nhận lượt 2 nhưng để mục lục vẫn khẳng định "Receipt chưa có URL comment bản chiếu". Mục lục nay
     ghi khoá đã có, kèm nguyên do câu cũ ĐÚNG tại thời điểm reviewer đo.

@@ -2,8 +2,8 @@
 # và phép đo vì sao lease #482/#483 chết).
 #
 # Nghĩa vụ ghi land evidence: `ADR-0034:17-20`; mẫu trường: `docs/PROTOCOL_DA_PHIEN.md:466-488`.
-# `PROTOCOL §20` xếp các ADR về land evidence vào ô 0 cổng — không bộ kiểm nào cưỡng chế NỘI DUNG
-# tệp này. Đọc như LỜI KHAI.
+# Nguồn: §20 ghi ADR-0034 là "có nhắc", không phải "0 cổng"; nhắc tên không chứng minh
+# cưỡng chế nội dung. Các phép kiểm ngắn của lượt này không xác thực prose/API trong land evidence.
 
 schema_version: 1
 mission_id: pr-487
@@ -53,9 +53,10 @@ cross_review:
     tong_slug: 8
     don_vi: 'SỐ TRẠNG THÁI SLUG — không phải severity.'
     ghi_chu: >-
-      Ba nhãn VÁ SINH LỖI MỚI KHÔNG tái mở P2 nào; reviewer nói rõ phần P2 cũ đã đóng và lỗi phát
-      sinh đều là lệch nội bộ mức P3 giữa biên nhận và mục lục. Cả ba đã sửa trong chính commit đưa
-      verdict lượt 2 vào kho.
+      Ba nhãn VÁ SINH LỖI MỚI của lượt trước thuộc mức P3. `edb288e` sửa hai lệch trong
+      biên nhận lượt 1; mục lục chỉ sửa ở `3873173`; `manifest.ghi_chu` còn sót tới `1455741`.
+      Bản trước nói cả ba sửa trong chính commit đưa verdict là sai. Việc sửa ba vị trí
+      không chứng nhận toàn bộ lời văn không còn lỗi; verdict hậu kiểm còn phạm vi riêng.
 
 head_da_cross_review_khac_head_merge:
   head_cross_review_approve: 5c05778219e293ff929e8cb1f1c31aea4120d967
@@ -74,26 +75,20 @@ head_da_cross_review_khac_head_merge:
     PR #468 để lại đúng nợ này (lượt cuối review `745d888`, head merge `17f4a1b`) và bị chấm ở
     cross-review sau. Không có đường tránh: verdict phải vào kho, mà kho là chính PR này.
   no_review_head_da_merge:
-    trang_thai: NO_CHUA_TRA
+    trang_thai: DA_HAU_KIEM_CHO_DONG_FINDINGS
     mo_ta: >-
-      **Head `3873173` CHƯA qua lượt cross-review nào.** Bản đầu của khối này mô tả chênh lệch rồi
-      dừng ở đó, và như thế nó ĐỌC THÀNH "đã giải thích xong". Chưa xong: giải thích một nợ không
-      phải trả nó.
-    ai_da_chi_ra:
-      - 'Chủ kho, chất vấn trực tiếp trong phiên: "vẫn còn P1, đã có approve của cross review chưa #487".'
-      - 'Cross-review #489 (codex connector), P1 `Re-review the exact head that was merged` — độc lập với chủ kho, cùng kết luận.'
-    vi_sao_loi_khai_cu_khong_du: >-
-      Bản đầu dựa vào "nội dung đã approve giữ NGUYÊN byte". Câu ấy là LỜI KHAI CỦA ĐIỀU PHỐI, không
-      phải kết luận của một lượt review trên head ấy — và connector nói đúng: bốn tệp review/evidence
-      CÓ đổi giữa hai head, nên phép review theo exact-SHA đã cũ dù các tài liệu sản phẩm khác giữ
-      nguyên byte. Duyệt của người trên đúng head là UỶ QUYỀN, KHÔNG phải REVIEW; hai vai khác nhau
-      và không thay nhau được.
-    duong_tra_no:
-      - 'Chạy một lượt cross-review HẬU KIỂM trên `3873173` (nay đã ở master) và ghi verdict + biên nhận vào kho.'
-      - 'Hoặc một human audit của `3873173` được ghi lại.'
-    trang_thai_hien_tai: >-
-      Đã đề xuất lượt hậu kiểm với chủ kho; CHƯA có quyết định. Cho tới lúc đó nợ này ở lại
-      `NO_CHUA_TRA`, và land evidence này KHÔNG được đọc như "đã hoàn tất review".
+      Tại thời điểm merge, head `3873173` chưa có lượt cross-review exact head. Nay đã có
+      verdict hậu kiểm `ops/reviews/pr487-hau-kiem-head-review-1-codex-verdict.md`, neo đúng
+      `3873173094a3e294b069998ed21dc117d8ad659a`. Điều đó khép việc thiếu một lần đọc head,
+      không hồi tố thành review trước merge và không phải verdict `approve`.
+    ket_qua_hau_kiem: >-
+      `changes_requested`; tổng 0 finding P1, 1 finding P2, 4 finding P3. Chính phần chênh
+      của head `3873173` có 0 finding P1, 0 finding P2, 3 finding P3 nội dung; 1 finding P3
+      về gói; finding P2 thuộc lập luận PR #489 tại `8911ea4`, ngoài head `3873173`.
+    dieu_kien_con_lai: >-
+      Giữ finding chưa đóng và tiếp tục cross-review PR #489 tới `approve` theo chỉ thị
+      chủ kho. `0 P1` không thay verdict hoặc tự tạo thẩm quyền merge. Nợ lịch sử merge
+      trước review vẫn có vết; không cần viết lại lịch sử để tạo tiền kiểm.
 
 # --- P1 CỦA CODEX CONNECTOR: ĐIỀU PHỐI ĐÃ BÁC, VÀ VIỆC BÁC ẤY SAI ---
 p1_connector_dieu_phoi_bac_SAI:
@@ -108,23 +103,34 @@ p1_connector_dieu_phoi_bac_SAI:
     điều phối. Đo lại sau `git fetch --unshallow`, SÁU commit, tất cả `rc=0` và **0 vi phạm**:
     `c87b067` 30 ĐẠT · `da481f9` 33 ĐẠT · `5b96ddc` 28 ĐẠT · `7e69b8e` 33 ĐẠT · `3873173` 38 ĐẠT ·
     `f4d74fe` 38 ĐẠT.
-    Nên: vế (a) của connector — "cha exit 0" — **ĐÚNG** trong kho đầy đủ, và điều phối đã bác nó
-    bằng một kết quả chỉ tồn tại trong kho nông. Vế (b) — "năm receipt fail" — **không đúng trong
-    kho đầy đủ** (0 vi phạm), nhưng điều phối KHÔNG có tư cách kết luận điều đó từ phép đo cũ.
+    Chỉ phần "cha exit 0" của vế (a) được xác nhận trong các cây đầy đủ của gói. Vế (a) còn
+    nói cây merge của connector exit 1; object ấy không có để tái chạy. Về vế (b), 5/5 neo
+    receipt hợp lệ trên head `3873173` và merge THẬT `f4d74fe`, nên không cần đổi neo trong
+    các cây này. Không khái quát kết quả ấy sang cây merge tổng hợp/môi trường connector.
   bang_chung_kho_nong:
+    loai_nguon: 'ATTESTATION của điều phối; không có kho nông hoặc log A/B gốc trong gói.'
     is_shallow_truoc: true
     so_commit_to_tien_HEAD_truoc: 417
     is_shallow_sau: false
     so_commit_to_tien_HEAD_sau: 1870
-    co_che: >-
-      `ops/bien_nhan_v2.py:818` chạy `merge-base --is-ancestor <commit neo> HEAD`. Trong kho NÔNG
-      phép ấy trả SAI cho commit CÓ THẬT; `cat-file -e` ở dòng 805 vẫn thấy object nên cổng đi tiếp
-      và kết tội "CÓ THẬT nhưng KHÔNG phải tổ tiên". Đúng bài học `CLAUDE.md` mục "Cắt độ sâu làm
-      hỏng phép hỏi LỊCH SỬ".
-    phep_A_B: >-
-      Cùng commit `3873173`, khác đúng MỘT biến là độ sâu kho. Mirror của gói review
-      (`is-shallow=false`, 1858 tổ tiên) ⇒ `38 ĐẠT · 0 vi phạm · TỔNG: ĐẠT · rc=0`.
-      Kho nông của điều phối (`is-shallow=true`, 405 tổ tiên) ⇒ `34 ĐẠT · 4 vi phạm · ĐỎ · rc=1`.
+    gioi_han: >-
+      Điều phối khai đã đo kho nông với `is-shallow=true`, 417 commit kể cả HEAD; sau
+      `--unshallow` thành `false`, 1870 commit. Gói review không có kho nông/log gốc và không neo
+      exact HEAD của cặp số này, nên phần lịch sử ấy là ATTESTATION, KHÔNG ĐO ĐƯỢC độc lập.
+      CƠ CHẾ đọc được trong mã: dòng 805 gọi `cat-file -e <neo>^{commit}`; dòng 818 gọi
+      `merge-base --is-ancestor <neo> HEAD`. Nếu object còn nhưng shallow boundary cắt đường
+      tổ tiên, mã thoát 1 bị diễn giải thành vi phạm ancestry. Trong kho đầy đủ của gói,
+      các neo được kiểm đều với tới được. Điều đó hỗ trợ cơ chế kho nông; không xác nhận
+      mọi yếu tố của hai môi trường lịch sử giống nhau.
+      A/B do điều phối thuật lại tại `3873173`: mirror không nông có 1858 commit, 38 biên nhận
+      v2 đạt, 0 vi phạm; kho nông có 405 commit, 34 biên nhận v2 đạt, 4 vi phạm. Reviewer chỉ
+      tái đo được vế mirror: 91/91 biên nhận phân loại, 0 vi phạm, `TỔNG: ĐẠT`.
+      Không gọi đây là phép thử độc lập đã chứng minh "chỉ khác đúng một biến" hoặc nguyên
+      nhân duy nhất. Không dùng vế kho nông chưa đối chứng để phán môi trường connector.
+  cay_connector_chua_do:
+    object_duoc_dan: a9b9edd014636dd49b208a5e2d37fbe5dfa0c01f
+    merge_tong_hop_dieu_phoi_tung_do: 372bf9adb331218212619fc04763acbedfaa3f3f
+    ket_qua: 'Cả hai object vắng trong gói. Không tái dựng object khác rồi coi là object lịch sử; không kết luận về cổng trên chúng.'
   dinh_chinh_nhan_cha_1: >-
     Bản đầu ghi `da481f9` là "cha 1". SAI về NHÃN: `f4d74fe` có cha `7e69b8e` + `3873173`.
     Cross-review #489 chấm P2 `Measure the actual first parent` đúng chỗ ấy. Nhưng việc sửa nhãn
@@ -149,10 +155,15 @@ p1_connector_dieu_phoi_bac_SAI:
     khớp bậc độ lớn với kho đầy đủ.
 
 pre_merge_checks:
-  - ten: 'CI trên exact head đã duyệt'
+  - ten: 'CI được báo cho PR có head 3873173094a3e294b069998ed21dc117d8ad659a'
     loai_nguon: 'attestation của điều phối, đọc qua endpoint /mcp/x/actions'
     ket_qua: '`gate` (`pull_request`, `3873173`) = **success**.'
-    canh_bao_doc_ket_qua: 'Lượt `pull_request` chỉ có MỘT job (ubuntu); Windows không chạy trên PR thường.'
+    canh_bao_doc_ket_qua: >-
+      Đây là lời khai kết quả PR, không phải bằng chứng CI exact head. `ci.yml` không ghim
+      `actions/checkout@v4` vào `pull_request.head.sha`; chính workflow ghi `GITHUB_SHA` của
+      event `pull_request` là merge tổng hợp. Không có log checkout/run JSON để xác thực
+      SHA cây đã test. Ma trận PR không nhãn `windows` chỉ khai Ubuntu; nhãn và event thực
+      tế vẫn là ATTESTATION. Windows còn có đường `workflow_dispatch` và PR nhãn `windows`.
   - ten: 'duyet khac danh tinh trên head đã duyệt'
     ket_qua: '`success` — chạy lại ở event `pull_request_review` sau khi `notebyme88` APPROVED trên `3873173`.'
   - ten: 'phan chung duyet khac danh tinh'
@@ -163,9 +174,13 @@ pre_merge_checks:
     ket_qua: '`rc=0` · sạch — **46 ADR / 46 dòng §20**, khớp 1–1'
   - ten: 'doc-claims-check --strict trên head'
     ket_qua: '`rc=0` · **`ok: true`** · 106 tệp'
-  - ten: 'bien_nhan_v2 trên head'
-    ket_qua: '`rc=0` · **`TỔNG: ĐẠT`** · **0 vi phạm** — `38 ĐẠT v2 · 11/11 · 42 nợ · tổng 91` trên `3873173`.'
-    dinh_chinh: 'Bản đầu khai "ĐỎ 4 vi phạm, đỏ sẵn" — SAI, đo trong kho nông. Xem `p1_connector_dieu_phoi_bac_SAI`.'
+  - ten: 'bien_nhan_v2 trước merge trên head 3873173094a3e294b069998ed21dc117d8ad659a'
+    trang_thai: KHONG_DO_DUOC
+    ket_qua: 'Không có bằng chứng hợp lệ cổng đã đạt TRƯỚC merge. Kết quả cũ được điều phối khai đo trong kho nông đã bị rút.'
+    do_lai_sau_merge:
+      tested_sha: 3873173094a3e294b069998ed21dc117d8ad659a
+      ket_qua: '91/91 biên nhận phân loại; 38 biên nhận v2 đạt, 11/11 biên nhận legacy, 42 biên nhận nợ; 0 vi phạm; TỔNG: ĐẠT'
+      loai_nguon: 'Đo lại hậu kiểm trên commit cũ trong kho đầy đủ; không hồi tố thành tiền kiểm. Số liệu: pr489-review-1-do-cuc-bo.json.'
   - ten: 'cross-review khác nền trên exact head đã merge'
     trang_thai: not_run
     ly_do: >-
@@ -212,10 +227,10 @@ khong_do_duoc:
     ly_do: 'GitHub không có trường phân biệt.'
   - muc: 'Môi trường của codex connector khi nó chấm P1'
     ly_do: >-
-      Vẫn không đọc được. NHƯNG câu hỏi đã đổi: bản đầu dùng giả thuyết "connector chạy trong kho
-      thiếu object" để BÁC finding của nó. Nay đo được rằng KHO NÔNG là của ĐIỀU PHỐI, và trong kho
-      đầy đủ cổng cho `0 vi phạm` ở mọi commit. Nên môi trường của connector không còn là điều cần
-      biết để phán finding — phép đo của điều phối mới là thứ đã sai.
+      Không đọc được môi trường, log hay object merge tổng hợp của connector. Không cần các
+      nguồn ấy để rút căn cứ bác cũ của điều phối; vẫn cần chúng nếu muốn kết luận toàn bộ
+      finding hoặc lý do connector cho kết quả khác. Đo được 0 vi phạm tại 6/6 commit được
+      liệt kê trong gói, không phải mọi commit hoặc mọi môi trường.
   - muc: 'Nội dung thật của các comment bản chiếu trên GitHub'
     ly_do: 'REST tới `repos/…` bị proxy chặn 403; đường MCP tự chuẩn hoá thực thể HTML.'
   - muc: 'Model đã phục vụ của năm lượt cross-review'
@@ -223,7 +238,8 @@ khong_do_duoc:
 
 bookkeeping:
   - >-
-    Land evidence thứ **NĂM** của kho. Cùng đợt với `pr480-land-evidence.yaml` (PR #489).
+    PR #489 thêm 2 tệp land evidence vào base có 4 tệp, thành 6 tệp tại reviewed head.
+    Số tệp không xác nhận PR đã land; PR #489 chưa merge tại lúc review.
   - >-
     **PR #486 nay có hiện vật cross-review** — hậu kiểm, sau khi đã merge. Không hồi tố biến thời
     điểm merge của nó thành đã qua review; bản ghi nợ ở `ops/reviews/pr486-hau-kiem-no-review.yaml`.

@@ -1,0 +1,134 @@
+# BIÊN NHẬN GIAO HÀNG — cross-review LƯỢT 4 của PR #478 (land evidence cho #468), KHÁC NỀN (codex).
+#
+# Verdict: changes_requested — 0 P1 / 3 P2 / 13 P3.
+# Ba P2 lời khai: dẫn ADR sai phạm vi · `so_luot` không đơn vị · gộp hai nguyên nhân manifest. 11/13 P3 là tín dụng độ phủ bảng.
+#
+# NEO KÉP: verdict này có CẢ blob trong kho LẪN comment bản chiếu trên PR #478 — mạnh hơn các lượt
+# 14/15 của #468 vốn chỉ có blob (PR đã merge trước khi verdict vào kho).
+#
+# TỰ KHAI MỘT LỖI CỦA ĐIỀU PHỐI: verdict lượt 5 bị ĐĂNG MUỘN hơn một ngày (comment 5598591753 lúc
+# 2026-09-09) vì phiên vá xong ba P1 rồi đi tiếp mà quên đăng. Suốt thời gian ấy nó chỉ tồn tại
+# trong scratchpad, tức sẽ mất cùng container. Đó ĐÚNG khuyết tật mà packet #483
+# `VERDICT-KHONG-BOC-HOI` được mở ra để chặn — mắc lại ngay trong lượt làm việc mở packet ấy.
+
+schema_version: 2
+receipt_id: pr478-land-review-4-codex-20260908-c80b9494
+kind: review_delivery_receipt
+packet_id: 'PR478-LAND-EVIDENCE-CHO-468'
+lease_id: khong-co-lease
+phase_key: LAND-EVIDENCE-468
+luot: 4
+role: reviewer
+provider: codex
+executor_provider: claude
+cross_provider: true
+assurance: cross_approved
+verdict: changes_requested
+verdict_path: ops/reviews/pr478-land-review-4-codex-verdict.md
+verdict_sha256: 2f63bee6843b2139f8bd45bedcda062e789b49b92a6a8d96cfc838de3ba03967
+verdict_bytes: 44074
+reviewed_sha: 5a4dd859ef791ca046aea3af4bab2731883323ec
+evidence_url: https://github.com/ducthangho/tra-luat/blob/718fc41272cf7f9aaa004a70041906aad64a03d0/ops/reviews/pr478-land-review-4-codex-verdict.md
+comment_ban_chieu: https://github.com/ducthangho/tra-luat/pull/478#issuecomment-5577923821
+evidence_url_ghi_chu: >-
+  `evidence_url` neo BLOB ghim commit `718fc41` — commit ĐẦU TIÊN chứa tệp verdict, trên nhánh
+  `claude/land-478-20260909`. Cổng `bien_nhan_v2` đòi đúng dạng `/blob/<40 hex>/<đường dẫn>` cho
+  `anchor.loai: canonical_ancestry`, và nó ĐÚNG: một URL comment KHÔNG đo được quan hệ tổ tiên.
+  Bản đầu của biên nhận này neo comment và bị cổng từ chối hai lần — ghi lại thay vì lặng lẽ sửa.
+  Neo THỨ HAI là comment bản chiếu ở `comment_ban_chieu` trên PR #478 — đã đọc ngược về và diff sau khi đăng, khớp TỪNG KÝ TỰ.
+  Neo thứ hai là blob của chính tệp `verdict_path` trong kho (PR land evidence #478 này).
+  Băm trong kho BẰNG băm bản gốc trong gói — đã kiểm, không có chuẩn hoá LF nào làm lệch.
+so_p1: 0
+so_p2: 3
+so_p3: 13
+
+model_reviewer_identity:
+  provider: openai_codex
+  surface: codex_cli
+  model_yeu_cau: gpt-6-astra
+  model_da_chay: KHONG_DO_DUOC
+  model_bang_chung: >-
+    `provider` và `surface` ĐO ĐƯỢC — `run.json` ghi thẳng `provider: openai_codex` và
+    `execution_surface: codex_cli`. `model` thì KHÔNG: `run.json.lenh` chỉ giữ
+    `chuong_trinh`, `so_doi_so`, `van_tay` — không lưu argv. Nên `-m gpt-6-astra
+    -c model_reasoning_effort=xhigh` là ATTESTATION của điều phối về đối số ĐÃ TRUYỀN, không phải
+    bằng chứng về model nhà cung cấp ĐÃ PHỤC VỤ. `codex` không phát `modelUsage` như `claude`.
+    ĐÍNH CHÍNH phạm vi so với biên nhận lượt 14/15 của #468: các tệp ấy viết `run.json` "chỉ có
+    chuong_trinh/so_doi_so/van_tay" — câu ấy đúng cho khoá `lenh`, nhưng rộng quá cho CẢ TỆP:
+    `run.json` v1.5.0 còn ghi provider, surface, prompt_sha256, head, mốc thời gian và băm
+    stdout/stderr. Ba trường đầu là thứ đo được thật.
+  session_run_id: c80b9494
+  run_id_day_du: c80b9494f4ec46318792a6331be42775
+  thread_id: KHONG_DO_DUOC
+  prompt_sha256: 49452995f2400281f6d2d992b27a086c2ef7240ae044db7ae0e56f649ae38d7f
+  prompt_kin_hoan_toan: false
+  bat_dau_utc: '2026-09-08T01:26:18.128219+00:00'
+  ket_thuc_utc: '2026-09-08T01:47:04.122762+00:00'
+  thoi_luong_giay: 1245.995
+  ma_thoat: 0
+  trang_thai: xong
+  stdout_byte: 370
+  stdout_sha256: a52f79914905a5b27d5494e71781a2f21cbb3817fc2f32889133cb4f42e8ebd8
+  stderr_byte: 1164648
+  stderr_sha256: 528e26eed99166fdd93e0e6d4a52aaa36fcd2d504155eed095a79ee085c7eac9
+  so_lan_chet_truoc_khi_xong: 0
+  neo_boi_launcher: >-
+    `launcher.py run --expected-repo github.com/ducthangho/tra-luat --expected-root-commit
+    394e93468fc8d84ec20938e6df8fb7ab72b2cc37 --expected-head 5a4dd859ef791ca046aea3af4bab2731883323ec --require-clean
+    --prompt-file PROMPT.md --expected-prompt-sha256 49452995f2400281f6d2d992b27a086c2ef7240ae044db7ae0e56f649ae38d7f --deadline-utc
+    2026-09-08T02:41:17+00:00` bọc `codex exec`. `run.json` xác nhận `worktree_sach: true`,
+    `so_muc_ban: 0`, `remotes: ['github.com/ducthangho/tra-luat']`, `commit_goc: ['394e93468fc8d84ec20938e6df8fb7ab72b2cc37']`.
+
+nang_luc_do_cua_goi:
+  ghi_chu: >-
+    Gói dựng bằng `ops/dung_goi_review.sh` (đã land ở PR #477): mirror ĐỦ MỌI REF, vật chất hoá
+    từng nhánh thành `refs/heads/*`, cài `actionlint` bằng bản ghim của kho, sinh EVIDENCE tự khai
+    cách trích số và phần bỏ sót.
+  so_ref: 309
+  lech: 0
+  so_tag: 62
+  chua_do_duoc: >-
+    Không có mạng trong sandbox nên KHÔNG xác minh được ảnh chụp nguồn so với GitHub tại lúc
+    reviewer đọc. Mọi khẳng định về GitHub API (CI, merged_by, timeline) reviewer đều khai
+    KHÔNG ĐO ĐƯỢC, đúng như prompt yêu cầu.
+
+manifest:
+  duong_dan: KHONG_CO_TRONG_KHO
+  ghi_chu: >-
+    CỐ Ý không đưa hiện vật gói vào kho: thư mục `do-luot4/` của reviewer nặng
+    34M vì chứa cả bản sao git 309 ref. Chỉ lưu tệp
+    VERDICT. Hệ quả phải nói thẳng: các script `do-luot4/*.py` mà reviewer viết để tự đo thì
+    KHÔNG tái chạy được từ kho — verdict còn, công cụ sinh ra nó thì không.
+
+github_submitter_identity:
+  actor: ducthangho
+  la_tac_gia_PR: true
+  ghi_chu: >-
+    `ADR-0040`: biên nhận và verdict do tài khoản tác giả PR vận chuyển KHÔNG thành required check
+    hay merge authorization. Comment bản chiếu đăng bằng `GITHUB_PAT` của chủ kho qua phiên điều
+    phối, nên `user.login` KHÔNG phân biệt được người với phiên.
+  phien_van_chuyen: https://claude.ai/code/session_01C52eS8AgeiwTrDifXGDGYP
+
+anchor:
+  loai: canonical_ancestry
+  cuong_do: cao
+  mo_ta: >-
+    Giá trị `loai` là `canonical_ancestry` vì đó là neo CHÍNH và là giá trị hợp lệ của cổng
+    (`ops/bien_nhan_v2.py` dùng DANH SÁCH CHO PHÉP: canonical_ancestry · check_object ·
+    protected_evidence_ref). Bản đầu của biên nhận này đặt `comment_va_blob` — một giá trị BỊA,
+    và cổng từ chối đúng. Cách chữa là dùng giá trị đúng, KHÔNG nới danh sách cho phép để vừa
+    tệp của mình; nới nó là tự tay tháo đúng cơ chế mà `CLAUDE.md` ghi là thứ duy nhất chặn được
+    kẻ gian ("danh sách CẤM không bao giờ đủ — phải đảo thành danh sách CHO PHÉP").
+    Neo comment vẫn được mô tả dưới đây như neo THỨ HAI, chỉ không dùng làm `loai`.
+    HAI neo độc lập. (1) Comment bản chiếu trên PR #478 (`issuecomment-5577923821`) — đăng xong đọc
+    ngược về và diff, khớp từng ký tự. (2) Blob `ops/reviews/pr478-land-review-4-codex-verdict.md` trong PR land evidence này; khi PR ấy merge
+    bằng merge commit thì blob thành tổ tiên của `master`.
+  gioi_han: >-
+    Neo (1) sống trong CSDL Issue nên SỬA/XOÁ ĐƯỢC và không có quan hệ tổ tiên; neo (2) chỉ vững
+    nếu land bằng MERGE hoặc fast-forward — SQUASH sẽ thay commit và phá quan hệ ấy (xem hàng
+    `neo-canonical-ancestry-chi-dung-khi-land-bang-merge` ở mục cảnh báo). Không có tag `luu-tru/*`.
+
+khong_do_duoc:
+  - 'Model đã phục vụ và `thread_id`: `run.json` không lưu argv; `codex` không phát `modelUsage`.'
+  - 'Hiện vật gói (script tự đo của reviewer) KHÔNG vào kho — verdict không tái chạy được từ kho.'
+  - 'Trạng thái GitHub tại thời điểm reviewer đọc: sandbox không có mạng.'

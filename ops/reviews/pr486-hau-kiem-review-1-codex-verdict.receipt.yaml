@@ -1,0 +1,151 @@
+# BIÊN NHẬN GIAO HÀNG — cross-review HẬU KIỂM lượt 1 của PR #486 (land evidence cho #478), KHÁC NỀN (codex).
+#
+# Verdict: changes_requested — 2 P1 / 4 P2 / 13 P3.
+#
+# THEO CHỈ THỊ HẬU KIỂM CỦA CHỦ KHO: PR #486 đã merge trước khi có verdict
+# cross-review hoàn tất. Mốc được cung cấp: 08:54:36Z gỡ draft, 08:54:45Z connector
+# bắt đầu, 08:55:09Z merge (ngày 2026-09-09 UTC). Hiệu hai mốc cuối là 24 giây.
+# Mốc API và trạng thái Running là ATTESTATION, không có response để đo lại offline;
+# không dùng Running để kết luận chưa từng có review khác hoặc sẽ không được cập nhật.
+# Hậu kiểm không hồi tố biến thời điểm merge thành đã qua cross-review.
+#
+# Reviewer chỉ ra lỗi suy luận `vang-nhanh-khong-chung-minh-chua-lam-viec` từ hồ sơ.
+# Điều phối bổ sung lời khai API về token và hạn mức tuần trong biên bản lease.
+# Hai nguồn có phạm vi khác nhau: API chưa được reviewer xác minh, không phải phép
+# kiểm độc lập chứng nhận nguyên nhân duy nhất hay lượng công việc thực của packet.
+
+schema_version: 2
+receipt_id: pr486-hau-kiem-review-1-codex-20260909-6f2e70d5
+kind: review_delivery_receipt
+packet_id: 'PR486-LAND-EVIDENCE-CHO-478'
+lease_id: khong-co-lease
+phase_key: LAND-EVIDENCE-478
+luot: 1
+role: reviewer
+provider: codex
+executor_provider: claude
+cross_provider: true
+assurance: cross_reviewed
+verdict: changes_requested
+verdict_path: ops/reviews/pr486-hau-kiem-review-1-codex-verdict.md
+verdict_sha256: f3e3d0c57786fa2c23c01a3216bddab3d5583109194e158e944c4b3fd2bdb94c
+verdict_bytes: 91292
+reviewed_sha: da481f94eee0adf1fe5fc4260a535a9b48fc2627
+evidence_url: https://github.com/ducthangho/tra-luat/blob/ee23363171ca0a5218a5d7f067649487470acd0c/ops/reviews/pr486-hau-kiem-review-1-codex-verdict.md
+comment_ban_chieu: https://github.com/ducthangho/tra-luat/pull/486#issuecomment-5600018857
+comment_ban_chieu_ghi_chu: >-
+  Điều phối khai đây là bản rút gọn, liệt kê các slug, mức và phép đo chính rồi trỏ về blob.
+  Không có response/readback hoặc log đối chiếu nội dung comment trong kho; sự tồn tại, độ đầy
+  đủ và nội dung comment là ATTESTATION, KHÔNG ĐO ĐƯỢC offline. Không khai khớp từng ký tự hay
+  byte. Finding neo-comment-khai-vuot-lop-doc thuộc verdict hậu kiểm PR #486 lượt 1.
+  CLAUDE.md:127–145 mô tả biến đổi ở trường thân issue/comment qua MCP, không chứng minh mọi
+  đường đọc GitHub cùng biến đổi. Cần giữ client, response và các bước biến đổi để đối chứng
+  mạnh hơn. Không gọi các comment lịch sử là nguyên văn đã xác thực; blob Git là nguồn đối chứng
+  được.
+evidence_url_ghi_chu: >-
+  URL blob ghim commit ee23363171ca0a5218a5d7f067649487470acd0c, commit thêm tệp verdict đầu
+  tiên trong lịch sử reachable của snapshot hậu kiểm. Blob tại URL khớp byte verdict_path và
+  verdict_sha256 trong cây đang review. Việc bản trong kho bằng bản scratchpad gốc ở lúc vận
+  chuyển là ATTESTATION: bản gốc không kèm. Commit ghim là tổ tiên của head PR #487 được hậu
+  kiểm; chưa xác nhận PR #487 đã vào master hoặc trạng thái GitHub hiện hành.
+so_p1: 2
+so_p2: 4
+so_p3: 13
+
+model_reviewer_identity:
+  provider: openai_codex
+  surface: codex_cli
+  model_yeu_cau: gpt-6-astra
+  model_da_chay: KHONG_DO_DUOC
+  model_bang_chung: >-
+    run.json của lượt này không kèm trong kho. Điều phối khai đã đọc provider, surface,
+    prompt_sha256, head, thời gian, trạng thái và băm stdout/stderr từ tệp đó; metadata runtime
+    dưới đây là ATTESTATION, chưa được hậu kiểm từ nguồn gốc. Hiệu hai timestamp tái tính được
+    là phép kiểm số học nội bộ, không xác thực lần chạy. Đối số model/effort được yêu cầu không
+    chứng minh model thực phục vụ. Nội dung verdict đối chứng được trong Git; nó không thay
+    run.json, prompt hoặc log của đúng session.
+  session_run_id: 6f2e70d5
+  run_id_day_du: 6f2e70d5f1eb4b189ab83ce3c26781f7
+  thread_id: KHONG_DO_DUOC
+  prompt_sha256: df5dab8884e853abfcbf6a8b7025944ea181f3fac34f95b3678c1137485f4401
+  prompt_kin_hoan_toan: false
+  bat_dau_utc: '2026-09-09T09:31:19.356648+00:00'
+  ket_thuc_utc: '2026-09-09T09:52:40.004479+00:00'
+  thoi_luong_giay: 1280.648
+  ma_thoat: 0
+  trang_thai: xong
+  stdout_byte: 575
+  stdout_sha256: 6545945eed0126f3b2a77ece51a48f866fb35f4e83132df8bb7adb7e22c87d5a
+  stderr_byte: 1352649
+  stderr_sha256: b60b6a068107dc47d96717d37498d05f07148521edeac4f95c4fc2811df46867
+  so_lan_chet_truoc_khi_xong: 0
+  vi_sao_thoi_luong_dang_ke: >-
+    Thời lượng và kích thước log được điều phối thuật lại; kích thước verdict trong kho đo trực
+    tiếp được. Các đại lượng này không tự chứng minh việc review hoàn tất hoặc chất lượng
+    review. Phải đọc nội dung verdict và đối chiếu các nguồn được dẫn.
+  neo_boi_launcher: >-
+    ATTESTATION về lời gọi launcher, chưa có run.json/argv/log gốc để tái xác minh: `launcher.py
+    run --expected-repo github.com/ducthangho/tra-luat --expected-root-commit
+    394e93468fc8d84ec20938e6df8fb7ab72b2cc37 --expected-head
+    da481f94eee0adf1fe5fc4260a535a9b48fc2627 --require-clean --prompt-file PROMPT.md
+    --expected-prompt-sha256 df5dab8884e853abfcbf6a8b7025944ea181f3fac34f95b3678c1137485f4401
+    --deadline-utc 2026-09-09T10:16:19Z` bọc `codex exec`. `run.json` xác nhận `worktree_sach:
+    true`, `so_muc_ban: 0`, `remotes: ['github.com/ducthangho/tra-luat']`, `commit_goc:
+    ['394e93468fc8d84ec20938e6df8fb7ab72b2cc37']`.
+
+nang_luc_do_cua_goi:
+  ghi_chu: >-
+    Điều phối khai gói dựng bằng ops/dung_goi_review.sh. so_ref đếm refs/heads, không phải mọi
+    namespace Git; so_tag là đại lượng riêng. Inventory, công cụ và response máy chủ của lượt cũ
+    không kèm trong kho; lời thuật lại trong verdict không thay dữ liệu gốc. Không xác minh lại
+    được độ phủ GitHub tại mốc lịch sử.
+  so_ref: 312
+  lech: 0
+  so_tag: 62
+  cong_cu_trong_goi: 'actionlint 1.7.7 (bản ghim) · shellcheck 0.9.0 · git 2.43.0 · python3 3.11.15'
+  chua_do_duoc: >-
+    Không có mạng trong sandbox nên KHÔNG xác minh được ảnh chụp nguồn so với GitHub tại lúc
+    reviewer đọc. Mọi khẳng định về GitHub API (CI, merged_by, timeline, comment) reviewer đều khai
+    KHÔNG ĐO ĐƯỢC, đúng như prompt yêu cầu.
+
+tuan_thu_cam_cua_reviewer:
+  cay_kho_sach: true
+  commit_them_ngoai_head: 0
+  bang_chung: >-
+    Điều phối và verdict khai cây được review sạch, không thêm commit ngoài reviewed_sha khi kết
+    thúc. Không có log status hoặc snapshot cây của đúng lượt trong kho; đây là lời thuật lại,
+    không được dùng trạng thái cây hiện tại để xác thực lần chạy trước.
+
+manifest:
+  duong_dan: KHONG_CO_TRONG_KHO
+  ghi_chu: >-
+    Không lưu gói review lịch sử trong kho. Tệp verdict được lưu; run.json, prompt,
+    stdout/stderr và công cụ tự đo của đúng lượt không kèm. Các băm log được khai không tái tính
+    được từ biên nhận. Số ref của gói xem nang_luc_do_cua_goi.
+
+github_submitter_identity:
+  actor: ducthangho
+  la_tac_gia_PR: true
+  ghi_chu: >-
+    `ADR-0040`: biên nhận và verdict do tài khoản tác giả PR vận chuyển KHÔNG thành required check
+    hay merge authorization. Comment bản chiếu đăng bằng `GITHUB_PAT` của chủ kho qua phiên điều
+    phối, nên `user.login` KHÔNG phân biệt được người với phiên.
+  phien_van_chuyen: https://claude.ai/code/session_01UN8WRS5Bc5pBBzYPDqs9Dx
+
+anchor:
+  loai: canonical_ancestry
+  cuong_do: cao
+  mo_ta: >-
+    Blob verdict ghim tại commit ee23363171ca0a5218a5d7f067649487470acd0c, đối chứng được trong
+    Git và là tổ tiên của head PR #487 được hậu kiểm. Comment_ban_chieu chỉ là địa chỉ được điều
+    phối khai; nội dung và độ đầy đủ của neo comment chưa được xác minh độc lập.
+  gioi_han: >-
+    PR #487 chưa được hồ sơ này chứng nhận đã merge. Quan hệ commit với master sau land phải đo
+    trên SHA thực land; squash có thể thay commit ghim. Comment sửa/xoá được và không có quan hệ
+    tổ tiên Git. Trạng thái PR không chứng minh có hay không có người theo dõi. Loại/cường độ mỏ
+    neo được khai không tự thành merge authorization.
+
+khong_do_duoc:
+  - 'Model đã phục vụ và `thread_id`: `run.json` không lưu argv; `codex` không phát `modelUsage`.'
+  - 'Hiện vật gói (script tự đo của reviewer) KHÔNG vào kho — verdict không tái chạy được từ kho.'
+  - 'Trạng thái GitHub tại thời điểm reviewer đọc: sandbox không có mạng.'

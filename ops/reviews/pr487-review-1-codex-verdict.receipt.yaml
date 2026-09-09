@@ -1,0 +1,149 @@
+# BIÊN NHẬN GIAO HÀNG — cross-review LƯỢT 1 của PR #487, KHÁC NỀN (codex).
+#
+# Verdict: changes_requested — 0 P1 / 2 P2 / 6 P3. HẾT P1 ngay lượt đầu.
+#
+# ĐỐI TƯỢNG của lượt này là HỒ SƠ TỰ KHAI CỦA ĐIỀU PHỐI: ba biên nhận điều phối tự viết, ba hàng
+# mục lục tự cập nhật, một biên bản đo tự soạn. KHÔNG tuyên đây là lượt đầu tiên làm việc ấy —
+# cross-review lượt 2 đưa hai phản chứng: verdict hậu kiểm #486 đã soi hồ sơ/biên nhận/mục lục của
+# điều phối, và verdict #480 lượt 2 đã bắt lời tự kiểm của điều phối. Bản đầu của dòng này viết
+# "khác mọi lượt trước" và "không ai kiểm những con số ấy trước lượt này"; cả hai bị rút.
+#
+# HAI P2 ĐỀU LÀ LỖI CỦA ĐIỀU PHỐI, và một trong đó là GHÉP SAI LƯỢT — thứ `CLAUDE.md` đã ghi thành
+# bài học riêng. Chi tiết ở `hai_p2_deu_la_loi_dieu_phoi` bên dưới.
+
+schema_version: 2
+receipt_id: pr487-review-1-codex-20260909-87c8e786
+kind: review_delivery_receipt
+packet_id: 'PR487-VERDICT-VA-BIEN-NHAN-BA-LUOT'
+lease_id: khong-co-lease
+phase_key: HO-SO-CROSS-REVIEW-PHIEN-20260909
+luot: 1
+role: reviewer
+provider: codex
+executor_provider: claude
+cross_provider: true
+assurance: cross_reviewed
+verdict: changes_requested
+verdict_path: ops/reviews/pr487-review-1-codex-verdict.md
+verdict_sha256: f1eb4c78c242ebc748b608e2c09696498050ff6b15c00d629e9ac0233dc08edd
+verdict_bytes: 43342
+reviewed_sha: bcbca7bbcea968a662b1ac69bfc9f2a329ed8ae7
+evidence_url: https://github.com/ducthangho/tra-luat/blob/a0b154d7c8e6491fb53825301ace2d6d4e97ac9f/ops/reviews/pr487-review-1-codex-verdict.md
+evidence_url_ghi_chu: >-
+  Neo BLOB ghim commit `a0b154d` — commit ĐẦU TIÊN chứa tệp verdict, trên chính nhánh của PR #487.
+  Băm blob trong kho đối chứng được bằng `sha256sum`; câu "bằng băm bản gốc trong gói scratchpad"
+  là ATTESTATION vì bản gốc ấy không vào kho.
+so_p1: 0
+so_p2: 2
+so_p3: 6
+
+hai_p2_deu_la_loi_dieu_phoi:
+  - slug: bien-nhan-moi-lai-nang-attestation-thanh-do-doc-lap
+    loi_gi: >-
+      GHÉP SAI LƯỢT. Biên nhận `pr480-land-review-1` dẫn slug `neo-comment-khai-vuot-lop-doc` như
+      của "cross-review lượt này". Reviewer đếm 8/8 tiêu đề finding của verdict #480 lượt 1: KHÔNG
+      có slug đó — nó thuộc verdict HẬU KIỂM #486 lượt 1.
+    hai_loi_cung_ho: >-
+      (a) Điều phối khái quát `CLAUDE.md:127–145` — vốn mô tả biến đổi ở TRƯỜNG THÂN issue/comment
+      qua MỘT máy chủ MCP cụ thể — thành "mọi đường đọc GitHub cùng chuẩn hoá".
+      (b) Biên nhận lượt 2 tuyên có "neo thứ hai là comment bản chiếu" trong khi THIẾU HẲN khoá địa
+      chỉ: comment được đăng SAU khi biên nhận viết lần đầu.
+    da_va: >-
+      Áp gói vá của reviewer cho ba biên nhận + mục lục. Điều phối BỔ SUNG thêm khoá
+      `comment_ban_chieu` cho biên nhận lượt 2 (việc reviewer không làm được vì sandbox không mạng)
+      — bổ sung ấy VÁ finding, không bác nó: lúc reviewer đo, khoá thật sự chưa có.
+  - slug: lease-nguyen-nhan-va-dieu-kien-dung-khai-vuot
+    loi_gi: >-
+      Biên bản lease LOẠI TRỪ các nguyên nhân khác ("không phải lỗi packet, lease, môi trường") và
+      tuyên "điều kiện dừng đã thoả". Một lỗi hạn mức ở CUỐI phiên không chứng minh không có lỗi
+      nào khác; mốc reset dự kiến không xác nhận tài khoản đã khả dụng; và snapshot thiếu hai tên
+      nhánh KHÔNG loại được ca đã push rồi xoá, hoặc push dưới tên khác.
+    da_va: >-
+      Áp gói vá: đổi tiêu đề tệp từ "ĐO" sang "HỒ SƠ — trạng thái được khai", thêm khối GIỚI HẠN
+      NGUỒN, đổi "khoảng sống" thành "chênh lệch tạo/cập nhật cuối", và bỏ câu tuyên đủ điều kiện
+      cấp lại.
+    duong_manh_hon_da_can_nhac_va_khong_lam: >-
+      Reviewer gợi ý "lưu response và bước biến đổi của đúng lượt" để biến attestation thành đo
+      được. KHÔNG làm, và nói rõ vì sao: response `get_session` chứa `usage` và `cost_usd` của tài
+      khoản chủ kho. Đưa dữ liệu sử dụng tài khoản vào kho là quyết định của chủ kho, không phải
+      của phiên điều phối. Giữ nhãn attestation là lựa chọn an toàn hơn ở đây.
+
+model_reviewer_identity:
+  provider: openai_codex
+  surface: codex_cli
+  model_yeu_cau: gpt-6-astra
+  model_da_chay: KHONG_DO_DUOC
+  model_bang_chung: >-
+    `provider` và `surface` đọc được từ `run.json` của CHÍNH lượt này (`/tmp/claude-0/-home-user-tra-luat/a511f798-5cbd-59bf-8659-0096717636ac/scratchpad/run487/87c8e786/run.json`, không vào kho).
+    `model` thì KHÔNG: `run.json.lenh` không lưu argv, và `codex` không phát `modelUsage`.
+  session_run_id: 87c8e786
+  run_id_day_du: 87c8e78689334951a7dca986e1ad4230
+  thread_id: KHONG_DO_DUOC
+  prompt_sha256: 3af83f53a7cfe9e376702f4a0bbb2e7264cf13d9f33c0b9fdfcdd05144cabd2a
+  prompt_kin_hoan_toan: false
+  bat_dau_utc: '2026-09-09T10:30:56.473286+00:00'
+  ket_thuc_utc: '2026-09-09T10:56:23.362455+00:00'
+  thoi_luong_giay: 1526.889
+  ma_thoat: 0
+  trang_thai: xong
+  stdout_byte: 548
+  stdout_sha256: 35597f653317cdd257559a6805e332152a9501735316624eff537fdc8afe86c7
+  stderr_byte: 1085032
+  stderr_sha256: 35df9d617685ab7216d2915fabff72151a7c6b2130f50a4e4e2e7eafd844ec05
+  so_lan_chet_truoc_khi_xong: 0
+  nguon_cac_scalar_tren: >-
+    Đọc từ `run.json` của lượt này trong scratchpad. Tệp ấy KHÔNG vào kho, nên với người đọc hồ sơ
+    các scalar này là ATTESTATION — đúng mức mà cross-review #486 đã đặt cho ba lượt trước.
+  neo_boi_launcher: >-
+    `launcher.py run --expected-repo github.com/ducthangho/tra-luat --expected-root-commit
+    394e93468fc8d84ec20938e6df8fb7ab72b2cc37 --expected-head
+    bcbca7bbcea968a662b1ac69bfc9f2a329ed8ae7 --require-clean --prompt-file PROMPT.md
+    --expected-prompt-sha256 3af83f53a7cfe9e376702f4a0bbb2e7264cf13d9f33c0b9fdfcdd05144cabd2a
+    --deadline-utc 2026-09-09T11:15:50Z` bọc `codex exec`.
+
+nang_luc_do_cua_goi:
+  ghi_chu: >-
+    Gói dựng bằng `ops/dung_goi_review.sh`, mang thêm hai bảng khẳng định (`BANG-CAU-TRUC.tsv` 317
+    lá từ 5 tệp YAML · `BANG-TOKEN.tsv` 14 hit từ biên bản .md) và cả hai script sinh ra chúng.
+  so_ref: 313
+  so_ref_dinh_chinh: >-
+    Bản đầu ghi 312 ref. SAI: đó là số của gói cross-review ĐẦU TIÊN trong phiên; nhánh
+    `claude/handoff-tra-luat-repo-2ak5th` được đẩy SAU gói ấy nên máy chủ thành 313. Đo lại trên
+    chính gói của lượt này: `git ls-remote --heads origin` ⇒ 313, `for-each-ref refs/heads` trong
+    `cay-kho` ⇒ 313, và `EVIDENCE.md` của gói khai 313/313/313, lệch 0. Cross-review lượt 2 bắt
+    được (`bien-nhan-luot-hai-chep-sai-so-ref`). Đúng bài học `CLAUDE.md`: một bất biến còn đúng
+    (mirror khớp máy chủ) KHÔNG chứng minh các số hạng còn đúng.
+  lech: 0
+  so_tag: 62
+  chua_do_duoc: >-
+    Không mạng: mọi khẳng định về GitHub API VÀ về API quản lý phiên (nguồn của biên bản lease) là
+    KHÔNG ĐO ĐƯỢC với reviewer. Prompt nói thẳng điều này thay vì để reviewer tự phát hiện.
+
+tuan_thu_cam_cua_reviewer:
+  cay_kho_sach: true
+  commit_them_ngoai_head: 0
+  bang_chung: '`status --porcelain` RỖNG và `log bcbca7b..HEAD` RỖNG sau khi lượt kết thúc.'
+
+manifest:
+  duong_dan: KHONG_CO_TRONG_KHO
+  ghi_chu: 'Hiện vật gói (mirror 312 ref + script tự đo của reviewer) CỐ Ý không vào kho.'
+
+github_submitter_identity:
+  actor: ducthangho
+  la_tac_gia_PR: true
+  ghi_chu: '`ADR-0040`: verdict do tài khoản tác giả PR vận chuyển KHÔNG là merge authorization.'
+  phien_van_chuyen: https://claude.ai/code/session_01UN8WRS5Bc5pBBzYPDqs9Dx
+
+anchor:
+  loai: canonical_ancestry
+  cuong_do: cao
+  mo_ta: >-
+    Blob verdict ghim tại `a0b154d`, trên chính nhánh của PR #487. Không có neo comment thứ hai tại
+    thời điểm viết biên nhận này.
+  gioi_han: >-
+    Chỉ vững nếu land bằng MERGE hoặc fast-forward; SQUASH thay commit và phá quan hệ tổ tiên.
+
+khong_do_duoc:
+  - 'Model đã phục vụ và `thread_id`.'
+  - '`run.json` của lượt này không vào kho ⇒ mọi scalar runtime ở trên là attestation.'
+  - 'Trạng thái GitHub và API quản lý phiên tại thời điểm reviewer đọc: sandbox không có mạng.'

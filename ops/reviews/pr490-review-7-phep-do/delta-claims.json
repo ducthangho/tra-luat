@@ -1,0 +1,314 @@
+[
+  {
+    "id": "D01",
+    "file": "ops/reviews/README.md",
+    "scope": "Các hàng thay thế",
+    "claim": "Chín hàng cũ có giới hạn toàn bộ runtime; năm của #490, bốn của #487/#489. Verdict lịch sử giữ nguyên byte.",
+    "sources": [
+      "index-audit.json"
+    ],
+    "status": "ĐO ĐƯỢC"
+  },
+  {
+    "id": "D02",
+    "file": "ops/reviews/README.md",
+    "scope": "Hàng R6 mới",
+    "claim": "SHA/byte/severity/lượt/neo của năm biên nhận, t27, phân loại CI và số hàng vá.",
+    "sources": [
+      "reviews.json",
+      "receipts.json",
+      "ci-audit.json",
+      "index-audit.json",
+      "extra-gates.json"
+    ],
+    "status": "ĐO ĐƯỢC kết quả tĩnh/tái chạy; câu sinh bằng script, model/runtime là ATTESTATION"
+  },
+  {
+    "id": "D03",
+    "file": "ops/reviews/README.md",
+    "scope": "Runtime tại mọi hàng mới/đổi",
+    "claim": "Thời lượng, lần đầu, model/effort đọc run.json ngoài kho; không có log để xác thực.",
+    "sources": [
+      "receipts.json",
+      "source-search.json"
+    ],
+    "status": "KHÔNG ĐO ĐƯỢC lịch sử; caveat đúng chỗ"
+  },
+  {
+    "id": "D04",
+    "file": "ops/reviews/pr490-review-5-codex-verdict.receipt.yaml",
+    "scope": "Lời cũ và chuỗi commit",
+    "claim": "13ba87d khai ĐỦ BỘ sau b43d784; sáu tên lệnh; có một commit chen giữa. Khoảng 25 là tự thuật bản nháp.",
+    "sources": [
+      "commit-messages.json",
+      "diffs.json"
+    ],
+    "status": "Git ĐO ĐƯỢC; bản nháp chưa commit KHÔNG ĐO ĐƯỢC"
+  },
+  {
+    "id": "D05",
+    "file": "ops/reviews/pr490-review-5-codex-verdict.receipt.yaml",
+    "scope": "do_lai",
+    "claim": "Workflow có 40 bước, phân loại 8 setup/31 gate/1 upload; hai mục tương ứng trong message cũ, lease chỉ tương ứng suite.",
+    "sources": [
+      "ci-audit.json",
+      "commit-messages.json"
+    ],
+    "status": "ĐO ĐƯỢC; không coi hai mục là hai full bước CI đã chạy"
+  },
+  {
+    "id": "D06",
+    "file": "ops/reviews/pr490-review-5-codex-verdict.receipt.yaml",
+    "scope": "da_chay_them",
+    "claim": "Receipt test 48 ca/63 mutant thường/2 tự kiểm; packet test TỔNG ĐẠT.",
+    "sources": [
+      "gates.json",
+      "positive-evidence.json"
+    ],
+    "status": "ĐO ĐƯỢC qua tái chạy đúng HEAD; lịch sử executor chạy KHÔNG ĐO ĐƯỢC"
+  },
+  {
+    "id": "D07",
+    "file": "ops/reviews/pr490-review-5-codex-verdict.receipt.yaml",
+    "scope": "tap_CO_BANG_CHUNG",
+    "claim": "Tám lệnh được liệt kê; số lệnh khác số bước; ánh xạ bằng thân run.",
+    "sources": [
+      "gates.json",
+      "ci-audit.json"
+    ],
+    "status": "ĐO ĐƯỢC; độ phủ hiện tại tách 3 thân run và 1 suite trong wrapper"
+  },
+  {
+    "id": "D08",
+    "file": "ops/reviews/pr490-review-5-codex-verdict.receipt.yaml",
+    "scope": "tap_CHUA_CO_BANG_CHUNG",
+    "claim": "Các nhóm cổng chưa có bằng chứng và phân biệt chưa có bằng chứng/đã không chạy/sẽ đỏ.",
+    "sources": [
+      "ci-audit.json",
+      "source-search.json"
+    ],
+    "status": "Giới hạn hợp lệ; không phải inventory đủ từng bước, bảng reviewer bổ sung cả py_compile/EOL ancestry/don-nhanh"
+  },
+  {
+    "id": "D09",
+    "file": "ops/reviews/pr490-review-5-codex-verdict.receipt.yaml",
+    "scope": "Cơ chế sửa",
+    "claim": "Giữ commit cũ và đưa đính chính vào receipt/index; bài học về độ phủ.",
+    "sources": [
+      "commit-messages.json",
+      "index-audit.json"
+    ],
+    "status": "ĐO ĐƯỢC nội dung; câu bài học là chuẩn tắc"
+  },
+  {
+    "id": "D10",
+    "file": "ops/reviews/pr490-review-6-codex-verdict.receipt.yaml",
+    "scope": "Header/neo/field/severity",
+    "claim": "Verdict changes_requested, P1/P2 bằng 0, P3 bằng 1, SHA/31520 byte/hash/blob đầu tiên.",
+    "sources": [
+      "receipts.json",
+      "reviews.json"
+    ],
+    "status": "ĐO ĐƯỢC"
+  },
+  {
+    "id": "D11",
+    "file": "ops/reviews/pr490-review-6-codex-verdict.receipt.yaml",
+    "scope": "ket_qua_kiem_nam_bien_nhan",
+    "claim": "Năm bộ trường neo đúng; năm blob giữ byte; mỗi đường dẫn một commit thêm; bốn receipt đầu cùng commit và mỗi tệp hơn hai chục scalar.",
+    "sources": [
+      "receipts.json",
+      "topology.json",
+      "regression-static.json"
+    ],
+    "status": "Git/cú pháp ĐO ĐƯỢC; phương pháp tạo bằng script/run.json KHÔNG ĐO ĐƯỢC"
+  },
+  {
+    "id": "D12",
+    "file": "ops/reviews/pr490-review-6-codex-verdict.receipt.yaml",
+    "scope": "p3_con_lai",
+    "claim": "Hai vế đã chữa, chín hàng có caveat và receipt R5 rút lời ĐỦ BỘ; lý do mức P3 thuật từ verdict.",
+    "sources": [
+      "index-audit.json",
+      "ci-audit.json",
+      "reviews.json"
+    ],
+    "status": "ĐO ĐƯỢC hai bản vá; lời đánh giá được đối chiếu verdict gốc"
+  },
+  {
+    "id": "D13",
+    "file": "ops/reviews/pr490-review-6-codex-verdict.receipt.yaml",
+    "scope": "Identity/runtime/snapshot/cmp/submitter",
+    "claim": "Timestamps, 1442.026 giây, 182/931800 byte, hash, ref317, không restart/commit, cmp bốn tệp, actor.",
+    "sources": [
+      "receipts.json",
+      "source-search.json"
+    ],
+    "status": "KHÔNG ĐO ĐƯỢC sự kiện/byte nguồn; phép trừ timestamps khớp, bốn tệp liệt kê tồn tại"
+  },
+  {
+    "id": "D14",
+    "file": "ops/reviews/pr490-review-6-codex-verdict.receipt.yaml",
+    "scope": "hien_vat_reviewer_vao_kho và manifest",
+    "claim": "Bốn tệp đo được nhập; CI comparison phân loại từng bước; muốn dùng lại số thì phải tái đo.",
+    "sources": [
+      "ci-audit.json",
+      "receipts.json",
+      "script-replay.json"
+    ],
+    "status": "Inventory/phân loại ĐO ĐƯỢC; đường chạy lại thiếu đầu vào, xem finding"
+  },
+  {
+    "id": "D15",
+    "file": "ops/reviews/pr490-review-6-codex-verdict.receipt.yaml",
+    "scope": "Anchor và giới hạn",
+    "claim": "Canonical ancestry có điều kiện; runtime/API/model không đo được.",
+    "sources": [
+      "receipts.json",
+      "graph.json",
+      "source-search.json"
+    ],
+    "status": "Giới hạn phù hợp; không cấp quyền land"
+  },
+  {
+    "id": "D16",
+    "file": "ops/reviews/pr490-review-6-codex-verdict.md",
+    "scope": "Toàn văn verdict lịch sử",
+    "claim": "Tệp là bản verdict R6 nguyên byte được cấp trong gói hiện tại.",
+    "sources": [
+      "copies.json"
+    ],
+    "status": "ĐO ĐƯỢC tính nguyên byte; không biến toàn bộ lịch sử phép chạy của R6 thành chứng cứ gốc"
+  },
+  {
+    "id": "D17",
+    "file": "ops/reviews/pr490-review-6-codex-verdict.md",
+    "scope": "Bảng receipt và mục lục",
+    "claim": "Field/hash/byte/neo/severity, nhãn, runtime số học, inventory artifact và các số map/docs/AST.",
+    "sources": [
+      "receipts.json",
+      "reviews.json",
+      "status.json",
+      "code-scope.json",
+      "historical-topology.json"
+    ],
+    "status": "Tái đo Git/cú pháp và số học; runtime/cmp/ref lịch sử KHÔNG ĐO ĐƯỢC"
+  },
+  {
+    "id": "D18",
+    "file": "ops/reviews/pr490-review-6-codex-verdict.md",
+    "scope": "BẢNG ĐO về land",
+    "claim": "Diffs/ancestors/status/old inputs/literal/AST/schema, kết quả các cổng trên efa397e/c0a5cbe.",
+    "sources": [
+      "diffs.json",
+      "anchors.json",
+      "status.json",
+      "old-inputs.json",
+      "code-scope.json",
+      "graph.json",
+      "gates.json",
+      "positive-evidence.json"
+    ],
+    "status": "Tái đo theo exact SHA; sự kiện API/chỉ thị/thời điểm chạy KHÔNG ĐO ĐƯỢC"
+  },
+  {
+    "id": "D19",
+    "file": "ops/reviews/pr490-review-6-codex-verdict.md",
+    "scope": "CI/hồi quy/tập cổng mới",
+    "claim": "Thiếu hàng/receipt trên c42fc74 và dccce0a; t27 fail trước sửa; số receipt b43d784/13ba87d; 40 bước và MOI8.",
+    "sources": [
+      "regression-static.json",
+      "extra-gates.json",
+      "ci-audit.json",
+      "code-scope.json"
+    ],
+    "status": "Tái đo được cục bộ; không chứng thực CI đã đỏ ở đâu"
+  },
+  {
+    "id": "D20",
+    "file": "ops/reviews/pr490-review-6-codex-verdict.md",
+    "scope": "Manifest/ref/copy/27 lượt chạy/giàn đo/phần thiếu",
+    "claim": "Các tổng ở gói R6: manifest3224/ref317, hash tracked1886/ref697, 27 lần gọi gồm22 rc0 và5 rc1, runtime hạ tầng và lần PATH sai.",
+    "sources": [
+      "source-search.json"
+    ],
+    "status": "KHÔNG ĐO ĐƯỢC độc lập: bản đầy đủ manifest/log/snapshot R6 không được cấp; giữ như lời reviewer lịch sử, không thay bằng gói R7"
+  },
+  {
+    "id": "D21",
+    "file": "ops/reviews/pr490-review-6-codex-verdict.md",
+    "scope": "95 ledger/18 nhóm delta và giới hạn",
+    "claim": "95 ID cùng topology c42fc74 được đo lại; 330 scalar/357 key của R1..R5 tại13ba87d đo lại; 18 nhóm delta cũ không kèm.",
+    "sources": [
+      "land-ledger.json",
+      "historical-topology.json",
+      "historical-receipt-topology.json"
+    ],
+    "status": "Phần đầu ĐO ĐƯỢC; 18 nhóm delta và coverage map gói R6 KHÔNG ĐO ĐƯỢC độc lập"
+  },
+  {
+    "id": "D22",
+    "file": "ops/reviews/pr490-review-6-phep-do/receipts.json",
+    "scope": "Từng bản ghi/trường",
+    "claim": "Đo các trường receipt R1..R5 và giữ metadata runtime đã khai tại SHA13ba87d.",
+    "sources": [
+      "imported-receipts-comparison.json"
+    ],
+    "status": "Các phép đối chiếu giá trị khớp; metadata runtime vẫn là lời khai"
+  },
+  {
+    "id": "D23",
+    "file": "ops/reviews/pr490-review-6-phep-do/ci-steps.json",
+    "scope": "Từng bước/key/value/điều kiện",
+    "claim": "Bản trích bước của job gate.",
+    "sources": [
+      "ci-audit.json"
+    ],
+    "status": "ĐO ĐƯỢC: đối chiếu toàn bộ step object với YAML"
+  },
+  {
+    "id": "D24",
+    "file": "ops/reviews/pr490-review-6-phep-do/ci-comparison.json",
+    "scope": "Từng bước/phân loại/prose evidence",
+    "claim": "Step body và category; message cũ không chứng minh selftest đầy đủ; runtime CI chưa đo.",
+    "sources": [
+      "ci-audit.json",
+      "commit-messages.json"
+    ],
+    "status": "ĐO ĐƯỢC nội dung/phân loại; vắng bằng chứng không khẳng định không chạy"
+  },
+  {
+    "id": "D25",
+    "file": "ops/reviews/pr490-review-6-phep-do/do-static.py",
+    "scope": "Mã/khả năng chạy",
+    "claim": "Chép script đo R6 nhưng giữ đường dẫn và tên đầu vào gói cũ; chưa có đường chạy lại từ checkout được cấp.",
+    "sources": [
+      "script-replay.json"
+    ],
+    "status": "PHẢN CHỨNG: bản nguyên byte rc1 trước khi đo, thiếu thư mục cay-kho được suy sai"
+  },
+  {
+    "id": "D26",
+    "file": "COMMIT:2f783bc",
+    "scope": "Commit message",
+    "claim": "Nhập verdict/script và tuyên do-static.py chạy lại được.",
+    "sources": [
+      "commit-messages.json",
+      "script-replay.json"
+    ],
+    "status": "Nhập hiện vật ĐO ĐƯỢC; tuyên khả năng tái lập vượt hiện vật có trong kho, finding riêng"
+  },
+  {
+    "id": "D27",
+    "file": "COMMIT:01e7f77",
+    "scope": "Commit message",
+    "claim": "Tuyên vá hai vế/chín hàng/tập tám lệnh/CI31 và kết quả từng lệnh.",
+    "sources": [
+      "index-audit.json",
+      "ci-audit.json",
+      "gates.json",
+      "positive-evidence.json"
+    ],
+    "status": "Kết quả tái chạy khớp; lịch sử executor và bản nháp chưa commit KHÔNG ĐO ĐƯỢC"
+  }
+]

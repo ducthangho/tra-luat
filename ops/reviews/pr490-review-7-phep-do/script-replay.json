@@ -1,0 +1,23 @@
+{
+  "argv": [
+    "python3",
+    "phep-do/script-replay/ops/reviews/pr490-review-6-phep-do/do-static.py"
+  ],
+  "rc": 1,
+  "source_sha256": "5414a19d947849af4671543c8f80a4fd7eda198e5e0c01078f8a1d882d7272bf",
+  "copy_sha256": "5414a19d947849af4671543c8f80a4fd7eda198e5e0c01078f8a1d882d7272bf",
+  "stdout": "",
+  "stderr": "Traceback (most recent call last):\n  File \"/tmp/claude-0/-home-user-tra-luat/a511f798-5cbd-59bf-8659-0096717636ac/scratchpad/goi-pr490-l7/phep-do/script-replay/ops/reviews/pr490-review-6-phep-do/do-static.py\", line 15, in <module>\n    if not (P/'tree-before.json').exists():save('tree-before.json',snap())\n                                                                   ^^^^^^\n  File \"/tmp/claude-0/-home-user-tra-luat/a511f798-5cbd-59bf-8659-0096717636ac/scratchpad/goi-pr490-l7/phep-do/script-replay/ops/reviews/pr490-review-6-phep-do/do-static.py\", line 13, in snap\n    fs=git('ls-files','-z').split('\\0');fs=[f for f in fs if f]\n       ^^^^^^^^^^^^^^^^^^^^\n  File \"/tmp/claude-0/-home-user-tra-luat/a511f798-5cbd-59bf-8659-0096717636ac/scratchpad/goi-pr490-l7/phep-do/script-replay/ops/reviews/pr490-review-6-phep-do/do-static.py\", line 9, in git\n    p=subprocess.run(['git','--no-optional-locks',*a],cwd=R,capture_output=True,check=True);return p.stdout.decode()\n      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/lib/python3.11/subprocess.py\", line 548, in run\n    with Popen(*popenargs, **kwargs) as process:\n         ^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/lib/python3.11/subprocess.py\", line 1026, in __init__\n    self._execute_child(args, executable, preexec_fn, close_fds,\n  File \"/usr/lib/python3.11/subprocess.py\", line 1955, in _execute_child\n    raise child_exception_type(errno_num, err_msg, err_filename)\nFileNotFoundError: [Errno 2] No such file or directory: PosixPath('/tmp/claude-0/-home-user-tra-luat/a511f798-5cbd-59bf-8659-0096717636ac/scratchpad/goi-pr490-l7/phep-do/script-replay/ops/reviews/cay-kho')\n",
+  "derived_repo": "phep-do/script-replay/ops/reviews/cay-kho",
+  "derived_repo_exists": false,
+  "hardcoded_required_inputs": [
+    "ARTIFACTS.sha256",
+    "nguon-refs.tsv",
+    "mirror-refs.tsv",
+    "cay-kho-refs.tsv",
+    "BAN-DANG-REVIEW.yaml",
+    "VERDICT-luot5.md",
+    "LEDGER-luot4.json"
+  ],
+  "writes_ci_comparison": false
+}

@@ -72,7 +72,12 @@ cross_review:
   vi_sao_ket_qua_tung_luot_KHONG_mang_trang_thai: >-
     `ket_qua_tung_luot` là DANH SÁCH BẢN GHI LƯỢT REVIEW, không phải một cổng — mỗi phần tử đã tự
     mang `verdict` và `reviewed_sha`. Quy ước "mọi mapping mang kết quả phải có `trang_thai` cùng
-    cấp" áp cho `pre_merge_checks` và `post_merge_checks` (17/17 mục nay đều có), KHÔNG áp ở đây.
+    cấp" áp cho `pre_merge_checks` và `post_merge_checks`, KHÔNG áp ở đây. Nói cho đúng TẬP ĐẾM:
+    17/17 là số mapping TỪNG THIẾU `trang_thai` và nay đã được bổ sung — KHÔNG phải tổng số mục
+    cổng. Reviewer lượt 2 đo lại và tách rõ: 21/21 mục cổng cấp ngoài mang `trang_thai`
+    (10 tiền kiểm + 11 hậu kiểm), trong đó 17/17 mapping cấp ngoài có kết quả, cộng 1/1 mapping
+    kết quả lồng thành 18/18 mapping kết quả có `trang_thai`; đếm cả mục chỉ có lý do/bỏ qua thì
+    tổng là 22/22. Trộn các tập đếm ấy vào một con số là cách một câu đúng biến thành câu sai.
     Nói ra để lần quét sau không đọc sự vắng mặt này thành thiếu sót.
   reviewer_provider: codex
   executor_provider: claude
@@ -109,11 +114,26 @@ head_da_cross_review_khac_head_merge:
     HAI commit: `f7fe802` (verdict lượt 2 + bốn tệp hiện vật đo) và `efa397e` (biên nhận lượt 2 +
     hàng mục lục + hai bản vá P3).
   phan_them_la_gi: >-
-    HIỆN VẬT REVIEW cộng HAI BẢN VÁ P3 MÀ CHÍNH REVIEWER ĐỀ XUẤT trong `GOI-VA.md` của gói. Đo
-    được: `diff -u` giữa 2/2 tệp reviewer đề xuất trong `cay/` và 2/2 tệp điều phối áp cho ĐÚNG
-    MỘT hunk khác nhau — câu chữ của P3 CI, điều phối viết CHẶT HƠN (tách hẳn ĐO ĐƯỢC khỏi KHÔNG
-    ĐO ĐƯỢC); phần đổi tên khoá `ba_loi`→`bon_loi` TRÙNG KHỚP hoàn toàn, 0 dòng lệch. Số đo:
-    8 tệp · +2 189 · −4.
+    HIỆN VẬT REVIEW cộng HAI BẢN VÁ P3 MÀ CHÍNH REVIEWER ĐỀ XUẤT trong `GOI-VA.md` của gói.
+  phan_them_la_gi_do_duoc:
+    nguon: 'phép đo Git, tái lập được từ chính kho'
+    so_do: '8 tệp · thêm 2 189 dòng · bớt 4 dòng, giữa `98ef1f1` và `efa397e`.'
+    lenh: '`git diff --shortstat 98ef1f1..efa397e`, cộng tay từ `--numstat` cho cùng cặp số.'
+  phan_them_la_gi_ATTESTATION:
+    khai: >-
+      `diff -u` giữa 2/2 tệp reviewer đề xuất trong `cay/` và 2/2 tệp điều phối áp cho ĐÚNG MỘT
+      hunk khác nhau — câu chữ của P3 CI, điều phối viết CHẶT HƠN; phần đổi tên khoá
+      `ba_loi`→`bon_loi` TRÙNG KHỚP hoàn toàn, 0 dòng lệch.
+    vi_sao_KHONG_phai_do_duoc: >-
+      Phép so ấy CÓ CHẠY THẬT, nhưng đầu vào của nó — `GOI-VA.md` và cây `cay/` do reviewer đề
+      xuất — nằm trong gói scratchpad `goi-pr489-luot2b`, KHÔNG vào kho. Người đọc sau KHÔNG tái
+      lập được, nên đây là ATTESTATION của điều phối chứ không phải phép đo. Bản trước gọi nó là
+      "Đo được" và gộp chung với số Git ở cùng một câu — làm số tái lập được BẢO LÃNH cho phép so
+      không tái lập được. Cross-review lượt 2 chấm đúng chỗ này (P3
+      `van-xuoi-do-duoc-van-vuot-nguon`, lần thứ hai của cùng slug), và nó ĐÚNG.
+    cach_dong_no_nay: >-
+      Hoặc đưa `GOI-VA.md` + cây `cay/` của gói vào kho, hoặc bỏ hẳn lời khai. Không chọn đường
+      thứ ba là giữ lời khai rồi gọi nó là phép đo.
   phe_duyet_cua_nguoi_thi_dung_head: >-
     Phê duyệt của `notebyme88` neo `efa397e` — ĐÚNG head merge. Chỉ lượt cross-review MÁY là neo
     head trước đó.
@@ -279,8 +299,19 @@ post_merge_checks:
       nên workflow ĐƯỢC CẤU HÌNH để chạy trên lượt master. Đó là CẤU HÌNH đọc được từ tệp;
       runner có chạy thật hay không thì hồ sơ này KHÔNG ĐO (không đọc, không giữ run JSON) —
       đừng đọc câu này thành "lượt ấy đã chạy". Tiết kiệm là THỜI GIAN
-      CHỜ của phiên, không phải phút runner. Hệ quả: lượt push master là lần đo Windows ĐẦU TIÊN
-      của mã này, nên nếu Windows đỏ thì biết MUỘN HƠN — không phải không biết.
+      CHỜ của phiên, không phải phút runner.
+    he_qua_windows_la_SUY_TU_CAU_HINH_khong_phai_su_kien: >-
+      Bản trước viết: "lượt push master là lần đo Windows ĐẦU TIÊN của mã này". ĐÓ LÀ MỘT SUY
+      LUẬN TỪ MA TRẬN, không phải phép đo — và cross-review lượt 2 chấm đúng chỗ này (vế thứ hai
+      của P3 `van-xuoi-do-duoc-van-vuot-nguon`).
+      ĐO ĐƯỢC (đọc `.github/workflows/ci.yml`): ma trận khai `ubuntu-latest` cho `pull_request`
+      thường, và khai CẢ `ubuntu-latest` LẪN `windows-latest` cho lượt `push` trên master; PR này
+      không gắn nhãn `windows` và không ai gọi `workflow_dispatch`.
+      KHÔNG ĐO ĐƯỢC: runner Windows đã chạy lần nào cho mã này hay chưa. Hồ sơ không đọc run nào,
+      không giữ run JSON, và KHÔNG quét lịch sử để tìm một lượt Windows trước đó.
+      Nên câu đúng là: THEO CẤU HÌNH, lượt push master là lần ĐẦU TIÊN Windows được LÊN LỊCH cho
+      mã này — chứ không phải "lần đo Windows đầu tiên" như một sự kiện đã xác lập. Hệ quả thực
+      hành không đổi: nếu Windows đỏ thì biết MUỘN HƠN, không phải không biết.
     vi_sao_doi_tu_ket_qua_sang_trang_thai: >-
       Bản trước cất sự kiện "không đo" trong khoá `ket_qua`, trong khi CHÍNH TỆP NÀY dùng
       `trang_thai: not_run` ở chỗ khác. Bộ đọc schema thấy một mục hậu kiểm CÓ `ket_qua` sẽ đếm nó

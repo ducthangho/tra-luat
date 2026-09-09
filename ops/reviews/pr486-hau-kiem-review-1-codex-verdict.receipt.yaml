@@ -1,0 +1,136 @@
+# BIÊN NHẬN GIAO HÀNG — cross-review HẬU KIỂM lượt 1 của PR #486 (land evidence cho #478), KHÁC NỀN (codex).
+#
+# Verdict: changes_requested — 2 P1 / 4 P2 / 13 P3.
+#
+# VÌ SAO CÓ LƯỢT HẬU KIỂM NÀY, và nó nằm trong chính một P1 của lượt: PR #486 đã MERGE mà KHÔNG
+# qua cross-review nào. Dòng thời gian đo được: `08:54:36Z` gỡ draft → `08:54:45Z` connector codex
+# BẮT ĐẦU review → `08:55:09Z` MERGE. Tức merge 24 giây sau khi review bắt đầu, và verdict lượt ấy
+# là KHÔNG ĐO ĐƯỢC — comment còn nguyên chữ `Running`, không bao giờ được cập nhật.
+# Hậu kiểm không lùi được merge. Thứ nó mua là: một lời khai sai đã ở master không nằm đó im lặng.
+#
+# MỘT P2 TRÙNG PHÉP ĐO ĐỘC LẬP CỦA ĐIỀU PHỐI: `vang-nhanh-khong-chung-minh-chua-lam-viec`. Điều
+# phối đo qua `list_sessions`/`get_session` (hai phiên executor FAILED vì hạn mức tuần, sinh 66 709
+# và 26 680 token đầu ra); reviewer đo trong sandbox không mạng bằng cách đọc chính lời khai và ba
+# phép đo hiện vật của nó. Hai đường khác hẳn nhau, cùng một kết luận — xem
+# `ops/DO_VI_SAO_LEASE_482_483_CHET_20260909.md`.
+
+schema_version: 2
+receipt_id: pr486-hau-kiem-review-1-codex-20260909-6f2e70d5
+kind: review_delivery_receipt
+packet_id: 'PR486-LAND-EVIDENCE-CHO-478'
+lease_id: khong-co-lease
+phase_key: LAND-EVIDENCE-478
+luot: 1
+role: reviewer
+provider: codex
+executor_provider: claude
+cross_provider: true
+assurance: cross_reviewed
+verdict: changes_requested
+verdict_path: ops/reviews/pr486-hau-kiem-review-1-codex-verdict.md
+verdict_sha256: f3e3d0c57786fa2c23c01a3216bddab3d5583109194e158e944c4b3fd2bdb94c
+verdict_bytes: 91292
+reviewed_sha: da481f94eee0adf1fe5fc4260a535a9b48fc2627
+evidence_url: https://github.com/ducthangho/tra-luat/blob/ee23363171ca0a5218a5d7f067649487470acd0c/ops/reviews/pr486-hau-kiem-review-1-codex-verdict.md
+evidence_url_ghi_chu: >-
+  `evidence_url` neo BLOB ghim commit `ee23363` — commit ĐẦU TIÊN chứa tệp verdict, trên nhánh
+  `claude/handoff-tra-luat-repo-2ak5th` (PR #487). Cổng `bien_nhan_v2` đòi đúng dạng
+  `/blob/<40 hex>/<đường dẫn>` cho `anchor.loai: canonical_ancestry`.
+  `reviewed_sha` là MERGE COMMIT `da481f9` (= `master` lúc review), không phải head của PR #486
+  trước merge — vì đây là hậu kiểm trên thứ đã vào master, không phải tiền kiểm trên một head chờ.
+  Băm trong kho BẰNG băm bản gốc trong gói — đã kiểm, không có chuẩn hoá LF nào làm lệch.
+so_p1: 2
+so_p2: 4
+so_p3: 13
+
+model_reviewer_identity:
+  provider: openai_codex
+  surface: codex_cli
+  model_yeu_cau: gpt-6-astra
+  model_da_chay: KHONG_DO_DUOC
+  model_bang_chung: >-
+    `provider` và `surface` ĐO ĐƯỢC — `run.json` ghi thẳng `provider: openai_codex` và
+    `execution_surface: codex_cli`. `model` thì KHÔNG: `run.json.lenh` chỉ giữ `chuong_trinh`,
+    `so_doi_so`, `van_tay` — không lưu argv. Nên `-m gpt-6-astra -c model_reasoning_effort=xhigh`
+    là ATTESTATION của điều phối về đối số ĐÃ TRUYỀN, không phải bằng chứng về model đã PHỤC VỤ.
+  session_run_id: 6f2e70d5
+  run_id_day_du: 6f2e70d5f1eb4b189ab83ce3c26781f7
+  thread_id: KHONG_DO_DUOC
+  prompt_sha256: df5dab8884e853abfcbf6a8b7025944ea181f3fac34f95b3678c1137485f4401
+  prompt_kin_hoan_toan: false
+  bat_dau_utc: '2026-09-09T09:31:19.356648+00:00'
+  ket_thuc_utc: '2026-09-09T09:52:40.004479+00:00'
+  thoi_luong_giay: 1280.648
+  ma_thoat: 0
+  trang_thai: xong
+  stdout_byte: 575
+  stdout_sha256: 6545945eed0126f3b2a77ece51a48f866fb35f4e83132df8bb7adb7e22c87d5a
+  stderr_byte: 1352649
+  stderr_sha256: b60b6a068107dc47d96717d37498d05f07148521edeac4f95c4fc2811df46867
+  so_lan_chet_truoc_khi_xong: 0
+  vi_sao_thoi_luong_dang_ke: >-
+    `1280,648 giây` (21 phút 21 giây) — nêu ra vì `trang_thai: xong` + `ma_thoat: 0` KHÔNG chứng
+    minh việc đã làm; `launcher.py` tự cảnh báo điều đó ở đầu tệp. Ba số chống lại cách đọc ấy:
+    thời lượng, `91292 B` verdict, `1352649 B` stderr.
+  neo_boi_launcher: >-
+    `launcher.py run --expected-repo github.com/ducthangho/tra-luat --expected-root-commit
+    394e93468fc8d84ec20938e6df8fb7ab72b2cc37 --expected-head
+    da481f94eee0adf1fe5fc4260a535a9b48fc2627 --require-clean --prompt-file PROMPT.md
+    --expected-prompt-sha256 df5dab8884e853abfcbf6a8b7025944ea181f3fac34f95b3678c1137485f4401
+    --deadline-utc 2026-09-09T10:16:19Z` bọc `codex exec`. `run.json` xác nhận `worktree_sach:
+    true`, `so_muc_ban: 0`, `remotes: ['github.com/ducthangho/tra-luat']`, `commit_goc:
+    ['394e93468fc8d84ec20938e6df8fb7ab72b2cc37']`.
+
+nang_luc_do_cua_goi:
+  ghi_chu: >-
+    Gói dựng bằng `ops/dung_goi_review.sh`: mirror ĐỦ MỌI REF, vật chất hoá từng nhánh thành
+    `refs/heads/*`, cài `actionlint` bằng bản ghim của kho, sinh EVIDENCE tự khai cách trích số và
+    phần bỏ sót.
+  so_ref: 312
+  lech: 0
+  so_tag: 62
+  cong_cu_trong_goi: 'actionlint 1.7.7 (bản ghim) · shellcheck 0.9.0 · git 2.43.0 · python3 3.11.15'
+  chua_do_duoc: >-
+    Không có mạng trong sandbox nên KHÔNG xác minh được ảnh chụp nguồn so với GitHub tại lúc
+    reviewer đọc. Mọi khẳng định về GitHub API (CI, merged_by, timeline, comment) reviewer đều khai
+    KHÔNG ĐO ĐƯỢC, đúng như prompt yêu cầu.
+
+tuan_thu_cam_cua_reviewer:
+  cay_kho_sach: true
+  commit_them_ngoai_head: 0
+  bang_chung: >-
+    `git -C cay-kho status --porcelain` RỖNG và `git -C cay-kho log --oneline da481f9..HEAD` RỖNG
+    sau khi lượt kết thúc.
+
+manifest:
+  duong_dan: KHONG_CO_TRONG_KHO
+  ghi_chu: >-
+    CỐ Ý không đưa hiện vật gói vào kho: thư mục gói chứa cả mirror git 312 ref. Chỉ lưu tệp
+    VERDICT. Hệ quả nói thẳng: script tự đo của reviewer KHÔNG tái chạy được từ kho.
+
+github_submitter_identity:
+  actor: ducthangho
+  la_tac_gia_PR: true
+  ghi_chu: >-
+    `ADR-0040`: biên nhận và verdict do tài khoản tác giả PR vận chuyển KHÔNG thành required check
+    hay merge authorization. Comment bản chiếu đăng bằng `GITHUB_PAT` của chủ kho qua phiên điều
+    phối, nên `user.login` KHÔNG phân biệt được người với phiên.
+  phien_van_chuyen: https://claude.ai/code/session_01UN8WRS5Bc5pBBzYPDqs9Dx
+
+anchor:
+  loai: canonical_ancestry
+  cuong_do: cao
+  mo_ta: >-
+    HAI neo độc lập. (1) Blob `ops/reviews/pr486-hau-kiem-review-1-codex-verdict.md` ghim tại
+    commit `ee23363` trên nhánh của PR #487. (2) Comment bản chiếu trên PR #486 — xem
+    `comment_ban_chieu` khi đã đăng.
+  gioi_han: >-
+    Neo (1) chỉ vững nếu land bằng MERGE hoặc fast-forward — SQUASH phá quan hệ tổ tiên.
+    Neo (2) sống trong CSDL Issue nên SỬA/XOÁ ĐƯỢC. Không có tag `luu-tru/*`.
+    Riêng lượt này neo (2) YẾU HƠN thường lệ: PR #486 đã CLOSED (merged), nên comment bản chiếu
+    nằm trên một PR không ai còn theo dõi.
+
+khong_do_duoc:
+  - 'Model đã phục vụ và `thread_id`: `run.json` không lưu argv; `codex` không phát `modelUsage`.'
+  - 'Hiện vật gói (script tự đo của reviewer) KHÔNG vào kho — verdict không tái chạy được từ kho.'
+  - 'Trạng thái GitHub tại thời điểm reviewer đọc: sandbox không có mạng.'

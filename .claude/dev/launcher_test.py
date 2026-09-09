@@ -4651,9 +4651,11 @@ def t133_do_codex_spawn_bang_duong_dan_da_resolve_khong_ten_tran():
     m._do_codex_song = do_codex_song_goc
     goi.clear()
     m.subprocess.run = lambda cmd, **_k: (goi.append(list(cmd)) or POk())
-    m._do_codex_song()
-    bang(goi and goi[0][0] == "/gia/codex.cmd",
-         f"_do_codex_song van spawn ten tran: {goi[:1]}")
+    for kw in ({}, {"duong_dan": "/gia/codex.cmd"}):
+        goi.clear()
+        m._do_codex_song(**kw)
+        bang(goi and goi[0][0] == "/gia/codex.cmd",
+             f"_do_codex_song van spawn ten tran ({kw}): {goi[:1]}")
 
 
 @ca
@@ -8285,6 +8287,11 @@ def chay_dot_bien() -> int:
     khong_do = 0
     tam = Path(tempfile.mkdtemp(prefix="lt_db_"))
     try:
+        # Preserve the real delegated probe dependency in neutral/mutant copies.
+        # Otherwise t133 fails before reaching the mutation and reports a false kill.
+        companion = LAUNCHER.with_name("codex_cred.py")
+        if companion.is_file():
+            shutil.copy2(companion, tam / companion.name)
         for muc in DOT_BIEN:
             ten, cap, phai_chet = muc[0], muc[1], muc[2]
             # Phan tu thu TU (tuy chon) = ('posix'|'windows', ly do). Co dot bien

@@ -1,0 +1,63 @@
+{
+  "source_sha": "98ef1f1629a2ac786ff91e352dd02da9b693e81e",
+  "yaml_inputs": [
+    {
+      "path": "ops/land/pr480-land-evidence.yaml",
+      "leaves": 134,
+      "comments": 27
+    },
+    {
+      "path": "ops/land/pr487-land-evidence.yaml",
+      "leaves": 139,
+      "comments": 9
+    },
+    {
+      "path": "ops/reviews/pr489-review-1-codex-verdict.receipt.yaml",
+      "leaves": 84,
+      "comments": 8
+    },
+    {
+      "path": "ops/reviews/pr487-hau-kiem-head-review-1-codex-verdict.receipt.yaml",
+      "leaves": 87,
+      "comments": 7
+    },
+    {
+      "path": "ops/reviews/pr487-review-2-codex-verdict.receipt.yaml",
+      "leaves": 82,
+      "comments": 11
+    }
+  ],
+  "yaml_leaf_count": 526,
+  "comments": 62,
+  "json_path": "ops/reviews/pr489-review-1-do-cuc-bo.json",
+  "json_leaf_count": 242,
+  "markdown_changed": [
+    "ops/reviews/README.md",
+    "ops/reviews/pr489-review-1-codex-verdict.md"
+  ],
+  "tsv_in_repo": [
+    "ops/reviews/pr468-hoso-4-packet-review-10-codex/goi-y/cay/ops/reviews/pr468-hoso-4-packet-review-9-codex/artifact-repair/nen-a1-a5/buoc.tsv",
+    "ops/reviews/pr468-hoso-4-packet-review-10-codex/goi-y/cay/ops/reviews/pr468-hoso-4-packet-review-9-codex/artifact-repair/nen-a1-a5/job.tsv",
+    "ops/reviews/pr468-hoso-4-packet-review-11-codex/artifact9-repair/nen-a1-a5/buoc.tsv",
+    "ops/reviews/pr468-hoso-4-packet-review-11-codex/artifact9-repair/nen-a1-a5/job.tsv",
+    "ops/reviews/pr468-hoso-4-packet-review-12-codex/cay-kho-refs.tsv",
+    "ops/reviews/pr468-hoso-4-packet-review-12-codex/kho-git-refs.tsv",
+    "ops/reviews/pr468-hoso-4-packet-review-12-codex/manifest11-layout/do-review10/artifact9-repair/nen-a1-a5/buoc.tsv",
+    "ops/reviews/pr468-hoso-4-packet-review-12-codex/manifest11-layout/do-review10/artifact9-repair/nen-a1-a5/job.tsv",
+    "ops/reviews/pr468-hoso-4-packet-review-14-codex/bundle-nguon-refs.tsv",
+    "ops/reviews/pr468-hoso-4-packet-review-15-codex/bundle-nguon-refs.tsv",
+    "ops/reviews/pr468-hoso-4-packet-review-6-codex/nen-a1-a5/buoc.tsv",
+    "ops/reviews/pr468-hoso-4-packet-review-6-codex/nen-a1-a5/job.tsv",
+    "ops/reviews/pr468-hoso-4-packet-review-7-codex/nen-a1-a5/buoc.tsv",
+    "ops/reviews/pr468-hoso-4-packet-review-7-codex/nen-a1-a5/job.tsv",
+    "ops/reviews/pr468-hoso-4-packet-review-8-codex/nen-a1-a5/buoc.tsv",
+    "ops/reviews/pr468-hoso-4-packet-review-8-codex/nen-a1-a5/job.tsv",
+    "ops/reviews/pr468-hoso-4-packet-review-9-codex/artifact-repair/nen-a1-a5/buoc.tsv",
+    "ops/reviews/pr468-hoso-4-packet-review-9-codex/artifact-repair/nen-a1-a5/job.tsv",
+    "ops/reviews/pr468-hoso-4-packet-review-9-codex/nen-a1-a5/buoc.tsv",
+    "ops/reviews/pr468-hoso-4-packet-review-9-codex/nen-a1-a5/job.tsv",
+    "ops/reviews/pr489-review-2-phep-do/bang-chu-thich-do-lai.tsv",
+    "ops/reviews/pr490-review-4-phep-do/claim-ledger.tsv"
+  ],
+  "table_comparison": "KHÔNG ĐO ĐƯỢC: không có TSV gốc; claim-ledger.tsv mới là bảng cho PR490, không phải bảng YAML nguồn của PR489."
+}

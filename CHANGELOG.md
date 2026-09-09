@@ -150,6 +150,14 @@ P1 `chuoi-tam-pr-thuc-te-bay` ở trên.
 **Hai P2 khác đã vá TRƯỚC merge**, trong thân PR chứ không trong tệp, nên KHÔNG nằm trong con số
 năm ở trên: `than-pr-van-phu-nhan-t33-da-chay` và `sau-p3-khong-deu-la-bo-sot-bang`.
 
+**NỢ CÓ ĐỊA CHỈ — giới hạn của cổng, đã đo hai chiều.** `release-verify` **CÓ răng**: đổi đúng một
+byte trong `CHANGELOG.md` (giữ nguyên kích thước) ⇒ `rc=2`, `failed=[CHANGELOG.md]`,
+`package_hash_match: false`. Nhưng `doc-claims-check --strict` **KHÔNG** bắt được một con số bị
+đổi: reviewer đột biến `1016→1017`, tiêu đề `5→6`, và phép trừ `13−2=11` thành `13−2=12` — cả ba
+đều `rc=0`, `ok: true`. Nghĩa là **không cổng nào trong kho hiện kiểm phép đếm hay phép trừ trong
+văn xuôi**; thứ duy nhất chặn chúng là cross-review. Ghi thành nợ có địa chỉ thay vì để trôi: muốn
+đóng thì phải có cổng mới, và **phản chứng bắt buộc** của nó là ba đột biến trên phải ĐỎ.
+
 **Chưa vá: 10 P3 của lượt 2 — và chúng KHÔNG cùng một loại.** Bản đầu của đoạn này chia
 **9 + 1** rồi gọi cả chín là *"giới hạn regex"*; cross-review PR #493 chấm P2
 (`dong-chin-p3-khong-deu-can-bo-trich-moi`) vì chín cái ấy cũng không cùng loại. Phân hoạch đúng là
@@ -182,8 +190,10 @@ Hồ sơ vá lời khai sai thì cũng bị soi như mọi thứ khác.
 | 2 | `9484970` | `changes_requested` · **1 P1 · 4 P2 · 15 P3** | **0 ĐÃ VÁ THẬT · 6 VÁ HỜ · 11 CHƯA VÁ** |
 | 3 | `fae2fb7` | `changes_requested` · **0 P1 · 2 P2 · 15 P3** | **7 ĐÃ VÁ THẬT · 3 VÁ HỜ · 10 CHƯA VÁ** |
 
-Lượt 2 nói thẳng điều đáng nhớ nhất: **cả năm bản vá của lượt 1 chỉ sửa MỘT bản chiếu và để nguyên
-các bản chiếu khác**. Đây là một hình dạng **TÁI DIỄN** — và cố ý **không** gắn số thứ tự: bản đầu
+Lượt 2 nói thẳng điều đáng nhớ nhất: **cả năm bản vá của lượt 1 đều để sót ít nhất một bản chiếu**.
+Nói *"chỉ sửa MỘT bản chiếu"* thì **quá rộng** và lượt 5 chấm đúng chỗ đó: riêng bản vá P1 đã đụng
+**nhiều** vị trí ở cả `README.md` (hàng cảnh báo + `id` caveat) lẫn `receipt.yaml` — thứ nó bỏ quên
+là hàng *mục lục*, header receipt và trường `khong_suy_rong`. Sai lầm là **sót**, không phải **ít**. Đây là một hình dạng **TÁI DIỄN** — và cố ý **không** gắn số thứ tự: bản đầu
 viết *"lần thứ sáu kho gặp đúng hình dạng ấy"* mà không có danh sách sáu mốc, không phạm vi thời
 gian, không quy tắc khử trùng (một lần vá sinh nhiều hậu quả không thành nhiều lần). Cross-review
 lượt 3 chấm P3 (`so-lan-thu-sau-moi-khong-co-phep-dem`), và số ấy đã bị rút thay vì đi tìm hậu
@@ -194,7 +204,10 @@ Chúng nằm rải ở **bốn** hiện vật, không phải "chính mục này"
 `ops/reviews/README.md` (cả bảng cảnh báo LẪN bảng mục lục) ·
 `ops/reviews/pr491-review-2-codex-verdict.receipt.yaml` · **thân PR**. Bản trước của tiêu đề này
 viết *"CHÍNH mục này"* — hẹp hơn sự thật. Nói cho đúng cả phần tự thuật, vì bản trước của câu này
-cũng hẹp hơn lịch sử thật (cross-review lượt 3 chấm P3 `tu-thu-tron-hai-tap-nam-finding`): bản vá
+cũng hẹp hơn lịch sử thật — slug `tu-thu-tron-hai-tap-nam-finding`, **lượt 3 chấm nó là P2** (lõi:
+trộn hai tập cùng lực lượng năm), và **lượt 4 hạ PHẦN DƯ xuống P3** sau khi lõi đã đóng. Bản trước
+của chính câu này ghi *"cross-review lượt 3 chấm P3"* — gán sai mức cho đúng cái finding đang bàn,
+và lượt 5 chấm `VÁ SINH LỖI MỚI`. Nội dung: bản vá
 lượt 1 **có** sửa hàng *cảnh báo* + `id` caveat trong `README.md` **và** hai chỗ trong
 `receipt.yaml` — không phải *"chỉ sửa mục CHANGELOG"*. Thứ nó **bỏ quên** là hàng *mục lục* ở
 chính `README.md` và hai trường khác trong `receipt.yaml`. Sai lầm không phải *"chỉ đụng một tệp"*
@@ -233,6 +246,13 @@ loại trừ nhau**. Không cổng nào bắt được cái nào — `release-ve
 `lease_publish_test`, `bien_nhan_v2` đều XANH trên bản sai.
 
 ## Một cái giá phải trả trong chính phiên này, ghi vì nó là bài học đã có mà vẫn dẫm
+
+**NHÃN NGUỒN cho cả mục này — TỰ THUẬT, KHÔNG CÓ LOG.** Cross-review PR #493 chấm P3
+(`hai-tu-thu-thieu-nguyen-lieu-kiem-doc-lap`) và **đúng**: gói không có transcript `git checkout`,
+không có output verifier cho cặp `806980`/`806981`, không có bản nháp mang số *"tám"*. Byte của
+các blob đã commit **không** tái dựng được một trạng thái CHƯA commit, nên nó không chứng minh mà
+cũng không bác được lời kể. Đây là **lời tự thuật của phiên**, hạng thấp hơn mọi số Git trong mục
+này — đọc nó như vậy, và đừng dẫn nó làm phép đo.
 
 `CLAUDE.md` viết sẵn: *"Đột biến ghi vào tệp THẬT rồi khôi phục trong `finally` là bom hẹn giờ"*.
 Phiên này đột biến `CHANGELOG.md` để chứng minh `release-verify` có răng — nó CÓ (`ok: false`,

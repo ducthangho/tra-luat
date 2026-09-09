@@ -3,8 +3,8 @@
 # Verdict: changes_requested — 3 P1 / 0 P2 / 17 P3.
 # Bác chính PHÉP LOẠI mà lượt 4 đã chấp nhận: phản ví dụ (44,4)+(-1,0)=(43,4). Ba P1 đều là lời khai sai, không phải lỗi mã.
 #
-# NEO KÉP: verdict này có CẢ blob trong kho LẪN comment bản chiếu trên PR #478 — mạnh hơn các lượt
-# 14/15 của #468 vốn chỉ có blob (PR đã merge trước khi verdict vào kho).
+# NEO: blob trong kho đối chứng được; comment bản chiếu trên PR #478 là ATTESTATION.
+# Không có response/log readback để chứng minh nội dung GitHub khớp từng ký tự hoặc byte.
 #
 # TỰ KHAI MỘT LỖI CỦA ĐIỀU PHỐI: verdict lượt 5 bị ĐĂNG MUỘN hơn một ngày (comment 5598591753 lúc
 # 2026-09-09) vì phiên vá xong ba P1 rồi đi tiếp mà quên đăng. Suốt thời gian ấy nó chỉ tồn tại
@@ -35,9 +35,12 @@ evidence_url_ghi_chu: >-
   `claude/land-478-20260909`. Cổng `bien_nhan_v2` đòi đúng dạng `/blob/<40 hex>/<đường dẫn>` cho
   `anchor.loai: canonical_ancestry`, và nó ĐÚNG: một URL comment KHÔNG đo được quan hệ tổ tiên.
   Bản đầu của biên nhận này neo comment và bị cổng từ chối hai lần — ghi lại thay vì lặng lẽ sửa.
-  Neo THỨ HAI là comment bản chiếu ở `comment_ban_chieu` trên PR #478 — đã đọc ngược về và diff sau khi đăng, khớp TỪNG KÝ TỰ.
-  Neo thứ hai là blob của chính tệp `verdict_path` trong kho (PR land evidence #478 này).
-  Băm trong kho BẰNG băm bản gốc trong gói — đã kiểm, không có chuẩn hoá LF nào làm lệch.
+  Comment ở `comment_ban_chieu` là neo được điều phối khai đã đăng và đọc lại. Không có client,
+  response thô hoặc log diff trong kho; đường đọc MCP có thể chuẩn hoá thực thể HTML theo
+  `CLAUDE.md`. Vì vậy nội dung lưu trên GitHub KHÔNG ĐO ĐƯỢC offline, không khai khớp từng ký tự.
+  Blob tại commit ghim được hậu kiểm khớp byte với `verdict_path` trong kho. Bản scratchpad gốc
+  không kèm; câu băm blob bằng bản gốc và không lệch LF ở lần vận chuyển là ATTESTATION.
+
 so_p1: 3
 so_p2: 0
 so_p3: 17
@@ -48,15 +51,11 @@ model_reviewer_identity:
   model_yeu_cau: gpt-6-astra
   model_da_chay: KHONG_DO_DUOC
   model_bang_chung: >-
-    `provider` và `surface` ĐO ĐƯỢC — `run.json` ghi thẳng `provider: openai_codex` và
-    `execution_surface: codex_cli`. `model` thì KHÔNG: `run.json.lenh` chỉ giữ
-    `chuong_trinh`, `so_doi_so`, `van_tay` — không lưu argv. Nên `-m gpt-6-astra
-    -c model_reasoning_effort=xhigh` là ATTESTATION của điều phối về đối số ĐÃ TRUYỀN, không phải
-    bằng chứng về model nhà cung cấp ĐÃ PHỤC VỤ. `codex` không phát `modelUsage` như `claude`.
-    ĐÍNH CHÍNH phạm vi so với biên nhận lượt 14/15 của #468: các tệp ấy viết `run.json` "chỉ có
-    chuong_trinh/so_doi_so/van_tay" — câu ấy đúng cho khoá `lenh`, nhưng rộng quá cho CẢ TỆP:
-    `run.json` v1.5.0 còn ghi provider, surface, prompt_sha256, head, mốc thời gian và băm
-    stdout/stderr. Ba trường đầu là thứ đo được thật.
+    `run.json` của lượt này không kèm trong kho. Điều phối khai đã đọc provider, surface,
+    prompt_sha256, head, thời gian và băm stdout/stderr từ tệp đó; reviewer hậu kiểm chỉ đo
+    được tính nhất quán nội bộ receipt, KHÔNG tái xác minh nguồn runtime. Mọi metadata lần
+    chạy dưới đây là ATTESTATION. Đối số yêu cầu model/effort không chứng minh model phục vụ.
+    Nguồn code launcher mô tả khả năng ghi trường cũng không thay thế run.json của lần chạy.
   session_run_id: a59fff06
   run_id_day_du: a59fff06c2bd49d9a9bba329a60286dd
   thread_id: KHONG_DO_DUOC
@@ -120,8 +119,8 @@ anchor:
     tệp của mình; nới nó là tự tay tháo đúng cơ chế mà `CLAUDE.md` ghi là thứ duy nhất chặn được
     kẻ gian ("danh sách CẤM không bao giờ đủ — phải đảo thành danh sách CHO PHÉP").
     Neo comment vẫn được mô tả dưới đây như neo THỨ HAI, chỉ không dùng làm `loai`.
-    HAI neo độc lập. (1) Comment bản chiếu trên PR #478 (`issuecomment-5598591753`) — đăng xong đọc
-    ngược về và diff, khớp từng ký tự. (2) Blob `ops/reviews/pr478-land-review-5-codex-verdict.md` trong PR land evidence này; khi PR ấy merge
+    Hai loại nơi lưu được khai. (1) Comment bản chiếu trên PR #478 (`issuecomment-5598591753`) — đăng xong đọc
+    ngược về theo ATTESTATION; chưa có nguồn kiểm byte GitHub độc lập. (2) Blob `ops/reviews/pr478-land-review-5-codex-verdict.md` trong PR land evidence này; khi PR ấy merge
     bằng merge commit thì blob thành tổ tiên của `master`.
   gioi_han: >-
     Neo (1) sống trong CSDL Issue nên SỬA/XOÁ ĐƯỢC và không có quan hệ tổ tiên; neo (2) chỉ vững

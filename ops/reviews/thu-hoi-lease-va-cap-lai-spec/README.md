@@ -14,6 +14,7 @@ ghi ở đây hoặc ở §0 của `ops/specs/THU-HOI-LEASE-VA-CAP-LAI.md`.
 | 4b | 5 | r4 `415ce35d…` | xhigh, đổi phân công | `7d3017ec…` | `4a0321fd…` | `1a2e3d6c…` | 2076,6 s | 4 P1 + 2 P2 (S1–S6) |
 | 5 | 6 | r5 `23a7deaf…` | xhigh | `1596d562…` | `8ca8474b…` | `704183b1…` | 2394,7 s | **3 P1** (S1, S2, S3) + **2 P2** (S5, S6); S4 ĐÓNG |
 | 6 | 7 | r6 `f78135cf…` | xhigh, trần mới `5578460203` (tới hết P1), harness dựng lại (scratch cũ mất) | `9090aadd…` | `47fbf8cb…` (7 hunk) | `e5006b15…` | 2889,1 s · stdout 85 B · stderr 4 049 518 B · rc=0 | **3 P1** (S1 một phần; S3 một phần; **S7 mới**: tệp retired xung đột schema M1) + **3 P2** (S5, S6 một phần; **S8 mới**: layout/ngân sách object-store) + P3 S9 (kế toán); **S2, S4 ĐÓNG** |
+| 7a | — (preflight, KHÔNG tính) | r8 `48ea894a…` | xhigh | — (CHẾT trước khi sinh output) | — | `169d3248…` | 5,4 s, rc=1, stdout 0 B | `refresh_token_invalidated` — ảnh chụp `CODEX_AUTH_JSON` 65 h đã bị xoay vòng; xem `luot7a-CHET-preflight.md` |
 
 `spec-rN.md` = đúng bản spec reviewer đã đọc (sha256 khớp cột "spec"). `luotN-EVIDENCE.md` = lời khai
 điều phối gửi reviewer (số đo offline, mốc commit; lượt 6 cộng dồn lượt 1–5 + mục "Bổ sung lượt 6"). `phong.sh.mau` = lệnh
@@ -28,4 +29,5 @@ phóng lượt 6 nguyên văn (`<scratchpad>` = thư mục scratchpad của cont
 | `DONG-la-dong-HOP-DONG-khong-phai-chung-nhan-ban-ke` | "ĐÓNG" ở bảng lượt N là đóng vấn đề hợp đồng trên bản lượt ấy đọc. r8 vá theo hint lượt 6 và **chưa được lượt nào review** cho tới khi có dòng lượt 7. |
 | `TRAN-MOI-toi-het-P1-comment-5578460203` | Trần 6 (`5575587924`) đã hết ở lượt 5 ⇒ checkpoint `5576397733`; chủ kho reroute bằng comment `5578460203` (08-09-2026): review **tới hết P1**, bộ đếm KHÔNG reset (lời gọi kế sau lượt 6 = **8**). |
 | `hinh-dang-nguon-tin-cay-trung-6-lan` | S1 lượt 6 (nền thực thi/trust store chưa được duyệt độc lập) là lần **6** của hình dạng "nguồn tin cậy cho cổng đọc lease". **ADR-0047** (`docs/adr/0047-nguon-tin-cay-cho-cong-doc-lease.md`, Proposed) đã soạn theo quyết định chủ kho 08-09-2026; lớp 2 của ADR cập nhật theo S1 lượt 6. |
+| `CODEX-AUTH-ANH-CHUP-CHET` | Lời gọi 8 (lượt 7a) chết preflight vì `CODEX_AUTH_JSON` 65 h bị vô hiệu (`refresh_token_invalidated`); §12: không tính. Lượt kế cần chuỗi auth MỚI từ chủ kho hoặc `codex login --device-auth` hoàn tất. |
 | `scratch-luot-1-5-MAT` | Harness reviewer lượt 1–5 nằm ở scratchpad container cũ, **không** được chép vào kho ⇒ mất; lượt 6 dựng lại toàn bộ (`scratch/luot6/`). Từ lượt 6, scratch của reviewer cũng không vào kho (kích thước) — số đo tái lập bằng lệnh trong VERDICT. |

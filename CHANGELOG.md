@@ -87,9 +87,22 @@ nghĩa của người — không tuyên thuật toán tự chứng minh mọi c�
   `R = P.parent/'cay-kho'` từ `__file__`, ở vị trí trong kho trỏ tới `ops/reviews/cay-kho` (không
   tồn tại) nên hỏng **trước phép đo đầu tiên**; và nó chỉ sinh `ci-steps.json`, **không** sinh
   `ci-comparison.json` như lời khai ngụ ý. Điều phối đã tự đo lại, đúng cả hai vế.
-- **#490 dừng ở `merged`, không phải `landed`.** `ADR-0034` đòi merged + hậu-merge gate +
-  bookkeeping; hai vế đầu xong, còn bookkeeping thì chủ kho đã quyết **đóng chuỗi** nên #490 cố ý
-  KHÔNG có land evidence riêng. Mục này chính là chỗ ghi sổ thay cho nó.
+- **#490 dừng ở `merged`, không phải `landed` — và KHÔNG chỉ vì thiếu bookkeeping.** `ADR-0034`
+  đòi ba vế; trạng thái thật của từng vế:
+  - `merged`: **ĐO ĐƯỢC**. `merge-base --is-ancestor 01e7f77 8cee941` ⇒ đúng; hai cha của
+    `8cee941` là `00e017a` + `01e7f77`.
+  - `hậu-merge gate`: **CHƯA ĐỦ BẰNG CHỨNG**, không phải "xong". Có **5** lệnh chạy TẠI CHỖ trên
+    worktree của `8cee941` (bảng dưới), trong khi `ci.yml` job `gate` có **31 bước cổng**; và
+    lượt CI của chính merge commit thì **CỐ Ý KHÔNG ĐỌC** theo quyết định chủ kho (ghi ở
+    `ops/land/pr489-land-evidence.yaml`, mục `CI trên merge commit`). Quét toàn kho: **0** hiện
+    vật CI nào neo `8cee941`. *Thiếu bằng chứng KHÔNG được tính là đạt.*
+  - `bookkeeping`: chủ kho quyết **đóng chuỗi** nên #490 cố ý KHÔNG có land evidence riêng — mục
+    này là chỗ ghi sổ thay cho nó.
+
+  **Bản đầu của gạch đầu dòng này viết "hai vế đầu xong" — SAI**, và Codex connector chấm P1 đúng
+  chỗ ấy (`CHANGELOG.md:92`, reviewed commit `ac157ef`). Mỉa mai đáng ghi: câu sai nằm trong chính
+  mục viết ra để tổng kết lớp lỗi *"khai rộng hơn nguồn"*. Nó là lần thứ **tư** trong đợt cùng một
+  hình dạng — và lần này người bắt là một reviewer tôi suýt merge trước khi nó chạy xong.
 
 ## Hậu-merge gate trên `8cee941` — chạy lại tại chỗ
 

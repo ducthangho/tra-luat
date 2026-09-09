@@ -122,14 +122,33 @@ head_da_cross_review_khac_head_merge:
       xích nữa. Chuỗi này chưa có điều kiện dừng (xem `chuoi_land_evidence_chua_co_diem_dung`),
       nên điều phối DỪNG và khai nợ thay vì tự quyết định kéo dài nó.
     cai_da_co_thay_the: >-
-      KHÔNG phải cross-review, nhưng cũng không phải rỗng: bốn cổng cục bộ chạy trên CHÍNH
-      `efa397e` trước khi xin duyệt, và toàn bộ CI của PR xanh trên chính head ấy.
+      KHÔNG phải cross-review, và KHÔNG thay thế được nó. Thứ có thật: bốn cổng CỤC BỘ chạy trên
+      CHÍNH `efa397e` trước khi xin duyệt. Bản trước còn viết thêm "toàn bộ CI của PR xanh trên
+      chính head ấy" — RÚT, vì đó đúng là lỗi lẫn CẤU HÌNH với CÂY RUNNER mà mục CI ở
+      `pre_merge_checks` vừa cảnh báo; CI của PR chạy trên cây nào thì KHÔNG ĐO ĐƯỢC.
+    dieu_kien_cross_review_CHO_HEAD_DA_MERGE: KHONG_THOA
+    khong_duoc_doc_la_da_thoa: >-
+      `PROTOCOL:29` ghi thẳng *"Head đổi làm bằng chứng và ủy quyền cũ hết hiệu lực"*, và
+      `PROTOCOL:43` cấm Land Operator *"tự nới điều kiện"*. Verdict `approve` neo `98ef1f1` vì vậy
+      KHÔNG thoả điều kiện cross-review cho head `efa397e` — nó là bằng chứng CHO MỘT SHA KHÁC,
+      không phải bằng chứng yếu cho SHA này. Mọi bảng tóm tắt của #489 phải ghi điều kiện
+      cross-review là CHƯA THOẢ, không được đánh dấu đã đạt rồi ghi chú ở chỗ khác.
+      Codex connector chấm đúng chỗ này (P1 `Do not count the stale cross-review toward landing`)
+      trên `a48f576`, và nó ĐÚNG. Đây là LẦN THỨ TƯ trong phiên bản TÓM TẮT khai rộng hơn bản
+      CHI TIẾT — cùng một hình dạng lỗi, bốn nạn nhân khác nhau.
 
 # --- CỔNG TRƯỚC MERGE, trên head efa397e ---
 pre_merge_checks:
   - ten: 'CI được báo cho PR có head efa397eb2515658a1e3e9b4cdfd6e887b492b957'
+    trang_thai: KHONG_XAC_THUC_EXACT_HEAD
     loai_nguon: 'attestation của điều phối, đọc qua MCP `get_check_runs`'
-    ket_qua: '`gate (ubuntu-latest)` = **success**, hoàn tất `14:47:25Z`, chạy **1 411 giây**.'
+    ket_qua_tho: '`gate (ubuntu-latest)` = **success**, hoàn tất `14:47:25Z`, chạy **1 411 giây**.'
+    vi_sao_KHONG_dat_o_khoa_ket_qua: >-
+      Đổi tên khoá từ `ket_qua` sang `ket_qua_tho` và thêm `trang_thai` CÓ CẤU TRÚC vì cảnh báo
+      bằng VĂN XUÔI không chặn được bộ đọc schema: một mục mang `ket_qua` trông như một cổng ĐÃ
+      ĐẠT. Codex connector chấm đúng chỗ này (P1 `Do not treat the PR check as an exact-head
+      gate`) trên `a48f576`, và nó ĐÚNG. Mục này KHÔNG được đếm vào tập cổng đã đạt cho
+      `authorized_head_sha`.
     canh_bao_doc_ket_qua: >-
       Đây là lời khai kết quả PR, KHÔNG phải bằng chứng CI exact head. Đọc
       `.github/workflows/ci.yml` chỉ cho biết workflow DỰ KIẾN dùng cây merge tổng hợp (1 bước
@@ -212,12 +231,50 @@ post_merge_checks:
         `actionlint` IM LẶNG bỏ toàn bộ luật nền ấy — nên một con số `lease_publish` không kèm
         điều kiện đo là con số sẽ trôi mà không ai biết.
   - ten: 'CI trên merge commit — CỐ Ý KHÔNG CHỜ ĐỌC'
+    trang_thai: not_run
     loai_nguon: 'không đo — quyết định của chủ kho'
-    ket_qua: 'KHÔNG ĐỌC. Lượt `push` trên master vẫn chạy tự động; hồ sơ này không chờ nó.'
-    ghi_chu: >-
-      BỎ CHỜ KHÔNG PHẢI BỎ CHẠY — `ci.yml` khai `on: push`. Tiết kiệm là THỜI GIAN CHỜ của phiên,
-      không phải phút runner. Hệ quả: lượt push master là lần đo Windows ĐẦU TIÊN của mã này, nên
-      nếu Windows đỏ thì biết MUỘN HƠN — không phải không biết.
+    ly_do: >-
+      KHÔNG ĐỌC theo quyết định chủ kho. BỎ CHỜ KHÔNG PHẢI BỎ CHẠY — `ci.yml` khai `on: push` nên
+      lượt master vẫn chạy tự động; hồ sơ này không chờ và không đọc nó. Tiết kiệm là THỜI GIAN
+      CHỜ của phiên, không phải phút runner. Hệ quả: lượt push master là lần đo Windows ĐẦU TIÊN
+      của mã này, nên nếu Windows đỏ thì biết MUỘN HƠN — không phải không biết.
+    vi_sao_doi_tu_ket_qua_sang_trang_thai: >-
+      Bản trước cất sự kiện "không đo" trong khoá `ket_qua`, trong khi CHÍNH TỆP NÀY dùng
+      `trang_thai: not_run` ở chỗ khác. Bộ đọc schema thấy một mục hậu kiểm CÓ `ket_qua` sẽ đếm nó
+      là cổng đã chạy — tức một cổng KHÔNG ĐO ĐƯỢC lọt vào tập ĐÃ ĐẠT, đúng lúc hồ sơ này được
+      dùng để đóng chuỗi. Codex connector chấm đúng chỗ này (P2) và nó ĐÚNG.
+
+# --- BOOKKEEPING (khoá BẮT BUỘC của schema `PROTOCOL:466-485`) ---
+# Bản đầu của tệp này KHÔNG có khoá `bookkeeping` — 6/6 land evidence khác trong `ops/land/` đều
+# có, và schema liệt kê nó. Codex connector chấm đúng chỗ này (P2 `Restore the required
+# bookkeeping field`) trên `a48f576`, và nó ĐÚNG: bộ đọc schema không tìm được thứ phân biệt
+# `merged` với `landed`, ngay trong tệp sinh ra để đóng chuỗi. Các khối văn xuôi tuỳ biến
+# (`no_con_lai`, `chuoi_land_evidence_DA_DONG_...`) GIỮ NGUYÊN nhưng chỉ là dữ liệu BỔ SUNG.
+bookkeeping:
+  - >-
+    PR #489 merged `c0a5cbe` lúc `2026-09-09T14:51:22Z`. Tại base `f4d74fe`, `ops/land/` có 4 tệp;
+    head `efa397e` có 6 tệp; sau khi tệp NÀY vào kho thì có 7. Số tệp trong Git KHÔNG phải số lần
+    land thành công.
+  - >-
+    Hậu-merge gate CHẠY TẠI CHỖ trên `master = c0a5cbe`, KHÔNG phải trên CI: `bien_nhan_v2` 94 bản
+    ghi · 0 vi phạm · `TỔNG: ĐẠT` · `rc=0` — `lease_publish` 121/121 (SAU khi cài `actionlint`
+    1.7.7; thiếu công cụ thì 120/121 fail-close) — `doctrine-scan` 7 tệp / 0 chỗ chép —
+    `adr-song` 46/46 — `doc-claims-check --strict` `ok: true` 106 tệp — `shellcheck` `rc=0`.
+  - trang_thai_ADR_0034_cua_489: >-
+      `merged` ĐÃ ĐẠT (đo bằng Git: `merge-base --is-ancestor efa397e origin/master` ⇒ ĐÚNG).
+      `hậu-merge gate` ĐÃ ĐẠT ở phần chạy tại chỗ; CI trên merge commit là `not_run` CỐ Ý.
+      `bookkeeping` = tệp này. NHƯNG `landed` KHÔNG được tuyên ở đây: điều kiện cross-review cho
+      head đã merge `efa397e` là KHÔNG THOẢ (verdict `approve` neo `98ef1f1`, và `PROTOCOL:29`
+      nói head đổi làm bằng chứng cũ hết hiệu lực). Xem
+      `head_da_cross_review_khac_head_merge.dieu_kien_cross_review_CHO_HEAD_DA_MERGE`.
+  - no_chua_dong_chuyen_giao_cho_phien_sau:
+      - 'cross-review exact head cho `efa397e` — CHƯA CHẠY'
+      - 'P3 `bang-khang-dinh-bo-chu-thich-va-gioi-han-nguon` — hiện vật tra cứu ở `ops/reviews/pr489-review-2-phep-do/`'
+      - 'P3 `tong-dong-diff-trong-prompt-khong-khop-numstat` — không có tệp trong kho để sửa'
+      - 'Quyết định "đóng chuỗi" chưa vào doctrine — xem `no_moi_sinh_ra_tu_quyet_dinh_nay`'
+  - readback: >-
+      Tệp này KHÔNG tự tuyên đã readback canonical. `complete` của Mission đòi final readback và
+      không còn Packet/lease mở (`PROTOCOL:722`); phạm vi tệp này chỉ tới bookkeeping của #489.
 
 # --- NỢ, khai chứ không đóng ---
 no_con_lai:
@@ -245,9 +302,15 @@ chuoi_land_evidence_DA_DONG_THEO_QUYET_DINH_CHU_KHO:
   mat_xich_thu: 6
   mat_xich_thu_7: KHONG_TON_TAI
   van_de_da_gay_ra_chuoi: >-
-    Mỗi PR hồ sơ cần land evidence, mà land evidence phải vào kho qua một PR, mà PR ấy lại cần
-    land evidence. Chi phí mỗi mắt xích ĐO ĐƯỢC: một lượt CI (~24 phút runner), một lượt duyệt
-    của người khác, và ít nhất một lượt cross-review (~16 phút cộng một hạn mức API).
+    THÓI QUEN, KHÔNG PHẢI QUY TẮC — và bản trước của dòng này viết ngược. Nó khai "land evidence
+    PHẢI vào kho qua một PR, mà PR ấy LẠI CẦN land evidence" như thể là luật. Quét lại toàn kho:
+    KHÔNG có luật ấy. `PROTOCOL:466-488` định nghĩa schema bản ghi và đòi bằng chứng bền;
+    `ADR-0034:17-21` đòi hậu-merge gate và bookkeeping — KHÔNG chỗ nào đòi một PR KẾ NHIỆM cho
+    chính bản ghi land evidence. Việc mỗi mắt xích lại sinh mắt xích sau là do CÁCH LÀM của các
+    phiên trước, không do doctrine. Codex connector chấm đúng chỗ này (P2 `Remove the invented
+    recursive-PR requirement`) trên `a48f576`, và nó ĐÚNG.
+    Chi phí mỗi mắt xích thì ĐO ĐƯỢC thật: một lượt CI (~24 phút runner), một lượt duyệt của
+    người khác, và ít nhất một lượt cross-review (~16 phút cộng một hạn mức API).
   quyet_dinh:
     nguoi_quyet: ducthangho
     ngay: '2026-09-09'
@@ -279,20 +342,25 @@ chuoi_land_evidence_DA_DONG_THEO_QUYET_DINH_CHU_KHO:
   no_moi_sinh_ra_tu_quyet_dinh_nay:
     slug: quyet-dinh-dong-chuoi-chua-vao-doctrine
     mo_ta: >-
-      Quyết định này hiện CHỈ nằm trong tệp land evidence — mà `ADR-0034` vẫn định nghĩa `landed`
-      cần "bookkeeping", và KHÔNG tệp doctrine nào nói bookkeeping của một PR hồ sơ THUẦN được
-      miễn PR riêng. Phiên sau đọc `ADR-0034` hoặc `docs/PROTOCOL_DA_PHIEN.md` sẽ tái tạo chuỗi.
+      Quyết định này hiện CHỈ nằm trong tệp land evidence. `ADR-0034` vẫn định nghĩa `landed` cần
+      "bookkeeping", nên phiên sau đọc doctrine vẫn phải GHI bookkeeping — điều đó không đổi.
+    dinh_chinh_ban_truoc: >-
+      Bản trước viết thêm: "KHÔNG tệp doctrine nào nói bookkeeping của một PR hồ sơ THUẦN được
+      MIỄN PR riêng" — câu ấy đọc sự VẮNG MẶT của một miễn trừ thành sự TỒN TẠI của một yêu cầu.
+      Đó là lỗi NGƯỢC của chính lỗi vừa rút ở `van_de_da_gay_ra_chuoi`: cả hai đều biến thói quen
+      thành luật. Không cần miễn trừ cho một thứ chưa từng bị đòi.
+    vi_sao_de_xuat_ADR_KHONG_con_la_cach_chua_duy_nhat: >-
+      Nếu doctrine chưa từng đòi PR kế nhiệm thì một `ADR-0046` miễn trừ là THỪA: không có luật
+      nào để nới. Cách rẻ hơn và đúng hơn là ghi rõ trong protocol rằng bookkeeping của một PR có
+      thể nằm TRONG chính PR ấy hoặc trong PR kế tiếp — làm cho điều đã đúng trở nên ĐỌC ĐƯỢC,
+      thay vì cấp ngoại lệ cho một quy tắc tưởng tượng. Phiên sau chọn đường nào cũng phải ĐO
+      trước: đi tìm câu doctrine thật sự đòi PR riêng; KHÔNG tìm thấy thì đừng viết ADR miễn trừ.
     vi_sao_dang_ghi_thay_vi_lam_ngay: >-
-      Viết một ADR mới là hành vi QUẢN TRỊ (`ADR-0034` đòi impact analysis + human approval) và
-      kéo theo cập nhật bảng §20 kẻo `adr-song` ĐỎ. Chủ kho bảo "đóng chuỗi", KHÔNG bảo "viết
-      ADR". Điều phối làm đúng phần được giao và KHAI phần chưa làm, thay vì tự mở rộng phạm vi
-      vào chỗ doctrine. `CLAUDE.md` đã ghi: nơi các ca đi chết là prompt/README — nên nợ này được
-      ghi Ở ĐÂY chứ không chỉ trong hội thoại.
-    de_xuat_cu_the_cho_phien_sau: >-
-      `ADR-0046`: land evidence của PR hồ sơ THUẦN (write set chỉ chạm `ops/land/**` hoặc
-      `ops/reviews/**`, không chạm mã sản phẩm) được gộp vào PR hồ sơ KẾ TIẾP thay vì đòi PR
-      riêng. Chuỗi thành hữu hạn theo CẤU TRÚC, không theo kỷ luật — cùng cách chữa đã dùng cho
-      `shell_environment_policy` (bỏ hẳn đường ghi thay vì vá tiếp). Kèm một dòng trong bảng §20.
+      Sửa doctrine là hành vi QUẢN TRỊ (`ADR-0034` đòi impact analysis + human approval), và nếu
+      đi đường ADR thì kéo theo cập nhật bảng §20 kẻo `adr-song` ĐỎ. Chủ kho bảo "đóng chuỗi",
+      KHÔNG bảo "sửa doctrine". Điều phối làm đúng phần được giao và KHAI phần chưa làm, thay vì
+      tự mở rộng phạm vi vào chỗ doctrine. `CLAUDE.md` đã ghi: nơi các ca đi chết là
+      prompt/README — nên nợ này được ghi Ở ĐÂY chứ không chỉ trong hội thoại.
 
 khong_do_duoc:
   - muc: 'CI trên merge commit `c0a5cbe`'

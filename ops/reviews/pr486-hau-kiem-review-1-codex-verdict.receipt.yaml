@@ -32,6 +32,17 @@ verdict_sha256: f3e3d0c57786fa2c23c01a3216bddab3d5583109194e158e944c4b3fd2bdb94c
 verdict_bytes: 91292
 reviewed_sha: da481f94eee0adf1fe5fc4260a535a9b48fc2627
 evidence_url: https://github.com/ducthangho/tra-luat/blob/ee23363171ca0a5218a5d7f067649487470acd0c/ops/reviews/pr486-hau-kiem-review-1-codex-verdict.md
+comment_ban_chieu: https://github.com/ducthangho/tra-luat/pull/486#issuecomment-5600018857
+comment_ban_chieu_ghi_chu: >-
+  BẢN RÚT GỌN CÓ CHỦ Ý, KHÔNG phải nguyên văn — nói thẳng vì cross-review lượt này chấm P2
+  `neo-comment-khai-vuot-lop-doc` cho đúng kiểu khai vượt ở chỗ này. Comment liệt kê đủ slug,
+  mức và phép đo chính, rồi trỏ về blob cho toàn văn; nó KHÔNG khớp từng ký tự với
+  `verdict_path` và KHÔNG được đọc như thế.
+  Hệ quả: neo thứ hai ở đây YẾU HƠN neo comment nguyên văn của các lượt trước. Bù lại, nó
+  không mang một lời khai không kiểm được — `CLAUDE.md` đã đo rằng đường ĐỌC của GitHub tự
+  chuẩn hoá thực thể HTML (`'`→`&#39;`), nên `diff` bản-đã-đến chỉ dùng để tìm lệch VỀ KÝ TỰ
+  THẬT, không dùng để khẳng định byte trên GitHub. Byte ấy vẫn là KHÔNG ĐO ĐƯỢC từ container
+  này (REST tới `repos/…` bị proxy chặn 403).
 evidence_url_ghi_chu: >-
   `evidence_url` neo BLOB ghim commit `ee23363` — commit ĐẦU TIÊN chứa tệp verdict, trên nhánh
   `claude/handoff-tra-luat-repo-2ak5th` (PR #487). Cổng `bien_nhan_v2` đòi đúng dạng

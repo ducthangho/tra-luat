@@ -104,6 +104,61 @@ anchor:
   cuong_do: cao
   gioi_han: 'Chỉ vững nếu land bằng MERGE hoặc fast-forward; SQUASH phá quan hệ tổ tiên.'
 
+dinh_chinh_loi_khai_DU_BO_trong_commit_13ba87d:
+  loi_khai: >-
+    Commit `13ba87d` viết "Cổng tại chỗ, ĐỦ BỘ (có `lease_publish`, thứ mà bốn lượt trước tôi bỏ
+    sót)" rồi liệt kê 6 cổng. SAI — và sai NGAY SAU commit `b43d784` vừa rút ra bài học "chạy bộ
+    cổng của CI, đừng chạy bộ cổng mình nhớ". Cùng hình dạng lỗi, cách nhau MỘT commit.
+  do_lai: >-
+    Reviewer lượt 6 phân loại TỪNG BƯỚC của job `gate` trong `.github/workflows/ci.yml`:
+    40 bước = 8 setup + 31 CỔNG + 1 upload artifact. Trong 31 bước cổng ấy, commit message của
+    `b43d784`/`13ba87d` chỉ nêu ĐÚNG 2: `lease-publish selftest` và `doc-claims-check strict` —
+    và ngay bước lease cũng kèm caveat (wrapper của CI cài lại `actionlint`, không có log cục bộ
+    tương đương). Tức 2/31, không phải "đủ bộ". Bản trước của dòng này viết "khoảng 25 lệnh kiểm"
+    — ƯỚC LƯỢNG của điều phối; số ĐO ĐƯỢC là 31, và hiện vật là `ci-comparison.json`.
+    Hai chỗ sắc nhất reviewer chỉ: `bien_nhan_v2.py` xanh KHÔNG chứng minh `bien_nhan_v2_test.py`
+    đã chạy; `doctrine-scan`/`adr-song` KHÔNG thay `packet_loop_test.py`.
+  da_chay_them_sau_khi_bi_bat:
+    - '`ops/bien_nhan_v2_test.py` ⇒ 48/48 ca đạt · 63/63 đột biến thường CÓ RĂNG · 2/2 ca tự kiểm đạt · TỔNG ĐẠT · rc=0'
+    - '`.claude/dev/packet_loop_test.py` ⇒ TỔNG ĐẠT · rc=0'
+  tap_CO_BANG_CHUNG_tai_SHA_nay:
+    so_luong: 8
+    don_vi: >-
+      8 = số LỆNH điều phối chạy tại chỗ và có kết quả ở SHA này. KHÔNG so trực tiếp được
+      với 31 bước cổng của CI: một bước CI có thể gọi nhiều lệnh, và tên bước không trùng
+      tên lệnh. Phép so ĐÚNG do reviewer làm là đọc THÂN `run` của từng bước — kết quả
+      2/31 bước cổng được nêu trong commit message. Hai con số ấy trả lời hai câu khác
+      nhau; đừng cộng hay trừ chúng.
+    hien_vat: 'ops/reviews/pr490-review-6-phep-do/ci-comparison.json · ci-steps.json'
+    danh_sach:
+      - 'ops/bien_nhan_v2.py --root .'
+      - 'ops/bien_nhan_v2_test.py'
+      - 'ops/lease_publish_test.py'
+      - '.claude/dev/packet_loop.py doctrine-scan'
+      - '.claude/dev/packet_loop.py adr-song'
+      - '.claude/dev/packet_loop_test.py'
+      - 'scripts/tl.py doc-claims-check --strict'
+      - 'shellcheck ops/dung_goi_review.sh'
+  tap_CHUA_CO_BANG_CHUNG_da_chay_tai_cho:
+    ghi_chu_quan_trong: >-
+      "CHƯA CÓ BẰNG CHỨNG ĐÃ CHẠY" KHÔNG phải "ĐÃ KHÔNG CHẠY", và cũng không phải "sẽ đỏ".
+      Reviewer nói thẳng điều này; đừng đọc danh sách dưới thành lời phủ định.
+    danh_sach:
+      - 'ops/cong_cu.py · ops/cong_cu_test.py (G5)'
+      - 'scripts/tl.py --selftest (full selftest)'
+      - 'scripts/tl.py workflow-audit --strict · golden-test · determinism-audit --strict'
+      - 'scripts/tl.py release-check · release-verify --strict (cả hai lane) · release-bundle x2'
+      - '.claude/dev/ci_dang_ky_test.py (test registry) · idiom_py_test.py · codex_cred_test.py · gate_lifecycle_test.py'
+      - '.githooks/eol_policy_test.py · pre_push_test.py · eol_policy.py'
+      - '.github/checks/ci_phamvi.py · ci_phamvi_test.py · bundle_fragment_check.py'
+      - 'scripts/gen_instructions.py · scripts/tl_core/command_registry_test.py · scripts/tl_boot.py · ruff'
+  vi_sao_khong_sua_commit_message: >-
+    KHÔNG viết lại lịch sử. Đính chính sống ở ĐÂY và ở hàng mục lục, đúng cơ chế `t27` đang canh.
+  bai_hoc: >-
+    Chữ "ĐỦ BỘ" là một lời khai về ĐỘ PHỦ, và độ phủ thì phải ĐO bằng cách so tập LỆNH của CI với
+    tập có bằng chứng — không so bằng cảm giác đã chạy nhiều. Lần sau muốn viết "đủ" thì phải kèm
+    hai con số: chạy bao nhiêu / CI có bao nhiêu.
+
 khong_do_duoc:
   - 'Model đã phục vụ và `thread_id`.'
   - '`run.json` không vào kho ⇒ scalar runtime là attestation.'

@@ -1,0 +1,117 @@
+# BIÊN NHẬN GIAO HÀNG — cross-review LƯỢT 6 của PR #490, KHÁC NỀN (codex).
+#
+# Verdict: changes_requested — 0 P1 / 0 P2 / 1 P3.
+#
+# LƯỢT NÀY KIỂM CHÍNH NĂM BIÊN NHẬN SINH BẰNG SCRIPT (`pr490-review-1..5`) — chúng khai hàng chục
+# scalar runtime và chưa từng qua review. Kết quả: MỌI trường neo ĐÚNG.
+# Mọi mốc CI nhắc trong biên nhận này là ATTESTATION: reviewer không có mạng, điều phối không giữ
+# run JSON. Thứ ĐO ĐƯỢC là kết quả chạy lại tại chỗ và các phép Git.
+
+schema_version: 2
+receipt_id: pr490-review-6-codex-20260909-1fc0cfe8
+kind: review_delivery_receipt
+packet_id: 'PR490-LAND-EVIDENCE-489'
+lease_id: khong-co-lease
+phase_key: HO-SO-CROSS-REVIEW-PHIEN-20260909
+luot: 6
+role: reviewer
+provider: codex
+executor_provider: claude
+cross_provider: true
+assurance: cross_reviewed
+verdict: changes_requested
+verdict_path: ops/reviews/pr490-review-6-codex-verdict.md
+verdict_sha256: 857644ff63e3529080a4d5d9385a7ff940207b0f25bfcbd6a1ebb3dd52d4cd9c
+verdict_bytes: 31520
+reviewed_sha: 13ba87d8e6054ec4e35a5a6ada1eec66afffb545
+evidence_url: https://github.com/ducthangho/tra-luat/blob/2f783bc778b7e17b6bdc8392933842073cc43d26/ops/reviews/pr490-review-6-codex-verdict.md
+evidence_url_ghi_chu: >-
+  Neo BLOB ghim `2f783bc` — commit ĐẦU TIÊN chứa tệp verdict, đo bằng
+  `git log --all --diff-filter=A -- <path>`, trả ĐÚNG 1 commit.
+so_p1: 0
+so_p2: 0
+so_p3: 1
+
+ket_qua_kiem_nam_bien_nhan:
+  ket_luan: 'MỌI trường neo ĐÚNG.'
+  phep_do_cua_reviewer: >-
+    Đọc byte verdict từ cây; đếm tiêu đề bằng regex `^###\s+(\S+)\s+\[(P[123])\]`; đọc
+    SHA/verdict từ header; tra commit thêm tệp bằng `git log --all --diff-filter=A`.
+  so_do: '5/5 đường dẫn trả 1/1 commit thêm tệp · 5/5 blob nguyên byte tại head · URL khớp cả SHA lẫn đường dẫn.'
+  y_nghia: >-
+    Bốn biên nhận sinh BẰNG SCRIPT từ `run.json` đứng được phép kiểm độc lập. Đây là lý do dùng
+    script thay vì gõ tay: bốn tệp, mỗi tệp hơn hai chục scalar, gõ tay là mời lỗi chép.
+
+p3_con_lai:
+  slug: van-xuoi-do-duoc-van-vuot-nguon
+  ve_1_da_va: >-
+    Các hàng mục lục đưa thời lượng và "chạy trọn ngay lần đầu" ra chỗ người đọc tra cứu nhưng bỏ
+    mất giới hạn nguồn mà biên nhận đã ghi. Đã vá ở 9/9 hàng bằng cụm "ATTESTATION — toàn bộ khối
+    runtime", không chỉ 5 hàng của PR này.
+  ve_2_da_va: >-
+    Lời "Cổng tại chỗ, ĐỦ BỘ" trong commit `13ba87d`. Xem
+    `dinh_chinh_loi_khai_DU_BO_trong_commit_13ba87d` ở biên nhận lượt 5.
+  vi_sao_reviewer_KHONG_nang_muc: >-
+    Nguyên văn: trường neo/hash/severity đúng, bản vá `t27` hoạt động, chưa có chứng cứ lỗi runtime
+    sản phẩm hoặc quyền land bị cấp bởi những câu ấy — "không phải một lỗi kỹ thuật nặng hơn bị hạ
+    mức để đạt approve". Ghi lại nguyên văn vì đó là chốt chống nghi ngờ "hạ mức cho dễ approve".
+
+model_reviewer_identity:
+  provider: openai_codex
+  surface: codex_cli
+  model_yeu_cau: gpt-6-astra
+  model_da_chay: KHONG_DO_DUOC
+  session_run_id: 1fc0cfe8
+  run_id_day_du: 1fc0cfe8cf6c44adaa1526b4fd492dcf
+  prompt_sha256: 3162b44070a4723e1d1008b43503632014e62d2e345750ee2a8e31d15354443a
+  bat_dau_utc: '2026-09-09T17:41:35.698105+00:00'
+  ket_thuc_utc: '2026-09-09T18:05:37.724007+00:00'
+  thoi_luong_giay: 1442.026
+  ma_thoat: 0
+  trang_thai: xong
+  stdout_byte: 182
+  stdout_sha256: 5efbb213b11f3cbbcd5717108bf66c039a3cd9e89d0a4135a86825cb6f046719
+  stderr_byte: 931800
+  stderr_sha256: 128e1aafabf29b4abd455b930efac3ce91a911b1c259fc4095a2b8b3971e739c
+  so_lan_chet_truoc_khi_xong: 0
+  nguon_cac_scalar_tren: 'Đọc từ `run.json` trong scratchpad; tệp ấy KHÔNG vào kho ⇒ ATTESTATION.'
+
+nang_luc_do_cua_goi:
+  so_ref: 317
+  lech: 0
+  kho_nong: false
+  chua_do_duoc: 'Không mạng: mọi khẳng định về GitHub API/CI là KHÔNG ĐO ĐƯỢC.'
+
+hien_vat_reviewer_vao_kho:
+  duong_dan: 'ops/reviews/pr490-review-6-phep-do/ — receipts.json · do-static.py · ci-comparison.json · ci-steps.json'
+  doi_chieu_nguyen_byte: '`cmp` giữa gói và bản trong kho: KHỚP 4/4 tệp, 0 tệp lệch.'
+  vi_sao_giu_ci_comparison: >-
+    `ci-comparison.json` phân loại TỪNG BƯỚC của job `gate` (40 bước = 8 setup + 31 cổng +
+    1 upload) và đánh dấu bước nào được nêu trong commit message. Đây là hiện vật khoá lời khai
+    "ĐỦ BỘ" — lần sau ai muốn viết "đủ" thì chạy lại nó trước.
+
+tuan_thu_cam_cua_reviewer:
+  cay_kho_sach: true
+  commit_them_ngoai_head: 0
+  bang_chung: '`status --porcelain` RỖNG và `log 13ba87d..HEAD` RỖNG sau khi lượt kết thúc.'
+
+manifest:
+  duong_dan: KHONG_CO_TRONG_KHO
+  ghi_chu: 'Hiện vật gói (mirror 317 ref) CỐ Ý không vào kho; riêng bốn tệp đo ở trên thì CÓ.'
+
+github_submitter_identity:
+  actor: ducthangho
+  la_tac_gia_PR: true
+  ghi_chu: '`ADR-0040`: verdict do tài khoản tác giả PR vận chuyển KHÔNG là merge authorization.'
+  phien_van_chuyen: https://claude.ai/code/session_01UN8WRS5Bc5pBBzYPDqs9Dx
+
+anchor:
+  loai: canonical_ancestry
+  cuong_do: cao
+  gioi_han: 'Chỉ vững nếu land bằng MERGE hoặc fast-forward; SQUASH phá quan hệ tổ tiên.'
+
+khong_do_duoc:
+  - 'Model đã phục vụ và `thread_id`.'
+  - '`run.json` không vào kho ⇒ scalar runtime là attestation.'
+  - 'Trạng thái GitHub tại thời điểm reviewer đọc: sandbox không mạng.'
+  - 'Lượt CI nào ĐÃ chạy thật trên các head của PR này — không đọc, không giữ run JSON.'

@@ -15,9 +15,9 @@ packet_issue_A0: 488                                # proposed, CHƯA lease
 spec: ops/specs/THU-HOI-LEASE-VA-CAP-LAI.md
 spec_revision: 9
 spec_hash: 465538364b1a3f9477782fba79869bbd1c9351140e3fa9df50451baae22f9c79
-spec_r9_da_review: false                            # r9 = r8 + HINT lượt 7 (2 P2); lượt 7 đọc r8 48ea894a… ⇒ 0 P1
+spec_r9_da_review: true                             # lượt 8 (lời gọi 9, VERDICT 85d10868…) đọc r9 + ADR: 0 P1; S11/P2 chỉ ở Issue #488
 adr: docs/adr/0047-nguon-tin-cay-cho-cong-doc-lease.md   # Proposed, sha256 b9975929… (đồng bộ S10)
-loi_goi_review_da_dung: 8                           # 1,2,3,4a(chết),4b,5,6(=7),7(=8); 7a chết preflight KHÔNG tính
+loi_goi_review_da_dung: 9                           # 1,2,3,4a(chết),4b,5,6(=7),7(=8),8(=9); 7a chết preflight KHÔNG tính
 comment_neo: [5571673973, 5575587924, 5576397733, 5578460203, 5598741255, 5600001299]
 hien_vat: ops/reviews/thu-hoi-lease-va-cap-lai-spec/   # luot1..7 VERDICT/HINT/PROMPT/EVIDENCE, spec-r1..r8, 4a/7a chết, README
 ```
@@ -29,12 +29,13 @@ hien_vat: ops/reviews/thu-hoi-lease-va-cap-lai-spec/   # luot1..7 VERDICT/HINT/P
 | 6 | 7 | r6 `f78135cf…` | `9090aadd…` (2889 s) | 3 (S1, S3, S7 mới) + 3 P2 (S5, S6, S8 mới) |
 | 7a | — | r8 | chết preflight `refresh_token_invalidated` | không tính |
 | 7 | 8 | r8 `48ea894a…` | `f28b7d0c…` (1377 s) | **0**; 2 P2 (S8 một phần, S10 mới) ⇒ vá r9 |
+| 8 | 9 | r9 `46553836…` + ADR | `85d10868…` (1431 s) | **0**; S8/S10 ĐÓNG; S11/P2 = hồ sơ Issue #488 (đã sửa: `wp488`, `land_obligations` đề xuất) |
 
 Chi tiết từng ô: spec §0.4 (r6→r8) và §0.5 (r8→r9).
 
 ## 3. Còn của CHỦ KHO (không phải finding — reviewer lượt 7 xác nhận)
 
-1. **Lease cho #488** (`--granted-by` chủ kho; phiên agent KHÔNG tự cấp).
+1. **Lease cho #488** (`--granted-by` chủ kho; phiên agent KHÔNG tự cấp); xác nhận `mission_issue: null` (standalone) và ghim `land_obligations` (S11).
 2. **Nền thực thi được tin** (runner/image) + **người duyệt** mỏ neo `PROFILE_ADAPTER_DA_DUYET` ⇒ ghi ADR-0047 lớp 2.
 3. Q7 (ngoại lệ dòng ADR-0044 cho A0 — ước 560–780 là TRƯỚC vá lượt 6, executor đo numstat trước ready), Q8 (lệnh
    thu hồi r2 trên #461), Q9 (nhận bản ghi cho lease hết hạn), Q10 facts (chỉ A1).

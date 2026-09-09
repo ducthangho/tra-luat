@@ -1,0 +1,454 @@
+{
+  "method": "yaml.scan ScalarToken spans, then # outside scalar; full and inline tracked separately",
+  "current_yaml_files": 5,
+  "current_comments": 62,
+  "current_kinds": {
+    "whole_line": 62
+  },
+  "current_rows": [
+    {
+      "file": "ops/land/pr480-land-evidence.yaml",
+      "line": 1,
+      "column": 1,
+      "kind": "whole_line",
+      "text": "# LAND EVIDENCE — PR #480 (land evidence cho PR #477)."
+    },
+    {
+      "file": "ops/land/pr480-land-evidence.yaml",
+      "line": 2,
+      "column": 1,
+      "kind": "whole_line",
+      "text": "#"
+    },
+    {
+      "file": "ops/land/pr480-land-evidence.yaml",
+      "line": 3,
+      "column": 1,
+      "kind": "whole_line",
+      "text": "# VÌ SAO TỆP NÀY TỒN TẠI: `ADR-0034:17-20` đòi mọi transition quan trọng có evidence trên GitHub, phần"
+    },
+    {
+      "file": "ops/land/pr480-land-evidence.yaml",
+      "line": 4,
+      "column": 1,
+      "kind": "whole_line",
+      "text": "# land phải ghi \"Approver, authorization, operator, merge commit, post-merge gate và bookkeeping\"."
+    },
+    {
+      "file": "ops/land/pr480-land-evidence.yaml",
+      "line": 5,
+      "column": 1,
+      "kind": "whole_line",
+      "text": "# Khung trường theo mẫu ở `docs/PROTOCOL_DA_PHIEN.md:466-488`."
+    },
+    {
+      "file": "ops/land/pr480-land-evidence.yaml",
+      "line": 6,
+      "column": 1,
+      "kind": "whole_line",
+      "text": "#"
+    },
+    {
+      "file": "ops/land/pr480-land-evidence.yaml",
+      "line": 7,
+      "column": 1,
+      "kind": "whole_line",
+      "text": "# Nguồn: §20 ghi ADR-0034 là \"có nhắc\", không phải \"0 cổng\"; nhắc tên không chứng minh"
+    },
+    {
+      "file": "ops/land/pr480-land-evidence.yaml",
+      "line": 8,
+      "column": 1,
+      "kind": "whole_line",
+      "text": "# cưỡng chế nội dung. Các phép kiểm ngắn của lượt này không xác thực prose/API trong land evidence."
+    },
+    {
+      "file": "ops/land/pr480-land-evidence.yaml",
+      "line": 9,
+      "column": 1,
+      "kind": "whole_line",
+      "text": "#"
+    },
+    {
+      "file": "ops/land/pr480-land-evidence.yaml",
+      "line": 10,
+      "column": 1,
+      "kind": "whole_line",
+      "text": "# TỆP NÀY LÀ LAND EVIDENCE CỦA MỘT LAND EVIDENCE. Nói thẳng chỗ ấy vì nó là một chuỗi không tự dừng:"
+    },
+    {
+      "file": "ops/land/pr480-land-evidence.yaml",
+      "line": 11,
+      "column": 1,
+      "kind": "whole_line",
+      "text": "# Tuyến này: #477 → land evidence ở #480 → hồ sơ bổ sung ở #489. Tuyến #468 → #478 → #486"
+    },
+    {
+      "file": "ops/land/pr480-land-evidence.yaml",
+      "line": 12,
+      "column": 1,
+      "kind": "whole_line",
+      "text": "# liên quan qua các hiện vật hậu kiểm ở #487; không phải chuỗi cha/con tuyến tính của #480."
+    },
+    {
+      "file": "ops/land/pr480-land-evidence.yaml",
+      "line": 13,
+      "column": 1,
+      "kind": "whole_line",
+      "text": "# Không có quy tắc nào trong kho nói chuỗi dừng ở đâu. Đây là câu hỏi cho chủ kho, không phải điều"
+    },
+    {
+      "file": "ops/land/pr480-land-evidence.yaml",
+      "line": 14,
+      "column": 1,
+      "kind": "whole_line",
+      "text": "# tệp này tự quyết — xem `bookkeeping.chuoi_land_evidence_chua_co_diem_dung`."
+    },
+    {
+      "file": "ops/land/pr480-land-evidence.yaml",
+      "line": 25,
+      "column": 1,
+      "kind": "whole_line",
+      "text": "# --- UỶ QUYỀN ---"
+    },
+    {
+      "file": "ops/land/pr480-land-evidence.yaml",
+      "line": 39,
+      "column": 1,
+      "kind": "whole_line",
+      "text": "# --- MERGE ---"
+    },
+    {
+      "file": "ops/land/pr480-land-evidence.yaml",
+      "line": 61,
+      "column": 1,
+      "kind": "whole_line",
+      "text": "# --- CROSS-REVIEW: 2 lượt, khác nền (executor claude / reviewer codex) ---"
+    },
+    {
+      "file": "ops/land/pr480-land-evidence.yaml",
+      "line": 113,
+      "column": 1,
+      "kind": "whole_line",
+      "text": "# --- PHÉP ĐO TRƯỚC MERGE, trên đúng head đã duyệt `5b96ddc` ---"
+    },
+    {
+      "file": "ops/land/pr480-land-evidence.yaml",
+      "line": 114,
+      "column": 1,
+      "kind": "whole_line",
+      "text": "# THIẾU TRONG BẢN ĐẦU. Cross-review #489 chấm P2 `Add the required pre-merge evidence`: hai land"
+    },
+    {
+      "file": "ops/land/pr480-land-evidence.yaml",
+      "line": 115,
+      "column": 1,
+      "kind": "whole_line",
+      "text": "# evidence mới bỏ hẳn mục này và nhảy thẳng từ metadata merge sang hậu-merge, nên không nói được"
+    },
+    {
+      "file": "ops/land/pr480-land-evidence.yaml",
+      "line": 116,
+      "column": 1,
+      "kind": "whole_line",
+      "text": "# cổng nào đã đạt TRÊN ĐÚNG HEAD trước merge. Hai land evidence CŨ (`pr477-…`, `pr478-…`) đều có"
+    },
+    {
+      "file": "ops/land/pr480-land-evidence.yaml",
+      "line": 117,
+      "column": 1,
+      "kind": "whole_line",
+      "text": "# mục này — tức đây là bỏ sót của điều phối, không phải mẫu đổi."
+    },
+    {
+      "file": "ops/land/pr480-land-evidence.yaml",
+      "line": 118,
+      "column": 1,
+      "kind": "whole_line",
+      "text": "# Các hàng lịch sử không có log gốc là attestation về tiền kiểm. Số đo lại sau merge ghi riêng"
+    },
+    {
+      "file": "ops/land/pr480-land-evidence.yaml",
+      "line": 119,
+      "column": 1,
+      "kind": "whole_line",
+      "text": "# trong `do_lai_sau_merge`, tuyệt đối không dùng làm bằng chứng đã đạt trước merge."
+    },
+    {
+      "file": "ops/land/pr480-land-evidence.yaml",
+      "line": 158,
+      "column": 1,
+      "kind": "whole_line",
+      "text": "# --- PHÉP ĐO SAU MERGE, trên master `7e69b8e` ---"
+    },
+    {
+      "file": "ops/land/pr480-land-evidence.yaml",
+      "line": 236,
+      "column": 1,
+      "kind": "whole_line",
+      "text": "# --- KHÔNG ĐO ĐƯỢC ---"
+    },
+    {
+      "file": "ops/land/pr480-land-evidence.yaml",
+      "line": 255,
+      "column": 1,
+      "kind": "whole_line",
+      "text": "# --- BOOKKEEPING ---"
+    },
+    {
+      "file": "ops/land/pr487-land-evidence.yaml",
+      "line": 1,
+      "column": 1,
+      "kind": "whole_line",
+      "text": "# LAND EVIDENCE — PR #487 (hiện vật cross-review của phiên 2026-09-09, vá hậu kiểm #486,"
+    },
+    {
+      "file": "ops/land/pr487-land-evidence.yaml",
+      "line": 2,
+      "column": 1,
+      "kind": "whole_line",
+      "text": "# và phép đo vì sao lease #482/#483 chết)."
+    },
+    {
+      "file": "ops/land/pr487-land-evidence.yaml",
+      "line": 3,
+      "column": 1,
+      "kind": "whole_line",
+      "text": "#"
+    },
+    {
+      "file": "ops/land/pr487-land-evidence.yaml",
+      "line": 4,
+      "column": 1,
+      "kind": "whole_line",
+      "text": "# Nghĩa vụ ghi land evidence: `ADR-0034:17-20`; mẫu trường: `docs/PROTOCOL_DA_PHIEN.md:466-488`."
+    },
+    {
+      "file": "ops/land/pr487-land-evidence.yaml",
+      "line": 5,
+      "column": 1,
+      "kind": "whole_line",
+      "text": "# Nguồn: §20 ghi ADR-0034 là \"có nhắc\", không phải \"0 cổng\"; nhắc tên không chứng minh"
+    },
+    {
+      "file": "ops/land/pr487-land-evidence.yaml",
+      "line": 6,
+      "column": 1,
+      "kind": "whole_line",
+      "text": "# cưỡng chế nội dung. Các phép kiểm ngắn của lượt này không xác thực prose/API trong land evidence."
+    },
+    {
+      "file": "ops/land/pr487-land-evidence.yaml",
+      "line": 39,
+      "column": 1,
+      "kind": "whole_line",
+      "text": "# --- CROSS-REVIEW ---"
+    },
+    {
+      "file": "ops/land/pr487-land-evidence.yaml",
+      "line": 93,
+      "column": 1,
+      "kind": "whole_line",
+      "text": "# --- P1 CỦA CODEX CONNECTOR: ĐIỀU PHỐI ĐÃ BÁC, VÀ VIỆC BÁC ẤY SAI ---"
+    },
+    {
+      "file": "ops/land/pr487-land-evidence.yaml",
+      "line": 193,
+      "column": 1,
+      "kind": "whole_line",
+      "text": "# --- PHÉP ĐO SAU MERGE, trên master f4d74fe ---"
+    },
+    {
+      "file": "ops/reviews/pr489-review-1-codex-verdict.receipt.yaml",
+      "line": 1,
+      "column": 1,
+      "kind": "whole_line",
+      "text": "# BIÊN NHẬN GIAO HÀNG — cross-review LƯỢT 1 của PR #489, KHÁC NỀN (codex)."
+    },
+    {
+      "file": "ops/reviews/pr489-review-1-codex-verdict.receipt.yaml",
+      "line": 2,
+      "column": 1,
+      "kind": "whole_line",
+      "text": "#"
+    },
+    {
+      "file": "ops/reviews/pr489-review-1-codex-verdict.receipt.yaml",
+      "line": 3,
+      "column": 1,
+      "kind": "whole_line",
+      "text": "# Verdict: changes_requested — 1 P1 / 4 P2 / 6 P3."
+    },
+    {
+      "file": "ops/reviews/pr489-review-1-codex-verdict.receipt.yaml",
+      "line": 4,
+      "column": 1,
+      "kind": "whole_line",
+      "text": "#"
+    },
+    {
+      "file": "ops/reviews/pr489-review-1-codex-verdict.receipt.yaml",
+      "line": 5,
+      "column": 1,
+      "kind": "whole_line",
+      "text": "# ĐỐI TƯỢNG: PR bookkeeping (hai land evidence) CỘNG một đính chính lớn mà điều phối vừa tự làm sau"
+    },
+    {
+      "file": "ops/reviews/pr489-review-1-codex-verdict.receipt.yaml",
+      "line": 6,
+      "column": 1,
+      "kind": "whole_line",
+      "text": "# khi phát hiện container mình là KHO NÔNG. Prompt kể thẳng chuỗi sai ấy và giao nhiệm vụ chính là"
+    },
+    {
+      "file": "ops/reviews/pr489-review-1-codex-verdict.receipt.yaml",
+      "line": 7,
+      "column": 1,
+      "kind": "whole_line",
+      "text": "# KIỂM CHÍNH BẢN SỬA, kèm câu hỏi ngược: \"bản sửa có khai vượt theo chiều ngược không?\""
+    },
+    {
+      "file": "ops/reviews/pr489-review-1-codex-verdict.receipt.yaml",
+      "line": 8,
+      "column": 1,
+      "kind": "whole_line",
+      "text": "# Reviewer trả lời đúng câu ấy — xem `p2_ban_sua_van_khai_vuot`."
+    },
+    {
+      "file": "ops/reviews/pr487-hau-kiem-head-review-1-codex-verdict.receipt.yaml",
+      "line": 1,
+      "column": 1,
+      "kind": "whole_line",
+      "text": "# BIÊN NHẬN GIAO HÀNG — cross-review HẬU KIỂM trên HEAD ĐÃ MERGE `3873173` của PR #487, KHÁC NỀN."
+    },
+    {
+      "file": "ops/reviews/pr487-hau-kiem-head-review-1-codex-verdict.receipt.yaml",
+      "line": 2,
+      "column": 1,
+      "kind": "whole_line",
+      "text": "#"
+    },
+    {
+      "file": "ops/reviews/pr487-hau-kiem-head-review-1-codex-verdict.receipt.yaml",
+      "line": 3,
+      "column": 1,
+      "kind": "whole_line",
+      "text": "# Verdict: changes_requested — 0 P1 / 1 P2 / 4 P3."
+    },
+    {
+      "file": "ops/reviews/pr487-hau-kiem-head-review-1-codex-verdict.receipt.yaml",
+      "line": 4,
+      "column": 1,
+      "kind": "whole_line",
+      "text": "#"
+    },
+    {
+      "file": "ops/reviews/pr487-hau-kiem-head-review-1-codex-verdict.receipt.yaml",
+      "line": 5,
+      "column": 1,
+      "kind": "whole_line",
+      "text": "# Lượt này bổ sung review hậu kiểm exact head; kết luận vẫn là changes_requested."
+    },
+    {
+      "file": "ops/reviews/pr487-hau-kiem-head-review-1-codex-verdict.receipt.yaml",
+      "line": 6,
+      "column": 1,
+      "kind": "whole_line",
+      "text": "# Thiếu lần đọc head đã được bổ sung, nhưng không hồi tố tiền kiểm hoặc tự tạo approve."
+    },
+    {
+      "file": "ops/reviews/pr487-hau-kiem-head-review-1-codex-verdict.receipt.yaml",
+      "line": 7,
+      "column": 1,
+      "kind": "whole_line",
+      "text": "# Phát hiện cổng đạt trong mirror dẫn tới điều phối đính chính; log kho nông không kèm."
+    },
+    {
+      "file": "ops/reviews/pr487-review-2-codex-verdict.receipt.yaml",
+      "line": 1,
+      "column": 1,
+      "kind": "whole_line",
+      "text": "# BIÊN NHẬN GIAO HÀNG — cross-review LƯỢT 2 của PR #487, KHÁC NỀN (codex)."
+    },
+    {
+      "file": "ops/reviews/pr487-review-2-codex-verdict.receipt.yaml",
+      "line": 2,
+      "column": 1,
+      "kind": "whole_line",
+      "text": "#"
+    },
+    {
+      "file": "ops/reviews/pr487-review-2-codex-verdict.receipt.yaml",
+      "line": 3,
+      "column": 1,
+      "kind": "whole_line",
+      "text": "# Verdict: approve — 0 P1 / 0 P2 / 6 P3."
+    },
+    {
+      "file": "ops/reviews/pr487-review-2-codex-verdict.receipt.yaml",
+      "line": 4,
+      "column": 1,
+      "kind": "whole_line",
+      "text": "#"
+    },
+    {
+      "file": "ops/reviews/pr487-review-2-codex-verdict.receipt.yaml",
+      "line": 5,
+      "column": 1,
+      "kind": "whole_line",
+      "text": "# ĐỐI CHIẾU LƯỢT 1, tổng 8 slug: 3 ĐÃ VÁ THẬT · 2 VÁ HỜ · 3 VÁ SINH LỖI MỚI · 0 CHƯA VÁ."
+    },
+    {
+      "file": "ops/reviews/pr487-review-2-codex-verdict.receipt.yaml",
+      "line": 6,
+      "column": 1,
+      "kind": "whole_line",
+      "text": "# Ba nhãn \"VÁ SINH LỖI MỚI\" KHÔNG tái mở P2 nào — reviewer nói rõ phần P2 cũ đã đóng, lỗi phát sinh"
+    },
+    {
+      "file": "ops/reviews/pr487-review-2-codex-verdict.receipt.yaml",
+      "line": 7,
+      "column": 1,
+      "kind": "whole_line",
+      "text": "# đều là LỆCH NỘI BỘ mức P3 giữa biên nhận và mục lục. Đây đúng hình dạng mà `CLAUDE.md` cảnh báo:"
+    },
+    {
+      "file": "ops/reviews/pr487-review-2-codex-verdict.receipt.yaml",
+      "line": 8,
+      "column": 1,
+      "kind": "whole_line",
+      "text": "# \"mỗi lượt vá bảo toàn được thứ ta NGHĨ TỚI và làm hỏng thứ ta KHÔNG NGHĨ TỚI\" — lần này bắt được"
+    },
+    {
+      "file": "ops/reviews/pr487-review-2-codex-verdict.receipt.yaml",
+      "line": 9,
+      "column": 1,
+      "kind": "whole_line",
+      "text": "# ngay ở lượt kế. ĐỊNH CHÍNH ĐƠN VỊ: `CLAUDE.md:722-723` nói **BẢY PHÁT HIỆN** cùng một đường,"
+    },
+    {
+      "file": "ops/reviews/pr487-review-2-codex-verdict.receipt.yaml",
+      "line": 10,
+      "column": 1,
+      "kind": "whole_line",
+      "text": "# ăn **BỐN LƯỢT** cross-review liên tiếp — không phải \"bảy lượt\". Bản trước đổi đơn vị của chính"
+    },
+    {
+      "file": "ops/reviews/pr487-review-2-codex-verdict.receipt.yaml",
+      "line": 11,
+      "column": 1,
+      "kind": "whole_line",
+      "text": "# phép đếm dùng làm bài học; cross-review hậu kiểm chấm P3 `doi-bay-phat-hien-thanh-bay-luot-review`."
+    }
+  ],
+  "old_candidates": 67,
+  "old_true_comments": 66,
+  "old_prose": [
+    {
+      "file": "ops/land/pr480-land-evidence.yaml",
+      "line": 97,
+      "text": "      #487 đã merge lúc `11:58:30Z` (merge commit `f4d74fe`), và commit đầu tiên chứa tệp này có"
+    }
+  ],
+  "old_replay_matches": true
+}

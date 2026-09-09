@@ -54,6 +54,23 @@ Ba lượt TRƯỚC approve (`34379197442`, `34380996975`, `34382419508`) đều
 `do nguoi duyet khac nguoi tao PR`; lượt `34382584417` ngay sau approve của `notebyme88` ⇒
 **`success`**. Điều phối KHÔNG merge trong lúc cổng ấy còn đỏ.
 
+## CI trên merge commit — xanh cả hai nền, và biên Windows HẸP LẠI
+
+Run `34382762199` (`push`, `00e017a`), đo theo job sau khi `completed`:
+`gate (ubuntu-latest)` **success**, 44 bước, 40 success + 4 skipped, 0 hỏng, 0 null,
+**20 phút 38 giây** · `gate (windows-latest)` **success**, 44 bước, 38 success + 6 skipped,
+0 hỏng, 0 null, **49 phút 09 giây**.
+
+**Đây là lần đo Windows ĐẦU TIÊN của nội dung r358** — lượt `pull_request` trên `2ec6171` chỉ sinh
+job ubuntu vì PR không gắn nhãn `windows`, và phiên KHÔNG gọi tay `workflow_dispatch` theo chỉ thị
+chủ kho *"chỉ chạy CI ở lượt cuối"*. Nếu Windows đỏ thì nó đã đỏ SAU khi land; đó là cái giá đã biết
+của lựa chọn ấy, không phải một bất ngờ.
+
+Biên Windows còn **~10 phút 51 giây** dưới trần 60, HẸP HƠN lần đo ở `pr477-…-land-evidence.yaml`
+(48 phút 15 giây, biên ~11 phút 45 giây). **Hai điểm đo trên hai commit khác nhau KHÔNG phải một
+xu hướng** — nhưng chúng cũng không cho phép đọc `success` thành "vấn đề đã hết". Issue #463
+(`GATE-TACH-JOB-CAT-CHI-PHI`) sinh ra để cắt bằng TÁCH JOB, không nâng trần; nó vẫn `open`.
+
 ## NĂM finding đã vá trong mục r358 ở PR này — và phép đếm này tự nó suýt sai
 
 Bản đầu của mục r359 ghi **"tám"** ở tiêu đề trong khi thân chỉ liệt kê được **bốn** nhóm, vì nó

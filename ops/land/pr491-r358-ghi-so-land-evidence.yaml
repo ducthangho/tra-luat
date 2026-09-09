@@ -151,7 +151,23 @@ post_merge_checks:
   - ten: 'ops/bien_nhan_v2.py trên master'
     ket_qua: '**0 vi phạm** · `TỔNG: ĐẠT` · 41 ĐẠT v2 · 11/11 miễn trừ legacy · 42 nợ đóng băng · tổng 94'
   - ten: 'CI trên merge commit 00e017a'
-    ket_qua: 'DO_SAU_KHI_CHAY_XONG'
+    ket_qua: >-
+      **XANH CẢ HAI NỀN.** Run `34382762199` (`event: push`, head `00e017a`), đo THEO JOB và chỉ
+      đọc sau khi `status == completed`:
+      `gate (ubuntu-latest)` = **`success`** — 44 bước, 40 `success` + 4 `skipped`, **0 hỏng**,
+      **0 bước `conclusion: null`**, `17:24:59Z → 17:45:37Z` (**20 phút 38 giây**).
+      `gate (windows-latest)` = **`success`** — 44 bước, 38 `success` + 6 `skipped`, **0 hỏng**,
+      **0 bước `conclusion: null`**, `17:24:59Z → 18:14:08Z` (**49 phút 09 giây**).
+    canh_bao_doc_ket_qua: >-
+      Windows chạy **49 phút 09 giây**, dưới trần `timeout-minutes` 60 nhưng **biên chỉ còn
+      ~10 phút 51 giây** — HẸP HƠN lần đo ở `pr477-…-land-evidence.yaml` (48 phút 15 giây,
+      biên ~11 phút 45 giây). Cùng một hiện tượng mà Issue #463 (`GATE-TACH-JOB-CAT-CHI-PHI`)
+      sinh ra để cắt bằng cách TÁCH JOB, KHÔNG nâng trần. Hai điểm đo trên hai commit khác nhau
+      KHÔNG đủ để gọi là xu hướng — nhưng chúng cũng KHÔNG cho phép đọc `success` này thành
+      "vấn đề đã hết".
+      Và đây mới là **lần đo Windows ĐẦU TIÊN** của nội dung r358: lượt `pull_request` trên
+      `2ec6171` chỉ có job ubuntu (xem `khong_do_duoc`). Nói cách khác, nếu Windows đỏ thì nó đã
+      đỏ SAU khi land — cái giá đã biết của việc không gọi tay `workflow_dispatch` trước merge.
 
 khong_do_duoc:
   - muc: 'Nền Windows cho nội dung của PR này'

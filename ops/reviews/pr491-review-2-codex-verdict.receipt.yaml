@@ -4,7 +4,9 @@
 # ĐIỀU KIỆN DỪNG của chủ kho ("cross-review tới hết P1 rồi merge và land") ĐÃ THOẢ ở lượt này.
 #
 # `changes_requested` KHÔNG phải "chưa đạt điều kiện": reviewer nói thẳng điều đó trong verdict.
-# Nhưng nó CŨNG KHÔNG phải `approve` — 13 finding còn sống, xem `no_con_lai`.
+# Nhưng nó CŨNG KHÔNG phải `approve`: verdict có **13 finding** LÚC REVIEW; **11** còn sống LÚC
+# MERGE (hai P2 thân PR được sửa trước merge — xem nhãn attestation ở `no_con_lai`). Đừng cộng
+# 11 với 5 báo cáo của bot: hai trong năm cái ấy TRÙNG finding của lượt này.
 
 schema_version: 2
 receipt_id: pr491-review-2-codex-20260909-46d8686e
@@ -43,7 +45,11 @@ dieu_kien_dung_da_thoa:
     tường minh ở dòng 4: *"KHÔNG CÒN P1 trong phạm vi PR #491 được review […] `changes_requested`
     phản ánh những sửa chữa còn nên làm, không có nghĩa điều kiện 'tới hết P1' của chủ kho chưa đạt."*
   khong_suy_rong: >-
-    "Hết P1" KHÔNG phải "hết finding" và KHÔNG phải `approve`. 3 P2 + 10 P3 còn sống lúc merge.
+    "Hết P1" KHÔNG phải "hết finding" và KHÔNG phải `approve`. Verdict có **3 P2 + 10 P3 = 13**
+    LÚC REVIEW. LÚC MERGE còn **11** (1 P2 + 10 P3): hai P2 nằm trong thân PR và được sửa trước
+    merge. **Con số 11 phụ thuộc một ATTESTATION** — việc sửa thân PR không để lại hiện vật nào
+    trong kho (không raw body, không readback), nên nó KHÔNG phải phép đo tái lập được. Năm báo
+    cáo của Codex connector bot đếm RIÊNG và có giao với 13 ở trên ⇒ không cộng 11 + 5.
 
 doi_chieu_luot_1:
   tong_slug: 14
@@ -100,10 +106,15 @@ no_con_lai:
     muc: P3
     trang_thai: 'CHƯA VÁ'
     ghi_chu: >-
-      Sáu P3 mang lại từ lượt 1 (đều `CHƯA VÁ`) cộng bốn P3 mới, tất cả về ĐỘ PHỦ của bảng trích
-      khẳng định (`trich_khang_dinh.py` lọc theo regex `\d`) hoặc về giới hạn cổng. Đóng chúng đòi
-      một bộ trích phủ cả mệnh đề viết bằng chữ — công cụ mới, cổng riêng, phản chứng riêng ⇒ việc
-      của một packet, không phải một dòng vá kèm.
+      Sáu P3 mang lại từ lượt 1 (đều `CHƯA VÁ`) cộng bốn P3 mới. Chúng **KHÔNG cùng một loại** —
+      phân hoạch **8 + 1 + 1**: TÁM là giới hạn bộ lọc (`trich_khang_dinh.py` giữ dòng có ít nhất
+      một chữ số, bỏ dòng không có chữ số nào); MỘT (`bo-sot-toan-than-pr`) là **THIẾU ĐẦU VÀO** —
+      thân PR chưa từng được đưa cho script — và **sửa được NGAY bằng chính script hiện có**
+      (`sys.argv[1:]`), KHÔNG cần đợi công cụ mới; MỘT (`cong-kiem-ke-co-rang-nhung-khong-kiem-su-that`)
+      là ghi nhận DƯƠNG về giới hạn cổng.
+      Chỉ **tám** cái đầu mới đòi một bộ trích phủ cả văn xuôi ⇒ việc của một packet. Bản đầu của
+      khoá này gộp cả nhóm vào phép hoãn ấy — cross-review PR #493 chấm P2
+      (`dong-chin-p3-khong-deu-can-bo-trich-moi`), đúng hai lượt liền.
 
 nam_finding_cua_CODEX_CONNECTOR_BOT:
   nguon: 'chatgpt-codex-connector[bot], review 5157660335, `Reviewed commit: 2ec6171f7a`, kích hoạt bởi "Draft marked ready"'
@@ -111,7 +122,7 @@ nam_finding_cua_CODEX_CONNECTOR_BOT:
   khac_gi_hai_luot_cross_review: >-
     Đây là ĐƯỜNG THỨ BA, độc lập với hai lượt `launcher.py run`. Ba trong năm là MỚI.
   danh_sach_va_phep_do_cua_dieu_phoi:
-    - {slug: bd32d11-khong-tra-duoc-tu-commit-duoc-review, moi: true, do_lai: '`git merge-base --is-ancestor bd32d114… 2ec6171` ⇒ SAI. OID ấy chỉ sống nhờ ref nhánh `claude/spec-thu-hoi-lease-va-cap-lai-20260907`; nhánh mất thì số chết, trong khi mục r358 xếp số Git vào loại "tự đo được".', ket_luan: ĐÚNG}
+    - {slug: bd32d11-khong-tra-duoc-tu-commit-duoc-review, moi: true, do_lai: '`git merge-base --is-ancestor bd32d114… 2ec6171` ⇒ SAI. OID ấy KHÔNG nằm trong lịch sử canonical của commit được ghi sổ, nên **không được bảo đảm tồn tại trong một clone tương lai chỉ lấy lịch sử canonical** — nói mạnh hơn thế ("xoá nhánh là số chết") là vượt phép đo: `git for-each-ref --contains` vẫn trả ref trỏ tới nó. Vấn đề thật là mục r358 xếp nó vào loại "tự đo được".', ket_luan: ĐÚNG}
     - {slug: goi-skill-khong-doi-lan-payload-voi-goi, moi: true, do_lai: '`package_hash` `bcde19d5…` (`c0a5cbe`) → `d47be343…` (`2ec6171`); `total_bytes` 8075509 → 8089302. Khớp từng số bot đưa. Câu "gói skill không đổi" đúng cho PAYLOAD `ops/` của bảy PR, KHÔNG đúng cho commit r358 vì nó sửa `CHANGELOG.md` vốn nằm trong kiểm kê.', ket_luan: ĐÚNG}
     - {slug: mirror-du-moi-ref-thuc-te-chi-branch-head, moi: false, trung_voi: bo-sot-pham-vi-ref-va-vat-chat-hoa, do_lai: '`ops/dung_goi_review.sh:68` dùng `git ls-remote --heads`; `EVIDENCE.md` tự khai "Chi phu refs/heads. KHONG co anh chup tag hay namespace khac".', ket_luan: ĐÚNG}
     - {slug: trang-thai-github-thieu-nhan-as-of, moi: false, trung_voi: so-lich-su-bi-mat-nhan-nguon, do_lai: 'Cùng bốn chỗ reviewer lượt 2 chỉ ra. Hai đường độc lập tìm ra cùng một lỗi.', ket_luan: ĐÚNG}

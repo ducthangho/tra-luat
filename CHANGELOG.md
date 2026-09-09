@@ -36,6 +36,8 @@ CHẠY"**, đúng câu đang được đính chính. Cross-review lượt 2 bắ
 `than-pr-van-phu-nhan-t33-da-chay`) và khoá bằng phản chứng: gọi thẳng `t33` với `shutil.which` trả
 `None` ⇒ `AssertionError`, **0** lời gọi `subprocess.run`. Ca đã CHẠY và ĐỎ; thứ chưa chạy là thao
 tác lint bên trong. Hồ sơ đã đếm câu này sai **ba lượt liền** trước đó; đây là lượt thứ tư.
+*(Số **ba** là **thuật lại** — verdict gốc của ba lượt ấy không có trong kho để đếm lại; xem nhãn
+loại (b) ở khối `GIỚI HẠN NGUỒN`.)*
 
 ## Vá được MIỄN PHÍ nhờ biết sự kiện nào bắn CI
 
@@ -50,7 +52,9 @@ kho, hai tập cò khác nhau; đừng suy từ tệp này sang tệp kia.
 
 ## Cổng duyệt khác danh tính ĐO được đúng thứ nó sinh ra để đo
 
-**Cùng nhãn (b) như mục CI trên** — số run và tên bước đọc qua API, không có response thô trong gói.
+**Cùng nhãn (b) như mục CI bên DƯỚI** — số run và tên bước đọc qua API, không có response thô
+trong gói. (Bản trước viết *"mục CI trên"* trong khi mục ấy nằm phía dưới — cross-review PR #493
+chấm P2; một chỉ dẫn sai hướng làm người đọc không tìm ra nhãn.)
 Ba lượt TRƯỚC approve (`34379197442`, `34380996975`, `34382419508`) đều `failure` ở **đúng bước**
 `do nguoi duyet khac nguoi tao PR`; lượt `34382584417` ngay sau approve của `notebyme88` ⇒
 **`success`**. Điều phối KHÔNG merge trong lúc cổng ấy còn đỏ.
@@ -79,7 +83,15 @@ Biên Windows còn **~10 phút 51 giây** dưới trần 60, HẸP HƠN lần đ
 xu hướng** — nhưng chúng cũng không cho phép đọc `success` thành "vấn đề đã hết". Issue #463
 (`GATE-TACH-JOB-CAT-CHI-PHI`) sinh ra để cắt bằng TÁCH JOB, không nâng trần; nó vẫn `open`.
 
-## NĂM finding đã vá trong mục r358 ở PR này — và phép đếm này tự nó suýt sai
+## NĂM ĐỐI TƯỢNG được sửa trong mục r358 ở PR này — "được sửa" KHÔNG phải "đã đóng sạch"
+
+Nói cho chật ngay ở tiêu đề, vì bản trước viết *"NĂM finding đã vá"* và cross-review PR #493 chấm
+P2 hai lượt liền: **năm là số ĐỐI TƯỢNG được đụng tới**, không phải số finding đã đóng. Lượt 2
+phân loại **cả năm là `VÁ HỜ`** — mỗi cái sửa được một bản chiếu và để nguyên các bản chiếu khác.
+Danh sách dưới đây giữ nguyên năm đối tượng ấy; trạng thái đóng/chưa đóng đọc ở mục cross-review
+PR #493 bên trên.
+
+### Phép đếm này tự nó suýt sai
 
 Bản đầu của mục r359 ghi **"tám"** ở tiêu đề trong khi thân chỉ liệt kê được **bốn** nhóm, vì nó
 cộng nhầm hai P2 đã vá TRƯỚC merge (trong thân PR, không phải trong tệp) vào phép đếm của PR này.
@@ -96,7 +108,9 @@ P1 `chuoi-tam-pr-thuc-te-bay` ở trên.
    trạng thái Issue/PR · cặp run (*"được cho là cùng một job"*, đúng chữ của nguồn) · số *"bốn
    lượt"*. Kèm: bảng cổng dựng gói tách **BA** loại nguồn thay vì hai, vì *"executor tự đo"* không
    cùng hạng với *"reviewer chạy độc lập"*.
-2. `bd32d114…` **không phải tổ tiên** của commit được ghi sổ ⇒ số ấy chết khi nhánh spec bị xoá.
+2. `bd32d114…` **không phải tổ tiên** của commit được ghi sổ ⇒ **không được bảo đảm tồn tại trong
+   một clone tương lai chỉ lấy lịch sử canonical**. (Nói mạnh hơn — *"xoá nhánh là số chết"* — là
+   vượt phép đo: `git for-each-ref --contains` vẫn trả ref trỏ tới OID ấy.)
 3. *"gói skill không đổi"* lẫn **payload `ops/`** với **gói mà chính r358 đổi** — `package_hash`
    `bcde19d5…`→`d47be343…`, `total_bytes` **8.075.509→8.089.302**.
 4. *"chuỗi đóng ở #490"* không tự kiểm được offline.
@@ -127,10 +141,22 @@ Lưu ý một chỗ dễ đọc nhầm: mục 5 ở trên vá **LỜI KHAI** *"�
 `bo-sot-pham-vi-ref-va-vat-chat-hoa` nói **BẢNG TRÍCH bỏ sót** chính câu ấy. Vá cái trước KHÔNG
 đóng cái sau — hai lỗi khác nhau trên cùng một dòng văn bản.
 
-## Cross-review PR #493 lượt 1 — 1 P1 · 4 P2 · 12 P3, và cả năm đều là lời khai của CHÍNH mục này
+## Cross-review PR #493 — hai lượt, và cả năm bản vá đầu đều là VÁ HỜ
 
 Hồ sơ vá lời khai sai thì cũng bị soi như mọi thứ khác. Lượt 1 trên `4af7e29` (`codex`, `rc=0`)
-tìm ra **1 P1 + 4 P2**, tất cả nằm trong hiện vật do phiên này vừa viết — không cái nào là lỗi mã.
+tìm ra **1 P1 · 4 P2 · 12 P3**; lượt 2 trên `9484970` cho **1 P1 · 4 P2 · 15 P3** và phân loại
+**0 `ĐÃ VÁ THẬT` · 6 `VÁ HỜ` · 11 `CHƯA VÁ`** — nghĩa là **cả năm bản vá của lượt 1 chỉ sửa MỘT
+bản chiếu và để nguyên các bản chiếu khác**. Đó là lần thứ sáu kho gặp đúng hình dạng ấy.
+
+Chúng nằm rải ở **bốn** hiện vật, không phải "chính mục này": `CHANGELOG.md` ·
+`ops/reviews/README.md` (cả bảng cảnh báo LẪN bảng mục lục) ·
+`ops/reviews/pr491-review-2-codex-verdict.receipt.yaml` · **thân PR**. Bản trước của tiêu đề này
+viết *"CHÍNH mục này"* — hẹp hơn sự thật, và chính chỗ hẹp ấy là lý do P1 sống sót qua lượt 1:
+tôi sửa mục CHANGELOG rồi tưởng đã xong.
+
+**Bài học rẻ và dùng được ngay:** trước khi gọi một finding là đã vá, `grep` chính câu khẳng định
+ấy trên TOÀN BỘ hiện vật của PR — `CHANGELOG.md`, `ops/**`, và thân PR — chứ đừng sửa chỗ mình
+nhớ ra. Bốn trong năm finding lượt 2 chết đúng vì bước `grep` ấy không được làm.
 
 - **P1 `no-luc-merge-dem-ca-hai-p2-da-dong`** — biên nhận và mục lục khai *"13 finding còn sống lúc
   merge"* trong khi CHÍNH chúng khai hai P2 đã sửa **trước** merge. `13 − 2 = 11`. Hai mệnh đề
@@ -178,8 +204,12 @@ bản đầu chỉ khai hai rồi thân mục lại thêm một loại thứ ba 
 THÂN; cross-review PR #493 chấm P2 (`nhan-nguon-van-va-than-de-nguyen-khung`). Loại thứ ba là
 **(c) bằng chứng ngoài lịch sử canonical**: OID chỉ tra được qua một ref nhánh, không phải tổ tiên
 của commit được ghi sổ, nên **không được bảo đảm tồn tại trong một clone tương lai chỉ lấy lịch sử
-canonical**. Ba loại: (a) **Tự đo được**: mọi số Git (số tệp, số dòng, số merge, nội dung tệp tại một SHA), số mục
-trong `RELEASE_MANIFEST.json`, và kết quả cổng chạy lại tại chỗ — ai đọc cũng tái đo được từ kho.
+canonical**. Ba loại:
+
+**(a) Tự đo được** — số Git **tra được từ lịch sử canonical của commit này** (số tệp, số dòng, số
+merge, nội dung tệp tại một SHA là tổ tiên), số mục trong `RELEASE_MANIFEST.json`, và kết quả cổng
+chạy lại tại chỗ. **KHÔNG phải "mọi số Git"** — bản trước viết thế và cross-review PR #493 chấm P2
+hai lượt liền, vì loại (c) ngay dưới đây là một phản ví dụ nằm trong chính mục này.
 (b) **Thuật lại**: mọi sự kiện GitHub (run/job CI, thời lượng, số bước `skipped`, trạng thái PR,
 số lượt và số finding của các lượt cross-review trước). Loại (b) không có response thô trong kho,
 nên chúng là **attestation của phiên điều phối**, không phải phép đo đã đối chiếu. Chỗ nào loại (b)
@@ -275,7 +305,8 @@ container khác*: 2026-09-09, thiếu `actionlint` ⇒ `120/121, rc=1`; cài b�
 **ĐÍNH CHÍNH ba lần lặp:** hồ sơ từng viết `t33` *"không chạy"*. Sai — nó **ĐÃ CHẠY và ĐỎ** ở tiền
 điều kiện; assertion tại `ops/lease_publish_test.py:1359–1363` bắn **trước** `subprocess.run` dòng
 1364. Thứ chưa chạy là thao tác **lint workflow** bên trong hàm. Câu sai này được sửa ở một chỗ
-mà sót chỗ khác **ba lượt liền** — bảng sửa rồi, tiêu đề và câu mở đầu vẫn sai.
+mà sót chỗ khác **ba lượt liền** *(số **ba** là **thuật lại**: verdict gốc của ba lượt ấy không có
+trong kho để đếm lại)* — bảng sửa rồi, tiêu đề và câu mở đầu vẫn sai.
 
 ## CI — một con số ĐÃ ĐÍNH CHÍNH, nguyên nhân thì CHƯA XÁC ĐỊNH
 
@@ -353,8 +384,11 @@ KHÔNG chứng minh sự kiện lịch sử kia đã xảy ra theo cơ chế đ�
   không có trong kho. Nội dung của giới hạn thứ hai, đo được: chỉ
   `actionlint` được ghim, ba công cụ còn lại TIN `$PATH` đầu vào (đặt bản giả đầu PATH ⇒ `rc=0`,
   ghi `version: 9.9.9`); script VẪN `rm -rf` `$R/kho.git` và `$R/cay-kho`, và chốt symlink KHÔNG
-  nhìn `$R` chính nó (đo: `$R` là symlink tới đích có sẵn hai thư mục ấy ⇒ sentinel trong cả hai
-  BỊ XOÁ). Mọi phép đo trên Linux+Bash; **chưa có** phép đo macOS/Windows native.
+  nhìn `$R` chính nó (`$R` là symlink tới đích có sẵn hai thư mục ấy ⇒ sentinel trong cả hai
+  BỊ XOÁ). **Nhãn nguồn cho cả đoạn probe này — loại (b):** thứ đọc lại được hôm nay chỉ là **nội
+  dung mã**; **sự kiện động** (lần chạy thật với PATH giả, lần xoá sentinel) **không có log trong
+  kho** ⇒ `KHÔNG ĐO ĐƯỢC`. Bản trước viết *"đo:"* ngay tại đây như một phép đo trực tiếp —
+  cross-review PR #493 chấm P2. Mọi phép đo trên Linux+Bash; **chưa có** phép đo macOS/Windows native.
 
 ## Hình dạng lỗi lặp lại — giá trị lớn nhất của chuỗi này
 

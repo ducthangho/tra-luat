@@ -1,20 +1,34 @@
-# ★ dev-side — r360: land evidence #491 + hiện vật 5 lượt cross-review + sửa 5 đối tượng trong r358 (2026-09-09)
+# ★ dev-side — r360: land evidence #491 + hiện vật cross-review của #491 + sửa 5 đối tượng trong r358 (2026-09-09)
 
 `r358` land ở merge commit `00e017af`. Mục này giữ **land evidence** của lần land ấy, **hiện vật
-năm lượt cross-review**, và **bản vá 5 đối tượng trong mục r358** theo finding mà ba đường review
-độc lập tìm ra sau khi nó được viết.
+hai lượt cross-review của PR #491** (hai verdict nguyên văn + hai biên nhận v2), và **bản vá 5 đối
+tượng trong mục r358**.
+
+**Phân biệt hai phạm vi, vì bản trước của câu này gộp nhầm** (cross-review lượt 6 chấm P3
+`hien-vat-nam-luot-khong-khop-write-set`): PR này **nhập vào kho** hiện vật của **hai** lượt — của
+**PR #491**. Sáu lượt cross-review của **chính PR #493** thì chỉ được **tóm tắt** trong mục này và
+đăng làm bản chiếu trên PR; verdict gốc của chúng **chưa** vào kho, nên `git ls-tree HEAD ops/reviews/`
+không có `pr493-review-*`. Đừng đọc *"hiện vật N lượt"* thành *"N verdict nằm trong kho"*.
 
 **VA CHẠM SỐ `r`, và cách giải.** Mục này viết ra khi `master` đang ở `00e017a`; trong lúc PR #493
 còn mở, một phiên khác land **#490** rồi **#494**, và `#494` chiếm số **`r359`** cho mục
 *"ghi sổ #491 + #490"*. Đây đúng bẫy mà `bc78656` đã trả giá (*"đổi số r355 → r356 vì master đã
-chiếm"*), khác một điểm: lần trước phát hiện **trước** khi viết, lần này phát hiện **sau**, lúc
-merge `master` vào nhánh — nên phải đổi số **và** hoà giải nội dung. Mục này nay là **`r360`**.
+chiếm"*) — và **cùng thời điểm phát hiện, không khác**: bản trước của câu này viết *"lần trước phát
+hiện TRƯỚC khi viết"*, cross-review lượt 6 bác bằng Git và **đúng** — cả **hai** cha của `bc78656`
+(`22b6339`, `cacaba3`) đều **đã có** một mục `r355`, tức số bị chiếm và bị phát hiện **lúc merge**,
+y như lần này. Cái khác thật sự chỉ là quy mô: `bc78656` đổi số ở **3 chỗ trong CHANGELOG + 4 chỗ
+trong `launcher_test.py`**. Mục này nay là **`r360`**.
 
 **Phân vai với `r359` để hai mục không dẫm nhau** — `r359` (trên master) ghi **PHẠM VI MERGE** của
 `#491` và `#490` (39 tệp, `c0a5cbe..8cee941`); `r360` (mục này) ghi thứ `r359` **không** có:
 `ops/land/pr491-…-land-evidence.yaml`, hai verdict + hai biên nhận v2 của **PR #491**, và bản vá
-**bên trong** mục `r358`. Chỗ duy nhất hai mục cùng nói là *"#491 đã merge ở `00e017a`"* — cùng một
-sự kiện, và cả hai đều dẫn cùng merge commit.
+**bên trong** mục `r358`.
+**Hai mục có CHỒNG LẤN, và nói là "chỉ trùng một chỗ" thì sai** — bản trước của đoạn này viết *"chỗ
+duy nhất hai mục cùng nói là #491 đã merge"*, cross-review lượt 6 bác đúng: `r360` cũng nhắc
+`39 tệp` / `c0a5cbe..8cee941`, cũng kể `#490` đã land, cũng dẫn quyết định **đóng chuỗi** ở `#490`
+— cả ba đều có trong `r359`. Lặp để định vị phạm vi là hợp lý; **khẳng định chỉ trùng đúng một sự
+kiện mới là lỗi**. Điều đúng và đủ: `r359` là mục **phạm vi merge**, `r360` là mục **hiện vật và
+bản vá**; chỗ chồng lấn đều là bối cảnh, không phải kết luận mâu thuẫn.
 
 **Land evidence này KHÔNG thuộc chuỗi đã đóng.** `ops/land/pr489-land-evidence.yaml` khai chuỗi
 `#468 → #478 → #486 → #487 → #489 → #490 — DỪNG`, `mat_xich_thu_7: KHONG_TON_TAI`, và nói rõ việc
@@ -85,8 +99,8 @@ Ba lượt TRƯỚC approve (`34379197442`, `34380996975`, `34382419508`) đều
 **gói không kèm response thô**, nên chúng KHÔNG cùng hạng với các số Git tự đo lại được. Nguồn có
 nhãn đầy đủ: `ops/land/pr491-r358-ghi-so-land-evidence.yaml`, mục `pre_merge_checks` /
 `post_merge_checks` / `khong_do_duoc`. Bản đầu của đoạn này chép số mà bỏ nhãn — cross-review
-PR #493 chấm P2 (`nhan-attestation-khong-di-cung-ban-tom-tat`), đúng lớp lỗi mà chính r359 đang
-sửa cho r358.
+PR #493 chấm P2 (`nhan-attestation-khong-di-cung-ban-tom-tat`), đúng lớp lỗi mà chính mục **này**
+(`r360`) đang sửa cho `r358`.
 
 Run `34382762199` (`push`, `00e017a`), đo theo job sau khi `completed`:
 `gate (ubuntu-latest)` **success**, 44 bước, 40 success + 4 skipped, 0 hỏng, 0 null,
@@ -114,7 +128,7 @@ r358*, và cross-review PR #493 lượt 3 chấm P2 (`tu-thu-tron-hai-tap-nam-fi
 NHAU, chỉ trùng lực lượng:
 
 - **Tập A — năm ĐỐI TƯỢNG trong `r358`** (danh sách ngay dưới): nhãn nguồn · neo `bd32d114…` ·
-  gói/payload · `#490` · phạm vi mirror. Đây là thứ `r359` sửa.
+  gói/payload · `#490` · phạm vi mirror. Đây là thứ mục **này** (`r360`) sửa.
 - **Tập B — năm FINDING của cross-review PR #493 lượt 1** (1 P1 + 4 P2): nợ lúc merge · khung
   nguồn · phân hoạch P3 · nhãn attestation · suy mất ref. Đây là thứ lượt 2 chấm `VÁ HỜ`.
 
@@ -124,7 +138,8 @@ dưới**; danh sách ngay sau đây là **tập A**.
 
 ### Phép đếm này tự nó suýt sai
 
-Bản đầu của mục r359 ghi **"tám"** ở tiêu đề trong khi thân chỉ liệt kê được **bốn** nhóm, vì nó
+Bản đầu của mục **này** — khi ấy còn mang số `r359`, trước khi master chiếm số — ghi **"tám"** ở
+tiêu đề trong khi thân chỉ liệt kê được **bốn** nhóm, vì nó
 cộng nhầm hai P2 đã vá TRƯỚC merge (trong thân PR, không phải trong tệp) vào phép đếm của PR này.
 Bắt được khi tự soi lại trước lúc đẩy, không phải nhờ cổng — **không cổng nào đếm hộ**. Ghi ra vì
 đây là **lần thứ hai trong cùng phiên** một con số bị viết rộng hơn thứ nó đếm, và lần đầu chính là
@@ -155,8 +170,13 @@ byte trong `CHANGELOG.md` (giữ nguyên kích thước) ⇒ `rc=2`, `failed=[CH
 `package_hash_match: false`. Nhưng `doc-claims-check --strict` **KHÔNG** bắt được một con số bị
 đổi: reviewer đột biến `1016→1017`, tiêu đề `5→6`, và phép trừ `13−2=11` thành `13−2=12` — cả ba
 đều `rc=0`, `ok: true`. Nghĩa là **không cổng nào trong kho hiện kiểm phép đếm hay phép trừ trong
-văn xuôi**; thứ duy nhất chặn chúng là cross-review. Ghi thành nợ có địa chỉ thay vì để trôi: muốn
-đóng thì phải có cổng mới, và **phản chứng bắt buộc** của nó là ba đột biến trên phải ĐỎ.
+văn xuôi**; thứ duy nhất chặn chúng là cross-review.
+
+**Nợ này CHƯA ĐÓNG, và PR này không đóng nó** — nói thẳng vì bản trước của đoạn này dễ đọc thành
+"đã có điều kiện đóng": ba đột biến ấy **vẫn XANH** khi đo lại ở lượt 6, và **mã cổng không nằm
+trong write set của PR này** (8 tệp, không tệp nào là `scripts/tl.py`). Câu *"phản chứng bắt buộc:
+ba đột biến phải ĐỎ"* là **tiêu chí nghiệm thu cho một cổng TƯƠNG LAI**, không phải phép đo đã đạt.
+Cross-review lượt 6 chấm P3 đúng chỗ đó.
 
 **Chưa vá: 10 P3 của lượt 2 — và chúng KHÔNG cùng một loại.** Bản đầu của đoạn này chia
 **9 + 1** rồi gọi cả chín là *"giới hạn regex"*; cross-review PR #493 chấm P2
@@ -173,9 +193,17 @@ văn xuôi**; thứ duy nhất chặn chúng là cross-review. Ghi thành nợ c
 - **MỘT** (`cong-kiem-ke-co-rang-nhung-khong-kiem-su-that`) là **GHI NHẬN DƯƠNG** về giới hạn cổng:
 `release-verify` **CÓ** răng — reviewer đột biến một byte ⇒ `rc=2`, `failed=[CHANGELOG.md]`,
 `package_hash_match: false` — còn `doc-claims-check` thì **KHÔNG** bắt `1016→1017`.
-Đóng **tám** cái đầu đòi một bộ trích phủ cả văn xuôi: công cụ mới, cổng riêng, phản chứng riêng ⇒
-việc của một packet. Đóng `bo-sot-toan-than-pr` thì **không** đòi công cụ mới — chỉ cần cấp đủ đầu
-vào cho script hiện có; nó là nợ riêng, hạng nhẹ hơn, và đừng để nó chìm vào phép hoãn của tám cái kia.
+**Phân hoạch trên là trạng thái Ở LƯỢT 2, giữ lại làm mốc lịch sử — nó KHÔNG còn mô tả bộ trích
+hiện tại.** Lúc ấy tám cái đầu được hoãn sang *"một bộ trích phủ cả văn xuôi: công cụ mới, cổng
+riêng"*. Thực tế **không cần công cụ mới**: chỉ cần **bỏ phép lọc**, và việc ấy đã làm ở lượt 5 của
+cross-review PR #493 — bộ trích nay in mọi dòng không rỗng, và lượt 6 đo được **11/14** P3 chuyển
+sang `ĐÃ VÁ THẬT` cùng lúc. Lời hoãn ấy đã sai về **cách chữa**, dù đúng về **chỗ đau**.
+
+Nói cho chật một chỗ nữa, vì bản trước của chính đoạn vá này viết quá rộng: bộ lọc cũ **KHÔNG** vứt
+*"mọi mệnh đề định lượng viết bằng chữ"* — nó vứt **dòng không có chữ số nào**. Một mệnh đề bằng
+chữ nằm cùng dòng với một chữ số khác thì vẫn được giữ; phản ví dụ ngay trong `r358`: dòng
+*"**ĐÍNH CHÍNH ba lần lặp:** … `t33` …"* có `33` nên regex cũ giữ nguyên. Cross-review lượt 6 chấm
+P3 đúng chỗ này.
 Lưu ý một chỗ dễ đọc nhầm: mục 5 ở trên vá **LỜI KHAI** *"đủ mọi ref"*, còn P3
 `bo-sot-pham-vi-ref-va-vat-chat-hoa` nói **BẢNG TRÍCH bỏ sót** chính câu ấy. Vá cái trước KHÔNG
 đóng cái sau — hai lỗi khác nhau trên cùng một dòng văn bản.
@@ -235,7 +263,7 @@ trên cùng đơn vị mà nội dung được viết ra**, không phải trên 
   regex"*; thật ra **một** trong chín (`bo-sot-toan-than-pr`) là **THIẾU ĐẦU VÀO**, sửa được ngay
   bằng script hiện có. Gộp nó vào phép hoãn *"đợi một packet"* là hoãn nhầm.
 - **P2 `nhan-attestation-khong-di-cung-ban-tom-tat`** — land evidence gắn nhãn attestation cho số
-  CI đầy đủ, nhưng r359 và thân PR **chép số mà bỏ nhãn**. Cùng lớp lỗi đang được sửa cho r358,
+  CI đầy đủ, nhưng mục **này** và thân PR **chép số mà bỏ nhãn**. Cùng lớp lỗi đang được sửa cho `r358`,
   tái phát ở bản tóm tắt.
 - **P2 `suy-mat-ref-thanh-mat-object-tuc-thi`** — *"không phải tổ tiên"* bị viết thành *"xoá nhánh
   là số chết"*. Reviewer đo `git for-each-ref --contains` ⇒ vẫn có ref trỏ tới OID ấy. Câu đúng và

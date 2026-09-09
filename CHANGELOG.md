@@ -1,15 +1,27 @@
 # ★ dev-side — r358: ghi sổ chuỗi #468→#489 — 1016 tệp, TẤT CẢ trong `ops/` (2026-09-09)
 
-Quy ước kho ghi sổ cả việc thuần `ops:` vào tệp này (r354, r355, r356 đều vậy). Chuỗi tám PR
-`#468 → #477 → #478 → #480 → #486 → #487 → #489` đã land mà **chưa có mục nào** — đây là mục ấy.
+Quy ước kho ghi sổ cả việc thuần `ops:` vào tệp này (r354, r355, r356 đều vậy). Chuỗi **bảy** PR
+`#468 → #477 → #478 → #486 → #480 → #487 → #489` đã land mà **chưa có mục nào** — đây là mục ấy.
+Thứ tự trên là thứ tự MERGE THẬT (`--first-parent`), không phải thứ tự số hiệu: #486 merge **trước**
+#480. Bản đầu của mục này khai "tám PR" và đảo hai mã ấy — cross-review lượt 1 của PR #491 bắt (P1).
 
 **Không nâng `VERSION`.** Nó đóng băng ở `1.36.68` từ r336; r337→r356 đều không nâng.
+
+**GIỚI HẠN NGUỒN — đọc trước mọi con số bên dưới.** Mục này có hai loại số, và chúng KHÔNG cùng
+hạng. (a) **Tự đo được**: mọi số Git (số tệp, số dòng, số merge, nội dung tệp tại một SHA), số mục
+trong `RELEASE_MANIFEST.json`, và kết quả cổng chạy lại tại chỗ — ai đọc cũng tái đo được từ kho.
+(b) **Thuật lại**: mọi sự kiện GitHub (run/job CI, thời lượng, số bước `skipped`, trạng thái PR,
+số lượt và số finding của các lượt cross-review trước). Loại (b) không có response thô trong kho,
+nên chúng là **attestation của phiên điều phối**, không phải phép đo đã đối chiếu. Chỗ nào loại (b)
+xuất hiện, mục này ghi nhãn tại chỗ. Cross-review lượt 1 của PR #491 chấm P2 vì bản đầu bỏ hẳn
+lớp nhãn này (`so-lich-su-bi-mat-nhan-nguon`).
 
 ## Phạm vi — đo, không ước
 
 ```
 git diff --shortstat b416830..c0a5cbe  ⇒  1016 files changed, 247458 insertions(+)
-git diff --name-only  | sed 's#/.*##' | sort -u  ⇒  ops
+git diff --name-only b416830..c0a5cbe | sed 's#/.*##' | sort -u  ⇒  ops
+git rev-list --count --first-parent b416830..c0a5cbe  ⇒  7
 ```
 
 **Đúng một thư mục cấp 1.** `ops/` bị loại khỏi kiểm kê gói từ r336, nên gói skill không đổi —
@@ -35,9 +47,16 @@ Land evidence sinh ra land evidence: `ops/land/` nay có **6** tệp. Chuỗi đ
 
 Việc dựng gói hiện vật cho reviewer trước nay nằm rải rác trong scratchpad từng phiên. Nay là một
 script chạy được, kiểm được: clone mirror đủ mọi ref, vật chất hoá nhánh thành `refs/heads/*`,
-cài công cụ bằng bản ghim của kho, sinh `EVIDENCE.md` tự khai cách trích và phần bỏ sót, lập manifest.
+cài `actionlint` theo **bản ghim của kho** rồi so phiên bản bằng nhau, sinh `EVIDENCE.md` tự khai
+cách trích và phần bỏ sót, lập manifest. Nói cho chật vì mục Nợ bên dưới đo ngược lại: **chỉ
+`actionlint`** được ghim; `shellcheck`/`git`/`python3` chỉ được *tìm trên `$PATH` đầu vào và kiểm
+chạy được* — "chạy được" KHÔNG phải "đúng phiên bản/đúng nguồn gốc".
 
-Cổng của nó được chứng minh **CHẶN**, không chỉ chứng minh đường xanh:
+Cổng của nó được đo là **CHẶN**, không chỉ được chứng minh xanh. **Nguồn của bảng dưới:** các hàng
+là số **thuật lại từ hồ sơ PR #477**, trừ hai hàng đã tái đo độc lập — `thiếu shellcheck ⇒ 4` (đo
+2026-09-09 khi dựng gói review cho chính PR #491, trên container thiếu `shellcheck`) và
+`dựng lại vào $R đã dùng ⇒ 4` (reviewer lượt 1 tự tái chạy). Các hàng còn lại KHÔNG được tái hiện
+trong r358; đọc chúng là lời khai, không phải phép đo của mục này.
 
 | ca | mã thoát |
 |---|---|
@@ -58,33 +77,62 @@ Cài `actionlint` bằng `ops/cai_actionlint.sh` (`AL_VER=1.7.7`, đối chiếu
 1364. Thứ chưa chạy là thao tác **lint workflow** bên trong hàm. Câu sai này được sửa ở một chỗ
 mà sót chỗ khác **ba lượt liền** — bảng sửa rồi, tiêu đề và câu mở đầu vẫn sai.
 
-## CI — và một phép đo SAI đã tự bắt được
+## CI — một con số ĐÃ ĐÍNH CHÍNH, nguyên nhân thì CHƯA XÁC ĐỊNH
 
 Đọc được qua `/mcp/x/actions` (endpoint RIÊNG, khác `/mcp/` 44 công cụ; `CLAUDE.md:583` ghi rõ cả hai).
 
 Merge commit `585c7d5`, đo THEO JOB: `gate (ubuntu-latest)` **success** 44 bước 0 hỏng
 (26 phút 46 giây) · `gate (windows-latest)` **success** 44 bước 0 hỏng (**48 phút 15 giây**).
+**Nguồn:** attestation của phiên điều phối chuỗi #468→#489; gói của r358 KHÔNG kèm response thô của
+run/job, nên các số này chưa được đối chiếu độc lập.
 
 Windows dưới trần 60 phút nhưng **biên chỉ còn ~11 phút 45 giây** — đúng thứ Issue #463 sinh ra để
 cắt bằng cách TÁCH JOB, không nâng trần. Đừng đọc `success` này thành "vấn đề đã hết".
 
-**Phép đo sai đã tự bắt:** hồ sơ #468 từng ghi `mau_thuan_chua_giai` giữa `4 skipped` (điều phối
-đọc) và `6` (reviewer phân tích tĩnh). Nguyên nhân: job lúc `in_progress` cho **43 bước, 1 skipped**;
-khi `completed` cho **44 bước, 6 skipped**. Bước chưa chạy tới thì `conclusion` còn `null`.
-**Đếm `skipped` trên job `in_progress` là phép đo SAI, không phải phép đo thiếu.**
+**Con số đã đính chính — nguyên nhân thì KHÔNG.** Hồ sơ #468 từng ghi `mau_thuan_chua_giai` giữa
+`4 skipped` (điều phối đọc) và `6` (reviewer phân tích tĩnh trên `ci.yml`); số khai đã được đính
+chính thành **6**. Nhưng **nguyên nhân của lần đọc `43 bước / 4 skipped` vẫn CHƯA XÁC ĐỊNH**, và
+`ops/land/pr477-dung-goi-review-land-evidence.yaml` (khoá `nguyen_nhan_cua_lan_doc_43_4`) ghi đúng
+như vậy. Bản đầu của mục này viết thẳng "Nguyên nhân: job lúc `in_progress`…" — tức **khôi phục một
+kết luận nguyên nhân mà chính nguồn đã RÚT**; cross-review lượt 1 của PR #491 bắt (P1).
+
+Ba lý do nó không phải phép đo, chép lại cho khỏi trôi:
+
+- Cặp `43 bước / 1 skipped` → `44 bước / 6 skipped` thuộc run **`34176439015`** (merge `585c7d5`,
+  PR #477). Run đang tranh cãi là **`34169756563`** (merge `802fc01`, PR #468). **Hai run khác nhau.**
+- Mẫu giữa chừng ấy là **1** skipped, không phải **4** — nên nó không neo được riêng giá trị đang cãi.
+- Giả thuyết đối thủ còn sống: đọc job **Ubuntu** đã `completed` (`44/4`) rồi ghi nhầm 44 thành 43
+  cũng cho đúng cặp `(43, 4)`. Không có response thô hay mốc gọi API của lần đọc cũ ⇒ **KHÔNG ĐO ĐƯỢC**.
+
+Thứ đứng vững, độc lập với đoạn trên: **chỉ đọc số bước và số `skipped` khi `status == "completed"`;
+job `in_progress` phải trả KHÔNG ĐO ĐƯỢC chứ không trả một con số.** Bài học ấy đúng, nhưng nó
+KHÔNG chứng minh sự kiện lịch sử kia đã xảy ra theo cơ chế đó.
 
 ## NỢ — ghi để không ai tưởng đã xong
 
 - **`_kiem_bia_mo` dùng `any(...)` VẪN NGUYÊN** (`ops/lease_publish.py`): một bản sao có bia mộ là
   đủ để `check` trả `rc=0`, trong khi `ai-dang-giu` vẫn đếm bản chưa bia mộ trên ref khác.
-  Đặc tả `THU-HOI-LEASE-VA-CAP-LAI` ở **revision 6**, `packet_issue: CHƯA CÓ`, trần 6/6 lời gọi
-  review đã hết; bước chặn kế là **Review Rescue Checkpoint thuộc chủ kho** (§12).
+  Bản thân `any(...)` đo lại trên `origin/master` vẫn còn (`ops/lease_publish.py:606`).
+  **Trạng thái đặc tả thì KHÔNG còn như câu cũ.** Bản đầu của mục này viết *"revision 6,
+  `packet_issue: CHƯA CÓ`, trần 6/6 lời gọi review đã hết"* mà không nói đó là mốc nào — số ấy
+  thuộc `2aee80a` (07-09) và **đã cũ trước khi PR #491 được tạo**; cross-review lượt 1 bắt (P1).
+  Đo lại trên chính gói review của PR #491: ref `claude/spec-thu-hoi-lease-va-cap-lai-20260907`
+  tip `bd32d11` (`2026-09-09T11:23:01Z`, TRƯỚC head PR `16:10Z`) mang đặc tả **revision 9**,
+  `packet_issue: neo ở Issue` — không còn `CHƯA CÓ`. Verdict `luot8-VERDICT.md` trong cùng ref là
+  **lượt 8 = lời gọi 9**, khai **0 P1**; `changes_requested` chỉ vì một P2 (`S11`) về hồ sơ Packet
+  Issue A0. Đây là **đối chiếu nội dung Git**: nó KHÔNG chứng minh Issue đã ready, lease đã cấp
+  lại, hay thẩm quyền của lời gọi thứ 9 — những thứ đó phải hỏi GitHub API, r358 chưa hỏi.
 - **Nợ A9 đã xác định**: bốn lease GATE cấp `03:37:33` · `07:50:35` · `09:44:51` · `10:17:12Z`,
   đều TRƯỚC hạn `14:30:07Z` của #456; bốn `spec_hash` khác nhau, `revision` 1/2/3/4, `generation`
   giữ **1**, lệch `ADR-0034` *"đổi contract phải revision + generation mới"*. Hết hạn KHÔNG hợp
   thức hoá bốn lần cấp sớm. #489 khép phần bookkeeping; quyết định xử lý thuộc chủ kho.
 - **Issue #463–#467 còn `open`** — chuỗi này KHÔNG nghiệm thu chúng.
-- **PR #479 chưa merge**: hai P3 tự khai hợp đồng đầu vào của `ops/dung_goi_review.sh` — chỉ
+- **PR #479 chưa merge**: **hai** P3 của lượt 6 PR #477, và chúng KHÁC nhau —
+  `t33-khong-chay-van-con-o-mo-dau` (lời mở đầu còn phủ nhận ca đã chạy) và
+  `gioi-han-dung-goi-chua-tu-khai` (thiếu tự khai hợp đồng đầu vào). Bản đầu gộp cả hai thành
+  "hai P3 tự khai hợp đồng đầu vào" — sai phân loại, cross-review lượt 1 bắt (P2). Số **hai** và
+  danh tính hai slug là **thuật lại** từ `ops/land/pr477-…-land-evidence.yaml`; verdict gốc lượt 6
+  không có trong kho. Nội dung của giới hạn thứ hai, đo được: chỉ
   `actionlint` được ghim, ba công cụ còn lại TIN `$PATH` đầu vào (đặt bản giả đầu PATH ⇒ `rc=0`,
   ghi `version: 9.9.9`); script VẪN `rm -rf` `$R/kho.git` và `$R/cay-kho`, và chốt symlink KHÔNG
   nhìn `$R` chính nó (đo: `$R` là symlink tới đích có sẵn hai thư mục ấy ⇒ sentinel trong cả hai
@@ -92,7 +140,9 @@ khi `completed` cho **44 bước, 6 skipped**. Bước chưa chạy tới thì `
 
 ## Hình dạng lỗi lặp lại — giá trị lớn nhất của chuỗi này
 
-Cross-review bắt **hơn 20 finding**; gần như tất cả là *lời khai sai*, không phải lỗi mã.
+Cross-review bắt **ít nhất 20 finding** — đây là **cận dưới** đếm được từ các verdict còn trong
+kho, không phải tổng đã kiểm kê. Câu "gần như tất cả là *lời khai sai*" là **đánh giá của điều
+phối**, chưa có tiêu chí phân loại đo được; đọc nó như ấn tượng, không như số liệu.
 
 1. **Đếm SỰ CÓ MẶT rồi tuyên là đã đo KHẢ NĂNG** — 44 tool ⇒ "CI không đo được" (chưa thử
    `/mcp/x/actions`); `command -v actionlint` ⇒ bỏ qua installer ghim, trái
@@ -103,12 +153,19 @@ Cross-review bắt **hơn 20 finding**; gần như tất cả là *lời khai sa
    `land_operator: ducthangho` khi `merged_by` là `notebyme88`.
 3. **Vá phần THÂN, để nguyên KHUNG** — một slug đi qua bốn lượt `VÁ HỜ`/`CHƯA VÁ` chỉ vì tiêu đề
    và tên cột bảng vẫn khẳng định điều đã rút.
-4. **Bản vá tự sinh lỗi mới — SÁU lần** — prepend PATH ⇒ che lệnh hệ thống; `rm -rf` ⇒ đi theo
+4. **Bản vá tự sinh lỗi mới — SÁU MỤC được hồ sơ #477 kể lại** (không phải sáu lần tái hiện độc
+   lập; một mục có thể gom nhiều hậu quả của cùng một bản vá — `pr477-…-land-evidence.yaml` nói
+   đúng điều đó) — prepend PATH ⇒ che lệnh hệ thống; `rm -rf` ⇒ đi theo
    symlink XOÁ DỮ LIỆU NGOÀI GÓI; `mktemp -d` ⇒ tích luỹ; chốt đặt sai chỗ ⇒ hỏng manifest lần
    trước; thêm verdict thiếu mục lục+biên nhận ⇒ ĐỎ `t27`; vá xong lại ĐỎ cổng receipt v2.
 5. **Dẫn một nguồn mở đọc được rồi gán cho nó nội dung nó không chứa** — biên nhận viết
-   `-m gpt-6-astra` "được ghi ở `run.json`", trong khi `run.json` chỉ có `chuong_trinh`,
-   `so_doi_so`, `van_tay`.
+   `-m gpt-6-astra` "được ghi ở `run.json`", trong khi **object `lenh`** của `run.json` chỉ lưu
+   `chuong_trinh`, `so_doi_so`, `van_tay`; tệp KHÔNG ghi argv và KHÔNG ghi model được yêu cầu.
+   **Bản đầu của mục này viết "`run.json` chỉ có" ba khoá ấy — cũng sai theo đúng kiểu nó đang
+   tố cáo**: đo lại `ops/reviews/pr468-hoso-4-packet-review-{14,15}-codex/run.json` cho **35 khoá
+   cấp cao** (có `provider`, `execution_surface`, `transport`, `head`, các số stdout/stderr…), ba
+   khoá kia nằm BÊN TRONG `lenh`. Cross-review lượt 1 của PR #491 bắt (P2). Điều đúng cần giữ
+   nguyên: các trường `provider`/`transport` là **tự khai**, không phải chứng thực model độc lập.
 
 # ★ dev-side — r356: kỳ vọng của fixture phụ thuộc NỀN CHẠY (2026-09-06)
 

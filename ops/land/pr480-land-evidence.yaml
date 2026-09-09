@@ -149,24 +149,34 @@ post_merge_checks:
       **CHƯA CHỨNG MINH.** Không dựng được phản chứng trong phiên này (không có cách xoá object khỏi
       tầm với mà giữ nguyên phần còn lại), và không đọc được môi trường của phiên cũ. Ghi thành
       giả thuyết còn sống, KHÔNG ghi thành nguyên nhân.
-  - ten: 'CI trên merge commit 7e69b8e'
-    loai_nguon: 'attestation của điều phối, đọc qua endpoint /mcp/x/actions'
-    ket_qua: 'ĐANG CHẠY tại thời điểm ghi tệp này — `gate` (`push`, `7e69b8e`) `status: in_progress`, run `34346689704`, bắt đầu `2026-09-09T11:39:05Z`.'
-    vi_sao_khong_ghi_so: >-
-      CỐ Ý KHÔNG ĐỌC SỐ. Chỉ đọc số bước và số `skipped` khi `status == "completed"`, và đòi số bước
-      có `conclusion: null` bằng 0 — chốt rút ra từ khối `4-vs-6` của `pr468-hoso-4-packet` và được
-      `pr478-land-evidence.yaml` nhắc lại. Một job `in_progress` phải trả KHÔNG ĐO ĐƯỢC chứ không trả
-      một con số.
-    phai_cap_nhat: >-
-      Tệp này PHẢI được cập nhật khi run `34346689704` `completed`, với số theo TỪNG JOB
-      (`gate (ubuntu-latest)` và `gate (windows-latest)` là HAI job khác nhau, không phải hai lần đo
-      cùng một job). Lượt `push` trên master chạy CẢ HAI nền — khác lượt `pull_request` của PR
-      thường vốn chỉ có ubuntu.
+  - ten: 'CI trên merge commit 7e69b8e — CỐ Ý KHÔNG CHỜ ĐỌC'
+    loai_nguon: 'không đo — quyết định của chủ kho'
+    ket_qua: 'KHÔNG ĐỌC. Run `34346689704` (`gate`, `push`, `7e69b8e`) vẫn chạy tự động; tệp này không chờ nó.'
+    quyet_dinh_cua_chu_kho: >-
+      Chỉ thị trực tiếp trong phiên: bỏ bước chờ đọc CI hậu-merge vì nó quá đắt về thời gian, và
+      lượt CI trên PR vừa xanh ngay trước merge. Từ đây land evidence KHÔNG chờ lượt `push` trên
+      master.
+    ba_dieu_phai_noi_kem_de_khong_ai_doc_rong_hon:
+      - >-
+        BỎ CHỜ KHÔNG PHẢI BỎ CHẠY. `ci.yml` khai `on: push`, nên lượt trên master vẫn chạy dù không
+        ai đọc. Thứ tiết kiệm được là THỜI GIAN CHỜ của phiên, KHÔNG phải phút runner. Muốn tiết
+        kiệm phút thật thì phải sửa ma trận trong `ci.yml` — đó là phạm vi packet GATE (#463), không
+        phải tệp này.
+      - >-
+        HỆ QUẢ ĐO ĐƯỢC, ghi để không ai bất ngờ: `ci.yml` chạy `ubuntu` cho PR thường và CẢ
+        `ubuntu` LẪN `windows` cho lượt `push` trên master. Nên với một PR không gắn nhãn `windows`
+        và không ai gọi `workflow_dispatch`, lượt `push` sau merge là lần đo Windows ĐẦU TIÊN của mã
+        đó. Bỏ chờ nghĩa là nếu Windows đỏ, ta biết MUỘN HƠN — không phải không biết.
+      - >-
+        PHẦN KHÔNG ĐỔI: mọi cổng chạy TẠI CHỖ ở `post_merge_checks` phía trên vẫn chạy đủ và vẫn là
+        điều kiện của land. Bỏ chờ CI không nới bất kỳ cổng nào khác.
 
 # --- KHÔNG ĐO ĐƯỢC ---
 khong_do_duoc:
-  - muc: 'CI trên merge commit tại thời điểm ghi'
-    ly_do: 'Run còn `in_progress`. Xem `post_merge_checks` mục cuối và `phai_cap_nhat`.'
+  - muc: 'CI trên merge commit'
+    ly_do: >-
+      CỐ Ý không đo — chủ kho bỏ bước chờ đọc CI hậu-merge. Run vẫn chạy tự động; không ai đọc nó
+      trong hồ sơ này. Xem `post_merge_checks` mục cuối.
   - muc: 'Người bấm merge là NGƯỜI hay PHIÊN'
     ly_do: 'GitHub không có trường phân biệt. Điều phối tự khai là phiên gọi API.'
   - muc: 'Nguồn thô cho mọi số API (merge, review, CI)'

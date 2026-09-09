@@ -91,9 +91,14 @@ cross_review:
     verdict_luot_1: ops/reviews/pr480-land-review-1-codex-verdict.md
     verdict_luot_2: ops/reviews/pr480-land-review-2-codex-verdict.md
     ghi_chu_vi_tri: >-
-      CẢ HAI verdict và biên nhận nằm ở PR #487, KHÔNG ở PR #480. Tại thời điểm ghi tệp này, #487
-      CHƯA merge — nên trên `master` hiện chưa có hiện vật của hai lượt ấy. Đây là trạng thái THẬT,
-      không phải thiếu sót cần che.
+      CẢ HAI verdict và biên nhận nằm ở PR #487, KHÔNG ở PR #480.
+      ẢNH CHỤP LỊCH SỬ, có mốc: lúc SOẠN tệp này (`2026-09-09T~11:50Z`), #487 chưa merge nên
+      `master` chưa có hiện vật của hai lượt ấy. TRẠNG THÁI TẠI COMMIT CHỨA TỆP NÀY thì khác:
+      #487 đã merge lúc `11:58:30Z` (merge commit `f4d74fe`), và commit đầu tiên chứa tệp này có
+      `f4d74fe` là tổ tiên — nên `master` ĐÃ có đủ hiện vật.
+      Bản đầu viết câu này ở thì HIỆN TẠI và giữ nguyên khi #487 đã merge, tạo hai lời khai không
+      tương thích trong cùng tệp (dòng này và mục `bookkeeping`). Cross-review #489 chấm P2
+      `Replace the stale unmerged-state assertion` đúng chỗ ấy.
     neo_kep: >-
       Mỗi lượt có blob trong kho (qua #487) và comment bản chiếu trên PR #480
       (`#issuecomment-5600009732` lượt 1, `#issuecomment-5600355552` lượt 2).
@@ -106,6 +111,42 @@ cross_review:
     *"bản gốc khai «bốn commit», SAI"*. Câu ấy RỘNG HƠN PHÉP ĐO và đã bị rút ở commit `60d62aa`:
     `git rev-list --count 14dab5e..75fe4c4 ⇒ 5` đo đúng MỘT KHOẢNG GIT, nhưng câu trong bản gốc là
     "bốn commit đẩy SAU KHI được duyệt" — đại lượng có ĐIỀU KIỆN THỜI GIAN mà `rev-list` không đo.
+
+# --- PHÉP ĐO TRƯỚC MERGE, trên đúng head đã duyệt `5b96ddc` ---
+# THIẾU TRONG BẢN ĐẦU. Cross-review #489 chấm P2 `Add the required pre-merge evidence`: hai land
+# evidence mới bỏ hẳn mục này và nhảy thẳng từ metadata merge sang hậu-merge, nên không nói được
+# cổng nào đã đạt TRÊN ĐÚNG HEAD trước merge. Hai land evidence CŨ (`pr477-…`, `pr478-…`) đều có
+# mục này — tức đây là bỏ sót của điều phối, không phải mẫu đổi.
+# KHÔNG lấy số hậu-merge lấp vào đây: mọi hàng dưới đây đo trên `5b96ddc`, trước khi merge xảy ra.
+pre_merge_checks:
+  - ten: 'CI trên exact head đã duyệt'
+    loai_nguon: 'attestation của điều phối, đọc qua endpoint /mcp/x/actions'
+    ket_qua: '`gate` (`pull_request`, `5b96ddc`) = **success**, run `34338301656`.'
+    canh_bao_doc_ket_qua: >-
+      Lượt `pull_request` chỉ có MỘT job (ubuntu). Windows KHÔNG chạy trên PR thường — nó chỉ xuất
+      hiện ở lượt `push` sau merge. "PR xanh" không nói gì về Windows.
+  - ten: 'duyet khac danh tinh trên head đã duyệt'
+    loai_nguon: 'attestation của điều phối'
+    ket_qua: '`success` — chạy lại ở event `pull_request_review` sau khi `notebyme88` APPROVED.'
+  - ten: 'lease_publish trên head'
+    loai_nguon: 'chạy tại chỗ'
+    ket_qua: '`rc=0` · **121/121 đạt; đã chạy=121, bỏ qua=0**'
+  - ten: 'doctrine-scan trên head'
+    ket_qua: '`rc=0` · sạch — **7 tệp quét, 0 chỗ chép doctrine**'
+  - ten: 'adr-song trên head'
+    ket_qua: '`rc=0` · sạch — **46 ADR / 46 dòng §20**, khớp 1–1'
+  - ten: 'doc-claims-check --strict trên head'
+    ket_qua: '`rc=0` · **`ok: true`** · 106 tệp'
+  - ten: 'bien_nhan_v2 trên head'
+    ket_qua: '**ĐỎ** 4 vi phạm — đo nền `afddf7e` SẠCH cũng ĐỎ, delta = 0.'
+  - ten: 'cross-review khác nền, lượt cuối trên đúng head'
+    ket_qua: '`approve` · 0 P1 · 0 P2 · 3 P3 trên `5b96ddc` — CÙNG head được duyệt và được merge.'
+  - ten: 'CI Windows trên head — KHÔNG CHẠY'
+    trang_thai: not_run
+    ly_do: >-
+      Không chạy trên PR thường: PR không gắn nhãn `windows` và không ai gọi `workflow_dispatch`.
+      Ghi thành `not_run` chứ KHÔNG ghi thành `passed` hay bỏ trống — phân biệt "đạt", "hỏng",
+      "bỏ qua" và "chưa chạy" là đúng thứ mà cross-review #489 đòi ở P2 này.
 
 # --- PHÉP ĐO SAU MERGE, trên master `7e69b8e` ---
 post_merge_checks:
@@ -195,9 +236,18 @@ bookkeeping:
   - >-
     Đây là land evidence thứ **TƯ** vào `master` (trước đó: `plat-x8-land-evidence.yaml`,
     `pr468-hoso-4-packet-land-evidence.yaml`, `pr478-land-evidence.yaml`).
-  - >-
-    **PR #477 nay `landed`** theo `ADR-0034`: merged (`585c7d5`) + hậu-merge gate + bookkeeping —
-    bookkeeping của nó CHÍNH LÀ PR #480, và #480 đã merge ở `7e69b8e`.
+  - trang_thai_cua_477: >-
+      **`merged` + bookkeeping xong; CI hậu-merge KHÔNG XÁC MINH.** Bản đầu của dòng này khai thẳng
+      `landed`, và cross-review #489 chấm **P1** `Keep #477 pending until post-merge CI is verified`
+      — ĐÚNG: cùng tệp này vừa phân loại CI merge-commit là KHÔNG ĐO (chủ kho bỏ bước chờ) vừa
+      tuyên `landed`, trong khi `landed` theo `ADR-0034` đòi hậu-merge gate. Hai câu không đứng
+      cùng nhau, và downstream có thể đóng việc dựa trên một bằng chứng chưa ai quan sát.
+      Thứ ĐÃ có: merged (`585c7d5`), bookkeeping (PR #480 merge ở `7e69b8e`), và hậu-merge gate
+      CHẠY TẠI CHỖ đầy đủ (xem `post_merge_checks`).
+      Thứ CHƯA có: một lượt CI thành công cho exact merge commit.
+      **Ai được tuyên `landed` là quyết định của chủ kho, không phải của tệp này** — vì chính chủ
+      kho đã bỏ bước chờ CI, nên hoặc định nghĩa `landed` của kho phải sửa cho khớp (và đó là việc
+      của một ADR), hoặc trạng thái này ở lại `merged` cho tới khi ai đó đọc lượt CI.
   - chuoi_land_evidence_chua_co_diem_dung: >-
       **CÂU HỎI CHO CHỦ KHO, tệp này không tự quyết.** Chuỗi đang là: #468 → land evidence ở #478 →
       land evidence ở #486 → hậu kiểm + vá ở #487 → land evidence ở tệp này (cho #480). Không quy tắc

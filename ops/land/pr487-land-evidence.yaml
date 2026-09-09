@@ -73,6 +73,27 @@ head_da_cross_review_khac_head_merge:
   vi_sao_ghi_ra: >-
     PR #468 để lại đúng nợ này (lượt cuối review `745d888`, head merge `17f4a1b`) và bị chấm ở
     cross-review sau. Không có đường tránh: verdict phải vào kho, mà kho là chính PR này.
+  no_review_head_da_merge:
+    trang_thai: NO_CHUA_TRA
+    mo_ta: >-
+      **Head `3873173` CHƯA qua lượt cross-review nào.** Bản đầu của khối này mô tả chênh lệch rồi
+      dừng ở đó, và như thế nó ĐỌC THÀNH "đã giải thích xong". Chưa xong: giải thích một nợ không
+      phải trả nó.
+    ai_da_chi_ra:
+      - 'Chủ kho, chất vấn trực tiếp trong phiên: "vẫn còn P1, đã có approve của cross review chưa #487".'
+      - 'Cross-review #489 (codex connector), P1 `Re-review the exact head that was merged` — độc lập với chủ kho, cùng kết luận.'
+    vi_sao_loi_khai_cu_khong_du: >-
+      Bản đầu dựa vào "nội dung đã approve giữ NGUYÊN byte". Câu ấy là LỜI KHAI CỦA ĐIỀU PHỐI, không
+      phải kết luận của một lượt review trên head ấy — và connector nói đúng: bốn tệp review/evidence
+      CÓ đổi giữa hai head, nên phép review theo exact-SHA đã cũ dù các tài liệu sản phẩm khác giữ
+      nguyên byte. Duyệt của người trên đúng head là UỶ QUYỀN, KHÔNG phải REVIEW; hai vai khác nhau
+      và không thay nhau được.
+    duong_tra_no:
+      - 'Chạy một lượt cross-review HẬU KIỂM trên `3873173` (nay đã ở master) và ghi verdict + biên nhận vào kho.'
+      - 'Hoặc một human audit của `3873173` được ghi lại.'
+    trang_thai_hien_tai: >-
+      Đã đề xuất lượt hậu kiểm với chủ kho; CHƯA có quyết định. Cho tới lúc đó nợ này ở lại
+      `NO_CHUA_TRA`, và land evidence này KHÔNG được đọc như "đã hoàn tất review".
 
 # --- P1 CỦA CODEX CONNECTOR: ĐÃ VERIFY VÀ BÁC, có phép đo ---
 p1_connector_da_bac:
@@ -82,15 +103,37 @@ p1_connector_da_bac:
     (a) `bien_nhan_v2` exit 1 trên cây merge trong khi CHA exit 0; (b) CẢ NĂM receipt mới fail
     `canonical_ancestry` vì neo commit "chỉ tồn tại trên lịch sử `work` riêng".
   do_lai_tren_kho_du_313_ref:
-    - {commit: da481f94eee0adf1fe5fc4260a535a9b48fc2627, vai_tro: 'cha 1 — master trước merge #487', rc: 1, ket_qua: 'ĐỎ'}
-    - {commit: 3873173094a3e294b069998ed21dc117d8ad659a, vai_tro: 'cha 2 — head PR', rc: 1, ket_qua: 'ĐỎ · 34 ĐẠT · 4 vi phạm · tổng 91'}
-    - {commit: 372bf9adb331218212619fc04763acbedfaa3f3f, vai_tro: 'cây merge thật (refs/pull/487/merge)', rc: 1, ket_qua: 'ĐỎ · 34 ĐẠT · 4 vi phạm · tổng 91'}
-  ket_luan_ve_a: 'KHÔNG cha nào exit 0. Cả ba commit đều rc=1.'
+    - {commit: 7e69b8e9c41a45854d149bc252218aada6df5aa4, vai_tro: 'CHA 1 THẬT — `merge_commit^1`', rc: 1, ket_qua: 'ĐỎ · 29 ĐẠT · 4 vi phạm · tổng 86'}
+    - {commit: 3873173094a3e294b069998ed21dc117d8ad659a, vai_tro: 'CHA 2 THẬT — `merge_commit^2`, head PR', rc: 1, ket_qua: 'ĐỎ · 34 ĐẠT · 4 vi phạm · tổng 91'}
+    - {commit: 372bf9adb331218212619fc04763acbedfaa3f3f, vai_tro: 'cây merge tổng hợp (`refs/pull/487/merge`) — KHÔNG phải merge commit thật', rc: 1, ket_qua: 'ĐỎ · 34 ĐẠT · 4 vi phạm · tổng 91'}
+    - {commit: da481f94eee0adf1fe5fc4260a535a9b48fc2627, vai_tro: 'nền CŨ HƠN — master TRƯỚC khi #480 merge; KHÔNG phải cha của f4d74fe', rc: 1, ket_qua: 'ĐỎ · 29 ĐẠT · 4 vi phạm · tổng 86'}
+  dinh_chinh_nhan_cha_1: >-
+    **BẢN ĐẦU GẮN NHÃN SAI.** Nó ghi `da481f9` là "cha 1 — master trước merge #487". SAI:
+    `git log -1 --format=%P f4d74fe` ⇒ `7e69b8e` + `3873173`, nên cha 1 THẬT là `7e69b8e`;
+    `da481f9` là nền cũ hơn một nhịp, từ trước khi #480 merge. Cross-review #489 chấm P2
+    `Measure the actual first parent of PR #487` đúng chỗ ấy, và nó nói thêm một điều đúng: khi
+    hàng "cha 1" không phải cha thật thì lập luận "không cha nào exit 0" CHƯA phủ cha thật.
+    Đã đo bù: `7e69b8e` ⇒ `rc=1`, `29 ĐẠT · 4 vi phạm · tổng 86`.
+  ket_luan_ve_a: >-
+    KHÔNG cha nào exit 0 — nay có đủ CẢ HAI cha thật: `7e69b8e` `rc=1` và `3873173` `rc=1`, cộng
+    cây merge tổng hợp `rc=1`. Kết luận không đổi so với bản đầu, nhưng bản đầu ĐẠT NÓ BẰNG MỘT
+    HÀNG SAI NHÃN; nay nó dựa trên phép đo đúng cha.
   ket_luan_ve_b: >-
     Lọc đầu ra cổng theo tên năm receipt mới ⇒ **0 dòng**. Bốn vi phạm là bốn tệp CŨ
     (`handoff-264-review-1/2`, `plat-x8-review-4`, `plat-x8b-review-1`), đỏ sẵn trên master trước
     khi PR này tồn tại. Quan hệ tổ tiên của năm `evidence_url`: **5/5** là tổ tiên của CẢ head
     LẪN cây merge.
+  gioi_han_cua_bang_chung_372bf9a: >-
+    `372bf9adb331218212619fc04763acbedfaa3f3f` là cây merge TỔNG HỢP mà GitHub sinh cho
+    `refs/pull/487/merge`. Nó KHÔNG bền: GitHub tính lại ref ấy mỗi khi base hoặc head đổi, và object
+    cũ không được giữ. Tại commit đang đọc tệp này, một reviewer chạy
+    `git cat-file -e 372bf9ad…^{commit}` có thể nhận `rc=128` và KHÔNG tái hiện được hàng đo ấy.
+    Cross-review #489 chấm P2 `Retain the synthetic merge object used as evidence` đúng chỗ này.
+    HAI ĐIỀU PHẢI ĐỌC KÈM: (1) trong container của phiên điều phối, object ấy CÒN — vì phiên đã
+    `git fetch '+refs/pull/487/merge:…'` trước khi đo; nên phép đo có thật, chỉ là KHÔNG TÁI HIỆN
+    ĐƯỢC từ kho. (2) Hàng ấy nay KHÔNG còn là chỗ dựa: kết luận `ket_luan_ve_a` đứng trên HAI CHA
+    THẬT (`7e69b8e`, `3873173`) — cả hai là commit BỀN trong lịch sử master. Cây merge tổng hợp chỉ
+    còn là hàng thứ ba, thừa chứ không thiết yếu.
   bay_da_gap_va_ghi_lai: >-
     Commit mà finding dẫn (`a9b9edd014636dd49b208a5e2d37fbe5dfa0c01f`) là BAD OBJECT trong kho này.
     `git rev-parse <40 hex>` TRẢ LẠI CHÍNH CHUỖI ĐÓ mà KHÔNG kiểm tồn tại — phải dùng `cat-file -e`
@@ -111,6 +154,35 @@ p1_connector_da_bac:
     vì sao `pr478-land-evidence.yaml` khai `0 vi phạm` trên `c87b067` trong khi kho đầy đủ đo được
     **4**. Lượt connector là một quan sát ĐỘC LẬP hỗ trợ giả thuyết ấy theo chiều ngược. Vẫn CHƯA
     phải phản chứng.
+
+# --- PHÉP ĐO TRƯỚC MERGE, trên đúng head đã duyệt `3873173` ---
+# THIẾU TRONG BẢN ĐẦU — cross-review #489, P2 `Add the required pre-merge evidence`.
+# KHÔNG lấy số hậu-merge hay số của cây merge tổng hợp lấp vào đây: mọi hàng đo trên `3873173`.
+pre_merge_checks:
+  - ten: 'CI trên exact head đã duyệt'
+    loai_nguon: 'attestation của điều phối, đọc qua endpoint /mcp/x/actions'
+    ket_qua: '`gate` (`pull_request`, `3873173`) = **success**.'
+    canh_bao_doc_ket_qua: 'Lượt `pull_request` chỉ có MỘT job (ubuntu); Windows không chạy trên PR thường.'
+  - ten: 'duyet khac danh tinh trên head đã duyệt'
+    ket_qua: '`success` — chạy lại ở event `pull_request_review` sau khi `notebyme88` APPROVED trên `3873173`.'
+  - ten: 'phan chung duyet khac danh tinh'
+    ket_qua: '`success`'
+  - ten: 'doctrine-scan trên head'
+    ket_qua: '`rc=0` · sạch — **7 tệp quét, 0 chỗ chép doctrine**'
+  - ten: 'adr-song trên head'
+    ket_qua: '`rc=0` · sạch — **46 ADR / 46 dòng §20**, khớp 1–1'
+  - ten: 'doc-claims-check --strict trên head'
+    ket_qua: '`rc=0` · **`ok: true`** · 106 tệp'
+  - ten: 'bien_nhan_v2 trên head'
+    ket_qua: '**ĐỎ** · `34 ĐẠT · 11/11 · 42 nợ · 4 vi phạm · tổng 91` — đỏ sẵn, delta = +5 ĐẠT, +0 vi phạm.'
+  - ten: 'cross-review khác nền trên exact head đã merge'
+    trang_thai: not_run
+    ly_do: >-
+      **KHÔNG CHẠY.** Lượt cross-review cuối (`approve`) neo `5c05778`, KHÔNG neo `3873173`.
+      Ghi thành `not_run` chứ không ghi `passed` — xem `no_review_head_da_merge`.
+  - ten: 'CI Windows trên head'
+    trang_thai: not_run
+    ly_do: 'Không chạy trên PR thường: không gắn nhãn `windows`, không gọi `workflow_dispatch`.'
 
 # --- PHÉP ĐO SAU MERGE, trên master f4d74fe ---
 post_merge_checks:

@@ -1,0 +1,214 @@
+# BIÊN NHẬN GIAO HÀNG — cross-review LƯỢT 2 của PR #489, KHÁC NỀN (codex).
+#
+# Verdict: approve — 0 P1 / 0 P2 / 4 P3. ĐIỀU KIỆN DỪNG của chủ kho ĐÃ THOẢ
+# ("lặp vá, cross-review tới khi approved").
+#
+# `approve` này áp cho ĐÚNG SHA `98ef1f1` trong PHẠM VI review OFFLINE. Reviewer nói thẳng nó
+# KHÔNG chứng nhận CI/API GitHub, KHÔNG cấp quyền merge, và KHÔNG xoá bốn nợ P3 còn lại.
+# Điều phối KHÔNG được đọc nó rộng hơn thế.
+
+schema_version: 2
+receipt_id: pr489-review-2-codex-20260909-cf7ed3ee
+kind: review_delivery_receipt
+packet_id: 'PR489-BOOKKEEPING-480-487'
+lease_id: khong-co-lease
+phase_key: HO-SO-CROSS-REVIEW-PHIEN-20260909
+luot: 2
+role: reviewer
+provider: codex
+executor_provider: claude
+cross_provider: true
+assurance: cross_reviewed
+verdict: approve
+verdict_path: ops/reviews/pr489-review-2-codex-verdict.md
+verdict_sha256: 3f7f8dd6f4d4fcf54d5f367d9049d972db862ac7963e33a39743d97bdb82ffff
+verdict_bytes: 32790
+reviewed_sha: 98ef1f1629a2ac786ff91e352dd02da9b693e81e
+base_da_review_luot_truoc: 9a99dd8aa137ef118a00671482c29ea2438cbdbb
+evidence_url: https://github.com/ducthangho/tra-luat/blob/f7fe80261779b8d11bf55e9fedd55a6912e29b99/ops/reviews/pr489-review-2-codex-verdict.md
+evidence_url_ghi_chu: >-
+  Neo BLOB ghim `f7fe802` — commit ĐẦU TIÊN chứa tệp verdict, đo bằng
+  `git log --diff-filter=A -- <path>` và `git log --all --diff-filter=A -- <path>`, cả hai trả
+  ĐÚNG 1 commit. Đây là lần thứ hai liên tiếp đo trước khi ghi, sau P3
+  `neo-verdict-khong-phai-commit-them-dau` của lượt trước.
+so_p1: 0
+so_p2: 0
+so_p3: 4
+
+dieu_kien_dung_da_thoa:
+  chi_thi_chu_kho: 'lặp vá, cross-review tới khi hết P1 hoặc approved'
+  do_duoc: >-
+    `verdict: approve` ở dòng 1 của tệp verdict; regex `^### <slug> [P1|P2|P3]` đếm 4/4 tiêu đề
+    finding, PHÂN BỐ 0 P1 · 0 P2 · 4 P3. Hai số của mỗi cặp N/N bằng nhau.
+  khong_suy_rong: >-
+    "Hết P1" KHÔNG phải "hết finding". Bốn P3 còn sống; hai đã vá trong chính commit mang biên nhận
+    này, hai còn là NỢ có địa chỉ (xem `no_con_lai`).
+
+doi_chieu_luot_1:
+  tong_slug: 11
+  da_va_that: 9
+  va_sinh_loi_moi: 1
+  va_ho: 0
+  chua_va: 1
+  don_vi: 'số TRẠNG THÁI SLUG, KHÔNG phải severity — một slug P3 và một slug P1 đếm như nhau ở đây.'
+  do_bang_may: >-
+    Đếm lại từ chính tệp verdict bằng regex trên dòng `- ``<slug>``: **<trạng thái>**` ⇒ 11/11 slug,
+    phân bố khớp bảng trên. Không chép số từ phần văn xuôi của reviewer.
+
+va_sinh_loi_moi_la_loi_cua_dieu_phoi:
+  slug: ci-pr-khong-chung-minh-exact-head
+  ha_tu: P1
+  xuong: P3
+  phan_noi_dung_da_dong: >-
+    2/2 mục CI trong `ops/land/pr480-land-evidence.yaml`:122–130 và `pr487-land-evidence.yaml`:158–166
+    đã đổi tên sang "CI được báo cho PR có head" và kèm giới hạn không chứng minh cây test là head.
+  phan_phat_sinh: >-
+    Nhưng BẢN TÓM TẮT trong biên nhận lượt 1 (`RN`:40–41) và mục lục (`INDEX`:269) lại viết lượt
+    `pull_request` "chạy trên cây merge tổng hợp" — biến một thứ ĐỌC ĐƯỢC TỪ CẤU HÌNH
+    (`.github/workflows/ci.yml`: 1 bước checkout, không khai `with.ref`) thành một SỰ KIỆN RUNNER ĐÃ
+    QUAN SÁT. Gói không có log checkout hay run JSON của lượt lịch sử ấy ⇒ cây runner thật là
+    KHÔNG ĐO ĐƯỢC. Chính verdict lượt 1 (`VN`:132) đã tự giới hạn đúng chỗ đó, và bản tóm tắt đánh mất.
+  vi_sao_dang_ghi: >-
+    Đây là LẦN THỨ BA trong cùng phiên một bản vá tái tạo lỗi ở chỗ khác: vá `pre_merge_checks` thì
+    đúng, rồi thuật lại nó thì lại khai vượt. Hình dạng "mỗi lượt vá bảo toàn thứ ta NGHĨ TỚI và làm
+    hỏng thứ ta KHÔNG NGHĨ TỚI" mà `CLAUDE.md` cảnh báo — lần này nạn nhân là lời TÓM TẮT chứ không
+    phải nội dung được vá. Bài học rẻ: sửa một mệnh đề thì phải sửa MỌI bản chiếu của nó, và bản
+    chiếu ở mục lục là bản dễ quên nhất vì nó nằm ngoài tệp đang sửa.
+  da_va: true
+  va_o_dau: >-
+    `ops/reviews/pr489-review-1-codex-verdict.receipt.yaml`:38–43 và `ops/reviews/README.md`:269,
+    trong CHÍNH commit mang biên nhận này. Cả hai nay tách rõ ĐO ĐƯỢC (cấu hình) khỏi KHÔNG ĐO ĐƯỢC
+    (cây runner), và giữ kết luận rằng cả hai đều đủ để bác cái tên "exact head".
+
+p3_thu_hai_da_va:
+  slug: ten-khoi-ba-loi-khong-khop-bon-phep-do
+  van_de: >-
+    Khoá `ba_loi_lich_su_git_dieu_phoi_tu_kiem_lai` trong biên nhận lượt 1 gọi BA lời khai, nhưng
+    danh sách có BỐN phần tử — và bốn mới đúng, khớp mục lục lẫn chỉ thị chủ kho.
+  do_lai_truoc_khi_va: '`yaml.safe_load` đếm 4/4 phần tử trước và sau khi đổi tên; nội dung nguyên trạng.'
+  da_va: true
+  va_o_dau: '`pr489-review-1-codex-verdict.receipt.yaml`:63 — khoá nay là `bon_loi_lich_su_git_dieu_phoi_tu_kiem_lai`.'
+
+no_con_lai:
+  - slug: bang-khang-dinh-bo-chu-thich-va-gioi-han-nguon
+    trang_thai_doi_chieu: 'CHƯA VÁ (lượt thứ BA liên tiếp mang slug họ này)'
+    do_duoc_phan_dat: >-
+      Bảng cấu trúc giữ 526/526 lá YAML, 0 lá bị cắt — phần đã sửa ở lượt trước thì ĐÚNG.
+    phan_con_thieu: >-
+      Bảng vẫn KHÔNG phủ 2 tệp Markdown thay đổi, 242 lá JSON mới và 62 dòng comment YAML. Bỏ bảng
+      chú thích ở lượt trước làm ĐỘ PHỦ TRA CỨU KÉM ĐI chứ không đóng lỗi — reviewer nói thẳng cách
+      sửa đúng là GIỮ DỮ LIỆU, SỬA PHÂN LOẠI, không phải chọn giữa bỏ dữ liệu và giữ kết luận sai.
+    da_co_dia_chi_tra_cuu: >-
+      Nợ này nay KHÔNG còn là lời mô tả suông: `ops/reviews/pr489-review-2-phep-do/bo-sot.json` giữ
+      nguyên byte 9/9 vị trí nguồn văn bản và 242/242 lá JSON bị bỏ sót; `comments.json` giữ phân loại
+      bằng span scalar `yaml.scan` (62/62 comment nguyên dòng, 0 comment cuối dòng ở tập hiện tại);
+      `tables.json` giữ phép đếm 526/526 lá. Phiên sau đóng nợ thì ĐO LẠI từ ba tệp ấy, đừng dựng lại
+      từ đầu.
+    vi_sao_chua_dong_o_luot_nay: >-
+      Đóng nó đòi viết một bộ trích khẳng định phủ CẢ Markdown, comment và JSON — một công cụ mới, có
+      cổng riêng và phản chứng riêng. Đó là việc của một packet, không phải một dòng vá kèm; và
+      `CLAUDE.md` đã ghi rõ bộ quét NHÁP tự viết là thứ dễ tin nhất nên nguy nhất.
+  - slug: tong-dong-diff-trong-prompt-khong-khop-numstat
+    van_de: >-
+      `PROMPT.md`:11 của gói lượt 2 khai "thêm 560 dòng"; `git diff --numstat 9a99dd8..98ef1f1` cộng
+      tay cho 8 tệp, thêm 950 dòng, bớt 132 dòng. THIẾU 390 dòng thêm trong lời khai quy mô.
+    dieu_phoi_tu_kiem: >-
+      Đã chạy lại `git diff --shortstat` và cộng tay từ `--numstat`: cả hai cho 950/132 trên 8 tệp.
+      Reviewer ĐÚNG. Không có hiện vật diff bị cắt — patch và numstat trong gói vẫn đầy đủ, nên lỗi
+      thuần ở LỜI GIỚI THIỆU, không ở dữ liệu reviewer nhận.
+    khong_va_o_dau: >-
+      `PROMPT.md` là hiện vật gói, KHÔNG vào kho ⇒ không có tệp nào trong kho để sửa. Ghi lại ở đây
+      chính là chỗ nó được ghi nhận. Con số đúng cho lượt này: 8 tệp · thêm 950 · bớt 132.
+    bai_hoc: >-
+      Số trong lời giao việc cũng là một lời khai, và nó KHÔNG có cổng nào canh. Lượt sau sinh số ấy
+      bằng lệnh rồi chèn vào prompt, đừng gõ tay.
+
+model_reviewer_identity:
+  provider: openai_codex
+  surface: codex_cli
+  model_yeu_cau: gpt-6-astra
+  model_da_chay: KHONG_DO_DUOC
+  session_run_id: cf7ed3ee
+  run_id_day_du: cf7ed3ee0f6c4b4a8c37121f01dcb78a
+  prompt_sha256: 3aca436c1c30ed6a2c4af82d9b099906b94c9c6841533265e59f704b493222fa
+  bat_dau_utc: '2026-09-09T13:53:52.122327+00:00'
+  ket_thuc_utc: '2026-09-09T14:10:14.819543+00:00'
+  thoi_luong_giay: 982.697
+  ma_thoat: 0
+  trang_thai: xong
+  stdout_byte: 512
+  stdout_sha256: 428e030cfe58f5fa53e3e1975abcb35da5daa0fc3c836c9afabff3922b89ed6d
+  stderr_byte: 726474
+  stderr_sha256: 7f7d564b48dfc101aee0ce9e7109a3ce6fa1ba4d51100b697ae97ae8cf0113fc
+  so_lan_chet_truoc_khi_xong: 0
+  nguon_cac_scalar_tren: 'Đọc từ `run.json` trong scratchpad; tệp ấy KHÔNG vào kho ⇒ ATTESTATION.'
+  neo_boi_launcher: >-
+    `launcher.py run --expected-repo github.com/ducthangho/tra-luat --expected-root-commit
+    394e93468fc8d84ec20938e6df8fb7ab72b2cc37 --expected-head 98ef1f1629a2ac786ff91e352dd02da9b693e81e
+    --require-clean --prompt-file PROMPT.md --expected-prompt-sha256 3aca436c…` bọc `codex exec`.
+    Probe: workspace ĐẠT · ghi ĐẠT · spawn ĐẠT.
+
+nang_luc_do_cua_goi:
+  so_ref: 314
+  lech: 0
+  kho_nong: false
+  ghi_chu: >-
+    `cay-kho` KHÔNG nông — điều phối ĐO LẠI trong chính cây gói: `rev-parse
+    --is-shallow-repository` ⇒ false, `for-each-ref refs/heads` ⇒ 314. Đây là số ĐO, không chép từ
+    `EVIDENCE.md` của gói.
+  chua_do_duoc: 'Không mạng: mọi khẳng định về GitHub API/CI là KHÔNG ĐO ĐƯỢC ở lượt này.'
+
+hien_vat_reviewer_vao_kho:
+  thu_muc: ops/reviews/pr489-review-2-phep-do/
+  tep:
+    - {ten: bo-sot.json, byte: 35689, sha256: d53d445c5aa48d176a95a182542881978a55807850b36b43d71bbc1c37547534}
+    - {ten: comments.json, byte: 15011, sha256: 536cf72852871594bc39323d53f14f67f60b3ceff4214d86ab26f10a61e8c94e}
+    - {ten: tables.json, byte: 621, sha256: 8dcd6e871929c4a9618155d149495aadeb6942a4253aa98c9ed710b6726b556c}
+    - {ten: bang-chu-thich-do-lai.tsv, byte: 8613, sha256: 3462a6212e5ed1af7dc45637d4f3727498339cd8434816e558bbe948019eba3e}
+  doi_chieu_nguyen_byte: '`cmp` giữa gói và bản trong kho: KHỚP 4/4 tệp, 0 tệp lệch.'
+  vi_sao_chon_bon_tep_nay: >-
+    Gói có 563 tệp dưới `phep-do/` (3 907 673 byte — đo bằng `find -type f` và `du -sb`, không
+    ước lượng): 27 tệp ở mức trên cùng cộng 536 tệp phép chiếu receipt trong `receipt-inputs/`,
+    và một `doc-claims-check.json` 80 537 byte. Chỉ bốn tệp này phục vụ NỢ CÒN MỞ về độ phủ bảng khẳng định;
+    phần còn lại tái sinh được bằng cách chạy lại cổng. KHÔNG tuyên đây là toàn bộ hiện vật của lượt.
+
+tuan_thu_cam_cua_reviewer:
+  cay_kho_sach: true
+  commit_them_ngoai_head: 0
+  bang_chung: >-
+    Đo trong chính `cay-kho` của gói: `status --porcelain` ⇒ 0 byte; `log 98ef1f1..HEAD` ⇒ 0 dòng;
+    `rev-parse HEAD` ⇒ `98ef1f1629a2ac786ff91e352dd02da9b693e81e` đúng head được giao.
+
+manifest:
+  duong_dan: KHONG_CO_TRONG_KHO
+  ghi_chu: 'Hiện vật gói (mirror 314 ref, ARTIFACTS.sha256 3.176 tệp) CỐ Ý không vào kho; riêng bốn tệp đo ở trên thì CÓ.'
+
+github_submitter_identity:
+  actor: ducthangho
+  la_tac_gia_PR: true
+  ghi_chu: '`ADR-0040`: verdict do tài khoản tác giả PR vận chuyển KHÔNG là merge authorization.'
+  phien_van_chuyen: https://claude.ai/code/session_01UN8WRS5Bc5pBBzYPDqs9Dx
+
+anchor:
+  loai: canonical_ancestry
+  cuong_do: cao
+  mo_ta: 'Blob verdict ghim `f7fe802` trên nhánh `claude/land-480-20260909`.'
+  gioi_han: 'Chỉ vững nếu land bằng MERGE hoặc fast-forward; SQUASH phá quan hệ tổ tiên.'
+
+head_da_approve_khac_head_se_merge:
+  head_da_approve: 98ef1f1629a2ac786ff91e352dd02da9b693e81e
+  ghi_chu: >-
+    Commit mang verdict (`f7fe802`) và commit mang biên nhận này đều nằm SAU head đã approve. `approve`
+    KHÔNG phủ chúng. Đây là hình dạng cố hữu của hồ sơ tự-ghi: đưa verdict vào kho là đã đổi head.
+    Bù bằng ba điều, không bằng một lời hứa: (a) nội dung thêm CHỈ là hiện vật review cộng hai bản vá
+    P3 mà chính reviewer đề xuất trong `GOI-VA.md`; (b) `diff -u` giữa 2/2 tệp reviewer đề xuất
+    trong `cay/` và 2/2 tệp điều phối áp cho ĐÚNG MỘT hunk khác nhau — câu chữ của P3 CI, điều phối
+    viết CHẶT HƠN (tách hẳn ĐO ĐƯỢC khỏi KHÔNG ĐO ĐƯỢC) chứ không lỏng hơn; phần đổi tên khoá
+    `ba_loi`→`bon_loi` TRÙNG KHỚP hoàn toàn, 0 dòng lệch; (c) cổng cục bộ chạy lại trên head cuối
+    trước khi xin duyệt.
+
+khong_do_duoc:
+  - 'Model đã phục vụ và `thread_id`.'
+  - '`run.json` không vào kho ⇒ scalar runtime là attestation.'
+  - 'Trạng thái GitHub tại thời điểm reviewer đọc: sandbox không mạng.'
+  - 'Cây mà runner CI thật đã checkout cho các lượt `pull_request` lịch sử — xem P3 đầu tiên.'

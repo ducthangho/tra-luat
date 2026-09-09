@@ -37,8 +37,11 @@ p1_la_loi_dieu_phoi_vua_them:
   slug: ci-pr-khong-chung-minh-exact-head
   mo_ta: >-
     `pre_merge_checks` — mục điều phối MỚI THÊM sau khi codex connector chấm P2 thiếu nó — đặt tên
-    "CI trên exact head đã duyệt". SAI: lượt `pull_request` chạy trên cây MERGE TỔNG HỢP; workflow
-    có 1 bước checkout, không khai `with.ref`.
+    "CI trên exact head đã duyệt". SAI vì tên ấy tuyên một thứ hồ sơ không đo được: đọc
+    `.github/workflows/ci.yml` chỉ cho biết workflow DỰ KIẾN dùng cây merge tổng hợp (1 bước
+    checkout, không khai `with.ref`), KHÔNG cho biết runner đã checkout cây nào — không có log
+    checkout hay run JSON của lượt lịch sử ấy trong gói. Đo được: cấu hình. KHÔNG đo được: cây
+    runner thật. Cả hai đều đủ để bác cái tên "exact head".
   vi_sao_dang_ghi: >-
     Land evidence CŨ của #477/#478 đã giới hạn ĐÚNG chỗ này. Điều phối vá một finding rồi TÁI TẠO
     đúng lỗi mà hồ sơ cũ đã tránh — hình dạng "mỗi lượt vá bảo toàn thứ ta NGHĨ TỚI và làm hỏng thứ
@@ -60,7 +63,7 @@ p2_ban_sua_van_khai_vuot:
     sử ấy là CHƯA ĐỐI CHỨNG vì thiếu log.
   da_va: true
 
-ba_loi_lich_su_git_dieu_phoi_tu_kiem_lai:
+bon_loi_lich_su_git_dieu_phoi_tu_kiem_lai:
   - {khai_cu: 'evidence_url neo `1455741` là "commit đầu tiên chứa verdict"', do_lai: '`git log --diff-filter=A` ⇒ `e1fd0a3`', ket: SAI}
   - {khai_cu: '"commit đầu tiên chứa tệp có `f4d74fe` là tổ tiên"', do_lai: '`pr480-land-evidence.yaml` thêm ở `6db5b6c`, cha `7e69b8e`', ket: SAI}
   - {khai_cu: 'land evidence "thứ TƯ" và "thứ NĂM"', do_lai: '`git ls-tree f4d74fe ops/land/` ⇒ 4 tệp, head ⇒ 6 tệp', ket: SAI}

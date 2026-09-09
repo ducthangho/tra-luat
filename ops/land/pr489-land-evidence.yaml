@@ -240,21 +240,59 @@ no_con_lai:
     muc: 'nợ quy trình, không phải finding'
     ghi_chu: 'Head `efa397e` chưa có cross-review exact head. Xem `no_review_head_da_merge`.'
 
-chuoi_land_evidence_chua_co_diem_dung:
-  chuoi_hien_tai: '#468 → #478 → #486 → #487 → #489 → CHÍNH TỆP NÀY'
+chuoi_land_evidence_DA_DONG_THEO_QUYET_DINH_CHU_KHO:
+  chuoi_day_du: '#468 → #478 → #486 → #487 → #489 → #490 (CHÍNH TỆP NÀY) — DỪNG'
   mat_xich_thu: 6
-  van_de: >-
-    Không quy tắc nào trong kho nói chuỗi dừng ở đâu. Mỗi PR hồ sơ cần land evidence, mà land
-    evidence phải vào kho qua một PR, mà PR ấy lại cần land evidence. Chi phí mỗi mắt xích: một
-    lượt CI (~24 phút runner), một lượt duyệt của người khác, và ít nhất một lượt cross-review
-    (~16 phút và một hạn mức API).
-  dieu_phoi_KHONG_tu_quyet: >-
-    Câu hỏi này đã đặt cho chủ kho trong thân PR #489 và CHƯA có trả lời. Điều phối ghi tệp này
-    theo chỉ thị đứng sẵn *"merge, CI gate và land"*, KHÔNG tự đặt ra điều kiện dừng cho chuỗi.
-  huong_giai_kha_di_chua_duoc_duyet: >-
-    Một khả năng: `ADR` mới cho phép land evidence của PR hồ sơ THUẦN (không đụng mã sản phẩm)
-    được gộp vào PR hồ sơ KẾ TIẾP thay vì đòi PR riêng — chuỗi thành hữu hạn theo cấu trúc chứ
-    không theo kỷ luật. Đây là ĐỀ XUẤT, chưa đo, chưa duyệt.
+  mat_xich_thu_7: KHONG_TON_TAI
+  van_de_da_gay_ra_chuoi: >-
+    Mỗi PR hồ sơ cần land evidence, mà land evidence phải vào kho qua một PR, mà PR ấy lại cần
+    land evidence. Chi phí mỗi mắt xích ĐO ĐƯỢC: một lượt CI (~24 phút runner), một lượt duyệt
+    của người khác, và ít nhất một lượt cross-review (~16 phút cộng một hạn mức API).
+  quyet_dinh:
+    nguoi_quyet: ducthangho
+    ngay: '2026-09-09'
+    nguyen_van: 'merge #490, tôi cho phép land mà không cần CI, đóng chuỗi'
+    loai_nguon: >-
+      Chỉ thị trực tiếp trong phiên điều phối. KHÔNG có hiện vật GitHub cho câu này ⇒ ATTESTATION;
+      thứ ĐO ĐƯỢC là hệ quả của nó (merge commit của #490, và sự VẮNG MẶT của một PR land evidence
+      cho #490).
+  hai_dieu_duoc_mien:
+    - muc: 'CI cho bước land của #490'
+      pham_vi: >-
+        MIỄN. Không chờ và không đòi lượt CI nào cho việc land tệp này. Đây là mở rộng của quyết
+        định đã có từ trước trong phiên (bỏ chờ CI hậu-merge), nay áp cả cho tiền kiểm của #490.
+    - muc: 'PR land evidence cho chính #490'
+      pham_vi: >-
+        MIỄN. Chuỗi dừng tại đây; #490 KHÔNG sinh mắt xích thứ 7. `merged` của #490 là kết cục
+        cuối cùng của tuyến hồ sơ này.
+  cai_KHONG_duoc_mien: >-
+    Duyệt khác danh tính. Ràng buộc cứng của chủ kho — *"Merge chỉ khi: duyệt khác danh tính trên
+    ĐÚNG head + gate xanh + đã cross-review"* — nêu CI và duyệt là HAI điều kiện TÁCH BIỆT, nên
+    miễn CI KHÔNG miễn duyệt. Cổng `cong` (`.claude/dev/duyet_danh_tinh.py`) cưỡng chế đúng điều
+    kiện ấy và nó KHÔNG phải một cổng CI: nó không chạy test nào, chỉ đếm bản duyệt hợp lệ. Điều
+    phối KHÔNG tự nới nó, và KHÔNG dùng quyền admin để đi vòng.
+  he_qua_do_duoc_cua_viec_dong_chuoi: >-
+    KHÔNG cổng nào đỏ vì chuỗi dừng. Đo được: `rg -l "ops/land"` (trừ chính `ops/land` và
+    `ops/reviews`) ⇒ 2 tệp, cả hai là VĂN BẢN; `packet_loop.py` có 17 lệnh con và KHÔNG lệnh nào
+    kiểm land evidence — chuỗi `landed` chỉ xuất hiện trong 2 chuỗi MÔ TẢ danh sách trạng thái.
+    Thứ mất là cho NGƯỜI ĐỌC, không phải cho máy.
+  no_moi_sinh_ra_tu_quyet_dinh_nay:
+    slug: quyet-dinh-dong-chuoi-chua-vao-doctrine
+    mo_ta: >-
+      Quyết định này hiện CHỈ nằm trong tệp land evidence — mà `ADR-0034` vẫn định nghĩa `landed`
+      cần "bookkeeping", và KHÔNG tệp doctrine nào nói bookkeeping của một PR hồ sơ THUẦN được
+      miễn PR riêng. Phiên sau đọc `ADR-0034` hoặc `docs/PROTOCOL_DA_PHIEN.md` sẽ tái tạo chuỗi.
+    vi_sao_dang_ghi_thay_vi_lam_ngay: >-
+      Viết một ADR mới là hành vi QUẢN TRỊ (`ADR-0034` đòi impact analysis + human approval) và
+      kéo theo cập nhật bảng §20 kẻo `adr-song` ĐỎ. Chủ kho bảo "đóng chuỗi", KHÔNG bảo "viết
+      ADR". Điều phối làm đúng phần được giao và KHAI phần chưa làm, thay vì tự mở rộng phạm vi
+      vào chỗ doctrine. `CLAUDE.md` đã ghi: nơi các ca đi chết là prompt/README — nên nợ này được
+      ghi Ở ĐÂY chứ không chỉ trong hội thoại.
+    de_xuat_cu_the_cho_phien_sau: >-
+      `ADR-0046`: land evidence của PR hồ sơ THUẦN (write set chỉ chạm `ops/land/**` hoặc
+      `ops/reviews/**`, không chạm mã sản phẩm) được gộp vào PR hồ sơ KẾ TIẾP thay vì đòi PR
+      riêng. Chuỗi thành hữu hạn theo CẤU TRÚC, không theo kỷ luật — cùng cách chữa đã dùng cho
+      `shell_environment_policy` (bỏ hẳn đường ghi thay vì vá tiếp). Kèm một dòng trong bảng §20.
 
 khong_do_duoc:
   - muc: 'CI trên merge commit `c0a5cbe`'
@@ -270,4 +308,7 @@ khong_do_duoc:
       REST tới `repos/…` bị proxy chặn 403; đường MCP tự chuẩn hoá thực thể HTML ở trường thân
       issue/comment. Cần một client thứ hai để khẳng định byte — container này không có.
   - muc: 'Land evidence của CHÍNH tệp này'
-    ly_do: 'Mắt xích thứ 7 của chuỗi; chưa có quyết định của chủ kho về điểm dừng.'
+    ly_do: >-
+      KHÔNG TỒN TẠI theo quyết định của chủ kho ngày 2026-09-09 — xem
+      `chuoi_land_evidence_DA_DONG_THEO_QUYET_DINH_CHU_KHO`. Đây là mục CỐ Ý KHÔNG CÓ, khác hẳn
+      một mục chưa đo được.

@@ -1,0 +1,115 @@
+# LEASE — packet wp488 (slice A0 của THU-HOI-LEASE-VA-CAP-LAI), executor lượt 1.
+# Thẩm quyền cấp: chủ kho `ducthangho`, chỉ thị bền ở `granted_on_instruction`.
+# Hồ sơ do phiên điều phối (`claude`) SOẠN theo chỉ thị; phiên KHÔNG tự cấp cho mình —
+# `ops/lease_publish.py` chỉ nhận `NGUOI_CO_THAM_QUYEN = ("ducthangho",)`, TỪ CHỐI mọi tên provider.
+# Đảo vai có vết (ADR-0045/0046): phiên soạn spec PR #475 được chủ kho chỉ định làm executor A0.
+schema_version: 2
+event: executor_lease_granted
+
+packet_issue: 488
+mission_issue: null
+granted_by: ducthangho
+granted_on_instruction: 'https://github.com/ducthangho/tra-luat/issues/488#issuecomment-5604451242'
+leased_at_utc: '2026-09-09T15:35:37Z'
+lease_expires_at_utc: '2026-09-10T15:35:37Z'
+
+packet_id: wp488
+packet_alias: THU-HOI-LEASE-VA-CAP-LAI-A0
+revision: 9
+generation: 1
+lease_id: wp488-thu-hoi-lease-a0-exec-1-claude-20260909
+role: executor
+provider: claude
+executor: claude
+model: fable-5.1
+effort: xhigh
+reviewer_model: gpt-6-astra
+reviewer_effort: xhigh
+reviewer_hint_patch: true
+environment: cloud
+risk: sensitive
+assurance_target: cross_approved
+access: read-write
+
+# Spec r9 nằm trên nhánh PR #475 (commit 5ff6cd5) — CHƯA ở master; bản sao byte-identical đi kèm nhánh lease này.
+spec_path: ops/specs/THU-HOI-LEASE-VA-CAP-LAI.md
+spec_sha256: 465538364b1a3f9477782fba79869bbd1c9351140e3fa9df50451baae22f9c79
+spec_hash: 465538364b1a3f9477782fba79869bbd1c9351140e3fa9df50451baae22f9c79
+adr_path: docs/adr/0047-nguon-tin-cay-cho-cong-doc-lease.md
+adr_sha256: b9975929c52e12767417b46b47829c265230117fe65df6a9fd22540d4868fdab
+
+# Exact set slice A0 của spec r9. `ai-dang-giu` cả ba đường, 15:29Z 09-09-2026: NGƯỜI_GIỮ 0
+# (tập tên ls-remote vs for-each-ref 314/314, lệch 0/0). KHÔNG chạm .claude/dev/packet_loop.py (slice B),
+# ops/thu-hoi/ (slice C), .claude/skills/land-packets (dependency LAND-DOC-RECEIPT-THU-HOI, packet riêng).
+write_set:
+  - .github/workflows/ops-thu-hoi-admission.yml
+  - ops/lease_publish.py
+  - ops/lease_publish_test.py
+depends_on: []
+# Nghĩa vụ LAND (không phải điều kiện bắt đầu): consumer receipt M9 phải land trước cửa sổ bootstrap A0.
+land_obligations:
+  - LAND-DOC-RECEIPT-THU-HOI
+
+branch: claude/thu-hoi-lease-a0
+branch_ownership: exclusive
+target_branch_neu_land: master
+
+# Ba mỏ neo = head `master` tại giờ cấp (đo `git rev-parse origin/master` lúc 15:29Z 09-09-2026).
+# ops/lease_publish.py KHÔNG đổi giữa b416830 (base_sha của spec) và c0a5cbe.
+base_sha: c0a5cbe89a90588115262e1a2c3ac84cbd98be9e
+start_from_sha: c0a5cbe89a90588115262e1a2c3ac84cbd98be9e
+reviewed_sha_required: c0a5cbe89a90588115262e1a2c3ac84cbd98be9e
+
+authority_basis: '§2 — start/pause/resume/reroute/override/authorize thuộc chủ kho'
+recorded_by: claude-session
+recorder_is_dispatcher: false
+
+run_minutes: 1440
+# sha256 của các đường write_set đã sort, nối bằng LF, có LF cuối.
+write_set_hash: 1bc9d9fc271a98ced6512eda506f0802baab230f650726b334b0bd2ce234edca
+heartbeat_at: '2026-09-09T15:35:37Z'
+lease_until: '2026-09-10T15:35:37Z'
+heartbeat_required_minutes: 30
+attempts_used: 0
+attempts_limit: 3
+
+reviewer_provider: codex
+review_class: sensitive
+effective_review_class: sensitive
+
+thay_the_cho: []
+
+ly_do_cap: >-
+  Thu hồi lease hôm nay chỉ có bia mộ hai chiều ghi vào TỆP CŨ có bản sao trên nhiều ref: lease r2 của
+  wp461 sống trên 9 ref (đo 08-09-2026, map 310 ref), bia mộ chỉ trên 1; tiền lệ #456 sống trên 14 ref.
+  `_kiem_bia_mo` dùng `any(...)` nên `check` vẫn rc=0; `kiem()` gọi `_lease_cham_duong` 0 lần.
+  Spec r9 (8 lượt cross-review, 9 lời gọi, P1: 11→…→0; lượt 8 đọc đúng r9 + ADR-0047: 0 P1) đóng băng
+  sổ thu hồi append-only ops/thu-hoi/ trên trunk với cổng tiếp nhận chạy mã canonical và cổng đọc theo
+  ADR-0047 (danh tính ghim · nền thực thi được duyệt · toàn vẹn object băm lại). A0 cài MỌI THỨ ở chế độ
+  CHƯA KÍCH HOẠT: verdict sản phẩm = luật cũ; luật mới chỉ chạy ở hàm dự báo.
+
+viec_trong_lease:
+  - 'M1: schema + parser bản ghi lease_revoked (hợp đồng r3) + đúng MỘT path metadata reserved
+     ops/thu-hoi/_ngoai-le-closure.retired.yaml (6 khoá, 100644); dispatcher schema toàn namespace; ba trạng thái.'
+  - 'Adapter nguồn Q4/ADR-0047: KHO_CANONICAL ghim; env con từ RỖNG; ls-remote --symref qua endpoint tường minh;
+     profile digest so PROFILE_ADAPTER_DA_DUYET (fixture; production = quyết định chủ kho); object-store cô lập
+     (GIT_DIR tạm + GIT_OBJECT_DIRECTORY giải bằng API Git), băm lại mọi object, cạnh từ bytes đã băm, ngân sách có đơn vị.'
+  - 'M2/M3: ai-dang-giu áp sổ theo lease_id + MAP_REF + --nhanh-mac-dinh + --du-bao; check ở chế độ chưa kích hoạt =
+     luật cũ + DU_BAO; SO_THU_HOI_KICH_HOAT = False; sổ không rỗng khi cờ False ⇒ 12.'
+  - 'M4: lệnh kiem-thu-hoi-github <H> --canonical-base <S> --nhanh-mac-dinh <tên>: ancestry S→H tự đi đồ thị,
+     T=tree(H), map path→(mode,type,blob) append-only, M1/Q13 toàn namespace T, receipt S/H/T; chế độ chưa kích hoạt
+     đòi tập revocation RỖNG ở S và T.'
+  - 'M9: workflow ops-thu-hoi-admission.yml (pull_request_target, KHÔNG workflow_dispatch, checkout exact S, fetch H,
+     artifact receipt thu-hoi-receipt-<H>-<attempt>, permissions tối thiểu) — cài, CHƯA kích hoạt; actionlint+shellcheck rc=0.'
+  - 'M6: ca A1–A9, A11–A12 theo spec nghiem_thu + catalog mutant ghi SEAM/chốt che (A6/A12); ca âm nguồn do điều phối dựng.'
+  - 'A11: hai vế một lệnh, delta theo tên; nền lease_publish_test 121/121 (wrapper AL_VER=1.7.7); doc-claims-check
+     --strict ok:true; doctrine-scan 0; numstat từng path so ước 560–780 (ước trước vá lượt 6 — đo lại, khai ngoại lệ ADR-0044 nếu vượt).'
+
+dieu_kien_dung:
+  - 'Đặt SO_THU_HOI_KICH_HOAT = True hay đổi verdict sản phẩm của check/ai-dang-giu — đó là slice A1.'
+  - 'Chạm .claude/dev/packet_loop.py (slice B), ops/thu-hoi/ (slice C), .claude/skills/land-packets (packet riêng),
+     ops-publish-lease.yml, ci.yml timeout-minutes.'
+  - 'Thêm cờ/biến môi trường production đổi được KHO_CANONICAL, profile hay object-store — fixture chỉ qua API nội bộ.'
+  - 'Tự đăng ký PROFILE_ADAPTER_DA_DUYET từ deployment đang chạy rồi coi là đã duyệt — production profile là quyết định chủ kho.'
+  - 'Khai mutant "chết" ở ca mà lớp khác che (S3) — catalog phải ghi SỐNG kèm seam.'
+  - 'Spec r9 thiếu ⇒ verdict blocked + revision (§3.2), không tự mở write set.'

@@ -1,0 +1,102 @@
+# BIÊN NHẬN GIAO HÀNG — cross-review LƯỢT 1 của PR #490, KHÁC NỀN (codex).
+#
+# Verdict: changes_requested — 0 P1 / 1 P2 / 3 P3.
+#
+# NHIỆM VỤ CỦA LƯỢT: Kiểm 5 finding của Codex connector mà điều phối đã chấp nhận.
+#
+# Bốn biên nhận `pr490-review-*` được viết CÙNG MỘT LÚC sau lượt 4, không phải ngay sau từng
+# lượt. Lý do đáng ghi: điều phối hoãn việc này bốn lượt liền, và cổng `t27` trong
+# `ops/lease_publish_test.py` BẮT ĐƯỢC — "verdict không biên nhận là verdict không ai khai đã
+# đăng ở đâu". Nó đỏ trên CI (`gate (ubuntu-latest)`, head `c42fc74`) trong khi bốn cổng điều
+# phối vẫn chạy tại chỗ (`bien_nhan_v2` · `doctrine-scan` · `adr-song` · `doc-claims-check`)
+# đều XANH — tức tập cổng chạy tại chỗ của điều phối THIẾU `lease_publish`, và cái thiếu ấy
+# che đúng lớp lỗi này. Mọi scalar dưới đây đọc từ `run.json`, không gõ tay.
+
+schema_version: 2
+receipt_id: pr490-review-1-codex-20260909-763dae81
+kind: review_delivery_receipt
+packet_id: 'PR490-LAND-EVIDENCE-489'
+lease_id: khong-co-lease
+phase_key: HO-SO-CROSS-REVIEW-PHIEN-20260909
+luot: 1
+role: reviewer
+provider: codex
+executor_provider: claude
+cross_provider: true
+assurance: cross_reviewed
+verdict: changes_requested
+verdict_path: ops/reviews/pr490-review-1-codex-verdict.md
+verdict_sha256: e81e5e3198b6143e27b36e8ea4776e8420a40004982e76a7faba34a24ae73d97
+verdict_bytes: 29710
+reviewed_sha: 9238606b21344fedae8d9c191834193b4bbee582
+evidence_url: https://github.com/ducthangho/tra-luat/blob/63c639ac1604f7c6bb8b734a556bdf68891f8046/ops/reviews/pr490-review-1-codex-verdict.md
+evidence_url_ghi_chu: >-
+  Neo BLOB ghim `63c639a` — commit ĐẦU TIÊN chứa tệp verdict, đo bằng
+  `git log --all --diff-filter=A -- <path>`, trả ĐÚNG 1 commit.
+so_p1: 0
+so_p2: 1
+so_p3: 3
+
+doi_chieu_luot_truoc: '3 ĐÃ VÁ THẬT · 1 VÁ SINH LỖI MỚI · 1 VÁ HỜ · 0 CHƯA VÁ (5/5 slug)'
+diem_noi_bat: >-
+  Reviewer TỰ QUÉT DOCTRINE độc lập — 76/76 tệp tracked dưới `docs/` — và xác nhận KHÔNG câu nào buộc chính hồ sơ evidence sinh PR kế nhiệm. Nó phân biệt đúng `ADR-0027:15` (draft land PR CỦA MISSION) với PR kế nhiệm CHO BẢN GHI EVIDENCE.
+
+model_reviewer_identity:
+  provider: openai_codex
+  surface: codex_cli
+  model_yeu_cau: gpt-6-astra
+  model_da_chay: KHONG_DO_DUOC
+  session_run_id: 763dae81
+  run_id_day_du: 763dae81ebce47b097b4511396620943
+  prompt_sha256: f469f8287ab6adfb798c563f0ef542442705d83de06c67fc138500d9840f58de
+  bat_dau_utc: '2026-09-09T15:38:43.053123+00:00'
+  ket_thuc_utc: '2026-09-09T15:58:55.753602+00:00'
+  thoi_luong_giay: 1212.7
+  ma_thoat: 0
+  trang_thai: xong
+  stdout_byte: 269
+  stdout_sha256: 5f3ded618633c38c9c0b1b6695a5497c0d4b8b26d54cf03951d84bd681902133
+  stderr_byte: 1486780
+  stderr_sha256: 0ea1a706fa573de199b3fc06e3e2b812856503b35c830facf4c4239cb4db728c
+  so_lan_chet_truoc_khi_xong: 0
+  nguon_cac_scalar_tren: 'Đọc từ `run.json` trong scratchpad; tệp ấy KHÔNG vào kho ⇒ ATTESTATION.'
+  neo_boi_launcher: >-
+    `launcher.py run --expected-repo github.com/ducthangho/tra-luat --expected-root-commit
+    394e93468fc8d84ec20938e6df8fb7ab72b2cc37 --expected-head 9238606b21344fedae8d9c191834193b4bbee582
+    --require-clean --prompt-file PROMPT.md --expected-prompt-sha256 f469f828…` bọc `codex exec`.
+
+nang_luc_do_cua_goi:
+  so_ref: 314
+  lech: 0
+  kho_nong: false
+  chua_do_duoc: 'Không mạng: mọi khẳng định về GitHub API/CI là KHÔNG ĐO ĐƯỢC.'
+
+hien_vat_reviewer_vao_kho:
+  duong_dan: 'ops/reviews/pr490-review-1-phep-do/ — schema.json · source-boundaries.json · additional.json'
+  doi_chieu_nguyen_byte: '`cmp` giữa gói và bản trong kho: KHỚP, 0 tệp lệch.'
+
+tuan_thu_cam_cua_reviewer:
+  cay_kho_sach: true
+  commit_them_ngoai_head: 0
+  bang_chung: '`status --porcelain` RỖNG và `log 9238606..HEAD` RỖNG sau khi lượt kết thúc.'
+
+manifest:
+  duong_dan: KHONG_CO_TRONG_KHO
+  ghi_chu: 'Hiện vật gói (mirror 314 ref) CỐ Ý không vào kho; riêng các tệp đo ở trên thì CÓ.'
+
+github_submitter_identity:
+  actor: ducthangho
+  la_tac_gia_PR: true
+  ghi_chu: '`ADR-0040`: verdict do tài khoản tác giả PR vận chuyển KHÔNG là merge authorization.'
+  phien_van_chuyen: https://claude.ai/code/session_01UN8WRS5Bc5pBBzYPDqs9Dx
+
+anchor:
+  loai: canonical_ancestry
+  cuong_do: cao
+  mo_ta: 'Blob verdict ghim `63c639a` trên nhánh `claude/handoff-tra-luat-repo-2ak5th`.'
+  gioi_han: 'Chỉ vững nếu land bằng MERGE hoặc fast-forward; SQUASH phá quan hệ tổ tiên.'
+
+khong_do_duoc:
+  - 'Model đã phục vụ và `thread_id`.'
+  - '`run.json` không vào kho ⇒ scalar runtime là attestation.'
+  - 'Trạng thái GitHub tại thời điểm reviewer đọc: sandbox không mạng.'

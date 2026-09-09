@@ -1,0 +1,822 @@
+[
+  {
+    "file": "ops/reviews/pr490-review-1-codex-verdict.receipt.yaml",
+    "checks": [
+      {
+        "field": "verdict_sha256",
+        "claimed": "e81e5e3198b6143e27b36e8ea4776e8420a40004982e76a7faba34a24ae73d97",
+        "measured": "e81e5e3198b6143e27b36e8ea4776e8420a40004982e76a7faba34a24ae73d97",
+        "match": true
+      },
+      {
+        "field": "verdict_bytes",
+        "claimed": 29710,
+        "measured": 29710,
+        "match": true
+      },
+      {
+        "field": "reviewed_sha",
+        "claimed": "9238606b21344fedae8d9c191834193b4bbee582",
+        "measured": "9238606b21344fedae8d9c191834193b4bbee582",
+        "match": true
+      },
+      {
+        "field": "verdict",
+        "claimed": "changes_requested",
+        "measured": "changes_requested",
+        "match": true
+      },
+      {
+        "field": "evidence_url",
+        "claimed": "https://github.com/ducthangho/tra-luat/blob/63c639ac1604f7c6bb8b734a556bdf68891f8046/ops/reviews/pr490-review-1-codex-verdict.md",
+        "measured": "https://github.com/ducthangho/tra-luat/blob/63c639ac1604f7c6bb8b734a556bdf68891f8046/ops/reviews/pr490-review-1-codex-verdict.md",
+        "match": true
+      },
+      {
+        "field": "so_p1",
+        "claimed": 0,
+        "measured": 0,
+        "match": true
+      },
+      {
+        "field": "so_p2",
+        "claimed": 1,
+        "measured": 1,
+        "match": true
+      },
+      {
+        "field": "so_p3",
+        "claimed": 3,
+        "measured": 3,
+        "match": true
+      }
+    ],
+    "headings": [
+      [
+        "ket-qua-con-thieu-trang-thai",
+        "P2"
+      ],
+      [
+        "ly-do-hau-kiem-van-tu-sinh-chuoi",
+        "P3"
+      ],
+      [
+        "bookkeeping-tro-sai-khoa-cross-review",
+        "P3"
+      ],
+      [
+        "van-xuoi-do-duoc-van-vuot-nguon",
+        "P3"
+      ]
+    ],
+    "first_add_commits": [
+      "63c639ac1604f7c6bb8b734a556bdf68891f8046"
+    ],
+    "verdict_same_as_first_add": true,
+    "identity": {
+      "provider": "openai_codex",
+      "surface": "codex_cli",
+      "model_yeu_cau": "gpt-6-astra",
+      "model_da_chay": "KHONG_DO_DUOC",
+      "session_run_id": "763dae81",
+      "run_id_day_du": "763dae81ebce47b097b4511396620943",
+      "prompt_sha256": "f469f8287ab6adfb798c563f0ef542442705d83de06c67fc138500d9840f58de",
+      "bat_dau_utc": "2026-09-09T15:38:43.053123+00:00",
+      "ket_thuc_utc": "2026-09-09T15:58:55.753602+00:00",
+      "thoi_luong_giay": 1212.7,
+      "ma_thoat": 0,
+      "trang_thai": "xong",
+      "stdout_byte": 269,
+      "stdout_sha256": "5f3ded618633c38c9c0b1b6695a5497c0d4b8b26d54cf03951d84bd681902133",
+      "stderr_byte": 1486780,
+      "stderr_sha256": "0ea1a706fa573de199b3fc06e3e2b812856503b35c830facf4c4239cb4db728c",
+      "so_lan_chet_truoc_khi_xong": 0,
+      "nguon_cac_scalar_tren": "Đọc từ `run.json` trong scratchpad; tệp ấy KHÔNG vào kho ⇒ ATTESTATION.",
+      "neo_boi_launcher": "`launcher.py run --expected-repo github.com/ducthangho/tra-luat --expected-root-commit 394e93468fc8d84ec20938e6df8fb7ab72b2cc37 --expected-head 9238606b21344fedae8d9c191834193b4bbee582 --require-clean --prompt-file PROMPT.md --expected-prompt-sha256 f469f828…` bọc `codex exec`."
+    },
+    "duration_arithmetic": 1212.700479,
+    "duration_round3": 1212.7,
+    "duration_round3_matches": true,
+    "source": "Đọc từ `run.json` trong scratchpad; tệp ấy KHÔNG vào kho ⇒ ATTESTATION.",
+    "numeric_leaves": [
+      {
+        "path": "$.schema_version",
+        "value": 2
+      },
+      {
+        "path": "$.luot",
+        "value": 1
+      },
+      {
+        "path": "$.cross_provider",
+        "value": true
+      },
+      {
+        "path": "$.verdict_bytes",
+        "value": 29710
+      },
+      {
+        "path": "$.so_p1",
+        "value": 0
+      },
+      {
+        "path": "$.so_p2",
+        "value": 1
+      },
+      {
+        "path": "$.so_p3",
+        "value": 3
+      },
+      {
+        "path": "$.model_reviewer_identity.thoi_luong_giay",
+        "value": 1212.7
+      },
+      {
+        "path": "$.model_reviewer_identity.ma_thoat",
+        "value": 0
+      },
+      {
+        "path": "$.model_reviewer_identity.stdout_byte",
+        "value": 269
+      },
+      {
+        "path": "$.model_reviewer_identity.stderr_byte",
+        "value": 1486780
+      },
+      {
+        "path": "$.model_reviewer_identity.so_lan_chet_truoc_khi_xong",
+        "value": 0
+      },
+      {
+        "path": "$.nang_luc_do_cua_goi.so_ref",
+        "value": 314
+      },
+      {
+        "path": "$.nang_luc_do_cua_goi.lech",
+        "value": 0
+      },
+      {
+        "path": "$.nang_luc_do_cua_goi.kho_nong",
+        "value": false
+      },
+      {
+        "path": "$.tuan_thu_cam_cua_reviewer.cay_kho_sach",
+        "value": true
+      },
+      {
+        "path": "$.tuan_thu_cam_cua_reviewer.commit_them_ngoai_head",
+        "value": 0
+      },
+      {
+        "path": "$.github_submitter_identity.la_tac_gia_PR",
+        "value": true
+      }
+    ]
+  },
+  {
+    "file": "ops/reviews/pr490-review-2-codex-verdict.receipt.yaml",
+    "checks": [
+      {
+        "field": "verdict_sha256",
+        "claimed": "7fe26df83c910738f954326ee8d9dd892fe6823aab6d68c8fcbd37d6fee4fffe",
+        "measured": "7fe26df83c910738f954326ee8d9dd892fe6823aab6d68c8fcbd37d6fee4fffe",
+        "match": true
+      },
+      {
+        "field": "verdict_bytes",
+        "claimed": 26633,
+        "measured": 26633,
+        "match": true
+      },
+      {
+        "field": "reviewed_sha",
+        "claimed": "63c639ac1604f7c6bb8b734a556bdf68891f8046",
+        "measured": "63c639ac1604f7c6bb8b734a556bdf68891f8046",
+        "match": true
+      },
+      {
+        "field": "verdict",
+        "claimed": "changes_requested",
+        "measured": "changes_requested",
+        "match": true
+      },
+      {
+        "field": "evidence_url",
+        "claimed": "https://github.com/ducthangho/tra-luat/blob/f7872ac6876b0675ae549dfac279ef238b24d58d/ops/reviews/pr490-review-2-codex-verdict.md",
+        "measured": "https://github.com/ducthangho/tra-luat/blob/f7872ac6876b0675ae549dfac279ef238b24d58d/ops/reviews/pr490-review-2-codex-verdict.md",
+        "match": true
+      },
+      {
+        "field": "so_p1",
+        "claimed": 0,
+        "measured": 0,
+        "match": true
+      },
+      {
+        "field": "so_p2",
+        "claimed": 0,
+        "measured": 0,
+        "match": true
+      },
+      {
+        "field": "so_p3",
+        "claimed": 1,
+        "measured": 1,
+        "match": true
+      }
+    ],
+    "headings": [
+      [
+        "van-xuoi-do-duoc-van-vuot-nguon",
+        "P3"
+      ]
+    ],
+    "first_add_commits": [
+      "f7872ac6876b0675ae549dfac279ef238b24d58d"
+    ],
+    "verdict_same_as_first_add": true,
+    "identity": {
+      "provider": "openai_codex",
+      "surface": "codex_cli",
+      "model_yeu_cau": "gpt-6-astra",
+      "model_da_chay": "KHONG_DO_DUOC",
+      "session_run_id": "b71b7487",
+      "run_id_day_du": "b71b74871ee34be9a8b2d4910c437f0b",
+      "prompt_sha256": "902549d01609b6279d8896db20d0a66c2a8dbd237be9598ed4f0b38a279e4d8b",
+      "bat_dau_utc": "2026-09-09T16:05:41.611106+00:00",
+      "ket_thuc_utc": "2026-09-09T16:21:35.139646+00:00",
+      "thoi_luong_giay": 953.529,
+      "ma_thoat": 0,
+      "trang_thai": "xong",
+      "stdout_byte": 275,
+      "stdout_sha256": "480a22016f01dbc926b12014799aef9555a946a550ebbec69324285123350c85",
+      "stderr_byte": 1358140,
+      "stderr_sha256": "4fb1247c30a18c2854d45cd2ac9c370e07263357d603444cedd1beb8e020c7e0",
+      "so_lan_chet_truoc_khi_xong": 0,
+      "nguon_cac_scalar_tren": "Đọc từ `run.json` trong scratchpad; tệp ấy KHÔNG vào kho ⇒ ATTESTATION.",
+      "neo_boi_launcher": "`launcher.py run --expected-repo github.com/ducthangho/tra-luat --expected-root-commit 394e93468fc8d84ec20938e6df8fb7ab72b2cc37 --expected-head 63c639ac1604f7c6bb8b734a556bdf68891f8046 --require-clean --prompt-file PROMPT.md --expected-prompt-sha256 902549d0…` bọc `codex exec`."
+    },
+    "duration_arithmetic": 953.52854,
+    "duration_round3": 953.529,
+    "duration_round3_matches": true,
+    "source": "Đọc từ `run.json` trong scratchpad; tệp ấy KHÔNG vào kho ⇒ ATTESTATION.",
+    "numeric_leaves": [
+      {
+        "path": "$.schema_version",
+        "value": 2
+      },
+      {
+        "path": "$.luot",
+        "value": 2
+      },
+      {
+        "path": "$.cross_provider",
+        "value": true
+      },
+      {
+        "path": "$.verdict_bytes",
+        "value": 26633
+      },
+      {
+        "path": "$.so_p1",
+        "value": 0
+      },
+      {
+        "path": "$.so_p2",
+        "value": 0
+      },
+      {
+        "path": "$.so_p3",
+        "value": 1
+      },
+      {
+        "path": "$.model_reviewer_identity.thoi_luong_giay",
+        "value": 953.529
+      },
+      {
+        "path": "$.model_reviewer_identity.ma_thoat",
+        "value": 0
+      },
+      {
+        "path": "$.model_reviewer_identity.stdout_byte",
+        "value": 275
+      },
+      {
+        "path": "$.model_reviewer_identity.stderr_byte",
+        "value": 1358140
+      },
+      {
+        "path": "$.model_reviewer_identity.so_lan_chet_truoc_khi_xong",
+        "value": 0
+      },
+      {
+        "path": "$.nang_luc_do_cua_goi.so_ref",
+        "value": 315
+      },
+      {
+        "path": "$.nang_luc_do_cua_goi.lech",
+        "value": 0
+      },
+      {
+        "path": "$.nang_luc_do_cua_goi.kho_nong",
+        "value": false
+      },
+      {
+        "path": "$.tuan_thu_cam_cua_reviewer.cay_kho_sach",
+        "value": true
+      },
+      {
+        "path": "$.tuan_thu_cam_cua_reviewer.commit_them_ngoai_head",
+        "value": 0
+      },
+      {
+        "path": "$.github_submitter_identity.la_tac_gia_PR",
+        "value": true
+      }
+    ]
+  },
+  {
+    "file": "ops/reviews/pr490-review-3-codex-verdict.receipt.yaml",
+    "checks": [
+      {
+        "field": "verdict_sha256",
+        "claimed": "c198b7364ca3a63d95bcf2ec800cecd01774842f3720710ee7aa3a2f01fd1ad4",
+        "measured": "c198b7364ca3a63d95bcf2ec800cecd01774842f3720710ee7aa3a2f01fd1ad4",
+        "match": true
+      },
+      {
+        "field": "verdict_bytes",
+        "claimed": 31388,
+        "measured": 31388,
+        "match": true
+      },
+      {
+        "field": "reviewed_sha",
+        "claimed": "f7872ac6876b0675ae549dfac279ef238b24d58d",
+        "measured": "f7872ac6876b0675ae549dfac279ef238b24d58d",
+        "match": true
+      },
+      {
+        "field": "verdict",
+        "claimed": "changes_requested",
+        "measured": "changes_requested",
+        "match": true
+      },
+      {
+        "field": "evidence_url",
+        "claimed": "https://github.com/ducthangho/tra-luat/blob/c42fc74cca04720627836e187f81a71ab44e9b76/ops/reviews/pr490-review-3-codex-verdict.md",
+        "measured": "https://github.com/ducthangho/tra-luat/blob/c42fc74cca04720627836e187f81a71ab44e9b76/ops/reviews/pr490-review-3-codex-verdict.md",
+        "match": true
+      },
+      {
+        "field": "so_p1",
+        "claimed": 0,
+        "measured": 0,
+        "match": true
+      },
+      {
+        "field": "so_p2",
+        "claimed": 0,
+        "measured": 0,
+        "match": true
+      },
+      {
+        "field": "so_p3",
+        "claimed": 1,
+        "measured": 1,
+        "match": true
+      }
+    ],
+    "headings": [
+      [
+        "van-xuoi-do-duoc-van-vuot-nguon",
+        "P3"
+      ]
+    ],
+    "first_add_commits": [
+      "c42fc74cca04720627836e187f81a71ab44e9b76"
+    ],
+    "verdict_same_as_first_add": true,
+    "identity": {
+      "provider": "openai_codex",
+      "surface": "codex_cli",
+      "model_yeu_cau": "gpt-6-astra",
+      "model_da_chay": "KHONG_DO_DUOC",
+      "session_run_id": "a13d62b1",
+      "run_id_day_du": "a13d62b1f0134536814ec59d4c315cec",
+      "prompt_sha256": "b9e37d76ad7f82003401508420a3cb2cf57a7c6f85c4a57cb9a83772be19eac9",
+      "bat_dau_utc": "2026-09-09T16:24:30.390992+00:00",
+      "ket_thuc_utc": "2026-09-09T16:43:18.656829+00:00",
+      "thoi_luong_giay": 1128.266,
+      "ma_thoat": 0,
+      "trang_thai": "xong",
+      "stdout_byte": 292,
+      "stdout_sha256": "fb2c8c132ccf2dcfcb3e1be348913473ac96a2f9c4d36f8882bc3813b6207a59",
+      "stderr_byte": 1738059,
+      "stderr_sha256": "3d2a12f294b0776387bdd1913b864f91684e542c0ddfb9b2b1c3b197b5826285",
+      "so_lan_chet_truoc_khi_xong": 0,
+      "nguon_cac_scalar_tren": "Đọc từ `run.json` trong scratchpad; tệp ấy KHÔNG vào kho ⇒ ATTESTATION.",
+      "neo_boi_launcher": "`launcher.py run --expected-repo github.com/ducthangho/tra-luat --expected-root-commit 394e93468fc8d84ec20938e6df8fb7ab72b2cc37 --expected-head f7872ac6876b0675ae549dfac279ef238b24d58d --require-clean --prompt-file PROMPT.md --expected-prompt-sha256 b9e37d76…` bọc `codex exec`."
+    },
+    "duration_arithmetic": 1128.265837,
+    "duration_round3": 1128.266,
+    "duration_round3_matches": true,
+    "source": "Đọc từ `run.json` trong scratchpad; tệp ấy KHÔNG vào kho ⇒ ATTESTATION.",
+    "numeric_leaves": [
+      {
+        "path": "$.schema_version",
+        "value": 2
+      },
+      {
+        "path": "$.luot",
+        "value": 3
+      },
+      {
+        "path": "$.cross_provider",
+        "value": true
+      },
+      {
+        "path": "$.verdict_bytes",
+        "value": 31388
+      },
+      {
+        "path": "$.so_p1",
+        "value": 0
+      },
+      {
+        "path": "$.so_p2",
+        "value": 0
+      },
+      {
+        "path": "$.so_p3",
+        "value": 1
+      },
+      {
+        "path": "$.model_reviewer_identity.thoi_luong_giay",
+        "value": 1128.266
+      },
+      {
+        "path": "$.model_reviewer_identity.ma_thoat",
+        "value": 0
+      },
+      {
+        "path": "$.model_reviewer_identity.stdout_byte",
+        "value": 292
+      },
+      {
+        "path": "$.model_reviewer_identity.stderr_byte",
+        "value": 1738059
+      },
+      {
+        "path": "$.model_reviewer_identity.so_lan_chet_truoc_khi_xong",
+        "value": 0
+      },
+      {
+        "path": "$.nang_luc_do_cua_goi.so_ref",
+        "value": 316
+      },
+      {
+        "path": "$.nang_luc_do_cua_goi.lech",
+        "value": 0
+      },
+      {
+        "path": "$.nang_luc_do_cua_goi.kho_nong",
+        "value": false
+      },
+      {
+        "path": "$.tuan_thu_cam_cua_reviewer.cay_kho_sach",
+        "value": true
+      },
+      {
+        "path": "$.tuan_thu_cam_cua_reviewer.commit_them_ngoai_head",
+        "value": 0
+      },
+      {
+        "path": "$.github_submitter_identity.la_tac_gia_PR",
+        "value": true
+      }
+    ]
+  },
+  {
+    "file": "ops/reviews/pr490-review-4-codex-verdict.receipt.yaml",
+    "checks": [
+      {
+        "field": "verdict_sha256",
+        "claimed": "1538dd59491b6253379067cbca7eb84add6b441e1d688d09da481f6ee6a14fc9",
+        "measured": "1538dd59491b6253379067cbca7eb84add6b441e1d688d09da481f6ee6a14fc9",
+        "match": true
+      },
+      {
+        "field": "verdict_bytes",
+        "claimed": 56281,
+        "measured": 56281,
+        "match": true
+      },
+      {
+        "field": "reviewed_sha",
+        "claimed": "c42fc74cca04720627836e187f81a71ab44e9b76",
+        "measured": "c42fc74cca04720627836e187f81a71ab44e9b76",
+        "match": true
+      },
+      {
+        "field": "verdict",
+        "claimed": "changes_requested",
+        "measured": "changes_requested",
+        "match": true
+      },
+      {
+        "field": "evidence_url",
+        "claimed": "https://github.com/ducthangho/tra-luat/blob/dccce0a54efdd687c20e128b64de1e355089c261/ops/reviews/pr490-review-4-codex-verdict.md",
+        "measured": "https://github.com/ducthangho/tra-luat/blob/dccce0a54efdd687c20e128b64de1e355089c261/ops/reviews/pr490-review-4-codex-verdict.md",
+        "match": true
+      },
+      {
+        "field": "so_p1",
+        "claimed": 0,
+        "measured": 0,
+        "match": true
+      },
+      {
+        "field": "so_p2",
+        "claimed": 0,
+        "measured": 0,
+        "match": true
+      },
+      {
+        "field": "so_p3",
+        "claimed": 1,
+        "measured": 1,
+        "match": true
+      }
+    ],
+    "headings": [
+      [
+        "van-xuoi-do-duoc-van-vuot-nguon",
+        "P3"
+      ]
+    ],
+    "first_add_commits": [
+      "dccce0a54efdd687c20e128b64de1e355089c261"
+    ],
+    "verdict_same_as_first_add": true,
+    "identity": {
+      "provider": "openai_codex",
+      "surface": "codex_cli",
+      "model_yeu_cau": "gpt-6-astra",
+      "model_da_chay": "KHONG_DO_DUOC",
+      "session_run_id": "7bcecfbe",
+      "run_id_day_du": "7bcecfbe26e34298ac7975d4256c5bdb",
+      "prompt_sha256": "1774b882ef914e761cac9af9ba9a314d908390ec39da55a685a60cabfe95e5e6",
+      "bat_dau_utc": "2026-09-09T16:46:27.189145+00:00",
+      "ket_thuc_utc": "2026-09-09T17:07:10.153444+00:00",
+      "thoi_luong_giay": 1242.964,
+      "ma_thoat": 0,
+      "trang_thai": "xong",
+      "stdout_byte": 308,
+      "stdout_sha256": "4441939ed238aa79f9b52ef87a9cfd429dd4b6a8ee01d3f977ccd0d399b482e6",
+      "stderr_byte": 2052295,
+      "stderr_sha256": "740fe34c62f6c4945eaceca46ece4734d087de45fd691db3aeb56ac6f03c1d92",
+      "so_lan_chet_truoc_khi_xong": 0,
+      "nguon_cac_scalar_tren": "Đọc từ `run.json` trong scratchpad; tệp ấy KHÔNG vào kho ⇒ ATTESTATION.",
+      "neo_boi_launcher": "`launcher.py run --expected-repo github.com/ducthangho/tra-luat --expected-root-commit 394e93468fc8d84ec20938e6df8fb7ab72b2cc37 --expected-head c42fc74cca04720627836e187f81a71ab44e9b76 --require-clean --prompt-file PROMPT.md --expected-prompt-sha256 1774b882…` bọc `codex exec`."
+    },
+    "duration_arithmetic": 1242.964299,
+    "duration_round3": 1242.964,
+    "duration_round3_matches": true,
+    "source": "Đọc từ `run.json` trong scratchpad; tệp ấy KHÔNG vào kho ⇒ ATTESTATION.",
+    "numeric_leaves": [
+      {
+        "path": "$.schema_version",
+        "value": 2
+      },
+      {
+        "path": "$.luot",
+        "value": 4
+      },
+      {
+        "path": "$.cross_provider",
+        "value": true
+      },
+      {
+        "path": "$.verdict_bytes",
+        "value": 56281
+      },
+      {
+        "path": "$.so_p1",
+        "value": 0
+      },
+      {
+        "path": "$.so_p2",
+        "value": 0
+      },
+      {
+        "path": "$.so_p3",
+        "value": 1
+      },
+      {
+        "path": "$.model_reviewer_identity.thoi_luong_giay",
+        "value": 1242.964
+      },
+      {
+        "path": "$.model_reviewer_identity.ma_thoat",
+        "value": 0
+      },
+      {
+        "path": "$.model_reviewer_identity.stdout_byte",
+        "value": 308
+      },
+      {
+        "path": "$.model_reviewer_identity.stderr_byte",
+        "value": 2052295
+      },
+      {
+        "path": "$.model_reviewer_identity.so_lan_chet_truoc_khi_xong",
+        "value": 0
+      },
+      {
+        "path": "$.nang_luc_do_cua_goi.so_ref",
+        "value": 317
+      },
+      {
+        "path": "$.nang_luc_do_cua_goi.lech",
+        "value": 0
+      },
+      {
+        "path": "$.nang_luc_do_cua_goi.kho_nong",
+        "value": false
+      },
+      {
+        "path": "$.tuan_thu_cam_cua_reviewer.cay_kho_sach",
+        "value": true
+      },
+      {
+        "path": "$.tuan_thu_cam_cua_reviewer.commit_them_ngoai_head",
+        "value": 0
+      },
+      {
+        "path": "$.github_submitter_identity.la_tac_gia_PR",
+        "value": true
+      }
+    ]
+  },
+  {
+    "file": "ops/reviews/pr490-review-5-codex-verdict.receipt.yaml",
+    "checks": [
+      {
+        "field": "verdict_sha256",
+        "claimed": "87e285d221a10e2a914050101feff444b172bc507f8d2f51d401e16c276d4852",
+        "measured": "87e285d221a10e2a914050101feff444b172bc507f8d2f51d401e16c276d4852",
+        "match": true
+      },
+      {
+        "field": "verdict_bytes",
+        "claimed": 23633,
+        "measured": 23633,
+        "match": true
+      },
+      {
+        "field": "reviewed_sha",
+        "claimed": "dccce0a54efdd687c20e128b64de1e355089c261",
+        "measured": "dccce0a54efdd687c20e128b64de1e355089c261",
+        "match": true
+      },
+      {
+        "field": "verdict",
+        "claimed": "approve",
+        "measured": "approve",
+        "match": true
+      },
+      {
+        "field": "evidence_url",
+        "claimed": "https://github.com/ducthangho/tra-luat/blob/16663cac4e81d3be31377faeb6e49899a357dd2a/ops/reviews/pr490-review-5-codex-verdict.md",
+        "measured": "https://github.com/ducthangho/tra-luat/blob/16663cac4e81d3be31377faeb6e49899a357dd2a/ops/reviews/pr490-review-5-codex-verdict.md",
+        "match": true
+      },
+      {
+        "field": "so_p1",
+        "claimed": 0,
+        "measured": 0,
+        "match": true
+      },
+      {
+        "field": "so_p2",
+        "claimed": 0,
+        "measured": 0,
+        "match": true
+      },
+      {
+        "field": "so_p3",
+        "claimed": 0,
+        "measured": 0,
+        "match": true
+      }
+    ],
+    "headings": [],
+    "first_add_commits": [
+      "16663cac4e81d3be31377faeb6e49899a357dd2a"
+    ],
+    "verdict_same_as_first_add": true,
+    "identity": {
+      "provider": "openai_codex",
+      "surface": "codex_cli",
+      "model_yeu_cau": "gpt-6-astra",
+      "model_da_chay": "KHONG_DO_DUOC",
+      "session_run_id": "d4210169",
+      "run_id_day_du": "d4210169b60c4eef846dc317058aab05",
+      "prompt_sha256": "84aa19f315a505880a5536f8aa2c7999ed8fc3253e21f75132d0d56b9a482e12",
+      "bat_dau_utc": "2026-09-09T17:11:38.913797+00:00",
+      "ket_thuc_utc": "2026-09-09T17:26:34.158267+00:00",
+      "thoi_luong_giay": 895.244,
+      "ma_thoat": 0,
+      "trang_thai": "xong",
+      "stdout_byte": 304,
+      "stdout_sha256": "50e62e26343abcfdff238978ac3d52f1ee2ca60149114afa7c4d4a81a8f75eb0",
+      "stderr_byte": 1439474,
+      "stderr_sha256": "71916e8409a69ff5ff230e5395c01a80d3ad23cd74db33a3403e7c895461aaed",
+      "so_lan_chet_truoc_khi_xong": 0,
+      "nguon_cac_scalar_tren": "Đọc từ `run.json` trong scratchpad; tệp ấy KHÔNG vào kho ⇒ ATTESTATION."
+    },
+    "duration_arithmetic": 895.24447,
+    "duration_round3": 895.244,
+    "duration_round3_matches": true,
+    "source": "Đọc từ `run.json` trong scratchpad; tệp ấy KHÔNG vào kho ⇒ ATTESTATION.",
+    "numeric_leaves": [
+      {
+        "path": "$.schema_version",
+        "value": 2
+      },
+      {
+        "path": "$.luot",
+        "value": 5
+      },
+      {
+        "path": "$.cross_provider",
+        "value": true
+      },
+      {
+        "path": "$.verdict_bytes",
+        "value": 23633
+      },
+      {
+        "path": "$.so_p1",
+        "value": 0
+      },
+      {
+        "path": "$.so_p2",
+        "value": 0
+      },
+      {
+        "path": "$.so_p3",
+        "value": 0
+      },
+      {
+        "path": "$.lop_loi_lap_5_luot_DA_DONG.so_luot_bi_cham",
+        "value": 4
+      },
+      {
+        "path": "$.model_reviewer_identity.thoi_luong_giay",
+        "value": 895.244
+      },
+      {
+        "path": "$.model_reviewer_identity.ma_thoat",
+        "value": 0
+      },
+      {
+        "path": "$.model_reviewer_identity.stdout_byte",
+        "value": 304
+      },
+      {
+        "path": "$.model_reviewer_identity.stderr_byte",
+        "value": 1439474
+      },
+      {
+        "path": "$.model_reviewer_identity.so_lan_chet_truoc_khi_xong",
+        "value": 0
+      },
+      {
+        "path": "$.nang_luc_do_cua_goi.so_ref",
+        "value": 317
+      },
+      {
+        "path": "$.nang_luc_do_cua_goi.lech",
+        "value": 0
+      },
+      {
+        "path": "$.nang_luc_do_cua_goi.kho_nong",
+        "value": false
+      },
+      {
+        "path": "$.tuan_thu_cam_cua_reviewer.cay_kho_sach",
+        "value": true
+      },
+      {
+        "path": "$.tuan_thu_cam_cua_reviewer.commit_them_ngoai_head",
+        "value": 0
+      },
+      {
+        "path": "$.github_submitter_identity.la_tac_gia_PR",
+        "value": true
+      }
+    ]
+  }
+]

@@ -69,6 +69,11 @@ land_operator_neo:
 cross_review:
   so_luot_cua_PR_nay: 2
   so_luot_don_vi: 'ĐƠN VỊ = số lượt cross-review chạy trên CHÍNH PR #489.'
+  vi_sao_ket_qua_tung_luot_KHONG_mang_trang_thai: >-
+    `ket_qua_tung_luot` là DANH SÁCH BẢN GHI LƯỢT REVIEW, không phải một cổng — mỗi phần tử đã tự
+    mang `verdict` và `reviewed_sha`. Quy ước "mọi mapping mang kết quả phải có `trang_thai` cùng
+    cấp" áp cho `pre_merge_checks` và `post_merge_checks` (17/17 mục nay đều có), KHÔNG áp ở đây.
+    Nói ra để lần quét sau không đọc sự vắng mặt này thành thiếu sót.
   reviewer_provider: codex
   executor_provider: claude
   ket_qua_tung_luot:
@@ -118,9 +123,18 @@ head_da_cross_review_khac_head_merge:
       Head `efa397e` CHƯA có lượt cross-review exact head. Đây là cùng một nợ mà #468 và #487 đã
       mắc; #487 trả bằng một lượt hậu kiểm trong phiên này, PR này thì CHƯA.
     vi_sao_ghi_thay_vi_chay_ngay: >-
-      Chạy hậu kiểm cho `efa397e` sẽ sinh thêm verdict + biên nhận ⇒ lại đổi head ⇒ lại một mắt
-      xích nữa. Chuỗi này chưa có điều kiện dừng (xem `chuoi_land_evidence_chua_co_diem_dung`),
-      nên điều phối DỪNG và khai nợ thay vì tự quyết định kéo dài nó.
+      Nợ chưa trả vì PHẠM VI PHIÊN và vì chủ kho đã quyết dừng chuỗi — KHÔNG phải vì hậu kiểm tự
+      sinh ra mắt xích mới.
+    dinh_chinh_ly_do_cu: >-
+      Bản trước viết: "chạy hậu kiểm cho `efa397e` sẽ sinh thêm verdict + biên nhận ⇒ lại đổi
+      head ⇒ lại một mắt xích nữa. Chuỗi này chưa có điều kiện dừng". Câu ấy GIỮ NGUYÊN tiền đề
+      đệ quy mà chính tệp này vừa rút ở `van_de_da_gay_ra_chuoi`. Hậu kiểm một OID CỐ ĐỊNH không
+      làm OID ấy đổi: `efa397e` vẫn là `efa397e` sau khi được review. Việc ghi hiện vật ở một
+      commit KHÁC không làm lượt hậu kiểm cho `efa397e` hết hiệu lực — chỉ LỰA CHỌN VẬN CHUYỂN
+      (đòi xét lại chính commit vận chuyển) mới tạo vòng lặp, và lựa chọn ấy là cách làm, không
+      phải luật. Để nguyên câu cũ thì người nhận nợ đọc thành "không thể hậu kiểm nếu không mở
+      lại chuỗi", tức đúng cái hiểu sai vừa được sửa. Codex chấm đúng chỗ này (P3
+      `ly-do-hau-kiem-van-tu-sinh-chuoi`) ở lượt 1 trên `9238606`.
     cai_da_co_thay_the: >-
       KHÔNG phải cross-review, và KHÔNG thay thế được nó. Thứ có thật: bốn cổng CỤC BỘ chạy trên
       CHÍNH `efa397e` trước khi xin duyệt. Bản trước còn viết thêm "toàn bộ CI của PR xanh trên
@@ -137,6 +151,16 @@ head_da_cross_review_khac_head_merge:
       trên `a48f576`, và nó ĐÚNG. Đây là LẦN THỨ TƯ trong phiên bản TÓM TẮT khai rộng hơn bản
       CHI TIẾT — cùng một hình dạng lỗi, bốn nạn nhân khác nhau.
 
+# --- TỪ VỰNG `trang_thai` dùng trong pre_merge_checks / post_merge_checks ---
+# Thêm ở lượt vá thứ hai, sau P2 `ket-qua-con-thieu-trang-thai`: bản trước chỉ đặt `trang_thai`
+# cho ĐÚNG HAI mục bị chấm, để 17 mục còn lại mang `ket_qua` trần — tức công bố một quy ước rồi
+# tự phá nó ngay trong cùng tệp. Năm giá trị, phân biệt theo NGUỒN chứ không chỉ theo đạt/hỏng:
+#   DAT_DO_LAI_CUC_BO        — chạy lại được tại commit này, trong container này. Mạnh nhất.
+#   DAT_DO_GIT               — thuần phép đo Git, đối chứng được offline.
+#   DAT_THEO_LOI_KHAI_API    — đọc qua GitHub API; gói KHÔNG giữ JSON/log ⇒ ATTESTATION.
+#   KHONG_XAC_THUC_EXACT_HEAD— có kết quả, nhưng không chứng minh được cây đã test là head nào.
+#   DO_THIEU_CONG_CU         — cổng ĐỎ vì thiếu công cụ (fail-close), không phải vì mã sai.
+#   not_run / skipped        — KHÔNG chạy. Không bao giờ được đếm vào tập ĐÃ ĐẠT.
 # --- CỔNG TRƯỚC MERGE, trên head efa397e ---
 pre_merge_checks:
   - ten: 'CI được báo cho PR có head efa397eb2515658a1e3e9b4cdfd6e887b492b957'
@@ -157,6 +181,7 @@ pre_merge_checks:
       `ci-pr-khong-chung-minh-exact-head` của lượt 2.
     nen_so_sanh: 'Lượt `gate` trước trên cùng nhánh (`98ef1f1`) chạy 1 541 giây và cũng `success` — nhịp bình thường, không phải treo.'
   - ten: 'duyet khac danh tinh (cong) trên head efa397e'
+    trang_thai: DAT_THEO_LOI_KHAI_API
     ket_qua: '`success` — run `34366297752`, chạy lại ở event `pull_request_review` sau khi `notebyme88` APPROVED.'
     lan_do_truoc_do: >-
       Cùng check ĐỎ ở run `34363322760`. Nguyên văn log: `số bản ghi review=2` và *"chưa có bản
@@ -166,16 +191,21 @@ pre_merge_checks:
       Hai cách hỏng ấy nhìn giống nhau và đòi hai cách chữa khác nhau. Đã đính chính ở
       `#issuecomment-5603536795`.
   - ten: 'phan chung duyet khac danh tinh'
+    trang_thai: DAT_THEO_LOI_KHAI_API
     ket_qua: '`success` (23 giây)'
   - ten: 'mo'
     trang_thai: skipped
   - ten: 'bien_nhan_v2 trên head efa397e'
+    trang_thai: DAT_DO_LAI_CUC_BO
     ket_qua: '`rc=0` · **94** bản ghi · **41** ĐẠT v2 · **11/11** miễn trừ legacy · **42** nợ đóng băng · **0 vi phạm** · **0** KHÔNG ĐO ĐƯỢC · `TỔNG: ĐẠT`'
   - ten: 'doctrine-scan trên head'
+    trang_thai: DAT_DO_LAI_CUC_BO
     ket_qua: '`rc=0` · sạch — **7 tệp quét, 0 chỗ chép doctrine**'
   - ten: 'adr-song trên head'
+    trang_thai: DAT_DO_LAI_CUC_BO
     ket_qua: '`rc=0` · sạch — **46 ADR / 46 dòng §20**, khớp 1–1 (tha thiếu trạng thái: ADR-0016)'
   - ten: 'doc-claims-check --strict trên head'
+    trang_thai: DAT_DO_LAI_CUC_BO
     ket_qua: '`rc=0` · **`ok: true`** · **106** tệp · **0** cờ cứng · **367** advisory'
   - ten: 'cross-review khác nền trên exact head đã merge'
     trang_thai: not_run
@@ -192,6 +222,7 @@ pre_merge_checks:
 # --- PHÉP ĐO SAU MERGE, trên master c0a5cbe ---
 post_merge_checks:
   - ten: 'kho KHÔNG nông — chốt phải chạy TRƯỚC mọi cổng đọc lịch sử'
+    trang_thai: DAT_DO_GIT
     loai_nguon: 'phép đo Git'
     ket_qua: '`rev-parse --is-shallow-repository` ⇒ **false**; `rev-list --count origin/master` ⇒ **1 879** commit.'
     vi_sao_dat_len_dau: >-
@@ -199,27 +230,37 @@ post_merge_checks:
       sáng đều đo trong KHO NÔNG, và một P1 ĐÚNG của codex connector đã bị bác bằng chính những
       con số ấy. Chốt này rẻ và phải chạy trước, không phải chạy khi nghi ngờ.
   - ten: 'head đã vào master'
+    trang_thai: DAT_DO_GIT
     loai_nguon: 'phép đo Git'
     ket_qua: '`merge-base --is-ancestor efa397e origin/master` ⇒ ĐÚNG. `master` = `c0a5cbe`.'
   - ten: 'hai cha của merge commit'
+    trang_thai: DAT_DO_GIT
     loai_nguon: 'phép đo Git'
     ket_qua: '`f4d74fe` + `efa397e` — đúng cặp mong đợi.'
   - ten: 'nhánh không còn commit ngoài master'
+    trang_thai: DAT_DO_GIT
     loai_nguon: 'phép đo Git'
     ket_qua: '`rev-list --count origin/master..origin/claude/land-480-20260909` ⇒ **0**'
   - ten: 'bien_nhan_v2 trên master'
+    trang_thai: DAT_DO_LAI_CUC_BO
     ket_qua: '`rc=0` · **`TỔNG: ĐẠT`** · **0 vi phạm** — `41 ĐẠT v2 · 11/11 legacy · 42 nợ · tổng 94` trên `c0a5cbe`.'
   - ten: 'doctrine-scan trên master'
+    trang_thai: DAT_DO_LAI_CUC_BO
     ket_qua: '`rc=0` · sạch — **7 tệp quét, 0 chỗ chép doctrine**'
   - ten: 'adr-song trên master'
+    trang_thai: DAT_DO_LAI_CUC_BO
     ket_qua: '`rc=0` · sạch — **46 ADR / 46 dòng §20**, khớp 1–1'
   - ten: 'doc-claims-check --strict trên master'
+    trang_thai: DAT_DO_LAI_CUC_BO
     ket_qua: '`rc=0` · **`ok: true`** · **106** tệp'
   - ten: 'shellcheck ops/dung_goi_review.sh trên master'
+    trang_thai: DAT_DO_LAI_CUC_BO
     ket_qua: '`rc=0` (ShellCheck 0.9.0)'
   - ten: 'lease_publish trên master — HAI PHÉP ĐO, và cái thứ nhất là TÍNH NĂNG'
+    trang_thai: DAT_DO_LAI_CUC_BO
     ket_qua: '`rc=0` · **121/121 đạt; đã chạy=121, bỏ qua=0**'
     do_lan_dau_thieu_cong_cu:
+      trang_thai: DO_THIEU_CONG_CU
       ket_qua: '`rc=1` · **120/121** — `t33_workflow_dang_lease_phai_qua_actionlint` ĐỎ với lý do `KHÔNG ĐO ĐƯỢC: thiếu actionlint`.'
       vi_sao_khong_phai_hoi_quy: >-
         Container này KHÔNG cài sẵn `actionlint`; `t33` fail-close đúng thiết kế — `CLAUDE.md` ghi
@@ -234,8 +275,10 @@ post_merge_checks:
     trang_thai: not_run
     loai_nguon: 'không đo — quyết định của chủ kho'
     ly_do: >-
-      KHÔNG ĐỌC theo quyết định chủ kho. BỎ CHỜ KHÔNG PHẢI BỎ CHẠY — `ci.yml` khai `on: push` nên
-      lượt master vẫn chạy tự động; hồ sơ này không chờ và không đọc nó. Tiết kiệm là THỜI GIAN
+      KHÔNG ĐỌC theo quyết định chủ kho. BỎ CHỜ KHÔNG PHẢI BỎ CHẠY — `ci.yml` khai `on: push`,
+      nên workflow ĐƯỢC CẤU HÌNH để chạy trên lượt master. Đó là CẤU HÌNH đọc được từ tệp;
+      runner có chạy thật hay không thì hồ sơ này KHÔNG ĐO (không đọc, không giữ run JSON) —
+      đừng đọc câu này thành "lượt ấy đã chạy". Tiết kiệm là THỜI GIAN
       CHỜ của phiên, không phải phút runner. Hệ quả: lượt push master là lần đo Windows ĐẦU TIÊN
       của mã này, nên nếu Windows đỏ thì biết MUỘN HƠN — không phải không biết.
     vi_sao_doi_tu_ket_qua_sang_trang_thai: >-
@@ -266,7 +309,7 @@ bookkeeping:
       `bookkeeping` = tệp này. NHƯNG `landed` KHÔNG được tuyên ở đây: điều kiện cross-review cho
       head đã merge `efa397e` là KHÔNG THOẢ (verdict `approve` neo `98ef1f1`, và `PROTOCOL:29`
       nói head đổi làm bằng chứng cũ hết hiệu lực). Xem
-      `head_da_cross_review_khac_head_merge.dieu_kien_cross_review_CHO_HEAD_DA_MERGE`.
+      `head_da_cross_review_khac_head_merge.no_review_head_da_merge.dieu_kien_cross_review_CHO_HEAD_DA_MERGE`.
   - no_chua_dong_chuyen_giao_cho_phien_sau:
       - 'cross-review exact head cho `efa397e` — CHƯA CHẠY'
       - 'P3 `bang-khang-dinh-bo-chu-thich-va-gioi-han-nguon` — hiện vật tra cứu ở `ops/reviews/pr489-review-2-phep-do/`'
@@ -309,16 +352,22 @@ chuoi_land_evidence_DA_DONG_THEO_QUYET_DINH_CHU_KHO:
     chính bản ghi land evidence. Việc mỗi mắt xích lại sinh mắt xích sau là do CÁCH LÀM của các
     phiên trước, không do doctrine. Codex connector chấm đúng chỗ này (P2 `Remove the invented
     recursive-PR requirement`) trên `a48f576`, và nó ĐÚNG.
-    Chi phí mỗi mắt xích thì ĐO ĐƯỢC thật: một lượt CI (~24 phút runner), một lượt duyệt của
-    người khác, và ít nhất một lượt cross-review (~16 phút cộng một hạn mức API).
+    Chi phí mỗi mắt xích là ƯỚC TÍNH từ scalar do điều phối thuật lại, KHÔNG phải phép đo: một
+    lượt CI (~24 phút runner), một lượt duyệt của người khác, và ít nhất một lượt cross-review
+    (~16 phút cộng một hạn mức API). Runtime của review đọc từ `run.json` trong scratchpad
+    (không vào kho) và thời lượng CI đọc qua API mà gói không giữ JSON/log ⇒ ATTESTATION. Bản
+    trước gọi đây là "ĐO ĐƯỢC thật" — SAI, và sai đúng kiểu mà bản vá P1 về CI vừa sửa.
   quyet_dinh:
     nguoi_quyet: ducthangho
     ngay: '2026-09-09'
     nguyen_van: 'merge #490, tôi cho phép land mà không cần CI, đóng chuỗi'
     loai_nguon: >-
-      Chỉ thị trực tiếp trong phiên điều phối. KHÔNG có hiện vật GitHub cho câu này ⇒ ATTESTATION;
-      thứ ĐO ĐƯỢC là hệ quả của nó (merge commit của #490, và sự VẮNG MẶT của một PR land evidence
-      cho #490).
+      Chỉ thị trực tiếp trong phiên điều phối. KHÔNG có hiện vật GitHub cho câu này ⇒ ATTESTATION.
+      Hệ quả của nó — merge commit của #490 và sự VẮNG MẶT của một PR land evidence cho #490 — sẽ
+      ĐO ĐƯỢC *về sau*, nhưng CHƯA ĐO ĐƯỢC tại commit này: `master` còn là `c0a5cbe`, chưa có
+      merge commit nào của #490 để định danh. Bản trước viết nó ở thì đã-đo — SAI, và đó là lời
+      khai về TƯƠNG LAI đội lốt phép đo. Ai đọc lại tệp này sau khi #490 merge thì ĐO được cả
+      hai; ai đọc trước thì phải coi đây là DỰ KIẾN.
   hai_dieu_duoc_mien:
     - muc: 'CI cho bước land của #490'
       pham_vi: >-

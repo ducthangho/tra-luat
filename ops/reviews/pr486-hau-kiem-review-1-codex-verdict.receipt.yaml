@@ -2,17 +2,17 @@
 #
 # Verdict: changes_requested — 2 P1 / 4 P2 / 13 P3.
 #
-# VÌ SAO CÓ LƯỢT HẬU KIỂM NÀY, và nó nằm trong chính một P1 của lượt: PR #486 đã MERGE mà KHÔNG
-# qua cross-review nào. Dòng thời gian đo được: `08:54:36Z` gỡ draft → `08:54:45Z` connector codex
-# BẮT ĐẦU review → `08:55:09Z` MERGE. Tức merge 24 giây sau khi review bắt đầu, và verdict lượt ấy
-# là KHÔNG ĐO ĐƯỢC — comment còn nguyên chữ `Running`, không bao giờ được cập nhật.
-# Hậu kiểm không lùi được merge. Thứ nó mua là: một lời khai sai đã ở master không nằm đó im lặng.
+# THEO CHỈ THỊ HẬU KIỂM CỦA CHỦ KHO: PR #486 đã merge trước khi có verdict
+# cross-review hoàn tất. Mốc được cung cấp: 08:54:36Z gỡ draft, 08:54:45Z connector
+# bắt đầu, 08:55:09Z merge (ngày 2026-09-09 UTC). Hiệu hai mốc cuối là 24 giây.
+# Mốc API và trạng thái Running là ATTESTATION, không có response để đo lại offline;
+# không dùng Running để kết luận chưa từng có review khác hoặc sẽ không được cập nhật.
+# Hậu kiểm không hồi tố biến thời điểm merge thành đã qua cross-review.
 #
-# MỘT P2 TRÙNG PHÉP ĐO ĐỘC LẬP CỦA ĐIỀU PHỐI: `vang-nhanh-khong-chung-minh-chua-lam-viec`. Điều
-# phối đo qua `list_sessions`/`get_session` (hai phiên executor FAILED vì hạn mức tuần, sinh 66 709
-# và 26 680 token đầu ra); reviewer đo trong sandbox không mạng bằng cách đọc chính lời khai và ba
-# phép đo hiện vật của nó. Hai đường khác hẳn nhau, cùng một kết luận — xem
-# `ops/DO_VI_SAO_LEASE_482_483_CHET_20260909.md`.
+# Reviewer chỉ ra lỗi suy luận `vang-nhanh-khong-chung-minh-chua-lam-viec` từ hồ sơ.
+# Điều phối bổ sung lời khai API về token và hạn mức tuần trong biên bản lease.
+# Hai nguồn có phạm vi khác nhau: API chưa được reviewer xác minh, không phải phép
+# kiểm độc lập chứng nhận nguyên nhân duy nhất hay lượng công việc thực của packet.
 
 schema_version: 2
 receipt_id: pr486-hau-kiem-review-1-codex-20260909-6f2e70d5
@@ -34,22 +34,20 @@ reviewed_sha: da481f94eee0adf1fe5fc4260a535a9b48fc2627
 evidence_url: https://github.com/ducthangho/tra-luat/blob/ee23363171ca0a5218a5d7f067649487470acd0c/ops/reviews/pr486-hau-kiem-review-1-codex-verdict.md
 comment_ban_chieu: https://github.com/ducthangho/tra-luat/pull/486#issuecomment-5600018857
 comment_ban_chieu_ghi_chu: >-
-  BẢN RÚT GỌN CÓ CHỦ Ý, KHÔNG phải nguyên văn — nói thẳng vì cross-review lượt này chấm P2
-  `neo-comment-khai-vuot-lop-doc` cho đúng kiểu khai vượt ở chỗ này. Comment liệt kê đủ slug,
-  mức và phép đo chính, rồi trỏ về blob cho toàn văn; nó KHÔNG khớp từng ký tự với
-  `verdict_path` và KHÔNG được đọc như thế.
-  Hệ quả: neo thứ hai ở đây YẾU HƠN neo comment nguyên văn của các lượt trước. Bù lại, nó
-  không mang một lời khai không kiểm được — `CLAUDE.md` đã đo rằng đường ĐỌC của GitHub tự
-  chuẩn hoá thực thể HTML (`'`→`&#39;`), nên `diff` bản-đã-đến chỉ dùng để tìm lệch VỀ KÝ TỰ
-  THẬT, không dùng để khẳng định byte trên GitHub. Byte ấy vẫn là KHÔNG ĐO ĐƯỢC từ container
-  này (REST tới `repos/…` bị proxy chặn 403).
+  Điều phối khai đây là bản rút gọn, liệt kê các slug, mức và phép đo chính rồi trỏ về blob.
+  Không có response/readback hoặc log đối chiếu nội dung comment trong kho; sự tồn tại, độ đầy
+  đủ và nội dung comment là ATTESTATION, KHÔNG ĐO ĐƯỢC offline. Không khai khớp từng ký tự hay
+  byte. Finding neo-comment-khai-vuot-lop-doc thuộc verdict hậu kiểm PR #486 lượt 1.
+  CLAUDE.md:127–145 mô tả biến đổi ở trường thân issue/comment qua MCP, không chứng minh mọi
+  đường đọc GitHub cùng biến đổi. Cần giữ client, response và các bước biến đổi để đối chứng
+  mạnh hơn. Không gọi các comment lịch sử là nguyên văn đã xác thực; blob Git là nguồn đối chứng
+  được.
 evidence_url_ghi_chu: >-
-  `evidence_url` neo BLOB ghim commit `ee23363` — commit ĐẦU TIÊN chứa tệp verdict, trên nhánh
-  `claude/handoff-tra-luat-repo-2ak5th` (PR #487). Cổng `bien_nhan_v2` đòi đúng dạng
-  `/blob/<40 hex>/<đường dẫn>` cho `anchor.loai: canonical_ancestry`.
-  `reviewed_sha` là MERGE COMMIT `da481f9` (= `master` lúc review), không phải head của PR #486
-  trước merge — vì đây là hậu kiểm trên thứ đã vào master, không phải tiền kiểm trên một head chờ.
-  Băm trong kho BẰNG băm bản gốc trong gói — đã kiểm, không có chuẩn hoá LF nào làm lệch.
+  URL blob ghim commit ee23363171ca0a5218a5d7f067649487470acd0c, commit thêm tệp verdict đầu
+  tiên trong lịch sử reachable của snapshot hậu kiểm. Blob tại URL khớp byte verdict_path và
+  verdict_sha256 trong cây đang review. Việc bản trong kho bằng bản scratchpad gốc ở lúc vận
+  chuyển là ATTESTATION: bản gốc không kèm. Commit ghim là tổ tiên của head PR #487 được hậu
+  kiểm; chưa xác nhận PR #487 đã vào master hoặc trạng thái GitHub hiện hành.
 so_p1: 2
 so_p2: 4
 so_p3: 13
@@ -60,10 +58,12 @@ model_reviewer_identity:
   model_yeu_cau: gpt-6-astra
   model_da_chay: KHONG_DO_DUOC
   model_bang_chung: >-
-    `provider` và `surface` ĐO ĐƯỢC — `run.json` ghi thẳng `provider: openai_codex` và
-    `execution_surface: codex_cli`. `model` thì KHÔNG: `run.json.lenh` chỉ giữ `chuong_trinh`,
-    `so_doi_so`, `van_tay` — không lưu argv. Nên `-m gpt-6-astra -c model_reasoning_effort=xhigh`
-    là ATTESTATION của điều phối về đối số ĐÃ TRUYỀN, không phải bằng chứng về model đã PHỤC VỤ.
+    run.json của lượt này không kèm trong kho. Điều phối khai đã đọc provider, surface,
+    prompt_sha256, head, thời gian, trạng thái và băm stdout/stderr từ tệp đó; metadata runtime
+    dưới đây là ATTESTATION, chưa được hậu kiểm từ nguồn gốc. Hiệu hai timestamp tái tính được
+    là phép kiểm số học nội bộ, không xác thực lần chạy. Đối số model/effort được yêu cầu không
+    chứng minh model thực phục vụ. Nội dung verdict đối chứng được trong Git; nó không thay
+    run.json, prompt hoặc log của đúng session.
   session_run_id: 6f2e70d5
   run_id_day_du: 6f2e70d5f1eb4b189ab83ce3c26781f7
   thread_id: KHONG_DO_DUOC
@@ -80,11 +80,12 @@ model_reviewer_identity:
   stderr_sha256: b60b6a068107dc47d96717d37498d05f07148521edeac4f95c4fc2811df46867
   so_lan_chet_truoc_khi_xong: 0
   vi_sao_thoi_luong_dang_ke: >-
-    `1280,648 giây` (21 phút 21 giây) — nêu ra vì `trang_thai: xong` + `ma_thoat: 0` KHÔNG chứng
-    minh việc đã làm; `launcher.py` tự cảnh báo điều đó ở đầu tệp. Ba số chống lại cách đọc ấy:
-    thời lượng, `91292 B` verdict, `1352649 B` stderr.
+    Thời lượng và kích thước log được điều phối thuật lại; kích thước verdict trong kho đo trực
+    tiếp được. Các đại lượng này không tự chứng minh việc review hoàn tất hoặc chất lượng
+    review. Phải đọc nội dung verdict và đối chiếu các nguồn được dẫn.
   neo_boi_launcher: >-
-    `launcher.py run --expected-repo github.com/ducthangho/tra-luat --expected-root-commit
+    ATTESTATION về lời gọi launcher, chưa có run.json/argv/log gốc để tái xác minh: `launcher.py
+    run --expected-repo github.com/ducthangho/tra-luat --expected-root-commit
     394e93468fc8d84ec20938e6df8fb7ab72b2cc37 --expected-head
     da481f94eee0adf1fe5fc4260a535a9b48fc2627 --require-clean --prompt-file PROMPT.md
     --expected-prompt-sha256 df5dab8884e853abfcbf6a8b7025944ea181f3fac34f95b3678c1137485f4401
@@ -94,9 +95,10 @@ model_reviewer_identity:
 
 nang_luc_do_cua_goi:
   ghi_chu: >-
-    Gói dựng bằng `ops/dung_goi_review.sh`: mirror ĐỦ MỌI REF, vật chất hoá từng nhánh thành
-    `refs/heads/*`, cài `actionlint` bằng bản ghim của kho, sinh EVIDENCE tự khai cách trích số và
-    phần bỏ sót.
+    Điều phối khai gói dựng bằng ops/dung_goi_review.sh. so_ref đếm refs/heads, không phải mọi
+    namespace Git; so_tag là đại lượng riêng. Inventory, công cụ và response máy chủ của lượt cũ
+    không kèm trong kho; lời thuật lại trong verdict không thay dữ liệu gốc. Không xác minh lại
+    được độ phủ GitHub tại mốc lịch sử.
   so_ref: 312
   lech: 0
   so_tag: 62
@@ -110,14 +112,16 @@ tuan_thu_cam_cua_reviewer:
   cay_kho_sach: true
   commit_them_ngoai_head: 0
   bang_chung: >-
-    `git -C cay-kho status --porcelain` RỖNG và `git -C cay-kho log --oneline da481f9..HEAD` RỖNG
-    sau khi lượt kết thúc.
+    Điều phối và verdict khai cây được review sạch, không thêm commit ngoài reviewed_sha khi kết
+    thúc. Không có log status hoặc snapshot cây của đúng lượt trong kho; đây là lời thuật lại,
+    không được dùng trạng thái cây hiện tại để xác thực lần chạy trước.
 
 manifest:
   duong_dan: KHONG_CO_TRONG_KHO
   ghi_chu: >-
-    CỐ Ý không đưa hiện vật gói vào kho: thư mục gói chứa cả mirror git 312 ref. Chỉ lưu tệp
-    VERDICT. Hệ quả nói thẳng: script tự đo của reviewer KHÔNG tái chạy được từ kho.
+    Không lưu gói review lịch sử trong kho. Tệp verdict được lưu; run.json, prompt,
+    stdout/stderr và công cụ tự đo của đúng lượt không kèm. Các băm log được khai không tái tính
+    được từ biên nhận. Số ref của gói xem nang_luc_do_cua_goi.
 
 github_submitter_identity:
   actor: ducthangho
@@ -132,14 +136,14 @@ anchor:
   loai: canonical_ancestry
   cuong_do: cao
   mo_ta: >-
-    HAI neo độc lập. (1) Blob `ops/reviews/pr486-hau-kiem-review-1-codex-verdict.md` ghim tại
-    commit `ee23363` trên nhánh của PR #487. (2) Comment bản chiếu trên PR #486 — xem
-    `comment_ban_chieu` khi đã đăng.
+    Blob verdict ghim tại commit ee23363171ca0a5218a5d7f067649487470acd0c, đối chứng được trong
+    Git và là tổ tiên của head PR #487 được hậu kiểm. Comment_ban_chieu chỉ là địa chỉ được điều
+    phối khai; nội dung và độ đầy đủ của neo comment chưa được xác minh độc lập.
   gioi_han: >-
-    Neo (1) chỉ vững nếu land bằng MERGE hoặc fast-forward — SQUASH phá quan hệ tổ tiên.
-    Neo (2) sống trong CSDL Issue nên SỬA/XOÁ ĐƯỢC. Không có tag `luu-tru/*`.
-    Riêng lượt này neo (2) YẾU HƠN thường lệ: PR #486 đã CLOSED (merged), nên comment bản chiếu
-    nằm trên một PR không ai còn theo dõi.
+    PR #487 chưa được hồ sơ này chứng nhận đã merge. Quan hệ commit với master sau land phải đo
+    trên SHA thực land; squash có thể thay commit ghim. Comment sửa/xoá được và không có quan hệ
+    tổ tiên Git. Trạng thái PR không chứng minh có hay không có người theo dõi. Loại/cường độ mỏ
+    neo được khai không tự thành merge authorization.
 
 khong_do_duoc:
   - 'Model đã phục vụ và `thread_id`: `run.json` không lưu argv; `codex` không phát `modelUsage`.'

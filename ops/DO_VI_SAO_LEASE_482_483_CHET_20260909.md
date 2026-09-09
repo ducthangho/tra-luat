@@ -1,7 +1,13 @@
-# ĐO — vì sao hai lease #482/#483 hết hạn mà không có hiện vật
+# HỒ SƠ — trạng thái được khai của hai phiên executor #482/#483
 
-**Đo lúc `2026-09-09T09:32Z`**, phiên `session_01UN8WRS5Bc5pBBzYPDqs9Dx`.
-Công cụ: `mcp__Claude_Code_Remote__{list_sessions,get_session}`.
+**Điều phối khai đã đọc API lúc `2026-09-09T09:32Z`**, phiên `session_01UN8WRS5Bc5pBBzYPDqs9Dx`.
+Công cụ được khai: `mcp__Claude_Code_Remote__{list_sessions,get_session}`.
+
+**Giới hạn nguồn:** không kèm response API, transcript hoặc log đọc lại. Các trường
+session, số token, chi phí, trạng thái, model, nhánh trong container và thông báo lỗi
+dưới đây là ATTESTATION của điều phối; reviewer offline không xác minh được sự kiện API.
+Phép tính từ các mốc được khai và việc đọc ref trong snapshot Git là hai phần đối chứng
+được riêng. Không dùng số học đúng để xác thực các mốc nguồn.
 
 ## Vì sao tệp này tồn tại
 
@@ -11,10 +17,11 @@ Công cụ: `mcp__Claude_Code_Remote__{list_sessions,get_session}`.
 > `MU-REF-KHONG-PHU-TAG` và #483 `VERDICT-KHONG-BOC-HOI` […] **VÌ SAO thì KHÔNG ĐO ĐƯỢC** từ phiên
 > này — công cụ quản lý phiên đã ngắt, không đọc được transcript của hai phiên executor.
 
-Câu *"KHÔNG ĐO ĐƯỢC"* ấy đúng **với phiên đó**. Phiên này có công cụ quản lý phiên, nên đo được.
+Câu *"KHÔNG ĐO ĐƯỢC"* ấy mô tả giới hạn **của phiên trước**. Phiên điều phối hiện tại khai
+đã dùng công cụ quản lý phiên để bổ sung dữ liệu; nguồn thô chưa được lưu trong hồ sơ.
 Ghi ra đây thay vì để nguyên một ô trống, và ghi **cả chỗ lời khai cũ rộng hơn phép đo của nó**.
 
-## Hai phiên executor CÓ TỒN TẠI — đo được, trái với "không có việc nào được làm"
+## Hai phiên executor được điều phối khai đã tìm thấy — chưa xác minh lượng việc của packet
 
 | trường | #482 | #483 |
 |---|---|---|
@@ -25,7 +32,7 @@ Ghi ra đây thay vì để nguyên một ô trống, và ghi **cả chỗ lời
 | model cấu hình / đã phục vụ | `claude-fable-5-1` / `claude-fable-5-1` | `claude-fable-5-1` / `claude-fable-5-1` |
 | tạo lúc | `2026-09-08T03:45:45Z` | `2026-09-08T03:46:32Z` |
 | cập nhật cuối | `2026-09-08T04:08:49Z` | `2026-09-08T04:02:28Z` |
-| khoảng sống | **23 phút 04 giây** | **15 phút 56 giây** |
+| chênh lệch tạo/cập nhật cuối | **23 phút 04 giây** | **15 phút 56 giây** |
 | `output_tokens` | **66 709 token** | **26 680 token** |
 | `cost_usd` | **8,898 USD** | **5,127 USD** |
 | `context_usage.used_tokens` | 233 392 / 1 000 000 token | 212 175 / 1 000 000 token |
@@ -33,9 +40,9 @@ Ghi ra đây thay vì để nguyên một ô trống, và ghi **cả chỗ lời
 | `connection_status` | `disconnected` | `disconnected` |
 | nhánh trong container | `claude/mu-ref-khong-phu-tag` | `claude/verdict-khong-boc-hoi` |
 
-## NGUYÊN NHÂN — một, và giống nhau ở cả hai
+## Thông báo lỗi cuối được khai — chưa đủ để loại trừ nguyên nhân khác
 
-Cả hai phiên có **cùng một** `post_turn_summary`:
+Điều phối khai cả hai phiên trả cùng nội dung `post_turn_summary` sau:
 
 ```
 status_category: failed
@@ -44,37 +51,49 @@ rate_limit_info: {rateLimitType: "seven_day", status: "rejected",
                   resetsAt: 1788940800, isUsingOverage: false}
 ```
 
-`resetsAt 1788940800` = **`2026-09-09T08:00:00Z`**. Tại lúc đo (`09:32Z`) hạn mức ấy **đã reset
-được 1 giờ 32 phút**.
+`resetsAt 1788940800` (đơn vị: giây Unix) quy đổi thành **`2026-09-09T08:00:00Z`**.
+Mốc `2026-09-09T09:32:00Z` cách mốc reset được thông báo **1 giờ 32 phút**. Số học này
+không xác nhận hạn mức thực tế đã reset hoặc tài khoản đã dùng được trở lại.
 
-Nguyên nhân là **hạn mức 7 ngày của tài khoản bị từ chối**, không phải lỗi packet, không phải lỗi
-lease, không phải môi trường. Cả hai phiên bị chặn cùng lúc vì dùng chung một hạn mức.
+Nếu bản chép API đúng, thông báo cuối ghi một lần từ chối do hạn mức tuần. Nó chưa đủ
+để loại trừ lỗi packet, lease hoặc môi trường; chưa có transcript để xác định toàn bộ
+diễn biến hay chứng minh hai phiên bị chặn cùng thời điểm.
 
 ## LỜI KHAI CŨ RỘNG HƠN PHÉP ĐO CỦA NÓ
 
-Land evidence khai *"KHÔNG có việc nào được làm"* và dẫn ba phép đo: 0 nhánh trên `origin`, 0 PR,
-Issue chỉ có 2 comment. Ba phép đo ấy **đúng** — đo lại `2026-09-09T09:32Z` trên 312 `refs/heads`:
-không ref nào tên `claude/mu-ref-khong-phu-tag` hay `claude/verdict-khong-boc-hoi`; chỉ có
-`ops/cap-lease-mu-ref-va-verdict` (nhánh CẤP lease).
+Land evidence cũ khai *"KHÔNG có việc nào được làm"* từ việc không tìm thấy nhánh/PR
+và số comment được thuật lại. Điều phối khai lần đọc ref lúc `2026-09-09T09:32Z` có
+**312 ref nhánh**; inventory đúng lần đọc ấy không kèm. Việc đếm ref không kiểm được số
+PR hoặc comment trên GitHub.
 
-Nhưng ba phép đo ấy đo **HIỆN VẬT**, còn kết luận nói về **VIỆC**. Hai phiên sinh ra
-**66 709** và **26 680** token đầu ra trong **23 phút** và **16 phút** — tức có chạy và có sinh nội
-dung. Điều **không** xảy ra là **push**: container ngắt, nhánh chỉ tồn tại cục bộ, nội dung mất.
+Hậu kiểm offline bằng snapshot gói lúc `2026-09-09T10:28:51Z` đếm **313/313 ref nhánh**
+khớp giữa `cay-kho/` và `kho.git`. **2/2 tên nhánh** `claude/mu-ref-khong-phu-tag` và
+`claude/verdict-khong-boc-hoi` vắng trong tập đó. Ref `ops/cap-lease-mu-ref-va-verdict`
+trỏ commit `a2468831896601c60c216133eac2ba1366fd3254`. Đây là snapshot cục bộ; không phải
+phép đọc lại GitHub hoặc tái tạo inventory ở mốc lịch sử trước đó.
 
-Câu đúng với phép đo: **"không có hiện vật nào được đẩy lên"**, không phải "không có việc nào được
-làm". Cùng lớp lỗi mà `CLAUDE.md` gọi là *lời khai rộng hơn phép đo*, và cùng lớp với
-`VERDICT-KHONG-BOC-HOI` — chính packet #483.
+Hai phiên được khai sinh **66 709 token** và **26 680 token**. Nếu dữ liệu API đúng, nó
+cho biết phiên có sinh nội dung; chưa xác nhận nội dung là công việc của packet. Các mốc
+tạo/cập nhật cách nhau **23 phút 04 giây** và **15 phút 56 giây**, không đo thời gian tính
+toán liên tục. Không thấy tên nhánh trong snapshot không chứng minh chưa từng push,
+nhánh chỉ tồn tại cục bộ, container đã mất nội dung hoặc không còn đường phục hồi.
 
-**Giới hạn của phép đo này, nói thẳng:** `output_tokens` chứng minh phiên đã chạy và đã sinh nội
-dung; nó **KHÔNG** chứng minh nội dung ấy là việc của packet, cũng không nói được bao nhiêu phần
-việc đã xong. Transcript hai phiên chưa đọc. Muốn biết còn cứu được gì thì phải mở lại chính hai
-phiên ấy (`unarchive`/`send_message`), và tới lúc đo thì chúng `IDLE` + `disconnected`.
+Câu giới hạn được đối chứng: **"hai tên nhánh dự kiến vắng trong snapshot refs/heads"**.
+Không nâng nó thành kết luận về mọi hiện vật, lịch sử push hoặc lượng việc đã làm.
+
+**Giới hạn của phép đo này, nói thẳng:** `output_tokens`, nếu bản chép API đúng, cho biết phiên có sinh nội dung; nó **KHÔNG** chứng minh nội dung ấy là việc của packet, cũng không nói được bao nhiêu phần
+việc đã xong. Transcript hai phiên chưa được lưu/đối chứng. Trạng thái `IDLE` + `disconnected` cũng
+chỉ là lời khai API. Khả năng phục hồi nội dung chưa được kiểm; hồ sơ này không cấp quyền
+mở lại phiên hoặc gửi thông điệp.
 
 ## Hệ quả cho việc cấp lại lease
 
-Điều kiện dừng mà bàn giao đặt ra — *"đừng cấp lại lease trước khi biết lượt đầu chết ở đâu"* —
-**đã thoả**: lượt đầu chết vì hạn mức tuần, và hạn mức đã reset.
+Điều phối dẫn điều kiện dừng *"đừng cấp lại lease trước khi biết lượt đầu chết ở đâu"*.
+Hồ sơ mới chỉ có thông báo lỗi hạn mức được chép lại. **Chưa đủ bằng chứng để tuyên điều
+kiện dừng đã thoả**, hạn mức đã khả dụng hoặc đã biết trạng thái công việc có thể phục hồi.
+Quyết định cấp lại cần nguồn phiên và trạng thái hiện hành được người có thẩm quyền kiểm.
 
-Nếu chủ kho quyết định cấp lại: `revision: 2`, `generation` giữ **1** (contract không đổi, cùng
-`spec_hash`). Kèm một chốt rút từ chính sự cố: executor phải **push nhánh sớm** thay vì đợi xong —
-một phiên bị cắt giữa chừng không mang được gì ra ngoài container.
+Đề xuất điều phối `revision: 2`, giữ `generation: 1` và cùng `spec_hash` chỉ có hiệu lực
+nếu contract thực sự không đổi và được cấp theo authority hiện hành. Đây không phải lease
+mới. Đẩy đầu ra sớm trong write set được cấp có thể giảm rủi ro mất việc khi phiên ngắt;
+snapshot này không chứng minh mọi nội dung chưa push đều đã mất.

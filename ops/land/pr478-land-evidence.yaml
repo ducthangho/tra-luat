@@ -143,7 +143,9 @@ pre_merge_checks:
       KHÔNG phải một thứ").
       Có MỘT lượt `duyet khac danh tinh` = `failure` trên cùng head (`34183411154`,
       `pull_request_target`): đó là lượt chạy TRƯỚC khi có phê duyệt, log ghi
-      `ĐỎ: chưa có bản duyệt nào từ danh tính khác ducthangho`. Nó đã bị hai lượt sau thay thế.
+      `ĐỎ: chưa có bản duyệt nào từ danh tính khác ducthangho`. Hai lượt xanh về sau
+      là các run được thuật lại; chưa chứng minh chúng thay thế required-check context của
+      lượt đỏ này.
       Điều phối khai `mergeable_state: unstable`. Chưa có response/timeline đầy đủ để xác nhận
       run nào quyết định trạng thái ấy; không chốt nguyên nhân từ một run cũ hoặc coi một run
       xanh khác tên là bằng chứng required check đã được thay thế.

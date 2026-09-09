@@ -248,12 +248,22 @@ pre_merge_checks:
     ly_do: >-
       **KHÔNG CHẠY.** Lượt cross-review cuối (`approve`) neo `98ef1f1`, KHÔNG neo `efa397e`.
       Ghi `not_run` chứ không ghi `passed` — xem `no_review_head_da_merge`.
-  - ten: 'CI Windows trên head'
+  - ten: 'Hồ sơ ĐỌC kết quả CI Windows trên head — bước của HỒ SƠ, không phải của CI'
     trang_thai: not_run
-    ly_do: >-
-      Không chạy trên PR thường: không gắn nhãn `windows`, không gọi `workflow_dispatch`. Nhắc
-      kèm: gắn nhãn KHÔNG đủ — `ci.yml` khai `pull_request:` mà không khai `types:`, nên `labeled`
-      không sinh lượt chạy nào.
+    doi_tuong_cua_trang_thai: >-
+      `not_run` ở đây nói về BƯỚC CỦA HỒ SƠ NÀY: điều phối KHÔNG đọc, KHÔNG giữ run JSON, KHÔNG
+      quét lịch sử để biết lượt Windows nào đã chạy cho head `efa397e`. Nó KHÔNG nói "CI Windows
+      chưa chạy" — đó là mệnh đề về LỊCH SỬ và hồ sơ này không có nguồn cho nó.
+    dinh_chinh_ban_truoc: >-
+      Bản trước đặt `not_run` với lý do "không gắn nhãn `windows`, không gọi `workflow_dispatch`"
+      — tức dựng trạng thái cổng TRÊN CHÍNH lời khai lịch sử mà `ma_tran_windows_CHI_la_cau_hinh`
+      liệt kê là KHÔNG ĐO ĐƯỢC. Hai chỗ trong cùng một tệp nói ngược nhau, và chỗ này còn biến
+      "chưa biết" thành "không chạy". Cross-review lượt 4 chấm đúng đây, và nó ĐÚNG: đây là ảnh
+      chụp trạng thái SAI MỨC CHỨNG CỨ, không phải một câu mô tả ma trận.
+    cau_hinh_thi_doc_duoc: >-
+      Nguồn riêng, KHÔNG dùng để suy ra lịch sử: `ci.yml` khai `pull_request:` mà KHÔNG khai
+      `types:`, nên `labeled` không nằm trong tập sự kiện mặc định — gắn nhãn `windows` cho một PR
+      ĐANG MỞ không tự sinh lượt chạy nào. Đó là mệnh đề về CẤU HÌNH.
 
 # --- PHÉP ĐO SAU MERGE, trên master c0a5cbe ---
 post_merge_checks:
@@ -382,9 +392,16 @@ no_con_lai:
     trang_thai: 'CHƯA VÁ — lượt thứ BA liên tiếp mang slug họ này'
     dia_chi_tra_cuu: 'ops/reviews/pr489-review-2-phep-do/{bo-sot.json,comments.json,tables.json}'
     ghi_chu: >-
-      Bảng cấu trúc giữ 526/526 lá YAML, 0 lá cắt — phần đã sửa thì ĐÚNG. Còn thiếu 2 tệp Markdown,
-      242 lá JSON và 62 dòng comment YAML. Đóng nó đòi một bộ trích khẳng định phủ cả ba nguồn, có
-      cổng riêng và phản chứng riêng — việc của một packet, không phải một dòng vá kèm.
+      Còn thiếu 2 tệp Markdown, 242 lá JSON và 62 dòng comment YAML. Đóng nó đòi một bộ trích
+      khẳng định phủ cả ba nguồn, có cổng riêng và phản chứng riêng — việc của một packet, không
+      phải một dòng vá kèm.
+    ket_qua_bang_cu_la_ATTESTATION: >-
+      "526/526 lá YAML, 0 lá cắt" là KẾT QUẢ REVIEWER LƯỢT TRƯỚC KHAI, không phải thứ tái lập
+      được từ kho: `tables.json` lưu con số, nhưng BẢNG TSV GỐC không vào kho nên không ai chạy
+      lại được phép so bảo toàn type/path/value hay phép kiểm "không cắt". Tái lập được ĐÚNG MỘT
+      vế: số lá NGUỒN. Bản trước viết "phần đã sửa thì ĐÚNG" như một xác nhận — cross-review lượt
+      4 chấm đúng chỗ ấy. Giữ con số vì nó là lời khai CÓ NGUỒN của reviewer; không nâng nó thành
+      bảo đảm của điều phối.
   - slug: tong-dong-diff-trong-prompt-khong-khop-numstat
     muc: P3
     trang_thai: 'KHÔNG CÓ TỆP TRONG KHO ĐỂ SỬA'
@@ -439,11 +456,18 @@ chuoi_land_evidence_DA_DONG_THEO_QUYET_DINH_CHU_KHO:
     miễn CI KHÔNG miễn duyệt. Cổng `cong` (`.claude/dev/duyet_danh_tinh.py`) cưỡng chế đúng điều
     kiện ấy và nó KHÔNG phải một cổng CI: nó không chạy test nào, chỉ đếm bản duyệt hợp lệ. Điều
     phối KHÔNG tự nới nó, và KHÔNG dùng quyền admin để đi vòng.
-  he_qua_do_duoc_cua_viec_dong_chuoi: >-
-    KHÔNG cổng nào đỏ vì chuỗi dừng. Đo được: `rg -l "ops/land"` (trừ chính `ops/land` và
-    `ops/reviews`) ⇒ 2 tệp, cả hai là VĂN BẢN; `packet_loop.py` có 17 lệnh con và KHÔNG lệnh nào
-    kiểm land evidence — chuỗi `landed` chỉ xuất hiện trong 2 chuỗi MÔ TẢ danh sách trạng thái.
-    Thứ mất là cho NGƯỜI ĐỌC, không phải cho máy.
+  he_qua_do_duoc_cua_viec_dong_chuoi:
+    do_duoc_trong_pham_vi_da_quet: >-
+      `rg -l "ops/land"` (trừ chính `ops/land` và `ops/reviews`) ⇒ 2 tệp, cả hai là VĂN BẢN;
+      `packet_loop.py` có 17 lệnh con và không lệnh nào kiểm land evidence; chuỗi `landed` chỉ
+      xuất hiện trong 2 chuỗi MÔ TẢ danh sách trạng thái. Đây là phép quét CHUỖI LITERAL trên
+      cây tại SHA này.
+    pham_vi_cua_ket_luan: >-
+      Kết luận đúng CHO TẬP ẤY: trong các tệp đã quét, tại SHA này, không cổng nào đọc
+      `ops/land/`. KHÔNG mở rộng thành "không cổng nào đỏ" nói chung — phép quét literal KHÔNG
+      thấy consumer dựng đường dẫn ĐỘNG, consumer ngoài kho, hay CI/API (vốn đã khai là chưa đo).
+      Bản trước viết câu bao trùm ấy; cross-review lượt 4 chấm đúng, và nó ĐÚNG.
+    thu_mat_la_gi: 'Cho NGƯỜI ĐỌC hồ sơ, không phải cho máy — trong đúng phạm vi vừa nêu.'
   no_moi_sinh_ra_tu_quyet_dinh_nay:
     slug: quyet-dinh-dong-chuoi-chua-vao-doctrine
     mo_ta: >-

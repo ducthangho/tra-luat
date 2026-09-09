@@ -205,9 +205,9 @@ bookkeeping:
       mắt xích đo được: một lượt CI (ubuntu ~26 phút, master thêm windows ~48 phút), một lượt duyệt
       của người khác, và ít nhất một lượt cross-review (~15–25 phút mỗi lượt).
   - >-
-    **PR #487 CHƯA merge tại thời điểm ghi.** Nó mang verdict và biên nhận của CẢ HAI lượt
-    cross-review #480, cộng bản vá hậu kiểm #486. Nên tới khi #487 merge, `master` có `7e69b8e`
-    (nội dung #480) mà CHƯA có hiện vật review của chính nó.
+    **PR #487 ĐÃ merge** — merge commit `f4d74fed59616ecd5a133fc232275a832dcd95bb`, sau tệp này một
+    nhịp. Nó mang verdict và biên nhận của CẢ HAI lượt cross-review #480, nên `master` nay có đủ
+    hiện vật review của #480. Land evidence của chính #487 ở `pr487-land-evidence.yaml`, cùng PR.
   - >-
     Lỗ hổng `_kiem_bia_mo` dùng `any(...)` trong `ops/lease_publish.py` **VẪN NGUYÊN** — ngoài phạm
     vi PR này.

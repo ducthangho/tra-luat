@@ -1,0 +1,168 @@
+# BIÊN NHẬN GIAO HÀNG — cross-review LƯỢT 1 của PR #491, KHÁC NỀN (codex).
+#
+# Verdict: changes_requested — 3 P1 · 5 P2 · 6 P3 trên head `ba4a258`.
+# Head ấy KHÔNG phải head đã merge; xem `head_da_review_khac_head_da_merge`.
+#
+# Gói hiện vật của lượt này do `ops/dung_goi_review.sh` dựng và KHÔNG vào kho.
+# Mọi scalar runtime dưới đây đọc từ `run.json` trong scratchpad ⇒ ATTESTATION.
+
+schema_version: 2
+receipt_id: pr491-review-1-codex-20260909-dc136619
+kind: review_delivery_receipt
+packet_id: 'PR491-R358-GHI-SO-CHUOI-468-489'
+lease_id: khong-co-lease
+phase_key: HO-SO-CROSS-REVIEW-PHIEN-20260909
+luot: 1
+role: reviewer
+provider: codex
+executor_provider: claude
+cross_provider: true
+assurance: cross_reviewed
+verdict: changes_requested
+verdict_path: ops/reviews/pr491-review-1-codex-verdict.md
+verdict_sha256: 38d7fb2eac39da2bbdb2d76dc43c1f0f3f505498686ffa5ad5478a7c7491248c
+verdict_bytes: 35088
+evidence_url: https://github.com/ducthangho/tra-luat/blob/34e9d35be0fc52406e3659bfc24c388bf54262cd/ops/reviews/pr491-review-1-codex-verdict.md
+evidence_url_ghi_chu: >-
+  Neo BLOB ghim `34e9d35` — commit ĐẦU TIÊN chứa tệp verdict, đo bằng
+  `git log --diff-filter=A --format=%H -1 -- <path>`. Commit ấy CỐ Ý chỉ mang hai tệp verdict
+  và không mang biên nhận: `evidence_url` phải neo được trước khi biên nhận tồn tại.
+reviewed_sha: ba4a258d4e7d13ce8630c94023ae2cbeedb2fb3a
+so_p1: 3
+so_p2: 5
+so_p3: 6
+so_p1_p2_p3_do_bang_may: >-
+  `grep -cE '^### .*\[P[123]\]'` ⇒ 14 tiêu đề finding; `grep -oE '\[P[123]\]' | sort | uniq -c`
+  ⇒ 3 P1 · 5 P2 · 6 P3. Tổng 3+5+6 = 14, khớp số tiêu đề. KHÔNG chép số từ văn xuôi của reviewer.
+
+ba_p1_va_thu_dieu_phoi_TU_DO_LAI_truoc_khi_va:
+  - slug: chuoi-tam-pr-thuc-te-bay
+    reviewer_khai: 'mục r358 nói "chuỗi tám PR", thực tế bảy; mũi tên đảo #480/#486'
+    dieu_phoi_do_lai: >-
+      `git rev-list --count --first-parent b416830..c0a5cbe` ⇒ **7**.
+      `git log --first-parent` cùng khoảng cho thứ tự #468 · #477 · #478 · #486 · #480 · #487 · #489.
+    ket_luan: 'reviewer ĐÚNG'
+  - slug: no-thu-hoi-lease-dang-chep-trang-thai-cu
+    reviewer_khai: 'câu "revision 6 / packet_issue CHƯA CÓ / trần 6/6" đã cũ trước khi PR được tạo'
+    dieu_phoi_do_lai: >-
+      `git show 2aee80a:ops/specs/THU-HOI-LEASE-VA-CAP-LAI.md` ⇒ revision 6, `packet_issue: CHƯA CÓ`.
+      Tip nhánh đặc tả `bd32d1145a4b890da695dc56196997b582c5be1e` (`2026-09-09T11:23:01Z`) ⇒
+      revision 9, `packet_issue: neo ở Issue`; `luot8-VERDICT.md` cùng ref khai lượt 8 = lời gọi 9,
+      0 P1, `changes_requested` chỉ vì P2 `S11`.
+    ket_luan: 'reviewer ĐÚNG'
+  - slug: ci-gia-thuyet-bi-viet-thanh-nguyen-nhan
+    reviewer_khai: 'r358 khôi phục một kết luận nguyên nhân mà nguồn đã RÚT'
+    dieu_phoi_do_lai: >-
+      `ops/land/pr477-dung-goi-review-land-evidence.yaml`, khoá `nguyen_nhan_cua_lan_doc_43_4`, ghi
+      nguyên văn **CHƯA XÁC ĐỊNH**. Cặp 43/1 → 44/6 thuộc run `34176439015` (merge `585c7d5`);
+      run đang tranh cãi là `34169756563` (merge `802fc01`). Mẫu giữa chừng là 1, không phải 4.
+    ket_luan: 'reviewer ĐÚNG'
+
+nam_p2_deu_do_lai_duoc:
+  - {slug: ghim-cong-cu-khai-rong-va-bi-bo-loc-bo-sot, do_lai: 'chỉ `actionlint` được so phiên bản bằng nhau trong `ops/dung_goi_review.sh`; vòng `for c in shellcheck git python3` chỉ resolve trên `$PATH` rồi gọi `--version`', ket_luan: ĐÚNG}
+  - {slug: lenh-pham-vi-thieu-hai-moc, do_lai: '`git diff --name-only` không khoảng, chạy trên cây sạch ⇒ RỖNG; có khoảng ⇒ `{ops}`', ket_luan: ĐÚNG}
+  - {slug: run-json-ba-khoa-chi-dung-cho-lenh, do_lai: '`json.load` hai tệp `pr468-hoso-4-packet-review-{14,15}-codex/run.json` ⇒ **35** khoá cấp cao cả hai; ba khoá `chuong_trinh`/`so_doi_so`/`van_tay` nằm trong object `lenh`; không khoá cấp cao nào chứa `model`', ket_luan: ĐÚNG}
+  - {slug: hai-p3-khong-cung-la-hop-dong-dau-vao, do_lai: '`pr477-…-land-evidence.yaml` liệt kê hai slug KHÁC nhau: `t33-khong-chay-van-con-o-mo-dau` và `gioi-han-dung-goi-chua-tu-khai`', ket_luan: ĐÚNG}
+  - {slug: so-lich-su-bi-mat-nhan-nguon, do_lai: 'mục r358 dùng số lịch sử mà bỏ nhãn nguồn mà `DO-T33-VA-GOI-REVIEW-20260907.md` và `pr477-…-land-evidence.yaml` đã đặt', ket_luan: ĐÚNG}
+
+sau_p3_khong_deu_mot_loai:
+  phan_hoach: '5 + 1'
+  nam_ve_do_phu_bang_trich: >-
+    `bo-sot-pham-vi-ref-va-vat-chat-hoa` · `bo-sot-tu-khai-evidence-va-manifest` ·
+    `bo-sot-pham-vi-nen-chua-do` · `bo-sot-nguong-hai-client` · `bo-sot-pham-vi-r-va-hai-sentinel`.
+  mot_ve_gioi_han_cong: >-
+    `cong-kiem-ke-co-rang-nhung-khong-kiem-su-that` là GHI NHẬN DƯƠNG: reviewer tự đột biến một byte
+    ⇒ `release-verify` `rc=2`, `failed=[CHANGELOG.md]`, `package_hash_match: false`; đột biến
+    `1016→1017` ⇒ `doc-claims-check --strict` VẪN `rc=0`. Đó là giới hạn cổng, không phải bảng bỏ sót.
+  vi_sao_ghi_o_day: >-
+    Thân PR #491 bản đầu gộp cả sáu thành một loại; lượt 2 chấm đúng chỗ đó (P2
+    `sau-p3-khong-deu-la-bo-sot-bang`). Ghi lại để phân hoạch đúng không trôi thêm lần nữa.
+
+head_da_review_khac_head_da_merge:
+  head_luot_nay: ba4a258d4e7d13ce8630c94023ae2cbeedb2fb3a
+  head_da_merge: 2ec6171f7a2e21ae950633f9e328329a355f7a6d
+  ghi_chu: >-
+    Lượt 1 KHÔNG phủ head đã merge. Thứ phủ head ấy là lượt 2 (`pr491-review-2-codex-verdict.md`).
+    `ba4a258` vẫn là tổ tiên của `origin/master` sau khi land bằng MERGE.
+
+model_reviewer_identity:
+  provider: openai_codex
+  surface: codex_cli
+  model_yeu_cau: gpt-6-astra
+  model_da_chay: KHONG_DO_DUOC
+  session_run_id: dc136619
+  run_id_day_du: dc13661977cb464390989d23fd72e8f2
+  prompt_sha256: 8b72ae226fa6adc3fe56aa49688bcfe06cb406ceb5e6fee76ef22f40cc213f4b
+  bat_dau_utc: '2026-09-09T16:29:48.605940+00:00'
+  ket_thuc_utc: '2026-09-09T16:41:24.505814+00:00'
+  thoi_luong_giay: 695.9
+  ma_thoat: 0
+  trang_thai: xong
+  stdout_byte: 206
+  stdout_sha256: 7fe4288517b8a26039d2987d6834b5438e441d8b1a988810b1da3a542d05c1ab
+  stderr_byte: 446066
+  stderr_sha256: c15d7ff5d98af7e1b146fb06a9066bd7f6f8cdfc69e9579e12845b9193d0d9af
+  so_lan_chet_truoc_khi_xong: 0
+  nguon_cac_scalar_tren: 'Đọc từ `run.json` trong scratchpad; tệp ấy KHÔNG vào kho ⇒ ATTESTATION.'
+  neo_boi_launcher: >-
+    `launcher.py run --expected-repo github.com/ducthangho/tra-luat --expected-root-commit
+    394e93468fc8d84ec20938e6df8fb7ab72b2cc37 --expected-head ba4a258d4e7d13ce8630c94023ae2cbeedb2fb3a
+    --prompt-file PROMPT.md --expected-prompt-sha256 8b72ae22…` bọc `codex exec`.
+    Probe: workspace ĐẠT · ghi ĐẠT · spawn ĐẠT.
+
+nang_luc_do_cua_goi:
+  so_ref: 316
+  lech: 0
+  kho_nong: false
+  ghi_chu: >-
+    `ops/dung_goi_review.sh` đo 316/316/316 (máy chủ / mirror / cây làm việc), lệch 0/0.
+    Đối chiếu cổng nền(worktree) ↔ sandbox(clone) trên CÙNG `ba4a258`: `doc-claims-check --strict`
+    0/0, `release-verify --deterministic` 0/0.
+  chua_do_duoc: >-
+    Ảnh chụp chỉ phủ `refs/heads` (`ls-remote --heads`); tag và namespace khác KHÔNG có ảnh chụp.
+    Sandbox không mạng ⇒ mọi khẳng định về GitHub API/CI là KHÔNG ĐO ĐƯỢC ở lượt này.
+
+tuan_thu_cam_cua_reviewer:
+  cay_kho_sach: true
+  commit_them_ngoai_head: 0
+  bang_chung: '`run.json` khai `worktree_sach: true`, `so_muc_ban: 0`. Kho THẬT đo lại `git status --porcelain` ⇒ 0 byte.'
+
+github_submitter_identity:
+  actor: ducthangho
+  la_tac_gia_PR: true
+  ghi_chu: '`ADR-0040`: verdict do tài khoản tác giả PR vận chuyển KHÔNG là merge authorization.'
+  phien_van_chuyen: https://claude.ai/code/session_012KBPdsckzqhbnufu7JBSZz
+
+anchor:
+  loai: canonical_ancestry
+  cuong_do: cao
+  mo_ta: 'Blob verdict ghim trên nhánh `claude/pr491-land-va-findings`.'
+  gioi_han: 'Chỉ vững nếu land bằng MERGE hoặc fast-forward; SQUASH phá quan hệ tổ tiên.'
+
+khong_do_duoc:
+  - 'Model đã phục vụ và `thread_id` — `codex` không phát `modelUsage`.'
+  - '`run.json` không vào kho ⇒ scalar runtime là attestation.'
+  - 'Trạng thái GitHub tại thời điểm reviewer đọc: sandbox không mạng.'
+  - 'Tag và namespace ref ngoài `refs/heads` trong gói hiện vật.'
+
+verdict_usage_caveats:
+  - id: HEAD-LUOT-1-KHONG-PHAI-HEAD-DA-MERGE
+    canh_bao: >-
+      Lượt này review `ba4a258`. Head ĐÃ MERGE là `2ec6171`. Ba P1 của lượt này được vá SAU khi
+      verdict ra đời, nên đừng đọc bất kỳ finding nào ở đây thành trạng thái của master.
+      Thứ phủ head đã merge là `pr491-review-2-codex-verdict.md`.
+  - id: SAU-P3-KHONG-DEU-MOT-LOAI-5-cong-1
+    canh_bao: >-
+      Sáu P3 của lượt này KHÔNG cùng một loại: NĂM về độ phủ bảng trích khẳng định, MỘT
+      (`cong-kiem-ke-co-rang-nhung-khong-kiem-su-that`) là GHI NHẬN DƯƠNG về giới hạn cổng —
+      `release-verify` CÓ răng (chặn đột biến một byte), `doc-claims-check` thì KHÔNG bắt `1016→1017`.
+      Thân PR #491 bản đầu gộp cả sáu thành một loại và lượt 2 chấm P2 đúng chỗ đó.
+  - id: MODEL-YEU-CAU-khac-MODEL-DA-PHUC-VU
+    canh_bao: >-
+      `model_yeu_cau: gpt-6-astra` là thứ TA YÊU CẦU. `codex` không phát `modelUsage`, nên
+      **model đã phục vụ là KHÔNG ĐO ĐƯỢC**. `cross_approved` ở đây phân biệt PROVIDER, không phải MODEL.
+  - id: phan-cong-CAM-tu-soan-phan-chung
+    canh_bao: >-
+      `PROMPT.md` CẤM reviewer tự soạn chuỗi tấn công đường dẫn / payload thoát thư mục (hai lượt
+      cross-review của kho đã chết giữa chừng vì đúng việc ấy). Nên ĐỘ PHỦ về phía đó HẸP HƠN một
+      lượt không ràng buộc — không đọc "không có finding loại ấy" thành "không có lỗ loại ấy".

@@ -1,0 +1,146 @@
+# BIÊN NHẬN GIAO HÀNG — cross-review HẬU KIỂM trên HEAD ĐÃ MERGE `3873173` của PR #487, KHÁC NỀN.
+#
+# Verdict: changes_requested — 0 P1 / 1 P2 / 4 P3.
+#
+# LƯỢT NÀY TRẢ MỘT NỢ VÀ LẬT MỘT KẾT LUẬN.
+# Nợ: head `3873173` đã merge mà chưa qua lượt cross-review nào. `0 P1` là câu trả lời — head ấy,
+# nếu được review trước merge, đã không bị P1 chặn.
+# Lật: P2 của lượt này dẫn tới phát hiện rằng container điều phối là KHO NÔNG, nên mọi con số
+# "bien_nhan_v2 ĐỎ 4 vi phạm" mà điều phối khai suốt phiên là ẢO. Xem `phat_hien_kho_nong`.
+
+schema_version: 2
+receipt_id: pr487-hau-kiem-head-review-1-codex-20260909-d550a37b
+kind: review_delivery_receipt
+packet_id: 'PR487-HAU-KIEM-HEAD-DA-MERGE'
+lease_id: khong-co-lease
+phase_key: HO-SO-CROSS-REVIEW-PHIEN-20260909
+luot: 1
+role: reviewer
+provider: codex
+executor_provider: claude
+cross_provider: true
+assurance: cross_reviewed
+verdict: changes_requested
+verdict_path: ops/reviews/pr487-hau-kiem-head-review-1-codex-verdict.md
+verdict_sha256: 683488f13c912ece73b249660a3ab7731055b4d401b43eb91f0002d3e0b54bb9
+verdict_bytes: 37900
+reviewed_sha: 3873173094a3e294b069998ed21dc117d8ad659a
+head_da_qua_cross_review_truoc_do: 5c05778219e293ff929e8cb1f1c31aea4120d967
+evidence_url: https://github.com/ducthangho/tra-luat/blob/145574101781909e06eea0d3040c051576a7523a/ops/reviews/pr487-hau-kiem-head-review-1-codex-verdict.md
+evidence_url_ghi_chu: 'Neo BLOB ghim commit `1455741` — commit ĐẦU TIÊN chứa tệp verdict.'
+so_p1: 0
+so_p2: 1
+so_p3: 4
+
+no_da_tra:
+  no: 'head `3873173` đã merge mà chưa qua cross-review nào'
+  ai_doi: >-
+    Chủ kho chất vấn trực tiếp (*"vẫn còn P1, đã có approve của cross review chưa #487"*), và
+    codex connector chấm P1 `Re-review the exact head that was merged` trên PR #489 — hai nguồn
+    độc lập, cùng kết luận.
+  ket_qua: >-
+    **0 P1.** Head đã merge, nếu được review trước khi merge, đã không bị P1 chặn. Nợ
+    `no_review_head_da_merge` trong `pr487-land-evidence.yaml` chuyển từ `NO_CHUA_TRA` sang ĐÃ TRẢ.
+  gioi_han: >-
+    `0 P1` KHÔNG nghĩa là "không có gì sai" — lượt này vẫn cho 1 P2 và 4 P3, và P2 của nó lật một
+    kết luận điều phối đã đưa vào master. Nó chỉ nghĩa là không finding nào đủ mức chặn merge.
+
+phat_hien_kho_nong:
+  slug_reviewer: ket-luan-bac-connector-vuot-phep-do-hau-kiem
+  reviewer_khai: >-
+    CLI thật trên HEAD trong mirror: **91/91 biên nhận** phân loại, `TỔNG: ĐẠT`; mỗi cây **0 vi
+    phạm**. Ngược hẳn con số điều phối khai (`4 vi phạm`), nên "sửa nhãn cha vẫn chưa làm câu
+    *không cha nào exit 0* đứng vững trước bên thứ ba".
+  dieu_phoi_do_lai_va_xac_nhan_reviewer_dung: >-
+    Chính chỗ ngược ấy buộc chạy phép A/B, và A/B lộ ra nguyên nhân: **container điều phối là KHO
+    NÔNG**. `is-shallow-repository` ⇒ `true`, HEAD có **417** commit tổ tiên; sau `--unshallow` ⇒
+    `false`, **1870** tổ tiên, cổng trả `rc=0 · 0 vi phạm · TỔNG: ĐẠT`.
+  phep_A_B: >-
+    Cùng commit `3873173`, khác đúng MỘT biến: mirror gói review (`is-shallow=false`, 1858 tổ tiên)
+    ⇒ `38 ĐẠT · 0 vi phạm · ĐẠT · rc=0`; kho nông điều phối (`is-shallow=true`, 405 tổ tiên) ⇒
+    `34 ĐẠT · 4 vi phạm · ĐỎ · rc=1`.
+  co_che: >-
+    `ops/bien_nhan_v2.py:818` chạy `merge-base --is-ancestor <neo> HEAD`. Kho nông trả SAI cho
+    commit CÓ THẬT; `cat-file -e` ở dòng 805 vẫn thấy object nên cổng đi tiếp và kết tội "CÓ THẬT
+    nhưng KHÔNG phải tổ tiên".
+  do_lai_sau_unshallow_sau_commit: >-
+    `c87b067` 30 ĐẠT · `da481f9` 33 ĐẠT · `5b96ddc` 28 ĐẠT · `7e69b8e` 33 ĐẠT · `3873173` 38 ĐẠT ·
+    `f4d74fe` 38 ĐẠT — TẤT CẢ `rc=0`, **0 vi phạm**.
+  ba_he_qua: >-
+    (1) Mọi câu "bien_nhan_v2 ĐỎ 4 vi phạm, đỏ sẵn, delta 0" trong hai land evidence là SAI, đã sửa.
+    (2) "Mâu thuẫn chưa giải" mà điều phối dựng lên — master đỏ trong khi `pr478-land-evidence` khai
+    0 vi phạm — KHÔNG TỒN TẠI; lời khai của `pr478-land-evidence` ĐÚNG.
+    (3) Việc điều phối BÁC P1 của codex connector trên #487 KHÔNG ĐỨNG: vế (a) của connector,
+    "cha exit 0", ĐÚNG trong kho đầy đủ.
+  bai_hoc: >-
+    Điều phối ĐÃ TRÍCH DẪN đúng bài học `CLAUDE.md` "cắt độ sâu làm hỏng phép hỏi lịch sử" để buộc
+    tội connector chạy kho thiếu object — trong khi CHÍNH MÌNH mới là bên chạy kho nông. Đọc một
+    bài học không phải áp dụng nó.
+  chot_re: >-
+    Trước MỌI phép đo cổng đọc lịch sử: `git rev-parse --is-shallow-repository` phải `false`, và
+    `git rev-list --count HEAD` phải khớp bậc độ lớn với kho đầy đủ.
+
+bon_P3_da_va:
+  - {slug: bien-nhan-luot-hai-chep-sai-so-ref, mo_ta: '`manifest.ghi_chu` của receipt lượt 1 vẫn ghi 312 ref dù `so_ref` đã sửa thành 313 — vá scalar mà bỏ sót văn xuôi trong CÙNG tệp. Lần thứ HAI cho cùng slug.', da_va: true}
+  - {slug: khai-va-het-ba-loi-sai-commit, mo_ta: 'Mục lục khai "cả ba đã sửa trong chính commit đưa verdict" — SAI: `edb288e` sửa hai lệch ở receipt, lệch mục lục chỉ sửa ở `3873173`, số ref sót tới lượt này.', da_va: true}
+  - {slug: doi-bay-phat-hien-thanh-bay-luot-review, mo_ta: '`CLAUDE.md:722-723` nói BẢY PHÁT HIỆN qua BỐN LƯỢT; điều phối viết "bảy lượt" ở hai chỗ — đổi đơn vị của chính phép đếm dùng làm bài học.', da_va: true}
+  - {slug: bang-khang-dinh-bo-chu-thich-va-gioi-han-nguon, mo_ta: 'Bảng giữ đủ 156/156 lá và 21/21 dòng chú thích, nhưng đầu vào chỉ có 2 receipt: `README.md` — một trong bốn tệp phải review — và các verdict `.md` nằm ngoài.', da_va: false, ly_do_chua_va: 'Nợ ĐỘ PHỦ của gói, không sửa được bằng một dòng; cần đổi cách dựng bảng. Ghi nợ.'}
+
+model_reviewer_identity:
+  provider: openai_codex
+  surface: codex_cli
+  model_yeu_cau: gpt-6-astra
+  model_da_chay: KHONG_DO_DUOC
+  session_run_id: d550a37b
+  run_id_day_du: d550a37bca294a7586e5b68582bff106
+  prompt_sha256: 8131ae2447687b982e3bf21450c526fd6abb13766b7a34a65e8fe4b57ea2cf0a
+  bat_dau_utc: '2026-09-09T12:30:43.572583+00:00'
+  ket_thuc_utc: '2026-09-09T12:54:24.154756+00:00'
+  thoi_luong_giay: 1420.582
+  ma_thoat: 0
+  trang_thai: xong
+  stdout_byte: 699
+  stdout_sha256: fc15824df25c4b423c4f525efb2cb31c8dc2287009bdb77123df15fd609b2e90
+  stderr_byte: 614405
+  stderr_sha256: a21a2efa458c9b0ee5472407d91b19421705d3ab001d17273e5cf72755e43ec7
+  so_lan_chet_truoc_khi_xong: 0
+  nguon_cac_scalar_tren: 'Đọc từ `run.json` trong scratchpad; tệp ấy KHÔNG vào kho ⇒ ATTESTATION.'
+  neo_boi_launcher: >-
+    `launcher.py run --expected-repo github.com/ducthangho/tra-luat --expected-root-commit
+    394e93468fc8d84ec20938e6df8fb7ab72b2cc37 --expected-head 3873173094a3e294b069998ed21dc117d8ad659a
+    --require-clean --prompt-file PROMPT.md --expected-prompt-sha256 8131ae24…` bọc `codex exec`.
+
+nang_luc_do_cua_goi:
+  so_ref: 314
+  lech: 0
+  ghi_chu: >-
+    Gói mang `VERDICT-luot2-tren-5c05778.md`, diff phần chưa qua review (4 tệp, +354 −6), bảng đầy
+    đủ 156 lá và bảng chú thích 21 dòng. **Mirror của gói KHÔNG nông** — chính điều đó làm reviewer
+    đo ra số đúng trong khi điều phối đo sai.
+  chua_do_duoc: 'Không mạng: mọi khẳng định về GitHub API là KHÔNG ĐO ĐƯỢC.'
+
+tuan_thu_cam_cua_reviewer:
+  cay_kho_sach: true
+  commit_them_ngoai_head: 0
+  bang_chung: '`status --porcelain` RỖNG và `log 3873173..HEAD` RỖNG sau khi lượt kết thúc.'
+
+manifest:
+  duong_dan: KHONG_CO_TRONG_KHO
+  ghi_chu: 'Hiện vật gói (mirror 314 ref + script tự đo của reviewer) CỐ Ý không vào kho.'
+
+github_submitter_identity:
+  actor: ducthangho
+  la_tac_gia_PR: true
+  ghi_chu: '`ADR-0040`: verdict do tài khoản tác giả PR vận chuyển KHÔNG là merge authorization.'
+  phien_van_chuyen: https://claude.ai/code/session_01UN8WRS5Bc5pBBzYPDqs9Dx
+
+anchor:
+  loai: canonical_ancestry
+  cuong_do: cao
+  mo_ta: 'Blob verdict trên nhánh `claude/land-480-20260909` (PR #489).'
+  gioi_han: 'Chỉ vững nếu land bằng MERGE hoặc fast-forward; SQUASH phá quan hệ tổ tiên.'
+
+khong_do_duoc:
+  - 'Model đã phục vụ và `thread_id`.'
+  - '`run.json` không vào kho ⇒ scalar runtime là attestation.'
+  - 'Trạng thái GitHub tại thời điểm reviewer đọc: sandbox không mạng.'

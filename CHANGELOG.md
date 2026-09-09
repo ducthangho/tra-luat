@@ -1,3 +1,11 @@
+# ★ dev-side — Codex credential tôn trọng `CODEX_HOME` (2026-09-09)
+
+Ba đường khôi phục credential (`launcher.py chuan-bi`, session-start hook và
+`codex_cred.py --cai-de`/`kiem`) nay chọn `<CODEX_HOME>/auth.json` khi biến có
+giá trị, fallback `~/.codex/auth.json` khi vắng/rỗng. Launcher materialize
+`CODEX_AUTH_JSON` trước khi sinh child rồi loại raw snapshot khỏi environment
+child; validation siết `tokens` phải là object và giữ atomic write/mode `0600`.
+
 # ★ dev-side — r356: kỳ vọng của fixture phụ thuộc NỀN CHẠY (2026-09-06)
 
 `launcher-windows.yml` ĐỬe trên `master` liên tục từ khi PR #449 land — run

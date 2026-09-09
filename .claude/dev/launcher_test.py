@@ -2326,6 +2326,50 @@ def t86_chuan_bi_nhan_ca_base64_lan_json_tho_va_tu_choi_rac():
 
 
 @ca
+def r357_chuan_bi_ton_trong_CODEX_HOME_va_tokens_phai_la_object():
+    """Credential phải tới đúng home mà Codex thực sự đọc, không phải ~/.codex cứng."""
+    import base64 as _b64
+    m = _tai_launcher_thu()
+    with tempfile.TemporaryDirectory() as nha:
+        custom = Path(nha) / "custom-codex"
+        raw = '{"tokens":{"access_token":"gia-dinh"}}'
+        m.os.environ = {"CODEX_HOME": str(custom),
+                        "CODEX_AUTH_JSON": _b64.b64encode(raw.encode()).decode()}
+        ket = m.chuan_bi_xac_thuc(that_su=True)
+        dich = custom / "auth.json"
+        bang(ket[0]["ok"] and dich.read_text(encoding="utf-8") == raw,
+             f"phai ghi vao CODEX_HOME, duoc {ket}")
+        bang(not (Path(nha) / ".codex" / "auth.json").exists(),
+             "co CODEX_HOME ma van ghi vao ~/.codex")
+        if not LA_WINDOWS:
+            bang(oct(custom.stat().st_mode)[-3:] == "700", "CODEX_HOME phai mode 700")
+        m.os.environ["CODEX_AUTH_JSON"] = _b64.b64encode(
+            b'{"tokens":"khong-phai-object"}').decode()
+        ket_xau = m.chuan_bi_xac_thuc(that_su=True)
+        bang(not ket_xau[0]["ok"], "tokens khong phai object ma van duoc nhan")
+
+
+@ca
+def r358_run_materialize_roi_bo_CODEX_AUTH_JSON_khoi_child():
+    """Run phải đổi secret lấy file chuẩn, không chuyển raw snapshot cho child."""
+    import base64 as _b64
+    with San() as s:
+        repo = tao_repo(s)
+        home = s / "codex-home"
+        raw = '{"tokens":{"access_token":"gia-dinh"}}'
+        env = dict(os.environ, CODEX_HOME=str(home),
+                   CODEX_AUTH_JSON=_b64.b64encode(raw.encode()).decode())
+        code = ("import os,sys,pathlib; "
+                "p=pathlib.Path(os.environ['CODEX_HOME'])/'auth.json'; "
+                "sys.exit(0 if p.read_text() and 'CODEX_AUTH_JSON' not in os.environ else 9)")
+        r = subprocess.run([PY, str(LAUNCHER_DANG_DUNG), "run", "--workspace", str(repo),
+                            "--run-root", str(s / "runs"), "--deadline-utc", mai_sau(30),
+                            "--", PY, "-c", code], env=env, capture_output=True, text=True,
+                           timeout=45)
+        bang(r.returncode == 0, f"child con thay secret hoac thieu auth file: {r.stderr[-300:]}")
+
+
+@ca
 def t87_khong_duoc_xuat_digest_on_dinh_cua_gia_tri_bien():
     """Đầu ra KHÔNG được chứa thứ băm ngoại tuyến được — cross-review, mức HIGH.
 

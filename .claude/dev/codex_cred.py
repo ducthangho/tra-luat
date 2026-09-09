@@ -77,6 +77,12 @@ _URL = re.compile(r"https://\S*device\S*")
 _MA = re.compile(r"\b([A-Z0-9]{3,6}-[A-Z0-9]{3,6})\b")
 
 
+def _codex_home_hieu_luc() -> Path:
+    """Đích credential thật: tôn trọng CODEX_HOME, rỗng thì dùng ~/.codex."""
+    raw = os.environ.get("CODEX_HOME", "").strip()
+    return Path(raw).expanduser() if raw else Path(os.path.expanduser("~/.codex"))
+
+
 def _in(*a):
     print(*a, flush=True)
 
@@ -393,7 +399,7 @@ def cmd_lay(a) -> int:
     _ghi_bi_mat(ra, (b64 + "\n").encode("ascii"))
 
     if a.cai_de:
-        that = Path(os.path.expanduser("~/.codex/auth.json"))
+        that = _codex_home_hieu_luc() / "auth.json"
         that.parent.mkdir(parents=True, exist_ok=True)
         bak = _sao_luu(that)
         _ghi_bi_mat(that, auth_bytes)
@@ -432,7 +438,7 @@ def cmd_lay(a) -> int:
 
 def cmd_kiem(a) -> int:
     """Đo credential ĐANG dùng: còn sống thật không, còn bao lâu."""
-    home = Path(a.codex_home) if a.codex_home else Path(os.path.expanduser("~/.codex"))
+    home = Path(a.codex_home).expanduser() if a.codex_home else _codex_home_hieu_luc()
     auth = home / "auth.json"
     if not auth.is_file():
         _in(f"KHÔNG_ĐO_ĐƯỢC: không có {auth}")

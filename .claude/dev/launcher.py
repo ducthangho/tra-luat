@@ -1606,6 +1606,16 @@ def lenh_run(a) -> int:
                    "lenh co {PROMPT_FILE} nhung khong truyen --prompt-file: "
                    "con se nhan chuoi nguyen van")
 
+    # Biến chỉ là hạt giống để dựng auth.json. Materialize trước khi mở log/sinh
+    # child, rồi trao một bản environment không còn raw credential.
+    moi_truong_con = dict(os.environ)
+    if moi_truong_con.get("CODEX_AUTH_JSON"):
+        ket_cred = chuan_bi_xac_thuc(that_su=True)
+        if not ket_cred or not all(x.get("ok") for x in ket_cred):
+            raise Chan(MA_CHUA_XAC_THUC,
+                       "CODEX_AUTH_JSON co mat nhung khong materialize duoc")
+        moi_truong_con.pop("CODEX_AUTH_JSON", None)
+
     f_out = (thu_muc / "stdout.log").open("w", encoding="utf-8")
     f_err = (thu_muc / "stderr.log").open("w", encoding="utf-8")
     them = {}
@@ -1615,7 +1625,7 @@ def lenh_run(a) -> int:
         # nhóm tiến trình riêng: điều kiện CẦN để giết được cả con cháu sau này
         them["start_new_session"] = True
     try:
-        p = subprocess.Popen(lenh_con, cwd=kq["workspace"],
+        p = subprocess.Popen(lenh_con, cwd=kq["workspace"], env=moi_truong_con,
                              stdout=f_out, stderr=f_err, stdin=subprocess.DEVNULL, **them)
     except (OSError, ValueError) as e:
         ban_ghi.update(trang_thai="hong", ly_do_dung=f"khong chay duoc lenh: {e}",
@@ -2435,7 +2445,8 @@ def quet_bien_moi_truong() -> dict:
 def chuan_bi_xac_thuc(that_su: bool = True) -> list[dict]:
     """Dựng credential trên ĐĨA từ biến môi trường, cho CLI nào cần đọc từ đĩa.
 
-    Hiện chỉ `codex` cần: nó đọc `~/.codex/auth.json`, không đọc biến.
+    Hiện chỉ `codex` cần: nó đọc `<CODEX_HOME>/auth.json` khi biến đó được đặt,
+    nếu không thì đọc `~/.codex/auth.json`; nó không đọc biến trực tiếp.
 
     KHÔNG IN NỘI DUNG, kể cả khi hỏng. Ghi quyền 0600. Idempotent: nội dung đã
     khớp thì không đụng tệp.
@@ -2467,7 +2478,9 @@ def chuan_bi_xac_thuc(that_su: bool = True) -> list[dict]:
     thoc = os.environ.get("CODEX_AUTH_JSON", "").strip()
     if not thoc:
         return ket
-    dich = Path(os.path.expanduser("~/.codex/auth.json"))
+    codex_home = os.environ.get("CODEX_HOME", "").strip()
+    dich = ((Path(codex_home).expanduser() if codex_home
+             else Path(os.path.expanduser("~/.codex"))) / "auth.json")
     # Giải mã SỚM để so mốc; phần kiểm lược đồ đầy đủ vẫn ở dưới, không bỏ.
     noi_dung_tam = None
     for thu in (thoc, None):
@@ -2524,7 +2537,7 @@ def chuan_bi_xac_thuc(that_su: bool = True) -> list[dict]:
             d = json.loads(thu)
         except Exception:
             continue
-        if not isinstance(d, dict) or "tokens" not in d:
+        if not isinstance(d, dict) or not isinstance(d.get("tokens"), dict):
             cach = f"HỎNG: giải được ({ten_cach}) nhưng thiếu khoá bắt buộc 'tokens'"
             continue
         noi_dung, cach = thu, ten_cach
@@ -2542,6 +2555,10 @@ def chuan_bi_xac_thuc(that_su: bool = True) -> list[dict]:
 
     # Chốt 4 — tệp tạm, quyền hẹp, rồi mới thay.
     dich.parent.mkdir(parents=True, mode=0o700, exist_ok=True)
+    try:
+        os.chmod(dich.parent, 0o700)
+    except OSError:
+        pass  # Windows/ACL: chmod POSIX không phải chốt bảo mật khả dụng
     fd, tam = tempfile.mkstemp(dir=str(dich.parent))
     try:
         os.write(fd, noi_dung.encode("utf-8"))

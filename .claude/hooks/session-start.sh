@@ -546,10 +546,16 @@ try:
     d = json.loads(data)
 except Exception:
     sys.exit(2)
-if not isinstance(d, dict) or "tokens" not in d:
+if not isinstance(d, dict) or not isinstance(d.get("tokens"), dict):
     sys.exit(3)                      # thieu khoa bat buoc
-dst = os.path.join(os.path.expanduser("~"), ".codex", "auth.json")
+home = os.environ.get("CODEX_HOME", "").strip()
+base = os.path.expanduser(home) if home else os.path.join(os.path.expanduser("~"), ".codex")
+dst = os.path.join(base, "auth.json")
 os.makedirs(os.path.dirname(dst), mode=0o700, exist_ok=True)
+try:
+    os.chmod(os.path.dirname(dst), 0o700)
+except OSError:
+    pass
 fd, tmp = tempfile.mkstemp(dir=os.path.dirname(dst))
 try:
     os.write(fd, data); os.close(fd)

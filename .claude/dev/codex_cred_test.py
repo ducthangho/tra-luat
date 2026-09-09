@@ -372,13 +372,28 @@ def t13_sao_luu_fail_closed_khi_thieu_O_NOFOLLOW(M):
     assert bak and bak.read_text() == "AN-TOAN", "chặn oan nền có O_NOFOLLOW"
 
 
+def t14_codex_home_hieu_luc_ton_trong_bien_va_fallback(M):
+    cu = dict(M.os.environ)
+    try:
+        with tempfile.TemporaryDirectory() as d:
+            custom = Path(d) / "custom"
+            M.os.environ = {"CODEX_HOME": str(custom)}
+            assert M._codex_home_hieu_luc() == custom
+            M.os.environ = {"CODEX_HOME": "   "}
+            M.os.path.expanduser = lambda p: p.replace("~", d)
+            assert M._codex_home_hieu_luc() == Path(d) / ".codex"
+    finally:
+        M.os.environ = cu
+
+
 CA = [t1_doc_duoc_url_va_ma_tu_dau_ra_that, t2_chua_thay_thi_tra_None_khong_doan,
       t3_kiem_song_doi_DAU_HIEU_khong_tin_rc0, t4_kiem_song_bat_credential_bi_tu_choi,
       t5_kiem_song_dat_khi_co_dau_hieu, t6_khong_in_gia_tri_khi_khong_co_co,
       t7_sao_luu_khong_de_ban_cu, t8_thieu_codex_la_KHONG_DO_DUOC_khong_phai_DAT,
       t9_cmd_lay_GHI_tep_huong_dan_dan, t10_gio_con_lai_doc_exp_va_bu_padding,
       t11_sao_luu_tu_choi_symlink, t12_sao_luu_O_NOFOLLOW_tai_diem_doc,
-      t13_sao_luu_fail_closed_khi_thieu_O_NOFOLLOW]
+      t13_sao_luu_fail_closed_khi_thieu_O_NOFOLLOW,
+      t14_codex_home_hieu_luc_ton_trong_bien_va_fallback]
 
 # ─────────────────────────── đột biến ───────────────────────────
 # (nhãn, chuỗi CŨ, chuỗi MỚI, ca ĐÍCH phải chết)

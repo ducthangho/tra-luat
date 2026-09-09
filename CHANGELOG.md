@@ -1,7 +1,27 @@
-# ★ dev-side — r359: land PR #491 + sửa 5 ĐỐI TƯỢNG trong mục r358 (2026-09-09)
+# ★ dev-side — r360: land evidence #491 + hiện vật 5 lượt cross-review + sửa 5 đối tượng trong r358 (2026-09-09)
 
-`r358` land ở merge commit `00e017af`. Mục này ghi sổ lần land ấy **và tự vá mục r358** theo các
-finding mà ba đường review độc lập tìm ra sau khi nó được viết.
+`r358` land ở merge commit `00e017af`. Mục này giữ **land evidence** của lần land ấy, **hiện vật
+năm lượt cross-review**, và **bản vá 5 đối tượng trong mục r358** theo finding mà ba đường review
+độc lập tìm ra sau khi nó được viết.
+
+**VA CHẠM SỐ `r`, và cách giải.** Mục này viết ra khi `master` đang ở `00e017a`; trong lúc PR #493
+còn mở, một phiên khác land **#490** rồi **#494**, và `#494` chiếm số **`r359`** cho mục
+*"ghi sổ #491 + #490"*. Đây đúng bẫy mà `bc78656` đã trả giá (*"đổi số r355 → r356 vì master đã
+chiếm"*), khác một điểm: lần trước phát hiện **trước** khi viết, lần này phát hiện **sau**, lúc
+merge `master` vào nhánh — nên phải đổi số **và** hoà giải nội dung. Mục này nay là **`r360`**.
+
+**Phân vai với `r359` để hai mục không dẫm nhau** — `r359` (trên master) ghi **PHẠM VI MERGE** của
+`#491` và `#490` (39 tệp, `c0a5cbe..8cee941`); `r360` (mục này) ghi thứ `r359` **không** có:
+`ops/land/pr491-…-land-evidence.yaml`, hai verdict + hai biên nhận v2 của **PR #491**, và bản vá
+**bên trong** mục `r358`. Chỗ duy nhất hai mục cùng nói là *"#491 đã merge ở `00e017a`"* — cùng một
+sự kiện, và cả hai đều dẫn cùng merge commit.
+
+**Land evidence này KHÔNG thuộc chuỗi đã đóng.** `ops/land/pr489-land-evidence.yaml` khai chuỗi
+`#468 → #478 → #486 → #487 → #489 → #490 — DỪNG`, `mat_xich_thu_7: KHONG_TON_TAI`, và nói rõ việc
+mỗi bản ghi land evidence lại đẻ một PR kế nhiệm là **THÓI QUEN, KHÔNG PHẢI QUY TẮC**. Chuỗi ấy là
+land-evidence-CỦA-land-evidence. `#491` là một PR **ghi sổ**, không phải PR land evidence, nên bản
+ghi land của nó là nghĩa vụ `ADR-0034` bình thường — và `master` **chưa** có tệp nào cho `#491`
+(đo: `git ls-tree origin/master ops/land/` ⇒ 7 tệp, không có `pr491-*`).
 
 ## Ba đường review, và chúng KHÔNG tìm ra cùng một thứ
 
@@ -221,6 +241,125 @@ Phiên này đột biến `CHANGELOG.md` để chứng minh `release-verify` có
 phải dựng lại từ đầu. Bài học đã nằm trong kho, đọc rồi, vẫn dẫm. Chốt đúng vẫn là chốt cũ: **đột
 biến phải chạy trên BẢN SAO TẠM**, không phải trên tệp thật — và nếu buộc phải đụng tệp thật thì
 commit trước, đừng dựa vào lệnh khôi phục.
+# ★ dev-side — r359: ghi sổ #491 + #490 — 39 tệp, chỉ `CHANGELOG` + `RELEASE_MANIFEST` + `ops/` (2026-09-09)
+
+Nối tiếp r358, vốn chốt tới `c0a5cbe` (#489). Hai merge sau đó chưa có mục: **#491** (chính r358)
+và **#490** (land evidence cho #489, và là **mắt xích CUỐI** của chuỗi land-evidence-của-land-evidence
+— chủ kho quyết đóng chuỗi ngày 2026-09-09).
+
+**Không nâng `VERSION`.** Vẫn `1.36.68` từ r336.
+
+**GIỚI HẠN NGUỒN.** Như r358, mục này có hai hạng số. (a) **Tự đo được**: mọi số Git, số mục trong
+`RELEASE_MANIFEST.json`, số verdict/biên nhận đếm từ tệp, và kết quả cổng chạy lại tại chỗ.
+(b) **Thuật lại**: mọi sự kiện GitHub — run/job CI, thời lượng, trạng thái PR, thời điểm duyệt — và
+mọi scalar runtime của các lượt cross-review (đọc từ `run.json` **ngoài kho**). Loại (b) là
+**attestation của phiên điều phối**, không phải phép đo đã đối chiếu; chỗ nào có, mục này ghi nhãn
+tại chỗ.
+
+## Phạm vi — đo, không ước
+
+```
+git diff --shortstat c0a5cbe..8cee941        ⇒  39 files changed, 7834 insertions(+), 9 deletions(-)
+git diff --name-only c0a5cbe..8cee941 | sed 's#/.*##' | sort | uniq -c
+                                             ⇒  1 CHANGELOG.md · 1 RELEASE_MANIFEST.json · 37 ops
+git rev-list --count --first-parent c0a5cbe..8cee941  ⇒  2
+```
+
+Riêng #490: `c0a5cbe..01e7f77` ⇒ **37 tệp, +7 660, −4**, **TẤT CẢ** trong `ops/`, qua **13 commit**.
+
+`ops/` bị loại khỏi kiểm kê gói từ r336. Số mục `ops/` trong `RELEASE_MANIFEST.json`: **0** trên
+tổng **180**. Nhưng `CHANGELOG.md` thì **NẰM TRONG** kiểm kê, nên chính mục này làm sha manifest
+lệch — manifest đã được tái sinh trong cùng commit (bài học r356: sửa một tệp có sẵn cũng đổi sha
+dù `file_count` không đổi).
+
+## Chuỗi merge
+
+| merge commit | PR | nội dung |
+|---|---|---|
+| `00e017a` | #491 | r358 — ghi sổ chuỗi #468→#489 vào tệp này |
+| `8cee941` | #490 | land evidence cho #489 + hiện vật 6 lượt cross-review |
+
+## #490 — bảy lượt cross-review, và lần đầu ba SHA trùng nhau
+
+Đếm từ tệp trong kho: **6/6 verdict** và **6/6 biên nhận** `pr490-review-*`.
+
+| lượt | verdict | P1 · P2 · P3 |
+|---|---|---|
+| 1 | `changes_requested` | 0 · 1 · 3 |
+| 2 | `changes_requested` | 0 · 0 · 1 |
+| 3 | `changes_requested` | 0 · 0 · 1 |
+| 4 | `changes_requested` | 0 · 0 · 1 |
+| 5 | **`approve`** | 0 · 0 · 0 |
+| 6 | `changes_requested` | 0 · 0 · 1 |
+
+**Lượt 7 CHƯA vào kho** — xem mục nợ bên dưới. Nó neo `01e7f77`, và đó là lần **ĐẦU TIÊN** trong
+đợt mà `reviewed_sha` = `authorized_head_sha` = head được merge: review, phê duyệt và nội dung
+merge cùng phủ **một** SHA. Các PR trước đều có chênh (hiện vật review phải vào kho, mà việc ấy
+đổi head).
+
+**Lớp lỗi `van-xuoi-do-duoc-van-vuot-nguon` bị chấm NĂM lượt liên tiếp (2→6) và đã đóng.** Thứ
+thoát ra khỏi vòng lặp KHÔNG phải vá thêm một chỗ, mà là **đổi cách giao việc ở lượt 4**: chuyển
+nhiệm vụ chính từ *tìm finding* sang *kiểm kê vét cạn*. Bảng 95 hàng ấy nay ở
+`ops/reviews/pr490-review-4-phep-do/claim-audit.json`, kèm `coverage.json` chứng minh bao phủ
+**214/214** scalar · **225/225** khoá · **27/27** comment · **0** bỏ ngoài ánh xạ. Reviewer tự khai
+cả **giới hạn** của phương pháp: bao phủ CÚ PHÁP thì bảo đảm, còn tách/hiểu mệnh đề là audit ngữ
+nghĩa của người — không tuyên thuật toán tự chứng minh mọi câu đúng.
+
+## Ba lỗi của phiên điều phối, ghi để không lặp
+
+1. **KHO NÔNG.** Mọi số `bien_nhan_v2` khai buổi sáng đo trong kho nông (`is-shallow=true`, 405 tổ
+   tiên), và điều phối dùng chúng để **bác một P1 ĐÚNG** của codex connector. Nó còn trích đúng bài
+   học `CLAUDE.md` về kho nông để buộc tội connector, trong khi chính mình đang mắc. Sau
+   `--unshallow`: 6/6 commit đo lại đều `rc=0`, **0 vi phạm**. Đã đăng đính chính công khai.
+2. **"ĐỦ BỘ".** Commit `13ba87d` khai *"Cổng tại chỗ, ĐỦ BỘ"* rồi liệt kê 6 cổng — **ngay sau**
+   commit `b43d784` vừa rút bài học *"chạy bộ cổng của CI, đừng chạy bộ cổng mình nhớ"*. Cách nhau
+   MỘT commit. Reviewer phân loại từng bước: `ci.yml` job `gate` có **40 bước = 8 setup + 31 cổng +
+   1 upload**, commit message nêu **2/31**. Hiện vật khoá: `pr490-review-6-phep-do/ci-comparison.json`.
+3. **BA phép đo hỏng thoát `rc=0`.** Script chờ CI gọi `actions_get` bằng `run_id` trong khi API
+   đòi `resource_id` (mọi vòng lặp nhận lỗi, in "quá hạn", **chưa từng đo gì**); poll `cong` chạy
+   hết vòng mà **không in gì**; và một lần in `expected == checked ⇒ True` khi thực chất so **hai
+   giá trị `None`** vì đoán sai tên khoá. Cả ba là cổng-xanh-giả, và cả ba bị bắt bằng cách hỏi lại
+   qua một đường độc lập.
+
+## Nợ mở
+
+- **Verdict lượt 7 KHÔNG vào kho.** Chủ kho duyệt `01e7f77` thay vì để điều phối đẩy tiếp, và điều
+  phối dừng đẩy đúng như đã cam kết trước đó.
+- **P3 lượt 7 chưa vá** — `script-do-luot6-khong-co-duong-tai-lap-trong-kho`. Commit `2f783bc` giới
+  thiệu `ops/reviews/pr490-review-6-phep-do/do-static.py` là *"chạy lại được"*: SAI. Script tính
+  `R = P.parent/'cay-kho'` từ `__file__`, ở vị trí trong kho trỏ tới `ops/reviews/cay-kho` (không
+  tồn tại) nên hỏng **trước phép đo đầu tiên**; và nó chỉ sinh `ci-steps.json`, **không** sinh
+  `ci-comparison.json` như lời khai ngụ ý. Điều phối đã tự đo lại, đúng cả hai vế.
+- **#490 dừng ở `merged`, không phải `landed` — và KHÔNG chỉ vì thiếu bookkeeping.** `ADR-0034`
+  đòi ba vế; trạng thái thật của từng vế:
+  - `merged`: **ĐO ĐƯỢC**. `merge-base --is-ancestor 01e7f77 8cee941` ⇒ đúng; hai cha của
+    `8cee941` là `00e017a` + `01e7f77`.
+  - `hậu-merge gate`: **CHƯA ĐỦ BẰNG CHỨNG**, không phải "xong". Có **5** lệnh chạy TẠI CHỖ trên
+    worktree của `8cee941` (bảng dưới), trong khi `ci.yml` job `gate` có **31 bước cổng**; và
+    lượt CI của chính merge commit thì **CỐ Ý KHÔNG ĐỌC** theo quyết định chủ kho (ghi ở
+    `ops/land/pr489-land-evidence.yaml`, mục `CI trên merge commit`). Quét toàn kho: **0** hiện
+    vật CI nào neo `8cee941`. *Thiếu bằng chứng KHÔNG được tính là đạt.*
+  - `bookkeeping`: chủ kho quyết **đóng chuỗi** nên #490 cố ý KHÔNG có land evidence riêng — mục
+    này là chỗ ghi sổ thay cho nó.
+
+  **Bản đầu của gạch đầu dòng này viết "hai vế đầu xong" — SAI**, và Codex connector chấm P1 đúng
+  chỗ ấy (`CHANGELOG.md:92`, reviewed commit `ac157ef`). Mỉa mai đáng ghi: câu sai nằm trong chính
+  mục viết ra để tổng kết lớp lỗi *"khai rộng hơn nguồn"*. Nó là lần thứ **tư** trong đợt cùng một
+  hình dạng — và lần này người bắt là một reviewer tôi suýt merge trước khi nó chạy xong.
+
+## Hậu-merge gate trên `8cee941` — chạy lại tại chỗ
+
+```
+release-verify --strict   ok=true · expected_file_count=180 · checked_file_count=180
+                          package_hash_match=true · failed=[] · extra_files=[]
+bien_nhan_v2              100 bản ghi · 47 ĐẠT v2 · 11/11 legacy · 42 nợ · 0 vi phạm · TỔNG ĐẠT
+lease_publish             121/121 đạt; đã chạy=121, bỏ qua=0
+doctrine-scan             sạch — 7 tệp quét, 0 chỗ chép
+adr-song                  46 ADR / 46 dòng §20, khớp 1–1
+```
+
+**KHÔNG khai đây là "đủ bộ"** — đó chính là lỗi số 2 ở trên. `ci.yml` job `gate` có **31 bước cổng**;
+đây là 5 lệnh có bằng chứng tại SHA này. *Chưa có bằng chứng đã chạy* KHÔNG phải *đã không chạy*.
 
 # ★ dev-side — r358: ghi sổ chuỗi #468→#489 — 1016 tệp, TẤT CẢ trong `ops/` (2026-09-09)
 

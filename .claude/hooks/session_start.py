@@ -25,6 +25,7 @@ from __future__ import annotations
 
 import os
 import platform
+import runpy
 import shutil
 import subprocess
 import sys
@@ -97,6 +98,21 @@ def main() -> int:
     if not script.is_file():
         print(f"[session-start] HONG: khong thay hook {script}")
         return 12
+    # Run the repository materializer in this process before even bash --version.
+    # The shell and all its descendants receive only the selected on-disk home.
+    if _lay_env(env, "CODEX_AUTH_JSON") and env.get("CLAUDE_CODE_REMOTE") == "true":
+        try:
+            launcher = runpy.run_path(str(project / ".claude/dev/launcher.py"))
+            ket = launcher["chuan_bi_xac_thuc"](that_su=True)
+            if not ket or not all(x.get("ok") for x in ket):
+                raise ValueError("credential unavailable")
+        except Exception:
+            print("[session-start] HONG: khong chuan bi duoc Codex credential")
+            return 13
+        finally:
+            os.environ.pop("CODEX_AUTH_JSON", None)
+    os.environ.pop("CODEX_AUTH_JSON", None)
+    env = {k: v for k, v in env.items() if k.upper() != "CODEX_AUTH_JSON"}
     loi = []
     for bash in _ung_vien_bash(env):
         try:

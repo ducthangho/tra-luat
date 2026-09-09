@@ -910,8 +910,695 @@ def dung_than(lease: dict, duong_dan: str) -> str:
     )
 
 
+# =====================================================================================
+# A0 — SỔ THU HỒI LEASE trên trunk (packet wp488; spec `ops/specs/THU-HOI-LEASE-VA-CAP-LAI.md`
+# revision 9, sha256 465538364b1a…; ADR-0047). CHƯA KÍCH HOẠT: `SO_THU_HOI_KICH_HOAT = False`.
+#
+# Verdict SẢN PHẨM của `check`/`ai-dang-giu` ở A0 vẫn là LUẬT CŨ (bia mộ hai chiều); luật mới
+# (áp sổ theo `lease_id`, precedence, chiều ngược) chỉ chạy trong hàm DỰ BÁO có nhãn `DU_BAO:`
+# và KHÔNG đổi rc. Điều duy nhất A0 cưỡng chế thật: sổ `ops/thu-hoi/` KHÔNG RỖNG khi cờ False
+# ⇒ 12 ở mọi consumer vận hành — một bản ghi lọt vào trước khi cổng tiếp nhận có mã canonical là
+# thứ spec §write_set "Bootstrap" cấm grandfather.
+#
+# Ba lớp của ADR-0047 nằm ở đây: (1) danh tính ghim `KHO_CANONICAL`, discovery bằng URL tường
+# minh; (2) nền thực thi = hồ sơ adapter so với mỏ neo `PROFILE_ADAPTER_DA_DUYET` — RỖNG ở A0 vì
+# nền production là QUYẾT ĐỊNH CHỦ KHO, không phải thứ mã tự đo rồi tự duyệt; (3) toàn vẹn object:
+# reader `KhoObject` băm lại từng object, lấy cạnh từ bytes đã băm, store cô lập, ngân sách có đơn vị.
+# =====================================================================================
+KHO_CANONICAL = "github.com/ducthangho/tra-luat"
+SO_THU_HOI_KICH_HOAT = False
+THU_MUC_SO = "ops/thu-hoi"
+PATH_NGOAI_LE_RETIRED = "ops/thu-hoi/_ngoai-le-closure.retired.yaml"
+PATH_POLICY_CLOSURE = ".github/coordination/change-impact.v1.json"
+PATH_BO_KIEM = "ops/lease_publish.py"
+# Mỏ neo profile ĐÃ DUYỆT. Rỗng có chủ đích ở A0: mọi lời gọi discovery production ⇒ 12 cho tới khi
+# chủ kho duyệt một manifest (ADR-0047 lớp 2). Test tiêm neo qua tham số `da_duyet=` của API nội bộ;
+# KHÔNG có cờ CLI hay biến môi trường nào đổi được tập này (A2: "không có cờ production đổi authority").
+PROFILE_ADAPTER_DA_DUYET: frozenset = frozenset()
+# Danh sách lịch sử bia mộ — A1 ghim từ receipt A0 (Q6). Rỗng ở A0.
+BIA_MO_LICH_SU: tuple = ()
+# Ngân sách reader — ĐỀ XUẤT của reviewer lượt 6 (spec Q4.5), CHƯA đo trên roots production.
+# Đơn vị: objects = số `(actual_type, OID)` phân biệt; bytes = bytes thô sau giải nén; edges = số cạnh
+# trên MỘT đường (parent: mỗi đường parent; tree/alias: một lần resolve tại một occurrence); seconds =
+# deadline monotonic. Biên INCLUSIVE: n ≤ bound đi tiếp, n > bound ⇒ 12.
+NGAN_SACH_MAC_DINH = {
+    "max_unique_objects": 50000,
+    "max_object_bytes": 8388608,
+    "max_total_object_bytes": 134217728,
+    "max_parent_path_edges": 10000,
+    "max_tree_or_alias_edges": 128,
+    "max_alternate_stores": 8,
+    "max_alternate_depth": 4,
+    "max_reader_wall_seconds": 60.0,
+}
+_RE_ISO_Z = re.compile(r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$")
+_KHOA_THU_HOI_BAT_BUOC = ("schema_version", "event", "lease_id", "packet_issue", "thu_hoi_boi",
+                         "thu_hoi_luc_utc", "ly_do", "can_cu")
+_KHOA_THU_HOI_TUY_CHON = ("cap_lai_cho", "blob_da_biet_luc_ghi")
+_KHOA_RETIRED = ("schema_version", "event", "descriptor_sha256", "first_policy_sha256",
+                 "base_sha_before_add", "retired_at_utc")
+
+
+def _nap_yaml_khong_trung_khoa(noi_dung: bytes):
+    """YAML an toàn, KHOÁ TRÙNG ⇒ 12 — PyYAML mặc định lặng lẽ lấy giá trị sau."""
+    import yaml
+    trung = []
+
+    class _Loader(yaml.SafeLoader):
+        pass
+
+    def _mapping(loader, node, deep=False):
+        da_thay = set()
+        for k_node, _ in node.value:
+            k = loader.construct_object(k_node, deep=deep)
+            if k in da_thay:
+                trung.append(k)
+            da_thay.add(k)
+        return yaml.SafeLoader.construct_mapping(loader, node, deep)
+
+    _Loader.add_constructor(yaml.resolver.BaseResolver.DEFAULT_MAPPING_TAG, _mapping)
+    try:
+        d = yaml.load(noi_dung.decode("utf-8"), Loader=_Loader)
+    except Exception as e:  # YAMLError / UnicodeDecodeError — nguồn hỏng là 12, không phải 8
+        raise Chan(RC_KHONG_XAC_DINH,
+                   f"KHÔNG_XÁC_ĐỊNH: YAML sổ thu hồi hỏng: {str(e).splitlines()[0][:160]}") from None
+    if trung:
+        raise Chan(RC_KHONG_XAC_DINH, f"KHÔNG_XÁC_ĐỊNH: YAML sổ thu hồi có khoá trùng: {trung[0]!r}")
+    return d
+
+
+def phan_tuyen_so(duong: str):
+    """Định tuyến một đường dẫn trong namespace sổ: ``thu_hoi`` · ``metadata`` · ``None`` (ngoài sổ).
+
+    ĐÚNG MỘT path reserved đi schema metadata (S7); mọi tên khác — kể cả tên GẦN reserved
+    (`.yml`, thiếu `_`) — vẫn là bản ghi thu hồi và phải qua M1. Thư mục con/ tệp không `.yaml`
+    trong sổ là ``thu_hoi`` để M1 từ chối (12), không được lặng lẽ bỏ qua.
+    """
+    if duong == PATH_NGOAI_LE_RETIRED:
+        return "metadata"
+    if duong.startswith(THU_MUC_SO + "/"):
+        return "thu_hoi"
+    return None
+
+
+def kiem_ban_ghi_thu_hoi(duong: str, mode: str, loai: str, noi_dung: bytes, bay_gio=None) -> dict:
+    """M1 — hợp đồng parser bản ghi ``lease_revoked`` (r3), thứ tự lỗi: nguồn/object (12) →
+    cấu trúc/ID (12) → thẩm quyền (4) → trường còn lại (8). Không truthiness cho bool."""
+    bay_gio = bay_gio or datetime.now(timezone.utc)
+    ten = duong[len(THU_MUC_SO) + 1:]
+    if "/" in ten or loai != "blob" or mode != "100644" or not ten.endswith(".yaml"):
+        raise Chan(RC_KHONG_XAC_DINH,
+                   f"KHÔNG_XÁC_ĐỊNH: {duong}: sổ chỉ nhận regular blob 100644 `<lease_id>.yaml` "
+                   f"ngay trong {THU_MUC_SO}/ (được mode={mode} type={loai})")
+    d = _nap_yaml_khong_trung_khoa(noi_dung)
+    if not isinstance(d, dict):
+        raise Chan(RC_KHONG_XAC_DINH, f"KHÔNG_XÁC_ĐỊNH: {duong}: root không phải mapping")
+    lease_id = d.get("lease_id")
+    if not isinstance(lease_id, str) or not LEASE_ID.fullmatch(lease_id) or lease_id != ten[:-5]:
+        raise Chan(RC_KHONG_XAC_DINH,
+                   f"KHÔNG_XÁC_ĐỊNH: {duong}: lease_id {lease_id!r} phải khớp LEASE_ID và bằng tên tệp")
+    nguoi = d.get("thu_hoi_boi")
+    nguoi_s = str(nguoi).strip().lower() if isinstance(nguoi, str) else ""
+    if nguoi_s in PROVIDERS:
+        raise Chan(RC_TU_CAP, f"{duong}: thu_hoi_boi={nguoi!r} là tên provider — agent không tự thu hồi")
+    if nguoi_s not in NGUOI_CO_THAM_QUYEN:
+        raise Chan(RC_TU_CAP, f"{duong}: thu_hoi_boi={nguoi!r} không nằm trong {list(NGUOI_CO_THAM_QUYEN)}")
+    khoa = set(d)
+    thua = khoa - set(_KHOA_THU_HOI_BAT_BUOC) - set(_KHOA_THU_HOI_TUY_CHON)
+    thieu = [k for k in _KHOA_THU_HOI_BAT_BUOC if k not in khoa]
+    if thua or thieu:
+        raise Chan(RC_NOI_DUNG, f"{duong}: khoá thừa {sorted(thua)} / thiếu {thieu}")
+    sv = d["schema_version"]
+    if isinstance(sv, bool) or sv != 1:
+        raise Chan(RC_NOI_DUNG, f"{duong}: schema_version phải là integer 1, được {sv!r}")
+    if d["event"] != "lease_revoked":
+        raise Chan(RC_NOI_DUNG, f"{duong}: event phải là 'lease_revoked', được {d['event']!r}")
+    so = d["packet_issue"]
+    if isinstance(so, bool) or not isinstance(so, int) or so <= 0:
+        raise Chan(RC_NOI_DUNG, f"{duong}: packet_issue phải là integer dương, được {so!r}")
+    luc = d["thu_hoi_luc_utc"]
+    if not isinstance(luc, str) or not _RE_ISO_Z.match(luc):
+        raise Chan(RC_NOI_DUNG, f"{duong}: thu_hoi_luc_utc phải là CHUỖI ISO8601 'Z', được {luc!r}")
+    if datetime.fromisoformat(luc.replace("Z", "+00:00")) > bay_gio:
+        raise Chan(RC_NOI_DUNG, f"{duong}: thu_hoi_luc_utc ở tương lai so clock snapshot")
+    if not isinstance(d["ly_do"], str) or not d["ly_do"].strip():
+        raise Chan(RC_NOI_DUNG, f"{duong}: ly_do phải là chuỗi không rỗng")
+    can_cu = d["can_cu"]
+    m = re.fullmatch(r"https://" + re.escape(KHO_CANONICAL) + r"/issues/(\d+)#issuecomment-(\d+)", can_cu) \
+        if isinstance(can_cu, str) else None
+    if not m or int(m.group(1)) != so:
+        raise Chan(RC_NOI_DUNG, f"{duong}: can_cu phải là MỘT URL Issue comment của {KHO_CANONICAL} "
+                                f"trên issue #{so}, được {can_cu!r}")
+    dich = d.get("cap_lai_cho")
+    if dich in (None, ""):
+        d["cap_lai_cho"] = None
+    elif not isinstance(dich, str) or not LEASE_ID.fullmatch(dich) or dich == lease_id:
+        raise Chan(RC_NOI_DUNG, f"{duong}: cap_lai_cho phải là LEASE_ID hợp lệ khác {lease_id!r}, được {dich!r}")
+    blobs = d.get("blob_da_biet_luc_ghi")
+    if blobs is not None and (not isinstance(blobs, list)
+                              or any(not isinstance(b, str) or not SHA40.match(b) for b in blobs)):
+        raise Chan(RC_NOI_DUNG, f"{duong}: blob_da_biet_luc_ghi phải là danh sách SHA40")
+    return d
+
+
+def kiem_metadata_retired(duong: str, mode: str, loai: str, noi_dung: bytes, bay_gio=None) -> dict:
+    """Q13/S7 — metadata `closure_exception_retired`: ĐÚNG sáu khoá, regular 100644; MỌI lỗi ⇒ 12."""
+    bay_gio = bay_gio or datetime.now(timezone.utc)
+    if loai != "blob" or mode != "100644":
+        raise Chan(RC_KHONG_XAC_DINH, f"KHÔNG_XÁC_ĐỊNH: {duong}: metadata phải là regular blob 100644")
+    d = _nap_yaml_khong_trung_khoa(noi_dung)
+    if not isinstance(d, dict) or set(d) != set(_KHOA_RETIRED):
+        raise Chan(RC_KHONG_XAC_DINH, f"KHÔNG_XÁC_ĐỊNH: {duong}: phải là mapping có đúng khoá {list(_KHOA_RETIRED)}")
+    sv = d["schema_version"]
+    if isinstance(sv, bool) or sv != 1 or d["event"] != "closure_exception_retired":
+        raise Chan(RC_KHONG_XAC_DINH, f"KHÔNG_XÁC_ĐỊNH: {duong}: schema_version/event sai")
+    for k in ("descriptor_sha256", "first_policy_sha256"):
+        if not isinstance(d[k], str) or not SHA256.match(d[k]):
+            raise Chan(RC_KHONG_XAC_DINH, f"KHÔNG_XÁC_ĐỊNH: {duong}: {k} phải là sha256 hex")
+    if not isinstance(d["base_sha_before_add"], str) or not SHA40.match(d["base_sha_before_add"]):
+        raise Chan(RC_KHONG_XAC_DINH, f"KHÔNG_XÁC_ĐỊNH: {duong}: base_sha_before_add phải là SHA40")
+    luc = d["retired_at_utc"]
+    if not isinstance(luc, str) or not _RE_ISO_Z.match(luc) \
+            or datetime.fromisoformat(luc.replace("Z", "+00:00")) > bay_gio:
+        raise Chan(RC_KHONG_XAC_DINH, f"KHÔNG_XÁC_ĐỊNH: {duong}: retired_at_utc phải là ISO8601 'Z' không ở tương lai")
+    return d
+
+
+def _git_exe_toi_thieu() -> str:
+    """Executable `git` giải MỘT lần bằng đường tuyệt đối trong PATH tối thiểu (Q4.1)."""
+    import shutil
+    duong = shutil.which("git", path="/usr/bin:/bin")
+    if not duong:
+        raise Chan(RC_KHONG_XAC_DINH, "KHÔNG_XÁC_ĐỊNH: không thấy `git` trong PATH tối thiểu /usr/bin:/bin")
+    return str(Path(duong).resolve())
+
+
+def _env_rong(git_exe: str, git_dir: str, home: str, **them) -> dict:
+    """Env con dựng TỪ RỖNG — không kế thừa `os.environ` (ADR-0047 lớp 2)."""
+    mt = {
+        "PATH": str(Path(git_exe).parent),
+        "HOME": home,
+        "GIT_DIR": git_dir,
+        "GIT_CONFIG_NOSYSTEM": "1",
+        "GIT_CONFIG_GLOBAL": os.devnull,
+        "GIT_TEMPLATE_DIR": "",
+        "GIT_NO_REPLACE_OBJECTS": "1",
+        "GIT_TERMINAL_PROMPT": "0",
+        "LC_ALL": "C",
+    }
+    mt.update(them)
+    return mt
+
+
+def _repo_tam_co_lap(git_exe: str, thu_muc: Path) -> str:
+    """Repo tạm KHÔNG ref, KHÔNG config nguồn, KHÔNG template — làm `GIT_DIR` cho mọi lời gọi adapter."""
+    git_dir = thu_muc / "tam.git"
+    p = subprocess.run([git_exe, "init", "-q", "--bare", "--template=", str(git_dir)],
+                       capture_output=True, text=True,
+                       env=_env_rong(git_exe, str(git_dir), str(thu_muc)))
+    if p.returncode != 0:
+        raise Chan(RC_KHONG_XAC_DINH, f"KHÔNG_XÁC_ĐỊNH: không dựng được repo tạm: {p.stderr[:160]}")
+    return str(git_dir)
+
+
+def hoso_adapter_do(git_exe: str | None = None) -> dict:
+    """Hồ sơ nền thực thi đo được từ deployment hiện tại (KHÔNG bí mật). Chỉ là INPUT để so với mỏ neo;
+    đo rồi tự đưa vào `PROFILE_ADAPTER_DA_DUYET` là tự khai — bị cấm (ADR-0047 lớp 2)."""
+    git_exe = git_exe or _git_exe_toi_thieu()
+    p = subprocess.run([git_exe, "--version"], capture_output=True, text=True,
+                       env={"PATH": str(Path(git_exe).parent), "LC_ALL": "C"})
+    return {
+        "schema_version": 1,
+        "git_path": git_exe,
+        "git_sha256": hashlib.sha256(Path(git_exe).read_bytes()).hexdigest(),
+        "git_version": p.stdout.strip() if p.returncode == 0 else "",
+        "credential_helper": "",   # không dùng
+        "http_sslCAInfo": None,
+        "http_sslCAPath": None,
+        "proxy": None,
+        "endpoint": "https://" + KHO_CANONICAL,
+    }
+
+
+def bam_ho_so(hoso: dict) -> str:
+    """Digest = sha256(JSON UTF-8, sort_keys, separators `,`/`:`) — MỘT phép so duy nhất với mỏ neo."""
+    return hashlib.sha256(json.dumps(hoso, sort_keys=True, separators=(",", ":"),
+                                     ensure_ascii=False).encode("utf-8")).hexdigest()
+
+
+def kham_pha_nguon(endpoint: str | None = None, *, hoso: dict | None = None, da_duyet=None,
+                   giao_thuc_cho_phep=("https",), thu_muc_tam: Path | None = None) -> tuple:
+    """Q4.1/Q4.3 — MỘT lời gọi discovery qua adapter: `ls-remote --symref <endpoint> HEAD refs/heads/*`.
+
+    Trả ``(nhanh_mac_dinh, {tên: SHA40}, digest)``. `endpoint`/`hoso`/`da_duyet` là API NỘI BỘ cho fixture;
+    CLI production KHÔNG có cờ nào tới được ba tham số này. Hồ sơ đo được phải có digest NẰM TRONG mỏ neo
+    đã duyệt, nếu không ⇒ 12 — với `PROFILE_ADAPTER_DA_DUYET` rỗng của A0 thì production luôn 12, đúng
+    thiết kế: nền được tin là quyết định chủ kho, không phải thứ mã tự công nhận.
+    """
+    import tempfile
+    git_exe = _git_exe_toi_thieu()
+    hoso = hoso if hoso is not None else hoso_adapter_do(git_exe)
+    if not isinstance(hoso, dict) or hoso.get("git_path") != git_exe:
+        raise Chan(RC_KHONG_XAC_DINH, "KHÔNG_XÁC_ĐỊNH: hồ sơ adapter không khớp executable git đã giải")
+    digest = bam_ho_so(hoso)
+    neo = PROFILE_ADAPTER_DA_DUYET if da_duyet is None else frozenset(da_duyet)
+    if digest not in neo:
+        raise Chan(RC_KHONG_XAC_DINH,
+                   f"KHÔNG_XÁC_ĐỊNH: profile adapter {digest[:12]}… CHƯA được duyệt "
+                   f"(mỏ neo có {len(neo)} digest) — nền thực thi production là quyết định chủ kho (ADR-0047)")
+    endpoint = endpoint or hoso.get("endpoint") or ("https://" + KHO_CANONICAL)
+    with tempfile.TemporaryDirectory(prefix="adapter_") as td:
+        git_dir = _repo_tam_co_lap(git_exe, Path(td))
+        mt = _env_rong(git_exe, git_dir, td, GIT_ALLOW_PROTOCOL=":".join(giao_thuc_cho_phep))
+        lenh = [git_exe, "-c", "protocol.allow=never"]
+        for gt in giao_thuc_cho_phep:
+            lenh += ["-c", f"protocol.{gt}.allow=always"]
+        for khoa, gia_tri in (("http.sslCAInfo", hoso.get("http_sslCAInfo")),
+                              ("http.sslCAPath", hoso.get("http_sslCAPath")),
+                              ("http.proxy", hoso.get("proxy"))):
+            if gia_tri:
+                lenh += ["-c", f"{khoa}={gia_tri}"]
+        lenh += ["ls-remote", "--symref", endpoint, "HEAD", "refs/heads/*"]
+        p = subprocess.run(lenh, capture_output=True, text=True, env=mt)
+    if p.returncode != 0:
+        raise Chan(RC_KHONG_XAC_DINH,
+                   f"KHÔNG_XÁC_ĐỊNH: discovery rc={p.returncode}: {(p.stderr or '').strip()[:160]}")
+    mac_dinh, quang_ba = None, {}
+    for dong in p.stdout.splitlines():
+        if dong.startswith("ref: "):
+            ref, _, dich = dong[5:].partition("\t")
+            if dich == "HEAD" and ref.startswith("refs/heads/"):
+                if mac_dinh is not None:
+                    raise Chan(RC_KHONG_XAC_DINH, "KHÔNG_XÁC_ĐỊNH: advertisement có nhiều symref HEAD")
+                mac_dinh = ref[len("refs/heads/"):]
+            continue
+        cot = dong.split("\t")
+        if len(cot) == 2 and cot[1].startswith("refs/heads/") and SHA40.match(cot[0]):
+            quang_ba[cot[1][len("refs/heads/"):]] = cot[0]
+    if not mac_dinh or mac_dinh not in quang_ba:
+        raise Chan(RC_KHONG_XAC_DINH, "KHÔNG_XÁC_ĐỊNH: máy chủ không quảng bá symref HEAD hợp lệ — không fallback")
+    return mac_dinh, quang_ba, digest
+
+
+def so_map_cuc_bo(goc: Path, quang_ba: dict) -> dict:
+    """Q4.2/Q4.4 — map remote-tracking chụp cục bộ phải có MỌI tên máy chủ với CÙNG SHA40; local heads không bù."""
+    out = _git(goc, "for-each-ref", "--format=%(refname) %(objectname)", "refs/remotes/origin")
+    cuc_bo = {}
+    for dong in out.splitlines():
+        ref, _, sha = dong.partition(" ")
+        if ref.endswith("/HEAD"):
+            continue
+        cuc_bo[ref[len("refs/remotes/origin/"):]] = sha
+    lech = [(ten, sha, cuc_bo.get(ten)) for ten, sha in quang_ba.items() if cuc_bo.get(ten) != sha]
+    if lech:
+        ten, sha, cb = lech[0]
+        raise Chan(RC_KHONG_XAC_DINH,
+                   f"KHÔNG_XÁC_ĐỊNH: map cục bộ lệch máy chủ ở {len(lech)} tên; ví dụ {ten}: "
+                   f"máy chủ {sha[:12]} vs cục bộ {(cb or '<thiếu>')[:12]}")
+    return cuc_bo
+
+
+class KhoObject:
+    """Q4.5 — API object-store đã xác minh: `GIT_DIR` tạm cô lập + `GIT_OBJECT_DIRECTORY` của kho nguồn
+    (giải bằng API Git, không ghép literal), `cat-file --batch` với no-replace, băm lại từng object,
+    cạnh lấy từ bytes đã băm, memo `(expected_type, OID)`, ngân sách có đơn vị + deadline monotonic.
+
+    `sau_cat_file` là SEAM cho ca âm của điều phối (bytes lệch OID sau framing, trước băm); `bay_gio` là
+    clock tiêm cho ca deadline. Cả hai là API nội bộ, không có đường CLI.
+    """
+
+    def __init__(self, goc_kho: Path, *, ngan_sach: dict | None = None, sau_cat_file=None,
+                 bay_gio=None, deadline: float | None = None):
+        import tempfile
+        import time
+        self.ngan_sach = dict(NGAN_SACH_MAC_DINH, **(ngan_sach or {}))
+        self._sau_cat_file = sau_cat_file
+        self._clock = bay_gio or time.monotonic
+        self.deadline = deadline if deadline is not None else self._clock() + self.ngan_sach["max_reader_wall_seconds"]
+        self.git_exe = _git_exe_toi_thieu()
+        goc_kho = Path(goc_kho).resolve()
+        if _git(goc_kho, "rev-parse", "--is-shallow-repository").strip() == "true":
+            raise Chan(RC_KHONG_XAC_DINH, "KHÔNG_XÁC_ĐỊNH: kho nguồn shallow — object thiếu là hợp lệ, không đọc được đồ thị")
+        obj = _git(goc_kho, "rev-parse", "--git-path", "objects").strip()
+        self.object_dir = str((goc_kho / obj).resolve()) if not Path(obj).is_absolute() else str(Path(obj).resolve())
+        if not Path(self.object_dir).is_dir():
+            raise Chan(RC_KHONG_XAC_DINH, f"KHÔNG_XÁC_ĐỊNH: object directory không tồn tại: {self.object_dir}")
+        self.alternates = self._kiem_alternates(self.object_dir)
+        self._td = tempfile.TemporaryDirectory(prefix="khoobj_")
+        self.git_dir = _repo_tam_co_lap(self.git_exe, Path(self._td.name))
+        self.env = _env_rong(self.git_exe, self.git_dir, self._td.name,
+                             GIT_OBJECT_DIRECTORY=self.object_dir,
+                             GIT_ALTERNATE_OBJECT_DIRECTORIES=os.pathsep.join(self.alternates))
+        self.memo: dict = {}
+        self.so_object = 0
+        self.tong_bytes = 0
+
+    def _kiem_alternates(self, goc_store: str) -> list[str]:
+        """Preflight alternate: DAG store, đếm store phân biệt ngoài primary và depth theo đường dài nhất."""
+        stores, tham = [], {}
+        def di(store: str, sau: int, duong: tuple):
+            if sau > self.ngan_sach["max_alternate_depth"]:
+                raise Chan(RC_KHONG_XAC_DINH, f"KHÔNG_XÁC_ĐỊNH: alternate depth {sau} > {self.ngan_sach['max_alternate_depth']}")
+            tep = Path(store) / "info" / "alternates"
+            if not tep.is_file():
+                return
+            for dong in tep.read_text(encoding="utf-8", errors="replace").splitlines():
+                dong = dong.strip()
+                if not dong or dong.startswith("#"):
+                    continue
+                st = str((Path(store) / dong).resolve()) if not Path(dong).is_absolute() else str(Path(dong).resolve())
+                if st in duong:
+                    raise Chan(RC_KHONG_XAC_DINH, "KHÔNG_XÁC_ĐỊNH: alternate có vòng")
+                if not Path(st).is_dir():
+                    raise Chan(RC_KHONG_XAC_DINH, f"KHÔNG_XÁC_ĐỊNH: alternate không đọc được: {st}")
+                if st not in stores:
+                    stores.append(st)
+                    if len(stores) > self.ngan_sach["max_alternate_stores"]:
+                        raise Chan(RC_KHONG_XAC_DINH, f"KHÔNG_XÁC_ĐỊNH: > {self.ngan_sach['max_alternate_stores']} alternate store")
+                tham[st] = max(tham.get(st, 0), sau + 1)
+                di(st, sau + 1, duong + (st,))
+        di(goc_store, 0, (goc_store,))
+        return stores
+
+    def _con_thoi_gian(self, o_dau: str) -> float:
+        con = self.deadline - self._clock()
+        if con <= 0:
+            raise Chan(RC_KHONG_XAC_DINH, f"KHÔNG_XÁC_ĐỊNH: hết deadline reader tại {o_dau}")
+        return con
+
+    def doc(self, oid: str, loai_mong_doi: str) -> bytes:
+        """Đọc MỘT object: framing → kiểm size trước khi nhận body → băm bằng OID → so type mong đợi."""
+        import threading
+        if not SHA40.match(oid or ""):
+            raise Chan(RC_KHONG_XAC_DINH, f"KHÔNG_XÁC_ĐỊNH: OID không hợp lệ {oid!r}")
+        khoa = (loai_mong_doi, oid)
+        if khoa in self.memo:
+            return self.memo[khoa]
+        if any(k[1] == oid and k[0] != loai_mong_doi for k in self.memo):
+            raise Chan(RC_KHONG_XAC_DINH, f"KHÔNG_XÁC_ĐỊNH: OID {oid[:12]} bị yêu cầu hai type khác nhau")
+        if self.so_object + 1 > self.ngan_sach["max_unique_objects"]:
+            raise Chan(RC_KHONG_XAC_DINH, f"KHÔNG_XÁC_ĐỊNH: > {self.ngan_sach['max_unique_objects']} object phân biệt")
+        con = self._con_thoi_gian(f"trước spawn cat-file {oid[:12]}")
+        p = subprocess.Popen([self.git_exe, "--no-replace-objects", "cat-file", "--batch"],
+                             stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE, env=self.env)
+        ket_qua: dict = {}
+
+        def _doc_thuc():
+            try:
+                p.stdin.write((oid + "\n").encode("ascii")); p.stdin.close()
+                dau = p.stdout.readline().decode("ascii", "replace").rstrip("\n")
+                ket_qua["dau"] = dau
+                cot = dau.split()
+                if len(cot) == 3 and cot[2].isdigit():
+                    kich = int(cot[2])
+                    if kich > self.ngan_sach["max_object_bytes"]:
+                        ket_qua["qua_lon"] = kich
+                        return
+                    ket_qua["than"] = p.stdout.read(kich + 1)
+            except Exception as e:  # noqa: BLE001
+                ket_qua["loi"] = repr(e)
+
+        t = threading.Thread(target=_doc_thuc, daemon=True); t.start(); t.join(timeout=con)
+        if t.is_alive():
+            p.kill(); p.wait()
+            raise Chan(RC_KHONG_XAC_DINH, f"KHÔNG_XÁC_ĐỊNH: hết deadline reader khi đọc {oid[:12]} (đã kill cat-file)")
+        p.wait(timeout=max(con, 0.1)) if p.poll() is None else None
+        if "loi" in ket_qua:
+            raise Chan(RC_KHONG_XAC_DINH, f"KHÔNG_XÁC_ĐỊNH: cat-file lỗi I/O: {ket_qua['loi'][:120]}")
+        if "qua_lon" in ket_qua:
+            raise Chan(RC_KHONG_XAC_DINH, f"KHÔNG_XÁC_ĐỊNH: object {oid[:12]} {ket_qua['qua_lon']} B > max_object_bytes")
+        cot = (ket_qua.get("dau") or "").split()
+        if len(cot) != 3 or cot[0] != oid or not cot[2].isdigit():
+            raise Chan(RC_KHONG_XAC_DINH,
+                       f"KHÔNG_XÁC_ĐỊNH: object {oid[:12]} `{ket_qua.get('dau', '')}` — `missing` là 12, không phải 'vắng'")
+        loai_that, kich = cot[1], int(cot[2])
+        than = ket_qua.get("than", b"")
+        if len(than) != kich + 1:
+            raise Chan(RC_KHONG_XAC_DINH, f"KHÔNG_XÁC_ĐỊNH: object {oid[:12]} framing ngắn ({len(than)}/{kich + 1})")
+        than = than[:kich]
+        if self.tong_bytes + kich > self.ngan_sach["max_total_object_bytes"]:
+            raise Chan(RC_KHONG_XAC_DINH, "KHÔNG_XÁC_ĐỊNH: vượt max_total_object_bytes")
+        if self._sau_cat_file is not None:   # SEAM ca âm (điều phối dựng), trước băm
+            loai_that, kich, than = self._sau_cat_file(oid, loai_that, kich, than)
+        bam = hashlib.sha1(f"{loai_that} {len(than)}\0".encode("ascii") + than).hexdigest()
+        if bam != oid:
+            raise Chan(RC_KHONG_XAC_DINH, f"KHÔNG_XÁC_ĐỊNH: bytes của {oid[:12]} băm ra {bam[:12]} — cache không tin cậy")
+        if loai_that != loai_mong_doi:
+            raise Chan(RC_KHONG_XAC_DINH, f"KHÔNG_XÁC_ĐỊNH: {oid[:12]} là {loai_that}, mong đợi {loai_mong_doi}")
+        self.so_object += 1
+        self.tong_bytes += kich
+        self.memo[khoa] = than
+        return than
+
+    def commit(self, oid: str) -> tuple:
+        """Trả ``(tree, [parents])`` từ header của bytes đã băm."""
+        than = self.doc(oid, "commit")
+        dau, _, _ = than.partition(b"\n\n")
+        tree, cha = None, []
+        for dong in dau.decode("utf-8", "replace").splitlines():
+            if dong.startswith("tree "):
+                tree = dong[5:].strip()
+            elif dong.startswith("parent "):
+                cha.append(dong[7:].strip())
+        if not tree or not SHA40.match(tree) or any(not SHA40.match(c) for c in cha):
+            raise Chan(RC_KHONG_XAC_DINH, f"KHÔNG_XÁC_ĐỊNH: commit {oid[:12]} header hỏng")
+        return tree, cha
+
+    def tree(self, oid: str) -> list:
+        """Entry ``(mode, tên, OID, type)`` parse từ bytes nhị phân đã băm — không `ls-tree`."""
+        than = self.doc(oid, "tree")
+        ket, i = [], 0
+        while i < len(than):
+            j = than.index(b"\0", i)
+            mode, _, ten = than[i:j].partition(b" ")
+            sha = than[j + 1:j + 21].hex()
+            if len(sha) != 40:
+                raise Chan(RC_KHONG_XAC_DINH, f"KHÔNG_XÁC_ĐỊNH: tree {oid[:12]} entry cụt")
+            mode = mode.decode("ascii")
+            loai = "tree" if mode == "40000" else "commit" if mode == "160000" else "blob"
+            ket.append((mode.zfill(6) if loai == "tree" else mode, ten.decode("utf-8", "surrogateescape"), sha, loai))
+            i = j + 21
+        return ket
+
+    def to_tien(self, S: str, H: str) -> int:
+        """S là tổ tiên của H? Tự đi đồ thị parent từ H (bytes đã băm), visited-set, biên parent inclusive.
+        Trả số cạnh của đường witness; không thấy ⇒ 12."""
+        gioi_han = self.ngan_sach["max_parent_path_edges"]
+        if S == H:
+            self.commit(H)
+            return 0
+        ngan, tham = [(H, 0)], set()
+        while ngan:
+            oid, sau = ngan.pop()
+            if oid in tham:
+                continue
+            tham.add(oid)
+            _, cha = self.commit(oid)
+            for c in cha:
+                # Biên INCLUSIVE, kiểm TRƯỚC khi nhận witness: đường đúng `bound` cạnh là hợp lệ,
+                # `bound + 1` ⇒ 12 kể cả khi cạnh ấy dẫn thẳng tới S (S8: bound−1/bound/bound+1).
+                if sau + 1 > gioi_han:
+                    raise Chan(RC_KHONG_XAC_DINH, f"KHÔNG_XÁC_ĐỊNH: đường parent > {gioi_han} cạnh")
+                if c == S:
+                    self.commit(S)
+                    return sau + 1
+                ngan.append((c, sau + 1))
+        raise Chan(RC_KHONG_XAC_DINH, f"KHÔNG_XÁC_ĐỊNH: S {S[:12]} không phải tổ tiên của H {H[:12]}")
+
+    def tim(self, tree_oid: str, duong: str):
+        """Resolve MỘT đường trong cây theo entry đã băm; trả ``(mode, OID, type)`` hoặc ``None`` nếu tree cha
+        đã xác minh không có entry. Đếm `max_tree_or_alias_edges` cho lần resolve này."""
+        buoc, oid, loai, mode = 0, tree_oid, "tree", "040000"
+        for phan in duong.split("/"):
+            if loai != "tree":
+                return None
+            buoc += 1
+            if buoc > self.ngan_sach["max_tree_or_alias_edges"]:
+                raise Chan(RC_KHONG_XAC_DINH, f"KHÔNG_XÁC_ĐỊNH: resolve {duong} > {self.ngan_sach['max_tree_or_alias_edges']} cạnh")
+            muc = next((e for e in self.tree(oid) if e[1] == phan), None)
+            if muc is None:
+                return None
+            mode, _, oid, loai = muc
+        return mode, oid, loai
+
+    def namespace(self, tree_oid: str, thu_muc: str) -> dict:
+        """Map ``path → (mode, type, OID)`` của MỌI entry ngay dưới `thu_muc` (kể cả thư mục con/symlink,
+        để validator từ chối chứ không bỏ qua). Tree cha vắng entry ⇒ map rỗng, đã được chứng minh."""
+        muc = self.tim(tree_oid, thu_muc)
+        if muc is None:
+            return {}
+        mode, oid, loai = muc
+        if loai != "tree":
+            raise Chan(RC_KHONG_XAC_DINH, f"KHÔNG_XÁC_ĐỊNH: {thu_muc} không phải thư mục (mode {mode})")
+        return {f"{thu_muc}/{ten}": (m, l, o) for m, ten, o, l in self.tree(oid)}
+
+    def dong(self):
+        self._td.cleanup()
+
+
+def _quet_so_thu_hoi_moi_ref(goc: Path, refs: list[str]) -> list[dict]:
+    """Chế độ CHƯA KÍCH HOẠT: mọi entry trong `ops/thu-hoi/` trên BẤT KỲ ref nào đều được liệt kê;
+    consumer vận hành gọi hàm này và ĐỎ (12) khi có bản ghi thu hồi. Lọc theo path trong mã, không tin
+    bộ lọc của `ls-tree`."""
+    ket = []
+    # `ten_ref` chứ không phải `ref`: mutant A1 của t94 neo chuỗi lặp-theo-ref của `_quet_lease_toan_kho` phải giữ DUY NHẤT.
+    for ten_ref in refs:
+        out = _git(goc, "ls-tree", "-r", ten_ref, "--", THU_MUC_SO)
+        for dong in out.splitlines():
+            try:
+                meta, duong = dong.split("\t", 1)
+                mode, loai, oid = meta.split()
+            except ValueError:
+                raise Chan(RC_KHONG_XAC_DINH, f"KHÔNG_XÁC_ĐỊNH: ls-tree có dòng hỏng: {dong!r}") from None
+            tuyen = phan_tuyen_so(duong)
+            if tuyen is None:
+                continue
+            ket.append({"ref": ten_ref, "path": duong, "mode": mode, "type": loai, "oid": oid, "tuyen": tuyen})
+    return ket
+
+
+def _kiem_so_rong_khi_chua_kich_hoat(goc: Path, refs: list[str]) -> None:
+    if SO_THU_HOI_KICH_HOAT:
+        return
+    for muc in _quet_so_thu_hoi_moi_ref(goc, refs):
+        if muc["tuyen"] == "thu_hoi":
+            raise Chan(RC_KHONG_XAC_DINH,
+                       f"KHÔNG_XÁC_ĐỊNH: SO_THU_HOI_KICH_HOAT=False mà sổ có bản ghi {muc['path']} tại "
+                       f"{muc['ref']} — bản ghi lọt trước kích hoạt: dừng, phục hồi có audit, không grandfather")
+        if muc["tuyen"] == "metadata":
+            co_policy = GOI_GIT("cat-file", "-e", f"{muc['ref']}:{PATH_POLICY_CLOSURE}", cwd=goc).returncode == 0
+            if not co_policy:
+                raise Chan(RC_KHONG_XAC_DINH,
+                           f"KHÔNG_XÁC_ĐỊNH: {muc['path']} có mặt tại {muc['ref']} mà policy {PATH_POLICY_CLOSURE} vắng (Q13)")
+
+
+def _du_bao_check(lease: dict, goc: Path, nhanh_mac_dinh: str) -> list[str]:
+    """M3 dự báo — luật mới (precedence Q3) trên ref canonical CỤC BỘ; KHÔNG đổi rc, chỉ in `DU_BAO:`."""
+    dong = [f"DU_BAO: chế độ CHƯA KÍCH HOẠT (SO_THU_HOI_KICH_HOAT={SO_THU_HOI_KICH_HOAT}); verdict sản phẩm = luật cũ"]
+    ref = f"refs/remotes/origin/{nhanh_mac_dinh}"
+    so = {m["path"]: m for m in _quet_so_thu_hoi_moi_ref(goc, [ref])} if _ref_ton_tai(goc, ref) else None
+    if so is None:
+        dong.append(f"DU_BAO: ref canonical {ref} KHÔNG có trong cache — dự báo KHÔNG ĐO ĐƯỢC")
+        return dong
+    dong.append(f"DU_BAO: sổ tại {ref}: {len(so)} entry (discovery qua adapter KHÔNG chạy — profile chưa duyệt)")
+    thay_the = _danh_sach_thay_the_cho(lease.get("thay_the_cho")) or []
+    for x in thay_the:
+        muc = so.get(f"{THU_MUC_SO}/{x}.yaml")
+        if muc:
+            try:
+                d = kiem_ban_ghi_thu_hoi(muc["path"], muc["mode"], muc["type"],
+                                         GOI_GIT("cat-file", "-p", muc["oid"], cwd=goc).stdout.encode("utf-8"))
+                dich = d["cap_lai_cho"]
+                rc = 0 if dich in (None, lease.get("lease_id")) else 8
+                dong.append(f"DU_BAO: sổ có {x}: cap_lai_cho={dich!r} ⇒ rc dự báo {rc}")
+            except Chan as e:
+                dong.append(f"DU_BAO: sổ có {x} nhưng bản ghi hỏng ⇒ rc dự báo {e.ma}: {e.thong_diep[:100]}")
+        elif any(x == cu and lease.get("lease_id") == moi for cu, moi, *_ in BIA_MO_LICH_SU):
+            dong.append(f"DU_BAO: {x} có trong BIA_MO_LICH_SU ⇒ rc dự báo 0")
+        else:
+            dong.append(f"DU_BAO: {x} không có trong sổ lẫn BIA_MO_LICH_SU ⇒ rc dự báo 8 (luật cũ: bia mộ hai chiều)")
+    if f"{THU_MUC_SO}/{lease.get('lease_id')}.yaml" in so:
+        dong.append("DU_BAO: chiều ngược — lease đang kiểm CÓ trong sổ ⇒ rc dự báo 8")
+    return dong
+
+
+def _du_bao_ai_dang_giu(goc: Path, refs: list[str], cac_lease: list[dict], nhanh_mac_dinh: str) -> list[str]:
+    """M2 dự báo: MAP_REF theo cặp (blob, path) và áp sổ canonical cục bộ theo lease_id — không đổi rc."""
+    dong = [f"DU_BAO: chế độ CHƯA KÍCH HOẠT (SO_THU_HOI_KICH_HOAT={SO_THU_HOI_KICH_HOAT}); verdict sản phẩm = luật cũ"]
+    ref = f"refs/remotes/origin/{nhanh_mac_dinh}"
+    so_ids = set()
+    if _ref_ton_tai(goc, ref):
+        so_ids = {Path(m["path"]).name[:-5] for m in _quet_so_thu_hoi_moi_ref(goc, [ref]) if m["tuyen"] == "thu_hoi"}
+        dong.append(f"DU_BAO: sổ tại {ref}: {len(so_ids)} bản ghi (discovery qua adapter KHÔNG chạy — profile chưa duyệt)")
+    else:
+        dong.append(f"DU_BAO: ref canonical {ref} KHÔNG có trong cache — dự báo KHÔNG ĐO ĐƯỢC")
+    map_ref: dict = {}
+    for r in refs:
+        for d in _git(goc, "ls-tree", "-r", r, "--", "ops/leases").splitlines():
+            meta, _, duong = d.partition("\t")
+            cot = meta.split()
+            if len(cot) == 3 and cot[1] == "blob":
+                map_ref.setdefault((cot[2], duong), []).append(r)
+    for muc in cac_lease:
+        lid = str(muc["lease"].get("lease_id") or "?")
+        nhan = " · ĐÃ_THU_HỒI" if lid in so_ids else ""
+        dong.append(f"DU_BAO: {lid}{nhan}\tMAP_REF {len(map_ref.get((muc['blob'], muc['path']), []))} ref")
+    dong.append(f"DU_BAO: MÙ 0 · {len(refs)} ref")
+    return dong
+
+
+def lenh_kiem_thu_hoi_github(a) -> int:
+    """M4 — cổng tiếp nhận: ancestry S→H, T = tree(H), map append-only, validator toàn namespace T,
+    receipt S/H/T. Chế độ chưa kích hoạt: tập revocation phải RỖNG ở cả S lẫn T."""
+    S, H = str(a.canonical_base).strip(), str(a.H).strip()
+    if not SHA40.match(S) or not SHA40.match(H):
+        raise Chan(RC_THAM_SO, "S và H phải là SHA40 hex thường")
+    if not a.nhanh_mac_dinh or "/" in a.nhanh_mac_dinh:
+        raise Chan(RC_THAM_SO, "--nhanh-mac-dinh bắt buộc, là TÊN nhánh do workflow truyền")
+    goc = Path(a.goc or ".").resolve()
+    kho = KhoObject(goc)
+    try:
+        canh = kho.to_tien(S, H)
+        tree_S, _ = kho.commit(S)
+        tree_T, _ = kho.commit(H)
+        map_S = kho.namespace(tree_S, THU_MUC_SO)
+        map_T = kho.namespace(tree_T, THU_MUC_SO)
+        # Append-only TRƯỚC validator T (Q13/S7): entry ở S phải nguyên vẹn ở T.
+        for duong, bo in map_S.items():
+            if map_T.get(duong) != bo:
+                raise Chan(RC_NOI_DUNG, f"append-only: {duong} tại S {bo} nhưng tại T {map_T.get(duong)}")
+        co_policy_T = kho.tim(tree_T, PATH_POLICY_CLOSURE) is not None
+        thu_hoi_S = [p for p in map_S if phan_tuyen_so(p) == "thu_hoi"]
+        thu_hoi_T, metadata_T = [], []
+        for duong, (mode, loai, oid) in sorted(map_T.items()):
+            tuyen = phan_tuyen_so(duong)
+            if tuyen == "metadata":
+                kiem_metadata_retired(duong, mode, loai, kho.doc(oid, "blob") if loai == "blob" else b"")
+                if not co_policy_T:
+                    raise Chan(RC_KHONG_XAC_DINH, f"KHÔNG_XÁC_ĐỊNH: {duong} có mà policy {PATH_POLICY_CLOSURE} vắng ở T (Q13)")
+                metadata_T.append(duong)
+            else:
+                kiem_ban_ghi_thu_hoi(duong, mode, loai, kho.doc(oid, "blob") if loai == "blob" else b"")
+                thu_hoi_T.append(duong)
+        if not SO_THU_HOI_KICH_HOAT and (thu_hoi_S or thu_hoi_T):
+            raise Chan(RC_KHONG_XAC_DINH,
+                       f"KHÔNG_XÁC_ĐỊNH: chế độ CHƯA KÍCH HOẠT đòi tập revocation RỖNG — S có {len(thu_hoi_S)}, T có {len(thu_hoi_T)}")
+        bo_kiem = kho.tim(tree_S, PATH_BO_KIEM)
+        receipt = {
+            "schema_version": 1, "event": "thu_hoi_admission_receipt", "che_do": "chua_kich_hoat",
+            "kho_canonical": KHO_CANONICAL, "nhanh_mac_dinh": a.nhanh_mac_dinh,
+            "S": S, "H": H, "T": tree_T, "tree_S": tree_S, "canh_ancestry": canh,
+            "so_thu_hoi_S": {p: list(v) for p, v in map_S.items()},
+            "so_thu_hoi_T": {p: list(v) for p, v in map_T.items()},
+            "metadata_T": metadata_T, "thu_hoi_moi": [p for p in thu_hoi_T if p not in map_S],
+            "oid_bo_kiem_tai_S": bo_kiem[1] if bo_kiem else None,
+            "profile_digest": None,
+            "discovery": "KHONG_CHAY: A0 chưa kích hoạt; PROFILE_ADAPTER_DA_DUYET rỗng (quyết định chủ kho)",
+            "ngan_sach": kho.ngan_sach, "so_object_da_doc": kho.so_object, "tong_bytes": kho.tong_bytes,
+            "ket_luan": "TAP_THU_HOI_RONG", "thoi_diem_utc": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
+        }
+    finally:
+        kho.dong()
+    van = json.dumps(receipt, ensure_ascii=False, sort_keys=True, indent=1)
+    if getattr(a, "receipt", None):
+        Path(a.receipt).write_text(van + "\n", encoding="utf-8")
+    print(f"THU_HOI_ADMISSION {receipt['ket_luan']}: S={S[:12]} H={H[:12]} T={tree_T[:12]} "
+          f"ancestry={canh} cạnh; sổ S={len(map_S)} T={len(map_T)} entry; object đã băm={kho.so_object}")
+    return RC_OK
+
+
 def lenh_check(a) -> int:
     lease, neo = kiem(_doc_yaml(a.tep), a.tep, getattr(a, "goc", None))
+    # A0 (spec r9 M3): verdict `check` = LUẬT CŨ, bộ kiểm THUẦN (t53: chạy được trong Actions không git/gh).
+    # Chỉ khi `--du-bao` mới chạm git: chốt "sổ không rỗng khi cờ False ⇒ 12" + in `DU_BAO:`; rc không đổi.
+    if getattr(a, "du_bao", False):
+        goc_check = _goc_kho(Path(a.tep), getattr(a, "goc", None))
+        if not (goc_check / ".git").exists():
+            raise Chan(RC_KHONG_XAC_DINH, f"KHÔNG_XÁC_ĐỊNH: --du-bao cần một kho git tại {goc_check}")
+        _, refs = _cac_ref_cuc_bo(goc_check)
+        _kiem_so_rong_khi_chua_kich_hoat(goc_check, refs)
+        for dong in _du_bao_check(lease, goc_check, getattr(a, "nhanh_mac_dinh", None) or "master"):
+            print(dong)
     print("LỆNH check KHÔNG CHẠY hai lớp GitHub: đo ISSUE/PR và dò comment; dùng `kiem-github`")
     print(f"lease {lease['lease_id']} ĐĂNG ĐƯỢC — issue #{lease['packet_issue']}, "
           f"neo {lease['reviewed_sha_required'][:12]}, hết hạn {lease['lease_expires_at_utc']}"
@@ -936,6 +1623,13 @@ def lenh_ai_dang_giu(a) -> int:
     root = Path(a.goc or ".").resolve()
     print("PHẠM_VI: quét refs/heads/*; nhánh cục bộ tụt sau origin/<cùng tên> sẽ bị CHẶN")
     cac_lease = _quet_lease_toan_kho(root, chan_nhanh_tut_sau=True)
+    # A0 (spec r9 M2): chế độ CHƯA KÍCH HOẠT — sổ thu hồi phải RỖNG trên mọi ref cục bộ (12 nếu không),
+    # và luật mới CHỈ in ở `--du-bao`; verdict sản phẩm bên dưới vẫn là luật cũ (bia mộ hai chiều).
+    _, refs_a0 = _cac_ref_cuc_bo(root)
+    _kiem_so_rong_khi_chua_kich_hoat(root, refs_a0)
+    if getattr(a, "du_bao", False):
+        for dong in _du_bao_ai_dang_giu(root, refs_a0, cac_lease, getattr(a, "nhanh_mac_dinh", None) or "master"):
+            print(dong)
     nguoi_giu = {}
     for muc in cac_lease:
         lease = muc["lease"]
@@ -982,6 +1676,13 @@ def lenh_con_tro_treo(a) -> int:
     return RC_OK
 
 
+def _them_co_du_bao(q) -> None:
+    q.add_argument("--du-bao", dest="du_bao", action="store_true",
+                   help="in dự báo luật mới (sổ thu hồi) dưới nhãn DU_BAO:; KHÔNG đổi mã thoát")
+    q.add_argument("--nhanh-mac-dinh", dest="nhanh_mac_dinh", default=None,
+                   help="tên nhánh mặc định cho dự báo (mặc định: master)")
+
+
 def main(argv=None) -> int:
     for luong in (sys.stdout, sys.stderr):
         try:
@@ -1001,11 +1702,22 @@ def main(argv=None) -> int:
         # một "kho" giả trong thư mục tạm mà không phải `git init`.
         q.add_argument("--root", dest="goc", default=None,
                        help="gốc kho để tính `prompt_path` (mặc định: tìm .git đi lên)")
+        if ten == "check":
+            _them_co_du_bao(q)
         q.set_defaults(fn=fn)
     q = sub.add_parser("ai-dang-giu", help="quét toàn kho xem ai đang giữ một đường dẫn")
     q.add_argument("duong_dan")
     q.add_argument("--root", dest="goc", default=".")
+    _them_co_du_bao(q)
     q.set_defaults(fn=lenh_ai_dang_giu)
+    q = sub.add_parser("kiem-thu-hoi-github",
+                       help="M4 cổng tiếp nhận sổ thu hồi: ancestry S→H, map append-only, validator toàn namespace")
+    q.add_argument("H", help="SHA40 head của PR (đã fetch vào object-store của kho)")
+    q.add_argument("--canonical-base", dest="canonical_base", required=True, help="SHA40 base S (mã canonical đang chạy)")
+    q.add_argument("--nhanh-mac-dinh", dest="nhanh_mac_dinh", required=True, help="tên nhánh mặc định (ghi vào receipt)")
+    q.add_argument("--root", dest="goc", default=".")
+    q.add_argument("--receipt", default=None, help="đường ghi receipt JSON (S/H/T + kết luận)")
+    q.set_defaults(fn=lenh_kiem_thu_hoi_github)
     q = sub.add_parser("con-tro-treo",
                        help="liệt kê read-only lease còn hiệu lực có con trỏ treo")
     q.add_argument("--root", dest="goc", default=".")

@@ -1,0 +1,107 @@
+name: thu-hoi
+
+# CỔNG TIẾP NHẬN SỔ THU HỒI LEASE (spec `ops/specs/THU-HOI-LEASE-VA-CAP-LAI.md` r9 §M9; ADR-0047).
+# TRẠNG THÁI: CÀI ở slice A0, CHƯA KÍCH HOẠT — `SO_THU_HOI_KICH_HOAT = False` trong
+# `ops/lease_publish.py`, nên bộ kiểm chỉ chứng minh tập revocation RỖNG ở cả S lẫn T và
+# ghi receipt; chưa là required check, chưa có consumer đọc receipt (dependency
+# LAND-DOC-RECEIPT-THU-HOI). Nghiệm thu + bật là slice A1, quyết định của chủ kho.
+#
+# VÌ SAO `pull_request_target` mà KHÔNG chạy code ứng viên: cổng phải chạy MÃ CANONICAL — bộ kiểm
+# lấy từ base.sha (S) — trên đúng head ứng viên (H) đã được fetch vào object-store; cây của H chỉ
+# được ĐỌC qua object-store, không checkout, không hook, không action nào của cây ứng viên chạy.
+# `ops-publish-lease.yml` từng ăn P1 vì bộ kiểm nằm cùng nhánh với thứ nó kiểm (PR #104).
+# `pull_request_target` là cách duy nhất có token đọc + định nghĩa workflow từ base; token ở đây
+# CHỈ ĐỌC (`contents: read`, `pull-requests: read`) — job này không ghi Issue/PR/kho.
+#
+# Ba mỏ neo ĐO, không tin lời khai của event:
+#   S — `git rev-parse HEAD` sau checkout phải bằng `base.sha` của event (ancestry S→H tự đi đồ thị).
+#   H — fetch `refs/pull/<n>/head` từ endpoint canonical tường minh; OID nhận được phải bằng `head.sha`.
+#   T — tree(H) do bộ kiểm tự lấy từ bytes đã băm; receipt ghi cả ba.
+# KHÔNG `workflow_dispatch` (hợp đồng R5/S5: consumer từ chối mọi event khác kể cả cùng tên).
+# Không lọc `paths:` — mọi PR vào nhánh mặc định đều qua admission (A11: docs/bot/rc9/standalone).
+
+on:
+  pull_request_target:
+    types: [opened, reopened, synchronize, ready_for_review, edited]
+    branches: [master]
+
+permissions:
+  contents: read
+  pull-requests: read
+
+concurrency:
+  group: thu-hoi-${{ github.event.pull_request.number }}
+  cancel-in-progress: false   # receipt của attempt trước không bị huỷ giữa chừng
+
+jobs:
+  thu-hoi:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: read
+    steps:
+      - name: lấy MÃ CANONICAL tại base.sha (S) — không bao giờ head PR
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.base.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+
+      # GHIM EXACT, cùng số với `ci.yml` và `ops-publish-lease.yml` (t31 đòi mọi workflow cùng một bản).
+      - name: cài PyYAML
+        run: python3 -m pip install --quiet PyYAML==6.0.3
+
+      - name: đo S, fetch H từ endpoint canonical, chạy bộ kiểm canonical, ghi receipt
+        env:
+          TL_S: ${{ github.event.pull_request.base.sha }}
+          TL_H: ${{ github.event.pull_request.head.sha }}
+          TL_PR: ${{ github.event.pull_request.number }}
+          TL_NHANH: ${{ github.event.pull_request.base.ref }}
+          TL_KHO: ${{ github.repository }}
+          TL_RUN_ID: ${{ github.run_id }}
+          TL_RUN_ATTEMPT: ${{ github.run_attempt }}
+        run: |
+          set -euo pipefail
+          # Input đi qua env rồi validate ở shell TRƯỚC khi thành argv — không nội suy biểu thức vào thân script.
+          case "$TL_S" in *[!0-9a-f]*|"") echo "S không phải sha40: $TL_S" >&2; exit 12;; esac
+          case "$TL_H" in *[!0-9a-f]*|"") echo "H không phải sha40: $TL_H" >&2; exit 12;; esac
+          if [ "${#TL_S}" -ne 40 ] || [ "${#TL_H}" -ne 40 ]; then echo "S/H phải dài 40" >&2; exit 12; fi
+          case "$TL_PR" in *[!0-9]*|"") echo "số PR hỏng: $TL_PR" >&2; exit 12;; esac
+          case "$TL_NHANH" in */*|"") echo "tên nhánh mặc định hỏng: $TL_NHANH" >&2; exit 12;; esac
+          [ "$TL_KHO" = "ducthangho/tra-luat" ] || { echo "kho không phải canonical: $TL_KHO" >&2; exit 12; }
+          # S: cây đang chạy PHẢI là base.sha của event; lệch là definition chưa chứng minh == S ⇒ 12.
+          THUC="$(git rev-parse HEAD)"
+          [ "$THUC" = "$TL_S" ] || { echo "checkout HEAD $THUC != base.sha $TL_S" >&2; exit 12; }
+          # H: fetch ref PR từ endpoint canonical TƯỜNG MINH (không qua `origin` của checkout), vào ref tạm;
+          # OID nhận được phải bằng head.sha của event, nếu không receipt stale ⇒ 12.
+          git -c protocol.allow=never -c protocol.https.allow=always \
+              fetch --no-tags "https://github.com/$TL_KHO" \
+              "+refs/pull/$TL_PR/head:refs/thu-hoi/ung-vien"
+          NHAN="$(git rev-parse refs/thu-hoi/ung-vien)"
+          [ "$NHAN" = "$TL_H" ] || { echo "fetch refs/pull/$TL_PR/head cho $NHAN != head.sha $TL_H" >&2; exit 12; }
+          # Bộ kiểm CANONICAL (tệp của cây S vừa checkout) đọc H qua object-store, không checkout cây ứng viên.
+          mkdir -p "$RUNNER_TEMP/thu-hoi-receipt"
+          python3 ops/lease_publish.py kiem-thu-hoi-github "$TL_H" \
+              --canonical-base "$TL_S" --nhanh-mac-dinh "$TL_NHANH" \
+              --receipt "$RUNNER_TEMP/thu-hoi-receipt/receipt.json"
+          python3 - "$RUNNER_TEMP/thu-hoi-receipt/receipt.json" "$TL_KHO" "$TL_PR" "$TL_RUN_ID" "$TL_RUN_ATTEMPT" <<'PY'
+          import hashlib, json, sys
+          tep, kho, pr, run_id, attempt = sys.argv[1:6]
+          d = json.load(open(tep, encoding="utf-8"))
+          d["repository"] = kho; d["pull_request"] = int(pr)
+          d["run_id"] = int(run_id); d["run_attempt"] = int(attempt)
+          d["workflow_definition_sha256"] = hashlib.sha256(
+              open(".github/workflows/ops-thu-hoi-admission.yml", "rb").read()).hexdigest()
+          json.dump(d, open(tep, "w", encoding="utf-8"), ensure_ascii=False, sort_keys=True, indent=1)
+          print("receipt:", d["ket_luan"], "S", d["S"][:12], "H", d["H"][:12], "T", d["T"][:12])
+          PY
+
+      # Tên artifact KHÔNG phải danh tính (consumer dùng artifact ID + metadata run sau readback);
+      # `if-no-files-found: error` để "không có receipt" là job ĐỎ chứ không phải job xanh rỗng.
+      - name: tải receipt lên artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: thu-hoi-receipt-${{ github.event.pull_request.head.sha }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/thu-hoi-receipt/receipt.json
+          if-no-files-found: error
+          retention-days: 90

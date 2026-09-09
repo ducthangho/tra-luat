@@ -275,6 +275,26 @@ loại trừ nhau**. Không cổng nào bắt được cái nào — `release-ve
 
 ## Một cái giá phải trả trong chính phiên này, ghi vì nó là bài học đã có mà vẫn dẫm
 
+## Một lỗi ĐO ĐƯỢC của chính đợt này: `printf '- …'` cắt mất nội dung TRƯỚC khi gửi
+
+Comment đăng verdict lượt 6 lên PR #493 bị **mất bốn gạch đầu dòng**. Nguyên nhân không phải tầng
+vận chuyển: tôi dựng comment bằng `printf '- …'`, và **bash đọc `-` thành cờ** ⇒
+`printf: - : invalid option`, bốn dòng ấy **không bao giờ được ghi ra**. Đo được hai chiều: bản gửi
+dự tính **29 793** byte, bản đã đến **27 683** byte (hụt **2 110**); và đọc ngược comment ấy thấy
+mục *"Bốn P3 đáng ghi nhất"* **rỗng thân**.
+
+Đây là họ hàng của bài học *"tầng vận chuyển cũng chuẩn hoá chuỗi — chỉ chứng minh được bằng ĐO
+THỨ ĐÃ ĐẾN"*, nhưng lệch một tầng và đáng ghi riêng vì thế: ở đó chuỗi **bị biến dạng** trên đường
+đi; ở đây chuỗi **chưa từng tồn tại** — shell nuốt nó trước khi có gì được gửi. Chốt *"đo thứ đã
+đến"* bắt được **cả hai**, và đó là lý do nó đáng giữ. Chốt rẻ hơn cho lần sau: đừng dựng nội dung
+nhiều dòng bằng chuỗi `printf` liên tiếp — dùng **heredoc trích dẫn** (`<<'EOF'`), thứ không diễn
+giải gì; và nếu buộc phải dùng `printf`, thì `printf '%s\n' "- …"` chứ đừng để dòng bắt đầu bằng
+`-` rơi vào vị trí format.
+
+Không sửa được comment cũ: endpoint MCP của kho chỉ có `add_comment_to_pending_review`,
+`add_issue_comment`, `add_reply_to_pull_request_comment` — **không có công cụ sửa comment**. Nên
+đính chính bằng một comment riêng, và ghi lại đây.
+
 **NHÃN NGUỒN cho cả mục này — TỰ THUẬT, KHÔNG CÓ LOG.** Cross-review PR #493 chấm P3
 (`hai-tu-thu-thieu-nguyen-lieu-kiem-doc-lap`) và **đúng**: gói không có transcript `git checkout`,
 không có output verifier cho cặp `806980`/`806981`, không có bản nháp mang số *"tám"*. Byte của

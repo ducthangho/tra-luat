@@ -32,27 +32,49 @@ thì trạng thái là `KHÔNG ĐO ĐƯỢC` và cổng **ĐỎ** (`rc=12`), kh�
 - Test tiêm nguồn giả (bare cục bộ) qua **API nội bộ**; **không** có biến môi trường hay cờ production nào đổi
   được authority. Đây là chốt chống chính lỗi "một cờ để test mở đường cho production".
 
-### Lớp 2 — HỒ SƠ TIẾN TRÌNH tường minh, so với mỏ neo đã duyệt
+### Lớp 2 — NỀN THỰC THI được duyệt, so với mỏ neo do người khác cấp
 
-- Adapter nguồn dựng **env con từ RỖNG** (không kế thừa `os.environ`); `GIT_DIR` = repo tạm cô lập do adapter tạo
+> Bản đầu của lớp này (08-09-2026, trước lượt review 6) chỉ băm *executable Git + version + tệp CA + tên helper*.
+> Cross-review lượt 6 (S1, VERDICT `9090aadd…`) bác đúng chỗ: **tên helper không định danh bytes chương trình mà nó
+> phân giải tới**, `http.sslCAPath` là **thư mục**, và transport HTTPS/runtime/thư viện nằm **ngoài** digest — cùng
+> digest vẫn có thể đi qua bộ helper/trust khác. Đó là lần thứ **6** của hình dạng lỗi này, và nó nằm ngay trong ADR
+> viết ra để chặn nó. Lớp 2 vì thế nói về **nền thực thi**, không nói về một hàm băm.
+
+- **Deployment profile là một NỀN THỰC THI được duyệt**, không phải tập biến của lời gọi: một manifest bất biến ghim
+  image/runtime (Git chính: đường, sha256, version; chương trình HTTPS/credential helper **thật sự dùng**, hoặc "không
+  dùng"; runtime/thư viện; **toàn bộ trust store hiệu lực** — tệp, thư mục CA, default store nếu dùng; endpoint và proxy
+  profile: scheme/host/port). Không đòi băm đệ quy cả OS: dùng manifest của image/deployment đã xác minh và **giữ
+  read-only suốt invocation**.
+- **Producer của manifest độc lập với caller và với cây ứng viên** (bước bootstrap/deployment tin cậy); **approver** của
+  mỏ neo `PROFILE_ADAPTER_DA_DUYET` là chủ kho, qua commit có review. **Cấm** đo profile từ chính deployment tuỳ ý rồi tự
+  đăng ký làm "đã duyệt" trong cùng lượt chạy — đó là tự khai, đúng thứ luật 3 dưới đây cấm.
+- Adapter dựng **env con từ RỖNG** (không kế thừa `os.environ`); `GIT_DIR` = repo tạm cô lập do adapter tạo
   (`git init --template=`), `GIT_CONFIG_NOSYSTEM=1`, `GIT_CONFIG_GLOBAL=/dev/null`, `GIT_NO_REPLACE_OBJECTS=1`,
-  `GIT_TERMINAL_PROMPT=0`, `GIT_ALLOW_PROTOCOL=https`, `LC_ALL=C`, `PATH` tối thiểu; executable `git` giải **một lần**
-  thành đường tuyệt đối. Danh sách **cấm** (`GIT_WORK_TREE`, `GIT_COMMON_DIR`, `GIT_EXEC_PATH`, `GIT_SSL_NO_VERIFY`,
-  `GIT_PROXY_COMMAND`, `GIT_ASKPASS`, `SSH_*`, …) là danh sách **chẩn đoán**; thứ cưỡng chế là allowlist.
-- Từ deployment chỉ kế thừa một **allowlist HỮU HẠN theo khoá + kiểu + miền giá trị** — không wildcard theo tiền tố
-  (`http.*`), không dò chuỗi trong giá trị; giá trị **parse theo kiểu Git** (bool/path/URL). Khoá ngoài allowlist ⇒ 12.
-  Bài học CLAUDE.md *"danh sách CẤM không bao giờ đủ — đảo thành danh sách CHO PHÉP"* áp nguyên văn ở đây.
-- **Profile digest** = sha256 của bản chuẩn hoá {khoá=giá trị không bí mật đã sắp xếp, đường tuyệt đối + sha256
-  executable git, `git --version`, sha256 tệp CA, tên credential helper}; digest phải **bằng** mỏ neo
-  `PROFILE_ADAPTER_DA_DUYET` ghim trong mã (đổi qua commit có review); khác hoặc không tính được ⇒ 12. Receipt ghi
-  digest + các trường không bí mật. Hệ quả chấp nhận: một deployment hợp lệ chưa đăng ký **bị chặn** — chữa bằng
-  duyệt profile có receipt, không bằng fallback kế thừa env.
+  `GIT_TERMINAL_PROMPT=0`, `GIT_ALLOW_PROTOCOL=https`, `LC_ALL=C`; executable giải bằng đường tuyệt đối **trong profile**
+  trước khi chạy. Danh sách cấm (`GIT_WORK_TREE`, `GIT_COMMON_DIR`, `GIT_EXEC_PATH`, `GIT_SSL_NO_VERIFY`,
+  `GIT_PROXY_COMMAND`, `GIT_ASKPASS`, `SSH_*`, …) là **chẩn đoán**; thứ cưỡng chế là profile.
+- Từ profile chỉ lấy một **allowlist HỮU HẠN theo khoá + kiểu + miền giá trị**: `credential.helper` = không dùng hoặc
+  đúng helper trong manifest; username chỉ scope URL canonical; `http.sslCAInfo`/`http.sslCAPath` chỉ đúng trust store
+  trong manifest; proxy chỉ đúng scheme/host/port đã duyệt, và `http.proxy`/`HTTPS_PROXY`/`https_proxy` phải quy về
+  **cùng một** giá trị. Không wildcard `http.*`/`credential.*`, không dò chuỗi; giá trị **parse theo kiểu Git** rồi chuyển
+  thành đối số Git hữu hạn; không kế thừa `GIT_CONFIG_*` của caller; khoá lạ ⇒ 12; TLS verification bắt buộc.
+- **Digest** = sha256(JSON UTF-8 chuẩn hoá, `sort_keys`, schema_version ghim) của manifest + cấu hình không bí mật hiệu lực
+  + định danh/version nguồn secret. Đường tạm (`HOME`, `GIT_DIR`, object store) là **vai trò** do adapter tạo/xác định và
+  kiểm isolation/ownership riêng — **không** đưa đường tạm ngẫu nhiên vào digest. Digest phải **bằng** một neo đã duyệt;
+  lệch hoặc không tính được ⇒ 12. Đây là **MỘT** phép so profile duy nhất: câu "receipt ghi hồ sơ" không tạo thêm chốt so
+  thứ hai (chốt kép che mutant — S3 lượt 6).
+- Hệ quả chấp nhận: đổi image/runner/package làm manifest đổi ⇒ **12 cho tới khi neo mới được duyệt**. Một deployment hợp
+  lệ chưa đăng ký bị chặn là đúng thiết kế; chữa bằng duyệt profile có receipt, không bằng fallback kế thừa env.
+- **Còn mở, của chủ kho:** nền thực thi cụ thể nào được tin (runner GitHub-hosted theo image digest? self-hosted?) và
+  quy trình duyệt mỏ neo. ADR này giữ bất biến; giá trị điền vào khi có quyết định, trước ready slice A0.
 
 ### Lớp 3 — TOÀN VẸN OBJECT: băm lại bytes, cạnh từ bytes đã băm, store cô lập
 
 - Cache object cục bộ của kho đọc là **không tin cậy**. Adapter đọc object qua `GIT_DIR` = repo tạm cô lập (không
-  ref, không `refs/replace`, config trống) + `GIT_OBJECT_DIRECTORY` = objects của kho nguồn (chỉ đọc; alternates
-  qua `GIT_ALTERNATE_OBJECT_DIRECTORIES`), `cat-file --batch`. Đo được (reviewer lượt 5): repo tạm **không** trỏ
+  ref, không `refs/replace`, config trống) + `GIT_OBJECT_DIRECTORY` = object directory của kho nguồn **giải một lần
+  bằng API Git** (bare / working copy / linked worktree — không ghép literal `<kho>/.git/objects`; S8 lượt 6), chỉ đọc;
+  alternates chỉ qua `GIT_ALTERNATE_OBJECT_DIRECTORIES` do adapter dựng; loose + pack; partial/promisor thiếu object ⇒
+  12 (không phải "vắng"); shallow ⇒ 12; `cat-file --batch`. Đo được (reviewer lượt 5): repo tạm **không** trỏ
   object directory ⇒ `cat-file` trả `<OID> missing` với `rc=0` — nên `missing` là **12**, không phải "vắng".
 - Với mọi object dùng để quyết định: đọc bytes một lần, băm `sha1("<type> <size>\0" + bytes)` **= OID** rồi mới
   dùng; **mọi cạnh** (entry tree: mode/tên/OID; header `tree`/`parent` của commit) trích từ **bytes đã xác minh** của

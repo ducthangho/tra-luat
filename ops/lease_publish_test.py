@@ -5262,6 +5262,40 @@ def t149_review_F09_preflight_object_store_khong_ke_thua_env():
             kho.dong()
 
 
+@ca
+def t150_review2_F10_nguon_khong_utf8_la_12_khong_traceback():
+    """Review lượt 2 (claude): nguồn KHÔNG PHẢI UTF-8 ở đường consumer phải là Chan 12, không UnicodeDecodeError.
+    (a) marker + policy không phải UTF-8 — chốt Q13 của `_kiem_so_rong_khi_chua_kich_hoat`;
+    (b) tên tệp trong sổ không phải UTF-8 — răng cho catch của `_ls_tree_z` (mutant bỏ catch phải đỏ ở đây)."""
+    mod = _nap_cong()
+    with San() as s:
+        cay, g = _kho_thu(s)
+        g(cay, "checkout", "-q", "-b", "meta-pol-hong")
+        p = cay / "ops" / "thu-hoi" / "_ngoai-le-closure.retired.yaml"
+        p.parent.mkdir(parents=True); p.write_bytes(_yaml_bytes(_metadata_retired()))
+        q = cay / ".github" / "coordination" / "change-impact.v1.json"
+        q.parent.mkdir(parents=True); q.write_bytes(b'{"a": "\xc3\x28"}\n')
+        g(cay, "add", "-A"); g(cay, "commit", "-qm", "policy non-utf8")
+        g(cay, "push", "-q", "origin", "meta-pol-hong")
+        try:
+            rc, o, e = _goi_main(mod, "ai-dang-giu", "ops/x.md", "--root", cay)
+        except UnicodeDecodeError:
+            chot(False, "policy không phải UTF-8 làm CLI nổ UnicodeDecodeError — hợp đồng đòi Chan 12")
+        chot(rc == 12 and "Traceback" not in e, f"policy không phải UTF-8 phải 12, không traceback: {rc} {e[-200:]!r}")
+    with San() as s:
+        cay, g = _kho_thu(s)
+        g(cay, "checkout", "-q", "-b", "ten-hong")
+        d = cay / "ops" / "thu-hoi"; d.mkdir(parents=True)
+        with open(str(d).encode("utf-8") + b"/thu\xe9.yaml", "wb") as f:
+            f.write(b"x: 1\n")
+        g(cay, "add", "-A"); g(cay, "commit", "-qm", "ten non-utf8")
+        g(cay, "push", "-q", "origin", "ten-hong")
+        try:
+            rc, o, e = _goi_main(mod, "ai-dang-giu", "ops/x.md", "--root", cay)
+        except UnicodeDecodeError:
+            chot(False, "tên không phải UTF-8 làm CLI nổ UnicodeDecodeError — hợp đồng đòi Chan 12")
+        chot(rc == 12 and "Traceback" not in e, f"tên không phải UTF-8 phải 12, không traceback: {rc} {e[-200:]!r}")
+
 def main() -> int:
     qua, hong, bo_qua = 0, [], []
     for fn in CA:

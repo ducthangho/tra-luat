@@ -1599,8 +1599,11 @@ def _kiem_so_rong_khi_chua_kich_hoat(goc: Path, refs: list[str]) -> None:
                        f"KHÔNG_XÁC_ĐỊNH: SO_THU_HOI_KICH_HOAT=False mà sổ có bản ghi {muc['path']} tại "
                        f"{muc['ref']} — bản ghi lọt trước kích hoạt: dừng, phục hồi có audit, không grandfather")
         if muc["tuyen"] == "metadata":
-            p = GOI_GIT("cat-file", "blob", f"{muc['ref']}:{PATH_POLICY_CLOSURE}", cwd=goc)
-            if p.returncode != 0 or _doc_policy_json((p.stdout or "").encode("utf-8")) is None:
+            try:
+                p = GOI_GIT("cat-file", "blob", f"{muc['ref']}:{PATH_POLICY_CLOSURE}", cwd=goc)
+            except UnicodeDecodeError:   # policy không phải UTF-8 — nguồn hỏng là 12, không traceback (F10 lượt 2)
+                p = None
+            if p is None or p.returncode != 0 or _doc_policy_json((p.stdout or "").encode("utf-8")) is None:
                 raise Chan(RC_KHONG_XAC_DINH,
                            f"KHÔNG_XÁC_ĐỊNH: {muc['path']} có mặt tại {muc['ref']} mà policy {PATH_POLICY_CLOSURE} "
                            f"vắng hoặc không phải JSON object (Q13)")

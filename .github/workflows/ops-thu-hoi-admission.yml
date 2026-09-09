@@ -96,10 +96,12 @@ jobs:
           [ "$NHAN" = "$TL_H" ] || { echo "fetch refs/pull/$TL_PR/head cho $NHAN != head.sha $TL_H" >&2; exit 12; }
           # Bộ kiểm CANONICAL (tệp của cây S vừa checkout) đọc H qua object-store, không checkout cây ứng viên.
           mkdir -p "$RUNNER_TEMP/thu-hoi-receipt"
+          # F12 (review lượt 2): dưới `set -e`, `X=$?` sau lệnh fail là dòng chết — lấy rc THẬT vào biến rồi mới thoát fail-close.
+          CHECKER_RC=0
           python3 ops/lease_publish.py kiem-thu-hoi-github "$TL_H" \
               --canonical-base "$TL_S" --nhanh-mac-dinh "$TL_NHANH" \
-              --receipt "$RUNNER_TEMP/thu-hoi-receipt/receipt.json"
-          CHECKER_RC=$?
+              --receipt "$RUNNER_TEMP/thu-hoi-receipt/receipt.json" || CHECKER_RC=$?
+          [ "$CHECKER_RC" -eq 0 ] || { echo "bộ kiểm canonical rc=$CHECKER_RC" >&2; exit "$CHECKER_RC"; }
           # check_run_id: đọc jobs của ĐÚNG run/attempt này qua API (token chỉ đọc), lấy `check_run_url` của job
           # tên $TL_JOB — KHÔNG đồng nhất job ID với check-run ID. Không lấy được ⇒ 12 (thiếu/mơ hồ là 12).
           curl -sS -f -H "Authorization: Bearer $TL_TOKEN" -H "Accept: application/vnd.github+json" \

@@ -163,14 +163,22 @@ Hồ sơ vá lời khai sai thì cũng bị soi như mọi thứ khác.
 | 3 | `fae2fb7` | `changes_requested` · **0 P1 · 2 P2 · 15 P3** | **7 ĐÃ VÁ THẬT · 3 VÁ HỜ · 10 CHƯA VÁ** |
 
 Lượt 2 nói thẳng điều đáng nhớ nhất: **cả năm bản vá của lượt 1 chỉ sửa MỘT bản chiếu và để nguyên
-các bản chiếu khác** — lần thứ sáu kho gặp đúng hình dạng ấy. Lượt 3 đóng được P1 và bốn trong năm
-bản vá, sau khi cách vá đổi từ *"sửa chỗ mình nhớ ra"* sang *"liệt kê mọi bản chiếu rồi mới sửa"*.
+các bản chiếu khác**. Đây là một hình dạng **TÁI DIỄN** — và cố ý **không** gắn số thứ tự: bản đầu
+viết *"lần thứ sáu kho gặp đúng hình dạng ấy"* mà không có danh sách sáu mốc, không phạm vi thời
+gian, không quy tắc khử trùng (một lần vá sinh nhiều hậu quả không thành nhiều lần). Cross-review
+lượt 3 chấm P3 (`so-lan-thu-sau-moi-khong-co-phep-dem`), và số ấy đã bị rút thay vì đi tìm hậu
+kiểm cho nó. Lượt 3 đóng được P1 và bốn trong năm bản vá, sau khi cách vá đổi từ *"sửa chỗ mình
+nhớ ra"* sang *"liệt kê mọi bản chiếu rồi mới sửa"*.
 
 Chúng nằm rải ở **bốn** hiện vật, không phải "chính mục này": `CHANGELOG.md` ·
 `ops/reviews/README.md` (cả bảng cảnh báo LẪN bảng mục lục) ·
 `ops/reviews/pr491-review-2-codex-verdict.receipt.yaml` · **thân PR**. Bản trước của tiêu đề này
-viết *"CHÍNH mục này"* — hẹp hơn sự thật, và chính chỗ hẹp ấy là lý do P1 sống sót qua lượt 1:
-tôi sửa mục CHANGELOG rồi tưởng đã xong.
+viết *"CHÍNH mục này"* — hẹp hơn sự thật. Nói cho đúng cả phần tự thuật, vì bản trước của câu này
+cũng hẹp hơn lịch sử thật (cross-review lượt 3 chấm P3 `tu-thu-tron-hai-tap-nam-finding`): bản vá
+lượt 1 **có** sửa hàng *cảnh báo* + `id` caveat trong `README.md` **và** hai chỗ trong
+`receipt.yaml` — không phải *"chỉ sửa mục CHANGELOG"*. Thứ nó **bỏ quên** là hàng *mục lục* ở
+chính `README.md` và hai trường khác trong `receipt.yaml`. Sai lầm không phải *"chỉ đụng một tệp"*
+mà là *"đụng đúng những chỗ mình nhớ ra, rồi coi đó là đủ"*.
 
 **Bài học rẻ và dùng được ngay:** trước khi gọi một finding là đã vá, `grep` chính câu khẳng định
 ấy trên TOÀN BỘ hiện vật của PR — `CHANGELOG.md`, `ops/**`, và thân PR — chứ đừng sửa chỗ mình

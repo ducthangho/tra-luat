@@ -1094,9 +1094,10 @@ def _probe_ghi(ws: str) -> dict:
                 pass
 
 
-def _probe_spawn(chuong_trinh: str, ws: str) -> dict:
+def _probe_spawn(chuong_trinh: str, ws: str, env: dict[str, str] | None = None) -> dict:
     try:
-        p = _chay_van_ban_an_toan([chuong_trinh, "--version"], cwd=ws, timeout=30)
+        p = _chay_van_ban_an_toan([chuong_trinh, "--version"], cwd=ws, env=env,
+                                  timeout=30)
     except (OSError, subprocess.SubprocessError) as e:
         return {"trang_thai": "DO", "chi_tiet": f"spawn --version: {type(e).__name__}"}
     ra = (p.stdout or "") + (p.stderr or "")
@@ -1125,9 +1126,10 @@ def _probe_cho_so(ds: dict) -> dict:
             for ten, kq in ds.items()}
 
 
-def chay_cac_probe(ws: str, lenh: list[str], bo_qua: str | None) -> tuple[dict, str | None]:
+def chay_cac_probe(ws: str, lenh: list[str], bo_qua: str | None,
+                   env: dict[str, str] | None = None) -> tuple[dict, str | None]:
     ds = {"workspace": _probe_workspace(ws), "ghi": _probe_ghi(ws),
-          "spawn": _probe_spawn(str(lenh[0]), ws)}
+          "spawn": _probe_spawn(str(lenh[0]), ws, env=env)}
     if Path(str(lenh[0])).name.casefold() in ("claude", "claude.exe"):
         ds["claude_trust"] = _probe_trust_claude(ws)
     ly_do = bo_qua.strip() if bo_qua is not None else None
@@ -1511,8 +1513,19 @@ def lenh_run(a) -> int:
     if not a.lenh:
         raise Chan(MA_THAM_SO, "thieu lenh de chay (dat sau dau --)")
     kq = chay_cac_chot(a)
+    # Dựng credential và bỏ snapshot TRƯỚC lần spawn ĐẦU TIÊN. Probe `--version`
+    # cũng là mã của chương trình do người gọi chọn, không phải code đáng tin của
+    # launcher; scrub chỉ trước Popen chính sẽ vẫn làm raw secret lọt qua probe.
+    moi_truong_con = dict(os.environ)
+    if moi_truong_con.get("CODEX_AUTH_JSON"):
+        ket_cred = chuan_bi_xac_thuc(that_su=True)
+        if not ket_cred or not all(x.get("ok") for x in ket_cred):
+            raise Chan(MA_CHUA_XAC_THUC,
+                       "CODEX_AUTH_JSON co mat nhung khong materialize duoc")
+        moi_truong_con.pop("CODEX_AUTH_JSON", None)
     try:
-        probe, ly_do_bo_qua = chay_cac_probe(kq["workspace"], a.lenh, a.bo_qua_probe)
+        probe, ly_do_bo_qua = chay_cac_probe(
+            kq["workspace"], a.lenh, a.bo_qua_probe, env=moi_truong_con)
     except Chan as e:
         if e.probe is None:
             raise
@@ -1605,16 +1618,6 @@ def lenh_run(a) -> int:
         raise Chan(MA_THAM_SO,
                    "lenh co {PROMPT_FILE} nhung khong truyen --prompt-file: "
                    "con se nhan chuoi nguyen van")
-
-    # Biến chỉ là hạt giống để dựng auth.json. Materialize trước khi mở log/sinh
-    # child, rồi trao một bản environment không còn raw credential.
-    moi_truong_con = dict(os.environ)
-    if moi_truong_con.get("CODEX_AUTH_JSON"):
-        ket_cred = chuan_bi_xac_thuc(that_su=True)
-        if not ket_cred or not all(x.get("ok") for x in ket_cred):
-            raise Chan(MA_CHUA_XAC_THUC,
-                       "CODEX_AUTH_JSON co mat nhung khong materialize duoc")
-        moi_truong_con.pop("CODEX_AUTH_JSON", None)
 
     f_out = (thu_muc / "stdout.log").open("w", encoding="utf-8")
     f_err = (thu_muc / "stderr.log").open("w", encoding="utf-8")

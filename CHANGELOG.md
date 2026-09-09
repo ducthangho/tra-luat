@@ -5,6 +5,9 @@ Ba đường khôi phục credential (`launcher.py chuan-bi`, session-start hook
 giá trị, fallback `~/.codex/auth.json` khi vắng/rỗng. Launcher materialize
 `CODEX_AUTH_JSON` trước khi sinh child rồi loại raw snapshot khỏi environment
 child; validation siết `tokens` phải là object và giữ atomic write/mode `0600`.
+Probe `--version` cũng dùng environment đã bỏ raw snapshot; session-start uỷ quyền
+cho cùng materializer so `last_refresh`, thay vì giữ tệp stale chỉ vì `login status`
+trả mã 0.
 
 # ★ dev-side — r356: kỳ vọng của fixture phụ thuộc NỀN CHẠY (2026-09-06)
 

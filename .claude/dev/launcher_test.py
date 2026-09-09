@@ -2351,7 +2351,7 @@ def r357_chuan_bi_ton_trong_CODEX_HOME_va_tokens_phai_la_object():
 
 @ca
 def r358_run_materialize_roi_bo_CODEX_AUTH_JSON_khoi_child():
-    """Run phải đổi secret lấy file chuẩn, không chuyển raw snapshot cho child."""
+    """Cả probe đầu tiên lẫn child chính chỉ nhận environment đã scrub secret."""
     import base64 as _b64
     with San() as s:
         repo = tao_repo(s)
@@ -2359,14 +2359,68 @@ def r358_run_materialize_roi_bo_CODEX_AUTH_JSON_khoi_child():
         raw = '{"tokens":{"access_token":"gia-dinh"}}'
         env = dict(os.environ, CODEX_HOME=str(home),
                    CODEX_AUTH_JSON=_b64.b64encode(raw.encode()).decode())
-        code = ("import os,sys,pathlib; "
-                "p=pathlib.Path(os.environ['CODEX_HOME'])/'auth.json'; "
-                "sys.exit(0 if p.read_text() and 'CODEX_AUTH_JSON' not in os.environ else 9)")
+        marker = s / "probe-marker"
+        code = ("import os,pathlib,sys;"
+                f"m=pathlib.Path({str(marker)!r});"
+                "a=pathlib.Path(os.environ['CODEX_HOME'])/'auth.json';"
+                "ok=bool(a.read_text()) and 'CODEX_AUTH_JSON' not in os.environ;"
+                "m.write_text('SCRUBBED' if ok else 'RAW_PRESENT');"
+                "print('tool 1.0');"
+                "sys.exit(0 if ok else 9)")
+        tool = _shim_thi_hanh(s, "cred-probe", code)
         r = subprocess.run([PY, str(LAUNCHER_DANG_DUNG), "run", "--workspace", str(repo),
                             "--run-root", str(s / "runs"), "--deadline-utc", mai_sau(30),
-                            "--", PY, "-c", code], env=env, capture_output=True, text=True,
+                            "--", str(tool)], env=env, capture_output=True, text=True,
                            timeout=45)
         bang(r.returncode == 0, f"child con thay secret hoac thieu auth file: {r.stderr[-300:]}")
+        bang(marker.read_text(encoding="utf-8") == "SCRUBBED",
+             "probe --version con nhan CODEX_AUTH_JSON hoac chay truoc materialize")
+
+
+@ca
+def r359_hook_phai_uy_quyen_cho_materializer_chung_khong_tin_login_status():
+    """Hook không được giữ credential stale chỉ vì `login status` trả rc=0."""
+    hook = LAUNCHER.parent.parent / "hooks" / "session-start.sh"
+    ly_do = _bo_qua_neu_ban_sao_roi_thieu(hook)
+    if ly_do:
+        return ly_do
+    text = hook.read_text(encoding="utf-8")
+    khoi = text[text.index('if [ -n "${CODEX_AUTH_JSON:-}" ]'):]
+    khoi = khoi[:khoi.index("\nfi\n") + 4]
+    bang('.claude/dev/launcher.py chuan-bi' in khoi,
+         "hook khong goi materializer chung cua launcher")
+    bang('if codex login status' not in khoi,
+         "hook van dung login status lam cong giu credential stale")
+
+
+@ca
+def r360_materializer_chung_thay_stale_nhung_khong_ha_cap_ban_dia():
+    """Hai chiều old/new mà hook uỷ quyền phải có bằng chứng chạy được."""
+    import base64 as _b64
+    m = _tai_launcher_thu()
+    with tempfile.TemporaryDirectory() as nha:
+        home = Path(nha) / "codex-home"
+        home.mkdir()
+        auth = home / "auth.json"
+
+        def snap(moc, token):
+            return json.dumps({"last_refresh": moc, "tokens": {"access_token": token}})
+
+        cu = snap("2026-09-08T00:00:00Z", "cu")
+        moi = snap("2026-09-09T00:00:00Z", "moi")
+        auth.write_text(cu, encoding="utf-8")
+        m.os.environ = {"CODEX_HOME": str(home),
+                        "CODEX_AUTH_JSON": _b64.b64encode(moi.encode()).decode()}
+        ket = m.chuan_bi_xac_thuc(that_su=True)
+        bang(ket[0]["ok"] and auth.read_text(encoding="utf-8") == moi,
+             "snapshot env moi hon khong thay duoc credential stale tren dia")
+
+        m.os.environ["CODEX_AUTH_JSON"] = _b64.b64encode(cu.encode()).decode()
+        ket = m.chuan_bi_xac_thuc(that_su=True)
+        bang(ket[0]["ok"] and ket[0].get("doi") is False,
+             "credential dia moi hon khong duoc ghi nhan la GIU")
+        bang(auth.read_text(encoding="utf-8") == moi,
+             "snapshot env cu da ha cap credential moi hon tren dia")
 
 
 @ca

@@ -532,42 +532,15 @@ if co codex; then
 fi
 
 if [ -n "${CODEX_AUTH_JSON:-}" ] && co codex && [ "${CODEX_BI_CHAN:-0}" = 0 ]; then
-  if codex login status >/dev/null 2>&1 </dev/null; then
-    echo "[session-start] codex: da dang nhap san — GIU nguyen, khong ghi de"
+  # Dùng CHÍNH materializer của launcher: `codex login status` chỉ chứng minh tệp
+  # đọc được, không chứng minh refresh token còn sống. Resolver chung so
+  # `last_refresh`, giữ bản đĩa mới hơn và thay bản stale bằng snapshot mới hơn.
+  # Không chép thuật toán ở đây để hai đường khỏi trôi lệch lần nữa.
+  if "$PY" .claude/dev/launcher.py chuan-bi >/dev/null; then
+    echo "[session-start] codex: da doi chieu/khoi phuc auth tu CODEX_AUTH_JSON"
   else
-    if "$PY" - <<'PYEOF'
-import base64, binascii, json, os, sys, tempfile
-raw = os.environ.get("CODEX_AUTH_JSON", "").strip()
-try:
-    data = base64.b64decode(raw, validate=True)
-except (binascii.Error, ValueError):
-    sys.exit(1)                      # KHONG in noi dung, ke ca doan dau
-try:
-    d = json.loads(data)
-except Exception:
-    sys.exit(2)
-if not isinstance(d, dict) or not isinstance(d.get("tokens"), dict):
-    sys.exit(3)                      # thieu khoa bat buoc
-home = os.environ.get("CODEX_HOME", "").strip()
-base = os.path.expanduser(home) if home else os.path.join(os.path.expanduser("~"), ".codex")
-dst = os.path.join(base, "auth.json")
-os.makedirs(os.path.dirname(dst), mode=0o700, exist_ok=True)
-try:
-    os.chmod(os.path.dirname(dst), 0o700)
-except OSError:
-    pass
-fd, tmp = tempfile.mkstemp(dir=os.path.dirname(dst))
-try:
-    os.write(fd, data); os.close(fd)
-    os.chmod(tmp, 0o600); os.replace(tmp, dst)
-except BaseException:
-    os.unlink(tmp); raise
-PYEOF
-    then
-      echo "[session-start] codex: da khoi phuc auth tu CODEX_AUTH_JSON"
-    else
-      echo "[session-start] CANH BAO: CODEX_AUTH_JSON khong dung dang (base64 cua auth.json) — bo qua"
-    fi
+    echo "[session-start] HONG: CODEX_AUTH_JSON khong hop le/khong materialize duoc"
+    exit 1
   fi
 fi
 if co codex && [ "${CODEX_BI_CHAN:-0}" = 0 ]; then

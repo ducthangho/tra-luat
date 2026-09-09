@@ -6,7 +6,9 @@
 # Ba nhãn "VÁ SINH LỖI MỚI" KHÔNG tái mở P2 nào — reviewer nói rõ phần P2 cũ đã đóng, lỗi phát sinh
 # đều là LỆCH NỘI BỘ mức P3 giữa biên nhận và mục lục. Đây đúng hình dạng mà `CLAUDE.md` cảnh báo:
 # "mỗi lượt vá bảo toàn được thứ ta NGHĨ TỚI và làm hỏng thứ ta KHÔNG NGHĨ TỚI" — lần này bắt được
-# ngay ở lượt kế, còn chuỗi trong CLAUDE.md phải mất BẢY lượt.
+# ngay ở lượt kế. ĐỊNH CHÍNH ĐƠN VỊ: `CLAUDE.md:722-723` nói **BẢY PHÁT HIỆN** cùng một đường,
+# ăn **BỐN LƯỢT** cross-review liên tiếp — không phải "bảy lượt". Bản trước đổi đơn vị của chính
+# phép đếm dùng làm bài học; cross-review hậu kiểm chấm P3 `doi-bay-phat-hien-thanh-bay-luot-review`.
 
 schema_version: 2
 receipt_id: pr487-review-2-codex-20260909-d4376d15

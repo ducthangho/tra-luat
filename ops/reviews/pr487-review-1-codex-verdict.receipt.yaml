@@ -126,7 +126,11 @@ tuan_thu_cam_cua_reviewer:
 
 manifest:
   duong_dan: KHONG_CO_TRONG_KHO
-  ghi_chu: 'Hiện vật gói (mirror 312 ref + script tự đo của reviewer) CỐ Ý không vào kho.'
+  ghi_chu: 'Hiện vật gói (mirror **313** ref + script tự đo của reviewer) CỐ Ý không vào kho.'
+  ghi_chu_dinh_chinh: >-
+    Bản trước ghi 312 ref Ở ĐÂY dù `so_ref` phía trên đã sửa thành 313 — tức vá scalar mà bỏ sót
+    văn xuôi trong CÙNG tệp. Cross-review hậu kiểm trên head `3873173` chấm P3
+    `bien-nhan-luot-hai-chep-sai-so-ref` đúng chỗ này, lần thứ HAI cho cùng một slug.
 
 github_submitter_identity:
   actor: ducthangho

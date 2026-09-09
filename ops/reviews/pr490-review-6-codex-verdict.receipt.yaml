@@ -88,7 +88,50 @@ hien_vat_reviewer_vao_kho:
   vi_sao_giu_ci_comparison: >-
     `ci-comparison.json` phân loại TỪNG BƯỚC của job `gate` (40 bước = 8 setup + 31 cổng +
     1 upload) và đánh dấu bước nào được nêu trong commit message. Đây là hiện vật khoá lời khai
-    "ĐỦ BỘ" — lần sau ai muốn viết "đủ" thì chạy lại nó trước.
+    "ĐỦ BỘ".
+  DINH_CHINH_do_static_py_KHONG_chay_lai_duoc_tu_kho:
+    loi_khai_bi_bac: >-
+      Commit `2f783bc` viết về `do-static.py`: "script sinh ra nó — chạy lại được". SAI. Và câu
+      cuối của `vi_sao_giu_ci_comparison` bản trước — "lần sau ai muốn viết đủ thì CHẠY LẠI nó
+      trước" — cũng sai theo, vì nó bảo người đọc làm một việc không làm được.
+    ba_ly_do_KHONG_chay_duoc:
+      - >-
+        ĐƯỜNG DẪN: script đặt `P = Path(__file__).resolve().parent` rồi `R = P.parent/'cay-kho'`.
+        Ở vị trí trong kho, `R` giải ra `ops/reviews/cay-kho` — thư mục KHÔNG TỒN TẠI. Mọi lời gọi
+        `git` của script dùng `cwd=R`, nên nó hỏng TRƯỚC phép đo đầu tiên. Đổi thư mục làm việc
+        KHÔNG chữa được, vì đường dẫn tính từ `__file__`.
+      - >-
+        ĐẦU VÀO: script còn đọc bắt buộc manifest/ref TSV của GÓI lượt 6, và đọc
+        `VERDICT-luot5.md` cùng `LEDGER-luot4.json`. Không tệp nào trong số đó nằm trong bộ hiện
+        vật được nhập kho.
+      - >-
+        ĐẦU RA: script chỉ xuất `ci-steps.json`. Nó KHÔNG có đoạn sinh `ci-comparison.json` —
+        tức đúng bảng phân loại mà `vi_sao_giu_ci_comparison` giới thiệu là "chạy lại nó".
+    phan_chung_cua_reviewer: >-
+      Chép 1/1 script nguyên byte sang scratch ngoài kho, giữ bố cục tương ứng, chạy `python3`:
+      1/1 lần thử LỖI, `rc=1`, stdout rỗng, `FileNotFoundError` tại `ops/reviews/cay-kho`. Hash
+      bản nguồn và bản chạy cùng là
+      `5414a19d947849af4671543c8f80a4fd7eda198e5e0c01078f8a1d882d7272bf`. Hiện vật:
+      `ops/reviews/pr490-review-7-phep-do/script-replay.json`.
+    dieu_phoi_tu_do_lai: >-
+      `python3 -c "P=Path('…/do-static.py').resolve(); print(P.parent.parent/'cay-kho')"` ⇒
+      `ops/reviews/cay-kho`, `exists() = False`. `grep -c ci-comparison do-static.py` ⇒ **0**;
+      `grep -c ci-steps` ⇒ **1**. Đúng cả ba vế reviewer nêu.
+    thu_dung_duoc_va_thu_khong:
+      DOC_VA_DOI_CHIEU_DUOC: >-
+        `ci-comparison.json` và `ci-steps.json` là DỮ LIỆU KẾT QUẢ, và chúng kiểm lại được ĐỘC
+        LẬP: đọc `.github/workflows/ci.yml` rồi đối chiếu từng bước, cộng đọc commit message —
+        đúng cách lượt 7 đã làm. Con số 40 = 8 + 31 + 1 vì thế vẫn đứng.
+      CHAY_LAI_SCRIPT: KHONG_LAM_DUOC
+    vi_sao_KHONG_dung_runner_moi: >-
+      Reviewer nêu hai đường: sửa lời khai, hoặc viết runner nhận `--repo`/`--out`/exact SHA cộng
+      đầu vào lịch sử. Đường thứ hai đòi tái dựng gói lượt 6 (mirror 317 ref, manifest, hai tệp
+      verdict/ledger của lượt trước) — tức biến một hiện vật LỊCH SỬ thành công cụ sản phẩm, và
+      reviewer nói rõ "không yêu cầu" điều đó. Chọn đường rẻ: sửa lời khai cho khớp thứ làm được.
+    nguoi_doc_sau_lam_gi: >-
+      Muốn kiểm lại con số 40/8/31/1: đọc `ci-comparison.json` rồi đối chiếu với
+      `.github/workflows/ci.yml` tại SHA tương ứng. ĐỪNG cố chạy `do-static.py` — nó giữ nguyên
+      byte của gói lượt 6 để truy nguyên, không phải để chạy.
 
 tuan_thu_cam_cua_reviewer:
   cay_kho_sach: true

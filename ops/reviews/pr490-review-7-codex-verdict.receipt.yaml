@@ -1,0 +1,145 @@
+# BIÊN NHẬN GIAO HÀNG — cross-review LƯỢT 7 (LƯỢT CUỐI) của PR #490, KHÁC NỀN (codex).
+#
+# Verdict: changes_requested — 0 P1 / 0 P2 / 1 P3.
+#
+# ĐÂY LÀ LƯỢT ĐÓNG LỚP LỖI LẶP NĂM LƯỢT. Slug `van-xuoi-do-duoc-van-vuot-nguon` bị chấm từ lượt 2
+# tới lượt 6; lượt 7 tuyên nó ĐÃ VÁ THẬT và không còn xuất hiện.
+#
+# Biên nhận này viết SAU khi PR #490 đã merge (`8cee941`) — nó là TRẢ NỢ, không phải tiền kiểm.
+# Verdict lượt 7 neo `01e7f77`, đúng head đã merge; nhưng nó KHÔNG được đọc thành "PR #490 đã qua
+# review sạch": verdict là `changes_requested`, và P3 của nó chỉ được vá SAU khi merge.
+
+schema_version: 2
+receipt_id: pr490-review-7-codex-20260909-8d53dfa1
+kind: review_delivery_receipt
+packet_id: 'PR490-LAND-EVIDENCE-489'
+lease_id: khong-co-lease
+phase_key: HO-SO-CROSS-REVIEW-PHIEN-20260909
+luot: 7
+role: reviewer
+provider: codex
+executor_provider: claude
+cross_provider: true
+assurance: cross_reviewed
+verdict: changes_requested
+verdict_path: ops/reviews/pr490-review-7-codex-verdict.md
+verdict_sha256: cbe24e85e6e3de397933df1eef21ff75135954a06e925a45d5b8220e02d2e510
+verdict_bytes: 26348
+reviewed_sha: 01e7f77d707cb093b5ba6d9b9d8577f40d025488
+evidence_url: https://github.com/ducthangho/tra-luat/blob/453c6bcdf8ce34bd1751a8442936a201d51a2495/ops/reviews/pr490-review-7-codex-verdict.md
+evidence_url_ghi_chu: >-
+  Neo BLOB ghim `453c6bc` — commit ĐẦU TIÊN chứa tệp verdict, đo bằng
+  `git log --all --diff-filter=A -- <path>`, trả ĐÚNG 1 commit.
+so_p1: 0
+so_p2: 0
+so_p3: 1
+
+lop_loi_lap_5_luot_DA_DONG:
+  slug: van-xuoi-do-duoc-van-vuot-nguon
+  cac_luot_bi_cham: '2 · 3 · 4 · 5(*) · 6'
+  ghi_chu_luot_5: '(*) lượt 5 cho `approve` 0/0/0 nhưng trên head CŨ; lượt 6 lại tìm ra chỗ mới.'
+  nguyen_van_luot_7: >-
+    "Hai vế P3 lượt 6 đã đóng thật. Các kết quả của 8/8 lệnh được khai đều tái chạy khớp."
+  vi_sao_dong_duoc: >-
+    Lượt 4 ĐỔI CÁCH GIAO VIỆC — từ "tìm finding" sang "kiểm kê vét cạn" — nên các lượt sau có bảng
+    95 hàng để rà TOÀN BỘ thay vì chỉ rà hunk vừa sửa. Đây là thứ thoát khỏi vòng lặp, không phải
+    một bản vá nào.
+
+ba_cau_dieu_phoi_TU_DAT_va_dap_an:
+  - cau: 'Chốt "8 và 31 trả lời hai câu khác nhau" có phải cách né đưa ra tỉ lệ độ phủ thật không?'
+    dap: >-
+      KHÔNG. Reviewer tự đọc 40/40 bước YAML và chạy lại 8/8 lệnh, kết quả khớp; lời đính chính
+      "ĐỦ BỘ" đứng vững.
+  - cau: 'Vá 9/9 hàng mục lục thay vì 5 hàng của PR này có phải scope creep không?'
+    dap: >-
+      KHÔNG — nguyên văn: "sửa là hợp lý… Đây là sửa đầy đủ các bản lặp của finding, không phải
+      scope creep." Kèm phép đo: 9/9 verdict lịch sử giữ NGUYÊN hash.
+  - cau: 'Lớp lỗi có tái phát trong 1 858 dòng nội dung mới không?'
+    dap: >-
+      Không phát hiện giá trị đo sai mới. 27/27 nhóm ngữ nghĩa trong `delta-claims.json`;
+      1 858/1 858 dòng thêm được ánh xạ, 0 dòng ngoài; 35/35 phép đối chiếu trường JSON receipt
+      khớp nguồn lịch sử.
+
+p3_da_va_sau_khi_merge:
+  slug: script-do-luot6-khong-co-duong-tai-lap-trong-kho
+  van_de: >-
+    Commit `2f783bc` giới thiệu `ops/reviews/pr490-review-6-phep-do/do-static.py` là "chạy lại
+    được". SAI ở BA vế độc lập: đường dẫn (`R = P.parent/'cay-kho'` giải ra `ops/reviews/cay-kho`,
+    không tồn tại), đầu vào (đòi manifest/ref TSV của gói lượt 6 + hai tệp không nhập kho), và đầu
+    ra (chỉ sinh `ci-steps.json`, KHÔNG sinh `ci-comparison.json` như lời khai ngụ ý).
+  phan_chung: >-
+    Reviewer chép 1/1 script nguyên byte ra ngoài kho và chạy: `rc=1`, stdout rỗng,
+    `FileNotFoundError` TRƯỚC phép đo đầu tiên. Điều phối tự đo lại, đúng cả ba vế.
+  da_va_o_dau: >-
+    `pr490-review-6-codex-verdict.receipt.yaml`, khối
+    `hien_vat_reviewer_vao_kho.DINH_CHINH_do_static_py_KHONG_chay_lai_duoc_tu_kho` — và nâng cảnh
+    báo lên hàng mục lục của lượt 6 theo cơ chế `t27`.
+  vi_sao_KHONG_viet_runner_moi: >-
+    Reviewer nêu hai đường và nói rõ KHÔNG yêu cầu biến script lịch sử thành công cụ sản phẩm.
+    Đường runner đòi tái dựng gói lượt 6 (mirror 317 ref, manifest, verdict/ledger lượt trước).
+    Chọn đường rẻ: sửa lời khai cho khớp thứ làm được, và nói rõ thứ ĐỌC ĐƯỢC (đối chiếu JSON với
+    `ci.yml`) khác thứ CHẠY ĐƯỢC (không).
+  thoi_diem: 'Vá SAU khi #490 merge. Đây là trả nợ, và hồ sơ ghi đúng như vậy.'
+
+model_reviewer_identity:
+  provider: openai_codex
+  surface: codex_cli
+  model_yeu_cau: gpt-6-astra
+  model_da_chay: KHONG_DO_DUOC
+  session_run_id: 8d53dfa1
+  run_id_day_du: 8d53dfa1debd487cb4c34d9ac68cc4b8
+  prompt_sha256: 9865a8dcb778ab27e3fb9b3f960696ba1675ba9298db63616927aafa28293d41
+  bat_dau_utc: '2026-09-09T18:22:55.286079+00:00'
+  ket_thuc_utc: '2026-09-09T18:45:11.000434+00:00'
+  thoi_luong_giay: 1335.714
+  ma_thoat: 0
+  trang_thai: xong
+  stdout_byte: 257
+  stdout_sha256: 35a78e1c0d879dd36a6e0738d7ef2bcc95359fe2ace7020fc41c32191064ec45
+  stderr_byte: 1760081
+  stderr_sha256: 59be0ca0c6d82c4280496589d92d9b2e53acf46a39632511b1fdbf34e14b6427
+  so_lan_chet_truoc_khi_xong: 0
+  nguon_cac_scalar_tren: 'Đọc từ `run.json` trong scratchpad; tệp ấy KHÔNG vào kho ⇒ ATTESTATION.'
+
+nang_luc_do_cua_goi:
+  so_ref: 318
+  lech: 0
+  kho_nong: false
+  chua_do_duoc: 'Không mạng: mọi khẳng định về GitHub API/CI là KHÔNG ĐO ĐƯỢC.'
+
+hien_vat_reviewer_vao_kho:
+  duong_dan: >-
+    ops/reviews/pr490-review-7-phep-do/ — ci-audit.json (phân loại 40 bước job `gate`) ·
+    gates.json (lệnh + log 8 cổng chạy lại) · script-replay.json (phản chứng nguyên byte cho P3) ·
+    delta-claims.json (27 nhóm mệnh đề mới) · index-audit.json (đối chiếu từng hàng mục lục)
+  doi_chieu_nguyen_byte: '`cmp` giữa gói và bản trong kho: KHỚP 5/5 tệp, 0 tệp lệch.'
+  canh_bao_hoc_tu_P3: >-
+    Năm tệp này là DỮ LIỆU KẾT QUẢ, đối chiếu độc lập được (đọc `ci.yml`, đọc Git, đọc mục lục).
+    KHÔNG kèm script chạy lại, và hồ sơ này KHÔNG khai có. Đó chính là bài học của P3 lượt 7.
+
+tuan_thu_cam_cua_reviewer:
+  cay_kho_sach: true
+  commit_them_ngoai_head: 0
+  bang_chung: '`status --porcelain` RỖNG và `log 01e7f77..HEAD` RỖNG sau khi lượt kết thúc.'
+
+manifest:
+  duong_dan: KHONG_CO_TRONG_KHO
+  ghi_chu: 'Hiện vật gói (mirror 318 ref) CỐ Ý không vào kho; riêng năm tệp đo ở trên thì CÓ.'
+
+github_submitter_identity:
+  actor: ducthangho
+  la_tac_gia_PR: true
+  ghi_chu: '`ADR-0040`: verdict do tài khoản tác giả PR vận chuyển KHÔNG là merge authorization.'
+  phien_van_chuyen: https://claude.ai/code/session_01UN8WRS5Bc5pBBzYPDqs9Dx
+
+anchor:
+  loai: canonical_ancestry
+  cuong_do: cao
+  mo_ta: 'Blob verdict ghim `453c6bc`.'
+  gioi_han: 'Chỉ vững nếu land bằng MERGE hoặc fast-forward; SQUASH phá quan hệ tổ tiên.'
+
+khong_do_duoc:
+  - 'Model đã phục vụ và `thread_id`.'
+  - '`run.json` không vào kho ⇒ scalar runtime là attestation.'
+  - 'Trạng thái GitHub tại thời điểm reviewer đọc: sandbox không mạng.'
+  - 'Lượt CI nào ĐÃ chạy thật trên các head của PR #490 — không đọc, không giữ run JSON.'

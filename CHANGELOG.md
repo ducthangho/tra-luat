@@ -8,8 +8,12 @@ PR #475) + ADR-0047. Mục này CŨNG là vế bookkeeping ADR-0034 của đợt
 **Không nâng `VERSION`.** Vẫn `1.36.68` từ r336.
 
 **GIỚI HẠN NGUỒN.** Như r358–r361: (a) **tự đo được** — mọi số Git, số mục `RELEASE_MANIFEST.json`, băm/byte tệp,
-kết quả cổng chạy lại tại chỗ; (b) **thuật lại** — mọi sự kiện GitHub (run/job CI, comment, review, thời điểm).
-Loại (b) là attestation của phiên điều phối (đọc qua MCP github), không phải phép đo đã đối chiếu.
+kết quả cổng khi thực sự tái chạy từ hiện vật có trong gói; (b) **thuật lại** — mọi sự kiện GitHub (run/job CI, comment, review, thời điểm);
+(c) **kết quả cũ điều phối/reviewer thuật lại** — probe/harness/suite không kèm mã/log, chưa tái lập từ gói hồ sơ.
+Loại (b) là attestation của phiên điều phối (đọc qua MCP github); loại (c) không chứng minh đã chạy lại tại chỗ.
+Runtime: ID/prompt digest/timestamp/thời lượng/exit/status/byte/hash stdout có trong run.json; modelUsage có trong stdout JSON,
+cả hai ở ngoài kho. Model yêu cầu, effort, số lần chết, thời điểm ghi verdict và chi tiết sự cố là ATTESTATION điều phối,
+không có khóa tương ứng trong các JSON kèm. Bộ ba provider reviewer trong receipt là chuẩn hoá hợp đồng, khác lớp logger launcher.
 
 **Số `r` chọn bằng ĐO.** Quét `CHANGELOG.md` trên **mọi** ref `refs/remotes/origin` lúc soạn: `r362` **đã bị chiếm**
 ở một nhánh chưa merge của phiên khác (#497), `r363` **0 nhánh**. Cùng nếp r361: đừng lấy `max(master)+1`.
@@ -55,18 +59,23 @@ nhưng chưa là required check** (A1).
 | 4 | claude `claude-fable-5`/max (run `f82cc4b7`, **modelUsage ĐẠT**) | `826bc36` | **`approve` · P1 0 · P2 0 · P3 3** (→ #499 B1–B3) | — |
 
 Bốn verdict vào kho **nguyên byte** (`cmp` khớp 4/4): `pr492-review-{1..4}-*-verdict.md`, băm ghi ở biên nhận và
-mục lục. Điều đáng ghi hơn con số: **ba lượt cross-review đọc theo phạm vi bản vá không thấy một P1 cấu trúc cũ**
-(`KhoObject.tim` trả `None` khi tổ tiên là blob/symlink — có từ `d5a980e`), và Codex connector đọc TOÀN diff thì
-thấy ngay. Lượt 4 vì thế được giao thêm câu *"cùng lớp còn ở đâu"* và rà đủ mọi đường đi qua cây — không chỗ hở
-trong write set; hai chỗ NGOÀI write set (`_quet_lease_toan_kho`, `con-tro-treo`) ghi #499 D.
+mục lục. **Các verdict lượt 1/2/3 không nêu C1** (`KhoObject.tim` trả `None` khi tổ tiên là blob/symlink).
+Lượt 1 review phần A0 ban đầu `c0a5cbe..d5a980e`; lượt 2 chạy lại F01–F09 và nêu F10–F14; lượt 3 tập trung
+bản vá `bd4ecd4..457affd`. Không gọi cả ba là review chỉ theo bản vá, không suy nguyên nhân bỏ sót từ kết quả.
+Connector trên `457affd` nêu C1 là sự kiện loại (b); không có prompt/log để xác nhận phạm vi đọc TOÀN diff.
+Verdict lượt 4 thuật lại việc rà cùng lớp và không tìm chỗ hở trong write set; hai chỗ NGOÀI write set
+(`_quet_lease_toan_kho`, `con-tro-treo`) ghi #499 D.
 
-## Cổng tại chỗ trên `826bc36` — tự đo
+## Cổng được báo trên `826bc36` — giới hạn tái lập
 
-| cổng | kết quả |
+Các kết quả chạy cũ dưới đây là loại (c), chưa có log gốc trong hồ sơ. Catalog t139 có mã trong kho để tái chạy;
+số ca đăng ký 146/121 đếm được từ mã, riêng số ca ĐẠT và lịch sử chạy wrapper cần log/công cụ tương ứng.
+
+| cổng | kết quả được báo |
 |---|---|
 | `AL_VER=1.7.7 bash ops/chay_lease_publish_test.sh` | **146/146 đạt; đã chạy=146, bỏ qua=0; rc=0** (nền `c0a5cbe`: 121/121) |
 | catalog mutant t139 | **37 = 34 giết / 3 SỐNG có chủ đích / 0 tín dụng giả** (17 lúc mở PR → 33 sau lượt 1 → 37 sau Codex) |
-| phản chứng Codex `repro_codex.py` | `457affd`: **0/5** xanh · `826bc36`: **5/5**; t151/t129 ĐỎ `TinHieuChotCa` trên module `457affd` |
+| phản chứng Codex `repro_codex.py` (mã/log không vào kho; KHÔNG ĐO ĐƯỢC từ gói) | `457affd`: **0/5** xanh · `826bc36`: **5/5**; t151/t129 ĐỎ `TinHieuChotCa` trên module `457affd` |
 | actionlint 1.7.7 + shellcheck | workflow mới rc=0; 7 workflow: chỉ `ops-don-ref.yml SC1003:info` có sẵn (delta 0) |
 | doctrine-scan · doc-claims-check --strict · ruff F | 7 tệp / 0 · ok:true · `lease_publish.py` 0, test 4 có sẵn (delta 0) |
 

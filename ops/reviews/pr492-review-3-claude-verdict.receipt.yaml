@@ -6,7 +6,7 @@
 # (harness đổi model giữa lượt; reviewer tự khai trong `model_tu_khai`). `kiem_ket_qua("claude-fable-5", …)`
 # trong `.claude/dev/chon_reviewer.py` trả KHÔNG ĐO ĐƯỢC. Executor KHÔNG TÍNH lượt này là lượt review sạch;
 # lượt 4 (run f82cc4b7, modelUsage ĐẠT) mới là lượt approve có hiệu lực. Cùng lúc, Codex connector đọc chính
-# head này và chấm 1 P1 + 2 P2 mà lượt 3 (và cả ba lượt trước) bỏ sót — xem caveat.
+# head này và chấm 1 P1 + 2 P2 mà lượt 3 và hai lượt 1/2 không nêu — xem caveat.
 
 schema_version: 2
 receipt_id: pr492-review-3-claude-20260910-5c61112d
@@ -69,7 +69,7 @@ model_reviewer_identity:
   stdout_sha256: 8eca72e75193e80fdef898ee0c6c888ef3921d5c17d8c76fbfbe4ef4b6479165
   stderr_byte: 0
   so_lan_chet_truoc_khi_xong: 0
-  nguon_cac_scalar_tren: 'Đọc từ `run.json` + stdout.log (JSON kết quả claude) trong scratchpad; KHÔNG vào kho ⇒ ATTESTATION.'
+  nguon_cac_scalar_tren: 'ĐỐI CHIẾU ĐƯỢC với run.json: session/run ID, prompt_sha256, bat_dau_utc, ket_thuc_utc, thoi_luong_giay, ma_thoat, trang_thai, stdout_byte/sha256, stderr_byte. Model phục vụ và kết quả kiem_ket_qua đọc từ stdout.log/modelUsage. Model yêu cầu, effort, số lần chết và chi tiết các run chết là ATTESTATION điều phối, KHÔNG ĐO ĐƯỢC từ các JSON kèm (không có các khóa ấy). Bộ ba provider/surface/transport là chuẩn hoá theo hợp đồng reviewer; run.json đo lớp launcher local_process/subprocess/machine. Các tệp runtime không vào kho.'
 
 nang_luc_do_cua_goi:
   mirror: 'clone bare cục bộ + fetch refs/remotes/origin/*, detached 457affd, không nông; origin/master trong mirror = 28ba133'
@@ -102,7 +102,8 @@ verdict_usage_caveats:
       không nhận lời khai.
     phai_lam_gi_khi_chay_lai: >-
       Dùng lượt 4 (`pr492-review-4-claude-verdict.md`, run f82cc4b7, modelUsage ĐẠT) làm verdict có hiệu lực trên
-      head cuối `826bc36`. Verdict lượt 3 chỉ có giá trị đo (mọi số tái lập được từ scratch/luot3).
+      head cuối `826bc36`. Verdict lượt 3 lưu kết quả reviewer thuật lại. Git, băm/byte và catalog t139 có đường tái đo;
+      scratch/luot3, HINT lượt 2 và log probe không vào kho, nên KHÔNG cam kết tái lập mọi số từ hồ sơ này.
   - id: CODEX-CONNECTOR-CHAM-1-P1-2-P2-TREN-CUNG-HEAD-lươt-3-bo-sot
     muc: P1
     mo_ta: >-

@@ -60,7 +60,7 @@ model_reviewer_identity:
   trang_thai: da_dung
   ly_do_dung: 'tien trinh da khong con chay — executor gọi `launcher.py stop` sau khi reviewer treo websocket (Connection refused, reconnect 3/5)'
   verdict_ghi_luc_utc: '2026-09-09T16:54:40Z'
-  nguon_cac_scalar_tren: 'Đọc từ `run.json` trong scratchpad; tệp ấy KHÔNG vào kho ⇒ ATTESTATION.'
+  nguon_cac_scalar_tren: 'ĐỐI CHIẾU ĐƯỢC với run.json: session/run ID, prompt_sha256, bat_dau_utc, ket_thuc_utc, ma_thoat, trang_thai; ly_do_dung gốc chỉ là tien trinh da khong con chay. JSON không có thoi_luong_giay nên receipt dùng null. Model yêu cầu, thời điểm ghi verdict, chi tiết websocket/reconnect và hành động dừng là ATTESTATION điều phối, KHÔNG ĐO ĐƯỢC từ nguồn kèm. Bộ ba provider/surface/transport là chuẩn hoá theo hợp đồng reviewer; run.json đo lớp launcher local_process/subprocess/machine, không phải bộ ba ấy. Tệp runtime không vào kho.'
 
 nang_luc_do_cua_goi:
   mirror: 'clone bare cục bộ + fetch refs/remotes/origin/*, detached d5a980e, core.abbrev 7, không nông'

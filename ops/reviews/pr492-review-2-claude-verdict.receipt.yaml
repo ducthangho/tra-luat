@@ -64,7 +64,7 @@ model_reviewer_identity:
   stderr_byte: 0
   so_lan_chet_truoc_khi_xong: 2
   ghi_chu_lan_chet: 'c6e89ee4 chết vì container khởi động lại 19:55Z; 3854a45f bị dừng vì task nền harness giới hạn 10 phút — không lần nào sinh verdict'
-  nguon_cac_scalar_tren: 'Đọc từ `run.json` trong scratchpad; tệp ấy KHÔNG vào kho ⇒ ATTESTATION.'
+  nguon_cac_scalar_tren: 'ĐỐI CHIẾU ĐƯỢC với run.json: session/run ID, prompt_sha256, bat_dau_utc, ket_thuc_utc, thoi_luong_giay, ma_thoat, trang_thai, stdout_byte/sha256, stderr_byte. Model phục vụ và kết quả kiem_ket_qua đọc từ stdout.log/modelUsage. Model yêu cầu, effort, số lần chết và chi tiết các run chết là ATTESTATION điều phối, KHÔNG ĐO ĐƯỢC từ các JSON kèm (không có các khóa ấy). Bộ ba provider/surface/transport là chuẩn hoá theo hợp đồng reviewer; run.json đo lớp launcher local_process/subprocess/machine. Các tệp runtime không vào kho.'
 
 nang_luc_do_cua_goi:
   mirror: 'clone bare cục bộ + fetch refs/remotes/origin/*, detached bd4ecd4, core.abbrev 7, không nông; suite trong sandbox 144/144'
@@ -93,7 +93,7 @@ verdict_usage_caveats:
     mo_ta: >-
       Reviewer là `claude`, cùng nhà cung cấp với executor; đổi theo chỉ thị chủ kho sau ba lần codex chết vì hạ tầng.
       §8 đòi cross-provider cho phạm vi workflow (A0 thêm `ops-thu-hoi-admission.yml`). Lượt 1 (codex) đã đọc phiên bản
-      đầu của workflow ấy; các lượt claude sau chỉ đọc bản vá. Lượt cross-provider duy nhất trên head cuối là Codex
+      đầu của workflow ấy; các lượt claude sau chỉ đọc bản vá. Lượt Codex gần head cuối nhất được hồ sơ thuật lại là Codex
       connector (review 5162390620 trên `457affd`, 1 P1 + 2 P2 — đã vá ở `826bc36`), KHÔNG có lượt codex nào trên `826bc36`.
     phai_lam_gi_khi_chay_lai: 'Đừng đọc verdict này thành mức `cross_*`. Chủ kho đã quyết merge với dấu vết ở #488#issuecomment-5613390662.'
 

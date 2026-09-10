@@ -62,7 +62,7 @@ model_reviewer_identity:
   stdout_sha256: 13fbca8c3cb4dec6127241452c10a7fa56c69fe068573b07923e9b84111f40b0
   stderr_byte: 0
   so_lan_chet_truoc_khi_xong: 0
-  nguon_cac_scalar_tren: 'Đọc từ `run.json` + stdout.log (JSON kết quả claude, dòng cuối `XONG VERDICT sha256=69728f92…`) trong scratchpad; KHÔNG vào kho ⇒ ATTESTATION.'
+  nguon_cac_scalar_tren: 'ĐỐI CHIẾU ĐƯỢC với run.json: session/run ID, prompt_sha256, bat_dau_utc, ket_thuc_utc, thoi_luong_giay, ma_thoat, trang_thai, stdout_byte/sha256, stderr_byte. Model phục vụ và kết quả kiem_ket_qua đọc từ stdout.log/modelUsage. Model yêu cầu, effort, số lần chết và chi tiết các run chết là ATTESTATION điều phối, KHÔNG ĐO ĐƯỢC từ các JSON kèm (không có các khóa ấy). Bộ ba provider/surface/transport là chuẩn hoá theo hợp đồng reviewer; run.json đo lớp launcher local_process/subprocess/machine. Các tệp runtime không vào kho. Dòng XONG trong result JSON khớp băm verdict.'
 
 nang_luc_do_cua_goi:
   mirror: 'clone bare cục bộ + fetch refs/remotes/origin/*, detached 826bc36, không nông; suite trong sandbox 146/146 rc=0 trước khi giao'
@@ -93,8 +93,8 @@ verdict_usage_caveats:
   - id: SAME-PROVIDER-APPROVE-va-cong-duyet-khac-danh-tinh-DO-khi-merge
     muc: P2
     mo_ta: >-
-      Reviewer cùng nhà cung cấp với executor (`same_provider_approved`). Lượt cross-provider duy nhất trên đường tới
-      head cuối là Codex connector trên `457affd` (không có lượt codex nào đọc `826bc36`). Khi merge (`0721811`,
+      Reviewer cùng nhà cung cấp với executor (`same_provider_approved`). Lượt Codex gần head cuối nhất được hồ sơ thuật lại
+      là Codex connector trên `457affd` (không có lượt codex nào đọc `826bc36`). Khi merge (`0721811`,
       04:5xZ 10-09), check `cong` (duyệt khác danh tính, packet #348) ĐỎ — chưa có review APPROVED từ danh tính khác
       `ducthangho`; `mergeable_state: unstable` (cong không phải required check). Chủ kho quyết merge bằng chỉ thị,
       dấu vết #488#issuecomment-5613390662; `guard --action merge` vẫn trả 7 theo thiết kế (#338).

@@ -194,7 +194,7 @@ dối theo chiều ĐANG CHẠY.
 **Đo tại chỗ sau khi vá** (`git`, `python`, tất cả trong cây này, không mạng, `core.abbrev=7`):
 
 ```
-ops/lease_publish_test.py            ⇒ 121/121 đạt · đã chạy=121 · bỏ qua=0    (t27 xanh với hồ sơ mới)
+ops/lease_publish_test.py            ⇒ 146/146 đạt · đã chạy=146 · bỏ qua=0    (t27 xanh với hồ sơ mới)
 ops/bien_nhan_v2.py --root .         ⇒ rc=0 · TỔNG ĐẠT · 49 ĐẠT v2 · 0 vi phạm · 0 KHÔNG ĐO ĐƯỢC · tổng 102
 ops/cong_cu.py kiem-tra --json       ⇒ rc=0 · tổng DAT · canary actionlint_shellcheck DAT
 ops/cong_cu_test.py                  ⇒ ca=23 · đột biến=18 · lỗi đột biến=0
@@ -205,6 +205,32 @@ scripts/tl.py release-verify --strict⇒ rc=0 · ok=true · expected=checked=180
 packet_loop.py doctrine-scan         ⇒ rc=0
 packet_loop.py adr-song              ⇒ rc=0
 ```
+
+**`146/146` là số của cây ĐÃ HỢP NHẤT, và nó vừa là `121/121` mấy phút trước.** Giữa vòng lặp
+review, `origin/master` nhảy `28ba133 → 0721811` (PR #492, sổ thu hồi lease A0) và một trong ba tệp
+nó đụng là **`ops/lease_publish_test.py`** — chính tệp giữ `t27`. Nên đã merge master vào nhánh rồi
+đo lại: khai `121/121` cho một cây mà không lượt CI nào sẽ chạy đúng là lớp lỗi mục này sinh ra để
+chặn. Giao write set bằng **rỗng** (master: `ops-thu-hoi-admission.yml` · `ops/lease_publish.py` ·
+`ops/lease_publish_test.py`; nhánh này: `CHANGELOG.md` · `RELEASE_MANIFEST.json` · `ops/cong_cu.py` ·
+`ops/reviews/**`), nên merge sạch, không xung đột.
+
+**Và phép canh hai nguồn — thứ mục này khoe ở đầu — vừa BẮT ĐƯỢC THẬT, lần này không nhờ may.**
+Đo lại trước khi dựng gói lượt 2:
+
+```
+git ls-remote --heads origin                    ⇒ 322   (HỎI máy chủ)
+git for-each-ref refs/remotes/origin (bỏ HEAD)  ⇒ 321   (ĐỌC bộ đệm)
+comm -23  ⇒ MÙ 2: claude/land-492-bookkeeping · codex/wp484-g4-windows
+comm -13  ⇒ THỪA 1: pr487-merge   (nhánh đã xoá trên máy chủ — vô hại)
+```
+
+**`322` so `321` lệch đúng `1`, mà số nhánh mù là `2`** — vì một nhánh thừa cục bộ che mất một nhánh
+thiếu. Đây chính là ca `wc -l` nói dối mà `CLAUDE.md` cấm canh bằng số đếm; ai đọc `322/321` rồi kết
+luận "thiếu một" sẽ đi tìm sai một nhánh và bỏ sót nhánh kia. Sau `git fetch` đủ refspec: **mù = 0**.
+Quét lại **323** ref cho `r362` ⇒ đúng **1** (chính nhánh này). Nhưng quét `r363` ⇒ **1**, ở
+`claude/land-492-bookkeeping` — **đúng một trong hai nhánh vừa mù**. Lần trước kết luận đứng nhờ may
+(nhánh mù mang `r356`); lần này nếu vẫn mù thì mục kế tiếp của kho đã va chạm `r363`. Cùng một phép
+đo, hai lượt, và chỉ lượt này trả công.
 
 Ba số G5 ở trên **khác** con số reviewer đo (`lỗi đột biến=1`, tổng `DO`) vì **nền đo khác, không
 phải mã khác**: sandbox reviewer thiếu `jsonschema` nên `T2` và đột biến của nó `KHÔNG_ĐO_ĐƯỢC`.

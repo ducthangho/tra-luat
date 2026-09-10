@@ -147,11 +147,11 @@ trong khi chính mục này hứa dán nhãn mọi số GitHub tại chỗ. Cả
 Nợ đã mở thành Issue **#498** với đúng các đính chính trên *(THUẬT LẠI — việc mở Issue và nội
 dung hiện tại của nó nằm ngoài kho; không hiện vật nào trong kho chứng thực)*.
 
-## 3. Hồ sơ cross-review của chính mục này — HAI lượt, verdict vào kho TRƯỚC khi land
+## 3. Hồ sơ cross-review của chính mục này — BA lượt, verdict vào kho TRƯỚC khi land
 
 Hai mục trên đã đi qua **cross-review khác nền** (`codex`) ngay trên nhánh, và verdict vào kho cùng
 PR chứ không để lại sau. Đây là chỗ khác #490: lượt 7 của #490 là **trả nợ** (viết sau merge), còn
-hai lượt này là **tiền kiểm** — mọi finding được vá TRƯỚC khi PR land, nên hồ sơ review không phải
+ba lượt này là **tiền kiểm** — mọi finding được vá TRƯỚC khi PR land, nên hồ sơ review không phải
 mô tả một bản đã cố định.
 
 **Và việc nhập verdict GIỮA vòng lặp đã tự chứng minh giá của nó.** Lượt 2 soi chính hồ sơ lượt 1 và
@@ -166,7 +166,9 @@ không tự review được nó.**
 | `ops/reviews/pr497-review-1-codex-verdict.receipt.yaml` | biên nhận lượt 1, neo blob ghim `8104480` |
 | `ops/reviews/pr497-review-2-codex-verdict.md` | verdict lượt 2, **43 791** byte / **259** dòng, `sha256 206aaf28…` |
 | `ops/reviews/pr497-review-2-codex-verdict.receipt.yaml` | biên nhận lượt 2, neo blob ghim `4d2a6f6` |
-| `ops/reviews/README.md` | 2 hàng mục lục + 2 hàng cảnh báo (`t27` đòi đủ cho MỖI verdict) |
+| `ops/reviews/pr497-review-3-codex-verdict.md` | verdict lượt 3, **48 843** byte / **285** dòng, `sha256 9a244e3d…` |
+| `ops/reviews/pr497-review-3-codex-verdict.receipt.yaml` | biên nhận lượt 3, neo blob ghim `60b99bd` |
+| `ops/reviews/README.md` | 3 hàng mục lục + 2 hàng cảnh báo (`t27` đòi đủ cho MỖI verdict; lượt 3 **không** sinh cảnh báo — gói của nó sạch) |
 
 **`P1 0 · P2 1 · P3 1`, và con số ấy đo bằng `grep -cE '^### .*\[Pn\]'` trên chính tệp verdict**,
 không đọc lời tóm tắt của reviewer — đúng lý do bài học `van-xuoi-do-duoc-van-vuot-nguon` ra đời ở
@@ -268,11 +270,42 @@ trôi khỏi hạ tầng thật**, và cả hai chỉ lộ vì reviewer ĐO thay
 `ops/reviews/README.md`. Nếp: **mọi câu trong `EVIDENCE.md` phải đo lại NGAY TRƯỚC khi phóng**, vì
 gói được dựng nhiều bước và câu viết ở bước 3 chết ở bước 5.
 
-**Đo tại chỗ sau khi vá** (`git`, `python`, tất cả trong cây này, không mạng, `core.abbrev=7`):
+**LƯỢT 3 — `0 P1 · 6 P2 · 0 P3` trên head `4e6a2d5`, cả sáu đã vá.** Và lượt này bắt được thứ hai
+lượt trước KHÔNG bắt được:
+
+| slug | tôi khai | đo được |
+|---|---|---|
+| `hai-loi-khai-thieu-nhan…` *(lần **3**)* | *"đã thêm nhãn cho `#498` trong `ops/cong_cu.py`"* | `git diff 1d58500 HEAD -- ops/cong_cu.py` ⇒ **RỖNG**. Tệp không hề đổi |
+| `ke-sai-ly-do-reviewer…` *(lần **2**)* | *"trích thẳng dòng 157 ở **cả bốn** nơi"* | **2/4** nơi còn nguyên câu cũ — `README.md:18` và chính biên nhận lượt 1 |
+| `attestation-runtime…` *(lần **2**)* | `neo_danh_tinh_kho`: *"Lý do **ĐO ĐƯỢC**"* | nằm ngay trong khối vừa khai là ATTESTATION *"không trừ trường nào"* |
+| `bang-cong-r362-con-neo-so…` | bảng *"đo trong **cây này**"*: `49 ĐẠT v2 · tổng 102` | HEAD là `50 · 103`; số cũ đúng tại `4d2a6f6`, sai tại HEAD |
+| `phep-grep-prompt-khong-ghim-snapshot…` | `git grep <digest> **HEAD**` ⇒ 1 tệp | trên HEAD ⇒ **2** tệp: verdict lượt 2 vừa nhập đã chép lại digest |
+| `dem-finding-doi-mau…` | *"số finding tăng `1 → 7`"*, bề mặt mới **5/7** | `1 → 7` là số **P2**; TỔNG là **2 → 7**. Bề mặt mới là **6/7** |
+
+**HAI dòng đầu là một LOẠI KHÁC, và là loại tệ nhất trong cả chuỗi.** Bốn dòng dưới là chỗ chưa vá —
+người đọc hoài nghi tự đi kiểm được. Hai dòng đầu là **lời khai về CHÍNH BẢN VÁ VỪA LÀM**, nên câu
+tuyên bố tự đóng vai bằng chứng và **chặn đúng người định đi kiểm**. Tệ hơn nữa ở dòng thứ hai: một
+trong hai nơi chưa sửa là **hàng cảnh báo mà `t27` cưỡng chế phải có** — tức người mở đúng cái chốt
+dựng ra để chống hiểu nhầm lại nhận lời kể cũ, **trái ngay hàng tổng kết ở CÙNG một tệp**.
+
+Cùng họ *"cổng xanh nhờ `rc=0` là cổng CÓ THỂ BỊ LỪA"*, chỉ khác chỗ thứ nói dối không phải mã thoát
+mà là **câu tự thuật của người vá**. `bang-cong-r362-con-neo-so…` là bản sao rõ nhất của họ ấy: cả
+`49/102` lẫn `50/103` đều cho `rc=0`, nên **nhìn cổng xanh thì vĩnh viễn không thấy**.
+
+**GÓI LƯỢT 3 SẠCH — bằng chứng cho bản vá "đo ở bước cuối".** Lượt 1 và lượt 2 đều bắt được một câu
+sai trong `EVIDENCE.md` của chính gói. Lượt 3 dựng gói bằng script đo **mọi số ở bước CUỐI**, xuất ra
+`do-goi.txt`, và `EVIDENCE.md` sinh từ chính tệp ấy — không câu nào gõ tay. Reviewer khai:
+*"khối cấu hình EVIDENCE = `do-goi.txt` = cấu hình thực, cả **9 dòng** … không phát hiện lệch cấu
+hình gói mới."* Ba lượt, hai lượt đầu lệch, lượt thứ ba sạch.
+
+**Đo tại chỗ sau khi vá** (`git`, `python`, không mạng, `core.abbrev=7`) — **chạy lại SAU bước cuối
+cùng của mục này**, tức sau khi biên nhận lượt 3 và hàng mục lục đã vào cây và manifest đã tái sinh.
+Đây là nếp §4 số 3, và nó ra đời vì bảng cũ từng khai `49 ĐẠT v2 · tổng 102` cho một cây đã là
+`50 · 103`; nay là `51 · 104` vì có thêm biên nhận lượt 3:
 
 ```
 ops/lease_publish_test.py            ⇒ 146/146 đạt · đã chạy=146 · bỏ qua=0    (t27 xanh với hồ sơ mới)
-ops/bien_nhan_v2.py --root .         ⇒ rc=0 · TỔNG ĐẠT · 50 ĐẠT v2 · 0 vi phạm · 0 KHÔNG ĐO ĐƯỢC · tổng 103
+ops/bien_nhan_v2.py --root .         ⇒ rc=0 · TỔNG ĐẠT · 51 ĐẠT v2 · 0 vi phạm · 0 KHÔNG ĐO ĐƯỢC · tổng 104
 ops/cong_cu.py kiem-tra --json       ⇒ rc=0 · tổng DAT · canary actionlint_shellcheck DAT
 ops/cong_cu_test.py                  ⇒ ca=23 · đột biến=18 · lỗi đột biến=0
 scripts/tl.py doc-claims-check       ⇒ rc=0 · ok=true

@@ -75,9 +75,13 @@ hai_finding:
 
 ba_lop_bang_chung_DUONG_reviewer_tu_dung:
   tree_khop: >-
-    Verdict khai `tree đã đo: 67df2efa7e6f6c7b23bedfb43da647b395800a37`. Điều phối đo lại
-    `git rev-parse e826730^{tree}` ⇒ **cùng OID**. Đây là bằng chứng DƯƠNG rằng reviewer đọc đúng
-    cây được giao, chứ không phải một bản chép trôi.
+    Verdict khai `tree đã đo: 67df2efa7e6f6c7b23bedfb43da647b395800a37`; `git rev-parse
+    e826730^{tree}` ⇒ **cùng OID**. **Định danh CÂY khớp — và CHỈ thế.** Đầu vào của phép so là HAI
+    OID, không phải nội dung tệp, nên nó KHÔNG xác thực hành vi ĐỌC, danh tính phiên hay runtime.
+    DINH_CHINH: bản đầu gọi đây là "bằng chứng DƯƠNG rằng reviewer đọc đúng cây". Lượt 4 chấm, tôi
+    khai đã sửa "5/5 nơi" — SAI, đây là nơi thứ SÁU và nó sống sót vì phép chứng minh của tôi dùng
+    `grep` THEO DÒNG, mà YAML gấp scalar qua nhiều dòng nên câu bị cắt làm đôi. Lượt 5 chấm lại.
+    Phép đo đúng: parse YAML, nối scalar, rồi mới tìm.
   dot_bien_co_rang: >-
     Reviewer chạy **13** ca đột biến trên BẢN CHÉP (không sửa cây được review) và báo cả hai chiều:
     ca `if chi is None` → `if False` làm `t13` `rc=0 → rc=1` (cổng CÓ răng); còn năm ca đột biến

@@ -94,7 +94,9 @@ bon_finding_con_lai:
   - slug: bang-cong-r362-con-neo-so-truoc-bien-nhan-luot-hai
     van_de: >-
       Bảng "Đo tại chỗ sau khi vá … tất cả trong cây này" còn ghi `49 ĐẠT v2 · tổng 102`, trong khi
-      validator trên exact HEAD trả `50 · tổng 103`.
+      validator tại `4e6a2d5` trả `50 · tổng 103`. (Bản đầu viết "trên exact HEAD" — không ghim,
+      cùng lớp lỗi; lượt 5 chấm. Chuỗi ghim: `4d2a6f6` ⇒ 49/102 · `4e6a2d5` ⇒ 50/103 · `25974e7` ⇒
+      51/104 · `f6ec9c0` ⇒ 52/105.)
     vi_sao_KHONG_CO_GI_BAT_DUOC: >-
       Cả hai lần chạy đều `rc=0`. Số `49/102` ĐÚNG tại `4d2a6f6` — trước khi biên nhận lượt 2 vào
       kho — và SAI tại HEAD; bảng không neo nó về commit nào. **Nhìn cổng xanh thì không thấy.**
@@ -124,12 +126,15 @@ bon_finding_con_lai:
       tên, nằm trong chính dòng khai đã sửa nó. Đúng tại `4e6a2d5`, SAI từ `25974e7` trở đi. Điều
       phối tự bắt bằng một lần quét toàn kho tìm mọi phép đo còn neo `HEAD`; không lượt nào chấm.
     phep_do_cua_reviewer_luot_3: >-
-      Reviewer chạy cùng truy vấn ở hai SHA: `1d58500` ⇒ **1** tệp; head họ review ⇒ **2** tệp
+      Reviewer chạy cùng truy vấn ở hai SHA: `1d58500` ⇒ **1** tệp; `4e6a2d5` ⇒ **2** tệp
       (`pr497-review-1-…receipt.yaml` + `pr497-review-2-…verdict.md`). Điều phối chạy lại, khớp.
     khong_bac_gi: >-
       KHÔNG tạo ra nguồn prompt thứ hai (cả hai đều là BẢN CHÉP) và KHÔNG bác bài học "prompt là
       ATTESTATION". Nó bác **con số và cái lệnh** đang được dùng để minh hoạ bài học ấy.
-    da_va: 'Ghim `1d58500` vào lệnh, và nói rõ HEAD nay có hai tệp nhưng đều là bản chép.'
+    da_va: >-
+      Ghim SHA vào lệnh, và nêu CHUỖI thay vì một con số: `1d58500` ⇒ 1 · `4e6a2d5` ⇒ 2 ·
+      `25974e7` ⇒ 3 · `f6ec9c0` ⇒ 4 tệp, tất cả đều là bản CHÉP của cùng một digest. Bản đầu ghi
+      "HEAD nay có hai tệp" — lại neo HEAD, đúng lớp lỗi slug này đặt tên; lượt 5 chấm.
     nep: >-
       Phép đo dùng làm bằng chứng phải GHIM SNAPSHOT. `HEAD` là mục tiêu DI ĐỘNG, và **chính hồ sơ
       review làm nó di động**. Phải phân biệt "một GIÁ TRỊ digest" với "một TỆP chứa giá trị ấy".
@@ -155,11 +160,19 @@ NGUONG_HINH_DANG_LOI_DA_DAT:
     câu hỏi đúng là 'có nên làm việc này không', không phải 'vá thế nào'."*
   do_duoc:
     slug: hai-loi-khai-thieu-nhan-va-sai-co-trang
-    so_luot_bi_cham: 4
-    cac_luot: >-
-      Codex connector (head `25c2d5b`, 1 trong 3 P2) · lượt 1 (`e826730`, ĐỐI CHIẾU ghi VÁ HỜ + 1
-      tiêu đề finding) · lượt 2 (`1d58500`, ĐỐI CHIẾU ghi VÁ HỜ + 1 tiêu đề) · lượt 3 (`4e6a2d5`).
-    phep_do: 'Đếm tiêu đề `^### <slug>` trong từng tệp verdict, cộng dòng ĐỐI CHIẾU của từng lượt.'
+    so_luot_DEM_DUOC: 3
+    cac_luot_DEM_DUOC: >-
+      lượt 1 (`e826730`) · lượt 2 (`1d58500`) · lượt 3 (`4e6a2d5`) — mỗi lượt có MỘT tệp verdict
+      trong kho, đếm được đúng 1 tiêu đề `^### <slug>`.
+    phep_do: >-
+      `grep -c '^### hai-loi-khai-thieu-nhan-va-sai-co-trang'` trên từng tệp verdict. CHỈ đếm tiêu
+      đề; KHÔNG cộng dòng ĐỐI CHIẾU, vì một lượt có thể vừa có tiêu đề vừa có dòng đối chiếu và bị
+      đếm hai lần.
+    luot_connector_THUAT_LAI: >-
+      Codex connector (head `25c2d5b`, khai 1 trong 3 P2) — **KHÔNG có response review nào trong
+      kho**, nên nó KHÔNG vào phép đếm. Bản đầu của trường này để nó trong `do_duoc` và khai
+      `so_luot_bi_cham: 4`; lượt 5 chấm đúng chỗ đó — mượn sức thuyết phục của phép đếm cho một
+      lời kể.
   hinh_dang_that_RONG_HON_slug: >-
     Không phải "quên một cái nhãn" mà là **khai một điều không có hiện vật trong kho chống lưng** —
     và ở lượt 3, hai lần trong đó là khai về CHÍNH BẢN VÁ VỪA LÀM.

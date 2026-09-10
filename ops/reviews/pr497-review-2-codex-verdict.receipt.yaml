@@ -77,7 +77,10 @@ bay_finding:
     DINH_CHINH_khong_ghim_snapshot: >-
       Bản đầu viết lệnh ấy với `HEAD` thay vì một SHA ghim. Lượt 3 chấm đúng chỗ đó (P2): sau khi
       verdict lượt 2 vào kho, chính nó CHÉP LẠI digest ấy trong phần trích finding, nên `git grep`
-      trên HEAD nay trả **HAI** tệp — `pr497-review-1-…receipt.yaml` và `pr497-review-2-…verdict.md`.
+      trả **HAI** tệp tại `4e6a2d5` — `pr497-review-1-…receipt.yaml` và `pr497-review-2-…verdict.md`.
+      GHIM SHA, đừng nói "HEAD nay": chuỗi thật là `1d58500` ⇒ 1 · `4e6a2d5` ⇒ 2 · `25974e7` ⇒ 3 ·
+      `f6ec9c0` ⇒ 4, tăng MỘT mỗi verdict. Bản đầu của chính dòng này viết "trên HEAD nay trả HAI"
+      — tái phạm lớp lỗi nó đang mô tả; lượt 5 chấm.
       Điều này KHÔNG tạo ra nguồn prompt thứ hai (cả hai đều là BẢN CHÉP) và KHÔNG bác bài học
       "prompt là ATTESTATION"; nó bác **con số và cái lệnh** đang được dùng để minh hoạ bài học.
       Nếp: một phép đo dùng làm bằng chứng phải GHIM SNAPSHOT nó đo — `HEAD` là mục tiêu di động, và

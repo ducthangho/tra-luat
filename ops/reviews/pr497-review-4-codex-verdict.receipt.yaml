@@ -12,11 +12,20 @@
 # chạm `ops/cong_cu.py` ở cả ba lượt 2-4.
 # `CLAUDE.md`: "cùng một hình dạng lặp ba lần trở lên thì câu hỏi đúng là **có nên làm việc này
 # không**, không phải **vá thế nào**." Ngưỡng đã đạt. Nên từ đây biên nhận chỉ giữ TRƯỜNG ĐO
-# ĐƯỢC cộng một dòng mỗi finding. Bài học vẫn được ghi — ở `CHANGELOG`, nơi nó vốn thuộc về và
-# đã đi qua bốn lượt review.
+# ĐƯỢC cộng một MỤC ngắn mỗi finding (`van_de` · `phep_do` · `da_va`) — KHÔNG phải một dòng: khối
+# `nam_finding` chiếm **45** dòng cho 5 finding. Bài học vẫn được ghi ở `CHANGELOG`.
+# ĐO, KHÔNG ƯỚC: tệp này **149** dòng, biên nhận lượt 3 **260** dòng ⇒ ngắn hơn **111**. Bản đầu
+# của chú thích này ghi 146 / 253 / 107 — ba con số đo TRƯỚC lần sửa cuối, và lượt 5 chấm đúng
+# chỗ đó. Cùng lớp lỗi mà `CHANGELOG` §4 nếp 3 đặt tên: bảng số phải chạy lại SAU bước cuối.
+# KHÔNG khai "cả lớp rủi ro chết theo kiến trúc": tệp này vẫn còn phần dẫn nhập và
+# `goi_luot_4_SACH` mang văn xuôi. Thứ đo được là văn xuôi ÍT ĐI, không phải hết.
 #
 # HẠNG NGUỒN: mọi trường dưới `model_reviewer_identity` là ATTESTATION, KHÔNG TRỪ TRƯỜNG NÀO
-# (`run.json` cố ý không vào kho). Mọi trường khác đo lại được từ kho, không cần mạng.
+# (`run.json` cố ý không vào kho). HAI KHỐI NỮA CŨNG LÀ ATTESTATION dù nằm ngoài nó:
+# `tuan_thu_cam_cua_reviewer` (sạch/0 commit thêm là tự khai về một phiên đã kết thúc) và
+# `github_submitter_identity` (actor, tác giả PR, phiên vận chuyển — không xác thực được từ kho).
+# Các trường CÒN LẠI đo lại được từ kho, không cần mạng. Bản đầu viết "Mọi trường khác đo lại
+# được từ kho" — quá rộng, lượt 5 chấm đúng chỗ đó.
 
 schema_version: 2
 receipt_id: pr497-review-4-codex-20260910-87eb2112
@@ -63,8 +72,15 @@ nam_finding:
       Phép so OID cây vẫn được gọi là bằng chứng reviewer "ĐỌC đúng cây" — gán sai MỨC chứng thực.
       Biên nhận lượt 3 còn mâu thuẫn ngay trong `tree_khop`: "xác nhận reviewer đọc… và chỉ thế".
     da_va: >-
-      Đổi 5/5 nơi thành "định danh CÂY khớp — và CHỈ thế; KHÔNG xác thực hành vi đọc". Đo lại:
-      chuỗi "Bằng chứng DƯƠNG rằng reviewer đọc đúng cây" còn **0** lần trong toàn kho.
+      Đổi thành "định danh CÂY khớp — và CHỈ thế; KHÔNG xác thực hành vi đọc" ở các vị trí tìm được.
+    DINH_CHINH_loi_khai_5_tren_5: >-
+      Bản đầu của trường này khai "đổi **5/5** nơi" và "chuỗi ấy còn **0** lần trong toàn kho".
+      CẢ HAI SAI, và lượt 5 chấm đúng chỗ đó. Có **SÁU** vị trí; vị trí thứ sáu là
+      `BN1.ba_lop_bang_chung_DUONG_reviewer_tu_dung.tree_khop` và nó SỐNG SÓT vì phép chứng minh
+      của tôi dùng `grep` THEO DÒNG — YAML gấp scalar qua nhiều dòng nên câu bị cắt làm đôi và
+      không dòng nào chứa trọn chuỗi. **Phép đo mù đúng chỗ nó cần bắt.**
+      Phép đo ĐÚNG, đã chạy: `yaml.safe_load` từng biên nhận, duyệt đệ quy mọi scalar, `re.sub`
+      gộp khoảng trắng, rồi mới tìm chuỗi — nó phơi ngay vị trí thứ sáu.
   - slug: dem-finding-doi-mau-va-bo-sot-phan-moi
     lan_thu: 2
     van_de: >-

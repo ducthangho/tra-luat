@@ -1,3 +1,189 @@
+# ★ dev-side — r361: ghi sổ #495 — 9 tệp trong `ops/reviews/`, và ba finding connector chấm vào chính hồ sơ review (2026-09-10)
+
+Nối tiếp r359, vốn chốt tới `8cee941` (#490). Merge sau đó chưa có mục: **#495** — trả hai nợ mà
+r359 tự khai còn mở (verdict lượt 7 vào kho + vá P3 của nó), rồi **phát sinh ba finding mới do Codex
+connector chấm vào chính bản vá ấy**.
+
+**Không nâng `VERSION`.** Vẫn `1.36.68` từ r336.
+
+**GIỚI HẠN NGUỒN.** Như r358/r359, mục này có hai hạng số. (a) **Tự đo được**: mọi số Git, số mục
+`RELEASE_MANIFEST.json`, số đếm từ tệp, và kết quả cổng chạy lại tại chỗ. (b) **Thuật lại**: mọi sự
+kiện GitHub — run/job CI, thời lượng bước, trạng thái PR, thời điểm duyệt. Loại (b) là **attestation
+của phiên điều phối**, không phải phép đo đã đối chiếu.
+
+**Số `r` chọn bằng ĐO, không bằng đếm tiếp.** `r360` **đã bị chiếm** ở `origin/claude/pr491-land-va-findings-wip`
+(nhánh chưa merge của phiên khác) lúc soạn mục này. Lấy `r360` là tái diễn đúng lớp `va-cham-r` kho đã
+trả giá hai lần. Phép đo: quét `CHANGELOG.md` trên **mọi** ref `refs/remotes/origin` ⇒ `r359` ở master +
+2 nhánh, `r361` **0 nhánh**. Nếp: **đừng lấy `max(master)+1`, hãy quét mọi nhánh** — mục CHANGELOG sống
+trên nhánh trước khi về master, y hệt lý do sổ lease không nằm một chỗ.
+
+## Phạm vi — đo, không ước
+
+```
+git diff --shortstat c31d8f1..7693852   ⇒  9 files changed, 2578 insertions(+), 2 deletions(-)
+git diff --name-only c31d8f1..7693852 | sed 's#/.*##' | sort | uniq -c   ⇒  9 ops
+git rev-list --count --first-parent c31d8f1..7693852   ⇒  1
+git rev-list --count              c31d8f1..70eea2e     ⇒  3     (commit của nhánh)
+git rev-list --count              c31d8f1..7693852     ⇒  4     (3 + merge commit)
+```
+
+**9/9 tệp nằm trong `ops/reviews/`.** `ops/` bị loại khỏi kiểm kê gói từ r336 ⇒ **0/180** mục manifest
+đến từ đợt này. Nhưng `CHANGELOG.md` **NẰM TRONG** kiểm kê, nên chính mục này làm sha manifest lệch —
+manifest tái sinh trong cùng commit (bài học r356: sửa tệp có sẵn cũng đổi sha dù `file_count` không đổi).
+
+## Merge commit và vì sao KHÔNG squash
+
+| merge commit | PR | hai cha |
+|---|---|---|
+| `7693852` | #495 | `c31d8f1` + `70eea2e` |
+
+Biên nhận lượt 7 neo `453c6bc` với `anchor.loai: canonical_ancestry`. **Đo đủ 3/3 lối land trước khi
+bấm nút**, trên cây dựng tại chỗ:
+
+| lối land | `merge-base --is-ancestor 453c6bc HEAD` | `ops/bien_nhan_v2.py` |
+|---|---|---|
+| merge commit | `rc=0` — **còn** tổ tiên | — |
+| fast-forward | `rc=0` — **còn** tổ tiên | — |
+| squash (`74a0a21`, dựng tại chỗ) | `rc=1` — **mất** | `rc=1` · `TỔNG: ĐỎ` · **1 vi phạm** |
+
+Nguyên văn cổng trên cây squash: *"commit `453c6bcdf8ce…` CÓ THẬT nhưng KHÔNG phải tổ tiên của HEAD"*.
+Object vẫn tồn tại (`cat-file -t` ⇒ `commit`) — **mất quan hệ, không mất vật**.
+
+**Đừng viết "chỉ vững khi land bằng MERGE COMMIT".** Hẹp một chiều, đã bị đính chính ở `R9-F06`:
+fast-forward cũng giữ neo; thứ phá tổ tiên là **squash**, không phải sự vắng mặt của merge commit.
+
+Xác nhận sau merge trên master `7693852`: `453c6bc` `a1c0d0a` `70eea2e` — **cả ba `rc=0`**, và
+`bien_nhan_v2` cho **48 ĐẠT v2 · 0 vi phạm · `TỔNG: ĐẠT`**.
+
+## Ba finding của Codex connector — cả ba ĐÚNG, cả ba tự đo lại trước khi nhận
+
+Connector chạy `20:04:19Z` trên head `a1c0d0a` (kích hoạt bằng **bỏ draft**; push thường KHÔNG kích
+hoạt nó). Vá tại `70eea2e`.
+
+### P2 — `cac_luot_bi_cham` sai ở CẢ HAI đầu
+
+Biên nhận ghi `2 · 3 · 4 · 5(*) · 6`. Đếm tiêu đề finding mang slug trong từng tệp verdict, **không đọc
+lời tóm tắt của lượt nào**:
+
+| lượt | 1 | 2 | 3 | 4 | 5 | 6 | 7 |
+|---|---|---|---|---|---|---|---|
+| tiêu đề có slug / tổng tiêu đề finding | **1/4** | 1/1 | 1/1 | 1/1 | **0/0** | 1/1 | 0/1 |
+
+Tập đúng **{1, 2, 3, 4, 6}**: **bỏ sót lượt 1**, **thêm nhầm lượt 5**. Lượt 5 ghi `ĐÃ VÁ THẬT`
+(`pr490-review-5-codex-verdict.md:18`, `3/3 vị trí`); chú thích `(*)` cũ mô tả **head** của lượt 5 — một
+điều KHÁC — rồi bị dùng để biện minh cho việc đếm lượt 5 vào danh sách bị chấm.
+
+**Vì sao không lộ ra khi đọc:** tổng vẫn đúng *"năm lượt"* ở **cả hai** bản, nên câu văn tự nhất quán
+trong khi **cả hai đầu mút** của tập đã trôi. Đúng lớp lỗi tệp này đã ghi: *một bất biến còn đúng KHÔNG
+chứng minh các số hạng còn đúng* — kiểm **số hạng**, đừng kiểm quan hệ. Nặng hơn: **verdict lượt 7 đã
+đính chính đúng chỗ này ở dòng 27** và nói rõ không tính thành finding; điều phối đọc verdict rồi vẫn
+chép lại phạm vi **cũ** từ prompt của chính mình.
+
+### P2 — liên kết hiện vật trong verdict trỏ ra ngoài kho
+
+Verdict dẫn bằng đường dẫn **tương đối** `phep-do/<tên>.json`; tệp verdict nằm ở `ops/reviews/` nên
+trong kho chúng giải ra `ops/reviews/phep-do/` — **thư mục không tồn tại**.
+
+| phép đo | giá trị |
+|---|---|
+| lần xuất hiện | **47** |
+| đích khác nhau | **29** |
+| đã nhập kho (dưới `pr490-review-7-phep-do/`) | **5/29** |
+| chỉ có trong gói reviewer ⇒ `KHÔNG ĐO ĐƯỢC` | **24/29** |
+
+Verdict là nguyên văn neo băm nên **không sửa tại nguồn** — đính chính ở biên nhận + mục lục, đúng cơ
+chế `t27` sinh ra để làm.
+
+### P1 — neo `453c6bc` chưa có trên master, và đường "hoãn biên nhận" KHÔNG dùng được ở kho này
+
+Connector đề xuất hai lối chữa: dựng bản vá trên chính commit bằng chứng, **hoặc hoãn biên nhận tới khi
+quan hệ tổ tiên tồn tại**. Lối thứ hai **bị `t27` chặn**, đo được: bỏ đúng tệp biên nhận, giữ verdict và
+giữ hàng mục lục ⇒ `t27` **ĐỎ**, nguyên văn *"pr490-review-7-codex-verdict.md: KHÔNG có biên nhận
+pr490-review-7-codex-verdict.receipt.yaml"* (`ops/lease_publish_test.py:1038` đòi **mọi** `*-verdict.md`
+có biên nhận cùng tên).
+
+Nên verdict và biên nhận **buộc vào cùng một lần land** ⇒ điều kiện tổ tiên **không thể thoả TRƯỚC** lúc
+land, chỉ thoả **BỞI** lúc land. Ghi thành cảnh báo cho người bấm nút, và **khai thẳng nó KHÔNG phải một
+cổng** — bất biến "phải land bằng merge/ff" sống ở nút merge của GitHub, ngoài tầm bộ test.
+
+Hai cảnh báo được nâng lên mục lục theo `t27`: `LIEN-KET-TUONG-DOI-TRONG-VERDICT-TRO-RA-NGOAI-KHO` và
+`NEO-453c6bc-CHUA-CO-TREN-MASTER-SQUASH-SE-PHA`.
+
+## Điều kiện merge — đo, không suy
+
+| điều kiện | phép đo trên `70eea2e` |
+|---|---|
+| duyệt khác danh tính trên ĐÚNG head | `notebyme88` · `COLLABORATOR` · `APPROVED` · `commit_id = 70eea2e7…` khớp head từng ký tự *(thuật lại)* |
+| `gate` lượt PR | **success** — 41 bước = 38 success + 3 skipped + **0 failure** *(thuật lại)* |
+| `cong` | **success**, chạy lại trên sự kiện `pull_request_review` *(thuật lại)* |
+
+Ba bước `skipped` của lượt PR đều có lý do cấu trúc, **không phải cổng vắng mặt**: `#23` nền không
+cgroup (vì `#22` đã chạy đường cgroup), `#29` exact-identity, `#38` lane LAND chỉ chạy trên master.
+
+## Hậu-merge: XANH CẢ HAI NỀN sau một lượt chạy lại — và phép đo nền là thứ tách được hạ tầng khỏi hồi quy
+
+Lượt CI master `34420394943` neo `7693852` *(mọi số trong mục này là **thuật lại**)*:
+
+| job | attempt 1 | attempt 2 (sau khi chạy lại) | 41 bước đánh số của attempt 2 |
+|---|---|---|---|
+| `gate (ubuntu-latest)` | **success** | **success** | 37 success · 4 skipped · **0 failure** |
+| `gate (windows-latest)` | **failure** | **success** | 35 success · 6 skipped · **0 failure** |
+
+**KẾT LUẬN CUỐI: master `7693852` xanh CẢ HAI nền.** Sáu bước `skipped` của Windows đối chiếu chéo
+đúng thiết kế, KHÔNG phải cổng vắng mặt: `#11 PR head contains required EOL base` skipped ở **cả
+hai** nền vì nó có `if: github.event_name == 'pull_request'` — đây đúng là caveat tệp này đã ghi
+(*tiêu chí "không bước nào skipped" chỉ đúng cho lượt PR; bê nguyên sang lượt master là tự báo động
+giả*); Windows skip `#22 cgroup (Linux)` còn ubuntu skip `#23 nền không cgroup` — **hai bước loại
+trừ nhau**, đúng một trong hai phải chạy; `#39 lane WORKER` skipped ở cả hai vì `#38 lane LAND` đã
+chạy. Windows còn skip `#21 don-nhanh` và `#36 ci-phamvi selftest`.
+
+Chỗ đỏ: bước **#8 `cài rg cho G5`** ⇒ `trang_thai_tong: KHONG_DO_DUOC`, `rg` `bat_buoc: true`,
+*"khong khoi chay duoc probe ['mac_dinh'] cua 'rg'"*, `exit code 3`.
+
+**Ba phép đo tách "lỗi của bản vá" khỏi "lỗi hạ tầng"** — đo nền TRƯỚC khi nghi bản vá của mình:
+
+| phép đo | kết quả |
+|---|---|
+| nền `c31d8f1` (base ngay trước, ~4,5 h trước) | job Windows **có chạy và ĐẠT** — `shellcheck` **20 s**, `rg` **4 s** |
+| trên `7693852` | cả hai cùng `KHONG_DO_DUOC`, chậm 20–40 lần — `shellcheck` **1 m 46 s**, `rg` **1 m 29 s** |
+| phạm vi diff `c31d8f1..7693852` | **9/9 tệp** trong `ops/reviews/`; `ops/cai_cong_cu.sh` và `.github/` diff **0 dòng** |
+
+Hai công cụ **độc lập** cùng hỏng, cùng chậm hàng chục lần, trong khi diff không chạm nổi một dòng của
+đường cài — chữ ký **retry mạng lúc tải**. Dùng **đúng một lần** quyền chạy lại (`rerun_failed_jobs`);
+attempt 2 qua được cả `#7` lẫn `#8` rồi **chạy trọn và xanh**, xác nhận chẩn đoán bằng bằng chứng
+dương chứ không bằng suy đoán.
+
+**Điều đáng lo hơn cái đỏ, và nó sẽ KHÔNG tự lộ ra:** `shellcheck` ở cùng lượt **cũng** `KHONG_DO_DUOC`,
+nhưng bước ấy vẫn **XANH** vì `bat_buoc: false`. Nghĩa là `actionlint` chạy mà **mất toàn bộ luật nền
+shellcheck**, cổng vẫn báo đạt. Đúng bệnh tệp này đã ghi — *một cổng tự tắt khi thiếu công cụ là cổng
+không tồn tại đúng lúc nó cần nhất* — và lần này nó bị che khuất vì `rg` đỏ trước. **Nếu chỉ `shellcheck`
+hỏng thì không ai biết.** Nợ khai, chưa chữa.
+
+## Cổng chạy tại chỗ trên master `7693852` — KHÔNG khai là đủ bộ
+
+`ci.yml` job `gate` có **31 bước cổng**; đây là **9** lệnh có bằng chứng.
+
+| cổng | kết quả |
+|---|---|
+| `bien_nhan_v2` | **48 ĐẠT v2** · 11/11 miễn trừ legacy · 42 NỢ đóng băng · **0 vi phạm** · 0 KHÔNG ĐO ĐƯỢC · tổng 101 |
+| `bien_nhan_v2_test` | **48/48** ca · **63/63** đột biến CÓ RĂNG · **2/2** ca tự kiểm |
+| `lease_publish_test` (chứa `t27`) | **121/121** đạt · đã chạy **121** · bỏ qua **0** |
+| `release-verify --strict` | `ok=true` · expected **180** = checked **180** · `failed=[]` |
+| `golden-test` | `ok=true` · **0 mismatch** |
+| `determinism-audit --strict` | `ok=true` |
+| `doc-claims-check --strict` | `ok=true` · **106** tệp |
+| `doctrine-scan` | `rc=0` |
+| `adr-song` | **46** ADR trên đĩa = **46** dòng §20 |
+
+## Nợ còn mở sau mục này
+
+- **#490 vẫn dừng ở `merged`, chưa `landed`** (`ADR-0034`): hậu-merge gate mới có bằng chứng cho **5/31**
+  bước cổng, **0** hiện vật CI neo `8cee941`. Không đợt nào đụng tới.
+- **`shellcheck` `bat_buoc: false` làm `actionlint` mất luật nền mà cổng vẫn xanh** — mới khai ở mục này.
+- **`70eea2e` chưa được connector đọc lại** sau khi vá: nó chỉ review `a1c0d0a`, và push không kích hoạt
+  lại. Đòi review đúng head sau mỗi lần vá là **không kết thúc được** — cùng hình dạng chicken-and-egg với
+  `canonical_ancestry` ở P1 trên.
+
 # ★ dev-side — r360: land evidence #491 + hiện vật cross-review của #491 + sửa 5 đối tượng trong r358 (2026-09-09)
 
 `r358` land ở merge commit `00e017af`. Mục này giữ **land evidence** của lần land ấy, **hiện vật

@@ -1,0 +1,243 @@
+# BIÊN NHẬN GIAO HÀNG — cross-review LƯỢT 7 (LƯỢT CUỐI) của PR #490, KHÁC NỀN (codex).
+#
+# Verdict: changes_requested — 0 P1 / 0 P2 / 1 P3.
+#
+# ĐÂY LÀ LƯỢT ĐÓNG LỚP LỖI LẶP NĂM LƯỢT. Slug `van-xuoi-do-duoc-van-vuot-nguon` bị chấm ở NĂM lượt
+# 1 · 2 · 3 · 4 · 6 — KHÔNG phải "từ lượt 2 tới lượt 6"; xem `dinh_chinh_cac_luot_bi_cham` bên dưới.
+# Lượt 7 tuyên nó ĐÃ VÁ THẬT và không còn xuất hiện.
+#
+# Biên nhận này viết SAU khi PR #490 đã merge (`8cee941`) — nó là TRẢ NỢ, không phải tiền kiểm.
+# Verdict lượt 7 neo `01e7f77`, đúng head đã merge; nhưng nó KHÔNG được đọc thành "PR #490 đã qua
+# review sạch": verdict là `changes_requested`, và P3 của nó chỉ được vá SAU khi merge.
+
+schema_version: 2
+receipt_id: pr490-review-7-codex-20260909-8d53dfa1
+kind: review_delivery_receipt
+packet_id: 'PR490-LAND-EVIDENCE-489'
+lease_id: khong-co-lease
+phase_key: HO-SO-CROSS-REVIEW-PHIEN-20260909
+luot: 7
+role: reviewer
+provider: codex
+executor_provider: claude
+cross_provider: true
+assurance: cross_reviewed
+verdict: changes_requested
+verdict_path: ops/reviews/pr490-review-7-codex-verdict.md
+verdict_sha256: cbe24e85e6e3de397933df1eef21ff75135954a06e925a45d5b8220e02d2e510
+verdict_bytes: 26348
+reviewed_sha: 01e7f77d707cb093b5ba6d9b9d8577f40d025488
+evidence_url: https://github.com/ducthangho/tra-luat/blob/453c6bcdf8ce34bd1751a8442936a201d51a2495/ops/reviews/pr490-review-7-codex-verdict.md
+evidence_url_ghi_chu: >-
+  Neo BLOB ghim `453c6bc` — commit ĐẦU TIÊN chứa tệp verdict, đo bằng
+  `git log --all --diff-filter=A -- <path>`, trả ĐÚNG 1 commit.
+so_p1: 0
+so_p2: 0
+so_p3: 1
+
+lop_loi_lap_5_luot_DA_DONG:
+  slug: van-xuoi-do-duoc-van-vuot-nguon
+  cac_luot_bi_cham: '1 · 2 · 3 · 4 · 6'
+  dinh_chinh_cac_luot_bi_cham:
+    ban_dau_SAI: '2 · 3 · 4 · 5(*) · 6'
+    sai_o_HAI_dau: >-
+      BỎ SÓT lượt 1 và THÊM NHẦM lượt 5. Lượt 5 KHÔNG chấm slug này: nó ghi ĐÃ VÁ THẬT
+      (`pr490-review-5-codex-verdict.md:18`, bảng đối chiếu, `3/3 vị trí`). Chú thích `(*)` cũ
+      — "lượt 5 cho approve 0/0/0 nhưng trên head CŨ" — mô tả một điều KHÁC (head của lượt 5) rồi
+      bị dùng để biện minh cho việc đếm lượt 5 vào danh sách bị chấm. Hai việc khác nhau.
+    phep_do_doc_lap: >-
+      Đếm tiêu đề finding có slug trong từng tệp verdict, KHÔNG đọc lời tóm tắt của lượt nào:
+      lượt 1 = 1/4 · lượt 2 = 1/1 · lượt 3 = 1/1 · lượt 4 = 1/1 · lượt 5 = 0/0 · lượt 6 = 1/1 ·
+      lượt 7 = 0/1. Tổng 5/5 lượt có tiêu đề mang slug, và tập đúng là {1,2,3,4,6}.
+    nguon_cua_cai_sai: >-
+      Chính verdict lượt 7 đã đính chính điều này ở dòng 27 ("xuất hiện ở các lượt 1, 2, 3, 4, 6…
+      Đây là sai số lịch sử trong prompt gói"), và reviewer nói rõ KHÔNG tính nó thành finding của
+      PR. Điều phối đọc verdict rồi vẫn chép lại phạm vi CŨ từ prompt của chính mình vào biên nhận.
+      Codex connector chấm lại ở PR #495 — lần thứ hai cho cùng một con số.
+    vi_sao_KHONG_lo_ra_khi_doc: >-
+      TỔNG vẫn đúng "5 lượt" ở cả hai bản, nên câu văn tự nhất quán: quan hệ ("năm lượt") sống sót
+      trong khi CẢ HAI đầu mút của tập trôi. Đúng lớp lỗi `CLAUDE.md` đã ghi — một bất biến còn
+      đúng KHÔNG chứng minh các số hạng còn đúng — nên phải kiểm SỐ HẠNG, đừng kiểm quan hệ.
+    con_song_trong_lich_su: >-
+      Thông điệp commit `a1c0d0a` và phần thân PR #495 lúc mở còn mang phạm vi cũ; không sửa được,
+      chỉ đính chính. Bản trong kho (biên nhận này + hàng mục lục) là bản có thẩm quyền.
+  nguyen_van_luot_7: >-
+    "Hai vế P3 lượt 6 đã đóng thật. Các kết quả của 8/8 lệnh được khai đều tái chạy khớp."
+  vi_sao_dong_duoc: >-
+    Lượt 4 ĐỔI CÁCH GIAO VIỆC — từ "tìm finding" sang "kiểm kê vét cạn" — nên các lượt sau có bảng
+    95 hàng để rà TOÀN BỘ thay vì chỉ rà hunk vừa sửa. Đây là thứ thoát khỏi vòng lặp, không phải
+    một bản vá nào.
+
+ba_cau_dieu_phoi_TU_DAT_va_dap_an:
+  - cau: 'Chốt "8 và 31 trả lời hai câu khác nhau" có phải cách né đưa ra tỉ lệ độ phủ thật không?'
+    dap: >-
+      KHÔNG. Reviewer tự đọc 40/40 bước YAML và chạy lại 8/8 lệnh, kết quả khớp; lời đính chính
+      "ĐỦ BỘ" đứng vững.
+  - cau: 'Vá 9/9 hàng mục lục thay vì 5 hàng của PR này có phải scope creep không?'
+    dap: >-
+      KHÔNG — nguyên văn: "sửa là hợp lý… Đây là sửa đầy đủ các bản lặp của finding, không phải
+      scope creep." Kèm phép đo: 9/9 verdict lịch sử giữ NGUYÊN hash.
+  - cau: 'Lớp lỗi có tái phát trong 1 858 dòng nội dung mới không?'
+    dap: >-
+      Không phát hiện giá trị đo sai mới. 27/27 nhóm ngữ nghĩa trong `delta-claims.json`;
+      1 858/1 858 dòng thêm được ánh xạ, 0 dòng ngoài; 35/35 phép đối chiếu trường JSON receipt
+      khớp nguồn lịch sử.
+
+p3_da_va_sau_khi_merge:
+  slug: script-do-luot6-khong-co-duong-tai-lap-trong-kho
+  van_de: >-
+    Commit `2f783bc` giới thiệu `ops/reviews/pr490-review-6-phep-do/do-static.py` là "chạy lại
+    được". SAI ở BA vế độc lập: đường dẫn (`R = P.parent/'cay-kho'` giải ra `ops/reviews/cay-kho`,
+    không tồn tại), đầu vào (đòi manifest/ref TSV của gói lượt 6 + hai tệp không nhập kho), và đầu
+    ra (chỉ sinh `ci-steps.json`, KHÔNG sinh `ci-comparison.json` như lời khai ngụ ý).
+  phan_chung: >-
+    Reviewer chép 1/1 script nguyên byte ra ngoài kho và chạy: `rc=1`, stdout rỗng,
+    `FileNotFoundError` TRƯỚC phép đo đầu tiên. Điều phối tự đo lại, đúng cả ba vế.
+  da_va_o_dau: >-
+    `pr490-review-6-codex-verdict.receipt.yaml`, khối
+    `hien_vat_reviewer_vao_kho.DINH_CHINH_do_static_py_KHONG_chay_lai_duoc_tu_kho` — và nâng cảnh
+    báo lên hàng mục lục của lượt 6 theo cơ chế `t27`.
+  vi_sao_KHONG_viet_runner_moi: >-
+    Reviewer nêu hai đường và nói rõ KHÔNG yêu cầu biến script lịch sử thành công cụ sản phẩm.
+    Đường runner đòi tái dựng gói lượt 6 (mirror 317 ref, manifest, verdict/ledger lượt trước).
+    Chọn đường rẻ: sửa lời khai cho khớp thứ làm được, và nói rõ thứ ĐỌC ĐƯỢC (đối chiếu JSON với
+    `ci.yml`) khác thứ CHẠY ĐƯỢC (không).
+  thoi_diem: 'Vá SAU khi #490 merge. Đây là trả nợ, và hồ sơ ghi đúng như vậy.'
+
+model_reviewer_identity:
+  provider: openai_codex
+  surface: codex_cli
+  model_yeu_cau: gpt-6-astra
+  model_da_chay: KHONG_DO_DUOC
+  session_run_id: 8d53dfa1
+  run_id_day_du: 8d53dfa1debd487cb4c34d9ac68cc4b8
+  prompt_sha256: 9865a8dcb778ab27e3fb9b3f960696ba1675ba9298db63616927aafa28293d41
+  bat_dau_utc: '2026-09-09T18:22:55.286079+00:00'
+  ket_thuc_utc: '2026-09-09T18:45:11.000434+00:00'
+  thoi_luong_giay: 1335.714
+  ma_thoat: 0
+  trang_thai: xong
+  stdout_byte: 257
+  stdout_sha256: 35a78e1c0d879dd36a6e0738d7ef2bcc95359fe2ace7020fc41c32191064ec45
+  stderr_byte: 1760081
+  stderr_sha256: 59be0ca0c6d82c4280496589d92d9b2e53acf46a39632511b1fdbf34e14b6427
+  so_lan_chet_truoc_khi_xong: 0
+  nguon_cac_scalar_tren: 'Đọc từ `run.json` trong scratchpad; tệp ấy KHÔNG vào kho ⇒ ATTESTATION.'
+
+nang_luc_do_cua_goi:
+  so_ref: 318
+  lech: 0
+  kho_nong: false
+  chua_do_duoc: 'Không mạng: mọi khẳng định về GitHub API/CI là KHÔNG ĐO ĐƯỢC.'
+
+hien_vat_reviewer_vao_kho:
+  duong_dan: >-
+    ops/reviews/pr490-review-7-phep-do/ — ci-audit.json (phân loại 40 bước job `gate`) ·
+    gates.json (lệnh + log 8 cổng chạy lại) · script-replay.json (phản chứng nguyên byte cho P3) ·
+    delta-claims.json (27 nhóm mệnh đề mới) · index-audit.json (đối chiếu từng hàng mục lục)
+  doi_chieu_nguyen_byte: '`cmp` giữa gói và bản trong kho: KHỚP 5/5 tệp, 0 tệp lệch.'
+  canh_bao_hoc_tu_P3: >-
+    Năm tệp này là DỮ LIỆU KẾT QUẢ, đối chiếu độc lập được (đọc `ci.yml`, đọc Git, đọc mục lục).
+    KHÔNG kèm script chạy lại, và hồ sơ này KHÔNG khai có. Đó chính là bài học của P3 lượt 7.
+
+tuan_thu_cam_cua_reviewer:
+  cay_kho_sach: true
+  commit_them_ngoai_head: 0
+  bang_chung: '`status --porcelain` RỖNG và `log 01e7f77..HEAD` RỖNG sau khi lượt kết thúc.'
+
+manifest:
+  duong_dan: KHONG_CO_TRONG_KHO
+  ghi_chu: 'Hiện vật gói (mirror 318 ref) CỐ Ý không vào kho; riêng năm tệp đo ở trên thì CÓ.'
+
+github_submitter_identity:
+  actor: ducthangho
+  la_tac_gia_PR: true
+  ghi_chu: '`ADR-0040`: verdict do tài khoản tác giả PR vận chuyển KHÔNG là merge authorization.'
+  phien_van_chuyen: https://claude.ai/code/session_01UN8WRS5Bc5pBBzYPDqs9Dx
+
+anchor:
+  loai: canonical_ancestry
+  cuong_do: cao
+  mo_ta: 'Blob verdict ghim `453c6bc`.'
+  gioi_han: 'Chỉ vững nếu land bằng MERGE hoặc fast-forward; SQUASH phá quan hệ tổ tiên.'
+
+khong_do_duoc:
+  - 'Model đã phục vụ và `thread_id`.'
+  - '`run.json` không vào kho ⇒ scalar runtime là attestation.'
+  - 'Trạng thái GitHub tại thời điểm reviewer đọc: sandbox không mạng.'
+  - 'Lượt CI nào ĐÃ chạy thật trên các head của PR #490 — không đọc, không giữ run JSON.'
+
+# ─────────────────────────────────────────────────────────────────────────────
+# HAI CẢNH BÁO DƯỚI ĐÂY DO CODEX CONNECTOR CHẤM TRÊN PR #495 (head `a1c0d0a`),
+# tức trên chính BIÊN NHẬN này chứ không phải trên verdict. Cả hai điều phối đã
+# tự đo lại trước khi nhận. `t27` cưỡng chế chúng phải có mặt ở hàng mục lục.
+# ─────────────────────────────────────────────────────────────────────────────
+
+verdict_usage_caveats:
+  - id: LIEN-KET-TUONG-DOI-TRONG-VERDICT-TRO-RA-NGOAI-KHO
+    muc: P2
+    mo_ta: >-
+      Verdict lượt 7 dẫn hiện vật bằng đường dẫn TƯƠNG ĐỐI dạng `phep-do/<tên>.json`. Tệp verdict
+      nằm ở `ops/reviews/`, nên trong kho chúng giải ra `ops/reviews/phep-do/…` — thư mục KHÔNG
+      TỒN TẠI. Hiện vật thật nằm ở `ops/reviews/pr490-review-7-phep-do/`.
+    phep_do:
+      lan_xuat_hien: 47
+      dich_khac_nhau: 29
+      thu_muc_giai_ra: 'ops/reviews/phep-do — `ls` trả No such file or directory'
+      dich_DA_NHAP_kho: '5/29 — ci-audit.json · delta-claims.json · gates.json · index-audit.json · script-replay.json'
+      dich_KHONG_NHAP_kho: >-
+        24/29 — graph.json · diffs.json · extra-gates.json · reviews.json · positive-evidence.json ·
+        numeric-inventory.json · land-ledger.json · code-scope.json · tree-final.json · status.json ·
+        regression-static.json · refs.json · receipts.json · old-inputs.json · node-source-audit.json ·
+        manifest.json · logs/imported-script.stderr · historical-receipt-topology.json ·
+        environment.json · delta-lines.json · copies.json · commit-messages.json · anchors.json ·
+        README.md. Chúng chỉ tồn tại trong GÓI của reviewer, gói KHÔNG vào kho.
+    vi_sao_KHONG_sua_tai_nguon: >-
+      Verdict là nguyên văn neo băm (`verdict_sha256`, `verdict_bytes`). Sửa một ký tự là phá neo và
+      biến hiện vật review thành thứ điều phối đã biên tập. Cùng lý do `t27` ra đời: chỗ sai trong
+      verdict phải đính chính ở biên nhận + mục lục, không vá tại nguồn.
+    phai_lam_gi_khi_chay_lai: >-
+      ĐỪNG bấm theo liên kết trong verdict. Với 5 đích đã nhập, thay tiền tố `phep-do/` bằng
+      `pr490-review-7-phep-do/`. Với 24 đích còn lại thì KHÔNG có tệp nào để mở — coi như
+      KHÔNG ĐO ĐƯỢC, đừng đọc sự vắng mặt thành hiện vật bị mất.
+
+  - id: NEO-453c6bc-CHUA-CO-TREN-MASTER-SQUASH-SE-PHA
+    muc: P1
+    mo_ta: >-
+      `evidence_url` của biên nhận này neo `453c6bc`, và `anchor.loai` là `canonical_ancestry`. Tại
+      thời điểm viết, `453c6bc` CHƯA nằm trên `master` — nó chỉ là commit thứ nhất của PR #495. Nên
+      lời khai "mỏ neo là tổ tiên" ĐÚNG một cách CÓ ĐIỀU KIỆN: nó chỉ thành sự thật trên `master`
+      nếu PR được land bằng lối GIỮ quan hệ tổ tiên.
+    phep_do_BA_LOI_LAND:
+      merge_commit: 'rc=0 — `merge --no-ff` rồi `merge-base --is-ancestor` ⇒ CÒN là tổ tiên'
+      fast_forward: 'rc=0 — `merge --ff-only` ⇒ CÒN là tổ tiên'
+      squash: >-
+        rc=1 — dựng commit squash (base `c31d8f1` + toàn bộ diff PR thành 1 commit, `74a0a21`) ⇒
+        `453c6bc` KHÔNG còn là tổ tiên, dù object vẫn tồn tại (`cat-file -t` ⇒ commit).
+      cong_tren_ban_squash: >-
+        `python3 ops/bien_nhan_v2.py --root <cây squash>` ⇒ rc=1, `TỔNG: ĐỎ`, `1 vi phạm`, nguyên văn
+        "commit `453c6bcdf8ce…` CÓ THẬT nhưng KHÔNG phải tổ tiên của HEAD". Trên cây thật (chưa land)
+        cùng lệnh cho rc=0, `48 ĐẠT v2`, `0 vi phạm`, `TỔNG: ĐẠT`.
+      ghi_chu_chieu_lech: >-
+        KHÔNG viết "chỉ vững khi land bằng MERGE COMMIT" — đó là lời khai HẸP một chiều đã bị đính
+        chính ở `R9-F06` (mục lục, hàng `neo-canonical-ancestry-chi-dung-khi-land-bang-merge`):
+        fast-forward cũng giữ neo. Thứ phá quan hệ tổ tiên là SQUASH, và chỉ với neo chưa có sẵn
+        trong nhánh đích.
+    duong_HOAN_BIEN_NHAN_bi_CHAN_boi_t27:
+      cach_reviewer_de_xuat: 'land verdict trước, để biên nhận lại cho tới khi `453c6bc` đã ở master.'
+      phep_do: >-
+        Bỏ ĐÚNG tệp biên nhận này, giữ verdict và giữ hàng mục lục, rồi chạy
+        `ops/lease_publish_test.py` ⇒ `t27` ĐỎ, nguyên văn "pr490-review-7-codex-verdict.md: KHÔNG
+        có biên nhận pr490-review-7-codex-verdict.receipt.yaml". Cùng cây khi CÓ biên nhận thì `t27`
+        KHÔNG đỏ.
+      ket_luan: >-
+        Đường hoãn KHÔNG dùng được trong kho này: `t27` (`ops/lease_publish_test.py:1038`) đòi MỌI
+        `*-verdict.md` phải có biên nhận cùng tên. Verdict và biên nhận buộc phải vào cùng một lần
+        land — nên điều kiện tổ tiên KHÔNG thể thoả TRƯỚC lúc land, chỉ có thể thoả BỞI lúc land.
+    phai_lam_gi_khi_chay_lai: >-
+      Land PR #495 bằng MERGE hoặc fast-forward. Nếu ai đó land bằng SQUASH thì biên nhận này thành
+      vi phạm `canonical_ancestry` và `ops/bien_nhan_v2.py` sẽ ĐỎ trên master — chữa bằng cách ghi
+      lại `evidence_url` theo commit squash mới, không phải bằng cách gỡ chốt.
+    KHONG_DO_DUOC: >-
+      Bất biến "kho phải land bằng merge/ff" sống ở nút merge của GitHub, ngoài tầm bộ test — không
+      ca cục bộ nào cưỡng chế được. Đây là cảnh báo cho người bấm nút, không phải một cổng.

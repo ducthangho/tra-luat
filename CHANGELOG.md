@@ -1,3 +1,102 @@
+# ★ dev-side — r362: đóng nợ `landed` của #490, và RÚT một lời khai sai của r361 (2026-09-10)
+
+Hai việc, và việc thứ hai là **tự bác một câu tôi vừa viết ở mục ngay trên**.
+
+**Không nâng `VERSION`.** Vẫn `1.36.68` từ r336.
+
+**GIỚI HẠN NGUỒN.** (a) **Tự đo được**: mọi phép chạy `ops/cong_cu.py` trong mục này, và mọi số Git.
+(b) **Thuật lại**: run/job/bước CI của GitHub. Loại (b) ghi nhãn tại chỗ.
+
+`r360` bị chiếm ở nhánh chưa merge của phiên khác (xem r361); `r362` quét **mọi** ref
+`refs/remotes/origin` ⇒ **0 nhánh**, nên lấy được.
+
+## 1. #490 đạt `landed` — và bằng chứng còn thiếu VỐN ĐÃ TỒN TẠI, chỉ chưa ai đọc
+
+r359 khai ba vế `ADR-0034` của #490: `merged` ĐO ĐƯỢC · `bookkeeping` là chính mục r359 ·
+`hậu-merge gate` **CHƯA ĐỦ BẰNG CHỨNG** — *"lượt CI của chính merge commit thì CỐ Ý KHÔNG ĐỌC theo
+quyết định chủ kho… Quét toàn kho: 0 hiện vật CI nào neo `8cee941`."*
+
+Câu ấy **đúng nguyên văn** (0 hiện vật *trong kho*) nhưng dễ bị đọc thành *"lượt CI không có"*.
+Đi hỏi đúng chỗ kết luận được ghi — GitHub Actions, không phải cây kho — thì lượt ấy **CÓ**, và nó
+**XANH** *(thuật lại)*:
+
+| job | kết luận | 41 bước đánh số | thời lượng |
+|---|---|---|---|
+| `gate (ubuntu-latest)` | **success** | 37 success · 4 skipped · **0 failure** | 18:50:37Z → 19:11:32Z |
+| `gate (windows-latest)` | **success** | 35 success · 6 skipped · **0 failure** | 18:50:37Z → 19:44:09Z |
+
+`run id 34391481045` · `event=push` · `branch=master` · `head_sha=8cee941` · attempt **1**, không
+chạy lại lần nào.
+
+Sáu bước `skipped` của Windows và bốn của ubuntu **khớp từng bước** với hai lượt master đo sau đó
+(`7693852` attempt 2 và `28ba133` attempt 1): `#11` skipped ở cả hai nền do
+`if: github.event_name == 'pull_request'`; ubuntu skip `#23 nền không cgroup` còn Windows skip
+`#22 cgroup (Linux)` — hai bước loại trừ nhau; `#39 lane WORKER` skipped vì `#38 lane LAND` chạy.
+Ba lượt master độc lập cho cùng một hình dạng ⇒ đây là hình dạng ĐÚNG của lane LAND, không phải
+tạo tác của một lượt.
+
+**Vậy `hậu-merge gate` của #490 nay ĐỦ BẰNG CHỨNG**, và #490 đạt `landed`:
+
+| vế `ADR-0034` | trạng thái | bằng chứng |
+|---|---|---|
+| `merged` | ĐẠT | `8cee941`, hai cha `00e017a` + `01e7f77` |
+| `hậu-merge gate` | **ĐẠT** | run `34391481045`, xanh cả hai nền, 0 failure |
+| `bookkeeping` | ĐẠT | mục r359 (chủ kho đã đóng chuỗi land-evidence nên #490 cố ý không có tệp riêng) |
+
+**Bài học, và nó là bài học cũ ở một mặt mới:** nợ được khai là *"0 hiện vật"* rồi được đọc thành
+*"chưa chạy"*. Kho đã ghi đúng lớp này — *"vắng mặt vì sạch" và "vắng mặt vì chưa chạy" nhìn giống
+hệt nhau nếu hỏng sai chỗ* — nhưng lần này nạn nhân là **chính dòng nợ**: nó mô tả trạng thái của
+KHO, còn người đọc lại hiểu thành trạng thái của CI. Nợ treo **~7 giờ** trong khi bằng chứng đã nằm
+sẵn trên GitHub từ `19:44:09Z`. Chốt rẻ: khi khai một nợ dạng *"không có X"*, ghi luôn **X được tìm ở
+ĐÂU** — *"0 hiện vật CI **trong cây kho**; **chưa hỏi GitHub Actions**"* là câu tự chỉ ra bước kế tiếp.
+
+## 2. RÚT lời khai sai của r361 về `shellcheck`
+
+r361 khai, ở mục *"Nợ MỚI"*:
+
+> `shellcheck` ở cùng lượt cũng `KHONG_DO_DUOC`, nhưng bước vẫn XANH vì `bat_buoc: false` — `actionlint`
+> mất toàn bộ luật nền mà cổng vẫn báo đạt. **Nếu chỉ `shellcheck` hỏng thì không ai biết.**
+
+**Câu in đậm SAI.** Kho ĐÃ có canary cho đúng bệnh ấy, và nó **blocking**. Phép thử một biến, cùng
+một cây, chỉ khác sự có mặt của `shellcheck` trong `PATH`:
+
+```
+CÓ shellcheck    → actionlint DAT · shellcheck DAT
+                   canary actionlint_shellcheck: DAT  "canary bat dung SC1003 (rc=1)"
+THIẾU shellcheck → actionlint DAT · shellcheck KHONG_DO_DUOC
+                   canary actionlint_shellcheck: DO   "SUY_GIAM: thieu shellcheck nen actionlint
+                                                       am tham bo lop luat SC*"  · chinh_sach=blocking
+```
+
+`ops/cong_cu.yaml` khai `actionlint.canary = actionlint_shellcheck`, `chinh_sach: blocking`; fixture
+`ops/canary/actionlint_shellcheck.yml`. `tong_hop` nâng canary `DO` (không phải `advisory`) lên trạng
+thái tổng. Và CI **có** chạy phép quét đầy đủ: bước `#9 G5` gọi `python ops/cong_cu.py kiem-tra --json`
+**không có `--chi`**.
+
+### Thứ CÒN LẠI sau khi rút — hẹp hơn nhiều, nhưng có thật
+
+Canary chỉ chạy khi quét **toàn bộ**: `tong_hop` bọc vòng lặp canary trong `if chi is None`
+(`ops/cong_cu.py`). CI gọi **từng công cụ một** ở bước `#7` (`bash ops/cai_cong_cu.sh shellcheck`) và
+`#8` (`… rg`), tức `chi` có giá trị ⇒ **không canary nào chạy**. Đó là lý do JSON của bước `#7` trong
+lượt Windows đỏ in ra `"canary": []` **và** `"trang_thai_tong": "DAT"` trong khi chính nó vừa báo
+`shellcheck: KHONG_DO_DUOC`.
+
+Nên khuyết tật đúng tên là **một màu XANH GÂY HIỂU LẦM Ở MỨC BƯỚC**, không phải lỗ độ phủ:
+ai đọc riêng bước `#7` sẽ kết luận `shellcheck` lành, trong khi nó hỏng. Độ phủ vẫn còn — bước `#9`
+bắt được — **miễn là `#9` chạy**. Ở lượt Windows đỏ nó **không** chạy: `#8` (`rg`, `bat_buoc: true`)
+đỏ trước nên `#9` bị skip. Tức trên đúng lượt ấy không phép đo nào chạm tới sự suy giảm — nhưng vì
+lượt **hỏng giữa chừng**, không phải vì cơ chế thiếu.
+
+**Vì sao tôi viết sai:** thấy `"canary": []` cạnh `trang_thai_tong: DAT` rồi suy ra *"canary không tồn
+tại / không bắt"*. Danh sách rỗng ấy là hệ quả của `chi` có giá trị — lại đúng lớp lỗi
+*"đọc chỗ RỖNG thành bằng chứng phủ định"* mà tệp này đã ghi ba lần. Tôi đọc sự IM LẶNG của một đường
+KHÔNG ĐƯỢC GỌI thành lời khai rằng cơ chế vắng mặt, và không chạy một phép thử nào trước khi ghi nó
+vào sổ. Phép thử bác nó tốn đúng **hai lần chạy** `cong_cu.py`.
+
+**Chỗ nhận việc còn lại:** mã thuộc `ops/cong_cu.py` + `ops/cong_cu.yaml`, do packet **#290** thi công
+theo đặc tả `ops/specs/HA-TANG-CONG-CU-TAT-DINH.md`. Chưa có Issue mở nào cho nó lúc viết mục này
+*(đọc 30 Issue mở, 0 khớp)*, và **không phiên nào đang chạy** về hạ tầng công cụ.
+
 # ★ dev-side — r361: ghi sổ #495 — 9 tệp trong `ops/reviews/`, và ba finding connector chấm vào chính hồ sơ review (2026-09-10)
 
 Nối tiếp r359, vốn chốt tới `8cee941` (#490). Merge sau đó chưa có mục: **#495** — trả hai nợ mà

@@ -206,6 +206,18 @@ def tong_hop(ban_ke, thu_muc_goc=None, chi=None):
     cc = ban_ke["cong_cu"]
     theo_ten = {t: kiem_tra_1(t, cc[t]) for t in ([chi] if chi else cc.keys())}
     canary_kq, da_chay = [], set()
+    # NỢ ĐÃ ĐO (r362, 10-09-2026) — `chi` có giá trị ⇒ KHÔNG canary nào chạy, nên bản tóm tắt của
+    # một lệnh MỘT-CÔNG-CỤ có thể in `trang_thai_tong: DAT` ngay cạnh `shellcheck: KHONG_DO_DUOC`,
+    # kèm `"canary": []`. CI gọi đúng kiểu ấy ở hai bước (`cai_cong_cu.sh shellcheck` / `… rg`), nên
+    # ai đọc RIÊNG một bước sẽ kết luận công cụ lành trong khi nó hỏng.
+    #   ĐỘ PHỦ VẪN CÒN: bước `#9 G5` gọi `kiem-tra` KHÔNG kèm `--chi`, và canary
+    #   `actionlint_shellcheck` là `blocking`. Đo một biến, cùng cây, chỉ khác PATH:
+    #     có shellcheck   -> canary DAT ("canary bat dung SC1003")
+    #     thiếu shellcheck-> canary DO  ("SUY_GIAM: thieu shellcheck nen actionlint am tham bo SC*")
+    #   Nên đây là MÀU XANH GÂY HIỂU LẦM Ở MỨC BƯỚC, KHÔNG phải lỗ độ phủ — trừ khi `#9` bị skip vì
+    #   một bước trước đó đỏ (đã xảy ra: `rg` đỏ ⇒ `#9` skip ⇒ lượt ấy không đo suy giảm).
+    # Chủ: packet #290 / `ops/specs/HA-TANG-CONG-CU-TAT-DINH.md`. ĐỪNG sửa hành vi ở đây mà không
+    # qua packet ấy — `chinh_sach`/`bat_buoc` là hợp đồng của đặc tả, không phải chi tiết nội bộ.
     if chi is None:
         for ten, dn in cc.items():
             cn = dn.get("canary")

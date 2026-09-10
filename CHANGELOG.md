@@ -1,3 +1,95 @@
+# ★ dev-side — r363: ghi sổ #492 — slice A0 sổ thu hồi lease land CHƯA KÍCH HOẠT, bốn lượt review + Codex connector, `cong` đỏ lúc merge (2026-09-10)
+
+Nối tiếp r361 (chốt tới `28ba133`, #496). Merge sau đó chưa có mục: **#492** — packet **#488**, slice **A0** của
+spec `THU-HOI-LEASE-VA-CAP-LAI` r9 (sha256 `465538364b1a3f9477782fba79869bbd1c9351140e3fa9df50451baae22f9c79`,
+PR #475) + ADR-0047. Mục này CŨNG là vế bookkeeping ADR-0034 của đợt: 4 verdict + 4 biên nhận v2 vào
+`ops/reviews/`, mục lục + cảnh báo, và manifest tái sinh.
+
+**Không nâng `VERSION`.** Vẫn `1.36.68` từ r336.
+
+**GIỚI HẠN NGUỒN.** Như r358–r361: (a) **tự đo được** — mọi số Git, số mục `RELEASE_MANIFEST.json`, băm/byte tệp,
+kết quả cổng chạy lại tại chỗ; (b) **thuật lại** — mọi sự kiện GitHub (run/job CI, comment, review, thời điểm).
+Loại (b) là attestation của phiên điều phối (đọc qua MCP github), không phải phép đo đã đối chiếu.
+
+**Số `r` chọn bằng ĐO.** Quét `CHANGELOG.md` trên **mọi** ref `refs/remotes/origin` lúc soạn: `r362` **đã bị chiếm**
+ở một nhánh chưa merge của phiên khác (#497), `r363` **0 nhánh**. Cùng nếp r361: đừng lấy `max(master)+1`.
+
+## Phạm vi — đo, không ước
+
+```
+git log -1 --format='%H %P' 0721811   ⇒  072181157a27… 28ba133e… 826bc36f…   (merge commit, 2 cha)
+git diff --shortstat 28ba133..0721811  ⇒  3 files changed, 2387 insertions(+), 1 deletion(-)
+git diff --name-only 28ba133..0721811  ⇒  .github/workflows/ops-thu-hoi-admission.yml (+141)
+                                          ops/lease_publish.py (+919) · ops/lease_publish_test.py (+1327/−1)
+git rev-list --count c0a5cbe..826bc36  ⇒  4     (commit của nhánh: d5a980e → bd4ecd4 → 457affd → 826bc36)
+git merge-base --is-ancestor 826bc36 0721811  ⇒  rc=0
+```
+
+Write set **đúng 3 đường** như lease `wp488-thu-hoi-lease-a0-exec-1-claude-20260909` khai; `ai-dang-giu` cả ba lúc
+mở packet: NGƯỜI_GIỮ 1 = chính lease này. `ops/` và `.github/` **không** nằm trong kiểm kê gói ⇒ **0/180** mục manifest
+đến từ #492; chỉ `CHANGELOG.md` (mục này) làm sha manifest lệch ⇒ manifest tái sinh trong cùng commit (bài học r356).
+
+**ADR-0044 — ngoại lệ có phạm vi, khai thẳng.** Sensitive: trần 3 tệp / 300 dòng; A0 = 3 tệp / **+2387**. Spec r9
+§write_set đã khai *"A0 vượt dòng ⇒ ngoại lệ có phạm vi"*; thực đo gấp ~3 lần ước 560–780, phần vượt nằm ở test
+(+1327: 25 ca + catalog 37 mutant) và ở reader/adapter mà lượt 6–7 của spec thêm. Quyết định bền của chủ kho về
+Q7 chưa có — ghi #499 A4.
+
+## Cái gì land, cái gì KHÔNG
+
+`SO_THU_HOI_KICH_HOAT = False`. Verdict sản phẩm của `check`/`ai-dang-giu` **vẫn là luật cũ** (bia mộ hai chiều);
+luật mới chỉ in dưới nhãn `DU_BAO:` khi gọi `--du-bao`, **không đổi rc** (t134/t135). Điều duy nhất cưỡng chế
+thật ở mọi consumer vận hành: sổ `ops/thu-hoi/` **không rỗng trên bất kỳ ref nào ⇒ 12** (không grandfather), và
+**mọi lỗi cấu trúc trên đường tới sổ ⇒ 12, không suy "vắng"** — tổ tiên non-tree, namespace không phải thư mục,
+marker sai schema sáu khoá, policy không phải JSON object, tên/bytes không UTF-8. Cổng M4 `kiem-thu-hoi-github`
+và workflow `ops-thu-hoi-admission.yml` (`pull_request_target`, checkout NEO `base.sha`, quyền chỉ đọc) **cài
+nhưng chưa là required check** (A1).
+
+## Vòng vá → cross-review → verdict — bốn lượt + một connector, đủ số
+
+| lượt | reviewer | đọc | kết quả | vá ở |
+|---|---|---|---|---|
+| 1 | codex `gpt-6-astra` xhigh (run `81ab2fa9`, **bị dừng** sau khi ghi verdict — không in `XONG`) | `d5a980e` | `changes_requested` **P1 3 · P2 6** | `bd4ecd4` (9/9) |
+| 2 | claude `claude-fable-5`/max (run `360657cc`; đổi reviewer theo #488#issuecomment-5607531721 sau 3 run codex chết vì hạ tầng) | `bd4ecd4` | `changes_requested` **P1 0 · P2 1 · P3 4** (F10–F14) | `457affd` (F10/F11/F12) |
+| 3 | claude (run `5c61112d`) | `457affd` | `approve` 0/0/0 — **KHÔNG TÍNH**: modelUsage lẫn `opus-4-8` 33 158 + `fable-5` 28 432 output token, `kiem_ket_qua` KHÔNG ĐO ĐƯỢC | — |
+| Codex connector | review 5162390620 (kích khi bỏ draft) | `457affd` | **P1 1 · P2 2** — tổ tiên non-tree ⇒ "sổ rỗng" rc=0 · consumer không validate marker · TypeError khoá lẫn kiểu; tái hiện ĐỎ **5/5** | `826bc36` (t151, t129, +4 mutant) |
+| 4 | claude `claude-fable-5`/max (run `f82cc4b7`, **modelUsage ĐẠT**) | `826bc36` | **`approve` · P1 0 · P2 0 · P3 3** (→ #499 B1–B3) | — |
+
+Bốn verdict vào kho **nguyên byte** (`cmp` khớp 4/4): `pr492-review-{1..4}-*-verdict.md`, băm ghi ở biên nhận và
+mục lục. Điều đáng ghi hơn con số: **ba lượt cross-review đọc theo phạm vi bản vá không thấy một P1 cấu trúc cũ**
+(`KhoObject.tim` trả `None` khi tổ tiên là blob/symlink — có từ `d5a980e`), và Codex connector đọc TOÀN diff thì
+thấy ngay. Lượt 4 vì thế được giao thêm câu *"cùng lớp còn ở đâu"* và rà đủ mọi đường đi qua cây — không chỗ hở
+trong write set; hai chỗ NGOÀI write set (`_quet_lease_toan_kho`, `con-tro-treo`) ghi #499 D.
+
+## Cổng tại chỗ trên `826bc36` — tự đo
+
+| cổng | kết quả |
+|---|---|
+| `AL_VER=1.7.7 bash ops/chay_lease_publish_test.sh` | **146/146 đạt; đã chạy=146, bỏ qua=0; rc=0** (nền `c0a5cbe`: 121/121) |
+| catalog mutant t139 | **37 = 34 giết / 3 SỐNG có chủ đích / 0 tín dụng giả** (17 lúc mở PR → 33 sau lượt 1 → 37 sau Codex) |
+| phản chứng Codex `repro_codex.py` | `457affd`: **0/5** xanh · `826bc36`: **5/5**; t151/t129 ĐỎ `TinHieuChotCa` trên module `457affd` |
+| actionlint 1.7.7 + shellcheck | workflow mới rc=0; 7 workflow: chỉ `ops-don-ref.yml SC1003:info` có sẵn (delta 0) |
+| doctrine-scan · doc-claims-check --strict · ruff F | 7 tệp / 0 · ok:true · `lease_publish.py` 0, test 4 có sẵn (delta 0) |
+
+## CI và cổng tin cậy — thuật lại, và một quyết định của chủ kho
+
+`gate (ubuntu)` **success** trên cả bốn head của nhánh (`d5a980e` 34377083111 · `bd4ecd4` 34382549720 ·
+`457affd` 34401567971 · `826bc36` 34435382257). Lượt master trên merge commit `0721811`: run 34439063235 —
+**đang chạy lúc soạn mục này**; kết quả ghi ở PR bookkeeping, đừng đọc dòng này thành "đã xanh".
+
+`cong` (`duyet-khac-danh-tinh.yml`, packet #348) **ĐỎ lúc merge**: chưa có review APPROVED từ danh tính khác
+`ducthangho` trên `826bc36`; `mergeable_state: unstable` (cong không phải required check). Executor **không tự
+merge**: báo blocker ở handoff (#488#issuecomment-5613113828), chủ kho ra chỉ thị merge; dấu vết bền
+#488#issuecomment-5613390662, `packet_loop.py ghi-uy-quyen --action merge` đã ghi, `guard --action merge` vẫn
+trả **7** theo thiết kế (#338 — cổng chặn NHÃN VAI, không đo thẩm quyền). Đây là lần merge thứ hai trong kho mà
+`cong` đỏ có chủ đích; hồ sơ ghi đúng như vậy chứ không ghi "đã qua cổng".
+
+## Nợ mở — tất cả có địa chỉ
+
+**#499** `[THU-HOI-LEASE-A1-TIEN-DE]`: A — F07 pin `upload-artifact` bằng commit (chủ kho cấp SHA) · F08 manifest
+ADR-0047 lớp 2 · `DESCRIPTOR_Q13_SHA256` · Q7; B — 5 P3 vá ở A1; C — `LAND-DOC-RECEIPT-THU-HOI`, canary M9,
+bookkeeping này; D — luật cũ cùng lớp F02/C1 (gom #414, #400). Packet #488 dùng hết **3/3** lượt executor; mọi vá
+thêm cần lease/generation mới.
+
 # ★ dev-side — r361: ghi sổ #495 — 9 tệp trong `ops/reviews/`, và ba finding connector chấm vào chính hồ sơ review (2026-09-10)
 
 Nối tiếp r359, vốn chốt tới `8cee941` (#490). Merge sau đó chưa có mục: **#495** — trả hai nợ mà

@@ -1,0 +1,112 @@
+# BIÊN NHẬN GIAO HÀNG — cross-review LƯỢT 2 của PR #492 (packet wp488, slice A0), reviewer `claude`
+# (claude-fable-5, effort max) trên head `bd4ecd4` — CÙNG NHÀ CUNG CẤP với executor.
+#
+# ĐỌC DÒNG NÀY TRƯỚC: reviewer đổi từ codex sang claude theo CHỈ THỊ CHỦ KHO (#488#issuecomment-5607531721)
+# sau ba lần codex chết vì hạ tầng (websocket 0.153.4 · bộ lọc nội dung ×2). `assurance` vì thế KHÔNG phải
+# `cross_*`. Phiên reviewer là phiên RIÊNG qua launcher (run 360657cc), không phải subagent trong phiên executor.
+#
+# Verdict: changes_requested — 0 P1; F01–F09 của lượt 1 ĐÓNG/ĐÓNG-MỘT-PHẦN; mới F10 (P2, kèm HINT) + F11–F14 (P3).
+# Executor áp nguyên HINT (F10 + t150) và vá F12 ở `457affd`; F13/F14 ghi nhận không vá (#499 B4/B5).
+
+schema_version: 2
+receipt_id: pr492-review-2-claude-20260909-360657cc
+kind: review_delivery_receipt
+packet_id: 'wp488'
+lease_id: wp488-thu-hoi-lease-a0-exec-1-claude-20260909
+phase_key: HO-SO-CROSS-REVIEW-PHIEN-20260910
+luot: 2
+role: reviewer
+provider: claude
+executor_provider: claude
+cross_provider: false
+assurance: same_provider_reviewed
+assurance_KHONG_dat: cross_reviewed
+ly_do_doi_reviewer: 'chỉ thị chủ kho #488#issuecomment-5607531721 (19:3xZ 09-09) sau 3 run codex chết: 7c2ca0cc (websocket), e0c76e44 (bộ lọc nội dung), 068de28c (bộ lọc nội dung)'
+verdict: changes_requested
+verdict_path: ops/reviews/pr492-review-2-claude-verdict.md
+verdict_sha256: fe1302de22213483d7e3dc78390c27ce8ebb9c9483113d34ad6307d14584db1b
+verdict_bytes: 22943
+reviewed_sha: bd4ecd4fffb389f6f9dfde9dee5b6a8250a80459
+reviewed_base: c0a5cbe89a90588115262e1a2c3ac84cbd98be9e
+evidence_url: https://github.com/ducthangho/tra-luat/blob/df7ec13285c3c5d92d645f1059a28102485b8467/ops/reviews/pr492-review-2-claude-verdict.md
+evidence_url_ghi_chu: 'Neo BLOB ghim `df7ec13`. Bản chiếu công khai sớm hơn: PR #492 comment 5608267313.'
+so_p1: 0
+so_p2: 1
+so_p3: 4
+findings_ids: [f10-consumer-q13-policy-khong-utf8-traceback, f11-ls-tree-z-catch-khong-rang, f12-checker-rc-dong-chet,
+  f13-ro-fd-duong-deadline, f14-clock-snapshot-per-record]
+hint_patch:
+  sha256: 6a7d7e30e199d145a735c51d284ad5cec5ac1063f51164c5a238a0badb6e54c2
+  noi_dung: '2 hunk (mã + test t150) cho F10; reviewer đo hai chiều trên bản sao trọn cây: test-only ĐỎ TinHieuChotCa, test+mã 145/145'
+xu_ly_cua_executor:
+  commit_va: 457affd49fabb8f6d891b93460e93255170c8784
+  da_va: 'F10 (áp nguyên HINT) · F11 (t150b) · F12 (workflow CHECKER_RC)'
+  ghi_nhan_khong_va: 'F13, F14 — P3, không mở lỗ; ghi #499 B4/B5'
+  xac_nhan_boi: 'lượt 3 (pr492-review-3-claude-verdict.md) và lượt 4: F10/F11/F12 ĐÓNG, đo hai chiều'
+
+model_reviewer_identity:
+  provider: anthropic_claude
+  surface: claude_code
+  transport: machine/local
+  model_yeu_cau: claude-fable-5
+  model_da_chay: 'claude-fable-5 (modelUsage của run: fable-5 + haiku-4-5 phụ; kiem_ket_qua ĐẠT)'
+  effort: max
+  session_run_id: 360657cc
+  run_id_day_du: 360657cc2f7947a3956d020f03a09c02
+  prompt_sha256: cba5f59625cc90f18932b598d53b0a11e270cd04137fa8e5853376e65f692118
+  bat_dau_utc: '2026-09-09T19:59:34.402689+00:00'
+  ket_thuc_utc: '2026-09-09T20:25:12.956217+00:00'
+  thoi_luong_giay: 1538.554
+  ma_thoat: 0
+  trang_thai: xong
+  stdout_byte: 5047
+  stdout_sha256: 1d1d63809c80cf70e3caa284569007fa6b628b3f6318691caf3b56a9cfbe39f6
+  stderr_byte: 0
+  so_lan_chet_truoc_khi_xong: 2
+  ghi_chu_lan_chet: 'c6e89ee4 chết vì container khởi động lại 19:55Z; 3854a45f bị dừng vì task nền harness giới hạn 10 phút — không lần nào sinh verdict'
+  nguon_cac_scalar_tren: 'Đọc từ `run.json` trong scratchpad; tệp ấy KHÔNG vào kho ⇒ ATTESTATION.'
+
+nang_luc_do_cua_goi:
+  mirror: 'clone bare cục bộ + fetch refs/remotes/origin/*, detached bd4ecd4, core.abbrev 7, không nông; suite trong sandbox 144/144'
+  chua_do_duoc: 'Không mạng. Reviewer khai harness TỰ BƠM `CLAUDE.md` vào ngữ cảnh (tệp cấm đọc) và cam kết không dùng.'
+
+tuan_thu_cam_cua_reviewer:
+  cay_kho_sach: true
+  commit_them_ngoai_head: 0
+  bang_chung: 'reviewer tự đo: HEAD bd4ecd4, worktree 0 dòng porcelain đầu và cuối lượt; `worktree_sach: true` trong run.json'
+
+github_submitter_identity:
+  actor: ducthangho
+  la_tac_gia_PR: true
+  ghi_chu: '`ADR-0040`: verdict do tài khoản tác giả PR vận chuyển KHÔNG là merge authorization.'
+  phien_van_chuyen: https://claude.ai/code/session_01Lnos1VZ4KSzHLG9u4UETiW
+
+anchor:
+  loai: canonical_ancestry
+  cuong_do: cao
+  mo_ta: 'Blob verdict ghim `df7ec13`.'
+  gioi_han: 'Vững khi land bằng merge commit hoặc fast-forward; squash phá quan hệ tổ tiên.'
+
+verdict_usage_caveats:
+  - id: SAME-PROVIDER-theo-chi-thi-chu-kho-KHONG-phai-cross
+    muc: P2
+    mo_ta: >-
+      Reviewer là `claude`, cùng nhà cung cấp với executor; đổi theo chỉ thị chủ kho sau ba lần codex chết vì hạ tầng.
+      §8 đòi cross-provider cho phạm vi workflow (A0 thêm `ops-thu-hoi-admission.yml`). Lượt 1 (codex) đã đọc phiên bản
+      đầu của workflow ấy; các lượt claude sau chỉ đọc bản vá. Lượt cross-provider duy nhất trên head cuối là Codex
+      connector (review 5162390620 trên `457affd`, 1 P1 + 2 P2 — đã vá ở `826bc36`), KHÔNG có lượt codex nào trên `826bc36`.
+    phai_lam_gi_khi_chay_lai: 'Đừng đọc verdict này thành mức `cross_*`. Chủ kho đã quyết merge với dấu vết ở #488#issuecomment-5613390662.'
+
+khong_do_duoc:
+  - 'Model build: modelUsage là tự khai của harness; không có phép đo độc lập.'
+  - '`run.json` không vào kho ⇒ scalar runtime là attestation.'
+  - 'Trạng thái GitHub lúc reviewer đọc: sandbox không mạng.'
+
+delivered: true
+delivered_by: claude-session
+authoritative_source: repo_file
+receipt_written_by: claude-session
+receipt_written_at_utc: '2026-09-10T05:2xZ'
+receipt_khong_khai:
+  - 'Không khai lượt này tương đương cross-provider. Nó KHÔNG.'
+  - 'Không khai F13/F14 đã vá — ghi #499.'

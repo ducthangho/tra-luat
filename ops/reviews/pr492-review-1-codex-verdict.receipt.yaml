@@ -1,0 +1,119 @@
+# BIÊN NHẬN GIAO HÀNG — cross-review LƯỢT 1 của PR #492 (packet wp488, slice A0 của spec
+# THU-HOI-LEASE-VA-CAP-LAI r9), KHÁC NỀN (codex gpt-6-astra, xhigh) trên head `d5a980e`.
+#
+# Verdict: changes_requested — 3 P1 (F01 binding Q13 · F02 ls-tree không -z · F03 tree entry có /)
+# + 6 P2 (F04–F09). Executor đã vá cả 9 ở `bd4ecd4` (lượt 2 xác nhận ĐÓNG/ĐÓNG-MỘT-PHẦN).
+#
+# ĐỌC CAVEAT TRƯỚC: lượt chạy này KHÔNG in dòng `XONG VERDICT` — reviewer mất websocket sau khi
+# ghi VERDICT.md (16:54:40Z) và treo; executor dừng bằng `launcher.py stop` (17:50:36Z, `da_dung`).
+# Tệp verdict là bản CUỐI reviewer ghi ra trước khi mất kết nối, băm lúc thu; không có xác nhận
+# "đã hoàn tất" từ chính reviewer. Biên nhận này viết SAU khi #492 đã merge (`0721811`) — TRẢ NỢ.
+
+schema_version: 2
+receipt_id: pr492-review-1-codex-20260909-81ab2fa9
+kind: review_delivery_receipt
+packet_id: 'wp488'
+lease_id: wp488-thu-hoi-lease-a0-exec-1-claude-20260909
+phase_key: HO-SO-CROSS-REVIEW-PHIEN-20260910
+luot: 1
+role: reviewer
+provider: codex
+executor_provider: claude
+cross_provider: true
+assurance: cross_reviewed
+verdict: changes_requested
+verdict_path: ops/reviews/pr492-review-1-codex-verdict.md
+verdict_sha256: abd1b9f77b0a7cb1eca676c58c77f0b54aec6970495268a6f79123df0cfc4b4c
+verdict_bytes: 30278
+reviewed_sha: d5a980e9a214992c38112e603de6724728857be2
+reviewed_base: c0a5cbe89a90588115262e1a2c3ac84cbd98be9e
+evidence_url: https://github.com/ducthangho/tra-luat/blob/df7ec13285c3c5d92d645f1059a28102485b8467/ops/reviews/pr492-review-1-codex-verdict.md
+evidence_url_ghi_chu: >-
+  Neo BLOB ghim `df7ec13` — commit ĐẦU TIÊN chứa tệp verdict (commit thứ nhất của PR bookkeeping
+  cho #492). Bản chiếu công khai SỚM HƠN: PR #492 comment 5606369602 (đăng nguyên văn 16:5xZ 09-09).
+so_p1: 3
+so_p2: 6
+so_p3: 0
+findings_ids: [f01-q13-metadata-chua-xac-minh, f02-ls-tree-khong-z-namespace, f03-tree-entry-sai-cau-truc,
+  f04-deadline-memo-hoan-tat, f05-object-lon-khong-thu-hoi-subprocess, f06-schema-float-lich-traceback,
+  f07-m9-workflow-definition-receipt, f08-profile-khong-validator-mien, f09-preflight-env-caller]
+hint_patch:
+  sha256: 0434d67a04bb403b103cfb61ef474479499102d70633296f70f8a55eb92defab
+  noi_dung: 'test-only t140–t149 (2 hunk); executor áp nguyên `patch -p0`, chỉ sửa t148 (bỏ đòi pin 40-hex — không readback được SHA kho ngoài)'
+xu_ly_cua_executor:
+  commit_va: bd4ecd4fffb389f6f9dfde9dee5b6a8250a80459
+  xac_nhan_boi: 'lượt 2 (pr492-review-2-claude-verdict.md): F01–F06/F09 ĐÓNG; F07/F08 ĐÓNG-MỘT-PHẦN, phần mở là việc chủ kho/A1 (#499 A1/A2)'
+
+model_reviewer_identity:
+  provider: openai_codex
+  surface: codex_cli
+  transport: machine
+  model_yeu_cau: gpt-6-astra
+  model_da_chay: KHONG_DO_DUOC
+  session_run_id: 81ab2fa9
+  run_id_day_du: 81ab2fa93c0440adbf38141b3d273bcb
+  prompt_sha256: 1ca6614133688805f17f9bc1a0cfe0987e288eb093d78d521c837c9bf2f25ce6
+  bat_dau_utc: '2026-09-09T16:31:22.756001+00:00'
+  ket_thuc_utc: '2026-09-09T17:50:36.800092+00:00'
+  thoi_luong_giay: null
+  ma_thoat: null
+  trang_thai: da_dung
+  ly_do_dung: 'tien trinh da khong con chay — executor gọi `launcher.py stop` sau khi reviewer treo websocket (Connection refused, reconnect 3/5)'
+  verdict_ghi_luc_utc: '2026-09-09T16:54:40Z'
+  nguon_cac_scalar_tren: 'Đọc từ `run.json` trong scratchpad; tệp ấy KHÔNG vào kho ⇒ ATTESTATION.'
+
+nang_luc_do_cua_goi:
+  mirror: 'clone bare cục bộ + fetch refs/remotes/origin/*, detached d5a980e, core.abbrev 7, không nông'
+  chua_do_duoc: 'Không mạng: mọi khẳng định về GitHub API/CI là KHÔNG ĐO ĐƯỢC.'
+
+hien_vat_reviewer_vao_kho:
+  duong_dan: KHONG_CO
+  ghi_chu: 'Harness lượt 1 (review_harness.py, extra_checks.py, mutant_runner.py, profile_probe.py, run_hint.py) ở sandbox ngoài kho; các lượt sau tái dùng qua `scratch/luot1/`.'
+
+tuan_thu_cam_cua_reviewer:
+  cay_kho_sach: true
+  commit_them_ngoai_head: 0
+  bang_chung: '`worktree_sach: true` trong run.json; executor kiểm `status --porcelain` rỗng và HEAD = d5a980e sau khi dừng.'
+
+github_submitter_identity:
+  actor: ducthangho
+  la_tac_gia_PR: true
+  ghi_chu: '`ADR-0040`: verdict do tài khoản tác giả PR vận chuyển KHÔNG là merge authorization.'
+  phien_van_chuyen: https://claude.ai/code/session_01Lnos1VZ4KSzHLG9u4UETiW
+
+anchor:
+  loai: canonical_ancestry
+  cuong_do: cao
+  mo_ta: 'Blob verdict ghim `df7ec13` (commit thứ nhất của PR bookkeeping #492).'
+  gioi_han: 'Vững khi land bằng merge commit hoặc fast-forward; squash phá quan hệ tổ tiên (bài học r361).'
+
+verdict_usage_caveats:
+  - id: LUOT-1-KHONG-IN-XONG-VERDICT-reviewer-mat-ket-noi
+    muc: P3
+    mo_ta: >-
+      Lượt chạy KHÔNG in dòng `XONG VERDICT sha256=…`. VERDICT.md được ghi lần cuối 16:54:40Z, rồi reviewer
+      mất websocket và treo tới khi executor dừng tiến trình (17:50:36Z, trạng thái `da_dung`). Tệp trong kho là
+      bản băm LÚC THU (184 dòng, `changes_requested`, 3 P1 + 6 P2); không có xác nhận hoàn tất từ chính reviewer.
+    phai_lam_gi_khi_chay_lai: >-
+      Đừng đọc verdict này thành "lượt chạy trọn". Cả 9 finding đều có phản chứng chạy được và đã được lượt 2
+      (khác phiên) chạy lại trên `bd4ecd4` — hãy dùng lượt 2 làm chốt đóng, verdict này làm nguồn finding.
+  - id: F07-F08-CON-MO-sau-khi-vá-la-viec-chu-kho-A1
+    muc: P2
+    mo_ta: >-
+      F07 (pin `actions/upload-artifact` bằng commit đã readback) và F08 (manifest ADR-0047 lớp 2 đủ trường) chỉ ĐÓNG
+      MỘT PHẦN ở `bd4ecd4`; phần còn lại thuộc chủ kho/A1 và không chặn merge A0 (lượt 2/3/4 cùng xếp).
+    phai_lam_gi_khi_chay_lai: 'Tra #499 mục A1/A2 trước khi coi F07/F08 là đã đóng.'
+
+khong_do_duoc:
+  - 'Model đã phục vụ (codex không trả modelUsage).'
+  - '`run.json` không vào kho ⇒ scalar runtime là attestation; stdout/stderr của run không được băm (run bị dừng).'
+  - 'Trạng thái GitHub tại thời điểm reviewer đọc: sandbox không mạng.'
+
+delivered: true
+delivered_by: claude-session
+authoritative_source: repo_file
+receipt_written_by: claude-session
+receipt_written_at_utc: '2026-09-10T05:2xZ'
+receipt_khong_khai:
+  - 'Không khai lượt này "chạy trọn" — nó bị dừng sau khi ghi verdict.'
+  - 'Không khai F07/F08 đã đóng — phần mở ở #499.'

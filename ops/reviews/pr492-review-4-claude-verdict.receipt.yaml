@@ -1,0 +1,118 @@
+# BIÊN NHẬN GIAO HÀNG — cross-review LƯỢT 4 (LƯỢT CUỐI, có hiệu lực) của PR #492 (packet wp488, slice A0 của
+# spec THU-HOI-LEASE-VA-CAP-LAI r9), reviewer `claude` (claude-fable-5, effort max) trên head `826bc36` —
+# head ĐÃ MERGE vào master (`0721811`, merge commit, không squash).
+#
+# Verdict: approve — 0 P1 · 0 P2 executor vá được · 3 P3 ghi nhận cho A1 (#499 B1–B3). modelUsage ĐẠT
+# (một model chính duy nhất `claude-fable-5`; haiku phụ). CÙNG NHÀ CUNG CẤP với executor ⇒ `same_provider_approved`,
+# KHÔNG phải `cross_approved` — xem caveat. Chủ kho ra chỉ thị merge với dấu vết ở #488#issuecomment-5613390662.
+
+schema_version: 2
+receipt_id: pr492-review-4-claude-20260910-f82cc4b7
+kind: review_delivery_receipt
+packet_id: 'wp488'
+lease_id: wp488-thu-hoi-lease-a0-exec-1-claude-20260909
+phase_key: HO-SO-CROSS-REVIEW-PHIEN-20260910
+luot: 4
+role: reviewer
+provider: claude
+executor_provider: claude
+cross_provider: false
+assurance: same_provider_approved
+assurance_KHONG_dat: cross_approved
+verdict: approve
+verdict_path: ops/reviews/pr492-review-4-claude-verdict.md
+verdict_sha256: 69728f9238051d93a1d5973e3ba029c7f55a5c9b64f077e7761b178bd1be4974
+verdict_bytes: 17419
+reviewed_sha: 826bc36fd1801bf828f21bf9580897899f16a299
+reviewed_base: c0a5cbe89a90588115262e1a2c3ac84cbd98be9e
+evidence_url: https://github.com/ducthangho/tra-luat/blob/df7ec13285c3c5d92d645f1059a28102485b8467/ops/reviews/pr492-review-4-claude-verdict.md
+evidence_url_ghi_chu: 'Neo BLOB ghim `df7ec13`. Bản chiếu công khai sớm hơn: PR #492 comment 5613092525.'
+so_p1: 0
+so_p2: 0
+so_p3: 3
+findings_ids: [p3-doc-blob-text-12-khong-bat-oserror, p3-laundering-text-mode-consumer, p3-du-bao-check-chua-do-decode]
+hint_patch:
+  sha256: e9229885b532f0e2ea65d654c9522eae94a08da98971c147f0a60a73bb96cf89
+  noi_dung: '0 hunk — ba ghi nhận P3 cho A1'
+noi_dung_do_duoc_van_dung:
+  - 'Bản vá 457affd..826bc36 ĐÚNG và CHỈ là C1/C2/C3 của Codex connector (mã +46/−10, test +72/−3, workflow 0).'
+  - 'C1 ĐÓNG cả reader (`tim` tổ tiên blob/symlink/gitlink ⇒ 12) lẫn consumer (`_kiem_to_tien_la_tree`); ops VẮNG hẳn vẫn 0.'
+  - 'C2 ĐÓNG: marker rác + `{}` ⇒ 12; marker đúng schema + `{}` ⇒ 0; biến thể mode/symlink/tương lai/blob vắng đều 12.'
+  - 'C3 ĐÓNG: khoá lẫn kiểu ⇒ 8; rà toàn bộ site sorted/so-sánh khoá không tin cậy trong khối A0 — không còn.'
+  - 'Cùng lớp "tin cấu trúc chưa xác minh": rà tim/namespace/tree/_ls_tree_z/_quet_so_thu_hoi_moi_ref/policy/PATH_BO_KIEM/DU_BAO — không chỗ hở trong write set.'
+  - 'Catalog t139 37 = 34 giết / 3 SỐNG / 0 tín dụng giả; 5 mutant độc lập của reviewer (B1–B5) đều ĐỎ TinHieuChotCa; t151/t129 ĐỎ trên module 457affd.'
+  - 'Suite 146/146 (144 + 2 ca actionlint chạy lẻ với PATH); master drift ∩ write set = ∅; SO_THU_HOI_KICH_HOAT = False.'
+
+model_reviewer_identity:
+  provider: anthropic_claude
+  surface: claude_code
+  transport: machine/local
+  model_yeu_cau: claude-fable-5
+  model_da_chay: 'claude-fable-5 — modelUsage: claude-fable-5 85 166 output token + claude-haiku-4-5 24 (phụ); kiem_ket_qua("claude-fable-5") ⇒ ĐẠT'
+  effort: max
+  session_run_id: f82cc4b7
+  run_id_day_du: f82cc4b7a3ab404aaedca159ffb2ca80
+  prompt_sha256: e71c9365ac6e8c853f95fcac59004cb2234566cb84d73ff3738bf2be1e9b62c6
+  bat_dau_utc: '2026-09-10T04:04:05.201072+00:00'
+  ket_thuc_utc: '2026-09-10T04:24:05.706631+00:00'
+  thoi_luong_giay: 1200.506
+  ma_thoat: 0
+  trang_thai: xong
+  stdout_byte: 4983
+  stdout_sha256: 13fbca8c3cb4dec6127241452c10a7fa56c69fe068573b07923e9b84111f40b0
+  stderr_byte: 0
+  so_lan_chet_truoc_khi_xong: 0
+  nguon_cac_scalar_tren: 'Đọc từ `run.json` + stdout.log (JSON kết quả claude, dòng cuối `XONG VERDICT sha256=69728f92…`) trong scratchpad; KHÔNG vào kho ⇒ ATTESTATION.'
+
+nang_luc_do_cua_goi:
+  mirror: 'clone bare cục bộ + fetch refs/remotes/origin/*, detached 826bc36, không nông; suite trong sandbox 146/146 rc=0 trước khi giao'
+  chua_do_duoc: 'Không mạng; doctrine-scan/doc-claims-check nằm trong `.claude/dev/**` (cấm đọc) nên reviewer không chạy — nhận theo lời khai executor.'
+
+hien_vat_reviewer_vao_kho:
+  duong_dan: KHONG_CO
+  ghi_chu: 'Harness lượt 4 (`scratch/luot4/`: probe_luot4.py 20/20, mut_runner.py, suite_luot4*.log) ở sandbox ngoài kho.'
+
+tuan_thu_cam_cua_reviewer:
+  cay_kho_sach: true
+  commit_them_ngoai_head: 0
+  bang_chung: 'reviewer tự đo cuối lượt: HEAD 826bc36, worktree 0 dòng porcelain; executor đo lại sau run: 0 dòng; `worktree_sach: true`'
+
+github_submitter_identity:
+  actor: ducthangho
+  la_tac_gia_PR: true
+  ghi_chu: '`ADR-0040`: verdict do tài khoản tác giả PR vận chuyển KHÔNG là merge authorization; uỷ quyền merge là chỉ thị chủ kho ghi ở #488#issuecomment-5613390662 (`ghi-uy-quyen` đã ghi).'
+  phien_van_chuyen: https://claude.ai/code/session_01Lnos1VZ4KSzHLG9u4UETiW
+
+anchor:
+  loai: canonical_ancestry
+  cuong_do: cao
+  mo_ta: 'Blob verdict ghim `df7ec13`. Head đã review `826bc36` là tổ tiên của master (`0721811`, merge commit).'
+  gioi_han: 'Vững khi land bằng merge commit hoặc fast-forward; squash phá quan hệ tổ tiên.'
+
+verdict_usage_caveats:
+  - id: SAME-PROVIDER-APPROVE-va-cong-duyet-khac-danh-tinh-DO-khi-merge
+    muc: P2
+    mo_ta: >-
+      Reviewer cùng nhà cung cấp với executor (`same_provider_approved`). Lượt cross-provider duy nhất trên đường tới
+      head cuối là Codex connector trên `457affd` (không có lượt codex nào đọc `826bc36`). Khi merge (`0721811`,
+      04:5xZ 10-09), check `cong` (duyệt khác danh tính, packet #348) ĐỎ — chưa có review APPROVED từ danh tính khác
+      `ducthangho`; `mergeable_state: unstable` (cong không phải required check). Chủ kho quyết merge bằng chỉ thị,
+      dấu vết #488#issuecomment-5613390662; `guard --action merge` vẫn trả 7 theo thiết kế (#338).
+    phai_lam_gi_khi_chay_lai: >-
+      Đừng đọc `approve` này là "đã qua cổng tin cậy khác danh tính". Nó là điều kiện DỪNG của vòng vá→review
+      (0 P1, 0 P2 vá được, modelUsage ĐẠT), không phải merge authorization.
+
+khong_do_duoc:
+  - 'Model build (chỉ có modelUsage tự khai của harness).'
+  - '`run.json`/stdout.log không vào kho ⇒ scalar runtime là attestation.'
+  - 'CI GitHub trên 826bc36 (gate success run 34435382257) và trên merge commit: reviewer không mạng — số này do executor đọc qua MCP.'
+
+delivered: true
+delivered_by: claude-session
+authoritative_source: repo_file
+receipt_written_by: claude-session
+receipt_written_at_utc: '2026-09-10T05:2xZ'
+receipt_khong_khai:
+  - 'Không khai lượt này tương đương cross-provider. Nó KHÔNG.'
+  - 'Không khai `cong` đã xanh lúc merge — nó ĐỎ, chủ kho quyết.'
+  - 'Không khai 3 P3 đã vá — ghi #499 B1–B3.'

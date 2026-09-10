@@ -11,13 +11,19 @@ tượng trong mục r358**.
 không có `pr493-review-*`. Đừng đọc *"hiện vật N lượt"* thành *"N verdict nằm trong kho"*.
 
 **VA CHẠM SỐ `r`, và cách giải.** Mục này viết ra khi `master` đang ở `00e017a`; trong lúc PR #493
-còn mở, một phiên khác land **#490** rồi **#494**, và `#494` chiếm số **`r359`** cho mục
+còn mở, một phiên khác **merge** **#490** rồi **#494**, và `#494` chiếm số **`r359`** cho mục
 *"ghi sổ #491 + #490"*. Đây đúng bẫy mà `bc78656` đã trả giá (*"đổi số r355 → r356 vì master đã
-chiếm"*) — và **cùng thời điểm phát hiện, không khác**: bản trước của câu này viết *"lần trước phát
-hiện TRƯỚC khi viết"*, cross-review lượt 6 bác bằng Git và **đúng** — cả **hai** cha của `bc78656`
-(`22b6339`, `cacaba3`) đều **đã có** một mục `r355`, tức số bị chiếm và bị phát hiện **lúc merge**,
-y như lần này. Cái khác thật sự chỉ là quy mô: `bc78656` đổi số ở **3 chỗ trong CHANGELOG + 4 chỗ
-trong `launcher_test.py`**. Mục này nay là **`r360`**.
+chiếm"*).
+**Nói cho ĐÚNG PHẠM VI Git đo được, vì câu này đã sai HAI lần theo hai hướng ngược nhau.** Bản đầu
+viết *"lần trước phát hiện TRƯỚC khi viết"*; cross-review lượt 6 bác bằng Git. Bản vá lại viết
+*"cùng thời điểm phát hiện, không khác"* — và lượt 7 bác tiếp: tôi **thay một lời kể thời điểm
+không có nguồn bằng một lời kể thời điểm khác cũng không có nguồn**. Git **ĐO ĐƯỢC** đúng hai điều:
+cả **hai** cha của `bc78656` (`22b6339`, `cacaba3`) **đã có** một mục `r355` trước lúc merge, và
+việc đổi số được **ghi trong** `bc78656` (**3 chỗ** trong `CHANGELOG` + **4 chỗ** trong
+`launcher_test.py`). Git **KHÔNG ĐO ĐƯỢC** lúc người vận hành *nhận ra* va chạm — blob và commit
+không ghi thời điểm nhận thức, và không có transcript. Nên chỗ giống nhau khẳng định được là
+**cả hai lần đều phải hoà giải hai mục đã tồn tại**, không phải "cùng lúc phát hiện".
+Mục này nay là **`r360`**.
 
 **Phân vai với `r359` để hai mục không dẫm nhau** — `r359` (trên master) ghi **PHẠM VI MERGE** của
 `#491` và `#490` (39 tệp, `c0a5cbe..8cee941`); `r360` (mục này) ghi thứ `r359` **không** có:
@@ -25,10 +31,15 @@ trong `launcher_test.py`**. Mục này nay là **`r360`**.
 **bên trong** mục `r358`.
 **Hai mục có CHỒNG LẤN, và nói là "chỉ trùng một chỗ" thì sai** — bản trước của đoạn này viết *"chỗ
 duy nhất hai mục cùng nói là #491 đã merge"*, cross-review lượt 6 bác đúng: `r360` cũng nhắc
-`39 tệp` / `c0a5cbe..8cee941`, cũng kể `#490` đã land, cũng dẫn quyết định **đóng chuỗi** ở `#490`
-— cả ba đều có trong `r359`. Lặp để định vị phạm vi là hợp lý; **khẳng định chỉ trùng đúng một sự
-kiện mới là lỗi**. Điều đúng và đủ: `r359` là mục **phạm vi merge**, `r360` là mục **hiện vật và
-bản vá**; chỗ chồng lấn đều là bối cảnh, không phải kết luận mâu thuẫn.
+`39 tệp` / `c0a5cbe..8cee941`, cũng kể lần **merge** `#490`, cũng dẫn quyết định **đóng chuỗi**
+ở `#490` — cả ba đều có trong `r359`. Lặp để định vị phạm vi là hợp lý; **khẳng định chỉ trùng đúng
+một sự kiện mới là lỗi**. Điều đúng và đủ: `r359` là mục **phạm vi merge**, `r360` là mục **hiện vật
+và bản vá**; chỗ chồng lấn đều là bối cảnh, không phải kết luận mâu thuẫn.
+**Bản trước của chính câu vừa sửa ấy lại hỏng theo kiểu KHÁC, và cross-review lượt 7 bắt được**: nó
+viết *"cũng kể `#490` **đã land**"* — trong khi `r359` nói **ngược lại** ở ngay dòng 90 của nó:
+*"#490 dừng ở `merged`, **không phải** `landed`"*, vì hậu-merge gate **chưa đủ bằng chứng** (5 lệnh
+chạy tại chỗ so 31 bước cổng của `ci.yml`; **0** hiện vật CI neo `8cee941`). Tức tôi **gán cho nguồn
+một trạng thái mà chính nguồn phủ định**, rồi kết luận *"không mâu thuẫn"* dựa trên cái gán ấy.
 
 **Land evidence này KHÔNG thuộc chuỗi đã đóng.** `ops/land/pr489-land-evidence.yaml` khai chuỗi
 `#468 → #478 → #486 → #487 → #489 → #490 — DỪNG`, `mat_xich_thu_7: KHONG_TON_TAI`, và nói rõ việc
@@ -138,6 +149,12 @@ dưới**; danh sách ngay sau đây là **tập A**.
 
 ### Phép đếm này tự nó suýt sai
 
+> **NHÃN NGUỒN cho riêng khối này — TỰ THUẬT, KHÔNG CÓ LOG.** Bản nháp mang số *"tám"* **chưa từng
+> được commit**, nên không blob nào tái dựng được nó; không có transcript của lần tự soi. Nhãn đặt
+> **tại đây** chứ không dựa vào nhãn ở cuối mục — cross-review lượt 6 rồi lượt 7 đều chấm P3
+> `hai-tu-thu-thieu-nguyen-lieu-kiem-doc-lap` đúng vì một nhãn nằm dưới **heading khác** không tự
+> phủ khối này. Đọc khối dưới đây như lời kể; **không** dẫn nó làm phép đo.
+
 Bản đầu của mục **này** — khi ấy còn mang số `r359`, trước khi master chiếm số — ghi **"tám"** ở
 tiêu đề trong khi thân chỉ liệt kê được **bốn** nhóm, vì nó
 cộng nhầm hai P2 đã vá TRƯỚC merge (trong thân PR, không phải trong tệp) vào phép đếm của PR này.
@@ -170,7 +187,9 @@ byte trong `CHANGELOG.md` (giữ nguyên kích thước) ⇒ `rc=2`, `failed=[CH
 `package_hash_match: false`. Nhưng `doc-claims-check --strict` **KHÔNG** bắt được một con số bị
 đổi: reviewer đột biến `1016→1017`, tiêu đề `5→6`, và phép trừ `13−2=11` thành `13−2=12` — cả ba
 đều `rc=0`, `ok: true`. Nghĩa là **không cổng nào trong kho hiện kiểm phép đếm hay phép trừ trong
-văn xuôi**; thứ duy nhất chặn chúng là cross-review.
+văn xuôi** — trong tập cổng của kho mà tôi đã chạy và liệt kê ở mục này. Thứ **đã thật sự** chặn
+ba đột biến ấy là cross-review; đó là một phép đo, không phải một khẳng định rằng không gì khác có
+thể chặn (tôi không vét cạn mọi cổng, mọi cách đọc).
 
 **Nợ này CHƯA ĐÓNG, và PR này không đóng nó** — nói thẳng vì bản trước của đoạn này dễ đọc thành
 "đã có điều kiện đóng": ba đột biến ấy **vẫn XANH** khi đo lại ở lượt 6, và **mã cổng không nằm
@@ -208,15 +227,28 @@ Lưu ý một chỗ dễ đọc nhầm: mục 5 ở trên vá **LỜI KHAI** *"�
 `bo-sot-pham-vi-ref-va-vat-chat-hoa` nói **BẢNG TRÍCH bỏ sót** chính câu ấy. Vá cái trước KHÔNG
 đóng cái sau — hai lỗi khác nhau trên cùng một dòng văn bản.
 
-## Cross-review PR #493 — BA lượt, và hình dạng lỗi lặp lại là VÁ HỜ
+## Cross-review PR #493 — BẢY lượt, và hình dạng lỗi lặp lại là VÁ HỜ
 
 Hồ sơ vá lời khai sai thì cũng bị soi như mọi thứ khác.
+
+**Bảng này từng dừng ở lượt 3 trong khi đã chạy tới lượt 6** — cross-review lượt 7 tha nó (gọi là
+*"tóm tắt chọn lọc"*), nhưng nó **cùng LỚP** với hai P3 mà lượt 7 chấm: *bản chiếu không theo kịp
+nguồn*. Nên nó được vá cùng lớp chứ không đợi ai chấm. Verdict gốc của bảy lượt **không** nằm trong
+kho (`git ls-tree HEAD ops/reviews/` không có `pr493-review-*`); chúng là bản chiếu đăng trên PR.
 
 | lượt | head | kết quả | đối chiếu lượt trước |
 |---|---|---|---|
 | 1 | `4af7e29` | `changes_requested` · **1 P1 · 4 P2 · 12 P3** | — |
 | 2 | `9484970` | `changes_requested` · **1 P1 · 4 P2 · 15 P3** | **0 ĐÃ VÁ THẬT · 6 VÁ HỜ · 11 CHƯA VÁ** |
 | 3 | `fae2fb7` | `changes_requested` · **0 P1 · 2 P2 · 15 P3** | **7 ĐÃ VÁ THẬT · 3 VÁ HỜ · 10 CHƯA VÁ** |
+| 4 | `b004da9` | `changes_requested` · **0 P1 · 1 P2 · 15 P3** | — |
+| 5 | `f5098dd` | **`approve`** · **0 P1 · 0 P2 · 14 P3** | — |
+| 6 | `2c57e99` | `changes_requested` · **0 P1 · 0 P2 · 10 P3** | **11 ĐÃ VÁ THẬT · 2 VÁ HỜ · 1 CHƯA VÁ** |
+| 7 | `a4bc01d` | `changes_requested` · **0 P1 · 0 P2 · 9 P3** | **4 ĐÃ VÁ THẬT · 3 VÁ HỜ · 2 VÁ SINH LỖI MỚI · 1 CHƯA VÁ** |
+
+Lượt 5 `approve` rồi lượt 6 và 7 lại `changes_requested` **không** phải mâu thuẫn: điều kiện dừng
+đổi từ *"hết P1"* sang *"hết P2"* rồi *"hết P3"* theo chỉ thị chủ kho, nên câu hỏi giao cho reviewer
+mỗi lượt một khác.
 
 Lượt 2 nói thẳng điều đáng nhớ nhất: **cả năm bản vá của lượt 1 đều để sót ít nhất một bản chiếu**.
 Nói *"chỉ sửa MỘT bản chiếu"* thì **quá rộng** và lượt 5 chấm đúng chỗ đó: riêng bản vá P1 đã đụng
@@ -273,15 +305,70 @@ Bốn trong năm là **lời khai rộng hơn phép đo**; cái thứ năm là *
 loại trừ nhau**. Không cổng nào bắt được cái nào — `release-verify`, `doc-claims-check`,
 `lease_publish_test`, `bien_nhan_v2` đều XANH trên bản sai.
 
+## Đổi cách vá từ lượt 7: quy về LỚP, rồi quét hết lớp — đo được 8 → 12
+
+Chủ kho chỉ thị sau lượt 7: *"cố gắng tìm các lỗi theo lớp lỗi, vá hết các lớp"*. Đây là phép đo
+đầu tiên của cách làm ấy, và nó có số.
+
+Chín P3 của lượt 7 quy về **BỐN** lớp — không phải chín lỗi độc lập:
+
+| lớp | mô tả | slug lượt 7 thuộc lớp | reviewer chỉ | quét ra & đã vá |
+|---|---|---|---:|---:|
+| **A** | khung *"ĐO ĐƯỢC"* hoặc lượng từ tuyệt đối áp cho sự kiện **không có hiện vật** | `printf-khai-do-duoc-khong-co-payload-goc` · `ket-luan-thieu-tool-khong-co-inventory` · `va-cham-r-ke-sai-thoi-diem-cu` · `hai-tu-thu-thieu-nguyen-lieu-kiem-doc-lap` | 4 | **6** |
+| **B** | bản chiếu **không theo kịp nguồn** hoặc trỏ tới thứ không tồn tại **trong chính bản chiếu ấy** | `than-pr-tro-muc-va-cham-khong-ton-tai` · `than-pr-khai-so-cong-cua-head-cu` · `mo-ta-bo-trich-va-no-khong-theo-kip-ban-va` | 3 | **4** |
+| **C** | gán cho nguồn một **trạng thái mà chính nguồn phủ định** | `phan-vai-khai-duy-nhat-vuot-noi-dung` | 1 | **3** |
+| **D** | **nợ cổng** — cổng đếm chuỗi chứ không đếm sự thật | `cong-byte-co-rang-cong-claims-khong-dem-su-that` | 1 | **0** (xem dưới) |
+
+**8 thể hiện được chỉ đích danh, quét ra và vá 12.** Bốn thể hiện thừa ra là thứ không ai chấm:
+- lớp A: *"thứ **duy nhất** chặn chúng là cross-review"* (lượng từ tuyệt đối, tôi không vét cạn mọi
+  cổng) · nhãn cuối mục ghi phạm vi *"cho cả mục này"* (vừa quá rộng — kéo dữ kiện Git xuống hạng
+  tự thuật — vừa không phủ được khối nằm dưới heading khác).
+- lớp B: bảng lượt cross-review dừng ở **3** trong khi đã chạy tới **6**.
+- lớp C: *"một phiên khác **land** #490 rồi #494"* ở khối VA CHẠM — cùng câu sai với chỗ reviewer
+  chấm, chỉ khác đoạn văn; và một lần nữa trong thân PR (*"PR #494 land"*).
+
+**Vì sao con số ấy là lý lẽ chứ không phải khoe.** Sáu lượt trước vá theo TRIỆU CHỨNG: mỗi lượt sửa
+đúng những chỗ reviewer chỉ, và lượt sau lại chấm cùng hình dạng ở chỗ khác — `tu-thu-tron-hai-tap`
+sống qua **năm** lượt, `va-cham-r-ke-sai-thoi-diem-cu` bị vá rồi **sai lại theo hướng ngược**
+(lượt 7 xếp `VÁ SINH LỖI MỚI`). Bốn thể hiện thừa ở trên chính là những cái đã lọt qua khe ấy.
+Đây là phép đo cho điều `CLAUDE.md` dặn từ trước — *"đếm HÌNH DẠNG lỗi, đừng chỉ đếm lỗi"* — và
+tiền lệ mạnh nhất vẫn là lượt 5→6: bỏ **một** phép lọc trong bộ trích đóng **11** finding cùng lúc,
+sau khi bốn lượt nới đầu vào chỉ **dời** chỗ mất dữ liệu.
+
+**Giới hạn của chính phép đo này, nói trước khi ai hỏi.** (a) Con số `12` là **các thể hiện tôi tìm
+ra**, không phải các thể hiện **có**; danh sách mẫu quét (`ĐO ĐƯỢC` · `duy nhất` · `chỉ có` · `mọi`
+· `xem … dưới` · `#490`) là **danh sách đoán trước**, tức chắc chắn thiếu — đúng khuyết tật mà
+`CLAUDE.md` gọi tên ở *"danh sách CẤM không bao giờ đủ"*. (b) Việc gộp chín finding vào bốn lớp là
+**phán đoán của tôi**, không có phép đo nào cưỡng chế; gộp sai thì một lớp sẽ nuốt mất một lỗi
+riêng. (c) **Không cổng nào canh mục này** — nó là kỷ luật đọc, y như các mục cùng loại trong
+`CLAUDE.md`.
+
+**Lớp D không đóng được ở PR này, và nói thẳng vì sao chứ không hoãn cho êm.** Đóng nó đòi sửa
+`scripts/tl.py` — tệp **không** nằm trong write set 8 tệp của PR hồ sơ này. Mở rộng một PR ghi sổ
+sang mã cổng là đúng thứ `CLAUDE.md` cấm (*"đừng widen the PR on your own"*), và reviewer lượt 7
+cũng nói y vậy. Tiêu chí nghiệm thu cho packet kế nhiệm giữ nguyên và **đã đo được nền**: ba đột
+biến (`1016→1017`, tiêu đề `5→6`, phép trừ `13−2=11` thành `12`) hiện **đều `rc=0`, `ok: true`**;
+cổng mới phải làm **cả ba ĐỎ** trong khi bản không đột biến vẫn XANH.
+
 ## Một cái giá phải trả trong chính phiên này, ghi vì nó là bài học đã có mà vẫn dẫm
 
-## Một lỗi ĐO ĐƯỢC của chính đợt này: `printf '- …'` cắt mất nội dung TRƯỚC khi gửi
+## Một lỗi của chính đợt này: `printf '- …'` cắt mất nội dung TRƯỚC khi gửi
 
-Comment đăng verdict lượt 6 lên PR #493 bị **mất bốn gạch đầu dòng**. Nguyên nhân không phải tầng
-vận chuyển: tôi dựng comment bằng `printf '- …'`, và **bash đọc `-` thành cờ** ⇒
-`printf: - : invalid option`, bốn dòng ấy **không bao giờ được ghi ra**. Đo được hai chiều: bản gửi
-dự tính **29 793** byte, bản đã đến **27 683** byte (hụt **2 110**); và đọc ngược comment ấy thấy
-mục *"Bốn P3 đáng ghi nhất"* **rỗng thân**.
+**Hai vế của mục này có HAI hạng nguồn khác nhau — cross-review lượt 7 chấm P3
+`printf-khai-do-duoc-khong-co-payload-goc` vì bản trước gộp chúng dưới một tiêu đề "ĐO ĐƯỢC".**
+
+**Vế CƠ CHẾ — TÁI HIỆN ĐƯỢC, bất kỳ ai cũng chạy lại được, không cần hiện vật của phiên:**
+`printf` với chuỗi format bắt đầu bằng `-` làm bash đọc nó thành **cờ** ⇒ `printf: - : invalid
+option`, `rc=2`, **stdout rỗng**; đổi sang `printf '%s\n' "- …"` ⇒ `rc=0`, nội dung đủ. Reviewer
+lượt 7 đã tự dựng phản chứng vô hại và xác nhận đúng cơ chế này.
+
+**Vế SỰ KIỆN — TỰ THUẬT, KHÔNG CÓ HIỆN VẬT:** comment đăng verdict lượt 6 lên PR #493 mất **bốn**
+gạch đầu dòng; bản gửi dự tính **29 793** byte, bản đã đến **27 683** (hiệu **2 110**); mục *"Bốn
+P3 đáng ghi nhất"* rỗng thân. **Không** payload trước/sau, **không** response đọc ngược nào được
+đưa vào kho hay vào gói hiện vật, nên ba con số ấy **KHÔNG ĐO ĐƯỢC ĐỘC LẬP** — `2 110` chỉ là hiệu
+của hai số do chính tôi khai, và verdict lượt 6 (`26 029` byte) **không** phải payload của comment
+nên không suy ra được. Cơ chế đúng **không** chứng minh sự kiện: đọc vế này như lời kể, đừng dẫn
+nó làm phép đo.
 
 Đây là họ hàng của bài học *"tầng vận chuyển cũng chuẩn hoá chuỗi — chỉ chứng minh được bằng ĐO
 THỨ ĐÃ ĐẾN"*, nhưng lệch một tầng và đáng ghi riêng vì thế: ở đó chuỗi **bị biến dạng** trên đường
@@ -291,11 +378,21 @@ nhiều dòng bằng chuỗi `printf` liên tiếp — dùng **heredoc trích d�
 giải gì; và nếu buộc phải dùng `printf`, thì `printf '%s\n' "- …"` chứ đừng để dòng bắt đầu bằng
 `-` rơi vào vị trí format.
 
-Không sửa được comment cũ: endpoint MCP của kho chỉ có `add_comment_to_pending_review`,
-`add_issue_comment`, `add_reply_to_pull_request_comment` — **không có công cụ sửa comment**. Nên
-đính chính bằng một comment riêng, và ghi lại đây.
+Không sửa được comment cũ bằng thứ **phiên này tìm thấy**: ba công cụ comment mà phiên biết là
+`add_comment_to_pending_review`, `add_issue_comment`, `add_reply_to_pull_request_comment`, và không
+cái nào sửa được comment đã đăng. **Nói vậy chứ đừng nói "endpoint không có công cụ sửa"** —
+cross-review lượt 7 chấm P3 `ket-luan-thieu-tool-khong-co-inventory` đúng chỗ này: từ **ba tên
+nhớ ra** không suy được **tập công cụ đã vét cạn**. Phiên không lưu inventory/discovery response
+nào của endpoint ấy, nên mệnh đề *"endpoint không có tool sửa comment"* là **CHƯA ĐO**; muốn kết
+luận vắng mặt thì phải kèm inventory đầy đủ có mốc thời gian. Cùng lớp lỗi với **danh sách CẤM
+không bao giờ đủ** — chỉ đảo chiều: ở đây là kết luận PHỦ ĐỊNH rút từ một liệt kê không đầy đủ.
+Đã đính chính bằng một comment riêng, và ghi lại đây.
 
-**NHÃN NGUỒN cho cả mục này — TỰ THUẬT, KHÔNG CÓ LOG.** Cross-review PR #493 chấm P3
+**NHÃN NGUỒN cho riêng phần *"Một cái giá phải trả trong chính phiên này"* và vế SỰ KIỆN của phần
+`printf` ngay trên — TỰ THUẬT, KHÔNG CÓ LOG.** (Bản trước ghi *"cho cả mục này"*: một phạm vi vừa
+quá rộng — nó kéo cả dữ kiện Git đo được xuống hạng tự thuật — vừa quá hẹp trong thực tế đọc, vì
+nó nằm dưới một heading khác nên không phủ khối *"Phép đếm này tự nó suýt sai"*. Khối ấy nay có
+nhãn riêng tại chỗ.) Cross-review PR #493 chấm P3
 (`hai-tu-thu-thieu-nguyen-lieu-kiem-doc-lap`) và **đúng**: gói không có transcript `git checkout`,
 không có output verifier cho cặp `806980`/`806981`, không có bản nháp mang số *"tám"*. Byte của
 các blob đã commit **không** tái dựng được một trạng thái CHƯA commit, nên nó không chứng minh mà

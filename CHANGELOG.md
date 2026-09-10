@@ -58,7 +58,9 @@ tạo tác của một lượt.
 **Bài học, và nó là bài học cũ ở một mặt mới:** nợ được khai là *"0 hiện vật"* rồi được đọc thành
 *"chưa chạy"*. Kho đã ghi đúng lớp này — *"vắng mặt vì sạch" và "vắng mặt vì chưa chạy" nhìn giống
 hệt nhau nếu hỏng sai chỗ* — nhưng lần này nạn nhân là **chính dòng nợ**: nó mô tả trạng thái của
-KHO, còn người đọc lại hiểu thành trạng thái của CI. Nợ treo **~7 giờ** trong khi bằng chứng đã nằm
+KHO, còn người đọc lại hiểu thành trạng thái của CI. Nợ treo **khoảng vài giờ** — con số chính xác
+là **KHÔNG ĐO ĐƯỢC**: không có mốc *"đọc CI"* nào được ghi lại, và giờ commit không phải giờ đọc
+(bản đầu ghi *"~7 giờ"*, một độ chính xác không có hai đầu mút đo được) — trong khi bằng chứng đã nằm
 sẵn trên GitHub từ `19:44:09Z`. Chốt rẻ: khi khai một nợ dạng *"không có X"*, ghi luôn **X được tìm ở
 ĐÂU** — *"0 hiện vật CI **trong cây kho**; **chưa hỏi GitHub Actions**"* là câu tự chỉ ra bước kế tiếp.
 
@@ -111,24 +113,103 @@ Mã thuộc `ops/cong_cu.py` + `ops/cong_cu.yaml`, **xuất xứ** packet **#290
 `ops/specs/HA-TANG-CONG-CU-TAT-DINH.md`). Bản đầu viết *"chủ: #290"* và *"đừng sửa mà không qua
 packet ấy"* — **SAI THẨM QUYỀN**: #290 đã land và đặc tả **đóng băng**, nên nó không có
 generation/lease/write authority hiện hành để ai đó "đi qua". Protocol nói thẳng: *"việc ngoài spec
-sang successor Packet"* (§28) · *"kết quả đã landed chỉ được sửa bằng corrective"* (§116) ·
-*"Phát hiện ngoài spec phải xuất handoff/successor rồi kết thúc"* (§164); `AGENTS.md:22-23`:
+sang successor Packet"* (`docs/PROTOCOL_DA_PHIEN.md:28`) · *"kết quả đã landed chỉ được sửa bằng
+corrective"* (`:116`) · *"Phát hiện ngoài spec phải xuất handoff/successor rồi kết thúc"* (`:164`);
+`AGENTS.md:22-23`:
 *"Không có Packet Spec hoặc authority được protocol hiện hành thừa nhận thì dừng."*
 ⇒ **#290 chỉ là xuất xứ; việc này cần packet KẾ NHIỆM/corrective được cấp thẩm quyền.**
 
 Bản đầu còn khai *"đọc 30 Issue mở, 0 khớp"* và *"không phiên nào đang chạy"* như **sự thật trần**,
 trong khi chính mục này hứa dán nhãn mọi số GitHub tại chỗ. Cả hai câu đều hỏng:
 
-- `30` là **cỡ trang**, không phải tổng. Đo lại: **128** Issue mở; truy vấn có từ khoá cho
-  `total_count: 101`. Câu ấy khai một phép quét **≈23%** như thể đã quét hết.
-- Quét đúng cho ra **bốn Issue liên đới** — `#249` (`t33` đòi actionlint mà không đòi shellcheck),
-  `#295`, `#269`, `#297` — **cùng lớp, khác cơ chế nên không trùng**, nhưng phải dẫn chiếu. `#249`
-  nhắm `ops/lease_publish_test.py`; nợ này nhắm `ops/cong_cu.py`.
+- `30` là **cỡ trang**, không phải tổng. Đo lại *(THUẬT LẠI — `search_issues`, không có response
+  thô trong kho, không tái đo được offline)*: **128** Issue mở; truy vấn có từ khoá cho
+  `total_count: 101`. Câu cũ khai một phép quét **≈23%** như thể đã quét hết — riêng phép chia
+  `30/128` là **đo được**, hai đầu vào thì không.
+- Quét đúng cho ra **bốn Issue liên đới** *(THUẬT LẠI, cùng nguồn)* — `#249` (`t33` đòi actionlint
+  mà không đòi shellcheck), `#295`, `#269`, `#297` — **cùng lớp, khác cơ chế nên không trùng**,
+  nhưng phải dẫn chiếu. `#249` nhắm `ops/lease_publish_test.py`; nợ này nhắm `ops/cong_cu.py`.
+  Quan hệ write set giữa hai nợ là **đo được** (đọc mã trong kho); còn *trạng thái* của bốn Issue
+  ấy trên GitHub thì **KHÔNG ĐO ĐƯỢC** từ kho.
 - **KHÔNG ĐO ĐƯỢC:** có phiên nào đang chạy về hạ tầng công cụ hay không. Vắng mặt trong truy vấn
   **Issue** không nói gì về **phiên** — hai phép đo khác nhau, và gộp chúng là mời người khác làm
   trùng việc.
 
-Nợ đã mở thành Issue **#498** với đúng các đính chính trên.
+Nợ đã mở thành Issue **#498** với đúng các đính chính trên *(THUẬT LẠI — việc mở Issue và nội
+dung hiện tại của nó nằm ngoài kho; không hiện vật nào trong kho chứng thực)*.
+
+## 3. Hồ sơ cross-review của chính mục này — verdict lượt 1 vào kho TRƯỚC khi land
+
+Hai mục trên đã đi qua **cross-review khác nền** (`codex`) ngay trên nhánh, và verdict vào kho cùng
+PR chứ không để lại sau. Đây là chỗ khác #490: lượt 7 của #490 là **trả nợ** (viết sau merge), còn
+lượt này là **tiền kiểm** — cả hai finding được vá TRƯỚC khi PR land, nên hồ sơ review không phải
+mô tả một bản đã cố định.
+
+| tệp | vai trò |
+|---|---|
+| `ops/reviews/pr497-review-1-codex-verdict.md` | verdict nguyên văn, **28 955** byte / **161** dòng, `sha256 a6bf4bea…` |
+| `ops/reviews/pr497-review-1-codex-verdict.receipt.yaml` | biên nhận, neo blob ghim `8104480` |
+| `ops/reviews/README.md` | 1 hàng mục lục + 1 hàng cảnh báo (`t27` đòi cả hai) |
+
+**`P1 0 · P2 1 · P3 1`, và con số ấy đo bằng `grep -cE '^### .*\[Pn\]'` trên chính tệp verdict**,
+không đọc lời tóm tắt của reviewer — đúng lý do bài học `van-xuoi-do-duoc-van-vuot-nguon` ra đời ở
+#490. Hai cách cho cùng kết quả ở lượt này; chỉ cách đầu là phép đo.
+
+**Reviewer KHÔNG cho cả ba bản vá của lượt trước đều đạt.** `chu-packet-sai-tham-quyen` và
+`quet-so-hieu-r-doc-bo-dem-cuc-bo` **ĐÃ VÁ THẬT**; `hai-loi-khai-thieu-nhan-va-sai-co-trang` bị chấm
+**VÁ HỜ** — các số MỚI thay vào (`128`, `101`, *bốn Issue*, `#498`) vẫn đứng như sự thật trần, trái
+chính lời hứa dán nhãn ở đầu mục. Đó là finding P2 của lượt này, và §"Chỗ nhận việc" bên trên nay
+mang nhãn nguồn cho từng cụm số vì thế. P3 là ba dẫn chiếu `§28/§116/§164` — chúng là **số DÒNG**,
+không phải số mục (`grep -cE '^## [0-9]+' docs/PROTOCOL_DA_PHIEN.md` ⇒ **20**).
+
+**Bằng chứng DƯƠNG rằng reviewer đọc đúng cây được giao:** verdict tự khai
+`tree 67df2efa7e6f6c7b23bedfb43da647b395800a37`; đo lại `git rev-parse e826730^{tree}` ⇒ **cùng OID**.
+Không có phép này thì mọi số trong verdict chỉ là lời kể về một cây không ai định danh được.
+
+**Đột biến của reviewer báo CẢ HAI CHIỀU — và chiều "không có răng" mới là chiều đáng đọc.** 13 ca
+chạy trên bản chép: đổi `if chi is None` thành `if False` làm `t13` `rc=0 → rc=1` (cổng CÓ răng);
+nhưng **5/5** đột biến LỜI KHAI — `128→129`, `37→36` giữ tổng 41, đổi cha thứ nhất của merge sang một
+SHA có thật, đổi *"xuất xứ"* lại thành *"chủ"*, đổi *mù 1* thành *mù 0* — đều `rc=0` ở cả
+`doc-claims-check --strict` lẫn `release-verify --strict` sau khi tái sinh manifest. **Không cổng nào
+trong kho canh được nghĩa của những câu ấy**, và reviewer nói thẳng là **không** biến sự sống sót đó
+thành yêu cầu xây cổng mới. Ghi lại ở đây vì đúng bài học *"NGHĨ RA được phép thử mà KHÔNG CHẠY nó
+thì phép thử ấy KHÔNG TỒN TẠI"* ở chiều ngược lại: phép thử đã chạy, và nó nói cổng im lặng.
+
+**Khiếm khuyết của GÓI, do reviewer bắt — và nó làm hỏng đúng con số mục này từng khoe.**
+`EVIDENCE.md` khai `origin` của cây được review trỏ mirror cục bộ; thật ra điều phối đã
+`git remote set-url` sang URL GitHub sau khi soạn EVIDENCE và quên sửa câu ấy. Reviewer tin câu sai
+đó, kết luận `ls-remote origin` sẽ đi ra mạng (sandbox không mạng) nên **không chạy nó** — nên phép so
+`321/321` trong verdict là **hai tập CỤC BỘ**, KHÔNG phải phép canh hai nguồn. Đã nâng thành cảnh báo
+`GOI-LUOT-1-KHAI-ORIGIN-TRO-MIRROR-THUC-TE-TRO-GITHUB` ở mục lục `ops/reviews/README.md`. Cùng họ với
+*"phải biết mình đang đứng ở LỚP NÀO"*: một câu mô tả hạ tầng đo trôi khỏi hạ tầng thật, và thứ chết
+theo là phép đo mà câu ấy chặn đường.
+
+**NỢ ĐÃ ĐO, chưa mở Issue.** Lượt 1 chết một lần trước khi chạy trọn — `failed to connect to
+websocket … Connection refused (os error 111)`, nguyên nhân THOÁNG QUA (probe ngay sau đó `rc=0`,
+**0** lỗi mạng). Nhưng `run.json` của lượt chết **đứng nguyên** ở `trang_thai: dang_chay`,
+`ma_thoat: null`: cơ chế *"lượt chết vẫn được ghi nhận"* của `launcher.py run` không chốt lại bản ghi
+khi chính launcher bị giết. Mọi phép đếm *"bao nhiêu lượt đang chạy"* dựa trên `run.json` vì thế nói
+dối theo chiều ĐANG CHẠY.
+
+**Đo tại chỗ sau khi vá** (`git`, `python`, tất cả trong cây này, không mạng, `core.abbrev=7`):
+
+```
+ops/lease_publish_test.py            ⇒ 121/121 đạt · đã chạy=121 · bỏ qua=0    (t27 xanh với hồ sơ mới)
+ops/bien_nhan_v2.py --root .         ⇒ rc=0 · TỔNG ĐẠT · 49 ĐẠT v2 · 0 vi phạm · 0 KHÔNG ĐO ĐƯỢC · tổng 102
+ops/cong_cu.py kiem-tra --json       ⇒ rc=0 · tổng DAT · canary actionlint_shellcheck DAT
+ops/cong_cu_test.py                  ⇒ ca=23 · đột biến=18 · lỗi đột biến=0
+scripts/tl.py doc-claims-check       ⇒ rc=0 · ok=true
+scripts/tl.py golden-test            ⇒ rc=0 · ok=true
+scripts/tl.py determinism-audit      ⇒ rc=0 · ok=true
+scripts/tl.py release-verify --strict⇒ rc=0 · ok=true · expected=checked=180
+packet_loop.py doctrine-scan         ⇒ rc=0
+packet_loop.py adr-song              ⇒ rc=0
+```
+
+Ba số G5 ở trên **khác** con số reviewer đo (`lỗi đột biến=1`, tổng `DO`) vì **nền đo khác, không
+phải mã khác**: sandbox reviewer thiếu `jsonschema` nên `T2` và đột biến của nó `KHÔNG_ĐO_ĐƯỢC`.
+Cài `jsonschema==4.26.0` + `actionlint 1.7.7` + `shellcheck 0.9.0` — đúng ba bản CI ghim — thì cùng
+cây cho `rc=0`. Nói ra vì một con số trong tài liệu không ghi ĐIỀU KIỆN ĐO thì sẽ trôi mà không ai biết.
 
 # ★ dev-side — r361: ghi sổ #495 — 9 tệp trong `ops/reviews/`, và ba finding connector chấm vào chính hồ sơ review (2026-09-10)
 

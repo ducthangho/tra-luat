@@ -3,21 +3,21 @@ schema_version: 1
 kieu: dac_ta_packet
 packet_id: wp-codex-credential-refresh
 packet_issue: 484
-revision: 3
-generation: 3
+revision: 4
+generation: 4
 environment: local
 platform: windows
 executor: codex
 risk: sensitive
 review_class: sensitive
-authority: https://github.com/ducthangho/tra-luat/issues/484#issuecomment-5612165878
+authority: https://github.com/ducthangho/tra-luat/issues/484#issuecomment-5613357281
 base_sha: c0a5cbe89a90588115262e1a2c3ac84cbd98be9e
 base_tree: f9897f6dba19484900776d7af7e9b042070d4ce1
-branch: codex/wp484-g3-windows
+branch: codex/wp484-g4-windows
 depends_on: []
 ---
 
-# WP484 r3 — khôi phục Codex credential trên Windows
+# WP484 r4 — khôi phục Codex credential trên Windows
 
 ## Objective
 
@@ -31,14 +31,17 @@ Materialize credential an toàn vào home Codex có hiệu lực; cho nhận sna
 .claude/dev/codex_env_policy.py
 .claude/dev/launcher.py
 .claude/dev/launcher_test.py
+.claude/dev/packet_loop_test.py
 .claude/hooks/session-start.sh
 .claude/hooks/session_start.py
-ops/handoff/wp-codex-credential-refresh-exec-g3.md
+.github/workflows/launcher-windows.yml
+ops/handoff/wp-codex-credential-refresh-exec-g4.md
 ops/leases/wp-codex-credential-refresh-exec-g3.yaml
+ops/leases/wp-codex-credential-refresh-exec-g4.yaml
 ops/specs/wp-codex-credential-refresh.md
 ```
 
-Không ghi CHANGELOG.md (#491), RELEASE_MANIFEST.json, VERSION, workflow, lease g1 hoặc các file khác. Tái sử dụng helper trong các file trên; cần thêm companion ngoài tập này phải xuất impact finding, không tự thêm quyền. CHANGELOG/release bookkeeping là land obligation, không phải quyền worker.
+Không ghi CHANGELOG.md (#491), RELEASE_MANIFEST.json, VERSION, workflow ngoài phạm vi, lease g1 hoặc các file khác. Tái sử dụng helper trong các file trên; cần thêm companion ngoài tập này phải xuất impact finding, không tự thêm quyền. CHANGELOG/release bookkeeping là land obligation, không phải quyền worker.
 
 ## Acceptance và phản chứng
 
@@ -57,26 +60,16 @@ Không ghi CHANGELOG.md (#491), RELEASE_MANIFEST.json, VERSION, workflow, lease 
 - Final worker gate theo CLAUDE.md/protocol: positive test evidence, temporary manifest verify, exact changed-path/spec/lease/EOL checks; một full oracle trên mỗi exact identity. Không tự sửa security/gate/manifest để qua.
 - Hosted CI cuối chỉ sau khi candidate đóng băng và review xong; Windows launcher bị skipped không coi passed. Không claim gate xanh nếu thiếu required check hoặc positive marker.
 
-## Vai trò, lịch sử và dừng
+## R4/G4 authority, scope limits and budget
 
-- Executor: OpenAI Codex desktop/service, Windows local, machine/local. Reviewer: phiên Claude Code độc lập, source read-only; model/effort do chon_reviewer.py chọn, modelUsage kiểm lại sau lượt thật. Không đổi vai tự review.
-- Reviewer không viết credential/launcher runtime cho executor; chỉ test/repro và finding. Không dùng hint runtime trong packet sensitive.
-- Hai Codex review calls và hai verdict R1/R2 của #485 giữ nguyên. R3 Claude timeout 124 có token/output trong transcript nhưng không verdict; không xóa lịch sử hoặc coi là approve.
-- G2 áp trần protocol: 3 content attempts, 90 phút/run, lease 240 phút, heartbeat 30 phút. Review deadline riêng; hết budget/same-failure/permission/quota thì rescue checkpoint. Không tự reset counters hoặc coi reroute là approve.
-- Không push branch g1; successor PR phải trỏ lịch sử #485. Không merge/land/deploy/LIVE/force-push. Head/base/spec/ownership drift chặn thao tác phụ thuộc trước khi ghi; phải đo lại.
+Owner decisions: issuecomment-5613270248 and issuecomment-5613357281 on issue #484. Entry candidate 625ea2a2cbe37626970550c8c2b4800af214b5fb, tree cb8161ee4a4fb36403db19514455332a916f24dd. Product base remains c0a5cbe89a90588115262e1a2c3ac84cbd98be9e. G3 independent approve and failed CI runs 34434932435 / 34434934941 remain historical exact-SHA evidence, not current acceptance.
 
-## Hash
+Executor OpenAI Codex desktop/service, Windows local, machine/local. Reviewer independent Anthropic Claude Code, machine/local, source read-only, external prepared scratch, sensitive class, model ratchet >= claude-fable-5/max with final modelUsage validation. Executor never self-reviews or self-approves. No real credential/device-auth/LIVE probe in tests.
 
-Spec hash là SHA-256 toàn bộ bytes UTF-8 LF của tệp này, lưu ngoài tệp ở lease và comment authority/activation. Write-set hash dùng các đường trong khối text trên đã sort ordinal, UTF-8 LF, có LF cuối. Không tự chèn hash của tệp vào chính tệp.
+The G3 lease file may ONLY receive da_bi_thay_the pointing to G4; all historical values remain. G4 lease must carry the reverse thay_the_cho marker. Metadata-only administrative commits/pushes on G3 and G4 are authorized to establish consistent two-way ownership before content work; G3 journal is not reset. Re-scan full refs and ownership before beginning the sole remaining content attempt.
 
-## Continuation r3/g3 — quyết định chủ kho ngày 10-09-2026
+packet_loop_test.py changes are limited to stale void fixtures and genuine positive/negative nonce controls for void_bo_dot_nonce and void_bo_khop_nonce. Never restore automatic refunds for unknown post-spawn child failures. launcher-windows.yml changes are limited to installing/probing shellcheck, rg and actionlint with existing repo tools; no altered selection, skips, assertions, permissions or runner matrix. All other runtime changes repair demonstrated credential/test failures within the listed paths.
 
-R3 giữ nguyên sáu acceptance sản phẩm của r2; các mô tả lịch sử g2 ở trên không cấp quyền hồi sinh lease cũ. Entry candidate là3dcbfd7567a6c92be2d1182db95b84a4e738dbc1/tree8d6381d4920acceffb38b7015e0ed550c8b76bd8. Product diff base vẫn làc0a5cbe89a90588115262e1a2c3ac84cbd98be9e. G3 chỉ đổi metadata trước review; không tự rebase/merge master.
+Global content attempts used 2 of 3; G4 may use exactly one remaining attempt. Preserve historical reviewer calls and G3's consumed Claude call; one further Claude call, at most 20 minutes. No timeout refunds or counter reset. New run starts 2026-09-10T04:50:00Z and ends no later than 2026-09-10T06:20:00Z; protocol invocation/cloud-minute limits remain. Lease lasts 240 minutes from verified durable grant timestamp, heartbeat every 30 minutes, no automatic renewal.
 
-Quyết định chủ kho: https://github.com/ducthangho/tra-luat/issues/484#issuecomment-5612165878, theo CONTINUATION_G3_PROPOSAL.md SHA25614b4c9bb800181cc31bd3f2aae7e31f1f516b1b604992fa3c70dd6d6d05af27d. Lease g2 đã hết hạn, g3 chỉ bắt đầu sau admission và readback grant riêng. Không sửa lịch sử g1/g2.
-
-Budget kế thừa: g2 đã dùng1 content attempt trên tổng3. State-dir g3 mới có trần2 attempt còn lại; tổng toàn chuỗi=g2(1)+g3(0..2), không reset. Commit metadata g3 tính là content attempt mới. Giữ2 Codex review lịch sử, Claude R3 timeout, g2 scope review, A1 approve, A2 timeout và A3 timeout. A2/A3 đã sinh nội dung, không refund. G3 được thêm tối đa2 Claude review calls, mỗi call20phút; model ratchet tối thiểu claude-fable-5/max. Các trần protocol30invocations/360cloud-minutes vẫn áp dụng;90phút/run,240phút/lease,heartbeat30phút. Không tự nới khi không hội tụ.
-
-Reviewer dùng source read-only và scratch mới chuẩn bị sẵn với harness của repository; không recursive cleanup, không blanket Write/Edit vào source. Permission-mode default và danh sách tools tường minh. User-level codex_supervision_guard.py ngoài write set: không sửa/tắt/lách. Cờ JSON chỉ xuất kết quả cuối; transcript metadata mới là bằng chứng tiến độ, không stdout0. Permission failure phải được khai, không giả approve. Full candidate gồm metadata g3 phải được review exactSHA; prior runtime evidence chỉ được reuse nếu xác minh byte identity và khai giới hạn.
-
-Được đăng authority/admission, verdict và receipt đã validate lên issue484/successorPR; không đăng credential/raw transcript. Chỉ push successor và mở draftPR khi candidate đủ điều kiện chạy fullCI cuối theo chỉ thị chủ kho. Chưa đủ required checks không được claim gate xanh. Không merge/land/deploy/LIVE/force-push.
+Run targeted Windows/Linux neutral and adversarial tests, freeze candidate, cross-review, then exactly one full CI per final reviewed identity. Required skipped/missing checks are not pass. Publish validated verdicts and receipts to #484 and successor draft PR; no raw transcripts or credentials. No merge, land, deploy, LIVE, force-push, guard change/bypass or unapproved path. If budgets or a repeated failure prevent convergence, preserve evidence and use rescue, not another call.

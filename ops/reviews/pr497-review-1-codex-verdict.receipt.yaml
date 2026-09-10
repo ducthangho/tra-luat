@@ -143,8 +143,13 @@ model_reviewer_identity:
     Bản đầu tự cấp một ngoại lệ: *"Riêng `prompt_sha256` thì đối chiếu được: hai lượt có CÙNG băm
     prompt"*. SAI, và cross-review lượt 2 chấm đúng chỗ đó (P2). Trong kho chỉ có **một** digest —
     chính con số đã chép vào biên nhận này; hai `run.json` và hai bản prompt đều nằm ngoài kho.
-    Đo thẳng: `git grep -l fd117770fa4c651aad6194d4dfb9adfc51b60ba78a3a9ea4928823799c480c85 HEAD`
-    chỉ trả về CHÍNH tệp biên nhận này. So một chuỗi với chính nó không phải phép đối chiếu.
+    Đo thẳng, GHIM SNAPSHOT `1d58500` — head mà lượt 2 đã review:
+    `git grep -l fd117770… 1d58500 -- .` ⇒ **1** tệp, chính biên nhận này.
+    So một chuỗi với chính nó không phải phép đối chiếu.
+    KHÔNG dùng `HEAD` cho phép đo này: nó là MỤC TIÊU DI ĐỘNG, và chính hồ sơ review làm nó di
+    động — mỗi verdict nhập kho lại CHÉP digest ấy trong phần trích finding. Đo đủ ba mốc:
+    `1d58500` ⇒ **1** · `4e6a2d5` ⇒ **2** · `25974e7` ⇒ **3** tệp. Cùng một lệnh, ba đáp án, và
+    chỉ bản ghim SHA mới còn đúng sau khi ai đó thêm một verdict.
     Đáng ghi vì đây là ATTESTATION tự nâng mình lên PHÉP ĐO ngay bên trong dòng khai nó là
     attestation — chốt dựng ra để chống bị lừa, rồi tự thủng ở dòng kế tiếp.
 

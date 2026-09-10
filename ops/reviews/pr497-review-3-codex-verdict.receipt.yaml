@@ -42,8 +42,11 @@ so_p_do_bang_cach: '`grep -cE ''^### .*\[Pn\]''` trên chính tệp verdict ⇒ 
 
 tree_khop: >-
   Verdict khai `tree tự đo: 115b1835be0a14c63669357a4c8e05a0ad542c4a`; đo lại
-  `git rev-parse 4e6a2d5^{tree}` ⇒ **cùng OID**. Xác nhận reviewer đọc đúng CÂY được giao — và chỉ
-  thế. KHÔNG xác nhận danh tính phiên, model, hay hành vi runtime nào.
+  `git rev-parse 4e6a2d5^{tree}` ⇒ **cùng OID**. **Định danh CÂY khớp — và CHỈ thế.**
+  KHÔNG xác nhận hành vi ĐỌC, danh tính phiên, model, hay runtime nào: đầu vào của phép so là HAI
+  OID, không phải nội dung tệp.
+  DINH_CHINH: bản đầu viết "xác nhận reviewer ĐỌC đúng cây … và chỉ thế" — hai vế ấy MÂU THUẪN
+  trong cùng một câu, vì "đọc" đã là một hành vi. Cross-review lượt 4 chấm đúng chỗ đó (P2).
 
 HAI_FINDING_NANG_NHAT_la_LOI_KHAI_VE_CHINH_BAN_VA:
   vi_sao_tach_rieng: >-
@@ -55,7 +58,7 @@ HAI_FINDING_NANG_NHAT_la_LOI_KHAI_VE_CHINH_BAN_VA:
   - slug: hai-loi-khai-thieu-nhan-va-sai-co-trang
     lan_thu: 3
     loi_khai_sai: 'Biên nhận lượt 2: "thêm nhãn cho `#498` trong `ops/cong_cu.py`".'
-    phep_do_bac_lai: '`git diff 1d58500 HEAD -- ops/cong_cu.py` ⇒ **rỗng**, rc=0. Tệp KHÔNG hề đổi.'
+    phep_do_bac_lai: '`git diff 1d58500 4e6a2d5 -- ops/cong_cu.py` ⇒ **rỗng**, rc=0. Tệp KHÔNG hề đổi.'
     da_va: >-
       Chú thích tại `ops/cong_cu.py` nay mang nhãn THUẬT LẠI thật, kèm lý do (việc mở Issue và trạng
       thái hiện tại của nó nằm ngoài kho, không tái đo được offline).
@@ -95,8 +98,19 @@ bon_finding_con_lai:
     vi_sao_KHONG_CO_GI_BAT_DUOC: >-
       Cả hai lần chạy đều `rc=0`. Số `49/102` ĐÚNG tại `4d2a6f6` — trước khi biên nhận lượt 2 vào
       kho — và SAI tại HEAD; bảng không neo nó về commit nào. **Nhìn cổng xanh thì không thấy.**
-    da_va: 'Đổi thành `50 · 103`, đo lại trên exact HEAD sau bước cuối.'
-    nep: 'Bảng số phải chạy lại SAU bước cuối, cùng nếp với việc dựng gói review.'
+    da_va: >-
+      Bảng nay ghi `51 ĐẠT v2 · tổng 104`, đo trên `25974e7` — SAU khi chính biên nhận lượt 3 này
+      vào cây. Trường `da_va` bản đầu ghi `50 · 103` và **cross-review lượt 4 chấm đúng chỗ đó
+      (P2)**: `50/103` là kết quả của cây TRƯỚC khi thêm biên nhận lượt 3, tức nó mô tả bản sửa
+      bằng một con số đã hết hạn ngay lúc viết. Đúng lớp lỗi mà chính slug này tố cáo, tái phát
+      trong dòng khai đã sửa nó.
+    chuoi_da_do_GHIM_SHA: >-
+      `ops/bien_nhan_v2.py --root .` tại từng mốc: `4d2a6f6` ⇒ **49 · 102** · `4e6a2d5` ⇒
+      **50 · 103** · `25974e7` ⇒ **51 · 104**. Cả ba `rc=0`, `0 vi phạm`. Bộ đếm TĂNG MỘT mỗi lần
+      một biên nhận vào kho, nên mọi con số của nó BẮT BUỘC phải neo commit.
+    nep: >-
+      Bảng số phải chạy lại SAU bước cuối, cùng nếp với việc dựng gói review — và phải NEO SHA,
+      vì "sau bước cuối" là một mốc di động: bước cuối của lượt này là bước áp chót của lượt sau.
   - slug: phep-grep-prompt-khong-ghim-snapshot-sau-khi-nhap-verdict
     van_de: >-
       Đính chính của biên nhận lượt 2 dùng `git grep -l <digest> HEAD -- .` để chứng minh chỉ CHÍNH

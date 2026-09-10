@@ -47,8 +47,10 @@ so_p_do_bang_cach: >-
 
 tree_khop: >-
   Verdict khai `tree tự đo: 0430d2bdbc8e6e6c11bbf93c8bb12b1272b1202d`. Điều phối đo lại
-  `git rev-parse 1d58500^{tree}` ⇒ **cùng OID**. Bằng chứng DƯƠNG rằng reviewer đọc đúng cây được
-  giao. Nó KHÔNG xác thực danh tính phiên hay runtime — chỉ xác thực cây.
+  `git rev-parse 1d58500^{tree}` ⇒ **cùng OID**. **Định danh CÂY khớp — và CHỈ thế.** Phép so nhận vào HAI OID, không nhận nội dung tệp,
+  nên nó KHÔNG xác thực rằng phiên đã ĐỌC cây ấy, cũng không xác thực danh tính phiên/model/runtime.
+  ĐÍNH CHÍNH: bản đầu viết "bằng chứng DƯƠNG rằng reviewer ĐỌC đúng cây" — cross-review lượt 4
+  chấm đúng mức chứng thực bị gán quá cao (P2).
 
 bay_finding:
   - slug: hai-loi-khai-thieu-nhan-va-sai-co-trang

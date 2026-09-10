@@ -70,8 +70,17 @@ bay_finding:
       `prompt_sha256` thì đối chiếu được"*. Trong kho chỉ có MỘT digest — chính con số đã chép vào
       biên nhận ấy. Hàng mục lục còn liệt `gpt-6-astra` như danh tính LƯỢT CHẠY.
     phep_do_cua_reviewer: >-
-      `git grep -l fd117770… HEAD -- .` chỉ trả về CHÍNH tệp biên nhận lượt 1. Điều phối chạy lại,
-      cùng kết quả.
+      `git grep -l fd117770… 1d58500 -- .` — GHIM SNAPSHOT `1d58500`, tức head mà lượt 2 đã review —
+      chỉ trả về CHÍNH tệp biên nhận lượt 1. Điều phối chạy lại, cùng kết quả.
+    DINH_CHINH_khong_ghim_snapshot: >-
+      Bản đầu viết lệnh ấy với `HEAD` thay vì một SHA ghim. Lượt 3 chấm đúng chỗ đó (P2): sau khi
+      verdict lượt 2 vào kho, chính nó CHÉP LẠI digest ấy trong phần trích finding, nên `git grep`
+      trên HEAD nay trả **HAI** tệp — `pr497-review-1-…receipt.yaml` và `pr497-review-2-…verdict.md`.
+      Điều này KHÔNG tạo ra nguồn prompt thứ hai (cả hai đều là BẢN CHÉP) và KHÔNG bác bài học
+      "prompt là ATTESTATION"; nó bác **con số và cái lệnh** đang được dùng để minh hoạ bài học.
+      Nếp: một phép đo dùng làm bằng chứng phải GHIM SNAPSHOT nó đo — `HEAD` là mục tiêu di động, và
+      chính hồ sơ review làm nó di động. Phải phân biệt "một GIÁ TRỊ digest" với "một TỆP chứa giá
+      trị ấy".
     da_va: >-
       Bỏ ngoại lệ (`prompt_sha256` cũng là attestation); hàng mục lục tách `model_yeu_cau` khỏi
       `model_da_chay` (KHÔNG ĐO ĐƯỢC — `codex` không phát `modelUsage`); khối "NỢ" trong CHANGELOG
@@ -140,17 +149,29 @@ bay_finding:
       NGUYÊN VẸN cũng không phải phép đo ấy — cây nguyên vẹn không có mutant nào để bắt.
 
 vi_sao_LUOT_2_RA_NHIEU_HON_LUOT_1:
-  so_lieu: 'lượt 1: 0/1/1 · lượt 2: 0/7/0'
+  so_lieu: 'lượt 1: 0/1/1 (tổng 2) · lượt 2: 0/7/0 (tổng 7)'
+  DINH_CHINH_cach_goi_so: >-
+    Bản đầu (và hàng mục lục, và CHANGELOG §3) gọi đây là *"số finding tăng 1 → 7"*. SAI MẪU SỐ:
+    `1 → 7` là số **hạng P2**; TỔNG finding là **2 → 7**, vì lượt 1 còn một P3. Lượt 3 chấm đúng
+    chỗ đó (P2). Nay gọi rõ: **finding hạng P2 tăng 1 → 7; tổng finding tăng 2 → 7**.
   ly_do_DO_DUOC: >-
     Ba trong bảy finding (`attestation-runtime…`, `so-hang-github…`, và một nửa
     `ke-sai-ly-do…`) nhắm vào HIỆN VẬT MỚI mà lượt 1 chưa thể thấy: biên nhận lượt 1 và hai hàng
     mục lục của nó chỉ tồn tại SAU lượt 1. Hai finding nữa (`evidence-dem-thieu-ref-giao-head`,
     `khai-shellcheck…`) nhắm vào gói lượt 2 và vào đoạn CHANGELOG viết SAU lượt 1.
+  DINH_CHINH_dem_be_mat_moi: >-
+    Bản đầu ghi **5/7** nhắm vào hiện vật chỉ tồn tại SAU lượt 1. Đếm đúng là **6/7**: slug thứ bảy
+    (`hai-cong-duoc-khai-thanh-moi-cong-trong-kho`) chấm vào câu *"Không cổng nào trong kho canh
+    được nghĩa của những câu ấy"*, mà câu ấy chỉ được THÊM ở `52b36d1` — tức SAU head lượt 1
+    (`e826730`). Phép đo: `git log -S 'Không cổng nào' -- CHANGELOG.md` ⇒ commit thêm `52b36d1`,
+    commit sửa `4d2a6f6`; đọc CHANGELOG tại `e826730` KHÔNG có câu ấy. Lượt 3 chấm đúng chỗ đó (P2).
+    Chính tiêu chí phân loại do điều phối đặt ra lại bị điều phối áp thiếu một trường hợp.
   ket_luan: >-
-    Số tăng KHÔNG có nghĩa chất lượng giảm; nó có nghĩa bề mặt review tăng. Nhưng cũng KHÔNG được
-    đọc thành "mọi finding mới đều là bề mặt mới": `hai-loi-khai-thieu-nhan-va-sai-co-trang` là
-    slug LẶP, đây là lần thứ hai nó bị chấm trong chuỗi này và lần thứ ba nếu tính bản vá trước
-    lượt 1. Lặp ba lần là dấu hiệu phải hỏi *"có nên khai kiểu này không"*, không phải *"vá thế nào"*.
+    Số tăng KHÔNG có nghĩa chất lượng giảm; nó có nghĩa bề mặt review tăng (6/7). Nhưng cũng KHÔNG
+    được đọc thành "mọi finding mới đều là bề mặt mới": `hai-loi-khai-thieu-nhan-va-sai-co-trang` là
+    slug LẶP. Lặp ba lần là dấu hiệu phải hỏi *"có nên khai kiểu này không"*, không phải
+    *"vá thế nào"* — và slug ấy ĐÃ đạt ba lần ở lượt 3. Xem `NGUONG_HINH_DANG_LOI_DA_DAT` trong
+    biên nhận lượt 3.
 
 model_reviewer_identity:
   provider: openai_codex
@@ -174,10 +195,18 @@ model_reviewer_identity:
   stderr_sha256: 940e871f8b8db18ee1b0de552d6144470d51f71446d404e5b2943e0bf150eca7
   so_lan_chet_truoc_khi_xong: 0
   neo_danh_tinh_kho: >-
-    Lượt này neo bằng `--expected-root-commit 394e9346…` chứ KHÔNG bằng `--expected-repo`. Lý do
-    ĐO ĐƯỢC: `origin` của `cay-kho` trỏ MIRROR trong sandbox (để câu trong `EVIDENCE.md` thành
-    THẬT, sau finding của lượt 1), và `--expected-repo` đọc remote ra `(khong co remote)` ⇒
-    `CHAN [11]`. Root commit là vân tay bền, đọc được không cần mạng — đúng thứ `CLAUDE.md` khuyên.
+    Lượt này neo bằng `--expected-root-commit 394e9346…` chứ KHÔNG bằng `--expected-repo`.
+    THUẬT LẠI (phiên đã truyền cờ nào, gặp mã chặn nào — nguồn là `run.json`/log ngoài kho):
+    `origin` của `cay-kho` trỏ MIRROR trong sandbox, và `--expected-repo` đọc remote ra
+    `(khong co remote)` ⇒ `CHAN [11]`. Root commit là vân tay bền, đọc được không cần mạng.
+  neo_danh_tinh_kho_DINH_CHINH: >-
+    Bản đầu gọi cả câu trên là "Lý do ĐO ĐƯỢC" — NGAY BÊN TRONG khối vừa khai là ATTESTATION
+    "KHÔNG TRỪ TRƯỜNG NÀO". Lượt 3 chấm đúng chỗ đó (P2), và nó là **lần thứ hai** slug
+    `attestation-runtime-bi-nang-thanh-phep-do` bị chấm. Hai đối tượng phải tách: **CƠ CHẾ**
+    (`--expected-repo` trên một cây không có remote thì chặn) đo lại được hôm nay — reviewer lượt 3
+    đã đo: `chot_kho(cwd, 'ducthangho/tra-luat', None)` ⇒ `CHAN 11`, `(khong co remote)`;
+    **PHIÊN CŨ** (đã truyền cờ gì, thấy lỗi gì, vì sao đổi cờ) thì chỉ thuật lại được.
+    Bài học: một chốt vừa dựng ra để chống bị lừa, thủng ở dòng kế tiếp — hai lượt liên tiếp.
   nguon_cac_scalar_tren: >-
     Đọc từ `run.json` trong scratchpad; tệp ấy KHÔNG vào kho ⇒ **toàn khối này là ATTESTATION,
     KHÔNG TRỪ TRƯỜNG NÀO**, kể cả `prompt_sha256`. Đây chính là chỗ biên nhận lượt 1 đã tự cấp

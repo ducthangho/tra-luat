@@ -250,12 +250,16 @@ thay vì hỏi chỗ KẾT LUẬN ĐƯỢC GHI"*.
 · `so-hang-…` — **một con số phân loại không kèm quy tắc phân loại thì không phải phép đo**; nó là
 ấn tượng của người viết, và nó trông y hệt phép đo.
 
-**Số finding tăng `1 → 7` KHÔNG có nghĩa chất lượng giảm:** năm trong bảy nhắm vào hiện vật chỉ tồn
-tại SAU lượt 1 (biên nhận lượt 1, hai hàng mục lục, gói lượt 2, đoạn CHANGELOG viết sau lượt 1) —
-bề mặt review tăng, không phải chất lượng giảm. **Nhưng cũng đừng đọc ngược thành *"mọi finding mới
-đều là bề mặt mới"***: `hai-loi-khai-thieu-nhan-va-sai-co-trang` là slug **LẶP**, đây là lần thứ hai
-trong chuỗi này. `CLAUDE.md` có sẵn ngưỡng: **đếm HÌNH DẠNG lỗi, đừng chỉ đếm lỗi** — cùng hình dạng
-ba lần thì câu hỏi đúng là *"có nên khai kiểu này không"*, không phải *"vá thế nào"*.
+**Finding hạng P2 tăng `1 → 7`; TỔNG finding tăng `2 → 7`** (lượt 1 còn một P3) — **sáu trong bảy**
+nhắm vào hiện vật chỉ tồn tại SAU lượt 1: biên nhận lượt 1, hai hàng mục lục, gói lượt 2, và hai đoạn
+CHANGELOG viết sau lượt 1. Bề mặt review tăng, không phải chất lượng giảm. *(Bản đầu gọi `1 → 7` là
+"số finding" — **sai mẫu số**, đó là số P2 — và đếm **5/7**. Lượt 3 chấm cả hai (P2). Trường hợp thứ
+sáu là slug `hai-cong-duoc-khai-thanh-moi-cong-trong-kho`: câu *"Không cổng nào trong kho…"* chỉ được
+thêm ở `52b36d1`, tức SAU head lượt 1 `e826730` — đo bằng `git log -S 'Không cổng nào' -- CHANGELOG.md`.
+Chính tiêu chí phân loại do tôi đặt ra lại bị tôi áp thiếu một trường hợp.)*
+**Nhưng đừng đọc ngược thành *"mọi finding mới đều là bề mặt mới"***:
+`hai-loi-khai-thieu-nhan-va-sai-co-trang` là slug **LẶP**, và ở lượt 3 nó đạt **lần thứ BA**.
+`CLAUDE.md` có sẵn ngưỡng cho đúng chỗ này — xem §4.
 
 **Khiếm khuyết của GÓI, lượt thứ HAI liên tiếp, cùng HÌNH DẠNG.** Lượt 1: `EVIDENCE.md` khai `origin`
 trỏ mirror trong khi nó trỏ GitHub. Lượt 2: `EVIDENCE.md` khai mirror có 323 nhánh trong khi nó có
@@ -268,7 +272,7 @@ gói được dựng nhiều bước và câu viết ở bước 3 chết ở b�
 
 ```
 ops/lease_publish_test.py            ⇒ 146/146 đạt · đã chạy=146 · bỏ qua=0    (t27 xanh với hồ sơ mới)
-ops/bien_nhan_v2.py --root .         ⇒ rc=0 · TỔNG ĐẠT · 49 ĐẠT v2 · 0 vi phạm · 0 KHÔNG ĐO ĐƯỢC · tổng 102
+ops/bien_nhan_v2.py --root .         ⇒ rc=0 · TỔNG ĐẠT · 50 ĐẠT v2 · 0 vi phạm · 0 KHÔNG ĐO ĐƯỢC · tổng 103
 ops/cong_cu.py kiem-tra --json       ⇒ rc=0 · tổng DAT · canary actionlint_shellcheck DAT
 ops/cong_cu_test.py                  ⇒ ca=23 · đột biến=18 · lỗi đột biến=0
 scripts/tl.py doc-claims-check       ⇒ rc=0 · ok=true
@@ -328,6 +332,58 @@ còn `ci.yml:101` chỉ gọi `bash ops/cai_cong_cu.sh shellcheck` **không nêu
 `0.9.0` là **bản apt của nền này ĐÃ TRẢ VỀ**, không phải bản CI cưỡng chế — CI có thể nhận bản khác
 mà không ai biết. Viết "đúng ba bản CI ghim" làm điều kiện tái lập nghe **chắc hơn cấu hình thật**,
 đúng lớp lỗi *"lời khai rộng hơn phép đo"* mà mục này đang đi sửa cho chỗ khác.
+
+## 4. NGƯỠNG "BA LẦN" ĐÃ ĐẠT — và cái phải đổi KHÔNG phải bản vá
+
+`CLAUDE.md` có một ngưỡng viết ra sau bốn lượt vá liên tiếp cùng một hàm: **đếm HÌNH DẠNG lỗi,
+đừng chỉ đếm lỗi; cùng một hình dạng lặp ba lần trở lên thì câu hỏi đúng là "có nên làm việc này
+không", không phải "vá thế nào"**. Chuỗi này vừa chạm ngưỡng ấy, nên mục này ghi thẳng thay vì
+lặng lẽ vá lần thứ tư.
+
+**Đếm, không ước** — đo bằng số tiêu đề finding trong từng tệp verdict, cộng bảng ĐỐI CHIẾU:
+
+| lượt | `hai-loi-khai-thieu-nhan-va-sai-co-trang` |
+|---|---|
+| Codex connector (trước lượt 1, head `25c2d5b`) | chấm — 1 trong 3 P2 |
+| lượt 1 (`e826730`) | **VÁ HỜ** + chấm lại (1 tiêu đề) |
+| lượt 2 (`1d58500`) | **VÁ HỜ** + chấm lại (1 tiêu đề) |
+| lượt 3 (`4e6a2d5`) | chấm lại |
+
+**BỐN lượt, một slug.** Và hình dạng thật rộng hơn tên slug. Lượt 3 ra **6** finding, trong đó
+**hai** cái — `hai-loi-khai-thieu-nhan…` và `ke-sai-ly-do-reviewer-khong-chay-ls-remote` — không
+phải "chỗ chưa vá" mà là **CHỖ TÔI KHAI ĐÃ VÁ TRONG KHI CHƯA VÁ**:
+
+- Biên nhận lượt 2 viết *"thêm nhãn cho `#498` trong `ops/cong_cu.py`"*. Đo:
+  `git diff 1d58500 HEAD -- ops/cong_cu.py` ⇒ **rỗng**. Tệp KHÔNG hề đổi.
+- Biên nhận lượt 2 viết *"trích thẳng dòng 157 … ở cả bốn nơi"*. Đo: `ops/reviews/README.md:18` và
+  chính biên nhận lượt 1 vẫn mang câu cũ. **Hai trong bốn nơi chưa đụng tới.**
+
+**Đó mới là hình dạng, và nó tệ hơn slug gốc.** Lời khai sai về THẾ GIỚI (một số Issue thiếu nhãn)
+thì người đọc còn nghi ngờ được; lời khai sai về **CHÍNH BẢN VÁ VỪA LÀM** thì nó tự đóng vai bằng
+chứng cho mình — người đọc thấy "đã vá ở bốn nơi" và không đi đếm bốn nơi ấy. Cùng họ với
+*"cổng xanh nhờ `rc=0` là cổng CÓ THỂ BỊ LỪA"*: ở đây thứ nói dối không phải mã thoát mà là **câu
+tự thuật của người vá**.
+
+**Cái đổi, và nó KHÔNG phải một bản vá văn xuôi:**
+
+1. **Không viết "đã vá ở N nơi" khi chưa liệt kê N đường dẫn và chưa `grep` từng cái.** Câu tổng kết
+   phải sinh TỪ danh sách đã đo, không phải từ trí nhớ về việc mình vừa định làm. Phép đo rẻ nhất:
+   `git diff <head cũ> HEAD -- <đường dẫn>` cho mỗi nơi đã tuyên bố.
+2. **Phép đo dùng làm bằng chứng phải GHIM SNAPSHOT.** Lượt 3 chấm `git grep … HEAD` (finding
+   `phep-grep-prompt-khong-ghim-snapshot…`): `HEAD` là mục tiêu DI ĐỘNG, và chính hồ sơ review làm
+   nó di động — verdict lượt 2 chép lại digest nên `grep` nay trả **2** tệp thay vì 1. Ghim SHA.
+3. **Bảng số phải chạy lại SAU bước cuối.** Lượt 3 chấm bảng cổng còn ghi `49 ĐẠT v2 · tổng 102`
+   trong khi HEAD đã là `50 · 103` — số đúng tại `4d2a6f6`, sai tại HEAD, và **cổng xanh ở cả hai
+   nên không gì bắt được**. Cùng nếp với việc dựng gói review: **đo ở bước CUỐI**.
+
+**Cái KHÔNG làm, và nói rõ vì sao:** không xây cổng ngữ nghĩa để canh những câu này. Cả ba lượt
+reviewer đều tự chạy đột biến lời khai và đều kết luận `rc=0` — `doc-claims-check` và
+`release-verify` không canh được nghĩa — và **cả ba đều nói thẳng là KHÔNG yêu cầu xây cổng mới**.
+Một danh sách CẤM các mẫu câu sẽ thua từ trong thiết kế, đúng bài học *"danh sách cấm không bao giờ
+đủ"*. Thứ bắt được bốn lượt này là **review chéo khác nền có năng lực ĐO**, không phải một regex.
+Ba nếp ở trên là **kỷ luật viết**, và mục này khai thẳng rằng **không cổng nào cưỡng chế chúng** —
+đúng như `CLAUDE.md` đòi khi một bài học không có máy canh.
+
 
 # ★ dev-side — r361: ghi sổ #495 — 9 tệp trong `ops/reviews/`, và ba finding connector chấm vào chính hồ sơ review (2026-09-10)
 

@@ -129,10 +129,12 @@ model_reviewer_identity:
       Một probe mới ngay sau đó trả `rc=0` và **0** lỗi mạng trên cùng container, cùng xác thực.
       Nên đây là lỗi ĐƯỜNG TRUYỀN, không phải "codex không dùng được" — đúng bài học `CLAUDE.md`
       *"gặp một công cụ trả kết quả xấu, hỏi nó hỏng ở ĐƯỜNG NÀO"*.
-    NO_DA_LO_RA: >-
+    NO_CHUA_MO_ISSUE_THUAT_LAI: >-
       `run.json` của lượt chết ĐỨNG NGUYÊN ở `trang_thai: dang_chay`, `ma_thoat: null`. Cơ chế
       "lượt chết vẫn được ghi nhận" của `launcher.py run` KHÔNG chốt lại bản ghi khi chính launcher
-      bị giết. Đây là NỢ ĐÃ ĐO, chưa mở Issue, và nó làm mọi phép đếm "bao nhiêu lượt đang chạy"
+      bị giết. THUẬT LẠI — nguồn duy nhất là `run.json` trong scratchpad, ngoài kho; bản đầu gọi đây
+      là "NỢ ĐÃ ĐO" ngay bên trong khối vừa khai là ATTESTATION, và lượt 3 chấm đúng chỗ đó. Nợ chưa
+      mở Issue, và nó làm mọi phép đếm "bao nhiêu lượt đang chạy"
       dựa trên `run.json` bị nói dối theo chiều ĐANG CHẠY.
   nguon_cac_scalar_tren: >-
     Đọc từ `run.json` trong scratchpad; tệp ấy KHÔNG vào kho ⇒ **toàn khối này là ATTESTATION,
@@ -194,8 +196,14 @@ verdict_usage_caveats:
       `EVIDENCE.md` trong gói lượt 1 khai `origin` của `cay-kho` trỏ mirror cục bộ `kho.git`. Sai:
       điều phối đã `git remote set-url` sang URL GitHub sau khi soạn EVIDENCE và quên sửa câu ấy.
     hau_qua_DO_DUOC: >-
-      Reviewer đọc câu sai đó, kết luận `ls-remote origin` sẽ đi ra mạng (sandbox không mạng) nên
-      KHÔNG chạy nó. Vì vậy con số `321/321 · thiếu 0 · thừa 0` trong verdict là phép so **hai tập
+      Theo verdict lượt 1 DÒNG 157, reviewer ĐO cấu hình thật (`git config --local --get
+      remote.origin.url` ⇒ URL GitHub), THẤY nó lệch với `EVIDENCE.md`, và vì cấu hình THẬT là URL
+      GitHub trong một sandbox không mạng nên `ls-remote origin` vô dụng ⇒ KHÔNG chạy nó.
+      (Bản đầu của trường này viết "Reviewer đọc câu sai đó… nên KHÔNG chạy nó" — kể NGƯỢC nhân quả
+      và gán cho reviewer một trạng thái tâm trí. KHÔNG ai bị lừa: reviewer bắt được nó. Lượt 2 chấm
+      lỗi này, lượt 3 chấm lại vì nó còn sót ở đây và ở hàng README — đó là bằng chứng rằng "đã vá
+      ở cả bốn nơi" phải ĐO từng nơi, không được kê khai.)
+      Vì vậy con số `321/321 · thiếu 0 · thừa 0` trong verdict là phép so **hai tập
       CỤC BỘ** — mirror `kho.git` so bộ đệm `refs/remotes/origin` — chứ KHÔNG phải phép canh hai
       nguồn mà `CLAUDE.md` quy định (máy chủ so bộ đệm). Chính verdict cũng nói vậy trong mục
       BẢNG ĐO: *"Đây là hai tập cục bộ, không phải phép hỏi máy chủ."*

@@ -220,8 +220,9 @@ def tong_hop(ban_ke, thu_muc_goc=None, chi=None):
     # nên nó KHÔNG còn generation/lease/write authority để ai đó "đi qua"
     # (docs/PROTOCOL_DA_PHIEN.md DÒNG 28/116/164 — số DÒNG, không phải số mục: tệp chỉ có tới §20;
     # AGENTS.md:22-23). Sửa hành vi ở đây đòi một packet KẾ NHIỆM/corrective được cấp thẩm quyền —
-    # nợ đã mở thành Issue #498, liên đới #249. `chinh_sach`/`bat_buoc` là hợp đồng của đặc tả,
-    # không phải chi tiết nội bộ: đừng đụng.
+    # nợ đã mở thành Issue #498, liên đới #249 — THUẬT LẠI: việc mở Issue và trạng thái hiện tại
+    # của nó nằm NGOÀI kho, không hiện vật nào ở đây chứng thực, và không ai tái đo được offline.
+    # `chinh_sach`/`bat_buoc` là hợp đồng của đặc tả, không phải chi tiết nội bộ: đừng đụng.
     if chi is None:
         for ten, dn in cc.items():
             cn = dn.get("canary")

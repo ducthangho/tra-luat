@@ -6873,7 +6873,7 @@ def r349_backend_PDF_du_phong_chay_thi_dung_noi_la_bi_chan():
 # ------------------------------------------------------ tự đột biến: có răng không
 
 @ca
-def wp484_g2_doctor_doc_dung_home_da_materialize():
+def r484_g2_doctor_doc_dung_home_da_materialize():
     """Custom home must be the same source for materialization and diagnostics."""
     with tempfile.TemporaryDirectory(prefix="wp484-home-") as td:
         root = Path(td)
@@ -6900,7 +6900,7 @@ def wp484_g2_doctor_doc_dung_home_da_materialize():
 
 
 @ca
-def wp484_g2_env_policy_cung_home_hai_chieu():
+def r484_g2_env_policy_cung_home_hai_chieu():
     """The active config, not residue in the other home, controls the gate."""
     import runpy
     policy = runpy.run_path(str(CODEX_ENV_POLICY))
@@ -6931,7 +6931,7 @@ def wp484_g2_env_policy_cung_home_hai_chieu():
 
 
 @ca
-def wp484_g2_auth_hong_utf8_tra_loi_co_kiem_soat():
+def r484_g2_auth_hong_utf8_tra_loi_co_kiem_soat():
     with tempfile.TemporaryDirectory(prefix="wp484-corrupt-") as td:
         root = Path(td)
         home = root / ".codex"
@@ -6952,7 +6952,7 @@ def wp484_g2_auth_hong_utf8_tra_loi_co_kiem_soat():
 
 
 @ca
-def wp484_g2_schema_truoc_freshness_va_home_materialize():
+def r484_g2_schema_truoc_freshness_va_home_materialize():
     """A newer disk snapshot must not hide malformed input or select default home."""
     with tempfile.TemporaryDirectory(prefix="wp484-schema-") as td:
         root = Path(td)
@@ -6982,7 +6982,7 @@ def wp484_g2_schema_truoc_freshness_va_home_materialize():
 
 
 @ca
-def wp484_g2_child_khong_nhan_snapshot_va_rac_chan_truoc_probe():
+def r484_g2_child_khong_nhan_snapshot_va_rac_chan_truoc_probe():
     """Run a real inert child; malformed snapshot must stop before run creation."""
     with San() as s:
         repo = tao_repo(s)
@@ -7021,7 +7021,7 @@ def wp484_g2_child_khong_nhan_snapshot_va_rac_chan_truoc_probe():
 
 
 @ca
-def wp484_g2_storage_kernel_guardrails():
+def r484_g2_storage_kernel_guardrails():
     """Kernel measurements: private replace, hardlinks, reparse/ancestors, rollback."""
     from unittest.mock import patch
     m = _tai_launcher_thu()
@@ -7111,7 +7111,7 @@ def wp484_g2_storage_kernel_guardrails():
 
 
 @ca
-def wp484_g2_recovery_probe_rollback_va_snapshot_moi():
+def r484_g2_recovery_probe_rollback_va_snapshot_moi():
     """A rejected token stays rejected across formatting; unknown errors are not auth."""
     from unittest.mock import patch
     m = _tai_launcher_thu()
@@ -7163,7 +7163,7 @@ def wp484_g2_recovery_probe_rollback_va_snapshot_moi():
 
 
 @ca
-def wp484_g2_checkpoint_resume_va_gia_auth_khong_refund():
+def r484_g2_checkpoint_resume_va_gia_auth_khong_refund():
     """Real CLI: frozen resume anchors, plus generated auth/quota spoof output."""
     with San() as s:
         repo = tao_repo(s)
@@ -7207,7 +7207,7 @@ def wp484_g2_checkpoint_resume_va_gia_auth_khong_refund():
 
 
 @ca
-def wp484_g2_timeout_sau_output_khong_refund():
+def r484_g2_timeout_sau_output_khong_refund():
     with San() as s:
         repo = tao_repo(s)
         rr = s / "runs"
@@ -7225,7 +7225,7 @@ def wp484_g2_timeout_sau_output_khong_refund():
 
 
 @ca
-def wp484_g2_probe_isolated_marker_va_refresh():
+def r484_g2_probe_isolated_marker_va_refresh():
     """Real inert child through the repository live-probe parser; no network."""
     import runpy
     from types import SimpleNamespace
@@ -7271,9 +7271,9 @@ def wp484_g2_probe_isolated_marker_va_refresh():
 
 
 @ca
-def wp484_g2_hook_shell_scrub_truoc_probe():
+def r484_g2_hook_shell_scrub_truoc_probe():
     if LA_WINDOWS:
-        return "BỎ QUA shell POSIX; đo bằng WSL Linux"
+        return "BO QUA shell POSIX; verified on WSL Linux"
     with San() as s:
         project = s / "project"
         dev = project / ".claude/dev"
@@ -7306,7 +7306,7 @@ def wp484_g2_hook_shell_scrub_truoc_probe():
 
 
 @ca
-def wp484_g2_bridge_scrub_va_chot_remote():
+def r484_g2_bridge_scrub_va_chot_remote():
     from unittest.mock import patch
     source = LAUNCHER.parents[1] / "hooks/session_start.py"
     bridge = _nap_sach(source)
@@ -7332,23 +7332,71 @@ def wp484_g2_bridge_scrub_va_chot_remote():
             assert calls == ["child", "child"], "local hook materialized credential"
 
 
+@ca
+def r484_g4_windows_sid_alias_identity():
+    """Native SID conversion, with inert descriptor/owner contexts; no real auth."""
+    if not LA_WINDOWS:
+        return "BO QUA native Windows SID conversion"
+    m = _tai_launcher_thu()
+    store = m._KhoCodex.__new__(m._KhoCodex)
+    store._win_init()
+    c, native = store.c, store.a
+    admin_sid = store._win_sid("LA")
+    assert admin_sid.startswith("S-1-") and admin_sid.endswith("-500")
+    print("Windows token matches local RID500:", store.sid == admin_sid)
+    class Descriptor:
+        sddl = ""
+        def __getattr__(self, name):
+            return getattr(native, name)
+        def GetSecurityInfo(self, *args):
+            sd = c.c_void_p()
+            assert native.ConvertStringSecurityDescriptorToSecurityDescriptorW(
+                self.sddl, 1, c.byref(sd), None)
+            c.cast(args[-1], c.POINTER(c.c_void_p))[0] = sd.value
+            return 0
+    fixture = Descriptor()
+    store.a = fixture
+    for who, owner, trustee, accepted in (
+            (admin_sid, "LA", "LA", True),
+            (admin_sid, "BA", "OW", True),
+            (admin_sid, "BA", "WD", False),
+            (admin_sid, "WD", "LA", False),
+            ("S-1-5-21-1-2-3-1234", "BA", "LA", False),
+            ("S-1-5-21-1-2-3-1234", "LA", "OW", False)):
+        store.sid = who  # explicit simulated token context, not impersonation
+        fixture.sddl = f"O:{owner}D:P(A;;FA;;;{trustee})(A;;FA;;;SY)(A;;FA;;;BA)"
+        try:
+            store._win_private(None)
+        except OSError:
+            assert not accepted, "same native SID rejected because of SDDL alias"
+        else:
+            assert accepted, "another principal was accepted through an alias"
+
+
 DOT_BIEN = [
+    ("g4_windows_sid_alias_not_normalized",
+     ('self._win_sid(fields[5])', 'fields[5]'),
+     ["r484_g4_windows_sid_alias_identity"], ("windows", "native SID conversion")),
+    ("g4_windows_LA_not_current_owner",
+     ('allowed = {self.sid, "S-1-5-18", "S-1-5-32-544"}',
+      'allowed = {self.sid, "S-1-5-18", "S-1-5-32-544", self._win_sid("LA")}'),
+     ["r484_g4_windows_sid_alias_identity"], ("windows", "native SID conversion")),
     ("g2_windows_directory_pin_access",
      ('(0x81 | (0x20000 if security else 0))', '(0x80 | (0x20000 if security else 0))'),
-     ["wp484_g2_storage_kernel_guardrails"], ("windows", "native Windows share-delete pin")),
+     ["r484_g2_storage_kernel_guardrails"], ("windows", "native Windows share-delete pin")),
     ("g2_rejected_refresh_khong_phu_thuoc_metadata",
      ('payload = {key: tokens.get(key)}', 'payload = tokens'),
-     ["wp484_g2_recovery_probe_rollback_va_snapshot_moi"]),
+     ["r484_g2_recovery_probe_rollback_va_snapshot_moi"]),
     ("g2_resume_bo_prompt",
      ('or cp["prompt_sha256"] != kq["prompt_sha256"]', 'or False'),
-     ["wp484_g2_checkpoint_resume_va_gia_auth_khong_refund"]),
+     ["r484_g2_checkpoint_resume_va_gia_auth_khong_refund"]),
     ("g2_unknown_child_khong_duoc_cap_void",
      ('requested_void = ban_ghi.pop("void_reason", None)',
       'requested_void = ban_ghi.get("void_reason")'),
-     ["wp484_g2_checkpoint_resume_va_gia_auth_khong_refund"]),
+     ["r484_g2_checkpoint_resume_va_gia_auth_khong_refund"]),
     ("g2_resume_bo_head",
      ('or cp["head"] != kq["head"]', 'or False'),
-     ["wp484_g2_checkpoint_resume_va_gia_auth_khong_refund"]),
+     ["r484_g2_checkpoint_resume_va_gia_auth_khong_refund"]),
     ("bo_ky_ban_ghi_luot",
      ('    if khoa_ky:\n        ban_ghi["chu_ky"] = ky_ban_ghi_luot(ban_ghi, khoa_ky)',
       '    if False:\n        ban_ghi["chu_ky"] = ky_ban_ghi_luot(ban_ghi, khoa_ky)'),

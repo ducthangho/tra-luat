@@ -2677,6 +2677,7 @@ class _KhoCodex:
             (self.a, "OpenProcessToken", [H,D,c.POINTER(H)], B),
             (self.a, "GetTokenInformation", [H,c.c_int,V,D,c.POINTER(D)], B),
             (self.a, "ConvertSidToStringSidW", [V,c.POINTER(w.LPWSTR)], B),
+            (self.a, "ConvertStringSidToSidW", [S,c.POINTER(V)], B),
             (self.a, "GetSecurityInfo", [H,c.c_int,D,V,V,V,V,c.POINTER(V)], D),
             (self.a, "ConvertSecurityDescriptorToStringSecurityDescriptorW",
              [V,D,D,c.POINTER(w.LPWSTR),V], B),
@@ -2731,6 +2732,22 @@ class _KhoCodex:
             raise OSError("credential path is a reparse point or non-regular object")
         return h
 
+    def _win_sid(self, value):
+        # SDDL may abbreviate a token SID (e.g. local RID 500 -> LA).
+        # Compare identity, never accept an alias for every caller.
+        c, w = self.c, self.w
+        sid, text = c.c_void_p(), w.LPWSTR()
+        if not self.a.ConvertStringSidToSidW(value, c.byref(sid)):
+            raise OSError("cannot resolve credential ACL principal")
+        try:
+            if not self.a.ConvertSidToStringSidW(sid, c.byref(text)):
+                raise OSError("cannot normalize credential ACL principal")
+            return text.value
+        finally:
+            if text:
+                self.k.LocalFree(c.cast(text, c.c_void_p))
+            self.k.LocalFree(sid)
+
     def _win_private(self, handle):
         c, w = self.c, self.w
         sd, text = c.c_void_p(), w.LPWSTR()
@@ -2747,8 +2764,9 @@ class _KhoCodex:
             self.k.LocalFree(sd)
         owner = re.search(r"O:(.*?)(?=[GDS]:|$)", value)
         acl = re.search(r"D:(.*?)(?=S:|$)", value)
-        allowed = {self.sid, "SY", "BA"}
-        if not owner or owner[1] not in allowed or not acl or "NO_ACCESS_CONTROL" in acl[1]:
+        allowed = {self.sid, "S-1-5-18", "S-1-5-32-544"}
+        if (not owner or not acl or "NO_ACCESS_CONTROL" in acl[1]
+                or self._win_sid(owner[1]) not in allowed):
             raise OSError("credential owner or DACL is unsafe")
         for ace in re.findall(r"\(([^()]*)\)", acl[1]):
             fields = ace.split(";")
@@ -2758,7 +2776,7 @@ class _KhoCodex:
                 continue
             # Python's private Windows directories use OWNER RIGHTS (OW).
             # It is safe here only because the actual owner was checked above.
-            if fields[0] != "A" or fields[5] not in allowed | {"OW"}:
+            if fields[0] != "A" or self._win_sid(fields[5]) not in allowed | {"S-1-3-4"}:
                 raise OSError("credential ACL grants access to another principal")
 
     @contextlib.contextmanager

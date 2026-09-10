@@ -120,14 +120,22 @@ Hai cảnh báo được nâng lên mục lục theo `t27`: `LIEN-KET-TUONG-DOI-
 Ba bước `skipped` của lượt PR đều có lý do cấu trúc, **không phải cổng vắng mặt**: `#23` nền không
 cgroup (vì `#22` đã chạy đường cgroup), `#29` exact-identity, `#38` lane LAND chỉ chạy trên master.
 
-## Hậu-merge: ubuntu XANH, windows ĐỎ VÌ HẠ TẦNG — và phép đo nền là thứ tách được hai chuyện đó
+## Hậu-merge: XANH CẢ HAI NỀN sau một lượt chạy lại — và phép đo nền là thứ tách được hạ tầng khỏi hồi quy
 
 Lượt CI master `34420394943` neo `7693852` *(mọi số trong mục này là **thuật lại**)*:
 
-| job | attempt 1 | 41 bước đánh số |
-|---|---|---|
-| `gate (ubuntu-latest)` | **success** | 37 success · 4 skipped · **0 failure** |
-| `gate (windows-latest)` | **failure** | 8 success · **1 failure** · 32 skipped |
+| job | attempt 1 | attempt 2 (sau khi chạy lại) | 41 bước đánh số của attempt 2 |
+|---|---|---|---|
+| `gate (ubuntu-latest)` | **success** | **success** | 37 success · 4 skipped · **0 failure** |
+| `gate (windows-latest)` | **failure** | **success** | 35 success · 6 skipped · **0 failure** |
+
+**KẾT LUẬN CUỐI: master `7693852` xanh CẢ HAI nền.** Sáu bước `skipped` của Windows đối chiếu chéo
+đúng thiết kế, KHÔNG phải cổng vắng mặt: `#11 PR head contains required EOL base` skipped ở **cả
+hai** nền vì nó có `if: github.event_name == 'pull_request'` — đây đúng là caveat tệp này đã ghi
+(*tiêu chí "không bước nào skipped" chỉ đúng cho lượt PR; bê nguyên sang lượt master là tự báo động
+giả*); Windows skip `#22 cgroup (Linux)` còn ubuntu skip `#23 nền không cgroup` — **hai bước loại
+trừ nhau**, đúng một trong hai phải chạy; `#39 lane WORKER` skipped ở cả hai vì `#38 lane LAND` đã
+chạy. Windows còn skip `#21 don-nhanh` và `#36 ci-phamvi selftest`.
 
 Chỗ đỏ: bước **#8 `cài rg cho G5`** ⇒ `trang_thai_tong: KHONG_DO_DUOC`, `rg` `bat_buoc: true`,
 *"khong khoi chay duoc probe ['mac_dinh'] cua 'rg'"*, `exit code 3`.
@@ -142,7 +150,8 @@ Chỗ đỏ: bước **#8 `cài rg cho G5`** ⇒ `trang_thai_tong: KHONG_DO_DUOC
 
 Hai công cụ **độc lập** cùng hỏng, cùng chậm hàng chục lần, trong khi diff không chạm nổi một dòng của
 đường cài — chữ ký **retry mạng lúc tải**. Dùng **đúng một lần** quyền chạy lại (`rerun_failed_jobs`);
-attempt 2 **qua được cả `#7` lẫn `#8`**, xác nhận chẩn đoán.
+attempt 2 qua được cả `#7` lẫn `#8` rồi **chạy trọn và xanh**, xác nhận chẩn đoán bằng bằng chứng
+dương chứ không bằng suy đoán.
 
 **Điều đáng lo hơn cái đỏ, và nó sẽ KHÔNG tự lộ ra:** `shellcheck` ở cùng lượt **cũng** `KHONG_DO_DUOC`,
 nhưng bước ấy vẫn **XANH** vì `bat_buoc: false`. Nghĩa là `actionlint` chạy mà **mất toàn bộ luật nền

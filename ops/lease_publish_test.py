@@ -4275,7 +4275,10 @@ def t129_Q45_reader_object_store_bam_lai_va_canh_tu_bytes():
             muc = kho.tim(tree2, "ops/leases/x.yaml")
             chot(muc and muc[0] == "100644" and muc[2] == "blob", f"tim sai: {muc}")
             chot(kho.doc(muc[1], "blob") == b"lease_id: x\n", "blob bytes sai")
-            chot(kho.tim(tree2, "ops/khong-co") is None and kho.tim(tree2, "README.md/x") is None, "tim vắng phải None")
+            chot(kho.tim(tree2, "ops/khong-co") is None, "tim vắng phải None")
+            # Đường đi XUYÊN một blob KHÔNG phải "vắng": tổ tiên non-tree ⇒ 12 (Codex review 457affd, P1; xem t151)
+            rc, td = _ma_chan(mod, kho.tim, tree2, "README.md/x")
+            chot(rc == 12 and "tổ tiên" in td, f"tim qua blob phải 12, không được suy vắng: {rc} {td}")
             chot(kho.namespace(tree2, "ops/thu-hoi") == {}, "namespace của thư mục vắng phải rỗng")
             ns = kho.namespace(tree2, "ops/leases")
             chot(list(ns) == ["ops/leases/x.yaml"] and ns["ops/leases/x.yaml"][:2] == ("100644", "blob"), f"namespace sai: {ns}")
@@ -4960,6 +4963,15 @@ def t139_A12_catalog_mutant_A0_giet_dung_ly_do_va_ghi_SONG_kem_seam():
         ("F09-preflight-env-cha", "        if self._git_nguon(goc_kho, \"rev-parse\", \"--is-shallow-repository\").strip() == \"true\":\n",
          "        if _git(goc_kho, \"rev-parse\", \"--is-shallow-repository\").strip() == \"true\":\n",
          t149_review_F09_preflight_object_store_khong_ke_thua_env, "GIET", "KhoObject.__init__ preflight"),
+        # --- bổ sung sau Codex connector review trên 457affd (C1 P1, C2 P2, C3 P2) ---
+        ("C1-tim-to-tien-non-tree-la-vang", "                raise Chan(RC_KHONG_XAC_DINH,\n                           f\"KHÔNG_XÁC_ĐỊNH: tổ tiên của {duong} không phải thư mục (mode {mode} {loai}) — không suy vắng\")\n",
+         "                return None\n", t151_review_codex_to_tien_non_tree_metadata_rac_va_khoa_lan_kieu, "GIET", "KhoObject.tim"),
+        ("C1-consumer-bo-kiem-to-tien", "        _kiem_to_tien_la_tree(goc, ten_ref, THU_MUC_SO)\n", "",
+         t151_review_codex_to_tien_non_tree_metadata_rac_va_khoa_lan_kieu, "GIET", "_quet_so_thu_hoi_moi_ref"),
+        ("C2-consumer-bo-validate-marker", "            kiem_metadata_retired(muc[\"path\"], muc[\"mode\"], muc[\"type\"],\n                                  _doc_blob_text_12(goc, muc[\"ref\"], muc[\"path\"]) or b\"\")\n", "",
+         t151_review_codex_to_tien_non_tree_metadata_rac_va_khoa_lan_kieu, "GIET", "_kiem_so_rong_khi_chua_kich_hoat metadata"),
+        ("C3-sorted-khong-key", "khoá thừa {sorted(thua, key=repr)}", "khoá thừa {sorted(thua)}",
+         t151_review_codex_to_tien_non_tree_metadata_rac_va_khoa_lan_kieu, "GIET", "kiem_ban_ghi_thu_hoi"),
     ]
     ket = {"GIET": 0, "SONG": 0, "TIN_DUNG_GIA": [], "SAI_KY_VONG": []}
     with San() as s:
@@ -4991,8 +5003,8 @@ def t139_A12_catalog_mutant_A0_giet_dung_ly_do_va_ghi_SONG_kem_seam():
           f"tín dụng giả={len(ket['TIN_DUNG_GIA'])}")
     chot(not ket["TIN_DUNG_GIA"], f"mutant chết vì lỗi VÔ CAN (tín dụng giả): {ket['TIN_DUNG_GIA']}")
     chot(not ket["SAI_KY_VONG"], f"catalog lệch: {ket['SAI_KY_VONG']}")
-    chot(ket["GIET"] + ket["SONG"] == len(muts) == 33, f"mẫu số phải cố định 33: {ket}")
-    chot(ket["GIET"] == 30 and ket["SONG"] == 3, f"catalog kỳ vọng 30 giết / 3 SỐNG: {ket}")
+    chot(ket["GIET"] + ket["SONG"] == len(muts) == 37, f"mẫu số phải cố định 37: {ket}")
+    chot(ket["GIET"] == 34 and ket["SONG"] == 3, f"catalog kỳ vọng 34 giết / 3 SỐNG: {ket}")
 
 
 # wp488 review lượt 1: regression hints; fixture/control local, không mạng.
@@ -5295,6 +5307,63 @@ def t150_review2_F10_nguon_khong_utf8_la_12_khong_traceback():
         except UnicodeDecodeError:
             chot(False, "tên không phải UTF-8 làm CLI nổ UnicodeDecodeError — hợp đồng đòi Chan 12")
         chot(rc == 12 and "Traceback" not in e, f"tên không phải UTF-8 phải 12, không traceback: {rc} {e[-200:]!r}")
+
+
+@ca
+def t151_review_codex_to_tien_non_tree_metadata_rac_va_khoa_lan_kieu():
+    """Codex connector review trên 457affd (PR #492, review 5162390620) — ba finding, mỗi finding một chốt:
+    C1 (P1) tổ tiên của `ops/thu-hoi` là blob/symlink ⇒ 12 ở CẢ reader M4 lẫn consumer, không suy "sổ vắng";
+    C2 (P2) consumer phải validate marker retired qua schema sáu khoá TRƯỚC khi hỏi policy (marker rác + `{}` ⇒ 12);
+    C3 (P2) khoá thừa lẫn kiểu trong bản ghi thu hồi ⇒ 8, không TypeError. Kèm positive control cho từng chốt."""
+    mod = _nap_cong()
+    # C1 — reader M4: H thay `ops` bằng blob / symlink
+    with San() as s:
+        cay, (c0, c1, S) = _kho_do_thi(s)
+        for kind in ("blob", "symlink"):
+            _g_a0(cay, "reset", "-q", "--hard"); _g_a0(cay, "checkout", "-q", "-B", "h-ops-" + kind, S)
+            _g_a0(cay, "rm", "-rq", "ops")
+            if kind == "blob":
+                (cay / "ops").write_bytes(b"khong phai thu muc\n")
+            else:
+                (cay / "ops").symlink_to("docs")
+            _g_a0(cay, "add", "-A"); _g_a0(cay, "commit", "-qm", "ops " + kind)
+            H = _g_a0(cay, "rev-parse", "HEAD")
+            rc, o, e = _goi_main(mod, "kiem-thu-hoi-github", H, "--canonical-base", S, "--nhanh-mac-dinh", "master", "--root", str(cay))
+            chot(rc == 12 and "tổ tiên" in e and "TAP_THU_HOI_RONG" not in o,
+                 f"M4: ops={kind} phải 12, không được kết luận sổ rỗng: {rc} {o!r} {e[-160:]!r}")
+        # positive control: H xoá hẳn `ops` (tổ tiên VẮNG, không phải non-tree) ⇒ vẫn 0 ở A0
+        H_xoa = _them_commit(cay, "h-xoa-ops", S, {"docs/b.md": b"b\n"}, xoa=("ops/leases/x.yaml", "ops/lease_publish.py"))
+        rc, o, e = _goi_main(mod, "kiem-thu-hoi-github", H_xoa, "--canonical-base", S, "--nhanh-mac-dinh", "master", "--root", str(cay))
+        chot(rc == 0 and "TAP_THU_HOI_RONG" in o, f"ops vắng hẳn (không phải non-tree) phải 0: {rc} {e[-160:]!r}")
+    # C1 — consumer: một ref trên origin có `ops` là blob
+    with San() as s:
+        cay, g = _kho_thu(s)
+        g(cay, "checkout", "-q", "-b", "ops-blob")
+        g(cay, "rm", "-rq", "ops"); (cay / "ops").write_bytes(b"x\n")
+        g(cay, "add", "-A"); g(cay, "commit", "-qm", "ops blob"); g(cay, "push", "-q", "origin", "ops-blob")
+        rc, o, e = _goi_main(mod, "ai-dang-giu", "ops/x.md", "--root", cay)
+        chot(rc == 12 and "không phải thư mục" in e and "Traceback" not in e,
+             f"consumer: ops là blob phải 12, không suy sổ vắng: {rc} {e[-160:]!r}")
+    # C2 — consumer: marker rác + policy `{}` ⇒ 12; positive control: marker đúng schema + `{}` ⇒ 0
+    RET = "ops/thu-hoi/_ngoai-le-closure.retired.yaml"
+    POL = ".github/coordination/change-impact.v1.json"
+    for ten, marker, mong in (("marker rác", b"garbage\n", 12), ("marker đúng schema", _yaml_bytes(_metadata_retired()), 0)):
+        with San() as s:
+            cay, g = _kho_thu(s)
+            g(cay, "checkout", "-q", "-b", "meta")
+            for duong, noi_dung in ((RET, marker), (POL, b"{}\n")):
+                p = cay / duong; p.parent.mkdir(parents=True, exist_ok=True); p.write_bytes(noi_dung)
+            g(cay, "add", "-A"); g(cay, "commit", "-qm", ten); g(cay, "push", "-q", "origin", "meta")
+            rc, o, e = _goi_main(mod, "ai-dang-giu", "ops/x.md", "--root", cay)
+            chot(rc == mong and "Traceback" not in e, f"consumer {ten} + policy {{}} phải {mong}: {rc} {e[-200:]!r}")
+    # C3 — khoá thừa lẫn kiểu (int 1 + str extra): 8 với thông điệp khoá thừa, không TypeError
+    noi_dung = _yaml_bytes(_ban_ghi_thu_hoi()) + b"1: x\nextra: y\n"
+    try:
+        rc, msg = _ma_chan(mod, mod.kiem_ban_ghi_thu_hoi, "ops/thu-hoi/wp1-exec-1-codex-20260901.yaml", "100644", "blob", noi_dung)
+    except TypeError as ex:
+        chot(False, f"khoá thừa lẫn kiểu làm sorted ném TypeError thay vì Chan 8: {ex}")
+    chot(rc == mod.RC_NOI_DUNG and "khoá thừa" in str(msg), f"khoá thừa lẫn kiểu phải 8: {rc} {msg!r}")
+
 
 def main() -> int:
     qua, hong, bo_qua = 0, [], []

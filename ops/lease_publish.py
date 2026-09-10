@@ -1039,7 +1039,9 @@ def kiem_ban_ghi_thu_hoi(duong: str, mode: str, loai: str, noi_dung: bytes, bay_
     thua = khoa - set(_KHOA_THU_HOI_BAT_BUOC) - set(_KHOA_THU_HOI_TUY_CHON)
     thieu = [k for k in _KHOA_THU_HOI_BAT_BUOC if k not in khoa]
     if thua or thieu:
-        raise Chan(RC_NOI_DUNG, f"{duong}: khoá thừa {sorted(thua)} / thiếu {thieu}")
+        # `key=repr`: khoá YAML lẫn kiểu (int `1` + str) làm `sorted` ném TypeError thành traceback rc=1 thay vì 8
+        # (Codex review 457affd, P2) — bản ghi không tin cậy không được quyền chọn mã thoát.
+        raise Chan(RC_NOI_DUNG, f"{duong}: khoá thừa {sorted(thua, key=repr)} / thiếu {thieu}")
     sv = d["schema_version"]
     if type(sv) is not int or sv != 1:   # `1.0`/`True` đều bị loại — so KIỂU, không so bằng (F06)
         raise Chan(RC_NOI_DUNG, f"{duong}: schema_version phải là integer 1, được {sv!r}")
@@ -1520,7 +1522,10 @@ class KhoObject:
         buoc, oid, loai, mode = 0, tree_oid, "tree", "040000"
         for phan in duong.split("/"):
             if loai != "tree":
-                return None
+                # Tổ tiên là blob/symlink/gitlink: cấu trúc KHÔNG xác minh được, không phải "vắng" — trả None
+                # ở đây từng biến H thay `ops` bằng một blob thành `TAP_THU_HOI_RONG` rc=0 (Codex review 457affd, P1).
+                raise Chan(RC_KHONG_XAC_DINH,
+                           f"KHÔNG_XÁC_ĐỊNH: tổ tiên của {duong} không phải thư mục (mode {mode} {loai}) — không suy vắng")
             buoc += 1
             if buoc > self.ngan_sach["max_tree_or_alias_edges"]:
                 raise Chan(RC_KHONG_XAC_DINH, f"KHÔNG_XÁC_ĐỊNH: resolve {duong} > {self.ngan_sach['max_tree_or_alias_edges']} cạnh")
@@ -1545,13 +1550,17 @@ class KhoObject:
         self._td.cleanup()
 
 
-def _ls_tree_z(goc: Path, ref: str, thu_muc: str) -> list[tuple]:
+def _ls_tree_z(goc: Path, ref: str, thu_muc: str, de_quy: bool = True) -> list[tuple]:
     """`ls-tree -r -z` — tên đi NUL-delimited, KHÔNG qua lớp quote của Git (F02: tên Unicode thường như
     `thu hồi.yaml` bị quote thành `"thu h\\341\\273\\223i.yaml"` và dispatcher không thấy tiền tố).
     Đi qua `GOI_GIT` (cùng cửa với luật cũ, để đồ giả trạng thái của bộ test thay được); tên không phải
-    UTF-8 làm lớp text của cửa ấy ném ⇒ 12, không traceback."""
+    UTF-8 làm lớp text của cửa ấy ném ⇒ 12, không traceback. `de_quy=False` liệt kê ĐÚNG entry `thu_muc`
+    (không `-r`) — dùng để hỏi kiểu của một tổ tiên."""
     try:
-        p = GOI_GIT("ls-tree", "-r", "-z", ref, "--", thu_muc, cwd=goc)
+        if de_quy:
+            p = GOI_GIT("ls-tree", "-r", "-z", ref, "--", thu_muc, cwd=goc)
+        else:
+            p = GOI_GIT("ls-tree", "-z", ref, "--", thu_muc, cwd=goc)
     except OSError as e:
         raise Chan(RC_KHONG_XAC_DINH, f"KHÔNG_XÁC_ĐỊNH: không gọi được git: {e}") from None
     except UnicodeDecodeError:
@@ -1579,6 +1588,7 @@ def _quet_so_thu_hoi_moi_ref(goc: Path, refs: list[str]) -> list[dict]:
     ket = []
     # `ten_ref` chứ không phải `ref`: mutant A1 của t94 neo chuỗi lặp-theo-ref của `_quet_lease_toan_kho` phải giữ DUY NHẤT.
     for ten_ref in refs:
+        _kiem_to_tien_la_tree(goc, ten_ref, THU_MUC_SO)
         for mode, loai, oid, duong in _ls_tree_z(goc, ten_ref, THU_MUC_SO):
             if duong == THU_MUC_SO:
                 raise Chan(RC_KHONG_XAC_DINH,
@@ -1590,6 +1600,31 @@ def _quet_so_thu_hoi_moi_ref(goc: Path, refs: list[str]) -> list[dict]:
     return ket
 
 
+def _kiem_to_tien_la_tree(goc: Path, ref: str, thu_muc: str) -> None:
+    """Mọi tổ tiên của `thu_muc` trên `ref` phải là TREE. `ls-tree -r ref -- ops/thu-hoi` trả RỖNG khi `ops` là
+    blob/symlink/gitlink — trông y hệt "sổ vắng" và consumer từng đi tiếp rc=0 (Codex review 457affd, P1, cùng
+    lớp F02 "namespace không phải thư mục ⇒ 12")."""
+    phan = thu_muc.split("/")
+    for i in range(1, len(phan)):
+        tien_to = "/".join(phan[:i])
+        for mode, loai, _oid, duong in _ls_tree_z(goc, ref, tien_to, de_quy=False):
+            if duong == tien_to and loai != "tree":
+                raise Chan(RC_KHONG_XAC_DINH,
+                           f"KHÔNG_XÁC_ĐỊNH: {tien_to} tại {ref} không phải thư mục (mode {mode} {loai}) — "
+                           f"không suy {thu_muc} vắng")
+
+
+def _doc_blob_text_12(goc: Path, ref: str, duong: str):
+    """Đọc blob `ref:duong` qua `GOI_GIT` (text). Vắng/rc≠0 ⇒ ``None``; không giải mã được ⇒ 12 (F10 lượt 2)."""
+    try:
+        p = GOI_GIT("cat-file", "blob", f"{ref}:{duong}", cwd=goc)
+    except UnicodeDecodeError:   # nguồn không phải UTF-8 là 12, không traceback
+        raise Chan(RC_KHONG_XAC_DINH, f"KHÔNG_XÁC_ĐỊNH: {duong} tại {ref} không phải UTF-8") from None
+    if p is None or p.returncode != 0:
+        return None
+    return (p.stdout or "").encode("utf-8")
+
+
 def _kiem_so_rong_khi_chua_kich_hoat(goc: Path, refs: list[str]) -> None:
     if SO_THU_HOI_KICH_HOAT:
         return
@@ -1599,11 +1634,12 @@ def _kiem_so_rong_khi_chua_kich_hoat(goc: Path, refs: list[str]) -> None:
                        f"KHÔNG_XÁC_ĐỊNH: SO_THU_HOI_KICH_HOAT=False mà sổ có bản ghi {muc['path']} tại "
                        f"{muc['ref']} — bản ghi lọt trước kích hoạt: dừng, phục hồi có audit, không grandfather")
         if muc["tuyen"] == "metadata":
-            try:
-                p = GOI_GIT("cat-file", "blob", f"{muc['ref']}:{PATH_POLICY_CLOSURE}", cwd=goc)
-            except UnicodeDecodeError:   # policy không phải UTF-8 — nguồn hỏng là 12, không traceback (F10 lượt 2)
-                p = None
-            if p is None or p.returncode != 0 or _doc_policy_json((p.stdout or "").encode("utf-8")) is None:
+            # Marker PHẢI qua đúng schema sáu khoá TRƯỚC khi hỏi policy — Q13 "mọi lỗi metadata ⇒ 12". Trước đây
+            # consumer chỉ hỏi policy nên marker RÁC + policy `{}` đi qua rc=0 (Codex review 457affd, P2).
+            kiem_metadata_retired(muc["path"], muc["mode"], muc["type"],
+                                  _doc_blob_text_12(goc, muc["ref"], muc["path"]) or b"")
+            noi_dung_p = _doc_blob_text_12(goc, muc["ref"], PATH_POLICY_CLOSURE)   # policy không UTF-8 ⇒ 12 (F10 lượt 2)
+            if noi_dung_p is None or _doc_policy_json(noi_dung_p) is None:
                 raise Chan(RC_KHONG_XAC_DINH,
                            f"KHÔNG_XÁC_ĐỊNH: {muc['path']} có mặt tại {muc['ref']} mà policy {PATH_POLICY_CLOSURE} "
                            f"vắng hoặc không phải JSON object (Q13)")

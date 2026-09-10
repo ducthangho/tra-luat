@@ -4,13 +4,22 @@ Hai việc, và việc thứ hai là **tự bác một câu tôi vừa viết �
 
 **Không nâng `VERSION`.** Vẫn `1.36.68` từ r336.
 
-**GIỚI HẠN NGUỒN.** (a) **Tự đo được**: mọi phép chạy `ops/cong_cu.py` trong mục này, và mọi số Git.
-(b) **Thuật lại**: run/job/bước CI của GitHub. Loại (b) ghi nhãn tại chỗ.
+**GIỚI HẠN NGUỒN.** (a) **Tự đo được**: mọi phép chạy `ops/cong_cu.py` trong mục này, và mọi số đọc
+được từ **object/ref CÓ SẴN trong cây** (băm, byte, quan hệ tổ tiên, nội dung tệp theo ref).
+(b) **Thuật lại**: run/job/bước CI của GitHub — **và mọi số REF MÁY CHỦ tại một thời điểm**
+(`git ls-remote`), vì kho không giữ response thô nào của chúng. Loại (b) ghi nhãn tại chỗ.
+**Bản trước của đoạn này viết "mọi số Git" và cross-review lượt 2 chấm đúng chỗ đó (P2):** gộp như
+thế thì `ls-remote` — một phép hỏi MÁY CHỦ, chụp tại một thời điểm, không tái lập được offline —
+lọt vào hạng tự đo được chỉ vì nó chạy bằng lệnh `git`. Tên công cụ không quyết định hạng nguồn;
+**thứ quyết định là dữ liệu ấy còn đọc lại được từ kho hay không**.
 
 `r360` bị chiếm ở nhánh chưa merge của phiên khác (xem r361). **Bản đầu của mục này khai `r362`
 trống sau khi quét `refs/remotes/origin` — ĐÚNG KẾT LUẬN, SAI PHƯƠNG PHÁP**, và cross-review PR #497
 chấm đúng chỗ đó (P2). `refs/remotes/origin` là **bộ đệm cục bộ**, không phải máy chủ; `CLAUDE.md`
-ghi sẵn lớp hỏng này. Đo lại bằng phép canh hai nguồn mà chính doctrine ấy quy định:
+ghi sẵn lớp hỏng này. Đo lại bằng phép canh hai nguồn mà chính doctrine ấy quy định
+*(THUẬT LẠI — cả bốn số dưới đây chụp ở phiên điều phối; kho KHÔNG giữ response `ls-remote` nào,
+cũng KHÔNG giữ ảnh bộ đệm TRƯỚC khi fetch, nên không ai tái lập được chúng offline. Cross-review
+lượt 2 chấm đúng chỗ này (P2))*:
 
 ```
 git ls-remote --heads origin        ⇒ 320   (HỎI máy chủ)
@@ -170,23 +179,41 @@ Không có phép này thì mọi số trong verdict chỉ là lời kể về m�
 chạy trên bản chép: đổi `if chi is None` thành `if False` làm `t13` `rc=0 → rc=1` (cổng CÓ răng);
 nhưng **5/5** đột biến LỜI KHAI — `128→129`, `37→36` giữ tổng 41, đổi cha thứ nhất của merge sang một
 SHA có thật, đổi *"xuất xứ"* lại thành *"chủ"*, đổi *mù 1* thành *mù 0* — đều `rc=0` ở cả
-`doc-claims-check --strict` lẫn `release-verify --strict` sau khi tái sinh manifest. **Không cổng nào
-trong kho canh được nghĩa của những câu ấy**, và reviewer nói thẳng là **không** biến sự sống sót đó
-thành yêu cầu xây cổng mới. Ghi lại ở đây vì đúng bài học *"NGHĨ RA được phép thử mà KHÔNG CHẠY nó
+`doc-claims-check --strict` lẫn `release-verify --strict` sau khi tái sinh manifest. **HAI CỔNG VỪA
+NÊU không phát hiện năm đột biến ấy trong phép thử này** — và reviewer nói thẳng là **không** biến
+sự sống sót đó thành yêu cầu xây cổng mới. *(Bản trước viết "không cổng nào trong kho canh được nghĩa
+của những câu ấy"; cross-review lượt 2 chấm đúng chỗ đó (P2). Phép đo chạy trên **hai** cổng, kết
+luận nói về **mọi** cổng — hai cổng không đại diện mặc nhiên cho 31 bước cổng của `ci.yml`, và mười
+hai lệnh xanh trên cây nguyên vẹn cũng không phải phép đo ấy.)* Ghi lại ở đây vì đúng bài học *"NGHĨ RA được phép thử mà KHÔNG CHẠY nó
 thì phép thử ấy KHÔNG TỒN TẠI"* ở chiều ngược lại: phép thử đã chạy, và nó nói cổng im lặng.
 
 **Khiếm khuyết của GÓI, do reviewer bắt — và nó làm hỏng đúng con số mục này từng khoe.**
 `EVIDENCE.md` khai `origin` của cây được review trỏ mirror cục bộ; thật ra điều phối đã
-`git remote set-url` sang URL GitHub sau khi soạn EVIDENCE và quên sửa câu ấy. Reviewer tin câu sai
-đó, kết luận `ls-remote origin` sẽ đi ra mạng (sandbox không mạng) nên **không chạy nó** — nên phép so
+`git remote set-url` sang URL GitHub sau khi soạn EVIDENCE và quên sửa câu ấy. Nguyên văn verdict
+lượt 1 (dòng 157): *"`EVIDENCE.md` nói origin trỏ mirror, nhưng `git config --local --get
+remote.origin.url` thực tế trả URL GitHub. Vì vậy không chạy `ls-remote origin`"* — nên phép so
 `321/321` trong verdict là **hai tập CỤC BỘ**, KHÔNG phải phép canh hai nguồn. Đã nâng thành cảnh báo
-`GOI-LUOT-1-KHAI-ORIGIN-TRO-MIRROR-THUC-TE-TRO-GITHUB` ở mục lục `ops/reviews/README.md`. Cùng họ với
-*"phải biết mình đang đứng ở LỚP NÀO"*: một câu mô tả hạ tầng đo trôi khỏi hạ tầng thật, và thứ chết
-theo là phép đo mà câu ấy chặn đường.
+`GOI-LUOT-1-KHAI-ORIGIN-TRO-MIRROR-THUC-TE-TRO-GITHUB` ở mục lục `ops/reviews/README.md`.
 
-**NỢ ĐÃ ĐO, chưa mở Issue.** Lượt 1 chết một lần trước khi chạy trọn — `failed to connect to
-websocket … Connection refused (os error 111)`, nguyên nhân THOÁNG QUA (probe ngay sau đó `rc=0`,
-**0** lỗi mạng). Nhưng `run.json` của lượt chết **đứng nguyên** ở `trang_thai: dang_chay`,
+**Bản trước của đoạn này kể NGƯỢC nhân quả, và cross-review lượt 2 chấm đúng chỗ đó (P2).** Nó viết
+*"reviewer tin câu sai đó, kết luận `ls-remote` sẽ đi ra mạng nên không chạy nó"*. Verdict nói điều
+khác hẳn: reviewer **ĐO** cấu hình thật, **thấy nó lệch với EVIDENCE**, và chính vì cấu hình thật là
+URL GitHub trong một sandbox không mạng nên `ls-remote` vô dụng. Tức reviewer **không hề bị câu sai
+ấy dẫn đi** — họ bắt được nó. Hai chỗ hỏng trong một câu: (a) gán cho reviewer một **trạng thái tâm
+trí** thay vì trích thứ hiện vật ghi, và (b) đảo chiều nhân quả để câu chuyện gọn hơn. Cùng họ với
+*"hỏi chỗ TIỆN TAY thay vì hỏi chỗ KẾT LUẬN ĐƯỢC GHI"*: kết luận đã nằm sẵn ở dòng 157 của tệp vừa
+nhập kho, và người viết tóm tắt lại kể theo trí nhớ. Bài học thật của khối này vẫn đứng — một câu mô
+tả hạ tầng đo trôi khỏi hạ tầng thật thì phép đo dựa trên nó chết theo — chỉ có phần *ai bị lừa* là
+sai, và đúng ra thì **không ai bị lừa cả**.
+
+**NỢ CHƯA MỞ ISSUE — và cả khối này là THUẬT LẠI, không hiện vật nào trong kho chứng thực.**
+*(Nguồn duy nhất là `run.json` + `stderr.log` trong scratchpad; chúng CỐ Ý không vào kho, nên người
+đọc kho không tái lập được câu nào dưới đây. Bản trước gắn nhãn "NỢ ĐÃ ĐO" cho chính khối này —
+cross-review lượt 2 chấm đúng chỗ đó (P2): "đã đo" đọc thành có phép đo kiểm lại được, mà không có.)*
+Lượt 1 chết một lần trước khi chạy trọn — `failed to connect to websocket … Connection refused
+(os error 111)`; probe ngay sau đó `rc=0` với **0** lỗi mạng, nên nguyên nhân được xếp THOÁNG QUA —
+**tương quan, không phải nhân quả**: transcript của lượt chết đủ để đọc thông báo lỗi, không đủ để
+chứng minh cái gì đã sửa nó. Nhưng `run.json` của lượt chết **đứng nguyên** ở `trang_thai: dang_chay`,
 `ma_thoat: null`: cơ chế *"lượt chết vẫn được ghi nhận"* của `launcher.py run` không chốt lại bản ghi
 khi chính launcher bị giết. Mọi phép đếm *"bao nhiêu lượt đang chạy"* dựa trên `run.json` vì thế nói
 dối theo chiều ĐANG CHẠY.
@@ -206,7 +233,8 @@ packet_loop.py doctrine-scan         ⇒ rc=0
 packet_loop.py adr-song              ⇒ rc=0
 ```
 
-**`146/146` là số của cây ĐÃ HỢP NHẤT, và nó vừa là `121/121` mấy phút trước.** Giữa vòng lặp
+**`146/146` là số của cây ĐÃ HỢP NHẤT; `121/121` là số của cùng phép chạy trên cây TRƯỚC merge.**
+Giữa vòng lặp
 review, `origin/master` nhảy `28ba133 → 0721811` (PR #492, sổ thu hồi lease A0) và một trong ba tệp
 nó đụng là **`ops/lease_publish_test.py`** — chính tệp giữ `t27`. Nên đã merge master vào nhánh rồi
 đo lại: khai `121/121` cho một cây mà không lượt CI nào sẽ chạy đúng là lớp lỗi mục này sinh ra để
@@ -215,7 +243,8 @@ chặn. Giao write set bằng **rỗng** (master: `ops-thu-hoi-admission.yml` ·
 `ops/reviews/**`), nên merge sạch, không xung đột.
 
 **Và phép canh hai nguồn — thứ mục này khoe ở đầu — vừa BẮT ĐƯỢC THẬT, lần này không nhờ may.**
-Đo lại trước khi dựng gói lượt 2:
+Đo lại trước khi dựng gói lượt 2 *(THUẬT LẠI, cùng lý do khối trên: không response thô, không ảnh
+bộ đệm trước fetch trong kho)*:
 
 ```
 git ls-remote --heads origin                    ⇒ 322   (HỎI máy chủ)
@@ -227,15 +256,32 @@ comm -13  ⇒ THỪA 1: pr487-merge   (nhánh đã xoá trên máy chủ — vô
 **`322` so `321` lệch đúng `1`, mà số nhánh mù là `2`** — vì một nhánh thừa cục bộ che mất một nhánh
 thiếu. Đây chính là ca `wc -l` nói dối mà `CLAUDE.md` cấm canh bằng số đếm; ai đọc `322/321` rồi kết
 luận "thiếu một" sẽ đi tìm sai một nhánh và bỏ sót nhánh kia. Sau `git fetch` đủ refspec: **mù = 0**.
-Quét lại **323** ref cho `r362` ⇒ đúng **1** (chính nhánh này). Nhưng quét `r363` ⇒ **1**, ở
-`claude/land-492-bookkeeping` — **đúng một trong hai nhánh vừa mù**. Lần trước kết luận đứng nhờ may
-(nhánh mù mang `r356`); lần này nếu vẫn mù thì mục kế tiếp của kho đã va chạm `r363`. Cùng một phép
-đo, hai lượt, và chỉ lượt này trả công.
+Quét lại **323** ref của `refs/remotes/origin` **ở kho điều phối** cho `r362` ⇒ đúng **1** (chính
+nhánh này). Nhưng quét `r363` ⇒ **1**, ở `claude/land-492-bookkeeping` — **đúng một trong hai nhánh
+vừa mù**. Lần trước kết luận đứng nhờ may (nhánh mù mang `r356`); lần này, nếu vẫn mù, **mục kế tiếp
+do bất kỳ ai soạn** — không phải mục này, vốn là `r362` — sẽ va chạm `r363`. Cùng một phép đo, hai
+lượt, và chỉ lượt này trả công.
+
+**`323` là số của MỘT tập cụ thể, và cross-review lượt 2 bắt được chỗ nó bị lẫn (P2).** Gói giao cho
+reviewer chứa một mirror có **324** head, vì điều phối đẩy thêm **một ref GIAO HÀNG** (`pr497-head`,
+trỏ đúng exact head) sau khi đã đếm 323. Ref ấy là ref thật, không phải alias `HEAD` — nên quét
+`r362` trên toàn mirror ra **2**, không phải 1. **Đừng lặng lẽ lọc nó đi để khớp lời khai**: hai con
+số thuộc hai tập khác nhau, và câu đúng là *"323 nhánh của kho điều phối, cộng 1 ref giao hàng do
+chính điều phối tạo"*. `EVIDENCE.md` của gói lượt 2 khai `323` cho mirror — sai hiện trạng gói, đã
+nâng thành cảnh báo ở `ops/reviews/README.md`.
 
 Ba số G5 ở trên **khác** con số reviewer đo (`lỗi đột biến=1`, tổng `DO`) vì **nền đo khác, không
 phải mã khác**: sandbox reviewer thiếu `jsonschema` nên `T2` và đột biến của nó `KHÔNG_ĐO_ĐƯỢC`.
-Cài `jsonschema==4.26.0` + `actionlint 1.7.7` + `shellcheck 0.9.0` — đúng ba bản CI ghim — thì cùng
-cây cho `rc=0`. Nói ra vì một con số trong tài liệu không ghi ĐIỀU KIỆN ĐO thì sẽ trôi mà không ai biết.
+Cài `jsonschema==4.26.0` + `actionlint 1.7.7` + `shellcheck 0.9.0` thì cùng cây cho `rc=0`. Nói ra vì
+một con số trong tài liệu không ghi ĐIỀU KIỆN ĐO thì sẽ trôi mà không ai biết.
+
+**Nhưng chỉ HAI trong ba bản ấy được ghim, và bản trước của đoạn này khai cả ba — cross-review lượt 2
+chấm đúng chỗ đó (P2).** Đo: `ci.yml:93` ghim `jsonschema==4.26.0`, `ci.yml:97` đặt `AL_VER: 1.7.7`;
+còn `ci.yml:101` chỉ gọi `bash ops/cai_cong_cu.sh shellcheck` **không nêu phiên bản**, và
+`ops/cong_cu.yaml` khai `shellcheck.ban_ghim: null` (so với `actionlint.ban_ghim: 1.7.7`). Nên
+`0.9.0` là **bản apt của nền này ĐÃ TRẢ VỀ**, không phải bản CI cưỡng chế — CI có thể nhận bản khác
+mà không ai biết. Viết "đúng ba bản CI ghim" làm điều kiện tái lập nghe **chắc hơn cấu hình thật**,
+đúng lớp lỗi *"lời khai rộng hơn phép đo"* mà mục này đang đi sửa cho chỗ khác.
 
 # ★ dev-side — r361: ghi sổ #495 — 9 tệp trong `ops/reviews/`, và ba finding connector chấm vào chính hồ sơ review (2026-09-10)
 

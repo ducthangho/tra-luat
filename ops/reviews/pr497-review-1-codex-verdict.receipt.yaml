@@ -85,9 +85,20 @@ ba_lop_bang_chung_DUONG_reviewer_tu_dung:
     doc-claims lẫn release-verify sau khi tái sinh manifest (cổng KHÔNG có răng với ngữ nghĩa).
     Reviewer nói thẳng KHÔNG biến sự sống sót của đột biến văn xuôi thành yêu cầu xây cổng mới.
   tu_khai_khong_do_duoc: >-
-    Bảng đo có **17** hàng mang nhãn KHÔNG ĐO ĐƯỢC cho phía GitHub (run/job/attempt/thời lượng/
-    trạng thái Issue/phiên). Reviewer KHÔNG suy từ Git ra trạng thái GitHub, và nói rõ không tự
-    chứng nhận `landed`.
+    Bảng đo có **28** hàng chứa nguyên văn nhãn `KHÔNG ĐO ĐƯỢC` — con số này gồm CẢ giới hạn ngoài
+    GitHub (ref lịch sử, thời gian treo nợ, ngữ nghĩa "ba lần"), không riêng run/job/attempt.
+    Reviewer KHÔNG suy từ Git ra trạng thái GitHub, và nói rõ không tự chứng nhận `landed`.
+  tu_khai_khong_do_duoc_quy_tac_dem: >-
+    Cắt tệp verdict từ `## BẢNG ĐO` tới `**Đột biến và phép thử`, đếm dòng bắt đầu bằng `|` có
+    chứa chuỗi `KHÔNG ĐO ĐƯỢC` ⇒ **28**. Quy tắc CƠ HỌC, tái lập được từ kho, không cần mạng.
+  DINH_CHINH_so_17: >-
+    Bản đầu của biên nhận này (và hàng mục lục) ghi **17** hàng "cho phía GitHub" mà KHÔNG kèm
+    danh sách hàng lẫn tiêu chí chọn, nên không ai suy lại được tác giả đã loại những hàng nào.
+    Cross-review lượt 2 chấm đúng chỗ đó (P2) và đếm cơ học ra **28**; ngay một tập chỉ lấy hàng
+    rõ ràng về PR/Issue/CI/authority/phiên đã có **21** dòng. Chữa bằng cách đổi sang khẳng định
+    ĐẾM ĐƯỢC ở trên, thay vì chống chế cho một nhóm ngữ nghĩa chưa từng được định nghĩa. Bài học:
+    **một con số phân loại mà không kèm quy tắc phân loại thì không phải phép đo** — nó chỉ là
+    ấn tượng của người viết, và nó trông y hệt phép đo.
 
 model_reviewer_identity:
   provider: openai_codex
@@ -124,9 +135,16 @@ model_reviewer_identity:
       bị giết. Đây là NỢ ĐÃ ĐO, chưa mở Issue, và nó làm mọi phép đếm "bao nhiêu lượt đang chạy"
       dựa trên `run.json` bị nói dối theo chiều ĐANG CHẠY.
   nguon_cac_scalar_tren: >-
-    Đọc từ `run.json` trong scratchpad; tệp ấy KHÔNG vào kho ⇒ toàn khối này là ATTESTATION.
-    Riêng `prompt_sha256` thì đối chiếu được: hai lượt (chết và xong) có CÙNG băm prompt, tức lượt
-    thứ hai chạy đúng prompt của lượt thứ nhất, không phải một prompt viết lại.
+    Đọc từ `run.json` trong scratchpad; tệp ấy KHÔNG vào kho ⇒ **toàn khối này là ATTESTATION,
+    KHÔNG TRỪ TRƯỜNG NÀO** — `prompt_sha256` cũng vậy.
+  DINH_CHINH_prompt_sha256: >-
+    Bản đầu tự cấp một ngoại lệ: *"Riêng `prompt_sha256` thì đối chiếu được: hai lượt có CÙNG băm
+    prompt"*. SAI, và cross-review lượt 2 chấm đúng chỗ đó (P2). Trong kho chỉ có **một** digest —
+    chính con số đã chép vào biên nhận này; hai `run.json` và hai bản prompt đều nằm ngoài kho.
+    Đo thẳng: `git grep -l fd117770fa4c651aad6194d4dfb9adfc51b60ba78a3a9ea4928823799c480c85 HEAD`
+    chỉ trả về CHÍNH tệp biên nhận này. So một chuỗi với chính nó không phải phép đối chiếu.
+    Đáng ghi vì đây là ATTESTATION tự nâng mình lên PHÉP ĐO ngay bên trong dòng khai nó là
+    attestation — chốt dựng ra để chống bị lừa, rồi tự thủng ở dòng kế tiếp.
 
 nang_luc_do_cua_goi:
   kho_nong: false

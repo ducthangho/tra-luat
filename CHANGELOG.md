@@ -147,18 +147,26 @@ trong khi chính mục này hứa dán nhãn mọi số GitHub tại chỗ. Cả
 Nợ đã mở thành Issue **#498** với đúng các đính chính trên *(THUẬT LẠI — việc mở Issue và nội
 dung hiện tại của nó nằm ngoài kho; không hiện vật nào trong kho chứng thực)*.
 
-## 3. Hồ sơ cross-review của chính mục này — verdict lượt 1 vào kho TRƯỚC khi land
+## 3. Hồ sơ cross-review của chính mục này — HAI lượt, verdict vào kho TRƯỚC khi land
 
 Hai mục trên đã đi qua **cross-review khác nền** (`codex`) ngay trên nhánh, và verdict vào kho cùng
 PR chứ không để lại sau. Đây là chỗ khác #490: lượt 7 của #490 là **trả nợ** (viết sau merge), còn
-lượt này là **tiền kiểm** — cả hai finding được vá TRƯỚC khi PR land, nên hồ sơ review không phải
+hai lượt này là **tiền kiểm** — mọi finding được vá TRƯỚC khi PR land, nên hồ sơ review không phải
 mô tả một bản đã cố định.
+
+**Và việc nhập verdict GIỮA vòng lặp đã tự chứng minh giá của nó.** Lượt 2 soi chính hồ sơ lượt 1 và
+ra **7 P2**, trong đó **ba** nằm ngay trong biên nhận lượt 1 và hai hàng mục lục của nó — tức trong
+những tệp vừa viết ĐỂ KHAI CHO ĐÚNG. Nếu để verdict lại sau khi land như #490 thì ba chỗ ấy đi thẳng
+vào master, đúng vết `#495` (r361: connector chấm ba finding vào chính hồ sơ review). **Hồ sơ review
+không tự review được nó.**
 
 | tệp | vai trò |
 |---|---|
-| `ops/reviews/pr497-review-1-codex-verdict.md` | verdict nguyên văn, **28 955** byte / **161** dòng, `sha256 a6bf4bea…` |
-| `ops/reviews/pr497-review-1-codex-verdict.receipt.yaml` | biên nhận, neo blob ghim `8104480` |
-| `ops/reviews/README.md` | 1 hàng mục lục + 1 hàng cảnh báo (`t27` đòi cả hai) |
+| `ops/reviews/pr497-review-1-codex-verdict.md` | verdict lượt 1, **28 955** byte / **161** dòng, `sha256 a6bf4bea…` |
+| `ops/reviews/pr497-review-1-codex-verdict.receipt.yaml` | biên nhận lượt 1, neo blob ghim `8104480` |
+| `ops/reviews/pr497-review-2-codex-verdict.md` | verdict lượt 2, **43 791** byte / **259** dòng, `sha256 206aaf28…` |
+| `ops/reviews/pr497-review-2-codex-verdict.receipt.yaml` | biên nhận lượt 2, neo blob ghim `4d2a6f6` |
+| `ops/reviews/README.md` | 2 hàng mục lục + 2 hàng cảnh báo (`t27` đòi đủ cho MỖI verdict) |
 
 **`P1 0 · P2 1 · P3 1`, và con số ấy đo bằng `grep -cE '^### .*\[Pn\]'` trên chính tệp verdict**,
 không đọc lời tóm tắt của reviewer — đúng lý do bài học `van-xuoi-do-duoc-van-vuot-nguon` ra đời ở
@@ -217,6 +225,44 @@ chứng minh cái gì đã sửa nó. Nhưng `run.json` của lượt chết **�
 `ma_thoat: null`: cơ chế *"lượt chết vẫn được ghi nhận"* của `launcher.py run` không chốt lại bản ghi
 khi chính launcher bị giết. Mọi phép đếm *"bao nhiêu lượt đang chạy"* dựa trên `run.json` vì thế nói
 dối theo chiều ĐANG CHẠY.
+
+**LƯỢT 2 — `0 P1 · 7 P2 · 0 P3` trên head `1d58500`, cả bảy đã vá.** Bảy finding, một hạng, một
+lớp: **lời khai rộng hơn phép đo**. Điều phối tự đo lại từng cái trước khi nhận; **không cái nào bị
+bác**. Đủ bảy, kèm phép đo bác nó:
+
+| slug | lời khai | đo được |
+|---|---|---|
+| `hai-loi-khai-thieu-nhan-va-sai-co-trang` *(lần thứ **HAI**)* | *"mọi số Git"* thuộc hạng tự đo được | `ls-remote` là phép hỏi **MÁY CHỦ**, không response thô trong kho ⇒ phải là thuật lại |
+| `attestation-runtime-bi-nang-thanh-phep-do` | *"Riêng `prompt_sha256` thì đối chiếu được"* | `git grep` digest ấy ⇒ trả về **chính** tệp biên nhận. So một chuỗi với chính nó |
+| `so-hang-github-khong-co-quy-tac-dem` | **17** hàng KHÔNG ĐO ĐƯỢC *"cho phía GitHub"* | đếm cơ học ⇒ **28**; và 17 không kèm quy tắc nào để suy lại |
+| `ke-sai-ly-do-reviewer-khong-chay-ls-remote` | *"reviewer TIN câu sai đó"* | verdict lượt 1 **dòng 157**: reviewer **ĐO** cấu hình, **THẤY LỆCH**, bỏ lệnh vô dụng |
+| `evidence-dem-thieu-ref-giao-head` | gói có **323** nhánh | **324** — thêm ref giao hàng `pr497-head`; quét `r362` trên mirror ra **2** |
+| `khai-shellcheck-duoc-ci-ghim-khi-khong-co-pin` | *"đúng **ba** bản CI ghim"* | `ops/cong_cu.yaml`: `shellcheck.ban_ghim: null`; `ci.yml:101` không nêu phiên bản ⇒ **2/3** |
+| `hai-cong-duoc-khai-thanh-moi-cong-trong-kho` | *"**không cổng nào** trong kho canh được"* | phép đo chạy trên **hai** cổng |
+
+**Ba cái đắt nhất, vì chúng là lỗi của người đang đi sửa đúng lớp lỗi ấy:**
+· `attestation-…` — một ATTESTATION **tự nâng mình lên PHÉP ĐO ngay bên trong dòng khai nó là
+attestation**. Chốt dựng ra để chống bị lừa, thủng ở dòng kế tiếp.
+· `ke-sai-ly-do-…` — hai lỗi trong một câu: **gán cho người khác một trạng thái tâm trí** thay vì
+trích thứ hiện vật ghi, và **đảo chiều nhân quả** cho câu chuyện gọn hơn. Kết luận đúng nằm sẵn ở
+dòng 157 của tệp vừa nhập kho; người viết tóm tắt lại kể theo trí nhớ. Cùng họ *"hỏi chỗ TIỆN TAY
+thay vì hỏi chỗ KẾT LUẬN ĐƯỢC GHI"*.
+· `so-hang-…` — **một con số phân loại không kèm quy tắc phân loại thì không phải phép đo**; nó là
+ấn tượng của người viết, và nó trông y hệt phép đo.
+
+**Số finding tăng `1 → 7` KHÔNG có nghĩa chất lượng giảm:** năm trong bảy nhắm vào hiện vật chỉ tồn
+tại SAU lượt 1 (biên nhận lượt 1, hai hàng mục lục, gói lượt 2, đoạn CHANGELOG viết sau lượt 1) —
+bề mặt review tăng, không phải chất lượng giảm. **Nhưng cũng đừng đọc ngược thành *"mọi finding mới
+đều là bề mặt mới"***: `hai-loi-khai-thieu-nhan-va-sai-co-trang` là slug **LẶP**, đây là lần thứ hai
+trong chuỗi này. `CLAUDE.md` có sẵn ngưỡng: **đếm HÌNH DẠNG lỗi, đừng chỉ đếm lỗi** — cùng hình dạng
+ba lần thì câu hỏi đúng là *"có nên khai kiểu này không"*, không phải *"vá thế nào"*.
+
+**Khiếm khuyết của GÓI, lượt thứ HAI liên tiếp, cùng HÌNH DẠNG.** Lượt 1: `EVIDENCE.md` khai `origin`
+trỏ mirror trong khi nó trỏ GitHub. Lượt 2: `EVIDENCE.md` khai mirror có 323 nhánh trong khi nó có
+324 — điều phối thêm ref giao hàng SAU khi đếm rồi quên sửa câu. Cả hai là **câu mô tả hạ tầng đo
+trôi khỏi hạ tầng thật**, và cả hai chỉ lộ vì reviewer ĐO thay vì đọc. Đã nâng thành hai cảnh báo ở
+`ops/reviews/README.md`. Nếp: **mọi câu trong `EVIDENCE.md` phải đo lại NGAY TRƯỚC khi phóng**, vì
+gói được dựng nhiều bước và câu viết ở bước 3 chết ở bước 5.
 
 **Đo tại chỗ sau khi vá** (`git`, `python`, tất cả trong cây này, không mạng, `core.abbrev=7`):
 

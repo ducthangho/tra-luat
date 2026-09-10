@@ -3,21 +3,21 @@ schema_version: 1
 kieu: dac_ta_packet
 packet_id: wp-codex-credential-refresh
 packet_issue: 484
-revision: 2
-generation: 2
+revision: 3
+generation: 3
 environment: local
 platform: windows
 executor: codex
 risk: sensitive
 review_class: sensitive
-authority: https://github.com/ducthangho/tra-luat/issues/484#issuecomment-5605568174
+authority: https://github.com/ducthangho/tra-luat/issues/484#issuecomment-5612165878
 base_sha: c0a5cbe89a90588115262e1a2c3ac84cbd98be9e
 base_tree: f9897f6dba19484900776d7af7e9b042070d4ce1
-branch: codex/wp484-g2-windows
+branch: codex/wp484-g3-windows
 depends_on: []
 ---
 
-# WP484 r2 — khôi phục Codex credential trên Windows
+# WP484 r3 — khôi phục Codex credential trên Windows
 
 ## Objective
 
@@ -33,8 +33,8 @@ Materialize credential an toàn vào home Codex có hiệu lực; cho nhận sna
 .claude/dev/launcher_test.py
 .claude/hooks/session-start.sh
 .claude/hooks/session_start.py
-ops/handoff/wp-codex-credential-refresh-exec-g2.md
-ops/leases/wp-codex-credential-refresh-exec-g2.yaml
+ops/handoff/wp-codex-credential-refresh-exec-g3.md
+ops/leases/wp-codex-credential-refresh-exec-g3.yaml
 ops/specs/wp-codex-credential-refresh.md
 ```
 
@@ -68,3 +68,15 @@ Không ghi CHANGELOG.md (#491), RELEASE_MANIFEST.json, VERSION, workflow, lease 
 ## Hash
 
 Spec hash là SHA-256 toàn bộ bytes UTF-8 LF của tệp này, lưu ngoài tệp ở lease và comment authority/activation. Write-set hash dùng các đường trong khối text trên đã sort ordinal, UTF-8 LF, có LF cuối. Không tự chèn hash của tệp vào chính tệp.
+
+## Continuation r3/g3 — quyết định chủ kho ngày 10-09-2026
+
+R3 giữ nguyên sáu acceptance sản phẩm của r2; các mô tả lịch sử g2 ở trên không cấp quyền hồi sinh lease cũ. Entry candidate là3dcbfd7567a6c92be2d1182db95b84a4e738dbc1/tree8d6381d4920acceffb38b7015e0ed550c8b76bd8. Product diff base vẫn làc0a5cbe89a90588115262e1a2c3ac84cbd98be9e. G3 chỉ đổi metadata trước review; không tự rebase/merge master.
+
+Quyết định chủ kho: https://github.com/ducthangho/tra-luat/issues/484#issuecomment-5612165878, theo CONTINUATION_G3_PROPOSAL.md SHA25614b4c9bb800181cc31bd3f2aae7e31f1f516b1b604992fa3c70dd6d6d05af27d. Lease g2 đã hết hạn, g3 chỉ bắt đầu sau admission và readback grant riêng. Không sửa lịch sử g1/g2.
+
+Budget kế thừa: g2 đã dùng1 content attempt trên tổng3. State-dir g3 mới có trần2 attempt còn lại; tổng toàn chuỗi=g2(1)+g3(0..2), không reset. Commit metadata g3 tính là content attempt mới. Giữ2 Codex review lịch sử, Claude R3 timeout, g2 scope review, A1 approve, A2 timeout và A3 timeout. A2/A3 đã sinh nội dung, không refund. G3 được thêm tối đa2 Claude review calls, mỗi call20phút; model ratchet tối thiểu claude-fable-5/max. Các trần protocol30invocations/360cloud-minutes vẫn áp dụng;90phút/run,240phút/lease,heartbeat30phút. Không tự nới khi không hội tụ.
+
+Reviewer dùng source read-only và scratch mới chuẩn bị sẵn với harness của repository; không recursive cleanup, không blanket Write/Edit vào source. Permission-mode default và danh sách tools tường minh. User-level codex_supervision_guard.py ngoài write set: không sửa/tắt/lách. Cờ JSON chỉ xuất kết quả cuối; transcript metadata mới là bằng chứng tiến độ, không stdout0. Permission failure phải được khai, không giả approve. Full candidate gồm metadata g3 phải được review exactSHA; prior runtime evidence chỉ được reuse nếu xác minh byte identity và khai giới hạn.
+
+Được đăng authority/admission, verdict và receipt đã validate lên issue484/successorPR; không đăng credential/raw transcript. Chỉ push successor và mở draftPR khi candidate đủ điều kiện chạy fullCI cuối theo chỉ thị chủ kho. Chưa đủ required checks không được claim gate xanh. Không merge/land/deploy/LIVE/force-push.

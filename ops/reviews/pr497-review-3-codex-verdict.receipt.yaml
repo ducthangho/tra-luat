@@ -116,8 +116,15 @@ bon_finding_con_lai:
       Đính chính của biên nhận lượt 2 dùng `git grep -l <digest> HEAD -- .` để chứng minh chỉ CHÍNH
       tệp biên nhận lượt 1 chứa digest prompt. Đúng trên head lượt 2 đã review; SAI trên HEAD đang
       giao — verdict lượt 2 vừa nhập CHÉP LẠI digest ấy trong phần trích finding.
-    phep_do: >-
-      Reviewer chạy cùng truy vấn ở hai SHA: `1d58500` ⇒ **1** tệp; `HEAD` ⇒ **2** tệp
+    phep_do_GHIM_SHA: >-
+      `git grep -l <digest> <sha> -- .` ⇒ `1d58500` **1** tệp · `4e6a2d5` **2** · `25974e7` **3** ·
+      `f6ec9c0` **4**. Tăng MỘT mỗi lần một verdict vào kho.
+    DINH_CHINH_chinh_truong_nay: >-
+      Bản đầu của trường này ghi "`HEAD` ⇒ **2** tệp" — tức NEO HEAD, đúng lớp lỗi mà slug này đặt
+      tên, nằm trong chính dòng khai đã sửa nó. Đúng tại `4e6a2d5`, SAI từ `25974e7` trở đi. Điều
+      phối tự bắt bằng một lần quét toàn kho tìm mọi phép đo còn neo `HEAD`; không lượt nào chấm.
+    phep_do_cua_reviewer_luot_3: >-
+      Reviewer chạy cùng truy vấn ở hai SHA: `1d58500` ⇒ **1** tệp; head họ review ⇒ **2** tệp
       (`pr497-review-1-…receipt.yaml` + `pr497-review-2-…verdict.md`). Điều phối chạy lại, khớp.
     khong_bac_gi: >-
       KHÔNG tạo ra nguồn prompt thứ hai (cả hai đều là BẢN CHÉP) và KHÔNG bác bài học "prompt là

@@ -147,9 +147,10 @@ model_reviewer_identity:
     `git grep -l fd117770… 1d58500 -- .` ⇒ **1** tệp, chính biên nhận này.
     So một chuỗi với chính nó không phải phép đối chiếu.
     KHÔNG dùng `HEAD` cho phép đo này: nó là MỤC TIÊU DI ĐỘNG, và chính hồ sơ review làm nó di
-    động — mỗi verdict nhập kho lại CHÉP digest ấy trong phần trích finding. Đo đủ ba mốc:
-    `1d58500` ⇒ **1** · `4e6a2d5` ⇒ **2** · `25974e7` ⇒ **3** tệp. Cùng một lệnh, ba đáp án, và
-    chỉ bản ghim SHA mới còn đúng sau khi ai đó thêm một verdict.
+    động — mỗi verdict nhập kho lại CHÉP digest ấy trong phần trích finding, nên con số TĂNG MỘT
+    mỗi lần: `1d58500` ⇒ **1** · `4e6a2d5` ⇒ **2** · `25974e7` ⇒ **3** · `f6ec9c0` ⇒ **4** tệp.
+    Chuỗi này KHÔNG khép: nó còn tăng tiếp ở mỗi verdict sau. Cùng một lệnh, bốn đáp án, và chỉ
+    bản GHIM SHA mới còn đúng sau khi ai đó thêm một verdict.
     Đáng ghi vì đây là ATTESTATION tự nâng mình lên PHÉP ĐO ngay bên trong dòng khai nó là
     attestation — chốt dựng ra để chống bị lừa, rồi tự thủng ở dòng kế tiếp.
 

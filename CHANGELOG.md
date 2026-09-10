@@ -7,8 +7,20 @@ Hai việc, và việc thứ hai là **tự bác một câu tôi vừa viết �
 **GIỚI HẠN NGUỒN.** (a) **Tự đo được**: mọi phép chạy `ops/cong_cu.py` trong mục này, và mọi số Git.
 (b) **Thuật lại**: run/job/bước CI của GitHub. Loại (b) ghi nhãn tại chỗ.
 
-`r360` bị chiếm ở nhánh chưa merge của phiên khác (xem r361); `r362` quét **mọi** ref
-`refs/remotes/origin` ⇒ **0 nhánh**, nên lấy được.
+`r360` bị chiếm ở nhánh chưa merge của phiên khác (xem r361). **Bản đầu của mục này khai `r362`
+trống sau khi quét `refs/remotes/origin` — ĐÚNG KẾT LUẬN, SAI PHƯƠNG PHÁP**, và cross-review PR #497
+chấm đúng chỗ đó (P2). `refs/remotes/origin` là **bộ đệm cục bộ**, không phải máy chủ; `CLAUDE.md`
+ghi sẵn lớp hỏng này. Đo lại bằng phép canh hai nguồn mà chính doctrine ấy quy định:
+
+```
+git ls-remote --heads origin        ⇒ 320   (HỎI máy chủ)
+git for-each-ref refs/remotes/...   ⇒ 320   (ĐỌC bộ đệm)
+comm -23  ⇒ 1 nhánh MÙ: codex/wp484-g3-windows
+```
+
+**Hai số BẰNG NHAU mà TẬP LỆCH** — đúng lý do doctrine cấm canh bằng `wc -l`. Sau khi fetch đủ
+(mù = 0), quét lại 320 nhánh: `r362` chỉ xuất hiện trên chính nhánh của PR này. Kết luận đứng, nhưng
+nó đứng nhờ may: nhánh mù mang `r356` ở đầu tệp. **Nếu nó mang `r362` thì mục này đã va chạm.**
 
 ## 1. #490 đạt `landed` — và bằng chứng còn thiếu VỐN ĐÃ TỒN TẠI, chỉ chưa ai đọc
 
@@ -93,9 +105,30 @@ tại / không bắt"*. Danh sách rỗng ấy là hệ quả của `chi` có gi
 KHÔNG ĐƯỢC GỌI thành lời khai rằng cơ chế vắng mặt, và không chạy một phép thử nào trước khi ghi nó
 vào sổ. Phép thử bác nó tốn đúng **hai lần chạy** `cong_cu.py`.
 
-**Chỗ nhận việc còn lại:** mã thuộc `ops/cong_cu.py` + `ops/cong_cu.yaml`, do packet **#290** thi công
-theo đặc tả `ops/specs/HA-TANG-CONG-CU-TAT-DINH.md`. Chưa có Issue mở nào cho nó lúc viết mục này
-*(đọc 30 Issue mở, 0 khớp)*, và **không phiên nào đang chạy** về hạ tầng công cụ.
+**Chỗ nhận việc — và HAI ĐÍNH CHÍNH nữa mà cross-review PR #497 chấm đúng (P2 ×2).**
+
+Mã thuộc `ops/cong_cu.py` + `ops/cong_cu.yaml`, **xuất xứ** packet **#290** (đặc tả
+`ops/specs/HA-TANG-CONG-CU-TAT-DINH.md`). Bản đầu viết *"chủ: #290"* và *"đừng sửa mà không qua
+packet ấy"* — **SAI THẨM QUYỀN**: #290 đã land và đặc tả **đóng băng**, nên nó không có
+generation/lease/write authority hiện hành để ai đó "đi qua". Protocol nói thẳng: *"việc ngoài spec
+sang successor Packet"* (§28) · *"kết quả đã landed chỉ được sửa bằng corrective"* (§116) ·
+*"Phát hiện ngoài spec phải xuất handoff/successor rồi kết thúc"* (§164); `AGENTS.md:22-23`:
+*"Không có Packet Spec hoặc authority được protocol hiện hành thừa nhận thì dừng."*
+⇒ **#290 chỉ là xuất xứ; việc này cần packet KẾ NHIỆM/corrective được cấp thẩm quyền.**
+
+Bản đầu còn khai *"đọc 30 Issue mở, 0 khớp"* và *"không phiên nào đang chạy"* như **sự thật trần**,
+trong khi chính mục này hứa dán nhãn mọi số GitHub tại chỗ. Cả hai câu đều hỏng:
+
+- `30` là **cỡ trang**, không phải tổng. Đo lại: **128** Issue mở; truy vấn có từ khoá cho
+  `total_count: 101`. Câu ấy khai một phép quét **≈23%** như thể đã quét hết.
+- Quét đúng cho ra **bốn Issue liên đới** — `#249` (`t33` đòi actionlint mà không đòi shellcheck),
+  `#295`, `#269`, `#297` — **cùng lớp, khác cơ chế nên không trùng**, nhưng phải dẫn chiếu. `#249`
+  nhắm `ops/lease_publish_test.py`; nợ này nhắm `ops/cong_cu.py`.
+- **KHÔNG ĐO ĐƯỢC:** có phiên nào đang chạy về hạ tầng công cụ hay không. Vắng mặt trong truy vấn
+  **Issue** không nói gì về **phiên** — hai phép đo khác nhau, và gộp chúng là mời người khác làm
+  trùng việc.
+
+Nợ đã mở thành Issue **#498** với đúng các đính chính trên.
 
 # ★ dev-side — r361: ghi sổ #495 — 9 tệp trong `ops/reviews/`, và ba finding connector chấm vào chính hồ sơ review (2026-09-10)
 

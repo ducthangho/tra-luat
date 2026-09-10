@@ -216,8 +216,11 @@ def tong_hop(ban_ke, thu_muc_goc=None, chi=None):
     #     thiếu shellcheck-> canary DO  ("SUY_GIAM: thieu shellcheck nen actionlint am tham bo SC*")
     #   Nên đây là MÀU XANH GÂY HIỂU LẦM Ở MỨC BƯỚC, KHÔNG phải lỗ độ phủ — trừ khi `#9` bị skip vì
     #   một bước trước đó đỏ (đã xảy ra: `rg` đỏ ⇒ `#9` skip ⇒ lượt ấy không đo suy giảm).
-    # Chủ: packet #290 / `ops/specs/HA-TANG-CONG-CU-TAT-DINH.md`. ĐỪNG sửa hành vi ở đây mà không
-    # qua packet ấy — `chinh_sach`/`bat_buoc` là hợp đồng của đặc tả, không phải chi tiết nội bộ.
+    # XUẤT XỨ: packet #290 / `ops/specs/HA-TANG-CONG-CU-TAT-DINH.md` — ĐÃ LAND, đặc tả ĐÓNG BĂNG,
+    # nên nó KHÔNG còn generation/lease/write authority để ai đó "đi qua" (protocol §28/§116/§164;
+    # AGENTS.md:22-23). Sửa hành vi ở đây đòi một packet KẾ NHIỆM/corrective được cấp thẩm quyền —
+    # nợ đã mở thành Issue #498, liên đới #249. `chinh_sach`/`bat_buoc` là hợp đồng của đặc tả,
+    # không phải chi tiết nội bộ: đừng đụng.
     if chi is None:
         for ten, dn in cc.items():
             cn = dn.get("canary")

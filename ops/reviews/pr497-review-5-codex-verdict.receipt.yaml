@@ -1,0 +1,149 @@
+# BIÊN NHẬN GIAO HÀNG — cross-review LƯỢT 5 của PR #497, KHÁC NỀN (codex).
+# Verdict: changes_requested — 0 P1 / 8 P2 / 0 P3. TIỀN KIỂM: cả tám đã vá TRƯỚC khi PR land.
+# Dạng NGẮN, theo nếp §4 số 4: chỉ trường ĐO ĐƯỢC + một mục ngắn mỗi finding. Bài học ở CHANGELOG.
+# HẠNG NGUỒN — ATTESTATION: `model_reviewer_identity`, `tuan_thu_cam_cua_reviewer`,
+# `github_submitter_identity`. Các trường còn lại đo lại được từ kho, không cần mạng.
+
+schema_version: 2
+receipt_id: pr497-review-5-codex-20260910-ef61b2a5
+kind: review_delivery_receipt
+packet_id: 'PR497-R362-LANDED-490-VA-RUT-KHAI-R361'
+lease_id: khong-co-lease
+phase_key: HO-SO-CROSS-REVIEW-PHIEN-20260910
+luot: 5
+role: reviewer
+provider: codex
+executor_provider: claude
+cross_provider: true
+assurance: cross_reviewed
+verdict: changes_requested
+verdict_path: ops/reviews/pr497-review-5-codex-verdict.md
+verdict_sha256: ce7add4fd6aa38c4acf38e98c2dbe27d796bca2160fbc7d5c11273a6f870986b
+verdict_bytes: 42310
+reviewed_sha: f6ec9c0650de2716776e8b58a63b3141095097fa
+evidence_url: https://github.com/ducthangho/tra-luat/blob/3c82ae30702e44b9290237d0fa8c4fc145e01589/ops/reviews/pr497-review-5-codex-verdict.md
+evidence_url_ghi_chu: >-
+  Neo BLOB ghim `3c82ae3` — commit ĐẦU TIÊN chứa tệp verdict, đo bằng
+  `git log --all --diff-filter=A -- ops/reviews/pr497-review-5-codex-verdict.md`, trả ĐÚNG 1 commit.
+so_p1: 0
+so_p2: 8
+so_p3: 0
+so_p_do_bang_cach: "`grep -cE '^### .*\\[Pn\\]'` trên chính tệp verdict ⇒ 0 / 8 / 0."
+tree_khop: >-
+  KHÔNG ĐO ĐƯỢC — verdict lượt 5 không khai OID cây cho `f6ec9c0` (hai OID nó nhắc là cây của lượt
+  1 và lượt 2, trích lại từ hồ sơ cũ). Bốn lượt trước đều khai và đều khớp; lượt này không có gì để
+  đối chiếu, và biên nhận này KHÔNG suy sự vắng mặt ấy thành bất cứ điều gì.
+
+tam_finding:
+  - slug: t27-duoc-gan-ca-trach-nhiem-kiem-tep-cua-t26
+    loai: 'LỖI VỀ CHỐT — không phải văn xuôi'
+    van_de: '4 thông điệp commit + `CHANGELOG` khai "`t27` đòi đủ ba mảnh cho MỖI verdict".'
+    phep_do_DIEU_PHOI_TU_CHAY: >-
+      Trên bản chép, gọi thẳng từng ca: bỏ TỆP VERDICT ⇒ `t27` **XANH**, `t26` **ĐỎ** ("trỏ vào tệp
+      không có"); phục hồi ⇒ cả hai XANH. Trước đó đã đo: bỏ biên nhận / bỏ hàng mục lục / bỏ hàng
+      cảnh báo ⇒ `t27` ĐỎ cả ba.
+    nguyen_nhan_cau_truc: >-
+      `t27` duyệt verdict CÓ TRÊN ĐĨA để đòi biên nhận, rồi duyệt biên nhận để kiểm tên trong bảng;
+      lượt duyệt sau KHÔNG đòi tệp verdict tồn tại. `t26` mới gọi `f.is_file()`.
+    da_va: 'Chốt đúng là `t26` CỘNG `t27`. Sửa ở `CHANGELOG`; 4 thông điệp commit đã ghi thì không sửa lịch sử.'
+    vi_sao_khai_sai: 'Chạy BA phép thử (biên nhận · mục lục · cảnh báo) rồi khai một kết luận cần BỐN — chưa từng thử bỏ chính tệp verdict.'
+  - slug: attestation-runtime-bi-nang-thanh-phep-do
+    lan_thu: 4
+    van_de: 'Lượt 4 khai "đổi 5/5 nơi" và "chuỗi ấy còn 0 lần trong toàn kho". Cả hai SAI.'
+    phep_do: >-
+      Có **SÁU** vị trí. Vị trí thứ sáu (`BN1.…tree_khop`) sống sót vì phép chứng minh dùng `grep`
+      THEO DÒNG, mà YAML gấp scalar qua nhiều dòng nên không dòng nào chứa trọn chuỗi.
+      Phép đo ĐÚNG: `yaml.safe_load` → duyệt đệ quy mọi scalar → `re.sub(r'\s+',' ')` → tìm.
+    da_va: 'Sửa vị trí thứ sáu; quét lại bằng phương pháp đúng ⇒ **0** lời khai sống.'
+  - slug: bang-tu-dinh-chinh-khong-tai-lap-duoc-quy-tac-duong-dan
+    lan_thu: 2
+    van_de: 'Số `5/7` và `4/6` không sinh từ chính quy tắc đã viết ra trước.'
+    phep_do: >-
+      Bộ trích chỉ bắt đường dẫn dạng ĐẦY ĐỦ, mà verdict dẫn tắt (*"receipt lượt 2"*, *"README:273"*).
+      Áp đúng quy tắc cho cả hai dạng ⇒ `0/2 · 7/7 · 6/6 · 5/5`.
+    da_va: >-
+      **XOÁ BẢNG.** Ba con số cho cùng một câu hỏi, cả ba do điều phối viết, bị chấm hai lượt liên
+      tiếp ⇒ ngưỡng `CLAUDE.md` áp cho chính nó. Thay bằng mệnh đề định tính không có số để trôi.
+  - slug: phep-grep-prompt-khong-ghim-snapshot-sau-khi-nhap-verdict
+    lan_thu: 3
+    van_de: 'Danh sách "5 nơi đã sửa" không bao trùm; `BN2:80` và `BN3` còn neo `HEAD`.'
+    da_va: >-
+      Ghim SHA và nêu CHUỖI thay vì một con số ở mọi nơi còn lại. Quét lại bằng parse-YAML ⇒
+      **0** mệnh đề neo HEAD còn sống.
+  - slug: hai-loi-khai-thieu-nhan-va-sai-co-trang
+    lan_thu: 5
+    van_de: '`BN3.do_duoc` vẫn để lượt Codex connector trong phép đếm và khai `so_luot_bi_cham: 4`; hàng README lượt 3 cũng vậy.'
+    da_va: >-
+      Tách **3 lượt ĐẾM ĐƯỢC** (mỗi lượt một tệp verdict, `grep -c '^### <slug>'`) khỏi **1 lượt
+      connector THUẬT LẠI** (không response review trong kho). Bỏ "cộng dòng ĐỐI CHIẾU" khỏi phép
+      đếm — nó đếm hai lần một lượt.
+  - slug: bien-nhan-luot-bon-tu-cap-hang-do-cho-cac-truong-ngoai-runtime
+    van_de: '`BN4` khai "Mọi trường khác đo lại được từ kho" — quá rộng.'
+    da_va: 'Khai thêm `tuan_thu_cam_cua_reviewer` và `github_submitter_identity` cũng là ATTESTATION. Biên nhận này áp ngay từ đầu tệp.'
+  - slug: bien-nhan-ngan-chua-thuc-hien-ban-va-cau-truc-da-khai
+    van_de: 'Ba con số sai và một lời khai quá rộng trong chú thích `BN4`.'
+    phep_do: 'Lượt 5 đo `wc -l` ⇒ BN4 **149** / BN3 **260** (chú thích khai 146 / 253). Khối `nam_finding` là năm object nhiều dòng, không phải "một dòng mỗi finding".'
+    nguyen_nhan: 'Số đo TRƯỚC lần sửa cuối — đúng nếp §4 số 3 mà chính chú thích ấy viện dẫn.'
+    da_va: >-
+      Vòng đầu sửa ba số; **lượt 6 chấm lại** vì chúng đã trôi tiếp (`e27d839` ⇒ BN4 **165** /
+      BN3 **273**). Nên cuối cùng **XOÁ HẲN phép so số dòng** ở cả `CHANGELOG` §4, chú thích BN4 và
+      hàng mục lục: mẫu số thay đổi mỗi lần chạm vào tệp, nên neo SHA cũng vô nghĩa — con số ấy chỉ
+      nói về một bản đã qua. Giữ mệnh đề không cần số: **văn xuôi trong biên nhận đã rút gọn**.
+      Cũng bỏ "cả lớp rủi ro chết theo kiến trúc" ở cả ba nơi — thứ đo được là văn xuôi ÍT ĐI.
+    ba_moc_da_do: '`f6ec9c0` ⇒ 253/149 · `3c82ae3` ⇒ 260/149 · `e27d839` ⇒ 273/165 — ba lần viết, ba cặp số.'
+  - slug: tong-ket-pham-vi-van-dung-o-ba-luot-va-nam-hang
+    van_de: '§3 còn "BA lượt" và "3 hàng mục lục + 2 hàng cảnh báo" trong khi cùng mục đã có phần LƯỢT 4.'
+    phep_do: 'Đếm hàng README: **4** mục lục PR497 + **2** cảnh báo.'
+    da_va: 'Sửa tiêu đề §3, câu mở đầu, và hàng vai trò.'
+
+goi_luot_5_SACH: >-
+  Reviewer khai không phát hiện lệch giữa cấu hình gói hiện tại, `do-goi.txt` và `EVIDENCE.md` —
+  lượt thứ BA liên tiếp gói sạch kể từ khi chuyển sang script đo-ở-bước-cuối.
+
+model_reviewer_identity:
+  provider: openai_codex
+  surface: codex_cli
+  transport: machine
+  model_yeu_cau: gpt-6-astra
+  model_da_chay: KHONG_DO_DUOC
+  session_run_id: ef61b2a5
+  run_id_day_du: ef61b2a55e8f469089eab9665e0aa08e
+  ten_lan_chay: cross-review-pr497-luot5
+  prompt_sha256: 3696e2f85e3dbc9bcb694f27e2ff69718a9646f759d614d7964c296a54a113cd
+  bat_dau_utc: '2026-09-10T09:55:35.014191+00:00'
+  ket_thuc_utc: '2026-09-10T10:15:49.051544+00:00'
+  thoi_luong_giay: 1214.037
+  ma_thoat: 0
+  trang_thai: xong
+  stdout_byte: 270
+  stdout_sha256: 732fbad388220089c1483d8de71f5090e4b6e2e84c39ce9ea4223acc952a3d14
+  stderr_byte: 846773
+  stderr_sha256: 988403c5c320c45317a6e6bf3d3c7d9c9bb215337c2dee4c7c20d7163a0754b3
+  so_lan_chet_truoc_khi_xong: 0
+  nguon: 'Đọc từ `run.json` ngoài kho ⇒ TOÀN KHỐI là ATTESTATION, `prompt_sha256` không ngoại lệ.'
+
+tuan_thu_cam_cua_reviewer:
+  cay_kho_sach: true
+  commit_them_ngoai_head: 0
+  bang_chung: 'Reviewer khai kiểm cuối `status --porcelain` rc=0 stdout rỗng. ATTESTATION.'
+  khong_tu_soan_noi_dung_tan_cong: 'Reviewer tự khai: chỉ chạy suite/fixture sẵn có. ATTESTATION.'
+
+github_submitter_identity:
+  actor: ducthangho
+  la_tac_gia_PR: true
+  ghi_chu: '`ADR-0040`: verdict do tài khoản tác giả PR vận chuyển KHÔNG là merge authorization.'
+  phien_van_chuyen: https://claude.ai/code/session_01UN8WRS5Bc5pBBzYPDqs9Dx
+  nguon: 'ATTESTATION — không xác thực được từ kho.'
+
+anchor:
+  loai: canonical_ancestry
+  cuong_do: cao
+  mo_ta: 'Blob verdict ghim `3c82ae3`.'
+  gioi_han: 'Chỉ vững nếu land bằng MERGE hoặc fast-forward; SQUASH phá quan hệ tổ tiên.'
+
+khong_do_duoc:
+  - 'Model đã phục vụ và `thread_id` của lượt codex.'
+  - 'Mọi scalar runtime (`run.json` ngoài kho).'
+  - 'OID cây mà lượt 5 đã đọc — verdict không khai.'
+  - 'Trạng thái GitHub tại thời điểm reviewer đọc: sandbox không mạng.'
+  - 'Lượt CI nào đã chạy trên `f6ec9c0` — cố ý không đốt CI trong vòng lặp review.'

@@ -76,6 +76,24 @@ byte khai trong receipt là LỜI KHAI. Cảnh báo `VERDICT-BYTES-VA-SO-P-TRONG
 `SO-P1-P2-…` của r367; receipt PR #510 lượt 2 đã ghi cả `verdict_bytes` và mutant 269934→269933 sống 4/4.
 Phạm vi nợ không tăng thêm trường; giữ nguyên receipt PR #510 đã land.
 
+## Codex connector trên `a41fc69` (bỏ draft 19:39Z, Completed 19:52:04Z) — hai P1, đọc TRƯỚC khi merge (trả nợ "chờ connector")
+
+- **P1 "Remove cross-approved assurance from the incomplete rereview" — ĐÚNG, đã đo.** Verdict lượt 2 của #511
+  (`cfe61825…`) không có mục `## ĐỐI CHIẾU LƯỢT TRƯỚC` mà `docs/PROTOCOL_DA_PHIEN.md` ("Từ lượt review thứ HAI trở đi…")
+  và khung VERDICT của adapter đòi; chỉ có hàng "Đóng P2 lượt1 …" trong bảng đo (dòng 355–359). Lỗi ở PROMPT lượt 2
+  do tác giả soạn (không đòi mục ấy). Sửa trong PR: `assurance` của receipt lượt 2 hạ `cross_approved` → `cross_reviewed`,
+  caveat mới `APPROVE-LUOT-2-THIEU-MUC-DOI-CHIEU-LUOT-TRUOC-assurance-ha-xuong-cross_reviewed` + hàng README. Verdict
+  vẫn `approve` 0/0/0 khác nền — chỉ mức bảo đảm đổi. **Cùng khuyết tật ở receipt ĐÃ LAND `pr510-review-2` (r367)** —
+  không sửa receipt đã land, ghi nợ dưới. Từ #516 lượt 2 trở đi PROMPT đã đòi mục này (verdict `e2d0fc65…` có bảng
+  bốn trạng thái). Connector còn đòi fixture validator từ chối receipt lượt ≥ 2 `cross_approved` mà verdict thiếu phân
+  loại canonical — đụng `ops/bien_nhan_v2.py`, ngoài PR hồ sơ ⇒ nợ.
+- **P1 "Re-anchor both verdict URLs into the committed ancestry" — KHÔNG ÁP DỤNG, đã đo.** Connector đo trên commit
+  `6fe742e` — **không tồn tại trong kho** (`git cat-file -t 6fe742e` fatal sau `fetch --prune`): đó là squash tổng hợp
+  của chính connector, cùng hình dạng sự cố #460 (commit `403fe12…` không tồn tại). Trên head thật `a41fc69`:
+  `120d47a` là tổ tiên (`merge-base --is-ancestor` rc=0), `bien_nhan_v2 --root .` 83 ĐẠT / 0 vi phạm; hai lượt review
+  đều đo ba lối land: merge/ff giữ neo, squash ⇒ 2 vi phạm — đúng `anchor.gioi_han` đã ghi trong receipt và đúng tiền lệ
+  kho land bằng merge commit. Không đổi `evidence_url`.
+
 ## NỢ (mở ở r369)
 
 - **Cổng cho `so_p*` + `verdict_bytes` trong receipt** — nợ đã ghi ở r367, nay được xác nhận lại; trạng thái chưa có
@@ -86,6 +104,10 @@ Phạm vi nợ không tăng thêm trường; giữ nguyên receipt PR #510 đã 
 - **Hai PR hồ sơ song song (r368 #493 · r369 #511)** cùng chạm README/CHANGELOG — PR land sau phải merge master và
   chạy lại 4 cổng; số ở mục này là số của nhánh này trước khi merge.
 - Nợ r367 còn nguyên: cổng `so_p*`, `SO-LEASE-KHONG-NAM-MOT-CHO`, `AG-T0-01B` (lease không tự chết khi packet land).
+- **Receipt `pr510-review-2` (r367) khai `cross_approved` với verdict thiếu mục ĐỐI CHIẾU LƯỢT TRƯỚC** — cùng khuyết
+  tật connector bắt ở #516; receipt đã land, chưa sửa; cần packet hồ sơ đính chính hoặc đợi cổng dưới.
+- **Cổng cấu trúc verdict lượt ≥ 2** — `bien_nhan_v2` chưa từ chối receipt `cross_approved` mà verdict thiếu phân loại
+  canonical bốn trạng thái; fixture chưa có (đụng gate code, ngoài PR hồ sơ).
 
 # ★ dev-side — r367: ghi sổ #510 — hai verdict codex chấm CHÍNH hồ sơ r366 của #505; 5 P2 + 1 P3 vá rồi approve; merge theo chỉ thị "chọn A" (2026-09-11)
 

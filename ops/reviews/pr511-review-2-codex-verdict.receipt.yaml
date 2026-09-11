@@ -17,7 +17,7 @@ role: reviewer
 provider: codex
 executor_provider: claude
 cross_provider: true
-assurance: cross_approved
+assurance: cross_reviewed
 verdict: approve
 verdict_path: ops/reviews/pr511-review-2-codex-verdict.md
 verdict_sha256: cfe618258d782354b84b9dbeb733bf2861adfc04d94edd4cc3fb85a6effe842e
@@ -100,6 +100,23 @@ anchor:
   gioi_han: 'Vững khi land bằng merge commit hoặc fast-forward; squash phá quan hệ tổ tiên.'
 
 verdict_usage_caveats:
+  - id: APPROVE-LUOT-2-THIEU-MUC-DOI-CHIEU-LUOT-TRUOC-assurance-ha-xuong-cross_reviewed
+    muc: P1
+    mo_ta: >-
+      Codex connector trên #516 head a41fc69 (review 19:52:04Z, P1 "Remove cross-approved assurance from the incomplete
+      rereview") — ĐÃ ĐO: verdict lượt 2 (tệp này trỏ tới, sha256 cfe61825…) KHÔNG có mục `## ĐỐI CHIẾU LƯỢT TRƯỚC`
+      mà PROTOCOL_DA_PHIEN §"Từ lượt review thứ HAI trở đi" và khung VERDICT của adapter cross-review đòi từ lượt 2
+      (mỗi finding lượt trước phải mang MỘT trong bốn trạng thái ĐÃ VÁ THẬT / VÁ HỜ / VÁ SINH LỖI MỚI / CHƯA VÁ).
+      Verdict chỉ có các hàng "Đóng P2 lượt1 …" trong `## Bảng đo lại` (dòng 355–359) với chữ "ĐÓNG". Nguyên nhân:
+      PROMPT lượt 2 do tác giả soạn KHÔNG đòi mục ấy. Vì thế `assurance` hạ từ `cross_approved` xuống
+      `cross_reviewed`: verdict vẫn là `approve` 0/0/0 của reviewer khác nền, nhưng hợp đồng tái-review chưa được
+      thực hiện đúng dạng — không được coi biên nhận này là đã thanh toán nợ review của #511 ở mức cross_approved.
+      Cùng khuyết tật ở receipt ĐÃ LAND `pr510-review-2-codex-verdict.receipt.yaml` (r367, verdict 41c3533c… không có
+      mục ấy, chỉ có bảng "Đóng từng finding lượt 1") — không sửa receipt đã land; ghi nợ ở CHANGELOG r369.
+    phai_lam_gi_khi_chay_lai: >-
+      Muốn mức cross_approved cho #511 thì cần một lượt tái-review độc lập có mục ĐỐI CHIẾU LƯỢT TRƯỚC đúng dạng trên
+      6adb7ff (đã merge — chỉ còn giá trị hồ sơ). Từ #516 lượt 2 trở đi PROMPT đã đòi mục này (verdict rvhs516-2 có).
+      Nợ cổng: bien_nhan_v2 chưa kiểm cấu trúc verdict lượt ≥ 2 — fixture chưa có, ghi ở CHANGELOG r369.
   - id: APPROVE-HO-SO-la-dieu-kien-DUNG-merge-theo-LUAT-CHUNG-chu-kho-14-4xZ
     muc: P2
     mo_ta: >-

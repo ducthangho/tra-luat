@@ -1265,7 +1265,7 @@ Lưu ý một chỗ dễ đọc nhầm: mục 5 ở trên vá **LỜI KHAI** *"�
 `bo-sot-pham-vi-ref-va-vat-chat-hoa` nói **BẢNG TRÍCH bỏ sót** chính câu ấy. Vá cái trước KHÔNG
 đóng cái sau — hai lỗi khác nhau trên cùng một dòng văn bản.
 
-## Cross-review PR #493 — MƯỜI BỐN lượt, và hình dạng lỗi lặp lại là VÁ HỜ
+## Cross-review PR #493 — MƯỜI LĂM lượt, và hình dạng lỗi lặp lại là VÁ HỜ
 
 Hồ sơ vá lời khai sai thì cũng bị soi như mọi thứ khác.
 
@@ -1293,7 +1293,8 @@ tắt có ích**, không hơn. Verdict gốc của các lượt cross-review PR 
 | 11 | `b43d4ab` | `changes_requested` · **0 P1 · 0 P2 · 2 P3** | **2 ĐÃ VÁ THẬT · 0 VÁ HỜ · 0 VÁ SINH LỖI MỚI · 1 CHƯA VÁ** (đối chiếu **3** slug lượt 10) |
 | 12 | `e921131` | `changes_requested` · **0 P1 · 0 P2 · 3 P3** (2 lớp B + nợ D) | **1 ĐÃ VÁ THẬT · 0 VÁ HỜ · 0 VÁ SINH LỖI MỚI · 1 CHƯA VÁ** (đối chiếu **2** slug lượt 11) |
 | 13 | `89d938e` | `changes_requested` · **0 P1 · 0 P2 · 2 P3** (1 lớp B + nợ D) | **2 ĐÃ VÁ THẬT · 0 VÁ HỜ · 0 VÁ SINH LỖI MỚI · 1 CHƯA VÁ** (đối chiếu **3** slug lượt 12) |
-| 14 | `f618e01` | `changes_requested` · **0 P1 · 0 P2 · 4 P3** (1 lớp A + 1 lớp B + **2** nợ D) | (điền ở lượt sau) |
+| 14 | `f618e01` | `changes_requested` · **0 P1 · 0 P2 · 4 P3** (1 lớp A + 1 lớp B + **2** nợ D) | **0 ĐÃ VÁ THẬT · 0 VÁ HỜ · 1 VÁ SINH LỖI MỚI · 1 CHƯA VÁ** (đối chiếu **2** slug lượt 13) |
+| 15 | `d47ea59` | `changes_requested` · **0 P1 · 0 P2 · 5 P3** (F + C + E + **2** nợ D) | **1 ĐÃ VÁ THẬT · 0 VÁ HỜ · 1 VÁ SINH LỖI MỚI · 2 CHƯA VÁ** (đối chiếu **4** slug lượt 14) |
 
 Lượt 5 `approve` rồi lượt 6–8 lại `changes_requested` **không** phải mâu thuẫn: điều kiện dừng đổi
 từ *"hết P1"* sang *"hết P2"* rồi *"hết P3"* theo chỉ thị chủ kho, nên câu hỏi giao cho reviewer mỗi
@@ -1594,10 +1595,10 @@ nhãn nguồn runtime, lượt 12 bỏ chỗ dè dặt *"được cho là"*, lư
 Thông điệp merge lần 5 ghi *"2/2/1/4/11 ở năm lần merge"*. Sai. Đọc lại **chính thông điệp commit của
 năm lần merge ấy** — chúng nằm sẵn trong lịch sử, tôi chỉ cần `git log` thay vì nhớ:
 
-| # | merge | master mang vào | biên nhận thêm | vi phạm lúc CHƯA commit |
+| # | merge | master mang vào | biên nhận THÊM MỚI (`--diff-filter=A`) | vi phạm lúc CHƯA commit |
 |---:|---|---|---:|---:|
 | 1 | `7e236cf` | `c31d8f1` | 6 | **6** |
-| 2 | `dd4a3ae` | `0721811` | 2 | **1** |
+| 2 | `dd4a3ae` | `0721811` | 1 | **1** |
 | 3 | `9e78e19` | `c00c88a` | 4 | **4** |
 | 4 | `e921131` | `27c413c` | 2 | **2** |
 | 5 | `f618e01` | `4b5184e` | 11 | **11** |
@@ -1605,10 +1606,20 @@ năm lần merge ấy** — chúng nằm sẵn trong lịch sử, tôi chỉ c�
 Chuỗi đúng là **6 · 1 · 4 · 2 · 11**. Cross-review lượt 14 chấm P3 lớp B
 `chuoi-nam-merge-chep-sai-bon-moc`, và đo độc lập ra cùng chuỗi ấy.
 
-**Và "quy luật" tôi khai kèm theo — *"số vi phạm = số biên nhận master mang sang"* — CŨNG SAI**, có
-phản chứng **ngay trong năm ca tôi viện dẫn**: lần **2** thêm **2** biên nhận mà chỉ **1** vi phạm.
-Bốn trên năm khớp, nên nó là một **hình dạng hay gặp**, không phải luật. Tôi đã gọi một mẫu 4/5 là
-"đúng quy luật" — đúng thứ hồ sơ này tổng kết suốt mười bốn lượt.
+**Về "quy luật" tôi khai kèm — và bản trước của đoạn này RÚT NÓ BẰNG MỘT PHẢN CHỨNG KHÔNG CÓ THẬT.**
+Nó viết *"lần 2 thêm **2** biên nhận mà chỉ **1** vi phạm"*. Sai vì **đơn vị đếm**: lệnh tôi dùng
+đếm tệp **THAY ĐỔI**, không phải tệp **THÊM MỚI**; `dd4a3ae` có 1 thêm + 1 sửa. Đếm bằng
+`--diff-filter=A` cho **6/1/4/2/11** — khớp chuỗi vi phạm ở **cả năm** ca. Cross-review lượt 15 chấm
+P3 lớp F `phan-chung-bon-tren-nam-dem-receipt-sua-thanh-them`.
+Năm ca khớp vẫn **không phải luật** — đó là lý do đủ để không gọi nó là quy luật, và là lý do đúng;
+lý do cũ thì bịa.
+
+**ĐÍNH CHÍNH thông điệp commit `d47ea59`, hai chỗ** (không sửa được lịch sử; cross-review lượt 15):
+· nó ghi đối chiếu lượt 14 là *"1 ĐÃ VÁ THẬT · 0 VÁ SINH LỖI MỚI"*, trong khi verdict lượt 14 xếp
+`chieu-edited-mat-pham-vi-ci-yml` là **`VÁ SINH LỖI MỚI`** ⇒ đúng là **0 ĐÃ VÁ THẬT · 0 VÁ HỜ ·
+1 VÁ SINH LỖI MỚI · 1 CHƯA VÁ** (lớp C — gán trạng thái nguồn phủ định).
+· nó viết nợ cổng ancestry làm *"mọi lần merge chưa commit đều báo vi phạm giả"*; đo được là **năm**
+ca, không phải mọi ca (lớp E).
 
 **Điều đáng nhớ không phải con số mà là CHỖ tôi lấy nó:** cả năm con số đã được chính tôi đo và ghi
 vào thông điệp commit lúc ấy. Chúng nằm trong `git log`, cách một lệnh. Tôi vẫn chép từ trí nhớ.

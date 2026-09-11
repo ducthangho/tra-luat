@@ -27,7 +27,9 @@ evidence_url: https://github.com/ducthangho/tra-luat/blob/bb2a3e2e78132e3a9af123
 evidence_url_ghi_chu: >-
   Neo BLOB ghim `bb2a3e2` — commit ĐẦU TIÊN chứa tệp verdict (`git log --all --diff-filter=A`, đúng 1 commit).
   Bản chiếu công khai sớm hơn: PR #510 comment 5635206884 — chiếu dòng 1–4, 28–46, 49–59 và 908–941 (bỏ 23 băm tệp
-  trong frontmatter và đoạn liệt kê hiện vật scratch); `## Bảng đo lại` (dòng 47–907, 861 dòng) chỉ có trong tệp này.
+  trong frontmatter và đoạn liệt kê hiện vật scratch). `## Bảng đo lại` có 861 dòng (47–907); theo chính phạm vi
+  bản chiếu được thuật lại, 11 dòng 49–59 (bảng đóng finding) đã được chiếu, 850 dòng còn lại chỉ có trong tệp.
+  Nội dung comment GitHub là nguồn thuật lại, không đo được từ hiện vật trong kho.
 so_p1: 0
 so_p2: 0
 so_p3: 0
@@ -114,16 +116,18 @@ verdict_usage_caveats:
     muc: P2
     mo_ta: >-
       Cả hai lượt review hồ sơ đo cùng một giới hạn cổng: đổi `so_p1` của một receipt từ 0 thành 1 SỐNG qua
-      `bien_nhan_v2`, t26, t27 và `release-verify` (4/4). Chỉ băm/byte verdict, cặp caveat↔README và neo evidence_url
-      có cổng canh; số finding khai trong receipt là LỜI KHAI chỉ được reviewer khác nền đếm lại từ tiêu đề verdict.
+      `bien_nhan_v2`, t26, t27 và `release-verify` (4/4). Băm SHA-256 của byte verdict, cặp caveat↔README và neo evidence_url có cổng canh; trường `verdict_bytes`
+      và số finding khai trong receipt chưa được bốn cổng này đối chiếu. Chúng vẫn là LỜI KHAI cần reviewer
+      đo byte tệp và đếm lại tiêu đề verdict; đổi `verdict_bytes` 269934→269933 cũng sống qua cả bốn cổng.
     phai_lam_gi_khi_chay_lai: >-
       Muốn tin so_p1/so_p2/so_p3 của một receipt thì đếm tiêu đề `### … [P1|P2|P3]` trong chính tệp verdict, đừng tin
       receipt hay README. Nợ cổng: ghi ở CHANGELOG r367, chưa có packet.
   - id: BANG-DO-LAI-KHONG-LEN-COMMENT-tep-trong-kho-la-ban-du
     muc: P3
     mo_ta: >-
-      Bản chiếu lên PR #510 (comment 5635206884) bỏ `## Bảng đo lại` (dòng 47–907, 861 dòng), 23 băm tệp trong
-      frontmatter và đoạn liệt kê hiện vật scratch — vượt trần một comment GitHub nên không đăng.
+      Theo phạm vi bản chiếu được thuật lại cho PR #510 comment 5635206884, bảng đầy đủ có 861 dòng (47–907),
+      trong đó 11 dòng 49–59 đã được chiếu; 850 dòng còn lại, 23 băm tệp trong frontmatter và đoạn liệt kê
+      hiện vật scratch không được chiếu. Nội dung comment và lý do vượt trần là nguồn thuật lại, không đo được trong kho.
     phai_lam_gi_khi_chay_lai: 'Tra bảng trong CHÍNH tệp này (sha256 41c3533c…, 169 277 B), không tra comment.'
 
 khong_do_duoc:

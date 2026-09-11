@@ -11,14 +11,17 @@ sơ kế tiếp, còn PR hồ sơ kế tiếp KHÔNG tự sinh thêm lượt rev
 (b) **thuật lại** — sự kiện GitHub (run CI, comment, thời điểm merge, chỉ thị chủ kho trong phiên chat); (c) **kết quả
 cũ thuật lại** — mutant/3 lối land/phản chứng cache mà reviewer chạy trong sandbox, chỉ có băm verdict và mô tả.
 Runtime hai lượt review: ID/prompt digest/timestamp/exit/byte+hash stdout,stderr có trong `run.json` + log NGOÀI kho
-(`5c3209aa`, `b1f0d485`); thời lượng = hiệu hai timestamp (run.json không có khoá thời lượng); **model đã chạy KHÔNG ĐO
+(`5c3209aa`, `b1f0d485`); thời lượng có trong run.json, khớp hiệu hai timestamp làm tròn 3 chữ số; **model đã chạy KHÔNG ĐO
 ĐƯỢC** — `codex exec` không xuất modelUsage, chỉ có lời tự khai của reviewer; `transport: machine` CÓ trong run.json
 (sửa từ r366 theo finding lượt 1); model/effort yêu cầu có trong header stderr; số lần chết là ATTESTATION điều phối.
 
-**Số `r` chọn bằng ĐO** (11-09-2026, 13:4xZ). Lần đầu `for-each-ref` 331 < `ls-remote --heads` 333 — **thiếu cục bộ 2**
+**Tác giả thuật lại lần đo chọn số `r`** (11-09-2026, 13:4xZ; không có snapshot ref/log fetch trong kho). Lần đầu `for-each-ref` 331 < `ls-remote --heads` 333 — **thiếu cục bộ 2**
 (`claude/land-493-bookkeeping-wip`, `codex/wp484-g6-integration`) vì worktree mới chỉ fetch `master`; fetch đủ refspec
 `+refs/heads/*` ⇒ 334/334 (kể nhánh này), rồi mới quét `CHANGELOG.md` trên **mọi** ref: `r367` **0** ref. Chọn **r367**.
 Ghi cả lần đo hụt vì đó chính là bài học *"for-each-ref đọc bộ đệm"* — quét 331 ref vẫn in "đã quét mọi ref".
+Các bộ số 331/333, 334/334 và kết quả trước khi thêm mục này là nguồn lịch sử thuật lại, KHÔNG ĐO ĐƯỢC từ
+snapshot hiện tại. Khi kiểm số mục đã dùng, cần phân biệt tiêu đề `# ★ … r367:` với chuỗi `r367` được nhắc
+trong thân mục khác; lời thuật lại trên chưa cung cấp biểu thức quét gốc, không dùng nó để khẳng định chuỗi vắng mặt.
 
 ## Phạm vi — đo, không ước
 
@@ -39,7 +42,7 @@ mục r366 (và mục này) làm sha manifest lệch — tái sinh trong cùng c
 
 | lượt | reviewer / run | head | verdict | ghi chú |
 |---|---|---|---|---|
-| 1 | codex `gpt-6-astra` xhigh · `5c3209aa` · 1 874,604 s · rc 0 | `3349c8b` | **`changes_requested` · 0 P1 · 5 P2 · 1 P3** | byte/băm 10 verdict, 410 hàng scalar, số finding, neo, cổng của hồ sơ r366 đo lại ĐÚNG hết; 6 finding đều là lời khai HỒ SƠ vượt đo |
+| 1 | codex `gpt-6-astra` xhigh · `5c3209aa` · 1 874,604 s · rc 0 | `3349c8b` | **`changes_requested` · 0 P1 · 5 P2 · 1 P3** | byte/băm 10 verdict, số finding, neo và cổng của hồ sơ r366 khớp; bảng 410 hàng đối chiếu có cả mục KHÔNG ĐO ĐƯỢC; 6 finding đều là lời khai HỒ SƠ vượt đo |
 | 2 | codex `gpt-6-astra` xhigh · `b1f0d485` · 1 302,481 s · rc 0 | `656f2dc` | **`approve` · 0/0/0** · HINT 0 hunk | 6 finding ĐÓNG đúng chỗ; áp lại HINT 1 `--fuzz=0` đủ 20 hunk; ngoài HINT chỉ khối 5 dòng CHANGELOG; manifest tái sinh nguyên byte |
 
 **Sáu finding của lượt 1 — cùng lớp với r364: hồ sơ review khai rộng hơn phép đo.**
@@ -56,13 +59,14 @@ mục r366 (và mục này) làm sha manifest lệch — tái sinh trong cùng c
 
 Vá ở `656f2dc`: áp NGUYÊN HINT (`9212942d…`, 20 hunk / 12 tệp, `patch -p0` rc=0) + tự thêm một khối 5 dòng ghi lượt
 review vào mục r366 + tái sinh manifest. 10 verdict PR #505 nguyên byte (t26). Bản chiếu verdict lên PR: comment
-5634872493 (lượt 1) · 5635206884 (lượt 2) — bỏ bảng đo lại 1 124 / 861 dòng (cảnh báo `BANG-DO-LAI-KHONG-LEN-COMMENT…`).
+5634872493 (lượt 1) · 5635206884 (lượt 2) — theo phạm vi chiếu được thuật lại, lượt 1 bỏ 1 124 dòng bảng đo;
+lượt 2 có bảng đầy đủ 861 dòng, chiếu 11 dòng 49–59 và bỏ 850 dòng còn lại (cảnh báo `BANG-DO-LAI-KHONG-LEN-COMMENT…`).
 
 ## Giới hạn cổng đo được hai lần — nợ mới
 
 Cả hai lượt chạy cùng đột biến: đổi `so_p1` của một receipt từ 0 thành 1 ⇒ **SỐNG qua `bien_nhan_v2`, t26, t27 và
-`release-verify`** (4/4). Cổng hồ sơ canh băm/byte verdict, cặp caveat↔README và neo `evidence_url`; **số finding khai
-trong receipt không cổng nào canh** — chỉ reviewer khác nền đếm lại từ tiêu đề verdict. Ghi thành cảnh báo
+`release-verify`** (4/4). Cổng hồ sơ canh băm SHA-256 của byte verdict, cặp caveat↔README và neo `evidence_url`; **trường
+`verdict_bytes` và số finding khai trong receipt chưa được bốn cổng này đối chiếu** — chỉ reviewer khác nền đếm lại từ tiêu đề verdict. Ghi thành cảnh báo
 `SO-P1-P2-TRONG-BIEN-NHAN-KHONG-CO-CONG-NAO-CANH`; chưa có packet (đụng `ops/bien_nhan_v2.py`, cần lease).
 
 ## Merge — theo chỉ thị, không tự cấp

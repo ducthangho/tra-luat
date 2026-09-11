@@ -43,7 +43,7 @@ hint_patch:
 
 noi_dung_do_duoc_van_dung:
   - '10 verdict PR #505 trong kho `cmp` khớp byte bản sandbox; sha256/byte của 10 receipt và cột byte 10 hàng README khớp; 23 băm tệp tại 3349c8b ghi trong frontmatter.'
-  - '410 hàng scalar `model_reviewer_identity` × 10 receipt so run.json + băm thật stdout/stderr: khớp; `head` run.json = reviewed_sha từng lượt; không có `modelUsage` trong 20 log.'
+  - 'Bảng mục 3 có tổng 410 hàng đối chiếu cho 10 receipt (41 hàng mỗi receipt), gồm cả mục không đo được như prompt.snapshot và lịch sử retry; các scalar có nguồn đối chiếu với run.json + băm thật stdout/stderr khớp; `head` run.json = reviewed_sha từng lượt; không có `modelUsage` trong 20 log.'
   - 'Số finding đếm từ tiêu đề 10 verdict khớp so_p1/so_p2/so_p3 từng receipt; tổng 9 vòng = 11 finding (4 P1 + 7 P2) — CHANGELOG r366 viết "9" là P2 đầu tiên.'
   - 'Tự áp HINT lượt 1 PR #505 lên test 62c299a: 303 788 B ≠ 304 616 B tại 6254570 (khác đúng docstring t152, 6 dòng) ⇒ "áp NGUYÊN / trùng byte" là lời khai vượt đo; HINT 2–9 trùng byte toàn tệp.'
   - '`transport: machine` CÓ trong cả 10 run.json (receipt khai "không có khoá") ; header stderr có model/effort yêu cầu; `python3 -B` không ngăn nạp `.pyc` có sẵn (phản chứng scalar 15 B cùng mtime: -B in 1, xoá cache mới in 2).'
@@ -72,7 +72,7 @@ model_reviewer_identity:
   nguon_cac_scalar_tren: >-
     ĐỐI CHIẾU ĐƯỢC với run.json (ngoài kho, `scratchpad/runs/5c3209aa/`): run_id/short_id, prompt_sha256 (khớp
     `prompt.snapshot` cùng thư mục), bat_dau_utc, ket_thuc_utc, ma_thoat, trang_thai, transport (`machine`),
-    worktree_sach, head; thoi_luong_giay = ket_thuc − bat_dau (run.json không có khoá thời lượng);
+    worktree_sach, head; run.json CÓ thoi_luong_giay, khớp hiệu ket_thuc − bat_dau làm tròn 3 chữ số;
     stdout/stderr byte + sha256 đo trực tiếp trên hai tệp log. Dòng cuối stdout `XONG VERDICT sha256=a1bd6de0…`
     khớp băm tệp. model_yeu_cau và effort có trong header stderr.log (cấu hình yêu cầu, không chứng thực model
     thực chạy), KHÔNG có khoá trong run.json. so_lan_chet_truoc_khi_xong là ATTESTATION điều phối.
@@ -117,8 +117,8 @@ verdict_usage_caveats:
     muc: P3
     mo_ta: >-
       Bản chiếu lên PR #510 (comment 5634872493) chỉ mang dòng 1–38 + 1163–1242; `## Bảng đo lại` (dòng 39–1162,
-      1 124 dòng, gồm 410 hàng scalar) vượt trần một comment GitHub nên không được đăng — sự vắng mặt ở comment không
-      phải reviewer không đo. Lượt 2 cùng giới hạn (comment 5635206884, bảng 861 dòng).
+      1 124 dòng, gồm bảng 410 hàng đối chiếu cho 10 receipt) vượt trần một comment GitHub nên không được đăng — sự vắng mặt ở comment không
+      phải reviewer không đo. Lượt 2 có bảng đầy đủ 861 dòng; theo phạm vi bản chiếu được thuật lại, 11 dòng 49–59 đã được chiếu, 850 dòng còn lại không được chiếu (comment 5635206884).
     phai_lam_gi_khi_chay_lai: 'Tra bảng trong CHÍNH tệp này (sha256 a1bd6de0…, 269 934 B), không tra comment.'
 
 khong_do_duoc:

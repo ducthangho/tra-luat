@@ -82,3 +82,6 @@ nang_tran:
     Dấu vết: https://github.com/ducthangho/tra-luat/issues/503#issuecomment-5630194531
   tran_cu: 2
   tran_moi: 3
+
+# BIA MỘ (chiều ngược của `thay_the_cho` trong exec-2) — gen 1 hết lượt, chủ kho chọn reroute A (#503 comment 5630541324).
+da_bi_thay_the: m9-fetch-auth-exec-2-claude-20260911

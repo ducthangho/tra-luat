@@ -12,6 +12,10 @@ phép ấy **tự ô nhiễm**: mục `r364` chứa chính dòng chống va ch�
 khi `r364` land thì `r365` hiện ra ở **14** ref mà chẳng ai dùng nó. Đo lại theo **TIÊU ĐỀ MỤC**
 (`^#\s*★[^\n]*?—\s*(r\d+):`) trên blob `CHANGELOG.md` của **mọi** ref:
 
+Phạm vi quét, nói cho chật: **`refs/heads` mà thôi** — không phải "mọi ref". Mirror còn `refs/pull/*` và
+`refs/tags/*`; chúng không mang tiêu đề mục `CHANGELOG.md` mới nào, nhưng khai "mọi ref" là rộng hơn thứ đã
+chạy (cross-review lượt 6 chấm đúng phạm vi này).
+
 ```
 git ls-remote --heads origin | sed 's#.*refs/heads/##' | sort   > /tmp/mc      ⇒ 331
 git for-each-ref --format='%(refname:lstrip=3)' refs/remotes/origin \
@@ -32,10 +36,19 @@ Kết quả đo LÚC ẤY (09:00Z 11-09): `r365` **là tiêu đề mục** trên
 của phiên khác. Mục này vì thế đổi số **`r366` → `r368`**, số trống đầu tiên ≥366 tại thời điểm mở PR.
 
 Bài học, và nó là bài học VẬN HÀNH chứ không phải bài học đo: **số `r` không phải thứ chiếm được bằng một
-phép đo — nó chỉ được chốt lúc MERGE.** Phép quét mọi ref vẫn đúng phương pháp, nhưng nó trả lời *"số nào
-trống LÚC NÀY"*, và giữa lúc ấy với lúc merge có thể là nhiều giờ và nhiều phiên. Cách duy nhất đóng được
-khe ấy là đo lại **ngay trước khi mở PR** và **ngay trước khi merge** — chính vì thế con số ở đây đổi hai
-lần và cả hai lần đều được ghi, thay vì sửa lặng lẽ cho khớp.
+phép đo — nó chỉ được chốt lúc MERGE.** Phép quét ref vẫn đúng phương pháp, nhưng nó trả lời *"số nào trống
+LÚC NÀY"*, và giữa lúc ấy với lúc merge có thể là nhiều giờ và nhiều phiên.
+
+Đo lại **ngay trước khi mở PR** và **ngay trước khi merge** **THU HẸP** khe ấy — nó phát hiện số đã bị dùng
+kể từ lần đo trước, và chính nhờ thế con số ở đây đổi hai lần, cả hai lần đều được ghi thay vì sửa lặng lẽ.
+Nhưng nó **KHÔNG ĐÓNG** khe. *(Bản trước viết "cách duy nhất **đóng được** khe ấy" — **RÚT**. Cross-review
+lượt 6 dựng phản chứng chạy được: mô phỏng lịch A mở → B mở → A kiểm trước merge → B kiểm trước merge,
+**tất cả trước khi bên nào công bố** ⇒ cả bốn lượt cùng chọn `369`. Hai phiên đều làm đúng quy trình mà vẫn
+trùng số, vì **đọc không phải là giữ**.)*
+
+Đây là tái phát đúng bài học `--force-with-lease` của `CLAUDE.md`: *"'thu hẹp' mà viết thành 'đóng' là một
+lời khai rộng hơn phép đo"*. Muốn ĐÓNG thật thì phải có thao tác **nguyên tử** buộc việc chọn số vào việc
+công bố — kho chưa có, và PR hồ sơ này không phải chỗ thiết kế nó.
 
 **GIỚI HẠN NGUỒN.** (a) **tự đo được** — số Git, băm/byte tệp, số mục manifest, cổng chạy lại từ hiện vật
 trong kho, và **số finding đếm bằng heading trong chính tệp verdict**; (b) **thuật lại** — sự kiện GitHub

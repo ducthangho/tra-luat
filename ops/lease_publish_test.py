@@ -30,6 +30,7 @@ SCRIPT = HERE / "lease_publish.py"
 # Cờ NỘI BỘ của `t125`, cố ý là ĐỐI SỐ chứ không phải biến môi trường: argv không
 # được kế thừa, nên không môi trường nào tắt được phép A/B một cách tình cờ.
 CO_AB = "--ab-con-noi-bo"
+AL_HAN_GIAY = 180     # hạn lời gọi actionlint trong t137 (packet #504 M5 bước 2) — lý do tại t137
 AB_HAN_GIAY = 420     # hạn MỖI lượt con của t125 (packet #504 M5) — lý do và số đo ở docstring t125
 WORKFLOW_DANG = HERE.parent / ".github" / "workflows" / "ops-publish-lease.yml"
 
@@ -4870,8 +4871,42 @@ def t137_M9_workflow_admission_hop_dong_tinh_va_actionlint_shellcheck():
     al, sc = shutil.which("actionlint"), shutil.which("shellcheck")
     chot(al, "KHÔNG ĐO ĐƯỢC: thiếu `actionlint` (cài: ops/cai_actionlint.sh với AL_VER)")
     chot(sc, "KHÔNG ĐO ĐƯỢC: thiếu `shellcheck` — actionlint IM LẶNG bỏ toàn bộ luật shell khi vắng nó")
-    p = subprocess.run([al, str(WORKFLOW_THU_HOI)], capture_output=True, text=True)
+    # Packet #504 M4 lần 2 (run 34615345948): trên windows-latest lời gọi này TREO ≥ 10 phút 56 s tới lúc job bị huỷ,
+    # trong khi t33 (cùng actionlint + shellcheck, tệp ops-publish-lease.yml) xong trong vài giây — tức treo phụ thuộc
+    # NỘI DUNG tệp này. Hạn `AL_HAN_GIAY` (ubuntu đo ~1 s) để ca ĐỎ có lý do thay vì kéo cả job xuống; quá hạn thì
+    # đo riêng từng công cụ (`_chan_doan_actionlint_treo`) để lượt Windows kế gọi được tên thứ treo.
+    try:
+        p = subprocess.run([al, str(WORKFLOW_THU_HOI)], capture_output=True, text=True, timeout=AL_HAN_GIAY)
+    except subprocess.TimeoutExpired:
+        chot(False, f"actionlint KHÔNG XONG trong {AL_HAN_GIAY}s trên {WORKFLOW_THU_HOI.name} — chẩn đoán: "
+                    + _chan_doan_actionlint_treo(al, sc, WORKFLOW_THU_HOI))
     chot(p.returncode == 0, f"actionlint ĐỎ (rc={p.returncode}):\n{p.stdout}{p.stderr}")
+
+
+def _chan_doan_actionlint_treo(al: str, sc: str, wf) -> str:
+    """Đo từng công cụ riêng, mỗi cái có hạn ngắn, trả một dòng: cái nào xong/rc/giây, cái nào TREO."""
+    import yaml
+    ket = []
+    def do(nhan, lenh, han):
+        t0 = time.monotonic()
+        try:
+            q = subprocess.run(lenh, capture_output=True, text=True, timeout=han)
+            ket.append(f"{nhan}: rc={q.returncode} {time.monotonic() - t0:.1f}s out={q.stdout.strip()[:60]!r} err={q.stderr.strip()[:80]!r}")
+        except subprocess.TimeoutExpired:
+            ket.append(f"{nhan}: TREO >{han}s")
+        except OSError as ex:
+            ket.append(f"{nhan}: OSError {ex}")
+    do("actionlint -version", [al, "-version"], 30)
+    do("shellcheck --version", [sc, "--version"], 30)
+    than = [b["run"] for b in yaml.safe_load(wf.read_text(encoding="utf-8"))["jobs"]["thu-hoi"]["steps"] if isinstance(b.get("run"), str)]
+    with tempfile.TemporaryDirectory() as td:
+        for i, x in enumerate(than):
+            f = Path(td) / f"run{i}.sh"; f.write_text(x, encoding="utf-8")
+            do(f"shellcheck -s bash run{i}", [sc, "-s", "bash", str(f)], 60)
+        f = Path(td) / "kiem.sh"; f.write_text(than[-1], encoding="utf-8")
+        # actionlint KHÔNG shellcheck: nếu xong ⇒ thứ treo là đường actionlint→shellcheck, không phải parser YAML
+        do("actionlint -shellcheck=", [al, "-shellcheck=", str(wf)], 60)
+    return " | ".join(ket)
 
 
 @ca
@@ -5532,6 +5567,10 @@ def main() -> int:
         except Exception as ex:  # noqa: BLE001
             hong.append((fn.__name__, f"{type(ex).__name__}: {ex}")); ket = "DO"
         _nhat_ky_ca("<<< ra", fn.__name__, f"{time.monotonic() - t0:.3f}s", ket)
+        if ket == "DO":
+            # In LÝ DO ngay tại chỗ (M4 lần 2, packet #504): danh sách `  ĐỎ  …` chỉ in ở cuối suite, nên khi job
+            # bị huỷ giữa chừng thì mọi lý do đã đo được mất theo. Tiền tố khác hẳn để không trùng dòng tổng kết.
+            _nhat_ky_ca("!!! do", fn.__name__, hong[-1][1].replace("\n", " ")[:700])
     for ten, ly in bo_qua:
         print(f"  BỎ QUA {ten}: {ly}")
     for ten, ly in hong:

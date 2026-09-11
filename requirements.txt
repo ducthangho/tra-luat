@@ -27,6 +27,9 @@ cffi
 #
 # KHÔNG GHIM `==6.0.3` Ở ĐÂY, và đây là phép đo chứ không phải sở thích. Ba workflow
 # ghim số ấy (`ci.yml:93` · `duyet-phan-chung.yml:39` · `ops-publish-lease.yml:80`) và
+# (r367: số đếm trên là phép đo lúc r338; `duyet-phan-chung.yml` đã RÚT ở #506/#507 (r365)
+#  nay vẫn có ba workflow ghim: ci.yml:93, ops-publish-lease.yml:80, ops-thu-hoi-admission.yml:56;
+#  chú dẫn cũ giữ nguyên làm sử liệu, đừng đi tìm tệp đã rút) và
 # bản đầu của dòng này ghim theo cho "khớp CI". Chạy hook THẬT thì hỏng ngay trên
 # container này: python hệ thống có PyYAML 6.0.1 do distro cài, nên
 # `pip install -r requirements.txt` phải GỠ nó trước và chết

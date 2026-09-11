@@ -115,7 +115,7 @@ Mỗi hàng: điều được khai · số đo · lệnh tái hiện. Chi tiết
 | Trần vòng review **không có cổng** | `nang_tran` xuất hiện **0** lần trong `ops/lease_publish.py`; **1/82** lease có khối ấy; §20 ghi `ADR-0043 \| 0 cổng` | `grep -c nang_tran ops/lease_publish.py` |
 | Vòng review để lại **0 hiện vật** | packet **#249**: 4 vòng, 0 biên nhận, suite 98/98 xanh | docstring `cmd_bien_nhan` trong `.claude/dev/packet_loop.py` |
 | Cổng **có** răng — nhưng phải đo mới biết | Lượt 4 đo 6 cổng → tìm ra **2** hỏng thật. Sau khi vá (kể cả `R5-01`): `cong_cu_test` **23/23 · bỏ qua=0 · 7 ca tự kiểm bộ phân hạng · lỗi đột biến=0**, và phản chứng `R5-01` **qua ranh giới tiến trình** cho `tin_dung_gia` (trước bản vá: `giet_that`); `packet_loop` **278/278 · BỎ QUA=0**; đột biến gỡ cổng sổ comment ⇒ 3 ca **ĐỎ** (261/278) trong khi **trước** bản vá chúng vẫn XANH | `python3 ops/cong_cu_test.py` · `python3 .claude/dev/packet_loop_test.py` |
-| Chốt trong kho **không tự chứng nhận được** | `.claude/dev/duyet_danh_tinh.py`: *"mọi chốt dựng trong kho đều là chốt chủ kho tự dựng cho chính mình"*; cổng chạy trên runner GitHub là **cơ chế đầu tiên** không tự chứng nhận | `sed -n '1,12p' .claude/dev/duyet_danh_tinh.py` |
+| Chốt trong kho **không tự chứng nhận được** | `.claude/dev/duyet_danh_tinh.py`: *"mọi chốt dựng trong kho đều là chốt chủ kho tự dựng cho chính mình"*; cổng chạy trên runner GitHub là **cơ chế đầu tiên** không tự chứng nhận | `sed -n '1,12p' .claude/dev/duyet_danh_tinh.py` — **tệp đã RÚT ở #506/#507 (r365)**; lệnh tái hiện chỉ chạy được trên cây trước `0bf0ba7` (vd `git show 27c413c3:.claude/dev/duyet_danh_tinh.py \| sed -n '1,12p'`); trích dẫn giữ nguyên làm sử liệu (r367 đóng P3 `tham-chieu-tai-lieu-song-con-sot`) |
 
 ---
 

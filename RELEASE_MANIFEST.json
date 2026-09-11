@@ -6,9 +6,9 @@
   "webapp_target": "2.21.2p",
   "root_name": "tra-luat",
   "file_count": 180,
-  "total_bytes": 8290534,
-  "package_hash": "a18468aaf9fbfcce501f52d98393883373a38bc496dc6250138d439b7bd5e83f",
-  "content_hash": "a18468aaf9fbfcce501f52d98393883373a38bc496dc6250138d439b7bd5e83f",
+  "total_bytes": 8320339,
+  "package_hash": "3d6e42770d0f3eabb42d8629e75bd2a9c48fb4d82c0a23c17bc10237944f619e",
+  "content_hash": "3d6e42770d0f3eabb42d8629e75bd2a9c48fb4d82c0a23c17bc10237944f619e",
   "required_missing": [],
   "files": [
     {
@@ -28,8 +28,8 @@
     },
     {
       "path": "CHANGELOG.md",
-      "size": 996212,
-      "sha256": "ee687af5363e37d36155f5ee44603608b084fa1d32f8b5c3ec80f3091e37e9e5"
+      "size": 1024798,
+      "sha256": "0f981b25db3801d967c53061b079a0e120e7f63cd8d149641db1bb4b9fe51501"
     },
     {
       "path": "CONTEXT.md",
@@ -498,8 +498,8 @@
     },
     {
       "path": "requirements.txt",
-      "size": 4257,
-      "sha256": "402c04d9b2f656b5ee6b5b11fdd88d908e64df10f83d7ab7a6730cda07df04e3"
+      "size": 4553,
+      "sha256": "97733a880d95f8a900f39af2bcd1a59a3ecb357dfc928c01c7a06636b1b07657"
     },
     {
       "path": "scripts/_fallback/README.md",
@@ -858,8 +858,8 @@
     },
     {
       "path": "scripts/tl_selftest.py",
-      "size": 2136983,
-      "sha256": "869c2f0b239196d466ff5dad9f844901e68793ab4203be6fd5c1c29297ed4599"
+      "size": 2137906,
+      "sha256": "b65bc7519e9781b88a01432a124092a6bb05d5fd07b1b3fd468ade6e3e9c1ce8"
     },
     {
       "path": "scripts/tl_test_fragments_bundled.py",

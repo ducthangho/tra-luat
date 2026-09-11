@@ -1,4 +1,4 @@
-# ★ dev-side — r366: ghi sổ #493 — 17 verdict codex + 17 biên nhận v2 vào `ops/reviews`, land evidence, và một lời khai `effort` bị PHÉP ĐO bác (2026-09-11)
+# ★ dev-side — r368: ghi sổ #493 — 17 verdict codex + 17 biên nhận v2 vào `ops/reviews`, land evidence, và một lời khai `effort` bị PHÉP ĐO bác (2026-09-11)
 
 Nối tiếp `r364` (chốt tới `c00c88a`, #500). Kể từ chốt ấy master nhận **bốn** merge: #501 · #497 · #506 ·
 **#493**. Mục này ghi sổ **đúng #493** theo chỉ thị chủ kho khi được hỏi thẳng về phạm vi
@@ -21,9 +21,21 @@ comm -13 /tmp/mc /tmp/cb   (thừa cục bộ, vô hại)                       
 331 ref → 16 blob CHANGELOG.md duy nhất → quét tiêu đề mục
 ```
 
-Kết quả: `r365` **là tiêu đề mục** trên đúng **1** ref — `claude/land-502-bookkeeping` (PR #507). `r366` chỉ
-mới là một lần *nhắc* trong dòng chống va chạm của chính #507. Số trống đầu tiên ≥365 là **`r366`**. Nói cách
-khác: tiêu đề PR #507 ghi "r365" và điều đó ĐÚNG — bảng ở đây đo tiêu đề mục chứ không đo tiêu đề PR.
+Kết quả đo LÚC ẤY (09:00Z 11-09): `r365` **là tiêu đề mục** trên đúng **1** ref —
+`claude/land-502-bookkeeping` (PR #507). `r366` chỉ mới là một lần *nhắc* trong dòng chống va chạm của chính
+#507. Số trống đầu tiên ≥365 là `r366`. Nói cách khác: tiêu đề PR #507 ghi "r365" và điều đó ĐÚNG — bảng ở
+đây đo tiêu đề mục chứ không đo tiêu đề PR.
+
+**VÀ PHÉP ĐO ẤY ĐÃ HẾT HẠN TRƯỚC KHI PR NÀY MỞ — va chạm XẢY RA THẬT, không phải giả định.** Đo lại lúc
+15:0xZ cùng ngày, sau khi `master` nhận **49** commit (merge #475, #505, #507, #510, #511): `r366` **và**
+`r367` đều đã là **tiêu đề mục trên `master`** — `r366` = *"ghi sổ #505"*, `r367` = *"ghi sổ #510"*, cả hai
+của phiên khác. Mục này vì thế đổi số **`r366` → `r368`**, số trống đầu tiên ≥366 tại thời điểm mở PR.
+
+Bài học, và nó là bài học VẬN HÀNH chứ không phải bài học đo: **số `r` không phải thứ chiếm được bằng một
+phép đo — nó chỉ được chốt lúc MERGE.** Phép quét mọi ref vẫn đúng phương pháp, nhưng nó trả lời *"số nào
+trống LÚC NÀY"*, và giữa lúc ấy với lúc merge có thể là nhiều giờ và nhiều phiên. Cách duy nhất đóng được
+khe ấy là đo lại **ngay trước khi mở PR** và **ngay trước khi merge** — chính vì thế con số ở đây đổi hai
+lần và cả hai lần đều được ghi, thay vì sửa lặng lẽ cho khớp.
 
 **GIỚI HẠN NGUỒN.** (a) **tự đo được** — số Git, băm/byte tệp, số mục manifest, cổng chạy lại từ hiện vật
 trong kho, và **số finding đếm bằng heading trong chính tệp verdict**; (b) **thuật lại** — sự kiện GitHub
@@ -399,6 +411,295 @@ Theo tiền lệ #495/#490 và `r364`: verdict của PR hồ sơ vào kho ở PR
 được về sau**, nhưng **chưa đo được** tại commit này; ai đọc trước khi nó merge phải coi đây là DỰ KIẾN.
 
 ---
+
+# ★ dev-side — r367: ghi sổ #510 — hai verdict codex chấm CHÍNH hồ sơ r366 của #505; 5 P2 + 1 P3 vá rồi approve; merge theo chỉ thị "chọn A" (2026-09-11)
+
+Nối tiếp r366 (chốt tới `fe05fa6`, #505). Merge sau đó chưa có mục: **#510** — vế bookkeeping ADR-0034 của #505/#503,
+và mục này là vế bookkeeping của CHÍNH nó: 2 verdict + 2 biên nhận v2 vào `ops/reviews/`, 2 hàng mục lục + 5 cảnh
+báo + 1 đoạn nguồn, manifest tái sinh. Đệ quy dừng ở đây theo tiền lệ r364/#495: verdict của PR hồ sơ vào kho ở PR hồ
+sơ kế tiếp, còn PR hồ sơ kế tiếp KHÔNG tự sinh thêm lượt review khác nền trừ khi chủ kho gọi.
+
+**Không nâng `VERSION`.** Vẫn `1.36.68` từ r336.
+
+**GIỚI HẠN NGUỒN.** Như r364/r366: (a) **tự đo được** — số Git, băm/byte tệp, cổng chạy lại từ hiện vật trong kho;
+(b) **thuật lại** — sự kiện GitHub (run CI, comment, thời điểm merge, chỉ thị chủ kho trong phiên chat); (c) **kết quả
+cũ thuật lại** — mutant/3 lối land/phản chứng cache mà reviewer chạy trong sandbox, chỉ có băm verdict và mô tả.
+Runtime hai lượt review: ID/prompt digest/timestamp/exit/byte+hash stdout,stderr có trong `run.json` + log NGOÀI kho
+(`5c3209aa`, `b1f0d485`); thời lượng có trong run.json, khớp hiệu hai timestamp làm tròn 3 chữ số; **model đã chạy KHÔNG ĐO
+ĐƯỢC** — `codex exec` không xuất modelUsage, chỉ có lời tự khai của reviewer; `transport: machine` CÓ trong run.json
+(sửa từ r366 theo finding lượt 1); model/effort yêu cầu có trong header stderr; số lần chết là ATTESTATION điều phối.
+
+**Tác giả thuật lại lần đo chọn số `r`** (11-09-2026, 13:4xZ; không có snapshot ref/log fetch trong kho). Lần đầu `for-each-ref` 331 < `ls-remote --heads` 333 — **thiếu cục bộ 2**
+(`claude/land-493-bookkeeping-wip`, `codex/wp484-g6-integration`) vì worktree mới chỉ fetch `master`; fetch đủ refspec
+`+refs/heads/*` ⇒ 334/334 (kể nhánh này), rồi mới quét `CHANGELOG.md` trên **mọi** ref: `r367` **0** ref. Chọn **r367**.
+Ghi cả lần đo hụt vì đó chính là bài học *"for-each-ref đọc bộ đệm"* — quét 331 ref vẫn in "đã quét mọi ref".
+Các bộ số 331/333, 334/334 và kết quả trước khi thêm mục này là nguồn lịch sử thuật lại, KHÔNG ĐO ĐƯỢC từ
+snapshot hiện tại. Khi kiểm số mục đã dùng, cần phân biệt tiêu đề `# ★ … r367:` với chuỗi `r367` được nhắc
+trong thân mục khác; lời thuật lại trên chưa cung cấp biểu thức quét gốc, không dùng nó để khẳng định chuỗi vắng mặt.
+
+## Phạm vi — đo, không ước
+
+```
+git diff --shortstat fe05fa6..b98531e            ⇒  23 files changed, 2982 insertions(+), 5 deletions(-)
+git diff --name-only fe05fa6..b98531e | sed 's#/.*##' | sort | uniq -c
+                                                  ⇒  1 CHANGELOG.md · 1 RELEASE_MANIFEST.json · 21 ops
+git rev-list --count --first-parent fe05fa6..b98531e   ⇒  1
+git rev-list --count              fe05fa6..b98531e     ⇒  5     (4 commit nhánh + merge commit)
+git log -1 --format=%P b98531e                   ⇒  fe05fa6 656f2dc   (merge commit, KHÔNG squash)
+git diff --numstat 3349c8b..656f2dc              ⇒  13 tệp, +77/−50   (bản vá lượt 1: HINT 20 hunk + 5 dòng CHANGELOG + manifest)
+```
+
+`ops/` nằm ngoài kiểm kê gói ⇒ 0/180 mục manifest từ 21 tệp `ops/reviews/`; `CHANGELOG.md` NẰM TRONG kiểm kê nên
+mục r366 (và mục này) làm sha manifest lệch — tái sinh trong cùng commit (bài học r356).
+
+## Vòng vá→review trên chính hồ sơ — hai lượt, khác nền, một bản vá
+
+| lượt | reviewer / run | head | verdict | ghi chú |
+|---|---|---|---|---|
+| 1 | codex `gpt-6-astra` xhigh · `5c3209aa` · 1 874,604 s · rc 0 | `3349c8b` | **`changes_requested` · 0 P1 · 5 P2 · 1 P3** | byte/băm 10 verdict, số finding, neo và cổng của hồ sơ r366 khớp; bảng 410 hàng đối chiếu có cả mục KHÔNG ĐO ĐƯỢC; 6 finding đều là lời khai HỒ SƠ vượt đo |
+| 2 | codex `gpt-6-astra` xhigh · `b1f0d485` · 1 302,481 s · rc 0 | `656f2dc` | **`approve` · 0/0/0** · HINT 0 hunk | 6 finding ĐÓNG đúng chỗ; áp lại HINT 1 `--fuzz=0` đủ 20 hunk; ngoài HINT chỉ khối 5 dòng CHANGELOG; manifest tái sinh nguyên byte |
+
+**Sáu finding của lượt 1 — cùng lớp với r364: hồ sơ review khai rộng hơn phép đo.**
+- **`r366-tong-hop-truot-so-va-moc`** (P2) — "cả 9 finding" khi đếm tiêu đề ra **11** (4 P1 + 7 P2; hai vòng đầu mỗi
+  vòng 2 finding); "sáu vòng (3→9)" là **7**; mốc `origin/master` sai gộp một cặp SHA cho ba round khác nhau.
+- **`hint-nguyen-byte-bo-sot-docstring-luot-1`** (P2) — áp HINT 1 lên test `62c299a` cho 303 788 B, test tại `6254570`
+  là 304 616 B: khác đúng docstring t152 (6 dòng, chính executor đã khai ở EVIDENCE lượt 2) — nhưng receipt/README/
+  CHANGELOG viết "áp NGUYÊN / trùng byte". HINT 2–9 trùng byte toàn tệp.
+- **`nguon-runtime-xep-sai-transport`** (P2) — 10 receipt khai `transport` "không có khoá trong run.json"; **có**.
+- **`huong-dan-tru-cache-b-van-doc-pyc-cu`** (P2) — hướng dẫn "xoá cache HOẶC `python3 -B`": `-B` chỉ ngăn GHI, không
+  ngăn NẠP `.pyc` có sẵn (phản chứng scalar 15 B cùng mtime: `-B` in 1, xoá cache mới in 2). Sửa thành xoá cache trước.
+- **`no-rong-bo-sot-no-a3-m3`** (P2) — mục NỢ GHI SANG #499 của round 10 không "rỗng": nó ghi A3/M3 vẫn chưa đo.
+- **`dem-hang-bang-do-sai-khoang`** (P3) — bảng đo 17–25 hàng dữ liệu, không phải 15–23.
+
+Vá ở `656f2dc`: áp NGUYÊN HINT (`9212942d…`, 20 hunk / 12 tệp, `patch -p0` rc=0) + tự thêm một khối 5 dòng ghi lượt
+review vào mục r366 + tái sinh manifest. 10 verdict PR #505 nguyên byte (t26). Bản chiếu verdict lên PR: comment
+5634872493 (lượt 1) · 5635206884 (lượt 2) — theo phạm vi chiếu được thuật lại, lượt 1 bỏ 1 124 dòng bảng đo;
+lượt 2 có bảng đầy đủ 861 dòng, chiếu 11 dòng 49–59 và bỏ 850 dòng còn lại (cảnh báo `BANG-DO-LAI-KHONG-LEN-COMMENT…`).
+
+## Giới hạn cổng đo được hai lần — nợ mới
+
+Cả hai lượt chạy cùng đột biến: đổi `so_p1` của một receipt từ 0 thành 1 ⇒ **SỐNG qua `bien_nhan_v2`, t26, t27 và
+`release-verify`** (4/4). Cổng hồ sơ canh băm SHA-256 của byte verdict, cặp caveat↔README và neo `evidence_url`; **trường
+`verdict_bytes` và số finding khai trong receipt chưa được bốn cổng này đối chiếu** — chỉ reviewer khác nền đếm lại từ tiêu đề verdict. Ghi thành cảnh báo
+`SO-P1-P2-TRONG-BIEN-NHAN-KHONG-CO-CONG-NAO-CANH`; chưa có packet (đụng `ops/bien_nhan_v2.py`, cần lease).
+
+## Merge — theo chỉ thị, không tự cấp
+
+| merge commit | PR | hai cha | chỉ thị |
+|---|---|---|---|
+| `b98531e` | #510 | `fe05fa6` + `656f2dc` | chủ kho, phiên chat ~13:05Z: **"chọn A"** = vòng 2 để có approve rồi merge khi gate xanh — ghi ở PR #510 comment 5635211398 trước khi bỏ draft (13:34Z) và merge (13:35Z) |
+
+Lúc merge: `gate (ubuntu-latest)` success (job 103272289299, 13:04–13:28Z) · `thu-hoi` success (job 103272281009) ·
+mergeable clean · không còn `cong` (đã rút ở #506/#507). Codex connector kích lúc bỏ draft, ~1 phút trước merge —
+kết quả của nó trên `656f2dc` **không được chờ, không được đọc**; ghi KHÔNG ĐO ĐƯỢC chứ không ghi "sạch". Đây là PR hồ
+sơ: không lease, không `guard --action merge`; sổ local gen4 `uy_quyen_merge.jsonl` có dòng KHAI BÁO cho `656f2dc`.
+
+**A3 đo hai lần trên #510** (nối r366, nơi mục ấy cố ý không khai A3 vì viết trước khi đo): `thu-hoi` success trên
+`3349c8b` (job 103242804577, 18 s, artifact receipt 10196441387 — #503 comment 5633632348) và trên `656f2dc` (job
+103272281009). Đó là hai lần liên tiếp `pull_request_target` xanh kể từ A0 — C2a đóng bằng phép đo. **M3 sâu** (đọc
+lại nội dung artifact receipt thật) vẫn chưa làm.
+
+## Cổng của mục này
+
+Trên cây r367 (2 verdict + 2 biên nhận + README + mục này + manifest): `bien_nhan_v2` **81 ĐẠT v2 · 11/11 miễn trừ legacy ·
+42 NỢ đóng băng · 0 vi phạm · TỔNG: ĐẠT** (79 r366 + 2 mới) · t26/t27 QUA · `release-verify --strict` ok 180/180 ·
+`doc-claims-check --strict` ok · `doctrine-scan` sạch. Neo `evidence_url` của hai biên nhận: blob tại commit đầu tiên
+chứa hai verdict (`git log --all --diff-filter=A` ⇒ đúng 1 commit).
+
+## Đếm hình dạng lỗi và nợ
+
+- "Lời khai rộng hơn phép đo" trong hồ sơ r366: **6** (5 P2 + 1 P3), cùng một lớp — hồ sơ tổng hợp làm tròn số hạng
+  và nâng mức bằng chứng ("áp NGUYÊN", "rỗng", "hoặc `-B`"). Cộng dồn với r364 (3 P2 cùng lớp): **9** finding review-hồ-sơ
+  trong hai PR hồ sơ liên tiếp, 0 finding mã sản phẩm.
+- **P3 `tham-chieu-tai-lieu-song-con-sot` (r365) ĐÓNG ở mục này**, commit riêng, hai chú dẫn: `requirements.txt:29` (comment
+  "Ba workflow" kể `duyet-phan-chung.yml:39`) và `ops/PHAN_BIEN_QUY_TRINH_BUILD_REVIEW_20260905.md:118` (lệnh tái hiện đọc
+  `.claude/dev/duyet_danh_tinh.py`). Không viết lại số cũ — ghi chú ngay cạnh rằng tệp đã rút ở #506/#507 và lệnh chỉ chạy
+  được trên cây trước `0bf0ba7`. `requirements.txt` NẰM TRONG manifest ⇒ tái sinh lại. Lý do đóng ở đây chứ không chờ packet:
+  chú dẫn, không mã; chủ kho đồng ý "làm hết" trong phiên này (nguồn (b)).
+- Nợ mở: M3 sâu; cổng cho `so_p1/so_p2/so_p3`; WINDOWS-LEASE-SUITE (#504) — chủ kho đã đồng ý cấp lease trong phiên này,
+  ghi hộ ở #504.
+
+# ★ dev-side — r366: ghi sổ #505 — packet #503 `M9-FETCH-AUTH` (#499 C2a) land sau 10 vòng cross-review codex qua 4 generation lease; approve dưới điều kiện dừng do chủ kho duyệt; A3 đo ở chính PR hồ sơ này
+
+Nối tiếp r365 (chốt tới `26e2555d`, #506). Merge sau đó chưa có mục: **#493** (`e82af37`, r360 — hồ sơ của một chuỗi khác),
+**#507** (`0bf0ba7`, chính r365), **#475** (`fa717ee`, ba spec bản 1 + spec A1 nháp 0 + lease nháp WINDOWS) và **#505**
+(`fe05fa6`) — mục này ghi sổ #505 và là vế bookkeeping ADR-0034 của chính nó (10 verdict + 10 biên nhận v2 + 14 cảnh báo
++ 10 hàng mục lục + manifest tái sinh).
+
+**Không nâng `VERSION`.** Vẫn `1.36.68` từ r336.
+
+**Số hiệu `r366` đo trước khi dùng** (11-09-2026, 11:2xZ; `ls-remote --heads` 332 = `for-each-ref` 332, thiếu cục bộ 0):
+chuỗi tiêu đề `# ★ dev-side — r366` có trên **1** ref — `claude/land-493-bookkeeping-wip`, nhánh WIP của một phiên khác,
+CHƯA merge (PR #493 đã land dưới số r360). `master` không có r366; `r367` 0. Chọn **r366**; nhánh WIP kia nếu land sau
+phải đổi số theo tiền lệ r359 → r360 ("master đã chiếm số").
+
+**GIỚI HẠN NGUỒN.** Như r364/r365: (a) tự đo được — Git, băm/byte, numstat, cổng chạy lại từ hiện vật trong kho; (b) thuật
+lại — sự kiện GitHub (run, comment, giờ merge); (c) kết quả cũ thuật lại — mutant/probe reviewer chạy trong sandbox, chỉ
+có băm verdict và mô tả. Runtime 10 lượt review: ID/prompt digest/timestamp/thời lượng/exit/byte+hash stdout,stderr có
+trong `run.json` NGOÀI kho (`28f02cda` `6b3e8525` `4024cfff` `c2bc3d98` `885398ce` `47b042b7` `7f38b236` `6b6e237b`
+`1f427b9d` `cb013b5c`); **model đã chạy KHÔNG ĐO ĐƯỢC** (codex exec không xuất modelUsage).
+
+## Packet #503 — việc gì, vì sao
+
+Nợ #499 C2a: workflow M9 (`ops-thu-hoi-admission.yml`, `pull_request_target`, cài ở A0) chết `rc=128 could not read
+Username` ở bước `git fetch` H trên MỌI PR vì checkout S dùng `persist-credentials: false` (đúng thiết kế) còn fetch endpoint
+tường minh không mang xác thực — cổng fail-close nhưng không bao giờ xanh. Spec bản 1 `ops/specs/M9-FETCH-AUTH.md`
+(sha256 `b8200141…`, nay trên master qua #475, cùng băm lease neo). Bản vá: **11 dòng** workflow — header Basic từ
+`TL_TOKEN` qua `GIT_CONFIG_COUNT/KEY_0/VALUE_0` cho ĐÚNG MỘT lời gọi `git fetch`, `::add-mask::` chuỗi base64 trước khi
+dùng, `unset` sau; không ghi config, không token trong URL — cộng ca **t152** (+69) chạy nguyên phần shell của bước với
+Git config thật, token giả, không mạng.
+
+```
+git diff --shortstat fa717ee..fe05fa6        ⇒  2 files changed, 80 insertions(+)
+git diff --numstat 27c413c3 fe05fa6 -- <2 tệp>   ⇒  11/0 workflow · 69/0 test  (= +80/−0 ở cây cuối; head 1 +61/−0, head 2 +79/−0; mọi head không vượt trần 80)
+git rev-list --count --first-parent fa717ee..fe05fa6 ⇒ 1 ; --count ⇒ 11 (10 commit nhánh + merge commit)
+git log -1 --format=%P fe05fa6               ⇒  fa717ee de49fa0   (merge commit, KHÔNG squash)
+```
+
+## Mười vòng cross-review codex (khác nền) qua bốn generation — bảng đo
+
+Lease gen 1 `m9-fetch-auth-exec-1` (#503 comment 5629606599, 3 lượt, trần review nâng 2→3 ở comment 5630194531) → gen 2
+`exec-2` (5630541324, trần nâng 5631624818) → gen 3 `exec-3` (5632052728, chỉ thị *"chạy đến hết P1, P2"*, nang_tran ghi sẵn)
+→ gen 4 `exec-4` (5633059702, *"Tôi chọn A"*, **điều kiện dừng**: chỉ P1 hoặc P2 có mutant sống ở WORKFLOW mới chặn
+approve; P2 thuần fixture ghi nợ). Mỗi reroute §12: lease cũ nhận `da_bi_thay_the`, lease mới `thay_the_cho`, `check` rc=0,
+state-dir mới `.claude/.packet_state/gen{2,3,4}/`.
+
+| round | gen·lượt | head | verdict | P1/P2 | finding (slug) | mutant sống ⇒ HINT | run · s |
+|---|---|---|---|---|---|---|---|
+| 1 | 1·1 | `62c299a` | `changes_requested` | 1/1 | `t152-khong-do-header-hieu-luc` · `t152-khong-khoa-dang-ky-mask` | m5/m7/m8 ⇒ chạy shell thật + Git config | `28f02cda` · 1 184 |
+| 2 | 1·2 | `6254570` | `changes_requested` | 1/1 | `t152-bo-sot-fetch-thu-hai` · `t152-stub-khong-do-quyen-transport` | m10/m11 | `6b3e8525` · 814 |
+| 3 | 1·3 | `c851f80` | `changes_requested` | 1/0 | `t152-bo-qua-stderr-truoc-mask` | m12 (set -x trước gán) | `4024cfff` · 995 |
+| 4 | 2·1 | `2b52173` | `changes_requested` | 1/0 | `t152-bo-qua-co-shell-truoc-wf-blob` | m13 (-x đầu bước) | `c2bc3d98` · 878 |
+| 5 | 2·2 | `19337fa` | `changes_requested` | 0/1 | `t152-fixture-ngan-bo-sot-base64-wrap` | m14 (bỏ -w0) | `885398ce` · 775 |
+| 6 | 2·3 | `301aac8` | `changes_requested` | 0/1 | `t152-fixture-mat-nhanh-padding-base64` | m15 (bỏ `=`) — do fixture HINT 5 | `47b042b7` · 891 |
+| 7 | 3·1 | `8726a1c` | `changes_requested` | 0/1 | `t152-khong-khoa-nguon-token-trong-env` | m16 (env TL_TOKEN rỗng) | `7f38b236` · 867 |
+| 8 | 3·2 | `81af1c9` | `changes_requested` | 0/1 | `t152-bo-sot-header-env-con-sau-fetch` | m22 (export VALUE_0 riêng) | `6b6e237b` · 991 |
+| 9 | 3·3 | `3ae4f61` | `changes_requested` | 0/1 | `t152-fixture-bo-sot-token-lan-hoa-thuong` | m23 (`${TL_TOKEN,,}`) | `1f427b9d` · 969 |
+| 10 | 4·1 | `de49fa0` | **`approve`** | 0/0 | — (không có P2 fixture mới; A3/M3 vẫn mở) | m1–m34: 33 GIẾT / 1 SỐNG hợp lệ (m17) | `cb013b5c` · 940 |
+
+Mỗi vòng reviewer xác nhận finding vòng trước **ĐÃ VÁ THẬT** (HINT 2–9 trùng byte toàn tệp; HINT 1 khớp ngoài docstring), trừ round 6 xếp HINT
+round 5 là *"vá sinh lỗi mới trong độ phủ; riêng nhánh wrap đã vá thật"* — reviewer tự nhận fixture của mình làm mất
+nhánh padding. **Cả 11 finding (4 P1 + 7 P2) của 9 vòng đều ở ca test t152; workflow 11 dòng không đổi từ round 1** (sha256 `184a54a6…` ở cả 10
+verdict). Executor giữ nguyên logic mọi HINT; riêng HINT 1 có sửa docstring như verdict 2 ghi; suite 147/147 (`AL_VER=1.7.7`), actionlint 1.7.7 + ShellCheck
+0.9.0 rc=0 ở mọi head. Verdict nguyên byte + biên nhận v2: `ops/reviews/pr505-review-{1..10}-codex-verdict.md`
+(+ `.receipt.yaml`), neo blob `9dc8460`.
+
+## Vì sao 4 generation, và điều kiện dừng
+
+Bảy vòng liên tiếp (3→9) tiếp tục phát hiện mutant mới ngoài tập đã khoá trong t152;
+đây là lịch sử tập mutant đã thử, không chứng minh luôn tìm được mutant mới. Handoff #503 comment 5632869731 nêu thẳng; chủ kho chọn A: gen 4 áp HINT round 9 (1 literal) +
+1 vòng, kèm điều kiện dừng ghi vào lease (`dieu_kien_dung`) và vào prompt review. Round 10 **không dùng tới** điều kiện
+nới: 0 finding ở cả hai nhóm. Đây là luật của một generation, không phải tiền lệ "P2 fixture không bao giờ chặn".
+
+## Phép đo bị bytecode cũ đánh lừa — ghi để hồ sơ không mang số sai
+
+HINT round 9 đổi 1 literal **cùng kích thước tệp** (304776 B). THUẬT LẠI executor: lần đo đầu ở bản sao cho *"m23 SỐNG sau HINT"* vì CPython
+dùng `.pyc` cũ (mtime giây + size không đổi; patch trong cùng giây với lần import trước) — đúng bài học `.pyc` trong
+`CLAUDE.md`. Theo lời executor, xoá `__pycache__` + `python3 -B` ⇒ m23 ĐỎ; reviewer round 10 ghi kích thước không
+đổi và chạy `-B`, nhưng không xác minh độc lập sự cố cache ban đầu. `-B` không ngăn đọc `.pyc` có sẵn: phải xoá cache cũ trước. Đính chính ngay trong #503 comment 5632869731; biên nhận round 9 mang cảnh báo
+`HINT-CUNG-KICH-THUOC-TEP-bytecode-cu-lam-phep-do-sai`.
+
+## Land, các PR khác của đợt, A3
+
+Uỷ quyền merge: #503 comment 5632304817 (*"các PR thuộc phiên này thực hiện theo khuyến nghị"*: thứ tự #505 → #507 →
+#475, mỗi PR chỉ khi gate ubuntu xanh trên đúng head; #505 chỉ khi approve). `ghi-uy-quyen` gen 4; `guard --action merge`
+vẫn 7 theo thiết kế (#338). Thực tế land: **#507 `0bf0ba7`** (10:06Z) → **#475 `fa717ee`** (10:52Z) → **#505 `fe05fa6`**
+(11:06Z) — #505 sau cùng vì round 10 chưa xong khi hai gate kia xanh; thứ tự khuyến nghị là ưu tiên đo A3, không phải
+phụ thuộc kỹ thuật. #475 phải merge master hai lần (manifest xung đột sau #493 rồi sau #507). Codex connector trên
+`de49fa0` khi bỏ draft: Completed **10:53:13Z — TRƯỚC merge**, 0 review object/0 review comment.
+
+**A3 (canary runner thật):** cả 10 verdict đều `chua_do_duoc` fetch trên runner GitHub. Trước land, mọi PR đo được hai
+chữ ký của `thu-hoi`: preflight `workflow_sha != S` rc=12 khi payload base cũ, hoặc `rc=128 could not read Username`
+khi preflight qua (đo trên #475 head `586e099` lúc 09:13Z — chính lỗi C2a). PR đầu tiên có sự kiện
+`pull_request_target` sau land là **PR hồ sơ này** — số đo ghi vào #503 sau khi PR mở; mục này KHÔNG khai A3 đã đạt.
+
+## Đếm hình dạng lỗi (chép từ spec) và nợ
+
+- "Lời khai rộng hơn phép đo" của phiên điều phối: round 7, prompt ghi `origin/master` = `26e2555`, đo được `e82af37`;
+  round 8 đã khớp `e82af37`; round 10 prompt ghi `e82af37`, đo được `0bf0ba7`. Mô tả *"27 commit chỉ chạm
+  reviews/CHANGELOG/manifest"* thiếu `ops/cong_cu.py` (round 1). Không chạm write set, không đổi kết luận — **2 loại
+  sai lệch** (mốc master; danh sách tệp), không phải hai lần xảy ra.
+- Nợ mở: A3/M3 (đo ở PR này); P3 `tham-chieu-tai-lieu-song-con-sot` (r365) vẫn mở; WINDOWS-LEASE-SUITE (#504) chờ cấp
+  lease — cùng tệp `ops/lease_publish_test.py`, nay đã rảnh.
+- Cross-review HỒ SƠ này (codex khác nền, run `5c3209aa`, 12:30–13:02Z 11-09-2026, head `3349c8b`): `changes_requested`
+  0 P1 / 5 P2 / 1 P3 — tổng hợp trượt số (9→11 finding, 6→7 vòng), HINT 1 khớp ngoài docstring, `transport` CÓ trong
+  run.json, `-B` không khử `.pyc` có sẵn, mục NỢ round 10 không rỗng (A3/M3), bảng đo 17–25 hàng. Verdict sha256
+  `a1bd6de0…`, HINT `9212942d…` áp NGUYÊN 20 hunk (12 tệp) + tái sinh manifest; verdict/biên nhận của lượt này vào kho
+  ở PR hồ sơ kế tiếp (tiền lệ r364). 10 verdict PR #505 KHÔNG đổi byte.
+
+## Gate tại chỗ (head hồ sơ, Linux)
+
+bien_nhan_v2 **79 ĐẠT v2 · 11/11 miễn trừ legacy · 42 NỢ đóng băng · 0 vi phạm · tổng 132** (67 ở r365 + 2 của #493 + 10
+mới) · t26/t27 QUA · doc-claims-check --strict ok · release-verify --strict ok (180/180) · doctrine-scan sạch. Mục này +
+manifest tái sinh trong cùng commit (`tl.py release-manifest --deterministic --out RELEASE_MANIFEST.json`), rồi
+release-verify lại.
+
+# ★ dev-side — r365: ghi sổ #506 — rút cổng `duyet khac danh tinh / cong` theo chỉ đạo chủ kho; hai verdict codex, gen 2 vì lỗi ghi sổ, A5 đo được: `cong` không còn trên PR đầu tiên sau land
+
+Nối tiếp r364 (chốt tới `27c413c3`, #501). Merge sau đó chưa có mục: **#497** (`4b5184e`, r362 của một chuỗi hồ sơ khác,
+27 commit chỉ `ops/reviews/**` + `ops/cong_cu.py` + CHANGELOG + manifest) và **#506** (`26e2555d`) — mục này ghi sổ #506 và
+là vế bookkeeping ADR-0034 của chính nó (2 verdict + 2 biên nhận v2 + 4 cảnh báo + 2 hàng mục lục + manifest tái sinh).
+
+**Số hiệu `r365` đo trước khi dùng** (11-09-2026, 06:1xZ, `guong.git` fetch đủ): chuỗi `r365` xuất hiện trên **11** ref nhưng
+chỉ trong THÂN mục r364 (*"`r365` 0"*), không ref nào có mục `# ★ … r365`; `r366` 0.
+
+## Packet #502 `BO-CONG-DUYET-KHAC-DANH-TINH` — việc gì, vì sao
+
+Chỉ đạo chủ kho phiên 11-09-2026, nguyên văn: *"tôi muốn bỏ phê duyệt khác danh tính"* (dấu vết bền: thân Issue #502).
+Spec bản 1 chốt `ops/specs/BO-CONG-DUYET-KHAC-DANH-TINH.md` (sha256 `d8d1e083…`, blob `1e5d91d` trên PR #475, bản sao
+trên `ops/cap-lease-502`); câu trả lời biên giới Q1/Q2/Q4 đồng ý, Q3 *"chưa từng bật"* (#502 comment 5629584614 + chỉ thị
+06:0xZ). Lease gen 1 `bo-cong-duyet-khac-danh-tinh-exec-1-claude-20260911` (#502 comment 5629605590; ngoại lệ ADR-0044
+**số tệp 6**, dòng thêm ≤ 30). Đo VÌ SAO: #500 (`c00c88a0`) và #501 (`27c413c3`) đều merge với `cong` ĐỎ ⇒ cổng không
+chặn; nó tốn một check đỏ mỗi PR và mọi push xoá bản duyệt của tài khoản thứ hai.
+
+Diff #506: **6 tệp, +13/−1710** — xoá `.github/workflows/duyet-khac-danh-tinh.yml` (−74), `duyet-phan-chung.yml` (−62),
+`.claude/dev/duyet_danh_tinh.py` (−338), `duyet_danh_tinh_test.py` (−1235); gỡ 1 mục `DA_NOI` trong
+`.claude/dev/ci_dang_ky_test.py`; khối ĐÃ RÚT (+13 kể dòng trống) đầu `ops/RUNBOOK_TACH_DANH_TINH_GITHUB.md`.
+
+## Hai lượt cross-review codex (khác nền) — bảng đo
+
+| lượt | head | verdict | P1/P2/P3 | run · thời lượng | HINT | vá ở |
+|---|---|---|---|---|---|---|
+| 1 | `1e36bb4` | `changes_requested` | 0/2/1 | `2df4d177` · 701,678 s | 1 hunk runbook (sha256 `d4fd6193…`) | `88e89b3` (áp nguyên) |
+| 2 | `88e89b3` | `approve` | 0/0/1 | `3c71bd7f` · 620,319 s | 0 hunk (`fc895712…`) | — |
+
+Hai P2 lượt 1 (`loi-khai-vuot-hai-su-kien` · `duong-dan-spec-khong-co-tren-head`) được lượt 2 đối chiếu từng hunk: **ĐÃ VÁ
+THẬT**. P3 `tham-chieu-tai-lieu-song-con-sot` (`requirements.txt:29`, `ops/PHAN_BIEN_QUY_TRINH_BUILD_REVIEW_20260905.md:118`)
+**còn mở**, ngoài write set — nợ tài liệu nhỏ. Reviewer tự đo cả hai lượt: đúng 4 tệp xoá; 75 dòng tham chiếu, 0 lời gọi
+thực thi sống; registry 21/21 + 2 mutant phục hồi rc=1; suite 146/146; `don_ref` 105/105; actionlint **rc=1, delta 0**
+(1 SC1003:info `ops-don-ref.yml:117` có sẵn trên master — A3 của spec đòi rc=0 chưa đạt ở cả base lẫn HEAD, ghi thẳng).
+Verdict nguyên byte + biên nhận v2: `ops/reviews/pr506-review-{1,2}-codex-verdict.md` (+ `.receipt.yaml`), neo blob `fcf252a`.
+
+## Sự cố ghi sổ — gen 1 `blocked`, chủ kho reroute gen 2
+
+Khi ghi review lượt 2 vào `packet_loop.py`, executor truyền lại slug P3 làm `--finding-id` lần thứ hai ⇒ same-failure 2/2 ⇒
+gen 1 về **`blocked`** dù bản ghi approve vẫn được lưu. Lỗi GHI SỔ, không phải lỗi bản vá; công cụ cố ý không có đường mở
+khoá (dòng 654). Failure evidence + handoff: #502 comment 5629947702. Chủ kho *"đồng ý"* ⇒ lease **generation 2**
+`bo-cong-duyet-khac-danh-tinh-exec-2-claude-20260911` (#502 comment 5630196493; gen 1 nhận `da_bi_thay_the`, `check` rc=0,
+`ops/cap-lease-502` commit `d22e4bf`); state-dir mới `.claude/.packet_state/gen2/` ghi lại bản duyệt KHÔNG kèm slug P3 ⇒
+`accepted` tại `88e89b3`. **Bài học:** finding ngoài write set mà reviewer xếp "CHƯA VÁ = xử lý đúng" KHÔNG được truyền lại
+làm khoá đếm ở lượt sau; chỗ của nó là `finding-desc`/hồ sơ.
+
+## Land và A5
+
+Uỷ quyền merge: #502 comment 5630265789 (chỉ thị *"#506 nếu đã cross review approve thì merge"*); `ghi-uy-quyen` gen 2;
+`guard --action merge` vẫn 7 theo thiết kế (#338). Merge commit **`26e2555d`** (cha `4b5184e` + `88e89b3`), 06:1xZ 11-09.
+Codex connector kích khi bỏ draft: `Completed` **06:14:48Z — SAU merge** (comment 5630269090, không finding) — không phải
+điều kiện merge. **A5 đo được trên PR #507 (PR đầu tiên sau land, head `f47b44e`, 06:17:5xZ):** check run = `thu-hoi` ·
+`gate (ubuntu-latest)` · `mo` — **không còn `cong`, không còn `phan-chung`**. `thu-hoi` vẫn đỏ tất định tới khi #505 land.
+A6 (gate master lượt `26e2555d`) chưa đọc lúc viết mục này — ubuntu kỳ vọng success, Windows kỳ vọng `cancelled` (#499 C3).
+
+## Đính chính và số đếm
+
+- Thông điệp commit `f47b44e` khai *"bien_nhan_v2 69 ĐẠT"* — **SAI**, đo là **67 ĐẠT v2 · 11/11 miễn trừ legacy · 42 NỢ
+  đóng băng · 0 vi phạm · tổng 120** (cùng số trước và sau khi thêm hai biên nhận vì hai tệp mới đếm vào 67 — số 69 là
+  cộng nhẩm sai). Commit đã đẩy, chỉ đính chính ở đây.
+- Bộ đếm hình dạng lỗi chép từ spec: "cổng có MẶT khác cổng CƯỠNG CHẾ" chạm **3** ⇒ packet rút; thêm hình dạng mới của
+  phiên: **"khoá đếm bị nạp lại bởi finding ngoài phạm vi"** = 1 (sự cố gen 1).
+
+## Gate tại chỗ (head `f47b44e`, Linux)
+bien_nhan_v2 67/0 vi phạm · t26/t27 QUA · doc-claims-check --strict ok · release-verify --strict ok. Mục này + manifest tái
+sinh ở commit kế tiếp (`tl.py release-manifest --deterministic`), rồi release-verify lại.
 
 # ★ dev-side — r364: ghi sổ #500 — hai verdict codex chấm CHÍNH hồ sơ review của #492, `cong` đỏ lúc merge vì tác giả không tự duyệt được (2026-09-11)
 

@@ -89,9 +89,20 @@ jobs:
           WF_BLOB="$(git rev-parse "$TL_WF_SHA:.github/workflows/ops-thu-hoi-admission.yml")"
           # H: fetch ref PR từ endpoint canonical TƯỜNG MINH (không qua `origin` của checkout), vào ref tạm;
           # OID nhận được phải bằng head.sha của event, nếu không receipt stale ⇒ 12.
+          # M9-FETCH-AUTH (#503, khắc phục #499 C2a): checkout S cố ý `persist-credentials: false`, nên lời gọi
+          # fetch dưới đây là nơi DUY NHẤT mang xác thực — header Basic từ TL_TOKEN, phạm vi đúng MỘT tiến trình git
+          # (GIT_CONFIG_KEY_0/VALUE_0: không ghi config, không nằm trong argv, không token trong URL). Chuỗi base64
+          # của token KHÔNG được GitHub tự mask, nên mask tay trước khi dùng. Đo lần đầu 10-09-2026: fetch nặc danh
+          # ⇒ rc=128 `could not read Username` trên mọi PR — cổng fail-close nhưng không bao giờ xanh. t152 khoá.
+          AUTH_B64="$(printf 'x-access-token:%s' "$TL_TOKEN" | base64 -w0)"
+          echo "::add-mask::$AUTH_B64"
+          GIT_CONFIG_COUNT=1 \
+          GIT_CONFIG_KEY_0="http.https://github.com/.extraheader" \
+          GIT_CONFIG_VALUE_0="AUTHORIZATION: basic $AUTH_B64" \
           git -c protocol.allow=never -c protocol.https.allow=always \
               fetch --no-tags "https://github.com/$TL_KHO" \
               "+refs/pull/$TL_PR/head:refs/thu-hoi/ung-vien"
+          unset AUTH_B64
           NHAN="$(git rev-parse refs/thu-hoi/ung-vien)"
           [ "$NHAN" = "$TL_H" ] || { echo "fetch refs/pull/$TL_PR/head cho $NHAN != head.sha $TL_H" >&2; exit 12; }
           # Bộ kiểm CANONICAL (tệp của cây S vừa checkout) đọc H qua object-store, không checkout cây ứng viên.

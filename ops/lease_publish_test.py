@@ -5365,6 +5365,75 @@ def t151_review_codex_to_tien_non_tree_metadata_rac_va_khoa_lan_kieu():
     chot(rc == mod.RC_NOI_DUNG and "khoá thừa" in str(msg), f"khoá thừa lẫn kiểu phải 8: {rc} {msg!r}")
 
 
+@ca
+def t152_C2a_M9_fetch_H_mang_xac_thuc_qua_header_khong_token_trong_URL():
+    """#503: Bash thật từ đầu bước tới trước NHAN; Git config thật; token giả, không mạng.
+    Stub rev-parse cấp S/blob giả; stub fetch đo config theo URL. (i) env/token/header; (ii) URL sạch;
+    (iii) không ghi config; (iv) checkout không giữ credential; (v) mask trước fetch, stdout/stderr sạch.
+    """
+    import base64, yaml
+    steps = yaml.safe_load(WORKFLOW_THU_HOI.read_text(encoding="utf-8"))["jobs"]["thu-hoi"]["steps"]
+    checkout = [b for b in steps if str(b.get("uses", "")).startswith("actions/checkout@")]
+    chot(len(checkout) == 1 and (checkout[0].get("with") or {}).get("persist-credentials") is False,
+         "(iv) checkout S phải giữ `persist-credentials: false`")
+    lenh_fetch, lenh_config = [], []
+    for b in steps:
+        than = b.get("run")
+        if not isinstance(than, str):
+            continue
+        ds = _dong_lenh(than)
+        for i, lenh in enumerate(ds):
+            if re.search(r"\bgit\b.*\bfetch\b", lenh) and "refs/pull/" in lenh:
+                lenh_fetch.append((lenh, ds, i, than, b.get("env") or {}))
+            if re.search(r"\bgit\b[^\n]*\bconfig\b[^\n]*extraheader", lenh):
+                lenh_config.append(lenh)
+    chot(len(lenh_fetch) == 1, f"đúng một lời gọi fetch H, thấy {len(lenh_fetch)}")
+    f, ds, i, than, mt = lenh_fetch[0]
+    chot(re.sub(r"\s+", "", str(mt.get("TL_TOKEN", ""))) in ("${{secrets.GITHUB_TOKEN}}", "${{github.token}}"),
+         "(i) env TL_TOKEN của bước fetch phải lấy GitHub token")
+    url = re.findall(r"https://[^\s\"']+", f)
+    chot(url and all("@" not in u and "TL_TOKEN" not in u for u in url),
+         f"(ii) URL fetch mang credential: {url}")
+    chot(not lenh_config, f"(iii) không được `git config` ghi extraheader vào cây S: {lenh_config}")
+    dau = [j for j in range(i) if ds[j].startswith("WF_BLOB=")]
+    cuoi = [j for j in range(i + 1, len(ds)) if ds[j].startswith("NHAN=")]
+    chot(len(dau) == len(cuoi) == 1, "(i) không tìm được ranh giới đoạn auth/fetch")
+    # Giữ nguyên bytes shell và chạy cả preflight: cờ debug trước WF_BLOB cũng có hiệu lực.
+    doan = than[:than.index("\nNHAN=")]
+    stub = r'''set -euo pipefail
+    git() {
+      if [ "${1-}" = rev-parse ] && [ "$#" -eq 2 ]; then
+        case "$2" in HEAD|"$TL_WF_SHA:.github/workflows/ops-thu-hoi-admission.yml") printf '%s\n' "$TL_S"; return;; esac
+      fi
+      local -a cfg=()
+      while [ "${1-}" = -c ]; do cfg+=("$1" "$2"); shift 2; done
+      [ "$#" -eq 4 ] && [ "$1" = fetch ] && [ "$2" = --no-tags ] || return 91
+      [ "$3" = "https://github.com/$TL_KHO" ] || return 92
+      [ "$4" = "+refs/pull/$TL_PR/head:refs/thu-hoi/ung-vien" ] || return 93
+      [ "$(command git "${cfg[@]}" config --get protocol.https.allow)" = always ] || return 95
+      command git "${cfg[@]}" config --get-urlmatch http.extraheader "$3"
+      if command git "${cfg[@]}" config --get-urlmatch http.extraheader https://example.invalid/repo; then return 94; fi
+    }
+    '''
+    for token in ("m9-fixture-token-" + "0123456789aBcDeF" * 4 + tail for tail in ("", "x", "xy")):  # dài, padding 0/2/1
+        b64 = base64.b64encode(("x-access-token:" + token).encode()).decode()
+        with San() as s:
+            cfg = s / "empty.config"; cfg.write_text("", encoding="utf-8")
+            env = dict(PATH=os.environ["PATH"], TL_TOKEN=token, TL_KHO="ducthangho/tra-luat", TL_PR="505",
+                       TL_S="a" * 40, TL_H="b" * 40, TL_WF_SHA="a" * 40, TL_NHANH="master",
+                       TL_WF_REF="ducthangho/tra-luat/.github/workflows/ops-thu-hoi-admission.yml@refs/heads/master",
+                       GIT_CONFIG_NOSYSTEM="1", GIT_CONFIG_GLOBAL=str(cfg))
+            p = subprocess.run([_bash_posix(), "--noprofile", "--norc", "-c", stub + doan +
+                                '\ntest -z "${AUTH_B64+x}${GIT_CONFIG_COUNT+x}${GIT_CONFIG_KEY_0+x}${GIT_CONFIG_VALUE_0+x}"\n'],
+                               cwd=s, env=env, capture_output=True, text=True, timeout=10)
+        chot(p.returncode == 0, f"(i) đoạn auth/fetch không chạy được: rc={p.returncode}: {p.stderr}")
+        dong = p.stdout.splitlines()
+        chot(dong and dong[-1] == "AUTHORIZATION: basic " + b64,
+             "(i) Git không nhận header hiệu lực dẫn từ TL_TOKEN trên URL fetch")
+        chot(dong == ["::add-mask::" + b64, "AUTHORIZATION: basic " + b64] and not p.stderr,
+             "(v) phải đăng ký mask đúng base64 trước fetch, không có output thừa (kể cả stderr)")
+
+
 def main() -> int:
     qua, hong, bo_qua = 0, [], []
     for fn in CA:

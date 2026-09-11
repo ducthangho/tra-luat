@@ -360,8 +360,19 @@ không được git theo dõi **vẫn còn**, lý do và số đo trước/sau *
 hơn nhiều: **giữ một cảnh báo đã được nhận diện và giải thích tại chỗ**, thay vì để nó biến mất không dấu
 vết. Đó là một lựa chọn chấp nhận được, không phải một tất yếu đạo đức.
 
-Con số của mục ghi sổ này: **`advisories` 370 → 371, delta = +1, một advisory, DƯƠNG TÍNH THẬT, đã khai.**
-`flags` vẫn **0** và `ok=true` ở cả hai vế — advisory không phải lỗi chặn.
+Con số của mục ghi sổ này — **và nó phải tự khai NỀN, vì nền đã đổi một lần giữa chừng:**
+
+| nền đo | nền | head | delta | `files_scanned` |
+|---|---:|---:|---:|---:|
+| `e82af37` (lúc soạn mục này, trước khi master nhích) | 370 | 371 | **+1** | 106 |
+| `05ba3f9` (`origin/master` lúc MỞ PR, sau 49 commit) | 369 | 370 | **+1** | 107 |
+
+Hai cặp số khác nhau, **cùng một delta `+1`**, cùng một advisory `L1` dương tính thật. Nền đổi vì `master`
+nhận thêm việc của phiên khác giữa lúc soạn và lúc mở PR; `files_scanned` 106 → 107 là tệp tài liệu mới của
+họ, không phải của mục này. `flags` **0** và `ok=true` ở **cả bốn** phép đo — advisory không phải lỗi chặn.
+
+Mọi con số `370/371` ở các đoạn TRÊN là phép đo so nền `e82af37` và **giữ nguyên có chủ đích**: chúng kể lại
+diễn biến đã xảy ra, và sửa chúng theo nền mới sẽ làm câu chuyện không còn khớp với thứ đã thật sự đo.
 
 **Quy tắc đếm — phát biểu HẸP, có phản chứng chạy được.** Bản trước nói advisory sinh theo *"mỗi lần chuỗi
 đường dẫn xuất hiện trong văn bản"*. **Sai.** Điều kiện thật là **token nằm trong span backtick INLINE, và

@@ -92,13 +92,10 @@ Và nó đã bác: `reasoning effort: none` ở **17/17** lượt. Các mục tr
 của #493 thì lời khai ấy SAI**, và đây là lần đầu kho có phép đo cho đại lượng đó. Câu này **KHÔNG** mở rộng
 sang các chuỗi khác — chúng cần đo riêng trên `stderr.log` của chúng, và tôi chưa làm.
 
-Vì sao đáng ghi: một lời khai "effort cao" làm người đọc tin độ phủ rộng hơn thực tế, mà nó lại nằm đúng ở
-chỗ không ai kiểm. Nay biên nhận tách hẳn hai nguồn: `run.json` (launcher ghi) và **header phiên** (công cụ
-ghi), và caveat `REASONING-EFFORT-DO-DUOC-LA-none` có ở cả 17 biên nhận.
-
-**Và nói cho chật: hai lời khai mâu thuẫn nhau, chỉ một trong hai có phép đo — hết.** Hồ sơ này **KHÔNG**
-suy ra điều gì về ĐỘ PHỦ của chuỗi review. Ảnh hưởng của `effort` lên độ phủ **chưa được đo ở đây**, và mục
-này không đo nó.
+Vì sao đáng ghi: **hai nguồn khai `effort` không khớp nhau, và chỉ một trong hai có phép đo.** Biên nhận
+ghi lại khác biệt ấy, tách hẳn hai nguồn — `run.json` (launcher ghi) và **header phiên** (công cụ ghi) —
+và caveat `REASONING-EFFORT-DO-DUOC-LA-none` có ở cả 17 biên nhận. **Hồ sơ chưa đo ảnh hưởng của `effort`
+lên độ phủ**, nên không suy ra điều gì về độ phủ của chuỗi review.
 
 Cùng đường đo ấy còn cho **hai** dữ kiện nữa, cả hai thành caveat chứ không bị bỏ:
 
@@ -419,14 +416,20 @@ diễn biến đã xảy ra, và sửa chúng theo nền mới sẽ làm câu ch
 ngoài khối code**. Mã: `_DOC_CLAIMS_SPAN_RE` là một biểu thức khớp span backtick một dòng, và L1 chỉ duyệt
 nó trên phần văn bản **đã bỏ khối code** (`scripts/tl_core/workflow.py:1183`).
 
-Ba ca, cùng một clone sạch của head này, mỗi ca thêm đúng một dòng vào cuối tài liệu:
+Ba ca, **phép thử LỊCH SỬ chạy trên clone sạch của `185ba5c`** (head lúc vá lượt 3), mỗi ca thêm đúng một
+dòng vào cuối tài liệu. **Neo SHA vì tổng advisory trôi theo head**: clone sạch của head hiện tại cho nền
+**370**, không phải 371 — nên đừng đọc bảng này như phép đo của head đang xem (cross-review lượt 9 chấm
+đúng chỗ này; bản trước viết *"clone sạch của head này"*).
 
-| ca | thêm gì | advisories | delta |
+| ca (trên `185ba5c`) | thêm gì | advisories | delta |
 |---|---|---|---|
 | nền | (không thêm) | 371 | — |
 | 1 | đường dẫn dạng **văn bản thường** | 371 | **0** |
 | 2 | cùng đường dẫn trong **backtick inline** | 372 | **+1** |
 | 3 | cùng đường dẫn trong **khối code** | 371 | **0** |
+
+Thứ bảng này đo là **delta `0 / +1 / 0`** — quy tắc đếm, không phải tổng. Delta ấy không phụ thuộc head;
+tổng thì có.
 
 Hệ quả thực hành, và nó khác hẳn kết luận của bản trước: **với đường dẫn và lớp `L1` đã thử**, nhắc dạng
 văn bản thường không làm tăng advisory. Cái phải đếm là số lần **trích trong backtick**, không phải số lần

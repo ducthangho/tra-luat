@@ -30,6 +30,7 @@ SCRIPT = HERE / "lease_publish.py"
 # Cờ NỘI BỘ của `t125`, cố ý là ĐỐI SỐ chứ không phải biến môi trường: argv không
 # được kế thừa, nên không môi trường nào tắt được phép A/B một cách tình cờ.
 CO_AB = "--ab-con-noi-bo"
+AB_HAN_GIAY = 420     # hạn MỖI lượt con của t125 (packet #504 M5) — lý do và số đo ở docstring t125
 WORKFLOW_DANG = HERE.parent / ".github" / "workflows" / "ops-publish-lease.yml"
 
 RC_OK, RC_THAM_SO, RC_TU_CAP, RC_DA_DANG, RC_NOI_DUNG, RC_NEO, RC_LOP = 0, 2, 4, 9, 8, 6, 10
@@ -4010,6 +4011,16 @@ def t125_AB_toan_suite_KHONG_doi_verdict_theo_ambient_actor():
 
     ĐỘT BIẾN LÀM CA NÀY ĐỎ: bỏ dòng `moi.pop("GITHUB_ACTOR", None)` trong `_goi_lop_gh`,
     hoặc bỏ lọc `env` trong `chay()`, hoặc bỏ `patch.dict` trong `_kiem_sach`.
+
+    HAI LƯỢT CON CHẠY SONG SONG, CÓ HẠN (packet #504 M5, #499 C3; M4 đo 11-09-2026 run 34608513250):
+    trên `windows-latest` 120 ca trước ca này xong trong 76 s rồi ca này KẸT ≥ 25 phút 41 s cho tới khi
+    job bị huỷ ở trần 60 phút — kiểu hỏng là "một ca treo bên trong lượt con", không phải "chậm đều";
+    stdout của con bị `capture_output` nuốt nên log CI không thấy ca nào. Hai chốt, cùng một lý do:
+    (1) `subprocess.Popen` ×2 rồi `communicate(timeout=…)` — ngữ nghĩa A/B GIỮ NGUYÊN (cùng lệnh, cùng
+    hai môi trường, so cùng bộ ba tập), chỉ chạy đồng thời; (2) `AB_HAN_GIAY` = 420 s cho MỖI lượt con:
+    ubuntu đo 94 s cho cả hai lượt, 120 ca trên Windows chạy 1,6× ubuntu, nên 7 phút là > 4× dự phòng —
+    quá hạn thì con bị kill và ca này ĐỎ kèm dòng `>>> vao` cuối cùng chưa có `<<< ra` của con: đó là TÊN
+    CA TREO, thứ M4 không thấy được. Không được nâng hạn để "cho xanh"; ca treo là ca phải sửa.
     """
     import re
     import subprocess
@@ -4018,21 +4029,36 @@ def t125_AB_toan_suite_KHONG_doi_verdict_theo_ambient_actor():
 
     nen = {k: v for k, v in os.environ.items() if k != "GITHUB_ACTOR"}
 
-    def luot(nhan, mt):
-        p = subprocess.run([sys.executable, str(Path(__file__).resolve()), CO_AB],
-                           env=mt, capture_output=True, text=True)
-        m = re.search(r"lease_publish: (\d+)/(\d+) đạt", p.stdout)
+    def mo(mt):
+        return subprocess.Popen([sys.executable, str(Path(__file__).resolve()), CO_AB],
+                                env=mt, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+
+    def doc(nhan, p):
+        try:
+            out, err = p.communicate(timeout=AB_HAN_GIAY)
+        except subprocess.TimeoutExpired as ex:
+            p.kill()
+            out_p, err_p = p.communicate()
+            out = (ex.stdout or "") + (out_p or "") if isinstance(ex.stdout, str) else (out_p or "")
+            vao = re.findall(r"(?m)^>>> vao (\S+) ", out)
+            ra = set(re.findall(r"(?m)^<<< ra (\S+) ", out))
+            treo = [x for x in vao if x not in ra]
+            bang(False, f"lượt {nhan}: lượt con KHÔNG XONG trong {AB_HAN_GIAY}s — đã kill; ca treo (vao không ra): "
+                        f"{treo!r}; đã xong {len(ra)} ca; stdout cuối={out[-300:]!r}; stderr cuối={(err_p or '')[-300:]!r}")
+        m = re.search(r"lease_publish: (\d+)/(\d+) đạt", out)
         bang(m, f"lượt {nhan}: KHÔNG ĐO ĐƯỢC dòng tổng kết; rc={p.returncode}, "
-                f"stdout={p.stdout[-400:]!r}, stderr={p.stderr[-400:]!r}")
-        do = frozenset(re.findall(r"(?m)^  ĐỎ  (\w+):", p.stdout))
+                f"stdout={out[-400:]!r}, stderr={err[-400:]!r}")
+        do = frozenset(re.findall(r"(?m)^  ĐỎ  (\w+):", out))
         # Phải so CẢ ca BỎ QUA. Hai lượt bỏ qua những ca KHÁC nhau nhưng CÙNG SỐ LƯỢNG
         # sẽ cho cùng mẫu số, cùng số đạt và cùng tập đỏ — tuple vẫn bằng nhau trong khi
         # tập ca THỰC SỰ ĐƯỢC ĐO đã khác. Cross-review codex 29-08-2026, finding 2.
-        bo = frozenset(re.findall(r"(?m)^  BỎ QUA (\w+):", p.stdout))
+        bo = frozenset(re.findall(r"(?m)^  BỎ QUA (\w+):", out))
         return p.returncode, m.group(1), m.group(2), do, bo
 
-    khong_actor = luot("KHÔNG actor", nen)
-    co_actor = luot("CÓ actor lạ", dict(nen, GITHUB_ACTOR="ke-la-mat-khong-co-quyen"))
+    p1 = mo(nen)
+    p2 = mo(dict(nen, GITHUB_ACTOR="ke-la-mat-khong-co-quyen"))
+    khong_actor = doc("KHÔNG actor", p1)
+    co_actor = doc("CÓ actor lạ", p2)
 
     bang(khong_actor == co_actor,
          "verdict của bộ test ĐỔI theo `GITHUB_ACTOR` của môi trường — "

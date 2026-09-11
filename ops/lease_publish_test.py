@@ -21,6 +21,7 @@ import shlex
 import subprocess
 import sys
 import tempfile
+import time
 from datetime import datetime, timedelta, timezone
 from pathlib import Path, PurePosixPath
 
@@ -5434,9 +5435,62 @@ def t152_C2a_M9_fetch_H_mang_xac_thuc_qua_header_khong_token_trong_URL():
              "(v) phải đăng ký mask đúng base64 trước fetch, không có output thừa (kể cả stderr)")
 
 
+@ca
+def t153_nhat_ky_tung_ca_vao_ra_cap_doi_va_khong_dem():
+    """M3 packet #504 (#499 C3): mỗi ca in đúng một `>>> vao X` rồi đúng một `<<< ra X` SAU nó, và dòng tổng
+    kết vẫn khớp regex của t125. Chạy chính tệp này trong tiến trình con với đúng một ca rẻ (`--chi-ca=t01_`),
+    stdout qua PIPE và KHÔNG đọc cho tới khi tiến trình con kết thúc.
+
+    Spec ghi tên ca này là `t152_…`; số ấy đã bị M9 (#503) dùng nên ở đây là t153 — ý nghĩa giữ nguyên.
+
+    ĐỘT BIẾN LÀM CA NÀY ĐỎ: bỏ dòng `<<< ra` (hoặc `>>> vao`) trong `main()`; đổi định dạng (tên ca không còn là
+    token sau `vao`/`ra`); in `ra` TRƯỚC `vao`; làm hỏng dòng tổng kết. ĐỘT BIẾN KHÔNG LÀM CA NÀY ĐỎ — CÓ CHỦ Ý:
+    bỏ `flush=True` trong `_nhat_ky_ca` — đệm được xả khi tiến trình con kết thúc nên ca này vẫn thấy đủ dòng;
+    chốt "không đệm" (`PYTHONUNBUFFERED=1` ở wrapper) chỉ đo được ở M4: lượt Windows thật bị huỷ giữa chừng mà dòng
+    `>>> vao` cuối vẫn hiện ra trong log. Đừng thêm phép đo giả cho nó ở đây.
+    """
+    import subprocess
+    if CO_AB in sys.argv:
+        return          # lượt con của t125: không sinh thêm tiến trình con lồng nhau
+    nen = {k: v for k, v in os.environ.items() if k != "GITHUB_ACTOR"}
+    p = subprocess.Popen([sys.executable, str(Path(__file__).resolve()), CO_CHI_CA + "t01_"],
+                         stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, env=nen)
+    out, err = p.communicate()      # đọc SAU khi con kết thúc — đúng cách log CI bị đệm
+    vao = re.findall(r"(?m)^>>> vao (\S+) \d{4}-\d\d-\d\dT\d\d:\d\d:\d\dZ$", out)
+    ra = re.findall(r"(?m)^<<< ra (\S+) \d+\.\d{3}s (QUA|DO|BO_QUA)$", out)
+    bang(vao == ["t01_lease_hop_le_thi_QUA"], f"lượt con phải chạy ĐÚNG một ca t01_: vao={vao!r}; rc={p.returncode}; "
+                                              f"stdout={out[-300:]!r}; stderr={err[-200:]!r}")
+    bang([x for x, _ in ra] == vao and ra[0][1] == "QUA", f"mỗi `vao` phải có đúng một `ra` cùng tên, kết QUA: ra={ra!r}")
+    bang(out.index(">>> vao ") < out.index("<<< ra "), "`<<< ra` phải in SAU `>>> vao`")
+    m = re.search(r"lease_publish: (\d+)/(\d+) đạt", out)
+    bang(m and m.group(1) == m.group(2) == "1" and p.returncode == 0,
+         f"dòng tổng kết phải còn khớp regex của t125 và là 1/1, rc=0: m={m and m.group(0)!r}, rc={p.returncode}")
+
+
+CO_CHI_CA = "--chi-ca="   # `--chi-ca=t01_` ⇒ chỉ chạy ca có tên bắt đầu bằng tiền tố ấy (M3 packet #504 dùng để sinh lượt con rẻ)
+
+
+def _nhat_ky_ca(*phan) -> None:
+    """Một dòng, xả ngay (packet #504 M1). `>>> vao <ca> <utc>` / `<<< ra <ca> <giây>s QUA|DO|BO_QUA`.
+
+    Vì sao: lane Windows của master bị huỷ ở trần 60 phút mà log bước chỉ có đệm khối, nên
+    "DÒNG IN CUỐI CÙNG ≠ CA CHẠY CUỐI CÙNG" (#499 C3) — không có tên ca nào để sửa. `flush=True`
+    mới qua đệm Python; qua đệm ống của HĐH là việc của `PYTHONUNBUFFERED=1` trong wrapper (M2),
+    và chốt "không đệm" chỉ đo được ở lượt Windows thật (M4), không đo được trong tiến trình này.
+    Dòng tổng kết `lease_publish: N/M đạt` và các dòng `  ĐỎ  …` / `  BỎ QUA …` GIỮ NGUYÊN BYTE —
+    regex của t125 và `ci_dang_ky_test.py` đọc chúng.
+    """
+    print(*phan, flush=True)
+
+
 def main() -> int:
     qua, hong, bo_qua = 0, [], []
-    for fn in CA:
+    tien_to = next((x[len(CO_CHI_CA):] for x in sys.argv[1:] if x.startswith(CO_CHI_CA)), "")
+    cac_ca = [fn for fn in CA if fn.__name__.startswith(tien_to)] if tien_to else list(CA)
+    for fn in cac_ca:
+        _nhat_ky_ca(">>> vao", fn.__name__, datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"))
+        t0 = time.monotonic()
+        ket = "QUA"
         try:
             fn()
             qua += 1
@@ -5444,18 +5498,19 @@ def main() -> int:
             try: ly_do = _ly_do_bo_qua_workflow(ex.tep, ex.ten_job)
             except Exception: ly_do = ""
             if ly_do:
-                bo_qua.append((fn.__name__, ly_do))
+                bo_qua.append((fn.__name__, ly_do)); ket = "BO_QUA"
             else:
-                hong.append((fn.__name__, "bỏ qua không dẫn xuất được từ runs-on"))
+                hong.append((fn.__name__, "bỏ qua không dẫn xuất được từ runs-on")); ket = "DO"
         except AssertionError as ex:
-            hong.append((fn.__name__, str(ex)))
+            hong.append((fn.__name__, str(ex))); ket = "DO"
         except Exception as ex:  # noqa: BLE001
-            hong.append((fn.__name__, f"{type(ex).__name__}: {ex}"))
+            hong.append((fn.__name__, f"{type(ex).__name__}: {ex}")); ket = "DO"
+        _nhat_ky_ca("<<< ra", fn.__name__, f"{time.monotonic() - t0:.3f}s", ket)
     for ten, ly in bo_qua:
         print(f"  BỎ QUA {ten}: {ly}")
     for ten, ly in hong:
         print(f"  ĐỎ  {ten}: {ly}")
-    print(_dong_tong_ket(qua, len(CA) - len(bo_qua), len(bo_qua)))
+    print(_dong_tong_ket(qua, len(cac_ca) - len(bo_qua), len(bo_qua)))
     return 1 if hong else 0
 
 

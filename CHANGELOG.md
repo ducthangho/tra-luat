@@ -1632,6 +1632,16 @@ ca, không phải mọi ca (lớp E).
 **Điều đáng nhớ không phải con số mà là CHỖ tôi lấy nó:** cả năm con số đã được chính tôi đo và ghi
 vào thông điệp commit lúc ấy. Chúng nằm trong `git log`, cách một lệnh. Tôi vẫn chép từ trí nhớ.
 
+**ĐÓNG VÒNG LẶP Ở LƯỢT 17 — quyết định của chủ kho, không phải vì hết finding.** Trạng thái lúc
+đóng: **0 P1 · 0 P2** (từ lượt 5), và **hai nợ lớp D** mang sang packet kế nhiệm:
+`cong-byte-co-rang-cong-claims-khong-dem-su-that` (cổng `doc-claims-check` không bắt ba đột biến số
+— mã ở `scripts/tl_core/workflow.py`) và `cong-receipt-chua-dinh-nghia-cay-dang-merge` (cổng biên
+nhận đọc cây trên đĩa nhưng xét ancestry theo `HEAD`, nên mọi merge chưa commit báo vi phạm giả —
+đo được **năm** ca). Cả hai **ngoài write set 8 tệp** của PR hồ sơ này; reviewer nói **bốn lượt
+liền** rằng chúng không chặn `approve`.
+**Duyệt khác danh tính: KHÔNG áp dụng cho lần merge này** — chủ kho quyết, và hai workflow
+`duyet-khac-danh-tinh.yml` / `duyet-phan-chung.yml` đã bị gỡ khỏi kho ở `26e2555` (PR #506).
+
 **Lớp D không đóng được ở PR này.** Mã thực thi `doc-claims-check` nằm ở
 `scripts/tl_core/workflow.py` (lượt 8 chỉ đúng địa chỉ; bản trước của câu này viết *"đòi sửa
 `scripts/tl.py`"* — khoanh sai tệp, dù kết luận *"ngoài write set"* vẫn đúng). Không tệp nào trong

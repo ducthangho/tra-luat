@@ -193,8 +193,20 @@ packet riêng**. Không làm tròn thành `landed`; cũng không đọc thành "
 
 **Và phần đắt nhất của bài học này là về CÁCH TÔI TƯ VẤN, không phải về CI.** Khi chủ kho hỏi lượt hậu-merge
 có đáng chi phí không, tôi trả lời rằng chân ubuntu là lặp lại còn **giá trị nằm hết ở chân windows**, rồi
-khuyến nghị để chạy hết. Phân tích ấy đúng về cấu trúc và **sai về thực tế**: chân windows đã `cancelled` ở
-ba lần land liên tiếp trước đó, và điều ấy **đã được ghi sẵn trong Issue #504 mà tôi chưa mở**.
+khuyến nghị để chạy hết.
+
+**Lời tư vấn ấy sai theo HAI đường độc lập, và bản trước của đoạn này chỉ nêu một** — nó còn gọi phần kia là
+*"đúng về cấu trúc"*, tức vẫn công nhận đúng cái mệnh đề mà mục này đã rút ở trên. Cross-review lượt 3 chấm
+P2 vào chính chỗ đó. Nói cho đủ:
+
+- **Sai về CẤU TRÚC** — *"giá trị nằm hết ở chân windows"* bỏ sót hai bước ubuntu mà lượt PR đã `skipped`
+  (bước **tl selftest** có bằng chứng exact-identity, 119 s; và bước **release-verify strict** lane LAND, 1 s). Cấu trúc
+  của lời tư vấn đã thiếu ngay từ đầu, không phải chỉ thực tế phản lại nó.
+- **Sai về THỰC TẾ** — chân windows đã `cancelled` ở ba lần land liên tiếp trước đó, và điều ấy **đã được
+  ghi sẵn trong Issue #504 mà tôi chưa mở**.
+
+Hai lỗi khác lớp: một là **bỏ sót một phần của tập**, một là **không đọc lịch sử của chính thứ mình đang
+khuyên**. Gộp chúng thành "đúng cấu trúc, sai thực tế" là tự tha cho lỗi thứ nhất.
 
 **Và câu tiếp theo của bản đầu TỰ MÂU THUẪN — cross-review lượt 1 chấm đúng.** Bản đầu viết lượt chạy
 ấy *"trả về **không một phép đo Windows nào**"*, trong khi chính mục này rút ra cận dưới **≥ 9,05×**
@@ -328,20 +340,42 @@ biệt được chúng mới là việc:
 | cổng **đúng hay sai** | **ĐÚNG** — đó là tên BƯỚC, tôi viết nhầm vào dấu backtick | **ĐÚNG** — đường dẫn thật sự không được git theo dõi |
 | việc phải làm | **sửa cách viết** (lỗi của tôi, không phải của nội dung) | **giữ và KHAI** — nội dung đúng, và chính nó là điều mục này nói |
 
-Viết lại câu để advisory biến mất sẽ cho `delta = 0` đẹp hơn và **giấu mất** đúng sự thật đang được ghi.
-Đó là *lọc lặng lẽ để làm khớp lời khai* — hình dạng lỗi mà `GOI-LUOT-2-KHAI-MIRROR-323-THUC-TE-324` của
-PR #497 đã trả giá. Nên con số đúng của mục ghi sổ này là:
+**Bản trước của chỗ này viết một câu RỘNG HƠN PHÉP ĐO, và cross-review lượt 3 bác nó bằng phản chứng.**
+Câu bị rút: *"viết lại câu để advisory biến mất sẽ giấu mất đúng sự thật đang được ghi, đó là lọc lặng lẽ"*.
+Không tất yếu như vậy — xem quy tắc đếm ngay dưới: đường dẫn **vẫn nguyên văn** trong tài liệu, lời khai nó
+không được git theo dõi **vẫn còn**, lý do và số đo trước/sau **vẫn còn**; chỉ dấu backtick mất. Một thay
+đổi cách trình bày **được khai công khai** thì không phải lọc lặng lẽ. Lý do đúng để giữ advisory này hẹp
+hơn nhiều: **giữ một cảnh báo đã được nhận diện và giải thích tại chỗ**, thay vì để nó biến mất không dấu
+vết. Đó là một lựa chọn chấp nhận được, không phải một tất yếu đạo đức.
 
-**`advisories` 370 → 371, delta = +1, một advisory, DƯƠNG TÍNH THẬT, đã khai.** `flags` vẫn **0** ở cả hai
-vế và `ok=true` ở cả hai vế — advisory không phải lỗi chặn.
+Con số của mục ghi sổ này: **`advisories` 370 → 371, delta = +1, một advisory, DƯƠNG TÍNH THẬT, đã khai.**
+`flags` vẫn **0** và `ok=true` ở cả hai vế — advisory không phải lỗi chặn.
 
-**Một tính chất đo được khi viết mục này, đáng ghi vì nó làm con số trông như đang tăng mà không thêm sự
-thật:** advisory sinh theo **mỗi lần chuỗi đường dẫn xuất hiện** trong văn bản, không theo mỗi *sự việc*.
-Viết cùng một đường dẫn ba lần để giải thích một hiện tượng ⇒ đo được `372`; rút về đúng **một** lần nhắc
-nguyên văn ⇒ `371`. Chuỗi nằm trong **khối code** thì KHÔNG bị đếm (đo được: bản có 3 lần nhắc, trong đó 1
-trong khối code, cho `+2` chứ không `+3`). Nên khi một mục ghi sổ phải bàn về một đường dẫn không tồn tại,
-hãy nhắc nguyên văn **một lần** ở chỗ nó là chủ thể, và mô tả bằng lời ở những chỗ còn lại — không phải để
-làm số đẹp, mà vì ba bản sao của một lời khai không mạnh hơn một bản.
+**Quy tắc đếm — phát biểu HẸP, có phản chứng chạy được.** Bản trước nói advisory sinh theo *"mỗi lần chuỗi
+đường dẫn xuất hiện trong văn bản"*. **Sai.** Điều kiện thật là **token nằm trong span backtick INLINE, và
+ngoài khối code**. Mã: `_DOC_CLAIMS_SPAN_RE` là một biểu thức khớp span backtick một dòng, và L1 chỉ duyệt
+nó trên phần văn bản **đã bỏ khối code** (`scripts/tl_core/workflow.py:1183`).
+
+Ba ca, cùng một clone sạch của head này, mỗi ca thêm đúng một dòng vào cuối tài liệu:
+
+| ca | thêm gì | advisories | delta |
+|---|---|---|---|
+| nền | (không thêm) | 371 | — |
+| 1 | đường dẫn dạng **văn bản thường** | 371 | **0** |
+| 2 | cùng đường dẫn trong **backtick inline** | 372 | **+1** |
+| 3 | cùng đường dẫn trong **khối code** | 371 | **0** |
+
+Hệ quả thực hành, và nó khác hẳn kết luận của bản trước: **nhắc bằng văn bản thường không tốn gì**, nên một
+mục ghi sổ có thể bàn kỹ bao nhiêu tuỳ ý về một đường dẫn không tồn tại mà tổng không nhúc nhích. Cái phải
+đếm là số lần bạn **trích nó trong backtick**, không phải số lần bạn **nói về nó**.
+
+**Và LỚP lỗi ấy chưa đóng — đo được ngay trong chính lần vá này.** Khi viết đoạn sửa lời tư vấn ở trên, tôi
+đặt tên bước *tl selftest* vào dấu backtick **lần thứ hai**, và advisory `L8 TL_COMMAND_UNKNOWN` quay lại;
+đo hai clone cho `372` thay vì `371`. Tức bản vá lượt trước chỉ gỡ **một thể hiện**, không đóng lớp: mỗi lần
+nhắc lại tên bước trong văn bản mới là một cơ hội tái phạm, và không cổng nào chặn trước — nó chỉ hiện ra ở
+phép đo delta hai clone. Ghi ra vì đây là bằng chứng cho một mệnh đề mà kho hay nói mà ít khi đo được: **sửa
+một thể hiện không phải sửa một lớp.** Nợ thật sự là *"tên bước workflow và lệnh CLI không phân biệt được
+bằng dấu backtick"*, và nó nằm ở cách `doc-claims` trích claim chứ không ở văn bản của tôi.
 
 ## Chuỗi hồ sơ dừng ở đâu
 

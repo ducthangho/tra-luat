@@ -30,6 +30,7 @@ SCRIPT = HERE / "lease_publish.py"
 # Cờ NỘI BỘ của `t125`, cố ý là ĐỐI SỐ chứ không phải biến môi trường: argv không
 # được kế thừa, nên không môi trường nào tắt được phép A/B một cách tình cờ.
 CO_AB = "--ab-con-noi-bo"
+SC_LOAI_TRU_NHU_ACTIONLINT = "SC1091,SC2194,SC2050,SC2154,SC2157,SC2043"   # đúng bộ actionlint 1.7.7 truyền cho shellcheck
 AL_HAN_GIAY = 180     # hạn lời gọi actionlint trong t137 (packet #504 M5 bước 2) — lý do tại t137
 AB_HAN_GIAY = 420     # hạn MỖI lượt con của t125 (packet #504 M5) — lý do và số đo ở docstring t125
 WORKFLOW_DANG = HERE.parent / ".github" / "workflows" / "ops-publish-lease.yml"
@@ -4871,16 +4872,30 @@ def t137_M9_workflow_admission_hop_dong_tinh_va_actionlint_shellcheck():
     al, sc = shutil.which("actionlint"), shutil.which("shellcheck")
     chot(al, "KHÔNG ĐO ĐƯỢC: thiếu `actionlint` (cài: ops/cai_actionlint.sh với AL_VER)")
     chot(sc, "KHÔNG ĐO ĐƯỢC: thiếu `shellcheck` — actionlint IM LẶNG bỏ toàn bộ luật shell khi vắng nó")
-    # Packet #504 M4 lần 2 (run 34615345948): trên windows-latest lời gọi này TREO ≥ 10 phút 56 s tới lúc job bị huỷ,
-    # trong khi t33 (cùng actionlint + shellcheck, tệp ops-publish-lease.yml) xong trong vài giây — tức treo phụ thuộc
-    # NỘI DUNG tệp này. Hạn `AL_HAN_GIAY` (ubuntu đo ~1 s) để ca ĐỎ có lý do thay vì kéo cả job xuống; quá hạn thì
-    # đo riêng từng công cụ (`_chan_doan_actionlint_treo`) để lượt Windows kế gọi được tên thứ treo.
+    # Packet #504 M4 lần 2+3 (run 34615345948, 34621902478): trên windows-latest, actionlint GỌI shellcheck bên trong
+    # trên tệp này TREO (≥ 10 phút 56 s tới lúc job bị huỷ; lần 3 đụng hạn 180 s), trong khi t33 (cùng actionlint +
+    # shellcheck, tệp ops-publish-lease.yml) xong trong vài giây, `actionlint -shellcheck=` xong 0,1 s và `shellcheck`
+    # gọi thẳng xong 0,1 s — tức treo nằm ở đường actionlint→shellcheck trên Windows với NỘI DUNG tệp này, không ở
+    # công cụ nào riêng lẻ. Chữa bằng cách TÁCH HAI PHÉP ĐO cùng tiêu chuẩn: (1) actionlint luật YAML/biểu thức với
+    # `-shellcheck=` (tắt đường treo); (2) shellcheck gọi THẲNG trên từng thân `run`, CÙNG bộ mã loại trừ actionlint
+    # dùng (SC1091,SC2194,SC2050,SC2154,SC2157,SC2043 — đọc từ chính binary 1.7.7), tệp tạm ghi NHỊ PHÂN LF (ghi text
+    # trên Windows sinh CRLF ⇒ SC1017 giả — lần 3 đã dính). Cả hai phải rc=0 — không bớt luật nào; đột biến thân run
+    # (vd `echo $TL_S` không nháy) phải làm ca ĐỎ qua (2). Vẫn giữ hạn AL_HAN_GIAY: lần sau có treo thì có tên.
     try:
-        p = subprocess.run([al, str(WORKFLOW_THU_HOI)], capture_output=True, text=True, timeout=AL_HAN_GIAY)
+        p = subprocess.run([al, "-shellcheck=", str(WORKFLOW_THU_HOI)], capture_output=True, text=True, timeout=AL_HAN_GIAY)
     except subprocess.TimeoutExpired:
-        chot(False, f"actionlint KHÔNG XONG trong {AL_HAN_GIAY}s trên {WORKFLOW_THU_HOI.name} — chẩn đoán: "
+        chot(False, f"actionlint -shellcheck= KHÔNG XONG trong {AL_HAN_GIAY}s trên {WORKFLOW_THU_HOI.name} — chẩn đoán: "
                     + _chan_doan_actionlint_treo(al, sc, WORKFLOW_THU_HOI))
-    chot(p.returncode == 0, f"actionlint ĐỎ (rc={p.returncode}):\n{p.stdout}{p.stderr}")
+    chot(p.returncode == 0, f"actionlint (luật YAML/biểu thức) ĐỎ (rc={p.returncode}):\n{p.stdout}{p.stderr}")
+    with tempfile.TemporaryDirectory() as td:
+        for i, x in enumerate(than):
+            f = Path(td) / f"run{i}.sh"; f.write_bytes(x.encode("utf-8"))
+            try:
+                q = subprocess.run([sc, "-s", "bash", "-e", SC_LOAI_TRU_NHU_ACTIONLINT, str(f)],
+                                   capture_output=True, text=True, timeout=AL_HAN_GIAY)
+            except subprocess.TimeoutExpired:
+                chot(False, f"shellcheck KHÔNG XONG trong {AL_HAN_GIAY}s trên thân run #{i}")
+            chot(q.returncode == 0, f"shellcheck ĐỎ trên thân run #{i} (rc={q.returncode}):\n{q.stdout}{q.stderr}")
 
 
 def _chan_doan_actionlint_treo(al: str, sc: str, wf) -> str:
@@ -4901,9 +4916,8 @@ def _chan_doan_actionlint_treo(al: str, sc: str, wf) -> str:
     than = [b["run"] for b in yaml.safe_load(wf.read_text(encoding="utf-8"))["jobs"]["thu-hoi"]["steps"] if isinstance(b.get("run"), str)]
     with tempfile.TemporaryDirectory() as td:
         for i, x in enumerate(than):
-            f = Path(td) / f"run{i}.sh"; f.write_text(x, encoding="utf-8")
-            do(f"shellcheck -s bash run{i}", [sc, "-s", "bash", str(f)], 60)
-        f = Path(td) / "kiem.sh"; f.write_text(than[-1], encoding="utf-8")
+            f = Path(td) / f"run{i}.sh"; f.write_bytes(x.encode("utf-8"))   # nhị phân: text mode trên Windows sinh CRLF ⇒ SC1017 giả
+            do(f"shellcheck -s bash run{i}", [sc, "-s", "bash", "-e", SC_LOAI_TRU_NHU_ACTIONLINT, str(f)], 60)
         # actionlint KHÔNG shellcheck: nếu xong ⇒ thứ treo là đường actionlint→shellcheck, không phải parser YAML
         do("actionlint -shellcheck=", [al, "-shellcheck=", str(wf)], 60)
     return " | ".join(ket)

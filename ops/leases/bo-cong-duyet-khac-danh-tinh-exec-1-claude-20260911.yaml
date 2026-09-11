@@ -78,3 +78,6 @@ review_class: sensitive
 effective_review_class: sensitive
 
 thay_the_cho: []
+
+# Bia mộ hai chiều — reroute gen 2 (#502 comment 5630196493): gen 1 về `blocked` trong máy trạng thái cục bộ do lỗi ghi sổ.
+da_bi_thay_the: bo-cong-duyet-khac-danh-tinh-exec-2-claude-20260911

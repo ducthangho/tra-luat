@@ -108,6 +108,480 @@ Phạm vi nợ không tăng thêm trường; giữ nguyên receipt PR #510 đã 
   tật connector bắt ở #516; receipt đã land, chưa sửa; cần packet hồ sơ đính chính hoặc đợi cổng dưới.
 - **Cổng cấu trúc verdict lượt ≥ 2** — `bien_nhan_v2` chưa từ chối receipt `cross_approved` mà verdict thiếu phân loại
   canonical bốn trạng thái; fixture chưa có (đụng gate code, ngoài PR hồ sơ).
+# ★ dev-side — r368: ghi sổ #493 — 17 verdict codex + 17 biên nhận v2 vào `ops/reviews`, land evidence, và một lời khai `effort` bị PHÉP ĐO bác (2026-09-11)
+
+Nối tiếp `r364` (chốt tới `c00c88a`, #500). Kể từ chốt ấy master nhận **bốn** merge: #501 · #497 · #506 ·
+**#493**. Mục này ghi sổ **đúng #493** theo chỉ thị chủ kho khi được hỏi thẳng về phạm vi
+(*"Chỉ #493, số r kế tiếp sau #507"*) — **KHÔNG** đụng #501/#497/#506. Vế ghi sổ của #506 thuộc PR **#507**
+của phiên khác, đang mở.
+
+**Không nâng `VERSION`.** Vẫn `1.36.68` từ `r336`.
+
+**VA CHẠM SỐ `r` — và vì sao phép đếm quen thuộc SAI ở đây.** Nếp cũ đếm "số ref có NHẮC tới `rNNN`", nhưng
+phép ấy **tự ô nhiễm**: mục `r364` chứa chính dòng chống va chạm của nó (*"`r364` **0** · `r365` 0"*), nên sau
+khi `r364` land thì `r365` hiện ra ở **14** ref mà chẳng ai dùng nó. Đo lại theo **TIÊU ĐỀ MỤC**
+(`^#\s*★[^\n]*?—\s*(r\d+):`) trên blob `CHANGELOG.md` của **mọi** ref:
+
+Phạm vi quét, nói cho chật: **`refs/heads` mà thôi** — không phải "mọi ref". Mirror còn `refs/pull/*` và
+`refs/tags/*`. Đo trên mirror — **và con số ref tự khai ĐIỂM ĐO, vì nó trôi**: snapshot lượt 7
+(`2026-09-11T17:23:34Z`) có **753** ref, snapshot lượt 8 (`18:00:25Z`) có **756**. Cả hai lần đều
+**151** số `r` trên `refs/heads`, **151** trên toàn bộ ref, **0** số chỉ tồn tại ngoài `refs/heads` ⇒ hai
+namespace kia không mang số `r` mới nào trong **cả hai** snapshot, nên phép chọn số không mù. Đừng đọc
+`753` thành tổng ref hiện tại của mirror. Nói cho chật đúng đại lượng (cross-review lượt 7 chấm chỗ này): câu trên được xác nhận
+**theo SỐ `r`**, không phải theo **chuỗi tiêu đề nguyên văn** — có đúng một chuỗi tiêu đề ngoài `refs/heads`
+(`refs/tags/bak/pre-renumber` giữ một bản `r325` khác chữ với bản trên `refs/heads`). Biến thể văn bản ấy
+không làm phép chọn `r368` mù một số nào.
+
+```
+git ls-remote --heads origin | sed 's#.*refs/heads/##' | sort   > /tmp/mc      ⇒ 331
+git for-each-ref --format='%(refname:lstrip=3)' refs/remotes/origin \
+    | grep -v '^HEAD$' | sort                                   > /tmp/cb      ⇒ 331
+comm -23 /tmp/mc /tmp/cb   (CÓ trên máy chủ, THIẾU cục bộ ⇒ MÙ)                ⇒ 0
+comm -13 /tmp/mc /tmp/cb   (thừa cục bộ, vô hại)                               ⇒ 0
+331 ref → 16 blob CHANGELOG.md duy nhất → quét tiêu đề mục
+```
+
+Kết quả đo LÚC ẤY (09:00Z 11-09): `r365` **là tiêu đề mục** trên đúng **1** ref —
+`claude/land-502-bookkeeping` (PR #507). `r366` chỉ mới là một lần *nhắc* trong dòng chống va chạm của chính
+#507. Số trống đầu tiên ≥365 là `r366`. Nói cách khác: tiêu đề PR #507 ghi "r365" và điều đó ĐÚNG — bảng ở
+đây đo tiêu đề mục chứ không đo tiêu đề PR.
+
+**VÀ PHÉP ĐO ẤY ĐÃ HẾT HẠN TRƯỚC KHI PR NÀY MỞ — va chạm XẢY RA THẬT, không phải giả định.** Đo lại lúc
+15:0xZ cùng ngày, sau khi `master` nhận **49** commit (merge #475, #505, #507, #510, #511): `r366` **và**
+`r367` đều đã là **tiêu đề mục trên `master`** — `r366` = *"ghi sổ #505"*, `r367` = *"ghi sổ #510"*, cả hai
+của phiên khác. Mục này vì thế đổi số **`r366` → `r368`**, số trống đầu tiên ≥366 tại thời điểm mở PR.
+
+Bài học, và nó là bài học VẬN HÀNH chứ không phải bài học đo: **số `r` không phải thứ chiếm được bằng một
+phép đo — nó chỉ được chốt lúc MERGE.** Phép quét ref vẫn đúng phương pháp, nhưng nó trả lời *"số nào trống
+LÚC NÀY"*, và giữa lúc ấy với lúc merge có thể là nhiều giờ và nhiều phiên.
+
+Đo lại **ngay trước khi mở PR** và **ngay trước khi merge** **THU HẸP** khe ấy — nó phát hiện số đã bị dùng
+kể từ lần đo trước, và chính nhờ thế con số ở đây đổi hai lần, cả hai lần đều được ghi thay vì sửa lặng lẽ.
+Nhưng nó **KHÔNG ĐÓNG** khe. *(Bản trước viết "cách duy nhất **đóng được** khe ấy" — **RÚT**. Cross-review
+lượt 6 dựng phản chứng chạy được: mô phỏng lịch A mở → B mở → A kiểm trước merge → B kiểm trước merge,
+**tất cả trước khi bên nào công bố** ⇒ cả bốn lượt cùng chọn `369`. Hai phiên đều làm đúng quy trình mà vẫn
+trùng số, vì **đọc không phải là giữ**.)*
+
+Đây là tái phát đúng bài học `--force-with-lease` của `CLAUDE.md`: *"'thu hẹp' mà viết thành 'đóng' là một
+lời khai rộng hơn phép đo"*. Cross-review lượt 7 kiểm phép so sánh ấy và xác nhận **đúng cùng lớp**: cả hai
+đều là "lần đọc cuối không bảo vệ trạng thái lúc ghi".
+
+Một đường đóng được khe là thao tác **nguyên tử** buộc việc chọn số vào việc công bố; kho chưa có, và PR hồ
+sơ này không phải chỗ thiết kế nó. *(Bản trước viết **"phải có"** — tức điều kiện CẦN — và cross-review lượt
+7 bác bằng phản chứng chạy được: **phân vùng trước** không gian số cũng đóng, không cần giao dịch nào. Quy
+ước A chỉ dùng `369+2k`, B chỉ dùng `370+2k`, mỗi bên không tái dùng số của mình ⇒ **6/6** lịch xen kẽ đều
+không trùng, và chứng minh tổng quát là `369+2k = 370+2j` đòi một số chẵn bằng một số lẻ. Giá của đường ấy,
+reviewer khai luôn: cần hai danh tính ổn định, phân vùng cố định không giao nhau, và **mất** tính liên tiếp
+của số. Nên "nguyên tử" là MỘT đường, không phải đường duy nhất.)*
+
+**GIỚI HẠN NGUỒN.** (a) **tự đo được** — số Git, băm/byte tệp, số mục manifest, cổng chạy lại từ hiện vật
+trong kho, và **số finding đếm bằng heading trong chính tệp verdict**; (b) **thuật lại** — sự kiện GitHub
+(run CI, comment, thời điểm merge); (c) **ATTESTATION** — mọi scalar runtime của 17 lượt, vì `run.json` và
+`stderr.log` nằm NGOÀI kho. Trong (c) có một phân tầng mà các mục trước chưa tách, và nó là phần đáng đọc
+nhất của lần ghi sổ này — xem ngay dưới.
+
+## Một lời khai của kho bị PHÉP ĐO bác: `effort` không phải `xhigh`, nó là `none`
+
+`codex` in một **header phiên** ra `stderr` trước khi chạy:
+
+```
+OpenAI Codex v0.153.4
+--------
+workdir: …/rv493-a
+model: gpt-6-astra
+provider: openai
+approval: never
+sandbox: workspace-write [workdir, /tmp, $TMPDIR]
+reasoning effort: none
+session id: 01a08769-6af5-7103-9eb4-6e9ffee815c0
+```
+
+Đây là lời tự khai của **CÔNG CỤ**, không phải của phiên điều phối — nên nó **bác được** lời khai của phiên.
+Và nó đã bác: `reasoning effort: none` ở **17/17** lượt. Các mục trước của kho (`r356`, `r363`, `r364`) khai
+`effort: xhigh` cho những chuỗi cross-review tương tự dưới nhãn "ATTESTATION điều phối"; với **chuỗi 17 lượt
+của #493 thì lời khai ấy SAI**, và đây là lần đầu kho có phép đo cho đại lượng đó. Câu này **KHÔNG** mở rộng
+sang các chuỗi khác — chúng cần đo riêng trên `stderr.log` của chúng, và tôi chưa làm.
+
+Vì sao đáng ghi: **hai nguồn khai `effort` không khớp nhau, và chỉ một trong hai có phép đo.** Biên nhận
+ghi lại khác biệt ấy, tách hẳn hai nguồn — `run.json` (launcher ghi) và **header phiên** (công cụ ghi) —
+và caveat `REASONING-EFFORT-DO-DUOC-LA-none` có ở cả 17 biên nhận. **Hồ sơ chưa đo ảnh hưởng của `effort`
+lên độ phủ**, nên không suy ra điều gì về độ phủ của chuỗi review.
+
+Cùng đường đo ấy còn cho **hai** dữ kiện nữa, cả hai thành caveat chứ không bị bỏ:
+
+- **Lượt 9 có một run CHẾT trước đó.** Trên cùng head `dd4a3ae` có HAI `run.json`: `93507a43` (tên `l9`) dừng
+  ở `trang_thai: dang_chay`, không `ket_thuc_utc`, không mã thoát; `48070d51` (`l9b`) mới chạy trọn.
+  **Ai đếm `run.json` để suy số lượt sẽ ra 18 chứ không phải 17.**
+- **Phiên bản công cụ ĐỔI giữa chuỗi.** Lượt 1–8 chạy `v0.153.4`, từ lượt 9 là `v0.154.0` — đúng lượt có run
+  chết. Chuỗi 17 lượt **không đồng nhất về công cụ**, nên so P3 giữa hai nửa là so qua một biến chưa kiểm soát.
+
+## Chuỗi 17 lượt — số đếm bằng HEADING, không bằng văn xuôi
+
+17 gói review `rv493-a…rv493-s` (bỏ `j`, `r`), mỗi gói giữ verdict lượt của nó ở `VERDICT.md` và các lượt
+trước ở `VERDICT-LUOT-*.md`. Toàn vẹn chuỗi sao chép **đo được**: 16/16 bản sao trong gói CUỐI khớp **từng
+byte** (`cmp`) với `VERDICT.md` của gói sinh ra chúng; 17/17 tệp vào kho khớp từng byte với gói cuối.
+
+| đại lượng | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13 | 14 | 15 | 16 | 17 |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| **P1** | 1 | 1 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
+| **P2** | 4 | 4 | 2 | 1 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
+| **P3** | 12 | 15 | 15 | 15 | 14 | 10 | 9 | 10 | 5 | 3 | 2 | 3 | 2 | 4 | 5 | 3 | 4 |
+
+**Đơn vị: số TIÊU ĐỀ finding mang nhãn `[P1]/[P2]/[P3]` trong chính tệp verdict** — không phải con số ở lời
+mở đầu của reviewer. Hai đại lượng ấy **lệch nhau**, và chính `VERDICT-LUOT-10` chỉ ra điều đó: *"Đếm heading
+finding, không lấy con số ở lời mở đầu làm đáp án."*
+
+**P1 về 0 từ lượt 3 · P2 về 0 từ lượt 5.** Lượt 5 là lượt `approve` DUY NHẤT — và nó vẫn còn **14 P3**, nên
+`approve` ở đây nghĩa là hết P1/P2 chứ **không** phải hết finding (caveat
+`APPROVE-KHONG-PHAI-KHONG-CON-FINDING`).
+
+**P3 KHÔNG giảm đơn điệu**: xuống 2 ở lượt 11 rồi lên lại 3, 2, 4, 5, 3, 4. Đừng đọc chuỗi này thành "đang
+hội tụ" — mỗi bản vá mở ra bề mặt đọc mới. Nói thẳng vì hình dạng "12 → 4" rất dễ bị kể thành một đường dốc.
+
+**KHÔNG lượt nào review head đã merge.** Lượt 17 neo `61b4c24`; sau nó còn HAI commit đi vào `99aef14` —
+`6da8291` (vá 2 P3 của chính lượt 17) và `99aef14` (khối đóng vòng lặp). Cả hai **chưa qua cross-review nào**.
+Vòng lặp đóng **theo quyết định chủ kho**, không phải vì hết finding.
+
+## Phạm vi — đo, và NÊU RÕ ĐIỂM ĐO
+
+**Bản đầu của mục này ghi `36 tệp · 5086 (+) · 3 commit` và con số ấy ĐÃ CŨ ngay khi viết xong**
+(cross-review lượt 1 chấm đúng chỗ này). Nó đo lúc mới có ba commit `ops/`, rồi commit
+`CHANGELOG.md` + manifest và commit ghi kết quả gate nối thêm vào sau. Đây là bệnh *"đo trước khi
+sửa hết"*. Nếu con số không **tự khai điểm đo của nó**, người đọc có thể nhầm số lịch sử với số hiện tại —
+mọi thay đổi sau phép đo đều làm số cũ đi:
+
+```
+ĐIỂM ĐO: 42f32fc  (commit cuối TRƯỚC commit mang chính đoạn vá này)
+git diff --shortstat e82af37..42f32fc     ⇒  38 files changed, 5362 insertions(+), 5 deletions(-)
+git diff --name-only e82af37..42f32fc | sed 's#/.*##' | sort | uniq -c
+                                          ⇒  1 CHANGELOG.md · 1 RELEASE_MANIFEST.json · 36 ops
+git rev-list --count e82af37..42f32fc     ⇒  5
+17 verdict   489 873 B (478,4 KiB)   ·   17 biên nhận   93 552 B (91,4 KiB)
+```
+
+**Commit mang đoạn này, và mọi commit sau nó, KHÔNG nằm trong các số trên** — cố ý. Một con số
+phạm vi chỉ đúng tới điểm đo của nó; số cuối cùng chỉ tồn tại sau khi merge, và chỗ ghi nó là
+`ops/land/` của mục ghi sổ KẾ TIẾP, đúng như `r364` neo `0721811..c00c88a0` sau khi #500 merge.
+
+`ops/` nằm NGOÀI kiểm kê gói — đo được: **0/180** mục manifest bắt đầu bằng `ops/`. Nhưng `CHANGELOG.md`
+**NẰM TRONG** kiểm kê, nên mục này làm sha manifest lệch ⇒ tái sinh trong CÙNG commit (bài học `r356`).
+
+## Cổng — bằng chứng DƯƠNG, không phải `rc=0`
+
+| cổng | kết quả | bằng chứng |
+|---|---|---|
+| `ops/bien_nhan_v2.py` | ĐẠT | **84 ĐẠT v2** · 11/11 miễn trừ legacy · 42 nợ đóng băng · **0 vi phạm** · **0 KHÔNG ĐO ĐƯỢC** |
+| `ops/lease_publish_test.py` | ĐẠT | **146/146**, đã chạy=146, **bỏ qua=0** — với `actionlint 1.7.7` đã cài |
+| `release-verify --strict` (lane LAND) | ĐẠT | `ok=true` · `expected_file_count` **180** == `checked_file_count` **180** · `package_hash_match=true` · `errors`/`extra_files`/`required_missing` đều **0** |
+
+**Hai ca `t33`/`t137` ĐỎ khi thiếu `actionlint`** — `KHÔNG ĐO ĐƯỢC`, và chúng làm cổng đỏ đúng theo doctrine
+`None ≠ False`. Đã cài `actionlint 1.7.7` rồi chạy lại: 144/146 → **146/146**. Ghi ra vì một cổng tự tắt khi
+thiếu công cụ là cổng không tồn tại đúng lúc nó cần nhất.
+
+**ĐO RĂNG cổng biên nhận trên chính tệp MỚI** — không dừng ở `rc=0`. Ba đột biến trên
+`pr493-review-9-…receipt.yaml`: sai `verdict_sha256` một ký tự · `model_reviewer_identity` rỗng ·
+`anchor.loai` bịa. Cả ba: `84 ĐẠT → 83 ĐẠT + 1 vi phạm`, `rc` 0→1; khôi phục về **đúng 84**.
+
+**`t27` so theo CẶP `(verdict, caveat id)`, không theo id** — *"verdict này vẫn phải có hàng cảnh báo của
+riêng nó"*. Vì thế 17 verdict sinh **72** hàng cảnh báo chứ không phải 24 id phân biệt. Bảng README:
+**414 → 503** hàng (+89 = 17 mục lục + 72 cảnh báo). Các hàng **sinh TỪ chính biên nhận** (đọc
+`verdict_usage_caveats`) nên một lần sinh cho hai bản khớp nhau, và `t27` đối chiếu sự hiện diện của cặp
+(verdict, caveat). Hai tệp **vẫn có thể lệch sau một lần sửa tay** và khi đó phải sinh lại — cơ chế này giảm
+công giữ 89 hàng khỏi mục nát, không phải một bảo đảm.
+
+## Merge #493 và một phép đo đổi cách đọc chi phí CI
+
+| merge commit | PR | hai cha | phương thức |
+|---|---|---|---|
+| `e82af37` | #493 | `26e2555` + `99aef14` | `merge` |
+
+```
+git rev-parse e82af37^{tree}   ⇒  e307ea3152d605b1456a04ef0757ff0f6b7fa128
+git rev-parse 99aef14^{tree}   ⇒  e307ea3152d605b1456a04ef0757ff0f6b7fa128    BẰNG NHAU
+```
+
+Merge là fast-forward về **NỘI DUNG**: hai commit có tree bằng nhau. Với **những bước mà lượt PR ĐÃ chạy**,
+chân `ubuntu-latest` của lượt hậu-merge đo lại **cùng một nội dung Git**. Nói chật đúng thứ đã đo: phần
+**chưa đo** là giá trị bổ sung do môi trường, đầu vào ngoài Git, hoặc tính chập chờn — tree bằng nhau không
+loại trừ chúng. Và cây trùng băm **không** kéo theo tập bước trùng: lượt hậu-merge mở rộng tập bước/nền
+bằng hai bước ubuntu mà lượt PR đã `skipped`, cộng chân `windows-latest`.
+
+*(Bản đầu của đoạn này viết "giá trị thêm nằm **hết** ở chân windows và ở bước `release-verify strict`" —
+**câu ấy đã bị RÚT**, cross-review lượt 1 chấm đúng và lượt 2 chỉ ra rằng bản vá đầu chỉ thêm đính chính ở
+dưới mà để nguyên kết luận ở đây. Nay sửa tại nguồn.)*
+
+Hai bước ubuntu mà lượt PR bỏ qua:
+lượt master trên ubuntu chạy **hai bước mà lượt PR đã `skipped`** —
+
+| bước | lượt PR | lượt master (ubuntu) |
+|---|---|---|
+| bước **tl selftest (có bằng chứng exact-identity)** | `skipped` | **success, 119 s** |
+| `release-verify strict (lane LAND — manifest committed)` | `skipped` | **success, 1 s** |
+
+Nợ MỚI `gate-master-do-lai-cay-trung-bam` vì vậy phải phát biểu HẸP: **chưa có cổng nào cắt những bước
+LẶP LẠI của chân ubuntu** khi cây sau merge trùng băm với cây đã đo xanh — **không** phải cắt cả chân
+ubuntu. Cắt cả chân là mất luôn hai bước trên. Chưa có packet.
+
+### Và lượt hậu-merge ấy đã chạy — kết quả `cancelled`, không phải xanh
+
+| chân | kết quả | đo được |
+|---|---|---|
+| `ubuntu-latest` | **success** | 44 bước = **40 `success` + 4 `skipped`**; **0 `failure`, 0 `cancelled`**. Bước **38** `release-verify strict (lane LAND — manifest committed)` **CHẠY THẬT** ⇒ `success` (1 s) — lần đầu bước ấy chạy trên CI cho cây này. Cùng lượt xanh: `golden-test` · `doc-claims-check strict` · `determinism-audit strict` · `release-check full` · `release-bundle x2 cùng SHA-256` |
+| `windows-latest` | **cancelled** | cắt ở bước **20** `lease-publish selftest` sau **1258 s**. Job chạy `07:58:49Z → 08:59:07Z` = **3618 s = 60 ph 18 s**, mà `ci.yml:64` khai `timeout-minutes: 60` ⇒ thời lượng **phù hợp** với việc chạm trần. Hồ sơ **không có log nguyên nhân**, nên đây là suy luận từ thời lượng, chưa loại trừ được một ca test lỗi |
+
+**Triệu chứng CÓ TRƯỚC #493 — và đó là thứ đo được, không phải một lời loại trừ trách nhiệm.** Issue **#504**
+(`WINDOWS-LEASE-SUITE`, đang mở, có đặc tả + quyết định chủ kho) ghi **ba** lượt `cancelled` liên tiếp cùng
+bước cùng trần kể từ khi A0 (#488) land: `0721811` · `c00c88a0` · `27c413c3`. Trước A0 bước ấy chạy
+**2 ph 58 s**. Lượt này là ca **THỨ TƯ**. Chưa có đối chứng đủ để **loại trừ mọi** ảnh hưởng của #493 lên
+thời lượng bước ấy; xử lý triệu chứng thuộc packet **#504**. `CLAUDE.md` CẤM nâng `timeout-minutes`, và tệp `ci.yml` ngoài write set ⇒ **không vá ở đây**.
+
+**Một số MỚI cho #504.** Issue ấy khai *"log bước bị đệm khối nên ca nào chậm/treo chưa đo được"* và nêu giả
+thuyết **H1: suite ≈ 3 × nền**, suy từ Linux. Lượt này cho một **cận dưới đo được** cho tỉ lệ Windows/Linux
+của **cùng bước trong cùng lượt chạy**: Windows **≥ 1258 s** (bị cắt, chưa xong) so ubuntu **139 s** ⇒
+**≥ 9,05×**. Nếu H1 (`≈ 3×`) nói về cùng đại lượng thì H1 thấp **ít nhất khoảng 3,02 lần**. Đây là cận
+**DƯỚI** vì 1258 s là lúc bị cắt chứ không phải lúc xong — **tỉ số khi hoàn tất chưa biết**.
+
+**Hệ quả cho trạng thái của #493, nói cho đúng §10.2.** `landed` đòi "hậu-merge gate XANH". Lượt này **không
+xanh**. Trạng thái đúng: kết quả ĐÃ vào canonical ở exact SHA được duyệt · bookkeeping đang hoàn tất bằng
+chính PR mang mục này · **hậu-merge gate CHƯA xanh trên chân Windows**, với triệu chứng trùng một nợ đã ghi
+ở **#504** và có trước #493. Nguyên nhân cụ thể, cùng phần đóng góp (nếu có) của #493, **chưa đo độc lập**.
+Không làm tròn thành `landed`; cũng không đọc thành "#493 có lỗi".
+
+**Và phần đắt nhất của bài học này là về CÁCH TÔI TƯ VẤN, không phải về CI.** Khi chủ kho hỏi lượt hậu-merge
+có đáng chi phí không, tôi trả lời rằng chân ubuntu là lặp lại còn **giá trị nằm hết ở chân windows**, rồi
+khuyến nghị để chạy hết.
+
+**Lời tư vấn ấy sai theo HAI đường độc lập, và bản trước của đoạn này chỉ nêu một** — nó còn gọi phần kia là
+*"đúng về cấu trúc"*, tức vẫn công nhận đúng cái mệnh đề mà mục này đã rút ở trên. Cross-review lượt 3 chấm
+P2 vào chính chỗ đó. Nói cho đủ:
+
+- **Sai về CẤU TRÚC** — *"giá trị nằm hết ở chân windows"* bỏ sót hai bước ubuntu mà lượt PR đã `skipped`
+  (bước **tl selftest** có bằng chứng exact-identity, 119 s; và bước **release-verify strict** lane LAND, 1 s). Cấu trúc
+  của lời tư vấn đã thiếu ngay từ đầu, không phải chỉ thực tế phản lại nó.
+- **Sai về THỰC TẾ** — chân windows đã `cancelled` ở ba lần land liên tiếp trước đó, và điều ấy **đã được
+  ghi sẵn trong Issue #504 mà tôi chưa mở**.
+
+Hai lỗi khác lớp: một là **bỏ sót một phần của tập**, một là **không đọc lịch sử của chính thứ mình đang
+khuyên**. Gộp chúng thành "đúng cấu trúc, sai thực tế" là tự tha cho lỗi thứ nhất.
+
+**Và câu tiếp theo của bản đầu TỰ MÂU THUẪN — cross-review lượt 1 chấm đúng.** Bản đầu viết lượt chạy
+ấy *"trả về **không một phép đo Windows nào**"*, trong khi chính mục này rút ra cận dưới **≥ 9,05×**
+**TỪ** con số Windows 1258 s. `1258 s` **là** một phép đo Windows; hai câu không thể cùng đúng.
+
+Nói cho đúng thì phải tách hai đại lượng: lượt chạy ấy **có** cho một phép đo Windows — thời lượng
+**một bước** (`lease-publish selftest` ≥ 1258 s), đủ để dựng cận dưới tỉ lệ; nhưng nó **không** cho
+thứ người ta chạy nó để lấy: một **kết luận đạt/hỏng của chân Windows cho cây này**. Mọi bước sau bước
+20 hiện `skipped`, nên `release-verify strict (lane LAND)`, `golden-test`, `determinism-audit` và 19
+bước khác vẫn CHƯA từng chạy trên Windows cho cây này. **Cái thiếu là KẾT LUẬN, không phải phép đo** —
+và đúng cái tôi bảo nó sẽ mua được là cái kết luận ấy.
+Cùng lớp lỗi *"hỏi chỗ tiện tay thay vì hỏi chỗ kết luận được ghi"*: tôi suy giá trị của một lượt chạy từ
+CẤU HÌNH của nó, trong khi LỊCH SỬ của chính lượt ấy đã trả lời sẵn. Chốt rẻ và luôn dùng được: **trước khi
+khuyên ai tiêu một lượt CI, hãy đọc ba lượt gần nhất của cùng job trên cùng nhánh.**
+
+## `thu-hoi` ĐỎ, triệu chứng có trước #493 — và 14 lượt đỏ trước chưa bao giờ CHẠM tới bước fetch
+
+Phép neo canonical `TL_WF_SHA == TL_S` (`26e2555d…`) **ĐẠT lần đầu tiên** trong lịch sử workflow ấy. Nhờ đó
+job chạy tiếp và chết ở bước fetch với `rc=128`, `fatal: could not read Username for 'https://github.com'`.
+Tức **14/14 lượt đỏ trước đó dừng TRƯỚC bước fetch**, nên chúng chưa bao giờ cho phép đánh giá bước ấy.
+Điều này **không** chứng minh cùng lỗi credential đã tồn tại trong cả 14 lượt — chỉ chứng minh chúng không
+đo tới đó. Tệp
+`.github/workflows/ops-thu-hoi-admission.yml` ngoài write set, thuộc packet **#503** (`M9-FETCH-AUTH`) của
+phiên khác — **không vá ở đây**. Check vẫn `CHƯA KÍCH HOẠT`, chưa là required (`mergeable_state: unstable`).
+
+**Một lời khai công khai của tôi đã phải RÚT.** Comment `5629351967` viết *"nó không thể xanh cho một PR mở
+lâu"* vì cho rằng `base.sha` đóng băng lúc tạo PR. **SAI**: `base.sha` của `pull_request_target` bám tip nhánh
+base **tại thời điểm event**, nên sau mỗi `synchronize` nó cập nhật — và chính lần đẩy của tôi là phản chứng.
+Đính chính `5630987483`; đo bản **đã đến**: `diff` = **0 dòng lệch**.
+
+## KHÔNG ĐO ĐƯỢC — khai thẳng, không làm tròn
+
+- **Model đã phục vụ 17 lượt.** `codex exec` không phát `modelUsage`. `gpt-6-astra` là thứ **công cụ** tự khai
+  ở header phiên, không phải thứ đã phục vụ từng lượt. `cross_provider` phân biệt PROVIDER, không phải MODEL.
+- **Kết quả lượt review của connector codex trên `99aef14`.** Nó chạy 07:55:23Z–08:12:57Z, tức kết thúc ~14
+  phút **sau** khi PR đã merge. Ba chỗ đã hỏi: `get_reviews` ⇒ `[]`; `get_review_comments` ⇒ 0; comment tổng
+  kết ⇒ `Completed`, không bảng finding. Connector tự khai tín hiệu "sạch" của nó là **reaction 👍** — mà
+  reactions trên PR là `total_count: 0`, **không có 👍 và cũng không có 👀** dù lượt review chắc chắn đã chạy.
+  **Không quan sát được** reaction nào tại lần đọc ấy; nguyên nhân (kênh hỏng, hay đơn giản là connector
+  không phản ứng trên PR đã đóng) **chưa xác định**. Nên sự vắng mặt của 👍 **không đọc được theo chiều nào**.
+  Bằng chứng còn lại nghiêng MẠNH về "không có finding" — nhưng *nghiêng mạnh* không phải *đã chứng minh*.
+- **Byte thật của comment trên GitHub.** Đường ĐỌC của MCP chuẩn hoá thực thể HTML trong thân issue/comment,
+  và container không có client thứ hai (REST tới `repos/…` bị proxy chặn 403).
+
+## Nợ
+
+| slug | trạng thái | ghi chú |
+|---|---|---|
+| `cong-byte-co-rang-cong-claims-khong-dem-su-that` | MANG SANG · **NAY CÓ PHÉP ĐO ĐỘC LẬP** | xem ngay dưới bảng |
+| `cong-receipt-chua-dinh-nghia-cay-dang-merge` | MANG SANG | cổng receipt đọc cây trên đĩa nhưng xét tổ tiên từ `HEAD` |
+| `gate-master-do-lai-cay-trung-bam` | **MỚI** | chưa có cổng cắt những BƯỚC LẶP LẠI của chân ubuntu khi cây sau merge trùng băm — **không** phải cắt cả chân: chân ấy còn chạy 2 bước mà lượt PR bỏ qua |
+| `quyet-dinh-dong-vong-lap-review-chua-vao-doctrine` | **MỚI** | "đóng vòng lặp khi P1=P2=0 mà P3 còn" chỉ nằm trong land evidence + `r360` |
+
+**Nợ `cong-byte-co-rang-cong-claims-khong-dem-su-that` nay có PHÉP ĐO, không còn chỉ là lời khai.** Hai
+lượt review khác nền đã đột biến MỘT con số trong `CHANGELOG.md` **giữ nguyên độ dài** và đo cổng nào bắt.
+**Hai lượt neo HAI head KHÁC NHAU — ghi rõ kẻo ai đọc `980925` rồi đi `wc -c` trên head hiện tại và thấy
+lệch** (cross-review lượt 2 chấm đúng chỗ này: bản đầu viết *"đo trên chính cây này"* trong khi số ấy là của
+head CŨ):
+
+```
+LƯỢT 1 — head 42f32fc  (nguồn: stderr của run 8c49cfdf, NGOÀI kho ⇒ ATTESTATION;
+                        lượt ấy chết trước khi ghi VERDICT.md nên không có hiện vật verdict)
+  mut-number-release  ok=False  failed=[CHANGELOG.md]
+                      expected_size 980925 == actual_size 980925   (ĐỘ DÀI KHÔNG ĐỔI)
+                      expected_sha256 d6e8ac0d…  !=  actual_sha256 a5145028…
+                      package_hash_match=False
+  mut-number-claims   ok=True   flags=[]   advisory_count=370      (KHÔNG BẮT)
+  artifacts checked 3368   not OK 0
+
+LƯỢT 2 — head e1cff07  (có VERDICT.md; `CHANGELOG.md` ở head ấy là 985145 B, KHÔNG phải 980925)
+  tái chạy cùng đột biến ⇒ CÙNG HÀNH VI CỔNG: release-verify ĐỎ, doc-claims XANH
+```
+
+Hai head, hai kích thước, **một hành vi cổng** — và chính việc lặp lại trên head thứ hai mới biến kết quả
+lượt 1 từ một lời thuật thành một điều tái lập được.
+
+`release-verify` bắt sai băm; `doc-claims-check` **không bắt** ca đổi số này — nó nằm ngoài các lớp cú pháp
+mà cổng ấy kiểm theo hợp đồng. Hai cổng, hai kết luận ngược nhau trên cùng một đột biến. Đây là một
+**khoảng trống kiểm SỐ** cần phép đo riêng, không phải bằng chứng rằng cổng làm sai thứ nó khai.
+
+**Một giới hạn của phép đo này phải nói ra:** đột biến giữ NGUYÊN ĐỘ DÀI, nên nó chứng minh
+`release-verify` bắt được thay đổi nội dung **không đổi kích thước** — thứ mà một cổng chỉ so `size` sẽ
+bỏ lọt. Nó KHÔNG chứng minh `doc-claims-check` mù với mọi loại đột biến; nó chỉ chứng minh mù với ca này.
+
+## Một lời khai `delta = 0` SAI, và cái sai nằm ở PHÉP ĐO chứ không ở con số
+
+Cross-review lượt 2 chấm **P1** vào câu *"delta so nền = 0"* của commit trước. Đo lại bằng hai clone sạch:
+**370 → 371**, tức delta **+1**, không phải 0.
+
+Advisory thêm là **L8 `TL_COMMAND_UNKNOWN`**, sinh bởi đúng HÀNG mà bản vá trước thêm vào: tên bước
+workflow *tl selftest (có bằng chứng exact-identity)* được viết trong dấu backtick, nên `doc-claims-check`
+đọc nó thành một **lệnh CLI** không tồn tại. **Cổng đúng, cách viết của tôi sai** — đó là tên bước, không
+phải lệnh. Bỏ backtick ⇒ đo lại hai clone ⇒ **370/370** cho advisory L8 ấy.
+*(Đó là trạng thái SAU khi gỡ L8 và TRƯỚC khi viết phần tiếp theo của mục này; con số CUỐI của mục
+ghi sổ là **371**, vì chính phần tiếp theo sinh thêm một advisory DƯƠNG TÍNH THẬT — xem dưới. Ghi
+theo thứ tự thay vì chỉ ghi số cuối, kẻo lại thành một con số không nói nó đo lúc nào.)*
+
+**Nhưng phần đáng ghi không phải advisory ấy — mà là VÌ SAO tôi không thấy nó.** Lần đo đầu tôi dựng
+**hai clone trong một lệnh** và được `370/370`. Rồi tôi commit thêm hai lần, và sau lần cuối chỉ **kiểm lại
+trên CÂY LÀM VIỆC** — cây ấy trả `370`, nên tôi kết luận delta vẫn 0. Sai ở chỗ: cây làm việc có thư mục
+**untracked** dưới `references/golden/` — thư mục `fixtures` mà git theo dõi **0** tệp — mà clone sạch **không có**, và
+sự có mặt của nó dịch tổng advisory. Tức tôi đã so **clone-nền** với **worktree-head** — hai trạng thái đĩa
+khác nhau — rồi gọi hiệu của chúng là "delta".
+
+Đây **đúng luật mà `CLAUDE.md` đã ghi** (*"phép đo delta so hai vế phải dựng CẢ HAI trong MỘT lệnh"*), và
+tôi vi phạm nó **sau khi đã tuân thủ một lần**: lần đầu làm đúng, rồi các commit sau đo tắt. Nên chốt phải
+chật hơn một nấc: **một phép đo delta hết hạn ngay khi một trong hai vế đổi** — dựng lại CẢ HAI, đừng tái
+dùng con số của vế nền. Và **đừng bao giờ lấy cây làm việc làm một vế**: nó mang trạng thái đĩa mà không
+commit nào mô tả.
+
+Kèm một hệ quả không hiển nhiên: `doc-claims-check` **không tất định theo commit** — cùng một commit, hai
+trạng thái thư mục, hai tổng advisory khác nhau. Reviewer đã kiểm soát biến ấy (tạo cùng thư mục rỗng trên
+cả hai clone ⇒ `369` so `370`, delta **vẫn +1**), nên kết luận delta không phụ thuộc mẹo kiểm soát. Sự phụ
+thuộc trạng thái đĩa ấy chưa có nợ mang tên; ghi ra đây để lần sau ai đo cũng biết phải neo điều kiện.
+
+### Và chính đoạn bạn đang đọc lại sinh thêm MỘT advisory — lần này là DƯƠNG TÍNH THẬT
+
+Đo hai clone sau khi viết xong mục này: **370 → 371**. Advisory thêm:
+
+```
+L1  PATH_MISSING_IN_HISTORICAL_DOC   claim: references/golden/fixtures/   file: CHANGELOG.md
+```
+
+Nguyên nhân: mục này **nhắc tới** đường dẫn ấy, mà git theo dõi **0** tệp trong đó — nên với một clone sạch,
+đây là một tài liệu trỏ tới đường dẫn không tồn tại. **Cổng nói đúng.**
+
+**Tôi GIỮ advisory này, không viết lại để làm số đẹp.** Hai ca trông giống nhau nhưng ngược nhau, và phân
+biệt được chúng mới là việc:
+
+| | L8 `TL_COMMAND_UNKNOWN` | L1 `PATH_MISSING_IN_HISTORICAL_DOC` |
+|---|---|---|
+| claim | *tl selftest (có bằng chứng exact-identity)* | `references/golden/fixtures/` |
+| cổng nói | đây không phải lệnh CLI | đường dẫn này không có trong kho |
+| cổng **đúng hay sai** | **ĐÚNG** — đó là tên BƯỚC, tôi viết nhầm vào dấu backtick | **ĐÚNG** — đường dẫn thật sự không được git theo dõi |
+| việc phải làm | **sửa cách viết** (lỗi của tôi, không phải của nội dung) | **giữ và KHAI** — nội dung đúng, và chính nó là điều mục này nói |
+
+**Bản trước của chỗ này viết một câu RỘNG HƠN PHÉP ĐO, và cross-review lượt 3 bác nó bằng phản chứng.**
+Câu bị rút: *"viết lại câu để advisory biến mất sẽ giấu mất đúng sự thật đang được ghi, đó là lọc lặng lẽ"*.
+Không tất yếu như vậy — xem quy tắc đếm ngay dưới: đường dẫn **vẫn nguyên văn** trong tài liệu, lời khai nó
+không được git theo dõi **vẫn còn**, lý do và số đo trước/sau **vẫn còn**; chỉ dấu backtick mất. Một thay
+đổi cách trình bày **được khai công khai** thì không phải lọc lặng lẽ. Lý do đúng để giữ advisory này hẹp
+hơn nhiều: **giữ một cảnh báo đã được nhận diện và giải thích tại chỗ**, thay vì để nó biến mất không dấu
+vết. Đó là một lựa chọn chấp nhận được, không phải một tất yếu đạo đức.
+
+Con số của mục ghi sổ này — **và nó phải tự khai NỀN, vì nền đã đổi một lần giữa chừng:**
+
+| nền đo | nền | head | delta | `files_scanned` |
+|---|---:|---:|---:|---:|
+| `e82af37` (lúc soạn mục này, trước khi master nhích) | 370 | 371 | **+1** | 106 |
+| `05ba3f9` (`origin/master` lúc MỞ PR, sau 49 commit) | 369 | 370 | **+1** | 107 |
+
+Hai cặp số khác nhau, **cùng một delta `+1`**, cùng một advisory `L1` dương tính thật. Nền đổi vì `master`
+nhận thêm việc của phiên khác giữa lúc soạn và lúc mở PR; `files_scanned` 106 → 107 là tệp tài liệu mới của
+họ, không phải của mục này. `flags` **0** và `ok=true` ở **cả bốn** phép đo — advisory không phải lỗi chặn.
+
+Mọi con số `370/371` ở các đoạn TRÊN là phép đo so nền `e82af37` và **giữ nguyên có chủ đích**: chúng kể lại
+diễn biến đã xảy ra, và sửa chúng theo nền mới sẽ làm câu chuyện không còn khớp với thứ đã thật sự đo.
+
+**Quy tắc đếm — phát biểu HẸP, có phản chứng chạy được.** Bản trước nói advisory sinh theo *"mỗi lần chuỗi
+đường dẫn xuất hiện trong văn bản"*. **Sai.** Điều kiện thật là **token nằm trong span backtick INLINE, và
+ngoài khối code**. Mã: `_DOC_CLAIMS_SPAN_RE` là một biểu thức khớp span backtick một dòng, và L1 chỉ duyệt
+nó trên phần văn bản **đã bỏ khối code** (`scripts/tl_core/workflow.py:1183`).
+
+Ba ca, **phép thử LỊCH SỬ chạy trên clone sạch của `185ba5c`** (head lúc vá lượt 3), mỗi ca thêm đúng một
+dòng vào cuối tài liệu. **Neo SHA vì tổng advisory trôi theo head**: clone sạch của head hiện tại cho nền
+**370**, không phải 371 — nên đừng đọc bảng này như phép đo của head đang xem (cross-review lượt 9 chấm
+đúng chỗ này; bản trước viết *"clone sạch của head này"*).
+
+| ca (trên `185ba5c`) | thêm gì | advisories | delta |
+|---|---|---|---|
+| nền | (không thêm) | 371 | — |
+| 1 | đường dẫn dạng **văn bản thường** | 371 | **0** |
+| 2 | cùng đường dẫn trong **backtick inline** | 372 | **+1** |
+| 3 | cùng đường dẫn trong **khối code** | 371 | **0** |
+
+Thứ bảng này đo là **delta `0 / +1 / 0` TRÊN `185ba5c`** — quy tắc đếm, không phải tổng. Phép đo ấy
+**KHÔNG bảo đảm** delta giữ nguyên khi đổi head, nội dung cây, mã cổng, hay trạng thái đĩa.
+
+*(Bản trước viết *"delta không phụ thuộc head; tổng thì có"* — **RÚT**. Cross-review lượt 10 dựng phản chứng
+chạy được: `L1` chỉ phát advisory khi đường dẫn **KHÔNG tồn tại** trong cây, nên trên một commit có theo dõi
+một tệp dưới thư mục ấy, thêm đúng cùng token inline cho **delta 0** thay vì `+1` — đo được `368 → 368`,
+trong khi cùng phép thêm trên head thật cho `370 → 371`. Delta phụ thuộc **nội dung cây**, không phải chỉ
+tổng mới trôi.)*
+
+Hệ quả thực hành, và nó khác hẳn kết luận của bản trước: **với đường dẫn và lớp `L1` đã thử**, nhắc dạng
+văn bản thường không làm tăng advisory. Cái phải đếm là số lần **trích trong backtick**, không phải số lần
+**nói về nó**. Phạm vi: ba ca trên đo đúng một đường dẫn và đúng lớp `L1` — **không** phải bảo đảm cho mọi
+nội dung hay mọi lớp của `doc-claims-check`.
+
+**Và LỚP lỗi ấy chưa đóng — đo được ngay trong chính lần vá này.** Khi viết đoạn sửa lời tư vấn ở trên, tôi
+đặt tên bước *tl selftest* vào dấu backtick **lần thứ hai**, và advisory `L8 TL_COMMAND_UNKNOWN` quay lại;
+đo hai clone cho `372` thay vì `371`. Tức bản vá lượt trước chỉ gỡ **một thể hiện**, không đóng lớp: mỗi lần
+nhắc lại tên bước trong văn bản mới là một cơ hội tái phạm. Ghi ra vì đây là bằng chứng cho một mệnh đề mà
+kho hay nói mà ít khi đo được: **sửa một thể hiện không phải sửa một lớp.**
+
+**Bản trước của đoạn này kết thúc bằng một câu ĐẨY LỖI, nay RÚT.** Câu bị rút: *"nợ thật sự … nằm ở cách
+`doc-claims` trích claim chứ không ở văn bản của tôi"*. Cross-review lượt 4 chấm P2 đúng chỗ đó, và nó tự
+mâu thuẫn với bảng cách trên bốn dòng — bảng ấy đã ghi **cổng ĐÚNG, lỗi cách viết của tôi**. Hợp đồng nói
+rõ phạm vi của L8: *"tên lệnh `tl <cmd>` trong span backtick, tra `references/golden/parser_surface.json`"*.
+Đó là một phép kiểm **cú pháp cơ học**, và nó **không hứa** đọc ngữ nghĩa "đây là tên bước workflow". Cổng
+làm đúng thứ nó khai; giới hạn của một bộ trích cơ học **không phải** bằng chứng nó sai hợp đồng, và càng
+không miễn cho người viết trách nhiệm chọn cách viết rõ nghĩa.
+
+Thứ CÒN LẠI sau khi rút câu ấy là một lời kể, không phải một giới hạn của cổng: **lần ấy tôi chỉ nhận ra
+advisory mới khi so delta sau commit.** Advisory có sẵn trong output của **một** cây, và mọi cổng ở đây chạy
+được **trước** commit — cross-review lượt 5 dựng phản chứng: đổi đúng dòng 203 từ đậm sang backtick trên cây
+CHƯA commit, `doc-claims-check --strict --json` hiện ngay `L8 TL_COMMAND_UNKNOWN` kèm `file`/`line`/`claim`,
+tổng `+1`; khôi phục thì về cũ, `git status` xác nhận `HEAD` không đổi. Bản trước viết *"sai sót chỉ hiện ở
+phép đo delta hai clone, tức sau khi đã commit"* — **RÚT**: đó là mô tả THÓI QUEN ĐO của tôi, không phải
+tính chất của cổng. (Thứ tự tôi thực sự đã chạy hôm ấy thì gói không giữ log để xác minh.)
+
+## Chuỗi hồ sơ dừng ở đâu
+
+Theo tiền lệ #495/#490 và `r364`: verdict của PR hồ sơ vào kho ở PR hồ sơ **kế tiếp**, và PR hồ sơ kế tiếp
+**không** tự sinh thêm lượt review khác nền trừ khi chủ kho gọi. PR mang mục này là PR hồ sơ của #493; nó
+**không** sinh mắt xích thứ ba. Hệ quả — sự **vắng mặt** của một PR land evidence cho chính nó — sẽ **đo
+được về sau**, nhưng **chưa đo được** tại commit này; ai đọc trước khi nó merge phải coi đây là DỰ KIẾN.
+
+---
 
 # ★ dev-side — r367: ghi sổ #510 — hai verdict codex chấm CHÍNH hồ sơ r366 của #505; 5 P2 + 1 P3 vá rồi approve; merge theo chỉ thị "chọn A" (2026-09-11)
 

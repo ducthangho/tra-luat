@@ -93,8 +93,13 @@ chứa hai verdict (`git log --all --diff-filter=A` ⇒ đúng 1 commit).
 - "Lời khai rộng hơn phép đo" trong hồ sơ r366: **6** (5 P2 + 1 P3), cùng một lớp — hồ sơ tổng hợp làm tròn số hạng
   và nâng mức bằng chứng ("áp NGUYÊN", "rỗng", "hoặc `-B`"). Cộng dồn với r364 (3 P2 cùng lớp): **9** finding review-hồ-sơ
   trong hai PR hồ sơ liên tiếp, 0 finding mã sản phẩm.
-- Nợ mở: M3 sâu; P3 `tham-chieu-tai-lieu-song-con-sot` (r365) vẫn mở; cổng cho `so_p1/so_p2/so_p3`; WINDOWS-LEASE-SUITE
-  (#504) — chủ kho đã đồng ý cấp lease trong phiên này, ghi hộ ở #504.
+- **P3 `tham-chieu-tai-lieu-song-con-sot` (r365) ĐÓNG ở mục này**, commit riêng, hai chú dẫn: `requirements.txt:29` (comment
+  "Ba workflow" kể `duyet-phan-chung.yml:39`) và `ops/PHAN_BIEN_QUY_TRINH_BUILD_REVIEW_20260905.md:118` (lệnh tái hiện đọc
+  `.claude/dev/duyet_danh_tinh.py`). Không viết lại số cũ — ghi chú ngay cạnh rằng tệp đã rút ở #506/#507 và lệnh chỉ chạy
+  được trên cây trước `0bf0ba7`. `requirements.txt` NẰM TRONG manifest ⇒ tái sinh lại. Lý do đóng ở đây chứ không chờ packet:
+  chú dẫn, không mã; chủ kho đồng ý "làm hết" trong phiên này (nguồn (b)).
+- Nợ mở: M3 sâu; cổng cho `so_p1/so_p2/so_p3`; WINDOWS-LEASE-SUITE (#504) — chủ kho đã đồng ý cấp lease trong phiên này,
+  ghi hộ ở #504.
 
 # ★ dev-side — r366: ghi sổ #505 — packet #503 `M9-FETCH-AUTH` (#499 C2a) land sau 10 vòng cross-review codex qua 4 generation lease; approve dưới điều kiện dừng do chủ kho duyệt; A3 đo ở chính PR hồ sơ này
 

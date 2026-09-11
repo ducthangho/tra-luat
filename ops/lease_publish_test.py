@@ -5367,16 +5367,11 @@ def t151_review_codex_to_tien_non_tree_metadata_rac_va_khoa_lan_kieu():
 
 @ca
 def t152_C2a_M9_fetch_H_mang_xac_thuc_qua_header_khong_token_trong_URL():
-    """#503 (M9-FETCH-AUTH, khắc phục #499 C2a): đo header HIỆU LỰC bằng Bash + Git config thật, token giả, không mạng.
-
-    Đo 10-09-2026 trên PR #500 (run 34440291662): fetch H nặc danh ⇒ rc=128 `could not read Username`
-    (checkout S đúng thiết kế `persist-credentials: false`) — cổng fail-close nhưng KHÔNG BAO GIỜ XANH.
-    Bản đầu (head 62c299a) chỉ DÒ CHUỖI `GIT_CONFIG_KEY_0=…`/`TL_TOKEN`; cross-review codex lượt 1 (verdict
-    sha256 a0bb40dc…) dựng ba đột biến SỐNG: COUNT=0, ghi đè AUTH_B64 sau gán đúng, xoá add-mask — chuỗi
-    có mặt khác giá trị Git THẬT đọc. Nay chốt (i) CHẠY chính đoạn shell auth/fetch (giữa `WF_BLOB=` và
-    `NHAN=`, nối continuation bằng `_dong_lenh`) với `git` là hàm stub chuyển các `-c` vào Git thật và hỏi
-    `config --get-urlmatch http.extraheader <URL fetch>`, kèm đối chứng host khác KHÔNG có header; chốt (v)
-    mask đăng ký đúng base64 TRƯỚC fetch, không output thừa. (ii)–(iv) độc lập; ĐỎ trên nền; m1–m9 giết.
+    """#503: đo auth bằng Bash + Git config thật, token giả, không mạng.
+    Chạy nguyên phần shell từ đầu bước tới trước NHAN, gồm cờ shell thật của workflow.
+    Stub rev-parse cấp S/blob giả cho preflight; stub fetch đo config hiệu lực theo URL.
+    (i) header từ TL_TOKEN; (ii) URL sạch; (iii) không ghi config; (iv) checkout không giữ
+    credential; (v) mask trước fetch, không output thừa trên stdout hoặc stderr.
     """
     import base64, yaml
     steps = yaml.safe_load(WORKFLOW_THU_HOI.read_text(encoding="utf-8"))["jobs"]["thu-hoi"]["steps"]
@@ -5391,11 +5386,11 @@ def t152_C2a_M9_fetch_H_mang_xac_thuc_qua_header_khong_token_trong_URL():
         ds = _dong_lenh(than)
         for i, lenh in enumerate(ds):
             if re.search(r"\bgit\b.*\bfetch\b", lenh) and "refs/pull/" in lenh:
-                lenh_fetch.append((lenh, ds, i))
+                lenh_fetch.append((lenh, ds, i, than))
             if re.search(r"\bgit\b[^\n]*\bconfig\b[^\n]*extraheader", lenh):
                 lenh_config.append(lenh)
     chot(len(lenh_fetch) == 1, f"đúng một lời gọi fetch H, thấy {len(lenh_fetch)}")
-    f, ds, i = lenh_fetch[0]
+    f, ds, i, than = lenh_fetch[0]
     url = re.findall(r"https://[^\s\"']+", f)
     chot(url and all("@" not in u and "TL_TOKEN" not in u for u in url),
          f"(ii) URL fetch mang credential: {url}")
@@ -5403,10 +5398,13 @@ def t152_C2a_M9_fetch_H_mang_xac_thuc_qua_header_khong_token_trong_URL():
     dau = [j for j in range(i) if ds[j].startswith("WF_BLOB=")]
     cuoi = [j for j in range(i + 1, len(ds)) if ds[j].startswith("NHAN=")]
     chot(len(dau) == len(cuoi) == 1, "(i) không tìm được ranh giới đoạn auth/fetch")
-    # Không sao chép câu lệnh auth: chạy chính bytes shell đã nối continuation của workflow.
-    doan = "\n".join(ds[dau[0] + 1:cuoi[0]])
+    # Giữ nguyên bytes shell và chạy cả preflight: cờ debug trước WF_BLOB cũng có hiệu lực.
+    doan = than[:than.index("\nNHAN=")]
     stub = r'''set -euo pipefail
     git() {
+      if [ "${1-}" = rev-parse ] && [ "$#" -eq 2 ]; then
+        case "$2" in HEAD|"$TL_WF_SHA:.github/workflows/ops-thu-hoi-admission.yml") printf '%s\n' "$TL_S"; return;; esac
+      fi
       local -a cfg=()
       while [ "${1-}" = -c ]; do cfg+=("$1" "$2"); shift 2; done
       [ "$#" -eq 4 ] && [ "$1" = fetch ] && [ "$2" = --no-tags ] || return 91
@@ -5422,6 +5420,8 @@ def t152_C2a_M9_fetch_H_mang_xac_thuc_qua_header_khong_token_trong_URL():
     with San() as s:
         cfg = s / "empty.config"; cfg.write_text("", encoding="utf-8")
         env = dict(PATH=os.environ["PATH"], TL_TOKEN=token, TL_KHO="ducthangho/tra-luat", TL_PR="505",
+                   TL_S="a" * 40, TL_H="b" * 40, TL_WF_SHA="a" * 40, TL_NHANH="master",
+                   TL_WF_REF="ducthangho/tra-luat/.github/workflows/ops-thu-hoi-admission.yml@refs/heads/master",
                    GIT_CONFIG_NOSYSTEM="1", GIT_CONFIG_GLOBAL=str(cfg))
         p = subprocess.run([_bash_posix(), "--noprofile", "--norc", "-c", stub + doan +
                             '\ntest "${AUTH_B64+x}" != x\ntest "${GIT_CONFIG_COUNT+x}" != x\n'],

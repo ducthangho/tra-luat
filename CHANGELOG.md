@@ -522,7 +522,7 @@ Lưu ý một chỗ dễ đọc nhầm: mục 5 ở trên vá **LỜI KHAI** *"�
 `bo-sot-pham-vi-ref-va-vat-chat-hoa` nói **BẢNG TRÍCH bỏ sót** chính câu ấy. Vá cái trước KHÔNG
 đóng cái sau — hai lỗi khác nhau trên cùng một dòng văn bản.
 
-## Cross-review PR #493 — CHÍN lượt, và hình dạng lỗi lặp lại là VÁ HỜ
+## Cross-review PR #493 — MƯỜI lượt, và hình dạng lỗi lặp lại là VÁ HỜ
 
 Hồ sơ vá lời khai sai thì cũng bị soi như mọi thứ khác.
 
@@ -546,6 +546,7 @@ tắt có ích**, không hơn. Verdict gốc của các lượt cross-review PR 
 | 7 | `a4bc01d` | `changes_requested` · **0 P1 · 0 P2 · 9 P3** | **4 ĐÃ VÁ THẬT · 3 VÁ HỜ · 2 VÁ SINH LỖI MỚI · 1 CHƯA VÁ** |
 | 8 | `025c6b2` | `changes_requested` · **0 P1 · 0 P2 · 10 P3** | **7 ĐÃ VÁ THẬT · 0 VÁ HỜ · 1 VÁ SINH LỖI MỚI · 1 CHƯA VÁ** |
 | 9 | `dd4a3ae` | `changes_requested` · **0 P1 · 0 P2 · 5 P3** | **7 ĐÃ VÁ THẬT · 2 VÁ HỜ · 0 VÁ SINH LỖI MỚI · 1 CHƯA VÁ** |
+| 10 | `9e78e19` | `changes_requested` · **0 P1 · 0 P2 · 3 P3** | (điền ở lượt sau) |
 
 Lượt 5 `approve` rồi lượt 6–8 lại `changes_requested` **không** phải mâu thuẫn: điều kiện dừng đổi
 từ *"hết P1"* sang *"hết P2"* rồi *"hết P3"* theo chỉ thị chủ kho, nên câu hỏi giao cho reviewer mỗi
@@ -617,7 +618,7 @@ Bốn trong năm là **lời khai rộng hơn phép đo**; cái thứ năm là *
 loại trừ nhau**. Không cổng nào bắt được cái nào — `release-verify`, `doc-claims-check`,
 `lease_publish_test`, `bien_nhan_v2` đều XANH trên bản sai.
 
-## Đổi cách vá từ lượt 7: quy về LỚP, rồi quét hết lớp — 13 vị trí, 4 tự tìm, 2 đứng vững
+## Đổi cách vá từ lượt 7: quy về LỚP, rồi quét hết lớp — 13 vị trí, 12 thuộc địa chỉ reviewer đã nêu
 
 Chủ kho chỉ thị sau lượt 7: *"cố gắng tìm các lỗi theo lớp lỗi, vá hết các lớp"*. Đây là phép đo
 đầu tiên của cách làm ấy.
@@ -655,7 +656,8 @@ tại một chỗ trong một hiện vật):
 nêu; **1** không (`B4` — và `B4` không phải lỗi). Bản trước ghi **9/4** và cross-review lượt 9 bác
 đúng chỗ đó: xem phần *"Số đúng"* ở cuối mục.
 
-**Và trong bốn cái tự tìm ấy, chỉ HAI đứng vững** — lượt 8 bác hai cái, tôi kiểm lại và họ đúng:
+**Bốn vị trí TỪNG BỊ XẾP NHẦM vào cột "tự tìm"** (`A2` `A6` `B4` `C3`) — lượt 8 bác hai, lượt 9 bác
+nốt phân hoạch, tôi kiểm lại và họ đúng cả:
 
 - `C1` **không phải** phát hiện thêm. Bản đầu ghi nó *"không ai chấm, chỉ khác đoạn văn"*; nhưng
   trường `TỆP/DÒNG` của finding `phan-vai-…` lượt 7 ghi rõ **`CHANGELOG.md:14,28–31`** — dòng 14
@@ -669,6 +671,10 @@ nêu; **1** không (`B4` — và `B4` không phải lỗi). Bản trước ghi *
 - Còn `A2` và `A6` đứng vững. `A6` **bị tôi xếp sai lớp**: định nghĩa A là *nâng* một sự kiện không
   hiện vật lên hạng đo được, còn nhãn *"cho cả mục này"* làm chiều **ngược lại** — nó **hạ** dữ kiện
   Git đo được xuống hạng tự thuật. Cùng đáng sửa, khác hình dạng.
+
+**ĐÍNH CHÍNH một bản chiếu KHÔNG sửa được: thông điệp commit `cc21507`.** Nó chép chuỗi
+`12→15→15→15→14→10→9→10→5` dưới tên *"xu hướng finding qua chín lượt"*. Đó là đường **P3**, không
+phải tổng finding; tổng là `17→20→17→16→14→10→9→10→5`. Đính chính ở đây, neo vào `cc21507`.
 
 **ĐÍNH CHÍNH một bản chiếu KHÔNG sửa được: thông điệp commit `dd4a3ae` — `257` phải là `258`.**
 Thông điệp merge khai *"**257** hàng cảnh báo"* làm **bằng chứng đã đo** sau khi giải xung đột.
@@ -701,12 +707,34 @@ diện thêm hai khuyết tật KHÁC** (`A2` lượng từ *"duy nhất"*, `A6`
 không nêu ra. Đó là *"đọc kỹ hơn trong vùng đã được chỉ"*, **không** phải *"tìm ra chỗ chưa ai chỉ"*.
 Hai câu ấy khác nhau, và tôi đã viết câu mạnh hơn ba lượt liền.
 
-**Không còn câu nào trong mục này khai công cho cách vá theo lớp.** Bằng chứng tôi từng viện dẫn —
-*"lần đầu `VÁ HỜ` = 0"* — cũng sai (lượt 5 đã bằng 0, xem mục Cross-review ở trên). Thứ đo được là
-**xu hướng finding qua chín lượt: 12 → 15 → 15 → 15 → 14 → 10 → 9 → 10 → 5**, và **0 `VÁ SINH LỖI
-MỚI`** ở lượt 9. Tương quan, không phải nhân quả: cùng thời gian ấy còn đổi cả điều kiện dừng, đầu
-vào bảng trích và nội dung prompt. Ai muốn quy công cho phương pháp thì phải dựng một phép đo tách
-được các biến ấy — tôi chưa có, và **không** có quyền viết như thể đã có. Tiền lệ duy nhất còn
+**Không còn câu nào trong mục này khai công cho cách vá theo lớp — và câu ấy CŨNG đã sai một lượt.**
+Bản trước của nó đứng ngay dưới một **heading vẫn rao *"4 tự tìm, 2 đứng vững"***, tức chính bản
+chiếu rút gọn của mục là một câu khai công. Cross-review lượt 10 chấm P3
+`phat-hien-them-da-co-trong-verdict-bay` đúng chỗ đó: tôi sửa **bảng** mà bỏ quên **tiêu đề**, rồi
+tuyên bố đã sạch — đúng lớp *bản chiếu không theo kịp nguồn* mà cả mục này sinh ra để tổng kết.
+Nay heading, đoạn dẫn và kết luận đều đọc từ **cùng một** inventory `13 = 12 + 1`.
+Bằng chứng tôi từng viện dẫn —
+*"lần đầu `VÁ HỜ` = 0"* — cũng sai (lượt 5 đã bằng 0, xem mục Cross-review ở trên).
+
+Thứ đo được là hai đường số, và **phải khai rõ đang đếm TẬP NÀO** — bản trước gọi một đường là
+*"xu hướng finding"* trong khi nó chỉ đếm **P3**, bỏ mất **13** finding P1/P2 có thật ở bốn điểm
+đầu; cross-review lượt 10 chấm P3 `chuoi-chin-luot-thieu-pham-vi-p3`, và đúng. Đếm heading
+`[P1]`/`[P2]`/`[P3]` trên chín verdict (lượt 10 ghi riêng dưới bảng vì nó chưa được đối chiếu):
+
+| lượt | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 |
+|---|--:|--:|--:|--:|--:|--:|--:|--:|--:|
+| **P3** | 12 | 15 | 15 | 15 | 14 | 10 | 9 | 10 | 5 |
+| **TỔNG P1+P2+P3** | **17** | **20** | **17** | **16** | 14 | 10 | 9 | 10 | 5 |
+
+(Lượt 10 trên `9e78e19`: **0 P1 · 0 P2 · 3 P3** ⇒ cả hai đường đều là **3**.)
+
+Hai đường **chỉ trùng từ lượt 5** trở đi, vì từ đó không còn P1/P2. Kèm **0 `VÁ SINH LỖI MỚI`** ở
+lượt 9.
+
+**Tương quan, không phải nhân quả**, và nhãn ấy **không** chữa được một bộ lọc không khai — đó là
+hai lỗi khác nhau, tôi mắc cả hai. Cùng thời gian ấy còn đổi điều kiện dừng, đầu vào bảng trích và
+nội dung prompt. Ai muốn quy công cho phương pháp thì phải dựng một phép đo tách được các biến ấy —
+tôi chưa có, và **không** có quyền viết như thể đã có. Tiền lệ duy nhất còn
 đứng vững về vá GỐC là lượt 5→6: bỏ **một** phép lọc đóng **11** finding cùng lúc, sau khi bốn lượt
 nới đầu vào chỉ **dời** chỗ mất dữ liệu.
 

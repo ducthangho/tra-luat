@@ -1111,11 +1111,19 @@ def _probe_spawn(chuong_trinh: str, ws: str) -> dict:
 def _probe_trust_claude(ws: str, home: Path | None = None) -> dict:
     try:
         data = json.loads(((home or Path.home()) / ".claude.json").read_text(encoding="utf-8"))
-        muc = data.get("projects", {}).get(str(Path(ws).resolve()))
+        # Claude writes Windows project keys with forward slashes. Only fold
+        # separators; do not broaden trust through case, parents or symlinks.
+        khoa = str(Path(ws).resolve())
+        chuan = (lambda p: p.replace("\\", "/")) if platform.system() == "Windows" else (lambda p: p)
+        cac_muc = [v for k, v in data.get("projects", {}).items() if chuan(k) == chuan(khoa)]
+        muc = cac_muc[0] if cac_muc else None
     except (OSError, TypeError, AttributeError, json.JSONDecodeError):
         return {"trang_thai": "KHONG_DO_DUOC", "chi_tiet": "khong doc duoc trust Claude"}
     if not isinstance(muc, dict) or "hasTrustDialogAccepted" not in muc:
         return {"trang_thai": "KHONG_DO_DUOC", "chi_tiet": "thieu khoa trust Claude"}
+    if any(not isinstance(v, dict) or "hasTrustDialogAccepted" not in v
+           or v["hasTrustDialogAccepted"] is not muc["hasTrustDialogAccepted"] for v in cac_muc):
+        return {"trang_thai": "KHONG_DO_DUOC", "chi_tiet": "trust Claude co alias mau thuan"}
     if muc["hasTrustDialogAccepted"] is True:
         return {"trang_thai": "DAT", "chi_tiet": "Claude trust=true"}
     if muc["hasTrustDialogAccepted"] is False:

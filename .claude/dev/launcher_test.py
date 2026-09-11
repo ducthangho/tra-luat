@@ -7373,7 +7373,66 @@ def r484_g4_windows_sid_alias_identity():
             assert accepted, "another principal was accepted through an alias"
 
 
+
+@ca
+def r484_g6_trust_windows_separator_aliases():
+    """Native and simulated Windows keys must refer to exactly one consent."""
+    from unittest.mock import patch
+    m = _tai_launcher_thu()
+    with San() as s:
+        repo = s / "repo"; repo.mkdir(); home = s / "home"; home.mkdir()
+        forward = str(repo.resolve()).replace("\\", "/")
+        backward = forward.replace("/", "\\")
+        mixed = forward.replace("/", "\\", 1)
+        tep = home / ".claude.json"
+        def check(projects, expected):
+            raw = json.dumps({"projects": projects}).encode("utf-8")
+            tep.write_bytes(raw)
+            got = m._probe_trust_claude(str(repo), home)
+            bang(got["trang_thai"] == expected, f"separator trust expected={expected}: {got}")
+            bang(tep.read_bytes() == raw, "probe modified user trust fixture")
+        with patch.object(m.platform, "system", return_value="Windows"):
+            for key in (forward, backward, mixed):
+                for value, expected in ((True, "DAT"), (False, "DO"), (1, "KHONG_DO_DUOC"),
+                                        (None, "KHONG_DO_DUOC"), ("true", "KHONG_DO_DUOC")):
+                    check({key: {"hasTrustDialogAccepted": value}}, expected)
+            check({}, "KHONG_DO_DUOC")
+            check({forward + "-other": {"hasTrustDialogAccepted": True}}, "KHONG_DO_DUOC")
+            check({forward: {}}, "KHONG_DO_DUOC")
+            check({forward: {"hasTrustDialogAccepted": True},
+                   backward: {"hasTrustDialogAccepted": True}}, "DAT")
+            for first, second in ((True, False), (False, True), (True, 1), (True, None)):
+                check({forward: {"hasTrustDialogAccepted": first},
+                       backward: {"hasTrustDialogAccepted": second}}, "KHONG_DO_DUOC")
+            check({forward: {"hasTrustDialogAccepted": True}, backward: {}}, "KHONG_DO_DUOC")
+            check({forward: {"hasTrustDialogAccepted": True}, backward: []}, "KHONG_DO_DUOC")
+
+
+@ca
+def r484_g6_trust_posix_backslash_is_not_separator():
+    if LA_WINDOWS:
+        return "POSIX literal backslash semantics measured on Linux"
+    m = _tai_launcher_thu()
+    with San() as s:
+        repo = s / "repo"; repo.mkdir(); home = s / "home"; home.mkdir()
+        different = str(repo.resolve()).replace("/", "\\")
+        (home / ".claude.json").write_text(json.dumps({"projects": {
+            different: {"hasTrustDialogAccepted": True}}}), encoding="utf-8")
+        got = m._probe_trust_claude(str(repo), home)
+        bang(got["trang_thai"] == "KHONG_DO_DUOC", f"POSIX trust broadened: {got}")
+
+
 DOT_BIEN = [
+    ("g6_trust_windows_separator_disabled",
+     ('if platform.system() == "Windows" else (lambda p: p)',
+      'if False else (lambda p: p)'),
+     ["r484_g6_trust_windows_separator_aliases"]),
+    ("g6_trust_conflicting_alias_ignored",
+     ('for v in cac_muc):', 'for v in []):'),
+     ["r484_g6_trust_windows_separator_aliases"]),
+    ("g6_trust_posix_separator_folded",
+     ('if platform.system() == "Windows" else (lambda p: p)', 'if True else (lambda p: p)'),
+     ["r484_g6_trust_posix_backslash_is_not_separator"], ("posix", "POSIX path semantics")),
     ("g4_windows_sid_alias_not_normalized",
      ('self._win_sid(fields[5])', 'fields[5]'),
      ["r484_g4_windows_sid_alias_identity"], ("windows", "native SID conversion")),

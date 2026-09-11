@@ -1,3 +1,83 @@
+# ★ dev-side — r369: ghi sổ #511 — hai verdict codex chấm CHÍNH hồ sơ r367 của #510; 5 P2 vá rồi approve; merge theo luật chung "approve ⇒ land" (2026-09-11)
+
+Nối tiếp r367 (chốt tới `b98531e`, #510). Merge sau đó chưa có mục: **#511** — vế bookkeeping ADR-0034 của #510/#505,
+và mục này là vế bookkeeping của CHÍNH nó: 2 verdict + 2 biên nhận v2 vào `ops/reviews/`, 2 hàng mục lục + 5 cảnh
+báo + 1 đoạn nguồn, manifest tái sinh. Đệ quy dừng ở đây theo tiền lệ r364/r367: verdict của PR hồ sơ vào kho ở PR hồ
+sơ kế tiếp, còn PR hồ sơ kế tiếp KHÔNG tự sinh thêm lượt review khác nền trừ khi chủ kho gọi.
+
+**Không nâng `VERSION`.** Vẫn `1.36.68` từ r336.
+
+**Số hiệu là r369, KHÔNG phải r368 — ĐO, không đoán.** Quét `CHANGELOG.md` trên MỌI `refs/remotes/origin/*` lúc
+19:0xZ 11-09-2026 sau khi hai nguồn ref khớp (`ls-remote` 340 / `for-each-ref` 340, `comm` 0/0): tiêu đề
+`# ★ dev-side — r368` đã có ở **2 ref** — `claude/land-493-bookkeeping` (`fdd951a`, 17:38Z) và
+`claude/land-493-bookkeeping-wip` (`db02755`, 18:34Z), tức hồ sơ #493 của một phiên khác đang mở; `r369`: **0 ref**.
+Hai PR hồ sơ song song cùng chạm `ops/reviews/README.md` + `CHANGELOG.md` ⇒ PR nào land sau phải merge master rồi
+chạy lại gate; ghi ở đây để phiên kia thấy.
+
+**GIỚI HẠN NGUỒN.** Như r364/r367: (a) **tự đo được** — số Git, băm/byte tệp, cổng chạy lại từ hiện vật trong kho;
+(b) **thuật lại** — sự kiện GitHub (run CI, comment, thời điểm merge, luật chủ kho trong phiên chat); (c) **kết quả
+cũ thuật lại** — mutant/3 lối land mà reviewer chạy trong sandbox, chỉ có băm verdict và mô tả. Scalar runtime trong
+`model_reviewer_identity` đối chiếu được với `run.json` NGOÀI kho (`scratchpad/runs/417a209c`, `8873d98d`) — và lần này
+ghi đúng: **run.json CÓ khoá `thoi_luong_giay`** (1077.179 / 979.492, khớp hiệu timestamp làm tròn 3 chữ số); r367 từng
+viết "không có khoá" và đó là P2 đầu tiên của lượt 1.
+
+## Hai lượt review hồ sơ #511 — (b) trừ chỗ ghi (a)
+
+| lượt | run | head | verdict | HINT |
+|---|---|---|---|---|
+| 1 | `417a209c` · 1 077,179 s (14:30:15 → 14:48:13Z) | `51466e6` | `changes_requested` 0 P1 / **5 P2** / 0 P3 | `81a4f36b…` 30 517 B, 12 hunk / 5 tệp |
+| 2 | `8873d98d` · 979,492 s (14:50:49 → 15:07:08Z) | `6adb7ff` | `approve` 0/0/0, 5 P2 ĐÓNG | `b5672fcb…` 89 B, 0 hunk |
+
+Năm P2 lượt 1, tất cả là LỜI KHAI HỒ SƠ rộng hơn phép đo (cùng lớp với r366→r367 — ba PR hồ sơ liên tiếp cùng ăn
+finding lớp này): `nguon-runtime-phu-nhan-khoa-thoi-luong` · `chu-thich-p3-dem-thieu-workflow-ghim` (ba workflow ghim
+`PyYAML==6.0.3`, chú thích đóng P3 viết "hai") · `bang-do-tong-hop-sai-pham-vi` (410 = 41 × 10 hàng HỖN HỢP, không phải
+410 scalar; 11 dòng 49–59 đã chiếu ⇒ 850 không chiếu, không phải 861) · `pham-vi-cong-can-bam-khong-can-so-byte`
+(`verdict_bytes` 269934→269933 SỐNG 4/4) · `quet-ref-lich-su-chua-tach-nguon-va-phep-dem` (331/333/334 là lịch sử
+KHÔNG ĐO ĐƯỢC; "r367 0 ref" phải nói rõ đếm tiêu đề hay chuỗi — mục này làm đúng thế ở đoạn r369 trên). Executor áp
+NGUYÊN HINT (`patch -p0` rc=0) tại `6adb7ff` + tái sinh manifest; lượt 2 áp lại `--fuzz=0` từng hunk: đủ 12, 5 tệp bằng
+byte HEAD, ngoài HINT chỉ manifest. Bản chiếu: #511 comment 5636291581 (bỏ `## Bảng đo lại` dòng 25–320 = 296 dòng) và
+5636504464 (bỏ dòng 27–459 = 433 dòng) — bảng đầy đủ chỉ có trong hai tệp verdict (83 049 B · 112 609 B).
+
+**Merge `05ba3f9` (15:18:28Z, merge commit `b98531e` + `6adb7ff`, không squash)** theo LUẬT CHUNG chủ kho đặt ~14:4xZ
+("tất cả PR chỉ được merge khi cross review approve … có approve rồi chưa land thì land luôn và báo tôi"), ghi lại ở
+#511 comment 5636504464 TRƯỚC khi bỏ draft; lúc merge `gate (ubuntu-latest)` success (job 103306092417, xong 15:13:54Z),
+`thu-hoi` success (job 103306084492). Không lease, không `guard --action merge` (PR hồ sơ); sổ local gen4
+`uy_quyen_merge.jsonl` có dòng KHAI BÁO cho `6adb7ff` (`la_loi_khai_khong_phai_bang_chung: true`).
+
+**Codex connector trên `6adb7ff`:** kích khi bỏ draft (15:18:2xZ), **hoàn tất 15:19:40Z — 72 giây SAU merge**
+(comment tổng kết 5636629713). Đọc lúc viết mục này (19:0xZ): `get_reviews` #511 rỗng, không comment finding, reaction
+KHÔNG ĐỌC. Lặp lại đúng hình dạng r367 (#510: connector kích ~1 phút trước merge) — bài học "gate xanh KHÔNG phải đã
+được review" (PR #104/#105) đang được lặp ở dạng nhẹ hơn: có approve khác nền rồi mới merge, nhưng connector của nền
+đó thì chưa từng được chờ. Nợ: ghi ở phần NỢ.
+
+## Phạm vi — (a)
+
+- Commit 1 `120d47a`: 2 verdict NGUYÊN BYTE (`cmp` với `VERDICT.rvhs511-{1,2}.md` trong sandbox reviewer khớp) —
+  `pr511-review-1-codex-verdict.md` sha256 `4e86bc17…` 83 049 B · `pr511-review-2-codex-verdict.md` `cfe61825…`
+  112 609 B; `git log --all --diff-filter=A` ⇒ đúng 1 commit ⇒ neo blob `evidence_url` = `120d47a`.
+- Commit 2: 2 biên nhận v2 (`cross_reviewed` / `cross_approved`), README (1 đoạn nguồn PR #511, 5 hàng cảnh báo, 2 hàng
+  mục lục — 638 → 647 dòng), mục r369 này, `RELEASE_MANIFEST.json` tái sinh (`tl.py release-manifest --deterministic`).
+- Gate tại chỗ trước commit 2: `bien_nhan_v2 --root .` **83 ĐẠT v2 (81 r367 + 2) · 11/11 miễn trừ legacy · 42 NỢ đóng
+  băng · 0 vi phạm · 0 KHÔNG ĐO ĐƯỢC · tổng 136**, TỔNG ĐẠT; t26/t27 QUA; doctrine-scan rc=0; `git diff --check` sạch.
+  `release-verify --strict --json` và `doc-claims-check --strict` chạy SAU khi tái sinh manifest — số ở mô tả PR.
+
+## Giới hạn cổng — đo được ở CẢ HAI lượt, nay rộng hơn r367 một trường
+
+Đổi `so_p2` (5→4) HOẶC đổi `verdict_bytes` (269934→269933) của một receipt: `bien_nhan_v2` 0 · t26 0 · t27 0 ·
+`release-verify` 0 — SỐNG 4/4 cả hai. Cổng canh BĂM verdict, cặp caveat↔README và neo evidence_url; số finding và số
+byte khai trong receipt là LỜI KHAI. Cảnh báo `VERDICT-BYTES-VA-SO-P-TRONG-BIEN-NHAN-KHONG-CO-CONG-NAO-CANH` thay cho
+`SO-P1-P2-…` của r367 (cảnh báo cũ giữ nguyên ở hai receipt PR #510 — không sửa receipt đã land).
+
+## NỢ (mở ở r369)
+
+- **Cổng cho `so_p*` + `verdict_bytes` trong receipt** — chưa có packet (nợ từ r367, nay có thêm một trường).
+- **Chờ connector Codex trước khi merge** — hai PR hồ sơ liên tiếp merge trong vòng ~1 phút quanh lúc connector kích;
+  luật chung "approve ⇒ land" chưa nói gì về connector. Đề xuất cho chủ kho: bỏ draft, đợi connector Completed, đọc,
+  rồi merge — hoặc ghi rõ connector không thuộc điều kiện.
+- **Hai PR hồ sơ song song (r368 #493 · r369 #511)** cùng chạm README/CHANGELOG — PR land sau phải merge master và
+  chạy lại 4 cổng; số ở mục này là số của nhánh này trước khi merge.
+- Nợ r367 còn nguyên: cổng `so_p*`, `SO-LEASE-KHONG-NAM-MOT-CHO`, `AG-T0-01B` (lease không tự chết khi packet land).
+
 # ★ dev-side — r367: ghi sổ #510 — hai verdict codex chấm CHÍNH hồ sơ r366 của #505; 5 P2 + 1 P3 vá rồi approve; merge theo chỉ thị "chọn A" (2026-09-11)
 
 Nối tiếp r366 (chốt tới `fe05fa6`, #505). Merge sau đó chưa có mục: **#510** — vế bookkeeping ADR-0034 của #505/#503,

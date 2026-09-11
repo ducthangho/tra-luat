@@ -13,8 +13,12 @@ khi `r364` land thì `r365` hiện ra ở **14** ref mà chẳng ai dùng nó. �
 (`^#\s*★[^\n]*?—\s*(r\d+):`) trên blob `CHANGELOG.md` của **mọi** ref:
 
 Phạm vi quét, nói cho chật: **`refs/heads` mà thôi** — không phải "mọi ref". Mirror còn `refs/pull/*` và
-`refs/tags/*`; chúng không mang tiêu đề mục `CHANGELOG.md` mới nào, nhưng khai "mọi ref" là rộng hơn thứ đã
-chạy (cross-review lượt 6 chấm đúng phạm vi này).
+`refs/tags/*`. Đo trên toàn bộ **753** ref của mirror: **151** số `r` trên `refs/heads`, **151** trên toàn
+bộ ref, **0** số chỉ tồn tại ngoài `refs/heads` ⇒ hai namespace kia **không mang số `r` mới nào**, nên phép
+chọn số không mù. Nói cho chật đúng đại lượng (cross-review lượt 7 chấm chỗ này): câu trên được xác nhận
+**theo SỐ `r`**, không phải theo **chuỗi tiêu đề nguyên văn** — có đúng một chuỗi tiêu đề ngoài `refs/heads`
+(`refs/tags/bak/pre-renumber` giữ một bản `r325` khác chữ với bản trên `refs/heads`). Biến thể văn bản ấy
+không làm phép chọn `r368` mù một số nào.
 
 ```
 git ls-remote --heads origin | sed 's#.*refs/heads/##' | sort   > /tmp/mc      ⇒ 331
@@ -47,8 +51,16 @@ lượt 6 dựng phản chứng chạy được: mô phỏng lịch A mở → B
 trùng số, vì **đọc không phải là giữ**.)*
 
 Đây là tái phát đúng bài học `--force-with-lease` của `CLAUDE.md`: *"'thu hẹp' mà viết thành 'đóng' là một
-lời khai rộng hơn phép đo"*. Muốn ĐÓNG thật thì phải có thao tác **nguyên tử** buộc việc chọn số vào việc
-công bố — kho chưa có, và PR hồ sơ này không phải chỗ thiết kế nó.
+lời khai rộng hơn phép đo"*. Cross-review lượt 7 kiểm phép so sánh ấy và xác nhận **đúng cùng lớp**: cả hai
+đều là "lần đọc cuối không bảo vệ trạng thái lúc ghi".
+
+Một đường đóng được khe là thao tác **nguyên tử** buộc việc chọn số vào việc công bố; kho chưa có, và PR hồ
+sơ này không phải chỗ thiết kế nó. *(Bản trước viết **"phải có"** — tức điều kiện CẦN — và cross-review lượt
+7 bác bằng phản chứng chạy được: **phân vùng trước** không gian số cũng đóng, không cần giao dịch nào. Quy
+ước A chỉ dùng `369+2k`, B chỉ dùng `370+2k`, mỗi bên không tái dùng số của mình ⇒ **6/6** lịch xen kẽ đều
+không trùng, và chứng minh tổng quát là `369+2k = 370+2j` đòi một số chẵn bằng một số lẻ. Giá của đường ấy,
+reviewer khai luôn: cần hai danh tính ổn định, phân vùng cố định không giao nhau, và **mất** tính liên tiếp
+của số. Nên "nguyên tử" là MỘT đường, không phải đường duy nhất.)*
 
 **GIỚI HẠN NGUỒN.** (a) **tự đo được** — số Git, băm/byte tệp, số mục manifest, cổng chạy lại từ hiện vật
 trong kho, và **số finding đếm bằng heading trong chính tệp verdict**; (b) **thuật lại** — sự kiện GitHub

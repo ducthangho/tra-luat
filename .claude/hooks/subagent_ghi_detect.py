@@ -124,14 +124,15 @@ def _chup(cwd):
 _TRAN_BAM_BYTE = 8 * 1024 * 1024
 
 
-def _unquote_c_style(s):
+def _consume_c_style_bytes(b):
     res = bytearray()
-    i = 0
-    b = s.encode("utf-8", "surrogateescape")
+    i = 1
     n = len(b)
     while i < n:
-        if b[i] == 92:
-            if i + 1 >= n: return None
+        if b[i] == 34:
+            return res.decode("utf-8", "surrogateescape"), i + 1
+        elif b[i] == 92:
+            if i + 1 >= n: return None, None
             c = b[i+1]
             if c == 97: res.append(7)
             elif c == 98: res.append(8)
@@ -142,47 +143,47 @@ def _unquote_c_style(s):
             elif c == 114: res.append(13)
             elif c == 34: res.append(34)
             elif c == 92: res.append(92)
-            elif 48 <= c <= 55:
-                if i + 3 >= n: return None
+            elif 48 <= c <= 51:
+                if i + 3 >= n: return None, None
                 octal = b[i+1:i+4]
-                if not (48 <= octal[1] <= 55 and 48 <= octal[2] <= 55): return None
+                if not (48 <= octal[1] <= 55 and 48 <= octal[2] <= 55): return None, None
                 res.append(int(octal, 8))
                 i += 4
                 continue
-            else: return None
+            else: return None, None
             i += 2
         else:
             res.append(b[i])
             i += 1
-    return res.decode("utf-8", "surrogateescape")
+    return None, None
 
 def _duong_tu_porcelain(dong):
     """Tra duong dan tu mot ban ghi porcelain v1. `R  cu -> moi` tra ban MOI."""
     if len(dong) < 4:
         return None
-    p = dong[3:]
-    if dong[0] in ('R', 'C'):
-        if p.startswith('"'):
-            i = 1
-            while i < len(p):
-                if p[i] == '\\': i += 2
-                elif p[i] == '"': break
-                else: i += 1
-            if i + 4 < len(p) and p[i+1:i+5] == ' -> ':
-                p = p[i+5:]
+    b_dong = dong.encode("utf-8", "surrogateescape")
+    p = b_dong[3:]
+    if b_dong[0] in (82, 67) or b_dong[1] in (82, 67):
+        if p.startswith(b'"'):
+            res, end_idx = _consume_c_style_bytes(p)
+            if res is None: return None
+            if end_idx + 4 <= len(p) and p[end_idx:end_idx+4] == b' -> ':
+                p = p[end_idx+4:]
             else:
                 return None
         else:
-            idx = p.find(' -> ')
+            idx = p.find(b' -> ')
             if idx != -1:
                 p = p[idx+4:]
             else:
                 return None
-    if p.startswith('"'):
-        if not p.endswith('"') or len(p) < 2:
+    
+    if p.startswith(b'"'):
+        res, end_idx = _consume_c_style_bytes(p)
+        if res is None or end_idx != len(p):
             return None
-        return _unquote_c_style(p[1:-1])
-    return p
+        return res
+    return p.decode("utf-8", "surrogateescape")
 
 
 def _van_tay_noi_dung(top, st):

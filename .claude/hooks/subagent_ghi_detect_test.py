@@ -1015,12 +1015,12 @@ def t26c_escaped_names_duoc_giai_ma_dung(h):
     mong_doi = 'tep\n"voi"\\slash.txt'
     return res == mong_doi, f"escaped names parser: {res!r} (mong doi {mong_doi!r})"
 
-def t26d_ten_byte_malformed_tra_unknown_hoac_fail_close(h):
+def t26d_valid_non_utf8_byte_roundtrip(h):
     # This tests VALID non-UTF8 byte path round-trip (which is octal escaped in git)
     hook = _nap_hook_de_do(h, "t26d")
     res = hook._duong_tu_porcelain('?? "bad-\\377.txt"')
     mong_doi = "bad-\udcff.txt"
-    return res == mong_doi, f"malformed bytes parser: {res!r} (mong doi {mong_doi!r})"
+    return res == mong_doi, f"valid non-utf8 parser: {res!r} (mong doi {mong_doi!r})"
 
 def t26e_mixed_literal_unicode_and_escapes(h):
     hook = _nap_hook_de_do(h, "t26e")
@@ -1031,10 +1031,12 @@ def t26e_mixed_literal_unicode_and_escapes(h):
 def t26f_arrow_name_decoy_collision_false_clean(h):
     hook = _nap_hook_de_do(h, "t26f")
     res1 = hook._duong_tu_porcelain('?? "victim -> decoy"')
-    mong_doi1 = "victim -> decoy"
     res2 = hook._duong_tu_porcelain('R  "victim" -> "decoy"')
+    res3 = hook._duong_tu_porcelain('R  "victim -> decoy" -> "new"')
+    mong_doi1 = "victim -> decoy"
     mong_doi2 = "decoy"
-    return res1 == mong_doi1 and res2 == mong_doi2, f"arrow collision: {res1!r}, {res2!r}"
+    mong_doi3 = "new"
+    return res1 == mong_doi1 and res2 == mong_doi2 and res3 == mong_doi3, f"arrow collision: {res1!r}, {res2!r}, {res3!r}"
 
 def t26g_malformed_syntax_rejection(h):
     hook = _nap_hook_de_do(h, "t26g")
@@ -1042,6 +1044,33 @@ def t26g_malformed_syntax_rejection(h):
     res2 = hook._duong_tu_porcelain('?? "bad-\\q"')
     res3 = hook._duong_tu_porcelain('?? "unterminated')
     return res1 is None and res2 is None and res3 is None, f"malformed rejection: {res1}, {res2}, {res3}"
+
+def t26h_real_git_arrow_collision_and_rename(h):
+    if os.name == 'nt':
+        return True, "CAPABILITY LIMITATION: Windows khong ho tro ky tu > trong ten tep."
+    c, s = _cay(), _snap()
+    subprocess.run(["git", "config", "core.quotePath", "true"], cwd=c, capture_output=True)
+    
+    f_arrow = pathlib.Path(c) / "victim -> decoy"
+    f_arrow.write_text("1", encoding="utf-8")
+    subprocess.run(["git", "add", "victim -> decoy"], cwd=c, capture_output=True)
+    subprocess.run(["git", "commit", "-m", "init"], cwd=c, capture_output=True)
+    
+    subprocess.run(["git", "mv", "victim -> decoy", "new"], cwd=c, capture_output=True)
+    
+    f_new = pathlib.Path(c) / "new"
+    
+    goi_byte("SubagentStart", "tl-auditor", "a26h_clean", c, s, h)
+    rc1, kq1, ly1, ct1 = goi_byte("SubagentStop", "tl-auditor", "a26h_clean", c, s, h)
+    if kq1 != "clean":
+        shutil.rmtree(c, ignore_errors=True)
+        return False, f"real git rename (unchanged): {kq1}"
+        
+    goi_byte("SubagentStart", "tl-auditor", "a26h_changed", c, s, h)
+    f_new.write_text("2", encoding="utf-8")
+    rc2, kq2, ly2, ct2 = goi_byte("SubagentStop", "tl-auditor", "a26h_changed", c, s, h)
+    shutil.rmtree(c, ignore_errors=True)
+    return kq2 == "changed", f"real git rename: {kq1} -> {kq2}"
 
 
 CA = [t1_khong_ghi_thi_clean, t2_ghi_tep_theo_doi_thi_changed,
@@ -1071,10 +1100,11 @@ CA = [t1_khong_ghi_thi_clean, t2_ghi_tep_theo_doi_thi_changed,
       t26a_ten_unicode_duoc_giai_ma_dung_byte_khi_quotePath_true,
       t26b_ten_unicode_giai_ma_dung_byte_khi_quotePath_false,
       t26c_escaped_names_duoc_giai_ma_dung,
-      t26d_ten_byte_malformed_tra_unknown_hoac_fail_close,
+      t26d_valid_non_utf8_byte_roundtrip,
       t26e_mixed_literal_unicode_and_escapes,
       t26f_arrow_name_decoy_collision_false_clean,
-      t26g_malformed_syntax_rejection]
+      t26g_malformed_syntax_rejection,
+      t26h_real_git_arrow_collision_and_rename]
 
 # --- DOT BIEN: moi cai go DUNG MOT tinh chat, va phai lam it nhat mot ca DO ---
 DOT_BIEN = [
@@ -1156,8 +1186,11 @@ DOT_BIEN = [
      '    rc_idx, duong_idx = _git(cwd, "rev-parse", "--git-path", "index")',
      '    rc_idx, duong_idx = 0, ".git/index"'),
     ("m27_bo_codecs_escape_decode",
-     '        return _unquote_c_style(p[1:-1])',
-     '        return p[1:-1].encode("latin-1", "backslashreplace").decode("unicode_escape")'),
+     '    if p.startswith(b\'"\'):\n        res, end_idx = _consume_c_style_bytes(p)',
+     '    if p.startswith(b\'"\'):\n        return p[1:-1].decode("unicode_escape")'),
+    ("m29_bo_xu_ly_arrow_rename",
+     '        if p.startswith(b\'"\'):\n            res, end_idx = _consume_c_style_bytes(p)\n            if res is None: return None\n            if end_idx + 4 <= len(p) and p[end_idx:end_idx+4] == b\' -> \':\n                p = p[end_idx+4:]\n            else:\n                return None\n        else:\n            idx = p.find(b\' -> \')\n            if idx != -1:\n                p = p[idx+4:]\n            else:\n                return None',
+     '        if b\' -> \' in p:\n            p = p.split(b\' -> \', 1)[1]'),
 ]
 
 

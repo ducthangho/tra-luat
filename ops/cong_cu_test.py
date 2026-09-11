@@ -515,6 +515,22 @@ DOT_BIEN = {
         "    :  # đột biến: không cắt CR\n",
         "CAI_SH", ("ops/cong_cu.py", "ops/cai_actionlint.sh") + _PHU,
         "t23_batch_chiu_duoc_stdout_CRLF_cua_python_windows"),
+    "t24_sai_pham_vi": ("ops/cong_cu.py",
+        '        pham_vi = "mot-cong-cu"\n',
+        '        pham_vi = "sai-pham-vi"  # đột biến\n',
+        "SCRIPT", _PHU, "t24_pham_vi_mot_cong_cu_va_toan_bo"),
+    "t24a_mot_cong_cu_ghi_chu_rong": ("ops/cong_cu.py",
+        '        ghi_chu_pham_vi = "chua quet canary toan bo"\n',
+        '        ghi_chu_pham_vi = ""  # đột biến\n',
+        "SCRIPT", _PHU, "t24_pham_vi_mot_cong_cu_va_toan_bo"),
+    "t24b_mot_cong_cu_ghi_chu_sai_su_that": ("ops/cong_cu.py",
+        '        ghi_chu_pham_vi = "chua quet canary toan bo"\n',
+        '        ghi_chu_pham_vi = "da quet canary toan bo"  # đột biến\n',
+        "SCRIPT", _PHU, "t24_pham_vi_mot_cong_cu_va_toan_bo"),
+    "t24c_toan_bo_ghi_chu_rong": ("ops/cong_cu.py",
+        '        ghi_chu_pham_vi = "da quet canary toan bo (khong co nghia moi canary dat)"\n',
+        '        ghi_chu_pham_vi = "   "  # đột biến\n',
+        "SCRIPT", _PHU, "t24_pham_vi_mot_cong_cu_va_toan_bo"),
 }
 
 def _chay_1_ca(fn):
@@ -898,6 +914,43 @@ def python_alias_behavior_test() -> None:
         bang(rc == 0 and '"trang_thai_tong": "DAT"' in out,
              f"máy chỉ có python3 bị probe alias python chặn: rc={rc}\n{out}")
 
+
+
+@ca
+def t24_pham_vi_mot_cong_cu_va_toan_bo():
+    """Phạm vi một công cụ và toàn bộ phải có đủ pham_vi, canary_da_quet, ghi_chu_pham_vi, không rỗng và đúng ngữ nghĩa."""
+    with tempfile.TemporaryDirectory() as tmp:
+        tmp = Path(tmp)
+        bk, env = bk_don(tmp, "cong-cu-t24", "#!/bin/sh\necho 1.0.0\n", ban_ghim="1.0.0")
+        rc, out, _ = chay("kiem-tra", "--ban-ke", str(bk), "--json", env=env)
+        bang(rc == 0, f"rc={rc} thay vi 0")
+        bc = json.loads(out)
+        bang(bc.get("pham_vi") == "toan-bo", f"sai pham_vi toan-bo: {bc.get('pham_vi')}")
+        bang(bc.get("canary_da_quet") is True, "sai canary_da_quet toan-bo")
+        ghi_chu_tb = bc.get("ghi_chu_pham_vi", "")
+        bang(bool(ghi_chu_tb.strip()), "ghi_chu_pham_vi toan-bo bi rong")
+        bang("da quet" in ghi_chu_tb.lower() or "đã quét" in ghi_chu_tb.lower(), "ghi_chu_pham_vi toan-bo khong mang y nghia da quet")
+        rc, out, _ = chay("kiem-tra", "--chi", "cong-cu-t24", "--ban-ke", str(bk), "--json", env=env)
+        bang(rc == 0, f"rc={rc} thay vi 0")
+        bc = json.loads(out)
+        bang(bc.get("pham_vi") == "mot-cong-cu", f"sai pham_vi mot-cong-cu: {bc.get('pham_vi')}")
+        bang(bc.get("canary_da_quet") is False, "sai canary_da_quet mot-cong-cu")
+        ghi_chu_1 = bc.get("ghi_chu_pham_vi", "")
+        bang(bool(ghi_chu_1.strip()), "ghi_chu_pham_vi mot-cong-cu bi rong")
+        bang("chua quet" in ghi_chu_1.lower() or "chưa quét" in ghi_chu_1.lower(), "ghi_chu_pham_vi mot-cong-cu khong mang y nghia chua quet")
+
+@ca
+def t25_optional_khong_do_duoc_giu_nguyen_trang_thai_tong():
+    """Optional KHONG_DO_DUOC không kéo trạng thái tổng xuống KHONG_DO_DUOC."""
+    with tempfile.TemporaryDirectory() as tmp:
+        tmp = Path(tmp)
+        bk = ghi_ban_ke(tmp, {"optional-hong": {"bat_buoc": False, "ban_ghim": None, "probe": mot_probe("khong-ton-tai-bin")}})
+        rc, out, _ = chay("kiem-tra", "--ban-ke", str(bk), "--json", env=moi_truong())
+        bang(rc == 0, f"rc={rc} thay vi 0")
+        bc = json.loads(out)
+        bang(bc.get("trang_thai_tong") == "DAT", "optional KHONG_DO_DUOC keo trang thai tong")
+        cc = bc["cong_cu"][0]
+        bang(cc["trang_thai"] == "KHONG_DO_DUOC", "optional tool khong phai KHONG_DO_DUOC")
 
 
 def _tu_kiem_phan_hang() -> int:

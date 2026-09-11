@@ -1045,32 +1045,90 @@ def t26g_malformed_syntax_rejection(h):
     res3 = hook._duong_tu_porcelain('?? "unterminated')
     return res1 is None and res2 is None and res3 is None, f"malformed rejection: {res1}, {res2}, {res3}"
 
-def t26h_real_git_arrow_collision_and_rename(h):
+def t26h_real_git_rename_of_arrow_filename(h):
     if os.name == 'nt':
         return True, "CAPABILITY LIMITATION: Windows khong ho tro ky tu > trong ten tep."
     c, s = _cay(), _snap()
-    subprocess.run(["git", "config", "core.quotePath", "true"], cwd=c, capture_output=True)
-    
+    r = subprocess.run(["git", "config", "core.quotePath", "true"], cwd=c, capture_output=True)
+    if r.returncode != 0: return False, "setup git config that bai"
+
     f_arrow = pathlib.Path(c) / "victim -> decoy"
     f_arrow.write_text("1", encoding="utf-8")
-    subprocess.run(["git", "add", "victim -> decoy"], cwd=c, capture_output=True)
-    subprocess.run(["git", "commit", "-m", "init"], cwd=c, capture_output=True)
-    
-    subprocess.run(["git", "mv", "victim -> decoy", "new"], cwd=c, capture_output=True)
-    
+    r = subprocess.run(["git", "add", "victim -> decoy"], cwd=c, capture_output=True)
+    if r.returncode != 0: return False, "setup git add that bai"
+    r = subprocess.run(["git", "commit", "-m", "init"], cwd=c, capture_output=True)
+    if r.returncode != 0: return False, "setup git commit that bai"
+
+    r = subprocess.run(["git", "mv", "victim -> decoy", "new"], cwd=c, capture_output=True)
+    if r.returncode != 0: return False, "setup git mv that bai"
+
     f_new = pathlib.Path(c) / "new"
-    
+
     goi_byte("SubagentStart", "tl-auditor", "a26h_clean", c, s, h)
     rc1, kq1, ly1, ct1 = goi_byte("SubagentStop", "tl-auditor", "a26h_clean", c, s, h)
     if kq1 != "clean":
         shutil.rmtree(c, ignore_errors=True)
         return False, f"real git rename (unchanged): {kq1}"
-        
+    if not ct1.get("so_duong_da_bam_noi_dung"):
+        shutil.rmtree(c, ignore_errors=True)
+        return False, "real git rename (unchanged): zero hashed paths"
+
     goi_byte("SubagentStart", "tl-auditor", "a26h_changed", c, s, h)
     f_new.write_text("2", encoding="utf-8")
     rc2, kq2, ly2, ct2 = goi_byte("SubagentStop", "tl-auditor", "a26h_changed", c, s, h)
     shutil.rmtree(c, ignore_errors=True)
     return kq2 == "changed", f"real git rename: {kq1} -> {kq2}"
+
+
+def t26i_record_boundary_regression(h):
+    if os.name == 'nt':
+        chars = ["\u0085", "\u2028", "\u2029", " "]
+    else:
+        chars = ["\u0085", "\u2028", "\u2029", " \r\n\t"]
+
+    xau = []
+    so_ca = 0
+    for qp in ["true", "false"]:
+        for i, char in enumerate(chars):
+            c, s = _cay(), _snap()
+            r = subprocess.run(["git", "config", "core.quotePath", qp], cwd=c, capture_output=True)
+            if r.returncode != 0:
+                xau.append(f"qp={qp}: git config rc={r.returncode}")
+                shutil.rmtree(c, ignore_errors=True)
+                continue
+
+            fname = f"line{char}break.txt"
+            fpath = pathlib.Path(c) / fname
+            fpath.write_text("1", encoding="utf-8")
+            r = subprocess.run(["git", "add", fname], cwd=c, capture_output=True)
+            if r.returncode != 0:
+                xau.append(f"qp={qp} char={repr(char)}: git add rc={r.returncode}")
+                shutil.rmtree(c, ignore_errors=True)
+                continue
+
+            aid = f"a26i_{qp}_{i}"
+            goi_byte("SubagentStart", "tl-auditor", aid + "_clean", c, s, h)
+            rc1, kq1, ly1, ct1 = goi_byte("SubagentStop", "tl-auditor", aid + "_clean", c, s, h)
+
+            if kq1 != "clean":
+                xau.append(f"qp={qp} char={repr(char)}: {kq1}")
+            elif not ct1.get("so_duong_da_bam_noi_dung") or ct1.get("khong_bam_duoc"):
+                xau.append(f"qp={qp} char={repr(char)}: missing paths or zero hashes")
+            else:
+                goi_byte("SubagentStart", "tl-auditor", aid + "_changed", c, s, h)
+                fpath.write_text("2", encoding="utf-8")
+                rc2, kq2, ly2, ct2 = goi_byte("SubagentStop", "tl-auditor", aid + "_changed", c, s, h)
+                if kq2 != "changed":
+                    xau.append(f"qp={qp} char={repr(char)}: {kq1} -> {kq2}")
+                else:
+                    so_ca += 1
+
+            shutil.rmtree(c, ignore_errors=True)
+
+    if so_ca != len(chars) * 2:
+        xau.append(f"thieu ca: do {so_ca} mong doi {len(chars) * 2}")
+
+    return not xau, "loi: " + "; ".join(xau) if xau else f"matrix passed ({so_ca} cases)"
 
 
 CA = [t1_khong_ghi_thi_clean, t2_ghi_tep_theo_doi_thi_changed,
@@ -1104,7 +1162,8 @@ CA = [t1_khong_ghi_thi_clean, t2_ghi_tep_theo_doi_thi_changed,
       t26e_mixed_literal_unicode_and_escapes,
       t26f_arrow_name_decoy_collision_false_clean,
       t26g_malformed_syntax_rejection,
-      t26h_real_git_arrow_collision_and_rename]
+      t26h_real_git_rename_of_arrow_filename,
+      t26i_record_boundary_regression]
 
 # --- DOT BIEN: moi cai go DUNG MOT tinh chat, va phai lam it nhat mot ca DO ---
 DOT_BIEN = [
@@ -1191,6 +1250,9 @@ DOT_BIEN = [
     ("m29_bo_xu_ly_arrow_rename",
      '        if p.startswith(b\'"\'):\n            res, end_idx = _consume_c_style_bytes(p)\n            if res is None: return None\n            if end_idx + 4 <= len(p) and p[end_idx:end_idx+4] == b\' -> \':\n                p = p[end_idx+4:]\n            else:\n                return None\n        else:\n            idx = p.find(b\' -> \')\n            if idx != -1:\n                p = p[idx+4:]\n            else:\n                return None',
      '        if b\' -> \' in p:\n            p = p.split(b\' -> \', 1)[1]'),
+    ("m30_record_boundary_splitlines",
+     "    for dong in st.split('\\n'):",
+     "    for dong in st.splitlines():"),
 ]
 
 

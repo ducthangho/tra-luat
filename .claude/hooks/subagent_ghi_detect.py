@@ -177,7 +177,7 @@ def _duong_tu_porcelain(dong):
                 p = p[idx+4:]
             else:
                 return None
-    
+
     if p.startswith(b'"'):
         res, end_idx = _consume_c_style_bytes(p)
         if res is None or end_idx != len(p):
@@ -210,7 +210,7 @@ def _van_tay_noi_dung(top, st):
     nam trong danh sach ay: no BAM DUOC, bam theo LINK TARGET (`symlink:<target>`), co y
     khong di theo link."""
     anh_xa, mu = {}, []
-    for dong in st.splitlines():
+    for dong in st.split('\n'):
         if not dong.strip():
             continue
         duong = _duong_tu_porcelain(dong)
@@ -278,8 +278,8 @@ def _bao(ket_qua, ly_do, chi_tiet=None):
 
 def _so(truoc, sau):
     """Tra danh sach dong DELTA. Giu NGUYEN VAN ban ghi, khong rut ve so dem."""
-    a = [x for x in truoc.splitlines() if x.strip()]
-    b = [x for x in sau.splitlines() if x.strip()]
+    a = [x for x in truoc.split('\n') if x.strip()]
+    b = [x for x in sau.split('\n') if x.strip()]
     ta, tb = set(a), set(b)
     return sorted(tb - ta), sorted(ta - tb)
 

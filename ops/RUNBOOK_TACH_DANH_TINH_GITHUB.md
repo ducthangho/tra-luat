@@ -1,5 +1,17 @@
 # Runbook — TÁCH DANH TÍNH GITHUB (nửa NGOÀI kho)
 
+> **ĐÃ RÚT — packet `BO-CONG-DUYET-KHAC-DANH-TINH` (Issue #502), 11-09-2026.**
+>
+> 1. **Rút gì:** cổng `duyet khac danh tinh / cong` (nửa B: `.github/workflows/duyet-khac-danh-tinh.yml`,
+>    `duyet-phan-chung.yml`, `.claude/dev/duyet_danh_tinh.py`, `duyet_danh_tinh_test.py`) đã bị **xoá khỏi kho**
+>    theo chỉ đạo chủ kho *"tôi muốn bỏ phê duyệt khác danh tính"*. Thân tệp phía dưới giữ nguyên làm lịch sử.
+> 2. **Vì sao:** xem `ops/specs/BO-CONG-DUYET-KHAC-DANH-TINH.md` §VÌ SAO — hai PR (#500, #501) merge vào `master`
+>    ngày 11-09-2026 với `cong` ĐỎ ⇒ cổng không chặn gì, chỉ tốn một check đỏ trên mọi PR và mọi push xoá bản duyệt.
+> 3. **Việc của chủ kho ở nửa A (trước trình duyệt, phiên không đọc được):** vào `Settings → Branches` và
+>    `Settings → Rules` của kho; nếu còn required status check `duyet khac danh tinh / cong` thì **gỡ** (context
+>    không còn tồn tại ⇒ `master` kẹt với mọi PR); nếu còn *Require approvals* thì gỡ theo cùng quyết định.
+>    Đường lùi khi `master` kẹt: bước 2 mục "ĐƯỜNG LÙI" bên dưới vẫn đúng.
+
 Packet **#348**. Tệp này là **nửa A**: phần mà phiên Claude **không làm được** và đã đo được
 là không làm được. Nửa B (cổng đo người duyệt khác người tạo PR) nằm trong kho, xem
 `.claude/dev/duyet_danh_tinh.py` và `.github/workflows/duyet-khac-danh-tinh.yml`.

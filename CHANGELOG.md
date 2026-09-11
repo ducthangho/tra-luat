@@ -1,3 +1,85 @@
+# ★ dev-side — r370: hai finding P1 của connector codex trên #514 — một BÁC bằng phản chứng clone nông, một ĐÚNG: `authorization_url` vắng hẳn khỏi land evidence (2026-09-11)
+
+## Bối cảnh — và một lỗi quy trình của chính tôi, ghi trước
+
+#514 (`r368`, ghi sổ #493) merge lúc `20:24:42Z` thành `8802924`. Bỏ draft lúc `20:24:1x` đã **tự
+kích hoạt** connector codex review trên `4965f0a` lúc `20:24:20Z`. Tức tôi merge **22 giây** sau khi
+một lượt review bắt đầu, và review ấy chạy tới `20:39:24Z` — sau merge 15 phút.
+
+Đây là mục *"Gate xanh KHÔNG phải đã được review"* của `CLAUDE.md` (PR #104/#105: hai finding thật
+vào master vì merge trước khi mở phần review), tái phát với một biến thể: lần này review **chưa tồn
+tại** lúc tôi quyết định merge, nó được sinh ra bởi **chính thao tác bỏ draft**. Nên chốt cũ ("đọc
+review trước khi merge") không đủ — phải thêm: **bỏ draft là một hành vi KÍCH HOẠT, không phải một
+thay đổi trạng thái trơ**. Chưa có cổng nào canh; đây là kỷ luật thao tác.
+
+Nội dung `4965f0a` đã qua 11 lượt cross-review codex (lượt 11 `approve`, 0 P1/0 P2/0 P3), nên việc
+merge không phải là bỏ qua review — nhưng connector chấm bằng prompt khác và **tìm ra một thứ đúng
+mà 11 lượt kia không tìm ra**. Đó là lý do mục này tồn tại.
+
+## Finding 1 — BÁC, và nó tái hiện đúng bẫy clone nông của `CLAUDE.md`
+
+Lời khai của connector: trên một checkout độc lập của `4965f0a`, `98f931bc3cd5…` không phải tổ tiên
+của HEAD, nên `ops/bien_nhan_v2.py` báo **cả 17 receipt mới là VI PHẠM**, và `canonical_ancestry` của
+chúng vô hiệu hoá cổng receipt.
+
+Hai clone dựng từ cùng một nguồn, trong một lệnh, cùng SHA `8802924`:
+
+| clone | `merge-base --is-ancestor 98f931bc… HEAD` | `bien_nhan_v2` |
+|---|---|---|
+| đầy đủ | **rc=0** — LÀ tổ tiên | 98 ĐẠT v2 · **0 vi phạm** · **0 KHÔNG ĐO ĐƯỢC** · tổng 151 |
+| `--depth=1 --branch master` | `fatal: Not a valid commit name`, **rc=128** | 98 ĐẠT v2 · 0 vi phạm · **196 KHÔNG ĐO ĐƯỢC** ⇒ `TỔNG: KHÔNG ĐO ĐƯỢC` |
+
+Hai sai độc lập chồng lên nhau trong một câu:
+
+1. **Nguồn**: `--depth` làm hỏng phép hỏi lịch sử — đúng mục *"cắt độ sâu làm hỏng phép hỏi LỊCH SỬ"*
+   (phiên `tra-luat-ae` mất 2,5h vì nó). Lần này nạn nhân là một reviewer tự động.
+2. **Phân loại**: kể cả ở clone nông, cổng **không** nói `vi phạm` — nó nói **`KHÔNG ĐO ĐƯỢC`**, đúng
+   doctrine ba trạng thái. Connector gộp trạng thái thứ ba vào "violation", tức `None → False`.
+
+Điều đáng giữ không phải "connector sai", mà là: **cổng đã phân loại ĐÚNG và vẫn bị đọc SAI.** Một
+trạng thái thứ ba chỉ cứu được người đọc nó như trạng thái thứ ba.
+
+## Finding 2 — ĐÚNG. `authorization_url` vắng HẲN khỏi `ops/land/pr493-land-evidence.yaml`
+
+`docs/PROTOCOL_DA_PHIEN.md:478` liệt `authorization_url: <durable-url>` trong schema land evidence,
+và cùng mục nói thẳng: *"chat transcript hoặc lời tự khai không thay thế GitHub object, commit và
+workflow run."*
+
+Đo tiền lệ trên `8802924` — **8/8 tệp `ops/land/*.yaml` khác đều CÓ khoá này**: 7 tệp trỏ một URL
+`#pullrequestreview-…` bền (`pr468` `pr477` `pr478` `pr480` `pr487` `pr489` `pr491`), và `plat-x8`
+ghi `authorization_url: null`. Tệp của #493 là **tệp duy nhất bỏ hẳn khoá**.
+
+Khối `uy_quyen` của nó CÓ khai trung thực *"KHÔNG có hiện vật GitHub cho câu này"* — nhưng khai trung
+thực về một khoá thiếu **không phải là có khoá ấy**, và `khong_do_duoc` cũng không liệt nó. Tiền lệ
+`plat-x8` cho thấy quy ước đúng là **viết khoá ra và để `null`**: có khoá thì khe hở ĐO ĐƯỢC, bỏ khoá
+thì nó vô hình.
+
+**Vá**: ghi `authorization_url: null` + một mục `khong_do_duoc` + chú thích ngay tại khoá. **KHÔNG bịa
+URL**: uỷ quyền cho `99aef14` là chỉ thị trong phiên; dựng một comment "uỷ quyền" trên #493 sau khi nó
+đã merge là **bịa provenance**, không phải vá.
+
+## Vì sao nó lọt — và đây mới là nợ
+
+**KHÔNG cổng nào đọc `ops/land/**`.** Đo trên `8802924`: grep `ops/*.py` · `.claude/dev/*.py` ·
+`scripts/tl_core/*.py` · `.github/workflows/*.yml` cho `ops/land` và `land_operator` ⇒ **0 nơi**.
+
+Nên một tệp land evidence thiếu hẳn một khoá schema bắt buộc đi lọt qua **gate PR** (44/44), **gate
+master** (44/44 chân ubuntu), và **11 lượt cross-review codex** — trong đó lượt 11 có hẳn một nhiệm vụ
+*"tự nhất quán của land evidence"* và báo *"không mâu thuẫn"*. Cả 11 lượt đều so tệp với CHÍNH NÓ và
+với Git; **không lượt nào so tệp với SCHEMA trong protocol**, cũng không lượt nào so với 8 tệp cùng
+loại đã có trong kho. Nợ ghi dưới slug `khong-cong-nao-doc-ops-land`.
+
+Cùng họ *"cổng vắng mặt trông giống cổng xanh"*, nhưng chật hơn một bậc: ở đây **không có cổng nào để
+mà vắng mặt** — chưa ai viết.
+
+## Gate hậu-merge của #514 trên master (`8802924`)
+
+- `gate (ubuntu-latest)`: **44/44 bước = 40 thành công + 4 không chạy theo điều kiện**, 0 thất bại,
+  0 bị huỷ. 20:24:49Z → 20:46:34Z. Bốn bước không chạy: `PR head contains required EOL base`
+  (`if: github.event_name == 'pull_request'`), `gate lifecycle selftest` (nền không có cgroup), và
+  hai biến thể lane PR nhường chỗ cho biến thể lane LAND.
+- `thu-hoi` trên `4965f0a`: thành công.
+
 # ★ dev-side — r368: ghi sổ #493 — 17 verdict codex + 17 biên nhận v2 vào `ops/reviews`, land evidence, và một lời khai `effort` bị PHÉP ĐO bác (2026-09-11)
 
 Nối tiếp `r364` (chốt tới `c00c88a`, #500). Kể từ chốt ấy master nhận **bốn** merge: #501 · #497 · #506 ·

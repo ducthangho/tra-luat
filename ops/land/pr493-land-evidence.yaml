@@ -18,6 +18,13 @@ recorded_by: claude
 # ─────────────────────────── MERGE ───────────────────────────
 authorized_head_sha: 99aef141796ebce7044c9f5c0c8a1a3b3d673d8e
 approver: ducthangho
+# r370 (finding P1 của connector codex trên PR #514, ĐÚNG): schema land evidence ở
+# `docs/PROTOCOL_DA_PHIEN.md:478` đòi khoá này, và §ấy nói thẳng "chat transcript hoặc lời tự
+# khai không thay thế GitHub object". Bản đầu BỎ HẲN khoá — 8/8 tệp land khác đều có nó
+# (7 trỏ `pullrequestreview` bền, `plat-x8` ghi `null`), nên tệp này là tệp duy nhất thiếu.
+# `null` chứ KHÔNG bịa URL: uỷ quyền cho `99aef14` là chỉ thị trong phiên, không có object
+# GitHub nào; dựng một comment "uỷ quyền" sau khi #493 đã merge là BỊA PROVENANCE.
+authorization_url: null
 merge_method: merge
 merge_commit: e82af37fe66629d5378ac56fc689e24db26594fa
 merged_at: '2026-09-11T07:58:42Z'
@@ -260,6 +267,11 @@ khong_do_duoc:
     ly_do: 'xem `cross_review.duong_review_thu_ba.vi_sao_khong_do_duoc`.'
   - muc: 'Nội dung `run.json` và `stderr.log` của 17 lượt'
     ly_do: 'Cả hai NGOÀI kho. Với người đọc kho, mọi scalar runtime là ATTESTATION.'
+  - muc: 'URL uỷ quyền bền cho `99aef14` (`authorization_url`)'
+    ly_do: >-
+      Chỉ thị chọn phương án 2 nằm trong phiên điều phối, KHÔNG có review/comment GitHub nào mang
+      nó. Nay ghi `authorization_url: null` thay vì bỏ khoá — bỏ khoá làm khe hở VÔ HÌNH với cả
+      người đọc lẫn máy. Không dựng hiện vật sau sự việc để lấp ô trống.
   - muc: 'Byte thật của comment trên GitHub'
     ly_do: >-
       Đường ĐỌC của MCP chuẩn hoá thực thể HTML trong thân issue/comment, và container không có
@@ -290,6 +302,16 @@ no_ky_thuat:
       (`tl selftest` có bằng chứng exact-identity, và `release-verify strict` lane LAND); cắt cả
       chân là mất luôn hai bước đó. Phát biểu rộng hơn phép đo chính là finding mà cross-review
       lượt 1 và lượt 2 đã chấm ở đúng chỗ này.
+    chua_co_packet: true
+  - slug: khong-cong-nao-doc-ops-land
+    trang_thai: MOI
+    mo_ta: >-
+      KHÔNG cổng nào đọc `ops/land/**`. Đo 11-09-2026 trên `8802924`: grep `ops/*.py`,
+      `.claude/dev/*.py`, `scripts/tl_core/*.py`, `.github/workflows/*.yml` cho `ops/land` và
+      `land_operator` ⇒ 0 nơi. Vì vậy một tệp land evidence THIẾU HẲN một khoá schema bắt buộc
+      (`authorization_url`, `docs/PROTOCOL_DA_PHIEN.md:478`) đi qua được cả gate PR lẫn gate
+      master lẫn 11 lượt cross-review; thứ bắt được nó là connector codex, và chỉ SAU khi merge.
+      Cùng họ "cổng vắng mặt trông giống cổng xanh".
     chua_co_packet: true
   - slug: quyet-dinh-dong-vong-lap-review-chua-vao-doctrine
     trang_thai: MOI

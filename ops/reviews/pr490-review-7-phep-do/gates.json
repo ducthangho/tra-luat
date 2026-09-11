@@ -1,0 +1,259 @@
+[
+  {
+    "id": "01e7f77-receipt",
+    "sha": "01e7f77d707cb093b5ba6d9b9d8577f40d025488",
+    "cwd": "/tmp/claude-0/-home-user-tra-luat/a511f798-5cbd-59bf-8659-0096717636ac/scratchpad/goi-pr490-l7/phep-do/replay",
+    "argv": [
+      "python3",
+      "ops/bien_nhan_v2.py",
+      "--root",
+      "."
+    ],
+    "rc": 0,
+    "elapsed_seconds": 1.227921724319458,
+    "stdout": "logs/01e7f77-receipt.stdout",
+    "stderr": "logs/01e7f77-receipt.stderr"
+  },
+  {
+    "id": "01e7f77-receipt-test",
+    "sha": "01e7f77d707cb093b5ba6d9b9d8577f40d025488",
+    "cwd": "/tmp/claude-0/-home-user-tra-luat/a511f798-5cbd-59bf-8659-0096717636ac/scratchpad/goi-pr490-l7/phep-do/replay",
+    "argv": [
+      "python3",
+      "ops/bien_nhan_v2_test.py"
+    ],
+    "rc": 0,
+    "elapsed_seconds": 51.54181981086731,
+    "stdout": "logs/01e7f77-receipt-test.stdout",
+    "stderr": "logs/01e7f77-receipt-test.stderr"
+  },
+  {
+    "id": "01e7f77-lease-test",
+    "sha": "01e7f77d707cb093b5ba6d9b9d8577f40d025488",
+    "cwd": "/tmp/claude-0/-home-user-tra-luat/a511f798-5cbd-59bf-8659-0096717636ac/scratchpad/goi-pr490-l7/phep-do/replay",
+    "argv": [
+      "python3",
+      "ops/lease_publish_test.py"
+    ],
+    "rc": 0,
+    "elapsed_seconds": 58.026161432266235,
+    "stdout": "logs/01e7f77-lease-test.stdout",
+    "stderr": "logs/01e7f77-lease-test.stderr"
+  },
+  {
+    "id": "01e7f77-doctrine",
+    "sha": "01e7f77d707cb093b5ba6d9b9d8577f40d025488",
+    "cwd": "/tmp/claude-0/-home-user-tra-luat/a511f798-5cbd-59bf-8659-0096717636ac/scratchpad/goi-pr490-l7/phep-do/replay",
+    "argv": [
+      "python3",
+      ".claude/dev/packet_loop.py",
+      "doctrine-scan"
+    ],
+    "rc": 0,
+    "elapsed_seconds": 0.16296148300170898,
+    "stdout": "logs/01e7f77-doctrine.stdout",
+    "stderr": "logs/01e7f77-doctrine.stderr"
+  },
+  {
+    "id": "01e7f77-adr",
+    "sha": "01e7f77d707cb093b5ba6d9b9d8577f40d025488",
+    "cwd": "/tmp/claude-0/-home-user-tra-luat/a511f798-5cbd-59bf-8659-0096717636ac/scratchpad/goi-pr490-l7/phep-do/replay",
+    "argv": [
+      "python3",
+      ".claude/dev/packet_loop.py",
+      "adr-song"
+    ],
+    "rc": 0,
+    "elapsed_seconds": 0.08616876602172852,
+    "stdout": "logs/01e7f77-adr.stdout",
+    "stderr": "logs/01e7f77-adr.stderr"
+  },
+  {
+    "id": "01e7f77-packet-test",
+    "sha": "01e7f77d707cb093b5ba6d9b9d8577f40d025488",
+    "cwd": "/tmp/claude-0/-home-user-tra-luat/a511f798-5cbd-59bf-8659-0096717636ac/scratchpad/goi-pr490-l7/phep-do/replay",
+    "argv": [
+      "python3",
+      ".claude/dev/packet_loop_test.py"
+    ],
+    "rc": 0,
+    "elapsed_seconds": 191.71989154815674,
+    "stdout": "logs/01e7f77-packet-test.stdout",
+    "stderr": "logs/01e7f77-packet-test.stderr"
+  },
+  {
+    "id": "01e7f77-doc-claims",
+    "sha": "01e7f77d707cb093b5ba6d9b9d8577f40d025488",
+    "cwd": "/tmp/claude-0/-home-user-tra-luat/a511f798-5cbd-59bf-8659-0096717636ac/scratchpad/goi-pr490-l7/phep-do/replay",
+    "argv": [
+      "python3",
+      "scripts/tl.py",
+      "doc-claims-check",
+      "--strict",
+      "--json"
+    ],
+    "rc": 0,
+    "elapsed_seconds": 2.6140308380126953,
+    "stdout": "logs/01e7f77-doc-claims.stdout",
+    "stderr": "logs/01e7f77-doc-claims.stderr"
+  },
+  {
+    "id": "01e7f77-shellcheck",
+    "sha": "01e7f77d707cb093b5ba6d9b9d8577f40d025488",
+    "cwd": "/tmp/claude-0/-home-user-tra-luat/a511f798-5cbd-59bf-8659-0096717636ac/scratchpad/goi-pr490-l7/phep-do/replay",
+    "argv": [
+      "shellcheck",
+      "--format=json",
+      "ops/dung_goi_review.sh"
+    ],
+    "rc": 0,
+    "elapsed_seconds": 0.11801338195800781,
+    "stdout": "logs/01e7f77-shellcheck.stdout",
+    "stderr": "logs/01e7f77-shellcheck.stderr"
+  },
+  {
+    "id": "efa397e-receipt",
+    "sha": "efa397eb2515658a1e3e9b4cdfd6e887b492b957",
+    "cwd": "/tmp/claude-0/-home-user-tra-luat/a511f798-5cbd-59bf-8659-0096717636ac/scratchpad/goi-pr490-l7/phep-do/replay",
+    "argv": [
+      "python3",
+      "ops/bien_nhan_v2.py",
+      "--root",
+      "."
+    ],
+    "rc": 0,
+    "elapsed_seconds": 1.1402802467346191,
+    "stdout": "logs/efa397e-receipt.stdout",
+    "stderr": "logs/efa397e-receipt.stderr"
+  },
+  {
+    "id": "efa397e-doctrine",
+    "sha": "efa397eb2515658a1e3e9b4cdfd6e887b492b957",
+    "cwd": "/tmp/claude-0/-home-user-tra-luat/a511f798-5cbd-59bf-8659-0096717636ac/scratchpad/goi-pr490-l7/phep-do/replay",
+    "argv": [
+      "python3",
+      ".claude/dev/packet_loop.py",
+      "doctrine-scan"
+    ],
+    "rc": 0,
+    "elapsed_seconds": 0.17342829704284668,
+    "stdout": "logs/efa397e-doctrine.stdout",
+    "stderr": "logs/efa397e-doctrine.stderr"
+  },
+  {
+    "id": "efa397e-adr",
+    "sha": "efa397eb2515658a1e3e9b4cdfd6e887b492b957",
+    "cwd": "/tmp/claude-0/-home-user-tra-luat/a511f798-5cbd-59bf-8659-0096717636ac/scratchpad/goi-pr490-l7/phep-do/replay",
+    "argv": [
+      "python3",
+      ".claude/dev/packet_loop.py",
+      "adr-song"
+    ],
+    "rc": 0,
+    "elapsed_seconds": 0.11941075325012207,
+    "stdout": "logs/efa397e-adr.stdout",
+    "stderr": "logs/efa397e-adr.stderr"
+  },
+  {
+    "id": "efa397e-doc-claims",
+    "sha": "efa397eb2515658a1e3e9b4cdfd6e887b492b957",
+    "cwd": "/tmp/claude-0/-home-user-tra-luat/a511f798-5cbd-59bf-8659-0096717636ac/scratchpad/goi-pr490-l7/phep-do/replay",
+    "argv": [
+      "python3",
+      "scripts/tl.py",
+      "doc-claims-check",
+      "--strict",
+      "--json"
+    ],
+    "rc": 0,
+    "elapsed_seconds": 2.3999722003936768,
+    "stdout": "logs/efa397e-doc-claims.stdout",
+    "stderr": "logs/efa397e-doc-claims.stderr"
+  },
+  {
+    "id": "c0a5cbe-receipt",
+    "sha": "c0a5cbe89a90588115262e1a2c3ac84cbd98be9e",
+    "cwd": "/tmp/claude-0/-home-user-tra-luat/a511f798-5cbd-59bf-8659-0096717636ac/scratchpad/goi-pr490-l7/phep-do/replay",
+    "argv": [
+      "python3",
+      "ops/bien_nhan_v2.py",
+      "--root",
+      "."
+    ],
+    "rc": 0,
+    "elapsed_seconds": 1.1221916675567627,
+    "stdout": "logs/c0a5cbe-receipt.stdout",
+    "stderr": "logs/c0a5cbe-receipt.stderr"
+  },
+  {
+    "id": "c0a5cbe-lease-test",
+    "sha": "c0a5cbe89a90588115262e1a2c3ac84cbd98be9e",
+    "cwd": "/tmp/claude-0/-home-user-tra-luat/a511f798-5cbd-59bf-8659-0096717636ac/scratchpad/goi-pr490-l7/phep-do/replay",
+    "argv": [
+      "python3",
+      "ops/lease_publish_test.py"
+    ],
+    "rc": 0,
+    "elapsed_seconds": 60.48381972312927,
+    "stdout": "logs/c0a5cbe-lease-test.stdout",
+    "stderr": "logs/c0a5cbe-lease-test.stderr"
+  },
+  {
+    "id": "c0a5cbe-doctrine",
+    "sha": "c0a5cbe89a90588115262e1a2c3ac84cbd98be9e",
+    "cwd": "/tmp/claude-0/-home-user-tra-luat/a511f798-5cbd-59bf-8659-0096717636ac/scratchpad/goi-pr490-l7/phep-do/replay",
+    "argv": [
+      "python3",
+      ".claude/dev/packet_loop.py",
+      "doctrine-scan"
+    ],
+    "rc": 0,
+    "elapsed_seconds": 0.1625196933746338,
+    "stdout": "logs/c0a5cbe-doctrine.stdout",
+    "stderr": "logs/c0a5cbe-doctrine.stderr"
+  },
+  {
+    "id": "c0a5cbe-adr",
+    "sha": "c0a5cbe89a90588115262e1a2c3ac84cbd98be9e",
+    "cwd": "/tmp/claude-0/-home-user-tra-luat/a511f798-5cbd-59bf-8659-0096717636ac/scratchpad/goi-pr490-l7/phep-do/replay",
+    "argv": [
+      "python3",
+      ".claude/dev/packet_loop.py",
+      "adr-song"
+    ],
+    "rc": 0,
+    "elapsed_seconds": 0.113128662109375,
+    "stdout": "logs/c0a5cbe-adr.stdout",
+    "stderr": "logs/c0a5cbe-adr.stderr"
+  },
+  {
+    "id": "c0a5cbe-doc-claims",
+    "sha": "c0a5cbe89a90588115262e1a2c3ac84cbd98be9e",
+    "cwd": "/tmp/claude-0/-home-user-tra-luat/a511f798-5cbd-59bf-8659-0096717636ac/scratchpad/goi-pr490-l7/phep-do/replay",
+    "argv": [
+      "python3",
+      "scripts/tl.py",
+      "doc-claims-check",
+      "--strict",
+      "--json"
+    ],
+    "rc": 0,
+    "elapsed_seconds": 2.475816488265991,
+    "stdout": "logs/c0a5cbe-doc-claims.stdout",
+    "stderr": "logs/c0a5cbe-doc-claims.stderr"
+  },
+  {
+    "id": "c0a5cbe-shellcheck",
+    "sha": "c0a5cbe89a90588115262e1a2c3ac84cbd98be9e",
+    "cwd": "/tmp/claude-0/-home-user-tra-luat/a511f798-5cbd-59bf-8659-0096717636ac/scratchpad/goi-pr490-l7/phep-do/replay",
+    "argv": [
+      "shellcheck",
+      "--format=json",
+      "ops/dung_goi_review.sh"
+    ],
+    "rc": 0,
+    "elapsed_seconds": 0.1075139045715332,
+    "stdout": "logs/c0a5cbe-shellcheck.stdout",
+    "stderr": "logs/c0a5cbe-shellcheck.stderr"
+  }
+]

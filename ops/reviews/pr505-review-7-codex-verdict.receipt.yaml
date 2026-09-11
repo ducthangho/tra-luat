@@ -64,8 +64,10 @@ model_reviewer_identity:
   nguon_cac_scalar_tren: >-
     ĐỐI CHIẾU ĐƯỢC với run.json (ngoài kho, `scratchpad/runs/7f38b236/`): run_id/short_id, prompt_sha256, bat_dau_utc,
     ket_thuc_utc, thoi_luong_giay, ma_thoat, trang_thai, stdout_byte/sha256, stderr_byte/sha256, worktree_sach, head.
-    Dòng cuối stdout `XONG VERDICT sha256=43b157ff…` khớp băm tệp. model_yeu_cau, effort, transport và
-    so_lan_chet_truoc_khi_xong là ATTESTATION điều phối, KHÔNG có khoá tương ứng trong run.json.
+    Dòng cuối stdout `XONG VERDICT sha256=43b157ff…` khớp băm tệp. transport: machine CÓ trong run.json.
+    model_yeu_cau và effort có trong header stderr.log (cấu hình yêu cầu, không chứng thực model thực chạy),
+    KHÔNG có khoá tương ứng trong run.json. so_lan_chet_truoc_khi_xong là ATTESTATION điều phối,
+    không có khoá hoặc lịch sử retry tương ứng trong run.json.
 
 nang_luc_do_cua_goi:
   mirror: 'clone mới từ guong.git (fetch sau push 8726a1c), detached 8726a1c, core.abbrev 7, không nông; nguon/ có spec M9-FETCH-AUTH.md (sha b8200141…) + actionlint 1.7.7 + VERDICT/HINT các lượt trước của chính reviewer; EVIDENCE.md bổ sung từng lượt'

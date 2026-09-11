@@ -65,8 +65,10 @@ model_reviewer_identity:
   nguon_cac_scalar_tren: >-
     ĐỐI CHIẾU ĐƯỢC với run.json (ngoài kho, `scratchpad/runs/28f02cda/`): run_id/short_id, prompt_sha256, bat_dau_utc,
     ket_thuc_utc, thoi_luong_giay, ma_thoat, trang_thai, stdout_byte/sha256, stderr_byte/sha256, worktree_sach, head.
-    Dòng cuối stdout `XONG VERDICT sha256=a0bb40dc…` khớp băm tệp. model_yeu_cau, effort, transport và
-    so_lan_chet_truoc_khi_xong là ATTESTATION điều phối, KHÔNG có khoá tương ứng trong run.json.
+    Dòng cuối stdout `XONG VERDICT sha256=a0bb40dc…` khớp băm tệp. transport: machine CÓ trong run.json.
+    model_yeu_cau và effort có trong header stderr.log (cấu hình yêu cầu, không chứng thực model thực chạy),
+    KHÔNG có khoá tương ứng trong run.json. so_lan_chet_truoc_khi_xong là ATTESTATION điều phối,
+    không có khoá hoặc lịch sử retry tương ứng trong run.json.
 
 nang_luc_do_cua_goi:
   mirror: 'clone mới từ guong.git (fetch sau push 62c299a), detached 62c299a, core.abbrev 7, không nông; nguon/ có spec M9-FETCH-AUTH.md (sha b8200141…) + actionlint 1.7.7 + VERDICT/HINT các lượt trước của chính reviewer; EVIDENCE.md bổ sung từng lượt'
@@ -98,8 +100,8 @@ verdict_usage_caveats:
     muc: P2
     mo_ta: >-
       Verdict chấm head `62c299a` (round 1, gen 1 lượt 1) với 1 P1 / 1 P2 — finding `t152-khong-do-header-hieu-luc`,
-      `t152-khong-khoa-dang-ky-mask`. Executor áp NGUYÊN HINT của chính verdict này tại `6254570`; verdict round 2 đối
-      chiếu từng hunk: ĐÃ VÁ THẬT. Mọi finding của 9 vòng đều ở ca test t152; workflow 11 dòng KHÔNG đổi từ round 1
+      `t152-khong-khoa-dang-ky-mask`. Executor áp nguyên LOGIC HINT tại `6254570`, riêng docstring t152 khác 6 dòng; verdict round 2 đối
+      chiếu byte ngoài docstring: ĐÃ VÁ THẬT. Mọi finding của 9 vòng đều ở ca test t152; workflow 11 dòng KHÔNG đổi từ round 1
       (sha256 184a54a6…).
     phai_lam_gi_khi_chay_lai: >-
       Đọc verdict này làm NGUỒN finding, round 2 làm chốt đóng. Số mutant/tín dụng trong tệp là của head `62c299a`;

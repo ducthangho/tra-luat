@@ -30,7 +30,7 @@ Git config thật, token giả, không mạng.
 
 ```
 git diff --shortstat fa717ee..fe05fa6        ⇒  2 files changed, 80 insertions(+)
-git diff --numstat 27c413c3 fe05fa6 -- <2 tệp>   ⇒  11/0 workflow · 69/0 test  (= +80/−0, đúng trần A4 ở MỌI head)
+git diff --numstat 27c413c3 fe05fa6 -- <2 tệp>   ⇒  11/0 workflow · 69/0 test  (= +80/−0 ở cây cuối; head 1 +61/−0, head 2 +79/−0; mọi head không vượt trần 80)
 git rev-list --count --first-parent fa717ee..fe05fa6 ⇒ 1 ; --count ⇒ 11 (10 commit nhánh + merge commit)
 git log -1 --format=%P fe05fa6               ⇒  fa717ee de49fa0   (merge commit, KHÔNG squash)
 ```
@@ -54,28 +54,28 @@ state-dir mới `.claude/.packet_state/gen{2,3,4}/`.
 | 7 | 3·1 | `8726a1c` | `changes_requested` | 0/1 | `t152-khong-khoa-nguon-token-trong-env` | m16 (env TL_TOKEN rỗng) | `7f38b236` · 867 |
 | 8 | 3·2 | `81af1c9` | `changes_requested` | 0/1 | `t152-bo-sot-header-env-con-sau-fetch` | m22 (export VALUE_0 riêng) | `6b6e237b` · 991 |
 | 9 | 3·3 | `3ae4f61` | `changes_requested` | 0/1 | `t152-fixture-bo-sot-token-lan-hoa-thuong` | m23 (`${TL_TOKEN,,}`) | `1f427b9d` · 969 |
-| 10 | 4·1 | `de49fa0` | **`approve`** | 0/0 | — (NỢ GHI SANG #499: rỗng) | m1–m34: 33 GIẾT / 1 SỐNG hợp lệ (m17) | `cb013b5c` · 940 |
+| 10 | 4·1 | `de49fa0` | **`approve`** | 0/0 | — (không có P2 fixture mới; A3/M3 vẫn mở) | m1–m34: 33 GIẾT / 1 SỐNG hợp lệ (m17) | `cb013b5c` · 940 |
 
-Mỗi vòng reviewer xác nhận finding vòng trước **ĐÃ VÁ THẬT** (áp HINT lên test cũ trùng byte HEAD), trừ round 6 xếp HINT
+Mỗi vòng reviewer xác nhận finding vòng trước **ĐÃ VÁ THẬT** (HINT 2–9 trùng byte toàn tệp; HINT 1 khớp ngoài docstring), trừ round 6 xếp HINT
 round 5 là *"vá sinh lỗi mới trong độ phủ; riêng nhánh wrap đã vá thật"* — reviewer tự nhận fixture của mình làm mất
-nhánh padding. **Cả 9 finding đều ở ca test t152; workflow 11 dòng không đổi từ round 1** (sha256 `184a54a6…` ở cả 10
-verdict). Executor áp NGUYÊN mọi HINT, không sửa lệch; suite 147/147 (`AL_VER=1.7.7`), actionlint 1.7.7 + ShellCheck
+nhánh padding. **Cả 11 finding (4 P1 + 7 P2) của 9 vòng đều ở ca test t152; workflow 11 dòng không đổi từ round 1** (sha256 `184a54a6…` ở cả 10
+verdict). Executor giữ nguyên logic mọi HINT; riêng HINT 1 có sửa docstring như verdict 2 ghi; suite 147/147 (`AL_VER=1.7.7`), actionlint 1.7.7 + ShellCheck
 0.9.0 rc=0 ở mọi head. Verdict nguyên byte + biên nhận v2: `ops/reviews/pr505-review-{1..10}-codex-verdict.md`
 (+ `.receipt.yaml`), neo blob `9dc8460`.
 
 ## Vì sao 4 generation, và điều kiện dừng
 
-Sáu vòng liên tiếp (3→9) là chuỗi *"mutant thứ N+1 vào encoder/fixture/env"* — không có điểm dừng tự nhiên, luôn dựng được
-một biến đổi bytes nữa. Handoff #503 comment 5632869731 nêu thẳng; chủ kho chọn A: gen 4 áp HINT round 9 (1 literal) +
+Bảy vòng liên tiếp (3→9) tiếp tục phát hiện mutant mới ngoài tập đã khoá trong t152;
+đây là lịch sử tập mutant đã thử, không chứng minh luôn tìm được mutant mới. Handoff #503 comment 5632869731 nêu thẳng; chủ kho chọn A: gen 4 áp HINT round 9 (1 literal) +
 1 vòng, kèm điều kiện dừng ghi vào lease (`dieu_kien_dung`) và vào prompt review. Round 10 **không dùng tới** điều kiện
 nới: 0 finding ở cả hai nhóm. Đây là luật của một generation, không phải tiền lệ "P2 fixture không bao giờ chặn".
 
 ## Phép đo bị bytecode cũ đánh lừa — ghi để hồ sơ không mang số sai
 
-HINT round 9 đổi 1 literal **cùng kích thước tệp** (304776 B). Lần đo đầu ở bản sao cho *"m23 SỐNG sau HINT"* vì CPython
+HINT round 9 đổi 1 literal **cùng kích thước tệp** (304776 B). THUẬT LẠI executor: lần đo đầu ở bản sao cho *"m23 SỐNG sau HINT"* vì CPython
 dùng `.pyc` cũ (mtime giây + size không đổi; patch trong cùng giây với lần import trước) — đúng bài học `.pyc` trong
-`CLAUDE.md`. Xoá `__pycache__` + `python3 -B` ⇒ m23 ĐỎ; reviewer round 10 cũng chạy `-B` và ghi rõ kích thước không
-đổi. Đính chính ngay trong #503 comment 5632869731; biên nhận round 9 mang cảnh báo
+`CLAUDE.md`. Theo lời executor, xoá `__pycache__` + `python3 -B` ⇒ m23 ĐỎ; reviewer round 10 ghi kích thước không
+đổi và chạy `-B`, nhưng không xác minh độc lập sự cố cache ban đầu. `-B` không ngăn đọc `.pyc` có sẵn: phải xoá cache cũ trước. Đính chính ngay trong #503 comment 5632869731; biên nhận round 9 mang cảnh báo
 `HINT-CUNG-KICH-THUOC-TEP-bytecode-cu-lam-phep-do-sai`.
 
 ## Land, các PR khác của đợt, A3
@@ -94,11 +94,17 @@ khi preflight qua (đo trên #475 head `586e099` lúc 09:13Z — chính lỗi C2
 
 ## Đếm hình dạng lỗi (chép từ spec) và nợ
 
-- "Lời khai rộng hơn phép đo" của phiên điều phối: prompt review ghi `origin/master` = `26e2555` khi thực tế đã `e82af37`
-  (round 7/8/10 bắt); mô tả *"27 commit chỉ chạm reviews/CHANGELOG/manifest"* thiếu `ops/cong_cu.py` (round 1). Không
-  chạm write set, không đổi kết luận — ghi để đếm: **2**.
+- "Lời khai rộng hơn phép đo" của phiên điều phối: round 7, prompt ghi `origin/master` = `26e2555`, đo được `e82af37`;
+  round 8 đã khớp `e82af37`; round 10 prompt ghi `e82af37`, đo được `0bf0ba7`. Mô tả *"27 commit chỉ chạm
+  reviews/CHANGELOG/manifest"* thiếu `ops/cong_cu.py` (round 1). Không chạm write set, không đổi kết luận — **2 loại
+  sai lệch** (mốc master; danh sách tệp), không phải hai lần xảy ra.
 - Nợ mở: A3/M3 (đo ở PR này); P3 `tham-chieu-tai-lieu-song-con-sot` (r365) vẫn mở; WINDOWS-LEASE-SUITE (#504) chờ cấp
   lease — cùng tệp `ops/lease_publish_test.py`, nay đã rảnh.
+- Cross-review HỒ SƠ này (codex khác nền, run `5c3209aa`, 12:30–13:02Z 11-09-2026, head `3349c8b`): `changes_requested`
+  0 P1 / 5 P2 / 1 P3 — tổng hợp trượt số (9→11 finding, 6→7 vòng), HINT 1 khớp ngoài docstring, `transport` CÓ trong
+  run.json, `-B` không khử `.pyc` có sẵn, mục NỢ round 10 không rỗng (A3/M3), bảng đo 17–25 hàng. Verdict sha256
+  `a1bd6de0…`, HINT `9212942d…` áp NGUYÊN 20 hunk (12 tệp) + tái sinh manifest; verdict/biên nhận của lượt này vào kho
+  ở PR hồ sơ kế tiếp (tiền lệ r364). 10 verdict PR #505 KHÔNG đổi byte.
 
 ## Gate tại chỗ (head hồ sơ, Linux)
 

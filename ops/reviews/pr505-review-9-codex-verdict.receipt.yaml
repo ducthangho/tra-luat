@@ -64,8 +64,10 @@ model_reviewer_identity:
   nguon_cac_scalar_tren: >-
     ĐỐI CHIẾU ĐƯỢC với run.json (ngoài kho, `scratchpad/runs/1f427b9d/`): run_id/short_id, prompt_sha256, bat_dau_utc,
     ket_thuc_utc, thoi_luong_giay, ma_thoat, trang_thai, stdout_byte/sha256, stderr_byte/sha256, worktree_sach, head.
-    Dòng cuối stdout `XONG VERDICT sha256=8623f20b…` khớp băm tệp. model_yeu_cau, effort, transport và
-    so_lan_chet_truoc_khi_xong là ATTESTATION điều phối, KHÔNG có khoá tương ứng trong run.json.
+    Dòng cuối stdout `XONG VERDICT sha256=8623f20b…` khớp băm tệp. transport: machine CÓ trong run.json.
+    model_yeu_cau và effort có trong header stderr.log (cấu hình yêu cầu, không chứng thực model thực chạy),
+    KHÔNG có khoá tương ứng trong run.json. so_lan_chet_truoc_khi_xong là ATTESTATION điều phối,
+    không có khoá hoặc lịch sử retry tương ứng trong run.json.
 
 nang_luc_do_cua_goi:
   mirror: 'clone mới từ guong.git (fetch sau push 3ae4f61), detached 3ae4f61, core.abbrev 7, không nông; nguon/ có spec M9-FETCH-AUTH.md (sha b8200141…) + actionlint 1.7.7 + VERDICT/HINT các lượt trước của chính reviewer; EVIDENCE.md bổ sung từng lượt'
@@ -106,13 +108,14 @@ verdict_usage_caveats:
   - id: HINT-CUNG-KICH-THUOC-TEP-bytecode-cu-lam-phep-do-sai
     muc: P2
     mo_ta: >-
-      HINT round 9 đổi 1 literal CÙNG KÍCH THƯỚC tệp (304776 B). Lần đo đầu của executor ở bản sao cho 'm23 SỐNG sau
+      HINT round 9 đổi 1 literal CÙNG KÍCH THƯỚC tệp (304776 B). THUẬT LẠI executor: lần đo đầu ở bản sao cho 'm23 SỐNG sau
       HINT' vì CPython dùng `.pyc` cũ (mtime giây + size không đổi, patch trong cùng giây với lần import trước) — đúng
       bài học `.pyc` trong CLAUDE.md. Xoá `__pycache__` + `python3 -B` ⇒ m23 ĐỎ; reviewer round 10 cũng chạy `-B` và
       ghi rõ kích thước không đổi.
     phai_lam_gi_khi_chay_lai: >-
-      Mọi phép đo trước/sau một HINT cùng kích thước tệp phải xoá `__pycache__` hoặc chạy `python3 -B`; con số 'SỐNG
-      sau HINT' ở #503 comment 5632869731 đã được đính chính ngay trong cùng comment.
+      Mọi phép đo trước/sau một HINT cùng kích thước tệp phải xoá cache bytecode cũ trước khi nạp lại;
+      có thể chạy `python3 -B` sau đó để không ghi cache mới. Riêng `-B` KHÔNG ngăn đọc `.pyc` đã tồn tại.
+      Việc đính chính con số 'SỐNG sau HINT' ở #503 comment 5632869731 là thuật lại executor, chưa xác minh độc lập.
 
 khong_do_duoc:
   - 'Model build và danh tính model thật của codex exec: không có modelUsage, chỉ có lời tự khai.'

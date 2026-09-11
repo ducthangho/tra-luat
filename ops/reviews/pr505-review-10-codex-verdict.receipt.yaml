@@ -66,8 +66,10 @@ model_reviewer_identity:
   nguon_cac_scalar_tren: >-
     ĐỐI CHIẾU ĐƯỢC với run.json (ngoài kho, `scratchpad/runs/cb013b5c/`): run_id/short_id, prompt_sha256, bat_dau_utc,
     ket_thuc_utc, thoi_luong_giay, ma_thoat, trang_thai, stdout_byte/sha256, stderr_byte/sha256, worktree_sach, head.
-    Dòng cuối stdout `XONG VERDICT sha256=fea4c511…` khớp băm tệp. model_yeu_cau, effort, transport và
-    so_lan_chet_truoc_khi_xong là ATTESTATION điều phối, KHÔNG có khoá tương ứng trong run.json.
+    Dòng cuối stdout `XONG VERDICT sha256=fea4c511…` khớp băm tệp. transport: machine CÓ trong run.json.
+    model_yeu_cau và effort có trong header stderr.log (cấu hình yêu cầu, không chứng thực model thực chạy),
+    KHÔNG có khoá tương ứng trong run.json. so_lan_chet_truoc_khi_xong là ATTESTATION điều phối,
+    không có khoá hoặc lịch sử retry tương ứng trong run.json.
 
 nang_luc_do_cua_goi:
   mirror: 'clone mới từ guong.git (fetch sau push de49fa0), detached de49fa0, core.abbrev 7, không nông; nguon/ có spec M9-FETCH-AUTH.md (sha b8200141…) + actionlint 1.7.7 + VERDICT/HINT các lượt trước của chính reviewer; EVIDENCE.md bổ sung từng lượt'
@@ -101,7 +103,7 @@ verdict_usage_caveats:
       `approve` round 10 được kết luận dưới ĐIỀU KIỆN DỪNG do chủ kho duyệt (phương án A, #503 comment 5633059702; ghi
       trong lease `m9-fetch-auth-exec-4-claude-20260911` khoá `dieu_kien_dung`): chỉ P1 hoặc P2 có mutant sống ở
       WORKFLOW mới chặn; P2 thuần fixture/độ phủ t152 ⇒ approve kèm nợ. Round 10 KHÔNG có finding ở cả hai nhóm và mục
-      `## NỢ GHI SANG #499` rỗng — tức approve này không dùng tới điều kiện nới, nhưng người đọc phải biết điều kiện
+      `## NỢ GHI SANG #499` không có P2 fixture mới, nhưng vẫn ghi A3/M3 chưa đo — tức approve này không dùng tới điều kiện nới, nhưng người đọc phải biết điều kiện
       ấy tồn tại. `approve` vẫn là điều kiện DỪNG, không phải merge authorization (ADR-0040); uỷ quyền merge là chỉ
       thị chủ kho #503 comment 5632304817.
     phai_lam_gi_khi_chay_lai: >-
@@ -120,7 +122,7 @@ verdict_usage_caveats:
     muc: P3
     mo_ta: >-
       Bản chiếu của cả 10 verdict lên PR #505 (comment 5629894965 … 5633349186) chỉ mang frontmatter, kết luận, ĐỐI
-      CHIẾU, Findings, bảng mutant, chua_do_duoc; `## BẢNG ĐO` (15–23 hàng) và các bảng shell/bề mặt lộ token CHỈ có
+      CHIẾU, Findings, bảng mutant, chua_do_duoc; `## BẢNG ĐO` (17–25 hàng dữ liệu, không tính tiêu đề/phân cách) và các bảng shell/bề mặt lộ token CHỈ có
       trong tệp verdict.
     phai_lam_gi_khi_chay_lai: >-
       Tra bảng đo trong chính tệp verdict (băm ở biên nhận); sự vắng mặt ở comment không phải reviewer không đo.

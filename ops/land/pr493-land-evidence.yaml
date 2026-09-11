@@ -171,15 +171,63 @@ post_merge_checks:
   - ten: 'gate (lượt master — ubuntu + windows)'
     run_id: 34576916278
     head: e82af37
-    ket_qua: DANG_CHAY_LUC_SOAN_TEP_NAY
-    se_cap_nhat: >-
-      Trường này CỐ Ý không khai kết quả. Tệp được soạn trong lúc lượt chạy chưa xong; điền một
-      kết quả chưa có là đúng thứ hồ sơ này tồn tại để chặn. Commit sau của chính nhánh này sẽ
-      ghi kết quả ĐÃ ĐO.
-    vi_sao_van_doi_luot_nay: >-
-      §10.2 định nghĩa `landed` gồm "hậu-merge gate xanh". Chân `ubuntu` đo lại một cây trùng
-      băm nên không thêm gì; chân `windows` và bước `release-verify strict (lane LAND)` là phần
-      CHƯA từng đo cho cây này.
+    ket_qua_run: cancelled
+    ket_qua_theo_chan:
+      ubuntu_latest:
+        ket_qua: success
+        bang_chung_duong: '44 bước · 4 skipped · 0 bước khác `success`'
+        bon_buoc_skipped_va_ly_do:
+          - 'PR head contains required EOL base — `if: event_name == pull_request`; lượt master
+             LUÔN skip bước này, nên tiêu chí "không bước nào skipped" chỉ đúng cho lượt PR'
+          - 'gate lifecycle selftest — nền không có cgroup'
+          - 'tl selftest (lượt PR — không sinh bằng chứng) — điều kiện lane'
+          - 'release-verify strict (lane WORKER) — `github.ref == master` nên chạy lane LAND'
+        buoc_master_only_DA_CHAY_THAT: >-
+          `release-verify strict (lane LAND — manifest committed)` bước 38 ⇒ `success` (1 s).
+          Đây là lần ĐẦU bước ấy chạy trên CI cho cây này; trước đó chỉ có phép đo TAY của điều
+          phối trên Linux. Cùng lượt còn chạy xanh: `golden-test` (26 s) · `doc-claims-check
+          strict` (3 s) · `determinism-audit strict` (34 s) · `release-check full` (2 s) ·
+          `release-bundle x2 cùng SHA-256` (4 s) · `tl selftest (có bằng chứng exact-identity)`
+          (119 s).
+      windows_latest:
+        ket_qua: cancelled
+        cat_o_buoc: 'bước 20 — `lease-publish selftest (đo lại setup sau G5)`'
+        so_giay_buoc_do_truoc_khi_bi_cat: 1258
+        tong_thoi_gian_job_giay: 3618
+        khoang_thoi_gian: '2026-09-11T07:58:49Z → 2026-09-11T08:59:07Z'
+        nguyen_nhan_do_duoc: >-
+          3618 s = 60 phút 18 giây, mà `ci.yml:64` khai `timeout-minutes: 60`. Job chạm TRẦN
+          THỜI GIAN, KHÔNG phải một ca test đỏ. Mọi bước sau bước 20 hiện `skipped` vì job đang
+          bị cắt, nên chân Windows **chưa đo** `release-verify strict (lane LAND)`,
+          `golden-test`, `determinism-audit` và 19 bước khác.
+        la_loi_cua_PR_nay: false
+        bang_chung_la_no_CO_TRUOC: >-
+          Issue #504 (`WINDOWS-LEASE-SUITE`, đang MỞ) ghi BA lượt `cancelled` liên tiếp cùng
+          bước, cùng trần, kể từ khi A0 (#488) land: `0721811` (run 34439063235, ≥ 25 ph 50 s),
+          `c00c88a0` (34549206309), `27c413c3` (34552510232, ≥ 22 ph 52 s). Trước A0 bước ấy
+          chạy 2 ph 58 s. Lượt này là ca **THỨ TƯ** của cùng chuỗi.
+        mot_so_MOI_ma_Issue_504_chua_co: >-
+          #504 khai *"log bước bị đệm khối nên ca nào chậm/treo chưa đo được"* và nêu giả thuyết
+          H1 *"suite ≈ 3 × nền"*, suy từ Linux. Lượt này cho một cận dưới ĐO ĐƯỢC cho tỉ lệ
+          Windows/Linux của CÙNG bước trong CÙNG lượt chạy: Windows ≥ 1258 s (bị cắt, chưa xong)
+          so ubuntu 139 s ⇒ **≥ 9,05×**. Tức H1 ước THẤP khoảng ba lần. Đây là cận DƯỚI vì
+          1258 s là lúc bị cắt chứ không phải lúc xong.
+        khong_sua_o_day: >-
+          Thuộc packet #504, có đặc tả và quyết định chủ kho riêng. `CLAUDE.md` CẤM nâng
+          `timeout-minutes`. Không đụng `ci.yml` trong PR này.
+    he_qua_cho_trang_thai_landed: >-
+      §10.2 định nghĩa `landed` gồm "hậu-merge gate XANH". Lượt này KHÔNG xanh — nó `cancelled`.
+      Nên trạng thái đúng của #493 là: kết quả ĐÃ vào canonical ở exact SHA được duyệt ·
+      bookkeeping ĐANG hoàn tất bằng chính PR mang tệp này · **hậu-merge gate CHƯA xanh trên
+      chân Windows, vì một khuyết tật hạ tầng CÓ TRƯỚC và có packet riêng**. KHÔNG làm tròn
+      thành `landed`; cũng KHÔNG đọc thành "#493 có lỗi".
+    cai_da_do_duoc_va_cai_chua:
+      da_do: >-
+        Toàn bộ lane LAND trên Linux, gồm bước `release-verify strict` mà lượt PR đã skip.
+        Cộng phép đo TAY của điều phối trước merge (cùng lệnh, cùng kết quả `180 == 180`).
+      chua_do: >-
+        Mọi bước sau `lease-publish selftest` trên Windows. Với cây này, Windows vẫn là vùng
+        CHƯA ĐO — và nó đã chưa-đo suốt bốn lần land liên tiếp.
 
 # ─────────────────── KHÔNG ĐO ĐƯỢC ───────────────────
 khong_do_duoc:

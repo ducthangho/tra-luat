@@ -146,6 +146,37 @@ nằm **hết** ở chân `windows-latest` (lượt PR chỉ chạy `ubuntu`) v�
 Câu ấy là căn cứ cho nợ MỚI `gate-master-do-lai-cay-trung-bam`: **chưa có cổng nào cắt chân ubuntu thừa** khi
 cây sau merge trùng băm với cây đã đo xanh. Chưa có packet.
 
+### Và lượt hậu-merge ấy đã chạy — kết quả `cancelled`, không phải xanh
+
+| chân | kết quả | đo được |
+|---|---|---|
+| `ubuntu-latest` | **success** | 44 bước · 4 skipped · **0 bước khác `success`**. Bước **38** `release-verify strict (lane LAND — manifest committed)` **CHẠY THẬT** ⇒ `success` (1 s) — lần đầu bước ấy chạy trên CI cho cây này. Cùng lượt xanh: `golden-test` · `doc-claims-check strict` · `determinism-audit strict` · `release-check full` · `release-bundle x2 cùng SHA-256` |
+| `windows-latest` | **cancelled** | cắt ở bước **20** `lease-publish selftest` sau **1258 s**. Job chạy `07:58:49Z → 08:59:07Z` = **3618 s = 60 ph 18 s**, mà `ci.yml:64` khai `timeout-minutes: 60` ⇒ **chạm TRẦN THỜI GIAN, không phải một ca test đỏ** |
+
+**Không phải lỗi của #493, và có bằng chứng chứ không phải lời khai.** Issue **#504** (`WINDOWS-LEASE-SUITE`,
+đang mở, có đặc tả + quyết định chủ kho) ghi **ba** lượt `cancelled` liên tiếp cùng bước cùng trần kể từ khi
+A0 (#488) land: `0721811` · `c00c88a0` · `27c413c3`. Trước A0 bước ấy chạy **2 ph 58 s**. Lượt này là ca
+**THỨ TƯ**. `CLAUDE.md` CẤM nâng `timeout-minutes`, và tệp `ci.yml` ngoài write set ⇒ **không vá ở đây**.
+
+**Một số MỚI cho #504.** Issue ấy khai *"log bước bị đệm khối nên ca nào chậm/treo chưa đo được"* và nêu giả
+thuyết **H1: suite ≈ 3 × nền**, suy từ Linux. Lượt này cho một **cận dưới đo được** cho tỉ lệ Windows/Linux
+của **cùng bước trong cùng lượt chạy**: Windows **≥ 1258 s** (bị cắt, chưa xong) so ubuntu **139 s** ⇒
+**≥ 9,05×**. Tức **H1 ước thấp khoảng ba lần**. Cận DƯỚI vì 1258 s là lúc bị cắt chứ không phải lúc xong.
+
+**Hệ quả cho trạng thái của #493, nói cho đúng §10.2.** `landed` đòi "hậu-merge gate XANH". Lượt này **không
+xanh**. Trạng thái đúng: kết quả ĐÃ vào canonical ở exact SHA được duyệt · bookkeeping đang hoàn tất bằng
+chính PR mang mục này · **hậu-merge gate CHƯA xanh trên chân Windows vì một khuyết tật hạ tầng CÓ TRƯỚC, có
+packet riêng**. Không làm tròn thành `landed`; cũng không đọc thành "#493 có lỗi".
+
+**Và phần đắt nhất của bài học này là về CÁCH TÔI TƯ VẤN, không phải về CI.** Khi chủ kho hỏi lượt hậu-merge
+có đáng chi phí không, tôi trả lời rằng chân ubuntu là lặp lại còn **giá trị nằm hết ở chân windows**, rồi
+khuyến nghị để chạy hết. Phân tích ấy đúng về cấu trúc và **sai về thực tế**: chân windows đã `cancelled` ở
+ba lần land liên tiếp trước đó, và điều ấy **đã được ghi sẵn trong Issue #504 mà tôi chưa mở**. Nên lượt chạy
+ấy tiêu ~90 phút runner và trả về **không một phép đo Windows nào** — đúng thứ tôi bảo nó sẽ mua được.
+Cùng lớp lỗi *"hỏi chỗ tiện tay thay vì hỏi chỗ kết luận được ghi"*: tôi suy giá trị của một lượt chạy từ
+CẤU HÌNH của nó, trong khi LỊCH SỬ của chính lượt ấy đã trả lời sẵn. Chốt rẻ và luôn dùng được: **trước khi
+khuyên ai tiêu một lượt CI, hãy đọc ba lượt gần nhất của cùng job trên cùng nhánh.**
+
 ## `thu-hoi` ĐỎ, không phải lỗi của #493 — và 14 lượt đỏ trước đã CHE một lỗi thứ hai
 
 Phép neo canonical `TL_WF_SHA == TL_S` (`26e2555d…`) **ĐẠT lần đầu tiên** trong lịch sử workflow ấy. Nhờ đó

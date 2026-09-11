@@ -2,9 +2,10 @@
 # KHÁC NỀN (codex), trên head `aad3d01` — head ĐÃ MERGE vào master (`c00c88a0`, merge commit, không squash).
 #
 # Verdict: approve — 0 P1 / 0 P2 / 0 P3; ba P2 lượt 1 (R1-01/R1-02/R1-03) ĐÓNG; HINT 0 hunk. Đây là ĐIỀU KIỆN
-# DỪNG của vòng vá→review, KHÔNG phải merge authorization: `cong` (duyệt khác danh tính) ĐỎ lúc merge vì tác giả
-# PR không tự duyệt được và kho không có danh tính thứ hai; chủ kho ra chỉ thị merge, dấu vết PR #500 comment
-# 5627797896. Biên nhận viết SAU khi merge — trả nợ ADR-0034 cho chính PR hồ sơ, như #495 với #490.
+# DỪNG của vòng vá→review, KHÔNG phải merge authorization: `cong` (duyệt khác danh tính) ĐỎ lúc merge vì lúc ấy
+# CHƯA có review APPROVED nào từ tài khoản khác tác giả; chủ kho ra chỉ thị merge, dấu vết PR #500 comment
+# 5627797896. (Sau đó, 01:20:27Z, collaborator `notebyme88` duyệt PR hồ sơ #501 và `cong` xanh ở đó — tức
+# danh tính thứ hai CÓ, chỉ là chưa được dùng lúc merge #500.) Biên nhận viết SAU khi merge — trả nợ ADR-0034 cho chính PR hồ sơ, như #495 với #490.
 
 schema_version: 2
 receipt_id: pr500-review-2-codex-20260910-d14509c5
@@ -104,13 +105,15 @@ verdict_usage_caveats:
     mo_ta: >-
       `approve` này là điều kiện DỪNG của vòng vá→review (khác nền, 0 P1 / 0 P2, HINT 0 hunk), KHÔNG phải
       merge authorization. Khi merge (`c00c88a0`, 01:05Z 11-09) check `cong` (duyệt khác danh tính, packet #348)
-      ĐỎ: nó đòi review APPROVED từ tài khoản khác `ducthangho`, mà chủ kho là tác giả PR nên GitHub không cho
-      tự duyệt và kho không có danh tính thứ hai — cùng tình huống #492. `thu-hoi` ĐỎ do lỗi fetch của workflow
+      ĐỎ: nó đòi review APPROVED từ tài khoản khác `ducthangho`; tác giả PR không tự duyệt được và lúc merge
+      CHƯA có tài khoản nào khác duyệt — cùng tình huống #492. Sau merge, collaborator `notebyme88` duyệt PR hồ sơ
+      #501 lúc 01:20:27Z và `cong` xanh ở đó (run 34550273565) ⇒ danh tính thứ hai CÓ tồn tại; câu "kho không có
+      danh tính thứ hai" ở PR #500 comment 5627797896 là lời khai rộng hơn phép đo. `thu-hoi` ĐỎ do lỗi fetch của workflow
       đã land (#499 C2a). Cả hai không phải required check; chủ kho quyết merge bằng chỉ thị, dấu vết PR #500
       comment 5627797896.
     phai_lam_gi_khi_chay_lai: >-
-      Đừng đọc `approve` này là "đã qua cổng tin cậy khác danh tính". Muốn `cong` xanh cần một tài khoản
-      GitHub khác tác giả duyệt — điều kho hiện không có.
+      Đừng đọc `approve` này là "đã qua cổng tin cậy khác danh tính" — trên #500 chưa có ai khác duyệt. Muốn
+      `cong` xanh cần một tài khoản GitHub khác tác giả duyệt (đã làm được ở #501 với `notebyme88`).
 
 khong_do_duoc:
   - 'Model build và danh tính model thật của codex exec: không có modelUsage, chỉ có lời tự khai.'
@@ -128,6 +131,7 @@ authoritative_source: repo_file
 receipt_written_by: claude-session
 receipt_written_at_utc: '2026-09-11T01:3xZ'
 receipt_khong_khai:
-  - 'Không khai `cong` đã xanh lúc merge — nó ĐỎ, chủ kho quyết.'
+  - 'Không khai `cong` đã xanh lúc merge #500 — nó ĐỎ, chủ kho quyết; `cong` chỉ xanh ở PR hồ sơ #501 sau đó.'
+  - 'Không khai "kho không có danh tính thứ hai" — `notebyme88` (collaborator) đã duyệt #501.'
   - 'Không khai model đã chạy — codex không đo được.'
   - 'Không khai Codex connector đã ĐO gì trên aad3d01 — chỉ khai API không trả finding nào sau khi nó Completed.'

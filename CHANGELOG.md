@@ -60,8 +60,11 @@ bằng `tl.py release-manifest --deterministic` ⇒ **trùng từng byte** hunk 
 | `c00c88a0` | #500 | `0721811` + `aad3d01` | chủ kho, 11-09 ~01:0xZ — dấu vết PR #500 comment 5627797896 |
 
 `cong` (duyệt khác danh tính, packet #348) đòi review APPROVED từ tài khoản khác `ducthangho`; chủ kho là tác giả PR
-nên GitHub **không cho tự duyệt**, và kho không có danh tính thứ hai — cùng tình huống #492 (r363). Không có link nào
-chủ kho bấm được để thoả `cong`; điều kiện ấy chỉ thoả khi có người thứ hai. `thu-hoi` đỏ do lỗi fetch của workflow
+nên GitHub **không cho tự duyệt**, và lúc merge CHƯA có tài khoản nào khác duyệt — cùng tình huống #492 (r363).
+**Đính chính ngay trong mục này:** bản đầu (và PR #500 comment 5627797896) viết "kho không có danh tính thứ hai" —
+SAI, rộng hơn phép đo: 01:20:27Z, collaborator `notebyme88` duyệt PR hồ sơ #501 (head `a957fa1`), workflow `cong`
+chạy lại theo `pull_request_review` và **xanh** (run 34550273565) — lần đầu `cong` xanh trong chuỗi #492/#500/#501.
+Điều đo được là *chưa ai duyệt lúc merge #500*, không phải *không có ai để duyệt*. `thu-hoi` đỏ do lỗi fetch của workflow
 đã land (#499 C2a). Cả hai không phải required check. Đây là PR hồ sơ: không lease, không `guard --action merge`.
 
 Xác nhận sau merge trên `c00c88a0`: `df7ec13` là tổ tiên (neo 4 biên nhận #492 vững) · `bien_nhan_v2` **52 ĐẠT v2 ·

@@ -124,22 +124,64 @@ def _chup(cwd):
 _TRAN_BAM_BYTE = 8 * 1024 * 1024
 
 
+def _unquote_c_style(s):
+    res = bytearray()
+    i = 0
+    b = s.encode("utf-8", "surrogateescape")
+    n = len(b)
+    while i < n:
+        if b[i] == 92:
+            if i + 1 >= n: return None
+            c = b[i+1]
+            if c == 97: res.append(7)
+            elif c == 98: res.append(8)
+            elif c == 116: res.append(9)
+            elif c == 110: res.append(10)
+            elif c == 118: res.append(11)
+            elif c == 102: res.append(12)
+            elif c == 114: res.append(13)
+            elif c == 34: res.append(34)
+            elif c == 92: res.append(92)
+            elif 48 <= c <= 55:
+                if i + 3 >= n: return None
+                octal = b[i+1:i+4]
+                if not (48 <= octal[1] <= 55 and 48 <= octal[2] <= 55): return None
+                res.append(int(octal, 8))
+                i += 4
+                continue
+            else: return None
+            i += 2
+        else:
+            res.append(b[i])
+            i += 1
+    return res.decode("utf-8", "surrogateescape")
+
 def _duong_tu_porcelain(dong):
     """Tra duong dan tu mot ban ghi porcelain v1. `R  cu -> moi` tra ban MOI."""
     if len(dong) < 4:
         return None
     p = dong[3:]
-    if " -> " in p:                       # rename/copy
-        p = p.split(" -> ", 1)[1]
-    if p.startswith('"') and p.endswith('"'):
-        # git trich dan khi ten co ky tu la; giai bang chinh luat cua no
-        try:
-            import codecs
-            p_bytes = p[1:-1].encode("utf-8", "surrogateescape")
-            p_unescaped, _ = codecs.escape_decode(p_bytes)
-            p = p_unescaped.decode("utf-8", "surrogateescape")
-        except Exception:
+    if dong[0] in ('R', 'C'):
+        if p.startswith('"'):
+            i = 1
+            while i < len(p):
+                if p[i] == '\\': i += 2
+                elif p[i] == '"': break
+                else: i += 1
+            if i + 4 < len(p) and p[i+1:i+5] == ' -> ':
+                p = p[i+5:]
+            else:
+                return None
+        else:
+            idx = p.find(' -> ')
+            if idx != -1:
+                p = p[idx+4:]
+            else:
+                return None
+    if p.startswith('"'):
+        if not p.endswith('"') or len(p) < 2:
             return None
+        return _unquote_c_style(p[1:-1])
     return p
 
 

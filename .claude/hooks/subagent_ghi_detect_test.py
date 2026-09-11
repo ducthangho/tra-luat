@@ -977,13 +977,13 @@ def t26a_ten_unicode_duoc_giai_ma_dung_byte_khi_quotePath_true(h):
     ten = "chữ-việt.txt"
     f = pathlib.Path(c) / ten
     f.write_text("1", encoding="utf-8")
-    
+
     goi_byte("SubagentStart", "tl-auditor", "a26a_clean", c, s, h)
     rc1, kq1, ly1, ct1 = goi_byte("SubagentStop", "tl-auditor", "a26a_clean", c, s, h)
     if kq1 != "clean" or ct1.get("so_duong_da_bam_noi_dung", 0) == 0:
         shutil.rmtree(c, ignore_errors=True)
         return False, f"quotePath=true (unchanged): {kq1}, hashed={ct1.get('so_duong_da_bam_noi_dung')}"
-    
+
     goi_byte("SubagentStart", "tl-auditor", "a26a_changed", c, s, h)
     f.write_text("2", encoding="utf-8")
     rc2, kq2, ly2, ct2 = goi_byte("SubagentStop", "tl-auditor", "a26a_changed", c, s, h)
@@ -996,13 +996,13 @@ def t26b_ten_unicode_giai_ma_dung_byte_khi_quotePath_false(h):
     ten = "chữ-việt.txt"
     f = pathlib.Path(c) / ten
     f.write_text("1", encoding="utf-8")
-    
+
     goi_byte("SubagentStart", "tl-auditor", "a26b_clean", c, s, h)
     rc1, kq1, ly1, ct1 = goi_byte("SubagentStop", "tl-auditor", "a26b_clean", c, s, h)
     if kq1 != "clean" or ct1.get("so_duong_da_bam_noi_dung", 0) == 0:
         shutil.rmtree(c, ignore_errors=True)
         return False, f"quotePath=false (unchanged): {kq1}, hashed={ct1.get('so_duong_da_bam_noi_dung')}"
-    
+
     goi_byte("SubagentStart", "tl-auditor", "a26b_changed", c, s, h)
     f.write_text("2", encoding="utf-8")
     rc2, kq2, ly2, ct2 = goi_byte("SubagentStop", "tl-auditor", "a26b_changed", c, s, h)
@@ -1011,21 +1011,37 @@ def t26b_ten_unicode_giai_ma_dung_byte_khi_quotePath_false(h):
 
 def t26c_escaped_names_duoc_giai_ma_dung(h):
     hook = _nap_hook_de_do(h, "t26c")
-    res = hook._duong_tu_porcelain(' ?? "tep\\n\\"voi\\"\\\\slash.txt"')
+    res = hook._duong_tu_porcelain('?? "tep\\n\\"voi\\"\\\\slash.txt"')
     mong_doi = 'tep\n"voi"\\slash.txt'
     return res == mong_doi, f"escaped names parser: {res!r} (mong doi {mong_doi!r})"
 
 def t26d_ten_byte_malformed_tra_unknown_hoac_fail_close(h):
+    # This tests VALID non-UTF8 byte path round-trip (which is octal escaped in git)
     hook = _nap_hook_de_do(h, "t26d")
-    res = hook._duong_tu_porcelain(' ?? "bad-\\377.txt"')
+    res = hook._duong_tu_porcelain('?? "bad-\\377.txt"')
     mong_doi = "bad-\udcff.txt"
     return res == mong_doi, f"malformed bytes parser: {res!r} (mong doi {mong_doi!r})"
 
 def t26e_mixed_literal_unicode_and_escapes(h):
     hook = _nap_hook_de_do(h, "t26e")
-    res = hook._duong_tu_porcelain(' ?? "chữ\\n.txt"')
+    res = hook._duong_tu_porcelain('?? "chữ\\n.txt"')
     mong_doi = "chữ\n.txt"
     return res == mong_doi, f"mixed literal and escapes: {res!r} (mong doi {mong_doi!r})"
+
+def t26f_arrow_name_decoy_collision_false_clean(h):
+    hook = _nap_hook_de_do(h, "t26f")
+    res1 = hook._duong_tu_porcelain('?? "victim -> decoy"')
+    mong_doi1 = "victim -> decoy"
+    res2 = hook._duong_tu_porcelain('R  "victim" -> "decoy"')
+    mong_doi2 = "decoy"
+    return res1 == mong_doi1 and res2 == mong_doi2, f"arrow collision: {res1!r}, {res2!r}"
+
+def t26g_malformed_syntax_rejection(h):
+    hook = _nap_hook_de_do(h, "t26g")
+    res1 = hook._duong_tu_porcelain('?? "bad-\\x61"')
+    res2 = hook._duong_tu_porcelain('?? "bad-\\q"')
+    res3 = hook._duong_tu_porcelain('?? "unterminated')
+    return res1 is None and res2 is None and res3 is None, f"malformed rejection: {res1}, {res2}, {res3}"
 
 
 CA = [t1_khong_ghi_thi_clean, t2_ghi_tep_theo_doi_thi_changed,
@@ -1056,7 +1072,9 @@ CA = [t1_khong_ghi_thi_clean, t2_ghi_tep_theo_doi_thi_changed,
       t26b_ten_unicode_giai_ma_dung_byte_khi_quotePath_false,
       t26c_escaped_names_duoc_giai_ma_dung,
       t26d_ten_byte_malformed_tra_unknown_hoac_fail_close,
-      t26e_mixed_literal_unicode_and_escapes]
+      t26e_mixed_literal_unicode_and_escapes,
+      t26f_arrow_name_decoy_collision_false_clean,
+      t26g_malformed_syntax_rejection]
 
 # --- DOT BIEN: moi cai go DUNG MOT tinh chat, va phai lam it nhat mot ca DO ---
 DOT_BIEN = [
@@ -1138,8 +1156,8 @@ DOT_BIEN = [
      '    rc_idx, duong_idx = _git(cwd, "rev-parse", "--git-path", "index")',
      '    rc_idx, duong_idx = 0, ".git/index"'),
     ("m27_bo_codecs_escape_decode",
-     '            import codecs\n            p_bytes = p[1:-1].encode("utf-8", "surrogateescape")\n            p_unescaped, _ = codecs.escape_decode(p_bytes)\n            p = p_unescaped.decode("utf-8", "surrogateescape")',
-     '            p = p[1:-1].encode("latin-1", "backslashreplace").decode("unicode_escape")'),
+     '        return _unquote_c_style(p[1:-1])',
+     '        return p[1:-1].encode("latin-1", "backslashreplace").decode("unicode_escape")'),
 ]
 
 

@@ -5424,7 +5424,7 @@ def t152_C2a_M9_fetch_H_mang_xac_thuc_qua_header_khong_token_trong_URL():
                        TL_WF_REF="ducthangho/tra-luat/.github/workflows/ops-thu-hoi-admission.yml@refs/heads/master",
                        GIT_CONFIG_NOSYSTEM="1", GIT_CONFIG_GLOBAL=str(cfg))
             p = subprocess.run([_bash_posix(), "--noprofile", "--norc", "-c", stub + doan +
-                                '\ntest "${AUTH_B64+x}" != x\ntest "${GIT_CONFIG_COUNT+x}" != x\n'],
+                                '\ntest -z "${AUTH_B64+x}${GIT_CONFIG_COUNT+x}${GIT_CONFIG_KEY_0+x}${GIT_CONFIG_VALUE_0+x}"\n'],
                                cwd=s, env=env, capture_output=True, text=True, timeout=10)
         chot(p.returncode == 0, f"(i) đoạn auth/fetch không chạy được: rc={p.returncode}: {p.stderr}")
         dong = p.stdout.splitlines()

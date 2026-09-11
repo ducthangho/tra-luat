@@ -383,9 +383,13 @@ rõ phạm vi của L8: *"tên lệnh `tl <cmd>` trong span backtick, tra `refer
 làm đúng thứ nó khai; giới hạn của một bộ trích cơ học **không phải** bằng chứng nó sai hợp đồng, và càng
 không miễn cho người viết trách nhiệm chọn cách viết rõ nghĩa.
 
-Thứ CÒN LẠI sau khi rút câu ấy, và nó vẫn là một quan sát thật: **vòng phản hồi chậm**. Không cổng nào chặn
-trước lúc viết; sai sót chỉ hiện ở phép đo delta hai clone, tức sau khi đã commit. Đó là một nhận xét về
-**độ trễ của tín hiệu**, không phải một lời buộc tội cổng — và nó không có packet, cũng chưa chắc đáng có.
+Thứ CÒN LẠI sau khi rút câu ấy là một lời kể, không phải một giới hạn của cổng: **lần ấy tôi chỉ nhận ra
+advisory mới khi so delta sau commit.** Advisory có sẵn trong output của **một** cây, và mọi cổng ở đây chạy
+được **trước** commit — cross-review lượt 5 dựng phản chứng: đổi đúng dòng 203 từ đậm sang backtick trên cây
+CHƯA commit, `doc-claims-check --strict --json` hiện ngay `L8 TL_COMMAND_UNKNOWN` kèm `file`/`line`/`claim`,
+tổng `+1`; khôi phục thì về cũ, `git status` xác nhận `HEAD` không đổi. Bản trước viết *"sai sót chỉ hiện ở
+phép đo delta hai clone, tức sau khi đã commit"* — **RÚT**: đó là mô tả THÓI QUEN ĐO của tôi, không phải
+tính chất của cổng. (Thứ tự tôi thực sự đã chạy hôm ấy thì gói không giữ log để xác minh.)
 
 ## Chuỗi hồ sơ dừng ở đâu
 

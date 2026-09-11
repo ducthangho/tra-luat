@@ -17,7 +17,9 @@
 # `CLAUDE.md`: "cùng một hình dạng lặp ba lần trở lên thì câu hỏi đúng là **có nên làm việc này
 # không**, không phải **vá thế nào**." Ngưỡng đã đạt. Nên từ đây biên nhận chỉ giữ TRƯỜNG ĐO
 # ĐƯỢC cộng một MỤC ngắn mỗi finding (`van_de` · `phep_do` · `da_va`) — KHÔNG phải một dòng: khối
-# `nam_finding` chiếm **45** dòng cho 5 finding. Bài học vẫn được ghi ở `CHANGELOG`.
+# `nam_finding` gồm NĂM OBJECT nhiều dòng. Bài học vẫn được ghi ở `CHANGELOG`.
+# (Bản đầu ghi "chiếm **45** dòng" — sai, khối dài **50** dòng; và nó sống sót qua lượt 7 vì phép
+#  quét của điều phối dùng mẫu chỉ bắt số BA CHỮ SỐ. Lượt 8 chấm. Bỏ số, không thay số mới.)
 # ĐÃ XOÁ phép so số dòng khỏi chú thích này. Ba lần viết cho ba cặp số (146/253, 149/260,
 # 165/273) vì nó TRÔI theo từng commit chạm vào tệp — neo SHA cũng không cứu, vì con số ấy chỉ
 # nói về một bản đã qua. Lượt 5 và lượt 6 chấm nó hai lần liên tiếp. Mệnh đề giữ lại không cần

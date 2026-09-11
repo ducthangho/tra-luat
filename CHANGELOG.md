@@ -428,8 +428,14 @@ dòng vào cuối tài liệu. **Neo SHA vì tổng advisory trôi theo head**: 
 | 2 | cùng đường dẫn trong **backtick inline** | 372 | **+1** |
 | 3 | cùng đường dẫn trong **khối code** | 371 | **0** |
 
-Thứ bảng này đo là **delta `0 / +1 / 0`** — quy tắc đếm, không phải tổng. Delta ấy không phụ thuộc head;
-tổng thì có.
+Thứ bảng này đo là **delta `0 / +1 / 0` TRÊN `185ba5c`** — quy tắc đếm, không phải tổng. Phép đo ấy
+**KHÔNG bảo đảm** delta giữ nguyên khi đổi head, nội dung cây, mã cổng, hay trạng thái đĩa.
+
+*(Bản trước viết *"delta không phụ thuộc head; tổng thì có"* — **RÚT**. Cross-review lượt 10 dựng phản chứng
+chạy được: `L1` chỉ phát advisory khi đường dẫn **KHÔNG tồn tại** trong cây, nên trên một commit có theo dõi
+một tệp dưới thư mục ấy, thêm đúng cùng token inline cho **delta 0** thay vì `+1` — đo được `368 → 368`,
+trong khi cùng phép thêm trên head thật cho `370 → 371`. Delta phụ thuộc **nội dung cây**, không phải chỉ
+tổng mới trôi.)*
 
 Hệ quả thực hành, và nó khác hẳn kết luận của bản trước: **với đường dẫn và lớp `L1` đã thử**, nhắc dạng
 văn bản thường không làm tăng advisory. Cái phải đếm là số lần **trích trong backtick**, không phải số lần

@@ -93,15 +93,25 @@ hội tụ" — mỗi bản vá mở ra bề mặt đọc mới. Nói thẳng v�
 `6da8291` (vá 2 P3 của chính lượt 17) và `99aef14` (khối đóng vòng lặp). Cả hai **chưa qua cross-review nào**.
 Vòng lặp đóng **theo quyết định chủ kho**, không phải vì hết finding.
 
-## Phạm vi — đo, không ước
+## Phạm vi — đo, và NÊU RÕ ĐIỂM ĐO
+
+**Bản đầu của mục này ghi `36 tệp · 5086 (+) · 3 commit` và con số ấy ĐÃ CŨ ngay khi viết xong**
+(cross-review lượt 1 chấm đúng chỗ này). Nó đo lúc mới có ba commit `ops/`, rồi commit
+`CHANGELOG.md` + manifest và commit ghi kết quả gate nối thêm vào sau. Đây là bệnh *"đo trước khi
+sửa hết"*, và nó sẽ TÁI PHÁT ở mọi mục ghi sổ trừ khi con số **tự khai điểm đo của nó**:
 
 ```
-git diff --shortstat e82af37..<head>            ⇒  36 files changed, 5086 insertions(+)
-git diff --name-only e82af37..<head> | sed 's#/.*##' | sort | uniq -c
-                                                ⇒  36 ops     (0 CHANGELOG, 0 manifest — ở commit này)
-git rev-list --count e82af37..<head>            ⇒  3
+ĐIỂM ĐO: 42f32fc  (commit cuối TRƯỚC commit mang chính đoạn vá này)
+git diff --shortstat e82af37..42f32fc     ⇒  38 files changed, 5362 insertions(+), 5 deletions(-)
+git diff --name-only e82af37..42f32fc | sed 's#/.*##' | sort | uniq -c
+                                          ⇒  1 CHANGELOG.md · 1 RELEASE_MANIFEST.json · 36 ops
+git rev-list --count e82af37..42f32fc     ⇒  5
 17 verdict   489 873 B (478,4 KB)   ·   17 biên nhận   93 552 B (91,4 KB)
 ```
+
+**Commit mang đoạn này, và mọi commit sau nó, KHÔNG nằm trong các số trên** — cố ý. Một con số
+phạm vi chỉ đúng tới điểm đo của nó; số cuối cùng chỉ tồn tại sau khi merge, và chỗ ghi nó là
+`ops/land/` của mục ghi sổ KẾ TIẾP, đúng như `r364` neo `0721811..c00c88a0` sau khi #500 merge.
 
 `ops/` nằm NGOÀI kiểm kê gói — đo được: **0/180** mục manifest bắt đầu bằng `ops/`. Nhưng `CHANGELOG.md`
 **NẰM TRONG** kiểm kê, nên mục này làm sha manifest lệch ⇒ tái sinh trong CÙNG commit (bài học `r356`).
@@ -143,8 +153,22 @@ lại một cây **không khác một byte** so với cây mà lượt gate củ
 nằm **hết** ở chân `windows-latest` (lượt PR chỉ chạy `ubuntu`) và ở bước `release-verify strict (lane LAND)`
 — bước duy nhất mang `if: github.ref == 'refs/heads/master'`.
 
-Câu ấy là căn cứ cho nợ MỚI `gate-master-do-lai-cay-trung-bam`: **chưa có cổng nào cắt chân ubuntu thừa** khi
-cây sau merge trùng băm với cây đã đo xanh. Chưa có packet.
+**THU HẸP — bản đầu viết câu này RỘNG HƠN PHÉP ĐO, và cross-review lượt 1 chấm đúng.** Bản đầu nói
+chân ubuntu *"đo lại một cây trùng băm nên không thêm gì"* và *"giá trị nằm HẾT ở chân windows"*. Sai:
+lượt master trên ubuntu chạy **hai bước mà lượt PR đã `skipped`** —
+
+| bước | lượt PR | lượt master (ubuntu) |
+|---|---|---|
+| `tl selftest (có bằng chứng exact-identity)` | `skipped` | **success, 119 s** |
+| `release-verify strict (lane LAND — manifest committed)` | `skipped` | **success, 1 s** |
+
+Cây trùng băm, nhưng **tập BƯỚC không trùng** — đó là hai thứ khác nhau, và tôi gộp chúng. Câu đúng:
+*với những bước lượt PR ĐÃ chạy*, chân ubuntu của lượt master đo lại một cây không khác một byte nên
+không thêm gì; **phần thêm thật của chân ubuntu là đúng hai bước trên**, cộng chân windows.
+
+Vì vậy nợ MỚI `gate-master-do-lai-cay-trung-bam` cũng phải thu hẹp theo: **chưa có cổng nào cắt những
+bước LẶP LẠI của chân ubuntu** khi cây sau merge trùng băm với cây đã đo xanh — chứ không phải cắt cả
+chân ubuntu. Cắt cả chân là mất luôn hai bước trên. Chưa có packet.
 
 ### Và lượt hậu-merge ấy đã chạy — kết quả `cancelled`, không phải xanh
 
@@ -171,8 +195,18 @@ packet riêng**. Không làm tròn thành `landed`; cũng không đọc thành "
 **Và phần đắt nhất của bài học này là về CÁCH TÔI TƯ VẤN, không phải về CI.** Khi chủ kho hỏi lượt hậu-merge
 có đáng chi phí không, tôi trả lời rằng chân ubuntu là lặp lại còn **giá trị nằm hết ở chân windows**, rồi
 khuyến nghị để chạy hết. Phân tích ấy đúng về cấu trúc và **sai về thực tế**: chân windows đã `cancelled` ở
-ba lần land liên tiếp trước đó, và điều ấy **đã được ghi sẵn trong Issue #504 mà tôi chưa mở**. Nên lượt chạy
-ấy tiêu ~90 phút runner và trả về **không một phép đo Windows nào** — đúng thứ tôi bảo nó sẽ mua được.
+ba lần land liên tiếp trước đó, và điều ấy **đã được ghi sẵn trong Issue #504 mà tôi chưa mở**.
+
+**Và câu tiếp theo của bản đầu TỰ MÂU THUẪN — cross-review lượt 1 chấm đúng.** Bản đầu viết lượt chạy
+ấy *"trả về **không một phép đo Windows nào**"*, trong khi chính mục này rút ra cận dưới **≥ 9,05×**
+**TỪ** con số Windows 1258 s. `1258 s` **là** một phép đo Windows; hai câu không thể cùng đúng.
+
+Nói cho đúng thì phải tách hai đại lượng: lượt chạy ấy **có** cho một phép đo Windows — thời lượng
+**một bước** (`lease-publish selftest` ≥ 1258 s), đủ để dựng cận dưới tỉ lệ; nhưng nó **không** cho
+thứ người ta chạy nó để lấy: một **kết luận đạt/hỏng của chân Windows cho cây này**. Mọi bước sau bước
+20 hiện `skipped`, nên `release-verify strict (lane LAND)`, `golden-test`, `determinism-audit` và 19
+bước khác vẫn CHƯA từng chạy trên Windows cho cây này. **Cái thiếu là KẾT LUẬN, không phải phép đo** —
+và đúng cái tôi bảo nó sẽ mua được là cái kết luận ấy.
 Cùng lớp lỗi *"hỏi chỗ tiện tay thay vì hỏi chỗ kết luận được ghi"*: tôi suy giá trị của một lượt chạy từ
 CẤU HÌNH của nó, trong khi LỊCH SỬ của chính lượt ấy đã trả lời sẵn. Chốt rẻ và luôn dùng được: **trước khi
 khuyên ai tiêu một lượt CI, hãy đọc ba lượt gần nhất của cùng job trên cùng nhánh.**
@@ -207,10 +241,30 @@ base **tại thời điểm event**, nên sau mỗi `synchronize` nó cập nh�
 
 | slug | trạng thái | ghi chú |
 |---|---|---|
-| `cong-byte-co-rang-cong-claims-khong-dem-su-that` | MANG SANG | `doc-claims-check` không bắt ba đột biến số; `scripts/tl_core/workflow.py`, ngoài write set |
+| `cong-byte-co-rang-cong-claims-khong-dem-su-that` | MANG SANG · **NAY CÓ PHÉP ĐO ĐỘC LẬP** | xem ngay dưới bảng |
 | `cong-receipt-chua-dinh-nghia-cay-dang-merge` | MANG SANG | cổng receipt đọc cây trên đĩa nhưng xét tổ tiên từ `HEAD` |
 | `gate-master-do-lai-cay-trung-bam` | **MỚI** | chưa có cổng cắt chân ubuntu thừa khi cây sau merge trùng băm |
 | `quyet-dinh-dong-vong-lap-review-chua-vao-doctrine` | **MỚI** | "đóng vòng lặp khi P1=P2=0 mà P3 còn" chỉ nằm trong land evidence + `r360` |
+
+**Nợ `cong-byte-co-rang-cong-claims-khong-dem-su-that` nay KHÔNG còn là lời khai — reviewer khác nền đã
+đo nó trên chính cây này.** Đột biến MỘT con số trong `CHANGELOG.md`, giữ nguyên độ dài:
+
+```
+mut-number-release  ok=False  failed=[CHANGELOG.md]
+                    expected_size 980925 == actual_size 980925   (ĐỘ DÀI KHÔNG ĐỔI)
+                    expected_sha256 d6e8ac0d…  !=  actual_sha256 a5145028…
+                    package_hash_match=False
+mut-number-claims   ok=True   flags=[]   advisory_count=370      (KHÔNG BẮT)
+artifacts checked 3368   not OK 0
+```
+
+`release-verify` **có răng** ở mức byte; `doc-claims-check` **mù** với đột biến số dù chính nó là cổng
+mang tên "claims". Hai cổng, hai kết luận ngược nhau trên cùng một đột biến — và cổng mang tên đúng việc
+lại là cổng không làm việc ấy.
+
+**Một giới hạn của phép đo này phải nói ra:** đột biến giữ NGUYÊN ĐỘ DÀI, nên nó chứng minh
+`release-verify` bắt được thay đổi nội dung **không đổi kích thước** — thứ mà một cổng chỉ so `size` sẽ
+bỏ lọt. Nó KHÔNG chứng minh `doc-claims-check` mù với mọi loại đột biến; nó chỉ chứng minh mù với ca này.
 
 ## Chuỗi hồ sơ dừng ở đâu
 

@@ -177,7 +177,7 @@ không tự review được nó.**
 | `ops/reviews/pr497-review-4-codex-verdict.md` | verdict lượt 4, **51 844** byte / **296** dòng, `sha256 30a0ddea…` |
 | `ops/reviews/pr497-review-4-codex-verdict.receipt.yaml` | biên nhận lượt 4, neo blob ghim `5ef3b3d` — **cố ý NGẮN**, xem §4 |
 | `ops/reviews/pr497-review-5-codex-verdict.md` | verdict lượt 5, **42 310** byte / **271** dòng, `sha256 ce7add4f…` |
-| `ops/reviews/pr497-review-5-codex-verdict.receipt.yaml` | biên nhận lượt 5, neo blob ghim `3c82ae3` — NGẮN, **143** dòng |
+| `ops/reviews/pr497-review-5-codex-verdict.receipt.yaml` | biên nhận lượt 5, neo blob ghim `3c82ae3` — dạng NGẮN |
 | `ops/reviews/README.md` | **5** hàng mục lục + **2** hàng cảnh báo (lượt 3, 4 và 5 **không** sinh cảnh báo — gói của chúng sạch) |
 
 **`P1 0 · P2 1 · P3 1`, và con số ấy đo bằng `grep -cE '^### .*\[Pn\]'` trên chính tệp verdict**,

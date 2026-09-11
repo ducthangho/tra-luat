@@ -5430,8 +5430,8 @@ def t152_C2a_M9_fetch_H_mang_xac_thuc_qua_header_khong_token_trong_URL():
     dong = p.stdout.splitlines()
     chot(dong and dong[-1] == "AUTHORIZATION: basic " + b64,
          "(i) Git không nhận header hiệu lực dẫn từ TL_TOKEN trên URL fetch")
-    chot(dong == ["::add-mask::" + b64, "AUTHORIZATION: basic " + b64],
-         "(v) phải đăng ký mask đúng base64 trước fetch, không có output thừa")
+    chot(dong == ["::add-mask::" + b64, "AUTHORIZATION: basic " + b64] and not p.stderr,
+         "(v) phải đăng ký mask đúng base64 trước fetch, không có output thừa (kể cả stderr)")
 
 
 def main() -> int:

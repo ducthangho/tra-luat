@@ -34,11 +34,18 @@ spec_hash: abbee703b24f97c1bd7a528ff700447658a095da2bade357126d096c30fd5a67
 # Đo trên `2323075`: 1 tệp · +429 / -32. Trần là 300 ⇒ vượt 129 dòng.
 # Phân rã 429: 25 chú thích · 60 dòng trống · 344 code+docstring — không cắt chú
 # thích cho lọt được. `so_tep` KHÔNG nới: đường dẫn thứ hai vẫn là điều kiện dừng S1.
+# BỎ BOUND DÒNG (lần quyết cuối): ba lần liên tiếp bound bị vượt và LẦN NÀO câu trả
+# lời cũng là "nới" (300→429 · 500→536 · 650→658) ⇒ cơ chế sinh ngắt quãng lặp lại mà
+# không thêm thông tin. `so_tep` mới là chốt canh BÁN KÍNH ẢNH HƯỞNG và nó KHÔNG nới;
+# S1 (đường dẫn thứ hai ⇒ DỪNG) nguyên vẹn. Phần lớn dòng thêm ở đây là ca phản chứng
+# và đột biến — tức chính thứ A6 BẮT BUỘC phải có, nên trần dòng phạt đúng cái đặc tả đòi.
+# Ngoại lệ này áp cho RIÊNG packet #513; KHÔNG đổi ADR-0044, KHÔNG là tiền lệ.
+# Nợ để mở: UOC-DONG-THEM-CUA-DAC-TA-KHONG-CO-CO-SO.
 # NỚI LẦN HAI: đo trên `c662141` ⇒ +536/-32 (36 chú thích · 66 dòng trống · 434 code).
 # Phiên thi công DỪNG đúng theo điều khoản của chính ngoại lệ rồi mới xin. 650 = 536 đã
 # đo + ~114 biên cho vòng vá review (mỗi P1 thường đòi một ca phản chứng ≈ 15–25 dòng,
 # trần vòng review là 4). Vượt 650 ⇒ DỪNG lần ba.
-ngoai_le_adr_0044: 'so_tep 1 (KHÔNG nới), dong_them <= 650 — chủ kho đồng ý 11-09-2026, #513 comment 5637410450 (nới lần hai; bound 500 ở comment 5637281693 đã hết hiệu lực)'
+ngoai_le_adr_0044: 'so_tep 1 (KHÔNG nới, là chốt DUY NHẤT còn hiệu lực), dong_them KHÔNG giới hạn — chủ kho đồng ý 11-09-2026, #513 comment 5637719340 (bỏ bound dòng sau ba lần trượt 300→429, 500→536, 650→658; bound 650 ở comment 5637410450 hết hiệu lực)'
 
 write_set:
   - ops/nhanh_don_duoc_test.py

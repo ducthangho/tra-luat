@@ -522,7 +522,7 @@ Lưu ý một chỗ dễ đọc nhầm: mục 5 ở trên vá **LỜI KHAI** *"�
 `bo-sot-pham-vi-ref-va-vat-chat-hoa` nói **BẢNG TRÍCH bỏ sót** chính câu ấy. Vá cái trước KHÔNG
 đóng cái sau — hai lỗi khác nhau trên cùng một dòng văn bản.
 
-## Cross-review PR #493 — MƯỜI lượt, và hình dạng lỗi lặp lại là VÁ HỜ
+## Cross-review PR #493 — MƯỜI MỘT lượt, và hình dạng lỗi lặp lại là VÁ HỜ
 
 Hồ sơ vá lời khai sai thì cũng bị soi như mọi thứ khác.
 
@@ -546,7 +546,8 @@ tắt có ích**, không hơn. Verdict gốc của các lượt cross-review PR 
 | 7 | `a4bc01d` | `changes_requested` · **0 P1 · 0 P2 · 9 P3** | **4 ĐÃ VÁ THẬT · 3 VÁ HỜ · 2 VÁ SINH LỖI MỚI · 1 CHƯA VÁ** |
 | 8 | `025c6b2` | `changes_requested` · **0 P1 · 0 P2 · 10 P3** | **7 ĐÃ VÁ THẬT · 0 VÁ HỜ · 1 VÁ SINH LỖI MỚI · 1 CHƯA VÁ** |
 | 9 | `dd4a3ae` | `changes_requested` · **0 P1 · 0 P2 · 5 P3** | **7 ĐÃ VÁ THẬT · 2 VÁ HỜ · 0 VÁ SINH LỖI MỚI · 1 CHƯA VÁ** |
-| 10 | `9e78e19` | `changes_requested` · **0 P1 · 0 P2 · 3 P3** | (điền ở lượt sau) |
+| 10 | `9e78e19` | `changes_requested` · **0 P1 · 0 P2 · 3 P3** | **7 ĐÃ VÁ THẬT · 2 VÁ HỜ · 0 VÁ SINH LỖI MỚI · 1 CHƯA VÁ** (đối chiếu 10 slug lượt 9) |
+| 11 | `b43d4ab` | `changes_requested` · **0 P1 · 0 P2 · 2 P3** | (điền ở lượt sau) |
 
 Lượt 5 `approve` rồi lượt 6–8 lại `changes_requested` **không** phải mâu thuẫn: điều kiện dừng đổi
 từ *"hết P1"* sang *"hết P2"* rồi *"hết P3"* theo chỉ thị chủ kho, nên câu hỏi giao cho reviewer mỗi
@@ -726,7 +727,8 @@ Thứ đo được là hai đường số, và **phải khai rõ đang đếm T�
 | **P3** | 12 | 15 | 15 | 15 | 14 | 10 | 9 | 10 | 5 |
 | **TỔNG P1+P2+P3** | **17** | **20** | **17** | **16** | 14 | 10 | 9 | 10 | 5 |
 
-(Lượt 10 trên `9e78e19`: **0 P1 · 0 P2 · 3 P3** ⇒ cả hai đường đều là **3**.)
+(Lượt 10 trên `9e78e19`: **0 P1 · 0 P2 · 3 P3**; lượt 11 trên `b43d4ab`: **0 P1 · 0 P2 · 2 P3**
+⇒ cả hai đường đều là **3** rồi **2**.)
 
 Hai đường **chỉ trùng từ lượt 5** trở đi, vì từ đó không còn P1/P2. Kèm **0 `VÁ SINH LỖI MỚI`** ở
 lượt 9.
@@ -747,6 +749,27 @@ mà tôi bỏ sót sạch (nhãn runtime bị đánh mất khi chiếu ra mục 
 đột merge bằng cách *"giữ cả hai bộ hàng"*. Base và master đều có **1** hàng mỗi verdict; nhánh này
 có **2**. (b) Việc gộp finding vào lớp là **phán đoán**, không cổng nào cưỡng chế — và `A6` là bằng
 chứng gộp sai. (c) **Không cổng nào canh mục này**; nó là kỷ luật đọc.
+
+**BỘ QUÉT LỚP CỦA TÔI LIỆT KÊ BA BẢN CHIẾU, THỰC TẾ CÓ NĂM — và cái bị bỏ sót là cái BỀN NHẤT.**
+Cross-review lượt 11 chấm P3 `runtime-pr491-luot2-mat-nhan-khi-chieu` **lần thứ hai**, và nó đúng:
+lượt 8 tôi gắn nhãn *"ATTESTATION — toàn bộ khối runtime"* ở `ops/reviews/README.md` và ở bảng
+đường review trong mục này, lượt 9 xác nhận cả hai đóng thật — nhưng **`ops/land/pr491-…-land-evidence.yaml`
+chưa từng được vét**. Hàng `pre_merge_checks[0].ket_qua` ở đó chép `rc=0` · `714,268 s` ·
+`worktree_sach: true` · `so_muc_ban: 0` cạnh `0 P1` mà không mang nhãn nguồn nào.
+
+Hai chi tiết làm nó **khó thấy đúng kiểu**, và đó mới là bài học:
+- Nhãn `GIỚI HẠN NGUỒN` ở đầu tệp ấy bao *"mọi sự kiện **GitHub**"* — đọc lướt thì tưởng đã phủ.
+  Nhưng một lượt `launcher.py run` là lần chạy **CỤC BỘ**, không phải sự kiện GitHub. Một nhãn
+  **gần đúng** che khuất chỗ hở tốt hơn hẳn không có nhãn.
+- Mục **kề bên** (`pre_merge_checks[1]`) đã có sẵn trường `canh_bao_doc_ket_qua`. Lược đồ không
+  thiếu chỗ; tôi chỉ không điền. Nên đây không phải giới hạn công cụ, thuần là sót.
+
+**Tập bản chiếu ĐẦY ĐỦ của PR này — đếm ra để lần sau không phải nhớ:** `CHANGELOG.md` (mục này) ·
+`ops/land/pr491-…-land-evidence.yaml` · `ops/reviews/README.md` · **thân PR** trên GitHub ·
+**thông điệp commit**. Năm. Hai tệp biên nhận là **NGUỒN** (chúng tự khai `nguon_cac_scalar_tren`
+và `khong_do_duoc` đúng), hai tệp verdict là **nguyên văn neo băm** — không sửa; `RELEASE_MANIFEST.json`
+là tệp sinh. Bộ quét nào chỉ liệt kê *"`CHANGELOG` · `ops/**` · thân PR"* thì **`ops/**` là một
+cụm chưa mở**, và chính chỗ chưa mở ấy chứa hồ sơ bền nhất của đợt.
 
 **Lớp D không đóng được ở PR này.** Mã thực thi `doc-claims-check` nằm ở
 `scripts/tl_core/workflow.py` (lượt 8 chỉ đúng địa chỉ; bản trước của câu này viết *"đòi sửa

@@ -102,11 +102,28 @@ cross_review:
 pre_merge_checks:
   - ten: 'cross-review lượt 2 trên đúng head 2ec6171'
     ket_qua: '`rc=0`, `714,268 s`, `worktree_sach: true`, `so_muc_ban: 0`; **0 P1**'
+    canh_bao_doc_ket_qua: >-
+      HAI HẠNG NGUỒN NẰM CHUNG MỘT HÀNG — đọc cho đúng cột. `rc=0`, `714,268 s`,
+      `worktree_sach: true` và `so_muc_ban: 0` là **scalar runtime của launcher**, đọc từ
+      `run.json` trong scratchpad; tệp ấy KHÔNG vào kho ⇒ **ATTESTATION**, đúng như biên nhận
+      lượt 2 tự khai (`nguon_cac_scalar_tren`, và `khong_do_duoc`: *"run.json không vào kho ⇒
+      scalar runtime là attestation"*). Không có log gốc để xác thực chúng.
+      Riêng **0 P1** thì **ĐO ĐƯỢC**: đếm heading `[P1]` trên chính tệp verdict trong kho
+      (`ops/reviews/pr491-review-2-codex-verdict.md`), và `2ec6171` đối chiếu được bằng Git.
+      Nhãn GIỚI HẠN NGUỒN ở đầu tệp KHÔNG phủ hàng này — nó chỉ bao *"mọi sự kiện GitHub"*, mà
+      một lượt `launcher.py run` là lần chạy CỤC BỘ, không phải sự kiện GitHub. Cross-review
+      lượt 11 của PR #493 chấm P3 `runtime-pr491-luot2-mat-nhan-khi-chieu` đúng chỗ này: bản vá
+      lượt 8 đã gắn nhãn ở `ops/reviews/README.md` và `CHANGELOG.md` nhưng **bỏ sót bản chiếu
+      thứ ba là chính tệp này** — cùng một lớp lỗi, một projection chưa được vét.
   - ten: 'đối chiếu cổng nền(worktree) ↔ sandbox(clone) trên CÙNG 2ec6171'
     ket_qua: '`doc-claims-check --strict` 0/0 · `release-verify --strict` 0/0'
     canh_bao_doc_ket_qua: >-
       Hai mã thoát bằng nhau KHÔNG chứng minh hai môi trường tương đương — nó chỉ nói hai cổng ấy
       không phân biệt được. Đã đối chiếu ĐÚNG HAI cổng đó, không khái quát.
+  # HẠNG NGUỒN của cụm cổng dưới đây KHÁC hàng runtime ở trên: chúng là output của lệnh chạy
+  # TẠI CHỖ trên một SHA xác định, nên người khác CHẠY LẠI ĐƯỢC trên cùng SHA và đối chiếu. Gói
+  # không kèm stdout gốc, nên con số cụ thể vẫn là lời ghi nhận của phiên — nhưng khác attestation
+  # ở chỗ nó KIỂM LẠI ĐƯỢC, không phụ thuộc một tệp đã mất.
   - ten: 'release-verify --strict trên cây đã vá (lệnh của lane LAND)'
     ket_qua: '`ok: true`, `checked_file_count` **180** / `expected_file_count` **180**, `package_hash_match: true`, `package_hash_self_match: true`, `failed: []`, `extra_files: []`, `required_missing: []`, `errors: []`'
   - ten: 'release-verify HAI CHIỀU — chứng minh cổng CHẶN, không chỉ chứng minh xanh'

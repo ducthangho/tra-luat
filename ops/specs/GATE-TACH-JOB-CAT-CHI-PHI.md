@@ -1,9 +1,9 @@
-# Đặc tả packet — GATE-TACH-JOB-CAT-CHI-PHI (revision 10)
+# Đặc tả packet — GATE-TACH-JOB-CAT-CHI-PHI (revision 11)
 
 - `packet_id`: **GATE-TACH-JOB-CAT-CHI-PHI**; ID bền theo `PROTOCOL §3.2` là `wp<packet_issue>`.
 - `packet_issue`: **#463**
 - `mission_issue`: **#467** (*"bốn packet treo sau #456: GATE → LO-319 → 2A → 2B"*)
-- `revision`: **10** · `generation`: 1 · soạn **11:3xZ 11-09-2026**
+- `revision`: **11** · `generation`: 1 · soạn **11:3xZ 11-09-2026**
 - `depends_on`: **`[wp502, wp<T125>]`** — xem `write_set`. `wp<T125>` điền khi chủ kho cấp Issue cho
   `T125-RA-JOB-RIENG`; **packet này không được cấp lease trước khi cả hai land.**
 - `executor`: claude · `environment`: cloud
@@ -73,7 +73,9 @@ gate-packet-loop  =  7,42 + thiet lap        = 10,17 .. 10,69 phut
 
 ⇒ `max(job)` ước **`19,29`–`19,29`** (job `gate` vẫn nặng nhất), so ngưỡng `A1` **`≤ 36,00`**.
 **Ước này dùng tải của nền G2.** Dưới tải hôm nay (sau `#492`), job `gate` còn mang bước
-`lease-publish selftest` đã phình; `T125-RA-JOB-RIENG` land trước mới đưa bước ấy về `≈ 8,96` phút —
+`lease-publish selftest` đã phình; `T125-RA-JOB-RIENG` land trước mới đưa bước ấy xuống theo hệ số
+`1/bội_số` — **không có con số cho bước ấy**, vì bội số Windows chưa ai đo và giá trị thật của bước
+là một **cận dưới** (xem `T125-RA-JOB-RIENG` mục *ƯỚC CÓ ĐIỀU KIỆN*) —
 đó chính là lý do thứ tự hai packet không đảo được.
 
 **Thứ ước này KHÔNG nói:** nó không nói `max(job)` sẽ dưới `36,00`. Chi phí thiết lập của job MỚI
@@ -197,10 +199,17 @@ Nới trần để `0,60 ×` rộng ra là **vi phạm `A4`**, và `§12` coi n�
 
 Đơn vị: **`completed_at − started_at` của JOB**, đọc qua `list_workflow_jobs`; lấy `max` trên **tất
 cả** job của lượt, **không** lấy tổng.
-**Nền:** G2 (`34429604548`) — `max(job) = 40,63` phút, **đã vượt** `36,00` (G4). Nền này **hợp lệ và
-có thật**; không còn nhánh *"nền không tồn tại"*.
-**Phép làm ĐỎ:** `max(job)` Windows vượt `0,60 ×` trần.
-**Đột biến bắt buộc:** gộp hai job mới trở lại `gate` ⇒ `max(job)` quay về `≈ 40,63` ⇒ `A1` phải ĐỎ.
+**Nền — và phải phân biệt HAI loại nền, vì bản trước gộp chúng:**
+- **Nền LỊCH SỬ:** G2 (`34429604548`) — `max(job) = 40,63` phút, `success`. Nó chứng minh job Windows
+  **từng** hoàn tất, và `40,63 > 36,00` (G4). **Nó KHÔNG phải nền nghiệm thu**: nó thuộc tải
+  **trước `#492`**.
+- **Nền NGHIỆM THU:** lượt sinh lại tại `start_from_sha` theo `A5(3)`, dưới tải **hiện tại**. Nền ấy
+  **có thể KHÔNG hợp lệ** (xem `chua_do_duoc` #0) — khi đó **DỪNG và hỏi chủ kho**, không mượn
+  `40,63`.
+**Phép làm ĐỎ:** `max(job)` Windows của lượt sau tách vượt `0,60 ×` trần.
+**Đột biến bắt buộc:** gộp hai job mới trở lại `gate` ⇒ `max(job)` phải **tăng trở lại mức chưa
+tách của CHÍNH nền nghiệm thu** ⇒ `A1` ĐỎ. **KHÔNG** đòi nó tái tạo `40,63` — số ấy của cây cũ,
+tải cũ, và đòi như thế là biến một đột biến thành phép so với một hằng số đã chết.
 
 **Kèm, công bố nhưng KHÔNG đặt ngưỡng** (chưa có nền cùng đơn vị): thời gian đầu-cuối của cả lượt
 (`run.created_at → run.updated_at` khi `status = completed`). Đây là phép đo duy nhất thấy được xếp
@@ -310,9 +319,36 @@ GIÁ TRỊ sau.**
      `if` mức bước, trong đó **7 ở dạng TRẦN** (không `${{ }}`) và chỉ **3** có dấu (đo 12:3xZ
      11-09-2026). Phép trích theo delimiter bỏ sót **7/10** — và `A3` ngay dưới đã công nhận dạng
      trần tồn tại, nên hai mục sẽ mâu thuẫn nhau.
-     ⇒ Đọc toán hạng ở **đúng những vị trí Actions coi là biểu thức**: `strategy.matrix.*` ·
-     `if` **mức job** · `if` **mức bước** — mỗi vị trí **kể cả dạng trần lẫn dạng có dấu**.
-     **KHÔNG** quét chuỗi toàn tệp: chữ trong `run:` hay comment sẽ bị nhận nhầm là biểu thức.
+     ⇒ **KHÔNG liệt kê vị trí — QUÉT TOÀN TÀI LIỆU rồi FAIL-CLOSE theo SCHEMA.**
+     Một danh sách vị trí đoán trước **thua từ trong thiết kế**, và đo được là đã thua: bản trước
+     liệt kê `strategy.matrix.*` · `if` mức job · `if` mức bước, trong khi `ci.yml` hôm nay có biểu
+     thức ở **7** khoá khác nhau (đo `yaml.safe_load` + duyệt đệ quy, 12:5xZ 11-09-2026):
+
+     ```
+     3x steps.if            1x concurrency.group              1x jobs.gate.runs-on
+     1x jobs.gate.strategy.matrix.os                          1x steps.env.PR_HEAD_SHA
+     1x concurrency.cancel-in-progress                        1x steps.with.name
+     ```
+
+     Danh sách cũ phủ **2/7**, và cái bỏ sót gồm **`runs-on: ${{ matrix.os }}`** — đúng khoá
+     **quyết định instance**, tức đúng thứ `A5` tựa vào. Cùng gốc *"danh sách CẤM không bao giờ đủ,
+     phải đảo thành danh sách CHO PHÉP"*.
+
+     **Phép đúng, hai nửa, và nửa sau mới là chốt:**
+     1. **Tập vị trí biểu thức** = mọi scalar trong tài liệu đã parse **chứa `${{`**, **hợp** với
+        mọi khoá `if` (mức job và mức bước) **bất kể dạng trần hay có dấu**. Duyệt đệ quy toàn bộ
+        cây, không liệt kê khoá.
+     2. **SCHEMA VỊ TRÍ ĐƯỢC HỖ TRỢ** khai tường minh trong bản vá. Vị trí nào ở (1) mà **không**
+        nằm trong schema ⇒ **ĐỎ**, kèm tên khoá. Đây là chốt trả lời được câu *"đã quét hết chưa"*
+        bằng **cấu trúc**, thay vì bằng lời tự khai của bộ giải.
+     **Ca khoá:** làm nguồn chọn runner phụ thuộc một toán hạng không giải được, đặt ở một vị trí
+     **ngoài** schema (ví dụ `runs-on` nếu schema quên nó) ⇒ phải **ĐỎ**. Ca này phải đỏ **độc lập
+     với tập mà bộ giải tự trả về** — nếu nó chỉ đỏ khi bộ giải tự khai thiếu thì chốt vô nghĩa.
+     **Về `run:` — bản trước nói sai và tự mâu thuẫn:** comment **của YAML** bị parser bỏ nên không
+     bao giờ tới được phép quét này; nhưng dấu `#` **bên trong scalar `run:`** là **một phần của
+     scalar** và Actions **có** nội suy nó — chính đặc tả này kể sự cố `ops-don-ref.yml` vì đúng
+     chuyện đó. Nên `run:` là **vị trí biểu thức thật**, phải nằm trong schema (hoặc bị từ chối),
+     **không** được loại trừ bằng một câu cấm quét.
   3. **Giải từng toán hạng — và "toán hạng" gồm cả HÀM, không chỉ đường dẫn ngữ cảnh.**
      `ci.yml` hôm nay dùng `always()` · `cancelled()` · `contains()` · `fromJSON()` (đo cùng lúc);
      `always()`/`cancelled()` phụ thuộc **trạng thái lượt**, không phải metadata tĩnh.
@@ -488,8 +524,19 @@ Kế thừa nguyên trạng; packet này **không** đóng thêm mục nào, và
    **Chưa có cổng nào canh ngân sách này** — nợ, chưa có tên, ngoài phạm vi packet này.
    Rút nợ xuống chỉ còn phần `#492` là **thu hẹp không có phép đo bác phần còn lại**.
 
+0c. **XUẤT XỨ CỦA SỐ — phân loại lại, vì gói review không chứa hiện vật cho một số ô.**
+   Có hiện vật, tái lập được: G1/G2/G3/G4 (`do-nen-hai-nen.txt`, `do-nen-windows.txt`) · bội số
+   suite (`benchmark.txt` + `benchmark.sh`) · `prefix 33,97` / `overhead 0,03` (nêu run/job/attempt
+   trong `T125-RA-JOB-RIENG`).
+   **CHỈ THUẬT LẠI, KHÔNG có hiện vật trong kho** — và vì thế **không** được dùng làm nền đã sẵn
+   có: `2,75`–`3,27` phút thiết lập Windows · `400`/`270` giây song song hoá Linux ·
+   `20,7 ms/biên nhận` trên 118 biên nhận · response của `/rules/branches/master` (`200`,
+   ruleset `20856202`) và `403` của `/branches/master/protection`.
+   Phiên thi công **đo lại** từng số ấy kèm hiện vật, hoặc khai `KHÔNG ĐO ĐƯỢC` — **không** đưa số
+   trần. Một lệnh REST tổng quát **không** tái lập một phép đo quá khứ.
+
 1. **Chi phí thiết lập trên Windows của job MỚI chưa ai đo.** `2,75`–`3,27` phút là đo của **một**
-   job đang có. Job mới có thể tốn khác (cache runner, thứ tự cấp máy, ba lần checkout
+   job đang có, và **không có hiện vật** (mục `0c`). Job mới có thể tốn khác (cache runner, thứ tự cấp máy, ba lần checkout
    `fetch-depth: 0`). Mọi con số ở mục *"ƯỚC CÓ ĐIỀU KIỆN"* là **ước có đơn vị từ số đo cũ**. `A1` và
    `A5` là hai phép đo trả lời câu ấy — và nếu chúng ĐỎ thì đó là **kết quả**, không phải thất bại.
 2. **Không có đường đo Windows tại chỗ.** Container Linux; mọi khẳng định về Windows đi qua CI.

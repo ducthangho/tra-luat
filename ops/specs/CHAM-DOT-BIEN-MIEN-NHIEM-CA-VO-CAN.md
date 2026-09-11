@@ -1,9 +1,9 @@
-# Đặc tả packet — CHAM-DOT-BIEN-MIEN-NHIEM-CA-VO-CAN (revision 5)
+# Đặc tả packet — CHAM-DOT-BIEN-MIEN-NHIEM-CA-VO-CAN (revision 6)
 
 - `packet_id`: **CHAM-DOT-BIEN-MIEN-NHIEM-CA-VO-CAN**; ID bền theo `PROTOCOL §3.2` là `wp<packet_issue>`.
 - `packet_issue`: **(để trống — chủ kho cấp)**
 - `mission_issue`: **(để trống — chủ kho cấp.)** Packet sinh từ một sự cố đo được, chưa lane nào ôm.
-- `revision`: **5** · `generation`: 1 · soạn **11:1xZ 11-09-2026**
+- `revision`: **6** · `generation`: 1 · soạn **11:1xZ 11-09-2026**
 - `depends_on`: **`[]`**
 - `executor`: claude · `environment`: cloud
 - `risk`: **sensitive** · `review_class`: **sensitive**
@@ -61,11 +61,27 @@ mà mọi `raise` trên đường đều viết ra được.
 
 ## MÔ HÌNH ĐE DOẠ — khai trước, vì mọi tiêu chí về kênh kết quả neo vào nó
 
-Đặc tả này bảo vệ kênh kết quả khỏi **giả mạo NGẪU NHIÊN**: mã hạ tầng hoặc mã test, viết với ý định
-đúng, tình cờ sinh ra đúng tín hiệu mà bộ chấm tin. Đó là loại **đã xảy ra hai lần** (`#355`/`#359`,
-và `CASE T4` ở trên).
+Đặc tả này bảo vệ kênh kết quả khỏi **một TẬP LỖI KHAI TƯỜNG MINH**, không phải khỏi *"lỗi vô ý"* —
+**ý định của tác giả không tạo ra ranh giới lỗi nào**, và bản trước nói sai chỗ đó. Tập được bảo vệ:
 
-**Nó KHÔNG bảo vệ khỏi mã sản phẩm ĐỐI KHÁNG trong cùng interpreter, và không thể.** `nap_tool`
+| # | lỗi | chốt nào bắt |
+|---|---|---|
+| E1 | một `raise` trên đường hạ tầng sinh ra đúng kiểu ngoại lệ bộ chấm tin | lớp `TinHieuChotCa` riêng (`M1`) |
+| E2 | một ca **ngoài `dich`** đỏ và làm lệch tập ca đỏ | ba trạng thái + neo tên ca (`M2`, `A2`) |
+| E3 | bản ghi của **lượt khác** (mutant/lần thử/rc khác) lọt vào kênh | neo `(ca·mutant·lần thử·rc)` (`M7`) |
+| E4 | bản ghi của **cùng định danh nghiệp vụ nhưng lượt trước** bị phát lại | **dấu phiên sinh mới mỗi lượt** (`M7`, `A5c(1)(1b)`) |
+| E5 | lượt con chết giữa chừng để lại đủ số bản ghi | bản ghi **đóng lượt** (`M7`, `A5c(2)`) |
+| E6 | hai bản ghi cho cùng một ca, hoặc ca lạ, hoặc thiếu ca | đúng một bản ghi/ca (`M7`, `A5b`) |
+| E7 | mã sản phẩm gọi **đúng hàm phát** của khung và tự khai tên ca khác | khung đóng dấu tên ca từ trạng thái của chính nó (`A5c(3)`) |
+
+**Thứ tập này KHÔNG phủ, bất kể tác giả có ý định gì:** mã cùng interpreter **sửa thẳng trạng thái
+khung** (gán lại tên ca đang chạy, thay chính hàm phát, vá `sys.modules`). `E7` chỉ chặn đường **gọi
+hàm**, không chặn đường **sửa trạng thái** — và một lỗi **vô ý** cũng đi được đường ấy. `chua_do_duoc`
+#4/#5 giữ nguyên phần này ở trạng thái **chưa chặn**.
+Hai sự cố đã xảy ra (`#355`/`#359` và `CASE T4`) thuộc **E1**.
+
+**Nó KHÔNG bảo vệ khỏi mã ĐỐI KHÁNG — hay khỏi một lỗi vô ý đi cùng đường ấy — trong cùng
+interpreter, và không thể.** `nap_tool`
 (dòng 78–84) `import` mã sản phẩm **vào chính tiến trình chạy ca**, nên giữa khung test và mã bị thử
 **không có ranh giới quyền nào**. Phạm vi biến Python **không phải** một miền quyền: mã cùng
 interpreter sửa được trạng thái và hàm của khung.
@@ -198,7 +214,7 @@ Thêm ba ca biên: **dòng trùng** · **thiếu dòng** · **dòng của ca kh�
 `KHÔNG ĐO ĐƯỢC`; không cái nào được ⇒ `GIẾT`.
 
 **A5c (M7) — bản ghi phải QUY VỀ ĐƯỢC lượt vừa phóng, và ca do KHUNG đóng dấu.**
-Ba ca, mỗi ca một đột biến riêng làm **đúng ca đó** đổi màu.
+**BỐN** ca (`1`, `1b`, `2`, `3`), mỗi ca một đột biến riêng làm **đúng ca đó** đổi màu.
 
 1. `r5xx_ban_ghi_luot_TRUOC_chi_khac_dau_phien`. Cấy vào kênh một bộ bản ghi **hợp lệ về mọi mặt
    khác**: **đúng tên ca**, **đúng tên mutant của lượt hiện tại**, **đúng số lần thử**, **đúng `rc`**,
@@ -211,9 +227,23 @@ Ba ca, mỗi ca một đột biến riêng làm **đúng ca đó** đổi màu.
 1b. `r5xx_dau_phien_phai_sinh_moi_moi_luot`: chạy **hai** lượt có **cùng** định danh nghiệp vụ
    (cùng mutant, cùng số lần thử, cùng `rc`). Đòi **hai dấu phiên KHÁC nhau**; và cấy bản ghi của
    lượt **thứ nhất** vào kênh của lượt **thứ hai** ⇒ **`KHÔNG ĐO ĐƯỢC`**.
-   **Phép làm ĐỎ:** cho bộ sinh trả **hằng số**, hoặc trả mốc thời gian giây ⇒ hai dấu trùng ⇒ ca ĐỎ.
+   **Phép làm ĐỎ — ba đột biến, và ca phải đỏ với CẢ BA:**
+   (i) bộ sinh trả **hằng số**;
+   (ii) bộ sinh trả **mốc thời gian độ phân giải giây**;
+   (iii) bộ sinh trả một **bộ đếm tăng dần**.
+   **(ii) và (iii) là lý do ca này cần thêm hai ràng buộc — thiếu chúng thì ca xanh oan:**
+   - **GHIM NGUỒN CLOCK.** Ca phải chạy hai lượt dưới một clock **bị đóng băng ở cùng một tick**
+     (bơm nguồn thời gian, không dựa vào việc hai lượt tình cờ rơi vào hai giây khác nhau). Không
+     ghim thì đột biến (ii) cho hai dấu khác nhau và **ca xanh đúng theo quy trình đã viết** —
+     tức phép đo mù đúng chỗ nó phải canh.
+   - **ĐO NGUỒN NGẪU NHIÊN, không chỉ đo tính khác nhau.** Đòi bộ sinh lấy từ nguồn ngẫu nhiên mã
+     hoá (`secrets` / `os.urandom`) và đếm **số lần gọi nguồn ấy = số lượt**. Đột biến (iii) cho
+     mọi dấu **khác nhau** nên phép so "hai dấu khác nhau" **không bắt được nó**; chỉ phép đếm lời
+     gọi mới bắt.
+   **KHÔNG thay bộ sinh thật bằng fixture tự dựng hai dấu** — làm thế là quay về đo PHÉP SO (ca 1),
+   đúng thứ ca này sinh ra để tách khỏi.
    **Vì sao ca này tách khỏi ca 1:** ca 1 đo **PHÉP SO** (fixture tự dựng một dấu khác); ca này đo
-   **BỘ SINH**. Bỏ ca này thì một triển khai dùng dấu cố định vẫn qua được cả ba ca kia.
+   **BỘ SINH**. Bỏ ca này thì một triển khai dùng dấu cố định vẫn qua được ba ca kia.
 
 2. `r5xx_ban_ghi_thieu_dau_dong_luot`: lượt con phát đủ kết quả nhưng **không** đóng lượt. Đòi
    **`KHÔNG ĐO ĐƯỢC`** — một lượt bị giết giữa chừng có thể để lại đúng số bản ghi.
@@ -288,7 +318,7 @@ chưa đạt để tự cấp thẩm quyền. Người quyết vẫn là chủ k
 4b. **THU HẸP PHẠM VI, KHAI THẲNG — và nó KHÔNG phải một bản vá.** Cross-review lượt 2 mở finding
    `lop-ngoai-le-chua-bao-ve-duong-truyen-ket-qua` với phạm vi gồm **cả** mã sản phẩm đối kháng.
    Bản này **thu hẹp** phạm vi ấy xuống chống giả mạo **ngẫu nhiên** (xem *MÔ HÌNH ĐE DOẠ*), và đưa
-   đường sửa khung ra `ngoai_pham_vi`/#5. Theo điều khoản chống lách của chủ kho 11-09-2026:
+   đường sửa khung ra `chua_do_duoc` #4/#5. Theo điều khoản chống lách của chủ kho 11-09-2026:
    **thu hẹp phạm vi là một mục `chua_do_duoc`, KHÔNG được tính là đã vá finding.** Finding ấy vì vậy
    ở trạng thái **PHẠM VI ĐÃ ĐỔI**, còn mở với phần đối kháng, và chỉ chủ kho mới đóng được nó.
 

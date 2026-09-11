@@ -1,9 +1,9 @@
-# Đặc tả packet — T125-RA-JOB-RIENG (revision 4)
+# Đặc tả packet — T125-RA-JOB-RIENG (revision 5)
 
 - `packet_id`: **T125-RA-JOB-RIENG**; ID bền theo `PROTOCOL §3.2` là `wp<packet_issue>`.
 - `packet_issue`: **(để trống — chủ kho cấp)**
 - `mission_issue`: **(để trống — chủ kho cấp.)** Khuyến nghị `#467` (mission đang ôm `#463`).
-- `revision`: **4** · `generation`: 1 · soạn **11:0xZ 11-09-2026**
+- `revision`: **5** · `generation`: 1 · soạn **11:0xZ 11-09-2026**
 - `depends_on`: **`[wp503]`** — `ops/lease_publish_test.py` đang bị `#503` giữ (đo ở `write_set`).
 - `executor`: claude · `environment`: cloud
 - `risk`: **sensitive** · `review_class`: **sensitive** (`.github/workflows/**`, `§8`)
@@ -58,18 +58,32 @@ lại của trần `timeout-minutes: 60`**, và từ `10-09-2026` nó làm job b
 **Mô hình phải có BA số hạng, và hai trong ba CHƯA ĐO ĐƯỢC.** Job Windows sau khi bỏ `t125` là:
 
 ```
-job_sau = prefix + buoc20_hoan_tat/boi_so + suffix
-  prefix          = buoc 1..19  = 33,97 phut   (do duoc tren luot bi cat)
-  buoc20_hoan_tat = KHONG BIET, >= 26,25 phut  (CAN DUOI - buoc bi CAT dung o day)
-  suffix          = buoc 21..41 = KHONG BIET   (KHONG phai 0 - 21 buoc nay CHUA CHAY lan nao
-                                                tren luot bi cat, nen khong co so)
-  boi_so          = KHONG BIET tren Windows    (2,9312 la so LINUX)
+job_sau = prefix + buoc20_hoan_tat/boi_so + suffix + overhead
+  prefix          = 33,97 phut   DO DUOC   19 buoc truoc b20
+  buoc20_hoan_tat = >= 26,25     CAN DUOI  buoc bi CAT dung o day
+  suffix          = KHONG BIET             cac buoc sau b20 chua chay het
+  overhead        = 0,03 phut    DO DUOC   job tru tong buoc
+  boi_so          = KHONG BIET             tren Windows (2,9312 la so LINUX)
 ```
 
-**Phép trừ thẳng `60,52 − 26,25 + 26,25/2,9312 = 43,23` SAI MÔ HÌNH**, và sai theo **hai** hướng cùng
-lúc, cả hai đều làm ước **nhỏ hơn** sự thật:
+**Xuất xứ `prefix` và `overhead`** (đo 12:5xZ 11-09-2026, `GET /actions/runs/34563553711/jobs`):
+run `34563553711` · job `103150987797` · `run_attempt` `1` · `windows-latest` · `conclusion`
+`cancelled` · **44** bước, `lease-publish selftest` ở chỉ số **19**. Tổng `started_at..completed_at`
+của 19 bước trước nó = **`33,97`**; `job` = **`60,52`**; Σ mọi bước = **`60,48`**.
+
+**Khe `60,52 − 26,25 = 34,27` so `prefix 33,97` lệch `0,30` — và nó hạch toán TRỌN VẸN:**
+`suffix đã chạy` **`0,27`** (các bước dọn có `if: always()` vẫn chạy sau khi job bị huỷ) cộng
+`overhead ngoài bước` **`0,03`**. Không có phần nào bị xoá khỏi mô hình.
+**Lưu ý `suffix`:** `0,27` là phần **đã chạy** của các bước sau `b20` trên lượt **bị cắt** — nó
+**không** phải chi phí của chúng trên một lượt chạy trọn, nơi chúng làm việc thật. Nên `suffix`
+của mô hình vẫn **KHÔNG BIẾT**, và **không** được đặt bằng `0,27`.
+
+**Phép trừ thẳng `60,52 − 26,25 + 26,25/2,9312 = 43,23` SAI MÔ HÌNH**, và sai theo **ba** hướng cùng
+lúc, cả ba đều làm ước **nhỏ hơn** sự thật:
 1. nó lấy `26,25` — một **cận dưới** của bước bị cắt — làm **giá trị thật**;
-2. nó ngầm đặt `suffix = 0`, trong khi `suffix` là **21 bước chưa từng chạy** trên lượt ấy.
+2. nó ngầm đặt `suffix = 0`, trong khi các bước sau `b20` trên một lượt chạy trọn làm việc thật
+   (trên lượt bị cắt chúng chỉ kịp chạy phần dọn, `0,27` phút);
+3. nó dùng bội số **Linux** cho một job **Windows**.
 
 **Nên đặc tả KHÔNG khai một con số cho job sau tách.** Thứ khai được: bỏ `t125` làm bước 20 giảm theo
 hệ số `1/bội_số`; mọi số hạng khác **để mở** cho tới khi có một lượt Windows **hoàn tất** sau khi
@@ -170,11 +184,25 @@ cộng biên ⇒ `0,45`. Đơn vị: **giây của BƯỚC**, đọc qua `list_w
   cờ hoàn tất thì cả (a) lẫn (b) đều ĐẠT. `M1` và `ngoai_pham_vi` #3 áp **cả hai nền**, nên phải có
   một phép đo áp cả hai nền.
   Đòi, **cho MỖI nền trong ma trận**, lấy từ `list_workflow_jobs` của lượt sau tách:
-  1. bước `lease-publish selftest` của job `gate` **có** mang cờ bỏ — đọc từ `steps[].name` và từ
-     bản ghi BỎ QUA mà `A3` đòi, **không** đọc từ `ci.yml`;
+  1. **thân `t125` KHÔNG được vào** trong job `gate` của nền ấy — đo bằng **BẰNG CHỨNG THỰC THI**,
+     không bằng tên hiển thị:
+     - `steps[].name` là **tên hiển thị**, không phải `argv`. Tên bước hiện tại **không chứa cờ**,
+       và **ép cờ vào tên là làm `A4` ĐỎ** (đổi tên một bước cũ) — hai tiêu chí sẽ đá nhau. Nên
+       **giữ nguyên tên bước**, và **cấm** dùng tên làm bằng chứng.
+     - Bằng chứng hợp lệ: dòng tổng kết của chính bộ test (`A3`) khai `t125` ở danh sách **BỎ QUA**,
+       **cộng** số tiến trình con A/B mà `gate` phóng cho `t125` **bằng 0**. Cả hai neo
+       `(run_id, job_id, run_attempt, head_sha, nền)` và lấy từ log của **đúng job ấy**, ghi đường
+       lấy log vào biên nhận.
+     - **Hạch toán phải xảy ra TRƯỚC khi vào thân.** Một bản vá đặt việc ghi BỎ QUA **sau** thân
+       `t125` sẽ **vừa chạy tải vừa báo bỏ** — nhãn đúng, tải vẫn còn.
+       **Ca khoá bắt buộc:** hạch toán-sau-thân ⇒ `A1(c)` phải **ĐỎ**. Thiếu ca này thì (1) chỉ đo
+       **NHÃN**, không đo **TẢI**.
+     - Và nói thẳng cái `A2c` KHÔNG chứng minh: `A2c` chứng minh **job mới CÓ chạy** `t125`; nó
+       **không** chứng minh **job `gate` đã NGỪNG** chạy nó. Hai mệnh đề khác nhau, cần hai phép đo;
   2. job `gate-t125` của **chính nền ấy** tồn tại, `conclusion` **không** phải `skipped`, và bản ghi
      A/B của `A2c` có mặt cho nền ấy;
-  3. `gate` và `gate-t125` **KHÔNG** nối bằng `needs` (đọc `yaml.safe_load`) — hai job phải chạy
+  3. `gate` và `gate-t125` **KHÔNG** nối bằng `needs`, **kể cả GIÁN TIẾP** qua một job trung gian
+     (đóng đồ thị `needs` rồi kiểm không có đường đi giữa hai job) — hai job phải chạy
      **song song**; nối chuỗi thì `t125` vẫn nằm trên đường tới hạn của workflow dù đã ra khỏi job.
   **Phép làm ĐỎ:** giữ `t125` **chỉ trên Windows** (bỏ cờ ở nhánh windows của ma trận) ⇒ (1) hỏng ở
   nền windows ⇒ ĐỎ · cho `gate-t125` `needs: gate` ⇒ (3) ⇒ ĐỎ · để `gate-t125` `skipped` trên một
@@ -329,7 +357,12 @@ hai đặc tả để lần thứ hai không bị quên, và để không ai req
 Vượt ⇒ **DỪNG và hỏi chủ kho**, không tự xin ngoại lệ.
 
 **A8 (toàn packet) — suite không tụt.** `ops/lease_publish_test.py` chạy đủ (job `gate` + job
-`gate-t125` gộp lại) phủ **đúng** tập ca như trước: `145 + 1 = 146` (mẫu số đúng lúc thi công).
+`gate-t125` gộp lại) phủ **đúng** tập ca như trước.
+**MẪU SỐ PHẢI ĐẾM LẠI, KHÔNG CHÉP.** Mọi số `146` trong đặc tả này là **ảnh chụp tại `0236ca7`**
+(cùng lúc chạy benchmark N3); đếm bằng AST trên `HEAD` `d81f155` ⇒ **147** ca `@ca` (đo 13:0xZ
+11-09-2026). Suite tăng ca theo từng packet land, nên mẫu số **trôi trong vài ngày**.
+Hợp đồng là: `tập ca sau == tập ca trước` (so **TẬP**, không so số đếm), và
+`đạt + bỏ qua == |tập ca|` với **hai số BẰNG NHAU**; `bỏ qua = 1` là `t125`.
 Hai số phải **BẰNG NHAU**; không tin `rc=0` suông.
 **Phép làm ĐỎ:** tập ca thiếu, hoặc tăng ngoài hợp đồng. `145+1` tự nó **không** chứng minh `t125`
 có chạy A/B — đó là A2c.

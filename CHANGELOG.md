@@ -372,10 +372,20 @@ mục ghi sổ có thể bàn kỹ bao nhiêu tuỳ ý về một đường dẫ
 **Và LỚP lỗi ấy chưa đóng — đo được ngay trong chính lần vá này.** Khi viết đoạn sửa lời tư vấn ở trên, tôi
 đặt tên bước *tl selftest* vào dấu backtick **lần thứ hai**, và advisory `L8 TL_COMMAND_UNKNOWN` quay lại;
 đo hai clone cho `372` thay vì `371`. Tức bản vá lượt trước chỉ gỡ **một thể hiện**, không đóng lớp: mỗi lần
-nhắc lại tên bước trong văn bản mới là một cơ hội tái phạm, và không cổng nào chặn trước — nó chỉ hiện ra ở
-phép đo delta hai clone. Ghi ra vì đây là bằng chứng cho một mệnh đề mà kho hay nói mà ít khi đo được: **sửa
-một thể hiện không phải sửa một lớp.** Nợ thật sự là *"tên bước workflow và lệnh CLI không phân biệt được
-bằng dấu backtick"*, và nó nằm ở cách `doc-claims` trích claim chứ không ở văn bản của tôi.
+nhắc lại tên bước trong văn bản mới là một cơ hội tái phạm. Ghi ra vì đây là bằng chứng cho một mệnh đề mà
+kho hay nói mà ít khi đo được: **sửa một thể hiện không phải sửa một lớp.**
+
+**Bản trước của đoạn này kết thúc bằng một câu ĐẨY LỖI, nay RÚT.** Câu bị rút: *"nợ thật sự … nằm ở cách
+`doc-claims` trích claim chứ không ở văn bản của tôi"*. Cross-review lượt 4 chấm P2 đúng chỗ đó, và nó tự
+mâu thuẫn với bảng cách trên bốn dòng — bảng ấy đã ghi **cổng ĐÚNG, lỗi cách viết của tôi**. Hợp đồng nói
+rõ phạm vi của L8: *"tên lệnh `tl <cmd>` trong span backtick, tra `references/golden/parser_surface.json`"*.
+Đó là một phép kiểm **cú pháp cơ học**, và nó **không hứa** đọc ngữ nghĩa "đây là tên bước workflow". Cổng
+làm đúng thứ nó khai; giới hạn của một bộ trích cơ học **không phải** bằng chứng nó sai hợp đồng, và càng
+không miễn cho người viết trách nhiệm chọn cách viết rõ nghĩa.
+
+Thứ CÒN LẠI sau khi rút câu ấy, và nó vẫn là một quan sát thật: **vòng phản hồi chậm**. Không cổng nào chặn
+trước lúc viết; sai sót chỉ hiện ở phép đo delta hai clone, tức sau khi đã commit. Đó là một nhận xét về
+**độ trễ của tín hiệu**, không phải một lời buộc tội cổng — và nó không có packet, cũng chưa chắc đáng có.
 
 ## Chuỗi hồ sơ dừng ở đâu
 

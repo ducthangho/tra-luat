@@ -1,4 +1,4 @@
-# Đặc tả packet — GATE-TACH-JOB-CAT-CHI-PHI (revision 4)
+# Đặc tả packet — GATE-TACH-JOB-CAT-CHI-PHI (revision 5)
 
 - `packet_id`: **GATE-TACH-JOB-CAT-CHI-PHI** (bí danh chữ; ID bền theo `PROTOCOL §3.2` là
   `wp<packet_issue>`, suy ra được ngay khi có số Issue — tiền lệ #456 giữ bí danh ở `packet_id`,
@@ -7,7 +7,7 @@
 - `mission_issue`: **(để trống — chủ kho cấp.)** `§3.2` đòi; lease #456 không có, và không có
   mission nào đang mở cho lane này. Khuyến nghị: mở MỘT Mission Issue cho cả bốn packet
   (`GATE` · `LO` · `2A` · `2B`); nếu không, ghi số Issue của `#456` và nói rõ đó là thay thế.
-- `revision`: **4** · `generation`: 1 — **revision 4** theo chỉ thị chủ kho 07-09-2026 (*"Vá xong thì mở r3 luôn, không cần hỏi lại"* + *"Tiếp tục vòng lặp vá, cross-review tới khi hết P1"*; dấu vết bền: https://github.com/ducthangho/tra-luat/issues/463#issuecomment-5568696936 — comment riêng cho r4 executor chưa đăng được, chủ kho có thể bổ sung) sau cross-review lượt 9 (`reviewed_sha` `0bc6e56`, ba P2 câu chữ):
+- `revision`: **5** · `generation`: 1 — **revision 5** theo chỉ thị chủ kho 11-09-2026 (chọn đường **(b)**: sửa phẫu thuật CỘNG quét lại mọi con số mà `nghiem_thu` tựa lên). Xem khối **REVISION 5** ngay dưới mục `nguon_cap_viec`. Lịch sử: **revision 4** theo chỉ thị chủ kho 07-09-2026 (*"Vá xong thì mở r3 luôn, không cần hỏi lại"* + *"Tiếp tục vòng lặp vá, cross-review tới khi hết P1"*; dấu vết bền: https://github.com/ducthangho/tra-luat/issues/463#issuecomment-5568696936 — comment riêng cho r4 executor chưa đăng được, chủ kho có thể bổ sung) sau cross-review lượt 9 (`reviewed_sha` `0bc6e56`, ba P2 câu chữ):
   (g) câu *"nhiễu runner cỡ 1–2,3 phút là có thật"* và các chỗ A1/A5 gọi chênh giữa hai lượt là "nhiễu" viết lại cho đúng: hai lượt ấy cùng
   tree nhưng KHÁC event/lane (`workflow_dispatch` nhánh so `push` master ⇒ 4 bộ ba thêm/4 mất do release-verify lane), phần do runner
   KHÔNG tách được (nợ `NHIEU-RUNNER-CHUA-TACH-KHOI-TAI`); biên `~4` phút của A1 và `~9` của A5 là **biên thiết kế**, không phải nhiễu đo được;
@@ -57,6 +57,98 @@ Bản này là **bản sửa theo verdict cross-review lượt 2** (`reviewed_sh
 ngoài write set (P1 `write-set-thieu-noi-doc-job-registry`); thứ tự packet đổi theo. Lượt 2: A3 đổi
 từ so `rc` sang so **tập chẩn đoán** `actionlint` (P2), A9 thu hồi lease viết lại cho thực thi được
 (P1), và mọi bảng dùng đúng đơn vị **mục GitHub liệt kê** thay cho "bước đã chạy" (P3).
+
+
+---
+
+## REVISION 5 — QUÉT LẠI SỐ, và hai tiêu chí của r4 nay KHÔNG ĐO ĐƯỢC
+
+Chủ kho chọn đường **(b)** ngày 11-09-2026: sửa phẫu thuật **cộng** quét lại mọi con số mà
+`nghiem_thu` tựa lên. Mục này là kết quả quét. **Đọc nó TRƯỚC khi đọc `nghiem_thu`** — bốn tiêu
+chí đã đổi, và hai trong số đó đổi vì đại lượng chúng so với đã **biến mất khỏi tầm đo**.
+
+### (1) Workflow KHÔNG đổi một byte. Toàn bộ trôi nằm ở TẢI.
+
+```
+sha256 .github/workflows/ci.yml @ d28c4b1       = 8dbc730f8a66a8dc…   (nền của r4)
+sha256 .github/workflows/ci.yml @ origin/master = 8dbc730f8a66a8dc…   (đo 07:0xZ 11-09-2026)
+```
+
+Cấu trúc cũng y nguyên ở cả hai ref: **1** job `gate` · **40** bước YAML · `timeout-minutes: 60` ·
+`if` mức job = `None` · **10** bước mang `if`. Nên mọi con số của r4 về **hình dạng** workflow —
+A2 (`40` bước), A3 (tiền tố `9` bước, bộ ba `(None, fromJSON(…), 60)`), A4 — **vẫn đứng nguyên**,
+không cần sửa. Đây là kết quả có giá trị của lượt quét: nó khoanh vùng cái đã trôi.
+
+### (2) Thứ đã trôi: TẢI. Suite `lease-publish` gấp **2,24 lần** trong **4 ngày**.
+
+Phép đo A/B **một lệnh, hai vòng lặp, cùng rig** (07-09 so 11-09), đo 06:1xZ 11-09-2026:
+
+| | `d28c4b1` (07-09) | `4b5184e` (11-09) | đổi |
+|---|---:|---:|---|
+| ca test `lease_publish_test.py` | 121 | 146 | +21 % |
+| biên nhận trong `ops/reviews/` | 73 | 118 | +62 % |
+| **`B`** — suite ở chế độ lượt con | **24,4 s** | **54,6 s** | **+124 %** |
+| **TỔNG** — suite đầy đủ | **75,3 s** | **177,0 s** | **+135 %** |
+| **bội số** `TỔNG / B` | **3,09** | **3,24** | ổn định |
+
+### (3) Vì sao bội số ~3 tồn tại — `t125`, thứ r4 nhắc **0** lần
+
+`t125_AB_toan_suite_KHONG_doi_verdict_theo_ambient_actor` **chạy lại TOÀN BỘ suite hai lượt** trong
+tiến trình con (A/B đúng một biến `GITHUB_ACTOR`). Đo từng ca, 06:0xZ 11-09-2026: nó chiếm
+**114,10 s trên TỔNG `173,6` s CỦA CHÍNH LƯỢT ẤY = 65,7 %** toàn suite.
+
+*(Bản nháp r5 của mục này viết `114,10 / 177,0 = 65,7 %` — **sai**: `177,0` s là TỔNG của lượt **A/B
+ở bảng (2)**, một lượt KHÁC, và `114,10 / 177,0` ra `64,5 %` chứ không phải `65,7 %`. Ghép tử số của
+lượt này với mẫu số của lượt kia đúng là bệnh **ghép sai lượt** mà `CLAUDE.md` đã tố cáo. Ghi cả cái
+sai ở đây vì mục này tồn tại để dạy đúng điều đó.)*
+
+Nên chi phí thật của bước là `≈ 3 × B` **ở mọi nền**.
+
+Trên Linux `3B` = 177 s, không ai thấy. Trên Windows `3B` là cả ngân sách còn lại.
+
+**`t125` KHÔNG phải thứ cần xoá** — nó bắt được một lỗi thật (`#396`: rò `GITHUB_ACTOR` làm **29**
+ca đỏ oan), và docstring của nó lập luận đúng vì sao một khẳng định rẻ hơn sẽ mù. Nó là **bội số
+trên tăng trưởng**, và cách chữa là đưa nó **ra khỏi đường tới hạn**, không phải hạ răng nó.
+
+### (4) `lease-publish selftest` ĐỔI LỚP — bảng hệ số nền của r4 hết hạn đúng một hàng
+
+r4 khai trung vị `2,94×` cho bước ấy (11 cặp). Đo 11-09-2026: **≥ 7,8×** — tức đã sang lớp của
+`bien-nhan v2 selftest` (`7,79×`). Kiểm chéo mô hình r4: `75,3 s × 2,94 = 3,70` phút, và r4 đo
+thật **3,53** phút ⇒ mô hình khớp *khi ấy*. Hôm nay `177,0 s` mà Windows đo **≥ 22,7** phút ⇒ hệ
+số đã đổi. **Một hàng trong bảng hết hạn; sáu hàng kia chưa có phép đo mới** — ghi vậy chứ không
+suy rộng.
+
+### (5) HAI TIÊU CHÍ CỦA r4 NAY KHÔNG ĐO ĐƯỢC — vì đại lượng bị TRẦN KIỂM DUYỆT
+
+Job `gate (windows-latest)` **chưa hoàn tất lần nào** trên `master` kể từ ~07-09. Bốn lượt liên
+tiếp `cancelled` đúng ở trần (đo 07:0xZ 11-09-2026):
+
+| lượt | head | windows | ubuntu |
+|---|---|---|---|
+| `34552510232` | `27c413c` | **60,32** phút · `cancelled` | 29,03 phút · `success` |
+| `34563553711` | `4b5184e` | **60,52** phút · `cancelled` | 12,38 phút · `failure` |
+
+Hệ quả cho hai tiêu chí:
+
+- **A1** khai *"phép làm ĐỎ: gộp lại một job ⇒ `43,20` ⇒ ĐỎ"*. `43,20` là `max(job)` **trước khi
+  tách**, đo khi Windows còn chạy trọn. Nay đại lượng ấy là **`≥ 60`, KHÔNG BIẾT** — bị trần cắt.
+  Không thể phát biểu lại bằng một con số.
+- **A5** đòi `Σ(phút job × hệ số nền)` cho lượt **TRƯỚC**. Tính được cần một job Windows **hoàn
+  tất**; không còn cái nào.
+
+**Và đây là chỗ nguy hiểm, phải khai thẳng:** phép tính ngây thơ trên lượt `34563553711` cho
+`60,52 × 2 + 12,38 × 1 = **133,42**` phút tính tiền — **lọt dưới ngưỡng `≤ 135,00` của r4**, trong
+khi job Windows bị **cắt** và job Ubuntu **ĐỎ**. Một phép đo bị kiểm duyệt rơi vào trong ngưỡng và
+**trông y hệt đạt**. Cùng họ *"cổng vắng mặt trông giống cổng xanh"*, đổi đối tượng: **một đại
+lượng bị chặn trên trông giống một đại lượng nhỏ**. Ai tính A5 theo r4 mà không nhìn `conclusion`
+sẽ báo ĐẠT cho một lượt hỏng cả hai job.
+
+### (6) Thứ KHÔNG trôi — ghi lại để khỏi đo lại
+
+Chi phí thiết lập Windows (bước 1–13) mà A1 dùng: r4 khai **3,33** phút; đo lại **3,27** phút
+(`27c413c`) và **2,75** phút (`4b5184e`) ⇒ dải `2,75–3,27`, **chưa vượt** con số r4 dùng. Giữ.
+
+---
 
 ## Bối cảnh đo được (mọi số kèm thời điểm)
 
@@ -379,6 +471,18 @@ Write set là **2 tệp**.
 |---|---|---|
 | 1 | `.github/workflows/ci.yml` | định nghĩa job `gate` và toàn bộ 39 bước của nó (trên `1b3caa1`; `origin/master` `28cb898` đo 22:45Z 06-09-2026 đã là **40** — xem `base_sha`) |
 | 2 | `.claude/dev/ci_dang_ky_test.py` | consumer `loi_ruff_ci` khoá cứng `jobs.gate`; tách job mà không sửa nó thì bước `test registry` tự đỏ (đo 19:33Z) |
+| 3 | `ops/lease_publish_test.py` | **revision 5.** Cờ đưa `t125` ra khỏi đường tới hạn của job `gate` (M8). Bội số `3,24` đo được ở khối REVISION 5 (2) nằm TRONG tệp này, không nằm trong `ci.yml` |
+
+**`ADR-0044` cho `sensitive`: ≤ 3 tệp.** Ba đường trên là **đúng trần**, không dư một chỗ nào —
+nên bất kỳ đường thứ tư nào phát sinh lúc thi công đều phải **DỪNG và hỏi chủ kho**, không tự xin
+ngoại lệ. Riêng bản vá bộ chấm đột biến (`ops/nhanh_don_duoc_test.py`) **cố ý KHÔNG** nằm ở đây:
+nó đi bằng packet `CHAM-DOT-BIEN-MIEN-NHIEM-CA-VO-CAN` (PR #508), đúng để packet này không vượt trần.
+
+**`ops/lease_publish_test.py` ĐANG BỊ GIỮ** — `ai-dang-giu` 06:40Z 11-09-2026 ⇒ `rc=11`,
+`NGƯỜI_GIỮ 1: m9-fetch-auth-exec-1-claude-20260911` (packet `#503`, hạn `17:00:00Z 11-09-2026`).
+Nên `depends_on: [wp503]`, và lease của packet này chỉ được cấp **SAU KHI #503 land** — không phải
+sau khi lease kia hết hạn danh nghĩa. Cấp chồng là tự tạo cửa sổ hai writer, đúng thứ write-set
+exclusion sinh ra để chặn.
 
 Không ký tự đại diện. Không đường dẫn nào khác. Trong tệp #2 chỉ đụng `loi_ruff_ci` và phản chứng
 của nó; **không** đụng `bang_chung_xanh`, `MOI`, `MOI_WINDOWS`, `chay_moi` — đó là của ba packet
@@ -447,14 +551,23 @@ lại 20:59Z: `ls-remote` **298** · `for-each-ref` **298** · `comm -23` rỗng
 | M5 | Phút tính tiền tăng thêm được **đo và công bố**, không phải ước — nó là số chủ kho đã duyệt trước, và lượt chạy phải xác nhận nó. | `write_set` #1 |
 | M6 | Bảo vệ nhánh vẫn có cổng: nếu `gate` đang là required status check thì hai job mới cũng phải được khai, kẻo tách job = tháo cổng. | `write_set` #1 (phần đo được) |
 | M7 | `loi_ruff_ci` tìm bước `test registry` trong **mọi** job và đòi Ruff được cài trong **cùng job**, **trước** bước ấy; không job nào có bước ⇒ lỗi. Tương thích với `ci.yml` chưa tách. | `write_set` #2 |
+| M8 | **revision 5.** `t125` ra khỏi đường tới hạn của job `gate`: nó chạy trong một **job RIÊNG**, song song, cùng ma trận nền. Cắt bội `3,24` khỏi bước `lease-publish selftest`. **Không** skip trên nền nào, **không** hạ răng `t125`, **không** nâng `timeout-minutes`. | `write_set` #1 + #3 |
+| M9 | **revision 5.** Cơ chế bỏ `t125` khỏi lượt chính phải **FAIL-CLOSE**: thiếu job `t125` ⇒ gate **ĐỎ**. Và cờ bỏ ấy phải khiến `t125` được đếm là **BỎ QUA có lý do**, KHÔNG phải ĐẠT. | `write_set` #3 |
 
 ## `nghiem_thu`
 
 **A1 (M1) — job dài nhất giảm, đo bằng PHÚT TƯỜNG CỦA JOB, kèm đầu-cuối của WORKFLOW.**
 `workflow_dispatch` `ci.yml` trên nhánh packet. Đòi: `max(thời lượng job)` trên `windows-latest`
-**≤ 25,00 phút**. Ngưỡng ấy suy từ số học `21,03` cộng `~4` phút **biên thiết kế** (revision 4: chênh job `0,92`–`2,27`
-giữa hai lượt cùng tree KHÁC event/lane không tách được phần runner — không gọi là nhiễu đo được; nợ
-`NHIEU-RUNNER-CHUA-TACH-KHOI-TAI`).
+**≤ 0,60 × `timeout-minutes`** — hôm nay `timeout-minutes: 60` nên là **≤ 36,00 phút**.
+
+**REVISION 5 — ngưỡng đổi từ SỐ PHÚT sang BIÊN TƯƠNG ĐỐI, và đây là lý do.** r4 khai `≤ 25,00`,
+suy từ `21,03 + ~4`. Cả hai số ấy tính trên nền `B = 24,4 s`; đo lại 11-09-2026 `B = 54,6 s`, tức
+**gấp 2,24 lần trong 4 ngày** (khối REVISION 5 mục (2)). Một ngưỡng tính bằng phút **hết hạn trước
+khi packet kịp land** — đúng `L5`. Bất biến cần giữ KHÔNG phải *"job dưới 25 phút"* mà là
+***"còn ít nhất 40 % biên dưới trần"***; bất biến ấy không trôi theo tải. Số phút tuyệt đối vẫn
+phải **công bố** làm đối chiếu, chỉ không còn là tiêu chí.
+Ràng buộc kèm theo, để biên tương đối không thành cửa hậu: `timeout-minutes` **giữ nguyên 60** (A4).
+Nới trần để `0,60 ×` rộng ra là **vi phạm A4**, và `§12` coi việc nâng trần là điều kiện DỪNG.
 Đơn vị: **`completed_at − started_at` của JOB**, đọc qua `actions_list` +
 `method: list_workflow_jobs`; lấy `max` trên tất cả job của lượt, không lấy tổng.
 **Kèm, công bố nhưng không đặt ngưỡng** (chưa có nền): thời gian đầu-cuối của cả lượt
@@ -462,9 +575,16 @@ giữa hai lượt cùng tree KHÁC event/lane không tách được phần runn
 nhất thấy được xếp hàng của ba runner; nếu nó KHÔNG giảm dù `max(job)` giảm, đó là kết quả đo, báo
 chủ kho. **Không quy thời gian chờ thành phút tính tiền** — chờ không tính tiền, và ta chưa có dữ
 liệu billing.
-Phép làm ĐỎ: gộp lại một job ⇒ `43,20` ⇒ ĐỎ. Và: nếu `max` **không** giảm dù đã tách, đó là
-**KẾT QUẢ ĐO** (chi phí thiết lập trên Windows lớn hơn `3,33` phút đã đo) — báo chủ kho, đừng nới
-gì để ép nó xanh.
+Phép làm ĐỎ: `max(thời lượng job)` trên `windows-latest` vượt `0,60 ×` trần.
+
+**REVISION 5 — phép làm ĐỎ của r4 KHÔNG DÙNG ĐƯỢC NỮA, và phải nói thẳng vì sao.** r4 viết
+*"gộp lại một job ⇒ `43,20` ⇒ ĐỎ"*. `43,20` là `max(job)` **trước khi tách**, đo khi Windows còn
+chạy trọn. Nay job ấy **chưa hoàn tất lần nào** trên `master` kể từ ~07-09: bốn lượt liên tiếp
+`cancelled` đúng ở trần (`60,32` · `60,52` phút, đo 07:0xZ 11-09-2026). Đại lượng ấy là
+**`≥ 60`, KHÔNG BIẾT** — bị trần **kiểm duyệt**, không phải bị đo sai. Nên không phát biểu lại nó
+bằng một con số; phép làm ĐỎ nay neo vào **biên tương đối**, thứ không cần biết giá trị "trước".
+Và: nếu `max` **không** giảm dù đã tách, đó là **KẾT QUẢ ĐO** (chi phí thiết lập trên Windows lớn
+hơn `2,75`–`3,27` phút đã đo lại 11-09-2026) — báo chủ kho, đừng nới gì để ép nó xanh.
 
 **A2 (M2) — độ phủ không đổi, đo bằng TẬP HỢP, không bằng số đếm, trên HAI loại cò.**
 Lấy `(job, tên bước, nền, conclusion)` của lượt TRƯỚC và của lượt SAU. Bỏ cột `job`, rồi so **tập**
@@ -536,10 +656,28 @@ Phép làm ĐỎ: `grep -c 'timeout-minutes: 60'` phải bằng **số job**, v�
 **A5 (M5) — phút tính tiền được ĐO và công bố, neo đúng lượt.**
 Tính `Σ(thời lượng job × hệ số nền)` với hệ số `windows = 2`, `ubuntu = 1`, cho lượt TRƯỚC và
 lượt SAU trên cùng bộ bước.
-Nền: lượt **nhánh** `34045664423` = **110,65** (bảng phân rã theo bước chỉ có cho lượt này, nên
-mọi số "sau" suy từ nó); lượt **master** `34048685345` = **111,08** (để đối chiếu — cùng tree, khác event/lane). Ước sau:
-**126,22** (**+14,1 %**) từ lượt nhánh. Đòi: số đo thật **≤ 135,00** phút tính tiền
-(`126,22 + ~9` **biên thiết kế**, tức `~7 %` — rộng hơn chênh job `2,27` giữa hai lượt khác lane nhân hệ số; revision 4).
+**REVISION 5 — NỀN CỦA A5 NAY KHÔNG ĐO ĐƯỢC. Tiêu chí phải đổi hình, không được giữ số.**
+
+Nền r4: lượt **nhánh** `34045664423` = **110,65**; lượt **master** `34048685345` = **111,08**; ước
+sau tách **126,22** (**+14,1 %**); ngưỡng **≤ 135,00**. Cả bốn số ấy đo 06–07-09-2026 và **giữ
+nguyên giá trị lịch sử** — nhưng chúng **không tái lập được hôm nay**: `Σ(phút job × hệ số nền)`
+đòi một job Windows **HOÀN TẤT**, mà không còn cái nào (xem A1).
+
+**Cạm bẫy phải khai, vì nó trông y hệt thành công.** Tính ngây thơ trên lượt `34563553711`:
+`60,52 × 2 + 12,38 × 1 = **133,42**` — **lọt dưới `≤ 135,00`**, trong khi job Windows bị **cắt** và
+job Ubuntu **ĐỎ**. Một đại lượng bị **chặn trên** trông hệt một đại lượng **nhỏ**. Ai đọc A5 của r4
+mà không nhìn `conclusion` sẽ báo ĐẠT cho một lượt hỏng cả hai job. Cùng họ *"cổng vắng mặt trông
+giống cổng xanh"*.
+
+Hình mới của A5 — ba thứ, và thứ đầu là **điều kiện** của hai thứ sau:
+1. **TÍNH HỢP LỆ trước, GIÁ TRỊ sau.** Mọi job trong cả hai lượt phải `conclusion == "success"`.
+   Một job `cancelled`/`failure`/`timed_out` ⇒ **`KHÔNG ĐO ĐƯỢC`** ⇒ **ĐỎ**, KHÔNG phải một con số.
+2. Lượt **SAU tách** phải hợp lệ theo (1), rồi công bố `Σ(phút job × hệ số nền)` (`windows = 2`,
+   `ubuntu = 1`).
+3. Lượt **TRƯỚC** — nền để so — **phải được sinh lại tại lúc thi công** trên `start_from_sha` của
+   lease, và cũng phải hợp lệ theo (1). Nếu nó **không thể** hợp lệ (job Windows chưa tách vẫn chạm
+   trần), thì đó chính là **kết quả đo**: khai `KHÔNG ĐO ĐƯỢC` cho vế TRƯỚC, công bố vế SAU, và
+   **báo chủ kho** — đừng chép lại `110,65` của r4 làm nền, vì nó thuộc một cây và một tải khác.
 Đơn vị: **phút tính tiền** = Σ phút tường của job × hệ số nền. Đo lại cả hai nền tại lúc thi công.
 Phép làm ĐỎ: vượt `135,00` ⇒ ĐỎ ⇒ tách job đắt hơn dự kiến ⇒ báo chủ kho.
 **Tiêu chí này KHÔNG được bỏ dù A1 xanh.** Packet này mua wall clock bằng billing; một lượt đo
@@ -573,10 +711,29 @@ Hai phản chứng sẵn có `ruff-pin-required` và `ruff-version-probe-require
 Đơn vị: **số thông điệp lỗi trả về**. Phép làm ĐỎ: đột biến `loi_ruff_ci` quay về đọc
 `jobs.gate` ⇒ ca thứ hai ĐỎ.
 
-**A8 — không đụng gì khác.** `git diff --numstat` chỉ hiện đúng **2** đường dẫn, và cột thêm
-≤ `300`.
+**A8 — không đụng gì khác.** `git diff --numstat` chỉ hiện đúng **3** đường dẫn (revision 5:
+`ops/lease_publish_test.py` nhập write set cho M8/M9), và cột thêm ≤ `300`.
+**3 tệp là ĐÚNG TRẦN `ADR-0044` cho `sensitive`**, không dư chỗ nào ⇒ đường thứ tư ⇒ **DỪNG và hỏi
+chủ kho**, không tự xin ngoại lệ.
 
-**A9 — lease #456 không còn giữ TRƯỚC khi bắt tay, đo trên MỌI bản bằng `ai-dang-giu`.**
+**A9 — KHÔNG lease nào còn giữ write set TRƯỚC khi bắt tay, đo trên MỌI bản bằng `ai-dang-giu`.**
+
+**REVISION 5 — người giữ đã ĐỔI, và write set rộng thêm một đường.** Đo 06:40Z 11-09-2026, sau khi
+canh hai nguồn ref (`comm -23` RỖNG) và dựng nhánh cục bộ cho mọi nhánh máy chủ — công cụ quét
+`refs/heads/*`, nên thiếu nhánh cục bộ cho ra `CHAN [12]` chứ không phải `NGƯỜI_GIỮ 0`, và đọc nhầm
+chỗ này là tự cấp cho mình một câu trả lời sai:
+
+```
+.github/workflows/ci.yml          rc=0   NGƯỜI_GIỮ 0: không có
+ops/lease_publish_test.py         rc=11  NGƯỜI_GIỮ 1: m9-fetch-auth-exec-1-claude-20260911
+```
+
+⇒ Người chặn hôm nay là **`#503`** (`M9-FETCH-AUTH`, hạn `17:00:00Z 11-09-2026`), **không** còn là
+`#456`. `depends_on: [wp503]`, và lease cấp **SAU KHI #503 land** — không phải sau khi hạn danh
+nghĩa trôi qua. Đoạn về `#456` bên dưới giữ nguyên làm **lời khai lịch sử** của r2–r4; mốc
+`14:30:07Z 07-09-2026` trong đó **đã qua từ lâu** và không còn là điều kiện của packet này.
+
+*(Lời khai lịch sử r2–r4:)*
 `python ops/lease_publish.py ai-dang-giu .claude/dev/ci_dang_ky_test.py` (và `… .github/workflows/ci.yml`)
 phải in `NGƯỜI_GIỮ 1` với tên lease của **packet này**, và **0** dòng mang
 `mutant-khong-chay-tren-windows-…` mà thiếu `ĐÃ_BỊ_THAY_THẾ` lẫn `HẾT_HẠN`. Vì packet này đi đầu, tiền
@@ -590,6 +747,27 @@ giữ blob cũ được xử với readback: hai nhánh 0-ahead xoá được qu
 `check` không chặn chồng lấn write set (đo 21:02Z: `thay_the_cho: []` + sáu ô điền tạm ⇒ `rc=0` ngay
 khi #456 còn giữ).
 
+**A10 (M8) — `t125` ra khỏi đường tới hạn, đo bằng THỜI LƯỢNG BƯỚC, không bằng sự có mặt của job.**
+Sau tách, bước `lease-publish selftest` trong job `gate` phải tốn **≤ 0,45 ×** thời lượng của chính
+nó ở lượt nền cùng cách (biên tương đối, cùng lý do như A1: `0,45` chọn từ cấu trúc `TỔNG ≈ 3 × B`
+⇒ bỏ `t125` còn `≈ 1/3`, cộng biên; **không** chọn từ một con số phút).
+Đơn vị: **giây của BƯỚC**, đọc qua `list_workflow_jobs`, trên `windows-latest`.
+Phép làm ĐỎ: để `t125` lại trong job `gate` ⇒ tỉ lệ `≈ 1,00` ⇒ ĐỎ.
+**Đột biến bắt buộc:** cho job `t125` chạy nhưng **không** cho job `gate` bỏ `t125` ⇒ A10 phải ĐỎ —
+không có đột biến ấy thì không biết A10 đang đo VIỆC BỎ hay chỉ đo sự tồn tại của job mới.
+
+**A11 (M9) — cơ chế bỏ `t125` phải FAIL-CLOSE, và cờ bỏ KHÔNG được đếm là ĐẠT.**
+Hai nửa, mỗi nửa một phản chứng riêng:
+1. **Thiếu job ⇒ ĐỎ.** Xoá job `t125` khỏi `ci.yml` trong khi job `gate` vẫn mang cờ bỏ ⇒ phải có
+   một cổng ĐỎ. Phép làm ĐỎ: không cổng nào đỏ ⇒ A11 ĐỎ. Đây là chốt chống đúng bệnh
+   *"một job CI mặc định SKIP là một cổng KHÔNG TỒN TẠI"* mà kho đã trả giá.
+2. **Cờ bỏ ⇒ BỎ QUA có lý do, KHÔNG phải ĐẠT.** Chạy `lease_publish_test.py` với cờ mới ⇒ dòng
+   tổng kết phải khai **`145/146 · bỏ qua = 1`**, và `t125` nằm trong danh sách BỎ QUA kèm lý do.
+   Phép làm ĐỎ: cờ làm `t125` `return` im lặng rồi được đếm ĐẠT (`146/146`) ⇒ A11 ĐỎ.
+   **Cờ `--ab-con-noi-bo` sẵn có KHÔNG được dùng lại cho việc này**: nó làm `t125` `return` và **vẫn
+   đếm ĐẠT** — đo được, và đó đúng là bệnh *"ca có MẶT khác ca có ĐO"*. Phải là **cờ MỚI**, tên khác,
+   ngữ nghĩa khác.
+
 ## `hinh_dang_ke_thua`
 
 Chép từ `ops/specs/MUTANT-KHONG-CHAY-TREN-WINDOWS.md`, `ops/specs/CI-CAI-JSONSCHEMA-r3.md` và từ
@@ -597,6 +775,9 @@ chú thích của chính `ci.yml`. Mỗi dòng ghi thời điểm đo hoặc ngu
 
 | hình dạng | số lần đã gặp | đo/trích lúc (đọc lại 21:03Z 06-09-2026 trên `b1c2284`) | ghi chú |
 |---|---:|---|---|
+| **(r5)** con số trong đặc tả **hết hạn** giữa lúc viết và lúc dùng | **8** | 4 của `#250` trích `CLAUDE.md` (`117/100`→`120/110` · `37`→`39` · `3/90`→`3/100` · `4/120`→`5/121`); **4 mới** đo 07:0xZ 11-09-2026 trên chính đặc tả này (`B` `24,4`→`54,6` s · `lease-publish` `2,94×`→`≥7,8×` · nền A5 `110,65` ⇒ KHÔNG ĐO ĐƯỢC · người giữ `#456`⇒`#503`) | Lần thứ **5–8** của cùng một hình dạng, và lần này nạn nhân là **chính packet sinh ra để đo CI**. `§12` đòi xem lại CÁCH LÀM: câu trả lời của r5 là **neo tiêu chí vào BIÊN TƯƠNG ĐỐI** (A1, A10), không vào số phút. |
+| **(r5)** đại lượng bị **CHẶN TRÊN** trông giống đại lượng **nhỏ** | **1** | đo 07:0xZ 11-09-2026 | `60,52 × 2 + 12,38 = 133,42` lọt dưới ngưỡng `≤ 135,00` của r4 trong khi job Windows `cancelled` và job Ubuntu `failure`. Lý do A5 của r5 đòi **TÍNH HỢP LỆ trước, GIÁ TRỊ sau**. Cùng họ *"cổng vắng mặt trông giống cổng xanh"*, đổi đối tượng. |
+| **(r5)** cờ làm một ca `return` im lặng rồi **vẫn đếm ĐẠT** | **1** | trích `ops/lease_publish_test.py` (`--ab-con-noi-bo`), đọc 06:3xZ 11-09-2026 | Lý do A11 đòi **cờ MỚI** và đòi `t125` hiện ra ở danh sách **BỎ QUA**, không phải ĐẠT. Bệnh *"ca có MẶT khác ca có ĐO"*. |
 | nâng `timeout-minutes` để mua cổng xanh | **2 lần nâng** (3 mức `25`→`45`→`60`) | `git log -G 'timeout-minutes:' -- .github/workflows/ci.yml` chạy lại 21:03Z 06-09-2026: `9e4f361` (2026-07-09) · `6d88a2c` (2026-08-29 03:29Z) · `7657bfd` (2026-08-29 04:49Z) | Bản đầu chép `3` từ #456 (đếm mức). Lần kế là lần thứ ba ⇒ `§12` đòi xem lại CÁCH LÀM; câu trả lời ở đây là **tách job**, không phải trần. Điều kiện DỪNG. |
 | thêm một mặt ĐIỀU KIỆN vào workflow rồi nó vắng mặt lặng lẽ | **2** | trích `ci.yml:490-506` và `CLAUDE.md` (mục *"Workflow có `paths:`"*, mục nhãn `windows`), đọc lại 21:03Z 06-09-2026; hai sự kiện GitHub không readback lại | `paths:` không bắn ở lần đẩy tạo nhánh mới · `pull_request:` thiếu `types:` nên nhãn `windows` không sinh lượt chạy. Cộng lần thứ ba suýt xảy ra: `CI-FASTPATH-THEO-DIFF` (PR #247 đóng). ⇒ `ngoai_pham_vi` #2, và A3 đo bằng cấu trúc. |
 | cổng vắng mặt trông giống cổng xanh | **≥ 3** | trích `CLAUDE.md` (dấu bỏ-qua-CI / PR #100; job `cancelled`; `ops-don-ref.yml` run `31971137920`), đọc lại 21:03Z 06-09-2026; số run tương ứng không readback từ GitHub ở lượt này | dấu bỏ-qua-CI (PR #100, 0 check `clean`) · job `cancelled` không phải `failure` · `ops-don-ref.yml` bị GitHub từ chối, 0 job. Tất cả là lý do A2 so TẬP và A6 tách hai phần. |
@@ -619,7 +800,22 @@ Bản đầu viết *"ba mục nay đóng được"* trong khi bảng của chí
 
 ## `chua_do_duoc`
 
-1. **Chi phí thiết lập trên Windows sau khi tách chưa ai đo.** `3,33` phút là đo của **một** job.
+0. **(r5) KHÔNG CÓ NỀN "TRƯỚC KHI TÁCH" HỢP LỆ, và chưa biết bao giờ có lại.** `max(job)` Windows và
+   `Σ` phút tính tiền của một lượt **chưa tách** đều đòi job Windows **hoàn tất** — mà nó chạm trần
+   **bốn lượt liên tiếp** (đo 07:0xZ 11-09-2026). Nên vế TRƯỚC của A5 có thể **vĩnh viễn** là
+   `KHÔNG ĐO ĐƯỢC` cho tới khi packet này land, tức **packet tự nó là điều kiện để đo nền của
+   chính nó**. Đó là một vòng, và đặc tả khai thẳng thay vì giấu: A5 mục (3) cho phép công bố vế
+   SAU cùng một vế TRƯỚC `KHÔNG ĐO ĐƯỢC`, **không** cho phép chép `110,65` của r4 làm nền.
+
+0b. **(r5) Tải còn tăng, và không ai đang canh tốc độ ấy.** `B` gấp `2,24` lần trong `4` ngày;
+   `t26`+`t27` tốn `20,7 ms/biên nhận` (đo 06:0xZ 11-09-2026 trên 118 biên nhận), nhân `≈10` cho nền
+   Windows và nhân `3,24` cho bội `t125` ⇒ `≈ 0,67 s/biên nhận` trên đường tới hạn
+   (`20,7 × 10 × 3,24 = 671` ms; bản nháp r5 viết `0,62` — sai số học, sửa tại chỗ). Mỗi packet ghi
+   sổ thêm biên nhận. **Chưa có cổng nào canh ngân sách này** — nợ, chưa có tên, không thuộc phạm vi
+   packet này.
+
+1. **Chi phí thiết lập trên Windows sau khi tách chưa ai đo.** `3,33` phút là đo của **một** job
+   (r5 đo lại: `2,75`–`3,27` phút, 11-09-2026 — chưa vượt).
    Job mới có thể tốn khác (cache runner, thứ tự cấp máy, ba lần checkout `fetch-depth: 0`). Mọi
    con số ở bảng "cái giá" là **ước có đơn vị từ số đo cũ**, không phải phép đo mới. A1 và A5 là
    hai phép đo trả lời câu ấy — và nếu chúng ĐỎ thì đó là kết quả, không phải thất bại.

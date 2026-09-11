@@ -5367,52 +5367,70 @@ def t151_review_codex_to_tien_non_tree_metadata_rac_va_khoa_lan_kieu():
 
 @ca
 def t152_C2a_M9_fetch_H_mang_xac_thuc_qua_header_khong_token_trong_URL():
-    """Packet #503 (M9-FETCH-AUTH, khắc phục #499 C2a): bước fetch H phải MANG XÁC THỰC.
+    """#503 (M9-FETCH-AUTH, khắc phục #499 C2a): đo header HIỆU LỰC bằng Bash + Git config thật, token giả, không mạng.
 
-    Đo 05:14Z 10-09-2026 trên PR #500 (run 34440291662): mọi chốt input qua rồi `git fetch` chết
-    rc=128 `could not read Username` — checkout S đúng thiết kế `persist-credentials: false`, còn
-    fetch endpoint tường minh không mang xác thực ⇒ cổng fail-close nhưng KHÔNG BAO GIỜ XANH.
-    Không lượt review nào của A0 thấy vì sandbox review không có mạng (r9 `chua_do_duoc` #4).
-
-    Bốn chốt, bốn răng — cùng đỏ vì một lý do là chưa độc lập (spec A1):
-      (i)   header `http.https://github.com/.extraheader` có mặt trên CHÍNH lời gọi fetch, qua
-            `GIT_CONFIG_KEY_0=` (dạng a) hoặc `-c` (dạng b); giá trị dẫn từ `$TL_TOKEN`;
-      (ii)  URL fetch không mang credential (không `@`, không `TL_TOKEN` trong URL);
-      (iii) không lời gọi `git config` nào ghi `extraheader` (không để credential lại trong cây S);
-      (iv)  bước checkout vẫn `persist-credentials: false`.
-    ĐỎ trên nền 27c413c3 (thiếu (i)); XANH sau vá. Đột biến m1–m4 ở spec `M9-FETCH-AUTH.md`.
+    Đo 10-09-2026 trên PR #500 (run 34440291662): fetch H nặc danh ⇒ rc=128 `could not read Username`
+    (checkout S đúng thiết kế `persist-credentials: false`) — cổng fail-close nhưng KHÔNG BAO GIỜ XANH.
+    Bản đầu (head 62c299a) chỉ DÒ CHUỖI `GIT_CONFIG_KEY_0=…`/`TL_TOKEN`; cross-review codex lượt 1 (verdict
+    sha256 a0bb40dc…) dựng ba đột biến SỐNG: COUNT=0, ghi đè AUTH_B64 sau gán đúng, xoá add-mask — chuỗi
+    có mặt khác giá trị Git THẬT đọc. Nay chốt (i) CHẠY chính đoạn shell auth/fetch (giữa `WF_BLOB=` và
+    `NHAN=`, nối continuation bằng `_dong_lenh`) với `git` là hàm stub chuyển các `-c` vào Git thật và hỏi
+    `config --get-urlmatch http.extraheader <URL fetch>`, kèm đối chứng host khác KHÔNG có header; chốt (v)
+    mask đăng ký đúng base64 TRƯỚC fetch, không output thừa. (ii)–(iv) độc lập; ĐỎ trên nền; m1–m9 giết.
     """
-    import yaml
-    van = WORKFLOW_THU_HOI.read_text(encoding="utf-8")
-    d = yaml.safe_load(van)
-    steps = d["jobs"]["thu-hoi"]["steps"]
+    import base64, yaml
+    steps = yaml.safe_load(WORKFLOW_THU_HOI.read_text(encoding="utf-8"))["jobs"]["thu-hoi"]["steps"]
     checkout = [b for b in steps if str(b.get("uses", "")).startswith("actions/checkout@")]
     chot(len(checkout) == 1 and (checkout[0].get("with") or {}).get("persist-credentials") is False,
-         "(iv) checkout S phải giữ `persist-credentials: false` — header của M1 là thứ DUY NHẤT mang xác thực")
+         "(iv) checkout S phải giữ `persist-credentials: false`")
     lenh_fetch, lenh_config = [], []
     for b in steps:
         than = b.get("run")
         if not isinstance(than, str):
             continue
-        for lenh in _dong_lenh(than):
+        ds = _dong_lenh(than)
+        for i, lenh in enumerate(ds):
             if "fetch --no-tags" in lenh and "refs/pull/" in lenh:
-                lenh_fetch.append(lenh)
+                lenh_fetch.append((lenh, ds, i))
             if re.search(r"\bgit\b[^\n]*\bconfig\b[^\n]*extraheader", lenh):
                 lenh_config.append(lenh)
     chot(len(lenh_fetch) == 1, f"đúng một lời gọi fetch H, thấy {len(lenh_fetch)}")
-    f = lenh_fetch[0]
-    co_header = ("GIT_CONFIG_KEY_0=\"http.https://github.com/.extraheader\"" in f
-                 or "GIT_CONFIG_KEY_0=http.https://github.com/.extraheader" in f
-                 or "-c http.https://github.com/.extraheader=" in f
-                 or "-c \"http.https://github.com/.extraheader=" in f)
-    chot(co_header, "(i) fetch H không mang `http.https://github.com/.extraheader` trên chính lời gọi — "
-                    "đây là lỗi #499 C2a: fetch nặc danh ⇒ rc=128 `could not read Username`")
-    chot("TL_TOKEN" in f or ("AUTH_B64" in f and "x-access-token:%s' \"$TL_TOKEN\"" in van),
-         "(i) giá trị header phải dẫn từ $TL_TOKEN (trực tiếp, hoặc qua biến AUTH_B64 gán từ $TL_TOKEN)")
+    f, ds, i = lenh_fetch[0]
     url = re.findall(r"https://[^\s\"']+", f)
     chot(url and all("@" not in u and "TL_TOKEN" not in u for u in url),
          f"(ii) URL fetch mang credential: {url}")
     chot(not lenh_config, f"(iii) không được `git config` ghi extraheader vào cây S: {lenh_config}")
+    dau = [j for j in range(i) if ds[j].startswith("WF_BLOB=")]
+    cuoi = [j for j in range(i + 1, len(ds)) if ds[j].startswith("NHAN=")]
+    chot(len(dau) == len(cuoi) == 1, "(i) không tìm được ranh giới đoạn auth/fetch")
+    # Không sao chép câu lệnh auth: chạy chính bytes shell đã nối continuation của workflow.
+    doan = "\n".join(ds[dau[0] + 1:cuoi[0]])
+    stub = r'''set -euo pipefail
+    git() {
+      local -a cfg=()
+      while [ "${1-}" = -c ]; do cfg+=("$1" "$2"); shift 2; done
+      [ "$#" -eq 4 ] && [ "$1" = fetch ] && [ "$2" = --no-tags ] || return 91
+      [ "$3" = "https://github.com/$TL_KHO" ] || return 92
+      [ "$4" = "+refs/pull/$TL_PR/head:refs/thu-hoi/ung-vien" ] || return 93
+      command git "${cfg[@]}" config --get-urlmatch http.extraheader "$3"
+      if command git "${cfg[@]}" config --get-urlmatch http.extraheader https://example.invalid/repo; then return 94; fi
+    }
+    '''
+    token = "m9-fixture-token"
+    b64 = base64.b64encode(("x-access-token:" + token).encode()).decode()
+    with San() as s:
+        cfg = s / "empty.config"; cfg.write_text("", encoding="utf-8")
+        env = dict(PATH=os.environ["PATH"], TL_TOKEN=token, TL_KHO="ducthangho/tra-luat", TL_PR="505",
+                   GIT_CONFIG_NOSYSTEM="1", GIT_CONFIG_GLOBAL=str(cfg))
+        p = subprocess.run([_bash_posix(), "--noprofile", "--norc", "-c", stub + doan +
+                            '\ntest "${AUTH_B64+x}" != x\ntest "${GIT_CONFIG_COUNT+x}" != x\n'],
+                           cwd=s, env=env, capture_output=True, text=True, timeout=10)
+    chot(p.returncode == 0, f"(i) đoạn auth/fetch không chạy được: rc={p.returncode}: {p.stderr}")
+    dong = p.stdout.splitlines()
+    chot(dong and dong[-1] == "AUTHORIZATION: basic " + b64,
+         "(i) Git không nhận header hiệu lực dẫn từ TL_TOKEN trên URL fetch")
+    chot(dong == ["::add-mask::" + b64, "AUTHORIZATION: basic " + b64],
+         "(v) phải đăng ký mask đúng base64 trước fetch, không có output thừa")
 
 
 def main() -> int:

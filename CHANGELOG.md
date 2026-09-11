@@ -1,3 +1,100 @@
+# ★ dev-side — r364: ghi sổ #500 — hai verdict codex chấm CHÍNH hồ sơ review của #492, `cong` đỏ lúc merge vì tác giả không tự duyệt được (2026-09-11)
+
+Nối tiếp r363 (chốt tới `0721811`, #492). Merge sau đó chưa có mục: **#500** — vế bookkeeping ADR-0034 của #492,
+và mục này là vế bookkeeping của CHÍNH nó: 2 verdict + 2 biên nhận v2 vào `ops/reviews/`, 2 hàng mục lục + 3 cảnh
+báo, manifest tái sinh. Đệ quy dừng ở đây theo tiền lệ #495/#490: verdict của PR hồ sơ vào kho ở PR hồ sơ kế tiếp,
+còn PR hồ sơ kế tiếp KHÔNG tự sinh thêm lượt review khác nền trừ khi chủ kho gọi.
+
+**Không nâng `VERSION`.** Vẫn `1.36.68` từ r336.
+
+**GIỚI HẠN NGUỒN.** Như r363: (a) **tự đo được** — số Git, số mục manifest, băm/byte tệp, cổng chạy lại từ hiện vật
+trong kho; (b) **thuật lại** — sự kiện GitHub (run CI, comment, thời điểm merge); (c) **kết quả cũ thuật lại** — mutant/3
+lối land/catalog mà reviewer chạy trong sandbox, chỉ có băm verdict và mô tả, không có log trong kho. Runtime của hai
+lượt review: ID/prompt digest/timestamp/thời lượng/exit/byte+hash stdout,stderr có trong `run.json` NGOÀI kho;
+**model đã chạy KHÔNG ĐO ĐƯỢC** — `codex exec` không xuất modelUsage, chỉ có lời tự khai `GPT-6 (Codex)` của
+reviewer; effort/model yêu cầu/số lần chết là ATTESTATION điều phối.
+
+**Số `r` chọn bằng ĐO.** So tập tên `ls-remote --heads` với `for-each-ref` (322/322, thiếu cục bộ 0) rồi quét
+`CHANGELOG.md` trên **mọi** ref: `r362` 1 ref (nhánh handoff chưa merge) · `r363` 2 ref (`master` + nhánh #500 đã
+merge) · `r364` **0** · `r365` 0. Chọn **r364**.
+
+## Phạm vi — đo, không ước
+
+```
+git diff --shortstat 0721811..c00c88a0            ⇒  11 files changed, 1167 insertions(+), 5 deletions(-)
+git diff --name-only 0721811..c00c88a0 | sed 's#/.*##' | sort | uniq -c
+                                                  ⇒  1 CHANGELOG.md · 1 RELEASE_MANIFEST.json · 9 ops
+git rev-list --count --first-parent 0721811..c00c88a0   ⇒  1
+git rev-list --count              0721811..c00c88a0     ⇒  4     (3 commit nhánh + merge commit)
+git log -1 --format=%P c00c88a0                   ⇒  0721811 aad3d01   (merge commit, KHÔNG squash)
+```
+
+`ops/` nằm ngoài kiểm kê gói ⇒ 0/180 mục manifest từ 9 tệp `ops/reviews/`; `CHANGELOG.md` NẰM TRONG kiểm kê nên
+mục r363 (và mục này) làm sha manifest lệch — tái sinh trong cùng commit (bài học r356).
+
+## Vòng vá→review trên chính hồ sơ — hai lượt, khác nền, một bản vá
+
+| lượt | reviewer / run | head | verdict | ghi chú |
+|---|---|---|---|---|
+| 1 | codex `gpt-6-astra` xhigh · `76665114` · 1 604,715 s · rc 0 | `5a29d35` | **`changes_requested` · 0 P1 · 3 P2 · 0 P3** | băm/byte/modelUsage/số finding/neo/cổng của hồ sơ #492 đo lại ĐÚNG hết; 3 P2 là lời khai NGUỒN vượt đo |
+| 2 | codex `gpt-6-astra` xhigh · `d14509c5` · 1 902,292 s · rc 0 | `aad3d01` | **`approve` · 0/0/0** · HINT 0 hunk | R1-01/02/03 ĐÓNG đúng chỗ; văn bản mới không sinh lời khai vượt đo |
+
+**Ba P2 của lượt 1 — cùng một lớp: hồ sơ review khai rộng hơn phép đo, đúng lớp `CLAUDE.md` đã ghi nhiều lần.**
+- **R1-01** — CHANGELOG r363 gọi cả ba lượt 1/2/3 của #492 là "đọc theo phạm vi bản vá" trong khi verdict lượt 1
+  review trọn A0 `c0a5cbe..d5a980e`; receipt lượt 3 ghi "cả ba lượt trước" khi chỉ có hai; "lượt cross-provider duy
+  nhất trên đường tới head cuối" bỏ quên lượt 1 codex. Quan hệ đúng, số hạng sai — không lộ khi đọc.
+- **R1-02** — `nguon_cac_scalar_tren` của 4 receipt khai "đọc từ run.json" cho cả `model_yeu_cau` / `effort` /
+  `so_lan_chet_truoc_khi_xong` / `verdict_ghi_luc_utc` — **không run.json nào có các khoá ấy** (đo lại: đúng).
+- **R1-03** — "mọi số tái lập được từ scratch/luot3" trong khi harness/log/HINT cũ không vào kho.
+
+Vá ở `aad3d01`: áp HINT của reviewer (`17d34cd9…`, 7 tệp/14 hunk) **trừ hunk manifest**, rồi tự tái sinh manifest
+bằng `tl.py release-manifest --deterministic` ⇒ **trùng từng byte** hunk của reviewer. 4 verdict PR #492 nguyên byte
+(t26). Bản chiếu verdict lên PR: comment 5614046571 (lượt 1) · 5614383847 (lượt 2) — **chỉ phần kết luận**; bảng
+đo lại 530/651 dòng vượt trần comment GitHub, nay chỉ có trong hai tệp verdict (cảnh báo
+`BANG-DO-LAI-KHONG-LEN-COMMENT…`).
+
+## Merge và vì sao `cong` đỏ mà vẫn land
+
+| merge commit | PR | hai cha | chỉ thị |
+|---|---|---|---|
+| `c00c88a0` | #500 | `0721811` + `aad3d01` | chủ kho, 11-09 ~01:0xZ — dấu vết PR #500 comment 5627797896 |
+
+`cong` (duyệt khác danh tính, packet #348) đòi review APPROVED từ tài khoản khác `ducthangho`; chủ kho là tác giả PR
+nên GitHub **không cho tự duyệt**, và lúc merge CHƯA có tài khoản nào khác duyệt — cùng tình huống #492 (r363).
+**Đính chính ngay trong mục này:** bản đầu (và PR #500 comment 5627797896) viết "kho không có danh tính thứ hai" —
+SAI, rộng hơn phép đo: 01:20:27Z, collaborator `notebyme88` duyệt PR hồ sơ #501 (head `a957fa1`), workflow `cong`
+chạy lại theo `pull_request_review` và **xanh** (run 34550273565) — lần đầu `cong` xanh trong chuỗi #492/#500/#501.
+Điều đo được là *chưa ai duyệt lúc merge #500*, không phải *không có ai để duyệt*. `thu-hoi` đỏ do lỗi fetch của workflow
+đã land (#499 C2a). Cả hai không phải required check. Đây là PR hồ sơ: không lease, không `guard --action merge`.
+
+Xác nhận sau merge trên `c00c88a0`: `df7ec13` là tổ tiên (neo 4 biên nhận #492 vững) · `bien_nhan_v2` **52 ĐẠT v2 ·
+0 vi phạm · TỔNG: ĐẠT** · `release-verify --strict` ok. Trên cây của mục này (thêm 2 verdict + 2 biên nhận): xem
+phần cổng bên dưới.
+
+## Hai nợ đo được của đợt, ghi ở #499 (không thuộc diff #500)
+
+- **C2a** — canary M9 `ops-thu-hoi-admission.yml` chạy thật lần đầu: `fatal: could not read Username` rc=128 tại
+  bước fetch H (kho private, URL tường minh không mang xác thực). Tái lập tất định trên mọi PR. Bản vá đề nghị: xác
+  thực bằng `TL_TOKEN` qua `http.extraheader`, không nhúng URL. Cần corrective packet có lease.
+- **C3** — lane Windows của master **CANCELLED** ở phút 60 ngay lượt đầu sau A0 land (run 34439063235): bước
+  `lease-publish selftest` chạy 25 phút 50 giây chưa xong, so **2 phút 58 giây** ở lượt master ngay trước (`28ba133`).
+  Log bị đệm khối nên ca gây chậm/treo KHÔNG ĐO ĐƯỢC. Lane PR chỉ chạy ubuntu ⇒ merge là lần đo Windows đầu tiên —
+  đúng bẫy (c) doctrine. CI master trên `c00c88a0` (run 34549206309) **đang chạy lúc soạn**; kỳ vọng lặp lại
+  cancelled ở Windows cho tới khi có bản vá — kỳ vọng, chưa đo.
+- Codex connector kích trên `aad3d01` lúc 01:04:55Z (bỏ draft, vài giây trước merge), **Completed 01:06:27Z**: không
+  review object, không comment finding, không dòng `Reviewed commit:` (comment 5627799419 chỉ là bảng tóm tắt) ⇒ sạch
+  theo API — loại (b). Khác r361: lần này connector không chấm gì vào hồ sơ.
+
+## Cổng trên cây của mục này — tự đo
+
+| cổng | kết quả |
+|---|---|
+| `ops/bien_nhan_v2.py --root .` | **54 ĐẠT v2 · 11/11 miễn trừ legacy · 42 NỢ đóng băng · 0 vi phạm · 0 KHÔNG ĐO ĐƯỢC · tổng 107 · TỔNG: ĐẠT** (52 + 2 mới) |
+| t26 / t27 | 2 băm verdict mới khớp; 3 cảnh báo mới có hàng ở "Cảnh báo đang có hiệu lực" |
+| `tl.py release-verify RELEASE_MANIFEST.json --strict --json` | `ok: true`, 180/180 — chỉ `CHANGELOG.md` đổi băm |
+| doctrine-scan · doc-claims-check --strict · determinism-audit --strict · `git diff --check` | 7 tệp / 0 · ok:true · ok:true · sạch |
+| `AL_VER=1.7.7 bash ops/chay_lease_publish_test.sh` | ghi ở commit message (chạy sau khi soạn mục này) |
+
 # ★ dev-side — r363: ghi sổ #492 — slice A0 sổ thu hồi lease land CHƯA KÍCH HOẠT, bốn lượt review + Codex connector, `cong` đỏ lúc merge (2026-09-10)
 
 Nối tiếp r361 (chốt tới `28ba133`, #496). Merge sau đó chưa có mục: **#492** — packet **#488**, slice **A0** của

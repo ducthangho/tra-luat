@@ -594,8 +594,13 @@ số để trôi. Xem §4.
 cùng của mục này**, tức sau khi biên nhận lượt 3 và hàng mục lục đã vào cây và manifest đã tái sinh.
 Đây là nếp §4 số 3, và nó ra đời vì bảng cũ từng khai `49 ĐẠT v2 · tổng 102` cho một cây đã là
 `50 · 103`. Chuỗi GHIM SHA của bộ đếm ấy: `4d2a6f6` ⇒ **49/102** · `4e6a2d5` ⇒ **50/103** ·
-`25974e7` ⇒ **51/104** · `f6ec9c0` ⇒ **52/105** · `e27d839` ⇒ **53/106** · head hiện tại ⇒ **57/110** — nhảy **4** vì merge `c00c88a` mang theo bốn biên nhận của `r363` (#492), không phải vì mục này. Nó tăng MỘT mỗi lần
-một biên nhận vào kho, nên mọi con số của nó bắt buộc phải neo commit:
+`25974e7` ⇒ **51/104** · `f6ec9c0` ⇒ **52/105** · `e27d839` ⇒ **53/106**.
+**Chuỗi dừng ở đó có chủ đích — không nối thêm một ô "head hiện tại".** Bộ đếm này đếm MỌI
+biên nhận trong kho, của **bất kỳ PR nào**, nên nó đổi khi merge master mang biên nhận phiên
+khác (`r363` +4, `r364` +2) — tức nó trôi mà **không ai trong PR này chạm vào**. Một ô mang
+nhãn "head hiện tại" vì thế hết hạn ngay ở lần merge kế tiếp, và đã hết hạn thật: bản trước
+ghi `57/110` rồi merge thứ ba làm nó thành `59/112`. Số ĐANG ĐO nằm ở bảng ngay dưới, và bảng
+ấy nói về đúng cây của mục này. Mọi con số của bộ đếm bắt buộc phải neo commit:
 
 ```
 ops/lease_publish_test.py            ⇒ 146/146 đạt · đã chạy=146 · bỏ qua=0    (t27 xanh với hồ sơ mới)

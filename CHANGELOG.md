@@ -1,3 +1,112 @@
+# ★ dev-side — r366: ghi sổ #505 — packet #503 `M9-FETCH-AUTH` (#499 C2a) land sau 10 vòng cross-review codex qua 4 generation lease; approve dưới điều kiện dừng do chủ kho duyệt; A3 đo ở chính PR hồ sơ này
+
+Nối tiếp r365 (chốt tới `26e2555d`, #506). Merge sau đó chưa có mục: **#493** (`e82af37`, r360 — hồ sơ của một chuỗi khác),
+**#507** (`0bf0ba7`, chính r365), **#475** (`fa717ee`, ba spec bản 1 + spec A1 nháp 0 + lease nháp WINDOWS) và **#505**
+(`fe05fa6`) — mục này ghi sổ #505 và là vế bookkeeping ADR-0034 của chính nó (10 verdict + 10 biên nhận v2 + 14 cảnh báo
++ 10 hàng mục lục + manifest tái sinh).
+
+**Không nâng `VERSION`.** Vẫn `1.36.68` từ r336.
+
+**Số hiệu `r366` đo trước khi dùng** (11-09-2026, 11:2xZ; `ls-remote --heads` 332 = `for-each-ref` 332, thiếu cục bộ 0):
+chuỗi tiêu đề `# ★ dev-side — r366` có trên **1** ref — `claude/land-493-bookkeeping-wip`, nhánh WIP của một phiên khác,
+CHƯA merge (PR #493 đã land dưới số r360). `master` không có r366; `r367` 0. Chọn **r366**; nhánh WIP kia nếu land sau
+phải đổi số theo tiền lệ r359 → r360 ("master đã chiếm số").
+
+**GIỚI HẠN NGUỒN.** Như r364/r365: (a) tự đo được — Git, băm/byte, numstat, cổng chạy lại từ hiện vật trong kho; (b) thuật
+lại — sự kiện GitHub (run, comment, giờ merge); (c) kết quả cũ thuật lại — mutant/probe reviewer chạy trong sandbox, chỉ
+có băm verdict và mô tả. Runtime 10 lượt review: ID/prompt digest/timestamp/thời lượng/exit/byte+hash stdout,stderr có
+trong `run.json` NGOÀI kho (`28f02cda` `6b3e8525` `4024cfff` `c2bc3d98` `885398ce` `47b042b7` `7f38b236` `6b6e237b`
+`1f427b9d` `cb013b5c`); **model đã chạy KHÔNG ĐO ĐƯỢC** (codex exec không xuất modelUsage).
+
+## Packet #503 — việc gì, vì sao
+
+Nợ #499 C2a: workflow M9 (`ops-thu-hoi-admission.yml`, `pull_request_target`, cài ở A0) chết `rc=128 could not read
+Username` ở bước `git fetch` H trên MỌI PR vì checkout S dùng `persist-credentials: false` (đúng thiết kế) còn fetch endpoint
+tường minh không mang xác thực — cổng fail-close nhưng không bao giờ xanh. Spec bản 1 `ops/specs/M9-FETCH-AUTH.md`
+(sha256 `b8200141…`, nay trên master qua #475, cùng băm lease neo). Bản vá: **11 dòng** workflow — header Basic từ
+`TL_TOKEN` qua `GIT_CONFIG_COUNT/KEY_0/VALUE_0` cho ĐÚNG MỘT lời gọi `git fetch`, `::add-mask::` chuỗi base64 trước khi
+dùng, `unset` sau; không ghi config, không token trong URL — cộng ca **t152** (+69) chạy nguyên phần shell của bước với
+Git config thật, token giả, không mạng.
+
+```
+git diff --shortstat fa717ee..fe05fa6        ⇒  2 files changed, 80 insertions(+)
+git diff --numstat 27c413c3 fe05fa6 -- <2 tệp>   ⇒  11/0 workflow · 69/0 test  (= +80/−0, đúng trần A4 ở MỌI head)
+git rev-list --count --first-parent fa717ee..fe05fa6 ⇒ 1 ; --count ⇒ 11 (10 commit nhánh + merge commit)
+git log -1 --format=%P fe05fa6               ⇒  fa717ee de49fa0   (merge commit, KHÔNG squash)
+```
+
+## Mười vòng cross-review codex (khác nền) qua bốn generation — bảng đo
+
+Lease gen 1 `m9-fetch-auth-exec-1` (#503 comment 5629606599, 3 lượt, trần review nâng 2→3 ở comment 5630194531) → gen 2
+`exec-2` (5630541324, trần nâng 5631624818) → gen 3 `exec-3` (5632052728, chỉ thị *"chạy đến hết P1, P2"*, nang_tran ghi sẵn)
+→ gen 4 `exec-4` (5633059702, *"Tôi chọn A"*, **điều kiện dừng**: chỉ P1 hoặc P2 có mutant sống ở WORKFLOW mới chặn
+approve; P2 thuần fixture ghi nợ). Mỗi reroute §12: lease cũ nhận `da_bi_thay_the`, lease mới `thay_the_cho`, `check` rc=0,
+state-dir mới `.claude/.packet_state/gen{2,3,4}/`.
+
+| round | gen·lượt | head | verdict | P1/P2 | finding (slug) | mutant sống ⇒ HINT | run · s |
+|---|---|---|---|---|---|---|---|
+| 1 | 1·1 | `62c299a` | `changes_requested` | 1/1 | `t152-khong-do-header-hieu-luc` · `t152-khong-khoa-dang-ky-mask` | m5/m7/m8 ⇒ chạy shell thật + Git config | `28f02cda` · 1 184 |
+| 2 | 1·2 | `6254570` | `changes_requested` | 1/1 | `t152-bo-sot-fetch-thu-hai` · `t152-stub-khong-do-quyen-transport` | m10/m11 | `6b3e8525` · 814 |
+| 3 | 1·3 | `c851f80` | `changes_requested` | 1/0 | `t152-bo-qua-stderr-truoc-mask` | m12 (set -x trước gán) | `4024cfff` · 995 |
+| 4 | 2·1 | `2b52173` | `changes_requested` | 1/0 | `t152-bo-qua-co-shell-truoc-wf-blob` | m13 (-x đầu bước) | `c2bc3d98` · 878 |
+| 5 | 2·2 | `19337fa` | `changes_requested` | 0/1 | `t152-fixture-ngan-bo-sot-base64-wrap` | m14 (bỏ -w0) | `885398ce` · 775 |
+| 6 | 2·3 | `301aac8` | `changes_requested` | 0/1 | `t152-fixture-mat-nhanh-padding-base64` | m15 (bỏ `=`) — do fixture HINT 5 | `47b042b7` · 891 |
+| 7 | 3·1 | `8726a1c` | `changes_requested` | 0/1 | `t152-khong-khoa-nguon-token-trong-env` | m16 (env TL_TOKEN rỗng) | `7f38b236` · 867 |
+| 8 | 3·2 | `81af1c9` | `changes_requested` | 0/1 | `t152-bo-sot-header-env-con-sau-fetch` | m22 (export VALUE_0 riêng) | `6b6e237b` · 991 |
+| 9 | 3·3 | `3ae4f61` | `changes_requested` | 0/1 | `t152-fixture-bo-sot-token-lan-hoa-thuong` | m23 (`${TL_TOKEN,,}`) | `1f427b9d` · 969 |
+| 10 | 4·1 | `de49fa0` | **`approve`** | 0/0 | — (NỢ GHI SANG #499: rỗng) | m1–m34: 33 GIẾT / 1 SỐNG hợp lệ (m17) | `cb013b5c` · 940 |
+
+Mỗi vòng reviewer xác nhận finding vòng trước **ĐÃ VÁ THẬT** (áp HINT lên test cũ trùng byte HEAD), trừ round 6 xếp HINT
+round 5 là *"vá sinh lỗi mới trong độ phủ; riêng nhánh wrap đã vá thật"* — reviewer tự nhận fixture của mình làm mất
+nhánh padding. **Cả 9 finding đều ở ca test t152; workflow 11 dòng không đổi từ round 1** (sha256 `184a54a6…` ở cả 10
+verdict). Executor áp NGUYÊN mọi HINT, không sửa lệch; suite 147/147 (`AL_VER=1.7.7`), actionlint 1.7.7 + ShellCheck
+0.9.0 rc=0 ở mọi head. Verdict nguyên byte + biên nhận v2: `ops/reviews/pr505-review-{1..10}-codex-verdict.md`
+(+ `.receipt.yaml`), neo blob `9dc8460`.
+
+## Vì sao 4 generation, và điều kiện dừng
+
+Sáu vòng liên tiếp (3→9) là chuỗi *"mutant thứ N+1 vào encoder/fixture/env"* — không có điểm dừng tự nhiên, luôn dựng được
+một biến đổi bytes nữa. Handoff #503 comment 5632869731 nêu thẳng; chủ kho chọn A: gen 4 áp HINT round 9 (1 literal) +
+1 vòng, kèm điều kiện dừng ghi vào lease (`dieu_kien_dung`) và vào prompt review. Round 10 **không dùng tới** điều kiện
+nới: 0 finding ở cả hai nhóm. Đây là luật của một generation, không phải tiền lệ "P2 fixture không bao giờ chặn".
+
+## Phép đo bị bytecode cũ đánh lừa — ghi để hồ sơ không mang số sai
+
+HINT round 9 đổi 1 literal **cùng kích thước tệp** (304776 B). Lần đo đầu ở bản sao cho *"m23 SỐNG sau HINT"* vì CPython
+dùng `.pyc` cũ (mtime giây + size không đổi; patch trong cùng giây với lần import trước) — đúng bài học `.pyc` trong
+`CLAUDE.md`. Xoá `__pycache__` + `python3 -B` ⇒ m23 ĐỎ; reviewer round 10 cũng chạy `-B` và ghi rõ kích thước không
+đổi. Đính chính ngay trong #503 comment 5632869731; biên nhận round 9 mang cảnh báo
+`HINT-CUNG-KICH-THUOC-TEP-bytecode-cu-lam-phep-do-sai`.
+
+## Land, các PR khác của đợt, A3
+
+Uỷ quyền merge: #503 comment 5632304817 (*"các PR thuộc phiên này thực hiện theo khuyến nghị"*: thứ tự #505 → #507 →
+#475, mỗi PR chỉ khi gate ubuntu xanh trên đúng head; #505 chỉ khi approve). `ghi-uy-quyen` gen 4; `guard --action merge`
+vẫn 7 theo thiết kế (#338). Thực tế land: **#507 `0bf0ba7`** (10:06Z) → **#475 `fa717ee`** (10:52Z) → **#505 `fe05fa6`**
+(11:06Z) — #505 sau cùng vì round 10 chưa xong khi hai gate kia xanh; thứ tự khuyến nghị là ưu tiên đo A3, không phải
+phụ thuộc kỹ thuật. #475 phải merge master hai lần (manifest xung đột sau #493 rồi sau #507). Codex connector trên
+`de49fa0` khi bỏ draft: Completed **10:53:13Z — TRƯỚC merge**, 0 review object/0 review comment.
+
+**A3 (canary runner thật):** cả 10 verdict đều `chua_do_duoc` fetch trên runner GitHub. Trước land, mọi PR đo được hai
+chữ ký của `thu-hoi`: preflight `workflow_sha != S` rc=12 khi payload base cũ, hoặc `rc=128 could not read Username`
+khi preflight qua (đo trên #475 head `586e099` lúc 09:13Z — chính lỗi C2a). PR đầu tiên có sự kiện
+`pull_request_target` sau land là **PR hồ sơ này** — số đo ghi vào #503 sau khi PR mở; mục này KHÔNG khai A3 đã đạt.
+
+## Đếm hình dạng lỗi (chép từ spec) và nợ
+
+- "Lời khai rộng hơn phép đo" của phiên điều phối: prompt review ghi `origin/master` = `26e2555` khi thực tế đã `e82af37`
+  (round 7/8/10 bắt); mô tả *"27 commit chỉ chạm reviews/CHANGELOG/manifest"* thiếu `ops/cong_cu.py` (round 1). Không
+  chạm write set, không đổi kết luận — ghi để đếm: **2**.
+- Nợ mở: A3/M3 (đo ở PR này); P3 `tham-chieu-tai-lieu-song-con-sot` (r365) vẫn mở; WINDOWS-LEASE-SUITE (#504) chờ cấp
+  lease — cùng tệp `ops/lease_publish_test.py`, nay đã rảnh.
+
+## Gate tại chỗ (head hồ sơ, Linux)
+
+bien_nhan_v2 **79 ĐẠT v2 · 11/11 miễn trừ legacy · 42 NỢ đóng băng · 0 vi phạm · tổng 132** (67 ở r365 + 2 của #493 + 10
+mới) · t26/t27 QUA · doc-claims-check --strict ok · release-verify --strict ok (180/180) · doctrine-scan sạch. Mục này +
+manifest tái sinh trong cùng commit (`tl.py release-manifest --deterministic --out RELEASE_MANIFEST.json`), rồi
+release-verify lại.
+
 # ★ dev-side — r365: ghi sổ #506 — rút cổng `duyet khac danh tinh / cong` theo chỉ đạo chủ kho; hai verdict codex, gen 2 vì lỗi ghi sổ, A5 đo được: `cong` không còn trên PR đầu tiên sau land
 
 Nối tiếp r364 (chốt tới `27c413c3`, #501). Merge sau đó chưa có mục: **#497** (`4b5184e`, r362 của một chuỗi hồ sơ khác,

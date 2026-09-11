@@ -30,6 +30,12 @@ spec_path: ops/specs/CHAM-DOT-BIEN-MIEN-NHIEM-CA-VO-CAN.md
 spec_sha256: abbee703b24f97c1bd7a528ff700447658a095da2bade357126d096c30fd5a67
 spec_hash: abbee703b24f97c1bd7a528ff700447658a095da2bade357126d096c30fd5a67
 
+# NGOẠI LỆ ADR-0044 — cấp SAU khi phiên thi công DỪNG theo A8/S2 và trình ba đường.
+# Đo trên `2323075`: 1 tệp · +429 / -32. Trần là 300 ⇒ vượt 129 dòng.
+# Phân rã 429: 25 chú thích · 60 dòng trống · 344 code+docstring — không cắt chú
+# thích cho lọt được. `so_tep` KHÔNG nới: đường dẫn thứ hai vẫn là điều kiện dừng S1.
+ngoai_le_adr_0044: 'so_tep 1 (KHÔNG nới), dong_them <= 500 — chủ kho đồng ý 11-09-2026, #513 comment 5637281693'
+
 write_set:
   - ops/nhanh_don_duoc_test.py
 depends_on: []

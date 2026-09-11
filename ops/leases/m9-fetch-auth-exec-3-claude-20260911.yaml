@@ -92,3 +92,6 @@ nang_tran:
     P1/P2. Dấu vết: https://github.com/ducthangho/tra-luat/issues/503#issuecomment-5632052728
   tran_cu: 2
   tran_moi: 3
+
+# BIA MỘ (chiều ngược của `thay_the_cho` trong exec-4) — gen 3 hết lượt và hết vòng, chủ kho chọn A gen 4 (#503 comment 5633059702).
+da_bi_thay_the: m9-fetch-auth-exec-4-claude-20260911

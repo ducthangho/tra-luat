@@ -1,0 +1,92 @@
+# LEASE GENERATION 4 — packet wp503 (alias M9-FETCH-AUTH, khắc phục #499 C2a): reroute §12 sau khi gen 3 dùng hết
+# 3/3 lượt thực thi + 3/3 vòng review (trần nâng ghi sẵn) mà vòng 3 vẫn `changes_requested` với đúng 1 P2 ở fixture của ca
+# test t152 (`t152-fixture-bo-sot-token-lan-hoa-thuong`, HINT round 9 sha256 67a3b7d5cf558103ee080931efaf8457d1021e85a5cd3cc4eb75b6a23c77bccc).
+# Thẩm quyền cấp: chủ kho `ducthangho`, chỉ thị bền ở `granted_on_instruction` ("Tôi chọn A", phiên 11-09-2026, KÈM ĐIỀU
+# KIỆN DỪNG — xem `dieu_kien_dung`). Hồ sơ do phiên `claude` SOẠN và GHI HỘ; phiên KHÔNG tự cấp —
+# `ops/lease_publish.py` chỉ nhận `NGUOI_CO_THAM_QUYEN = ("ducthangho",)`, TỪ CHỐI mọi tên provider.
+schema_version: 2
+event: executor_lease_granted
+
+packet_issue: 503
+mission_issue: 499
+granted_by: ducthangho
+granted_on_instruction: 'https://github.com/ducthangho/tra-luat/issues/503#issuecomment-5633059702'
+leased_at_utc: '2026-09-11T10:30:00Z'
+lease_expires_at_utc: '2026-09-11T22:30:00Z'
+
+packet_id: wp503
+packet_alias: M9-FETCH-AUTH
+revision: 1
+generation: 4
+lease_id: m9-fetch-auth-exec-4-claude-20260911
+role: executor
+provider: claude
+executor: claude
+model: fable-5.1
+effort: xhigh
+reviewer_model: gpt-6-astra
+reviewer_effort: xhigh
+reviewer_hint_patch: true
+environment: cloud
+risk: sensitive
+assurance_target: cross_approved
+access: read-write
+
+# Spec bản 1 chốt nằm trên nhánh PR #475 (commit 1e5d91d) — CHƯA ở master; bản sao byte-identical đi kèm nhánh lease này.
+spec_path: ops/specs/M9-FETCH-AUTH.md
+spec_sha256: b820014107023f818c23b19cbf515d9e74445e0e67cec154a0b2dc34a57a19ac
+spec_hash: b820014107023f818c23b19cbf515d9e74445e0e67cec154a0b2dc34a57a19ac
+
+# Exact set 2 đường của spec — Y HỆT gen 1/2/3 (write_set_hash không đổi). Người giữ duy nhất trước đó là chính gen 3,
+# nay bị thay thế (bia mộ hai chiều: `thay_the_cho` ở đây + `da_bi_thay_the` trong tệp exec-3).
+write_set:
+  - .github/workflows/ops-thu-hoi-admission.yml
+  - ops/lease_publish_test.py
+depends_on: []
+
+branch: claude/m9-fetch-auth
+branch_ownership: exclusive
+target_branch_neu_land: master
+
+# base giữ nguyên gen 1 (`origin/master` 0bf0ba7 lúc cấp không chạm write set); start/reviewed = head cuối gen 3.
+base_sha: 27c413c3e531800431cad9db4452d7236505a5a9
+start_from_sha: 3ae4f6157636949b2941a218deba5dbaa7df1d30
+reviewed_sha_required: 3ae4f6157636949b2941a218deba5dbaa7df1d30
+
+authority_basis: '§2 — start/pause/resume/reroute/override/authorize thuộc chủ kho'
+recorded_by: claude-session
+recorder_is_dispatcher: false
+recorder_cung_la_nguoi_thi_cong: true
+recorder_xung_dot_loi_ich: >-
+  Phiên ghi lease này cũng là phiên thi công A0 đã để lọt lỗi C2a và là executor gen 1, 2, 3. Cross-review phải là phiên
+  `codex` KHÁC; trần ADR-0043 = 2 vòng cho generation này, vượt thì DỪNG xin nâng trần — không tự nâng.
+
+run_minutes: 720
+# sha256 của các đường write_set đã sort, nối bằng LF, có LF cuối.
+write_set_hash: 941adde790453ffb1cf52293ce42bcd85b54fb7fa6d17bf009010dfe6f016c71
+heartbeat_at: '2026-09-11T10:30:00Z'
+lease_until: '2026-09-11T22:30:00Z'
+heartbeat_required_minutes: 30
+attempts_used: 0
+attempts_limit: 2
+
+reviewer_provider: codex
+review_class: sensitive
+effective_review_class: sensitive
+
+thay_the_cho:
+  - m9-fetch-auth-exec-3-claude-20260911
+ly_do_thu_hoi: >-
+  Gen 3 đã dùng 3/3 lượt thực thi và 3/3 vòng review (nang_tran ghi sẵn, #503 comment 5632052728); round 9 (verdict
+  sha256 8623f20bad8a67cc08558c26d63d0f026b6224d7f7a31f149dbd71170cdd22c1, PR #505 comment 5632840048) còn 0 P1 + 1 P2
+  ở fixture của t152 (fixture toàn chữ thường nên mutant hạ chữ token sống). Tác giả đã đo lại HINT round 9 ở bản sao:
+  m23 SỐNG trên 3ae4f61, ĐỎ sau HINT (sau khi xoá bytecode cũ — bẫy .pyc cùng kích thước/cùng giây); +80/−0.
+  Handoff #503 comment 5632869731; chủ kho chọn A (gen 4 kèm điều kiện dừng).
+
+# ĐIỀU KIỆN DỪNG — chủ kho duyệt qua phương án A (#503 comment 5633059702). Đây là luật của generation này, ghi cả vào
+# prompt review. Reviewer vẫn ghi mọi finding + HINT; chỉ khác ở KẾT LUẬN.
+dieu_kien_dung: >-
+  Vòng review gen 4 chỉ CHẶN approve khi có P1, hoặc P2 có mutant SỐNG ở phần WORKFLOW
+  (.github/workflows/ops-thu-hoi-admission.yml, 11 dòng sản phẩm). P2 thuần fixture/độ phủ của ca test t152
+  (ops/lease_publish_test.py) ⇒ reviewer ghi finding + HINT nhưng kết luận `approve` kèm mục nợ; tác giả ghi nợ vào
+  #499, không vá thêm trong packet này.

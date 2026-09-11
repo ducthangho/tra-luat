@@ -80,12 +80,7 @@ anchor:
   reviewed_base: fe05fa6de0a151ced39261ccb97a88026cd1de91
   verdict_blob_commit: 9196eaf70ca0d908b8d23ff26512c4e395e1e997
 verdict_usage_caveats:
-  - id: BAM-DA-DANG-TREN-PR-LA-CUA-TEP-CHUA-VIET-XONG
-    muc: P1
-    mo_ta: >-
-      Comment lượt 4 trên PR #508 (issuecomment-5634418060) đăng `sha256 bb005aad…` / `46 637` B / 287 dòng. SAI — đó là tệp lúc còn đang ghi. Bản cuối: `eab84221…` / 47 218 B / 298 dòng; `run.json` báo `trang_thai: xong` lúc 12:27:04Z, băm lúc ~12:23. Kết luận và số đếm KHÔNG đổi.
-    phai_lam_gi_khi_chay_lai: >-
-      Tin băm trong biên nhận, đừng tin băm trong comment. Khi băm hiện vật do tiến trình khác sinh: chờ `trang_thai: xong`, đừng chờ tệp xuất hiện.
+  - BAM-DA-DANG-TREN-PR-LA-CUA-TEP-CHUA-VIET-XONG
 khong_do_duoc:
   - 'model_da_chay của reviewer'
   - 'Số GitHub Actions trong hiện vật có phản ánh GitHub thật hay không (gói không có mạng)'

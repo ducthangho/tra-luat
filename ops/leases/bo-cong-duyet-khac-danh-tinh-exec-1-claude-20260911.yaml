@@ -1,0 +1,80 @@
+# LEASE — packet BO-CONG-DUYET-KHAC-DANH-TINH (#502): rút cổng `duyet khac danh tinh / cong`, executor lượt 1.
+# Thẩm quyền cấp: chủ kho `ducthangho`, chỉ thị bền ở `granted_on_instruction`. Hồ sơ do phiên `claude` SOẠN
+# và GHI HỘ theo chỉ thị "Bước 3: Đồng ý cấp lease theo thứ tự" (phiên 11-09-2026); phiên KHÔNG tự cấp —
+# `ops/lease_publish.py` chỉ nhận `NGUOI_CO_THAM_QUYEN = ("ducthangho",)`, TỪ CHỐI mọi tên provider.
+schema_version: 2
+event: executor_lease_granted
+
+packet_issue: 502
+mission_issue: null
+granted_by: ducthangho
+granted_on_instruction: 'https://github.com/ducthangho/tra-luat/issues/502#issuecomment-5629605590'
+leased_at_utc: '2026-09-11T05:00:00Z'
+lease_expires_at_utc: '2026-09-11T17:00:00Z'
+
+packet_id: BO-CONG-DUYET-KHAC-DANH-TINH
+revision: 1
+generation: 1
+lease_id: bo-cong-duyet-khac-danh-tinh-exec-1-claude-20260911
+role: executor
+provider: claude
+executor: claude
+model: fable-5.1
+effort: xhigh
+reviewer_model: gpt-6-astra
+reviewer_effort: xhigh
+reviewer_hint_patch: true
+environment: cloud
+risk: sensitive
+assurance_target: cross_approved
+access: read-write
+
+# Spec bản 1 chốt nằm trên nhánh PR #475 (commit 1e5d91d) — CHƯA ở master; bản sao byte-identical đi kèm nhánh lease này.
+spec_path: ops/specs/BO-CONG-DUYET-KHAC-DANH-TINH.md
+spec_sha256: d8d1e0837f093b5c65b0583a02cee9d82ca1736c30df199f770c2671095edffd
+spec_hash: d8d1e0837f093b5c65b0583a02cee9d82ca1736c30df199f770c2671095edffd
+
+# Ngoại lệ ADR-0044 CÓ PHẠM VI — Q1 đồng ý (#502 comment 5629584614): 6 tệp (4 xoá + 2 sửa), dòng thêm ≤ 30.
+ngoai_le_adr_0044: 'so_tep 6 (4 xoá + 2 sửa), dong_them <= 30 — chủ kho đồng ý 11-09-2026, #502 comment 5629584614'
+
+# Exact set 6 đường của spec. `ai-dang-giu` 02:54:23Z 11-09-2026 (bản sao sạch 27c413c3, 324/324 ref, comm 0/0):
+# NGƯỜI_GIỮ 0 cả sáu. Giao thoa TIỀM TÀNG với nháp LO-319 (ci_dang_ky_test.py) — chưa cấp (S3 của spec).
+write_set:
+  - .github/workflows/duyet-khac-danh-tinh.yml
+  - .github/workflows/duyet-phan-chung.yml
+  - .claude/dev/duyet_danh_tinh.py
+  - .claude/dev/duyet_danh_tinh_test.py
+  - .claude/dev/ci_dang_ky_test.py
+  - ops/RUNBOOK_TACH_DANH_TINH_GITHUB.md
+depends_on: []
+
+branch: claude/bo-cong-duyet-khac-danh-tinh
+branch_ownership: exclusive
+target_branch_neu_land: master
+
+# Ba mỏ neo = head `master` tại giờ cấp (git ls-remote origin master, 04:45Z 11-09-2026).
+base_sha: 27c413c3e531800431cad9db4452d7236505a5a9
+start_from_sha: 27c413c3e531800431cad9db4452d7236505a5a9
+reviewed_sha_required: 27c413c3e531800431cad9db4452d7236505a5a9
+
+authority_basis: '§2 — start/pause/resume/reroute/override/authorize thuộc chủ kho'
+recorded_by: claude-session
+recorder_is_dispatcher: false
+recorder_cung_la_nguoi_thi_cong: true
+recorder_xung_dot_loi_ich: >-
+  Phiên ghi lease này soạn đặc tả VÀ thi công. Cross-review phải là phiên `codex` KHÁC; im lặng ⇒ CHƯA CHẠY.
+
+run_minutes: 720
+# sha256 của các đường write_set đã sort, nối bằng LF, có LF cuối.
+write_set_hash: 366dab362ae70c865456c102d98ce0350ce83f38ab1231aabf618bd6019e8e29
+heartbeat_at: '2026-09-11T05:00:00Z'
+lease_until: '2026-09-11T17:00:00Z'
+heartbeat_required_minutes: 30
+attempts_used: 0
+attempts_limit: 3
+
+reviewer_provider: codex
+review_class: sensitive
+effective_review_class: sensitive
+
+thay_the_cho: []

@@ -41,7 +41,7 @@ hint_patch:
 noi_dung_do_duoc_van_dung:
   - 'Áp lại HINT lượt 1 (patch --batch --fuzz=0 -p0) trên cây 51466e6: đủ 12 hunk / 5 tệp, cả năm tệp bằng byte HEAD, không văn bản thêm ngoài HINT; tệp thứ sáu là manifest, tái sinh (`tl.py release-manifest --deterministic`) nguyên byte; 2 verdict PR #510 nguyên byte.'
   - '5 P2 lượt 1 ĐÓNG đúng chỗ (bảng đo lại): thời lượng có khoá, ba workflow ghim, 410 hàng hỗn hợp, 11/850 dòng, giới hạn `verdict_bytes`; số ref lịch sử đã chuyển sang thuật lại/KHÔNG ĐO ĐƯỢC.'
-  - 'Literal `modelUsage` xuất hiện 29/97 lần trong stderr là văn bản prompt/mã audit, KHÔNG phải telemetry — giữ model thực KHÔNG ĐO ĐƯỢC là đúng.'
+  - 'Theo verdict, literal `modelUsage` xuất hiện 29/97 lần trong stderr của hai run PR #510 (`5c3209aa`/`b1f0d485`), là văn bản prompt/mã audit/trích dẫn, KHÔNG phải telemetry — giữ model thực KHÔNG ĐO ĐƯỢC là đúng.'
   - '5 mutant cổng: verdict_sha256 → v2+t26 ĐỎ; xoá hàng cảnh báo → t27 ĐỎ; evidence_url sang commit không chứa tệp → v2 ĐỎ; `so_p2` 5→4 SỐNG 4/4; `verdict_bytes` 269934→269933 SỐNG 4/4 (giới hạn cổng, lặp lại lượt 1).'
   - '3 lối land (commit-tree) lên b98531e: merge/ff giữ neo bb2a3e2 (anchor rc=0, v2 81 ĐẠT / 0 vi phạm); squash ⇒ anchor rc=1, v2 79 ĐẠT / 2 vi phạm.'
   - 'Mục "M3 sâu chưa làm" của r367 so phép đo sau đó kể trong EVIDENCE: không tạo hai kết luận đối nghịch trong hồ sơ tại cay-kho.'
@@ -115,13 +115,14 @@ verdict_usage_caveats:
   - id: VERDICT-BYTES-VA-SO-P-TRONG-BIEN-NHAN-KHONG-CO-CONG-NAO-CANH
     muc: P2
     mo_ta: >-
-      Hai lượt review hồ sơ đo cùng một giới hạn cổng, nay rộng hơn r367 một trường: đổi `so_p2` (5→4) HOẶC đổi
+      Hai lượt review hồ sơ xác nhận lại giới hạn đã ghi ở r367 (receipt PR #510 lượt 2 đã nêu cả
+      `verdict_bytes`): đổi `so_p2` (5→4) HOẶC đổi
       `verdict_bytes` (269934→269933) của một receipt đều SỐNG qua `bien_nhan_v2`, t26, t27 và `release-verify` (4/4).
       Cổng canh BĂM verdict (t26, v2 blob neo), cặp caveat↔README (t27) và neo evidence_url (v2); số finding và số byte
       khai trong receipt là LỜI KHAI chỉ được reviewer khác nền đếm/đo lại.
     phai_lam_gi_khi_chay_lai: >-
       Muốn tin so_p*/verdict_bytes của một receipt thì đếm tiêu đề `### … [P1|P2|P3]` và `wc -c` trên CHÍNH tệp verdict,
-      đừng tin receipt hay README. Nợ cổng: ghi ở CHANGELOG r367/r368, chưa có packet.
+      đừng tin receipt hay README. Nợ cổng: ghi ở CHANGELOG r367/r369; chưa có packet là lời điều phối thuật lại.
   - id: BANG-DO-LAI-KHONG-LEN-COMMENT-tep-trong-kho-la-ban-du
     muc: P3
     mo_ta: >-

@@ -41,7 +41,7 @@ hint_patch:
   noi_dung: '12 hunk / 5 tệp (2 receipt PR #510 + README + CHANGELOG + requirements.txt); KHÔNG chạm 2 verdict PR #510, KHÔNG sửa manifest tay. Executor áp NGUYÊN (patch -p0 rc=0) ở 6adb7ff rồi tái sinh manifest; lượt 2 áp lại `--fuzz=0`: đủ 12 hunk, 5 tệp bằng byte HEAD.'
 
 noi_dung_do_duoc_van_dung:
-  - '2 verdict PR #510 trong kho `cmp` khớp byte bản sandbox; băm/byte 2 receipt và cột byte 2 hàng README khớp; 4 mutant cổng M1/M2/M4 ĐỎ đúng chốt.'
+  - '2 verdict PR #510 trong kho `cmp` khớp byte bản sandbox; băm/byte 2 receipt và cột byte 2 hàng README khớp; 5 mutant cổng: 3 mutant M1/M2/M4 ĐỎ đúng chốt; M3 (`so_p2`) và M5 (`verdict_bytes`) SỐNG cả 4 cổng.'
   - 'run.json `5c3209aa`/`b1f0d485` CÓ khoá `thoi_luong_giay` (1874.604 / 1302.481) khớp hiệu timestamp làm tròn 3 chữ số — receipt và CHANGELOG r367 tại 51466e6 viết "không có khoá" là SAI (P2 thứ nhất).'
   - '`PyYAML==6.0.3` ghim ở BA workflow (ci.yml:93, ops-publish-lease.yml:80, ops-thu-hoi-admission.yml:56); chú thích đóng P3 ở requirements.txt viết "còn hai" là SAI (P2 thứ hai).'
   - 'Bảng "410 hàng" của verdict 1 PR #510 là 41 × 10 hàng HỖN HỢP (cmp, HINT, finding, lease, runtime, KHÔNG ĐO ĐƯỢC), chỉ 120 hàng có literal `model_reviewer_identity.`; bản chiếu lượt 2 PR #510 chiếu 11 dòng 49–59 của chính bảng đo nên số không chiếu là 850, không phải 861 (P2 thứ ba).'

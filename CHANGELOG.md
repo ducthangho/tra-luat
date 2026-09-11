@@ -7,10 +7,15 @@ sơ kế tiếp, còn PR hồ sơ kế tiếp KHÔNG tự sinh thêm lượt rev
 
 **Không nâng `VERSION`.** Vẫn `1.36.68` từ r336.
 
-**Số hiệu là r369, KHÔNG phải r368 — ĐO, không đoán.** Quét `CHANGELOG.md` trên MỌI `refs/remotes/origin/*` lúc
-19:0xZ 11-09-2026 sau khi hai nguồn ref khớp (`ls-remote` 340 / `for-each-ref` 340, `comm` 0/0): tiêu đề
-`# ★ dev-side — r368` đã có ở **2 ref** — `claude/land-493-bookkeeping` (`fdd951a`, 17:38Z) và
-`claude/land-493-bookkeeping-wip` (`db02755`, 18:34Z), tức hồ sơ #493 của một phiên khác đang mở; `r369`: **0 ref**.
+**Tác giả thuật lại lần chọn số r369 trên KHO NGUỒN** (19:0xZ 11-09-2026): quét `CHANGELOG.md` trên mọi
+`refs/remotes/origin/*` sau khi hai nguồn ref khớp (`ls-remote` 340 / `for-each-ref` 340, `comm` 0/0): tiêu đề
+`# ★ dev-side — r368` ở **2 ref** — `claude/land-493-bookkeeping` (`fdd951a`, 17:38Z) và
+`claude/land-493-bookkeeping-wip` (`db02755`, 18:34Z); tiêu đề `r369`: **0 ref** trước khi thêm mục này.
+Các số 340/340, comm 0/0 và r369=0 là kết quả lịch sử thuật lại, **KHÔNG ĐO ĐƯỢC từ gói review**: không có snapshot
+hai tập ref/log phép so; origin là URL GitHub và sandbox không có mạng. Không lấy số ref hiện tại để xác nhận hoặc
+bác bỏ số lịch sử. Quét mới tại gói review head `899f305`: **342 ref (341 nhánh + origin/HEAD)**, tiêu đề r368 ở
+đúng hai ref trên, tiêu đề r369 ở **1 ref** (`claude/land-511-bookkeeping`). Đây là đếm tiêu đề, không đếm mọi chuỗi
+nhắc `r368`/`r369` (lần lượt có trong 3/1 ref). Việc PR của phiên khác còn mở là nguồn (b) thuật lại.
 Hai PR hồ sơ song song cùng chạm `ops/reviews/README.md` + `CHANGELOG.md` ⇒ PR nào land sau phải merge master rồi
 chạy lại gate; ghi ở đây để phiên kia thấy.
 
@@ -58,21 +63,23 @@ KHÔNG ĐỌC. Lặp lại đúng hình dạng r367 (#510: connector kích ~1 ph
   "r368"** — viết TRƯỚC khi quét số hiệu; số hiệu đúng là r369 (đoạn trên). KHÔNG amend: đổi commit là đổi neo blob
   của cả hai receipt. Lời khai trong tiêu đề commit thua phép đo trong mục này.
 - Commit 2: 2 biên nhận v2 (`cross_reviewed` / `cross_approved`), README (1 đoạn nguồn PR #511, 5 hàng cảnh báo, 2 hàng
-  mục lục — 638 → 647 dòng), mục r369 này, `RELEASE_MANIFEST.json` tái sinh (`tl.py release-manifest --deterministic`).
+  mục lục — 637 → 646 dòng), mục r369 này, `RELEASE_MANIFEST.json` tái sinh (`tl.py release-manifest --deterministic`).
 - Gate tại chỗ trước commit 2: `bien_nhan_v2 --root .` **83 ĐẠT v2 (81 r367 + 2) · 11/11 miễn trừ legacy · 42 NỢ đóng
   băng · 0 vi phạm · 0 KHÔNG ĐO ĐƯỢC · tổng 136**, TỔNG ĐẠT; t26/t27 QUA; doctrine-scan rc=0; `git diff --check` sạch.
   `release-verify --strict --json` và `doc-claims-check --strict` chạy SAU khi tái sinh manifest — số ở mô tả PR.
 
-## Giới hạn cổng — đo được ở CẢ HAI lượt, nay rộng hơn r367 một trường
+## Giới hạn cổng — hai lượt xác nhận lại phạm vi đã ghi ở r367
 
 Đổi `so_p2` (5→4) HOẶC đổi `verdict_bytes` (269934→269933) của một receipt: `bien_nhan_v2` 0 · t26 0 · t27 0 ·
 `release-verify` 0 — SỐNG 4/4 cả hai. Cổng canh BĂM verdict, cặp caveat↔README và neo evidence_url; số finding và số
 byte khai trong receipt là LỜI KHAI. Cảnh báo `VERDICT-BYTES-VA-SO-P-TRONG-BIEN-NHAN-KHONG-CO-CONG-NAO-CANH` thay cho
-`SO-P1-P2-…` của r367 (cảnh báo cũ giữ nguyên ở hai receipt PR #510 — không sửa receipt đã land).
+`SO-P1-P2-…` của r367; receipt PR #510 lượt 2 đã ghi cả `verdict_bytes` và mutant 269934→269933 sống 4/4.
+Phạm vi nợ không tăng thêm trường; giữ nguyên receipt PR #510 đã land.
 
 ## NỢ (mở ở r369)
 
-- **Cổng cho `so_p*` + `verdict_bytes` trong receipt** — chưa có packet (nợ từ r367, nay có thêm một trường).
+- **Cổng cho `so_p*` + `verdict_bytes` trong receipt** — nợ đã ghi ở r367, nay được xác nhận lại; trạng thái chưa có
+  packet là lời điều phối thuật lại.
 - **Chờ connector Codex trước khi merge** — hai PR hồ sơ liên tiếp merge trong vòng ~1 phút quanh lúc connector kích;
   luật chung "approve ⇒ land" chưa nói gì về connector. Đề xuất cho chủ kho: bỏ draft, đợi connector Completed, đọc,
   rồi merge — hoặc ghi rõ connector không thuộc điều kiện.

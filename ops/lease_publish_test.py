@@ -5367,11 +5367,9 @@ def t151_review_codex_to_tien_non_tree_metadata_rac_va_khoa_lan_kieu():
 
 @ca
 def t152_C2a_M9_fetch_H_mang_xac_thuc_qua_header_khong_token_trong_URL():
-    """#503: đo auth bằng Bash + Git config thật, token giả, không mạng.
-    Chạy nguyên phần shell từ đầu bước tới trước NHAN, gồm cờ shell thật của workflow.
-    Stub rev-parse cấp S/blob giả cho preflight; stub fetch đo config hiệu lực theo URL.
-    (i) header từ TL_TOKEN; (ii) URL sạch; (iii) không ghi config; (iv) checkout không giữ
-    credential; (v) mask trước fetch, không output thừa trên stdout hoặc stderr.
+    """#503: Bash thật từ đầu bước tới trước NHAN; Git config thật; token giả, không mạng.
+    Stub rev-parse cấp S/blob giả; stub fetch đo config theo URL. (i) env/token/header; (ii) URL sạch;
+    (iii) không ghi config; (iv) checkout không giữ credential; (v) mask trước fetch, stdout/stderr sạch.
     """
     import base64, yaml
     steps = yaml.safe_load(WORKFLOW_THU_HOI.read_text(encoding="utf-8"))["jobs"]["thu-hoi"]["steps"]
@@ -5386,11 +5384,13 @@ def t152_C2a_M9_fetch_H_mang_xac_thuc_qua_header_khong_token_trong_URL():
         ds = _dong_lenh(than)
         for i, lenh in enumerate(ds):
             if re.search(r"\bgit\b.*\bfetch\b", lenh) and "refs/pull/" in lenh:
-                lenh_fetch.append((lenh, ds, i, than))
+                lenh_fetch.append((lenh, ds, i, than, b.get("env") or {}))
             if re.search(r"\bgit\b[^\n]*\bconfig\b[^\n]*extraheader", lenh):
                 lenh_config.append(lenh)
     chot(len(lenh_fetch) == 1, f"đúng một lời gọi fetch H, thấy {len(lenh_fetch)}")
-    f, ds, i, than = lenh_fetch[0]
+    f, ds, i, than, mt = lenh_fetch[0]
+    chot(re.sub(r"\s+", "", str(mt.get("TL_TOKEN", ""))) in ("${{secrets.GITHUB_TOKEN}}", "${{github.token}}"),
+         "(i) env TL_TOKEN của bước fetch phải lấy GitHub token")
     url = re.findall(r"https://[^\s\"']+", f)
     chot(url and all("@" not in u and "TL_TOKEN" not in u for u in url),
          f"(ii) URL fetch mang credential: {url}")

@@ -515,6 +515,10 @@ DOT_BIEN = {
         "    :  # đột biến: không cắt CR\n",
         "CAI_SH", ("ops/cong_cu.py", "ops/cai_actionlint.sh") + _PHU,
         "t23_batch_chiu_duoc_stdout_CRLF_cua_python_windows"),
+    "t24_sai_pham_vi": ("ops/cong_cu.py",
+        '        pham_vi = "mot-cong-cu"\n',
+        '        pham_vi = "sai-pham-vi"  # đột biến\n',
+        "SCRIPT", _PHU, "t24_pham_vi_mot_cong_cu_va_toan_bo"),
 }
 
 def _chay_1_ca(fn):
@@ -898,6 +902,26 @@ def python_alias_behavior_test() -> None:
         bang(rc == 0 and '"trang_thai_tong": "DAT"' in out,
              f"máy chỉ có python3 bị probe alias python chặn: rc={rc}\n{out}")
 
+
+
+@ca
+def t24_pham_vi_mot_cong_cu_va_toan_bo():
+    """Phạm vi một công cụ và toàn bộ phải có đủ pham_vi, canary_da_quet, ghi_chu_pham_vi."""
+    with tempfile.TemporaryDirectory() as tmp:
+        tmp = Path(tmp)
+        bk, env = bk_don(tmp, "cong-cu-t24", "#!/bin/sh\necho 1.0.0\n", ban_ghim="1.0.0")
+        rc, out, _ = chay("kiem-tra", "--ban-ke", str(bk), "--json", env=env)
+        bang(rc == 0, f"rc={rc} thay vi 0")
+        bc = json.loads(out)
+        bang(bc.get("pham_vi") == "toan-bo", f"sai pham_vi toan-bo: {bc.get('pham_vi')}")
+        bang(bc.get("canary_da_quet") is True, "sai canary_da_quet toan-bo")
+        bang("ghi_chu_pham_vi" in bc, "thieu ghi_chu_pham_vi")
+        rc, out, _ = chay("kiem-tra", "--chi", "cong-cu-t24", "--ban-ke", str(bk), "--json", env=env)
+        bang(rc == 0, f"rc={rc} thay vi 0")
+        bc = json.loads(out)
+        bang(bc.get("pham_vi") == "mot-cong-cu", f"sai pham_vi mot-cong-cu: {bc.get('pham_vi')}")
+        bang(bc.get("canary_da_quet") is False, "sai canary_da_quet mot-cong-cu")
+        bang("ghi_chu_pham_vi" in bc, "thieu ghi_chu_pham_vi")
 
 
 def _tu_kiem_phan_hang() -> int:

@@ -71,22 +71,36 @@ recorder_xung_dot_loi_ich: >-
   Ba vai trên một phiên. Giảm nhẹ: cross-review BẮT BUỘC là phiên `codex` KHÁC NỀN; điều kiện dừng là
   `approve` HOẶC hết P1 VÀ P2 (chỉ thị chủ kho 11-09-2026, cập nhật tại Checkpoint sau lượt 4 —
   bản đầu ghi `approve` TƯỜNG MINH, chỉ thị mới nói rõ "tới khi approve HOẶC hết P1, P2");
-  trần vòng 5 (`ADR-0043`, xem khối `nang_tran`), vượt thì DỪNG xin nâng — KHÔNG tự nâng.
+  trần vòng 6 (`ADR-0043`, xem khối `nang_tran` và `lich_su` trong đó), vượt thì DỪNG xin
+  nâng — KHÔNG tự nâng.
 
 nang_tran:
-  tran_cu: 4
-  tran_moi: 5
+  tran_cu: 5
+  tran_moi: 6
   ai_nang: ducthangho
-  khi_nao: 'Review Rescue Checkpoint sau verdict lượt 4 (changes_requested, 2 P1 · 4 P2)'
-  granted_on_instruction: 'https://github.com/ducthangho/tra-luat/issues/513#issuecomment-5638976697'
+  khi_nao: 'sau verdict lượt 5 (changes_requested, 2 P1 · 2 P2)'
+  granted_on_instruction: 'https://github.com/ducthangho/tra-luat/issues/513#issuecomment-5639237129'
+  # LỊCH SỬ — ghi ra để không ai đọc nhầm đây là lần nâng ĐẦU TIÊN.
+  lich_su:
+    - {lan: 1, tu: 2, den: 4, khi_nao: 'trước khi cấp lease', ai_nang: ducthangho}
+    - {lan: 2, tu: 4, den: 5, ai_nang: ducthangho,
+       khi_nao: 'Review Rescue Checkpoint sau lượt 4',
+       chi_thi: 'https://github.com/ducthangho/tra-luat/issues/513#issuecomment-5638976697'}
+    - {lan: 3, tu: 5, den: 6, ai_nang: ducthangho, khi_nao: 'sau lượt 5',
+       chi_thi: 'https://github.com/ducthangho/tra-luat/issues/513#issuecomment-5639237129'}
+  canh_bao_tu_ghi: >-
+    BA LẦN NÂNG LIÊN TIẾP TỰ NÓ LÀ MỘT TÍN HIỆU. ADR-0043 đặt canon ở 2 chính để chặn kiểu kéo
+    dài này. Căn cứ để tiếp vẫn đứng vững (tổng finding 9 → 7 → 6 → 6 → 4, và bản vá 50cbcd8 đổi
+    CẤU TRÚC phép đo chứ không vá thêm ô), nhưng nếu lượt 6 lại ra một lớp α nữa thì phiên thi
+    công PHẢI khuyến nghị DỪNG và cắt Stable Slice, KHÔNG xin nâng lần thứ tư.
   can_cu: >-
-    ADR-0037 Review Rescue Checkpoint. Điều kiện Stable Slice do chủ kho đặt ("sau 4 vòng mà số
-    lượng lỗi P1/P2/P3 KHÔNG cải thiện") KHÔNG thoả: P1 đo được qua bốn vòng là 8 → 7 → 5 → 2,
-    và mức nghiêm trọng dịch xuống (lượt 4: 2 P1 + 4 P2). Chủ kho chọn nâng trần thay vì cắt
-    Stable Slice — packet là MỘT tệp, MỘT chuỗi phòng thủ liền mạch, cắt đôi sẽ land một chuỗi
-    còn đầu hở.
+    Bản vá 50cbcd8 ĐỔI CẤU TRÚC phép đo (r516 sinh TÍCH ĐỀ-CÁC 18 ô thay vì liệt kê tay; r514 VÉT
+    CẠN bội số (2,3,5) thay vì KHAI chúng lệch nhau; r505 phủ tích lần-1 × lần-2; r509 lật từng
+    bit trong 128 + hoán vị byte), không phải vá thêm ô — cần đúng MỘT lượt xác nhận xem lớp α
+    còn tái phát không. Điều kiện Stable Slice ("số lượng lỗi KHÔNG cải thiện") vẫn KHÔNG thoả:
+    tổng finding qua năm vòng là 9 → 7 → 6 → 6 → 4.
   pham_vi: >-
-    CHỈ packet wp513, CHỈ lượt review thứ 5 trên 8116659. Không mở rộng sang packet khác,
+    CHỈ packet wp513, CHỈ lượt review thứ 6 trên 50cbcd8. Không mở rộng sang packet khác,
     KHÔNG đổi canon ADR-0043 (vẫn là 2).
   trang_thai_cuong_che_cua_tran: >-
     NÓI CHO ĐÚNG: trần vòng vẫn là KỶ LUẬT VẬN HÀNH, CHƯA CÓ CƯỠNG CHẾ MÁY. `review_rounds_used`

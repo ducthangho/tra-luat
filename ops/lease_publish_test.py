@@ -5390,7 +5390,7 @@ def t152_C2a_M9_fetch_H_mang_xac_thuc_qua_header_khong_token_trong_URL():
             continue
         ds = _dong_lenh(than)
         for i, lenh in enumerate(ds):
-            if "fetch --no-tags" in lenh and "refs/pull/" in lenh:
+            if re.search(r"\bgit\b.*\bfetch\b", lenh) and "refs/pull/" in lenh:
                 lenh_fetch.append((lenh, ds, i))
             if re.search(r"\bgit\b[^\n]*\bconfig\b[^\n]*extraheader", lenh):
                 lenh_config.append(lenh)
@@ -5412,6 +5412,7 @@ def t152_C2a_M9_fetch_H_mang_xac_thuc_qua_header_khong_token_trong_URL():
       [ "$#" -eq 4 ] && [ "$1" = fetch ] && [ "$2" = --no-tags ] || return 91
       [ "$3" = "https://github.com/$TL_KHO" ] || return 92
       [ "$4" = "+refs/pull/$TL_PR/head:refs/thu-hoi/ung-vien" ] || return 93
+      [ "$(command git "${cfg[@]}" config --get protocol.https.allow)" = always ] || return 95
       command git "${cfg[@]}" config --get-urlmatch http.extraheader "$3"
       if command git "${cfg[@]}" config --get-urlmatch http.extraheader https://example.invalid/repo; then return 94; fi
     }

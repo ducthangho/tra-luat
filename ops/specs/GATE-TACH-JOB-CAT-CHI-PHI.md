@@ -1,11 +1,13 @@
-# Đặc tả packet — GATE-TACH-JOB-CAT-CHI-PHI (revision 11)
+# Đặc tả packet — GATE-TACH-JOB-CAT-CHI-PHI (revision 12)
 
 - `packet_id`: **GATE-TACH-JOB-CAT-CHI-PHI**; ID bền theo `PROTOCOL §3.2` là `wp<packet_issue>`.
 - `packet_issue`: **#463**
 - `mission_issue`: **#467** (*"bốn packet treo sau #456: GATE → LO-319 → 2A → 2B"*)
-- `revision`: **11** · `generation`: 1 · soạn **11:3xZ 11-09-2026**
-- `depends_on`: **`[wp502, wp<T125>]`** — xem `write_set`. `wp<T125>` điền khi chủ kho cấp Issue cho
-  `T125-RA-JOB-RIENG`; **packet này không được cấp lease trước khi cả hai land.**
+- `revision`: **12** · `generation`: 1 · soạn **11:3xZ 11-09-2026**
+- `depends_on`: **`[wp502, wp504]`** — xem `write_set`. **`wp504`** là `WINDOWS-LEASE-SUITE` (lease
+  sống, cấp `14:05Z 11-09-2026`), **KHÔNG** còn là `T125-RA-JOB-RIENG`: đặc tả ấy đã **RÚT** vì `#504`
+  nhận cùng vấn đề bằng đường chủ kho chọn (song song hoá `t125` trong bộ test, giữ nguyên ngữ nghĩa)
+  thay vì tách job. **Packet này không được cấp lease trước khi cả hai land.**
 - `executor`: claude · `environment`: cloud
 - `risk`: **sensitive** · `review_class`: **sensitive** (`.github/workflows/` — `PROTOCOL §8` loại trừ
   tường minh khỏi patch-as-hint; đây là ĐỊNH NGHĨA của cổng, không phải mã dưới cổng)
@@ -73,9 +75,11 @@ gate-packet-loop  =  7,42 + thiet lap        = 10,17 .. 10,69 phut
 
 ⇒ `max(job)` ước **`19,29`–`19,29`** (job `gate` vẫn nặng nhất), so ngưỡng `A1` **`≤ 36,00`**.
 **Ước này dùng tải của nền G2.** Dưới tải hôm nay (sau `#492`), job `gate` còn mang bước
-`lease-publish selftest` đã phình; `T125-RA-JOB-RIENG` land trước mới đưa bước ấy xuống theo hệ số
+`lease-publish selftest` đã phình; **`#504`** land trước mới đưa bước ấy xuống (nghiệm thu của `#504`:
+bước 20 ≤ **15** phút) theo hệ số
 `1/bội_số` — **không có con số cho bước ấy**, vì bội số Windows chưa ai đo và giá trị thật của bước
-là một **cận dưới** (xem `T125-RA-JOB-RIENG` mục *ƯỚC CÓ ĐIỀU KIỆN*) —
+là một **cận dưới** (mô hình ba số hạng ở `T125-RA-JOB-RIENG` mục *ƯỚC CÓ ĐIỀU KIỆN* — đặc tả ấy đã
+RÚT, nhưng phép đo trong nó vẫn dùng được) —
 đó chính là lý do thứ tự hai packet không đảo được.
 
 **Thứ ước này KHÔNG nói:** nó không nói `max(job)` sẽ dưới `36,00`. Chi phí thiết lập của job MỚI
@@ -117,7 +121,7 @@ Trong tệp #2 chỉ đụng `loi_ruff_ci` và phản chứng của nó; **khôn
 `MOI_WINDOWS`, `chay_moi` — của `LO-319` và hai packet mutant.
 
 Hai packet **cố ý KHÔNG** nằm ở đây: bản vá bộ chấm đột biến đi bằng
-`CHAM-DOT-BIEN-MIEN-NHIEM-CA-VO-CAN`; `t125` đi bằng `T125-RA-JOB-RIENG`.
+`CHAM-DOT-BIEN-MIEN-NHIEM-CA-VO-CAN`; `t125` đi bằng **`#504 WINDOWS-LEASE-SUITE`**.
 
 **Người giữ — đo 09:3xZ 11-09-2026** (sau canh hai nguồn ref, `comm -23` RỖNG):
 
@@ -126,12 +130,13 @@ Hai packet **cố ý KHÔNG** nằm ở đây: bản vá bộ chấm đột bi�
 .claude/dev/ci_dang_ky_test.py    rc=11  NGƯỜI_GIỮ 1: bo-cong-duyet-khac-danh-tinh-exec-2-claude-20260911  (#502)
 ```
 
-⇒ lease cấp **SAU KHI `#502` land VÀ SAU KHI `T125-RA-JOB-RIENG` land**, không phải sau khi hạn danh
+⇒ lease cấp **SAU KHI `#502` land VÀ SAU KHI `#504` land**, không phải sau khi hạn danh
 nghĩa trôi. Cấp chồng là tự tạo cửa sổ hai writer. Phiên cấp lease **đo lại**, không chép dòng này.
 
-**Vì sao nối tiếp SAU `T125-RA-JOB-RIENG`** dù hai packet không chồng tệp thứ hai: cả hai ghi
-`ci.yml` ⇒ không chạy song song được; và bước `lease-publish selftest` phải ra khỏi đường tới hạn
-trước thì ước ở trên mới đúng với tải hiện tại.
+**Vì sao nối tiếp SAU `#504`.** Không phải vì chồng write set — `#504` **không** ghi `ci.yml` (nó khai
+`ci.yml` là ngoài phạm vi) — mà vì **NỀN ĐO**: `A1`/`A5` của packet này cần một lượt Windows **hoàn
+tất**, và `#504` là thứ làm nó hoàn tất. Chạy trước `#504` thì vế TRƯỚC của `A5` vẫn `KHÔNG ĐO ĐƯỢC`
+(xem `chua_do_duoc` #0).
 
 **Thứ tự chuỗi: `#502 → T125 → GATE → LO → 2A → 2B`.** Tệp #2 cũng nằm trong write set của `LO-319`,
 `MUTANT-WINDOWS-SUBAGENT-GHI-DETECT`, `MUTANT-WINDOWS-NHANH-DON-DUOC`; `§5` exclusion theo ĐƯỜNG DẪN
@@ -155,7 +160,7 @@ tách (`gate-registry`), thay vì phải giữ hai trường hợp.
 5. **Bỏ bước trùng** — đã đo, **0** bước trùng. Không có gì để làm.
 6. **Không đổi tập bước, không đổi lệnh của bước nào. KHÔNG NGOẠI LỆ.** Packet này chỉ đổi bước ấy
    nằm trong **job** nào.
-7. **KHÔNG đụng `t125`** — của `T125-RA-JOB-RIENG`.
+7. **KHÔNG đụng `t125`** — của **`#504 WINDOWS-LEASE-SUITE`**.
 8. **KHÔNG chữa phần việc `#492` thêm vào suite `lease-publish`.** Nợ riêng, `chua_do_duoc` #6.
 
 ## `muc_tieu`
@@ -277,7 +282,7 @@ vào một workflow **đã có sẵn một lỗi** ⇒ `rc` vẫn `1` **ở cả
 
 **A4 (M4) — trần không đổi, đo bằng GIÁ TRỊ ĐÃ PARSE của TỪNG job.**
 `yaml.safe_load(ci.yml)`; với **mỗi** `job_id` trong danh sách job kỳ vọng của **pha sau packet này**
-— **bốn**: `gate` · `gate-t125` · `gate-registry` · `gate-packet-loop` — đòi
+— **BA**: `gate` · `gate-registry` · `gate-packet-loop` — đòi
 `jobs[job_id]["timeout-minutes"] == 60`.
 **Thiếu khoá ⇒ ĐỎ.** Giá trị khác `60` ⇒ ĐỎ, kể cả nhỏ hơn. Ngoài ra: **không** `timeout-minutes` nào
 ở mức bước.
@@ -416,9 +421,8 @@ nửa đầu là một lời khai thiếu nửa sau, và nửa sau đã giết C
 
 - **(b) TRẠNG THÁI THẬT của ruleset — đọc được, nên là tiêu chí, không phải lời nhắc.**
   `GET /repos/{owner}/{repo}/rules/branches/master` ⇒ mục `type == "required_status_checks"` ⇒
-  `parameters.required_status_checks[].context`. Đòi tập ấy **chứa cả bốn**:
-  `gate (ubuntu-latest)` · `gate-t125 (ubuntu-latest)` · `gate-registry (ubuntu-latest)` ·
-  `gate-packet-loop (ubuntu-latest)`.
+  `parameters.required_status_checks[].context`. Đòi tập ấy **chứa cả BA**:
+  `gate (ubuntu-latest)` · `gate-registry (ubuntu-latest)` · `gate-packet-loop (ubuntu-latest)`.
   **Không đọc được (rc ≠ 200, thiếu trường, thiếu quyền) ⇒ `KHÔNG ĐO ĐƯỢC` ⇒ ĐỎ.**
   **Phép làm ĐỎ:** chạy tiêu chí khi ruleset **chưa** cập nhật ⇒ thiếu context ⇒ ĐỎ. Đây là phép phân
   biệt mà bản trước **không có**: Issue trông y hệt nhau ở hai trạng thái đã-require và chưa-require.
@@ -438,16 +442,19 @@ nửa đầu là một lời khai thiếu nửa sau, và nửa sau đã giết C
    vĩnh viễn mọi PR thường**. Đây là lý do cấu trúc khiến hôm nay chỉ có **một** context được require,
    và packet này **giữ nguyên luật ấy**.
 
-**BẢNG CONTEXT THEO PHA — nguồn DUY NHẤT, dùng chung với `T125-RA-JOB-RIENG`:**
+**BẢNG CONTEXT THEO PHA — nguồn DUY NHẤT.**
+*(Bản chiếu trong `T125-RA-JOB-RIENG` theo đặc tả đã RÚT; chỉ bảng này còn hiệu lực.)*
 
 | pha | job trong `ci.yml` | context require |
 |---|---:|---|
 | hôm nay (`master`) | **1** — `gate` | `gate (ubuntu-latest)` |
-| sau khi `T125-RA-JOB-RIENG` land | **2** | thêm `gate-t125 (ubuntu-latest)` |
-| **sau khi packet này land** | **4** | thêm `gate-registry (ubuntu-latest)` · `gate-packet-loop (ubuntu-latest)` |
+| sau khi `#504` land | **1** — `#504` **không** thêm job nào (nó sửa trong bộ test) | `gate (ubuntu-latest)` |
+| **sau khi packet này land** | **3** | thêm `gate-registry (ubuntu-latest)` · `gate-packet-loop (ubuntu-latest)` |
 
-Chủ kho cập nhật ruleset **HAI lần**, mỗi packet một lần, **mỗi lần một tập KHÁC nhau**. Khai ở cả hai
-đặc tả để lần thứ hai không bị quên, và để không ai require một job chưa tồn tại.
+Chủ kho cập nhật ruleset **MỘT lần** — sau khi packet này land. `#504` **không** thêm job nào (nó sửa
+trong bộ test), nên pha của nó **không** đổi tập context.
+**Bản trước khai HAI lần và BỐN job** vì nó giả định `T125-RA-JOB-RIENG` (đã RÚT) sẽ thêm job
+`gate-t125`. Số `4` và nghĩa vụ *"hai lần"* đều **hết hiệu lực** cùng đặc tả ấy.
 
 **A7 (M7) — consumer `loi_ruff_ci` đọc được bố cục mới và vẫn có răng.**
 **4** ca — fixture DỰ KIẾN, chưa thi công — đi qua chính `loi_ruff_ci(source)`:
@@ -475,7 +482,7 @@ bằng `wc -l`; `comm -23` khác rỗng ⇒ **MÙ** ⇒ fail-close).
 **Công cụ quét `refs/heads/*`** ⇒ thiếu nhánh cục bộ cho ra `CHAN [12]`, **không phải** `NGƯỜI_GIỮ 0`;
 đọc nhầm chỗ này là tự cấp cho mình một câu trả lời sai.
 **`check rc=0` KHÔNG thay được phép đo này** — `check` không chặn chồng lấn write set.
-Điều kiện bổ sung: **`#502` đã land** và **`T125-RA-JOB-RIENG` đã land** (`depends_on`).
+Điều kiện bổ sung: **`#502` đã land** và **`#504` đã land** (`depends_on`).
 
 ## `hinh_dang_ke_thua`
 
@@ -527,7 +534,7 @@ Kế thừa nguyên trạng; packet này **không** đóng thêm mục nào, và
 0c. **XUẤT XỨ CỦA SỐ — phân loại lại, vì gói review không chứa hiện vật cho một số ô.**
    Có hiện vật, tái lập được: G1/G2/G3/G4 (`do-nen-hai-nen.txt`, `do-nen-windows.txt`) · bội số
    suite (`benchmark.txt` + `benchmark.sh`) · `prefix 33,97` / `overhead 0,03` (nêu run/job/attempt
-   trong `T125-RA-JOB-RIENG`).
+   trong `T125-RA-JOB-RIENG`, đặc tả đã RÚT nhưng phép đo còn dùng được).
    **CHỈ THUẬT LẠI, KHÔNG có hiện vật trong kho** — và vì thế **không** được dùng làm nền đã sẵn
    có: `2,75`–`3,27` phút thiết lập Windows · `400`/`270` giây song song hoá Linux ·
    `20,7 ms/biên nhận` trên 118 biên nhận · response của `/rules/branches/master` (`200`,

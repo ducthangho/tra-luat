@@ -1,4 +1,4 @@
-# Đặc tả packet — T125-RA-JOB-RIENG (revision 5)
+# Đặc tả packet — T125-RA-JOB-RIENG (revision 5) — ĐÃ RÚT
 
 - `packet_id`: **T125-RA-JOB-RIENG**; ID bền theo `PROTOCOL §3.2` là `wp<packet_issue>`.
 - `packet_issue`: **(để trống — chủ kho cấp)**
@@ -8,6 +8,38 @@
 - `executor`: claude · `environment`: cloud
 - `risk`: **sensitive** · `review_class`: **sensitive** (`.github/workflows/**`, `§8`)
 - **Đi TRƯỚC `GATE-TACH-JOB-CAT-CHI-PHI` (`#463`)** — lý do ở `nguon_cap_viec`, không phải thứ tự tiện tay.
+
+> # ⛔ ĐẶC TẢ NÀY ĐÃ BỊ RÚT — `#504 WINDOWS-LEASE-SUITE` THAY THẾ NÓ
+>
+> **Trạng thái: RÚT** (chủ kho duyệt 11-09-2026). Giữ tệp làm hồ sơ; **không cấp lease cho nó**.
+>
+> **Vì sao.** `#504` có **lease SỐNG** — `granted_by: ducthangho`, cấp `2026-09-11T14:05:00Z`, hạn
+> `2026-09-12T14:05:00Z`, `lease_id: windows-lease-suite-exec-1-claude-20260911`,
+> `granted_on_instruction: issues/504#issuecomment-5635544794` — cho **đúng vấn đề** đặc tả này nhắm:
+> *"lane Windows của master bị huỷ ở trần 60 phút tại bước `lease-publish selftest`"*.
+>
+> | | `#504` (có lease) | đặc tả này |
+> |---|---|---|
+> | cách làm | đo từng ca → định vị ca chậm → **song song hoá `t125`, GIỮ NGUYÊN ngữ nghĩa** | chuyển `t125` sang job `gate-t125` riêng |
+> | write set | `ops/lease_publish_test.py` · `ops/chay_lease_publish_test.sh` | `.github/workflows/ci.yml` · `ops/lease_publish_test.py` |
+> | `.github/workflows/ci.yml` | **ngoài phạm vi, khai tường minh** | write set #1 |
+>
+> **Chủ kho đã quyết ngược hướng của đặc tả này từ trước**, ở `#499` Q2: *"giữ ngữ nghĩa `t125`, **chỉ
+> song song hoá**"*. Đặc tả này soạn mà không đọc quyết định ấy.
+>
+> **Mục đích DUY NHẤT của nó** là làm nền của `#463` đo được (xem `nguon_cap_viec`). `#504` làm đúng
+> việc ấy bằng đường chủ kho đã chọn, với nghiệm thu **bước 20 ≤ 15 phút**. Nên đặc tả này **không còn
+> mua được gì**, và `#463` nay `depends_on: [wp502, wp504]`.
+>
+> **Thứ còn dùng được, đừng vứt:** phép đo `N1`–`N13` (nhất là bội số **2,9312** / share **65,88 %** có
+> hiện vật hai vế một lệnh — `#504` đo độc lập ra **66 %**, hai đường gặp nhau), mô hình ba số hạng của
+> ước job Windows, và `BẢNG CONTEXT THEO PHA`. `#463` và `#504` dùng lại được.
+>
+> **Giá đã trả, ghi để không lặp:** hai lượt cross-review (4 và 5) đổ vào đặc tả này sau khi `#504` đã
+> tồn tại (`04:42Z` 11-09). Phiên soạn **đã thấy `#504` trong danh sách Issue mở** lúc ~12:00 mà không
+> mở ra đọc — đúng bệnh *"hỏi chỗ TIỆN TAY thay vì hỏi chỗ KẾT LUẬN ĐƯỢC GHI"* mà `CLAUDE.md` tố cáo.
+> **Nếp rút ra: trước khi soạn một đặc tả, quét Issue mở xem đã có packet nào nhận cùng vấn đề chưa —
+> `write_set` trống KHÔNG chứng minh việc còn trống.**
 
 > **Tệp này KHÔNG thuật lại lịch sử của chính nó.** Vết revision 1–2 và mười lượt cross-review nằm ở
 > PR `#508`, Issue `#463` và `git log`. Đặc tả là **hợp đồng ở các trường `§3.2`**, không phải nhật ký.

@@ -5415,7 +5415,7 @@ def t152_C2a_M9_fetch_H_mang_xac_thuc_qua_header_khong_token_trong_URL():
       if command git "${cfg[@]}" config --get-urlmatch http.extraheader https://example.invalid/repo; then return 94; fi
     }
     '''
-    token = "m9-fixture-token"
+    token = "m9-fixture-token-" + "0123456789abcdef" * 4  # base64 >76 ký tự: khoá wrap/mask nhiều dòng
     b64 = base64.b64encode(("x-access-token:" + token).encode()).decode()
     with San() as s:
         cfg = s / "empty.config"; cfg.write_text("", encoding="utf-8")

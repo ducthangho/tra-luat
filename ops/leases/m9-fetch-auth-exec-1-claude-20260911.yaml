@@ -72,3 +72,13 @@ review_class: sensitive
 effective_review_class: sensitive
 
 thay_the_cho: []
+
+# NÂNG TRẦN review (ADR-0043) — ghi hộ chỉ thị chủ kho "đồng ý" (#503 comment 5630194531), 11-09-2026.
+nang_tran:
+  ai_nang: ducthangho
+  can_cu: >-
+    Hai vòng review đều tìm lỗi MỚI ở ca test t152 (workflow không đổi từ 62c299a); HINT lượt 2 đã áp nguyên
+    tại c851f80 (m5/m7/m8/m10/m11 ĐỎ, suite 147/147, +80 đúng trần A4); không slug nào lặp.
+    Dấu vết: https://github.com/ducthangho/tra-luat/issues/503#issuecomment-5630194531
+  tran_cu: 2
+  tran_moi: 3

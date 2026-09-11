@@ -69,8 +69,29 @@ recorder_cung_la_nguoi_thi_cong: true
 recorder_xung_dot_loi_ich: >-
   Phiên ghi lease này CŨNG là phiên soạn đặc tả (6 revision, 5 lượt cross-review) và sẽ là phiên thi công.
   Ba vai trên một phiên. Giảm nhẹ: cross-review BẮT BUỘC là phiên `codex` KHÁC NỀN; điều kiện dừng là
-  `approve` TƯỜNG MINH chứ không phải "0 P1 + 0 P2" (chỉ thị chủ kho 11-09-2026); trần vòng 4
-  (`ADR-0043` nâng bởi `ducthangho`), vượt thì DỪNG xin nâng — KHÔNG tự nâng.
+  `approve` HOẶC hết P1 VÀ P2 (chỉ thị chủ kho 11-09-2026, cập nhật tại Checkpoint sau lượt 4 —
+  bản đầu ghi `approve` TƯỜNG MINH, chỉ thị mới nói rõ "tới khi approve HOẶC hết P1, P2");
+  trần vòng 5 (`ADR-0043`, xem khối `nang_tran`), vượt thì DỪNG xin nâng — KHÔNG tự nâng.
+
+nang_tran:
+  tran_cu: 4
+  tran_moi: 5
+  ai_nang: ducthangho
+  khi_nao: 'Review Rescue Checkpoint sau verdict lượt 4 (changes_requested, 2 P1 · 4 P2)'
+  granted_on_instruction: 'https://github.com/ducthangho/tra-luat/issues/513#issuecomment-5638976697'
+  can_cu: >-
+    ADR-0037 Review Rescue Checkpoint. Điều kiện Stable Slice do chủ kho đặt ("sau 4 vòng mà số
+    lượng lỗi P1/P2/P3 KHÔNG cải thiện") KHÔNG thoả: P1 đo được qua bốn vòng là 8 → 7 → 5 → 2,
+    và mức nghiêm trọng dịch xuống (lượt 4: 2 P1 + 4 P2). Chủ kho chọn nâng trần thay vì cắt
+    Stable Slice — packet là MỘT tệp, MỘT chuỗi phòng thủ liền mạch, cắt đôi sẽ land một chuỗi
+    còn đầu hở.
+  pham_vi: >-
+    CHỈ packet wp513, CHỈ lượt review thứ 5 trên 8116659. Không mở rộng sang packet khác,
+    KHÔNG đổi canon ADR-0043 (vẫn là 2).
+  trang_thai_cuong_che_cua_tran: >-
+    NÓI CHO ĐÚNG: trần vòng vẫn là KỶ LUẬT VẬN HÀNH, CHƯA CÓ CƯỠNG CHẾ MÁY. `review_rounds_used`
+    tồn tại trong 0 tệp .py (đã đo), và §20 ghi ADR-0043 là "0 cổng". Khối này là bản ghi THẨM
+    QUYỀN, không phải một chốt máy sẽ chặn nếu ai đó chạy lượt thứ sáu.
 
 run_minutes: 1440
 write_set_hash: a32e008e9243ec8d4d1052c7bc6b295fd5c7c7c17290f7c29271350bb1c3a21e

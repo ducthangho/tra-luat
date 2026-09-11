@@ -1,3 +1,101 @@
+# ★ dev-side — r367: ghi sổ #510 — hai verdict codex chấm CHÍNH hồ sơ r366 của #505; 5 P2 + 1 P3 vá rồi approve; merge theo chỉ thị "chọn A" (2026-09-11)
+
+Nối tiếp r366 (chốt tới `fe05fa6`, #505). Merge sau đó chưa có mục: **#510** — vế bookkeeping ADR-0034 của #505/#503,
+và mục này là vế bookkeeping của CHÍNH nó: 2 verdict + 2 biên nhận v2 vào `ops/reviews/`, 2 hàng mục lục + 5 cảnh
+báo + 1 đoạn nguồn, manifest tái sinh. Đệ quy dừng ở đây theo tiền lệ r364/#495: verdict của PR hồ sơ vào kho ở PR hồ
+sơ kế tiếp, còn PR hồ sơ kế tiếp KHÔNG tự sinh thêm lượt review khác nền trừ khi chủ kho gọi.
+
+**Không nâng `VERSION`.** Vẫn `1.36.68` từ r336.
+
+**GIỚI HẠN NGUỒN.** Như r364/r366: (a) **tự đo được** — số Git, băm/byte tệp, cổng chạy lại từ hiện vật trong kho;
+(b) **thuật lại** — sự kiện GitHub (run CI, comment, thời điểm merge, chỉ thị chủ kho trong phiên chat); (c) **kết quả
+cũ thuật lại** — mutant/3 lối land/phản chứng cache mà reviewer chạy trong sandbox, chỉ có băm verdict và mô tả.
+Runtime hai lượt review: ID/prompt digest/timestamp/exit/byte+hash stdout,stderr có trong `run.json` + log NGOÀI kho
+(`5c3209aa`, `b1f0d485`); thời lượng = hiệu hai timestamp (run.json không có khoá thời lượng); **model đã chạy KHÔNG ĐO
+ĐƯỢC** — `codex exec` không xuất modelUsage, chỉ có lời tự khai của reviewer; `transport: machine` CÓ trong run.json
+(sửa từ r366 theo finding lượt 1); model/effort yêu cầu có trong header stderr; số lần chết là ATTESTATION điều phối.
+
+**Số `r` chọn bằng ĐO** (11-09-2026, 13:4xZ). Lần đầu `for-each-ref` 331 < `ls-remote --heads` 333 — **thiếu cục bộ 2**
+(`claude/land-493-bookkeeping-wip`, `codex/wp484-g6-integration`) vì worktree mới chỉ fetch `master`; fetch đủ refspec
+`+refs/heads/*` ⇒ 334/334 (kể nhánh này), rồi mới quét `CHANGELOG.md` trên **mọi** ref: `r367` **0** ref. Chọn **r367**.
+Ghi cả lần đo hụt vì đó chính là bài học *"for-each-ref đọc bộ đệm"* — quét 331 ref vẫn in "đã quét mọi ref".
+
+## Phạm vi — đo, không ước
+
+```
+git diff --shortstat fe05fa6..b98531e            ⇒  23 files changed, 2982 insertions(+), 5 deletions(-)
+git diff --name-only fe05fa6..b98531e | sed 's#/.*##' | sort | uniq -c
+                                                  ⇒  1 CHANGELOG.md · 1 RELEASE_MANIFEST.json · 21 ops
+git rev-list --count --first-parent fe05fa6..b98531e   ⇒  1
+git rev-list --count              fe05fa6..b98531e     ⇒  5     (4 commit nhánh + merge commit)
+git log -1 --format=%P b98531e                   ⇒  fe05fa6 656f2dc   (merge commit, KHÔNG squash)
+git diff --numstat 3349c8b..656f2dc              ⇒  13 tệp, +77/−50   (bản vá lượt 1: HINT 20 hunk + 5 dòng CHANGELOG + manifest)
+```
+
+`ops/` nằm ngoài kiểm kê gói ⇒ 0/180 mục manifest từ 21 tệp `ops/reviews/`; `CHANGELOG.md` NẰM TRONG kiểm kê nên
+mục r366 (và mục này) làm sha manifest lệch — tái sinh trong cùng commit (bài học r356).
+
+## Vòng vá→review trên chính hồ sơ — hai lượt, khác nền, một bản vá
+
+| lượt | reviewer / run | head | verdict | ghi chú |
+|---|---|---|---|---|
+| 1 | codex `gpt-6-astra` xhigh · `5c3209aa` · 1 874,604 s · rc 0 | `3349c8b` | **`changes_requested` · 0 P1 · 5 P2 · 1 P3** | byte/băm 10 verdict, 410 hàng scalar, số finding, neo, cổng của hồ sơ r366 đo lại ĐÚNG hết; 6 finding đều là lời khai HỒ SƠ vượt đo |
+| 2 | codex `gpt-6-astra` xhigh · `b1f0d485` · 1 302,481 s · rc 0 | `656f2dc` | **`approve` · 0/0/0** · HINT 0 hunk | 6 finding ĐÓNG đúng chỗ; áp lại HINT 1 `--fuzz=0` đủ 20 hunk; ngoài HINT chỉ khối 5 dòng CHANGELOG; manifest tái sinh nguyên byte |
+
+**Sáu finding của lượt 1 — cùng lớp với r364: hồ sơ review khai rộng hơn phép đo.**
+- **`r366-tong-hop-truot-so-va-moc`** (P2) — "cả 9 finding" khi đếm tiêu đề ra **11** (4 P1 + 7 P2; hai vòng đầu mỗi
+  vòng 2 finding); "sáu vòng (3→9)" là **7**; mốc `origin/master` sai gộp một cặp SHA cho ba round khác nhau.
+- **`hint-nguyen-byte-bo-sot-docstring-luot-1`** (P2) — áp HINT 1 lên test `62c299a` cho 303 788 B, test tại `6254570`
+  là 304 616 B: khác đúng docstring t152 (6 dòng, chính executor đã khai ở EVIDENCE lượt 2) — nhưng receipt/README/
+  CHANGELOG viết "áp NGUYÊN / trùng byte". HINT 2–9 trùng byte toàn tệp.
+- **`nguon-runtime-xep-sai-transport`** (P2) — 10 receipt khai `transport` "không có khoá trong run.json"; **có**.
+- **`huong-dan-tru-cache-b-van-doc-pyc-cu`** (P2) — hướng dẫn "xoá cache HOẶC `python3 -B`": `-B` chỉ ngăn GHI, không
+  ngăn NẠP `.pyc` có sẵn (phản chứng scalar 15 B cùng mtime: `-B` in 1, xoá cache mới in 2). Sửa thành xoá cache trước.
+- **`no-rong-bo-sot-no-a3-m3`** (P2) — mục NỢ GHI SANG #499 của round 10 không "rỗng": nó ghi A3/M3 vẫn chưa đo.
+- **`dem-hang-bang-do-sai-khoang`** (P3) — bảng đo 17–25 hàng dữ liệu, không phải 15–23.
+
+Vá ở `656f2dc`: áp NGUYÊN HINT (`9212942d…`, 20 hunk / 12 tệp, `patch -p0` rc=0) + tự thêm một khối 5 dòng ghi lượt
+review vào mục r366 + tái sinh manifest. 10 verdict PR #505 nguyên byte (t26). Bản chiếu verdict lên PR: comment
+5634872493 (lượt 1) · 5635206884 (lượt 2) — bỏ bảng đo lại 1 124 / 861 dòng (cảnh báo `BANG-DO-LAI-KHONG-LEN-COMMENT…`).
+
+## Giới hạn cổng đo được hai lần — nợ mới
+
+Cả hai lượt chạy cùng đột biến: đổi `so_p1` của một receipt từ 0 thành 1 ⇒ **SỐNG qua `bien_nhan_v2`, t26, t27 và
+`release-verify`** (4/4). Cổng hồ sơ canh băm/byte verdict, cặp caveat↔README và neo `evidence_url`; **số finding khai
+trong receipt không cổng nào canh** — chỉ reviewer khác nền đếm lại từ tiêu đề verdict. Ghi thành cảnh báo
+`SO-P1-P2-TRONG-BIEN-NHAN-KHONG-CO-CONG-NAO-CANH`; chưa có packet (đụng `ops/bien_nhan_v2.py`, cần lease).
+
+## Merge — theo chỉ thị, không tự cấp
+
+| merge commit | PR | hai cha | chỉ thị |
+|---|---|---|---|
+| `b98531e` | #510 | `fe05fa6` + `656f2dc` | chủ kho, phiên chat ~13:05Z: **"chọn A"** = vòng 2 để có approve rồi merge khi gate xanh — ghi ở PR #510 comment 5635211398 trước khi bỏ draft (13:34Z) và merge (13:35Z) |
+
+Lúc merge: `gate (ubuntu-latest)` success (job 103272289299, 13:04–13:28Z) · `thu-hoi` success (job 103272281009) ·
+mergeable clean · không còn `cong` (đã rút ở #506/#507). Codex connector kích lúc bỏ draft, ~1 phút trước merge —
+kết quả của nó trên `656f2dc` **không được chờ, không được đọc**; ghi KHÔNG ĐO ĐƯỢC chứ không ghi "sạch". Đây là PR hồ
+sơ: không lease, không `guard --action merge`; sổ local gen4 `uy_quyen_merge.jsonl` có dòng KHAI BÁO cho `656f2dc`.
+
+**A3 đo hai lần trên #510** (nối r366, nơi mục ấy cố ý không khai A3 vì viết trước khi đo): `thu-hoi` success trên
+`3349c8b` (job 103242804577, 18 s, artifact receipt 10196441387 — #503 comment 5633632348) và trên `656f2dc` (job
+103272281009). Đó là hai lần liên tiếp `pull_request_target` xanh kể từ A0 — C2a đóng bằng phép đo. **M3 sâu** (đọc
+lại nội dung artifact receipt thật) vẫn chưa làm.
+
+## Cổng của mục này
+
+Trên cây r367 (2 verdict + 2 biên nhận + README + mục này + manifest): `bien_nhan_v2` **81 ĐẠT v2 · 11/11 miễn trừ legacy ·
+42 NỢ đóng băng · 0 vi phạm · TỔNG: ĐẠT** (79 r366 + 2 mới) · t26/t27 QUA · `release-verify --strict` ok 180/180 ·
+`doc-claims-check --strict` ok · `doctrine-scan` sạch. Neo `evidence_url` của hai biên nhận: blob tại commit đầu tiên
+chứa hai verdict (`git log --all --diff-filter=A` ⇒ đúng 1 commit).
+
+## Đếm hình dạng lỗi và nợ
+
+- "Lời khai rộng hơn phép đo" trong hồ sơ r366: **6** (5 P2 + 1 P3), cùng một lớp — hồ sơ tổng hợp làm tròn số hạng
+  và nâng mức bằng chứng ("áp NGUYÊN", "rỗng", "hoặc `-B`"). Cộng dồn với r364 (3 P2 cùng lớp): **9** finding review-hồ-sơ
+  trong hai PR hồ sơ liên tiếp, 0 finding mã sản phẩm.
+- Nợ mở: M3 sâu; P3 `tham-chieu-tai-lieu-song-con-sot` (r365) vẫn mở; cổng cho `so_p1/so_p2/so_p3`; WINDOWS-LEASE-SUITE
+  (#504) — chủ kho đã đồng ý cấp lease trong phiên này, ghi hộ ở #504.
+
 # ★ dev-side — r366: ghi sổ #505 — packet #503 `M9-FETCH-AUTH` (#499 C2a) land sau 10 vòng cross-review codex qua 4 generation lease; approve dưới điều kiện dừng do chủ kho duyệt; A3 đo ở chính PR hồ sơ này
 
 Nối tiếp r365 (chốt tới `26e2555d`, #506). Merge sau đó chưa có mục: **#493** (`e82af37`, r360 — hồ sơ của một chuỗi khác),

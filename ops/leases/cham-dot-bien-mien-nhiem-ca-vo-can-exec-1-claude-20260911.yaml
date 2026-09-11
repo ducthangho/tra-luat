@@ -44,7 +44,8 @@ spec_hash: abbee703b24f97c1bd7a528ff700447658a095da2bade357126d096c30fd5a67
 # NỚI LẦN HAI: đo trên `c662141` ⇒ +536/-32 (36 chú thích · 66 dòng trống · 434 code).
 # Phiên thi công DỪNG đúng theo điều khoản của chính ngoại lệ rồi mới xin. 650 = 536 đã
 # đo + ~114 biên cho vòng vá review (mỗi P1 thường đòi một ca phản chứng ≈ 15–25 dòng,
-# trần vòng review là 4). Vượt 650 ⇒ DỪNG lần ba.
+# trần vòng review là 4 LÚC ƯỚC LƯỢNG — nay đã 8; con số ấy chỉ là tham số của phép ước
+# lượng 650 dòng ĐÃ HẾT HIỆU LỰC, không phải khai trần hiện hành). Vượt 650 ⇒ DỪNG lần ba.
 ngoai_le_adr_0044: 'so_tep 1 (KHÔNG nới, là chốt DUY NHẤT còn hiệu lực), dong_them KHÔNG giới hạn — chủ kho đồng ý 11-09-2026, #513 comment 5637719340 (bỏ bound dòng sau ba lần trượt 300→429, 500→536, 650→658; bound 650 ở comment 5637410450 hết hiệu lực)'
 
 write_set:
@@ -71,17 +72,17 @@ recorder_xung_dot_loi_ich: >-
   Ba vai trên một phiên. Giảm nhẹ: cross-review BẮT BUỘC là phiên `codex` KHÁC NỀN; điều kiện dừng là
   `approve` HOẶC hết P1 VÀ P2 (chỉ thị chủ kho 11-09-2026, cập nhật tại Checkpoint sau lượt 4 —
   bản đầu ghi `approve` TƯỜNG MINH, chỉ thị mới nói rõ "tới khi approve HOẶC hết P1, P2");
-  trần vòng 6 (`ADR-0043`, xem khối `nang_tran` và `lich_su` trong đó), vượt thì DỪNG xin
+  trần vòng 8 (`ADR-0043` — con số CANON nằm ở khối `nang_tran`/`lich_su`, KHÔNG ở câu này;
+  câu này đã TRÔI một lượt, ghi 6 khi trần thật đã là 7), vượt thì DỪNG xin
   nâng — KHÔNG tự nâng.
 
 nang_tran:
-  tran_cu: 6
-  tran_moi: 7
+  tran_cu: 7
+  tran_moi: 8
   ai_nang: ducthangho
-  khi_nao: >-
-    sau verdict lượt 6 (changes_requested, 2 P1 · 3 P2), VÀ SAU KHI phiên thi công khuyến nghị DỪNG
-  granted_on_instruction: 'https://github.com/ducthangho/tra-luat/issues/513#issuecomment-5639580686'
-  trai_khuyen_nghi_thi_cong: true
+  khi_nao: 'sau verdict lượt 7 (changes_requested, 1 P1 SẢN PHẨM · 3 P2 META)'
+  granted_on_instruction: 'https://github.com/ducthangho/tra-luat/issues/513#issuecomment-5640020739'
+  trai_khuyen_nghi_thi_cong: false
   # LỊCH SỬ — ghi ra để không ai đọc nhầm đây là lần nâng ĐẦU TIÊN.
   lich_su:
     - {lan: 1, tu: 2, den: 4, khi_nao: 'trước khi cấp lease', ai_nang: ducthangho}
@@ -93,6 +94,9 @@ nang_tran:
     - {lan: 4, tu: 6, den: 7, ai_nang: ducthangho, khi_nao: 'sau lượt 6',
        trai_khuyen_nghi_thi_cong: true,
        chi_thi: 'https://github.com/ducthangho/tra-luat/issues/513#issuecomment-5639580686'}
+    - {lan: 5, tu: 7, den: 8, ai_nang: ducthangho, khi_nao: 'sau lượt 7',
+       trai_khuyen_nghi_thi_cong: false,
+       chi_thi: 'https://github.com/ducthangho/tra-luat/issues/513#issuecomment-5640020739'}
   canh_bao_tu_ghi: >-
     CẢNH BÁO NÀY ĐÃ KÍCH HOẠT VÀ ĐÃ ĐƯỢC THỰC HIỆN. Bản trước ghi: "nếu lượt 6 lại ra một lớp α
     nữa thì phiên thi công PHẢI khuyến nghị DỪNG, KHÔNG xin nâng lần thứ tư". Lượt 6 ra đúng một
@@ -103,14 +107,23 @@ nang_tran:
     mọi lượt. Thứ sinh finding là TẦNG META (test kiểm test kiểm bộ chấm), tầng ấy chưa có hợp
     đồng đủ rõ nên chưa có điểm dừng tự nhiên. Từ lượt 7, reviewer được yêu cầu phân finding theo
     TẦNG (sản phẩm / meta) ngoài phân theo LỚP, để lần quyết sau dựa trên số liệu.
+    KẾT QUẢ NGAY LƯỢT ĐẦU ÁP DỤNG: 1 SẢN PHẨM + 3 META, và mục SẢN PHẨM là lỗi THẬT của mã.
+    BÀI HỌC: MỘT PHÉP ĐO CHỈ RA ĐƯỢC THỨ NÓ ĐƯỢC BẢO ĐI TÌM — sáu vòng trước phiên thi công đọc
+    sự VẮNG MẶT của finding sản phẩm thành bằng chứng rằng sản phẩm ĐÚNG; đó đúng bệnh "vắng mặt
+    vì sạch và vắng mặt vì chưa chạy nhìn giống hệt nhau" mà CLAUDE.md đã tố cáo.
+    TIÊU CHÍ QUYẾT SAU LƯỢT 8, ghi TRƯỚC khi chạy: 0 finding tầng SẢN PHẨM ⇒ khuyến nghị DỪNG
+    (căn cứ khi ấy mạnh hơn lượt 6 vì đã có HAI lượt nhắm thẳng vào sản phẩm); còn ra lỗi sản
+    phẩm nữa ⇒ tín hiệu ngược, tiếp là đúng.
   can_cu: >-
-    CHỈ ĐẠO TRỰC TIẾP CỦA CHỦ KHO, không phải căn cứ kỹ thuật do phiên thi công đưa ra. Điều kiện
-    Stable Slice mà chính chủ kho đặt ("số lượng lỗi KHÔNG cải thiện") ĐÃ THOẢ ở lượt 6: tổng
-    finding qua sáu vòng là 9 → 7 → 6 → 6 → 4 → 5. Phiên thi công đã khuyến nghị DỪNG và cắt
-    Stable Slice; chủ kho chọn tiếp. Khuyến nghị ấy KHÔNG bị rút, xem
-    https://github.com/ducthangho/tra-luat/issues/513#issuecomment-5639547322
+    Khuyến nghị DỪNG của lượt 6 ĐÃ BỊ PHÉP ĐO BÁC BỎ, nên lần nâng này THUẬN với khuyến nghị thi
+    công. Căn cứ cũ là "sáu lượt, 37 finding, không cái nào chạm SẢN PHẨM" — đúng về dữ liệu
+    nhưng SAI về nguyên nhân: không phải vì sản phẩm đúng mà vì CHƯA AI NHẮM VÀO. Lượt 7, lượt
+    đầu tiên yêu cầu reviewer phân TẦNG và tấn công tầng SẢN PHẨM trước, ra ngay một lỗi THẬT
+    trong `doc_kenh` (hai bản ghi dong_luot ghi đè nhau ⇒ rc=99 rồi rc=1 qua được phép neo rc và
+    trả GIẾT, phá thẳng E3). Câu hỏi của lượt 8: CÒN LỖI TẦNG SẢN PHẨM NÀO NỮA KHÔNG. Khuyến nghị
+    DỪNG của lượt 6: https://github.com/ducthangho/tra-luat/issues/513#issuecomment-5639547322
   pham_vi: >-
-    CHỈ packet wp513, CHỈ lượt review thứ 7 trên e26d6db. Không mở rộng sang packet khác,
+    CHỈ packet wp513, CHỈ lượt review thứ 8 trên f53903e. Không mở rộng sang packet khác,
     KHÔNG đổi canon ADR-0043 (vẫn là 2).
   trang_thai_cuong_che_cua_tran: >-
     NÓI CHO ĐÚNG: trần vòng vẫn là KỶ LUẬT VẬN HÀNH, CHƯA CÓ CƯỠNG CHẾ MÁY. `review_rounds_used`

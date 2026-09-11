@@ -134,7 +134,10 @@ def _duong_tu_porcelain(dong):
     if p.startswith('"') and p.endswith('"'):
         # git trich dan khi ten co ky tu la; giai bang chinh luat cua no
         try:
-            p = p[1:-1].encode("latin-1", "backslashreplace").decode("unicode_escape")
+            import codecs
+            p_bytes = p[1:-1].encode("utf-8", "surrogateescape")
+            p_unescaped, _ = codecs.escape_decode(p_bytes)
+            p = p_unescaped.decode("utf-8", "surrogateescape")
         except Exception:
             return None
     return p

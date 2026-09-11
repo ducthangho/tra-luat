@@ -971,6 +971,63 @@ def t22b_fixture_KHONG_an_cau_hinh_git_ngoai(h):
                      if rc == 0 else f"cau hinh PHAM VI LENH van lot: rc={rc}")
 
 
+def t26a_ten_unicode_duoc_giai_ma_dung_byte_khi_quotePath_true(h):
+    c, s = _cay(), _snap()
+    subprocess.run(["git", "config", "core.quotePath", "true"], cwd=c, capture_output=True)
+    ten = "chữ-việt.txt"
+    f = pathlib.Path(c) / ten
+    f.write_text("1", encoding="utf-8")
+    
+    goi_byte("SubagentStart", "tl-auditor", "a26a_clean", c, s, h)
+    rc1, kq1, ly1, ct1 = goi_byte("SubagentStop", "tl-auditor", "a26a_clean", c, s, h)
+    if kq1 != "clean" or ct1.get("so_duong_da_bam_noi_dung", 0) == 0:
+        shutil.rmtree(c, ignore_errors=True)
+        return False, f"quotePath=true (unchanged): {kq1}, hashed={ct1.get('so_duong_da_bam_noi_dung')}"
+    
+    goi_byte("SubagentStart", "tl-auditor", "a26a_changed", c, s, h)
+    f.write_text("2", encoding="utf-8")
+    rc2, kq2, ly2, ct2 = goi_byte("SubagentStop", "tl-auditor", "a26a_changed", c, s, h)
+    shutil.rmtree(c, ignore_errors=True)
+    return kq2 == "changed", f"quotePath=true: {kq1} -> {kq2}"
+
+def t26b_ten_unicode_giai_ma_dung_byte_khi_quotePath_false(h):
+    c, s = _cay(), _snap()
+    subprocess.run(["git", "config", "core.quotePath", "false"], cwd=c, capture_output=True)
+    ten = "chữ-việt.txt"
+    f = pathlib.Path(c) / ten
+    f.write_text("1", encoding="utf-8")
+    
+    goi_byte("SubagentStart", "tl-auditor", "a26b_clean", c, s, h)
+    rc1, kq1, ly1, ct1 = goi_byte("SubagentStop", "tl-auditor", "a26b_clean", c, s, h)
+    if kq1 != "clean" or ct1.get("so_duong_da_bam_noi_dung", 0) == 0:
+        shutil.rmtree(c, ignore_errors=True)
+        return False, f"quotePath=false (unchanged): {kq1}, hashed={ct1.get('so_duong_da_bam_noi_dung')}"
+    
+    goi_byte("SubagentStart", "tl-auditor", "a26b_changed", c, s, h)
+    f.write_text("2", encoding="utf-8")
+    rc2, kq2, ly2, ct2 = goi_byte("SubagentStop", "tl-auditor", "a26b_changed", c, s, h)
+    shutil.rmtree(c, ignore_errors=True)
+    return kq2 == "changed", f"quotePath=false: {kq1} -> {kq2}"
+
+def t26c_escaped_names_duoc_giai_ma_dung(h):
+    hook = _nap_hook_de_do(h, "t26c")
+    res = hook._duong_tu_porcelain(' ?? "tep\\n\\"voi\\"\\\\slash.txt"')
+    mong_doi = 'tep\n"voi"\\slash.txt'
+    return res == mong_doi, f"escaped names parser: {res!r} (mong doi {mong_doi!r})"
+
+def t26d_ten_byte_malformed_tra_unknown_hoac_fail_close(h):
+    hook = _nap_hook_de_do(h, "t26d")
+    res = hook._duong_tu_porcelain(' ?? "bad-\\377.txt"')
+    mong_doi = "bad-\udcff.txt"
+    return res == mong_doi, f"malformed bytes parser: {res!r} (mong doi {mong_doi!r})"
+
+def t26e_mixed_literal_unicode_and_escapes(h):
+    hook = _nap_hook_de_do(h, "t26e")
+    res = hook._duong_tu_porcelain(' ?? "chữ\\n.txt"')
+    mong_doi = "chữ\n.txt"
+    return res == mong_doi, f"mixed literal and escapes: {res!r} (mong doi {mong_doi!r})"
+
+
 CA = [t1_khong_ghi_thi_clean, t2_ghi_tep_theo_doi_thi_changed,
       t3_ghi_tep_BI_IGNORE_van_changed, t4_sua_tep_da_theo_doi_thi_changed,
       t4b_XOA_tep_da_theo_doi_thi_changed, t4c_DOI_TEN_tep_da_theo_doi_thi_changed,
@@ -994,7 +1051,12 @@ CA = [t1_khong_ghi_thi_clean, t2_ghi_tep_theo_doi_thi_changed,
       # --- #412 loi B: giai ma utf-8 tuong minh o ca hai duong ---
       t25a_git_doc_byte_utf8_khong_phu_thuoc_locale,
       t25b_stdin_doc_byte_utf8_khong_phu_thuoc_locale,
-      t25_duong_dan_NGOAI_ASCII_van_bam_duoc_noi_dung]
+      t25_duong_dan_NGOAI_ASCII_van_bam_duoc_noi_dung,
+      t26a_ten_unicode_duoc_giai_ma_dung_byte_khi_quotePath_true,
+      t26b_ten_unicode_giai_ma_dung_byte_khi_quotePath_false,
+      t26c_escaped_names_duoc_giai_ma_dung,
+      t26d_ten_byte_malformed_tra_unknown_hoac_fail_close,
+      t26e_mixed_literal_unicode_and_escapes]
 
 # --- DOT BIEN: moi cai go DUNG MOT tinh chat, va phai lam it nhat mot ca DO ---
 DOT_BIEN = [
@@ -1075,6 +1137,9 @@ DOT_BIEN = [
     ("m18_index_ghep_chuoi_top_git_index",
      '    rc_idx, duong_idx = _git(cwd, "rev-parse", "--git-path", "index")',
      '    rc_idx, duong_idx = 0, ".git/index"'),
+    ("m27_bo_codecs_escape_decode",
+     '            import codecs\n            p_bytes = p[1:-1].encode("utf-8", "surrogateescape")\n            p_unescaped, _ = codecs.escape_decode(p_bytes)\n            p = p_unescaped.decode("utf-8", "surrogateescape")',
+     '            p = p[1:-1].encode("latin-1", "backslashreplace").decode("unicode_escape")'),
 ]
 
 

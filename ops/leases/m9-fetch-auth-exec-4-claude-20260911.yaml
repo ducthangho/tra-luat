@@ -90,3 +90,8 @@ dieu_kien_dung: >-
   (.github/workflows/ops-thu-hoi-admission.yml, 11 dòng sản phẩm). P2 thuần fixture/độ phủ của ca test t152
   (ops/lease_publish_test.py) ⇒ reviewer ghi finding + HINT nhưng kết luận `approve` kèm mục nợ; tác giả ghi nợ vào
   #499, không vá thêm trong packet này.
+
+# BIA MỘ (chiều ngược của `thay_the_cho` trong lease WINDOWS-LEASE-SUITE) — packet #503 ĐÃ LAND (`fe05fa6`, 11:06Z 11-09-2026,
+# hồ sơ r366 #510 `b98531e`) mà lease này còn hạn tới 22:30Z và vẫn giữ `ops/lease_publish_test.py` (nợ AG-T0-01B); chủ kho
+# cấp lease WINDOWS cùng tệp (#504 comment 5635544794) ⇒ thu hồi sớm bằng bia mộ hai chiều, tránh cửa sổ hai writer.
+da_bi_thay_the: windows-lease-suite-exec-1-claude-20260911

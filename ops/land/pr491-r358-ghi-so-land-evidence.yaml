@@ -1,0 +1,246 @@
+# LAND EVIDENCE — r358: ghi sổ chuỗi #468→#489 (PR #491).
+#
+# Land evidence thứ BẢY của kho (`ls-tree ops/land/` trên `origin/master` tại `00e017a` ⇒ 6 tệp
+# trước khi thêm tệp này). Nghĩa vụ ghi land evidence: `ADR-0034:17-20`; mẫu: `PROTOCOL:466-488`.
+# `PROTOCOL §20` xếp `ADR-0045` vào ô **0 cổng** — KHÔNG bộ kiểm nào cưỡng chế tệp này, nên nó chỉ
+# đáng tin bằng đúng mức cross-review soi được. Đừng đọc sự tồn tại của nó thành "đã được kiểm".
+#
+# GIỚI HẠN NGUỒN, đặt ngay đầu để không ai đọc nhầm: mọi sự kiện GitHub dưới đây (số run/job CI,
+# thời lượng, số bước, trạng thái PR, `merged_by`) là ATTESTATION của phiên điều phối — gói này
+# KHÔNG kèm response thô. Thứ ĐO ĐƯỢC độc lập là các mệnh đề Git (quan hệ tổ tiên, nội dung tệp tại
+# một SHA, băm) và kết quả cổng chạy lại tại chỗ.
+
+schema_version: 1
+mission_id: pr-491
+generation: 1
+provider: claude
+role: land_operator
+session_id: session_012KBPdsckzqhbnufu7JBSZz
+recorded_by: claude
+input_packet_generations: []
+
+authorized_head_sha: 2ec6171f7a2e21ae950633f9e328329a355f7a6d
+approver: notebyme88
+authorization_url: https://github.com/ducthangho/tra-luat/pull/491#pullrequestreview-5157674846
+authorization_ghi_chu: >-
+  Duyệt KHÁC DANH TÍNH có vết bền: `notebyme88` ≠ tác giả PR `ducthangho`, `state: APPROVED`,
+  `commit_id` = `2ec6171f7a2e21ae950633f9e328329a355f7a6d` — ĐÚNG head mà cross-review lượt 2 đã
+  review và đúng head đã merge. Không có phê duyệt nào bị dismiss trong PR này (chỉ MỘT commit được
+  đẩy sau khi PR mở, và nó được đẩy TRƯỚC mọi phê duyệt).
+  Cổng `duyet khac danh tinh` là phép đo độc lập của điều kiện ấy: nó ĐỎ ở ba lượt trước approve —
+  job `cong`, hỏng đúng bước `do nguoi duyet khac nguoi tao PR` — và XANH ở lượt
+  `34382584417` (`event: pull_request_review`) ngay sau khi approve. Điều phối KHÔNG merge trong lúc
+  cổng ấy còn đỏ, và KHÔNG tìm đường vòng qua nó.
+
+merge_method: merge
+merge_commit: 00e017af102bc8355e0c276d2d813e20620ddb42
+merged_at: '2026-09-09T17:24:54Z'
+land_operator: ducthangho
+land_operator_neo:
+  loai_nguon: 'attestation của điều phối — gói KHÔNG kèm JSON thô PR để reviewer đối chiếu'
+  nguon: 'GitHub PR API — `pull_request_read(get)` trên PR #491, trường `merged_by.login`'
+  gia_tri: ducthangho
+  canh_bao_phai_doc: >-
+    `merged_by` ghi `ducthangho`, NHƯNG thao tác merge do **phiên điều phối (claude) gọi API** bằng
+    `GITHUB_PAT` của chủ kho, KHÔNG phải chủ kho tự bấm nút. GitHub quy công cho chủ sở hữu PAT nên
+    trường này KHÔNG phân biệt được người với phiên. Ghi ra để không ai đọc nhầm thành "chủ kho đích
+    thân thao tác". Cùng giới hạn đã ghi ở `pr477-` và `pr487-`.
+  uy_quyen: >-
+    Chỉ thị trực tiếp của chủ kho trong phiên: *"#491, cross-review tới hết P1 rồi merge và land"*,
+    rồi *"nếu gate xanh, merge và land. mở PR mới cho các findings còn lại"*. Khi điều phối chỉ ra
+    cổng `duyet khac danh tinh` đang ĐỎ và hỏi lại, chủ kho chọn **"Đợi tôi approve rồi mới merge"**
+    — nên uỷ quyền cuối cùng KHÔNG chỉ là chỉ thị trong phiên mà là **phê duyệt GitHub có URL bền**
+    ở trên. Chỉ thị trong phiên không có URL bền; vết của nó là chính tệp này.
+  mot_su_that_khong_dep_phai_ghi: >-
+    Chỉ thị *"chỉ chạy CI ở lượt cuối ngay trước khi merge"* đến SAU khi điều phối đã đẩy commit vá
+    `2ec6171` lên nhánh PR, nên lượt gate `34379199104` là hệ quả của cú đẩy ấy. Nếu lượt 2 còn P1
+    thì lượt gate đó đã thành lãng phí. Nó không lãng phí vì lượt 2 trả 0 P1 — đó là MAY, không phải
+    thiết kế. Từ chỗ đó trở đi điều phối không đẩy thêm commit nào lên nhánh PR.
+
+cross_review:
+  so_luot: 2
+  reviewer_provider: codex
+  executor_provider: claude
+  model_yeu_cau: gpt-6-astra
+  model_da_chay: KHONG_DO_DUOC
+  p1_theo_luot: {1: 3, 2: 0}
+  p1_theo_luot_nguon: >-
+    ĐO ĐƯỢC, không phải attestation: cả hai tệp verdict nằm trong kho tại
+    `ops/reviews/pr491-review-{1,2}-codex-verdict.md`, và số P1 đếm bằng
+    `grep -oE '\[P[123]\]' | sort | uniq -c` trên chính chúng. Lượt 1: 14 tiêu đề = 3 P1 · 5 P2 · 6 P3.
+    Lượt 2: 13 tiêu đề = 0 P1 · 3 P2 · 10 P3. Đây là điểm khác với các land evidence trước của chuỗi,
+    nơi verdict gốc KHÔNG có trong gói và số P1 chỉ là lời thuật lại.
+  luot_cuoi:
+    so: 2
+    reviewed_sha: 2ec6171f7a2e21ae950633f9e328329a355f7a6d
+    verdict: changes_requested
+    p1: 0
+    p2: 3
+    p3: 10
+  khop_head_da_merge: true
+  ghi_chu_head: >-
+    ĐO ĐƯỢC: `reviewed_sha` ghi ở dòng 2 của tệp verdict lượt 2 BẰNG `authorized_head_sha` BẰNG cha
+    thứ hai của merge commit `00e017a`. Không phải lời khai của điều phối.
+  vi_sao_changes_requested_van_du_dieu_kien: >-
+    Chỉ thị chủ kho là "tới hết P1", không phải "tới approve". Verdict lượt 2 có 0 P1 và reviewer
+    khai thẳng ở dòng 4 rằng `changes_requested` "không có nghĩa điều kiện 'tới hết P1' của chủ kho
+    chưa đạt". Điều phối KHÔNG nâng nó thành `approve`.
+  doi_chieu_luot_truoc:
+    tong_slug: 14
+    da_va_that: 7
+    va_ho: 1
+    va_sinh_loi_moi: 0
+    chua_va: 6
+    don_vi: 'số TRẠNG THÁI SLUG, không phải severity'
+    do_bang_may: '`grep -oE ''\*\*(ĐÃ VÁ THẬT|VÁ HỜ|VÁ SINH LỖI MỚI|CHƯA VÁ)\*\*''` trên tệp verdict lượt 2 ⇒ 7+1+0+6 = 14.'
+  duong_review_thu_ba:
+    nguon: 'chatgpt-codex-connector[bot], review 5157660335, cùng head 2ec6171, kích hoạt bởi "Draft marked ready"'
+    ket_qua: '5 finding, tất cả P2; 3 MỚI so hai lượt cross-review, 2 trùng'
+    dieu_phoi_do_lai: 'bốn ĐÚNG, một ĐÚNG MỘT PHẦN — chi tiết ở `ops/reviews/pr491-review-2-codex-verdict.receipt.yaml`'
+    trang_thai_luc_merge: 'CHƯA VÁ; năm thread KHÔNG được resolve, mang sang PR kế tiếp'
+
+pre_merge_checks:
+  - ten: 'cross-review lượt 2 trên đúng head 2ec6171'
+    ket_qua: '`rc=0`, `714,268 s`, `worktree_sach: true`, `so_muc_ban: 0`; **0 P1**'
+    canh_bao_doc_ket_qua: >-
+      HAI HẠNG NGUỒN NẰM CHUNG MỘT HÀNG — đọc cho đúng cột. `rc=0`, `714,268 s`,
+      `worktree_sach: true` và `so_muc_ban: 0` là **scalar runtime của launcher**, đọc từ
+      `run.json` trong scratchpad; tệp ấy KHÔNG vào kho ⇒ **ATTESTATION**, đúng như biên nhận
+      lượt 2 tự khai (`nguon_cac_scalar_tren`, và `khong_do_duoc`: *"run.json không vào kho ⇒
+      scalar runtime là attestation"*). Không có log gốc để xác thực chúng.
+      Riêng **0 P1** thì **ĐO ĐƯỢC**: đếm heading `[P1]` trên chính tệp verdict trong kho
+      (`ops/reviews/pr491-review-2-codex-verdict.md`), và `2ec6171` đối chiếu được bằng Git.
+      Nhãn GIỚI HẠN NGUỒN ở đầu tệp KHÔNG phủ hàng này — nó chỉ bao *"mọi sự kiện GitHub"*, mà
+      một lượt `launcher.py run` là lần chạy CỤC BỘ, không phải sự kiện GitHub. Cross-review
+      lượt 11 của PR #493 chấm P3 `runtime-pr491-luot2-mat-nhan-khi-chieu` đúng chỗ này: bản vá
+      lượt 8 đã gắn nhãn ở `ops/reviews/README.md` và `CHANGELOG.md` nhưng **bỏ sót bản chiếu
+      thứ ba là chính tệp này** — cùng một lớp lỗi, một projection chưa được vét.
+  - ten: 'đối chiếu cổng nền(worktree) ↔ sandbox(clone) trên CÙNG 2ec6171'
+    ket_qua: '`doc-claims-check --strict` 0/0 · `release-verify --strict` 0/0'
+    canh_bao_doc_ket_qua: >-
+      Hai mã thoát bằng nhau KHÔNG chứng minh hai môi trường tương đương — nó chỉ nói hai cổng ấy
+      không phân biệt được. Đã đối chiếu ĐÚNG HAI cổng đó, không khái quát.
+  # HẠNG NGUỒN của cụm cổng dưới đây KHÁC hàng runtime ở trên: chúng là output của lệnh chạy
+  # TẠI CHỖ trên một SHA xác định, nên người khác CHẠY LẠI ĐƯỢC trên cùng SHA và đối chiếu. Gói
+  # không kèm stdout gốc, nên con số cụ thể vẫn là lời ghi nhận của phiên — nhưng khác attestation
+  # ở chỗ nó KIỂM LẠI ĐƯỢC, không phụ thuộc một tệp đã mất.
+  - ten: 'release-verify --strict trên cây đã vá (lệnh của lane LAND)'
+    ket_qua: '`ok: true`, `checked_file_count` **180** / `expected_file_count` **180**, `package_hash_match: true`, `package_hash_self_match: true`, `failed: []`, `extra_files: []`, `required_missing: []`, `errors: []`'
+  - ten: 'release-verify HAI CHIỀU — chứng minh cổng CHẶN, không chỉ chứng minh xanh'
+    ket_qua: 'sau khi sửa `CHANGELOG.md` mà TRƯỚC khi tái sinh manifest ⇒ `ok: false`, `package_hash_match: false`, `failed: 1`. Sau tái sinh ⇒ `ok: true`.'
+  - ten: 'doc-claims-check --strict'
+    ket_qua: '`rc=0`, `ok: true`'
+  - ten: 'ops/lease_publish_test.py (có actionlint 1.7.7 bản ghim)'
+    ket_qua: '`rc=0` · **121/121 đạt; đã chạy=121, bỏ qua=0**'
+  - ten: 'ops/bien_nhan_v2.py'
+    ket_qua: '**0 vi phạm** · `TỔNG: ĐẠT`'
+  - ten: 'CI trên PR head 2ec6171'
+    ket_qua: >-
+      Run `34379199104` (`event: pull_request`) = **`success`**. `gate (ubuntu-latest)`: **44 bước**,
+      41 `success` + 3 `skipped`, **0 hỏng**, **0 bước `conclusion: null`**,
+      `16:50:11Z → 17:19:47Z` (**29 phút 36 giây**).
+    canh_bao_doc_ket_qua: >-
+      Ba giới hạn, không giấu cái nào. (a) Lượt này chỉ có **MỘT job: ubuntu**. PR không gắn nhãn
+      `windows` nên ma trận không sinh job Windows ⇒ **"PR xanh" KHÔNG nói gì về Windows**.
+      (b) Lượt `pull_request` chạy trên cây MERGE TỔNG HỢP, không phải trên chính commit `2ec6171`
+      — điều này đọc từ cấu hình `.github/workflows/ci.yml` (một bước checkout, không khai
+      `with.ref`), là ĐO ĐƯỢC ở mức cấu hình; cây mà runner thật đã checkout thì **KHÔNG ĐO ĐƯỢC**
+      vì gói không có log checkout. (c) Số bước và số `skipped` chỉ được đọc SAU khi job
+      `status == completed`, và đã kiểm thêm `0 bước conclusion null` — đúng bài học mà chính mục
+      r358 ghi lại.
+  - ten: 'cổng duyệt khác danh tính'
+    ket_qua: >-
+      Run `34382584417` (`event: pull_request_review`, sau approve) = **`success`**. Ba lượt TRƯỚC
+      approve (`34379197442`, `34380996975`, `34382419508`) đều `failure` ở đúng bước
+      `do nguoi duyet khac nguoi tao PR` — tức cổng ĐO được đúng thứ nó sinh ra để đo.
+
+post_merge_checks:
+  - ten: 'head đã vào master'
+    ket_qua: '`git merge-base --is-ancestor 2ec6171 origin/master` ⇒ ĐÚNG. master = `00e017a`.'
+  - ten: 'nhánh không còn commit ngoài master'
+    ket_qua: '`git rev-list --count origin/master..origin/claude/r358-ghi-so-chuoi-468-489` ⇒ **0**'
+  - ten: 'release-verify --strict trên master'
+    ket_qua: '`ok: true`, checked **180** / expected **180**, `package_hash_match: true`, `failed: []`, `extra_files: []`'
+  - ten: 'doc-claims-check --strict trên master'
+    ket_qua: '`rc=0`, `ok: true`'
+  - ten: 'ops/lease_publish_test.py trên master'
+    ket_qua: '`rc=0` · **121/121 đạt; đã chạy=121, bỏ qua=0**'
+  - ten: 'ops/bien_nhan_v2.py trên master'
+    ket_qua: '**0 vi phạm** · `TỔNG: ĐẠT` · 41 ĐẠT v2 · 11/11 miễn trừ legacy · 42 nợ đóng băng · tổng 94'
+  - ten: 'CI trên merge commit 00e017a'
+    ket_qua: >-
+      **XANH CẢ HAI NỀN.** Run `34382762199` (`event: push`, head `00e017a`), đo THEO JOB và chỉ
+      đọc sau khi `status == completed`:
+      `gate (ubuntu-latest)` = **`success`** — 44 bước, 40 `success` + 4 `skipped`, **0 hỏng**,
+      **0 bước `conclusion: null`**, `17:24:59Z → 17:45:37Z` (**20 phút 38 giây**).
+      `gate (windows-latest)` = **`success`** — 44 bước, 38 `success` + 6 `skipped`, **0 hỏng**,
+      **0 bước `conclusion: null`**, `17:24:59Z → 18:14:08Z` (**49 phút 09 giây**).
+    canh_bao_doc_ket_qua: >-
+      Windows chạy **49 phút 09 giây**, dưới trần `timeout-minutes` 60 nhưng **biên chỉ còn
+      ~10 phút 51 giây** — HẸP HƠN lần đo ở `pr477-…-land-evidence.yaml` (48 phút 15 giây,
+      biên ~11 phút 45 giây). Cùng một hiện tượng mà Issue #463 (`GATE-TACH-JOB-CAT-CHI-PHI`)
+      sinh ra để cắt bằng cách TÁCH JOB, KHÔNG nâng trần. Hai điểm đo trên hai commit khác nhau
+      KHÔNG đủ để gọi là xu hướng — nhưng chúng cũng KHÔNG cho phép đọc `success` này thành
+      "vấn đề đã hết".
+      Và đây mới là **lần đo Windows ĐẦU TIÊN** của nội dung r358: lượt `pull_request` trên
+      `2ec6171` chỉ có job ubuntu (xem `khong_do_duoc`). Nói cách khác, nếu Windows đỏ thì nó đã
+      đỏ SAU khi land — cái giá đã biết của việc không gọi tay `workflow_dispatch` trước merge.
+
+khong_do_duoc:
+  - muc: 'Nền Windows cho nội dung của PR này'
+    ly_do: >-
+      PR không gắn nhãn `windows` và điều phối KHÔNG gọi tay `workflow_dispatch` cho Windows, theo
+      chỉ thị chủ kho *"chỉ chạy CI ở lượt cuối ngay trước khi merge"* (Windows tốn gấp đôi phút).
+      Nên **lần merge là lần đo Windows ĐẦU TIÊN** của nội dung này — đúng cái bẫy `CLAUDE.md` ghi.
+      Diff là 2 tệp văn bản, không đụng `.claude/dev/**`; đó là lý do chấp nhận rủi ro, không phải
+      bằng chứng rằng không có rủi ro.
+  - muc: 'Người thao tác merge là người hay là phiên'
+    ly_do: '`merged_by` chỉ ghi chủ sở hữu PAT. Không trường nào của GitHub phân biệt được hai thứ đó.'
+  - muc: 'Nguồn thô cho các số CI, run, job và merge'
+    ly_do: 'Gói không kèm JSON thô của run/job/PR; mọi số ấy là attestation của điều phối.'
+  - muc: 'Model đã phục vụ hai lượt cross-review'
+    ly_do: '`codex` không phát `modelUsage`. `gpt-6-astra` là thứ ta YÊU CẦU, không phải thứ đã đo.'
+  - muc: 'Cây mà runner CI thật đã checkout cho lượt `pull_request`'
+    ly_do: 'Đọc được DỰ ĐỊNH từ `ci.yml`; không có log checkout hay run JSON để xác nhận cây thật.'
+  - muc: 'Tag và namespace ref ngoài `refs/heads` trong gói hiện vật của reviewer'
+    ly_do: '`ops/dung_goi_review.sh` chụp máy chủ bằng `git ls-remote --heads`; `EVIDENCE.md` tự khai giới hạn ấy.'
+
+bookkeeping:
+  - >-
+    HAI P2 của lượt 2 nằm trong THÂN PR (`than-pr-van-phu-nhan-t33-da-chay` và
+    `sau-p3-khong-deu-la-bo-sot-bang`) đã được vá TRƯỚC khi merge, bằng `update_pull_request`. Sửa
+    thân PR KHÔNG đổi head, và KHÔNG kích hoạt workflow `gate`: `.github/workflows/ci.yml` tại
+    `2ec6171` khai `on: pull_request` **không có `types:`**, nên nó dùng tập activity MẶC ĐỊNH
+    (`opened`/`synchronize`/`reopened`) — `edited` không nằm trong đó. Nói đúng phạm vi ấy, ĐỪNG nói
+    "GitHub không phát `pull_request` cho `edited`": đó là khẳng định về NỀN TẢNG, rộng hơn nguồn.
+    (Cross-review PR #493 lượt 13 chấm P3 `chieu-edited-mat-pham-vi-ci-yml` đúng chỗ này.)
+    THỨ ĐỌC ĐƯỢC TỪ KHO, và chỉ thế thôi: `.github/workflows/ops-thu-hoi-admission.yml` khai
+    `pull_request_target` với `types: [opened, reopened, synchronize, ready_for_review, edited]` —
+    một TẬP EVENT KHÁC của một EVENT KHÁC. Nó KHÔNG chứng minh nền tảng phát `pull_request` với
+    `edited`; semantics phát event của GitHub là KHÔNG ĐO ĐƯỢC từ kho, và không cần đo nó mới thấy
+    câu kia rộng hơn nguồn. (Bản trước của chính đoạn vá này viết workflow ấy "ĐÃ bắn" như một
+    "phản chứng có sẵn" — lời điều phối thuật lại, không có raw event trong kho; cross-review lượt 14
+    chấm P3 lớp A `phan-chung-edited-nang-loi-ke-thanh-hien-vat`.)
+    Nhờ vậy nó không vứt kết quả 0-P1 neo ở `2ec6171`. Đọc ngược thân PR qua API rồi `diff` với bản gửi
+    ⇒ **0 dòng lệch** (đo theo doctrine "đo thứ ĐÃ ĐẾN", cả hai lần cập nhật).
+    `than-pr-van-phu-nhan-t33-da-chay` đáng ghi riêng: thân PR bản đầu viết `t33` *"KHÔNG CHẠY"* —
+    đúng lỗi mà mục r358 đang đính chính, do chính phiên vừa đọc đoạn đính chính ấy viết ra.
+  - >-
+    MỘT P2 còn lại (`so-lich-su-bi-mat-nhan-nguon`, `VÁ HỜ`) nằm trong `CHANGELOG.md` ⇒ cần commit
+    mới ⇒ (a) `PROTOCOL §8` *"commit mới buộc review lại"* sẽ vứt kết quả 0-P1; (b) mỗi push bắn
+    thêm một lượt gate. Vá ở PR kế tiếp, theo chỉ thị chủ kho *"mở PR mới cho các findings còn lại"*.
+  - >-
+    MƯỜI P3 của lượt 2 và NĂM P2 của Codex connector bot chưa vá lúc merge. Năm thread review của
+    bot KHÔNG được resolve — điều phối chỉ resolve thread đã thật sự xử lý.
+  - >-
+    Cả hai tệp verdict được đưa vào kho ở commit `34e9d35` của nhánh
+    `claude/pr491-land-va-findings`, CỐ Ý tách khỏi commit mang biên nhận: `evidence_url` neo BLOB
+    tại commit ĐẦU TIÊN chứa tệp verdict, nên commit ấy phải tồn tại trước. Đây là lần đầu trong
+    chuỗi này mà verdict gốc vào kho CÙNG đợt land, nên số P1/P2/P3 của land evidence này ĐO ĐƯỢC
+    thay vì thuật lại.
+  - >-
+    NỢ CŨ KHÔNG ĐỘNG TỚI: `_kiem_bia_mo` dùng `any(...)` trong `ops/lease_publish.py:606` vẫn
+    nguyên trên master · nợ A9 (bốn lease GATE cấp trước hạn #456, `generation` giữ 1, lệch
+    `ADR-0034`) chờ quyết định chủ kho · Issue #463–#467 còn `open` · PR #479 và #490 chưa merge.
+    Bốn câu này là THUẬT LẠI theo hồ sơ chuỗi #468→#489, trừ câu về `any(...)` đã đo lại trên
+    `origin/master`; trạng thái Issue/PR chưa hỏi lại API trong đợt này.

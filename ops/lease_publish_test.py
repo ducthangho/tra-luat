@@ -5365,6 +5365,56 @@ def t151_review_codex_to_tien_non_tree_metadata_rac_va_khoa_lan_kieu():
     chot(rc == mod.RC_NOI_DUNG and "khoá thừa" in str(msg), f"khoá thừa lẫn kiểu phải 8: {rc} {msg!r}")
 
 
+@ca
+def t152_C2a_M9_fetch_H_mang_xac_thuc_qua_header_khong_token_trong_URL():
+    """Packet #503 (M9-FETCH-AUTH, khắc phục #499 C2a): bước fetch H phải MANG XÁC THỰC.
+
+    Đo 05:14Z 10-09-2026 trên PR #500 (run 34440291662): mọi chốt input qua rồi `git fetch` chết
+    rc=128 `could not read Username` — checkout S đúng thiết kế `persist-credentials: false`, còn
+    fetch endpoint tường minh không mang xác thực ⇒ cổng fail-close nhưng KHÔNG BAO GIỜ XANH.
+    Không lượt review nào của A0 thấy vì sandbox review không có mạng (r9 `chua_do_duoc` #4).
+
+    Bốn chốt, bốn răng — cùng đỏ vì một lý do là chưa độc lập (spec A1):
+      (i)   header `http.https://github.com/.extraheader` có mặt trên CHÍNH lời gọi fetch, qua
+            `GIT_CONFIG_KEY_0=` (dạng a) hoặc `-c` (dạng b); giá trị dẫn từ `$TL_TOKEN`;
+      (ii)  URL fetch không mang credential (không `@`, không `TL_TOKEN` trong URL);
+      (iii) không lời gọi `git config` nào ghi `extraheader` (không để credential lại trong cây S);
+      (iv)  bước checkout vẫn `persist-credentials: false`.
+    ĐỎ trên nền 27c413c3 (thiếu (i)); XANH sau vá. Đột biến m1–m4 ở spec `M9-FETCH-AUTH.md`.
+    """
+    import yaml
+    van = WORKFLOW_THU_HOI.read_text(encoding="utf-8")
+    d = yaml.safe_load(van)
+    steps = d["jobs"]["thu-hoi"]["steps"]
+    checkout = [b for b in steps if str(b.get("uses", "")).startswith("actions/checkout@")]
+    chot(len(checkout) == 1 and (checkout[0].get("with") or {}).get("persist-credentials") is False,
+         "(iv) checkout S phải giữ `persist-credentials: false` — header của M1 là thứ DUY NHẤT mang xác thực")
+    lenh_fetch, lenh_config = [], []
+    for b in steps:
+        than = b.get("run")
+        if not isinstance(than, str):
+            continue
+        for lenh in _dong_lenh(than):
+            if "fetch --no-tags" in lenh and "refs/pull/" in lenh:
+                lenh_fetch.append(lenh)
+            if re.search(r"\bgit\b[^\n]*\bconfig\b[^\n]*extraheader", lenh):
+                lenh_config.append(lenh)
+    chot(len(lenh_fetch) == 1, f"đúng một lời gọi fetch H, thấy {len(lenh_fetch)}")
+    f = lenh_fetch[0]
+    co_header = ("GIT_CONFIG_KEY_0=\"http.https://github.com/.extraheader\"" in f
+                 or "GIT_CONFIG_KEY_0=http.https://github.com/.extraheader" in f
+                 or "-c http.https://github.com/.extraheader=" in f
+                 or "-c \"http.https://github.com/.extraheader=" in f)
+    chot(co_header, "(i) fetch H không mang `http.https://github.com/.extraheader` trên chính lời gọi — "
+                    "đây là lỗi #499 C2a: fetch nặc danh ⇒ rc=128 `could not read Username`")
+    chot("TL_TOKEN" in f or ("AUTH_B64" in f and "x-access-token:%s' \"$TL_TOKEN\"" in van),
+         "(i) giá trị header phải dẫn từ $TL_TOKEN (trực tiếp, hoặc qua biến AUTH_B64 gán từ $TL_TOKEN)")
+    url = re.findall(r"https://[^\s\"']+", f)
+    chot(url and all("@" not in u and "TL_TOKEN" not in u for u in url),
+         f"(ii) URL fetch mang credential: {url}")
+    chot(not lenh_config, f"(iii) không được `git config` ghi extraheader vào cây S: {lenh_config}")
+
+
 def main() -> int:
     qua, hong, bo_qua = 0, [], []
     for fn in CA:

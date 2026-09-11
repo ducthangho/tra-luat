@@ -5415,23 +5415,23 @@ def t152_C2a_M9_fetch_H_mang_xac_thuc_qua_header_khong_token_trong_URL():
       if command git "${cfg[@]}" config --get-urlmatch http.extraheader https://example.invalid/repo; then return 94; fi
     }
     '''
-    token = "m9-fixture-token-" + "0123456789abcdef" * 4  # base64 >76 ký tự: khoá wrap/mask nhiều dòng
-    b64 = base64.b64encode(("x-access-token:" + token).encode()).decode()
-    with San() as s:
-        cfg = s / "empty.config"; cfg.write_text("", encoding="utf-8")
-        env = dict(PATH=os.environ["PATH"], TL_TOKEN=token, TL_KHO="ducthangho/tra-luat", TL_PR="505",
-                   TL_S="a" * 40, TL_H="b" * 40, TL_WF_SHA="a" * 40, TL_NHANH="master",
-                   TL_WF_REF="ducthangho/tra-luat/.github/workflows/ops-thu-hoi-admission.yml@refs/heads/master",
-                   GIT_CONFIG_NOSYSTEM="1", GIT_CONFIG_GLOBAL=str(cfg))
-        p = subprocess.run([_bash_posix(), "--noprofile", "--norc", "-c", stub + doan +
-                            '\ntest "${AUTH_B64+x}" != x\ntest "${GIT_CONFIG_COUNT+x}" != x\n'],
-                           cwd=s, env=env, capture_output=True, text=True, timeout=10)
-    chot(p.returncode == 0, f"(i) đoạn auth/fetch không chạy được: rc={p.returncode}: {p.stderr}")
-    dong = p.stdout.splitlines()
-    chot(dong and dong[-1] == "AUTHORIZATION: basic " + b64,
-         "(i) Git không nhận header hiệu lực dẫn từ TL_TOKEN trên URL fetch")
-    chot(dong == ["::add-mask::" + b64, "AUTHORIZATION: basic " + b64] and not p.stderr,
-         "(v) phải đăng ký mask đúng base64 trước fetch, không có output thừa (kể cả stderr)")
+    for token in ("m9-fixture-token-" + "0123456789abcdef" * 4 + tail for tail in ("", "x", "xy")):  # dài, padding 0/2/1
+        b64 = base64.b64encode(("x-access-token:" + token).encode()).decode()
+        with San() as s:
+            cfg = s / "empty.config"; cfg.write_text("", encoding="utf-8")
+            env = dict(PATH=os.environ["PATH"], TL_TOKEN=token, TL_KHO="ducthangho/tra-luat", TL_PR="505",
+                       TL_S="a" * 40, TL_H="b" * 40, TL_WF_SHA="a" * 40, TL_NHANH="master",
+                       TL_WF_REF="ducthangho/tra-luat/.github/workflows/ops-thu-hoi-admission.yml@refs/heads/master",
+                       GIT_CONFIG_NOSYSTEM="1", GIT_CONFIG_GLOBAL=str(cfg))
+            p = subprocess.run([_bash_posix(), "--noprofile", "--norc", "-c", stub + doan +
+                                '\ntest "${AUTH_B64+x}" != x\ntest "${GIT_CONFIG_COUNT+x}" != x\n'],
+                               cwd=s, env=env, capture_output=True, text=True, timeout=10)
+        chot(p.returncode == 0, f"(i) đoạn auth/fetch không chạy được: rc={p.returncode}: {p.stderr}")
+        dong = p.stdout.splitlines()
+        chot(dong and dong[-1] == "AUTHORIZATION: basic " + b64,
+             "(i) Git không nhận header hiệu lực dẫn từ TL_TOKEN trên URL fetch")
+        chot(dong == ["::add-mask::" + b64, "AUTHORIZATION: basic " + b64] and not p.stderr,
+             "(v) phải đăng ký mask đúng base64 trước fetch, không có output thừa (kể cả stderr)")
 
 
 def main() -> int:

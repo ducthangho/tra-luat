@@ -1,0 +1,64 @@
+{
+  "manifest": {
+    "6": {
+      "listed": 62,
+      "matched": 62,
+      "mismatches": []
+    },
+    "7": {
+      "listed": 66,
+      "matched": 66,
+      "mismatches": []
+    }
+  },
+  "a2": {
+    "model": "Move two heavy steps and duplicate setup 2..10 from the exact lease-base observations; preserve every conclusion. This is a model, not a new CI run.",
+    "old_head": "1b3caa1",
+    "lease_base_head": "d28c4b1",
+    "before_old": 86,
+    "before_exact_base": 88,
+    "split_distinct_triples": 88,
+    "added_vs_A2_old_baseline": [
+      [
+        "bien-nhan v2 selftest",
+        "ubuntu",
+        "success"
+      ],
+      [
+        "bien-nhan v2 selftest",
+        "windows",
+        "success"
+      ]
+    ],
+    "removed_vs_A2_old_baseline": [],
+    "M2_preserved": true,
+    "A2_old_baseline_pass": false,
+    "suggested_same_base_pass": true,
+    "drop_receipt_old_A2_pass": true,
+    "drop_receipt_same_base_pass": false,
+    "yaml_steps": {
+      "1b3caa1": 39,
+      "d28c4b1": 40
+    }
+  },
+  "h_decision": {
+    "url_in_three_files": [
+      true,
+      true,
+      true
+    ],
+    "selected_spec": true,
+    "selected_issue": true,
+    "selected_lease_comment": true,
+    "draft_grant_is_null": true,
+    "stale_heading": true,
+    "stale_lease_denial": true,
+    "text_only_repair_check": {
+      "stale_heading_removed": true,
+      "stale_denial_removed": true,
+      "authority_url_preserved": true,
+      "draft_grant_still_null": true
+    }
+  },
+  "runtime_diff": ""
+}

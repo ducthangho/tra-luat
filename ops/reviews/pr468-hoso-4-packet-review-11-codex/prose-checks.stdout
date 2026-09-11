@@ -1,0 +1,152 @@
+{
+  "a2_r3_r4_byte_identical": true,
+  "ordering_row": "| số đo của GATE (A1/A2/A5) | đo trên cây **chưa đổi**: nền so tập A2 là lượt `workflow_dispatch` TRƯỚC tách tại `start_from_sha` (r3); hai run 39 bước `34045664423`/`34048685345` chỉ còn là đối chiếu lịch sử cho A1/A5 (revision 4) | nền trôi sau ba packet cắt `test registry` (41 % chi phí Windows) ⇒ đo lại cả bảng |",
+  "ordering_denies_old_baseline": true,
+  "A1_unchanged": true,
+  "A5_unchanged": true,
+  "H_python_blocks_unchanged": true,
+  "H_python_blocks": 2,
+  "H_conditions_unchanged": true,
+  "H_conditions": 5,
+  "H_explicit_old_denials_remaining": [],
+  "H_preamble_history": true,
+  "H_preamble_current": true,
+  "H_table_current": true,
+  "lease_current_noise": [
+    "ĐO và CÔNG BỐ phút tính tiền; ngưỡng ≤ 135,00 phút tính tiền, nền lượt nhánh 34045664423 = 110,65 (lượt master 34048685345 = 111,08 để đối chiếu nhiễu). Công bố kèm thời gian đầu-cuối của workflow, không đặt ngưỡng vì chưa có nền."
+  ],
+  "same_tree_different_lane": {
+    "same_tree": true,
+    "diff_paths": [],
+    "before": 86,
+    "after": 86,
+    "added": [
+      [
+        "release-verify strict (lane LAND — manifest committed)",
+        "ubuntu",
+        "success"
+      ],
+      [
+        "release-verify strict (lane LAND — manifest committed)",
+        "windows",
+        "success"
+      ],
+      [
+        "release-verify strict (lane WORKER — manifest TẠM ngoài repo)",
+        "ubuntu",
+        "skipped"
+      ],
+      [
+        "release-verify strict (lane WORKER — manifest TẠM ngoài repo)",
+        "windows",
+        "skipped"
+      ]
+    ],
+    "removed": [
+      [
+        "release-verify strict (lane LAND — manifest committed)",
+        "ubuntu",
+        "skipped"
+      ],
+      [
+        "release-verify strict (lane LAND — manifest committed)",
+        "windows",
+        "skipped"
+      ],
+      [
+        "release-verify strict (lane WORKER — manifest TẠM ngoài repo)",
+        "ubuntu",
+        "success"
+      ],
+      [
+        "release-verify strict (lane WORKER — manifest TẠM ngoài repo)",
+        "windows",
+        "success"
+      ]
+    ],
+    "jobs": [
+      {
+        "run_id": "34048685345",
+        "head7": "1b3caa1",
+        "head_branch": "master",
+        "event": "push",
+        "job_name": "gate (ubuntu-latest)",
+        "started_at": "2026-09-06T17:28:01Z",
+        "completed_at": "2026-09-06T17:54:32Z"
+      },
+      {
+        "run_id": "34048685345",
+        "head7": "1b3caa1",
+        "head_branch": "master",
+        "event": "push",
+        "job_name": "gate (windows-latest)",
+        "started_at": "2026-09-06T17:28:00Z",
+        "completed_at": "2026-09-06T18:10:17Z"
+      },
+      {
+        "run_id": "34045664423",
+        "head7": "426bfc0",
+        "head_branch": "claude/cap-nhat-trang-thai-pr-taxzax",
+        "event": "workflow_dispatch",
+        "job_name": "gate (ubuntu-latest)",
+        "started_at": "2026-09-06T16:30:32Z",
+        "completed_at": "2026-09-06T16:54:47Z"
+      },
+      {
+        "run_id": "34045664423",
+        "head7": "426bfc0",
+        "head_branch": "claude/cap-nhat-trang-thai-pr-taxzax",
+        "event": "workflow_dispatch",
+        "job_name": "gate (windows-latest)",
+        "started_at": "2026-09-06T16:30:32Z",
+        "completed_at": "2026-09-06T17:13:44Z"
+      }
+    ]
+  },
+  "two_run_minutes": {
+    "426bfc0": {
+      "ubuntu": 24.25,
+      "windows": 43.2
+    },
+    "1b3caa1": {
+      "ubuntu": 26.516666666666666,
+      "windows": 42.28333333333333
+    }
+  },
+  "two_run_job_deltas": {
+    "windows": 0.9166666666666714,
+    "ubuntu": 2.2666666666666657
+  },
+  "sample11": {
+    "n": 11,
+    "master_push": 5,
+    "other_branch": 6,
+    "min": 40.2,
+    "max": 50.483333333333334,
+    "range": 10.283333333333331,
+    "median": 46.016666666666666,
+    "mean": 45.837878787878786,
+    "yaml_step_counts": {
+      "8ce02fd": 40,
+      "82e01a4": 40,
+      "1b3caa1": 39,
+      "c0f18ac": 40,
+      "28cb898": 40,
+      "b912e5f": 40,
+      "cacaba3": 40,
+      "d28c4b1": 40,
+      "62a6385": 40,
+      "771c6ed": 40,
+      "0c3405f": 40
+    }
+  },
+  "lease_remedy_model": {
+    "anchor_count": 1,
+    "changed_keys": [
+      "viec_trong_lease"
+    ],
+    "changed_list_items": 1,
+    "authority_hashes_times_unchanged": true,
+    "A5_unchanged": true
+  }
+}

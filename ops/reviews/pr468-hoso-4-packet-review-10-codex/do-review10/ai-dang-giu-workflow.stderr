@@ -1,0 +1,1 @@
+CHAN [12]: KHÔNG_XÁC_ĐỊNH: git ls-remote --heads origin rc=128: fatal: unable to access 'https://github.com/ducthangho/tra-luat/': Failed to connect to 127.0.0.1 port 35099 after 0 ms: Couldn't connect to server

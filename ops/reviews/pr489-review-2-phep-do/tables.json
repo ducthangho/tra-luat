@@ -1,0 +1,15 @@
+{
+  "input_files": {
+    "pr480-land-evidence.yaml": "ops/land/pr480-land-evidence.yaml",
+    "pr487-land-evidence.yaml": "ops/land/pr487-land-evidence.yaml",
+    "pr489-review-1-codex-verdict.receipt.yaml": "ops/reviews/pr489-review-1-codex-verdict.receipt.yaml",
+    "pr487-hau-kiem-head-review-1-codex-verdict.receipt.yaml": "ops/reviews/pr487-hau-kiem-head-review-1-codex-verdict.receipt.yaml",
+    "pr487-review-2-codex-verdict.receipt.yaml": "ops/reviews/pr487-review-2-codex-verdict.receipt.yaml"
+  },
+  "rows": 526,
+  "actual_leaves": 526,
+  "matching_leaves": 526,
+  "missing": [],
+  "extra": [],
+  "ok": true
+}

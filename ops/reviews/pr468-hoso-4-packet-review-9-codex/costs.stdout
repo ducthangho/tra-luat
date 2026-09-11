@@ -1,0 +1,431 @@
+{
+  "regenerate_rc": 0,
+  "regenerate_equal": {
+    "buoc.tsv": true,
+    "tom_tat.md": true,
+    "job.tsv": true,
+    "khong_do_duoc.txt": true,
+    "tinh.py": true
+  },
+  "runs": 13,
+  "jobs": 26,
+  "steps": 1140,
+  "columns_job": 14,
+  "columns_step": 9,
+  "eleven": [
+    {
+      "head": "8ce02fd",
+      "run": "34068433781",
+      "branch": "master",
+      "event": "push",
+      "steps": 40,
+      "windows_seconds": 2412.0,
+      "windows_minutes": 40.2
+    },
+    {
+      "head": "82e01a4",
+      "run": "34058508426",
+      "branch": "claude/priceless-volhard-329577",
+      "event": "pull_request",
+      "steps": 40,
+      "windows_seconds": 2499.0,
+      "windows_minutes": 41.65
+    },
+    {
+      "head": "1b3caa1",
+      "run": "34048685345",
+      "branch": "master",
+      "event": "push",
+      "steps": 39,
+      "windows_seconds": 2537.0,
+      "windows_minutes": 42.28333333333333
+    },
+    {
+      "head": "c0f18ac",
+      "run": "34052910676",
+      "branch": "claude/tra-luat-process-review-o4d7kb",
+      "event": "pull_request",
+      "steps": 40,
+      "windows_seconds": 2630.0,
+      "windows_minutes": 43.833333333333336
+    },
+    {
+      "head": "28cb898",
+      "run": "34060879398",
+      "branch": "master",
+      "event": "push",
+      "steps": 40,
+      "windows_seconds": 2735.0,
+      "windows_minutes": 45.583333333333336
+    },
+    {
+      "head": "b912e5f",
+      "run": "34049592719",
+      "branch": "claude/tra-luat-process-review-o4d7kb",
+      "event": "pull_request",
+      "steps": 40,
+      "windows_seconds": 2761.0,
+      "windows_minutes": 46.016666666666666
+    },
+    {
+      "head": "cacaba3",
+      "run": "34055467808",
+      "branch": "master",
+      "event": "push",
+      "steps": 40,
+      "windows_seconds": 2831.0,
+      "windows_minutes": 47.18333333333333
+    },
+    {
+      "head": "d28c4b1",
+      "run": "34074288203",
+      "branch": "master",
+      "event": "push",
+      "steps": 40,
+      "windows_seconds": 2880.0,
+      "windows_minutes": 48.0
+    },
+    {
+      "head": "62a6385",
+      "run": "34062997697",
+      "branch": "claude/tra-luat-process-review-o4d7kb",
+      "event": "workflow_dispatch",
+      "steps": 40,
+      "windows_seconds": 2962.0,
+      "windows_minutes": 49.36666666666667
+    },
+    {
+      "head": "771c6ed",
+      "run": "34065779670",
+      "branch": "claude/tra-luat-process-review-o4d7kb",
+      "event": "workflow_dispatch",
+      "steps": 40,
+      "windows_seconds": 2977.0,
+      "windows_minutes": 49.61666666666667
+    },
+    {
+      "head": "0c3405f",
+      "run": "34070122978",
+      "branch": "claude/tra-luat-process-review-o4d7kb",
+      "event": "workflow_dispatch",
+      "steps": 40,
+      "windows_seconds": 3029.0,
+      "windows_minutes": 50.483333333333334
+    }
+  ],
+  "sample": {
+    "master": 5,
+    "other": 6,
+    "workloads": {
+      "40": 10,
+      "39": 1
+    },
+    "windows_stats": {
+      "n": 11,
+      "minimum": 40.2,
+      "maximum": 50.483333333333334,
+      "median": 46.016666666666666,
+      "mean": 45.837878787878786,
+      "range": 10.283333333333331
+    }
+  },
+  "ratios": {
+    "test registry": {
+      "n": 11,
+      "minimum": 1.0679501698754248,
+      "maximum": 1.7070866141732284,
+      "median": 1.2125435540069687,
+      "mean": 1.2499042113497771,
+      "range": 0.6391364442978036,
+      "rounding_lower": 1.2112594312246083,
+      "rounding_upper": 1.2138291690877396,
+      "expected": [
+        "11",
+        "1,07",
+        "1,71",
+        "1,21"
+      ],
+      "display": [
+        "11",
+        "1,07",
+        "1,71",
+        "1,21"
+      ],
+      "cells_match": [
+        true,
+        true,
+        true,
+        true
+      ],
+      "range_expected": [
+        "1,21",
+        "1,21"
+      ],
+      "range_display": [
+        "1,21",
+        "1,21"
+      ],
+      "range_matches": true
+    },
+    "tl selftest": {
+      "n": 11,
+      "minimum": 1.4054054054054055,
+      "maximum": 2.2577319587628866,
+      "median": 1.8305084745762712,
+      "mean": 1.8314963953304,
+      "range": 0.8523265533574811,
+      "rounding_lower": 1.8185654008438819,
+      "rounding_upper": 1.8425531914893618,
+      "expected": [
+        "11",
+        "1,41",
+        "2,26",
+        "1,83"
+      ],
+      "display": [
+        "11",
+        "1,41",
+        "2,26",
+        "1,83"
+      ],
+      "cells_match": [
+        true,
+        true,
+        true,
+        true
+      ],
+      "range_expected": [
+        "1,82",
+        "1,84"
+      ],
+      "range_display": [
+        "1,82",
+        "1,84"
+      ],
+      "range_matches": true
+    },
+    "packet-loop selftest": {
+      "n": 11,
+      "minimum": 1.8775510204081634,
+      "maximum": 2.893854748603352,
+      "median": 2.3692946058091287,
+      "mean": 2.3654846950250774,
+      "range": 1.0163037281951885,
+      "rounding_lower": 2.36231884057971,
+      "rounding_upper": 2.3762993762993765,
+      "expected": [
+        "11",
+        "1,88",
+        "2,89",
+        "2,37"
+      ],
+      "display": [
+        "11",
+        "1,88",
+        "2,89",
+        "2,37"
+      ],
+      "cells_match": [
+        true,
+        true,
+        true,
+        true
+      ],
+      "range_expected": [
+        "2,36",
+        "2,38"
+      ],
+      "range_display": [
+        "2,36",
+        "2,38"
+      ],
+      "range_matches": true
+    },
+    "G5 kiem ban ke": {
+      "n": 11,
+      "minimum": 1.9137931034482758,
+      "maximum": 3.0930232558139537,
+      "median": 2.396551724137931,
+      "mean": 2.447311565388704,
+      "range": 1.1792301523656779,
+      "rounding_lower": 2.3675213675213675,
+      "rounding_upper": 2.4260869565217393,
+      "expected": [
+        "11",
+        "1,91",
+        "3,09",
+        "2,40"
+      ],
+      "display": [
+        "11",
+        "1,91",
+        "3,09",
+        "2,40"
+      ],
+      "cells_match": [
+        true,
+        true,
+        true,
+        true
+      ],
+      "range_expected": [
+        "2,37",
+        "2,43"
+      ],
+      "range_display": [
+        "2,37",
+        "2,43"
+      ],
+      "range_matches": true
+    },
+    "lease-publish selftest": {
+      "n": 11,
+      "minimum": 2.4166666666666665,
+      "maximum": 3.843137254901961,
+      "median": 2.9420289855072466,
+      "mean": 2.9381524487381636,
+      "range": 1.4264705882352944,
+      "rounding_lower": 2.9136690647482015,
+      "rounding_upper": 2.9708029197080292,
+      "expected": [
+        "11",
+        "2,42",
+        "3,84",
+        "2,94"
+      ],
+      "display": [
+        "11",
+        "2,42",
+        "3,84",
+        "2,94"
+      ],
+      "cells_match": [
+        true,
+        true,
+        true,
+        true
+      ],
+      "range_expected": [
+        "2,91",
+        "2,97"
+      ],
+      "range_display": [
+        "2,91",
+        "2,97"
+      ],
+      "range_matches": true
+    },
+    "bien-nhan v2 selftest": {
+      "n": 10,
+      "minimum": 7.066666666666666,
+      "maximum": 9.74468085106383,
+      "median": 7.792929292929292,
+      "mean": 8.10748348601652,
+      "range": 2.6780141843971634,
+      "rounding_lower": 7.7051777051777055,
+      "rounding_upper": 7.882486341614267,
+      "expected": [
+        "10",
+        "7,07",
+        "9,74",
+        "7,79"
+      ],
+      "display": [
+        "10",
+        "7,07",
+        "9,74",
+        "7,79"
+      ],
+      "cells_match": [
+        true,
+        true,
+        true,
+        true
+      ],
+      "range_expected": [
+        "7,71",
+        "7,88"
+      ],
+      "range_display": [
+        "7,71",
+        "7,88"
+      ],
+      "range_matches": true
+    },
+    "job trọn": {
+      "n": 11,
+      "minimum": 1.523780487804878,
+      "maximum": 2.3582802547770703,
+      "median": 1.7267041901188243,
+      "mean": 1.7798048382197824,
+      "range": 0.8344997669721923,
+      "rounding_lower": 1.7258518286964677,
+      "rounding_upper": 1.727557084766969,
+      "expected": [
+        "11",
+        "1,52",
+        "2,36",
+        "1,73"
+      ],
+      "display": [
+        "11",
+        "1,52",
+        "2,36",
+        "1,73"
+      ],
+      "cells_match": [
+        true,
+        true,
+        true,
+        true
+      ],
+      "range_expected": [],
+      "range_display": [],
+      "range_matches": true
+    }
+  },
+  "costs": {
+    "ubuntu": {
+      "job": 24.25,
+      "step_sum": 24.2,
+      "setup": 1.1833333333333333,
+      "registry": 13.133333333333333,
+      "packet": 3.65,
+      "remaining": 7.416666666666666,
+      "split_registry": 14.316666666666666,
+      "split_packet": 4.833333333333333,
+      "total_after": 26.566666666666666
+    },
+    "windows": {
+      "job": 43.2,
+      "step_sum": 43.166666666666664,
+      "setup": 3.3333333333333335,
+      "registry": 17.7,
+      "packet": 9.7,
+      "remaining": 15.766666666666666,
+      "split_registry": 21.03333333333333,
+      "split_packet": 13.033333333333333,
+      "total_after": 49.83333333333333
+    }
+  },
+  "cost_arithmetic": {
+    "before": 110.65,
+    "after_raw_seconds": 126.23333333333332,
+    "longest_windows": 21.03333333333333,
+    "A1_threshold": 25,
+    "A5_threshold": 135
+  },
+  "cancelled": [
+    {
+      "run_id": "34048229370",
+      "head7": "4cd80c5",
+      "head_branch": "claude/tra-luat-process-review-o4d7kb",
+      "event": "workflow_dispatch",
+      "job_name": "gate (windows-latest)",
+      "conclusion": "cancelled",
+      "seconds": 3610.0,
+      "minutes": 60.166666666666664
+    }
+  ],
+  "step_seconds_match_timestamps": true
+}

@@ -1,0 +1,36 @@
+{
+  "cay-kho": {
+    "head_names": [
+      "claude/soan-spec-3-viec-treo-20260906"
+    ],
+    "remote_names": [
+      "claude/gate-tach-job-cat-chi-phi",
+      "claude/soan-spec-3-viec-treo-20260906",
+      "master"
+    ]
+  },
+  "kho.git": {
+    "head_names": [
+      "claude/gate-tach-job-cat-chi-phi",
+      "claude/soan-spec-3-viec-treo-20260906",
+      "master"
+    ],
+    "remote_names": []
+  },
+  "historical_reference_only": {
+    "round10_measurement_utc": "2026-09-07T11:29:38.358192+00:00",
+    "historical_old_blob_branch_count": 10,
+    "historical_old_blob_names_missing_now": [
+      "claude/agents-ngoai-goi",
+      "claude/cap-nhat-trang-thai-pr-taxzax",
+      "claude/elegant-bun-cd554f",
+      "claude/priceless-volhard-329577",
+      "claude/r356-bien-nhan-cross-review",
+      "claude/tra-luat-process-review-o4d7kb",
+      "ops/cap-lease-456",
+      "ops/cap-lease-461",
+      "ops/lease-wp461-g2"
+    ],
+    "caveat": "Không gọi tên lịch sử là nhánh máy chủ hiện hành; chỉ chứng minh gói lịch sử biết tên mà mirror hiện tại không có."
+  }
+}

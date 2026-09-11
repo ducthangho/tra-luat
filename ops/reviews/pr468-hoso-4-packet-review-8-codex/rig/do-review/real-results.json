@@ -1,0 +1,98 @@
+[
+  {
+    "path": ".claude/dev/chon_reviewer_test.py",
+    "start_utc": "2026-09-07T06:15:49.921057+00:00",
+    "seconds": 0.6896513110000342,
+    "rc": 0,
+    "chars": 2746,
+    "utf8_bytes": 2765,
+    "sha256": "a58070829bf0732f81f9e4fa601196637467cea0528ed7e362ed8da48a82ede7",
+    "H_red": 0,
+    "BASE_red": 0,
+    "output": "outputs/chon_reviewer_test.stdout"
+  },
+  {
+    "path": ".claude/dev/gh_readback_test.py",
+    "start_utc": "2026-09-07T06:15:50.611850+00:00",
+    "seconds": 0.12749681100001453,
+    "rc": 0,
+    "chars": 40,
+    "utf8_bytes": 40,
+    "sha256": "0a476a97ea3c334220ff9bee8485d720a8ab62acc17eb1e4a59e3d33c67f2cc2",
+    "H_red": 0,
+    "BASE_red": 0,
+    "output": "outputs/gh_readback_test.stdout"
+  },
+  {
+    "path": ".claude/dev/mcp_gh_test.py",
+    "start_utc": "2026-09-07T06:15:50.740712+00:00",
+    "seconds": 0.18335735799996655,
+    "rc": 1,
+    "chars": 589,
+    "utf8_bytes": 718,
+    "sha256": "ab5eefde5db37e2f429a1dc418cf30893763ade21fc1dce9af5f7a77a649ec7e",
+    "H_red": 1,
+    "BASE_red": 1,
+    "output": "outputs/mcp_gh_test.stdout"
+  },
+  {
+    "path": ".claude/dev/mcp_github_doc_test.py",
+    "start_utc": "2026-09-07T06:15:50.925121+00:00",
+    "seconds": 0.4466530109999667,
+    "rc": 0,
+    "chars": 55,
+    "utf8_bytes": 55,
+    "sha256": "82f89e9d5170cc190c941b9b5e247c69623d98f135217d8c8495c806074f033b",
+    "H_red": 0,
+    "BASE_red": 0,
+    "output": "outputs/mcp_github_doc_test.stdout"
+  },
+  {
+    "path": ".claude/dev/probe_mang_test.py",
+    "start_utc": "2026-09-07T06:15:51.373382+00:00",
+    "seconds": 1.6899175839999998,
+    "rc": 0,
+    "chars": 457,
+    "utf8_bytes": 497,
+    "sha256": "c9997dac6d36e60d76b48d5b71e1b87fd60f0c387682061d09382d0585fd54a1",
+    "H_red": 0,
+    "BASE_red": 0,
+    "output": "outputs/probe_mang_test.stdout"
+  },
+  {
+    "path": ".claude/hooks/pretooluse_guard_test.py",
+    "start_utc": "2026-09-07T06:15:53.065047+00:00",
+    "seconds": 432.988809922,
+    "rc": 1,
+    "chars": 9475,
+    "utf8_bytes": 9490,
+    "sha256": "00bb4b944b12cca20b33fd8ce77ba8280e1becd4249e41aced15803ecab44004",
+    "H_red": 1,
+    "BASE_red": 1,
+    "output": "outputs/pretooluse_guard_test.stdout"
+  },
+  {
+    "path": ".claude/hooks/subagent_ghi_detect_test.py",
+    "start_utc": "2026-09-07T06:23:06.054973+00:00",
+    "seconds": 124.952511017,
+    "rc": 0,
+    "chars": 8325,
+    "utf8_bytes": 8340,
+    "sha256": "56f4f998bed4b71e294e8d159fc624e6313d5102778838778d097a6d45026573",
+    "H_red": 0,
+    "BASE_red": 0,
+    "output": "outputs/subagent_ghi_detect_test.stdout"
+  },
+  {
+    "path": "ops/nhanh_don_duoc_test.py",
+    "start_utc": "2026-09-07T06:25:11.009424+00:00",
+    "seconds": 3.33033397600002,
+    "rc": 1,
+    "chars": 8515,
+    "utf8_bytes": 8531,
+    "sha256": "25b731689d77defb724e479c460730a53cf8a3e419c1131039f4dfcf017e8f66",
+    "H_red": 1,
+    "BASE_red": 1,
+    "output": "outputs/nhanh_don_duoc_test.stdout"
+  }
+]

@@ -1,0 +1,315 @@
+{
+  "utc": "2026-09-07T11:35:37.756686+00:00",
+  "diff": {
+    "files": 141,
+    "additions": 34464,
+    "deletions": 23,
+    "patch_equal": true,
+    "numstat_equal": true,
+    "outside_ops": [],
+    "new_commits": 3
+  },
+  "spec_anchors": [
+    {
+      "issue": 463,
+      "spec": "ops/specs/GATE-TACH-JOB-CAT-CHI-PHI.md",
+      "lease": "ops/leases/gate-tach-job-cat-chi-phi-exec-1r4-claude-20260906.yaml",
+      "revision": 4,
+      "actual": "4c542f6b931f62687edd6dca0c5f22c0399ad41f4e80b48e29cdfcd519289cd8",
+      "lease_hash": "4c542f6b931f62687edd6dca0c5f22c0399ad41f4e80b48e29cdfcd519289cd8",
+      "alias": "4c542f6b931f62687edd6dca0c5f22c0399ad41f4e80b48e29cdfcd519289cd8",
+      "issue_blob_hash": "4c542f6b931f62687edd6dca0c5f22c0399ad41f4e80b48e29cdfcd519289cd8",
+      "commit": "1a330305e20a0667fff4954f8542aadd5e375b50",
+      "issue_has_hash": true,
+      "all_equal": true,
+      "null_keys": []
+    },
+    {
+      "issue": 464,
+      "spec": "ops/specs/LO-319-LINUX-BANG-CHUNG-XANH.md",
+      "lease": "ops/leases/lo-319-linux-bang-chung-xanh-exec-1-claude-20260906.yaml.nhap",
+      "revision": 1,
+      "actual": "66dcb20d7bc044cc3185074b56152f0f7f737ac2d1a49c225c29a29b144b4917",
+      "lease_hash": "66dcb20d7bc044cc3185074b56152f0f7f737ac2d1a49c225c29a29b144b4917",
+      "alias": "66dcb20d7bc044cc3185074b56152f0f7f737ac2d1a49c225c29a29b144b4917",
+      "issue_blob_hash": "66dcb20d7bc044cc3185074b56152f0f7f737ac2d1a49c225c29a29b144b4917",
+      "commit": "1a330305e20a0667fff4954f8542aadd5e375b50",
+      "issue_has_hash": true,
+      "all_equal": true,
+      "null_keys": [
+        "mission_issue",
+        "granted_by",
+        "granted_on_instruction",
+        "leased_at_utc",
+        "lease_expires_at_utc"
+      ]
+    },
+    {
+      "issue": 465,
+      "spec": "ops/specs/MUTANT-WINDOWS-SUBAGENT-GHI-DETECT.md",
+      "lease": "ops/leases/mutant-windows-subagent-ghi-detect-exec-1-claude-20260906.yaml.nhap",
+      "revision": 1,
+      "actual": "2abace8588ec2b4e0626c1c77e9c3e0f7e713ecb2ce528b149e6c7f1f0000759",
+      "lease_hash": "2abace8588ec2b4e0626c1c77e9c3e0f7e713ecb2ce528b149e6c7f1f0000759",
+      "alias": "2abace8588ec2b4e0626c1c77e9c3e0f7e713ecb2ce528b149e6c7f1f0000759",
+      "issue_blob_hash": "2abace8588ec2b4e0626c1c77e9c3e0f7e713ecb2ce528b149e6c7f1f0000759",
+      "commit": "b743f1798aba12615f903a11bd451c87e404814e",
+      "issue_has_hash": true,
+      "all_equal": true,
+      "null_keys": [
+        "mission_issue",
+        "granted_by",
+        "granted_on_instruction",
+        "leased_at_utc",
+        "lease_expires_at_utc"
+      ]
+    },
+    {
+      "issue": 466,
+      "spec": "ops/specs/MUTANT-WINDOWS-NHANH-DON-DUOC.md",
+      "lease": "ops/leases/mutant-windows-nhanh-don-duoc-exec-1-claude-20260906.yaml.nhap",
+      "revision": 1,
+      "actual": "417dce16227687cbb1e642284f39d2f847a617b2d730f7f52aaa58f33c936521",
+      "lease_hash": "417dce16227687cbb1e642284f39d2f847a617b2d730f7f52aaa58f33c936521",
+      "alias": "417dce16227687cbb1e642284f39d2f847a617b2d730f7f52aaa58f33c936521",
+      "issue_blob_hash": "417dce16227687cbb1e642284f39d2f847a617b2d730f7f52aaa58f33c936521",
+      "commit": "b743f1798aba12615f903a11bd451c87e404814e",
+      "issue_has_hash": true,
+      "all_equal": true,
+      "null_keys": [
+        "mission_issue",
+        "granted_by",
+        "granted_on_instruction",
+        "leased_at_utc",
+        "lease_expires_at_utc"
+      ]
+    }
+  ],
+  "grep_checks": {
+    "lo_old": {
+      "pattern": "chưa được chọn\\|chưa chọn",
+      "rc": 1,
+      "stdout": "0\n",
+      "stderr": ""
+    },
+    "gate_old": {
+      "pattern": "còn đúng",
+      "rc": 1,
+      "stdout": "0\n",
+      "stderr": ""
+    }
+  },
+  "h_decision": {
+    "url_3_of_3": true,
+    "intro_selected": true,
+    "row_selected": true,
+    "decision_selected": true,
+    "issue_selected": true,
+    "lease_selected": true,
+    "draft_null": [
+      "mission_issue",
+      "granted_by",
+      "granted_on_instruction",
+      "leased_at_utc",
+      "lease_expires_at_utc"
+    ],
+    "conditions": [
+      "Đ1",
+      "Đ2",
+      "Đ3",
+      "Đ4",
+      "Đ5"
+    ],
+    "h_python_blocks_unchanged": true,
+    "h_block_hashes": [
+      "bb827f87e096517b06ed60bc554dbecddc13141acb7d4e2148f8526cae33e6cd",
+      "25c44a862fbefb5317ca2ca2967d3765f37d584245f08842d30a7ceab99abb9f"
+    ],
+    "deferred_execution": true
+  },
+  "a2": {
+    "model_only": true,
+    "base": "d28c4b1062e8505cbdaaf0237fcbe3f9b8ee4705",
+    "dispatch": {
+      "before": 88,
+      "after": 88,
+      "full_equal": true,
+      "drop_receipt_equal": false,
+      "drop_missing": 2
+    },
+    "pr": {
+      "before": 44,
+      "after": 44,
+      "full_equal": true,
+      "drop_receipt_equal": false,
+      "drop_missing": 1
+    },
+    "pr_source": {
+      "run_id": "34058508426",
+      "head7": "82e01a4",
+      "head_branch": "claude/priceless-volhard-329577",
+      "event": "pull_request",
+      "job_name": "gate (ubuntu-latest)",
+      "conclusion": "success",
+      "started_at": "2026-09-06T20:36:16Z",
+      "completed_at": "2026-09-06T21:03:36Z",
+      "phut": "27.33",
+      "so_muc_liet_ke": "44",
+      "so_skipped": "3",
+      "run_created_at": "2026-09-06T20:36:13Z",
+      "run_updated_at": "2026-09-06T21:17:56Z",
+      "run_dau_cuoi_phut": "41.72"
+    },
+    "wrong_lane": {
+      "equal": false,
+      "added": 4,
+      "removed": 4
+    },
+    "yaml_steps_old": 39,
+    "yaml_steps_base": 40,
+    "ordering_row": "| số đo của GATE (A1/A2/A5) | đo trên cây **chưa đổi**: nền so tập A2 là lượt `workflow_dispatch` TRƯỚC tách tại `start_from_sha` (r3); hai run 39 bước `34045664423`/`34048685345` chỉ còn là đối chiếu lịch sử cho A1/A5 (revision 4) | nền trôi sau ba packet cắt `test registry` (41 % chi phí Windows) ⇒ đo lại cả bảng |",
+    "lane_changes": [
+      {
+        "step": "release-verify strict (lane LAND — manifest committed)",
+        "platform": "ubuntu",
+        "conclusion": "success",
+        "number": 38,
+        "job": "gate",
+        "model_conclusion": "skipped"
+      },
+      {
+        "step": "release-verify strict (lane WORKER — manifest TẠM ngoài repo)",
+        "platform": "ubuntu",
+        "conclusion": "skipped",
+        "number": 39,
+        "job": "gate",
+        "model_conclusion": "success"
+      },
+      {
+        "step": "release-verify strict (lane LAND — manifest committed)",
+        "platform": "windows",
+        "conclusion": "success",
+        "number": 38,
+        "job": "gate",
+        "model_conclusion": "skipped"
+      },
+      {
+        "step": "release-verify strict (lane WORKER — manifest TẠM ngoài repo)",
+        "platform": "windows",
+        "conclusion": "skipped",
+        "number": 39,
+        "job": "gate",
+        "model_conclusion": "success"
+      }
+    ]
+  },
+  "d2_replay": [
+    {
+      "path": ".claude/dev/chon_reviewer_test.py",
+      "source": "ops/reviews/pr468-hoso-4-packet-review-6-codex/outputs/chon_reviewer_test.stdout",
+      "recorded_rc": 0,
+      "bytes": 2765,
+      "sha256": "a58070829bf0732f81f9e4fa601196637467cea0528ed7e362ed8da48a82ede7",
+      "hash_matches": true,
+      "H": 0,
+      "BASE": 0
+    },
+    {
+      "path": ".claude/dev/gh_readback_test.py",
+      "source": "ops/reviews/pr468-hoso-4-packet-review-6-codex/outputs/gh_readback_test.stdout",
+      "recorded_rc": 0,
+      "bytes": 40,
+      "sha256": "0a476a97ea3c334220ff9bee8485d720a8ab62acc17eb1e4a59e3d33c67f2cc2",
+      "hash_matches": true,
+      "H": 0,
+      "BASE": 0
+    },
+    {
+      "path": ".claude/dev/mcp_gh_test.py",
+      "source": "ops/reviews/pr468-hoso-4-packet-review-6-codex/outputs-that/mcp_gh_test.stdout",
+      "recorded_rc": 0,
+      "bytes": 2260,
+      "sha256": "87349f553be22fa00992f3651963f850a12633b522efe19b2e0350d4cfc19340",
+      "hash_matches": true,
+      "H": 0,
+      "BASE": 0
+    },
+    {
+      "path": ".claude/dev/mcp_github_doc_test.py",
+      "source": "ops/reviews/pr468-hoso-4-packet-review-6-codex/outputs/mcp_github_doc_test.stdout",
+      "recorded_rc": 0,
+      "bytes": 55,
+      "sha256": "82f89e9d5170cc190c941b9b5e247c69623d98f135217d8c8495c806074f033b",
+      "hash_matches": true,
+      "H": 0,
+      "BASE": 0
+    },
+    {
+      "path": ".claude/dev/probe_mang_test.py",
+      "source": "ops/reviews/pr468-hoso-4-packet-review-6-codex/outputs/probe_mang_test.stdout",
+      "recorded_rc": 0,
+      "bytes": 497,
+      "sha256": "c9997dac6d36e60d76b48d5b71e1b87fd60f0c387682061d09382d0585fd54a1",
+      "hash_matches": true,
+      "H": 0,
+      "BASE": 0
+    },
+    {
+      "path": ".claude/hooks/pretooluse_guard_test.py",
+      "source": "ops/reviews/pr468-hoso-4-packet-review-6-codex/outputs-that/pretooluse_guard_test.stdout",
+      "recorded_rc": 0,
+      "bytes": 9995,
+      "sha256": "69878c4f9efb24a6666d1cf0e4dea99d1ac87fa0aa904e28c6d397fd08cb7991",
+      "hash_matches": true,
+      "H": 0,
+      "BASE": 0
+    },
+    {
+      "path": ".claude/hooks/subagent_ghi_detect_test.py",
+      "source": "ops/reviews/pr468-hoso-4-packet-review-6-codex/outputs/subagent_ghi_detect_test.stdout",
+      "recorded_rc": 0,
+      "bytes": 8340,
+      "sha256": "56f4f998bed4b71e294e8d159fc624e6313d5102778838778d097a6d45026573",
+      "hash_matches": true,
+      "H": 0,
+      "BASE": 0
+    },
+    {
+      "path": "ops/nhanh_don_duoc_test.py",
+      "source": "ops/reviews/pr468-hoso-4-packet-review-6-codex/outputs/nhanh_don_duoc_test.rerun.stdout",
+      "recorded_rc": 0,
+      "bytes": 491,
+      "sha256": "366795e45727a70aa7e6ed4ee64c6a1f0bd952dc1191b901c5d40479c722ad96",
+      "hash_matches": true,
+      "H": 0,
+      "BASE": 0
+    }
+  ],
+  "d9_replay": {
+    "pre-ca": {
+      "source_sha256": "249358f72a85e02369fb32196d4fe5dc89cc651b4a51133a658efe78c3db9209",
+      "path": ".claude/hooks/pretooluse_guard_test.py",
+      "H": "ValueError",
+      "BASE": "ValueError"
+    },
+    "pre-mutant": {
+      "source_sha256": "1e9344e20b0251af176aff6a13d08cdb865eb0a12a0c1647bf3d156c26c66c23",
+      "path": ".claude/hooks/pretooluse_guard_test.py",
+      "H": "ValueError",
+      "BASE": 0
+    },
+    "mcp-ca": {
+      "source_sha256": "b0a6b95c3a571902200ae60f0c4d2b2048f29e3be729dd7bc2b608adbc0aacf5",
+      "path": ".claude/dev/mcp_gh_test.py",
+      "H": "ValueError",
+      "BASE": "ValueError"
+    },
+    "mcp-mutant": {
+      "source_sha256": "e11766c719c9a9c365d9817e87cfe8f060c10ed55849c8055d0b0e6527dee05c",
+      "path": ".claude/dev/mcp_gh_test.py",
+      "H": "ValueError",
+      "BASE": 0
+    }
+  },
+  "runtime_unchanged": true
+}

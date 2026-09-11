@@ -1,0 +1,13 @@
+{
+  "name": "doctrine-scan",
+  "command": [
+    "/usr/local/bin/python",
+    ".claude/dev/packet_loop.py",
+    "doctrine-scan",
+    "--root",
+    "."
+  ],
+  "start_utc": "2026-09-07T06:17:56.853549+00:00",
+  "seconds": 0.39594770799999424,
+  "rc": 0
+}

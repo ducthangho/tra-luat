@@ -1,0 +1,25 @@
+{
+ "do_luc_utc": "2026-09-07T06:59:48Z",
+ "cay": "/home/user/tra-luat @ d28c4b1 (origin/master, cây thật của phiên executor #463)",
+ "ket_qua": {
+  ".claude/dev/mcp_gh_test.py": {
+   "rc": 0,
+   "bytes": 2260,
+   "sha256": "87349f553be22fa00992f3651963f850a12633b522efe19b2e0350d4cfc19340",
+   "H_do": 0,
+   "BASE_do": 0,
+   "ghi_chu": "bản in xanh thật (rc=0) trên cây thật; H đọc qua harness của reviewer lượt 6"
+  },
+  ".claude/hooks/pretooluse_guard_test.py": {
+   "rc": 0,
+   "bytes": 9995,
+   "sha256": "69878c4f9efb24a6666d1cf0e4dea99d1ac87fa0aa904e28c6d397fd08cb7991",
+   "H_do": 0,
+   "BASE_do": 0,
+   "ghi_chu": "bản in xanh thật (rc=0) trên cây thật SAU khi đặt /usr/local/bin (ruff 0.15.15) trước /root/.local/bin (ruff 0.15.8) trên PATH — nguyên nhân 3 ca đỏ t11/t15/t33 là Ruff sai bản, không phải bộ test; bản đỏ cũ giữ ở pretooluse_guard_test.DO-rc1.stdout",
+   "do_luc_utc": "2026-09-07T07:52:03Z",
+   "ruff": "0.15.15"
+  }
+ },
+ "tom_tat": "Đ2 cộng dồn: reviewer 0/6 + executor mcp_gh 0/1 + pretooluse 0/1 ⇒ 0/8 bản in xanh thật bị H bác — ĐỦ 8/8"
+}

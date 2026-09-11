@@ -1,0 +1,93 @@
+{
+  "patch": {
+    "command": [
+      "git",
+      "diff",
+      "a48f576..HEAD",
+      "--",
+      "ops/land/pr489-land-evidence.yaml"
+    ],
+    "rc": 0,
+    "bytes": 13224,
+    "supplied_bytes": 13224,
+    "equal": true
+  },
+  "numstat": {
+    "command": [
+      "git",
+      "diff",
+      "--numstat",
+      "a48f576..HEAD"
+    ],
+    "rc": 0,
+    "bytes": 40,
+    "supplied_bytes": 40,
+    "equal": true
+  },
+  "declared_chain_ids": [
+    "468",
+    "478",
+    "486",
+    "487",
+    "489",
+    "490"
+  ],
+  "merge_messages": {
+    "468": {
+      "rc": 0,
+      "lines": [
+        "802fc01b5db866478459dbc4a65d008a38619898 Merge pull request #468 from ducthangho/claude/soan-spec-3-viec-treo-20260906"
+      ]
+    },
+    "478": {
+      "rc": 0,
+      "lines": [
+        "c87b0679a837055ee4cc33ac48c9adb8d7ad8784 Merge pull request #478 — land evidence PR #468, cross-review 6 lượt tới 0 P1"
+      ]
+    },
+    "486": {
+      "rc": 0,
+      "lines": [
+        "da481f94eee0adf1fe5fc4260a535a9b48fc2627 Merge pull request #486 — land evidence PR #478 + biên nhận v2 ba lượt cross-review"
+      ]
+    },
+    "487": {
+      "rc": 0,
+      "lines": [
+        "f4d74fed59616ecd5a133fc232275a832dcd95bb Merge pull request #487 — verdict + biên nhận 5 lượt cross-review, vá hậu kiểm #486, phép đo lease #482/#483"
+      ]
+    },
+    "489": {
+      "rc": 0,
+      "lines": [
+        "c0a5cbe89a90588115262e1a2c3ac84cbd98be9e Merge pull request #489 from ducthangho/claude/land-480-20260909"
+      ]
+    },
+    "490": {
+      "rc": 0,
+      "lines": []
+    }
+  },
+  "actual_p3_diff": "diff --git a/ops/reviews/README.md b/ops/reviews/README.md\nindex ec7eb57..83d7eb2 100644\n--- a/ops/reviews/README.md\n+++ b/ops/reviews/README.md\n@@ -266,7 +266,8 @@ không — nên nó được nâng lên đây, và `t27` ĐỎ nếu bảng dư\n \n | tệp verdict | biên nhận | lease | kết luận | head đã review | byte |\n |---|---|---|---|---|---|\n-| [`pr489-review-1-codex-verdict.md`](pr489-review-1-codex-verdict.md) | [`.receipt.yaml`](pr489-review-1-codex-verdict.receipt.yaml) | *(không có lease — PR hồ sơ)* | **`changes_requested`** · lượt **1** của PR #489 (bookkeeping cho #480 và #487), head `9a99dd8a`, khác nền (`codex`, `gpt-6-astra`, xhigh, **1560 s**, chạy trọn ngay lần đầu). **P1 1 · P2 4 · P3 6.** **P1 là lỗi điều phối VỪA THÊM khi vá finding trước**: `pre_merge_checks` — mục mới thêm sau khi connector chấm P2 thiếu nó — đặt tên *\"CI trên exact head đã duyệt\"*, trong khi lượt `pull_request` chạy trên cây **merge tổng hợp** (workflow 1 bước checkout, không khai `with.ref`). Land evidence CŨ của #477/#478 đã giới hạn ĐÚNG chỗ ấy — vá một finding rồi tái tạo lỗi mà hồ sơ cũ đã tránh. **P2 `ket-luan-bac-connector-vuot-phep-do-hau-kiem` trả lời đúng câu prompt đã hỏi trước** (*\"bản sửa có khai vượt theo chiều ngược không?\"*): CÓ — đính chính kho nông rút lời bác đúng hướng và **6/6 commit** sạch là thật, nhưng nó tuyên hai rig *\"khác đúng một biến\"* mà **không kèm log**, và gói **không** chứng minh kho nông là nguyên nhân **duy nhất**. Điều phối sai vì khai quá mạnh, rồi sửa bằng lời khai cũng quá mạnh theo hướng ngược. **Bốn lời khai lịch sử Git bị bác, điều phối tự đo lại và xác nhận cả bốn SAI**: `evidence_url` khai `1455741` là commit đầu tiên chứa verdict (thật: `e1fd0a3`); *\"commit đầu tiên có `f4d74fe` là tổ tiên\"* (thật: `6db5b6c`, cha `7e69b8e`); land evidence *\"thứ TƯ/NĂM\"* (`ls-tree` ⇒ base **4** tệp, head **6**); và `§20` xếp `ADR-0034` vào ô *\"0 cổng\"* (`PROTOCOL:1136` ghi *\"có nhắc\"*). **LẦN ĐẦU trong phiên một lượt để lại hiện vật đo MÁY ĐỌC ĐƯỢC trong kho**: [`pr489-review-1-do-cuc-bo.json`](pr489-review-1-do-cuc-bo.json). **Model/effort là ATTESTATION**. Gói: mirror **314** ref, **KHÔNG nông** — chính điều đó cho reviewer đo lại thay vì chép số của điều phối. | `9a99dd8a` | 54761 |\n+| [`pr489-review-2-codex-verdict.md`](pr489-review-2-codex-verdict.md) | [`.receipt.yaml`](pr489-review-2-codex-verdict.receipt.yaml) | *(không có lease — PR hồ sơ)* | **`approve`** · lượt **2** của PR #489 (bookkeeping cho #480 và #487), head `98ef1f16`, khác nền (`codex`, `gpt-6-astra`, xhigh, **983 s**, chạy trọn ngay lần đầu). **P1 0 · P2 0 · P3 4.** **ĐIỀU KIỆN DỪNG của chủ kho ĐÃ THOẢ** — nhưng `approve` chỉ áp cho ĐÚNG SHA ấy trong phạm vi review OFFLINE: reviewer nói thẳng nó KHÔNG chứng nhận CI/API GitHub, KHÔNG cấp quyền merge và KHÔNG xoá bốn P3. ĐỐI CHIẾU LƯỢT 1, **11 slug**: **9 ĐÃ VÁ THẬT · 1 VÁ SINH LỖI MỚI · 0 VÁ HỜ · 1 CHƯA VÁ** (đơn vị: số trạng thái slug, không phải severity). Slug *VÁ SINH LỖI MỚI* là `ci-pr-khong-chung-minh-exact-head`, **hạ từ P1 xuống P3**: nội dung đã đóng thật ở **2/2 mục CI** của cả hai land evidence, nhưng bản **TÓM TẮT** trong biên nhận lượt 1 và hàng mục lục lại biến *\"workflow DỰ KIẾN dùng cây merge tổng hợp\"* (đọc từ `ci.yml` — cấu hình, **ĐO ĐƯỢC**) thành một **sự kiện runner đã quan sát** (không có log checkout / run JSON ⇒ **KHÔNG ĐO ĐƯỢC**) — đúng giới hạn mà chính verdict lượt 1 đã tự đặt rồi bản tóm tắt đánh mất. **Lần thứ ba trong cùng phiên một bản vá tái tạo lỗi ở chỗ khác**, lần này nạn nhân là lời tóm tắt chứ không phải nội dung được vá. Cùng `ten-khoi-ba-loi-khong-khop-bon-phep-do` (khoá gọi *ba* lời khai nhưng có **4 phần tử**), **cả hai đã vá trong commit mang biên nhận này**. **Hai P3 còn lại là NỢ CÓ ĐỊA CHỈ**: bảng khẳng định vẫn bỏ **2 tệp Markdown**, **242 lá JSON** và **62 dòng comment YAML** — nợ này nay tra cứu được bằng hiện vật đo chép **nguyên byte** từ gói reviewer ([`pr489-review-2-phep-do/`](pr489-review-2-phep-do/), `cmp` khớp **4/4 tệp**); và `PROMPT.md` của gói khai *thêm 560 dòng* trong khi `git diff --numstat` cộng ra **8 tệp · thêm 950 · bớt 132** (thiếu **390 dòng thêm**) — số trong lời giao việc cũng là lời khai, và **không cổng nào canh nó**. **HEAD ĐÃ APPROVE ≠ HEAD SẼ MERGE**. **Model/effort là ATTESTATION**. Gói: mirror **314** ref, **KHÔNG nông** (điều phối đo lại trong chính `cay-kho`, không chép từ `EVIDENCE.md`). | `98ef1f16` | 32790 |\n+| [`pr489-review-1-codex-verdict.md`](pr489-review-1-codex-verdict.md) | [`.receipt.yaml`](pr489-review-1-codex-verdict.receipt.yaml) | *(không có lease — PR hồ sơ)* | **`changes_requested`** · lượt **1** của PR #489 (bookkeeping cho #480 và #487), head `9a99dd8a`, khác nền (`codex`, `gpt-6-astra`, xhigh, **1560 s**, chạy trọn ngay lần đầu). **P1 1 · P2 4 · P3 6.** **P1 là lỗi điều phối VỪA THÊM khi vá finding trước**: `pre_merge_checks` — mục mới thêm sau khi connector chấm P2 thiếu nó — đặt tên *\"CI trên exact head đã duyệt\"*, trong khi `.github/workflows/ci.yml` chỉ cho biết workflow **DỰ KIẾN** dùng cây merge tổng hợp (1 bước checkout, không khai `with.ref`) — cấu hình thì ĐO ĐƯỢC, còn cây runner đã checkout thật thì **KHÔNG ĐO ĐƯỢC** (gói không có log checkout / run JSON của lượt lịch sử ấy); cả hai đều đủ để bác cái tên *\"exact head\"*. Land evidence CŨ của #477/#478 đã giới hạn ĐÚNG chỗ ấy — vá một finding rồi tái tạo lỗi mà hồ sơ cũ đã tránh. **P2 `ket-luan-bac-connector-vuot-phep-do-hau-kiem` trả lời đúng câu prompt đã hỏi trước** (*\"bản sửa có khai vượt theo chiều ngược không?\"*): CÓ — đính chính kho nông rút lời bác đúng hướng và **6/6 commit** sạch là thật, nhưng nó tuyên hai rig *\"khác đúng một biến\"* mà **không kèm log**, và gói **không** chứng minh kho nông là nguyên nhân **duy nhất**. Điều phối sai vì khai quá mạnh, rồi sửa bằng lời khai cũng quá mạnh theo hướng ngược. **Bốn lời khai lịch sử Git bị bác, điều phối tự đo lại và xác nhận cả bốn SAI**: `evidence_url` khai `1455741` là commit đầu tiên chứa verdict (thật: `e1fd0a3`); *\"commit đầu tiên có `f4d74fe` là tổ tiên\"* (thật: `6db5b6c`, cha `7e69b8e`); land evidence *\"thứ TƯ/NĂM\"* (`ls-tree` ⇒ base **4** tệp, head **6**); và `§20` xếp `ADR-0034` vào ô *\"0 cổng\"* (`PROTOCOL:1136` ghi *\"có nhắc\"*). **LẦN ĐẦU trong phiên một lượt để lại hiện vật đo MÁY ĐỌC ĐƯỢC trong kho**: [`pr489-review-1-do-cuc-bo.json`](pr489-review-1-do-cuc-bo.json). **Model/effort là ATTESTATION**. Gói: mirror **314** ref, **KHÔNG nông** — chính điều đó cho reviewer đo lại thay vì chép số của điều phối. | `9a99dd8a` | 54761 |\n | [`pr487-hau-kiem-head-review-1-codex-verdict.md`](pr487-hau-kiem-head-review-1-codex-verdict.md) | [`.receipt.yaml`](pr487-hau-kiem-head-review-1-codex-verdict.receipt.yaml) | *(không có lease — PR hồ sơ)* | **`changes_requested`** · Hậu kiểm exact head `3873173` đã merge của PR #487. **0 finding P1 · 1 finding P2 · 4 finding P3** tổng nhiệm vụ. Finding P2 thuộc hồ sơ PR #489 tại `8911ea4`, ngoài head `3873173`; phần chênh head có **0 finding P1 · 0 finding P2 · 3 finding P3 nội dung**, thêm **1 finding P3 độ phủ gói**. Đã bổ sung lượt đọc head; không hồi tố tiền kiểm, không thay `approve`, không tuyên mọi finding đã đóng. Reviewer đo **91/91 biên nhận**, **0 vi phạm**, `TỔNG: ĐẠT`. Điều phối sau đó thuật lại A/B kho nông; gói không giữ kho nông/log gốc, nên không chứng nhận hai môi trường chỉ khác độ sâu. Tái đo đầy đủ **6/6 commit** khớp số đính chính; **5/5 neo receipt** hợp lệ trên head và merge thật. Cổng trên object merge tổng hợp của connector chưa đo được. P3 số ref và đơn vị đã sửa; P3 mốc sửa còn sót trong receipt/land evidence tại `9a99dd8`; P3 độ phủ tiếp tục là nợ. Runtime **1.421 giây** làm tròn, model/effort và gói **314 ref nhánh** là attestation lịch sử. Blob verdict được thêm tại `e1fd0a3`. | `3873173` | 37900 |\n | [`pr487-review-2-codex-verdict.md`](pr487-review-2-codex-verdict.md) | [`.receipt.yaml`](pr487-review-2-codex-verdict.receipt.yaml) | *(không có lease — PR hồ sơ)* | **`approve`** · lượt **2** của PR #487, head `5c057782`, khác nền (`codex`, `gpt-6-astra`, xhigh, 961 s, chạy trọn ngay lần đầu). **P1 0 · P2 0 · P3 6.** ĐỐI CHIẾU LƯỢT 1, **8 slug**: **3 ĐÃ VÁ THẬT · 2 VÁ HỜ · 3 VÁ SINH LỖI MỚI · 0 CHƯA VÁ** (đơn vị: số trạng thái slug, không phải severity). Ba nhãn *VÁ SINH LỖI MỚI* **KHÔNG tái mở P2 nào** — reviewer nói rõ phần P2 cũ đã đóng, lỗi phát sinh đều là LỆCH NỘI BỘ mức P3 giữa biên nhận và mục lục: bổ sung `comment_ban_chieu` mà quên cập nhật mục lục; sửa số ref ở receipt cũ rồi chép lại số sai vào receipt mới; bỏ *\"tiền kiểm đầu tiên\"* ở hàng cũ rồi thêm *\"khác mọi lượt trước\"* ở hàng mới. **Cả ba đã sửa, nhưng KHÔNG trong một commit:** `edb288e` (commit đưa verdict) sửa hai lệch trong biên nhận lượt 1; lệch thứ ba — mục lục còn phủ định sự có mặt của `comment_ban_chieu` — chỉ sửa ở `3873173`; và số ref trong `manifest.ghi_chu` sót tới tận lượt hậu kiểm. Bản trước hàng này khai *\"cả ba đã sửa trong chính commit đưa verdict\"* — SAI, nhận công sớm hơn lịch sử Git (P3 `khai-va-het-ba-loi-sai-commit`). Đây đúng hình dạng mà `CLAUDE.md` cảnh báo (*\"mỗi lượt vá bảo toàn thứ ta NGHĨ TỚI và làm hỏng thứ ta KHÔNG NGHĨ TỚI\"*) — lần này bắt được ngay ở lượt kế, còn chuỗi trong `CLAUDE.md` là **BẢY PHÁT HIỆN** qua **BỐN LƯỢT** cross-review (bản trước viết *\"bảy lượt\"* — sai đơn vị, P3 `doi-bay-phat-hien-thanh-bay-luot-review`). Hai slug **VÁ HỜ** thành nợ có địa chỉ: bảng đầy đủ giữ **392/392 lá, 0 lá cắt**, phục hồi **15 439 ký tự** trên **73 lá**, bảng chú thích giữ **67/67 dòng** — nhưng bảng token vẫn gọi **20 hit** trên **10 dòng nguồn** là *\"khẳng định\"*, comment cuối dòng vẫn mất, và mục lục lẫn verdict Markdown vẫn ngoài đầu vào. **HEAD ĐÃ APPROVE ≠ HEAD SẼ MERGE** — xem `head_da_approve_khac_head_se_merge` trong biên nhận. **Model/effort là ATTESTATION**. **Hiện vật gói KHÔNG vào kho** (mirror **313** ref). | `5c057782` | 36009 |\n | [`pr487-review-1-codex-verdict.md`](pr487-review-1-codex-verdict.md) | [`.receipt.yaml`](pr487-review-1-codex-verdict.receipt.yaml) | *(không có lease — PR hồ sơ)* | **`changes_requested`** · lượt **1** của PR #487, head `bcbca7bb`, khác nền (`codex`, `gpt-6-astra`, xhigh, 1527 s, chạy trọn ngay lần đầu). **P1 0 · P2 2 · P3 6.** **HẾT P1 ngay lượt đầu** — điều kiện dừng chủ kho đặt ra. **Đối tượng review là HỒ SƠ TỰ KHAI CỦA ĐIỀU PHỐI** về công việc của chính điều phối — ba biên nhận tự viết, ba hàng mục lục tự cập nhật, một biên bản đo tự soạn. KHÔNG tuyên đây là lượt đầu tiên làm việc ấy: lượt 2 đưa hai phản chứng (verdict hậu kiểm #486 đã soi hồ sơ/biên nhận/mục lục; verdict #480 lượt 2 đã bắt lời tự kiểm của điều phối). **Cả hai P2 đều là lỗi của điều phối.** `bien-nhan-moi-lai-nang-attestation-thanh-do-doc-lap`: biên nhận `pr480-land-review-1` dẫn slug `neo-comment-khai-vuot-lop-doc` như của *\"lượt này\"*, nhưng reviewer đếm **8/8** tiêu đề finding của verdict ấy và slug đó KHÔNG có — nó thuộc verdict hậu kiểm #486. Đúng bệnh **ghép sai lượt** mà `CLAUDE.md` đã ghi thành bài học. Kèm hai lỗi cùng họ: khái quát `CLAUDE.md:127–145` (nói về trường thân issue/comment qua MỘT máy chủ MCP) thành *\"mọi đường đọc GitHub\"*; và biên nhận lượt 2 tuyên có neo comment thứ hai trong khi THIẾU HẲN khoá địa chỉ. `lease-nguyen-nhan-va-dieu-kien-dung-khai-vuot`: biên bản lease LOẠI TRỪ nguyên nhân khác và tuyên *\"điều kiện dừng đã thoả\"* — lỗi hạn mức cuối phiên không chứng minh không có lỗi nào khác, và snapshot thiếu hai tên nhánh không loại được ca đã push rồi xoá. Sáu P3 gồm hai P3 lặp lại về công cụ trích khẳng định (cắt 160 ký tự, bỏ chú thích `#`) mà điều phối **chưa** sửa. **Model/effort là ATTESTATION** — `run.json` không vào kho. **Hiện vật gói KHÔNG vào kho** (mirror **313** ref — bản đầu hàng này ghi 312, số của gói ĐẦU phiên; nhánh được đẩy sau nên máy chủ thành 313). | `bcbca7bb` | 43342 |\ndiff --git a/ops/reviews/pr489-review-1-codex-verdict.receipt.yaml b/ops/reviews/pr489-review-1-codex-verdict.receipt.yaml\nindex f034cb0..22546ba 100644\n--- a/ops/reviews/pr489-review-1-codex-verdict.receipt.yaml\n+++ b/ops/reviews/pr489-review-1-codex-verdict.receipt.yaml\n@@ -37,8 +37,11 @@ p1_la_loi_dieu_phoi_vua_them:\n   slug: ci-pr-khong-chung-minh-exact-head\n   mo_ta: >-\n     `pre_merge_checks` — mục điều phối MỚI THÊM sau khi codex connector chấm P2 thiếu nó — đặt tên\n-    \"CI trên exact head đã duyệt\". SAI: lượt `pull_request` chạy trên cây MERGE TỔNG HỢP; workflow\n-    có 1 bước checkout, không khai `with.ref`.\n+    \"CI trên exact head đã duyệt\". SAI vì tên ấy tuyên một thứ hồ sơ không đo được: đọc\n+    `.github/workflows/ci.yml` chỉ cho biết workflow DỰ KIẾN dùng cây merge tổng hợp (1 bước\n+    checkout, không khai `with.ref`), KHÔNG cho biết runner đã checkout cây nào — không có log\n+    checkout hay run JSON của lượt lịch sử ấy trong gói. Đo được: cấu hình. KHÔNG đo được: cây\n+    runner thật. Cả hai đều đủ để bác cái tên \"exact head\".\n   vi_sao_dang_ghi: >-\n     Land evidence CŨ của #477/#478 đã giới hạn ĐÚNG chỗ này. Điều phối vá một finding rồi TÁI TẠO\n     đúng lỗi mà hồ sơ cũ đã tránh — hình dạng \"mỗi lượt vá bảo toàn thứ ta NGHĨ TỚI và làm hỏng thứ\n@@ -60,7 +63,7 @@ p2_ban_sua_van_khai_vuot:\n     sử ấy là CHƯA ĐỐI CHỨNG vì thiếu log.\n   da_va: true\n \n-ba_loi_lich_su_git_dieu_phoi_tu_kiem_lai:\n+bon_loi_lich_su_git_dieu_phoi_tu_kiem_lai:\n   - {khai_cu: 'evidence_url neo `1455741` là \"commit đầu tiên chứa verdict\"', do_lai: '`git log --diff-filter=A` ⇒ `e1fd0a3`', ket: SAI}\n   - {khai_cu: '\"commit đầu tiên chứa tệp có `f4d74fe` là tổ tiên\"', do_lai: '`pr480-land-evidence.yaml` thêm ở `6db5b6c`, cha `7e69b8e`', ket: SAI}\n   - {khai_cu: 'land evidence \"thứ TƯ\" và \"thứ NĂM\"', do_lai: '`git ls-tree f4d74fe ops/land/` ⇒ 4 tệp, head ⇒ 6 tệp', ket: SAI}\n",
+  "coverage_debt_mentions": [
+    {
+      "path": "ops/reviews/pr487-hau-kiem-head-review-1-codex-verdict.md",
+      "headings": [
+        "### bang-khang-dinh-bo-chu-thich-va-gioi-han-nguon  [P3]  Đủ lá và comment nguyên dòng vẫn thiếu các nguồn đối chứng Markdown"
+      ]
+    },
+    {
+      "path": "ops/reviews/pr489-review-1-codex-verdict.md",
+      "headings": [
+        "### bang-khang-dinh-bo-chu-thich-va-gioi-han-nguon  [P3]  Bảng đủ lá vẫn bỏ nguồn Markdown và đếm một dòng prose thành comment"
+      ]
+    },
+    {
+      "path": "ops/reviews/pr489-review-2-codex-verdict.md",
+      "headings": [
+        "### bang-khang-dinh-bo-chu-thich-va-gioi-han-nguon  [P3]  Giữ đủ lá YAML vẫn bỏ Markdown, comment và hiện vật JSON mới"
+      ]
+    }
+  ],
+  "git_ref_namespace_note": "origin/master is absent in the supplied mirror-shaped tree; refs/heads/master is the supplied canonical snapshot."
+}

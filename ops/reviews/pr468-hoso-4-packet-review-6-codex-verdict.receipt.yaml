@@ -1,0 +1,76 @@
+# BIÊN NHẬN GIAO HÀNG — cross-review LƯỢT 6 của PR #468 (hồ sơ bốn packet treo sau #456), KHÁC NỀN (codex).
+#
+# Lượt 5 chết 5/5 lần giữa chừng (chữ ký `Connection refused` trên đường tái kết nối WebSocket; chẩn đoán
+# "proxy chặn" đã bị đính chính là SAI, nguyên nhân chưa biết). Lượt này phóng CÓ GIÁM SÁT qua
+# `launcher.py run` (neo head + băm prompt, hạn chót 75 phút, sẵn `codex exec resume` nếu chết) và
+# chạy trọn NGAY LẦN ĐẦU: 1851,4 s, trang_thai=xong, stdout 729.727 B. Sandbox rời có mirror đầy đủ tại
+# reviewed_sha (core.abbrev=7), không mạng, cấm đọc ra ngoài.
+#
+# Verdict: changes_requested — 7 P1 / 4 P2; P3 cũ ĐÃ VÁ THẬT; P1 cũ `span-rong-nuot-ti-le-vo-can`
+# xếp VÁ HỜ về nghĩa vụ xác nhận (1213 ca / 0 đỏ giả / 0 bỏ sót, nhưng hồ sơ thiếu hiện vật tái tính).
+# Bộ ca + harness + bản in + log của reviewer được chép NGUYÊN vào thư mục cùng tên (`ARTIFACTS.sha256`).
+
+schema_version: 2
+receipt_id: pr468-hoso-4-packet-review-6-codex-20260907-64c8e663
+kind: review_delivery_receipt
+packet_id: 'PR468-HOSO-4-PACKET-TREO-SAU-456'
+lease_id: khong-co-lease
+phase_key: HOSO-4-PACKET-TREO-SAU-456
+luot: 6
+role: reviewer
+provider: codex
+executor_provider: claude
+cross_provider: true
+assurance: cross_approved
+verdict: changes_requested
+verdict_path: ops/reviews/pr468-hoso-4-packet-review-6-codex-verdict.md
+verdict_sha256: f71403696471aaabefebc01a72be72f07682e9ebeb41f067dcddd2797f149036
+verdict_bytes: 41709
+reviewed_sha: 2adb6819caee0225d7b7e4f0c4e8c16f2faa7e73
+evidence_url: https://github.com/ducthangho/tra-luat/blob/8c3e37184275b4e2230c593be56e4aa1cff0b9ea/ops/reviews/pr468-hoso-4-packet-review-6-codex-verdict.md
+evidence_url_ghi_chu: >-
+  blob ghim commit ĐẦU TIÊN chứa tệp verdict trên nhánh hồ sơ #468 (commit bản vá lượt 6); PR: https://github.com/ducthangho/tra-luat/pull/468
+
+model_reviewer_identity:
+  provider: openai_codex
+  surface: codex_cli
+  model_yeu_cau: gpt-6-astra
+  model_da_chay: gpt-6-astra
+  model_bang_chung: >-
+    tệp session của codex (~/.codex/sessions, thread 01a07a80-2229-7d31-a848-be32d1687413) ghi
+    `"model":"gpt-6-astra"` 6/6 mục; đối số phóng `-m gpt-6-astra -c model_reasoning_effort="xhigh"`.
+  session_run_id: 64c8e663
+  thread_id: 01a07a80-2229-7d31-a848-be32d1687413
+  prompt_sha256: a4db2e9ee4b6243a10049424f0b65c03cc0b2e7baeb38a283c71c9f2ae407166
+  prompt_kin_hoan_toan: true
+  thoi_luong_giay: 1851.448
+  ma_thoat: 0
+  stdout_byte: 729727
+  token_vao: 7260491
+  token_ra: 45917
+  neo_boi_launcher: >-
+    `launcher.py run --expected-repo github.com/ducthangho/tra-luat --expected-head <reviewed_sha>
+    --prompt-file PROMPT.md --expected-prompt-sha256 <băm> --deadline-utc +75m` bọc `codex exec`;
+    workspace là mirror rời detached đúng reviewed_sha, porcelain rỗng trước/sau. Launcher TỪ CHỐI khi
+    lệch ⇒ ba thứ ấy đo được, không phải lời khai.
+
+github_submitter_identity:
+  actor: ducthangho
+  la_tac_gia_PR: true
+  ghi_chu: >-
+    `ADR-0040`: biên nhận và verdict do tài khoản tác giả PR vận chuyển KHÔNG thành required check
+    hay merge authorization (cổng `duyet khac danh tinh` vẫn đỏ). Trường này ghi AI VẬN CHUYỂN.
+  phien_van_chuyen: https://claude.ai/code/session_013F2m3uJw7X9bFvDqJ7Q63b
+
+anchor:
+  loai: canonical_ancestry
+  cuong_do: trung_binh
+  mo_ta: >-
+    reviewed_sha 2adb681 là merge `origin/master` (d28c4b1) vào nhánh hồ sơ #468, đã push lên
+    `refs/heads/claude/soan-spec-3-viec-treo-20260906`; verdict và gói hiện vật commit ngay sau head ấy
+    trên cùng nhánh nên là hậu duệ trực tiếp. Chưa có tag `luu-tru/*`; nhánh có thể bị xoá sau land.
+
+KHONG_do_duoc:
+  - 'Trạng thái GitHub trực tiếp từ sandbox (không mạng): ai-dang-giu máy chủ, branch protection, Windows thật.'
+  - 'Replay nguyên bộ ca lịch sử 311 hàng / kill-list 14 đột biến / 419 ca lượt 5: hiện vật không có trong kho.'
+  - 'Bản in xanh thật của mcp_gh_test và pretooluse_guard_test TRONG sandbox reviewer (đỏ vì rig) — executor chạy lại trên cây thật, ghi ở outputs-that/.'

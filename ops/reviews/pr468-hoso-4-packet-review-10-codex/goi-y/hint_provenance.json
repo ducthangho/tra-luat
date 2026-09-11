@@ -1,0 +1,1111 @@
+{
+  "reviewed_sha": "c43347d1e2c2f76bb21dc2d9d28bd6bfa153d355",
+  "label": "chưa chạy trên cây thật — executor tự áp, tự đo, tự chịu trách nhiệm commit",
+  "scope": "Gợi ý ngoài checkout. P1 chỉ bổ sung hồ sơ chặn/readback; không đóng trạng thái trước hạn, không cấp hay thu hồi lease. P2 phục dựng byte thiếu, giữ nguyên manifest lịch sử.",
+  "files": [
+    {
+      "path": "ops/issues/463-GATE-TACH-JOB-CAT-CHI-PHI.md",
+      "operation": "document_open_state_and_required_future_readback",
+      "slugs": [
+        "bia-mo-mot-ref-khong-thu-hoi-moi-ban"
+      ],
+      "target_existed_at_reviewed_sha": true,
+      "target_base_sha256": "8bdb5f63f25d0bb6235b816fa5a19a909daeb9f49dee57d2270aaf53b28e6ea6",
+      "source_path": "ops/issues/463-GATE-TACH-JOB-CAT-CHI-PHI.md",
+      "source_sha256": "8bdb5f63f25d0bb6235b816fa5a19a909daeb9f49dee57d2270aaf53b28e6ea6",
+      "hint_sha256": "30e070ce401bc66b0588d8395dbd1000f117b6c417126d7d4d1db341a50972f3",
+      "hunks": [
+        {
+          "kind": "insert",
+          "base_start_line": 126,
+          "base_line_count": 0,
+          "hint_start_line": 126,
+          "hint_line_count": 34,
+          "slugs": [
+            "bia-mo-mot-ref-khong-thu-hoi-moi-ban"
+          ]
+        }
+      ]
+    },
+    {
+      "path": "ops/reviews/pr468-hoso-4-packet-review-9-codex/artifact-repair/ARTIFACTS.sha256",
+      "operation": "unchanged_context_for_standalone_checksum",
+      "slugs": [],
+      "target_existed_at_reviewed_sha": true,
+      "target_base_sha256": "a4b56f2a93da088ea54e150d46c513a2ff3a73dec3271bdd43a6a5591710e406",
+      "source_path": "ops/reviews/pr468-hoso-4-packet-review-9-codex/artifact-repair/ARTIFACTS.sha256",
+      "source_sha256": "a4b56f2a93da088ea54e150d46c513a2ff3a73dec3271bdd43a6a5591710e406",
+      "hint_sha256": "a4b56f2a93da088ea54e150d46c513a2ff3a73dec3271bdd43a6a5591710e406",
+      "hunks": []
+    },
+    {
+      "path": "ops/reviews/pr468-hoso-4-packet-review-9-codex/artifact-repair/adr-song.json",
+      "operation": "unchanged_context_for_standalone_checksum",
+      "slugs": [],
+      "target_existed_at_reviewed_sha": true,
+      "target_base_sha256": "78e851bba5482dbc3dc9ea39f1f64d0ce82d1d02295e30a11b5f9399bc3b5bda",
+      "source_path": "ops/reviews/pr468-hoso-4-packet-review-9-codex/artifact-repair/adr-song.json",
+      "source_sha256": "78e851bba5482dbc3dc9ea39f1f64d0ce82d1d02295e30a11b5f9399bc3b5bda",
+      "hint_sha256": "78e851bba5482dbc3dc9ea39f1f64d0ce82d1d02295e30a11b5f9399bc3b5bda",
+      "hunks": []
+    },
+    {
+      "path": "ops/reviews/pr468-hoso-4-packet-review-9-codex/artifact-repair/adr-song.stderr",
+      "operation": "unchanged_context_for_standalone_checksum",
+      "slugs": [],
+      "target_existed_at_reviewed_sha": true,
+      "target_base_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "source_path": "ops/reviews/pr468-hoso-4-packet-review-9-codex/artifact-repair/adr-song.stderr",
+      "source_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "hint_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "hunks": []
+    },
+    {
+      "path": "ops/reviews/pr468-hoso-4-packet-review-9-codex/artifact-repair/adr-song.stdout",
+      "operation": "unchanged_context_for_standalone_checksum",
+      "slugs": [],
+      "target_existed_at_reviewed_sha": true,
+      "target_base_sha256": "751fa693b8d22f3c7d0089ad96461c3ccb88887a847c5bca3e08ff24ec3a07aa",
+      "source_path": "ops/reviews/pr468-hoso-4-packet-review-9-codex/artifact-repair/adr-song.stdout",
+      "source_sha256": "751fa693b8d22f3c7d0089ad96461c3ccb88887a847c5bca3e08ff24ec3a07aa",
+      "hint_sha256": "751fa693b8d22f3c7d0089ad96461c3ccb88887a847c5bca3e08ff24ec3a07aa",
+      "hunks": []
+    },
+    {
+      "path": "ops/reviews/pr468-hoso-4-packet-review-9-codex/artifact-repair/attack_h.py.log",
+      "operation": "unchanged_context_for_standalone_checksum",
+      "slugs": [],
+      "target_existed_at_reviewed_sha": true,
+      "target_base_sha256": "50868677536846a02bbf99434233a3d4d6e3b28eabbe6876d46b63d0b733a745",
+      "source_path": "ops/reviews/pr468-hoso-4-packet-review-9-codex/artifact-repair/attack_h.py.log",
+      "source_sha256": "50868677536846a02bbf99434233a3d4d6e3b28eabbe6876d46b63d0b733a745",
+      "hint_sha256": "50868677536846a02bbf99434233a3d4d6e3b28eabbe6876d46b63d0b733a745",
+      "hunks": []
+    },
+    {
+      "path": "ops/reviews/pr468-hoso-4-packet-review-9-codex/artifact-repair/bien-nhan-v2.json",
+      "operation": "unchanged_context_for_standalone_checksum",
+      "slugs": [],
+      "target_existed_at_reviewed_sha": true,
+      "target_base_sha256": "5811c530171d49365bc0d36c3fdc3f54258552f0a586be7c71c3d46b34feff0b",
+      "source_path": "ops/reviews/pr468-hoso-4-packet-review-9-codex/artifact-repair/bien-nhan-v2.json",
+      "source_sha256": "5811c530171d49365bc0d36c3fdc3f54258552f0a586be7c71c3d46b34feff0b",
+      "hint_sha256": "5811c530171d49365bc0d36c3fdc3f54258552f0a586be7c71c3d46b34feff0b",
+      "hunks": []
+    },
+    {
+      "path": "ops/reviews/pr468-hoso-4-packet-review-9-codex/artifact-repair/bien-nhan-v2.stderr",
+      "operation": "unchanged_context_for_standalone_checksum",
+      "slugs": [],
+      "target_existed_at_reviewed_sha": true,
+      "target_base_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "source_path": "ops/reviews/pr468-hoso-4-packet-review-9-codex/artifact-repair/bien-nhan-v2.stderr",
+      "source_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "hint_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "hunks": []
+    },
+    {
+      "path": "ops/reviews/pr468-hoso-4-packet-review-9-codex/artifact-repair/bien-nhan-v2.stdout",
+      "operation": "unchanged_context_for_standalone_checksum",
+      "slugs": [],
+      "target_existed_at_reviewed_sha": true,
+      "target_base_sha256": "b35265571e55e9493b476675698a3adf8cd5fa29eb95f7e645321b89ece3f24c",
+      "source_path": "ops/reviews/pr468-hoso-4-packet-review-9-codex/artifact-repair/bien-nhan-v2.stdout",
+      "source_sha256": "b35265571e55e9493b476675698a3adf8cd5fa29eb95f7e645321b89ece3f24c",
+      "hint_sha256": "b35265571e55e9493b476675698a3adf8cd5fa29eb95f7e645321b89ece3f24c",
+      "hunks": []
+    },
+    {
+      "path": "ops/reviews/pr468-hoso-4-packet-review-9-codex/artifact-repair/build_verdict.py",
+      "operation": "unchanged_context_for_standalone_checksum",
+      "slugs": [],
+      "target_existed_at_reviewed_sha": true,
+      "target_base_sha256": "c02b220be22cbfb1e0e48a205c096cd6fd776a5a10bdc1afff568259edb6544b",
+      "source_path": "ops/reviews/pr468-hoso-4-packet-review-9-codex/artifact-repair/build_verdict.py",
+      "source_sha256": "c02b220be22cbfb1e0e48a205c096cd6fd776a5a10bdc1afff568259edb6544b",
+      "hint_sha256": "c02b220be22cbfb1e0e48a205c096cd6fd776a5a10bdc1afff568259edb6544b",
+      "hunks": []
+    },
+    {
+      "path": "ops/reviews/pr468-hoso-4-packet-review-9-codex/artifact-repair/ci-dang-ky.json",
+      "operation": "unchanged_context_for_standalone_checksum",
+      "slugs": [],
+      "target_existed_at_reviewed_sha": true,
+      "target_base_sha256": "593c7c6e61c0cb6b24913c0823ca307f11c5d5da977ccffdacf737c039f49ddb",
+      "source_path": "ops/reviews/pr468-hoso-4-packet-review-9-codex/artifact-repair/ci-dang-ky.json",
+      "source_sha256": "593c7c6e61c0cb6b24913c0823ca307f11c5d5da977ccffdacf737c039f49ddb",
+      "hint_sha256": "593c7c6e61c0cb6b24913c0823ca307f11c5d5da977ccffdacf737c039f49ddb",
+      "hunks": []
+    },
+    {
+      "path": "ops/reviews/pr468-hoso-4-packet-review-9-codex/artifact-repair/ci-dang-ky.stderr",
+      "operation": "unchanged_context_for_standalone_checksum",
+      "slugs": [],
+      "target_existed_at_reviewed_sha": true,
+      "target_base_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "source_path": "ops/reviews/pr468-hoso-4-packet-review-9-codex/artifact-repair/ci-dang-ky.stderr",
+      "source_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "hint_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "hunks": []
+    },
+    {
+      "path": "ops/reviews/pr468-hoso-4-packet-review-9-codex/artifact-repair/ci-dang-ky.stdout",
+      "operation": "unchanged_context_for_standalone_checksum",
+      "slugs": [],
+      "target_existed_at_reviewed_sha": true,
+      "target_base_sha256": "d31de5aefad408c8fb7562e18856c79a201e2bd2fbedbbd1c8b13929dabe5089",
+      "source_path": "ops/reviews/pr468-hoso-4-packet-review-9-codex/artifact-repair/ci-dang-ky.stdout",
+      "source_sha256": "d31de5aefad408c8fb7562e18856c79a201e2bd2fbedbbd1c8b13929dabe5089",
+      "hint_sha256": "d31de5aefad408c8fb7562e18856c79a201e2bd2fbedbbd1c8b13929dabe5089",
+      "hunks": []
+    },
+    {
+      "path": "ops/reviews/pr468-hoso-4-packet-review-9-codex/artifact-repair/contract-checks.json",
+      "operation": "unchanged_context_for_standalone_checksum",
+      "slugs": [],
+      "target_existed_at_reviewed_sha": true,
+      "target_base_sha256": "acdfb4e63a0c4d77c693cb51ec2c55066c41f827cecfacb0cad9c4fb43087292",
+      "source_path": "ops/reviews/pr468-hoso-4-packet-review-9-codex/artifact-repair/contract-checks.json",
+      "source_sha256": "acdfb4e63a0c4d77c693cb51ec2c55066c41f827cecfacb0cad9c4fb43087292",
+      "hint_sha256": "acdfb4e63a0c4d77c693cb51ec2c55066c41f827cecfacb0cad9c4fb43087292",
+      "hunks": []
+    },
+    {
+      "path": "ops/reviews/pr468-hoso-4-packet-review-9-codex/artifact-repair/contract_checks.py",
+      "operation": "unchanged_context_for_standalone_checksum",
+      "slugs": [],
+      "target_existed_at_reviewed_sha": true,
+      "target_base_sha256": "430e7aabe0b6623181e0ba3422eac33880dae68aa9ba75ef797ec559e5ebb756",
+      "source_path": "ops/reviews/pr468-hoso-4-packet-review-9-codex/artifact-repair/contract_checks.py",
+      "source_sha256": "430e7aabe0b6623181e0ba3422eac33880dae68aa9ba75ef797ec559e5ebb756",
+      "hint_sha256": "430e7aabe0b6623181e0ba3422eac33880dae68aa9ba75ef797ec559e5ebb756",
+      "hunks": []
+    },
+    {
+      "path": "ops/reviews/pr468-hoso-4-packet-review-9-codex/artifact-repair/costs.json",
+      "operation": "unchanged_context_for_standalone_checksum",
+      "slugs": [],
+      "target_existed_at_reviewed_sha": true,
+      "target_base_sha256": "098554c9ef30bfd9a5607f3168c47a267c83c009a566149819ddeaf7cbb7904f",
+      "source_path": "ops/reviews/pr468-hoso-4-packet-review-9-codex/artifact-repair/costs.json",
+      "source_sha256": "098554c9ef30bfd9a5607f3168c47a267c83c009a566149819ddeaf7cbb7904f",
+      "hint_sha256": "098554c9ef30bfd9a5607f3168c47a267c83c009a566149819ddeaf7cbb7904f",
+      "hunks": []
+    },
+    {
+      "path": "ops/reviews/pr468-hoso-4-packet-review-9-codex/artifact-repair/doc-claims.json",
+      "operation": "unchanged_context_for_standalone_checksum",
+      "slugs": [],
+      "target_existed_at_reviewed_sha": true,
+      "target_base_sha256": "52177cff3494536f076dcd65cd9933ade7077cbd4c00705027f0760317d01831",
+      "source_path": "ops/reviews/pr468-hoso-4-packet-review-9-codex/artifact-repair/doc-claims.json",
+      "source_sha256": "52177cff3494536f076dcd65cd9933ade7077cbd4c00705027f0760317d01831",
+      "hint_sha256": "52177cff3494536f076dcd65cd9933ade7077cbd4c00705027f0760317d01831",
+      "hunks": []
+    },
+    {
+      "path": "ops/reviews/pr468-hoso-4-packet-review-9-codex/artifact-repair/doc-claims.stderr",
+      "operation": "unchanged_context_for_standalone_checksum",
+      "slugs": [],
+      "target_existed_at_reviewed_sha": true,
+      "target_base_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "source_path": "ops/reviews/pr468-hoso-4-packet-review-9-codex/artifact-repair/doc-claims.stderr",
+      "source_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "hint_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "hunks": []
+    },
+    {
+      "path": "ops/reviews/pr468-hoso-4-packet-review-9-codex/artifact-repair/doc-claims.stdout",
+      "operation": "unchanged_context_for_standalone_checksum",
+      "slugs": [],
+      "target_existed_at_reviewed_sha": true,
+      "target_base_sha256": "b9001f390f47286930965480160e62b23da1e47354acc0e9172b94a48d758286",
+      "source_path": "ops/reviews/pr468-hoso-4-packet-review-9-codex/artifact-repair/doc-claims.stdout",
+      "source_sha256": "b9001f390f47286930965480160e62b23da1e47354acc0e9172b94a48d758286",
+      "hint_sha256": "b9001f390f47286930965480160e62b23da1e47354acc0e9172b94a48d758286",
+      "hunks": []
+    },
+    {
+      "path": "ops/reviews/pr468-hoso-4-packet-review-9-codex/artifact-repair/doctrine-scan.json",
+      "operation": "unchanged_context_for_standalone_checksum",
+      "slugs": [],
+      "target_existed_at_reviewed_sha": true,
+      "target_base_sha256": "4d1e506462da60170e61dd160f917bfe3fd3c7376774f45c0307de6e4d9c62f6",
+      "source_path": "ops/reviews/pr468-hoso-4-packet-review-9-codex/artifact-repair/doctrine-scan.json",
+      "source_sha256": "4d1e506462da60170e61dd160f917bfe3fd3c7376774f45c0307de6e4d9c62f6",
+      "hint_sha256": "4d1e506462da60170e61dd160f917bfe3fd3c7376774f45c0307de6e4d9c62f6",
+      "hunks": []
+    },
+    {
+      "path": "ops/reviews/pr468-hoso-4-packet-review-9-codex/artifact-repair/doctrine-scan.stderr",
+      "operation": "unchanged_context_for_standalone_checksum",
+      "slugs": [],
+      "target_existed_at_reviewed_sha": true,
+      "target_base_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "source_path": "ops/reviews/pr468-hoso-4-packet-review-9-codex/artifact-repair/doctrine-scan.stderr",
+      "source_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "hint_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "hunks": []
+    },
+    {
+      "path": "ops/reviews/pr468-hoso-4-packet-review-9-codex/artifact-repair/doctrine-scan.stdout",
+      "operation": "unchanged_context_for_standalone_checksum",
+      "slugs": [],
+      "target_existed_at_reviewed_sha": true,
+      "target_base_sha256": "9ee1866d82544445d0b015d90aaeb90aead5e9ebf0ffa8ae6556f3ca2963f5cb",
+      "source_path": "ops/reviews/pr468-hoso-4-packet-review-9-codex/artifact-repair/doctrine-scan.stdout",
+      "source_sha256": "9ee1866d82544445d0b015d90aaeb90aead5e9ebf0ffa8ae6556f3ca2963f5cb",
+      "hint_sha256": "9ee1866d82544445d0b015d90aaeb90aead5e9ebf0ffa8ae6556f3ca2963f5cb",
+      "hunks": []
+    },
+    {
+      "path": "ops/reviews/pr468-hoso-4-packet-review-9-codex/artifact-repair/extra_checks.py.log",
+      "operation": "unchanged_context_for_standalone_checksum",
+      "slugs": [],
+      "target_existed_at_reviewed_sha": true,
+      "target_base_sha256": "25b90acd3ebf8353c3c07f3ff0e5b1ef730629df1f8bc909cbc36b84f8f31ff3",
+      "source_path": "ops/reviews/pr468-hoso-4-packet-review-9-codex/artifact-repair/extra_checks.py.log",
+      "source_sha256": "25b90acd3ebf8353c3c07f3ff0e5b1ef730629df1f8bc909cbc36b84f8f31ff3",
+      "hint_sha256": "25b90acd3ebf8353c3c07f3ff0e5b1ef730629df1f8bc909cbc36b84f8f31ff3",
+      "hunks": []
+    },
+    {
+      "path": "ops/reviews/pr468-hoso-4-packet-review-9-codex/artifact-repair/final-check.json",
+      "operation": "unchanged_context_for_standalone_checksum",
+      "slugs": [],
+      "target_existed_at_reviewed_sha": true,
+      "target_base_sha256": "178084d965ef37b7d53011246a75c9b26b1c297674e1fb4eca259799fbb721e3",
+      "source_path": "ops/reviews/pr468-hoso-4-packet-review-9-codex/artifact-repair/final-check.json",
+      "source_sha256": "178084d965ef37b7d53011246a75c9b26b1c297674e1fb4eca259799fbb721e3",
+      "hint_sha256": "178084d965ef37b7d53011246a75c9b26b1c297674e1fb4eca259799fbb721e3",
+      "hunks": []
+    },
+    {
+      "path": "ops/reviews/pr468-hoso-4-packet-review-9-codex/artifact-repair/followup-checks.json",
+      "operation": "unchanged_context_for_standalone_checksum",
+      "slugs": [],
+      "target_existed_at_reviewed_sha": true,
+      "target_base_sha256": "21e7e0ea57db0a570b2a5eae45f3eab469ffe69c6814ec6d776ef610ecb16716",
+      "source_path": "ops/reviews/pr468-hoso-4-packet-review-9-codex/artifact-repair/followup-checks.json",
+      "source_sha256": "21e7e0ea57db0a570b2a5eae45f3eab469ffe69c6814ec6d776ef610ecb16716",
+      "hint_sha256": "21e7e0ea57db0a570b2a5eae45f3eab469ffe69c6814ec6d776ef610ecb16716",
+      "hunks": []
+    },
+    {
+      "path": "ops/reviews/pr468-hoso-4-packet-review-9-codex/artifact-repair/followup_checks.py",
+      "operation": "unchanged_context_for_standalone_checksum",
+      "slugs": [],
+      "target_existed_at_reviewed_sha": true,
+      "target_base_sha256": "a744461323ae6c31e4d1032a9333babc64e06eefe2c5e09ccebe751ef44d0333",
+      "source_path": "ops/reviews/pr468-hoso-4-packet-review-9-codex/artifact-repair/followup_checks.py",
+      "source_sha256": "a744461323ae6c31e4d1032a9333babc64e06eefe2c5e09ccebe751ef44d0333",
+      "hint_sha256": "a744461323ae6c31e4d1032a9333babc64e06eefe2c5e09ccebe751ef44d0333",
+      "hunks": []
+    },
+    {
+      "path": "ops/reviews/pr468-hoso-4-packet-review-9-codex/artifact-repair/harness.py.log",
+      "operation": "unchanged_context_for_standalone_checksum",
+      "slugs": [],
+      "target_existed_at_reviewed_sha": true,
+      "target_base_sha256": "6678fb19ef5de4dc52a4249031423a60b0dd4cf373a9ead88643492aeb52b657",
+      "source_path": "ops/reviews/pr468-hoso-4-packet-review-9-codex/artifact-repair/harness.py.log",
+      "source_sha256": "6678fb19ef5de4dc52a4249031423a60b0dd4cf373a9ead88643492aeb52b657",
+      "hint_sha256": "6678fb19ef5de4dc52a4249031423a60b0dd4cf373a9ead88643492aeb52b657",
+      "hunks": []
+    },
+    {
+      "path": "ops/reviews/pr468-hoso-4-packet-review-9-codex/artifact-repair/lease-check.json",
+      "operation": "unchanged_context_for_standalone_checksum",
+      "slugs": [],
+      "target_existed_at_reviewed_sha": true,
+      "target_base_sha256": "06ab31af29e75fa43b9660a9eeea79c78104030d45f996e3b2523df11bed04dc",
+      "source_path": "ops/reviews/pr468-hoso-4-packet-review-9-codex/artifact-repair/lease-check.json",
+      "source_sha256": "06ab31af29e75fa43b9660a9eeea79c78104030d45f996e3b2523df11bed04dc",
+      "hint_sha256": "06ab31af29e75fa43b9660a9eeea79c78104030d45f996e3b2523df11bed04dc",
+      "hunks": []
+    },
+    {
+      "path": "ops/reviews/pr468-hoso-4-packet-review-9-codex/artifact-repair/lease-check.stderr",
+      "operation": "unchanged_context_for_standalone_checksum",
+      "slugs": [],
+      "target_existed_at_reviewed_sha": true,
+      "target_base_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "source_path": "ops/reviews/pr468-hoso-4-packet-review-9-codex/artifact-repair/lease-check.stderr",
+      "source_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "hint_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "hunks": []
+    },
+    {
+      "path": "ops/reviews/pr468-hoso-4-packet-review-9-codex/artifact-repair/lease-check.stdout",
+      "operation": "unchanged_context_for_standalone_checksum",
+      "slugs": [],
+      "target_existed_at_reviewed_sha": true,
+      "target_base_sha256": "27924ee14325f81d7590c1c22bc3c78ecfd3dca155f1fdce3f93396425229717",
+      "source_path": "ops/reviews/pr468-hoso-4-packet-review-9-codex/artifact-repair/lease-check.stdout",
+      "source_sha256": "27924ee14325f81d7590c1c22bc3c78ecfd3dca155f1fdce3f93396425229717",
+      "hint_sha256": "27924ee14325f81d7590c1c22bc3c78ecfd3dca155f1fdce3f93396425229717",
+      "hunks": []
+    },
+    {
+      "path": "ops/reviews/pr468-hoso-4-packet-review-9-codex/artifact-repair/lease-publish-test.json",
+      "operation": "unchanged_context_for_standalone_checksum",
+      "slugs": [],
+      "target_existed_at_reviewed_sha": true,
+      "target_base_sha256": "d3ec3ff3f95f113053e66a8ad4b3d625566f7de1a3d283e251f029053b486022",
+      "source_path": "ops/reviews/pr468-hoso-4-packet-review-9-codex/artifact-repair/lease-publish-test.json",
+      "source_sha256": "d3ec3ff3f95f113053e66a8ad4b3d625566f7de1a3d283e251f029053b486022",
+      "hint_sha256": "d3ec3ff3f95f113053e66a8ad4b3d625566f7de1a3d283e251f029053b486022",
+      "hunks": []
+    },
+    {
+      "path": "ops/reviews/pr468-hoso-4-packet-review-9-codex/artifact-repair/lease-publish-test.stderr",
+      "operation": "unchanged_context_for_standalone_checksum",
+      "slugs": [],
+      "target_existed_at_reviewed_sha": true,
+      "target_base_sha256": "11f0d363bf3a5f400d90975601037fb8b0f4319a0147a3e1f08a95ff6ccec96a",
+      "source_path": "ops/reviews/pr468-hoso-4-packet-review-9-codex/artifact-repair/lease-publish-test.stderr",
+      "source_sha256": "11f0d363bf3a5f400d90975601037fb8b0f4319a0147a3e1f08a95ff6ccec96a",
+      "hint_sha256": "11f0d363bf3a5f400d90975601037fb8b0f4319a0147a3e1f08a95ff6ccec96a",
+      "hunks": []
+    },
+    {
+      "path": "ops/reviews/pr468-hoso-4-packet-review-9-codex/artifact-repair/lease-publish-test.stdout",
+      "operation": "unchanged_context_for_standalone_checksum",
+      "slugs": [],
+      "target_existed_at_reviewed_sha": true,
+      "target_base_sha256": "9d3f3e46cd0ba25f7c7bd19f6505704d928baae39138e80539e275b64d8e6c7d",
+      "source_path": "ops/reviews/pr468-hoso-4-packet-review-9-codex/artifact-repair/lease-publish-test.stdout",
+      "source_sha256": "9d3f3e46cd0ba25f7c7bd19f6505704d928baae39138e80539e275b64d8e6c7d",
+      "hint_sha256": "9d3f3e46cd0ba25f7c7bd19f6505704d928baae39138e80539e275b64d8e6c7d",
+      "hunks": []
+    },
+    {
+      "path": "ops/reviews/pr468-hoso-4-packet-review-9-codex/artifact-repair/measure_costs.py",
+      "operation": "unchanged_context_for_standalone_checksum",
+      "slugs": [],
+      "target_existed_at_reviewed_sha": true,
+      "target_base_sha256": "4068823de53d028999e64b6b72f7d9b7d69ae5ddace50f2b3c5f6ba7c1eff671",
+      "source_path": "ops/reviews/pr468-hoso-4-packet-review-9-codex/artifact-repair/measure_costs.py",
+      "source_sha256": "4068823de53d028999e64b6b72f7d9b7d69ae5ddace50f2b3c5f6ba7c1eff671",
+      "hint_sha256": "4068823de53d028999e64b6b72f7d9b7d69ae5ddace50f2b3c5f6ba7c1eff671",
+      "hunks": []
+    },
+    {
+      "path": "ops/reviews/pr468-hoso-4-packet-review-9-codex/artifact-repair/nen-a1-a5/buoc.tsv",
+      "operation": "unchanged_context_for_standalone_checksum",
+      "slugs": [],
+      "target_existed_at_reviewed_sha": true,
+      "target_base_sha256": "c51cf52e809babab1b0ff6944c711ce9d3c09101526378a7b66c2d9be7864c60",
+      "source_path": "ops/reviews/pr468-hoso-4-packet-review-9-codex/artifact-repair/nen-a1-a5/buoc.tsv",
+      "source_sha256": "c51cf52e809babab1b0ff6944c711ce9d3c09101526378a7b66c2d9be7864c60",
+      "hint_sha256": "c51cf52e809babab1b0ff6944c711ce9d3c09101526378a7b66c2d9be7864c60",
+      "hunks": []
+    },
+    {
+      "path": "ops/reviews/pr468-hoso-4-packet-review-9-codex/artifact-repair/nen-a1-a5/job.tsv",
+      "operation": "unchanged_context_for_standalone_checksum",
+      "slugs": [],
+      "target_existed_at_reviewed_sha": true,
+      "target_base_sha256": "06c78b8ace81116bb9c86f1e8e6a79d245dc58fc0bc7c8a0c5a9a4b850574c4d",
+      "source_path": "ops/reviews/pr468-hoso-4-packet-review-9-codex/artifact-repair/nen-a1-a5/job.tsv",
+      "source_sha256": "06c78b8ace81116bb9c86f1e8e6a79d245dc58fc0bc7c8a0c5a9a4b850574c4d",
+      "hint_sha256": "06c78b8ace81116bb9c86f1e8e6a79d245dc58fc0bc7c8a0c5a9a4b850574c4d",
+      "hunks": []
+    },
+    {
+      "path": "ops/reviews/pr468-hoso-4-packet-review-9-codex/artifact-repair/nen-a1-a5/khong_do_duoc.txt",
+      "operation": "unchanged_context_for_standalone_checksum",
+      "slugs": [],
+      "target_existed_at_reviewed_sha": true,
+      "target_base_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "source_path": "ops/reviews/pr468-hoso-4-packet-review-9-codex/artifact-repair/nen-a1-a5/khong_do_duoc.txt",
+      "source_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "hint_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "hunks": []
+    },
+    {
+      "path": "ops/reviews/pr468-hoso-4-packet-review-9-codex/artifact-repair/nen-a1-a5/raw/jobs.txt",
+      "operation": "unchanged_context_for_standalone_checksum",
+      "slugs": [],
+      "target_existed_at_reviewed_sha": true,
+      "target_base_sha256": "84c797f15c0593113985d014fb95d1829843b859ecfdb14b89e2bd3d1845948b",
+      "source_path": "ops/reviews/pr468-hoso-4-packet-review-9-codex/artifact-repair/nen-a1-a5/raw/jobs.txt",
+      "source_sha256": "84c797f15c0593113985d014fb95d1829843b859ecfdb14b89e2bd3d1845948b",
+      "hint_sha256": "84c797f15c0593113985d014fb95d1829843b859ecfdb14b89e2bd3d1845948b",
+      "hunks": []
+    },
+    {
+      "path": "ops/reviews/pr468-hoso-4-packet-review-9-codex/artifact-repair/nen-a1-a5/raw/runs.json",
+      "operation": "unchanged_context_for_standalone_checksum",
+      "slugs": [],
+      "target_existed_at_reviewed_sha": true,
+      "target_base_sha256": "fa9ab9a0821217121d9b04b2e305391c42a59111487977447673e7a0177b961d",
+      "source_path": "ops/reviews/pr468-hoso-4-packet-review-9-codex/artifact-repair/nen-a1-a5/raw/runs.json",
+      "source_sha256": "fa9ab9a0821217121d9b04b2e305391c42a59111487977447673e7a0177b961d",
+      "hint_sha256": "fa9ab9a0821217121d9b04b2e305391c42a59111487977447673e7a0177b961d",
+      "hunks": []
+    },
+    {
+      "path": "ops/reviews/pr468-hoso-4-packet-review-9-codex/artifact-repair/nen-a1-a5/tinh.py",
+      "operation": "unchanged_context_for_standalone_checksum",
+      "slugs": [],
+      "target_existed_at_reviewed_sha": true,
+      "target_base_sha256": "4e13e7903f0511a1440b5e8af9a160fae6a1a91fe588acf33f8e894b220276d2",
+      "source_path": "ops/reviews/pr468-hoso-4-packet-review-9-codex/artifact-repair/nen-a1-a5/tinh.py",
+      "source_sha256": "4e13e7903f0511a1440b5e8af9a160fae6a1a91fe588acf33f8e894b220276d2",
+      "hint_sha256": "4e13e7903f0511a1440b5e8af9a160fae6a1a91fe588acf33f8e894b220276d2",
+      "hunks": []
+    },
+    {
+      "path": "ops/reviews/pr468-hoso-4-packet-review-9-codex/artifact-repair/nen-a1-a5/tom_tat.md",
+      "operation": "unchanged_context_for_standalone_checksum",
+      "slugs": [],
+      "target_existed_at_reviewed_sha": true,
+      "target_base_sha256": "8309012b11ad03959ac420f64e5f7ffc84f4532653fb15a6d84c90976e8920d2",
+      "source_path": "ops/reviews/pr468-hoso-4-packet-review-9-codex/artifact-repair/nen-a1-a5/tom_tat.md",
+      "source_sha256": "8309012b11ad03959ac420f64e5f7ffc84f4532653fb15a6d84c90976e8920d2",
+      "hint_sha256": "8309012b11ad03959ac420f64e5f7ffc84f4532653fb15a6d84c90976e8920d2",
+      "hunks": []
+    },
+    {
+      "path": "ops/reviews/pr468-hoso-4-packet-review-9-codex/artifact-repair/nen-replay.log",
+      "operation": "unchanged_context_for_standalone_checksum",
+      "slugs": [],
+      "target_existed_at_reviewed_sha": true,
+      "target_base_sha256": "8309012b11ad03959ac420f64e5f7ffc84f4532653fb15a6d84c90976e8920d2",
+      "source_path": "ops/reviews/pr468-hoso-4-packet-review-9-codex/artifact-repair/nen-replay.log",
+      "source_sha256": "8309012b11ad03959ac420f64e5f7ffc84f4532653fb15a6d84c90976e8920d2",
+      "hint_sha256": "8309012b11ad03959ac420f64e5f7ffc84f4532653fb15a6d84c90976e8920d2",
+      "hunks": []
+    },
+    {
+      "path": "ops/reviews/pr468-hoso-4-packet-review-9-codex/artifact-repair/notes.md",
+      "operation": "unchanged_context_for_standalone_checksum",
+      "slugs": [],
+      "target_existed_at_reviewed_sha": true,
+      "target_base_sha256": "7f10bc75fcd6d22efc26e7b426c8e03fa2dddbc812602ccd4d32938ce114e433",
+      "source_path": "ops/reviews/pr468-hoso-4-packet-review-9-codex/artifact-repair/notes.md",
+      "source_sha256": "7f10bc75fcd6d22efc26e7b426c8e03fa2dddbc812602ccd4d32938ce114e433",
+      "hint_sha256": "7f10bc75fcd6d22efc26e7b426c8e03fa2dddbc812602ccd4d32938ce114e433",
+      "hunks": []
+    },
+    {
+      "path": "ops/reviews/pr468-hoso-4-packet-review-9-codex/artifact-repair/pretooluse-replay.json",
+      "operation": "unchanged_context_for_standalone_checksum",
+      "slugs": [],
+      "target_existed_at_reviewed_sha": true,
+      "target_base_sha256": "5165c82e8dbd3a191e7d48807cf29769329f898121fd9c4aee53f6992b21acc7",
+      "source_path": "ops/reviews/pr468-hoso-4-packet-review-9-codex/artifact-repair/pretooluse-replay.json",
+      "source_sha256": "5165c82e8dbd3a191e7d48807cf29769329f898121fd9c4aee53f6992b21acc7",
+      "hint_sha256": "5165c82e8dbd3a191e7d48807cf29769329f898121fd9c4aee53f6992b21acc7",
+      "hunks": []
+    },
+    {
+      "path": "ops/reviews/pr468-hoso-4-packet-review-9-codex/artifact-repair/pretooluse.json",
+      "operation": "unchanged_context_for_standalone_checksum",
+      "slugs": [],
+      "target_existed_at_reviewed_sha": true,
+      "target_base_sha256": "39582c556d95c49fd71e19df434735bb8b1f77a6201d4188550eb8aefc38a527",
+      "source_path": "ops/reviews/pr468-hoso-4-packet-review-9-codex/artifact-repair/pretooluse.json",
+      "source_sha256": "39582c556d95c49fd71e19df434735bb8b1f77a6201d4188550eb8aefc38a527",
+      "hint_sha256": "39582c556d95c49fd71e19df434735bb8b1f77a6201d4188550eb8aefc38a527",
+      "hunks": []
+    },
+    {
+      "path": "ops/reviews/pr468-hoso-4-packet-review-9-codex/artifact-repair/pretooluse.stderr",
+      "operation": "unchanged_context_for_standalone_checksum",
+      "slugs": [],
+      "target_existed_at_reviewed_sha": true,
+      "target_base_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "source_path": "ops/reviews/pr468-hoso-4-packet-review-9-codex/artifact-repair/pretooluse.stderr",
+      "source_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "hint_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "hunks": []
+    },
+    {
+      "path": "ops/reviews/pr468-hoso-4-packet-review-9-codex/artifact-repair/pretooluse.stdout",
+      "operation": "unchanged_context_for_standalone_checksum",
+      "slugs": [],
+      "target_existed_at_reviewed_sha": true,
+      "target_base_sha256": "69878c4f9efb24a6666d1cf0e4dea99d1ac87fa0aa904e28c6d397fd08cb7991",
+      "source_path": "ops/reviews/pr468-hoso-4-packet-review-9-codex/artifact-repair/pretooluse.stdout",
+      "source_sha256": "69878c4f9efb24a6666d1cf0e4dea99d1ac87fa0aa904e28c6d397fd08cb7991",
+      "hint_sha256": "69878c4f9efb24a6666d1cf0e4dea99d1ac87fa0aa904e28c6d397fd08cb7991",
+      "hunks": []
+    },
+    {
+      "path": "ops/reviews/pr468-hoso-4-packet-review-9-codex/artifact-repair/replay-h.json",
+      "operation": "unchanged_context_for_standalone_checksum",
+      "slugs": [],
+      "target_existed_at_reviewed_sha": true,
+      "target_base_sha256": "cd1f5d3c675f5862629f5722f65fa9d5f0fd304531508ff0e46e58965c10634a",
+      "source_path": "ops/reviews/pr468-hoso-4-packet-review-9-codex/artifact-repair/replay-h.json",
+      "source_sha256": "cd1f5d3c675f5862629f5722f65fa9d5f0fd304531508ff0e46e58965c10634a",
+      "hint_sha256": "cd1f5d3c675f5862629f5722f65fa9d5f0fd304531508ff0e46e58965c10634a",
+      "hunks": []
+    },
+    {
+      "path": "ops/reviews/pr468-hoso-4-packet-review-9-codex/artifact-repair/replay_h.py",
+      "operation": "unchanged_context_for_standalone_checksum",
+      "slugs": [],
+      "target_existed_at_reviewed_sha": true,
+      "target_base_sha256": "57c42e7d089f533c830353bfd7348eb3dc01a27dc4341c2581ac4f52739be7ed",
+      "source_path": "ops/reviews/pr468-hoso-4-packet-review-9-codex/artifact-repair/replay_h.py",
+      "source_sha256": "57c42e7d089f533c830353bfd7348eb3dc01a27dc4341c2581ac4f52739be7ed",
+      "hint_sha256": "57c42e7d089f533c830353bfd7348eb3dc01a27dc4341c2581ac4f52739be7ed",
+      "hunks": []
+    },
+    {
+      "path": "ops/reviews/pr468-hoso-4-packet-review-9-codex/artifact-repair/run_command.py",
+      "operation": "unchanged_context_for_standalone_checksum",
+      "slugs": [],
+      "target_existed_at_reviewed_sha": true,
+      "target_base_sha256": "4dd8c29f8f84b5aa3de271bc10ca4c02f9b9f7bdf6b6cb14d3633ed051f14b52",
+      "source_path": "ops/reviews/pr468-hoso-4-packet-review-9-codex/artifact-repair/run_command.py",
+      "source_sha256": "4dd8c29f8f84b5aa3de271bc10ca4c02f9b9f7bdf6b6cb14d3633ed051f14b52",
+      "hint_sha256": "4dd8c29f8f84b5aa3de271bc10ca4c02f9b9f7bdf6b6cb14d3633ed051f14b52",
+      "hunks": []
+    },
+    {
+      "path": "ops/reviews/pr468-hoso-4-packet-review-9-codex/artifact-repair/static.json",
+      "operation": "unchanged_context_for_standalone_checksum",
+      "slugs": [],
+      "target_existed_at_reviewed_sha": true,
+      "target_base_sha256": "0fa6efe1963b8a69abc66010f01191387cf4c4ca267d52e704bb6dd6b7cd35a1",
+      "source_path": "ops/reviews/pr468-hoso-4-packet-review-9-codex/artifact-repair/static.json",
+      "source_sha256": "0fa6efe1963b8a69abc66010f01191387cf4c4ca267d52e704bb6dd6b7cd35a1",
+      "hint_sha256": "0fa6efe1963b8a69abc66010f01191387cf4c4ca267d52e704bb6dd6b7cd35a1",
+      "hunks": []
+    },
+    {
+      "path": "ops/reviews/pr468-hoso-4-packet-review-9-codex/artifact-repair/static_checks.py",
+      "operation": "unchanged_context_for_standalone_checksum",
+      "slugs": [],
+      "target_existed_at_reviewed_sha": true,
+      "target_base_sha256": "c836634d4f59756d36e8e8f9dd85ed601b7b4f614049b56a54d18a194bb9ad43",
+      "source_path": "ops/reviews/pr468-hoso-4-packet-review-9-codex/artifact-repair/static_checks.py",
+      "source_sha256": "c836634d4f59756d36e8e8f9dd85ed601b7b4f614049b56a54d18a194bb9ad43",
+      "hint_sha256": "c836634d4f59756d36e8e8f9dd85ed601b7b4f614049b56a54d18a194bb9ad43",
+      "hunks": []
+    },
+    {
+      "path": "ops/reviews/pr468-hoso-4-packet-review-9-codex/artifact-repair/rig/do-review/attack-h-cases.json",
+      "operation": "restore_exact_bytes_from_complete_round8",
+      "slugs": [
+        "manifest-luot8-liet-ke-hien-vat-khong-duoc-giao"
+      ],
+      "target_existed_at_reviewed_sha": false,
+      "target_base_sha256": null,
+      "source_path": "ops/reviews/pr468-hoso-4-packet-review-8-codex/rig/do-review/attack-h-cases.json",
+      "source_sha256": "72dac0275ce51256d766aad3c542e98058c2ce0312ae0a6be92b4327231a6df6",
+      "hint_sha256": "72dac0275ce51256d766aad3c542e98058c2ce0312ae0a6be92b4327231a6df6",
+      "hunks": [
+        {
+          "kind": "insert",
+          "base_start_line": 1,
+          "base_line_count": 0,
+          "hint_start_line": 1,
+          "hint_line_count": 12916,
+          "slugs": [
+            "manifest-luot8-liet-ke-hien-vat-khong-duoc-giao"
+          ]
+        }
+      ],
+      "manifest_path": "ops/reviews/pr468-hoso-4-packet-review-9-codex/artifact-repair/ARTIFACTS.sha256",
+      "manifest_line": 48
+    },
+    {
+      "path": "ops/reviews/pr468-hoso-4-packet-review-9-codex/artifact-repair/rig/do-review/attack-h-summary.json",
+      "operation": "restore_exact_bytes_from_complete_round8",
+      "slugs": [
+        "manifest-luot8-liet-ke-hien-vat-khong-duoc-giao"
+      ],
+      "target_existed_at_reviewed_sha": false,
+      "target_base_sha256": null,
+      "source_path": "ops/reviews/pr468-hoso-4-packet-review-8-codex/rig/do-review/attack-h-summary.json",
+      "source_sha256": "50868677536846a02bbf99434233a3d4d6e3b28eabbe6876d46b63d0b733a745",
+      "hint_sha256": "50868677536846a02bbf99434233a3d4d6e3b28eabbe6876d46b63d0b733a745",
+      "hunks": [
+        {
+          "kind": "insert",
+          "base_start_line": 1,
+          "base_line_count": 0,
+          "hint_start_line": 1,
+          "hint_line_count": 19,
+          "slugs": [
+            "manifest-luot8-liet-ke-hien-vat-khong-duoc-giao"
+          ]
+        }
+      ],
+      "manifest_path": "ops/reviews/pr468-hoso-4-packet-review-9-codex/artifact-repair/ARTIFACTS.sha256",
+      "manifest_line": 49
+    },
+    {
+      "path": "ops/reviews/pr468-hoso-4-packet-review-9-codex/artifact-repair/rig/do-review/extra-checks.json",
+      "operation": "restore_exact_bytes_from_complete_round8",
+      "slugs": [
+        "manifest-luot8-liet-ke-hien-vat-khong-duoc-giao"
+      ],
+      "target_existed_at_reviewed_sha": false,
+      "target_base_sha256": null,
+      "source_path": "ops/reviews/pr468-hoso-4-packet-review-8-codex/rig/do-review/extra-checks.json",
+      "source_sha256": "f807d6da02cfc43f151c82a86e92833ed7bd721f7066003a0a5ed6514dae74c7",
+      "hint_sha256": "f807d6da02cfc43f151c82a86e92833ed7bd721f7066003a0a5ed6514dae74c7",
+      "hunks": [
+        {
+          "kind": "insert",
+          "base_start_line": 1,
+          "base_line_count": 0,
+          "hint_start_line": 1,
+          "hint_line_count": 317,
+          "slugs": [
+            "manifest-luot8-liet-ke-hien-vat-khong-duoc-giao"
+          ]
+        }
+      ],
+      "manifest_path": "ops/reviews/pr468-hoso-4-packet-review-9-codex/artifact-repair/ARTIFACTS.sha256",
+      "manifest_line": 50
+    },
+    {
+      "path": "ops/reviews/pr468-hoso-4-packet-review-9-codex/artifact-repair/rig/do-review/h_predicate.py",
+      "operation": "restore_exact_bytes_from_complete_round8",
+      "slugs": [
+        "manifest-luot8-liet-ke-hien-vat-khong-duoc-giao"
+      ],
+      "target_existed_at_reviewed_sha": false,
+      "target_base_sha256": null,
+      "source_path": "ops/reviews/pr468-hoso-4-packet-review-8-codex/rig/do-review/h_predicate.py",
+      "source_sha256": "bde441a08d129a962d862fe237003997610238edc8e87b7948d35de875e5f165",
+      "hint_sha256": "bde441a08d129a962d862fe237003997610238edc8e87b7948d35de875e5f165",
+      "hunks": [
+        {
+          "kind": "insert",
+          "base_start_line": 1,
+          "base_line_count": 0,
+          "hint_start_line": 1,
+          "hint_line_count": 29,
+          "slugs": [
+            "manifest-luot8-liet-ke-hien-vat-khong-duoc-giao"
+          ]
+        }
+      ],
+      "manifest_path": "ops/reviews/pr468-hoso-4-packet-review-9-codex/artifact-repair/ARTIFACTS.sha256",
+      "manifest_line": 51
+    },
+    {
+      "path": "ops/reviews/pr468-hoso-4-packet-review-9-codex/artifact-repair/rig/do-review/h_tong.py",
+      "operation": "restore_exact_bytes_from_complete_round8",
+      "slugs": [
+        "manifest-luot8-liet-ke-hien-vat-khong-duoc-giao"
+      ],
+      "target_existed_at_reviewed_sha": false,
+      "target_base_sha256": null,
+      "source_path": "ops/reviews/pr468-hoso-4-packet-review-8-codex/rig/do-review/h_tong.py",
+      "source_sha256": "c23bcd019182023496cb3d9817c6553a0074c77bca26c0a0d1f71a4f5104e45c",
+      "hint_sha256": "c23bcd019182023496cb3d9817c6553a0074c77bca26c0a0d1f71a4f5104e45c",
+      "hunks": [
+        {
+          "kind": "insert",
+          "base_start_line": 1,
+          "base_line_count": 0,
+          "hint_start_line": 1,
+          "hint_line_count": 21,
+          "slugs": [
+            "manifest-luot8-liet-ke-hien-vat-khong-duoc-giao"
+          ]
+        }
+      ],
+      "manifest_path": "ops/reviews/pr468-hoso-4-packet-review-9-codex/artifact-repair/ARTIFACTS.sha256",
+      "manifest_line": 52
+    },
+    {
+      "path": "ops/reviews/pr468-hoso-4-packet-review-9-codex/artifact-repair/rig/do-review/nhanh-rerun.json",
+      "operation": "restore_exact_bytes_from_complete_round8",
+      "slugs": [
+        "manifest-luot8-liet-ke-hien-vat-khong-duoc-giao"
+      ],
+      "target_existed_at_reviewed_sha": false,
+      "target_base_sha256": null,
+      "source_path": "ops/reviews/pr468-hoso-4-packet-review-8-codex/rig/do-review/nhanh-rerun.json",
+      "source_sha256": "b51c3f1dab6beeab4f44a976178f212b5e9b675f3bc0efc02414a605ca317044",
+      "hint_sha256": "b51c3f1dab6beeab4f44a976178f212b5e9b675f3bc0efc02414a605ca317044",
+      "hunks": [
+        {
+          "kind": "insert",
+          "base_start_line": 1,
+          "base_line_count": 0,
+          "hint_start_line": 1,
+          "hint_line_count": 12,
+          "slugs": [
+            "manifest-luot8-liet-ke-hien-vat-khong-duoc-giao"
+          ]
+        }
+      ],
+      "manifest_path": "ops/reviews/pr468-hoso-4-packet-review-9-codex/artifact-repair/ARTIFACTS.sha256",
+      "manifest_line": 53
+    },
+    {
+      "path": "ops/reviews/pr468-hoso-4-packet-review-9-codex/artifact-repair/rig/do-review/outputs/chon_reviewer_test.stdout",
+      "operation": "restore_exact_bytes_from_complete_round8",
+      "slugs": [
+        "manifest-luot8-liet-ke-hien-vat-khong-duoc-giao"
+      ],
+      "target_existed_at_reviewed_sha": false,
+      "target_base_sha256": null,
+      "source_path": "ops/reviews/pr468-hoso-4-packet-review-8-codex/rig/do-review/outputs/chon_reviewer_test.stdout",
+      "source_sha256": "a58070829bf0732f81f9e4fa601196637467cea0528ed7e362ed8da48a82ede7",
+      "hint_sha256": "a58070829bf0732f81f9e4fa601196637467cea0528ed7e362ed8da48a82ede7",
+      "hunks": [
+        {
+          "kind": "insert",
+          "base_start_line": 1,
+          "base_line_count": 0,
+          "hint_start_line": 1,
+          "hint_line_count": 37,
+          "slugs": [
+            "manifest-luot8-liet-ke-hien-vat-khong-duoc-giao"
+          ]
+        }
+      ],
+      "manifest_path": "ops/reviews/pr468-hoso-4-packet-review-9-codex/artifact-repair/ARTIFACTS.sha256",
+      "manifest_line": 54
+    },
+    {
+      "path": "ops/reviews/pr468-hoso-4-packet-review-9-codex/artifact-repair/rig/do-review/outputs/gh_readback_test.stdout",
+      "operation": "restore_exact_bytes_from_complete_round8",
+      "slugs": [
+        "manifest-luot8-liet-ke-hien-vat-khong-duoc-giao"
+      ],
+      "target_existed_at_reviewed_sha": false,
+      "target_base_sha256": null,
+      "source_path": "ops/reviews/pr468-hoso-4-packet-review-8-codex/rig/do-review/outputs/gh_readback_test.stdout",
+      "source_sha256": "0a476a97ea3c334220ff9bee8485d720a8ab62acc17eb1e4a59e3d33c67f2cc2",
+      "hint_sha256": "0a476a97ea3c334220ff9bee8485d720a8ab62acc17eb1e4a59e3d33c67f2cc2",
+      "hunks": [
+        {
+          "kind": "insert",
+          "base_start_line": 1,
+          "base_line_count": 0,
+          "hint_start_line": 1,
+          "hint_line_count": 2,
+          "slugs": [
+            "manifest-luot8-liet-ke-hien-vat-khong-duoc-giao"
+          ]
+        }
+      ],
+      "manifest_path": "ops/reviews/pr468-hoso-4-packet-review-9-codex/artifact-repair/ARTIFACTS.sha256",
+      "manifest_line": 55
+    },
+    {
+      "path": "ops/reviews/pr468-hoso-4-packet-review-9-codex/artifact-repair/rig/do-review/outputs/mcp_gh_test.stdout",
+      "operation": "restore_exact_bytes_from_complete_round8",
+      "slugs": [
+        "manifest-luot8-liet-ke-hien-vat-khong-duoc-giao"
+      ],
+      "target_existed_at_reviewed_sha": false,
+      "target_base_sha256": null,
+      "source_path": "ops/reviews/pr468-hoso-4-packet-review-8-codex/rig/do-review/outputs/mcp_gh_test.stdout",
+      "source_sha256": "ab5eefde5db37e2f429a1dc418cf30893763ade21fc1dce9af5f7a77a649ec7e",
+      "hint_sha256": "ab5eefde5db37e2f429a1dc418cf30893763ade21fc1dce9af5f7a77a649ec7e",
+      "hunks": [
+        {
+          "kind": "insert",
+          "base_start_line": 1,
+          "base_line_count": 0,
+          "hint_start_line": 1,
+          "hint_line_count": 14,
+          "slugs": [
+            "manifest-luot8-liet-ke-hien-vat-khong-duoc-giao"
+          ]
+        }
+      ],
+      "manifest_path": "ops/reviews/pr468-hoso-4-packet-review-9-codex/artifact-repair/ARTIFACTS.sha256",
+      "manifest_line": 56
+    },
+    {
+      "path": "ops/reviews/pr468-hoso-4-packet-review-9-codex/artifact-repair/rig/do-review/outputs/mcp_github_doc_test.stdout",
+      "operation": "restore_exact_bytes_from_complete_round8",
+      "slugs": [
+        "manifest-luot8-liet-ke-hien-vat-khong-duoc-giao"
+      ],
+      "target_existed_at_reviewed_sha": false,
+      "target_base_sha256": null,
+      "source_path": "ops/reviews/pr468-hoso-4-packet-review-8-codex/rig/do-review/outputs/mcp_github_doc_test.stdout",
+      "source_sha256": "82f89e9d5170cc190c941b9b5e247c69623d98f135217d8c8495c806074f033b",
+      "hint_sha256": "82f89e9d5170cc190c941b9b5e247c69623d98f135217d8c8495c806074f033b",
+      "hunks": [
+        {
+          "kind": "insert",
+          "base_start_line": 1,
+          "base_line_count": 0,
+          "hint_start_line": 1,
+          "hint_line_count": 2,
+          "slugs": [
+            "manifest-luot8-liet-ke-hien-vat-khong-duoc-giao"
+          ]
+        }
+      ],
+      "manifest_path": "ops/reviews/pr468-hoso-4-packet-review-9-codex/artifact-repair/ARTIFACTS.sha256",
+      "manifest_line": 57
+    },
+    {
+      "path": "ops/reviews/pr468-hoso-4-packet-review-9-codex/artifact-repair/rig/do-review/outputs/nhanh_don_duoc_test.rerun.stdout",
+      "operation": "restore_exact_bytes_from_complete_round8",
+      "slugs": [
+        "manifest-luot8-liet-ke-hien-vat-khong-duoc-giao"
+      ],
+      "target_existed_at_reviewed_sha": false,
+      "target_base_sha256": null,
+      "source_path": "ops/reviews/pr468-hoso-4-packet-review-8-codex/rig/do-review/outputs/nhanh_don_duoc_test.rerun.stdout",
+      "source_sha256": "366795e45727a70aa7e6ed4ee64c6a1f0bd952dc1191b901c5d40479c722ad96",
+      "hint_sha256": "366795e45727a70aa7e6ed4ee64c6a1f0bd952dc1191b901c5d40479c722ad96",
+      "hunks": [
+        {
+          "kind": "insert",
+          "base_start_line": 1,
+          "base_line_count": 0,
+          "hint_start_line": 1,
+          "hint_line_count": 19,
+          "slugs": [
+            "manifest-luot8-liet-ke-hien-vat-khong-duoc-giao"
+          ]
+        }
+      ],
+      "manifest_path": "ops/reviews/pr468-hoso-4-packet-review-9-codex/artifact-repair/ARTIFACTS.sha256",
+      "manifest_line": 58
+    },
+    {
+      "path": "ops/reviews/pr468-hoso-4-packet-review-9-codex/artifact-repair/rig/do-review/outputs/nhanh_don_duoc_test.stdout",
+      "operation": "restore_exact_bytes_from_complete_round8",
+      "slugs": [
+        "manifest-luot8-liet-ke-hien-vat-khong-duoc-giao"
+      ],
+      "target_existed_at_reviewed_sha": false,
+      "target_base_sha256": null,
+      "source_path": "ops/reviews/pr468-hoso-4-packet-review-8-codex/rig/do-review/outputs/nhanh_don_duoc_test.stdout",
+      "source_sha256": "25b731689d77defb724e479c460730a53cf8a3e419c1131039f4dfcf017e8f66",
+      "hint_sha256": "25b731689d77defb724e479c460730a53cf8a3e419c1131039f4dfcf017e8f66",
+      "hunks": [
+        {
+          "kind": "insert",
+          "base_start_line": 1,
+          "base_line_count": 0,
+          "hint_start_line": 1,
+          "hint_line_count": 137,
+          "slugs": [
+            "manifest-luot8-liet-ke-hien-vat-khong-duoc-giao"
+          ]
+        }
+      ],
+      "manifest_path": "ops/reviews/pr468-hoso-4-packet-review-9-codex/artifact-repair/ARTIFACTS.sha256",
+      "manifest_line": 59
+    },
+    {
+      "path": "ops/reviews/pr468-hoso-4-packet-review-9-codex/artifact-repair/rig/do-review/outputs/pretooluse_guard_test.stdout",
+      "operation": "restore_exact_bytes_from_complete_round8",
+      "slugs": [
+        "manifest-luot8-liet-ke-hien-vat-khong-duoc-giao"
+      ],
+      "target_existed_at_reviewed_sha": false,
+      "target_base_sha256": null,
+      "source_path": "ops/reviews/pr468-hoso-4-packet-review-8-codex/rig/do-review/outputs/pretooluse_guard_test.stdout",
+      "source_sha256": "00bb4b944b12cca20b33fd8ce77ba8280e1becd4249e41aced15803ecab44004",
+      "hint_sha256": "00bb4b944b12cca20b33fd8ce77ba8280e1becd4249e41aced15803ecab44004",
+      "hunks": [
+        {
+          "kind": "insert",
+          "base_start_line": 1,
+          "base_line_count": 0,
+          "hint_start_line": 1,
+          "hint_line_count": 78,
+          "slugs": [
+            "manifest-luot8-liet-ke-hien-vat-khong-duoc-giao"
+          ]
+        }
+      ],
+      "manifest_path": "ops/reviews/pr468-hoso-4-packet-review-9-codex/artifact-repair/ARTIFACTS.sha256",
+      "manifest_line": 60
+    },
+    {
+      "path": "ops/reviews/pr468-hoso-4-packet-review-9-codex/artifact-repair/rig/do-review/outputs/probe_mang_test.stdout",
+      "operation": "restore_exact_bytes_from_complete_round8",
+      "slugs": [
+        "manifest-luot8-liet-ke-hien-vat-khong-duoc-giao"
+      ],
+      "target_existed_at_reviewed_sha": false,
+      "target_base_sha256": null,
+      "source_path": "ops/reviews/pr468-hoso-4-packet-review-8-codex/rig/do-review/outputs/probe_mang_test.stdout",
+      "source_sha256": "c9997dac6d36e60d76b48d5b71e1b87fd60f0c387682061d09382d0585fd54a1",
+      "hint_sha256": "c9997dac6d36e60d76b48d5b71e1b87fd60f0c387682061d09382d0585fd54a1",
+      "hunks": [
+        {
+          "kind": "insert",
+          "base_start_line": 1,
+          "base_line_count": 0,
+          "hint_start_line": 1,
+          "hint_line_count": 10,
+          "slugs": [
+            "manifest-luot8-liet-ke-hien-vat-khong-duoc-giao"
+          ]
+        }
+      ],
+      "manifest_path": "ops/reviews/pr468-hoso-4-packet-review-9-codex/artifact-repair/ARTIFACTS.sha256",
+      "manifest_line": 61
+    },
+    {
+      "path": "ops/reviews/pr468-hoso-4-packet-review-9-codex/artifact-repair/rig/do-review/outputs/subagent_ghi_detect_test.stdout",
+      "operation": "restore_exact_bytes_from_complete_round8",
+      "slugs": [
+        "manifest-luot8-liet-ke-hien-vat-khong-duoc-giao"
+      ],
+      "target_existed_at_reviewed_sha": false,
+      "target_base_sha256": null,
+      "source_path": "ops/reviews/pr468-hoso-4-packet-review-8-codex/rig/do-review/outputs/subagent_ghi_detect_test.stdout",
+      "source_sha256": "56f4f998bed4b71e294e8d159fc624e6313d5102778838778d097a6d45026573",
+      "hint_sha256": "56f4f998bed4b71e294e8d159fc624e6313d5102778838778d097a6d45026573",
+      "hunks": [
+        {
+          "kind": "insert",
+          "base_start_line": 1,
+          "base_line_count": 0,
+          "hint_start_line": 1,
+          "hint_line_count": 80,
+          "slugs": [
+            "manifest-luot8-liet-ke-hien-vat-khong-duoc-giao"
+          ]
+        }
+      ],
+      "manifest_path": "ops/reviews/pr468-hoso-4-packet-review-9-codex/artifact-repair/ARTIFACTS.sha256",
+      "manifest_line": 62
+    },
+    {
+      "path": "ops/reviews/pr468-hoso-4-packet-review-9-codex/artifact-repair/rig/do-review/real-results.json",
+      "operation": "restore_exact_bytes_from_complete_round8",
+      "slugs": [
+        "manifest-luot8-liet-ke-hien-vat-khong-duoc-giao"
+      ],
+      "target_existed_at_reviewed_sha": false,
+      "target_base_sha256": null,
+      "source_path": "ops/reviews/pr468-hoso-4-packet-review-8-codex/rig/do-review/real-results.json",
+      "source_sha256": "08b42a013c8b539ef72b420a33510be6dc5bd066fe135ce0c079c98aa0c2854e",
+      "hint_sha256": "08b42a013c8b539ef72b420a33510be6dc5bd066fe135ce0c079c98aa0c2854e",
+      "hunks": [
+        {
+          "kind": "insert",
+          "base_start_line": 1,
+          "base_line_count": 0,
+          "hint_start_line": 1,
+          "hint_line_count": 98,
+          "slugs": [
+            "manifest-luot8-liet-ke-hien-vat-khong-duoc-giao"
+          ]
+        }
+      ],
+      "manifest_path": "ops/reviews/pr468-hoso-4-packet-review-9-codex/artifact-repair/ARTIFACTS.sha256",
+      "manifest_line": 63
+    },
+    {
+      "path": "ops/reviews/pr468-hoso-4-packet-review-9-codex/artifact-repair/rig/source/attack_h.py",
+      "operation": "restore_exact_bytes_from_complete_round8",
+      "slugs": [
+        "manifest-luot8-liet-ke-hien-vat-khong-duoc-giao"
+      ],
+      "target_existed_at_reviewed_sha": false,
+      "target_base_sha256": null,
+      "source_path": "ops/reviews/pr468-hoso-4-packet-review-8-codex/rig/source/attack_h.py",
+      "source_sha256": "672b5b24ebf25918459cd2184dfcba22022e32bee5d76319eac1017e4b97b400",
+      "hint_sha256": "672b5b24ebf25918459cd2184dfcba22022e32bee5d76319eac1017e4b97b400",
+      "hunks": [
+        {
+          "kind": "insert",
+          "base_start_line": 1,
+          "base_line_count": 0,
+          "hint_start_line": 1,
+          "hint_line_count": 106,
+          "slugs": [
+            "manifest-luot8-liet-ke-hien-vat-khong-duoc-giao"
+          ]
+        }
+      ],
+      "manifest_path": "ops/reviews/pr468-hoso-4-packet-review-9-codex/artifact-repair/ARTIFACTS.sha256",
+      "manifest_line": 64
+    },
+    {
+      "path": "ops/reviews/pr468-hoso-4-packet-review-9-codex/artifact-repair/rig/source/extra_checks.py",
+      "operation": "restore_exact_bytes_from_complete_round8",
+      "slugs": [
+        "manifest-luot8-liet-ke-hien-vat-khong-duoc-giao"
+      ],
+      "target_existed_at_reviewed_sha": false,
+      "target_base_sha256": null,
+      "source_path": "ops/reviews/pr468-hoso-4-packet-review-8-codex/rig/source/extra_checks.py",
+      "source_sha256": "24e2ee335f05a6d9b441e4dac2d57d0f756ac6531f1a9dd9119acea26eaa87dd",
+      "hint_sha256": "24e2ee335f05a6d9b441e4dac2d57d0f756ac6531f1a9dd9119acea26eaa87dd",
+      "hunks": [
+        {
+          "kind": "insert",
+          "base_start_line": 1,
+          "base_line_count": 0,
+          "hint_start_line": 1,
+          "hint_line_count": 44,
+          "slugs": [
+            "manifest-luot8-liet-ke-hien-vat-khong-duoc-giao"
+          ]
+        }
+      ],
+      "manifest_path": "ops/reviews/pr468-hoso-4-packet-review-9-codex/artifact-repair/ARTIFACTS.sha256",
+      "manifest_line": 65
+    },
+    {
+      "path": "ops/reviews/pr468-hoso-4-packet-review-9-codex/artifact-repair/rig/source/harness.py",
+      "operation": "restore_exact_bytes_from_complete_round8",
+      "slugs": [
+        "manifest-luot8-liet-ke-hien-vat-khong-duoc-giao"
+      ],
+      "target_existed_at_reviewed_sha": false,
+      "target_base_sha256": null,
+      "source_path": "ops/reviews/pr468-hoso-4-packet-review-8-codex/rig/source/harness.py",
+      "source_sha256": "6d896573ccd0392cd38f3f2f7b9d5ba32f19891047a10e9840dc32efad6a125d",
+      "hint_sha256": "6d896573ccd0392cd38f3f2f7b9d5ba32f19891047a10e9840dc32efad6a125d",
+      "hunks": [
+        {
+          "kind": "insert",
+          "base_start_line": 1,
+          "base_line_count": 0,
+          "hint_start_line": 1,
+          "hint_line_count": 50,
+          "slugs": [
+            "manifest-luot8-liet-ke-hien-vat-khong-duoc-giao"
+          ]
+        }
+      ],
+      "manifest_path": "ops/reviews/pr468-hoso-4-packet-review-9-codex/artifact-repair/ARTIFACTS.sha256",
+      "manifest_line": 66
+    },
+    {
+      "path": "ops/reviews/pr468-hoso-4-packet-review-9-codex/artifact-repair/README.md",
+      "operation": "label_historical_repair_copy",
+      "slugs": [
+        "manifest-luot8-liet-ke-hien-vat-khong-duoc-giao"
+      ],
+      "target_existed_at_reviewed_sha": false,
+      "target_base_sha256": null,
+      "source_path": null,
+      "source_sha256": null,
+      "hint_sha256": "7c0953f77d69cd00aad0caa11312ddbc83c018db11421acf29c07f3b5080b9f5",
+      "hunks": [
+        {
+          "kind": "insert",
+          "base_start_line": 1,
+          "base_line_count": 0,
+          "hint_start_line": 1,
+          "hint_line_count": 14,
+          "slugs": [
+            "manifest-luot8-liet-ke-hien-vat-khong-duoc-giao"
+          ]
+        }
+      ]
+    }
+  ],
+  "manifest_source_sha256": "a4b56f2a93da088ea54e150d46c513a2ff3a73dec3271bdd43a6a5591710e406"
+}

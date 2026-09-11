@@ -1,0 +1,18 @@
+{
+  "name": "eol",
+  "command": [
+    "python3",
+    "-B",
+    ".githooks/eol_policy.py",
+    "--all",
+    "--json"
+  ],
+  "cwd": "cay-kho",
+  "utc": "2026-09-07T11:44:55.413846+00:00",
+  "rc": 0,
+  "seconds": 0.2464888700000074,
+  "stdout_bytes": 138,
+  "stdout_sha256": "9d446bc382dc35957a054e219ad070fd13c9050c68e639db80d3ca8bda7d0454",
+  "stderr_bytes": 0,
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+}

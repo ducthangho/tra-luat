@@ -1,0 +1,182 @@
+# TỆP NHÁP — đuôi `.yaml.nhap` CÓ CHỦ ĐÍCH. `ai-dang-giu` chỉ đọc blob đuôi `.yaml`/`.yml`
+# (`ops/lease_publish.py:521`), `ops-publish-lease.yml` chỉ bắn với `ops/leases/**.yaml|yml`, và
+# `t23` của `ops/lease_publish_test.py` chỉ đọc `suffix in (".yaml", ".yml")` — nên nháp KHÔNG bị
+# tính là lease đang giữ. Đo 19:33–19:34Z 06-09-2026 trong bản sao đủ 299 ref: đuôi `.yaml` ⇒
+# `ai-dang-giu .claude/dev/ci_dang_ky_test.py` = NGƯỜI_GIỮ 4 (gồm nháp này); đuôi `.nhap` ⇒ 1
+# (chỉ còn #456). `check` vẫn chạy trên tên này — đo lại 21:00Z 06-09-2026 trên cây b1c2284: rc=8, thiếu
+# 3 trường packet_issue/granted_by/lease_expires_at_utc (bản này đã bỏ hạn điền sẵn; số 19:31Z "thiếu
+# hai trường" là của bản trung gian còn hạn mặc định).
+# ĐỔI TÊN VỀ `.yaml` LÀ BƯỚC CUỐI khi cấp thật, SAU khi điền đủ các ô dưới đây.
+schema_version: 2
+event: executor_lease_granted
+
+# ── CÁC Ô CHỦ KHO ĐIỀN TẠI LÚC CẤP — 6 ô: packet_issue · mission_issue · granted_by ·
+#    granted_on_instruction · leased_at_utc · lease_expires_at_utc (yaml.safe_load 21:00Z 06-09-2026: đúng
+#    6 trường null trong tệp này) — không ai khác điền được ──────────────────────────────────
+# `packet_issue`  : số hiệu Issue sau khi đăng (phải là ISSUE, không phải PR).
+# `mission_issue` : Mission Issue chứa packet (`PROTOCOL §3.2` đòi; khuyến nghị ở spec).
+# `granted_by`    : `ducthangho` — `record-lease` TỪ CHỐI tên provider (`claude`/`codex`).
+# `granted_on_instruction`: dấu vết BỀN của uỷ quyền (URL/ID comment cấp lease). Một câu trong
+#                   khung chat KHÔNG phải dấu vết bền.
+# `leased_at_utc` / `lease_expires_at_utc`: giờ cấp THẬT và giờ hết hạn = giờ cấp + `run_minutes`.
+#                   Hai mốc là SỰ KIỆN cấp, không có mặc định (bản đầu điền sẵn 18:30Z — bỏ).
+#                   Để trống: `check` chặn rc=8 khi thiếu `lease_expires_at_utc` (đo 19:35Z).
+#                   `--expires-utc` của `record-lease` phải khớp đúng giá trị điền ở đây.
+packet_issue: 464
+mission_issue:
+granted_by:
+granted_on_instruction:   # khi cấp: neo https://github.com/ducthangho/tra-luat/issues/464#issuecomment-5567158069 (chủ kho đã chọn §12 = tiếp H, 07-09-2026)
+leased_at_utc:
+lease_expires_at_utc:
+# ───────────────────────────────────────────────────────────────────────────────────
+
+packet_id: LO-319-LINUX-BANG-CHUNG-XANH
+revision: 1
+generation: 1
+lease_id: lo-319-linux-bang-chung-xanh-exec-1-claude-20260906
+role: executor
+provider: claude
+executor: claude
+model: opus-5
+effort: xhigh
+environment: cloud
+risk: sensitive
+assurance_target: cross_approved
+access: read-write
+
+spec_path: ops/specs/LO-319-LINUX-BANG-CHUNG-XANH.md
+spec_sha256: 66dcb20d7bc044cc3185074b56152f0f7f737ac2d1a49c225c29a29b144b4917
+spec_hash: 66dcb20d7bc044cc3185074b56152f0f7f737ac2d1a49c225c29a29b144b4917
+
+write_set:
+  - .claude/dev/ci_dang_ky_test.py
+depends_on:
+  - GATE-TACH-JOB-CAT-CHI-PHI
+
+branch: claude/lo319-linux-bang-chung-xanh
+branch_ownership: exclusive
+target_branch_neu_land: master
+# 3 MỎ NEO (base_sha · start_from_sha · reviewed_sha_required) — chỗ giữ, KHÔNG phải giá trị cấp.
+# Packet này đi THỨ HAI (sau GATE), nên CẢ 3 trường
+# dưới đây phải ĐO LẠI tại lúc cấp = head `origin/master` SAU khi GATE integrated. Điền một SHA cũ
+# là neo review vào một cây không còn tồn tại; `check` không phân biệt được chỗ giữ với mỏ neo
+# thật, nên đây là việc tay của chủ kho. Quy tắc này cũng nằm trong đặc tả đóng băng.
+base_sha: 1b3caa11df3e339bcfdb52be903884b5b99b9f77
+start_from_sha: 1b3caa11df3e339bcfdb52be903884b5b99b9f77
+reviewed_sha_required: 1b3caa11df3e339bcfdb52be903884b5b99b9f77
+
+authority_basis: '§2 — start/pause/resume/reroute/override/authorize thuộc chủ kho'
+recorded_by: claude-session
+recorder_is_dispatcher: false
+
+# `run_minutes` = độ dài HẠN LEASE (phút), KHÔNG phải trần một run (`max_run_minutes: 90`, §12).
+run_minutes: 1440
+heartbeat_required_minutes: 30
+attempts_used: 0
+attempts_limit: 3
+
+reviewer_provider: codex
+review_class: sensitive
+effective_review_class: sensitive
+
+# THAY THẾ tiền nhiệm — chuỗi điều phối #456 → GATE → LO-319 → 2A → 2B; tiền nhiệm TRỰC TIẾP của
+# lease này là GATE:
+#   gate-tach-job-cat-chi-phi-exec-1-claude-20260906
+# (dấu vết audit — KHÔNG phải điều kiện cổng). Nháp chọn ĐƯỜNG (a): cấp SAU khi tiền nhiệm hết hạn
+# (`lease_expires_at_utc` của lease GATE đã cấp — KHÔNG phải 14:30:07Z 07-09 của #456) ⇒ `thay_the_cho: []`. Lý do, đo 21:02Z 06-09-2026 trên cây b1c2284:
+#   · `_kiem_bia_mo` (check) KHÔNG miễn cho HẾT_HẠN — giữ tên tiền nhiệm ⇒ check rc=8 tới khi có bia mộ;
+#   · `thay_the_cho: []` + 6 ô điền tạm ⇒ check rc=0 (ĐĂNG ĐƯỢC) ngay khi #456 còn hạn — tức check
+#     KHÔNG chặn chồng lấn write set; chỉ `ai-dang-giu` đo được chuyện ấy;
+#   · `ai-dang-giu` không đếm bản HẾT_HẠN: mô phỏng #456 ⇒ NGƯỜI_GIỮ 1 → 0 đúng tại giây hết hạn.
+# ĐƯỜNG (b) cấp SỚM: điền `thay_the_cho: [<tiền nhiệm>]`; chủ kho thêm `da_bi_thay_the: <lease này>`
+# vào tệp lease tiền nhiệm trên nhánh ops/** và commit TRƯỚC khi check; MỌI ref còn giữ bản cũ được
+# cập nhật/dọn, readback `ai-dang-giu` ⇒ 0 dòng CÒN_HẠN của tiền nhiệm — thủ tục ở spec LO-319 mục
+# "Lease đang giữ" (b). Chọn đường nào ghi vào granted_on_instruction. Trước khi bắt tay, A8/A9 đo
+# bằng `ai-dang-giu` trên MỌI đường write set, không bằng check.
+thay_the_cho: []
+
+ly_do_cap: >-
+  `bang_chung_xanh` chỉ soi HAI NHÓM BẮT của regex, mà ở `MOI` hai nhóm ấy là cặp số CA; cặp
+  ĐỘT BIẾN nằm ngoài nhóm bắt nên không bao giờ được nhìn tới. Đo 19:32Z 06-09-2026: nguyên
+  chuỗi `TONG: CA 39/39 dat · DOT BIEN 0/0 bi giet\nTONG: DAT\n` ⇒ `True` — đúng hình dạng "tập
+  rỗng thoả `not song`" của bài học #319. Lỗ có sẵn TỪ TRƯỚC #456; #456 bịt phía Windows và CỐ Ý
+  không bịt phía Linux vì M4 của nó đóng băng hành vi Linux (`426bfc0`).
+  Bốn bản thiết kế đã bị cross-review bác bằng phép đo — A-b (lượt 1: đỏ giả trên ghi chú `3/5`);
+  A-c (lượt 2: đỏ giả 7/64 + bỏ sót 7/64); T (lượt 3: prototype lấy số từ nhóm `re.search(SPAN)`
+  + wildcard `(?: .*)?`); T' (lượt 4: bộ chọn đòi dấu cách/payload nên bỏ 16/131 ca tổng cụt/tab
+  đã có kỳ vọng; luật 7 đếm hằng trong MÃ REGEX nên hằng ở nhánh không tham gia match vẫn được
+  cộng — 3 đỏ giả / 5 bỏ sót trên 11 ca `law7.json`). Slug `span-rong-nuot-ti-le-vo-can` hỏng BỐN
+  lượt; câu trả lời PROTOCOL §12 ở lượt 3 ("hợp đồng T đúng, chỉ gỡ mâu thuẫn") bị bác.
+  Bản này ghi phương án H (gợi ý reviewer lượt 4; executor tái dẫn xuất từng hunk và ĐO LẠI
+  00:15Z 07-09-2026 bằng bộ ca riêng, không chép số reviewer): bộ chọn nhận NHÃN độc lập payload
+  (tổng cụt/tab là bản ghi sai cấu trúc); hằng cũng là nhóm bắt; danh sách VỊ TRÍ các cặp `_CAP`
+  trên dòng phải bằng danh sách vị trí các cặp nhóm trong match (thứ tự, số lần) — không đọc mã
+  regex để đếm hằng. Đo qua chính `chay_moi`: 0 đỏ giả / 0 bỏ sót trên 131 ca verdict lượt 3, 137
+  ca executor, 32 ca tấn công mới; 11 ca `law7` khớp 11/11 theo hợp đồng H; 16 ca selector đều ĐỎ;
+  14 đột biến vào nguồn, 12 có ca chứng (mH13 là mã chết; mH8/mH9 là con của mH7). 5 ranh giới
+  mới của H ghi ở spec `chua_do_duoc` #1 (chuỗi `54/54/0` khi grammar khai `/\d+`; `039/39`;
+  chữ số Unicode; số 5000 chữ số ⇒ ngoại lệ rc≠0; `nhanh` hậu tố).
+  H là bản thiết kế THỨ NĂM của cùng một cách làm; spec đặt ba lựa chọn (1 — tiếp H trong write
+  set 1 tệp · 2 — mở revision đổi bên IN, 9 tệp, vượt trần sensitive ADR-0044 · 3 — dừng packet và
+  tách lại) và năm điều kiện đo được Đ1–Đ5 ở mục "§12 — bốn lần hỏng". CHỦ KHO ĐÃ CHỌN 07-09-2026:
+  lựa chọn 1 — tiếp H (dấu vết bền: https://github.com/ducthangho/tra-luat/issues/464#issuecomment-5567158069; khi cấp, granted_on_instruction
+  neo vào đó). Quyết định thiết kế KHÔNG phải cấp lease: các ô chủ kho vẫn trống tới lúc cấp, thi
+  công chưa bắt đầu, Đ1–Đ5 tiếp tục ràng buộc (chạm ngưỡng ⇒ chuyển 2/3). Chuỗi regex SPAN của 8 mục giữ NGUYÊN VĂN — chỉ đổi KIỂU giá trị của `MOI`/`MOI_WINDOWS`.
+
+viec_trong_lease:
+  - 'CHỈ bắt tay khi granted_on_instruction ghi chủ kho đã chọn lựa chọn 1 của spec mục "§12 — bốn
+     lần hỏng" (tiếp H). Chọn 2 hoặc 3 ⇒ lease này không có việc; đi revision.'
+  - 'Sửa `bang_chung_xanh` theo 7 luật của H (spec, mục "Thiết kế H"): đơn vị (SPAN, TONG); BỘ CHỌN
+     `re.match` đầu dòng, chỉ nhận NHÃN độc lập payload (`TONG: CA(?=\s|:|$)`, `CA\s*:`, `nền:` …);
+     mỗi bản ghi đúng MỘT dòng; GRAMMAR `re.fullmatch` đóng. Khi có TONG, số CHỈ từ nhóm bắt của
+     GRAMMAR trên dòng được chọn, soi cặp int(n) == int(m) > 0; SPAN chỉ là điều kiện khớp (luật 5).
+     Luật 7: danh sách span các cặp `_CAP.finditer` trên dòng == danh sách span các cặp nhóm của
+     match, giữ thứ tự và số lần; mỗi bản ghi ≥ 1 cặp; KHÔNG cộng hằng từ mã regex. Nhóm LẺ ⇒ False;
+     chuỗi trần 0 nhóm ⇒ False; dòng ngoài bộ chọn là văn xuôi (luật 6).'
+  - 'Khai `TONG` cho đủ 8 mục `MOI` và `TONG_WINDOWS` cho mục Windows theo hai khối mã ở spec (băm
+     khối c23bcd01… / bde441a0…); chuỗi SPAN giữ NGUYÊN VĂN. Ba hằng probe là nhóm bắt (9)/(9) ·
+     (1)/(1) · (11)/(11). Đổi khối mã thì ĐO LẠI toàn bộ bộ ca, không chép số của spec.'
+  - 'Gỡ mệnh đề thoát `len(m.groups()) != 2` — không còn số nhóm nào cho True vô điều kiện (A2: 20/20).'
+  - 'Phản chứng A1–A6 đi qua chính `chay_moi` (r6/#401): 0/0 trong bản ghi ⇒ 1 đỏ, kể cả ở đuôi dòng
+     tổng probe; 16 ca tổng cụt/tab (trước/sau tổng xanh, 8 nhãn) ⇒ 1; ghi chú có nhãn hay mang tiền
+     tố tổng trước/sau bản in thật ⇒ 0; hai bản ghi cùng loại ⇒ 1; grammar lỗi (bỏ nhóm bắt, hằng ở
+     nhánh vắng mặt/không được chọn, nhóm chồng vị trí, literal 0/0 hay 33/34, nhóm tuỳ chọn vắng,
+     nhóm lẻ, lệch biên số, thứ tự đảo, bản ghi 0 cặp) ⇒ 1 ngay trên bản in xanh; ba cách viết hằng
+     CÓ nhóm bắt ⇒ 0. Ca tĩnh thay cho "tập SPAN ⊆ tập GRAMMAR": danh sách span `_CAP` trên dòng
+     canonical == danh sách span nhóm của match, cho mọi mục MOI/MOI_WINDOWS.'
+  - 'Đột biến vào H (bảng răng ở spec): mH11 trả bộ chọn cũ ⇒ 16/16 ca selector phải ĐỎ; mH7 bỏ
+     phủ vị trí ⇒ ca grammar-lỗi phải ĐỎ; mH8 so tập ⇒ ca thứ-tự-đảo phải ĐỎ; mH10 ⇒ ca bản-ghi-0-cặp
+     phải ĐỎ; mH12 hằng probe bỏ nhóm ⇒ bản in thật probe phải ĐỎ; mH1/mH2/mH3/mH5/mH6/mH14 như
+     bảng. KHÔNG khai mH13 (`bool(cap)`) hay m8 cũ (wildcard) là chốt độc lập.'
+  - 'Đảo chiều VÀ đổi tên `p456-linux-nhan-0-tren-0-Y-HET-base`; đổi neo hai ca
+     `p456-mau-linux-KHONG-DOI-so-voi-base` / `p456-linux-A-B-tung-dau-vao-khop-base` sang SPAN
+     nguyên văn + TONG canonical; không xoá ca nào (A5).'
+  - 'Đường Windows của #456 giữ năm hành vi đã đo; thêm ba chốt: 0/0 trên Linux ⇒ 1 đỏ, hai dòng
+     Windows ⇒ 1 đỏ, tổng Windows xanh + `TONG: CA\t0/0 dat` ⇒ 1 đỏ (A4).'
+  - 'Chạy lại 5 bộ ngắn lấy bản in nguyên byte của phiên thi công; subagent/nhanh/pretooluse lấy
+     từ full-gate cuối (A6). Đo `git diff --numstat` additions trước review; > 300 ⇒ DỪNG (Đ4).'
+
+dieu_kien_dung:
+  - 'Chủ kho chưa ghi lựa chọn §12 vào granted_on_instruction, hoặc đã chọn 2/3 — lease này không
+     có việc.'
+  - 'Đổi chuỗi regex SPAN của bất kỳ mục nào — H chỉ đổi KIỂU giá trị; đổi chuỗi là mở lại M4 của
+     #456 ngoài thẩm quyền của packet này.'
+  - 'Quay về soi MỌI cặp trong span (A-b), quét nhãn trong span (A-c), lấy số từ nhóm SPAN khi đã có
+     TONG (T), đếm hằng từ NGUỒN REGEX hay so SỐ LƯỢNG/TẬP thay cho DANH SÁCH VỊ TRÍ (T'') — bốn bản
+     đã bị bác bằng phép đo (spec, bảng "Các hướng vá đã ĐO"); làm lại là vá lần thứ sáu.'
+  - 'Nới grammar bằng `.*`/khoảng mở, bỏ nhóm bắt của một hằng, hay bỏ đối chiếu vị trí để "qua"
+     một bản in — luật 7 H làm ĐỎ ngay bản in xanh là KẾT QUẢ ĐÚNG; bản in thật bị H bác (Đ2), cần
+     metadata n/m (Đ3), hay đỏ giả/bỏ sót ngoài danh sách ranh giới công khai (Đ1) là điều kiện chuyển
+     sang lựa chọn 2/3 của §12, không phải lý do nới bên ĐỌC.'
+  - 'Coi `check rc=0` là bằng chứng tiền nhiệm đã thôi giữ — check không chặn chồng lấn write set
+     (đo 21:02Z 06-09-2026); chỉ `ai-dang-giu` trên MỌI đường write set đo được.'
+  - 'Chạm bất kỳ đường dẫn nào ngoài MỘT đường đã khai — đổi revision, KHÔNG tự mở write set.'
+  - 'Đụng `loi_ruff_ci` trong cùng tệp — của GATE, đã land trước.'
+  - 'Sửa `.github/workflows/ci.yml` — CỐ Ý ngoài write set; packet này không đổi thời gian
+     chạy của bất cứ thứ gì, nó chỉ làm một cổng đang mù nhìn thấy.'
+  - 'Xoá ca `p456-linux-nhan-0-tren-0-Y-HET-base` thay vì đảo chiều nó — xoá là mất phép đo,
+     không phải đổi nó.'
+  - 'Bắt tay khi `ai-dang-giu .claude/dev/ci_dang_ky_test.py` còn một dòng của lease GATE hoặc
+     #456 thiếu `ĐÃ_BỊ_THAY_THẾ`/`HẾT_HẠN`.'
+  - 'Nâng `timeout-minutes` trong `ci.yml` — đã nâng HAI lần (ba mức 25→45→60); lần kế là lần
+     thứ ba, `PROTOCOL §12` đòi xem lại cách làm. Ngoài write set, và là điều kiện DỪNG.'

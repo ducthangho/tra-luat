@@ -1,0 +1,7 @@
+{"name": "adr-song", "command": ["/usr/local/bin/python", ".claude/dev/packet_loop.py", "adr-song"], "start_utc": "2026-09-07T06:17:56.855101+00:00", "seconds": 0.2713920459999599, "rc": 0}
+{"name": "doctrine-scan", "command": ["/usr/local/bin/python", ".claude/dev/packet_loop.py", "doctrine-scan", "--root", "."], "start_utc": "2026-09-07T06:17:56.853549+00:00", "seconds": 0.39594770799999424, "rc": 0}
+{"name": "ci-dang-ky", "command": ["/usr/local/bin/python", ".claude/dev/ci_dang_ky_test.py"], "start_utc": "2026-09-07T06:17:57.126719+00:00", "seconds": 0.3148366209999267, "rc": 0}
+{"name": "lease-holder-ci", "command": ["/usr/local/bin/python", "ops/lease_publish.py", "ai-dang-giu", ".github/workflows/ci.yml"], "start_utc": "2026-09-07T06:17:57.441758+00:00", "seconds": 0.09489639699995678, "rc": 12}
+{"name": "lease-holder-registry", "command": ["/usr/local/bin/python", "ops/lease_publish.py", "ai-dang-giu", ".claude/dev/ci_dang_ky_test.py"], "start_utc": "2026-09-07T06:17:57.536857+00:00", "seconds": 0.0854271890000291, "rc": 12}
+{"name": "lease-check", "command": ["/usr/local/bin/python", "ops/lease_publish.py", "check", "ops/leases/gate-tach-job-cat-chi-phi-exec-1-claude-20260906.yaml"], "start_utc": "2026-09-07T06:17:57.249753+00:00", "seconds": 1.0660124680000536, "rc": 0}
+{"name": "doc-claims", "command": ["/usr/local/bin/python", "scripts/tl.py", "doc-claims-check", "--strict", "--json"], "start_utc": "2026-09-07T06:17:56.855904+00:00", "seconds": 5.311086105999948, "rc": 0}

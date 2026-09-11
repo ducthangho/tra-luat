@@ -1,0 +1,201 @@
+{
+  "utc": "2026-09-07T13:19:26.218831+00:00",
+  "diffs": {
+    "since11": {
+      "patch_matches": true,
+      "numstat_matches": true,
+      "files": 267,
+      "additions": 75698,
+      "deletions": 1,
+      "outside_ops": []
+    },
+    "full": {
+      "patch_matches": true,
+      "numstat_matches": true,
+      "files": 613,
+      "additions": 165904,
+      "deletions": 0,
+      "outside_ops": []
+    }
+  },
+  "receipts": [
+    {
+      "round": 10,
+      "bytes": 25294,
+      "declared_bytes": 25294,
+      "sha256": "5e22088b996a4b6e4f564159703ed311bba2c0cf6b137cb9a0614bc9c7476672",
+      "declared_sha256": "5e22088b996a4b6e4f564159703ed311bba2c0cf6b137cb9a0614bc9c7476672",
+      "reviewed_sha": "c43347d1e2c2f76bb21dc2d9d28bd6bfa153d355",
+      "anchor_commit": "17c6901348749c7f0e25f1f2c992b8c790e214af",
+      "anchor_blob_equal": true,
+      "anchor_first_commit": true,
+      "reviewed_is_ancestor": true,
+      "projection_receipt_equal": true,
+      "projection_verdict_equal": true,
+      "commit_transport_session_urls": [
+        "https://claude.ai/code/session_0186nh13XYsStVs1usBCsx5Y"
+      ],
+      "identity_source_candidates": [],
+      "model_reviewer_identity": {
+        "provider": "openai_codex",
+        "surface": "codex_cli",
+        "model_yeu_cau": "gpt-6-astra",
+        "model_da_chay": "KHÔNG ĐO ĐƯỢC",
+        "model_bang_chung": "verdict tự khai \"Reviewer: Codex / OpenAI, phiên độc lập qua API, shell cục bộ\"; gói do-review10/ không chứa run.json, tệp session hay đối số phóng. Mission #467 chỉ định reviewer `gpt-6-astra` xhigh; không có bằng chứng máy trong gói cho model đã chạy.",
+        "KHONG_do_duoc": "session_run_id, thread_id, prompt_sha256, thoi_luong_giay, ma_thoat, stdout_byte — lượt do phiên khác phóng (commit 17c6901); phiên soạn biên nhận này không có transcript/run.json của phiên ấy. Verdict tự khai `so_lan_luot_nay_bi_chet_va_phong_lai: 0`.",
+        "neo_boi_launcher": "KHÔNG ĐO ĐƯỢC — không có run.json trong gói."
+      },
+      "github_submitter_identity": {
+        "actor": "ducthangho",
+        "la_tac_gia_PR": true,
+        "ghi_chu": "`ADR-0040`: biên nhận và verdict do tài khoản tác giả PR vận chuyển KHÔNG thành required check hay merge authorization (cổng `duyet khac danh tinh` vẫn đỏ). Trường này ghi AI VẬN CHUYỂN.",
+        "phien_van_chuyen": "verdict/gói: phiên khác (commit 17c6901, không rõ session URL); biên nhận này: https://claude.ai/code/session_013F2m3uJw7X9bFvDqJ7Q63b"
+      },
+      "assurance": "review_deferred"
+    },
+    {
+      "round": 11,
+      "bytes": 22385,
+      "declared_bytes": 22385,
+      "sha256": "852ba0df07c83a8fc2f2bd02f6658157156e96944273139e6cc8d2aa227cbffd",
+      "declared_sha256": "852ba0df07c83a8fc2f2bd02f6658157156e96944273139e6cc8d2aa227cbffd",
+      "reviewed_sha": "c43347d1e2c2f76bb21dc2d9d28bd6bfa153d355",
+      "anchor_commit": "4c18cb2c2cd1c8109794601c8266b380ee31b974",
+      "anchor_blob_equal": true,
+      "anchor_first_commit": true,
+      "reviewed_is_ancestor": true,
+      "projection_receipt_equal": true,
+      "projection_verdict_equal": true,
+      "commit_transport_session_urls": [
+        "https://claude.ai/code/session_013F2m3uJw7X9bFvDqJ7Q63b"
+      ],
+      "identity_source_candidates": [],
+      "model_reviewer_identity": {
+        "provider": "openai_codex",
+        "surface": "codex_cli",
+        "model_yeu_cau": "gpt-6-astra",
+        "model_da_chay": "gpt-6-astra",
+        "model_bang_chung": "tệp session của codex (~/.codex/sessions, thread 01a07ba6-71b9-7f80-9deb-9ef6616243b8) ghi `\"model\":\"gpt-6-astra\"` 6/6 mục; đối số phóng `-m gpt-6-astra -c model_reasoning_effort=\"xhigh\"`.",
+        "session_run_id": "a25fea88",
+        "thread_id": "01a07ba6-71b9-7f80-9deb-9ef6616243b8",
+        "prompt_sha256": "9d0caf1fa2f106d0def639d6df9e07cf8bcf3df30e42d32588c62df3a255d7ee",
+        "prompt_kin_hoan_toan": false,
+        "thoi_luong_giay": 939.246,
+        "ma_thoat": 0,
+        "stdout_byte": 552459,
+        "neo_boi_launcher": "`launcher.py run --expected-repo github.com/ducthangho/tra-luat --expected-head <reviewed_sha> --prompt-file PROMPT.md --expected-prompt-sha256 <băm> --deadline-utc +75m` bọc `codex exec`; workspace là mirror rời detached đúng reviewed_sha, porcelain rỗng trước/sau."
+      },
+      "github_submitter_identity": {
+        "actor": "ducthangho",
+        "la_tac_gia_PR": true,
+        "ghi_chu": "`ADR-0040`: biên nhận và verdict do tài khoản tác giả PR vận chuyển KHÔNG thành required check hay merge authorization (cổng `duyet khac danh tinh` vẫn đỏ). Trường này ghi AI VẬN CHUYỂN.",
+        "phien_van_chuyen": "https://claude.ai/code/session_013F2m3uJw7X9bFvDqJ7Q63b"
+      },
+      "assurance": "cross_approved"
+    }
+  ],
+  "anchors": [
+    {
+      "issue": 463,
+      "revision": 4,
+      "sha256": "4c542f6b931f62687edd6dca0c5f22c0399ad41f4e80b48e29cdfcd519289cd8",
+      "declared_hash": "4c542f6b931f62687edd6dca0c5f22c0399ad41f4e80b48e29cdfcd519289cd8",
+      "alias_hash": "4c542f6b931f62687edd6dca0c5f22c0399ad41f4e80b48e29cdfcd519289cd8",
+      "issue_commit": "1a330305e20a0667fff4954f8542aadd5e375b50",
+      "issue_blob_matches": true,
+      "projection_equal": true,
+      "null_fields": []
+    },
+    {
+      "issue": 464,
+      "revision": 1,
+      "sha256": "66dcb20d7bc044cc3185074b56152f0f7f737ac2d1a49c225c29a29b144b4917",
+      "declared_hash": "66dcb20d7bc044cc3185074b56152f0f7f737ac2d1a49c225c29a29b144b4917",
+      "alias_hash": "66dcb20d7bc044cc3185074b56152f0f7f737ac2d1a49c225c29a29b144b4917",
+      "issue_commit": "1a330305e20a0667fff4954f8542aadd5e375b50",
+      "issue_blob_matches": true,
+      "projection_equal": true,
+      "null_fields": [
+        "mission_issue",
+        "granted_by",
+        "granted_on_instruction",
+        "leased_at_utc",
+        "lease_expires_at_utc"
+      ]
+    },
+    {
+      "issue": 465,
+      "revision": 1,
+      "sha256": "2abace8588ec2b4e0626c1c77e9c3e0f7e713ecb2ce528b149e6c7f1f0000759",
+      "declared_hash": "2abace8588ec2b4e0626c1c77e9c3e0f7e713ecb2ce528b149e6c7f1f0000759",
+      "alias_hash": "2abace8588ec2b4e0626c1c77e9c3e0f7e713ecb2ce528b149e6c7f1f0000759",
+      "issue_commit": "b743f1798aba12615f903a11bd451c87e404814e",
+      "issue_blob_matches": true,
+      "projection_equal": true,
+      "null_fields": [
+        "mission_issue",
+        "granted_by",
+        "granted_on_instruction",
+        "leased_at_utc",
+        "lease_expires_at_utc"
+      ]
+    },
+    {
+      "issue": 466,
+      "revision": 1,
+      "sha256": "417dce16227687cbb1e642284f39d2f847a617b2d730f7f52aaa58f33c936521",
+      "declared_hash": "417dce16227687cbb1e642284f39d2f847a617b2d730f7f52aaa58f33c936521",
+      "alias_hash": "417dce16227687cbb1e642284f39d2f847a617b2d730f7f52aaa58f33c936521",
+      "issue_commit": "b743f1798aba12615f903a11bd451c87e404814e",
+      "issue_blob_matches": true,
+      "projection_equal": true,
+      "null_fields": [
+        "mission_issue",
+        "granted_by",
+        "granted_on_instruction",
+        "leased_at_utc",
+        "lease_expires_at_utc"
+      ]
+    }
+  ],
+  "commits": [
+    "17c6901348749c7f0e25f1f2c992b8c790e214af\t2026-09-07T11:50:33+00:00\t2026-09-07T11:50:33+00:00\tops: verdict cross-review lượt 10 (1 P1 / 1 P2) + vá P2 manifest — 4/4 manifest nay rc=0",
+    "4c18cb2c2cd1c8109794601c8266b380ee31b974\t2026-09-07T12:17:11+00:00\t2026-09-07T12:17:11+00:00\tops/reviews: verdict + gói hiện vật cross-review lượt 11 (PR #468, head c43347d — chạy song song với lượt 10 của phiên khác) và vá 2 P2",
+    "06f6ce303ac2a16f190fb5631188af4947b97b3b\t2026-09-07T12:19:56+00:00\t2026-09-07T12:19:56+00:00\tops/reviews: biên nhận v2 + hàng README + ghi nhận cho cross-review lượt 11 (PR #468)",
+    "02b0b86bf64a89b561a75ff060164332792fb73d\t2026-09-07T13:06:21+00:00\t2026-09-07T13:06:21+00:00\tops/reviews: biên nhận + hàng README cho verdict lượt 10 của phiên kia (gỡ t27 đỏ trên gate PR #468); ghi mốc thu hồi #456"
+  ],
+  "repair_commits": {
+    "17c6901": {
+      "changed_count": 19,
+      "changes": [
+        "A\tops/reviews/pr468-hoso-4-packet-review-9-codex/artifact-repair/rig/do-review/attack-h-cases.json",
+        "A\tops/reviews/pr468-hoso-4-packet-review-9-codex/artifact-repair/rig/do-review/attack-h-summary.json",
+        "A\tops/reviews/pr468-hoso-4-packet-review-9-codex/artifact-repair/rig/do-review/extra-checks.json",
+        "A\tops/reviews/pr468-hoso-4-packet-review-9-codex/artifact-repair/rig/do-review/h_predicate.py",
+        "A\tops/reviews/pr468-hoso-4-packet-review-9-codex/artifact-repair/rig/do-review/h_tong.py",
+        "A\tops/reviews/pr468-hoso-4-packet-review-9-codex/artifact-repair/rig/do-review/nhanh-rerun.json",
+        "A\tops/reviews/pr468-hoso-4-packet-review-9-codex/artifact-repair/rig/do-review/outputs/chon_reviewer_test.stdout",
+        "A\tops/reviews/pr468-hoso-4-packet-review-9-codex/artifact-repair/rig/do-review/outputs/gh_readback_test.stdout",
+        "A\tops/reviews/pr468-hoso-4-packet-review-9-codex/artifact-repair/rig/do-review/outputs/mcp_gh_test.stdout",
+        "A\tops/reviews/pr468-hoso-4-packet-review-9-codex/artifact-repair/rig/do-review/outputs/mcp_github_doc_test.stdout",
+        "A\tops/reviews/pr468-hoso-4-packet-review-9-codex/artifact-repair/rig/do-review/outputs/nhanh_don_duoc_test.rerun.stdout",
+        "A\tops/reviews/pr468-hoso-4-packet-review-9-codex/artifact-repair/rig/do-review/outputs/nhanh_don_duoc_test.stdout",
+        "A\tops/reviews/pr468-hoso-4-packet-review-9-codex/artifact-repair/rig/do-review/outputs/pretooluse_guard_test.stdout",
+        "A\tops/reviews/pr468-hoso-4-packet-review-9-codex/artifact-repair/rig/do-review/outputs/probe_mang_test.stdout",
+        "A\tops/reviews/pr468-hoso-4-packet-review-9-codex/artifact-repair/rig/do-review/outputs/subagent_ghi_detect_test.stdout",
+        "A\tops/reviews/pr468-hoso-4-packet-review-9-codex/artifact-repair/rig/do-review/real-results.json",
+        "A\tops/reviews/pr468-hoso-4-packet-review-9-codex/artifact-repair/rig/source/attack_h.py",
+        "A\tops/reviews/pr468-hoso-4-packet-review-9-codex/artifact-repair/rig/source/extra_checks.py",
+        "A\tops/reviews/pr468-hoso-4-packet-review-9-codex/artifact-repair/rig/source/harness.py"
+      ]
+    },
+    "4c18cb2": {
+      "changed_count": 0,
+      "changes": []
+    }
+  },
+  "round10_launch_record": "=== lan 1 bat dau 11:24:25 ===\n",
+  "round10_final_check_utc": "2026-09-07T11:47:28.896723+00:00",
+  "round11_final_check_utc": "2026-09-07T11:50:17.131690+00:00",
+  "commit_time_gap_seconds": 1598.0
+}

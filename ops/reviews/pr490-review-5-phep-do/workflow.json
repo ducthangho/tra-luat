@@ -1,0 +1,94 @@
+{
+  "matrix": "${{ fromJSON( (github.event_name == 'workflow_dispatch' || github.ref == 'refs/heads/master' || contains(github.event.pull_request.labels.*.name, 'windows')) && '[\"ubuntu-latest\",\"windows-latest\"]' || '[\"ubuntu-latest\"]') }}",
+  "on": {
+    "push": {
+      "branches": [
+        "master"
+      ]
+    },
+    "pull_request": "",
+    "workflow_dispatch": ""
+  },
+  "checkout": [
+    {
+      "uses": "actions/checkout@v4",
+      "with": {
+        "fetch-depth": "0"
+      }
+    }
+  ],
+  "combinations": [
+    {
+      "dispatch": false,
+      "master": false,
+      "windows_label": false,
+      "os": [
+        "ubuntu-latest"
+      ]
+    },
+    {
+      "dispatch": false,
+      "master": false,
+      "windows_label": true,
+      "os": [
+        "ubuntu-latest",
+        "windows-latest"
+      ]
+    },
+    {
+      "dispatch": false,
+      "master": true,
+      "windows_label": false,
+      "os": [
+        "ubuntu-latest",
+        "windows-latest"
+      ]
+    },
+    {
+      "dispatch": false,
+      "master": true,
+      "windows_label": true,
+      "os": [
+        "ubuntu-latest",
+        "windows-latest"
+      ]
+    },
+    {
+      "dispatch": true,
+      "master": false,
+      "windows_label": false,
+      "os": [
+        "ubuntu-latest",
+        "windows-latest"
+      ]
+    },
+    {
+      "dispatch": true,
+      "master": false,
+      "windows_label": true,
+      "os": [
+        "ubuntu-latest",
+        "windows-latest"
+      ]
+    },
+    {
+      "dispatch": true,
+      "master": true,
+      "windows_label": false,
+      "os": [
+        "ubuntu-latest",
+        "windows-latest"
+      ]
+    },
+    {
+      "dispatch": true,
+      "master": true,
+      "windows_label": true,
+      "os": [
+        "ubuntu-latest",
+        "windows-latest"
+      ]
+    }
+  ],
+  "limitation": "Suy giải biểu thức boolean đọc được, không chạy expression engine hoặc đo trigger/run GitHub."
+}

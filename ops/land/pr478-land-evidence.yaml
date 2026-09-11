@@ -1,0 +1,236 @@
+# LAND EVIDENCE — PR #478 (land evidence cho PR #468 / Mission #467).
+#
+# VÌ SAO TỆP NÀY TỒN TẠI: `ADR-0034:17-20` đòi mọi transition quan trọng có evidence trên GitHub, và
+# nói thẳng phần land phải ghi "Approver, authorization, operator, merge commit, post-merge gate và
+# bookkeeping". Khung trường theo mẫu ở `docs/PROTOCOL_DA_PHIEN.md:466-488`.
+# KHÔNG dẫn `ADR-0045` — đó là ngoại lệ ĐẢO VAI (Codex làm Executor trên packet `sensitive`), và vết
+# nó đòi là LEASE khai `review_class`, không phải land evidence. Hồ sơ này executor `claude` nên
+# ADR ấy không áp. (Cross-review #478 lượt 4 đã bắt đúng lỗi dẫn nguồn này ở tệp cho #468.)
+#
+# CẢNH BÁO PHẠM VI: `PROTOCOL §20` ghi ADR-0034 ở ô "có nhắc", không phải "0 cổng".
+# Chính §20 nói số lần nhắc là proxy, KHÔNG chứng minh cưỡng chế. Không suy từ bảng ấy rằng
+# NỘI DUNG tệp này đã được xác minh. Đây là lời khai; phải đối chứng từng nguồn và đúng phạm vi.
+
+schema_version: 1
+mission_id: gh-467
+generation: 1
+provider: claude
+role: land_operator
+recorded_by: claude
+session_id: 01C52eS8AgeiwTrDifXGDGYP
+input_packet_generations: [1]
+
+# --- UỶ QUYỀN ---
+authorized_head_sha: ff3431f11bc0ba3ffa0c3616003f833c3cfc3ebb
+approver: notebyme88
+authorization_url: https://github.com/ducthangho/tra-luat/pull/478#pullrequestreview-5137165112
+authorization_ghi_chu: >-
+  Duyệt KHÁC DANH TÍNH có vết bền: `notebyme88` (≠ tác giả PR `ducthangho`), `author_association:
+  COLLABORATOR`, trên ĐÚNG head `ff3431f` — cùng SHA mà cross-review lượt 6 đã review và cho
+  `approve`. Có HAI review `APPROVED` trên cùng head ấy: `#pullrequestreview-5137106684` lúc
+  `03:47:22Z` và `#pullrequestreview-5137165112` lúc `03:59:25Z`; trường này neo cái SAU.
+  KHÁC #468 ở một điểm quan trọng: lần đó lượt cuối review `745d888` còn head merge là `17f4a1b`,
+  để lại nợ "head đã merge chưa qua cross-review". **Lần này KHÔNG có nợ ấy** — head được duyệt và
+  head được merge và head được review là CÙNG MỘT SHA.
+  GIỚI HẠN NGUỒN: danh tính người duyệt, hai mốc, `commit_id` của từng review đều ĐỌC TỪ GitHub PR
+  API qua phiên điều phối. Gói không kèm JSON thô, nên reviewer offline không đối chứng lại được.
+  Đây là ATTESTATION, không phải bằng chứng đã đối chứng độc lập.
+  Câu "Lần này KHÔNG có nợ ấy" chỉ nói về head PR #478 và verdict lượt 6; KHÔNG áp cho
+  PR #486 vận chuyển hồ sơ này. Nợ merge trước khi có verdict của PR #486 được ghi riêng ở
+  `ops/reviews/pr486-hau-kiem-no-review.yaml`.
+
+# --- MERGE ---
+merge_method: merge
+merge_commit: c87b0679a837055ee4cc33ac48c9adb8d7ad8784
+merged_at: '2026-09-08T04:01:29Z'
+land_operator: ducthangho
+land_operator_neo:
+  loai_nguon: 'attestation của điều phối — API trả `merged_by`, KHÔNG có snapshot thô trong kho'
+  nguon: 'GitHub PR API — `pull_request_read(get)` trên PR #478, trường `merged_by.login`'
+  gia_tri: ducthangho
+  git_object: >-
+    `git show -s --format=fuller c87b067` ⇒ author `ducthangho <ducthangho@gmail.com>`,
+    committer `GitHub <noreply@github.com>`. Hai cha: `585c7d5` (master trước đó) + `ff3431f`.
+  ai_thuc_su_bam: >-
+    **PHẢI ĐỌC — trường `merged_by` KHÔNG phân biệt được NGƯỜI với PHIÊN.** Thao tác merge do
+    **phiên điều phối `claude` gọi API** (`merge_pull_request`, `merge_method: merge`,
+    `expectedHeadSha: ff3431f…`) bằng `GITHUB_PAT` của chủ kho, theo chỉ thị trực tiếp của chủ kho
+    trong phiên: *"#478 đã duyệt, xử lý tiếp đi"*. GitHub quy công cho chủ sở hữu PAT, nên
+    `merged_by: ducthangho` là ĐÚNG về tài khoản và KHÔNG ĐÚNG nếu đọc thành "chủ kho tự bấm".
+    Ghi thẳng ra đây vì tệp land evidence cho #468 đã từng khai sai đúng chỗ này theo chiều ngược
+    lại (khai `ducthangho` tự bấm trong khi `merged_by` là `notebyme88`), và bị cross-review bắt.
+    Cùng giới hạn mà PR #480 đã khai cho land của #477.
+  chot_CAS: >-
+    Merge có neo `expectedHeadSha: ff3431f11bc0ba3ffa0c3616003f833c3cfc3ebb` — tức compare-and-swap:
+    head đổi giữa lúc đo và lúc merge thì lời gọi HỎNG chứ không merge nhầm bản khác.
+
+# --- CROSS-REVIEW: 6 lượt, khác nền (executor claude / reviewer codex) ---
+cross_review:
+  so_luot_cao_nhat: 6
+  so_luot_don_vi: >-
+    ĐƠN VỊ = **số thứ tự lượt CUỐI**. Số lượt CÓ HIỆN VẬT thì khác và nhỏ hơn — xem `hien_vat`.
+    Bài học lấy từ cross-review #478 lượt 4 (`land-evidence-so-luot-khong-co-don-vi`): một con số
+    lượt trần luôn đọc được thành "số lượt hoàn tất", nên phải khai đơn vị ngay tại chỗ.
+  reviewer_provider: codex
+  executor_provider: claude
+  reviewer_model_ghi_chu: >-
+    Điều phối khai đã yêu cầu `gpt-6-astra` với `model_reasoning_effort=xhigh` và đọc metadata
+    provider/surface/prompt/head/thời gian/băm từ `run.json`. Các `run.json` của lượt 4, 5, 6
+    KHÔNG kèm trong kho; reviewer hậu kiểm không tái xác minh được các trường ấy. Đây là
+    ATTESTATION về lần chạy. Model thực phục vụ và `thread_id` vẫn KHÔNG ĐO ĐƯỢC.
+  ket_qua_tung_luot:
+    - {luot: 4, reviewed_sha: 5a4dd859ef791ca046aea3af4bab2731883323ec, verdict: changes_requested, p1: 0, p2: 3, p3: 13}
+    - {luot: 5, reviewed_sha: 9337779b7d61d3b08947982383081de127e7d632, verdict: changes_requested, p1: 3, p2: 0, p3: 17}
+    - {luot: 6, reviewed_sha: ff3431f11bc0ba3ffa0c3616003f833c3cfc3ebb, verdict: approve,            p1: 0, p2: 0, p3: 23}
+  hien_vat:
+    co_hien_vat: '3 tệp verdict, tương ứng lượt 4, 5, 6, cùng 3 biên nhận v2 trong PR #486; comment bản chiếu là attestation'
+    khong_co_hien_vat: >-
+      CHƯA TÌM THẤY verdict gốc lượt 1, 2, 3 trong phạm vi đã kiểm. Điều phối khai `get_comments`
+      trên PR #478 từng trả 0 comment; không có snapshot JSON, mốc chính xác hoặc thông tin
+      phân trang để reviewer offline đối chứng. Không dùng lời khai đó để kết luận không có
+      review comment hay bản lưu ở nơi khác.
+      Quét `git rev-list --objects 5a4dd859ef791ca046aea3af4bab2731883323ec` và lọc phần đường
+      dẫn theo `pr478|478-verdict` trả 0 đường dẫn. Quét `--all` tại snapshot gói hậu kiểm
+      `2026-09-09T09:25:48Z`, HEAD `da481f94eee0adf1fe5fc4260a535a9b48fc2627`, trả 7 đường dẫn,
+      đều là land evidence, verdict và receipt mới của PR #486. Tập ref lịch sử ở lần quét
+      đầu KHÔNG kèm nên không tái lập được chính lần quét ấy.
+      Commit `8f7becb`, `260f7c6`, `5a4dd85` có lời điều phối nhắc các lượt trước; commit message
+      không thay thế verdict gốc và không tự xác thực phiên reviewer. Nợ vẫn mở: chưa có nội
+      dung để đối chiếu. Không kết luận hiện vật không tồn tại hoặc không thể khôi phục.
+    neo_kep: >-
+      Có 2 loại neo được khai: blob và comment bản chiếu. Hậu kiểm đối chiếu 3/3 blob tại
+      commit `718fc41272cf7f9aaa004a70041906aad64a03d0` khớp byte verdict, và commit đó là
+      tổ tiên của `da481f94eee0adf1fe5fc4260a535a9b48fc2627`.
+      Sự tồn tại và nội dung 3 comment là ATTESTATION: không có response thô hay log so sánh
+      trong kho. `CLAUDE.md` cảnh báo đường đọc MCP có thể chuẩn hoá thực thể HTML; lời khai
+      đọc ngược rồi diff chưa chứng minh byte hoặc từng ký tự lưu trên GitHub. Cần lưu client,
+      dữ liệu trả về, các bước biến đổi và phép đối chiếu độc lập trước khi kết luận mạnh hơn.
+    tu_khai_loi_dieu_phoi: >-
+      Verdict lượt 5 bị ĐĂNG MUỘN hơn một ngày (comment `5598591753`, 2026-09-09) vì phiên vá xong
+      ba P1 rồi đi tiếp mà quên đăng. Suốt thời gian ấy nó chỉ nằm trong scratchpad. Mắc lại đúng
+      khuyết tật mà packet #483 vừa được mở ra để chặn — ghi thay vì lặng lẽ bổ sung.
+  ba_P1_cua_luot_5: >-
+    Cả ba đều là LỜI KHAI SAI, không phải lỗi mã, và lượt 6 xác nhận ĐÃ VÁ THẬT cả ba:
+    (1) `chot-nguyen-nhan-chua-quan-sat` — khối `4-vs-6` chốt NGUYÊN NHÂN ("điều phối đo giữa
+    chừng") trong khi phép loại không đứng. Phản ví dụ reviewer chạy được: `(44,4)+(−1,0)=(43,4)`,
+    tức đọc Ubuntu `44/4` rồi GHI NHẦM 44 thành 43 cũng sinh đúng cặp đang xét; bản trước lấy chính
+    số `43` ĐANG TRANH CÃI làm chuẩn chắc chắn. Vá bằng cách đổi CẢ TÊN TRƯỜNG (tên trường chính là
+    lời khẳng định) và thêm `nguyen_nhan_that_su: CHƯA XÁC ĐỊNH` với bốn giả thuyết còn sống.
+    (2) `pr477-chua-merge-trai-nguon-moi` — bookkeeping còn khai #477 "chưa merge" trong khi cùng
+    tệp đã dùng `585c7d5` làm merge commit của #477.
+    (3) `khai-dong-p3-khi-con-sot` — khai `17f4a1b` "vá nốt P3 duy nhất còn lại" trong khi câu mà
+    verdict 15 nêu đích danh còn NGUYÊN TỪNG CHỮ ở `full-gate-pr468-20260907/README.md:57`.
+
+# --- CI TRƯỚC MERGE LIÊN QUAN PR #478 — exact checkout SHA chưa được đối chứng ---
+pre_merge_checks:
+  - ten: 'CI pull_request và cổng duyệt — nguồn attestation, chưa chứng minh checkout exact head'
+    loai_nguon: 'attestation của điều phối, đọc qua endpoint `/mcp/x/actions`; không có response/log checkout trong kho'
+    ket_qua: >-
+      Run `34183412163` (`pull_request`): `gate (ubuntu-latest)` = `success`, **44 bước · 3 skipped ·
+      0 bước `conclusion: null` · 0 hỏng**. Run `34185388550` (`pull_request_review`, chạy SAU khi
+      duyệt): `cong` = `success`, **5 bước · 0 null · 0 hỏng**.
+    gioi_han_exact_head: >-
+      `.github/workflows/ci.yml` dùng `actions/checkout@v4` không ghim `with.ref`; chính workflow
+      ghi `pull_request` checkout commit MERGE TỔNG HỢP. Bước kiểm tổ tiên EOL có dùng PR head
+      nhưng không chuyển checkout cho toàn bộ suite. Vì vậy run `34183412163` liên quan PR có
+      head `ff3431f` không tự chứng minh suite đã chạy trực tiếp trên exact head ấy. Cổng
+      `pull_request_review` kiểm phê duyệt cũng không thay thế bằng chứng checkout của suite.
+      Exact checkout SHA/tree và CI riêng trên head `ff3431f` KHÔNG ĐO ĐƯỢC từ hồ sơ hiện có.
+    canh_bao_doc_ket_qua: >-
+      Lượt `pull_request` chỉ có **MỘT** job (ubuntu). Windows KHÔNG chạy trên PR thường — nó chỉ
+      xuất hiện ở lượt `push` của merge commit, tức SAU khi merge. Đúng cái bẫy mà
+      `plat-x8-land-evidence.yaml` đã ghi và `CLAUDE.md` nêu thành luật ("gate PR và gate master
+      KHÔNG phải một thứ").
+      Có MỘT lượt `duyet khac danh tinh` = `failure` trên cùng head (`34183411154`,
+      `pull_request_target`): đó là lượt chạy TRƯỚC khi có phê duyệt, log ghi
+      `ĐỎ: chưa có bản duyệt nào từ danh tính khác ducthangho`. Hai lượt xanh về sau
+      là các run được thuật lại; chưa chứng minh chúng thay thế required-check context của
+      lượt đỏ này.
+      Điều phối khai `mergeable_state: unstable`. Chưa có response/timeline đầy đủ để xác nhận
+      run nào quyết định trạng thái ấy; không chốt nguyên nhân từ một run cũ hoặc coi một run
+      xanh khác tên là bằng chứng required check đã được thay thế.
+    dem_null_bang_0: >-
+      Cột `conclusion: null` = 0 ở mọi job là chốt rút ra từ chính khối `4-vs-6`: chỉ đọc số bước và
+      số `skipped` khi `status == "completed"`, và đòi số bước `null` bằng 0 — nếu không thì một
+      phép đo CHƯA XONG trông hệt một phép đo ĐÃ XONG.
+
+# --- PHÉP ĐO SAU MERGE, trên master `c87b067` ---
+post_merge_checks:
+  - ten: 'head đã vào master'
+    ket_qua: '`git merge-base --is-ancestor ff3431f origin/master` ⇒ ĐÚNG. `master` = `c87b067`, hai cha = `585c7d5` + `ff3431f`.'
+  - ten: 'nhánh không còn commit ngoài master'
+    ket_qua: '`git rev-list --count origin/master..origin/claude/land-468-20260908` ⇒ **0**'
+  - ten: 'CI trên merge commit — CẢ HAI NỀN'
+    loai_nguon: 'attestation của điều phối, đọc theo JOB qua `/mcp/x/actions`'
+    ket_qua: >-
+      Run `34185511309` (`push`, `c87b067`), đọc khi cả hai job đã `completed`:
+      `gate (ubuntu-latest)` = **success**, 44 bước · 4 skipped · **0 null** · **0 hỏng**;
+      `gate (windows-latest)` = **success**, 44 bước · 6 skipped · **0 null** · **0 hỏng**.
+    ghi_chu_4_vs_6: >-
+      Ubuntu 4 skipped và Windows 6 skipped — **cả hai đều ĐÚNG**, đây là HAI JOB KHÁC NHAU chứ
+      không phải hai lần đo cùng một job. Nêu ra vì chênh lệch ấy từng thành một "mâu thuẫn" treo
+      nhiều lượt ở hồ sơ #468.
+  - ten: 'bộ lease trên master, có actionlint đúng bản ghim'
+    ket_qua: '`rc=0` · **121/121 đạt; đã chạy=121, bỏ qua=0**. `actionlint 1.7.7` cài bằng `ops/cai_actionlint.sh`, `shellcheck 0.9.0` có mặt.'
+    vi_sao_ke_shellcheck: >-
+      Thiếu `shellcheck` thì `actionlint` **im lặng bỏ toàn bộ luật nền ấy** và vẫn trả `rc=0` —
+      nên nêu cả hai công cụ, không chỉ nêu `actionlint`.
+  - ten: 'bien_nhan_v2 trên master'
+    ket_qua: '`rc=0` · **0 vi phạm · 0 KHÔNG ĐO ĐƯỢC · TỔNG: ĐẠT** (30 ĐẠT v2 · 11/11 miễn trừ legacy · 42 nợ đóng băng · tổng 83)'
+  - ten: 'doc-claims-check trên master'
+    ket_qua: '`rc=0`, `ok: true`'
+    dieu_kien_do: >-
+      Kích thước stdout của cổng này **phụ thuộc MÔI TRƯỜNG** — xem mục `dieu_kien_do` trong
+      `pr468-hoso-4-packet-land-evidence.yaml`. Kho đủ tag và kho thiếu tag cho hai kích thước khác
+      nhau mà `rc` KHÔNG đổi. Nên ở đây chỉ khai `rc` và `ok`, không khai byte.
+
+# --- KHÔNG ĐO ĐƯỢC ---
+khong_do_duoc:
+  - muc: 'Nội dung cross-review lượt 1–3 của PR #478'
+    ly_do: 'Chưa tìm được verdict gốc trong tập đường dẫn của snapshot đã kiểm; GitHub không đối chứng được offline. Phạm vi này không chứng minh bất khả phục hồi.'
+  - muc: 'Model đã phục vụ và `thread_id` của ba lượt có hiện vật'
+    ly_do: 'run.json của lượt 4, 5, 6 không kèm; metadata lần chạy và đối số đều chỉ có attestation. Không xác minh độc lập provider/surface, model phục vụ hoặc thread_id.'
+  - muc: 'Người bấm merge là NGƯỜI hay PHIÊN'
+    ly_do: 'GitHub không có trường phân biệt. Ở đây điều phối tự khai là phiên gọi API — xem `land_operator_neo.ai_thuc_su_bam`.'
+  - muc: 'Nguồn thô cho mọi số CI/merge/review'
+    ly_do: 'Gói không kèm JSON thô của API. Mọi số ấy là attestation của điều phối.'
+  - muc: 'Script tự đo của reviewer (`do-luot{4,5,6}/`)'
+    ly_do: 'Cố ý KHÔNG vào kho — 34M/8,3M/170M vì chứa cả bản sao git. Verdict còn, công cụ sinh ra nó thì không tái chạy được từ kho.'
+
+# --- BOOKKEEPING ---
+bookkeeping:
+  - >-
+    Đây là land evidence thứ **BA** vào `master` (trước đó: `plat-x8-land-evidence.yaml` và
+    `pr468-hoso-4-packet-land-evidence.yaml`). Land evidence cho #477 nằm ở PR **#480**, tại thời
+    điểm điều phối ghi ban đầu được khai là `draft`; đây không phải trạng thái hiện hành.
+    Commit message `da481f9` sau đó khai #480 đã gỡ draft và được duyệt lúc `08:32:30Z` ngày
+    2026-09-09. Cả hai trạng thái GitHub là attestation, không có response thô để hậu kiểm.
+    Git xác nhận #477 đã merged; không dùng riêng trạng thái draft hoặc phê duyệt để xác nhận landed.
+  - >-
+    **Mission #467 KHÔNG được nghiệm thu bởi PR này.** Issue #463–#466 và #467 vẫn `open`.
+    PR #478 chỉ là HỒ SƠ land của #468.
+  - >-
+    Lỗ hổng `_kiem_bia_mo` dùng `any(...)` trong `ops/lease_publish.py` **VẪN NGUYÊN** — PR này
+    không chạm mã điều phối. Đặc tả `THU-HOI-LEASE-VA-CAP-LAI` ở PR #475, còn draft.
+  - >-
+    **NỢ A9 vẫn chờ QUYẾT ĐỊNH của chủ kho**, không phải chờ phép đo: bốn lease GATE cấp
+    `03:37:33Z` · `07:50:35Z` · `09:44:51Z` · `10:17:12Z`, **đều trước** hạn `14:30:07Z` của #456;
+    bốn `spec_hash` khác nhau, `revision` 1/2/3/4, `generation` giữ nguyên **1**, trong khi
+    `ADR-0034` đòi *"đổi contract phải revision + generation mới"*. Hết hạn KHÔNG hợp thức hoá
+    bốn lần cấp sớm.
+  - >-
+    **Nợ có địa chỉ, chưa đóng:** câu *"muốn đối chiếu byte gốc phải chạy lại"* ở
+    `ops/reviews/full-gate-pr468-20260907/README.md:57` — verdict 15 của #468 đòi làm rõ rằng chạy
+    lại sinh log MỚI, không khôi phục byte lịch sử đã mất. Sửa nó làm lệch băm trong
+    `ARTIFACTS.sha256` của gói full-gate, nên là việc của một commit có đo lại manifest.
+  - >-
+    **Hai packet chưa có nhánh đầu ra trong snapshot đã kiểm:** #482 `MU-REF-KHONG-PHU-TAG`
+    và #483 `VERDICT-KHONG-BOC-HOI`. Lease trong commit
+    `a2468831896601c60c216133eac2ba1366fd3254` (nhánh `ops/cap-lease-mu-ref-va-verdict`) đều ghi
+    cấp `2026-09-08T03:32:58Z`, hết hạn `2026-09-09T03:32:58Z`. Tại snapshot gói hậu kiểm
+    `2026-09-09T09:25:48Z`, 2/2 lease đã qua mốc hết hạn được ghi trong tệp và 2/2 tên nhánh
+    `claude/mu-ref-khong-phu-tag`, `claude/verdict-khong-boc-hoi` vắng trong 312 refs/heads.
+    Điều phối khai không có PR và mỗi Issue có 2 comment; đây là ATTESTATION chưa có JSON thô.
+    Không có nhánh ở snapshot không chứng minh chưa làm việc: có thể còn công việc cục bộ,
+    chưa đẩy, hoặc dùng tên khác. Lượng việc thực làm và VÌ SAO chưa có đầu ra đều KHÔNG ĐO ĐƯỢC.
+    Đừng ghi một nguyên nhân vào đây khi chưa đo được nó.

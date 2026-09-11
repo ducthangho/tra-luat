@@ -1,0 +1,67 @@
+# BIÊN NHẬN GIAO HÀNG — cross-review LƯỢT 8 của PR #468 (hồ sơ bốn packet treo sau #456), KHÁC NỀN (codex).
+#
+# Lượt 8 review head 4d0ead5 = bản vá lượt 7 + revision 2 GATE + quyết định §12. Phóng CÓ GIÁM SÁT qua `launcher.py run`;
+# chạy trọn ngay lần đầu: 1404,7 s, trang_thai=xong. Verdict: changes_requested — 2 P1 / 2 P2. Đối chiếu 6 finding lượt 7:
+# 4 ĐÃ VÁ THẬT (kể cả `span-rong-nuot-ti-le-vo-can`: 1213/0/0/0, Đ2 8/8) · 1 VÁ HỜ · 1 CHƯA VÁ (bia mộ #456, chờ hết hạn).
+# Mới: P1 `a2-neo-nen-cu-trai-write-set-hien-tai`, P2 `quyet-dinh-tiep-h-con-bi-phu-dinh`. Hiện vật reviewer ở thư mục cùng tên.
+
+schema_version: 2
+receipt_id: pr468-hoso-4-packet-review-8-codex-20260907-9d98c94f
+kind: review_delivery_receipt
+packet_id: 'PR468-HOSO-4-PACKET-TREO-SAU-456'
+lease_id: khong-co-lease
+phase_key: HOSO-4-PACKET-TREO-SAU-456
+luot: 8
+role: reviewer
+provider: codex
+executor_provider: claude
+cross_provider: true
+assurance: cross_approved
+verdict: changes_requested
+verdict_path: ops/reviews/pr468-hoso-4-packet-review-8-codex-verdict.md
+verdict_sha256: 7d9dcd7572d1228701f7f365d6029a21dad6182fb134b0b29613fee0bc66b417
+verdict_bytes: 32466
+reviewed_sha: 4d0ead5591a58463423754cc93a84ce744c3a50b
+evidence_url: https://github.com/ducthangho/tra-luat/blob/3ef7d2a37d833ae62ff8d2848e146a945360e64d/ops/reviews/pr468-hoso-4-packet-review-8-codex-verdict.md
+evidence_url_ghi_chu: >-
+  blob ghim commit ĐẦU TIÊN chứa tệp verdict trên nhánh hồ sơ #468 (commit bản vá lượt 8 / revision 3); PR: https://github.com/ducthangho/tra-luat/pull/468
+
+model_reviewer_identity:
+  provider: openai_codex
+  surface: codex_cli
+  model_yeu_cau: gpt-6-astra
+  model_da_chay: gpt-6-astra
+  model_bang_chung: >-
+    tệp session của codex (~/.codex/sessions, thread 01a07b28-6b7f-7151-9f1f-182fc3bc3526) ghi `"model":"gpt-6-astra"` 6/6 mục;
+    đối số phóng `-m gpt-6-astra -c model_reasoning_effort="xhigh"`.
+  session_run_id: 9d98c94f
+  thread_id: 01a07b28-6b7f-7151-9f1f-182fc3bc3526
+  prompt_sha256: 49ee58d4b7e1acbd9af7940bae456ded069ad6f25f7a04f9ecdd5617fd713e8b
+  prompt_kin_hoan_toan: true
+  thoi_luong_giay: 1404.749
+  ma_thoat: 0
+  stdout_byte: 850215
+  neo_boi_launcher: >-
+    `launcher.py run --expected-repo github.com/ducthangho/tra-luat --expected-head <reviewed_sha>
+    --prompt-file PROMPT.md --expected-prompt-sha256 <băm> --deadline-utc +75m` bọc `codex exec`;
+    workspace là mirror rời detached đúng reviewed_sha, porcelain rỗng trước/sau.
+
+github_submitter_identity:
+  actor: ducthangho
+  la_tac_gia_PR: true
+  ghi_chu: >-
+    `ADR-0040`: biên nhận và verdict do tài khoản tác giả PR vận chuyển KHÔNG thành required check hay merge
+    authorization (cổng `duyet khac danh tinh` vẫn đỏ). Trường này ghi AI VẬN CHUYỂN.
+  phien_van_chuyen: https://claude.ai/code/session_013F2m3uJw7X9bFvDqJ7Q63b
+
+anchor:
+  loai: canonical_ancestry
+  cuong_do: trung_binh
+  mo_ta: >-
+    reviewed_sha 4d0ead5 đã push lên `refs/heads/claude/soan-spec-3-viec-treo-20260906`; verdict và gói hiện vật
+    commit ngay sau head ấy trên cùng nhánh. Chưa có tag `luu-tru/*`; nhánh có thể bị xoá sau land.
+
+KHONG_do_duoc:
+  - 'GitHub trực tiếp từ sandbox; head master đúng giây cấp lease; branch protection; Windows thật; hoá đơn; runner jitter.'
+  - 'Bộ lịch sử 311/419/2062 hàng và bốn lý do hint đã rút — không tái lập được.'
+  - 'Trạng thái blob #456 trên master SAU 14:30:07Z 07-09-2026 — lượt này chạy trước mốc ấy, chỉ mô phỏng.'

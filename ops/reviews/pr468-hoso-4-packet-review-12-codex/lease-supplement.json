@@ -1,0 +1,16 @@
+{
+  "leased_at_utc": "2026-09-07T10:17:12Z",
+  "lease_expires_at_utc": "2026-09-08T10:17:12Z",
+  "duration_minutes": 1440.0,
+  "write_set_count": 2,
+  "write_set_hash_actual": "0f7b869da648e9b21023e461925efd0d45bca58fb308a8fcc82bc55ad9f66ef0",
+  "write_set_hash_declared": "0f7b869da648e9b21023e461925efd0d45bca58fb308a8fcc82bc55ad9f66ef0",
+  "anchors": {
+    "base_sha": "d28c4b1062e8505cbdaaf0237fcbe3f9b8ee4705",
+    "start_from_sha": "d28c4b1062e8505cbdaaf0237fcbe3f9b8ee4705",
+    "reviewed_sha_required": "d28c4b1062e8505cbdaaf0237fcbe3f9b8ee4705"
+  },
+  "gate_projection_copies": 4,
+  "specs_changed_since_c43347d": [],
+  "runtime_changed_since_c43347d": []
+}

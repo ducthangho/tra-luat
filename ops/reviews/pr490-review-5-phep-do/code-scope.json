@@ -1,0 +1,89 @@
+{
+  "literal_files": [
+    "./ops/prompts/handoff-264-review-1-claude-20260823.md",
+    "./ops/DO_VI_SAO_LEASE_482_483_CHET_20260909.md"
+  ],
+  "subcommands": [
+    {
+      "line": 1975,
+      "name": "init"
+    },
+    {
+      "line": 1984,
+      "name": "record-lease"
+    },
+    {
+      "line": 1997,
+      "name": "begin-attempt"
+    },
+    {
+      "line": 2004,
+      "name": "void-attempt"
+    },
+    {
+      "line": 2014,
+      "name": "chup-anh-doctor"
+    },
+    {
+      "line": 2019,
+      "name": "record-review"
+    },
+    {
+      "line": 2036,
+      "name": "transition"
+    },
+    {
+      "line": 2043,
+      "name": "record-post"
+    },
+    {
+      "line": 2049,
+      "name": "next-comment"
+    },
+    {
+      "line": 2053,
+      "name": "guard"
+    },
+    {
+      "line": 2057,
+      "name": "ghi-uy-quyen"
+    },
+    {
+      "line": 2066,
+      "name": "doi-chieu-uy-quyen"
+    },
+    {
+      "line": 2076,
+      "name": "doctrine-scan"
+    },
+    {
+      "line": 2081,
+      "name": "adr-song"
+    },
+    {
+      "line": 2086,
+      "name": "bien-nhan"
+    },
+    {
+      "line": 2094,
+      "name": "status"
+    },
+    {
+      "line": 2098,
+      "name": "where"
+    }
+  ],
+  "landed_strings": [
+    {
+      "line": 191,
+      "value": "proposed → ready → leased → running → reviewing → accepted → integrated → landed"
+    },
+    {
+      "line": 211,
+      "value": "landed: kết quả đã vào canonical"
+    }
+  ],
+  "adr0034_row": [
+    "| `ADR-0034` | Change-control, review độc lập và thẩm quyền land | Accepted | có nhắc: `lease_publish.py`×10 · `packet_loop.py`×11 |"
+  ]
+}

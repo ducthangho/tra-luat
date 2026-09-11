@@ -1,0 +1,28 @@
+{
+  "ci_on": {
+    "push": {
+      "branches": [
+        "master"
+      ]
+    },
+    "pull_request": "",
+    "workflow_dispatch": ""
+  },
+  "ci_matrix": {
+    "os": "${{ fromJSON( (github.event_name == 'workflow_dispatch' || github.ref == 'refs/heads/master' || contains(github.event.pull_request.labels.*.name, 'windows')) && '[\"ubuntu-latest\",\"windows-latest\"]' || '[\"ubuntu-latest\"]') }}"
+  },
+  "checkouts": [
+    {
+      "uses": "actions/checkout@v4",
+      "with": {
+        "fetch-depth": "0"
+      }
+    }
+  ],
+  "missing_hint_candidates": [],
+  "pr489_runtime_candidates": [],
+  "surviving_hint_claim": "HIỆN VẬT REVIEW cộng HAI BẢN VÁ P3 MÀ CHÍNH REVIEWER ĐỀ XUẤT trong `GOI-VA.md` của gói. Đo được: `diff -u` giữa 2/2 tệp reviewer đề xuất trong `cay/` và 2/2 tệp điều phối áp cho ĐÚNG MỘT hunk khác nhau — câu chữ của P3 CI, điều phối viết CHẶT HƠN (tách hẳn ĐO ĐƯỢC khỏi KHÔNG ĐO ĐƯỢC); phần đổi tên khoá `ba_loi`→`bon_loi` TRÙNG KHỚP hoàn toàn, 0 dòng lệch. Số đo: 8 tệp · +2 189 · −4.",
+  "old_hint_claim_unchanged": true,
+  "rerun_reason": "Nợ chưa trả vì PHẠM VI PHIÊN và vì chủ kho đã quyết dừng chuỗi — KHÔNG phải vì hậu kiểm tự sinh ra mắt xích mới.",
+  "ci_reason": "KHÔNG ĐỌC theo quyết định chủ kho. BỎ CHỜ KHÔNG PHẢI BỎ CHẠY — `ci.yml` khai `on: push`, nên workflow ĐƯỢC CẤU HÌNH để chạy trên lượt master. Đó là CẤU HÌNH đọc được từ tệp; runner có chạy thật hay không thì hồ sơ này KHÔNG ĐO (không đọc, không giữ run JSON) — đừng đọc câu này thành \"lượt ấy đã chạy\". Tiết kiệm là THỜI GIAN CHỜ của phiên, không phải phút runner. Hệ quả: lượt push master là lần đo Windows ĐẦU TIÊN của mã này, nên nếu Windows đỏ thì biết MUỘN HƠN — không phải không biết."
+}

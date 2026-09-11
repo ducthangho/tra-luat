@@ -1,0 +1,63 @@
+tệp	dòng	cột	loại	nội dung nguyên dòng
+ops/land/pr480-land-evidence.yaml	1	1	whole_line	# LAND EVIDENCE — PR #480 (land evidence cho PR #477).
+ops/land/pr480-land-evidence.yaml	2	1	whole_line	#
+ops/land/pr480-land-evidence.yaml	3	1	whole_line	# VÌ SAO TỆP NÀY TỒN TẠI: `ADR-0034:17-20` đòi mọi transition quan trọng có evidence trên GitHub, phần
+ops/land/pr480-land-evidence.yaml	4	1	whole_line	# land phải ghi "Approver, authorization, operator, merge commit, post-merge gate và bookkeeping".
+ops/land/pr480-land-evidence.yaml	5	1	whole_line	# Khung trường theo mẫu ở `docs/PROTOCOL_DA_PHIEN.md:466-488`.
+ops/land/pr480-land-evidence.yaml	6	1	whole_line	#
+ops/land/pr480-land-evidence.yaml	7	1	whole_line	# Nguồn: §20 ghi ADR-0034 là "có nhắc", không phải "0 cổng"; nhắc tên không chứng minh
+ops/land/pr480-land-evidence.yaml	8	1	whole_line	# cưỡng chế nội dung. Các phép kiểm ngắn của lượt này không xác thực prose/API trong land evidence.
+ops/land/pr480-land-evidence.yaml	9	1	whole_line	#
+ops/land/pr480-land-evidence.yaml	10	1	whole_line	# TỆP NÀY LÀ LAND EVIDENCE CỦA MỘT LAND EVIDENCE. Nói thẳng chỗ ấy vì nó là một chuỗi không tự dừng:
+ops/land/pr480-land-evidence.yaml	11	1	whole_line	# Tuyến này: #477 → land evidence ở #480 → hồ sơ bổ sung ở #489. Tuyến #468 → #478 → #486
+ops/land/pr480-land-evidence.yaml	12	1	whole_line	# liên quan qua các hiện vật hậu kiểm ở #487; không phải chuỗi cha/con tuyến tính của #480.
+ops/land/pr480-land-evidence.yaml	13	1	whole_line	# Không có quy tắc nào trong kho nói chuỗi dừng ở đâu. Đây là câu hỏi cho chủ kho, không phải điều
+ops/land/pr480-land-evidence.yaml	14	1	whole_line	# tệp này tự quyết — xem `bookkeeping.chuoi_land_evidence_chua_co_diem_dung`.
+ops/land/pr480-land-evidence.yaml	25	1	whole_line	# --- UỶ QUYỀN ---
+ops/land/pr480-land-evidence.yaml	39	1	whole_line	# --- MERGE ---
+ops/land/pr480-land-evidence.yaml	61	1	whole_line	# --- CROSS-REVIEW: 2 lượt, khác nền (executor claude / reviewer codex) ---
+ops/land/pr480-land-evidence.yaml	113	1	whole_line	# --- PHÉP ĐO TRƯỚC MERGE, trên đúng head đã duyệt `5b96ddc` ---
+ops/land/pr480-land-evidence.yaml	114	1	whole_line	# THIẾU TRONG BẢN ĐẦU. Cross-review #489 chấm P2 `Add the required pre-merge evidence`: hai land
+ops/land/pr480-land-evidence.yaml	115	1	whole_line	# evidence mới bỏ hẳn mục này và nhảy thẳng từ metadata merge sang hậu-merge, nên không nói được
+ops/land/pr480-land-evidence.yaml	116	1	whole_line	# cổng nào đã đạt TRÊN ĐÚNG HEAD trước merge. Hai land evidence CŨ (`pr477-…`, `pr478-…`) đều có
+ops/land/pr480-land-evidence.yaml	117	1	whole_line	# mục này — tức đây là bỏ sót của điều phối, không phải mẫu đổi.
+ops/land/pr480-land-evidence.yaml	118	1	whole_line	# Các hàng lịch sử không có log gốc là attestation về tiền kiểm. Số đo lại sau merge ghi riêng
+ops/land/pr480-land-evidence.yaml	119	1	whole_line	# trong `do_lai_sau_merge`, tuyệt đối không dùng làm bằng chứng đã đạt trước merge.
+ops/land/pr480-land-evidence.yaml	158	1	whole_line	# --- PHÉP ĐO SAU MERGE, trên master `7e69b8e` ---
+ops/land/pr480-land-evidence.yaml	236	1	whole_line	# --- KHÔNG ĐO ĐƯỢC ---
+ops/land/pr480-land-evidence.yaml	255	1	whole_line	# --- BOOKKEEPING ---
+ops/land/pr487-land-evidence.yaml	1	1	whole_line	# LAND EVIDENCE — PR #487 (hiện vật cross-review của phiên 2026-09-09, vá hậu kiểm #486,
+ops/land/pr487-land-evidence.yaml	2	1	whole_line	# và phép đo vì sao lease #482/#483 chết).
+ops/land/pr487-land-evidence.yaml	3	1	whole_line	#
+ops/land/pr487-land-evidence.yaml	4	1	whole_line	# Nghĩa vụ ghi land evidence: `ADR-0034:17-20`; mẫu trường: `docs/PROTOCOL_DA_PHIEN.md:466-488`.
+ops/land/pr487-land-evidence.yaml	5	1	whole_line	# Nguồn: §20 ghi ADR-0034 là "có nhắc", không phải "0 cổng"; nhắc tên không chứng minh
+ops/land/pr487-land-evidence.yaml	6	1	whole_line	# cưỡng chế nội dung. Các phép kiểm ngắn của lượt này không xác thực prose/API trong land evidence.
+ops/land/pr487-land-evidence.yaml	39	1	whole_line	# --- CROSS-REVIEW ---
+ops/land/pr487-land-evidence.yaml	93	1	whole_line	# --- P1 CỦA CODEX CONNECTOR: ĐIỀU PHỐI ĐÃ BÁC, VÀ VIỆC BÁC ẤY SAI ---
+ops/land/pr487-land-evidence.yaml	193	1	whole_line	# --- PHÉP ĐO SAU MERGE, trên master f4d74fe ---
+ops/reviews/pr489-review-1-codex-verdict.receipt.yaml	1	1	whole_line	# BIÊN NHẬN GIAO HÀNG — cross-review LƯỢT 1 của PR #489, KHÁC NỀN (codex).
+ops/reviews/pr489-review-1-codex-verdict.receipt.yaml	2	1	whole_line	#
+ops/reviews/pr489-review-1-codex-verdict.receipt.yaml	3	1	whole_line	# Verdict: changes_requested — 1 P1 / 4 P2 / 6 P3.
+ops/reviews/pr489-review-1-codex-verdict.receipt.yaml	4	1	whole_line	#
+ops/reviews/pr489-review-1-codex-verdict.receipt.yaml	5	1	whole_line	# ĐỐI TƯỢNG: PR bookkeeping (hai land evidence) CỘNG một đính chính lớn mà điều phối vừa tự làm sau
+ops/reviews/pr489-review-1-codex-verdict.receipt.yaml	6	1	whole_line	# khi phát hiện container mình là KHO NÔNG. Prompt kể thẳng chuỗi sai ấy và giao nhiệm vụ chính là
+ops/reviews/pr489-review-1-codex-verdict.receipt.yaml	7	1	whole_line	# KIỂM CHÍNH BẢN SỬA, kèm câu hỏi ngược: "bản sửa có khai vượt theo chiều ngược không?"
+ops/reviews/pr489-review-1-codex-verdict.receipt.yaml	8	1	whole_line	# Reviewer trả lời đúng câu ấy — xem `p2_ban_sua_van_khai_vuot`.
+ops/reviews/pr487-hau-kiem-head-review-1-codex-verdict.receipt.yaml	1	1	whole_line	# BIÊN NHẬN GIAO HÀNG — cross-review HẬU KIỂM trên HEAD ĐÃ MERGE `3873173` của PR #487, KHÁC NỀN.
+ops/reviews/pr487-hau-kiem-head-review-1-codex-verdict.receipt.yaml	2	1	whole_line	#
+ops/reviews/pr487-hau-kiem-head-review-1-codex-verdict.receipt.yaml	3	1	whole_line	# Verdict: changes_requested — 0 P1 / 1 P2 / 4 P3.
+ops/reviews/pr487-hau-kiem-head-review-1-codex-verdict.receipt.yaml	4	1	whole_line	#
+ops/reviews/pr487-hau-kiem-head-review-1-codex-verdict.receipt.yaml	5	1	whole_line	# Lượt này bổ sung review hậu kiểm exact head; kết luận vẫn là changes_requested.
+ops/reviews/pr487-hau-kiem-head-review-1-codex-verdict.receipt.yaml	6	1	whole_line	# Thiếu lần đọc head đã được bổ sung, nhưng không hồi tố tiền kiểm hoặc tự tạo approve.
+ops/reviews/pr487-hau-kiem-head-review-1-codex-verdict.receipt.yaml	7	1	whole_line	# Phát hiện cổng đạt trong mirror dẫn tới điều phối đính chính; log kho nông không kèm.
+ops/reviews/pr487-review-2-codex-verdict.receipt.yaml	1	1	whole_line	# BIÊN NHẬN GIAO HÀNG — cross-review LƯỢT 2 của PR #487, KHÁC NỀN (codex).
+ops/reviews/pr487-review-2-codex-verdict.receipt.yaml	2	1	whole_line	#
+ops/reviews/pr487-review-2-codex-verdict.receipt.yaml	3	1	whole_line	# Verdict: approve — 0 P1 / 0 P2 / 6 P3.
+ops/reviews/pr487-review-2-codex-verdict.receipt.yaml	4	1	whole_line	#
+ops/reviews/pr487-review-2-codex-verdict.receipt.yaml	5	1	whole_line	# ĐỐI CHIẾU LƯỢT 1, tổng 8 slug: 3 ĐÃ VÁ THẬT · 2 VÁ HỜ · 3 VÁ SINH LỖI MỚI · 0 CHƯA VÁ.
+ops/reviews/pr487-review-2-codex-verdict.receipt.yaml	6	1	whole_line	# Ba nhãn "VÁ SINH LỖI MỚI" KHÔNG tái mở P2 nào — reviewer nói rõ phần P2 cũ đã đóng, lỗi phát sinh
+ops/reviews/pr487-review-2-codex-verdict.receipt.yaml	7	1	whole_line	# đều là LỆCH NỘI BỘ mức P3 giữa biên nhận và mục lục. Đây đúng hình dạng mà `CLAUDE.md` cảnh báo:
+ops/reviews/pr487-review-2-codex-verdict.receipt.yaml	8	1	whole_line	# "mỗi lượt vá bảo toàn được thứ ta NGHĨ TỚI và làm hỏng thứ ta KHÔNG NGHĨ TỚI" — lần này bắt được
+ops/reviews/pr487-review-2-codex-verdict.receipt.yaml	9	1	whole_line	# ngay ở lượt kế. ĐỊNH CHÍNH ĐƠN VỊ: `CLAUDE.md:722-723` nói **BẢY PHÁT HIỆN** cùng một đường,
+ops/reviews/pr487-review-2-codex-verdict.receipt.yaml	10	1	whole_line	# ăn **BỐN LƯỢT** cross-review liên tiếp — không phải "bảy lượt". Bản trước đổi đơn vị của chính
+ops/reviews/pr487-review-2-codex-verdict.receipt.yaml	11	1	whole_line	# phép đếm dùng làm bài học; cross-review hậu kiểm chấm P3 `doi-bay-phat-hien-thanh-bay-luot-review`.

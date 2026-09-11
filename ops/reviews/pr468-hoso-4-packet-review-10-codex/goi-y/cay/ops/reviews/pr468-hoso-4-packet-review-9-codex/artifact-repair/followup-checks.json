@@ -1,0 +1,30 @@
+{
+  "utc": "2026-09-07T09:30:02.764850+00:00",
+  "master_old_blob": "8b2103c06687546379a17f6deafc97f1fe0173fd",
+  "real_registry_holders": [
+    "gate-tach-job-cat-chi-phi-exec-1r2-claude-20260906",
+    "mutant-khong-chay-tren-windows-exec-1-claude-20260906"
+  ],
+  "all_old_copies_tombstoned_model": [
+    "gate-tach-job-cat-chi-phi-exec-1r2-claude-20260906"
+  ],
+  "model_is_not_ref_write": true,
+  "sample_prose_check": {
+    "old_clauses_present": [
+      true,
+      true,
+      true
+    ],
+    "text_only_repairs_remove_all": [
+      true,
+      true,
+      true
+    ],
+    "A1_kept": true,
+    "A5_kept": true,
+    "old_branch_numbers_kept": [
+      true,
+      true
+    ]
+  }
+}

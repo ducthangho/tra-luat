@@ -1,0 +1,130 @@
+# BIÊN NHẬN GIAO HÀNG — cross-review LƯỢT 3 của PR #492 (packet wp488, slice A0), reviewer `claude`
+# trên head `457affd`.
+#
+# ĐỌC DÒNG NÀY TRƯỚC MỌI DÒNG KHÁC: verdict là `approve` (0 P1, 0 P2) NHƯNG NHÃN MODEL CỦA LƯỢT KHÔNG SẠCH —
+# `modelUsage` của run: `claude-fable-5` 28 432 output token + `claude-opus-4-8` 33 158 output token
+# (harness đổi model giữa lượt; reviewer tự khai trong `model_tu_khai`). `kiem_ket_qua("claude-fable-5", …)`
+# trong `.claude/dev/chon_reviewer.py` trả KHÔNG ĐO ĐƯỢC. Executor KHÔNG TÍNH lượt này là lượt review sạch;
+# lượt 4 (run f82cc4b7, modelUsage ĐẠT) mới là lượt approve có hiệu lực. Cùng lúc, Codex connector đọc chính
+# head này và chấm 1 P1 + 2 P2 mà lượt 3 và hai lượt 1/2 không nêu — xem caveat.
+
+schema_version: 2
+receipt_id: pr492-review-3-claude-20260910-5c61112d
+kind: review_delivery_receipt
+packet_id: 'wp488'
+lease_id: wp488-thu-hoi-lease-a0-exec-1-claude-20260909
+phase_key: HO-SO-CROSS-REVIEW-PHIEN-20260910
+luot: 3
+role: reviewer
+provider: claude
+executor_provider: claude
+cross_provider: false
+assurance: same_provider_reviewed
+assurance_KHONG_dat: same_provider_approved
+ly_do_KHONG_dat: 'modelUsage lẫn `claude-opus-4-8` bên cạnh `claude-fable-5` ⇒ danh tính model của lượt không xác định được'
+verdict: approve
+verdict_KHONG_co_hieu_luc: true
+verdict_path: ops/reviews/pr492-review-3-claude-verdict.md
+verdict_sha256: 1a8069704ceb55801f2aa0779b32ed98cd3cfe06b57ea5f93dbeae130b5d228e
+verdict_bytes: 15489
+reviewed_sha: 457affd49fabb8f6d891b93460e93255170c8784
+reviewed_base: c0a5cbe89a90588115262e1a2c3ac84cbd98be9e
+evidence_url: https://github.com/ducthangho/tra-luat/blob/df7ec13285c3c5d92d645f1059a28102485b8467/ops/reviews/pr492-review-3-claude-verdict.md
+evidence_url_ghi_chu: 'Neo BLOB ghim `df7ec13`. Bản chiếu công khai sớm hơn: PR #492 comment 5612715873 (đăng kèm khai báo modelUsage).'
+so_p1: 0
+so_p2: 0
+so_p3: 0
+hint_patch:
+  sha256: 94f93a74153275f0cb40d0d2161ba70601c1e66f5e9e45e021636521a6cffbd8
+  noi_dung: '0 hunk'
+noi_dung_do_duoc_van_dung:
+  - 'Bản vá bd4ecd4..457affd KHỚP TỪNG DÒNG với HINT lượt 2 (mã + test) + F12 workflow đúng khuôn — không dòng ngoài phạm vi.'
+  - 'F10/F11/F12 ĐÓNG, đo hai chiều: đột biến bỏ từng catch/guard ĐỎ TinHieuChotCa ở t150; catalog t139 33 = 30/3/0.'
+  - 'Không tìm thấy chỗ mở mới trong phạm vi bản vá lượt 2 — nhưng phạm vi ấy hẹp, xem caveat CODEX.'
+
+codex_connector_cung_head:
+  review_id: 5162390620
+  reviewed_commit: 457affd49f
+  ket_qua: '1 P1 (C1 `KhoObject.tim` trả None khi tổ tiên non-tree ⇒ H thay `ops` bằng blob ⇒ TAP_THU_HOI_RONG rc=0) + 2 P2 (C2 consumer không validate marker retired; C3 `sorted(thua)` TypeError khoá lẫn kiểu)'
+  executor_tai_hien: '5/5 ca ĐỎ trên 457affd (scratch repro_codex.py) trước khi vá'
+  commit_va: 826bc36fd1801bf828f21bf9580897899f16a299
+  xac_nhan_boi: 'lượt 4 (pr492-review-4-claude-verdict.md): C1/C2/C3 ĐÓNG đúng chỗ ở cả reader lẫn consumer'
+
+model_reviewer_identity:
+  provider: anthropic_claude
+  surface: claude_code
+  transport: machine/local
+  model_yeu_cau: claude-fable-5
+  model_da_chay: 'KHONG_XAC_DINH — modelUsage: claude-fable-5 (28 432 output) + claude-opus-4-8 (33 158 output) + claude-haiku-4-5 (39, phụ); kiem_ket_qua ⇒ KhongDoDuoc "còn mô hình LẠ [claude-opus-4-8]"'
+  effort: max
+  session_run_id: 5c61112d
+  run_id_day_du: 5c61112d1e9d47afb7b18267365a4aea
+  prompt_sha256: 87b4df0d4bf6d4d3b6ac1f546e098e764adb37c055eb1252d90a3537d87910c7
+  bat_dau_utc: '2026-09-10T03:31:40.265537+00:00'
+  ket_thuc_utc: '2026-09-10T03:48:22.048296+00:00'
+  thoi_luong_giay: 1001.783
+  ma_thoat: 0
+  trang_thai: xong
+  stdout_byte: 4944
+  stdout_sha256: 8eca72e75193e80fdef898ee0c6c888ef3921d5c17d8c76fbfbe4ef4b6479165
+  stderr_byte: 0
+  so_lan_chet_truoc_khi_xong: 0
+  nguon_cac_scalar_tren: 'ĐỐI CHIẾU ĐƯỢC với run.json: session/run ID, prompt_sha256, bat_dau_utc, ket_thuc_utc, thoi_luong_giay, ma_thoat, trang_thai, stdout_byte/sha256, stderr_byte. Model phục vụ và kết quả kiem_ket_qua đọc từ stdout.log/modelUsage. Model yêu cầu, effort, số lần chết và chi tiết các run chết là ATTESTATION điều phối, KHÔNG ĐO ĐƯỢC từ các JSON kèm (không có các khóa ấy). Bộ ba provider/surface/transport là chuẩn hoá theo hợp đồng reviewer; run.json đo lớp launcher local_process/subprocess/machine. Các tệp runtime không vào kho.'
+
+nang_luc_do_cua_goi:
+  mirror: 'clone bare cục bộ + fetch refs/remotes/origin/*, detached 457affd, không nông; origin/master trong mirror = 28ba133'
+  chua_do_duoc: 'Không mạng; harness bơm `CLAUDE.md` vào ngữ cảnh — reviewer khai không dùng.'
+
+tuan_thu_cam_cua_reviewer:
+  cay_kho_sach: true
+  commit_them_ngoai_head: 0
+  bang_chung: 'HEAD 457affd, worktree 0 dòng porcelain sau lượt (executor đo); `worktree_sach: true`'
+
+github_submitter_identity:
+  actor: ducthangho
+  la_tac_gia_PR: true
+  ghi_chu: '`ADR-0040`: verdict do tài khoản tác giả PR vận chuyển KHÔNG là merge authorization.'
+  phien_van_chuyen: https://claude.ai/code/session_01Lnos1VZ4KSzHLG9u4UETiW
+
+anchor:
+  loai: canonical_ancestry
+  cuong_do: cao
+  mo_ta: 'Blob verdict ghim `df7ec13`.'
+  gioi_han: 'Vững khi land bằng merge commit hoặc fast-forward; squash phá quan hệ tổ tiên.'
+
+verdict_usage_caveats:
+  - id: APPROVE-LUOT-3-KHONG-TINH-nhan-model-lan-opus-4-8
+    muc: P1
+    mo_ta: >-
+      `approve` của lượt này KHÔNG có hiệu lực land: `modelUsage` của run mang HAI model chính (`claude-fable-5`
+      28 432 output token · `claude-opus-4-8` 33 158 output token) — harness đổi model giữa lượt, reviewer tự khai.
+      Vị từ `kiem_ket_qua` trả KHÔNG ĐO ĐƯỢC. Đây đúng là lớp lỗi PLAT-X7 (#220): cổng phải ĐO danh tính model,
+      không nhận lời khai.
+    phai_lam_gi_khi_chay_lai: >-
+      Dùng lượt 4 (`pr492-review-4-claude-verdict.md`, run f82cc4b7, modelUsage ĐẠT) làm verdict có hiệu lực trên
+      head cuối `826bc36`. Verdict lượt 3 lưu kết quả reviewer thuật lại. Git, băm/byte và catalog t139 có đường tái đo;
+      scratch/luot3, HINT lượt 2 và log probe không vào kho, nên KHÔNG cam kết tái lập mọi số từ hồ sơ này.
+  - id: CODEX-CONNECTOR-CHAM-1-P1-2-P2-TREN-CUNG-HEAD-lươt-3-bo-sot
+    muc: P1
+    mo_ta: >-
+      Trên CHÍNH head `457affd`, Codex connector (review 5162390620, kích khi bỏ draft #492) chấm 1 P1 + 2 P2 mà
+      lượt 3 — và cả lượt 1/2 — bỏ sót: tổ tiên non-tree của `ops/thu-hoi` được đọc thành "sổ rỗng" (rc=0);
+      consumer không validate marker retired; TypeError khoá lẫn kiểu. Lượt 3 chỉ đọc phạm vi bản vá lượt 2
+      (đúng phân công) nên không tìm chỗ mới ngoài đó.
+    phai_lam_gi_khi_chay_lai: >-
+      Đừng đọc `approve` của lượt 3 là "head 457affd sạch". Cả ba finding đã vá ở `826bc36` (t151, catalog 37 = 34/3/0)
+      và lượt 4 xác nhận đóng đúng chỗ.
+
+khong_do_duoc:
+  - 'Model build; lý do harness đổi model giữa lượt.'
+  - '`run.json`/stdout.log không vào kho ⇒ scalar runtime là attestation.'
+  - 'Trạng thái GitHub lúc reviewer đọc: sandbox không mạng.'
+
+delivered: true
+delivered_by: claude-session
+authoritative_source: repo_file
+receipt_written_by: claude-session
+receipt_written_at_utc: '2026-09-10T05:2xZ'
+receipt_khong_khai:
+  - 'Không khai lượt này là lượt review có hiệu lực. Nó KHÔNG.'
+  - 'Không khai head 457affd sạch — Codex connector chấm 1 P1 trên đúng head ấy.'

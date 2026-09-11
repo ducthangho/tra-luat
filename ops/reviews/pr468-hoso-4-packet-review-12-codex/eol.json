@@ -1,0 +1,15 @@
+{
+  "command": [
+    "python3",
+    "-B",
+    ".githooks/eol_policy.py",
+    "--all"
+  ],
+  "cwd": "cay-kho",
+  "started_utc": "2026-09-07T13:17:15.559570+00:00",
+  "ended_utc": "2026-09-07T13:17:15.830517+00:00",
+  "elapsed_seconds": 0.2709390170000461,
+  "rc": 0,
+  "stdout_bytes": 0,
+  "stderr_bytes": 0
+}

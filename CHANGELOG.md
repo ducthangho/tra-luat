@@ -78,7 +78,26 @@ mà vắng mặt** — chưa ai viết.
   0 bị huỷ. 20:24:49Z → 20:46:34Z. Bốn bước không chạy: `PR head contains required EOL base`
   (`if: github.event_name == 'pull_request'`), `gate lifecycle selftest` (nền không có cgroup), và
   hai biến thể lane PR nhường chỗ cho biến thể lane LAND.
+- `gate (windows-latest)`: **BỊ HUỶ Ở TRẦN**. 20:24:50Z → 21:25:07Z = **60 phút 17 giây**, đúng
+  `timeout-minutes: 60` (`ci.yml:64`). Bộ đếm bước: **21 thành công · 1 BỊ HUỶ · 22 không chạy**
+  (22 bước sau chỗ huỷ không bao giờ khởi động). Bước bị huỷ là **số 20,
+  `lease-publish selftest (đo lại setup sau G5)`**.
 - `thu-hoi` trên `4965f0a`: thành công.
+
+**Vì vậy `landed` của #514 CHƯA đủ điều kiện theo §10.2** — điều kiện đòi gate hậu-merge XANH, mà
+chân Windows cho trạng thái thứ ba: **BỊ HUỶ**, không phải `pass`, cũng không phải `fail`. Nói
+"gate hậu-merge xanh" ở đây là gộp trạng thái thứ ba vào `pass` — đúng lỗi mà mục r370 này vừa
+chấm connector codex ở Finding 1. Trạng thái đúng của #514: **`merged` + ubuntu xanh + Windows
+KHÔNG ĐO ĐƯỢC**.
+
+Đây là nợ đã khai của Issue #504 (`[WINDOWS-LEASE-SUITE]`), KHÔNG phải lỗi của #514: bản vá của
+#514 không chạm `ci.yml`, không chạm `ops/lease_publish*`. **KHÔNG nâng `timeout-minutes`** —
+`ci.yml:63` đã ghi sẵn *"NÂNG TRẦN KHÔNG CHỮA NGUYÊN NHÂN"*.
+
+Thứ phiên này thêm được vào #504 là một dữ kiện mà các lần trước chưa có: **TÊN BƯỚC** chỗ đồng hồ
+chạm trần (`lease-publish selftest`, bước 20) và **thời điểm** (60:17). Chưa đo được các lần huỷ
+TRƯỚC đó chết ở bước nào — `list_workflow_runs` lọc theo `branch: master` chỉ trả về 2 lượt gate
+trong 30 lượt gần nhất, nên **không** khẳng định "vẫn bước ấy"; đó là câu chưa có phép đo.
 
 # ★ dev-side — r368: ghi sổ #493 — 17 verdict codex + 17 biên nhận v2 vào `ops/reviews`, land evidence, và một lời khai `effort` bị PHÉP ĐO bác (2026-09-11)
 

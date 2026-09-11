@@ -497,12 +497,12 @@ số để trôi. Xem §4.
 cùng của mục này**, tức sau khi biên nhận lượt 3 và hàng mục lục đã vào cây và manifest đã tái sinh.
 Đây là nếp §4 số 3, và nó ra đời vì bảng cũ từng khai `49 ĐẠT v2 · tổng 102` cho một cây đã là
 `50 · 103`. Chuỗi GHIM SHA của bộ đếm ấy: `4d2a6f6` ⇒ **49/102** · `4e6a2d5` ⇒ **50/103** ·
-`25974e7` ⇒ **51/104** · `f6ec9c0` ⇒ **52/105** · head hiện tại (có biên nhận lượt 5) ⇒ **53/106**. Nó tăng MỘT mỗi lần
+`25974e7` ⇒ **51/104** · `f6ec9c0` ⇒ **52/105** · `e27d839` ⇒ **53/106** · head hiện tại ⇒ **57/110** — nhảy **4** vì merge `c00c88a` mang theo bốn biên nhận của `r363` (#492), không phải vì mục này. Nó tăng MỘT mỗi lần
 một biên nhận vào kho, nên mọi con số của nó bắt buộc phải neo commit:
 
 ```
 ops/lease_publish_test.py            ⇒ 146/146 đạt · đã chạy=146 · bỏ qua=0    (t27 xanh với hồ sơ mới)
-ops/bien_nhan_v2.py --root .         ⇒ rc=0 · TỔNG ĐẠT · 53 ĐẠT v2 · 0 vi phạm · 0 KHÔNG ĐO ĐƯỢC · tổng 106
+ops/bien_nhan_v2.py --root .         ⇒ rc=0 · TỔNG ĐẠT · 57 ĐẠT v2 · 0 vi phạm · 0 KHÔNG ĐO ĐƯỢC · tổng 110
 ops/cong_cu.py kiem-tra --json       ⇒ rc=0 · tổng DAT · canary actionlint_shellcheck DAT
 ops/cong_cu_test.py                  ⇒ ca=23 · đột biến=18 · lỗi đột biến=0
 scripts/tl.py doc-claims-check       ⇒ rc=0 · ok=true

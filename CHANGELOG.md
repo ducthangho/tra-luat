@@ -1265,7 +1265,7 @@ Lưu ý một chỗ dễ đọc nhầm: mục 5 ở trên vá **LỜI KHAI** *"�
 `bo-sot-pham-vi-ref-va-vat-chat-hoa` nói **BẢNG TRÍCH bỏ sót** chính câu ấy. Vá cái trước KHÔNG
 đóng cái sau — hai lỗi khác nhau trên cùng một dòng văn bản.
 
-## Cross-review PR #493 — MƯỜI BA lượt, và hình dạng lỗi lặp lại là VÁ HỜ
+## Cross-review PR #493 — MƯỜI BỐN lượt, và hình dạng lỗi lặp lại là VÁ HỜ
 
 Hồ sơ vá lời khai sai thì cũng bị soi như mọi thứ khác.
 
@@ -1292,7 +1292,8 @@ tắt có ích**, không hơn. Verdict gốc của các lượt cross-review PR 
 | 10 | `9e78e19` | `changes_requested` · **0 P1 · 0 P2 · 3 P3** | **3 ĐÃ VÁ THẬT · 1 VÁ HỜ · 0 VÁ SINH LỖI MỚI · 1 CHƯA VÁ** (đối chiếu **5** slug lượt 9) |
 | 11 | `b43d4ab` | `changes_requested` · **0 P1 · 0 P2 · 2 P3** | **2 ĐÃ VÁ THẬT · 0 VÁ HỜ · 0 VÁ SINH LỖI MỚI · 1 CHƯA VÁ** (đối chiếu **3** slug lượt 10) |
 | 12 | `e921131` | `changes_requested` · **0 P1 · 0 P2 · 3 P3** (2 lớp B + nợ D) | **1 ĐÃ VÁ THẬT · 0 VÁ HỜ · 0 VÁ SINH LỖI MỚI · 1 CHƯA VÁ** (đối chiếu **2** slug lượt 11) |
-| 13 | `89d938e` | `changes_requested` · **0 P1 · 0 P2 · 2 P3** (1 lớp B + nợ D) | (điền ở lượt sau) |
+| 13 | `89d938e` | `changes_requested` · **0 P1 · 0 P2 · 2 P3** (1 lớp B + nợ D) | **2 ĐÃ VÁ THẬT · 0 VÁ HỜ · 0 VÁ SINH LỖI MỚI · 1 CHƯA VÁ** (đối chiếu **3** slug lượt 12) |
+| 14 | `f618e01` | `changes_requested` · **0 P1 · 0 P2 · 4 P3** (1 lớp A + 1 lớp B + **2** nợ D) | (điền ở lượt sau) |
 
 Lượt 5 `approve` rồi lượt 6–8 lại `changes_requested` **không** phải mâu thuẫn: điều kiện dừng đổi
 từ *"hết P1"* sang *"hết P2"* rồi *"hết P3"* theo chỉ thị chủ kho, nên câu hỏi giao cho reviewer mỗi
@@ -1565,16 +1566,52 @@ bắn ở `opened`/`synchronize`/`reopened`"*. Nhưng hai bản chiếu — `ops
 và `pr491-review-2-…receipt.yaml` — rút gọn thành *"**GitHub không phát** `pull_request` cho sự kiện
 `edited`"*. Đó là khẳng định về **NỀN TẢNG**, trong khi nguồn chỉ nói về **MỘT workflow**.
 
-**Phản chứng có sẵn, không cần mạng:** `.github/workflows/ops-thu-hoi-admission.yml` khai
-`types: [opened, reopened, synchronize, ready_for_review, **edited**]` và **đã bắn** đúng lúc thân PR
-#493 được sửa (lượt `34560860197`, `04:05:08Z`). Nếu GitHub không phát event ấy thì nó đã không chạy.
-Tức bản chiếu **tự mâu thuẫn với một hiện vật khác của cùng đợt**.
+**Bản vá đầu của đoạn này lại hỏng theo hướng NGƯỢC — và cross-review lượt 14 chấm P3 lớp A
+`phan-chung-edited-nang-loi-ke-thanh-hien-vat`.** Nó viết *"**Phản chứng có sẵn, không cần mạng**"*
+rồi gộp vào đó cả một sự kiện runtime. Hai lỗi trong một câu:
+
+- **Cấp độ bằng chứng.** *"Đã bắn đúng lúc thân PR #493 được sửa (lượt `34560860197`, `04:05:08Z`)"*
+  là **LỜI ĐIỀU PHỐI THUẬT LẠI**, không phải thứ đọc được offline: kho không có raw event / run JSON
+  của lượt ấy. Gọi nó là *"phản chứng không cần mạng"* là **nâng một lời kể lên hạng hiện vật** —
+  đúng định nghĩa lớp A, và xảy ra bên trong đoạn viết ra để sửa một lỗi phạm vi.
+- **Phạm vi suy luận.** `ops-thu-hoi-admission.yml` khai **`pull_request_target`**, còn câu đang bác
+  nói về **`pull_request`**. **Hai event KHÁC NHAU.** Một workflow `pull_request_target` có `edited`
+  **không** chứng minh nền tảng phát `pull_request` với `edited`.
+
+**Thứ ĐỌC ĐƯỢC offline, và chỉ thế thôi:** hai tệp workflow trong kho khai hai tập event khác nhau —
+`ci.yml` để `on: pull_request` **trần** (không `types:`), `ops-thu-hoi-admission.yml` khai
+`pull_request_target` với `types: [opened, reopened, synchronize, ready_for_review, edited]`. Từ đó
+suy được đúng một điều: **`ci.yml` không chạy trên `edited`**. Semantics phát event của GitHub là
+**KHÔNG ĐO ĐƯỢC** trong gói này — và **không cần** đo nó mới thấy bản chiếu rộng hơn nguồn.
 
 Cross-review lượt 13 chấm P3 `chieu-edited-mat-pham-vi-ci-yml`. Đáng ghi vì nó là **lần thứ ba liên
 tiếp** lớp B trúng cùng một hình dạng: câu gốc đúng phạm vi, bản chiếu **nới rộng** — lượt 11 mất
 nhãn nguồn runtime, lượt 12 bỏ chỗ dè dặt *"được cho là"*, lượt 13 đổi *"workflow không chạy"* thành
 *"nền tảng không phát"*. **Rút gọn một câu là thao tác NGUY HIỂM**: thứ bị cắt đầu tiên luôn là mệnh
 đề giới hạn, vì nó trông như chi tiết phụ.
+
+**CHUỖI NĂM SỐ TÔI VIẾT TRONG THÔNG ĐIỆP MERGE SAI BỐN TRÊN NĂM — đính chính, neo `f618e01`.**
+Thông điệp merge lần 5 ghi *"2/2/1/4/11 ở năm lần merge"*. Sai. Đọc lại **chính thông điệp commit của
+năm lần merge ấy** — chúng nằm sẵn trong lịch sử, tôi chỉ cần `git log` thay vì nhớ:
+
+| # | merge | master mang vào | biên nhận thêm | vi phạm lúc CHƯA commit |
+|---:|---|---|---:|---:|
+| 1 | `7e236cf` | `c31d8f1` | 6 | **6** |
+| 2 | `dd4a3ae` | `0721811` | 2 | **1** |
+| 3 | `9e78e19` | `c00c88a` | 4 | **4** |
+| 4 | `e921131` | `27c413c` | 2 | **2** |
+| 5 | `f618e01` | `4b5184e` | 11 | **11** |
+
+Chuỗi đúng là **6 · 1 · 4 · 2 · 11**. Cross-review lượt 14 chấm P3 lớp B
+`chuoi-nam-merge-chep-sai-bon-moc`, và đo độc lập ra cùng chuỗi ấy.
+
+**Và "quy luật" tôi khai kèm theo — *"số vi phạm = số biên nhận master mang sang"* — CŨNG SAI**, có
+phản chứng **ngay trong năm ca tôi viện dẫn**: lần **2** thêm **2** biên nhận mà chỉ **1** vi phạm.
+Bốn trên năm khớp, nên nó là một **hình dạng hay gặp**, không phải luật. Tôi đã gọi một mẫu 4/5 là
+"đúng quy luật" — đúng thứ hồ sơ này tổng kết suốt mười bốn lượt.
+
+**Điều đáng nhớ không phải con số mà là CHỖ tôi lấy nó:** cả năm con số đã được chính tôi đo và ghi
+vào thông điệp commit lúc ấy. Chúng nằm trong `git log`, cách một lệnh. Tôi vẫn chép từ trí nhớ.
 
 **Lớp D không đóng được ở PR này.** Mã thực thi `doc-claims-check` nằm ở
 `scripts/tl_core/workflow.py` (lượt 8 chỉ đúng địa chỉ; bản trước của câu này viết *"đòi sửa

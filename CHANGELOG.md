@@ -619,7 +619,7 @@ Lưu ý một chỗ dễ đọc nhầm: mục 5 ở trên vá **LỜI KHAI** *"�
 `bo-sot-pham-vi-ref-va-vat-chat-hoa` nói **BẢNG TRÍCH bỏ sót** chính câu ấy. Vá cái trước KHÔNG
 đóng cái sau — hai lỗi khác nhau trên cùng một dòng văn bản.
 
-## Cross-review PR #493 — MƯỜI MỘT lượt, và hình dạng lỗi lặp lại là VÁ HỜ
+## Cross-review PR #493 — MƯỜI HAI lượt, và hình dạng lỗi lặp lại là VÁ HỜ
 
 Hồ sơ vá lời khai sai thì cũng bị soi như mọi thứ khác.
 
@@ -635,16 +635,17 @@ tắt có ích**, không hơn. Verdict gốc của các lượt cross-review PR 
 | lượt | head | kết quả | đối chiếu lượt trước |
 |---|---|---|---|
 | 1 | `4af7e29` | `changes_requested` · **1 P1 · 4 P2 · 12 P3** | — |
-| 2 | `9484970` | `changes_requested` · **1 P1 · 4 P2 · 15 P3** | **0 ĐÃ VÁ THẬT · 6 VÁ HỜ · 11 CHƯA VÁ** |
-| 3 | `fae2fb7` | `changes_requested` · **0 P1 · 2 P2 · 15 P3** | **7 ĐÃ VÁ THẬT · 3 VÁ HỜ · 10 CHƯA VÁ** |
-| 4 | `b004da9` | `changes_requested` · **0 P1 · 1 P2 · 15 P3** | — |
-| 5 | `f5098dd` | **`approve`** · **0 P1 · 0 P2 · 14 P3** | — |
-| 6 | `2c57e99` | `changes_requested` · **0 P1 · 0 P2 · 10 P3** | **11 ĐÃ VÁ THẬT · 2 VÁ HỜ · 1 CHƯA VÁ** |
-| 7 | `a4bc01d` | `changes_requested` · **0 P1 · 0 P2 · 9 P3** | **4 ĐÃ VÁ THẬT · 3 VÁ HỜ · 2 VÁ SINH LỖI MỚI · 1 CHƯA VÁ** |
-| 8 | `025c6b2` | `changes_requested` · **0 P1 · 0 P2 · 10 P3** | **7 ĐÃ VÁ THẬT · 0 VÁ HỜ · 1 VÁ SINH LỖI MỚI · 1 CHƯA VÁ** |
-| 9 | `dd4a3ae` | `changes_requested` · **0 P1 · 0 P2 · 5 P3** | **7 ĐÃ VÁ THẬT · 2 VÁ HỜ · 0 VÁ SINH LỖI MỚI · 1 CHƯA VÁ** |
-| 10 | `9e78e19` | `changes_requested` · **0 P1 · 0 P2 · 3 P3** | **7 ĐÃ VÁ THẬT · 2 VÁ HỜ · 0 VÁ SINH LỖI MỚI · 1 CHƯA VÁ** (đối chiếu 10 slug lượt 9) |
-| 11 | `b43d4ab` | `changes_requested` · **0 P1 · 0 P2 · 2 P3** | (điền ở lượt sau) |
+| 2 | `9484970` | `changes_requested` · **1 P1 · 4 P2 · 15 P3** | **0 ĐÃ VÁ THẬT · 6 VÁ HỜ · 0 VÁ SINH LỖI MỚI · 11 CHƯA VÁ** (đối chiếu **17** slug lượt 1) |
+| 3 | `fae2fb7` | `changes_requested` · **0 P1 · 2 P2 · 15 P3** | **7 ĐÃ VÁ THẬT · 3 VÁ HỜ · 0 VÁ SINH LỖI MỚI · 10 CHƯA VÁ** (đối chiếu **20** slug lượt 2) |
+| 4 | `b004da9` | `changes_requested` · **0 P1 · 1 P2 · 15 P3** | **1 ĐÃ VÁ THẬT · 2 VÁ HỜ · 0 VÁ SINH LỖI MỚI · 14 CHƯA VÁ** (đối chiếu **17** slug lượt 3) |
+| 5 | `f5098dd` | **`approve`** · **0 P1 · 0 P2 · 14 P3** | **3 ĐÃ VÁ THẬT · 0 VÁ HỜ · 1 VÁ SINH LỖI MỚI · 13 CHƯA VÁ** (đối chiếu **17** slug lượt 4) |
+| 6 | `2c57e99` | `changes_requested` · **0 P1 · 0 P2 · 10 P3** | **11 ĐÃ VÁ THẬT · 2 VÁ HỜ · 0 VÁ SINH LỖI MỚI · 1 CHƯA VÁ** (đối chiếu **14** slug lượt 5) |
+| 7 | `a4bc01d` | `changes_requested` · **0 P1 · 0 P2 · 9 P3** | **4 ĐÃ VÁ THẬT · 3 VÁ HỜ · 2 VÁ SINH LỖI MỚI · 1 CHƯA VÁ** (đối chiếu **10** slug lượt 6) |
+| 8 | `025c6b2` | `changes_requested` · **0 P1 · 0 P2 · 10 P3** | **7 ĐÃ VÁ THẬT · 0 VÁ HỜ · 1 VÁ SINH LỖI MỚI · 1 CHƯA VÁ** (đối chiếu **9** slug lượt 7) |
+| 9 | `dd4a3ae` | `changes_requested` · **0 P1 · 0 P2 · 5 P3** | **7 ĐÃ VÁ THẬT · 2 VÁ HỜ · 0 VÁ SINH LỖI MỚI · 1 CHƯA VÁ** (đối chiếu **10** slug lượt 8) |
+| 10 | `9e78e19` | `changes_requested` · **0 P1 · 0 P2 · 3 P3** | **3 ĐÃ VÁ THẬT · 1 VÁ HỜ · 0 VÁ SINH LỖI MỚI · 1 CHƯA VÁ** (đối chiếu **5** slug lượt 9) |
+| 11 | `b43d4ab` | `changes_requested` · **0 P1 · 0 P2 · 2 P3** | **2 ĐÃ VÁ THẬT · 0 VÁ HỜ · 0 VÁ SINH LỖI MỚI · 1 CHƯA VÁ** (đối chiếu **3** slug lượt 10) |
+| 12 | `e921131` | `changes_requested` · **0 P1 · 0 P2 · 3 P3** (2 lớp B + nợ D) | (điền ở lượt sau) |
 
 Lượt 5 `approve` rồi lượt 6–8 lại `changes_requested` **không** phải mâu thuẫn: điều kiện dừng đổi
 từ *"hết P1"* sang *"hết P2"* rồi *"hết P3"* theo chỉ thị chủ kho, nên câu hỏi giao cho reviewer mỗi
@@ -685,8 +686,11 @@ chính `README.md` và hai trường khác trong `receipt.yaml`. Sai lầm khôn
 mà là *"đụng đúng những chỗ mình nhớ ra, rồi coi đó là đủ"*.
 
 **Bài học rẻ và dùng được ngay:** trước khi gọi một finding là đã vá, `grep` chính câu khẳng định
-ấy trên TOÀN BỘ hiện vật của PR — `CHANGELOG.md`, `ops/**`, và thân PR — chứ đừng sửa chỗ mình
-nhớ ra. Bốn trong năm finding lượt 2 chết đúng vì bước `grep` ấy không được làm.
+ấy trên TOÀN BỘ hiện vật của PR, **liệt kê từng đường dẫn chứ đừng viết một cụm glob**:
+`CHANGELOG.md` · `ops/land/pr491-…-land-evidence.yaml` · `ops/reviews/README.md` · **cả hai**
+`ops/reviews/pr491-review-{1,2}-codex-verdict.receipt.yaml` · **thân PR** · **thông điệp commit**
+— chứ đừng sửa chỗ mình nhớ ra. (Bản trước viết `ops/**`, và **cụm chưa mở ấy đã che hai lỗi qua
+hai lượt** — xem mục *"phân loại theo TRƯỜNG"* phía dưới.) Bốn trong năm finding lượt 2 chết đúng vì bước `grep` ấy không được làm.
 
 **Và `grep` một dòng vẫn CHƯA đủ** — lượt 3 chỉ ra một phản ví dụ còn sống mà phép vét bỏ qua, vì
 câu ấy **bị xuống dòng giữa hai chữ** (`mọi số` / `Git`) nên không khớp bất kỳ mẫu một dòng nào.
@@ -824,8 +828,8 @@ Thứ đo được là hai đường số, và **phải khai rõ đang đếm T�
 | **P3** | 12 | 15 | 15 | 15 | 14 | 10 | 9 | 10 | 5 |
 | **TỔNG P1+P2+P3** | **17** | **20** | **17** | **16** | 14 | 10 | 9 | 10 | 5 |
 
-(Lượt 10 trên `9e78e19`: **0 P1 · 0 P2 · 3 P3**; lượt 11 trên `b43d4ab`: **0 P1 · 0 P2 · 2 P3**
-⇒ cả hai đường đều là **3** rồi **2**.)
+(Lượt 10 `9e78e19`: **3**; lượt 11 `b43d4ab`: **2**; lượt 12 `e921131`: **3** — từ lượt 5 trở đi
+hai đường trùng nhau vì không còn P1/P2, nên ba số này đúng cho cả hai.)
 
 Hai đường **chỉ trùng từ lượt 5** trở đi, vì từ đó không còn P1/P2. Kèm **0 `VÁ SINH LỖI MỚI`** ở
 lượt 9.
@@ -861,12 +865,52 @@ Hai chi tiết làm nó **khó thấy đúng kiểu**, và đó mới là bài h
 - Mục **kề bên** (`pre_merge_checks[1]`) đã có sẵn trường `canh_bao_doc_ket_qua`. Lược đồ không
   thiếu chỗ; tôi chỉ không điền. Nên đây không phải giới hạn công cụ, thuần là sót.
 
-**Tập bản chiếu ĐẦY ĐỦ của PR này — đếm ra để lần sau không phải nhớ:** `CHANGELOG.md` (mục này) ·
-`ops/land/pr491-…-land-evidence.yaml` · `ops/reviews/README.md` · **thân PR** trên GitHub ·
-**thông điệp commit**. Năm. Hai tệp biên nhận là **NGUỒN** (chúng tự khai `nguon_cac_scalar_tren`
-và `khong_do_duoc` đúng), hai tệp verdict là **nguyên văn neo băm** — không sửa; `RELEASE_MANIFEST.json`
-là tệp sinh. Bộ quét nào chỉ liệt kê *"`CHANGELOG` · `ops/**` · thân PR"* thì **`ops/**` là một
-cụm chưa mở**, và chính chỗ chưa mở ấy chứa hồ sơ bền nhất của đợt.
+**Tập bản chiếu — và bản đầu của chính đoạn này PHÂN LOẠI SAI ĐƠN VỊ, cross-review lượt 12 bắt
+được.** Nó liệt kê **năm** bản chiếu (`CHANGELOG.md` · `ops/land/pr491-…-land-evidence.yaml` ·
+`ops/reviews/README.md` · thân PR · thông điệp commit) rồi gọi **hai tệp biên nhận là "NGUỒN"** và
+**loại chúng khỏi bộ vét**. Sai — và sai theo đúng cách đắt nhất: nó **phân loại theo TỆP** trong
+khi đơn vị đúng là **TRƯỜNG**.
+
+Một biên nhận v2 chứa **nhiều hạng nguồn cùng lúc**: `bang_bam`/`byte` là **ĐO ĐƯỢC**;
+`nguon_cac_scalar_tren` là **tự khai đúng** (nó là nguồn của chính nó); nhưng `reviewer_khai`
+**CHIẾU lại** từ verdict, và `dieu_phoi_do_lai` **CHIẾU lại** từ những hồ sơ khác — tức chúng là
+**bản chiếu nằm bên trong một tệp được gắn nhãn "nguồn"**. Gọi cả tệp là *"nguồn"* nên không ai vét
+tới chúng.
+
+**Giá phải trả, đo được:** trường `dieu_phoi_do_lai` của biên nhận lượt 1 viết *"Cặp 43/1 → 44/6
+**thuộc** run `34176439015`"*, trong khi nguồn (`ops/land/pr477-…-land-evidence.yaml`) viết *"hai
+mẫu **ĐƯỢC CHO LÀ** của cùng một job"* và nói rõ **thiếu response trước/sau để kiểm danh tính
+job/attempt**. Chắc hơn nguồn. Mỉa mai đúng chỗ: **biên nhận lượt 2 ĐÃ chấm đúng lỗi ấy** (*"cặp
+run viết 'thuộc run' chắc hơn nguồn"*) và `r358` đã sửa theo — chỉ biên nhận lượt 1 sót lại, vì nó
+nằm trong cái tệp vừa được miễn vét.
+
+**Nếp đúng, phát biểu bằng đơn vị TRƯỜNG:** mọi tệp hồ sơ của PR đều phải được mở ra và phân hạng
+**từng trường**; không tệp nào được miễn vét chỉ vì cái tên của nó. Hai tệp verdict là ngoại lệ
+**duy nhất** — chúng là **nguyên văn neo băm**, sửa một byte là `t26` ĐỎ. Danh sách tệp cần mở:
+`CHANGELOG.md` · `ops/land/pr491-…-land-evidence.yaml` · `ops/reviews/README.md` ·
+**cả hai** `pr491-review-{1,2}-…receipt.yaml` · thân PR · thông điệp commit. `RELEASE_MANIFEST.json`
+là tệp sinh.
+
+**Và đừng viết chỉ dẫn vét bằng một cụm glob.** Bộ quét ghi *"`CHANGELOG` · `ops/**` · thân PR"* thì
+`ops/**` là một **cụm chưa mở** — nó đọc như đã phủ, nhưng người làm theo sẽ không biết bên trong có
+mấy tệp và mấy hạng trường. **Liệt kê từng đường dẫn.** Hai lượt liền (11 rồi 12) cùng một gốc: lần
+đầu chỗ chưa mở là `ops/land/`, lần sau là chính hai biên nhận.
+
+**Ô BẢNG CHÉP NHẦM NGUỒN — và nó phóng con số đóng thật từ 3 lên 7.** Hàng lượt 10 tôi điền
+*"7 ĐÃ VÁ THẬT · 2 VÁ HỜ · 0 · 1 (đối chiếu **10** slug lượt 9)"*. Sai nguồn: đó là ô của **lượt 9**
+nằm ngay hàng trên. Lượt 10 đối chiếu **5** slug của lượt 9 và cho **3 · 1 · 0 · 1**. Cross-review
+lượt 12 chấm P3 `doi-chieu-luot10-chep-nham-hang-luot9`; tôi tự parse lại phần `ĐỐI CHIẾU` của
+verdict 10 và họ đúng.
+
+**Vá theo LỚP chứ không chỉ ô ấy:** tôi đếm lại phần `ĐỐI CHIẾU` của **cả mười một** verdict rồi
+sinh lại **toàn bộ cột**, một định dạng duy nhất kèm **số slug và lượt nguồn** ở mỗi ô. Việc ấy lộ
+thêm hai khuyết tật **không ai chấm**: hàng **4** và hàng **5** bỏ trống ô đối chiếu trong khi
+verdict có dữ liệu (`1·2·0·14` và `3·0·1·13`), và các hàng cũ bỏ hẳn cột `VÁ SINH LỖI MỚI` khi nó
+bằng 0 — đọc thành *"không có mục ấy"* thay vì *"bằng không"*.
+
+**Và trong lúc vá nó tôi suýt tái phạm y hệt:** ghi hàng lượt 11 là `1 ĐÃ VÁ THẬT` từ trí nhớ, đo
+lại thì là **2**. Chỉ vì đã dựng phép đếm máy trước khi ghi nên mới bắt được. Đó là lý do cột này
+nay **sinh ra từ phép đếm**, không chép tay.
 
 **Lớp D không đóng được ở PR này.** Mã thực thi `doc-claims-check` nằm ở
 `scripts/tl_core/workflow.py` (lượt 8 chỉ đúng địa chỉ; bản trước của câu này viết *"đòi sửa

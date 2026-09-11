@@ -54,8 +54,13 @@ ba_p1_va_thu_dieu_phoi_TU_DO_LAI_truoc_khi_va:
     reviewer_khai: 'r358 khôi phục một kết luận nguyên nhân mà nguồn đã RÚT'
     dieu_phoi_do_lai: >-
       `ops/land/pr477-dung-goi-review-land-evidence.yaml`, khoá `nguyen_nhan_cua_lan_doc_43_4`, ghi
-      nguyên văn **CHƯA XÁC ĐỊNH**. Cặp 43/1 → 44/6 thuộc run `34176439015` (merge `585c7d5`);
-      run đang tranh cãi là `34169756563` (merge `802fc01`). Mẫu giữa chừng là 1, không phải 4.
+      nguyên văn **CHƯA XÁC ĐỊNH**. Theo hồ sơ điều phối ở đó, cặp 43/1 → 44/6 là hai mẫu **ĐƯỢC
+      CHO LÀ** của cùng một job thuộc run `34176439015` (merge `585c7d5`) — nguồn nói rõ **thiếu
+      response trước/sau để kiểm danh tính job, attempt, danh sách bước**, nên đừng đọc thành đã
+      xác minh; run đang tranh cãi là `34169756563` (merge `802fc01`). Mẫu giữa chừng là 1, không
+      phải 4. (Giới hạn này được KHÔI PHỤC theo cross-review PR #493 lượt 12: biên nhận lượt 2 đã
+      chấm đúng chỗ *"cặp run viết 'thuộc run' chắc hơn nguồn"* và `r358` đã sửa theo, nhưng chính
+      biên nhận lượt 1 thì sót.)
     ket_luan: 'reviewer ĐÚNG'
 
 nam_p2_deu_do_lai_duoc:

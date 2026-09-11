@@ -1,9 +1,9 @@
-# Đặc tả packet — T125-RA-JOB-RIENG (revision 3)
+# Đặc tả packet — T125-RA-JOB-RIENG (revision 4)
 
 - `packet_id`: **T125-RA-JOB-RIENG**; ID bền theo `PROTOCOL §3.2` là `wp<packet_issue>`.
 - `packet_issue`: **(để trống — chủ kho cấp)**
 - `mission_issue`: **(để trống — chủ kho cấp.)** Khuyến nghị `#467` (mission đang ôm `#463`).
-- `revision`: **3** · `generation`: 1 · soạn **11:0xZ 11-09-2026**
+- `revision`: **4** · `generation`: 1 · soạn **11:0xZ 11-09-2026**
 - `depends_on`: **`[wp503]`** — `ops/lease_publish_test.py` đang bị `#503` giữ (đo ở `write_set`).
 - `executor`: claude · `environment`: cloud
 - `risk`: **sensitive** · `review_class`: **sensitive** (`.github/workflows/**`, `§8`)
@@ -19,7 +19,9 @@
 
 `t125_AB_toan_suite_KHONG_doi_verdict_theo_ambient_actor` chạy lại **toàn bộ** suite
 `ops/lease_publish_test.py` **hai** lượt trong tiến trình con (A/B trên `GITHUB_ACTOR`). Nên bước
-`lease-publish selftest` tốn **≈ 2,93 lần** thứ nó cần tốn, trên **mọi** nền.
+`lease-publish selftest` tốn **≈ 2,93 lần** thứ nó cần tốn. **Bội số `2,9312` đo trên LINUX** (N3);
+bội số trên `windows-latest` **chưa ai đo** (`chua_do_duoc` #1). Cấu trúc *"chạy lại toàn bộ suite hai
+lượt"* đúng trên mọi nền; **con số** thì không được khai là đúng trên mọi nền.
 
 Trên `ubuntu-latest` bội số ấy vô hại (`≈ 2,4` phút). Trên `windows-latest` nó là **toàn bộ biên còn
 lại của trần `timeout-minutes: 60`**, và từ `10-09-2026` nó làm job bị cắt (bảng `N1` dưới).
@@ -42,7 +44,7 @@ lại của trần `timeout-minutes: 60`**, và từ `10-09-2026` nó làm job b
 | N8 | PR `#492` thêm vào chính tệp suite | **+1327 / −1** dòng `ops/lease_publish_test.py` | `git diff --numstat 28ba133 0721811` | 10:5xZ 11-09 |
 | N9 | required status check của `master` **hôm nay** | **đúng MỘT**: `gate (ubuntu-latest)` | `GET /repos/…/rules/branches/master` ⇒ ruleset `bao-ve-cong-dang-lease` id `20856202`, `enforcement: active` | 10:4xZ 11-09 |
 | N10 | toán hạng ngữ cảnh mà `matrix.os` thật sự đọc | `github.event_name` · `github.ref` · `github.event.pull_request.labels.*.name` — **KHÔNG** có `inputs` | `yaml.safe_load` trên `origin/master:.github/workflows/ci.yml` | 10:5xZ 11-09 |
-| N11 | phút TÍNH TIỀN bị 8 lượt `cancelled` đốt mà **không thu được thông tin nào** | **723,96** phút (hệ số windows ×2) = **36,2 %** hạn mức Free `2.000` phút/tháng | tính từ N1, 6 lượt từ `10-09T04:55Z` | 11:0xZ 11-09 |
+| N11 | phút TÍNH TIỀN của **8** lượt `cancelled` ở N1, **không lượt nào cho kết quả hoàn tất hợp lệ** | Σ thời lượng job = **482,55** phút × hệ số windows `2` = **965,10** phút = **48,3 %** hạn mức Free `2.000` phút/tháng | N1; `run_id` `34576916278` `34568864158` `34563553711` `34552510232` `34549206309` `34439063235` `34033930149` `34023635399` | 11:0xZ 11-09 |
 
 ### THUẬT LẠI — số GitHub Actions, `run_id` là mỏ neo truy tìm
 
@@ -53,15 +55,29 @@ lại của trần `timeout-minutes: 60`**, và từ `10-09-2026` nó làm job b
 
 ### ƯỚC CÓ ĐIỀU KIỆN — không phải phép đo
 
-Nếu bội số N3 (`2,9312`, đo trên Linux) cũng đúng trên `windows-latest` — **chưa ai đo** — thì bỏ
-`t125` khỏi bước 20 đưa nó về `26,25 / 2,9312 ≈ **8,96** phút`, và job về
-`60,52 − 26,25 + 8,96 ≈ **43,23** phút`.
+**Mô hình phải có BA số hạng, và hai trong ba CHƯA ĐO ĐƯỢC.** Job Windows sau khi bỏ `t125` là:
 
-**Đối chiếu độc lập làm ước này mạnh hơn, nhưng vẫn không biến nó thành phép đo:** `43,23` nằm gọn
-trong dải **`40,20`–`53,53`** phút của **18** lượt `success` ở N1. Hai đường tính độc lập gặp nhau.
+```
+job_sau = prefix + buoc20_hoan_tat/boi_so + suffix
+  prefix          = buoc 1..19  = 33,97 phut   (do duoc tren luot bi cat)
+  buoc20_hoan_tat = KHONG BIET, >= 26,25 phut  (CAN DUOI - buoc bi CAT dung o day)
+  suffix          = buoc 21..41 = KHONG BIET   (KHONG phai 0 - 21 buoc nay CHUA CHAY lan nao
+                                                tren luot bi cat, nen khong co so)
+  boi_so          = KHONG BIET tren Windows    (2,9312 la so LINUX)
+```
 
-**Thứ ước này KHÔNG nói:** nó không nói job sẽ chạy trọn. Bội số trên Windows chưa đo (`chua_do_duoc`
-#1), và N7 cho thấy hai nền **không** tỉ lệ với nhau ở phần việc mới.
+**Phép trừ thẳng `60,52 − 26,25 + 26,25/2,9312 = 43,23` SAI MÔ HÌNH**, và sai theo **hai** hướng cùng
+lúc, cả hai đều làm ước **nhỏ hơn** sự thật:
+1. nó lấy `26,25` — một **cận dưới** của bước bị cắt — làm **giá trị thật**;
+2. nó ngầm đặt `suffix = 0`, trong khi `suffix` là **21 bước chưa từng chạy** trên lượt ấy.
+
+**Nên đặc tả KHÔNG khai một con số cho job sau tách.** Thứ khai được: bỏ `t125` làm bước 20 giảm theo
+hệ số `1/bội_số`; mọi số hạng khác **để mở** cho tới khi có một lượt Windows **hoàn tất** sau khi
+packet land — đó chính là `A1(b)`.
+
+**Và dải `40,20`–`53,53` của 18 lượt `success` (N1) KHÔNG phải đối chiếu độc lập**: cả 18 lượt ấy
+nằm **trước** `#492`, tức khác tải. Dùng chúng làm cận cho job sau `#492` là mượn mẫu của một tải
+khác — đúng bệnh *"ghép sai lượt"*.
 
 ### Thứ KHÔNG được suy ra, nói thẳng
 
@@ -69,8 +85,9 @@ trong dải **`40,20`–`53,53`** phút của **18** lượt `success` ở N1. H
 N1, khi bước 20 tốn `2,45`–`3,88` phút. Nguyên nhân trực tiếp là **`#492` thêm `+1327` dòng test**
 (N8) vào một suite mà `t125` nhân **2,93** lần (N3). `t125` là **hệ số khuếch đại**, không phải nguồn.
 
-Hệ quả cho phạm vi: packet này cắt hệ số khuếch đại — việc ấy đủ để đưa job về dải đã đo (N2, ước ở
-trên). Nó **không** chạm phần việc mới của `#492`, và **không** có cổng nào canh tốc độ tăng của
+Hệ quả cho phạm vi: packet này cắt **hệ số khuếch đại**, và chỉ thế. Nó **KHÔNG** khai rằng việc ấy
+đủ đưa job về dải đã đo — hai trong ba số hạng của mô hình trên **chưa đo được**. Nó **không** chạm
+phần việc mới của `#492`, và **không** có cổng nào canh tốc độ tăng của
 phần ấy (`chua_do_duoc` #3).
 
 ## `write_set`
@@ -120,8 +137,10 @@ lại**, không chép dòng này.
 **Ràng buộc chi phí, áp cho MỌI tiêu chí dưới đây (chỉ thị chủ kho 11-09-2026):**
 **KHÔNG phóng lượt CI / full CI khi chưa đủ điều kiện merge.** Cụ thể: mọi lượt
 `workflow_dispatch` mà `A1`/`A2`/`A4` cần chỉ được phóng **sau khi** bản vá đã qua lint/test tại chỗ
-**và** đã có cross-review; không phóng lượt để "thử xem". Căn cứ đo được: N11 — **723,96** phút tính
-tiền (**36,2 %** hạn mức tháng) đã bị đốt bởi 8 lượt `cancelled` **không thu được thông tin nào**.
+**và** đã có cross-review; không phóng lượt để "thử xem". Căn cứ đo được: N11 — **965,10** phút tính
+tiền (**48,3 %** hạn mức tháng) bị **8** lượt `cancelled` tiêu mà **không lượt nào cho một kết quả
+hoàn tất hợp lệ**. *(Nói "không có kết quả hoàn tất hợp lệ", KHÔNG nói "thu 0 thông tin": chính các
+bước bị cắt đang được dùng làm cận dưới và làm chẩn đoán trong đặc tả này.)*
 Vi phạm ràng buộc này ⇒ ghi vào biên nhận, không tự bỏ qua.
 
 ---
@@ -133,14 +152,39 @@ cộng biên ⇒ `0,45`. Đơn vị: **giây của BƯỚC**, đọc qua `list_w
 
 - **(a) `ubuntu-latest` — VẾ BẮT BUỘC, và nó ĐO ĐƯỢC NGAY.** Bước `lease-publish selftest` trong job
   `gate` sau tách ≤ **`0,45 ×`** thời lượng của chính nó ở lượt nền cùng `event`, cùng nhánh.
-  Mẫu số **tồn tại và ổn định**: `2,32`–`2,42` phút trên 5 lượt `push`/`master` liên tiếp sau `#492`
-  (hiện vật N1). **Không có nhánh `KHÔNG ĐO ĐƯỢC` ở vế này** — mẫu số có sẵn, nên
-  `KHÔNG ĐO ĐƯỢC` ở đây là **ĐỎ**.
+  Mẫu số **tồn tại**: **7** lượt `push`/`master` `success` sau `#492` cho `1,90`–`2,42` phút
+  (hiện vật `do-nen-hai-nen.txt`, cửa sổ đo **`10-09T04:55Z` … `11-09T11:06Z`**).
+  **Không có nhánh `KHÔNG ĐO ĐƯỢC` ở vế này** — mẫu số có sẵn, nên `KHÔNG ĐO ĐƯỢC` ở đây là **ĐỎ**.
+  **Mẫu số phải ĐO LẠI tại lúc thi công, KHÔNG chép dải trên.** Bản trước của chính dòng này khai
+  `2,32`–`2,42` trên **5** lượt; đo lại `12:4xZ 11-09-2026` ⇒ **7** lượt, dải `1,90`–`2,42` — hai
+  lượt mới nhất (`0bf0ba7`, `fe05fa6`) **nằm ngoài** dải cũ. Con số hết hạn trong đúng một ngày.
+  Vì thế `A1(a)` neo vào **tỉ lệ so mẫu số ĐO CÙNG LƯỢT**, và dải trên chỉ là chứng cứ rằng mẫu số
+  **tồn tại**, không phải một hằng số để so.
   **Phép làm ĐỎ:** để `t125` lại trong job `gate` ⇒ tỉ lệ `≈ 1,00` ⇒ ĐỎ.
   **Đột biến bắt buộc:** cho job `gate-t125` chạy **nhưng không** cho job `gate` bỏ `t125` ⇒ A1(a)
   phải ĐỎ. Đột biến này phân biệt *đo VIỆC BỎ* với *đo SỰ TỒN TẠI của job mới*, và nó **chạy được**
   vì mẫu số ubuntu có sẵn.
-- **(b) `windows-latest` — VẾ CÔNG BỐ, và nó quyết TRẠNG THÁI nghiệm thu.** Đọc và công bố: thời
+- **(c) BỎ TẢI TRÊN CẢ HAI NỀN — phép chứng minh ĐỘC LẬP VỚI THỜI LƯỢNG, và nó BẮT BUỘC.**
+  Vế (a) chỉ đo Ubuntu; vế (b) chỉ đọc `conclusion`. Nên **không vế nào phân biệt** hai triển khai:
+  *bỏ `t125` trên cả hai nền* và *bỏ `t125` chỉ trên Ubuntu* — nếu lượt Windows của bản thứ hai tình
+  cờ hoàn tất thì cả (a) lẫn (b) đều ĐẠT. `M1` và `ngoai_pham_vi` #3 áp **cả hai nền**, nên phải có
+  một phép đo áp cả hai nền.
+  Đòi, **cho MỖI nền trong ma trận**, lấy từ `list_workflow_jobs` của lượt sau tách:
+  1. bước `lease-publish selftest` của job `gate` **có** mang cờ bỏ — đọc từ `steps[].name` và từ
+     bản ghi BỎ QUA mà `A3` đòi, **không** đọc từ `ci.yml`;
+  2. job `gate-t125` của **chính nền ấy** tồn tại, `conclusion` **không** phải `skipped`, và bản ghi
+     A/B của `A2c` có mặt cho nền ấy;
+  3. `gate` và `gate-t125` **KHÔNG** nối bằng `needs` (đọc `yaml.safe_load`) — hai job phải chạy
+     **song song**; nối chuỗi thì `t125` vẫn nằm trên đường tới hạn của workflow dù đã ra khỏi job.
+  **Phép làm ĐỎ:** giữ `t125` **chỉ trên Windows** (bỏ cờ ở nhánh windows của ma trận) ⇒ (1) hỏng ở
+  nền windows ⇒ ĐỎ · cho `gate-t125` `needs: gate` ⇒ (3) ⇒ ĐỎ · để `gate-t125` `skipped` trên một
+  nền ⇒ (2) ⇒ ĐỎ.
+  **Ba điều kiện này KHÔNG thay được nhau:** (1) đo *đã bỏ*, (2) đo *vẫn chạy ở chỗ mới*, (3) đo
+  *ra khỏi đường tới hạn*. Thiếu bất kỳ cái nào là mù đúng một hướng.
+  **Đây là phép đo khôi phục nghĩa vụ mà vế Windows bắt buộc cũ đang gánh** — chuyển vế bắt buộc
+  sang Ubuntu là **thu hẹp**, và thu hẹp phải được thay bằng một phép đo khác, không được bỏ trống.
+
+- **(b) `windows-latest` — VẾ CÔNG BỐ thời lượng.** Đọc và công bố: thời
   lượng bước `lease-publish selftest` và `conclusion` của job `gate`, ở lượt `push`/`master` đầu tiên
   sau khi packet land.
   - job `success` ⇒ trạng thái **`ĐẠT`**; ghi số vào biên nhận. Từ đây nền của `#463` đo được.
@@ -232,6 +276,17 @@ có dấu nội suy) ⇒ ĐỎ.
 
 - **(a) tên khai ra khớp `ci.yml`.** Bản vá in danh sách **context** job mới.
   **Phép làm ĐỎ:** tên trong `ci.yml` khác tên in ra ⇒ ĐỎ.
+- **(b0) MỐC THỜI GIAN — ruleset phải được cập nhật TRƯỚC KHI MERGE.**
+  Đọc trạng thái **sau đó** không bảo vệ **lần merge đầu tiên**: một chuỗi *merge trước, thêm context
+  sau* vẫn thoả phép so tập ở thời điểm cuối, trong khi chính lần merge ấy **không** bị job mới chặn.
+  Đây là **nghĩa vụ thời gian**, không thay được bằng một phép so tập cuối cùng.
+  Đòi lưu vào biên nhận: **readback tập context** và **kết quả check trên đúng head được merge**, đo
+  **trước** thao tác merge. Mục này phải nằm trong thân Issue như một việc chủ kho làm **TRƯỚC** khi
+  merge.
+  **Phép làm ĐỎ:** biên nhận chỉ có readback **sau** land ⇒ ĐỎ.
+  **Thứ tự an toàn, để không tự khoá đường merge:** job mới phải **đã sinh ra check với đúng tên ấy
+  trên PR** rồi mới chuyển require sang nó — đừng bỏ nghĩa vụ chỉ để tránh trạng thái chờ.
+
 - **(b) TRẠNG THÁI THẬT của branch protection — đọc được, nên là tiêu chí, không phải lời nhắc.**
   Đọc `GET /repos/{owner}/{repo}/rules/branches/master`, lấy mục `type == "required_status_checks"`,
   trường `parameters.required_status_checks[].context` ⇒ tập context đang được require.
@@ -243,9 +298,15 @@ có dấu nội suy) ⇒ ĐỎ.
 
 **HAI LUẬT VỀ TÊN, cả hai đo được (N9), và sai luật nào cũng hỏng:**
 
-1. **Require theo CONTEXT, không theo `job_id`.** Ruleset lưu tên **instance** `"<job_id> (<nền>)"`.
+1. **Require theo CONTEXT, không theo `job_id`.** Ruleset lưu **tên check**, và với một job có ma
+   trận, tên ấy là `"<tên job> (<nền>)"`. **`<tên job>` là `job_id` CHỈ KHI job không khai khoá
+   `name:`** — khai `name:` thì check mang giá trị của `name`, và luật này sai. Đo trên
+   `origin/master` 12:3xZ 11-09-2026: job `gate` **không** có khoá `name` ⇒ hôm nay context đúng là
+   `job_id + nền`. Phiên thi công **đo lại** điều kiện ấy cho mỗi job mới, không suy từ dòng này.
    Đo được: hôm nay require đúng **`gate (ubuntu-latest)`** — chuỗi có dấu ngoặc và tên nền.
-   Require chuỗi `gate` trần thì **không khớp check nào** và cổng thành trang trí.
+   Require chuỗi `gate` trần thì **không khớp check nào** — và hậu quả **không** phải "cổng trang
+   trí" mà là **PR bị CHẶN vĩnh viễn**: một required check không bao giờ báo cáo giữ PR ở trạng thái
+   chờ. Cùng cơ chế với luật 2 ngay dưới, nên hai luật phải đọc cùng một cách.
 2. **KHÔNG require một context mà PR thường KHÔNG BAO GIỜ sinh ra.** `matrix.os` (N10) chỉ cho
    `windows-latest` khi `event_name == workflow_dispatch`, hoặc `ref == refs/heads/master`, hoặc PR
    mang nhãn `windows`. Một PR thường ⇒ **chỉ** `ubuntu-latest`. Nên require

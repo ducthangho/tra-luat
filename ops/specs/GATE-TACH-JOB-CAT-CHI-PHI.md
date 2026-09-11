@@ -1,9 +1,9 @@
-# Đặc tả packet — GATE-TACH-JOB-CAT-CHI-PHI (revision 9)
+# Đặc tả packet — GATE-TACH-JOB-CAT-CHI-PHI (revision 10)
 
 - `packet_id`: **GATE-TACH-JOB-CAT-CHI-PHI**; ID bền theo `PROTOCOL §3.2` là `wp<packet_issue>`.
 - `packet_issue`: **#463**
 - `mission_issue`: **#467** (*"bốn packet treo sau #456: GATE → LO-319 → 2A → 2B"*)
-- `revision`: **9** · `generation`: 1 · soạn **11:3xZ 11-09-2026**
+- `revision`: **10** · `generation`: 1 · soạn **11:3xZ 11-09-2026**
 - `depends_on`: **`[wp502, wp<T125>]`** — xem `write_set`. `wp<T125>` điền khi chủ kho cấp Issue cho
   `T125-RA-JOB-RIENG`; **packet này không được cấp lease trước khi cả hai land.**
 - `executor`: claude · `environment`: cloud
@@ -45,7 +45,7 @@ Mọi phép đo dưới đây là **đọc-only qua REST `/repos/…/actions`**;
 | G5 | required status check của `master` **hôm nay** | **đúng MỘT context**: `gate (ubuntu-latest)` | `GET /repos/…/rules/branches/master` ⇒ ruleset `bao-ve-cong-dang-lease` id `20856202`, `enforcement: active` | 10:4xZ 11-09 |
 | G6 | toán hạng ngữ cảnh mà `matrix.os` thật sự đọc | `github.event_name` · `github.ref` · `github.event.pull_request.labels.*.name` — **KHÔNG** có `inputs` | `yaml.safe_load` trên `origin/master:.github/workflows/ci.yml` | 10:5xZ 11-09 |
 | G7 | `jobs` của `ci.yml` hôm nay | **1** — `gate`; `if` mức job `None`; `timeout-minutes` `60`; **40** bước | cùng phép parse G6 | 10:5xZ 11-09 |
-| G8 | phút TÍNH TIỀN bị 8 lượt `cancelled` đốt, thu **0** thông tin | **723,96** phút (hệ số windows ×2) = **36,2 %** hạn mức Free `2.000` phút/tháng | tính từ G1 | 11:0xZ 11-09 |
+| G8 | phút TÍNH TIỀN của **8** lượt `cancelled` ở G1, **không lượt nào cho kết quả hoàn tất hợp lệ** | Σ thời lượng job = **482,55** phút × hệ số windows `2` = **965,10** phút = **48,3 %** hạn mức Free `2.000` phút/tháng | G1; `run_id` `34576916278` `34568864158` `34563553711` `34552510232` `34549206309` `34439063235` `34033930149` `34023635399` | 11:0xZ 11-09 |
 
 ### THUẬT LẠI — số GitHub Actions, `run_id` là mỏ neo truy tìm
 
@@ -145,7 +145,9 @@ tách (`gate-registry`), thay vì phải giữ hai trường hợp.
    và bản triển khai đã bị bỏ (PR #247 đóng). Kho đã trả giá hai lần cho logic điều kiện của workflow.
 3. **Song song hoá TRONG `test registry`.** Chạm `chay_moi` — vùng ba packet sau sửa; hiệu quả trên
    Windows chưa đo. Đo trên Linux: tuần tự `400` s, bộ dài nhất `270` s ⇒ trần song song hoá `−32,5 %`.
-   **Nợ có tên: `SONG-SONG-HOA-TRONG-TEST-REGISTRY`.**
+   **Nợ có tên: `SONG-SONG-HOA-TRONG-TEST-REGISTRY`** — mở packet riêng **SAU KHI có phân rã theo bộ
+   trên Windows**. Điều kiện mở ấy là phần của nợ, không phải lời khuyên: mở trước khi có phân rã là
+   tối ưu hoá một thứ chưa ai đo.
 4. **Cắt vòng lặp đột biến của `packet_loop_test.py`.** Cùng hình dạng bản vá với `#456`, nhưng tệp
    khác. **Nợ có tên: `MUTANT-WINDOWS-PACKET-LOOP`.**
 5. **Bỏ bước trùng** — đã đo, **0** bước trùng. Không có gì để làm.
@@ -172,7 +174,9 @@ tách (`gate-registry`), thay vì phải giữ hai trường hợp.
 `workflow_dispatch`: **một** lượt nền tại `start_from_sha`, **một** lượt sau tách. Mỗi lần chi ghi
 `run_id` vào biên nhận. **Vượt `N` ⇒ revision**, không tự chi thêm. Lượt `pull_request` tự bắn là
 **cổng**, không tính vào `N`. **Cấm tuyệt đối lượt "chạy thử xem sao".**
-Căn cứ: G8 — **723,96** phút tính tiền (**36,2 %** hạn mức tháng) đã bị đốt mà thu **0** thông tin.
+Căn cứ: G8 — **965,10** phút tính tiền (**48,3 %** hạn mức tháng) bị **8** lượt `cancelled` tiêu mà
+**không lượt nào cho một kết quả hoàn tất hợp lệ**. *(Nói vậy chứ không nói "thu 0 thông tin":
+chính các bước bị cắt đang được dùng làm chẩn đoán trong đặc tả này.)*
 
 **Điều kiện dừng (chỉ thị chủ kho 11-09-2026).** `review_class = sensitive` ⇒ packet chỉ đóng khi
 cross-review **`approve`** tường minh. **"0 P1 + 0 P2" KHÔNG đủ**: *"vắng mặt vì sạch"* và *"vắng mặt
@@ -253,6 +257,10 @@ Vì sao không so `rc`: `rc=1 → rc=1` che được lỗi MỚI (phản mô hì
 **Vắng `actionlint`, thiếu `shellcheck`, hay thiếu log một vế ⇒ `KHÔNG ĐO ĐƯỢC` ⇒ ĐỎ**, không phải
 delta 0. (Nền đã đo: có `shellcheck` ⇒ `rc=1` một finding `SC1003` tại `ops-don-ref.yml:106`; vắng
 ⇒ `rc=0` — hai nền khác nhau, nên phiên bản công cụ phải nằm cạnh kết quả.)
+**Phản chứng BẮT BUỘC, và nó phải được CHẠY chứ không chỉ được kể:** chèn **một lỗi shellcheck MỚI**
+vào một workflow **đã có sẵn một lỗi** ⇒ `rc` vẫn `1` **ở cả hai vế** ⇒ delta đa tập **khác rỗng**
+⇒ **ĐỎ**. Đoạn kể phép tính tập ở trên **không thay** được lần chạy ca này: một phép kiểm chưa từng
+đỏ thì chưa phải bằng chứng.
 
 **Và: KHÔNG viết cú pháp `${{ }}` trong comment của `run:`** — kho đã bị GitHub từ chối cả tệp vì
 đúng chuyện đó (`ops-don-ref.yml`, run `31971137920`, 0 job, `conclusion: failure`).
@@ -290,13 +298,31 @@ GIÁ TRỊ sau.**
 
   **Nguồn của tập kỳ vọng, và nó phải TỰ SINH RA ngữ cảnh chứ không nhận một danh sách đoán trước:**
 
-  1. `yaml.safe_load` **chính `ci.yml` tại `run.head_sha` của lượt đó** — neo vào **SHA bất biến**,
-     **không** neo tên nhánh: đọc lại theo tên nhánh sau một commit khác cho ra cây khác.
-  2. **Trích TOÀN BỘ toán hạng ngữ cảnh** mà biểu thức `matrix.os` và mọi `if` thật sự tham chiếu
-     (quét `${{ … }}` trong YAML đã parse). Hôm nay tập ấy là **`github.event_name` · `github.ref` ·
-     `github.event.pull_request.labels.*.name`** (G6) — **không** có `inputs`.
-  3. Với **mỗi** toán hạng, lấy giá trị từ metadata của **chính lượt ấy**.
-     **Toán hạng nào KHÔNG giải được ⇒ `KHÔNG ĐO ĐƯỢC` ⇒ ĐỎ.** Không đoán, không bỏ qua.
+  1. `yaml.safe_load` **chính `ci.yml` tại SHA của định nghĩa workflow ĐÃ THỰC THI lượt ấy** — neo
+     vào **SHA bất biến**, **không** neo tên nhánh.
+     **`run.head_sha` KHÔNG luôn là SHA ấy.** Với `pull_request_target` (và mọi cò đọc định nghĩa từ
+     nhánh base), định nghĩa chạy là của **base**, không của head — kho vừa trả giá đúng chỗ này:
+     `ops-thu-hoi-admission.yml` thoát `12` vì `github.workflow_sha` lệch `pull_request.base.sha`.
+     ⇒ Lấy SHA định nghĩa từ **chính lượt** (`workflow_sha`/`workflow_ref`), và **kiểm** nó khớp cây
+     dùng để giải; không khớp ⇒ `KHÔNG ĐO ĐƯỢC` ⇒ ĐỎ.
+  2. **Trích toán hạng theo VỊ TRÍ TRONG YAML, KHÔNG theo dấu nội suy.**
+     **Quét `${{ … }}` là SAI, và đo được là sai:** trong job `gate` trên `origin/master` có **10**
+     `if` mức bước, trong đó **7 ở dạng TRẦN** (không `${{ }}`) và chỉ **3** có dấu (đo 12:3xZ
+     11-09-2026). Phép trích theo delimiter bỏ sót **7/10** — và `A3` ngay dưới đã công nhận dạng
+     trần tồn tại, nên hai mục sẽ mâu thuẫn nhau.
+     ⇒ Đọc toán hạng ở **đúng những vị trí Actions coi là biểu thức**: `strategy.matrix.*` ·
+     `if` **mức job** · `if` **mức bước** — mỗi vị trí **kể cả dạng trần lẫn dạng có dấu**.
+     **KHÔNG** quét chuỗi toàn tệp: chữ trong `run:` hay comment sẽ bị nhận nhầm là biểu thức.
+  3. **Giải từng toán hạng — và "toán hạng" gồm cả HÀM, không chỉ đường dẫn ngữ cảnh.**
+     `ci.yml` hôm nay dùng `always()` · `cancelled()` · `contains()` · `fromJSON()` (đo cùng lúc);
+     `always()`/`cancelled()` phụ thuộc **trạng thái lượt**, không phải metadata tĩnh.
+     Với **mỗi** toán hạng, lấy giá trị từ metadata của **chính lượt ấy**.
+     **Toán hạng nào KHÔNG giải được — kể cả vì bộ giải chưa hỗ trợ dạng ấy — ⇒ `KHÔNG ĐO ĐƯỢC`
+     ⇒ ĐỎ.**
+     **Chốt bắt buộc, vì fail-close chỉ cứu được thứ đã TÌM THẤY:** bộ giải phải khai **tập vị trí
+     nó đã quét**; một dạng biểu thức nằm ngoài tập ấy ⇒ **ĐỎ**, không phải im lặng bỏ qua.
+     **Ca khoá:** cùng một toán hạng không giải được, đặt lần lượt trong `if` **có** dấu và `if`
+     **trần** ⇒ **cả hai** phải `KHÔNG ĐO ĐƯỢC`. Chỉ ca có dấu đỏ ⇒ bộ giải vẫn mù 7/10 ⇒ ĐỎ.
   4. Giải biểu thức dưới ngữ cảnh đó ⇒ tập **instance** ⇒ đó là kỳ vọng.
 
   **Vì sao KHÔNG được liệt kê một danh sách ngữ cảnh cố định:** bản trước ghi *"`event_name` và
@@ -343,6 +369,15 @@ nửa đầu là một lời khai thiếu nửa sau, và nửa sau đã giết C
 
 - **(a) tên khai ra khớp `ci.yml`.** Bản vá in danh sách **context** của job mới.
   **Phép làm ĐỎ:** tên trong `ci.yml` khác tên in ra ⇒ ĐỎ.
+- **(b0) MỐC THỜI GIAN — ruleset phải được cập nhật TRƯỚC KHI MERGE.**
+  Đọc trạng thái **sau đó** không bảo vệ **lần merge đầu tiên**: chuỗi *merge trước, thêm context
+  sau* vẫn thoả phép so tập ở thời điểm cuối, trong khi chính lần merge ấy **không** bị hai job mới
+  chặn. Đây là **nghĩa vụ thời gian**, không thay được bằng một phép so tập cuối cùng.
+  Đòi lưu vào biên nhận **readback tập context** và **kết quả check trên đúng head được merge**, đo
+  **trước** thao tác merge; mục này nằm trong thân Issue như việc chủ kho làm **TRƯỚC** khi merge.
+  **Phép làm ĐỎ:** biên nhận chỉ có readback **sau** land ⇒ ĐỎ.
+  **Thứ tự an toàn:** job mới phải **đã sinh check đúng tên trên PR** rồi mới chuyển require sang nó.
+
 - **(b) TRẠNG THÁI THẬT của ruleset — đọc được, nên là tiêu chí, không phải lời nhắc.**
   `GET /repos/{owner}/{repo}/rules/branches/master` ⇒ mục `type == "required_status_checks"` ⇒
   `parameters.required_status_checks[].context`. Đòi tập ấy **chứa cả bốn**:
@@ -354,9 +389,13 @@ nửa đầu là một lời khai thiếu nửa sau, và nửa sau đã giết C
 
 **HAI LUẬT VỀ TÊN, cả hai đo được (G5), sai luật nào cũng hỏng:**
 
-1. **Require theo CONTEXT, không theo `job_id`.** Ruleset lưu tên **instance** `"<job_id> (<nền>)"`.
+1. **Require theo CONTEXT, không theo `job_id`.** Ruleset lưu **tên check**; với job có ma trận tên
+   ấy là `"<tên job> (<nền>)"`, và **`<tên job>` là `job_id` CHỈ KHI job không khai khoá `name:`**.
+   Đo trên `origin/master` 12:3xZ 11-09-2026: job `gate` **không** có `name` ⇒ hôm nay đúng là
+   `job_id + nền`. Phiên thi công **đo lại** cho từng job mới, không suy từ dòng này.
    Đo được: hôm nay require đúng **`gate (ubuntu-latest)`**. Require chuỗi `gate` trần thì **không
-   khớp check nào** và cổng thành trang trí.
+   khớp check nào** — hậu quả **không** phải "cổng trang trí" mà là **PR bị CHẶN vĩnh viễn**: một
+   required check không bao giờ báo cáo giữ PR ở trạng thái chờ. Cùng cơ chế với luật 2 ngay dưới.
 2. **KHÔNG require một context mà PR thường KHÔNG BAO GIỜ sinh ra.** `matrix.os` (G6) chỉ cho
    `windows-latest` khi `event_name == workflow_dispatch`, hoặc `ref == refs/heads/master`, hoặc PR
    mang nhãn `windows`. PR thường ⇒ **chỉ** `ubuntu-latest`. Require `… (windows-latest)` sẽ **chặn
@@ -416,7 +455,38 @@ bằng `wc -l`; `comm -23` khác rỗng ⇒ **MÙ** ⇒ fail-close).
 | **lời khai rộng hơn phép đo** | **4** | bản đầu (*"không có chi phí ẩn"*, *"không phải ước lượng"*) · lượt 1 (*"43/43 bước chạy được"*) · **mới, đo 10:5xZ 11-09-2026**: *"job Windows chưa hoàn tất lần nào"* và *"bốn lượt chạm trần"* — G1 đo được **18 `success` / 8 `cancelled`** | mục *"Phát biểu đúng phạm vi"* ở phần bằng chứng; mọi số `cancelled` nay kèm mẫu số |
 | **một đặc tả vừa CẤM vừa MỜI cùng một phương án** | **1** | đo 11:3xZ 11-09-2026 | lối thoát composite (`2+1=3`) trái `A8` (đòi đúng **2**). Đã **BỎ HẲN**, không giữ làm gợi ý |
 
+### Ba mục `chua_do_duoc` của `#456` — trạng thái TỪNG MỤC, không gộp
+
+Kế thừa nguyên trạng; packet này **không** đóng thêm mục nào, và **không** được khai gộp là đã đóng.
+
+| mục của `#456` | trạng thái |
+|---|---|
+| #1 *"tổng thời gian thật của job Windows"* | **ĐÓNG.** `43,20` phút, run `34045664423`, job `success` (đọc 17:41Z 06-09-2026). |
+| #3 *"tỉ lệ 3× là đo TỔNG BƯỚC, không đo riêng đột biến"* | **ĐÓNG MỘT PHẦN.** Ước `44,3p → ~14p` cho `test registry`; thật `17,70`. **Vẫn chưa có phân rã theo bộ trên Windows** — đó là điều kiện mở `SONG-SONG-HOA-TRONG-TEST-REGISTRY` (`ngoai_pham_vi` #3). |
+| #4 *"không có đường đo Windows tại chỗ"* | **KHÔNG ĐÓNG.** Xem `chua_do_duoc` #2. |
+
 ## `chua_do_duoc`
+
+0. **NỀN LỊCH SỬ ≠ NỀN NGHIỆM THU, và nợ về nền hiện tại CHƯA bị bác.**
+   G1/G2 bác đúng **một** mệnh đề — *"job Windows chưa hoàn tất lần nào"* — bằng 18 lượt `success`,
+   gần nhất `34429604548`. Đó là **nền lịch sử**, và nó **không** chứng minh có một nền **hợp lệ dưới
+   tải hiện tại**: cả **6** lượt Windows đã kết thúc **sau `#492`** trong hiện vật đều `cancelled`.
+   `A5(3)` đòi **sinh lại** nền tại `start_from_sha` *sau khi* `T125` land, trong khi `T125 A1(b)` cho
+   `ĐẠT CÓ ĐIỀU KIỆN` khi Windows **vẫn** `cancelled`. Hai điều ấy có thể cùng xảy ra ⇒ vế TRƯỚC của
+   `A5` có thể **vẫn** `KHÔNG ĐO ĐƯỢC` khi packet này tới lượt.
+   **Khi đó: DỪNG và hỏi chủ kho** — không chép nền lịch sử `40,63` làm nền nghiệm thu (khác tải),
+   và không tự nới `A5`. `A5` hiện **fail-close** (không còn ngoại lệ như bản cũ); fail-close là chặt
+   hơn, **không** phải bằng chứng rằng vòng phụ thuộc đã hết.
+   **Và đột biến của `A1`** (gộp hai job mới trở lại `gate`) **không tự trở về `40,63`** — số ấy của
+   cây cũ, tải cũ; đột biến chỉ phải làm `A1` ĐỎ, không phải khớp một con số lịch sử.
+
+0b. **Tải còn tăng, và không ai canh tốc độ ấy — nợ RỘNG HƠN phần `#492`.**
+   Ngoài `+1327` dòng của `#492` (mục #6), chi phí còn tăng **theo số biên nhận**: `t26`+`t27` tốn
+   `20,7 ms/biên nhận` (đo 06:0xZ 11-09-2026 trên 118 biên nhận), nhân `≈10` cho nền Windows và nhân
+   bội số `t125` ⇒ cỡ `0,6`–`0,7` s/biên nhận trên đường tới hạn. **Mỗi packet ghi sổ thêm biên
+   nhận**, nên đại lượng này tăng đơn điệu theo số packet đã land.
+   **Chưa có cổng nào canh ngân sách này** — nợ, chưa có tên, ngoài phạm vi packet này.
+   Rút nợ xuống chỉ còn phần `#492` là **thu hẹp không có phép đo bác phần còn lại**.
 
 1. **Chi phí thiết lập trên Windows của job MỚI chưa ai đo.** `2,75`–`3,27` phút là đo của **một**
    job đang có. Job mới có thể tốn khác (cache runner, thứ tự cấp máy, ba lần checkout

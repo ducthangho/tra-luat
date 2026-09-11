@@ -1,9 +1,9 @@
-# Đặc tả packet — CHAM-DOT-BIEN-MIEN-NHIEM-CA-VO-CAN (revision 4)
+# Đặc tả packet — CHAM-DOT-BIEN-MIEN-NHIEM-CA-VO-CAN (revision 5)
 
 - `packet_id`: **CHAM-DOT-BIEN-MIEN-NHIEM-CA-VO-CAN**; ID bền theo `PROTOCOL §3.2` là `wp<packet_issue>`.
 - `packet_issue`: **(để trống — chủ kho cấp)**
 - `mission_issue`: **(để trống — chủ kho cấp.)** Packet sinh từ một sự cố đo được, chưa lane nào ôm.
-- `revision`: **4** · `generation`: 1 · soạn **11:1xZ 11-09-2026**
+- `revision`: **5** · `generation`: 1 · soạn **11:1xZ 11-09-2026**
 - `depends_on`: **`[]`**
 - `executor`: claude · `environment`: cloud
 - `risk`: **sensitive** · `review_class`: **sensitive**
@@ -132,7 +132,7 @@ ops/specs/CHAM-DOT-BIEN-MIEN-NHIEM-CA-VO-CAN.md   rc=0   NGƯỜI_GIỮ 0: khôn
 | M4 | Tắt ký commit ở **MỌI** kho bộ test dựng: `kho_bare` (dòng 25–66) **và** repo `src` thứ hai trong `chay_dot_bien` (dòng 186–192). Sửa một chỗ thì tám ca qua còn suite đầy đủ vẫn chết ở lần commit nguồn mutant. | `write_set` #1 |
 | M5 | Bộ chấm có **ca tự kiểm cho chính nó** — không có thì nó là thứ duy nhất trong tệp không ai canh. | `write_set` #1 |
 | M6 | **Kênh kết quả riêng**, vì **lớp ngoại lệ KHÔNG qua được ranh giới tiến trình**: bộ chấm gọi tiến trình con rồi đọc **chuỗi trên stdout**, object ngoại lệ chết ở biên. Lượt con phát kết quả ra kênh riêng; bộ chấm đọc **kênh ấy**. | `write_set` #1 |
-| M7 | **Bản ghi neo vào LƯỢT, và ca do KHUNG đóng dấu.** Mỗi bản ghi mang `(tên ca · tên mutant · số lần thử · rc · dấu phiên)`; bộ chấm chỉ nhận bản ghi neo đúng lượt nó vừa phóng, và đòi bản ghi **đóng lượt**. **Tên ca do khung đóng dấu từ trạng thái của chính khung**, KHÔNG lấy từ đối số người gọi — nên không lời gọi nào tự khai mình là ca khác. **Đúng một** bản ghi cho mỗi ca; cái thứ hai ⇒ `KHÔNG ĐO ĐƯỢC`. | `write_set` #1 |
+| M7 | **Bản ghi neo vào LƯỢT, và ca do KHUNG đóng dấu.** Mỗi bản ghi mang `(tên ca · tên mutant · số lần thử · rc · dấu phiên)`; bộ chấm chỉ nhận bản ghi neo đúng lượt nó vừa phóng. **Dấu phiên phải NGẪU NHIÊN và SINH MỚI MỖI LƯỢT** — mang và so một dấu là chưa đủ: một dấu tái dùng qua hai lần chạy cùng `(mutant, lần thử, rc)` làm bản ghi cũ được nhận lại, và ca *"bỏ so dấu"* vẫn xanh. Cấm lấy mốc thời gian độ phân giải thấp làm dấu (trùng khi chạy nhanh), và đòi bản ghi **đóng lượt**. **Tên ca do khung đóng dấu từ trạng thái của chính khung**, KHÔNG lấy từ đối số người gọi — nên không lời gọi nào tự khai mình là ca khác. **Đúng một** bản ghi cho mỗi ca; cái thứ hai ⇒ `KHÔNG ĐO ĐƯỢC`. | `write_set` #1 |
 
 ## `nghiem_thu`
 
@@ -208,6 +208,13 @@ Ba ca, mỗi ca một đột biến riêng làm **đúng ca đó** đổi màu.
    **Ca phải dựng đúng như trên, không được đổi khác:** nếu bản ghi cấy vào mang tên mutant của lượt
    **trước**, thì chốt so tên mutant đã bác nó rồi, nên gỡ chốt dấu phiên **không đổi màu gì** và ca
    trở thành xanh-vô-nghĩa. Dấu phiên phải là **biến DUY NHẤT** thì mới đo được chính nó.
+1b. `r5xx_dau_phien_phai_sinh_moi_moi_luot`: chạy **hai** lượt có **cùng** định danh nghiệp vụ
+   (cùng mutant, cùng số lần thử, cùng `rc`). Đòi **hai dấu phiên KHÁC nhau**; và cấy bản ghi của
+   lượt **thứ nhất** vào kênh của lượt **thứ hai** ⇒ **`KHÔNG ĐO ĐƯỢC`**.
+   **Phép làm ĐỎ:** cho bộ sinh trả **hằng số**, hoặc trả mốc thời gian giây ⇒ hai dấu trùng ⇒ ca ĐỎ.
+   **Vì sao ca này tách khỏi ca 1:** ca 1 đo **PHÉP SO** (fixture tự dựng một dấu khác); ca này đo
+   **BỘ SINH**. Bỏ ca này thì một triển khai dùng dấu cố định vẫn qua được cả ba ca kia.
+
 2. `r5xx_ban_ghi_thieu_dau_dong_luot`: lượt con phát đủ kết quả nhưng **không** đóng lượt. Đòi
    **`KHÔNG ĐO ĐƯỢC`** — một lượt bị giết giữa chừng có thể để lại đúng số bản ghi.
    **Phép làm ĐỎ:** bỏ phép đòi bản ghi đóng ⇒ ca ĐỎ.
@@ -224,7 +231,7 @@ Ba ca, mỗi ca một đột biến riêng làm **đúng ca đó** đổi màu.
    `chua_do_duoc` #5 và **không** được khai là đã chặn.
 
 **A6 (M5) — bộ chấm tự kiểm không phải một lời hứa.**
-Đòi **≥ 11** ca `r5xx_` mới (A1 · A1b · A2 · A3 · A4 · A5 · A5b · ba ca A5c · ba ca biên của A5b tính
+Đòi **≥ 12** ca `r5xx_` mới (A1 · A1b · A2 · A3 · A4 · A5 · A5b · **bốn** ca A5c (1, 1b, 2, 3) · ba ca biên của A5b tính
 chung một) và **mỗi ca có đúng một đột biến riêng làm nó ĐỎ**. Đếm bằng
 `(tên ca, tên đột biến, đã chạy, ĐỎ)`; ca nào không có đột biến riêng thì **không tính**.
 **Phép làm ĐỎ:** một ca thiếu đột biến ⇒ bảng đếm lệch ⇒ khai thiếu.
@@ -273,11 +280,18 @@ chưa đạt để tự cấp thẩm quyền. Người quyết vẫn là chủ k
 2. **Không đo được bản vá có làm lượt master xanh trở lại hay không** cho tới khi nó chạy trên CI.
    Lượt nền `8/8` sạch nên có cơ sở tin, nhưng *"có cơ sở tin"* không phải *"đã đo"*.
 3. **Ước dòng thêm chưa phải phép đo.** 14 `assert` → `chot()` + lớp ngoại lệ + bộ chấm ba trạng thái
-   + chạy lại có trần + **≥ 11** ca tự kiểm + **≥ 11** đột biến. Ước **≈ 150–260** dòng thêm trên tệp
+   + chạy lại có trần + **≥ 12** ca tự kiểm + **≥ 12** đột biến. Ước **≈ 150–260** dòng thêm trên tệp
    **233** dòng (đo 06:2xZ 11-09-2026). Trần `ADR-0044` là **300**; vượt thì **DỪNG** — A8.
 4. **`A5c(3)` chỉ đo được ca mã sản phẩm gọi ĐÚNG hàm phát của khung.** Nếu mutant sửa thẳng trạng
    thái khung (gán lại tên ca đang chạy, hoặc thay chính hàm phát), cơ chế đóng dấu **không** chặn
    được. Không có phản chứng nào trong packet này cho đường ấy.
+4b. **THU HẸP PHẠM VI, KHAI THẲNG — và nó KHÔNG phải một bản vá.** Cross-review lượt 2 mở finding
+   `lop-ngoai-le-chua-bao-ve-duong-truyen-ket-qua` với phạm vi gồm **cả** mã sản phẩm đối kháng.
+   Bản này **thu hẹp** phạm vi ấy xuống chống giả mạo **ngẫu nhiên** (xem *MÔ HÌNH ĐE DOẠ*), và đưa
+   đường sửa khung ra `ngoai_pham_vi`/#5. Theo điều khoản chống lách của chủ kho 11-09-2026:
+   **thu hẹp phạm vi là một mục `chua_do_duoc`, KHÔNG được tính là đã vá finding.** Finding ấy vì vậy
+   ở trạng thái **PHẠM VI ĐÃ ĐỔI**, còn mở với phần đối kháng, và chỉ chủ kho mới đóng được nó.
+
 5. **KHÔNG có ranh giới quyền giữa khung test và mã sản phẩm, và packet này KHÔNG tạo ra một cái.**
    `nap_tool` import mã sản phẩm vào cùng interpreter. Một ranh giới thật đòi chạy thân ca trong
    **tiến trình riêng** với kênh kết quả là fd kế thừa — đổi kiến trúc `chay_dot_bien` và gần chắc

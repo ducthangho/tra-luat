@@ -1,10 +1,13 @@
-# Đặc tả packet — T125-RA-JOB-RIENG (revision 1)
+# Đặc tả packet — T125-RA-JOB-RIENG (revision 2)
 
 - `packet_id`: **T125-RA-JOB-RIENG**; ID bền theo `PROTOCOL §3.2` là `wp<packet_issue>`.
 - `packet_issue`: **(để trống — chủ kho cấp)**
 - `mission_issue`: **(để trống — chủ kho cấp.)** `§3.2` đòi. Khuyến nghị: cùng mission với `#463`,
   vì hai packet là một chuỗi nối tiếp.
-- `revision`: **1** · `generation`: 1 · soạn **09:4xZ 11-09-2026**. Mọi số kèm thời điểm đo (`L5`).
+- `revision`: **2** · `generation`: 1 · r1 soạn **09:4xZ**, r2 vá cross-review lượt 2 **10:5xZ**
+  11-09-2026 (3 P1 + 2 P2 thuộc tệp này): **RÚT** mệnh đề *"⇒ chạy trọn"* · sửa phép cộng và
+  `2,35×` · `A1` hai đường (trước/sau land) · `A2c` MỚI đòi chứng minh **hai lượt A/B thật** ·
+  require **theo PHA** thay vì một con số cố định. Mọi số kèm thời điểm đo (`L5`).
 - `depends_on`: **`[wp503]`** — xem `write_set`.
 - **Đi TRƯỚC `GATE-TACH-JOB-CAT-CHI-PHI`.** Không phải thứ tự tiện tay: xem `nguon_cap_viec`.
 
@@ -24,7 +27,7 @@ lý do đó (cross-review `#508` lượt 1, P1 `a2-doi-giu-ca-ket-luan-cua-nen-b
 
 ## Vấn đề — ba mức chứng cứ, khai riêng
 
-**ĐO LẠI ĐƯỢC** (đọc từ cây kho, tái lập offline):
+**ĐO LẠI ĐƯỢC** (đọc từ cây kho, tái lập offline) — **TRỪ hàng 2/3/4**, xem ghi chú dưới bảng:
 
 | # | khẳng định | giá trị | thời điểm đo |
 |---|---|---|---|
@@ -33,6 +36,12 @@ lý do đó (cross-review `#508` lượt 1, P1 `a2-doi-giu-ca-ket-luan-cua-nen-b
 | 3 | bội `TỔNG / B` — `d28c4b1` so `4b5184e` | **3,09** → **3,24** (ổn định) | 06:1xZ 11-09 |
 | 4 | `B` (suite chế độ lượt con) — hai ref trên | **24,4 s** → **54,6 s** (+124 %) | 06:1xZ 11-09 |
 | 5 | cờ `--ab-con-noi-bo` hiện có làm `t125` `return` mà **vẫn đếm ĐẠT** | đọc mã | 06:3xZ 11-09 |
+
+**REVISION 2 — hàng 2, 3, 4 KHÔNG thuộc nhóm này** (cross-review lượt 2, P2
+`benchmark-moi-thieu-hien-vat-neo-luot`). Chúng là **THỜI LƯỢNG CHẠY**, không phải thứ đọc từ cây
+kho: tái lập chúng cần lệnh benchmark đầy đủ, cấu hình rig, `rc`, số ca đạt/bỏ qua và mốc từng
+lượt — **kho không có hiện vật nào trong số đó**. Xếp đúng: **`KHÔNG TÁI LẬP ĐƯỢC OFFLINE`**. Chỉ
+hàng 1 và 5 là đọc mã thuần. Nợ bàn giao hiện vật ở `chua_do_duoc` #3.
 
 **THUẬT LẠI** (số GitHub Actions; **không hiện vật nào trong kho**, `run_id` là mỏ neo truy tìm chứ
 không thay hiện vật):
@@ -45,14 +54,49 @@ không thay hiện vật):
 
 **SUY LUẬN CÓ ĐIỀU KIỆN** (đúng chỉ khi nhóm THUẬT LẠI đúng; **ƯỚC, không phải phép đo**):
 
-Bỏ `t125` đưa bước 20 xuống `≈ 26,25 / 3,24 ≈ 8,1` phút. Job Windows khi ấy `≈ 51`–`56` phút tuỳ hệ
-số của bước 21–41 (`1,73×` job trọn ÷ `2,35×` cận trên của `packet-loop`) ⇒ **chạy trọn**, biên còn
-`3,74`–`8,68` phút.
+**REVISION 2 — MỆNH ĐỀ "⇒ CHẠY TRỌN" ĐÃ BỊ RÚT. Nó KHÔNG suy ra được.**
+Cross-review lượt 2 bắt hai lỗi độc lập ở đoạn này (P1 `t125-do-buoc-khong-go-duoc-vong-nen-bi-cat`,
+P2 `uoc-bien-t125-sai-so-hang-va-sai-chieu-can`), và **cả hai đều đúng**:
 
-**Biên ấy MỎNG và đang co.** `B` gấp `2,24` lần trong `4` ngày; nếu tốc độ ấy giữ, biên `5` phút hết
-trong khoảng một tuần. Packet này **mua thời gian**, `#463` mới là thứ mua **biên bền** — nó đưa
+1. **`26,25` là CẬN DƯỚI của một đại lượng bị cắt.** Chia một cận dưới cho một hệ số giả định
+   **không tạo ra cận trên** cho bước mới. Bước 20 thật có thể lớn hơn `26,25` bao nhiêu cũng được
+   mà vẫn phù hợp dữ liệu — nên job sau khi bỏ `t125` **vẫn có thể vượt `60`**.
+2. **Phép cộng của bản trước SAI, không phải sai làm tròn.** Với đúng tiền đề đặc tả ghi:
+
+   ```
+   33,97 + 26,25/3,24 + 5,35 × h
+     h = 1,73 ⇒ job 51,32735 · biên 8,67265
+     h = 2,35 ⇒ job 54,64435 · biên 5,35565
+   ```
+
+   Khoảng đúng là **job `51,33`–`54,64` · biên `5,36`–`8,67`**. Bản trước ghi `51`–`56` và
+   `3,74`–`8,68`: hai đầu mút `56,26`/`3,74` đến từ một tiền đề **KHÁC** (`bước 20 = 31,50`) mà đặc
+   tả **không ghi**. Cùng họ *"ghép sai lượt"*, lần này là **ghép sai TIỀN ĐỀ**.
+3. **`2,35×` không phải "cận trên của `packet-loop`".** Bảng hệ số của `#463` ghi
+   `min 1,88× · max 2,89× · trung vị 2,37×`. `2,35×` là trung vị của một revision **cũ**, và nó
+   **không phải cận trên**. Cận trên thật là `2,89×`.
+
+**Phát biểu đã rút xuống, và đây là thứ đặc tả khai:**
+Bỏ `t125` đưa bước 20 xuống `≈ 26,25 / 3,24 ≈ 8,10` phút **NẾU** bước 20 thật đúng bằng cận dưới —
+điều **chưa biết**. Dưới giả định ấy, job Windows `≈ 51,33`–`54,64` phút (`h ∈ [1,73; 2,35]`), hoặc
+tới `≈ 57,53` phút nếu lấy cận trên thật `h = 2,89` (`33,97 + 8,10 + 5,35 × 2,89 = 57,53335`). **Không mệnh đề nào trong số này là "sẽ chạy
+trọn"** — chúng là **một giả thuyết có điều kiện**, và điều kiện ấy **không kiểm được từ phiên này**.
+
+**Hệ quả cho nghiệm thu, nói thẳng:** nếu sau khi packet land job Windows **vẫn chạm trần**, đó là
+**KẾT QUẢ ĐO**, không phải thất bại của packet — báo chủ kho, **đừng nới `timeout-minutes`**
+(`ngoai_pham_vi` #2), đừng hạ răng `t125` (`ngoai_pham_vi` #3). Cùng nếp `A1` của `#463`.
+
+**Và biên — nếu có — thì MỎNG.** `B` gấp `2,24` lần trong `4` ngày. **Hai điểm đo không xác lập một
+tốc độ tăng**; câu *"biên hết trong một tuần"* của bản trước là **ngoại suy không có mô hình** và đã
+bị rút. Thứ nói được: hai phép đo cho thấy tải **đã** tăng nhanh một lần; chưa ai đo lần thứ ba. Packet này **mua thời gian**, `#463` mới là thứ mua **biên bền** — nó đưa
 `test registry` **`15,48`** phút và `packet-loop selftest` **`7,13`** phút khỏi đường tới hạn
-(**cùng lượt `34563553711`** với mọi số THUẬT LẠI ở trên). **Đừng đọc packet này thành lời giải cuối.**
+(**cùng lượt `34563553711`**). **Đừng đọc packet này thành lời giải cuối.**
+
+> **Revision 2 — sửa một câu tự mâu thuẫn** (cross-review lượt 2, P2
+> `so-ci-moi-chua-duoc-khai-la-thuat-lai-trong-spec`): bản trước viết *"cùng lượt `34563553711` với
+> **mọi** số THUẬT LẠI ở trên"*, trong khi bảng THUẬT LẠI có `N14` (`ubuntu` bước 21–41) thuộc lượt
+> **`34552510232`**. Mệnh đề *"mọi"* sai ngay trong tệp. Nay chỉ khai cho **hai số ngay trước nó**;
+> mỗi hàng của bảng THUẬT LẠI mang `run_id` của riêng nó.
 
 > **Bản nháp của chính hai con số này ghi `15,93` và `8,85` — số của lượt `34552510232`, một lượt
 > KHÁC.** Ghép số của lượt này với ngữ cảnh của lượt kia đúng là bệnh **ghép sai lượt** mà
@@ -105,7 +149,7 @@ ops/lease_publish_test.py    rc=11  NGƯỜI_GIỮ 1: m9-fetch-auth-exec-3-claud
 | M2 | Cơ chế bỏ `t125` khỏi lượt chính **FAIL-CLOSE**: thiếu job `gate-t125` ⇒ một cổng **ĐỎ**. | `write_set` #1 |
 | M3 | Cờ mới khiến `t125` được đếm là **BỎ QUA CÓ LÝ DO**, **KHÔNG** phải ĐẠT — dòng tổng kết phải khai bỏ qua. | `write_set` #2 |
 | M4 | **Độ phủ không đổi**, đo bằng phép chiếu tường minh: tập bước sau = tập bước trước **cộng đúng một phần tử** có tên trong danh sách cho phép. | `write_set` #1 |
-| M5 | Branch protection require **cả bốn** job sau khi packet này land — nếu không, kết quả `t125` nằm ngoài hợp đồng bảo vệ nhánh. | `write_set` #1 (phần đo được) |
+| M5 | Branch protection require **đúng tập job CỦA PHA NÀY** sau khi packet land — **hai**: `gate` · `gate-t125`. Không phải bốn: `gate-registry` và `gate-packet-loop` **chưa tồn tại** ở pha này. Xem BẢNG SỐ JOB THEO PHA ở `nghiem_thu`. | `write_set` #1 (phần đo được) |
 
 ## `nghiem_thu`
 
@@ -114,11 +158,34 @@ Bước `lease-publish selftest` trong job `gate` sau tách phải tốn **≤ 0
 nó ở lượt nền cùng cách. `0,45` suy từ cấu trúc `TỔNG ≈ 3,24 × B` (bỏ `t125` còn `≈ 1/3,24 = 0,31`)
 cộng biên — **không** suy từ một con số phút, vì số phút trôi theo tải.
 Đơn vị: **giây của BƯỚC**, đọc qua `list_workflow_jobs`.
-**Nền phải HỢP LỆ trước khi so** (xem A2 của `#463`, cùng luật): nếu lượt nền có job `cancelled`
-hoặc thiếu job, khai **`KHÔNG ĐO ĐƯỢC`** ⇒ ĐỎ. **Ở packet này nền CÓ THỂ vẫn bị cắt** — chính đó là
-vấn đề đang chữa. Khi ấy dùng **thời lượng bước** thay cho thời lượng job: bước 20 ở lượt nền có số
-đo riêng dù job bị cắt sau đó, miễn bước ấy **đã hoàn tất**; bước nền **chưa hoàn tất** ⇒
-`KHÔNG ĐO ĐƯỢC` ⇒ ĐỎ, **không** được lấy giá trị bị cắt làm mẫu số.
+**REVISION 2 — VÒNG TỰ PHỤ THUỘC CHƯA THÁO ĐƯỢC, và bản trước khai sai là đã tháo.**
+Cross-review lượt 2 (P1 `t125-do-buoc-khong-go-duoc-vong-nen-bi-cat`): phép né *"đo BƯỚC thay vì
+JOB"* chỉ cứu được ca **bước đã hoàn tất mà job bị cắt sau đó**. Nhưng ca đang bàn là ca **chính
+bước 20 bị cắt** (`N11`: `≥ 26,25` phút, `cancelled`). Với ca ấy, mẫu số bị chính đặc tả cấm ⇒
+`A1` **ĐỎ** ở đúng tình huống nó sinh ra để chữa. Đó là vòng, và nó **KHÔNG tháo được bằng câu chữ**.
+
+**Hợp đồng đã sửa — hai đường, khai rõ đường nào đo được lúc nào:**
+
+- **(a) TRƯỚC khi land — mẫu số hợp lệ có thể KHÔNG TỒN TẠI.** Nếu bước nền `lease-publish selftest`
+  trên `windows-latest` **đã hoàn tất** ở một lượt nào đó, dùng nó làm mẫu số và áp ngưỡng
+  `≤ 0,45 ×`. Nếu **không có lượt nào** như thế — tình trạng hôm nay — thì `A1` khai
+  **`KHÔNG ĐO ĐƯỢC`**, và **`KHÔNG ĐO ĐƯỢC` ở đây KHÔNG làm packet ĐỎ**: nó là **tình trạng đầu
+  vào**, không phải khuyết tật của bản vá. Ghi thẳng vào biên nhận.
+  *(Đây là chỗ duy nhất trong hai đặc tả mà `KHÔNG ĐO ĐƯỢC` không kéo theo ĐỎ. Lý do: mọi tiêu chí
+  khác đo thứ bản vá **làm ra**; riêng `A1` đo thứ bản vá **đi chữa**, và không ai đo được một đại
+  lượng trước khi thứ làm nó đo được tồn tại. Ngoại lệ này phải HẸP và phải khai — một ngoại lệ
+  không khai chính là cách `KHÔNG ĐO ĐƯỢC` lặng lẽ thành ĐẠT.)*
+- **(b) SAU khi land — phép đo thật, và nó là nghĩa vụ.** Lượt `push` đầu tiên trên `master` sau khi
+  packet land phải được đọc và **công bố**: thời lượng bước `lease-publish selftest` trên
+  `windows-latest`, và job `gate` có `conclusion == "success"` không.
+  - job chạy trọn ⇒ ghi số, và **từ đây nền của `#463` đo được** (đó là lý do packet này đi trước);
+  - job **vẫn** chạm trần ⇒ **KẾT QUẢ ĐO**, báo chủ kho. **Không** nới `timeout-minutes`
+    (`ngoai_pham_vi` #2), **không** hạ răng `t125` (#3). Packet vẫn ĐẠT về hợp đồng — nó làm đúng
+    thứ nó hứa; điều không đúng là **giả thuyết** ở mục "SUY LUẬN CÓ ĐIỀU KIỆN", và giả thuyết ấy
+    đã được khai là giả thuyết.
+
+**Thứ A1 KHÔNG chứng minh, nói thẳng:** nó **không** chứng minh job Windows sẽ chạy trọn. Không tiêu
+chí nào trong đặc tả này chứng minh điều đó, vì **không phiên nào ở đây đo được Windows**.
 **Phép làm ĐỎ:** để `t125` lại trong job `gate` ⇒ tỉ lệ `≈ 1,00` ⇒ ĐỎ.
 **Đột biến bắt buộc:** cho job `gate-t125` chạy nhưng **không** cho job `gate` bỏ `t125` ⇒ A1 phải
 ĐỎ. Thiếu đột biến ấy thì không biết A1 đang đo **VIỆC BỎ** hay chỉ đo **sự tồn tại của job mới**.
@@ -130,6 +197,29 @@ vấn đề đang chữa. Khi ấy dùng **thời lượng bước** thay cho th
 2. **Job có mà KHÔNG chạy `t125` ⇒ ĐỎ.** Giữ job `gate-t125` nhưng đổi lệnh của nó thành một lệnh
    không chạy `t125` ⇒ phải ĐỎ. Nửa này tồn tại vì nửa (1) chỉ đo **SỰ CÓ MẶT** của job, và kho đã
    trả giá **bốn lần** cho việc đếm sự có mặt thay vì khả năng.
+
+**A2c (M1) — JOB MỚI phải THỰC SỰ CHẠY HAI LƯỢT A/B, không chỉ gọi đúng tên.**
+Cross-review lượt 2 (P1 `t125-doi-chung-co-cu-chua-chung-minh-than-ca-do`): `A2(2)` bắt được ca
+*"lệnh không gọi `t125`"*, nhưng **không** bắt được ca **thân `t125` trả về sớm**. Phản chứng: giữ
+nguyên job và lệnh, làm `t125` `return` **trước khi** thực hiện A/B ⇒ job riêng báo `t125` ĐẠT, job
+chính báo BỎ QUA có lý do, `A3` vẫn phân biệt được hai chuỗi tổng kết, `A8` vẫn thấy đủ `145+1`,
+`A1` vẫn đo job chính nhẹ hơn. **Mọi tiêu chí đang có đều xanh trong khi phép đo A/B đã biến mất.**
+
+Đòi: job `gate-t125` phải chứng minh **hai lượt con đã chạy THẬT**, bằng bằng chứng lượt con tự phát
+chứ không bằng lời:
+1. **đếm hai tiến trình con** — `t125` phóng đúng **2** lượt, mỗi lượt là một `subprocess` riêng;
+2. **hai lượt khác nhau ĐÚNG MỘT biến** — một lượt không có `GITHUB_ACTOR`, một lượt có; bằng chứng
+   phải cho thấy **cả hai** giá trị ấy đã tới lượt con;
+3. **phép so verdict còn tác dụng** — hai lượt phải cho ra hai bộ `(rc, n/m, tập ĐỎ, tập BỎ QUA)`
+   và `t125` phải **so** chúng, không chỉ đọc.
+**Phép làm ĐỎ:** `t125` `return` sớm (bất kỳ điểm nào trước lượt con thứ hai) ⇒ A2c ĐỎ.
+**Đột biến bắt buộc:** bỏ **một** trong hai lượt con ⇒ A2c ĐỎ; đổi biến phân biệt thành một biến vô
+can ⇒ A2c ĐỎ.
+
+**Và khai thẳng thứ đối chứng cờ cũ KHÔNG chứng minh** (A3 dưới): so với `--ab-con-noi-bo` chỉ chứng
+minh **hai chế độ hạch toán khác nhau**. Nó **không** chứng minh job mới thực hiện hai subprocess,
+**không** chứng minh hai lượt cùng tập ca chỉ khác actor, và **không** chứng minh rò actor còn làm
+`t125` đỏ. Ba điều ấy là việc của A2c.
 
 **A3 (M3) — cờ mới cho BỎ QUA CÓ LÝ DO, không cho ĐẠT.**
 Chạy `ops/lease_publish_test.py` với cờ mới ⇒ dòng tổng kết phải khai **`145/146 · bỏ qua = 1`**
@@ -160,11 +250,27 @@ có** dấu nội suy `${{ }}`) ⇒ ĐỎ.
 **A6 (M5) — cổng không bị tháo, hai phần, phần hai KHÔNG đo được từ phiên.**
 - (a) **đo được**: bản vá in ra tên job mới đúng dạng chuỗi branch protection dùng.
   **Phép làm ĐỎ:** tên trong `ci.yml` khác tên in ra ⇒ ĐỎ.
-- (b) **không đo được từ phiên**: chủ kho phải require **cả bốn** job — `gate` · `gate-registry` ·
-  `gate-packet-loop` · `gate-t125`. **Không có phép đo**; phải nằm trong thân Issue như một mục chủ
-  kho làm **TRƯỚC** khi merge.
-  **Nhắc:** `#463` cũng có nghĩa vụ ấy cho hai job của nó ⇒ chủ kho cập nhật branch protection
-  **HAI lần**, mỗi packet một lần. Khai ở cả hai đặc tả để lần thứ hai không bị quên.
+- (b) **không đo được từ phiên**: chủ kho phải require **đúng hai** job của pha này — `gate` ·
+  `gate-t125`. **Không có phép đo**; phải nằm trong thân Issue như một mục chủ kho làm **TRƯỚC** khi
+  merge.
+  **Nhắc:** `GATE-TACH-JOB-CAT-CHI-PHI` land sau sẽ nâng lên **bốn** và mang nghĩa vụ ấy của riêng
+  nó ⇒ chủ kho cập nhật branch protection **HAI lần**, mỗi packet một lần, **mỗi lần một tập KHÁC
+  nhau**. Khai ở cả hai đặc tả để lần thứ hai không bị quên, và để không ai require một job chưa có.
+
+**BẢNG SỐ JOB THEO PHA — hợp đồng dùng CHUNG cho cả hai packet (revision 2 / revision 8).**
+Cross-review lượt 2 bắt (P1 `them-t125-nhung-giu-hop-dong-ba-job`): bản trước khai **một con số cố
+định** cho branch protection, nên nó sai ở **mọi** pha.
+
+| pha | `ci.yml` có job | require |
+|---|---|---|
+| hôm nay (`master`) | **1** — `gate` | `gate` |
+| **SAU khi `T125-RA-JOB-RIENG` land** | **2** — `gate` · `gate-t125` | **cả hai** |
+| **SAU khi `GATE-TACH-JOB-CAT-CHI-PHI` land** | **4** — thêm `gate-registry` · `gate-packet-loop` | **cả bốn** |
+
+**KHÔNG pha nào có đúng BA job.** Bản trước của `T125` đòi require **bốn** ngay khi nó merge (hai
+job khi ấy **chưa tồn tại**), còn `GATE` đòi **ba** sau khi nó land (khi ấy có **bốn**) — hai đặc tả
+sai **ngược chiều nhau**, và con số `3` không ứng với pha nào. Nay mỗi packet chỉ khai **pha của
+chính nó**, và bảng này là nguồn duy nhất.
 
 **A7 (toàn packet) — `ADR-0044`.** `git diff --numstat` ⇒ đúng **2** đường dẫn, dòng thêm ≤ `300`.
 Vượt ⇒ **DỪNG và hỏi chủ kho**, không tự xin ngoại lệ.

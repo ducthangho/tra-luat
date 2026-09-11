@@ -1,4 +1,4 @@
-# Đặc tả packet — CHAM-DOT-BIEN-MIEN-NHIEM-CA-VO-CAN (revision 2)
+# Đặc tả packet — CHAM-DOT-BIEN-MIEN-NHIEM-CA-VO-CAN (revision 3)
 
 - `packet_id`: **CHAM-DOT-BIEN-MIEN-NHIEM-CA-VO-CAN** (bí danh chữ; ID bền theo `PROTOCOL §3.2` là
   `wp<packet_issue>`, suy ra được khi có số Issue — tiền lệ `#456`/`#463` giữ bí danh ở `packet_id`,
@@ -7,7 +7,9 @@
 - `mission_issue`: **(để trống — chủ kho cấp.)** `§3.2` đòi. Packet này sinh ra từ một sự cố đo được
   chứ không từ một lane kế hoạch, nên chưa có mission nào ôm nó. Khuyến nghị: gắn vào cùng mission
   với `#463` nếu chủ kho mở một mission chung cho lane CI.
-- `revision`: **2** · `generation`: 1 — **revision 2** vá cross-review khác nền lượt 1 (`codex`,
+- `revision`: **3** · `generation`: 1 — **revision 3** vá cross-review lượt 2 (`c1bfabc`, 3 P1/P2
+  thuộc tệp này): `M7`+`A5c` MỚI cho **mô hình tin cậy** của kênh · `16`→`14` ở ba chỗ còn sót ·
+  rút nốt lời kích hoạt `§12` ở `chua_do_duoc` #4 (nó phủ định lời rút ở bảng). Lịch sử: **revision 2** vá cross-review khác nền lượt 1 (`codex`,
   `reviewed_sha` `4918d5f`, `changes_requested`, VERDICT `sha256 29ee0caa…`): 3 P1 + 3 P2 + 1 P3
   thuộc đặc tả này. Đổi lớn nhất: `M1` từ **16** `assert` xuống **14** (hai cái còn lại là HẠ TẦNG,
   giữ nguyên) · `M6` + `A5b` MỚI cho **kênh kết quả** (lớp ngoại lệ KHÔNG qua được ranh giới tiến
@@ -98,7 +100,7 @@ thêm ở `chua_do_duoc` #3.
 
 | # | đường dẫn | vì sao |
 |---|---|---|
-| 1 | `ops/nhanh_don_duoc_test.py` | chứa cả bộ chấm đột biến (`chay_dot_bien`, dòng 182-219), cả 16 `assert` trần của 8 ca, cả fixture `kho_bare` (dòng 25-66) |
+| 1 | `ops/nhanh_don_duoc_test.py` | chứa cả bộ chấm đột biến (`chay_dot_bien`, dòng 182-219), cả **14** `assert` trần của 8 ca (tổng tệp **16**; hai cái kia là HẠ TẦNG — `nap_tool` dòng 80, `chay_dot_bien` dòng 198), cả fixture `kho_bare` (dòng 25-66) |
 
 Không ký tự đại diện. Không đường dẫn nào khác.
 
@@ -144,7 +146,8 @@ ops/specs/CHAM-DOT-BIEN-MIEN-NHIEM-CA-VO-CAN.md   rc=0   NGƯỜI_GIỮ 0: khôn
 | M3 | `KHÔNG ĐO ĐƯỢC` ⇒ chạy lại **ĐÚNG MỘT** lần chính mutant ấy; lần hai vẫn `KHÔNG ĐO ĐƯỢC` ⇒ suite **ĐỎ** kèm in rõ ngoại lệ. Tuyệt đối **không** đường nào biến `KHÔNG ĐO ĐƯỢC` thành GIẾT. | `write_set` #1 |
 | M4 | Tắt ký commit ở **MỌI** kho mà bộ test dựng, không chỉ `kho_bare`: `chay_dot_bien` (dòng 186–192) còn dựng **repo `src` thứ hai** rồi `git commit -qm "source"` mà chỉ đặt `user.name`/`user.email`. Sửa một chỗ thì tám ca qua còn **suite đầy đủ vẫn chết ở lần commit nguồn mutant**. | `write_set` #1 |
 | M5 | Bộ chấm có **ca tự kiểm cho chính nó** — không ca nào thì bộ chấm là thứ duy nhất trong tệp không ai canh. | `write_set` #1 |
-| M6 | **KÊNH KẾT QUẢ phải chịu được giả mạo, vì LỚP NGOẠI LỆ KHÔNG QUA ĐƯỢC RANH GIỚI TIẾN TRÌNH.** Bộ chấm gọi tiến trình con rồi đọc **chuỗi trên stdout**; object ngoại lệ chết ở biên. Lượt con phải phát kết quả ra **một kênh riêng** (fd thứ ba, hoặc tệp kết quả mà bộ chấm truyền đường dẫn vào), **không** trộn với stdout của mã đang bị thử. Bộ chấm đọc **kênh ấy**, không đọc stdout. | `write_set` #1 |
+| M6 | **KÊNH KẾT QUẢ phải chịu được giả mạo, vì LỚP NGOẠI LỆ KHÔNG QUA ĐƯỢC RANH GIỚI TIẾN TRÌNH.** Bộ chấm gọi tiến trình con rồi đọc **chuỗi trên stdout**; object ngoại lệ chết ở biên. Lượt con phát kết quả ra **kênh riêng**, không trộn với stdout của mã đang bị thử; bộ chấm đọc **kênh ấy**. | `write_set` #1 |
+| M7 | **MÔ HÌNH TIN CẬY của kênh — "kênh riêng" tự nó KHÔNG xác thực người phát.** Mỗi bản ghi kết quả phải neo **(tên ca · tên mutant · số lần thử · `rc` của lượt)**, và bộ chấm **chỉ nhận** bản ghi neo đúng lượt nó vừa phóng. Kèm một **dấu phiên ngẫu nhiên** sinh mới mỗi lượt, truyền vào lượt con, và bản ghi phải mang nó. Bộ chấm đòi lượt con khai **ĐÃ HOÀN TẤT** (bản ghi cuối cùng đóng lượt); thiếu ⇒ `KHÔNG ĐO ĐƯỢC`. | `write_set` #1 |
 
 ## `nghiem_thu`
 
@@ -212,8 +215,30 @@ nằm ở **ranh giới tiến trình**, mà một phép thử trong bộ nhớ 
 Thêm ba ca biên của kênh: **dòng trùng** (một ca hai kết quả) · **thiếu dòng** (ca chạy mà không phát
 kết quả) · **dòng của ca không tồn tại**. Cả ba ⇒ `KHÔNG ĐO ĐƯỢC`, không cái nào được ⇒ `GIẾT`.
 
+**A5c (M7) — KÊNH RIÊNG TỰ NÓ KHÔNG XÁC THỰC NGƯỜI PHÁT.**
+Cross-review lượt 2 (P1 `lop-ngoai-le-chua-bao-ve-duong-truyen-ket-qua`) chỉ ra đường mà `A5b`
+**không** chặn: mã bị thử **ghi thẳng vào chính kênh được tin**, hoặc đưa vào một bộ bản ghi
+**đủ ca, duy nhất mỗi ca, đúng định dạng** — nhưng thuộc **mutant hoặc lần thử TRƯỚC**. Bộ bản ghi
+ấy **không** trùng, **không** thiếu, **không** có ca lạ, và **không** đi qua stdout ⇒ cả bốn ca của
+`A5b` đều **xanh**. *"Dời chuỗi sang kênh khác"* không chứng minh **người phát** được tin.
+
+Ba ca, mỗi ca một đột biến riêng:
+1. `r5xx_ban_ghi_cua_luot_TRUOC_khong_duoc_nhan`: cấy nguyên bộ bản ghi hợp lệ của **mutant trước**
+   vào kênh của lượt hiện tại. Đòi **`KHÔNG ĐO ĐƯỢC`**. **Phép làm ĐỎ:** bỏ phép so **dấu phiên** ⇒
+   ca ĐỎ.
+2. `r5xx_ban_ghi_thieu_dau_dong_luot`: lượt con phát đủ kết quả nhưng **không** đóng lượt. Đòi
+   **`KHÔNG ĐO ĐƯỢC`** — một lượt bị giết giữa chừng có thể để lại đúng số bản ghi. **Phép làm ĐỎ:**
+   bỏ phép đòi bản ghi đóng ⇒ ca ĐỎ.
+3. `r5xx_ma_bi_thu_ghi_thang_vao_kenh`: mutant khiến **mã sản phẩm** (không phải thân ca) ghi một
+   bản ghi hợp lệ vào kênh. Đòi: bộ chấm **không** nhận nó là kết quả của ca.
+   **Phép làm ĐỎ:** cho mã sản phẩm dùng chung kênh với thân ca ⇒ ca ĐỎ.
+   *(Ca 3 khó nhất và đặc tả khai thẳng giới hạn: `nap_tool` **import mã sản phẩm trong chính tiến
+   trình chạy ca**, nên không có ranh giới tiến trình giữa hai bên. Chốt khả thi là **quyền ghi**:
+   chỉ hàm phát kết quả của khung test giữ handle, và nó đóng handle trước khi gọi thân ca. Nếu
+   phiên thi công thấy chốt ấy không đủ, đó là **KẾT QUẢ ĐO** — báo chủ kho, đừng khai là đã chặn.)*
+
 **A6 (M5) — bộ chấm tự kiểm không phải là một lời hứa.**
-Đòi: **≥ 8** ca `r5xx_` mới (A1 · A1b · A2 · A3 · A4 · A5 · A5b · và ba ca biên của kênh ở A5b tính
+Đòi: **≥ 11** ca `r5xx_` mới (A1 · A1b · A2 · A3 · A4 · A5 · A5b · A5c ba ca · và ba ca biên của kênh ở A5b tính
 chung một), và **mỗi ca có đúng một đột biến riêng làm nó ĐỎ**. Đếm bằng
 `(tên ca, tên đột biến, đã chạy, ĐỎ)`; ca nào không có đột biến riêng thì **không tính**.
 **Phép làm ĐỎ:** một ca thiếu đột biến ⇒ bảng đếm lệch ⇒ khai thiếu.
@@ -265,11 +290,18 @@ QUYỀN"* mà `soan-spec` `L5` cảnh báo.
    runner **2.55.0**. Packet này **cố ý không** đi chữa nó (`ngoai_pham_vi` #1) — nợ để mở, chưa có tên.
 2. **Không đo được bản vá có làm lượt master xanh trở lại hay không** cho tới khi nó chạy trên CI.
    Lượt nền `8/8` sạch nên có cơ sở tin, nhưng *"có cơ sở tin"* không phải *"đã đo"*.
-3. **Ước dòng thêm chưa phải phép đo.** 16 `assert` trần đổi sang `chot()` + lớp ngoại lệ + bộ chấm
-   ba trạng thái + chạy lại có trần + 5 ca tự kiểm + 5 đột biến. Ước **≈ 90–150** dòng thêm trên tệp
+3. **Ước dòng thêm chưa phải phép đo.** **14** `assert` trần đổi sang `chot()` (revision 2 — bản r1
+   ghi **16**, cross-review lượt 2 bắt: hai cái còn lại là HẠ TẦNG, **không** được đổi) + lớp ngoại lệ + bộ chấm
+   ba trạng thái + chạy lại có trần + **≥ 11** ca tự kiểm + **≥ 11** đột biến (revision 2 — bản r1
+   ghi `5`/`5`, đã cũ từ khi thêm `A1b`/`A5b`/`A5c`). Ước **≈ 150–260** dòng thêm trên tệp
    233 dòng (đo 06:2xZ 11-09-2026). Trần `ADR-0044` là **300**; nếu thi công vượt thì **DỪNG**, đừng
    tự xin ngoại lệ — A8.
-4. **`§12` "lặp ba lần thì hỏi có nên làm cách này không".** `hinh_dang_ke_thua` dòng 1 đếm **3**.
-   Đặc tả này khẳng định câu trả lời là **đổi loại tín hiệu** (lớp riêng + tên ca), không phải vá
-   tiếp phép so — nhưng **người quyết là chủ kho**, không phải đặc tả. Nếu chủ kho thấy cách làm vẫn
-   sai gốc thì packet này phải bị bác chứ không phải được nới.
+4. **`§12` KHÔNG được kích hoạt — và mục này của bản trước TỰ PHỦ ĐỊNH lời rút ở `hinh_dang_ke_thua`.**
+   Cross-review lượt 2 (P2 `lan-thu-ba-khong-cung-hinh-dang-tin-dung-gia`): bảng ở trên **đã** tách
+   hai chiều (`cấp thừa` **2** · `cấp thiếu` **1**) và **đã** rút lời kích hoạt, nhưng mục này vẫn
+   viết *"dòng 1 đếm **3**"* rồi dùng số ấy để đặt một quyết định trước chủ kho. **Hai đoạn trong
+   cùng một tệp nói ngược nhau, và đoạn sau thắng vì nó nằm ở phần kết luận.**
+   Nay thống nhất: **không hình dạng nào đạt 3**. Bản vá của packet — lớp ngoại lệ riêng + neo tên
+   ca + kênh kết quả có mô hình tin cậy — **tự đứng bằng lập luận của nó**, và đặc tả **không** mượn
+   một ngưỡng chưa đạt để tự cấp thẩm quyền. Người quyết vẫn là chủ kho; nếu chủ kho thấy cách làm
+   sai gốc thì packet bị bác chứ không được nới.

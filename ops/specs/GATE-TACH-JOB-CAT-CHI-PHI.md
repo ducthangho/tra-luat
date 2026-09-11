@@ -1,4 +1,4 @@
-# Đặc tả packet — GATE-TACH-JOB-CAT-CHI-PHI (revision 7)
+# Đặc tả packet — GATE-TACH-JOB-CAT-CHI-PHI (revision 8)
 
 - `packet_id`: **GATE-TACH-JOB-CAT-CHI-PHI** (bí danh chữ; ID bền theo `PROTOCOL §3.2` là
   `wp<packet_issue>`, suy ra được ngay khi có số Issue — tiền lệ #456 giữ bí danh ở `packet_id`,
@@ -7,7 +7,10 @@
 - `mission_issue`: **(để trống — chủ kho cấp.)** `§3.2` đòi; lease #456 không có, và không có
   mission nào đang mở cho lane này. Khuyến nghị: mở MỘT Mission Issue cho cả bốn packet
   (`GATE` · `LO` · `2A` · `2B`); nếu không, ghi số Issue của `#456` và nói rõ đó là thay thế.
-- `revision`: **7** · `generation`: 1 — **revision 7** ĐỔI QUYẾT ĐỊNH của revision 6 sau khi chủ kho
+- `revision`: **8** · `generation`: 1 — **revision 8** vá cross-review lượt 2 (`c1bfabc`): `A5(1)(a)`
+  có **NGUỒN** cho tập kỳ vọng (giải ma trận từ `ci.yml` tại ref của lượt, dưới đúng `event_name`) ·
+  `A6` require **BỐN** job · `A4` bốn tên · `A8` về **2** đường · `wp503`→`wp502` ở hai chỗ sót ·
+  thu hồi khẳng định phổ quát về CI. Lịch sử: **revision 7** ĐỔI QUYẾT ĐỊNH của revision 6 sau khi chủ kho
   gỡ ràng buộc *"gộp #463"* (11-09-2026): `M8`/`M9` ra khỏi packet này, thành `T125-RA-JOB-RIENG` đi
   **TRƯỚC** — nó là **tiền đề** để `A1`/`A5` của packet này đo được. Xem khối **REVISION 7**.
   Lịch sử: **revision 6** vá cross-review khác nền lượt 1 (`codex`,
@@ -37,8 +40,12 @@
   `metadata-va-loi-thoat-composite-chua-theo-write-set-r5`). r5 đưa `ops/lease_publish_test.py` vào
   write set và khai ở hai chỗ rằng lease chỉ cấp SAU KHI `#503` land, nhưng **metadata vẫn để `[]`
   và vẫn chỉ nói chờ `#456`** — sửa bằng thêm giải thích mà không gỡ chỉ thị cũ. Nay gỡ: packet vẫn
-  đi **ĐẦU** chuỗi `GATE → LO → 2A → 2B` (lý do ở `write_set`), nhưng nó **chờ `wp503`**, không chờ
-  ba packet kia. Điều kiện `#456` ở A9 là **lời khai lịch sử**, đã hết hạn từ `14:30:07Z 07-09-2026`.
+  đi **ĐẦU** chuỗi `GATE → LO → 2A → 2B` (lý do ở `write_set`), nhưng nó **chờ `wp502`** (giữ
+  `.claude/dev/ci_dang_ky_test.py`) **VÀ nối tiếp sau `T125-RA-JOB-RIENG`** (cùng ghi `ci.yml`, và
+  là tiền đề đo được cho `A1`/`A5` — xem khối REVISION 7). Không chờ ba packet `LO`/`2A`/`2B`.
+  **Revision 8:** bản r7 để sót chữ `wp503` ở đây và ở `A9` — `#503` giữ `ops/lease_publish_test.py`,
+  tệp **đã ra khỏi write set**, nên nó không còn chặn packet này. Điều kiện `#456` ở `A9` là **lời
+  khai lịch sử**, đã hết hạn từ `14:30:07Z 07-09-2026`.
 - `base_sha`: `1b3caa1` (`origin/master`, đo 17:47Z 06-09-2026; `core.abbrev=7`) — vì đi đầu, ba
   mỏ neo trong lease (`base_sha` · `start_from_sha` · `reviewed_sha_required`) vẫn phải **đo lại
   tại lúc cấp** bằng head `origin/master` khi ấy; `1b3caa1` là số của lúc soạn.
@@ -205,7 +212,10 @@ suy rộng.
 
 ### (5) HAI TIÊU CHÍ CỦA r4 NAY KHÔNG ĐO ĐƯỢC — vì đại lượng bị TRẦN KIỂM DUYỆT
 
-Job `gate (windows-latest)` **chưa hoàn tất lần nào** trên `master` kể từ ~07-09. Bốn lượt liên
+Job `gate (windows-latest)` **không có lượt nào hoàn tất mà đặc tả này đọc được** trên `master` kể
+từ ~07-09 — khai cho đúng mức: đây là **THUẬT LẠI**, và *"chưa hoàn tất lần nào"* là một mệnh đề
+**phổ quát** mà bốn điểm dữ liệu không xác lập (revision 8, cross-review lượt 2, P2
+`so-ci-moi-chua-duoc-khai-la-thuat-lai-trong-spec`). Bốn lượt liên
 tiếp `cancelled` đúng ở trần (đo 07:0xZ 11-09-2026):
 
 | lượt | head | windows | ubuntu |
@@ -771,8 +781,10 @@ cả tệp vì đúng chuyện đó (`ops-don-ref.yml`, run `31971137920`, 0 job
 Phép làm ĐỎ: bất kỳ phép so nào lệch. Đột biến bắt buộc: chính ca `if` không delimiter ở trên.
 
 **A4 (M4) — trần không đổi, đo bằng GIÁ TRỊ ĐÃ PARSE của TỪNG job.**
-`yaml.safe_load(ci.yml)` rồi với **mỗi** `job_id` trong **danh sách job kỳ vọng** (revision 7: **ba**
-tên, xem A6), đòi `jobs[job_id]["timeout-minutes"] == 60`. **Thiếu khoá ⇒ ĐỎ.** Giá trị khác `60` ⇒
+`yaml.safe_load(ci.yml)` rồi với **mỗi** `job_id` trong **danh sách job kỳ vọng của PHA SAU packet
+này** (revision 8: **bốn** tên — `gate` · `gate-t125` · `gate-registry` · `gate-packet-loop`; xem
+BẢNG SỐ JOB THEO PHA ở `T125-RA-JOB-RIENG`), đòi `jobs[job_id]["timeout-minutes"] == 60`.
+**Thiếu khoá ⇒ ĐỎ.** Giá trị khác `60` ⇒
 ĐỎ, kể cả nhỏ hơn. Ngoài ra: không `timeout-minutes` nào ở **mức bước**.
 
 **REVISION 6 — phép đo cũ đếm CHUỖI, không đo được thứ nó nhận canh** (cross-review lượt 1, P2
@@ -803,8 +815,30 @@ giống cổng xanh"*.
 Hình mới của A5 — ba thứ, và thứ đầu là **điều kiện** của hai thứ sau:
 1. **TÍNH HỢP LỆ trước, GIÁ TRỊ sau — và "hợp lệ" đòi ĐỦ MẪU, không chỉ đòi mọi mẫu đều xanh.**
    Với **mỗi** lượt, theo thứ tự, dừng ở cái đầu tiên hỏng:
-   a. **tập `(job_id, nền)` đọc được phải BẰNG tập kỳ vọng** (revision 6: bốn job × ma trận nền của
-      lượt ấy). Thiếu một job ⇒ `KHÔNG ĐO ĐƯỢC` ⇒ ĐỎ;
+   a. **tập `(job_id, nền)` đọc được phải BẰNG tập kỳ vọng CỦA CHÍNH LƯỢT ẤY.**
+
+      **REVISION 8 — "tập kỳ vọng" phải có NGUỒN, và nguồn khác nhau cho hai vế** (cross-review
+      lượt 2, P1 `a5-hop-le-chua-doi-du-job-va-du-luot`). Bản trước dùng **một** con số cho **mọi**
+      lượt, nên nó sai ở ít nhất một vế: lượt nền (sau `T125`) có **2** job, lượt sau tách có **4**.
+      Dùng `4` cho cả hai ⇒ nền **luôn** bị đánh thiếu; dùng `3` ⇒ không ứng với pha nào.
+
+      Nguồn có thẩm quyền, theo thứ tự, **không được suy từ dữ liệu đã đọc**:
+      1. `yaml.safe_load` **chính `ci.yml` tại ref của lượt đó** ⇒ tập `job_id` **cấu trúc**;
+      2. với mỗi `job_id`, giải biểu thức `matrix.os` **dưới đúng `event_name` và `inputs` của lượt
+         đó** ⇒ tập **instance** `(job_id, nền)`;
+      3. tập ấy là kỳ vọng. **Tuyệt đối không** lấy kỳ vọng từ danh sách job API đã đọc — làm thế
+         thì điều kiện "bằng nhau" **tự chứng minh** và lỗi thiếu job lọt sạch.
+
+      **Ba khái niệm KHÁC nhau, đặc tả trước gộp làm một:** `job_id` **cấu trúc** (khoá trong
+      `jobs:`) · **instance** `(job_id, nền)` sau khi giải ma trận · `id` **API** của job trong một
+      lượt. Phép so phải chạy trên **instance**; dùng `id` API thì hai lượt không so được, dùng
+      `job_id` trần thì mất chiều nền.
+
+      Thiếu một instance ⇒ `KHÔNG ĐO ĐƯỢC` ⇒ ĐỎ.
+      **Phép làm ĐỎ cho chính (a):** bơm một `ci.yml` có 4 job nhưng dữ liệu chỉ trả 3 instance ⇒
+      phải ĐỎ; và bơm một kỳ vọng **suy từ chính dữ liệu** ⇒ ca tự kiểm phải ĐỎ.
+      **Ma trận nền phải giải dưới CÙNG `event_name`** với lượt đang đo — giải dưới event khác có
+      thể làm mất `windows-latest` khỏi kỳ vọng, và khi ấy một lượt **thiếu Windows** trông hợp lệ;
    b. **danh sách không được RỖNG** — đây không thừa: *"mọi job đều `success`"* **ĐÚNG RỖNG** với
       danh sách rỗng, và tổng khi ấy là `0`, tức một lượt **không đọc được gì** sẽ cho **`Σ = 0`**
       và **lọt qua mọi ngưỡng**;
@@ -840,10 +874,11 @@ chỉ nói nửa đầu là một lời khai thiếu nửa sau, và nửa sau l�
 selftest **không thể** tự chứng minh job được GitHub gọi. Nên A6 là **hai phần, và phần thứ hai
 KHÔNG đo được từ phiên thi công**:
 - (a) đo được: bản vá phải in ra danh sách tên job mới, đúng dạng chuỗi mà branch protection dùng;
-- (b) **không đo được từ phiên**: branch protection phải được cập nhật để require **cả BA** job —
-  `gate` · `gate-registry` · `gate-packet-loop`. Đây là việc của chủ kho.
-  **Packet `T125-RA-JOB-RIENG` thêm job thứ TƯ và mang theo nghĩa vụ ấy của riêng nó** — require ba
-  trong khi có bốn là để kết quả `t125` nằm ngoài hợp đồng bảo vệ nhánh, đúng cái bẫy mục này mô tả
+- (b) **không đo được từ phiên**: branch protection phải require **cả BỐN** job của pha này —
+  `gate` · `gate-t125` · `gate-registry` · `gate-packet-loop`. Đây là việc của chủ kho.
+  `gate-t125` **đã có từ trước** (packet `T125-RA-JOB-RIENG` land trước); packet này thêm hai job
+  cuối. Require **ba** — bỏ sót `gate-t125` — là để kết quả `t125` nằm ngoài hợp đồng bảo vệ nhánh,
+  đúng cái bẫy mục này mô tả
   ở câu dưới. Hai packet nối tiếp ⇒ chủ kho cập nhật branch protection **HAI lần**, mỗi lần một job
   mới; khai thẳng ở đây để lần thứ hai không bị quên.
 Phép làm ĐỎ cho (a): tên job trong `ci.yml` khác tên in ra ⇒ ĐỎ.
@@ -867,7 +902,8 @@ Hai phản chứng sẵn có `ruff-pin-required` và `ruff-version-probe-require
 Đơn vị: **số thông điệp lỗi trả về**. Phép làm ĐỎ: đột biến `loi_ruff_ci` quay về đọc
 `jobs.gate` ⇒ ca thứ hai ĐỎ.
 
-**A8 — không đụng gì khác.** `git diff --numstat` chỉ hiện đúng **3** đường dẫn (revision 5:
+**A8 — không đụng gì khác.** `git diff --numstat` chỉ hiện đúng **2** đường dẫn (revision 8 —
+bản r7 để sót câu này ở **3**, cross-review lượt 2 bắt; revision 5 từng thêm:
 `ops/lease_publish_test.py` nhập write set cho M8/M9), và cột thêm ≤ `300`.
 **3 tệp là ĐÚNG TRẦN `ADR-0044` cho `sensitive`**, không dư chỗ nào ⇒ đường thứ tư ⇒ **DỪNG và hỏi
 chủ kho**, không tự xin ngoại lệ.
@@ -884,9 +920,10 @@ chỗ này là tự cấp cho mình một câu trả lời sai:
 ops/lease_publish_test.py         rc=11  NGƯỜI_GIỮ 1: m9-fetch-auth-exec-1-claude-20260911
 ```
 
-⇒ Người chặn hôm nay là **`#503`** (`M9-FETCH-AUTH`, hạn `17:00:00Z 11-09-2026`), **không** còn là
-`#456`. `depends_on: [wp503]`, và lease cấp **SAU KHI #503 land** — không phải sau khi hạn danh
-nghĩa trôi qua. Đoạn về `#456` bên dưới giữ nguyên làm **lời khai lịch sử** của r2–r4; mốc
+⇒ **Revision 8:** người chặn packet này là **`#502`** (giữ `.claude/dev/ci_dang_ky_test.py`),
+**không** phải `#456` và **không** còn là `#503` — `#503` giữ `ops/lease_publish_test.py`, tệp đã ra
+khỏi write set ở revision 7. `depends_on: [wp502]`, và lease cấp **SAU KHI `#502` land VÀ SAU KHI
+`T125-RA-JOB-RIENG` land** — không phải sau khi hạn danh nghĩa trôi qua. Đoạn về `#456` bên dưới giữ nguyên làm **lời khai lịch sử** của r2–r4; mốc
 `14:30:07Z 07-09-2026` trong đó **đã qua từ lâu** và không còn là điều kiện của packet này.
 
 *(Lời khai lịch sử r2–r4:)*

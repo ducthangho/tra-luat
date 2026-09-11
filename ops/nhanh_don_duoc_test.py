@@ -125,7 +125,7 @@ def _doc_kenh_xac_thuc(duong: Path, dau_phien: str, mutant: str, lan_thu: int, d
     neo = {"dau_phien": dau_phien, "mutant": mutant, "lan_thu": lan_thu}
     NHAN_HOP_LE = {NHAN_DAT, NHAN_DO_CHOT, NHAN_DO_KHAC}
     theo_ca, chi_tiet, dong = {}, {}, None
-    for dong_txt in noi_dung.splitlines():
+    for dong_txt in noi_dung.split("\n"):
         if not dong_txt.strip():
             continue
         try:
@@ -1577,6 +1577,85 @@ def r517_kenh_phai_duoc_xac_thuc_truoc_khi_tin(d: Path):
     chot(tt == KHONG_DO_DUOC and nk == ["1", "2"] and so_lan == 2, "r517")
 
 
+
+def r518_kenh_chiu_duoc_ky_tu_phan_dong_unicode(d: Path):
+    """F01 (luot 8) — U+2028 / U+2029 / U+0085 trong `chi_tiet` KHONG duoc lam vo ban ghi.
+
+    HUONG DO nay den tu cross-review luot 8. Luot ay bi BO LOC NEN cat o giay
+    154 truoc khi kip ghi `VERDICT.md`, nhung da neu huong BANG LOI truoc do:
+    *"ky tu phan dong Unicode trong chi_tiet"*. Phep do duoi day do phien chinh
+    viet — dung nep "doi phan cong, khong doi provider" cua CLAUDE.md. Mot huong
+    NEU RA ma khong ai CHAY thi khong ton tai; day la luc bien no thanh ca.
+
+    GOC LOI. Ben GHI dung `json.dumps(..., ensure_ascii=False)` — CO Y, de van
+    ban tieng Viet trong kenh con doc duoc — nen U+2028 / U+2029 / U+0085 di
+    THO vao kenh (ba ky tu nay KHONG phai ma dieu khien < 0x20 nen JSON khong
+    buoc thoat; do la ly do `chr(11)` `chr(12)` `chr(28)` VO HAI con ba ky tu
+    nay thi khong). Ben DOC tach ban ghi bang `splitlines()`, ma `splitlines()`
+    coi CA BA la dau xuong dong. Mot ban ghi HOP LE vi the bi cat lam DOI, nua
+    dau thanh JSON hong.
+
+    DO DUOC TRUOC KHI VA (cung mot rig, chi doi mot ky tu):
+      chi_tiet sach        -> KHONG_GIET     (dung)
+      chi_tiet co U+2028   -> KHONG_DO_DUOC "ban ghi khong phai JSON"
+      chi_tiet co U+2029   -> KHONG_DO_DUOC "ban ghi khong phai JSON"
+      chi_tiet co U+0085   -> KHONG_DO_DUOC "ban ghi khong phai JSON"
+    Tuc MOT KY TU trong van ban thong diep DOI HAN verdict cua luot.
+
+    VI SAO KHONG PHAI "VO HAI VI FAIL-CLOSE". Huong hong dung la fail-close
+    (KDD khong cap tin dung gia), nhung KDD lam suite DO. Mot ca hop le bi doi
+    thanh "khong do duoc" chi vi NOI DUNG thong diep ngoai le la bao dong GIA —
+    va bao dong gia la cach nhanh nhat de nguoi ta ngung tin mot cong. Duong
+    toi duoc: `chi_tiet` mang `f"{type(exc).__name__}: {exc}"`, tuc VAN BAN
+    NGOAI LE, va thong diep ngoai le thuong CHEP LAI dau vao (JSON hong, van
+    ban git, noi dung tep) — khong co gi cam dau vao ay chua U+2028.
+
+    VI SAO SUA BEN DOC, KHONG SUA BEN GHI — va day la phan dang nho nhat.
+    Ca hai deu dong duoc lo:
+      · ben GHI `ensure_ascii=True` -> ky tu bi thoat, `splitlines()` het thay;
+      · ben DOC tach dung dau phan ban ghi that -> khong con cat nham.
+    Nhung SUA CA HAI thi moi ben BIEN THANH DOT BIEN TUONG DUONG cua ben kia:
+    neu ben ghi da thoat het thi ben doc tach kieu nao cung nhu nhau, va nguoc
+    lai — KHONG dau vao nao phan biet duoc, tuc khong do duoc RANG cua ben nao.
+    Do la cai bay "dot bien tuong duong" ma kho nay da tra gia mot lan
+    (`bo-vo-fail-close`, luot 7). Chon DUY NHAT ben DOC vi no MANH HON: no dung
+    ke ca khi ben ghi doi, va no giu duoc `ensure_ascii=False`. Ben GHI GIU
+    NGUYEN CO CHU Y — khong phai bo sot.
+
+    HAI CHOT, vi mot minh khong du:
+      (A) duong DO_CHOT -> verdict phai la GIET, khong con KDD;
+      (B) duong DO_KHAC -> ly do phai chua `chi_tiet` NGUYEN VAN.
+    Thieu (B) thi mot ban "va" bang cach XOA hoac thay ky tu van qua duoc (A)
+    trong khi da lam hong bang chung. Thieu (A) thi khong do duoc hau qua that.
+    """
+    KY_TU = [("U+2028", chr(0x2028)), ("U+2029", chr(0x2029)), ("U+0085", chr(0x85))]
+    for ten_ky_tu, ch in KY_TU:
+        ct = "loi" + ch + "phan hai"
+
+        # (A) duong DO_CHOT: ket luan phai la GIET.
+        ph_a = sinh_dau_phien()
+        k_a = d / f"k{ord(ch):04x}a.jsonl"
+        kh_a = KhungPhat(k_a, ph_a, "m", 1)
+        for ten, _ in CA:
+            kh_a.vao_ca(ten)
+            kh_a.phat(NHAN_DO_CHOT if ten == "T1" else NHAN_DAT, ct if ten == "T1" else "")
+        kh_a.dong_luot(1)
+        tt_a, ly_a = doc_kenh(k_a, ph_a, "m", 1, ("T1",), 1)
+        chot(tt_a == GIET, "r518")
+
+        # (B) duong DO_KHAC: `chi_tiet` phai ve NGUYEN VAN trong ly do.
+        ph_b = sinh_dau_phien()
+        k_b = d / f"k{ord(ch):04x}b.jsonl"
+        kh_b = KhungPhat(k_b, ph_b, "m", 1)
+        for ten, _ in CA:
+            kh_b.vao_ca(ten)
+            kh_b.phat(NHAN_DO_KHAC if ten == "T1" else NHAN_DAT, ct if ten == "T1" else "")
+        kh_b.dong_luot(1)
+        tt_b, ly_b = doc_kenh(k_b, ph_b, "m", 1, ("T1",), 1)
+        chot(tt_b == KHONG_DO_DUOC, "r518")
+        chot(ct in ly_b, "r518")
+
+
 TU_KIEM = [
     ("r501", r501_tin_hieu_chot_khong_gia_mao_duoc, True),
     ("r502", r502_assert_ha_tang_khong_duoc_cap_lop_chot, True),
@@ -1595,12 +1674,13 @@ TU_KIEM = [
     ("r515", r515_moi_chieu_neo_deu_co_ca_am, True),
     ("r516", r516_bo_cham_tu_dot_bien_phan_hang_dung, True),
     ("r517", r517_kenh_phai_duoc_xac_thuc_truoc_khi_tin, True),
+    ("r518", r518_kenh_chiu_duoc_ky_tu_phan_dong_unicode, True),
 ]
 
 # ---- A6: MOI ca tu kiem phai co MOT dot bien rieng lam no DO --------------
 # Ca khong doi mau theo dot bien duoc chi dinh thi KHONG duoc tinh vao so nhom.
 DOT_BIEN_TU_KIEM = [
-    ("bo-phan-biet-lop-ngoai-le", ("r501", "r504"),
+    ("bo-phan-biet-lop-ngoai-le", ("r501", "r504", "r518"),
      "if any(n == NHAN_DO_KHAC for n in theo_ca.values()):", "if False:"),
     ("cap-lop-chot-cho-assert-ha-tang", ("r502",),
      "    assert spec and spec.loader", '    chot(spec and spec.loader, "nap_tool")'),
@@ -1726,6 +1806,12 @@ DOT_BIEN_TU_KIEM = [
     # Ban dau toi viet dot bien nay THEM mot `except ZeroDivisionError` TRUOC vo —
     # cu phap hop le nhung `except Exception` van bat, tuc dot bien KHONG tat duoc
     # thu no dinh tat. Phai THU HEP chinh lop bat.
+    # F01 (luot 8) — do RANG cua ben DOC. Ben GHI giu `ensure_ascii=False`
+    # CO Y, nen day la chot DUY NHAT chan ba ky tu phan dong Unicode; khong
+    # co dot bien song doi o ben ghi vi sua ca hai se lam CA HAI tuong duong.
+    ("doc-tach-dong-bang-splitlines", ("r518",),
+     '    for dong_txt in noi_dung.split("\\n"):',
+     "    for dong_txt in noi_dung.splitlines():"),
     ("bo-vo-fail-close", ("r517",),
      "    except Exception as exc:                      # noqa: BLE001 — fail-close co chu y",
      "    except ZeroDivisionError as exc:"),
@@ -1864,8 +1950,8 @@ DOT_BIEN_TU_KIEM = [
 # thi bo dem van bao du, du da mat A5c(1b).
 NHOM_BAT_BUOC = frozenset({"r501", "r502", "r503", "r504", "r505", "r506",
                            "r507", "r508", "r509", "r510", "r511", "r512",
-                           "r513", "r514", "r515", "r516", "r517"})
-SAN_NHOM = 17
+                           "r513", "r514", "r515", "r516", "r517", "r518"})
+SAN_NHOM = 18
 
 
 def chay_dot_bien_tu_kiem():

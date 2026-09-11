@@ -619,7 +619,7 @@ Lưu ý một chỗ dễ đọc nhầm: mục 5 ở trên vá **LỜI KHAI** *"�
 `bo-sot-pham-vi-ref-va-vat-chat-hoa` nói **BẢNG TRÍCH bỏ sót** chính câu ấy. Vá cái trước KHÔNG
 đóng cái sau — hai lỗi khác nhau trên cùng một dòng văn bản.
 
-## Cross-review PR #493 — MƯỜI HAI lượt, và hình dạng lỗi lặp lại là VÁ HỜ
+## Cross-review PR #493 — MƯỜI BA lượt, và hình dạng lỗi lặp lại là VÁ HỜ
 
 Hồ sơ vá lời khai sai thì cũng bị soi như mọi thứ khác.
 
@@ -645,7 +645,8 @@ tắt có ích**, không hơn. Verdict gốc của các lượt cross-review PR 
 | 9 | `dd4a3ae` | `changes_requested` · **0 P1 · 0 P2 · 5 P3** | **7 ĐÃ VÁ THẬT · 2 VÁ HỜ · 0 VÁ SINH LỖI MỚI · 1 CHƯA VÁ** (đối chiếu **10** slug lượt 8) |
 | 10 | `9e78e19` | `changes_requested` · **0 P1 · 0 P2 · 3 P3** | **3 ĐÃ VÁ THẬT · 1 VÁ HỜ · 0 VÁ SINH LỖI MỚI · 1 CHƯA VÁ** (đối chiếu **5** slug lượt 9) |
 | 11 | `b43d4ab` | `changes_requested` · **0 P1 · 0 P2 · 2 P3** | **2 ĐÃ VÁ THẬT · 0 VÁ HỜ · 0 VÁ SINH LỖI MỚI · 1 CHƯA VÁ** (đối chiếu **3** slug lượt 10) |
-| 12 | `e921131` | `changes_requested` · **0 P1 · 0 P2 · 3 P3** (2 lớp B + nợ D) | (điền ở lượt sau) |
+| 12 | `e921131` | `changes_requested` · **0 P1 · 0 P2 · 3 P3** (2 lớp B + nợ D) | **1 ĐÃ VÁ THẬT · 0 VÁ HỜ · 0 VÁ SINH LỖI MỚI · 1 CHƯA VÁ** (đối chiếu **2** slug lượt 11) |
+| 13 | `89d938e` | `changes_requested` · **0 P1 · 0 P2 · 2 P3** (1 lớp B + nợ D) | (điền ở lượt sau) |
 
 Lượt 5 `approve` rồi lượt 6–8 lại `changes_requested` **không** phải mâu thuẫn: điều kiện dừng đổi
 từ *"hết P1"* sang *"hết P2"* rồi *"hết P3"* theo chỉ thị chủ kho, nên câu hỏi giao cho reviewer mỗi
@@ -911,6 +912,23 @@ bằng 0 — đọc thành *"không có mục ấy"* thay vì *"bằng không"*.
 **Và trong lúc vá nó tôi suýt tái phạm y hệt:** ghi hàng lượt 11 là `1 ĐÃ VÁ THẬT` từ trí nhớ, đo
 lại thì là **2**. Chỉ vì đã dựng phép đếm máy trước khi ghi nên mới bắt được. Đó là lý do cột này
 nay **sinh ra từ phép đếm**, không chép tay.
+
+**MỘT CÂU ĐÚNG Ở `CHANGELOG` BỊ CHIẾU RỘNG RA Ở HAI YAML — và phản chứng nằm ngay trong kho này.**
+Mục này viết đúng phạm vi: *"`ci.yml` khai `on: pull_request` **không có `types:`** ⇒ mặc định chỉ
+bắn ở `opened`/`synchronize`/`reopened`"*. Nhưng hai bản chiếu — `ops/land/pr491-…-land-evidence.yaml`
+và `pr491-review-2-…receipt.yaml` — rút gọn thành *"**GitHub không phát** `pull_request` cho sự kiện
+`edited`"*. Đó là khẳng định về **NỀN TẢNG**, trong khi nguồn chỉ nói về **MỘT workflow**.
+
+**Phản chứng có sẵn, không cần mạng:** `.github/workflows/ops-thu-hoi-admission.yml` khai
+`types: [opened, reopened, synchronize, ready_for_review, **edited**]` và **đã bắn** đúng lúc thân PR
+#493 được sửa (lượt `34560860197`, `04:05:08Z`). Nếu GitHub không phát event ấy thì nó đã không chạy.
+Tức bản chiếu **tự mâu thuẫn với một hiện vật khác của cùng đợt**.
+
+Cross-review lượt 13 chấm P3 `chieu-edited-mat-pham-vi-ci-yml`. Đáng ghi vì nó là **lần thứ ba liên
+tiếp** lớp B trúng cùng một hình dạng: câu gốc đúng phạm vi, bản chiếu **nới rộng** — lượt 11 mất
+nhãn nguồn runtime, lượt 12 bỏ chỗ dè dặt *"được cho là"*, lượt 13 đổi *"workflow không chạy"* thành
+*"nền tảng không phát"*. **Rút gọn một câu là thao tác NGUY HIỂM**: thứ bị cắt đầu tiên luôn là mệnh
+đề giới hạn, vì nó trông như chi tiết phụ.
 
 **Lớp D không đóng được ở PR này.** Mã thực thi `doc-claims-check` nằm ở
 `scripts/tl_core/workflow.py` (lượt 8 chỉ đúng địa chỉ; bản trước của câu này viết *"đòi sửa

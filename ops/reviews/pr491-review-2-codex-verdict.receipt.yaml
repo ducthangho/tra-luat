@@ -90,9 +90,12 @@ no_con_lai:
     o_dau: 'thân PR #491 (không phải tệp trong kho)'
     da_va: true
     va_the_nao: >-
-      Sửa thẳng thân PR TRƯỚC khi merge, bằng `update_pull_request`. Sửa thân PR KHÔNG đổi head và
-      KHÔNG bắn CI (GitHub không phát `pull_request` cho sự kiện `edited`), nên nó không vứt kết quả
-      review. Đọc ngược thân PR qua API rồi `diff` với bản gửi ⇒ **0 dòng lệch**.
+      Sửa thẳng thân PR TRƯỚC khi merge, bằng `update_pull_request`. Sửa thân PR KHÔNG đổi head, và
+      KHÔNG kích hoạt workflow `gate`: `.github/workflows/ci.yml` tại `2ec6171` khai `on:
+      pull_request` KHÔNG có `types:`, nên dùng tập activity MẶC ĐỊNH
+      (`opened`/`synchronize`/`reopened`) — `edited` không nằm trong đó. Đây là giới hạn của MỘT
+      workflow, KHÔNG phải quy tắc phát event của GitHub (bản trước viết rộng hơn nguồn; cross-review
+      PR #493 lượt 13 chấm P3 `chieu-edited-mat-pham-vi-ci-yml`). Nên nó không vứt kết quả review. Đọc ngược thân PR qua API rồi `diff` với bản gửi ⇒ **0 dòng lệch**.
     noi_dung: >-
       Câu cũ gán "KHÔNG CHẠY" cho `t33`. Đúng là `t33` ĐÃ CHẠY và ĐỎ ở tiền điều kiện; thứ chưa chạy
       là thao tác lint workflow bên trong. Reviewer khoá bằng phản chứng: gọi thẳng `t33` với

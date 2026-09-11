@@ -57,7 +57,6 @@ MOI_WINDOWS = {
 CACH_LY = {}
 DA_NOI = {
     ".claude/dev/ci_dang_ky_test.py",
-    ".claude/dev/duyet_danh_tinh_test.py",
     ".claude/dev/codex_cred_test.py", ".claude/dev/gate_lifecycle_test.py",
     ".claude/dev/idiom_py_test.py", ".claude/dev/launcher_test.py",
     ".claude/dev/packet_loop_test.py", ".githooks/eol_policy_test.py",

@@ -1265,7 +1265,7 @@ Lưu ý một chỗ dễ đọc nhầm: mục 5 ở trên vá **LỜI KHAI** *"�
 `bo-sot-pham-vi-ref-va-vat-chat-hoa` nói **BẢNG TRÍCH bỏ sót** chính câu ấy. Vá cái trước KHÔNG
 đóng cái sau — hai lỗi khác nhau trên cùng một dòng văn bản.
 
-## Cross-review PR #493 — MƯỜI LĂM lượt, và hình dạng lỗi lặp lại là VÁ HỜ
+## Cross-review PR #493 — MƯỜI SÁU lượt, và hình dạng lỗi lặp lại là VÁ HỜ
 
 Hồ sơ vá lời khai sai thì cũng bị soi như mọi thứ khác.
 
@@ -1295,6 +1295,7 @@ tắt có ích**, không hơn. Verdict gốc của các lượt cross-review PR 
 | 13 | `89d938e` | `changes_requested` · **0 P1 · 0 P2 · 2 P3** (1 lớp B + nợ D) | **2 ĐÃ VÁ THẬT · 0 VÁ HỜ · 0 VÁ SINH LỖI MỚI · 1 CHƯA VÁ** (đối chiếu **3** slug lượt 12) |
 | 14 | `f618e01` | `changes_requested` · **0 P1 · 0 P2 · 4 P3** (1 lớp A + 1 lớp B + **2** nợ D) | **0 ĐÃ VÁ THẬT · 0 VÁ HỜ · 1 VÁ SINH LỖI MỚI · 1 CHƯA VÁ** (đối chiếu **2** slug lượt 13) |
 | 15 | `d47ea59` | `changes_requested` · **0 P1 · 0 P2 · 5 P3** (F + C + E + **2** nợ D) | **1 ĐÃ VÁ THẬT · 0 VÁ HỜ · 1 VÁ SINH LỖI MỚI · 2 CHƯA VÁ** (đối chiếu **4** slug lượt 14) |
+| 16 | `95071a1` | `changes_requested` · **0 P1 · 0 P2 · 3 P3** (1 F + **2** nợ D) | **3 ĐÃ VÁ THẬT · 0 VÁ HỜ · 0 VÁ SINH LỖI MỚI · 2 CHƯA VÁ** (đối chiếu **5** slug lượt 15) |
 
 Lượt 5 `approve` rồi lượt 6–8 lại `changes_requested` **không** phải mâu thuẫn: điều kiện dừng đổi
 từ *"hết P1"* sang *"hết P2"* rồi *"hết P3"* theo chỉ thị chủ kho, nên câu hỏi giao cho reviewer mỗi
@@ -1613,6 +1614,12 @@ Nó viết *"lần 2 thêm **2** biên nhận mà chỉ **1** vi phạm"*. Sai v
 P3 lớp F `phan-chung-bon-tren-nam-dem-receipt-sua-thanh-them`.
 Năm ca khớp vẫn **không phải luật** — đó là lý do đủ để không gọi nó là quy luật, và là lý do đúng;
 lý do cũ thì bịa.
+
+**ĐÍNH CHÍNH thông điệp commit `95071a1`: số đo bản vá SAI vì chụp giữa chừng.** Nó ghi
+*"+16/−6"* và *"654 → 664 (+10)"* — đó là ảnh chụp **trước** khi cập nhật bảng lượt và tái sinh
+manifest. Đo trên diff cuối (`git diff --numstat d47ea59 95071a1`): **toàn bản vá 2 tệp `+24/−13`;
+riêng `CHANGELOG.md` `+19/−8`; `r360` 654 → **665** (+11)**. Cross-review lượt 16 chấm P3 lớp F
+`so-do-va-toi-gian-khong-khop-diff-cuoi`.
 
 **ĐÍNH CHÍNH thông điệp commit `d47ea59`, hai chỗ** (không sửa được lịch sử; cross-review lượt 15):
 · nó ghi đối chiếu lượt 14 là *"1 ĐÃ VÁ THẬT · 0 VÁ SINH LỖI MỚI"*, trong khi verdict lượt 14 xếp

@@ -421,14 +421,18 @@ Lưu ý một chỗ dễ đọc nhầm: mục 5 ở trên vá **LỜI KHAI** *"�
 `bo-sot-pham-vi-ref-va-vat-chat-hoa` nói **BẢNG TRÍCH bỏ sót** chính câu ấy. Vá cái trước KHÔNG
 đóng cái sau — hai lỗi khác nhau trên cùng một dòng văn bản.
 
-## Cross-review PR #493 — TÁM lượt, và hình dạng lỗi lặp lại là VÁ HỜ
+## Cross-review PR #493 — CHÍN lượt, và hình dạng lỗi lặp lại là VÁ HỜ
 
 Hồ sơ vá lời khai sai thì cũng bị soi như mọi thứ khác.
 
-**Bảng này từng dừng ở lượt 3 trong khi đã chạy tới lượt 6** — cross-review lượt 7 tha nó (gọi là
-*"tóm tắt chọn lọc"*), nhưng nó **cùng LỚP** với hai P3 mà lượt 7 chấm: *bản chiếu không theo kịp
-nguồn*. Nên nó được vá cùng lớp chứ không đợi ai chấm. Verdict gốc của bảy lượt **không** nằm trong
-kho (`git ls-tree HEAD ops/reviews/` không có `pr493-review-*`); chúng là bản chiếu đăng trên PR.
+**Bảng này từng dừng ở lượt 3 trong khi đã chạy tới lượt 6, và việc nối dài nó KHÔNG phải một lỗi
+đã vá.** Bản trước của chính đoạn này viết nó *"cùng LỚP"* với hai P3 lượt 7 và *"được vá cùng lớp
+chứ không đợi ai chấm"* — cross-review lượt 9 chấm P3 `bang-ba-luot-van-bi-goi-la-loi-da-va`, và
+**đúng**: bảng inventory phía dưới đã rút `B4` khỏi danh sách lỗi (lượt 7 đọc bảng cũ là *"tóm tắt
+chọn lọc"*, và nguồn không bị gán sai chỉ vì không chép hết), nhưng đoạn dẫn này vẫn giữ lời kết
+tội cũ ⇒ **cùng một mục đưa ra hai phán quyết trái nhau**. Nối dài bảng là **mở rộng một bản tóm
+tắt có ích**, không hơn. Verdict gốc của các lượt cross-review PR #493 **không** nằm trong kho
+(`git ls-tree HEAD ops/reviews/` không có `pr493-review-*`); chúng là bản chiếu đăng trên PR.
 
 | lượt | head | kết quả | đối chiếu lượt trước |
 |---|---|---|---|
@@ -440,17 +444,22 @@ kho (`git ls-tree HEAD ops/reviews/` không có `pr493-review-*`); chúng là b�
 | 6 | `2c57e99` | `changes_requested` · **0 P1 · 0 P2 · 10 P3** | **11 ĐÃ VÁ THẬT · 2 VÁ HỜ · 1 CHƯA VÁ** |
 | 7 | `a4bc01d` | `changes_requested` · **0 P1 · 0 P2 · 9 P3** | **4 ĐÃ VÁ THẬT · 3 VÁ HỜ · 2 VÁ SINH LỖI MỚI · 1 CHƯA VÁ** |
 | 8 | `025c6b2` | `changes_requested` · **0 P1 · 0 P2 · 10 P3** | **7 ĐÃ VÁ THẬT · 0 VÁ HỜ · 1 VÁ SINH LỖI MỚI · 1 CHƯA VÁ** |
+| 9 | `dd4a3ae` | `changes_requested` · **0 P1 · 0 P2 · 5 P3** | **7 ĐÃ VÁ THẬT · 2 VÁ HỜ · 0 VÁ SINH LỖI MỚI · 1 CHƯA VÁ** |
 
 Lượt 5 `approve` rồi lượt 6–8 lại `changes_requested` **không** phải mâu thuẫn: điều kiện dừng đổi
 từ *"hết P1"* sang *"hết P2"* rồi *"hết P3"* theo chỉ thị chủ kho, nên câu hỏi giao cho reviewer mỗi
 lượt một khác. Cross-review lượt 8 tự kiểm mệnh đề này trên bảy verdict và xác nhận nó **được các
 verdict chứng minh**, không phải một lời kể sau khi việc đã rồi.
 
-**Lượt 8 là lượt đầu `VÁ HỜ` bằng 0** — bảy lượt trước lần nào cũng có. Cả **hai** slug bị lượt 7 xếp
-`VÁ SINH LỖI MỚI` (`va-cham-r-…`, `phan-vai-…`) đều đóng thật ở lượt 8, sau khi cách vá đổi sang
-**quy về lớp rồi quét hết lớp** (mục riêng phía dưới). Cái `VÁ SINH LỖI MỚI` còn lại của lượt 8 là
-**lớp E** trong chính bài học `printf`, và cái `CHƯA VÁ` là **nợ cổng lớp D** — không đụng được ở
-write set này.
+**`VÁ HỜ` = 0 ở lượt 8 KHÔNG phải lần đầu — lượt 5 cũng bằng 0.** Bản trước của câu này viết
+*"lượt đầu trong tám lượt"* và *"bảy lượt trước lần nào cũng có"*, rồi dùng nó làm bằng chứng riêng
+cho cách vá theo lớp. Cross-review lượt 9 bác bằng chính verdict lượt 5, dòng 36:
+*"3 ĐÃ VÁ THẬT · **0 VÁ HỜ** · 1 VÁ SINH LỖI MỚI · 13 CHƯA VÁ"* — và lượt 5 diễn ra **trước** khi
+đổi cách vá. Nên chỉ số ấy **không** tách được phương pháp ra khỏi phần còn lại; giữ nó như một số
+đo trần trong bảng, đừng gán nhân quả cho nó.
+Hai slug bị lượt 7 xếp `VÁ SINH LỖI MỚI` (`va-cham-r-…`, `phan-vai-…`) đều đóng thật ở lượt 8. Cái
+`VÁ SINH LỖI MỚI` còn lại của lượt 8 là **lớp E** trong chính bài học `printf`; cái `CHƯA VÁ` là
+**nợ cổng lớp D** — không đụng được ở write set này.
 
 Lượt 2 nói thẳng điều đáng nhớ nhất: **cả năm bản vá của lượt 1 đều để sót ít nhất một bản chiếu**.
 Nói *"chỉ sửa MỘT bản chiếu"* thì **quá rộng** và lượt 5 chấm đúng chỗ đó: riêng bản vá P1 đã đụng
@@ -527,22 +536,23 @@ tại một chỗ trong một hiện vật):
 | ID | lớp | vị trí | reviewer lượt 7 đã nêu địa chỉ? |
 |---|---|---|:--:|
 | `A1` | A | `r360` — khối VA CHẠM, *"cùng thời điểm phát hiện"* | có (`va-cham-r-…`) |
-| `A2` | A | `r360` — *"thứ **duy nhất** chặn chúng là cross-review"* | **không** |
+| `A2` | A | `r360` — *"thứ **duy nhất** chặn chúng là cross-review"* (dòng cũ 173) | **có** — trong `168–179` của `cong-byte-…` |
 | `A3` | A | `r360` — khối `printf`, tiêu đề *"ĐO ĐƯỢC"* + hai số byte | có (`printf-…`) |
 | `A4` | A | `r360` — *"endpoint MCP của kho **chỉ có** ba tool"* | có (`ket-luan-thieu-tool-…`) |
 | `A5` | A | `r360` — khối nháp *"tám"*, thiếu nhãn nguồn tại chỗ | có (`hai-tu-thu-…`) |
-| `A6` | A→**nhãn** | `r360` — nhãn cuối mục khai phạm vi *"cho cả mục này"* | **không** |
+| `A6` | **nhãn** (không phải A) | `r360` — nhãn cuối mục khai phạm vi *"cho cả mục này"* (dòng cũ 298) | **có** — trong `298–303`, hai finding cùng dẫn |
 | `B1` | B | thân PR — *"xem phần Va chạm số `r` dưới"* trỏ vào chỗ trống | có (`than-pr-tro-muc-…`) |
 | `B2` | B | thân PR — bảng cổng *"trên head này"* không ghim SHA | có (`than-pr-khai-so-cong-…`) |
 | `B3` | B | `trich_khang_dinh.py` — docstring *"mọi mệnh đề bằng chữ"* | có (`mo-ta-bo-trich-…`) |
-| `B4` | B | `r360` — bảng lượt cross-review dừng ở 3 | **không** |
+| `B4` | — (**không phải lỗi**) | `r360` — bảng lượt cross-review dừng ở 3 | **không** — và lượt 7 đã tha nó |
 | `C1` | C | `r360:14` — *"một phiên khác **land** #490 rồi #494"* | **có** |
 | `C2` | C | `r360:28` — *"cũng kể `#490` đã land"* | có (`phan-vai-…`) |
-| `C3` | C | thân PR — *"PR #494 land"* | **không** |
+| `C3` | C? (**chưa chứng minh**) | thân PR — *"PR #494 land"* (dòng 13) | **có** — `than-pr-493.md:13` của `than-pr-tro-muc-…` |
 | — | D | nợ cổng — không đụng được, xem dưới | có (`cong-byte-…`) |
 
-**Đọc bảng theo một đơn vị:** **13** vị trí được đụng tới; **9** thuộc địa chỉ reviewer đã nêu;
-**4** là tôi tự tìm (`A2` `A6` `B4` `C3`).
+**Đọc bảng theo một đơn vị:** **13** vị trí được đụng tới; **12** thuộc địa chỉ reviewer lượt 7 đã
+nêu; **1** không (`B4` — và `B4` không phải lỗi). Bản trước ghi **9/4** và cross-review lượt 9 bác
+đúng chỗ đó: xem phần *"Số đúng"* ở cuối mục.
 
 **Và trong bốn cái tự tìm ấy, chỉ HAI đứng vững** — lượt 8 bác hai cái, tôi kiểm lại và họ đúng:
 
@@ -559,6 +569,16 @@ tại một chỗ trong một hiện vật):
   hiện vật lên hạng đo được, còn nhãn *"cho cả mục này"* làm chiều **ngược lại** — nó **hạ** dữ kiện
   Git đo được xuống hạng tự thuật. Cùng đáng sửa, khác hình dạng.
 
+**ĐÍNH CHÍNH một bản chiếu KHÔNG sửa được: thông điệp commit `dd4a3ae` — `257` phải là `258`.**
+Thông điệp merge khai *"**257** hàng cảnh báo"* làm **bằng chứng đã đo** sau khi giải xung đột.
+Bảng thật có **258** hàng. Cross-review lượt 9 chấm P3 `merge-khai-257-canh-bao-thuc-te-258`, và
+tôi đo lại theo **cấu trúc bảng** (đếm dòng dữ liệu giữa dòng phân cách và dòng không-phải-hàng)
+thay vì theo regex: **258**. Hai phép cộng độc lập khớp: `master 249 + nhánh 9 = 258`, và
+`trước merge 256 + của master 2 = 258`. Ba số còn lại của thông điệp ấy **đúng** (0 số `r` trùng ·
+103 hàng mục lục · 0 hàng trùng ở cả hai bảng). **Không hàng nào bị mất** — lỗi nằm ở bộ đếm của
+tôi, đúng chỗ mỉa mai nhất: con số ấy được viết ra để **chứng minh** lần merge này không lặp lại
+sai sót của lần merge trước.
+
 **ĐÍNH CHÍNH một bản chiếu KHÔNG sửa được: thông điệp commit `025c6b2`.** Nó viết *"`r360` **ba
 chỗ** viết land"*. Sai vị trí: chỉ **hai** chỗ nằm trong `r360` (`C1`, `C2`), chỗ thứ ba (`C3`) nằm
 trong **thân PR** và nói về **#494**, không phải #490. Cross-review lượt 8 chấm P3
@@ -566,14 +586,28 @@ trong **thân PR** và nói về **#494**, không phải #490. Cross-review lư�
 đính chính ở đây, neo vào `025c6b2`, đúng nếp *"nguồn có thẩm quyền là tệp trong kho, thông điệp chỉ
 là bản chiếu"*.
 
-**Số đúng, phát biểu một lần cho rõ:** vá theo lớp tìm thêm được **2** lỗi thật ngoài địa chỉ
-reviewer nêu (`A2`, `A6`), trên tổng **13** vị trí được đụng tới. Không phải `8 → 12`.
+**Số đúng, và nó là LẦN THỨ BA phải rút — chép cả ba để thấy hướng trôi.** Lượt 7 tôi báo
+*"8 → 12"*. Lượt 8 bác phép cộng và đơn vị, tôi rút thành *"13 vị trí, 2 lỗi thật **ngoài địa chỉ**
+reviewer nêu"*. **Lượt 9 bác nốt vế ấy, và đúng:** cột này tôi tự đặt tên là *"reviewer đã nêu
+**ĐỊA CHỈ**?"*, mà theo đúng tiêu chí đó thì `A2` (dòng 173) nằm trong `CHANGELOG.md:168–179` của
+finding `cong-byte-…`; `A6` (dòng 298) nằm trong `298–303` mà **hai** finding lượt 7 cùng dẫn; `C3`
+(thân PR:13) nằm trong `than-pr-493.md:13` của finding `than-pr-tro-muc-…`. Vậy phân hoạch đúng là
+**13 = 12 đã nêu địa chỉ + 1 (`B4`)**, và `B4` không phải lỗi ⇒ **0 lỗi ngoài địa chỉ reviewer nêu**,
+không phải 2.
 
-**Vì sao vẫn giữ cách làm này dù con số nhỏ hơn tôi tưởng.** Bằng chứng nằm ở cột đối chiếu, không
-ở cột đếm: lượt 8 xếp **7/9 `ĐÃ VÁ THẬT` · 0 `VÁ HỜ`** — **lần đầu trong tám lượt `VÁ HỜ` bằng 0**,
-sau khi sáu lượt trước đó lần nào cũng có. Cả **hai** slug bị lượt 7 xếp `VÁ SINH LỖI MỚI` cũng đóng
-thật ở lượt 8. Tiền lệ mạnh nhất vẫn là lượt 5→6: bỏ **một** phép lọc đóng **11** finding cùng lúc,
-sau khi bốn lượt nới đầu vào chỉ **dời** chỗ mất dữ liệu.
+Thứ còn đúng, phát biểu hẹp đúng bằng phép đo: **trong vùng địa chỉ reviewer đã dẫn, tôi tự nhận
+diện thêm hai khuyết tật KHÁC** (`A2` lượng từ *"duy nhất"*, `A6` phạm vi nhãn) mà finding lượt 7
+không nêu ra. Đó là *"đọc kỹ hơn trong vùng đã được chỉ"*, **không** phải *"tìm ra chỗ chưa ai chỉ"*.
+Hai câu ấy khác nhau, và tôi đã viết câu mạnh hơn ba lượt liền.
+
+**Không còn câu nào trong mục này khai công cho cách vá theo lớp.** Bằng chứng tôi từng viện dẫn —
+*"lần đầu `VÁ HỜ` = 0"* — cũng sai (lượt 5 đã bằng 0, xem mục Cross-review ở trên). Thứ đo được là
+**xu hướng finding qua chín lượt: 12 → 15 → 15 → 15 → 14 → 10 → 9 → 10 → 5**, và **0 `VÁ SINH LỖI
+MỚI`** ở lượt 9. Tương quan, không phải nhân quả: cùng thời gian ấy còn đổi cả điều kiện dừng, đầu
+vào bảng trích và nội dung prompt. Ai muốn quy công cho phương pháp thì phải dựng một phép đo tách
+được các biến ấy — tôi chưa có, và **không** có quyền viết như thể đã có. Tiền lệ duy nhất còn
+đứng vững về vá GỐC là lượt 5→6: bỏ **một** phép lọc đóng **11** finding cùng lúc, sau khi bốn lượt
+nới đầu vào chỉ **dời** chỗ mất dữ liệu.
 
 **Giới hạn của chính phép đo này.** (a) `13` là các vị trí **tôi tìm ra**, không phải các vị trí
 **có**: mẫu quét (`ĐO ĐƯỢC` · `duy nhất` · `chỉ có` · `mọi` · `xem … dưới` · `#490`) là **danh sách

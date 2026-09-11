@@ -13,9 +13,11 @@ khi `r364` land thì `r365` hiện ra ở **14** ref mà chẳng ai dùng nó. �
 (`^#\s*★[^\n]*?—\s*(r\d+):`) trên blob `CHANGELOG.md` của **mọi** ref:
 
 Phạm vi quét, nói cho chật: **`refs/heads` mà thôi** — không phải "mọi ref". Mirror còn `refs/pull/*` và
-`refs/tags/*`. Đo trên toàn bộ **753** ref của mirror: **151** số `r` trên `refs/heads`, **151** trên toàn
-bộ ref, **0** số chỉ tồn tại ngoài `refs/heads` ⇒ hai namespace kia **không mang số `r` mới nào**, nên phép
-chọn số không mù. Nói cho chật đúng đại lượng (cross-review lượt 7 chấm chỗ này): câu trên được xác nhận
+`refs/tags/*`. Đo trên mirror — **và con số ref tự khai ĐIỂM ĐO, vì nó trôi**: snapshot lượt 7
+(`2026-09-11T17:23:34Z`) có **753** ref, snapshot lượt 8 (`18:00:25Z`) có **756**. Cả hai lần đều
+**151** số `r` trên `refs/heads`, **151** trên toàn bộ ref, **0** số chỉ tồn tại ngoài `refs/heads` ⇒ hai
+namespace kia không mang số `r` mới nào trong **cả hai** snapshot, nên phép chọn số không mù. Đừng đọc
+`753` thành tổng ref hiện tại của mirror. Nói cho chật đúng đại lượng (cross-review lượt 7 chấm chỗ này): câu trên được xác nhận
 **theo SỐ `r`**, không phải theo **chuỗi tiêu đề nguyên văn** — có đúng một chuỗi tiêu đề ngoài `refs/heads`
 (`refs/tags/bak/pre-renumber` giữ một bản `r325` khác chữ với bản trên `refs/heads`). Biến thể văn bản ấy
 không làm phép chọn `r368` mù một số nào.
@@ -91,9 +93,12 @@ của #493 thì lời khai ấy SAI**, và đây là lần đầu kho có phép 
 sang các chuỗi khác — chúng cần đo riêng trên `stderr.log` của chúng, và tôi chưa làm.
 
 Vì sao đáng ghi: một lời khai "effort cao" làm người đọc tin độ phủ rộng hơn thực tế, mà nó lại nằm đúng ở
-chỗ không ai kiểm — cùng họ *"lời khai rộng hơn phép đo"* mà `CLAUDE.md` đã tố cáo nhiều lần. Nay biên nhận
-tách hẳn hai nguồn: `run.json` (launcher ghi) và **header phiên** (công cụ ghi), và caveat
-`REASONING-EFFORT-DO-DUOC-LA-none` có ở cả 17 biên nhận.
+chỗ không ai kiểm. Nay biên nhận tách hẳn hai nguồn: `run.json` (launcher ghi) và **header phiên** (công cụ
+ghi), và caveat `REASONING-EFFORT-DO-DUOC-LA-none` có ở cả 17 biên nhận.
+
+**Và nói cho chật: hai lời khai mâu thuẫn nhau, chỉ một trong hai có phép đo — hết.** Hồ sơ này **KHÔNG**
+suy ra điều gì về ĐỘ PHỦ của chuỗi review. Ảnh hưởng của `effort` lên độ phủ **chưa được đo ở đây**, và mục
+này không đo nó.
 
 Cùng đường đo ấy còn cho **hai** dữ kiện nữa, cả hai thành caveat chứ không bị bỏ:
 
@@ -135,7 +140,8 @@ Vòng lặp đóng **theo quyết định chủ kho**, không phải vì hết f
 **Bản đầu của mục này ghi `36 tệp · 5086 (+) · 3 commit` và con số ấy ĐÃ CŨ ngay khi viết xong**
 (cross-review lượt 1 chấm đúng chỗ này). Nó đo lúc mới có ba commit `ops/`, rồi commit
 `CHANGELOG.md` + manifest và commit ghi kết quả gate nối thêm vào sau. Đây là bệnh *"đo trước khi
-sửa hết"*, và nó sẽ TÁI PHÁT ở mọi mục ghi sổ trừ khi con số **tự khai điểm đo của nó**:
+sửa hết"*. Nếu con số không **tự khai điểm đo của nó**, người đọc có thể nhầm số lịch sử với số hiện tại —
+mọi thay đổi sau phép đo đều làm số cũ đi:
 
 ```
 ĐIỂM ĐO: 42f32fc  (commit cuối TRƯỚC commit mang chính đoạn vá này)
@@ -143,7 +149,7 @@ git diff --shortstat e82af37..42f32fc     ⇒  38 files changed, 5362 insertions
 git diff --name-only e82af37..42f32fc | sed 's#/.*##' | sort | uniq -c
                                           ⇒  1 CHANGELOG.md · 1 RELEASE_MANIFEST.json · 36 ops
 git rev-list --count e82af37..42f32fc     ⇒  5
-17 verdict   489 873 B (478,4 KB)   ·   17 biên nhận   93 552 B (91,4 KB)
+17 verdict   489 873 B (478,4 KiB)   ·   17 biên nhận   93 552 B (91,4 KiB)
 ```
 
 **Commit mang đoạn này, và mọi commit sau nó, KHÔNG nằm trong các số trên** — cố ý. Một con số
@@ -172,7 +178,9 @@ thiếu công cụ là cổng không tồn tại đúng lúc nó cần nhất.
 **`t27` so theo CẶP `(verdict, caveat id)`, không theo id** — *"verdict này vẫn phải có hàng cảnh báo của
 riêng nó"*. Vì thế 17 verdict sinh **72** hàng cảnh báo chứ không phải 24 id phân biệt. Bảng README:
 **414 → 503** hàng (+89 = 17 mục lục + 72 cảnh báo). Các hàng **sinh TỪ chính biên nhận** (đọc
-`verdict_usage_caveats`) nên hai bên không trôi lệch được — đó là cách duy nhất giữ 89 hàng khỏi mục nát.
+`verdict_usage_caveats`) nên một lần sinh cho hai bản khớp nhau, và `t27` đối chiếu sự hiện diện của cặp
+(verdict, caveat). Hai tệp **vẫn có thể lệch sau một lần sửa tay** và khi đó phải sinh lại — cơ chế này giảm
+công giữ 89 hàng khỏi mục nát, không phải một bảo đảm.
 
 ## Merge #493 và một phép đo đổi cách đọc chi phí CI
 
@@ -185,10 +193,11 @@ git rev-parse e82af37^{tree}   ⇒  e307ea3152d605b1456a04ef0757ff0f6b7fa128
 git rev-parse 99aef14^{tree}   ⇒  e307ea3152d605b1456a04ef0757ff0f6b7fa128    BẰNG NHAU
 ```
 
-Merge là fast-forward về **NỘI DUNG**. Hệ quả đo được: **với những bước mà lượt PR ĐÃ chạy**, chân
-`ubuntu-latest` của lượt hậu-merge đo lại một cây **không khác một byte** — phần ấy không thêm gì. Nhưng cây
-trùng băm **không** kéo theo tập bước trùng, và giá trị thêm của lượt hậu-merge gồm **ba** phần, không phải
-một: hai bước ubuntu mà lượt PR đã `skipped`, cộng chân `windows-latest`.
+Merge là fast-forward về **NỘI DUNG**: hai commit có tree bằng nhau. Với **những bước mà lượt PR ĐÃ chạy**,
+chân `ubuntu-latest` của lượt hậu-merge đo lại **cùng một nội dung Git**. Nói chật đúng thứ đã đo: phần
+**chưa đo** là giá trị bổ sung do môi trường, đầu vào ngoài Git, hoặc tính chập chờn — tree bằng nhau không
+loại trừ chúng. Và cây trùng băm **không** kéo theo tập bước trùng: lượt hậu-merge mở rộng tập bước/nền
+bằng hai bước ubuntu mà lượt PR đã `skipped`, cộng chân `windows-latest`.
 
 *(Bản đầu của đoạn này viết "giá trị thêm nằm **hết** ở chân windows và ở bước `release-verify strict`" —
 **câu ấy đã bị RÚT**, cross-review lượt 1 chấm đúng và lượt 2 chỉ ra rằng bản vá đầu chỉ thêm đính chính ở
@@ -210,23 +219,26 @@ ubuntu. Cắt cả chân là mất luôn hai bước trên. Chưa có packet.
 
 | chân | kết quả | đo được |
 |---|---|---|
-| `ubuntu-latest` | **success** | 44 bước · 4 skipped · **0 bước khác `success`**. Bước **38** `release-verify strict (lane LAND — manifest committed)` **CHẠY THẬT** ⇒ `success` (1 s) — lần đầu bước ấy chạy trên CI cho cây này. Cùng lượt xanh: `golden-test` · `doc-claims-check strict` · `determinism-audit strict` · `release-check full` · `release-bundle x2 cùng SHA-256` |
-| `windows-latest` | **cancelled** | cắt ở bước **20** `lease-publish selftest` sau **1258 s**. Job chạy `07:58:49Z → 08:59:07Z` = **3618 s = 60 ph 18 s**, mà `ci.yml:64` khai `timeout-minutes: 60` ⇒ **chạm TRẦN THỜI GIAN, không phải một ca test đỏ** |
+| `ubuntu-latest` | **success** | 44 bước = **40 `success` + 4 `skipped`**; **0 `failure`, 0 `cancelled`**. Bước **38** `release-verify strict (lane LAND — manifest committed)` **CHẠY THẬT** ⇒ `success` (1 s) — lần đầu bước ấy chạy trên CI cho cây này. Cùng lượt xanh: `golden-test` · `doc-claims-check strict` · `determinism-audit strict` · `release-check full` · `release-bundle x2 cùng SHA-256` |
+| `windows-latest` | **cancelled** | cắt ở bước **20** `lease-publish selftest` sau **1258 s**. Job chạy `07:58:49Z → 08:59:07Z` = **3618 s = 60 ph 18 s**, mà `ci.yml:64` khai `timeout-minutes: 60` ⇒ thời lượng **phù hợp** với việc chạm trần. Hồ sơ **không có log nguyên nhân**, nên đây là suy luận từ thời lượng, chưa loại trừ được một ca test lỗi |
 
-**Không phải lỗi của #493, và có bằng chứng chứ không phải lời khai.** Issue **#504** (`WINDOWS-LEASE-SUITE`,
-đang mở, có đặc tả + quyết định chủ kho) ghi **ba** lượt `cancelled` liên tiếp cùng bước cùng trần kể từ khi
-A0 (#488) land: `0721811` · `c00c88a0` · `27c413c3`. Trước A0 bước ấy chạy **2 ph 58 s**. Lượt này là ca
-**THỨ TƯ**. `CLAUDE.md` CẤM nâng `timeout-minutes`, và tệp `ci.yml` ngoài write set ⇒ **không vá ở đây**.
+**Triệu chứng CÓ TRƯỚC #493 — và đó là thứ đo được, không phải một lời loại trừ trách nhiệm.** Issue **#504**
+(`WINDOWS-LEASE-SUITE`, đang mở, có đặc tả + quyết định chủ kho) ghi **ba** lượt `cancelled` liên tiếp cùng
+bước cùng trần kể từ khi A0 (#488) land: `0721811` · `c00c88a0` · `27c413c3`. Trước A0 bước ấy chạy
+**2 ph 58 s**. Lượt này là ca **THỨ TƯ**. Chưa có đối chứng đủ để **loại trừ mọi** ảnh hưởng của #493 lên
+thời lượng bước ấy; xử lý triệu chứng thuộc packet **#504**. `CLAUDE.md` CẤM nâng `timeout-minutes`, và tệp `ci.yml` ngoài write set ⇒ **không vá ở đây**.
 
 **Một số MỚI cho #504.** Issue ấy khai *"log bước bị đệm khối nên ca nào chậm/treo chưa đo được"* và nêu giả
 thuyết **H1: suite ≈ 3 × nền**, suy từ Linux. Lượt này cho một **cận dưới đo được** cho tỉ lệ Windows/Linux
 của **cùng bước trong cùng lượt chạy**: Windows **≥ 1258 s** (bị cắt, chưa xong) so ubuntu **139 s** ⇒
-**≥ 9,05×**. Tức **H1 ước thấp khoảng ba lần**. Cận DƯỚI vì 1258 s là lúc bị cắt chứ không phải lúc xong.
+**≥ 9,05×**. Nếu H1 (`≈ 3×`) nói về cùng đại lượng thì H1 thấp **ít nhất khoảng 3,02 lần**. Đây là cận
+**DƯỚI** vì 1258 s là lúc bị cắt chứ không phải lúc xong — **tỉ số khi hoàn tất chưa biết**.
 
 **Hệ quả cho trạng thái của #493, nói cho đúng §10.2.** `landed` đòi "hậu-merge gate XANH". Lượt này **không
 xanh**. Trạng thái đúng: kết quả ĐÃ vào canonical ở exact SHA được duyệt · bookkeeping đang hoàn tất bằng
-chính PR mang mục này · **hậu-merge gate CHƯA xanh trên chân Windows vì một khuyết tật hạ tầng CÓ TRƯỚC, có
-packet riêng**. Không làm tròn thành `landed`; cũng không đọc thành "#493 có lỗi".
+chính PR mang mục này · **hậu-merge gate CHƯA xanh trên chân Windows**, với triệu chứng trùng một nợ đã ghi
+ở **#504** và có trước #493. Nguyên nhân cụ thể, cùng phần đóng góp (nếu có) của #493, **chưa đo độc lập**.
+Không làm tròn thành `landed`; cũng không đọc thành "#493 có lỗi".
 
 **Và phần đắt nhất của bài học này là về CÁCH TÔI TƯ VẤN, không phải về CI.** Khi chủ kho hỏi lượt hậu-merge
 có đáng chi phí không, tôi trả lời rằng chân ubuntu là lặp lại còn **giá trị nằm hết ở chân windows**, rồi
@@ -259,11 +271,13 @@ Cùng lớp lỗi *"hỏi chỗ tiện tay thay vì hỏi chỗ kết luận đ�
 CẤU HÌNH của nó, trong khi LỊCH SỬ của chính lượt ấy đã trả lời sẵn. Chốt rẻ và luôn dùng được: **trước khi
 khuyên ai tiêu một lượt CI, hãy đọc ba lượt gần nhất của cùng job trên cùng nhánh.**
 
-## `thu-hoi` ĐỎ, không phải lỗi của #493 — và 14 lượt đỏ trước đã CHE một lỗi thứ hai
+## `thu-hoi` ĐỎ, triệu chứng có trước #493 — và 14 lượt đỏ trước chưa bao giờ CHẠM tới bước fetch
 
 Phép neo canonical `TL_WF_SHA == TL_S` (`26e2555d…`) **ĐẠT lần đầu tiên** trong lịch sử workflow ấy. Nhờ đó
 job chạy tiếp và chết ở bước fetch với `rc=128`, `fatal: could not read Username for 'https://github.com'`.
-Tức **14/14 lượt đỏ trước đó đã che một lỗi credential có sẵn**; nó chỉ hiện khi chốt thứ nhất qua. Tệp
+Tức **14/14 lượt đỏ trước đó dừng TRƯỚC bước fetch**, nên chúng chưa bao giờ cho phép đánh giá bước ấy.
+Điều này **không** chứng minh cùng lỗi credential đã tồn tại trong cả 14 lượt — chỉ chứng minh chúng không
+đo tới đó. Tệp
 `.github/workflows/ops-thu-hoi-admission.yml` ngoài write set, thuộc packet **#503** (`M9-FETCH-AUTH`) của
 phiên khác — **không vá ở đây**. Check vẫn `CHƯA KÍCH HOẠT`, chưa là required (`mergeable_state: unstable`).
 
@@ -280,7 +294,8 @@ base **tại thời điểm event**, nên sau mỗi `synchronize` nó cập nh�
   phút **sau** khi PR đã merge. Ba chỗ đã hỏi: `get_reviews` ⇒ `[]`; `get_review_comments` ⇒ 0; comment tổng
   kết ⇒ `Completed`, không bảng finding. Connector tự khai tín hiệu "sạch" của nó là **reaction 👍** — mà
   reactions trên PR là `total_count: 0`, **không có 👍 và cũng không có 👀** dù lượt review chắc chắn đã chạy.
-  Kênh reaction **không hoạt động** trên PR này, nên sự vắng mặt của 👍 **không đọc được theo chiều nào**.
+  **Không quan sát được** reaction nào tại lần đọc ấy; nguyên nhân (kênh hỏng, hay đơn giản là connector
+  không phản ứng trên PR đã đóng) **chưa xác định**. Nên sự vắng mặt của 👍 **không đọc được theo chiều nào**.
   Bằng chứng còn lại nghiêng MẠNH về "không có finding" — nhưng *nghiêng mạnh* không phải *đã chứng minh*.
 - **Byte thật của comment trên GitHub.** Đường ĐỌC của MCP chuẩn hoá thực thể HTML trong thân issue/comment,
   và container không có client thứ hai (REST tới `repos/…` bị proxy chặn 403).
@@ -317,9 +332,9 @@ LƯỢT 2 — head e1cff07  (có VERDICT.md; `CHANGELOG.md` ở head ấy là 98
 Hai head, hai kích thước, **một hành vi cổng** — và chính việc lặp lại trên head thứ hai mới biến kết quả
 lượt 1 từ một lời thuật thành một điều tái lập được.
 
-`release-verify` **có răng** ở mức byte; `doc-claims-check` **mù** với đột biến số dù chính nó là cổng
-mang tên "claims". Hai cổng, hai kết luận ngược nhau trên cùng một đột biến — và cổng mang tên đúng việc
-lại là cổng không làm việc ấy.
+`release-verify` bắt sai băm; `doc-claims-check` **không bắt** ca đổi số này — nó nằm ngoài các lớp cú pháp
+mà cổng ấy kiểm theo hợp đồng. Hai cổng, hai kết luận ngược nhau trên cùng một đột biến. Đây là một
+**khoảng trống kiểm SỐ** cần phép đo riêng, không phải bằng chứng rằng cổng làm sai thứ nó khai.
 
 **Một giới hạn của phép đo này phải nói ra:** đột biến giữ NGUYÊN ĐỘ DÀI, nên nó chứng minh
 `release-verify` bắt được thay đổi nội dung **không đổi kích thước** — thứ mà một cổng chỉ so `size` sẽ
@@ -413,9 +428,10 @@ Ba ca, cùng một clone sạch của head này, mỗi ca thêm đúng một dò
 | 2 | cùng đường dẫn trong **backtick inline** | 372 | **+1** |
 | 3 | cùng đường dẫn trong **khối code** | 371 | **0** |
 
-Hệ quả thực hành, và nó khác hẳn kết luận của bản trước: **nhắc bằng văn bản thường không tốn gì**, nên một
-mục ghi sổ có thể bàn kỹ bao nhiêu tuỳ ý về một đường dẫn không tồn tại mà tổng không nhúc nhích. Cái phải
-đếm là số lần bạn **trích nó trong backtick**, không phải số lần bạn **nói về nó**.
+Hệ quả thực hành, và nó khác hẳn kết luận của bản trước: **với đường dẫn và lớp `L1` đã thử**, nhắc dạng
+văn bản thường không làm tăng advisory. Cái phải đếm là số lần **trích trong backtick**, không phải số lần
+**nói về nó**. Phạm vi: ba ca trên đo đúng một đường dẫn và đúng lớp `L1` — **không** phải bảo đảm cho mọi
+nội dung hay mọi lớp của `doc-claims-check`.
 
 **Và LỚP lỗi ấy chưa đóng — đo được ngay trong chính lần vá này.** Khi viết đoạn sửa lời tư vấn ở trên, tôi
 đặt tên bước *tl selftest* vào dấu backtick **lần thứ hai**, và advisory `L8 TL_COMMAND_UNKNOWN` quay lại;

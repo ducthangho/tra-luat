@@ -83,9 +83,10 @@ verdict_usage_caveats:
     KHÔNG phải bằng chứng model nào đã phục vụ từng lượt — `codex exec` không phát `modelUsage`. `cross_provider`
     ở đây phân biệt PROVIDER, không phải MODEL.'
 - id: REASONING-EFFORT-DO-DUOC-LA-none
-  canh_bao: 'Header phiên khai `reasoning effort: none` ở **17/17** lượt. Hồ sơ nào của kho nói chuỗi
-    này chạy ở `xhigh` là SAI — phép đo bác điều đó. Ghi lại vì một lời khai effort cao làm người đọc
-    tin độ phủ rộng hơn thực tế.'
+  canh_bao: 'Header phiên khai `reasoning effort: none` ở **17/17** lượt. Nó KHÔNG khớp lời khai
+    `xhigh` ở một số mục của kho cho chuỗi này. Ghi lại vì hai lời khai mâu thuẫn nhau và chỉ một
+    trong hai có phép đo. KHÔNG suy ra điều gì về ĐỘ PHỦ: ảnh hưởng của `effort` lên độ phủ chưa
+    được đo ở đây, và hồ sơ này không đo nó.'
 - id: phan-cong-CAM-tu-soan-phan-chung
   canh_bao: '`PROMPT.md` CẤM reviewer tự soạn chuỗi tấn công đường dẫn / payload thoát thư mục (hai
     lượt cross-review của kho đã chết giữa chừng vì đúng việc ấy). Nên ĐỘ PHỦ về phía đó HẸP HƠN một

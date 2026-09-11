@@ -43,9 +43,11 @@ cay_da_merge_trung_cay_da_do:
   bang_nhau: true
   do_bang: '`git rev-parse e82af37^{tree}` so `git rev-parse 99aef14^{tree}`'
   he_qua_phai_doc: >-
-    Merge là fast-forward về NỘI DUNG (master là tổ tiên của head), nên VỚI NHỮNG BƯỚC MÀ LƯỢT PR
-    ĐÃ CHẠY, chân `ubuntu-latest` của lượt hậu-merge đo lại một cây KHÔNG khác một byte nào —
-    phần ấy không thêm gì. Nhưng cây trùng băm KHÔNG kéo theo tập bước trùng: giá trị thêm của
+    Merge là fast-forward về NỘI DUNG (master là tổ tiên của head): hai commit có tree bằng nhau.
+    VỚI NHỮNG BƯỚC MÀ LƯỢT PR ĐÃ CHẠY, chân `ubuntu-latest` của lượt hậu-merge đo lại CÙNG MỘT
+    NỘI DUNG GIT. Phần CHƯA ĐO: giá trị bổ sung do môi trường, đầu vào ngoài Git, hoặc tính chập
+    chờn — tree bằng nhau không loại trừ chúng. Và cây trùng băm KHÔNG kéo theo tập bước trùng:
+    phần mở rộng tập bước/nền của
     lượt hậu-merge gồm BA phần chứ không phải một — bước `tl selftest (có bằng chứng
     exact-identity)` (119 s) và bước `release-verify strict (lane LAND)` (1 s), cả hai lượt PR đã
     `skipped`, CỘNG chân `windows-latest`.
@@ -113,8 +115,9 @@ cross_review:
       `get_reviews` ⇒ `[]`; `get_review_comments` ⇒ 0; comment tổng kết ⇒ `Completed`, không
       bảng finding. Connector tự khai tín hiệu "sạch" của nó là REACTION 👍 — mà reactions trên
       PR là `total_count: 0`, KHÔNG có 👍 **và cũng không có 👀** dù lượt review chắc chắn đã
-      chạy. Kênh reaction không hoạt động trên PR này, nên sự VẮNG MẶT của 👍 không đọc được
-      theo chiều nào. Bằng chứng còn lại nghiêng MẠNH về "không có finding" — nhưng nghiêng
+      chạy. KHÔNG QUAN SÁT ĐƯỢC reaction nào tại lần đọc ấy; nguyên nhân (kênh hỏng, hay
+      connector không phản ứng trên PR đã đóng) CHƯA XÁC ĐỊNH. Nên sự VẮNG MẶT của 👍 không
+      đọc được theo chiều nào. Bằng chứng còn lại nghiêng MẠNH về "không có finding" — nhưng nghiêng
       mạnh không phải đã chứng minh, và ghi thành `KHONG_DO_DUOC` chứ không làm tròn lên.
 
 # ─────────────────── CỔNG TRƯỚC MERGE ───────────────────
@@ -123,7 +126,7 @@ pre_merge_checks:
     run_id: 34574232783
     head: 99aef14
     ket_qua: success
-    bang_chung_duong: '44 bước · 0 bước khác `success` · 3 bước `skipped`'
+    bang_chung_duong: '44 bước = 41 `success` + 3 `skipped`; 0 `failure`, 0 `cancelled`'
     ba_buoc_skipped_va_ly_do:
       - 'gate lifecycle selftest — nền không có cgroup (điều kiện hạ tầng runner)'
       - 'tl selftest — có bằng chứng exact-identity; `tl.py` KHÔNG nằm trong write set 8 tệp'
@@ -157,12 +160,16 @@ pre_merge_checks:
   - ten: 'thu-hoi'
     run_id: [34574229829, 34576651228]
     ket_qua: failure
-    la_loi_cua_PR_nay: false
+    la_loi_cua_PR_nay: KHONG_DO_DUOC
+    la_loi_cua_PR_nay_ghi_chu: >-
+      Bản trước khai `false`. Đổi thành KHONG_DO_DUOC: triệu chứng CÓ TRƯỚC #493 là thứ đo được,
+      nhưng nó không đủ để LOẠI TRỪ mọi ảnh hưởng của #493 — chưa có đối chứng cho điều đó.
     bang_chung: >-
       Phép neo canonical `TL_WF_SHA == TL_S` (`26e2555d…`) ĐẠT — lần đầu tiên trong lịch sử
       workflow ấy. Nhờ đó job chạy tiếp và chết ở bước fetch với `rc=128`,
-      `fatal: could not read Username for 'https://github.com'`. Tức 14/14 lượt đỏ trước đó đã
-      CHE một lỗi credential có sẵn; nó chỉ hiện khi chốt thứ nhất qua.
+      `fatal: could not read Username for 'https://github.com'`. Tức 14/14 lượt đỏ trước đó DỪNG
+      TRƯỚC bước fetch, nên chúng chưa bao giờ cho phép đánh giá bước ấy. Điều này KHÔNG chứng
+      minh cùng lỗi credential đã tồn tại trong cả 14 lượt — chỉ chứng minh chúng không đo tới đó.
     trang_thai_cua_check: 'CHƯA KÍCH HOẠT, chưa là required check — `mergeable_state: unstable`'
     ngoai_write_set: true
     thuoc_packet: '#503 M9-FETCH-AUTH (lease của phiên khác)'
@@ -181,10 +188,12 @@ post_merge_checks:
     ket_qua_theo_chan:
       ubuntu_latest:
         ket_qua: success
-        bang_chung_duong: '44 bước · 4 skipped · 0 bước khác `success`'
+        bang_chung_duong: '44 bước = 40 `success` + 4 `skipped`; 0 `failure`, 0 `cancelled`'
         bon_buoc_skipped_va_ly_do:
           - 'PR head contains required EOL base — `if: event_name == pull_request`; lượt master
-             LUÔN skip bước này, nên tiêu chí "không bước nào skipped" chỉ đúng cho lượt PR'
+             LUÔN skip bước này. Hệ quả: `skipped` phải xét THEO ĐIỀU KIỆN TỪNG BƯỚC, không đặt
+             tiêu chí tổng "lượt PR không được có bước nào skipped" — chính lượt PR cũng có 3 bước
+             skipped hợp lệ, liệt kê ở `pre_merge_checks`.'
           - 'gate lifecycle selftest — nền không có cgroup'
           - 'tl selftest (lượt PR — không sinh bằng chứng) — điều kiện lane'
           - 'release-verify strict (lane WORKER) — `github.ref == master` nên chạy lane LAND'
@@ -201,13 +210,17 @@ post_merge_checks:
         so_giay_buoc_do_truoc_khi_bi_cat: 1258
         tong_thoi_gian_job_giay: 3618
         khoang_thoi_gian: '2026-09-11T07:58:49Z → 2026-09-11T08:59:07Z'
-        nguyen_nhan_do_duoc: >-
-          3618 s = 60 phút 18 giây, mà `ci.yml:64` khai `timeout-minutes: 60`. Job chạm TRẦN
-          THỜI GIAN, KHÔNG phải một ca test đỏ. Mọi bước sau bước 20 hiện `skipped` vì job đang
+        nguyen_nhan_SUY_LUAN: >-
+          3618 s = 60 phút 18 giây, PHÙ HỢP với `timeout-minutes: 60` ở `ci.yml:64`. Hồ sơ KHÔNG
+          có log nguyên nhân, nên đây là suy luận từ thời lượng — chưa xác nhận chạm trần, và
+          chưa loại trừ một ca test lỗi. Mọi bước sau bước 20 hiện `skipped` vì job đang
           bị cắt, nên chân Windows **chưa đo** `release-verify strict (lane LAND)`,
           `golden-test`, `determinism-audit` và 19 bước khác.
-        la_loi_cua_PR_nay: false
-        bang_chung_la_no_CO_TRUOC: >-
+        la_loi_cua_PR_nay: KHONG_DO_DUOC
+        la_loi_cua_PR_nay_ghi_chu: >-
+          Bản trước khai `false`. Dữ kiện đo được chỉ là TRIỆU CHỨNG đã có ở ba head trước;
+          từ đó không suy ra được việc loại trừ đóng góp của #493.
+        trieu_chung_CO_TRUOC: >-
           Issue #504 (`WINDOWS-LEASE-SUITE`, đang MỞ) ghi BA lượt `cancelled` liên tiếp cùng
           bước, cùng trần, kể từ khi A0 (#488) land: `0721811` (run 34439063235, ≥ 25 ph 50 s),
           `c00c88a0` (34549206309), `27c413c3` (34552510232, ≥ 22 ph 52 s). Trước A0 bước ấy
@@ -216,8 +229,9 @@ post_merge_checks:
           #504 khai *"log bước bị đệm khối nên ca nào chậm/treo chưa đo được"* và nêu giả thuyết
           H1 *"suite ≈ 3 × nền"*, suy từ Linux. Lượt này cho một cận dưới ĐO ĐƯỢC cho tỉ lệ
           Windows/Linux của CÙNG bước trong CÙNG lượt chạy: Windows ≥ 1258 s (bị cắt, chưa xong)
-          so ubuntu 139 s ⇒ **≥ 9,05×**. Tức H1 ước THẤP khoảng ba lần. Đây là cận DƯỚI vì
-          1258 s là lúc bị cắt chứ không phải lúc xong.
+          so ubuntu 139 s ⇒ **≥ 9,05×**. Nếu H1 (`≈ 3×`) nói về cùng đại lượng và cùng mẫu số
+          thì H1 thấp ÍT NHẤT khoảng 3,02 lần. Đây là cận DƯỚI vì 1258 s là lúc bị cắt chứ không
+          phải lúc xong — TỈ SỐ KHI HOÀN TẤT CHƯA BIẾT.
         khong_sua_o_day: >-
           Thuộc packet #504, có đặc tả và quyết định chủ kho riêng. `CLAUDE.md` CẤM nâng
           `timeout-minutes`. Không đụng `ci.yml` trong PR này.
@@ -225,8 +239,9 @@ post_merge_checks:
       §10.2 định nghĩa `landed` gồm "hậu-merge gate XANH". Lượt này KHÔNG xanh — nó `cancelled`.
       Nên trạng thái đúng của #493 là: kết quả ĐÃ vào canonical ở exact SHA được duyệt ·
       bookkeeping ĐANG hoàn tất bằng chính PR mang tệp này · **hậu-merge gate CHƯA xanh trên
-      chân Windows, vì một khuyết tật hạ tầng CÓ TRƯỚC và có packet riêng**. KHÔNG làm tròn
-      thành `landed`; cũng KHÔNG đọc thành "#493 có lỗi".
+      chân Windows**, với triệu chứng trùng một nợ đã ghi ở #504 và có trước #493. Nguyên nhân
+      cụ thể, cùng phần đóng góp (nếu có) của #493, CHƯA ĐO ĐỘC LẬP. KHÔNG làm tròn thành
+      `landed`; cũng KHÔNG đọc thành "#493 có lỗi".
     cai_da_do_duoc_va_cai_chua:
       da_do: >-
         Toàn bộ lane LAND trên Linux, gồm bước `release-verify strict` mà lượt PR đã skip.

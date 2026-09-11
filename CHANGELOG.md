@@ -557,14 +557,26 @@ Mỗi biên nhận mang một khối văn xuôi ("bài học", "vì sao đáng g
 và lượt sau chấm đúng vào chúng.
 
 **Cái đổi: từ lượt 4, biên nhận chỉ giữ TRƯỜNG ĐO ĐƯỢC** — `verdict_sha256` · `verdict_bytes` ·
-`reviewed_sha` · `evidence_url` · `so_p*` · `tree_khop` · kết quả cổng — **cộng đúng một dòng mỗi
-finding**. Không khối bài học, không "vì sao đáng ghi". Bài học vẫn được ghi, nhưng ở **`CHANGELOG`**,
-nơi nó vốn thuộc về và đã đi qua bốn lượt review. So sánh **đo bằng `wc -l`, không ước**: biên nhận lượt 3 dài **253** dòng, biên nhận lượt 4 dài **146** — ngắn hơn **107** dòng, và phần cắt đi đúng là phần bị chấm ba lượt liền. *(Bản đầu của câu này viết `239` và `~150` — hai con số TÔI ƯỚC trong khi `wc -l` cách đó một lệnh. Không lượt review nào chấm; tôi tự bắt lúc chạy lệnh để kiểm. Ghi lại vì nó xảy ra **ngay trong đoạn văn tố cáo đúng thói ấy**, và vì dấu `~` là thứ duy nhất khai báo rằng mình đang ước — con số `239` thì không.)*
+`reviewed_sha` · `evidence_url` · `so_p*` · `tree_khop` · kết quả cổng — **cộng một MỤC NGẮN mỗi
+finding** (`van_de` · `phep_do` · `da_va`). Bỏ khối bài học và "vì sao đáng ghi"; bài học ghi ở
+**`CHANGELOG`**, nơi nó vốn thuộc về và đã đi qua nhiều lượt review.
 
-**Cả lớp rủi ro chết theo KIẾN TRÚC, không theo bản vá** — cùng lối thoát mà kho đã dùng khi bỏ hẳn
-việc tự ghi `~/.codex/config.toml` sau bốn lượt vá. Và nó có tiền lệ đo được ngay trong chuỗi này:
-`EVIDENCE.md` lệch ở **lượt 1 và lượt 2**, tôi chuyển sang **script đo mọi số ở bước cuối**, và lượt
-3 lẫn lượt 4 đều khai gói **SẠCH**. Đổi cách làm ăn đứt vá lần thứ ba.
+**Bản đầu của đoạn này khai "đúng MỘT DÒNG mỗi finding" kèm một phép so số dòng — cả hai đã bị
+XOÁ, và lý do đáng ghi hơn con số.** *"Một dòng"* sai: khối `nam_finding` là năm object nhiều dòng.
+Còn phép so số dòng thì **trôi theo từng commit** — đo được ở ba mốc liên tiếp: `f6ec9c0` ⇒
+`253 / 149`, `3c82ae3` ⇒ `260 / 149`, `e27d839` ⇒ `273 / 165`. Cross-review chấm nó ở **hai lượt
+liên tiếp** (5 và 6), mỗi lần với một cặp số khác. Một con số mà mẫu của nó thay đổi mỗi lần ta
+chạm vào tệp thì **không neo SHA cũng vô nghĩa, mà neo SHA thì vô dụng** — nó chỉ nói về một bản đã
+qua. Nên bỏ hẳn, giữ mệnh đề không cần số: **văn xuôi trong biên nhận đã rút gọn**.
+
+**KHÔNG khai "cả lớp rủi ro chết theo KIẾN TRÚC".** Câu ấy cũng đã bị xoá: biên nhận lượt 4 và lượt
+5 vẫn còn phần dẫn nhập và khối `goi_luot_*_SACH` mang văn xuôi, nên thứ đo được là văn xuôi **ÍT
+ĐI**, không phải hết. Đây là lần thứ hai một câu tổng kết của tôi rộng hơn thứ đã làm, trong đúng
+đoạn văn nói về việc thu hẹp lời khai.
+
+**Thứ CÓ bằng chứng là tiền lệ ở chỗ khác trong chính chuỗi này:** `EVIDENCE.md` lệch ở **lượt 1 và
+lượt 2**; chuyển sang **script đo mọi số ở bước cuối**; lượt **3, 4 và 5** đều khai gói SẠCH. Ở đó
+việc đổi cách làm đóng được lớp lỗi, và có ba lượt liên tiếp làm chứng.
 
 
 # ★ dev-side — r361: ghi sổ #495 — 9 tệp trong `ops/reviews/`, và ba finding connector chấm vào chính hồ sơ review (2026-09-10)

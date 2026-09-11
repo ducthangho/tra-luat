@@ -82,9 +82,15 @@ tam_finding:
     da_va: 'Khai thêm `tuan_thu_cam_cua_reviewer` và `github_submitter_identity` cũng là ATTESTATION. Biên nhận này áp ngay từ đầu tệp.'
   - slug: bien-nhan-ngan-chua-thuc-hien-ban-va-cau-truc-da-khai
     van_de: 'Ba con số sai và một lời khai quá rộng trong chú thích `BN4`.'
-    phep_do: '`wc -l`: BN4 = **149** (không phải 146) · BN3 = **260** (không phải 253) · giảm **111** (không phải 107). Khối `nam_finding` = **45** dòng cho 5 finding, không phải "một dòng mỗi finding".'
-    nguyen_nhan: 'Ba số đo TRƯỚC lần sửa cuối — đúng nếp §4 số 3 mà chính chú thích ấy vi phạm.'
-    da_va: 'Sửa ba số; bỏ khai "cả lớp rủi ro chết theo kiến trúc" — thứ đo được là văn xuôi ÍT ĐI, không phải hết.'
+    phep_do: 'Lượt 5 đo `wc -l` ⇒ BN4 **149** / BN3 **260** (chú thích khai 146 / 253). Khối `nam_finding` là năm object nhiều dòng, không phải "một dòng mỗi finding".'
+    nguyen_nhan: 'Số đo TRƯỚC lần sửa cuối — đúng nếp §4 số 3 mà chính chú thích ấy viện dẫn.'
+    da_va: >-
+      Vòng đầu sửa ba số; **lượt 6 chấm lại** vì chúng đã trôi tiếp (`e27d839` ⇒ BN4 **165** /
+      BN3 **273**). Nên cuối cùng **XOÁ HẲN phép so số dòng** ở cả `CHANGELOG` §4, chú thích BN4 và
+      hàng mục lục: mẫu số thay đổi mỗi lần chạm vào tệp, nên neo SHA cũng vô nghĩa — con số ấy chỉ
+      nói về một bản đã qua. Giữ mệnh đề không cần số: **văn xuôi trong biên nhận đã rút gọn**.
+      Cũng bỏ "cả lớp rủi ro chết theo kiến trúc" ở cả ba nơi — thứ đo được là văn xuôi ÍT ĐI.
+    ba_moc_da_do: '`f6ec9c0` ⇒ 253/149 · `3c82ae3` ⇒ 260/149 · `e27d839` ⇒ 273/165 — ba lần viết, ba cặp số.'
   - slug: tong-ket-pham-vi-van-dung-o-ba-luot-va-nam-hang
     van_de: '§3 còn "BA lượt" và "3 hàng mục lục + 2 hàng cảnh báo" trong khi cùng mục đã có phần LƯỢT 4.'
     phep_do: 'Đếm hàng README: **4** mục lục PR497 + **2** cảnh báo.'

@@ -4,19 +4,24 @@
 #
 # ── BIÊN NHẬN NÀY CỐ Ý NGẮN, VÀ ĐÓ LÀ MỘT BẢN VÁ CẤU TRÚC ────────────────────────────────────
 # Ba biên nhận trước mang những khối văn xuôi dài ("bài học", "vì sao đáng ghi"). Đo được: mỗi
-# khối ấy là LỜI KHAI MỚI, và lượt sau chấm đúng vào chúng. Quy tắc đếm — trích `TỆP/DÒNG` của
-# từng finding, hỏi tập đường dẫn có chứa hiện vật CHỈ TỒN TẠI VÌ vòng lặp review không
-# (`ops/reviews/pr497-*`, `EVIDENCE.md`): lượt 1 ⇒ 0/2 · lượt 2 ⇒ 5/7 · lượt 3 ⇒ 4/6 · lượt 4 ⇒
-# 5/5. Bề mặt review tự nở ra và tự sinh việc cho mình.
+# khối ấy là LỜI KHAI MỚI, và lượt sau chấm đúng vào chúng.
+# MỆNH ĐỀ ĐO ĐƯỢC, không kèm bảng: trích `TỆP/DÒNG` của từng finding thì thấy — từ lượt 2 trở đi,
+# MỌI finding đều dẫn ít nhất một hiện vật CHỈ TỒN TẠI VÌ vòng lặp review (`ops/reviews/pr497-*`,
+# `EVIDENCE.md`, hoặc dẫn tắt "receipt lượt N" / "verdict lượt N"); ở lượt 1 thì KHÔNG cái nào.
+# Bề mặt review tự nở ra và tự sinh việc cho mình.
 # KHÔNG đọc điều đó thành "nội dung gốc đã sạch": `hai-loi-khai-thieu-nhan-va-sai-co-trang` vẫn
 # chạm `ops/cong_cu.py` ở cả ba lượt 2-4.
+# ĐÃ XOÁ khỏi chú thích này một BẢNG `0/2 · 5/7 · 4/6 · 5/5`: hai số giữa SAI (bộ trích chỉ bắt
+# đường dẫn dạng đầy đủ, bỏ dẫn tắt), và `CHANGELOG` §4 đã bác chính bảng ấy. Lượt 6 chấm vì bản
+# sao của nó còn sống ở đây sau khi bản gốc bị xoá — vá chỗ A, để nguyên chỗ B, lần thứ tư.
 # `CLAUDE.md`: "cùng một hình dạng lặp ba lần trở lên thì câu hỏi đúng là **có nên làm việc này
 # không**, không phải **vá thế nào**." Ngưỡng đã đạt. Nên từ đây biên nhận chỉ giữ TRƯỜNG ĐO
 # ĐƯỢC cộng một MỤC ngắn mỗi finding (`van_de` · `phep_do` · `da_va`) — KHÔNG phải một dòng: khối
 # `nam_finding` chiếm **45** dòng cho 5 finding. Bài học vẫn được ghi ở `CHANGELOG`.
-# ĐO, KHÔNG ƯỚC: tệp này **149** dòng, biên nhận lượt 3 **260** dòng ⇒ ngắn hơn **111**. Bản đầu
-# của chú thích này ghi 146 / 253 / 107 — ba con số đo TRƯỚC lần sửa cuối, và lượt 5 chấm đúng
-# chỗ đó. Cùng lớp lỗi mà `CHANGELOG` §4 nếp 3 đặt tên: bảng số phải chạy lại SAU bước cuối.
+# ĐÃ XOÁ phép so số dòng khỏi chú thích này. Ba lần viết cho ba cặp số (146/253, 149/260,
+# 165/273) vì nó TRÔI theo từng commit chạm vào tệp — neo SHA cũng không cứu, vì con số ấy chỉ
+# nói về một bản đã qua. Lượt 5 và lượt 6 chấm nó hai lần liên tiếp. Mệnh đề giữ lại không cần
+# số: văn xuôi trong biên nhận đã RÚT GỌN.
 # KHÔNG khai "cả lớp rủi ro chết theo kiến trúc": tệp này vẫn còn phần dẫn nhập và
 # `goi_luot_4_SACH` mang văn xuôi. Thứ đo được là văn xuôi ÍT ĐI, không phải hết.
 #

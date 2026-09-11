@@ -1,3 +1,70 @@
+# ★ dev-side — r365: ghi sổ #506 — rút cổng `duyet khac danh tinh / cong` theo chỉ đạo chủ kho; hai verdict codex, gen 2 vì lỗi ghi sổ, A5 đo được: `cong` không còn trên PR đầu tiên sau land
+
+Nối tiếp r364 (chốt tới `27c413c3`, #501). Merge sau đó chưa có mục: **#497** (`4b5184e`, r362 của một chuỗi hồ sơ khác,
+27 commit chỉ `ops/reviews/**` + `ops/cong_cu.py` + CHANGELOG + manifest) và **#506** (`26e2555d`) — mục này ghi sổ #506 và
+là vế bookkeeping ADR-0034 của chính nó (2 verdict + 2 biên nhận v2 + 4 cảnh báo + 2 hàng mục lục + manifest tái sinh).
+
+**Số hiệu `r365` đo trước khi dùng** (11-09-2026, 06:1xZ, `guong.git` fetch đủ): chuỗi `r365` xuất hiện trên **11** ref nhưng
+chỉ trong THÂN mục r364 (*"`r365` 0"*), không ref nào có mục `# ★ … r365`; `r366` 0.
+
+## Packet #502 `BO-CONG-DUYET-KHAC-DANH-TINH` — việc gì, vì sao
+
+Chỉ đạo chủ kho phiên 11-09-2026, nguyên văn: *"tôi muốn bỏ phê duyệt khác danh tính"* (dấu vết bền: thân Issue #502).
+Spec bản 1 chốt `ops/specs/BO-CONG-DUYET-KHAC-DANH-TINH.md` (sha256 `d8d1e083…`, blob `1e5d91d` trên PR #475, bản sao
+trên `ops/cap-lease-502`); câu trả lời biên giới Q1/Q2/Q4 đồng ý, Q3 *"chưa từng bật"* (#502 comment 5629584614 + chỉ thị
+06:0xZ). Lease gen 1 `bo-cong-duyet-khac-danh-tinh-exec-1-claude-20260911` (#502 comment 5629605590; ngoại lệ ADR-0044
+**số tệp 6**, dòng thêm ≤ 30). Đo VÌ SAO: #500 (`c00c88a0`) và #501 (`27c413c3`) đều merge với `cong` ĐỎ ⇒ cổng không
+chặn; nó tốn một check đỏ mỗi PR và mọi push xoá bản duyệt của tài khoản thứ hai.
+
+Diff #506: **6 tệp, +13/−1710** — xoá `.github/workflows/duyet-khac-danh-tinh.yml` (−74), `duyet-phan-chung.yml` (−62),
+`.claude/dev/duyet_danh_tinh.py` (−338), `duyet_danh_tinh_test.py` (−1235); gỡ 1 mục `DA_NOI` trong
+`.claude/dev/ci_dang_ky_test.py`; khối ĐÃ RÚT (+13 kể dòng trống) đầu `ops/RUNBOOK_TACH_DANH_TINH_GITHUB.md`.
+
+## Hai lượt cross-review codex (khác nền) — bảng đo
+
+| lượt | head | verdict | P1/P2/P3 | run · thời lượng | HINT | vá ở |
+|---|---|---|---|---|---|---|
+| 1 | `1e36bb4` | `changes_requested` | 0/2/1 | `2df4d177` · 701,678 s | 1 hunk runbook (sha256 `d4fd6193…`) | `88e89b3` (áp nguyên) |
+| 2 | `88e89b3` | `approve` | 0/0/1 | `3c71bd7f` · 620,319 s | 0 hunk (`fc895712…`) | — |
+
+Hai P2 lượt 1 (`loi-khai-vuot-hai-su-kien` · `duong-dan-spec-khong-co-tren-head`) được lượt 2 đối chiếu từng hunk: **ĐÃ VÁ
+THẬT**. P3 `tham-chieu-tai-lieu-song-con-sot` (`requirements.txt:29`, `ops/PHAN_BIEN_QUY_TRINH_BUILD_REVIEW_20260905.md:118`)
+**còn mở**, ngoài write set — nợ tài liệu nhỏ. Reviewer tự đo cả hai lượt: đúng 4 tệp xoá; 75 dòng tham chiếu, 0 lời gọi
+thực thi sống; registry 21/21 + 2 mutant phục hồi rc=1; suite 146/146; `don_ref` 105/105; actionlint **rc=1, delta 0**
+(1 SC1003:info `ops-don-ref.yml:117` có sẵn trên master — A3 của spec đòi rc=0 chưa đạt ở cả base lẫn HEAD, ghi thẳng).
+Verdict nguyên byte + biên nhận v2: `ops/reviews/pr506-review-{1,2}-codex-verdict.md` (+ `.receipt.yaml`), neo blob `fcf252a`.
+
+## Sự cố ghi sổ — gen 1 `blocked`, chủ kho reroute gen 2
+
+Khi ghi review lượt 2 vào `packet_loop.py`, executor truyền lại slug P3 làm `--finding-id` lần thứ hai ⇒ same-failure 2/2 ⇒
+gen 1 về **`blocked`** dù bản ghi approve vẫn được lưu. Lỗi GHI SỔ, không phải lỗi bản vá; công cụ cố ý không có đường mở
+khoá (dòng 654). Failure evidence + handoff: #502 comment 5629947702. Chủ kho *"đồng ý"* ⇒ lease **generation 2**
+`bo-cong-duyet-khac-danh-tinh-exec-2-claude-20260911` (#502 comment 5630196493; gen 1 nhận `da_bi_thay_the`, `check` rc=0,
+`ops/cap-lease-502` commit `d22e4bf`); state-dir mới `.claude/.packet_state/gen2/` ghi lại bản duyệt KHÔNG kèm slug P3 ⇒
+`accepted` tại `88e89b3`. **Bài học:** finding ngoài write set mà reviewer xếp "CHƯA VÁ = xử lý đúng" KHÔNG được truyền lại
+làm khoá đếm ở lượt sau; chỗ của nó là `finding-desc`/hồ sơ.
+
+## Land và A5
+
+Uỷ quyền merge: #502 comment 5630265789 (chỉ thị *"#506 nếu đã cross review approve thì merge"*); `ghi-uy-quyen` gen 2;
+`guard --action merge` vẫn 7 theo thiết kế (#338). Merge commit **`26e2555d`** (cha `4b5184e` + `88e89b3`), 06:1xZ 11-09.
+Codex connector kích khi bỏ draft: `Completed` **06:14:48Z — SAU merge** (comment 5630269090, không finding) — không phải
+điều kiện merge. **A5 đo được trên PR #507 (PR đầu tiên sau land, head `f47b44e`, 06:17:5xZ):** check run = `thu-hoi` ·
+`gate (ubuntu-latest)` · `mo` — **không còn `cong`, không còn `phan-chung`**. `thu-hoi` vẫn đỏ tất định tới khi #505 land.
+A6 (gate master lượt `26e2555d`) chưa đọc lúc viết mục này — ubuntu kỳ vọng success, Windows kỳ vọng `cancelled` (#499 C3).
+
+## Đính chính và số đếm
+
+- Thông điệp commit `f47b44e` khai *"bien_nhan_v2 69 ĐẠT"* — **SAI**, đo là **67 ĐẠT v2 · 11/11 miễn trừ legacy · 42 NỢ
+  đóng băng · 0 vi phạm · tổng 120** (cùng số trước và sau khi thêm hai biên nhận vì hai tệp mới đếm vào 67 — số 69 là
+  cộng nhẩm sai). Commit đã đẩy, chỉ đính chính ở đây.
+- Bộ đếm hình dạng lỗi chép từ spec: "cổng có MẶT khác cổng CƯỠNG CHẾ" chạm **3** ⇒ packet rút; thêm hình dạng mới của
+  phiên: **"khoá đếm bị nạp lại bởi finding ngoài phạm vi"** = 1 (sự cố gen 1).
+
+## Gate tại chỗ (head `f47b44e`, Linux)
+bien_nhan_v2 67/0 vi phạm · t26/t27 QUA · doc-claims-check --strict ok · release-verify --strict ok. Mục này + manifest tái
+sinh ở commit kế tiếp (`tl.py release-manifest --deterministic`), rồi release-verify lại.
+
 # ★ dev-side — r364: ghi sổ #500 — hai verdict codex chấm CHÍNH hồ sơ review của #492, `cong` đỏ lúc merge vì tác giả không tự duyệt được (2026-09-11)
 
 Nối tiếp r363 (chốt tới `0721811`, #492). Merge sau đó chưa có mục: **#500** — vế bookkeeping ADR-0034 của #492,

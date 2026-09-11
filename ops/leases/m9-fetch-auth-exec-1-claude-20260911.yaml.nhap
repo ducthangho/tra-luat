@@ -1,0 +1,89 @@
+# TỆP NHÁP — đuôi `.yaml.nhap` CÓ CHỦ ĐÍCH (không bị `ai-dang-giu` / `ops-publish-lease.yml` / `t23` tính là lease).
+# ĐỔI TÊN VỀ `.yaml` LÀ BƯỚC CUỐI khi cấp thật, SAU khi điền các ô chủ kho và ĐO LẠI `spec_sha256` (spec còn nháp,
+# băm dưới đây là của bản nháp 03:1xZ 11-09-2026).
+schema_version: 2
+event: executor_lease_granted
+
+# ── CÁC Ô CHỦ KHO ĐIỀN TẠI LÚC CẤP ──────────────────────────────────────────────────────────────────
+packet_issue:             # Issue Packet (CHƯA ĐĂNG). Nợ gốc: #499 C2a (comment 5613562702)
+mission_issue:            # khuyến nghị: #499
+granted_by:               # `ducthangho`
+granted_on_instruction:   # URL comment cấp lease trên Packet Issue
+leased_at_utc:
+lease_expires_at_utc:     # = leased_at_utc + run_minutes
+# ─────────────────────────────────────────────────────────────────────────────────────────────────────
+
+packet_id: M9-FETCH-AUTH
+revision: 1
+generation: 1
+lease_id: m9-fetch-auth-exec-1-claude-20260911
+role: executor
+provider: claude
+executor: claude
+environment: cloud
+risk: sensitive
+assurance_target: cross_approved
+access: read-write
+
+spec_path: ops/specs/M9-FETCH-AUTH.md
+spec_sha256: 799383bc3be1c1a26ee4b81af03e270ef9d261e580af3aa7c13c954b0aab6cbe   # ĐO LẠI khi cấp
+spec_hash: 799383bc3be1c1a26ee4b81af03e270ef9d261e580af3aa7c13c954b0aab6cbe
+
+write_set:
+  - .github/workflows/ops-thu-hoi-admission.yml
+  - ops/lease_publish_test.py
+
+write_set_da_do_truoc_khi_cap: >-
+  02:54:23Z 11-09-2026, bản sao sạch detach origin/master 27c413c3, hai nguồn ref 324/324, comm 0/0: cả hai đường
+  NGƯỜI_GIỮ 0 (HẾT_HẠN: wp488-thu-hoi-lease-a0-exec-1-claude-20260909; slice-b-c-exec-1-claude-20260821;
+  plat-x5-exec-1r4-codex-20260821). Giao thoa với WINDOWS-LEASE-SUITE và THU-HOI-LEASE-A1 (cùng tệp) — cấp TRƯỚC
+  hai packet ấy, không chồng. CHỦ KHO ĐO LẠI bằng `ai-dang-giu` ngay trước khi cấp.
+
+branch: claude/m9-fetch-auth
+branch_ownership: exclusive
+target_branch_neu_land: master
+# 3 MỎ NEO — chỗ giữ, ĐO LẠI lúc cấp = head origin/master lúc ấy.
+base_sha: 27c413c3e531800431cad9db4452d7236505a5a9
+start_from_sha: 27c413c3e531800431cad9db4452d7236505a5a9
+reviewed_sha_required: 27c413c3e531800431cad9db4452d7236505a5a9
+
+authority_basis: '§2 — start/pause/resume/reroute/override/authorize thuộc chủ kho'
+recorded_by: claude-session
+recorder_is_dispatcher: false
+recorder_cung_la_nguoi_thi_cong: true
+recorder_xung_dot_loi_ich: >-
+  Phiên ghi nháp cũng là phiên thi công A0 đã để lọt lỗi này (canary chưa từng chạy được). Cross-review phải là
+  phiên `codex` KHÁC; im lặng ⇒ CHƯA CHẠY.
+
+run_minutes: 720
+heartbeat_required_minutes: 30
+attempts_used: 0
+attempts_limit: 3
+
+reviewer_provider: codex
+review_class: sensitive
+effective_review_class: sensitive
+
+depends_on: []
+thay_the_cho: []
+
+ly_do_cap: >-
+  #499 C2a: `ops-thu-hoi-admission.yml` chết rc=128 ở bước fetch H (`could not read Username`) trên mọi PR vì fetch
+  endpoint tường minh không mang xác thực (checkout `persist-credentials: false`). Cổng fail-close nhưng KHÔNG BAO
+  GIỜ XANH ⇒ không bật được required check ở A1, và nợ C2 (canary raw API) kẹt sau nó. Chi tiết: spec §VÌ SAO.
+
+viec_trong_lease:
+  - 'M1: fetch H mang header xác thực từ $TL_TOKEN, phạm vi một lời gọi git (dạng Q1 chủ kho chọn), không ghi config,
+     không token trong URL; giữ chốt NHAN == TL_H.'
+  - 'M2: ca t152 khoá bốn điều (i)–(iv) của spec; ĐỎ trên nền 27c413c3, XANH sau vá; bốn đột biến m1–m4 mỗi cái một răng.'
+  - 'A2: actionlint AL_VER=1.7.7 + shellcheck rc=0; chay_lease_publish_test.sh 147/147; delta 0.'
+  - 'M3/A3 đo ở PR ĐẦU TIÊN SAU LAND: run success, log không lộ base64 token, tải receipt.json và ghi bốn trường vào
+     PR hồ sơ (ADR-0034) — đóng #499 C2 và C2a.'
+
+dieu_kien_dung:
+  - 'S1 cần đường dẫn thứ ba.'
+  - 'S2 dòng thêm > 80.'
+  - 'S3 canary sau vá vẫn 128/403 — KHÔNG nâng permissions, KHÔNG nhúng token vào URL; DỪNG và khai.'
+  - 'S4 origin/master chạm một trong hai đường.'
+  - 'S5 WINDOWS-LEASE-SUITE hoặc A1 được cấp trước mà chưa land.'
+  - 'S6 trần HAI vòng review (ADR-0043).'

@@ -43,11 +43,17 @@ cay_da_merge_trung_cay_da_do:
   bang_nhau: true
   do_bang: '`git rev-parse e82af37^{tree}` so `git rev-parse 99aef14^{tree}`'
   he_qua_phai_doc: >-
-    Merge là fast-forward về NỘI DUNG (master là tổ tiên của head), nên chân `ubuntu-latest` của
-    lượt gate hậu-merge đo lại một cây KHÔNG khác một byte nào so với cây mà lượt gate của PR đã
-    đo xanh. Giá trị thêm của lượt hậu-merge nằm HẾT ở chân `windows-latest` và ở bước
-    `release-verify strict (lane LAND)` — bước duy nhất `if: github.ref == 'refs/heads/master'`.
-    Ghi ra đây vì con số này là căn cứ cho một nợ đã khai bên dưới.
+    Merge là fast-forward về NỘI DUNG (master là tổ tiên của head), nên VỚI NHỮNG BƯỚC MÀ LƯỢT PR
+    ĐÃ CHẠY, chân `ubuntu-latest` của lượt hậu-merge đo lại một cây KHÔNG khác một byte nào —
+    phần ấy không thêm gì. Nhưng cây trùng băm KHÔNG kéo theo tập bước trùng: giá trị thêm của
+    lượt hậu-merge gồm BA phần chứ không phải một — bước `tl selftest (có bằng chứng
+    exact-identity)` (119 s) và bước `release-verify strict (lane LAND)` (1 s), cả hai lượt PR đã
+    `skipped`, CỘNG chân `windows-latest`.
+  ban_dau_viet_sai_o_day: >-
+    Bản đầu của trường trên viết "giá trị thêm nằm HẾT ở chân windows và ở bước release-verify
+    lane LAND" — BỎ SÓT bước `tl selftest`. Cross-review lượt 1 chấm câu tương ứng trong
+    CHANGELOG; lượt 2 chỉ ra rằng bản vá đầu chỉ sửa CHANGELOG mà để nguyên tệp này, tức đính
+    chính một bản chiếu còn để nguyên bản kia. Nay sửa tại cả hai.
 
 # ─────────────────────── CROSS-REVIEW ───────────────────────
 cross_review:
@@ -260,9 +266,15 @@ no_ky_thuat:
   - slug: gate-master-do-lai-cay-trung-bam
     trang_thai: MOI
     mo_ta: >-
-      Khi merge là fast-forward về nội dung, chân `ubuntu-latest` của lượt master đo lại một cây
-      KHÔNG khác một byte so với cây lượt PR đã đo xanh. Đo được ở chính lần land này:
-      `tree(e82af37) == tree(99aef14) == e307ea31`. Chưa có cổng nào cắt lượt thừa ấy.
+      Khi merge là fast-forward về nội dung, những BƯỚC LẶP LẠI của chân `ubuntu-latest` ở lượt
+      master đo lại một cây KHÔNG khác một byte so với cây lượt PR đã đo xanh. Đo được ở chính
+      lần land này: `tree(e82af37) == tree(99aef14) == e307ea31`. Chưa có cổng nào cắt những
+      bước lặp ấy.
+    pham_vi_HEP_co_chu_dich: >-
+      Nợ này KHÔNG đề xuất cắt CẢ chân ubuntu. Chân ấy còn chạy hai bước mà lượt PR bỏ qua
+      (`tl selftest` có bằng chứng exact-identity, và `release-verify strict` lane LAND); cắt cả
+      chân là mất luôn hai bước đó. Phát biểu rộng hơn phép đo chính là finding mà cross-review
+      lượt 1 và lượt 2 đã chấm ở đúng chỗ này.
     chua_co_packet: true
   - slug: quyet-dinh-dong-vong-lap-review-chua-vao-doctrine
     trang_thai: MOI

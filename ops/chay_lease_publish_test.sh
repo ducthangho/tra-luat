@@ -48,7 +48,7 @@ fi
 # PYTHONUNBUFFERED=1 (packet #504 M2, #499 C3): stdout cua buoc CI la ONG nen Python dem KHOI;
 # khi job bi huy o tran `timeout-minutes` thi moi thu chua xa mat theo — "DONG IN CUOI CUNG
 # != CA CHAY CUOI CUNG". Nhat ky `>>> vao` / `<<< ra` tung ca cua bo test chi dinh vi duoc
-# ca treo khi dong da ra khoi dem cua HDH, tuc phai tat dem O DAY, truoc `exec`.
+# ca dang chay; tat dem Python cho ca cac print khac O DAY, truoc `exec`.
 export PYTHONUNBUFFERED=1
 
 # `exec` giu nguyen ma thoat cua bo test; khong pipeline, khong `tail`/`head` nuot rc.

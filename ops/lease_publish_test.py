@@ -4014,53 +4014,73 @@ def t125_AB_toan_suite_KHONG_doi_verdict_theo_ambient_actor():
     ĐỘT BIẾN LÀM CA NÀY ĐỎ: bỏ dòng `moi.pop("GITHUB_ACTOR", None)` trong `_goi_lop_gh`,
     hoặc bỏ lọc `env` trong `chay()`, hoặc bỏ `patch.dict` trong `_kiem_sach`.
 
-    HAI LƯỢT CON CHẠY SONG SONG, CÓ HẠN (packet #504 M5, #499 C3; M4 đo 11-09-2026 run 34608513250):
-    trên `windows-latest` 120 ca trước ca này xong trong 76 s rồi ca này KẸT ≥ 25 phút 41 s cho tới khi
-    job bị huỷ ở trần 60 phút — kiểu hỏng là "một ca treo bên trong lượt con", không phải "chậm đều";
-    stdout của con bị `capture_output` nuốt nên log CI không thấy ca nào. Hai chốt, cùng một lý do:
-    (1) `subprocess.Popen` ×2 rồi `communicate(timeout=…)` — ngữ nghĩa A/B GIỮ NGUYÊN (cùng lệnh, cùng
-    hai môi trường, so cùng bộ ba tập), chỉ chạy đồng thời; (2) `AB_HAN_GIAY` = 420 s cho MỖI lượt con:
-    ubuntu đo 94 s cho cả hai lượt, 120 ca trên Windows chạy 1,6× ubuntu, nên 7 phút là > 4× dự phòng —
-    quá hạn thì con bị kill và ca này ĐỎ kèm dòng `>>> vao` cuối cùng chưa có `<<< ra` của con: đó là TÊN
-    CA TREO, thứ M4 không thấy được. Không được nâng hạn để "cho xanh"; ca treo là ca phải sửa.
+    HAI LƯỢT CON CHẠY SONG SONG, CÓ HẠN (packet #504 M5): M4 lượt 1 thấy t125 vào nhưng không ra
+    trong 1540 s; log ấy chưa phân biệt được con treo với con chậm. Giữ toàn suite và cùng tuple A/B.
+    AB_HAN_GIAY=420 là trần mỗi con TỪ LÚC START; hai waiter chạy đồng thời, quá hạn thì ĐỎ và thu hồi
+    cả hai PID. 5 s chỉ dành cho wait sau kill. M4 lượt 4 ghi t125=344.438 s, không chứng minh trần đủ
+    sau khi sửa các ca PATH ngoài write set; khi ấy phải đo Windows lại, không tự nâng trần cho xanh.
+
+    Phạm vi số M4: Windows lượt 4 hoàn tất 526.866 s với 15 ĐỎ, 7 BỎ QUA. Chỉ 14 ca có chữ ký PATH;
+    t150 chỉ giữ 200 ký tự cuối stderr, chưa xác định gốc. Ubuntu lượt 4=114.528 s, A2 lượt 1=141.023 s.
+    Lượt 3: t139 vào 17:24:51.969Z, log huỷ 17:25:47.047Z, khoảng 55.077 s; không phải 90 s.
+    Numstat cộng dồn theo base: f1b0b4f +102/-15, 570209c +142/-16, dff28f6 +157/-17;
+    +166/-26 là tổng delta cộng cơ học, không phải diff của dff28f6 so base.
     """
     import re
     import subprocess
     if CO_AB in sys.argv:
         return          # lượt con: KHÔNG tự gọi lại mình (chống đệ quy)
 
+    from concurrent.futures import ThreadPoolExecutor, as_completed
+    from contextlib import ExitStack
     nen = {k: v for k, v in os.environ.items() if k != "GITHUB_ACTOR"}
 
-    def mo(mt):
-        return subprocess.Popen([sys.executable, str(Path(__file__).resolve()), CO_AB],
-                                env=mt, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
-
-    def doc(nhan, p):
+    def doc(nhan, p, out_f, err_f, han):
+        qua_han = False
         try:
-            out, err = p.communicate(timeout=AB_HAN_GIAY)
-        except subprocess.TimeoutExpired as ex:
+            p.communicate(timeout=max(0, han - time.monotonic()))
+        except subprocess.TimeoutExpired:
+            qua_han = True
             p.kill()
-            out_p, err_p = p.communicate()
-            out = (ex.stdout or "") + (out_p or "") if isinstance(ex.stdout, str) else (out_p or "")
+            p.wait(timeout=5)  # chỉ thu hồi PID đã kill, không đợi công việc của con
+        out_f.seek(0); err_f.seek(0)
+        out, err = out_f.read(), err_f.read()
+        if qua_han:
             vao = re.findall(r"(?m)^>>> vao (\S+) ", out)
             ra = set(re.findall(r"(?m)^<<< ra (\S+) ", out))
             treo = [x for x in vao if x not in ra]
             bang(False, f"lượt {nhan}: lượt con KHÔNG XONG trong {AB_HAN_GIAY}s — đã kill; ca treo (vao không ra): "
-                        f"{treo!r}; đã xong {len(ra)} ca; stdout cuối={out[-300:]!r}; stderr cuối={(err_p or '')[-300:]!r}")
+                        f"{treo!r}; đã xong {len(ra)} ca; stdout cuối={out[-300:]!r}; stderr cuối={err[-300:]!r}")
         m = re.search(r"lease_publish: (\d+)/(\d+) đạt", out)
         bang(m, f"lượt {nhan}: KHÔNG ĐO ĐƯỢC dòng tổng kết; rc={p.returncode}, "
                 f"stdout={out[-400:]!r}, stderr={err[-400:]!r}")
         do = frozenset(re.findall(r"(?m)^  ĐỎ  (\w+):", out))
-        # Phải so CẢ ca BỎ QUA. Hai lượt bỏ qua những ca KHÁC nhau nhưng CÙNG SỐ LƯỢNG
-        # sẽ cho cùng mẫu số, cùng số đạt và cùng tập đỏ — tuple vẫn bằng nhau trong khi
-        # tập ca THỰC SỰ ĐƯỢC ĐO đã khác. Cross-review codex 29-08-2026, finding 2.
+        # Giữ cả tập BỎ QUA: cùng số lượng chưa chứng minh cùng tập ca đã đo.
         bo = frozenset(re.findall(r"(?m)^  BỎ QUA (\w+):", out))
         return p.returncode, m.group(1), m.group(2), do, bo
 
-    p1 = mo(nen)
-    p2 = mo(dict(nen, GITHUB_ACTOR="ke-la-mat-khong-co-quyen"))
-    khong_actor = doc("KHÔNG actor", p1)
-    co_actor = doc("CÓ actor lạ", p2)
+    # Tệp riêng cho từng luồng: không đầy PIPE, không chờ EOF do cháu giữ handle.
+    # Hai communicate chạy đồng thời; hạn tính từ lúc START, không cấp lại khi đọc lượt B.
+    with ExitStack() as logs, ThreadPoolExecutor(max_workers=2) as pool:
+        con, ket_qua = [], {}
+        try:
+            for nhan, mt in (("KHÔNG actor", nen), ("CÓ actor lạ", dict(nen, GITHUB_ACTOR="ke-la-mat-khong-co-quyen"))):
+                out_f = logs.enter_context(tempfile.TemporaryFile(mode="w+"))
+                err_f = logs.enter_context(tempfile.TemporaryFile(mode="w+"))
+                han = time.monotonic() + AB_HAN_GIAY
+                p = subprocess.Popen([sys.executable, str(Path(__file__).resolve()), CO_AB],
+                                     env=mt, stdout=out_f, stderr=err_f, text=True)
+                con.append((nhan, p, out_f, err_f, han))
+            viec = {pool.submit(doc, *x): x[0] for x in con}
+            for f in as_completed(viec):
+                ket_qua[viec[f]] = f.result()
+        finally:
+            for _, p, *_ in con:
+                if p.poll() is None:
+                    p.kill()
+            for _, p, *_ in con:
+                p.wait(timeout=5)
+    khong_actor, co_actor = ket_qua["KHÔNG actor"], ket_qua["CÓ actor lạ"]
 
     bang(khong_actor == co_actor,
          "verdict của bộ test ĐỔI theo `GITHUB_ACTOR` của môi trường — "
@@ -4888,10 +4908,22 @@ def t137_M9_workflow_admission_hop_dong_tinh_va_actionlint_shellcheck():
                     + _chan_doan_actionlint_treo(al, sc, WORKFLOW_THU_HOI))
     chot(p.returncode == 0, f"actionlint (luật YAML/biểu thức) ĐỎ (rc={p.returncode}):\n{p.stdout}{p.stderr}")
     with tempfile.TemporaryDirectory() as td:
-        for i, x in enumerate(than):
+        mac_dinh = d.get("defaults", {}).get("run", {}).get("shell")
+        mac_dinh = job.get("defaults", {}).get("run", {}).get("shell", mac_dinh)
+        if not mac_dinh:
+            nen_job = job.get("runs-on", "")
+            cac_nen = nen_job if isinstance(nen_job, list) else [nen_job]
+            mac_dinh = "pwsh" if any(str(n).lower().startswith("windows-") for n in cac_nen) else "bash"
+        for i, b in enumerate(b for b in steps if isinstance(b.get("run"), str)):
+            shell = b.get("shell", mac_dinh).split(maxsplit=1)[0]
+            if shell not in ("bash", "sh"):
+                continue  # actionlint cũng chỉ chạy shellcheck cho bash/sh
+            # actionlint thay biểu thức bằng placeholder; literal đơn có thể chứa dấu đóng.
+            x = re.sub(r"\$\{\{(?:'[^']*(?:''[^']*)*'|[^'}]|}(?!}))*}}",
+                       lambda m: "_" * len(m.group()), b["run"])
             f = Path(td) / f"run{i}.sh"; f.write_bytes(x.encode("utf-8"))
             try:
-                q = subprocess.run([sc, "-s", "bash", "-e", SC_LOAI_TRU_NHU_ACTIONLINT, str(f)],
+                q = subprocess.run([sc, "-s", shell, "-e", SC_LOAI_TRU_NHU_ACTIONLINT, str(f)],
                                    capture_output=True, text=True, timeout=AL_HAN_GIAY)
             except subprocess.TimeoutExpired:
                 chot(False, f"shellcheck KHÔNG XONG trong {AL_HAN_GIAY}s trên thân run #{i}")
@@ -5525,12 +5557,15 @@ def t153_nhat_ky_tung_ca_vao_ra_cap_doi_va_khong_dem():
     `>>> vao` cuối vẫn hiện ra trong log. Đừng thêm phép đo giả cho nó ở đây.
     """
     import subprocess
-    if CO_AB in sys.argv:
-        return          # lượt con của t125: không sinh thêm tiến trình con lồng nhau
     nen = {k: v for k, v in os.environ.items() if k != "GITHUB_ACTOR"}
     p = subprocess.Popen([sys.executable, str(Path(__file__).resolve()), CO_CHI_CA + "t01_"],
                          stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, env=nen)
-    out, err = p.communicate()      # đọc SAU khi con kết thúc — đúng cách log CI bị đệm
+    try:
+        p.wait(timeout=30)  # M4 t153=0.250 s; 30 s là trần cho con chỉ chạy t01, chưa đọc PIPE
+    except subprocess.TimeoutExpired:
+        p.kill(); p.wait(timeout=5)
+        bang(False, "con t01 của t153 không kết thúc trong 30 s — đã kill")
+    out, err = p.communicate(timeout=5)  # chỉ đọc SAU khi con kết thúc (M3)
     vao = re.findall(r"(?m)^>>> vao (\S+) \d{4}-\d\d-\d\dT\d\d:\d\d:\d\dZ$", out)
     ra = re.findall(r"(?m)^<<< ra (\S+) \d+\.\d{3}s (QUA|DO|BO_QUA)$", out)
     bang(vao == ["t01_lease_hop_le_thi_QUA"], f"lượt con phải chạy ĐÚNG một ca t01_: vao={vao!r}; rc={p.returncode}; "
@@ -5550,10 +5585,10 @@ def _nhat_ky_ca(*phan) -> None:
 
     Vì sao: lane Windows của master bị huỷ ở trần 60 phút mà log bước chỉ có đệm khối, nên
     "DÒNG IN CUỐI CÙNG ≠ CA CHẠY CUỐI CÙNG" (#499 C3) — không có tên ca nào để sửa. `flush=True`
-    mới qua đệm Python; qua đệm ống của HĐH là việc của `PYTHONUNBUFFERED=1` trong wrapper (M2),
+    xả đệm Python; `PYTHONUNBUFFERED=1` ở wrapper (M2) tắt đệm Python cho cả các print khác,
     và chốt "không đệm" chỉ đo được ở lượt Windows thật (M4), không đo được trong tiến trình này.
     Dòng tổng kết `lease_publish: N/M đạt` và các dòng `  ĐỎ  …` / `  BỎ QUA …` GIỮ NGUYÊN BYTE —
-    regex của t125 và `ci_dang_ky_test.py` đọc chúng.
+    regex của t125 đọc chúng; `ci_dang_ky_test.py` kiểm DA_NOI và wiring của wrapper.
     """
     print(*phan, flush=True)
 

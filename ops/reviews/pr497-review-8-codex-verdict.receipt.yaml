@@ -1,0 +1,93 @@
+# BIÊN NHẬN GIAO HÀNG — cross-review LƯỢT 8 của PR #497, KHÁC NỀN (codex).
+# Verdict: changes_requested — 0 P1 / 2 P2 / 0 P3.
+#
+# DẠNG NGẮN theo nếp `CHANGELOG` §4: chỉ TRƯỜNG ĐO ĐƯỢC + một mục ngắn. Bài học ở `CHANGELOG`.
+#
+# HỒ SƠ NÀY VÀO KHO SAU KHI VÒNG LẶP KẾT THÚC. Từ lượt 6 hồ sơ review được ĐÓNG BĂNG ngoài kho —
+# đo được: từ lượt 2 trở đi MỌI finding đều dẫn ít nhất một hiện vật chỉ tồn tại VÌ vòng lặp, tức
+# hồ sơ tự sinh việc cho chính nó. Hệ quả phải khai thẳng: **sáu biên nhận lượt 6-11 CHƯA QUA
+# cross-review**, vì không còn lượt nào sau lượt 11 để soi chúng. Cùng tình huống #490/#495 mà kho
+# đã chấp nhận; nói ra ở đây để người đọc không nhận nhầm chúng là đã được soi.
+#
+# HẠNG NGUỒN — ATTESTATION: `model_reviewer_identity`, `tuan_thu_cam_cua_reviewer`,
+# `github_submitter_identity`. Các trường khác đo lại được từ kho, không cần mạng.
+
+schema_version: 2
+receipt_id: pr497-review-8-codex-20260911-c5207cd5
+kind: review_delivery_receipt
+packet_id: 'PR497-R362-LANDED-490-VA-RUT-KHAI-R361'
+lease_id: khong-co-lease
+phase_key: HO-SO-CROSS-REVIEW-PHIEN-20260910
+luot: 8
+role: reviewer
+provider: codex
+executor_provider: claude
+cross_provider: true
+assurance: cross_reviewed
+verdict: changes_requested
+verdict_path: ops/reviews/pr497-review-8-codex-verdict.md
+verdict_sha256: 00a1fd80637feeb631718c9c10833b6a3030b1e2bdc18581adfbeadadb9a1e0d
+verdict_bytes: 17847
+reviewed_sha: c912945c0bcbec5e602ff931d2490d18c2a0d47d
+evidence_url: https://github.com/ducthangho/tra-luat/blob/209bb1978e76de08689bc5fb41000563068361d2/ops/reviews/pr497-review-8-codex-verdict.md
+evidence_url_ghi_chu: >-
+  Neo BLOB ghim `209bb19` — commit ĐẦU TIÊN chứa tệp verdict, đo bằng
+  `git log --all --diff-filter=A -- ops/reviews/pr497-review-8-codex-verdict.md`, trả ĐÚNG 1 commit.
+  Sáu verdict lượt 6-11 vào kho trong CÙNG commit ấy (hồ sơ đóng băng, nhập một lần), nên cả sáu
+  biên nhận neo cùng một SHA — đó là sự thật, không phải chép nhầm.
+so_p1: 0
+so_p2: 2
+so_p3: 0
+so_p_do_bang_cach: "`grep -cE '^### .*\\[Pn\\]'` trên chính tệp verdict ⇒ 0 / 2 / 0."
+
+tom_tat_finding: >-
+  Hai finding, nội dung gốc §1/§2 + chú thích `tong_hop` + manifest KHÔNG có sai mới. (a) Chú thích biên nhận lượt 4 còn khai `nam_finding` "chiếm 45 dòng", đo thật 50 — và nó sống sót qua lượt 7 vì phép quét của điều phối dùng mẫu chỉ bắt số BA CHỮ SỐ. (b) Gói khai "sau fetch mù = 0" trong khi MIRROR dựng TRƯỚC lần fetch: thiếu `claude/land-500-bookkeeping`, thừa `pr487-merge`, một ref chung LỆCH OID. Vá ở SCRIPT dựng gói, không ở EVIDENCE.
+
+model_reviewer_identity:
+  provider: openai_codex
+  surface: codex_cli
+  transport: machine
+  model_yeu_cau: gpt-6-astra
+  model_da_chay: KHONG_DO_DUOC
+  ghi_chu_model: '`codex` không phát `modelUsage` ⇒ không có đường đối chiếu sau lượt chạy.'
+  session_run_id: c5207cd5
+  run_id_day_du: c5207cd566bd499a9352c3f05a850ba8
+  ten_lan_chay: cross-review-pr497-luot8
+  prompt_sha256: 725e43cead59f1c1f5b76ecf0a38ad8620d819d004bebd52f9024705541f39d6
+  bat_dau_utc: '2026-09-11T01:36:19.461298+00:00'
+  ket_thuc_utc: '2026-09-11T01:50:03.521895+00:00'
+  thoi_luong_giay: 824.061
+  ma_thoat: 0
+  trang_thai: xong
+  stdout_byte: 346
+  stdout_sha256: aeab39cd435bac9a03e6b7264036b34bac244f330201793919b28c81308c6c6f
+  stderr_byte: 1100523
+  stderr_sha256: b06f43e48d9dbfc648e60cda8c33b827728354d7a6200f90dce4ff312a4ecc3e
+  so_lan_chet_truoc_khi_xong: 0
+  nguon: 'Đọc từ `run.json` ngoài kho ⇒ TOÀN KHỐI là ATTESTATION, `prompt_sha256` không ngoại lệ.'
+
+tuan_thu_cam_cua_reviewer:
+  cay_kho_sach: true
+  commit_them_ngoai_head: 0
+  bang_chung: 'Reviewer khai kiểm cuối `status --porcelain` rc=0 stdout rỗng. ATTESTATION.'
+  khong_tu_soan_noi_dung_tan_cong: 'Reviewer tự khai: chỉ chạy suite/fixture sẵn có. ATTESTATION.'
+
+github_submitter_identity:
+  actor: ducthangho
+  la_tac_gia_PR: true
+  ghi_chu: '`ADR-0040`: verdict do tài khoản tác giả PR vận chuyển KHÔNG là merge authorization.'
+  phien_van_chuyen: https://claude.ai/code/session_01UN8WRS5Bc5pBBzYPDqs9Dx
+  nguon: 'ATTESTATION — không xác thực được từ kho.'
+
+anchor:
+  loai: canonical_ancestry
+  cuong_do: cao
+  mo_ta: 'Blob verdict ghim `209bb19`.'
+  gioi_han: 'Chỉ vững nếu land bằng MERGE hoặc fast-forward; SQUASH phá quan hệ tổ tiên.'
+
+khong_do_duoc:
+  - 'Model đã phục vụ và `thread_id` của lượt codex.'
+  - 'Mọi scalar runtime (`run.json` ngoài kho).'
+  - 'Trạng thái GitHub tại thời điểm reviewer đọc: sandbox không mạng.'
+  - 'Lượt CI nào đã chạy trên `c912945` — cố ý không đốt CI trong vòng lặp review.'
+  - 'Chính biên nhận này: nó vào kho sau khi vòng lặp kết thúc nên CHƯA qua cross-review.'

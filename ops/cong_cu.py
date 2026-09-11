@@ -206,6 +206,29 @@ def tong_hop(ban_ke, thu_muc_goc=None, chi=None):
     cc = ban_ke["cong_cu"]
     theo_ten = {t: kiem_tra_1(t, cc[t]) for t in ([chi] if chi else cc.keys())}
     canary_kq, da_chay = [], set()
+    # NỢ (r362, 10-09-2026). HAI HẠNG NGUỒN, đừng trộn: CƠ CHẾ dưới đây ĐO ĐƯỢC (đọc chính hàm
+    # này, và đọc `cai_cong_cu.sh` gọi kèm `--chi`); còn mọi câu về MỘT LƯỢT CI CỤ THỂ là THUẬT
+    # LẠI — không log job nào trong kho, không ai tái đo được offline. Cấu hình CHO PHÉP diễn
+    # biến ấy; cho phép không phải đã xảy ra.
+    # `chi` có giá trị ⇒ KHÔNG canary nào chạy, nên bản tóm tắt của
+    # một lệnh MỘT-CÔNG-CỤ có thể in `trang_thai_tong: DAT` ngay cạnh `shellcheck: KHONG_DO_DUOC`,
+    # kèm `"canary": []`. CI gọi đúng kiểu ấy ở hai bước (`cai_cong_cu.sh shellcheck` / `… rg`), nên
+    # ai đọc RIÊNG một bước sẽ kết luận công cụ lành trong khi nó hỏng.
+    #   ĐỘ PHỦ VẪN CÒN: bước `#9 G5` gọi `kiem-tra` KHÔNG kèm `--chi`, và canary
+    #   `actionlint_shellcheck` là `blocking`. Đo một biến, cùng cây, chỉ khác PATH:
+    #     có shellcheck   -> canary DAT ("canary bat dung SC1003")
+    #     thiếu shellcheck-> canary DO  ("SUY_GIAM: thieu shellcheck nen actionlint am tham bo SC*")
+    #   Nên đây là MÀU XANH GÂY HIỂU LẦM Ở MỨC BƯỚC, KHÔNG phải lỗ độ phủ — trừ khi `#9` bị skip vì
+    #   một bước trước đó đỏ. (`rg` đỏ ⇒ `#9` skip: đây là THUẬT LẠI về một lượt CI, không phải
+    #   phép đo; thứ đo được là `rg` có `bat_buoc: true` trong `ops/cong_cu.yaml` và `#9` đứng SAU
+    #   `#8` trong `ci.yml` — tức cấu hình CHO PHÉP nó, không phải nó đã xảy ra.)
+    # XUẤT XỨ: packet #290 / `ops/specs/HA-TANG-CONG-CU-TAT-DINH.md` — ĐÃ LAND, đặc tả ĐÓNG BĂNG,
+    # nên nó KHÔNG còn generation/lease/write authority để ai đó "đi qua"
+    # (docs/PROTOCOL_DA_PHIEN.md DÒNG 28/116/164 — số DÒNG, không phải số mục: tệp chỉ có tới §20;
+    # AGENTS.md:22-23). Sửa hành vi ở đây đòi một packet KẾ NHIỆM/corrective được cấp thẩm quyền —
+    # nợ đã mở thành Issue #498, liên đới #249 — THUẬT LẠI: việc mở Issue và trạng thái hiện tại
+    # của nó nằm NGOÀI kho, không hiện vật nào ở đây chứng thực, và không ai tái đo được offline.
+    # `chinh_sach`/`bat_buoc` là hợp đồng của đặc tả, không phải chi tiết nội bộ: đừng đụng.
     if chi is None:
         for ten, dn in cc.items():
             cn = dn.get("canary")

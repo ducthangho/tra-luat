@@ -54,7 +54,9 @@ KHÔNG ĐỌC. Lặp lại đúng hình dạng r367 (#510: connector kích ~1 ph
 
 - Commit 1 `120d47a`: 2 verdict NGUYÊN BYTE (`cmp` với `VERDICT.rvhs511-{1,2}.md` trong sandbox reviewer khớp) —
   `pr511-review-1-codex-verdict.md` sha256 `4e86bc17…` 83 049 B · `pr511-review-2-codex-verdict.md` `cfe61825…`
-  112 609 B; `git log --all --diff-filter=A` ⇒ đúng 1 commit ⇒ neo blob `evidence_url` = `120d47a`.
+  112 609 B; `git log --all --diff-filter=A` ⇒ đúng 1 commit ⇒ neo blob `evidence_url` = `120d47a`. **Tiêu đề commit ấy ghi
+  "r368"** — viết TRƯỚC khi quét số hiệu; số hiệu đúng là r369 (đoạn trên). KHÔNG amend: đổi commit là đổi neo blob
+  của cả hai receipt. Lời khai trong tiêu đề commit thua phép đo trong mục này.
 - Commit 2: 2 biên nhận v2 (`cross_reviewed` / `cross_approved`), README (1 đoạn nguồn PR #511, 5 hàng cảnh báo, 2 hàng
   mục lục — 638 → 647 dòng), mục r369 này, `RELEASE_MANIFEST.json` tái sinh (`tl.py release-manifest --deterministic`).
 - Gate tại chỗ trước commit 2: `bien_nhan_v2 --root .` **83 ĐẠT v2 (81 r367 + 2) · 11/11 miễn trừ legacy · 42 NỢ đóng

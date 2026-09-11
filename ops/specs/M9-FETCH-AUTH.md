@@ -1,9 +1,9 @@
-# ĐẶC TẢ ĐÓNG BĂNG — `M9-FETCH-AUTH` — **BẢN 1 (NHÁP, chờ chủ kho trả lời Q1–Q2)**
+# ĐẶC TẢ ĐÓNG BĂNG — `M9-FETCH-AUTH` — **BẢN 1 — ĐÃ CHỐT 11-09-2026** (Q1/Q2 tại #499 comment 5629586342)
 
 | trường | giá trị |
 |---|---|
 | `packet_id` | `M9-FETCH-AUTH` |
-| `packet_issue` | **CHƯA ĐĂNG** — điền sau khi chủ kho trả lời Q1–Q2 |
+| `packet_issue` | **#503** (mission #499) |
 | `nguon_cap_viec` | **Packet khắc phục** của A0 (packet #488, PR #492, merge `0721811`). Nợ **#499 C2a** (comment `5613562702`, 05:16:52Z 10-09-2026), đã được chủ kho duyệt đề xuất số 1 trong phiên 11-09-2026 (*"đồng ý các đề xuất, trừ nội dung số 3"*). Spec cha: `THU-HOI-LEASE-VA-CAP-LAI` r9 (sha256 `465538364b1a3f9477782fba79869bbd1c9351140e3fa9df50451baae22f9c79`), hợp đồng M9. |
 | `review_class` | **`sensitive`** — `.github/workflows/**` (PROTOCOL §8) và `ops/lease_publish_test.py` (gate test). Vế nghiêm ADR-0044: ≤3 tệp, ≤300 dòng thêm — **trong trần** (2 tệp, ước +45). |
 
@@ -153,7 +153,14 @@ cách làm trước khi vá tiếp.
 - **S5** `WINDOWS-LEASE-SUITE` hoặc `A1` được cấp trước và chưa land ⇒ DỪNG (chồng write set).
 - **S6** trần HAI vòng review (ADR-0043).
 
-## Câu hỏi biên giới cho chủ kho
+## Câu hỏi biên giới — ĐÃ CHỐT (chủ kho: *"Bước 2: Trả lời luôn hộ tôi"* = lấy khuyến nghị; #499 comment 5629586342)
+
+| câu | kết luận |
+|---|---|
+| Q1 | **dạng (a)** `GIT_CONFIG_COUNT/GIT_CONFIG_KEY_0/GIT_CONFIG_VALUE_0` cho đúng một lời gọi `git fetch`; t152 nhận cả (a) lẫn (b). Chưa có SHA F07 ⇒ không gộp |
+| Q2 | **M9-FETCH-AUTH → WINDOWS-LEASE-SUITE → THU-HOI-LEASE-A1**, mỗi packet cấp sau khi packet trước land |
+
+Nguyên văn hai câu hỏi giữ dưới đây làm hồ sơ:
 
 ❓ **Q1 — Dạng cấu hình header.** (a) `GIT_CONFIG_KEY_0/VALUE_0` (không lộ trong argv, không tệp) hay (b) `-c` như
 comment C2a đề nghị. ➡️ **(a)** — cùng ngữ nghĩa, ít bề mặt hơn; t152 nhận cả hai dạng để không khoá vào cú pháp.

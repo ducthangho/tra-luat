@@ -1,9 +1,9 @@
-# ĐẶC TẢ ĐÓNG BĂNG — `BO-CONG-DUYET-KHAC-DANH-TINH` — **BẢN 1 (NHÁP, chờ chủ kho trả lời Q1–Q3)**
+# ĐẶC TẢ ĐÓNG BĂNG — `BO-CONG-DUYET-KHAC-DANH-TINH` — **BẢN 1 — ĐÃ CHỐT 11-09-2026** (Q1/Q2/Q4 đồng ý tại #502 comment 5629584614; Q3 chưa đo, xem ghi chú cuối)
 
 | trường | giá trị |
 |---|---|
 | `packet_id` | `BO-CONG-DUYET-KHAC-DANH-TINH` |
-| `packet_issue` | **CHƯA ĐĂNG** — điền sau khi chủ kho trả lời Q1–Q3; Issue phải chép nguyên văn chỉ đạo ở `nguon_cap_viec` để có dấu vết bền |
+| `packet_issue` | **#502** — thân Issue chép nguyên văn chỉ đạo ở `nguon_cap_viec`; câu trả lời biên giới ở comment 5629584614 |
 | `nguon_cap_viec` | Chỉ đạo chủ kho, phiên 11-09-2026, nguyên văn: *"đồng ý các đề xuất, trừ nội dung số 3. tôi muốn bỏ phê duyệt khác danh tính"*. Một câu trong khung chat KHÔNG phải dấu vết bền — `granted_on_instruction` của lease phải neo vào comment trên Packet Issue. Không phải packet khắc phục của một packet đã land theo nghĩa "sửa lỗi"; nó **RÚT** một cổng do packet **#348** (`TACH-DANH-TINH-GITHUB`) dựng và **#386** (`CONG-DUYET-THEO-THAM-QUYEN`, PR #393) sửa. |
 | `review_class` | **`sensitive`** — chạm `.github/workflows/**` (PROTOCOL §8: workflow/CI authority) và chạm chính cổng quyết định AI ĐƯỢC DUYỆT. Vế nghiêm ADR-0044: ≤3 tệp, ≤300 dòng thêm — **vượt số tệp (6)**, xem Q1. |
 
@@ -186,7 +186,16 @@ câu trả lời của chủ kho là **không làm nữa**.
 
 ---
 
-## Câu hỏi biên giới cho chủ kho (soan-spec §1) — mỗi câu kèm khuyến nghị
+## Câu hỏi biên giới — ĐÃ CHỐT (chủ kho: *"Bước 1: Đồng ý"*, #502 comment 5629584614)
+
+| câu | kết luận |
+|---|---|
+| Q1 | **ĐỒNG Ý** — ngoại lệ ADR-0044 có phạm vi cho SỐ TỆP: 6 tệp, dòng thêm ≤ 30 (ghi vào lease `ngoai_le_adr_0044`) |
+| Q2 | **ĐỒNG Ý** — không mở ADR |
+| Q3 | **CHƯA ĐO** — chủ kho đọc tại `https://github.com/ducthangho/tra-luat/settings/branches` và `/settings/rules`, trả lời trên #502. Mặc định làm việc: *chưa từng bật* (hai merge #500/#501 với `cong` ĐỎ đã đi qua). KHÔNG chặn cấp lease/thi công; là điều kiện trước khi LAND (A5) |
+| Q4 | **ĐỒNG Ý** — song song với M9/WINDOWS; không cấp trùng LO-319 |
+
+Nguyên văn bốn câu hỏi giữ dưới đây làm hồ sơ:
 
 ❓ **Q1 — Ngoại lệ ADR-0044 về SỐ TỆP.** Vế nghiêm cho `sensitive` là ≤3 tệp; packet này chạm **6** (4 xoá + 2 sửa nhỏ),
 dòng thêm ≈ 15. Tách thành hai packet thì cây ở giữa **hỏng**: xoá workflow mà giữ test ⇒ lane phản chứng mất; xoá test

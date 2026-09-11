@@ -1,9 +1,9 @@
-# ĐẶC TẢ ĐÓNG BĂNG — `WINDOWS-LEASE-SUITE` — **BẢN 1 (NHÁP, chờ chủ kho trả lời Q1–Q3)**
+# ĐẶC TẢ ĐÓNG BĂNG — `WINDOWS-LEASE-SUITE` — **BẢN 1 — ĐÃ CHỐT 11-09-2026** (Q1–Q3 tại #499 comment 5629586342)
 
 | trường | giá trị |
 |---|---|
 | `packet_id` | `WINDOWS-LEASE-SUITE` |
-| `packet_issue` | **CHƯA ĐĂNG** — điền sau khi chủ kho trả lời Q1–Q3 |
+| `packet_issue` | **#504** (mission #499; `depends_on: M9-FETCH-AUTH` #503) |
 | `nguon_cap_viec` | **Packet khắc phục** của A0 (packet #488, PR #492, merge `0721811`). Nợ **#499 C3** (comment `5614089053`, 06:18:50Z 10-09-2026), chủ kho duyệt đề xuất số 2 trong phiên 11-09-2026. |
 | `review_class` | **`sensitive`** — `ops/lease_publish_test.py` là gate test (PROTOCOL §8: gate lifecycle). Vế nghiêm ADR-0044: ≤3 tệp, ≤300 dòng thêm. |
 
@@ -164,7 +164,15 @@ Chép từ spec cha r9 (biên nhận A0 không mang bộ đếm — cùng ghi nh
 - **S5** `origin/master` chạm một trong hai đường; hoặc `M9-FETCH-AUTH` chưa land / `A1` đã cấp ⇒ DỪNG.
 - **S6** trần HAI vòng review (ADR-0043).
 
-## Câu hỏi biên giới cho chủ kho
+## Câu hỏi biên giới — ĐÃ CHỐT (chủ kho: *"Bước 2: Trả lời luôn hộ tôi"* = lấy khuyến nghị; #499 comment 5629586342)
+
+| câu | kết luận |
+|---|---|
+| Q1 | ngưỡng nghiệm thu bước 20 Windows: **≤ 15 phút** |
+| Q2 | **(i)** giữ nguyên ngữ nghĩa A/B toàn suite của `t125`, chỉ song song hoá; (ii) chỉ khi (i) không đạt ngưỡng và có ca riêng chứng minh `t124`/`t139` không đọc actor |
+| Q3 | ca treo trong `ops/lease_publish.py` ⇒ **DỪNG**, revision mở write set (S3) |
+
+Nguyên văn ba câu hỏi giữ dưới đây làm hồ sơ:
 
 ❓ **Q1 — Ngưỡng nghiệm thu Windows cho bước 20.** Trước A0 là 2 phút 58 s. ➡️ **≤ 15 phút** (đủ chỗ cho ×3 của `t125`
 trên nền Windows ~5 phút, và còn cách trần job 60 phút hơn 20 phút cho các bước sau — job Windows trước A0 mất 40 phút 38 s

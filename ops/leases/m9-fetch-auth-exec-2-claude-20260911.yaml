@@ -82,3 +82,14 @@ ly_do_thu_hoi: >-
   ops/lease_publish_test.py (t152 chỉ so stdout, bỏ lọt base64 ra stderr trước mask khi bật xtrace). Tác giả đã đo lại
   HINT lượt 3 ở bản sao: m12 SỐNG trên c851f80, ĐỎ sau HINT, t152 QUA, +80/−0. Handoff #503 comment 5630395195;
   chủ kho chọn phương án A (reroute generation 2, cùng write set).
+
+# NÂNG TRẦN review (ADR-0043) — ghi hộ chỉ thị chủ kho "Chọn theo đề xuất" (#503 comment 5631624818), 11-09-2026.
+nang_tran:
+  ai_nang: ducthangho
+  can_cu: >-
+    Hai vòng gen 2 (round 4 trên 2b52173, round 5 trên 19337fa) đều xác nhận finding vòng trước ĐÃ VÁ THẬT và
+    mutant cũ 13/13 GIẾT; finding còn lại chỉ ở fixture test t152 (P2, m14 bỏ -w0), HINT 1 dòng đã áp nguyên
+    tại 301aac8; workflow không đổi từ 62c299a qua 5 vòng. Executor gen 2 đã dùng 3/3 lượt.
+    Dấu vết: https://github.com/ducthangho/tra-luat/issues/503#issuecomment-5631624818
+  tran_cu: 2
+  tran_moi: 3

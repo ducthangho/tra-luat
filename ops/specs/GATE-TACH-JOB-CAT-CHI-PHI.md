@@ -1,4 +1,4 @@
-# Đặc tả packet — GATE-TACH-JOB-CAT-CHI-PHI (revision 6)
+# Đặc tả packet — GATE-TACH-JOB-CAT-CHI-PHI (revision 7)
 
 - `packet_id`: **GATE-TACH-JOB-CAT-CHI-PHI** (bí danh chữ; ID bền theo `PROTOCOL §3.2` là
   `wp<packet_issue>`, suy ra được ngay khi có số Issue — tiền lệ #456 giữ bí danh ở `packet_id`,
@@ -7,7 +7,10 @@
 - `mission_issue`: **(để trống — chủ kho cấp.)** `§3.2` đòi; lease #456 không có, và không có
   mission nào đang mở cho lane này. Khuyến nghị: mở MỘT Mission Issue cho cả bốn packet
   (`GATE` · `LO` · `2A` · `2B`); nếu không, ghi số Issue của `#456` và nói rõ đó là thay thế.
-- `revision`: **6** · `generation`: 1 — **revision 6** vá cross-review khác nền lượt 1 (`codex`,
+- `revision`: **7** · `generation`: 1 — **revision 7** ĐỔI QUYẾT ĐỊNH của revision 6 sau khi chủ kho
+  gỡ ràng buộc *"gộp #463"* (11-09-2026): `M8`/`M9` ra khỏi packet này, thành `T125-RA-JOB-RIENG` đi
+  **TRƯỚC** — nó là **tiền đề** để `A1`/`A5` của packet này đo được. Xem khối **REVISION 7**.
+  Lịch sử: **revision 6** vá cross-review khác nền lượt 1 (`codex`,
   `reviewed_sha` `4918d5f`, `changes_requested`, VERDICT `sha256 29ee0caa…`): 3 P1 + 4 P2 thuộc
   đặc tả này. Xem khối **REVISION 6** ngay dưới. Lịch sử: **revision 5** theo chỉ thị chủ kho 11-09-2026 (chọn đường **(b)**: sửa phẫu thuật CỘNG quét lại mọi con số mà `nghiem_thu` tựa lên). Xem khối **REVISION 5** ngay dưới mục `nguon_cap_viec`. Lịch sử: **revision 4** theo chỉ thị chủ kho 07-09-2026 (*"Vá xong thì mở r3 luôn, không cần hỏi lại"* + *"Tiếp tục vòng lặp vá, cross-review tới khi hết P1"*; dấu vết bền: https://github.com/ducthangho/tra-luat/issues/463#issuecomment-5568696936 — comment riêng cho r4 executor chưa đăng được, chủ kho có thể bổ sung) sau cross-review lượt 9 (`reviewed_sha` `0bc6e56`, ba P2 câu chữ):
   (g) câu *"nhiễu runner cỡ 1–2,3 phút là có thật"* và các chỗ A1/A5 gọi chênh giữa hai lượt là "nhiễu" viết lại cho đúng: hai lượt ấy cùng
@@ -29,7 +32,8 @@
 - `executor`: claude · `environment`: cloud
 - `risk`: **sensitive** · `review_class`: **sensitive** (`.github/workflows/` — `PROTOCOL §8` loại
   trừ tường minh khỏi patch-as-hint; đây là ĐỊNH NGHĨA của cổng, không phải mã dưới cổng)
-- `depends_on`: **`[wp503]`** — **revision 6** (cross-review lượt 1, P2
+- `depends_on`: **`[wp502]`** — **revision 7** (`wp503` của revision 6 không còn đúng: tệp do `#503`
+  giữ đã ra khỏi write set). Xuất xứ mục này: cross-review lượt 1, P2
   `metadata-va-loi-thoat-composite-chua-theo-write-set-r5`). r5 đưa `ops/lease_publish_test.py` vào
   write set và khai ở hai chỗ rằng lease chỉ cấp SAU KHI `#503` land, nhưng **metadata vẫn để `[]`
   và vẫn chỉ nói chờ `#456`** — sửa bằng thêm giải thích mà không gỡ chỉ thị cũ. Nay gỡ: packet vẫn
@@ -67,7 +71,56 @@ từ so `rc` sang so **tập chẩn đoán** `actionlint` (P2), A9 thu hồi lea
 
 ---
 
-## REVISION 6 — MỘT QUYẾT ĐỊNH THIẾT KẾ DO PHIÊN SOẠN TỰ LÀM, và chủ kho bác được
+## REVISION 7 — `t125` RA KHỎI PACKET NÀY. Nó là TIỀN ĐỀ, không phải mục tiêu phụ.
+
+**Chủ kho gỡ ràng buộc "gộp #463" ngày 11-09-2026** (*"không phải chỉ đạo cứng, nếu có hướng nào tốt
+hơn tôi cho phép thực thi theo hướng tốt hơn"*). Phiên soạn đo lại và **đổi quyết định của revision
+6**: `M8`/`M9` **RA KHỎI** packet này, thành packet riêng `T125-RA-JOB-RIENG` **đi TRƯỚC**.
+
+**Lý do KHÔNG phải "packet nhỏ dễ review hơn". Nó là quan hệ phụ thuộc, đo được:**
+
+`A1` và `A5` của packet này đòi một **lượt nền hợp lệ** — tức job Windows **chạy trọn**. Job ấy đang
+bị trần cắt (`60,32` · `60,52` phút, `cancelled`), nên hai tiêu chí ấy **KHÔNG ĐO ĐƯỢC** (khối
+REVISION 5 mục (5)), và `A2` mâu thuẫn với `A5` đúng vì lý do đó (P1
+`a2-doi-giu-ca-ket-luan-cua-nen-bi-cat`).
+
+Ước từ số đo: bỏ `t125` khỏi đường tới hạn đưa bước 20 từ `≥ 26,25` phút xuống `≈ 8,1` phút ⇒ job
+Windows `≈ 51`–`56` phút ⇒ **chạy trọn**. Khi ấy nền của packet này **trở lại đo được**.
+*(Ước, không phải phép đo — bước 20 bị cắt nên giá trị thật CHƯA BIẾT, và bước 21–41 trên Windows
+chưa ai đo gần đây; con số nhân từ Ubuntu `5,35` phút với hệ số `1,73×`–`2,35×`.)*
+
+⇒ **`T125-RA-JOB-RIENG` là ĐIỀU KIỆN để packet này nghiệm thu được**, không phải một việc song song.
+Revision 6 đảo ngược quan hệ ấy: nó nhét tiền đề vào trong thứ mà tiền đề phải đến trước.
+
+**Thứ hoá giải theo KIẾN TRÚC, không phải theo câu chữ, khi tách:**
+
+| | revision 6 vá bằng | revision 7 |
+|---|---|---|
+| P1 `them-t125-nhung-giu-hop-dong-ba-job` | ngoại lệ `ngoai_pham_vi` #6 + sửa `A6`/`A3`/`A4` | **biến mất** — không có job thứ tư |
+| P1 `a2-doi-giu-ca-ket-luan-cua-nen-bi-cat` | thêm nhánh nền-bị-cắt | **biến mất ở ca thường**; nhánh **GIỮ** làm lưới an toàn |
+| trần `ADR-0044` | 3 tệp, **không dư chỗ nào** | về **2 tệp**, còn chỗ |
+| lối thoát composite action | phải **BỎ** vì `3+1=4` | **dùng lại được** |
+| `depends_on` | `[wp503]` | **`[wp502]`** — xem dưới |
+
+**Lease đo 09:3xZ 11-09-2026** (sau canh hai nguồn, `comm -23` RỖNG): `.github/workflows/ci.yml` ⇒
+**`NGƯỜI_GIỮ 0`** · `.claude/dev/ci_dang_ky_test.py` ⇒ **`NGƯỜI_GIỮ 1`**
+(`bo-cong-duyet-khac-danh-tinh-exec-2`, packet `#502`) · `ops/lease_publish_test.py` ⇒
+**`NGƯỜI_GIỮ 1`** (`m9-fetch-auth-exec-3`, packet `#503`).
+Gộp thì packet này chờ **CẢ HAI** `#502` và `#503`; tách thì nó chờ **một** (`#502`), còn
+`T125-RA-JOB-RIENG` chờ **một** (`#503`). Hai packet vẫn phải **nối tiếp** vì cùng ghi `ci.yml`.
+
+**Thứ GIỮ LẠI từ revision 6** (chúng đúng bất kể tách hay gộp): `A4` đo **giá trị đã parse từng
+job** · `A5(1)` đòi **đủ mẫu** (tập job kỳ vọng, không rỗng, cạn phân trang, cùng `run_attempt`, đủ
+mốc) · `A2` có nhánh nền-bị-cắt · quét ngưỡng cũ `25,00`/`135,00` thành lời khai lịch sử · cận
+`≥ 7,69×` · `chua_do_duoc` `0a` về hiện vật benchmark · ba mức chứng cứ.
+
+---
+
+## REVISION 6 — MỘT QUYẾT ĐỊNH THIẾT KẾ DO PHIÊN SOẠN TỰ LÀM (ĐÃ BỊ REVISION 7 THAY)
+
+> **Khối dưới đây là LỊCH SỬ.** Revision 6 chọn đường (a) — mở hợp đồng lên bốn job — dưới ràng buộc
+> *"gộp #463"*. Chủ kho đã gỡ ràng buộc ấy, và revision 7 chọn đường (b). Giữ khối này để thấy vì
+> sao (a) từng là lựa chọn đúng **dưới ràng buộc cũ**, và nó sai ở chỗ nào khi ràng buộc được gỡ.
 
 **Đọc mục này TRƯỚC mọi mục khác.** Cross-review lượt 1 cho `changes_requested` với **6 P1**, trong
 đó `them-t125-nhung-giu-hop-dong-ba-job` **không phải lỗi câu chữ**: nó chứng minh `M8`/`M9` của r5
@@ -418,8 +471,7 @@ bằng số đếm (xem A3, lý do ở đó).
 
 ### Cái giá của việc tách job — ước CÓ ĐƠN VỊ từ số đo cũ, chưa phải phép đo mới
 
-Chia `gate` thành **BỐN** job trên **cùng một ma trận nền** (revision 6 — bản r4/r5 viết *"ba"*;
-job thứ tư là `gate-t125` của `M8`):
+Chia `gate` thành **ba** job trên **cùng một ma trận nền**:
 
 - `gate` — mọi bước trừ hai bước nặng
 - `gate-registry` — thiết lập + `test registry`
@@ -493,14 +545,15 @@ P2). Ước ĐÚNG THƯỚC, từ số đo khối (19:31Z, `sed -n | wc -l` trê
 Cộng hai bước dời (≈4 dòng), sửa `loi_ruff_ci` (hàm hôm nay 19 dòng; ước +15–25) và phản chứng
 mới (ước +15) ⇒ **ước `135`–`200` dòng thêm**, tuỳ chép hay không chép chú thích. Dưới `300`,
 biên ≥ `100`. **Đo thật bằng `git diff --numstat` trước review; vượt `300` thì DỪNG** — và cách
-giảm nếu cần **KHÔNG còn dùng được nữa**: rút phần thiết lập thành composite action
-(`.github/actions/…`) là thêm MỘT tệp, mà write set r5 **đã dùng đủ 3** ⇒ thành **4**, tức **vi phạm
-chính A8**. Bỏ lối thoát ấy (**revision 6**, cross-review lượt 1, P2
-`metadata-va-loi-thoat-composite-chua-theo-write-set-r5`). Vượt `300` dòng thì **DỪNG và hỏi chủ
-kho**, không có đường vòng nào trong trần hiện tại.
+giảm nếu cần là rút phần thiết lập thành composite action (`.github/actions/…`), tức thêm MỘT tệp
+(**2 + 1 = 3**, vẫn ≤ 3), không phải cắt bớt bước.
+*(Revision 5 đưa write set lên 3 nên lối thoát này thành `3+1=4` và **vi phạm chính A8** —
+cross-review lượt 1, P2 `metadata-va-loi-thoat-composite-chua-theo-write-set-r5`. **Revision 7 trả
+write set về 2**, nên nó dùng lại được. Ghi lại cả quãng đường vì nó cho thấy một trần chật làm mất
+một phương án hợp lệ.)*
 
-Write set là **3 tệp** (revision 5 thêm `ops/lease_publish_test.py`; bản r5 để sót câu này ghi
-**2** ngay dưới một bảng có **3** — cross-review lượt 1 bắt, hàng `X7`).
+Write set là **2 tệp** (revision 7; bản r5 để sót một câu ghi **2** ngay dưới một bảng có **3** —
+cross-review lượt 1 bắt, hàng `X7`. Nay hai con số ấy khớp nhau trở lại).
 
 ## `write_set`
 
@@ -508,18 +561,22 @@ Write set là **3 tệp** (revision 5 thêm `ops/lease_publish_test.py`; bản r
 |---|---|---|
 | 1 | `.github/workflows/ci.yml` | định nghĩa job `gate` và toàn bộ 39 bước của nó (trên `1b3caa1`; `origin/master` `28cb898` đo 22:45Z 06-09-2026 đã là **40** — xem `base_sha`) |
 | 2 | `.claude/dev/ci_dang_ky_test.py` | consumer `loi_ruff_ci` khoá cứng `jobs.gate`; tách job mà không sửa nó thì bước `test registry` tự đỏ (đo 19:33Z) |
-| 3 | `ops/lease_publish_test.py` | **revision 5.** Cờ đưa `t125` ra khỏi đường tới hạn của job `gate` (M8). Bội số `3,24` đo được ở khối REVISION 5 (2) nằm TRONG tệp này, không nằm trong `ci.yml` |
 
-**`ADR-0044` cho `sensitive`: ≤ 3 tệp.** Ba đường trên là **đúng trần**, không dư một chỗ nào —
-nên bất kỳ đường thứ tư nào phát sinh lúc thi công đều phải **DỪNG và hỏi chủ kho**, không tự xin
-ngoại lệ. Riêng bản vá bộ chấm đột biến (`ops/nhanh_don_duoc_test.py`) **cố ý KHÔNG** nằm ở đây:
-nó đi bằng packet `CHAM-DOT-BIEN-MIEN-NHIEM-CA-VO-CAN` (PR #508), đúng để packet này không vượt trần.
+**`ADR-0044` cho `sensitive`: ≤ 3 tệp.** Hai đường trên để lại **một chỗ trống** — đó là khoảng an
+toàn có chủ đích (revision 7), không phải chỗ để nhét thêm việc. Hai packet **cố ý KHÔNG** nằm ở
+đây: bản vá bộ chấm đột biến (`ops/nhanh_don_duoc_test.py`) đi bằng
+`CHAM-DOT-BIEN-MIEN-NHIEM-CA-VO-CAN`, và `t125` đi bằng `T125-RA-JOB-RIENG`.
 
-**`ops/lease_publish_test.py` ĐANG BỊ GIỮ** — `ai-dang-giu` 06:40Z 11-09-2026 ⇒ `rc=11`,
-`NGƯỜI_GIỮ 1: m9-fetch-auth-exec-1-claude-20260911` (packet `#503`, hạn `17:00:00Z 11-09-2026`).
-Nên `depends_on: [wp503]`, và lease của packet này chỉ được cấp **SAU KHI #503 land** — không phải
+**`.claude/dev/ci_dang_ky_test.py` ĐANG BỊ GIỮ** — `ai-dang-giu` 09:3xZ 11-09-2026 (sau canh hai
+nguồn, `comm -23` RỖNG) ⇒ `rc=11`, `NGƯỜI_GIỮ 1: bo-cong-duyet-khac-danh-tinh-exec-2-claude-20260911`
+(packet `#502`). `.github/workflows/ci.yml` ⇒ **`NGƯỜI_GIỮ 0`**.
+Nên `depends_on: [wp502]`, và lease của packet này chỉ được cấp **SAU KHI `#502` land** — không phải
 sau khi lease kia hết hạn danh nghĩa. Cấp chồng là tự tạo cửa sổ hai writer, đúng thứ write-set
 exclusion sinh ra để chặn.
+
+**Và nối tiếp SAU `T125-RA-JOB-RIENG`**, dù hai packet không chồng write set về mặt tệp thứ hai:
+cả hai đều ghi `ci.yml`, nên chúng **không chạy song song được**; cộng thêm lý do ở khối REVISION 7 —
+nền của `A1`/`A5` chỉ đo được sau khi `t125` ra khỏi đường tới hạn.
 
 Không ký tự đại diện. Không đường dẫn nào khác. Trong tệp #2 chỉ đụng `loi_ruff_ci` và phản chứng
 của nó; **không** đụng `bang_chung_xanh`, `MOI`, `MOI_WINDOWS`, `chay_moi` — đó là của ba packet
@@ -572,16 +629,12 @@ lại 20:59Z: `ls-remote` **298** · `for-each-ref` **298** · `comm -23` rỗng
    hình dạng bản vá với #456 — nhưng nó là `.claude/dev/packet_loop_test.py`, không phải `ci.yml`.
    **Nợ có tên: `MUTANT-WINDOWS-PACKET-LOOP`.**
 5. **Bỏ bước trùng** — đã đo, **0 bước trùng** (xem bối cảnh). Không có gì để làm.
-6. **Không đổi tập bước, không đổi lệnh của bước nào — TRỪ ĐÚNG MỘT NGOẠI LỆ ĐƯỢC LIỆT KÊ.**
-   Packet này chỉ đổi bước ấy nằm trong **job** nào.
-   **Ngoại lệ duy nhất (revision 6):** bước `lease-publish selftest` được thêm **đúng một cờ** đưa
-   `t125` ra khỏi lượt chính (M9), và **một bước MỚI** chạy `t125` trong job riêng (M8). Không cờ
-   nào khác, không bước nào khác, không lệnh nào khác.
-   **REVISION 6 — vì sao phải mở ngoại lệ này** (cross-review lượt 1, P1
-   `them-t125-nhung-giu-hop-dong-ba-job`): r5 thêm M8/M9 mà **giữ nguyên** điều cấm này, nên bản thi
-   công đúng M9 sẽ **trái điều cấm**, và bước mới của M8 sẽ làm phép so tập của A2/A3 **đỏ**. Hai
-   mệnh đề loại trừ nhau ⇒ packet **không thi công được** như r5 viết. Ngoại lệ phải **liệt kê**,
-   không được viết dạng *"những thay đổi cần thiết"* — danh sách cho phép, không phải danh sách cấm.
+6. **Không đổi tập bước, không đổi lệnh của bước nào. KHÔNG NGOẠI LỆ.** Packet này chỉ đổi bước ấy
+   nằm trong **job** nào.
+   *(Revision 6 từng mở một ngoại lệ hẹp cho cờ của `M9`, vì `M8`/`M9` khi ấy nằm trong packet này
+   và **trái chính điều cấm này** — P1 `them-t125-nhung-giu-hop-dong-ba-job`. **Revision 7 đóng lại
+   ngoại lệ ấy** bằng cách chuyển `M8`/`M9` sang packet `T125-RA-JOB-RIENG`. Một điều cấm không có
+   ngoại lệ thì không ai phải đoán biên của ngoại lệ.)*
 7. **Trong `.claude/dev/ci_dang_ky_test.py`: không đụng gì ngoài `loi_ruff_ci` và phản chứng của
    nó.** `bang_chung_xanh`/`MOI`/`MOI_WINDOWS`/`chay_moi` là của `LO-319` và hai packet mutant.
 
@@ -596,8 +649,8 @@ lại 20:59Z: `ls-remote` **298** · `for-each-ref` **298** · `comm -23` rỗng
 | M5 | Phút tính tiền tăng thêm được **đo và công bố**, không phải ước — nó là số chủ kho đã duyệt trước, và lượt chạy phải xác nhận nó. | `write_set` #1 |
 | M6 | Bảo vệ nhánh vẫn có cổng: nếu `gate` đang là required status check thì hai job mới cũng phải được khai, kẻo tách job = tháo cổng. | `write_set` #1 (phần đo được) |
 | M7 | `loi_ruff_ci` tìm bước `test registry` trong **mọi** job và đòi Ruff được cài trong **cùng job**, **trước** bước ấy; không job nào có bước ⇒ lỗi. Tương thích với `ci.yml` chưa tách. | `write_set` #2 |
-| M8 | **revision 5.** `t125` ra khỏi đường tới hạn của job `gate`: nó chạy trong một **job RIÊNG**, song song, cùng ma trận nền. Cắt bội `3,24` khỏi bước `lease-publish selftest`. **Không** skip trên nền nào, **không** hạ răng `t125`, **không** nâng `timeout-minutes`. | `write_set` #1 + #3 |
-| M9 | **revision 5.** Cơ chế bỏ `t125` khỏi lượt chính phải **FAIL-CLOSE**: thiếu job `t125` ⇒ gate **ĐỎ**. Và cờ bỏ ấy phải khiến `t125` được đếm là **BỎ QUA có lý do**, KHÔNG phải ĐẠT. | `write_set` #3 |
+*(revision 5 từng có `M8`/`M9` cho `t125`; **revision 7 chuyển chúng sang packet
+`T125-RA-JOB-RIENG`** — xem khối REVISION 7. Packet này **không** đụng `t125`.)*
 
 ## `nghiem_thu`
 
@@ -693,12 +746,9 @@ phép so, đã chạy 19:33Z trên YAML tách trong bộ nhớ:
      **bắt được** (`gate-registry: False`). Với riêng Ruff, A7 (`loi_ruff_ci`) cũng bắt.
 3. **mức workflow**: `on:` và `concurrency:` không đổi một ký tự (so chuỗi sau `yaml.safe_load` +
    `safe_dump`).
-4. **(revision 6) PHÉP CHIẾU cho bước MỚI và cờ MỚI.** A2/A3 của r4 so tập tên bước **đúng bằng
-   nhau**, nên một bước mới làm chúng đỏ oan. Nay: tập sau tách phải bằng tập trước tách **cộng đúng
-   một phần tử** — bước `t125` trong job `gate-t125` — và tên bước ấy phải nằm trong một **danh sách
-   cho phép khai tường minh trong đặc tả**, không phải một mẫu. Bước `lease-publish selftest` giữ
-   **nguyên tên**; chỉ thân `run` của nó được thêm cờ ở `ngoai_pham_vi` #6.
-   **Phép làm ĐỎ:** thêm bất kỳ bước nào **ngoài** danh sách cho phép ⇒ ĐỎ. Đổi tên bước cũ ⇒ ĐỎ.
+*(Revision 6 thêm một mục 4 — phép chiếu cho bước MỚI của `M8`. **Revision 7 gỡ** vì packet này
+không còn thêm bước nào: `A2`/`A3` trở lại so tập **đúng bằng nhau**, đúng như r4. Phép chiếu ấy
+chuyển sang `T125-RA-JOB-RIENG`, nơi nó thật sự cần.)*
 Đơn vị: **tập bộ ba / tập cặp**, không phải số đếm. Kèm chốt cứng `actionlint`, đo bằng **TẬP CHẨN
 ĐOÁN, không bằng `rc`** (verdict lượt 2, P2 `actionlint-so-rc-che-loi-moi`): chạy `actionlint` trên
 `ci.yml` của `origin/master` và của nhánh packet trong CÙNG một lệnh, CÙNG môi trường; ghi phiên bản
@@ -721,7 +771,7 @@ cả tệp vì đúng chuyện đó (`ops-don-ref.yml`, run `31971137920`, 0 job
 Phép làm ĐỎ: bất kỳ phép so nào lệch. Đột biến bắt buộc: chính ca `if` không delimiter ở trên.
 
 **A4 (M4) — trần không đổi, đo bằng GIÁ TRỊ ĐÃ PARSE của TỪNG job.**
-`yaml.safe_load(ci.yml)` rồi với **mỗi** `job_id` trong **danh sách job kỳ vọng** (revision 6: bốn
+`yaml.safe_load(ci.yml)` rồi với **mỗi** `job_id` trong **danh sách job kỳ vọng** (revision 7: **ba**
 tên, xem A6), đòi `jobs[job_id]["timeout-minutes"] == 60`. **Thiếu khoá ⇒ ĐỎ.** Giá trị khác `60` ⇒
 ĐỎ, kể cả nhỏ hơn. Ngoài ra: không `timeout-minutes` nào ở **mức bước**.
 
@@ -790,11 +840,12 @@ chỉ nói nửa đầu là một lời khai thiếu nửa sau, và nửa sau l�
 selftest **không thể** tự chứng minh job được GitHub gọi. Nên A6 là **hai phần, và phần thứ hai
 KHÔNG đo được từ phiên thi công**:
 - (a) đo được: bản vá phải in ra danh sách tên job mới, đúng dạng chuỗi mà branch protection dùng;
-- (b) **không đo được từ phiên**: branch protection phải được cập nhật để require **cả BỐN** job —
-  `gate` · `gate-registry` · `gate-packet-loop` · `gate-t125` (revision 6). Đây là việc của chủ kho.
-  **r5 vẫn ghi "ba job" trong khi M8 thêm job thứ tư** (cross-review lượt 1, P1
-  `them-t125-nhung-giu-hop-dong-ba-job`); require ba trong khi có bốn là **để kết quả `t125` nằm
-  ngoài hợp đồng bảo vệ nhánh** — đúng cái bẫy mà chính mục này mô tả ở câu dưới, chỉ đổi con số.
+- (b) **không đo được từ phiên**: branch protection phải được cập nhật để require **cả BA** job —
+  `gate` · `gate-registry` · `gate-packet-loop`. Đây là việc của chủ kho.
+  **Packet `T125-RA-JOB-RIENG` thêm job thứ TƯ và mang theo nghĩa vụ ấy của riêng nó** — require ba
+  trong khi có bốn là để kết quả `t125` nằm ngoài hợp đồng bảo vệ nhánh, đúng cái bẫy mục này mô tả
+  ở câu dưới. Hai packet nối tiếp ⇒ chủ kho cập nhật branch protection **HAI lần**, mỗi lần một job
+  mới; khai thẳng ở đây để lần thứ hai không bị quên.
 Phép làm ĐỎ cho (a): tên job trong `ci.yml` khác tên in ra ⇒ ĐỎ.
 Cho (b): **không có phép đo** — ghi thẳng, và nó phải nằm trong thân Issue như một mục chủ kho
 phải làm TRƯỚC khi merge. Tách một job đang được require thành ba job mà chỉ require một là
@@ -852,7 +903,10 @@ giữ blob cũ được xử với readback: hai nhánh 0-ahead xoá được qu
 `check` không chặn chồng lấn write set (đo 21:02Z: `thay_the_cho: []` + sáu ô điền tạm ⇒ `rc=0` ngay
 khi #456 còn giữ).
 
-**A10 (M8) — `t125` ra khỏi đường tới hạn, đo bằng THỜI LƯỢNG BƯỚC, không bằng sự có mặt của job.**
+*(revision 5 từng có `A10`/`A11` cho `M8`/`M9`; **revision 7 chuyển chúng sang packet
+`T125-RA-JOB-RIENG`**. Phần dưới đây giữ lại làm lịch sử, KHÔNG còn là tiêu chí của packet này.)*
+
+**~~A10 (M8)~~ — `t125` ra khỏi đường tới hạn, đo bằng THỜI LƯỢNG BƯỚC, không bằng sự có mặt của job.**
 Sau tách, bước `lease-publish selftest` trong job `gate` phải tốn **≤ 0,45 ×** thời lượng của chính
 nó ở lượt nền cùng cách (biên tương đối, cùng lý do như A1: `0,45` chọn từ cấu trúc `TỔNG ≈ 3 × B`
 ⇒ bỏ `t125` còn `≈ 1/3`, cộng biên; **không** chọn từ một con số phút).

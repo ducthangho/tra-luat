@@ -357,11 +357,11 @@ trong khi chính mục này hứa dán nhãn mọi số GitHub tại chỗ. Cả
 Nợ đã mở thành Issue **#498** với đúng các đính chính trên *(THUẬT LẠI — việc mở Issue và nội
 dung hiện tại của nó nằm ngoài kho; không hiện vật nào trong kho chứng thực)*.
 
-## 3. Hồ sơ cross-review của chính mục này — NĂM lượt, verdict vào kho TRƯỚC khi land
+## 3. Hồ sơ cross-review của chính mục này — MƯỜI MỘT lượt, kết thúc bằng `approve`
 
 Hai mục trên đã đi qua **cross-review khác nền** (`codex`) ngay trên nhánh, và verdict vào kho cùng
 PR chứ không để lại sau. Đây là chỗ khác #490: lượt 7 của #490 là **trả nợ** (viết sau merge), còn
-năm lượt này là **tiền kiểm** — mọi finding được vá TRƯỚC khi PR land, nên hồ sơ review không phải
+mười một lượt này là **tiền kiểm** — mọi finding được vá TRƯỚC khi PR land, nên hồ sơ review không phải
 mô tả một bản đã cố định.
 
 **Và việc nhập verdict GIỮA vòng lặp đã tự chứng minh giá của nó.** Lượt 2 soi chính hồ sơ lượt 1 và
@@ -382,7 +382,9 @@ không tự review được nó.**
 | `ops/reviews/pr497-review-4-codex-verdict.receipt.yaml` | biên nhận lượt 4, neo blob ghim `5ef3b3d` — **cố ý NGẮN**, xem §4 |
 | `ops/reviews/pr497-review-5-codex-verdict.md` | verdict lượt 5, **42 310** byte / **271** dòng, `sha256 ce7add4f…` |
 | `ops/reviews/pr497-review-5-codex-verdict.receipt.yaml` | biên nhận lượt 5, neo blob ghim `3c82ae3` — dạng NGẮN |
-| `ops/reviews/README.md` | **5** hàng mục lục + **2** hàng cảnh báo **của PR #497** (lượt 3, 4 và 5 **không** sinh cảnh báo — gói của chúng sạch). Bảng dùng chung cho mọi PR nên còn mang hàng của các PR khác; **hai số trên chỉ là phần của PR này**, không phải tổng của bảng. *(Bản trước liệt kê cả số hàng mà `r363` thêm — một con số của PR KHÁC, sẽ trôi mỗi lần merge master; đã thấy trôi ngay ở lần merge kế khi `r364` vào. Bỏ hẳn phép liệt kê ấy.)* |
+| `ops/reviews/pr497-review-{6..11}-codex-verdict.md` | sáu verdict lượt 6–11, **đóng băng** ngoài kho suốt vòng lặp, nhập một lần ở `209bb19` |
+| `ops/reviews/pr497-review-{6..11}-codex-verdict.receipt.yaml` | sáu biên nhận dạng NGẮN, cùng neo blob `209bb19` |
+| `ops/reviews/README.md` | **11** hàng mục lục + **2** hàng cảnh báo **của PR #497** (lượt 3, 4 và 5 **không** sinh cảnh báo — gói của chúng sạch). Bảng dùng chung cho mọi PR nên còn mang hàng của các PR khác; **hai số trên chỉ là phần của PR này**, không phải tổng của bảng. *(Bản trước liệt kê cả số hàng mà `r363` thêm — một con số của PR KHÁC, sẽ trôi mỗi lần merge master; đã thấy trôi ngay ở lần merge kế khi `r364` vào. Bỏ hẳn phép liệt kê ấy.)* |
 
 **`P1 0 · P2 1 · P3 1`, và con số ấy đo bằng `grep -cE '^### .*\[Pn\]'` trên chính tệp verdict**,
 không đọc lời tóm tắt của reviewer — đúng lý do bài học `van-xuoi-do-duoc-van-vuot-nguon` ra đời ở
@@ -590,6 +592,59 @@ lặp tự sinh"* cho **ba** con số khác nhau qua ba lần viết, bị chấ
 `CLAUDE.md` áp cho chính nó ⇒ không sửa lần thứ ba mà bỏ hẳn, thay bằng mệnh đề định tính không có
 số để trôi. Xem §4.
 
+**LƯỢT 6–11 — ĐÓNG BĂNG HỒ SƠ, và đó là thứ làm vòng lặp hội tụ.**
+
+Sau lượt 5, phép đo trên trường `TỆP/DÒNG` của bốn verdict đầu cho một kết luận khó chịu: **từ lượt
+2 trở đi, MỌI finding đều dẫn ít nhất một hiện vật chỉ tồn tại VÌ vòng lặp review** (`ops/reviews/
+pr497-*`, `EVIDENCE.md`, hoặc dẫn tắt *"receipt lượt N"*); ở lượt 1 thì **không cái nào**. Mỗi lượt
+nhập thêm verdict + biên nhận + hàng mục lục, mỗi thứ mang lời khai mới, lượt sau chấm vào đó —
+**hồ sơ review tự sinh việc cho chính nó**.
+
+Nên từ lượt 6, verdict và biên nhận **KHÔNG vào kho** cho tới khi một lượt trả `0/0`. Kết quả đo được:
+
+| lượt | head | kết luận | finding |
+|---|---|---|---|
+| 6 | `e27d839` | `changes_requested` | 3 P2 — cả ba là **bản sao còn sót** |
+| 7 | `df09f3e` | `changes_requested` | 1 P2 |
+| 8 | `c912945` | `changes_requested` | 2 P2 — *nội dung gốc §1/§2 KHÔNG có sai mới* |
+| 9 | `8de21be` | `changes_requested` | 2 P2 |
+| 10 | `a6dcdbe` | `changes_requested` | 1 P2 |
+| 11 | `5271e99` | **`approve`** | **0 P1 · 0 P2 · 0 P3** |
+
+Đường cong cả chuỗi: `2 · 7 · 6 · 5 · 8 · 3 · 1 · 2 · 2 · 1 · 0`. **Đóng băng là chỗ nó quay đầu.**
+
+**BA Ô SỐ BỊ BỎ HẲN, cùng một hình dạng.** Không phải sửa cho đúng — **bỏ**, vì cả ba có **mẫu do
+người khác quyết định** nên không neo được: (1) phép so số dòng biên nhận — viết **ba lần cho ba cặp
+số** (`253/149` → `260/149` → `273/165`) vì nó đổi mỗi lần ta chạm vào tệp; (2) số hàng mục lục mà
+`r363` thêm — số của **PR khác**, trôi ngay khi `r364` vào; (3) ô *"head hiện tại"* của bộ đếm
+`bien_nhan_v2` — bộ đếm ấy đếm biên nhận của **mọi PR**, nên nó trôi mà không ai trong PR này chạm
+vào. Nếp rút ra: **một con số mà mẫu của nó nằm ngoài tầm PR thì không neo SHA cũng vô nghĩa, mà neo
+SHA thì vô dụng** — nó chỉ nói về một bản đã qua.
+
+**BA LẦN PHÉP KIỂM CỦA TÔI HẸP HƠN LỜI KHAI NÓ ĐI KIỂM**, và cả ba lần nó mù **đúng chỗ cần bắt**:
+`grep` theo DÒNG mù với scalar YAML gấp dòng (lượt 5) · bộ trích đường dẫn chỉ bắt dạng ĐẦY ĐỦ, mù
+với dẫn tắt (lượt 6) · mẫu số chỉ bắt BA CHỮ SỐ, mù với số hai chữ số (lượt 8). Cùng họ *"cổng xanh
+nhờ `rc=0` là cổng CÓ THỂ BỊ LỪA"*, chỉ khác: thứ nói dối là **chính phép kiểm vừa dựng ra để chứng
+minh mình đã sạch**.
+
+**MỘT LỖI VỀ CHỐT, do lượt 5 chấm.** Bốn thông điệp commit và mục này từng khai *"`t27` đòi đủ ba
+mảnh cho MỖI verdict"*. Đo lại: bỏ **tệp verdict** ⇒ `t27` **XANH**, `t26` **ĐỎ**; bỏ biên nhận
+hoặc hàng mục lục ⇒ `t27` ĐỎ. Chốt đúng là **`t26` CỘNG `t27`**. Tôi chạy **ba** phép thử rồi khai
+một kết luận cần **bốn** — phép thử thứ tư không bị bỏ quên, nó **chưa bao giờ được nghĩ ra**.
+
+**GÓI BẰNG CHỨNG — ba lỗ, cùng một hình dạng, vá ở SCRIPT chứ không ở văn bản.** Lượt 1: `EVIDENCE`
+khai `origin` trỏ mirror trong khi nó trỏ GitHub. Lượt 2: khai mirror 323 nhánh trong khi có 324.
+Lượt 8: khai *"sau fetch mù = 0"* trong khi mirror dựng **trước** lần fetch. Ngưỡng ba lần chạm ⇒
+`dung-goi-review.sh` nay **fetch trước** → canh hai nguồn và **dừng `rc=3`** nếu còn ref mù → mới
+dựng mirror → chụp `ls-remote` cùng lần chạy → **tự đối chiếu mirror ↔ raw** và xuất
+`mirror_vs_raw_THIEU/THUA/LECH_OID`. Ba lượt cuối đều khai gói **SẠCH**.
+
+**SÁU BIÊN NHẬN LƯỢT 6–11 CHƯA QUA CROSS-REVIEW — khai thẳng.** Chúng vào kho **sau khi** vòng lặp
+kết thúc, nên không còn lượt nào để soi chúng. Đó là cái giá đã biết của việc đóng băng, và là cùng
+tình huống #490/#495 mà kho đã chấp nhận. Verdict lượt 11 cũng nói rõ nó **không tái dựng hồ sơ lượt
+6–10**, và rằng kết luận `approve` là **review OFFLINE trên một SHA**, **không** xác nhận trạng thái
+GitHub hay quyền land.
+
 **Đo tại chỗ sau khi vá** (`git`, `python`, không mạng, `core.abbrev=7`) — **chạy lại SAU bước cuối
 cùng của mục này**, tức sau khi biên nhận lượt 3 và hàng mục lục đã vào cây và manifest đã tái sinh.
 Đây là nếp §4 số 3, và nó ra đời vì bảng cũ từng khai `49 ĐẠT v2 · tổng 102` cho một cây đã là
@@ -604,7 +659,7 @@ ghi `57/110` rồi merge thứ ba làm nó thành `59/112`. Số ĐANG ĐO nằm
 
 ```
 ops/lease_publish_test.py            ⇒ 146/146 đạt · đã chạy=146 · bỏ qua=0    (t27 xanh với hồ sơ mới)
-ops/bien_nhan_v2.py --root .         ⇒ rc=0 · TỔNG ĐẠT · 59 ĐẠT v2 · 0 vi phạm · 0 KHÔNG ĐO ĐƯỢC · tổng 112
+ops/bien_nhan_v2.py --root .         ⇒ rc=0 · TỔNG ĐẠT · 65 ĐẠT v2 · 0 vi phạm · 0 KHÔNG ĐO ĐƯỢC · tổng 118
 ops/cong_cu.py kiem-tra --json       ⇒ rc=0 · tổng DAT · canary actionlint_shellcheck DAT
 ops/cong_cu_test.py                  ⇒ ca=23 · đột biến=18 · lỗi đột biến=0
 scripts/tl.py doc-claims-check       ⇒ rc=0 · ok=true

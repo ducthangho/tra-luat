@@ -128,11 +128,21 @@ lớp | lý do vá lẻ* của từng lớp. Mở tệp trước rồi phân lo�
 
 | reviewer trả về | phiên làm gì |
 |---|---|
-| lớp P1/P2 còn mở, lớp khai **bản vá theo lớp** | thực hiện ĐÚNG bản vá theo lớp ấy |
+| lớp P1/P2 còn mở, lớp khai **bản vá theo lớp** | **đóng CẢ LỚP** — xem *quyền chọn phương án* dưới |
 | lớp khai **lý do vá lẻ** | vá lẻ ĐƯỢC, nhưng lý do phải đứng vững ở vòng sau |
 | cùng một lớp sang vòng thứ **BA** | **CẤM vá lẻ lần nữa** — xem `M4` dưới |
 | `approve` + bảng săn đủ | dừng vòng lặp |
 | `blocked` | dừng, xuất handoff, **hỏi chủ kho** |
+
+**Cột *bản vá theo lớp* là DỮ LIỆU BÀN GIAO, không phải chỉ thị triển khai.** Nghĩa vụ của phiên là
+**đóng cả lớp**, không phải gõ đúng phương án reviewer viết. Phiên **được** chọn cách khác, với ba điều
+kiện: **tái dẫn xuất** lớp từ đầu (đừng nhận phân loại làm tiền đề), **tự đo** rằng cách mình chọn đóng
+hết các thể hiện, và **giải thích** vì sao khác. Chép nguyên phương án mà **chưa tự đo** thì KHÔNG đạt.
+
+Quyền ấy **không** phải quyền quay về vá lẻ không lý do: đóng cả lớp vẫn là đầu ra bắt buộc, và `M4`
+vẫn áp. Nói ra vì hàng trên từng viết *"thực hiện ĐÚNG bản vá theo lớp ấy"* — câu đó trao cho reviewer
+quyền quyết định cách triển khai, trong khi protocol nói gợi ý **không** phải chỉ thị và buộc executor
+tái dẫn xuất.
 
 ### `M4` — lớp sang vòng thứ BA thì CẤM vá lẻ
 
@@ -153,9 +163,21 @@ tỉ lệ VÁ THẬT = (số finding vòng trước được phán ĐÃ VÁ TH�
 **Hai vòng LIÊN TIẾP có tỉ lệ `< 50 %` ⇒ DỪNG và hỏi chủ kho.** Đây là điều kiện dừng bắt buộc, không
 phải một chỉ báo để tham khảo.
 
-Mẫu số là **số finding vòng trước**, và phân hạng lấy từ mục đối chiếu của verdict
-(`ĐÃ VÁ THẬT` / `VÁ HỜ` / `VÁ SINH LỖI MỚI` / `CHƯA VÁ`). Giữ ánh xạ thể hiện khi đếm; đừng cộng trùng
-một thể hiện vào hai lớp.
+**ĐƠN VỊ của cả tử và mẫu là LỚP** — cụ thể là **tập slug lớp duy nhất** của vòng trước. Phân hạng
+lấy từ mục đối chiếu của verdict (`ĐÃ VÁ THẬT` / `VÁ HỜ` / `VÁ SINH LỖI MỚI` / `CHƯA VÁ`), mỗi slug
+đúng một nhãn. **Thể hiện chỉ để TRUY VẾT, KHÔNG vào phép chia** — nhân số thể hiện trong một lớp
+không được làm tỉ lệ đổi.
+
+Vì sao phải chốt đơn vị: cùng một lượt **3 lớp / 10 thể hiện** với **1 lớp** vá thật có **8 thể hiện**
+cho hai kết quả trái nhau — theo LỚP là `1/3 = 33 %` (**DỪNG** nếu lặp), theo THỂ HIỆN là
+`8/10 = 80 %` (**tiếp tục**). Không chốt đơn vị thì hai người cùng tính ra hai quyết định.
+
+**MIỀN XÁC ĐỊNH — mẫu số bằng 0.** Vòng trước có **0 lớp** thì tỉ lệ là **KHÔNG XÁC ĐỊNH**; **không**
+tự gán `0 %`, **không** tự gán `100 %`. Vòng như thế **không tính** là một vòng `< 50 %`, và cũng
+**không** làm đứt một chuỗi đang đếm: chuỗi *"hai vòng liên tiếp"* đếm trên các vòng **CÓ tỉ lệ xác
+định**, theo thứ tự, bỏ qua vòng không xác định. Nói thẳng hệ quả của cách đọc ấy: hai vòng `< 50 %`
+cách nhau bởi một vòng không xác định **VẪN** bắn — đó là chủ đích, vì một vòng không có gì để vá
+không nói được điều gì về hội tụ.
 
 **Vì sao PHÂN HẠNG chứ không TỔNG — đo trên dữ liệu thật của `#508`** (`13 → 12 → 11` finding; `VÁ
 THẬT` `4` rồi `3`):
@@ -164,6 +186,10 @@ THẬT` `4` rồi `3`):
 |---|---|
 | theo **TỔNG** (*"số lượng không cải thiện"*) | **KHÔNG bắn** — 13 → 12 → 11 vẫn là đang giảm |
 | theo **PHÂN HẠNG** (`4/13 = 31 %`, rồi `3/12 = 25 %`) | **BẮN** — cả hai vòng `< 50 %` |
+
+**Bộ dữ liệu `#508` ở trên là dữ liệu LỊCH SỬ đếm theo FINDING**, từ trước khi packet chuyển sang đếm
+theo LỚP. Giữ nguyên các con số ấy làm hồ sơ; **đừng** hồi tố đổi chúng sang đơn vị lớp rồi khai là
+cùng một phép đo. Nó minh hoạ *TỔNG so PHÂN HẠNG*, không minh hoạ *lớp so thể hiện*.
 
 Hai luật cho **hai kết luận KHÁC NHAU trên cùng một dữ liệu**; đó chính là thứ luật này mua được. Một
 luật mới cho cùng kết quả với luật cũ thì không mua được gì.
@@ -215,7 +241,18 @@ workflow không khai loại sự kiện gắn nhãn. Nhãn chỉ được đọc
 phải *"đã có lượt đo"*.
 
 **KHÔNG CỔNG NÀO CƯỠNG CHẾ MỤC NÀY.** Cả vòng lặp, phần hậu-merge và ba loại chi CI ở trên đều là
-**chữ**, tức **kỷ luật đọc**. `§20` ghi `ADR-0037` và ADR trần vòng là **`0 cổng`**; cưỡng chế chi CI
+**chữ**, tức **kỷ luật đọc**.
+
+**Và `doctrine-scan` XANH KHÔNG chứng minh adapter không chép doctrine** — nó chứng minh adapter không
+chép những **CỤM CÓ TRONG DANH SÁCH** của nó. Đo được 12-09-2026, bốn phép trên cùng một cây: bản gốc
+`rc=0` · chép nguyên một mục có cụm trong danh sách ⇒ `rc=6` (**có răng ở đó**) · chép nguyên câu phát
+biểu con số trần từ ADR ⇒ **`rc=0`** · chép nguyên trọn mục ngoại lệ master-drift của protocol ⇒
+**`rc=0`**. Hai phép sau **lọt**, tức hai *"phép làm ĐỎ"* mà tiêu chí nghiệm thu viện dẫn **chưa có
+răng**. Cùng lớp *"danh sách CẤM phân biệt CÁCH VIẾT, không phân biệt HÀNH VI"*.
+
+Hệ quả thực hành: **đừng phán "adapter không chép doctrine" từ `rc=0`.** Đọc mắt phần thêm vào, và khi
+khai một tiêu chí kiểu ấy là ĐẠT thì khai kèm **phạm vi của phép đo** — cổng thấy được cái gì, và cái
+gì nó không thấy. `§20` ghi `ADR-0037` và ADR trần vòng là **`0 cổng`**; cưỡng chế chi CI
 nằm ở packet `CONG-CHAN-CHI-CI-SOM`; cổng đọc một hằng số trần duy nhất là nợ `SO-CANON-CHUA-TON-TAI`.
 Ai tin ở đây đã có cơ chế sẽ bỏ đúng bước kiểm bằng tay mà mục này đang đòi.
 

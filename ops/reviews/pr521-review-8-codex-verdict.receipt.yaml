@@ -1,9 +1,9 @@
 # BIÊN NHẬN GIAO HÀNG — cross-review lượt 8 của PR #521 (adapter `cross-review`), KHÁC NỀN
 # (codex), review THEO LỚP, trên head `91bbc82`. approve 0/0/0, 0 thể hiện.
 #
-# PR #521 KHÔNG phải một packet của protocol: không có Packet Issue, không có lease. Nó là một
-# thay đổi adapter đi một mình (tiền lệ `3184773`). Vì vậy `packet_id` ghi SỐ HIỆU PR và
-# `lease_id` khai KHONG_CO — đừng đọc hai trường ấy thành "packet 521 đã được cấp lease".
+# Theo phiên điều phối thuật lại, #521 là PR adapter đi riêng (tiền lệ `3184773`), không có
+# Packet Issue được dẫn. `packet_id` là số PR; `lease_id: KHONG_CO` chỉ ghi chưa tìm thấy
+# hiện vật lease riêng #521 trong snapshot, không chứng minh chưa từng được cấp lease.
 
 schema_version: 2
 receipt_id: pr521-review-8-codex-20260912-c6ee6d72
@@ -12,9 +12,12 @@ packet_id: '521'
 packet_slug: 'ADAPTER-CROSS-REVIEW-CODEX-HINT'
 lease_id: KHONG_CO
 lease_id_ghi_chu: >-
-  Không có tệp lease nào trong `ops/leases/**` giữ `.claude/skills/cross-review/SKILL.md` cho
-  đợt này; PR mở thẳng từ nhánh `claude/adapter-cross-review-codex-hint`. Ghi KHONG_CO thay vì
-  bịa một id — một trường điền cho đủ ô là một lời khai không có phép đo.
+  Quét snapshot 360 refs/heads của gói lúc 2026-09-12T16:17:21Z chưa tìm thấy lease riêng
+  #521. Không suy từ đó rằng đường adapter không có người giữ hoặc #521 chưa từng có lease:
+  ref `ops/cap-lease-522-523` chứa các lease #523 có write_set giữ chính đường ấy, từ gen 1
+  `quy-trinh-lap-review-r2-exec-1-claude-20260912` (leased_at_utc 2026-09-12T08:15:00Z),
+  rồi gen 2 và gen 3. Quét master đơn lẻ bỏ sót chúng; ref đã xoá/lịch sử ngoài snapshot
+  và quyền thực tế tại từng thời điểm KHÔNG ĐO ĐƯỢC. Không gán lease của #523 cho #521.
 phase_key: PR521-ADAPTER-CROSS-REVIEW-LUOT8-PHIEN-20260912
 luot: 8
 role: reviewer
@@ -37,11 +40,11 @@ evidence_url_ghi_chu: >-
 
 verdict_usage_caveats:
   - id: EVIDENCE-NGOAI-KHO-moi-lien-ket-evidence-KHONG-tra-duoc
-    mo_ta: 'Như lượt 5: mọi liên kết `evidence/...` trong tệp này là liên kết nội bộ gói review đã chết theo container. Riêng lượt này số liên kết lớn nhất (kiểm kê 520 dòng, 400 ứng viên con trỏ, 242 token số, 8 mutation) — các BẢNG đầy đủ chỉ có trong evidence/, phần trong verdict là tóm tắt.'
+    mo_ta: 'Như lượt 5: mọi liên kết `evidence/...` trong tệp này là liên kết nội bộ gói review đã chết theo container. Số 520 dòng/400 ứng viên/242 token/8 mutation mô tả kiểm kê và phép thử, không phải số liên kết. Đếm liên kết Markdown tới evidence/: lượt 5–8 lần lượt 42/28/33/27 (39/26/27/24 đích riêng); lượt 8 không có nhiều liên kết nhất — các BẢNG đầy đủ chỉ có trong evidence/, phần trong verdict là tóm tắt. Phạm vi nguồn: phép chạy/phép đọc sandbox cũ là (c) theo verdict; scalar runtime, model/effort yêu cầu và việc chép nguyên byte từ gói gốc là (b) theo phiên điều phối. Kho chỉ cho so byte/hash với receipt và blob e759a7e; không có VERDICT.md gốc/run.json/log để kiểm độc lập nguồn ngoài kho.'
   - id: APPROVE-la-dieu-kien-DUNG-khong-phai-merge-authorization
     mo_ta: '`approve` 0/0/0 này là điều kiện DỪNG của vòng vá→cross-review theo chỉ thị chủ kho (''lặp vá, cross review, đăng verdict đến hết P1, P2 hoặc approve''), KHÔNG phải merge authorization. ADR-0040: verdict do tài khoản tác giả PR vận chuyển không thành required check.'
   - id: HEAD-DA-DOI-SAU-APPROVE-merge-master-85fcbf8
-    mo_ta: 'Verdict neo `91bbc82`. Sau đó master trôi (26 commit, gồm #512 land WINDOWS-LEASE-SUITE) nên nhánh phải merge `85fcbf8` ⇒ head thành `dd62c88`, và ĐÓ mới là head được land. Adapter còn NGUYÊN BYTE qua lần merge ấy (`git diff` rỗng) và các mục `§4/§8/§9/§10.2/§13` mà adapter trỏ tới không đổi số — nhưng verdict này KHÔNG chấm `dd62c88`. Phép đo độc lập gần nhất trên `dd62c88` là lượt connector codex (sạch).'
+    mo_ta: 'Verdict neo `91bbc82`. Tập `91bbc82..85fcbf8` có 28 commit (đếm bằng `git rev-list --count`, gồm #512 và #526) nên nhánh phải merge `85fcbf8` ⇒ head thành `dd62c88`, và ĐÓ mới là head được land. Adapter còn NGUYÊN BYTE qua lần merge ấy (`git diff` rỗng) và các mục `§4/§8/§9/§10.2/§13` mà adapter trỏ tới không đổi số — nhưng verdict này KHÔNG chấm `dd62c88`. Phép đo độc lập gần nhất trên `dd62c88` là lượt connector codex (sạch).'
   - id: WINDOWS-tren-merge-commit-KHONG-DO-DUOC
     mo_ta: '`gate (ubuntu-latest)` success trên merge commit `dc02c9b`; `gate (windows-latest)` bị HUỶ theo chỉ thị chủ kho (lỗi đã biết, tiết kiệm runner). Trạng thái Windows của `dc02c9b` là KHÔNG ĐO ĐƯỢC — đừng suy xanh từ ubuntu.'
 
@@ -66,7 +69,7 @@ hint_patch:
 
 noi_dung_do_duoc_van_dung:
   - 'ĐỐI CHIẾU LƯỢT TRƯỚC — replay NGUYÊN HINT lượt 7 (5 hunk) lên blob `aaef55b`: rc=0, 5/5, bằng byte HEAD. Cả năm hunk được kiểm ĐỘC LẬP trên HEAD và đều ĐÃ VÁ THẬT.'
-  - 'QUÉT VÉT CẠN có KHAI TẬP VÀ KÍCH THƯỚC — lượt đầu tiên của chuỗi làm việc này: 520 dòng phân hoạch thành 23 fence + 93 đơn vị ngoài fence, `0 dòng không trắng bị bỏ ngoài hai tập`. `va-qua-tay-mat-cong-cu` duyệt 400 ứng viên con trỏ (gồm đủ 45 dấu §, 26 lần nhắc tệp Git, 60 đường/hiện vật mẫu); `lenh-khong-noi-hien-vat` duyệt 23 fence = 21 khối lệnh + 2 mẫu Markdown; `don-vi-byte` lấy 242 token chứa số làm chỉ mục dư.'
+  - 'QUÉT VÉT CẠN có KHAI TẬP VÀ KÍCH THƯỚC theo từng lớp — chi tiết hơn tập theo vùng/dòng đã khai ở lượt 6–7: 520 dòng phân hoạch thành 23 fence + 93 đơn vị ngoài fence, `0 dòng không trắng bị bỏ ngoài hai tập`. `va-qua-tay-mat-cong-cu` duyệt 400 ứng viên con trỏ (gồm đủ 45 dấu §, 26 lần nhắc tệp Git, 60 đường/hiện vật mẫu); `lenh-khong-noi-hien-vat` duyệt 23 fence = 21 khối lệnh + 2 mẫu Markdown; `don-vi-byte` lấy 242 token chứa số làm chỉ mục dư.'
   - 'TÁM ĐỘT BIẾN, mỗi lớp khai 0 dòng có một đột biến riêng bơm một thể hiện của ĐÚNG lớp ấy rồi cho thấy bảng chuyển `0 → 1 → 0`. Đáng chú ý: M2 đổi con trỏ sang một heading CÓ THẬT nhưng không chứa nội dung đã hứa (đích tồn tại cả ba lần, chỉ ''thiếu nội dung'' chuyển 0→1→0) — tức oracle phân biệt được ''đích tồn tại'' với ''đích chứa thứ đã hứa''. M8 nhắm đúng câu HINT lượt 7 vừa viết: giữ lời hứa ''tên và OID'' nhưng bỏ `%(objectname)` ⇒ `echo diff` `1→0→1`.'
   - 'Reviewer TỰ PHÂN HẠNG oracle của mình: M2/M3/M5/M8 có oracle nội dung đích hoặc hành vi độc lập; M1/M4/M6/M7 còn cần đối chiếu NGHĨA câu, và nói thẳng không được quảng bá thành bộ chứng minh ngữ nghĩa tự động.'
   - 'Khôi phục đủ 8/8: sha256 tệp trước/sau MỖI ca bằng nhau (`723e1831…`), cả 8 `git diff --exit-code` rc=0, tag fixture đã gỡ, OID master đặt lại giá trị cũ.'

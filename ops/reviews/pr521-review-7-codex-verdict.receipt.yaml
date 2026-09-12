@@ -1,9 +1,9 @@
 # BIÊN NHẬN GIAO HÀNG — cross-review lượt 7 của PR #521 (adapter `cross-review`), KHÁC NỀN
 # (codex), review THEO LỚP, trên head `aaef55b`. changes_requested 0/4/0, 5 thể hiện.
 #
-# PR #521 KHÔNG phải một packet của protocol: không có Packet Issue, không có lease. Nó là một
-# thay đổi adapter đi một mình (tiền lệ `3184773`). Vì vậy `packet_id` ghi SỐ HIỆU PR và
-# `lease_id` khai KHONG_CO — đừng đọc hai trường ấy thành "packet 521 đã được cấp lease".
+# Theo phiên điều phối thuật lại, #521 là PR adapter đi riêng (tiền lệ `3184773`), không có
+# Packet Issue được dẫn. `packet_id` là số PR; `lease_id: KHONG_CO` chỉ ghi chưa tìm thấy
+# hiện vật lease riêng #521 trong snapshot, không chứng minh chưa từng được cấp lease.
 
 schema_version: 2
 receipt_id: pr521-review-7-codex-20260912-730ed330
@@ -12,9 +12,12 @@ packet_id: '521'
 packet_slug: 'ADAPTER-CROSS-REVIEW-CODEX-HINT'
 lease_id: KHONG_CO
 lease_id_ghi_chu: >-
-  Không có tệp lease nào trong `ops/leases/**` giữ `.claude/skills/cross-review/SKILL.md` cho
-  đợt này; PR mở thẳng từ nhánh `claude/adapter-cross-review-codex-hint`. Ghi KHONG_CO thay vì
-  bịa một id — một trường điền cho đủ ô là một lời khai không có phép đo.
+  Quét snapshot 360 refs/heads của gói lúc 2026-09-12T16:17:21Z chưa tìm thấy lease riêng
+  #521. Không suy từ đó rằng đường adapter không có người giữ hoặc #521 chưa từng có lease:
+  ref `ops/cap-lease-522-523` chứa các lease #523 có write_set giữ chính đường ấy, từ gen 1
+  `quy-trinh-lap-review-r2-exec-1-claude-20260912` (leased_at_utc 2026-09-12T08:15:00Z),
+  rồi gen 2 và gen 3. Quét master đơn lẻ bỏ sót chúng; ref đã xoá/lịch sử ngoài snapshot
+  và quyền thực tế tại từng thời điểm KHÔNG ĐO ĐƯỢC. Không gán lease của #523 cho #521.
 phase_key: PR521-ADAPTER-CROSS-REVIEW-LUOT7-PHIEN-20260912
 luot: 7
 role: reviewer
@@ -37,9 +40,9 @@ evidence_url_ghi_chu: >-
 
 verdict_usage_caveats:
   - id: EVIDENCE-NGOAI-KHO-moi-lien-ket-evidence-KHONG-tra-duoc
-    mo_ta: 'Như lượt 5: mọi liên kết `evidence/...` trong tệp này là liên kết nội bộ gói review đã chết theo container.'
+    mo_ta: 'Như lượt 5: mọi liên kết `evidence/...` trong tệp này là liên kết nội bộ gói review đã chết theo container. Phạm vi nguồn: phép chạy/phép đọc sandbox cũ là (c) theo verdict; scalar runtime, model/effort yêu cầu và việc chép nguyên byte từ gói gốc là (b) theo phiên điều phối. Kho chỉ cho so byte/hash với receipt và blob e759a7e; không có VERDICT.md gốc/run.json/log để kiểm độc lập nguồn ngoài kho.'
   - id: BA-LOP-CU-VAN-CON-THE-HIEN-SONG-sau-HINT-luot-6
-    mo_ta: 'Ba lớp mà lượt 6 khai ''đóng đủ N thể hiện'' đều còn thể hiện sống, tìm ra ở lượt 7. Đọc bảng ''đóng lớp'' của BẤT KỲ lượt nào trong chuỗi này như một lời khai về TẬP ĐÃ DUYỆT, không như một lời khai về tập TỒN TẠI — chỉ lượt 8 mới khai tập và kích thước tập.'
+    mo_ta: 'Ba lớp mà lượt 6 khai ''đóng đủ N thể hiện'' đều còn thể hiện sống, tìm ra ở lượt 7. Đọc bảng ''đóng lớp'' của BẤT KỲ lượt nào trong chuỗi này như một lời khai về TẬP ĐÃ DUYỆT, không như một lời khai về tập TỒN TẠI — lượt 6 đã khai 506/506 dòng theo 14 vùng, lượt 7 khai 509/509 dòng và 23 fence; lượt 8 kê chi tiết hơn theo từng lớp.'
 
 phan_loai_finding: theo_lop
 phan_loai_finding_ghi_chu: >-
@@ -65,7 +68,7 @@ hint_patch:
     Phiên chính áp NGUYÊN, không sửa tay hunk nào; dry-run strict chạy TRƯỚC khi áp thật, cùng chế độ `--fuzz=0` với lần áp.
 
 noi_dung_do_duoc_van_dung:
-  - 'ĐỐI CHIẾU LƯỢT TRƯỚC — replay NGUYÊN HINT lượt 6 (5 hunk) lên blob `aaef55b`: rc=0, kết quả bằng byte HEAD; năm hunk đều ĐÃ VÁ THẬT ở thể hiện chúng phủ.'
+  - 'ĐỐI CHIẾU LƯỢT TRƯỚC — theo verdict lượt 7, replay NGUYÊN HINT lượt 6 (5 hunk) lên blob `e849e2eb341801155cd20341b9f77b5116329dcc`: rc=0, kết quả bằng byte HEAD `aaef55bf77f061015d46b14411475d7f448beb05`; năm hunk đều ĐÃ VÁ THẬT ở thể hiện chúng phủ.'
   - 'Lớp MỚI `neo-sha-tu-head-dong` — phát hiện có giá trị nhất của cả chuỗi: HAI tuyến trong adapter lấy lại head PR bằng `gh pr view --json headRefOid` NGAY TẠI LÚC GỌI rồi dùng nó làm SHA của dữ liệu đang review (`gh pr diff` + `git diff <base> <head_sha>`, và `record-review --reviewed-sha $(gh pr view …)`). Head đổi giữa lúc đọc và lúc ghi thì artifact neo vào một revision KHÁC — đúng thứ đã xảy ra sau mỗi lần áp HINT trong chính chuỗi này.'
   - 'Ba lớp cũ còn thể hiện SỐNG sau HINT lượt 6, đúng hình dạng ''vá đúng chỗ được chỉ rồi bỏ sót đường tiếp theo'': con trỏ thứ hai (`§9` trong khi cú pháp `release-manifest` thật nằm ở §10.2 L699–709) · `"$RV"` dùng trước khi biến được cấp giá trị · `diff` hai danh sách ref chỉ so TÊN mà câu dẫn đọc thành ''mirror nhận đủ cái kho nguồn đang có''.'
   - 'HINT sửa phép so ref thành `tên + objectname` và in `ref diff rc=`, kèm câu khai thẳng nó KHÔNG kiểm mọi namespace ref lẫn toàn vẹn mọi object — thu hẹp đúng phạm vi, không thu hẹp tới mức vô nghĩa.'

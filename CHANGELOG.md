@@ -1,8 +1,13 @@
-# ★ dev-side — r373: ghi sổ #521 — bốn verdict codex của chuỗi tám lượt cross-review adapter `cross-review`; lượt 8 là lượt đầu tiên KHAI TẬP VẬT THỂ rồi chứng minh phép quét có răng (2026-09-12)
+# ★ dev-side — r373: ghi sổ #521 — bốn verdict codex của chuỗi tám lượt cross-review adapter `cross-review`; lượt 8 khai tập theo từng lớp và chứng minh phép quét có răng (2026-09-12)
 
 Nối tiếp r372 (chốt tới `f4da553`, #517). Mục này là vế bookkeeping ADR-0034 của **#521** (merge `dc02c9b`):
 4 verdict + 4 biên nhận v2 vào `ops/reviews/`, 4 hàng mục lục + 10 cảnh báo + 1 đoạn nguồn, manifest tái sinh.
 Tiền lệ r364/r367/r369/r371/r372.
+
+**Phạm vi nguồn của mục r373:** (a) Git, băm/byte và nội dung bốn verdict có trong kho đối chiếu lại được;
+(b) sự kiện GitHub, chỉ thị chủ kho, runtime và việc chép nguyên byte từ gói gốc là lời phiên điều phối
+thuật lại; (c) phép chạy/phép đọc sandbox cũ dưới đây là kết quả do các verdict thuật lại, không phải
+phép chạy mới. Gói gốc và log không có trong kho; băm nội bộ không chứng minh bản sao bằng bản gốc ngoài kho.
 
 **Không nâng `VERSION`.** Vẫn `1.36.68` từ r336.
 
@@ -36,8 +41,9 @@ khác, phạm vi khác — chấm ĐÚNG head ấy và ra **4 P2**, tất cả t
 và **nhận cả bốn**. Lượt 5 đọc lại PROMPT lượt 3 NGUYÊN BẢN cạnh bốn finding và kết luận **cả bốn là BỎ
 SÓT**, không phải giới hạn phạm vi được giao.
 
-Đó là lý do bốn lượt tiếp theo tồn tại, và là lý do lượt 8 bị đòi thứ mà bảy lượt trước không bị đòi:
-**khai TẬP VẬT THỂ, rồi chứng minh phép quét bắt được một thể hiện bơm vào.**
+Theo verdict lượt 8, lượt này kê tập chi tiết theo từng lớp và chứng minh phép quét bằng đột biến.
+Lượt 6 đã khai 506/506 dòng theo 14 vùng; lượt 7 khai 509/509 dòng và 23 fence. Không có đủ prompt
+nguyên bản của các lượt trước trong kho để kết luận họ chưa từng được giao yêu cầu khai tập.
 
 ## Mô thức đo được: bản vá ĐÚNG mà HẸP, ba lượt liên tiếp
 
@@ -67,7 +73,7 @@ chính chuỗi này head đổi sau **mỗi** lần áp HINT. Nay cả hai dùng
 
 ## Lượt 8 — khai tập, rồi đo răng của chính phép quét
 
-Lượt 8 là lượt đầu tiên trả lời được câu *"bảng 0 dòng của anh duyệt bao nhiêu thứ?"*:
+Lượt 8 trả lời câu *"bảng 0 dòng của anh duyệt bao nhiêu thứ?"* bằng kiểm kê chi tiết hơn các lượt 6–7:
 
 - kiểm kê **520 dòng** ⇒ **23 fence + 93 đơn vị** ngoài fence, **0 dòng không trắng bỏ ngoài hai tập**;
 - `va-qua-tay-mat-cong-cu` duyệt **400 ứng viên con trỏ**, gồm đủ **45 dấu §**, 26 lần nhắc tệp Git,
@@ -88,7 +94,9 @@ Cổng trên head land `dd62c88`: `gate` **success** · `thu-hoi` **success**. T
 `eol_policy --all` 2085 scanned / 2063 checked / 22 skipped / 0 vi phạm · `doc-claims-check --strict`
 `ok=true` · `golden-test` `ok=true` · `release-verify --strict` `ok=true` **180 == 180** ·
 `lease_publish_test` **155/155** (với `actionlint` 1.7.7 trên PATH; thiếu nó thì `t33`/`t137` trả
-`KHÔNG ĐO ĐƯỢC` và bộ test ra 145/147 — **môi trường**, delta so master = 0).
+`KHÔNG ĐO ĐƯỢC`. `t159` cũng chưa tới consumer vì thiếu công cụ. Trên bộ 155 ca, kết quả là **152/155**, không phải 145/147;
+số **145/147** thuộc bộ 147 ca trước merge master. Phải giữ riêng hai tập ca; thiếu công cụ là
+**chưa đo được ba ca**, không phải ba phép kiểm sản phẩm đã chạy rồi thất bại).
 
 **`gate (windows-latest)` trên merge commit `dc02c9b` bị HUỶ** theo chỉ thị chủ kho (lỗi đã biết, tiết kiệm
 runner) ⇒ trạng thái Windows của `dc02c9b` là **KHÔNG ĐO ĐƯỢC**. Đừng suy xanh từ việc ubuntu xanh.

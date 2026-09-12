@@ -1,0 +1,12 @@
+>>> vao t163_A2_A3_A8_M5_dot_bien_tu_kiem_cho_chinh_bo_cham 2026-09-12T16:54:17Z
+    tukiem A2-lam-rong-chi_tiet-tren-KENH                       XANH_DUNG   rc=[0, 0]
+    tukiem doi-thu-tu-except-TinHieuChotCa-sau-AssertionError   GIET        ctrl=CTRL-DUONG-chet-dung-chot-ca-dich
+    tukiem bo-chot-DO_KHAC-trong-bo-cham                        GIET        ctrl=CTRL-ngoai-le-Exception-TRAN
+    tukiem dong-luot-ghi-rc-0-cung                              GIET        ctrl=CTRL-DUONG-chet-dung-chot-ca-dich
+    tukiem dong-luot-KHONG-ghi-gi                               GIET        ctrl=CTRL-DUONG-chet-dung-chot-ca-dich
+    tukiem dong-luot-ghi-1-thay-vi-bool-true                    GIET        ctrl=CTRL-DUONG-chet-dung-chot-ca-dich
+    tukiem bo-CA-HAI-chot-vat-hoa-dich                          GIET        ctrl=CTRL-DUONG-chet-dung-chot-ca-dich
+tự kiểm bộ chấm 512: đạt 7/7 (6 mục DO gỡ-chốt + 1 mục XANH bất-biến-A2) · chốt CHƯA có control phân biệt: 9 (khai, không đếm là đã đo)
+<<< ra t163_A2_A3_A8_M5_dot_bien_tu_kiem_cho_chinh_bo_cham 53.516s QUA
+
+lease_publish: 1/1 đạt; đã chạy=1, bỏ qua=0

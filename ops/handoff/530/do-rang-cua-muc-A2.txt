@@ -1,0 +1,7 @@
+neo ngoai bang: 1  (phep dem CHI tinh phan MA)
+rc = 1  (ky vong: 1 — muc A2 phai DO)
+    tukiem A2-lam-rong-chi_tiet-tren-KENH                       XANH_SAI    rc=[1, 1]
+    tự kiểm bộ chấm 512: đạt 6/7 (6 mục DO gỡ-chốt + 1 mục XANH bất-biến-A2) · chốt CHƯA có control phân biệt: 9 (khai, không đếm là đã đo)
+    !!! do t163_A2_A3_A8_M5_dot_bien_tu_kiem_cho_chinh_bo_cham đột biến tự kiểm KHÔNG làm ca đích đỏ đúng lý do: ['A2-lam-rong-chi_tiet-tren-KENH: kỳ vọng XANH mà rc=[1, 1]']
+    ĐỎ  t163_A2_A3_A8_M5_dot_bien_tu_kiem_cho_chinh_bo_cham: đột biến tự kiểm KHÔNG làm ca đích đỏ đúng lý do: ['A2-lam-rong-chi_tiet-tren-KENH: kỳ vọng XANH mà rc=[1, 1]']
+KET LUAN: MUC A2 CO RANG

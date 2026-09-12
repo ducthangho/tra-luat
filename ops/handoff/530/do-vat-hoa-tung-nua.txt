@@ -1,0 +1,3 @@
+chi go nua A               rc=0  KHONG lech (bi HAP THU)
+chi go nua B               rc=0  KHONG lech (bi HAP THU)
+go CA HAI                  rc=1  LECH: LỆCH  CTRL-DUONG-chet-dung-chot-ca-dich    mong_đợi=GIET           thực_tế=KHONG_GIET

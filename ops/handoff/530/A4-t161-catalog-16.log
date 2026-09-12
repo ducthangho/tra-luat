@@ -1,0 +1,21 @@
+>>> vao t161_A4_catalog_16_mutant_512_giet_that_khong_tin_dung_gia 2026-09-12T16:35:16Z
+    mut giet-chi-PID-khong-giet-cay            t154  GIET             2.21s 
+    mut bo-start_new_session                   t154  GIET             0.15s 
+    mut bo-chot-selector-khong-khop            t155  GIET             0.49s 
+    mut AB_HAN_GIAY-ghi-tay-420                t156  GIET             0.09s 
+    mut tee-chi-in-o-cuoi                      t157  GIET            15.29s 
+    mut tee-bo-tien-to                         t157  GIET             0.34s 
+    mut ngan-sach-cap-lai-han-toi-thieu        t156  GIET             4.01s 
+    mut M09-tee-bo-flush-CA-HAI-print          t157  GIET            15.28s 
+    mut M10-ngan-sach-chi-cap-lai-khi-CAN      t156  GIET             4.25s 
+    mut M11-nhanh-can-tra-ket-do-dang          t156  GIET             4.25s 
+    mut M13-killpg-khong-chot-truong-nhom      t154  GIET             2.37s 
+    mut M15-classifier-tra-KHOP-khi-lech       t160  GIET             0.14s 
+    mut M16-consumer-bo-classifier-gan-KHOP    t160  GIET             0.13s 
+    mut M17-consumer-nhan-ca-trang-thai-CHUA-RO t160  GIET             0.14s 
+    mut M14-moi-truong-con-khong-TAT-DEM       t158  GIET             0.13s 
+    mut T137_TRAN-bo-chan-doan                 t156  GIET             0.09s 
+catalog 512: mẫu số=16, giết=16, không giết=0, KHÔNG ĐO ĐƯỢC=0
+<<< ra t161_A4_catalog_16_mutant_512_giet_that_khong_tin_dung_gia 49.372s QUA
+
+lease_publish: 1/1 đạt; đã chạy=1, bỏ qua=0

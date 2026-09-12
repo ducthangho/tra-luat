@@ -1,0 +1,27 @@
+>>> vao t162_A1_muoi_control_cua_bo_cham_dung_phan_hang 2026-09-12T16:32:08Z
+    mut CTRL-ngoai-le-Exception-TRAN           t160  KHONG_DO_DUOC    0.25s ca ĐỎ vì ngoại lệ KHÔNG phải TinHieuChotCa: ['t160_lech_AB_phai_giu_bang_chung_va_CHAN_tai_consumer_t125'] | t160_lech_A
+    mut CTRL-ngoai-le-Error-TRAN               t160  KHONG_DO_DUOC    0.25s ca ĐỎ vì ngoại lệ KHÔNG phải TinHieuChotCa: ['t160_lech_AB_phai_giu_bang_chung_va_CHAN_tai_consumer_t125'] | t160_lech_A
+    mut CTRL-ngoai-le-RuntimeError             t160  KHONG_DO_DUOC    0.23s ca ĐỎ vì ngoại lệ KHÔNG phải TinHieuChotCa: ['t160_lech_AB_phai_giu_bang_chung_va_CHAN_tai_consumer_t125'] | t160_lech_A
+    mut CTRL-StopIteration-khong-hau-to        t160  KHONG_DO_DUOC    0.25s ca ĐỎ vì ngoại lệ KHÔNG phải TinHieuChotCa: ['t160_lech_AB_phai_giu_bang_chung_va_CHAN_tai_consumer_t125'] | t160_lech_A
+    mut CTRL-lop-tu-dinh-nghia-ten-la          t160  KHONG_DO_DUOC    0.25s ca ĐỎ vì ngoại lệ KHÔNG phải TinHieuChotCa: ['t160_lech_AB_phai_giu_bang_chung_va_CHAN_tai_consumer_t125'] | t160_lech_A
+    mut CTRL-GeneratorExit                     t160  KHONG_DO_DUOC    0.24s thiếu bản ghi đóng lượt
+    mut CTRL-ten-lop-UNICODE                   t160  KHONG_DO_DUOC    0.22s ca ĐỎ vì ngoại lệ KHÔNG phải TinHieuChotCa: ['t160_lech_AB_phai_giu_bang_chung_va_CHAN_tai_consumer_t125'] | t160_lech_A
+    mut CTRL-thong-diep-RONG                   t160  KHONG_DO_DUOC    0.26s ca ĐỎ vì ngoại lệ KHÔNG phải TinHieuChotCa: ['t160_lech_AB_phai_giu_bang_chung_va_CHAN_tai_consumer_t125'] | t160_lech_A
+    mut CTRL-DUONG-chet-dung-chot-ca-dich      t160  KHONG_DO_DUOC    0.00s neo khớp 3 lần, phải đúng 1
+    mut CTRL-DUONG-M1b-chot-that-t96           t96   KHONG_DO_DUOC    0.00s neo khớp 2 lần, phải đúng 1
+  ĐẠT   CTRL-ngoai-le-Exception-TRAN         mong_đợi=KHONG_DO_DUOC  thực_tế=KHONG_DO_DUOC
+  ĐẠT   CTRL-ngoai-le-Error-TRAN             mong_đợi=KHONG_DO_DUOC  thực_tế=KHONG_DO_DUOC
+  ĐẠT   CTRL-ngoai-le-RuntimeError           mong_đợi=KHONG_DO_DUOC  thực_tế=KHONG_DO_DUOC
+  ĐẠT   CTRL-StopIteration-khong-hau-to      mong_đợi=KHONG_DO_DUOC  thực_tế=KHONG_DO_DUOC
+  ĐẠT   CTRL-lop-tu-dinh-nghia-ten-la        mong_đợi=KHONG_DO_DUOC  thực_tế=KHONG_DO_DUOC
+  ĐẠT   CTRL-GeneratorExit                   mong_đợi=KHONG_DO_DUOC  thực_tế=KHONG_DO_DUOC
+  ĐẠT   CTRL-ten-lop-UNICODE                 mong_đợi=KHONG_DO_DUOC  thực_tế=KHONG_DO_DUOC
+  ĐẠT   CTRL-thong-diep-RONG                 mong_đợi=KHONG_DO_DUOC  thực_tế=KHONG_DO_DUOC
+  LỆCH  CTRL-DUONG-chet-dung-chot-ca-dich    mong_đợi=GIET           thực_tế=KHONG_DO_DUOC
+  LỆCH  CTRL-DUONG-M1b-chot-that-t96         mong_đợi=GIET           thực_tế=KHONG_DO_DUOC
+control 512: 8/10 ca đúng phân hạng
+<<< ra t162_A1_muoi_control_cua_bo_cham_dung_phan_hang 1.947s DO
+!!! do t162_A1_muoi_control_cua_bo_cham_dung_phan_hang control LỆCH phân hạng: ['CTRL-DUONG-chet-dung-chot-ca-dich: mong_doi=GIET, thuc_te=KHONG_DO_DUOC — neo khớp 3 lần, phải đúng 1', 'CTRL-DUONG-M1b-chot-that-t96: mong_doi=GIET, thuc_te=KHONG_DO_DUOC — neo khớp 2 lần, phải đúng 1']
+  ĐỎ  t162_A1_muoi_control_cua_bo_cham_dung_phan_hang: control LỆCH phân hạng: ['CTRL-DUONG-chet-dung-chot-ca-dich: mong_doi=GIET, thuc_te=KHONG_DO_DUOC — neo khớp 3 lần, phải đúng 1', 'CTRL-DUONG-M1b-chot-that-t96: mong_doi=GIET, thuc_te=KHONG_DO_DUOC — neo khớp 2 lần, phải đúng 1']
+
+lease_publish: 0/1 đạt; đã chạy=1, bỏ qua=0

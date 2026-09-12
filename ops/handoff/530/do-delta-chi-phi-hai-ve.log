@@ -1,0 +1,11 @@
+=== VE nen  sha=dc02c9b  rc=0 ===
+  lease_publish: 155/155 đạt; đã chạy=155, bỏ qua=0
+  TONG_GIAY 104.4
+  <<< ra t125_AB_toan_suite_KHONG_doi_verdict_theo_ambient_actor 53.039s QUA
+  so ca chay: 155
+=== VE sau  sha=a1c7d7f  rc=0 ===
+  lease_publish: 158/158 đạt; đã chạy=158, bỏ qua=0
+  TONG_GIAY 319.4
+  <<< ra t125_AB_toan_suite_KHONG_doi_verdict_theo_ambient_actor 160.378s QUA
+  so ca chay: 158
+=== log giu o /tmp/dohaive-ImHS5W · ma=0 ===

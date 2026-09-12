@@ -80,7 +80,18 @@ anchor:
   reviewed_base: 26e2555d36c48b3c0f625ae50ab2cfb62b6cb858
   verdict_blob_commit: 9196eaf70ca0d908b8d23ff26512c4e395e1e997
 verdict_usage_caveats:
-  - NAM-LUOT-NAY-KHONG-PHAI-VONG-CANON
+  - id: NAM-LUOT-NAY-KHONG-PHAI-VONG-CANON
+    muc: P2
+    mo_ta: >-
+      Năm lượt không sinh biên nhận lúc chạy, và `review_rounds_used` không tồn tại trong bất kỳ tệp `.py` nào (đo 11-09-2026 ⇒ 0 tệp, đúng như `ADR-0043` tự khai; `§20` ghi `ADR-0043` và `ADR-0037` đều `0 cổng`). Biên nhận ghi SAU, trả nợ hồ sơ.
+    phai_lam_gi_khi_chay_lai: >-
+      Đừng đọc năm biên nhận này thành "đã dùng 5 vòng canon". Thẩm quyền lượt 4–5: chủ kho nâng trần 2 → 4 rồi cho phép lượt 5 (`ai_nang=ducthangho`).
+  - id: T125-RA-JOB-RIENG-DA-RUT-bi-504-thay-the
+    muc: P2
+    mo_ta: >-
+      Cả năm verdict chấm một bộ ba đặc tả có `T125-RA-JOB-RIENG`. Đặc tả ấy ĐÃ RÚT (`c960318`): `#504 WINDOWS-LEASE-SUITE` có lease sống cho đúng vấn đề ấy, bằng đường chủ kho chọn ở `#499` Q2.
+    phai_lam_gi_khi_chay_lai: >-
+      Mọi finding nhắm `T125` trong năm verdict là hồ sơ, không còn là việc phải làm. `#463` nay `depends_on: [wp502, wp504]`.
 khong_do_duoc:
   - 'model_da_chay của reviewer'
   - 'Số GitHub Actions trong hiện vật có phản ánh GitHub thật hay không (gói không có mạng)'

@@ -80,7 +80,12 @@ anchor:
   reviewed_base: b98531e256ea91e20f31b74ac6b9046e8fac8eed
   verdict_blob_commit: 9196eaf70ca0d908b8d23ff26512c4e395e1e997
 verdict_usage_caveats:
-  - T125-RA-JOB-RIENG-DA-RUT-bi-504-thay-the
+  - id: ANCHOR-cuong_do-trung_binh-vi-PR-CHUA-MERGE
+    muc: P2
+    mo_ta: >-
+      Năm biên nhận khai `anchor.cuong_do: trung_binh`, yếu hơn các biên nhận `cao` cùng thư mục: PR #508 chưa merge nên quan hệ tổ tiên mới ở trong NHÁNH.
+    phai_lam_gi_khi_chay_lai: >-
+      Land bằng merge commit hoặc fast-forward thì nâng được lên `cao`; SQUASH phá quan hệ ấy và làm cả 5 `reviewed_sha` thành SHA không tra được.
 khong_do_duoc:
   - 'model_da_chay của reviewer'
   - 'Số GitHub Actions trong hiện vật có phản ánh GitHub thật hay không (gói không có mạng)'

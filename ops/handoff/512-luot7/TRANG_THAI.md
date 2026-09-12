@@ -35,7 +35,15 @@ của packet này ĐÃ MẤT đúng theo đường đó. Thứ phiên sau cần 
 | tự kiểm bộ đo, **hai chiều** | bản CŨ `2/4` rc=1 · bản MỚI `4/4` rc=0 |
 | `doctrine-scan --root .` | rc=0, `7 tệp, 0 chỗ chép doctrine` |
 | `adr-song --root .` | rc=0, `47 ADR / 47 dòng §20` |
-| `git diff --numstat origin/master...HEAD` (2 đường) | **+1114 / −27** (`1076+32` · `6+0`) ⇒ `1114 ≤ 1500`, dư **386** |
+| `git diff --numstat origin/master...HEAD` (2 đường) | **+1101 / −27** (`1095` + `6`) ⇒ `1101 ≤ 1500`, dư **399** |
+
+> **ĐÍNH CHÍNH `N32-b` (vòng 8).** Bản đầu của hàng trên ghi `+1114/−27`, số hạng `1076+32`, dư `386`.
+> **Cả ba sai.** Số hạng thật: Python **1095**, shell **6**, tổng **1101**, dư **399**. HINT `+32/−13`
+> thay thế 13 dòng vốn đã là dòng THÊM của chính PR, nên cột "thêm" tăng **19**, không 32.
+> `418` (trong lease gen 1) là dư của head CŨ `353eae1` = `1500 − 1082` — đúng ở chỗ của nó.
+> Bài học: **hai quan hệ `1101 ≤ 1500` và `1101 > 300` vẫn ĐÚNG trong khi CẢ HAI số hạng đã SAI.**
+> Nó sống sót qua vòng 7 vì vòng 7 chỉ điểm danh con số nằm trong thông điệp commit, không quét tệp này.
+
 
 ### ĐIỀU KIỆN ĐO — đọc trước khi so số
 
@@ -93,7 +101,8 @@ in `str(ex)` nên danh tính lớp CHẾT ngay tại đó) ⇒ **thay đổi wri
 
 ## `A5` — đừng biến thành ô tích xanh
 
-Đặc tả đóng băng vẫn ghi `A5 ≤ 300` và **KHÔNG được sửa** (`§3.2`). `1114 > 300`. Trạng thái đúng:
+Đặc tả đóng băng vẫn ghi `A5 ≤ 300` và **KHÔNG được sửa** (`§3.2`). `1101 > 300` (đính chính `N32-b`;
+bản đầu ghi `1114`). Trạng thái đúng:
 **"KHÔNG ĐẠT ở ngưỡng 300, được chủ kho OVERRIDE lên 1500"**.
 
 ## Hạ tầng — đã đo trong container NÀY
@@ -117,7 +126,14 @@ in `str(ex)` nên danh tính lớp CHẾT ngay tại đó) ⇒ **thay đổi wri
 `verdict: changes_requested` · `so_p1: 1` · `so_p2: 0` · `so_p3: 0` · `so_the_hien: 38`
 `reviewed_sha: 36f68c7` · `reviewed_base: bb7013c` · không nộp HINT.
 
-Lượt chạy: phóng 13:10:20Z, `XONG VERDICT` 13:25:15Z (~8,5 phút), 24 280 byte, **0** chữ ký mất mạng.
+Lượt chạy: phóng 13:10:20Z, `XONG VERDICT` 13:25:15Z ⇒ **895 s = 14 phút 55 giây**, 24 280 byte,
+**0** chữ ký mất mạng.
+
+> **ĐÍNH CHÍNH `N37` (vòng 8).** Bản đầu ghi *"~8,5 phút"*. Hiệu hai mốc là **895 s ≈ 14,92 phút**.
+> Nguồn của `8,5`: bộ theo dõi in `~510s`, nhưng `510s` đếm **từ lúc bộ theo dõi bắt đầu**, không
+> từ lúc phóng. Tôi lấy số của một đồng hồ rồi gán cho khoảng của đồng hồ khác — đúng bệnh
+> **ghép sai lượt** mà `CLAUDE.md` đã tố cáo. Hai mốc `13:10:20Z`/`13:25:15Z` là **tự khai**,
+> chưa chứng thực độc lập; điều sai ở đây là chính **phép trừ nội tại**.
 Container KHÔNG recycle lần này — khác hẳn vòng 6 (phóng bốn lần).
 
 ## Bảy lớp sau vòng 7
@@ -126,7 +142,7 @@ Container KHÔNG recycle lần này — khác hẳn vòng 6 (phóng bốn lần)
 |---|---|---|
 | F1 · F3 · F4 · F5 | **ĐÃ VÁ THẬT**, không thoái lui | control mỗi ca `1/1`; mutant chết đúng chốt (phạm vi POSIX, **không** ngoại suy Windows) |
 | **F2** | **ĐÃ VÁ THẬT** | `N10` SỐNG ở `353eae1`, CHẾT ở `36f68c7` với `consumer t125 phải nối đủ bốn tệp vào đúng tee: []` |
-| **F7** | **ĐÃ VÁ THẬT** | `N01 N02 N12 N17 N18` — cùng phép biến đổi trên **hai head**: SỐNG 6/6 ở `353eae1`, CHẾT đúng chốt 6/6 ở `36f68c7` |
+| **F7** | **ĐÃ VÁ THẬT** | `N01 N02 N12 N17 N18` — **5/5** SỐNG ở `353eae1`, **5/5** CHẾT đúng chốt ở `36f68c7`. (ĐÍNH CHÍNH `N38`: bản đầu ghi `6/6` cho F7; tập ấy có **năm** phần tử — `6` là tổng F2+F7, vì `N10` thuộc **F2**.) |
 | **F6** | **VÁ HỜ, P1** | `F6.5` `StopIteration` vẫn được cấp `GIET THAT` · `F6.6` lời khai gói log không khớp · `F6.N01–N36` số bảng EVIDENCE bỏ sót |
 
 **`so_the_hien: 38` KHÔNG phải 38 lỗi thực thi** — reviewer nói rõ: 36 trong số đó là các con số bảng
@@ -165,7 +181,7 @@ chỉ có hai: `N31` và `N32` (xem dưới).
 
 ## Việc kế tiếp
 
-- **Vòng 8** để xác nhận `F6` đóng. Sẽ là **7/10** vòng sau khi phóng.
+- **Vòng 8** đã chạy ⇒ đã dùng **8/10** vòng. (ĐÍNH CHÍNH `N39`: bản đầu ghi *"sẽ là 7/10 sau khi phóng"* — `7/10` là trạng thái TRƯỚC lượt 8, sau khi phóng phải là **8/10**.)
 - **Lease gen 2 ĐÃ SOẠN nhưng CHƯA ĐẨY**: nhánh `ops/cap-lease-504`, commit cục bộ, bia mộ **hai chiều**
   đã khớp, `lease_publish.py check` ⇒ **`ĐĂNG ĐƯỢC` rc=0**. Còn thiếu **đúng một thứ**: URL chỉ thị bền của
   chủ kho cho `granted_on_instruction` và `nang_tran.can_cu`. Cổng **không** xác thực trường ấy, nên để
@@ -173,3 +189,71 @@ chỉ có hai: `N31` và `N32` (xem dưới).
   **Chú ý:** khối `nang_tran` của gen 1 tự bó phạm vi *"Chỉ lease …exec-1…, generation 1"*, nên gen 2
   **KHÔNG tự thừa hưởng** trần `S2=1500`; phải cấp LẠI. Đọc một override hết phạm vi thành còn hiệu lực
   chính là tự nâng trần.
+
+---
+
+# CẬP NHẬT — VÒNG 8 ĐÃ XONG, và F6 phải DỪNG VÁ
+
+`VERDICT.rvwin512-8.md` sha256 **`62d71e818c2d753a00e2e682c8dd844c53fa9eef5f7dc77a0efe94dd5c3f0cb2`**.
+`verdict: changes_requested` · `so_p1: 1` · `so_p2: 0` · `so_p3: 0` · `so_the_hien: 9` · không nộp HINT.
+Lượt chạy: phóng 13:36:19Z → `XONG VERDICT` 13:49:51Z ⇒ **813 s = 13 ph 33 s**, 21 430 byte, **0** chữ ký
+mất mạng. (Mốc đo từ `run.json`/`stat`, KHÔNG từ số của bộ theo dõi — xem `N37`.)
+
+## PR: SẠCH. Lớp còn mở nằm NGOÀI nó.
+
+| lớp | vòng 8 |
+|---|---|
+| F1 · F2 · F3 · F4 · F5 · F7 | **ĐÃ VÁ THẬT**, không thoái lui (phạm vi Linux; **không** ngoại suy Windows) |
+| **F6** (ngoài write set) | **VÁ SINH LỖI MỚI** |
+
+Lượt này reviewer **chạy được full wrapper độc lập** (nhờ gói `actionlint` offline đóng kèm — vòng 7
+`rc=4` vì sandbox không ra mạng): **`155/155` ở CHA, `[A]` và `[B]`**, 0 đỏ, 0 bỏ qua. Đây là **ba tổng
+kết dương của LƯỢT REVIEWER**, không phải log của tác giả. Và nhờ **ngoại lệ hẹp** cấp riêng cho lượt 8,
+reviewer tự chạy được `doctrine-scan` (`rc=0`, `7/0`) và `adr-song` (`rc=0`, `47/47`) — hai cổng mà vòng 7
+buộc phải trả `KHÔNG ĐO ĐƯỢC` chỉ vì lệnh của chúng đọc tệp trong danh sách cấm.
+
+## F6 — BA LẦN VÁ, BA LẦN MỘT HÌNH DẠNG. Đây là chỗ phải dừng.
+
+| lượt | bản vá | đường lọt lượt sau tìm ra |
+|---|---|---|
+| vòng 6 → 7 | cho tiền tố regex thành **tuỳ chọn** | `StopIteration` — không mang hậu tố `Error`/`Exception` |
+| vòng 7 → 8 | đo **hình dạng `main()` in ra**, `^[A-Za-z_][A-Za-z0-9_]*…: ` | `F6.7` tên lớp **Unicode** (`Bùng`) · `F6.8` thông điệp **RỖNG** (`Exception: ` → `.strip()` → `Exception:` → trượt `: `) |
+| — | — | **`F6.9` HỒI QUY**: chốt THẬT `t96: khớp đúng nghĩa…` bị xếp `TIN DUNG GIA`; bản vòng 6 nhận **đúng** |
+
+`F6.9` là điều quyết định, và reviewer phát biểu đúng bản chất: **hai miền chuỗi *"thông điệp assertion"*
+và *"tên lớp + thông điệp"* GIAO NHAU** — `t96: ` là tiền tố tên ca bình thường **đã có trong cây**, không
+phải chuỗi do reviewer bịa. Nên *"nới regex thêm nữa không tự giải quyết được sự nhập nhằng ấy"*.
+
+Cộng `F6.10`: chốt fail-close `_kiem_hop_dong_main` **có** răng khi còn nguyên, nhưng **tự kiểm không canh
+việc nó bị gỡ** — bỏ lời gọi vẫn `7/7` và catalogue vẫn `16/16`. Tức tôi đã dựng một chốt rồi **không đo
+chính chốt ấy**, đúng lỗi mà `CLAUDE.md` gọi là *"cửa không có mutant là cửa sẽ âm thầm hở lại"*.
+
+**`CLAUDE.md` có đúng luật cho tình huống này:** *"Đếm HÌNH DẠNG lỗi, đừng chỉ đếm lỗi: cùng một hình
+dạng lặp ba lần trở lên thì câu hỏi đúng là 'CÓ NÊN LÀM VIỆC NÀY KHÔNG', không phải 'vá thế nào'."*
+Ba lượt, cùng một hình dạng: **suy LÝ DO một mutant chết bằng cách phân tích CHUỖI trên stdout.**
+Kết luận: **kiến trúc sai, không phải bản vá sai.** Vá lần thứ tư sẽ mua thêm một thể hiện và một hồi quy.
+
+### Đường đúng — và nó đòi THẨM QUYỀN, nên phiên này DỪNG
+
+Cho `main()` phát một **dấu riêng, không giả được**, cho một LỚP TÍN HIỆU của ca đích, để bộ đo **không
+phải phân biệt chuỗi** nữa. Kho **đã có** `TinHieuChotCa(AssertionError)` (`ops/lease_publish_test.py:4328`)
+với đúng chú thích *"không `except` nào trong mã sản phẩm hay fixture dựng được nó"* — nhưng nó chỉ dùng
+cho khối `A0`/`t139`, và **`main()` bắt `AssertionError` rồi in `str(ex)`** nên danh tính lớp **chết ngay
+tại đó**.
+
+Đó là **thay đổi write set** (`ops/lease_publish_test.py`) ⇒ cần lease còn hiệu lực **và** quyết định của
+chủ kho, vì nó mở rộng phạm vi packet ở vòng 8/10. Lease gen 1 hết `2026-09-12T14:05:00Z`; gen 2 đã soạn
+nhưng **chưa đẩy** (thiếu URL chỉ thị). **Phiên này KHÔNG tự làm.**
+
+Ba lựa chọn để chủ kho chọn, xếp theo mức xâm phạm:
+1. **Dời F6 sang packet RIÊNG.** `dotbien512.py` là bộ đo, không phải sản phẩm; F6 chưa từng chặn PR #512
+   ở bất kỳ vòng nào. PR #512 có thể land với F6 khai thành nợ có tên.
+2. **Cấp gen 2 + cho phép sửa `main()`** để phát dấu riêng ⇒ đóng F6 theo KIẾN TRÚC, nhưng thêm dòng vào
+   write set ở vòng 8/10 và đòi một vòng review nữa.
+3. **Chấp nhận bộ đo ở trạng thái vòng 6** (đóng `Exception`/`Error` trần, nhận đúng chiều chốt thật) và
+   khai ba thể hiện còn lại là nợ. Bản vòng 8 của tôi **tệ hơn** bản vòng 6 ở chiều dương (`F6.9`), nên
+   nếu chọn hướng này thì phải **lùi** về `dotbien512_VA_VONG6.py`, không giữ bản mới.
+
+**Khuyến nghị: (1).** F6 là công cụ đo, nằm ngoài write set, và ba vòng liền nó là lớp P1 duy nhất giữ
+một PR mà mọi lớp sản phẩm đã `ĐÃ VÁ THẬT` và CI xanh. Giữ nó trong packet này là để một khuyết tật của
+**thước đo** chặn một **bản vá đã được thước đo ấy chứng minh là tốt**.

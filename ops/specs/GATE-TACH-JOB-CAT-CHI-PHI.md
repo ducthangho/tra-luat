@@ -1,11 +1,12 @@
-# Đặc tả packet — GATE-TACH-JOB-CAT-CHI-PHI (revision 15)
+# Đặc tả packet — GATE-TACH-JOB-CAT-CHI-PHI (revision 16)
 
 - `packet_id`: **GATE-TACH-JOB-CAT-CHI-PHI**; ID bền theo `PROTOCOL §3.2` là `wp<packet_issue>`.
 - `packet_issue`: **#463**
 - `mission_issue`: **#467** (*"bốn packet treo sau #456: GATE → LO-319 → 2A → 2B"*)
 - `revision`: **15** · `generation`: 1 · soạn **11:3xZ 11-09-2026**; `A5` r13 **10:0xZ 12-09-2026**;
   r14 (A8 400 + F03/F04/F05) **11:4xZ 12-09-2026**; r15 (F04 lượt 2 — **XOÁ** câu bị thay thay vì
-  nối thêm đính chính) **13:5xZ 12-09-2026**
+  nối thêm đính chính) **13:5xZ 12-09-2026**; r16 (`R3-F04` lượt 3 — cửa THỨ BA của cùng lớp ấy ở
+  `A5`, ánh xạ manifest hai lane của `A2`, và bẫy `on:` là boolean ở `A3(3)`) **14:2xZ 12-09-2026**
 - `depends_on`: **`[wp502, wp504]`** — xem `write_set`. **`wp504`** là `WINDOWS-LEASE-SUITE` (lease
   sống, cấp `14:05Z 11-09-2026`), **KHÔNG** còn là `T125-RA-JOB-RIENG`: đặc tả ấy đã **RÚT** vì `#504`
   nhận cùng vấn đề bằng đường chủ kho chọn (song song hoá `t125` trong bộ test, giữ nguyên ngữ nghĩa)
@@ -297,6 +298,12 @@ job biến mất trên mọi PR. Thay bằng **ba phép so**:
      `gate` — nửa này bắt đúng ca nửa trên bỏ sót.
 3. **mức workflow**: `on:` và `concurrency:` không đổi một ký tự (so chuỗi sau
    `yaml.safe_load` + `safe_dump`).
+   **BẪY, đo được:** YAML 1.1 coi `on` là **BOOLEAN**, nên sau `yaml.safe_load` khoá là `True`,
+   **không** phải chuỗi `"on"`. Ai viết đúng từng chữ câu trên — `d.get("on")` — nhận `None` ở
+   **cả hai** vế và phép so **luôn ĐẠT** kể cả khi `on:` bị sửa. Đó chính là lỗi *"bằng nhau TỰ
+   CHỨNG MINH"* mà `A5(a)` cấm, chỉ đổi chỗ. Đọc khoá `True` (hoặc so RAW text).
+   **Phản chứng BẮT BUỘC:** sửa `on:` rồi chạy `(3)` — phải ĐỎ. Không có nó thì không phân biệt
+   được *"so đúng"* với *"so hai `None`"*.
 
 **Chốt cứng `actionlint`, đo bằng TẬP CHẨN ĐOÁN, không bằng `rc`.** Chạy `actionlint` trên `ci.yml`
 của `origin/master` và của nhánh packet trong **CÙNG một lệnh, CÙNG môi trường**; ghi phiên bản
@@ -427,7 +434,10 @@ GIÁ TRỊ sau.**
 
   **Vì sao (f) một mình không đủ:** (f) sửa ca *job hỏng CÓ TRONG mẫu*, không sửa ca *job VẮNG khỏi
   mẫu* — mà ca thứ hai mới là ca cho ra **tổng thấp giả**.
-  **Phép làm ĐỎ cho (a)–(e):** bỏ một job Windows khỏi mẫu ⇒ `A5` phải `KHÔNG ĐO ĐƯỢC`.
+  **Phép làm ĐỎ cho (a)–(e):** bỏ một instance khỏi mẫu ⇒ `A5` phải `KHÔNG ĐO ĐƯỢC` — instance
+  nào thì theo `(4)`, **không** ghi cứng *"một job Windows"*. Trên lane PR ubuntu-only, bỏ một job
+  Windows là **phép không đổi dữ liệu** (đo được: `removed = 0`, `equality = True`) nên ca ấy
+  không thể làm tiêu chí đỏ; bỏ một instance đang tồn tại thì `removed = 1`, `equality = False`.
 
 **(2)** Lượt **SAU tách** phải hợp lệ theo (1), rồi công bố `Σ(phút job × hệ số nền)`.
 **(3)** Lượt **TRƯỚC** — nền để so — phải hợp lệ theo (1) **và** thoả `(6)`: hoặc **sinh lại** tại
@@ -474,10 +484,13 @@ lane PR không nhãn `windows` có **0** job Windows nên phép ấy **không đ
 làm tiêu chí đỏ. Đo được: PR `expected = 3`, bỏ Windows xoá **0** instance, `equality = True`; đối
 chứng dispatch `expected = 6`, bỏ **1** ⇒ `equality = False`.
 
-**(5) MỖI LANE MỘT MANIFEST — `A2` và `A5` KHÔNG dùng chung.** Mỗi tiêu chí có manifest **của lane
-mình** (`run_id`, `run_attempt`, tập job, SHA định nghĩa workflow). Ràng buộc *"cùng một mẫu"* áp
-**trong** một lane, **không** bắc cầu giữa hai lane — `A2` đọc lane dispatch, `A5` đọc lane PR, nên
-một manifest dùng chung sẽ buộc một trong hai đọc mẫu của lane kia.
+**(5) MỘT MANIFEST CHO MỖI `(tiêu chí, lane, trước/sau)` — `A2` và `A5` KHÔNG dùng chung.** Mỗi
+manifest ghi `run_id`, `run_attempt`, tập job, SHA định nghĩa workflow. Ràng buộc *"cùng một mẫu"*
+áp **trong** một ô ấy, **không** bắc cầu sang ô khác.
+**Khoá đúng số ô, vì bản r15 đầu ghi *"`A2` đọc lane dispatch"* và như thế là bỏ mất nửa nghĩa vụ
+của `A2`** (cross-review lượt 3 `R3-F04`): `A2` đo trên **CẢ HAI** lane (xem `A2`), `A5` chỉ lane
+PR ⇒ **6** ô cho `A2` (2 lane × trước/sau, trong đó cặp dispatch có thể là `KHÔNG ĐO ĐƯỢC` theo
+`A1`) và **2** ô cho `A5`. Một manifest dùng chung sẽ buộc một ô đọc mẫu của ô khác.
 
 **(6) Nền `A5` KHÔNG được công nhận chỉ vì `ci.yml` bằng byte.** Tải do **cả cây** quyết định, không
 chỉ định nghĩa workflow. Nền hợp lệ khi **một trong hai**: (a) sinh lại tại đúng `start_from_sha`

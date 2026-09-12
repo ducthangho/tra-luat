@@ -1428,7 +1428,10 @@ except Exception       as ex: hong.append((fn.__name__, f"{type(ex).__name__}: {
 ```
 
 Bộ đo chạy **ngoài tiến trình**, chỉ đọc **CHUỖI** trên stdout, nên nó phải **suy** xem một mutant
-chết vì chốt của ca đích hay vì một ngoại lệ vô can — tức phân biệt hai hình dạng trên **bằng văn bản**.
+chết vì chốt của ca đích hay vì một ngoại lệ vô can — tức phân biệt các hình dạng trên **bằng văn bản**.
+**Và `main()` có BA nhánh, không phải hai** (đính chính vòng 9): `except BoQuaNen` in một chuỗi **cố
+định** không mang tên kiểu, nên nó không thuộc cả hai hình dạng ở trên. Mô hình "hai hình dạng" của
+bản trước là **thiếu**, và chính chỗ thiếu ấy sinh ra lời khai sai ở mục dưới.
 Cấp tín dụng cho một ngoại lệ vô can là cấp `GIET THAT` khống, và con số `N/N` trở thành lời khai rỗng.
 
 ### Đo được — ba lượt, cùng một hình dạng
@@ -1453,18 +1456,31 @@ Phép đo ba bản trên **cùng một bộ 10 control** (dựng trong MỘT l�
 Hai câu hỏi khác nhau, đừng gộp: *"bản vá ấy có sinh lỗi mới không"* (**có** — reviewer đúng) và
 *"trong ba hiện vật đã đo, giữ cái nào làm mặc định"*. Phép đo quyết định câu thứ hai:
 
-- **`v6` cấp tín dụng giả cho CẢ BỐN lớp ngoại lệ của chính kho** — `BoQuaNen`, `Chan`, `HetNganSachDay`,
-  `TinHieuChotCa` — vì không tên nào mang hậu tố `Error`/`Exception`. `Chan` là lớp mà
-  `ops/lease_publish.py` ném **khắp nơi**, nên đó không phải ca lý thuyết. Đo ghim trên blob
-  `13a2af8c…` của `36f68c7`: `v6` bỏ sót **4/4**, `v8` bắt **4/4** (bỏ sót **0/4**).
+- **Lời khai "4/4" của bản trước SAI, và vòng 9 bác đúng chỗ.** Tôi khớp regex với một chuỗi **tự ghép**
+  (`f"{ten}: m"`) thay vì **chạy lớp ngoại lệ thật qua `main()`** — đúng lỗi *"nghĩ ra được phép thử mà
+  KHÔNG CHẠY nó thì phép thử ấy không tồn tại"*. Reviewer chạy thật; tôi đã kiểm lại và xác nhận:
 
-  > **ĐÍNH CHÍNH.** Bản đầu của dòng này ghi **3/3** và liệt kê ba lớp. Sai: bộ lọc base class của
-  > phép đo đầu bỏ mất `HetNganSachDay`. Đo lại bằng cách **ghim blob** (`git show 36f68c7:…`) thay vì
-  > tin cây đang checkout ⇒ **4**. Kết luận không đổi, chỉ mạnh hơn.
+  | lớp ném trong ca | `main()` thật đi nhánh nào | `v6` | `v8` |
+  |---|---|---|---|
+  | `BoQuaNen` | nhánh **RIÊNG** `except BoQuaNen` ⇒ in chuỗi cố định `bỏ qua không dẫn xuất được từ runs-on` | lọt | **lọt** |
+  | `Chan` | `except Exception` ⇒ in tên kiểu | lọt | loại đúng |
+  | `HetNganSachDay` | `except Exception` ⇒ in tên kiểu | lọt | loại đúng |
+  | `TinHieuChotCa` | con của `AssertionError` ⇒ in `str(ex)`, mất tên kiểu | lọt | **lọt** |
+
+  Nên `v8` loại **2/4**, không phải 4/4. **Và đếm `TinHieuChotCa` vào đây vốn đã SAI**: nó **LÀ** lớp tín
+  hiệu của ca đích, nên nhận nó là `GIET THAT` là **đúng đáp án**, không phải tín dụng giả. Trên **ba**
+  lớp vô can thật: `v6` lọt **3/3**, `v8` lọt **1/3**.
 - Tập lọt của `v6` là **KHÔNG BIÊN**: "mọi lớp thiếu hậu tố". Tập lọt của `v8` nhỏ hơn, và hồi quy của nó
-  **ĐẾM ĐƯỢC**: `8` trong `454` lời gọi `bang()`/`chot()` của tệp test trùng hình dạng `^<định danh>: `,
-  trải trên **4 ca** — `t96` (4 thông điệp), `t133`, `t136`, `t151`. Ai dùng bộ đo trên bốn ca ấy phải
-  biết trước.
+- **Và lời khai "hồi quy CÓ BIÊN 8/454, bốn ca" cũng SAI — biên ấy không tồn tại.** Mẫu số thật là
+  **493** lời gọi `bang()`/`chot()`; bộ lọc của tôi chỉ đọc được **454** và **bỏ 39** lời gọi có **tiền
+  tố ĐỘNG**. Vòng 9 tìm ra `t131` là ca va chạm **thứ năm**; đo lại cho đủ thì trong 39 lời gọi ấy có
+  **21** mang đúng hình dạng va chạm `f"{x}: …"`, trải trên **7 ca nữa** (`t23 t26 t27 t126 t127 t131
+  t133`). Hợp lại: **≥29 lời gọi trên ≥10 ca**, và 21 cái **phụ thuộc giá trị lúc chạy** nên **không
+  quyết định được tĩnh**.
+
+  ⇒ **RÚT lời khai "có biên".** Cả `v6` lẫn `v8` đều có miền khuyết tật **KHÔNG CÓ BIÊN**, chỉ ngược
+  chiều nhau. Lựa chọn `v8` đứng trên **một mẫu đã đo** (3 lớp vô can thật: lọt `1/3` so `3/3`), **không
+  phải** một phép chứng minh tối ưu trên toàn miền — và vòng 9 nói đúng như vậy.
 - **False GREEN nguy hơn false RED.** Một `GIET THAT` khống là lời khai an toàn sai; một `TIN DUNG GIA`
   khống làm catalogue **ĐỎ**, tức ồn ào và có người đi điều tra.
 
@@ -1515,7 +1531,9 @@ tư** trên cùng hình dạng, và vẫn để lại một lớp lọt cộng m
    `t96`.
 3. Có **mutant RIÊNG cho chính chốt mới**: gỡ nó ra thì một ca đích phải ĐỎ. Thiếu điều này thì lặp lại
    `F6.10`.
-4. Bảng `8/454` ở trên đo lại còn **0** — tức không thông điệp chốt nào còn trùng hình dạng dấu hiệu.
+4. Phân hạng **không còn đọc nội dung thông điệp** — nên phép đếm va chạm hình dạng chuỗi trở thành
+   **không liên quan**, chứ không phải "về 0". (Đính chính vòng 9, `F9.1`: đòi con số ấy về 0 là đo sai
+   đại lượng, vì `M2`/`M6` bỏ hẳn việc đọc chuỗi.)
 
 **Đây là thay đổi write set** (`ops/lease_publish_test.py`) ⇒ cần packet riêng và lease riêng. Chủ kho đã
 quyết **dời F6 ra khỏi `#504`** (chỉ thị #504 comment `5646460376`), và `#504` land với mục này là nợ.

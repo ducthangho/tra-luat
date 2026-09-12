@@ -88,7 +88,9 @@ chỉ để lại `GeneratorExit`, `KeyboardInterrupt`, `SystemExit`, và **mọ
 
 ## Bản vá thứ hai — ĐẢO CHIỀU phép đo
 
-Thôi đoán TÊN; đo **HÌNH DẠNG mà `main()` thật sự in ra**. `main()` có đúng hai nhánh:
+Thôi đoán TÊN; đo **HÌNH DẠNG mà `main()` thật sự in ra**. Hai nhánh dưới đây là hai nhánh **liên quan**
+— nhưng **`main()` có BA** (đính chính vòng 9): còn `except BoQuaNen` in một chuỗi **cố định** không mang
+tên kiểu. Bỏ sót nhánh thứ ba là gốc của lời khai sai ở §CHỐT SAU VÒNG 8 dưới đây:
 
 ```
 except AssertionError as ex: hong.append((fn.__name__, str(ex)))                        <- CHỐT ca đích
@@ -173,14 +175,30 @@ Vòng 8 xếp bản vá `v8` là **`VÁ SINH LỖI MỚI`**, và **đúng**: nó
 Nhưng đó là câu hỏi *"bản vá có sinh lỗi mới không"*, khác câu hỏi *"trong ba hiện vật đã đo, giữ cái nào
 làm mặc định"*. Phép đo trả lời câu thứ hai:
 
-- **`v6` cấp tín dụng giả cho CẢ BỐN lớp ngoại lệ của chính kho** — `BoQuaNen`, `Chan`,
-  `HetNganSachDay`, `TinHieuChotCa`. `Chan` là lớp `ops/lease_publish.py` ném **khắp nơi**.
-  Đo ghim blob `13a2af8c…`: `v6` bỏ sót **4/4**, `v8` bỏ sót **0/4**.
-  (**ĐÍNH CHÍNH**: bản đầu ghi `3/3` — bộ lọc base class bỏ mất `HetNganSachDay`; đo lại bằng
-  `git show 36f68c7:…` thay vì tin cây đang checkout.)
-- Tập lọt của `v6` **không có biên** ("mọi lớp thiếu hậu tố"); hồi quy của `v8` thì **đếm được**:
-  **`8` trong `454`** lời gọi `bang()`/`chot()` trùng hình dạng `^<định danh>: `, trải trên **4 ca** —
-  `t96` (4 thông điệp), `t133`, `t136`, `t151`.
+- **Lời khai "4/4" của bản trước SAI, và vòng 9 bác đúng chỗ.** Tôi khớp regex với một chuỗi **tự ghép**
+  (`f"{ten}: m"`) thay vì **chạy lớp ngoại lệ thật qua `main()`** — đúng lỗi *"nghĩ ra được phép thử mà
+  KHÔNG CHẠY nó thì phép thử ấy không tồn tại"*. Reviewer chạy thật; tôi đã kiểm lại và xác nhận:
+
+  | lớp ném trong ca | `main()` thật đi nhánh nào | `v6` | `v8` |
+  |---|---|---|---|
+  | `BoQuaNen` | nhánh **RIÊNG** `except BoQuaNen` ⇒ in chuỗi cố định `bỏ qua không dẫn xuất được từ runs-on` | lọt | **lọt** |
+  | `Chan` | `except Exception` ⇒ in tên kiểu | lọt | loại đúng |
+  | `HetNganSachDay` | `except Exception` ⇒ in tên kiểu | lọt | loại đúng |
+  | `TinHieuChotCa` | con của `AssertionError` ⇒ in `str(ex)`, mất tên kiểu | lọt | **lọt** |
+
+  Nên `v8` loại **2/4**, không phải 4/4. **Và đếm `TinHieuChotCa` vào đây vốn đã SAI**: nó **LÀ** lớp tín
+  hiệu của ca đích, nên nhận nó là `GIET THAT` là **đúng đáp án**, không phải tín dụng giả. Trên **ba**
+  lớp vô can thật: `v6` lọt **3/3**, `v8` lọt **1/3**.
+- **Và lời khai "hồi quy CÓ BIÊN 8/454, bốn ca" cũng SAI — biên ấy không tồn tại.** Mẫu số thật là
+  **493** lời gọi `bang()`/`chot()`; bộ lọc của tôi chỉ đọc được **454** và **bỏ 39** lời gọi có **tiền
+  tố ĐỘNG**. Vòng 9 tìm ra `t131` là ca va chạm **thứ năm**; đo lại cho đủ thì trong 39 lời gọi ấy có
+  **21** mang đúng hình dạng va chạm `f"{x}: …"`, trải trên **7 ca nữa** (`t23 t26 t27 t126 t127 t131
+  t133`). Hợp lại: **≥29 lời gọi trên ≥10 ca**, và 21 cái **phụ thuộc giá trị lúc chạy** nên **không
+  quyết định được tĩnh**.
+
+  ⇒ **RÚT lời khai "có biên".** Cả `v6` lẫn `v8` đều có miền khuyết tật **KHÔNG CÓ BIÊN**, chỉ ngược
+  chiều nhau. Lựa chọn `v8` đứng trên **một mẫu đã đo** (3 lớp vô can thật: lọt `1/3` so `3/3`), **không
+  phải** một phép chứng minh tối ưu trên toàn miền — và vòng 9 nói đúng như vậy.
 - **False GREEN nguy hơn false RED**: một `GIET THAT` khống là lời khai an toàn SAI; một `TIN DUNG GIA`
   khống làm catalogue **ĐỎ**, tức ồn ào và có người điều tra.
 

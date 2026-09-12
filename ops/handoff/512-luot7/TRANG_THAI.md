@@ -196,7 +196,8 @@ chỉ có hai: `N31` và `N32` (xem dưới).
 
 `VERDICT.rvwin512-8.md` sha256 **`62d71e818c2d753a00e2e682c8dd844c53fa9eef5f7dc77a0efe94dd5c3f0cb2`**.
 `verdict: changes_requested` · `so_p1: 1` · `so_p2: 0` · `so_p3: 0` · `so_the_hien: 9` · không nộp HINT.
-Lượt chạy: phóng 13:36:19Z → `XONG VERDICT` 13:49:51Z ⇒ **813 s = 13 ph 33 s**, 21 430 byte, **0** chữ ký
+Lượt chạy: phóng 13:36:19Z → `XONG VERDICT` 13:49:51Z ⇒ **812 s = 13 ph 32 s**, 21 430 byte, **0** chữ ký
+(ĐÍNH CHÍNH `N40` vòng 9: bản đầu ghi `813 s = 13 ph 33 s`; hiệu đúng là **812 s**.)
 mất mạng. (Mốc đo từ `run.json`/`stat`, KHÔNG từ số của bộ theo dõi — xem `N37`.)
 
 ## PR: SẠCH. Lớp còn mở nằm NGOÀI nó.
@@ -299,7 +300,20 @@ thử đăng lại nó và ĐỎ. `.github/workflows/**` **ngoài write set** (`
 - Issue packet: **#530** · spec đóng băng `ops/specs/CHAM-DOT-BIEN-MIEN-NHIEM-LEASE-SUITE.md`
   sha256 `5fcc14b5e33ecf130172bc1cafbb0ca229ddae8363069284eba5fcca49602781`. **Chưa có lease.**
 - **Hoá ra là một PORT**: kiến trúc đã land ở **#513** (closed-completed), và `#513` loại
-  `ops/lease_publish_test.py` khỏi phạm vi **vì `#504` giữ nó**. F6 là hệ quả đoán được.
+  `ops/lease_publish_test.py` khỏi phạm vi **vì một packet KHÁC đang giữ nó**. F6 là hệ quả đoán được.
+
+  > **ĐÍNH CHÍNH `N42` (vòng 9).** Bản đầu ghi *"vì `#504` giữ nó"* — **dẫn sai chủ thể**. Tệp spec thật
+  > (`ops/specs/CHAM-DOT-BIEN-MIEN-NHIEM-CA-VO-CAN.md:129`) ghi **`#503`** giữ, lease
+  > `m9-fetch-auth-exec-1-claude-20260911`, và phân việc `t125` sang packet `T125-RA-JOB-RIENG`.
+  >
+  > **Và có một chỗ lệch đáng báo, không phải lỗi của tôi:** thân **Issue `#513`** ghi
+  > `ops/lease_publish_test.py (#504 giữ)`, còn **tệp spec** ghi `#503`. Hai hiện vật của cùng một packet
+  > **nói khác nhau**. Tôi chép theo Issue rồi **quy cho tệp spec** — đó là lỗi dẫn nguồn của tôi. Nhưng
+  > việc hai hiện vật lệch nhau là chuyện của `#513`, nên khai ra đây để người giữ biết.
+  >
+  > Điều **không** đổi: exclusion có thật, và `ops/lease_publish_test.py` bị loại khỏi phạm vi `#513` vì
+  > một lease của packet khác đang giữ nó. Suy luận *"F6 là hệ quả của một write-set exclusion"* đứng
+  > vững; chỉ **chủ thể** của exclusion là `#503`, không phải `#504`.
 
 ### Bản bộ đo mặc định — chọn BẰNG PHÉP ĐO, và phép đo BÁC dự đoán của kế hoạch
 
@@ -313,9 +327,19 @@ ra) ⇒ **giữ `v8`**:
 | **`v8` (mặc định)** | `7/10` | **2** | **1** |
 
 Lý do quyết định: **cả BỐN** lớp ngoại lệ của chính kho — `BoQuaNen`, `Chan`, `HetNganSachDay`,
-`TinHieuChotCa` — đều thiếu hậu tố `Error`/`Exception`, nên `v6` cấp tín dụng giả **4/4**, `v8` bắt
-**4/4**. `Chan` là lớp `ops/lease_publish.py` ném khắp nơi. Tập lọt của `v6` **không có biên**; hồi quy
-của `v8` **đếm được**: `8/454` assertion, 4 ca (`t96 t133 t136 t151`).
+`TinHieuChotCa` — đều thiếu hậu tố `Error`/`Exception`.
+
+> **ĐÍNH CHÍNH vòng 9 (`F6.11`, `F6.12`) — hai con số trên SAI, và đây là chỗ tôi sai nặng nhất lượt này.**
+> Tôi khớp regex với chuỗi **tự ghép** thay vì **chạy lớp thật qua `main()`**. Chạy thật:
+> `main()` có **BA** nhánh — `except BoQuaNen` in chuỗi **cố định** nên `BoQuaNen` **lọt cả hai bản**; và
+> `TinHieuChotCa` là con của `AssertionError` nên cũng lọt cả hai — mà **đếm nó vào đây vốn đã sai**, vì nó
+> **LÀ** lớp tín hiệu. Nên `v8` loại **2/4**, không phải `4/4`; trên **ba** lớp vô can thật thì `v6` lọt
+> **3/3**, `v8` lọt **1/3**.
+> Và **biên `8/454` không tồn tại**: mẫu số thật **493**, bộ lọc bỏ **39** lời gọi tiền tố ĐỘNG; trong đó
+> **21** mang hình dạng va chạm `f"{x}: …"` trên **7 ca nữa** (`t23 t26 t27 t126 t127 t131 t133`) ⇒
+> **≥29 lời gọi / ≥10 ca**, phần lớn **không quyết định được tĩnh**. **RÚT** lời khai "có biên": cả hai bản
+> đều có miền khuyết tật **không có biên**, chỉ ngược chiều. Giữ `v8` là lựa chọn trên **một mẫu đã đo**,
+> KHÔNG phải phép chứng minh tối ưu.
 
 Bộ đo được giao ở trạng thái **TỰ BÁO ĐỎ** (`7/10`, `rc=1`) — **cố ý**: bộ control kèm cả ba ca nó xử
 sai, nên mỗi lần tự kiểm là một lần khuyết tật tự khai.

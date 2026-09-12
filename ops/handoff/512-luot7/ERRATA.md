@@ -36,3 +36,37 @@ ai dừng, vì soi tính nhất quán nội tại thì câu ấy **sạch hoàn 
 
 `CLAUDE.md` đã ghi chính bài học này (`117/100 chênh 10`). Nó vẫn bắt được tôi. Chốt thực hành:
 **khi một câu vừa nêu số hạng vừa nêu quan hệ giữa chúng, kiểm SỐ HẠNG — quan hệ là thứ sống sót qua trôi số.**
+
+---
+
+# BỔ SUNG SAU VÒNG 9 — bốn lời khai nữa, và cả bốn cùng MỘT nguyên nhân
+
+| ID | nơi lời khai sai NẰM | khai sai | ĐÚNG | đã xử |
+|---|---|---|---|---|
+| `F6.11` | `F6-HO-SO.md` · `NO_KY_THUAT.md §23` · `TRANG_THAI.md` · spec `#530` rev 1 | `main()` có **hai** hình dạng in; `v6` lọt `4/4`, `v8` bắt `4/4` | `main()` có **BA** nhánh; `v8` loại **2/4**; trên **3** lớp vô can thật: `v6` lọt `3/3`, `v8` lọt `1/3` | sửa tại chỗ + spec lên **revision 2** |
+| `F6.12` | cùng bốn nơi | hồi quy `v8` **có biên** `8/454`, 4 ca | mẫu số **493**; thêm **21** lời gọi tiền tố ĐỘNG trên **7 ca nữa** ⇒ **≥29 / ≥10 ca**, không quyết định được tĩnh. **RÚT** lời khai "có biên" | sửa tại chỗ |
+| `N40` | `TRANG_THAI.md` | vòng 8 dài **813 s** | **812 s** | sửa tại chỗ |
+| `N42` | `TRANG_THAI.md` | exclusion của `#513` là *"`#504` giữ"* | tệp spec ghi **`#503`**, lease `m9-fetch-auth-exec-1-claude-20260911` | sửa tại chỗ |
+
+## Một nguyên nhân, không phải bốn lỗi rời
+
+`F6.11` và `F6.12` cùng sinh từ **một** việc: tôi khớp regex với một **chuỗi TỰ GHÉP** (`f"{ten}: m"`)
+thay vì **chạy lớp ngoại lệ thật qua `main()`**. Reviewer chạy thật và thấy ngay nhánh
+`except BoQuaNen` mà mô hình của tôi không có.
+
+Đó đúng lỗi `CLAUDE.md` gọi là *"NGHĨ RA được phép thử mà KHÔNG CHẠY nó thì phép thử ấy KHÔNG TỒN TẠI"* —
+và trớ trêu là tôi mắc nó **ngay trong** một packet mà cả nội dung là về việc bộ đo nói dối. Tôi viết ra
+một phép đo, thấy nó hợp lý, rồi **không chạy nó qua đường thật**.
+
+`N42` là mặt khác của cùng thói: tôi chép con số từ **thân Issue** rồi **quy cho tệp spec**, không mở tệp
+spec ra đọc. (Và lần này còn phát hiện thêm: **thân `#513` ghi `#504`, tệp spec ghi `#503`** — hai hiện
+vật của cùng packet lệch nhau. Lỗi dẫn nguồn là của tôi; chỗ lệch là của `#513`, đã khai để người giữ biết.)
+
+`N40` thì thuần cẩu thả: shell in `812s`, tôi viết `813 s`.
+
+## Chốt rẻ, và nó là chốt duy nhất bắt được cả hai lớp trên
+
+**Đừng khớp một phép đo với dữ liệu bạn tự dựng. Chạy nó qua đúng đường mà thứ thật sẽ đi.**
+Với bộ đo này, "đường thật" nghĩa là: ném ngoại lệ **trong thân một ca**, để `main()` **thật** in ra, rồi
+để **nguyên chương trình bộ đo** phân hạng. Mọi con số không đi qua đường ấy là **phỏng đoán**.
+Spec `#530` revision 2 nay đặt đúng điều này thành ràng buộc của packet.

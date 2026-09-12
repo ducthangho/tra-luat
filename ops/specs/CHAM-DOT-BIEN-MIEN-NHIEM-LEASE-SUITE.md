@@ -1,9 +1,10 @@
-# Đặc tả packet — `CHAM-DOT-BIEN-MIEN-NHIEM-LEASE-SUITE` (revision 1)
+# Đặc tả packet — `CHAM-DOT-BIEN-MIEN-NHIEM-LEASE-SUITE` (revision 2)
 
 - `packet_id`: **`CHAM-DOT-BIEN-MIEN-NHIEM-LEASE-SUITE`**; ID bền theo `PROTOCOL §3.2` là `wp<packet_issue>`.
 - `packet_issue`: **(để trống — chủ kho cấp)**
 - `mission_issue`: **(để trống — chủ kho cấp)**
-- `revision`: **1** · `generation`: 1 · soạn **14:4xZ 12-09-2026**
+- `revision`: **2** · `generation`: 1 · soạn **14:4xZ**, sửa **15:0xZ 12-09-2026** sau cross-review vòng 9
+  của PR #512 (`F6.11` · `F6.12` · `F9.1` · `N42`). Revision 1 có **ba** lời khai SAI — xem `§dinh_chinh`.
 - `depends_on`: **`[]`** — bản mẫu đã LAND trên `master`, không chờ gì.
 - `executor`: claude · `environment`: cloud
 - `risk`: **sensitive** · `review_class`: **sensitive**
@@ -21,12 +22,17 @@ Verdict có băm: `ops/handoff/512-luot7/VERDICT.rvwin512-{6,7,8}.md`.
 
 Bộ đo đột biến `ops/handoff/512-luot7/dotbien512.py` chạy **ngoài tiến trình** và chỉ đọc **CHUỖI** trên
 stdout, nên nó phải **suy** xem một mutant chết vì chốt của ca đích hay vì một ngoại lệ vô can.
-`ops/lease_publish_test.py::main()` in hai hình dạng:
+`ops/lease_publish_test.py::main()` có **BA** nhánh `except`, in **ba** hình dạng khác nhau:
 
 ```
-except AssertionError as ex: hong.append((fn.__name__, str(ex)))                        # CHỐT ca đích
-except Exception       as ex: hong.append((fn.__name__, f"{type(ex).__name__}: {ex}"))  # VÔ CAN
+except BoQuaNen       as ex: hong.append((fn.__name__, "bỏ qua không dẫn xuất được từ runs-on"))  # CHUỖI CỐ ĐỊNH
+except AssertionError as ex: hong.append((fn.__name__, str(ex)))                                 # CHỐT ca đích
+except Exception      as ex: hong.append((fn.__name__, f"{type(ex).__name__}: {ex}"))            # VÔ CAN
 ```
+
+Nhánh thứ nhất in một chuỗi **cố định, không mang tên kiểu**, nên nó **không thuộc** hai hình dạng kia.
+Revision 1 mô hình hoá `main()` thành *"hai hình dạng"* và **bỏ sót nhánh này** — đó là gốc của hai lời
+khai sai mà vòng 9 bác.
 
 **Ba lượt vá, ba lượt cùng một hình dạng** (chi tiết + log: `ops/NO_KY_THUAT.md` §23):
 
@@ -47,9 +53,17 @@ Phép đo ba bản trên **cùng 10 control**, dựng trong **MỘT lệnh**, kh
 ### Vì sao KHÔNG vá tiếp — lý do CẤU TRÚC
 
 Hai miền chuỗi *"thông điệp assertion"* và *"tên lớp + thông điệp"* **GIAO NHAU**. Đo ghim trên blob
-`13a2af8c…` của `36f68c7`: **`8` trong `454`** lời gọi `bang()`/`chot()` của tệp test trùng hình dạng
-`^<định danh>: `, trải trên **4 ca** — `t96` (4 thông điệp), `t133`, `t136`, `t151`. Đó là tiền tố tên ca
-**bình thường, có sẵn trong cây**. Một phép đo trên chuỗi **không thể** tách hai miền giao nhau.
+`13a2af8c…` của `36f68c7`, mẫu số **493** lời gọi `bang()`/`chot()`:
+
+- **8** lời gọi có **tiền tố TĨNH** trùng hình dạng `^<định danh>: `, trên **4 ca** — `t96` (4 thông
+  điệp), `t133`, `t136`, `t151`;
+- **39** lời gọi mà bộ lọc tĩnh **không đọc được** vì thông điệp có **tiền tố ĐỘNG**. Trong đó **21**
+  mang đúng hình dạng va chạm `f"{x}: …"`, trên **7 ca nữa** — `t23` `t26` `t27` `t126` `t127` `t131`
+  `t133`. Vòng 9 chạy thật `t131` và xác nhận nó **va chạm**.
+
+⇒ **≥29 lời gọi trên ≥10 ca**, và 21 cái phụ thuộc **giá trị lúc chạy** nên **không quyết định được
+tĩnh**. **Không có biên nào.** Đó là tiền tố tên ca **bình thường, có sẵn trong cây** — và một phép đo
+trên chuỗi **không thể** tách hai miền giao nhau.
 
 ## Đường đã có — TÁI DÙNG, đừng thiết kế lại
 
@@ -74,7 +88,7 @@ ngay tại đó**. Đó là đúng chỗ phải sửa.
 
 | # | đường dẫn | vì sao |
 |---|---|---|
-| 1 | `ops/lease_publish_test.py` | chứa `main()` (hai nhánh in), **59** lời gọi `bang()` của 9 ca `#504`, `TinHieuChotCa`/`chot()` đã có, và — theo bản mẫu `#513` — là nơi catalogue tự kiểm phải **nằm trong** |
+| 1 | `ops/lease_publish_test.py` | chứa `main()` (**ba** nhánh in), **59** lời gọi `bang()` của 9 ca `#504`, `TinHieuChotCa`/`chot()` đã có, và — theo bản mẫu `#513` — là nơi catalogue tự kiểm phải **nằm trong** |
 
 Không ký tự đại diện. Không đường dẫn nào khác.
 
@@ -111,7 +125,7 @@ Cấp trước mốc đó ⇒ chồng lấn ⇒ phải thu hồi bằng **bia m�
 | # | tiêu chí | phép đo |
 |---|---|---|
 | A1 | 10 control **đều ĐẠT** | `--tu-kiem` ⇒ `10/10`, `rc=0` (hiện `7/10`, `rc=1`) |
-| A2 | va chạm hình dạng chuỗi về **0** | script ghim blob ở §`nguon_cap_viec` ⇒ `0`, không còn `8/454` |
+| A2 | phân hạng **KHÔNG CÒN ĐỌC nội dung thông điệp** | đột biến: đổi **mọi** thông điệp chốt thành chuỗi RỖNG ⇒ phân hạng **không đổi**. *(Sửa ở revision 2 theo `F9.1`: revision 1 đòi "va chạm hình dạng chuỗi về 0" — **đo sai đại lượng**, vì `M2`/`M6` bỏ hẳn việc đọc chuỗi nên con số va chạm trở thành **không liên quan**, chứ không phải phải về 0.)* |
 | A3 | gỡ chốt ⇒ ca đích **ĐỎ** | đột biến M5, đo `rc` và tên ca đỏ |
 | A4 | catalogue 16 mutant giữ `16/16 giết thật`, **0** tín dụng giả, **0** sống sót | catalogue trong tệp test |
 | A5 | suite đầy đủ `N/N` với **hai số bằng nhau** ở **CHA + `[A]` + `[B]`** — ba dòng | `AL_VER=1.7.7 bash ops/chay_lease_publish_test.sh` |
@@ -140,3 +154,24 @@ Cấp trước mốc đó ⇒ chồng lấn ⇒ phải thu hồi bằng **bia m�
 - `S6` chạm trần vòng review.
 - `S7` phải sửa `ops/nhanh_don_duoc_test.py` — nghĩa là bản mẫu không đủ, và **đó là câu hỏi thiết kế
   khác**, không giải trong packet này.
+
+## `dinh_chinh` — revision 1 → 2
+
+Cross-review **vòng 9** của PR #512 bác **ba** lời khai của revision 1. Ghi lại cả câu SAI, vì một đặc tả
+chỉ giữ câu đúng thì người đọc sau không biết chỗ nào từng trượt.
+
+| # | revision 1 khai | ĐÚNG, đã đo |
+|---|---|---|
+| `F6.11` | `main()` có **hai** hình dạng in; `v6` lọt `4/4` lớp ngoại lệ của kho, `v8` bắt `4/4` | `main()` có **BA** nhánh. `BoQuaNen` đi nhánh riêng in **chuỗi cố định** ⇒ **cả hai bản lọt**; `TinHieuChotCa` là con `AssertionError` ⇒ cả hai lọt — **và đếm nó vào đây vốn đã SAI, vì nó LÀ lớp tín hiệu của ca đích**. `v8` loại **2/4**. Trên **ba** lớp vô can THẬT: `v6` lọt `3/3`, `v8` lọt `1/3`. |
+| `F6.12` | hồi quy của `v8` **có biên**: `8/454`, bốn ca | Mẫu số **493**; `454` chỉ là tập **tiền tố tĩnh**. Thêm **21** lời gọi tiền tố ĐỘNG hình dạng va chạm trên **7 ca nữa** ⇒ **≥29 / ≥10 ca**, phần lớn **không quyết định được tĩnh**. **Không có biên.** |
+| `F9.1` | `A2` đòi *"va chạm hình dạng chuỗi về 0"* | Đo sai đại lượng: `M2`/`M6` bỏ hẳn việc đọc chuỗi. `A2` nay đòi **phân hạng không đổi khi mọi thông điệp chốt thành RỖNG**. |
+
+**Nguyên nhân gốc của cả ba là MỘT:** phiên soạn khớp regex với **chuỗi TỰ GHÉP** (`f"{ten}: m"`) thay vì
+**chạy lớp ngoại lệ thật qua `main()`**. Đúng lỗi *"nghĩ ra được phép thử mà KHÔNG CHẠY nó thì phép thử ấy
+không tồn tại"*. Hệ quả thực hành, và nó là ràng buộc của packet này: **mọi** tiêu chí nghiệm thu phải
+chạy qua `main()` **thật**, không qua một chuỗi dựng tay.
+
+Kèm `N42`: chủ thể của exclusion trong `#513` là **`#503`** (lease `m9-fetch-auth-exec-1-claude-20260911`),
+không phải `#504`. Và **thân Issue `#513` ghi `#504` trong khi tệp spec ghi `#503`** — hai hiện vật của
+cùng một packet **lệch nhau**; khai ra để người giữ `#513` biết. Exclusion vẫn có thật, chỉ đổi chủ thể,
+nên suy luận *"F6 là hệ quả của một write-set exclusion"* đứng vững.

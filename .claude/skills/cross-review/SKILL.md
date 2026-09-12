@@ -113,12 +113,16 @@ codex exec -m <model> -c model_reasoning_effort="xhigh" \
    từng báo cạn. Các quan sát này chưa xác định quota riêng theo model, số pool hay tính độc lập.
    Probe ngắn chỉ đo khả năng đáp ứng tại lúc gọi, không bảo đảm quota cho cả lượt review;
    thông điệp reset vẫn là dữ liệu do dịch vụ báo. Xử lý quota theo protocol §8.
-4. **Đầu `stderr.log` ghi model/effort mà CLI công bố cho lượt chạy.** Đọc header bằng:
+4. **Đầu `stderr.log` ghi model/effort mà CLI công bố cho lượt chạy.** Xem ngữ cảnh đầu tệp bằng:
 
 ```bash
-grep -m 2 -E '^model:|^reasoning effort:' <run-root>/<short_id>/stderr.log
-# rc=1: khong co truong khop; rc=2: loi doc. rc=0 van can doc du CA HAI truong.
+sed -n '1,80p' <run-root>/<short_id>/stderr.log
+# rc=0: doc duoc tep (ke ca tep rong), chua xac nhan co header hay du hai truong.
 ```
+
+Lệnh chỉ in 80 dòng đầu; nếu chưa thấy đủ header CLI thì đọc tiếp log. Chỉ lấy `model:` và
+`reasoning effort:` trong header khởi tạo của đúng lượt; dòng cùng tên trong prompt/output
+không thay được trường header bị thiếu. Không xác định được header thì chưa đo được hai trường.
 
 Header này không phải thống kê model thực thi mọi yêu cầu như `modelUsage` của lane `claude`.
 Hồ sơ `r368` ghi lời khai `xhigh` lệch header `none`; đó là đối chiếu hai nguồn khai,

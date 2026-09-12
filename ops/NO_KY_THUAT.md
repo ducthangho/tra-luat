@@ -1519,3 +1519,23 @@ tư** trên cùng hình dạng, và vẫn để lại một lớp lọt cộng m
 
 **Đây là thay đổi write set** (`ops/lease_publish_test.py`) ⇒ cần packet riêng và lease riêng. Chủ kho đã
 quyết **dời F6 ra khỏi `#504`** (chỉ thị #504 comment `5646460376`), và `#504` land với mục này là nợ.
+
+### Packet đã mở — và hoá ra đây là một PORT, không phải một thiết kế mới
+
+**Issue `#530`** `CHAM-DOT-BIEN-MIEN-NHIEM-LEASE-SUITE`, spec đóng băng
+`ops/specs/CHAM-DOT-BIEN-MIEN-NHIEM-LEASE-SUITE.md` sha256
+`5fcc14b5e33ecf130172bc1cafbb0ca229ddae8363069284eba5fcca49602781`. **Chưa có lease.**
+
+Phát hiện làm đổi hẳn hình dạng việc: kiến trúc cần cho mục này **đã được thiết kế, cross-review 5 lượt,
+và ĐÃ LAND** — packet `CHAM-DOT-BIEN-MIEN-NHIEM-CA-VO-CAN`, Issue **`#513`**, closed-completed
+`2026-09-12T07:19:50Z`. `ops/nhanh_don_duoc_test.py` trên `master` đã có `TinHieuChotCa` (`:30`),
+`chot()` (`:34`), ba trạng thái (`:48`), `sinh_dau_phien()` (`:51`), **kênh JSONL neo
+`(dau_phien, mutant, lan_thu)`** (`:70`–`:72`), `dong_luot(rc)` so với mã thoát THẬT (`:83`),
+`doc_kenh`/`_doc_kenh_xac_thuc` với ~15 nhánh fail-close (`:90`/`:113`), và `DOT_BIEN_TU_KIEM` tự kiểm
+chính bộ chấm (`:2236`).
+
+**Và đó cũng là lý do mục này tồn tại:** `ngoai_pham_vi` #4 của `#513` ghi rõ *"KHÔNG đụng
+`ops/lease_publish_test.py` — `#504` giữ"*. Thiết kế đã có; nó chỉ chưa được mang sang tệp thứ hai, **vì
+chính lease của `#504` đang giữ tệp ấy**. Nói cách khác: nợ này là **hệ quả đoán được của một write-set
+exclusion**, không phải một khuyết tật mới ai cũng bất ngờ. Đáng ghi, vì cùng hình dạng ấy sẽ tái diễn
+mỗi khi một thiết kế land cho đúng một tệp trong khi tệp em của nó đang bị giữ.

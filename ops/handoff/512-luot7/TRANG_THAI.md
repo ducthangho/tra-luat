@@ -257,3 +257,80 @@ Ba lựa chọn để chủ kho chọn, xếp theo mức xâm phạm:
 **Khuyến nghị: (1).** F6 là công cụ đo, nằm ngoài write set, và ba vòng liền nó là lớp P1 duy nhất giữ
 một PR mà mọi lớp sản phẩm đã `ĐÃ VÁ THẬT` và CI xanh. Giữ nó trong packet này là để một khuyết tật của
 **thước đo** chặn một **bản vá đã được thước đo ấy chứng minh là tốt**.
+
+---
+
+# CẬP NHẬT 14:5xZ — hai quyết định của chủ kho ĐÃ THI HÀNH
+
+Chỉ thị: phiên chat 12-09-2026, nguyên văn `"1. theo khuyến nghị"` / `"2. đẩy đi"`; mỏ neo bền
+**#504 comment `5646460376`** (comment ấy do phiên GHI HỘ và KHAI RÕ điều đó trong chính nó).
+
+## (2) Lease generation 2 — ĐÃ ĐĂNG
+
+`windows-lease-suite-exec-2-claude-20260912`, commit `876bdc9` nhánh `ops/cap-lease-504`.
+Marker do `github-actions[bot]` đăng: **#504 comment `5646489814`**, mở đầu đúng vị từ
+`**Lease <id>**`. `ai-dang-giu` trên **cả hai** đường ⇒ `NGƯỜI_GIỮ 1` = gen 2. Hạn `2026-09-13T14:22:00Z`.
+
+**Đã sửa hai thứ trong bản nháp trước khi đẩy:**
+- bản nháp ghi `leased_at_utc: 13:20:00Z` — **lùi ngày** so với lúc chỉ thị đến. Re-time về `14:22:00Z`.
+- `granted_on_instruction` / `nang_tran.can_cu` là placeholder ⇒ neo vào comment thật. Cổng `check`
+  **không** xác thực trường ấy, nên nó là kỷ luật của người ghi, không phải của cổng.
+
+**Trần `S2=1500` phải CẤP LẠI cho gen 2**, không tự thừa hưởng: khối `nang_tran` của gen 1 tự bó
+*"Chỉ lease …exec-1…, generation 1"*.
+
+### Lượt workflow đăng lease ĐỎ — và vì sao đó KHÔNG phải lỗi của gen 2
+
+Run `34699156658` `conclusion: failure`. Đọc log thay vì suy: workflow lặp qua **mọi** tệp lease đổi
+trong push, và commit chạm **hai** tệp.
+
+| tệp | kết quả |
+|---|---|
+| `…exec-2…yaml` (gen 2) | `hai lớp GitHub ĐÃ QUA` · `ĐĂNG ĐƯỢC` · `đã đăng comment 5646489814` |
+| `…exec-1…yaml` (gen 1, chạm chỉ để mang bia mộ) | `CHAN [8]: lease đã hết hạn lúc 2026-09-12T14:05:00+00:00` |
+
+Từ chối ấy **ĐÚNG** — *"đăng một lease chết thì người nhận tưởng có quyền mà không có"*. Nhưng nó làm cả
+lượt `exit 1`. **Nợ mới, chưa chữa:** thêm bia mộ vào một lease **đã hết hạn** thì workflow đăng lease sẽ
+thử đăng lại nó và ĐỎ. `.github/workflows/**` **ngoài write set** (`S3`) ⇒ khai nợ, không sửa.
+
+## (1) F6 — ĐÃ DỜI sang packet riêng
+
+- Nợ: `ops/NO_KY_THUAT.md` **§23** `BO-DO-DOT-BIEN-SUY-LY-DO-CHET-TU-CHUOI-STDOUT`.
+- Issue packet: **#530** · spec đóng băng `ops/specs/CHAM-DOT-BIEN-MIEN-NHIEM-LEASE-SUITE.md`
+  sha256 `5fcc14b5e33ecf130172bc1cafbb0ca229ddae8363069284eba5fcca49602781`. **Chưa có lease.**
+- **Hoá ra là một PORT**: kiến trúc đã land ở **#513** (closed-completed), và `#513` loại
+  `ops/lease_publish_test.py` khỏi phạm vi **vì `#504` giữ nó**. F6 là hệ quả đoán được.
+
+### Bản bộ đo mặc định — chọn BẰNG PHÉP ĐO, và phép đo BÁC dự đoán của kế hoạch
+
+Kế hoạch dự đoán sẽ **lùi về `v6`**. Đo trên **10 control** (bộ 7 ca cũ **thiếu** hai ca vòng 8 đã tìm
+ra) ⇒ **giữ `v8`**:
+
+| bản | đúng | lọt | hồi quy |
+|---|---|---|---|
+| `v0` | `4/10` | 6 | 0 |
+| `v6` | `7/10` | 3 | 0 |
+| **`v8` (mặc định)** | `7/10` | **2** | **1** |
+
+Lý do quyết định: **cả BỐN** lớp ngoại lệ của chính kho — `BoQuaNen`, `Chan`, `HetNganSachDay`,
+`TinHieuChotCa` — đều thiếu hậu tố `Error`/`Exception`, nên `v6` cấp tín dụng giả **4/4**, `v8` bắt
+**4/4**. `Chan` là lớp `ops/lease_publish.py` ném khắp nơi. Tập lọt của `v6` **không có biên**; hồi quy
+của `v8` **đếm được**: `8/454` assertion, 4 ca (`t96 t133 t136 t151`).
+
+Bộ đo được giao ở trạng thái **TỰ BÁO ĐỎ** (`7/10`, `rc=1`) — **cố ý**: bộ control kèm cả ba ca nó xử
+sai, nên mỗi lần tự kiểm là một lần khuyết tật tự khai.
+
+### Một bài học về PHÉP ĐO của chính lượt này
+
+Phép đo `8/454` và `4/4` ở trên có một lần bị chạy **trên cây SAI** — đang đứng ở nhánh hồ sơ (nền
+`master`, `147` ca) thay vì `36f68c7` (`155` ca, có `t153`–`t160`). Lộ ra vì `t153`–`t160` **không tồn
+tại** trong kết quả. Chữa bằng cách **ghim BLOB** (`git show 36f68c7:…`) thay vì tin nhánh đang checkout.
+Và lần ghim ấy còn sửa một con số đã đẩy: lớp ngoại lệ là **4**, không phải 3 — bộ lọc base class đầu bỏ
+mất `HetNganSachDay`.
+
+## Việc còn lại
+
+- **Vòng 9** — phạm vi là hai đường write set, nhưng **KHÔNG đóng khung lớp lỗi cho reviewer**: phát hiện
+  ngoài write set **vẫn báo**, đánh dấu là **nợ**. Sẽ là **9/10**.
+- Sau `approve` ⇒ merge, rồi **ĐỌC** lượt CI hậu merge (lần đo Windows **đầu tiên** của mã này).
+  **Không** CI bằng tay ở bất kỳ giai đoạn nào.

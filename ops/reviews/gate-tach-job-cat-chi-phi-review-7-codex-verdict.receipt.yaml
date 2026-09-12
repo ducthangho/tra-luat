@@ -1,0 +1,58 @@
+# BIÊN NHẬN GIAO HÀNG — cross-review LƯỢT 7 của packet GATE-TACH-JOB-CAT-CHI-PHI (#463).
+#
+# Verdict này KHÔNG công bố trên PR: PR #476 đã đóng không merge (12-09 10:46Z) và nhánh
+# packet `claude/gate-tach-job-cat-chi-phi` hiện KHÔNG có PR mở. Nơi verdict sống là
+# Issue #463 (bản chiếu) + tệp này trong kho (bản có thẩm quyền). Suy theo khuôn
+# "verdict nằm trên PR" sẽ đi tìm một PR không tồn tại.
+#
+# Nhánh công bố là `ops/cap-lease-463` — KHÔNG phải nhánh packet: thêm tệp vào nhánh
+# packet là đường dẫn thứ BA, vi phạm chính `A8` (đòi ĐÚNG 2 đường dẫn).
+#
+# `revision: 19` là spec TẠI LÚC REVIEW; head hiện tại đã sang r21 (trần A8 = 500).
+
+schema_version: 1
+kind: review_delivery_receipt
+packet_id: GATE-TACH-JOB-CAT-CHI-PHI
+packet_issue: 463
+revision: 19
+lease_id: gate-tach-job-cat-chi-phi-exec-2r8-claude-20260912
+provider: codex
+role: reviewer
+verdict: changes_requested
+reviewed_sha: 201bd7a46a948f9ed0a4cb51263f9f236bf5a5d7
+reviewed_tree: 1949403d2a76ea6b96d7a0b255a44af1c1dc1cd6
+verdict_path: ops/reviews/gate-tach-job-cat-chi-phi-review-7-codex-verdict.md
+verdict_sha256: 9a27f039afddbcc71a7c99952f04e440ee5c53e48f6d212cdc2e75ae23b70f49
+verdict_bytes: 55753
+finding_theo_muc:
+  P1: 0
+  P2: 4
+  P3: 1
+so_huong_san: 9
+phan_lop:
+  A: VÁ SINH LỖI MỚI — loi_ruff_ci chỉ nhận `ruff` ở TOKEN ĐẦU nên một lệnh cài thật vẫn bị gán KHONG_PHAN_TICH_DUOC.
+    Ba CỬA — cách gọi · thứ tự probe/ghim · ngữ cảnh env.
+  B: Chưa chứng nhận trên head — công cụ đo sống ở nhánh lease, không ở head packet.
+  C: Chưa vá trọn — fixture `da-tach-thieu-ruff` còn bước Ruff ở `gate-registry` nên ca không đo đúng
+    thứ nó khai.
+  D: ĐÃ VÁ THẬT ở r19.
+  E: CHƯA VÁ — số trong thông điệp commit chép tay (khai 93/93 và A8=439; thật 91/91 và 438).
+  F_G: Nằm trong ops/nhanh_don_duoc_test.py — NGOÀI write set. Nghĩa vụ ĐỌC của lease (chỉ thị chủ kho,
+    quyết định 3) chỉ cho ĐỌC, không mở quyền GHI nên đi packet RIÊNG.
+run_id: ff00230e
+run_ma_thoat: 0
+run_thoi_luong_giay: 2002.075
+run_bat_dau_utc: '2026-09-12T16:34:54Z'
+run_ket_thuc_utc: '2026-09-12T17:08:16Z'
+prompt_sha256: 8ce802a89c5b9c68ba0bc47bc0b04dcc0a12c0373f30202cb9356bf00d731666
+evidence_channel: repo_file
+authoritative_source: repo_file
+delivered: true
+delivered_by: claude-session
+receipt_written_by: claude-session
+khong_khai:
+- Không khai model/effort THỰC SỰ đã chạy — chính verdict ghi rằng exact model ID và effort không có phép
+  tự xác minh qua tool. gpt-6-astra/xhigh trong lease là Ý ĐỊNH được ghi, không phải receipt danh tính.
+- Không khai A1 và A5 — verdict ghi KHÔNG ĐO ĐƯỢC theo lệnh CẤM CI của chủ kho.
+- Không khai landed_to_master hay tag_giu_published — chưa land, chưa có tag lưu trữ. Tới lúc xoá nhánh
+  ops/cap-lease-463 phải tạo tag TRƯỚC, kẻo published_* thành SHA không tra được.

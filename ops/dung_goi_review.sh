@@ -114,7 +114,7 @@ comm -3 "$R/nguon-refs.tsv" "$R/cay-kho-refs.tsv" > "$R/refs-lech-cay-kho.tsv"
 N_MIRROR=$(wc -l < "$R/mirror-refs.tsv"); N_CAY=$(wc -l < "$R/cay-kho-refs.tsv")
 N_L1=$(wc -l < "$R/refs-lech-mirror.tsv");  N_L2=$(wc -l < "$R/refs-lech-cay-kho.tsv")
 
-# ---- 5. Cong cu bat buoc: LUON goi installer ghim, KHONG tin PATH ----
+# ---- 5. Cong cu bat buoc: LUON goi installer ghim cho actionlint, KHONG tin PATH cho cong cu nay ----
 #    `ops/cai_actionlint.sh:14` (ban b416830) viet ro: "KHONG co nhanh thoat som `da co actionlint tren
 #    PATH thi thoi`: co mat != dung ban." Ban dau tep nay CO nhanh ay -> cross-review PR #477
 #    do duoc bon ca `wrong-version`/`invalid-pin`/`empty-pin`/`broken-binary` deu rc=0.
@@ -147,7 +147,7 @@ AL_VER="$AL_VER" AL_DICH="$AL_DICH" bash "$KHO/ops/cai_actionlint.sh" > "$R/cai-
 #     chinh ban va truoc tao ra);
 #   - `command -v actionlint` tra ve FUNCTION neu co `export -f actionlint`, vi bash
 #     function uu tien hon PATH => van chay ban gia. Phan chung: function in "1.7.70".
-# Nen: goi binary bang DUONG DAN TUYET DOI tu AL_DICH.
+# Nen: goi binary bang DUONG DAN CAI DAT CU THE (co the la tuong doi neu $R la tuong doi).
 AL_BIN="$AL_DICH/actionlint"
 [ -x "$AL_BIN" ] || AL_BIN="$AL_DICH/actionlint.exe"
 [ -x "$AL_BIN" ] || loi 4 "khong thay binary actionlint trong $AL_DICH sau khi cai"
@@ -164,8 +164,9 @@ al_ban=$(printf '%s' "$al_raw" | head -1 | tr -d '\r')
 [ "$al_ban" = "$AL_VER" ] || loi 4 "actionlint SAI BAN: can '$AL_VER', do duoc '$al_ban' ($AL_BIN)"
 printf '%s\t%s\t%s\n' actionlint "$AL_BIN" "$al_ban" >> "$R/cong-cu.txt"
 
-# Cac cong cu con lai: resolve tren PATH DAU VAO bang `type -P` (bo qua function/alias/builtin),
-# roi goi bang dung duong dan vua resolve. THIEU hoac KHONG CHAY DUOC deu la CHAN.
+# Cac cong cu con lai: thao tac thuc te (git, v.v.) tin vao moi truong goi shell (bare name).
+# Rieng viec ghi version o day moi dung `type -P` de trich duong dan nhung KHONG thay the lenh goi thuc te.
+# THIEU hoac KHONG CHAY DUOC o buoc ghi nay deu la CHAN.
 # `shellcheck` la BAT BUOC: thieu no thi `actionlint` bo luat SC* TRONG IM LANG.
 for c in shellcheck git python3; do
   duong=$(type -P "$c" 2>/dev/null) || duong=""

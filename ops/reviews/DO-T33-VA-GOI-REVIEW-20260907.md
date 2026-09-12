@@ -9,10 +9,11 @@ hồi quy. Nhưng nói cho chính xác: **ca `t33` khi ấy ĐÃ CHẠY và Đ�
 `actionlint` — assertion tại `ops/lease_publish_test.py:1359–1363` (bản `b416830`) bắn **trước** `subprocess.run`
 ở dòng 1364. Thứ **chưa chạy** là **thao tác lint workflow** bên trong hàm, không phải bản thân ca.
 
-> Bản đầu của tài liệu này viết *"không đỏ, cũng không xanh — nó KHÔNG CHẠY"*. Sai, và bị chính
-> log trong `ops/reviews/log-t33-20260907/` bác: `ĐỎ t33` cùng `đã chạy=121, bỏ qua=0`.
-> Cross-review #477 lượt 6 (`t33-khong-chay-van-con-o-mo-dau`) bắt được rằng bảng đã sửa nhưng
-> lời mở đầu thì chưa.
+> Bản đầu của tài liệu này viết *"không đỏ, cũng không xanh — nó KHÔNG CHẠY"*. Lời khai này sai về
+> mặt mã nguồn (assertion đánh rơi ca thành ĐỎ t33), nhưng xin lưu ý: **không có log của lần chạy
+> hỏng đó**. Các tệp trong `ops/reviews/log-t33-20260907/` hoàn toàn là log chạy lại **thành công**
+> (đạt 121/121). Việc "ĐỎ t33" là báo cáo lịch sử chưa kiểm chứng (historical unverified report) của
+> executor kết hợp với phân tích mã nguồn, chứ không được chứng minh bằng các log đang giữ.
 
 `ops/lease_publish_test.py:1338` (bản `b416830`) nói rõ chủ ý: *"`actionlint` phải XANH … và THIẾU công cụ là
 ĐỎ."* Vậy `rc=1` là hành vi ĐÚNG, không phải lỗi mã. Cách đóng là **cài công cụ rồi đo**, không
@@ -136,7 +137,7 @@ Cross-review PR #477 (P3 `so-do-lich-su-thieu-hien-vat-tai-tinh`) chỉ ra đún
 | `sau.lease-sau-cai-actionlint.out` / `.err` | stdout/stderr vế sau `f77f198`, 8649 B |
 | `moi-truong-va-rc.txt` | lệnh, hai SHA đầy đủ, `rc` hai vế, bản `actionlint`/`shellcheck`, cách cài |
 
-Hai stdout khác nhau **32 dòng** trước chuẩn hoá; sau khi chuẩn hoá tên thư mục tạm ngẫu nhiên
+Hai stdout khác nhau **16 vị trí dòng (32 dòng cộng/trừ trong diff)** trước chuẩn hoá; sau khi chuẩn hoá tên thư mục tạm ngẫu nhiên
 (`sed -E 's/lp_[a-z0-9_]+/LP/g'`) thì **giống hệt, 49/49 dòng**.
 
 Vẫn chưa kiểm lại được, ghi rõ: TSV và manifest của lần đo `305`/`2131` **không còn** — chúng ở
@@ -214,16 +215,16 @@ Phản chứng tự đo sau khi vá:
 ## GIỚI HẠN CỦA `ops/dung_goi_review.sh` — hợp đồng đầu vào, tự khai
 
 Cross-review #477 lượt 6 (`gioi-han-dung-goi-chua-tu-khai`) chỉ ra tài liệu này thiếu phần tự khai
-điều kiện môi trường và quyền sở hữu thư mục đầu ra. Bổ sung, kèm phép đo tự chạy lại.
+điều kiện môi trường và quyền sở hữu thư mục đầu ra. Bổ sung, kèm báo cáo lịch sử chưa kiểm chứng (historical unverified report) do không còn lưu log đối chứng.
 
 ### Chỉ `actionlint` được ghim — ba công cụ còn lại TIN VÀO PATH ĐẦU VÀO
 
 `actionlint` luôn được cài bằng `ops/cai_actionlint.sh` (bản ghim + đối chiếu băm) và gọi bằng
-đường dẫn tuyệt đối. Nhưng `shellcheck`, `git`, `python3` chỉ được resolve bằng `type -P` trên
-`$PATH` người gọi đưa vào. `type -P` bỏ qua function/alias/builtin — nó **không** xác thực nguồn gốc.
+đường dẫn đã cài (có thể là tương đối nếu `$R` tương đối). Nhưng `shellcheck`, `git`, `python3` chỉ được resolve bằng `type -P` trên
+`$PATH` người gọi đưa vào cho mục đích ghi nhận phiên bản. Thêm vào đó, việc gọi `git` thực tế trong script là gọi trực tiếp theo tên bare name, có thể bị thay thế bởi function/alias của shell. `type -P` bỏ qua function/alias/builtin — nó **không** xác thực nguồn gốc công cụ dùng để chạy.
 
-Đo được: đặt một `shellcheck` giả đầu PATH ⇒ script **`rc=0`**, `cong-cu.txt` ghi
-`version: 9.9.9` từ bản giả. Nói cách khác: **PATH đầu vào là đầu vào TIN CẬY của hợp đồng.**
+Báo cáo lịch sử chưa kiểm chứng (historical unverified report): đặt một `shellcheck` giả đầu PATH ⇒ script **`rc=0`**, `cong-cu.txt` ghi
+`version: 9.9.9` từ bản giả. Nói cách khác: **PATH và môi trường shell đầu vào là đầu vào TIN CẬY của hợp đồng.**
 Người gọi phải cấp môi trường sạch; script không thay được việc đó.
 
 ### `$R` là thư mục CHUYÊN DỤNG, và script CÓ XOÁ trong đó
@@ -234,7 +235,7 @@ Câu *"không xoá gì cả"* ở mục vá `rm -rf` chỉ đúng cho **thư m�
 Các chốt symlink chỉ nhìn **thành phần con** (`$R/cong-cu`, `$R/kho.git`, `$R/cay-kho`).
 Chúng **KHÔNG** nhìn `$R` chính nó, cũng không nhìn các thành phần cha.
 
-Đo được: `$R` là symlink tới một đích **đã có** `kho.git/` và `cay-kho/` chứa dữ liệu ⇒ script
+Báo cáo lịch sử chưa kiểm chứng (historical unverified report): `$R` là symlink tới một đích **đã có** `kho.git/` và `cay-kho/` chứa dữ liệu ⇒ script
 `rc=0`, dựng gói bình thường, và **hai sentinel trong hai thư mục ấy BỊ XOÁ**; sentinel ở thư mục
 không liên quan còn nguyên. Gọi thẳng vào đích (không qua symlink) cho **cùng kết quả** — nên đây
 là hành vi ghi đè theo TÊN đầu ra, không phải lỗi riêng do symlink.
@@ -243,10 +244,10 @@ là hành vi ghi đè theo TÊN đầu ra, không phải lỗi riêng do symlink
 đường dẫn cha đều đáng tin và **không chứa dữ liệu cần giữ**. Script không bảo vệ được thư mục
 của người gọi.
 
-### Nền đã đo, và nền chưa đo
+### Nền đã báo cáo, và nền chưa báo cáo
 
-Mọi số trong tài liệu này đo trên **Linux + Bash** trong container của phiên. **Chưa có** phép đo
-nào trên macOS hay Windows native. Ngoài ra, lần dựng đầu trong container này **đỏ vì `tar` không
+Mọi số trong báo cáo lịch sử chưa kiểm chứng này dựa trên chạy **Linux + Bash** trong container của phiên. **Chưa có** phép đo
+nào trên macOS hay Windows native. Ngoài ra, báo cáo lịch sử chưa kiểm chứng cũng ghi nhận lần dựng đầu trong container này **đỏ vì `tar` không
 đổi được owner** — cần `TAR_OPTIONS` phù hợp; đó là điều kiện môi trường, không phải lỗi script.
 
 ### Chưa xử lý

@@ -146,3 +146,19 @@ nang_tran:
     Vượt 1500, hoặc chạm S1/S3/S4/S5, thì DỪNG và hỏi lại chủ kho. Phiên KHÔNG tự nới thêm.
   truc_khac_nang_rieng: >-
     Trục VÒNG (S6 / ADR-0043) nâng lên 10 là một phép nâng RIÊNG, ghi riêng — không gộp vào đây.
+
+# BIA MỘ — chiều NGƯỢC của `thay_the_cho` trong
+# `cham-dot-bien-mien-nhiem-lease-suite-exec-1-claude-20260912.yaml` (nhánh ops/cap-lease-530).
+# `_kiem_bia_mo` (ops/lease_publish.py:595-615) đòi ĐỦ HAI CHIỀU, nên dòng dưới là ĐIỀU KIỆN để lease
+# mới đăng được, không phải một ghi chú lịch sự.
+#
+# LÝ DO THU HỒI: packet #504 ĐÃ LAND — `36f68c7` là tổ tiên của `origin/master`, merge `85fcbf8` lúc
+# 2026-09-12T13:59:47Z. Lease này vẫn giữ `ops/lease_publish_test.py` tới 14:22Z NGÀY MAI trong khi việc
+# đã xong: đúng nợ `AG-T0-01B-thu-hoi-lease-chua-co-duong` (CLAUDE.md — "lease không tự chết khi packet
+# đã land"). Packet #530 port kênh chốt-ca vào CHÍNH tệp ấy, nên để hai lease cùng giữ nó là tự mở cửa
+# sổ hai writer — đúng thứ write-set exclusion sinh ra để chặn.
+#
+# VÌ SAO KHÔNG DÙNG SỔ THU HỒI: `ops/lease_publish.py` có schema `lease_revoked` và sổ `ops/thu-hoi/`,
+# nhưng `SO_THU_HOI_KICH_HOAT = False`, và cờ tắt mà sổ có bản ghi thì cổng trả KHÔNG_XÁC_ĐỊNH (rc=12).
+# Đo được, không đoán. Nên bia mộ hai chiều là đường thu hồi duy nhất CHẠY ĐƯỢC hôm nay.
+da_bi_thay_the: cham-dot-bien-mien-nhiem-lease-suite-exec-1-claude-20260912

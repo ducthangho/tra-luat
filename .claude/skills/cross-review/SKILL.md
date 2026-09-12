@@ -98,9 +98,17 @@ Bảng bậc ở trên là của reviewer **`claude`**. Khi reviewer là `codex`
 hẳn; dưới đây đo 12-09-2026 trên chuỗi #518.
 
 ```bash
+# Prompt qua STDIN, không qua argv — cùng dạng `- < PROMPT.md` đã dùng ở mục "Chạy nền kia
+# trong sandbox". Prompt đặt trong argv có hai chỗ gãy: vượt giới hạn kích thước đối số của
+# nền khi diff/evidence lớn, và lộ nguyên văn trên bảng tiến trình suốt lượt chạy.
 codex exec -m <model> -c model_reasoning_effort="xhigh" \
-  --cd <sandbox> --sandbox workspace-write --skip-git-repo-check "<prompt>"
+  --cd <sandbox> --sandbox workspace-write --skip-git-repo-check - < PROMPT.md
 ```
+
+**Dạng này KHÔNG dùng được khi bọc bằng `launcher.py run`**: nó cho tiến trình con
+`stdin=DEVNULL` (xem `CLAUDE.md`), nên `codex exec -` nhận EOF và chạy với prompt RỖNG. Bọc bằng
+launcher thì truyền `--prompt-file` + `--expected-prompt-sha256` và đưa cho `codex` một chỉ thị
+NGẮN trỏ vào tệp, chứ đừng dán cả prompt vào argv.
 
 1. **Trong phép thử #518, `gpt-5.3-codex-spark` từ chối effort `max`.** Thông báo HTTP 400 liệt kê
    `low`, `medium`, `high`, `xhigh`; `xhigh` là mức cao nhất trong danh sách của phép thử đó.
@@ -137,14 +145,26 @@ Các phép kiểm dưới đây thu thêm dấu hiệu; chưa chứng minh phả
 ```bash
 PY="$(command -v python3 || command -v python || command -v py)"   # CLAUDE.md: nhan CA BA ten
 "$PY" -m json.tool <run>/run.json      # doc pid va khoa_danh_tinh; loi doc != tien trinh chet
-ps -p <pid> -o pid=,stat=,lstart=,args=  # PID ton tai chua chung minh dung tien trinh reviewer
-ls -la <goi>/VERDICT.md                # lay nhieu mau co moc gio de so mtime
-tail -50 <run>/stderr.log             # doc ca log neu can; loi reconnect khong xac dinh trang thai cuoi
+
+# Khoa danh tinh, dung DINH DANG launcher ghi — KHONG dung `ps -o lstart`.
+# `.claude/dev/launcher.py:_khoa_danh_tinh` ghi `linux:<truong 22 cua /proc/<pid>/stat>`
+# (starttime, don vi tick). `lstart` la chuoi gio doc duoc, KHAC dinh dang, nen khong
+# so sanh duoc voi khoa da luu: mot PID bi tai dung se khop nham.
+cat /proc/<pid>/stat 2>/dev/null | sed 's/.*) //' | awk '{print "linux:" $20}'   # rong = khong doc duoc
+ps -p <pid> -o pid=,stat=   # `Z` = zombie da thoat; PID ton tai KHONG chung minh dung tien trinh
+
+# Hai mau moc gio + kich thuoc, cach nhau mot khoang da dinh — mot mau khong do duoc chuyen dong.
+stat -c '%Y %s' <goi>/VERDICT.md; sleep 60; stat -c '%Y %s' <goi>/VERDICT.md
+
+tail -50 <run>/stderr.log   # doc ca log neu can; loi reconnect khong xac dinh trang thai cuoi
 ```
 
-Thiếu/hỏng sổ hoặc lệnh lỗi là **KHÔNG ĐO ĐƯỢC**. Khi thấy PID, đối chiếu `stat`, `lstart`
-và `khoa_danh_tinh` của launcher trước khi gắn nó với lượt cũ; `Z` là zombie đã thoát.
-Một lần xem mtime chưa đo được chuyển động; lỗi reconnect chỉ là dấu hiệu tại thời điểm log.
+Thiếu/hỏng sổ hoặc lệnh lỗi là **KHÔNG ĐO ĐƯỢC**, và **fail-close**: không đọc được khoá thì
+KHÔNG được kết luận đã chết. Khoá đọc được mà **khác** khoá trong `run.json` ⇒ PID đã bị tái
+dùng, tiến trình cũ đã thoát; khoá **khớp** ⇒ đúng tiến trình ấy còn sống.
+
+Hai mẫu mốc giờ **giống nhau cũng vẫn là `KHÔNG ĐO ĐƯỢC`**, không phải bằng chứng đã chết: một
+reviewer còn sống có thể im giữa hai lần ghi. Chỉ mẫu **đổi** mới chứng minh còn chuyển động.
 
 Ghi `VERDICT.md` tăng dần (mục bên dưới) giúp giữ phần đã ghi khi lượt bị ngắt.
 Hai sự cố thuật lại không đo mức lợi ích hay tốc độ mất dữ liệu so với bộ lọc.
@@ -153,7 +173,17 @@ Hai sự cố thuật lại không đo mức lợi ích hay tốc độ mất d�
 
 Lượt đó nhận `Rejected("... rejected: rm -f style commands are not permitted. Use a safer approach")`
 khi dùng `rm -rf`. Đây là hành vi của môi trường đã thử, không xác định policy mọi sandbox Codex.
-Trong môi trường ấy, có thể dùng `mktemp -d` để dựng chỗ thử rồi giữ lại thư mục.
+Trong môi trường ấy, có thể dùng `mktemp -d` để dựng chỗ thử rồi **để reviewer giữ lại** thư mục —
+reviewer không phải là bên dọn.
+
+**Nhưng giữ lại KHÔNG có nghĩa là giữ mãi.** Trên runner sống lâu, mỗi lượt và mỗi lần chạy lại
+để lại nguyên một bản sao kho cộng prompt và evidence; `/tmp` phình dần và vật liệu review cũ nằm
+lại. Việc dọn thuộc **phiên điều phối**, sau khi đã thu hiện vật (`VERDICT.md`, `HINT.patch`, log),
+và phải theo ba chốt: cấp thư mục dưới **một gốc riêng của lượt** (`mktemp -d -p <goc-rieng>`);
+chỉ xoá đường dẫn **nằm trong gốc ấy** sau khi giải symlink, đường nào không nhận ra thì **fail-close
+— bỏ qua, đừng xoá**; và đặt hạn lưu (theo số lượt hoặc theo tuổi). Chưa có cổng nào trong kho
+cưỡng chế ba chốt này — đây là thao tác của người điều phối, nói thẳng ra để không ai tưởng đã có
+cơ chế.
 
 ## Khi PAT là chính tài khoản tác giả PR
 

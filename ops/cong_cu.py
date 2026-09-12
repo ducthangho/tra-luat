@@ -248,7 +248,15 @@ def tong_hop(ban_ke, thu_muc_goc=None, chi=None):
             tong = KHONG_DO_DUOC
         elif kq["trang_thai"] == DO and tong != KHONG_DO_DUOC:
             tong = DO
-    return {"trang_thai_tong": tong, "cong_cu": list(theo_ten.values()), "canary": canary_kq}
+    if chi is not None:
+        pham_vi = "mot-cong-cu"
+        canary_da_quet = False
+        ghi_chu_pham_vi = "chua quet canary toan bo"
+    else:
+        pham_vi = "toan-bo"
+        canary_da_quet = True
+        ghi_chu_pham_vi = "da quet canary toan bo (khong co nghia moi canary dat)"
+    return {"trang_thai_tong": tong, "pham_vi": pham_vi, "canary_da_quet": canary_da_quet, "ghi_chu_pham_vi": ghi_chu_pham_vi, "cong_cu": list(theo_ten.values()), "canary": canary_kq}
 
 def _cai_lenh(ten, ban_ke, nen):
     dn = ban_ke["cong_cu"].get(ten)

@@ -1,4 +1,4 @@
-# Đặc tả packet — GATE-TACH-JOB-CAT-CHI-PHI (revision 16)
+# Đặc tả packet — GATE-TACH-JOB-CAT-CHI-PHI (revision 17)
 
 - `packet_id`: **GATE-TACH-JOB-CAT-CHI-PHI**; ID bền theo `PROTOCOL §3.2` là `wp<packet_issue>`.
 - `packet_issue`: **#463**
@@ -6,7 +6,8 @@
 - `revision`: **15** · `generation`: 1 · soạn **11:3xZ 11-09-2026**; `A5` r13 **10:0xZ 12-09-2026**;
   r14 (A8 400 + F03/F04/F05) **11:4xZ 12-09-2026**; r15 (F04 lượt 2 — **XOÁ** câu bị thay thay vì
   nối thêm đính chính) **13:5xZ 12-09-2026**; r16 (`R3-F04` lượt 3 — cửa THỨ BA của cùng lớp ấy ở
-  `A5`, ánh xạ manifest hai lane của `A2`, và bẫy `on:` là boolean ở `A3(3)`) **14:2xZ 12-09-2026**
+  `A5`, ánh xạ manifest hai lane của `A2`, và bẫy `on:` là boolean ở `A3(3)`) **14:2xZ 12-09-2026**;
+  r17 (trần `A8` `400 → 430`, ngoại lệ CÓ PHẠM VI thứ hai) **14:4xZ 12-09-2026**
 - `depends_on`: **`[wp502, wp504]`** — xem `write_set`. **`wp504`** là `WINDOWS-LEASE-SUITE` (lease
   sống, cấp `14:05Z 11-09-2026`), **KHÔNG** còn là `T125-RA-JOB-RIENG`: đặc tả ấy đã **RÚT** vì `#504`
   nhận cùng vấn đề bằng đường chủ kho chọn (song song hoá `t125` trong bộ test, giữ nguyên ngữ nghĩa)
@@ -93,8 +94,9 @@ phép đo trả lời câu ấy, và `A1` ĐỎ là **KẾT QUẢ ĐO**, không 
 
 `sensitive` ⇒ `ADR-0044`: **≤ 3 tệp và ≤ 300 dòng THÊM** — cột `additions` của `git diff --numstat`,
 **KHÔNG** phải `adds − deletes`. Thước sai đã trả giá: `+351/−351` có ròng `0` mà `additions = 351 > 300`.
-**TRẦN HIỆU LỰC CỦA PACKET NÀY LÀ `400`, KHÔNG PHẢI `300`** — ngoại lệ CÓ PHẠM VI do chủ kho cấp
-(12-09-2026, `#463` comment 5645742072), phát biểu đầy đủ tại `A8`. `so_tep = 2` **không** được nới.
+**TRẦN HIỆU LỰC CỦA PACKET NÀY KHÔNG PHẢI `300`** — ngoại lệ CÓ PHẠM VI do chủ kho cấp
+(12-09-2026, `#463` comment 5645742072). **Con số nêu ĐÚNG MỘT CHỖ — tại `A8`** — và mọi chỗ khác
+trong tệp này trỏ tới đó thay vì chép lại. `so_tep = 2` **không** được nới.
 Nêu ngay ở đây vì mục này là chỗ người đọc gặp trần TRƯỚC, và r14 chỉ sửa con số ở `A8` nên hai chỗ
 khai hai trần khác nhau — cross-review lượt 2 `F04` bắt đúng hình dạng ấy.
 
@@ -108,14 +110,19 @@ khai hai trần khác nhau — cross-review lượt 2 `F04` bắt đúng hình d
 | **hai job mới** | **158** | **100** |
 
 Cộng hai bước dời (≈4 dòng), sửa `loi_ruff_ci` (ước +15–25) và phản chứng mới (ước +15)
-⇒ **ước `135`–`200` dòng thêm**. Dưới trần hiệu lực `400`; ước này soạn trước khi có phản chứng
-`A7` và bộ đột biến của nó, nên nó là **ước cũ**, không phải hạn mức — hạn mức là `400` ở `A8`.
+⇒ **ước `135`–`200` dòng thêm**. Đây là **ước cũ**, soạn trước khi có phản chứng `A7` và bộ đột
+biến của nó — **không** phải hạn mức. Hạn mức là con số nêu ngay trên và ở `A8`, và **chỉ có một
+chỗ được nêu số** để hai chỗ không trôi lệch.
+*(Hai dòng này đã ghi `400` sau khi trần lên `430` — lần thứ HAI của đúng hình dạng "hai trần trong
+một đặc tả" mà r15 sinh ra để đóng. Con số bị nhắc ở nhiều chỗ thì mỗi lần đổi là một cơ hội sót;
+cách chữa không phải sửa cho khớp mà là **thôi nhắc lại con số**.)*
 
 **KHÔNG có lối thoát composite.** Bản trước đề nghị rút phần thiết lập thành
 `.github/actions/…` khi chật trần. Lối ấy thêm **một đường dẫn thứ ba** vào write set, tức
 **vi phạm chính `A8`** (đòi đúng **2** đường). Một đặc tả không được đồng thời cấm và mời một
-phương án. **Vượt trần hiệu lực `400` ⇒ DỪNG và hỏi chủ kho**, không tự xin ngoại lệ, không tự mở
-write set.
+phương án. **Vượt trần hiệu lực (con số ở `A8`) ⇒ DỪNG và hỏi chủ kho**, không tự xin ngoại lệ, không tự mở
+write set. Luật này **đã chạy thật hai lần** (`300 → 400` ở r14, `400 → 430` ở r17): cả hai lần
+phiên thi công dừng ở số đo và hỏi, không tự nới.
 
 ## `write_set`
 
@@ -580,12 +587,20 @@ Hai phản chứng sẵn có `ruff-pin-required` và `ruff-version-probe-require
 **Phép làm ĐỎ:** đột biến `loi_ruff_ci` quay về đọc `jobs.gate` ⇒ ca **2** ĐỎ.
 
 **A8 (toàn packet) — không đụng gì khác.** `git diff --numstat` chỉ hiện đúng **2** đường dẫn, cột
-`additions` ≤ **400** (ngoại lệ CÓ PHẠM VI, xem dưới; đây là trần hiệu lực DUY NHẤT của packet). Đường thứ ba ⇒ **DỪNG và hỏi chủ kho**,
+`additions` ≤ **430** (ngoại lệ CÓ PHẠM VI, xem dưới; đây là trần hiệu lực DUY NHẤT của packet). Đường thứ ba ⇒ **DỪNG và hỏi chủ kho**,
 không tự xin ngoại lệ, không tự mở write set (`§3.2`: *"agent không tự mở write set"*).
 
-**Ngoại lệ trần dòng, r14 — chỉ thị chủ kho 12-09-2026, `#463` comment 5645742072.** Trần `ADR-0044`
-cho `sensitive` là `300`; packet này được nới lên **`400`**, **RIÊNG** nó, **KHÔNG** đổi `ADR-0044`,
-**KHÔNG** là tiền lệ. `so_tep = 2` **không** nới — bán kính ảnh hưởng vẫn là chốt, và `S1` nguyên vẹn.
+**Ngoại lệ trần dòng — hai lần, đều CÓ PHẠM VI, đều do chủ kho quyết sau khi phiên thi công DỪNG
+và hỏi.** Trần `ADR-0044` cho `sensitive` là `300`; packet này lên **`400`** (r14, `#463` comment
+5645742072) rồi **`430`** (r17, chỉ thị 12-09-2026 sau cross-review lượt 3). **RIÊNG** packet này,
+**KHÔNG** đổi `ADR-0044`, **KHÔNG** là tiền lệ.
+**Căn cứ lần thứ hai, đo được:** tại `12ca9b3` `additions = 414`, phân rã `ci.yml` **154** +
+`ci_dang_ky_test.py` **260**. Vế `ci.yml` **không nén được** — nó là 9 bước thiết lập nhân đôi cho
+hai job mới, và lối composite bị **chính `A8`** cấm vì thêm đường dẫn thứ ba. Vế còn lại có `84`
+dòng chú thích; cắt `14` dòng là đủ xuống `400` nhưng mất phần ghi **VÌ SAO** ba đột biến từng sống
+sót — đúng lý lẽ mà lần nới thứ nhất đã dùng để bác lối ấy. Bỏ bớt fixture thì **đo được là mất
+răng**: bỏ nhóm toán tử PEP 440 ⇒ đột biến `l3-quay-ve-tach-bang-hai-dau-bang` sống lại; bỏ
+`ghim-noi-dong` ⇒ survivor `l3-bo-noi-dong-logic` của reviewer sống lại. `so_tep = 2` **không** nới — bán kính ảnh hưởng vẫn là chốt, và `S1` nguyên vẹn.
 Căn cứ đo được: tại `d4ba096` `additions = 302`, đã nén hết chỗ nén được (`304 → 302`). Hai lối còn
 lại đều **xoá phép đo**: cắt chú thích thì mất bài học *"vì sao đột biến thứ ba từng sống sót"*; bỏ ca
 `apt` thì đột biến `khong-fail-close` **sống lại** ⇒ nhánh fail-close thành không đo được. Nới trần là

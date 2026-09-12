@@ -155,6 +155,20 @@ _TUY_CHON_AN_TOAN = frozenset({"--quiet", "-q", "--no-cache-dir",
 # lai cua token la RANG BUOC — khong liet ke toan tu nao, nen khong con cua toan tu de sot.
 _TEN_GOI = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]*(?:\[[^\]]*\])?")
 _RUFF_NHAC = re.compile(r"\bruff\b", re.I)   # PEP 503: ten goi khong phan biet hoa/thuong
+# CHO PHEP (khong CAM) cach GOI ruff — ban truoc chi nhan `ruff` o TOKEN DAU nen `python -m ruff`
+# (chay that, rc=0) bi gan KHONG_PHAN_TICH_DUOC, cong DO OAN. Luot 7 lop A, ba truc cua lop:
+# CACH GOI (day) · THU TU (`_probe_sau_ghim`) · NGU CANH (`_env_la`).
+_TIEN_TO_CHAY = (["python", "-m", "ruff"], ["python3", "-m", "ruff"], ["uv", "run", "ruff"], ["uvx", "ruff"])
+# Env doi DICH cai (vd `PIP_TARGET`) lam "da cai" thoi chung minh duoc "se chay". CHO PHEP:
+# ten ngoai bang thi cong noi KHONG CHUNG MINH DUOC, khong doan.
+_ENV_CHUNG_MINH_DUOC = frozenset({"PYTHONDONTWRITEBYTECODE", "PYTHONIOENCODING", "PYTHONUTF8",
+                                  "AL_VER", "EOL_BASE_SHA", "PR_HEAD_SHA"})
+
+
+def _env_la(*muc):
+    """Ten env NGOAI danh sach cho phep, gom tu ba cap workflow/job/step."""
+    return sorted({k for m in muc if isinstance(m, dict)
+                   for k in (m.get("env") or {}) if k not in _ENV_CHUNG_MINH_DUOC})
 
 
 def _dong_logic(run):
@@ -183,6 +197,9 @@ def _loai_mot_dong(tok):
     dau = _TEN_GOI.match(tok[0])
     if dau and _chuan_ten(dau.group(0)) == "ruff":
         return "KHONG"                                  # (1) CHAY ruff, khong phai cai
+    for tt in _TIEN_TO_CHAY:                            # (1b) CHAY qua module/uv — van la chay
+        if [_chuan_ten(x) for x in tok[:len(tt)]] == tt:
+            return "KHONG"
     for tt in _TIEN_TO_CAI:                             # (2) khuon cai duy nhat duoc cong nhan
         if tok[:len(tt)] == tt and tok[len(tt):len(tt) + 1] == ["install"]:
             con = tok[len(tt) + 1:]
@@ -221,6 +238,20 @@ def _phan_loai_cai_ruff(run):
     return ket, vet
 
 
+def _probe_sau_ghim(run):
+    """Probe `ruff --version` phai SAU dong cai GHIM trong CUNG than `run`. Ban truoc chi doi probe CO
+    MAT, nen probe-truoc-cai van tra `[]` du chay that cho rc=127 — lenh cai CHUA TUNG chay (l7, h4)."""
+    ghim = probe = -1
+    for i, dong in enumerate(_dong_logic(run)):
+        if dong == "ruff --version":
+            probe = i if probe < 0 else probe
+        elif _RUFF_NHAC.search(dong):
+            try: tok = shlex.split(dong)
+            except ValueError: tok = dong.split()
+            if _loai_mot_dong(tok) == "GHIM" and ghim < 0: ghim = i
+    return 0 <= ghim < probe
+
+
 def _buoc_co_dieu_kien(step):
     """DAO DANH SACH: chi buoc VO DIEU KIEN moi chung minh duoc no CHAY. Ban truoc liet
     ke hai cach viet false nen `if: '0'`, `if: '${{false}}'`, `if: runner.os == 'Linux'`
@@ -232,11 +263,13 @@ def _buoc_co_dieu_kien(step):
 def loi_ruff_ci(source=None):
     """Hợp đồng Ruff của CI, đọc MỌI job — packet #463 tách `test registry` khỏi `jobs.gate`.
 
-    Ba chốt, cùng số với bản trước (`RUFF CI: n/3` không đổi nghĩa): (1) mọi job cài Ruff đều
+    BỐN chốt (`RUFF CI: n/4` — chốt thứ tư thêm ở lượt 7): (1) mọi job cài Ruff đều
     ghim `ruff==0.15.15`; (2) mọi job cài Ruff đều in probe `ruff --version` (dòng riêng);
     (3) đúng MỘT job chạy `--chay`, Ruff cài trong CÙNG job và TRƯỚC bước đó. 1–2 đo trên MỌI
     job vì hai phản chứng đột biến bản Ruff ĐẦU TIÊN trong tệp, tức bản ở `gate` — chỉ soi job
-    registry thì cả hai LỌT. Tương thích lùi: `ci.yml` chưa tách vẫn trả `[]`.
+    registry thì cả hai LỌT; (4) env của job cài Ruff / job registry chỉ mang tên trong danh sách
+    CHO PHÉP — `PIP_TARGET` ở BẤT KỲ cấp nào đổi đích cài mà argv không đổi một ký tự.
+    Tương thích lùi: `ci.yml` chưa tách vẫn trả `[]`.
     """
     source = CI_WORKFLOW.read_text(encoding="utf-8") if source is None else source
     try:
@@ -266,9 +299,11 @@ def loi_ruff_ci(source=None):
                   or any(l in ("KHONG_GHIM", "KHONG_PHAN_TICH_DUOC") for l, _ in loai_theo_job[jn])]
     # Probe phai o CHINH buoc cai — cung buoc thi khong the bi mot buoc khac "muon" bang chung.
     thieu_probe = [jn for jn in job_cai_ruff
-                   if not any(l == "GHIM" and re.search(r"(?m)^\s*ruff --version\s*$",
-                                                        runs_theo_job[jn][i])
+                   if not any(l == "GHIM" and _probe_sau_ghim(runs_theo_job[jn][i])
                               for i, (l, _) in enumerate(loai_theo_job[jn]))]
+    env_la = {jn: _env_la(data, jobs[jn], *buoc_theo_job[jn])   # (3) env la o BAT KY cap
+              for jn in set(job_cai_ruff) | set(job_registry)}
+    job_env_la = sorted(jn for jn, v in env_la.items() if v)
     truoc = False
     if len(job_registry) == 1:
         jn = job_registry[0]; runs = runs_theo_job[jn]
@@ -280,6 +315,8 @@ def loi_ruff_ci(source=None):
         (job_cai_ruff and not thieu_probe, f"CI không in probe Ruff --version (job: {thieu_probe or 'không job nào cài Ruff'})"),
         (truoc, "CI không provision Ruff trước test registry trong cùng job "
                 f"(job chạy test registry: {job_registry or 'KHÔNG CÓ'})"),
+        (not job_env_la, "CI có env ngoài danh sách chứng minh được, nên đích cài Ruff không "
+                         f"còn chứng minh được (job: {job_env_la})"),
     ]
     return [message for ok, message in checks if not ok], len(checks)
 
@@ -636,16 +673,33 @@ def phan_chung():
     _reg = {"name": "test registry", "run": "python .claude/dev/ci_dang_ky_test.py --chay"}
     _khac = {"name": "khác", "run": "python x.py"}
     def _p(lenh): return {"name": "cài Ruff (biến thể)", "run": lenh + "\nruff --version\n"}
-    def _wf(jobs): return yaml.safe_dump({"on": "push", "jobs": jobs}, sort_keys=False)
+    _probe_truoc = {"name": "cài Ruff (probe trước)",  # probe dat TRUOC lenh cai
+                    "run": "ruff --version\npython -m pip install --quiet ruff==0.15.15\n"}
+    def _wf(jobs, env=None):
+        d = {"on": "push", "jobs": jobs}
+        if env: d["env"] = env
+        return yaml.safe_dump(d, sort_keys=False)
     # Moi fixture la mot bo ba (ten, dau vao, ky vong) — xem chu thich F02 dau ham.
     _FX = [
         ("chua-tach-tuong-thich-lui", {"gate": {"steps": [_ruff, _khac, _reg]}}, 0),
         ("da-tach-dung", {"gate": {"steps": [_ruff, _khac]}, "gate-registry": {"steps": [_ruff, _reg]}}, 0),
-        ("da-tach-thieu-ruff", {"gate": {"steps": [_ruff, _khac]}, "gate-registry": {"steps": [_reg]}}, 1),
+        ("da-tach-thieu-ruff", {"gate": {"steps": [_ruff, _khac]}, "gate-registry": {"steps": [_khac, _reg]}}, 1),
         ("da-tach-ruff-sau-registry", {"gate": {"steps": [_ruff, _khac]}, "gate-registry": {"steps": [_reg, _ruff]}}, 1),
         ("khong-job-nao-chay-registry", {"gate": {"steps": [_ruff, _khac]}}, 1),
         ("hai-job-chay-registry", {"gate": {"steps": [_ruff, _reg]}, "gate-registry": {"steps": [_ruff, _reg]}}, 1),
+        ("probe-truoc-cai", {"gate": {"steps": [_ruff, _khac]},   # THU TU trong cung than `run`
+                             "gate-registry": {"steps": [_probe_truoc, _reg]}}, 1),
     ]
+    # NGU CANH env — ba cap, moi cap MOT ca, vi moi cap la mot cua rieng (luot 7, huong 5).
+    _PT, _g = {"PIP_TARGET": "tmp"}, {"steps": [_ruff, _khac]}
+    for _t, _jobs, _env in [
+            ("env-la-cap-workflow", {"gate": _g, "gate-registry": {"steps": [_ruff, _reg]}}, _PT),
+            ("env-la-cap-job", {"gate": _g, "gate-registry": {"steps": [_ruff, _reg], "env": _PT}}, None),
+            ("env-la-cap-buoc", {"gate": _g, "gate-registry": {"steps": [dict(_ruff, env=_PT), _reg]}}, None)]:
+        _them("ruff-ci-" + _t, len(loi_ruff_ci(_wf(_jobs, _env))[0]) >= 1)
+    _them("ruff-ci-env-vo-hai",   # chieu NHAN: env trong bang khong duoc lam do oan
+          len(loi_ruff_ci(_wf({"gate": _g, "gate-registry": {"steps": [_ruff, _reg],
+                                                             "env": {"PYTHONUTF8": "1"}}}))[0]) == 0)
     # Bon ca `if:` do `_buoc_co_dieu_kien` o muc BUOC, khong phai lop phan loai. 19 ca phan
     # loai cu da CHUYEN xuong BANG NHAN (ky vong la DUNG NHAN, khong phai "co loi").
     for _t, _b in [("buoc-if-false", {"if": "false"}), ("if-so-khong", {"if": "0"}),
@@ -675,6 +729,10 @@ def phan_chung():
             ("extras", "python -m pip install ruff[all]==0.15.15", "GHIM"),
             ("noi-dong", "python -m pip install \\\n  ruff==0.15.15", "GHIM"),
             ("chay-ruff-khong-phai-cai", "ruff check .", "KHONG"),
+            ("chay-module", "python -m ruff --version", "KHONG"),
+            ("chay-module-py3", "python3 -m ruff check .", "KHONG"),
+            ("chay-uv-run", "uv run ruff --version", "KHONG"),
+            ("chay-uvx", "uvx ruff check .", "KHONG"),
             ("comment-khong-tinh", "# " + _PIN, "KHONG"),
             # chieu TU CHOI — nhan phai DUNG, khong chi "co loi"
             ("khong-ghim", "python -m pip install ruff", "KHONG_GHIM"),
@@ -702,6 +760,10 @@ def phan_chung():
     _them("tap-tuy-chon-khop-ky-vong",
           {"--quiet", "-q", "--no-cache-dir", "--disable-pip-version-check",
            "--no-input"} == _TUY_CHON_AN_TOAN)
+    _them("tap-tien-to-chay-khop-ky-vong", list(_TIEN_TO_CHAY) == [
+        ["python", "-m", "ruff"], ["python3", "-m", "ruff"], ["uv", "run", "ruff"], ["uvx", "ruff"]])
+    _them("tap-env-khop-ky-vong", _ENV_CHUNG_MINH_DUOC == {
+        "PYTHONDONTWRITEBYTECODE", "PYTHONIOENCODING", "PYTHONUTF8", "AL_VER", "EOL_BASE_SHA", "PR_HEAD_SHA"})
     for _ten, _jobs, _mong in _FX:
         _loi = len(loi_ruff_ci(_wf(_jobs))[0])
         _them("ruff-ci-" + _ten, (_loi == 0) if _mong == 0 else (_loi >= 1))

@@ -34,7 +34,7 @@ KHÔNG ĐO ĐƯỢC.
 |---|---|---|---|---|---|---|
 | 1 | `a488739c` · 1 687,481 s (02:34:04 → 03:02:12Z) | `86f87b2` / `46d9561` | `changes_requested` 0 P1 / **3 P2** / 1 P3 | 21 | `cross_reviewed` | `292c42b6…` 56 938 B, 20 hunk / 6 tệp |
 | 2 | `6b193c07` · 986,278 s (03:07:42 → 03:24:08Z) | `458314a` / `46d9561` | `changes_requested` 0/**1**/0 — VÁ SINH LỖI MỚI của HINT lượt 1 | 1 | `cross_reviewed` | `f7de8c04…` 1 399 B, 1 hunk |
-| 3 (hẹp) | `702e1fb2` · 476,868 s (03:27:03 → 03:35:00Z) | `da04323` / `157b368` | `approve` 0/0/0 | 0 | `cross_approved` | `dcd44ce6…` 289 B, 0 hunk |
+| 3 (hẹp) | `702e1fb2` · 476,868 s (03:27:03 → 03:35:00Z) | `da04323` / `157b368` | `approve` 0/0/0 | 0 | `cross_reviewed` (vượt trần 2 vòng, xem dưới) | `dcd44ce6…` 289 B, 0 hunk |
 
 **Bốn lớp lượt 1** (đều lời khai HỒ SƠ r371 rộng hơn phép đo — lần thứ NĂM liên tiếp, chuỗi PR được chấm
 r363→r366→r367→r369→r371): `nguon-thuat-lai-bi-nang-thanh-do` (10 thể hiện — nhãn (b)/(c) bị nâng thành (a) khi tổng hợp,
@@ -72,14 +72,38 @@ reply + resolve TRƯỚC khi phóng lượt 1 (trả nợ "đọc connector trư
 ~14:4xZ 11-09; lúc merge `gate (ubuntu-latest)` job 103490507437 success (03:54:21Z), `thu-hoi` job 103490472949 success.
 Không lease, không `guard --action merge` (PR hồ sơ); sổ local gen4 `uy_quyen_merge.jsonl` có dòng KHAI BÁO cho `da04323`.
 
+## Codex connector trên `5ca3bb2` (bỏ draft 04:10Z, Completed 04:18:06Z) — hai P1, đọc TRƯỚC lượt review nào kết thúc
+
+- **P1 "Preserve the verdict-anchor commit in ancestry" — KHÔNG ÁP DỤNG, đã đo.** Connector đo trên `87839aa` — object
+  không tồn tại (`git cat-file -t` fatal sau fetch): squash tổng hợp của connector, lần thứ TƯ cùng hình dạng (`403fe12`
+  #460, `6fe742e` #516, `38d6326` #517). Lịch sử thật `5ca3bb2 → 606b5ed → f4da553`, neo là tổ tiên, v2 108/0. Reply +
+  resolve.
+- **P1 "Do not certify a third Codex review round" — ĐÚNG về canon, receipt chưa ghi đủ.** `docs/PROTOCOL_DA_PHIEN.md:597-600`
+  ("tối đa hai lượt Codex … lượt hai chưa approve phải chuyển sang checkpoint, không tiếp tục gọi Codex theo quán tính"),
+  `:806-808` (stop condition review budget → Review Rescue Checkpoint), `ops/KE_HOACH_THI_CONG_DA_PROVIDER.md` §10 (trần
+  canon **2 vòng**, đếm theo VÒNG; hiện **TỰ NGUYỆN** — `review_rounds_used` không có trần cưỡng chế), `ADR-0043` (vượt trần
+  phải có khối `nang_tran` khai `ai_nang` thuộc người có thẩm quyền, `can_cu`, `tran_cu`). #517 chạy **3 vòng**; vòng 3 phóng
+  theo chỉ thị chủ kho trong phiên chat 02:2xZ ("lặp vá, cross-review … cho tới hết P1, P2 hoặc approve") — lời của người có
+  thẩm quyền nhưng là (b) thuật lại, đưa ra TRƯỚC vòng 1, và **không có khối `nang_tran` nào được ghi trước khi phóng**.
+  Sửa trong PR này (commit 3): receipt 3 hạ `assurance` `cross_approved` → `cross_reviewed`, thêm khối `nang_tran_adr_0043`
+  ghi HẬU KỲ (`khoi_nay_co_truoc_khi_phong_vong_3: false`), caveat P1
+  `VONG-3-VUOT-TRAN-2-VONG-ADR-0043-KHONG-CO-KHOI-nang_tran-truoc-khi-phong-assurance-cross_reviewed` + hàng README.
+  Merge `f4da553` đứng trên chỉ thị chủ kho (ADR-0040, khai báo) — không đứng trên `cross_approved`. Cùng khuyết tật ở
+  receipt ĐÃ LAND `pr516-review-3` (r371: lượt 3 của #516 khai `cross_approved` khi #516 chạy 5 vòng) — không sửa receipt đã
+  land, ghi nợ. Bài học: **HINT/chỉ thị/luật đều là lời khai cho tới khi được ghi đúng chỗ luật đòi** — executor đã đọc
+  "lặp tới approve" thành nâng trần mà không ghi khối luật đòi, y hệt lớp `nguon-thuat-lai-bi-nang-thanh-do`.
+
 ## Phạm vi — (a)
 
+- Commit 3: sửa theo connector P1 thứ hai (receipt 3 + README + CHANGELOG mục này + NỢ), manifest tái sinh; 4 cổng chạy
+  lại — số ở mô tả PR.
 - Commit 1 `606b5ed`: 3 verdict NGUYÊN BYTE (`cmp` với `VERDICT.rvhs517-{1,2,3}.md` trong sandbox khớp) —
   `pr517-review-1` sha256 `a97d5d94…` 131 162 B (655 dòng) · `-2` `49516ae2…` 27 355 B (187) · `-3` `7c068a44…` 12 451 B
   (106); số dòng = số LF, tệp kết thúc LF (bài học `dem-dong-cong-them-duoi-lf`). `git log --all --diff-filter=A` ⇒ đúng 1
   commit ⇒ neo blob `evidence_url` = `606b5ed`.
-- Commit 2: 3 biên nhận v2 (`cross_reviewed` / `cross_reviewed` / `cross_approved`), README (1 đoạn nguồn PR #517, 10 hàng
-  cảnh báo, 3 hàng mục lục — 756 → 771 dòng), mục r372 này, `RELEASE_MANIFEST.json` tái sinh.
+- Commit 2: 3 biên nhận v2 (`cross_reviewed` / `cross_reviewed` / `cross_approved` — hạ ở commit 3), README (1 đoạn nguồn
+  PR #517, 10 hàng cảnh báo — 11 sau commit 3, 3 hàng mục lục — 756 → 771 → 787 dòng), mục r372 này, `RELEASE_MANIFEST.json`
+  tái sinh.
 - Gate tại chỗ trước commit 2: `bien_nhan_v2 --root .` **108 ĐẠT v2 (105 tại `f4da553` + 3) · 11/11 miễn trừ legacy · 42 NỢ
   đóng băng · 0 vi phạm · 0 KHÔNG ĐO ĐƯỢC · tổng 161**, TỔNG ĐẠT; t26/t27 QUA. `release-verify --strict --json`,
   `doc-claims-check --strict`, doctrine-scan, `git diff --check` chạy SAU khi tái sinh manifest — số ở mô tả PR.
@@ -93,6 +117,10 @@ sống trong `scratch/` của sandbox, chưa vào kho, chưa có packet.
 
 ## NỢ (mở ở r372)
 
+- **Cổng trần vòng review ADR-0043** — `review_rounds_used` không có trần cưỡng chế (KE_HOACH §10 tự khai "TỰ NGUYỆN");
+  connector đề nghị test sổ từ chối `luot: 3` không void khi thiếu khối `nang_tran` — đụng gate code, ngoài PR hồ sơ.
+- **Receipt `pr516-review-3` (r371) khai `cross_approved` cho vòng 3 của #516 (5 vòng) không có `nang_tran`** — cùng khuyết
+  tật; đã land, chưa đính chính (tiền lệ `pr510-review-2`).
 - **Cổng nội dung receipt** (so_p*/verdict_bytes/assurance/owner caveat/chuỗi r) — bốn lần xác nhận giới hạn; lượt 2 #517
   có bản phác `semantics.py` ngoài kho; chưa có packet.
 - **Cổng cấu trúc verdict lượt ≥ 2** (`bien_nhan_v2` chưa từ chối `cross_approved` khi verdict thiếu bốn trạng thái canonical)

@@ -1,4 +1,4 @@
-# BIÊN NHẬN GIAO HÀNG — cross-review HỒ SƠ LƯỢT 3 (LƯỢT CUỐI, HẸP) của PR #517, KHÁC NỀN (codex), theo lớp, trên head `da04323` — head ĐÃ MERGE vào master (`f4da553`, merge commit, cha `157b368` + `da04323`); approve 0/0/0.
+# BIÊN NHẬN GIAO HÀNG — cross-review HỒ SƠ LƯỢT 3 (LƯỢT CUỐI, HẸP) của PR #517, KHÁC NỀN (codex), theo lớp, trên head `da04323` — head ĐÃ MERGE vào master (`f4da553`, merge commit, cha `157b368` + `da04323`); approve 0/0/0 nhưng VƯỢT trần 2 vòng ADR-0043 không có khối nang_tran ⇒ assurance giữ cross_reviewed.
 # Biên nhận viết SAU khi #517 merge (`f4da553`, 03:54:51Z 12-09-2026) — trả nợ ADR-0034 cho chính PR hồ sơ (tiền lệ r364/r367/r369/r371).
 
 schema_version: 2
@@ -12,7 +12,7 @@ role: reviewer
 provider: codex
 executor_provider: claude
 cross_provider: true
-assurance: cross_approved
+assurance: cross_reviewed
 verdict: approve
 verdict_path: ops/reviews/pr517-review-3-codex-verdict.md
 verdict_sha256: 7c068a44d6c65b0bb25b30129d80658e636bc2dd3e148f1ab297eb445921616a
@@ -97,7 +97,22 @@ anchor:
   mo_ta: 'Blob verdict ghim `606b5ed`. Head đã review `da04323` là tổ tiên của master (`f4da553`, merge commit #517, hai cha 157b368 + da04323; da04323 = 8a18429 + 1; 8a18429 = merge(458314a, 157b368); 458314a = 86f87b2 + 1; 86f87b2 = 896bfbf + 1; 896bfbf = 8fd3f48 + 1; 8fd3f48 = 46d9561 + 1).'
   gioi_han: 'Vững khi land bằng merge commit hoặc fast-forward; squash phá quan hệ tổ tiên (lượt 1–3 đo: 5 receipt pr516 vi phạm khi squash — với hồ sơ này sẽ là 3 receipt pr517).'
 
+nang_tran_adr_0043:
+  ghi_hau_ky: true
+  tran_cu: 2
+  vong_da_dung: 3
+  ai_nang: ducthangho
+  can_cu: 'chỉ thị trong phiên chat 02:2xZ 12-09-2026: "#517: bỏ draft, cross-review (tìm, phân theo lớp, không theo từng lỗi). Nếu chưa xanh thì lặp vá, cross-review …, đăng verdict, cho tới hết P1, P2 hoặc approve" — (b) thuật lại; đưa ra TRƯỚC vòng 1, không phải checkpoint sau vòng 2'
+  khoi_nay_co_truoc_khi_phong_vong_3: false
+  ghi_chu: 'Khối này KHÔNG chứng minh trần đã được nâng hợp lệ theo ADR-0043 — nó ghi lại rằng executor đã phóng vòng 3 mà không có khối nang_tran nào; assurance vì thế giữ cross_reviewed. Connector Codex trên #520 (discussion_r3995065526) bắt.'
+
 verdict_usage_caveats:
+  - id: VONG-3-VUOT-TRAN-2-VONG-ADR-0043-KHONG-CO-KHOI-nang_tran-truoc-khi-phong-assurance-cross_reviewed
+    muc: P1
+    mo_ta: >-
+      Trần canon `ADR-0043` / `ops/KE_HOACH_THI_CONG_DA_PROVIDER.md` §10 = 2 vòng review mỗi PR (đếm theo VÒNG; hiện TỰ NGUYỆN, `review_rounds_used` không có trần cưỡng chế); `docs/PROTOCOL_DA_PHIEN.md:597-600,806-808`: lượt hai chưa approve phải sang checkpoint, không gọi tiếp. #517 chạy 3 vòng (0/3/1 → 0/1/0 → approve). Vòng 3 phóng theo chỉ thị chủ kho trong phiên chat 02:2xZ 12-09 ("lặp vá, cross-review … cho tới hết P1, P2 hoặc approve") — lời người có thẩm quyền nhưng là (b) thuật lại, đưa ra TRƯỚC vòng 1, và KHÔNG có khối `nang_tran` (ai_nang/can_cu/tran_cu) nào được ghi trước khi phóng. Codex connector trên #520 (thread discussion_r3995065526) bắt. Vì thế receipt này giữ `cross_reviewed` dù verdict là approve và run sạch; khối `nang_tran_adr_0043` bên dưới ghi HẬU KỲ. Merge f4da553 đứng trên chỉ thị chủ kho (ADR-0040, khai báo), không đứng trên cross_approved.
+    phai_lam_gi_khi_chay_lai: >-
+      Muốn cross_approved cho da04323 cần chủ kho xác nhận nâng trần bằng comment/lease có ai_nang + can_cu (ghi ở PR hồ sơ kế); receipt pr516-review-3 (r371) cùng khuyết tật — đã land, ghi nợ đính chính. Nợ cổng: chặn `luot: 3` không void khi thiếu nang_tran.
   - id: APPROVE-HO-SO-la-dieu-kien-DUNG-merge-theo-CHI-THI-chu-kho-02-2xZ-12-09
     muc: P2
     mo_ta: >-
@@ -137,7 +152,7 @@ delivered: true
 delivered_by: claude-session
 authoritative_source: repo_file
 receipt_written_by: claude-session
-receipt_written_at_utc: '2026-09-12T04:10:00Z'
+receipt_written_at_utc: '2026-09-12T04:35:00Z'
 receipt_khong_khai:
   - 'Không khai model đã chạy — codex không đo được.'
   - 'Không khai lượt 3 đã đo lại mọi phép đo của lượt 1–2 — lượt hẹp, xem caveat.'

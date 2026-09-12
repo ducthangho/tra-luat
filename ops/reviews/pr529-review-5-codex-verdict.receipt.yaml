@@ -32,10 +32,11 @@ verdict_sha256: 4b6b8864b4c48c98fb0a9aee7abebcb4eae70ce0af50e58f5532f27c8149c93c
 verdict_bytes: 30977
 reviewed_sha: f89f07de6c102a61dafc147e1f47025b8cecb812
 reviewed_base: dc02c9beed42bd2ea44a80a2e34e1bbe3acfc6c5
-evidence_url: https://github.com/ducthangho/tra-luat/blob/PENDING/ops/reviews/pr529-review-5-codex-verdict.md
+evidence_url: https://github.com/ducthangho/tra-luat/blob/52956fc351640964cffbc939e07004dca1227ce4/ops/reviews/pr529-review-5-codex-verdict.md
 evidence_url_ghi_chu: >-
-  `PENDING` thay bằng SHA commit ĐẦU TIÊN chứa tệp verdict, đo bằng `git log --diff-filter=A`, điền
-  trong MỘT commit RIÊNG — KHÔNG điền rồi `--amend` (amend đổi SHA; ở lượt 3 nó đã làm URL treo).
+  Neo BLOB ghim `52956fc351640964cffbc939e07004dca1227ce4` — commit ĐẦU TIÊN chứa tệp verdict, đo bằng `git log --diff-filter=A`, điền
+  trong MỘT commit RIÊNG. KHÔNG điền rồi `--amend`: amend là phép ĐỔI SHA, và ở lượt 3 nó đã làm
+  `evidence_url` trỏ một commit mồ côi chưa từng đẩy.
 
 # ---- PHÂN CÔNG MỚI: kết quả đo được, để riêng khỏi lời khai
 phan_cong_M16_ket_qua:

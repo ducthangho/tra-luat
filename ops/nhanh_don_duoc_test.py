@@ -412,6 +412,16 @@ def chay_dot_bien():
         run(["git", "add", "--", TOOL.name, Path(__file__).name], src)
         run(["git", "commit", "-qm", "source"], src)
         for ten, dich, neo, thay in DOT_BIEN:
+            # F07 (luot 12) — cho THU BA cua cung benh F04, va la cho ban va
+            # luot 11 BO SOT. `chay_mot_mutant` co `dich = tuple(dich)` nhung do
+            # chi gan lai ten CUC BO cua no; iterator cua NGUOI GOI van bi tieu
+            # thu. Nen `set(dich)` o duoi day nhin thay RONG va dong bao cao in
+            # `|  | 0/0` cho mot mutant DA BI GIET THAT. Do duoc (cross-review
+            # luot 12, HUONG 2): cung muc `in-ca-C`, tuple in `T3,T5,T8 | 3/3`
+            # con iterator/generator in `|  | 0/0`, trong khi con THAT tra GIET
+            # voi do_chot = T3,T5,T8. Bo dem tong van dung — chi DONG BAO CAO
+            # noi doi, va mot bo cham noi doi ve tung muc thi khong dung de doc.
+            dich = tuple(dich)
             ban_sao = root / ten
             ban_sao.mkdir()
             # Moi mutant bat dau bang dung duong `git archive ... | tar -x`.
@@ -2003,6 +2013,33 @@ def r521_dich_mot_lan_doc_khong_duoc_bi_tieu_thu(d: Path):
     chot(nhan_duoc == [("T1", "T2"), ("T1", "T2")], "r521")
     chot((tt2, lan2) == (GIET, 2), "r521")
 
+    # (C) DUONG THU BA: `chay_dot_bien` phai in DUNG dong bao cao. `chay_mot_mutant`
+    #     gan lai `dich` o pham vi CUC BO cua no, nen iterator cua NGUOI GOI van bi
+    #     tieu thu — day la cho ban va luot 11 bo sot, luot 12 tim ra.
+    #     Do bang mot `chay_mot_mutant` gia TIEU THU dich Y HET ban that (`tuple(dich)`)
+    #     roi tra GIET: hop dong can do la "bat ke callee lam gi voi iterable, dong
+    #     bao cao cua CALLER phai dung". Dung ban gia vi ban that phong con that
+    #     (~1,4 s) va `chay_dot_bien_tu_kiem` chay lai ca bo nay 73 lan.
+    def in_ra(dich_vao):
+        mm = _nap_ban_sao(d / f"bc-{secrets.token_hex(4)}")
+        e = DOT_BIEN[0]
+        mm.DOT_BIEN = [(e[0], dich_vao, e[2], e[3])]
+
+        def mutant_gia(ban_sao, ten, dich):
+            tuple(dich)                      # TIEU THU y het ban that
+            return mm.GIET, "", 1
+
+        mm.chay_mot_mutant = mutant_gia
+        ra = io.StringIO()
+        with contextlib.redirect_stdout(ra):
+            mm.chay_dot_bien()
+        return ra.getvalue().strip()
+
+    mong_in = in_ra(("T3", "T5"))
+    chot("| T3,T5 | 2/2" in mong_in, "r521")
+    chot(in_ra(iter(("T3", "T5"))) == mong_in, "r521")
+    chot(in_ra(x for x in ("T3", "T5")) == mong_in, "r521")
+
 
 def r522_loi_phong_ngoai_oserror_cung_phai_o_lai_vong(d: Path):
     """F06 (luot 11) — `OSError` MOT MINH khong du o duong phong con.
@@ -2244,6 +2281,9 @@ DOT_BIEN_TU_KIEM = [
     ("bo-vat-hoa-dich-o-doc-kenh", ("r521",),
      "lan_thu, tuple(dich), rc_that)",
      "lan_thu, dich, rc_that)"),
+    ("bo-vat-hoa-dich-o-chay-dot-bien", ("r521",),
+     "            dich = tuple(dich)\n            ban_sao = root / ten",
+     "            ban_sao = root / ten"),
     ("bo-vat-hoa-dich-o-chay-mot-mutant", ("r521",),
      "    dich = tuple(dich)\n    trang_thai = ly_do = None",
      "    trang_thai = ly_do = None"),

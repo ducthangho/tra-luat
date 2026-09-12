@@ -36,10 +36,18 @@ reviewed_sha_la_merge_commit: >-
   `7f028a7` có HAI cha: `6b46012` (nhánh packet) + `dc02c9b` (master sau khi #521 land). Đây là
   lượt đầu tiên của packet này review một merge commit, và chính điều đó sinh hai finding về
   tiêu chí — xem `a9-bo-sot-delta-trong-merge`.
-evidence_url: https://github.com/ducthangho/tra-luat/blob/eb8aee66b2b8f0bbb1fc554abdf9c4675d95529b/ops/reviews/pr529-review-3-codex-verdict.md
+evidence_url: https://github.com/ducthangho/tra-luat/blob/f9386129a505427744ca7e463102e328fdb67218/ops/reviews/pr529-review-3-codex-verdict.md
 evidence_url_ghi_chu: >-
-  `PENDING` sẽ được thay bằng SHA của commit ĐẦU TIÊN chứa tệp verdict, đo bằng `git cat-file -e`,
-  TRƯỚC khi đẩy. Không để một URL trỏ nơi không có hiện vật — bài học `evidence_url` của #304.
+  Neo BLOB ghim `f938612` — commit ĐẦU TIÊN chứa tệp verdict trong lịch sử HIỆN TẠI của nhánh, đo
+  bằng `git log --diff-filter=A`.
+  MỘT URL TREO ĐÃ BỊ BẮT TRƯỚC KHI ĐẨY, ghi ra vì nó là đúng lớp lỗi trường này sinh ra để chặn:
+  bản đầu neo `eb8aee6` — SHA của một commit tạm mà tôi ĐÃ `--amend` ngay sau đó. Amend đổi SHA,
+  nên `eb8aee6` thành **mồ côi** và CHƯA TỪNG được đẩy (`git branch -r --contains` ⇒ RỖNG,
+  `merge-base --is-ancestor` ⇒ khác 0) ⇒ URL ấy sẽ **404** trên GitHub. Đúng bài học `evidence_url`
+  của #304: một URL trỏ nơi không có hiện vật thì không phải bằng chứng.
+  Nếp rút ra: khi `evidence_url` neo vào commit chứa CHÍNH tệp đó, đừng điền SHA rồi `--amend` —
+  amend là một phép đổi SHA, nên thứ tự đúng là commit xong rồi điền URL trong MỘT commit tiếp,
+  hoặc điền sau khi đã chốt không amend nữa.
 
 VERDICT_CON_DUOC_GHI_SAU_KHI_RUN_BAO_XONG:
   # PHÉP ĐO ĐÁNG GHI NHẤT VỀ QUY TRÌNH ở lượt này, và nó suýt làm biên nhận mang một băm SAI.

@@ -159,7 +159,9 @@ anchor:
     canonical đã THÀNH LẬP, không còn chờ.
   gioi_han: >-
     `cuong_do: cao` chỉ nói quan hệ tổ tiên đã thành lập, KHÔNG nói nội dung verdict đã được kiểm
-    bởi bên thứ ba. Nếu `master` bị viết lại lịch sử thì `evidence_url` thành blob không tra được.
+    bởi bên thứ ba. Viết lại ref `master` có thể làm mất quan hệ tổ tiên đã kiểm, nhưng
+    không tự làm mất commit/blob ghim nếu chúng còn được ref khác giữ. Khả năng tra URL
+    trên GitHub cần đo riêng; phép kiểm object trong snapshot không chứng thực dịch vụ.
 
 khong_do_duoc:
   - 'Model thật của `codex exec`: không có `modelUsage`, chỉ có lời tự khai trong VERDICT.md. Effort thực chạy cũng vậy — `xhigh` là GIÁ TRỊ TRUYỀN VÀO.'

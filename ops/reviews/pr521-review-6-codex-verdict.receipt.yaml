@@ -157,7 +157,9 @@ anchor:
     canonical đã THÀNH LẬP, không còn chờ.
   gioi_han: >-
     `cuong_do: cao` chỉ nói quan hệ tổ tiên đã thành lập, KHÔNG nói nội dung verdict đã được kiểm
-    bởi bên thứ ba. Nếu `master` bị viết lại lịch sử thì `evidence_url` thành blob không tra được.
+    bởi bên thứ ba. Viết lại ref `master` có thể làm mất quan hệ tổ tiên đã kiểm, nhưng
+    không tự làm mất commit/blob ghim nếu chúng còn được ref khác giữ. Khả năng tra URL
+    trên GitHub cần đo riêng; phép kiểm object trong snapshot không chứng thực dịch vụ.
 
 khong_do_duoc:
   - 'Model thật của `codex exec`: không có `modelUsage`, chỉ có lời tự khai trong VERDICT.md. Effort thực chạy cũng vậy — `xhigh` là GIÁ TRỊ TRUYỀN VÀO.'
@@ -180,5 +182,5 @@ receipt_written_at_utc: null  # KHÔNG ĐO ĐƯỢC — git chỉ cho commit tim
 receipt_khong_khai:
   - 'Không khai model đã chạy — codex không đo được.'
   - 'Không khai CI live xanh: `gate`/`thu-hoi` được ĐO RIÊNG trên head cuối `dd62c88`, không suy từ verdict này.'
-  - 'Không khai lượt này đóng lớp nào: `changes_requested` nghĩa là còn thể hiện sống; lượt SAU mới là chỗ kiểm bản vá.'
+  - '`changes_requested` nói toàn lượt còn finding, không suy rằng mọi lớp đều còn mở. Cần đọc riêng kết luận từng lớp trên reviewed_sha với kết quả trên bản đã áp HINT; lượt sau kiểm lại bản vá.'
   - 'Không khai bốn lượt 1–4 đã được ghi sổ — chúng chỉ có trong CHANGELOG dưới nhãn (b) thuật lại.'

@@ -69,7 +69,7 @@ hint_patch:
 
 noi_dung_do_duoc_van_dung:
   - 'ĐỐI CHIẾU LƯỢT TRƯỚC — theo verdict lượt 7, replay NGUYÊN HINT lượt 6 (5 hunk) lên blob `e849e2eb341801155cd20341b9f77b5116329dcc`: rc=0, kết quả bằng byte HEAD `aaef55bf77f061015d46b14411475d7f448beb05`; năm hunk đều ĐÃ VÁ THẬT ở thể hiện chúng phủ.'
-  - 'Lớp MỚI `neo-sha-tu-head-dong` — phát hiện có giá trị nhất của cả chuỗi: HAI tuyến trong adapter lấy lại head PR bằng `gh pr view --json headRefOid` NGAY TẠI LÚC GỌI rồi dùng nó làm SHA của dữ liệu đang review (`gh pr diff` + `git diff <base> <head_sha>`, và `record-review --reviewed-sha $(gh pr view …)`). Head đổi giữa lúc đọc và lúc ghi thì artifact neo vào một revision KHÁC — đúng thứ đã xảy ra sau mỗi lần áp HINT trong chính chuỗi này.'
+  - 'Lớp MỚI `neo-sha-tu-head-dong` — phát hiện có giá trị nhất của cả chuỗi: HAI tuyến trong adapter lấy lại head PR bằng `gh pr view --json headRefOid` NGAY TẠI LÚC GỌI rồi dùng nó làm SHA của dữ liệu đang review (`gh pr diff` + `git diff <base> <head_sha>`, và `record-review --reviewed-sha $(gh pr view …)`). Theo verdict lượt 7, Git và packet_loop thật cùng gh stand-in tái hiện việc artifact bị neo vào revision KHÁC khi head đổi giữa lúc đọc và lúc ghi. Git xác nhận các head của chuỗi đổi qua các commit áp HINT; đó không phải bằng chứng race này đã xảy ra trên GitHub. Verdict nói rõ không quan sát race trên dịch vụ thật.'
   - 'Ba lớp cũ còn thể hiện SỐNG sau HINT lượt 6, đúng hình dạng ''vá đúng chỗ được chỉ rồi bỏ sót đường tiếp theo'': con trỏ thứ hai (`§9` trong khi cú pháp `release-manifest` thật nằm ở §10.2 L699–709) · `"$RV"` dùng trước khi biến được cấp giá trị · `diff` hai danh sách ref chỉ so TÊN mà câu dẫn đọc thành ''mirror nhận đủ cái kho nguồn đang có''.'
   - 'HINT sửa phép so ref thành `tên + objectname` và in `ref diff rc=`, kèm câu khai thẳng nó KHÔNG kiểm mọi namespace ref lẫn toàn vẹn mọi object — thu hẹp đúng phạm vi, không thu hẹp tới mức vô nghĩa.'
 
@@ -157,7 +157,9 @@ anchor:
     canonical đã THÀNH LẬP, không còn chờ.
   gioi_han: >-
     `cuong_do: cao` chỉ nói quan hệ tổ tiên đã thành lập, KHÔNG nói nội dung verdict đã được kiểm
-    bởi bên thứ ba. Nếu `master` bị viết lại lịch sử thì `evidence_url` thành blob không tra được.
+    bởi bên thứ ba. Viết lại ref `master` có thể làm mất quan hệ tổ tiên đã kiểm, nhưng
+    không tự làm mất commit/blob ghim nếu chúng còn được ref khác giữ. Khả năng tra URL
+    trên GitHub cần đo riêng; phép kiểm object trong snapshot không chứng thực dịch vụ.
 
 khong_do_duoc:
   - 'Model thật của `codex exec`: không có `modelUsage`, chỉ có lời tự khai trong VERDICT.md. Effort thực chạy cũng vậy — `xhigh` là GIÁ TRỊ TRUYỀN VÀO.'
@@ -180,5 +182,5 @@ receipt_written_at_utc: null  # KHÔNG ĐO ĐƯỢC — git chỉ cho commit tim
 receipt_khong_khai:
   - 'Không khai model đã chạy — codex không đo được.'
   - 'Không khai CI live xanh: `gate`/`thu-hoi` được ĐO RIÊNG trên head cuối `dd62c88`, không suy từ verdict này.'
-  - 'Không khai lượt này đóng lớp nào: `changes_requested` nghĩa là còn thể hiện sống; lượt SAU mới là chỗ kiểm bản vá.'
+  - '`changes_requested` nói toàn lượt còn finding, không suy rằng mọi lớp đều còn mở. Cần đọc riêng kết luận từng lớp trên reviewed_sha với kết quả trên bản đã áp HINT; lượt sau kiểm lại bản vá.'
   - 'Không khai bốn lượt 1–4 đã được ghi sổ — chúng chỉ có trong CHANGELOG dưới nhãn (b) thuật lại.'

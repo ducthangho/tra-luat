@@ -71,7 +71,7 @@ noi_dung_do_duoc_van_dung:
   - 'Lớp `adapter-chep-doctrine` quét TOÀN tệp thay vì chỉ diff, theo yêu cầu ưu tiên số 1 của prompt: 60 mệnh đề tại 38 cụm vị trí, mỗi ID có dòng HEAD và hunk. Ba ID trong bản nháp (D11/D18/D42) bị LOẠI sau khi đọc nghĩa — giữ khoảng trống ID để không tráo dấu vết bản nháp.'
   - 'Mutation M1 đo răng của `doctrine-scan` trên CHÍNH tệp này: thêm một cụm cấm ⇒ `0 → 6 → 0`. Kèm kết luận đúng mức: cổng khớp CHUỖI nên xanh KHÔNG chứng minh 60 mệnh đề nghĩa đã hết.'
   - 'Lớp `prompt-qua-argv` (A01) đo được chứ không suy: prompt 131072 byte làm lệnh Claude thật + `--help` trả `126 / Argument list too long`, OS probe `execve` trả errno 7 (E2BIG); bản stdin + `--help` trả 0. Reviewer khai thẳng đây KHÔNG phải một lượt Claude review end-to-end.'
-  - 'Bốn thể hiện `loi-khai-vuot-phep-do` (E01–E04) có hai phản chứng CHẠY ĐƯỢC: ghi-rồi-hoàn-nguyên trên clone làm `status`/`log` sạch ở cả ba thời điểm; fixture SIGTERM có handler thu hồi con cho parent rc=143 và child 0→1.'
+  - 'Bốn thể hiện `loi-khai-vuot-phep-do` (E01–E04) có hai phản chứng CHẠY ĐƯỢC: ghi-rồi-hoàn-nguyên trên clone: `status` sạch trước/sau nhưng báo thay đổi ở giữa; `log` không có commit mới ở cả ba thời điểm; fixture SIGTERM có handler thu hồi con cho parent rc=143 và child 0→1.'
   - 'Phân tích VÌ SAO bốn P2 của connector lọt lượt 3: đọc PROMPT lượt 3 NGUYÊN BẢN cạnh VERDICT lượt 3, kết luận cả bốn là BỎ SÓT chứ không phải giới hạn phạm vi — và nói rõ đó là nhận xét về ARTIFACT, không suy đoán suy nghĩ nội bộ của reviewer cũ.'
 
 model_reviewer_identity:
@@ -158,7 +158,9 @@ anchor:
     canonical đã THÀNH LẬP, không còn chờ.
   gioi_han: >-
     `cuong_do: cao` chỉ nói quan hệ tổ tiên đã thành lập, KHÔNG nói nội dung verdict đã được kiểm
-    bởi bên thứ ba. Nếu `master` bị viết lại lịch sử thì `evidence_url` thành blob không tra được.
+    bởi bên thứ ba. Viết lại ref `master` có thể làm mất quan hệ tổ tiên đã kiểm, nhưng
+    không tự làm mất commit/blob ghim nếu chúng còn được ref khác giữ. Khả năng tra URL
+    trên GitHub cần đo riêng; phép kiểm object trong snapshot không chứng thực dịch vụ.
 
 khong_do_duoc:
   - 'Model thật của `codex exec`: không có `modelUsage`, chỉ có lời tự khai trong VERDICT.md. Effort thực chạy cũng vậy — `xhigh` là GIÁ TRỊ TRUYỀN VÀO.'
@@ -181,5 +183,5 @@ receipt_written_at_utc: null  # KHÔNG ĐO ĐƯỢC — git chỉ cho commit tim
 receipt_khong_khai:
   - 'Không khai model đã chạy — codex không đo được.'
   - 'Không khai CI live xanh: `gate`/`thu-hoi` được ĐO RIÊNG trên head cuối `dd62c88`, không suy từ verdict này.'
-  - 'Không khai lượt này đóng lớp nào: `changes_requested` nghĩa là còn thể hiện sống; lượt SAU mới là chỗ kiểm bản vá.'
+  - '`changes_requested` nói toàn lượt còn finding, không suy rằng mọi lớp đều còn mở. Cần đọc riêng kết luận từng lớp trên reviewed_sha với kết quả trên bản đã áp HINT; lượt sau kiểm lại bản vá.'
   - 'Không khai bốn lượt 1–4 đã được ghi sổ — chúng chỉ có trong CHANGELOG dưới nhãn (b) thuật lại.'

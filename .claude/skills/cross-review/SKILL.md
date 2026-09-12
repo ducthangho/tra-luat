@@ -462,8 +462,15 @@ Bỏ nó thì bảng tụt xuống thành bảng phân loại thuần.
 | `findings_ids` | slug của **LỚP**, kebab-case |
 
 Một LỚP = một **cơ chế** sinh cùng hình dạng lỗi; hạng của lớp là hạng **cao nhất** trong các thể
-hiện. Slug là **khoá đếm** — giữ NGUYÊN qua các lượt cho cùng một lớp. Ngưỡng lặp lại và định nghĩa
-P1/P2/P3: xem protocol `§8`/`§12`.
+hiện. Slug là **khoá đếm** — giữ NGUYÊN qua các lượt cho cùng một lớp. Ngưỡng lặp lại: xem protocol
+`§12`.
+
+**`P1`/`P2`/`P3` KHÔNG có nguồn định nghĩa có thẩm quyền trong kho — nợ `DINH-NGHIA-PHAN-HANG-KHONG-CO-NGUON`.**
+Đo được: `§8` chứa `P1` nhưng **không** `P2`/`P3`; `§12` **không** chứa cả ba. Bản trước của dòng này
+trỏ *"định nghĩa P1/P2/P3: xem `§8`/`§12`"* và đó là một **con trỏ sai đích** — nó dẫn người đọc tới
+nội dung assurance/budget thay cho định nghĩa severity. Dùng ba hạng theo cách chúng đang được dùng
+trong `ops/reviews/**`, và **đừng** tự định nghĩa chúng ở đây: một adapter tự định nghĩa thứ doctrine
+chưa định nghĩa là dựng một nguồn thứ hai sẽ trôi lệch.
 
 **Reviewer phải GỌI TÊN khi một vòng đóng finding bằng cách CẮT TIÊU CHÍ** hoặc thu hẹp phạm vi, chứ
 đừng ghi nhận nó là đã vá.

@@ -1,3 +1,20 @@
+## ⏩ CON TRỎ TIẾN — thư mục này ĐÃ HẾT HẠN làm trạng thái hiện tại (cập nhật 13:15Z)
+
+Bàn giao **đã được nhận và thực hiện**. Mọi câu ở trên mô tả trạng thái *"head `353eae1`, HINT CHƯA ÁP"*
+là lời khai đúng **tại 11:20Z**, và **không còn đúng** bây giờ:
+
+| | |
+|---|---|
+| head #512 | **`36f68c7`** — `1db6af2` merge master `bb7013c` trước, rồi áp HINT |
+| `HINT.rvwin512-6.patch` | **ĐÃ ÁP nguyên văn**; chạm đúng một tệp (`ops/lease_publish_test.py`), wrapper giữ nguyên byte `87c76029…` |
+| `numstat` | **`+1101/−27`** (`≤ 1500`, dư 399) — **không** phải `1114` như một thông điệp commit từng ghi; xem đính chính trong bản chiếu |
+| hồ sơ tiếp | **`ops/handoff/512-luot7/`** nhánh `ops/handoff-512-luot7` — F6, log hai lượt đo, vòng 7 |
+| bản chiếu verdict vòng 6 + kết quả áp HINT | comment của phiên kế nhiệm trên PR #512, đăng ~13:12Z 12-09-2026, mở đầu *"Bản chiếu verdict vòng 6 + kết quả áp HINT — head `36f68c7`"* (KHÔNG ghi số comment ở đây: tôi chưa đo được ID, và một con số chưa đo thì không được ghi) |
+
+Ghi con trỏ này vì `ADR-0043` đã trả giá đúng chỗ đó: một tài liệu bị cấm sửa mà **không có dòng nào dẫn
+tới bản thay thế** thì thành **con trỏ chết**, và người mở thẳng nó sẽ đọc con số cũ. Thư mục này là hồ sơ
+của **vòng 6**, không phải trạng thái hiện tại — hỏi `ops/handoff/512-luot7/` và `git` cho trạng thái.
+
 # Trạng thái bàn giao — PR #512 / packet #504 WINDOWS-LEASE-SUITE, sau vòng review 6
 
 Soạn 11:20Z 12-09-2026 bởi phiên `claude` (Opus 5) `session_01Lnos1VZ4KSzHLG9u4UETiW`.

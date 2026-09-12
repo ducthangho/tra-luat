@@ -29,6 +29,13 @@ Hai clone dựng từ cùng một nguồn, trong một lệnh, cùng SHA `880292
 | đầy đủ | **rc=0** — LÀ tổ tiên | 98 ĐẠT v2 · **0 vi phạm** · **0 KHÔNG ĐO ĐƯỢC** · tổng 151 |
 | `--depth=1 --branch master` | `fatal: Not a valid commit name`, **rc=128** | 98 ĐẠT v2 · 0 vi phạm · **196 KHÔNG ĐO ĐƯỢC** ⇒ `TỔNG: KHÔNG ĐO ĐƯỢC` |
 
+**Bốn số trên TRÔI theo head, và đó là tính chất chứ không phải lỗi** — ghi ra đây vì một reviewer
+đã đo ở head khác rồi chấm bảng này sai. `#516` land thêm 2 biên nhận, nên trên `7718863` cùng hai
+lệnh ấy cho `100 ĐẠT / tổng 153` và `200 KHÔNG ĐO ĐƯỢC` (đo lại, cả hai). Bảng neo `8802924`; ai
+đo ở head khác mà thấy số khác thì **đó là bằng chứng neo đang làm đúng việc của nó**, không phải
+bằng chứng bảng sai. Cặp `0 vi phạm` so `KHÔNG ĐO ĐƯỢC` — thứ kết luận thật sự nằm ở đây — **không
+đổi** qua cả hai head.
+
 Hai sai độc lập chồng lên nhau trong một câu:
 
 1. **Nguồn**: `--depth` làm hỏng phép hỏi lịch sử — đúng mục *"cắt độ sâu làm hỏng phép hỏi LỊCH SỬ"*
@@ -83,6 +90,12 @@ mà vắng mặt** — chưa ai viết.
   (22 bước sau chỗ huỷ không bao giờ khởi động). Bước bị huỷ là **số 20,
   `lease-publish selftest (đo lại setup sau G5)`**.
 - `thu-hoi` trên `4965f0a`: thành công.
+
+**Nguồn của bốn số Windows ở trên, và giới hạn của chúng**: `actions/runs/34644073109`, đọc qua API
+GitHub trong phiên. Với người đọc **từ trong kho**, chúng là **ATTESTATION, KHÔNG tái lập được** —
+gói review không mang `run.json` nào của lượt CI, và reviewer không có mạng. Nói đúng ra: chúng là
+`KHÔNG ĐO ĐƯỢC` từ bên trong kho. Ghi rõ vì chính mục này đang tố cáo việc trình bày một trạng thái
+thứ ba như thể nó là kết quả đo, nên nó không được phép phạm cùng lỗi ở đoạn dưới của chính nó.
 
 **Vì vậy `landed` của #514 CHƯA đủ điều kiện theo §10.2** — điều kiện đòi gate hậu-merge XANH, mà
 chân Windows cho trạng thái thứ ba: **BỊ HUỶ**, không phải `pass`, cũng không phải `fail`. Nói

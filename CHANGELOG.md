@@ -1,4 +1,4 @@
-# ★ dev-side — r371: ghi sổ #516 — năm verdict codex chấm CHÍNH hồ sơ r369 của #511; lượt 5 approve nhưng codex HẾT QUOTA lúc kết thúc (ma_thoat=1); PR này KHÔNG thể cross-review trước 15-09 (2026-09-11)
+# ★ dev-side — r371: ghi sổ #516 — năm verdict codex chấm CHÍNH hồ sơ r369 của #511; lượt 5 approve nhưng codex báo HẾT QUOTA lúc kết thúc (ma_thoat=1) — thông điệp "try again Sep 15th" KHÔNG phải phép đo: probe 12-09 chạy được (2026-09-11)
 
 Nối tiếp r369 (chốt tới `46d9561`, #516). Mục này là vế bookkeeping ADR-0034 của CHÍNH #516: 5 verdict + 5 biên nhận v2
 vào `ops/reviews/`, 5 hàng mục lục + 13 cảnh báo + 1 đoạn nguồn, manifest tái sinh. Đệ quy dừng ở đây theo tiền lệ
@@ -57,14 +57,19 @@ chua_do_duoc); cay-kho sạch; 7 băm khớp lượt 4. Băm verdict do EXECUTOR
 `MA-THOAT-1-CODEX-HET-QUOTA-luc-ket-thuc-verdict-day-du-tren-dia-assurance-cross_reviewed`. Merge `46d9561` (20:56:47Z,
 merge commit `8802924` + `c98c33e`, không squash) dựa trên: approve lượt 5 + kết luận cây của lượt 4 + `cross_approved`
 lượt 3 trên cha 1 `5f45e6e`; gate ubuntu (job 103411426056) + thu-hoi success trên `c98c33e`. Muốn `cross_approved` cho
-`c98c33e` cần một lượt chạy trọn (rc=0, có dòng XONG) — không thể trước 15-09.
+`c98c33e` cần một lượt chạy trọn (rc=0, có dòng XONG) — chưa phóng vì #516 đã merge; xem mục "Hệ quả" về thời điểm codex
+chạy lại được.
 
-## Hệ quả: PR hồ sơ NÀY không có reviewer khác nền cho tới 15-09-2026 01:26Z
+## Hệ quả: thông điệp quota của codex KHÔNG phải phép đo — bản đầu của mục này đã tin nó
 
-Luật chung chủ kho ("mọi PR chỉ merge khi cross-review approve") KHÔNG thoả được bằng codex trước mốc đó. PR này mở
-ở trạng thái draft, chờ chủ kho chọn: (i) reviewer dự phòng khác nền (không có — `llm`/`agy` chưa cài, không xác thực),
-(ii) lane `same_provider_approved` (reviewer claude, cùng nền — ADR-0036 xếp thấp hơn), hoặc (iii) đợi quota. Tác giả
-KHÔNG tự chọn. Cùng lý do, **PR #512 (packet `WINDOWS-LEASE-SUITE`, #504) DỪNG ở S6** sau lượt 2 approve (`8239554`) vì
+Bản đầu (21:0xZ 11-09) viết *"PR hồ sơ NÀY không có reviewer khác nền cho tới 15-09-2026 01:26Z"* và mở PR ở trạng thái
+draft chờ chủ kho chọn reviewer dự phòng. Chủ kho chỉ thị bỏ draft và cross-review; **probe `codex exec` lúc 02:3xZ
+12-09 chạy được (rc=0)** — tức chuỗi `try again at Sep 15th` trong stderr run `6c8b0629` là thông điệp của nhà cung
+cấp về một cửa sổ giới hạn, không phải mốc đo được, và câu "không thể trước 15-09" là lời khai rộng hơn phép đo —
+đúng lớp lỗi mà bốn PR hồ sơ liên tiếp đã ăn. Sửa ở đây trước khi phóng lượt review 1 của #517 (commit 3 của PR),
+để reviewer đo câu đã sửa chứ không phải câu sai. Bài học: **thông điệp lỗi của công cụ là (b) thuật lại**; muốn
+khẳng định "không dùng được tới mốc T" phải đo lại tại T hoặc ghi rõ là lời của công cụ.
+Không liên quan quota, **PR #512 (packet `WINDOWS-LEASE-SUITE`, #504) DỪNG ở S6** sau lượt 2 approve (`8239554`) vì
 connector Codex ra 4 finding đã kiểm (1 P1 tree-kill, 3 P2) và trần ADR-0043 = 2 vòng — chưa merge, chờ nâng trần và
 chọn phạm vi vá; hai verdict `rvwin512-{1,2}` của #512 (`88f0a645…` 34 537 B · `74259a45…` 26 824 B) CHƯA vào kho —
 sẽ vào ở PR hồ sơ của chính #512 khi #512 land, không vào mục này.
@@ -78,6 +83,8 @@ sẽ vào ở PR hồ sơ của chính #512 khi #512 land, không vào mục nà
   từng được tham chiếu nên amend không phá gì; sau push thì KHÔNG amend, tiền lệ `120d47a`).
 - Commit 2: 5 biên nhận v2 (assurance như bảng trên), README (1 đoạn nguồn PR #516, 13 hàng cảnh báo, 5 hàng mục lục —
   736 → 756 dòng), mục r371 này, `RELEASE_MANIFEST.json` tái sinh (`tl.py release-manifest --deterministic`).
+- Commit 3: sửa lời khai quota (tiêu đề + mục "Hệ quả" + NỢ của mục này; caveat P1 receipt lượt 5 và hàng README
+  tương ứng), manifest tái sinh; 4 cổng chạy lại — số ở mô tả PR.
 - Gate tại chỗ trước commit 2: `bien_nhan_v2 --root .` **105 ĐẠT v2 (100 tại `46d9561` + 5) · 11/11 miễn trừ legacy ·
   42 NỢ đóng băng · 0 vi phạm · 0 KHÔNG ĐO ĐƯỢC · tổng 158**, TỔNG ĐẠT; t26/t27 QUA. `release-verify --strict --json`,
   `doc-claims-check --strict`, doctrine-scan, `git diff --check` chạy SAU khi tái sinh manifest — số ở mô tả PR.
@@ -91,8 +98,8 @@ văn; nợ cổng vẫn chưa có packet.
 
 ## NỢ (mở ở r371)
 
-- **Reviewer khác nền hết quota tới 15-09** — PR hồ sơ này và mọi lượt review mới đều chờ; chưa có reviewer dự phòng
-  được cài/xác thực (`doctor`: `openai-llm`, `antigravity` THIẾU).
+- **Chưa có reviewer dự phòng khác nền được cài/xác thực** (`doctor`: `openai-llm`, `antigravity` THIẾU) — lộ ra khi
+  codex báo hết quota; giới hạn ấy hoá ra ngắn, nhưng lần sau có thể không.
 - **#512 dừng ở S6** (4 finding connector đã kiểm, trần 2 vòng) — cần chủ kho nâng trần + chọn phạm vi vá; verdict
   #512 chưa vào kho.
 - **`so_p*`/`verdict_bytes`/`assurance` không có cổng** — r367/r369/r371, ba lần đo, chưa có packet.

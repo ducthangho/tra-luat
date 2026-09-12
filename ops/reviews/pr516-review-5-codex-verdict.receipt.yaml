@@ -96,7 +96,7 @@ verdict_usage_caveats:
     mo_ta: >-
       run.json 6c8b0629 ghi ma_thoat=1, stdout.log 0 byte (không có dòng `XONG VERDICT sha256=`), last.md rỗng; đuôi stderr: `ERROR: You've hit your usage limit … try again at Sep 15th, 2026 1:26 AM` — codex hết quota đúng lúc kết thúc lượt. VERDICT.md trên đĩa đầy đủ (frontmatter, ĐỐI CHIẾU với trạng thái canonical, Bảng đo lại tự ghi chốt lúc 20:50:46Z, Findings, chua_do_duoc), cay-kho sạch, 7 băm khớp lượt 4; băm verdict do executor tính. Vì lượt chạy KHÔNG kết thúc sạch, receipt này giữ assurance `cross_reviewed` dù verdict là approve; merge 46d9561 dựa trên approve này + kết luận cây của lượt 4 + cross_approved của lượt 3 trên cha 1 (5f45e6e).
     phai_lam_gi_khi_chay_lai: >-
-      Muốn mức cross_approved cho c98c33e cần một lượt chạy trọn (rc=0, có dòng XONG) — không thể trước 15-09 vì quota; đừng đọc ma_thoat=1 thành "lượt hỏng" nhưng cũng đừng đọc tệp đầy đủ thành "lượt sạch".
+      Muốn mức cross_approved cho c98c33e cần một lượt chạy trọn (rc=0, có dòng XONG). Thông điệp stderr nói "try again at Sep 15th" nhưng một probe `codex exec` lúc 02:3xZ 12-09 (rc=0) cho thấy giới hạn ấy KHÔNG kéo dài tới 15-09 — nó là thông điệp của nhà cung cấp, không phải phép đo; lượt chạy trọn chưa được phóng vì #516 đã merge. Đừng đọc ma_thoat=1 thành "lượt hỏng" nhưng cũng đừng đọc tệp đầy đủ thành "lượt sạch".
   - id: APPROVE-HO-SO-la-dieu-kien-DUNG-merge-theo-LUAT-CHUNG-chu-kho-14-4xZ
     muc: P2
     mo_ta: >-

@@ -4036,6 +4036,16 @@ def _mo_con_nhom_rieng(lenh, env, stdout, stderr):
     return subprocess.Popen(lenh, env=env, stdout=stdout, stderr=stderr, text=True, **them)
 
 
+def _nap_launcher_thu_hoi():
+    """Dùng lại cơ chế chụp cây/khoá PID của launcher đã có trong cùng checkout."""
+    import importlib.util
+    duong = HERE.parent / ".claude" / "dev" / "launcher.py"
+    spec = importlib.util.spec_from_file_location("launcher_thu_hoi_lease_test", duong)
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    return mod
+
+
 def _giet_ca_cay(p, cho_giay: float = 5.0) -> str:
     """Giết con VÀ CHÁU. Trả một dòng ĐO ĐƯỢC về đường đã đi — kể cả đường KHÔNG làm được gì.
 
@@ -4045,11 +4055,11 @@ def _giet_ca_cay(p, cho_giay: float = 5.0) -> str:
       giết cả runner ("test không được nhét PID của chính nó vào thứ mình đang thử giết").
     · `taskkill /T /F` KHÔNG đáng tin — trả `Access denied` ngay trên con do chính mình sinh. Gọi
       xong phải KIỂM LẠI, còn sống thì `p.kill()`.
-    · ZOMBIE tính là ĐÃ CHẾT: `wait()` thu hồi, và trạng thái SAU `wait` mới là lời khai.
+    · POSIX dùng lại launcher để chụp hậu duệ, giữ khoá danh tính và kiểm cả nhóm;
+      ZOMBIE tính là ĐÃ CHẾT. `wait()` bên dưới thu hồi PID con trực tiếp.
     · "Đã gọi lệnh giết" ≠ "đã chết" — nên hàm này trả nhật ký từng bước, và ca gọi nó phải ĐO hành
       vi của cháu (nhịp tim), đừng đọc mã thoát của lệnh giết.
     """
-    import signal
     buoc = []
     killpg, getpgid = getattr(os, "killpg", None), getattr(os, "getpgid", None)
     if killpg and getpgid:
@@ -4059,19 +4069,11 @@ def _giet_ca_cay(p, cho_giay: float = 5.0) -> str:
         except OSError as ex:
             buoc.append(f"getpgid loi {type(ex).__name__}")
         if nhom_con is not None and nhom_con == p.pid and nhom_con != nhom_minh:
-            for ten in ("SIGTERM", "SIGKILL"):
-                sig = getattr(signal, ten, None)
-                if sig is None or p.poll() is not None:
-                    continue
-                try:
-                    killpg(nhom_con, sig)
-                    buoc.append(f"killpg({nhom_con},{ten})")
-                except OSError as ex:
-                    buoc.append(f"killpg {ten} loi {type(ex).__name__}")
-                try:
-                    p.wait(timeout=max(0.1, cho_giay / 2))
-                except subprocess.TimeoutExpired:
-                    pass
+            # Mẹ chết bởi TERM chưa chứng minh cháu chết. Chụp cây TRƯỚC tín hiệu
+            # để giữ cả cháu đã mở session riêng (t154/t156/t157 cũng tạo nhóm lồng).
+            thu_hoi = _nap_launcher_thu_hoi()
+            kq = thu_hoi._giet_cay(p.pid, thu_hoi._khoa_danh_tinh(p.pid))
+            buoc.append(f"ca_cay={kq.ca_cay}: {kq}")
         else:
             buoc.append(f"KHONG co nhom rieng (nhom_con={nhom_con} pid={p.pid} nhom_minh={nhom_minh}) "
                         f"- chi giet PID, CHAU KHONG DO DUOC")
@@ -4100,6 +4102,23 @@ def _giet_ca_cay(p, cho_giay: float = 5.0) -> str:
         buoc.append("wait QUA HAN - con CON SONG")
     buoc.append(f"rc={p.returncode}")
     return " -> ".join(buoc)
+
+
+def _moi_truong_con_ab(nen: dict) -> dict:
+    """Môi trường cho MỘT lượt con của t125: nền đã lọc + TẮT ĐỆM Python.
+
+    VÌ SAO `PYTHONUNBUFFERED` PHẢI ĐẶT Ở ĐÂY, không phó cho wrapper. Đo 12-09-2026: con in một dòng
+    rồi `sleep 6` mà KHÔNG flush ⇒ tee thấy dòng trong 3 s: **không** biến ⇒ KHÔNG · có biến ⇒ CÓ.
+    Trên CI thì `ops/chay_lease_publish_test.sh` (M2) đã `export PYTHONUNBUFFERED=1`, nên đường CI vốn
+    sống; nhưng giá trị của một bản vá không được phụ thuộc một biến do TỆP KHÁC đặt — chạy trực tiếp
+    `python3 ops/lease_publish_test.py` thì bằng chứng lại nằm trong đệm của con tới lúc con thoát,
+    đúng chỗ mù mà lớp `bang-chung-song-bi-chon-trong-tep-tam` sinh ra để xoá. `t157` đo CƠ CHẾ bằng
+    một writer tự flush nên nó xanh ở CẢ HAI đường ⇒ `t157` KHÔNG canh được chỗ này; `t158` canh.
+
+    Đặt cho CẢ HAI vế A/B nên bất biến của t125 không đổi: hai vế vẫn khác nhau ĐÚNG một biến
+    `GITHUB_ACTOR`.
+    """
+    return dict(nen, PYTHONUNBUFFERED="1")
 
 
 def _theo_duoi_va_in(duong, tien_to: str, dung, khoa) -> None:
@@ -4212,7 +4231,7 @@ def t125_AB_toan_suite_KHONG_doi_verdict_theo_ambient_actor():
             vao = re.findall(r"(?m)^>>> vao (\S+) ", out)
             ra = set(re.findall(r"(?m)^<<< ra (\S+) ", out))
             treo = [x for x in vao if x not in ra]
-            bang(False, f"lượt {nhan}: lượt con KHÔNG XONG trong {AB_HAN_GIAY}s — đã giết cả cây "
+            bang(False, f"lượt {nhan}: lượt con KHÔNG XONG trong {AB_HAN_GIAY}s — kết quả thu hồi "
                         f"({nhat_ky_giet}); ca treo (vao không ra): {treo!r}; đã xong {len(ra)} ca; "
                         f"stdout cuối={out[-300:]!r}; stderr cuối={err[-300:]!r}")
         m = re.search(r"lease_publish: (\d+)/(\d+) đạt", out)
@@ -4236,7 +4255,8 @@ def t125_AB_toan_suite_KHONG_doi_verdict_theo_ambient_actor():
                 ow = open(out_p, "w", encoding="utf-8"); tay.append(ow)
                 ew = open(err_p, "w", encoding="utf-8"); tay.append(ew)
                 han = time.monotonic() + AB_HAN_GIAY
-                p = _mo_con_nhom_rieng([sys.executable, str(Path(__file__).resolve()), CO_AB], mt, ow, ew)
+                p = _mo_con_nhom_rieng([sys.executable, str(Path(__file__).resolve()), CO_AB],
+                                       _moi_truong_con_ab(mt), ow, ew)
                 dung = threading.Event()
                 luong = [threading.Thread(target=_theo_duoi_va_in, args=(out_p, f"[{ma}]", dung, khoa), daemon=True),
                          threading.Thread(target=_theo_duoi_va_in, args=(err_p, f"[{ma} err]", dung, khoa), daemon=True)]
@@ -5109,12 +5129,14 @@ def t137_M9_workflow_admission_hop_dong_tinh_va_actionlint_shellcheck():
         try:
             ket = _chay_day_lenh_trong_ngan_sach([l for _, l in day], SC_HAN_TONG_GIAY)
         except subprocess.TimeoutExpired as ex:
-            chot(False, f"shellcheck TREO trên thân run #{day[len(ket)][0]}: hết ngân sách TỔNG "
+            chot(False, f"shellcheck TREO trên thân run #{next((i for i, l in day if l == ex.cmd), '?')}: hết ngân sách TỔNG "
                         f"{SC_HAN_TONG_GIAY}s của cả vòng ({getattr(ex, 'cmd', '')})")
         except HetNganSachDay as ex:
             chot(False, f"vòng shellcheck tiêu hết ngân sách TỔNG {SC_HAN_TONG_GIAY}s tại thân run "
                         f"#{day[ex.chi_so][0]} — chỉ {ex.da_chay}/{len(day)} thân được ĐO; số thân đã đo "
                         f"không được im lặng nhỏ hơn số thân có mặt")
+        chot(len(ket) == len(day),
+             f"shellcheck chỉ trả {len(ket)}/{len(day)} kết quả — chưa đo đủ thân run")
         for (i, _), q in zip(day, ket):
             chot(q.returncode == 0, f"shellcheck ĐỎ trên thân run #{i} (rc={q.returncode}):\n{q.stdout}{q.stderr}")
 
@@ -5899,6 +5921,8 @@ def t154_giet_ca_cay_thu_hoi_CHAU_chu_khong_chi_CON():
             bang(dap, f"phản chứng MẤT RĂNG: giết đúng PID con mà cháu đã im (nhịp {a}->{b}); "
                       f"cháu phải sống sót cú giết PID, nếu không thì chiều 2 không chứng minh gì")
         finally:
+            if p1.poll() is None:
+                p1.kill(); p1.wait(timeout=5)
             don_chau(pid1)
 
         # ── CHIỀU 2: `_giet_ca_cay` ⇒ cháu im
@@ -5911,7 +5935,62 @@ def t154_giet_ca_cay_thu_hoi_CHAU_chu_khong_chi_CON():
             bang(not dap, f"`_giet_ca_cay` KHÔNG thu hồi được CHÁU: nhịp còn tăng {a}->{b}; "
                           f"nhật ký giết: {nhat_ky}")
         finally:
+            if p2.poll() is None:
+                p2.kill(); p2.wait(timeout=5)
             don_chau(pid2)
+
+
+    # Giữ chốt nhóm của runner bằng seam tín hiệu: không gửi tín hiệu thật tới nhóm ấy.
+    from unittest import mock
+    if os.name == "posix":
+        for nhom_con, nhom_minh in ((43210, 43210), (12345, 12345), (12345, 67890)):
+            p = mock.Mock(pid=43210, returncode=-9)
+            p.poll.return_value = -9
+            with mock.patch.object(os, "getpgid", side_effect=lambda pid: nhom_minh if pid == 0 else nhom_con), \
+                    mock.patch.object(os, "killpg") as kg, \
+                    mock.patch.dict(globals(), {"_nap_launcher_thu_hoi": mock.Mock()}) as _:
+                _giet_ca_cay(p)
+                bang(not kg.called and not _nap_launcher_thu_hoi.called,
+                     "không được giết nhóm khi cùng nhóm runner hoặc con không phải trưởng nhóm")
+
+        # Dùng nguyên văn hai fixture đã có; không sáng tác thêm mã đối kháng.
+        import ast
+        cay = ast.parse((HERE.parent / ".claude/dev/launcher_test.py").read_text(encoding="utf-8"))
+        thu_hoi = _nap_launcher_thu_hoi()
+        for dau in ("t63_", "t66_"):
+            fn = next(n for n in cay.body if isinstance(n, ast.FunctionDef) and n.name.startswith(dau))
+            ma = {}
+            for call in ast.walk(fn):
+                if (isinstance(call, ast.Call) and isinstance(call.func, ast.Attribute)
+                        and call.func.attr == "write_text" and isinstance(call.func.value, ast.Name)
+                        and call.func.value.id in ("chau_py", "me_py")):
+                    ma[call.func.value.id] = ast.literal_eval(call.args[0])
+            with tempfile.TemporaryDirectory() as td:
+                td = Path(td)
+                me, chau, pid_tep = td / "me.py", td / "chau.py", td / "pid"
+                me.write_text(ma["me_py"], encoding="utf-8")
+                chau.write_text(ma["chau_py"], encoding="utf-8")
+                p = _mo_con_nhom_rieng([sys.executable, str(me), str(chau), str(pid_tep)],
+                                      nen, subprocess.DEVNULL, subprocess.DEVNULL)
+                pid, khoa_pid = None, None
+                try:
+                    het = time.monotonic() + 15
+                    while not pid_tep.exists() and time.monotonic() < het:
+                        time.sleep(0.05)
+                    bang(pid_tep.exists(), f"fixture {dau} chưa ghi PID cháu")
+                    pid = int(pid_tep.read_text(encoding="utf-8"))
+                    khoa_pid = thu_hoi._khoa_danh_tinh(pid)
+                    bang(khoa_pid is not None and thu_hoi._con_song_dung_khoa(pid, khoa_pid),
+                         f"fixture {dau}: chưa đo được cháu sống trước thu hồi")
+                    nhat_ky = _giet_ca_cay(p)
+                    bang(p.poll() is not None and not thu_hoi._con_song_dung_khoa(pid, khoa_pid),
+                         f"fixture {dau}: cháu sống sau thu hồi: {nhat_ky}")
+                finally:
+                    if pid is not None and khoa_pid is not None:
+                        thu_hoi._giet_rieng({pid: khoa_pid}, signal.SIGKILL)
+                    if p.poll() is None:
+                        p.kill()
+                    p.wait(timeout=5)
 
 
 @ca
@@ -5931,6 +6010,7 @@ def t157_tee_dua_dong_con_LEN_NGAY_trong_luc_con_CON_DANG_CHAY():
     gọi) — nên đột biến đích là: `_theo_duoi_va_in` chỉ in khi `dung` đã set (tức chỉ in ở cuối); bỏ
     tiền tố; bỏ `flush=True`; đọc text theo khối thay vì nhị phân từng dòng.
     """
+    # Quan sát bytes bên dưới TextIOWrapper; StringIO.getvalue() thấy cả dữ liệu chưa flush.
     import io
     import threading
     nen = {k: v for k, v in os.environ.items() if k != "GITHUB_ACTOR"}
@@ -5943,7 +6023,9 @@ def t157_tee_dua_dong_con_LEN_NGAY_trong_luc_con_CON_DANG_CHAY():
               "time.sleep(30)\n")
         p = _mo_con_nhom_rieng([sys.executable, "-c", ma, str(log)], nen,
                               subprocess.DEVNULL, subprocess.DEVNULL)
-        dung, khoa, bat = threading.Event(), threading.Lock(), io.StringIO()
+        dung, khoa = threading.Event(), threading.Lock()
+        luu = io.BytesIO()
+        bat = io.TextIOWrapper(luu, encoding="utf-8", newline="\n")
         cu = sys.stdout
         t = threading.Thread(target=_theo_duoi_va_in, args=(log, "[GIA]", dung, khoa), daemon=True)
         try:
@@ -5951,7 +6033,7 @@ def t157_tee_dua_dong_con_LEN_NGAY_trong_luc_con_CON_DANG_CHAY():
             t.start()
             t0, thay, con_song = time.monotonic(), "", None
             while time.monotonic() - t0 < 15:
-                thay = bat.getvalue()
+                thay = luu.getvalue().decode("utf-8")
                 if "t_gia_dang_chay" in thay:
                     con_song = p.poll() is None      # ĐO NGAY: con còn chạy lúc dòng đã lên chưa?
                     break
@@ -5961,6 +6043,7 @@ def t157_tee_dua_dong_con_LEN_NGAY_trong_luc_con_CON_DANG_CHAY():
             dung.set()
             t.join(timeout=5)
             nhat_ky = _giet_ca_cay(p)
+            bat.close()
         bang("t_gia_dang_chay" in thay,
              f"tee KHÔNG đưa dòng của con lên stdout trong 15 s: bắt được {thay!r}; giết: {nhat_ky}")
         bang(con_song is True,
@@ -5972,6 +6055,74 @@ def t157_tee_dua_dong_con_LEN_NGAY_trong_luc_con_CON_DANG_CHAY():
         bang(not re.search(r"(?m)^>>> vao ", thay),
              f"dòng teed KHÔNG được khớp regex nhật ký của CHA (`^>>> vao`), kẻo nhật ký con lẫn "
              f"thành nhật ký cha: {thay!r}")
+
+
+@ca
+def t158_tee_chi_song_khi_con_KHONG_DEM_nen_moi_truong_con_phai_TAT_DEM():
+    """Bản vá lớp `bang-chung-song-bi-chon-trong-tep-tam` chỉ sống khi lượt con KHÔNG ĐỆM — ca này đo
+    đúng chỗ `t157` không thấy, và là lỗi TÁC GIẢ TỰ TÌM sau khi phóng lượt review 3.
+
+    Hai chiều, đúng bảng đã đo 12-09-2026:
+    · con KHÔNG `PYTHONUNBUFFERED` ⇒ tee KHÔNG thấy dòng trong cửa sổ quan sát (bằng chứng nằm trong
+      đệm của con) — nếu chiều này thấy thì ca mất răng và phải nói ra, đừng mừng.
+    · con CÓ `PYTHONUNBUFFERED=1` ⇒ tee THẤY, trong lúc con vẫn đang chạy.
+    Và chốt thứ ba: `_moi_truong_con_ab` phải THẬT SỰ đặt biến ấy, đồng thời KHÔNG mang `GITHUB_ACTOR`
+    vào (kẻo vá một lỗ mà mở lỗ khác — chính bất biến của t125).
+
+    ĐỘT BIẾN LÀM CA NÀY ĐỎ: `_moi_truong_con_ab` trả `dict(nen)` trần; t125 truyền `mt` thay cho
+    `_moi_truong_con_ab(mt)` (chốt thứ ba vẫn xanh nhưng chiều CÓ biến sẽ đỏ nếu đo qua helper).
+    """
+    # Quan sát bytes bên DƯỚI `TextIOWrapper` có đệm, KHÔNG dùng `StringIO`: cross-review lượt 3
+    # (F2.1) đo được `StringIO.getvalue()` thấy cả dữ liệu CHƯA xả, nên một phép bắt như thế không
+    # phân biệt được stream có đệm với stream đã xả — đúng lý do đột biến bỏ `flush` từng sống sót
+    # ở `t157`. Dùng bytes ở đây làm ca này mạnh hơn: nó đỏ cả khi tee thôi xả.
+    import io
+    import threading
+    mt_nen = {k: v for k, v in os.environ.items() if k != "GITHUB_ACTOR"}
+    bang("PYTHONUNBUFFERED" in _moi_truong_con_ab({}) and _moi_truong_con_ab({})["PYTHONUNBUFFERED"] == "1",
+         f"`_moi_truong_con_ab` phải TẮT ĐỆM cho lượt con: {_moi_truong_con_ab({})!r}")
+    bang("GITHUB_ACTOR" not in _moi_truong_con_ab({"A": "1"}),
+         "`_moi_truong_con_ab` không được mang `GITHUB_ACTOR` vào — đó là bất biến của t125")
+
+    ma = "import sys,time\nprint('>>> vao t_do_dem_158 2026-01-01T00:00:00Z')\ntime.sleep(8)\n"  # KHÔNG flush
+    def do(mt):
+        with tempfile.TemporaryDirectory() as td:
+            lg = Path(td) / "o"
+            lg.write_text("", encoding="utf-8")
+            with open(lg, "w", encoding="utf-8") as ow:
+                p = _mo_con_nhom_rieng([sys.executable, "-c", ma], mt, ow, subprocess.DEVNULL)
+                dung, khoa = threading.Event(), threading.Lock()
+                luu = io.BytesIO()
+                bat = io.TextIOWrapper(luu, encoding="utf-8", newline="\n")
+                cu = sys.stdout
+                try:
+                    sys.stdout = bat
+                    t = threading.Thread(target=_theo_duoi_va_in, args=(lg, "[158]", dung, khoa), daemon=True)
+                    t.start()
+                    t0, thay = time.monotonic(), ""
+                    while time.monotonic() - t0 < 3.0:
+                        thay = luu.getvalue().decode("utf-8", "replace")
+                        if "t_do_dem_158" in thay:
+                            break
+                        time.sleep(0.05)
+                    con_song = p.poll() is None
+                finally:
+                    sys.stdout = cu
+                    dung.set()
+                    t.join(timeout=5)
+                    nhat_ky = _giet_ca_cay(p)
+                    bat.close()
+            return ("t_do_dem_158" in thay), con_song, nhat_ky
+
+    thay_dem, song_dem, _ = do({k: v for k, v in mt_nen.items() if k != "PYTHONUNBUFFERED"})
+    bang(not thay_dem,
+         "phản chứng MẤT RĂNG: con CÒN ĐỆM mà tee đã thấy dòng — nghĩa là phép đo này không còn phân "
+         "biệt được hai đường, và câu 'phải tắt đệm' trong `_moi_truong_con_ab` thành vô căn cứ; "
+         "hãy ĐO LẠI rồi sửa lời khai, đừng mừng vì ca xanh")
+    thay_tat, song_tat, nhat_ky = do(_moi_truong_con_ab(mt_nen))
+    bang(thay_tat and song_tat,
+         f"với môi trường của lượt con (đã TẮT ĐỆM), tee phải thấy dòng TRONG LÚC con còn chạy: "
+         f"thay={thay_tat} con_song={song_tat}; giết: {nhat_ky}")
 
 
 @ca
@@ -6113,6 +6264,23 @@ def t156_han_NGOAI_khong_nho_hon_tong_han_TRONG_va_duoi_tran_cung():
     bang(do_thoi[24] < do_thoi[4] + ngan_sach + 1.0,
          f"trần của dãy TRÔI THEO SỐ LỆNH: 4 lệnh {do_thoi[4]:.2f}s vs 24 lệnh {do_thoi[24]:.2f}s — "
          f"ngân sách TỔNG phải cắt ở {ngan_sach}s bất kể n, nếu không thì `T137_TRAN_GIAY` là số bịa")
+
+
+    # Các lệnh ngủ phía trên hết hạn TRONG run(). Cần đo riêng hết ngân sách GIỮA
+    # hai lời gọi đã hoàn tất: nhánh HetNganSachDay không được đổi thành return/cấp lại hạn.
+    from unittest import mock
+    da_goi, het_tai = [], None
+    def chay_xong(lenh, **kw):
+        da_goi.append(lenh)
+        return subprocess.CompletedProcess(lenh, 0, "", "")
+    with mock.patch.object(time, "monotonic", side_effect=[0.0, 0.0, 1.0]):
+        try:
+            _chay_day_lenh_trong_ngan_sach([["lenh1"], ["lenh2"]], 0.6, chay=chay_xong)
+        except HetNganSachDay as ex:
+            het_tai = (ex.chi_so, ex.da_chay)
+    bang(het_tai == (1, 1) and da_goi == [["lenh1"]],
+         f"hết ngân sách GIỮA hai lệnh phải ném HetNganSachDay trước lệnh #1: "
+         f"het_tai={het_tai}, da_goi={da_goi}")
 
 
 CO_CHI_CA = "--chi-ca="   # `--chi-ca=t01_` ⇒ chỉ chạy ca có tên bắt đầu bằng tiền tố ấy (M3 packet #504 dùng để sinh lượt con rẻ)

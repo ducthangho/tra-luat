@@ -183,6 +183,35 @@ def r24_cli_effective_leo_lop(m):
 def r25_hop_dong_loi_api(m):
     _doi_loi(m, m.kiem_ket_qua, "claude-opus-5", {"is_error": False, "modelUsage": {None: {}}})
     _doi_loi(m, m.chon, "routine", ["scripts/x.py"], 0, 1, ("claude-opus-5",))
+def r26_duong_dan_bi_chan_nham(m):
+    for path in ("..foo.py", "..a/b.py", "...x", "..ops/x.py"):
+        if m._chuan_hoa_duong(path) != path: raise AssertionError("bị stripped: %s" % path)
+        if _bac(m, "routine", [path]) != BAC[2]: raise AssertionError("không thành khong-biet: %s" % path)
+    if m._chuan_hoa_duong("ops/..bar.md") != "ops/..bar.md": raise AssertionError("bị stripped: ops/..bar.md")
+    if _bac(m, "routine", ["ops/..bar.md"]) != BAC[0]: raise AssertionError("ops/..bar.md sai điểm")
+def r27_duong_dan_thoat_repo(m):
+    for path in ("..", "../x", "../../etc/passwd", "ops/../../x"):
+        _doi_loi(m, m.chon, "routine", [path], 0, 1)
+def r28_so_bang_nhau_exact_match(m):
+    kq1 = m.chon("routine", [".claude/settings.json"], 0, 1)
+    if "chạm vùng cong" not in kq1[2]: raise AssertionError("sai vùng .claude/settings.json")
+    if m._vung(".claude/settings.json") != "cong": raise AssertionError(".claude/settings.json không là cong")
+    kq2 = m.chon("routine", ["RELEASE_MANIFEST.json"], 0, 1)
+    if "chạm vùng cong" not in kq2[2]: raise AssertionError("sai vùng RELEASE_MANIFEST.json")
+    if m._vung("RELEASE_MANIFEST.json") != "cong": raise AssertionError("RELEASE_MANIFEST.json không là cong")
+    kq3 = m.chon("routine", ["docs/PROTOCOL_DA_PHIEN.md"], 0, 1)
+    if "chạm vùng giao-thuc" not in kq3[2]: raise AssertionError("sai vùng docs/PROTOCOL_DA_PHIEN.md")
+    if m._vung("docs/PROTOCOL_DA_PHIEN.md") != "giao-thuc": raise AssertionError("docs/PROTOCOL_DA_PHIEN.md không là giao-thuc")
+    kq4 = m.chon("routine", [".gitignore"], 0, 1)
+    if "khong-biet" in kq4[2] or "cong" in kq4[2] or "giao-thuc" in kq4[2]: raise AssertionError("sai vùng .gitignore")
+    if m._vung(".gitignore") != "dev": raise AssertionError(".gitignore không là dev")
+    if m._vung("tmp/.claude/settings.json.bak") != "khong-biet": raise AssertionError("tmp/.claude/settings.json.bak không là khong-biet")
+    if m._vung("x/RELEASE_MANIFEST.json") != "khong-biet": raise AssertionError("x/RELEASE_MANIFEST.json không là khong-biet")
+    if m._vung("docs/PROTOCOL_DA_PHIEN.md.orig") != "tai-lieu": raise AssertionError("docs/PROTOCOL_DA_PHIEN.md.orig không là tai-lieu")
+    if m._vung("vendor/.gitignore") != "khong-biet": raise AssertionError("vendor/.gitignore không là khong-biet")
+    if m._vung("a/b/.claude/settings.json") != "khong-biet": raise AssertionError("a/b/.claude/settings.json không là khong-biet")
+    if m._vung("ops/RELEASE_MANIFEST.json.tmp") != "dev": raise AssertionError("ops/RELEASE_MANIFEST.json.tmp không là dev")
+
 CA = [(h.__name__, h) for h in (r01_bon_bac_biet_truoc, r02_khong_biet_day_len_cao_nhat, r03_banh_coc_hai_chieu,
     r04_dinh_danh_allow_list, r05_chin_fixture_hai_rig, r06_json_mo_ho_phai_do, r07_don_dieu_moi_to_hop,
     r08_review_class_allow_list, r09_write_set_rong_khong_do_duoc, r10_so_am_khong_phai_pham_vi_nho,
@@ -190,10 +219,11 @@ CA = [(h.__name__, h) for h in (r01_bon_bac_biet_truoc, r02_khong_biet_day_len_c
     r14_khong_co_model_phu_van_dat, r15_backslash_bi_tu_choi, r16_bang_vung_r6_va_nhan_planned,
     r17_cli_khong_hoan_vi_so_dong_luot, r18_cli_bac_truoc_fail_close, r19_dinh_danh_phai_khop_bang_nhau,
     r20_dict_chi_review_class_van_chay, r21_ghim_bien_duoi_tuyet_doi, r22_duong_khong_chuan_va_planned_lap,
-    r23_nhan_thu_muc_chi_boc_mot_slash, r24_cli_effective_leo_lop, r25_hop_dong_loi_api)]
+    r23_nhan_thu_muc_chi_boc_mot_slash, r24_cli_effective_leo_lop, r25_hop_dong_loi_api,
+    r26_duong_dan_bi_chan_nham, r27_duong_dan_thoat_repo, r28_so_bang_nhau_exact_match)]
 def _db(tim, thay, *dich): return tim, thay, list(dich)
 DOT_BIEN = {
-    "bo_nhanh_khong_biet": _db('    if "khong-biet" in cac_vung: cong(3, "chạm vùng khong-biet")', '    if "khong-biet" in cac_vung: pass', "r02_khong_biet_day_len_cao_nhat"),
+    "bo_nhanh_khong_biet": _db('    if "khong-biet" in cac_vung: cong(3, "chạm vùng khong-biet")', '    if "khong-biet" in cac_vung: pass', "r02_khong_biet_day_len_cao_nhat", "r26_duong_dan_bi_chan_nham"),
     "bo_banh_coc": _db("        if truoc > chi_so:", "        if False and truoc > chi_so:", "r03_banh_coc_hai_chieu", "r18_cli_bac_truoc_fail_close"),
     "nhan_bi_danh": _db('MO_HINH_CHO_PHEP = ("claude-opus-5", "claude-fable-5")', 'MO_HINH_CHO_PHEP = ("claude-opus-5", "claude-fable-5", "opus", "fable", "sonnet")', "r04_dinh_danh_allow_list"),
     "tin_subtype_success": _db('    model_usage = ket_qua_json.get("modelUsage")', '    if ket_qua_json.get("subtype") == "success":\n        return "modelUsage: ĐẠT (đột biến tin subtype)"\n    model_usage = ket_qua_json.get("modelUsage")', "r05_chin_fixture_hai_rig", "r13_tut_giua_chung_bi_chan", "r14_khong_co_model_phu_van_dat"),
@@ -222,11 +252,26 @@ DOT_BIEN = {
     "so_tep_ha_bien_duoi": _db('    if len(ds) >= 5: cong(1, "số tệp=%d >= 5" % len(ds))', '    if len(ds) >= 4: cong(1, "số tệp=%d >= 5" % len(ds))', "r21_ghim_bien_duoi_tuyet_doi"),
     "so_dong_ha_bien_duoi": _db('    if so_dong >= 400: cong(1, "số dòng=%d >= 400" % so_dong)', '    if so_dong >= 399: cong(1, "số dòng=%d >= 400" % so_dong)', "r21_ghim_bien_duoi_tuyet_doi"),
     "diem_ha_bien_duoi": _db('    return 0 if diem <= 0 else 1 if diem <= 2 else 2 if diem <= 4 else 3', '    return 0 if diem <= 0 else 1 if diem <= 2 else 2 if diem < 4 else 3', "r21_ghim_bien_duoi_tuyet_doi"),
-    "bo_chuan_hoa_duong": _db('        duong = _chuan_hoa_duong(duong)', '        duong = duong', "r15_backslash_bi_tu_choi", "r22_duong_khong_chuan_va_planned_lap", "r23_nhan_thu_muc_chi_boc_mot_slash"),
+    "bo_chuan_hoa_duong": _db('        duong = _chuan_hoa_duong(duong)', '        duong = duong', "r15_backslash_bi_tu_choi", "r22_duong_khong_chuan_va_planned_lap", "r23_nhan_thu_muc_chi_boc_mot_slash", "r27_duong_dan_thoat_repo"),
     "boc_planned_lap": _db('        if duong.startswith("planned:"): raise KhongDoDuoc("nhãn planned: lặp: %r" % duong)', '        while duong.startswith("planned:"): duong = duong[len("planned:"):].strip()', "r22_duong_khong_chuan_va_planned_lap"),
     "boc_slash_cuoi_nhieu_lan": _db('    de_so = duong[:-1] if duong.endswith("/") else duong', '    de_so = duong.rstrip("/") if duong.endswith("/") else duong', "r23_nhan_thu_muc_chi_boc_mot_slash"),
-    "duong_khong_chuan_thanh_khong_biet": _db('    if de_so != chuan: raise KhongDoDuoc("đường dẫn không chuẩn %r; bản chuẩn: %r" % (duong, chuan))', '    if de_so != chuan: return duong', "r22_duong_khong_chuan_va_planned_lap", "r23_nhan_thu_muc_chi_boc_mot_slash"),
+    "duong_khong_chuan_thanh_khong_biet": _db('    if de_so != chuan: raise KhongDoDuoc("đường dẫn không chuẩn %r; bản chuẩn: %r" % (duong, chuan))', '    if de_so != chuan: return duong', "r22_duong_khong_chuan_va_planned_lap", "r23_nhan_thu_muc_chi_boc_mot_slash", "r27_duong_dan_thoat_repo"),
     "bo_uu_tien_effective_review_class": _db('            review_class = max((khai, hieu_luc), key=_HANG_REVIEW.get)', '            review_class = khai', "r24_cli_effective_leo_lop"),
+    "revert_startswith_dotdot": _db('if chuan == ".." or chuan.startswith("../"):', 'if chuan.startswith(".."):', 'r26_duong_dan_bi_chan_nham'),
+    "bo_escape_bang_cham_cham": _db('if chuan == ".." or chuan.startswith("../"):', 'if chuan.startswith("../"):', 'r27_duong_dan_thoat_repo'),
+    "bo_escape_startswith_cham_cham_slash": _db('if chuan == ".." or chuan.startswith("../"):', 'if chuan == "..":', 'r27_duong_dan_thoat_repo'),
+    "rong_settings_json": _db('path == ".claude/settings.json"', '".claude/settings.json" in path', 'r28_so_bang_nhau_exact_match'),
+    "rong_release_manifest": _db('path == "RELEASE_MANIFEST.json"', '"RELEASE_MANIFEST.json" in path', 'r28_so_bang_nhau_exact_match'),
+    "rong_protocol": _db('path == "docs/PROTOCOL_DA_PHIEN.md"', '"docs/PROTOCOL_DA_PHIEN.md" in path', 'r28_so_bang_nhau_exact_match'),
+    "rong_gitignore": _db('path == ".gitignore"', '".gitignore" in path', 'r28_so_bang_nhau_exact_match'),
+    "rong_bon_exact_match": _db(
+        '    if path == ".claude/settings.json" or path == "RELEASE_MANIFEST.json" or path.startswith(\n            (".github/workflows/", ".github/checks/", ".claude/hooks/",\n                        ".claude/dev/packet_loop", "ops/lease_publish")): return "cong"\n    if path == "docs/PROTOCOL_DA_PHIEN.md" or path.startswith(\n            ("docs/adr/", ".claude/skills/", ".claude/agents/")): return "giao-thuc"\n    if path.startswith("scripts/"): return "runtime"\n    if path == ".gitignore"',
+        '    if ".claude/settings.json" in path or "RELEASE_MANIFEST.json" in path or path.startswith(\n            (".github/workflows/", ".github/checks/", ".claude/hooks/",\n                        ".claude/dev/packet_loop", "ops/lease_publish")): return "cong"\n    if "docs/PROTOCOL_DA_PHIEN.md" in path or path.startswith(\n            ("docs/adr/", ".claude/skills/", ".claude/agents/")): return "giao-thuc"\n    if path.startswith("scripts/"): return "runtime"\n    if ".gitignore" in path',
+        'r28_so_bang_nhau_exact_match'
+    ),
+    "dot_names_become_known": _db('    return "khong-biet"', '    if path.startswith(".."): return "dev"\n    return "khong-biet"', 'r26_duong_dan_bi_chan_nham'),
+    "normalizer_strips_leading_dots": _db('    return chuan', '    return chuan.lstrip(".")', 'r01_bon_bac_biet_truoc', 'r21_ghim_bien_duoi_tuyet_doi', 'r26_duong_dan_bi_chan_nham', 'r28_so_bang_nhau_exact_match'),
+    "same_score_wrong_zone": _db('    if path == ".gitignore" or path.startswith((".claude/dev/", "ops/")): return "dev"', '    if path == ".gitignore" or path.startswith((".claude/dev/", "ops/")) or path.endswith(".orig"): return "dev"', 'r28_so_bang_nhau_exact_match'),
 }
 def _chay(m):
     dat, ly = {}, {}

@@ -24,9 +24,21 @@ role: reviewer
 provider: codex
 executor_provider: claude
 cross_provider: true
-assurance: cross_approved
+assurance: cross_reviewed
 assurance_ghi_chu: >-
-  `cross_approved` (approve khác nền).
+  HẠ TỪ `cross_approved` XUỐNG `cross_reviewed` theo finding P1 của connector codex trên PR #531
+  (thread `PRRT_kwDOTNeRjc6h0DKH`, head `d846159`), và phép đo xác nhận connector ĐÚNG:
+  `docs/PROTOCOL_DA_PHIEN.md:597` khai *"Mỗi PR được dùng tối đa HAI lượt Codex"*, và :806-816 đặt
+  `codex_review_calls_used` **tối đa hai trên một PR**, kèm câu chặn thẳng *"không cho phép gọi thêm
+  bằng prompt/phiên khác để lách trần"*. `ADR-0048` nâng trần trục VÒNG lên MƯỜI nhưng KHAI TƯỜNG MINH
+  (dòng 11-12) rằng `codex_review_calls_used` **giữ nguyên trần của nó** — hai trục khác nhau.
+  #521 đã dùng **TÁM** lượt Codex review. Không có hiện vật uỷ quyền bền nào nâng trần LỜI GỌI cho
+  PR ấy, nên `approve` của lượt 8 KHÔNG được mang mức `cross_approved`.
+  Nội dung verdict, `reviewed_sha` và quan hệ tổ tiên giữ nguyên; chỉ mức assurance bị hạ.
+  Muốn khôi phục `cross_approved` thì cần một uỷ quyền BỀN của chủ kho nâng trần trục LỜI GỌI bằng
+  SỐ, ghi công khai (tiền lệ: comment 5643435742 cho trục VÒNG của #517), rồi receipt ghi khối
+  `nang_tran` kèm `khoi_nay_co_truoc_khi_phong: false`. Chỉ thị trong phiên chat KHÔNG thay thế được
+  hiện vật ấy — chính protocol §12 nói vậy.
 verdict: approve
 verdict_path: ops/reviews/pr521-review-8-codex-verdict.md
 verdict_sha256: 25e70fbab1ef2744327bb849f64c719406ca649e62643a78527541330a1c1ce1
@@ -39,8 +51,10 @@ evidence_url_ghi_chu: >-
   #521 (nếu có) đăng SAU commit ấy; nguồn có thẩm quyền là TỆP CÓ BĂM trong kho, không phải comment.
 
 verdict_usage_caveats:
-  - id: EVIDENCE-NGOAI-KHO-moi-lien-ket-evidence-KHONG-tra-duoc
-    mo_ta: 'Như lượt 5: mọi liên kết `evidence/...` trong tệp này là liên kết nội bộ gói review đã chết theo container. Số 520 dòng/400 ứng viên/242 token/8 mutation mô tả kiểm kê và phép thử, không phải số liên kết. Đếm liên kết Markdown tới evidence/: lượt 5–8 lần lượt 42/28/33/27 (39/26/27/24 đích riêng); lượt 8 không có nhiều liên kết nhất — các BẢNG đầy đủ chỉ có trong evidence/, phần trong verdict là tóm tắt. Phạm vi nguồn: phép chạy/phép đọc sandbox cũ là (c) theo verdict; scalar runtime, model/effort yêu cầu và việc chép nguyên byte từ gói gốc là (b) theo phiên điều phối. Kho chỉ cho so byte/hash với receipt và blob e759a7e; không có VERDICT.md gốc/run.json/log để kiểm độc lập nguồn ngoài kho.'
+  - id: VUOT-TRAN-LOI-GOI-CODEX-8-lan-tran-la-2-assurance-da-HA
+    mo_ta: '`approve` này là lượt Codex review thứ TÁM trên PR #521, trong khi `docs/PROTOCOL_DA_PHIEN.md:597` và :806-816 đặt trần `codex_review_calls_used` là **HAI** lời gọi mỗi PR, và `ADR-0048` (dòng 11-12) khai tường minh rằng nó nâng trần trục VÒNG chứ **không** nâng trần trục LỜI GỌI. Vì vậy `assurance` của biên nhận này đã được HẠ về `cross_reviewed`. **Đừng đọc `approve` ở đây thành một cổng tin cậy khác danh tính đã đạt.** Nội dung verdict và `reviewed_sha` không bị đụng. Connector codex trên #531 (thread `PRRT_kwDOTNeRjc6h0DKH`) là bên tìm ra; phiên điều phối đo lại protocol/ADR và xác nhận đúng.'
+  - id: LIEN-KET-NOI-BO-GOI-KHONG-TRA-DUOC-gom-ca-HINT-patch-va-duong-cay-kho
+    mo_ta: 'Như lượt 5. Kiểm kê ĐỦ cho lượt này: chỉ có liên kết `evidence/...`, không có liên kết tương đối nào khác. Riêng lượt này số liên kết lớn nhất (kiểm kê 520 dòng, 400 ứng viên con trỏ, 242 token số, 8 mutation) — các BẢNG đầy đủ chỉ có trong `evidence/`, phần trong verdict là tóm tắt.'
   - id: APPROVE-la-dieu-kien-DUNG-khong-phai-merge-authorization
     mo_ta: '`approve` 0/0/0 này là điều kiện DỪNG của vòng vá→cross-review theo chỉ thị chủ kho (''lặp vá, cross review, đăng verdict đến hết P1, P2 hoặc approve''), KHÔNG phải merge authorization. ADR-0040: verdict do tài khoản tác giả PR vận chuyển không thành required check.'
   - id: HEAD-DA-DOI-SAU-APPROVE-merge-master-85fcbf8

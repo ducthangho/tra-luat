@@ -39,8 +39,8 @@ evidence_url_ghi_chu: >-
   #521 (nếu có) đăng SAU commit ấy; nguồn có thẩm quyền là TỆP CÓ BĂM trong kho, không phải comment.
 
 verdict_usage_caveats:
-  - id: EVIDENCE-NGOAI-KHO-moi-lien-ket-evidence-KHONG-tra-duoc
-    mo_ta: 'Như lượt 5: mọi liên kết `evidence/...` trong tệp này là liên kết nội bộ gói review đã chết theo container. Phạm vi nguồn: phép chạy/phép đọc sandbox cũ là (c) theo verdict; scalar runtime, model/effort yêu cầu và việc chép nguyên byte từ gói gốc là (b) theo phiên điều phối. Kho chỉ cho so byte/hash với receipt và blob e759a7e; không có VERDICT.md gốc/run.json/log để kiểm độc lập nguồn ngoài kho.'
+  - id: LIEN-KET-NOI-BO-GOI-KHONG-TRA-DUOC-gom-ca-HINT-patch-va-duong-cay-kho
+    mo_ta: 'Như lượt 5, và kiểm kê ĐỦ cho lượt này: các liên kết `evidence/...` CỘNG một liên kết `HINT.patch` — tệp HINT nằm cạnh VERDICT trong gói review, KHÔNG được đưa vào kho. Mọi liên kết tương đối trong tệp này là KHÔNG TRA ĐƯỢC.'
   - id: LOP-doctrine-DUOC-KHAI-DONG-o-luot-nay-nhung-bang-PHEP-DOC
     mo_ta: 'Lượt 6 khai `adapter-chep-doctrine` đã đóng sau khi tự phân hoạch 506 dòng theo 14 vùng. Đó là một phép ĐỌC độc lập với lượt 5 (23 vùng), không phải một phép đo máy chạy được. Lượt 7 và 8 đọc lại và không tìm thêm — ba phép đọc khác nhau cùng kết luận, vẫn là ba phép đọc.'
 

@@ -89,7 +89,23 @@ Lượt 8 trả lời câu *"bảng 0 dòng của anh duyệt bao nhiêu thứ?"
 
 ## Đo — và chỗ KHÔNG ĐO ĐƯỢC
 
-Cổng trên head land `dd62c88`: `gate` **success** · `thu-hoi` **success**. Tại chỗ sau khi áp HINT lượt 7:
+**Cổng — tách theo SHA và theo SỰ KIỆN, vì hai thứ đó không thay nhau được.** `ci.yml` (khối chú
+thích ngay trên bước `tl selftest`) khai thẳng: ở lượt `pull_request`, `actions/checkout` lấy **commit
+merge TỔNG HỢP**, nên `git rev-parse HEAD` **không** phải head của PR, và CI **cố ý không sinh bằng
+chứng exact-head** ở lượt ấy — bằng chứng chỉ sinh ở `push`/`workflow_dispatch`. Vì vậy:
+
+| SHA | sự kiện | cổng | kết quả | bằng chứng exact-head? |
+|---|---|---|---|---|
+| `dd62c88` (head nhánh #521) | `pull_request` | `gate (ubuntu-latest)` | success | **KHÔNG** — chạy trên cây merge tổng hợp |
+| `dd62c88` | `pull_request` | `thu-hoi` | success | — (nó kiểm `base.sha`, không kiểm cây) |
+| `dc02c9b` (merge commit trên master) | `push` | `gate (ubuntu-latest)` | success | **CÓ** |
+| `dc02c9b` | `push` | `gate (windows-latest)` | **cancelled** | **KHÔNG ĐO ĐƯỢC** |
+
+Bản đầu của mục này viết *"Cổng trên head land `dd62c88`: `gate` success"* — gán một lượt PR cho head
+nhánh, đúng thứ `ci.yml` từ chối khai. Connector codex trên #531 bắt (P1); phiên điều phối đọc lại
+`ci.yml` và xác nhận đúng. Việc sửa attribution **không** biến chân Windows đã huỷ thành đạt.
+
+Tại chỗ sau khi áp HINT lượt 7:
 `idiom_py_test` ĐẠT · `doctrine-scan` 7 tệp / 0 chỗ · `adr-song` 48/48 · `bien_nhan_v2` 0 vi phạm ·
 `eol_policy --all` 2085 scanned / 2063 checked / 22 skipped / 0 vi phạm · `doc-claims-check --strict`
 `ok=true` · `golden-test` `ok=true` · `release-verify --strict` `ok=true` **180 == 180** ·

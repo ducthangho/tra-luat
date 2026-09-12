@@ -21273,10 +21273,34 @@ def run() -> int:
         # TRẢ GIÁ LẦN THỨ TƯ đúng nếp "ĐÃ TRẢ GIÁ" trong ca này: phiên #475 chạy `adr-song` +
         # `doctrine-scan` + `doc-claims-check --strict` (cả ba xanh) rồi đẩy; CI mới là nơi ca này đỏ
         # (`tl selftest 1708/1709`, run 34183079571). Kê khai này viết SAU khi đọc đúng ca đỏ ấy.
-        ok3 = int(j.get("file_count") or 0) == len(paths) and len(paths) + 72 == 252
+        # KÊ KHAI SLOT (PR #526 — ADR-0048 nâng trần trục VÒNG, packet #522 r3): 72 → **73** Markdown
+        # dưới `docs/`. Thêm ĐÚNG MỘT tệp dev-side/ngoài gói:
+        #   + `docs/adr/0048-tran-vong-review-len-muoi.md`
+        # `docs/PROTOCOL_DA_PHIEN.md` (dòng §20) là sửa, không thêm. `RELEASE_MANIFEST.json` có đổi
+        # trong cùng PR ấy, nhưng CHỈ vì băm của CHÍNH TỆP NÀY đổi — không tệp runtime nào được thêm
+        # nên `file_count` giữ **180** và trần Package 200 không nhúc nhích; cây thật = 180 + 73 = **253**.
+        # TRẢ GIÁ LẦN THỨ NĂM, và lần này cái giá nằm ở chỗ khác hai lần trước nên ghi cho rõ: phiên
+        # thi công r2 chạy `adr-song` + `doctrine-scan` + `doc-claims-check --strict` + `git diff --check`
+        # — BỐN cổng, tất cả xanh — rồi bàn giao với lời khai "MỌI cổng xanh". Nó KHÔNG chạy `tl
+        # selftest`. Bàn giao còn ghi `gate` đang `in_progress` ⇒ "KHÔNG ĐO ĐƯỢC"; đo lại thì `gate`
+        # đã `completed/failure` TỪ TRƯỚC lúc bàn giao (run 34685943174 trên `a3f5f21`, run
+        # 34684537107 trên `7059cbb`). Tức bốn cổng kia trả lời một câu hỏi KHÁC, y như ba lần đã ghi
+        # ở trên — nhưng lần này còn thêm một cách sập mới: **đọc một lượt CI chưa xong thành "chưa
+        # biết" rồi bàn giao, trong khi nó đã đỏ**. Phép đo delta hai vế dựng trong MỘT lệnh (hai
+        # clone rời, cùng các bước, cùng ghim `core.abbrev 7`, chạy song song): nền `015ffcc` cho
+        # `rc=0` với `1709/1709` và 0 FAIL; head packet `a3f5f21` cho `rc=1` với `1708/1709` và đúng
+        # MỘT FAIL là chính ca này. Nền XANH ⇒ delta là của packet, không phải đỏ sẵn, không phải
+        # nhiễu rig.
+        # NỢ CÓ TÊN, vì kê khai slot là chữa TRIỆU CHỨNG: **`R291-DAM-SO-CUNG`**. Mỗi tệp `docs/*.md`
+        # thêm vào kho lại làm ca này đỏ và lại đòi một lần kê khai — đó chính là hình dạng đã lặp NĂM
+        # lần, và doctrine của kho nói lặp từ ba lần trở lên thì câu hỏi đúng là *"có nên làm việc này
+        # không"*, không phải *"vá thế nào"*. Cách chữa là cho ca này TÍNH số docs từ cây và chỉ
+        # ratchet phần thực sự là bất biến (số tệp trong GÓI); việc ấy ngoài phạm vi packet #522
+        # (`S6` của lease gen 3 chặn đúng chỗ này).
+        ok3 = int(j.get("file_count") or 0) == len(paths) and len(paths) + 73 == 253
         d = root / "docs"
         tren_dia = sorted(d.rglob("*.md")) if d.is_dir() else []
-        ok4 = (len(tren_dia) == 72
+        ok4 = (len(tren_dia) == 73
                and all(not _rel209._release_should_include(q, root) for q in tren_dia)
                and all(set(q.relative_to(root).parts) & _rel209._RELEASE_EXCLUDE_DIRS == {"docs"}
                        for q in tren_dia))

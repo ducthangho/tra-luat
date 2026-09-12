@@ -25,7 +25,7 @@ im lặng thì không phải trần.
 viết *"không có khối ấy thì cổng đăng lease từ chối"*, chép lời khai của `ADR-0043`. Đo lại
 12-09-2026, **đếm RIÊNG từng tên** vì chúng có phạm vi khác nhau:
 
-| tên | `ops/lease_publish.py` | số tệp `*.py` toàn kho |
+| tên | `ops/lease_publish.py` — số LẦN xuất hiện | toàn kho — số TỆP `*.py` chứa nó |
 |---|---:|---:|
 | `nang_tran` | 0 | 0 |
 | `ai_nang` | 0 | 0 |
@@ -39,6 +39,12 @@ Bốn tên RIÊNG của cơ chế vượt trần — `nang_tran`, `ai_nang`, `tr
 **thu hồi lease** (`ops/lease_publish.py:960`, `1062`–`1067` đòi `can_cu` là một URL Issue comment),
 không phải cơ chế vượt trần. Nên kết luận *"không có cổng nào cưỡng chế `nang_tran`"* vẫn đứng, còn
 lời khai *"cả năm tên đều 0"* thì **sai** — và bản trước của chính đoạn này đã viết đúng câu sai ấy.
+
+**Hai cột trên CỐ Ý khác đơn vị, và phải khai ra đơn vị kẻo bảng tự sinh đúng cái lớp lỗi nó đang
+tố cáo.** Đo lại 12-09-2026: `can_cu` trong `ops/lease_publish.py` là **6 dòng / 7 lần xuất hiện**
+(dòng `1062` mang hai lần trên cùng một dòng), và toàn kho là **11 tệp / 53 dòng / 62 lần**. Nên `7`
+là số LẦN còn `11` là số TỆP. Bản đầu của bảng chỉ ghi đơn vị cho cột thứ hai, nên đọc thoáng thì hai
+cột trông như cùng một phép đếm — với các hàng `0` thì không ai thấy, vì 0 bằng nhau ở mọi đơn vị.
 
 Ghi cả cái sai vì nó là một lớp lỗi có tên: **gộp nhiều tên trường khác phạm vi vào một con số 0**.
 Một tên dùng chung với cơ chế khác sẽ khác 0 mà chẳng chứng minh gì về cơ chế đang xét; đếm gộp thì

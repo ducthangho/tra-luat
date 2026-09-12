@@ -21309,13 +21309,16 @@ def run() -> int:
         root = _ROOT209
         ok1 = ".agents" in _rel209._RELEASE_EXCLUDE_DIRS
         mf = root / "RELEASE_MANIFEST.json"
+        ok2 = ok3 = ok_git = True
         if not mf.exists():
-            return ok1
-        j = _j209.loads(mf.read_text(encoding="utf-8"))
-        paths = [str(x.get("path") or "") for x in (j.get("files") or [])]
-        ok2 = not [p for p in paths if p.startswith(".agents/")]
-        # RATCHET: goi giu 180. Do o day => co tep RUNTIME duoc them, phai ke khai slot CO CHU DICH.
-        ok3 = int(j.get("file_count") or 0) == len(paths) and len(paths) == 180
+            if (root / ".git").exists():
+                ok_git = False
+        else:
+            j = _j209.loads(mf.read_text(encoding="utf-8"))
+            paths = [str(x.get("path") or "") for x in (j.get("files") or [])]
+            ok2 = not [p for p in paths if p.startswith(".agents/")]
+            # RATCHET: goi giu 180. Do o day => co tep RUNTIME duoc them, phai ke khai slot CO CHU DICH.
+            ok3 = int(j.get("file_count") or 0) == len(paths) and len(paths) == 180
         # RANG HAI CHIEU tren CAY TAM: khoa VAO => loai; go khoa RA => phai QUAY LAI vao goi.
         # Khong co ve thu hai thi ca chi chung minh "hang co chua chuoi", khong chung minh hang ay
         # CO HIEU LUC — va mot phep kiem khong the do thi khong phai bang chung.
@@ -21339,7 +21342,7 @@ def run() -> int:
                 _rel209._RELEASE_EXCLUDE_DIRS.clear()
                 _rel209._RELEASE_EXCLUDE_DIRS.update(goc)
         ok4 = loai and quay_lai and giu and ".agents" in _rel209._RELEASE_EXCLUDE_DIRS
-        return ok1 and ok2 and ok3 and ok4
+        return ok1 and ok2 and ok3 and ok4 and ok_git
     _t110("r357_agents_ngoai_goi", _c357_agents_ngoai_goi)
     def _c307_changelog_mot_version_mot_dot():
         # r307 — SỔ: MỘT version phải ứng ĐÚNG MỘT số đợt. Lớp này trước nay KHÔNG cổng nào soi:

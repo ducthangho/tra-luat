@@ -1,0 +1,21 @@
+P2-3 t163 doc CHUOI: t162 chet bang Exception thay vi chot
+   ky vong : t163 PHAI DO (vi t162 chet bang ngoai le VO CAN, kenh ghi DO_KHAC)
+   THUC TE : rc=0
+             tự kiểm bộ chấm 512: đạt 7/7 (6 mục DO gỡ-chốt + 1 mục XANH bất-biến-A2) · chốt CHƯA có control phân biệt: 9 (
+             lease_publish: 1/1 đạt; đã chạy=1, bỏ qua=0
+   => KET LUAN: *** LOT — reviewer DUNG ***
+
+P2-4#9 khong control nao doi KHONG_GIET: cap GIET khi KHONG ca nao do
+   ky vong : t161/t162/t163 PHAI DO (cong cap GIET cho thu KHONG chet)
+   THUC TE : rc=0
+             catalog 512: mẫu số=16, giết=16, không giết=0, KHÔNG ĐO ĐƯỢC=0
+             lease_publish: 1/1 đạt; đã chạy=1, bỏ qua=0
+   => KET LUAN: *** LOT — reviewer DUNG ***
+
+P2-4#8 noi main() nhan AssertionError TRAN thanh DO_CHOT
+   ky vong : t162 PHAI DO (M1b cam nhan moi AssertionError)
+   THUC TE : rc=0
+             control 512: 10/10 ca đúng phân hạng
+             lease_publish: 1/1 đạt; đã chạy=1, bỏ qua=0
+   => KET LUAN: *** LOT — reviewer DUNG ***
+

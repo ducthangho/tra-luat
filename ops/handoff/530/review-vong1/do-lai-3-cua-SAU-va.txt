@@ -1,0 +1,18 @@
+P2-3  t162 chet bang Exception (vo can) thay vi chot
+   rc=1
+             tự kiểm bộ chấm 512: đạt 5/7 (6 mục DO gỡ-chốt + 1 mục XANH bất-biến-A2) · chốt CHƯA có control phân biệt: 9 (khai, khôn
+             lease_publish: 0/1 đạt; đã chạy=1, bỏ qua=0
+   => CO RANG
+
+RANG cua ky vong KDD: go chot rc-lech trong bo doc
+   rc=1
+             tự kiểm bộ chấm 512: đạt 6/7 (6 mục DO gỡ-chốt + 1 mục XANH bất-biến-A2) · chốt CHƯA có control phân biệt: 9 (khai, khôn
+             lease_publish: 0/1 đạt; đã chạy=1, bỏ qua=0
+   => CO RANG
+
+RANG cua ky vong KDD: go chot thieu-dong-luot
+   rc=1
+             tự kiểm bộ chấm 512: đạt 6/7 (6 mục DO gỡ-chốt + 1 mục XANH bất-biến-A2) · chốt CHƯA có control phân biệt: 9 (khai, khôn
+             lease_publish: 0/1 đạt; đã chạy=1, bỏ qua=0
+   => CO RANG
+

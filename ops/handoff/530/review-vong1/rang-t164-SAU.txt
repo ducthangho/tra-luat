@@ -1,0 +1,9 @@
+ban-ghi-SAU-dong-luot        t164 rc=1  => CO RANG
+neo-sai-luot                 t164 rc=1  => CO RANG
+vua-ca-vua-dong-luot         t164 rc=0  => *** VAN MU ***
+thieu-ten-ca                 t164 rc=0  => *** VAN MU ***
+rc-phai-int-khong-bool       t164 rc=1  => CO RANG
+kenh-khong-co-ca-nao         t164 rc=0  => *** VAN MU ***
+vo-doc_kenh-bat-ngoai-le     t164 rc=0  => *** VAN MU ***
+
+TONG: 3/7 chot da co dau vao phan biet; con mu: ['vua-ca-vua-dong-luot', 'thieu-ten-ca', 'kenh-khong-co-ca-nao', 'vo-doc_kenh-bat-ngoai-le']

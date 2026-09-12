@@ -1,0 +1,26 @@
+=== doctrine-scan ===
+doctrine-scan: sạch — đã quét 7 tệp, 0 chỗ chép doctrine
+rc=0
+=== adr-song ===
+adr-song: sạch — 48 ADR trên đĩa, 48 dòng trong §20, khớp 1–1 (tha thiếu trạng thái: ['0016'])
+rc=0
+=== t161 ===
+catalog 512: mẫu số=16, giết=16, không giết=0, KHÔNG ĐO ĐƯỢC=0
+lease_publish: 1/1 đạt; đã chạy=1, bỏ qua=0
+=== t162 ===
+control 512: 12/12 ca đúng phân hạng
+lease_publish: 1/1 đạt; đã chạy=1, bỏ qua=0
+=== t163 ===
+tự kiểm bộ chấm 512: đạt 7/7 (6 mục DO gỡ-chốt + 1 mục XANH bất-biến-A2) · chốt bộ đọc: 3 có đầu vào phân biệt (t164) · 4 bị chốt sau hấp thụ · 2 còn NỢ tự kiểm
+lease_publish: 1/1 đạt; đã chạy=1, bỏ qua=0
+=== t164 ===
+chốt fail-close của bộ đọc: 13/13 đầu vào cho KHÔNG ĐO ĐƯỢC
+lease_publish: 1/1 đạt; đã chạy=1, bỏ qua=0
+=== WRAPPER (A5) ===
+WRAPPER_RC=0
+ba dong tong ket:
+[B] lease_publish: 159/159 đạt; đã chạy=159, bỏ qua=0
+[A] lease_publish: 159/159 đạt; đã chạy=159, bỏ qua=0
+lease_publish: 159/159 đạt; đã chạy=159, bỏ qua=0
+dong DO that : 0
+dong BO QUA  : 0

@@ -21273,15 +21273,101 @@ def run() -> int:
         # TRẢ GIÁ LẦN THỨ TƯ đúng nếp "ĐÃ TRẢ GIÁ" trong ca này: phiên #475 chạy `adr-song` +
         # `doctrine-scan` + `doc-claims-check --strict` (cả ba xanh) rồi đẩy; CI mới là nơi ca này đỏ
         # (`tl selftest 1708/1709`, run 34183079571). Kê khai này viết SAU khi đọc đúng ca đỏ ấy.
-        ok3 = int(j.get("file_count") or 0) == len(paths) and len(paths) + 72 == 252
+        # KÊ KHAI SLOT (PR #526 — ADR-0048 nâng trần trục VÒNG, packet #522 r3): 72 → **73** Markdown
+        # dưới `docs/`. Thêm ĐÚNG MỘT tệp dev-side/ngoài gói:
+        #   + `docs/adr/0048-tran-vong-review-len-muoi.md`
+        # `docs/PROTOCOL_DA_PHIEN.md` (dòng §20) là sửa, không thêm. `RELEASE_MANIFEST.json` có đổi
+        # trong cùng PR ấy, nhưng CHỈ vì băm của CHÍNH TỆP NÀY đổi — không tệp runtime nào được thêm
+        # nên `file_count` giữ **180** và trần Package 200 không nhúc nhích; cây thật = 180 + 73 = **253**.
+        # TRẢ GIÁ LẦN THỨ NĂM, và lần này cái giá nằm ở chỗ khác hai lần trước nên ghi cho rõ: phiên
+        # thi công r2 chạy `adr-song` + `doctrine-scan` + `doc-claims-check --strict` + `git diff --check`
+        # — BỐN cổng, tất cả xanh — rồi bàn giao với lời khai "MỌI cổng xanh". Nó KHÔNG chạy `tl
+        # selftest`. Bàn giao còn ghi `gate` đang `in_progress` ⇒ "KHÔNG ĐO ĐƯỢC"; đo lại thì `gate`
+        # đã `completed/failure` TỪ TRƯỚC lúc bàn giao (run 34685943174 trên `a3f5f21`, run
+        # 34684537107 trên `7059cbb`). Tức bốn cổng kia trả lời một câu hỏi KHÁC, y như ba lần đã ghi
+        # ở trên — nhưng lần này còn thêm một cách sập mới: **đọc một lượt CI chưa xong thành "chưa
+        # biết" rồi bàn giao, trong khi nó đã đỏ**. Phép đo delta hai vế dựng trong MỘT lệnh (hai
+        # clone rời, cùng các bước, cùng ghim `core.abbrev 7`, chạy song song): nền `015ffcc` cho
+        # `rc=0` với `1709/1709` và 0 FAIL; head packet `a3f5f21` cho `rc=1` với `1708/1709` và đúng
+        # MỘT FAIL là chính ca này. Nền XANH ⇒ delta là của packet, không phải đỏ sẵn, không phải
+        # nhiễu rig.
+        # NỢ CÓ TÊN, vì kê khai slot là chữa TRIỆU CHỨNG: **`R291-DAM-SO-CUNG`**. Mỗi tệp `docs/*.md`
+        # thêm vào kho lại làm ca này đỏ và lại đòi một lần kê khai — đó chính là hình dạng đã lặp NĂM
+        # lần, và doctrine của kho nói lặp từ ba lần trở lên thì câu hỏi đúng là *"có nên làm việc này
+        # không"*, không phải *"vá thế nào"*. Cách chữa là cho ca này TÍNH số docs từ cây và chỉ
+        # ratchet phần thực sự là bất biến (số tệp trong GÓI); việc ấy ngoài phạm vi packet #522
+        # (`S6` của lease gen 3 chặn đúng chỗ này).
+        ok3 = int(j.get("file_count") or 0) == len(paths) and len(paths) + 73 == 253
         d = root / "docs"
         tren_dia = sorted(d.rglob("*.md")) if d.is_dir() else []
-        ok4 = (len(tren_dia) == 72
+        ok4 = (len(tren_dia) == 73
                and all(not _rel209._release_should_include(q, root) for q in tren_dia)
                and all(set(q.relative_to(root).parts) & _rel209._RELEASE_EXCLUDE_DIRS == {"docs"}
                        for q in tren_dia))
         return ok1 and ok2 and ok3 and ok4
     _t110("r291_docs_ngoai_goi", _c291_docs_ngoai_goi)
+    def _c357_agents_ngoai_goi():
+        # r357 — `.agents/` la ANH EM THU BA cua `.claude`/`.codex`: vi tri adapter phia Codex ma
+        # `docs/adr/0019-ba-skill-adapter-hai-agent-mot-protocol.md` thiet ke, va
+        # `docs/KE_HOACH_TRIEN_KHAI_PROTOCOL_DA_PHIEN.md:273` khai thang "phai bi loai khoi release
+        # bundle". Tran goi la 200 tep CUNG (goi dang 180).
+        #
+        # DO TRUOC KHI VA (06-09-2026): chep mot cay `.agents/` 10 tep vao kho roi hoi
+        # `_release_should_include` => 10/10 SE VAO GOI, tuc 180 -> 190, an 10 trong 20 khe con lai.
+        # Cung hinh dang ca `.codex` (r331), khac dung mot dieu: bat duoc TRUOC khi tep vao git.
+        #
+        # VI SAO KHONG DO CAY THAT CUA KHO. `.agents/` CO Y khong nam trong kho: noi dung hien co la
+        # ban thay-chuoi-mu va con hong (22 tham chieu `.Codex/dev/*.py` tro thu muc khong ton tai,
+        # `--executor Codex` sai allowlist `PROVIDERS`, mot lenh Claude CLI bi doi ten thanh `Codex`)
+        # — de packet rieng. Neu ve nay soi `root/".agents"` thi cay rong => `all()` tren danh sach
+        # rong DUNG VO DIEU KIEN => "co MAT ma khong DO", dung benh `t24`.
+        #
+        # VA MOT LOI KHAI DA BI BAC NGAY TRONG LUOT VIET CA NAY, ghi lai vi no la cai bay that:
+        # ban nhap dung DUONG DAN TONG HOP (khong tao tep) va chu thich khai `_release_should_include`
+        # "thuan path, khong stat tep". SAI — dong cuoi cua ham la `return path.is_file()`
+        # (`release.py:593`). Duong dan khong ton tai luon tra False, nen ve "go khoa phai quay lai
+        # vao goi" KHONG THE do => ca se xanh ma khong co rang. Do duoc: go khoa ra van cho False.
+        # Nay dung CAY TAM voi TEP THAT, va lay chinh thu muc tam lam `root`.
+        import tempfile as _tf357
+        from pathlib import Path as _Path357
+        root = _ROOT209
+        ok1 = ".agents" in _rel209._RELEASE_EXCLUDE_DIRS
+        mf = root / "RELEASE_MANIFEST.json"
+        ok2 = ok3 = ok_git = True
+        if not mf.exists():
+            if (root / ".git").exists():
+                ok_git = False
+        else:
+            j = _j209.loads(mf.read_text(encoding="utf-8"))
+            paths = [str(x.get("path") or "") for x in (j.get("files") or [])]
+            ok2 = not [p for p in paths if p.startswith(".agents/")]
+            # RATCHET: goi giu 180. Do o day => co tep RUNTIME duoc them, phai ke khai slot CO CHU DICH.
+            ok3 = int(j.get("file_count") or 0) == len(paths) and len(paths) == 180
+        # RANG HAI CHIEU tren CAY TAM: khoa VAO => loai; go khoa RA => phai QUAY LAI vao goi.
+        # Khong co ve thu hai thi ca chi chung minh "hang co chua chuoi", khong chung minh hang ay
+        # CO HIEU LUC — va mot phep kiem khong the do thi khong phai bang chung.
+        with _tf357.TemporaryDirectory() as _td:
+            troot = _Path357(_td)
+            mau = [troot / ".agents" / "skills" / "cross-review" / "SKILL.md",
+                   troot / ".agents" / "skills" / "grill-me" / "LICENSE"]
+            mau_giu = [troot / "my.agents" / "file.txt",
+                       troot / "scripts" / ".agents_tools" / "file.py",
+                       troot / "scripts" / "tl.py"]
+            for q in mau + mau_giu:
+                q.parent.mkdir(parents=True, exist_ok=True)
+                q.write_text("x\n", encoding="utf-8")
+            loai = bool(mau) and all(not _rel209._release_should_include(q, troot) for q in mau)
+            giu = bool(mau_giu) and all(_rel209._release_should_include(q, troot) for q in mau_giu)
+            goc = set(_rel209._RELEASE_EXCLUDE_DIRS)
+            try:
+                _rel209._RELEASE_EXCLUDE_DIRS.discard(".agents")
+                quay_lai = bool(mau) and all(_rel209._release_should_include(q, troot) for q in mau)
+            finally:
+                _rel209._RELEASE_EXCLUDE_DIRS.clear()
+                _rel209._RELEASE_EXCLUDE_DIRS.update(goc)
+        ok4 = loai and quay_lai and giu and ".agents" in _rel209._RELEASE_EXCLUDE_DIRS
+        return ok1 and ok2 and ok3 and ok4 and ok_git
+    _t110("r357_agents_ngoai_goi", _c357_agents_ngoai_goi)
     def _c307_changelog_mot_version_mot_dot():
         # r307 — SỔ: MỘT version phải ứng ĐÚNG MỘT số đợt. Lớp này trước nay KHÔNG cổng nào soi:
         # merge PR #6 (`dfb9418`) đi qua CI xanh + gate local 8/8 xanh mà vẫn khai 15 số version

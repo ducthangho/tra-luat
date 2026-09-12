@@ -102,46 +102,54 @@ codex exec -m <model> -c model_reasoning_effort="xhigh" \
   --cd <sandbox> --sandbox workspace-write --skip-git-repo-check "<prompt>"
 ```
 
-1. **`model_reasoning_effort=max` KHÔNG tồn tại.** API trả HTTP 400: *"Unsupported value: 'max' is not
-   supported with the 'gpt-5.3-codex-spark' model. Supported values are: 'low', 'medium', 'high', and
-   'xhigh'."* Muốn "cao nhất" thì viết `xhigh`.
-2. **Tài khoản ChatGPT chỉ mở một tập model nhỏ.** `gpt-5.3-codex`, `gpt-5.1-codex-max`, `gpt-5-codex`
-   đều trả 400 *"not supported when using Codex with a ChatGPT account"*. Lỗi ấy **khác** lỗi hết
-   quota — đọc nhầm thì đi sai hướng chữa.
-3. **Quota tính RIÊNG theo model, và thông điệp hạn của nó KHÔNG phải phép đo.** `gpt-6-astra` báo
-   *"try again at Sep 15th"*, rồi **chạy được sau ~4 giờ**; cùng lúc ấy `gpt-5.3-codex-spark` mới là
-   model đang cạn. Đường connector GitHub (`@codex review`) có quota **thứ ba**, cạn độc lập. Muốn
-   biết đường nào còn sống thì **probe một câu** trên từng model, đừng tin dòng chữ hạn.
-4. **Bằng chứng model/effort THẬT nằm ở đầu `stderr.log` của chính lượt chạy**, không ở lời khai của
-   reviewer:
+1. **Trong phép thử #518, `gpt-5.3-codex-spark` từ chối effort `max`.** Thông báo HTTP 400 liệt kê
+   `low`, `medium`, `high`, `xhigh`; `xhigh` là mức cao nhất trong danh sách của phép thử đó.
+   Danh sách ấy không xác định effort hợp lệ cho model khác.
+2. **Ba model bị tài khoản ChatGPT dùng trong #518 từ chối:** `gpt-5.3-codex`, `gpt-5.1-codex-max`,
+   `gpt-5-codex`, với lỗi 400 *"not supported when using Codex with a ChatGPT account"*.
+   Đây là lỗi khác hết quota; ba lần từ chối không cho biết toàn bộ tập model tài khoản được dùng.
+3. **Thuật lại ở #518:** `gpt-6-astra` báo *"try again at Sep 15th"* nhưng một lần gọi sau khoảng
+   4 giờ chạy được; khi ấy `gpt-5.3-codex-spark` báo cạn, connector GitHub (`@codex review`) cũng
+   từng báo cạn. Các quan sát này chưa xác định quota riêng theo model, số pool hay tính độc lập.
+   Probe ngắn chỉ đo khả năng đáp ứng tại lúc gọi, không bảo đảm quota cho cả lượt review;
+   thông điệp reset vẫn là dữ liệu do dịch vụ báo. Xử lý quota theo protocol §8.
+4. **Đầu `stderr.log` ghi model/effort mà CLI công bố cho lượt chạy.** Đọc header bằng:
 
 ```bash
-grep -E '^model:|^reasoning effort:' <run-root>/<short_id>/stderr.log | head -2
+grep -m 2 -E '^model:|^reasoning effort:' <run-root>/<short_id>/stderr.log
+# rc=1: khong co truong khop; rc=2: loi doc. rc=0 van can doc du CA HAI truong.
 ```
 
-Cùng doctrine với `modelUsage` của lane `claude`: khai `xhigh` mà đo ra `none` là ca đã xảy ra thật
-trong kho (finding `effort` của `r368`).
+Header này không phải thống kê model thực thi mọi yêu cầu như `modelUsage` của lane `claude`.
+Hồ sơ `r368` ghi lời khai `xhigh` lệch header `none`; đó là đối chiếu hai nguồn khai,
+không đo tác động của effort lên độ phủ review.
 
-### `launcher.py run` để lại `dang_chay` VĨNH VIỄN khi container chết
+### `launcher.py run` có thể còn ghi `dang_chay` sau khi container chết
 
-Đo hai lần trong cùng phiên: container remote khởi động lại giữa lượt ⇒ `run.json` giữ nguyên
-`trang_thai: dang_chay`, `ma_thoat: null`, `pid` trỏ một tiến trình **không còn tồn tại**. Đọc mỗi
-`run.json` sẽ báo nhầm là "đang chạy". Ba phép đo phân biệt được, và cần **cả ba**:
+Theo thuật lại hai lần ở #518, container remote khởi động lại giữa lượt; lúc kiểm lại,
+`run.json` vẫn ghi `trang_thai: dang_chay`, `ma_thoat: null` dù PID cũ không còn.
+Các phép kiểm dưới đây thu thêm dấu hiệu; chưa chứng minh phải đủ cả ba mới chẩn đoán được:
 
 ```bash
-ps -p "$(python3 -c 'import json;print(json.load(open("<run>/run.json"))["pid"])')" >/dev/null && echo SONG || echo CHET
-ls -la <goi>/VERDICT.md          # mtime con nhich khong
-tail -3 <run>/stderr.log         # `Connection refused` + `Reconnecting... n/5` = da bi cat mang
+PY="$(command -v python3 || command -v python || command -v py)"   # CLAUDE.md: nhan CA BA ten
+"$PY" -m json.tool <run>/run.json      # doc pid va khoa_danh_tinh; loi doc != tien trinh chet
+ps -p <pid> -o pid=,stat=,lstart=,args=  # PID ton tai chua chung minh dung tien trinh reviewer
+ls -la <goi>/VERDICT.md                # lay nhieu mau co moc gio de so mtime
+tail -50 <run>/stderr.log             # doc ca log neu can; loi reconnect khong xac dinh trang thai cuoi
 ```
 
-Đây là lý do mục *"BẮT reviewer ghi `VERDICT.md` TĂNG DẦN"* ở dưới đáng giá gấp đôi trên nền remote:
-lượt chết vì container còn mất trắng nhanh hơn lượt chết vì bộ lọc.
+Thiếu/hỏng sổ hoặc lệnh lỗi là **KHÔNG ĐO ĐƯỢC**. Khi thấy PID, đối chiếu `stat`, `lstart`
+và `khoa_danh_tinh` của launcher trước khi gắn nó với lượt cũ; `Z` là zombie đã thoát.
+Một lần xem mtime chưa đo được chuyển động; lỗi reconnect chỉ là dấu hiệu tại thời điểm log.
 
-### Sandbox codex TỪ CHỐI lệnh dạng `rm -rf`
+Ghi `VERDICT.md` tăng dần (mục bên dưới) giúp giữ phần đã ghi khi lượt bị ngắt.
+Hai sự cố thuật lại không đo mức lợi ích hay tốc độ mất dữ liệu so với bộ lọc.
 
-`Rejected("... rejected: rm -f style commands are not permitted. Use a safer approach")`. Reviewer mất
-một lượt gọi vì dọn thư mục tạm bằng lệnh ấy. Báo trước trong `PROMPT.md`: dựng thư mục tạm bằng
-`mktemp -d` rồi **cứ để đó**, đừng dọn.
+### Sandbox của lượt codex ở #518 đã từ chối lệnh dọn thư mục
+
+Lượt đó nhận `Rejected("... rejected: rm -f style commands are not permitted. Use a safer approach")`
+khi dùng `rm -rf`. Đây là hành vi của môi trường đã thử, không xác định policy mọi sandbox Codex.
+Trong môi trường ấy, có thể dùng `mktemp -d` để dựng chỗ thử rồi giữ lại thư mục.
 
 ## Khi PAT là chính tài khoản tác giả PR
 
@@ -421,25 +429,24 @@ VẤN ĐỀ:
 
 Bảng đo **chỉ liệt kê cái lệch là bảng giấu công** — đòi cả cái khớp.
 
-**HINT.patch — đường thứ hai, đã đo 6/6 trên chuỗi #518 (12-09-2026).** Bảy lượt review, sáu lượt có
-finding; mỗi lượt nộp **một** tệp `HINT.patch` và phiên chính áp NGUYÊN bằng `patch -p0 --fuzz=0`:
-**rc=0 cả sáu lượt**, 13 hunk tổng cộng, không lượt nào phải sửa tay. Đó là đối chứng cho câu ngay
-dưới — **không phải bác nó**: hai đợt đo khác điều kiện, và điều kiện mới là thứ đáng chép.
+**HINT.patch — kết quả thuật lại của #518 (12-09-2026).** Commit merge
+`a8b0cf443ca8475e859ad8ae5e150fce135818d2` ghi bảy lượt review, sáu lượt có finding;
+`patch -p0 --fuzz=0` trả rc=0 cho sáu HINT, tổng 13 hunk. Đây là số do phiên điều phối ghi,
+không phải log sáu lần áp được đính ở mục này.
 
-Bốn điều kiện, viết thẳng vào `PROMPT.md`; bỏ cái nào cũng rơi về ca hỏng của #250/#252:
+Bối cảnh prompt của đợt ấy được liệt kê dưới đây. Số 6/6 tự nó chưa xác định
+nguyên nhân khác biệt với #250/#252 hay chứng minh từng điều kiện là cần:
 
-- `patch -p0` tính từ **gốc cây làm việc** (`cay-kho/`), không `-p1`, không đường dẫn `a/`–`b/`;
-- reviewer **tự kiểm trước khi nộp** (`cd cay-kho && patch -p0 --dry-run < ../HINT.patch`) và **báo lại
-  số hunk + số tệp** trong verdict;
-- reviewer **KHÔNG sửa cây thật** — chỉ ghi `HINT.patch`; mọi lần áp thử ở clone tạm. Đây chính là ca
-  hỏng thứ hai của #250 ("reviewer sửa thẳng vào cây nên diff đọc thành đã áp");
-- **mỗi hunk thuộc đúng một finding**, và thân finding phải nói hunk nào đóng nó. Vá phải đóng cả
-  LỚP: lớp có N thể hiện thì HINT chạm đủ N và liệt kê đủ N vị trí — *"các chỗ khác tương tự"* là
-  không đạt.
+- Định dạng của đợt #518 dùng `patch -p0` từ **gốc cây làm việc** (`cay-kho/`), với đường dẫn
+  repo-relative không có tiền tố `a/`–`b/`;
+- Để thử cùng chế độ áp `--fuzz=0`: `cd cay-kho && patch -p0 --fuzz=0 --dry-run < ../HINT.patch`.
+  Có thể thêm `--verbose` để xem kết quả từng hunk.
+- Quyền ghi, cách dùng patch-as-hint và hợp đồng finding: xem `docs/PROTOCOL_DA_PHIEN.md`
+  §8/§13. Adapter không đặt thêm quy tắc nghiệm thu theo hunk hay theo lớp.
 
-Nói thẳng với reviewer rằng bản vá sẽ bị đo lại `--fuzz=0` từng hunk, nên hunk nào không áp được
-nguyên byte sẽ lộ. Và đừng để HINT chứa `RELEASE_MANIFEST.json`: phiên chính tái sinh bằng tooling,
-HINT chỉ mang thay đổi **nội dung**.
+Để áp thử, dùng clone tạm với cùng lệnh `patch -p0 --fuzz=0` ở trên.
+Về tệp phái sinh và tooling sinh `RELEASE_MANIFEST.json`, xem protocol §9 và `CLAUDE.md`
+mục "Quy ước deploy".
 
 **Gói vá: đòi CÂY ĐÃ SỬA, đừng đòi diff.** Đo trên bốn lượt của PR #250 và một lượt của #252: định
 dạng diff hỏng **2/5 lượt** (đường dẫn hai chiều bất đối xứng ⇒ `patch` từ chối cả gói; hoặc reviewer

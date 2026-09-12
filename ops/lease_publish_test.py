@@ -7076,7 +7076,7 @@ def t162_A1_muoi_control_cua_bo_cham_dung_phan_hang():
     nguon = Path(__file__).read_text(encoding="utf-8")
     # M5 lọc xuống ĐÚNG MỘT control khi `t163` phóng ca này trên một bản bộ chấm đã đột biến —
     # chạy trọn 10 control cho mỗi mục tự kiểm là 60 lượt con cho một phép đo cần 6. Lượt thường
-    # KHÔNG đặt biến này, nên mẫu số mặc định vẫn là 10 và chốt mẫu số dưới đây vẫn có răng.
+    # KHÔNG đặt biến này, nên mặc định chạy TRỌN cả hai bảng; chốt dưới đây giữ riêng mẫu số ĐÓNG BĂNG 10.
     chi_mot = os.environ.get(CO_TU_KIEM_CTRL, "")
     tat_ca = _muc_control_512()
     muc = [m for m in tat_ca if m[0] == chi_mot] if chi_mot else tat_ca
@@ -7173,7 +7173,7 @@ CHOT_BI_HAP_THU_512 = {
 }
 # CÒN NỢ, khai thẳng chứ không lấp: hai đường phân biệt HAI nửa vật hoá `dich` mà vòng 1 đo được
 # (đường CHẠY LẠI của M3, và đường gọi TRỰC TIẾP bộ đọc với iterator) chưa có mục tự kiểm riêng —
-# xem docstring `doc_kenh`. Chúng cần thêm dòng, mà trần `S2` của lease chỉ còn dư ~26 dòng.
+# xem docstring `doc_kenh`. Chúng cần thêm dòng, mà trần `S2` của lease đã gần chạm — đo bằng `numstat`.
 NO_CHUA_CO_TU_KIEM_512 = (
     "vật hoá dich: đường CHẠY LẠI của M3 tiêu thụ iterator ở lần thử ĐẦU",
     "vật hoá dich: đường gọi TRỰC TIẾP doc_kenh với iterator trên kênh DAT thật",

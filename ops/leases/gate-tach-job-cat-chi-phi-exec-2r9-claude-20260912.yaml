@@ -101,6 +101,7 @@ reviewer_provider: codex
 review_class: sensitive
 effective_review_class: sensitive
 
+da_bi_thay_the: gate-tach-job-cat-chi-phi-exec-2r10-claude-20260912
 thay_the_cho:
   - gate-tach-job-cat-chi-phi-exec-2r8-claude-20260912
 ly_do_thu_hoi: >-

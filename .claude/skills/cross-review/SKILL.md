@@ -19,7 +19,7 @@ PY="$(command -v python3 || command -v python || command -v py)"   # CLAUDE.md: 
 
 Dưới đây chỉ có cú pháp của nền.
 
-## Bước 0 — CÔNG CỤ, làm TRƯỚC khi đọc diff
+## Kiểm tra công cụ
 
 Skill này chạy được hay không phụ thuộc `codex` (hoặc provider reviewer được chỉ định),
 mà container phiên **không có sẵn** (đo 17-08-2026: `codex` vắng, `gh` vắng — hook phiên
@@ -36,12 +36,13 @@ codex --version                                  # bằng chứng THẬT về ph
 `doctor` in rõ bảng trạng thái `KHA DUNG` và các công cụ còn thiếu — đọc kỹ mục `KHA DUNG`
 thay vì chỉ dựa vào mã thoát tiến trình.
 
-Làm bước này ở ĐẦU phiên, không phải lúc sắp review: phát hiện thiếu `codex` sau khi
-đã viết xong thay đổi thì không lùi lại được, và cám dỗ khi ấy là tự duyệt bài của
-chính mình — thứ §8 không cho. (Khi cả Claude lẫn Codex hết quota, xem hướng dẫn
-Antigravity Reviewer lane trong `AGENTS.md` theo cơ chế `same_provider_approved`.)
+Về thời điểm preflight, tính độc lập và fallback khi thiếu quota, xem protocol §8/§13
+và con trỏ provider trong `AGENTS.md`.
 
-## Chọn model/effort theo độ phức tạp
+## Cú pháp bộ chọn model/effort
+
+Bảng dưới mô tả các bậc hiện có của `.claude/dev/chon_reviewer.py`; chính sách review
+và mức assurance xem protocol §8.
 
 | điểm | model | effort |
 |---:|---|---|
@@ -50,20 +51,25 @@ Antigravity Reviewer lane trong `AGENTS.md` theo cơ chế `same_provider_approv
 | `3–4` | `claude-fable-5` | `xhigh` |
 | `>= 5` | `claude-fable-5` | `max` |
 
-Giữa các lượt của cùng packet, truyền bậc lượt trước bằng `--bac-truoc model,effort` (lượt 1 bỏ cờ): bánh cóc chỉ cho giữ hoặc tăng bậc, không bao giờ cho tụt khi diff còn lại nhỏ đi.
+`--bac-truoc model,effort` truyền bậc trước cho bộ chọn. Khi nhận cờ này, hàm `chon`
+trả bậc không thấp hơn bậc đã truyền; thiếu cờ thì nó không có dữ liệu bậc trước.
 
 Ba bẫy CLI đã đo 27-08-2026, không phải giả định:
 
 - `--effort khong-ton-tai` chỉ cảnh báo rồi lùi im lặng về mặc định; kết quả không ghi đã lùi.
 - `--model claude-khong-ton-tai-9` không chạy review nào nhưng vẫn trả `rc=0`.
 - Trong 9 lượt, `haiku-4-5` có 8/9, `fable-5` 6/9, `opus-5` 3/9 và `opus-4-8` 2/9; cả hai lượt `opus-4-8` là lượt tụt giữa chừng thật.
-  **`rc` và `subtype` cùng nói dối**. Danh tính mỗi mục là `canonicalModel` nếu có, ngược lại là tên khoá; bỏ qua danh tính mang tiền tố phụ `claude-haiku-`, rồi đòi tập danh tính chính bằng đúng `{model yêu cầu}`. Model yêu cầu vắng và model lạ có mặt là hai nhánh lỗi riêng. Không được đòi model phụ có mặt.
+  **`rc` và `subtype` không đủ để nhận diện model.** Hàm `kiem_ket_qua` lấy `canonicalModel`
+  nếu có, nếu không lấy tên khóa; bỏ danh tính có tiền tố `claude-haiku-`, rồi so tập chính
+  với `{model yêu cầu}`. Nó phân biệt model yêu cầu vắng với model lạ có mặt.
 
-Giới hạn đã biết: phép so tập chỉ hỏi model phụ **có mặt**, không hỏi nó **làm gì**; `{fable-5: 500 outputTokens, haiku: 90000}` vẫn ĐẠT. Chưa ai đo phân bố share của model phụ, nên không đặt ngưỡng token ở lượt này; phải đếm trước khi bàn ngưỡng.
+Giới hạn của hàm: không đo phần công việc của model phụ;
+`{fable-5: 500 outputTokens, haiku: 90000}` vẫn có thể đạt phép so danh tính.
 
-Probe ngắn chỉ loại được ca *model hoàn toàn không gọi được*; nó không chứng nhận lượt dài sẽ giữ model. Đo 27-08: probe xanh 3/3 rồi lượt dài vẫn tụt hoàn toàn, nên luôn kiểm `modelUsage` **sau** lượt thật.
+Probe ngắn chỉ loại được ca *model hoàn toàn không gọi được*; nó không chứng nhận lượt dài sẽ giữ model.
+Đo 27-08: probe xanh 3/3 rồi lượt dài vẫn tụt hoàn toàn. Lệnh đọc `modelUsage` nằm dưới ví dụ phóng.
 
-Chọn bậc **trước khi phóng**:
+Ví dụ gọi bộ chọn:
 
 ```bash
 PY="$(command -v python3 || command -v python || command -v py)"
@@ -78,12 +84,16 @@ Nếu lease có `effective_review_class`, đút **cả hai** trường bằng `-
 Phóng Claude reviewer headless, cấp đúng công cụ cần để review, và giữ JSON nguyên vẹn:
 
 ```bash
-claude --model <id> --effort <bac> --output-format json --allowedTools Bash Read Write Edit Glob Grep --permission-mode acceptEdits --add-dir <sandbox> -p "$(cat PROMPT.md)" > reviewer.json
+claude --model <id> --effort <bac> --output-format json --allowedTools Bash Read Write Edit Glob Grep --permission-mode acceptEdits --add-dir <sandbox> -p < PROMPT.md > reviewer.json
 ```
 
-Đo 27-08-2026: `-p "$(cat TEP)"` và `-p ... < TEP` đều chạy. Không dùng `--dangerously-skip-permissions`: dưới root nó báo *"cannot be used with root/sudo privileges for security reasons"* rồi thoát `rc=1` sau `1.151s`; dùng `--allowedTools` cùng `--permission-mode` như trên để phiên headless gọi được công cụ.
+Mẫu trên đưa prompt qua stdin; kích thước prompt không cộng vào một đối số argv và nội dung
+không nằm trong dòng lệnh tiến trình. Phép đo 27-08-2026 từng chạy được cả dạng argv và stdin,
+nhưng không xác định kích thước prompt tối đa. Dưới root, `--dangerously-skip-permissions`
+báo *"cannot be used with root/sudo privileges for security reasons"* rồi thoát `rc=1`
+sau `1.151s`; ví dụ dùng `--allowedTools` cùng `--permission-mode`.
 
-Kiểm `modelUsage` **sau khi phóng**; lệnh gọi đúng vị từ fail-close dùng chung với CI:
+Cú pháp đọc `modelUsage` từ JSON bằng vị từ dùng chung với CI:
 
 ```bash
 PY="$(command -v python3 || command -v python || command -v py)"
@@ -92,82 +102,168 @@ PY="$(command -v python3 || command -v python || command -v py)"
 
 Mục này **KHÔNG thay** `docs/PROTOCOL_DA_PHIEN.md` §8; nó chỉ nói chọn bậc nào và cú pháp đo model thực sự đã chạy.
 
+## Reviewer là `codex` — model, effort, quota: bốn phép đo, không phải giả định
+
+Bảng bậc ở trên là của reviewer **`claude`**. Khi reviewer là `codex` thì cú pháp và các chỗ gãy khác
+hẳn; dưới đây đo 12-09-2026 trên chuỗi #518.
+
+```bash
+# Prompt qua STDIN, không qua argv — cùng dạng `- < PROMPT.md` đã dùng ở mục "Chạy nền kia
+# trong sandbox". Prompt đặt trong argv có hai chỗ gãy: vượt giới hạn kích thước đối số của
+# nền khi diff/evidence lớn, và lộ nguyên văn trên bảng tiến trình suốt lượt chạy.
+codex exec -m <model> -c model_reasoning_effort="xhigh" \
+  --cd <sandbox> --sandbox workspace-write --skip-git-repo-check - < PROMPT.md
+```
+
+**Dạng này KHÔNG dùng được khi bọc bằng `launcher.py run`**: nó cho tiến trình con
+`stdin=DEVNULL` (xem `.claude/dev/launcher.py:lenh_run`), nên `codex exec -` nhận EOF.
+Đo với `codex-cli 0.154.0`: stdin rỗng làm CLI thoát rc=1, báo `No prompt provided via stdin.`,
+chưa chạy review. Bọc bằng launcher thì truyền `--prompt-file` + `--expected-prompt-sha256`
+và đưa cho `codex` một chỉ thị NGẮN trỏ vào `{PROMPT_FILE}` (launcher thay bằng đường dẫn
+bản chụp), chứ đừng dán cả prompt vào argv.
+
+1. **Trong phép thử #518, `gpt-5.3-codex-spark` từ chối effort `max`.** Thông báo HTTP 400 liệt kê
+   `low`, `medium`, `high`, `xhigh`; `xhigh` là mức cao nhất trong danh sách của phép thử đó.
+   Danh sách ấy không xác định effort hợp lệ cho model khác.
+2. **Ba model bị tài khoản ChatGPT dùng trong #518 từ chối:** `gpt-5.3-codex`, `gpt-5.1-codex-max`,
+   `gpt-5-codex`, với lỗi 400 *"not supported when using Codex with a ChatGPT account"*.
+   Đây là lỗi khác hết quota; ba lần từ chối không cho biết toàn bộ tập model tài khoản được dùng.
+3. **Thuật lại ở #518:** `gpt-6-astra` báo *"try again at Sep 15th"* nhưng một lần gọi sau khoảng
+   4 giờ chạy được; khi ấy `gpt-5.3-codex-spark` báo cạn, connector GitHub (`@codex review`) cũng
+   từng báo cạn. Các quan sát này chưa xác định quota riêng theo model, số pool hay tính độc lập.
+   Probe ngắn chỉ đo khả năng đáp ứng tại lúc gọi, không bảo đảm quota cho cả lượt review;
+   thông điệp reset vẫn là dữ liệu do dịch vụ báo. Xử lý quota theo protocol §8.
+4. **Đầu `stderr.log` ghi model/effort mà CLI công bố cho lượt chạy.** Xem ngữ cảnh đầu tệp bằng:
+
+```bash
+sed -n '1,80p' <run-root>/<short_id>/stderr.log
+# rc=0: doc duoc tep (ke ca tep rong), chua xac nhan co header hay du hai truong.
+```
+
+Lệnh chỉ in 80 dòng đầu; nếu chưa thấy đủ header CLI thì đọc tiếp log. Chỉ lấy `model:` và
+`reasoning effort:` trong header khởi tạo của đúng lượt; dòng cùng tên trong prompt/output
+không thay được trường header bị thiếu. Không xác định được header thì chưa đo được hai trường.
+
+Header này không phải thống kê model thực thi mọi yêu cầu như `modelUsage` của lane `claude`.
+Hồ sơ `r368` ghi lời khai `xhigh` lệch header `none`; đó là đối chiếu hai nguồn khai,
+không đo tác động của effort lên độ phủ review.
+
+### `launcher.py run` có thể còn ghi `dang_chay` sau khi container chết
+
+Theo thuật lại hai lần ở #518, container remote khởi động lại giữa lượt; lúc kiểm lại,
+`run.json` vẫn ghi `trang_thai: dang_chay`, `ma_thoat: null` dù PID cũ không còn.
+Các phép kiểm dưới đây thu thêm dấu hiệu; chưa chứng minh phải đủ cả ba mới chẩn đoán được:
+
+```bash
+PY="$(command -v python3 || command -v python || command -v py)"   # CLAUDE.md: nhan CA BA ten
+"$PY" -m json.tool <run>/run.json      # doc pid va khoa_danh_tinh; loi doc != tien trinh chet
+
+# Chay tu goc clone: goi cung ham launcher, khong thay bang `ps -o lstart`.
+# Tren Linux, ham doc TOAN ban ghi /proc/<pid>/stat, cat sau dau ')' cuoi cung;
+# ten tien trinh co khoang trang, dau ')' hoac xuong dong van duoc xu ly cung cach.
+# rc=1 / KHONG_DO_DUOC: ham khong doc duoc khoa; khong suy ra tien trinh da chet.
+"$PY" -c 'import runpy,sys; k=runpy.run_path(".claude/dev/launcher.py")["_khoa_danh_tinh"](int(sys.argv[1])); print(k or "KHONG_DO_DUOC"); sys.exit(0 if k else 1)' <pid>
+ps -p <pid> -o pid=,stat=   # `Z` = zombie da thoat; PID ton tai KHONG chung minh dung tien trinh
+
+# Hai mau moc gio + kich thuoc, cach nhau mot khoang da dinh — mot mau khong do duoc chuyen dong.
+stat -c '%Y %s' <goi>/VERDICT.md; sleep 60; stat -c '%Y %s' <goi>/VERDICT.md
+
+tail -50 <run>/stderr.log   # doc ca log neu can; loi reconnect khong xac dinh trang thai cuoi
+```
+
+Thiếu/hỏng sổ hoặc lệnh lỗi là **KHÔNG ĐO ĐƯỢC**; không đọc được khoá không chứng minh đã chết.
+So hai khoá của cùng PID trong cùng hệ điều hành, lần khởi động và không gian PID: khác khoá
+là dấu hiệu PID đã được tái dùng; khớp khoá chỉ đối chiếu danh tính, chưa xác nhận còn sống.
+Đọc cả trạng thái: `Z` là zombie đã thoát dù khoá còn khớp. Các lệnh đọc ở những thời điểm
+khác nhau; trạng thái không phải `Z` cũng không chứng minh reviewer còn tiến triển hay đã hoàn tất.
+
+Hai mẫu mốc giờ **giống nhau cũng vẫn là `KHÔNG ĐO ĐƯỢC`**, không phải bằng chứng đã chết: một
+reviewer còn sống có thể im giữa hai lần ghi. Chỉ mẫu **đổi** mới chứng minh còn chuyển động.
+
+Ghi `VERDICT.md` tăng dần (mục bên dưới) giúp giữ phần đã ghi khi lượt bị ngắt.
+Hai sự cố thuật lại không đo mức lợi ích hay tốc độ mất dữ liệu so với bộ lọc.
+
+### Sandbox của lượt codex ở #518 đã từ chối lệnh dọn thư mục
+
+Lượt đó nhận `Rejected("... rejected: rm -f style commands are not permitted. Use a safer approach")`
+khi dùng `rm -rf`. Đây là hành vi của môi trường đã thử, không xác định policy mọi sandbox Codex.
+Trong môi trường ấy, có thể dùng `mktemp -d` để dựng chỗ thử. Ví dụ tạo thư mục dưới một gốc
+đã chọn: `mktemp -d -p <goc-rieng>`. Lệnh này chỉ tạo thư mục; không thu hiện vật, đặt hạn lưu
+hay tự dọn các bản sao.
+
+Các bản sao được giữ lại chiếm dung lượng và lưu cả vật liệu review cũ trên runner sống lâu.
+Về quyền ghi, phân công và vòng đời công việc, xem protocol §4/§8/§13 cùng chỉ thị điều phối
+của lượt. Adapter này không ấn định bên dọn, tập đường dẫn được phép xoá hoặc hạn lưu.
+
 ## Khi PAT là chính tài khoản tác giả PR
 
 `pull_request_review_write` với `event=REQUEST_CHANGES` sẽ bị GitHub từ chối:
 *"Can not request changes on your own pull request"* (đo trên PR #141). Đường còn
-lại là **comment** (`add_issue_comment`). Verdict đăng kiểu ấy **không** mang trạng
-thái review chính thức của GitHub — ghi rõ điều đó trong chính verdict, và nói rõ
-nó chưa đủ cho mức assurance nào nếu §8 đòi reviewer có danh tính khác.
+lại là **comment** (`add_issue_comment`). Comment không mang trạng thái review chính thức
+của GitHub. Cách khai transport và xác định assurance xem protocol §8/§13.
 
 Trigger reviewer bot của kho: comment `@codex review` trên PR.
 
 ## Lấy diff của ĐÚNG head SHA
 
+Trong ví dụ, `<base_sha>` và `<reviewed_sha>` là hai OID đã chốt cho lượt.
+`gh pr view` in metadata tại lúc gọi; hai lệnh Git dùng trực tiếp cặp OID ấy.
+
 ```bash
 gh pr view 56 --json headRefOid,headRefName,state,statusCheckRollup
-gh pr diff 56 > diff.patch
-git diff --numstat <base_sha> <head_sha> > numstat.txt
+git diff <base_sha> <reviewed_sha> > diff.patch
+git diff --numstat <base_sha> <reviewed_sha> > numstat.txt
 ```
 
-Verdict neo `reviewed_sha`. **Head đổi thì hỏi VÌ SAO nó đổi trước khi quyết làm gì** — hai nguyên
-nhân dưới đây đòi hai hành động KHÁC nhau, và bản trước của dòng này chỉ mô tả nguyên nhân thứ nhất
-rồi áp cách xử lý của nó cho cả hai:
+Hợp đồng `reviewed_sha` và xử lý khi head đổi: xem protocol §8/§13.
+
+`§8`/`§13` cho hợp đồng, **không** phân xử VÌ SAO head đổi — mà hai nguyên nhân đòi hai hành động
+ngược nhau, nên bảng này ở lại:
 
 | head đổi vì | hành động |
 |---|---|
-| **TÁC GIẢ ĐẨY COMMIT MỚI** vào nhánh packet | bản duyệt cũ hết hiệu lực. **Làm lại** vòng review trên head mới; đừng review bản đã cũ. |
-| **BASE TRÔI** (nhánh mặc định tiến lên, nhánh packet không tự đổi) | KHÔNG phải "làm lại vòng cũ". **Merge nhánh mặc định vào nhánh packet TRƯỚC**, rồi mở vòng trên head SAU merge, và verdict neo head ấy. |
+| **tác giả đẩy commit mới** vào nhánh packet | bản duyệt cũ hết hiệu lực ⇒ **làm lại** vòng trên head mới |
+| **base trôi** (nhánh mặc định tiến lên) | **merge base TRƯỚC**, rồi mở vòng trên head SAU merge |
 
-**Đo `base` TRƯỚC vòng mà bạn dự đoán sẽ ra `approve`** — đây là nghĩa vụ, không phải gợi ý:
+**Đo `base` trước vòng mà bạn dự đoán sẽ ra `approve`** — nghĩa vụ, không phải gợi ý:
 
 ```bash
-git fetch -q origin <nhánh mặc định>
 git merge-base --is-ancestor origin/<nhánh mặc định> HEAD   # rc khác 0 ⇒ CÓ DRIFT
 ```
 
-Có drift mà phóng luôn thì tốn trọn một vòng: lượt review neo một head sắp bị thay, và cổng tiếp nhận
-có thể ĐỎ vì base cũ chứ không vì nội dung. Đo được trên `#512`: **hai** lượt cổng ĐỎ liên tiếp cùng
-một chẩn đoán *base không phải tổ tiên của head*, chữa bằng một lần merge base rồi xanh ngay.
-
-**Giới hạn, khai thẳng:** *"dự đoán vòng này là cuối"* là **phán đoán của phiên, không đo được** — nợ
-có tên `DIEU-KIEN-VONG-CUOI-KHONG-DO-DUOC`. Cách đóng nó thành phép đo là đo drift ở MỌI vòng, nhưng
-chi phí ấy chưa ai đo. Không cổng nào cưỡng chế mục này; nó là kỷ luật đọc.
-
-**Ca THỨ BA chưa có luật, đo được 12-09-2026 trên `#522`:** head đổi vì **hiện vật của CHÍNH lượt
-review** — verdict và biên nhận mà protocol buộc commit, cộng một hàng mục lục mà cổng `t27` đòi. Đo:
-`approve` neo `7bdd8ad`, head được merge `73558aa`, `diff` giữa hai cái là **đúng ba tệp**
-`ops/reviews/**`, không có thay đổi sản phẩm nào. Xếp nó vào *"tác giả đẩy commit"* sẽ tạo một vòng
-lặp không bao giờ đóng — mỗi vòng sinh hiện vật, hiện vật làm head đổi, head đổi lại đòi một vòng.
-Bảng trên **chưa** phân xử ca này; nợ có tên `HEAD-DOI-VI-HIEN-VAT-REVIEW`, và cách giải quyết thuộc
-chủ kho qua một revision mới, không thuộc phiên đang chạy.
+Hai nợ CÓ TÊN, chưa ai đóng: `DIEU-KIEN-VONG-CUOI-KHONG-DO-DUOC` (*"dự đoán vòng này là cuối"* là
+phán đoán của phiên, không đo được) · `HEAD-DOI-VI-HIEN-VAT-REVIEW` (head đổi vì hiện vật của CHÍNH
+lượt review — bảng trên chưa phân xử; xếp vào hàng thứ nhất tạo vòng lặp không bao giờ đóng).
 
 ## Dựng mirror trong sandbox — cú pháp nền, và ba chỗ đã gãy thật
 
-Mirror là **clone rời, detached đúng exact head**, không phải worktree của cây đang làm việc:
-worktree dùng chung `.git` nên reviewer chạm được nhánh executor, mà lease cấm đúng điều đó.
+Ví dụ dưới dùng clone rời và checkout detached. Worktree dùng chung kho Git với cây nguồn;
+quyền reviewer và yêu cầu cách ly xem protocol §8/§13.
 
 ```bash
+RV=<thu-muc-clone-rieng>
 git clone -q <nguồn> "$RV"
 git -C "$RV" remote set-url origin https://github.com/<chủ>/<kho>   # BẮT BUỘC — xem (1)
 git -C "$RV" fetch -q origin <nhánh>
 git -C "$RV" checkout -q --detach <exact-sha>
-git -C "$RV" status --porcelain    # phải RỖNG trước khi phóng
+git -C "$RV" status --porcelain    # in thay đổi Git đang thấy trong worktree
 ```
 
 1. **Clone từ ĐƯỜNG DẪN cục bộ để lại `origin` là đường dẫn, và `launcher.py` từ chối với `rc=11`**
-   (`kho lech: mong doi github.com/<chủ>/<kho>, thuc te (khong co remote)`). Đúng doctrine *neo theo
-   KHO, không theo đường dẫn*: từ một đường dẫn cục bộ không xác minh được danh tính kho. Clone cục
-   bộ vẫn nhanh và vẫn nên dùng — chỉ phải `remote set-url` về dạng URL ngay sau đó.
+   (`kho lech: mong doi github.com/<chủ>/<kho>, thuc te (khong co remote)`) khi
+   kiểm bằng `--expected-repo`. `remote set-url` đổi chuỗi remote mà chốt này đọc;
+   chi tiết các cờ neo kho xem `docs/GOI_AGENT_DA_NEN.md`, mục "Neo theo *kho*, không theo đường dẫn".
 2. **`git fetch origin <nhánh>` gãy nếu nhánh chỉ tồn tại dưới dạng remote-tracking ở nguồn cục bộ**
    (`couldn't find remote ref`). Vô hại khi commit đã có sẵn trong clone, nhưng đừng đọc nó thành
    "sandbox hỏng" — kiểm bằng `rev-parse HEAD`, không bằng mã thoát của `fetch`.
 3. **Phiên headless NGOÀI kho không kế thừa `.claude/settings.json`** — nó in
-   `Ignoring N permissions.allow entries: this workspace has not been trusted`. Đó là hành vi ĐÚNG
-   và nên giữ: quyền của reviewer phải đến từ `--allowedTools` tường minh, không từ cây bị review.
+   `Ignoring N permissions.allow entries: this workspace has not been trusted`.
+   `--allowedTools` ở ví dụ Claude phía trên truyền danh sách công cụ tường minh.
 
-Sau khi phóng, **kiểm reviewer đã tuân cấm**: `git -C "$RV" status --porcelain` rỗng VÀ
-`git -C "$RV" log --oneline <head>..HEAD` rỗng, cộng cùng hai phép ấy trên kho THẬT.
+Hai lệnh sau quan sát thay đổi Git còn lại và commit mới ở thời điểm kiểm:
+`git -C "$RV" status --porcelain` và `git -C "$RV" log --oneline <head>..HEAD`;
+có thể chạy cùng phép đọc trên kho nguồn. Output rỗng không chứng minh cả lượt không ghi:
+thay đổi đã hoàn nguyên, tệp bị Git bỏ qua và lịch sử thao tác không nằm trong hai output ấy.
 
 ## Chạy nền kia trong sandbox
 
@@ -175,16 +271,15 @@ Sau khi phóng, **kiểm reviewer đã tuân cấm**: `git -C "$RV" status --por
 codex exec -s workspace-write --skip-git-repo-check --cd <sandbox> - < PROMPT.md
 ```
 
-Sandbox là thư mục ngoài kho, chứa sẵn: `SPEC.md` · `diff.patch` · `numstat.txt` · trích protocol ·
-`EVIDENCE.md` (số đo gate — thiếu nó sẽ ra kết luận "KHÔNG ĐO ĐƯỢC") · bản sao cây sau sửa. Trong
-prompt phải **cấm đọc ra ngoài thư mục đó**: một lượt chạy phạm vi mở đã quét ra ngoài kho, đọc nhầm
-transcript phiên, 40 phút không ra kết luận. `workspace-write` để nó tự đột biến bản sao mà không
-chạm kho thật.
+Ví dụ bố trí sandbox dùng một thư mục ngoài kho, gồm `SPEC.md`, `diff.patch`, `numstat.txt`,
+trích protocol, `EVIDENCE.md` và bản sao cây. Một lượt phạm vi mở từng đọc nhầm transcript
+ngoài kho và sau 40 phút chưa có kết luận. Phạm vi đọc/ghi và yêu cầu evidence xem protocol §8/§13.
+`--sandbox workspace-write` là cờ chọn chế độ sandbox của CLI.
 
 ### Mirror trong sandbox — khi §8 đòi năng lực đo
 
-§8 quy định KHI NÀO phải cấp và VÌ SAO; đây chỉ là cú pháp dựng. Đặt mirror **BÊN TRONG** sandbox để
-ràng buộc "cấm đọc ra ngoài" ở trên vẫn giữ nguyên:
+Điều kiện cấp bản sao và phạm vi sandbox: xem protocol §8/§13. Ví dụ cú pháp đặt mirror
+và working clone dưới cùng thư mục `$R`:
 
 ```bash
 R=<sandbox>
@@ -196,17 +291,13 @@ git -C "$R/cay-kho" config core.abbrev 7        # BAT BUOC — xem duoi
 git -C "$R/cay-kho" checkout --quiet <reviewed_sha>
 ```
 
-**Ghim `core.abbrev 7` không phải tuỳ chọn.** Clone sạch có kích thước khác cây gốc nên git tự chọn
-độ viết tắt khác, và cổng của kho đọc giá trị ấy. Đo được ở lượt review đầu tiên dùng cơ chế này
-(PR #252): không ghim ⇒ `git rev-parse --short` trả **8** ⇒ `doc-claims-check --strict` biến năm SHA
-dài 8 ký tự từ *advisory* thành **cờ cứng** ⇒ `rc=2`, reviewer báo "cổng bắt buộc không xanh" trong
-khi cây gốc `rc=0`. Ghim rồi ⇒ `rc=0`.
+`core.abbrev` điều khiển độ dài SHA viết tắt mà `doc-claims-check` đọc.
+Phép đo clone PR #252 và yêu cầu cấu hình nằm ở protocol §8; lệnh trên đặt giá trị `7`.
 
-**Đối chiếu cổng TRƯỚC khi giao sandbox** — §8 đòi điều này, và nó rẻ:
+**Cú pháp đối chiếu một cổng trên hai cây tại `reviewed_sha`.**
 
-Hai phép chạy phải ở **CÙNG MỘT COMMIT**, nếu không thì so hai thứ khác nhau: `<kho>` thường đang
-đứng ở nhánh khác, và khi ấy một khác biệt THẬT về mã bị dán nhãn nhầm thành "lỗi sandbox". Dựng nền
-bằng worktree read-only tại đúng `reviewed_sha`:
+Yêu cầu đối chiếu môi trường xem protocol §8. Ví dụ worktree nền dưới đây checkout
+cùng commit với clone để giảm một nguồn khác biệt khi đọc kết quả:
 
 ```bash
 git -C <kho> worktree add --detach /tmp/nen-<reviewed_sha> <reviewed_sha>
@@ -216,28 +307,27 @@ cd "$R/cay-kho"            && "$PY" scripts/tl.py doc-claims-check --strict; ech
 git -C <kho> worktree remove /tmp/nen-<reviewed_sha> --force
 ```
 
-Hai mã thoát lệch ⇒ **lỗi sandbox** cho tới khi chứng minh ngược lại; đừng giao một mirror chưa đối
-chiếu, vì mọi finding về cổng từ nó đều đáng ngờ.
+Mỗi dòng `echo` in mã thoát của chuỗi `cd && "$PY" ...` ngay trước nó. Nếu `cd` lỗi,
+cổng chưa chạy và số in là mã lỗi của `cd`; bản thân `echo` vẫn có thể trả 0. Khi `cd`
+thành công, số in là mã thoát của lời gọi Python. Hai mã bằng nhau chưa chứng minh
+môi trường tương đương; hai mã khác nhau chưa định vị được nguyên nhân.
 
-Chiều ngược lại KHÔNG đúng: **hai mã thoát bằng nhau chưa chứng minh môi trường tương đương** — nó chỉ
-nói cổng ấy không phân biệt được. Ghi trong `EVIDENCE.md` là đã đối chiếu cổng NÀO, đừng khái quát.
-
-**Phép so hai nguồn phải chạy TRÊN KHO NGUỒN, TRƯỚC khi clone** — chạy nó trong sandbox là vô nghĩa ở
-**cả hai** trạng thái của `origin`, nhưng vì hai lý do KHÁC NHAU, và reviewer phải ghi đúng lý do của
-trạng thái mình đang đứng:
+**Phạm vi của phép so ref.** Yêu cầu kiểm nguồn và báo cáo giới hạn xem protocol §8 và
+`CLAUDE.md`, mục `for-each-ref` đọc bộ đệm. Trong sandbox không mạng, hai trạng thái `origin`
+cho hai loại kết quả khác nhau:
 · **trước `set-url`** — `origin` trỏ vào chính mirror vừa tạo, nên `ls-remote` `rc=0` và **đếm head của
 chính mirror** (đo được: 201 head), tức không có nguồn có thẩm quyền nào để so;
 · **sau `set-url`** — `origin` là URL HTTPS thật nhưng sandbox không ra được mạng, nên `ls-remote`
 `rc=128`, **0 dòng**. Nó KHÔNG "đếm mirror": nó không đếm gì cả.
-Đừng chép câu của trạng thái kia — đó là chỗ bản trước đã tự mâu thuẫn. Mirror kế thừa đúng cái mù của kho nguồn, nên chỗ duy nhất chặn được
-là trước bước clone (luật đầy đủ + lệnh `comm`: `CLAUDE.md`, mục `for-each-ref` đọc bộ đệm):
+Mirror chỉ chứa ref đã được nạp từ nguồn. Ví dụ phép so sau dùng remote của kho nguồn;
+nhánh `ls-remote` cần kết nối đến remote đó:
 
 ```bash
 cd <kho>
 git ls-remote --heads origin | sed 's#.*refs/heads/##' | sort            > /tmp/mc
 git for-each-ref --format='%(refname:lstrip=3)' refs/remotes/origin \
     | grep -v '^HEAD$' | sort                                           > /tmp/cb
-comm -23 /tmp/mc /tmp/cb        # CO tren may chu, THIEU cuc bo -> MU, fetch roi hay clone
+comm -23 /tmp/mc /tmp/cb        # tên có ở nguồn remote, thiếu ở bộ đệm cục bộ
 ```
 
 **So bằng TẬP TÊN, không bằng `wc -l`** — hai tập cùng lực lượng vẫn có thể lệch (một nhánh cục bộ đã
@@ -245,41 +335,30 @@ bị xoá trên máy chủ cộng một nhánh mới chưa fetch), và `refs/rem
 đếm lệch sẵn 1 mà chẳng ai mù. Bản đầu của chính mục này đếm bằng `wc -l` **ngay dưới một câu trỏ về
 doctrine cấm làm thế** — cross-review PR #261 bắt (P1).
 
-Sau khi clone, thứ kiểm được trong sandbox chỉ là *mirror có nhận đủ cái kho nguồn đang có không*:
+Sau khi clone, ví dụ dưới đối chiếu tên và OID của các ref `refs/remotes/origin/*`
+(trừ ref tên `HEAD`) giữa kho nguồn và clone. Nó không kiểm mọi namespace ref
+hoặc tính toàn vẹn mọi object; dòng cuối chỉ đọc cờ shallow:
 
 ```bash
-diff <(git -C <kho> for-each-ref --format='%(refname:lstrip=3)' refs/remotes/origin | grep -v '^HEAD$' | sort) \
-     <(git -C "$R/cay-kho" for-each-ref --format='%(refname:lstrip=3)' refs/remotes/origin | grep -v '^HEAD$' | sort)
-git -C "$R/cay-kho" rev-parse --is-shallow-repository        # phai la false
+diff <(git -C <kho> for-each-ref --format='%(refname:lstrip=3) %(objectname)' refs/remotes/origin | grep -v '^HEAD ' | sort) \
+     <(git -C "$R/cay-kho" for-each-ref --format='%(refname:lstrip=3) %(objectname)' refs/remotes/origin | grep -v '^HEAD ' | sort)
+echo "ref diff rc=$?"
+git -C "$R/cay-kho" rev-parse --is-shallow-repository        # true/false về shallow
 ```
 
-Và nói thẳng trong `EVIDENCE.md` rằng trạng thái GitHub **trực tiếp** là `KHÔNG ĐO ĐƯỢC` từ sandbox.
+Trong sandbox không mạng, các phép đọc này không cập nhật trạng thái GitHub trực tiếp.
+Bài học #309 (`evidence-origin-khong-phai-mirror-cuc-bo`): sau `remote set-url`,
+`origin` mang URL HTTPS thật; gọi nó là mirror cục bộ là mô tả sai cấu hình. Trước `set-url`,
+`ls-remote` tới mirror đọc ref cục bộ; sau `set-url`, lời gọi tới HTTPS có thể thất bại vì mạng.
+Hai kết quả này không phải cùng một phép đo nguồn.
 
-**LÝ DO phải viết cho đúng — bản trước của chính mục này viết SAI, và cross-review bắt** (P3
-`evidence-origin-khong-phai-mirror-cuc-bo`, #309). Nó ghi *"`origin` trong đó là mirror cục bộ, không
-phải máy chủ"* — nhưng bước dựng mirror ở trên **BẮT BUỘC** chạy `remote set-url origin
-https://github.com/<chủ>/<kho>`. Làm đúng bước ấy thì `origin` là **URL HTTPS thật**, không phải mirror.
-Hai mục trong CÙNG một tệp dặn hai điều loại trừ nhau, và **bốn verdict trong kho đã chép lại câu sai**.
+## Bộ lọc nền cắt lượt giữa chừng — ghi chép #513
 
-Câu đúng, và nó đúng ở **cả hai trạng thái** — trước và sau khi `remote set-url` chạy: sandbox
-**không có đường ra mạng**, nên `origin` trỏ đâu cũng không đọc được máy chủ. Trước `set-url` nó là
-mirror cục bộ; sau `set-url` nó là URL HTTPS **không gọi tới được**. Cả hai đường đều dẫn tới
-`KHÔNG ĐO ĐƯỢC`, nhưng vì **hai lý do khác nhau** — và reviewer phải ghi lý do ĐÚNG với trạng thái
-mình đang đứng, chứ đừng chép câu có sẵn.
+Hồ sơ 13 lượt packet #513 (12-09-2026) ghi bộ lọc nội dung cắt 3 lượt khi reviewer
+đang tự soạn nội dung tấn công. Bảng dưới ghi thời điểm ngắt và hiện vật còn lại;
+không đo được cơ chế bộ lọc hoặc hiệu quả nhân quả của cách viết prompt.
 
-Hệ quả thực hành: phép so hai nguồn (`ls-remote` ↔ `for-each-ref`) chạy **TRONG** sandbox là vô nghĩa
-dù `origin` trông như URL thật. Nói cho chật, vì bản trước viết "nó vẫn chỉ đếm được thứ mirror đã
-nhận" và câu ấy SAI sau `set-url`: lúc đó `ls-remote` gọi HTTPS và **thất bại** (`rc=128`, 0 dòng) —
-không đếm mirror, không đếm gì. Kết luận đúng cho cả hai trạng thái là **không đo được GitHub từ
-sandbox**; chỗ duy nhất chặn được vẫn là **trước bước clone**, trên kho nguồn.
-
-## Bộ lọc nền cắt lượt giữa chừng — hai chốt ĐÃ ĐO, cả hai bắt buộc
-
-Đo trên 13 lượt của packet #513 (12-09-2026). Bộ lọc nội dung của nền (`flagged for possible
-cybersecurity risk`) cắt **3/13 lượt** — và nó cắt đúng lúc reviewer chuyển sang **tự soạn** nội dung
-tấn công. Chưa ai biết cách chặn nó. Nhưng hai chốt dưới đây làm hậu quả rẻ hẳn, và cả hai có số.
-
-### 1. BẮT reviewer ghi `VERDICT.md` TĂNG DẦN
+### Hiện vật còn lại ở ba lượt bị ngắt
 
 | lượt | bị cắt ở | giữ được verdict |
 |---|---|---|
@@ -287,28 +366,17 @@ tấn công. Chưa ai biết cách chặn nó. Nhưng hai chốt dưới đây l
 | 11 | 437 s | **KHÔNG** — 35 lệnh, 3 lỗi thật, không một dòng verdict |
 | 12 | 299 s | **CÓ** — verdict còn nguyên một hướng kèm output thật |
 
-Khác biệt duy nhất giữa lượt 12 và hai lượt kia là ba câu trong prompt:
+Prompt lượt 12 có ba câu về ghi sớm và cập nhật verdict. Bảng không xác định đây là
+khác biệt duy nhất giữa các lượt hoặc cô lập tác động của ba câu đó.
 
-```
-1. NGAY BÂY GIỜ, trước khi đo gì, tạo VERDICT.md với 4 dòng đầu (dùng changes_requested
-   và các số 0 làm chỗ giữ).
-2. Sau MỖI hướng, ghi ngay khối của hướng đó vào cuối VERDICT.md (`>>` là đủ).
-3. CUỐI CÙNG mới sửa 4 dòng đầu cho khớp và thêm phần finding.
-```
-
-Đây là chốt chống **mất bằng chứng**, KHÔNG phải chốt chặn bộ lọc — đừng khai nhầm.
-
-### 2. Phân công: reviewer CHẠY và ĐỘT BIẾN, không TỰ SOẠN
-
-Cho phép: chạy phản chứng có sẵn · **đột biến mã CÓ SẴN trong cây** rồi chạy lại · viết probe gọi
-thẳng hàm sản phẩm với đầu vào bất thường · đọc mã.
-Cấm: soạn payload tấn công/giả mạo. Hướng nào cần thứ đó thì **mô tả BẰNG LỜI kèm công thức tái
-hiện**, phiên điều phối viết probe và đo hộ.
+Cú pháp ghi Markdown thông thường: `>` tạo/ghi lại tệp, `>>` nối thêm; đây là thao tác
+trên tệp, không đặt trạng thái verdict khởi tạo, lịch cập nhật hay điều kiện hoàn tất.
+Hợp đồng verdict và phân công phản chứng xem protocol §8/§13 cùng prompt được giao.
 
 Kênh "nêu bằng lời" KHÔNG phải giải pháp hạng hai: **toàn bộ giá trị của lượt 8 đi qua đúng nó** —
 nó nêu hai hướng trước khi chết, một hướng hoá ra là lỗi sản phẩm thật.
 
-## BẮT reviewer nộp BẢNG SĂN — nếu không, `approve` chỉ nghĩa là "chưa tìm"
+## Mẫu trình bày hướng thử
 
 Đo được, cùng packet, hai lượt liền:
 
@@ -317,8 +385,8 @@ nó nêu hai hướng trước khi chết, một hướng hoá ra là lỗi sả
 | 9 | *"nếu không tìm ra gì thì liệt kê hướng đã thử"* | `approve`, và 4 "hướng đã thử" hoá ra **cả 4 đều là việc bắt buộc ở phần khác của prompt** — không hướng nào độc lập |
 | 10 | **bảng SĂN ≥ 6 hướng ĐỘC LẬP, mỗi hướng có LỆNH + OUTPUT THẬT** | **8 hướng**, **2 lỗi sản phẩm thật** |
 
-Câu *"nếu không thấy thì khai"* cho phép **"chưa tìm"** đi qua như **"đã tìm, không thấy"**. Khối bắt
-buộc:
+Dữ liệu hai lượt cho thấy hai kết quả với hai prompt; không xác lập một tiêu chí
+`approve` chung. Ví dụ khối trình bày một hướng thử:
 
 ```
 HƯỚNG <n>: <tên>
@@ -328,21 +396,15 @@ HƯỚNG <n>: <tên>
   kết luận   : LỖI | KHÔNG PHẢI LỖI | KHÔNG ĐO ĐƯỢC
 ```
 
-Kèm ba điều kiện, thiếu cái nào cũng làm bảng mất răng:
-- **KHÔNG tính** vào N hướng: đo nền; trỏ vào ca test đã có sẵn; đột biến chỉ nhằm kiểm bản vá lượt trước.
-- **Nộp danh sách hướng các lượt TRƯỚC đã đi** và cấm lặp y nguyên — hoặc hướng mới, hoặc biến thể
-  chưa ai chạm và phải nói rõ biến thể là gì.
-- `approve` mà **thiếu bảng** thì bị coi là `KHÔNG ĐO ĐƯỢC`, bất kể kết luận ghi gì.
+Các trường trong ví dụ là nhãn trình bày. Số hướng, độ độc lập, xử lý lịch sử và
+điều kiện nhận verdict thuộc protocol §8/§13 cùng yêu cầu của lượt.
 
-Ở lượt XÁC NHẬN, nói thẳng với reviewer rằng **kết luận SẠCH có giá ngang một phát hiện** — kèm câu
-*"đừng bới một finding tầng META cho có"* và *"đừng nương tay ở tầng sản phẩm chỉ vì đây là lượt
-cuối"*. Không có câu ấy thì một lượt xác nhận dễ trả về finding trang trí.
+## Quan sát tiến trình con còn lại
 
-## Dọn tiến trình mồ côi TRƯỚC mỗi phép đo
-
-Bộ test nào phóng tiến trình con mà bị giết giữa chừng sẽ **bỏ rơi** con của nó. Đo 12-09-2026: hai
-lượt bị giết để lại **526 tiến trình `ban_sao_*` còn sống**, RAM `14,5/16 GB`, và mọi phép đo sau đó
-chậm theo — suýt thành kết luận *"bộ kiểm chậm 5 lần"* trong khi nguyên nhân thật là một lỗi đệ quy.
+Tiến trình con có thể còn lại khi bộ test bị ngắt; kết quả phụ thuộc cách quản lý vòng đời con.
+Đo 12-09-2026: hai lượt bị giết để lại **526 tiến trình `ban_sao_*` còn sống**, RAM `14,5/16 GB`,
+và các phép đo sau chậm theo — suýt thành kết luận *"bộ kiểm chậm 5 lần"* trong khi
+nguyên nhân thật của sự cố ấy là một lỗi đệ quy.
 
 **Mẫu PHẢI TỰ LOẠI TRỪ.** `pkill -f` khớp **toàn bộ dòng lệnh**, mà trong shell headless dòng lệnh
 của chính `bash -c '...'` **chứa cái mẫu bạn vừa gõ** — nên `pkill` giết luôn shell đang chạy nó, và
@@ -366,35 +428,32 @@ nhưng **không cứu được một shell đã chết**. Người viết câu �
 phiên mà chẩn đoán nhầm; chỉ lộ khi cross-review dựng phản chứng ở trên. Cùng họ *"kết luận từ một
 đường hỏng"*.
 
-Dọn xong mới đo, và đo lại **nền** trước khi nghi bản vá của mình.
+Việc dọn và trình tự phép đo theo chỉ thị điều phối của lượt; các lệnh trên chỉ minh họa
+chọn tiến trình bằng mẫu và quan sát danh sách còn lại.
 
-## Điều kiện dừng — ánh xạ theo `review_class`, BA lớp phân biệt được
+## Điều kiện dừng theo `review_class`
 
-`§3.2` đã có trục `review_class`; bảng này chỉ ánh xạ nó sang điều kiện dừng, không tạo trục mới.
+Trục `review_class`: xem protocol `§3.2`. Bảng này chỉ ánh xạ nó sang điều kiện dừng.
 
 | `review_class` | điều kiện dừng |
 |---|---|
-| `routine` | **0 P1**. P2 còn lại thành **nợ CÓ TÊN** ghi trong Issue của packet |
+| `routine` | **0 P1**; P2 còn lại thành **nợ CÓ TÊN** trong Issue của packet |
 | `systemic` | **0 P1 + 0 P2** |
 | `sensitive` | **`approve` tường minh** của reviewer khác nền |
 
-**Hàng `sensitive` KHÔNG được đọc thành *"hết P1 và P2"*.** *"Vắng mặt vì sạch"* và *"vắng mặt vì chưa
-nhìn tới"* nhìn **giống hệt nhau**; một `approve` phân biệt được hai thứ đó, còn *"không thấy lỗi"* thì
-không. Đây là lý do hàng thứ ba khác hai hàng trên về KIỂU, không chỉ về mức.
+Hàng `sensitive` **KHÔNG** được đọc thành *"hết P1 và P2"*: *"vắng mặt vì sạch"* và *"vắng mặt vì
+chưa nhìn tới"* nhìn giống hệt nhau, và chỉ một `approve` phân biệt được hai thứ đó.
 
-## BẢNG LỚP — nghĩa vụ mỗi vòng, không phải gợi ý
+## `BẢNG LỚP`
 
-Verdict **phải** mang mục `BẢNG LỚP`. **Mỗi finding thuộc ĐÚNG MỘT `lop_loi`** — finding không có lớp
-thì verdict **thiếu**, không phải "chưa phân loại".
+Verdict **phải** mang mục này. **Mỗi finding thuộc ĐÚNG MỘT `lop_loi`** — finding không có lớp thì
+verdict **thiếu**, không phải *"chưa phân loại"*.
 
 | `lop_loi` | các slug thuộc lớp | **bản vá theo lớp** \| lý do vá lẻ |
 |---|---|---|
 
-Cột thứ ba là cột có răng: mỗi lớp phải khai **một thay đổi đóng cả lớp**, hoặc khai **lý do** vì sao
-lớp ấy buộc phải vá lẻ. Bỏ cột ấy thì bảng tụt xuống thành bảng phân loại thuần — phân hạng xong rồi
-ai cũng vá lẻ như cũ, tức không ép đổi cách làm gì cả.
-
-**Đơn vị đếm, vì đếm sai đơn vị làm mọi phép so giữa các lượt vô nghĩa:**
+Cột thứ ba là cột có răng: mỗi lớp khai **một thay đổi đóng cả lớp**, hoặc khai **lý do** phải vá lẻ.
+Bỏ nó thì bảng tụt xuống thành bảng phân loại thuần.
 
 | trường | đếm gì |
 |---|---|
@@ -402,38 +461,34 @@ ai cũng vá lẻ như cũ, tức không ép đổi cách làm gì cả.
 | `so_the_hien` | tổng số **THỂ HIỆN** |
 | `findings_ids` | slug của **LỚP**, kebab-case |
 
-Một LỚP = một **CƠ CHẾ** sinh cùng một hình dạng lỗi; cùng cơ chế hiện ở năm chỗ là **một lớp, năm thể
-hiện**. Hạng của lớp là hạng **CAO NHẤT** trong các thể hiện.
-
-**KHÔNG đổi định nghĩa P1/P2/P3** — chúng đang dùng được, đổi là làm mọi verdict cũ không so được.
-
-**Slug là KHOÁ ĐẾM, giữ NGUYÊN qua các lượt cho cùng một lớp.** Mô tả đổi thoải mái. Đặt slug mới cho
-một lớp cũ là vô hiệu hoá chính chốt đang canh *"bản vá không trúng gốc"*; ngưỡng và tên trường của chốt
-ấy ở `§12` và `packet_loop.py --help` — đừng chép số vào đây.
+Một LỚP = một **cơ chế** sinh cùng hình dạng lỗi; hạng của lớp là hạng **cao nhất** trong các thể
+hiện. Slug là **khoá đếm** — giữ NGUYÊN qua các lượt cho cùng một lớp. Ngưỡng lặp lại và định nghĩa
+P1/P2/P3: xem protocol `§8`/`§12`.
 
 **Reviewer phải GỌI TÊN khi một vòng đóng finding bằng cách CẮT TIÊU CHÍ** hoặc thu hẹp phạm vi, chứ
-đừng ghi nhận nó là đã vá. Xem mục cùng tên ở `work-packet`.
+đừng ghi nhận nó là đã vá.
 
-## Khung `VERDICT.md` bắt reviewer sinh ra
+## Ví dụ trình bày `VERDICT.md`
 
-§8 quy định mục nào bắt buộc; đây là khung để dán vào `PROMPT.md`:
+Hợp đồng verdict và các mục bắt buộc: xem protocol §8/§13. Mẫu dưới chỉ minh họa Markdown;
+không phải schema đủ để được chấp nhận.
 
 ```
-verdict: approve | changes_requested | blocked      <- BA gia tri canonical, xem §13
+verdict: <giá trị theo protocol §13>
 reviewed_sha: <sha>
 
-## ĐỐI CHIẾU LƯỢT TRƯỚC        <- BO QUA o luot 1; BAT BUOC tu luot 2
-- <slug luot truoc>: ĐÃ VÁ THẬT | VÁ HỜ | VÁ SINH LỖI MỚI | CHƯA VÁ — <bang chung TU DO>
+## ĐỐI CHIẾU LƯỢT TRƯỚC
+- <slug>: <kết quả kiểm lại và bằng chứng>
 
-## BẢNG SĂN                     <- BAT BUOC; thieu khoi nay thi `approve` = KHÔNG ĐO ĐƯỢC
+## BẢNG SĂN
 HƯỚNG 1: <ten>
   giả thuyết : <neu ... thi ... sai>
   lệnh       : <lenh da chay>
   output     : <output that, cat gon>
   kết luận   : LỖI | KHÔNG PHẢI LỖI | KHÔNG ĐO ĐƯỢC
-HƯỚNG 2: ...                    <- lap toi DU N huong DOC LAP (N do prompt dat, >= 6)
+HƯỚNG 2: ...
 
-## BẢNG ĐO                      <- moi con so da do, KE CA cai khop
+## BẢNG ĐO
 | khẳng định | PR khai | đo được | khớp? |
 
 ### <slug>  [P1|P2|P3]  <tieu de mot dong>
@@ -444,48 +499,72 @@ VẤN ĐỀ:
 ĐỘ TIN: cao/vừa/thấp
 ```
 
-Bảng đo **chỉ liệt kê cái lệch là bảng giấu công** — đòi cả cái khớp.
+Cú pháp bảng Markdown trên có thể trình bày cả số khớp và số lệch.
 
-**Gói vá: đòi CÂY ĐÃ SỬA, đừng đòi diff.** Đo trên bốn lượt của PR #250 và một lượt của #252: định
-dạng diff hỏng **2/5 lượt** (đường dẫn hai chiều bất đối xứng ⇒ `patch` từ chối cả gói; hoặc reviewer
-sửa thẳng vào cây nên diff đọc thành "đã áp"). Thứ dùng được cả năm lượt là **tệp trong `cay/`**. Nếu
-vẫn muốn diff thì bắt sinh đối xứng và tự kiểm:
+**HINT.patch — kết quả thuật lại của #518 (12-09-2026).** Commit merge
+`a8b0cf443ca8475e859ad8ae5e150fce135818d2` ghi bảy lượt review, sáu lượt có finding;
+`patch -p0 --fuzz=0` trả rc=0 cho sáu HINT, tổng 13 hunk. Đây là số do phiên điều phối ghi,
+không phải log sáu lần áp được đính ở mục này.
+
+Bối cảnh prompt của đợt ấy được liệt kê dưới đây. Số 6/6 tự nó chưa xác định
+nguyên nhân khác biệt với #250/#252 hay chứng minh từng điều kiện là cần:
+
+- Định dạng của đợt #518 dùng `patch -p0` từ **gốc cây làm việc** (`cay-kho/`), với đường dẫn
+  repo-relative không có tiền tố `a/`–`b/`;
+- Để thử cùng chế độ áp `--fuzz=0`: `cd cay-kho && patch -p0 --fuzz=0 --dry-run < ../HINT.patch`.
+  Có thể thêm `--verbose` để xem kết quả từng hunk.
+- Quyền ghi, cách dùng patch-as-hint và hợp đồng finding: xem `docs/PROTOCOL_DA_PHIEN.md`
+  §8/§13. Adapter không đặt thêm quy tắc nghiệm thu theo hunk hay theo lớp.
+
+Để áp thử, dùng clone tạm với cùng lệnh `patch -p0 --fuzz=0` ở trên.
+Về tệp phái sinh, xem protocol §9 và `CLAUDE.md`, mục "Quy ước deploy".
+Cú pháp sinh manifest tạm nằm ở protocol §10.2 (`release-manifest --root … --out …`);
+các cờ được mô tả bởi `--help` của lệnh `scripts/tl.py release-manifest`.
+
+**Lane tệp và lane diff — phép đo #250/#252.** Trên bốn lượt #250 và một lượt #252,
+định dạng diff hỏng **2/5 lượt** (đường dẫn hai chiều bất đối xứng, hoặc diff được lấy
+sau khi cây đã đổi); tệp trong `cay/` dùng được cả năm lượt. Quyền chọn hiện vật và
+hợp đồng patch-as-hint xem protocol §8/§13. Ví dụ sinh diff đối xứng cho layout `cay/`:
 
 ```bash
-diff -u --label a/cay/<tep> --label b/cay/<tep> <ban goc> cay/<tep>
-patch --dry-run -p1 -d <cay tam chua BAN GOC> < GOI_Y_VA.diff   # ghi ma thoat vao VERDICT.md
+diff -u --label a/cay/<tep> --label b/cay/<tep> <ban goc> cay/<tep> > GOI_Y_VA.diff
+patch --dry-run -p1 -d <cay tam chua BAN GOC> < GOI_Y_VA.diff   # kiểm layout cay/
 ```
 
-## GHI VERDICT LÊN PR — bắt buộc, đây là nơi verdict sống
+## Cú pháp ghi verdict lên PR
 
 ```bash
-gh pr review 56 --request-changes --body-file verdict.md
-gh pr review 56 --approve         --body-file verdict.md
-gh pr comment 56 --body-file verdict.md          # verdict blocked, hoặc phần bằng chứng dài
+gh pr review 56 --request-changes --body-file VERDICT.md
+gh pr review 56 --approve         --body-file VERDICT.md
+gh pr comment 56 --body-file VERDICT.md          # verdict blocked, hoặc phần bằng chứng dài
 ```
 
-Không có bước này thì lượt review **không tồn tại** với ai ngoài phiên đang chạy — prompt review
-vòng 6 của đợt F2 đã bốc hơi đúng kiểu đó. Nếu `gh` không dùng được, đường tương đương trên nền này
-là MCP GitHub (`pull_request_review_write` với `method: create` rồi `submit_pending`); ghi rõ đã dùng
-đường nào trong chính verdict.
+Các lệnh `gh` trên ghi review hoặc comment. Với MCP GitHub,
+`pull_request_review_write` dùng `method: create` rồi `submit_pending`.
+Nơi ghi, khai transport và điều kiện hoàn tất: xem protocol §8/§13.
 
 ## Ghi lại lượt review
+
+`<reviewed_sha>` dưới đây là giá trị `reviewed_sha` trong `VERDICT.md` của lượt.
+Lệnh dưới truyền trực tiếp OID ấy vào `record-review`.
 
 ```bash
 PY="$(command -v python3 || command -v python || command -v py)"   # CLAUDE.md: nhận CẢ BA tên
 "$PY"  .claude/dev/packet_loop.py record-review --packet 55 --provider codex \
     --verdict changes_requested \
-    --reviewed-sha $(gh pr view 56 --json headRefOid -q .headRefOid) \
+    --reviewed-sha <reviewed_sha> \
     --finding-id url-alias      --finding-desc "mô tả tự do, KHÔNG tham gia phép đếm" \
     --finding-id van-tay-lach   --finding-desc "mỗi lỗi một slug ổn định"
 ```
 
-`--reviewed-sha` phải là **exact head bạn thực sự đã đọc**, và phải khớp head đã đưa ra review; lệch
-thì lệnh thoát khác 0 và không ghi được bản duyệt. Head đổi giữa chừng ⇒ đọc lại, đừng duyệt bản cũ.
+`record-review` kiểm `--reviewed-sha` là OID 40 hex thường và bằng `reviewing_head_sha`
+trong state; thiếu/sai/không khớp trả mã khác 0. Quy tắc exact head và xử lý head đổi
+thuộc protocol §8/§13.
 
-`--finding-id` là **khoá đếm**: slug kebab-case do người review đặt và giữ NGUYÊN qua các lượt cho
-cùng một lỗi. Mô tả đổi thoải mái. Đặt slug mới cho một lỗi cũ là làm hỏng phép đếm — đó là lý do
-khoá không còn là văn xuôi. Slug sai dạng hoặc thiếu thì lệnh thoát khác 0 và không tự đoán từ mô tả.
+`--finding-id` nhận slug kebab-case làm khóa đếm; `--finding-desc` là mô tả tự do.
+Nhánh kiểm finding chặn slug sai dạng; chỉ đòi có slug với verdict `changes_requested`.
+`approve` và `blocked` có thể không có finding; lệnh không suy slug từ mô tả.
+Cách giữ danh tính finding qua các lượt xem protocol §8/§12/§13.
 
 `--help` cho ý nghĩa từng mã thoát.
 

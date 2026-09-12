@@ -358,3 +358,69 @@ mất `HetNganSachDay`.
   ngoài write set **vẫn báo**, đánh dấu là **nợ**. Sẽ là **9/10**.
 - Sau `approve` ⇒ merge, rồi **ĐỌC** lượt CI hậu merge (lần đo Windows **đầu tiên** của mã này).
   **Không** CI bằng tay ở bất kỳ giai đoạn nào.
+
+---
+
+# CẬP NHẬT — VÒNG 10 XONG. **TRẦN ĐÃ HẾT.** Write set SẠCH hai lượt liền.
+
+`VERDICT.rvwin512-10.md` sha256 **`6f50203271a5211709a73f9f2aa4c951912b950b89a9203c0b01dcd1a75923bc`**.
+`verdict: changes_requested` · `so_p1: 1` · `so_p2: 1` · `so_p3: 0` · `so_the_hien: 7`
+· **`so_p1_trong_write_set: 0`** · **`so_p2_trong_write_set: 0`** · không nộp HINT.
+Lượt chạy: phóng 15:13:28Z → `XONG VERDICT` 15:24:0xZ, 23 283 byte, **0** chữ ký mất mạng.
+
+## Điều quan trọng nhất, nguyên văn reviewer
+
+> **Toàn bộ finding mở là nợ ngoài write set, không yêu cầu PR sửa thêm đường.**
+
+Và: *"Không tìm thấy hồi quy trong hai đường write set. Full suite độc lập đạt **155/155 ở CHA, [A], [B]**,
+đủ nhật ký, không đỏ, không bỏ qua."*
+
+⇒ **Hai lượt liền** (vòng 9 và vòng 10) cho `0 P1` và `0 P2` **trong write set**, mỗi lượt kèm một lượt
+full suite **độc lập** của chính reviewer.
+
+## Các đính chính vòng 9 của tôi: ĐÃ VÁ THẬT
+
+Reviewer tự đo lại và xác nhận: `493 = 295 bang + 198 chot`; `454` tĩnh + `39` động; **21** hình dạng va
+chạm động trên **đúng bảy** ca; **8** hình dạng tĩnh trên **bốn** ca. `main()` có **ba** handler phân loại
+kết quả `fn()` (cộng một `except Exception` **lồng** để xử lý lỗi suy lý do bỏ qua — nói cho đúng, và
+đừng đánh đồng hai số đếm). Bảng `2/4` và `3/3` so `1/3` **đúng trên lớp thật**, chạy nguyên đường
+`main() → stdout → bộ đo`.
+
+`N42` **đúng về tệp spec**. Phần *"thân Issue `#513` ghi `#504`"* là **`KHÔNG ĐO ĐƯỢC`** từ sandbox
+(không mạng) — reviewer từ chối nhận lời khai của tôi, và đó là đúng kỷ luật.
+
+## Nhưng bản sửa vòng 9 của tôi SINH LỖI MỚI — `F9.1`
+
+`A2` của spec rev 2 đòi *"đổi **mọi thông điệp chốt** thành RỖNG ⇒ phân hạng không đổi"*. **Sai phạm vi
+thao tác.** Phản chứng chạy qua `main()` thật: chuyển đúng 59 `bang→chot` ⇒ `t159` **`1/1`, rc=0**; giữ
+nguyên điều kiện mà chỉ làm rỗng thông điệp tại hàm chốt ⇒ **`0/1`, rc=1**. Gốc ở
+`ops/lease_publish_test.py:6460–6475`: `t159` bắt `TinHieuChotCa` rồi **kiểm NỘI DUNG** chẩn đoán của
+`t137`. Tức **thông điệp ở đó LÀ DỮ LIỆU MÀ CA KIỂM**, chưa phải chi tiết báo cáo cho bộ chấm — làm rỗng
+là **đổi ngữ nghĩa ca**, trái `ngoai_pham_vi` #5 của chính đặc tả ấy.
+
+**Đã sửa: spec `#530` lên revision 3**, sha256 **`47c3b1fe70da6976cf802436fa8883c2ba48ac8f706b3d9ec103deaeb5f37778`** (rev 2 `1c87aa4e…`, rev 1 `5fcc14b5…` —
+đừng neo lease vào hai bản cũ). `A2` nay đặt phép biến đổi ở **đúng ranh giới của bộ chấm**: `chi_tiet`
+**trên KÊNH**, **sau** khi `main()` đã xác định loại kết quả, giữ nguyên tên ca · loại tín hiệu · nhãn ·
+neo · `rc`. Kèm `M1b` mới cho quan hệ `M1`/`M4`/`A1` quanh control dương `t96` (nó nằm ngoài chín ca nên
+vẫn ném `AssertionError` **trần**, mà bản mẫu `#513` chỉ nhận `TinHieuChotCa`).
+
+**Ba revision liên tiếp, ba lần cùng một gốc:** rev 1 sai vì khớp regex với **chuỗi tự ghép**; rev 2 sai
+vì đặt phép đo ở **sai ranh giới**. Cả hai đều là **một phép đo chưa từng chạy qua đường thật**. Nên rev 3
+ghi thẳng thành ràng buộc: chạy qua `main()` thật **và** nói rõ **tác động ở RANH GIỚI NÀO**.
+
+## Bảy thể hiện mở — tất cả là NỢ ngoài write set
+
+`F6.7`–`F6.12` (sáu thể hiện hành vi của bộ đo, → `#530`) và `F9.1` (tiêu chí của spec `#530`, nay đã sửa
+ở rev 3). Reviewer nói rõ: *"Lời khai `F6.11`/`F6.12` đã sửa đúng **không** đồng nghĩa hành vi `BoQuaNen`/
+`t131` đã được **chữa**"* — hai thứ khác nhau, và cái sau thuộc `#530`.
+
+## TRẦN 10 VÒNG ĐÃ HẾT ⇒ DỪNG, hỏi chủ kho
+
+Điều kiện chủ kho đặt cho merge (*"vòng 9 chỉ review write set, rồi merge"*) **đã đạt**: write set `0 P1`
+`0 P2`, xác nhận **hai lượt liền** bằng full suite độc lập. Nhưng:
+
+- chuỗi verdict vẫn là `changes_requested` (vì các nợ ngoài write set), **không** có `approve` tường minh;
+- `assurance_target` của lease là `cross_approved`;
+- và **trần `S6` = 10 vòng đã dùng hết**.
+
+Phiên **KHÔNG** tự merge và **KHÔNG** tự nới trần. Ba đường để chủ kho chọn nằm trong bản chiếu trên PR.

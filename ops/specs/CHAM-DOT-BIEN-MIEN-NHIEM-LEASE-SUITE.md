@@ -1,10 +1,11 @@
-# Đặc tả packet — `CHAM-DOT-BIEN-MIEN-NHIEM-LEASE-SUITE` (revision 2)
+# Đặc tả packet — `CHAM-DOT-BIEN-MIEN-NHIEM-LEASE-SUITE` (revision 3)
 
 - `packet_id`: **`CHAM-DOT-BIEN-MIEN-NHIEM-LEASE-SUITE`**; ID bền theo `PROTOCOL §3.2` là `wp<packet_issue>`.
 - `packet_issue`: **(để trống — chủ kho cấp)**
 - `mission_issue`: **(để trống — chủ kho cấp)**
-- `revision`: **2** · `generation`: 1 · soạn **14:4xZ**, sửa **15:0xZ 12-09-2026** sau cross-review vòng 9
-  của PR #512 (`F6.11` · `F6.12` · `F9.1` · `N42`). Revision 1 có **ba** lời khai SAI — xem `§dinh_chinh`.
+- `revision`: **3** · `generation`: 1 · soạn **14:4xZ**, sửa **15:0xZ** (vòng 9) và **15:3xZ 12-09-2026**
+  (vòng 10) của PR #512. Rev 1 có **ba** lời khai sai; rev 2 sửa chúng nhưng **`A2` mới lại sinh lỗi
+  khác** — xem `§dinh_chinh`.
 - `depends_on`: **`[]`** — bản mẫu đã LAND trên `master`, không chờ gì.
 - `executor`: claude · `environment`: cloud
 - `risk`: **sensitive** · `review_class`: **sensitive**
@@ -114,6 +115,7 @@ Cấp trước mốc đó ⇒ chồng lấn ⇒ phải thu hồi bằng **bia m�
 | # | mục tiêu | chiếu vào |
 |---|---|---|
 | M1 | **59** lời gọi `bang()` của 9 ca `#504` (`t125` 3 · `t153` 5 · `t154` 10 · `t155` 4 · `t156` 11 · `t157` 6 · `t158` 7 · `t159` 4 · `t160` 9) đổi sang `chot()` ⇒ ném `TinHieuChotCa`. `bang()` **giữ nguyên** cho hạ tầng và cho các ca ngoài `#504`. | `write_set` #1 |
+| M1b | **Control dương `t96` phải mang tín hiệu RIÊNG khi port.** `t96` nằm **ngoài** chín ca `M1` nên vẫn dùng `bang()` ⇒ ném `AssertionError` **trần**; mà bản mẫu `#513` **chỉ nhận `TinHieuChotCa`**, trong khi `A1` đòi control ấy phải ra `GIẾT`. Phải nói rõ cách chuyển tín hiệu cho **riêng fixture control này** (ví dụ: đột biến control ném `TinHieuChotCa` thay vì đảo `bang()`), và **KHÔNG** được nới bộ chấm nhận **mọi** `AssertionError` — nới thế là phá chính `M1`. | `write_set` #1 |
 | M2 | `main()` phát **kênh kết quả riêng** theo bản mẫu `#513`: bản ghi mỗi ca mang `(tên ca · nhãn · chi tiết)`, neo `(dấu phiên · mutant · lần thử)`, cộng bản ghi **đóng lượt** mang `rc` — và `rc` ấy được so với **mã thoát THẬT** của tiến trình con. Tên ca do **khung** đóng dấu, không lấy từ đối số người gọi. | `write_set` #1 |
 | M3 | Bộ chấm phân **BA** trạng thái. `KHÔNG ĐO ĐƯỢC` ⇒ chạy lại **ĐÚNG MỘT** lần; lần hai vẫn vậy ⇒ **ĐỎ** kèm in ngoại lệ. **Không đường nào** biến `KHÔNG ĐO ĐƯỢC` thành `GIẾT`. | `write_set` #1 |
 | M4 | Catalogue `#504` (16 mutant hiện có + 10 control) **nằm trong** tệp test, theo khuôn `DOT_BIEN_TU_KIEM`. | `write_set` #1 |
@@ -125,7 +127,7 @@ Cấp trước mốc đó ⇒ chồng lấn ⇒ phải thu hồi bằng **bia m�
 | # | tiêu chí | phép đo |
 |---|---|---|
 | A1 | 10 control **đều ĐẠT** | `--tu-kiem` ⇒ `10/10`, `rc=0` (hiện `7/10`, `rc=1`) |
-| A2 | phân hạng **KHÔNG CÒN ĐỌC nội dung thông điệp** | đột biến: đổi **mọi** thông điệp chốt thành chuỗi RỖNG ⇒ phân hạng **không đổi**. *(Sửa ở revision 2 theo `F9.1`: revision 1 đòi "va chạm hình dạng chuỗi về 0" — **đo sai đại lượng**, vì `M2`/`M6` bỏ hẳn việc đọc chuỗi nên con số va chạm trở thành **không liên quan**, chứ không phải phải về 0.)* |
+| A2 | phân hạng **KHÔNG CÒN ĐỌC nội dung thông điệp** | đột biến đặt ở **ĐÚNG RANH GIỚI của bộ chấm**: làm rỗng (hoặc biến đổi) **trường `chi_tiet` phát trên KÊNH, SAU khi `main()` đã xác định loại kết quả của ca** — giữ nguyên **tên ca · loại tín hiệu · nhãn · neo `(dấu phiên, mutant, lần thử)` · `rc`**; rồi so phân hạng trên **cùng** tập control và catalogue ⇒ **không đổi**. *(Xem `§dinh_chinh` — rev 2 đòi làm rỗng ở **hàm chốt**, và đó là SAI.)* |
 | A3 | gỡ chốt ⇒ ca đích **ĐỎ** | đột biến M5, đo `rc` và tên ca đỏ |
 | A4 | catalogue 16 mutant giữ `16/16 giết thật`, **0** tín dụng giả, **0** sống sót | catalogue trong tệp test |
 | A5 | suite đầy đủ `N/N` với **hai số bằng nhau** ở **CHA + `[A]` + `[B]`** — ba dòng | `AL_VER=1.7.7 bash ops/chay_lease_publish_test.sh` |
@@ -175,3 +177,28 @@ Kèm `N42`: chủ thể của exclusion trong `#513` là **`#503`** (lease `m9-f
 không phải `#504`. Và **thân Issue `#513` ghi `#504` trong khi tệp spec ghi `#503`** — hai hiện vật của
 cùng một packet **lệch nhau**; khai ra để người giữ `#513` biết. Exclusion vẫn có thật, chỉ đổi chủ thể,
 nên suy luận *"F6 là hệ quả của một write-set exclusion"* đứng vững.
+
+### `dinh_chinh` — revision 2 → 3 (cross-review vòng 10)
+
+Rev 2 sửa ba lời khai sai của rev 1, **nhưng `A2` mới của nó lại SAI theo một cách khác** — và vòng 10
+chứng minh bằng phép chạy qua `main()` **thật**, không bằng đọc:
+
+| | rev 2 đòi | vì sao SAI | phép đo |
+|---|---|---|---|
+| `F9.1` | đổi **mọi thông điệp chốt** thành RỖNG ⇒ phân hạng không đổi | thông điệp ở một số ca **LÀ DỮ LIỆU MÀ CA KIỂM**, chưa phải chi tiết báo cáo cho bộ chấm. Làm rỗng chúng **đổi ngữ nghĩa ca** ⇒ trái `ngoai_pham_vi` #5 của chính đặc tả này | chuyển đúng 59 `bang→chot` rồi `main()` thật với `--chi-ca=t159` ⇒ **`1/1`, rc=0**; giữ nguyên điều kiện mà chỉ làm rỗng thông điệp tại `bang()`/`chot()` ⇒ **`0/1`, rc=1**. Gốc ở `ops/lease_publish_test.py:6460–6475`: `t159` gọi `t137`, bắt `TinHieuChotCa`, rồi **kiểm nội dung** chẩn đoán *"shellcheck chỉ trả 1/2 kết quả"* và nhãn timeout |
+
+Nói cho đúng mức: **đại lượng của rev 2 ĐÚNG** (bất biến phân hạng, phù hợp `M2`/`M6`); chỉ **phạm vi
+thao tác** sai. Đòi phân hạng không đổi ở chỗ ấy sẽ **đánh đỏ một port ĐÚNG**, hoặc thúc người thi công đi
+gỡ chốt nội bộ của `t159` — **cấm** chữa theo đường đó.
+
+⇒ Rev 3 dời phép biến đổi về **đúng ranh giới của bộ chấm**: `chi_tiet` **trên KÊNH**, **sau** khi `main()`
+đã xác định loại kết quả. Nếu ai muốn làm rỗng **trước khi ném**, phải **xác định một tập fixture không
+dùng thông điệp làm dữ liệu** và **chứng minh** phép biến đổi giữ hành vi ấy — không được giả định.
+
+Kèm `M1b` mới: quan hệ `M1`/`M4`/`A1` quanh **control dương `t96`** mà vòng 9 nêu và rev 2 **chưa giải**.
+
+**Bài học lặp lại ba lần trong ba revision liên tiếp, nên ghi thành ràng buộc:** rev 1 sai vì khớp regex
+với chuỗi tự ghép; rev 2 sai vì đặt phép đo ở sai ranh giới. Cả hai đều là **một phép đo chưa từng chạy
+qua đường thật**. Ràng buộc của packet này, đã có ở rev 2 và giữ nguyên: **mọi tiêu chí nghiệm thu phải
+chạy qua `main()` THẬT** — và rev 3 thêm: **phải nói rõ nó tác động ở RANH GIỚI NÀO**, vì "chạy qua
+`main()`" mà đặt sai ranh giới thì vẫn ra kết luận sai.

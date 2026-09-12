@@ -21,6 +21,7 @@ import shlex
 import subprocess
 import sys
 import tempfile
+import time
 from datetime import datetime, timedelta, timezone
 from pathlib import Path, PurePosixPath
 
@@ -29,6 +30,36 @@ SCRIPT = HERE / "lease_publish.py"
 # Cờ NỘI BỘ của `t125`, cố ý là ĐỐI SỐ chứ không phải biến môi trường: argv không
 # được kế thừa, nên không môi trường nào tắt được phép A/B một cách tình cờ.
 CO_AB = "--ab-con-noi-bo"
+SC_LOAI_TRU_NHU_ACTIONLINT = "SC1091,SC2194,SC2050,SC2154,SC2157,SC2043"   # đúng bộ actionlint 1.7.7 truyền cho shellcheck
+AL_HAN_GIAY = 180        # hạn MỘT lời gọi actionlint trong t137 (packet #504 M5 bước 2) — lý do tại t137
+SC_HAN_TONG_GIAY = 180   # hạn TOÀN BỘ vòng shellcheck của t137 — TỔNG, không phải mỗi lời gọi
+CD_HAN_TONG_GIAY = 120   # hạn TOÀN BỘ chẩn đoán khi actionlint treo (`_chan_doan_actionlint_treo`)
+# Vì sao shellcheck dùng hạn TỔNG mà không phải hạn MỖI LỜI GỌI: số thân `run` bash trong workflow là
+# DỮ LIỆU (hôm nay 2), nên hạn-mỗi-lời-gọi làm trần của t137 trôi theo dữ liệu, và mọi con số dẫn xuất
+# từ nó cũng trôi — đúng hình dạng "bất biến còn đúng, số hạng đã trôi". Hạn TỔNG cho t137 một trần
+# ĐỘC LẬP với số thân, nên `T137_TRAN_GIAY` dưới đây là một con số đo được, không phải một phép đoán.
+T137_TRAN_GIAY = AL_HAN_GIAY + SC_HAN_TONG_GIAY + CD_HAN_TONG_GIAY       # 480
+
+
+def _han_ngoai_toi_thieu(han_actionlint, han_sc_tong, han_chan_doan, suite_do_duoc, du_phong):
+    """Hạn NGOÀI tối thiểu = tổng hạn TRONG có thể tiêu HỢP LỆ + thời gian suite đã ĐO + dự phòng.
+
+    Hàm thuần, không đọc hằng nào, để `t156` gọi lại được với số THU NHỎ: một phản chứng chạy trong
+    vài giây vẫn đo đúng QUAN HỆ mà `AB_HAN_GIAY` phải giữ, thay vì phải chờ 540 s thật.
+    """
+    return han_actionlint + han_sc_tong + han_chan_doan + suite_do_duoc + du_phong
+
+
+AB_SUITE_DO_DUOC_GIAY = 350   # đo Windows M4 lượt 4: t125 = 344.438 s (lượt con = TOÀN suite trừ t125)
+AB_DU_PHONG_GIAY = 120
+# hạn MỖI lượt con của t125. Cross-review codex 11-09-2026 (P2): bản trước ghi tay 420 s, NHỎ HƠN tổng
+# hạn trong của riêng t137 (180 + 180×2 = 540) ⇒ con bị giết dù mọi lệnh còn trong hạn RIÊNG của nó, và
+# verdict lồng lệch verdict đứng một mình. Nay dẫn xuất, nên không sửa được một vế mà quên vế kia.
+AB_HAN_GIAY = _han_ngoai_toi_thieu(AL_HAN_GIAY, SC_HAN_TONG_GIAY, CD_HAN_TONG_GIAY,
+                                   AB_SUITE_DO_DUOC_GIAY, AB_DU_PHONG_GIAY)      # 950
+AB_TRAN_CUNG_GIAY = 1500   # trần CỨNG. Hạn ngoài phải nằm DƯỚI nó, và nó nằm dưới trần job 60 phút của
+#                            `ci.yml` — nâng hạn ngoài cho tới khi hết treo là đổi cổng lấy sự im lặng.
+RC_CHON_CA_SAI = 3       # `--chi-ca=` rỗng hoặc không khớp ca nào ⇒ KHÔNG chạy gì và KHÔNG xanh
 WORKFLOW_DANG = HERE.parent / ".github" / "workflows" / "ops-publish-lease.yml"
 
 RC_OK, RC_THAM_SO, RC_TU_CAP, RC_DA_DANG, RC_NOI_DUNG, RC_NEO, RC_LOP = 0, 2, 4, 9, 8, 6, 10
@@ -3983,6 +4014,178 @@ def t126_dau_da_dang_la_HIEN_VAT_SUA_DUOC_chu_khong_phai_ban_ghi_git():
              f"lại mục `danh_doi`, đừng nới lời khẳng định cho vừa.")
 
 
+LECH_KHOP, LECH_CHUA_RO = "KHỚP", "LỆCH_CHƯA_RÕ_NGUYÊN_NHÂN"
+
+
+def _phan_loai_lech_ab(ket_a, ket_b):
+    """So kết quả quan sát được; A/B lệch chưa xác định được nguyên nhân.
+
+    CI e6feddb có t139 đỏ vì S8-bo-deadline sống ở vế B. Log đó xác định ca/mutant,
+    không chứng minh hay loại trừ quan hệ nhân quả với actor. Một lần đo lại khớp,
+    kể cả tuần tự, cũng không loại trừ rò actor phụ thuộc thứ tự ca hoặc tải.
+    Đo lại một ca riêng còn thay đổi ngữ cảnh của phép đo TOÀN SUITE.
+
+    Vì vậy giữ nguyên bằng chứng A/B và trả trạng thái chưa rõ nguyên nhân cho
+    MỌI lệch, gồm cả rc/số đếm/tập đỏ/tập bỏ qua. t125 phải ĐỎ ngay, không chạy thêm
+    chẩn đoán thiếu ngân sách tổng, thu hồi cây hoặc tee rồi gọi nó là chập chờn.
+    """
+    if ket_a == ket_b:
+        return LECH_KHOP, "hai vế khớp"
+    lech_do = sorted(set(ket_a[3]) ^ set(ket_b[3]))
+    lech_bo = sorted(set(ket_a[4]) ^ set(ket_b[4]))
+    return (LECH_CHUA_RO,
+            f"{LECH_CHUA_RO}: hai lượt TOÀN SUITE A/B khác nhau; "
+            f"không-actor=(rc={ket_a[0]}, {ket_a[1]}/{ket_a[2]}), "
+            f"có-actor=(rc={ket_b[0]}, {ket_b[1]}/{ket_b[2]}); "
+            f"ca lệch ĐỎ={lech_do!r} BỎ QUA={lech_bo!r}. "
+            "CHƯA loại trừ rò GITHUB_ACTOR, ảnh hưởng thứ tự ca hoặc tải; "
+            "không kết luận nguyên nhân từ riêng hai kết quả. "
+            "Đọc lý do từng ca trong log [A]/[B]; mọi lệch đều chặn cổng.")
+
+
+def _mo_con_nhom_rieng(lenh, env, stdout, stderr):
+    """`Popen` cho con làm LÃNH ĐẠO một nhóm tiến trình RIÊNG, để `_giet_ca_cay` với tới được CHÁU.
+
+    Vì sao không `Popen` trần: `p.kill()` giết ĐÚNG PID con. Cross-review codex 11-09-2026 (P1) đo
+    được cháu sống tiếp; probe Linux tại chỗ xác nhận (con rc=-9, cháu `sleep` vẫn chạy). Cháu ở đây
+    là git/actionlint/shellcheck — trên Windows chúng giữ handle tệp và ăn CPU sau khi con đã chết.
+
+    API RIÊNG NỀN, tra bằng `getattr` chứ không đụng thẳng (CLAUDE.md: "API CHỈ CÓ TRÊN MỘT NỀN" —
+    `os.getpgid` từng làm suite Windows 0/103): `start_new_session` chỉ có nghĩa trên POSIX,
+    `CREATE_NEW_PROCESS_GROUP` chỉ có trên Windows. Cờ vắng ⇒ vẫn chạy, và `_giet_ca_cay` sẽ KHAI
+    rằng nó không có nhóm riêng thay vì im lặng giết nhầm.
+    """
+    them = {}
+    if os.name == "posix":
+        them["start_new_session"] = True
+    else:
+        co = getattr(subprocess, "CREATE_NEW_PROCESS_GROUP", 0)
+        if co:
+            them["creationflags"] = co
+    return subprocess.Popen(lenh, env=env, stdout=stdout, stderr=stderr, text=True, **them)
+
+
+def _nap_launcher_thu_hoi():
+    """Dùng lại cơ chế chụp cây/khoá PID của launcher đã có trong cùng checkout."""
+    import importlib.util
+    duong = HERE.parent / ".claude" / "dev" / "launcher.py"
+    spec = importlib.util.spec_from_file_location("launcher_thu_hoi_lease_test", duong)
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    return mod
+
+
+def _giet_ca_cay(p, cho_giay: float = 5.0) -> str:
+    """Giết con VÀ CHÁU. Trả một dòng ĐO ĐƯỢC về đường đã đi — kể cả đường KHÔNG làm được gì.
+
+    Bốn chốt, mỗi chốt là một bài học đã trả giá:
+    · KHÔNG BAO GIỜ giết nhóm của CHÍNH MÌNH. Chỉ `killpg` khi nhóm của con ĐÚNG BẰNG PID con VÀ
+      KHÁC nhóm của tiến trình này; `start_new_session` hỏng âm thầm thì lùi về `p.kill()` chứ không
+      giết cả runner ("test không được nhét PID của chính nó vào thứ mình đang thử giết").
+    · `taskkill /T /F` KHÔNG đáng tin — trả `Access denied` ngay trên con do chính mình sinh. Gọi
+      xong phải KIỂM LẠI, còn sống thì `p.kill()`.
+    · POSIX dùng lại launcher để chụp hậu duệ, giữ khoá danh tính và kiểm cả nhóm;
+      ZOMBIE tính là ĐÃ CHẾT. `wait()` bên dưới thu hồi PID con trực tiếp.
+    · "Đã gọi lệnh giết" ≠ "đã chết" — nên hàm này trả nhật ký từng bước, và ca gọi nó phải ĐO hành
+      vi của cháu (nhịp tim), đừng đọc mã thoát của lệnh giết.
+    """
+    buoc = []
+    killpg, getpgid = getattr(os, "killpg", None), getattr(os, "getpgid", None)
+    if killpg and getpgid:
+        nhom_con = nhom_minh = None
+        try:
+            nhom_con, nhom_minh = getpgid(p.pid), getpgid(0)
+        except OSError as ex:
+            buoc.append(f"getpgid loi {type(ex).__name__}")
+        if nhom_con is not None and nhom_con == p.pid and nhom_con != nhom_minh:
+            # Mẹ chết bởi TERM chưa chứng minh cháu chết. Chụp cây TRƯỚC tín hiệu
+            # để giữ cả cháu đã mở session riêng (t154/t156/t157 cũng tạo nhóm lồng).
+            thu_hoi = _nap_launcher_thu_hoi()
+            kq = thu_hoi._giet_cay(p.pid, thu_hoi._khoa_danh_tinh(p.pid))
+            buoc.append(f"ca_cay={kq.ca_cay}: {kq}")
+        else:
+            buoc.append(f"KHONG co nhom rieng (nhom_con={nhom_con} pid={p.pid} nhom_minh={nhom_minh}) "
+                        f"- chi giet PID, CHAU KHONG DO DUOC")
+    else:
+        import shutil
+        tk = shutil.which("taskkill")
+        if tk:
+            try:
+                r = subprocess.run([tk, "/T", "/F", "/PID", str(p.pid)],
+                                   capture_output=True, text=True, timeout=cho_giay)
+                buoc.append(f"taskkill rc={r.returncode} err={(r.stderr or '').strip()[:80]!r}")
+            except (OSError, subprocess.TimeoutExpired) as ex:
+                buoc.append(f"taskkill loi {type(ex).__name__}")
+            try:
+                p.wait(timeout=max(0.1, cho_giay / 2))
+            except subprocess.TimeoutExpired:
+                pass
+        else:
+            buoc.append("KHONG co taskkill")
+    if p.poll() is None:
+        p.kill()
+        buoc.append("p.kill()")
+    try:
+        p.wait(timeout=cho_giay)
+    except subprocess.TimeoutExpired:
+        buoc.append("wait QUA HAN - con CON SONG")
+    buoc.append(f"rc={p.returncode}")
+    return " -> ".join(buoc)
+
+
+def _moi_truong_con_ab(nen: dict) -> dict:
+    """Môi trường cho MỘT lượt con của t125: nền đã lọc + TẮT ĐỆM Python.
+
+    VÌ SAO `PYTHONUNBUFFERED` PHẢI ĐẶT Ở ĐÂY, không phó cho wrapper. Đo 12-09-2026: con in một dòng
+    rồi `sleep 6` mà KHÔNG flush ⇒ tee thấy dòng trong 3 s: **không** biến ⇒ KHÔNG · có biến ⇒ CÓ.
+    Trên CI thì `ops/chay_lease_publish_test.sh` (M2) đã `export PYTHONUNBUFFERED=1`, nên đường CI vốn
+    sống; nhưng giá trị của một bản vá không được phụ thuộc một biến do TỆP KHÁC đặt — chạy trực tiếp
+    `python3 ops/lease_publish_test.py` thì bằng chứng lại nằm trong đệm của con tới lúc con thoát,
+    đúng chỗ mù mà lớp `bang-chung-song-bi-chon-trong-tep-tam` sinh ra để xoá. `t157` đo CƠ CHẾ bằng
+    một writer tự flush nên nó xanh ở CẢ HAI đường ⇒ `t157` KHÔNG canh được chỗ này; `t158` canh.
+
+    Đặt cho CẢ HAI vế A/B nên bất biến của t125 không đổi: hai vế vẫn khác nhau ĐÚNG một biến
+    `GITHUB_ACTOR`.
+    """
+    return dict(nen, PYTHONUNBUFFERED="1")
+
+
+def _theo_duoi_va_in(duong, tien_to: str, dung, khoa) -> None:
+    """Tail tệp log con đang ghi, in từng DÒNG ĐỦ ra stdout CHA kèm tiền tố. Line-atomic qua `khoa`.
+
+    Vì sao: job bị huỷ giữa t125 (trần 60 phút của `ci.yml`, hay huỷ từ ngoài) thì tệp tạm đi theo
+    container và log CI chỉ còn một dòng `>>> vao t125` — đúng chỗ mù packet này sinh ra để xoá
+    (cross-review codex 11-09-2026, P2). Tee đưa bằng chứng lên log CI NGAY, bản riêng trong tệp vẫn
+    còn nguyên byte cho phép so ba tập của A/B.
+
+    TIỀN TỐ ở ĐẦU DÒNG là thứ giữ cho tee không lừa được ai: mọi regex của bộ test neo `(?m)^` (
+    `^>>> vao`, `^<<< ra`, `^  ĐỎ  `, `^  BỎ QUA `) nên không dòng teed nào khớp. Regex duy nhất
+    KHÔNG neo đầu dòng là `lease_publish: (\d+)/(\d+) đạt`, và nó đọc BẢN RIÊNG trong tệp chứ
+    không đọc stdout — đã kiểm: ngoài tệp này không script nào trong kho grep dòng tổng kết đó.
+
+    Đọc NHỊ PHÂN rồi mới giải mã từng dòng: đọc text theo khối cắt ngang một ký tự nhiều byte sẽ
+    sinh ký tự thay thế giả.
+    """
+    du = b""
+    with open(duong, "rb") as f:
+        while True:
+            xong = dung.is_set()          # đọc cờ TRƯỚC khi đọc tệp: con đã được `wait` rồi mới set
+            moi = f.read(65536)
+            if moi:
+                du += moi
+                *dong, du = du.split(b"\n")
+                for d in dong:
+                    with khoa:
+                        print(f"{tien_to} {d.decode('utf-8', 'replace').rstrip(chr(13))}", flush=True)
+                continue
+            if xong:
+                if du:
+                    with khoa:
+                        print(f"{tien_to} {du.decode('utf-8', 'replace').rstrip(chr(13))}", flush=True)
+                return
+            time.sleep(0.05)
+
+
 @ca
 def t125_AB_toan_suite_KHONG_doi_verdict_theo_ambient_actor():
     """A/B: chạy lại TOÀN SUITE hai lượt, khác nhau ĐÚNG một biến `GITHUB_ACTOR`.
@@ -4009,37 +4212,105 @@ def t125_AB_toan_suite_KHONG_doi_verdict_theo_ambient_actor():
 
     ĐỘT BIẾN LÀM CA NÀY ĐỎ: bỏ dòng `moi.pop("GITHUB_ACTOR", None)` trong `_goi_lop_gh`,
     hoặc bỏ lọc `env` trong `chay()`, hoặc bỏ `patch.dict` trong `_kiem_sach`.
+
+    HAI LƯỢT CON CHẠY SONG SONG, CÓ HẠN (packet #504 M5): M4 lượt 1 thấy t125 vào nhưng không ra
+    trong 1540 s; log ấy chưa phân biệt được con treo với con chậm. Giữ toàn suite và cùng tuple A/B.
+    `AB_HAN_GIAY` là trần mỗi con TỪ LÚC START; hai waiter chạy đồng thời, quá hạn thì ĐỎ và thu hồi
+    CẢ CÂY (không chỉ PID con). 5 s chỉ dành cho wait sau kill. M4 lượt 4 ghi t125=344.438 s, không
+    chứng minh trần đủ sau khi sửa các ca PATH ngoài write set; phải đo Windows lại, không tự nâng
+    trần cho xanh — nên trần nay DẪN XUẤT từ các hạn trong (xem `_han_ngoai_toi_thieu`) và bị `t156`
+    chặn ở cả hai đầu: không nhỏ hơn tổng hạn trong, không vượt `AB_TRAN_CUNG_GIAY`.
+
+    BA BẢN VÁ CROSS-REVIEW 11-09-2026 nằm ở ca này, mỗi bản một LỚP, và mỗi lớp có phản chứng riêng:
+    · P1 `_giet_ca_cay` thay `p.kill()` — cháu (git/shellcheck) sống sót cú giết PID; phản chứng `t154`
+      đo NHỊP TIM của cháu hai chiều (giết PID ⇒ cháu còn đập; giết cây ⇒ cháu im).
+    · P2 tee `_theo_duoi_va_in` — stdout/stderr con vào tệp CÓ TÊN và được tail ra log CI ngay, nên
+      job bị huỷ giữa t125 vẫn để lại tên ca đang chạy của con. Bản riêng trong tệp vẫn nguyên byte.
+    · P2 hạn ngoài dẫn xuất — xem đoạn trên và `t156`.
+
+    Phạm vi số M4: Windows lượt 4 hoàn tất 526.866 s với 15 ĐỎ, 7 BỎ QUA. Chỉ 14 ca có chữ ký PATH;
+    t150 chỉ giữ 200 ký tự cuối stderr, chưa xác định gốc. Ubuntu lượt 4=114.528 s, A2 lượt 1=141.023 s.
+    Lượt 3: t139 vào 17:24:51.969Z, log huỷ 17:25:47.047Z, khoảng 55.077 s; không phải 90 s.
+    Numstat cộng dồn theo base: f1b0b4f +102/-15, 570209c +142/-16, dff28f6 +157/-17;
+    +166/-26 là tổng delta cộng cơ học, không phải diff của dff28f6 so base.
     """
     import re
     import subprocess
     if CO_AB in sys.argv:
         return          # lượt con: KHÔNG tự gọi lại mình (chống đệ quy)
 
+    import threading
+    from concurrent.futures import ThreadPoolExecutor, as_completed
     nen = {k: v for k, v in os.environ.items() if k != "GITHUB_ACTOR"}
 
-    def luot(nhan, mt):
-        p = subprocess.run([sys.executable, str(Path(__file__).resolve()), CO_AB],
-                           env=mt, capture_output=True, text=True)
-        m = re.search(r"lease_publish: (\d+)/(\d+) đạt", p.stdout)
+    def doc(x):
+        nhan, ma, p, out_p, err_p, dung, luong, han = x
+        qua_han, nhat_ky_giet = False, ""
+        try:
+            p.wait(timeout=max(0.0, han - time.monotonic()))
+        except subprocess.TimeoutExpired:
+            qua_han = True
+            nhat_ky_giet = _giet_ca_cay(p)   # CẢ CÂY: cháu git/shellcheck không được sống sót
+        dung.set()
+        for t in luong:
+            t.join(timeout=5)
+        out = out_p.read_text(encoding="utf-8", errors="replace")
+        err = err_p.read_text(encoding="utf-8", errors="replace")
+        if qua_han:
+            vao = re.findall(r"(?m)^>>> vao (\S+) ", out)
+            ra = set(re.findall(r"(?m)^<<< ra (\S+) ", out))
+            treo = [x for x in vao if x not in ra]
+            bang(False, f"lượt {nhan}: lượt con KHÔNG XONG trong {AB_HAN_GIAY}s — kết quả thu hồi "
+                        f"({nhat_ky_giet}); ca treo (vao không ra): {treo!r}; đã xong {len(ra)} ca; "
+                        f"stdout cuối={out[-300:]!r}; stderr cuối={err[-300:]!r}")
+        m = re.search(r"lease_publish: (\d+)/(\d+) đạt", out)
         bang(m, f"lượt {nhan}: KHÔNG ĐO ĐƯỢC dòng tổng kết; rc={p.returncode}, "
-                f"stdout={p.stdout[-400:]!r}, stderr={p.stderr[-400:]!r}")
-        do = frozenset(re.findall(r"(?m)^  ĐỎ  (\w+):", p.stdout))
-        # Phải so CẢ ca BỎ QUA. Hai lượt bỏ qua những ca KHÁC nhau nhưng CÙNG SỐ LƯỢNG
-        # sẽ cho cùng mẫu số, cùng số đạt và cùng tập đỏ — tuple vẫn bằng nhau trong khi
-        # tập ca THỰC SỰ ĐƯỢC ĐO đã khác. Cross-review codex 29-08-2026, finding 2.
-        bo = frozenset(re.findall(r"(?m)^  BỎ QUA (\w+):", p.stdout))
+                f"stdout={out[-400:]!r}, stderr={err[-400:]!r}")
+        do = frozenset(re.findall(r"(?m)^  ĐỎ  (\w+):", out))
+        # Giữ cả tập BỎ QUA: cùng số lượng chưa chứng minh cùng tập ca đã đo.
+        bo = frozenset(re.findall(r"(?m)^  BỎ QUA (\w+):", out))
         return p.returncode, m.group(1), m.group(2), do, bo
 
-    khong_actor = luot("KHÔNG actor", nen)
-    co_actor = luot("CÓ actor lạ", dict(nen, GITHUB_ACTOR="ke-la-mat-khong-co-quyen"))
+    # Tệp CÓ TÊN cho từng luồng: không đầy PIPE, không chờ EOF do cháu giữ handle (M3), và có đường
+    # cho `_theo_duoi_va_in` tail ra log CI. Hai waiter chạy đồng thời; hạn tính từ lúc START của
+    # CHÍNH con ấy, không cấp lại khi đọc lượt B.
+    khoa = threading.Lock()
+    with tempfile.TemporaryDirectory() as td, ThreadPoolExecutor(max_workers=2) as pool:
+        con, ket_qua, tay = [], {}, []
+        try:
+            for nhan, ma, mt in (("KHÔNG actor", "A", nen),
+                                 ("CÓ actor lạ", "B", dict(nen, GITHUB_ACTOR="ke-la-mat-khong-co-quyen"))):
+                out_p, err_p = Path(td) / f"{ma}.out", Path(td) / f"{ma}.err"
+                ow = open(out_p, "w", encoding="utf-8"); tay.append(ow)
+                ew = open(err_p, "w", encoding="utf-8"); tay.append(ew)
+                han = time.monotonic() + AB_HAN_GIAY
+                p = _mo_con_nhom_rieng([sys.executable, str(Path(__file__).resolve()), CO_AB],
+                                       _moi_truong_con_ab(mt), ow, ew)
+                dung = threading.Event()
+                luong = [threading.Thread(target=_theo_duoi_va_in, args=(out_p, f"[{ma}]", dung, khoa), daemon=True),
+                         threading.Thread(target=_theo_duoi_va_in, args=(err_p, f"[{ma} err]", dung, khoa), daemon=True)]
+                for t in luong:
+                    t.start()
+                con.append((nhan, ma, p, out_p, err_p, dung, luong, han))
+            viec = {pool.submit(doc, x): x[0] for x in con}
+            for f in as_completed(viec):
+                ket_qua[viec[f]] = f.result()
+        finally:
+            for x in con:
+                if x[2].poll() is None:
+                    _giet_ca_cay(x[2])
+                x[5].set()
+                for t in x[6]:
+                    t.join(timeout=5)
+            for h in tay:            # đóng TRƯỚC khi TemporaryDirectory dọn: Windows không xoá được
+                try:                 # thư mục còn handle mở
+                    h.close()
+                except OSError:
+                    pass
+    khong_actor, co_actor = ket_qua["KHÔNG actor"], ket_qua["CÓ actor lạ"]
 
-    bang(khong_actor == co_actor,
-         "verdict của bộ test ĐỔI theo `GITHUB_ACTOR` của môi trường — "
-         "một helper nào đó đang kế thừa nó thay vì dựng môi trường con hermetic. "
-         f"không-actor=(rc={khong_actor[0]}, {khong_actor[1]}/{khong_actor[2]}), "
-         f"có-actor=(rc={co_actor[0]}, {co_actor[1]}/{co_actor[2]}), "
-         f"lệch ở ca ĐỎ: {sorted(khong_actor[3] ^ co_actor[3])}, "
-         f"lệch ở ca BỎ QUA: {sorted(khong_actor[4] ^ co_actor[4])}")
+    ket_luan, thong_diep = _phan_loai_lech_ab(khong_actor, co_actor)
+    bang(ket_luan == LECH_KHOP, thong_diep)
 
 
 
@@ -4843,8 +5114,122 @@ def t137_M9_workflow_admission_hop_dong_tinh_va_actionlint_shellcheck():
     al, sc = shutil.which("actionlint"), shutil.which("shellcheck")
     chot(al, "KHÔNG ĐO ĐƯỢC: thiếu `actionlint` (cài: ops/cai_actionlint.sh với AL_VER)")
     chot(sc, "KHÔNG ĐO ĐƯỢC: thiếu `shellcheck` — actionlint IM LẶNG bỏ toàn bộ luật shell khi vắng nó")
-    p = subprocess.run([al, str(WORKFLOW_THU_HOI)], capture_output=True, text=True)
-    chot(p.returncode == 0, f"actionlint ĐỎ (rc={p.returncode}):\n{p.stdout}{p.stderr}")
+    # Packet #504 M4 lần 2+3 (run 34615345948, 34621902478): trên windows-latest, actionlint GỌI shellcheck bên trong
+    # trên tệp này TREO (≥ 10 phút 56 s tới lúc job bị huỷ; lần 3 đụng hạn 180 s), trong khi t33 (cùng actionlint +
+    # shellcheck, tệp ops-publish-lease.yml) xong trong vài giây, `actionlint -shellcheck=` xong 0,1 s và `shellcheck`
+    # gọi thẳng xong 0,1 s — tức treo nằm ở đường actionlint→shellcheck trên Windows với NỘI DUNG tệp này, không ở
+    # công cụ nào riêng lẻ. Chữa bằng cách TÁCH HAI PHÉP ĐO cùng tiêu chuẩn: (1) actionlint luật YAML/biểu thức với
+    # `-shellcheck=` (tắt đường treo); (2) shellcheck gọi THẲNG trên từng thân `run`, CÙNG bộ mã loại trừ actionlint
+    # dùng (SC1091,SC2194,SC2050,SC2154,SC2157,SC2043 — đọc từ chính binary 1.7.7), tệp tạm ghi NHỊ PHÂN LF (ghi text
+    # trên Windows sinh CRLF ⇒ SC1017 giả — lần 3 đã dính). Cả hai phải rc=0 — không bớt luật nào; đột biến thân run
+    # (vd `echo $TL_S` không nháy) phải làm ca ĐỎ qua (2). Vẫn giữ hạn AL_HAN_GIAY: lần sau có treo thì có tên.
+    try:
+        p = subprocess.run([al, "-shellcheck=", str(WORKFLOW_THU_HOI)], capture_output=True, text=True, timeout=AL_HAN_GIAY)
+    except subprocess.TimeoutExpired:
+        chot(False, f"actionlint -shellcheck= KHÔNG XONG trong {AL_HAN_GIAY}s trên {WORKFLOW_THU_HOI.name} — chẩn đoán: "
+                    + _chan_doan_actionlint_treo(al, sc, WORKFLOW_THU_HOI, CD_HAN_TONG_GIAY))
+    chot(p.returncode == 0, f"actionlint (luật YAML/biểu thức) ĐỎ (rc={p.returncode}):\n{p.stdout}{p.stderr}")
+    with tempfile.TemporaryDirectory() as td:
+        # MỘT ngân sách cho CẢ vòng shellcheck, không phải hạn mỗi lời gọi: trần của t137 phải độc
+        # lập với SỐ thân `run` (dữ liệu), kẻo `AB_HAN_GIAY` dẫn xuất từ nó cũng trôi theo dữ liệu.
+        # Phép chia ngân sách nằm ở `_chay_day_lenh_trong_ngan_sach`, và `t156` đo tính độc-lập-với-n.
+        mac_dinh = d.get("defaults", {}).get("run", {}).get("shell")
+        mac_dinh = job.get("defaults", {}).get("run", {}).get("shell", mac_dinh)
+        if not mac_dinh:
+            nen_job = job.get("runs-on", "")
+            cac_nen = nen_job if isinstance(nen_job, list) else [nen_job]
+            mac_dinh = "pwsh" if any(str(n).lower().startswith("windows-") for n in cac_nen) else "bash"
+        day = []
+        for i, b in enumerate(b for b in steps if isinstance(b.get("run"), str)):
+            shell = b.get("shell", mac_dinh).split(maxsplit=1)[0]
+            if shell not in ("bash", "sh"):
+                continue  # actionlint cũng chỉ chạy shellcheck cho bash/sh
+            # actionlint thay biểu thức bằng placeholder; literal đơn có thể chứa dấu đóng.
+            x = re.sub(r"\$\{\{(?:'[^']*(?:''[^']*)*'|[^'}]|}(?!}))*}}",
+                       lambda m: "_" * len(m.group()), b["run"])
+            f = Path(td) / f"run{i}.sh"; f.write_bytes(x.encode("utf-8"))
+            day.append((i, [sc, "-s", shell, "-e", SC_LOAI_TRU_NHU_ACTIONLINT, str(f)]))
+        ket = []
+        try:
+            ket = _chay_day_lenh_trong_ngan_sach([l for _, l in day], SC_HAN_TONG_GIAY)
+        except subprocess.TimeoutExpired as ex:
+            chot(False, f"shellcheck TREO trên thân run #{next((i for i, l in day if l == ex.cmd), '?')}: hết ngân sách TỔNG "
+                        f"{SC_HAN_TONG_GIAY}s của cả vòng ({getattr(ex, 'cmd', '')})")
+        except HetNganSachDay as ex:
+            chot(False, f"vòng shellcheck tiêu hết ngân sách TỔNG {SC_HAN_TONG_GIAY}s tại thân run "
+                        f"#{day[ex.chi_so][0]} — chỉ {ex.da_chay}/{len(day)} thân được ĐO; số thân đã đo "
+                        f"không được im lặng nhỏ hơn số thân có mặt")
+        chot(len(ket) == len(day),
+             f"shellcheck chỉ trả {len(ket)}/{len(day)} kết quả — chưa đo đủ thân run")
+        for (i, _), q in zip(day, ket):
+            chot(q.returncode == 0, f"shellcheck ĐỎ trên thân run #{i} (rc={q.returncode}):\n{q.stdout}{q.stderr}")
+
+
+class HetNganSachDay(Exception):
+    """Dãy lệnh đã tiêu hết NGÂN SÁCH TỔNG trước khi chạy tới lệnh thứ `chi_so`."""
+
+    def __init__(self, chi_so, da_chay, ngan_sach):
+        super().__init__(f"hết ngân sách tổng {ngan_sach}s tại lệnh #{chi_so}, đã chạy {da_chay}")
+        self.chi_so, self.da_chay, self.ngan_sach = chi_so, da_chay, ngan_sach
+
+
+def _chay_day_lenh_trong_ngan_sach(cac_lenh, ngan_sach_giay, chay=None):
+    """Chạy lần lượt `cac_lenh` trong MỘT ngân sách TỔNG. Hết ngân sách ⇒ `HetNganSachDay`.
+
+    VÌ SAO KHÔNG CẤP LẠI HẠN TỐI THIỂU CHO LỆNH KẾ TIẾP — và đây là chỗ bản vá lượt 3 tự bắt được
+    mình khai rộng hơn phép đo: bản đầu viết `timeout=max(1.0, con_lai)`, nên khi ngân sách đã cạn,
+    mỗi lệnh còn lại vẫn được cấp 1 s ⇒ trần của cả vòng là `ngân sách + n×1 s`, tức LẠI trôi theo
+    SỐ lệnh — đúng thứ phụ thuộc dữ liệu mà ngân sách TỔNG sinh ra để cắt, trong khi chú thích ngay
+    trên nó đã khẳng định là đã cắt. Nay hết là DỪNG, nên trần của cả dãy độc lập với `n`, và `t156`
+    đo đúng tính chất ấy bằng hai dãy dài khác nhau trên cùng một ngân sách.
+    """
+    chay = subprocess.run if chay is None else chay
+    het = time.monotonic() + ngan_sach_giay
+    ket = []
+    for i, lenh in enumerate(cac_lenh):
+        con_lai = het - time.monotonic()
+        if con_lai <= 0:
+            raise HetNganSachDay(i, len(ket), ngan_sach_giay)
+        ket.append(chay(lenh, capture_output=True, text=True, timeout=con_lai))
+    return ket
+
+
+def _chan_doan_actionlint_treo(al: str, sc: str, wf, han_tong: float = None) -> str:
+    """Đo từng công cụ riêng, mỗi cái có hạn ngắn, trả một dòng: cái nào xong/rc/giây, cái nào TREO.
+
+    `han_tong` là trần cho TOÀN BỘ chẩn đoán. Không có nó thì chi phí chẩn đoán trôi theo SỐ thân
+    `run` (30 + 30 + 60×n + 60) và cộng vào t137 đúng lúc t137 đã quá hạn — tức trần ngoài của t125
+    không còn tính được. Probe nào hết ngân sách thì ghi thẳng `BỎ ĐO`, KHÔNG im lặng bỏ qua: "ca có
+    MẶT khác ca có ĐO", và một dòng chẩn đoán thiếu probe mà không khai là một lời khai rộng hơn
+    phép đo.
+    """
+    import yaml
+    ket = []
+    het = time.monotonic() + (CD_HAN_TONG_GIAY if han_tong is None else han_tong)
+    def do(nhan, lenh, han):
+        con_lai = het - time.monotonic()
+        if con_lai <= 1:
+            ket.append(f"{nhan}: BỎ ĐO (hết ngân sách chẩn đoán)")
+            return
+        han = min(han, con_lai)
+        t0 = time.monotonic()
+        try:
+            q = subprocess.run(lenh, capture_output=True, text=True, timeout=han)
+            ket.append(f"{nhan}: rc={q.returncode} {time.monotonic() - t0:.1f}s out={q.stdout.strip()[:60]!r} err={q.stderr.strip()[:80]!r}")
+        except subprocess.TimeoutExpired:
+            ket.append(f"{nhan}: TREO >{han}s")
+        except OSError as ex:
+            ket.append(f"{nhan}: OSError {ex}")
+    do("actionlint -version", [al, "-version"], 30)
+    do("shellcheck --version", [sc, "--version"], 30)
+    than = [b["run"] for b in yaml.safe_load(wf.read_text(encoding="utf-8"))["jobs"]["thu-hoi"]["steps"] if isinstance(b.get("run"), str)]
+    with tempfile.TemporaryDirectory() as td:
+        for i, x in enumerate(than):
+            f = Path(td) / f"run{i}.sh"; f.write_bytes(x.encode("utf-8"))   # nhị phân: text mode trên Windows sinh CRLF ⇒ SC1017 giả
+            do(f"shellcheck -s bash run{i}", [sc, "-s", "bash", "-e", SC_LOAI_TRU_NHU_ACTIONLINT, str(f)], 60)
+        # actionlint KHÔNG shellcheck: nếu xong ⇒ thứ treo là đường actionlint→shellcheck, không phải parser YAML
+        do("actionlint -shellcheck=", [al, "-shellcheck=", str(wf)], 60)
+    return " | ".join(ket)
 
 
 @ca
@@ -5434,9 +5819,687 @@ def t152_C2a_M9_fetch_H_mang_xac_thuc_qua_header_khong_token_trong_URL():
              "(v) phải đăng ký mask đúng base64 trước fetch, không có output thừa (kể cả stderr)")
 
 
+@ca
+def t153_nhat_ky_tung_ca_vao_ra_cap_doi_va_khong_dem():
+    """M3 packet #504 (#499 C3): mỗi ca in đúng một `>>> vao X` rồi đúng một `<<< ra X` SAU nó, và dòng tổng
+    kết vẫn khớp regex của t125. Chạy chính tệp này trong tiến trình con với đúng một ca rẻ (`--chi-ca=t01_`),
+    stdout qua PIPE và KHÔNG đọc cho tới khi tiến trình con kết thúc.
+
+    Spec ghi tên ca này là `t152_…`; số ấy đã bị M9 (#503) dùng nên ở đây là t153 — ý nghĩa giữ nguyên.
+
+    ĐỘT BIẾN LÀM CA NÀY ĐỎ: bỏ dòng `<<< ra` (hoặc `>>> vao`) trong `main()`; đổi định dạng (tên ca không còn là
+    token sau `vao`/`ra`); in `ra` TRƯỚC `vao`; làm hỏng dòng tổng kết. ĐỘT BIẾN KHÔNG LÀM CA NÀY ĐỎ — CÓ CHỦ Ý:
+    bỏ `flush=True` trong `_nhat_ky_ca` — đệm được xả khi tiến trình con kết thúc nên ca này vẫn thấy đủ dòng;
+    chốt "không đệm" (`PYTHONUNBUFFERED=1` ở wrapper) chỉ đo được ở M4: lượt Windows thật bị huỷ giữa chừng mà dòng
+    `>>> vao` cuối vẫn hiện ra trong log. Đừng thêm phép đo giả cho nó ở đây.
+    """
+    import subprocess
+    nen = {k: v for k, v in os.environ.items() if k != "GITHUB_ACTOR"}
+    p = subprocess.Popen([sys.executable, str(Path(__file__).resolve()), CO_CHI_CA + "t01_"],
+                         stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, env=nen)
+    try:
+        p.wait(timeout=30)  # M4 t153=0.250 s; 30 s là trần cho con chỉ chạy t01, chưa đọc PIPE
+    except subprocess.TimeoutExpired:
+        p.kill(); p.wait(timeout=5)
+        bang(False, "con t01 của t153 không kết thúc trong 30 s — đã kill")
+    out, err = p.communicate(timeout=5)  # chỉ đọc SAU khi con kết thúc (M3)
+    vao = re.findall(r"(?m)^>>> vao (\S+) \d{4}-\d\d-\d\dT\d\d:\d\d:\d\dZ$", out)
+    ra = re.findall(r"(?m)^<<< ra (\S+) \d+\.\d{3}s (QUA|DO|BO_QUA)$", out)
+    bang(vao == ["t01_lease_hop_le_thi_QUA"], f"lượt con phải chạy ĐÚNG một ca t01_: vao={vao!r}; rc={p.returncode}; "
+                                              f"stdout={out[-300:]!r}; stderr={err[-200:]!r}")
+    bang([x for x, _ in ra] == vao and ra[0][1] == "QUA", f"mỗi `vao` phải có đúng một `ra` cùng tên, kết QUA: ra={ra!r}")
+    bang(out.index(">>> vao ") < out.index("<<< ra "), "`<<< ra` phải in SAU `>>> vao`")
+    m = re.search(r"lease_publish: (\d+)/(\d+) đạt", out)
+    bang(m and m.group(1) == m.group(2) == "1" and p.returncode == 0,
+         f"dòng tổng kết phải còn khớp regex của t125 và là 1/1, rc=0: m={m and m.group(0)!r}, rc={p.returncode}")
+
+
+# Mã của cháu và của con cho t154. Cháu ĐẬP NHỊP vào một tệp rồi TỰ HUỶ sau 30 s: một phản chứng về
+# việc giết tiến trình không được phép để lại tiến trình mồ côi khi chính nó hỏng.
+_MA_CHAU_T154 = (
+    "import os,sys,time\n"
+    "nhip, pid = sys.argv[1], sys.argv[2]\n"
+    "open(pid,'w').write(str(os.getpid()))\n"
+    "het = time.monotonic() + 30\n"
+    "while time.monotonic() < het:\n"
+    "    f = open(nhip,'a'); f.write('x'); f.flush(); f.close()\n"
+    "    time.sleep(0.05)\n"
+)
+_MA_CON_T154 = (
+    "import subprocess,sys,time\n"
+    "subprocess.Popen([sys.executable,'-c',sys.argv[1],sys.argv[2],sys.argv[3]])\n"
+    "time.sleep(60)\n"
+)
+
+
+@ca
+def t154_giet_ca_cay_thu_hoi_CHAU_chu_khong_chi_CON():
+    """Phản chứng HAI CHIỀU cho `_giet_ca_cay` (cross-review codex 11-09-2026, P1).
+
+    Ca này ĐO HÀNH VI của cháu — nhịp tim ghi ra tệp — chứ không đọc mã thoát của lệnh giết: "đã gọi
+    lệnh giết" ≠ "đã chết", và `taskkill` từng trả `Access denied` ngay trên con của chính mình. Nhịp
+    tim cũng miễn nhiễm với tái dùng PID, thứ mà phép hỏi `os.kill(pid, 0)` không phân biệt được.
+
+    CHIỀU 1 (phản chứng có RĂNG): giết ĐÚNG PID con ⇒ cháu PHẢI còn đập. Không có chiều này thì không
+    biết chiều 2 đang đo cú giết cây hay đang đo một cháu vốn đã tự chết.
+    CHIỀU 2: `_giet_ca_cay` ⇒ cháu PHẢI im trong cửa sổ quan sát.
+
+    PHẠM VI ĐO: chạy tại chỗ trên Linux (POSIX `start_new_session` + `killpg`). Đường Windows
+    (`CREATE_NEW_PROCESS_GROUP` + `taskkill /T /F` + kiểm lại) CHƯA ĐO ĐƯỢC trong phiên viết ca này —
+    lượt Windows nói, và ca viết sao cho một thất bại ở đó hiện thành ĐỎ kèm nhật ký từng bước của
+    `_giet_ca_cay`, KHÔNG thành một ca bỏ qua được đếm là đạt.
+
+    ĐỘT BIẾN LÀM CA NÀY ĐỎ: đổi `_giet_ca_cay` về `p.kill()` trần; bỏ `start_new_session` trong
+    `_mo_con_nhom_rieng`; nới chốt "chỉ killpg khi nhóm con == PID con" thành killpg vô điều kiện
+    (ca này sẽ ĐỎ ở chốt nhóm riêng thay vì giết cả runner).
+    """
+    import signal
+    nen = {k: v for k, v in os.environ.items() if k != "GITHUB_ACTOR"}
+    with tempfile.TemporaryDirectory() as td:
+        def sinh(ten):
+            nhip, pid = Path(td) / (ten + ".nhip"), Path(td) / (ten + ".pid")
+            p = _mo_con_nhom_rieng([sys.executable, "-c", _MA_CON_T154, _MA_CHAU_T154, str(nhip), str(pid)],
+                                   nen, subprocess.DEVNULL, subprocess.DEVNULL)
+            return p, nhip, pid
+
+        def doi_nhip(nhip, han=15.0):
+            t0 = time.monotonic()
+            while time.monotonic() - t0 < han:
+                if nhip.exists() and nhip.stat().st_size > 0:
+                    return True
+                time.sleep(0.05)
+            return False
+
+        def con_dap(nhip, cho=1.0):
+            a = nhip.stat().st_size if nhip.exists() else -1
+            time.sleep(cho)
+            b = nhip.stat().st_size if nhip.exists() else -1
+            return b > a, a, b
+
+        def don_chau(pid_tep):
+            """Dọn cháu mồ côi của chiều 1. Cháu cũng tự huỷ sau 30 s — hai lớp, vì một lớp có thể hỏng."""
+            try:
+                so = int(pid_tep.read_text(encoding="utf-8").strip())
+            except (OSError, ValueError):
+                return
+            try:
+                if os.name == "posix":
+                    os.kill(so, getattr(signal, "SIGKILL", signal.SIGTERM))
+                else:
+                    subprocess.run(["taskkill", "/F", "/PID", str(so)], capture_output=True, timeout=10)
+            except (OSError, subprocess.SubprocessError):
+                pass
+
+        # ── CHIỀU 1: giết ĐÚNG PID con ⇒ cháu còn sống (phản chứng có răng)
+        p1, nhip1, pid1 = sinh("chieu1")
+        try:
+            bang(doi_nhip(nhip1), "fixture hỏng: cháu chiều 1 không đập nhịp trong 15 s — chưa đo được gì")
+            gp = getattr(os, "getpgid", None)
+            if gp is not None:
+                bang(gp(p1.pid) == p1.pid and gp(p1.pid) != gp(0),
+                     f"con phải là LÃNH ĐẠO một nhóm RIÊNG, kẻo cú giết cây nhắm vào nhóm của chính runner: "
+                     f"nhom_con={gp(p1.pid)} pid={p1.pid} nhom_minh={gp(0)}")
+            p1.kill()
+            p1.wait(timeout=5)
+            dap, a, b = con_dap(nhip1)
+            bang(dap, f"phản chứng MẤT RĂNG: giết đúng PID con mà cháu đã im (nhịp {a}->{b}); "
+                      f"cháu phải sống sót cú giết PID, nếu không thì chiều 2 không chứng minh gì")
+        finally:
+            if p1.poll() is None:
+                p1.kill(); p1.wait(timeout=5)
+            don_chau(pid1)
+
+        # ── CHIỀU 2: `_giet_ca_cay` ⇒ cháu im
+        p2, nhip2, pid2 = sinh("chieu2")
+        try:
+            bang(doi_nhip(nhip2), "fixture hỏng: cháu chiều 2 không đập nhịp trong 15 s")
+            nhat_ky = _giet_ca_cay(p2)
+            bang(p2.poll() is not None, f"con chưa chết sau `_giet_ca_cay`: {nhat_ky}")
+            dap, a, b = con_dap(nhip2)
+            bang(not dap, f"`_giet_ca_cay` KHÔNG thu hồi được CHÁU: nhịp còn tăng {a}->{b}; "
+                          f"nhật ký giết: {nhat_ky}")
+        finally:
+            if p2.poll() is None:
+                p2.kill(); p2.wait(timeout=5)
+            don_chau(pid2)
+
+
+    # Giữ chốt nhóm của runner bằng seam tín hiệu: không gửi tín hiệu thật tới nhóm ấy.
+    from unittest import mock
+    if os.name == "posix":
+        for nhom_con, nhom_minh in ((43210, 43210), (12345, 12345), (12345, 67890)):
+            p = mock.Mock(pid=43210, returncode=-9)
+            p.poll.return_value = -9
+            with mock.patch.object(os, "getpgid", side_effect=lambda pid: nhom_minh if pid == 0 else nhom_con), \
+                    mock.patch.object(os, "killpg") as kg, \
+                    mock.patch.dict(globals(), {"_nap_launcher_thu_hoi": mock.Mock()}) as _:
+                _giet_ca_cay(p)
+                bang(not kg.called and not _nap_launcher_thu_hoi.called,
+                     "không được giết nhóm khi cùng nhóm runner hoặc con không phải trưởng nhóm")
+
+        # Dùng nguyên văn hai fixture đã có; không sáng tác thêm mã đối kháng.
+        import ast
+        cay = ast.parse((HERE.parent / ".claude/dev/launcher_test.py").read_text(encoding="utf-8"))
+        thu_hoi = _nap_launcher_thu_hoi()
+        for dau in ("t63_", "t66_"):
+            fn = next(n for n in cay.body if isinstance(n, ast.FunctionDef) and n.name.startswith(dau))
+            ma = {}
+            for call in ast.walk(fn):
+                if (isinstance(call, ast.Call) and isinstance(call.func, ast.Attribute)
+                        and call.func.attr == "write_text" and isinstance(call.func.value, ast.Name)
+                        and call.func.value.id in ("chau_py", "me_py")):
+                    ma[call.func.value.id] = ast.literal_eval(call.args[0])
+            with tempfile.TemporaryDirectory() as td:
+                td = Path(td)
+                me, chau, pid_tep = td / "me.py", td / "chau.py", td / "pid"
+                me.write_text(ma["me_py"], encoding="utf-8")
+                chau.write_text(ma["chau_py"], encoding="utf-8")
+                p = _mo_con_nhom_rieng([sys.executable, str(me), str(chau), str(pid_tep)],
+                                      nen, subprocess.DEVNULL, subprocess.DEVNULL)
+                pid, khoa_pid = None, None
+                try:
+                    het = time.monotonic() + 15
+                    while not pid_tep.exists() and time.monotonic() < het:
+                        time.sleep(0.05)
+                    bang(pid_tep.exists(), f"fixture {dau} chưa ghi PID cháu")
+                    pid = int(pid_tep.read_text(encoding="utf-8"))
+                    khoa_pid = thu_hoi._khoa_danh_tinh(pid)
+                    bang(khoa_pid is not None and thu_hoi._con_song_dung_khoa(pid, khoa_pid),
+                         f"fixture {dau}: chưa đo được cháu sống trước thu hồi")
+                    nhat_ky = _giet_ca_cay(p)
+                    bang(p.poll() is not None and not thu_hoi._con_song_dung_khoa(pid, khoa_pid),
+                         f"fixture {dau}: cháu sống sau thu hồi: {nhat_ky}")
+                finally:
+                    if pid is not None and khoa_pid is not None:
+                        thu_hoi._giet_rieng({pid: khoa_pid}, signal.SIGKILL)
+                    if p.poll() is None:
+                        p.kill()
+                    p.wait(timeout=5)
+
+
+@ca
+def t157_tee_dua_dong_con_LEN_NGAY_trong_luc_con_CON_DANG_CHAY():
+    """Phản chứng cho tee `_theo_duoi_va_in` (cross-review codex 11-09-2026, P2).
+
+    Tính chất cần giữ KHÔNG phải "tee có tồn tại" mà là "dòng của con LÊN LOG TRƯỚC khi con kết thúc"
+    — vì ca hỏng là job bị huỷ GIỮA t125: nếu bằng chứng chỉ xuất hiện lúc đọc tệp ở cuối thì nó
+    không bao giờ xuất hiện. Nên ca này đòi ĐỒNG THỜI hai điều đo được: dòng ĐÃ có trên stdout, và
+    con VẪN đang chạy lúc ấy.
+
+    Chốt thứ hai: dòng teed phải mang TIỀN TỐ ở đầu dòng, nên KHÔNG khớp `(?m)^>>> vao` — nhật ký của
+    con không được lẫn thành nhật ký của cha. Thiếu chốt này thì `t153` và chính `t125` có thể đọc
+    dòng của con thành dòng của mình.
+
+    ĐỘT BIẾN LÀM CA NÀY ĐỎ: bỏ luồng tee trong t125 sẽ KHÔNG làm ca này đỏ (ca đo hàm, không đo lời
+    gọi) — nên đột biến đích là: `_theo_duoi_va_in` chỉ in khi `dung` đã set (tức chỉ in ở cuối); bỏ
+    tiền tố; bỏ `flush=True`; đọc text theo khối thay vì nhị phân từng dòng.
+    """
+    # Quan sát bytes bên dưới TextIOWrapper; StringIO.getvalue() thấy cả dữ liệu chưa flush.
+    import io
+    import threading
+    nen = {k: v for k, v in os.environ.items() if k != "GITHUB_ACTOR"}
+    with tempfile.TemporaryDirectory() as td:
+        log = Path(td) / "con.out"
+        log.write_text("", encoding="utf-8")
+        ma = ("import sys,time\n"
+              "f = open(sys.argv[1], 'a', encoding='utf-8')\n"
+              "f.write('>>> vao t_gia_dang_chay 2026-01-01T00:00:00Z' + chr(10)); f.flush()\n"
+              "time.sleep(30)\n")
+        dung, khoa = threading.Event(), threading.Lock()
+        luu = io.BytesIO()
+        bat = io.TextIOWrapper(luu, encoding="utf-8", newline="\n")
+        # Hiệu chuẩn chính phép đọc sẽ dùng bên dưới: phải phân biệt write và flush.
+        # Đổi capture về StringIO sẽ đỏ ở đây, kể cả khi đồng thời bỏ flush của tee.
+        try:
+            bat.write("kiem-dem")
+            bang(luu.getvalue().decode("utf-8") == "",
+                 "capture mất răng: thấy dữ liệu CHƯA flush")
+            bat.flush()
+            bang(luu.getvalue().decode("utf-8") == "kiem-dem",
+                 "capture hỏng: không thấy dữ liệu ĐÃ flush")
+            bat.seek(0)
+            bat.truncate(0)
+        except Exception:
+            bat.close()
+            raise
+        p = _mo_con_nhom_rieng([sys.executable, "-c", ma, str(log)], nen,
+                              subprocess.DEVNULL, subprocess.DEVNULL)
+        cu = sys.stdout
+        t = threading.Thread(target=_theo_duoi_va_in, args=(log, "[GIA]", dung, khoa), daemon=True)
+        try:
+            sys.stdout = bat
+            t.start()
+            t0, thay, con_song = time.monotonic(), "", None
+            while time.monotonic() - t0 < 15:
+                thay = luu.getvalue().decode("utf-8")
+                if "t_gia_dang_chay" in thay:
+                    con_song = p.poll() is None      # ĐO NGAY: con còn chạy lúc dòng đã lên chưa?
+                    break
+                time.sleep(0.05)
+        finally:
+            sys.stdout = cu
+            dung.set()
+            t.join(timeout=5)
+            nhat_ky = _giet_ca_cay(p)
+            bat.close()
+        bang("t_gia_dang_chay" in thay,
+             f"tee KHÔNG đưa dòng của con lên stdout trong 15 s: bắt được {thay!r}; giết: {nhat_ky}")
+        bang(con_song is True,
+             f"dòng chỉ lên SAU khi con kết thúc — đúng chỗ mù mà job bị huỷ giữa t125 sẽ rơi vào: "
+             f"con_song={con_song}; bắt được {thay!r}")
+        dong = [x for x in thay.splitlines() if "t_gia_dang_chay" in x]
+        bang(dong and dong[0].startswith("[GIA] "),
+             f"dòng teed phải mang tiền tố ở ĐẦU dòng: {dong!r}")
+        bang(not re.search(r"(?m)^>>> vao ", thay),
+             f"dòng teed KHÔNG được khớp regex nhật ký của CHA (`^>>> vao`), kẻo nhật ký con lẫn "
+             f"thành nhật ký cha: {thay!r}")
+
+
+@ca
+def t158_tee_chi_song_khi_con_KHONG_DEM_nen_moi_truong_con_phai_TAT_DEM():
+    """Bản vá lớp `bang-chung-song-bi-chon-trong-tep-tam` chỉ sống khi lượt con KHÔNG ĐỆM — ca này đo
+    đúng chỗ `t157` không thấy, và là lỗi TÁC GIẢ TỰ TÌM sau khi phóng lượt review 3.
+
+    Hai chiều, đúng bảng đã đo 12-09-2026:
+    · con KHÔNG `PYTHONUNBUFFERED` ⇒ tee KHÔNG thấy dòng trong cửa sổ quan sát (bằng chứng nằm trong
+      đệm của con) — nếu chiều này thấy thì ca mất răng và phải nói ra, đừng mừng.
+    · con CÓ `PYTHONUNBUFFERED=1` ⇒ tee THẤY, trong lúc con vẫn đang chạy.
+    Và chốt thứ ba: `_moi_truong_con_ab` phải THẬT SỰ đặt biến ấy, đồng thời KHÔNG mang `GITHUB_ACTOR`
+    vào (kẻo vá một lỗ mà mở lỗ khác — chính bất biến của t125).
+
+    ĐỘT BIẾN LÀM CA NÀY ĐỎ: `_moi_truong_con_ab` trả `dict(nen)` trần; t125 truyền `mt` thay cho
+    `_moi_truong_con_ab(mt)` (seam gọi CHÍNH t125 phía dưới kiểm wiring và hai môi trường tại Popen).
+    """
+    # Quan sát bytes bên DƯỚI `TextIOWrapper` có đệm, KHÔNG dùng `StringIO`: cross-review lượt 3
+    # (F2.1) đo được `StringIO.getvalue()` thấy cả dữ liệu CHƯA xả, nên một phép bắt như thế không
+    # phân biệt được stream có đệm với stream đã xả — đúng lý do đột biến bỏ `flush` từng sống sót
+    # ở `t157`. Dùng bytes ở đây làm ca này mạnh hơn: nó đỏ cả khi tee thôi xả.
+    import io
+    import threading
+    mt_nen = {k: v for k, v in os.environ.items() if k != "GITHUB_ACTOR"}
+
+    # Gọi consumer thật, chỉ thay tiến trình/tee bằng seam. Không để PYTHONUNBUFFERED
+    # của wrapper che mất việc t125 thôi gọi helper. CO_AB cũng không được bỏ phép đo này.
+    from unittest import mock
+    moi_truong = []
+    nen_kiem = {k: v for k, v in os.environ.items() if k in ("TMPDIR", "TEMP", "TMP")}
+    nen_kiem.update(AB_GIU="giu", GITHUB_ACTOR="ambient")
+    khong_actor = {k: v for k, v in nen_kiem.items() if k != "GITHUB_ACTOR"}
+    def sinh_gia(lenh, env, stdout, stderr):
+        moi_truong.append(dict(env))
+        stdout.write("lease_publish: 1/1 đạt; đã chạy=1, bỏ qua=0\n")
+        stdout.flush()
+        p = mock.Mock(returncode=0)
+        p.poll.return_value = 0
+        return p
+    with mock.patch.dict(os.environ, nen_kiem, clear=True), \
+            mock.patch.object(sys, "argv", [sys.argv[0]]), \
+            mock.patch.dict(globals(), {"_mo_con_nhom_rieng": sinh_gia,
+                                        "_theo_duoi_va_in": mock.Mock()}):
+        t125_AB_toan_suite_KHONG_doi_verdict_theo_ambient_actor()
+    bang(len(moi_truong) == 2, f"t125 phải sinh đúng hai vế: {moi_truong}")
+    a, b = moi_truong
+    bang(a == dict(khong_actor, PYTHONUNBUFFERED="1")
+         and b == dict(a, GITHUB_ACTOR="ke-la-mat-khong-co-quyen"),
+         f"môi trường THỰC ở t125 phải tắt đệm cả hai vế, giữ nền và chỉ khác GITHUB_ACTOR: {a}, {b}")
+
+    bang("PYTHONUNBUFFERED" in _moi_truong_con_ab({}) and _moi_truong_con_ab({})["PYTHONUNBUFFERED"] == "1",
+         f"`_moi_truong_con_ab` phải TẮT ĐỆM cho lượt con: {_moi_truong_con_ab({})!r}")
+    bang("GITHUB_ACTOR" not in _moi_truong_con_ab({"A": "1"}),
+         "`_moi_truong_con_ab` không được mang `GITHUB_ACTOR` vào — đó là bất biến của t125")
+
+    ma = "import sys,time\nprint('>>> vao t_do_dem_158 2026-01-01T00:00:00Z')\ntime.sleep(8)\n"  # KHÔNG flush
+    def do(mt):
+        with tempfile.TemporaryDirectory() as td:
+            lg = Path(td) / "o"
+            lg.write_text("", encoding="utf-8")
+            with open(lg, "w", encoding="utf-8") as ow:
+                p = _mo_con_nhom_rieng([sys.executable, "-c", ma], mt, ow, subprocess.DEVNULL)
+                dung, khoa = threading.Event(), threading.Lock()
+                luu = io.BytesIO()
+                bat = io.TextIOWrapper(luu, encoding="utf-8", newline="\n")
+                cu = sys.stdout
+                try:
+                    sys.stdout = bat
+                    t = threading.Thread(target=_theo_duoi_va_in, args=(lg, "[158]", dung, khoa), daemon=True)
+                    t.start()
+                    t0, thay = time.monotonic(), ""
+                    while time.monotonic() - t0 < 3.0:
+                        thay = luu.getvalue().decode("utf-8", "replace")
+                        if "t_do_dem_158" in thay:
+                            break
+                        time.sleep(0.05)
+                    con_song = p.poll() is None
+                finally:
+                    sys.stdout = cu
+                    dung.set()
+                    t.join(timeout=5)
+                    nhat_ky = _giet_ca_cay(p)
+                    bat.close()
+            return ("t_do_dem_158" in thay), con_song, nhat_ky
+
+    thay_dem, song_dem, _ = do({k: v for k, v in mt_nen.items() if k != "PYTHONUNBUFFERED"})
+    bang(song_dem, "chiều CÒN ĐỆM phải có con sống; con chết sớm không chứng minh đệm giữ dòng")
+    bang(not thay_dem,
+         "phản chứng MẤT RĂNG: con CÒN ĐỆM mà tee đã thấy dòng — nghĩa là phép đo này không còn phân "
+         "biệt được hai đường, và câu 'phải tắt đệm' trong `_moi_truong_con_ab` thành vô căn cứ; "
+         "hãy ĐO LẠI rồi sửa lời khai, đừng mừng vì ca xanh")
+    thay_tat, song_tat, nhat_ky = do(_moi_truong_con_ab(mt_nen))
+    bang(thay_tat and song_tat,
+         f"với môi trường của lượt con (đã TẮT ĐỆM), tee phải thấy dòng TRONG LÚC con còn chạy: "
+         f"thay={thay_tat} con_song={song_tat}; giết: {nhat_ky}")
+
+
+@ca
+def t160_lech_AB_phai_giu_bang_chung_va_CHAN_tai_consumer_t125():
+    """Đo CHÍNH t125: dữ liệu bịa tại ranh giới tiến trình, parser/so sánh/chốt thật.
+
+    So hàm riêng không khóa được wiring: bỏ classifier, nuốt kết quả lệch hay
+    cho cổng nhận trạng thái chưa rõ đều từng qua t160 cũ. Đo cả vế khớp và các
+    dạng lệch, giữ đúng nhãn A/B, và kiểm bốn luồng tee tại consumer. Mỗi thành phần
+    của tuple phải có chiều chỉ riêng nó thay đổi. Không cho một lần retry thay thế
+    bằng chứng của toàn suite, dù retry dùng run hay Popen trực tiếp.
+    """
+    from unittest import mock
+    a = (0, "2", "2", frozenset(), frozenset())
+    do_x = (1, "1", "2", frozenset({"t_x"}), frozenset())
+    do_y = (1, "1", "2", frozenset({"t_y"}), frozenset())
+    bo_x = (0, "1", "1", frozenset(), frozenset({"t_x"}))
+    bo_y = (0, "1", "1", frozenset(), frozenset({"t_y"}))
+
+    def do(cap):
+        da_sinh = []
+        def sinh_gia(lenh, env, stdout, stderr):
+            k = cap[len(da_sinh)]
+            da_sinh.append((list(lenh), dict(env)))
+            for ten in sorted(k[3]):
+                stdout.write(f"  ĐỎ  {ten}: lý do gốc của fixture\n")
+            for ten in sorted(k[4]):
+                stdout.write(f"  BỎ QUA {ten}: nền fixture\n")
+            stdout.write(f"lease_publish: {k[1]}/{k[2]} đạt\n")
+            stdout.flush()
+            p = mock.Mock(returncode=k[0])
+            p.poll.return_value = k[0]
+            return p
+        loi, tee = None, mock.Mock()
+        phan_loai = mock.Mock(wraps=_phan_loai_lech_ab)
+        with mock.patch.object(sys, "argv", [sys.argv[0]]), \
+                mock.patch.dict(globals(), {"_mo_con_nhom_rieng": sinh_gia,
+                                            "_theo_duoi_va_in": tee,
+                                            "_phan_loai_lech_ab": phan_loai}), \
+                mock.patch.object(subprocess, "run") as chay_them, \
+                mock.patch.object(subprocess, "Popen") as mo_them:
+            try:
+                t125_AB_toan_suite_KHONG_doi_verdict_theo_ambient_actor()
+            except AssertionError as ex:
+                loi = str(ex)
+        cac_cap_da_so = list(phan_loai.call_args_list)
+        bang(cac_cap_da_so == [mock.call(*cap)],
+             f"classifier phải nhận đúng tuple theo nhãn không-actor rồi có-actor: {cac_cap_da_so!r}")
+        bang(len(da_sinh) == 2 and all(x[0][-1] == CO_AB for x in da_sinh),
+             f"phải đo đúng hai lượt TOÀN SUITE qua t125: {da_sinh!r}")
+        bang(not chay_them.called and not mo_them.called,
+             "t125 không được mở thêm tiến trình bằng run/Popen ngoài hai vế A/B")
+        duong_tee = sorted((x.args[0].name, x.args[1]) for x in tee.call_args_list)
+        bang(duong_tee == [("A.err", "[A err]"), ("A.out", "[A]"),
+                          ("B.err", "[B err]"), ("B.out", "[B]")],
+             f"consumer t125 phải nối đủ bốn tệp vào đúng tee: {duong_tee!r}")
+        if cap[0] != cap[1]:
+            for nhan, k in zip(("không-actor", "có-actor"), cap):
+                can = f"{nhan}=(rc={k[0]}, {k[1]}/{k[2]})"
+                bang(loi is not None and can in loi,
+                     f"chẩn đoán phải giữ đúng vế {can!r}: {loi!r}")
+        return loi
+
+    bang(do((a, a)) is None, "hai vế khớp phải qua consumer t125")
+    bang(do((do_x, do_x)) is None, "t125 so bất biến, không thay verdict của từng ca con")
+    for cap, can_co in (
+            ((a, do_x), ("t_x", "rc=0, 2/2", "rc=1, 1/2")),
+            ((do_x, do_y), ("t_x", "t_y")),
+            ((bo_x, bo_y), ("t_x", "t_y", "BỎ QUA")),
+            ((a, (1, *a[1:])), ("rc=0", "rc=1")),
+            ((a, (0, "1", "2", a[3], a[4])), ("1/2", "2/2")),
+            ((do_x, (1, "1", "3", do_x[3], do_x[4])), ("1/2", "1/3"))):
+        for hai_ve in (cap, cap[::-1]):
+            loi = do(hai_ve)
+            bang(loi is not None and LECH_CHUA_RO in loi,
+                 f"mọi lệch phải làm CHÍNH t125 đỏ, chưa rõ nguyên nhân: {hai_ve!r}: {loi!r}")
+            bang("CHƯA loại trừ rò GITHUB_ACTOR" in loi and "[A]/[B]" in loi
+                 and all(x in loi for x in can_co),
+                 f"phải giữ bằng chứng gốc và khả năng rò actor trong chẩn đoán: {loi!r}")
+
+
+@ca
+def t155_chon_ca_khong_khop_hoac_RONG_thi_KHONG_XANH():
+    """Selector `--chi-ca=` gõ sai hay rỗng ⇒ rc≠0, và KHÔNG in dòng tổng kết (codex 11-09-2026, P2).
+
+    Vì sao đáng một ca riêng: bản trước trả `lease_publish: 0/0 đạt` + rc=0, tức một cổng VẮNG MẶT
+    trông y hệt một cổng XANH — cùng họ với "cổng không nói dối, nó vắng mặt". Một script bảo trì hay
+    một reviewer chạy `--chi-ca=<tên ca đã đổi>` sẽ ghi một phép đo GIẢ mà không có dấu hiệu nào.
+
+    Ba đường phải giữ nguyên, và ca này nói rõ đường nào ĐO Ở ĐÂY, đường nào đo Ở CHỖ KHÁC:
+    · prefix HỢP LỆ ⇒ vẫn chạy, vẫn `1/1`, rc=0 — đo ở đây (và t153 đo kỹ định dạng nhật ký).
+    · `CO_AB` ⇒ vẫn chạy — đo ở đây, kèm một prefix hợp lệ cho rẻ.
+    · KHÔNG selector ⇒ TOÀN suite: KHÔNG đo lại ở đây. Chính `t125` đã đo (hai lượt con chạy `CO_AB`
+      không selector, mỗi lượt là toàn suite). Chạy thêm một lượt toàn suite nữa ở đây là nhân ba chi
+      phí mà không thêm phép đo nào.
+
+    ĐỘT BIẾN LÀM CA NÀY ĐỎ: bỏ nhánh `if not tien_to or not cac_ca` trong `main()`; trả 0 thay cho
+    `RC_CHON_CA_SAI`; in dòng tổng kết trước khi trả về.
+    """
+    nen = {k: v for k, v in os.environ.items() if k != "GITHUB_ACTOR"}
+
+    def chay_con(*co):
+        p = subprocess.run([sys.executable, str(Path(__file__).resolve()), *co],
+                           capture_output=True, text=True, env=nen, timeout=180)
+        return p.returncode, p.stdout, p.stderr
+
+    rc, out, err = chay_con(CO_CHI_CA + "t01_")
+    bang(rc == 0 and re.search(r"lease_publish: 1/1 đạt", out),
+         f"prefix hợp lệ phải còn chạy đúng một ca: rc={rc}, stdout={out[-300:]!r}, stderr={err[-200:]!r}")
+
+    rc, out, err = chay_con(CO_AB, CO_CHI_CA + "t01_")
+    bang(rc == 0 and re.search(r"lease_publish: 1/1 đạt", out),
+         f"đường CO_AB phải còn chạy ca: rc={rc}, stdout={out[-300:]!r}, stderr={err[-200:]!r}")
+
+    for co, ten in ((CO_CHI_CA + "zzz_khong_co_ca_nao_ten_the_nay_", "không khớp ca nào"),
+                    (CO_CHI_CA, "RỖNG")):
+        rc, out, err = chay_con(co)
+        bang(rc == RC_CHON_CA_SAI,
+             f"selector {ten} phải trả rc={RC_CHON_CA_SAI}, đo được rc={rc}; "
+             f"stdout={out[-300:]!r}, stderr={err[-300:]!r}")
+        bang(not re.search(r"lease_publish: \d+/\d+ đạt", out + err),
+             f"selector {ten} KHÔNG được in dòng tổng kết (đọc thành một kết quả): "
+             f"stdout={out[-300:]!r}, stderr={err[-300:]!r}")
+
+
+@ca
+def t156_han_NGOAI_khong_nho_hon_tong_han_TRONG_va_duoi_tran_cung():
+    """Hạn ngoài của t125 phải ≥ tổng hạn trong tiêu được hợp lệ, và < trần cứng (codex 11-09-2026, P2).
+
+    Phần 1 đo SỐ HỌC trên hằng thật. Phần 2 là phản chứng THU NHỎ, dùng CHÍNH `_han_ngoai_toi_thieu`
+    và CHÍNH `_mo_con_nhom_rieng`/`_giet_ca_cay`: ba "lint giả", mỗi lời gọi dưới hạn RIÊNG của nó,
+    TỔNG vượt hạn ngoài kiểu cũ. Verdict đứng-một-mình và verdict lồng phải KHỚP với hạn dẫn xuất, và
+    phải LỆCH với hạn kiểu cũ — không có chiều thứ hai thì không biết phép đo có răng.
+
+    Vì sao thu nhỏ mà vẫn đúng: hàm dẫn xuất là hàm THUẦN của năm hạn, nên quan hệ nó bảo đảm không
+    phụ thuộc thang thời gian. Đo thật ở thang 540 s sẽ tốn 9 phút mỗi lượt và vẫn chỉ đo đúng quan hệ ấy.
+
+    ĐỘT BIẾN LÀM CA NÀY ĐỎ: ghi tay `AB_HAN_GIAY = 420`; bỏ `CD_HAN_TONG_GIAY` khỏi `T137_TRAN_GIAY`;
+    nâng `AB_HAN_GIAY` lên quá `AB_TRAN_CUNG_GIAY` cho "khỏi treo".
+    """
+    bang(T137_TRAN_GIAY == AL_HAN_GIAY + SC_HAN_TONG_GIAY + CD_HAN_TONG_GIAY,
+         f"trần t137 phải gồm ĐỦ ba hạn trong: {T137_TRAN_GIAY} vs "
+         f"{AL_HAN_GIAY}+{SC_HAN_TONG_GIAY}+{CD_HAN_TONG_GIAY}")
+    bang(AB_HAN_GIAY >= T137_TRAN_GIAY + AB_SUITE_DO_DUOC_GIAY,
+         f"hạn ngoài {AB_HAN_GIAY}s phải ≥ trần t137 {T137_TRAN_GIAY}s + suite đã đo "
+         f"{AB_SUITE_DO_DUOC_GIAY}s — nếu không, con bị giết dù mọi lệnh còn trong hạn riêng")
+    bang(AB_HAN_GIAY > 540,
+         f"hạn ngoài phải vượt 540 s (tổng hạn trong của riêng t137 mà cross-review đã đo): {AB_HAN_GIAY}")
+    bang(AB_HAN_GIAY < AB_TRAN_CUNG_GIAY,
+         f"hạn ngoài {AB_HAN_GIAY}s phải nằm DƯỚI trần cứng {AB_TRAN_CUNG_GIAY}s — nâng trần cho tới "
+         f"khi hết treo là đổi cổng lấy sự im lặng")
+
+    # ── phản chứng thu nhỏ
+    tre, han_moi_goi, so_goi = 0.3, 1.0, 3
+    ngoai_moi = _han_ngoai_toi_thieu(han_moi_goi, han_moi_goi * (so_goi - 1), 0.5, 0.5, 0.5)
+    ngoai_cu = tre * so_goi - 0.1          # kiểu cũ: NHỎ HƠN tổng công việc hợp lệ của con
+    ma_lint = "import sys,time\ntime.sleep(float(sys.argv[1]))\n"
+    ma_con = ("import subprocess,sys\n"
+              "for _ in range(int(sys.argv[3])):\n"
+              "    r = subprocess.run([sys.executable,'-c',sys.argv[1],sys.argv[2]], timeout=float(sys.argv[4]))\n"
+              "    assert r.returncode == 0\n"
+              "print('LINT GIA XONG')\n")
+    doi_so = [ma_lint, str(tre), str(so_goi), str(han_moi_goi)]
+    nen = {k: v for k, v in os.environ.items() if k != "GITHUB_ACTOR"}
+
+    # đứng-một-mình: từng lời gọi trong hạn riêng ⇒ ĐẠT
+    t0 = time.monotonic()
+    for _ in range(so_goi):
+        r = subprocess.run([sys.executable, "-c", ma_lint, str(tre)], timeout=han_moi_goi)
+        bang(r.returncode == 0, "lint giả đứng-một-mình phải rc=0")
+    rieng = time.monotonic() - t0
+    bang(rieng > ngoai_cu,
+         f"phản chứng MẤT RĂNG: công việc hợp lệ {rieng:.2f}s không vượt hạn ngoài kiểu cũ "
+         f"{ngoai_cu:.2f}s, nên ca này không đo được gì")
+
+    def chay_long(han):
+        with tempfile.TemporaryDirectory() as td:
+            o, e = Path(td) / "o", Path(td) / "e"
+            with open(o, "w", encoding="utf-8") as ow, open(e, "w", encoding="utf-8") as ew:
+                p = _mo_con_nhom_rieng([sys.executable, "-c", ma_con, *doi_so], nen, ow, ew)
+                qua_han = False
+                try:
+                    p.wait(timeout=han)
+                except subprocess.TimeoutExpired:
+                    qua_han = True
+                    _giet_ca_cay(p)
+            return qua_han, p.returncode, o.read_text(encoding="utf-8", errors="replace")
+
+    qua_han, rc, out = chay_long(ngoai_moi)
+    bang(not qua_han and rc == 0 and "LINT GIA XONG" in out,
+         f"hạn ngoài DẪN XUẤT {ngoai_moi:.2f}s phải để con làm xong việc hợp lệ ({rieng:.2f}s): "
+         f"qua_han={qua_han}, rc={rc}, out={out[-200:]!r}")
+    qua_han_cu, rc_cu, _ = chay_long(ngoai_cu)
+    bang(qua_han_cu,
+         f"hạn ngoài kiểu CŨ {ngoai_cu:.2f}s phải giết con dù việc còn hợp lệ — không lệch thì ca này "
+         f"không chứng minh vì sao cần dẫn xuất: qua_han={qua_han_cu}, rc={rc_cu}")
+
+    # ── NGÂN SÁCH TỔNG phải ĐỘC LẬP VỚI SỐ LỆNH. Đây là vế mà `T137_TRAN_GIAY` đứng trên: nếu vòng
+    # shellcheck cấp lại hạn cho từng thân sau khi ngân sách cạn thì trần thật là `ngân sách + n×hạn`,
+    # và mọi con số dẫn xuất ở trên thành lời khai rộng hơn phép đo. Đo bằng HAI dãy dài khác nhau
+    # trên CÙNG một ngân sách: thời gian phải xấp xỉ nhau, không nhân theo n.
+    ngan_sach, tre_lenh = 0.6, 0.25
+    lenh_cham = [sys.executable, "-c", ma_lint, str(tre_lenh)]
+    do_thoi = {}
+    for n in (4, 24):
+        t0 = time.monotonic()
+        het_tai = None
+        try:
+            _chay_day_lenh_trong_ngan_sach([lenh_cham] * n, ngan_sach)
+        except HetNganSachDay as ex:
+            het_tai = ex.chi_so
+        except subprocess.TimeoutExpired:
+            het_tai = -1
+        do_thoi[n] = time.monotonic() - t0
+        bang(het_tai is not None,
+             f"dãy {n} lệnh × {tre_lenh}s phải tiêu hết ngân sách {ngan_sach}s và DỪNG, "
+             f"đo được {do_thoi[n]:.2f}s mà không báo hết ngân sách")
+    bang(do_thoi[24] < do_thoi[4] + ngan_sach + 1.0,
+         f"trần của dãy TRÔI THEO SỐ LỆNH: 4 lệnh {do_thoi[4]:.2f}s vs 24 lệnh {do_thoi[24]:.2f}s — "
+         f"ngân sách TỔNG phải cắt ở {ngan_sach}s bất kể n, nếu không thì `T137_TRAN_GIAY` là số bịa")
+
+
+    # Các lệnh ngủ phía trên hết hạn TRONG run(). Cần đo riêng hết ngân sách GIỮA
+    # hai lời gọi đã hoàn tất: nhánh HetNganSachDay không được đổi thành return/cấp lại hạn.
+    from unittest import mock
+    da_goi, het_tai = [], None
+    def chay_xong(lenh, **kw):
+        da_goi.append(lenh)
+        return subprocess.CompletedProcess(lenh, 0, "", "")
+    with mock.patch.object(time, "monotonic", side_effect=[0.0, 0.0, 1.0]):
+        try:
+            _chay_day_lenh_trong_ngan_sach([["lenh1"], ["lenh2"]], 0.6, chay=chay_xong)
+        except HetNganSachDay as ex:
+            het_tai = (ex.chi_so, ex.da_chay)
+    bang(het_tai == (1, 1) and da_goi == [["lenh1"]],
+         f"hết ngân sách GIỮA hai lệnh phải ném HetNganSachDay trước lệnh #1: "
+         f"het_tai={het_tai}, da_goi={da_goi}")
+
+
+@ca
+def t159_t137_can_do_DU_ket_qua_va_dung_nhan_than_timeout():
+    """Khóa consumer t137 bằng dãy đủ/thiếu và timeout thân thứ hai.
+
+    Dùng workflow thật và actionlint thật; seam chỉ thay bộ chạy dãy shellcheck để
+    tạo kết quả dở dang/timeout tất định. t137 thường vẫn chạy ShellCheck thật.
+    Bỏ chốt len(ket), hoặc quay nhãn timeout về len(ket), phải làm CHÍNH ca này đỏ.
+    """
+    from unittest import mock
+
+    def do(kieu):
+        da_goi, loi = [], None
+        def day_gia(cac_lenh, ngan_sach):
+            da_goi.extend(cac_lenh)
+            chot(len(cac_lenh) == 2, f"fixture t137 phải có hai thân shell: {cac_lenh}")
+            if kieu == "treo":
+                raise subprocess.TimeoutExpired(cac_lenh[1], ngan_sach)
+            ket = [subprocess.CompletedProcess(l, 0, "", "") for l in cac_lenh]
+            return ket if kieu == "du" else ket[:1]
+        with mock.patch.dict(globals(), {"_chay_day_lenh_trong_ngan_sach": day_gia}):
+            try:
+                t137_M9_workflow_admission_hop_dong_tinh_va_actionlint_shellcheck()
+            except TinHieuChotCa as ex:
+                loi = str(ex)
+        bang(len(da_goi) == 2, f"chưa tới consumer shellcheck ở t137: {loi}")
+        return loi
+
+    bang(do("du") is None, "t137 phải nhận đủ hai kết quả xanh")
+    thieu = do("thieu")
+    bang(thieu is not None and "shellcheck chỉ trả 1/2 kết quả" in thieu,
+         f"t137 phải từ chối kết quả dở dang 1/2: {thieu!r}")
+    treo = do("treo")
+    bang(treo is not None and "shellcheck TREO trên thân run #1:" in treo,
+         f"timeout lệnh thứ hai phải ghi run #1 từ ex.cmd: {treo!r}")
+
+
+CO_CHI_CA = "--chi-ca="   # `--chi-ca=t01_` ⇒ chỉ chạy ca có tên bắt đầu bằng tiền tố ấy (M3 packet #504 dùng để sinh lượt con rẻ)
+
+
+def _nhat_ky_ca(*phan) -> None:
+    """Một dòng, xả ngay (packet #504 M1). `>>> vao <ca> <utc>` / `<<< ra <ca> <giây>s QUA|DO|BO_QUA`.
+
+    Vì sao: lane Windows của master bị huỷ ở trần 60 phút mà log bước chỉ có đệm khối, nên
+    "DÒNG IN CUỐI CÙNG ≠ CA CHẠY CUỐI CÙNG" (#499 C3) — không có tên ca nào để sửa. `flush=True`
+    xả đệm Python; `PYTHONUNBUFFERED=1` ở wrapper (M2) tắt đệm Python cho cả các print khác,
+    và chốt "không đệm" chỉ đo được ở lượt Windows thật (M4), không đo được trong tiến trình này.
+    Dòng tổng kết `lease_publish: N/M đạt` và các dòng `  ĐỎ  …` / `  BỎ QUA …` GIỮ NGUYÊN BYTE —
+    regex của t125 đọc chúng; `ci_dang_ky_test.py` kiểm DA_NOI và wiring của wrapper.
+    """
+    print(*phan, flush=True)
+
+
 def main() -> int:
     qua, hong, bo_qua = 0, [], []
-    for fn in CA:
+    # Selector không khớp ca nào ⇒ KHÔNG chạy gì và KHÔNG xanh (cross-review codex 11-09-2026, P2).
+    # Bản trước in `lease_publish: 0/0 đạt` rồi rc=0: một cổng VẮNG MẶT trông y hệt một cổng XANH, nên
+    # một prefix gõ sai hay một tên ca đã đổi sinh ra phép đo giả. Dòng lỗi dưới đây CỐ Ý không khớp
+    # regex dòng tổng kết, để không ai đọc nó thành một kết quả.
+    cac_co = [x for x in sys.argv[1:] if x.startswith(CO_CHI_CA)]
+    if cac_co:
+        tien_to = cac_co[-1][len(CO_CHI_CA):]
+        cac_ca = [fn for fn in CA if fn.__name__.startswith(tien_to)]
+        if not tien_to or not cac_ca:
+            vi = "RỖNG" if not tien_to else "không khớp ca nào"
+            print(f"chon-ca SAI: tiền tố {tien_to!r} {vi} (có {len(CA)} ca) — KHÔNG chạy gì, "
+                  f"rc={RC_CHON_CA_SAI}", file=sys.stderr, flush=True)
+            return RC_CHON_CA_SAI
+    else:
+        cac_ca = list(CA)
+    for fn in cac_ca:
+        _nhat_ky_ca(">>> vao", fn.__name__, datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"))
+        t0 = time.monotonic()
+        ket = "QUA"
         try:
             fn()
             qua += 1
@@ -5444,18 +6507,23 @@ def main() -> int:
             try: ly_do = _ly_do_bo_qua_workflow(ex.tep, ex.ten_job)
             except Exception: ly_do = ""
             if ly_do:
-                bo_qua.append((fn.__name__, ly_do))
+                bo_qua.append((fn.__name__, ly_do)); ket = "BO_QUA"
             else:
-                hong.append((fn.__name__, "bỏ qua không dẫn xuất được từ runs-on"))
+                hong.append((fn.__name__, "bỏ qua không dẫn xuất được từ runs-on")); ket = "DO"
         except AssertionError as ex:
-            hong.append((fn.__name__, str(ex)))
+            hong.append((fn.__name__, str(ex))); ket = "DO"
         except Exception as ex:  # noqa: BLE001
-            hong.append((fn.__name__, f"{type(ex).__name__}: {ex}"))
+            hong.append((fn.__name__, f"{type(ex).__name__}: {ex}")); ket = "DO"
+        _nhat_ky_ca("<<< ra", fn.__name__, f"{time.monotonic() - t0:.3f}s", ket)
+        if ket == "DO":
+            # In LÝ DO ngay tại chỗ (M4 lần 2, packet #504): danh sách `  ĐỎ  …` chỉ in ở cuối suite, nên khi job
+            # bị huỷ giữa chừng thì mọi lý do đã đo được mất theo. Tiền tố khác hẳn để không trùng dòng tổng kết.
+            _nhat_ky_ca("!!! do", fn.__name__, hong[-1][1].replace("\n", " ")[:700])
     for ten, ly in bo_qua:
         print(f"  BỎ QUA {ten}: {ly}")
     for ten, ly in hong:
         print(f"  ĐỎ  {ten}: {ly}")
-    print(_dong_tong_ket(qua, len(CA) - len(bo_qua), len(bo_qua)))
+    print(_dong_tong_ket(qua, len(cac_ca) - len(bo_qua), len(bo_qua)))
     return 1 if hong else 0
 
 

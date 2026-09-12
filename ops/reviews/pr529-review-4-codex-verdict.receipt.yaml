@@ -30,11 +30,12 @@ verdict_sha256: 86e867a7eadd1c0b4a25dae96e4d19a7e356d9d4ebebc7a98b8f0583320e3041
 verdict_bytes: 38604
 reviewed_sha: a97d95c1763af30aa26750ef4d5246cfc4aa1206
 reviewed_base: dc02c9beed42bd2ea44a80a2e34e1bbe3acfc6c5
-evidence_url: https://github.com/ducthangho/tra-luat/blob/PENDING/ops/reviews/pr529-review-4-codex-verdict.md
+evidence_url: https://github.com/ducthangho/tra-luat/blob/358b7511a376d340e2295ef452dcb0301ae51b42/ops/reviews/pr529-review-4-codex-verdict.md
 evidence_url_ghi_chu: >-
-  `PENDING` được thay bằng SHA của commit ĐẦU TIÊN chứa tệp verdict, đo bằng
-  `git log --diff-filter=A`, trong MỘT commit riêng — KHÔNG điền rồi `--amend`, vì amend đổi SHA và
-  làm URL treo (đã xảy ra ở lượt 3, bắt được trước khi đẩy).
+  Neo BLOB ghim `358b7511a376d340e2295ef452dcb0301ae51b42` — commit ĐẦU TIÊN chứa tệp verdict, đo bằng `git log --diff-filter=A`.
+  Điền trong MỘT commit RIÊNG, **KHÔNG** điền rồi `--amend`: amend là một phép ĐỔI SHA, và ở lượt 3
+  nó đã làm `evidence_url` trỏ một commit mồ côi chưa từng được đẩy (URL sẽ 404). Bắt được trước
+  khi đẩy lần ấy; lần này đi đúng thứ tự từ đầu.
 
 # ---- A16' — NGÂN SÁCH khác SỐ ĐÃ CHI. Lớp `bien-nhan-thieu-so-ci-da-chi` đòi đúng khối này.
 ngan_sach_ci_loai_b: 0

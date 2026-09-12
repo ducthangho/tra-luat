@@ -7,8 +7,8 @@
   "root_name": "tra-luat",
   "file_count": 180,
   "total_bytes": 8349705,
-  "package_hash": "262f26495c08881da8d6312237856f061c75bfc7ee3cdd3cb702c557e0fae3d9",
-  "content_hash": "262f26495c08881da8d6312237856f061c75bfc7ee3cdd3cb702c557e0fae3d9",
+  "package_hash": "a7c86cab3f32a9abba727ae0329dbead1fea741abde7ece2ff5c677c1601f060",
+  "content_hash": "a7c86cab3f32a9abba727ae0329dbead1fea741abde7ece2ff5c677c1601f060",
   "required_missing": [],
   "files": [
     {
@@ -29,7 +29,7 @@
     {
       "path": "CHANGELOG.md",
       "size": 1054164,
-      "sha256": "90815daa972140c064cf846bb3b9137802bc30553de50a1ab04b3d4d078aaac6"
+      "sha256": "559bf81a04e470095b6cf5cd588123a95bfa0cdfa45dd1f314548307f5d2c11d"
     },
     {
       "path": "CONTEXT.md",

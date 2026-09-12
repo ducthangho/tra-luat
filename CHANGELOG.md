@@ -29,7 +29,7 @@ chạm README/CHANGELOG** ⇒ PR land sau phải merge master và chạy lại 4
 | 4 | `04792ddf` · 631,034 s (20:33:15 → 20:43:46Z) | `c98c33e` / `8802924` | `changes_requested` 0/**1**/0 — P2 ở EVIDENCE gói review | `cross_reviewed` | `a17f443e…` 853 B, 0 hunk (+ `EVIDENCE.HINT` 1 hunk, ngoài kho) |
 | 5 | `6c8b0629` · 260,011 s (20:46:27 → 20:50:47Z) · **ma_thoat=1** | `c98c33e` / `8802924` | `approve` 0/0/0, P2-E01 ĐÃ VÁ THẬT | `cross_reviewed` | `434746d1…` 300 B, 0 hunk |
 
-Bốn P2 + một P3 lượt 1 — lần thứ TƯ liên tiếp (r364→r366→r367→r369) PR hồ sơ ăn finding lớp "lời khai HỒ SƠ rộng hơn
+Bốn P2 + một P3 lượt 1 — lần thứ TƯ liên tiếp (r363→r366→r367→r369) PR hồ sơ ăn finding lớp "lời khai HỒ SƠ rộng hơn
 phép đo": `tong-hop-mutant-dem-bon-thay-vi-ba` (nguồn có 5 mutant: 3 ĐỎ / 2 SỐNG, receipt viết "4 ĐỎ") ·
 `pham-vi-no-khong-rong-hon-r367` (receipt pr510 lượt 2 đã có `verdict_bytes` ⇒ tập trường mới = 0) ·
 `nguon-lich-su-van-gan-nhan-do` (340/340, comm 0/0 đặt dưới nhãn ĐO) · `muc-luc-bo-nhan-thuat-lai-cua-nguon` (README

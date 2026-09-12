@@ -1,0 +1,208 @@
+# TỆP NHÁP — đuôi `.yaml.nhap` CÓ CHỦ ĐÍCH. `ai-dang-giu` chỉ đọc blob đuôi `.yaml`/`.yml`
+# (`ops/lease_publish.py:521`), `ops-publish-lease.yml` chỉ bắn với `ops/leases/**.yaml|yml`, và
+# `t23` của `ops/lease_publish_test.py` chỉ đọc `suffix in (".yaml", ".yml")` — nên nháp KHÔNG bị
+# tính là lease đang giữ. Đo 19:33–19:34Z 06-09-2026 trong bản sao đủ 299 ref: đuôi `.yaml` ⇒
+# `ai-dang-giu .github/workflows/ci.yml` = NGƯỜI_GIỮ 1 (chính nháp này); đuôi `.nhap` ⇒ 0.
+# `check` vẫn chạy trên tên này — đo lại 21:00Z 06-09-2026 trên cây b1c2284: rc=8, thiếu 3 trường
+# packet_issue/granted_by/lease_expires_at_utc (bản này đã bỏ hạn điền sẵn; 19:31Z là bản trung gian).
+# ĐỔI TÊN VỀ `.yaml` LÀ BƯỚC CUỐI khi cấp thật, SAU khi điền đủ các ô dưới đây.
+# REVISION 3 — 2026-09-07T09:44:51Z: thay lease exec-1r2 (băm r2 `bda86f12…`) sau cross-review lượt 8, chỉ thị chủ kho https://github.com/ducthangho/tra-luat/issues/463#issuecomment-5568696936.
+# Chuỗi: #456 → exec-1 → exec-1r2 → exec-1r3. Bên dưới là chú thích của revision 2, giữ làm lịch sử.
+# REVISION 2 — 2026-09-07T07:50:35Z: thay lease exec-1 (băm đặc tả `8cca700c…`) sau khi chủ kho mở revision r2 cho đặc tả
+# theo cross-review lượt 6–7 của PR #468 (dấu vết bền: https://github.com/ducthangho/tra-luat/issues/463#issuecomment-5567157629). Đổi so exec-1: lease_id, revision, spec_sha256/spec_hash,
+# granted_on_instruction, mốc cấp/hết hạn, thay_the_cho. Mọi trường khác giữ nguyên. Hồ sơ do phiên executor soạn theo
+# chỉ thị; thẩm quyền cấp vẫn là chủ kho (`granted_by: ducthangho`).
+schema_version: 2
+event: executor_lease_granted
+
+# ── CÁC Ô CHỦ KHO ĐIỀN TẠI LÚC CẤP — 6 ô: packet_issue · mission_issue · granted_by ·
+#    granted_on_instruction · leased_at_utc · lease_expires_at_utc (yaml.safe_load 21:00Z 06-09-2026: đúng
+#    6 trường null trong tệp này) — không ai khác điền được ──────────────────────────────────
+# `packet_issue`  : số hiệu Issue sau khi đăng (phải là ISSUE, không phải PR).
+# `mission_issue` : Mission Issue chứa packet (`PROTOCOL §3.2` đòi; khuyến nghị ở spec: một
+#                   Mission Issue chung cho bốn packet, hoặc ghi #456 và nói rõ là thay thế).
+# `granted_by`    : `ducthangho` — `record-lease` TỪ CHỐI tên provider (`claude`/`codex`).
+# `granted_on_instruction`: dấu vết BỀN của uỷ quyền (URL/ID comment cấp lease). Một câu trong
+#                   khung chat KHÔNG phải dấu vết bền. Ghi luôn ở đây lựa chọn về #456 (cấp SAU
+#                   14:30:07Z 07-09 hay thu hồi sớm) — xem khối `thay_the_cho`.
+# `leased_at_utc` / `lease_expires_at_utc`: giờ cấp THẬT và giờ hết hạn = giờ cấp + `run_minutes`.
+#                   Bản đầu điền sẵn 18:30Z 06-09 → 18:30Z 07-09 và gọi là "mặc định" — hai mốc
+#                   ấy là SỰ KIỆN cấp, không có mặc định (verdict lượt 1, P2). Để trống: `check`
+#                   chặn rc=8 khi thiếu `lease_expires_at_utc` (đo 19:35Z). `--expires-utc` của
+#                   `record-lease` phải khớp đúng giá trị điền ở đây.
+packet_issue: 463
+mission_issue: 467
+granted_by: ducthangho
+granted_on_instruction: 'https://github.com/ducthangho/tra-luat/issues/463#issuecomment-5568696936'
+leased_at_utc: '2026-09-07T09:44:51Z'
+lease_expires_at_utc: '2026-09-08T09:44:51Z'
+# ───────────────────────────────────────────────────────────────────────────────────
+
+packet_id: GATE-TACH-JOB-CAT-CHI-PHI
+revision: 3
+generation: 1
+lease_id: gate-tach-job-cat-chi-phi-exec-1r3-claude-20260906
+role: executor
+provider: claude
+executor: claude
+model: fable-5.1
+effort: xhigh
+# Cấu hình do chủ kho chỉ định (Mission #467): executor Claude `claude-fable-5-1` mức high/xhigh;
+# reviewer Codex `gpt-6-astra` mức high→max, CÓ hint patch. `reviewer_model`/`reviewer_effort` là
+# trường KHAI BÁO — packet_loop không đọc chúng; chúng ghi ý định để phiên review neo theo.
+reviewer_model: gpt-6-astra
+reviewer_effort: xhigh
+reviewer_hint_patch: true
+environment: cloud
+risk: sensitive
+assurance_target: cross_approved
+access: read-write
+
+spec_path: ops/specs/GATE-TACH-JOB-CAT-CHI-PHI.md
+spec_sha256: 37800aa6b33afb8caf3296440bd0ac49dbd6b4300fe59f832e11ae629cc1ffb2
+spec_hash: 37800aa6b33afb8caf3296440bd0ac49dbd6b4300fe59f832e11ae629cc1ffb2
+
+# Hai tệp (verdict lượt 1, P1 `write-set-thieu-noi-doc-job-registry`): `loi_ruff_ci` trong tệp #2
+# khoá cứng `jobs.gate`; tách job mà không sửa nó thì bước `test registry` tự đỏ — đo 19:33Z
+# 06-09-2026 trên YAML tách trong bộ nhớ: trước `([], 3)`, sau `(["CI không provision Ruff trước
+# test registry"], 3)`. Tệp #2 giao với ba packet mutant-Windows ⇒ bốn packet NỐI TIẾP, packet
+# này đi ĐẦU (lý do có bảng ở spec, mục `write_set`).
+write_set:
+  - .github/workflows/ci.yml
+  - .claude/dev/ci_dang_ky_test.py
+depends_on: []
+
+branch: claude/gate-tach-job-cat-chi-phi
+branch_ownership: exclusive
+target_branch_neu_land: master
+# 3 MỎ NEO (base_sha · start_from_sha · reviewed_sha_required) — ĐÃ ĐO LẠI theo finding P1
+# `lease-gate-cap-that-con-ho-so-nhap` (cross-review lượt 6): bản cấp 03:37:33Z giữ nguyên chỗ giữ
+# `1b3caa1` của lúc soạn. Head `master` tại giờ cấp = `d28c4b1` (commit 01:50:09Z 07-09-2026, không
+# commit nào sau đó tới lúc cấp — đo `git log origin/master` 06:0xZ 07-09-2026); `1b3caa1..d28c4b1`
+# chạm cả hai tệp write set (+8 dòng ci.yml / +1 dòng ci_dang_ky_test.py). Ba trường cùng một giá trị.
+base_sha: d28c4b1062e8505cbdaaf0237fcbe3f9b8ee4705
+start_from_sha: d28c4b1062e8505cbdaaf0237fcbe3f9b8ee4705
+reviewed_sha_required: d28c4b1062e8505cbdaaf0237fcbe3f9b8ee4705
+
+authority_basis: '§2 — start/pause/resume/reroute/override/authorize thuộc chủ kho'
+recorded_by: claude-session
+recorder_is_dispatcher: false
+
+# `run_minutes` = độ dài HẠN LEASE tính bằng phút (1440 = 24 giờ), KHÔNG phải trần một run —
+# trần ấy là `max_run_minutes: 90` của `PROTOCOL §12`; một lease 24 giờ chứa nhiều run 90 phút.
+run_minutes: 1440
+# Ba trường theo `PROTOCOL §4` (bổ sung theo finding lượt 6): `write_set_hash` = sha256 của các đường dẫn
+# write_set đã sort, nối bằng LF, có LF cuối; `heartbeat_at` = mốc cấp (chưa có heartbeat nào của executor
+# — executor chưa bắt tay vì A9 chưa đạt); `lease_until` = `lease_expires_at_utc` (cùng một mốc, hai tên).
+write_set_hash: 0f7b869da648e9b21023e461925efd0d45bca58fb308a8fcc82bc55ad9f66ef0
+heartbeat_at: '2026-09-07T09:44:51Z'
+lease_until: '2026-09-08T09:44:51Z'
+heartbeat_required_minutes: 30
+attempts_used: 0
+attempts_limit: 3
+
+reviewer_provider: codex
+review_class: sensitive
+effective_review_class: sensitive
+
+# THAY THẾ tiền nhiệm — chuỗi điều phối #456 → GATE → LO-319 → 2A → 2B; tiền nhiệm TRỰC TIẾP của
+# lease này là #456 (packet này đi ĐẦU chuỗi):
+#   mutant-khong-chay-tren-windows-exec-1-claude-20260906
+# (dấu vết audit — KHÔNG phải điều kiện cổng). Nháp chọn ĐƯỜNG (a): cấp SAU khi tiền nhiệm hết hạn
+# (hạn #456 = 14:30:07Z 07-09-2026 — đúng mốc vì tiền nhiệm trực tiếp là #456) ⇒ `thay_the_cho: []`. Lý do, đo 21:02Z 06-09-2026 trên cây b1c2284:
+#   · `_kiem_bia_mo` (check) KHÔNG miễn cho HẾT_HẠN — giữ tên tiền nhiệm ⇒ check rc=8 tới khi có bia mộ;
+#   · `thay_the_cho: []` + 6 ô điền tạm ⇒ check rc=0 (ĐĂNG ĐƯỢC) ngay khi #456 còn hạn — tức check
+#     KHÔNG chặn chồng lấn write set; chỉ `ai-dang-giu` đo được chuyện ấy;
+#   · `ai-dang-giu` không đếm bản HẾT_HẠN: mô phỏng #456 ⇒ NGƯỜI_GIỮ 1 → 0 đúng tại giây hết hạn.
+# ĐƯỜNG (b) cấp SỚM: điền `thay_the_cho: [<tiền nhiệm>]`; chủ kho thêm `da_bi_thay_the: <lease này>`
+# vào tệp lease tiền nhiệm trên nhánh ops/** và commit TRƯỚC khi check; MỌI ref còn giữ bản cũ được
+# cập nhật/dọn, readback `ai-dang-giu` ⇒ 0 dòng CÒN_HẠN của tiền nhiệm — thủ tục ở spec LO-319 mục
+# "Lease đang giữ" (b). Chọn đường nào ghi vào granted_on_instruction. Trước khi bắt tay, A8/A9 đo
+# bằng `ai-dang-giu` trên MỌI đường write set, không bằng check.
+thay_the_cho:
+  - gate-tach-job-cat-chi-phi-exec-1r2-claude-20260906
+# (lease exec-1 là bản đã thay #456 — chuỗi: #456 → exec-1 → exec-1r2; bia mộ của #456 trỏ exec-1, giữ nguyên làm lịch sử)
+
+ly_do_cap: >-
+  Nợ do chính `ci.yml:63` tự khai: "NÂNG TRẦN KHÔNG CHỮA NGUYÊN NHÂN: gate 22 phút và đang
+  lớn dần là nợ riêng". Khi #456 được soạn, nợ ấy CHƯA BÀN ĐƯỢC vì tổng thời gian Windows
+  thật chưa ai đo — job luôn bị cắt ở trần. #456 đã land và LẦN ĐẦU sinh ra số đo ấy.
+  Đo run 34045664423 (NHÁNH, head `426bfc0`) lúc 17:41Z và run 34048685345 (MASTER, head
+  `1b3caa1`, đã chạy trọn) lúc 18:10Z 06-09-2026: Windows 43,20p `success`, 43 mục GitHub liệt kê /
+  6 skipped (nhánh) · 42,28p `success`, 43 mục / 6 skipped (master) — "mục liệt kê" không phải
+  "bước đã chạy". Biên dưới trần 60: 16,80p (nhánh) · 17,72p (master) — mỏng.
+  Hai bước nặng nhất = 63,5 % tổng bước Windows (`test registry` 17,70 = 41,0 % ·
+  `packet-loop selftest` 9,70 = 22,5 %; mẫu số là tổng bước 43,17). Chênh job − Σbước = 0,03
+  phút — phép đo ấy chỉ phân rã khoảng started→completed của MỘT job đã có runner; nó không
+  đo xếp hàng, độ trễ workflow hay chi phí thiết lập runner mới (bản đầu viết "không có chi
+  phí ẩn" — rộng hơn phép đo, đã thu hẹp). Thứ rút được: trong một job, mọi khoản cắt phải cắt
+  vào một bước có tên.
+  "Bỏ bước trùng" ĐÃ ĐO và KHÔNG CÓ: 39 bước khai, 0 bước có thân `run` trùng nhau (17:59Z).
+  Tách ba job ⇒ ước có đơn vị từ số đo cũ: job dài nhất Windows 43,20 → 21,03 phút (−51,3 %),
+  NHƯNG phút TÍNH TIỀN của lượt nhánh 110,65 → 126,22 (+15,57, +14,1 %) vì trả tiền thiết lập
+  ba lần thay vì một. Khoản tăng ấy đụng đúng chỗ kho này đã chết một lần — `ci.yml:19-24` ghi
+  CI đứng hình từ 12-08-2026 vì cạn hạn mức 2.000 phút/tháng (số của ghi chú 13-08) — nên nó
+  là con số CHỦ KHO DUYỆT TRƯỚC, không phải con số phiên thi công tự nuốt.
+  Consumer ngoài `ci.yml`: `loi_ruff_ci` khoá cứng `jobs.gate` ⇒ write set 2 tệp, packet đi đầu
+  chuỗi nối tiếp với ba packet mutant-Windows.
+
+viec_trong_lease:
+  - 'Tách `test registry` và `packet-loop selftest` sang job riêng, CÙNG ma trận nền với `gate`.'
+  - 'Giữ độ phủ: tập `(tên bước, nền, conclusion)` sau khi tách phải BẰNG ĐÚNG tập trước khi
+     tách, đo trên CẢ lượt `workflow_dispatch` LẪN lượt `pull_request` của PR packet. So bằng
+     TẬP, không bằng `wc -l`.'
+  - 'Không thêm mặt điều kiện nào — đo bằng CẤU TRÚC: bộ ba (`if` mức job, `matrix.os`,
+     `timeout-minutes`) của mỗi job mới BẰNG của `gate`; tập (tên bước, `if` bước) trước/sau
+     BẰNG NHAU; `on:`/`concurrency:` không đổi. Đếm biểu thức `${{ }}` KHÔNG đủ: `if:` viết
+     không có dấu nội suy lọt (đo 19:33Z).'
+  - 'Giữ `timeout-minutes: 60` trên MỌI job.'
+  - 'ĐO và CÔNG BỐ phút tính tiền; ngưỡng ≤ 135,00 phút tính tiền, nền lượt nhánh 34045664423
+     = 110,65 (lượt master 34048685345 = 111,08 để đối chiếu nhiễu). Công bố kèm thời gian
+     đầu-cuối của workflow, không đặt ngưỡng vì chưa có nền.'
+  - 'Sửa `loi_ruff_ci` trong `.claude/dev/ci_dang_ky_test.py`: tìm bước `test registry` trong
+     MỌI job, đòi Ruff cài trong CÙNG job và TRƯỚC bước ấy; tương thích với `ci.yml` chưa tách;
+     phản chứng bốn ca (A7 của spec).'
+  - 'In ra danh sách tên job mới, đúng dạng chuỗi mà branch protection dùng.'
+  - '`actionlint`: so TẬP CHẨN ĐOÁN, không so `rc` — chạy hai vế (`origin/master` · nhánh) trong CÙNG
+     một lệnh, cùng môi trường; lưu phiên bản actionlint/shellcheck, rc và toàn bộ chẩn đoán; chuẩn
+     hoá (tệp, mã, thông điệp, thân bước) bỏ số dòng; đa tập hai vế phải BẰNG NHAU. `rc=1 → 1` che
+     được lỗi mới (phản mô hình đo 06-09-2026). Vắng công cụ hay thiếu log một vế ⇒ KHÔNG ĐO ĐƯỢC ⇒
+     ĐỎ, không phải delta 0.'
+  - 'Cột thêm của `git diff --numstat` ≤ 300 (ADR-0044 đo ADDITIONS, không đo ròng); ước
+     135–200 từ số đo khối `ci.yml:35-113`.'
+
+dieu_kien_dung:
+  - 'Nâng `timeout-minutes` — đã nâng HAI lần (ba mức 25→45→60; `9e4f361` → `6d88a2c` →
+     `7657bfd`), lần kế là lần thứ BA, `PROTOCOL §12` đòi xem lại cách làm. `ci.yml:63` tự kết
+     luận "NÂNG TRẦN KHÔNG CHỮA NGUYÊN NHÂN". Điều kiện DỪNG.'
+  - 'HẠ `timeout-minutes` để "ép kỷ luật" — biến một job chậm thành `cancelled`, tức đổi một
+     vấn đề đọc được lấy một vấn đề vô hình. Trần đứng nguyên ở 60.'
+  - 'Thêm bất kỳ mặt ĐIỀU KIỆN nào (theo diff / theo nhãn / `paths:` / `if:` mức job kể cả viết
+     không có dấu nội suy) — đã có đặc tả đóng băng `ops/specs/CI-FASTPATH-THEO-DIFF.md` và bản
+     triển khai ĐÃ BỊ BỎ (PR #247 đóng, không merge). Kho đã trả giá HAI lần cho logic điều kiện
+     của workflow. Tách job là thêm JOB, không thêm ĐIỀU KIỆN.'
+  - 'Đụng bất kỳ hàm nào trong `.claude/dev/ci_dang_ky_test.py` NGOÀI `loi_ruff_ci` và phản chứng của
+     nó (các ca A7 thêm vào `phan_chung()` — đặc tả `write_set` #2 và A7 cho phép; bản đầu của dòng này
+     cấm cả `phan_chung`, trái đặc tả — finding P2 `gate-lease-cam-sua-phan-chung` lượt 6):
+     `bang_chung_xanh`, `MOI`, `MOI_WINDOWS`, `chay_moi` là của LO-319 và hai packet mutant-Windows, đi sau.'
+  - 'Song song hoá TRONG `test registry` — nợ có tên SONG-SONG-HOA-TRONG-TEST-REGISTRY; trần
+     song song trên Linux là −32,5 % (400 s tuần tự, bộ dài nhất 270 s) và con số ấy KHÔNG đổi
+     sau hai packet mutant-Windows vì chúng giữ nguyên vòng đột biến trên Linux.'
+  - 'Cắt đột biến của `packet_loop_test.py` — 9,70 phút Windows (22,5 %), đáng giá, nhưng ở
+     `.claude/dev/**` chứ không ở `ci.yml`. Nợ có tên: MUTANT-WINDOWS-PACKET-LOOP.'
+  - 'Đổi tập bước hoặc đổi lệnh của bất kỳ bước nào — packet này chỉ đổi bước ấy nằm trong
+     JOB nào.'
+  - 'Viết cú pháp `${{ }}` trong comment của `run:` — GitHub nội suy TOÀN BỘ thân `run` trước
+     khi shell thấy nó, và kho đã bị từ chối cả tệp vì đúng chuyện đó (`ops-don-ref.yml`,
+     run 31971137920: 0 job, `conclusion: failure`).'
+  - 'Merge khi branch protection chưa require CẢ BA job — tách một job đang được require thành
+     ba mà chỉ require một là THÁO CỔNG bằng một thao tác trông như tối ưu hoá. Nửa này KHÔNG
+     ĐO ĐƯỢC từ phiên thi công; nợ có tên PLAT-X5-required-status-check, việc của chủ kho.'
+  - 'Bắt tay khi `ai-dang-giu .claude/dev/ci_dang_ky_test.py` còn một dòng của lease #456 thiếu
+     `ĐÃ_BỊ_THAY_THẾ`/`HẾT_HẠN` — đó là cửa sổ hai writer theo định nghĩa của công cụ.'
+  - 'A1 hoặc A5 ĐỎ là KẾT QUẢ ĐO, không phải thất bại thiết kế — báo chủ kho, đừng nới gì.'
+
+# BIA MỘ — thay bởi lease revision 4 (chỉ thị chủ kho https://github.com/ducthangho/tra-luat/issues/463#issuecomment-5568696936); `_kiem_bia_mo` đòi hai chiều.
+da_bi_thay_the: gate-tach-job-cat-chi-phi-exec-1r4-claude-20260906
+da_bi_thay_the_luc_utc: '2026-09-07T10:17:12Z'
+da_bi_thay_the_theo: 'https://github.com/ducthangho/tra-luat/issues/463#issuecomment-5568696936'

@@ -1,0 +1,14 @@
+{
+  "name": "ci-dang-ky",
+  "command": [
+    "python3",
+    ".claude/dev/ci_dang_ky_test.py"
+  ],
+  "start_utc": "2026-09-07T09:21:51.600257+00:00",
+  "end_utc": "2026-09-07T09:21:51.839392+00:00",
+  "seconds": 0.23913788800001612,
+  "rc": 0,
+  "stdout_bytes": 2934,
+  "stdout_sha256": "d31de5aefad408c8fb7562e18856c79a201e2bd2fbedbbd1c8b13929dabe5089",
+  "stderr_bytes": 0
+}

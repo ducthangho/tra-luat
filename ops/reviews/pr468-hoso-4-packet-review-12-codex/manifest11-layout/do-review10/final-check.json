@@ -1,0 +1,19 @@
+{
+  "utc": "2026-09-07T11:50:17.131690+00:00",
+  "head": "c43347d1e2c2f76bb21dc2d9d28bd6bfa153d355",
+  "tree": "799a4b2549d68c6a3ad44cc70f9257e794cd1db8",
+  "status": "",
+  "tracked_diff": "",
+  "index_diff": "",
+  "new_commits": "0",
+  "finding_ids": [
+    "bia-mo-mot-ref-khong-thu-hoi-moi-ban",
+    "bien-do-khac-head-khong-phai-nhieu-runner",
+    "manifest-luot8-liet-ke-hien-vat-khong-duoc-giao"
+  ],
+  "severities": {
+    "P1": 1,
+    "P2": 2
+  },
+  "manifest_files": 128
+}

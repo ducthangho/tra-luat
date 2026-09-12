@@ -1,0 +1,319 @@
+{
+  "utc": "2026-09-07T09:56:25.851244+00:00",
+  "head": "0bc6e56e1a1fd21cedfc18557320941d51db866c",
+  "tree": "86b3f017010575bd37b612242acb7e60bbf2db03",
+  "initial_status": "",
+  "diffs": {
+    "since8": {
+      "patch_matches": true,
+      "numstat_matches": true,
+      "files": 68,
+      "additions": 9067,
+      "deletions": 67,
+      "outside_ops": []
+    },
+    "full": {
+      "patch_matches": true,
+      "numstat_matches": true,
+      "files": 217,
+      "additions": 55766,
+      "deletions": 0,
+      "outside_ops": []
+    }
+  },
+  "leases": [
+    {
+      "issue": 463,
+      "lease": "gate-tach-job-cat-chi-phi-exec-1r3-claude-20260906.yaml",
+      "revision": 3,
+      "spec": "GATE-TACH-JOB-CAT-CHI-PHI.md",
+      "hash_actual": "37800aa6b33afb8caf3296440bd0ac49dbd6b4300fe59f832e11ae629cc1ffb2",
+      "hash_declared": "37800aa6b33afb8caf3296440bd0ac49dbd6b4300fe59f832e11ae629cc1ffb2",
+      "hash_alias": "37800aa6b33afb8caf3296440bd0ac49dbd6b4300fe59f832e11ae629cc1ffb2",
+      "issue_commit": "3ef7d2a37d833ae62ff8d2848e146a945360e64d",
+      "issue_blob_hash": "37800aa6b33afb8caf3296440bd0ac49dbd6b4300fe59f832e11ae629cc1ffb2",
+      "issue_hash": true,
+      "copy_equal": true,
+      "granted_on_instruction": "https://github.com/ducthangho/tra-luat/issues/463#issuecomment-5568696936",
+      "null_keys": [],
+      "write_set": [
+        ".github/workflows/ci.yml",
+        ".claude/dev/ci_dang_ky_test.py"
+      ]
+    },
+    {
+      "issue": 464,
+      "lease": "lo-319-linux-bang-chung-xanh-exec-1-claude-20260906.yaml.nhap",
+      "revision": 1,
+      "spec": "LO-319-LINUX-BANG-CHUNG-XANH.md",
+      "hash_actual": "399a9e8162dbe6a59c8bee3514a725e796c82787aa6dfffba6d42f1eb76973c0",
+      "hash_declared": "399a9e8162dbe6a59c8bee3514a725e796c82787aa6dfffba6d42f1eb76973c0",
+      "hash_alias": "399a9e8162dbe6a59c8bee3514a725e796c82787aa6dfffba6d42f1eb76973c0",
+      "issue_commit": "3ef7d2a37d833ae62ff8d2848e146a945360e64d",
+      "issue_blob_hash": "399a9e8162dbe6a59c8bee3514a725e796c82787aa6dfffba6d42f1eb76973c0",
+      "issue_hash": true,
+      "copy_equal": true,
+      "granted_on_instruction": null,
+      "null_keys": [
+        "mission_issue",
+        "granted_by",
+        "granted_on_instruction",
+        "leased_at_utc",
+        "lease_expires_at_utc"
+      ],
+      "write_set": [
+        ".claude/dev/ci_dang_ky_test.py"
+      ]
+    },
+    {
+      "issue": 465,
+      "lease": "mutant-windows-subagent-ghi-detect-exec-1-claude-20260906.yaml.nhap",
+      "revision": 1,
+      "spec": "MUTANT-WINDOWS-SUBAGENT-GHI-DETECT.md",
+      "hash_actual": "2abace8588ec2b4e0626c1c77e9c3e0f7e713ecb2ce528b149e6c7f1f0000759",
+      "hash_declared": "2abace8588ec2b4e0626c1c77e9c3e0f7e713ecb2ce528b149e6c7f1f0000759",
+      "hash_alias": "2abace8588ec2b4e0626c1c77e9c3e0f7e713ecb2ce528b149e6c7f1f0000759",
+      "issue_commit": "b743f1798aba12615f903a11bd451c87e404814e",
+      "issue_blob_hash": "2abace8588ec2b4e0626c1c77e9c3e0f7e713ecb2ce528b149e6c7f1f0000759",
+      "issue_hash": true,
+      "copy_equal": true,
+      "granted_on_instruction": null,
+      "null_keys": [
+        "mission_issue",
+        "granted_by",
+        "granted_on_instruction",
+        "leased_at_utc",
+        "lease_expires_at_utc"
+      ],
+      "write_set": [
+        ".claude/hooks/subagent_ghi_detect_test.py",
+        ".claude/dev/ci_dang_ky_test.py"
+      ]
+    },
+    {
+      "issue": 466,
+      "lease": "mutant-windows-nhanh-don-duoc-exec-1-claude-20260906.yaml.nhap",
+      "revision": 1,
+      "spec": "MUTANT-WINDOWS-NHANH-DON-DUOC.md",
+      "hash_actual": "417dce16227687cbb1e642284f39d2f847a617b2d730f7f52aaa58f33c936521",
+      "hash_declared": "417dce16227687cbb1e642284f39d2f847a617b2d730f7f52aaa58f33c936521",
+      "hash_alias": "417dce16227687cbb1e642284f39d2f847a617b2d730f7f52aaa58f33c936521",
+      "issue_commit": "b743f1798aba12615f903a11bd451c87e404814e",
+      "issue_blob_hash": "417dce16227687cbb1e642284f39d2f847a617b2d730f7f52aaa58f33c936521",
+      "issue_hash": true,
+      "copy_equal": true,
+      "granted_on_instruction": null,
+      "null_keys": [
+        "mission_issue",
+        "granted_by",
+        "granted_on_instruction",
+        "leased_at_utc",
+        "lease_expires_at_utc"
+      ],
+      "write_set": [
+        "ops/nhanh_don_duoc_test.py",
+        ".claude/dev/ci_dang_ky_test.py"
+      ]
+    }
+  ],
+  "gate": {
+    "anchors": {
+      "base_sha": "d28c4b1062e8505cbdaaf0237fcbe3f9b8ee4705",
+      "start_from_sha": "d28c4b1062e8505cbdaaf0237fcbe3f9b8ee4705",
+      "reviewed_sha_required": "d28c4b1062e8505cbdaaf0237fcbe3f9b8ee4705"
+    },
+    "write_set_hash_actual": "0f7b869da648e9b21023e461925efd0d45bca58fb308a8fcc82bc55ad9f66ef0",
+    "write_set_hash_declared": "0f7b869da648e9b21023e461925efd0d45bca58fb308a8fcc82bc55ad9f66ef0",
+    "leased": "2026-09-07T09:44:51Z",
+    "heartbeat": "2026-09-07T09:44:51Z",
+    "until": "2026-09-08T09:44:51Z",
+    "expires": "2026-09-08T09:44:51Z",
+    "duration_minutes": 1440.0,
+    "thay_the_cho": [
+      "gate-tach-job-cat-chi-phi-exec-1r2-claude-20260906"
+    ]
+  },
+  "snapshot_blob_path_pairs": 89,
+  "chain_current_tree": [
+    {
+      "lease_id": "mutant-khong-chay-tren-windows-exec-1-claude-20260906",
+      "replaces": null,
+      "tombstone": "gate-tach-job-cat-chi-phi-exec-1-claude-20260906",
+      "bidirectional": true
+    },
+    {
+      "lease_id": "gate-tach-job-cat-chi-phi-exec-1-claude-20260906",
+      "replaces": [
+        "mutant-khong-chay-tren-windows-exec-1-claude-20260906"
+      ],
+      "tombstone": "gate-tach-job-cat-chi-phi-exec-1r2-claude-20260906",
+      "bidirectional": true
+    },
+    {
+      "lease_id": "gate-tach-job-cat-chi-phi-exec-1r2-claude-20260906",
+      "replaces": [
+        "gate-tach-job-cat-chi-phi-exec-1-claude-20260906"
+      ],
+      "tombstone": "gate-tach-job-cat-chi-phi-exec-1r3-claude-20260906",
+      "bidirectional": true
+    },
+    {
+      "lease_id": "gate-tach-job-cat-chi-phi-exec-1r3-claude-20260906",
+      "replaces": [
+        "gate-tach-job-cat-chi-phi-exec-1r2-claude-20260906"
+      ],
+      "tombstone": null,
+      "bidirectional": null
+    }
+  ],
+  "holders": {
+    "2026-09-07T09:56:25.851244+00:00": {
+      ".github/workflows/ci.yml": [
+        "gate-tach-job-cat-chi-phi-exec-1r3-claude-20260906"
+      ],
+      ".claude/dev/ci_dang_ky_test.py": [
+        "gate-tach-job-cat-chi-phi-exec-1r3-claude-20260906",
+        "mutant-khong-chay-tren-windows-exec-1-claude-20260906"
+      ],
+      ".claude/hooks/subagent_ghi_detect_test.py": [],
+      "ops/nhanh_don_duoc_test.py": []
+    },
+    "2026-09-07T14:30:06+00:00": {
+      ".github/workflows/ci.yml": [
+        "gate-tach-job-cat-chi-phi-exec-1r3-claude-20260906"
+      ],
+      ".claude/dev/ci_dang_ky_test.py": [
+        "gate-tach-job-cat-chi-phi-exec-1r3-claude-20260906",
+        "mutant-khong-chay-tren-windows-exec-1-claude-20260906"
+      ],
+      ".claude/hooks/subagent_ghi_detect_test.py": [],
+      "ops/nhanh_don_duoc_test.py": []
+    },
+    "2026-09-07T14:30:07+00:00": {
+      ".github/workflows/ci.yml": [
+        "gate-tach-job-cat-chi-phi-exec-1r3-claude-20260906"
+      ],
+      ".claude/dev/ci_dang_ky_test.py": [
+        "gate-tach-job-cat-chi-phi-exec-1r3-claude-20260906"
+      ],
+      ".claude/hooks/subagent_ghi_detect_test.py": [],
+      "ops/nhanh_don_duoc_test.py": []
+    },
+    "2026-09-07T14:30:08+00:00": {
+      ".github/workflows/ci.yml": [
+        "gate-tach-job-cat-chi-phi-exec-1r3-claude-20260906"
+      ],
+      ".claude/dev/ci_dang_ky_test.py": [
+        "gate-tach-job-cat-chi-phi-exec-1r3-claude-20260906"
+      ],
+      ".claude/hooks/subagent_ghi_detect_test.py": [],
+      "ops/nhanh_don_duoc_test.py": []
+    }
+  },
+  "model_all_456_copies_tombstoned": {
+    ".github/workflows/ci.yml": [
+      "gate-tach-job-cat-chi-phi-exec-1r3-claude-20260906"
+    ],
+    ".claude/dev/ci_dang_ky_test.py": [
+      "gate-tach-job-cat-chi-phi-exec-1r3-claude-20260906"
+    ],
+    ".claude/hooks/subagent_ghi_detect_test.py": [],
+    "ops/nhanh_don_duoc_test.py": []
+  },
+  "master_old_blob": "8b2103c06687546379a17f6deafc97f1fe0173fd",
+  "consumer_copy_equal": true,
+  "manifest": {
+    "6": {
+      "listed": 62,
+      "matched": 62,
+      "mismatches": []
+    },
+    "7": {
+      "listed": 66,
+      "matched": 66,
+      "mismatches": []
+    },
+    "8": {
+      "listed": 69,
+      "matched": 50,
+      "mismatches": [
+        {
+          "file": "rig/do-review/attack-h-cases.json",
+          "match": false
+        },
+        {
+          "file": "rig/do-review/attack-h-summary.json",
+          "match": false
+        },
+        {
+          "file": "rig/do-review/extra-checks.json",
+          "match": false
+        },
+        {
+          "file": "rig/do-review/h_predicate.py",
+          "match": false
+        },
+        {
+          "file": "rig/do-review/h_tong.py",
+          "match": false
+        },
+        {
+          "file": "rig/do-review/nhanh-rerun.json",
+          "match": false
+        },
+        {
+          "file": "rig/do-review/outputs/chon_reviewer_test.stdout",
+          "match": false
+        },
+        {
+          "file": "rig/do-review/outputs/gh_readback_test.stdout",
+          "match": false
+        },
+        {
+          "file": "rig/do-review/outputs/mcp_gh_test.stdout",
+          "match": false
+        },
+        {
+          "file": "rig/do-review/outputs/mcp_github_doc_test.stdout",
+          "match": false
+        },
+        {
+          "file": "rig/do-review/outputs/nhanh_don_duoc_test.rerun.stdout",
+          "match": false
+        },
+        {
+          "file": "rig/do-review/outputs/nhanh_don_duoc_test.stdout",
+          "match": false
+        },
+        {
+          "file": "rig/do-review/outputs/pretooluse_guard_test.stdout",
+          "match": false
+        },
+        {
+          "file": "rig/do-review/outputs/probe_mang_test.stdout",
+          "match": false
+        },
+        {
+          "file": "rig/do-review/outputs/subagent_ghi_detect_test.stdout",
+          "match": false
+        },
+        {
+          "file": "rig/do-review/real-results.json",
+          "match": false
+        },
+        {
+          "file": "rig/source/attack_h.py",
+          "match": false
+        },
+        {
+          "file": "rig/source/extra_checks.py",
+          "match": false
+        },
+        {
+          "file": "rig/source/harness.py",
+          "match": false
+        }
+      ]
+    }
+  }
+}

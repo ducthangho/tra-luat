@@ -1,0 +1,1141 @@
+run_id	head7	job_name	step_number	step_name	step_conclusion	started_at	completed_at	giay
+34074288203	d28c4b1	gate (ubuntu-latest)	1	Set up job	success	2026-09-07T01:50:16Z	2026-09-07T01:50:17Z	1
+34074288203	d28c4b1	gate (ubuntu-latest)	2	Force LF checkout (hash parity với manifest)	success	2026-09-07T01:50:17Z	2026-09-07T01:50:17Z	0
+34074288203	d28c4b1	gate (ubuntu-latest)	3	Run actions/checkout@v4	success	2026-09-07T01:50:17Z	2026-09-07T01:50:24Z	7
+34074288203	d28c4b1	gate (ubuntu-latest)	4	Run actions/setup-python@v5	success	2026-09-07T01:50:24Z	2026-09-07T01:50:24Z	0
+34074288203	d28c4b1	gate (ubuntu-latest)	5	cài PyYAML + jsonschema (cổng đăng lease + validator verdict cần)	success	2026-09-07T01:50:24Z	2026-09-07T01:50:26Z	2
+34074288203	d28c4b1	gate (ubuntu-latest)	6	cài actionlint cho G5	success	2026-09-07T01:50:26Z	2026-09-07T01:50:26Z	0
+34074288203	d28c4b1	gate (ubuntu-latest)	7	cài shellcheck cho G5 (cài xong đo lại)	success	2026-09-07T01:50:26Z	2026-09-07T01:50:28Z	2
+34074288203	d28c4b1	gate (ubuntu-latest)	8	cài rg cho G5 (cài xong đo lại)	success	2026-09-07T01:50:28Z	2026-09-07T01:50:32Z	4
+34074288203	d28c4b1	gate (ubuntu-latest)	9	G5 kiem ban ke cong cu + T1..T8 (packet	success	2026-09-07T01:50:32Z	2026-09-07T01:51:32Z	60
+34074288203	d28c4b1	gate (ubuntu-latest)	10	cài Ruff 0.15.15 và in probe dương	success	2026-09-07T01:51:32Z	2026-09-07T01:51:33Z	1
+34074288203	d28c4b1	gate (ubuntu-latest)	11	PR head contains required EOL base	skipped	2026-09-07T01:51:33Z	2026-09-07T01:51:33Z	0
+34074288203	d28c4b1	gate (ubuntu-latest)	12	py_compile	success	2026-09-07T01:51:33Z	2026-09-07T01:51:33Z	0
+34074288203	d28c4b1	gate (ubuntu-latest)	13	codex credential selftest (packet #300)	success	2026-09-07T01:51:33Z	2026-09-07T01:51:33Z	0
+34074288203	d28c4b1	gate (ubuntu-latest)	14	packet-loop selftest	success	2026-09-07T01:51:33Z	2026-09-07T01:55:34Z	241
+34074288203	d28c4b1	gate (ubuntu-latest)	15	bien-nhan v2 selftest	success	2026-09-07T01:55:34Z	2026-09-07T01:56:31Z	57
+34074288203	d28c4b1	gate (ubuntu-latest)	16	test registry (phạm vi + các bộ chưa được nối)	success	2026-09-07T01:56:31Z	2026-09-07T02:11:03Z	872
+34074288203	d28c4b1	gate (ubuntu-latest)	17	idiom-ba-ten selftest	success	2026-09-07T02:11:03Z	2026-09-07T02:11:05Z	2
+34074288203	d28c4b1	gate (ubuntu-latest)	18	eol-policy selftest	success	2026-09-07T02:11:05Z	2026-09-07T02:11:24Z	19
+34074288203	d28c4b1	gate (ubuntu-latest)	19	pre-push selftest	success	2026-09-07T02:11:24Z	2026-09-07T02:11:31Z	7
+34074288203	d28c4b1	gate (ubuntu-latest)	20	lease-publish selftest (đo lại setup sau G5)	success	2026-09-07T02:11:31Z	2026-09-07T02:12:42Z	71
+34074288203	d28c4b1	gate (ubuntu-latest)	21	don-nhanh selftest (chốt xoá nhánh)	success	2026-09-07T02:12:42Z	2026-09-07T02:13:09Z	27
+34074288203	d28c4b1	gate (ubuntu-latest)	22	bo ca gate chay TRONG cgroup duoc uy quyen (Linux)	success	2026-09-07T02:13:09Z	2026-09-07T02:14:30Z	81
+34074288203	d28c4b1	gate (ubuntu-latest)	23	gate lifecycle selftest (nen khong co cgroup)	skipped	2026-09-07T02:14:30Z	2026-09-07T02:14:30Z	0
+34074288203	d28c4b1	gate (ubuntu-latest)	24	eol-policy survey	success	2026-09-07T02:14:30Z	2026-09-07T02:14:30Z	0
+34074288203	d28c4b1	gate (ubuntu-latest)	25	bundled-fragment check (topology gói)	success	2026-09-07T02:14:30Z	2026-09-07T02:14:34Z	4
+34074288203	d28c4b1	gate (ubuntu-latest)	26	gen_instructions selftest	success	2026-09-07T02:14:34Z	2026-09-07T02:14:34Z	0
+34074288203	d28c4b1	gate (ubuntu-latest)	27	command-registry unit test (AG-T0-03)	success	2026-09-07T02:14:34Z	2026-09-07T02:14:35Z	1
+34074288203	d28c4b1	gate (ubuntu-latest)	28	tl selftest (luot PR — khong sinh bang chung)	skipped	2026-09-07T02:14:35Z	2026-09-07T02:14:35Z	0
+34074288203	d28c4b1	gate (ubuntu-latest)	29	tl selftest (co bang chung exact-identity)	success	2026-09-07T02:14:35Z	2026-09-07T02:16:33Z	118
+34074288203	d28c4b1	gate (ubuntu-latest)	30	tai len gate-evidence	success	2026-09-07T02:16:33Z	2026-09-07T02:16:34Z	1
+34074288203	d28c4b1	gate (ubuntu-latest)	31	workflow-audit strict	success	2026-09-07T02:16:34Z	2026-09-07T02:16:35Z	1
+34074288203	d28c4b1	gate (ubuntu-latest)	32	golden-test	success	2026-09-07T02:16:35Z	2026-09-07T02:17:01Z	26
+34074288203	d28c4b1	gate (ubuntu-latest)	33	doc-claims-check strict	success	2026-09-07T02:17:01Z	2026-09-07T02:17:04Z	3
+34074288203	d28c4b1	gate (ubuntu-latest)	34	determinism-audit strict	success	2026-09-07T02:17:04Z	2026-09-07T02:17:39Z	35
+34074288203	d28c4b1	gate (ubuntu-latest)	35	ci-phamvi guard (bang phu thuoc khop ma)	success	2026-09-07T02:17:39Z	2026-09-07T02:17:39Z	0
+34074288203	d28c4b1	gate (ubuntu-latest)	36	ci-phamvi selftest (phan chung — cong co rang)	success	2026-09-07T02:17:39Z	2026-09-07T02:17:42Z	3
+34074288203	d28c4b1	gate (ubuntu-latest)	37	release-check full	success	2026-09-07T02:17:42Z	2026-09-07T02:17:43Z	1
+34074288203	d28c4b1	gate (ubuntu-latest)	38	release-verify strict (lane LAND — manifest committed)	success	2026-09-07T02:17:43Z	2026-09-07T02:17:44Z	1
+34074288203	d28c4b1	gate (ubuntu-latest)	39	release-verify strict (lane WORKER — manifest TẠM ngoài repo)	skipped	2026-09-07T02:17:44Z	2026-09-07T02:17:44Z	0
+34074288203	d28c4b1	gate (ubuntu-latest)	40	release-bundle x2 cùng SHA-256	success	2026-09-07T02:17:44Z	2026-09-07T02:17:48Z	4
+34074288203	d28c4b1	gate (ubuntu-latest)	41	tl_boot smoke	success	2026-09-07T02:17:48Z	2026-09-07T02:17:49Z	1
+34074288203	d28c4b1	gate (ubuntu-latest)	81	Post Run actions/setup-python@v5	success	2026-09-07T02:17:49Z	2026-09-07T02:17:49Z	0
+34074288203	d28c4b1	gate (ubuntu-latest)	82	Post Run actions/checkout@v4	success	2026-09-07T02:17:49Z	2026-09-07T02:17:50Z	1
+34074288203	d28c4b1	gate (ubuntu-latest)	83	Complete job	success	2026-09-07T02:17:50Z	2026-09-07T02:17:50Z	0
+34074288203	d28c4b1	gate (windows-latest)	1	Set up job	success	2026-09-07T01:50:15Z	2026-09-07T01:50:16Z	1
+34074288203	d28c4b1	gate (windows-latest)	2	Force LF checkout (hash parity với manifest)	success	2026-09-07T01:50:16Z	2026-09-07T01:50:18Z	2
+34074288203	d28c4b1	gate (windows-latest)	3	Run actions/checkout@v4	success	2026-09-07T01:50:18Z	2026-09-07T01:50:29Z	11
+34074288203	d28c4b1	gate (windows-latest)	4	Run actions/setup-python@v5	success	2026-09-07T01:50:29Z	2026-09-07T01:50:30Z	1
+34074288203	d28c4b1	gate (windows-latest)	5	cài PyYAML + jsonschema (cổng đăng lease + validator verdict cần)	success	2026-09-07T01:50:30Z	2026-09-07T01:50:37Z	7
+34074288203	d28c4b1	gate (windows-latest)	6	cài actionlint cho G5	success	2026-09-07T01:50:37Z	2026-09-07T01:50:38Z	1
+34074288203	d28c4b1	gate (windows-latest)	7	cài shellcheck cho G5 (cài xong đo lại)	success	2026-09-07T01:50:38Z	2026-09-07T01:50:54Z	16
+34074288203	d28c4b1	gate (windows-latest)	8	cài rg cho G5 (cài xong đo lại)	success	2026-09-07T01:50:54Z	2026-09-07T01:50:59Z	5
+34074288203	d28c4b1	gate (windows-latest)	9	G5 kiem ban ke cong cu + T1..T8 (packet	success	2026-09-07T01:50:59Z	2026-09-07T01:53:22Z	143
+34074288203	d28c4b1	gate (windows-latest)	10	cài Ruff 0.15.15 và in probe dương	success	2026-09-07T01:53:22Z	2026-09-07T01:53:25Z	3
+34074288203	d28c4b1	gate (windows-latest)	11	PR head contains required EOL base	skipped	2026-09-07T01:53:25Z	2026-09-07T01:53:25Z	0
+34074288203	d28c4b1	gate (windows-latest)	12	py_compile	success	2026-09-07T01:53:25Z	2026-09-07T01:53:26Z	1
+34074288203	d28c4b1	gate (windows-latest)	13	codex credential selftest (packet #300)	success	2026-09-07T01:53:26Z	2026-09-07T01:53:27Z	1
+34074288203	d28c4b1	gate (windows-latest)	14	packet-loop selftest	success	2026-09-07T01:53:27Z	2026-09-07T02:02:58Z	571
+34074288203	d28c4b1	gate (windows-latest)	15	bien-nhan v2 selftest	success	2026-09-07T02:02:58Z	2026-09-07T02:10:05Z	427
+34074288203	d28c4b1	gate (windows-latest)	16	test registry (phạm vi + các bộ chưa được nối)	success	2026-09-07T02:10:05Z	2026-09-07T02:26:20Z	975
+34074288203	d28c4b1	gate (windows-latest)	17	idiom-ba-ten selftest	success	2026-09-07T02:26:20Z	2026-09-07T02:26:23Z	3
+34074288203	d28c4b1	gate (windows-latest)	18	eol-policy selftest	success	2026-09-07T02:26:23Z	2026-09-07T02:27:12Z	49
+34074288203	d28c4b1	gate (windows-latest)	19	pre-push selftest	success	2026-09-07T02:27:12Z	2026-09-07T02:27:42Z	30
+34074288203	d28c4b1	gate (windows-latest)	20	lease-publish selftest (đo lại setup sau G5)	success	2026-09-07T02:27:42Z	2026-09-07T02:30:52Z	190
+34074288203	d28c4b1	gate (windows-latest)	21	don-nhanh selftest (chốt xoá nhánh)	skipped	2026-09-07T02:30:52Z	2026-09-07T02:30:52Z	0
+34074288203	d28c4b1	gate (windows-latest)	22	bo ca gate chay TRONG cgroup duoc uy quyen (Linux)	skipped	2026-09-07T02:30:52Z	2026-09-07T02:30:52Z	0
+34074288203	d28c4b1	gate (windows-latest)	23	gate lifecycle selftest (nen khong co cgroup)	success	2026-09-07T02:30:52Z	2026-09-07T02:31:17Z	25
+34074288203	d28c4b1	gate (windows-latest)	24	eol-policy survey	success	2026-09-07T02:31:17Z	2026-09-07T02:31:19Z	2
+34074288203	d28c4b1	gate (windows-latest)	25	bundled-fragment check (topology gói)	success	2026-09-07T02:31:19Z	2026-09-07T02:31:29Z	10
+34074288203	d28c4b1	gate (windows-latest)	26	gen_instructions selftest	success	2026-09-07T02:31:29Z	2026-09-07T02:31:30Z	1
+34074288203	d28c4b1	gate (windows-latest)	27	command-registry unit test (AG-T0-03)	success	2026-09-07T02:31:31Z	2026-09-07T02:31:33Z	2
+34074288203	d28c4b1	gate (windows-latest)	28	tl selftest (luot PR — khong sinh bang chung)	skipped	2026-09-07T02:31:33Z	2026-09-07T02:31:33Z	0
+34074288203	d28c4b1	gate (windows-latest)	29	tl selftest (co bang chung exact-identity)	success	2026-09-07T02:31:33Z	2026-09-07T02:35:09Z	216
+34074288203	d28c4b1	gate (windows-latest)	30	tai len gate-evidence	success	2026-09-07T02:35:09Z	2026-09-07T02:35:11Z	2
+34074288203	d28c4b1	gate (windows-latest)	31	workflow-audit strict	success	2026-09-07T02:35:11Z	2026-09-07T02:35:12Z	1
+34074288203	d28c4b1	gate (windows-latest)	32	golden-test	success	2026-09-07T02:35:12Z	2026-09-07T02:36:21Z	69
+34074288203	d28c4b1	gate (windows-latest)	33	doc-claims-check strict	success	2026-09-07T02:36:21Z	2026-09-07T02:36:30Z	9
+34074288203	d28c4b1	gate (windows-latest)	34	determinism-audit strict	success	2026-09-07T02:36:30Z	2026-09-07T02:37:48Z	78
+34074288203	d28c4b1	gate (windows-latest)	35	ci-phamvi guard (bang phu thuoc khop ma)	success	2026-09-07T02:37:48Z	2026-09-07T02:37:50Z	2
+34074288203	d28c4b1	gate (windows-latest)	36	ci-phamvi selftest (phan chung — cong co rang)	skipped	2026-09-07T02:37:50Z	2026-09-07T02:37:50Z	0
+34074288203	d28c4b1	gate (windows-latest)	37	release-check full	success	2026-09-07T02:37:50Z	2026-09-07T02:37:55Z	5
+34074288203	d28c4b1	gate (windows-latest)	38	release-verify strict (lane LAND — manifest committed)	success	2026-09-07T02:37:55Z	2026-09-07T02:37:58Z	3
+34074288203	d28c4b1	gate (windows-latest)	39	release-verify strict (lane WORKER — manifest TẠM ngoài repo)	skipped	2026-09-07T02:37:58Z	2026-09-07T02:37:58Z	0
+34074288203	d28c4b1	gate (windows-latest)	40	release-bundle x2 cùng SHA-256	success	2026-09-07T02:37:58Z	2026-09-07T02:38:06Z	8
+34074288203	d28c4b1	gate (windows-latest)	41	tl_boot smoke	success	2026-09-07T02:38:06Z	2026-09-07T02:38:09Z	3
+34074288203	d28c4b1	gate (windows-latest)	81	Post Run actions/setup-python@v5	success	2026-09-07T02:38:09Z	2026-09-07T02:38:09Z	0
+34074288203	d28c4b1	gate (windows-latest)	82	Post Run actions/checkout@v4	success	2026-09-07T02:38:09Z	2026-09-07T02:38:12Z	3
+34074288203	d28c4b1	gate (windows-latest)	83	Complete job	success	2026-09-07T02:38:13Z	2026-09-07T02:38:13Z	0
+34068433781	8ce02fd	gate (windows-latest)	1	Set up job	success	2026-09-07T00:00:20Z	2026-09-07T00:00:21Z	1
+34068433781	8ce02fd	gate (windows-latest)	2	Force LF checkout (hash parity với manifest)	success	2026-09-07T00:00:21Z	2026-09-07T00:00:24Z	3
+34068433781	8ce02fd	gate (windows-latest)	3	Run actions/checkout@v4	success	2026-09-07T00:00:24Z	2026-09-07T00:00:35Z	11
+34068433781	8ce02fd	gate (windows-latest)	4	Run actions/setup-python@v5	success	2026-09-07T00:00:35Z	2026-09-07T00:00:36Z	1
+34068433781	8ce02fd	gate (windows-latest)	5	cài PyYAML + jsonschema (cổng đăng lease + validator verdict cần)	success	2026-09-07T00:00:36Z	2026-09-07T00:00:44Z	8
+34068433781	8ce02fd	gate (windows-latest)	6	cài actionlint cho G5	success	2026-09-07T00:00:44Z	2026-09-07T00:00:45Z	1
+34068433781	8ce02fd	gate (windows-latest)	7	cài shellcheck cho G5 (cài xong đo lại)	success	2026-09-07T00:00:45Z	2026-09-07T00:01:17Z	32
+34068433781	8ce02fd	gate (windows-latest)	8	cài rg cho G5 (cài xong đo lại)	success	2026-09-07T00:01:17Z	2026-09-07T00:01:21Z	4
+34068433781	8ce02fd	gate (windows-latest)	9	G5 kiem ban ke cong cu + T1..T8 (packet	success	2026-09-07T00:01:21Z	2026-09-07T00:03:12Z	111
+34068433781	8ce02fd	gate (windows-latest)	10	cài Ruff 0.15.15 và in probe dương	success	2026-09-07T00:03:12Z	2026-09-07T00:03:15Z	3
+34068433781	8ce02fd	gate (windows-latest)	11	PR head contains required EOL base	skipped	2026-09-07T00:03:15Z	2026-09-07T00:03:15Z	0
+34068433781	8ce02fd	gate (windows-latest)	12	py_compile	success	2026-09-07T00:03:15Z	2026-09-07T00:03:15Z	0
+34068433781	8ce02fd	gate (windows-latest)	13	codex credential selftest (packet #300)	success	2026-09-07T00:03:15Z	2026-09-07T00:03:16Z	1
+34068433781	8ce02fd	gate (windows-latest)	14	packet-loop selftest	success	2026-09-07T00:03:16Z	2026-09-07T00:10:47Z	451
+34068433781	8ce02fd	gate (windows-latest)	15	bien-nhan v2 selftest	success	2026-09-07T00:10:47Z	2026-09-07T00:15:58Z	311
+34068433781	8ce02fd	gate (windows-latest)	16	test registry (phạm vi + các bộ chưa được nối)	success	2026-09-07T00:15:58Z	2026-09-07T00:31:25Z	927
+34068433781	8ce02fd	gate (windows-latest)	17	idiom-ba-ten selftest	success	2026-09-07T00:31:25Z	2026-09-07T00:31:27Z	2
+34068433781	8ce02fd	gate (windows-latest)	18	eol-policy selftest	success	2026-09-07T00:31:27Z	2026-09-07T00:32:14Z	47
+34068433781	8ce02fd	gate (windows-latest)	19	pre-push selftest	success	2026-09-07T00:32:14Z	2026-09-07T00:32:40Z	26
+34068433781	8ce02fd	gate (windows-latest)	20	lease-publish selftest (đo lại setup sau G5)	success	2026-09-07T00:32:40Z	2026-09-07T00:35:07Z	147
+34068433781	8ce02fd	gate (windows-latest)	21	don-nhanh selftest (chốt xoá nhánh)	skipped	2026-09-07T00:35:07Z	2026-09-07T00:35:07Z	0
+34068433781	8ce02fd	gate (windows-latest)	22	bo ca gate chay TRONG cgroup duoc uy quyen (Linux)	skipped	2026-09-07T00:35:07Z	2026-09-07T00:35:07Z	0
+34068433781	8ce02fd	gate (windows-latest)	23	gate lifecycle selftest (nen khong co cgroup)	success	2026-09-07T00:35:07Z	2026-09-07T00:35:21Z	14
+34068433781	8ce02fd	gate (windows-latest)	24	eol-policy survey	success	2026-09-07T00:35:21Z	2026-09-07T00:35:22Z	1
+34068433781	8ce02fd	gate (windows-latest)	25	bundled-fragment check (topology gói)	success	2026-09-07T00:35:22Z	2026-09-07T00:35:29Z	7
+34068433781	8ce02fd	gate (windows-latest)	26	gen_instructions selftest	success	2026-09-07T00:35:29Z	2026-09-07T00:35:30Z	1
+34068433781	8ce02fd	gate (windows-latest)	27	command-registry unit test (AG-T0-03)	success	2026-09-07T00:35:30Z	2026-09-07T00:35:33Z	3
+34068433781	8ce02fd	gate (windows-latest)	28	tl selftest (luot PR — khong sinh bang chung)	skipped	2026-09-07T00:35:33Z	2026-09-07T00:35:33Z	0
+34068433781	8ce02fd	gate (windows-latest)	29	tl selftest (co bang chung exact-identity)	success	2026-09-07T00:35:33Z	2026-09-07T00:38:09Z	156
+34068433781	8ce02fd	gate (windows-latest)	30	tai len gate-evidence	success	2026-09-07T00:38:09Z	2026-09-07T00:38:20Z	11
+34068433781	8ce02fd	gate (windows-latest)	31	workflow-audit strict	success	2026-09-07T00:38:20Z	2026-09-07T00:38:22Z	2
+34068433781	8ce02fd	gate (windows-latest)	32	golden-test	success	2026-09-07T00:38:22Z	2026-09-07T00:39:11Z	49
+34068433781	8ce02fd	gate (windows-latest)	33	doc-claims-check strict	success	2026-09-07T00:39:11Z	2026-09-07T00:39:18Z	7
+34068433781	8ce02fd	gate (windows-latest)	34	determinism-audit strict	success	2026-09-07T00:39:18Z	2026-09-07T00:40:15Z	57
+34068433781	8ce02fd	gate (windows-latest)	35	ci-phamvi guard (bang phu thuoc khop ma)	success	2026-09-07T00:40:15Z	2026-09-07T00:40:16Z	1
+34068433781	8ce02fd	gate (windows-latest)	36	ci-phamvi selftest (phan chung — cong co rang)	skipped	2026-09-07T00:40:16Z	2026-09-07T00:40:16Z	0
+34068433781	8ce02fd	gate (windows-latest)	37	release-check full	success	2026-09-07T00:40:16Z	2026-09-07T00:40:18Z	2
+34068433781	8ce02fd	gate (windows-latest)	38	release-verify strict (lane LAND — manifest committed)	success	2026-09-07T00:40:18Z	2026-09-07T00:40:19Z	1
+34068433781	8ce02fd	gate (windows-latest)	39	release-verify strict (lane WORKER — manifest TẠM ngoài repo)	skipped	2026-09-07T00:40:19Z	2026-09-07T00:40:19Z	0
+34068433781	8ce02fd	gate (windows-latest)	40	release-bundle x2 cùng SHA-256	success	2026-09-07T00:40:19Z	2026-09-07T00:40:24Z	5
+34068433781	8ce02fd	gate (windows-latest)	41	tl_boot smoke	success	2026-09-07T00:40:24Z	2026-09-07T00:40:26Z	2
+34068433781	8ce02fd	gate (windows-latest)	81	Post Run actions/setup-python@v5	success	2026-09-07T00:40:26Z	2026-09-07T00:40:26Z	0
+34068433781	8ce02fd	gate (windows-latest)	82	Post Run actions/checkout@v4	success	2026-09-07T00:40:26Z	2026-09-07T00:40:29Z	3
+34068433781	8ce02fd	gate (windows-latest)	83	Complete job	success	2026-09-07T00:40:29Z	2026-09-07T00:40:29Z	0
+34068433781	8ce02fd	gate (ubuntu-latest)	1	Set up job	success	2026-09-07T00:00:21Z	2026-09-07T00:00:22Z	1
+34068433781	8ce02fd	gate (ubuntu-latest)	2	Force LF checkout (hash parity với manifest)	success	2026-09-07T00:00:22Z	2026-09-07T00:00:22Z	0
+34068433781	8ce02fd	gate (ubuntu-latest)	3	Run actions/checkout@v4	success	2026-09-07T00:00:22Z	2026-09-07T00:00:29Z	7
+34068433781	8ce02fd	gate (ubuntu-latest)	4	Run actions/setup-python@v5	success	2026-09-07T00:00:29Z	2026-09-07T00:00:29Z	0
+34068433781	8ce02fd	gate (ubuntu-latest)	5	cài PyYAML + jsonschema (cổng đăng lease + validator verdict cần)	success	2026-09-07T00:00:29Z	2026-09-07T00:00:31Z	2
+34068433781	8ce02fd	gate (ubuntu-latest)	6	cài actionlint cho G5	success	2026-09-07T00:00:31Z	2026-09-07T00:00:31Z	0
+34068433781	8ce02fd	gate (ubuntu-latest)	7	cài shellcheck cho G5 (cài xong đo lại)	success	2026-09-07T00:00:31Z	2026-09-07T00:00:33Z	2
+34068433781	8ce02fd	gate (ubuntu-latest)	8	cài rg cho G5 (cài xong đo lại)	success	2026-09-07T00:00:33Z	2026-09-07T00:00:38Z	5
+34068433781	8ce02fd	gate (ubuntu-latest)	9	G5 kiem ban ke cong cu + T1..T8 (packet	success	2026-09-07T00:00:38Z	2026-09-07T00:01:29Z	51
+34068433781	8ce02fd	gate (ubuntu-latest)	10	cài Ruff 0.15.15 và in probe dương	success	2026-09-07T00:01:29Z	2026-09-07T00:01:30Z	1
+34068433781	8ce02fd	gate (ubuntu-latest)	11	PR head contains required EOL base	skipped	2026-09-07T00:01:30Z	2026-09-07T00:01:30Z	0
+34068433781	8ce02fd	gate (ubuntu-latest)	12	py_compile	success	2026-09-07T00:01:30Z	2026-09-07T00:01:30Z	0
+34068433781	8ce02fd	gate (ubuntu-latest)	13	codex credential selftest (packet #300)	success	2026-09-07T00:01:30Z	2026-09-07T00:01:31Z	1
+34068433781	8ce02fd	gate (ubuntu-latest)	14	packet-loop selftest	success	2026-09-07T00:01:31Z	2026-09-07T00:04:58Z	207
+34068433781	8ce02fd	gate (ubuntu-latest)	15	bien-nhan v2 selftest	success	2026-09-07T00:04:58Z	2026-09-07T00:05:35Z	37
+34068433781	8ce02fd	gate (ubuntu-latest)	16	test registry (phạm vi + các bộ chưa được nối)	success	2026-09-07T00:05:35Z	2026-09-07T00:18:04Z	749
+34068433781	8ce02fd	gate (ubuntu-latest)	17	idiom-ba-ten selftest	success	2026-09-07T00:18:04Z	2026-09-07T00:18:05Z	1
+34068433781	8ce02fd	gate (ubuntu-latest)	18	eol-policy selftest	success	2026-09-07T00:18:05Z	2026-09-07T00:18:21Z	16
+34068433781	8ce02fd	gate (ubuntu-latest)	19	pre-push selftest	success	2026-09-07T00:18:21Z	2026-09-07T00:18:27Z	6
+34068433781	8ce02fd	gate (ubuntu-latest)	20	lease-publish selftest (đo lại setup sau G5)	success	2026-09-07T00:18:27Z	2026-09-07T00:19:24Z	57
+34068433781	8ce02fd	gate (ubuntu-latest)	21	don-nhanh selftest (chốt xoá nhánh)	success	2026-09-07T00:19:24Z	2026-09-07T00:19:48Z	24
+34068433781	8ce02fd	gate (ubuntu-latest)	22	bo ca gate chay TRONG cgroup duoc uy quyen (Linux)	success	2026-09-07T00:19:48Z	2026-09-07T00:21:08Z	80
+34068433781	8ce02fd	gate (ubuntu-latest)	23	gate lifecycle selftest (nen khong co cgroup)	skipped	2026-09-07T00:21:08Z	2026-09-07T00:21:08Z	0
+34068433781	8ce02fd	gate (ubuntu-latest)	24	eol-policy survey	success	2026-09-07T00:21:08Z	2026-09-07T00:21:09Z	1
+34068433781	8ce02fd	gate (ubuntu-latest)	25	bundled-fragment check (topology gói)	success	2026-09-07T00:21:09Z	2026-09-07T00:21:12Z	3
+34068433781	8ce02fd	gate (ubuntu-latest)	26	gen_instructions selftest	success	2026-09-07T00:21:12Z	2026-09-07T00:21:12Z	0
+34068433781	8ce02fd	gate (ubuntu-latest)	27	command-registry unit test (AG-T0-03)	success	2026-09-07T00:21:12Z	2026-09-07T00:21:13Z	1
+34068433781	8ce02fd	gate (ubuntu-latest)	28	tl selftest (luot PR — khong sinh bang chung)	skipped	2026-09-07T00:21:13Z	2026-09-07T00:21:13Z	0
+34068433781	8ce02fd	gate (ubuntu-latest)	29	tl selftest (co bang chung exact-identity)	success	2026-09-07T00:21:13Z	2026-09-07T00:23:04Z	111
+34068433781	8ce02fd	gate (ubuntu-latest)	30	tai len gate-evidence	success	2026-09-07T00:23:04Z	2026-09-07T00:23:05Z	1
+34068433781	8ce02fd	gate (ubuntu-latest)	31	workflow-audit strict	success	2026-09-07T00:23:05Z	2026-09-07T00:23:06Z	1
+34068433781	8ce02fd	gate (ubuntu-latest)	32	golden-test	success	2026-09-07T00:23:06Z	2026-09-07T00:23:29Z	23
+34068433781	8ce02fd	gate (ubuntu-latest)	33	doc-claims-check strict	success	2026-09-07T00:23:29Z	2026-09-07T00:23:32Z	3
+34068433781	8ce02fd	gate (ubuntu-latest)	34	determinism-audit strict	success	2026-09-07T00:23:32Z	2026-09-07T00:24:03Z	31
+34068433781	8ce02fd	gate (ubuntu-latest)	35	ci-phamvi guard (bang phu thuoc khop ma)	success	2026-09-07T00:24:03Z	2026-09-07T00:24:03Z	0
+34068433781	8ce02fd	gate (ubuntu-latest)	36	ci-phamvi selftest (phan chung — cong co rang)	success	2026-09-07T00:24:03Z	2026-09-07T00:24:06Z	3
+34068433781	8ce02fd	gate (ubuntu-latest)	37	release-check full	success	2026-09-07T00:24:06Z	2026-09-07T00:24:07Z	1
+34068433781	8ce02fd	gate (ubuntu-latest)	38	release-verify strict (lane LAND — manifest committed)	success	2026-09-07T00:24:07Z	2026-09-07T00:24:08Z	1
+34068433781	8ce02fd	gate (ubuntu-latest)	39	release-verify strict (lane WORKER — manifest TẠM ngoài repo)	skipped	2026-09-07T00:24:08Z	2026-09-07T00:24:08Z	0
+34068433781	8ce02fd	gate (ubuntu-latest)	40	release-bundle x2 cùng SHA-256	success	2026-09-07T00:24:08Z	2026-09-07T00:24:11Z	3
+34068433781	8ce02fd	gate (ubuntu-latest)	41	tl_boot smoke	success	2026-09-07T00:24:11Z	2026-09-07T00:24:12Z	1
+34068433781	8ce02fd	gate (ubuntu-latest)	81	Post Run actions/setup-python@v5	success	2026-09-07T00:24:12Z	2026-09-07T00:24:12Z	0
+34068433781	8ce02fd	gate (ubuntu-latest)	82	Post Run actions/checkout@v4	success	2026-09-07T00:24:12Z	2026-09-07T00:24:12Z	0
+34068433781	8ce02fd	gate (ubuntu-latest)	83	Complete job	success	2026-09-07T00:24:12Z	2026-09-07T00:24:12Z	0
+34060879398	28cb898	gate (windows-latest)	1	Set up job	success	2026-09-06T21:22:37Z	2026-09-06T21:22:38Z	1
+34060879398	28cb898	gate (windows-latest)	2	Force LF checkout (hash parity với manifest)	success	2026-09-06T21:22:38Z	2026-09-06T21:22:40Z	2
+34060879398	28cb898	gate (windows-latest)	3	Run actions/checkout@v4	success	2026-09-06T21:22:40Z	2026-09-06T21:22:53Z	13
+34060879398	28cb898	gate (windows-latest)	4	Run actions/setup-python@v5	success	2026-09-06T21:22:53Z	2026-09-06T21:22:53Z	0
+34060879398	28cb898	gate (windows-latest)	5	cài PyYAML + jsonschema (cổng đăng lease + validator verdict cần)	success	2026-09-06T21:22:53Z	2026-09-06T21:23:03Z	10
+34060879398	28cb898	gate (windows-latest)	6	cài actionlint cho G5	success	2026-09-06T21:23:03Z	2026-09-06T21:23:04Z	1
+34060879398	28cb898	gate (windows-latest)	7	cài shellcheck cho G5 (cài xong đo lại)	success	2026-09-06T21:23:04Z	2026-09-06T21:23:21Z	17
+34060879398	28cb898	gate (windows-latest)	8	cài rg cho G5 (cài xong đo lại)	success	2026-09-06T21:23:21Z	2026-09-06T21:23:26Z	5
+34060879398	28cb898	gate (windows-latest)	9	G5 kiem ban ke cong cu + T1..T8 (packet	success	2026-09-06T21:23:26Z	2026-09-06T21:25:46Z	140
+34060879398	28cb898	gate (windows-latest)	10	cài Ruff 0.15.15 và in probe dương	success	2026-09-06T21:25:46Z	2026-09-06T21:25:50Z	4
+34060879398	28cb898	gate (windows-latest)	11	PR head contains required EOL base	skipped	2026-09-06T21:25:50Z	2026-09-06T21:25:50Z	0
+34060879398	28cb898	gate (windows-latest)	12	py_compile	success	2026-09-06T21:25:50Z	2026-09-06T21:25:50Z	0
+34060879398	28cb898	gate (windows-latest)	13	codex credential selftest (packet #300)	success	2026-09-06T21:25:50Z	2026-09-06T21:25:52Z	2
+34060879398	28cb898	gate (windows-latest)	14	packet-loop selftest	success	2026-09-06T21:25:52Z	2026-09-06T21:35:30Z	578
+34060879398	28cb898	gate (windows-latest)	15	bien-nhan v2 selftest	success	2026-09-06T21:35:30Z	2026-09-06T21:40:48Z	318
+34060879398	28cb898	gate (windows-latest)	16	test registry (phạm vi + các bộ chưa được nối)	success	2026-09-06T21:40:48Z	2026-09-06T21:56:31Z	943
+34060879398	28cb898	gate (windows-latest)	17	idiom-ba-ten selftest	success	2026-09-06T21:56:31Z	2026-09-06T21:56:33Z	2
+34060879398	28cb898	gate (windows-latest)	18	eol-policy selftest	success	2026-09-06T21:56:33Z	2026-09-06T21:57:29Z	56
+34060879398	28cb898	gate (windows-latest)	19	pre-push selftest	success	2026-09-06T21:57:29Z	2026-09-06T21:57:48Z	19
+34060879398	28cb898	gate (windows-latest)	20	lease-publish selftest (đo lại setup sau G5)	success	2026-09-06T21:57:48Z	2026-09-06T22:00:55Z	187
+34060879398	28cb898	gate (windows-latest)	21	don-nhanh selftest (chốt xoá nhánh)	skipped	2026-09-06T22:00:55Z	2026-09-06T22:00:55Z	0
+34060879398	28cb898	gate (windows-latest)	22	bo ca gate chay TRONG cgroup duoc uy quyen (Linux)	skipped	2026-09-06T22:00:55Z	2026-09-06T22:00:55Z	0
+34060879398	28cb898	gate (windows-latest)	23	gate lifecycle selftest (nen khong co cgroup)	success	2026-09-06T22:00:55Z	2026-09-06T22:01:19Z	24
+34060879398	28cb898	gate (windows-latest)	24	eol-policy survey	success	2026-09-06T22:01:19Z	2026-09-06T22:01:20Z	1
+34060879398	28cb898	gate (windows-latest)	25	bundled-fragment check (topology gói)	success	2026-09-06T22:01:20Z	2026-09-06T22:01:27Z	7
+34060879398	28cb898	gate (windows-latest)	26	gen_instructions selftest	success	2026-09-06T22:01:27Z	2026-09-06T22:01:27Z	0
+34060879398	28cb898	gate (windows-latest)	27	command-registry unit test (AG-T0-03)	success	2026-09-06T22:01:27Z	2026-09-06T22:01:29Z	2
+34060879398	28cb898	gate (windows-latest)	28	tl selftest (luot PR — khong sinh bang chung)	skipped	2026-09-06T22:01:29Z	2026-09-06T22:01:29Z	0
+34060879398	28cb898	gate (windows-latest)	29	tl selftest (co bang chung exact-identity)	success	2026-09-06T22:01:29Z	2026-09-06T22:05:04Z	215
+34060879398	28cb898	gate (windows-latest)	30	tai len gate-evidence	success	2026-09-06T22:05:04Z	2026-09-06T22:05:06Z	2
+34060879398	28cb898	gate (windows-latest)	31	workflow-audit strict	success	2026-09-06T22:05:06Z	2026-09-06T22:05:09Z	3
+34060879398	28cb898	gate (windows-latest)	32	golden-test	success	2026-09-06T22:05:09Z	2026-09-06T22:06:21Z	72
+34060879398	28cb898	gate (windows-latest)	33	doc-claims-check strict	success	2026-09-06T22:06:21Z	2026-09-06T22:06:27Z	6
+34060879398	28cb898	gate (windows-latest)	34	determinism-audit strict	success	2026-09-06T22:06:27Z	2026-09-06T22:07:51Z	84
+34060879398	28cb898	gate (windows-latest)	35	ci-phamvi guard (bang phu thuoc khop ma)	success	2026-09-06T22:07:51Z	2026-09-06T22:07:52Z	1
+34060879398	28cb898	gate (windows-latest)	36	ci-phamvi selftest (phan chung — cong co rang)	skipped	2026-09-06T22:07:52Z	2026-09-06T22:07:52Z	0
+34060879398	28cb898	gate (windows-latest)	37	release-check full	success	2026-09-06T22:07:52Z	2026-09-06T22:07:55Z	3
+34060879398	28cb898	gate (windows-latest)	38	release-verify strict (lane LAND — manifest committed)	success	2026-09-06T22:07:55Z	2026-09-06T22:07:57Z	2
+34060879398	28cb898	gate (windows-latest)	39	release-verify strict (lane WORKER — manifest TẠM ngoài repo)	skipped	2026-09-06T22:07:57Z	2026-09-06T22:07:57Z	0
+34060879398	28cb898	gate (windows-latest)	40	release-bundle x2 cùng SHA-256	success	2026-09-06T22:07:57Z	2026-09-06T22:08:03Z	6
+34060879398	28cb898	gate (windows-latest)	41	tl_boot smoke	success	2026-09-06T22:08:03Z	2026-09-06T22:08:05Z	2
+34060879398	28cb898	gate (windows-latest)	81	Post Run actions/setup-python@v5	success	2026-09-06T22:08:05Z	2026-09-06T22:08:05Z	0
+34060879398	28cb898	gate (windows-latest)	82	Post Run actions/checkout@v4	success	2026-09-06T22:08:05Z	2026-09-06T22:08:09Z	4
+34060879398	28cb898	gate (windows-latest)	83	Complete job	success	2026-09-06T22:08:09Z	2026-09-06T22:08:09Z	0
+34060879398	28cb898	gate (ubuntu-latest)	1	Set up job	success	2026-09-06T21:22:37Z	2026-09-06T21:22:38Z	1
+34060879398	28cb898	gate (ubuntu-latest)	2	Force LF checkout (hash parity với manifest)	success	2026-09-06T21:22:38Z	2026-09-06T21:22:38Z	0
+34060879398	28cb898	gate (ubuntu-latest)	3	Run actions/checkout@v4	success	2026-09-06T21:22:38Z	2026-09-06T21:22:44Z	6
+34060879398	28cb898	gate (ubuntu-latest)	4	Run actions/setup-python@v5	success	2026-09-06T21:22:44Z	2026-09-06T21:22:44Z	0
+34060879398	28cb898	gate (ubuntu-latest)	5	cài PyYAML + jsonschema (cổng đăng lease + validator verdict cần)	success	2026-09-06T21:22:44Z	2026-09-06T21:22:46Z	2
+34060879398	28cb898	gate (ubuntu-latest)	6	cài actionlint cho G5	success	2026-09-06T21:22:46Z	2026-09-06T21:22:47Z	1
+34060879398	28cb898	gate (ubuntu-latest)	7	cài shellcheck cho G5 (cài xong đo lại)	success	2026-09-06T21:22:47Z	2026-09-06T21:22:50Z	3
+34060879398	28cb898	gate (ubuntu-latest)	8	cài rg cho G5 (cài xong đo lại)	success	2026-09-06T21:22:50Z	2026-09-06T21:22:56Z	6
+34060879398	28cb898	gate (ubuntu-latest)	9	G5 kiem ban ke cong cu + T1..T8 (packet	success	2026-09-06T21:22:56Z	2026-09-06T21:23:56Z	60
+34060879398	28cb898	gate (ubuntu-latest)	10	cài Ruff 0.15.15 và in probe dương	success	2026-09-06T21:23:56Z	2026-09-06T21:23:57Z	1
+34060879398	28cb898	gate (ubuntu-latest)	11	PR head contains required EOL base	skipped	2026-09-06T21:23:57Z	2026-09-06T21:23:57Z	0
+34060879398	28cb898	gate (ubuntu-latest)	12	py_compile	success	2026-09-06T21:23:57Z	2026-09-06T21:23:57Z	0
+34060879398	28cb898	gate (ubuntu-latest)	13	codex credential selftest (packet #300)	success	2026-09-06T21:23:57Z	2026-09-06T21:23:58Z	1
+34060879398	28cb898	gate (ubuntu-latest)	14	packet-loop selftest	success	2026-09-06T21:23:58Z	2026-09-06T21:28:01Z	243
+34060879398	28cb898	gate (ubuntu-latest)	15	bien-nhan v2 selftest	success	2026-09-06T21:28:01Z	2026-09-06T21:28:46Z	45
+34060879398	28cb898	gate (ubuntu-latest)	16	test registry (phạm vi + các bộ chưa được nối)	success	2026-09-06T21:28:46Z	2026-09-06T21:43:29Z	883
+34060879398	28cb898	gate (ubuntu-latest)	17	idiom-ba-ten selftest	success	2026-09-06T21:43:29Z	2026-09-06T21:43:31Z	2
+34060879398	28cb898	gate (ubuntu-latest)	18	eol-policy selftest	success	2026-09-06T21:43:31Z	2026-09-06T21:43:49Z	18
+34060879398	28cb898	gate (ubuntu-latest)	19	pre-push selftest	success	2026-09-06T21:43:49Z	2026-09-06T21:43:56Z	7
+34060879398	28cb898	gate (ubuntu-latest)	20	lease-publish selftest (đo lại setup sau G5)	success	2026-09-06T21:43:56Z	2026-09-06T21:45:07Z	71
+34060879398	28cb898	gate (ubuntu-latest)	21	don-nhanh selftest (chốt xoá nhánh)	success	2026-09-06T21:45:07Z	2026-09-06T21:45:33Z	26
+34060879398	28cb898	gate (ubuntu-latest)	22	bo ca gate chay TRONG cgroup duoc uy quyen (Linux)	success	2026-09-06T21:45:33Z	2026-09-06T21:46:55Z	82
+34060879398	28cb898	gate (ubuntu-latest)	23	gate lifecycle selftest (nen khong co cgroup)	skipped	2026-09-06T21:46:55Z	2026-09-06T21:46:55Z	0
+34060879398	28cb898	gate (ubuntu-latest)	24	eol-policy survey	success	2026-09-06T21:46:55Z	2026-09-06T21:46:55Z	0
+34060879398	28cb898	gate (ubuntu-latest)	25	bundled-fragment check (topology gói)	success	2026-09-06T21:46:55Z	2026-09-06T21:46:59Z	4
+34060879398	28cb898	gate (ubuntu-latest)	26	gen_instructions selftest	success	2026-09-06T21:46:59Z	2026-09-06T21:46:59Z	0
+34060879398	28cb898	gate (ubuntu-latest)	27	command-registry unit test (AG-T0-03)	success	2026-09-06T21:46:59Z	2026-09-06T21:47:00Z	1
+34060879398	28cb898	gate (ubuntu-latest)	28	tl selftest (luot PR — khong sinh bang chung)	skipped	2026-09-06T21:47:00Z	2026-09-06T21:47:00Z	0
+34060879398	28cb898	gate (ubuntu-latest)	29	tl selftest (co bang chung exact-identity)	success	2026-09-06T21:47:00Z	2026-09-06T21:48:59Z	119
+34060879398	28cb898	gate (ubuntu-latest)	30	tai len gate-evidence	success	2026-09-06T21:48:59Z	2026-09-06T21:49:00Z	1
+34060879398	28cb898	gate (ubuntu-latest)	31	workflow-audit strict	success	2026-09-06T21:49:00Z	2026-09-06T21:49:00Z	0
+34060879398	28cb898	gate (ubuntu-latest)	32	golden-test	success	2026-09-06T21:49:00Z	2026-09-06T21:49:27Z	27
+34060879398	28cb898	gate (ubuntu-latest)	33	doc-claims-check strict	success	2026-09-06T21:49:27Z	2026-09-06T21:49:30Z	3
+34060879398	28cb898	gate (ubuntu-latest)	34	determinism-audit strict	success	2026-09-06T21:49:30Z	2026-09-06T21:50:04Z	34
+34060879398	28cb898	gate (ubuntu-latest)	35	ci-phamvi guard (bang phu thuoc khop ma)	success	2026-09-06T21:50:04Z	2026-09-06T21:50:05Z	1
+34060879398	28cb898	gate (ubuntu-latest)	36	ci-phamvi selftest (phan chung — cong co rang)	success	2026-09-06T21:50:05Z	2026-09-06T21:50:08Z	3
+34060879398	28cb898	gate (ubuntu-latest)	37	release-check full	success	2026-09-06T21:50:08Z	2026-09-06T21:50:09Z	1
+34060879398	28cb898	gate (ubuntu-latest)	38	release-verify strict (lane LAND — manifest committed)	success	2026-09-06T21:50:09Z	2026-09-06T21:50:10Z	1
+34060879398	28cb898	gate (ubuntu-latest)	39	release-verify strict (lane WORKER — manifest TẠM ngoài repo)	skipped	2026-09-06T21:50:10Z	2026-09-06T21:50:10Z	0
+34060879398	28cb898	gate (ubuntu-latest)	40	release-bundle x2 cùng SHA-256	success	2026-09-06T21:50:10Z	2026-09-06T21:50:14Z	4
+34060879398	28cb898	gate (ubuntu-latest)	41	tl_boot smoke	success	2026-09-06T21:50:14Z	2026-09-06T21:50:15Z	1
+34060879398	28cb898	gate (ubuntu-latest)	81	Post Run actions/setup-python@v5	success	2026-09-06T21:50:15Z	2026-09-06T21:50:15Z	0
+34060879398	28cb898	gate (ubuntu-latest)	82	Post Run actions/checkout@v4	success	2026-09-06T21:50:15Z	2026-09-06T21:50:15Z	0
+34060879398	28cb898	gate (ubuntu-latest)	83	Complete job	success	2026-09-06T21:50:15Z	2026-09-06T21:50:15Z	0
+34055467808	cacaba3	gate (ubuntu-latest)	1	Set up job	success	2026-09-06T19:37:18Z	2026-09-06T19:37:19Z	1
+34055467808	cacaba3	gate (ubuntu-latest)	2	Force LF checkout (hash parity với manifest)	success	2026-09-06T19:37:19Z	2026-09-06T19:37:19Z	0
+34055467808	cacaba3	gate (ubuntu-latest)	3	Run actions/checkout@v4	success	2026-09-06T19:37:19Z	2026-09-06T19:37:26Z	7
+34055467808	cacaba3	gate (ubuntu-latest)	4	Run actions/setup-python@v5	success	2026-09-06T19:37:26Z	2026-09-06T19:37:27Z	1
+34055467808	cacaba3	gate (ubuntu-latest)	5	cài PyYAML + jsonschema (cổng đăng lease + validator verdict cần)	success	2026-09-06T19:37:27Z	2026-09-06T19:37:30Z	3
+34055467808	cacaba3	gate (ubuntu-latest)	6	cài actionlint cho G5	success	2026-09-06T19:37:30Z	2026-09-06T19:37:31Z	1
+34055467808	cacaba3	gate (ubuntu-latest)	7	cài shellcheck cho G5 (cài xong đo lại)	success	2026-09-06T19:37:31Z	2026-09-06T19:37:33Z	2
+34055467808	cacaba3	gate (ubuntu-latest)	8	cài rg cho G5 (cài xong đo lại)	success	2026-09-06T19:37:33Z	2026-09-06T19:37:37Z	4
+34055467808	cacaba3	gate (ubuntu-latest)	9	G5 kiem ban ke cong cu + T1..T8 (packet	success	2026-09-06T19:37:37Z	2026-09-06T19:38:27Z	50
+34055467808	cacaba3	gate (ubuntu-latest)	10	cài Ruff 0.15.15 và in probe dương	success	2026-09-06T19:38:27Z	2026-09-06T19:38:29Z	2
+34055467808	cacaba3	gate (ubuntu-latest)	11	PR head contains required EOL base	skipped	2026-09-06T19:38:29Z	2026-09-06T19:38:29Z	0
+34055467808	cacaba3	gate (ubuntu-latest)	12	py_compile	success	2026-09-06T19:38:29Z	2026-09-06T19:38:29Z	0
+34055467808	cacaba3	gate (ubuntu-latest)	13	codex credential selftest (packet #300)	success	2026-09-06T19:38:29Z	2026-09-06T19:38:29Z	0
+34055467808	cacaba3	gate (ubuntu-latest)	14	packet-loop selftest	success	2026-09-06T19:38:29Z	2026-09-06T19:42:00Z	211
+34055467808	cacaba3	gate (ubuntu-latest)	15	bien-nhan v2 selftest	success	2026-09-06T19:42:00Z	2026-09-06T19:42:37Z	37
+34055467808	cacaba3	gate (ubuntu-latest)	16	test registry (phạm vi + các bộ chưa được nối)	success	2026-09-06T19:42:37Z	2026-09-06T19:54:59Z	742
+34055467808	cacaba3	gate (ubuntu-latest)	17	idiom-ba-ten selftest	success	2026-09-06T19:54:59Z	2026-09-06T19:55:00Z	1
+34055467808	cacaba3	gate (ubuntu-latest)	18	eol-policy selftest	success	2026-09-06T19:55:00Z	2026-09-06T19:55:16Z	16
+34055467808	cacaba3	gate (ubuntu-latest)	19	pre-push selftest	success	2026-09-06T19:55:16Z	2026-09-06T19:55:22Z	6
+34055467808	cacaba3	gate (ubuntu-latest)	20	lease-publish selftest (đo lại setup sau G5)	success	2026-09-06T19:55:22Z	2026-09-06T19:56:20Z	58
+34055467808	cacaba3	gate (ubuntu-latest)	21	don-nhanh selftest (chốt xoá nhánh)	success	2026-09-06T19:56:20Z	2026-09-06T19:56:42Z	22
+34055467808	cacaba3	gate (ubuntu-latest)	22	bo ca gate chay TRONG cgroup duoc uy quyen (Linux)	success	2026-09-06T19:56:42Z	2026-09-06T19:58:03Z	81
+34055467808	cacaba3	gate (ubuntu-latest)	23	gate lifecycle selftest (nen khong co cgroup)	skipped	2026-09-06T19:58:03Z	2026-09-06T19:58:03Z	0
+34055467808	cacaba3	gate (ubuntu-latest)	24	eol-policy survey	success	2026-09-06T19:58:03Z	2026-09-06T19:58:03Z	0
+34055467808	cacaba3	gate (ubuntu-latest)	25	bundled-fragment check (topology gói)	success	2026-09-06T19:58:03Z	2026-09-06T19:58:06Z	3
+34055467808	cacaba3	gate (ubuntu-latest)	26	gen_instructions selftest	success	2026-09-06T19:58:06Z	2026-09-06T19:58:06Z	0
+34055467808	cacaba3	gate (ubuntu-latest)	27	command-registry unit test (AG-T0-03)	success	2026-09-06T19:58:06Z	2026-09-06T19:58:08Z	2
+34055467808	cacaba3	gate (ubuntu-latest)	28	tl selftest (luot PR — khong sinh bang chung)	skipped	2026-09-06T19:58:08Z	2026-09-06T19:58:08Z	0
+34055467808	cacaba3	gate (ubuntu-latest)	29	tl selftest (co bang chung exact-identity)	success	2026-09-06T19:58:08Z	2026-09-06T19:59:56Z	108
+34055467808	cacaba3	gate (ubuntu-latest)	30	tai len gate-evidence	success	2026-09-06T19:59:56Z	2026-09-06T19:59:57Z	1
+34055467808	cacaba3	gate (ubuntu-latest)	31	workflow-audit strict	success	2026-09-06T19:59:57Z	2026-09-06T19:59:58Z	1
+34055467808	cacaba3	gate (ubuntu-latest)	32	golden-test	success	2026-09-06T19:59:58Z	2026-09-06T20:00:21Z	23
+34055467808	cacaba3	gate (ubuntu-latest)	33	doc-claims-check strict	success	2026-09-06T20:00:21Z	2026-09-06T20:00:24Z	3
+34055467808	cacaba3	gate (ubuntu-latest)	34	determinism-audit strict	success	2026-09-06T20:00:24Z	2026-09-06T20:00:54Z	30
+34055467808	cacaba3	gate (ubuntu-latest)	35	ci-phamvi guard (bang phu thuoc khop ma)	success	2026-09-06T20:00:54Z	2026-09-06T20:00:54Z	0
+34055467808	cacaba3	gate (ubuntu-latest)	36	ci-phamvi selftest (phan chung — cong co rang)	success	2026-09-06T20:00:54Z	2026-09-06T20:00:57Z	3
+34055467808	cacaba3	gate (ubuntu-latest)	37	release-check full	success	2026-09-06T20:00:57Z	2026-09-06T20:00:58Z	1
+34055467808	cacaba3	gate (ubuntu-latest)	38	release-verify strict (lane LAND — manifest committed)	success	2026-09-06T20:00:58Z	2026-09-06T20:00:59Z	1
+34055467808	cacaba3	gate (ubuntu-latest)	39	release-verify strict (lane WORKER — manifest TẠM ngoài repo)	skipped	2026-09-06T20:00:59Z	2026-09-06T20:00:59Z	0
+34055467808	cacaba3	gate (ubuntu-latest)	40	release-bundle x2 cùng SHA-256	success	2026-09-06T20:00:59Z	2026-09-06T20:01:02Z	3
+34055467808	cacaba3	gate (ubuntu-latest)	41	tl_boot smoke	success	2026-09-06T20:01:02Z	2026-09-06T20:01:03Z	1
+34055467808	cacaba3	gate (ubuntu-latest)	81	Post Run actions/setup-python@v5	success	2026-09-06T20:01:03Z	2026-09-06T20:01:03Z	0
+34055467808	cacaba3	gate (ubuntu-latest)	82	Post Run actions/checkout@v4	success	2026-09-06T20:01:03Z	2026-09-06T20:01:03Z	0
+34055467808	cacaba3	gate (ubuntu-latest)	83	Complete job	success	2026-09-06T20:01:03Z	2026-09-06T20:01:03Z	0
+34055467808	cacaba3	gate (windows-latest)	1	Set up job	success	2026-09-06T19:37:19Z	2026-09-06T19:37:20Z	1
+34055467808	cacaba3	gate (windows-latest)	2	Force LF checkout (hash parity với manifest)	success	2026-09-06T19:37:20Z	2026-09-06T19:37:21Z	1
+34055467808	cacaba3	gate (windows-latest)	3	Run actions/checkout@v4	success	2026-09-06T19:37:21Z	2026-09-06T19:37:34Z	13
+34055467808	cacaba3	gate (windows-latest)	4	Run actions/setup-python@v5	success	2026-09-06T19:37:34Z	2026-09-06T19:37:34Z	0
+34055467808	cacaba3	gate (windows-latest)	5	cài PyYAML + jsonschema (cổng đăng lease + validator verdict cần)	success	2026-09-06T19:37:34Z	2026-09-06T19:37:42Z	8
+34055467808	cacaba3	gate (windows-latest)	6	cài actionlint cho G5	success	2026-09-06T19:37:42Z	2026-09-06T19:37:43Z	1
+34055467808	cacaba3	gate (windows-latest)	7	cài shellcheck cho G5 (cài xong đo lại)	success	2026-09-06T19:37:43Z	2026-09-06T19:38:01Z	18
+34055467808	cacaba3	gate (windows-latest)	8	cài rg cho G5 (cài xong đo lại)	success	2026-09-06T19:38:01Z	2026-09-06T19:38:06Z	5
+34055467808	cacaba3	gate (windows-latest)	9	G5 kiem ban ke cong cu + T1..T8 (packet	success	2026-09-06T19:38:06Z	2026-09-06T19:40:27Z	141
+34055467808	cacaba3	gate (windows-latest)	10	cài Ruff 0.15.15 và in probe dương	success	2026-09-06T19:40:27Z	2026-09-06T19:40:30Z	3
+34055467808	cacaba3	gate (windows-latest)	11	PR head contains required EOL base	skipped	2026-09-06T19:40:30Z	2026-09-06T19:40:30Z	0
+34055467808	cacaba3	gate (windows-latest)	12	py_compile	success	2026-09-06T19:40:30Z	2026-09-06T19:40:31Z	1
+34055467808	cacaba3	gate (windows-latest)	13	codex credential selftest (packet #300)	success	2026-09-06T19:40:31Z	2026-09-06T19:40:32Z	1
+34055467808	cacaba3	gate (windows-latest)	14	packet-loop selftest	success	2026-09-06T19:40:32Z	2026-09-06T19:50:18Z	586
+34055467808	cacaba3	gate (windows-latest)	15	bien-nhan v2 selftest	success	2026-09-06T19:50:18Z	2026-09-06T19:55:52Z	334
+34055467808	cacaba3	gate (windows-latest)	16	test registry (phạm vi + các bộ chưa được nối)	success	2026-09-06T19:55:52Z	2026-09-06T20:12:21Z	989
+34055467808	cacaba3	gate (windows-latest)	17	idiom-ba-ten selftest	success	2026-09-06T20:12:21Z	2026-09-06T20:12:24Z	3
+34055467808	cacaba3	gate (windows-latest)	18	eol-policy selftest	success	2026-09-06T20:12:24Z	2026-09-06T20:13:15Z	51
+34055467808	cacaba3	gate (windows-latest)	19	pre-push selftest	success	2026-09-06T20:13:15Z	2026-09-06T20:13:42Z	27
+34055467808	cacaba3	gate (windows-latest)	20	lease-publish selftest (đo lại setup sau G5)	success	2026-09-06T20:13:42Z	2026-09-06T20:16:53Z	191
+34055467808	cacaba3	gate (windows-latest)	21	don-nhanh selftest (chốt xoá nhánh)	skipped	2026-09-06T20:16:53Z	2026-09-06T20:16:53Z	0
+34055467808	cacaba3	gate (windows-latest)	22	bo ca gate chay TRONG cgroup duoc uy quyen (Linux)	skipped	2026-09-06T20:16:53Z	2026-09-06T20:16:53Z	0
+34055467808	cacaba3	gate (windows-latest)	23	gate lifecycle selftest (nen khong co cgroup)	success	2026-09-06T20:16:53Z	2026-09-06T20:17:11Z	18
+34055467808	cacaba3	gate (windows-latest)	24	eol-policy survey	success	2026-09-06T20:17:11Z	2026-09-06T20:17:12Z	1
+34055467808	cacaba3	gate (windows-latest)	25	bundled-fragment check (topology gói)	success	2026-09-06T20:17:12Z	2026-09-06T20:17:23Z	11
+34055467808	cacaba3	gate (windows-latest)	26	gen_instructions selftest	success	2026-09-06T20:17:23Z	2026-09-06T20:17:24Z	1
+34055467808	cacaba3	gate (windows-latest)	27	command-registry unit test (AG-T0-03)	success	2026-09-06T20:17:24Z	2026-09-06T20:17:27Z	3
+34055467808	cacaba3	gate (windows-latest)	28	tl selftest (luot PR — khong sinh bang chung)	skipped	2026-09-06T20:17:27Z	2026-09-06T20:17:27Z	0
+34055467808	cacaba3	gate (windows-latest)	29	tl selftest (co bang chung exact-identity)	success	2026-09-06T20:17:27Z	2026-09-06T20:21:13Z	226
+34055467808	cacaba3	gate (windows-latest)	30	tai len gate-evidence	success	2026-09-06T20:21:13Z	2026-09-06T20:21:15Z	2
+34055467808	cacaba3	gate (windows-latest)	31	workflow-audit strict	success	2026-09-06T20:21:15Z	2026-09-06T20:21:18Z	3
+34055467808	cacaba3	gate (windows-latest)	32	golden-test	success	2026-09-06T20:21:18Z	2026-09-06T20:22:24Z	66
+34055467808	cacaba3	gate (windows-latest)	33	doc-claims-check strict	success	2026-09-06T20:22:24Z	2026-09-06T20:22:30Z	6
+34055467808	cacaba3	gate (windows-latest)	34	determinism-audit strict	success	2026-09-06T20:22:30Z	2026-09-06T20:24:02Z	92
+34055467808	cacaba3	gate (windows-latest)	35	ci-phamvi guard (bang phu thuoc khop ma)	success	2026-09-06T20:24:02Z	2026-09-06T20:24:04Z	2
+34055467808	cacaba3	gate (windows-latest)	36	ci-phamvi selftest (phan chung — cong co rang)	skipped	2026-09-06T20:24:04Z	2026-09-06T20:24:04Z	0
+34055467808	cacaba3	gate (windows-latest)	37	release-check full	success	2026-09-06T20:24:04Z	2026-09-06T20:24:09Z	5
+34055467808	cacaba3	gate (windows-latest)	38	release-verify strict (lane LAND — manifest committed)	success	2026-09-06T20:24:09Z	2026-09-06T20:24:13Z	4
+34055467808	cacaba3	gate (windows-latest)	39	release-verify strict (lane WORKER — manifest TẠM ngoài repo)	skipped	2026-09-06T20:24:13Z	2026-09-06T20:24:13Z	0
+34055467808	cacaba3	gate (windows-latest)	40	release-bundle x2 cùng SHA-256	success	2026-09-06T20:24:13Z	2026-09-06T20:24:21Z	8
+34055467808	cacaba3	gate (windows-latest)	41	tl_boot smoke	success	2026-09-06T20:24:21Z	2026-09-06T20:24:23Z	2
+34055467808	cacaba3	gate (windows-latest)	81	Post Run actions/setup-python@v5	success	2026-09-06T20:24:23Z	2026-09-06T20:24:24Z	1
+34055467808	cacaba3	gate (windows-latest)	82	Post Run actions/checkout@v4	success	2026-09-06T20:24:24Z	2026-09-06T20:24:26Z	2
+34055467808	cacaba3	gate (windows-latest)	83	Complete job	success	2026-09-06T20:24:26Z	2026-09-06T20:24:26Z	0
+34048685345	1b3caa1	gate (ubuntu-latest)	1	Set up job	success	2026-09-06T17:28:02Z	2026-09-06T17:28:03Z	1
+34048685345	1b3caa1	gate (ubuntu-latest)	2	Force LF checkout (hash parity với manifest)	success	2026-09-06T17:28:03Z	2026-09-06T17:28:03Z	0
+34048685345	1b3caa1	gate (ubuntu-latest)	3	Run actions/checkout@v4	success	2026-09-06T17:28:03Z	2026-09-06T17:28:10Z	7
+34048685345	1b3caa1	gate (ubuntu-latest)	4	Run actions/setup-python@v5	success	2026-09-06T17:28:10Z	2026-09-06T17:28:10Z	0
+34048685345	1b3caa1	gate (ubuntu-latest)	5	cài PyYAML + jsonschema (cổng đăng lease + validator verdict cần)	success	2026-09-06T17:28:10Z	2026-09-06T17:28:16Z	6
+34048685345	1b3caa1	gate (ubuntu-latest)	6	cài actionlint cho G5	success	2026-09-06T17:28:16Z	2026-09-06T17:28:16Z	0
+34048685345	1b3caa1	gate (ubuntu-latest)	7	cài shellcheck cho G5 (cài xong đo lại)	success	2026-09-06T17:28:16Z	2026-09-06T17:28:23Z	7
+34048685345	1b3caa1	gate (ubuntu-latest)	8	cài rg cho G5 (cài xong đo lại)	success	2026-09-06T17:28:23Z	2026-09-06T17:28:31Z	8
+34048685345	1b3caa1	gate (ubuntu-latest)	9	G5 kiem ban ke cong cu + T1..T8 (packet	success	2026-09-06T17:28:31Z	2026-09-06T17:29:28Z	57
+34048685345	1b3caa1	gate (ubuntu-latest)	10	cài Ruff 0.15.15 và in probe dương	success	2026-09-06T17:29:28Z	2026-09-06T17:29:30Z	2
+34048685345	1b3caa1	gate (ubuntu-latest)	11	PR head contains required EOL base	skipped	2026-09-06T17:29:30Z	2026-09-06T17:29:30Z	0
+34048685345	1b3caa1	gate (ubuntu-latest)	12	py_compile	success	2026-09-06T17:29:30Z	2026-09-06T17:29:30Z	0
+34048685345	1b3caa1	gate (ubuntu-latest)	13	codex credential selftest (packet #300)	success	2026-09-06T17:29:30Z	2026-09-06T17:29:31Z	1
+34048685345	1b3caa1	gate (ubuntu-latest)	14	packet-loop selftest	success	2026-09-06T17:29:31Z	2026-09-06T17:33:30Z	239
+34048685345	1b3caa1	gate (ubuntu-latest)	15	test registry (phạm vi + các bộ chưa được nối)	success	2026-09-06T17:33:30Z	2026-09-06T17:47:50Z	860
+34048685345	1b3caa1	gate (ubuntu-latest)	16	idiom-ba-ten selftest	success	2026-09-06T17:47:50Z	2026-09-06T17:47:52Z	2
+34048685345	1b3caa1	gate (ubuntu-latest)	17	eol-policy selftest	success	2026-09-06T17:47:52Z	2026-09-06T17:48:10Z	18
+34048685345	1b3caa1	gate (ubuntu-latest)	18	pre-push selftest	success	2026-09-06T17:48:10Z	2026-09-06T17:48:17Z	7
+34048685345	1b3caa1	gate (ubuntu-latest)	19	lease-publish selftest (đo lại setup sau G5)	success	2026-09-06T17:48:17Z	2026-09-06T17:49:26Z	69
+34048685345	1b3caa1	gate (ubuntu-latest)	20	don-nhanh selftest (chốt xoá nhánh)	success	2026-09-06T17:49:26Z	2026-09-06T17:49:52Z	26
+34048685345	1b3caa1	gate (ubuntu-latest)	21	bo ca gate chay TRONG cgroup duoc uy quyen (Linux)	success	2026-09-06T17:49:52Z	2026-09-06T17:51:14Z	82
+34048685345	1b3caa1	gate (ubuntu-latest)	22	gate lifecycle selftest (nen khong co cgroup)	skipped	2026-09-06T17:51:14Z	2026-09-06T17:51:14Z	0
+34048685345	1b3caa1	gate (ubuntu-latest)	23	eol-policy survey	success	2026-09-06T17:51:14Z	2026-09-06T17:51:14Z	0
+34048685345	1b3caa1	gate (ubuntu-latest)	24	bundled-fragment check (topology gói)	success	2026-09-06T17:51:14Z	2026-09-06T17:51:18Z	4
+34048685345	1b3caa1	gate (ubuntu-latest)	25	gen_instructions selftest	success	2026-09-06T17:51:18Z	2026-09-06T17:51:18Z	0
+34048685345	1b3caa1	gate (ubuntu-latest)	26	command-registry unit test (AG-T0-03)	success	2026-09-06T17:51:18Z	2026-09-06T17:51:19Z	1
+34048685345	1b3caa1	gate (ubuntu-latest)	27	tl selftest (luot PR — khong sinh bang chung)	skipped	2026-09-06T17:51:19Z	2026-09-06T17:51:19Z	0
+34048685345	1b3caa1	gate (ubuntu-latest)	28	tl selftest (co bang chung exact-identity)	success	2026-09-06T17:51:19Z	2026-09-06T17:53:16Z	117
+34048685345	1b3caa1	gate (ubuntu-latest)	29	tai len gate-evidence	success	2026-09-06T17:53:16Z	2026-09-06T17:53:17Z	1
+34048685345	1b3caa1	gate (ubuntu-latest)	30	workflow-audit strict	success	2026-09-06T17:53:17Z	2026-09-06T17:53:18Z	1
+34048685345	1b3caa1	gate (ubuntu-latest)	31	golden-test	success	2026-09-06T17:53:18Z	2026-09-06T17:53:43Z	25
+34048685345	1b3caa1	gate (ubuntu-latest)	32	doc-claims-check strict	success	2026-09-06T17:53:43Z	2026-09-06T17:53:46Z	3
+34048685345	1b3caa1	gate (ubuntu-latest)	33	determinism-audit strict	success	2026-09-06T17:53:46Z	2026-09-06T17:54:20Z	34
+34048685345	1b3caa1	gate (ubuntu-latest)	34	ci-phamvi guard (bang phu thuoc khop ma)	success	2026-09-06T17:54:20Z	2026-09-06T17:54:20Z	0
+34048685345	1b3caa1	gate (ubuntu-latest)	35	ci-phamvi selftest (phan chung — cong co rang)	success	2026-09-06T17:54:20Z	2026-09-06T17:54:23Z	3
+34048685345	1b3caa1	gate (ubuntu-latest)	36	release-check full	success	2026-09-06T17:54:23Z	2026-09-06T17:54:24Z	1
+34048685345	1b3caa1	gate (ubuntu-latest)	37	release-verify strict (lane LAND — manifest committed)	success	2026-09-06T17:54:24Z	2026-09-06T17:54:25Z	1
+34048685345	1b3caa1	gate (ubuntu-latest)	38	release-verify strict (lane WORKER — manifest TẠM ngoài repo)	skipped	2026-09-06T17:54:25Z	2026-09-06T17:54:25Z	0
+34048685345	1b3caa1	gate (ubuntu-latest)	39	release-bundle x2 cùng SHA-256	success	2026-09-06T17:54:25Z	2026-09-06T17:54:29Z	4
+34048685345	1b3caa1	gate (ubuntu-latest)	40	tl_boot smoke	success	2026-09-06T17:54:29Z	2026-09-06T17:54:30Z	1
+34048685345	1b3caa1	gate (ubuntu-latest)	79	Post Run actions/setup-python@v5	success	2026-09-06T17:54:30Z	2026-09-06T17:54:30Z	0
+34048685345	1b3caa1	gate (ubuntu-latest)	80	Post Run actions/checkout@v4	success	2026-09-06T17:54:30Z	2026-09-06T17:54:30Z	0
+34048685345	1b3caa1	gate (ubuntu-latest)	81	Complete job	success	2026-09-06T17:54:30Z	2026-09-06T17:54:30Z	0
+34048685345	1b3caa1	gate (windows-latest)	1	Set up job	success	2026-09-06T17:28:01Z	2026-09-06T17:28:02Z	1
+34048685345	1b3caa1	gate (windows-latest)	2	Force LF checkout (hash parity với manifest)	success	2026-09-06T17:28:02Z	2026-09-06T17:28:05Z	3
+34048685345	1b3caa1	gate (windows-latest)	3	Run actions/checkout@v4	success	2026-09-06T17:28:05Z	2026-09-06T17:28:16Z	11
+34048685345	1b3caa1	gate (windows-latest)	4	Run actions/setup-python@v5	success	2026-09-06T17:28:16Z	2026-09-06T17:28:16Z	0
+34048685345	1b3caa1	gate (windows-latest)	5	cài PyYAML + jsonschema (cổng đăng lease + validator verdict cần)	success	2026-09-06T17:28:16Z	2026-09-06T17:28:24Z	8
+34048685345	1b3caa1	gate (windows-latest)	6	cài actionlint cho G5	success	2026-09-06T17:28:24Z	2026-09-06T17:28:25Z	1
+34048685345	1b3caa1	gate (windows-latest)	7	cài shellcheck cho G5 (cài xong đo lại)	success	2026-09-06T17:28:25Z	2026-09-06T17:28:42Z	17
+34048685345	1b3caa1	gate (windows-latest)	8	cài rg cho G5 (cài xong đo lại)	success	2026-09-06T17:28:42Z	2026-09-06T17:28:47Z	5
+34048685345	1b3caa1	gate (windows-latest)	9	G5 kiem ban ke cong cu + T1..T8 (packet	success	2026-09-06T17:28:47Z	2026-09-06T17:31:05Z	138
+34048685345	1b3caa1	gate (windows-latest)	10	cài Ruff 0.15.15 và in probe dương	success	2026-09-06T17:31:05Z	2026-09-06T17:31:08Z	3
+34048685345	1b3caa1	gate (windows-latest)	11	PR head contains required EOL base	skipped	2026-09-06T17:31:08Z	2026-09-06T17:31:08Z	0
+34048685345	1b3caa1	gate (windows-latest)	12	py_compile	success	2026-09-06T17:31:08Z	2026-09-06T17:31:09Z	1
+34048685345	1b3caa1	gate (windows-latest)	13	codex credential selftest (packet #300)	success	2026-09-06T17:31:09Z	2026-09-06T17:31:10Z	1
+34048685345	1b3caa1	gate (windows-latest)	14	packet-loop selftest	success	2026-09-06T17:31:10Z	2026-09-06T17:40:32Z	562
+34048685345	1b3caa1	gate (windows-latest)	15	test registry (phạm vi + các bộ chưa được nối)	success	2026-09-06T17:40:32Z	2026-09-06T17:57:40Z	1028
+34048685345	1b3caa1	gate (windows-latest)	16	idiom-ba-ten selftest	success	2026-09-06T17:57:40Z	2026-09-06T17:57:43Z	3
+34048685345	1b3caa1	gate (windows-latest)	17	eol-policy selftest	success	2026-09-06T17:57:43Z	2026-09-06T17:58:49Z	66
+34048685345	1b3caa1	gate (windows-latest)	18	pre-push selftest	success	2026-09-06T17:58:49Z	2026-09-06T17:59:11Z	22
+34048685345	1b3caa1	gate (windows-latest)	19	lease-publish selftest (đo lại setup sau G5)	success	2026-09-06T17:59:11Z	2026-09-06T18:02:39Z	208
+34048685345	1b3caa1	gate (windows-latest)	20	don-nhanh selftest (chốt xoá nhánh)	skipped	2026-09-06T18:02:39Z	2026-09-06T18:02:39Z	0
+34048685345	1b3caa1	gate (windows-latest)	21	bo ca gate chay TRONG cgroup duoc uy quyen (Linux)	skipped	2026-09-06T18:02:39Z	2026-09-06T18:02:39Z	0
+34048685345	1b3caa1	gate (windows-latest)	22	gate lifecycle selftest (nen khong co cgroup)	success	2026-09-06T18:02:39Z	2026-09-06T18:02:58Z	19
+34048685345	1b3caa1	gate (windows-latest)	23	eol-policy survey	success	2026-09-06T18:02:58Z	2026-09-06T18:03:00Z	2
+34048685345	1b3caa1	gate (windows-latest)	24	bundled-fragment check (topology gói)	success	2026-09-06T18:03:00Z	2026-09-06T18:03:06Z	6
+34048685345	1b3caa1	gate (windows-latest)	25	gen_instructions selftest	success	2026-09-06T18:03:06Z	2026-09-06T18:03:07Z	1
+34048685345	1b3caa1	gate (windows-latest)	26	command-registry unit test (AG-T0-03)	success	2026-09-06T18:03:07Z	2026-09-06T18:03:09Z	2
+34048685345	1b3caa1	gate (windows-latest)	27	tl selftest (luot PR — khong sinh bang chung)	skipped	2026-09-06T18:03:09Z	2026-09-06T18:03:09Z	0
+34048685345	1b3caa1	gate (windows-latest)	28	tl selftest (co bang chung exact-identity)	success	2026-09-06T18:03:09Z	2026-09-06T18:07:15Z	246
+34048685345	1b3caa1	gate (windows-latest)	29	tai len gate-evidence	success	2026-09-06T18:07:15Z	2026-09-06T18:07:17Z	2
+34048685345	1b3caa1	gate (windows-latest)	30	workflow-audit strict	success	2026-09-06T18:07:17Z	2026-09-06T18:07:18Z	1
+34048685345	1b3caa1	gate (windows-latest)	31	golden-test	success	2026-09-06T18:07:18Z	2026-09-06T18:08:23Z	65
+34048685345	1b3caa1	gate (windows-latest)	32	doc-claims-check strict	success	2026-09-06T18:08:23Z	2026-09-06T18:08:29Z	6
+34048685345	1b3caa1	gate (windows-latest)	33	determinism-audit strict	success	2026-09-06T18:08:29Z	2026-09-06T18:09:50Z	81
+34048685345	1b3caa1	gate (windows-latest)	34	ci-phamvi guard (bang phu thuoc khop ma)	success	2026-09-06T18:09:50Z	2026-09-06T18:09:52Z	2
+34048685345	1b3caa1	gate (windows-latest)	35	ci-phamvi selftest (phan chung — cong co rang)	skipped	2026-09-06T18:09:52Z	2026-09-06T18:09:52Z	0
+34048685345	1b3caa1	gate (windows-latest)	36	release-check full	success	2026-09-06T18:09:52Z	2026-09-06T18:09:57Z	5
+34048685345	1b3caa1	gate (windows-latest)	37	release-verify strict (lane LAND — manifest committed)	success	2026-09-06T18:09:57Z	2026-09-06T18:10:01Z	4
+34048685345	1b3caa1	gate (windows-latest)	38	release-verify strict (lane WORKER — manifest TẠM ngoài repo)	skipped	2026-09-06T18:10:01Z	2026-09-06T18:10:01Z	0
+34048685345	1b3caa1	gate (windows-latest)	39	release-bundle x2 cùng SHA-256	success	2026-09-06T18:10:01Z	2026-09-06T18:10:09Z	8
+34048685345	1b3caa1	gate (windows-latest)	40	tl_boot smoke	success	2026-09-06T18:10:09Z	2026-09-06T18:10:12Z	3
+34048685345	1b3caa1	gate (windows-latest)	79	Post Run actions/setup-python@v5	success	2026-09-06T18:10:12Z	2026-09-06T18:10:13Z	1
+34048685345	1b3caa1	gate (windows-latest)	80	Post Run actions/checkout@v4	success	2026-09-06T18:10:13Z	2026-09-06T18:10:16Z	3
+34048685345	1b3caa1	gate (windows-latest)	81	Complete job	success	2026-09-06T18:10:16Z	2026-09-06T18:10:16Z	0
+34058508426	82e01a4	gate (windows-latest)	1	Set up job	success	2026-09-06T20:36:17Z	2026-09-06T20:36:18Z	1
+34058508426	82e01a4	gate (windows-latest)	2	Force LF checkout (hash parity với manifest)	success	2026-09-06T20:36:18Z	2026-09-06T20:36:20Z	2
+34058508426	82e01a4	gate (windows-latest)	3	Run actions/checkout@v4	success	2026-09-06T20:36:20Z	2026-09-06T20:36:30Z	10
+34058508426	82e01a4	gate (windows-latest)	4	Run actions/setup-python@v5	success	2026-09-06T20:36:30Z	2026-09-06T20:36:31Z	1
+34058508426	82e01a4	gate (windows-latest)	5	cài PyYAML + jsonschema (cổng đăng lease + validator verdict cần)	success	2026-09-06T20:36:31Z	2026-09-06T20:36:43Z	12
+34058508426	82e01a4	gate (windows-latest)	6	cài actionlint cho G5	success	2026-09-06T20:36:43Z	2026-09-06T20:36:44Z	1
+34058508426	82e01a4	gate (windows-latest)	7	cài shellcheck cho G5 (cài xong đo lại)	success	2026-09-06T20:36:44Z	2026-09-06T20:37:10Z	26
+34058508426	82e01a4	gate (windows-latest)	8	cài rg cho G5 (cài xong đo lại)	success	2026-09-06T20:37:10Z	2026-09-06T20:37:14Z	4
+34058508426	82e01a4	gate (windows-latest)	9	G5 kiem ban ke cong cu + T1..T8 (packet	success	2026-09-06T20:37:14Z	2026-09-06T20:39:05Z	111
+34058508426	82e01a4	gate (windows-latest)	10	cài Ruff 0.15.15 và in probe dương	success	2026-09-06T20:39:05Z	2026-09-06T20:39:08Z	3
+34058508426	82e01a4	gate (windows-latest)	11	PR head contains required EOL base	success	2026-09-06T20:39:08Z	2026-09-06T20:39:08Z	0
+34058508426	82e01a4	gate (windows-latest)	12	py_compile	success	2026-09-06T20:39:08Z	2026-09-06T20:39:09Z	1
+34058508426	82e01a4	gate (windows-latest)	13	codex credential selftest (packet #300)	success	2026-09-06T20:39:09Z	2026-09-06T20:39:10Z	1
+34058508426	82e01a4	gate (windows-latest)	14	packet-loop selftest	success	2026-09-06T20:39:10Z	2026-09-06T20:46:50Z	460
+34058508426	82e01a4	gate (windows-latest)	15	bien-nhan v2 selftest	success	2026-09-06T20:46:50Z	2026-09-06T20:52:10Z	320
+34058508426	82e01a4	gate (windows-latest)	16	test registry (phạm vi + các bộ chưa được nối)	success	2026-09-06T20:52:10Z	2026-09-06T21:08:18Z	968
+34058508426	82e01a4	gate (windows-latest)	17	idiom-ba-ten selftest	success	2026-09-06T21:08:18Z	2026-09-06T21:08:20Z	2
+34058508426	82e01a4	gate (windows-latest)	18	eol-policy selftest	success	2026-09-06T21:08:20Z	2026-09-06T21:09:10Z	50
+34058508426	82e01a4	gate (windows-latest)	19	pre-push selftest	success	2026-09-06T21:09:10Z	2026-09-06T21:09:38Z	28
+34058508426	82e01a4	gate (windows-latest)	20	lease-publish selftest (đo lại setup sau G5)	success	2026-09-06T21:09:38Z	2026-09-06T21:12:28Z	170
+34058508426	82e01a4	gate (windows-latest)	21	don-nhanh selftest (chốt xoá nhánh)	skipped	2026-09-06T21:12:28Z	2026-09-06T21:12:28Z	0
+34058508426	82e01a4	gate (windows-latest)	22	bo ca gate chay TRONG cgroup duoc uy quyen (Linux)	skipped	2026-09-06T21:12:28Z	2026-09-06T21:12:28Z	0
+34058508426	82e01a4	gate (windows-latest)	23	gate lifecycle selftest (nen khong co cgroup)	success	2026-09-06T21:12:28Z	2026-09-06T21:12:47Z	19
+34058508426	82e01a4	gate (windows-latest)	24	eol-policy survey	success	2026-09-06T21:12:47Z	2026-09-06T21:12:48Z	1
+34058508426	82e01a4	gate (windows-latest)	25	bundled-fragment check (topology gói)	success	2026-09-06T21:12:48Z	2026-09-06T21:12:56Z	8
+34058508426	82e01a4	gate (windows-latest)	26	gen_instructions selftest	success	2026-09-06T21:12:56Z	2026-09-06T21:12:56Z	0
+34058508426	82e01a4	gate (windows-latest)	27	command-registry unit test (AG-T0-03)	success	2026-09-06T21:12:56Z	2026-09-06T21:12:58Z	2
+34058508426	82e01a4	gate (windows-latest)	28	tl selftest (luot PR — khong sinh bang chung)	success	2026-09-06T21:12:58Z	2026-09-06T21:15:49Z	171
+34058508426	82e01a4	gate (windows-latest)	29	tl selftest (co bang chung exact-identity)	skipped	2026-09-06T21:15:49Z	2026-09-06T21:15:49Z	0
+34058508426	82e01a4	gate (windows-latest)	30	tai len gate-evidence	success	2026-09-06T21:15:49Z	2026-09-06T21:15:49Z	0
+34058508426	82e01a4	gate (windows-latest)	31	workflow-audit strict	success	2026-09-06T21:15:49Z	2026-09-06T21:15:51Z	2
+34058508426	82e01a4	gate (windows-latest)	32	golden-test	success	2026-09-06T21:15:51Z	2026-09-06T21:16:34Z	43
+34058508426	82e01a4	gate (windows-latest)	33	doc-claims-check strict	success	2026-09-06T21:16:34Z	2026-09-06T21:16:41Z	7
+34058508426	82e01a4	gate (windows-latest)	34	determinism-audit strict	success	2026-09-06T21:16:41Z	2026-09-06T21:17:33Z	52
+34058508426	82e01a4	gate (windows-latest)	35	ci-phamvi guard (bang phu thuoc khop ma)	success	2026-09-06T21:17:33Z	2026-09-06T21:17:35Z	2
+34058508426	82e01a4	gate (windows-latest)	36	ci-phamvi selftest (phan chung — cong co rang)	skipped	2026-09-06T21:17:35Z	2026-09-06T21:17:35Z	0
+34058508426	82e01a4	gate (windows-latest)	37	release-check full	success	2026-09-06T21:17:35Z	2026-09-06T21:17:38Z	3
+34058508426	82e01a4	gate (windows-latest)	38	release-verify strict (lane LAND — manifest committed)	skipped	2026-09-06T21:17:38Z	2026-09-06T21:17:38Z	0
+34058508426	82e01a4	gate (windows-latest)	39	release-verify strict (lane WORKER — manifest TẠM ngoài repo)	success	2026-09-06T21:17:38Z	2026-09-06T21:17:42Z	4
+34058508426	82e01a4	gate (windows-latest)	40	release-bundle x2 cùng SHA-256	success	2026-09-06T21:17:42Z	2026-09-06T21:17:49Z	7
+34058508426	82e01a4	gate (windows-latest)	41	tl_boot smoke	success	2026-09-06T21:17:49Z	2026-09-06T21:17:51Z	2
+34058508426	82e01a4	gate (windows-latest)	81	Post Run actions/setup-python@v5	success	2026-09-06T21:17:51Z	2026-09-06T21:17:51Z	0
+34058508426	82e01a4	gate (windows-latest)	82	Post Run actions/checkout@v4	success	2026-09-06T21:17:51Z	2026-09-06T21:17:54Z	3
+34058508426	82e01a4	gate (windows-latest)	83	Complete job	success	2026-09-06T21:17:54Z	2026-09-06T21:17:54Z	0
+34058508426	82e01a4	gate (ubuntu-latest)	1	Set up job	success	2026-09-06T20:36:17Z	2026-09-06T20:36:18Z	1
+34058508426	82e01a4	gate (ubuntu-latest)	2	Force LF checkout (hash parity với manifest)	success	2026-09-06T20:36:18Z	2026-09-06T20:36:18Z	0
+34058508426	82e01a4	gate (ubuntu-latest)	3	Run actions/checkout@v4	success	2026-09-06T20:36:18Z	2026-09-06T20:36:25Z	7
+34058508426	82e01a4	gate (ubuntu-latest)	4	Run actions/setup-python@v5	success	2026-09-06T20:36:25Z	2026-09-06T20:36:25Z	0
+34058508426	82e01a4	gate (ubuntu-latest)	5	cài PyYAML + jsonschema (cổng đăng lease + validator verdict cần)	success	2026-09-06T20:36:25Z	2026-09-06T20:36:28Z	3
+34058508426	82e01a4	gate (ubuntu-latest)	6	cài actionlint cho G5	success	2026-09-06T20:36:28Z	2026-09-06T20:36:28Z	0
+34058508426	82e01a4	gate (ubuntu-latest)	7	cài shellcheck cho G5 (cài xong đo lại)	success	2026-09-06T20:36:28Z	2026-09-06T20:36:30Z	2
+34058508426	82e01a4	gate (ubuntu-latest)	8	cài rg cho G5 (cài xong đo lại)	success	2026-09-06T20:36:30Z	2026-09-06T20:36:35Z	5
+34058508426	82e01a4	gate (ubuntu-latest)	9	G5 kiem ban ke cong cu + T1..T8 (packet	success	2026-09-06T20:36:35Z	2026-09-06T20:37:33Z	58
+34058508426	82e01a4	gate (ubuntu-latest)	10	cài Ruff 0.15.15 và in probe dương	success	2026-09-06T20:37:33Z	2026-09-06T20:37:35Z	2
+34058508426	82e01a4	gate (ubuntu-latest)	11	PR head contains required EOL base	success	2026-09-06T20:37:35Z	2026-09-06T20:37:35Z	0
+34058508426	82e01a4	gate (ubuntu-latest)	12	py_compile	success	2026-09-06T20:37:35Z	2026-09-06T20:37:35Z	0
+34058508426	82e01a4	gate (ubuntu-latest)	13	codex credential selftest (packet #300)	success	2026-09-06T20:37:35Z	2026-09-06T20:37:35Z	0
+34058508426	82e01a4	gate (ubuntu-latest)	14	packet-loop selftest	success	2026-09-06T20:37:35Z	2026-09-06T20:41:40Z	245
+34058508426	82e01a4	gate (ubuntu-latest)	15	bien-nhan v2 selftest	success	2026-09-06T20:41:40Z	2026-09-06T20:42:25Z	45
+34058508426	82e01a4	gate (ubuntu-latest)	16	test registry (phạm vi + các bộ chưa được nối)	success	2026-09-06T20:42:25Z	2026-09-06T20:56:54Z	869
+34058508426	82e01a4	gate (ubuntu-latest)	17	idiom-ba-ten selftest	success	2026-09-06T20:56:54Z	2026-09-06T20:56:56Z	2
+34058508426	82e01a4	gate (ubuntu-latest)	18	eol-policy selftest	success	2026-09-06T20:56:56Z	2026-09-06T20:57:14Z	18
+34058508426	82e01a4	gate (ubuntu-latest)	19	pre-push selftest	success	2026-09-06T20:57:14Z	2026-09-06T20:57:21Z	7
+34058508426	82e01a4	gate (ubuntu-latest)	20	lease-publish selftest (đo lại setup sau G5)	success	2026-09-06T20:57:21Z	2026-09-06T20:58:31Z	70
+34058508426	82e01a4	gate (ubuntu-latest)	21	don-nhanh selftest (chốt xoá nhánh)	success	2026-09-06T20:58:31Z	2026-09-06T20:58:54Z	23
+34058508426	82e01a4	gate (ubuntu-latest)	22	bo ca gate chay TRONG cgroup duoc uy quyen (Linux)	success	2026-09-06T20:58:54Z	2026-09-06T21:00:15Z	81
+34058508426	82e01a4	gate (ubuntu-latest)	23	gate lifecycle selftest (nen khong co cgroup)	skipped	2026-09-06T21:00:15Z	2026-09-06T21:00:15Z	0
+34058508426	82e01a4	gate (ubuntu-latest)	24	eol-policy survey	success	2026-09-06T21:00:15Z	2026-09-06T21:00:16Z	1
+34058508426	82e01a4	gate (ubuntu-latest)	25	bundled-fragment check (topology gói)	success	2026-09-06T21:00:16Z	2026-09-06T21:00:20Z	4
+34058508426	82e01a4	gate (ubuntu-latest)	26	gen_instructions selftest	success	2026-09-06T21:00:20Z	2026-09-06T21:00:20Z	0
+34058508426	82e01a4	gate (ubuntu-latest)	27	command-registry unit test (AG-T0-03)	success	2026-09-06T21:00:20Z	2026-09-06T21:00:21Z	1
+34058508426	82e01a4	gate (ubuntu-latest)	28	tl selftest (luot PR — khong sinh bang chung)	success	2026-09-06T21:00:21Z	2026-09-06T21:02:17Z	116
+34058508426	82e01a4	gate (ubuntu-latest)	29	tl selftest (co bang chung exact-identity)	skipped	2026-09-06T21:02:17Z	2026-09-06T21:02:17Z	0
+34058508426	82e01a4	gate (ubuntu-latest)	30	tai len gate-evidence	success	2026-09-06T21:02:17Z	2026-09-06T21:02:18Z	1
+34058508426	82e01a4	gate (ubuntu-latest)	31	workflow-audit strict	success	2026-09-06T21:02:18Z	2026-09-06T21:02:19Z	1
+34058508426	82e01a4	gate (ubuntu-latest)	32	golden-test	success	2026-09-06T21:02:19Z	2026-09-06T21:02:45Z	26
+34058508426	82e01a4	gate (ubuntu-latest)	33	doc-claims-check strict	success	2026-09-06T21:02:45Z	2026-09-06T21:02:48Z	3
+34058508426	82e01a4	gate (ubuntu-latest)	34	determinism-audit strict	success	2026-09-06T21:02:48Z	2026-09-06T21:03:22Z	34
+34058508426	82e01a4	gate (ubuntu-latest)	35	ci-phamvi guard (bang phu thuoc khop ma)	success	2026-09-06T21:03:22Z	2026-09-06T21:03:23Z	1
+34058508426	82e01a4	gate (ubuntu-latest)	36	ci-phamvi selftest (phan chung — cong co rang)	success	2026-09-06T21:03:23Z	2026-09-06T21:03:26Z	3
+34058508426	82e01a4	gate (ubuntu-latest)	37	release-check full	success	2026-09-06T21:03:26Z	2026-09-06T21:03:27Z	1
+34058508426	82e01a4	gate (ubuntu-latest)	38	release-verify strict (lane LAND — manifest committed)	skipped	2026-09-06T21:03:27Z	2026-09-06T21:03:27Z	0
+34058508426	82e01a4	gate (ubuntu-latest)	39	release-verify strict (lane WORKER — manifest TẠM ngoài repo)	success	2026-09-06T21:03:27Z	2026-09-06T21:03:29Z	2
+34058508426	82e01a4	gate (ubuntu-latest)	40	release-bundle x2 cùng SHA-256	success	2026-09-06T21:03:29Z	2026-09-06T21:03:33Z	4
+34058508426	82e01a4	gate (ubuntu-latest)	41	tl_boot smoke	success	2026-09-06T21:03:33Z	2026-09-06T21:03:33Z	0
+34058508426	82e01a4	gate (ubuntu-latest)	81	Post Run actions/setup-python@v5	success	2026-09-06T21:03:33Z	2026-09-06T21:03:34Z	1
+34058508426	82e01a4	gate (ubuntu-latest)	82	Post Run actions/checkout@v4	success	2026-09-06T21:03:34Z	2026-09-06T21:03:34Z	0
+34058508426	82e01a4	gate (ubuntu-latest)	83	Complete job	success	2026-09-06T21:03:34Z	2026-09-06T21:03:34Z	0
+34052910676	c0f18ac	gate (ubuntu-latest)	1	Set up job	success	2026-09-06T18:49:00Z	2026-09-06T18:49:01Z	1
+34052910676	c0f18ac	gate (ubuntu-latest)	2	Force LF checkout (hash parity với manifest)	success	2026-09-06T18:49:01Z	2026-09-06T18:49:01Z	0
+34052910676	c0f18ac	gate (ubuntu-latest)	3	Run actions/checkout@v4	success	2026-09-06T18:49:01Z	2026-09-06T18:49:07Z	6
+34052910676	c0f18ac	gate (ubuntu-latest)	4	Run actions/setup-python@v5	success	2026-09-06T18:49:07Z	2026-09-06T18:49:08Z	1
+34052910676	c0f18ac	gate (ubuntu-latest)	5	cài PyYAML + jsonschema (cổng đăng lease + validator verdict cần)	success	2026-09-06T18:49:08Z	2026-09-06T18:49:09Z	1
+34052910676	c0f18ac	gate (ubuntu-latest)	6	cài actionlint cho G5	success	2026-09-06T18:49:09Z	2026-09-06T18:49:10Z	1
+34052910676	c0f18ac	gate (ubuntu-latest)	7	cài shellcheck cho G5 (cài xong đo lại)	success	2026-09-06T18:49:10Z	2026-09-06T18:49:13Z	3
+34052910676	c0f18ac	gate (ubuntu-latest)	8	cài rg cho G5 (cài xong đo lại)	success	2026-09-06T18:49:13Z	2026-09-06T18:49:17Z	4
+34052910676	c0f18ac	gate (ubuntu-latest)	9	G5 kiem ban ke cong cu + T1..T8 (packet	success	2026-09-06T18:49:17Z	2026-09-06T18:50:16Z	59
+34052910676	c0f18ac	gate (ubuntu-latest)	10	cài Ruff 0.15.15 và in probe dương	success	2026-09-06T18:50:16Z	2026-09-06T18:50:17Z	1
+34052910676	c0f18ac	gate (ubuntu-latest)	11	PR head contains required EOL base	success	2026-09-06T18:50:17Z	2026-09-06T18:50:17Z	0
+34052910676	c0f18ac	gate (ubuntu-latest)	12	py_compile	success	2026-09-06T18:50:17Z	2026-09-06T18:50:17Z	0
+34052910676	c0f18ac	gate (ubuntu-latest)	13	codex credential selftest (packet #300)	success	2026-09-06T18:50:17Z	2026-09-06T18:50:18Z	1
+34052910676	c0f18ac	gate (ubuntu-latest)	14	packet-loop selftest	success	2026-09-06T18:50:18Z	2026-09-06T18:54:16Z	238
+34052910676	c0f18ac	gate (ubuntu-latest)	15	bien-nhan v2 selftest	success	2026-09-06T18:54:16Z	2026-09-06T18:55:01Z	45
+34052910676	c0f18ac	gate (ubuntu-latest)	16	test registry (phạm vi + các bộ chưa được nối)	success	2026-09-06T18:55:01Z	2026-09-06T19:09:30Z	869
+34052910676	c0f18ac	gate (ubuntu-latest)	17	idiom-ba-ten selftest	success	2026-09-06T19:09:30Z	2026-09-06T19:09:32Z	2
+34052910676	c0f18ac	gate (ubuntu-latest)	18	eol-policy selftest	success	2026-09-06T19:09:32Z	2026-09-06T19:09:51Z	19
+34052910676	c0f18ac	gate (ubuntu-latest)	19	pre-push selftest	success	2026-09-06T19:09:51Z	2026-09-06T19:09:58Z	7
+34052910676	c0f18ac	gate (ubuntu-latest)	20	lease-publish selftest (đo lại setup sau G5)	success	2026-09-06T19:09:58Z	2026-09-06T19:11:10Z	72
+34052910676	c0f18ac	gate (ubuntu-latest)	21	don-nhanh selftest (chốt xoá nhánh)	success	2026-09-06T19:11:10Z	2026-09-06T19:11:37Z	27
+34052910676	c0f18ac	gate (ubuntu-latest)	22	bo ca gate chay TRONG cgroup duoc uy quyen (Linux)	success	2026-09-06T19:11:37Z	2026-09-06T19:12:59Z	82
+34052910676	c0f18ac	gate (ubuntu-latest)	23	gate lifecycle selftest (nen khong co cgroup)	skipped	2026-09-06T19:12:59Z	2026-09-06T19:12:59Z	0
+34052910676	c0f18ac	gate (ubuntu-latest)	24	eol-policy survey	success	2026-09-06T19:12:59Z	2026-09-06T19:12:59Z	0
+34052910676	c0f18ac	gate (ubuntu-latest)	25	bundled-fragment check (topology gói)	success	2026-09-06T19:12:59Z	2026-09-06T19:13:03Z	4
+34052910676	c0f18ac	gate (ubuntu-latest)	26	gen_instructions selftest	success	2026-09-06T19:13:03Z	2026-09-06T19:13:03Z	0
+34052910676	c0f18ac	gate (ubuntu-latest)	27	command-registry unit test (AG-T0-03)	success	2026-09-06T19:13:03Z	2026-09-06T19:13:04Z	1
+34052910676	c0f18ac	gate (ubuntu-latest)	28	tl selftest (luot PR — khong sinh bang chung)	success	2026-09-06T19:13:04Z	2026-09-06T19:15:02Z	118
+34052910676	c0f18ac	gate (ubuntu-latest)	29	tl selftest (co bang chung exact-identity)	skipped	2026-09-06T19:15:02Z	2026-09-06T19:15:02Z	0
+34052910676	c0f18ac	gate (ubuntu-latest)	30	tai len gate-evidence	success	2026-09-06T19:15:02Z	2026-09-06T19:15:02Z	0
+34052910676	c0f18ac	gate (ubuntu-latest)	31	workflow-audit strict	success	2026-09-06T19:15:02Z	2026-09-06T19:15:03Z	1
+34052910676	c0f18ac	gate (ubuntu-latest)	32	golden-test	success	2026-09-06T19:15:03Z	2026-09-06T19:15:29Z	26
+34052910676	c0f18ac	gate (ubuntu-latest)	33	doc-claims-check strict	success	2026-09-06T19:15:29Z	2026-09-06T19:15:33Z	4
+34052910676	c0f18ac	gate (ubuntu-latest)	34	determinism-audit strict	success	2026-09-06T19:15:33Z	2026-09-06T19:16:07Z	34
+34052910676	c0f18ac	gate (ubuntu-latest)	35	ci-phamvi guard (bang phu thuoc khop ma)	success	2026-09-06T19:16:07Z	2026-09-06T19:16:07Z	0
+34052910676	c0f18ac	gate (ubuntu-latest)	36	ci-phamvi selftest (phan chung — cong co rang)	success	2026-09-06T19:16:07Z	2026-09-06T19:16:11Z	4
+34052910676	c0f18ac	gate (ubuntu-latest)	37	release-check full	success	2026-09-06T19:16:11Z	2026-09-06T19:16:12Z	1
+34052910676	c0f18ac	gate (ubuntu-latest)	38	release-verify strict (lane LAND — manifest committed)	skipped	2026-09-06T19:16:12Z	2026-09-06T19:16:12Z	0
+34052910676	c0f18ac	gate (ubuntu-latest)	39	release-verify strict (lane WORKER — manifest TẠM ngoài repo)	success	2026-09-06T19:16:12Z	2026-09-06T19:16:13Z	1
+34052910676	c0f18ac	gate (ubuntu-latest)	40	release-bundle x2 cùng SHA-256	success	2026-09-06T19:16:13Z	2026-09-06T19:16:17Z	4
+34052910676	c0f18ac	gate (ubuntu-latest)	41	tl_boot smoke	success	2026-09-06T19:16:18Z	2026-09-06T19:16:18Z	0
+34052910676	c0f18ac	gate (ubuntu-latest)	81	Post Run actions/setup-python@v5	success	2026-09-06T19:16:18Z	2026-09-06T19:16:18Z	0
+34052910676	c0f18ac	gate (ubuntu-latest)	82	Post Run actions/checkout@v4	success	2026-09-06T19:16:18Z	2026-09-06T19:16:19Z	1
+34052910676	c0f18ac	gate (ubuntu-latest)	83	Complete job	success	2026-09-06T19:16:19Z	2026-09-06T19:16:19Z	0
+34052910676	c0f18ac	gate (windows-latest)	1	Set up job	success	2026-09-06T18:49:00Z	2026-09-06T18:49:01Z	1
+34052910676	c0f18ac	gate (windows-latest)	2	Force LF checkout (hash parity với manifest)	success	2026-09-06T18:49:01Z	2026-09-06T18:49:02Z	1
+34052910676	c0f18ac	gate (windows-latest)	3	Run actions/checkout@v4	success	2026-09-06T18:49:02Z	2026-09-06T18:49:13Z	11
+34052910676	c0f18ac	gate (windows-latest)	4	Run actions/setup-python@v5	success	2026-09-06T18:49:13Z	2026-09-06T18:49:13Z	0
+34052910676	c0f18ac	gate (windows-latest)	5	cài PyYAML + jsonschema (cổng đăng lease + validator verdict cần)	success	2026-09-06T18:49:13Z	2026-09-06T18:49:22Z	9
+34052910676	c0f18ac	gate (windows-latest)	6	cài actionlint cho G5	success	2026-09-06T18:49:22Z	2026-09-06T18:49:24Z	2
+34052910676	c0f18ac	gate (windows-latest)	7	cài shellcheck cho G5 (cài xong đo lại)	success	2026-09-06T18:49:24Z	2026-09-06T18:49:56Z	32
+34052910676	c0f18ac	gate (windows-latest)	8	cài rg cho G5 (cài xong đo lại)	success	2026-09-06T18:49:56Z	2026-09-06T18:50:01Z	5
+34052910676	c0f18ac	gate (windows-latest)	9	G5 kiem ban ke cong cu + T1..T8 (packet	success	2026-09-06T18:50:01Z	2026-09-06T18:52:10Z	129
+34052910676	c0f18ac	gate (windows-latest)	10	cài Ruff 0.15.15 và in probe dương	success	2026-09-06T18:52:10Z	2026-09-06T18:52:13Z	3
+34052910676	c0f18ac	gate (windows-latest)	11	PR head contains required EOL base	success	2026-09-06T18:52:13Z	2026-09-06T18:52:13Z	0
+34052910676	c0f18ac	gate (windows-latest)	12	py_compile	success	2026-09-06T18:52:13Z	2026-09-06T18:52:14Z	1
+34052910676	c0f18ac	gate (windows-latest)	13	codex credential selftest (packet #300)	success	2026-09-06T18:52:14Z	2026-09-06T18:52:15Z	1
+34052910676	c0f18ac	gate (windows-latest)	14	packet-loop selftest	success	2026-09-06T18:52:15Z	2026-09-06T18:59:59Z	464
+34052910676	c0f18ac	gate (windows-latest)	15	bien-nhan v2 selftest	success	2026-09-06T18:59:59Z	2026-09-06T19:05:42Z	343
+34052910676	c0f18ac	gate (windows-latest)	16	test registry (phạm vi + các bộ chưa được nối)	success	2026-09-06T19:05:42Z	2026-09-06T19:22:46Z	1024
+34052910676	c0f18ac	gate (windows-latest)	17	idiom-ba-ten selftest	success	2026-09-06T19:22:46Z	2026-09-06T19:22:49Z	3
+34052910676	c0f18ac	gate (windows-latest)	18	eol-policy selftest	success	2026-09-06T19:22:49Z	2026-09-06T19:23:30Z	41
+34052910676	c0f18ac	gate (windows-latest)	19	pre-push selftest	success	2026-09-06T19:23:30Z	2026-09-06T19:23:58Z	28
+34052910676	c0f18ac	gate (windows-latest)	20	lease-publish selftest (đo lại setup sau G5)	success	2026-09-06T19:23:58Z	2026-09-06T19:26:52Z	174
+34052910676	c0f18ac	gate (windows-latest)	21	don-nhanh selftest (chốt xoá nhánh)	skipped	2026-09-06T19:26:52Z	2026-09-06T19:26:52Z	0
+34052910676	c0f18ac	gate (windows-latest)	22	bo ca gate chay TRONG cgroup duoc uy quyen (Linux)	skipped	2026-09-06T19:26:52Z	2026-09-06T19:26:52Z	0
+34052910676	c0f18ac	gate (windows-latest)	23	gate lifecycle selftest (nen khong co cgroup)	success	2026-09-06T19:26:52Z	2026-09-06T19:27:14Z	22
+34052910676	c0f18ac	gate (windows-latest)	24	eol-policy survey	success	2026-09-06T19:27:14Z	2026-09-06T19:27:15Z	1
+34052910676	c0f18ac	gate (windows-latest)	25	bundled-fragment check (topology gói)	success	2026-09-06T19:27:15Z	2026-09-06T19:27:24Z	9
+34052910676	c0f18ac	gate (windows-latest)	26	gen_instructions selftest	success	2026-09-06T19:27:24Z	2026-09-06T19:27:24Z	0
+34052910676	c0f18ac	gate (windows-latest)	27	command-registry unit test (AG-T0-03)	success	2026-09-06T19:27:24Z	2026-09-06T19:27:26Z	2
+34052910676	c0f18ac	gate (windows-latest)	28	tl selftest (luot PR — khong sinh bang chung)	success	2026-09-06T19:27:26Z	2026-09-06T19:30:28Z	182
+34052910676	c0f18ac	gate (windows-latest)	29	tl selftest (co bang chung exact-identity)	skipped	2026-09-06T19:30:28Z	2026-09-06T19:30:28Z	0
+34052910676	c0f18ac	gate (windows-latest)	30	tai len gate-evidence	success	2026-09-06T19:30:28Z	2026-09-06T19:30:32Z	4
+34052910676	c0f18ac	gate (windows-latest)	31	workflow-audit strict	success	2026-09-06T19:30:32Z	2026-09-06T19:30:33Z	1
+34052910676	c0f18ac	gate (windows-latest)	32	golden-test	success	2026-09-06T19:30:33Z	2026-09-06T19:31:22Z	49
+34052910676	c0f18ac	gate (windows-latest)	33	doc-claims-check strict	success	2026-09-06T19:31:22Z	2026-09-06T19:31:30Z	8
+34052910676	c0f18ac	gate (windows-latest)	34	determinism-audit strict	success	2026-09-06T19:31:30Z	2026-09-06T19:32:29Z	59
+34052910676	c0f18ac	gate (windows-latest)	35	ci-phamvi guard (bang phu thuoc khop ma)	success	2026-09-06T19:32:29Z	2026-09-06T19:32:30Z	1
+34052910676	c0f18ac	gate (windows-latest)	36	ci-phamvi selftest (phan chung — cong co rang)	skipped	2026-09-06T19:32:30Z	2026-09-06T19:32:30Z	0
+34052910676	c0f18ac	gate (windows-latest)	37	release-check full	success	2026-09-06T19:32:30Z	2026-09-06T19:32:32Z	2
+34052910676	c0f18ac	gate (windows-latest)	38	release-verify strict (lane LAND — manifest committed)	skipped	2026-09-06T19:32:32Z	2026-09-06T19:32:32Z	0
+34052910676	c0f18ac	gate (windows-latest)	39	release-verify strict (lane WORKER — manifest TẠM ngoài repo)	success	2026-09-06T19:32:32Z	2026-09-06T19:32:35Z	3
+34052910676	c0f18ac	gate (windows-latest)	40	release-bundle x2 cùng SHA-256	success	2026-09-06T19:32:35Z	2026-09-06T19:32:41Z	6
+34052910676	c0f18ac	gate (windows-latest)	41	tl_boot smoke	success	2026-09-06T19:32:41Z	2026-09-06T19:32:44Z	3
+34052910676	c0f18ac	gate (windows-latest)	81	Post Run actions/setup-python@v5	success	2026-09-06T19:32:44Z	2026-09-06T19:32:44Z	0
+34052910676	c0f18ac	gate (windows-latest)	82	Post Run actions/checkout@v4	success	2026-09-06T19:32:44Z	2026-09-06T19:32:48Z	4
+34052910676	c0f18ac	gate (windows-latest)	83	Complete job	success	2026-09-06T19:32:48Z	2026-09-06T19:32:48Z	0
+34049592719	b912e5f	gate (ubuntu-latest)	1	Set up job	success	2026-09-06T17:45:47Z	2026-09-06T17:45:49Z	2
+34049592719	b912e5f	gate (ubuntu-latest)	2	Force LF checkout (hash parity với manifest)	success	2026-09-06T17:45:49Z	2026-09-06T17:45:49Z	0
+34049592719	b912e5f	gate (ubuntu-latest)	3	Run actions/checkout@v4	success	2026-09-06T17:45:49Z	2026-09-06T17:45:57Z	8
+34049592719	b912e5f	gate (ubuntu-latest)	4	Run actions/setup-python@v5	success	2026-09-06T17:45:57Z	2026-09-06T17:45:57Z	0
+34049592719	b912e5f	gate (ubuntu-latest)	5	cài PyYAML + jsonschema (cổng đăng lease + validator verdict cần)	success	2026-09-06T17:45:57Z	2026-09-06T17:45:59Z	2
+34049592719	b912e5f	gate (ubuntu-latest)	6	cài actionlint cho G5	success	2026-09-06T17:45:59Z	2026-09-06T17:45:59Z	0
+34049592719	b912e5f	gate (ubuntu-latest)	7	cài shellcheck cho G5 (cài xong đo lại)	success	2026-09-06T17:45:59Z	2026-09-06T17:46:01Z	2
+34049592719	b912e5f	gate (ubuntu-latest)	8	cài rg cho G5 (cài xong đo lại)	success	2026-09-06T17:46:01Z	2026-09-06T17:46:06Z	5
+34049592719	b912e5f	gate (ubuntu-latest)	9	G5 kiem ban ke cong cu + T1..T8 (packet	success	2026-09-06T17:46:06Z	2026-09-06T17:47:02Z	56
+34049592719	b912e5f	gate (ubuntu-latest)	10	cài Ruff 0.15.15 và in probe dương	success	2026-09-06T17:47:02Z	2026-09-06T17:47:03Z	1
+34049592719	b912e5f	gate (ubuntu-latest)	11	PR head contains required EOL base	success	2026-09-06T17:47:03Z	2026-09-06T17:47:03Z	0
+34049592719	b912e5f	gate (ubuntu-latest)	12	py_compile	success	2026-09-06T17:47:03Z	2026-09-06T17:47:03Z	0
+34049592719	b912e5f	gate (ubuntu-latest)	13	codex credential selftest (packet #300)	success	2026-09-06T17:47:03Z	2026-09-06T17:47:04Z	1
+34049592719	b912e5f	gate (ubuntu-latest)	14	packet-loop selftest	success	2026-09-06T17:47:04Z	2026-09-06T17:51:00Z	236
+34049592719	b912e5f	gate (ubuntu-latest)	15	bien-nhan v2 selftest	success	2026-09-06T17:51:00Z	2026-09-06T17:51:14Z	14
+34049592719	b912e5f	gate (ubuntu-latest)	16	test registry (phạm vi + các bộ chưa được nối)	success	2026-09-06T17:51:14Z	2026-09-06T18:05:41Z	867
+34049592719	b912e5f	gate (ubuntu-latest)	17	idiom-ba-ten selftest	success	2026-09-06T18:05:41Z	2026-09-06T18:05:43Z	2
+34049592719	b912e5f	gate (ubuntu-latest)	18	eol-policy selftest	success	2026-09-06T18:05:43Z	2026-09-06T18:06:01Z	18
+34049592719	b912e5f	gate (ubuntu-latest)	19	pre-push selftest	success	2026-09-06T18:06:01Z	2026-09-06T18:06:08Z	7
+34049592719	b912e5f	gate (ubuntu-latest)	20	lease-publish selftest (đo lại setup sau G5)	success	2026-09-06T18:06:08Z	2026-09-06T18:07:17Z	69
+34049592719	b912e5f	gate (ubuntu-latest)	21	don-nhanh selftest (chốt xoá nhánh)	success	2026-09-06T18:07:17Z	2026-09-06T18:07:43Z	26
+34049592719	b912e5f	gate (ubuntu-latest)	22	bo ca gate chay TRONG cgroup duoc uy quyen (Linux)	success	2026-09-06T18:07:43Z	2026-09-06T18:09:04Z	81
+34049592719	b912e5f	gate (ubuntu-latest)	23	gate lifecycle selftest (nen khong co cgroup)	skipped	2026-09-06T18:09:04Z	2026-09-06T18:09:04Z	0
+34049592719	b912e5f	gate (ubuntu-latest)	24	eol-policy survey	success	2026-09-06T18:09:04Z	2026-09-06T18:09:04Z	0
+34049592719	b912e5f	gate (ubuntu-latest)	25	bundled-fragment check (topology gói)	success	2026-09-06T18:09:04Z	2026-09-06T18:09:08Z	4
+34049592719	b912e5f	gate (ubuntu-latest)	26	gen_instructions selftest	success	2026-09-06T18:09:08Z	2026-09-06T18:09:08Z	0
+34049592719	b912e5f	gate (ubuntu-latest)	27	command-registry unit test (AG-T0-03)	success	2026-09-06T18:09:08Z	2026-09-06T18:09:09Z	1
+34049592719	b912e5f	gate (ubuntu-latest)	28	tl selftest (luot PR — khong sinh bang chung)	success	2026-09-06T18:09:09Z	2026-09-06T18:11:07Z	118
+34049592719	b912e5f	gate (ubuntu-latest)	29	tl selftest (co bang chung exact-identity)	skipped	2026-09-06T18:11:07Z	2026-09-06T18:11:07Z	0
+34049592719	b912e5f	gate (ubuntu-latest)	30	tai len gate-evidence	success	2026-09-06T18:11:07Z	2026-09-06T18:11:07Z	0
+34049592719	b912e5f	gate (ubuntu-latest)	31	workflow-audit strict	success	2026-09-06T18:11:07Z	2026-09-06T18:11:08Z	1
+34049592719	b912e5f	gate (ubuntu-latest)	32	golden-test	success	2026-09-06T18:11:08Z	2026-09-06T18:11:34Z	26
+34049592719	b912e5f	gate (ubuntu-latest)	33	doc-claims-check strict	success	2026-09-06T18:11:34Z	2026-09-06T18:11:37Z	3
+34049592719	b912e5f	gate (ubuntu-latest)	34	determinism-audit strict	success	2026-09-06T18:11:37Z	2026-09-06T18:12:12Z	35
+34049592719	b912e5f	gate (ubuntu-latest)	35	ci-phamvi guard (bang phu thuoc khop ma)	success	2026-09-06T18:12:12Z	2026-09-06T18:12:12Z	0
+34049592719	b912e5f	gate (ubuntu-latest)	36	ci-phamvi selftest (phan chung — cong co rang)	success	2026-09-06T18:12:12Z	2026-09-06T18:12:15Z	3
+34049592719	b912e5f	gate (ubuntu-latest)	37	release-check full	success	2026-09-06T18:12:15Z	2026-09-06T18:12:17Z	2
+34049592719	b912e5f	gate (ubuntu-latest)	38	release-verify strict (lane LAND — manifest committed)	skipped	2026-09-06T18:12:17Z	2026-09-06T18:12:17Z	0
+34049592719	b912e5f	gate (ubuntu-latest)	39	release-verify strict (lane WORKER — manifest TẠM ngoài repo)	success	2026-09-06T18:12:17Z	2026-09-06T18:12:18Z	1
+34049592719	b912e5f	gate (ubuntu-latest)	40	release-bundle x2 cùng SHA-256	success	2026-09-06T18:12:18Z	2026-09-06T18:12:22Z	4
+34049592719	b912e5f	gate (ubuntu-latest)	41	tl_boot smoke	success	2026-09-06T18:12:22Z	2026-09-06T18:12:23Z	1
+34049592719	b912e5f	gate (ubuntu-latest)	81	Post Run actions/setup-python@v5	success	2026-09-06T18:12:23Z	2026-09-06T18:12:23Z	0
+34049592719	b912e5f	gate (ubuntu-latest)	82	Post Run actions/checkout@v4	success	2026-09-06T18:12:23Z	2026-09-06T18:12:23Z	0
+34049592719	b912e5f	gate (ubuntu-latest)	83	Complete job	success	2026-09-06T18:12:23Z	2026-09-06T18:12:23Z	0
+34049592719	b912e5f	gate (windows-latest)	1	Set up job	success	2026-09-06T17:45:47Z	2026-09-06T17:45:48Z	1
+34049592719	b912e5f	gate (windows-latest)	2	Force LF checkout (hash parity với manifest)	success	2026-09-06T17:45:48Z	2026-09-06T17:45:49Z	1
+34049592719	b912e5f	gate (windows-latest)	3	Run actions/checkout@v4	success	2026-09-06T17:45:49Z	2026-09-06T17:46:02Z	13
+34049592719	b912e5f	gate (windows-latest)	4	Run actions/setup-python@v5	success	2026-09-06T17:46:02Z	2026-09-06T17:46:02Z	0
+34049592719	b912e5f	gate (windows-latest)	5	cài PyYAML + jsonschema (cổng đăng lease + validator verdict cần)	success	2026-09-06T17:46:02Z	2026-09-06T17:46:10Z	8
+34049592719	b912e5f	gate (windows-latest)	6	cài actionlint cho G5	success	2026-09-06T17:46:10Z	2026-09-06T17:46:12Z	2
+34049592719	b912e5f	gate (windows-latest)	7	cài shellcheck cho G5 (cài xong đo lại)	success	2026-09-06T17:46:12Z	2026-09-06T17:46:30Z	18
+34049592719	b912e5f	gate (windows-latest)	8	cài rg cho G5 (cài xong đo lại)	success	2026-09-06T17:46:30Z	2026-09-06T17:46:35Z	5
+34049592719	b912e5f	gate (windows-latest)	9	G5 kiem ban ke cong cu + T1..T8 (packet	success	2026-09-06T17:46:35Z	2026-09-06T17:49:00Z	145
+34049592719	b912e5f	gate (windows-latest)	10	cài Ruff 0.15.15 và in probe dương	success	2026-09-06T17:49:00Z	2026-09-06T17:49:04Z	4
+34049592719	b912e5f	gate (windows-latest)	11	PR head contains required EOL base	success	2026-09-06T17:49:04Z	2026-09-06T17:49:04Z	0
+34049592719	b912e5f	gate (windows-latest)	12	py_compile	success	2026-09-06T17:49:04Z	2026-09-06T17:49:05Z	1
+34049592719	b912e5f	gate (windows-latest)	13	codex credential selftest (packet #300)	success	2026-09-06T17:49:05Z	2026-09-06T17:49:07Z	2
+34049592719	b912e5f	gate (windows-latest)	14	packet-loop selftest	success	2026-09-06T17:49:07Z	2026-09-06T17:58:54Z	587
+34049592719	b912e5f	gate (windows-latest)	15	bien-nhan v2 selftest	success	2026-09-06T17:58:54Z	2026-09-06T18:01:02Z	128
+34049592719	b912e5f	gate (windows-latest)	16	test registry (phạm vi + các bộ chưa được nối)	success	2026-09-06T18:01:02Z	2026-09-06T18:19:35Z	1113
+34049592719	b912e5f	gate (windows-latest)	17	idiom-ba-ten selftest	success	2026-09-06T18:19:35Z	2026-09-06T18:19:40Z	5
+34049592719	b912e5f	gate (windows-latest)	18	eol-policy selftest	success	2026-09-06T18:19:40Z	2026-09-06T18:20:37Z	57
+34049592719	b912e5f	gate (windows-latest)	19	pre-push selftest	success	2026-09-06T18:20:37Z	2026-09-06T18:21:08Z	31
+34049592719	b912e5f	gate (windows-latest)	20	lease-publish selftest (đo lại setup sau G5)	success	2026-09-06T18:21:08Z	2026-09-06T18:24:31Z	203
+34049592719	b912e5f	gate (windows-latest)	21	don-nhanh selftest (chốt xoá nhánh)	skipped	2026-09-06T18:24:31Z	2026-09-06T18:24:31Z	0
+34049592719	b912e5f	gate (windows-latest)	22	bo ca gate chay TRONG cgroup duoc uy quyen (Linux)	skipped	2026-09-06T18:24:31Z	2026-09-06T18:24:31Z	0
+34049592719	b912e5f	gate (windows-latest)	23	gate lifecycle selftest (nen khong co cgroup)	success	2026-09-06T18:24:31Z	2026-09-06T18:24:58Z	27
+34049592719	b912e5f	gate (windows-latest)	24	eol-policy survey	success	2026-09-06T18:24:58Z	2026-09-06T18:25:00Z	2
+34049592719	b912e5f	gate (windows-latest)	25	bundled-fragment check (topology gói)	success	2026-09-06T18:25:00Z	2026-09-06T18:25:11Z	11
+34049592719	b912e5f	gate (windows-latest)	26	gen_instructions selftest	success	2026-09-06T18:25:11Z	2026-09-06T18:25:12Z	1
+34049592719	b912e5f	gate (windows-latest)	27	command-registry unit test (AG-T0-03)	success	2026-09-06T18:25:12Z	2026-09-06T18:25:15Z	3
+34049592719	b912e5f	gate (windows-latest)	28	tl selftest (luot PR — khong sinh bang chung)	success	2026-09-06T18:25:15Z	2026-09-06T18:28:45Z	210
+34049592719	b912e5f	gate (windows-latest)	29	tl selftest (co bang chung exact-identity)	skipped	2026-09-06T18:28:45Z	2026-09-06T18:28:45Z	0
+34049592719	b912e5f	gate (windows-latest)	30	tai len gate-evidence	success	2026-09-06T18:28:45Z	2026-09-06T18:28:46Z	1
+34049592719	b912e5f	gate (windows-latest)	31	workflow-audit strict	success	2026-09-06T18:28:46Z	2026-09-06T18:28:49Z	3
+34049592719	b912e5f	gate (windows-latest)	32	golden-test	success	2026-09-06T18:28:49Z	2026-09-06T18:29:51Z	62
+34049592719	b912e5f	gate (windows-latest)	33	doc-claims-check strict	success	2026-09-06T18:29:51Z	2026-09-06T18:29:57Z	6
+34049592719	b912e5f	gate (windows-latest)	34	determinism-audit strict	success	2026-09-06T18:29:57Z	2026-09-06T18:31:19Z	82
+34049592719	b912e5f	gate (windows-latest)	35	ci-phamvi guard (bang phu thuoc khop ma)	success	2026-09-06T18:31:19Z	2026-09-06T18:31:20Z	1
+34049592719	b912e5f	gate (windows-latest)	36	ci-phamvi selftest (phan chung — cong co rang)	skipped	2026-09-06T18:31:20Z	2026-09-06T18:31:20Z	0
+34049592719	b912e5f	gate (windows-latest)	37	release-check full	success	2026-09-06T18:31:20Z	2026-09-06T18:31:23Z	3
+34049592719	b912e5f	gate (windows-latest)	38	release-verify strict (lane LAND — manifest committed)	skipped	2026-09-06T18:31:23Z	2026-09-06T18:31:23Z	0
+34049592719	b912e5f	gate (windows-latest)	39	release-verify strict (lane WORKER — manifest TẠM ngoài repo)	success	2026-09-06T18:31:23Z	2026-09-06T18:31:27Z	4
+34049592719	b912e5f	gate (windows-latest)	40	release-bundle x2 cùng SHA-256	success	2026-09-06T18:31:27Z	2026-09-06T18:31:37Z	10
+34049592719	b912e5f	gate (windows-latest)	41	tl_boot smoke	success	2026-09-06T18:31:37Z	2026-09-06T18:31:40Z	3
+34049592719	b912e5f	gate (windows-latest)	81	Post Run actions/setup-python@v5	success	2026-09-06T18:31:40Z	2026-09-06T18:31:41Z	1
+34049592719	b912e5f	gate (windows-latest)	82	Post Run actions/checkout@v4	success	2026-09-06T18:31:41Z	2026-09-06T18:31:45Z	4
+34049592719	b912e5f	gate (windows-latest)	83	Complete job	success	2026-09-06T18:31:45Z	2026-09-06T18:31:45Z	0
+34062997697	62a6385	gate (ubuntu-latest)	1	Set up job	success	2026-09-06T22:05:47Z	2026-09-06T22:05:49Z	2
+34062997697	62a6385	gate (ubuntu-latest)	2	Force LF checkout (hash parity với manifest)	success	2026-09-06T22:05:49Z	2026-09-06T22:05:49Z	0
+34062997697	62a6385	gate (ubuntu-latest)	3	Run actions/checkout@v4	success	2026-09-06T22:05:49Z	2026-09-06T22:05:56Z	7
+34062997697	62a6385	gate (ubuntu-latest)	4	Run actions/setup-python@v5	success	2026-09-06T22:05:56Z	2026-09-06T22:05:56Z	0
+34062997697	62a6385	gate (ubuntu-latest)	5	cài PyYAML + jsonschema (cổng đăng lease + validator verdict cần)	success	2026-09-06T22:05:56Z	2026-09-06T22:05:58Z	2
+34062997697	62a6385	gate (ubuntu-latest)	6	cài actionlint cho G5	success	2026-09-06T22:05:58Z	2026-09-06T22:05:59Z	1
+34062997697	62a6385	gate (ubuntu-latest)	7	cài shellcheck cho G5 (cài xong đo lại)	success	2026-09-06T22:05:59Z	2026-09-06T22:06:01Z	2
+34062997697	62a6385	gate (ubuntu-latest)	8	cài rg cho G5 (cài xong đo lại)	success	2026-09-06T22:06:01Z	2026-09-06T22:06:05Z	4
+34062997697	62a6385	gate (ubuntu-latest)	9	G5 kiem ban ke cong cu + T1..T8 (packet	success	2026-09-06T22:06:05Z	2026-09-06T22:06:48Z	43
+34062997697	62a6385	gate (ubuntu-latest)	10	cài Ruff 0.15.15 và in probe dương	success	2026-09-06T22:06:48Z	2026-09-06T22:06:49Z	1
+34062997697	62a6385	gate (ubuntu-latest)	11	PR head contains required EOL base	skipped	2026-09-06T22:06:49Z	2026-09-06T22:06:49Z	0
+34062997697	62a6385	gate (ubuntu-latest)	12	py_compile	success	2026-09-06T22:06:49Z	2026-09-06T22:06:49Z	0
+34062997697	62a6385	gate (ubuntu-latest)	13	codex credential selftest (packet #300)	success	2026-09-06T22:06:49Z	2026-09-06T22:06:50Z	1
+34062997697	62a6385	gate (ubuntu-latest)	14	packet-loop selftest	success	2026-09-06T22:06:50Z	2026-09-06T22:09:49Z	179
+34062997697	62a6385	gate (ubuntu-latest)	15	bien-nhan v2 selftest	success	2026-09-06T22:09:49Z	2026-09-06T22:10:36Z	47
+34062997697	62a6385	gate (ubuntu-latest)	16	test registry (phạm vi + các bộ chưa được nối)	success	2026-09-06T22:10:36Z	2026-09-06T22:21:11Z	635
+34062997697	62a6385	gate (ubuntu-latest)	17	idiom-ba-ten selftest	success	2026-09-06T22:21:11Z	2026-09-06T22:21:12Z	1
+34062997697	62a6385	gate (ubuntu-latest)	18	eol-policy selftest	success	2026-09-06T22:21:12Z	2026-09-06T22:21:26Z	14
+34062997697	62a6385	gate (ubuntu-latest)	19	pre-push selftest	success	2026-09-06T22:21:26Z	2026-09-06T22:21:31Z	5
+34062997697	62a6385	gate (ubuntu-latest)	20	lease-publish selftest (đo lại setup sau G5)	success	2026-09-06T22:21:31Z	2026-09-06T22:22:22Z	51
+34062997697	62a6385	gate (ubuntu-latest)	21	don-nhanh selftest (chốt xoá nhánh)	success	2026-09-06T22:22:22Z	2026-09-06T22:22:41Z	19
+34062997697	62a6385	gate (ubuntu-latest)	22	bo ca gate chay TRONG cgroup duoc uy quyen (Linux)	success	2026-09-06T22:22:41Z	2026-09-06T22:24:03Z	82
+34062997697	62a6385	gate (ubuntu-latest)	23	gate lifecycle selftest (nen khong co cgroup)	skipped	2026-09-06T22:24:03Z	2026-09-06T22:24:03Z	0
+34062997697	62a6385	gate (ubuntu-latest)	24	eol-policy survey	success	2026-09-06T22:24:03Z	2026-09-06T22:24:03Z	0
+34062997697	62a6385	gate (ubuntu-latest)	25	bundled-fragment check (topology gói)	success	2026-09-06T22:24:03Z	2026-09-06T22:24:06Z	3
+34062997697	62a6385	gate (ubuntu-latest)	26	gen_instructions selftest	success	2026-09-06T22:24:06Z	2026-09-06T22:24:06Z	0
+34062997697	62a6385	gate (ubuntu-latest)	27	command-registry unit test (AG-T0-03)	success	2026-09-06T22:24:06Z	2026-09-06T22:24:07Z	1
+34062997697	62a6385	gate (ubuntu-latest)	28	tl selftest (luot PR — khong sinh bang chung)	skipped	2026-09-06T22:24:07Z	2026-09-06T22:24:07Z	0
+34062997697	62a6385	gate (ubuntu-latest)	29	tl selftest (co bang chung exact-identity)	success	2026-09-06T22:24:07Z	2026-09-06T22:25:44Z	97
+34062997697	62a6385	gate (ubuntu-latest)	30	tai len gate-evidence	success	2026-09-06T22:25:44Z	2026-09-06T22:25:45Z	1
+34062997697	62a6385	gate (ubuntu-latest)	31	workflow-audit strict	success	2026-09-06T22:25:45Z	2026-09-06T22:25:45Z	0
+34062997697	62a6385	gate (ubuntu-latest)	32	golden-test	success	2026-09-06T22:25:45Z	2026-09-06T22:26:04Z	19
+34062997697	62a6385	gate (ubuntu-latest)	33	doc-claims-check strict	success	2026-09-06T22:26:04Z	2026-09-06T22:26:07Z	3
+34062997697	62a6385	gate (ubuntu-latest)	34	determinism-audit strict	success	2026-09-06T22:26:07Z	2026-09-06T22:26:32Z	25
+34062997697	62a6385	gate (ubuntu-latest)	35	ci-phamvi guard (bang phu thuoc khop ma)	success	2026-09-06T22:26:32Z	2026-09-06T22:26:32Z	0
+34062997697	62a6385	gate (ubuntu-latest)	36	ci-phamvi selftest (phan chung — cong co rang)	success	2026-09-06T22:26:32Z	2026-09-06T22:26:34Z	2
+34062997697	62a6385	gate (ubuntu-latest)	37	release-check full	success	2026-09-06T22:26:34Z	2026-09-06T22:26:35Z	1
+34062997697	62a6385	gate (ubuntu-latest)	38	release-verify strict (lane LAND — manifest committed)	skipped	2026-09-06T22:26:35Z	2026-09-06T22:26:35Z	0
+34062997697	62a6385	gate (ubuntu-latest)	39	release-verify strict (lane WORKER — manifest TẠM ngoài repo)	success	2026-09-06T22:26:35Z	2026-09-06T22:26:36Z	1
+34062997697	62a6385	gate (ubuntu-latest)	40	release-bundle x2 cùng SHA-256	success	2026-09-06T22:26:36Z	2026-09-06T22:26:39Z	3
+34062997697	62a6385	gate (ubuntu-latest)	41	tl_boot smoke	success	2026-09-06T22:26:39Z	2026-09-06T22:26:40Z	1
+34062997697	62a6385	gate (ubuntu-latest)	81	Post Run actions/setup-python@v5	success	2026-09-06T22:26:40Z	2026-09-06T22:26:40Z	0
+34062997697	62a6385	gate (ubuntu-latest)	82	Post Run actions/checkout@v4	success	2026-09-06T22:26:40Z	2026-09-06T22:26:40Z	0
+34062997697	62a6385	gate (ubuntu-latest)	83	Complete job	success	2026-09-06T22:26:40Z	2026-09-06T22:26:40Z	0
+34062997697	62a6385	gate (windows-latest)	1	Set up job	success	2026-09-06T22:05:51Z	2026-09-06T22:05:53Z	2
+34062997697	62a6385	gate (windows-latest)	2	Force LF checkout (hash parity với manifest)	success	2026-09-06T22:05:53Z	2026-09-06T22:05:54Z	1
+34062997697	62a6385	gate (windows-latest)	3	Run actions/checkout@v4	success	2026-09-06T22:05:54Z	2026-09-06T22:06:08Z	14
+34062997697	62a6385	gate (windows-latest)	4	Run actions/setup-python@v5	success	2026-09-06T22:06:08Z	2026-09-06T22:06:08Z	0
+34062997697	62a6385	gate (windows-latest)	5	cài PyYAML + jsonschema (cổng đăng lease + validator verdict cần)	success	2026-09-06T22:06:08Z	2026-09-06T22:06:17Z	9
+34062997697	62a6385	gate (windows-latest)	6	cài actionlint cho G5	success	2026-09-06T22:06:17Z	2026-09-06T22:06:18Z	1
+34062997697	62a6385	gate (windows-latest)	7	cài shellcheck cho G5 (cài xong đo lại)	success	2026-09-06T22:06:18Z	2026-09-06T22:06:36Z	18
+34062997697	62a6385	gate (windows-latest)	8	cài rg cho G5 (cài xong đo lại)	success	2026-09-06T22:06:36Z	2026-09-06T22:06:40Z	4
+34062997697	62a6385	gate (windows-latest)	9	G5 kiem ban ke cong cu + T1..T8 (packet	success	2026-09-06T22:06:40Z	2026-09-06T22:08:53Z	133
+34062997697	62a6385	gate (windows-latest)	10	cài Ruff 0.15.15 và in probe dương	success	2026-09-06T22:08:53Z	2026-09-06T22:08:57Z	4
+34062997697	62a6385	gate (windows-latest)	11	PR head contains required EOL base	skipped	2026-09-06T22:08:57Z	2026-09-06T22:08:57Z	0
+34062997697	62a6385	gate (windows-latest)	12	py_compile	success	2026-09-06T22:08:57Z	2026-09-06T22:08:58Z	1
+34062997697	62a6385	gate (windows-latest)	13	codex credential selftest (packet #300)	success	2026-09-06T22:08:58Z	2026-09-06T22:08:59Z	1
+34062997697	62a6385	gate (windows-latest)	14	packet-loop selftest	success	2026-09-06T22:08:59Z	2026-09-06T22:17:37Z	518
+34062997697	62a6385	gate (windows-latest)	15	bien-nhan v2 selftest	success	2026-09-06T22:17:37Z	2026-09-06T22:25:15Z	458
+34062997697	62a6385	gate (windows-latest)	16	test registry (phạm vi + các bộ chưa được nối)	success	2026-09-06T22:25:15Z	2026-09-06T22:43:19Z	1084
+34062997697	62a6385	gate (windows-latest)	17	idiom-ba-ten selftest	success	2026-09-06T22:43:19Z	2026-09-06T22:43:21Z	2
+34062997697	62a6385	gate (windows-latest)	18	eol-policy selftest	success	2026-09-06T22:43:21Z	2026-09-06T22:44:17Z	56
+34062997697	62a6385	gate (windows-latest)	19	pre-push selftest	success	2026-09-06T22:44:17Z	2026-09-06T22:44:45Z	28
+34062997697	62a6385	gate (windows-latest)	20	lease-publish selftest (đo lại setup sau G5)	success	2026-09-06T22:44:45Z	2026-09-06T22:48:01Z	196
+34062997697	62a6385	gate (windows-latest)	21	don-nhanh selftest (chốt xoá nhánh)	skipped	2026-09-06T22:48:01Z	2026-09-06T22:48:01Z	0
+34062997697	62a6385	gate (windows-latest)	22	bo ca gate chay TRONG cgroup duoc uy quyen (Linux)	skipped	2026-09-06T22:48:01Z	2026-09-06T22:48:01Z	0
+34062997697	62a6385	gate (windows-latest)	23	gate lifecycle selftest (nen khong co cgroup)	success	2026-09-06T22:48:01Z	2026-09-06T22:48:28Z	27
+34062997697	62a6385	gate (windows-latest)	24	eol-policy survey	success	2026-09-06T22:48:28Z	2026-09-06T22:48:29Z	1
+34062997697	62a6385	gate (windows-latest)	25	bundled-fragment check (topology gói)	success	2026-09-06T22:48:29Z	2026-09-06T22:48:36Z	7
+34062997697	62a6385	gate (windows-latest)	26	gen_instructions selftest	success	2026-09-06T22:48:36Z	2026-09-06T22:48:37Z	1
+34062997697	62a6385	gate (windows-latest)	27	command-registry unit test (AG-T0-03)	success	2026-09-06T22:48:37Z	2026-09-06T22:48:39Z	2
+34062997697	62a6385	gate (windows-latest)	28	tl selftest (luot PR — khong sinh bang chung)	skipped	2026-09-06T22:48:39Z	2026-09-06T22:48:39Z	0
+34062997697	62a6385	gate (windows-latest)	29	tl selftest (co bang chung exact-identity)	success	2026-09-06T22:48:39Z	2026-09-06T22:52:18Z	219
+34062997697	62a6385	gate (windows-latest)	30	tai len gate-evidence	success	2026-09-06T22:52:18Z	2026-09-06T22:52:20Z	2
+34062997697	62a6385	gate (windows-latest)	31	workflow-audit strict	success	2026-09-06T22:52:20Z	2026-09-06T22:52:24Z	4
+34062997697	62a6385	gate (windows-latest)	32	golden-test	success	2026-09-06T22:52:24Z	2026-09-06T22:53:21Z	57
+34062997697	62a6385	gate (windows-latest)	33	doc-claims-check strict	success	2026-09-06T22:53:21Z	2026-09-06T22:53:27Z	6
+34062997697	62a6385	gate (windows-latest)	34	determinism-audit strict	success	2026-09-06T22:53:27Z	2026-09-06T22:54:51Z	84
+34062997697	62a6385	gate (windows-latest)	35	ci-phamvi guard (bang phu thuoc khop ma)	success	2026-09-06T22:54:51Z	2026-09-06T22:54:52Z	1
+34062997697	62a6385	gate (windows-latest)	36	ci-phamvi selftest (phan chung — cong co rang)	skipped	2026-09-06T22:54:52Z	2026-09-06T22:54:52Z	0
+34062997697	62a6385	gate (windows-latest)	37	release-check full	success	2026-09-06T22:54:52Z	2026-09-06T22:54:54Z	2
+34062997697	62a6385	gate (windows-latest)	38	release-verify strict (lane LAND — manifest committed)	skipped	2026-09-06T22:54:54Z	2026-09-06T22:54:54Z	0
+34062997697	62a6385	gate (windows-latest)	39	release-verify strict (lane WORKER — manifest TẠM ngoài repo)	success	2026-09-06T22:54:54Z	2026-09-06T22:54:57Z	3
+34062997697	62a6385	gate (windows-latest)	40	release-bundle x2 cùng SHA-256	success	2026-09-06T22:54:57Z	2026-09-06T22:55:02Z	5
+34062997697	62a6385	gate (windows-latest)	41	tl_boot smoke	success	2026-09-06T22:55:02Z	2026-09-06T22:55:05Z	3
+34062997697	62a6385	gate (windows-latest)	81	Post Run actions/setup-python@v5	success	2026-09-06T22:55:05Z	2026-09-06T22:55:06Z	1
+34062997697	62a6385	gate (windows-latest)	82	Post Run actions/checkout@v4	success	2026-09-06T22:55:06Z	2026-09-06T22:55:10Z	4
+34062997697	62a6385	gate (windows-latest)	83	Complete job	success	2026-09-06T22:55:10Z	2026-09-06T22:55:10Z	0
+34065779670	771c6ed	gate (ubuntu-latest)	1	Set up job	success	2026-09-06T23:03:36Z	2026-09-06T23:03:37Z	1
+34065779670	771c6ed	gate (ubuntu-latest)	2	Force LF checkout (hash parity với manifest)	success	2026-09-06T23:03:37Z	2026-09-06T23:03:37Z	0
+34065779670	771c6ed	gate (ubuntu-latest)	3	Run actions/checkout@v4	success	2026-09-06T23:03:37Z	2026-09-06T23:03:44Z	7
+34065779670	771c6ed	gate (ubuntu-latest)	4	Run actions/setup-python@v5	success	2026-09-06T23:03:44Z	2026-09-06T23:03:45Z	1
+34065779670	771c6ed	gate (ubuntu-latest)	5	cài PyYAML + jsonschema (cổng đăng lease + validator verdict cần)	success	2026-09-06T23:03:45Z	2026-09-06T23:03:49Z	4
+34065779670	771c6ed	gate (ubuntu-latest)	6	cài actionlint cho G5	success	2026-09-06T23:03:49Z	2026-09-06T23:03:49Z	0
+34065779670	771c6ed	gate (ubuntu-latest)	7	cài shellcheck cho G5 (cài xong đo lại)	success	2026-09-06T23:03:49Z	2026-09-06T23:03:52Z	3
+34065779670	771c6ed	gate (ubuntu-latest)	8	cài rg cho G5 (cài xong đo lại)	success	2026-09-06T23:03:52Z	2026-09-06T23:03:56Z	4
+34065779670	771c6ed	gate (ubuntu-latest)	9	G5 kiem ban ke cong cu + T1..T8 (packet	success	2026-09-06T23:03:56Z	2026-09-06T23:04:54Z	58
+34065779670	771c6ed	gate (ubuntu-latest)	10	cài Ruff 0.15.15 và in probe dương	success	2026-09-06T23:04:54Z	2026-09-06T23:04:55Z	1
+34065779670	771c6ed	gate (ubuntu-latest)	11	PR head contains required EOL base	skipped	2026-09-06T23:04:55Z	2026-09-06T23:04:55Z	0
+34065779670	771c6ed	gate (ubuntu-latest)	12	py_compile	success	2026-09-06T23:04:55Z	2026-09-06T23:04:55Z	0
+34065779670	771c6ed	gate (ubuntu-latest)	13	codex credential selftest (packet #300)	success	2026-09-06T23:04:55Z	2026-09-06T23:04:56Z	1
+34065779670	771c6ed	gate (ubuntu-latest)	14	packet-loop selftest	success	2026-09-06T23:04:56Z	2026-09-06T23:08:56Z	240
+34065779670	771c6ed	gate (ubuntu-latest)	15	bien-nhan v2 selftest	success	2026-09-06T23:08:56Z	2026-09-06T23:09:54Z	58
+34065779670	771c6ed	gate (ubuntu-latest)	16	test registry (phạm vi + các bộ chưa được nối)	success	2026-09-06T23:09:54Z	2026-09-06T23:24:15Z	861
+34065779670	771c6ed	gate (ubuntu-latest)	17	idiom-ba-ten selftest	success	2026-09-06T23:24:15Z	2026-09-06T23:24:17Z	2
+34065779670	771c6ed	gate (ubuntu-latest)	18	eol-policy selftest	success	2026-09-06T23:24:17Z	2026-09-06T23:24:35Z	18
+34065779670	771c6ed	gate (ubuntu-latest)	19	pre-push selftest	success	2026-09-06T23:24:35Z	2026-09-06T23:24:42Z	7
+34065779670	771c6ed	gate (ubuntu-latest)	20	lease-publish selftest (đo lại setup sau G5)	success	2026-09-06T23:24:42Z	2026-09-06T23:25:50Z	68
+34065779670	771c6ed	gate (ubuntu-latest)	21	don-nhanh selftest (chốt xoá nhánh)	success	2026-09-06T23:25:50Z	2026-09-06T23:26:14Z	24
+34065779670	771c6ed	gate (ubuntu-latest)	22	bo ca gate chay TRONG cgroup duoc uy quyen (Linux)	success	2026-09-06T23:26:14Z	2026-09-06T23:27:35Z	81
+34065779670	771c6ed	gate (ubuntu-latest)	23	gate lifecycle selftest (nen khong co cgroup)	skipped	2026-09-06T23:27:35Z	2026-09-06T23:27:35Z	0
+34065779670	771c6ed	gate (ubuntu-latest)	24	eol-policy survey	success	2026-09-06T23:27:35Z	2026-09-06T23:27:36Z	1
+34065779670	771c6ed	gate (ubuntu-latest)	25	bundled-fragment check (topology gói)	success	2026-09-06T23:27:36Z	2026-09-06T23:27:39Z	3
+34065779670	771c6ed	gate (ubuntu-latest)	26	gen_instructions selftest	success	2026-09-06T23:27:39Z	2026-09-06T23:27:39Z	0
+34065779670	771c6ed	gate (ubuntu-latest)	27	command-registry unit test (AG-T0-03)	success	2026-09-06T23:27:39Z	2026-09-06T23:27:41Z	2
+34065779670	771c6ed	gate (ubuntu-latest)	28	tl selftest (luot PR — khong sinh bang chung)	skipped	2026-09-06T23:27:41Z	2026-09-06T23:27:41Z	0
+34065779670	771c6ed	gate (ubuntu-latest)	29	tl selftest (co bang chung exact-identity)	success	2026-09-06T23:27:41Z	2026-09-06T23:29:39Z	118
+34065779670	771c6ed	gate (ubuntu-latest)	30	tai len gate-evidence	success	2026-09-06T23:29:39Z	2026-09-06T23:29:41Z	2
+34065779670	771c6ed	gate (ubuntu-latest)	31	workflow-audit strict	success	2026-09-06T23:29:41Z	2026-09-06T23:29:42Z	1
+34065779670	771c6ed	gate (ubuntu-latest)	32	golden-test	success	2026-09-06T23:29:42Z	2026-09-06T23:30:08Z	26
+34065779670	771c6ed	gate (ubuntu-latest)	33	doc-claims-check strict	success	2026-09-06T23:30:08Z	2026-09-06T23:30:11Z	3
+34065779670	771c6ed	gate (ubuntu-latest)	34	determinism-audit strict	success	2026-09-06T23:30:11Z	2026-09-06T23:30:46Z	35
+34065779670	771c6ed	gate (ubuntu-latest)	35	ci-phamvi guard (bang phu thuoc khop ma)	success	2026-09-06T23:30:46Z	2026-09-06T23:30:46Z	0
+34065779670	771c6ed	gate (ubuntu-latest)	36	ci-phamvi selftest (phan chung — cong co rang)	success	2026-09-06T23:30:46Z	2026-09-06T23:30:49Z	3
+34065779670	771c6ed	gate (ubuntu-latest)	37	release-check full	success	2026-09-06T23:30:49Z	2026-09-06T23:30:51Z	2
+34065779670	771c6ed	gate (ubuntu-latest)	38	release-verify strict (lane LAND — manifest committed)	skipped	2026-09-06T23:30:51Z	2026-09-06T23:30:51Z	0
+34065779670	771c6ed	gate (ubuntu-latest)	39	release-verify strict (lane WORKER — manifest TẠM ngoài repo)	success	2026-09-06T23:30:51Z	2026-09-06T23:30:52Z	1
+34065779670	771c6ed	gate (ubuntu-latest)	40	release-bundle x2 cùng SHA-256	success	2026-09-06T23:30:52Z	2026-09-06T23:30:56Z	4
+34065779670	771c6ed	gate (ubuntu-latest)	41	tl_boot smoke	success	2026-09-06T23:30:56Z	2026-09-06T23:30:57Z	1
+34065779670	771c6ed	gate (ubuntu-latest)	81	Post Run actions/setup-python@v5	success	2026-09-06T23:30:57Z	2026-09-06T23:30:57Z	0
+34065779670	771c6ed	gate (ubuntu-latest)	82	Post Run actions/checkout@v4	success	2026-09-06T23:30:57Z	2026-09-06T23:30:57Z	0
+34065779670	771c6ed	gate (ubuntu-latest)	83	Complete job	success	2026-09-06T23:30:57Z	2026-09-06T23:30:57Z	0
+34065779670	771c6ed	gate (windows-latest)	1	Set up job	success	2026-09-06T23:03:34Z	2026-09-06T23:03:35Z	1
+34065779670	771c6ed	gate (windows-latest)	2	Force LF checkout (hash parity với manifest)	success	2026-09-06T23:03:35Z	2026-09-06T23:03:37Z	2
+34065779670	771c6ed	gate (windows-latest)	3	Run actions/checkout@v4	success	2026-09-06T23:03:37Z	2026-09-06T23:03:48Z	11
+34065779670	771c6ed	gate (windows-latest)	4	Run actions/setup-python@v5	success	2026-09-06T23:03:48Z	2026-09-06T23:03:48Z	0
+34065779670	771c6ed	gate (windows-latest)	5	cài PyYAML + jsonschema (cổng đăng lease + validator verdict cần)	success	2026-09-06T23:03:48Z	2026-09-06T23:03:57Z	9
+34065779670	771c6ed	gate (windows-latest)	6	cài actionlint cho G5	success	2026-09-06T23:03:57Z	2026-09-06T23:03:58Z	1
+34065779670	771c6ed	gate (windows-latest)	7	cài shellcheck cho G5 (cài xong đo lại)	success	2026-09-06T23:03:58Z	2026-09-06T23:04:15Z	17
+34065779670	771c6ed	gate (windows-latest)	8	cài rg cho G5 (cài xong đo lại)	success	2026-09-06T23:04:15Z	2026-09-06T23:04:20Z	5
+34065779670	771c6ed	gate (windows-latest)	9	G5 kiem ban ke cong cu + T1..T8 (packet	success	2026-09-06T23:04:20Z	2026-09-06T23:06:39Z	139
+34065779670	771c6ed	gate (windows-latest)	10	cài Ruff 0.15.15 và in probe dương	success	2026-09-06T23:06:39Z	2026-09-06T23:06:42Z	3
+34065779670	771c6ed	gate (windows-latest)	11	PR head contains required EOL base	skipped	2026-09-06T23:06:42Z	2026-09-06T23:06:42Z	0
+34065779670	771c6ed	gate (windows-latest)	12	py_compile	success	2026-09-06T23:06:42Z	2026-09-06T23:06:43Z	1
+34065779670	771c6ed	gate (windows-latest)	13	codex credential selftest (packet #300)	success	2026-09-06T23:06:43Z	2026-09-06T23:06:45Z	2
+34065779670	771c6ed	gate (windows-latest)	14	packet-loop selftest	success	2026-09-06T23:06:45Z	2026-09-06T23:15:56Z	551
+34065779670	771c6ed	gate (windows-latest)	15	bien-nhan v2 selftest	success	2026-09-06T23:15:56Z	2026-09-06T23:23:11Z	435
+34065779670	771c6ed	gate (windows-latest)	16	test registry (phạm vi + các bộ chưa được nối)	success	2026-09-06T23:23:11Z	2026-09-06T23:40:35Z	1044
+34065779670	771c6ed	gate (windows-latest)	17	idiom-ba-ten selftest	success	2026-09-06T23:40:35Z	2026-09-06T23:40:39Z	4
+34065779670	771c6ed	gate (windows-latest)	18	eol-policy selftest	success	2026-09-06T23:40:39Z	2026-09-06T23:41:32Z	53
+34065779670	771c6ed	gate (windows-latest)	19	pre-push selftest	success	2026-09-06T23:41:32Z	2026-09-06T23:42:06Z	34
+34065779670	771c6ed	gate (windows-latest)	20	lease-publish selftest (đo lại setup sau G5)	success	2026-09-06T23:42:06Z	2026-09-06T23:45:46Z	220
+34065779670	771c6ed	gate (windows-latest)	21	don-nhanh selftest (chốt xoá nhánh)	skipped	2026-09-06T23:45:46Z	2026-09-06T23:45:46Z	0
+34065779670	771c6ed	gate (windows-latest)	22	bo ca gate chay TRONG cgroup duoc uy quyen (Linux)	skipped	2026-09-06T23:45:46Z	2026-09-06T23:45:46Z	0
+34065779670	771c6ed	gate (windows-latest)	23	gate lifecycle selftest (nen khong co cgroup)	success	2026-09-06T23:45:46Z	2026-09-06T23:46:10Z	24
+34065779670	771c6ed	gate (windows-latest)	24	eol-policy survey	success	2026-09-06T23:46:10Z	2026-09-06T23:46:11Z	1
+34065779670	771c6ed	gate (windows-latest)	25	bundled-fragment check (topology gói)	success	2026-09-06T23:46:11Z	2026-09-06T23:46:18Z	7
+34065779670	771c6ed	gate (windows-latest)	26	gen_instructions selftest	success	2026-09-06T23:46:18Z	2026-09-06T23:46:18Z	0
+34065779670	771c6ed	gate (windows-latest)	27	command-registry unit test (AG-T0-03)	success	2026-09-06T23:46:18Z	2026-09-06T23:46:21Z	3
+34065779670	771c6ed	gate (windows-latest)	28	tl selftest (luot PR — khong sinh bang chung)	skipped	2026-09-06T23:46:21Z	2026-09-06T23:46:21Z	0
+34065779670	771c6ed	gate (windows-latest)	29	tl selftest (co bang chung exact-identity)	success	2026-09-06T23:46:21Z	2026-09-06T23:50:08Z	227
+34065779670	771c6ed	gate (windows-latest)	30	tai len gate-evidence	success	2026-09-06T23:50:08Z	2026-09-06T23:50:10Z	2
+34065779670	771c6ed	gate (windows-latest)	31	workflow-audit strict	success	2026-09-06T23:50:10Z	2026-09-06T23:50:12Z	2
+34065779670	771c6ed	gate (windows-latest)	32	golden-test	success	2026-09-06T23:50:12Z	2026-09-06T23:51:21Z	69
+34065779670	771c6ed	gate (windows-latest)	33	doc-claims-check strict	success	2026-09-06T23:51:21Z	2026-09-06T23:51:27Z	6
+34065779670	771c6ed	gate (windows-latest)	34	determinism-audit strict	success	2026-09-06T23:51:27Z	2026-09-06T23:52:51Z	84
+34065779670	771c6ed	gate (windows-latest)	35	ci-phamvi guard (bang phu thuoc khop ma)	success	2026-09-06T23:52:51Z	2026-09-06T23:52:53Z	2
+34065779670	771c6ed	gate (windows-latest)	36	ci-phamvi selftest (phan chung — cong co rang)	skipped	2026-09-06T23:52:53Z	2026-09-06T23:52:53Z	0
+34065779670	771c6ed	gate (windows-latest)	37	release-check full	success	2026-09-06T23:52:53Z	2026-09-06T23:52:56Z	3
+34065779670	771c6ed	gate (windows-latest)	38	release-verify strict (lane LAND — manifest committed)	skipped	2026-09-06T23:52:56Z	2026-09-06T23:52:56Z	0
+34065779670	771c6ed	gate (windows-latest)	39	release-verify strict (lane WORKER — manifest TẠM ngoài repo)	success	2026-09-06T23:52:56Z	2026-09-06T23:52:59Z	3
+34065779670	771c6ed	gate (windows-latest)	40	release-bundle x2 cùng SHA-256	success	2026-09-06T23:52:59Z	2026-09-06T23:53:04Z	5
+34065779670	771c6ed	gate (windows-latest)	41	tl_boot smoke	success	2026-09-06T23:53:04Z	2026-09-06T23:53:06Z	2
+34065779670	771c6ed	gate (windows-latest)	81	Post Run actions/setup-python@v5	success	2026-09-06T23:53:06Z	2026-09-06T23:53:06Z	0
+34065779670	771c6ed	gate (windows-latest)	82	Post Run actions/checkout@v4	success	2026-09-06T23:53:06Z	2026-09-06T23:53:09Z	3
+34065779670	771c6ed	gate (windows-latest)	83	Complete job	success	2026-09-06T23:53:09Z	2026-09-06T23:53:09Z	0
+34070122978	0c3405f	gate (ubuntu-latest)	1	Set up job	success	2026-09-07T00:32:18Z	2026-09-07T00:32:19Z	1
+34070122978	0c3405f	gate (ubuntu-latest)	2	Force LF checkout (hash parity với manifest)	success	2026-09-07T00:32:19Z	2026-09-07T00:32:19Z	0
+34070122978	0c3405f	gate (ubuntu-latest)	3	Run actions/checkout@v4	success	2026-09-07T00:32:19Z	2026-09-07T00:32:26Z	7
+34070122978	0c3405f	gate (ubuntu-latest)	4	Run actions/setup-python@v5	success	2026-09-07T00:32:26Z	2026-09-07T00:32:26Z	0
+34070122978	0c3405f	gate (ubuntu-latest)	5	cài PyYAML + jsonschema (cổng đăng lease + validator verdict cần)	success	2026-09-07T00:32:26Z	2026-09-07T00:32:28Z	2
+34070122978	0c3405f	gate (ubuntu-latest)	6	cài actionlint cho G5	success	2026-09-07T00:32:28Z	2026-09-07T00:32:28Z	0
+34070122978	0c3405f	gate (ubuntu-latest)	7	cài shellcheck cho G5 (cài xong đo lại)	success	2026-09-07T00:32:28Z	2026-09-07T00:32:30Z	2
+34070122978	0c3405f	gate (ubuntu-latest)	8	cài rg cho G5 (cài xong đo lại)	success	2026-09-07T00:32:30Z	2026-09-07T00:32:34Z	4
+34070122978	0c3405f	gate (ubuntu-latest)	9	G5 kiem ban ke cong cu + T1..T8 (packet	success	2026-09-07T00:32:34Z	2026-09-07T00:33:30Z	56
+34070122978	0c3405f	gate (ubuntu-latest)	10	cài Ruff 0.15.15 và in probe dương	success	2026-09-07T00:33:30Z	2026-09-07T00:33:32Z	2
+34070122978	0c3405f	gate (ubuntu-latest)	11	PR head contains required EOL base	skipped	2026-09-07T00:33:32Z	2026-09-07T00:33:32Z	0
+34070122978	0c3405f	gate (ubuntu-latest)	12	py_compile	success	2026-09-07T00:33:32Z	2026-09-07T00:33:32Z	0
+34070122978	0c3405f	gate (ubuntu-latest)	13	codex credential selftest (packet #300)	success	2026-09-07T00:33:32Z	2026-09-07T00:33:32Z	0
+34070122978	0c3405f	gate (ubuntu-latest)	14	packet-loop selftest	success	2026-09-07T00:33:32Z	2026-09-07T00:37:22Z	230
+34070122978	0c3405f	gate (ubuntu-latest)	15	bien-nhan v2 selftest	success	2026-09-07T00:37:22Z	2026-09-07T00:38:17Z	55
+34070122978	0c3405f	gate (ubuntu-latest)	16	test registry (phạm vi + các bộ chưa được nối)	success	2026-09-07T00:38:17Z	2026-09-07T00:52:00Z	823
+34070122978	0c3405f	gate (ubuntu-latest)	17	idiom-ba-ten selftest	success	2026-09-07T00:52:00Z	2026-09-07T00:52:02Z	2
+34070122978	0c3405f	gate (ubuntu-latest)	18	eol-policy selftest	success	2026-09-07T00:52:02Z	2026-09-07T00:52:19Z	17
+34070122978	0c3405f	gate (ubuntu-latest)	19	pre-push selftest	success	2026-09-07T00:52:19Z	2026-09-07T00:52:26Z	7
+34070122978	0c3405f	gate (ubuntu-latest)	20	lease-publish selftest (đo lại setup sau G5)	success	2026-09-07T00:52:26Z	2026-09-07T00:53:32Z	66
+34070122978	0c3405f	gate (ubuntu-latest)	21	don-nhanh selftest (chốt xoá nhánh)	success	2026-09-07T00:53:32Z	2026-09-07T00:53:56Z	24
+34070122978	0c3405f	gate (ubuntu-latest)	22	bo ca gate chay TRONG cgroup duoc uy quyen (Linux)	success	2026-09-07T00:53:56Z	2026-09-07T00:55:17Z	81
+34070122978	0c3405f	gate (ubuntu-latest)	23	gate lifecycle selftest (nen khong co cgroup)	skipped	2026-09-07T00:55:17Z	2026-09-07T00:55:17Z	0
+34070122978	0c3405f	gate (ubuntu-latest)	24	eol-policy survey	success	2026-09-07T00:55:17Z	2026-09-07T00:55:17Z	0
+34070122978	0c3405f	gate (ubuntu-latest)	25	bundled-fragment check (topology gói)	success	2026-09-07T00:55:17Z	2026-09-07T00:55:21Z	4
+34070122978	0c3405f	gate (ubuntu-latest)	26	gen_instructions selftest	success	2026-09-07T00:55:21Z	2026-09-07T00:55:21Z	0
+34070122978	0c3405f	gate (ubuntu-latest)	27	command-registry unit test (AG-T0-03)	success	2026-09-07T00:55:21Z	2026-09-07T00:55:22Z	1
+34070122978	0c3405f	gate (ubuntu-latest)	28	tl selftest (luot PR — khong sinh bang chung)	skipped	2026-09-07T00:55:22Z	2026-09-07T00:55:22Z	0
+34070122978	0c3405f	gate (ubuntu-latest)	29	tl selftest (co bang chung exact-identity)	success	2026-09-07T00:55:22Z	2026-09-07T00:57:18Z	116
+34070122978	0c3405f	gate (ubuntu-latest)	30	tai len gate-evidence	success	2026-09-07T00:57:18Z	2026-09-07T00:57:19Z	1
+34070122978	0c3405f	gate (ubuntu-latest)	31	workflow-audit strict	success	2026-09-07T00:57:19Z	2026-09-07T00:57:20Z	1
+34070122978	0c3405f	gate (ubuntu-latest)	32	golden-test	success	2026-09-07T00:57:20Z	2026-09-07T00:57:45Z	25
+34070122978	0c3405f	gate (ubuntu-latest)	33	doc-claims-check strict	success	2026-09-07T00:57:45Z	2026-09-07T00:57:48Z	3
+34070122978	0c3405f	gate (ubuntu-latest)	34	determinism-audit strict	success	2026-09-07T00:57:48Z	2026-09-07T00:58:21Z	33
+34070122978	0c3405f	gate (ubuntu-latest)	35	ci-phamvi guard (bang phu thuoc khop ma)	success	2026-09-07T00:58:21Z	2026-09-07T00:58:21Z	0
+34070122978	0c3405f	gate (ubuntu-latest)	36	ci-phamvi selftest (phan chung — cong co rang)	success	2026-09-07T00:58:21Z	2026-09-07T00:58:24Z	3
+34070122978	0c3405f	gate (ubuntu-latest)	37	release-check full	success	2026-09-07T00:58:24Z	2026-09-07T00:58:26Z	2
+34070122978	0c3405f	gate (ubuntu-latest)	38	release-verify strict (lane LAND — manifest committed)	skipped	2026-09-07T00:58:26Z	2026-09-07T00:58:26Z	0
+34070122978	0c3405f	gate (ubuntu-latest)	39	release-verify strict (lane WORKER — manifest TẠM ngoài repo)	success	2026-09-07T00:58:26Z	2026-09-07T00:58:27Z	1
+34070122978	0c3405f	gate (ubuntu-latest)	40	release-bundle x2 cùng SHA-256	success	2026-09-07T00:58:27Z	2026-09-07T00:58:31Z	4
+34070122978	0c3405f	gate (ubuntu-latest)	41	tl_boot smoke	success	2026-09-07T00:58:31Z	2026-09-07T00:58:32Z	1
+34070122978	0c3405f	gate (ubuntu-latest)	81	Post Run actions/setup-python@v5	success	2026-09-07T00:58:32Z	2026-09-07T00:58:32Z	0
+34070122978	0c3405f	gate (ubuntu-latest)	82	Post Run actions/checkout@v4	success	2026-09-07T00:58:32Z	2026-09-07T00:58:32Z	0
+34070122978	0c3405f	gate (ubuntu-latest)	83	Complete job	success	2026-09-07T00:58:32Z	2026-09-07T00:58:32Z	0
+34070122978	0c3405f	gate (windows-latest)	1	Set up job	success	2026-09-07T00:32:19Z	2026-09-07T00:32:21Z	2
+34070122978	0c3405f	gate (windows-latest)	2	Force LF checkout (hash parity với manifest)	success	2026-09-07T00:32:21Z	2026-09-07T00:32:23Z	2
+34070122978	0c3405f	gate (windows-latest)	3	Run actions/checkout@v4	success	2026-09-07T00:32:23Z	2026-09-07T00:32:36Z	13
+34070122978	0c3405f	gate (windows-latest)	4	Run actions/setup-python@v5	success	2026-09-07T00:32:36Z	2026-09-07T00:32:37Z	1
+34070122978	0c3405f	gate (windows-latest)	5	cài PyYAML + jsonschema (cổng đăng lease + validator verdict cần)	success	2026-09-07T00:32:37Z	2026-09-07T00:32:45Z	8
+34070122978	0c3405f	gate (windows-latest)	6	cài actionlint cho G5	success	2026-09-07T00:32:45Z	2026-09-07T00:32:47Z	2
+34070122978	0c3405f	gate (windows-latest)	7	cài shellcheck cho G5 (cài xong đo lại)	success	2026-09-07T00:32:47Z	2026-09-07T00:33:05Z	18
+34070122978	0c3405f	gate (windows-latest)	8	cài rg cho G5 (cài xong đo lại)	success	2026-09-07T00:33:05Z	2026-09-07T00:33:11Z	6
+34070122978	0c3405f	gate (windows-latest)	9	G5 kiem ban ke cong cu + T1..T8 (packet	success	2026-09-07T00:33:11Z	2026-09-07T00:35:37Z	146
+34070122978	0c3405f	gate (windows-latest)	10	cài Ruff 0.15.15 và in probe dương	success	2026-09-07T00:35:37Z	2026-09-07T00:35:41Z	4
+34070122978	0c3405f	gate (windows-latest)	11	PR head contains required EOL base	skipped	2026-09-07T00:35:41Z	2026-09-07T00:35:41Z	0
+34070122978	0c3405f	gate (windows-latest)	12	py_compile	success	2026-09-07T00:35:41Z	2026-09-07T00:35:42Z	1
+34070122978	0c3405f	gate (windows-latest)	13	codex credential selftest (packet #300)	success	2026-09-07T00:35:42Z	2026-09-07T00:35:43Z	1
+34070122978	0c3405f	gate (windows-latest)	14	packet-loop selftest	success	2026-09-07T00:35:43Z	2026-09-07T00:45:09Z	566
+34070122978	0c3405f	gate (windows-latest)	15	bien-nhan v2 selftest	success	2026-09-07T00:45:09Z	2026-09-07T00:52:27Z	438
+34070122978	0c3405f	gate (windows-latest)	16	test registry (phạm vi + các bộ chưa được nối)	success	2026-09-07T00:52:27Z	2026-09-07T01:10:18Z	1071
+34070122978	0c3405f	gate (windows-latest)	17	idiom-ba-ten selftest	success	2026-09-07T01:10:18Z	2026-09-07T01:10:21Z	3
+34070122978	0c3405f	gate (windows-latest)	18	eol-policy selftest	success	2026-09-07T01:10:21Z	2026-09-07T01:11:25Z	64
+34070122978	0c3405f	gate (windows-latest)	19	pre-push selftest	success	2026-09-07T01:11:25Z	2026-09-07T01:11:46Z	21
+34070122978	0c3405f	gate (windows-latest)	20	lease-publish selftest (đo lại setup sau G5)	success	2026-09-07T01:11:46Z	2026-09-07T01:15:21Z	215
+34070122978	0c3405f	gate (windows-latest)	21	don-nhanh selftest (chốt xoá nhánh)	skipped	2026-09-07T01:15:21Z	2026-09-07T01:15:21Z	0
+34070122978	0c3405f	gate (windows-latest)	22	bo ca gate chay TRONG cgroup duoc uy quyen (Linux)	skipped	2026-09-07T01:15:21Z	2026-09-07T01:15:21Z	0
+34070122978	0c3405f	gate (windows-latest)	23	gate lifecycle selftest (nen khong co cgroup)	success	2026-09-07T01:15:21Z	2026-09-07T01:15:46Z	25
+34070122978	0c3405f	gate (windows-latest)	24	eol-policy survey	success	2026-09-07T01:15:46Z	2026-09-07T01:15:48Z	2
+34070122978	0c3405f	gate (windows-latest)	25	bundled-fragment check (topology gói)	success	2026-09-07T01:15:48Z	2026-09-07T01:15:54Z	6
+34070122978	0c3405f	gate (windows-latest)	26	gen_instructions selftest	success	2026-09-07T01:15:54Z	2026-09-07T01:15:55Z	1
+34070122978	0c3405f	gate (windows-latest)	27	command-registry unit test (AG-T0-03)	success	2026-09-07T01:15:55Z	2026-09-07T01:15:57Z	2
+34070122978	0c3405f	gate (windows-latest)	28	tl selftest (luot PR — khong sinh bang chung)	skipped	2026-09-07T01:15:57Z	2026-09-07T01:15:57Z	0
+34070122978	0c3405f	gate (windows-latest)	29	tl selftest (co bang chung exact-identity)	success	2026-09-07T01:15:57Z	2026-09-07T01:19:41Z	224
+34070122978	0c3405f	gate (windows-latest)	30	tai len gate-evidence	success	2026-09-07T01:19:41Z	2026-09-07T01:19:43Z	2
+34070122978	0c3405f	gate (windows-latest)	31	workflow-audit strict	success	2026-09-07T01:19:43Z	2026-09-07T01:19:45Z	2
+34070122978	0c3405f	gate (windows-latest)	32	golden-test	success	2026-09-07T01:19:45Z	2026-09-07T01:20:56Z	71
+34070122978	0c3405f	gate (windows-latest)	33	doc-claims-check strict	success	2026-09-07T01:20:56Z	2026-09-07T01:21:02Z	6
+34070122978	0c3405f	gate (windows-latest)	34	determinism-audit strict	success	2026-09-07T01:21:02Z	2026-09-07T01:22:23Z	81
+34070122978	0c3405f	gate (windows-latest)	35	ci-phamvi guard (bang phu thuoc khop ma)	success	2026-09-07T01:22:23Z	2026-09-07T01:22:24Z	1
+34070122978	0c3405f	gate (windows-latest)	36	ci-phamvi selftest (phan chung — cong co rang)	skipped	2026-09-07T01:22:24Z	2026-09-07T01:22:24Z	0
+34070122978	0c3405f	gate (windows-latest)	37	release-check full	success	2026-09-07T01:22:24Z	2026-09-07T01:22:27Z	3
+34070122978	0c3405f	gate (windows-latest)	38	release-verify strict (lane LAND — manifest committed)	skipped	2026-09-07T01:22:27Z	2026-09-07T01:22:27Z	0
+34070122978	0c3405f	gate (windows-latest)	39	release-verify strict (lane WORKER — manifest TẠM ngoài repo)	success	2026-09-07T01:22:27Z	2026-09-07T01:22:29Z	2
+34070122978	0c3405f	gate (windows-latest)	40	release-bundle x2 cùng SHA-256	success	2026-09-07T01:22:29Z	2026-09-07T01:22:37Z	8
+34070122978	0c3405f	gate (windows-latest)	41	tl_boot smoke	success	2026-09-07T01:22:37Z	2026-09-07T01:22:40Z	3
+34070122978	0c3405f	gate (windows-latest)	81	Post Run actions/setup-python@v5	success	2026-09-07T01:22:40Z	2026-09-07T01:22:41Z	1
+34070122978	0c3405f	gate (windows-latest)	82	Post Run actions/checkout@v4	success	2026-09-07T01:22:41Z	2026-09-07T01:22:45Z	4
+34070122978	0c3405f	gate (windows-latest)	83	Complete job	success	2026-09-07T01:22:45Z	2026-09-07T01:22:45Z	0
+34045664423	426bfc0	gate (ubuntu-latest)	1	Set up job	success	2026-09-06T16:30:33Z	2026-09-06T16:30:34Z	1
+34045664423	426bfc0	gate (ubuntu-latest)	2	Force LF checkout (hash parity với manifest)	success	2026-09-06T16:30:34Z	2026-09-06T16:30:34Z	0
+34045664423	426bfc0	gate (ubuntu-latest)	3	Run actions/checkout@v4	success	2026-09-06T16:30:34Z	2026-09-06T16:30:41Z	7
+34045664423	426bfc0	gate (ubuntu-latest)	4	Run actions/setup-python@v5	success	2026-09-06T16:30:41Z	2026-09-06T16:30:42Z	1
+34045664423	426bfc0	gate (ubuntu-latest)	5	cài PyYAML + jsonschema (cổng đăng lease + validator verdict cần)	success	2026-09-06T16:30:42Z	2026-09-06T16:30:44Z	2
+34045664423	426bfc0	gate (ubuntu-latest)	6	cài actionlint cho G5	success	2026-09-06T16:30:44Z	2026-09-06T16:30:44Z	0
+34045664423	426bfc0	gate (ubuntu-latest)	7	cài shellcheck cho G5 (cài xong đo lại)	success	2026-09-06T16:30:44Z	2026-09-06T16:30:46Z	2
+34045664423	426bfc0	gate (ubuntu-latest)	8	cài rg cho G5 (cài xong đo lại)	success	2026-09-06T16:30:46Z	2026-09-06T16:30:50Z	4
+34045664423	426bfc0	gate (ubuntu-latest)	9	G5 kiem ban ke cong cu + T1..T8 (packet	success	2026-09-06T16:30:50Z	2026-09-06T16:31:42Z	52
+34045664423	426bfc0	gate (ubuntu-latest)	10	cài Ruff 0.15.15 và in probe dương	success	2026-09-06T16:31:42Z	2026-09-06T16:31:44Z	2
+34045664423	426bfc0	gate (ubuntu-latest)	11	PR head contains required EOL base	skipped	2026-09-06T16:31:44Z	2026-09-06T16:31:44Z	0
+34045664423	426bfc0	gate (ubuntu-latest)	12	py_compile	success	2026-09-06T16:31:44Z	2026-09-06T16:31:44Z	0
+34045664423	426bfc0	gate (ubuntu-latest)	13	codex credential selftest (packet #300)	success	2026-09-06T16:31:44Z	2026-09-06T16:31:44Z	0
+34045664423	426bfc0	gate (ubuntu-latest)	14	packet-loop selftest	success	2026-09-06T16:31:44Z	2026-09-06T16:35:23Z	219
+34045664423	426bfc0	gate (ubuntu-latest)	15	test registry (phạm vi + các bộ chưa được nối)	success	2026-09-06T16:35:23Z	2026-09-06T16:48:31Z	788
+34045664423	426bfc0	gate (ubuntu-latest)	16	idiom-ba-ten selftest	success	2026-09-06T16:48:31Z	2026-09-06T16:48:33Z	2
+34045664423	426bfc0	gate (ubuntu-latest)	17	eol-policy selftest	success	2026-09-06T16:48:33Z	2026-09-06T16:48:49Z	16
+34045664423	426bfc0	gate (ubuntu-latest)	18	pre-push selftest	success	2026-09-06T16:48:49Z	2026-09-06T16:48:56Z	7
+34045664423	426bfc0	gate (ubuntu-latest)	19	lease-publish selftest (đo lại setup sau G5)	success	2026-09-06T16:48:56Z	2026-09-06T16:49:56Z	60
+34045664423	426bfc0	gate (ubuntu-latest)	20	don-nhanh selftest (chốt xoá nhánh)	success	2026-09-06T16:49:56Z	2026-09-06T16:50:18Z	22
+34045664423	426bfc0	gate (ubuntu-latest)	21	bo ca gate chay TRONG cgroup duoc uy quyen (Linux)	success	2026-09-06T16:50:18Z	2026-09-06T16:51:40Z	82
+34045664423	426bfc0	gate (ubuntu-latest)	22	gate lifecycle selftest (nen khong co cgroup)	skipped	2026-09-06T16:51:40Z	2026-09-06T16:51:40Z	0
+34045664423	426bfc0	gate (ubuntu-latest)	23	eol-policy survey	success	2026-09-06T16:51:40Z	2026-09-06T16:51:40Z	0
+34045664423	426bfc0	gate (ubuntu-latest)	24	bundled-fragment check (topology gói)	success	2026-09-06T16:51:40Z	2026-09-06T16:51:43Z	3
+34045664423	426bfc0	gate (ubuntu-latest)	25	gen_instructions selftest	success	2026-09-06T16:51:43Z	2026-09-06T16:51:43Z	0
+34045664423	426bfc0	gate (ubuntu-latest)	26	command-registry unit test (AG-T0-03)	success	2026-09-06T16:51:43Z	2026-09-06T16:51:45Z	2
+34045664423	426bfc0	gate (ubuntu-latest)	27	tl selftest (luot PR — khong sinh bang chung)	skipped	2026-09-06T16:51:45Z	2026-09-06T16:51:45Z	0
+34045664423	426bfc0	gate (ubuntu-latest)	28	tl selftest (co bang chung exact-identity)	success	2026-09-06T16:51:45Z	2026-09-06T16:53:36Z	111
+34045664423	426bfc0	gate (ubuntu-latest)	29	tai len gate-evidence	success	2026-09-06T16:53:36Z	2026-09-06T16:53:37Z	1
+34045664423	426bfc0	gate (ubuntu-latest)	30	workflow-audit strict	success	2026-09-06T16:53:37Z	2026-09-06T16:53:37Z	0
+34045664423	426bfc0	gate (ubuntu-latest)	31	golden-test	success	2026-09-06T16:53:37Z	2026-09-06T16:54:01Z	24
+34045664423	426bfc0	gate (ubuntu-latest)	32	doc-claims-check strict	success	2026-09-06T16:54:01Z	2026-09-06T16:54:04Z	3
+34045664423	426bfc0	gate (ubuntu-latest)	33	determinism-audit strict	success	2026-09-06T16:54:04Z	2026-09-06T16:54:35Z	31
+34045664423	426bfc0	gate (ubuntu-latest)	34	ci-phamvi guard (bang phu thuoc khop ma)	success	2026-09-06T16:54:35Z	2026-09-06T16:54:35Z	0
+34045664423	426bfc0	gate (ubuntu-latest)	35	ci-phamvi selftest (phan chung — cong co rang)	success	2026-09-06T16:54:35Z	2026-09-06T16:54:38Z	3
+34045664423	426bfc0	gate (ubuntu-latest)	36	release-check full	success	2026-09-06T16:54:38Z	2026-09-06T16:54:39Z	1
+34045664423	426bfc0	gate (ubuntu-latest)	37	release-verify strict (lane LAND — manifest committed)	skipped	2026-09-06T16:54:39Z	2026-09-06T16:54:39Z	0
+34045664423	426bfc0	gate (ubuntu-latest)	38	release-verify strict (lane WORKER — manifest TẠM ngoài repo)	success	2026-09-06T16:54:39Z	2026-09-06T16:54:40Z	1
+34045664423	426bfc0	gate (ubuntu-latest)	39	release-bundle x2 cùng SHA-256	success	2026-09-06T16:54:40Z	2026-09-06T16:54:44Z	4
+34045664423	426bfc0	gate (ubuntu-latest)	40	tl_boot smoke	success	2026-09-06T16:54:44Z	2026-09-06T16:54:45Z	1
+34045664423	426bfc0	gate (ubuntu-latest)	79	Post Run actions/setup-python@v5	success	2026-09-06T16:54:45Z	2026-09-06T16:54:45Z	0
+34045664423	426bfc0	gate (ubuntu-latest)	80	Post Run actions/checkout@v4	success	2026-09-06T16:54:45Z	2026-09-06T16:54:45Z	0
+34045664423	426bfc0	gate (ubuntu-latest)	81	Complete job	success	2026-09-06T16:54:45Z	2026-09-06T16:54:45Z	0
+34045664423	426bfc0	gate (windows-latest)	1	Set up job	success	2026-09-06T16:30:33Z	2026-09-06T16:30:34Z	1
+34045664423	426bfc0	gate (windows-latest)	2	Force LF checkout (hash parity với manifest)	success	2026-09-06T16:30:34Z	2026-09-06T16:30:35Z	1
+34045664423	426bfc0	gate (windows-latest)	3	Run actions/checkout@v4	success	2026-09-06T16:30:35Z	2026-09-06T16:30:47Z	12
+34045664423	426bfc0	gate (windows-latest)	4	Run actions/setup-python@v5	success	2026-09-06T16:30:47Z	2026-09-06T16:30:48Z	1
+34045664423	426bfc0	gate (windows-latest)	5	cài PyYAML + jsonschema (cổng đăng lease + validator verdict cần)	success	2026-09-06T16:30:48Z	2026-09-06T16:30:55Z	7
+34045664423	426bfc0	gate (windows-latest)	6	cài actionlint cho G5	success	2026-09-06T16:30:55Z	2026-09-06T16:30:57Z	2
+34045664423	426bfc0	gate (windows-latest)	7	cài shellcheck cho G5 (cài xong đo lại)	success	2026-09-06T16:30:57Z	2026-09-06T16:31:15Z	18
+34045664423	426bfc0	gate (windows-latest)	8	cài rg cho G5 (cài xong đo lại)	success	2026-09-06T16:31:15Z	2026-09-06T16:31:19Z	4
+34045664423	426bfc0	gate (windows-latest)	9	G5 kiem ban ke cong cu + T1..T8 (packet	success	2026-09-06T16:31:19Z	2026-09-06T16:33:49Z	150
+34045664423	426bfc0	gate (windows-latest)	10	cài Ruff 0.15.15 và in probe dương	success	2026-09-06T16:33:49Z	2026-09-06T16:33:53Z	4
+34045664423	426bfc0	gate (windows-latest)	11	PR head contains required EOL base	skipped	2026-09-06T16:33:53Z	2026-09-06T16:33:53Z	0
+34045664423	426bfc0	gate (windows-latest)	12	py_compile	success	2026-09-06T16:33:53Z	2026-09-06T16:33:54Z	1
+34045664423	426bfc0	gate (windows-latest)	13	codex credential selftest (packet #300)	success	2026-09-06T16:33:54Z	2026-09-06T16:33:55Z	1
+34045664423	426bfc0	gate (windows-latest)	14	packet-loop selftest	success	2026-09-06T16:33:55Z	2026-09-06T16:43:37Z	582
+34045664423	426bfc0	gate (windows-latest)	15	test registry (phạm vi + các bộ chưa được nối)	success	2026-09-06T16:43:37Z	2026-09-06T17:01:19Z	1062
+34045664423	426bfc0	gate (windows-latest)	16	idiom-ba-ten selftest	success	2026-09-06T17:01:19Z	2026-09-06T17:01:23Z	4
+34045664423	426bfc0	gate (windows-latest)	17	eol-policy selftest	success	2026-09-06T17:01:23Z	2026-09-06T17:02:28Z	65
+34045664423	426bfc0	gate (windows-latest)	18	pre-push selftest	success	2026-09-06T17:02:28Z	2026-09-06T17:02:53Z	25
+34045664423	426bfc0	gate (windows-latest)	19	lease-publish selftest (đo lại setup sau G5)	success	2026-09-06T17:02:53Z	2026-09-06T17:06:25Z	212
+34045664423	426bfc0	gate (windows-latest)	20	don-nhanh selftest (chốt xoá nhánh)	skipped	2026-09-06T17:06:25Z	2026-09-06T17:06:25Z	0
+34045664423	426bfc0	gate (windows-latest)	21	bo ca gate chay TRONG cgroup duoc uy quyen (Linux)	skipped	2026-09-06T17:06:25Z	2026-09-06T17:06:25Z	0
+34045664423	426bfc0	gate (windows-latest)	22	gate lifecycle selftest (nen khong co cgroup)	success	2026-09-06T17:06:25Z	2026-09-06T17:06:49Z	24
+34045664423	426bfc0	gate (windows-latest)	23	eol-policy survey	success	2026-09-06T17:06:49Z	2026-09-06T17:06:51Z	2
+34045664423	426bfc0	gate (windows-latest)	24	bundled-fragment check (topology gói)	success	2026-09-06T17:06:51Z	2026-09-06T17:07:03Z	12
+34045664423	426bfc0	gate (windows-latest)	25	gen_instructions selftest	success	2026-09-06T17:07:03Z	2026-09-06T17:07:04Z	1
+34045664423	426bfc0	gate (windows-latest)	26	command-registry unit test (AG-T0-03)	success	2026-09-06T17:07:04Z	2026-09-06T17:07:08Z	4
+34045664423	426bfc0	gate (windows-latest)	27	tl selftest (luot PR — khong sinh bang chung)	skipped	2026-09-06T17:07:08Z	2026-09-06T17:07:08Z	0
+34045664423	426bfc0	gate (windows-latest)	28	tl selftest (co bang chung exact-identity)	success	2026-09-06T17:07:08Z	2026-09-06T17:10:36Z	208
+34045664423	426bfc0	gate (windows-latest)	29	tai len gate-evidence	success	2026-09-06T17:10:36Z	2026-09-06T17:10:38Z	2
+34045664423	426bfc0	gate (windows-latest)	30	workflow-audit strict	success	2026-09-06T17:10:38Z	2026-09-06T17:10:41Z	3
+34045664423	426bfc0	gate (windows-latest)	31	golden-test	success	2026-09-06T17:10:41Z	2026-09-06T17:11:45Z	64
+34045664423	426bfc0	gate (windows-latest)	32	doc-claims-check strict	success	2026-09-06T17:11:45Z	2026-09-06T17:11:51Z	6
+34045664423	426bfc0	gate (windows-latest)	33	determinism-audit strict	success	2026-09-06T17:11:51Z	2026-09-06T17:13:15Z	84
+34045664423	426bfc0	gate (windows-latest)	34	ci-phamvi guard (bang phu thuoc khop ma)	success	2026-09-06T17:13:15Z	2026-09-06T17:13:16Z	1
+34045664423	426bfc0	gate (windows-latest)	35	ci-phamvi selftest (phan chung — cong co rang)	skipped	2026-09-06T17:13:16Z	2026-09-06T17:13:16Z	0
+34045664423	426bfc0	gate (windows-latest)	36	release-check full	success	2026-09-06T17:13:16Z	2026-09-06T17:13:21Z	5
+34045664423	426bfc0	gate (windows-latest)	37	release-verify strict (lane LAND — manifest committed)	skipped	2026-09-06T17:13:21Z	2026-09-06T17:13:21Z	0
+34045664423	426bfc0	gate (windows-latest)	38	release-verify strict (lane WORKER — manifest TẠM ngoài repo)	success	2026-09-06T17:13:21Z	2026-09-06T17:13:26Z	5
+34045664423	426bfc0	gate (windows-latest)	39	release-bundle x2 cùng SHA-256	success	2026-09-06T17:13:26Z	2026-09-06T17:13:35Z	9
+34045664423	426bfc0	gate (windows-latest)	40	tl_boot smoke	success	2026-09-06T17:13:35Z	2026-09-06T17:13:39Z	4
+34045664423	426bfc0	gate (windows-latest)	79	Post Run actions/setup-python@v5	success	2026-09-06T17:13:39Z	2026-09-06T17:13:39Z	0
+34045664423	426bfc0	gate (windows-latest)	80	Post Run actions/checkout@v4	success	2026-09-06T17:13:39Z	2026-09-06T17:13:43Z	4
+34045664423	426bfc0	gate (windows-latest)	81	Complete job	success	2026-09-06T17:13:43Z	2026-09-06T17:13:43Z	0
+34048229370	4cd80c5	gate (windows-latest)	1	Set up job	success	2026-09-06T17:19:33Z	2026-09-06T17:19:34Z	1
+34048229370	4cd80c5	gate (windows-latest)	2	Force LF checkout (hash parity với manifest)	success	2026-09-06T17:19:34Z	2026-09-06T17:19:36Z	2
+34048229370	4cd80c5	gate (windows-latest)	3	Run actions/checkout@v4	success	2026-09-06T17:19:36Z	2026-09-06T17:19:56Z	20
+34048229370	4cd80c5	gate (windows-latest)	4	Run actions/setup-python@v5	success	2026-09-06T17:19:56Z	2026-09-06T17:19:57Z	1
+34048229370	4cd80c5	gate (windows-latest)	5	cài PyYAML + jsonschema (cổng đăng lease + validator verdict cần)	success	2026-09-06T17:19:57Z	2026-09-06T17:20:05Z	8
+34048229370	4cd80c5	gate (windows-latest)	6	cài actionlint cho G5	success	2026-09-06T17:20:05Z	2026-09-06T17:20:06Z	1
+34048229370	4cd80c5	gate (windows-latest)	7	cài shellcheck cho G5 (cài xong đo lại)	success	2026-09-06T17:20:06Z	2026-09-06T17:20:24Z	18
+34048229370	4cd80c5	gate (windows-latest)	8	cài rg cho G5 (cài xong đo lại)	success	2026-09-06T17:20:24Z	2026-09-06T17:20:29Z	5
+34048229370	4cd80c5	gate (windows-latest)	9	G5 kiem ban ke cong cu + T1..T8 (packet	success	2026-09-06T17:20:29Z	2026-09-06T17:22:50Z	141
+34048229370	4cd80c5	gate (windows-latest)	10	cài Ruff 0.15.15 và in probe dương	success	2026-09-06T17:22:50Z	2026-09-06T17:22:54Z	4
+34048229370	4cd80c5	gate (windows-latest)	11	PR head contains required EOL base	skipped	2026-09-06T17:22:54Z	2026-09-06T17:22:54Z	0
+34048229370	4cd80c5	gate (windows-latest)	12	py_compile	success	2026-09-06T17:22:54Z	2026-09-06T17:22:54Z	0
+34048229370	4cd80c5	gate (windows-latest)	13	codex credential selftest (packet #300)	success	2026-09-06T17:22:54Z	2026-09-06T17:22:56Z	2
+34048229370	4cd80c5	gate (windows-latest)	14	packet-loop selftest	success	2026-09-06T17:22:56Z	2026-09-06T17:32:15Z	559
+34048229370	4cd80c5	gate (windows-latest)	15	bien-nhan v2 selftest	success	2026-09-06T17:32:15Z	2026-09-06T17:34:14Z	119
+34048229370	4cd80c5	gate (windows-latest)	16	test registry (phạm vi + các bộ chưa được nối)	cancelled	2026-09-06T17:34:14Z	2026-09-06T18:19:32Z	2718
+34048229370	4cd80c5	gate (windows-latest)	17	idiom-ba-ten selftest	skipped	2026-09-06T18:19:32Z	2026-09-06T18:19:32Z	0
+34048229370	4cd80c5	gate (windows-latest)	18	eol-policy selftest	skipped	2026-09-06T18:19:32Z	2026-09-06T18:19:32Z	0
+34048229370	4cd80c5	gate (windows-latest)	19	pre-push selftest	skipped	2026-09-06T18:19:32Z	2026-09-06T18:19:32Z	0
+34048229370	4cd80c5	gate (windows-latest)	20	lease-publish selftest (đo lại setup sau G5)	skipped	2026-09-06T18:19:32Z	2026-09-06T18:19:32Z	0
+34048229370	4cd80c5	gate (windows-latest)	21	don-nhanh selftest (chốt xoá nhánh)	skipped	2026-09-06T18:19:32Z	2026-09-06T18:19:32Z	0
+34048229370	4cd80c5	gate (windows-latest)	22	bo ca gate chay TRONG cgroup duoc uy quyen (Linux)	skipped	2026-09-06T18:19:32Z	2026-09-06T18:19:32Z	0
+34048229370	4cd80c5	gate (windows-latest)	23	gate lifecycle selftest (nen khong co cgroup)	skipped	2026-09-06T18:19:32Z	2026-09-06T18:19:32Z	0
+34048229370	4cd80c5	gate (windows-latest)	24	eol-policy survey	skipped	2026-09-06T18:19:32Z	2026-09-06T18:19:32Z	0
+34048229370	4cd80c5	gate (windows-latest)	25	bundled-fragment check (topology gói)	skipped	2026-09-06T18:19:32Z	2026-09-06T18:19:32Z	0
+34048229370	4cd80c5	gate (windows-latest)	26	gen_instructions selftest	skipped	2026-09-06T18:19:32Z	2026-09-06T18:19:32Z	0
+34048229370	4cd80c5	gate (windows-latest)	27	command-registry unit test (AG-T0-03)	skipped	2026-09-06T18:19:32Z	2026-09-06T18:19:32Z	0
+34048229370	4cd80c5	gate (windows-latest)	28	tl selftest (luot PR — khong sinh bang chung)	skipped	2026-09-06T18:19:32Z	2026-09-06T18:19:32Z	0
+34048229370	4cd80c5	gate (windows-latest)	29	tl selftest (co bang chung exact-identity)	skipped	2026-09-06T18:19:32Z	2026-09-06T18:19:32Z	0
+34048229370	4cd80c5	gate (windows-latest)	30	tai len gate-evidence	success	2026-09-06T18:19:32Z	2026-09-06T18:19:34Z	2
+34048229370	4cd80c5	gate (windows-latest)	31	workflow-audit strict	skipped	2026-09-06T18:19:34Z	2026-09-06T18:19:34Z	0
+34048229370	4cd80c5	gate (windows-latest)	32	golden-test	skipped	2026-09-06T18:19:34Z	2026-09-06T18:19:34Z	0
+34048229370	4cd80c5	gate (windows-latest)	33	doc-claims-check strict	skipped	2026-09-06T18:19:34Z	2026-09-06T18:19:34Z	0
+34048229370	4cd80c5	gate (windows-latest)	34	determinism-audit strict	skipped	2026-09-06T18:19:34Z	2026-09-06T18:19:34Z	0
+34048229370	4cd80c5	gate (windows-latest)	35	ci-phamvi guard (bang phu thuoc khop ma)	skipped	2026-09-06T18:19:34Z	2026-09-06T18:19:34Z	0
+34048229370	4cd80c5	gate (windows-latest)	36	ci-phamvi selftest (phan chung — cong co rang)	skipped	2026-09-06T18:19:34Z	2026-09-06T18:19:34Z	0
+34048229370	4cd80c5	gate (windows-latest)	37	release-check full	skipped	2026-09-06T18:19:34Z	2026-09-06T18:19:34Z	0
+34048229370	4cd80c5	gate (windows-latest)	38	release-verify strict (lane LAND — manifest committed)	skipped	2026-09-06T18:19:34Z	2026-09-06T18:19:34Z	0
+34048229370	4cd80c5	gate (windows-latest)	39	release-verify strict (lane WORKER — manifest TẠM ngoài repo)	skipped	2026-09-06T18:19:34Z	2026-09-06T18:19:34Z	0
+34048229370	4cd80c5	gate (windows-latest)	40	release-bundle x2 cùng SHA-256	skipped	2026-09-06T18:19:34Z	2026-09-06T18:19:34Z	0
+34048229370	4cd80c5	gate (windows-latest)	41	tl_boot smoke	skipped	2026-09-06T18:19:34Z	2026-09-06T18:19:34Z	0
+34048229370	4cd80c5	gate (windows-latest)	81	Post Run actions/setup-python@v5	skipped	2026-09-06T18:19:34Z	2026-09-06T18:19:34Z	0
+34048229370	4cd80c5	gate (windows-latest)	82	Post Run actions/checkout@v4	success	2026-09-06T18:19:34Z	2026-09-06T18:19:41Z	7
+34048229370	4cd80c5	gate (windows-latest)	83	Complete job	success	2026-09-06T18:19:41Z	2026-09-06T18:19:41Z	0
+34048229370	4cd80c5	gate (ubuntu-latest)	1	Set up job	success	2026-09-06T17:19:33Z	2026-09-06T17:19:34Z	1
+34048229370	4cd80c5	gate (ubuntu-latest)	2	Force LF checkout (hash parity với manifest)	success	2026-09-06T17:19:34Z	2026-09-06T17:19:34Z	0
+34048229370	4cd80c5	gate (ubuntu-latest)	3	Run actions/checkout@v4	success	2026-09-06T17:19:34Z	2026-09-06T17:19:42Z	8
+34048229370	4cd80c5	gate (ubuntu-latest)	4	Run actions/setup-python@v5	success	2026-09-06T17:19:42Z	2026-09-06T17:19:42Z	0
+34048229370	4cd80c5	gate (ubuntu-latest)	5	cài PyYAML + jsonschema (cổng đăng lease + validator verdict cần)	success	2026-09-06T17:19:42Z	2026-09-06T17:19:44Z	2
+34048229370	4cd80c5	gate (ubuntu-latest)	6	cài actionlint cho G5	success	2026-09-06T17:19:44Z	2026-09-06T17:19:44Z	0
+34048229370	4cd80c5	gate (ubuntu-latest)	7	cài shellcheck cho G5 (cài xong đo lại)	success	2026-09-06T17:19:44Z	2026-09-06T17:19:46Z	2
+34048229370	4cd80c5	gate (ubuntu-latest)	8	cài rg cho G5 (cài xong đo lại)	success	2026-09-06T17:19:46Z	2026-09-06T17:19:50Z	4
+34048229370	4cd80c5	gate (ubuntu-latest)	9	G5 kiem ban ke cong cu + T1..T8 (packet	success	2026-09-06T17:19:50Z	2026-09-06T17:20:48Z	58
+34048229370	4cd80c5	gate (ubuntu-latest)	10	cài Ruff 0.15.15 và in probe dương	success	2026-09-06T17:20:48Z	2026-09-06T17:20:50Z	2
+34048229370	4cd80c5	gate (ubuntu-latest)	11	PR head contains required EOL base	skipped	2026-09-06T17:20:50Z	2026-09-06T17:20:50Z	0
+34048229370	4cd80c5	gate (ubuntu-latest)	12	py_compile	success	2026-09-06T17:20:50Z	2026-09-06T17:20:50Z	0
+34048229370	4cd80c5	gate (ubuntu-latest)	13	codex credential selftest (packet #300)	success	2026-09-06T17:20:50Z	2026-09-06T17:20:50Z	0
+34048229370	4cd80c5	gate (ubuntu-latest)	14	packet-loop selftest	success	2026-09-06T17:20:50Z	2026-09-06T17:24:49Z	239
+34048229370	4cd80c5	gate (ubuntu-latest)	15	bien-nhan v2 selftest	success	2026-09-06T17:24:49Z	2026-09-06T17:25:04Z	15
+34048229370	4cd80c5	gate (ubuntu-latest)	16	test registry (phạm vi + các bộ chưa được nối)	success	2026-09-06T17:25:04Z	2026-09-06T17:39:19Z	855
+34048229370	4cd80c5	gate (ubuntu-latest)	17	idiom-ba-ten selftest	success	2026-09-06T17:39:19Z	2026-09-06T17:39:21Z	2
+34048229370	4cd80c5	gate (ubuntu-latest)	18	eol-policy selftest	success	2026-09-06T17:39:21Z	2026-09-06T17:39:38Z	17
+34048229370	4cd80c5	gate (ubuntu-latest)	19	pre-push selftest	success	2026-09-06T17:39:38Z	2026-09-06T17:39:45Z	7
+34048229370	4cd80c5	gate (ubuntu-latest)	20	lease-publish selftest (đo lại setup sau G5)	success	2026-09-06T17:39:45Z	2026-09-06T17:40:51Z	66
+34048229370	4cd80c5	gate (ubuntu-latest)	21	don-nhanh selftest (chốt xoá nhánh)	success	2026-09-06T17:40:51Z	2026-09-06T17:41:18Z	27
+34048229370	4cd80c5	gate (ubuntu-latest)	22	bo ca gate chay TRONG cgroup duoc uy quyen (Linux)	success	2026-09-06T17:41:18Z	2026-09-06T17:42:39Z	81
+34048229370	4cd80c5	gate (ubuntu-latest)	23	gate lifecycle selftest (nen khong co cgroup)	skipped	2026-09-06T17:42:39Z	2026-09-06T17:42:39Z	0
+34048229370	4cd80c5	gate (ubuntu-latest)	24	eol-policy survey	success	2026-09-06T17:42:39Z	2026-09-06T17:42:39Z	0
+34048229370	4cd80c5	gate (ubuntu-latest)	25	bundled-fragment check (topology gói)	success	2026-09-06T17:42:39Z	2026-09-06T17:42:43Z	4
+34048229370	4cd80c5	gate (ubuntu-latest)	26	gen_instructions selftest	success	2026-09-06T17:42:43Z	2026-09-06T17:42:43Z	0
+34048229370	4cd80c5	gate (ubuntu-latest)	27	command-registry unit test (AG-T0-03)	success	2026-09-06T17:42:43Z	2026-09-06T17:42:44Z	1
+34048229370	4cd80c5	gate (ubuntu-latest)	28	tl selftest (luot PR — khong sinh bang chung)	skipped	2026-09-06T17:42:44Z	2026-09-06T17:42:44Z	0
+34048229370	4cd80c5	gate (ubuntu-latest)	29	tl selftest (co bang chung exact-identity)	success	2026-09-06T17:42:44Z	2026-09-06T17:44:40Z	116
+34048229370	4cd80c5	gate (ubuntu-latest)	30	tai len gate-evidence	success	2026-09-06T17:44:40Z	2026-09-06T17:44:41Z	1
+34048229370	4cd80c5	gate (ubuntu-latest)	31	workflow-audit strict	success	2026-09-06T17:44:41Z	2026-09-06T17:44:42Z	1
+34048229370	4cd80c5	gate (ubuntu-latest)	32	golden-test	success	2026-09-06T17:44:42Z	2026-09-06T17:45:08Z	26
+34048229370	4cd80c5	gate (ubuntu-latest)	33	doc-claims-check strict	success	2026-09-06T17:45:08Z	2026-09-06T17:45:11Z	3
+34048229370	4cd80c5	gate (ubuntu-latest)	34	determinism-audit strict	success	2026-09-06T17:45:11Z	2026-09-06T17:45:45Z	34
+34048229370	4cd80c5	gate (ubuntu-latest)	35	ci-phamvi guard (bang phu thuoc khop ma)	success	2026-09-06T17:45:45Z	2026-09-06T17:45:45Z	0
+34048229370	4cd80c5	gate (ubuntu-latest)	36	ci-phamvi selftest (phan chung — cong co rang)	success	2026-09-06T17:45:45Z	2026-09-06T17:45:48Z	3
+34048229370	4cd80c5	gate (ubuntu-latest)	37	release-check full	success	2026-09-06T17:45:48Z	2026-09-06T17:45:49Z	1
+34048229370	4cd80c5	gate (ubuntu-latest)	38	release-verify strict (lane LAND — manifest committed)	skipped	2026-09-06T17:45:49Z	2026-09-06T17:45:49Z	0
+34048229370	4cd80c5	gate (ubuntu-latest)	39	release-verify strict (lane WORKER — manifest TẠM ngoài repo)	success	2026-09-06T17:45:49Z	2026-09-06T17:45:51Z	2
+34048229370	4cd80c5	gate (ubuntu-latest)	40	release-bundle x2 cùng SHA-256	success	2026-09-06T17:45:51Z	2026-09-06T17:45:55Z	4
+34048229370	4cd80c5	gate (ubuntu-latest)	41	tl_boot smoke	success	2026-09-06T17:45:55Z	2026-09-06T17:45:56Z	1
+34048229370	4cd80c5	gate (ubuntu-latest)	81	Post Run actions/setup-python@v5	success	2026-09-06T17:45:56Z	2026-09-06T17:45:56Z	0
+34048229370	4cd80c5	gate (ubuntu-latest)	82	Post Run actions/checkout@v4	success	2026-09-06T17:45:56Z	2026-09-06T17:45:56Z	0
+34048229370	4cd80c5	gate (ubuntu-latest)	83	Complete job	success	2026-09-06T17:45:56Z	2026-09-06T17:45:56Z	0

@@ -1,0 +1,14 @@
+== ai-dang-giu .github/workflows/ci.yml @ 20:45:46Z
+rc=11
+NGƯỜI_GIỮ 1: gate-tach-job-cat-chi-phi-exec-1r4-claude-20260906
+dong #456: 0
+== ai-dang-giu .claude/dev/ci_dang_ky_test.py @ 20:45:49Z
+rc=11
+NGƯỜI_GIỮ 1: gate-tach-job-cat-chi-phi-exec-1r4-claude-20260906
+dong #456: 2
+      2 HẾT_HẠN
+== ai-dang-giu .claude/hooks/pretooluse_guard_test.py @ 20:45:52Z
+rc=0
+NGƯỜI_GIỮ 0: không có
+dong #456: 2
+      2 HẾT_HẠN

@@ -1,0 +1,25 @@
+{
+  "last_line": "verdict: changes_requested",
+  "findings": [
+    [
+      "bia-mo-mot-ref-khong-thu-hoi-moi-ban",
+      "P1"
+    ],
+    [
+      "a2-neo-nen-cu-trai-write-set-hien-tai",
+      "P1"
+    ],
+    [
+      "bien-do-khac-head-khong-phai-nhieu-runner",
+      "P2"
+    ],
+    [
+      "quyet-dinh-tiep-h-con-bi-phu-dinh",
+      "P2"
+    ]
+  ],
+  "bytes": 32466,
+  "sha256": "7d9dcd7572d1228701f7f365d6029a21dad6182fb134b0b29613fee0bc66b417",
+  "six_previous_findings_present": true,
+  "format_valid": true
+}

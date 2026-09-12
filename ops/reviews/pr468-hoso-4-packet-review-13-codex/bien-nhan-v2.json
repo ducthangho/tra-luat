@@ -1,0 +1,14 @@
+{
+  "command": [
+    "python3",
+    "-B",
+    "ops/bien_nhan_v2.py"
+  ],
+  "cwd": "cay-kho",
+  "started_utc": "2026-09-07T20:54:07.932714+00:00",
+  "ended_utc": "2026-09-07T20:54:09.101449+00:00",
+  "elapsed_seconds": 1.169,
+  "rc": 0,
+  "stdout_bytes": 163,
+  "stderr_bytes": 0
+}

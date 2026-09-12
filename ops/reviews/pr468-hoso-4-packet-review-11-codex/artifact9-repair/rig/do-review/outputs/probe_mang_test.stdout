@@ -1,0 +1,10 @@
+tự đột biến cổng: 9/9 chết (m1..m5 + 4 dòng cơ chế)
+named mutant probe_missing_tool_executes_git: 1/1 chết
+nền: 11/11 đạt
+  ok  m1_sai_stage_bind: kill-set=['t8_giai_doan_socket']
+  ok  m2_gom_dns_endpoint: kill-set=['t2_dns_loi']
+  ok  m3_gom_auth_repo: kill-set=['t6_auth_loi']
+  ok  m4_main_bo_kenh_git: kill-set=['t10_main_schema_va_fail_close']
+  ok  m5_gom_hai_ma: kill-set=['t11_ma_phan_loai_doc_nhat']
+SỐ LIỆU: ca 11 · đột biến 5 · sống 0
+TỔNG: ĐẠT

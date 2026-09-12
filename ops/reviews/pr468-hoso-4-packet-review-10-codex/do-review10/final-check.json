@@ -1,0 +1,34 @@
+{
+  "utc": "2026-09-07T11:47:28.896723+00:00",
+  "head": "c43347d1e2c2f76bb21dc2d9d28bd6bfa153d355",
+  "tree": "799a4b2549d68c6a3ad44cc70f9257e794cd1db8",
+  "status": "",
+  "tracked_diff": "",
+  "index_diff": "",
+  "new_commits_after_reviewed": 0,
+  "abbrev": "7",
+  "shallow": "false",
+  "verdict_sha256": "5e22088b996a4b6e4f564159703ed311bba2c0cf6b137cb9a0614bc9c7476672",
+  "findings": [
+    [
+      "bia-mo-mot-ref-khong-thu-hoi-moi-ban",
+      "P1"
+    ],
+    [
+      "manifest-luot8-liet-ke-hien-vat-khong-duoc-giao",
+      "P2"
+    ]
+  ],
+  "hint_files": 72,
+  "hint_hunks": 21,
+  "hint_sources_valid": true,
+  "hint_targets_valid": true,
+  "initial_launch_log": "=== lan 1 bat dau 11:24:25 ===\n",
+  "round9_classifications": {
+    "bia-mo-mot-ref-khong-thu-hoi-moi-ban": "CHƯA VÁ",
+    "a2-neo-nen-cu-trai-write-set-hien-tai": "ĐÃ VÁ THẬT",
+    "bien-do-khac-head-khong-phai-nhieu-runner": "ĐÃ VÁ THẬT",
+    "quyet-dinh-tiep-h-con-bi-phu-dinh": "ĐÃ VÁ THẬT",
+    "manifest-luot8-liet-ke-hien-vat-khong-duoc-giao": "VÁ SINH LỖI MỚI"
+  }
+}

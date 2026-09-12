@@ -1,0 +1,37 @@
+[
+  {
+    "command": [
+      "patch",
+      "--dry-run",
+      "-p1",
+      "-d",
+      "/tmp/claude-0/-home-user/fbace9af-dba2-5564-96ad-cc29ca23dc03/scratchpad/rv468n/do-review14/prose-check"
+    ],
+    "rc": 0,
+    "stdout": "checking file ops/reviews/full-gate-pr468-20260907/README.md\nchecking file ops/reviews/full-gate-pr468-20260907/ARTIFACTS.sha256\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "patch",
+      "-p1",
+      "-d",
+      "/tmp/claude-0/-home-user/fbace9af-dba2-5564-96ad-cc29ca23dc03/scratchpad/rv468n/do-review14/prose-check"
+    ],
+    "rc": 0,
+    "stdout": "patching file ops/reviews/full-gate-pr468-20260907/README.md\npatching file ops/reviews/full-gate-pr468-20260907/ARTIFACTS.sha256\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "sha256sum",
+      "-c",
+      "ARTIFACTS.sha256"
+    ],
+    "cwd": "do-review14/prose-check/ops/reviews/full-gate-pr468-20260907",
+    "rc": 0,
+    "ok": 12,
+    "stdout": "./README.md: OK\n./nen.cidk.tail.txt: OK\n./nen.doc-claims.json: OK\n./nen.lease.norm.out: OK\n./nen.ploop.tail.txt: OK\n./nen.rc: OK\n./neo.txt: OK\n./sau.cidk.tail.txt: OK\n./sau.doc-claims.json: OK\n./sau.lease.norm.out: OK\n./sau.ploop.tail.txt: OK\n./sau.rc: OK\n",
+    "stderr": ""
+  }
+]

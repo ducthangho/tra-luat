@@ -1,0 +1,366 @@
+{
+  "reviewed_sha": "9a99dd8aa137ef118a00671482c29ea2438cbdbb",
+  "source": "Reviewer offline PR489 lượt 1, phép tái đo sau merge; không phải log tiền kiểm.",
+  "bien_nhan": [
+    {
+      "cmd": [
+        "python3",
+        "-B",
+        "ops/bien_nhan_v2.py",
+        "--root",
+        "."
+      ],
+      "rc": 0,
+      "stdout": "\nbien_nhan_v2: 30 ĐẠT v2 · 11/11 miễn trừ legacy (băm khớp) · 42 NỢ đóng băng · 0 vi phạm · 0 KHÔNG ĐO ĐƯỢC · tổng 83\nTỔNG: ĐẠT\n",
+      "stderr": "",
+      "sha": "c87b0679a837055ee4cc33ac48c9adb8d7ad8784",
+      "ancestors": 1842,
+      "receipt_files": 83,
+      "expected_v2": 30,
+      "shallow": "false",
+      "input_blobs_equal": true,
+      "counts": {
+        "v2": 30,
+        "legacy": 11,
+        "legacy_expected": 11,
+        "debt": 42,
+        "violations": 0,
+        "unknown": 0,
+        "total": 83
+      },
+      "ok": true
+    },
+    {
+      "cmd": [
+        "python3",
+        "-B",
+        "ops/bien_nhan_v2.py",
+        "--root",
+        "."
+      ],
+      "rc": 0,
+      "stdout": "\nbien_nhan_v2: 33 ĐẠT v2 · 11/11 miễn trừ legacy (băm khớp) · 42 NỢ đóng băng · 0 vi phạm · 0 KHÔNG ĐO ĐƯỢC · tổng 86\nTỔNG: ĐẠT\n",
+      "stderr": "",
+      "sha": "da481f94eee0adf1fe5fc4260a535a9b48fc2627",
+      "ancestors": 1845,
+      "receipt_files": 86,
+      "expected_v2": 33,
+      "shallow": "false",
+      "input_blobs_equal": true,
+      "counts": {
+        "v2": 33,
+        "legacy": 11,
+        "legacy_expected": 11,
+        "debt": 42,
+        "violations": 0,
+        "unknown": 0,
+        "total": 86
+      },
+      "ok": true
+    },
+    {
+      "cmd": [
+        "python3",
+        "-B",
+        "ops/bien_nhan_v2.py",
+        "--root",
+        "."
+      ],
+      "rc": 0,
+      "stdout": "\nbien_nhan_v2: 28 ĐẠT v2 · 11/11 miễn trừ legacy (băm khớp) · 42 NỢ đóng băng · 0 vi phạm · 0 KHÔNG ĐO ĐƯỢC · tổng 81\nTỔNG: ĐẠT\n",
+      "stderr": "",
+      "sha": "5b96ddc91593e9704ac3265b4e0b688059478cc8",
+      "ancestors": 1838,
+      "receipt_files": 81,
+      "expected_v2": 28,
+      "shallow": "false",
+      "input_blobs_equal": true,
+      "counts": {
+        "v2": 28,
+        "legacy": 11,
+        "legacy_expected": 11,
+        "debt": 42,
+        "violations": 0,
+        "unknown": 0,
+        "total": 81
+      },
+      "ok": true
+    },
+    {
+      "cmd": [
+        "python3",
+        "-B",
+        "ops/bien_nhan_v2.py",
+        "--root",
+        "."
+      ],
+      "rc": 0,
+      "stdout": "\nbien_nhan_v2: 33 ĐẠT v2 · 11/11 miễn trừ legacy (băm khớp) · 42 NỢ đóng băng · 0 vi phạm · 0 KHÔNG ĐO ĐƯỢC · tổng 86\nTỔNG: ĐẠT\n",
+      "stderr": "",
+      "sha": "7e69b8e9c41a45854d149bc252218aada6df5aa4",
+      "ancestors": 1850,
+      "receipt_files": 86,
+      "expected_v2": 33,
+      "shallow": "false",
+      "input_blobs_equal": true,
+      "counts": {
+        "v2": 33,
+        "legacy": 11,
+        "legacy_expected": 11,
+        "debt": 42,
+        "violations": 0,
+        "unknown": 0,
+        "total": 86
+      },
+      "ok": true
+    },
+    {
+      "cmd": [
+        "python3",
+        "-B",
+        "ops/bien_nhan_v2.py",
+        "--root",
+        "."
+      ],
+      "rc": 0,
+      "stdout": "\nbien_nhan_v2: 38 ĐẠT v2 · 11/11 miễn trừ legacy (băm khớp) · 42 NỢ đóng băng · 0 vi phạm · 0 KHÔNG ĐO ĐƯỢC · tổng 91\nTỔNG: ĐẠT\n",
+      "stderr": "",
+      "sha": "3873173094a3e294b069998ed21dc117d8ad659a",
+      "ancestors": 1858,
+      "receipt_files": 91,
+      "expected_v2": 38,
+      "shallow": "false",
+      "input_blobs_equal": true,
+      "counts": {
+        "v2": 38,
+        "legacy": 11,
+        "legacy_expected": 11,
+        "debt": 42,
+        "violations": 0,
+        "unknown": 0,
+        "total": 91
+      },
+      "ok": true
+    },
+    {
+      "cmd": [
+        "python3",
+        "-B",
+        "ops/bien_nhan_v2.py",
+        "--root",
+        "."
+      ],
+      "rc": 0,
+      "stdout": "\nbien_nhan_v2: 38 ĐẠT v2 · 11/11 miễn trừ legacy (băm khớp) · 42 NỢ đóng băng · 0 vi phạm · 0 KHÔNG ĐO ĐƯỢC · tổng 91\nTỔNG: ĐẠT\n",
+      "stderr": "",
+      "sha": "f4d74fed59616ecd5a133fc232275a832dcd95bb",
+      "ancestors": 1864,
+      "receipt_files": 91,
+      "expected_v2": 38,
+      "shallow": "false",
+      "input_blobs_equal": true,
+      "counts": {
+        "v2": 38,
+        "legacy": 11,
+        "legacy_expected": 11,
+        "debt": 42,
+        "violations": 0,
+        "unknown": 0,
+        "total": 91
+      },
+      "ok": true
+    },
+    {
+      "cmd": [
+        "python3",
+        "-B",
+        "ops/bien_nhan_v2.py",
+        "--root",
+        "."
+      ],
+      "rc": 0,
+      "stdout": "\nbien_nhan_v2: 39 ĐẠT v2 · 11/11 miễn trừ legacy (băm khớp) · 42 NỢ đóng băng · 0 vi phạm · 0 KHÔNG ĐO ĐƯỢC · tổng 92\nTỔNG: ĐẠT\n",
+      "stderr": "",
+      "sha": "9a99dd8aa137ef118a00671482c29ea2438cbdbb",
+      "direct_cli": true
+    }
+  ],
+  "five_anchors": [
+    {
+      "receipt": "ops/reviews/pr480-land-review-1-codex-verdict.receipt.yaml",
+      "anchor": "01c5a2713778d06535bad8e617be70ea4f5fac4d",
+      "ancestors": {
+        "3873173": true,
+        "f4d74fe": true
+      },
+      "hash_equal": true,
+      "path_equal": true,
+      "ok": true
+    },
+    {
+      "receipt": "ops/reviews/pr480-land-review-2-codex-verdict.receipt.yaml",
+      "anchor": "60d62aa60da45fdd7c79bd71dc17a0d2ffc1e439",
+      "ancestors": {
+        "3873173": true,
+        "f4d74fe": true
+      },
+      "hash_equal": true,
+      "path_equal": true,
+      "ok": true
+    },
+    {
+      "receipt": "ops/reviews/pr486-hau-kiem-review-1-codex-verdict.receipt.yaml",
+      "anchor": "ee23363171ca0a5218a5d7f067649487470acd0c",
+      "ancestors": {
+        "3873173": true,
+        "f4d74fe": true
+      },
+      "hash_equal": true,
+      "path_equal": true,
+      "ok": true
+    },
+    {
+      "receipt": "ops/reviews/pr487-review-1-codex-verdict.receipt.yaml",
+      "anchor": "a0b154d7c8e6491fb53825301ace2d6d4e97ac9f",
+      "ancestors": {
+        "3873173": true,
+        "f4d74fe": true
+      },
+      "hash_equal": true,
+      "path_equal": true,
+      "ok": true
+    },
+    {
+      "receipt": "ops/reviews/pr487-review-2-codex-verdict.receipt.yaml",
+      "anchor": "edb288e4e95081b83661c94c88addea005d3f121",
+      "ancestors": {
+        "3873173": true,
+        "f4d74fe": true
+      },
+      "hash_equal": true,
+      "path_equal": true,
+      "ok": true
+    }
+  ],
+  "graph": {
+    "c87b067": {
+      "sha": "c87b0679a837055ee4cc33ac48c9adb8d7ad8784",
+      "parents": [
+        "585c7d510e026b4ea5a2b395c69581f24c1d8fa0",
+        "ff3431f11bc0ba3ffa0c3616003f833c3cfc3ebb"
+      ],
+      "commit_time": "2026-09-08T11:01:28+07:00",
+      "commits_including_self": 1842
+    },
+    "da481f9": {
+      "sha": "da481f94eee0adf1fe5fc4260a535a9b48fc2627",
+      "parents": [
+        "c87b0679a837055ee4cc33ac48c9adb8d7ad8784",
+        "359d38e8c449e009acc4123fa6110257ad800949"
+      ],
+      "commit_time": "2026-09-09T15:55:07+07:00",
+      "commits_including_self": 1845
+    },
+    "5b96ddc": {
+      "sha": "5b96ddc91593e9704ac3265b4e0b688059478cc8",
+      "parents": [
+        "afddf7efe21e784fd22ed6b5aed399bc9d04a67d"
+      ],
+      "commit_time": "2026-09-09T10:05:00+00:00",
+      "commits_including_self": 1838
+    },
+    "7e69b8e": {
+      "sha": "7e69b8e9c41a45854d149bc252218aada6df5aa4",
+      "parents": [
+        "da481f94eee0adf1fe5fc4260a535a9b48fc2627",
+        "5b96ddc91593e9704ac3265b4e0b688059478cc8"
+      ],
+      "commit_time": "2026-09-09T18:39:00+07:00",
+      "commits_including_self": 1850
+    },
+    "3873173": {
+      "sha": "3873173094a3e294b069998ed21dc117d8ad659a",
+      "parents": [
+        "edb288e4e95081b83661c94c88addea005d3f121"
+      ],
+      "commit_time": "2026-09-09T11:27:27+00:00",
+      "commits_including_self": 1858
+    },
+    "f4d74fe": {
+      "sha": "f4d74fed59616ecd5a133fc232275a832dcd95bb",
+      "parents": [
+        "7e69b8e9c41a45854d149bc252218aada6df5aa4",
+        "3873173094a3e294b069998ed21dc117d8ad659a"
+      ],
+      "commit_time": "2026-09-09T18:58:30+07:00",
+      "commits_including_self": 1864
+    },
+    "8911ea4": {
+      "sha": "8911ea41ed326807cf22c0dacbbff69be9342747",
+      "parents": [
+        "1451fd6adea257049e4197930a10dac6fa51dd28"
+      ],
+      "commit_time": "2026-09-09T12:23:28+00:00",
+      "commits_including_self": 1870
+    },
+    "e1fd0a3": {
+      "sha": "e1fd0a333109a555af4823fd2b830521d86fafbd",
+      "parents": [
+        "8911ea41ed326807cf22c0dacbbff69be9342747"
+      ],
+      "commit_time": "2026-09-09T13:02:06+00:00",
+      "commits_including_self": 1871
+    },
+    "6db5b6c": {
+      "sha": "6db5b6ca3b9322cbb42099aefd10b442ac309bf2",
+      "parents": [
+        "7e69b8e9c41a45854d149bc252218aada6df5aa4"
+      ],
+      "commit_time": "2026-09-09T11:51:54+00:00",
+      "commits_including_self": 1851
+    },
+    "1455741": {
+      "sha": "145574101781909e06eea0d3040c051576a7523a",
+      "parents": [
+        "e1fd0a333109a555af4823fd2b830521d86fafbd"
+      ],
+      "commit_time": "2026-09-09T13:06:10+00:00",
+      "commits_including_self": 1872
+    },
+    "9a99dd8": {
+      "sha": "9a99dd8aa137ef118a00671482c29ea2438cbdbb",
+      "parents": [
+        "145574101781909e06eea0d3040c051576a7523a"
+      ],
+      "commit_time": "2026-09-09T13:06:51+00:00",
+      "commits_including_self": 1873
+    },
+    "first_land480_add": "6db5b6ca3b9322cbb42099aefd10b442ac309bf2",
+    "first_land480_has_f4_ancestor": {
+      "rc": 1,
+      "stdout": "",
+      "stderr": ""
+    },
+    "synthetic_objects": {
+      "a9b9edd014636dd49b208a5e2d37fbe5dfa0c01f": {
+        "rc": 128,
+        "stdout": "",
+        "stderr": "fatal: Not a valid object name a9b9edd014636dd49b208a5e2d37fbe5dfa0c01f^{commit}\n"
+      },
+      "372bf9adb331218212619fc04763acbedfaa3f3f": {
+        "rc": 128,
+        "stdout": "",
+        "stderr": "fatal: Not a valid object name 372bf9adb331218212619fc04763acbedfaa3f3f^{commit}\n"
+      }
+    },
+    "branch_excess": {
+      "claude/land-477-20260908": "0",
+      "claude/handoff-tra-luat-repo-2ak5th": "0"
+    }
+  },
+  "khong_do_duoc": [
+    "GitHub API/CI",
+    "Kho nông và log A/B gốc",
+    "Môi trường connector và object merge tổng hợp"
+  ]
+}

@@ -21264,10 +21264,19 @@ def run() -> int:
         # KÊ KHAI SLOT (MANG-SANDBOX-CODEX / #334): 70 → **71** Markdown dưới `docs/`. Thêm đúng
         # `docs/MANG_SANDBOX_CODEX.md`, dev-side/NGOÀI gói. `RELEASE_MANIFEST.json` KHÔNG đổi nên
         # gói giữ **180**, trần Package 200 không nhúc nhích; cây thật = 180 + 71 = **251**.
-        ok3 = int(j.get("file_count") or 0) == len(paths) and len(paths) + 71 == 251
+        # KÊ KHAI SLOT (PR #475 — ADR nguồn tin cậy cho cổng đọc lease): 71 → **72** Markdown dưới
+        # `docs/`. Thêm ĐÚNG MỘT tệp dev-side/ngoài gói:
+        #   + `docs/adr/0047-nguon-tin-cay-cho-cong-doc-lease.md`
+        # `docs/PROTOCOL_DA_PHIEN.md` (dòng §20) là sửa, không thêm; `ops/specs/**` và `ops/reviews/**`
+        # cùng PR nằm ngoài `docs/` nên ratchet này không đếm. `RELEASE_MANIFEST.json` KHÔNG đổi ⇒ gói
+        # giữ **180**, trần Package 200 không nhúc nhích; cây thật = 180 + 72 = **252**.
+        # TRẢ GIÁ LẦN THỨ TƯ đúng nếp "ĐÃ TRẢ GIÁ" trong ca này: phiên #475 chạy `adr-song` +
+        # `doctrine-scan` + `doc-claims-check --strict` (cả ba xanh) rồi đẩy; CI mới là nơi ca này đỏ
+        # (`tl selftest 1708/1709`, run 34183079571). Kê khai này viết SAU khi đọc đúng ca đỏ ấy.
+        ok3 = int(j.get("file_count") or 0) == len(paths) and len(paths) + 72 == 252
         d = root / "docs"
         tren_dia = sorted(d.rglob("*.md")) if d.is_dir() else []
-        ok4 = (len(tren_dia) == 71
+        ok4 = (len(tren_dia) == 72
                and all(not _rel209._release_should_include(q, root) for q in tren_dia)
                and all(set(q.relative_to(root).parts) & _rel209._RELEASE_EXCLUDE_DIRS == {"docs"}
                        for q in tren_dia))

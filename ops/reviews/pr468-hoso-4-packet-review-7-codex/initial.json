@@ -1,0 +1,41 @@
+{
+  "utc": "2026-09-07T07:07:42.275278+00:00",
+  "head": "b2ea0f24576275014e8124bfd3e0b6a16c3ca8b5",
+  "tree": "4d58c45a8a4e6dd5cca831da1cdf3141679a72e0",
+  "initial_status": "",
+  "abbrev": "7",
+  "shallow": "false",
+  "manifest_rc": 0,
+  "manifest_entries": 62,
+  "manifest_ok": 62,
+  "unlisted": [
+    "d2-that-results.json",
+    "d2-ci-results.json",
+    "outputs-that/mcp_gh_test.stdout",
+    "outputs-that/pretooluse_guard_test.stdout",
+    "outputs-that/pretooluse_guard_test.DO-rc1.stdout",
+    "nen-a1-a5/buoc.tsv",
+    "nen-a1-a5/tom_tat.md",
+    "nen-a1-a5/job.tsv",
+    "nen-a1-a5/khong_do_duoc.txt",
+    "nen-a1-a5/tinh.py",
+    "nen-a1-a5/raw/runs.json",
+    "nen-a1-a5/raw/jobs.txt"
+  ],
+  "2adb681": {
+    "diff_equal": true,
+    "numstat_equal": true,
+    "files": 86,
+    "add": 21550,
+    "del": 62,
+    "outside_ops": []
+  },
+  "d28c4b1": {
+    "diff_equal": true,
+    "numstat_equal": true,
+    "files": 92,
+    "add": 24876,
+    "del": 0,
+    "outside_ops": []
+  }
+}

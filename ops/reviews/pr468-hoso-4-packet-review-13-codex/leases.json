@@ -1,0 +1,87 @@
+{
+  "transport": "real git ls-remote redirected to sandbox bare via per-process url.insteadOf; GIT_ALLOW_PROTOCOL=file; no network",
+  "redirected_refs": 303,
+  "paths": {
+    ".github/workflows/ci.yml": {
+      "command": [
+        "python3",
+        "-B",
+        "ops/lease_publish.py",
+        "ai-dang-giu",
+        ".github/workflows/ci.yml"
+      ],
+      "started_utc": "2026-09-07T20:50:34.221619+00:00",
+      "seconds": 2.705,
+      "rc": 11,
+      "holder": [
+        "NGƯỜI_GIỮ 1: gate-tach-job-cat-chi-phi-exec-1r4-claude-20260906"
+      ],
+      "old456_lines": [],
+      "old456_states": []
+    },
+    ".claude/dev/ci_dang_ky_test.py": {
+      "command": [
+        "python3",
+        "-B",
+        "ops/lease_publish.py",
+        "ai-dang-giu",
+        ".claude/dev/ci_dang_ky_test.py"
+      ],
+      "started_utc": "2026-09-07T20:50:36.927062+00:00",
+      "seconds": 2.552,
+      "rc": 11,
+      "holder": [
+        "NGƯỜI_GIỮ 1: gate-tach-job-cat-chi-phi-exec-1r4-claude-20260906"
+      ],
+      "old456_lines": [
+        "HẾT_HẠN\tmutant-khong-chay-tren-windows-exec-1-claude-20260906\trefs/heads/master:ops/leases/mutant-khong-chay-tren-windows-exec-1-claude-20260906.yaml",
+        "HẾT_HẠN\tmutant-khong-chay-tren-windows-exec-1-claude-20260906\trefs/remotes/origin/claude/soan-spec-3-viec-treo-20260906:ops/leases/mutant-khong-chay-tren-windows-exec-1-claude-20260906.yaml"
+      ],
+      "old456_states": [
+        "HẾT_HẠN"
+      ]
+    },
+    ".claude/hooks/pretooluse_guard_test.py": {
+      "command": [
+        "python3",
+        "-B",
+        "ops/lease_publish.py",
+        "ai-dang-giu",
+        ".claude/hooks/pretooluse_guard_test.py"
+      ],
+      "started_utc": "2026-09-07T20:50:39.479042+00:00",
+      "seconds": 2.571,
+      "rc": 0,
+      "holder": [
+        "NGƯỜI_GIỮ 0: không có"
+      ],
+      "old456_lines": [
+        "HẾT_HẠN\tmutant-khong-chay-tren-windows-exec-1-claude-20260906\trefs/heads/master:ops/leases/mutant-khong-chay-tren-windows-exec-1-claude-20260906.yaml",
+        "HẾT_HẠN\tmutant-khong-chay-tren-windows-exec-1-claude-20260906\trefs/remotes/origin/claude/soan-spec-3-viec-treo-20260906:ops/leases/mutant-khong-chay-tren-windows-exec-1-claude-20260906.yaml"
+      ],
+      "old456_states": [
+        "HẾT_HẠN"
+      ]
+    }
+  },
+  "old456_blobs": {
+    "8b2103c06687546379a17f6deafc97f1fe0173fd": [
+      "claude/agents-ngoai-goi",
+      "claude/cap-nhat-trang-thai-pr-taxzax",
+      "claude/elegant-bun-cd554f",
+      "claude/priceless-volhard-329577",
+      "claude/r356-bien-nhan-cross-review",
+      "claude/spec-thu-hoi-lease-va-cap-lai-20260907",
+      "claude/tra-luat-process-review-o4d7kb",
+      "master",
+      "ops/cap-lease-456",
+      "ops/cap-lease-461",
+      "ops/lease-wp461-g2"
+    ],
+    "1f9504281c3415f7194e124eb7b2702c34c8efd1": [
+      "claude/soan-spec-3-viec-treo-20260906"
+    ]
+  },
+  "scanner_refs": 304,
+  "lease_code_unchanged_since12": true
+}

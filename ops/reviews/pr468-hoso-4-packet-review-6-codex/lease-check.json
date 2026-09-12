@@ -1,0 +1,12 @@
+{
+  "name": "lease-check",
+  "command": [
+    "/usr/local/bin/python",
+    "ops/lease_publish.py",
+    "check",
+    "ops/leases/gate-tach-job-cat-chi-phi-exec-1-claude-20260906.yaml"
+  ],
+  "start_utc": "2026-09-07T06:17:57.249753+00:00",
+  "seconds": 1.0660124680000536,
+  "rc": 0
+}

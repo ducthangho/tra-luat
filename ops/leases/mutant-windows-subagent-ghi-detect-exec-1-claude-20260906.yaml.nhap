@@ -1,0 +1,160 @@
+# TỆP NHÁP — đuôi `.yaml.nhap` CÓ CHỦ ĐÍCH. `ai-dang-giu` chỉ đọc blob đuôi `.yaml`/`.yml`
+# (`ops/lease_publish.py:521`), `ops-publish-lease.yml` chỉ bắn với `ops/leases/**.yaml|yml`, và
+# `t23` của `ops/lease_publish_test.py` chỉ đọc `suffix in (".yaml", ".yml")` — nên nháp KHÔNG bị
+# tính là lease đang giữ. Đo 19:33–19:34Z 06-09-2026 trong bản sao đủ 299 ref: đuôi `.yaml` ⇒
+# `ai-dang-giu .claude/hooks/subagent_ghi_detect_test.py` = NGƯỜI_GIỮ 1 (chính nháp này); đuôi
+# `.nhap` ⇒ 0. `check` vẫn chạy trên tên này — đo lại 21:00Z 06-09-2026 trên cây b1c2284: rc=8, thiếu 3
+# trường packet_issue/granted_by/lease_expires_at_utc (bản này đã bỏ hạn điền sẵn; 19:31Z là bản trung gian).
+# ĐỔI TÊN VỀ `.yaml` LÀ BƯỚC CUỐI khi cấp thật, SAU khi điền đủ các ô dưới đây.
+schema_version: 2
+event: executor_lease_granted
+
+# ── CÁC Ô CHỦ KHO ĐIỀN TẠI LÚC CẤP — 6 ô: packet_issue · mission_issue · granted_by ·
+#    granted_on_instruction · leased_at_utc · lease_expires_at_utc (yaml.safe_load 21:00Z 06-09-2026: đúng
+#    6 trường null trong tệp này) — không ai khác điền được ──────────────────────────────────
+# `packet_issue`  : số hiệu Issue sau khi đăng (phải là ISSUE, không phải PR).
+# `mission_issue` : Mission Issue chứa packet (`PROTOCOL §3.2` đòi; khuyến nghị ở spec GATE).
+# `granted_by`    : `ducthangho` — `record-lease` TỪ CHỐI tên provider (`claude`/`codex`).
+# `granted_on_instruction`: dấu vết BỀN của uỷ quyền (URL/ID comment cấp lease).
+# `leased_at_utc` / `lease_expires_at_utc`: giờ cấp THẬT và giờ hết hạn = giờ cấp + `run_minutes`.
+#                   Hai mốc là SỰ KIỆN cấp, không có mặc định. Để trống: `check` chặn rc=8 khi
+#                   thiếu `lease_expires_at_utc` (đo 19:35Z). `--expires-utc` phải khớp.
+packet_issue: 465
+mission_issue:
+granted_by:
+granted_on_instruction:
+leased_at_utc:
+lease_expires_at_utc:
+# ───────────────────────────────────────────────────────────────────────────────────
+
+packet_id: MUTANT-WINDOWS-SUBAGENT-GHI-DETECT
+revision: 1
+generation: 1
+lease_id: mutant-windows-subagent-ghi-detect-exec-1-claude-20260906
+role: executor
+provider: claude
+executor: claude
+model: opus-5
+effort: xhigh
+environment: cloud
+risk: sensitive
+assurance_target: cross_approved
+access: read-write
+
+spec_path: ops/specs/MUTANT-WINDOWS-SUBAGENT-GHI-DETECT.md
+spec_sha256: 2abace8588ec2b4e0626c1c77e9c3e0f7e713ecb2ce528b149e6c7f1f0000759
+spec_hash: 2abace8588ec2b4e0626c1c77e9c3e0f7e713ecb2ce528b149e6c7f1f0000759
+
+write_set:
+  - .claude/hooks/subagent_ghi_detect_test.py
+  - .claude/dev/ci_dang_ky_test.py
+depends_on:
+  - GATE-TACH-JOB-CAT-CHI-PHI
+  - LO-319-LINUX-BANG-CHUNG-XANH
+
+branch: claude/mutant-windows-subagent-ghi-detect
+branch_ownership: exclusive
+target_branch_neu_land: master
+# 3 MỎ NEO (base_sha · start_from_sha · reviewed_sha_required) — chỗ giữ, KHÔNG phải giá trị cấp.
+# Packet này đi THỨ BA (sau GATE và LO-319), nên CẢ 3 trường dưới đây (`base_sha`, `start_from_sha`, `reviewed_sha_required` — bản đầu chỉ nhắc
+# hai) phải ĐO LẠI tại lúc cấp = head `origin/master` SAU khi LO-319 integrated. Không có SHA
+# tương lai nào để điền hôm nay. Quy tắc này nằm trong đặc tả đóng băng, không chỉ ở đây.
+base_sha: 1b3caa11df3e339bcfdb52be903884b5b99b9f77
+start_from_sha: 1b3caa11df3e339bcfdb52be903884b5b99b9f77
+reviewed_sha_required: 1b3caa11df3e339bcfdb52be903884b5b99b9f77
+
+authority_basis: '§2 — start/pause/resume/reroute/override/authorize thuộc chủ kho'
+recorded_by: claude-session
+recorder_is_dispatcher: false
+
+# `run_minutes` = độ dài HẠN LEASE (phút), KHÔNG phải trần một run (`max_run_minutes: 90`, §12).
+run_minutes: 1440
+heartbeat_required_minutes: 30
+attempts_used: 0
+attempts_limit: 3
+
+reviewer_provider: codex
+review_class: sensitive
+effective_review_class: sensitive
+
+# THAY THẾ tiền nhiệm — chuỗi điều phối #456 → GATE → LO-319 → 2A → 2B; tiền nhiệm TRỰC TIẾP của
+# lease này là LO-319:
+#   lo-319-linux-bang-chung-xanh-exec-1-claude-20260906
+# (dấu vết audit — KHÔNG phải điều kiện cổng). Nháp chọn ĐƯỜNG (a): cấp SAU khi tiền nhiệm hết hạn
+# (`lease_expires_at_utc` của lease LO-319 đã cấp — KHÔNG phải hạn #456) ⇒ `thay_the_cho: []`. Lý do, đo 21:02Z 06-09-2026 trên cây b1c2284:
+#   · `_kiem_bia_mo` (check) KHÔNG miễn cho HẾT_HẠN — giữ tên tiền nhiệm ⇒ check rc=8 tới khi có bia mộ;
+#   · `thay_the_cho: []` + 6 ô điền tạm ⇒ check rc=0 (ĐĂNG ĐƯỢC) ngay khi #456 còn hạn — tức check
+#     KHÔNG chặn chồng lấn write set; chỉ `ai-dang-giu` đo được chuyện ấy;
+#   · `ai-dang-giu` không đếm bản HẾT_HẠN: mô phỏng #456 ⇒ NGƯỜI_GIỮ 1 → 0 đúng tại giây hết hạn.
+# ĐƯỜNG (b) cấp SỚM: điền `thay_the_cho: [<tiền nhiệm>]`; chủ kho thêm `da_bi_thay_the: <lease này>`
+# vào tệp lease tiền nhiệm trên nhánh ops/** và commit TRƯỚC khi check; MỌI ref còn giữ bản cũ được
+# cập nhật/dọn, readback `ai-dang-giu` ⇒ 0 dòng CÒN_HẠN của tiền nhiệm — thủ tục ở spec LO-319 mục
+# "Lease đang giữ" (b). Chọn đường nào ghi vào granted_on_instruction. Trước khi bắt tay, A8/A9 đo
+# bằng `ai-dang-giu` trên MỌI đường write set, không bằng check.
+thay_the_cho: []
+
+ly_do_cap: >-
+  Đo 17:39–17:47Z 06-09-2026 trên container Linux, MỘT lượt, không lặp, tách nền/đột biến
+  trên BẢN SAO (tệp thật không bị đụng): bộ này 88 s đầy đủ so 3 s nền-only ⇒ đột biến là
+  85 s = 96,6 % chi phí của bộ. (#456 đo bộ này 101 s CÙNG NGÀY; chạy lại 19:30Z: 75 s — ba lần
+  đo, ba con số; đây là lý do `L5` đòi đo lại và lý do A1 KHÔNG đo bằng giây.)
+  Đột biến đo BỘ TEST CÓ RĂNG KHÔNG — tính chất của logic test, không phải của nền; chạy nó
+  trên Windows là đo lại cùng một sự thật với giá đắt hơn. "Đắt gấp ~3" là NỘI SUY từ tỉ lệ
+  tổng bước hai nền của #456 (44,3/14,6 ≈ 3,03), KHÔNG phải số đo riêng của bộ này hay của
+  riêng đột biến — chưa có phân rã theo bộ trên Windows ở lượt nào. A7 mới là phép đo.
+  NHƯNG "chép hình dạng sang là việc rẻ" chỉ đúng MỘT NỬA, và nửa kia đo được (17:50Z): bộ
+  này có BA kênh đột biến (`DOT_BIEN` 22 · `DOT_BIEN_NHAM_TEST` 6 · `DOT_BIEN_SETTINGS` 1)
+  trong khi bộ đã sửa ở #456 có MỘT; nó đã có một nhánh `TONG` THỨ HAI khi
+  `duoc_cong_bo_diem` từ chối công bố điểm; và nó đã dùng `os.name` sẵn trong mã sản xuất
+  (dòng 468, 507 — tìm bash của Git for Windows).
+  Đối chứng cho A1, đo 19:35Z/19:41Z: ca nền 438 lần `subprocess.run`; nền + kênh 1 = 10.045;
+  kênh 2 = 10 spawn + 6 `exec` bản đột biến; kênh 3 = 6 spawn. Trên `nt` số spawn phải BẰNG
+  438 (đối chứng), không phải "không tỉ lệ" — một điểm đo không phân biệt được đã cắt với còn
+  nhưng nhỏ.
+  Hai dòng `MOI` kề nhau (`:39`, `:40`) trùng GIÁ TRỊ regex nhưng không chung Ô NHỚ:
+  `mau_theo_nen` tra `MOI_WINDOWS.get(path)` theo ĐƯỜNG DẪN, nên hai mục độc lập.
+
+viec_trong_lease:
+  - 'Trên Windows: CẢ BA kênh đột biến KHÔNG chạy; 33 ca nền vẫn chạy đủ.'
+  - 'A1 đo bằng ĐỐI CHỨNG, đếm ở `Popen` (mỗi tiến trình một lần; bọc cả run lẫn Popen là đếm
+     đôi): `S_nen` = chay() với ba bảng rỗng trên posix — đo lại 21:07Z 06-09-2026: 438 Popen, 0
+     exec, bằng đúng ca nền vì bộ này KHÔNG dựng fixture ngoài vòng lặp (khác 2B); `S_nt == S_nen`;
+     `S_nt` bằng nhau tại hai kích thước bảng (22 và 11 qua seam); `exec` bản đột biến trên nt = 0;
+     ba hàm runner gọi 0 lần trên nt; tập tên 33 ca nền trên nt bằng trên posix; đối chứng chiều
+     ngược `S_posix > S_nen` (10.045 > 438, đo 19:35Z, chưa đo lại lượt này).'
+  - 'Trên Windows: in một dòng bằng chứng DƯƠNG khai rõ đột biến không đo ở đây và đo ở đâu,
+     kèm số mục của CẢ BA kênh. Không mang chữ `bi giet`, không mang cặp `n/m` sau nhãn
+     `DOT BIEN`; dòng ấy phải có grammar riêng trong TONG_WINDOWS (LO-319 đọc bản ghi tổng theo
+     grammar; cặp n/m sau nhãn là sai grammar ⇒ đỏ).'
+  - 'Nhánh Windows đứng SAU chốt `duoc_cong_bo_diem` — nền đỏ trên Windows vẫn ĐỎ.'
+  - '`dat_windows` đòi số dương BA VẾ — chốt tương đương `len(DOT_BIEN) > 0` cho cả ba kênh.'
+  - 'Sổ đăng ký chấp nhận dòng ấy CHỈ khi nền là Windows; hai chiều đều có phản chứng, đi qua
+     chính `chay_moi` với năm seam.'
+  - 'Linux giữ nguyên: vẫn `CA 33/33`, vẫn `DOT BIEN 22/22 bi giet`, vẫn ba kênh chạy — tổng
+     Linux của `test registry` KHÔNG giảm ở packet này.'
+  - 'Chạy `workflow_dispatch` `ci.yml` trên nhánh packet để ĐO bước `test registry` trên
+     Windows thật; tìm BƯỚC theo TÊN trên mọi job (sau GATE nó ở `gate-registry`); đơn vị là
+     PHÚT TƯỜNG CỦA BƯỚC, không phải của job.'
+
+dieu_kien_dung:
+  - 'Chạm `ops/nhanh_don_duoc_test.py` — packet riêng, CỐ Ý ngoài write set.'
+  - 'Đụng `loi_ruff_ci` hoặc `bang_chung_xanh` trong `ci_dang_ky_test.py` — của GATE và LO-319,
+     đã land trước.'
+  - 'Cắt một kênh đột biến rồi coi là xong — để lại hai vòng lặp sinh tiến trình con trên Windows;
+     A1 so BẰNG đối chứng nên kênh 3 (6 spawn) vẫn lộ.'
+  - 'Đặt nhánh Windows TRƯỚC chốt `duoc_cong_bo_diem` — một nền đỏ trên Windows sẽ mua được
+     cổng xanh. Đây là bẫy mà `pretooluse_guard_test.py` KHÔNG có, nên bản vá cũ không chép
+     nguyên xi được.'
+  - 'Làm chốt `len(DOT_BIEN) > 0` im trên Windows thay vì thay bằng chốt tương đương —
+     đó là xoá bằng chứng dương để mua cổng xanh (bài học #319).'
+  - 'Bỏ qua ca nền trên Windows — chỉ đột biến được cắt; ca nền là thứ THẬT SỰ cần Windows.'
+  - 'Trộn vị từ nền mới với `os.name` ở `_git_for_windows_usr_bin` hoặc khối dựng PATH —
+     hai bất biến không liên quan.'
+  - 'Đo A1 bằng THỜI GIAN TƯỜNG, hay bằng MỘT điểm đo "không tỉ lệ" — phải có đối chứng và hai
+     kích thước bảng.'
+  - 'Nâng `timeout-minutes` trong `ci.yml` — đã nâng HAI lần (ba mức 25→45→60); lần kế là lần
+     thứ ba, `PROTOCOL §12` đòi xem lại cách làm. Điều kiện DỪNG.'
+  - 'Bắt tay khi `ai-dang-giu .claude/dev/ci_dang_ky_test.py` còn một dòng của lease LO-319
+     thiếu `ĐÃ_BỊ_THAY_THẾ`/`HẾT_HẠN`.'
+  - 'A7 ĐỎ (bước `test registry` không nhanh hơn) là KẾT QUẢ ĐO — giả định NỘI SUY "Windows đắt
+     gấp ~3" sai. Báo chủ kho, đừng nới gì để ép nó xanh.'

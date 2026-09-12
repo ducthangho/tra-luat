@@ -1,0 +1,327 @@
+{
+  "docs_count": 76,
+  "docs_hits": [
+    {
+      "path": "docs/KE_HOACH_RASOAT_HOSO_ORCHESTRATION.md",
+      "line": 80,
+      "text": "`run_pipeline`, `profile-ingest-resume` lên bảng stage, gộp `ingest_commit`) làm hàng \"Nạp hồ sơ\" và \"kế nhiệm/resume\""
+    },
+    {
+      "path": "docs/KE_HOACH_RASOAT_HOSO_ORCHESTRATION.md",
+      "line": 109,
+      "text": "   để kế nhiệm phiên: \"phiên chính\" là VAI TRÒ chuyển giao tuần tự, không phải một cửa sổ context bất tử."
+    },
+    {
+      "path": "docs/KE_HOACH_RASOAT_HOSO_ORCHESTRATION.md",
+      "line": 137,
+      "text": "        │ cạn context/ngân sách NLM → chốt checkpoint + note bàn giao → phiên KẾ NHIỆM│"
+    },
+    {
+      "path": "docs/KE_HOACH_RASOAT_HOSO_ORCHESTRATION.md",
+      "line": 178,
+      "text": "| Kế nhiệm phiên | ~55% | journal/resume phủ phần ghi (r205 chặt thêm); THIẾU note bàn giao trạng thái rà (gộp vào C1) |"
+    },
+    {
+      "path": "docs/KE_HOACH_RASOAT_HOSO_ORCHESTRATION.md",
+      "line": 237,
+      "text": "| **H8. Kiểm chứng kế nhiệm** | kill phiên giữa đơn vị đang rà → mở phiên mới | phiên mới đọc PLAN + note bàn giao, rà tiếp đúng chỗ, không lặp lại đơn vị `done`, mất tối đa 1 đơn vị dở |"
+    },
+    {
+      "path": "docs/KE_HOACH_TRIEN_KHAI_PROTOCOL_DA_PHIEN.md",
+      "line": 20,
+      "text": "1. Mỗi mission có Issue, integration branch và draft land PR riêng."
+    },
+    {
+      "path": "docs/KE_HOACH_TRIEN_KHAI_PROTOCOL_DA_PHIEN.md",
+      "line": 115,
+      "text": "| **W1-G2** | Mutation matrix cho `gate_lifecycle.py` | PR riêng sau W1-G1; survivor/mutant không chạy không được biến mất khỏi mẫu số |"
+    },
+    {
+      "path": "docs/KE_HOACH_TRIEN_KHAI_PROTOCOL_DA_PHIEN.md",
+      "line": 134,
+      "text": "| **M1 — Evidence Truth** | W0-M1, W0-M3, W0-M4, W0-M2, W0-R1, W0-R2, W0-R3, W0-C1 | plan/MCR được duyệt; base từ canonical mới nhất | từng capability có phản chứng; land PR riêng; canonical readback trước M2 |"
+    },
+    {
+      "path": "docs/KE_HOACH_TRIEN_KHAI_PROTOCOL_DA_PHIEN.md",
+      "line": 138,
+      "text": "Mỗi Mission có Issue, integration branch và draft land PR riêng; tối đa hai Executor writer với effective write"
+    },
+    {
+      "path": "docs/KE_HOACH_TRIEN_KHAI_PROTOCOL_DA_PHIEN.md",
+      "line": 675,
+      "text": "review/approve diff của mình. Merge vào integration là `integrated`; chỉ canonical + hậu-merge gate + bookkeeping"
+    },
+    {
+      "path": "docs/KE_HOACH_TRIEN_KHAI_PROTOCOL_DA_PHIEN.md",
+      "line": 727,
+      "text": "  bookkeeping/dependency đã cập nhật."
+    },
+    {
+      "path": "docs/PROTOCOL_DA_PHIEN.md",
+      "line": 29,
+      "text": "9. Review, CI, authorization và land evidence đều gắn exact SHA. Head đổi làm bằng chứng và ủy quyền cũ hết hiệu lực."
+    },
+    {
+      "path": "docs/PROTOCOL_DA_PHIEN.md",
+      "line": 43,
+      "text": "| Land Operator | Thực hiện đúng prepare/apply đã được ủy quyền và ghi land evidence | Tự chọn head, tự nới điều kiện hoặc coi thao tác của mình là review/approval |"
+    },
+    {
+      "path": "docs/PROTOCOL_DA_PHIEN.md",
+      "line": 353,
+      "text": "## 7. Handoff và tự sinh phiên kế nhiệm"
+    },
+    {
+      "path": "docs/PROTOCOL_DA_PHIEN.md",
+      "line": 466,
+      "text": "Land evidence tách approval khỏi thao tác:"
+    },
+    {
+      "path": "docs/PROTOCOL_DA_PHIEN.md",
+      "line": 484,
+      "text": "bookkeeping: []"
+    },
+    {
+      "path": "docs/PROTOCOL_DA_PHIEN.md",
+      "line": 721,
+      "text": "- `landed`: kết quả đã vào canonical ở exact SHA được duyệt, hậu-merge gate xanh và bookkeeping Packet xong;"
+    },
+    {
+      "path": "docs/PROTOCOL_DA_PHIEN.md",
+      "line": 725,
+      "text": "bootstrap cũng chỉ thành `landed` sau post-merge evidence và bookkeeping."
+    },
+    {
+      "path": "docs/PROTOCOL_DA_PHIEN.md",
+      "line": 727,
+      "text": "**`bookkeeping Packet xong` đòi DUYỆT TỪNG MỤC việc mà lease khai, không dừng ở hiện vật chính.** Một phép thử"
+    },
+    {
+      "path": "docs/PROTOCOL_DA_PHIEN.md",
+      "line": 736,
+      "text": "con số ghi ở đây sai ngay ở lần land kế tiếp. Cổng thi hành thuộc packet kế nhiệm (Issue #284), có lease"
+    },
+    {
+      "path": "docs/PROTOCOL_DA_PHIEN.md",
+      "line": 787,
+      "text": "độ sâu kế nhiệm 5, hai worker song song, 30 agent invocation và 360 cloud minute. Các trần độc lập và trần chạm"
+    },
+    {
+      "path": "docs/PROTOCOL_DA_PHIEN.md",
+      "line": 828,
+      "text": "Remediation Slice kế nhiệm, giữ nguyên stable finding IDs và lịch sử. Finding cắt ngang bất biến lõi thì không"
+    },
+    {
+      "path": "docs/PROTOCOL_DA_PHIEN.md",
+      "line": 862,
+      "text": "post-merge và bookkeeping evidence trước khi chuyển `landed`/`complete`."
+    },
+    {
+      "path": "docs/PROTOCOL_DA_PHIEN.md",
+      "line": 913,
+      "text": "- **Automation horizon (pha 3–9):** roadmap bắt buộc để đạt mục tiêu tự sinh kế nhiệm, cloud/local continuity và"
+    },
+    {
+      "path": "docs/PROTOCOL_DA_PHIEN.md",
+      "line": 938,
+      "text": "| Tự sinh phiên kế nhiệm | Khả thi ở dạng headless worker; không thể hứa một chat tương tác chung giữa hai sản phẩm |"
+    },
+    {
+      "path": "docs/WORKFLOW_RASOAT_TU_DONG.md",
+      "line": 45,
+      "text": "| **bàn giao** | phiên kế nhiệm: Pha 0 → đọc state từ Drive → GHI claim mới → rà tiếp. Kill-ngang = bàn giao không nghi thức, mất tối đa 1 đơn vị dở |"
+    },
+    {
+      "path": "docs/WORKFLOW_RASOAT_TU_DONG.md",
+      "line": 65,
+      "text": "| P1 | **State là file, không phải context.** Mọi hàng đợi/tiến độ/phát hiện nằm trong file máy-đọc-được; phiên (và context) là VAI TRÒ dùng lại được, kill lúc nào cũng resume | journal/WAL + `--resume`; bài học kế nhiệm phiên |"
+    },
+    {
+      "path": "docs/WORKFLOW_RASOAT_TU_DONG.md",
+      "line": 360,
+      "text": "| Lưu trữ giữa phiên | `~/.tra_luat_cache` sống lâu | sandbox **xoá trắng mỗi phiên** | state sống-còn trên Drive (§3) nên kế nhiệm vẹn; riêng chat: đẩy `master/` sau MỖI đơn vị/lô nhỏ |"
+    },
+    {
+      "path": "docs/adr/0016-lop-dieu-phoi-rasoat-hoso-state-lai-single-writer-anchor.md",
+      "line": 28,
+      "text": "  nặng; local-only = chết theo sandbox Claude chat (xoá trắng mỗi phiên) → mất kế nhiệm. LAI lấy đúng mặt"
+    },
+    {
+      "path": "docs/adr/0016-lop-dieu-phoi-rasoat-hoso-state-lai-single-writer-anchor.md",
+      "line": 30,
+      "text": "- Single-writer bằng claim mềm (file) thay vì lock cứng: cho phép kế nhiệm khi phiên chết không nhả khoá,"
+    },
+    {
+      "path": "docs/adr/0017-pr-github-la-ban-giao-va-dieu-phoi-chinh.md",
+      "line": 43,
+      "text": "lỗi xuất hiện 2 lần thì `blocked`, toàn mission tối đa 20 packet và độ sâu kế nhiệm 5. Chạm trần hoặc cần quyền"
+    },
+    {
+      "path": "docs/adr/0017-pr-github-la-ban-giao-va-dieu-phoi-chinh.md",
+      "line": 48,
+      "text": "tóm tắt, changed paths, bằng chứng test, việc còn lại, failure fingerprint và danh sách packet kế nhiệm. Mỗi đề"
+    },
+    {
+      "path": "docs/adr/0017-pr-github-la-ban-giao-va-dieu-phoi-chinh.md",
+      "line": 49,
+      "text": "xuất kế nhiệm khai mục tiêu, write set, phụ thuộc, executor, môi trường, tiêu chí hoàn tất và khóa chống sinh"
+    },
+    {
+      "path": "docs/adr/0024-review-phan-tang-khi-het-quota.md",
+      "line": 18,
+      "text": "dung mới tiêu thụ attempt; phát hiện ngoài effective write set cần cấp lại lease hoặc tạo packet kế nhiệm."
+    },
+    {
+      "path": "docs/adr/0026-rollout-theo-promotion-gate.md",
+      "line": 9,
+      "text": "(3) dispatcher shadow với fixture/dry-run; (4) cloud canary một provider, một packet, chưa tự sinh kế nhiệm;"
+    },
+    {
+      "path": "docs/adr/0026-rollout-theo-promotion-gate.md",
+      "line": 35,
+      "text": "tuyên bố hệ thống đã tự sinh kế nhiệm, chạy khi Windows tắt hay land end-to-end trên Android."
+    },
+    {
+      "path": "docs/adr/0034-governance-change-control-review-land-authority.md",
+      "line": 19,
+      "text": "authorization, operator, merge commit, post-merge gate và bookkeeping. Head đổi làm review, CI và authorization cũ"
+    },
+    {
+      "path": "docs/adr/0034-governance-change-control-review-land-authority.md",
+      "line": 21,
+      "text": "canonical cùng hậu-merge gate và bookkeeping, còn Mission chỉ `complete` sau final readback và không còn việc mở."
+    },
+    {
+      "path": "docs/adr/0037-review-rescue-va-tach-stable-slice.md",
+      "line": 8,
+      "text": "review exact head mới. Phần chưa ổn thành Remediation Slice kế nhiệm, giữ finding IDs và lịch sử. Nếu finding cắt"
+    },
+    {
+      "path": "docs/research/2026-08-03-phan-bien-protocol-da-phien.md",
+      "line": 202,
+      "text": "   phiên kế nhiệm hoặc tiếp tục khi Windows tắt."
+    },
+    {
+      "path": "docs/research/2026-08-04-lua-chon-orchestrator-da-model-codex-claude.md",
+      "line": 133,
+      "text": "- Mỗi worker có worktree/branch/PR riêng; daemon theo dõi PR, CI, review và chuyển failure/comment về đúng"
+    },
+    {
+      "path": "docs/research/2026-08-04-lua-chon-orchestrator-da-model-codex-claude.md",
+      "line": 271,
+      "text": "plan/code/review/test khá sát yêu cầu: repo đã archived và README chỉ sang dự án kế nhiệm; không"
+    },
+    {
+      "path": "docs/research/2026-08-08-toi-uu-selftest-gate.md",
+      "line": 202,
+      "text": "Nightly không thay thế exact-SHA land evidence vì có khoảng trễ và có thể chạy trên commit khác."
+    }
+  ],
+  "land_path_hits": [
+    {
+      "path": "ops/DO_VI_SAO_LEASE_482_483_CHET_20260909.md",
+      "hits": [
+        {
+          "line": 14,
+          "text": "`ops/land/pr478-land-evidence.yaml` (đã ở `master` qua PR #486) khai trong `bookkeeping`:"
+        }
+      ]
+    },
+    {
+      "path": "ops/prompts/handoff-264-review-1-claude-20260823.md",
+      "hits": [
+        {
+          "line": 40,
+          "text": "4. **Land evidence** `ops/land/plat-x8-land-evidence.yaml`: `merge_commit`, `authorized_head_sha`,"
+        }
+      ]
+    }
+  ],
+  "parser_commands": [
+    {
+      "line": 1975,
+      "name": "init"
+    },
+    {
+      "line": 1984,
+      "name": "record-lease"
+    },
+    {
+      "line": 1997,
+      "name": "begin-attempt"
+    },
+    {
+      "line": 2004,
+      "name": "void-attempt"
+    },
+    {
+      "line": 2014,
+      "name": "chup-anh-doctor"
+    },
+    {
+      "line": 2019,
+      "name": "record-review"
+    },
+    {
+      "line": 2036,
+      "name": "transition"
+    },
+    {
+      "line": 2043,
+      "name": "record-post"
+    },
+    {
+      "line": 2049,
+      "name": "next-comment"
+    },
+    {
+      "line": 2053,
+      "name": "guard"
+    },
+    {
+      "line": 2057,
+      "name": "ghi-uy-quyen"
+    },
+    {
+      "line": 2066,
+      "name": "doi-chieu-uy-quyen"
+    },
+    {
+      "line": 2076,
+      "name": "doctrine-scan"
+    },
+    {
+      "line": 2081,
+      "name": "adr-song"
+    },
+    {
+      "line": 2086,
+      "name": "bien-nhan"
+    },
+    {
+      "line": 2094,
+      "name": "status"
+    },
+    {
+      "line": 2098,
+      "name": "where"
+    }
+  ],
+  "landed_literals": [
+    {
+      "line": 191,
+      "value": "proposed → ready → leased → running → reviewing → accepted → integrated → landed"
+    },
+    {
+      "line": 211,
+      "value": "landed: kết quả đã vào canonical"
+    }
+  ],
+  "adr0034_path": "docs/adr/0034-governance-change-control-review-land-authority.md",
+  "protocol_row": [
+    {
+      "line": 1136,
+      "text": "| `ADR-0034` | Change-control, review độc lập và thẩm quyền land | Accepted | có nhắc: `lease_publish.py`×10 · `packet_loop.py`×11 |"
+    }
+  ]
+}

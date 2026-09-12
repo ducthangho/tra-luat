@@ -1,0 +1,77 @@
+CA:
+  DAT  t1_agent_bi_chan_moi_hinh_dang_ghi     8 hinh dang ghi -> deny 8/8
+  DAT  t2_ca_hai_agent_deu_bi_chan            2 agent x 8 ca -> deny 16/16
+  DAT  t3_khong_chan_oan_lenh_doc             lenh doc hop le -> allow 7/7
+  DAT  t4_phien_chinh_khop_packet_base        phien chinh: 17/17 khop base c03a409afc17
+  DAT  t5_doi_chung_van_ask                   doi chung -> ask 2/2
+  DAT  t6_agent_la_khong_bi_ap_luat           agent ngoai danh sach: khong ap luat (0 ca bi chan oan)
+  DAT  t7_nhom_mutate_tra_luat_bi_chan        nhom mutate tra-luat -> deny 3/3
+  DAT  t8_ghi_giau_qua_tach_lenh_va_thay_the  ghi giau ($() · backtick · xuong dong · <()) -> deny 7/7
+  DAT  t9_che_do_ghi_cua_chuong_trinh_cho_phep che do GHI (10 ca cross-review) -> deny 10/10
+  DAT  t10_che_do_doc_cua_cung_chuong_trinh_khong_bi_chan che do DOC -> allow 8/8
+  DAT  t11_lo_336_co_that_VA_bi_chan          lo #336 chay-that-VA-bi-chan 2/2
+  DAT  t12_tl_lenh_read_only_false_bi_chan    lenh tl read_only=False -> deny 4/4
+  DAT  t13_khong_chan_oan_che_do_doc          che do DOC cua cung chuong trinh -> allow 8/8
+  DAT  t14_co_khong_ton_tai_phan_biet_duoc_voi_bi_chan co KHONG TON TAI: guard=deny · ly-do-la-allowlist=True · diff-tu-choi=True · tao-tep=False (mong doi deny/True/True/False)
+  DAT  t15_cong_kiem_bang_khop_nguon_that     --kiem-bang rc=0 · TANG 1 : 97 writer top-level + 7 writer LONG = 104 (nguon: runtime) · TANG 1b: help THAT cua 8 lenh phoi 1 spelling; ho co 4 ten, trong do 3 la PHONG NGUA (khong lenh nao trong 8 lenh ay phoi ra): --out-dir --output --output-file · TANG 1b: 8 lenh read_only=True nhung write_scope != none (chi ghi khi co --out/--out-dir/--output/--output-file)
+  DAT  t17_co_sinh_tep_cua_tl_bi_chan_nhung_che_do_doc_thi_khong ho co sinh tep tl: chan 3/3 · qua 3/3
+  DAT  t18_co_ngan_GOP_mot_chu_xau_la_ca_cum_xau co ngan gop: qua 3/3 · chan 3/3
+  DAT  t19_kiem_bang_FAIL_CLOSE_khi_thieu_nguon goc KHONG co command_registry.py -> rc=4 (mong doi khac 0), co 'KHONG DO DUOC' tren stderr=True
+  DAT  t20_TL_CAM_bat_cai_ma_hai_tang_kia_KHONG_bat chi _TL_CAM bat duoc -> deny 3/3
+  DAT  t28_writer_credential_bi_chan          stage/set credential -> deny 5/5
+  DAT  t29_lenh_LONG_bi_chan                  lenh LONG -> deny 7/7
+  DAT  t30_co_global_khong_lam_lech_ten_lenh  co global + writer -> deny 5/5
+  DAT  t31_kich_ban_ngoai_danh_sach_bi_chan   kich ban ngoai danh sach -> deny 3/3
+  DAT  t32_khong_chan_oan_be_mat_vua_siet     doc hop le -> allow 5/5
+  DAT  t33_cong_hoi_RUNTIME_chu_khong_parse_van_ban rc=0 · TANG 1 : 97 writer top-level + 7 writer LONG = 104 (nguon: runtime)
+  DAT  t34_so_tran_chi_cho_chuong_trinh_DO_DUOC_la_nhan -<so>: 6 nhan / 5 tu choi -> dung 11/11
+  DAT  t35_co_ngan_an_gia_tri_gan_lien_khong_bi_chan_oan co ngan gan gia tri: 10 allow / 4 deny -> dung 14/14
+  DAT  t37_duong_dan_kich_ban_KHONG_CO_LOI_THOAT duong dan kich ban: 6/6
+  DAT  t38_git_c_chi_nhan_khoa_DA_DO          git -c theo khoa: 6/6
+  DAT  t39_gan_bien_TIEN_TO_bi_chan_gan_bien_THUAN_thi_KHONG gan bien tien to: 7/7
+  DAT  t40_co_ngan_gia_tri_PHI_SO_khong_bi_chan_oan co ngan gia tri phi so: 6/6
+  DAT  t41_co_GLOBAL_DON_khong_lam_lech_ten_lenh co global don: 8/8
+  DAT  t42_bo_dem_khoa_theo_BAM_khong_theo_THOI_GIAN khoa bo dem: 2/2
+  DAT  t43_hook_quyet_dinh_duoi_code_page_mac_dinh decision child default-code-page=True · non-ASCII write=deny
+  DAT  t44_thieu_Ruff_01515_lam_cong_do       PATH khong Ruff -> rc=4 · fail-closed=True
+  DAT  t45_windows_bang_dot_bien_RONG_thi_KHONG_dat Windows: bang dot bien RONG / khong ca / co ca DO -> KHONG dat
+  DAT  t46_dong_windows_KHONG_gia_dang_dong_linux Windows: dong bang chung khai dung noi dot bien duoc do
+  DAT  t47_vi_tu_nen_chi_cat_dot_bien_tren_nt vi tu nen: chi 'nt' moi cat vong lap dot bien
+  DAT  t36_moi_ca_DINH_NGHIA_deu_phai_DANG_KY dinh nghia 39 · dang ky 39
+DOT BIEN (moi cai PHAI lam it nhat mot ca DO):
+  GIET m1_cho_sed_awk_vao_CA HAI bang lam DO: t1_agent_bi_chan_moi_hinh_dang_ghi, t2_ca_hai_agent_deu_bi_chan, t8_ghi_giau_qua_tach_lenh_va_thay_the, t9_che_do_ghi_cua_chuong_trinh_cho_phep
+  GIET m2_bo_chot_chuyen_huong        lam DO: t1_agent_bi_chan_moi_hinh_dang_ghi, t2_ca_hai_agent_deu_bi_chan, t43_hook_quyet_dinh_duoi_code_page_mac_dinh, t9_che_do_ghi_cua_chuong_trinh_cho_phep
+  GIET m3_bo_de_quy_thay_the          lam DO: t8_ghi_giau_qua_tach_lenh_va_thay_the
+  GIET m4_bo_kiem_python              lam DO: t12_tl_lenh_read_only_false_bi_chan, t17_co_sinh_tep_cua_tl_bi_chan_nhung_che_do_doc_thi_khong, t1_agent_bi_chan_moi_hinh_dang_ghi, t28_writer_credential_bi_chan, t29_lenh_LONG_bi_chan, t2_ca_hai_agent_deu_bi_chan, t30_co_global_khong_lam_lech_ten_lenh, t31_kich_ban_ngoai_danh_sach_bi_chan, t37_duong_dan_kich_ban_KHONG_CO_LOI_THOAT, t41_co_GLOBAL_DON_khong_lam_lech_ten_lenh
+  GIET m5_cho_tee_vao_CA HAI bang     lam DO: t1_agent_bi_chan_moi_hinh_dang_ghi, t2_ca_hai_agent_deu_bi_chan, t8_ghi_giau_qua_tach_lenh_va_thay_the
+  GIET m6_rong_danh_sach_agent        lam DO: t11_lo_336_co_that_VA_bi_chan, t12_tl_lenh_read_only_false_bi_chan, t14_co_khong_ton_tai_phan_biet_duoc_voi_bi_chan, t17_co_sinh_tep_cua_tl_bi_chan_nhung_che_do_doc_thi_khong, t18_co_ngan_GOP_mot_chu_xau_la_ca_cum_xau, t1_agent_bi_chan_moi_hinh_dang_ghi, t20_TL_CAM_bat_cai_ma_hai_tang_kia_KHONG_bat, t28_writer_credential_bi_chan, t29_lenh_LONG_bi_chan, t2_ca_hai_agent_deu_bi_chan, t30_co_global_khong_lam_lech_ten_lenh, t31_kich_ban_ngoai_danh_sach_bi_chan, t34_so_tran_chi_cho_chuong_trinh_DO_DUOC_la_nhan, t35_co_ngan_an_gia_tri_gan_lien_khong_bi_chan_oan, t37_duong_dan_kich_ban_KHONG_CO_LOI_THOAT, t38_git_c_chi_nhan_khoa_DA_DO, t39_gan_bien_TIEN_TO_bi_chan_gan_bien_THUAN_thi_KHONG, t40_co_ngan_gia_tri_PHI_SO_khong_bi_chan_oan, t41_co_GLOBAL_DON_khong_lam_lech_ten_lenh, t43_hook_quyet_dinh_duoi_code_page_mac_dinh, t7_nhom_mutate_tra_luat_bi_chan, t8_ghi_giau_qua_tach_lenh_va_thay_the, t9_che_do_ghi_cua_chuong_trinh_cho_phep
+  GIET m7_bo_chot_tl_mutate           lam DO: t20_TL_CAM_bat_cai_ma_hai_tang_kia_KHONG_bat
+  GIET m8_bo_tach_xuong_dong          lam DO: t8_ghi_giau_qua_tach_lenh_va_thay_the
+  GIET m9_bo_thay_the_tien_trinh      lam DO: t8_ghi_giau_qua_tach_lenh_va_thay_the
+  GIET m13_bo_kiem_uniq               lam DO: t35_co_ngan_an_gia_tri_gan_lien_khong_bi_chan_oan, t9_che_do_ghi_cua_chuong_trinh_cho_phep
+  GIET m14_bo_chot_vi_tri_git_ref     lam DO: t9_che_do_ghi_cua_chuong_trinh_cho_phep
+  GIET m15_bo_tang2_kiem_co           lam DO: t11_lo_336_co_that_VA_bi_chan, t14_co_khong_ton_tai_phan_biet_duoc_voi_bi_chan, t18_co_ngan_GOP_mot_chu_xau_la_ca_cum_xau, t34_so_tran_chi_cho_chuong_trinh_DO_DUOC_la_nhan, t35_co_ngan_an_gia_tri_gan_lien_khong_bi_chan_oan, t40_co_ngan_gia_tri_PHI_SO_khong_bi_chan_oan, t9_che_do_ghi_cua_chuong_trinh_cho_phep
+  GIET m16_bo_tang1_lenh_tl_ghi       lam DO: t12_tl_lenh_read_only_false_bi_chan, t28_writer_credential_bi_chan, t29_lenh_LONG_bi_chan, t30_co_global_khong_lam_lech_ten_lenh, t41_co_GLOBAL_DON_khong_lam_lech_ten_lenh
+  GIET m17_rong_bang_lenh_ghi         lam DO: t12_tl_lenh_read_only_false_bi_chan, t15_cong_kiem_bang_khop_nguon_that, t28_writer_credential_bi_chan, t30_co_global_khong_lam_lech_ten_lenh, t33_cong_hoi_RUNTIME_chu_khong_parse_van_ban, t41_co_GLOBAL_DON_khong_lam_lech_ten_lenh
+  GIET m18_noi_bang_co_git_cho_output lam DO: t11_lo_336_co_that_VA_bi_chan
+  GIET m23_rong_ho_co_sinh_tep        lam DO: t15_cong_kiem_bang_khop_nguon_that, t17_co_sinh_tep_cua_tl_bi_chan_nhung_che_do_doc_thi_khong, t33_cong_hoi_RUNTIME_chu_khong_parse_van_ban
+  GIET m24_bo_mien_tang2_cho_python   lam DO: t17_co_sinh_tep_cua_tl_bi_chan_nhung_che_do_doc_thi_khong, t32_khong_chan_oan_be_mat_vua_siet, t37_duong_dan_kich_ban_KHONG_CO_LOI_THOAT, t39_gan_bien_TIEN_TO_bi_chan_gan_bien_THUAN_thi_KHONG, t3_khong_chan_oan_lenh_doc, t41_co_GLOBAL_DON_khong_lam_lech_ten_lenh
+  GIET m21_noi_so_tran_cho_moi_chuong_trinh lam DO: t34_so_tran_chi_cho_chuong_trinh_DO_DUOC_la_nhan
+  GIET m22_bo_luat_so_tran            lam DO: t10_che_do_doc_cua_cung_chuong_trinh_khong_bi_chan, t13_khong_chan_oan_che_do_doc, t17_co_sinh_tep_cua_tl_bi_chan_nhung_che_do_doc_thi_khong, t32_khong_chan_oan_be_mat_vua_siet, t34_so_tran_chi_cho_chuong_trinh_DO_DUOC_la_nhan, t3_khong_chan_oan_lenh_doc
+  GIET m19_no_cum_cho_qua_tat_ca      lam DO: t18_co_ngan_GOP_mot_chu_xau_la_ca_cum_xau, t35_co_ngan_an_gia_tri_gan_lien_khong_bi_chan_oan, t40_co_ngan_gia_tri_PHI_SO_khong_bi_chan_oan
+  GIET m23_rong_bang_lenh_LONG        lam DO: t15_cong_kiem_bang_khop_nguon_that, t29_lenh_LONG_bi_chan, t33_cong_hoi_RUNTIME_chu_khong_parse_van_ban
+  GIET m24_bo_tieu_gia_tri_co_global  lam DO: t30_co_global_khong_lam_lech_ten_lenh
+  GIET m25_noi_kich_ban_ve_theo_THU_MUC lam DO: t31_kich_ban_ngoai_danh_sach_bi_chan
+  GIET m26_cong_fail_OPEN_khi_khong_hoi_duoc_runtime lam DO: t19_kiem_bang_FAIL_CLOSE_khi_thieu_nguon
+  GIET m27_bo_grep_diff_khoi_so_tran  lam DO: t32_khong_chan_oan_be_mat_vua_siet, t34_so_tran_chi_cho_chuong_trinh_DO_DUOC_la_nhan
+  GIET m28_bo_nhanh_co_ngan_gan_gia_tri lam DO: t35_co_ngan_an_gia_tri_gan_lien_khong_bi_chan_oan, t40_co_ngan_gia_tri_PHI_SO_khong_bi_chan_oan
+  GIET m29_bo_mot_spelling_THAT_khoi_ho_sinh_tep lam DO: t15_cong_kiem_bang_khop_nguon_that, t17_co_sinh_tep_cua_tl_bi_chan_nhung_che_do_doc_thi_khong, t33_cong_hoi_RUNTIME_chu_khong_parse_van_ban
+  GIET m10_ghep_bo_heredoc_va_tach_dong lam DO: t8_ghi_giau_qua_tach_lenh_va_thay_the
+  GIET m30_tra_lai_lstrip_cho_kich_ban lam DO: t37_duong_dan_kich_ban_KHONG_CO_LOI_THOAT
+  GIET m31_git_c_tha_moi_khoa         lam DO: t38_git_c_chi_nhan_khoa_DA_DO
+  GIET m32_gan_bien_tien_to_tha_vo_dieu_kien lam DO: t39_gan_bien_TIEN_TO_bi_chan_gan_bien_THUAN_thi_KHONG
+  GIET m35_bo_dem_khoa_theo_mtime     lam DO: t42_bo_dem_khoa_theo_BAM_khong_theo_THOI_GIAN
+  GIET m34_bo_timings_khoi_co_global_don lam DO: t41_co_GLOBAL_DON_khong_lam_lech_ten_lenh
+  GIET m33_siet_lai_isdigit_cho_co_ngan lam DO: t40_co_ngan_gia_tri_PHI_SO_khong_bi_chan_oan
+TONG: CA 39/39 dat · DOT BIEN 34/34 bi giet
+TONG: DAT

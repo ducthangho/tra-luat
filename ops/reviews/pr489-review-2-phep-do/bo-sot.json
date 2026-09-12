@@ -1,0 +1,1273 @@
+{
+  "source_locations": [
+    {
+      "path": "ops/land/pr480-land-evidence.yaml",
+      "line_start": 7,
+      "line_end": 12,
+      "text": "# Nguồn: §20 ghi ADR-0034 là \"có nhắc\", không phải \"0 cổng\"; nhắc tên không chứng minh\n# cưỡng chế nội dung. Các phép kiểm ngắn của lượt này không xác thực prose/API trong land evidence.\n#\n# TỆP NÀY LÀ LAND EVIDENCE CỦA MỘT LAND EVIDENCE. Nói thẳng chỗ ấy vì nó là một chuỗi không tự dừng:\n# Tuyến này: #477 → land evidence ở #480 → hồ sơ bổ sung ở #489. Tuyến #468 → #478 → #486\n# liên quan qua các hiện vật hậu kiểm ở #487; không phải chuỗi cha/con tuyến tính của #480."
+    },
+    {
+      "path": "ops/land/pr487-land-evidence.yaml",
+      "line_start": 5,
+      "line_end": 6,
+      "text": "# Nguồn: §20 ghi ADR-0034 là \"có nhắc\", không phải \"0 cổng\"; nhắc tên không chứng minh\n# cưỡng chế nội dung. Các phép kiểm ngắn của lượt này không xác thực prose/API trong land evidence."
+    },
+    {
+      "path": "ops/reviews/pr489-review-1-codex-verdict.receipt.yaml",
+      "line_start": 5,
+      "line_end": 8,
+      "text": "# ĐỐI TƯỢNG: PR bookkeeping (hai land evidence) CỘNG một đính chính lớn mà điều phối vừa tự làm sau\n# khi phát hiện container mình là KHO NÔNG. Prompt kể thẳng chuỗi sai ấy và giao nhiệm vụ chính là\n# KIỂM CHÍNH BẢN SỬA, kèm câu hỏi ngược: \"bản sửa có khai vượt theo chiều ngược không?\"\n# Reviewer trả lời đúng câu ấy — xem `p2_ban_sua_van_khai_vuot`."
+    },
+    {
+      "path": "ops/reviews/pr489-review-1-codex-verdict.md",
+      "line_start": 132,
+      "line_end": 132,
+      "text": "VẤN ĐỀ: Tên mục khẳng định CI trên exact head đã duyệt, nhưng nguồn chỉ thuật `pull_request` success. Workflow có **1 bước checkout**, không khai `with.ref`; chính comment trong workflow phân biệt `GITHUB_SHA` merge tổng hợp với head PR. Không có log/JSON chứng minh cây test thực là head. Land evidence cũ của #477/#478 đã giới hạn đúng cùng trường hợp này. Đưa lại tên “exact head” có thể cho downstream đi qua điều kiện trước merge bằng bằng chứng của cây khác. Tôi không tuyên đã quan sát runner checkout cây tổng hợp; finding là phạm vi chứng nhận không có bằng chứng hỗ trợ."
+    },
+    {
+      "path": "ops/reviews/pr489-review-1-codex-verdict.md",
+      "line_start": 107,
+      "line_end": 107,
+      "text": "| BANG-CHU-THICH.tsv | **67 dòng chú thích** | **67/67 dòng ứng viên** khớp vị trí/text sau bỏ thụt đầu dòng. Nhưng **66 dòng** là comment YAML; **1 dòng** L480:97 ở trong folded scalar `ghi_chu_vi_tri`, không phải comment. Đã được bảng lá giữ nữa. | ĐO ĐƯỢC+LỆCH | Khớp dữ liệu; sai phân loại một dòng |"
+    },
+    {
+      "path": "ops/reviews/pr489-review-1-codex-verdict.md",
+      "line_start": 150,
+      "line_end": 150,
+      "text": "GÓI VÁ: Hai tệp land đầy đủ và `cay/ops/land/pr489-review-1-do-cuc-bo.json`. **chưa chạy trên cây thật — executor tự áp, tự đo, tự chịu trách nhiệm commit**."
+    },
+    {
+      "path": "ops/reviews/README.md",
+      "line_start": 269,
+      "line_end": 269,
+      "text": "| [`pr489-review-1-codex-verdict.md`](pr489-review-1-codex-verdict.md) | [`.receipt.yaml`](pr489-review-1-codex-verdict.receipt.yaml) | *(không có lease — PR hồ sơ)* | **`changes_requested`** · lượt **1** của PR #489 (bookkeeping cho #480 và #487), head `9a99dd8a`, khác nền (`codex`, `gpt-6-astra`, xhigh, **1560 s**, chạy trọn ngay lần đầu). **P1 1 · P2 4 · P3 6.** **P1 là lỗi điều phối VỪA THÊM khi vá finding trước**: `pre_merge_checks` — mục mới thêm sau khi connector chấm P2 thiếu nó — đặt tên *\"CI trên exact head đã duyệt\"*, trong khi lượt `pull_request` chạy trên cây **merge tổng hợp** (workflow 1 bước checkout, không khai `with.ref`). Land evidence CŨ của #477/#478 đã giới hạn ĐÚNG chỗ ấy — vá một finding rồi tái tạo lỗi mà hồ sơ cũ đã tránh. **P2 `ket-luan-bac-connector-vuot-phep-do-hau-kiem` trả lời đúng câu prompt đã hỏi trước** (*\"bản sửa có khai vượt theo chiều ngược không?\"*): CÓ — đính chính kho nông rút lời bác đúng hướng và **6/6 commit** sạch là thật, nhưng nó tuyên hai rig *\"khác đúng một biến\"* mà **không kèm log**, và gói **không** chứng minh kho nông là nguyên nhân **duy nhất**. Điều phối sai vì khai quá mạnh, rồi sửa bằng lời khai cũng quá mạnh theo hướng ngược. **Bốn lời khai lịch sử Git bị bác, điều phối tự đo lại và xác nhận cả bốn SAI**: `evidence_url` khai `1455741` là commit đầu tiên chứa verdict (thật: `e1fd0a3`); *\"commit đầu tiên có `f4d74fe` là tổ tiên\"* (thật: `6db5b6c`, cha `7e69b8e`); land evidence *\"thứ TƯ/NĂM\"* (`ls-tree` ⇒ base **4** tệp, head **6**); và `§20` xếp `ADR-0034` vào ô *\"0 cổng\"* (`PROTOCOL:1136` ghi *\"có nhắc\"*). **LẦN ĐẦU trong phiên một lượt để lại hiện vật đo MÁY ĐỌC ĐƯỢC trong kho**: [`pr489-review-1-do-cuc-bo.json`](pr489-review-1-do-cuc-bo.json). **Model/effort là ATTESTATION**. Gói: mirror **314** ref, **KHÔNG nông** — chính điều đó cho reviewer đo lại thay vì chép số của điều phối. | `9a99dd8a` | 54761 |"
+    },
+    {
+      "path": "ops/reviews/README.md",
+      "line_start": 270,
+      "line_end": 270,
+      "text": "| [`pr487-hau-kiem-head-review-1-codex-verdict.md`](pr487-hau-kiem-head-review-1-codex-verdict.md) | [`.receipt.yaml`](pr487-hau-kiem-head-review-1-codex-verdict.receipt.yaml) | *(không có lease — PR hồ sơ)* | **`changes_requested`** · Hậu kiểm exact head `3873173` đã merge của PR #487. **0 finding P1 · 1 finding P2 · 4 finding P3** tổng nhiệm vụ. Finding P2 thuộc hồ sơ PR #489 tại `8911ea4`, ngoài head `3873173`; phần chênh head có **0 finding P1 · 0 finding P2 · 3 finding P3 nội dung**, thêm **1 finding P3 độ phủ gói**. Đã bổ sung lượt đọc head; không hồi tố tiền kiểm, không thay `approve`, không tuyên mọi finding đã đóng. Reviewer đo **91/91 biên nhận**, **0 vi phạm**, `TỔNG: ĐẠT`. Điều phối sau đó thuật lại A/B kho nông; gói không giữ kho nông/log gốc, nên không chứng nhận hai môi trường chỉ khác độ sâu. Tái đo đầy đủ **6/6 commit** khớp số đính chính; **5/5 neo receipt** hợp lệ trên head và merge thật. Cổng trên object merge tổng hợp của connector chưa đo được. P3 số ref và đơn vị đã sửa; P3 mốc sửa còn sót trong receipt/land evidence tại `9a99dd8`; P3 độ phủ tiếp tục là nợ. Runtime **1.421 giây** làm tròn, model/effort và gói **314 ref nhánh** là attestation lịch sử. Blob verdict được thêm tại `e1fd0a3`. | `3873173` | 37900 |"
+    },
+    {
+      "path": "ops/reviews/pr487-hau-kiem-head-review-1-codex-verdict.md",
+      "line_start": 7,
+      "line_end": 9,
+      "text": "Kết luận chung cho các nhiệm vụ được giao: **0 finding P1 mới · 1 finding P2 · 4 finding P3**. **Finding P2 thuộc lập luận đối chứng của PR #489**, tại commit `8911ea41ed326807cf22c0dacbbff69be9342747`; tệp ấy **không nằm trong HEAD được review**. Trong phần chưa review của chính HEAD: **0 finding P1 · 0 finding P2 · 3 finding P3 nội dung**; thêm **1 finding P3 về độ phủ gói**. Không quy lỗi của tệp viết sau thành lỗi đã tồn tại trong HEAD. `changes_requested` ở đây yêu cầu sửa hồ sơ gom findings trên PR #489, không đề nghị lùi merge hoặc đổi lịch sử.\n\nTôi **đồng ý** rằng giữ nguyên một tập tệp không thay thế review exact head. Tuy nhiên, không dùng chính việc lượt hậu kiểm này chưa diễn ra trước đây để tạo một vòng yêu cầu review vô hạn. Lượt này đã đọc và đo phần chênh trên đúng HEAD. Những gì xảy ra trước merge vẫn là lịch sử: hậu kiểm và đính chính không hồi tố thành tiền kiểm."
+    }
+  ],
+  "json_path": "ops/reviews/pr489-review-1-do-cuc-bo.json",
+  "json_leaves": [
+    {
+      "path": "reviewed_sha",
+      "type": "str",
+      "value": "9a99dd8aa137ef118a00671482c29ea2438cbdbb"
+    },
+    {
+      "path": "source",
+      "type": "str",
+      "value": "Reviewer offline PR489 lượt 1, phép tái đo sau merge; không phải log tiền kiểm."
+    },
+    {
+      "path": "bien_nhan[0].cmd[0]",
+      "type": "str",
+      "value": "python3"
+    },
+    {
+      "path": "bien_nhan[0].cmd[1]",
+      "type": "str",
+      "value": "-B"
+    },
+    {
+      "path": "bien_nhan[0].cmd[2]",
+      "type": "str",
+      "value": "ops/bien_nhan_v2.py"
+    },
+    {
+      "path": "bien_nhan[0].cmd[3]",
+      "type": "str",
+      "value": "--root"
+    },
+    {
+      "path": "bien_nhan[0].cmd[4]",
+      "type": "str",
+      "value": "."
+    },
+    {
+      "path": "bien_nhan[0].rc",
+      "type": "int",
+      "value": 0
+    },
+    {
+      "path": "bien_nhan[0].stdout",
+      "type": "str",
+      "value": "\nbien_nhan_v2: 30 ĐẠT v2 · 11/11 miễn trừ legacy (băm khớp) · 42 NỢ đóng băng · 0 vi phạm · 0 KHÔNG ĐO ĐƯỢC · tổng 83\nTỔNG: ĐẠT\n"
+    },
+    {
+      "path": "bien_nhan[0].stderr",
+      "type": "str",
+      "value": ""
+    },
+    {
+      "path": "bien_nhan[0].sha",
+      "type": "str",
+      "value": "c87b0679a837055ee4cc33ac48c9adb8d7ad8784"
+    },
+    {
+      "path": "bien_nhan[0].ancestors",
+      "type": "int",
+      "value": 1842
+    },
+    {
+      "path": "bien_nhan[0].receipt_files",
+      "type": "int",
+      "value": 83
+    },
+    {
+      "path": "bien_nhan[0].expected_v2",
+      "type": "int",
+      "value": 30
+    },
+    {
+      "path": "bien_nhan[0].shallow",
+      "type": "str",
+      "value": "false"
+    },
+    {
+      "path": "bien_nhan[0].input_blobs_equal",
+      "type": "bool",
+      "value": true
+    },
+    {
+      "path": "bien_nhan[0].counts.v2",
+      "type": "int",
+      "value": 30
+    },
+    {
+      "path": "bien_nhan[0].counts.legacy",
+      "type": "int",
+      "value": 11
+    },
+    {
+      "path": "bien_nhan[0].counts.legacy_expected",
+      "type": "int",
+      "value": 11
+    },
+    {
+      "path": "bien_nhan[0].counts.debt",
+      "type": "int",
+      "value": 42
+    },
+    {
+      "path": "bien_nhan[0].counts.violations",
+      "type": "int",
+      "value": 0
+    },
+    {
+      "path": "bien_nhan[0].counts.unknown",
+      "type": "int",
+      "value": 0
+    },
+    {
+      "path": "bien_nhan[0].counts.total",
+      "type": "int",
+      "value": 83
+    },
+    {
+      "path": "bien_nhan[0].ok",
+      "type": "bool",
+      "value": true
+    },
+    {
+      "path": "bien_nhan[1].cmd[0]",
+      "type": "str",
+      "value": "python3"
+    },
+    {
+      "path": "bien_nhan[1].cmd[1]",
+      "type": "str",
+      "value": "-B"
+    },
+    {
+      "path": "bien_nhan[1].cmd[2]",
+      "type": "str",
+      "value": "ops/bien_nhan_v2.py"
+    },
+    {
+      "path": "bien_nhan[1].cmd[3]",
+      "type": "str",
+      "value": "--root"
+    },
+    {
+      "path": "bien_nhan[1].cmd[4]",
+      "type": "str",
+      "value": "."
+    },
+    {
+      "path": "bien_nhan[1].rc",
+      "type": "int",
+      "value": 0
+    },
+    {
+      "path": "bien_nhan[1].stdout",
+      "type": "str",
+      "value": "\nbien_nhan_v2: 33 ĐẠT v2 · 11/11 miễn trừ legacy (băm khớp) · 42 NỢ đóng băng · 0 vi phạm · 0 KHÔNG ĐO ĐƯỢC · tổng 86\nTỔNG: ĐẠT\n"
+    },
+    {
+      "path": "bien_nhan[1].stderr",
+      "type": "str",
+      "value": ""
+    },
+    {
+      "path": "bien_nhan[1].sha",
+      "type": "str",
+      "value": "da481f94eee0adf1fe5fc4260a535a9b48fc2627"
+    },
+    {
+      "path": "bien_nhan[1].ancestors",
+      "type": "int",
+      "value": 1845
+    },
+    {
+      "path": "bien_nhan[1].receipt_files",
+      "type": "int",
+      "value": 86
+    },
+    {
+      "path": "bien_nhan[1].expected_v2",
+      "type": "int",
+      "value": 33
+    },
+    {
+      "path": "bien_nhan[1].shallow",
+      "type": "str",
+      "value": "false"
+    },
+    {
+      "path": "bien_nhan[1].input_blobs_equal",
+      "type": "bool",
+      "value": true
+    },
+    {
+      "path": "bien_nhan[1].counts.v2",
+      "type": "int",
+      "value": 33
+    },
+    {
+      "path": "bien_nhan[1].counts.legacy",
+      "type": "int",
+      "value": 11
+    },
+    {
+      "path": "bien_nhan[1].counts.legacy_expected",
+      "type": "int",
+      "value": 11
+    },
+    {
+      "path": "bien_nhan[1].counts.debt",
+      "type": "int",
+      "value": 42
+    },
+    {
+      "path": "bien_nhan[1].counts.violations",
+      "type": "int",
+      "value": 0
+    },
+    {
+      "path": "bien_nhan[1].counts.unknown",
+      "type": "int",
+      "value": 0
+    },
+    {
+      "path": "bien_nhan[1].counts.total",
+      "type": "int",
+      "value": 86
+    },
+    {
+      "path": "bien_nhan[1].ok",
+      "type": "bool",
+      "value": true
+    },
+    {
+      "path": "bien_nhan[2].cmd[0]",
+      "type": "str",
+      "value": "python3"
+    },
+    {
+      "path": "bien_nhan[2].cmd[1]",
+      "type": "str",
+      "value": "-B"
+    },
+    {
+      "path": "bien_nhan[2].cmd[2]",
+      "type": "str",
+      "value": "ops/bien_nhan_v2.py"
+    },
+    {
+      "path": "bien_nhan[2].cmd[3]",
+      "type": "str",
+      "value": "--root"
+    },
+    {
+      "path": "bien_nhan[2].cmd[4]",
+      "type": "str",
+      "value": "."
+    },
+    {
+      "path": "bien_nhan[2].rc",
+      "type": "int",
+      "value": 0
+    },
+    {
+      "path": "bien_nhan[2].stdout",
+      "type": "str",
+      "value": "\nbien_nhan_v2: 28 ĐẠT v2 · 11/11 miễn trừ legacy (băm khớp) · 42 NỢ đóng băng · 0 vi phạm · 0 KHÔNG ĐO ĐƯỢC · tổng 81\nTỔNG: ĐẠT\n"
+    },
+    {
+      "path": "bien_nhan[2].stderr",
+      "type": "str",
+      "value": ""
+    },
+    {
+      "path": "bien_nhan[2].sha",
+      "type": "str",
+      "value": "5b96ddc91593e9704ac3265b4e0b688059478cc8"
+    },
+    {
+      "path": "bien_nhan[2].ancestors",
+      "type": "int",
+      "value": 1838
+    },
+    {
+      "path": "bien_nhan[2].receipt_files",
+      "type": "int",
+      "value": 81
+    },
+    {
+      "path": "bien_nhan[2].expected_v2",
+      "type": "int",
+      "value": 28
+    },
+    {
+      "path": "bien_nhan[2].shallow",
+      "type": "str",
+      "value": "false"
+    },
+    {
+      "path": "bien_nhan[2].input_blobs_equal",
+      "type": "bool",
+      "value": true
+    },
+    {
+      "path": "bien_nhan[2].counts.v2",
+      "type": "int",
+      "value": 28
+    },
+    {
+      "path": "bien_nhan[2].counts.legacy",
+      "type": "int",
+      "value": 11
+    },
+    {
+      "path": "bien_nhan[2].counts.legacy_expected",
+      "type": "int",
+      "value": 11
+    },
+    {
+      "path": "bien_nhan[2].counts.debt",
+      "type": "int",
+      "value": 42
+    },
+    {
+      "path": "bien_nhan[2].counts.violations",
+      "type": "int",
+      "value": 0
+    },
+    {
+      "path": "bien_nhan[2].counts.unknown",
+      "type": "int",
+      "value": 0
+    },
+    {
+      "path": "bien_nhan[2].counts.total",
+      "type": "int",
+      "value": 81
+    },
+    {
+      "path": "bien_nhan[2].ok",
+      "type": "bool",
+      "value": true
+    },
+    {
+      "path": "bien_nhan[3].cmd[0]",
+      "type": "str",
+      "value": "python3"
+    },
+    {
+      "path": "bien_nhan[3].cmd[1]",
+      "type": "str",
+      "value": "-B"
+    },
+    {
+      "path": "bien_nhan[3].cmd[2]",
+      "type": "str",
+      "value": "ops/bien_nhan_v2.py"
+    },
+    {
+      "path": "bien_nhan[3].cmd[3]",
+      "type": "str",
+      "value": "--root"
+    },
+    {
+      "path": "bien_nhan[3].cmd[4]",
+      "type": "str",
+      "value": "."
+    },
+    {
+      "path": "bien_nhan[3].rc",
+      "type": "int",
+      "value": 0
+    },
+    {
+      "path": "bien_nhan[3].stdout",
+      "type": "str",
+      "value": "\nbien_nhan_v2: 33 ĐẠT v2 · 11/11 miễn trừ legacy (băm khớp) · 42 NỢ đóng băng · 0 vi phạm · 0 KHÔNG ĐO ĐƯỢC · tổng 86\nTỔNG: ĐẠT\n"
+    },
+    {
+      "path": "bien_nhan[3].stderr",
+      "type": "str",
+      "value": ""
+    },
+    {
+      "path": "bien_nhan[3].sha",
+      "type": "str",
+      "value": "7e69b8e9c41a45854d149bc252218aada6df5aa4"
+    },
+    {
+      "path": "bien_nhan[3].ancestors",
+      "type": "int",
+      "value": 1850
+    },
+    {
+      "path": "bien_nhan[3].receipt_files",
+      "type": "int",
+      "value": 86
+    },
+    {
+      "path": "bien_nhan[3].expected_v2",
+      "type": "int",
+      "value": 33
+    },
+    {
+      "path": "bien_nhan[3].shallow",
+      "type": "str",
+      "value": "false"
+    },
+    {
+      "path": "bien_nhan[3].input_blobs_equal",
+      "type": "bool",
+      "value": true
+    },
+    {
+      "path": "bien_nhan[3].counts.v2",
+      "type": "int",
+      "value": 33
+    },
+    {
+      "path": "bien_nhan[3].counts.legacy",
+      "type": "int",
+      "value": 11
+    },
+    {
+      "path": "bien_nhan[3].counts.legacy_expected",
+      "type": "int",
+      "value": 11
+    },
+    {
+      "path": "bien_nhan[3].counts.debt",
+      "type": "int",
+      "value": 42
+    },
+    {
+      "path": "bien_nhan[3].counts.violations",
+      "type": "int",
+      "value": 0
+    },
+    {
+      "path": "bien_nhan[3].counts.unknown",
+      "type": "int",
+      "value": 0
+    },
+    {
+      "path": "bien_nhan[3].counts.total",
+      "type": "int",
+      "value": 86
+    },
+    {
+      "path": "bien_nhan[3].ok",
+      "type": "bool",
+      "value": true
+    },
+    {
+      "path": "bien_nhan[4].cmd[0]",
+      "type": "str",
+      "value": "python3"
+    },
+    {
+      "path": "bien_nhan[4].cmd[1]",
+      "type": "str",
+      "value": "-B"
+    },
+    {
+      "path": "bien_nhan[4].cmd[2]",
+      "type": "str",
+      "value": "ops/bien_nhan_v2.py"
+    },
+    {
+      "path": "bien_nhan[4].cmd[3]",
+      "type": "str",
+      "value": "--root"
+    },
+    {
+      "path": "bien_nhan[4].cmd[4]",
+      "type": "str",
+      "value": "."
+    },
+    {
+      "path": "bien_nhan[4].rc",
+      "type": "int",
+      "value": 0
+    },
+    {
+      "path": "bien_nhan[4].stdout",
+      "type": "str",
+      "value": "\nbien_nhan_v2: 38 ĐẠT v2 · 11/11 miễn trừ legacy (băm khớp) · 42 NỢ đóng băng · 0 vi phạm · 0 KHÔNG ĐO ĐƯỢC · tổng 91\nTỔNG: ĐẠT\n"
+    },
+    {
+      "path": "bien_nhan[4].stderr",
+      "type": "str",
+      "value": ""
+    },
+    {
+      "path": "bien_nhan[4].sha",
+      "type": "str",
+      "value": "3873173094a3e294b069998ed21dc117d8ad659a"
+    },
+    {
+      "path": "bien_nhan[4].ancestors",
+      "type": "int",
+      "value": 1858
+    },
+    {
+      "path": "bien_nhan[4].receipt_files",
+      "type": "int",
+      "value": 91
+    },
+    {
+      "path": "bien_nhan[4].expected_v2",
+      "type": "int",
+      "value": 38
+    },
+    {
+      "path": "bien_nhan[4].shallow",
+      "type": "str",
+      "value": "false"
+    },
+    {
+      "path": "bien_nhan[4].input_blobs_equal",
+      "type": "bool",
+      "value": true
+    },
+    {
+      "path": "bien_nhan[4].counts.v2",
+      "type": "int",
+      "value": 38
+    },
+    {
+      "path": "bien_nhan[4].counts.legacy",
+      "type": "int",
+      "value": 11
+    },
+    {
+      "path": "bien_nhan[4].counts.legacy_expected",
+      "type": "int",
+      "value": 11
+    },
+    {
+      "path": "bien_nhan[4].counts.debt",
+      "type": "int",
+      "value": 42
+    },
+    {
+      "path": "bien_nhan[4].counts.violations",
+      "type": "int",
+      "value": 0
+    },
+    {
+      "path": "bien_nhan[4].counts.unknown",
+      "type": "int",
+      "value": 0
+    },
+    {
+      "path": "bien_nhan[4].counts.total",
+      "type": "int",
+      "value": 91
+    },
+    {
+      "path": "bien_nhan[4].ok",
+      "type": "bool",
+      "value": true
+    },
+    {
+      "path": "bien_nhan[5].cmd[0]",
+      "type": "str",
+      "value": "python3"
+    },
+    {
+      "path": "bien_nhan[5].cmd[1]",
+      "type": "str",
+      "value": "-B"
+    },
+    {
+      "path": "bien_nhan[5].cmd[2]",
+      "type": "str",
+      "value": "ops/bien_nhan_v2.py"
+    },
+    {
+      "path": "bien_nhan[5].cmd[3]",
+      "type": "str",
+      "value": "--root"
+    },
+    {
+      "path": "bien_nhan[5].cmd[4]",
+      "type": "str",
+      "value": "."
+    },
+    {
+      "path": "bien_nhan[5].rc",
+      "type": "int",
+      "value": 0
+    },
+    {
+      "path": "bien_nhan[5].stdout",
+      "type": "str",
+      "value": "\nbien_nhan_v2: 38 ĐẠT v2 · 11/11 miễn trừ legacy (băm khớp) · 42 NỢ đóng băng · 0 vi phạm · 0 KHÔNG ĐO ĐƯỢC · tổng 91\nTỔNG: ĐẠT\n"
+    },
+    {
+      "path": "bien_nhan[5].stderr",
+      "type": "str",
+      "value": ""
+    },
+    {
+      "path": "bien_nhan[5].sha",
+      "type": "str",
+      "value": "f4d74fed59616ecd5a133fc232275a832dcd95bb"
+    },
+    {
+      "path": "bien_nhan[5].ancestors",
+      "type": "int",
+      "value": 1864
+    },
+    {
+      "path": "bien_nhan[5].receipt_files",
+      "type": "int",
+      "value": 91
+    },
+    {
+      "path": "bien_nhan[5].expected_v2",
+      "type": "int",
+      "value": 38
+    },
+    {
+      "path": "bien_nhan[5].shallow",
+      "type": "str",
+      "value": "false"
+    },
+    {
+      "path": "bien_nhan[5].input_blobs_equal",
+      "type": "bool",
+      "value": true
+    },
+    {
+      "path": "bien_nhan[5].counts.v2",
+      "type": "int",
+      "value": 38
+    },
+    {
+      "path": "bien_nhan[5].counts.legacy",
+      "type": "int",
+      "value": 11
+    },
+    {
+      "path": "bien_nhan[5].counts.legacy_expected",
+      "type": "int",
+      "value": 11
+    },
+    {
+      "path": "bien_nhan[5].counts.debt",
+      "type": "int",
+      "value": 42
+    },
+    {
+      "path": "bien_nhan[5].counts.violations",
+      "type": "int",
+      "value": 0
+    },
+    {
+      "path": "bien_nhan[5].counts.unknown",
+      "type": "int",
+      "value": 0
+    },
+    {
+      "path": "bien_nhan[5].counts.total",
+      "type": "int",
+      "value": 91
+    },
+    {
+      "path": "bien_nhan[5].ok",
+      "type": "bool",
+      "value": true
+    },
+    {
+      "path": "bien_nhan[6].cmd[0]",
+      "type": "str",
+      "value": "python3"
+    },
+    {
+      "path": "bien_nhan[6].cmd[1]",
+      "type": "str",
+      "value": "-B"
+    },
+    {
+      "path": "bien_nhan[6].cmd[2]",
+      "type": "str",
+      "value": "ops/bien_nhan_v2.py"
+    },
+    {
+      "path": "bien_nhan[6].cmd[3]",
+      "type": "str",
+      "value": "--root"
+    },
+    {
+      "path": "bien_nhan[6].cmd[4]",
+      "type": "str",
+      "value": "."
+    },
+    {
+      "path": "bien_nhan[6].rc",
+      "type": "int",
+      "value": 0
+    },
+    {
+      "path": "bien_nhan[6].stdout",
+      "type": "str",
+      "value": "\nbien_nhan_v2: 39 ĐẠT v2 · 11/11 miễn trừ legacy (băm khớp) · 42 NỢ đóng băng · 0 vi phạm · 0 KHÔNG ĐO ĐƯỢC · tổng 92\nTỔNG: ĐẠT\n"
+    },
+    {
+      "path": "bien_nhan[6].stderr",
+      "type": "str",
+      "value": ""
+    },
+    {
+      "path": "bien_nhan[6].sha",
+      "type": "str",
+      "value": "9a99dd8aa137ef118a00671482c29ea2438cbdbb"
+    },
+    {
+      "path": "bien_nhan[6].direct_cli",
+      "type": "bool",
+      "value": true
+    },
+    {
+      "path": "five_anchors[0].receipt",
+      "type": "str",
+      "value": "ops/reviews/pr480-land-review-1-codex-verdict.receipt.yaml"
+    },
+    {
+      "path": "five_anchors[0].anchor",
+      "type": "str",
+      "value": "01c5a2713778d06535bad8e617be70ea4f5fac4d"
+    },
+    {
+      "path": "five_anchors[0].ancestors.3873173",
+      "type": "bool",
+      "value": true
+    },
+    {
+      "path": "five_anchors[0].ancestors.f4d74fe",
+      "type": "bool",
+      "value": true
+    },
+    {
+      "path": "five_anchors[0].hash_equal",
+      "type": "bool",
+      "value": true
+    },
+    {
+      "path": "five_anchors[0].path_equal",
+      "type": "bool",
+      "value": true
+    },
+    {
+      "path": "five_anchors[0].ok",
+      "type": "bool",
+      "value": true
+    },
+    {
+      "path": "five_anchors[1].receipt",
+      "type": "str",
+      "value": "ops/reviews/pr480-land-review-2-codex-verdict.receipt.yaml"
+    },
+    {
+      "path": "five_anchors[1].anchor",
+      "type": "str",
+      "value": "60d62aa60da45fdd7c79bd71dc17a0d2ffc1e439"
+    },
+    {
+      "path": "five_anchors[1].ancestors.3873173",
+      "type": "bool",
+      "value": true
+    },
+    {
+      "path": "five_anchors[1].ancestors.f4d74fe",
+      "type": "bool",
+      "value": true
+    },
+    {
+      "path": "five_anchors[1].hash_equal",
+      "type": "bool",
+      "value": true
+    },
+    {
+      "path": "five_anchors[1].path_equal",
+      "type": "bool",
+      "value": true
+    },
+    {
+      "path": "five_anchors[1].ok",
+      "type": "bool",
+      "value": true
+    },
+    {
+      "path": "five_anchors[2].receipt",
+      "type": "str",
+      "value": "ops/reviews/pr486-hau-kiem-review-1-codex-verdict.receipt.yaml"
+    },
+    {
+      "path": "five_anchors[2].anchor",
+      "type": "str",
+      "value": "ee23363171ca0a5218a5d7f067649487470acd0c"
+    },
+    {
+      "path": "five_anchors[2].ancestors.3873173",
+      "type": "bool",
+      "value": true
+    },
+    {
+      "path": "five_anchors[2].ancestors.f4d74fe",
+      "type": "bool",
+      "value": true
+    },
+    {
+      "path": "five_anchors[2].hash_equal",
+      "type": "bool",
+      "value": true
+    },
+    {
+      "path": "five_anchors[2].path_equal",
+      "type": "bool",
+      "value": true
+    },
+    {
+      "path": "five_anchors[2].ok",
+      "type": "bool",
+      "value": true
+    },
+    {
+      "path": "five_anchors[3].receipt",
+      "type": "str",
+      "value": "ops/reviews/pr487-review-1-codex-verdict.receipt.yaml"
+    },
+    {
+      "path": "five_anchors[3].anchor",
+      "type": "str",
+      "value": "a0b154d7c8e6491fb53825301ace2d6d4e97ac9f"
+    },
+    {
+      "path": "five_anchors[3].ancestors.3873173",
+      "type": "bool",
+      "value": true
+    },
+    {
+      "path": "five_anchors[3].ancestors.f4d74fe",
+      "type": "bool",
+      "value": true
+    },
+    {
+      "path": "five_anchors[3].hash_equal",
+      "type": "bool",
+      "value": true
+    },
+    {
+      "path": "five_anchors[3].path_equal",
+      "type": "bool",
+      "value": true
+    },
+    {
+      "path": "five_anchors[3].ok",
+      "type": "bool",
+      "value": true
+    },
+    {
+      "path": "five_anchors[4].receipt",
+      "type": "str",
+      "value": "ops/reviews/pr487-review-2-codex-verdict.receipt.yaml"
+    },
+    {
+      "path": "five_anchors[4].anchor",
+      "type": "str",
+      "value": "edb288e4e95081b83661c94c88addea005d3f121"
+    },
+    {
+      "path": "five_anchors[4].ancestors.3873173",
+      "type": "bool",
+      "value": true
+    },
+    {
+      "path": "five_anchors[4].ancestors.f4d74fe",
+      "type": "bool",
+      "value": true
+    },
+    {
+      "path": "five_anchors[4].hash_equal",
+      "type": "bool",
+      "value": true
+    },
+    {
+      "path": "five_anchors[4].path_equal",
+      "type": "bool",
+      "value": true
+    },
+    {
+      "path": "five_anchors[4].ok",
+      "type": "bool",
+      "value": true
+    },
+    {
+      "path": "graph.c87b067.sha",
+      "type": "str",
+      "value": "c87b0679a837055ee4cc33ac48c9adb8d7ad8784"
+    },
+    {
+      "path": "graph.c87b067.parents[0]",
+      "type": "str",
+      "value": "585c7d510e026b4ea5a2b395c69581f24c1d8fa0"
+    },
+    {
+      "path": "graph.c87b067.parents[1]",
+      "type": "str",
+      "value": "ff3431f11bc0ba3ffa0c3616003f833c3cfc3ebb"
+    },
+    {
+      "path": "graph.c87b067.commit_time",
+      "type": "str",
+      "value": "2026-09-08T11:01:28+07:00"
+    },
+    {
+      "path": "graph.c87b067.commits_including_self",
+      "type": "int",
+      "value": 1842
+    },
+    {
+      "path": "graph.da481f9.sha",
+      "type": "str",
+      "value": "da481f94eee0adf1fe5fc4260a535a9b48fc2627"
+    },
+    {
+      "path": "graph.da481f9.parents[0]",
+      "type": "str",
+      "value": "c87b0679a837055ee4cc33ac48c9adb8d7ad8784"
+    },
+    {
+      "path": "graph.da481f9.parents[1]",
+      "type": "str",
+      "value": "359d38e8c449e009acc4123fa6110257ad800949"
+    },
+    {
+      "path": "graph.da481f9.commit_time",
+      "type": "str",
+      "value": "2026-09-09T15:55:07+07:00"
+    },
+    {
+      "path": "graph.da481f9.commits_including_self",
+      "type": "int",
+      "value": 1845
+    },
+    {
+      "path": "graph.5b96ddc.sha",
+      "type": "str",
+      "value": "5b96ddc91593e9704ac3265b4e0b688059478cc8"
+    },
+    {
+      "path": "graph.5b96ddc.parents[0]",
+      "type": "str",
+      "value": "afddf7efe21e784fd22ed6b5aed399bc9d04a67d"
+    },
+    {
+      "path": "graph.5b96ddc.commit_time",
+      "type": "str",
+      "value": "2026-09-09T10:05:00+00:00"
+    },
+    {
+      "path": "graph.5b96ddc.commits_including_self",
+      "type": "int",
+      "value": 1838
+    },
+    {
+      "path": "graph.7e69b8e.sha",
+      "type": "str",
+      "value": "7e69b8e9c41a45854d149bc252218aada6df5aa4"
+    },
+    {
+      "path": "graph.7e69b8e.parents[0]",
+      "type": "str",
+      "value": "da481f94eee0adf1fe5fc4260a535a9b48fc2627"
+    },
+    {
+      "path": "graph.7e69b8e.parents[1]",
+      "type": "str",
+      "value": "5b96ddc91593e9704ac3265b4e0b688059478cc8"
+    },
+    {
+      "path": "graph.7e69b8e.commit_time",
+      "type": "str",
+      "value": "2026-09-09T18:39:00+07:00"
+    },
+    {
+      "path": "graph.7e69b8e.commits_including_self",
+      "type": "int",
+      "value": 1850
+    },
+    {
+      "path": "graph.3873173.sha",
+      "type": "str",
+      "value": "3873173094a3e294b069998ed21dc117d8ad659a"
+    },
+    {
+      "path": "graph.3873173.parents[0]",
+      "type": "str",
+      "value": "edb288e4e95081b83661c94c88addea005d3f121"
+    },
+    {
+      "path": "graph.3873173.commit_time",
+      "type": "str",
+      "value": "2026-09-09T11:27:27+00:00"
+    },
+    {
+      "path": "graph.3873173.commits_including_self",
+      "type": "int",
+      "value": 1858
+    },
+    {
+      "path": "graph.f4d74fe.sha",
+      "type": "str",
+      "value": "f4d74fed59616ecd5a133fc232275a832dcd95bb"
+    },
+    {
+      "path": "graph.f4d74fe.parents[0]",
+      "type": "str",
+      "value": "7e69b8e9c41a45854d149bc252218aada6df5aa4"
+    },
+    {
+      "path": "graph.f4d74fe.parents[1]",
+      "type": "str",
+      "value": "3873173094a3e294b069998ed21dc117d8ad659a"
+    },
+    {
+      "path": "graph.f4d74fe.commit_time",
+      "type": "str",
+      "value": "2026-09-09T18:58:30+07:00"
+    },
+    {
+      "path": "graph.f4d74fe.commits_including_self",
+      "type": "int",
+      "value": 1864
+    },
+    {
+      "path": "graph.8911ea4.sha",
+      "type": "str",
+      "value": "8911ea41ed326807cf22c0dacbbff69be9342747"
+    },
+    {
+      "path": "graph.8911ea4.parents[0]",
+      "type": "str",
+      "value": "1451fd6adea257049e4197930a10dac6fa51dd28"
+    },
+    {
+      "path": "graph.8911ea4.commit_time",
+      "type": "str",
+      "value": "2026-09-09T12:23:28+00:00"
+    },
+    {
+      "path": "graph.8911ea4.commits_including_self",
+      "type": "int",
+      "value": 1870
+    },
+    {
+      "path": "graph.e1fd0a3.sha",
+      "type": "str",
+      "value": "e1fd0a333109a555af4823fd2b830521d86fafbd"
+    },
+    {
+      "path": "graph.e1fd0a3.parents[0]",
+      "type": "str",
+      "value": "8911ea41ed326807cf22c0dacbbff69be9342747"
+    },
+    {
+      "path": "graph.e1fd0a3.commit_time",
+      "type": "str",
+      "value": "2026-09-09T13:02:06+00:00"
+    },
+    {
+      "path": "graph.e1fd0a3.commits_including_self",
+      "type": "int",
+      "value": 1871
+    },
+    {
+      "path": "graph.6db5b6c.sha",
+      "type": "str",
+      "value": "6db5b6ca3b9322cbb42099aefd10b442ac309bf2"
+    },
+    {
+      "path": "graph.6db5b6c.parents[0]",
+      "type": "str",
+      "value": "7e69b8e9c41a45854d149bc252218aada6df5aa4"
+    },
+    {
+      "path": "graph.6db5b6c.commit_time",
+      "type": "str",
+      "value": "2026-09-09T11:51:54+00:00"
+    },
+    {
+      "path": "graph.6db5b6c.commits_including_self",
+      "type": "int",
+      "value": 1851
+    },
+    {
+      "path": "graph.1455741.sha",
+      "type": "str",
+      "value": "145574101781909e06eea0d3040c051576a7523a"
+    },
+    {
+      "path": "graph.1455741.parents[0]",
+      "type": "str",
+      "value": "e1fd0a333109a555af4823fd2b830521d86fafbd"
+    },
+    {
+      "path": "graph.1455741.commit_time",
+      "type": "str",
+      "value": "2026-09-09T13:06:10+00:00"
+    },
+    {
+      "path": "graph.1455741.commits_including_self",
+      "type": "int",
+      "value": 1872
+    },
+    {
+      "path": "graph.9a99dd8.sha",
+      "type": "str",
+      "value": "9a99dd8aa137ef118a00671482c29ea2438cbdbb"
+    },
+    {
+      "path": "graph.9a99dd8.parents[0]",
+      "type": "str",
+      "value": "145574101781909e06eea0d3040c051576a7523a"
+    },
+    {
+      "path": "graph.9a99dd8.commit_time",
+      "type": "str",
+      "value": "2026-09-09T13:06:51+00:00"
+    },
+    {
+      "path": "graph.9a99dd8.commits_including_self",
+      "type": "int",
+      "value": 1873
+    },
+    {
+      "path": "graph.first_land480_add",
+      "type": "str",
+      "value": "6db5b6ca3b9322cbb42099aefd10b442ac309bf2"
+    },
+    {
+      "path": "graph.first_land480_has_f4_ancestor.rc",
+      "type": "int",
+      "value": 1
+    },
+    {
+      "path": "graph.first_land480_has_f4_ancestor.stdout",
+      "type": "str",
+      "value": ""
+    },
+    {
+      "path": "graph.first_land480_has_f4_ancestor.stderr",
+      "type": "str",
+      "value": ""
+    },
+    {
+      "path": "graph.synthetic_objects.a9b9edd014636dd49b208a5e2d37fbe5dfa0c01f.rc",
+      "type": "int",
+      "value": 128
+    },
+    {
+      "path": "graph.synthetic_objects.a9b9edd014636dd49b208a5e2d37fbe5dfa0c01f.stdout",
+      "type": "str",
+      "value": ""
+    },
+    {
+      "path": "graph.synthetic_objects.a9b9edd014636dd49b208a5e2d37fbe5dfa0c01f.stderr",
+      "type": "str",
+      "value": "fatal: Not a valid object name a9b9edd014636dd49b208a5e2d37fbe5dfa0c01f^{commit}\n"
+    },
+    {
+      "path": "graph.synthetic_objects.372bf9adb331218212619fc04763acbedfaa3f3f.rc",
+      "type": "int",
+      "value": 128
+    },
+    {
+      "path": "graph.synthetic_objects.372bf9adb331218212619fc04763acbedfaa3f3f.stdout",
+      "type": "str",
+      "value": ""
+    },
+    {
+      "path": "graph.synthetic_objects.372bf9adb331218212619fc04763acbedfaa3f3f.stderr",
+      "type": "str",
+      "value": "fatal: Not a valid object name 372bf9adb331218212619fc04763acbedfaa3f3f^{commit}\n"
+    },
+    {
+      "path": "graph.branch_excess.claude/land-477-20260908",
+      "type": "str",
+      "value": "0"
+    },
+    {
+      "path": "graph.branch_excess.claude/handoff-tra-luat-repo-2ak5th",
+      "type": "str",
+      "value": "0"
+    },
+    {
+      "path": "khong_do_duoc[0]",
+      "type": "str",
+      "value": "GitHub API/CI"
+    },
+    {
+      "path": "khong_do_duoc[1]",
+      "type": "str",
+      "value": "Kho nông và log A/B gốc"
+    },
+    {
+      "path": "khong_do_duoc[2]",
+      "type": "str",
+      "value": "Môi trường connector và object merge tổng hợp"
+    }
+  ],
+  "json_leaf_count": 242,
+  "ok": true
+}

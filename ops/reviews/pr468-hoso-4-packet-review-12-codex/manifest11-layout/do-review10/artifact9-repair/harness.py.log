@@ -1,0 +1,13 @@
+{
+  "blocks": 2,
+  "sha256_no_final_newline": [
+    "bb827f87e096517b06ed60bc554dbecddc13141acb7d4e2148f8526cae33e6cd",
+    "25c44a862fbefb5317ca2ca2967d3765f37d584245f08842d30a7ceab99abb9f"
+  ],
+  "sha256_with_final_newline": [
+    "c23bcd019182023496cb3d9817c6553a0074c77bca26c0a0d1f71a4f5104e45c",
+    "bde441a08d129a962d862fe237003997610238edc8e87b7948d35de875e5f165"
+  ],
+  "moi": 8,
+  "windows_forms": 2
+}

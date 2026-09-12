@@ -1,0 +1,1523 @@
+{
+  "repair_existing": [
+    {
+      "line": 1,
+      "path": "adr-song.json",
+      "expected": "78e851bba5482dbc3dc9ea39f1f64d0ce82d1d02295e30a11b5f9399bc3b5bda",
+      "source": "ops/reviews/pr468-hoso-4-packet-review-8-codex/adr-song.json",
+      "source_matches": true,
+      "actual": "78e851bba5482dbc3dc9ea39f1f64d0ce82d1d02295e30a11b5f9399bc3b5bda",
+      "identical_to_round8": true
+    },
+    {
+      "line": 2,
+      "path": "adr-song.stderr",
+      "expected": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "source": "ops/reviews/pr468-hoso-4-packet-review-8-codex/adr-song.stderr",
+      "source_matches": true,
+      "actual": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "identical_to_round8": true
+    },
+    {
+      "line": 3,
+      "path": "adr-song.stdout",
+      "expected": "751fa693b8d22f3c7d0089ad96461c3ccb88887a847c5bca3e08ff24ec3a07aa",
+      "source": "ops/reviews/pr468-hoso-4-packet-review-8-codex/adr-song.stdout",
+      "source_matches": true,
+      "actual": "751fa693b8d22f3c7d0089ad96461c3ccb88887a847c5bca3e08ff24ec3a07aa",
+      "identical_to_round8": true
+    },
+    {
+      "line": 4,
+      "path": "attack_h.py.log",
+      "expected": "50868677536846a02bbf99434233a3d4d6e3b28eabbe6876d46b63d0b733a745",
+      "source": "ops/reviews/pr468-hoso-4-packet-review-8-codex/attack_h.py.log",
+      "source_matches": true,
+      "actual": "50868677536846a02bbf99434233a3d4d6e3b28eabbe6876d46b63d0b733a745",
+      "identical_to_round8": true
+    },
+    {
+      "line": 5,
+      "path": "bien-nhan-v2.json",
+      "expected": "5811c530171d49365bc0d36c3fdc3f54258552f0a586be7c71c3d46b34feff0b",
+      "source": "ops/reviews/pr468-hoso-4-packet-review-8-codex/bien-nhan-v2.json",
+      "source_matches": true,
+      "actual": "5811c530171d49365bc0d36c3fdc3f54258552f0a586be7c71c3d46b34feff0b",
+      "identical_to_round8": true
+    },
+    {
+      "line": 6,
+      "path": "bien-nhan-v2.stderr",
+      "expected": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "source": "ops/reviews/pr468-hoso-4-packet-review-8-codex/bien-nhan-v2.stderr",
+      "source_matches": true,
+      "actual": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "identical_to_round8": true
+    },
+    {
+      "line": 7,
+      "path": "bien-nhan-v2.stdout",
+      "expected": "b35265571e55e9493b476675698a3adf8cd5fa29eb95f7e645321b89ece3f24c",
+      "source": "ops/reviews/pr468-hoso-4-packet-review-8-codex/bien-nhan-v2.stdout",
+      "source_matches": true,
+      "actual": "b35265571e55e9493b476675698a3adf8cd5fa29eb95f7e645321b89ece3f24c",
+      "identical_to_round8": true
+    },
+    {
+      "line": 8,
+      "path": "build_verdict.py",
+      "expected": "c02b220be22cbfb1e0e48a205c096cd6fd776a5a10bdc1afff568259edb6544b",
+      "source": "ops/reviews/pr468-hoso-4-packet-review-8-codex/build_verdict.py",
+      "source_matches": true,
+      "actual": "c02b220be22cbfb1e0e48a205c096cd6fd776a5a10bdc1afff568259edb6544b",
+      "identical_to_round8": true
+    },
+    {
+      "line": 9,
+      "path": "ci-dang-ky.json",
+      "expected": "593c7c6e61c0cb6b24913c0823ca307f11c5d5da977ccffdacf737c039f49ddb",
+      "source": "ops/reviews/pr468-hoso-4-packet-review-8-codex/ci-dang-ky.json",
+      "source_matches": true,
+      "actual": "593c7c6e61c0cb6b24913c0823ca307f11c5d5da977ccffdacf737c039f49ddb",
+      "identical_to_round8": true
+    },
+    {
+      "line": 10,
+      "path": "ci-dang-ky.stderr",
+      "expected": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "source": "ops/reviews/pr468-hoso-4-packet-review-8-codex/ci-dang-ky.stderr",
+      "source_matches": true,
+      "actual": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "identical_to_round8": true
+    },
+    {
+      "line": 11,
+      "path": "ci-dang-ky.stdout",
+      "expected": "d31de5aefad408c8fb7562e18856c79a201e2bd2fbedbbd1c8b13929dabe5089",
+      "source": "ops/reviews/pr468-hoso-4-packet-review-8-codex/ci-dang-ky.stdout",
+      "source_matches": true,
+      "actual": "d31de5aefad408c8fb7562e18856c79a201e2bd2fbedbbd1c8b13929dabe5089",
+      "identical_to_round8": true
+    },
+    {
+      "line": 12,
+      "path": "contract-checks.json",
+      "expected": "acdfb4e63a0c4d77c693cb51ec2c55066c41f827cecfacb0cad9c4fb43087292",
+      "source": "ops/reviews/pr468-hoso-4-packet-review-8-codex/contract-checks.json",
+      "source_matches": true,
+      "actual": "acdfb4e63a0c4d77c693cb51ec2c55066c41f827cecfacb0cad9c4fb43087292",
+      "identical_to_round8": true
+    },
+    {
+      "line": 13,
+      "path": "contract_checks.py",
+      "expected": "430e7aabe0b6623181e0ba3422eac33880dae68aa9ba75ef797ec559e5ebb756",
+      "source": "ops/reviews/pr468-hoso-4-packet-review-8-codex/contract_checks.py",
+      "source_matches": true,
+      "actual": "430e7aabe0b6623181e0ba3422eac33880dae68aa9ba75ef797ec559e5ebb756",
+      "identical_to_round8": true
+    },
+    {
+      "line": 14,
+      "path": "costs.json",
+      "expected": "098554c9ef30bfd9a5607f3168c47a267c83c009a566149819ddeaf7cbb7904f",
+      "source": "ops/reviews/pr468-hoso-4-packet-review-8-codex/costs.json",
+      "source_matches": true,
+      "actual": "098554c9ef30bfd9a5607f3168c47a267c83c009a566149819ddeaf7cbb7904f",
+      "identical_to_round8": true
+    },
+    {
+      "line": 15,
+      "path": "doc-claims.json",
+      "expected": "52177cff3494536f076dcd65cd9933ade7077cbd4c00705027f0760317d01831",
+      "source": "ops/reviews/pr468-hoso-4-packet-review-8-codex/doc-claims.json",
+      "source_matches": true,
+      "actual": "52177cff3494536f076dcd65cd9933ade7077cbd4c00705027f0760317d01831",
+      "identical_to_round8": true
+    },
+    {
+      "line": 16,
+      "path": "doc-claims.stderr",
+      "expected": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "source": "ops/reviews/pr468-hoso-4-packet-review-8-codex/doc-claims.stderr",
+      "source_matches": true,
+      "actual": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "identical_to_round8": true
+    },
+    {
+      "line": 17,
+      "path": "doc-claims.stdout",
+      "expected": "b9001f390f47286930965480160e62b23da1e47354acc0e9172b94a48d758286",
+      "source": "ops/reviews/pr468-hoso-4-packet-review-8-codex/doc-claims.stdout",
+      "source_matches": true,
+      "actual": "b9001f390f47286930965480160e62b23da1e47354acc0e9172b94a48d758286",
+      "identical_to_round8": true
+    },
+    {
+      "line": 18,
+      "path": "doctrine-scan.json",
+      "expected": "4d1e506462da60170e61dd160f917bfe3fd3c7376774f45c0307de6e4d9c62f6",
+      "source": "ops/reviews/pr468-hoso-4-packet-review-8-codex/doctrine-scan.json",
+      "source_matches": true,
+      "actual": "4d1e506462da60170e61dd160f917bfe3fd3c7376774f45c0307de6e4d9c62f6",
+      "identical_to_round8": true
+    },
+    {
+      "line": 19,
+      "path": "doctrine-scan.stderr",
+      "expected": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "source": "ops/reviews/pr468-hoso-4-packet-review-8-codex/doctrine-scan.stderr",
+      "source_matches": true,
+      "actual": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "identical_to_round8": true
+    },
+    {
+      "line": 20,
+      "path": "doctrine-scan.stdout",
+      "expected": "9ee1866d82544445d0b015d90aaeb90aead5e9ebf0ffa8ae6556f3ca2963f5cb",
+      "source": "ops/reviews/pr468-hoso-4-packet-review-8-codex/doctrine-scan.stdout",
+      "source_matches": true,
+      "actual": "9ee1866d82544445d0b015d90aaeb90aead5e9ebf0ffa8ae6556f3ca2963f5cb",
+      "identical_to_round8": true
+    },
+    {
+      "line": 21,
+      "path": "extra_checks.py.log",
+      "expected": "25b90acd3ebf8353c3c07f3ff0e5b1ef730629df1f8bc909cbc36b84f8f31ff3",
+      "source": "ops/reviews/pr468-hoso-4-packet-review-8-codex/extra_checks.py.log",
+      "source_matches": true,
+      "actual": "25b90acd3ebf8353c3c07f3ff0e5b1ef730629df1f8bc909cbc36b84f8f31ff3",
+      "identical_to_round8": true
+    },
+    {
+      "line": 22,
+      "path": "final-check.json",
+      "expected": "178084d965ef37b7d53011246a75c9b26b1c297674e1fb4eca259799fbb721e3",
+      "source": "ops/reviews/pr468-hoso-4-packet-review-8-codex/final-check.json",
+      "source_matches": true,
+      "actual": "178084d965ef37b7d53011246a75c9b26b1c297674e1fb4eca259799fbb721e3",
+      "identical_to_round8": true
+    },
+    {
+      "line": 23,
+      "path": "followup-checks.json",
+      "expected": "21e7e0ea57db0a570b2a5eae45f3eab469ffe69c6814ec6d776ef610ecb16716",
+      "source": "ops/reviews/pr468-hoso-4-packet-review-8-codex/followup-checks.json",
+      "source_matches": true,
+      "actual": "21e7e0ea57db0a570b2a5eae45f3eab469ffe69c6814ec6d776ef610ecb16716",
+      "identical_to_round8": true
+    },
+    {
+      "line": 24,
+      "path": "followup_checks.py",
+      "expected": "a744461323ae6c31e4d1032a9333babc64e06eefe2c5e09ccebe751ef44d0333",
+      "source": "ops/reviews/pr468-hoso-4-packet-review-8-codex/followup_checks.py",
+      "source_matches": true,
+      "actual": "a744461323ae6c31e4d1032a9333babc64e06eefe2c5e09ccebe751ef44d0333",
+      "identical_to_round8": true
+    },
+    {
+      "line": 25,
+      "path": "harness.py.log",
+      "expected": "6678fb19ef5de4dc52a4249031423a60b0dd4cf373a9ead88643492aeb52b657",
+      "source": "ops/reviews/pr468-hoso-4-packet-review-8-codex/harness.py.log",
+      "source_matches": true,
+      "actual": "6678fb19ef5de4dc52a4249031423a60b0dd4cf373a9ead88643492aeb52b657",
+      "identical_to_round8": true
+    },
+    {
+      "line": 26,
+      "path": "lease-check.json",
+      "expected": "06ab31af29e75fa43b9660a9eeea79c78104030d45f996e3b2523df11bed04dc",
+      "source": "ops/reviews/pr468-hoso-4-packet-review-8-codex/lease-check.json",
+      "source_matches": true,
+      "actual": "06ab31af29e75fa43b9660a9eeea79c78104030d45f996e3b2523df11bed04dc",
+      "identical_to_round8": true
+    },
+    {
+      "line": 27,
+      "path": "lease-check.stderr",
+      "expected": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "source": "ops/reviews/pr468-hoso-4-packet-review-8-codex/lease-check.stderr",
+      "source_matches": true,
+      "actual": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "identical_to_round8": true
+    },
+    {
+      "line": 28,
+      "path": "lease-check.stdout",
+      "expected": "27924ee14325f81d7590c1c22bc3c78ecfd3dca155f1fdce3f93396425229717",
+      "source": "ops/reviews/pr468-hoso-4-packet-review-8-codex/lease-check.stdout",
+      "source_matches": true,
+      "actual": "27924ee14325f81d7590c1c22bc3c78ecfd3dca155f1fdce3f93396425229717",
+      "identical_to_round8": true
+    },
+    {
+      "line": 29,
+      "path": "lease-publish-test.json",
+      "expected": "d3ec3ff3f95f113053e66a8ad4b3d625566f7de1a3d283e251f029053b486022",
+      "source": "ops/reviews/pr468-hoso-4-packet-review-8-codex/lease-publish-test.json",
+      "source_matches": true,
+      "actual": "d3ec3ff3f95f113053e66a8ad4b3d625566f7de1a3d283e251f029053b486022",
+      "identical_to_round8": true
+    },
+    {
+      "line": 30,
+      "path": "lease-publish-test.stderr",
+      "expected": "11f0d363bf3a5f400d90975601037fb8b0f4319a0147a3e1f08a95ff6ccec96a",
+      "source": "ops/reviews/pr468-hoso-4-packet-review-8-codex/lease-publish-test.stderr",
+      "source_matches": true,
+      "actual": "11f0d363bf3a5f400d90975601037fb8b0f4319a0147a3e1f08a95ff6ccec96a",
+      "identical_to_round8": true
+    },
+    {
+      "line": 31,
+      "path": "lease-publish-test.stdout",
+      "expected": "9d3f3e46cd0ba25f7c7bd19f6505704d928baae39138e80539e275b64d8e6c7d",
+      "source": "ops/reviews/pr468-hoso-4-packet-review-8-codex/lease-publish-test.stdout",
+      "source_matches": true,
+      "actual": "9d3f3e46cd0ba25f7c7bd19f6505704d928baae39138e80539e275b64d8e6c7d",
+      "identical_to_round8": true
+    },
+    {
+      "line": 32,
+      "path": "measure_costs.py",
+      "expected": "4068823de53d028999e64b6b72f7d9b7d69ae5ddace50f2b3c5f6ba7c1eff671",
+      "source": "ops/reviews/pr468-hoso-4-packet-review-8-codex/measure_costs.py",
+      "source_matches": true,
+      "actual": "4068823de53d028999e64b6b72f7d9b7d69ae5ddace50f2b3c5f6ba7c1eff671",
+      "identical_to_round8": true
+    },
+    {
+      "line": 33,
+      "path": "nen-a1-a5/buoc.tsv",
+      "expected": "c51cf52e809babab1b0ff6944c711ce9d3c09101526378a7b66c2d9be7864c60",
+      "source": "ops/reviews/pr468-hoso-4-packet-review-8-codex/nen-a1-a5/buoc.tsv",
+      "source_matches": true,
+      "actual": "c51cf52e809babab1b0ff6944c711ce9d3c09101526378a7b66c2d9be7864c60",
+      "identical_to_round8": true
+    },
+    {
+      "line": 34,
+      "path": "nen-a1-a5/job.tsv",
+      "expected": "06c78b8ace81116bb9c86f1e8e6a79d245dc58fc0bc7c8a0c5a9a4b850574c4d",
+      "source": "ops/reviews/pr468-hoso-4-packet-review-8-codex/nen-a1-a5/job.tsv",
+      "source_matches": true,
+      "actual": "06c78b8ace81116bb9c86f1e8e6a79d245dc58fc0bc7c8a0c5a9a4b850574c4d",
+      "identical_to_round8": true
+    },
+    {
+      "line": 35,
+      "path": "nen-a1-a5/khong_do_duoc.txt",
+      "expected": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "source": "ops/reviews/pr468-hoso-4-packet-review-8-codex/nen-a1-a5/khong_do_duoc.txt",
+      "source_matches": true,
+      "actual": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "identical_to_round8": true
+    },
+    {
+      "line": 36,
+      "path": "nen-a1-a5/raw/jobs.txt",
+      "expected": "84c797f15c0593113985d014fb95d1829843b859ecfdb14b89e2bd3d1845948b",
+      "source": "ops/reviews/pr468-hoso-4-packet-review-8-codex/nen-a1-a5/raw/jobs.txt",
+      "source_matches": true,
+      "actual": "84c797f15c0593113985d014fb95d1829843b859ecfdb14b89e2bd3d1845948b",
+      "identical_to_round8": true
+    },
+    {
+      "line": 37,
+      "path": "nen-a1-a5/raw/runs.json",
+      "expected": "fa9ab9a0821217121d9b04b2e305391c42a59111487977447673e7a0177b961d",
+      "source": "ops/reviews/pr468-hoso-4-packet-review-8-codex/nen-a1-a5/raw/runs.json",
+      "source_matches": true,
+      "actual": "fa9ab9a0821217121d9b04b2e305391c42a59111487977447673e7a0177b961d",
+      "identical_to_round8": true
+    },
+    {
+      "line": 38,
+      "path": "nen-a1-a5/tinh.py",
+      "expected": "4e13e7903f0511a1440b5e8af9a160fae6a1a91fe588acf33f8e894b220276d2",
+      "source": "ops/reviews/pr468-hoso-4-packet-review-8-codex/nen-a1-a5/tinh.py",
+      "source_matches": true,
+      "actual": "4e13e7903f0511a1440b5e8af9a160fae6a1a91fe588acf33f8e894b220276d2",
+      "identical_to_round8": true
+    },
+    {
+      "line": 39,
+      "path": "nen-a1-a5/tom_tat.md",
+      "expected": "8309012b11ad03959ac420f64e5f7ffc84f4532653fb15a6d84c90976e8920d2",
+      "source": "ops/reviews/pr468-hoso-4-packet-review-8-codex/nen-a1-a5/tom_tat.md",
+      "source_matches": true,
+      "actual": "8309012b11ad03959ac420f64e5f7ffc84f4532653fb15a6d84c90976e8920d2",
+      "identical_to_round8": true
+    },
+    {
+      "line": 40,
+      "path": "nen-replay.log",
+      "expected": "8309012b11ad03959ac420f64e5f7ffc84f4532653fb15a6d84c90976e8920d2",
+      "source": "ops/reviews/pr468-hoso-4-packet-review-8-codex/nen-replay.log",
+      "source_matches": true,
+      "actual": "8309012b11ad03959ac420f64e5f7ffc84f4532653fb15a6d84c90976e8920d2",
+      "identical_to_round8": true
+    },
+    {
+      "line": 41,
+      "path": "notes.md",
+      "expected": "7f10bc75fcd6d22efc26e7b426c8e03fa2dddbc812602ccd4d32938ce114e433",
+      "source": "ops/reviews/pr468-hoso-4-packet-review-8-codex/notes.md",
+      "source_matches": true,
+      "actual": "7f10bc75fcd6d22efc26e7b426c8e03fa2dddbc812602ccd4d32938ce114e433",
+      "identical_to_round8": true
+    },
+    {
+      "line": 42,
+      "path": "pretooluse-replay.json",
+      "expected": "5165c82e8dbd3a191e7d48807cf29769329f898121fd9c4aee53f6992b21acc7",
+      "source": "ops/reviews/pr468-hoso-4-packet-review-8-codex/pretooluse-replay.json",
+      "source_matches": true,
+      "actual": "5165c82e8dbd3a191e7d48807cf29769329f898121fd9c4aee53f6992b21acc7",
+      "identical_to_round8": true
+    },
+    {
+      "line": 43,
+      "path": "pretooluse.json",
+      "expected": "39582c556d95c49fd71e19df434735bb8b1f77a6201d4188550eb8aefc38a527",
+      "source": "ops/reviews/pr468-hoso-4-packet-review-8-codex/pretooluse.json",
+      "source_matches": true,
+      "actual": "39582c556d95c49fd71e19df434735bb8b1f77a6201d4188550eb8aefc38a527",
+      "identical_to_round8": true
+    },
+    {
+      "line": 44,
+      "path": "pretooluse.stderr",
+      "expected": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "source": "ops/reviews/pr468-hoso-4-packet-review-8-codex/pretooluse.stderr",
+      "source_matches": true,
+      "actual": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "identical_to_round8": true
+    },
+    {
+      "line": 45,
+      "path": "pretooluse.stdout",
+      "expected": "69878c4f9efb24a6666d1cf0e4dea99d1ac87fa0aa904e28c6d397fd08cb7991",
+      "source": "ops/reviews/pr468-hoso-4-packet-review-8-codex/pretooluse.stdout",
+      "source_matches": true,
+      "actual": "69878c4f9efb24a6666d1cf0e4dea99d1ac87fa0aa904e28c6d397fd08cb7991",
+      "identical_to_round8": true
+    },
+    {
+      "line": 46,
+      "path": "replay-h.json",
+      "expected": "cd1f5d3c675f5862629f5722f65fa9d5f0fd304531508ff0e46e58965c10634a",
+      "source": "ops/reviews/pr468-hoso-4-packet-review-8-codex/replay-h.json",
+      "source_matches": true,
+      "actual": "cd1f5d3c675f5862629f5722f65fa9d5f0fd304531508ff0e46e58965c10634a",
+      "identical_to_round8": true
+    },
+    {
+      "line": 47,
+      "path": "replay_h.py",
+      "expected": "57c42e7d089f533c830353bfd7348eb3dc01a27dc4341c2581ac4f52739be7ed",
+      "source": "ops/reviews/pr468-hoso-4-packet-review-8-codex/replay_h.py",
+      "source_matches": true,
+      "actual": "57c42e7d089f533c830353bfd7348eb3dc01a27dc4341c2581ac4f52739be7ed",
+      "identical_to_round8": true
+    },
+    {
+      "line": 67,
+      "path": "run_command.py",
+      "expected": "4dd8c29f8f84b5aa3de271bc10ca4c02f9b9f7bdf6b6cb14d3633ed051f14b52",
+      "source": "ops/reviews/pr468-hoso-4-packet-review-8-codex/run_command.py",
+      "source_matches": true,
+      "actual": "4dd8c29f8f84b5aa3de271bc10ca4c02f9b9f7bdf6b6cb14d3633ed051f14b52",
+      "identical_to_round8": true
+    },
+    {
+      "line": 68,
+      "path": "static.json",
+      "expected": "0fa6efe1963b8a69abc66010f01191387cf4c4ca267d52e704bb6dd6b7cd35a1",
+      "source": "ops/reviews/pr468-hoso-4-packet-review-8-codex/static.json",
+      "source_matches": true,
+      "actual": "0fa6efe1963b8a69abc66010f01191387cf4c4ca267d52e704bb6dd6b7cd35a1",
+      "identical_to_round8": true
+    },
+    {
+      "line": 69,
+      "path": "static_checks.py",
+      "expected": "c836634d4f59756d36e8e8f9dd85ed601b7b4f614049b56a54d18a194bb9ad43",
+      "source": "ops/reviews/pr468-hoso-4-packet-review-8-codex/static_checks.py",
+      "source_matches": true,
+      "actual": "c836634d4f59756d36e8e8f9dd85ed601b7b4f614049b56a54d18a194bb9ad43",
+      "identical_to_round8": true
+    }
+  ],
+  "repair_missing": [
+    {
+      "line": 48,
+      "path": "rig/do-review/attack-h-cases.json",
+      "expected": "72dac0275ce51256d766aad3c542e98058c2ce0312ae0a6be92b4327231a6df6",
+      "source": "ops/reviews/pr468-hoso-4-packet-review-8-codex/rig/do-review/attack-h-cases.json",
+      "source_matches": true
+    },
+    {
+      "line": 49,
+      "path": "rig/do-review/attack-h-summary.json",
+      "expected": "50868677536846a02bbf99434233a3d4d6e3b28eabbe6876d46b63d0b733a745",
+      "source": "ops/reviews/pr468-hoso-4-packet-review-8-codex/rig/do-review/attack-h-summary.json",
+      "source_matches": true
+    },
+    {
+      "line": 50,
+      "path": "rig/do-review/extra-checks.json",
+      "expected": "f807d6da02cfc43f151c82a86e92833ed7bd721f7066003a0a5ed6514dae74c7",
+      "source": "ops/reviews/pr468-hoso-4-packet-review-8-codex/rig/do-review/extra-checks.json",
+      "source_matches": true
+    },
+    {
+      "line": 51,
+      "path": "rig/do-review/h_predicate.py",
+      "expected": "bde441a08d129a962d862fe237003997610238edc8e87b7948d35de875e5f165",
+      "source": "ops/reviews/pr468-hoso-4-packet-review-8-codex/rig/do-review/h_predicate.py",
+      "source_matches": true
+    },
+    {
+      "line": 52,
+      "path": "rig/do-review/h_tong.py",
+      "expected": "c23bcd019182023496cb3d9817c6553a0074c77bca26c0a0d1f71a4f5104e45c",
+      "source": "ops/reviews/pr468-hoso-4-packet-review-8-codex/rig/do-review/h_tong.py",
+      "source_matches": true
+    },
+    {
+      "line": 53,
+      "path": "rig/do-review/nhanh-rerun.json",
+      "expected": "b51c3f1dab6beeab4f44a976178f212b5e9b675f3bc0efc02414a605ca317044",
+      "source": "ops/reviews/pr468-hoso-4-packet-review-8-codex/rig/do-review/nhanh-rerun.json",
+      "source_matches": true
+    },
+    {
+      "line": 54,
+      "path": "rig/do-review/outputs/chon_reviewer_test.stdout",
+      "expected": "a58070829bf0732f81f9e4fa601196637467cea0528ed7e362ed8da48a82ede7",
+      "source": "ops/reviews/pr468-hoso-4-packet-review-8-codex/rig/do-review/outputs/chon_reviewer_test.stdout",
+      "source_matches": true
+    },
+    {
+      "line": 55,
+      "path": "rig/do-review/outputs/gh_readback_test.stdout",
+      "expected": "0a476a97ea3c334220ff9bee8485d720a8ab62acc17eb1e4a59e3d33c67f2cc2",
+      "source": "ops/reviews/pr468-hoso-4-packet-review-8-codex/rig/do-review/outputs/gh_readback_test.stdout",
+      "source_matches": true
+    },
+    {
+      "line": 56,
+      "path": "rig/do-review/outputs/mcp_gh_test.stdout",
+      "expected": "ab5eefde5db37e2f429a1dc418cf30893763ade21fc1dce9af5f7a77a649ec7e",
+      "source": "ops/reviews/pr468-hoso-4-packet-review-8-codex/rig/do-review/outputs/mcp_gh_test.stdout",
+      "source_matches": true
+    },
+    {
+      "line": 57,
+      "path": "rig/do-review/outputs/mcp_github_doc_test.stdout",
+      "expected": "82f89e9d5170cc190c941b9b5e247c69623d98f135217d8c8495c806074f033b",
+      "source": "ops/reviews/pr468-hoso-4-packet-review-8-codex/rig/do-review/outputs/mcp_github_doc_test.stdout",
+      "source_matches": true
+    },
+    {
+      "line": 58,
+      "path": "rig/do-review/outputs/nhanh_don_duoc_test.rerun.stdout",
+      "expected": "366795e45727a70aa7e6ed4ee64c6a1f0bd952dc1191b901c5d40479c722ad96",
+      "source": "ops/reviews/pr468-hoso-4-packet-review-8-codex/rig/do-review/outputs/nhanh_don_duoc_test.rerun.stdout",
+      "source_matches": true
+    },
+    {
+      "line": 59,
+      "path": "rig/do-review/outputs/nhanh_don_duoc_test.stdout",
+      "expected": "25b731689d77defb724e479c460730a53cf8a3e419c1131039f4dfcf017e8f66",
+      "source": "ops/reviews/pr468-hoso-4-packet-review-8-codex/rig/do-review/outputs/nhanh_don_duoc_test.stdout",
+      "source_matches": true
+    },
+    {
+      "line": 60,
+      "path": "rig/do-review/outputs/pretooluse_guard_test.stdout",
+      "expected": "00bb4b944b12cca20b33fd8ce77ba8280e1becd4249e41aced15803ecab44004",
+      "source": "ops/reviews/pr468-hoso-4-packet-review-8-codex/rig/do-review/outputs/pretooluse_guard_test.stdout",
+      "source_matches": true
+    },
+    {
+      "line": 61,
+      "path": "rig/do-review/outputs/probe_mang_test.stdout",
+      "expected": "c9997dac6d36e60d76b48d5b71e1b87fd60f0c387682061d09382d0585fd54a1",
+      "source": "ops/reviews/pr468-hoso-4-packet-review-8-codex/rig/do-review/outputs/probe_mang_test.stdout",
+      "source_matches": true
+    },
+    {
+      "line": 62,
+      "path": "rig/do-review/outputs/subagent_ghi_detect_test.stdout",
+      "expected": "56f4f998bed4b71e294e8d159fc624e6313d5102778838778d097a6d45026573",
+      "source": "ops/reviews/pr468-hoso-4-packet-review-8-codex/rig/do-review/outputs/subagent_ghi_detect_test.stdout",
+      "source_matches": true
+    },
+    {
+      "line": 63,
+      "path": "rig/do-review/real-results.json",
+      "expected": "08b42a013c8b539ef72b420a33510be6dc5bd066fe135ce0c079c98aa0c2854e",
+      "source": "ops/reviews/pr468-hoso-4-packet-review-8-codex/rig/do-review/real-results.json",
+      "source_matches": true
+    },
+    {
+      "line": 64,
+      "path": "rig/source/attack_h.py",
+      "expected": "672b5b24ebf25918459cd2184dfcba22022e32bee5d76319eac1017e4b97b400",
+      "source": "ops/reviews/pr468-hoso-4-packet-review-8-codex/rig/source/attack_h.py",
+      "source_matches": true
+    },
+    {
+      "line": 65,
+      "path": "rig/source/extra_checks.py",
+      "expected": "24e2ee335f05a6d9b441e4dac2d57d0f756ac6531f1a9dd9119acea26eaa87dd",
+      "source": "ops/reviews/pr468-hoso-4-packet-review-8-codex/rig/source/extra_checks.py",
+      "source_matches": true
+    },
+    {
+      "line": 66,
+      "path": "rig/source/harness.py",
+      "expected": "6d896573ccd0392cd38f3f2f7b9d5ba32f19891047a10e9840dc32efad6a125d",
+      "source": "ops/reviews/pr468-hoso-4-packet-review-8-codex/rig/source/harness.py",
+      "source_matches": true
+    }
+  ],
+  "command_metadata": [
+    {
+      "metadata": "ops/reviews/pr468-hoso-4-packet-review-9-codex/doctrine-scan.json",
+      "rc_recorded": 0,
+      "utc": "2026-09-07T09:59:00.709643+00:00",
+      "streams": [
+        {
+          "name": "stdout",
+          "bytes": 69,
+          "sha256": "9ee1866d82544445d0b015d90aaeb90aead5e9ebf0ffa8ae6556f3ca2963f5cb",
+          "bytes_match": true,
+          "hash_match": true
+        },
+        {
+          "name": "stderr",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "bytes_match": true,
+          "hash_match": true
+        }
+      ]
+    },
+    {
+      "metadata": "ops/reviews/pr468-hoso-4-packet-review-9-codex/adr-song.json",
+      "rc_recorded": 0,
+      "utc": "2026-09-07T09:59:00.929067+00:00",
+      "streams": [
+        {
+          "name": "stdout",
+          "bytes": 113,
+          "sha256": "751fa693b8d22f3c7d0089ad96461c3ccb88887a847c5bca3e08ff24ec3a07aa",
+          "bytes_match": true,
+          "hash_match": true
+        },
+        {
+          "name": "stderr",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "bytes_match": true,
+          "hash_match": true
+        }
+      ]
+    },
+    {
+      "metadata": "ops/reviews/pr468-hoso-4-packet-review-9-codex/eol-json.json",
+      "rc_recorded": 0,
+      "utc": "2026-09-07T10:05:37.880383+00:00",
+      "streams": [
+        {
+          "name": "stdout",
+          "bytes": 138,
+          "sha256": "7b3affd695fe78cf8aca16b339954d59d4963807b7eb561625bfdaa862ea8526",
+          "bytes_match": true,
+          "hash_match": true
+        },
+        {
+          "name": "stderr",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "bytes_match": true,
+          "hash_match": true
+        }
+      ]
+    },
+    {
+      "metadata": "ops/reviews/pr468-hoso-4-packet-review-9-codex/lease-check.json",
+      "rc_recorded": 0,
+      "utc": "2026-09-07T09:58:16.347901+00:00",
+      "streams": [
+        {
+          "name": "stdout",
+          "bytes": 235,
+          "sha256": "25d4a2364a6cddd3a25c794547c31de4d43f0eefd62c9ede2b7d98ffb6ebad1e",
+          "bytes_match": true,
+          "hash_match": true
+        },
+        {
+          "name": "stderr",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "bytes_match": true,
+          "hash_match": true
+        }
+      ]
+    },
+    {
+      "metadata": "ops/reviews/pr468-hoso-4-packet-review-9-codex/eol.json",
+      "rc_recorded": 0,
+      "utc": "2026-09-07T09:59:01.089151+00:00",
+      "streams": [
+        {
+          "name": "stdout",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "bytes_match": true,
+          "hash_match": true
+        },
+        {
+          "name": "stderr",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "bytes_match": true,
+          "hash_match": true
+        }
+      ]
+    },
+    {
+      "metadata": "ops/reviews/pr468-hoso-4-packet-review-9-codex/doc-claims.json",
+      "rc_recorded": 0,
+      "utc": "2026-09-07T09:58:16.412139+00:00",
+      "streams": [
+        {
+          "name": "stdout",
+          "bytes": 70861,
+          "sha256": "b9001f390f47286930965480160e62b23da1e47354acc0e9172b94a48d758286",
+          "bytes_match": true,
+          "hash_match": true
+        },
+        {
+          "name": "stderr",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "bytes_match": true,
+          "hash_match": true
+        }
+      ]
+    },
+    {
+      "metadata": "ops/reviews/pr468-hoso-4-packet-review-9-codex/lease-publish-test.json",
+      "rc_recorded": 0,
+      "utc": "2026-09-07T09:58:16.373172+00:00",
+      "streams": [
+        {
+          "name": "stdout",
+          "bytes": 8649,
+          "sha256": "a4d5d6383a34a86007ae6b5d5f17866eb1b680108760b2605e17362f5ee07b7e",
+          "bytes_match": true,
+          "hash_match": true
+        },
+        {
+          "name": "stderr",
+          "bytes": 56,
+          "sha256": "11f0d363bf3a5f400d90975601037fb8b0f4319a0147a3e1f08a95ff6ccec96a",
+          "bytes_match": true,
+          "hash_match": true
+        }
+      ]
+    },
+    {
+      "metadata": "ops/reviews/pr468-hoso-4-packet-review-9-codex/bien-nhan-v2.json",
+      "rc_recorded": 0,
+      "utc": "2026-09-07T09:58:16.344548+00:00",
+      "streams": [
+        {
+          "name": "stdout",
+          "bytes": 163,
+          "sha256": "613119d2d61bc12021c9dd7d3bf823e58c9da9f15f9fddb8885e7824a2c8bfe5",
+          "bytes_match": true,
+          "hash_match": true
+        },
+        {
+          "name": "stderr",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "bytes_match": true,
+          "hash_match": true
+        }
+      ]
+    },
+    {
+      "metadata": "ops/reviews/pr468-hoso-4-packet-review-9-codex/artifact-repair/doctrine-scan.json",
+      "rc_recorded": 0,
+      "utc": "2026-09-07T09:21:47.652563+00:00",
+      "streams": [
+        {
+          "name": "stdout",
+          "bytes": 69,
+          "sha256": "9ee1866d82544445d0b015d90aaeb90aead5e9ebf0ffa8ae6556f3ca2963f5cb",
+          "bytes_match": true,
+          "hash_match": true
+        },
+        {
+          "name": "stderr",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "bytes_match": true,
+          "hash_match": true
+        }
+      ]
+    },
+    {
+      "metadata": "ops/reviews/pr468-hoso-4-packet-review-9-codex/artifact-repair/adr-song.json",
+      "rc_recorded": 0,
+      "utc": "2026-09-07T09:21:47.931170+00:00",
+      "streams": [
+        {
+          "name": "stdout",
+          "bytes": 113,
+          "sha256": "751fa693b8d22f3c7d0089ad96461c3ccb88887a847c5bca3e08ff24ec3a07aa",
+          "bytes_match": true,
+          "hash_match": true
+        },
+        {
+          "name": "stderr",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "bytes_match": true,
+          "hash_match": true
+        }
+      ]
+    },
+    {
+      "metadata": "ops/reviews/pr468-hoso-4-packet-review-9-codex/artifact-repair/pretooluse.json",
+      "rc_recorded": 0,
+      "utc": "2026-09-07T09:27:45.642641+00:00",
+      "streams": [
+        {
+          "name": "stdout",
+          "bytes": 9995,
+          "sha256": "69878c4f9efb24a6666d1cf0e4dea99d1ac87fa0aa904e28c6d397fd08cb7991",
+          "bytes_match": true,
+          "hash_match": true
+        },
+        {
+          "name": "stderr",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "bytes_match": true,
+          "hash_match": true
+        }
+      ]
+    },
+    {
+      "metadata": "ops/reviews/pr468-hoso-4-packet-review-9-codex/artifact-repair/lease-check.json",
+      "rc_recorded": 0,
+      "utc": "2026-09-07T09:21:47.646408+00:00",
+      "streams": [
+        {
+          "name": "stdout",
+          "bytes": 235,
+          "sha256": "27924ee14325f81d7590c1c22bc3c78ecfd3dca155f1fdce3f93396425229717",
+          "bytes_match": true,
+          "hash_match": true
+        },
+        {
+          "name": "stderr",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "bytes_match": true,
+          "hash_match": true
+        }
+      ]
+    },
+    {
+      "metadata": "ops/reviews/pr468-hoso-4-packet-review-9-codex/artifact-repair/doc-claims.json",
+      "rc_recorded": 0,
+      "utc": "2026-09-07T09:21:48.075296+00:00",
+      "streams": [
+        {
+          "name": "stdout",
+          "bytes": 70861,
+          "sha256": "b9001f390f47286930965480160e62b23da1e47354acc0e9172b94a48d758286",
+          "bytes_match": true,
+          "hash_match": true
+        },
+        {
+          "name": "stderr",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "bytes_match": true,
+          "hash_match": true
+        }
+      ]
+    },
+    {
+      "metadata": "ops/reviews/pr468-hoso-4-packet-review-9-codex/artifact-repair/lease-publish-test.json",
+      "rc_recorded": 0,
+      "utc": "2026-09-07T09:21:47.659900+00:00",
+      "streams": [
+        {
+          "name": "stdout",
+          "bytes": 8649,
+          "sha256": "9d3f3e46cd0ba25f7c7bd19f6505704d928baae39138e80539e275b64d8e6c7d",
+          "bytes_match": true,
+          "hash_match": true
+        },
+        {
+          "name": "stderr",
+          "bytes": 56,
+          "sha256": "11f0d363bf3a5f400d90975601037fb8b0f4319a0147a3e1f08a95ff6ccec96a",
+          "bytes_match": true,
+          "hash_match": true
+        }
+      ]
+    },
+    {
+      "metadata": "ops/reviews/pr468-hoso-4-packet-review-9-codex/artifact-repair/ci-dang-ky.json",
+      "rc_recorded": 0,
+      "utc": "2026-09-07T09:21:51.600257+00:00",
+      "streams": [
+        {
+          "name": "stdout",
+          "bytes": 2934,
+          "sha256": "d31de5aefad408c8fb7562e18856c79a201e2bd2fbedbbd1c8b13929dabe5089",
+          "bytes_match": true,
+          "hash_match": true
+        },
+        {
+          "name": "stderr",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "bytes_match": true,
+          "hash_match": true
+        }
+      ]
+    },
+    {
+      "metadata": "ops/reviews/pr468-hoso-4-packet-review-9-codex/artifact-repair/bien-nhan-v2.json",
+      "rc_recorded": 0,
+      "utc": "2026-09-07T09:21:48.534296+00:00",
+      "streams": [
+        {
+          "name": "stdout",
+          "bytes": 163,
+          "sha256": "b35265571e55e9493b476675698a3adf8cd5fa29eb95f7e645321b89ece3f24c",
+          "bytes_match": true,
+          "hash_match": true
+        },
+        {
+          "name": "stderr",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "bytes_match": true,
+          "hash_match": true
+        }
+      ]
+    }
+  ],
+  "receipt9": {
+    "bytes": 29806,
+    "hash": "fa11cdcfb3fa43d5b54eca50cffd2d8ddf1e8e988db8b778f991a0b924589ec0",
+    "declared_bytes": 29806,
+    "declared_hash": "fa11cdcfb3fa43d5b54eca50cffd2d8ddf1e8e988db8b778f991a0b924589ec0",
+    "bytes_and_hash_match": true,
+    "reviewed_sha": "0bc6e56e1a1fd21cedfc18557320941d51db866c",
+    "equals_delivered_verdict": true
+  },
+  "repair_claims": {
+    "listed": 69,
+    "present": 50,
+    "missing": 19,
+    "recoverable": 69,
+    "original_rc": 1,
+    "repaired_copy_rc": 0,
+    "files": [
+      {
+        "path": "adr-song.json",
+        "exists": true,
+        "tracked": true,
+        "source": "ops/reviews/pr468-hoso-4-packet-review-8-codex/adr-song.json",
+        "expected": "78e851bba5482dbc3dc9ea39f1f64d0ce82d1d02295e30a11b5f9399bc3b5bda",
+        "recoverable": true
+      },
+      {
+        "path": "adr-song.stderr",
+        "exists": true,
+        "tracked": true,
+        "source": "ops/reviews/pr468-hoso-4-packet-review-8-codex/adr-song.stderr",
+        "expected": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "recoverable": true
+      },
+      {
+        "path": "adr-song.stdout",
+        "exists": true,
+        "tracked": true,
+        "source": "ops/reviews/pr468-hoso-4-packet-review-8-codex/adr-song.stdout",
+        "expected": "751fa693b8d22f3c7d0089ad96461c3ccb88887a847c5bca3e08ff24ec3a07aa",
+        "recoverable": true
+      },
+      {
+        "path": "attack_h.py.log",
+        "exists": true,
+        "tracked": true,
+        "source": "ops/reviews/pr468-hoso-4-packet-review-8-codex/attack_h.py.log",
+        "expected": "50868677536846a02bbf99434233a3d4d6e3b28eabbe6876d46b63d0b733a745",
+        "recoverable": true
+      },
+      {
+        "path": "bien-nhan-v2.json",
+        "exists": true,
+        "tracked": true,
+        "source": "ops/reviews/pr468-hoso-4-packet-review-8-codex/bien-nhan-v2.json",
+        "expected": "5811c530171d49365bc0d36c3fdc3f54258552f0a586be7c71c3d46b34feff0b",
+        "recoverable": true
+      },
+      {
+        "path": "bien-nhan-v2.stderr",
+        "exists": true,
+        "tracked": true,
+        "source": "ops/reviews/pr468-hoso-4-packet-review-8-codex/bien-nhan-v2.stderr",
+        "expected": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "recoverable": true
+      },
+      {
+        "path": "bien-nhan-v2.stdout",
+        "exists": true,
+        "tracked": true,
+        "source": "ops/reviews/pr468-hoso-4-packet-review-8-codex/bien-nhan-v2.stdout",
+        "expected": "b35265571e55e9493b476675698a3adf8cd5fa29eb95f7e645321b89ece3f24c",
+        "recoverable": true
+      },
+      {
+        "path": "build_verdict.py",
+        "exists": true,
+        "tracked": true,
+        "source": "ops/reviews/pr468-hoso-4-packet-review-8-codex/build_verdict.py",
+        "expected": "c02b220be22cbfb1e0e48a205c096cd6fd776a5a10bdc1afff568259edb6544b",
+        "recoverable": true
+      },
+      {
+        "path": "ci-dang-ky.json",
+        "exists": true,
+        "tracked": true,
+        "source": "ops/reviews/pr468-hoso-4-packet-review-8-codex/ci-dang-ky.json",
+        "expected": "593c7c6e61c0cb6b24913c0823ca307f11c5d5da977ccffdacf737c039f49ddb",
+        "recoverable": true
+      },
+      {
+        "path": "ci-dang-ky.stderr",
+        "exists": true,
+        "tracked": true,
+        "source": "ops/reviews/pr468-hoso-4-packet-review-8-codex/ci-dang-ky.stderr",
+        "expected": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "recoverable": true
+      },
+      {
+        "path": "ci-dang-ky.stdout",
+        "exists": true,
+        "tracked": true,
+        "source": "ops/reviews/pr468-hoso-4-packet-review-8-codex/ci-dang-ky.stdout",
+        "expected": "d31de5aefad408c8fb7562e18856c79a201e2bd2fbedbbd1c8b13929dabe5089",
+        "recoverable": true
+      },
+      {
+        "path": "contract-checks.json",
+        "exists": true,
+        "tracked": true,
+        "source": "ops/reviews/pr468-hoso-4-packet-review-8-codex/contract-checks.json",
+        "expected": "acdfb4e63a0c4d77c693cb51ec2c55066c41f827cecfacb0cad9c4fb43087292",
+        "recoverable": true
+      },
+      {
+        "path": "contract_checks.py",
+        "exists": true,
+        "tracked": true,
+        "source": "ops/reviews/pr468-hoso-4-packet-review-8-codex/contract_checks.py",
+        "expected": "430e7aabe0b6623181e0ba3422eac33880dae68aa9ba75ef797ec559e5ebb756",
+        "recoverable": true
+      },
+      {
+        "path": "costs.json",
+        "exists": true,
+        "tracked": true,
+        "source": "ops/reviews/pr468-hoso-4-packet-review-8-codex/costs.json",
+        "expected": "098554c9ef30bfd9a5607f3168c47a267c83c009a566149819ddeaf7cbb7904f",
+        "recoverable": true
+      },
+      {
+        "path": "doc-claims.json",
+        "exists": true,
+        "tracked": true,
+        "source": "ops/reviews/pr468-hoso-4-packet-review-8-codex/doc-claims.json",
+        "expected": "52177cff3494536f076dcd65cd9933ade7077cbd4c00705027f0760317d01831",
+        "recoverable": true
+      },
+      {
+        "path": "doc-claims.stderr",
+        "exists": true,
+        "tracked": true,
+        "source": "ops/reviews/pr468-hoso-4-packet-review-8-codex/doc-claims.stderr",
+        "expected": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "recoverable": true
+      },
+      {
+        "path": "doc-claims.stdout",
+        "exists": true,
+        "tracked": true,
+        "source": "ops/reviews/pr468-hoso-4-packet-review-8-codex/doc-claims.stdout",
+        "expected": "b9001f390f47286930965480160e62b23da1e47354acc0e9172b94a48d758286",
+        "recoverable": true
+      },
+      {
+        "path": "doctrine-scan.json",
+        "exists": true,
+        "tracked": true,
+        "source": "ops/reviews/pr468-hoso-4-packet-review-8-codex/doctrine-scan.json",
+        "expected": "4d1e506462da60170e61dd160f917bfe3fd3c7376774f45c0307de6e4d9c62f6",
+        "recoverable": true
+      },
+      {
+        "path": "doctrine-scan.stderr",
+        "exists": true,
+        "tracked": true,
+        "source": "ops/reviews/pr468-hoso-4-packet-review-8-codex/doctrine-scan.stderr",
+        "expected": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "recoverable": true
+      },
+      {
+        "path": "doctrine-scan.stdout",
+        "exists": true,
+        "tracked": true,
+        "source": "ops/reviews/pr468-hoso-4-packet-review-8-codex/doctrine-scan.stdout",
+        "expected": "9ee1866d82544445d0b015d90aaeb90aead5e9ebf0ffa8ae6556f3ca2963f5cb",
+        "recoverable": true
+      },
+      {
+        "path": "extra_checks.py.log",
+        "exists": true,
+        "tracked": true,
+        "source": "ops/reviews/pr468-hoso-4-packet-review-8-codex/extra_checks.py.log",
+        "expected": "25b90acd3ebf8353c3c07f3ff0e5b1ef730629df1f8bc909cbc36b84f8f31ff3",
+        "recoverable": true
+      },
+      {
+        "path": "final-check.json",
+        "exists": true,
+        "tracked": true,
+        "source": "ops/reviews/pr468-hoso-4-packet-review-8-codex/final-check.json",
+        "expected": "178084d965ef37b7d53011246a75c9b26b1c297674e1fb4eca259799fbb721e3",
+        "recoverable": true
+      },
+      {
+        "path": "followup-checks.json",
+        "exists": true,
+        "tracked": true,
+        "source": "ops/reviews/pr468-hoso-4-packet-review-8-codex/followup-checks.json",
+        "expected": "21e7e0ea57db0a570b2a5eae45f3eab469ffe69c6814ec6d776ef610ecb16716",
+        "recoverable": true
+      },
+      {
+        "path": "followup_checks.py",
+        "exists": true,
+        "tracked": true,
+        "source": "ops/reviews/pr468-hoso-4-packet-review-8-codex/followup_checks.py",
+        "expected": "a744461323ae6c31e4d1032a9333babc64e06eefe2c5e09ccebe751ef44d0333",
+        "recoverable": true
+      },
+      {
+        "path": "harness.py.log",
+        "exists": true,
+        "tracked": true,
+        "source": "ops/reviews/pr468-hoso-4-packet-review-8-codex/harness.py.log",
+        "expected": "6678fb19ef5de4dc52a4249031423a60b0dd4cf373a9ead88643492aeb52b657",
+        "recoverable": true
+      },
+      {
+        "path": "lease-check.json",
+        "exists": true,
+        "tracked": true,
+        "source": "ops/reviews/pr468-hoso-4-packet-review-8-codex/lease-check.json",
+        "expected": "06ab31af29e75fa43b9660a9eeea79c78104030d45f996e3b2523df11bed04dc",
+        "recoverable": true
+      },
+      {
+        "path": "lease-check.stderr",
+        "exists": true,
+        "tracked": true,
+        "source": "ops/reviews/pr468-hoso-4-packet-review-8-codex/lease-check.stderr",
+        "expected": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "recoverable": true
+      },
+      {
+        "path": "lease-check.stdout",
+        "exists": true,
+        "tracked": true,
+        "source": "ops/reviews/pr468-hoso-4-packet-review-8-codex/lease-check.stdout",
+        "expected": "27924ee14325f81d7590c1c22bc3c78ecfd3dca155f1fdce3f93396425229717",
+        "recoverable": true
+      },
+      {
+        "path": "lease-publish-test.json",
+        "exists": true,
+        "tracked": true,
+        "source": "ops/reviews/pr468-hoso-4-packet-review-8-codex/lease-publish-test.json",
+        "expected": "d3ec3ff3f95f113053e66a8ad4b3d625566f7de1a3d283e251f029053b486022",
+        "recoverable": true
+      },
+      {
+        "path": "lease-publish-test.stderr",
+        "exists": true,
+        "tracked": true,
+        "source": "ops/reviews/pr468-hoso-4-packet-review-8-codex/lease-publish-test.stderr",
+        "expected": "11f0d363bf3a5f400d90975601037fb8b0f4319a0147a3e1f08a95ff6ccec96a",
+        "recoverable": true
+      },
+      {
+        "path": "lease-publish-test.stdout",
+        "exists": true,
+        "tracked": true,
+        "source": "ops/reviews/pr468-hoso-4-packet-review-8-codex/lease-publish-test.stdout",
+        "expected": "9d3f3e46cd0ba25f7c7bd19f6505704d928baae39138e80539e275b64d8e6c7d",
+        "recoverable": true
+      },
+      {
+        "path": "measure_costs.py",
+        "exists": true,
+        "tracked": true,
+        "source": "ops/reviews/pr468-hoso-4-packet-review-8-codex/measure_costs.py",
+        "expected": "4068823de53d028999e64b6b72f7d9b7d69ae5ddace50f2b3c5f6ba7c1eff671",
+        "recoverable": true
+      },
+      {
+        "path": "nen-a1-a5/buoc.tsv",
+        "exists": true,
+        "tracked": true,
+        "source": "ops/reviews/pr468-hoso-4-packet-review-8-codex/nen-a1-a5/buoc.tsv",
+        "expected": "c51cf52e809babab1b0ff6944c711ce9d3c09101526378a7b66c2d9be7864c60",
+        "recoverable": true
+      },
+      {
+        "path": "nen-a1-a5/job.tsv",
+        "exists": true,
+        "tracked": true,
+        "source": "ops/reviews/pr468-hoso-4-packet-review-8-codex/nen-a1-a5/job.tsv",
+        "expected": "06c78b8ace81116bb9c86f1e8e6a79d245dc58fc0bc7c8a0c5a9a4b850574c4d",
+        "recoverable": true
+      },
+      {
+        "path": "nen-a1-a5/khong_do_duoc.txt",
+        "exists": true,
+        "tracked": true,
+        "source": "ops/reviews/pr468-hoso-4-packet-review-8-codex/nen-a1-a5/khong_do_duoc.txt",
+        "expected": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "recoverable": true
+      },
+      {
+        "path": "nen-a1-a5/raw/jobs.txt",
+        "exists": true,
+        "tracked": true,
+        "source": "ops/reviews/pr468-hoso-4-packet-review-8-codex/nen-a1-a5/raw/jobs.txt",
+        "expected": "84c797f15c0593113985d014fb95d1829843b859ecfdb14b89e2bd3d1845948b",
+        "recoverable": true
+      },
+      {
+        "path": "nen-a1-a5/raw/runs.json",
+        "exists": true,
+        "tracked": true,
+        "source": "ops/reviews/pr468-hoso-4-packet-review-8-codex/nen-a1-a5/raw/runs.json",
+        "expected": "fa9ab9a0821217121d9b04b2e305391c42a59111487977447673e7a0177b961d",
+        "recoverable": true
+      },
+      {
+        "path": "nen-a1-a5/tinh.py",
+        "exists": true,
+        "tracked": true,
+        "source": "ops/reviews/pr468-hoso-4-packet-review-8-codex/nen-a1-a5/tinh.py",
+        "expected": "4e13e7903f0511a1440b5e8af9a160fae6a1a91fe588acf33f8e894b220276d2",
+        "recoverable": true
+      },
+      {
+        "path": "nen-a1-a5/tom_tat.md",
+        "exists": true,
+        "tracked": true,
+        "source": "ops/reviews/pr468-hoso-4-packet-review-8-codex/nen-a1-a5/tom_tat.md",
+        "expected": "8309012b11ad03959ac420f64e5f7ffc84f4532653fb15a6d84c90976e8920d2",
+        "recoverable": true
+      },
+      {
+        "path": "nen-replay.log",
+        "exists": true,
+        "tracked": true,
+        "source": "ops/reviews/pr468-hoso-4-packet-review-8-codex/nen-replay.log",
+        "expected": "8309012b11ad03959ac420f64e5f7ffc84f4532653fb15a6d84c90976e8920d2",
+        "recoverable": true
+      },
+      {
+        "path": "notes.md",
+        "exists": true,
+        "tracked": true,
+        "source": "ops/reviews/pr468-hoso-4-packet-review-8-codex/notes.md",
+        "expected": "7f10bc75fcd6d22efc26e7b426c8e03fa2dddbc812602ccd4d32938ce114e433",
+        "recoverable": true
+      },
+      {
+        "path": "pretooluse-replay.json",
+        "exists": true,
+        "tracked": true,
+        "source": "ops/reviews/pr468-hoso-4-packet-review-8-codex/pretooluse-replay.json",
+        "expected": "5165c82e8dbd3a191e7d48807cf29769329f898121fd9c4aee53f6992b21acc7",
+        "recoverable": true
+      },
+      {
+        "path": "pretooluse.json",
+        "exists": true,
+        "tracked": true,
+        "source": "ops/reviews/pr468-hoso-4-packet-review-8-codex/pretooluse.json",
+        "expected": "39582c556d95c49fd71e19df434735bb8b1f77a6201d4188550eb8aefc38a527",
+        "recoverable": true
+      },
+      {
+        "path": "pretooluse.stderr",
+        "exists": true,
+        "tracked": true,
+        "source": "ops/reviews/pr468-hoso-4-packet-review-8-codex/pretooluse.stderr",
+        "expected": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "recoverable": true
+      },
+      {
+        "path": "pretooluse.stdout",
+        "exists": true,
+        "tracked": true,
+        "source": "ops/reviews/pr468-hoso-4-packet-review-8-codex/pretooluse.stdout",
+        "expected": "69878c4f9efb24a6666d1cf0e4dea99d1ac87fa0aa904e28c6d397fd08cb7991",
+        "recoverable": true
+      },
+      {
+        "path": "replay-h.json",
+        "exists": true,
+        "tracked": true,
+        "source": "ops/reviews/pr468-hoso-4-packet-review-8-codex/replay-h.json",
+        "expected": "cd1f5d3c675f5862629f5722f65fa9d5f0fd304531508ff0e46e58965c10634a",
+        "recoverable": true
+      },
+      {
+        "path": "replay_h.py",
+        "exists": true,
+        "tracked": true,
+        "source": "ops/reviews/pr468-hoso-4-packet-review-8-codex/replay_h.py",
+        "expected": "57c42e7d089f533c830353bfd7348eb3dc01a27dc4341c2581ac4f52739be7ed",
+        "recoverable": true
+      },
+      {
+        "path": "rig/do-review/attack-h-cases.json",
+        "exists": false,
+        "tracked": false,
+        "source": "ops/reviews/pr468-hoso-4-packet-review-6-codex/attack-h-cases.json",
+        "expected": "72dac0275ce51256d766aad3c542e98058c2ce0312ae0a6be92b4327231a6df6",
+        "recoverable": true
+      },
+      {
+        "path": "rig/do-review/attack-h-summary.json",
+        "exists": false,
+        "tracked": false,
+        "source": "ops/reviews/pr468-hoso-4-packet-review-6-codex/attack-h-summary.json",
+        "expected": "50868677536846a02bbf99434233a3d4d6e3b28eabbe6876d46b63d0b733a745",
+        "recoverable": true
+      },
+      {
+        "path": "rig/do-review/extra-checks.json",
+        "exists": false,
+        "tracked": false,
+        "source": "ops/reviews/pr468-hoso-4-packet-review-6-codex/extra-checks.json",
+        "expected": "f807d6da02cfc43f151c82a86e92833ed7bd721f7066003a0a5ed6514dae74c7",
+        "recoverable": true
+      },
+      {
+        "path": "rig/do-review/h_predicate.py",
+        "exists": false,
+        "tracked": false,
+        "source": "ops/reviews/pr468-hoso-4-packet-review-6-codex/h_predicate.py",
+        "expected": "bde441a08d129a962d862fe237003997610238edc8e87b7948d35de875e5f165",
+        "recoverable": true
+      },
+      {
+        "path": "rig/do-review/h_tong.py",
+        "exists": false,
+        "tracked": false,
+        "source": "ops/reviews/pr468-hoso-4-packet-review-6-codex/h_tong.py",
+        "expected": "c23bcd019182023496cb3d9817c6553a0074c77bca26c0a0d1f71a4f5104e45c",
+        "recoverable": true
+      },
+      {
+        "path": "rig/do-review/nhanh-rerun.json",
+        "exists": false,
+        "tracked": false,
+        "source": "ops/reviews/pr468-hoso-4-packet-review-6-codex/nhanh-rerun.json",
+        "expected": "b51c3f1dab6beeab4f44a976178f212b5e9b675f3bc0efc02414a605ca317044",
+        "recoverable": true
+      },
+      {
+        "path": "rig/do-review/outputs/chon_reviewer_test.stdout",
+        "exists": false,
+        "tracked": false,
+        "source": "ops/reviews/pr468-hoso-4-packet-review-6-codex/outputs/chon_reviewer_test.stdout",
+        "expected": "a58070829bf0732f81f9e4fa601196637467cea0528ed7e362ed8da48a82ede7",
+        "recoverable": true
+      },
+      {
+        "path": "rig/do-review/outputs/gh_readback_test.stdout",
+        "exists": false,
+        "tracked": false,
+        "source": "ops/reviews/pr468-hoso-4-packet-review-6-codex/outputs/gh_readback_test.stdout",
+        "expected": "0a476a97ea3c334220ff9bee8485d720a8ab62acc17eb1e4a59e3d33c67f2cc2",
+        "recoverable": true
+      },
+      {
+        "path": "rig/do-review/outputs/mcp_gh_test.stdout",
+        "exists": false,
+        "tracked": false,
+        "source": "ops/reviews/pr468-hoso-4-packet-review-6-codex/outputs/mcp_gh_test.stdout",
+        "expected": "ab5eefde5db37e2f429a1dc418cf30893763ade21fc1dce9af5f7a77a649ec7e",
+        "recoverable": true
+      },
+      {
+        "path": "rig/do-review/outputs/mcp_github_doc_test.stdout",
+        "exists": false,
+        "tracked": false,
+        "source": "ops/reviews/pr468-hoso-4-packet-review-6-codex/outputs/mcp_github_doc_test.stdout",
+        "expected": "82f89e9d5170cc190c941b9b5e247c69623d98f135217d8c8495c806074f033b",
+        "recoverable": true
+      },
+      {
+        "path": "rig/do-review/outputs/nhanh_don_duoc_test.rerun.stdout",
+        "exists": false,
+        "tracked": false,
+        "source": "ops/reviews/pr468-hoso-4-packet-review-6-codex/outputs/nhanh_don_duoc_test.rerun.stdout",
+        "expected": "366795e45727a70aa7e6ed4ee64c6a1f0bd952dc1191b901c5d40479c722ad96",
+        "recoverable": true
+      },
+      {
+        "path": "rig/do-review/outputs/nhanh_don_duoc_test.stdout",
+        "exists": false,
+        "tracked": false,
+        "source": "ops/reviews/pr468-hoso-4-packet-review-6-codex/outputs/nhanh_don_duoc_test.stdout",
+        "expected": "25b731689d77defb724e479c460730a53cf8a3e419c1131039f4dfcf017e8f66",
+        "recoverable": true
+      },
+      {
+        "path": "rig/do-review/outputs/pretooluse_guard_test.stdout",
+        "exists": false,
+        "tracked": false,
+        "source": "ops/reviews/pr468-hoso-4-packet-review-6-codex/outputs/pretooluse_guard_test.stdout",
+        "expected": "00bb4b944b12cca20b33fd8ce77ba8280e1becd4249e41aced15803ecab44004",
+        "recoverable": true
+      },
+      {
+        "path": "rig/do-review/outputs/probe_mang_test.stdout",
+        "exists": false,
+        "tracked": false,
+        "source": "ops/reviews/pr468-hoso-4-packet-review-6-codex/outputs/probe_mang_test.stdout",
+        "expected": "c9997dac6d36e60d76b48d5b71e1b87fd60f0c387682061d09382d0585fd54a1",
+        "recoverable": true
+      },
+      {
+        "path": "rig/do-review/outputs/subagent_ghi_detect_test.stdout",
+        "exists": false,
+        "tracked": false,
+        "source": "ops/reviews/pr468-hoso-4-packet-review-6-codex/outputs/subagent_ghi_detect_test.stdout",
+        "expected": "56f4f998bed4b71e294e8d159fc624e6313d5102778838778d097a6d45026573",
+        "recoverable": true
+      },
+      {
+        "path": "rig/do-review/real-results.json",
+        "exists": false,
+        "tracked": false,
+        "source": "ops/reviews/pr468-hoso-4-packet-review-6-codex/real-results.json",
+        "expected": "08b42a013c8b539ef72b420a33510be6dc5bd066fe135ce0c079c98aa0c2854e",
+        "recoverable": true
+      },
+      {
+        "path": "rig/source/attack_h.py",
+        "exists": false,
+        "tracked": false,
+        "source": "ops/reviews/pr468-hoso-4-packet-review-6-codex/attack_h.py",
+        "expected": "672b5b24ebf25918459cd2184dfcba22022e32bee5d76319eac1017e4b97b400",
+        "recoverable": true
+      },
+      {
+        "path": "rig/source/extra_checks.py",
+        "exists": false,
+        "tracked": false,
+        "source": "ops/reviews/pr468-hoso-4-packet-review-6-codex/extra_checks.py",
+        "expected": "24e2ee335f05a6d9b441e4dac2d57d0f756ac6531f1a9dd9119acea26eaa87dd",
+        "recoverable": true
+      },
+      {
+        "path": "rig/source/harness.py",
+        "exists": false,
+        "tracked": false,
+        "source": "ops/reviews/pr468-hoso-4-packet-review-6-codex/harness.py",
+        "expected": "6d896573ccd0392cd38f3f2f7b9d5ba32f19891047a10e9840dc32efad6a125d",
+        "recoverable": true
+      },
+      {
+        "path": "run_command.py",
+        "exists": true,
+        "tracked": true,
+        "source": "ops/reviews/pr468-hoso-4-packet-review-8-codex/run_command.py",
+        "expected": "4dd8c29f8f84b5aa3de271bc10ca4c02f9b9f7bdf6b6cb14d3633ed051f14b52",
+        "recoverable": true
+      },
+      {
+        "path": "static.json",
+        "exists": true,
+        "tracked": true,
+        "source": "ops/reviews/pr468-hoso-4-packet-review-8-codex/static.json",
+        "expected": "0fa6efe1963b8a69abc66010f01191387cf4c4ca267d52e704bb6dd6b7cd35a1",
+        "recoverable": true
+      },
+      {
+        "path": "static_checks.py",
+        "exists": true,
+        "tracked": true,
+        "source": "ops/reviews/pr468-hoso-4-packet-review-8-codex/static_checks.py",
+        "expected": "c836634d4f59756d36e8e8f9dd85ed601b7b4f614049b56a54d18a194bb9ad43",
+        "recoverable": true
+      }
+    ],
+    "method": "Fill declared missing paths in reviewer scratch with exact-hash bytes already archived in turn 6; no repository changes."
+  },
+  "p9_final": {
+    "utc": "2026-09-07T10:12:19.196619+00:00",
+    "head": "0bc6e56e1a1fd21cedfc18557320941d51db866c",
+    "tree": "86b3f017010575bd37b612242acb7e60bbf2db03",
+    "status": "",
+    "tracked_diff": "",
+    "index_diff": "",
+    "new_commits": "0",
+    "finding_ids": [
+      "bia-mo-mot-ref-khong-thu-hoi-moi-ban",
+      "a2-neo-nen-cu-trai-write-set-hien-tai",
+      "bien-do-khac-head-khong-phai-nhieu-runner",
+      "quyet-dinh-tiep-h-con-bi-phu-dinh",
+      "manifest-luot8-liet-ke-hien-vat-khong-duoc-giao"
+    ],
+    "severities": {
+      "P1": 1,
+      "P2": 4
+    },
+    "rows": 67,
+    "last_line": "verdict: changes_requested"
+  },
+  "ref_extra_tip": "3c4c5875c9dbc4b6d9a1142c99edde49ab74db6f 2026-09-07T11:20:33+00:00 ops(wp461 g2): vá cross-review lượt 3 — merge KHÔNG tự làm hết hai người giữ",
+  "metadata_failure": []
+}

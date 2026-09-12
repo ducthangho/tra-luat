@@ -1,0 +1,16 @@
+{
+  "name": "lease-publish-test",
+  "command": [
+    "python3",
+    "-B",
+    "ops/lease_publish_test.py"
+  ],
+  "cwd": "cay-kho",
+  "utc": "2026-09-07T11:39:27.525127+00:00",
+  "rc": 0,
+  "seconds": 62.49856002000001,
+  "stdout_bytes": 8649,
+  "stdout_sha256": "dc38a6e9c21c9481d79b38632f889462ab2eb0df30e5a1a277573104135eafd1",
+  "stderr_bytes": 56,
+  "stderr_sha256": "11f0d363bf3a5f400d90975601037fb8b0f4319a0147a3e1f08a95ff6ccec96a"
+}

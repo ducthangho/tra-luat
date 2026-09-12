@@ -1,0 +1,10 @@
+MUTANT dao-chieu-to-tien | T1 | 1/1
+MUTANT bo-kiem-commit-rieng | T2 | 1/1
+MUTANT noi-B-thanh-mot-commit | T3 | 1/1
+MUTANT loi-thanh-khong-commit-rieng | T4 | 1/1
+MUTANT in-ca-C | T3,T5,T8 | 3/3
+MUTANT bo-loai-mac-dinh | T6 | 1/1
+MUTANT xoa-khai-gioi-han | T7 | 1/1
+MUTANT bo-chan-fetch-loi | T8 | 1/1
+MUTANT go-nhanh-kho-nong | T5 | 1/1
+MUTANT dao-khop-base-remote | T1,T3,T6 | 3/3

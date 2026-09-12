@@ -1,0 +1,206 @@
+{
+  "remaining_prose": {
+    "a2_stale_ordering": [
+      [
+        387,
+        "| số đo của GATE (A1/A2/A5) | đo trên cây **chưa đổi** — nền `34045664423`/`34048685345` còn đúng | nền trôi sau ba packet cắt `test registry` (41 % chi phí Windows) ⇒ đo lại cả bảng |"
+      ]
+    ],
+    "lo_denials": [
+      [
+        59,
+        "**chưa được chọn**."
+      ],
+      [
+        157,
+        "| **H** (bản này) — bộ chọn nhận NHÃN độc lập payload; hằng cũng là nhóm bắt; đối chiếu **DANH SÁCH VỊ TRÍ** cặp trên dòng với vị trí nhóm trong match | 0 chuỗi regex (đổi KIỂU giá trị `MOI`, `ngoai_pham_vi` #1) | ≥ 3 (A5) | CÓ, kể cả khi grammar có lỗ — grammar lỗ làm ĐỎ ngay bản in xanh | **0 / 131** · **0 / 137** · **0 / 32** ca tấn công mới (00:15Z 07-09-2026) | **0 / 131** · **0 / 137** · **0 / 32** · `law7` **0 lệch / 11** theo hợp đồng H | **ứng viên — chưa chọn** (`§12` thuộc chủ kho) |"
+      ]
+    ],
+    "gate_noise_claims": [
+      [
+        98,
+        "⇒ **nhiễu runner cỡ `1`–`2,3` phút ở mức job là có thật**, và mọi ngưỡng ở `nghiem_thu` phải chừa"
+      ],
+      [
+        107,
+        "Hai bảng trên viết lúc 18:10Z 06-09-2026 khi chỉ có **hai** lượt master chạy trọn. Bảng này là"
+      ],
+      [
+        447,
+        "**≤ 25,00 phút**. Ngưỡng ấy suy từ số học `21,03` cộng `~4` phút biên cho nhiễu runner (chênh job"
+      ],
+      [
+        531,
+        "mọi số \"sau\" suy từ nó); lượt **master** `34048685345` = **111,08** (để đối chiếu nhiễu). Ước sau:"
+      ],
+      [
+        533,
+        "(`126,22 + ~9` biên, tức `~7 %` — rộng hơn nhiễu job đo được `2,27` nhân hệ số)."
+      ]
+    ],
+    "stale_round8_target_phrases": {
+      "**mười một** lượt master chạy trọn": false,
+      "Mẫu là **mọi lượt master trong ~9,6 giờ**": false,
+      "(đổi băm ⇒ lease cấp lại), chưa làm ở PR này.": false
+    }
+  },
+  "prose_repair_experiment": {
+    "gate_anchors": 6,
+    "lo_anchors": 3,
+    "gate_noise_assertions_removed": true,
+    "a2_stale_row_removed": true,
+    "lo_denials_removed": true,
+    "A1_preserved": true,
+    "A5_preserved": true,
+    "branch_numbers_preserved": true,
+    "lo_code_blocks_unchanged": true,
+    "H_decision_url_preserved": true
+  },
+  "two_run_context": {
+    "jobs": [
+      {
+        "run_id": "34048685345",
+        "head7": "1b3caa1",
+        "head_branch": "master",
+        "event": "push",
+        "job_name": "gate (ubuntu-latest)",
+        "conclusion": "success",
+        "started_at": "2026-09-06T17:28:01Z",
+        "completed_at": "2026-09-06T17:54:32Z"
+      },
+      {
+        "run_id": "34048685345",
+        "head7": "1b3caa1",
+        "head_branch": "master",
+        "event": "push",
+        "job_name": "gate (windows-latest)",
+        "conclusion": "success",
+        "started_at": "2026-09-06T17:28:00Z",
+        "completed_at": "2026-09-06T18:10:17Z"
+      },
+      {
+        "run_id": "34045664423",
+        "head7": "426bfc0",
+        "head_branch": "claude/cap-nhat-trang-thai-pr-taxzax",
+        "event": "workflow_dispatch",
+        "job_name": "gate (ubuntu-latest)",
+        "conclusion": "success",
+        "started_at": "2026-09-06T16:30:32Z",
+        "completed_at": "2026-09-06T16:54:47Z"
+      },
+      {
+        "run_id": "34045664423",
+        "head7": "426bfc0",
+        "head_branch": "claude/cap-nhat-trang-thai-pr-taxzax",
+        "event": "workflow_dispatch",
+        "job_name": "gate (windows-latest)",
+        "conclusion": "success",
+        "started_at": "2026-09-06T16:30:32Z",
+        "completed_at": "2026-09-06T17:13:44Z"
+      }
+    ],
+    "same_tree": true,
+    "diff_paths": [],
+    "triples_before": 86,
+    "triples_after": 86,
+    "added": [
+      [
+        "release-verify strict (lane LAND — manifest committed)",
+        "ubuntu",
+        "success"
+      ],
+      [
+        "release-verify strict (lane LAND — manifest committed)",
+        "windows",
+        "success"
+      ],
+      [
+        "release-verify strict (lane WORKER — manifest TẠM ngoài repo)",
+        "ubuntu",
+        "skipped"
+      ],
+      [
+        "release-verify strict (lane WORKER — manifest TẠM ngoài repo)",
+        "windows",
+        "skipped"
+      ]
+    ],
+    "removed": [
+      [
+        "release-verify strict (lane LAND — manifest committed)",
+        "ubuntu",
+        "skipped"
+      ],
+      [
+        "release-verify strict (lane LAND — manifest committed)",
+        "windows",
+        "skipped"
+      ],
+      [
+        "release-verify strict (lane WORKER — manifest TẠM ngoài repo)",
+        "ubuntu",
+        "success"
+      ],
+      [
+        "release-verify strict (lane WORKER — manifest TẠM ngoài repo)",
+        "windows",
+        "success"
+      ]
+    ],
+    "warning": "Different event and release-verify lane; job range does not identify pure runner noise."
+  },
+  "merge": {
+    "history": [
+      "0bc6e56 982cd1d b416830 Merge origin/master (b416830 — wp461 r2) vào nhánh hồ sơ #468 — 0 xung đột",
+      "982cd1d 896c1c0 ec03c85 Merge origin/claude/soan-spec-3-viec-treo-20260906 (ec03c85, đính chính WebSocket của phiên kia) — 0 xung đột; chỉnh câu dẫn cho khớp mục đã viết lại",
+      "896c1c0 3ef7d2a ops/reviews: biên nhận v2 + mục lục cho cross-review lượt 8; neo commit chứa GATE r3 / LO đã đồng bộ vào footer Issue #463/#464",
+      "3ef7d2a 4d0ead5 ops: revision 3 đặc tả GATE (A2 neo nền cùng base/cùng event) + lease exec-1r3 (bia mộ r2); đồng bộ quyết định §12; verdict + hiện vật lượt 8",
+      "ec03c85 4d0ead5 ops/issues: đính chính chẩn đoán WebSocket SAI trong cả bốn Issue body #463–#466",
+      "b416830 d28c4b1 6635379 Merge pull request #471 — wp461 r2: spec revision 2 + lease r2 neo Mission #470",
+      "6635379 10d7414 ops(wp461 r2): spec revision 2 + lease r2 neo Mission #470, thu hồi lease r1 bằng bia mộ hai chiều",
+      "10d7414 d28c4b1 ops: cấp lease EXECUTOR cho wp461 (#461) — neo spec_hash e74812cf, ba quyết định do chủ kho chốt"
+    ],
+    "merge_982_paths": [
+      "ops/issues/463-GATE-TACH-JOB-CAT-CHI-PHI.md",
+      "ops/issues/464-LO-319-LINUX-BANG-CHUNG-XANH.md",
+      "ops/issues/465-MUTANT-WINDOWS-SUBAGENT-GHI-DETECT.md",
+      "ops/issues/466-MUTANT-WINDOWS-NHANH-DON-DUOC.md"
+    ],
+    "merge_master_paths": [
+      "ops/leases/wp461-be-mat-thu-hai-cua-codex-exec-1-claude-20260907.yaml",
+      "ops/leases/wp461-be-mat-thu-hai-cua-codex-exec-1r2-claude-20260907.yaml",
+      "ops/specs/wp461-be-mat-thu-hai-cua-codex.md"
+    ],
+    "issues": [
+      {
+        "issue": 463,
+        "block_count": 1,
+        "outside_block_identical_to_executor": true,
+        "first_line": "> **⚠ ĐÍNH CHÍNH 09:3xZ 07-09-2026 — bản đầu của mục dưới đây từng nói proxy chặn `WebSocket` — SAI; mục đã được viết lại sau lượt 6.**",
+        "merged_file_same_as_head": true
+      },
+      {
+        "issue": 464,
+        "block_count": 1,
+        "outside_block_identical_to_executor": true,
+        "first_line": "> **⚠ ĐÍNH CHÍNH 09:3xZ 07-09-2026 — bản đầu của mục dưới đây từng nói proxy chặn `WebSocket` — SAI; mục đã được viết lại sau lượt 6.**",
+        "merged_file_same_as_head": true
+      },
+      {
+        "issue": 465,
+        "block_count": 1,
+        "outside_block_identical_to_executor": true,
+        "first_line": "> **⚠ ĐÍNH CHÍNH 09:3xZ 07-09-2026 — bản đầu của mục dưới đây từng nói proxy chặn `WebSocket` — SAI; mục đã được viết lại sau lượt 6.**",
+        "merged_file_same_as_head": true
+      },
+      {
+        "issue": 466,
+        "block_count": 1,
+        "outside_block_identical_to_executor": true,
+        "first_line": "> **⚠ ĐÍNH CHÍNH 09:3xZ 07-09-2026 — bản đầu của mục dưới đây từng nói proxy chặn `WebSocket` — SAI; mục đã được viết lại sau lượt 6.**",
+        "merged_file_same_as_head": true
+      }
+    ],
+    "review_note_equals_ec03c85": false
+  }
+}

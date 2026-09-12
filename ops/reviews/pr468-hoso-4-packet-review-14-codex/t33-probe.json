@@ -1,0 +1,71 @@
+{
+  "scope": "Only import and call t33; no main/suite",
+  "cases": [
+    {
+      "scenario": "missing_actionlint",
+      "seconds": 6.9e-05,
+      "outcome": "assertion_failed",
+      "message": "KHÔNG ĐO ĐƯỢC: thiếu `actionlint`. PyYAML không thay được nó — nó không biết luật của GitHub. Cài: go install github.com/rhysd/actionlint/cmd/actionlint@latest (hoặc `brew install actionlint`, hoặc tải bản dựng sẵn từ releases)."
+    },
+    {
+      "scenario": "provided_actionlint",
+      "seconds": 0.060127,
+      "outcome": "passed"
+    }
+  ],
+  "actionlint_version": {
+    "rc": 0,
+    "stdout": "1.7.7\ninstalled by downloading from release page\nbuilt with go1.23.4 compiler for linux/amd64\n",
+    "stderr": ""
+  },
+  "blobs": {
+    "ops/lease_publish_test.py": {
+      "oids": {
+        "b416830ef2a509d60203d55552ce17950afcf67c": "99b53533cf14e8e6012b5950916beef08e361fcd",
+        "f77f19895e00835d71644d82f1c54e9b519ccfe6": "99b53533cf14e8e6012b5950916beef08e361fcd",
+        "HEAD": "99b53533cf14e8e6012b5950916beef08e361fcd"
+      },
+      "same": true
+    },
+    ".github/workflows/ops-publish-lease.yml": {
+      "oids": {
+        "b416830ef2a509d60203d55552ce17950afcf67c": "4114a5205f19b99a7f22227d7fa8c971945a003c",
+        "f77f19895e00835d71644d82f1c54e9b519ccfe6": "4114a5205f19b99a7f22227d7fa8c971945a003c",
+        "HEAD": "4114a5205f19b99a7f22227d7fa8c971945a003c"
+      },
+      "same": true
+    },
+    ".claude/dev/ci_dang_ky_test.py": {
+      "oids": {
+        "b416830ef2a509d60203d55552ce17950afcf67c": "b804f519ae1066cf18d7f5dc4af92e274b72713d",
+        "f77f19895e00835d71644d82f1c54e9b519ccfe6": "b804f519ae1066cf18d7f5dc4af92e274b72713d",
+        "HEAD": "b804f519ae1066cf18d7f5dc4af92e274b72713d"
+      },
+      "same": true
+    },
+    ".claude/dev/packet_loop_test.py": {
+      "oids": {
+        "b416830ef2a509d60203d55552ce17950afcf67c": "cc352948b096711fea84c276704596399ad3bc69",
+        "f77f19895e00835d71644d82f1c54e9b519ccfe6": "cc352948b096711fea84c276704596399ad3bc69",
+        "HEAD": "cc352948b096711fea84c276704596399ad3bc69"
+      },
+      "same": true
+    },
+    ".claude/dev/packet_loop.py": {
+      "oids": {
+        "b416830ef2a509d60203d55552ce17950afcf67c": "16c8c17227786e1ce636b8b736e1c38502c2caf7",
+        "f77f19895e00835d71644d82f1c54e9b519ccfe6": "16c8c17227786e1ce636b8b736e1c38502c2caf7",
+        "HEAD": "16c8c17227786e1ce636b8b736e1c38502c2caf7"
+      },
+      "same": true
+    },
+    "scripts/tl.py": {
+      "oids": {
+        "b416830ef2a509d60203d55552ce17950afcf67c": "41df6dc665e5abd2a977c0b46127daea6e8797fa",
+        "f77f19895e00835d71644d82f1c54e9b519ccfe6": "41df6dc665e5abd2a977c0b46127daea6e8797fa",
+        "HEAD": "41df6dc665e5abd2a977c0b46127daea6e8797fa"
+      },
+      "same": true
+    }
+  }
+}

@@ -1,0 +1,257 @@
+{
+  "measured_utc": "2026-09-07T06:22:16.405491+00:00",
+  "leases": [
+    {
+      "file": "gate-tach-job-cat-chi-phi-exec-1-claude-20260906.yaml",
+      "actual_spec_sha256": "8cca700cba9c2312d05bf64eee3d4a5bda5317cb45e244ed22161b4ddcc83c62",
+      "declared_spec_sha256": "8cca700cba9c2312d05bf64eee3d4a5bda5317cb45e244ed22161b4ddcc83c62",
+      "spec_hash_equals_sha": true,
+      "hash_matches": true,
+      "reference_copy_matches": true,
+      "write_set": [
+        ".github/workflows/ci.yml",
+        ".claude/dev/ci_dang_ky_test.py"
+      ],
+      "depends_on": [],
+      "null_fields": [],
+      "missing_protocol32_literal": [
+        "objective",
+        "acceptance_criteria"
+      ],
+      "missing_protocol4_literal": [
+        "write_set_hash",
+        "heartbeat_at",
+        "lease_until"
+      ],
+      "base_sha": "1b3caa11df3e339bcfdb52be903884b5b99b9f77",
+      "issued": "2026-09-07T03:37:33Z",
+      "expires": "2026-09-08T03:37:33Z"
+    },
+    {
+      "file": "lo-319-linux-bang-chung-xanh-exec-1-claude-20260906.yaml.nhap",
+      "actual_spec_sha256": "3aafd766abd1fdcfa55a23e2f2716efbcbd8dc2505ddf9fe6dc878074a675067",
+      "declared_spec_sha256": "3aafd766abd1fdcfa55a23e2f2716efbcbd8dc2505ddf9fe6dc878074a675067",
+      "spec_hash_equals_sha": true,
+      "hash_matches": true,
+      "reference_copy_matches": true,
+      "write_set": [
+        ".claude/dev/ci_dang_ky_test.py"
+      ],
+      "depends_on": [
+        "GATE-TACH-JOB-CAT-CHI-PHI"
+      ],
+      "null_fields": [
+        "mission_issue",
+        "granted_by",
+        "granted_on_instruction",
+        "leased_at_utc",
+        "lease_expires_at_utc"
+      ],
+      "missing_protocol32_literal": [
+        "objective",
+        "acceptance_criteria"
+      ],
+      "missing_protocol4_literal": [
+        "write_set_hash",
+        "heartbeat_at",
+        "lease_until"
+      ],
+      "base_sha": "1b3caa11df3e339bcfdb52be903884b5b99b9f77",
+      "issued": "None",
+      "expires": "None"
+    },
+    {
+      "file": "mutant-windows-nhanh-don-duoc-exec-1-claude-20260906.yaml.nhap",
+      "actual_spec_sha256": "417dce16227687cbb1e642284f39d2f847a617b2d730f7f52aaa58f33c936521",
+      "declared_spec_sha256": "417dce16227687cbb1e642284f39d2f847a617b2d730f7f52aaa58f33c936521",
+      "spec_hash_equals_sha": true,
+      "hash_matches": true,
+      "reference_copy_matches": true,
+      "write_set": [
+        "ops/nhanh_don_duoc_test.py",
+        ".claude/dev/ci_dang_ky_test.py"
+      ],
+      "depends_on": [
+        "GATE-TACH-JOB-CAT-CHI-PHI",
+        "LO-319-LINUX-BANG-CHUNG-XANH",
+        "MUTANT-WINDOWS-SUBAGENT-GHI-DETECT"
+      ],
+      "null_fields": [
+        "mission_issue",
+        "granted_by",
+        "granted_on_instruction",
+        "leased_at_utc",
+        "lease_expires_at_utc"
+      ],
+      "missing_protocol32_literal": [
+        "objective",
+        "acceptance_criteria"
+      ],
+      "missing_protocol4_literal": [
+        "write_set_hash",
+        "heartbeat_at",
+        "lease_until"
+      ],
+      "base_sha": "1b3caa11df3e339bcfdb52be903884b5b99b9f77",
+      "issued": "None",
+      "expires": "None"
+    },
+    {
+      "file": "mutant-windows-subagent-ghi-detect-exec-1-claude-20260906.yaml.nhap",
+      "actual_spec_sha256": "2abace8588ec2b4e0626c1c77e9c3e0f7e713ecb2ce528b149e6c7f1f0000759",
+      "declared_spec_sha256": "2abace8588ec2b4e0626c1c77e9c3e0f7e713ecb2ce528b149e6c7f1f0000759",
+      "spec_hash_equals_sha": true,
+      "hash_matches": true,
+      "reference_copy_matches": true,
+      "write_set": [
+        ".claude/hooks/subagent_ghi_detect_test.py",
+        ".claude/dev/ci_dang_ky_test.py"
+      ],
+      "depends_on": [
+        "GATE-TACH-JOB-CAT-CHI-PHI",
+        "LO-319-LINUX-BANG-CHUNG-XANH"
+      ],
+      "null_fields": [
+        "mission_issue",
+        "granted_by",
+        "granted_on_instruction",
+        "leased_at_utc",
+        "lease_expires_at_utc"
+      ],
+      "missing_protocol32_literal": [
+        "objective",
+        "acceptance_criteria"
+      ],
+      "missing_protocol4_literal": [
+        "write_set_hash",
+        "heartbeat_at",
+        "lease_until"
+      ],
+      "base_sha": "1b3caa11df3e339bcfdb52be903884b5b99b9f77",
+      "issued": "None",
+      "expires": "None"
+    }
+  ],
+  "consumer_copy_matches": true,
+  "diff_numstat": "93\t0\tops/issues/463-GATE-TACH-JOB-CAT-CHI-PHI.md\n124\t0\tops/issues/464-LO-319-LINUX-BANG-CHUNG-XANH.md\n54\t0\tops/issues/465-MUTANT-WINDOWS-SUBAGENT-GHI-DETECT.md\n55\t0\tops/issues/466-MUTANT-WINDOWS-NHANH-DON-DUOC.md\n187\t0\tops/leases/gate-tach-job-cat-chi-phi-exec-1-claude-20260906.yaml\n181\t0\tops/leases/lo-319-linux-bang-chung-xanh-exec-1-claude-20260906.yaml.nhap\n8\t0\tops/leases/mutant-khong-chay-tren-windows-exec-1-claude-20260906.yaml\n158\t0\tops/leases/mutant-windows-nhanh-don-duoc-exec-1-claude-20260906.yaml.nhap\n160\t0\tops/leases/mutant-windows-subagent-ghi-detect-exec-1-claude-20260906.yaml.nhap\n222\t0\tops/reviews/GHI-NHAN-CROSS-REVIEW-LUOT5-KHONG-HOAN-TAT.md\n621\t0\tops/specs/GATE-TACH-JOB-CAT-CHI-PHI.md\n849\t0\tops/specs/LO-319-LINUX-BANG-CHUNG-XANH.md\n322\t0\tops/specs/MUTANT-WINDOWS-NHANH-DON-DUOC.md\n354\t0\tops/specs/MUTANT-WINDOWS-SUBAGENT-GHI-DETECT.md\n",
+  "provided_numstat_matches": true,
+  "diff_patch_matches": true,
+  "drift_1b_to_28_count": 46,
+  "diff_parent_merge_456": "",
+  "diff_0c5e889_numstat": "76\t5\t.claude/dev/ci_dang_ky_test.py\n68\t0\t.claude/hooks/pretooluse_guard_test.py\n",
+  "runtime_diff_1b_e5": "",
+  "runtime_diff_master_head": "",
+  "head_refs": 1,
+  "origin_refs": 2,
+  "current_master": "KHÔNG ĐO ĐƯỢC: không có refs/heads/master hoặc refs/remotes/origin/master",
+  "comparison_base": "d28c4b1062e8505cbdaaf0237fcbe3f9b8ee4705",
+  "runtime_drift_since_lease_anchor": "1\t0\t.claude/dev/ci_dang_ky_test.py\n8\t0\t.github/workflows/ci.yml\n",
+  "master_ancestor_pre_issue": "d28c4b1062e8505cbdaaf0237fcbe3f9b8ee4705 2026-09-07T08:50:09+07:00",
+  "blocks": {
+    "e5ab4b7": [
+      {
+        "lines": 21,
+        "numstat": "21\t0\t/tmp/claude-0/-home-user-tra-luat/d706aae3-d737-5ec6-8390-ae296d24c1a2/scratchpad/rv468/do-review/{empty => block-e5ab4b7-0.py}",
+        "rc": 1
+      },
+      {
+        "lines": 26,
+        "numstat": "26\t0\t/tmp/claude-0/-home-user-tra-luat/d706aae3-d737-5ec6-8390-ae296d24c1a2/scratchpad/rv468/do-review/{empty => block-e5ab4b7-1.py}",
+        "rc": 1
+      }
+    ],
+    "HEAD": [
+      {
+        "lines": 21,
+        "numstat": "21\t0\t/tmp/claude-0/-home-user-tra-luat/d706aae3-d737-5ec6-8390-ae296d24c1a2/scratchpad/rv468/do-review/{empty => block-HEAD-0.py}",
+        "rc": 1
+      },
+      {
+        "lines": 29,
+        "numstat": "29\t0\t/tmp/claude-0/-home-user-tra-luat/d706aae3-d737-5ec6-8390-ae296d24c1a2/scratchpad/rv468/do-review/{empty => block-HEAD-1.py}",
+        "rc": 1
+      }
+    ]
+  },
+  "workflow": {
+    "1b3caa1": {
+      "steps": 39,
+      "ifs": 10,
+      "lines": 588,
+      "duplicate_run_bodies": 0,
+      "timeout": 60
+    },
+    "28cb898": {
+      "steps": 40,
+      "ifs": 10,
+      "lines": 596,
+      "duplicate_run_bodies": 0,
+      "timeout": 60
+    },
+    "HEAD": {
+      "steps": 40,
+      "ifs": 10,
+      "lines": 596,
+      "duplicate_run_bodies": 0,
+      "timeout": 60
+    }
+  },
+  "collections": {
+    ".claude/hooks/pretooluse_guard_test.py": {
+      "CA": 39,
+      "DOT_BIEN": 34
+    },
+    ".claude/hooks/subagent_ghi_detect_test.py": {
+      "CA": 33,
+      "DOT_BIEN": 22,
+      "DOT_BIEN_NHAM_TEST": 6,
+      "DOT_BIEN_SETTINGS": 1
+    },
+    "ops/nhanh_don_duoc_test.py": {
+      "CA": "ListComp(elt=Tuple(elts=[JoinedStr(values=[Constant(value='T'), FormattedValue(value=Name(id='i', ct",
+      "DOT_BIEN": 10
+    }
+  },
+  "artifact_paths": {
+    "do_h.py": [],
+    "do_h.json": [],
+    "law7.json": [],
+    "prior131.json": [],
+    "hint_provenance.json": [],
+    "buoc_master.tsv": [],
+    "mruns_all.tsv": [],
+    "executor-luot4-va": [],
+    "executor-luot3-va": [],
+    "MANIFEST.sha256": [],
+    "do_t2.json": [],
+    "attack-h.json": []
+  },
+  "snapshot_lease_blob_path_pairs": 85,
+  "predecessor_blobs": [
+    {
+      "ref": "refs/heads/claude/soan-spec-3-viec-treo-20260906",
+      "path": "ops/leases/mutant-khong-chay-tren-windows-exec-1-claude-20260906.yaml",
+      "blob": "1f9504281c3415f7194e124eb7b2702c34c8efd1",
+      "tombstone": "gate-tach-job-cat-chi-phi-exec-1-claude-20260906",
+      "status": "CÒN_HẠN",
+      "bidirectional": true
+    },
+    {
+      "ref": "refs/remotes/origin/claude/gate-tach-job-cat-chi-phi",
+      "path": "ops/leases/mutant-khong-chay-tren-windows-exec-1-claude-20260906.yaml",
+      "blob": "8b2103c06687546379a17f6deafc97f1fe0173fd",
+      "tombstone": null,
+      "status": "CÒN_HẠN",
+      "bidirectional": null
+    }
+  ],
+  "snapshot_holders": {
+    ".github/workflows/ci.yml": [
+      "gate-tach-job-cat-chi-phi-exec-1-claude-20260906"
+    ],
+    ".claude/dev/ci_dang_ky_test.py": [
+      "gate-tach-job-cat-chi-phi-exec-1-claude-20260906",
+      "mutant-khong-chay-tren-windows-exec-1-claude-20260906"
+    ]
+  }
+}

@@ -1,0 +1,115 @@
+# BIÊN NHẬN GIAO HÀNG — cross-review LƯỢT 14 của PR #468 (hồ sơ bốn packet treo sau #456), KHÁC NỀN (codex).
+#
+# Verdict: approve — 0 P1 / 0 P2 / 2 P3. Chạy trọn NGAY LẦN PHÓNG ĐẦU, ma_thoat=0.
+#
+# CẢNH BÁO PHẢI ĐỌC — biên nhận này lập MUỘN. Verdict lượt 14 được soạn ngày 07-09 nhưng CHỈ vào kho
+# ở PR #478 ngày 08-09. Cross-review #478 lượt 1 (`cross-review-14-15-thieu-hien-vat`) bắt được rằng
+# land evidence trình bày kết quả lượt 14/15 như đã xác minh trong khi kho KHÔNG có verdict của chúng.
+# Việc thêm verdict mà THIẾU biên nhận và hàng mục lục làm `t27` ĐỎ (đo được: suite rc=1, 120/121) —
+# cross-review #478 lượt 2 bắt tiếp. Tệp này đóng phần biên nhận.
+#
+# KHÔNG vận chuyển lên GitHub: hai lượt này KHÔNG có comment bản chiếu trên PR #468 (PR đã merge lúc
+# 23:21:22Z). `evidence_url` neo vào blob trong kho, không neo comment.
+
+schema_version: 2
+receipt_id: pr468-hoso-4-packet-review-14-codex-20260907-229ddb14
+kind: review_delivery_receipt
+packet_id: 'PR468-HOSO-4-PACKET-TREO-SAU-456'
+lease_id: khong-co-lease
+phase_key: HOSO-4-PACKET-TREO-SAU-456
+luot: 14
+role: reviewer
+provider: codex
+executor_provider: claude
+cross_provider: true
+assurance: cross_approved
+verdict: approve
+verdict_path: ops/reviews/pr468-hoso-4-packet-review-14-codex-verdict.md
+verdict_sha256: 27702e558a06295e992b92d78ed03b48289e4fa73ea20ac91dd8c93e58a62994
+verdict_bytes: 23257
+reviewed_sha: 922956a7048fd23eea1c9f88aeb986e076f10e24
+evidence_url: https://github.com/ducthangho/tra-luat/blob/8f7becbd3b1e7dd678b1729295e46437fdddd410/ops/reviews/pr468-hoso-4-packet-review-14-codex-verdict.md
+evidence_url_ghi_chu: >-
+  Blob ghim commit ĐẦU TIÊN chứa tệp verdict trong kho — `8f7becb` trên nhánh
+  `claude/land-468-20260908` (PR #478). KHÔNG neo comment GitHub: hai lượt này không có
+  comment bản chiếu trên PR #468, vì #468 đã merge lúc 23:21:22Z trước khi verdict vào kho.
+  Đây là điểm YẾU so với các lượt 6–13 vốn có comment bản chiếu làm neo thứ hai.
+so_p1: 0
+so_p2: 0
+so_p3: 2
+
+model_reviewer_identity:
+  provider: openai_codex
+  surface: codex_cli
+  model_yeu_cau: gpt-6-astra
+  model_da_chay: gpt-6-astra
+  model_bang_chung: >-
+    ĐÍNH CHÍNH. Bản đầu của biên nhận này viết rằng đối số `-m gpt-6-astra -c
+    model_reasoning_effort=xhigh` "được ghi lại ở `run.json` kèm trong gói". **SAI** — `run.json`
+    của lượt này CHỈ có `lenh.chuong_trinh: codex`, `lenh.so_doi_so: 12` và
+    `lenh.van_tay: 3b3c068b45bbcdac`. Nó **KHÔNG** lưu argv, tên model, effort hay `thread_id`.
+    Gói cũng không kèm stdout/session/script phóng để kiểm ba trường ấy.
+    Vậy `model_yeu_cau`, `model_da_chay`, effort và `thread_id` dưới đây là **ATTESTATION CỦA
+    ĐIỀU PHỐI**, không có nguồn trong gói để reviewer đối chiếu. Cross-review #478 lượt 3 bắt được
+    (`bien-nhan-14-15-gan-doi-so-model-vao-run-json`).
+    Lưu ý: tệp `receipt.json` trong gói lượt 14 KHÔNG phải nguồn cho lượt 14 — nó đang audit
+    biên nhận lượt **13** (`parsed.luot: 13`).
+  session_run_id: 229ddb14
+  thread_id: 01a07df4-01f7-78e3-8928-8976fa4e4fb3
+  prompt_sha256: 4a0ee1dcabdb370213730daf9cc1bc80d144111b6e3dd9d8fe43b28f70076a01
+  prompt_kin_hoan_toan: false
+  bat_dau_utc: '2026-09-07T22:18:57.827424Z'
+  ket_thuc_utc: '2026-09-07T22:33:46.558728Z'
+  thoi_luong_giay: 888.731304
+  ma_thoat: 0
+  stdout_byte: 575912
+  so_lan_chet_truoc_khi_xong: 0
+  neo_boi_launcher: >-
+    `launcher.py run --expected-repo github.com/ducthangho/tra-luat --expected-head 922956a7048fd23eea1c9f88aeb986e076f10e24
+    --require-clean --prompt-file PROMPT.md --expected-prompt-sha256 <băm> --deadline-utc +70m`
+    bọc `codex exec`; workspace là bản sao rời detached đúng reviewed_sha, porcelain rỗng trước khi phóng.
+
+nang_luc_do_cua_goi:
+  ghi_chu: >-
+    Gói dựng bằng `ops/dung_goi_review.sh` (đang chờ merge ở PR #477): mirror ĐỦ MỌI REF, vật chất hoá
+    từng nhánh thành `refs/heads/*`, cài công cụ bằng bản ghim của kho, sinh EVIDENCE tự khai giới hạn.
+  so_ref: 306
+  lech: 0
+  chua_do_duoc: >-
+    Không có mạng trong sandbox nên KHÔNG xác minh được ảnh chụp nguồn so với GitHub. Remote `origin`
+    của cây làm việc do script đặt để qua phép kiểm `--expected-repo`; object thật lấy từ mirror cục bộ.
+
+manifest:
+  duong_dan: ops/reviews/pr468-hoso-4-packet-review-14-codex/ARTIFACTS.sha256
+  so_tep: 59
+  sha256sum_check: 'rc=0, 59/59 OK'
+  ghi_chu: >-
+    Manifest này do PHIÊN ĐIỀU PHỐI lập lúc chép hiện vật vào kho, đường dẫn tính từ chính thư mục gói —
+    KHÁC các gói lượt 6–13 vốn giữ manifest của reviewer theo bố cục sandbox. Nêu ra để không ai đối chiếu
+    nhầm hai loại.
+
+github_submitter_identity:
+  actor: ducthangho
+  la_tac_gia_PR: true
+  ghi_chu: >-
+    `ADR-0040`: biên nhận và verdict do tài khoản tác giả PR vận chuyển KHÔNG thành required check hay
+    merge authorization. Trường này ghi AI VẬN CHUYỂN. Lượt này KHÔNG có comment bản chiếu trên #468.
+  phien_van_chuyen: https://claude.ai/code/session_0186nh13XYsStVs1usBCsx5Y
+
+anchor:
+  loai: canonical_ancestry
+  cuong_do: trung_binh
+  mo_ta: >-
+    `evidence_url` neo blob tại `8f7becb` — commit ĐẦU TIÊN chứa tệp verdict, trên nhánh
+    `claude/land-468-20260908` (PR #478). Lúc lập biên nhận, `8f7becb` là TỔ TIÊN của head PR đang
+    được kiểm, nhưng CHƯA vào `master`. Không có tag `luu-tru/*`, không có bằng chứng ref được bảo
+    vệ hay chính sách giữ object. Nếu PR #478 được squash/rebase thì neo này PHẢI được lập lại từ
+    nguồn thật, không được giữ nguyên URL cũ.
+  gioi_han: >-
+    Cổng chỉ kiểm quan hệ ancestry với HEAD đang validate. Nó KHÔNG chứng minh server coi commit ấy
+    là canonical, cũng không chứng minh GitHub sẽ giữ object. Neo YẾU HƠN các lượt 6–13 vốn còn có
+    comment bản chiếu trên PR #468 làm neo thứ hai; hai lượt này KHÔNG có comment ấy.
+
+khong_do_duoc:
+  - 'Model/effort/thread_id đã chạy: KHÔNG có nguồn nào trong gói. run.json chỉ giữ vân tay lệnh.'
+  - 'Biên nhận lập muộn hơn lượt review một ngày; không có comment GitHub làm neo độc lập.'

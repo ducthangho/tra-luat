@@ -1,0 +1,83 @@
+{
+  "reviewed_sha": "98ef1f1629a2ac786ff91e352dd02da9b693e81e",
+  "authorized_sha": "efa397eb2515658a1e3e9b4cdfd6e887b492b957",
+  "review_matches_authorized": false,
+  "cross_review_status": "KHONG_THOA",
+  "bookkeeping_cited_path": "head_da_cross_review_khac_head_merge.dieu_kien_cross_review_CHO_HEAD_DA_MERGE",
+  "bookkeeping_cited_path_resolves": false,
+  "on": {
+    "push": {
+      "branches": [
+        "master"
+      ]
+    },
+    "pull_request": "",
+    "workflow_dispatch": ""
+  },
+  "checkout_count": 1,
+  "checkouts": [
+    {
+      "uses": "actions/checkout@v4",
+      "with": {
+        "fetch-depth": "0"
+      }
+    }
+  ],
+  "matrix": {
+    "os": "${{ fromJSON( (github.event_name == 'workflow_dispatch' || github.ref == 'refs/heads/master' || contains(github.event.pull_request.labels.*.name, 'windows')) && '[\"ubuntu-latest\",\"windows-latest\"]' || '[\"ubuntu-latest\"]') }}"
+  },
+  "pr_selftest_steps": [
+    {
+      "name": "tl selftest (luot PR — khong sinh bang chung)",
+      "if": "${{ github.event_name == 'pull_request' }}",
+      "run": "python scripts/tl.py --selftest"
+    }
+  ],
+  "runtime_versions": {
+    "git": {
+      "cmd": [
+        "git",
+        "--version"
+      ],
+      "rc": 0,
+      "stdout": "git version 2.43.0\n",
+      "stderr": ""
+    },
+    "python": {
+      "cmd": [
+        "python3",
+        "--version"
+      ],
+      "rc": 0,
+      "stdout": "Python 3.11.15\n",
+      "stderr": ""
+    },
+    "shellcheck": {
+      "cmd": [
+        "shellcheck",
+        "--version"
+      ],
+      "rc": 0,
+      "stdout": "ShellCheck - shell script analysis tool\nversion: 0.9.0\nlicense: GNU General Public License, version 3\nwebsite: https://www.shellcheck.net\n",
+      "stderr": ""
+    },
+    "actionlint": {
+      "cmd": [
+        "cong-cu/actionlint.VfcqRW/actionlint",
+        "-version"
+      ],
+      "rc": 0,
+      "stdout": "1.7.7\ninstalled by downloading from release page\nbuilt with go1.23.4 compiler for linux/amd64\n",
+      "stderr": ""
+    }
+  },
+  "merge_490_log": {
+    "rc": 0,
+    "stdout": ""
+  },
+  "patch_hint_files_present": [],
+  "reference_docs": [
+    "ops/reviews/pr489-review-1-codex-verdict.md",
+    "ops/reviews/pr489-review-2-codex-verdict.md"
+  ]
+}

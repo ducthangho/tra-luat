@@ -1,0 +1,193 @@
+tai-lieu/464-LO-319-LINUX-BANG-CHUNG-XANH.md-38-hướng hiển nhiên.
+tai-lieu/464-LO-319-LINUX-BANG-CHUNG-XANH.md-39-
+tai-lieu/464-LO-319-LINUX-BANG-CHUNG-XANH.md:40:## §12 — hình dạng này đã hỏng BỐN LẦN, và câu hỏi thuộc CHỦ KHO
+tai-lieu/464-LO-319-LINUX-BANG-CHUNG-XANH.md-41-
+tai-lieu/464-LO-319-LINUX-BANG-CHUNG-XANH.md-42-**Đây là phần quan trọng nhất của Issue.** Trong sáu vòng soạn + năm lượt cross-review, cùng một
+--
+tai-lieu/464-LO-319-LINUX-BANG-CHUNG-XANH.md-44-qua bốn thiết kế: **A-b → A-c → T → T'**. Reviewer khác nền hạ được **cả bốn**.
+tai-lieu/464-LO-319-LINUX-BANG-CHUNG-XANH.md-45-
+tai-lieu/464-LO-319-LINUX-BANG-CHUNG-XANH.md:46:Thiết kế hiện tại trong đặc tả là **H**, tức **bản thứ NĂM**. `PROTOCOL §12` nói: *"Cùng hình dạng
+tai-lieu/464-LO-319-LINUX-BANG-CHUNG-XANH.md-47-lỗi xuất hiện lần thứ ba bắt buộc xem lại có nên tiếp tục cách làm đó, không chỉ vá lần thứ tư."*
+tai-lieu/464-LO-319-LINUX-BANG-CHUNG-XANH.md-48-
+tai-lieu/464-LO-319-LINUX-BANG-CHUNG-XANH.md-49-Đặc tả **không tự trả lời** câu ấy. Nó đặt lên bàn **ba lựa chọn** (`:205-211`) — (1) tiếp H trong
+tai-lieu/464-LO-319-LINUX-BANG-CHUNG-XANH.md-50-write set 1 tệp · (2) mở revision đổi **bên IN**, 9 tệp, vượt trần `sensitive` `ADR-0044` · (3) dừng
+tai-lieu/464-LO-319-LINUX-BANG-CHUNG-XANH.md:51:packet và tách lại — kèm **năm điều kiện đo được Đ1–Đ5** (`:221-227`) làm chốt tự động chuyển hướng.
+tai-lieu/464-LO-319-LINUX-BANG-CHUNG-XANH.md-52-
+tai-lieu/464-LO-319-LINUX-BANG-CHUNG-XANH.md-53-**Chủ kho ĐÃ CHỌN 07-09-2026: lựa chọn (1) — tiếp H.** Dấu vết bền: https://github.com/ducthangho/tra-luat/issues/464#issuecomment-5567158069; khi cấp lease, `granted_on_instruction` neo vào đó.
+--
+tai-lieu/464-LO-319-LINUX-BANG-CHUNG-XANH.md-94-- Mỗi tiêu chí nghiệm thu nêu **đơn vị**.
+tai-lieu/464-LO-319-LINUX-BANG-CHUNG-XANH.md-95-- **Không đụng `.github/workflows/ci.yml`**, và **không** đề xuất nâng `timeout-minutes`
+tai-lieu/464-LO-319-LINUX-BANG-CHUNG-XANH.md:96:  (`PROTOCOL §12`, điều kiện DỪNG — đã nâng 2 lần, 3 mức: `25 → 45 → 60`).
+tai-lieu/464-LO-319-LINUX-BANG-CHUNG-XANH.md-97-
+tai-lieu/464-LO-319-LINUX-BANG-CHUNG-XANH.md-98-## HAI ĐIỀU KIỆN CHƯA THOẢ — đọc trước khi cấp lease
+--
+tai-lieu/464-LO-319-LINUX-BANG-CHUNG-XANH.md-108-`reviewed_sha` `2adb681`: `changes_requested`, 7 P1 / 4 P2. Cho packet này: P1 cũ
+tai-lieu/464-LO-319-LINUX-BANG-CHUNG-XANH.md-109-`span-rong-nuot-ti-le-vo-can` xếp **VÁ HỜ về nghĩa vụ xác nhận** — reviewer tự dựng **1213 ca, 0 đỏ giả /
+tai-lieu/464-LO-319-LINUX-BANG-CHUNG-XANH.md:110:0 bỏ sót** (Đ1 = 0 trên bộ ấy), Đ2 `0/6` bản in xanh thật bị bác ở lượt 6; executor bổ sung `mcp_gh` (0/1) và — sau khi đặt đúng Ruff 0.15.15 lên PATH — `pretooluse` xanh thật (`CA 39/39 · DOT BIEN 34/34`, rc=0, 0/1) ⇒ **Đ2 = 0/8** (`d2-that-results.json` trong gói lượt 6);
+tai-lieu/464-LO-319-LINUX-BANG-CHUNG-XANH.md-111-giữ P1 vì hồ sơ **thiếu hiện vật để tái tính** (bộ 311 hàng, `do_h.py`, `law7.json`, `prior131.json`
+tai-lieu/464-LO-319-LINUX-BANG-CHUNG-XANH.md-112-không có trong kho) chứ **không** vì tìm được phản chứng H mới. P3 `uoc-kich-thuoc-lo-con-tinh-nhan-ac`
+--
+tai-lieu/lo-319-linux-bang-chung-xanh-exec-1-claude-20260906.yaml.nhap-26-mission_issue:
+tai-lieu/lo-319-linux-bang-chung-xanh-exec-1-claude-20260906.yaml.nhap-27-granted_by:
+tai-lieu/lo-319-linux-bang-chung-xanh-exec-1-claude-20260906.yaml.nhap:28:granted_on_instruction:   # khi cấp: neo https://github.com/ducthangho/tra-luat/issues/464#issuecomment-5567158069 (chủ kho đã chọn §12 = tiếp H, 07-09-2026)
+tai-lieu/lo-319-linux-bang-chung-xanh-exec-1-claude-20260906.yaml.nhap-29-leased_at_utc:
+tai-lieu/lo-319-linux-bang-chung-xanh-exec-1-claude-20260906.yaml.nhap-30-lease_expires_at_utc:
+--
+tai-lieu/lo-319-linux-bang-chung-xanh-exec-1-claude-20260906.yaml.nhap-70-recorder_is_dispatcher: false
+tai-lieu/lo-319-linux-bang-chung-xanh-exec-1-claude-20260906.yaml.nhap-71-
+tai-lieu/lo-319-linux-bang-chung-xanh-exec-1-claude-20260906.yaml.nhap:72:# `run_minutes` = độ dài HẠN LEASE (phút), KHÔNG phải trần một run (`max_run_minutes: 90`, §12).
+tai-lieu/lo-319-linux-bang-chung-xanh-exec-1-claude-20260906.yaml.nhap-73-run_minutes: 1440
+tai-lieu/lo-319-linux-bang-chung-xanh-exec-1-claude-20260906.yaml.nhap-74-heartbeat_required_minutes: 30
+--
+tai-lieu/lo-319-linux-bang-chung-xanh-exec-1-claude-20260906.yaml.nhap-107-  đã có kỳ vọng; luật 7 đếm hằng trong MÃ REGEX nên hằng ở nhánh không tham gia match vẫn được
+tai-lieu/lo-319-linux-bang-chung-xanh-exec-1-claude-20260906.yaml.nhap-108-  cộng — 3 đỏ giả / 5 bỏ sót trên 11 ca `law7.json`). Slug `span-rong-nuot-ti-le-vo-can` hỏng BỐN
+tai-lieu/lo-319-linux-bang-chung-xanh-exec-1-claude-20260906.yaml.nhap:109:  lượt; câu trả lời PROTOCOL §12 ở lượt 3 ("hợp đồng T đúng, chỉ gỡ mâu thuẫn") bị bác.
+tai-lieu/lo-319-linux-bang-chung-xanh-exec-1-claude-20260906.yaml.nhap-110-  Bản này ghi phương án H (gợi ý reviewer lượt 4; executor tái dẫn xuất từng hunk và ĐO LẠI
+tai-lieu/lo-319-linux-bang-chung-xanh-exec-1-claude-20260906.yaml.nhap-111-  00:15Z 07-09-2026 bằng bộ ca riêng, không chép số reviewer): bộ chọn nhận NHÃN độc lập payload
+--
+tai-lieu/lo-319-linux-bang-chung-xanh-exec-1-claude-20260906.yaml.nhap-119-  H là bản thiết kế THỨ NĂM của cùng một cách làm; spec đặt ba lựa chọn (1 — tiếp H trong write
+tai-lieu/lo-319-linux-bang-chung-xanh-exec-1-claude-20260906.yaml.nhap-120-  set 1 tệp · 2 — mở revision đổi bên IN, 9 tệp, vượt trần sensitive ADR-0044 · 3 — dừng packet và
+tai-lieu/lo-319-linux-bang-chung-xanh-exec-1-claude-20260906.yaml.nhap:121:  tách lại) và năm điều kiện đo được Đ1–Đ5 ở mục "§12 — bốn lần hỏng". CHỦ KHO ĐÃ CHỌN 07-09-2026:
+tai-lieu/lo-319-linux-bang-chung-xanh-exec-1-claude-20260906.yaml.nhap-122-  lựa chọn 1 — tiếp H (dấu vết bền: https://github.com/ducthangho/tra-luat/issues/464#issuecomment-5567158069; khi cấp, granted_on_instruction
+tai-lieu/lo-319-linux-bang-chung-xanh-exec-1-claude-20260906.yaml.nhap-123-  neo vào đó). Quyết định thiết kế KHÔNG phải cấp lease: các ô chủ kho vẫn trống tới lúc cấp, thi
+tai-lieu/lo-319-linux-bang-chung-xanh-exec-1-claude-20260906.yaml.nhap:124:  công chưa bắt đầu, Đ1–Đ5 tiếp tục ràng buộc (chạm ngưỡng ⇒ chuyển 2/3). Chuỗi regex SPAN của 8 mục giữ NGUYÊN VĂN — chỉ đổi KIỂU giá trị của `MOI`/`MOI_WINDOWS`.
+tai-lieu/lo-319-linux-bang-chung-xanh-exec-1-claude-20260906.yaml.nhap-125-
+tai-lieu/lo-319-linux-bang-chung-xanh-exec-1-claude-20260906.yaml.nhap-126-viec_trong_lease:
+tai-lieu/lo-319-linux-bang-chung-xanh-exec-1-claude-20260906.yaml.nhap:127:  - 'CHỈ bắt tay khi granted_on_instruction ghi chủ kho đã chọn lựa chọn 1 của spec mục "§12 — bốn
+tai-lieu/lo-319-linux-bang-chung-xanh-exec-1-claude-20260906.yaml.nhap-128-     lần hỏng" (tiếp H). Chọn 2 hoặc 3 ⇒ lease này không có việc; đi revision.'
+tai-lieu/lo-319-linux-bang-chung-xanh-exec-1-claude-20260906.yaml.nhap-129-  - 'Sửa `bang_chung_xanh` theo 7 luật của H (spec, mục "Thiết kế H"): đơn vị (SPAN, TONG); BỘ CHỌN
+--
+tai-lieu/lo-319-linux-bang-chung-xanh-exec-1-claude-20260906.yaml.nhap-155-     Windows ⇒ 1 đỏ, tổng Windows xanh + `TONG: CA\t0/0 dat` ⇒ 1 đỏ (A4).'
+tai-lieu/lo-319-linux-bang-chung-xanh-exec-1-claude-20260906.yaml.nhap-156-  - 'Chạy lại 5 bộ ngắn lấy bản in nguyên byte của phiên thi công; subagent/nhanh/pretooluse lấy
+tai-lieu/lo-319-linux-bang-chung-xanh-exec-1-claude-20260906.yaml.nhap:157:     từ full-gate cuối (A6). Đo `git diff --numstat` additions trước review; > 300 ⇒ DỪNG (Đ4).'
+tai-lieu/lo-319-linux-bang-chung-xanh-exec-1-claude-20260906.yaml.nhap-158-
+tai-lieu/lo-319-linux-bang-chung-xanh-exec-1-claude-20260906.yaml.nhap-159-dieu_kien_dung:
+tai-lieu/lo-319-linux-bang-chung-xanh-exec-1-claude-20260906.yaml.nhap:160:  - 'Chủ kho chưa ghi lựa chọn §12 vào granted_on_instruction, hoặc đã chọn 2/3 — lease này không
+tai-lieu/lo-319-linux-bang-chung-xanh-exec-1-claude-20260906.yaml.nhap-161-     có việc.'
+tai-lieu/lo-319-linux-bang-chung-xanh-exec-1-claude-20260906.yaml.nhap-162-  - 'Đổi chuỗi regex SPAN của bất kỳ mục nào — H chỉ đổi KIỂU giá trị; đổi chuỗi là mở lại M4 của
+--
+tai-lieu/lo-319-linux-bang-chung-xanh-exec-1-claude-20260906.yaml.nhap-166-     đã bị bác bằng phép đo (spec, bảng "Các hướng vá đã ĐO"); làm lại là vá lần thứ sáu.'
+tai-lieu/lo-319-linux-bang-chung-xanh-exec-1-claude-20260906.yaml.nhap-167-  - 'Nới grammar bằng `.*`/khoảng mở, bỏ nhóm bắt của một hằng, hay bỏ đối chiếu vị trí để "qua"
+tai-lieu/lo-319-linux-bang-chung-xanh-exec-1-claude-20260906.yaml.nhap:168:     một bản in — luật 7 H làm ĐỎ ngay bản in xanh là KẾT QUẢ ĐÚNG; bản in thật bị H bác (Đ2), cần
+tai-lieu/lo-319-linux-bang-chung-xanh-exec-1-claude-20260906.yaml.nhap:169:     metadata n/m (Đ3), hay đỏ giả/bỏ sót ngoài danh sách ranh giới công khai (Đ1) là điều kiện chuyển
+tai-lieu/lo-319-linux-bang-chung-xanh-exec-1-claude-20260906.yaml.nhap:170:     sang lựa chọn 2/3 của §12, không phải lý do nới bên ĐỌC.'
+tai-lieu/lo-319-linux-bang-chung-xanh-exec-1-claude-20260906.yaml.nhap-171-  - 'Coi `check rc=0` là bằng chứng tiền nhiệm đã thôi giữ — check không chặn chồng lấn write set
+tai-lieu/lo-319-linux-bang-chung-xanh-exec-1-claude-20260906.yaml.nhap-172-     (đo 21:02Z 06-09-2026); chỉ `ai-dang-giu` trên MỌI đường write set đo được.'
+--
+tai-lieu/lo-319-linux-bang-chung-xanh-exec-1-claude-20260906.yaml.nhap-180-     #456 thiếu `ĐÃ_BỊ_THAY_THẾ`/`HẾT_HẠN`.'
+tai-lieu/lo-319-linux-bang-chung-xanh-exec-1-claude-20260906.yaml.nhap-181-  - 'Nâng `timeout-minutes` trong `ci.yml` — đã nâng HAI lần (ba mức 25→45→60); lần kế là lần
+tai-lieu/lo-319-linux-bang-chung-xanh-exec-1-claude-20260906.yaml.nhap:182:     thứ ba, `PROTOCOL §12` đòi xem lại cách làm. Ngoài write set, và là điều kiện DỪNG.'
+--
+tai-lieu/LO-319-LINUX-BANG-CHUNG-XANH.md-53-ý, executor tái dẫn xuất từng hunk và **đo lại bằng bộ ca của mình**, mục *"Thiết kế H"*). Slug
+tai-lieu/LO-319-LINUX-BANG-CHUNG-XANH.md-54-`span-rong-nuot-ti-le-vo-can` hỏng **bốn lượt liên tiếp**; bản lượt 3 viết *"không có thiết kế thứ tư"* và
+tai-lieu/LO-319-LINUX-BANG-CHUNG-XANH.md:55:trả lời `PROTOCOL §12` bằng *"hợp đồng T đúng, chỉ gỡ mâu thuẫn"* — verdict lượt 4 bác câu trả lời ấy bằng
+tai-lieu/LO-319-LINUX-BANG-CHUNG-XANH.md-56-hai phản chứng chạy được (16 ca tổng cụt/tab trong bộ 131 đã giao; countermodel của luật 7). Các bản lượt 4–7
+tai-lieu/LO-319-LINUX-BANG-CHUNG-XANH.md:57:**không tự khai `§12` đã xong**: câu hỏi *"có nên tiếp tục cách làm này không"* là quyết định của **chủ kho**,
+tai-lieu/LO-319-LINUX-BANG-CHUNG-XANH.md:58:đặt lên bàn ở mục *"§12 — bốn lần hỏng"* cùng ba lựa chọn và năm điều kiện đo được. **Từ 07-09-2026 chủ kho ĐÃ
+tai-lieu/LO-319-LINUX-BANG-CHUNG-XANH.md:59:CHỌN lựa chọn (1) — tiếp H** (dấu vết bền ở mục §12); thi công chưa bắt đầu, lease chưa cấp, Đ1–Đ5 còn ràng buộc.
+tai-lieu/LO-319-LINUX-BANG-CHUNG-XANH.md-60-
+tai-lieu/LO-319-LINUX-BANG-CHUNG-XANH.md-61-### ĐÍNH CHÍNH sau cross-review lượt 6 (Codex `gpt-6-astra`, `reviewed_sha` `2adb681`, 07-09-2026) — đọc trước mọi con số bên dưới
+--
+tai-lieu/LO-319-LINUX-BANG-CHUNG-XANH.md-75-   trùng), 4 đột biến H đo trên 1213 hàng (`no_positions` 5 đổi màu · `no_unique` 51 · `no_positive` 42 ·
+tai-lieu/LO-319-LINUX-BANG-CHUNG-XANH.md-76-   `remove_dead_bool` 0 ⇒ `mH13` đúng là mã chết), và bản in thật của 8 formatter (`outputs/`).
+tai-lieu/LO-319-LINUX-BANG-CHUNG-XANH.md:77:2. **Đ2 đo trên bản in xanh thật:** reviewer thu được 6/8 bản `rc=0` trong sandbox, H bác **0/6**; hai bản
+tai-lieu/LO-319-LINUX-BANG-CHUNG-XANH.md-78-   còn lại (`mcp_gh_test`, `pretooluse_guard_test`) đỏ vì rig sandbox. Executor chạy lại hai bộ ấy trên cây
+tai-lieu/LO-319-LINUX-BANG-CHUNG-XANH.md-79-   thật sau lượt 6 — kết quả và băm ghi ở `pr468-hoso-4-packet-review-6-codex/outputs-that/` và
+--
+tai-lieu/LO-319-LINUX-BANG-CHUNG-XANH.md-83-
+tai-lieu/LO-319-LINUX-BANG-CHUNG-XANH.md-84-Kết luận của lượt 6 cho P1 `span-rong-nuot-ti-le-vo-can`: **VÁ HỜ về nghĩa vụ xác nhận** — không tìm được
+tai-lieu/LO-319-LINUX-BANG-CHUNG-XANH.md:85:phản chứng H mới ngoài ranh giới công khai, nhưng hồ sơ chưa đủ hiện vật để đóng. Câu hỏi `§12` vẫn thuộc chủ kho.
+tai-lieu/LO-319-LINUX-BANG-CHUNG-XANH.md-86-
+tai-lieu/LO-319-LINUX-BANG-CHUNG-XANH.md-87-## Bối cảnh đo được (mọi số kèm thời điểm)
+--
+tai-lieu/LO-319-LINUX-BANG-CHUNG-XANH.md-138-Phép đo tập giá trị cũ giữ làm lịch sử, không dùng làm chứng minh của H.
+tai-lieu/LO-319-LINUX-BANG-CHUNG-XANH.md-139-
+tai-lieu/LO-319-LINUX-BANG-CHUNG-XANH.md:140:### Các hướng vá đã ĐO — A-b, A-c, T, T' đều bị bác; H là ứng viên
+tai-lieu/LO-319-LINUX-BANG-CHUNG-XANH.md-141-
+tai-lieu/LO-319-LINUX-BANG-CHUNG-XANH.md-142-Đơn vị của bảng: **số phản chứng trong `phan_chung()` đổi màu** (nền `1b3caa1` = `51/51` đỏ đúng,
+--
+tai-lieu/LO-319-LINUX-BANG-CHUNG-XANH.md-155-| **T** (lượt 2) — bản ghi TỔNG theo từng định dạng, nhưng prototype còn lấy số từ nhóm `SPAN`, và grammar `probe` #1 có `(?: .*)?` | 0 chuỗi regex | ≥ 3 (A5) | CÓ ở bản ghi · **KHÔNG** ở đuôi wildcard | **7 / 66** (reviewer lượt 3, 22:10Z) · **8 / 137** (đo lại 22:33Z, bộ ca lượt 3) | **1 / 66** · **5 / 137** | **bác ở lượt 3** |
+tai-lieu/LO-319-LINUX-BANG-CHUNG-XANH.md-156-| **T'** (lượt 3) — T với luật 5 viết lại (số CHỈ từ dòng tổng) + luật 7 **đếm hằng trong mã regex** | 0 chuỗi regex (đổi KIỂU giá trị `MOI`) | ≥ 3 (A5) | CÓ ở bản ghi · **KHÔNG** khi hằng nằm ở nhánh regex không tham gia match | **0 / 137** (22:33Z 06-09) · **0 / 131** bộ verdict lượt 3 (đo lại 00:15Z 07-09) · luật 7 **3 / 11** ca `law7` | **0 / 137** · **16 / 131** (tổng cụt/tab — bộ chọn đòi dấu cách/payload) · luật 7 **5 / 11** | **bác ở lượt 4** |
+tai-lieu/LO-319-LINUX-BANG-CHUNG-XANH.md:157:| **H** (bản này) — bộ chọn nhận NHÃN độc lập payload; hằng cũng là nhóm bắt; đối chiếu **DANH SÁCH VỊ TRÍ** cặp trên dòng với vị trí nhóm trong match | 0 chuỗi regex (đổi KIỂU giá trị `MOI`, `ngoai_pham_vi` #1) | ≥ 3 (A5) | CÓ, kể cả khi grammar có lỗ — grammar lỗ làm ĐỎ ngay bản in xanh | **0 / 131** · **0 / 137** · **0 / 32** ca tấn công mới (00:15Z 07-09-2026) | **0 / 131** · **0 / 137** · **0 / 32** · `law7` **0 lệch / 11** theo hợp đồng H | **chủ kho CHỌN 07-09-2026 — lựa chọn 1** (mục §12; thi công chưa bắt đầu) |
+tai-lieu/LO-319-LINUX-BANG-CHUNG-XANH.md-158-
+tai-lieu/LO-319-LINUX-BANG-CHUNG-XANH.md-159-A-c bị bác ở HAI chiều, cả hai reviewer lượt 2 dựng được và tôi đo lại 21:07Z 06-09-2026 qua
+--
+tai-lieu/LO-319-LINUX-BANG-CHUNG-XANH.md-176-`re.search(SPAN)`) và để ngỏ một khoảng `.*` trong một grammar. T' (lượt 3) gỡ hai chỗ ấy rồi **dời phần
+tai-lieu/LO-319-LINUX-BANG-CHUNG-XANH.md-177-mù sang luật 7**: `len(_CAP.findall(grammar))` đếm ký tự của *chương trình regex*, không đếm hằng đã tiêu
+tai-lieu/LO-319-LINUX-BANG-CHUNG-XANH.md:178:thụ *trên dòng* — reviewer lượt 4 dựng được cả hai chiều (mục `§12`, (b)). Và bộ chọn của T' (`TONG: CA `,
+tai-lieu/LO-319-LINUX-BANG-CHUNG-XANH.md-179-`nền: `, `CA\s+:`…) đòi dấu cách hoặc payload nên **bỏ qua tổng cụt/tab** (`TONG: CA`, `nền:\t0/0 đạt`) —
+tai-lieu/LO-319-LINUX-BANG-CHUNG-XANH.md:180:16 ca của bộ 131 mà verdict lượt 3 đã giao, T' cho `0` thay vì `1`. Mục kế tiếp là câu trả lời `§12` viết
+tai-lieu/LO-319-LINUX-BANG-CHUNG-XANH.md-181-lại lần thứ hai — lần này **không kết luận thay chủ kho**.
+tai-lieu/LO-319-LINUX-BANG-CHUNG-XANH.md-182-
+tai-lieu/LO-319-LINUX-BANG-CHUNG-XANH.md:183:### §12 — bốn lần hỏng: câu hỏi "có nên tiếp tục" thuộc CHỦ KHO, đặc tả này không tự trả lời
+tai-lieu/LO-319-LINUX-BANG-CHUNG-XANH.md-184-
+tai-lieu/LO-319-LINUX-BANG-CHUNG-XANH.md:185:`PROTOCOL §12`: *"Cùng hình dạng lỗi xuất hiện lần thứ ba bắt buộc xem lại có nên tiếp tục cách làm
+tai-lieu/LO-319-LINUX-BANG-CHUNG-XANH.md-186-đó, không chỉ vá lần thứ tư."* Slug `span-rong-nuot-ti-le-vo-can` hỏng **bốn** lượt: A-b (lượt 1) → A-c
+tai-lieu/LO-319-LINUX-BANG-CHUNG-XANH.md-187-(lượt 2) → T (lượt 3) → **T' (lượt 4)**. Bản lượt 3 đã trả lời câu hỏi ấy bằng *"ba lần cùng một gốc; hợp
+--
+tai-lieu/LO-319-LINUX-BANG-CHUNG-XANH.md-206-  **ngay trong dòng tổng được chọn**. Điều kiện thứ nhất (*"bản in thật mà grammar đóng không mô tả
+tai-lieu/LO-319-LINUX-BANG-CHUNG-XANH.md-207-  được"*) reviewer chỉ ra là **không thực thi được** khi chưa định nghĩa lớp grammar được phép — một chuỗi
+tai-lieu/LO-319-LINUX-BANG-CHUNG-XANH.md:208:  hữu hạn luôn viết được thành literal regex; bản này thay nó bằng Đ2 ở bảng dưới.
+tai-lieu/LO-319-LINUX-BANG-CHUNG-XANH.md-209-- **(d) Bộ chọn của T' bỏ tổng lỗi** — phần này verdict lượt 3 đã nêu và bản lượt 3 **chưa vá**: với
+tai-lieu/LO-319-LINUX-BANG-CHUNG-XANH.md-210-  `TONG: CA ` làm bộ chọn, `TONG: CA` cụt hay `TONG: CA\t0/0 …` không được chọn ⇒ thành văn xuôi ⇒ `0` đỏ
+--
+tai-lieu/LO-319-LINUX-BANG-CHUNG-XANH.md-222-
+tai-lieu/LO-319-LINUX-BANG-CHUNG-XANH.md-223-Hai cột không cộng vào nhau: cột đầu là lỗi cổng CI đã cho qua thật; cột sau là bốn bản thiết kế chết
+tai-lieu/LO-319-LINUX-BANG-CHUNG-XANH.md:224:trên giấy trước khi thi công — chính cơ chế review đang làm việc. Nhưng `§12` đếm **hình dạng**, không
+tai-lieu/LO-319-LINUX-BANG-CHUNG-XANH.md-225-đếm nơi nó xuất hiện: cùng một gốc (*số làm bằng chứng đến từ vùng mà hợp đồng không khoanh*) tái phát
+tai-lieu/LO-319-LINUX-BANG-CHUNG-XANH.md:226:bốn lần trong cùng một packet, hai lần sau khi đã có câu trả lời `§12` lần thứ nhất. **H là bản thiết kế
+tai-lieu/LO-319-LINUX-BANG-CHUNG-XANH.md-227-thứ NĂM.** Nó có phép đo tốt hơn bốn bản trước (mục kế), nhưng "tốt hơn" không phải là câu trả lời cho
+tai-lieu/LO-319-LINUX-BANG-CHUNG-XANH.md-228-*"có nên tiếp tục cách làm này không"* — câu ấy hỏi về CÁCH LÀM (đọc bản in cho người bằng grammar), không
+--
+tai-lieu/LO-319-LINUX-BANG-CHUNG-XANH.md-247-| # | điều kiện | phép đo | ngưỡng ⇒ H KHÔNG đủ |
+tai-lieu/LO-319-LINUX-BANG-CHUNG-XANH.md-248-|---|---|---|---|
+tai-lieu/LO-319-LINUX-BANG-CHUNG-XANH.md:249:| Đ1 | lượt review kế tìm được đỏ giả hoặc bỏ sót **ngoài** danh sách ranh giới đã công khai (49 ca lượt 3 + 5 ca của H, `chua_do_duoc` #1) | replay qua `chay_moi` với bộ chạy giả; đơn vị: số mục ĐỎ | **≥ 1** ca ⇒ lần **thứ năm** của hình dạng; dừng cách làm |
+tai-lieu/LO-319-LINUX-BANG-CHUNG-XANH.md:250:| Đ2 | bản in xanh THẬT của một formatter hiện có (thu qua `_chay_that`, `rc=0`) bị H bác | A6(a) trên bản in của phiên thi công, 8 định dạng | **≥ 1** định dạng ⇒ grammar đóng không mô tả được bản in thật — điều kiện mở lại thứ nhất của bản lượt 3, nay thực thi được |
+tai-lieu/LO-319-LINUX-BANG-CHUNG-XANH.md:251:| Đ3 | cần một cặp `n/m` **không phải bằng chứng** trên dòng tổng (metadata kiểu `schema 1/2`) | một formatter hiện có hoặc một packet đang mở đòi in nó | **có** ⇒ H không hỗ trợ theo thiết kế (`law7.json` `optional-version-present`: H bác); phải quyết schema vai trò ở revision |
+tai-lieu/LO-319-LINUX-BANG-CHUNG-XANH.md:252:| Đ4 | additions runtime | `git diff --numstat`, cột additions, trên `ci_dang_ky_test.py`, đo trước review | **> 300** ⇒ dừng (`ADR-0044`); không cắt ca, không nâng trần |
+tai-lieu/LO-319-LINUX-BANG-CHUNG-XANH.md:253:| Đ5 | `phan_chung()` sau thi công | `N/N` với `N ≥ 51 + số ca mới A1–A6` (A5) | **< N/N** ⇒ chưa đủ; không tính là lần thứ năm nếu nguyên nhân là ca mới viết sai |
+tai-lieu/LO-319-LINUX-BANG-CHUNG-XANH.md-254-
+tai-lieu/LO-319-LINUX-BANG-CHUNG-XANH.md:255:**QUYẾT ĐỊNH CHỦ KHO — 07-09-2026: lựa chọn (1), tiếp H trong write set hiện tại**, kèm năm điều kiện Đ1–Đ5 làm chốt tự
+tai-lieu/LO-319-LINUX-BANG-CHUNG-XANH.md:256:động chuyển sang (2)/(3) nếu chạm ngưỡng. Nguyên văn chỉ thị *"§12 chọn tiếp H"*; dấu vết bền: https://github.com/ducthangho/tra-luat/issues/464#issuecomment-5567158069 —
+tai-lieu/LO-319-LINUX-BANG-CHUNG-XANH.md:257:khi cấp lease LO-319, `granted_on_instruction` neo vào đó. Các bản trước của đặc tả không tự trả lời `§12`; câu trả lời
+tai-lieu/LO-319-LINUX-BANG-CHUNG-XANH.md-258-là của chủ kho và nay đã có. Lease nháp giữ `thay_the_cho: []` và các ô chủ kho trống cho tới lúc cấp.
+tai-lieu/LO-319-LINUX-BANG-CHUNG-XANH.md-259-
+tai-lieu/LO-319-LINUX-BANG-CHUNG-XANH.md:260:### Thiết kế H — phủ VỊ TRÍ cặp trên dòng được chọn (đã đo; **chủ kho CHỌN 07-09-2026 — lựa chọn 1**, xem mục §12 ngay trên; thi công chưa bắt đầu, lease chưa cấp, Đ1–Đ5 còn ràng buộc)
+tai-lieu/LO-319-LINUX-BANG-CHUNG-XANH.md-261-
+tai-lieu/LO-319-LINUX-BANG-CHUNG-XANH.md-262-Nguồn: gói gợi ý của verdict lượt 4 (nhãn *"chưa chạy trên cây thật — executor tự áp, tự đo, tự chịu
+--
+tai-lieu/LO-319-LINUX-BANG-CHUNG-XANH.md-392-| A — bộ verdict lượt 3 (`review-artifacts-luot3/T.json`) | reviewer lượt 3 | 131 | 8 / 28 | 0 / **16** | **0 / 0** |
+tai-lieu/LO-319-LINUX-BANG-CHUNG-XANH.md-393-| B — bộ executor lượt 3 (`executor-luot3-va/do_t2.py`, 186 ca) | executor, kỳ vọng ghi ở lượt 3 | 137 (+ 49 ranh giới) | 8 / 33 | 0 / 0 | **0 / 0** |
+tai-lieu/LO-319-LINUX-BANG-CHUNG-XANH.md:394:| C — bộ thăm dò luật 7 (`review-artifacts-luot4/law7.json`) | reviewer lượt 4, kỳ vọng đặt cho **T'** | 11 | 0 / 7 | 3 / 5 | 3 / 0 theo kỳ vọng T' — **ba ca "đỏ" là đỏ ĐÚNG THIẾT KẾ H**: `equivalent-slash-class` · `equivalent-escaped-slash` dùng hằng KHÔNG nhóm bắt (grammar lỗi theo luật 7 H; cùng ba cách viết CÓ nhóm bắt ⇒ H nhận 3/3, ca `D16`); `optional-version-present` là metadata `1/2` ngoài hợp đồng (Đ3). Theo hợp đồng H: **0 lệch / 11** |
+tai-lieu/LO-319-LINUX-BANG-CHUNG-XANH.md-395-| D — ca tấn công MỚI của executor vào H (bảng dưới) | executor | 32 (+ 5 ranh giới) | 0 / 19 | 0 / 11 | **0 / 0** |
+tai-lieu/LO-319-LINUX-BANG-CHUNG-XANH.md-396-| **tổng hàng đo** | | **311** (+ 54 ranh giới) | 16 / 87 | 3 / 32 | **0 / 0** theo hợp đồng H (3 / 0 theo kỳ vọng T' của bộ C) |
+--
+tai-lieu/LO-319-LINUX-BANG-CHUNG-XANH.md-427-
+tai-lieu/LO-319-LINUX-BANG-CHUNG-XANH.md-428-Năm ranh giới của H (`D1` · `D2` · `D3` · `D9` · `D12b`) chép vào `chua_do_duoc` #1 cùng 49 ranh giới cũ;
+tai-lieu/LO-319-LINUX-BANG-CHUNG-XANH.md:429:Đ1 của `§12` đếm ca **ngoài** danh sách ấy.
+tai-lieu/LO-319-LINUX-BANG-CHUNG-XANH.md-430-
+tai-lieu/LO-319-LINUX-BANG-CHUNG-XANH.md-431-**Răng của từng luật — 14 đột biến áp vào NGUỒN của hai khối mã H** (thay chuỗi; bộ đo ép nguồn phải
+--
+tai-lieu/LO-319-LINUX-BANG-CHUNG-XANH.md-594-`phan_chung()`, và có dòng cũ được thay. `git diff --numstat 1b3caa1..e5ab4b7 -- .claude/dev/ci_dang_ky_test.py`
+tai-lieu/LO-319-LINUX-BANG-CHUNG-XANH.md-595-rỗng — chưa có thi công nào để đo tổng; không suy từ net, không suy từ diff tài liệu. Phiên thi công đo
+tai-lieu/LO-319-LINUX-BANG-CHUNG-XANH.md:596:`git diff --numstat` trước review; vượt `300` thì DỪNG (Đ4) — không cắt ca để lách, không nâng trần.
+tai-lieu/LO-319-LINUX-BANG-CHUNG-XANH.md-597-
+tai-lieu/LO-319-LINUX-BANG-CHUNG-XANH.md-598-## `write_set`
+--
+tai-lieu/LO-319-LINUX-BANG-CHUNG-XANH.md-815-| hình dạng | số lần đã gặp | đo/trích lúc (đọc lại 21:03Z 06-09-2026 trên `b1c2284`) | ghi chú |
+tai-lieu/LO-319-LINUX-BANG-CHUNG-XANH.md-816-|---|---:|---|---|
+tai-lieu/LO-319-LINUX-BANG-CHUNG-XANH.md:817:| tập RỖNG thoả `not song` (`0/0` được nhận là bằng chứng) | **3** | trích `ops/specs/MUTANT-KHONG-CHAY-TREN-WINDOWS.md:137-140` (đọc lại 21:03Z) + đo B1 19:32Z và đo lại A1 21:07Z, 22:33Z 06-09-2026 | #319 (gốc) · #456 đường Windows (đã bịt) · đường Linux (packet này). Lần thứ ba ⇒ `PROTOCOL §12` đòi xem lại CÁCH LÀM: câu trả lời là **bịt ở vị từ dùng chung**, không bịt ở từng mẫu. Lần thứ tư **suýt** xảy ra trong chính bản nháp T lượt 2 (`(?: .*)?` cho `0/0` lọt ở đuôi dòng tổng — reviewer lượt 3 đo 22:10Z); chưa thi công nên không đếm, nhưng luật 7 sinh ra từ đó. |
+tai-lieu/LO-319-LINUX-BANG-CHUNG-XANH.md:818:| nâng `timeout-minutes` để mua cổng xanh | **2 lần nâng** (3 mức: `25` khởi tạo `9e4f361` → `45` `6d88a2c` → `60` `7657bfd`) | `git log -G 'timeout-minutes:' -- .github/workflows/ci.yml` chạy lại 21:03Z 06-09-2026: `9e4f361` (2026-07-09) · `6d88a2c` (2026-08-29 03:29Z) · `7657bfd` (2026-08-29 04:49Z) | Bản đầu chép `3` từ #456; #456 đếm MỨC chứ không đếm LẦN NÂNG (verdict lượt 1, P2). Lần nâng kế tiếp là lần **thứ ba** ⇒ `§12`. Packet này không đụng `ci.yml`. |
+tai-lieu/LO-319-LINUX-BANG-CHUNG-XANH.md-819-| khai một phép đo là `KHÔNG ĐO ĐƯỢC` rồi để nguyên | **1** | trích `ops/specs/CI-CAI-JSONSCHEMA-r3.md:135-160` (A5), đọc lại 21:03Z 06-09-2026 | Đã đo được ở #456. Sự kiện lịch sử, không tái chạy. |
+tai-lieu/LO-319-LINUX-BANG-CHUNG-XANH.md-820-| cổng vắng mặt trông giống cổng xanh | nhiều | trích `CLAUDE.md` (mục dấu bỏ-qua-CI / PR #100; `ops-don-ref.yml` run `31971137920`), đọc lại 21:03Z 06-09-2026 | Ở đây: cổng CÓ MẶT, CÓ CHẠY, và vẫn không đo — biến thể đắt hơn. Sự kiện GitHub không readback lại ở lượt này. |
+tai-lieu/LO-319-LINUX-BANG-CHUNG-XANH.md-821-| lease không tự chết khi packet đã land | **2** | `#355`: trích `CLAUDE.md` mục *"LEASE KHÔNG TỰ CHẾT KHI PACKET ĐÃ LAND"*, đọc lại 21:03Z; `#456`: đo 17:46Z và **đo lại 21:00Z 06-09-2026** (`ai-dang-giu` ⇒ `NGƯỜI_GIỮ 1`, còn ~17,5 giờ) | Xem A8. |
+tai-lieu/LO-319-LINUX-BANG-CHUNG-XANH.md:822:| lời khai rộng hơn phép đo | **4** — đều ở BẢN NHÁP đặc tả, **0** trong mã đã land (bản đầu: *"A-b không sinh đỏ giả"*; lượt 1: *"mọi cặp mang nhãn được kiểm"* trong khi `[^\n\d]{0,24}?` bỏ sót; lượt 2: *"T: đỏ giả 0, bỏ sót 0"* trong khi prototype còn đọc nhóm `SPAN`; **lượt 3: *"T': 0/137"* và *"hợp đồng T đúng, chỉ gỡ mâu thuẫn, không có thiết kế thứ tư"* trong khi bộ 131 đã giao còn 16 bỏ sót và luật 7 đếm nguồn regex**) | verdict lượt 1 tái hiện 19:32Z; lượt 2 21:07Z; lượt 3 22:10Z 06-09-2026; lượt 4 `prior131.json`/`law7.json`, executor đo lại 00:15Z 07-09-2026 | Cùng họ *"thu hẹp mà viết thành đóng"* trong `CLAUDE.md`. Lần thứ ba đã kích `§12` ở lượt 3, và câu trả lời khi ấy **tự nó là lần thứ tư**. Bản này: mọi điểm hai chiều là `X/N trên bộ ca S` kèm băm bộ đo + danh sách lớp chưa phủ, **và** câu hỏi `§12` chuyển cho chủ kho với ba lựa chọn + năm điều kiện đo được — không tự trả lời lần nữa. |
+tai-lieu/LO-319-LINUX-BANG-CHUNG-XANH.md:823:| vùng bằng chứng không được khoanh đủ (A-b, A-c, mảnh `SPAN`/`.*` trong T, **hằng trong mã regex ở T'** — và bộ chọn đòi payload ở cả T lẫn T') | **4** — đều ở BẢN NHÁP, **0** trong mã đã land | verdict lượt 1 (19:32Z), lượt 2 (21:07Z), lượt 3 (22:10Z 06-09-2026), lượt 4 (`law7.json` 3 đỏ giả / 5 bỏ sót trên 11; `prior131.json` 16 bỏ sót trên 131); executor đo lại 00:15Z 07-09-2026 | **Lần thứ tư ⇒ `§12` lần hai**, mục *"§12 — bốn lần hỏng"*: H đổi phép chứng minh sang phủ VỊ TRÍ (0/0 trên 311 hàng đo, 5 ranh giới mới), nhưng H là bản thứ NĂM của cùng cách làm; tiếp / đổi bên IN / tách lại là quyết định của chủ kho, chốt tự động Đ1–Đ5. |
+tai-lieu/LO-319-LINUX-BANG-CHUNG-XANH.md-824-
+tai-lieu/LO-319-LINUX-BANG-CHUNG-XANH.md-825-## `chua_do_duoc`
+--
+tai-lieu/LO-319-LINUX-BANG-CHUNG-XANH.md-831-   grammar quá chặt bác một formatter hợp lệ — đo được ở A6(a): 7 bản in thật ⇒ `0` đỏ (00:15Z 07-09-2026
+tai-lieu/LO-319-LINUX-BANG-CHUNG-XANH.md-832-   dưới H); **chưa đo** trên bản in thật của `pretooluse` (mục 2, 4) và trên **Windows** (mục 3).
+tai-lieu/LO-319-LINUX-BANG-CHUNG-XANH.md:833:   **Metadata `n/m` trên dòng tổng KHÔNG được hỗ trợ** — H bác `bi giet (schema 1/2)` (Đ3); muốn có thì
+tai-lieu/LO-319-LINUX-BANG-CHUNG-XANH.md-834-   revision schema vai trò, không miễn kiểm bằng cách đếm hằng trong mã regex.
+tai-lieu/LO-319-LINUX-BANG-CHUNG-XANH.md-835-   **Lớp CHƯA PHỦ, liệt kê để không ai đọc "0/311" thành "0 với mọi cách in":**

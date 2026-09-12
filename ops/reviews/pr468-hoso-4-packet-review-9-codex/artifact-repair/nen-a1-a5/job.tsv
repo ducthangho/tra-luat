@@ -1,0 +1,27 @@
+run_id	head7	head_branch	event	job_name	conclusion	started_at	completed_at	phut	so_muc_liet_ke	so_skipped	run_created_at	run_updated_at	run_dau_cuoi_phut
+34074288203	d28c4b1	master	push	gate (ubuntu-latest)	success	2026-09-07T01:50:15Z	2026-09-07T02:17:52Z	27.62	44	4	2026-09-07T01:50:12Z	2026-09-07T02:38:14Z	48.03
+34074288203	d28c4b1	master	push	gate (windows-latest)	success	2026-09-07T01:50:14Z	2026-09-07T02:38:14Z	48.00	44	6	2026-09-07T01:50:12Z	2026-09-07T02:38:14Z	48.03
+34068433781	8ce02fd	master	push	gate (windows-latest)	success	2026-09-07T00:00:19Z	2026-09-07T00:40:31Z	40.20	44	6	2026-09-07T00:00:16Z	2026-09-07T00:40:32Z	40.27
+34068433781	8ce02fd	master	push	gate (ubuntu-latest)	success	2026-09-07T00:00:19Z	2026-09-07T00:24:15Z	23.93	44	4	2026-09-07T00:00:16Z	2026-09-07T00:40:32Z	40.27
+34060879398	28cb898	master	push	gate (windows-latest)	success	2026-09-06T21:22:36Z	2026-09-06T22:08:11Z	45.58	44	6	2026-09-06T21:22:34Z	2026-09-06T22:08:12Z	45.63
+34060879398	28cb898	master	push	gate (ubuntu-latest)	success	2026-09-06T21:22:36Z	2026-09-06T21:50:17Z	27.68	44	4	2026-09-06T21:22:34Z	2026-09-06T22:08:12Z	45.63
+34055467808	cacaba3	master	push	gate (ubuntu-latest)	success	2026-09-06T19:37:17Z	2026-09-06T20:01:05Z	23.80	44	4	2026-09-06T19:37:15Z	2026-09-06T20:24:29Z	47.23
+34055467808	cacaba3	master	push	gate (windows-latest)	success	2026-09-06T19:37:17Z	2026-09-06T20:24:28Z	47.18	44	6	2026-09-06T19:37:15Z	2026-09-06T20:24:29Z	47.23
+34048685345	1b3caa1	master	push	gate (ubuntu-latest)	success	2026-09-06T17:28:01Z	2026-09-06T17:54:32Z	26.52	43	4	2026-09-06T17:27:58Z	2026-09-06T18:10:18Z	42.33
+34048685345	1b3caa1	master	push	gate (windows-latest)	success	2026-09-06T17:28:00Z	2026-09-06T18:10:17Z	42.28	43	6	2026-09-06T17:27:58Z	2026-09-06T18:10:18Z	42.33
+34058508426	82e01a4	claude/priceless-volhard-329577	pull_request	gate (windows-latest)	success	2026-09-06T20:36:16Z	2026-09-06T21:17:55Z	41.65	44	5	2026-09-06T20:36:13Z	2026-09-06T21:17:56Z	41.72
+34058508426	82e01a4	claude/priceless-volhard-329577	pull_request	gate (ubuntu-latest)	success	2026-09-06T20:36:16Z	2026-09-06T21:03:36Z	27.33	44	3	2026-09-06T20:36:13Z	2026-09-06T21:17:56Z	41.72
+34052910676	c0f18ac	claude/tra-luat-process-review-o4d7kb	pull_request	gate (ubuntu-latest)	success	2026-09-06T18:48:58Z	2026-09-06T19:16:20Z	27.37	44	3	2026-09-06T18:48:56Z	2026-09-06T19:32:50Z	43.90
+34052910676	c0f18ac	claude/tra-luat-process-review-o4d7kb	pull_request	gate (windows-latest)	success	2026-09-06T18:48:59Z	2026-09-06T19:32:49Z	43.83	44	5	2026-09-06T18:48:56Z	2026-09-06T19:32:50Z	43.90
+34049592719	b912e5f	claude/tra-luat-process-review-o4d7kb	pull_request	gate (ubuntu-latest)	success	2026-09-06T17:45:46Z	2026-09-06T18:12:25Z	26.65	44	3	2026-09-06T17:45:27Z	2026-09-06T18:31:48Z	46.35
+34049592719	b912e5f	claude/tra-luat-process-review-o4d7kb	pull_request	gate (windows-latest)	success	2026-09-06T17:45:46Z	2026-09-06T18:31:47Z	46.02	44	5	2026-09-06T17:45:27Z	2026-09-06T18:31:48Z	46.35
+34062997697	62a6385	claude/tra-luat-process-review-o4d7kb	workflow_dispatch	gate (ubuntu-latest)	success	2026-09-06T22:05:46Z	2026-09-06T22:26:42Z	20.93	44	4	2026-09-06T22:05:43Z	2026-09-06T22:55:12Z	49.48
+34062997697	62a6385	claude/tra-luat-process-review-o4d7kb	workflow_dispatch	gate (windows-latest)	success	2026-09-06T22:05:50Z	2026-09-06T22:55:12Z	49.37	44	6	2026-09-06T22:05:43Z	2026-09-06T22:55:12Z	49.48
+34065779670	771c6ed	claude/tra-luat-process-review-o4d7kb	workflow_dispatch	gate (ubuntu-latest)	success	2026-09-06T23:03:33Z	2026-09-06T23:31:01Z	27.47	44	4	2026-09-06T23:03:29Z	2026-09-06T23:53:11Z	49.70
+34065779670	771c6ed	claude/tra-luat-process-review-o4d7kb	workflow_dispatch	gate (windows-latest)	success	2026-09-06T23:03:33Z	2026-09-06T23:53:10Z	49.62	44	6	2026-09-06T23:03:29Z	2026-09-06T23:53:11Z	49.70
+34070122978	0c3405f	claude/tra-luat-process-review-o4d7kb	workflow_dispatch	gate (ubuntu-latest)	success	2026-09-07T00:32:17Z	2026-09-07T00:58:35Z	26.30	44	4	2026-09-07T00:32:14Z	2026-09-07T01:22:48Z	50.57
+34070122978	0c3405f	claude/tra-luat-process-review-o4d7kb	workflow_dispatch	gate (windows-latest)	success	2026-09-07T00:32:18Z	2026-09-07T01:22:47Z	50.48	44	6	2026-09-07T00:32:14Z	2026-09-07T01:22:48Z	50.57
+34045664423	426bfc0	claude/cap-nhat-trang-thai-pr-taxzax	workflow_dispatch	gate (ubuntu-latest)	success	2026-09-06T16:30:32Z	2026-09-06T16:54:47Z	24.25	43	4	2026-09-06T16:30:28Z	2026-09-06T17:13:45Z	43.28
+34045664423	426bfc0	claude/cap-nhat-trang-thai-pr-taxzax	workflow_dispatch	gate (windows-latest)	success	2026-09-06T16:30:32Z	2026-09-06T17:13:44Z	43.20	43	6	2026-09-06T16:30:28Z	2026-09-06T17:13:45Z	43.28
+34048229370	4cd80c5	claude/tra-luat-process-review-o4d7kb	workflow_dispatch	gate (windows-latest)	cancelled	2026-09-06T17:19:32Z	2026-09-06T18:19:42Z	60.17	44	26	2026-09-06T17:19:12Z	2026-09-06T18:19:43Z	60.52
+34048229370	4cd80c5	claude/tra-luat-process-review-o4d7kb	workflow_dispatch	gate (ubuntu-latest)	success	2026-09-06T17:19:32Z	2026-09-06T17:45:57Z	26.42	44	4	2026-09-06T17:19:12Z	2026-09-06T18:19:43Z	60.52

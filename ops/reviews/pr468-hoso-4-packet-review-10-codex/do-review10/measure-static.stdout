@@ -1,0 +1,29 @@
+{
+  "measured_at_utc": "2026-09-07T11:46:48.757470+00:00",
+  "manifests": [
+    {
+      "path": "ops/reviews/pr468-hoso-4-packet-review-6-codex/ARTIFACTS.sha256",
+      "rc": 0,
+      "ok": 62,
+      "entries": 62
+    },
+    {
+      "path": "ops/reviews/pr468-hoso-4-packet-review-7-codex/ARTIFACTS.sha256",
+      "rc": 0,
+      "ok": 66,
+      "entries": 66
+    },
+    {
+      "path": "ops/reviews/pr468-hoso-4-packet-review-8-codex/ARTIFACTS.sha256",
+      "rc": 0,
+      "ok": 69,
+      "entries": 69
+    },
+    {
+      "path": "ops/reviews/pr468-hoso-4-packet-review-9-codex/artifact-repair/ARTIFACTS.sha256",
+      "rc": 1,
+      "ok": 50,
+      "entries": 69
+    }
+  ]
+}

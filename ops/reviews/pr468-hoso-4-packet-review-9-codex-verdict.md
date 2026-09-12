@@ -1,0 +1,159 @@
+# VERDICT — cross-review PR #468, lượt 9
+
+verdict: changes_requested
+reviewed_sha: 0bc6e56e1a1fd21cedfc18557320941d51db866c
+
+Kết luận: **changes_requested — 1 P1, 4 P2**. Đối chiếu bốn finding lượt 8: **3 VÁ HỜ, 1 CHƯA VÁ**; phép so nghiệm thu A2 đã sửa đúng, phần còn lại của finding đó hạ từ P1 xuống P2.
+
+Reviewer: Codex / OpenAI, phiên độc lập qua API, có shell cục bộ. Transport: tệp trong sandbox. Dùng khung `tai-lieu/cross-review-SKILL.md`; chỉ đọc/ghi trong phạm vi PROMPT, không mạng, không commit/push, không đăng GitHub, không cấp merge authorization. Đường `ops/...` tính từ `cay-kho/`; hiện vật tự đo nằm ở `do-review9/`.
+
+## ĐỐI CHIẾU LƯỢT TRƯỚC
+
+- `a2-neo-nen-cu-trai-write-set-hien-tai` [P1 lượt8 → P2 lượt9]: **VÁ HỜ về đồng bộ hợp đồng; phép so nghiệm thu đã vá đúng**. Mô hình r3 cùng base/event/lane: dispatch giữ88/88 bộ ba và PR ubuntu44/44 đều QUA; bỏ receipt-v2 lần lượt mất2/1 bộ ba, đều ĐỎ. So nhầm master/LAND với dispatch/WORKER lệch4 thêm/4 mất dù YAML bằng byte. A2 :463–471 không cho phép khác event/lane nữa. Tuy nhiên bảng thứ tự GATE :387 vẫn gộp A1/A2/A5 rồi khẳng định nền run34045664423/34048685345 “còn đúng”, trái phần revision và A2 mới; hai run này đều39 bước. Lỗ P1 ở phép so đã đóng; phần còn lại là mâu thuẫn văn bản P2. Hiện vật: `contract-checks.json`, `followup-checks.json`.
+- `bia-mo-mot-ref-khong-thu-hoi-moi-ban` [P1]: **CHƯA VÁ tại thời điểm đo 2026-09-07T09:56:25.851244+00:00**. Tự quét 89 cặp `(blob,path)` trên snapshot bằng công cụ thật: registry có 2 người giữ, ci.yml có 1. Bản #456 chưa bia mộ vẫn ở `origin/master` (blob `8b2103c06687546379a17f6deafc97f1fe0173fd`). Chuỗi #456 → exec-1 → exec-1r2 → exec-1r3 có đủ 3 cạnh YAML hai chiều trên cây PR. Mô phỏng 14:30:06Z → 14:30:07Z và 14:30:08Z: registry 2 → 1 → 1; chưa phải readback tương lai. Hiện vật: `do-review9/static.json`.
+- `bien-do-khac-head-khong-phai-nhieu-runner` [P2]: **VÁ HỜ**. Hai câu “mười một/mọi lượt master” và câu revision chưa làm đã mất3/3; Issue #463 đã sửa đúng. Tính lại mẫu đúng5 master/push +6 nhánh, 1×39+10×40 bước; A1≤25,00/A5≤135,00 giữ nguyên. Nhưng GATE :98–99 còn tuyên bố nhiễu runner1–2,3 phút “là có thật” và buộc mọi ngưỡng chừa biên; :447–448/:531–533 tiếp tục gọi chênh là nhiễu; :107 gọi hai run cũ là hai lượt master. Hai run cùng tree nhưng khác event và release-verify lane (4 bộ ba thêm/4 mất), nên không tách được nhiễu runner riêng, đúng nợ ở :619–625. Hiện vật: `costs.json`, `followup-checks.json`.
+- `quyet-dinh-tiep-h-con-bi-phu-dinh` [P2]: **VÁ HỜ**. Tiêu đề H, §12, Issue #464 và `ly_do_cap` đã đồng bộ; URL đúng 3/3, năm điều kiện và 5 null giữ nguyên. Nhưng quét toàn văn và đọc ngữ cảnh tìm thấy `ops/specs/LO-319-LINUX-BANG-CHUNG-XANH.md:56–59` vẫn nói H chưa được chọn, hàng H “bản này” tại :157 vẫn ghi “ứng viên — chưa chọn”. Hai câu cũ được chỉ tên lượt8 mất 2/2, nhưng còn hai phủ định hiện hành khác. Đã sửa kết luận tạm sau phép quét rộng.
+
+## BẢNG ĐO
+
+| khẳng định | PR khai | đo được | khớp? |
+|---|---|---|---|
+| HEAD / môi trường git | 0bc6e56e1a1fd21cedfc18557320941d51db866c; abbrev=7; không shallow; sạch | SHA đúng; abbrev=7; shallow=false; status rỗng | có |
+| HEAD / tree | exact reviewed_sha | 0bc6e56e1a1fd21cedfc18557320941d51db866c / 86b3f017010575bd37b612242acb7e60bbf2db03 | có |
+| Diff since8 | patch / numstat đã giao | 68 tệp; +9067/−67; patch=True; numstat=True; ngoài ops=0 | có |
+| Diff full | patch / numstat đã giao | 217 tệp; +55766/−0; patch=True; numstat=True; ngoài ops=0 | có |
+| Snapshot lease | registry2; ci.yml1 | 89 cặp blob/path; registry2, ci.yml1; #456 có hai blob, một chưa bia mộ | có; P1 còn mở |
+| Chuỗi trên cây PR | hai chiều #456→exec-1→exec-1r2→exec-1r3 | 3/3 cạnh đúng; r1 và r2 có bia mộ; r3 thay r2, chưa bia mộ | có |
+| Mô phỏng hết hạn #456 | 14:30:07Z 07-09-2026 | 14:30:06Z registry2; 14:30:07Z và 14:30:08Z registry1; ci.yml luôn1 | có trong mô hình |
+| Thu hồi mọi bản #456 | không chỉ sửa một ref | mô hình thêm bia mộ mọi bản: registry2→1 | có; không ghi ref |
+| Spec / lease / Issue #463 | 37800aa6b33afb8caf3296440bd0ac49dbd6b4300fe59f832e11ae629cc1ffb2 | 37800aa6b33afb8caf3296440bd0ac49dbd6b4300fe59f832e11ae629cc1ffb2; blob 3ef7d2a37d833ae62ff8d2848e146a945360e64d khớp; bản chiếu khớp; revision=3; null=0 | có |
+| Spec / lease / Issue #464 | 399a9e8162dbe6a59c8bee3514a725e796c82787aa6dfffba6d42f1eb76973c0 | 399a9e8162dbe6a59c8bee3514a725e796c82787aa6dfffba6d42f1eb76973c0; blob 3ef7d2a37d833ae62ff8d2848e146a945360e64d khớp; bản chiếu khớp; revision=1; null=5 | có |
+| Spec / lease / Issue #465 | 2abace8588ec2b4e0626c1c77e9c3e0f7e713ecb2ce528b149e6c7f1f0000759 | 2abace8588ec2b4e0626c1c77e9c3e0f7e713ecb2ce528b149e6c7f1f0000759; blob b743f1798aba12615f903a11bd451c87e404814e khớp; bản chiếu khớp; revision=1; null=5 | có |
+| Spec / lease / Issue #466 | 417dce16227687cbb1e642284f39d2f847a617b2d730f7f52aaa58f33c936521 | 417dce16227687cbb1e642284f39d2f847a617b2d730f7f52aaa58f33c936521; blob b743f1798aba12615f903a11bd451c87e404814e khớp; bản chiếu khớp; revision=1; null=5 | có |
+| Lease r3: băm write set | 0f7b869da648e9b21023e461925efd0d45bca58fb308a8fcc82bc55ad9f66ef0 | 0f7b869da648e9b21023e461925efd0d45bca58fb308a8fcc82bc55ad9f66ef0 (sort + LF + LF cuối; 2 đường) | có |
+| Lease r3: mốc giờ | 24h; heartbeat=mốc cấp; until=expires | 2026-09-07T09:44:51Z → 2026-09-08T09:44:51Z; 1440.0 phút; heartbeat/until khớp | có |
+| Lease r3: authority / base | comment r3; ba neo d28c4b1 | URL #463/5568696936; thay r2; base/start/reviewed= d28c4b1062e8505cbdaaf0237fcbe3f9b8ee4705 | khớp hồ sơ; GitHub trực tiếp KHÔNG ĐO ĐƯỢC |
+| Manifest lượt 6 | băm hiện vật bất biến | 62/62 khớp | có |
+| Manifest lượt 7 | băm hiện vật bất biến | 66/66 khớp | có |
+| Manifest lượt 8 | băm hiện vật bất biến | 50/69 khớp | không; 19 đường dẫn rig/ thiếu |
+| Receipt lượt 8 | v2; reviewed_sha lượt8; bytes/hash đúng | v2; 4d0ead5591a58463423754cc93a84ce744c3a50b; 32466 B; 7d9dcd7572d1228701f7f365d6029a21dad6182fb134b0b29613fee0bc66b417; blob neo 3ef7d2a37d833ae62ff8d2848e146a945360e64d khớp | có; schema gate đang đo |
+| Đồng bộ quyết định H | đã chọn1; lease chưa cấp; Đ1–Đ5 ràng buộc | URL3/3; tiêu đề/§12/Issue/ly_do_cap khớp; hai câu đích cũ đã mất, còn2 phủ định hiện hành ở :56–59 và :157; Đ1–Đ5 đủ5/5; 5 null | VÁ HỜ |
+| Phản mô hình A2 lượt8 | 39 bước nền cũ / 40 bước lease | 86/88 bộ ba; tách đầy đủ: nền cũ False, cùng base True; bỏ receipt-v2: nền cũ True, cùng base False | có |
+| A2 r3: dispatch nhánh | cùng base/event/lane; đủ bước qua; mất bước đỏ | 88→88 bộ ba: True; bỏ2 bộ ba receipt: False; so sai lane master: False (4 bộ ba thêm/4 mất) | có trong mô hình; chưa chạy Actions |
+| A2 r3: PR ubuntu | ci.yml byte bằng start_from_sha | 34058508426 / 82e01a4; 44→44 bộ ba: True; bỏ1 bộ ba receipt: False | có trong mô hình, baseline từ TSV đã lưu |
+| A2: câu nền trong bảng thứ tự | run34045664423/34048685345 “còn đúng” cho A1/A2/A5 | cả2 run39 bước; lease40; còn1 hàng mâu thuẫn tại GATE:387 | không; phép so A2 mới đã đúng |
+| Câu mẫu và revision từng bị nêu lượt8 | gỡ hai nhãn11-master + câu revision chưa làm | 0/3 câu đích còn lại; Issue463 mô tả đúng5/6 | có |
+| Nhiễu runner riêng | GATE98,447,531,533 vẫn khai nhiễu đã đo | hai head426bfc0/1b3caa1 cùng tree,0 path đổi; event dispatch/push,laneWORKER/LAND;86/86 bộ ba nhưng +4/−4 | không chứng minh được nhiễu |
+| Thử đồng bộ văn bản ngoài checkout | không nới ngưỡng / không đổi thiết kế H | 6 neo GATE +3 neo LO duy nhất; gỡ câu stale; A1/A5/43,20/21,03 và hai khốiPython H giữ nguyên | có trong thử nghiệm |
+| Gói hiện vật lượt8: sửa trong bản sao reviewer | manifest phải khớp toàn bộ | gốc rc1:50/69; thiếu19,tìm đủ19 byte-exact ở lượt6; phục dựng rc0:69/69 | không ở PR; mô hình vá đạt |
+| Merge ec03c85 → 982cd1d | không đè bản vá executor | 4 Issue: bỏ đúng1 block đính chính mỗi tệp thì bằng byte896c1c0; câu dẫn đúng4/4;0 path spec/lease đổi | có |
+| Merge master b416830 → reviewed_sha | wp461, ngoài phạm vi giao | 3 path wp461;4/4 Issue giữ byte982cd1d; không đụng bốn packet đang review | có; không review nội dung wp461 |
+| Nguồn A1/A5 | 13 run /26 job /1140 bước | 13/26/1140;TSV14/9 cột;1140/1140 giây khớp timestamp; tái sinh rc0,4/4 đầu ra khớp byte | có |
+| Mẫu11 run | 5master+6nhánh;1×39+10×40 | 5master/push+6nhánh;1×39+10×40 | có |
+| Windows mẫu11: phút job | min40,20;max50,48;median46,02;mean45,84;biên10,28 | n=11.0000000000; minimum=40.2000000000; maximum=50.4833333333; median=46.0166666667; mean=45.8378787879; range=10.2833333333 | có |
+| Hệ số test registry | 11 / 1,07 / 1,71 / 1,21; dải 1,21–1,21 | n=11.0000000000; minimum=1.0679501699; maximum=1.7070866142; median=1.2125435540; mean=1.2499042113; range=0.6391364443; dải median=1.2112594312–1.2138291691 | có; job không khai dải |
+| Hệ số tl selftest | 11 / 1,41 / 2,26 / 1,83; dải 1,82–1,84 | n=11.0000000000; minimum=1.4054054054; maximum=2.2577319588; median=1.8305084746; mean=1.8314963953; range=0.8523265534; dải median=1.8185654008–1.8425531915 | có; job không khai dải |
+| Hệ số packet-loop selftest | 11 / 1,88 / 2,89 / 2,37; dải 2,36–2,38 | n=11.0000000000; minimum=1.8775510204; maximum=2.8938547486; median=2.3692946058; mean=2.3654846950; range=1.0163037282; dải median=2.3623188406–2.3762993763 | có; job không khai dải |
+| Hệ số G5 kiem ban ke | 11 / 1,91 / 3,09 / 2,40; dải 2,37–2,43 | n=11.0000000000; minimum=1.9137931034; maximum=3.0930232558; median=2.3965517241; mean=2.4473115654; range=1.1792301524; dải median=2.3675213675–2.4260869565 | có; job không khai dải |
+| Hệ số lease-publish selftest | 11 / 2,42 / 3,84 / 2,94; dải 2,91–2,97 | n=11.0000000000; minimum=2.4166666667; maximum=3.8431372549; median=2.9420289855; mean=2.9381524487; range=1.4264705882; dải median=2.9136690647–2.9708029197 | có; job không khai dải |
+| Hệ số bien-nhan v2 selftest | 10 / 7,07 / 9,74 / 7,79; dải 7,71–7,88 | n=10.0000000000; minimum=7.0666666667; maximum=9.7446808511; median=7.7929292929; mean=8.1074834860; range=2.6780141844; dải median=7.7051777052–7.8824863416 | có; job không khai dải |
+| Hệ số job trọn | 11 / 1,52 / 2,36 / 1,73 | n=11.0000000000; minimum=1.5237804878; maximum=2.3582802548; median=1.7267041901; mean=1.7798048382; range=0.8344997670; dải median=1.7258518287–1.7275570848 | có; job không khai dải |
+| Bảng hệ số r3 | 7 dòng +6 dải | 28/28 ô n/min/max/median;12/12 đầu dải khớp sau làm tròn | có |
+| Run34068433781 / 8ce02fd | bảng11run | master;push;40 bước;Windows 2412.0s=40.2000000000ph | có |
+| Run34058508426 / 82e01a4 | bảng11run | claude/priceless-volhard-329577;pull_request;40 bước;Windows 2499.0s=41.6500000000ph | có |
+| Run34048685345 / 1b3caa1 | bảng11run | master;push;39 bước;Windows 2537.0s=42.2833333333ph | có |
+| Run34052910676 / c0f18ac | bảng11run | claude/tra-luat-process-review-o4d7kb;pull_request;40 bước;Windows 2630.0s=43.8333333333ph | có |
+| Run34060879398 / 28cb898 | bảng11run | master;push;40 bước;Windows 2735.0s=45.5833333333ph | có |
+| Run34049592719 / b912e5f | bảng11run | claude/tra-luat-process-review-o4d7kb;pull_request;40 bước;Windows 2761.0s=46.0166666667ph | có |
+| Run34055467808 / cacaba3 | bảng11run | master;push;40 bước;Windows 2831.0s=47.1833333333ph | có |
+| Run34074288203 / d28c4b1 | bảng11run | master;push;40 bước;Windows 2880.0s=48.0000000000ph | có |
+| Run34062997697 / 62a6385 | bảng11run | claude/tra-luat-process-review-o4d7kb;workflow_dispatch;40 bước;Windows 2962.0s=49.3666666667ph | có |
+| Run34065779670 / 771c6ed | bảng11run | claude/tra-luat-process-review-o4d7kb;workflow_dispatch;40 bước;Windows 2977.0s=49.6166666667ph | có |
+| Run34070122978 / 0c3405f | bảng11run | claude/tra-luat-process-review-o4d7kb;workflow_dispatch;40 bước;Windows 3029.0s=50.4833333333ph | có |
+| Run nhánh34045664423 / ubuntu | 43,20/21,03 Windows; ước từ bước cũ | job=24.2500000000; step_sum=24.2000000000; setup=1.1833333333; registry=13.1333333333; packet=3.6500000000; remaining=7.4166666667; split_registry=14.3166666667; split_packet=4.8333333333; total_after=26.5666666667 | có; dự toán dùng các số phút đã làm tròn |
+| Run nhánh34045664423 / windows | 43,20/21,03 Windows; ước từ bước cũ | job=43.2000000000; step_sum=43.1666666667; setup=3.3333333333; registry=17.7000000000; packet=9.7000000000; remaining=15.7666666667; split_registry=21.0333333333; split_packet=13.0333333333; total_after=49.8333333333 | có; dự toán dùng các số phút đã làm tròn |
+| Số học chi phí, phút theo định nghĩa spec | 110,65→126,22;A1≤25;A5≤135 | từ giây:110,65→126,2333333333; từ số hạng phút làm tròn trong bảng:126,22;longest21,0333333333;A1=25,A5=135 | có theo hai cách tính đã khai; không xác minh hóa đơn |
+| Run cancelled34048229370 | nhánh/workflow_dispatch | 4cd80c5;claude/tra-luat-process-review-o4d7kb;workflow_dispatch;3610.0s=60.1666666667ph;cancelled | có |
+| Cổng bien-nhan-v2 | rc0;TỔNG ĐẠT | rc=0;TỔNG: ĐẠT;1.367s;stdout=163B | có |
+| Cổng lease-check | rc0;ĐĂNG ĐƯỢC | rc=0;lease gate-tach-job-cat-chi-phi-exec-1r3-claude-20260906 ĐĂNG ĐƯỢC — issue #463, neo d28c4b1062e8, hết hạn 2026-09-08T09:44:51Z;1.058s;stdout=235B | có |
+| Cổng lease-publish-test | rc0;121/121 | rc=0;lease_publish: 121/121 đạt; đã chạy=121, bỏ qua=0;66.423s;stdout=8649B | có |
+| Cổng doc-claims | rc0;ok:true | rc=0;ok=true;106 tệp;0 hard flags;367 advisory;3,873s;stdout70861B | có; roots không gồm ops/ |
+| Cổng doctrine-scan | rc0 | rc=0;doctrine-scan: sạch — đã quét 7 tệp, 0 chỗ chép doctrine;0.185s;stdout=69B | có |
+| Cổng adr-song | rc0;46/46 | rc=0;adr-song: sạch — 46 ADR trên đĩa, 46 dòng trong §20, khớp 1–1 (tha thiếu trạng thái: ['0016']);0.115s;stdout=113B | có |
+| Cổng eol-json | ok:true | rc=0;{<br>  "checked": 1035,<br>  "mode": "all",<br>  "ok": true,<br>  "scanned": 1057,<br>  "schema": "eol_policy.v1",<br>  "skipped": 22,<br>  "violations": []<br>};0.264s;stdout=138B | có |
+| Cổng EOL không JSON | rc0 | rc0;stdout0B; đã chạy lại --json để lấy bằng chứng dương | có, không suy pass chỉ từ output rỗng |
+| Biên bản lượt5 qua merge | ghi thêm lượt8, giữ đính chính | bản cuối bằng byte896c1c0; bằng ec03c85 cộng7 dòng phụ lục lượt8 | có; khác ec03c85 có lý do |
+| Kiểm cuối checkout | không sửa cây / không commit | HEAD=0bc6e56e1a1fd21cedfc18557320941d51db866c;tree=86b3f017010575bd37b612242acb7e60bbf2db03;status/diff/index rỗng;commits sau reviewed_sha=0 | có |
+| Mốc commit trong snapshot | r3 cấp09:44:51Z;master b416830 được merge vào HEAD | committer_date b416830=2026-09-07T09:28:42+00:00;3ef7d2a=2026-09-07T09:44:52+00:00;commit r3 sau mốc cấp1s | commit metadata đo được; master máy chủ đúng giây cấp KHÔNG ĐO ĐƯỢC |
+
+### bia-mo-mot-ref-khong-thu-hoi-moi-ban  [P1]  Bản #456 chưa bia mộ vẫn giữ write set trước hạn
+
+TỆP/DÒNG: `ops/leases/mutant-khong-chay-tren-windows-exec-1-claude-20260906.yaml:39` trên `origin/master`, blob `8b2103c06687546379a17f6deafc97f1fe0173fd`; `ops/specs/GATE-TACH-JOB-CAT-CHI-PHI.md:574` (A9); `ops/leases/gate-tach-job-cat-chi-phi-exec-1r3-claude-20260906.yaml:123`.
+
+VẤN ĐỀ: Tại 09:56:25Z ngày 07-09-2026, snapshot có 89 cặp `(blob,path)`, trong đó #456 có hai blob: bản trên cây PR đã mang bia mộ, bản trên master chưa mang bia mộ và còn hạn tới 14:30:07Z. Registry có hai người giữ (#456 và exec-1r3), trái điều kiện bắt tay A9. Cả ba cạnh #456 → exec-1 → exec-1r2 → exec-1r3 trên cây PR đúng hai chiều; điều đó không thu hồi bản cũ trên ref khác. EVIDENCE đã tự khai đúng tình trạng này. Đây là finding còn mở về trạng thái, không cáo buộc executor đã bắt tay trái A9.
+
+ĐÃ THỬ VÁ: Có, mô hình trong bộ nhớ đặt bia mộ trên mọi bản #456 làm registry 2 → 1; giữ nguyên các ref thật. Hướng xử lý: chờ hết hạn rồi fetch đủ ref và đo lại bằng `ai-dang-giu` trên cả hai đường write set, hoặc thu hồi sớm theo thủ tục có thẩm quyền ở mọi ref giữ bản cũ. Ca khóa: một bản mới có bia mộ cùng một bản cũ còn hạn vẫn phải đếm 2; mọi bản hết hạn/thu hồi thì còn 1. Rủi ro: chỉ cập nhật master nhưng còn bản cũ ở ref khác vẫn để hai writer. **chưa chạy trên cây thật — executor tự áp, tự đo, tự chịu trách nhiệm commit**.
+
+ĐÃ THỬ NGHIỆM: `python3 -B do-review9/static_checks.py`, dùng `_quet_lease_toan_kho(..., doi_chieu_ref=False)`, `_phan_loai_lease`, `_bia_mo_doi_xung` và `_lease_cham_duong` thật. Đo registry=2, ci.yml=1; mô phỏng 14:30:06Z / 14:30:07Z / 14:30:08Z cho registry=2/1/1. `lease_publish.py check` r3 rc=0, nhưng lệnh này không thay phép kiểm chồng lấn. `static.json` giữ ref/blob/trạng thái và hai mô hình; đây chỉ là snapshot offline, chưa phải readback máy chủ sau hết hạn.
+
+ĐỘ TIN: cao với snapshot và mô phỏng; GitHub trực tiếp KHÔNG ĐO ĐƯỢC.
+
+### a2-neo-nen-cu-trai-write-set-hien-tai  [P2]  Bảng thứ tự vẫn xác nhận nền cũ cho A2 đã sửa
+
+TỆP/DÒNG: `ops/specs/GATE-TACH-JOB-CAT-CHI-PHI.md:387`, đối chiếu mục revision `:10–12` và A2 `:460–471`.
+
+VẤN ĐỀ: Phần nghiệm thu r3 đã sửa đúng lỗi P1: lấy dispatch trước tách tại `start_from_sha`, cùng nhánh/event/lane, và PR với YAML nền bằng byte. Nhưng hàng “số đo của GATE (A1/A2/A5)” trong bảng chọn thứ tự vẫn nói nền `34045664423`/`34048685345` “còn đúng”. Hai run đó đều có 39 bước, còn lease có 40; master còn khác lane. Cùng một spec vì vậy vừa rút, vừa xác nhận nền A2 cũ. Hạ mức từ P1 xuống P2 vì phép so nghiệm thu mới đã bác ca mất receipt-v2; không khai rằng bản r3 vẫn cho ca ấy qua.
+
+ĐÃ THỬ VÁ: Có, thay duy nhất hàng :387 trong bản sao văn bản để A2 trỏ về nền mới theo r3; giữ hai run cũ làm nguồn ước lịch sử cho A1/A5. Ca khóa: tách đủ bước phải qua, bỏ receipt-v2 phải đỏ trên cả dispatch và PR; không còn hàng nào gọi nền lịch sử là nền hiện hành cho A2. Rủi ro: xóa cả số lịch sử sẽ làm mất nguồn của 43,20/21,03; sửa spec phải cập nhật revision/băm/lease và neo Issue theo quy trình. **chưa chạy trên cây thật — executor tự áp, tự đo, tự chịu trách nhiệm commit**.
+
+ĐÃ THỬ NGHIỆM: `contract_checks.py` rc=0: mô hình lượt8 tái lập 86/88 bộ ba; nền cũ bác tách đủ nhưng nhận bản bỏ receipt. Phép so r3 trên dispatch nhánh giữ 88/88, bỏ hai bộ ba receipt thì đỏ; PR ubuntu giữ 44/44, bỏ một bộ ba receipt thì đỏ. Baseline PR trong dữ liệu đã lưu: run 34058508426/head 82e01a4, YAML bằng byte d28c4b1. Mô hình sai lane master/dispatch lệch 4 thêm/4 mất. `followup_checks.py` rc=0 xác nhận hàng stale có đúng một lần và hướng sửa loại nó. Không chạy CI mới; conclusion của mô hình dispatch được suy có giới hạn từ hai điều kiện LAND/WORKER thật trong YAML.
+
+ĐỘ TIN: cao; lỗi còn lại là mâu thuẫn văn bản, không phải lỗ đã chứng minh trong phép so r3.
+
+### bien-do-khac-head-khong-phai-nhieu-runner  [P2]  Vẫn gọi chênh lệch khác lane là nhiễu runner đã đo
+
+TỆP/DÒNG: `ops/specs/GATE-TACH-JOB-CAT-CHI-PHI.md:98–99`, `:107`, `:447–448`, `:531–533`; đối chiếu `:619–625` và Issue #463 `:33–36`.
+
+VẤN ĐỀ: Hai câu gọi mẫu 11 run là master và lời nới theo biên 10,28 đã được sửa. Tuy nhiên :98–99 vẫn tuyên bố nhiễu runner 1–2,3 phút “là có thật” và mọi ngưỡng phải chừa biên; A1/A5 tiếp tục dùng “nhiễu … đo được” làm lý do cho biên. :107 còn gọi hai run ban đầu là hai lượt master. Tự đối chiếu nguồn cho thấy một run nhánh/dispatch và một master/push, cùng tree nhưng khác release-verify lane: 4 bộ ba thêm/4 mất. Chênh job không xác định được phần do runner. Điều này mâu thuẫn với nợ chưa tách nhiễu ở `chua_do_duoc` #3. A1 ≤ 25,00 và A5 ≤ 135,00 vẫn nguyên; không có cơ sở nới chúng.
+
+ĐÃ THỬ VÁ: Có, sửa năm mỏ neo văn bản trong bản sao: gọi đúng mẫu hai run, ghi chênh lệch quan sát và biên thiết kế, giữ nợ đo nhiễu riêng. Ca khóa: metadata phải là 1 nhánh/dispatch + 1 master/push; không câu hiện hành nào gọi chênh khác lane là nhiễu đã tách; A1/A5 và các số nhánh 43,20/21,03 giữ nguyên. Rủi ro: đổi ngưỡng để hợp thức hóa lời giải thích, hoặc gộp số nhánh vào số master. **chưa chạy trên cây thật — executor tự áp, tự đo, tự chịu trách nhiệm commit**.
+
+ĐÃ THỬ NGHIỆM: `measure_costs.py` và `followup_checks.py`, rc=0. Mẫu 11 run đúng 5 master/push + 6 nhánh, 1×39 + 10×40 bước; bảng hệ số khớp 28/28 ô và 12/12 đầu dải. `git diff --name-only 426bfc0 1b3caa1` rỗng nhưng hai tập conclusion 86/86 lệch 4 thêm/4 mất ở LAND/WORKER. Quét rồi đọc ngữ cảnh tìm năm vị trí khẳng định còn sai; thử sửa loại đủ năm và giữ ngưỡng. Các câu lịch sử được trích để phủ định không bị tính thành finding.
+
+ĐỘ TIN: cao về mâu thuẫn và metadata; nguyên nhân/phương sai runner KHÔNG ĐO ĐƯỢC.
+
+### quyet-dinh-tiep-h-con-bi-phu-dinh  [P2]  Phần mở đầu và hàng H vẫn nói chưa chọn
+
+TỆP/DÒNG: `ops/specs/LO-319-LINUX-BANG-CHUNG-XANH.md:56–59`, `:157` (hàng “H — bản này”); đối chiếu quyết định `:254–260`, lease nháp `:119–125` và Issue #464 `:53`.
+
+VẤN ĐỀ: Tiêu đề H và `ly_do_cap` đã sửa đúng theo lượt8. Nhưng phần mở đầu vẫn nói “không khai §12 đã xong”, H “chưa được chọn”; hàng H mang nhãn “bản này” còn ghi “ứng viên — chưa chọn”. Đây là các lời khai hiện hành, không được đánh dấu là trạng thái lịch sử trước quyết định 07-09. Chúng phủ định lựa chọn (1) đã ghi ở §12 và ba hồ sơ. Việc chọn thiết kế không đồng nghĩa cấp lease; năm ô null và Đ1–Đ5 đang được giữ đúng.
+
+ĐÃ THỬ VÁ: Có, sửa khối mở đầu, trạng thái hàng H và tiêu đề bảng ở bản sao reviewer; ghi lựa chọn (1) đã có, lease chưa cấp, Đ1–Đ5 còn ràng buộc. Ca khóa: quét toàn văn cho cả “chưa được chọn” và “chưa chọn”, đọc ngữ cảnh để phân biệt selector regex với quyết định H; giữ URL và null của nháp. Rủi ro: thay “đã chọn” thành “đã cấp” hoặc “mọi điều kiện đã đạt” sẽ tạo lời khai authority/evidence không có. **chưa chạy trên cây thật — executor tự áp, tự đo, tự chịu trách nhiệm commit**.
+
+ĐÃ THỬ NGHIỆM: `contract_checks.py` xác nhận URL 3/3, Đ1–Đ5 5/5, null 5/5 và hai câu đích lượt8 đã mất. Phép quét rộng trong `followup_checks.py` tìm hai phủ định khác tại :59/:157; sửa ba mỏ neo loại chúng, giữ nguyên hai khối Python của H và URL quyết định. Hai script rc=0. Đã sửa kết luận tạm trong VERDICT từ “đã vá” sang “vá hờ” sau khi đọc phần mở đầu/bảng; không dùng phép grep hai chuỗi đích làm bằng chứng hoàn tất.
+
+ĐỘ TIN: cao về văn bản; quyền và nội dung comment chủ kho trực tiếp KHÔNG ĐO ĐƯỢC.
+
+### manifest-luot8-liet-ke-hien-vat-khong-duoc-giao  [P2]  Gói lượt 8 thiếu 19 tệp mà manifest cam kết
+
+TỆP/DÒNG: `ops/reviews/pr468-hoso-4-packet-review-8-codex/ARTIFACTS.sha256:48–66`; `ops/reviews/pr468-hoso-4-packet-review-8-codex-verdict.md:173`.
+
+VẤN ĐỀ: Manifest liệt kê 69 tệp nhưng toàn bộ 19 đường `rig/` vắng trên cây và không có trong `git ls-files`: gồm corpus 1213 ca, bản H trích, đầu ra mutant, nguồn harness và stdout. `sha256sum --check ARTIFACTS.sha256` trả rc=1. Băm chính tệp verdict và receipt v2 vẫn đúng; cổng receipt không chứng nhận cây hiện vật bên cạnh. Đây là phần EVIDENCE không khai. Không nâng thành P1 mất bằng chứng H: cả 19 tệp có bản đúng từng byte tại gói lượt6 và phục dựng được.
+
+ĐÃ THỬ VÁ: Có, trong `do-review9/artifact-repair/`, chép 50 tệp hiện có và điền đúng 19 đường thiếu bằng các tệp lượt6 có SHA-256 trùng manifest; manifest gốc được giữ nguyên. Executor có thể bổ sung chính các byte đã cam kết, hoặc ghi rõ cơ chế tham chiếu chéo và tạo manifest đúng cấu trúc lưu trữ. Ca khóa: mỗi dòng manifest phải trỏ tới tệp có thật và băm đúng; toàn bộ kiểm rc=0. Rủi ro: chỉ xóa dòng thiếu sẽ che mất phạm vi gói, còn dựng lại tên với byte khác thì làm sai chứng cứ lịch sử. **chưa chạy trên cây thật — executor tự áp, tự đo, tự chịu trách nhiệm commit**.
+
+ĐÃ THỬ NGHIỆM: `python3 -B do-review9/artifact_checks.py` rc=0; bản PR kiểm manifest rc=1, có 50/69 và thiếu 19/69; xác minh 19/19 bản thay thế khớp byte; bản phục dựng kiểm rc=0, 69/69. `artifact-checks.json` lưu ánh xạ từng đường nguồn/đích và hash. Không sửa gói trong checkout, không khai đây là lần chạy lại suite H.
+
+ĐỘ TIN: cao.
+
+
+## Giới hạn và bàn giao
+
+Đã review hai trục: Spec (r3, A2, quyết định H, nguồn số và neo spec/lease/Issue) và Standards (snapshot lease, hợp đồng authority/băm, merge giữ bản vá, receipt/manifest, các cổng phù hợp PR thuần hồ sơ). Nội dung wp461 từ master nằm ngoài phạm vi giao; chỉ kiểm ranh giới merge.
+**KHÔNG ĐO ĐƯỢC:** GitHub trực tiếp, tập ref máy chủ và master đúng giây cấp r3; nội dung/quyền các comment chủ kho; trạng thái thực sau 14:30:07Z; Windows và các lượt Actions trước/sau tách thật; branch protection, hóa đơn và nhiễu runner riêng. Chỉ tái tính dữ liệu API đã lưu và dựng mô hình offline; không đổi các mục này thành pass.
+Không chạy toàn bộ `packet_loop_test`, registry `--chay`, corpus H 1213 ca hay suite pretooluse ở lượt9: không có thay đổi mã runtime trong phạm vi được giao, và lượt này kiểm các finding/hồ sơ mới. Không dùng stdout được lưu ở lượt8 như kết quả vừa chạy. Không xác minh lại bộ lịch sử311/419/2062 hàng đã được rút khỏi nguồn hiện hành.
+Hiện vật chính: `static.json` (snapshot/băm/receipt); `contract-checks.json` (A2 và trạng thái H tại các vị trí đích); `followup-checks.json` (quét toàn văn, phản chứng lane, thử đồng bộ và kiểm merge); `costs.json`/`nen-a1-a5/` (số giây, thống kê, tái sinh); `artifact-checks.json` (19 đường thiếu và cách phục dựng); stdout/stderr/metadata các cổng. `followup-checks.json` bổ sung kết luận phủ định H mà phép kiểm hai câu đích trong `contract-checks.json` chưa bao quát.
+Bản sao văn bản thử sửa ở `prose-experiment/` mang nhãn gợi ý; không phải spec/lease đã được cấp lại. Không tạo patch workflow/gate. Tệp verdict này chưa được đăng GitHub hay ghi vào state/receipt; đó là giới hạn vận chuyển theo PROMPT, không phải merge authorization.
+Kiểm cuối lúc 2026-09-07T10:11:46.572952+00:00: HEAD/tree đúng, status và diff/index rỗng, 0 commit sau reviewed_sha. Mốc commit b416830 (09:28:42Z) đứng trước giờ cấp r3 trong metadata; sandbox không có readback ref máy chủ tại thời điểm cấp, nên không chứng nhận lời khai “master lúc cấp”. Phần merge b416830 chỉ chạm ba path wp461 ngoài write set GATE.
+
+verdict: changes_requested

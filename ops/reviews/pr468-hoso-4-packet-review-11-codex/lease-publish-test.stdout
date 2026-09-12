@@ -1,0 +1,49 @@
+đột biến mã sản phẩm: đã chạy=9, bị giết=9
+đột biến packet #313: đã chạy=4, bị giết=4
+đột biến ref cục bộ: đã chạy=6, bị giết=6
+đột biến prunable: ĐỎ=['prunable'], đối chứng cho phép sống=2
+đột biến last-wins: ĐỎ=['hai'], đối chứng cho phép sống=2
+đột biến sạch: ĐỎ=['ban'], đối chứng cho phép sống=2
+đột biến thao-tác-dở: ĐỎ=['merge', 'rebase'], đối chứng cho phép sống=2
+đột biến vô-điều-kiện: ĐỎ=['ban', 'hai', 'merge', 'prunable', 'rebase'], đối chứng cho phép sống=2
+ca upstream tutsau: rc=12; PHẠM_VI: quét refs/heads/*; nhánh cục bộ tụt sau origin/<cùng tên> sẽ bị CHẶN | NHÁNH_CỤC_BỘ_TỤT_SAU: tutsau -> refs/remotes/origin/tutsau (0/1). ai-dang-giu quét refs/heads/*; chữa: git branch -f tutsau refs/remotes/origin/tutsau
+ca upstream phanky: rc=12; PHẠM_VI: quét refs/heads/*; nhánh cục bộ tụt sau origin/<cùng tên> sẽ bị CHẶN | NHÁNH_CỤC_BỘ_PHÂN_KỲ: phanky -> refs/remotes/origin/phanky (1/1). KHÔNG_PHÁT_LỆNH_CHỮA; người dùng tự quyết cách hợp nhất hoặc giữ commit.
+ca upstream main: rc=12; PHẠM_VI: quét refs/heads/*; nhánh cục bộ tụt sau origin/<cùng tên> sẽ bị CHẶN | NHÁNH_CỤC_BỘ_TỤT_SAU: main -> refs/remotes/origin/main (0/1). ai-dang-giu quét refs/heads/*; chữa: git branch -f main refs/remotes/origin/main
+ca upstream bang: rc=0; PHẠM_VI: quét refs/heads/*; nhánh cục bộ tụt sau origin/<cùng tên> sẽ bị CHẶN | NGƯỜI_GIỮ 0: không có
+ca upstream ditruoc: rc=0; PHẠM_VI: quét refs/heads/*; nhánh cục bộ tụt sau origin/<cùng tên> sẽ bị CHẶN | NGƯỜI_GIỮ 0: không có
+ca upstream thuancucbo: rc=0; PHẠM_VI: quét refs/heads/*; nhánh cục bộ tụt sau origin/<cùng tên> sẽ bị CHẶN | NGƯỜI_GIỮ 0: không có
+ca upstream khacten: rc=12; PHẠM_VI: quét refs/heads/*; nhánh cục bộ tụt sau origin/<cùng tên> sẽ bị CHẶN | NHÁNH_CỤC_BỘ_PHÂN_KỲ: khacten -> refs/remotes/origin/main (1/1). KHÔNG_PHÁT_LỆNH_CHỮA; người dùng tự quyết cách hợp nhất hoặc giữ commit.
+ca upstream khactensau: rc=12; PHẠM_VI: quét refs/heads/*; nhánh cục bộ tụt sau origin/<cùng tên> sẽ bị CHẶN | NHÁNH_CỤC_BỘ_TỤT_SAU: khactensau -> refs/remotes/origin/main (0/1). ai-dang-giu quét refs/heads/*; chữa: git branch -f khactensau refs/remotes/origin/main
+ca upstream khaihong: rc=12; PHẠM_VI: quét refs/heads/*; nhánh cục bộ tụt sau origin/<cùng tên> sẽ bị CHẶN | KHÔNG_XÁC_ĐỊNH: khaihong có config upstream nhưng không giải được: branch.khaihong.remote='khongcorenote', branch.khaihong.merge='refs/heads/khaihong'
+ca upstream khaihongkhongref: rc=12; PHẠM_VI: quét refs/heads/*; nhánh cục bộ tụt sau origin/<cùng tên> sẽ bị CHẶN | KHÔNG_XÁC_ĐỊNH: khaihongkhongref có config upstream nhưng không giải được: branch.khaihongkhongref.remote='khongcorenote', branch.khaihongkhongref.merge='refs/heads/khaihongkhongref'
+ca upstream remotecham: rc=0; PHẠM_VI: quét refs/heads/*; nhánh cục bộ tụt sau origin/<cùng tên> sẽ bị CHẶN | NGƯỜI_GIỮ 0: không có
+ca upstream tagup: rc=0; PHẠM_VI: quét refs/heads/*; nhánh cục bộ tụt sau origin/<cùng tên> sẽ bị CHẶN | NGƯỜI_GIỮ 0: không có
+ca upstream tagupsau: rc=12; PHẠM_VI: quét refs/heads/*; nhánh cục bộ tụt sau origin/<cùng tên> sẽ bị CHẶN | NHÁNH_CỤC_BỘ_TỤT_SAU: tagupsau -> refs/tags/v1 (0/1). ai-dang-giu quét refs/heads/*; chữa: git branch -f tagupsau refs/tags/v1
+ca upstream tagpeel: rc=12; PHẠM_VI: quét refs/heads/*; nhánh cục bộ tụt sau origin/<cùng tên> sẽ bị CHẶN | KHÔNG_XÁC_ĐỊNH: git check-ref-format refs/tags/vann^{} rc=1: refname không hợp lệ
+ca upstream refnamesai: rc=12; PHẠM_VI: quét refs/heads/*; nhánh cục bộ tụt sau origin/<cùng tên> sẽ bị CHẶN | KHÔNG_XÁC_ĐỊNH: git check-ref-format refs/heads/ten sai rc=1: refname không hợp lệ
+ca upstream refcodau: rc=12; PHẠM_VI: quét refs/heads/*; nhánh cục bộ tụt sau origin/<cùng tên> sẽ bị CHẶN | KHÔNG_XÁC_ĐỊNH: ref có hình dạng không an toàn (bắt đầu bằng '-'): --help
+đột biến go-phat-hien-phan-ky: thư_mục=lp_qcgu_edi; ĐỎ=['khacten', 'phanky'], đối chứng SỐNG=['bang', 'ditruoc', 'khactensau', 'khaihong', 'khaihongkhongref', 'main', 'refcodau', 'refnamesai', 'remotecham', 'tagpeel', 'tagup', 'tagupsau', 'thuancucbo', 'tutsau']
+đột biến phan-ky-thanh-tut-sau: thư_mục=lp_z4ehbsci; ĐỎ=['khacten', 'phanky'], đối chứng SỐNG=['bang', 'ditruoc', 'khactensau', 'khaihong', 'khaihongkhongref', 'main', 'refcodau', 'refnamesai', 'remotecham', 'tagpeel', 'tagup', 'tagupsau', 'thuancucbo', 'tutsau']
+đột biến doi-ung-theo-ten: thư_mục=lp_evbrasb3; ĐỎ=['khacten', 'khactensau', 'khaihong', 'remotecham', 'tagup', 'tagupsau'], đối chứng SỐNG=['bang', 'ditruoc', 'khaihongkhongref', 'main', 'phanky', 'refcodau', 'refnamesai', 'tagpeel', 'thuancucbo', 'tutsau']
+đột biến ton-tai-lai-hoi-tap-ref: thư_mục=lp_fd7t5aee; ĐỎ=['tagup', 'tagupsau'], đối chứng SỐNG=['bang', 'ditruoc', 'khacten', 'khactensau', 'khaihong', 'khaihongkhongref', 'main', 'phanky', 'refcodau', 'refnamesai', 'remotecham', 'tagpeel', 'thuancucbo', 'tutsau']
+đột biến go-phat-hien-khai-hong: thư_mục=lp_vufw6xjw; ĐỎ=['khaihong', 'khaihongkhongref'], đối chứng SỐNG=['bang', 'ditruoc', 'khacten', 'khactensau', 'main', 'phanky', 'refcodau', 'refnamesai', 'remotecham', 'tagpeel', 'tagup', 'tagupsau', 'thuancucbo', 'tutsau']
+đột biến khai-hong-lui-ve-ten: thư_mục=lp_5rai586j; ĐỎ=['khaihong'], đối chứng SỐNG=['bang', 'ditruoc', 'khacten', 'khactensau', 'khaihongkhongref', 'main', 'phanky', 'refcodau', 'refnamesai', 'remotecham', 'tagpeel', 'tagup', 'tagupsau', 'thuancucbo', 'tutsau']
+đột biến chan-remote-cham: thư_mục=lp_wz5ospaz; ĐỎ=['remotecham', 'tagup', 'tagupsau'], đối chứng SỐNG=['bang', 'ditruoc', 'khacten', 'khactensau', 'khaihong', 'khaihongkhongref', 'main', 'phanky', 'refcodau', 'refnamesai', 'tagpeel', 'thuancucbo', 'tutsau']
+đột biến chan-khong-upstream: thư_mục=lp_8v4vd48p; ĐỎ=['thuancucbo'], đối chứng SỐNG=['bang', 'ditruoc', 'khacten', 'khactensau', 'khaihong', 'khaihongkhongref', 'main', 'phanky', 'refcodau', 'refnamesai', 'remotecham', 'tagpeel', 'tagup', 'tagupsau', 'tutsau']
+đột biến go-chot-quan-he-ref: thư_mục=lp_fxofy5ju; ĐỎ=['khacten', 'phanky'], đối chứng SỐNG=['bang', 'ditruoc', 'khactensau', 'khaihong', 'khaihongkhongref', 'main', 'refcodau', 'refnamesai', 'remotecham', 'tagpeel', 'tagup', 'tagupsau', 'thuancucbo', 'tutsau']
+đột biến go-lui-ve-ten: thư_mục=lp_ptpxpwhd; ĐỎ=['main', 'phanky', 'tutsau'], đối chứng SỐNG=['bang', 'ditruoc', 'khacten', 'khactensau', 'khaihong', 'khaihongkhongref', 'refcodau', 'refnamesai', 'remotecham', 'tagpeel', 'tagup', 'tagupsau', 'thuancucbo']
+đột biến mở-phạm-vi-quét-tag: thư_mục=lp__pttgbwg; ĐỎ=['tag-khong-quet'], đối chứng SỐNG=['remotecham', 'tagup']
+đột biến bắt buộc go-chot-dau-tru: thư_mục=lp_rb7pswoo; ĐỎ=['refcodau']
+đột biến bắt buộc rev-parse: thư_mục=lp_7pmaybys; ĐỎ=['refnamesai', 'tagpeel']
+đột biến bắt buộc go-check-ref-format: thư_mục=lp_wwzassts; ĐỎ=['refnamesai', 'tagpeel']
+đột biến bắt buộc mo-pham-vi-tag: thư_mục=lp_6rubxiir; ĐỎ=['tag-khong-quet']
+đột biến bắt buộc chan-tag-that: thư_mục=lp_gol7ze6m; ĐỎ=['tagup']
+đột biến bia mộ noi-vi-tu-thanh-if-False: ĐỎ=['t117', 't118'], SỐNG=['t119', 't120', 't121', 't122', 't123']
+đột biến bia mộ so-bang-thanh-do-chuoi: ĐỎ=['t118'], SỐNG=['t117', 't119', 't120', 't121', 't122', 't123']
+đột biến bia mộ bo-schema-danh-sach: ĐỎ=['t120', 't121'], SỐNG=['t117', 't118', 't119', 't122', 't123']
+đột biến bia mộ chi-kiem-phan-tu-dau: ĐỎ=['t121'], SỐNG=['t117', 't118', 't119', 't120', 't122', 't123']
+đột biến bia mộ bo-hanh-vi-go: ĐỎ=['t119', 't120', 't122'], SỐNG=['t117', 't118', 't121', 't123']
+đột biến bia mộ fail-toan-ca-het-han: ĐỎ=['t123'], SỐNG=['t117', 't118', 't119', 't120', 't121', 't122']
+đột biến bia mộ fail-toan-ca-khong-cham: ĐỎ=['t123'], SỐNG=['t117', 't118', 't119', 't120', 't121', 't122']
+
+lease_publish: 121/121 đạt; đã chạy=121, bỏ qua=0

@@ -1,0 +1,22 @@
+{
+  "utc": "2026-09-07T10:12:19.196619+00:00",
+  "head": "0bc6e56e1a1fd21cedfc18557320941d51db866c",
+  "tree": "86b3f017010575bd37b612242acb7e60bbf2db03",
+  "status": "",
+  "tracked_diff": "",
+  "index_diff": "",
+  "new_commits": "0",
+  "finding_ids": [
+    "bia-mo-mot-ref-khong-thu-hoi-moi-ban",
+    "a2-neo-nen-cu-trai-write-set-hien-tai",
+    "bien-do-khac-head-khong-phai-nhieu-runner",
+    "quyet-dinh-tiep-h-con-bi-phu-dinh",
+    "manifest-luot8-liet-ke-hien-vat-khong-duoc-giao"
+  ],
+  "severities": {
+    "P1": 1,
+    "P2": 4
+  },
+  "rows": 67,
+  "last_line": "verdict: changes_requested"
+}

@@ -1,0 +1,106 @@
+[
+  {
+    "name": "doctrine-scan",
+    "command": [
+      "/usr/local/bin/python3",
+      "-B",
+      ".claude/dev/packet_loop.py",
+      "doctrine-scan",
+      "--root",
+      "."
+    ],
+    "start_utc": "2026-09-07T07:08:24.591875+00:00",
+    "seconds": 0.266,
+    "rc": 0,
+    "bytes": 69,
+    "sha256": "9ee1866d82544445d0b015d90aaeb90aead5e9ebf0ffa8ae6556f3ca2963f5cb"
+  },
+  {
+    "name": "adr-song",
+    "command": [
+      "/usr/local/bin/python3",
+      "-B",
+      ".claude/dev/packet_loop.py",
+      "adr-song",
+      "--root",
+      "."
+    ],
+    "start_utc": "2026-09-07T07:08:24.858333+00:00",
+    "seconds": 0.166,
+    "rc": 0,
+    "bytes": 113,
+    "sha256": "751fa693b8d22f3c7d0089ad96461c3ccb88887a847c5bca3e08ff24ec3a07aa"
+  },
+  {
+    "name": "doc-claims",
+    "command": [
+      "/usr/local/bin/python3",
+      "-B",
+      "scripts/tl.py",
+      "doc-claims-check",
+      "--strict",
+      "--json"
+    ],
+    "start_utc": "2026-09-07T07:08:25.024960+00:00",
+    "seconds": 4.831,
+    "rc": 0,
+    "bytes": 70861,
+    "sha256": "b9001f390f47286930965480160e62b23da1e47354acc0e9172b94a48d758286"
+  },
+  {
+    "name": "ci-dang-ky",
+    "command": [
+      "/usr/local/bin/python3",
+      "-B",
+      ".claude/dev/ci_dang_ky_test.py"
+    ],
+    "start_utc": "2026-09-07T07:08:29.856640+00:00",
+    "seconds": 0.316,
+    "rc": 0,
+    "bytes": 2934,
+    "sha256": "d31de5aefad408c8fb7562e18856c79a201e2bd2fbedbbd1c8b13929dabe5089"
+  },
+  {
+    "name": "lease-publish-test",
+    "command": [
+      "/usr/local/bin/python3",
+      "-B",
+      "ops/lease_publish_test.py"
+    ],
+    "start_utc": "2026-09-07T07:08:30.172954+00:00",
+    "seconds": 137.298,
+    "rc": 1,
+    "bytes": 43296,
+    "sha256": "361cd9d80b0c535020e918d3e8eb11ecb3a4de48faa2508ebc3764cacbbe744f"
+  },
+  {
+    "name": "bien-nhan-v2",
+    "command": [
+      "/usr/local/bin/python3",
+      "-B",
+      "ops/bien_nhan_v2.py",
+      "--root",
+      "."
+    ],
+    "start_utc": "2026-09-07T07:10:47.471882+00:00",
+    "seconds": 1.018,
+    "rc": 0,
+    "bytes": 163,
+    "sha256": "0a5eb4ef9e94a25cf5dd0aadf3be87c8d25122ef9b75bc9f798482187c9dd828"
+  },
+  {
+    "name": "lease-check",
+    "command": [
+      "/usr/local/bin/python3",
+      "-B",
+      "ops/lease_publish.py",
+      "check",
+      "ops/leases/gate-tach-job-cat-chi-phi-exec-1-claude-20260906.yaml"
+    ],
+    "start_utc": "2026-09-07T07:10:48.490461+00:00",
+    "seconds": 1.018,
+    "rc": 0,
+    "bytes": 233,
+    "sha256": "fd8a0c3ecc31024f852bb71dd7ee0614e255ac01069b805546defc1d1aac21fc"
+  }
+]

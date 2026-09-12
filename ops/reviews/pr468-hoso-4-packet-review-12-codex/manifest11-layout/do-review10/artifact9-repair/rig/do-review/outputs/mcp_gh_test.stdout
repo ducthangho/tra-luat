@@ -1,0 +1,14 @@
+CA         : 38/42 đạt · 4 đỏ · ĐỎ
+  ĐỎ A5: PermissionError: [Errno 1] Operation not permitted
+  ĐỎ A6-302: PermissionError: [Errno 1] Operation not permitted
+  ĐỎ A6-303: PermissionError: [Errno 1] Operation not permitted
+  ĐỎ A7: PermissionError: [Errno 1] Operation not permitted
+ĐỘT BIẾN   : KHÔNG_ĐO_ĐƯỢC (nền đỏ)
+D8(a) đích nằm trong tập giết: KHÔNG_ĐO_ĐƯỢC (nền đỏ)
+D8(b) không tập giết rỗng: KHÔNG_ĐO_ĐƯỢC (nền đỏ)
+D8(c) mọi ca có đột biến canh: KHÔNG_ĐO_ĐƯỢC (nền đỏ)
+GIAO PHẠM VI:
+| đột biến | đích | ca ngoài đích bị giết |
+|---|---|---|
+| KHÔNG_ĐO_ĐƯỢC | — | nền đỏ |
+TỔNG: ĐỎ

@@ -1,0 +1,19 @@
+{
+  "cases": 1213,
+  "false_red": 0,
+  "missed": 0,
+  "exceptions": 0,
+  "by_kind": {
+    "bare-span": 10,
+    "canonical": 8,
+    "duplicate": 100,
+    "exhaustive": 625,
+    "grammar-equivalent": 40,
+    "grammar-hole": 33,
+    "old-law7": 8,
+    "pair": 91,
+    "prose": 288,
+    "windows": 10
+  },
+  "failures": []
+}

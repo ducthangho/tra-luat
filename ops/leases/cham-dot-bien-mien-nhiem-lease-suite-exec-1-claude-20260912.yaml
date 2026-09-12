@@ -87,6 +87,11 @@ effective_review_class: sensitive
 # 8c610f7). `_kiem_bia_mo` đòi đủ hai chiều.
 thay_the_cho:
   - windows-lease-suite-exec-2-claude-20260912
+
+# BIA MỘ CHIỀU NGƯỢC (thêm 2026-09-12T17:3xZ). `_kiem_bia_mo` đòi ĐỦ HAI CHIỀU, và cả hai chiều được
+# đặt trong CÙNG MỘT commit — làm lệch nhau tạo một cửa sổ mà `ai-dang-giu` trả
+# `CHAN [12] KHÔNG_XÁC_ĐỊNH: bia mộ một chiều`, đã đo đúng như vậy khi cấp `exec-1`.
+da_bi_thay_the: cham-dot-bien-mien-nhiem-lease-suite-exec-1r2-claude-20260912
 ly_do_thu_hoi: >-
   Không phải reroute, không phải kỷ luật: packet #504 ĐÃ LAND (merge 85fcbf8 lúc 2026-09-12T13:59:47Z;
   36f68c7 là tổ tiên của origin/master) nhưng lease gen 2 của nó vẫn giữ ops/lease_publish_test.py tới

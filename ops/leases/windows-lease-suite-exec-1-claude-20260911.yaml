@@ -109,3 +109,38 @@ dieu_kien_dung:
   - 'S4 muốn skip/cách ly/nâng timeout-minutes.'
   - 'S5 origin/master chạm một trong hai đường sau b98531e; hoặc A1 đã cấp.'
   - 'S6 trần HAI vòng review (ADR-0043).'
+
+# NÂNG TRẦN `S2` — chỉ thị chủ kho phiên chat 12-09-2026 ~09:50Z, GHI HỘ. Khối này KHÔNG xoá dòng
+# `S2 dòng thêm > 300` ở trên: dòng ấy là lời khai ĐÚNG về trần tại thời điểm cấp lease, và khối này
+# là phép override có thẩm quyền đặt LÊN TRÊN nó (tiền lệ `plat-x4-review-3`, `m9-fetch-auth-exec-3`).
+# Đặc tả đóng băng `A5` vẫn ghi 300 và KHÔNG được sửa (§3.2) ⇒ trạng thái đúng của A5 là
+# "KHÔNG ĐẠT ở ngưỡng 300, được chủ kho override lên 1500", KHÔNG phải "A5 đạt".
+nang_tran:
+  truc: S2
+  ai_nang: ducthangho
+  tran_cu: 300
+  tran_moi: 1500
+  khi_nao: 'sau khi tác giả tự khai S2 đã bị vượt từ 8ffd062 (PR #512 comment 5645054339), trước vòng review 6'
+  pham_vi: >-
+    Chỉ lease `windows-lease-suite-exec-1-claude-20260911`, generation 1 — chủ kho nói "cho phiên này".
+    KHÔNG đổi `ADR-0044` và KHÔNG áp cho packet nào khác; packet khác muốn trần khác thì xin riêng.
+  phep_do: >-
+    Tổng cột `additions` của `git diff --numstat origin/master...HEAD --
+    ops/lease_publish_test.py ops/chay_lease_publish_test.sh`. Ghi phép đo ra đây vì một con số
+    không kèm điều kiện đo thì sẽ trôi mà không ai biết.
+  do_luc_nang: >-
+    head `353eae10120da2a1788dcaf7a906fe46261bd71b`: 2 đường dẫn, +1082/−27. Cùng 1082 khi neo
+    `base_sha` b98531e thay cho `origin/master` — hai phép neo cho một con số. 1082 <= 1500 ⇒ S2 hết
+    vi phạm, còn 418 dòng dư địa. Mốc vượt trần cũ: 8ffd062 (195 -> 746), tức bốn vòng review trước.
+  can_cu: >-
+    Chỉ thị chủ kho 12-09-2026 "tôi cho phép nâng trần S2 cho phiên này lên 1500". Dấu vết:
+    https://github.com/ducthangho/tra-luat/issues/504#issuecomment-5645151563
+  khong_nang_them: >-
+    Vượt 1500, hoặc chạm S1/S3/S4/S5, thì DỪNG và hỏi lại chủ kho. Phiên KHÔNG tự nới thêm.
+  duong_sach_hon_da_KHONG_dung: >-
+    §3.2 có đường revision + generation mới cho thay đổi policy làm closure thay đổi. Không dùng vì
+    chủ kho đã override tường minh và packet đang ở vòng review dự đoán là vòng chốt. Khai ra đây
+    thay vì im lặng.
+  truc_khac_nang_rieng: >-
+    Trục VÒNG (S6 / ADR-0043) được nâng RIÊNG lên 10 ở packet #522. ADR-0043 tách ba trục vì nâng
+    nhầm trục là nâng chi phí chứ không nâng kỷ luật — nên hai lần nâng ghi riêng, không gộp.

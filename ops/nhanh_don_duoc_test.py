@@ -468,6 +468,22 @@ def chay_mot_mutant(ban_sao: Path, ten: str, dich):
     chu khong doc ma thoat — nep da tra gia o `ops-don-ref` (40/40 trong khi mot
     dot bien xoa han lenh pha van qua).
     """
+    # R13-F01 (luot 13) — `ban_sao` duoc dung theo HAI he quy chieu cung luc:
+    # lam goc de dung `kenh` (roi truyen NGUYEN chuoi ay qua `KENH_ENV`), va lam
+    # `cwd` cua con. Voi mot duong TUONG DOI `r` va cwd cha `P`, con chay tai
+    # `P/r` nhung duoc bao mo `r/.ket-qua-N.jsonl` => duong hieu luc thanh
+    # `P/r/r/...`. Con hong ngay khi mo kenh, ca HAI lan thu lap dung sai dia chi
+    # do. Do duoc (cross-review luot 13, HUONG 6): cung mot thu muc VAT LY, chi
+    # doi cach viet doi so — tuyet doi GIET lan 1, tuong doi KHONG DO DUOC ca 2
+    # lan. Bo doc tu choi kenh vang la DUNG; loi la o launcher tu lam hong phep
+    # do voi mot doi so `Path` hoan toan hop le.
+    # Chuan hoa MOT LAN roi dung CUNG gia tri cho ca hai cho — bat bien can giu
+    # la "mot he quy chieu", khong phai "duong phai tuyet doi".
+    # Chon `resolve()`: no vua tuyet doi hoa vua go symlink, nen `kenh` va `cwd`
+    # tro cung mot inode ke ca khi nguoi goi dua symlink. Duong CHUA TON TAI van
+    # duoc chap nhan (`strict=False` mac dinh) va se hong o buoc phong con voi
+    # dung loi that, chu khong bi bien thanh mot dia chi khac ngoai y dinh.
+    ban_sao = Path(ban_sao).resolve()
     # F04 (luot 11) — vat hoa TRUOC vong: neu `dich` la iterator thi lan thu 1
     # tieu thu no va lan thu 2 nhin thay RONG, tuc hai lan thu do HAI thu khac
     # nhau. Chot nay khac chot trong `doc_kenh` (xem o do) — moi chot che mot
@@ -2110,6 +2126,65 @@ def r522_loi_phong_ngoai_oserror_cung_phai_o_lai_vong(d: Path):
     chot((goi, tt, lan) == ([1], GIET, 1), "r522")
 
 
+
+def r523_ban_sao_tuong_doi_khong_duoc_lam_lech_kenh(d: Path):
+    """R13-F01 (luot 13) — cach VIET doi so khong duoc doi ket qua do.
+
+    Cross-review luot 13, HUONG 6. `chay_mot_mutant` dung `ban_sao` theo HAI he
+    quy chieu cung luc: lam goc dung `kenh` (truyen nguyen chuoi qua `KENH_ENV`)
+    va lam `cwd` cua con. Duong TUONG DOI vi the bi ghep hai lan:
+
+        cwd cha = P, doi so = r  ->  con chay tai P/r, duoc bao mo r/.ket-qua-N
+                                 ->  duong hieu luc P/r/r/.ket-qua-N   (khong ton tai)
+
+    Do duoc tren ban nguyen goc, CUNG MOT thu muc vat ly, chi doi cach viet:
+        tuyet doi        -> GIET, 1 lan, 9 ban ghi, DO_CHOT = T3,T5,T8
+        tuong doi        -> KHONG DO DUOC, 2 lan, 0 ban ghi, FileNotFoundError
+        tuong doi + resolve -> GIET, 1 lan
+
+    Huong hong la FAIL-CLOSE (mat kha nang do, khong cap GIET gia) nhung van sai:
+    launcher tu lam hong phep do cua chinh no voi mot doi so `Path` HOAN TOAN
+    HOP LE, va lan thu hai khong cuu duoc vi no lap lai dung sai dia chi ay.
+
+    Ca nay dung cung mot thu muc that cho ca hai cach viet — duong tuong doi tinh
+    bang `os.path.relpath` tu cwd hien hanh, nen KHONG phai doi cwd (doi cwd giua
+    bo test la mot nguon nhieu khac). Con la ban TOI GIAN nhu r520: no chi doc
+    `KENH_ENV` roi phat qua `KhungPhat` THAT, du de lo bug dia chi ma khong ton
+    ~1,4 s moi lan.
+    """
+    STUB = (
+        "import importlib.util, os\n"
+        "from pathlib import Path\n"
+        "s = importlib.util.spec_from_file_location('goc', r'@@GOC@@')\n"
+        "m = importlib.util.module_from_spec(s)\n"
+        "s.loader.exec_module(m)\n"
+        "kh = m.KhungPhat(Path(os.environ[m.KENH_ENV]), os.environ[m.DAU_PHIEN_ENV],\n"
+        "                 os.environ[m.MUTANT_ENV], int(os.environ[m.LAN_THU_ENV]))\n"
+        "for _t, _ in m.CA:\n"
+        "    kh.vao_ca(_t)\n"
+        "    kh.phat(m.NHAN_DO_CHOT if _t == 'T1' else m.NHAN_DAT)\n"
+        "kh.dong_luot(1)\n"
+        "raise SystemExit(1)\n"
+    ).replace("@@GOC@@", str(Path(__file__).resolve()))
+
+    goc = (d / "thuc-te").resolve()
+    goc.mkdir(parents=True, exist_ok=True)
+
+    def chay(duong_vao):
+        m = _nap_ban_sao(d / f"bs-{secrets.token_hex(4)}")
+        bs = goc / Path(m.__file__).stem
+        bs.mkdir(parents=True, exist_ok=True)
+        (bs / Path(m.__file__).name).write_text(STUB, encoding="utf-8", newline="\n")
+        return m.chay_mot_mutant(duong_vao(bs), Path(m.__file__).stem, ("T1",))
+
+    tuyet_doi = chay(lambda bs: bs)
+    tuong_doi = chay(lambda bs: Path(os.path.relpath(bs, Path.cwd())))
+    chot(tuyet_doi == (GIET, "", 1), "r523")
+    # Chot THAT: cach VIET khong duoc doi ket qua. Thieu chot nay thi mot ban
+    # "va" bang cach tu choi moi duong tuong doi van qua.
+    chot(tuong_doi == tuyet_doi, "r523")
+
+
 TU_KIEM = [
     ("r501", r501_tin_hieu_chot_khong_gia_mao_duoc, True),
     ("r502", r502_assert_ha_tang_khong_duoc_cap_lop_chot, True),
@@ -2133,6 +2208,7 @@ TU_KIEM = [
     ("r520", r520_loi_phong_con_phai_o_lai_trong_vong_chay_lai, True),
     ("r521", r521_dich_mot_lan_doc_khong_duoc_bi_tieu_thu, True),
     ("r522", r522_loi_phong_ngoai_oserror_cung_phai_o_lai_vong, True),
+    ("r523", r523_ban_sao_tuong_doi_khong_duoc_lam_lech_kenh, True),
 ]
 
 # ---- A6: MOI ca tu kiem phai co MOT dot bien rieng lam no DO --------------
@@ -2187,7 +2263,7 @@ DOT_BIEN_TU_KIEM = [
      "        trang_thai, ly_do = doc_kenh(kenh, dau_phien, ten, lan_thu, dich, p.returncode)\n"
      '        if trang_thai == GIET and set(re.findall(r"^CASE (T\\d+): DO", p.stdout, re.M)) - set(dich):\n'
      "            trang_thai = KHONG_GIET"),
-    ("cham-doc-stdout-khi-rc-mot", ("r505", "r512", "r520", "r521", "r522"),
+    ("cham-doc-stdout-khi-rc-mot", ("r505", "r512", "r520", "r521", "r522", "r523"),
      "        if trang_thai == KHONG_DO_DUOC:",
      "        if p.returncode == 1 and trang_thai != KHONG_DO_DUOC:\n"
      '            trang_thai = GIET if set(re.findall(r"^CASE (T\\d+): DO", p.stdout, re.M)) == set(dich) else KHONG_GIET\n'
@@ -2281,6 +2357,9 @@ DOT_BIEN_TU_KIEM = [
     ("bo-vat-hoa-dich-o-doc-kenh", ("r521",),
      "lan_thu, tuple(dich), rc_that)",
      "lan_thu, dich, rc_that)"),
+    ("bo-chuan-hoa-ban-sao", ("r523",),
+     "    ban_sao = Path(ban_sao).resolve()",
+     "    pass"),
     ("bo-vat-hoa-dich-o-chay-dot-bien", ("r521",),
      "            dich = tuple(dich)\n            ban_sao = root / ten",
      "            ban_sao = root / ten"),
@@ -2355,7 +2434,7 @@ DOT_BIEN_TU_KIEM = [
      "        trang_thai, ly_do = doc_kenh(kenh, dau_phien, ten, lan_thu, dich, p.returncode)\n"
      "        if lan_thu == 2 and trang_thai == KHONG_GIET:\n            trang_thai = GIET"),
     # F05 — chieu NGUOC lai: GIET khong con la terminal.
-    ("dung-chi-khi-khong-giet", ("r505", "r520", "r522"),
+    ("dung-chi-khi-khong-giet", ("r505", "r520", "r522", "r523"),
      "        if trang_thai != KHONG_DO_DUOC:\n            return trang_thai, ly_do, lan_thu",
      "        if trang_thai == KHONG_GIET:\n            return trang_thai, ly_do, lan_thu"),
     # ---- F04: entropy phai phu thuoc MOI byte; dau phai moi moi LUOT PHONG ----
@@ -2444,8 +2523,8 @@ DOT_BIEN_TU_KIEM = [
 NHOM_BAT_BUOC = frozenset({"r501", "r502", "r503", "r504", "r505", "r506",
                            "r507", "r508", "r509", "r510", "r511", "r512",
                            "r513", "r514", "r515", "r516", "r517", "r518",
-                           "r519", "r520", "r521", "r522"})
-SAN_NHOM = 22
+                           "r519", "r520", "r521", "r522", "r523"})
+SAN_NHOM = 23
 
 
 def chay_dot_bien_tu_kiem():

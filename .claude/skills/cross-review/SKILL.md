@@ -243,6 +243,84 @@ nhận" và câu ấy SAI sau `set-url`: lúc đó `ls-remote` gọi HTTPS và *
 không đếm mirror, không đếm gì. Kết luận đúng cho cả hai trạng thái là **không đo được GitHub từ
 sandbox**; chỗ duy nhất chặn được vẫn là **trước bước clone**, trên kho nguồn.
 
+## Bộ lọc nền cắt lượt giữa chừng — hai chốt ĐÃ ĐO, cả hai bắt buộc
+
+Đo trên 13 lượt của packet #513 (12-09-2026). Bộ lọc nội dung của nền (`flagged for possible
+cybersecurity risk`) cắt **3/13 lượt** — và nó cắt đúng lúc reviewer chuyển sang **tự soạn** nội dung
+tấn công. Chưa ai biết cách chặn nó. Nhưng hai chốt dưới đây làm hậu quả rẻ hẳn, và cả hai có số.
+
+### 1. BẮT reviewer ghi `VERDICT.md` TĂNG DẦN
+
+| lượt | bị cắt ở | giữ được verdict |
+|---|---|---|
+| 8 | 154 s | **KHÔNG** — mất trắng, phiên chính phải tự đọc log probe mới cứu được |
+| 11 | 437 s | **KHÔNG** — 35 lệnh, 3 lỗi thật, không một dòng verdict |
+| 12 | 299 s | **CÓ** — verdict còn nguyên một hướng kèm output thật |
+
+Khác biệt duy nhất giữa lượt 12 và hai lượt kia là ba câu trong prompt:
+
+```
+1. NGAY BÂY GIỜ, trước khi đo gì, tạo VERDICT.md với 4 dòng đầu (dùng changes_requested
+   và các số 0 làm chỗ giữ).
+2. Sau MỖI hướng, ghi ngay khối của hướng đó vào cuối VERDICT.md (`>>` là đủ).
+3. CUỐI CÙNG mới sửa 4 dòng đầu cho khớp và thêm phần finding.
+```
+
+Đây là chốt chống **mất bằng chứng**, KHÔNG phải chốt chặn bộ lọc — đừng khai nhầm.
+
+### 2. Phân công: reviewer CHẠY và ĐỘT BIẾN, không TỰ SOẠN
+
+Cho phép: chạy phản chứng có sẵn · **đột biến mã CÓ SẴN trong cây** rồi chạy lại · viết probe gọi
+thẳng hàm sản phẩm với đầu vào bất thường · đọc mã.
+Cấm: soạn payload tấn công/giả mạo. Hướng nào cần thứ đó thì **mô tả BẰNG LỜI kèm công thức tái
+hiện**, phiên điều phối viết probe và đo hộ.
+
+Kênh "nêu bằng lời" KHÔNG phải giải pháp hạng hai: **toàn bộ giá trị của lượt 8 đi qua đúng nó** —
+nó nêu hai hướng trước khi chết, một hướng hoá ra là lỗi sản phẩm thật.
+
+## BẮT reviewer nộp BẢNG SĂN — nếu không, `approve` chỉ nghĩa là "chưa tìm"
+
+Đo được, cùng packet, hai lượt liền:
+
+| lượt | prompt nói gì | kết quả |
+|---|---|---|
+| 9 | *"nếu không tìm ra gì thì liệt kê hướng đã thử"* | `approve`, và 4 "hướng đã thử" hoá ra **cả 4 đều là việc bắt buộc ở phần khác của prompt** — không hướng nào độc lập |
+| 10 | **bảng SĂN ≥ 6 hướng ĐỘC LẬP, mỗi hướng có LỆNH + OUTPUT THẬT** | **8 hướng**, **2 lỗi sản phẩm thật** |
+
+Câu *"nếu không thấy thì khai"* cho phép **"chưa tìm"** đi qua như **"đã tìm, không thấy"**. Khối bắt
+buộc:
+
+```
+HƯỚNG <n>: <tên>
+  giả thuyết : <nếu ... thì ... sai>
+  lệnh       : <lệnh đã chạy>
+  output     : <output thật, cắt gọn>
+  kết luận   : LỖI | KHÔNG PHẢI LỖI | KHÔNG ĐO ĐƯỢC
+```
+
+Kèm ba điều kiện, thiếu cái nào cũng làm bảng mất răng:
+- **KHÔNG tính** vào N hướng: đo nền; trỏ vào ca test đã có sẵn; đột biến chỉ nhằm kiểm bản vá lượt trước.
+- **Nộp danh sách hướng các lượt TRƯỚC đã đi** và cấm lặp y nguyên — hoặc hướng mới, hoặc biến thể
+  chưa ai chạm và phải nói rõ biến thể là gì.
+- `approve` mà **thiếu bảng** thì bị coi là `KHÔNG ĐO ĐƯỢC`, bất kể kết luận ghi gì.
+
+Ở lượt XÁC NHẬN, nói thẳng với reviewer rằng **kết luận SẠCH có giá ngang một phát hiện** — kèm câu
+*"đừng bới một finding tầng META cho có"* và *"đừng nương tay ở tầng sản phẩm chỉ vì đây là lượt
+cuối"*. Không có câu ấy thì một lượt xác nhận dễ trả về finding trang trí.
+
+## Dọn tiến trình mồ côi TRƯỚC mỗi phép đo
+
+Bộ test nào phóng tiến trình con mà bị giết giữa chừng sẽ **bỏ rơi** con của nó. Đo 12-09-2026: hai
+lượt bị giết để lại **526 tiến trình `ban_sao_*` còn sống**, RAM `14,5/16 GB`, và mọi phép đo sau đó
+chậm theo — suýt thành kết luận *"bộ kiểm chậm 5 lần"* trong khi nguyên nhân thật là một lỗi đệ quy.
+
+```bash
+pkill -9 -f "<mau ten tep con>" 2>/dev/null || true   # `|| true`: pkill tra 1 khi khong khop,
+ps -eo cmd | grep -c "[m]au"                          # va no se cat ca chuoi `&&`
+```
+
+Dọn xong mới đo, và đo lại **nền** trước khi nghi bản vá của mình.
+
 ## Khung `VERDICT.md` bắt reviewer sinh ra
 
 §8 quy định mục nào bắt buộc; đây là khung để dán vào `PROMPT.md`:

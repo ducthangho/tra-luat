@@ -104,6 +104,12 @@ verdict_usage_caveats:
       Lượt này lặp lại phép đo giới hạn cổng: đổi `so_p2` (5→4) hoặc `verdict_bytes` (83049→83048) của receipt pr511 SỐNG qua v2/t26/t27/release (4/4). Cổng canh BĂM verdict, cặp caveat↔README và neo evidence_url; số finding/số byte khai trong receipt là LỜI KHAI.
     phai_lam_gi_khi_chay_lai: >-
       Muốn tin so_p*/verdict_bytes thì đếm tiêu đề `### … [P1|P2|P3]` và `wc -c` trên chính tệp verdict. Nợ cổng: CHANGELOG r367/r369/r371, chưa có packet.
+  - id: REVIEWER-TU-KHAI-LOI-PHAM-VI-DOC-launcher-ngoai-bang-_TRANSPORT_CONTRACTS
+    muc: P3
+    mo_ta: >-
+      Reviewer tự khai ở đầu verdict: lệnh trích `_TRANSPORT_CONTRACTS` dùng sai dấu kết thúc nên đã xuất cả phần sau bảng trong .claude/dev/launcher.py; không dùng phần ấy làm căn cứ; không tự khai đã giữ trọn rào chắn đọc.
+    phai_lam_gi_khi_chay_lai: >-
+      Đừng dùng verdict này để tuyên bố rào chắn "chỉ đọc bảng" đã được giữ tuyệt đối.
   - id: BANG-DO-LAI-KHONG-LEN-COMMENT-tep-trong-kho-la-ban-du
     muc: P3
     mo_ta: >-

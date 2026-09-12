@@ -73,7 +73,7 @@ model_reviewer_identity:
     so_lan_chet_truoc_khi_xong là ATTESTATION điều phối (lượt 1 phóng đúng một lần).
 
 nang_luc_do_cua_goi:
-  mirror: 'clone mới từ guong.git, detached 899f305, core.abbrev 7, không nông, đủ ref refs/remotes/origin/*; nguon/ có VERDICT/HINT các lượt trước của chính reviewer + run.json/stdout/stderr/prompt.snapshot + 2 VERDICT/HINT PR #511 bản sandbox + run 417a209c/8873d98d + actionlint 1.7.7; EVIDENCE.md của tác giả'
+  mirror: 'clone mới từ guong.git, detached 899f305, core.abbrev 7, không nông, đủ ref refs/remotes/origin/*; nguon/ có 2 VERDICT/HINT PR #511 bản sandbox + run.json/stdout/stderr/prompt.snapshot của run 417a209c/8873d98d; chưa có lượt trước của PR #516 + actionlint 1.7.7; EVIDENCE.md của tác giả'
   chua_do_duoc: 'Không mạng; sự kiện GitHub (comment, CI, connector, merge) chỉ có trong EVIDENCE — nguồn (b); ls-remote KHÔNG ĐO ĐƯỢC từ sandbox.'
 
 hien_vat_reviewer_vao_kho:
@@ -101,7 +101,7 @@ verdict_usage_caveats:
   - id: CHANGES-REQUESTED-TREN-899f305-DA-VA-o-a4c14c7-KHONG-phai-trang-thai-cuoi
     muc: P2
     mo_ta: >-
-      Verdict chấm head 899f305 với 0 P1 / 4 P2 / 1 P3 — cả năm là lời khai HỒ SƠ r369 rộng hơn phép đo (đếm 4 mutant khi có 5; "rộng hơn r367 một trường" khi tập trường mới = 0; số ref lịch sử dưới nhãn ĐO; README thiếu nhãn (b)/attestation; 638→647 khi đúng là 637→646). Executor áp NGUYÊN HINT (8 hunk / 4 tệp) tại a4c14c7; lượt 2 áp lại từng hunk: ĐÓNG. Mọi số trong bảng đo lại là số của 899f305, không phải cây đã land.
+      Verdict chấm head 899f305 với 0 P1 / 4 P2 / 1 P3 — cả năm là lời khai HỒ SƠ r369 rộng hơn phép đo (khai 4 mutant ĐỎ khi thực tế có 5 mutant: 3 ĐỎ / 2 SỐNG; "rộng hơn r367 một trường" khi tập trường mới = 0; số ref lịch sử dưới nhãn ĐO; README thiếu nhãn (b)/attestation; 638→647 khi đúng là 637→646). Executor áp NGUYÊN HINT (8 hunk / 4 tệp) tại a4c14c7; lượt 2 áp lại từng hunk: ĐÓNG. Mọi số trong bảng đo lại là số của 899f305, không phải cây đã land.
     phai_lam_gi_khi_chay_lai: >-
       Đọc lượt 1 làm NGUỒN finding, lượt 2 làm chốt đóng; đừng lấy changes_requested này làm trạng thái của #516.
   - id: BANG-DO-LAI-KHONG-LEN-COMMENT-tep-trong-kho-la-ban-du

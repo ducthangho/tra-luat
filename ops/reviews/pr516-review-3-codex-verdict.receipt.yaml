@@ -95,15 +95,9 @@ verdict_usage_caveats:
   - id: APPROVE-TREN-5f45e6e-KHONG-PHAI-HEAD-DA-MERGE-xung-dot-voi-r368
     muc: P2
     mo_ta: >-
-      `approve` 0/0/0 này chấm 5f45e6e (sau khi vá P1 assurance của connector). `merge_pull_request` trên 5f45e6e trả 405 merge conflict vì #514 (r368) vừa land ⇒ merge master giải xung đột ⇒ c98c33e; head đã merge là c98c33e, được lượt 4 (cây) + lượt 5 (approve) chấm. Nội dung 7 tệp hồ sơ không đổi qua merge (lượt 4 đo).
+      `approve` 0/0/0 này chấm 5f45e6e (sau khi vá P1 assurance của connector). `merge_pull_request` trên 5f45e6e trả 405 merge conflict vì #514 (r368) vừa land ⇒ merge master giải xung đột ⇒ c98c33e; head đã merge là c98c33e, được lượt 4 (cây) + lượt 5 (approve) chấm. Bốn tệp pr511 (2 verdict + 2 receipt) không đổi byte qua merge; CHANGELOG, README và manifest đổi để giữ thêm phía r368 (lượt 4 đo).
     phai_lam_gi_khi_chay_lai: >-
       Muốn biết head đã land hãy đọc lượt 5 và merge commit 46d9561; approve này chứng cho 5f45e6e.
-  - id: REVIEWER-TU-KHAI-LOI-PHAM-VI-DOC-launcher-ngoai-bang-_TRANSPORT_CONTRACTS
-    muc: P3
-    mo_ta: >-
-      Reviewer tự khai ở đầu verdict: lệnh trích `_TRANSPORT_CONTRACTS` dùng sai dấu kết thúc nên đã xuất cả phần sau bảng trong .claude/dev/launcher.py; không dùng phần ấy làm căn cứ; không tự khai đã giữ trọn rào chắn đọc.
-    phai_lam_gi_khi_chay_lai: >-
-      Đừng dùng verdict này để tuyên bố rào chắn "chỉ đọc bảng" đã được giữ tuyệt đối.
   - id: BANG-DO-LAI-KHONG-LEN-COMMENT-tep-trong-kho-la-ban-du
     muc: P3
     mo_ta: >-

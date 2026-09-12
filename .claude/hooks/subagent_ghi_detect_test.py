@@ -971,6 +971,166 @@ def t22b_fixture_KHONG_an_cau_hinh_git_ngoai(h):
                      if rc == 0 else f"cau hinh PHAM VI LENH van lot: rc={rc}")
 
 
+def t26a_ten_unicode_duoc_giai_ma_dung_byte_khi_quotePath_true(h):
+    c, s = _cay(), _snap()
+    subprocess.run(["git", "config", "core.quotePath", "true"], cwd=c, capture_output=True)
+    ten = "chữ-việt.txt"
+    f = pathlib.Path(c) / ten
+    f.write_text("1", encoding="utf-8")
+
+    goi_byte("SubagentStart", "tl-auditor", "a26a_clean", c, s, h)
+    rc1, kq1, ly1, ct1 = goi_byte("SubagentStop", "tl-auditor", "a26a_clean", c, s, h)
+    if kq1 != "clean" or ct1.get("so_duong_da_bam_noi_dung", 0) == 0:
+        shutil.rmtree(c, ignore_errors=True)
+        return False, f"quotePath=true (unchanged): {kq1}, hashed={ct1.get('so_duong_da_bam_noi_dung')}"
+
+    goi_byte("SubagentStart", "tl-auditor", "a26a_changed", c, s, h)
+    f.write_text("2", encoding="utf-8")
+    rc2, kq2, ly2, ct2 = goi_byte("SubagentStop", "tl-auditor", "a26a_changed", c, s, h)
+    shutil.rmtree(c, ignore_errors=True)
+    return kq2 == "changed", f"quotePath=true: {kq1} -> {kq2}"
+
+def t26b_ten_unicode_giai_ma_dung_byte_khi_quotePath_false(h):
+    c, s = _cay(), _snap()
+    subprocess.run(["git", "config", "core.quotePath", "false"], cwd=c, capture_output=True)
+    ten = "chữ-việt.txt"
+    f = pathlib.Path(c) / ten
+    f.write_text("1", encoding="utf-8")
+
+    goi_byte("SubagentStart", "tl-auditor", "a26b_clean", c, s, h)
+    rc1, kq1, ly1, ct1 = goi_byte("SubagentStop", "tl-auditor", "a26b_clean", c, s, h)
+    if kq1 != "clean" or ct1.get("so_duong_da_bam_noi_dung", 0) == 0:
+        shutil.rmtree(c, ignore_errors=True)
+        return False, f"quotePath=false (unchanged): {kq1}, hashed={ct1.get('so_duong_da_bam_noi_dung')}"
+
+    goi_byte("SubagentStart", "tl-auditor", "a26b_changed", c, s, h)
+    f.write_text("2", encoding="utf-8")
+    rc2, kq2, ly2, ct2 = goi_byte("SubagentStop", "tl-auditor", "a26b_changed", c, s, h)
+    shutil.rmtree(c, ignore_errors=True)
+    return kq2 == "changed", f"quotePath=false: {kq1} -> {kq2}"
+
+def t26c_escaped_names_duoc_giai_ma_dung(h):
+    hook = _nap_hook_de_do(h, "t26c")
+    res = hook._duong_tu_porcelain('?? "tep\\n\\"voi\\"\\\\slash.txt"')
+    mong_doi = 'tep\n"voi"\\slash.txt'
+    return res == mong_doi, f"escaped names parser: {res!r} (mong doi {mong_doi!r})"
+
+def t26d_valid_non_utf8_byte_roundtrip(h):
+    # This tests VALID non-UTF8 byte path round-trip (which is octal escaped in git)
+    hook = _nap_hook_de_do(h, "t26d")
+    res = hook._duong_tu_porcelain('?? "bad-\\377.txt"')
+    mong_doi = "bad-\udcff.txt"
+    return res == mong_doi, f"valid non-utf8 parser: {res!r} (mong doi {mong_doi!r})"
+
+def t26e_mixed_literal_unicode_and_escapes(h):
+    hook = _nap_hook_de_do(h, "t26e")
+    res = hook._duong_tu_porcelain('?? "chữ\\n.txt"')
+    mong_doi = "chữ\n.txt"
+    return res == mong_doi, f"mixed literal and escapes: {res!r} (mong doi {mong_doi!r})"
+
+def t26f_arrow_name_decoy_collision_false_clean(h):
+    hook = _nap_hook_de_do(h, "t26f")
+    res1 = hook._duong_tu_porcelain('?? "victim -> decoy"')
+    res2 = hook._duong_tu_porcelain('R  "victim" -> "decoy"')
+    res3 = hook._duong_tu_porcelain('R  "victim -> decoy" -> "new"')
+    mong_doi1 = "victim -> decoy"
+    mong_doi2 = "decoy"
+    mong_doi3 = "new"
+    return res1 == mong_doi1 and res2 == mong_doi2 and res3 == mong_doi3, f"arrow collision: {res1!r}, {res2!r}, {res3!r}"
+
+def t26g_malformed_syntax_rejection(h):
+    hook = _nap_hook_de_do(h, "t26g")
+    res1 = hook._duong_tu_porcelain('?? "bad-\\x61"')
+    res2 = hook._duong_tu_porcelain('?? "bad-\\q"')
+    res3 = hook._duong_tu_porcelain('?? "unterminated')
+    return res1 is None and res2 is None and res3 is None, f"malformed rejection: {res1}, {res2}, {res3}"
+
+def t26h_real_git_rename_of_arrow_filename(h):
+    if os.name == 'nt':
+        return True, "CAPABILITY LIMITATION: Windows khong ho tro ky tu > trong ten tep."
+    c, s = _cay(), _snap()
+    r = subprocess.run(["git", "config", "core.quotePath", "true"], cwd=c, capture_output=True)
+    if r.returncode != 0: return False, "setup git config that bai"
+
+    f_arrow = pathlib.Path(c) / "victim -> decoy"
+    f_arrow.write_text("1", encoding="utf-8")
+    r = subprocess.run(["git", "add", "victim -> decoy"], cwd=c, capture_output=True)
+    if r.returncode != 0: return False, "setup git add that bai"
+    r = subprocess.run(["git", "commit", "-m", "init"], cwd=c, capture_output=True)
+    if r.returncode != 0: return False, "setup git commit that bai"
+
+    r = subprocess.run(["git", "mv", "victim -> decoy", "new"], cwd=c, capture_output=True)
+    if r.returncode != 0: return False, "setup git mv that bai"
+
+    f_new = pathlib.Path(c) / "new"
+
+    goi_byte("SubagentStart", "tl-auditor", "a26h_clean", c, s, h)
+    rc1, kq1, ly1, ct1 = goi_byte("SubagentStop", "tl-auditor", "a26h_clean", c, s, h)
+    if kq1 != "clean":
+        shutil.rmtree(c, ignore_errors=True)
+        return False, f"real git rename (unchanged): {kq1}"
+    if not ct1.get("so_duong_da_bam_noi_dung"):
+        shutil.rmtree(c, ignore_errors=True)
+        return False, "real git rename (unchanged): zero hashed paths"
+
+    goi_byte("SubagentStart", "tl-auditor", "a26h_changed", c, s, h)
+    f_new.write_text("2", encoding="utf-8")
+    rc2, kq2, ly2, ct2 = goi_byte("SubagentStop", "tl-auditor", "a26h_changed", c, s, h)
+    shutil.rmtree(c, ignore_errors=True)
+    return kq2 == "changed", f"real git rename: {kq1} -> {kq2}"
+
+
+def t26i_record_boundary_regression(h):
+    if os.name == 'nt':
+        chars = ["\u0085", "\u2028", "\u2029", " "]
+    else:
+        chars = ["\u0085", "\u2028", "\u2029", " \r\n\t"]
+
+    xau = []
+    so_ca = 0
+    for qp in ["true", "false"]:
+        for i, char in enumerate(chars):
+            c, s = _cay(), _snap()
+            r = subprocess.run(["git", "config", "core.quotePath", qp], cwd=c, capture_output=True)
+            if r.returncode != 0:
+                xau.append(f"qp={qp}: git config rc={r.returncode}")
+                shutil.rmtree(c, ignore_errors=True)
+                continue
+
+            fname = f"line{char}break.txt"
+            fpath = pathlib.Path(c) / fname
+            fpath.write_text("1", encoding="utf-8")
+            r = subprocess.run(["git", "add", fname], cwd=c, capture_output=True)
+            if r.returncode != 0:
+                xau.append(f"qp={qp} char={repr(char)}: git add rc={r.returncode}")
+                shutil.rmtree(c, ignore_errors=True)
+                continue
+
+            aid = f"a26i_{qp}_{i}"
+            goi_byte("SubagentStart", "tl-auditor", aid + "_clean", c, s, h)
+            rc1, kq1, ly1, ct1 = goi_byte("SubagentStop", "tl-auditor", aid + "_clean", c, s, h)
+
+            if kq1 != "clean":
+                xau.append(f"qp={qp} char={repr(char)}: {kq1}")
+            elif not ct1.get("so_duong_da_bam_noi_dung") or ct1.get("khong_bam_duoc"):
+                xau.append(f"qp={qp} char={repr(char)}: missing paths or zero hashes")
+            else:
+                goi_byte("SubagentStart", "tl-auditor", aid + "_changed", c, s, h)
+                fpath.write_text("2", encoding="utf-8")
+                rc2, kq2, ly2, ct2 = goi_byte("SubagentStop", "tl-auditor", aid + "_changed", c, s, h)
+                if kq2 != "changed":
+                    xau.append(f"qp={qp} char={repr(char)}: {kq1} -> {kq2}")
+                else:
+                    so_ca += 1
+
+            shutil.rmtree(c, ignore_errors=True)
+
+    if so_ca != len(chars) * 2:
+        xau.append(f"thieu ca: do {so_ca} mong doi {len(chars) * 2}")
+
+    return not xau, "loi: " + "; ".join(xau) if xau else f"matrix passed ({so_ca} cases)"
+
+
 CA = [t1_khong_ghi_thi_clean, t2_ghi_tep_theo_doi_thi_changed,
       t3_ghi_tep_BI_IGNORE_van_changed, t4_sua_tep_da_theo_doi_thi_changed,
       t4b_XOA_tep_da_theo_doi_thi_changed, t4c_DOI_TEN_tep_da_theo_doi_thi_changed,
@@ -994,7 +1154,16 @@ CA = [t1_khong_ghi_thi_clean, t2_ghi_tep_theo_doi_thi_changed,
       # --- #412 loi B: giai ma utf-8 tuong minh o ca hai duong ---
       t25a_git_doc_byte_utf8_khong_phu_thuoc_locale,
       t25b_stdin_doc_byte_utf8_khong_phu_thuoc_locale,
-      t25_duong_dan_NGOAI_ASCII_van_bam_duoc_noi_dung]
+      t25_duong_dan_NGOAI_ASCII_van_bam_duoc_noi_dung,
+      t26a_ten_unicode_duoc_giai_ma_dung_byte_khi_quotePath_true,
+      t26b_ten_unicode_giai_ma_dung_byte_khi_quotePath_false,
+      t26c_escaped_names_duoc_giai_ma_dung,
+      t26d_valid_non_utf8_byte_roundtrip,
+      t26e_mixed_literal_unicode_and_escapes,
+      t26f_arrow_name_decoy_collision_false_clean,
+      t26g_malformed_syntax_rejection,
+      t26h_real_git_rename_of_arrow_filename,
+      t26i_record_boundary_regression]
 
 # --- DOT BIEN: moi cai go DUNG MOT tinh chat, va phai lam it nhat mot ca DO ---
 DOT_BIEN = [
@@ -1075,6 +1244,15 @@ DOT_BIEN = [
     ("m18_index_ghep_chuoi_top_git_index",
      '    rc_idx, duong_idx = _git(cwd, "rev-parse", "--git-path", "index")',
      '    rc_idx, duong_idx = 0, ".git/index"'),
+    ("m27_bo_codecs_escape_decode",
+     '    if p.startswith(b\'"\'):\n        res, end_idx = _consume_c_style_bytes(p)',
+     '    if p.startswith(b\'"\'):\n        return p[1:-1].decode("unicode_escape")'),
+    ("m29_bo_xu_ly_arrow_rename",
+     '        if p.startswith(b\'"\'):\n            res, end_idx = _consume_c_style_bytes(p)\n            if res is None: return None\n            if end_idx + 4 <= len(p) and p[end_idx:end_idx+4] == b\' -> \':\n                p = p[end_idx+4:]\n            else:\n                return None\n        else:\n            idx = p.find(b\' -> \')\n            if idx != -1:\n                p = p[idx+4:]\n            else:\n                return None',
+     '        if b\' -> \' in p:\n            p = p.split(b\' -> \', 1)[1]'),
+    ("m30_record_boundary_splitlines",
+     "    for dong in st.split('\\n'):",
+     "    for dong in st.splitlines():"),
 ]
 
 

@@ -91,6 +91,14 @@ effective_review_class: sensitive
 depends_on: []
 thay_the_cho:
   - quy-trinh-lap-review-r2-exec-1-claude-20260912
+da_bi_thay_the: quy-trinh-lap-review-r4-exec-3-claude-20260912
+da_bi_thay_the_ly_do: >-
+  ACCEPTANCE ĐỔI, không phải write set: chủ kho chọn phương án (B) hoà giải với PR #521
+  (comment 5647027599), và (B) viết lại A1/A2 — từ "nội dung nằm TRONG adapter" thành
+  "con trỏ § + phần tối thiểu còn răng". §3.2 đòi revision mới khi acceptance đổi.
+  Lease gen 3 neo ops/specs/…-r4.md, spec_sha256 78388d3e… (đo TỪ BLOB).
+  Chốt HAI CHIỀU: gen 3 khai `thay_the_cho` gen 2, và dòng này là chiều ngược lại —
+  `_kiem_bia_mo` đòi cả hai, một chiều thôi thì lease cũ vẫn tính là đang giữ.
 
 ly_do_cap: >-
   Hai phép đo. (1) Hiện vật review không vào được kho: write set r2 là ĐÚNG HAI tệp skill, nên hai

@@ -1,0 +1,155 @@
+# Lease EXECUTOR — QUY-TRINH-LAP-REVIEW-VA-DIEU-KIEN-DUNG revision 4 (#523). Ghi HỘ chủ kho.
+# THAY gen 2 vì ACCEPTANCE ĐỔI: chủ kho chọn phương án (B) hoà giải với PR #521, và (B) viết lại
+# A1/A2 (nội dung TRONG adapter -> con trỏ + phần tối thiểu còn răng). Write set KHÔNG đổi.
+schema_version: 2
+event: executor_lease_granted
+
+packet_issue: 523
+mission_issue: 499
+granted_by: ducthangho
+granted_on_instruction: https://github.com/ducthangho/tra-luat/pull/529#issuecomment-5647027599
+leased_at_utc: 2026-09-12T16:05:00Z
+lease_expires_at_utc: 2026-09-13T08:15:00Z
+
+packet_id: QUY-TRINH-LAP-REVIEW-VA-DIEU-KIEN-DUNG
+revision: 4
+generation: 3
+lease_id: quy-trinh-lap-review-r4-exec-3-claude-20260912
+role: executor
+provider: claude
+executor: claude
+environment: cloud
+risk: sensitive
+assurance_target: cross_approved
+access: read-write
+
+spec_path: ops/specs/QUY-TRINH-LAP-REVIEW-VA-DIEU-KIEN-DUNG-r4.md
+spec_sha256: 78388d3e25f780fd18581a47353e5560965d92f2f347379ef5da235e1e941bfa
+spec_hash: 78388d3e25f780fd18581a47353e5560965d92f2f347379ef5da235e1e941bfa
+spec_hash_do_tu_dau: >-
+  Đo TỪ BLOB: `git show claude/spec-quy-trinh-r4-20260912:ops/specs/…-r4.md | sha256sum`, và đối
+  chiếu với bản trên đĩa — hai phép khớp. Không lấy băm của tệp lease này làm `spec_hash`, và
+  không bịa một băm để lấp ô trống (bài học `spec_hash` của kho: protocol §3.2 đòi trường này, mà
+  trên master chỉ 2/74 lease có nó).
+
+write_set:
+  - .claude/skills/cross-review/SKILL.md
+  - .claude/skills/work-packet/SKILL.md
+  - ops/reviews/
+
+write_set_da_do_truoc_khi_cap: >-
+  Quét sau `fetch` refspec rộng; so TẬP TÊN hai nguồn (`ls-remote --heads` 358 ↔ `for-each-ref`
+  358, `comm -23` = 0 cả hai chiều) ⇒ KHÔNG MÙ; `is-shallow=false`.
+  `ai-dang-giu` cho cả ba đường (SAU khi đồng bộ `master` cục bộ — lệnh fail-close `rc=12` đúng
+  lúc nhánh cục bộ tụt 12 commit, và đó là chốt LÀM VIỆC, không phải lỗi):
+    .claude/skills/cross-review/SKILL.md  NGƯỜI_GIỮ 1 = gen 2 của packet này (gen 3 này thay)
+    .claude/skills/work-packet/SKILL.md   NGƯỜI_GIỮ 1 = gen 2 của packet này (gen 3 này thay)
+    ops/reviews/                          NGƯỜI_GIỮ 2 = gen 2 này + lease gen 3 của #522
+  Nhắc lại phát hiện đã ghi ở gen 2, vì nó vẫn đúng và vẫn dễ sập: `ai-dang-giu` so CHUỖI CHÍNH
+  XÁC, KHÔNG nở prefix — truy vấn `ops/reviews/` ⇒ 1, truy vấn `ops/reviews/README.md` ⇒ 0, và số
+  0 ấy là SỐ KHÔNG GIẢ.
+
+hai_writer_da_xay_ra_tren_write_set_nay: >-
+  ĐÂY LÀ LÝ DO r4 TỒN TẠI, không phải một ghi chú lề. PR #521 land vào master lúc
+  2026-09-12T15:31:01Z và sửa +247/−147 đúng `.claude/skills/cross-review/SKILL.md` — đường dẫn
+  mà lease gen 1 của packet này giữ từ 2026-09-12T08:14:57Z ⇒ cửa sổ hai writer ~7h16m.
+  `merge-tree --write-tree 6b46012 dc02c9b` ⇒ rc=1, CONFLICT, 2 hunk / 82 dòng.
+  Quét NỘI DUNG mọi `ops/leases/*` trên 358 ref tìm `write_set` chứa đường dẫn ấy ⇒ 36 tệp lease,
+  KHÔNG tệp nào thuộc #521. Hai khả năng — #521 không có lease, hoặc lease của nó sống trên một
+  nhánh `ops/**` đã xoá (nợ `SO-LEASE-KHONG-NAM-MOT-CHO`) — KHÔNG phân biệt được từ dữ liệu hiện
+  có, nên trạng thái là KHÔNG ĐO ĐƯỢC. Chủ kho chốt CHỈ GHI NHẬN: không mở packet cho vụ ấy,
+  không đi tìm thêm. Ghi vào lease để lần sau không ai đọc bản đo thành một kết luận về #521.
+
+chong_lan_write_set: >-
+  `ops/reviews/` vẫn bị lease gen 3 của #522 (`tran-vong-review-len-muoi-exec-3-claude-20260912`)
+  giữ, CÒN HẠN tới 2026-09-13T08:15:00Z dù #522 ĐÃ LAND (merge 63075a7, CI hậu merge ubuntu
+  success). Lease KHÔNG TỰ CHẾT khi packet đã land — nợ CÓ TÊN
+  `AG-T0-01B-thu-hoi-lease-chua-co-duong`. Phiên này KHÔNG tự viết bản thu hồi:
+  `_KHOA_THU_HOI_BAT_BUOC` đòi `thu_hoi_boi` là trường THẨM QUYỀN và bản ghi đi qua cổng tiếp
+  nhận M4 riêng. Khai thẳng thay vì che; quyết định thuộc chủ kho.
+
+branch: claude/quy-trinh-lap-review-r2
+branch_ownership: exclusive
+target_branch_neu_land: master
+base_sha: dc02c9beed42bd2ea44a80a2e34e1bbe3acfc6c5
+base_sha_ghi_chu: >-
+  ĐỔI so gen 2 (`85fcbf8`) và đó là chủ đích: `dc02c9b` là master SAU khi #521 land, tức mốc mà
+  mọi tiêu chí của r4 neo vào. `A17` đo `git diff dc02c9b..<head>`, nên `base_sha` phải là chính
+  commit ấy chứ không phải "nhánh mặc định hiện tại" — một mốc trôi làm tiêu chú chết đúng lúc
+  merge. Đo: `85fcbf8` là tổ tiên của `dc02c9b` (`merge-base --is-ancestor` rc=0).
+start_from_sha: 6b46012abd2a059029ae267740f2fcc0de120797
+reviewed_sha_required: KHONG_DO_DUOC_LUC_CAP
+reviewed_sha_required_ghi_chu: >-
+  CỐ Ý để KHÔNG ĐO ĐƯỢC, không bịa. Head phải review là head SAU commit merge `dc02c9b` vào
+  nhánh packet, và commit ấy CHƯA TỒN TẠI lúc cấp lease. Gõ một chuỗi 40 hex tự nghĩ ra vào đây
+  là dựng một MỎ NEO GIẢ: reviewer sẽ đọc một head khác với head mà lease tưởng đang nói tới, và
+  không ai phát hiện — đúng lỗi phiên này đã tự bắt được ở gen 2 trước khi commit. Head thật sẽ
+  được ghi vào `VERDICT.md` và vào biên nhận của lượt 3.
+
+authority_basis: '§2 — start/pause/resume/reroute/override/authorize thuộc chủ kho'
+recorded_by: claude-session
+recorder_is_dispatcher: false
+recorder_cung_la_nguoi_thi_cong: true
+recorder_xung_dot_loi_ich: >-
+  Phiên ghi lease này CŨNG là phiên thi công, CŨNG soạn r4, và CŨNG là phiên đã TRÌNH ba phương
+  án (A)/(B)/(C) cho chủ kho chọn — tức nó viết cả thực đơn lẫn món. Thu hẹp bằng: chỉ thị chọn
+  (B) có dấu vết bền (comment 5647027599) và bản đo mà lựa chọn dựa vào cũng có dấu vết bền
+  (comment 5647008786) nên kiểm lại được; `A18` buộc BẢY phép làm ĐỎ phải CHẠY THẬT kèm đối chứng
+  DƯƠNG, nên lời khai "tối thiểu vẫn đủ răng" không mua được bằng văn xuôi; cross-review phải
+  KHÁC NỀN và `sensitive` đòi approve tường minh.
+  Phần KHÔNG thu hẹp được, nói thẳng: chính phiên này phát biểu `A1'`, `A2'`, `A17`, `A18`, và
+  chính nó cũng là bên bị các tiêu chí ấy chấm. Reviewer phải đọc chúng như ĐỐI TƯỢNG ĐÁNG NGHI —
+  đặc biệt `A1'` ca thứ ba và `A2'` ca thứ tư, vì hai ca ấy là thứ duy nhất ngăn (B) âm thầm tụt
+  thành (A).
+
+run_minutes: 1440
+heartbeat_required_minutes: 30
+attempts_used: 0
+attempts_limit: 10
+
+nang_tran:
+  same_failure_limit: 2 -> 10
+  attempts_limit: 3 -> 10
+  ai_nang: ducthangho
+  tran_cu: same_failure_limit 2 · attempts_limit 3
+  tran_moi: same_failure_limit 10 · attempts_limit 10
+  can_cu: https://github.com/ducthangho/tra-luat/issues/523#issuecomment-5646812840
+  xac_nhan_khuon: 'chủ kho xác nhận "Nâng như #522"'
+  ghi_chu: >-
+    KẾ THỪA từ gen 2, r4 KHÔNG xin thêm lượt nào. Nâng KHÔNG chữa lớp nào; chỉ cho phép ĐO TIẾP.
+    Ba lớp của lượt 2 đã vá tại `56cfce5` và CHƯA được review lượt nào — lượt 3 sẽ là lượt đầu
+    tiên chấm chúng, cùng lúc chấm phép hoà giải (B).
+
+reviewer_provider: codex
+review_class: sensitive
+effective_review_class: sensitive
+
+depends_on: []
+thay_the_cho:
+  - quy-trinh-lap-review-r2-exec-2-claude-20260912
+
+ly_do_cap: >-
+  MỘT phép đo: PR #521 land và sửa cùng một tệp trong write set của packet này, cho 2 hunk xung
+  đột / 82 dòng, và hai hunk là hai chỉ thị TRÁI NHAU (#521 được giao GỠ doctrine khỏi adapter;
+  #523 được giao VIẾT bảng điều kiện dừng + BẢNG LỚP vào adapter). Ba lối ra cơ học đều MẤT hành
+  vi được giao: `theirs` mất trọn M1-M3 (đo: 8/10 mẫu của A1+A2 vắng trên master); `ours` hoàn
+  nguyên việc #521 trả 8 lượt cross-review để làm; giữ cả hai đưa lại vào adapter đúng loại prose
+  mà #521 gỡ, và `doctrine-scan` KHÔNG bắt được (chính lượt 2 của packet này đã đo và đã viết
+  giới hạn ấy vào skill). Chủ kho chọn (B) hoà giải ⇒ ĐỔI ACCEPTANCE ⇒ §3.2/§5 đòi revision mới,
+  generation mới, cấp lại lease.
+
+viec_trong_lease:
+  - 'M1-M12: giữ nguyên từ r1/r2/r3 — ĐỌC r1 cho định nghĩa đầy đủ, đừng đọc dòng liệt kê tóm tắt.'
+  - 'M13: hoà giải, KHÔNG chọn phía — giữ cấu trúc con trỏ của #521 VÀ mang phần bắt buộc của #523.'
+  - 'M14: mỗi chốt rút gọn phải có một đột biến làm tiêu chí đích ĐỎ; không nhận "ngắn mà đủ" bằng lời.'
+
+dieu_kien_dung:
+  - 'S1 cần đường dẫn thứ TƯ ngoài hai tệp skill + prefix ops/reviews/.'
+  - 'S2 tổng dòng thêm của HAI tệp skill (trước merge + sau merge, KHÔNG đếm delta #521 mà merge mang vào) > 300.'
+  - 'S3 muốn đụng docs/PROTOCOL_DA_PHIEN.md hay .claude/hooks/**.'
+  - 'S4 muốn vá packet_loop.py / doctrine-scan — KHÔNG trong write set; nợ riêng.'
+  - 'S5 muốn sửa VERDICT.md của một lượt đã giao (chúng neo theo băm).'
+  - 'S6 muốn đổi định nghĩa P1/P2/P3 hay đổi slug của một lớp cũ.'
+  - 'S7 MỚI — một ca làm ĐỎ của A1''/A2'' KHÔNG đỏ được, tức một chốt MẤT RĂNG khi rút gọn. Khi
+     ấy DỪNG và báo chủ kho; KHÔNG nới A1''/A2'' cho hết đỏ, và KHÔNG dựng lại bản dài để lách.'
+  - 'S8 MỚI — phép merge đòi xoá một dòng của #521 mà A1''/A2'' không đòi (tức A17 sẽ ĐỎ).'

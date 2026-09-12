@@ -307,12 +307,16 @@ no_ky_thuat:
   - slug: khong-cong-nao-doc-ops-land
     trang_thai: MOI
     mo_ta: >-
-      KHÔNG cổng nào đọc `ops/land/**`. Đo 11-09-2026 trên `8802924`: grep `ops/*.py`,
-      `.claude/dev/*.py`, `scripts/tl_core/*.py`, `.github/workflows/*.yml` cho `ops/land` và
-      `land_operator` ⇒ 0 nơi. Vì vậy một tệp land evidence THIẾU HẲN một khoá schema bắt buộc
-      (`authorization_url`, `docs/PROTOCOL_DA_PHIEN.md:478`) đi qua được cả gate PR lẫn gate
-      master lẫn 11 lượt cross-review; thứ bắt được nó là connector codex, và chỉ SAU khi merge.
-      Cùng họ "cổng vắng mặt trông giống cổng xanh".
+      Nợ schema/URL uỷ quyền; giữ slug lịch sử, không hiểu nó là không cổng nào đọc thư mục.
+      Đo trên `8802924`: grep `ops/*.py`, `.claude/dev/*.py`, `scripts/tl_core/*.py`,
+      `.github/workflows/*.yml` cho `ops/land` và `land_operator` ⇒ 0 nơi. Phép tìm literal
+      không đo đủ phạm vi đọc: tại cùng SHA, `eol-policy survey` trong `ci.yml` chạy
+      `python .githooks/eol_policy.py --all --json`, đọc blob trong index và kiểm EOL của cả
+      9 tệp `ops/land/*.yaml`, gồm tệp #493. Kiểm EOL không xác minh schema hay URL uỷ quyền.
+      Phản chứng bỏ dòng `authorization_url` trên bản sao r370 vẫn cho `bien_nhan_v2` ĐẠT.
+      Việc khoản thiếu đi qua gate PR, gate master và 11 lượt cross-review rồi được connector
+      nêu sau merge là ATTESTATION của phiên điều phối; gói không có đầy đủ log các lượt đó.
+      Không suy từ việc không báo finding thành cả 11 lượt đều chưa đối chiếu schema.
     chua_co_packet: true
   - slug: quyet-dinh-dong-vong-lap-review-chua-vao-doctrine
     trang_thai: MOI

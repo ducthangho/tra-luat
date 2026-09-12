@@ -37,15 +37,17 @@ tại chính `8802924` để xác minh bảng. Chênh lệch giữa hai head t�
 Cặp `0 vi phạm` so `KHÔNG ĐO ĐƯỢC` — thứ kết luận thật sự nằm ở đây — **không
 đổi** qua cả hai head.
 
-Hai sai độc lập chồng lên nhau trong một câu:
+Hai điều phép tái dựng ở bảng trên phân biệt được:
 
-1. **Nguồn**: `--depth` làm hỏng phép hỏi lịch sử — đúng mục *"cắt độ sâu làm hỏng phép hỏi LỊCH SỬ"*
-   (phiên `tra-luat-ae` mất 2,5h vì nó). Lần này nạn nhân là một reviewer tự động.
-2. **Phân loại**: kể cả ở clone nông, cổng **không** nói `vi phạm` — nó nói **`KHÔNG ĐO ĐƯỢC`**, đúng
-   doctrine ba trạng thái. Connector gộp trạng thái thứ ba vào "violation", tức `None → False`.
+1. **Nguồn**: trong phép tái dựng, `--depth=1` làm thiếu lịch sử để hỏi — đúng cơ chế được mô tả
+   trong mục *"cắt độ sâu làm hỏng phép hỏi LỊCH SỬ"* của `CLAUDE.md`. Chưa có log checkout và
+   lệnh gốc của connector trong gói để xác minh đó là nguyên nhân của chính lượt review ấy.
+2. **Phân loại**: ở clone nông đã đo, cổng nói **`KHÔNG ĐO ĐƯỢC`**, không nói `vi phạm`.
+   Gọi kết quả này là "violation" sẽ gộp trạng thái thứ ba vào sai, tức `None → False`.
 
-Điều đáng giữ không phải "connector sai", mà là: **cổng đã phân loại ĐÚNG và vẫn bị đọc SAI.** Một
-trạng thái thứ ba chỉ cứu được người đọc nó như trạng thái thứ ba.
+Phép tái dựng bác lời khai về ancestry trên cây đầy đủ và xác nhận cách cổng phân loại khi thiếu
+lịch sử. Nó chưa xác định connector thực sự đã chạy và đọc đầu ra nào. Cơ chế tái hiện được
+không tự chứng minh nguyên nhân của một lượt chạy khác.
 
 ## Finding 2 — ĐÚNG. `authorization_url` vắng HẲN khỏi `ops/land/pr493-land-evidence.yaml`
 
@@ -69,17 +71,21 @@ URL**: uỷ quyền cho `99aef14` là chỉ thị trong phiên; dựng một com
 
 ## Vì sao nó lọt — và đây mới là nợ
 
-**KHÔNG cổng nào đọc `ops/land/**`.** Đo trên `8802924`: grep `ops/*.py` · `.claude/dev/*.py` ·
-`scripts/tl_core/*.py` · `.github/workflows/*.yml` cho `ops/land` và `land_operator` ⇒ **0 nơi**.
+**Phép grep không đo đủ phạm vi đọc của các cổng.** Đo trên `8802924`: grep `ops/*.py` ·
+`.claude/dev/*.py` · `scripts/tl_core/*.py` · `.github/workflows/*.yml` cho `ops/land` và
+`land_operator` ⇒ **0 nơi**. Tuy nhiên, tại cùng SHA, bước `eol-policy survey` trong `ci.yml`
+chạy `python .githooks/eol_policy.py --all --json`: nó đọc blob trong index và kiểm EOL của cả
+9 tệp `ops/land/*.yaml`, gồm tệp #493. Kiểm EOL không xác minh schema hay URL uỷ quyền.
 
-Nên một tệp land evidence thiếu hẳn một khoá schema bắt buộc đi lọt qua **gate PR** (44/44), **gate
-master** (44/44 chân ubuntu), và **11 lượt cross-review codex** — trong đó lượt 11 có hẳn một nhiệm vụ
-*"tự nhất quán của land evidence"* và báo *"không mâu thuẫn"*. Cả 11 lượt đều so tệp với CHÍNH NÓ và
-với Git; **không lượt nào so tệp với SCHEMA trong protocol**, cũng không lượt nào so với 8 tệp cùng
-loại đã có trong kho. Nợ ghi dưới slug `khong-cong-nao-doc-ops-land`.
+Theo tường thuật của phiên điều phối, khoản thiếu khoá đã đi qua **gate PR** (44/44), **gate
+master** (44/44 chân ubuntu) và **11 lượt cross-review codex**; lượt 11 có nhiệm vụ *"tự nhất quán
+của land evidence"* và báo *"không mâu thuẫn"*. Đây là ATTESTATION về các lượt chạy ngoài gói.
+Việc không báo finding không chứng minh cả 11 lượt đều chưa đối chiếu schema hoặc tệp cùng loại;
+chưa có đầy đủ log của chúng trong gói để xác minh từng thao tác review.
 
-Cùng họ *"cổng vắng mặt trông giống cổng xanh"*, nhưng chật hơn một bậc: ở đây **không có cổng nào để
-mà vắng mặt** — chưa ai viết.
+Nợ cần canh là schema/URL uỷ quyền: phản chứng bỏ dòng `authorization_url` trên bản sao r370 vẫn
+cho `bien_nhan_v2` ĐẠT. Không dùng kết quả ấy, hoặc grep 0 nơi, để kết luận mọi cổng đều không đọc
+thư mục. Giữ slug lịch sử `khong-cong-nao-doc-ops-land`; mô tả nợ ở đây giới hạn lại phạm vi của nó.
 
 ## Gate hậu-merge của #514 trên master (`8802924`)
 

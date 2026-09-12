@@ -161,6 +161,22 @@ def _dong_logic(run):
     return ra
 
 
+# TEN goi la phan truoc toan tu PEP 440 DAU TIEN, khong phai truoc `==`. Ban luot 3 tach
+# bang `==` nen `ruff>=0.16` ra ten `ruff>=0.16`, khong khop `ruff`, va dong ay bi BO QUA
+# sach: ban ghim o dong tren van dung ⇒ gate NHAN mot buoc nang cap khong ghim (`R3-F01`).
+_TOAN_TU = re.compile(r"(===|==|>=|<=|~=|!=|>|<|@|;)")
+# Co lam ban ghim khong con chung minh duoc gi tren PATH cua job (cai vao dich khac, hoac
+# khong cai gi) — lenh mang bat ky co nao trong day deu KHONG_PHAN_TICH_DUOC.
+_CO_HUY_BANG_CHUNG = frozenset({"--dry-run", "--target", "-t", "--prefix", "--root",
+                                "--python", "--user"})
+
+
+def _tach_yeu_cau(t):
+    """`ruff[all]>=0.16` -> (`ruff[all]`, `>=0.16`). Khong toan tu -> rang buoc RONG."""
+    m = _TOAN_TU.search(t)
+    return (t, "") if m is None else (t[:m.start()], t[m.start():])
+
+
 def _chuan_ten(t):
     """PEP 503: bo extras, ha chu thuong, gom `-` `_` `.` — de `Ruff` va `ruff[all]` cung ve mot."""
     t = re.split(r"\[", t, 1)[0]
@@ -168,12 +184,11 @@ def _chuan_ten(t):
 
 
 def _phan_loai_cai_ruff(run):
-    """GHIM | KHONG_GHIM | KHONG_PHAN_TICH_DUOC | KHONG cho MOT than `run`.
-
-    SUA THEO LOP — ba nguyen nhan goc, khong phai bay ban va rieng cho bay bien the:
-    (1) chua chuan hoa ten => `_chuan_ten` (PEP 503, bo extras); (2) tra ve NGAY sau
-    lenh dau => nay duyet HET moi dong lay ket qua XAU NHAT, nen `upgrade` o dong sau
-    trong CUNG buoc khong con lot; (3) `--dry-run` khong cai gi => KHONG_PHAN_TICH_DUOC.
+    """GHIM | KHONG_GHIM | KHONG_PHAN_TICH_DUOC | KHONG cho MOT than `run`. SUA THEO LOP —
+    bon nguyen nhan goc, khong phai bon ban va rieng: (1) chua chuan hoa ten => `_chuan_ten`;
+    (2) tra ve NGAY sau lenh dau => nay duyet HET moi dong lay ket qua XAU NHAT; (3) co huy
+    bang chung (`--dry-run` `--target`...) => KHONG_PHAN_TICH_DUOC; (4) tach ten bang `==`
+    => nay tach bang toan tu PEP 440 dau tien (`_tach_yeu_cau`).
     """
     ket = "KHONG"; vet = None
     for dong in _dong_logic(run):
@@ -193,13 +208,14 @@ def _phan_loai_cai_ruff(run):
         hop_le = dt == "install" and (
             dau[:1] in (["pip"], ["pip3"]) or dau[:2] == ["uv", "pip"]
             or dau[:3] in (["python", "-m", "pip"], ["python3", "-m", "pip"]))
-        if not hop_le or "--dry-run" in tok:
+        if not hop_le or _CO_HUY_BANG_CHUNG.intersection(tok):
             ket, vet = "KHONG_PHAN_TICH_DUOC", dong; continue
-        spec = next((t for t in tok[i + 1:]
-                     if _chuan_ten(t.split("==")[0]) == "ruff"), None)
+        spec = next((t for t in tok[i + 1:] if not t.startswith("-")
+                     and _chuan_ten(_tach_yeu_cau(t)[0]) == "ruff"), None)
         if spec is None: continue
-        ten, _, ban = spec.partition("==")
-        moi_l = "GHIM" if (_chuan_ten(ten) == "ruff" and ban == "0.15.15") else "KHONG_GHIM"
+        # DANH SACH CHO PHEP tren RANG BUOC: chi DUNG chuoi `==0.15.15` moi la GHIM. Moi
+        # cach viet khac — `>=` `~=` `!=` `<` `@`, hay khong rang buoc — deu KHONG_GHIM.
+        moi_l = "GHIM" if _tach_yeu_cau(spec)[1] == "==0.15.15" else "KHONG_GHIM"
         # XAU NHAT thang: mot dong hong trong buoc lam ca buoc khong chung minh duoc.
         thu_tu = {"KHONG": 0, "GHIM": 1, "KHONG_GHIM": 2, "KHONG_PHAN_TICH_DUOC": 3}
         if thu_tu[moi_l] > thu_tu[ket]: ket, vet = moi_l, dong
@@ -217,12 +233,11 @@ def _buoc_co_dieu_kien(step):
 def loi_ruff_ci(source=None):
     """Hợp đồng Ruff của CI, đọc MỌI job — packet #463 tách `test registry` khỏi `jobs.gate`.
 
-    Ba chốt, cùng số với bản trước (`RUFF CI: n/3` không đổi nghĩa): (1) mọi job cài Ruff
-    đều ghim `ruff==0.15.15`; (2) mọi job cài Ruff đều in probe `ruff --version` (dòng
-    riêng); (3) đúng MỘT job chạy `--chay`, Ruff cài trong CÙNG job ấy và TRƯỚC bước đó.
-    Vì sao 1–2 đo trên MỌI job: hai phản chứng `ruff-pin-required`/`ruff-version-probe-
-    required` đột biến bản Ruff ĐẦU TIÊN trong tệp, tức bản ở `gate` — chỉ soi job registry
-    thì cả hai LỌT. Tương thích lùi: `ci.yml` chưa tách vẫn trả `[]`.
+    Ba chốt, cùng số với bản trước (`RUFF CI: n/3` không đổi nghĩa): (1) mọi job cài Ruff đều
+    ghim `ruff==0.15.15`; (2) mọi job cài Ruff đều in probe `ruff --version` (dòng riêng);
+    (3) đúng MỘT job chạy `--chay`, Ruff cài trong CÙNG job và TRƯỚC bước đó. 1–2 đo trên MỌI
+    job vì hai phản chứng đột biến bản Ruff ĐẦU TIÊN trong tệp, tức bản ở `gate` — chỉ soi job
+    registry thì cả hai LỌT. Tương thích lùi: `ci.yml` chưa tách vẫn trả `[]`.
     """
     source = CI_WORKFLOW.read_text(encoding="utf-8") if source is None else source
     try:
@@ -438,11 +453,10 @@ def chay_moi(moi=MOI, cach_ly=CACH_LY, chay_mot=_chay_that,
 
 def phan_chung():
     """Mỗi chốt dùng một bản sao fixture riêng dưới /tmp."""
-    # F02 luot 3 — MOT danh sach, MOT diem noi; ten va ket qua o CUNG mot tuple.
-    # Hai ban va truoc giu HAI danh sach song song roi canh bang DO DAI, va reviewer do
-    # duoc chot ay KHONG bat lech THU TU: bo ten cuoi truoc `zip` ra 64/64 True, dao thu
-    # tu ten ra 65/65 True. Nay khong con `zip`, khong con danh sach thu hai — LOP loi
-    # chet theo CAU TRUC. Kem chot ten trung (dau hieu copy-paste lam bang doc sai).
+    # F02 luot 3 — MOT danh sach, MOT diem noi; ten va ket qua o CUNG mot tuple. Hai ban va
+    # truoc giu HAI danh sach song song roi canh bang DO DAI, va chot ay KHONG bat lech THU
+    # TU (do duoc: bo ten cuoi truoc `zip` ra 64/64 True, dao thu tu ra 65/65 True). Nay
+    # khong con `zip` — lop loi chet theo CAU TRUC. Kem chot ten trung.
     KQ = []
     def _them(ten, ok):
         if any(t == ten for t, _ in KQ):
@@ -633,34 +647,37 @@ def phan_chung():
         ("khong-job-nao-chay-registry", {"gate": {"steps": [_ruff, _khac]}}, 1),
         ("hai-job-chay-registry", {"gate": {"steps": [_ruff, _reg]}, "gate-registry": {"steps": [_ruff, _reg]}}, 1),
     ]
-    for _t, _b in [("pip3", [_p("pip3 install ruff")]),
-                   ("option-truoc-install", [_p("python -m pip --quiet install ruff")]),
-                   ("lenh-noi-dong", [_p("python -m pip install \\\n  ruff")]),
-                   ("buoc-if-false", [dict(_ruff, **{"if": "false"})]),
-                   ("upgrade-khong-ghim-sau-pin", [_ruff, _p("python -m pip install --upgrade ruff")]),
-                   ("comment-chua-pin", [_p("# ruff==0.15.15")]),
-                   ("dang-cai-khong-phan-tich-duoc", [_ruff, _p("apt-get install -y ruff")]),
-                   ("poetry-add-khong-phan-tich-duoc", [_ruff, _p("poetry add ruff")]),
-                   # moi dau vao deu tung LOT qua mot ban bo cham truoc do
-                   ("ten-goi-viet-hoa", [_p("python -m pip install Ruff")]),
-                   ("extras", [_p("python -m pip install ruff[all]")]),
-                   ("upgrade-cung-buoc-dong-sau", [_p("python -m pip install ruff==0.15.15\npython -m pip install --upgrade ruff")]),
-                   ("dry-run", [_p("python -m pip install --dry-run ruff==0.15.15")]),
-                   ("if-so-khong", [dict(_ruff, **{"if": "0"})]),
-                   ("if-bieu-thuc-false", [dict(_ruff, **{"if": "${{false}}"})]),
-                   ("if-chi-linux", [dict(_ruff, **{"if": "runner.os == 'Linux'"})])]:
-        _FX.append((_t, {"gate": {"steps": [_ruff]}, "gate-registry": {"steps": _b + [_reg]}}, 1))
-    # CHIEU NHAN — do duoc: bo `_chuan_ten` / bo `_TRINH_QL_GOI` deu SONG SOT qua 72 ca vi moi
-    # fixture bien the deu doi DO, tuc ta chi dang do FAIL-CLOSE. Hai ban ghim duoi day HOP LE.
-    for _t, _b in [("ghim-ten-viet-hoa", [_p("python -m pip install Ruff==0.15.15")]),
-                   ("ghim-extras", [_p("python -m pip install ruff[all]==0.15.15")])]:
-        _FX.append((_t, {"gate": {"steps": [_ruff]}, "gate-registry": {"steps": _b + [_reg]}}, 0))
-    # Fail-open cua `_TRINH_QL_GOI`: dong trinh-quan-ly-goi cham ruff bang DONG TU ta khong
-    # hieu (`uninstall`) phai la KHONG_PHAN_TICH_DUOC — bo qua thi gate nhan buoc da go ruff.
-    _FX.append(("go-cai-sau-khi-ghim",
-                {"gate": {"steps": [_ruff]},
-                 "gate-registry": {"steps": [_p("python -m pip install ruff==0.15.15\n"
-                                                "python -m pip uninstall -y ruff"), _reg]}}, 1))
+    # MOT BANG, cot `mong` la CHIEU: 0 = gate phai NHAN, 1 = phai TU CHOI. Hai chieu tung
+    # nam o hai vong lap cach nhau nen co che chi co MOT chieu khong ai thay — da tra gia BA
+    # lan: `_chuan_ten`, `_TRINH_QL_GOI`, va noi dong (mutant `l3-bo-noi-dong-logic` cua
+    # reviewer luot 3 SONG SOT). `§12`: lan thu BA thi sua CACH LAM, khong vá lẻ.
+    for _t, _m, _b in [
+            ("pip3", 1, [_p("pip3 install ruff")]),
+            ("option-truoc-install", 1, [_p("python -m pip --quiet install ruff")]),
+            ("lenh-noi-dong", 1, [_p("python -m pip install \\\n  ruff")]),
+            ("ghim-noi-dong", 0, [_p("python -m pip install \\\n  ruff==0.15.15")]),
+            ("buoc-if-false", 1, [dict(_ruff, **{"if": "false"})]),
+            ("if-so-khong", 1, [dict(_ruff, **{"if": "0"})]),
+            ("if-bieu-thuc-false", 1, [dict(_ruff, **{"if": "${{false}}"})]),
+            ("if-chi-linux", 1, [dict(_ruff, **{"if": "runner.os == 'Linux'"})]),
+            ("comment-chua-pin", 1, [_p("# ruff==0.15.15")]),
+            ("ten-goi-viet-hoa", 1, [_p("python -m pip install Ruff")]),
+            ("ghim-ten-viet-hoa", 0, [_p("python -m pip install Ruff==0.15.15")]),
+            ("extras", 1, [_p("python -m pip install ruff[all]")]),
+            ("ghim-extras", 0, [_p("python -m pip install ruff[all]==0.15.15")]),
+            ("upgrade-khong-ghim-sau-pin", 1, [_ruff, _p("python -m pip install --upgrade ruff")]),
+            ("upgrade-cung-buoc-dong-sau", 1, [_p("python -m pip install ruff==0.15.15\npython -m pip install --upgrade ruff")]),
+            ("dang-cai-khong-phan-tich-duoc", 1, [_ruff, _p("apt-get install -y ruff")]),
+            ("poetry-add-khong-phan-tich-duoc", 1, [_ruff, _p("poetry add ruff")]),
+            ("go-cai-sau-khi-ghim", 1, [_p("python -m pip install ruff==0.15.15\npython -m pip uninstall -y ruff")]),
+            # luot 3 `R3-F01` — ba toan tu PEP 440 nay tung LOT sach SAU mot ban ghim
+            ("toan-tu-lon-hon-sau-ghim", 1, [_ruff, _p('python -m pip install --upgrade "ruff>=0.16"')]),
+            ("toan-tu-tuong-thich-sau-ghim", 1, [_ruff, _p('python -m pip install --upgrade "ruff~=0.16.0"')]),
+            ("toan-tu-khac-sau-ghim", 1, [_ruff, _p('python -m pip install --upgrade "ruff!=0.15.15"')]),
+            ("toan-tu-lon-hon-mot-minh", 1, [_p('python -m pip install "ruff>=0.16"')]),
+            ("dry-run", 1, [_p("python -m pip install --dry-run ruff==0.15.15")]),
+            ("doi-dich-target", 1, [_p("python -m pip install --target isolated ruff==0.15.15")])]:
+        _FX.append((_t, {"gate": {"steps": [_ruff]}, "gate-registry": {"steps": _b + [_reg]}}, _m))
     for _ten, _jobs, _mong in _FX:
         _loi = len(loi_ruff_ci(_wf(_jobs))[0])
         _them("ruff-ci-" + _ten, (_loi == 0) if _mong == 0 else (_loi >= 1))

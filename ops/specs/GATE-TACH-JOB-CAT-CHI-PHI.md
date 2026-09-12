@@ -1,13 +1,16 @@
-# Đặc tả packet — GATE-TACH-JOB-CAT-CHI-PHI (revision 17)
+# Đặc tả packet — GATE-TACH-JOB-CAT-CHI-PHI (revision 18)
 
 - `packet_id`: **GATE-TACH-JOB-CAT-CHI-PHI**; ID bền theo `PROTOCOL §3.2` là `wp<packet_issue>`.
 - `packet_issue`: **#463**
 - `mission_issue`: **#467** (*"bốn packet treo sau #456: GATE → LO-319 → 2A → 2B"*)
-- `revision`: **15** · `generation`: 1 · soạn **11:3xZ 11-09-2026**; `A5` r13 **10:0xZ 12-09-2026**;
+- `revision`: **18** · `generation`: 1 · soạn **11:3xZ 11-09-2026**; `A5` r13 **10:0xZ 12-09-2026**;
   r14 (A8 400 + F03/F04/F05) **11:4xZ 12-09-2026**; r15 (F04 lượt 2 — **XOÁ** câu bị thay thay vì
   nối thêm đính chính) **13:5xZ 12-09-2026**; r16 (`R3-F04` lượt 3 — cửa THỨ BA của cùng lớp ấy ở
   `A5`, ánh xạ manifest hai lane của `A2`, và bẫy `on:` là boolean ở `A3(3)`) **14:2xZ 12-09-2026**;
-  r17 (trần `A8` `400 → 430`, ngoại lệ CÓ PHẠM VI thứ hai) **14:4xZ 12-09-2026**
+  r17 (trần `A8` `400 → 430`, ngoại lệ CÓ PHẠM VI thứ hai) **14:4xZ 12-09-2026**;
+  r18 (`R4-F01`/`R4-F02` lượt 4 — trường `revision` đã đứng ở `15` từ r16 trong khi tiêu đề
+  ghi `17`; và lease còn CHÉP ngưỡng của `A1`/`A8`. Cả hai nay do MÁY canh:
+  `ops/kiem_hop_dong_packet.py`) **15:1xZ 12-09-2026**
 - `depends_on`: **`[wp502, wp504]`** — xem `write_set`. **`wp504`** là `WINDOWS-LEASE-SUITE` (lease
   sống, cấp `14:05Z 11-09-2026`), **KHÔNG** còn là `T125-RA-JOB-RIENG`: đặc tả ấy đã **RÚT** vì `#504`
   nhận cùng vấn đề bằng đường chủ kho chọn (song song hoá `t125` trong bộ test, giữ nguyên ngữ nghĩa)

@@ -1,0 +1,196 @@
+# LEASE EXECUTOR — packet #463 GATE-TACH-JOB-CAT-CHI-PHI (revision 18 — thay exec-2r6)
+# Ghi HỘ chủ kho. Thẩm quyền cấp thuộc `ducthangho` (§2); phiên claude chỉ SOẠN và GHI.
+# Chỉ thị gốc: phiên chat 12-09-2026 ("xử lý task #24, cấp lease, kết hợp xử lý 1 luôn"
+# + ba lựa chọn). Dấu vết BỀN đã đăng, neo ở `granted_on_instruction` — chính tệp lease
+# nháp của packet này dặn "Một câu trong khung chat KHÔNG phải dấu vết bền", nên comment
+# ấy tồn tại đúng để biến nó thành dấu vết.
+#
+# CHUỖI: #456 -> exec-1 -> exec-1r2 -> exec-1r3 -> exec-1r4 -> exec-2 -> exec-2r2 -> exec-2r3
+#        -> exec-2r4 -> exec-2r5 -> exec-2r6 -> exec-2r7 (tệp này).
+# `thay_the_cho` CHỈ nêu `exec-2r6` — tiền nhiệm TRỰC TIẾP và là mắt duy nhất còn CÒN_HẠN
+# chưa mang bia mộ (đo 13:3xZ 12-09-2026: `ai-dang-giu` trên CẢ HAI đường dẫn ⇒ NGƯỜI_GIỮ 1
+# = exec-2r3; exec-2 và exec-2r2 hiện `CÒN_HẠN · ĐÃ_BỊ_THAY_THẾ`).
+# Mọi mắt trước đó đã HẾT_HẠN (r4 hạn 2026-09-08T10:17:12Z); `_kiem_bia_mo` đòi bia mộ HAI
+# CHIỀU nên giữ tên một lease hết hạn trong `thay_the_cho` sẽ làm `check` rc=8.
+# Bia mộ ngược đã đặt trong chính tệp `exec-2` (`da_bi_thay_the: …exec-2r2…`).
+
+schema_version: 2
+event: executor_lease_granted
+
+packet_issue: 463
+mission_issue: 467
+granted_by: ducthangho
+granted_on_instruction: 'https://github.com/ducthangho/tra-luat/issues/463#issuecomment-5645742072'
+leased_at_utc: '2026-09-12T15:15:00Z'
+lease_expires_at_utc: '2026-09-13T15:15:00Z'
+
+packet_id: GATE-TACH-JOB-CAT-CHI-PHI
+revision: 18
+generation: 1
+lease_id: gate-tach-job-cat-chi-phi-exec-2r7-claude-20260912
+role: executor
+provider: claude
+executor: claude
+model: fable-5.1
+effort: xhigh
+# Trường KHAI BÁO — `packet_loop` không đọc chúng; chúng ghi ý định để phiên review neo theo.
+reviewer_model: gpt-6-astra
+reviewer_effort: xhigh
+reviewer_hint_patch: true
+environment: cloud
+risk: sensitive
+assurance_target: cross_approved
+access: read-write
+
+spec_path: ops/specs/GATE-TACH-JOB-CAT-CHI-PHI.md
+spec_sha256: 5951defd43965618f03612a690c779e40f5ef39a1376023ddaaa3ce82724ad65
+spec_hash: 5951defd43965618f03612a690c779e40f5ef39a1376023ddaaa3ce82724ad65
+
+# HAI tệp, không ký tự đại diện. `loi_ruff_ci` trong tệp #2 khoá cứng `jobs.gate`; tách job
+# mà không sửa nó thì bước `test registry` tự đỏ.
+write_set:
+  - .github/workflows/ci.yml
+  - .claude/dev/ci_dang_ky_test.py
+
+# `depends_on` của đặc tả r12 là `[wp502, wp504]`. ĐO 08:5xZ 12-09-2026 — KHÔNG suy từ trạng
+# thái Issue, vì `open` KHÔNG phải "chưa làm":
+#   · `wp502` BO-CONG-DUYET-KHAC-DANH-TINH — **ĐÃ LAND**. Merge `26e2555d36c48b3c0f625ae50ab2cfb62b6cb858`
+#     (PR #506, 06:1xZ 11-09-2026) là TỔ TIÊN của `origin/master`; cả 4 tệp write_set của nó đã MẤT
+#     khỏi master và `ci_dang_ky_test.py` nhắc `duyet_danh_tinh` **0** lần. Issue #502 còn `open` chỉ
+#     vì PR hồ sơ ADR-0034 chưa xong — đó là ghi sổ, không phải việc chưa làm. Nên phụ thuộc NGUY
+#     HIỂM NHẤT (chồng lấn write set thật trên `.claude/dev/ci_dang_ky_test.py`) đã **THOẢ**, không
+#     cần miễn.
+#   · `wp504` WINDOWS-LEASE-SUITE — còn `open`, `proposed`, chưa có lease. Chủ kho **MIỄN** (chỉ thị
+#     12-09-2026, neo ở `granted_on_instruction`). Miễn được vì nó là phụ thuộc **THỨ TỰ**: write set
+#     của nó (`ops/lease_publish_test.py`, `ops/chay_lease_publish_test.sh`) **KHÔNG giao** với write
+#     set này; nó vào `depends_on` vì cùng nhắm trần Windows, không vì tranh tệp.
+# Ngoại lệ áp cho RIÊNG lần cấp này; KHÔNG sửa `depends_on` của đặc tả r12, KHÔNG là tiền lệ.
+depends_on: []
+ngoai_le_depends_on: >-
+  wp502 ĐÃ LAND (merge 26e2555, tổ tiên của origin/master; 4/4 tệp write_set đã xoá;
+  ci_dang_ky_test.py nhắc duyet_danh_tinh 0 lần) — phụ thuộc chồng lấn write set THOẢ, không miễn.
+  MIỄN riêng wp504: phụ thuộc THỨ TỰ, write set không giao — chủ kho 12-09-2026,
+  https://github.com/ducthangho/tra-luat/issues/463#issuecomment-5644870372.
+
+branch: claude/gate-tach-job-cat-chi-phi
+branch_ownership: exclusive
+target_branch_neu_land: master
+
+# 3 MỎ NEO — ĐO LẠI lúc cấp, không chép số của lease r4 (`d28c4b1`, đã cũ 5 ngày).
+# Head `origin/master` lúc cấp = `3c7df6d` (merge PR #508, 07:16:06Z 12-09-2026).
+base_sha: 3c7df6d678e11090a1623f871dcd484250a4b68b
+start_from_sha: 3c7df6d678e11090a1623f871dcd484250a4b68b
+reviewed_sha_required: 3c7df6d678e11090a1623f871dcd484250a4b68b
+
+authority_basis: '§2 — start/pause/resume/reroute/override/authorize thuộc chủ kho'
+recorded_by: claude-session
+recorder_is_dispatcher: false
+
+run_minutes: 1440
+# `write_set_hash` = sha256 các đường dẫn write_set đã sort, nối bằng LF, có LF cuối.
+# Khớp ĐÚNG giá trị của lease r4 — cùng write set thì cùng băm; đó là phép tự kiểm, không
+# phải trùng hợp.
+write_set_hash: 0f7b869da648e9b21023e461925efd0d45bca58fb308a8fcc82bc55ad9f66ef0
+heartbeat_at: '2026-09-12T15:15:00Z'
+lease_until: '2026-09-13T15:15:00Z'
+heartbeat_required_minutes: 30
+attempts_used: 0
+attempts_limit: 3
+
+reviewer_provider: codex
+review_class: sensitive
+effective_review_class: sensitive
+
+thay_the_cho:
+  - gate-tach-job-cat-chi-phi-exec-2r6-claude-20260912
+ly_do_thu_hoi: >-
+  Dac ta len revision 18 theo cross-review luot 4 (reviewer DUNG o preflight — dung, va do la
+  tinh nang):
+  R4-F02 — truong `revision` cua dac ta van ghi 15 tu r16 trong khi tieu de ghi 17.
+  R4-F01 — lease `viec_trong_lease` va `dieu_kien_dung` van ghi tran 400 trong khi dac ta ghi
+  430. DUNG HAI DONG da phai sua o r4 (khi ay 300 -> 400), hong lai lan thu hai o r6.
+  Day la lan thu TU cua cung mot hinh dang, nen KHONG va con so lan nua. Bo han nguong ra
+  khoi lease: moi nghia vu TRO toi tieu chi cua dac ta da ghim bang `spec_hash`. Ap cho ca
+  `A1` (0,60 va 36,00) chu khong rieng `A8` — cung lop, chua ai chi, tu liet ke.
+  Va dung MAY canh thay vi ky luat doc: `ops/kiem_hop_dong_packet.py` do bon chot (revision
+  khop ba cho · dac ta neu tran dung MOT lan · lease khong chep nguong vao muc vien tieu chi ·
+  spec_hash khop byte), phan chung `ops/kiem_hop_dong_packet_test.py` 8/8 gom mot dot bien
+  noi danh sach CHO PHEP de kiem ca dich con rang.
+  spec_hash doi 1a92994e -> 5951defd nen lease phai cap lai.
+
+write_set_da_do_truoc_khi_cap: >-
+  15:1xZ 12-09-2026 — khong quet lai: khong co lan cap moi nao mo them quyen ghi, write_set y
+  het exec-2r4 (write_set_hash khong doi), va nguoi giu duy nhat la chuoi lease cua chinh
+  packet nay. Phep do goc, 13:3xZ 12-09-2026, giu nguyen hieu luc: Canh hai nguon ref TRUOC khi quet: lan dau 356/356 nhung comm -23 KHONG
+  rong (`ops/handoff-512-luot7` co tren may chu, thieu cuc bo) — dung ca "luc luong bang nhau
+  van mu"; sau `git fetch '+refs/heads/*:refs/remotes/origin/*'` thi 356/357, comm -23 RONG
+  (thua `pr487-merge` chi ton tai cuc bo, vo hai). Roi dong bo hai nhanh cuc bo tut sau
+  (`claude/windows-lease-suite` 0/7, `master` 0/10 — deu 0 commit di truoc nen `branch -f`
+  khong lam mat gi) vi `ai-dang-giu` quet refs/heads/* va tra CHAN [12] khi con tut.
+  Ket qua: CA HAI duong dan rc=11, NGUOI_GIU 1 = chinh `exec-2r3` (tien nhiem cua tep nay);
+  khong packet nao khac giu. `exec-2` va `exec-2r2` la CON_HAN · DA_BI_THAY_THE.
+
+ly_do_cap: >-
+  Task #24 của phiên 12-09-2026: chi phí CI. Đo được cùng rig, một lệnh hai vế — bộ
+  `ops/nhanh_don_duoc_test.py` đi từ 37 s (nền a639e48) lên 194 s (sau wp513) = 5,2×.
+  Hệ quả đo trên lượt master `34680281474` (head 3c7df6d, 12-09-2026): bước 16
+  `test registry` chiếm 16,05 phút / 29,40 phút của job ubuntu = 54,6 %. Trên lane Windows
+  của master, job chạm trần 60 phút và bị huỷ — ba lượt master liên tiếp trước đó
+  (a153c94, f4da553, 157b368) cùng hình dạng; riêng a153c94 đo được windows 60,53 phút
+  cancelled ở bước 20 trong khi ubuntu 30,65 phút success. Mỗi lần merge vào master vì vậy
+  đốt ~121 phút TÍNH TIỀN (60,5 × hệ số 2) mà KHÔNG trả verdict Windows nào.
+  Packet này là đường đã có đặc tả đóng băng cho nợ ấy. Nó cắt WALL-CLOCK bằng cách tách
+  job, KHÔNG cắt tổng công — và nói thẳng cái giá: phút tính tiền TĂNG.
+
+viec_trong_lease:
+  - 'M1 — tách `test registry` và `packet-loop selftest` sang job riêng, CÙNG ma trận nền với `gate`.'
+  - 'M2 — giữ độ phủ: tập `(tên bước, nền, conclusion)` sau khi tách BẰNG ĐÚNG tập trước khi
+     tách, đo trên CẢ lượt `workflow_dispatch` LẪN lượt `pull_request`. So bằng TẬP, không bằng `wc -l`.'
+  - 'M3 — không thêm mặt điều kiện nào, đo bằng CẤU TRÚC: bộ ba (`if` mức job, `matrix.os`,
+     `timeout-minutes`) của mỗi job mới BẰNG của `gate`; tập (tên bước, `if` bước) trước/sau BẰNG
+     NHAU; `on:`/`concurrency:` không đổi. Đếm `${{ }}` KHÔNG đủ — `if:` viết không có dấu nội suy lọt.'
+  - 'M4 — `timeout-minutes: 60` giữ nguyên trên MỌI job.'
+  - 'M5 — ĐO và CÔNG BỐ phút tính tiền, neo đúng lượt (A5).'
+  - 'M6 — cập nhật branch protection/ruleset cho tên job mới. Tách job mà không làm việc này là
+     THÁO CỔNG bằng một thao tác trông như tối ưu hoá.'
+  - 'M7 — sửa `loi_ruff_ci` trong `.claude/dev/ci_dang_ky_test.py`: tìm bước `test registry` trong
+     MỌI job, đòi Ruff cài trong CÙNG job và TRƯỚC bước ấy; không job nào có bước ⇒ lỗi; tương
+     thích với `ci.yml` chưa tách; kèm phản chứng (A7).'
+  - 'A1 — `max(thời lượng job)` trên `windows-latest` dưới ngưỡng nêu tại `A1` của đặc tả đã
+     ghim bằng `spec_hash`. Đơn vị: `completed_at − started_at` của JOB qua `list_workflow_jobs`;
+     lấy `max`, KHÔNG lấy tổng. Ngưỡng KHÔNG chép vào đây — xem `ly_do_thu_hoi`.'
+  - 'A8 — `git diff --numstat` hiện ĐÚNG 2 đường dẫn; cột `additions` (KHÔNG phải ròng) dưới
+     trần nêu tại `A8` của đặc tả đã ghim bằng `spec_hash` — ngoại lệ CÓ PHẠM VI do chủ kho cấp,
+     riêng packet này, KHÔNG đổi ADR-0044. Ngưỡng KHÔNG chép vào đây. Đường thứ ba ⇒ DỪNG và
+     hỏi chủ kho.'
+  - 'NGHĨA VỤ THÊM (chỉ thị chủ kho 12-09-2026, quyết định 3): lượt cross-review phải phủ CẢ
+     `ops/nhanh_don_duoc_test.py` đã land tại 3c7df6d — head `f9dc17c` được merge mà CHƯA lượt
+     review nào chạy trên nó (Codex chỉ chạy trên `94c416d`). Đây là nghĩa vụ ĐỌC, KHÔNG mở write
+     set; phát hiện nào cần vá thì đi bằng packet riêng.'
+
+dieu_kien_dung:
+  - 'S1 — đường dẫn thứ BA trong write set, kể cả `ops/nhanh_don_duoc_test.py`. Chủ kho đã chọn
+     "chỉ #463 như đặc tả" (12-09-2026), nên cắt TỔNG CÔNG không thuộc packet này.'
+  - 'Nâng `timeout-minutes` — đã nâng HAI lần (25→45→60); lần kế là lần thứ BA, §12 đòi xem lại
+     CÁCH LÀM. `ci.yml:63` tự kết luận "NÂNG TRẦN KHÔNG CHỮA NGUYÊN NHÂN".'
+  - 'HẠ `timeout-minutes` để "ép kỷ luật" — biến job chậm thành `cancelled`, tức đổi một vấn đề
+     đọc được lấy một vấn đề vô hình.'
+  - 'Thêm bất kỳ mặt ĐIỀU KIỆN nào (theo diff / theo nhãn / `paths:` / `if:` mức job kể cả viết
+     không có dấu nội suy). Kho đã trả giá HAI lần; PR #247 đóng không merge. Tách job là thêm
+     JOB, không thêm ĐIỀU KIỆN.'
+  - 'Rút phần thiết lập thành `.github/actions/…` composite — thêm đường dẫn thứ ba ⇒ vi phạm
+     chính A8. Vượt trần dòng thêm nêu tại `A8` của đặc tả ⇒ DỪNG và hỏi chủ kho.'
+  - 'Đụng hàm nào trong `.claude/dev/ci_dang_ky_test.py` NGOÀI `loi_ruff_ci` và phản chứng của nó.'
+  - 'Song song hoá TRONG `test registry` — nợ có tên SONG-SONG-HOA-TRONG-TEST-REGISTRY.'
+  - 'Đổi tập bước hoặc đổi lệnh của bất kỳ bước nào — packet này chỉ đổi bước ấy nằm trong JOB nào.'
+  - 'Viết cú pháp `${{ }}` trong comment của `run:` — GitHub nội suy TOÀN BỘ thân `run` trước khi
+     shell thấy nó; kho đã bị từ chối cả tệp vì đúng chuyện đó (run 31971137920, 0 job).'
+  - 'Chi quá N = 2 lượt `workflow_dispatch`. PHÂN BỔ ĐỔI Ở r15: nền tiền-tách là KHÔNG ĐO ĐƯỢC
+     có căn cứ (job Windows tiền-tách chạm trần — run 34680281474 cho `gate (windows-latest)
+     cancelled`, thời lượng ghi ở `A1` của đặc tả), nên KHÔNG chi suất nào cho nó; hai suất là
+     (1) lượt SAU tách cho A1,
+     (2) đột biến A1 gộp hai job trở lại `gate`. Chủ kho không cấp suất (2) ⇒ đột biến A1 là
+     KHÔNG ĐO ĐƯỢC, ghi vào biên nhận, KHÔNG được ghi A1 là ĐẠT trơn. Lượt `pull_request` tự bắn
+     là CỔNG, không tính vào N. CẤM tuyệt đối lượt "chạy thử xem sao".'
+  - 'Đóng packet khi chưa có `approve` TƯỜNG MINH — `review_class = sensitive`; "0 P1 + 0 P2"
+     KHÔNG đủ, vì "vắng mặt vì sạch" và "vắng mặt vì chưa nhìn tới" nhìn giống hệt nhau.'

@@ -10,7 +10,11 @@ một lượt review bắt đầu, và review ấy chạy tới `20:39:24Z` — 
 vào master vì merge trước khi mở phần review), tái phát với một biến thể: lần này review **chưa tồn
 tại** lúc tôi quyết định merge, nó được sinh ra bởi **chính thao tác bỏ draft**. Nên chốt cũ ("đọc
 review trước khi merge") không đủ — phải thêm: **bỏ draft là một hành vi KÍCH HOẠT, không phải một
-thay đổi trạng thái trơ**. Chưa có cổng nào canh; đây là kỷ luật thao tác.
+thay đổi trạng thái trơ**. Lần merge được tường thuật ở đây không đủ chứng minh **không có
+cổng nào canh**: cần phân biệt cổng tồn tại, đường thao tác mà nó phủ và trạng thái thực thi
+của nó trong lần ấy. Khi chưa đối chiếu các cấu hình và log tương ứng, chưa kết luận có hay
+không có cổng tự động đợi connector hoàn tất. Việc kiểm tra lượt review sau khi bỏ draft,
+đọc kết quả trước khi merge là kỷ luật thao tác cần tuân thủ.
 
 Nội dung `4965f0a` đã qua 11 lượt cross-review codex (lượt 11 `approve`, 0 P1/0 P2/0 P3), nên việc
 merge không phải là bỏ qua review — nhưng connector chấm bằng prompt khác và **tìm ra một thứ đúng

@@ -6,6 +6,9 @@ CTRL-chet-DUNG-chot-ca-dich            t160   GIET THAT      rc=1, chot ca dich:
 CTRL-StopIteration-khong-hau-to        t160   TIN DUNG GIA   chet vi ngoai le VO CAN: StopIteration: CONTROL vo can, khong co hau to Error/Exception
 CTRL-lop-tu-dinh-nghia-ten-la          t160   TIN DUNG GIA   chet vi ngoai le VO CAN: Bung: CONTROL vo can, ten lop khong theo quy uoc nao
 CTRL-GeneratorExit                     t160   TIN DUNG GIA   rc=1 nhung ĐỎ=[] — khong phai ca dich
+CTRL-DUONG-chot-that-t96               t96    TIN DUNG GIA   chet vi ngoai le VO CAN: t96: khớp đúng nghĩa (bằng nhau tuyệt đối) bị từ chối
+CTRL-ten-lop-UNICODE                   t160   GIET THAT      rc=1, chot ca dich: Bùng: CONTROL vo can, ten lop la dinh danh Unicode
+CTRL-thong-diep-RONG                   t160   GIET THAT      rc=1, chot ca dich: Exception:
 
   DAT   CTRL-ngoai-le-Exception-TRAN       mong_doi=TIN DUNG GIA   thuc_te=TIN DUNG GIA
   DAT   CTRL-ngoai-le-Error-TRAN           mong_doi=TIN DUNG GIA   thuc_te=TIN DUNG GIA
@@ -14,5 +17,8 @@ CTRL-GeneratorExit                     t160   TIN DUNG GIA   rc=1 nhung ĐỎ=[]
   DAT   CTRL-StopIteration-khong-hau-to    mong_doi=TIN DUNG GIA   thuc_te=TIN DUNG GIA
   DAT   CTRL-lop-tu-dinh-nghia-ten-la      mong_doi=TIN DUNG GIA   thuc_te=TIN DUNG GIA
   DAT   CTRL-GeneratorExit                 mong_doi=TIN DUNG GIA   thuc_te=TIN DUNG GIA
+  LECH  CTRL-DUONG-chot-that-t96           mong_doi=GIET THAT      thuc_te=TIN DUNG GIA
+  LECH  CTRL-ten-lop-UNICODE               mong_doi=TIN DUNG GIA   thuc_te=GIET THAT
+  LECH  CTRL-thong-diep-RONG               mong_doi=TIN DUNG GIA   thuc_te=GIET THAT
 
-TU KIEM: 7/7 ca dung phan hang
+TU KIEM: 7/10 ca dung phan hang — LECH: [('CTRL-DUONG-chot-that-t96', 'GIET THAT', 'TIN DUNG GIA'), ('CTRL-ten-lop-UNICODE', 'TIN DUNG GIA', 'GIET THAT'), ('CTRL-thong-diep-RONG', 'TIN DUNG GIA', 'GIET THAT')]

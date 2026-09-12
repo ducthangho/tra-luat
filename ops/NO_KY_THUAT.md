@@ -1408,3 +1408,109 @@ Dựng checkpoint chain là câu hỏi *"có nên làm việc này không"*, kh�
   không còn nhầm nó là mô tả hiện trạng.
 
 Không đóng bằng cách xoá mục này.
+
+---
+
+## 23. `BO-DO-DOT-BIEN-SUY-LY-DO-CHET-TU-CHUOI-STDOUT` — ba lượt vá, ba lượt cùng một hình dạng
+
+**Nguồn:** packet `#504` `WINDOWS-LEASE-SUITE` / PR #512, cross-review vòng 6·7·8 (`codex`).
+Verdict có băm ở `ops/handoff/512-luot7/` (`VERDICT.rvwin512-6/7/8.md`). Công cụ:
+`ops/handoff/512-luot7/dotbien512.py` — **bộ đo**, KHÔNG phải sản phẩm, và **ngoài write set** của
+lease `#504`.
+
+### Cơ chế — vì sao thứ này khó
+
+`ops/lease_publish_test.py::main()` in lý do một ca ĐỎ theo **hai** hình dạng khác nhau:
+
+```
+except AssertionError as ex: hong.append((fn.__name__, str(ex)))                        # CHỐT của ca đích
+except Exception       as ex: hong.append((fn.__name__, f"{type(ex).__name__}: {ex}"))  # ngoại lệ VÔ CAN
+```
+
+Bộ đo chạy **ngoài tiến trình**, chỉ đọc **CHUỖI** trên stdout, nên nó phải **suy** xem một mutant
+chết vì chốt của ca đích hay vì một ngoại lệ vô can — tức phân biệt hai hình dạng trên **bằng văn bản**.
+Cấp tín dụng cho một ngoại lệ vô can là cấp `GIET THAT` khống, và con số `N/N` trở thành lời khai rỗng.
+
+### Đo được — ba lượt, cùng một hình dạng
+
+| lượt | phép đo dùng | đường lọt lượt SAU tìm ra |
+|---|---|---|
+| gốc | đòi tiền tố **bắt buộc** trước `Error\|Exception` | `Exception:` **trần** và `Error:` **trần** đều lọt |
+| vòng 6→7 | cho tiền tố thành **tuỳ chọn** | `StopIteration` — không mang hậu tố `Error`/`Exception` |
+| vòng 7→8 | đo **hình dạng `main()` in**: `^<định danh>: ` | `F6.7` tên lớp **Unicode** (`Bùng`) · `F6.8` **thông điệp rỗng** (`Exception: ` → `.strip()` → `Exception:` ⇒ trượt vì đòi `": "`) · **`F6.9` HỒI QUY**: chốt THẬT `t96: …` bị xếp `TIN DUNG GIA` |
+
+Phép đo ba bản trên **cùng một bộ 10 control** (dựng trong MỘT lệnh, khác nhau **đúng một dòng** phép đo
+— `tukiem` log ở `ops/handoff/512-luot7/`):
+
+| bản | đúng phân hạng | **lọt** (false GREEN) | **hồi quy** (false RED) |
+|---|---|---|---|
+| `v0` tiền tố bắt buộc | **4/10**, rc=1 | 6 | 0 |
+| `v6` hậu tố tuỳ chọn | **7/10**, rc=1 | 3 | 0 |
+| `v8` định danh + `": "` | **7/10**, rc=1 | 2 | **1** |
+
+### Vì sao `v8` được giữ làm MẶC ĐỊNH, dù vòng 8 xếp nó là `VÁ SINH LỖI MỚI`
+
+Hai câu hỏi khác nhau, đừng gộp: *"bản vá ấy có sinh lỗi mới không"* (**có** — reviewer đúng) và
+*"trong ba hiện vật đã đo, giữ cái nào làm mặc định"*. Phép đo quyết định câu thứ hai:
+
+- **`v6` cấp tín dụng giả cho CẢ BA lớp ngoại lệ của chính kho** — `BoQuaNen`, `TinHieuChotCa`, **`Chan`**
+  — vì không tên nào mang hậu tố `Error`/`Exception`. `Chan` là lớp mà `ops/lease_publish.py` ném **khắp
+  nơi**, nên đó không phải ca lý thuyết. `v8` bắt được cả ba (**3/3** so **0/3**).
+- Tập lọt của `v6` là **KHÔNG BIÊN**: "mọi lớp thiếu hậu tố". Tập lọt của `v8` nhỏ hơn, và hồi quy của nó
+  **ĐẾM ĐƯỢC**: `8` trong `454` lời gọi `bang()`/`chot()` của tệp test trùng hình dạng `^<định danh>: `,
+  trải trên **4 ca** — `t96` (4 thông điệp), `t133`, `t136`, `t151`. Ai dùng bộ đo trên bốn ca ấy phải
+  biết trước.
+- **False GREEN nguy hơn false RED.** Một `GIET THAT` khống là lời khai an toàn sai; một `TIN DUNG GIA`
+  khống làm catalogue **ĐỎ**, tức ồn ào và có người đi điều tra.
+
+**Ghi cả cái sai của kế hoạch:** bản kế hoạch của phiên này **dự đoán sẽ lùi về `v6`** và phép đo **bác**
+dự đoán ấy. Ghi ra vì một nguyên nhân sai trong sổ nợ còn tệ hơn không ghi.
+
+### Chốt chống quên: bộ đo được giao ở trạng thái **TỰ BÁO ĐỎ**
+
+`dotbien512.py --tu-kiem` trả **`7/10`, `rc=1`** — **cố ý**. Bộ control được giao **kèm cả ba ca nó
+KHÔNG xử đúng**, nên mỗi lần ai đó tự kiểm là một lần khuyết tật tự khai. Chọn một bộ control "vừa
+khít" để có `10/10` là dựng đúng cái cổng nói dối mà mục này tố cáo.
+
+### Cái MẤT, nói thẳng
+
+- Catalogue vẫn có thể cấp tín dụng giả cho ngoại lệ **tên Unicode** và **thông điệp rỗng**.
+- Con số **`16/16 giết thật`** của `#504` chỉ đáng tin **trong phạm vi 10 control đã đo** và **trên đúng
+  16 mutant ấy** (đã kiểm: không ca nào đổi phân hạng khi đổi phép đo). Nó **không** là lời khai bộ đo
+  miễn nhiễm tín dụng giả.
+- `F6.10`: chốt `_kiem_hop_dong_main` **có** răng khi còn nguyên (đổi hợp đồng in ⇒ bộ đo `CHAN`, rc=1),
+  nhưng **tự kiểm không canh việc chốt ấy bị GỠ** — bỏ lời gọi đi mà `--tu-kiem` vẫn chạy bình thường.
+  Đúng lỗi *"cửa không có mutant là cửa sẽ âm thầm hở lại"*.
+- **Phần chống GIẢ MẠO tín hiệu** (một `except` trong tệp test tự dựng chuỗi giống chốt) là
+  `KHÔNG ĐO ĐƯỢC` — reviewer cố ý không tự soạn mã giả mạo, đúng ràng buộc đã giao.
+
+### Vì sao BỎ chứ không vá tiếp
+
+Câu mở đầu sổ này: *"cùng một hình dạng lỗi lặp ba lần trở lên thì câu hỏi đúng là **có nên làm việc này
+không**"*. Ba lượt, cùng một hình dạng: **suy LÝ DO một mutant chết bằng cách phân tích CHUỖI stdout**.
+
+Và vòng 8 nói ra lý do **cấu trúc**, không phải lý do "chưa đủ cẩn thận": hai miền chuỗi *"thông điệp
+assertion"* và *"tên lớp + thông điệp"* **GIAO NHAU** — `t96: ` là tiền tố tên ca **bình thường, có sẵn
+trong cây**, không phải chuỗi ai bịa. Một phép đo trên chuỗi **không thể** tách hai miền giao nhau. Nên
+bản vá thứ tư sẽ mua thêm một thể hiện và một hồi quy, đúng như ba lượt trước.
+
+Một hợp nhất hai phép đo (`v6 OR v8`) đo được là `8/10` — tốt hơn cả hai — nhưng nó **vẫn là bản vá thứ
+tư** trên cùng hình dạng, và vẫn để lại một lớp lọt cộng một hồi quy. Cố ý **không** làm.
+
+### Điều kiện coi là XONG
+
+Đóng khi **cả bốn** đạt, không phải khi ai đó thấy con số đã đẹp hơn:
+
+1. `main()` phát một **dấu RIÊNG cho một LỚP TÍN HIỆU** mà mã triển khai **không giả được**, để bộ đo
+   **không còn phải phân biệt chuỗi**. Kho đã có `TinHieuChotCa(AssertionError)`
+   (`ops/lease_publish_test.py`) với đúng chú thích *"không `except` nào trong mã sản phẩm hay fixture
+   dựng được nó"* — nhưng nó chỉ dùng cho khối `A0`/`t139`, và `main()` bắt `AssertionError` rồi in
+   `str(ex)` nên **danh tính lớp chết ngay tại đó**.
+2. **Mười control hiện có đều ĐẠT** — gồm ba ca `v8` đang sai: Unicode, thông điệp rỗng, và chiều dương
+   `t96`.
+3. Có **mutant RIÊNG cho chính chốt mới**: gỡ nó ra thì một ca đích phải ĐỎ. Thiếu điều này thì lặp lại
+   `F6.10`.
+4. Bảng `8/454` ở trên đo lại còn **0** — tức không thông điệp chốt nào còn trùng hình dạng dấu hiệu.
+
+**Đây là thay đổi write set** (`ops/lease_publish_test.py`) ⇒ cần packet riêng và lease riêng. Chủ kho đã
+quyết **dời F6 ra khỏi `#504`** (chỉ thị #504 comment `5646460376`), và `#504` land với mục này là nợ.

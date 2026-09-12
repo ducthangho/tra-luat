@@ -173,6 +173,35 @@ CONTROL = [
      '    raise GeneratorExit("CONTROL vo can, BaseException chu khong phai Exception")\n'
      '    a = (0, "2", "2", frozenset(), frozenset())',
      "TIN DUNG GIA"),
+    # --- CONTROL DUONG THU HAI, them o giai doan B (finding F6.9 cua vong 8).
+    # --- Lay NGUYEN assertion va NGUYEN thong diep da co trong cay tai
+    # --- `t96_lease_cham_duong_khop_tuyet_doi_khong_phai_chua`; chi DAO boolean de ca do.
+    # --- main() se in `t96: khop dung nghia (bang nhau tuyet doi) bi tu choi` — mot thong diep
+    # --- CHOT THAT, va no BAT DAU bang `t96: `, tuc trung hinh dang "<dinh danh>: " ma ban va
+    # --- vong 8 dung lam dau cua NGOAI LE VO CAN. Do la cho hai mien chuoi GIAO NHAU.
+    # --- Day KHONG phai chuoi do ai bia ra: no la fixture co san trong kho.
+    ("CTRL-DUONG-chot-that-t96", "t96",
+     '    bang(mod._lease_cham_duong({"write_set": [duong]}, duong),',
+     '    bang(not mod._lease_cham_duong({"write_set": [duong]}, duong),',
+     "GIET THAT"),
+    # --- HAI CA CUA VONG 8 (F6.7, F6.8) — bo control 8 ca cua toi THIEU chung, nen chon mac dinh
+    # --- tu bo ay la lap lai dung loi "danh sach giao cho reviewer tro thanh TRAN cua ho",
+    # --- lan nay tu ap len chinh minh. Them vao de phep so ba ban la so TREN CUNG mot tap.
+    #
+    # F6.7: dinh danh Python HOP LE nhung KHONG phai ASCII. `[A-Za-z_]` khong phu.
+    ("CTRL-ten-lop-UNICODE", "t160", NEO_T160,
+     '    from unittest import mock\n'
+     '    class Bùng(Exception): pass\n'
+     '    raise Bùng("CONTROL vo can, ten lop la dinh danh Unicode")\n'
+     '    a = (0, "2", "2", frozenset(), frozenset())',
+     "TIN DUNG GIA"),
+    # F6.8: thong diep RONG. main() in `Exception: ` (co dau cach cuoi), roi buoc lay `chi_tiet_do`
+    # goi `.strip()` bien no thanh `Exception:` — nen mot phep do doi `": "` se TRUOT.
+    ("CTRL-thong-diep-RONG", "t160", NEO_T160,
+     '    from unittest import mock\n'
+     '    raise Exception("")\n'
+     '    a = (0, "2", "2", frozenset(), frozenset())',
+     "TIN DUNG GIA"),
 ]
 
 

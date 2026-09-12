@@ -11,6 +11,7 @@ GOC = Path(sys.argv[1]).resolve()
 GOC_TEST = GOC / "ops" / "lease_publish_test.py"
 NGUON = GOC_TEST.read_text(encoding="utf-8")
 
+
 MUTANT = [
     ("giet-chi-PID-khong-giet-cay", "t154",
      '''    buoc = []
@@ -85,6 +86,34 @@ MUTANT = [
      '''T137_TRAN_GIAY = AL_HAN_GIAY + SC_HAN_TONG_GIAY  # DOT BIEN'''),
 ]
 
+# Dau cua NHANH THU HAI trong `main()`: `f"{type(ex).__name__}: {ex}"`. Moi ten lop ngoai le la mot
+# dinh danh Python (co the co cham neu ai do in ca module), nen mau nay phu TOAN BO nhanh ay.
+_DANG_VO_CAN = re.compile(r"^[A-Za-z_][A-Za-z0-9_]*(?:\.[A-Za-z_][A-Za-z0-9_]*)*: ")
+
+# Hai manh nguyen van cua `main()` ma phep phan hang dua vao. Neu chung khong con, `chi_tiet_do`
+# khong con mang y nghia bo do gan cho no, va moi con so in ra deu vo nghia.
+_HOP_DONG_MAIN = (
+    'hong.append((fn.__name__, str(ex)))',
+    'hong.append((fn.__name__, f"{type(ex).__name__}: {ex}"))',
+)
+
+
+def _kiem_hop_dong_main(nguon: str) -> None:
+    """FAIL-CLOSE: bo do CHI hop le chung nao `main()` con in dung hai hinh dang no gia dinh.
+
+    Bai hoc cua kho: "mot cong tu tat khi thieu cong cu la cong khong ton tai dung luc no can nhat".
+    O day cai "cong cu" la HOP DONG IN cua `main()`. Truoc day bo do gia dinh no am tham; nay do.
+    """
+    thieu = [m for m in _HOP_DONG_MAIN if m not in nguon]
+    if thieu:
+        raise SystemExit(
+            "CHAN: `main()` khong con in theo hai hinh dang ma bo do nay dua vao.\n"
+            "Thieu: " + repr(thieu) + "\n"
+            "Phep phan biet CHOT/VO CAN neo vao chung, nen moi ket qua se vo nghia. "
+            "Sua `_HOP_DONG_MAIN` + `_DANG_VO_CAN` cho khop `main()` moi TRUOC khi tin bat ky con so nao."
+        )
+
+
 # =====================================================================================
 # CONTROL cho CHINH bo do nay (F6). Bai hoc #355/#359 cua kho: "dot bien bi giet KHONG
 # phai dot bien bi giet DUNG LY DO" — va mot thuoc do dung de chong bi lua thi cung bi
@@ -126,6 +155,53 @@ CONTROL = [
     ("CTRL-chet-DUNG-chot-ca-dich", "t160",
      "    return (LECH_CHUA_RO,", "    return (LECH_KHOP,",
      "GIET THAT"),
+    # --- THEM O VONG 7 (finding F6.5). Ba ca duoi KHONG co hau to `Error`/`Exception`, tuc chung
+    # --- la phan chung cho chinh cach vá cu: bat ky ban vá nao con doan TEN ngoai le se DO o day.
+    ("CTRL-StopIteration-khong-hau-to", "t160", NEO_T160,
+     '    from unittest import mock\n'
+     '    raise StopIteration("CONTROL vo can, khong co hau to Error/Exception")\n'
+     '    a = (0, "2", "2", frozenset(), frozenset())',
+     "TIN DUNG GIA"),
+    ("CTRL-lop-tu-dinh-nghia-ten-la", "t160", NEO_T160,
+     '    from unittest import mock\n'
+     '    class Bung(Exception): pass\n'
+     '    raise Bung("CONTROL vo can, ten lop khong theo quy uoc nao")\n'
+     '    a = (0, "2", "2", frozenset(), frozenset())',
+     "TIN DUNG GIA"),
+    ("CTRL-GeneratorExit", "t160", NEO_T160,
+     '    from unittest import mock\n'
+     '    raise GeneratorExit("CONTROL vo can, BaseException chu khong phai Exception")\n'
+     '    a = (0, "2", "2", frozenset(), frozenset())',
+     "TIN DUNG GIA"),
+    # --- CONTROL DUONG THU HAI, them o giai doan B (finding F6.9 cua vong 8).
+    # --- Lay NGUYEN assertion va NGUYEN thong diep da co trong cay tai
+    # --- `t96_lease_cham_duong_khop_tuyet_doi_khong_phai_chua`; chi DAO boolean de ca do.
+    # --- main() se in `t96: khop dung nghia (bang nhau tuyet doi) bi tu choi` — mot thong diep
+    # --- CHOT THAT, va no BAT DAU bang `t96: `, tuc trung hinh dang "<dinh danh>: " ma ban va
+    # --- vong 8 dung lam dau cua NGOAI LE VO CAN. Do la cho hai mien chuoi GIAO NHAU.
+    # --- Day KHONG phai chuoi do ai bia ra: no la fixture co san trong kho.
+    ("CTRL-DUONG-chot-that-t96", "t96",
+     '    bang(mod._lease_cham_duong({"write_set": [duong]}, duong),',
+     '    bang(not mod._lease_cham_duong({"write_set": [duong]}, duong),',
+     "GIET THAT"),
+    # --- HAI CA CUA VONG 8 (F6.7, F6.8) — bo control 8 ca cua toi THIEU chung, nen chon mac dinh
+    # --- tu bo ay la lap lai dung loi "danh sach giao cho reviewer tro thanh TRAN cua ho",
+    # --- lan nay tu ap len chinh minh. Them vao de phep so ba ban la so TREN CUNG mot tap.
+    #
+    # F6.7: dinh danh Python HOP LE nhung KHONG phai ASCII. `[A-Za-z_]` khong phu.
+    ("CTRL-ten-lop-UNICODE", "t160", NEO_T160,
+     '    from unittest import mock\n'
+     '    class Bùng(Exception): pass\n'
+     '    raise Bùng("CONTROL vo can, ten lop la dinh danh Unicode")\n'
+     '    a = (0, "2", "2", frozenset(), frozenset())',
+     "TIN DUNG GIA"),
+    # F6.8: thong diep RONG. main() in `Exception: ` (co dau cach cuoi), roi buoc lay `chi_tiet_do`
+    # goi `.strip()` bien no thanh `Exception:` — nen mot phep do doi `": "` se TRUOT.
+    ("CTRL-thong-diep-RONG", "t160", NEO_T160,
+     '    from unittest import mock\n'
+     '    raise Exception("")\n'
+     '    a = (0, "2", "2", frozenset(), frozenset())',
+     "TIN DUNG GIA"),
 ]
 
 
@@ -143,6 +219,8 @@ def cay_moi(uniq):
     for t in ("launcher.py", "launcher_test.py"):
         shutil.copy2(GOC / ".claude" / "dev" / t, d / ".claude" / "dev" / t)
     return d
+
+_kiem_hop_dong_main(NGUON)   # FAIL-CLOSE truoc moi phep do
 
 TU_KIEM = "--tu-kiem" in sys.argv[1:]
 DANH_SACH = [c[:4] for c in CONTROL] if TU_KIEM else MUTANT
@@ -176,6 +254,20 @@ for i, (ten, dich, cu, moi) in enumerate(DANH_SACH, 1):
     # Chuyen tien to thanh TUY CHON dong ca hai duong. Huong sai con lai la FAIL-CLOSE: mot
     # thong diep chot THAT vo tinh bat dau bang `<Tu>Error:` bi xep TIN DUNG GIA, tuc lam
     # catalog DO chu khong cap tin dung khong. `CONTROL` ngay tren la phan chung cho ca hai chieu.
+    # F6 — BAN VA THU HAI (cross-review vong 7, finding F6.5). Ban dau doi hau to `Error|Exception`;
+    # `StopIteration` khong co hau to ay nen VAN duoc cap `GIET THAT`. Do la DUNG benh
+    # "danh sach CAM khong bao gio du" cua kho — va toi da mac lai no NGAY TRONG ban va cho no.
+    # Them mot ten nua (`StopIteration`) chi de lai `GeneratorExit`, `KeyboardInterrupt`, `SystemExit`,
+    # va bat ky lop tu dinh nghia nao. Nen doi CHIEU phep do: thay vi doan TEN ngoai le, do HINH DANG
+    # ma `main()` THAT SU in ra. Hai nhanh, hai hinh dang khac han:
+    #     except AssertionError as ex: hong.append((fn.__name__, str(ex)))                  <- CHOT ca dich
+    #     except Exception       as ex: hong.append((fn.__name__, f"{type(ex).__name__}: {ex}"))  <- VO CAN
+    # Nen dau cua "vo can" la: chi tiet BAT DAU bang mot DINH DANH Python (co the co cham) roi `: `.
+    # Moi ten lop ngoai le deu la dinh danh Python, nen phep nay phu TOAN BO nhanh thu hai — khong con
+    # danh sach nao de thieu. `_DANG_VO_CAN` duoc neo bang `_kiem_hop_dong_main()` ngay duoi: neu
+    # `main()` doi cach in thi bo do TU CHAN chu khong im lang phan hang sai.
+    # Huong sai con lai van la FAIL-CLOSE: mot thong diep chot THAT bat dau bang `Tu: ` bi xep
+    # TIN DUNG GIA, tuc lam catalog DO chu khong cap tin dung khong.
     vo_can = re.match(r"^[A-Za-z_][A-Za-z0-9_.]*(Error|Exception)\s*:", chi_tiet_do) is not None
     if r.returncode != 0 and dung_ca and len(ten_do) == 1 and not vo_can:
         bang.append((ten, dich, "GIET THAT", f"rc={r.returncode}, chot ca dich: {chi_tiet_do[:60]}"))

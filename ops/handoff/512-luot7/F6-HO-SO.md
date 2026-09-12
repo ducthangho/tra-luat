@@ -142,3 +142,59 @@ Vòng 7 đúng: `EVIDENCE.rvwin512-7.md` nói **cả hai** log ở `do-cua-tac-g
 chỉ có **một**. Log `153/155` có thật và **nằm trong kho** tại `ops/handoff/512-luot7/suite-36f68c7-THIEU-shellcheck.log`;
 lỗi là ở **khâu đóng gói sandbox**, không phải hiện vật thiếu. Lượt sau: đóng gói ĐỦ, hoặc khai rõ tệp nào
 không nằm trong gói.
+
+---
+
+# CHỐT SAU VÒNG 8 — F6 đã DỜI sang packet riêng, và bản mặc định được chọn BẰNG PHÉP ĐO
+
+Chủ kho quyết (#504 comment `5646460376`): **dời F6 sang packet riêng**, `#512` land, F6 thành **nợ có
+tên** — `ops/NO_KY_THUAT.md` §23 `BO-DO-DOT-BIEN-SUY-LY-DO-CHET-TU-CHUOI-STDOUT`. Tệp này giữ lại diễn
+biến; sổ nợ là nơi có **điều kiện coi là XONG**.
+
+## Bộ control nay có 10 ca, và bản mặc định TỰ BÁO ĐỎ
+
+Thêm ba ca mà bộ 7 ca cũ **thiếu** — hai ca của vòng 8 (`F6.7` tên lớp **Unicode**, `F6.8` **thông điệp
+rỗng**) và một **control DƯƠNG thứ hai** lấy nguyên assertion có sẵn trong cây
+(`t96_lease_cham_duong_khop_tuyet_doi_khong_phai_chua`, mọi thông điệp của nó mở đầu `t96: `).
+
+Chọn mặc định từ bộ control thiếu chính là lặp lại lỗi *"danh sách bạn giao trở thành TRẦN của họ"* —
+lần này tự áp lên mình. Nên ba bản được dựng **trong MỘT lệnh** từ cùng một nền, khác nhau **đúng một
+dòng** phép đo, rồi đo trên **cùng 10 control**:
+
+| bản | tệp | đúng | **lọt** (false GREEN) | **hồi quy** (false RED) |
+|---|---|---|---|---|
+| `v0` tiền tố bắt buộc | `dotbien512_REGEX_CU.py` | `4/10` rc=1 | 6 | 0 |
+| `v6` hậu tố tuỳ chọn | `dotbien512_VA_VONG6.py` | `7/10` rc=1 | 3 | 0 |
+| **`v8` định danh + `": "`** | **`dotbien512.py` (MẶC ĐỊNH)** | `7/10` rc=1 | **2** | **1** |
+
+## Vì sao `v8` — và vì sao điều đó KHÔNG mâu thuẫn với verdict vòng 8
+
+Vòng 8 xếp bản vá `v8` là **`VÁ SINH LỖI MỚI`**, và **đúng**: nó thêm một khuyết tật mà `v6` không có.
+Nhưng đó là câu hỏi *"bản vá có sinh lỗi mới không"*, khác câu hỏi *"trong ba hiện vật đã đo, giữ cái nào
+làm mặc định"*. Phép đo trả lời câu thứ hai:
+
+- **`v6` cấp tín dụng giả cho CẢ BA lớp ngoại lệ của chính kho** — `BoQuaNen`, `TinHieuChotCa`, **`Chan`**
+  — vì không tên nào mang hậu tố `Error`/`Exception`. `Chan` là lớp `ops/lease_publish.py` ném **khắp
+  nơi**. Đo: `v6` bỏ sót **3/3**, `v8` bắt **3/3**.
+- Tập lọt của `v6` **không có biên** ("mọi lớp thiếu hậu tố"); hồi quy của `v8` thì **đếm được**:
+  **`8` trong `454`** lời gọi `bang()`/`chot()` trùng hình dạng `^<định danh>: `, trải trên **4 ca** —
+  `t96` (4 thông điệp), `t133`, `t136`, `t151`.
+- **False GREEN nguy hơn false RED**: một `GIET THAT` khống là lời khai an toàn SAI; một `TIN DUNG GIA`
+  khống làm catalogue **ĐỎ**, tức ồn ào và có người điều tra.
+
+**Kế hoạch của phiên này dự đoán sẽ lùi về `v6`, và phép đo BÁC dự đoán ấy.** Ghi ra vì một nguyên nhân
+sai trong hồ sơ còn tệ hơn không ghi.
+
+## Bộ đo được giao ở trạng thái TỰ BÁO ĐỎ — cố ý
+
+`dotbien512.py --tu-kiem` ⇒ **`7/10`, `rc=1`**. Bộ control **kèm cả ba ca nó xử sai**, nên mỗi lần tự
+kiểm là một lần khuyết tật tự khai. Cắt bộ control cho "vừa khít" để có `10/10` là dựng đúng cái cổng
+nói dối mà cả packet này sinh ra để chống.
+
+## Catalogue 16 mutant, đo lại bằng bản mặc định + 10 control
+
+`16/16 giết thật, 0 tín dụng giả, 0 sống sót`, rc=0 — và **không ca nào đổi phân hạng** so lần đo trước
+(`dotbien-16-tren-36f68c7-bo-do-10ctrl.txt`). Đổi phép đo không làm xê dịch kết luận về 16 mutant ấy.
+
+Nhưng nói cho đúng phạm vi: con số ấy đáng tin **trong phạm vi 10 control đã đo** và **trên đúng 16
+mutant ấy**. Nó **không** là lời khai bộ đo miễn nhiễm tín dụng giả — xem §23 mục *Cái MẤT*.

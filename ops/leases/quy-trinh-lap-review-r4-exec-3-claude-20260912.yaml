@@ -136,6 +136,17 @@ effective_review_class: sensitive
 depends_on: []
 thay_the_cho:
   - quy-trinh-lap-review-r2-exec-2-claude-20260912
+da_bi_thay_the: quy-trinh-lap-review-r5-exec-4-claude-20260912
+da_bi_thay_the_ly_do: >-
+  ACCEPTANCE ĐỔI LẦN NỮA. Cross-review lượt 3 trên `7f028a7` trả **`blocked`**, và HAI finding
+  nhắm vào chính TIÊU CHÍ của r4 mà lease này neo: `a9-bo-sot-delta-trong-merge` (khoảng thứ hai
+  của `A9` RỖNG trên head thật; công thức bỏ lọt delta viết TRONG resolution nên có thể đếm THIẾU)
+  và `a17-whitelist-bo-roi-m8` (`A17` chỉ cho `A1'`/`A2'`, nhưng 18 dòng `M8` không thuộc hai tiêu
+  chí ấy). `§3.2`: finding cho thấy đặc tả thiếu ⇒ verdict `blocked` ⇒ revision mới.
+  Chủ kho chốt (comment `5647309978`): GIỮ `M8` và kê vào whitelist `A17'`; `A9'` là MỘT phép đo
+  duy nhất. Lease gen 4 neo `ops/specs/…-r5.md`, `spec_sha256` `32859b68…` (đo TỪ BLOB).
+  Chốt HAI CHIỀU: gen 4 khai `thay_the_cho` gen 3, và dòng này là chiều ngược lại — `_kiem_bia_mo`
+  đòi cả hai.
 
 ly_do_cap: >-
   MỘT phép đo: PR #521 land và sửa cùng một tệp trong write set của packet này, cho 2 hunk xung

@@ -34,7 +34,7 @@ KHÔNG ĐO ĐƯỢC.
 |---|---|---|---|---|---|---|
 | 1 | `a488739c` · 1 687,481 s (02:34:04 → 03:02:12Z) | `86f87b2` / `46d9561` | `changes_requested` 0 P1 / **3 P2** / 1 P3 | 21 | `cross_reviewed` | `292c42b6…` 56 938 B, 20 hunk / 6 tệp |
 | 2 | `6b193c07` · 986,278 s (03:07:42 → 03:24:08Z) | `458314a` / `46d9561` | `changes_requested` 0/**1**/0 — VÁ SINH LỖI MỚI của HINT lượt 1 | 1 | `cross_reviewed` | `f7de8c04…` 1 399 B, 1 hunk |
-| 3 (hẹp) | `702e1fb2` · 476,868 s (03:27:03 → 03:35:00Z) | `da04323` / `157b368` | `approve` 0/0/0 | 0 | `cross_reviewed` (vượt trần 2 vòng, xem dưới) | `dcd44ce6…` 289 B, 0 hunk |
+| 3 (hẹp) | `702e1fb2` · 476,868 s (03:27:03 → 03:35:00Z) | `da04323` / `157b368` | `approve` 0/0/0 | 0 | `cross_approved` (vượt trần 2 vòng — chủ kho xác nhận nâng trần hậu kỳ, xem dưới) | `dcd44ce6…` 289 B, 0 hunk |
 
 **Bốn lớp lượt 1** (đều lời khai HỒ SƠ r371 rộng hơn phép đo — lần thứ NĂM liên tiếp, chuỗi PR được chấm
 r363→r366→r367→r369→r371): `nguon-thuat-lai-bi-nang-thanh-do` (10 thể hiện — nhãn (b)/(c) bị nâng thành (a) khi tổng hợp,
@@ -85,23 +85,27 @@ Không lease, không `guard --action merge` (PR hồ sơ); sổ local gen4 `uy_q
   phải có khối `nang_tran` khai `ai_nang` thuộc người có thẩm quyền, `can_cu`, `tran_cu`). #517 chạy **3 vòng**; vòng 3 phóng
   theo chỉ thị chủ kho trong phiên chat 02:2xZ ("lặp vá, cross-review … cho tới hết P1, P2 hoặc approve") — lời của người có
   thẩm quyền nhưng là (b) thuật lại, đưa ra TRƯỚC vòng 1, và **không có khối `nang_tran` nào được ghi trước khi phóng**.
-  Sửa trong PR này (commit 3): receipt 3 hạ `assurance` `cross_approved` → `cross_reviewed`, thêm khối `nang_tran_adr_0043`
-  ghi HẬU KỲ (`khoi_nay_co_truoc_khi_phong_vong_3: false`), caveat P1
-  `VONG-3-VUOT-TRAN-2-VONG-ADR-0043-KHONG-CO-KHOI-nang_tran-truoc-khi-phong-assurance-cross_reviewed` + hàng README.
-  Merge `f4da553` đứng trên chỉ thị chủ kho (ADR-0040, khai báo) — không đứng trên `cross_approved`. Cùng khuyết tật ở
+  Commit 3 (`5475a64`): receipt 3 hạ `assurance` `cross_approved` → `cross_reviewed`, khối `nang_tran_adr_0043` ghi HẬU KỲ,
+  caveat P1. **Chủ kho xác nhận nâng trần 04:2xZ 12-09** trong phiên chat (*"Khôi phục cross-approved cho #517, tôi đồng ý
+  nâng trần khi có đề nghị trong phiên này"*; ghi công khai ở #520 comment 5643435742) ⇒ commit 4: khôi phục
+  `cross_approved`, khối `nang_tran_adr_0043` giữ `khoi_nay_co_truoc_khi_phong_vong_3: false` + thêm
+  `chu_kho_xac_nhan_hau_ky: true`, caveat hạ P1 → P2
+  `VONG-3-VUOT-TRAN-2-VONG-ADR-0043-nang_tran-GHI-HAU-KY-chu-kho-xac-nhan-04-2xZ-12-09`. Xác nhận ấy cũng cho phép phiên này
+  vượt trần cho các PR nó lái (gồm #520) với điều kiện ghi khối `nang_tran` viện dẫn comment ấy TRƯỚC khi phóng.
+  Merge `f4da553` đứng trên chỉ thị chủ kho (ADR-0040, khai báo). Cùng khuyết tật ở
   receipt ĐÃ LAND `pr516-review-3` (r371: lượt 3 của #516 khai `cross_approved` khi #516 chạy 5 vòng) — không sửa receipt đã
   land, ghi nợ. Bài học: **HINT/chỉ thị/luật đều là lời khai cho tới khi được ghi đúng chỗ luật đòi** — executor đã đọc
   "lặp tới approve" thành nâng trần mà không ghi khối luật đòi, y hệt lớp `nguon-thuat-lai-bi-nang-thanh-do`.
 
 ## Phạm vi — (a)
 
-- Commit 3: sửa theo connector P1 thứ hai (receipt 3 + README + CHANGELOG mục này + NỢ), manifest tái sinh; 4 cổng chạy
-  lại — số ở mô tả PR.
+- Commit 3 `5475a64`: hạ receipt 3 theo connector; commit 4: khôi phục `cross_approved` theo xác nhận chủ kho (receipt 3 +
+  README + CHANGELOG mục connector + NỢ), manifest tái sinh; 4 cổng chạy lại — số ở mô tả PR.
 - Commit 1 `606b5ed`: 3 verdict NGUYÊN BYTE (`cmp` với `VERDICT.rvhs517-{1,2,3}.md` trong sandbox khớp) —
   `pr517-review-1` sha256 `a97d5d94…` 131 162 B (655 dòng) · `-2` `49516ae2…` 27 355 B (187) · `-3` `7c068a44…` 12 451 B
   (106); số dòng = số LF, tệp kết thúc LF (bài học `dem-dong-cong-them-duoi-lf`). `git log --all --diff-filter=A` ⇒ đúng 1
   commit ⇒ neo blob `evidence_url` = `606b5ed`.
-- Commit 2: 3 biên nhận v2 (`cross_reviewed` / `cross_reviewed` / `cross_approved` — hạ ở commit 3), README (1 đoạn nguồn
+- Commit 2: 3 biên nhận v2 (`cross_reviewed` / `cross_reviewed` / `cross_approved` — hạ ở commit 3, khôi phục ở commit 4), README (1 đoạn nguồn
   PR #517, 10 hàng cảnh báo — 11 sau commit 3, 3 hàng mục lục — 756 → 771 → 787 dòng), mục r372 này, `RELEASE_MANIFEST.json`
   tái sinh.
 - Gate tại chỗ trước commit 2: `bien_nhan_v2 --root .` **108 ĐẠT v2 (105 tại `f4da553` + 3) · 11/11 miễn trừ legacy · 42 NỢ
@@ -120,7 +124,7 @@ sống trong `scratch/` của sandbox, chưa vào kho, chưa có packet.
 - **Cổng trần vòng review ADR-0043** — `review_rounds_used` không có trần cưỡng chế (KE_HOACH §10 tự khai "TỰ NGUYỆN");
   connector đề nghị test sổ từ chối `luot: 3` không void khi thiếu khối `nang_tran` — đụng gate code, ngoài PR hồ sơ.
 - **Receipt `pr516-review-3` (r371) khai `cross_approved` cho vòng 3 của #516 (5 vòng) không có `nang_tran`** — cùng khuyết
-  tật; đã land, chưa đính chính (tiền lệ `pr510-review-2`).
+  tật, KHÔNG có xác nhận riêng của chủ kho; đã land, chưa đính chính (tiền lệ `pr510-review-2`).
 - **Cổng nội dung receipt** (so_p*/verdict_bytes/assurance/owner caveat/chuỗi r) — bốn lần xác nhận giới hạn; lượt 2 #517
   có bản phác `semantics.py` ngoài kho; chưa có packet.
 - **Cổng cấu trúc verdict lượt ≥ 2** (`bien_nhan_v2` chưa từ chối `cross_approved` khi verdict thiếu bốn trạng thái canonical)

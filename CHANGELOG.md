@@ -1,3 +1,115 @@
+# ★ dev-side — r371: ghi sổ #516 — năm verdict codex chấm CHÍNH hồ sơ r369 của #511; lượt 5 approve nhưng codex báo HẾT QUOTA lúc kết thúc (ma_thoat=1) — thông điệp "try again Sep 15th" KHÔNG phải phép đo: (b) tác giả thuật lại probe 12-09 chạy được (2026-09-11)
+
+Nối tiếp r369 (chốt tới `46d9561`, #516). Mục này là vế bookkeeping ADR-0034 của CHÍNH #516: 5 verdict + 5 biên nhận v2
+vào `ops/reviews/`, 5 hàng mục lục + 13 cảnh báo + 1 đoạn nguồn, manifest tái sinh. Run lượt 5 kết thúc rc=1
+và stderr báo giới hạn sử dụng; thông điệp đó không chứng minh reviewer khác nền hiện không chạy được.
+
+**Không nâng `VERSION`.** Vẫn `1.36.68` từ r336.
+
+**Tác giả thuật lại lần chọn số r371 trên KHO NGUỒN** (21:06Z 11-09-2026): hai nguồn ref khớp (`ls-remote --heads`
+344 / `for-each-ref refs/remotes/origin` trừ HEAD 344, `comm -23`/`comm -13` đều 0) rồi quét TIÊU ĐỀ ĐẦU của
+`CHANGELOG.md` trên mọi ref: `r370` ở **1 ref** (`claude/vaerr-514-authorization-url`, phiên khác, 20:56Z — cùng phút
+với merge #516), `r371` **0 ref**, `r372` 0 ref. r370 bị nhường vì phiên kia đã ghi trước; **hai PR song song lại cùng
+chạm README/CHANGELOG** ⇒ PR land sau phải merge master và chạy lại 4 cổng (đúng như r369 đã báo và đã phải làm ở
+`c98c33e`). Các số 344/344/0/0 là lịch sử thuật lại, KHÔNG ĐO ĐƯỢC từ gói review (không có mạng, không snapshot).
+
+**GIỚI HẠN NGUỒN.** Như r367/r369: (a) **tự đo được** — số Git, băm/byte tệp, cổng chạy lại từ hiện vật trong kho;
+(b) **thuật lại** — sự kiện GitHub (run CI, comment, connector, thời điểm merge, luật chủ kho, QUOTA của reviewer);
+(c) **kết quả cũ thuật lại** — mutant/3 lối land/dựng lại merge mà reviewer chạy trong sandbox. Scalar runtime trong
+`model_reviewer_identity` đối chiếu được với `run.json` NGOÀI kho (`scratchpad/runs/{a146d00d,457a6568,0449ddb0,
+04792ddf,6c8b0629}`, CÓ khoá `thoi_luong_giay`); model đã chạy KHÔNG ĐO ĐƯỢC.
+
+## Năm lượt review hồ sơ #516 — số Git/băm/byte/finding (a); runtime đối chiếu nguồn ngoài kho; sự kiện (b); phép chạy sandbox cũ (c)
+
+| lượt | run | head / base | verdict | assurance | HINT |
+|---|---|---|---|---|---|
+| 1 | `a146d00d` · 1 089,259 s (19:02:32 → 19:20:41Z) | `899f305` / `05ba3f9` | `changes_requested` 0 P1 / **4 P2** / 1 P3 | `cross_reviewed` | `036fa165…` 28 684 B, 8 hunk / 4 tệp |
+| 2 | `457a6568` · 682,561 s (19:25:49 → 19:37:11Z) | `a41fc69` / `6786637` | `approve` 0/0/0, 5 finding ĐÃ VÁ THẬT | `cross_approved` | `b31ce9e6…` 82 B, 0 hunk |
+| 3 | `0449ddb0` · 462,238 s (19:57:45 → 20:05:28Z) | `5f45e6e` / `6786637` | `approve` 0/0/0 (sau P1 connector) | `cross_approved` | `f2703a7c…` 100 B, 0 hunk |
+| 4 | `04792ddf` · 631,034 s (20:33:15 → 20:43:46Z) | `c98c33e` / `8802924` | `changes_requested` 0/**1**/0 — P2 ở EVIDENCE gói review | `cross_reviewed` | `a17f443e…` 853 B, 0 hunk (+ `EVIDENCE.HINT` 1 hunk, ngoài kho) |
+| 5 | `6c8b0629` · 260,011 s (20:46:27 → 20:50:47Z) · **ma_thoat=1** | `c98c33e` / `8802924` | `approve` 0/0/0, P2-E01 ĐÃ VÁ THẬT | `cross_reviewed` | `434746d1…` 300 B, 0 hunk |
+
+Bốn P2 + một P3 lượt 1 — lần thứ TƯ liên tiếp (r363→r366→r367→r369) PR hồ sơ ăn finding lớp "lời khai HỒ SƠ rộng hơn
+phép đo": `tong-hop-mutant-dem-bon-thay-vi-ba` (nguồn có 5 mutant: 3 ĐỎ / 2 SỐNG, receipt viết "4 ĐỎ") ·
+`pham-vi-no-khong-rong-hon-r367` (receipt pr510 lượt 2 đã có `verdict_bytes` ⇒ tập trường mới = 0) ·
+`nguon-lich-su-van-gan-nhan-do` (340/340, comm 0/0 đặt dưới nhãn ĐO) · `muc-luc-bo-nhan-thuat-lai-cua-nguon` (README
+thiếu nhãn (b)) · `dem-dong-readme-lech-mot` (638→647 khai sai, đúng 637→646). Executor áp NGUYÊN HINT (`patch -p0
+--fuzz=0` rc=0) tại `a4c14c7`; lượt 2 áp lại từng hunk: 8/8, 4 tệp bằng byte, manifest bằng byte.
+
+**Lượt 3 tồn tại vì Codex connector** (bỏ draft 19:39Z trên `a41fc69`, Completed 19:52:04Z) ra 2 P1 — lần đầu connector
+được ĐỌC TRƯỚC khi merge (trả nợ r369 "chờ connector"): P1 assurance ĐÚNG (verdict pr511 lượt 2 thiếu mục `## ĐỐI CHIẾU
+LƯỢT TRƯỚC` ⇒ receipt hạ `cross_approved` → `cross_reviewed` ở `5f45e6e`), P1 re-anchor KHÔNG ÁP DỤNG (`6fe742e` không
+tồn tại — squash tổng hợp của connector, cùng hình dạng #460). **Lượt 4 tồn tại vì merge 405 conflict** (#514 = r368
+land vào master trong lúc #516 chờ): merge `8802924` ⇒ `c98c33e`, giải xung đột giữ CẢ HAI phía; reviewer dựng lại merge
+và đo: 4/4 pr511 bằng cha 1, 34/34 pr493 bằng base, CHANGELOG/README = nối hai phía bằng byte, manifest tái sinh bằng
+byte, 19/19 neo giữ ở merge/ff. P2 duy nhất `p2-e01-evidence-khai-doan-nguon-493-khong-ton-tai` ở EVIDENCE.md của GÓI
+REVIEW (tác giả khai một "đoạn nguồn riêng của #493" mà base lẫn head đều không có) — sửa bằng `EVIDENCE.HINT.patch`
+(sha256 `7acb408c…`) ngoài kho, lượt 5 xác nhận ĐÃ VÁ THẬT.
+
+## Lượt 5: `approve` với `ma_thoat=1` — codex HẾT QUOTA đúng lúc kết thúc
+
+`run.json 6c8b0629`: `ma_thoat: 1`, `stdout.log` **0 byte** (không có dòng `XONG VERDICT sha256=`), `last.md` rỗng; đuôi
+`stderr.log`: `ERROR: You've hit your usage limit … try again at Sep 15th, 2026 1:26 AM`. `VERDICT.md` trên đĩa ĐẦY ĐỦ
+(83 dòng, 7 577 B: frontmatter, ĐỐI CHIẾU với trạng thái canonical, Bảng đo lại tự chốt 20:50:46Z, Findings,
+chua_do_duoc); cay-kho sạch; 7 băm khớp lượt 4. Băm verdict do EXECUTOR tính trên tệp — reviewer không kịp in.
+**Xử lý:** verdict vào kho nguyên byte như bốn lượt kia; receipt lượt 5 giữ `assurance: cross_reviewed` (không phải
+`cross_approved`) dù verdict là `approve`, kèm caveat **P1**
+`MA-THOAT-1-CODEX-HET-QUOTA-luc-ket-thuc-verdict-day-du-tren-dia-assurance-cross_reviewed`. Merge `46d9561` (20:56:47Z,
+merge commit `8802924` + `c98c33e`, không squash) dựa trên: approve lượt 5 + kết luận cây của lượt 4 + `cross_approved`
+lượt 3 trên cha 1 `5f45e6e`; gate ubuntu (job 103411426056) + thu-hoi success trên `c98c33e`. Muốn `cross_approved` cho
+`c98c33e` cần một lượt chạy trọn (rc=0, có dòng XONG) — chưa phóng vì #516 đã merge; xem mục "Hệ quả" về thời điểm codex
+chạy lại được.
+
+## Hệ quả: thông điệp quota của codex KHÔNG phải phép đo — bản đầu của mục này đã tin nó
+
+(b) Tác giả thuật lại lịch sử điều phối và probe dưới đây; log probe không có trong gói review.
+Bản đầu (21:0xZ 11-09) viết *"PR hồ sơ NÀY không có reviewer khác nền cho tới 15-09-2026 01:26Z"* và mở PR ở trạng thái
+draft chờ chủ kho chọn reviewer dự phòng. Chủ kho chỉ thị bỏ draft và cross-review; **probe `codex exec` lúc 02:3xZ
+12-09 chạy được (rc=0)**. Đo được từ gói là chuỗi `try again at Sep 15th` trong stderr run `6c8b0629`;
+không đo được probe hay độ dài cửa sổ quota. Câu "không thể trước 15-09" là lời khai rộng hơn phép đo —
+đúng lớp lỗi mà bốn PR hồ sơ liên tiếp đã ăn. Sửa ở đây trước khi phóng lượt review 1 của #517 (commit 3 của PR),
+để reviewer đo câu đã sửa chứ không phải câu sai. Bài học: **thông điệp lỗi của công cụ là (b) thuật lại**; muốn
+khẳng định "không dùng được tới mốc T" phải đo lại tại T hoặc ghi rõ là lời của công cụ.
+Không liên quan quota, **PR #512 (packet `WINDOWS-LEASE-SUITE`, #504) DỪNG ở S6** sau lượt 2 approve (`8239554`) vì
+connector Codex ra 4 finding đã kiểm (1 P1 tree-kill, 3 P2) và trần ADR-0043 = 2 vòng — chưa merge, chờ nâng trần và
+chọn phạm vi vá; hai verdict `rvwin512-{1,2}` của #512 (`88f0a645…` 34 537 B · `74259a45…` 26 824 B) CHƯA vào kho —
+sẽ vào ở PR hồ sơ của chính #512 khi #512 land, không vào mục này.
+
+## Phạm vi — Git/băm/byte là (a); lịch sử thao tác và thứ tự chạy cổng là (b)
+
+- Commit 1 `8fd3f48`: 5 verdict NGUYÊN BYTE (`cmp` với `VERDICT.rvhs516-{1..5}.md` trong sandbox khớp) —
+  `pr516-review-1` sha256 `1a123573…` 74 068 B · `-2` `e2d0fc65…` 36 923 B · `-3` `532e022c…` 14 796 B · `-4` `4d227acb…`
+  16 275 B · `-5` `d66f5802…` 7 577 B; `git log --all --diff-filter=A` ⇒ đúng 1 commit ⇒ neo blob `evidence_url` =
+  `8fd3f48`. Tiêu đề commit ghi đúng r371 (bản trước push từng ghi "r370" và được amend TRƯỚC khi push — neo chưa
+  từng được tham chiếu nên amend không phá gì; sau push thì KHÔNG amend, tiền lệ `120d47a`).
+- Commit 2: 5 biên nhận v2 (assurance như bảng trên), README (1 đoạn nguồn PR #516, 13 hàng cảnh báo, 5 hàng mục lục —
+  736 → 756 dòng), mục r371 này, `RELEASE_MANIFEST.json` tái sinh (`tl.py release-manifest --deterministic`).
+- Commit 3: sửa lời khai quota (tiêu đề + mục "Hệ quả" + NỢ của mục này; caveat P1 receipt lượt 5 và hàng README
+  tương ứng), manifest tái sinh; 4 cổng chạy lại — số ở mô tả PR.
+- Gate tại chỗ trước commit 2: `bien_nhan_v2 --root .` **105 ĐẠT v2 (100 tại `46d9561` + 5) · 11/11 miễn trừ legacy ·
+  42 NỢ đóng băng · 0 vi phạm · 0 KHÔNG ĐO ĐƯỢC · tổng 158**, TỔNG ĐẠT; t26/t27 QUA. `release-verify --strict --json`,
+  `doc-claims-check --strict`, doctrine-scan, `git diff --check` chạy SAU khi tái sinh manifest — số ở mô tả PR.
+
+## Giới hạn cổng — lần thứ ba xác nhận lại
+
+Lượt 1 và 2 của #516 lặp lại phép đo r367/r369: đổi `so_p2` (5→4) HOẶC `verdict_bytes` (83049→83048) SỐNG 4/4; lượt 3
+thêm một mutant cùng lớp: **đảo `assurance` receipt pr511 lượt 2 về `cross_approved` cũng SỐNG 4/4** — cổng không kiểm
+cấu trúc/phân loại tái-review. Cảnh báo `VERDICT-BYTES-VA-SO-P-TRONG-BIEN-NHAN-KHONG-CO-CONG-NAO-CANH` giữ nguyên
+văn; nợ cổng vẫn chưa có packet.
+
+## NỢ (mở ở r371)
+
+- **Chưa có reviewer dự phòng khác nền được cài/xác thực** (`doctor`: `openai-llm`, `antigravity` THIẾU) — lộ ra khi
+  codex báo giới hạn sử dụng. (b) Tác giả thuật lại probe 12-09 chạy được; gói không đo được thời lượng giới hạn quota.
+- **#512 dừng ở S6** (4 finding connector đã kiểm, trần 2 vòng) — cần chủ kho nâng trần + chọn phạm vi vá; verdict
+  #512 chưa vào kho.
+- **`so_p*`/`verdict_bytes`/`assurance` không có cổng** — r367/r369/r371, ba lần đo, chưa có packet.
+- **Cổng cấu trúc verdict lượt ≥ 2** (`bien_nhan_v2` chưa từ chối `cross_approved` khi verdict thiếu bốn trạng thái
+  canonical) — connector đòi ở #516, đụng gate code, ngoài PR hồ sơ.
+- **Receipt `pr510-review-2` (r367) `cross_approved` với verdict thiếu mục ĐỐI CHIẾU** — chưa đính chính.
+- **Hai PR hồ sơ song song lại chạm README/CHANGELOG** (r370 nhánh `vaerr-514` · r371 nhánh này) — PR land sau merge
+  master + chạy lại 4 cổng.
+- Nợ r369 còn nguyên: `SO-LEASE-KHONG-NAM-MOT-CHO`, `AG-T0-01B`.
 # ★ dev-side — r369: ghi sổ #511 — hai verdict codex chấm CHÍNH hồ sơ r367 của #510; 5 P2 vá rồi approve; merge theo luật chung "approve ⇒ land" (2026-09-11)
 
 Nối tiếp r367 (chốt tới `b98531e`, #510). Merge sau đó chưa có mục: **#511** — vế bookkeeping ADR-0034 của #510/#505,

@@ -1,0 +1,294 @@
+# BIÊN NHẬN GIAO HÀNG — cross-review LƯỢT 4 của PR #529 (packet #523,
+# QUY-TRINH-LAP-REVIEW-VA-DIEU-KIEN-DUNG revision 5), KHÁC NỀN (codex), theo LỚP, trên `a97d95c`.
+# **`blocked`** — 0 P1 + 9 P2 + 0 P3 = 9 LỚP, 18 THỂ HIỆN.
+#
+# LƯỢT NÀY CHỨNG MINH BA BẢN VÁ CỦA r5 LÀ CHƯA ĐỦ, và hai trong ba là do CHÍNH BẢN VÁ sinh lỗ mới.
+# Phiên thi công đã ĐO LẠI cả ba và xác nhận reviewer đúng — xem `loi_khai_bi_bac`.
+#
+# `blocked` theo `§3.2`: finding cho thấy CHÍNH ĐẶC TẢ thiếu (`dac-ta-r5-giu-luat-cu-trai-tieu-chi-moi`)
+# và hai điều kiện dừng `S9`/`S10` của lease đã chạm. Packet KHÔNG được tự vá.
+
+schema_version: 2
+receipt_id: pr529-review-4-codex-20260912-bbd6d63a
+kind: review_delivery_receipt
+packet_id: '523'
+packet_slug: 'QUY-TRINH-LAP-REVIEW-VA-DIEU-KIEN-DUNG'
+lease_id: quy-trinh-lap-review-r5-exec-4-claude-20260912
+phase_key: QUY-TRINH-LAP-REVIEW-R5-GEN4-PHIEN-20260912
+luot: 4
+role: reviewer
+provider: codex
+executor_provider: claude
+cross_provider: true
+assurance: advisory_review
+assurance_ghi_chu: >-
+  KHÔNG phải `cross_approved`: verdict là `blocked`. `review_class` = `sensitive` đòi `approve`
+  TƯỜNG MINH; verdict mở đầu bằng *"không approve"*.
+verdict: blocked
+verdict_path: ops/reviews/pr529-review-4-codex-verdict.md
+verdict_sha256: 86e867a7eadd1c0b4a25dae96e4d19a7e356d9d4ebebc7a98b8f0583320e3041
+verdict_bytes: 38604
+reviewed_sha: a97d95c1763af30aa26750ef4d5246cfc4aa1206
+reviewed_base: dc02c9beed42bd2ea44a80a2e34e1bbe3acfc6c5
+evidence_url: https://github.com/ducthangho/tra-luat/blob/PENDING/ops/reviews/pr529-review-4-codex-verdict.md
+evidence_url_ghi_chu: >-
+  `PENDING` được thay bằng SHA của commit ĐẦU TIÊN chứa tệp verdict, đo bằng
+  `git log --diff-filter=A`, trong MỘT commit riêng — KHÔNG điền rồi `--amend`, vì amend đổi SHA và
+  làm URL treo (đã xảy ra ở lượt 3, bắt được trước khi đẩy).
+
+# ---- A16' — NGÂN SÁCH khác SỐ ĐÃ CHI. Lớp `bien-nhan-thieu-so-ci-da-chi` đòi đúng khối này.
+ngan_sach_ci_loai_b: 0
+ngan_sach_ci_loai_b_nguon: >-
+  `M10` của packet: `N = 0` cho giai đoạn TRƯỚC merge. Đây là NGÂN SÁCH, không phải số đã chi.
+da_chi_ci_loai_b: 0
+da_chi_ci_loai_b_run_id: []
+da_chi_ci_loai_b_do_the_nao: >-
+  ĐO, không khai. `actions_list` trên `ci.yml` lọc `event=workflow_dispatch`, 30 lượt gần nhất
+  (tổng 202): **0** lượt có `head_branch` khớp `claude/quy-trinh-lap-review*` và **0** lượt mang
+  `pull_requests` chứa 529.
+  CỬA SỔ ĐO CÓ PHỦ TRỌN ĐỜI PACKET — và đây là phần làm con số `0` có nghĩa: lượt
+  `workflow_dispatch` MỚI NHẤT của CẢ KHO là `2026-09-11T19:06:49Z`
+  (`claude/windows-lease-suite`), tức **trước** lúc PR #529 mở (`2026-09-12T14:34:01Z`). Nên không
+  lượt dispatch nào của packet có thể bị cắt khỏi cửa sổ 30 lượt. Một `0` từ cửa sổ quá hẹp thì vô
+  nghĩa; câu này là lý do `0` ở đây đo được.
+  Kèm phép đo thứ hai, ở mức CHECK RUN trên head: `gate (ubuntu-latest)` · `thu-hoi` · `mo` —
+  **KHÔNG có job `windows`** nào. Lane `windows` chỉ chạy qua nhãn hoặc dispatch, và cả hai đều 0.
+da_chi_ci_loai_b_gioi_han: >-
+  Phép đo dùng `actions_list` (MCP GitHub). Nó KHÔNG chứng thực rằng không có workflow KHÁC
+  `ci.yml` từng được gọi tay; phạm vi khai là `ci.yml`. Và `session_run_id` của lượt review
+  (`bbd6d63a`) **KHÔNG** phải `run_id` CI — reviewer cấm đúng chỗ đó, ghi ra để không ai nhầm.
+
+phan_loai_finding: theo_lop
+phan_loai_finding_ghi_chu: >-
+  `so_p1`/`so_p2`/`so_p3` đếm LỚP; `so_the_hien` đếm THỂ HIỆN. Reviewer khai: các tái phát
+  `A9`/`A17`/`A18`/`A20` **giữ slug canonical**, không tách slug theo từng bản probe; và lớp con
+  trỏ sản phẩm ĐÃ VÁ THẬT **không** nằm trong `findings_ids`.
+so_p1: 0
+so_p2: 9
+so_p3: 0
+so_the_hien: 18
+findings_ids:
+  - a9-bo-sot-delta-trong-merge
+  - a17-whitelist-bo-roi-m8
+  - dem-dot-bien-khong-theo-tieu-chi-dich
+  - bo-doc-bang-vuot-ranh-gioi-muc
+  - bo-do-bang-chi-kiem-ten-khong-kiem-nghia
+  - bien-nhan-thieu-so-ci-da-chi
+  - phep-do-doctrine-khong-du-rang
+  - doi-chung-a19-khong-chi-phoi-ket-luan
+  - dac-ta-r5-giu-luat-cu-trai-tieu-chi-moi
+
+lop_moi_o_luot_nay:
+  - slug: doi-chung-a19-khong-chi-phoi-ket-luan
+    noi_dung: >-
+      Đối chứng của `A19` chỉ **IN**, không vào điều kiện thoát. Đo được: nối nó vào exit condition
+      thì cùng một failure đổi `rc=0 → rc=1`. Tức bộ đo có đối chứng mà đối chứng **không chi phối
+      kết luận** — một đối chứng không thể làm cổng đỏ thì không phải đối chứng.
+  - slug: dac-ta-r5-giu-luat-cu-trai-tieu-chi-moi
+    noi_dung: >-
+      `SPEC.md` ĐÃ ĐÓNG BĂNG chứa HAI câu quy phạm trái chính tiêu chí mới của nó, và không câu nào
+      được đánh dấu đã rút. Hai người đọc cùng một revision có thể nhận hai nghĩa vụ loại trừ nhau.
+      Đây là lý do `blocked` theo `§3.2`, không chỉ `changes_requested`.
+
+loi_khai_bi_bac:
+  # BA bản vá của r5 bị chứng minh CHƯA ĐỦ. Phiên thi công ĐO LẠI cả ba, xác nhận reviewer đúng.
+  - id: a18-van-con-kenh-tin-dung-gia-THU-BA
+    toi_khai: '`A18''` bỏ luật `rc != 0` ⇒ 9/9 GIẾT THẬT, 0 tín dụng giả, và đã TỪ CHỐI oracle sai đích.'
+    do_lai: >-
+      **CHƯA ĐÓNG.** Luật mới kiểm GIÁ TRỊ của các kết quả đã trả về, nhưng không kiểm **SỰ CÓ MẶT**
+      của toàn bộ kết quả phải có. `all()` trên tập RỖNG là `True` — phiên đã đo:
+      `all({}.values()) == True`. Nên một oracle chỉ trả tiêu chí ĐÍCH và **bỏ** tiêu chí kia cho
+      `khac = {}` ⇒ `all(...)` đúng một cách rỗng ⇒ **9/9 GIẾT THẬT, rc=0**.
+      Reviewer dựng đúng oracle ấy (`T2`) và nói thẳng: *"Không có quan sát không đích KHÔNG tương
+      đương `DAT`"*. Hướng chữa họ nêu: so `set(khac)` **bằng đúng** tập tiêu chí trừ đích TRƯỚC khi
+      `all` — họ đã thử trên bản sao: `missing-nontarget` `rc=1` / `0of9`, oracle thật vẫn `rc=0` / `9of9`.
+      HÌNH DẠNG: đây là kênh tín dụng giả **THỨ BA** trong cùng một bộ đo. Lượt 3 đóng kênh 1 (bộ
+      đọc vượt ranh giới mục), r5 đóng kênh 2 (`rc != 0`), và kênh 3 vẫn mở. Đúng nếp *"vá đúng chỗ
+      được chỉ rồi bỏ sót đường tiếp theo"* — lần thứ BA ở packet này.
+  - id: a17-hai-ban-sua-cua-toi-LA-phep-noi-tieu-chi
+    toi_khai: >-
+      Hai bản sửa bộ đo `A17'` (xếp theo KHỐI; thêm `vá lẻ`/`bảng phân loại` vào danh sách CHO PHÉP)
+      là sửa ĐỘ PHỦ chứ không phải nới TIÊU CHÍ, và chốt *"ba phép làm ĐỎ phải VẪN ĐỎ"* chứng minh
+      điều đó.
+    do_lai: >-
+      **BỊ BÁC, và chốt của tôi KHÔNG ĐỦ.** `A17'` cấm **cả dòng vô hại** ngoài ba nhóm, nên không
+      cần payload phủ định mới chứng minh được nới. Hai phản chứng của reviewer:
+      `W2` — cùng một câu mô tả vô hại: đứng **RIÊNG** ⇒ bị bắt (`False`); đặt **KỀ** một khối `A2'`
+      ⇒ **lọt** (`True`), trong khi bản thân nó `xep=None`. Tức xếp theo KHỐI làm **một dòng nhận
+      diện hợp thức hoá phần còn lại**.
+      `W3` — câu mô tả vô hại có chữ `vá lẻ`: có hai từ mới thì `True`, bỏ hai từ mới thì `False`,
+      dù nó **không** mô tả nghĩa vụ `BẢNG LỚP` nào.
+      Và câu bác chốt của tôi, nguyên văn: *"Ba fixture cũ vẫn đỏ chỉ giữ **ba điểm kiểm**, không
+      giữ **tập chấp nhận**"*. Đó là chỗ tôi sai: tôi tưởng "ba phép làm ĐỎ vẫn ĐỎ" đủ để chứng minh
+      không nới, trong khi nó chỉ chứng minh ba ĐIỂM không đổi.
+      Reviewer còn nêu một giới hạn của chính `A17'` mà tôi chưa nghĩ tới: whitelist theo NHÓM nên
+      `A17'` có thể phân nhóm ĐÚNG trong khi `M8` **sai nội dung** — nó không đếm riêng ca `M8` đảo ô.
+  - id: a9-sua-truc-THOI-GIAN-nhung-mat-truc-DUONG-DAN
+    toi_khai: '`A9''` là MỘT phép đo nên đóng cả ba khiếm khuyết của `A9` r4.'
+    do_lai: >-
+      **Đóng được trục THỜI GIAN, nhưng `pathspec` làm mất trục ĐƯỜNG DẪN.** Hai phản chứng:
+      `G2` — index tạm từ HEAD thêm `extra.txt`: `full diff` THẤY nó, còn `numstat` đã lọc
+      `-- .claude/skills/` vẫn trả `62/139` ⇒ `A9'` **NHẬN**.
+      `G3` — hai đường `.claude/skills/one.md` và `two.md` được NHẬN, dù `A9` đòi đúng **hai tên
+      exact** (`cross-review/SKILL.md`, `work-packet/SKILL.md`).
+      Reviewer nói rõ điều họ KHÔNG khẳng định: *"Không khẳng định HEAD thật vi phạm write set: diff
+      thật chỉ hai skill và `ops/reviews`"*. Vấn đề là phép đo hiện tại **không thể chứng nhận mọi
+      cấu hình** theo hợp đồng. `S10` đòi BÁO, không tự đổi acceptance.
+  - id: hai-mau-thuan-NUA-trong-spec-toi-da-dong-bang
+    toi_khai: >-
+      Tôi tự bắt được mâu thuẫn `ngoai_pham_vi` mục 7 trước khi đóng băng r5 và đã sửa.
+    do_lai: >-
+      **Còn HAI cái y hệt, và tôi bỏ sót cả hai.** Phiên đã đo lại trên chính blob đã đóng băng:
+      `S9a` — `SPEC.md:94–98` vẫn viết *"Phép đếm đúng là `git diff --numstat <merge commit>..<head>`
+      … **CỘNG** `git diff --numstat <base trước merge>..<head trước merge>`"* — tức nguyên văn công
+      thức HAI KHOẢNG mà `A9'` vừa thay.
+      `S15a` — `SPEC.md:170` trong `A2'` vẫn viết *"Được phép trỏ `§8`/`§12` cho ngưỡng và cho **định
+      nghĩa P1/P2/P3**"* — trong khi `ngoai_pham_vi` mục 9 và `A19` **cấm** đúng con trỏ ấy và đòi bỏ nó.
+      Reviewer kiểm cả băm để loại khả năng đọc nhầm revision: *"hash vẫn khớp lease chứng minh không
+      phải đọc nhầm revision"*. Và họ nói đúng điều đáng sợ nhất: *"Có thể suy ưu tiên điều mới của
+      r5 để thi hành, nhưng đó không sửa văn bản đóng băng mâu thuẫn, nhất là khi packet đang yêu
+      cầu kiểm chính tiêu chí executor tự viết"*.
+      HÌNH DẠNG: tôi bắt MỘT rồi bỏ sót HAI cái cùng loại trong CÙNG một tệp — đúng nếp *"vá đúng
+      chỗ được chỉ rồi bỏ sót đường tiếp theo"*, lần này ở tầng ĐẶC TẢ. Lease `S2` cũng còn mô tả
+      *trước + sau merge*, nên chỗ dẫn xuất cũ chưa được rà hết.
+
+doi_chieu_luot_truoc:
+  ghi_chu: >-
+    Tám lớp của lượt 3 được phán canonical trong `## ĐỐI CHIẾU LƯỢT TRƯỚC` của verdict. Kết quả:
+    lớp `con-tro-dinh-nghia-phan-hang-sai-dich` **ĐÃ VÁ THẬT** (và reviewer khai thẳng nó KHÔNG nằm
+    trong `findings_ids` lượt này); bốn lớp `a9`/`a17`/`dem-dot-bien`/`bo-do-bang-*` **TÁI PHÁT** với
+    thể hiện MỚI, giữ NGUYÊN slug; `phep-do-doctrine-khong-du-rang` vẫn **CHƯA VÁ** (`S4` cấm);
+    `bien-nhan-thieu-so-ci-da-chi` **chưa đóng được** vì biên nhận lượt 4 (tệp NÀY) chưa tồn tại lúc
+    review — reviewer phán đúng trạng thái thay vì nhận lời hứa, và nói sẽ kiểm `receipt4` khi có.
+  he_qua_cho_bien_nhan_nay: >-
+    Vì thế khối `ngan_sach_ci_loai_b` / `da_chi_ci_loai_b` ở trên là bản THI HÀNH của `A16'`, và nó
+    CHƯA được lượt nào chấm. Đừng đọc nó thành "lớp đã đóng".
+
+model_reviewer_identity:
+  provider: openai_codex
+  surface: codex_cli
+  transport: machine
+  model_yeu_cau: 'KHONG_KHAI — không truyền `-m`'
+  model_da_chay: 'KHONG_DO_DUOC — `codex exec` không xuất `modelUsage`; reviewer tự khai KHÔNG tự chứng thực model ID/runtime nào mà công cụ không cung cấp.'
+  effort: 'KHONG_KHAI'
+  session_run_id: bbd6d63a
+  run_id_day_du: bbd6d63ad14449ba87af89dab24f1e4d
+  prompt_sha256: 677534e04c0d107310ad21a1ec8b10449a0075703cb00fefc36a4f1ee6da12bc
+  bat_dau_utc: '2026-09-12T17:12:27.307903+00:00'
+  ket_thuc_utc: '2026-09-12T17:24:51.564746+00:00'
+  thoi_luong_giay: 744.257
+  ma_thoat: 0
+  trang_thai: xong
+  stdout_byte: 336
+  stdout_sha256: 703ce0186524cc58f58e9b6b7c9633081334d4757c6cf85ad1520a43e4d6f01f
+  stderr_byte: 951469
+  stderr_sha256: bbfe836c807e80396737894e69df81e5bd9231a14ffc008ecd8d5afbfc2acabd
+  so_lan_chet_truoc_khi_xong: 0
+  prompt_kin_hoan_toan: false
+  neo_kho: >-
+    Chạy với `--expected-repo github.com/ducthangho/tra-luat`,
+    `--expected-head a97d95c1763af30aa26750ef4d5246cfc4aa1206`, `--require-clean`. Nên "reviewer đã
+    đọc đúng head nào" được CHỐT bởi launcher, không chỉ bởi lời khai.
+  nguon_cac_scalar_tren: >-
+    ĐỐI CHIẾU ĐƯỢC với `run.json` NGOÀI kho (`/tmp/claude-0/runs523e/bbd6d63a/run.json`, launcher
+    `version 1.5.0`): `worktree_sach: true`, `head` (`a97d95c`), `ly_do_dung: null`. KHÔNG khoá nào
+    chứng thực MODEL.
+  vi_sao_ba_so_nay_duoc_ghi: >-
+    744,257 s và **951 469 B** stderr — lớn nhất trong bốn lượt của packet (lượt 3: 527 798 B). Khớp
+    với việc lượt này tự dựng thêm nhiều bộ đo (`review4.py`, `controls4.py`, `facts4.py`).
+
+HIEN_VAT_XONG_TRUOC_KHI_RUN_KET_THUC:
+  # Đảo ngược so với lượt 3, và được ĐO chứ không giả định.
+  verdict_mtime_utc: '2026-09-12T17:24:09Z'
+  run_ket_thuc_utc: '2026-09-12T17:24:51.564746+00:00'
+  ket_luan: >-
+    `mtime` **TRƯỚC** `ket_thuc_utc` 42 giây ⇒ hiện vật đã xong trước khi bộ chạy kết thúc, KHÁC
+    lượt 3 (ghi thêm 94 giây SAU khi báo `xong`). Vẫn đo bằng chốt của lượt 3: **ba** phép băm cách
+    nhau 8 giây cho cùng `86e867a7…` / 38 604 B. Chốt ấy không tốn gì và bắt được một ca đã xảy ra,
+    nên giữ dùng dù lượt này không cần.
+  reviewer_tu_khai_them: >-
+    Reviewer ghi mục `## TÍNH TOÀN VẸN VÀ BÀN GIAO`: bản tăng dần lưu ở
+    `review-artifacts/VERDICT-incremental.md`, và **tự khai một sai sót của chính nó**: log sơ bộ
+    `H7`/`H8` từng cho `False` vì mẫu tìm thiếu dấu backtick / khác vị trí xuống dòng; đã sửa mẫu,
+    chạy lại, và **KHÔNG dùng hai `False` ấy làm finding**. Đó là cùng lớp lỗi "kiểm TÊN không kiểm
+    NGHĨA" mà nó tìm thấy ở bộ đo của tôi — nó gặp và tự khai.
+
+nang_luc_do_cua_goi:
+  mirror: >-
+    Mirror git ĐẦY ĐỦ NGOÀI kho (`/tmp/claude-0/rv523e/`): bare + `cay-kho` detached đúng `a97d95c`,
+    `is-shallow=false`, `core.abbrev 7`, `origin` = URL HTTPS thật. Gói gồm `SPEC.md` (r5, băm KHỚP
+    lease — kiểm được ngay trong sandbox), `SPEC-r4.md`, `SPEC-r1.md`, `LEASE-gen4.yaml`,
+    `VERDICT-luot3.md`, hai diff, và **SÁU** bộ đo của phiên để reviewer CHẠY và ĐỘT BIẾN.
+  so_hai_nguon_truoc_khi_clone: >-
+    Chạy TRÊN KHO NGUỒN, TRƯỚC clone: 363 ↔ 363, `comm` = 0 cả hai chiều.
+    MỘT LẦN MÙ ĐÃ BỊ BẮT: phép so đầu cho **363 / 362**, thiếu
+    `claude/cham-dot-bien-mien-nhiem-lease-suite` ⇒ **fail-close**, fetch refspec rộng, đo lại mới
+    KHÔNG MÙ. Nếu chỉ so `wc -l` một lần rồi đi tiếp thì mirror sẽ thiếu đúng một nhánh.
+  doi_chieu_cong_nen_sandbox: >-
+    Tại CÙNG MỘT COMMIT (nền = worktree, sandbox = clone; khác ĐÚNG MỘT biến): `doctrine-scan` 0/0 ·
+    `adr-song` 0/0 · `idiom-ba-ten` 0/0 · `doc-claims-check --strict` 0/0. Bốn mã thoát bằng nhau
+    CHƯA chứng minh môi trường tương đương.
+  reviewer_tu_khai_khong_do_duoc: >-
+    Reviewer khai thẳng, nguyên văn: *"không suy authority, CI thực chi hoặc hành vi executor ngoài
+    sandbox"* — lặp ở CẢ CHÍN finding. Và nó KHÔNG nhận khối `A16'` của biên nhận này làm bản vá.
+
+hien_vat_reviewer_vao_kho:
+  duong_dan: KHONG_CO
+  ghi_chu: >-
+    Reviewer sinh `review4.py`, `controls4.py`, `facts4.py`, `review-artifacts/VERDICT-incremental.md`
+    và nhiều tệp log trong sandbox NGOÀI kho; chúng chết theo container. Lệnh + output của các hướng
+    đã gói vào chính `VERDICT.md`.
+
+tuan_thu_cam_cua_reviewer:
+  cay_kho_sach: true
+  commit_them_ngoai_head: 0
+  bang_chung: >-
+    `run.json` `worktree_sach: true`, và lượt này chạy với `--require-clean`. Phiên điều phối đo ĐỘC
+    LẬP sau lượt: `status --porcelain` RỖNG và `log a97d95c..HEAD` RỖNG ở sandbox; kho THẬT cũng
+    RỖNG. Reviewer tự khai `original_files=2123`, `changed_or_missing=[]`, `added=[]`,
+    `git_status=''`, và rằng các phản chứng dùng `GIT_INDEX_FILE`/`GIT_OBJECT_DIRECTORY` trong
+    `review-artifacts`, **không tạo commit/ref**.
+
+github_submitter_identity:
+  actor: ducthangho
+  la_tac_gia_PR: true
+  ghi_chu: >-
+    `ADR-0040`: verdict do tài khoản tác giả PR vận chuyển KHÔNG là merge authorization.
+  phien_van_chuyen: https://claude.ai/code/session_01HZNBRUZKM2mbeA8sVyjcKQ
+
+anchor:
+  loai: canonical_ancestry
+  cuong_do: vua
+  mo_ta: >-
+    Blob verdict ghim ở commit đầu tiên chứa tệp; `a97d95c` là tổ tiên của commit ấy.
+  gioi_han: >-
+    `a97d95c` CHƯA vào master — PR #529 còn mở, còn draft, và nay `blocked` lần thứ hai. Với hai
+    verdict `blocked` liên tiếp, khả năng head này KHÔNG BAO GIỜ land là thực; khi ấy `evidence_url`
+    vẫn tra được (blob trên nhánh) nhưng mỏ neo canonical KHÔNG thành lập. Vì thế `cuong_do: vua`.
+
+khong_do_duoc:
+  - 'Model thật của `codex exec` — không có `modelUsage`, và reviewer KHÔNG tự khai model nào.'
+  - '`run.json` và toàn bộ bộ đo của reviewer KHÔNG vào kho ⇒ scalar runtime là ATTESTATION, không tái lập được sau khi container bị thu hồi.'
+  - '`gate` trên `a97d95c`: lượt tự động `34707272797` đã BẮN (đo bằng `pull_request_read get_check_runs`, KHÔNG gọi tay) và lúc viết còn `in_progress`; `thu-hoi` `success`, `mo` `skipped` ⇒ `gate` là KHÔNG ĐO ĐƯỢC, không phải xanh.'
+  - 'Ba lớp `a9`/`a17`/`dem-dot-bien` nay cần QUYẾT ĐỊNH của chủ kho, không phải bản vá: `S9` (chốt mất răng) và `S10` (`A9''` cũng bỏ lọt một cấu hình) đều đã chạm, và `dac-ta-r5-giu-luat-cu-trai-tieu-chi-moi` nằm ở SPEC đã đóng băng.'
+  - 'Nợ `phep-do-doctrine-khong-du-rang` (`S4`), `DINH-NGHIA-PHAN-HANG-KHONG-CO-NGUON`, `A9-KHONG-TACH-DUOC-AI-VIET-DONG-NAO`, `ADAPTER-VUA-CON-TRO-VUA-CO-RANG`, `HEAD-DOI-VI-HIEN-VAT-REVIEW` — tất cả còn nguyên.'
+  - 'Khối `A16''` trong chính biên nhận này CHƯA được lượt nào chấm.'
+
+codex_connector_cung_head:
+  kich_luc: 'KHÔNG — PR #529 ở trạng thái draft'
+  hoan_tat_luc: KHONG_AP_DUNG
+  ket_qua: 'Không có review object của connector trên head này.'
+
+delivered: true
+delivered_by: claude-session
+authoritative_source: repo_file
+receipt_written_by: claude-session
+receipt_written_at_utc: null  # KHÔNG ĐO ĐƯỢC — git chỉ cho commit time.
+recorder_cung_la_nguoi_thi_cong: true
+receipt_khong_khai:
+  - 'Không khai model đã chạy.'
+  - 'Không khai CI xanh trên `a97d95c`.'
+  - 'Không khai chín lớp đã vá — chúng CHƯA vá, và bốn trong số đó cần quyết định của chủ kho.'
+  - 'Không khai `A9''`/`A17''`/`A18''` đã ĐẠT: cả ba bị lượt này chứng minh chưa đủ, và phiên đã đo lại rồi rút.'
+  - 'Không khai khối `A16''` đóng được lớp `bien-nhan-thieu-so-ci-da-chi`.'
+  - 'Không khai `blocked` là "packet thất bại": `§3.2` định nghĩa nó là đường đi qua revision mới.'

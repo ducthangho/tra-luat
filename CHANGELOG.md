@@ -10,7 +10,7 @@ cross-review (tìm, phân theo lớp, không theo từng lỗi). Nếu chưa xan
 hết P1, P2 hoặc approve. Không chạy CI, full CI, CI cho Windows cho tới merge."* Prompt reviewer định nghĩa LỚP = một
 cơ chế sinh cùng hình dạng lỗi ở nhiều chỗ; mỗi lớp có slug, hạng (= hạng cao nhất của thể hiện), bảng thể hiện
 `tệp:dòng · khai · đo`, một cách chữa chung + HINT cho cả lớp; `so_p*` đếm số LỚP, `so_the_hien` đếm tổng. Receipt v2
-thêm hai trường `phan_loai_finding: theo_lop` + `phan_loai_finding_ghi_chu` và `so_the_hien`; `findings_ids` là slug lớp.
+thêm ba trường `phan_loai_finding: theo_lop` + `phan_loai_finding_ghi_chu` và `so_the_hien`; `findings_ids` là slug lớp.
 Kết quả đo được: lượt 1 gom **21 thể hiện vào 4 lớp** thay vì 21 finding rời — và HINT theo lớp (20 hunk / 6 tệp) áp một
 lần sạch; lượt 2 đối chiếu theo lớp với bảng từng thể hiện (20/21 ĐÃ VÁ THẬT). Không gọi tay lượt CI nào suốt ba lượt;
 CI PR tự chạy theo push.
@@ -28,7 +28,7 @@ mutant/3 lối land/bộ kiểm nội dung mà reviewer chạy trong sandbox. Sc
 được với `run.json` NGOÀI kho (`scratchpad/runs/{a488739c,6b193c07,702e1fb2}`, CÓ khoá `thoi_luong_giay`); model đã chạy
 KHÔNG ĐO ĐƯỢC.
 
-## Ba lượt review hồ sơ #517 — (b) trừ chỗ ghi (a)
+## Ba lượt review hồ sơ #517 — Git/băm/byte/số lớp/thể hiện (a); runtime đối chiếu log ngoài kho; sự kiện (b), kết quả sandbox cũ (c)
 
 | lượt | run | head / base | verdict (LỚP) | thể hiện | assurance | HINT |
 |---|---|---|---|---|---|---|
@@ -59,9 +59,9 @@ lượt 2 cũng tự đo `origin/master` trong gói = `157b368` ≠ base đượ
 `46d9561`, diff ba chấm bằng byte). Vì head đổi, lượt 3 là lượt HẸP trên `da04323`: 1 thể hiện còn mở ĐÃ VÁ THẬT; merge
 không đổi hồ sơ (ngoài 13 tệp chỉ 2 tệp hooks); cổng HEAD; 3 lối land lên `157b368`.
 
-**Lần phóng đầu lượt 3 bị executor giết** sau ~10 s (run `e5d5f4fa`, 03:26:28Z) vì EVIDENCE.md ghi numstat manifest
+**Theo tác giả, lần phóng đầu lượt 3 bị executor giết** (thời điểm giết KHÔNG ĐO ĐƯỢC) (run `e5d5f4fa`, 03:26:28Z) vì EVIDENCE.md ghi numstat manifest
 "5/5" trong khi đúng là 3/3 — sửa EVIDENCE rồi phóng lại (`702e1fb2`). Ghi vì đây là đúng lớp *lời khai rộng hơn phép đo*
-do tác giả tự bắt trước khi reviewer bắt; run bị giết không có verdict, không vào gói.
+do tác giả thuật lại; stderr ghi hoạt động tới 03:26:51Z và tạo VERDICT pending, không có verdict CHỐT trong gói; không có trong gói lượt 3 trước.
 
 **Codex connector trên `896bfbf`** (bỏ draft 02:27:14Z, Completed 02:41:20Z — head TRƯỚC `86f87b2`): 1 P1 "giữ commit neo
 trong tổ tiên" đo trên `38d6326` — object không tồn tại (`git cat-file -t` fatal trên worktree lẫn mirror): squash tổng hợp
@@ -97,8 +97,14 @@ Không lease, không `guard --action merge` (PR hồ sơ); sổ local gen4 `uy_q
   land, ghi nợ. Bài học: **HINT/chỉ thị/luật đều là lời khai cho tới khi được ghi đúng chỗ luật đòi** — executor đã đọc
   "lặp tới approve" thành nâng trần mà không ghi khối luật đòi, y hệt lớp `nguon-thuat-lai-bi-nang-thanh-do`.
 
-## Phạm vi — (a)
+## Phạm vi — Git/băm/byte (a); lịch sử thao tác và thời điểm chạy cổng (b)
 
+- Commit 5: áp HINT lượt 1 codex của #520 (2 lớp P2 / 17 thể hiện — nhãn nguồn bị nâng thành đo; câu tổng hợp đổi tập
+  đối tượng) — PORT bằng tay lên head đã đổi (HINT viết cho `5ca3bb2`; 9/17 hunk FAILED trên `52e032b` vì commit 3–4 đã đổi
+  receipt 3/README/CHANGELOG); `receipt_written_at_utc` của 3 receipt đặt `null` (giờ đặt tay không phải phép đo).
+  **Lỗi executor tự bắt khi port:** commit 3 và 4 chạy generator trên README ĐÃ CÓ hàng pr517 (khôi phục từ HEAD thay vì
+  từ base) ⇒ chèn TRÙNG 16 dòng mỗi lần (771 → 787 → 803); t27 chỉ kiểm có mặt nên không bắt. Commit 5 dựng lại README từ
+  `origin/master` rồi sinh một lần: 756 → 772 dòng đúng (1 đoạn + 1 trống + 11 cảnh báo + 3 mục lục = 16).
 - Commit 3 `5475a64`: hạ receipt 3 theo connector; commit 4: khôi phục `cross_approved` theo xác nhận chủ kho (receipt 3 +
   README + CHANGELOG mục connector + NỢ), manifest tái sinh; 4 cổng chạy lại — số ở mô tả PR.
 - Commit 1 `606b5ed`: 3 verdict NGUYÊN BYTE (`cmp` với `VERDICT.rvhs517-{1,2,3}.md` trong sandbox khớp) —
@@ -106,8 +112,8 @@ Không lease, không `guard --action merge` (PR hồ sơ); sổ local gen4 `uy_q
   (106); số dòng = số LF, tệp kết thúc LF (bài học `dem-dong-cong-them-duoi-lf`). `git log --all --diff-filter=A` ⇒ đúng 1
   commit ⇒ neo blob `evidence_url` = `606b5ed`.
 - Commit 2: 3 biên nhận v2 (`cross_reviewed` / `cross_reviewed` / `cross_approved` — hạ ở commit 3, khôi phục ở commit 4), README (1 đoạn nguồn
-  PR #517, 10 hàng cảnh báo — 11 sau commit 3, 3 hàng mục lục — 756 → 771 → 787 dòng), mục r372 này, `RELEASE_MANIFEST.json`
-  tái sinh.
+  PR #517, 10 hàng cảnh báo — 11 từ commit 3, 3 hàng mục lục — 756 → 771 dòng; 772 sau commit 5, xem lỗi trùng hàng ở trên),
+  mục r372 này, `RELEASE_MANIFEST.json` tái sinh.
 - Gate tại chỗ trước commit 2: `bien_nhan_v2 --root .` **108 ĐẠT v2 (105 tại `f4da553` + 3) · 11/11 miễn trừ legacy · 42 NỢ
   đóng băng · 0 vi phạm · 0 KHÔNG ĐO ĐƯỢC · tổng 161**, TỔNG ĐẠT; t26/t27 QUA. `release-verify --strict --json`,
   `doc-claims-check --strict`, doctrine-scan, `git diff --check` chạy SAU khi tái sinh manifest — số ở mô tả PR.
@@ -133,7 +139,7 @@ sống trong `scratch/` của sandbox, chưa vào kho, chưa có packet.
 - **#512 dừng ở S6** (4 finding connector đã kiểm, trần 2 vòng) — chờ chủ kho nâng trần + chọn phạm vi vá; hai verdict #512
   chưa vào kho.
 - **Chưa có reviewer dự phòng khác nền** (`doctor`: `openai-llm`, `antigravity` THIẾU) — lộ ra khi codex báo hết quota
-  11-09; giới hạn ấy hoá ra ngắn (probe 12-09 chạy được), nhưng lần sau có thể không.
+  11-09; (b) probe 12-09 chạy được là tác giả thuật lại; thiếu log probe nên KHÔNG ĐO ĐƯỢC thời lượng giới hạn quota.
 - **Nhánh r370 (`vaerr-514`) của phiên khác chưa land** — chạm README/CHANGELOG; PR land sau merge master + chạy lại 4 cổng.
 - Nợ r371 còn nguyên: `SO-LEASE-KHONG-NAM-MOT-CHO`, `AG-T0-01B`.
 # ★ dev-side — r371: ghi sổ #516 — năm verdict codex chấm CHÍNH hồ sơ r369 của #511; lượt 5 approve nhưng codex báo HẾT QUOTA lúc kết thúc (ma_thoat=1) — thông điệp "try again Sep 15th" KHÔNG phải phép đo: (b) tác giả thuật lại probe 12-09 chạy được (2026-09-11)

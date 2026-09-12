@@ -105,7 +105,7 @@ verdict_usage_caveats:
     mo_ta: >-
       `changes_requested` 0/1/0 lớp, 1 thể hiện: CHANGELOG:32 `r364` (từ HINT lượt 1) phải là `r363`. 20/21 thể hiện lượt 1 ĐÃ VÁ THẬT. HINT lượt 2 (1 hunk) áp nguyên ở da04323; lượt 3 xác nhận ĐÃ VÁ THẬT.
     phai_lam_gi_khi_chay_lai: >-
-      Đọc lượt 2 làm chốt đóng 4 lớp lượt 1 và làm nguồn của thể hiện còn lại; lượt 3 đóng nó.
+      Đọc lượt 2 làm chốt đóng 3 lớp và 20/21 thể hiện lượt 1; lớp tong-hop-doi-tap-doi-tuong còn 1 thể hiện VÁ SINH LỖI MỚI, lượt 3 đóng nó.
   - id: MASTER-TROI-157b368-trong-luc-review-base-46d9561-thu-hoi-rc12-merge-8a18429
     muc: P2
     mo_ta: >-
@@ -133,7 +133,7 @@ delivered: true
 delivered_by: claude-session
 authoritative_source: repo_file
 receipt_written_by: claude-session
-receipt_written_at_utc: '2026-09-12T04:10:00Z'
+receipt_written_at_utc: null  # KHÔNG ĐO ĐƯỢC; giá trị đặt tay trước đây (04:10:00Z / 04:40:00Z) không phải timestamp đo — giờ ghi đo được là commit time của receipt trong git
 receipt_khong_khai:
   - 'Không khai model đã chạy — codex không đo được.'
   - 'Không khai đây là trạng thái cuối của #517 — head đã merge là da04323 (lượt 3).'

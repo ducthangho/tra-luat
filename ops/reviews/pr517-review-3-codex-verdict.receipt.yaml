@@ -70,7 +70,7 @@ model_reviewer_identity:
     worktree_sach, head; run.json CÓ khoá `thoi_luong_giay` (khớp hiệu hai timestamp làm tròn 3 chữ số); stdout/stderr
     byte + sha256 đo trực tiếp trên hai tệp log; dòng cuối stdout `XONG VERDICT sha256=…` khớp băm tệp verdict.
     model_yeu_cau và effort có trong header stderr.log (cấu hình yêu cầu, không chứng thực model thực chạy).
-    so_lan_chet_truoc_khi_xong là ATTESTATION điều phối (lượt 3: run e5d5f4fa bị executor giết sau ~10 s vì EVIDENCE sai số, xem caveat).
+    so_lan_chet_truoc_khi_xong là ATTESTATION điều phối (lượt 3: tác giả thuật lại đã giết run e5d5f4fa vì EVIDENCE sai số; thời điểm giết KHÔNG ĐO ĐƯỢC, xem caveat).
 
 nang_luc_do_cua_goi:
   mirror: 'như gói lượt 2 + VERDICT/HINT lượt 2 + run 6b193c07; detached da04323, origin/master = 157b368'
@@ -129,7 +129,7 @@ verdict_usage_caveats:
   - id: PHONG-LAN-1-BI-GIET-vi-EVIDENCE-sai-so-run-e5d5f4fa-ngoai-goi
     muc: P3
     mo_ta: >-
-      Lần phóng đầu của lượt 3 (run e5d5f4fa, 03:26:28Z) bị executor giết sau ~10 s vì EVIDENCE.md ghi numstat manifest 5/5 (đúng 3/3); phóng lại với EVIDENCE đã sửa (run 702e1fb2, prompt sha khác vì dòng 'Bắt đầu lúc' ghi rõ lần 2). Run bị giết không có verdict, không vào gói; run.json của nó dừng ở trang_thai dang_chay.
+      Theo tác giả, lần phóng đầu của lượt 3 (run e5d5f4fa, bắt đầu 03:26:28.007461Z) bị executor giết vì EVIDENCE.md ghi numstat manifest 5/5 (đúng 3/3), rồi phóng lại với EVIDENCE đã sửa (run 702e1fb2; hai prompt khác dòng 'Bắt đầu lúc'). Thời điểm giết KHÔNG ĐO ĐƯỢC: run.json còn dang_chay, ma_thoat/ket_thuc_utc null; stderr ghi hoạt động 03:26:51Z và tạo VERDICT pending. Gói này không có verdict CHỐT của run đó; log của run không nằm trong gói lượt 3 trước.
     phai_lam_gi_khi_chay_lai: >-
       so_lan_chet_truoc_khi_xong = 1 là ATTESTATION điều phối, khác 0 ở hai lượt trước; đừng đọc thành reviewer chết.
   - id: BANG-DO-LAI-KHONG-LEN-COMMENT-tep-trong-kho-la-ban-du
@@ -153,7 +153,7 @@ delivered: true
 delivered_by: claude-session
 authoritative_source: repo_file
 receipt_written_by: claude-session
-receipt_written_at_utc: '2026-09-12T04:40:00Z'
+receipt_written_at_utc: null  # KHÔNG ĐO ĐƯỢC; giá trị đặt tay trước đây (04:10:00Z / 04:40:00Z) không phải timestamp đo — giờ ghi đo được là commit time của receipt trong git
 receipt_khong_khai:
   - 'Không khai model đã chạy — codex không đo được.'
   - 'Không khai lượt 3 đã đo lại mọi phép đo của lượt 1–2 — lượt hẹp, xem caveat.'

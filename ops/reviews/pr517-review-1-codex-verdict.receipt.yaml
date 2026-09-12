@@ -1,4 +1,4 @@
-# BIÊN NHẬN GIAO HÀNG — cross-review HỒ SƠ LƯỢT 1 của PR #517 (bookkeeping ADR-0034 r371 cho #516), KHÁC NỀN (codex), finding PHÂN THEO LỚP, trên head `86f87b2` — KHÔNG phải trạng thái cuối: 3 lớp P2 + 1 lớp P3 (21 thể hiện) đã vá ở `458314a`; HINT của lượt này tự sinh 1 lỗi mới (r364), lượt 2 bắt.
+# BIÊN NHẬN GIAO HÀNG — cross-review HỒ SƠ LƯỢT 1 của PR #517 (bookkeeping ADR-0034 r371 cho #516), KHÁC NỀN (codex), finding PHÂN THEO LỚP, trên head `86f87b2` — KHÔNG phải trạng thái cuối: tại `458314a` có 20/21 thể hiện ĐÃ VÁ THẬT, 3 lớp đóng và lớp tong-hop-doi-tap-doi-tuong VÁ SINH LỖI MỚI; HINT của lượt này tự sinh 1 lỗi mới (r364), lượt 2 bắt.
 # Biên nhận viết SAU khi #517 merge (`f4da553`, 03:54:51Z 12-09-2026) — trả nợ ADR-0034 cho chính PR hồ sơ (tiền lệ r364/r367/r369/r371).
 
 schema_version: 2
@@ -135,7 +135,7 @@ delivered: true
 delivered_by: claude-session
 authoritative_source: repo_file
 receipt_written_by: claude-session
-receipt_written_at_utc: '2026-09-12T04:10:00Z'
+receipt_written_at_utc: null  # KHÔNG ĐO ĐƯỢC; giá trị đặt tay trước đây (04:10:00Z / 04:40:00Z) không phải timestamp đo — giờ ghi đo được là commit time của receipt trong git
 receipt_khong_khai:
   - 'Không khai model đã chạy — codex không đo được.'
   - 'Không khai đây là trạng thái cuối của #517 — head đã merge là da04323 (lượt 3).'

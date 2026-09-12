@@ -44,7 +44,7 @@ spec_hash: abbee703b24f97c1bd7a528ff700447658a095da2bade357126d096c30fd5a67
 # NỚI LẦN HAI: đo trên `c662141` ⇒ +536/-32 (36 chú thích · 66 dòng trống · 434 code).
 # Phiên thi công DỪNG đúng theo điều khoản của chính ngoại lệ rồi mới xin. 650 = 536 đã
 # đo + ~114 biên cho vòng vá review (mỗi P1 thường đòi một ca phản chứng ≈ 15–25 dòng,
-# trần vòng review là 4 LÚC ƯỚC LƯỢNG — nay đã 11; con số ấy chỉ là tham số của phép ước
+# trần vòng review là 4 LÚC ƯỚC LƯỢNG — nay đã 12; con số ấy chỉ là tham số của phép ước
 # lượng 650 dòng ĐÃ HẾT HIỆU LỰC, không phải khai trần hiện hành). Vượt 650 ⇒ DỪNG lần ba.
 ngoai_le_adr_0044: 'so_tep 1 (KHÔNG nới, là chốt DUY NHẤT còn hiệu lực), dong_them KHÔNG giới hạn — chủ kho đồng ý 11-09-2026, #513 comment 5637719340 (bỏ bound dòng sau ba lần trượt 300→429, 500→536, 650→658; bound 650 ở comment 5637410450 hết hiệu lực)'
 
@@ -72,23 +72,29 @@ recorder_xung_dot_loi_ich: >-
   Ba vai trên một phiên. Giảm nhẹ: cross-review BẮT BUỘC là phiên `codex` KHÁC NỀN; điều kiện dừng là
   `approve` HOẶC hết P1 VÀ P2 (chỉ thị chủ kho 11-09-2026, cập nhật tại Checkpoint sau lượt 4 —
   bản đầu ghi `approve` TƯỜNG MINH, chỉ thị mới nói rõ "tới khi approve HOẶC hết P1, P2");
-  trần vòng 11 (`ADR-0043` — con số CANON nằm ở khối `nang_tran`/`lich_su`, KHÔNG ở câu này;
+  trần vòng 12 (`ADR-0043` — con số CANON nằm ở khối `nang_tran`/`lich_su`, KHÔNG ở câu này;
   câu này đã TRÔI một lượt, ghi 6 khi trần thật đã là 7 — nên ĐỪNG trích nó, trích `lich_su`),
   vượt thì DỪNG xin
   nâng — KHÔNG tự nâng.
 
 nang_tran:
-  tran_cu: 10
-  tran_moi: 11
+  tran_cu: 11
+  tran_moi: 12
   ai_nang: ducthangho
-  khi_nao: 'sau verdict lượt 10 (changes_requested, 0 P1 · 2 P2, CA HAI tang SAN PHAM; da va tai 2e7ec60)'
-  granted_on_instruction: 'https://github.com/ducthangho/tra-luat/issues/513#issuecomment-5643254911'
+  khi_nao: 'sau verdict lượt 11 (reviewer bi bo loc cat o 437s, KHONG co VERDICT.md; phien chinh doc evidence-r11 va rut 3 loi SAN PHAM, da va tai 3809d81)'
+  granted_on_instruction: 'https://github.com/ducthangho/tra-luat/issues/513#issuecomment-5643397009'
   muc_dich: >-
     Luot XAC NHAN. Ba ban va F01/F02/F03 sinh ra SAU luot 10 nen CHUA ai review.
     Prompt giu nghia vu bang SAN >= 6 huong doc lap, cong 4 cau rieng: (1) ba ban va
     dong lo hay chi doi; (2) r519/r520 co RANG THAT khong (do dung ly do, khong TIN
     DUNG GIA); (3) con TOI GIAN cua r520 co mat rang khong; (4) san dot bien tuong
-    duong trong 5 muc MOI (luot 10 da audit 64 muc cu).
+    duong trong 9 muc MOI (luot 10 da audit 64 muc cu).
+    LUOT 12 them mot chot CHONG MAT BANG CHUNG: prompt BUOC ghi VERDICT.md TANG DAN
+    (4 dong dau truoc khi do gi, moi huong ghi ngay sau khi do xong). Ly do do duoc:
+    hai luot bi bo loc cat (8 va 11) deu MAT TRON phan viet ket luan du da chay xong
+    phep do — luot 11 chay 35 lenh, do duoc 3 loi that, chet o 437s va khong de lai
+    mot dong verdict nao. Day KHONG phai chot chan bo loc (chua ai biet cach); no chi
+    lam hau qua cua mot lan cat re di.
   trai_khuyen_nghi_thi_cong: false
   # Lan dau chu kho cap HAI luot mot luc (8 -> 10), khong phai mot.
   cap_may_luot: 2
@@ -126,6 +132,10 @@ nang_tran:
        trai_khuyen_nghi_thi_cong: false,
        ghi_chu: 'luot XAC NHAN cho F01/F02/F03; reviewer gpt-6-astra @ effort max (model nay nhan max that)',
        chi_thi: 'https://github.com/ducthangho/tra-luat/issues/513#issuecomment-5643254911'}
+    - {lan: 8, tu: 11, den: 12, ai_nang: ducthangho, khi_nao: 'sau lượt 11',
+       trai_khuyen_nghi_thi_cong: false,
+       ghi_chu: 'luot XAC NHAN cho F04/F05/F06 — luot 11 da BAC chinh ban va no di xac nhan (F01 tu tai tao lo no chua), nen lap luan >>ban va chua ai soi la chua an toan<< co bang chung',
+       chi_thi: 'https://github.com/ducthangho/tra-luat/issues/513#issuecomment-5643397009'}
   canh_bao_tu_ghi: >-
     CẢNH BÁO NÀY ĐÃ KÍCH HOẠT VÀ ĐÃ ĐƯỢC THỰC HIỆN. Bản trước ghi: "nếu lượt 6 lại ra một lớp α
     nữa thì phiên thi công PHẢI khuyến nghị DỪNG, KHÔNG xin nâng lần thứ tư". Lượt 6 ra đúng một

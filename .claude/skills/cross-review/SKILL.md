@@ -106,9 +106,11 @@ codex exec -m <model> -c model_reasoning_effort="xhigh" \
 ```
 
 **Dạng này KHÔNG dùng được khi bọc bằng `launcher.py run`**: nó cho tiến trình con
-`stdin=DEVNULL` (xem `CLAUDE.md`), nên `codex exec -` nhận EOF và chạy với prompt RỖNG. Bọc bằng
-launcher thì truyền `--prompt-file` + `--expected-prompt-sha256` và đưa cho `codex` một chỉ thị
-NGẮN trỏ vào tệp, chứ đừng dán cả prompt vào argv.
+`stdin=DEVNULL` (xem `.claude/dev/launcher.py:lenh_run`), nên `codex exec -` nhận EOF.
+Đo với `codex-cli 0.154.0`: stdin rỗng làm CLI thoát rc=1, báo `No prompt provided via stdin.`,
+chưa chạy review. Bọc bằng launcher thì truyền `--prompt-file` + `--expected-prompt-sha256`
+và đưa cho `codex` một chỉ thị NGẮN trỏ vào `{PROMPT_FILE}` (launcher thay bằng đường dẫn
+bản chụp), chứ đừng dán cả prompt vào argv.
 
 1. **Trong phép thử #518, `gpt-5.3-codex-spark` từ chối effort `max`.** Thông báo HTTP 400 liệt kê
    `low`, `medium`, `high`, `xhigh`; `xhigh` là mức cao nhất trong danh sách của phép thử đó.
@@ -146,11 +148,11 @@ Các phép kiểm dưới đây thu thêm dấu hiệu; chưa chứng minh phả
 PY="$(command -v python3 || command -v python || command -v py)"   # CLAUDE.md: nhan CA BA ten
 "$PY" -m json.tool <run>/run.json      # doc pid va khoa_danh_tinh; loi doc != tien trinh chet
 
-# Khoa danh tinh, dung DINH DANG launcher ghi — KHONG dung `ps -o lstart`.
-# `.claude/dev/launcher.py:_khoa_danh_tinh` ghi `linux:<truong 22 cua /proc/<pid>/stat>`
-# (starttime, don vi tick). `lstart` la chuoi gio doc duoc, KHAC dinh dang, nen khong
-# so sanh duoc voi khoa da luu: mot PID bi tai dung se khop nham.
-cat /proc/<pid>/stat 2>/dev/null | sed 's/.*) //' | awk '{print "linux:" $20}'   # rong = khong doc duoc
+# Chay tu goc clone: goi cung ham launcher, khong thay bang `ps -o lstart`.
+# Tren Linux, ham doc TOAN ban ghi /proc/<pid>/stat, cat sau dau ')' cuoi cung;
+# ten tien trinh co khoang trang, dau ')' hoac xuong dong van duoc xu ly cung cach.
+# rc=1 / KHONG_DO_DUOC: ham khong doc duoc khoa; khong suy ra tien trinh da chet.
+"$PY" -c 'import runpy,sys; k=runpy.run_path(".claude/dev/launcher.py")["_khoa_danh_tinh"](int(sys.argv[1])); print(k or "KHONG_DO_DUOC"); sys.exit(0 if k else 1)' <pid>
 ps -p <pid> -o pid=,stat=   # `Z` = zombie da thoat; PID ton tai KHONG chung minh dung tien trinh
 
 # Hai mau moc gio + kich thuoc, cach nhau mot khoang da dinh — mot mau khong do duoc chuyen dong.
@@ -159,9 +161,11 @@ stat -c '%Y %s' <goi>/VERDICT.md; sleep 60; stat -c '%Y %s' <goi>/VERDICT.md
 tail -50 <run>/stderr.log   # doc ca log neu can; loi reconnect khong xac dinh trang thai cuoi
 ```
 
-Thiếu/hỏng sổ hoặc lệnh lỗi là **KHÔNG ĐO ĐƯỢC**, và **fail-close**: không đọc được khoá thì
-KHÔNG được kết luận đã chết. Khoá đọc được mà **khác** khoá trong `run.json` ⇒ PID đã bị tái
-dùng, tiến trình cũ đã thoát; khoá **khớp** ⇒ đúng tiến trình ấy còn sống.
+Thiếu/hỏng sổ hoặc lệnh lỗi là **KHÔNG ĐO ĐƯỢC**; không đọc được khoá không chứng minh đã chết.
+So hai khoá của cùng PID trong cùng hệ điều hành, lần khởi động và không gian PID: khác khoá
+là dấu hiệu PID đã được tái dùng; khớp khoá chỉ đối chiếu danh tính, chưa xác nhận còn sống.
+Đọc cả trạng thái: `Z` là zombie đã thoát dù khoá còn khớp. Các lệnh đọc ở những thời điểm
+khác nhau; trạng thái không phải `Z` cũng không chứng minh reviewer còn tiến triển hay đã hoàn tất.
 
 Hai mẫu mốc giờ **giống nhau cũng vẫn là `KHÔNG ĐO ĐƯỢC`**, không phải bằng chứng đã chết: một
 reviewer còn sống có thể im giữa hai lần ghi. Chỉ mẫu **đổi** mới chứng minh còn chuyển động.
@@ -173,17 +177,13 @@ Hai sự cố thuật lại không đo mức lợi ích hay tốc độ mất d�
 
 Lượt đó nhận `Rejected("... rejected: rm -f style commands are not permitted. Use a safer approach")`
 khi dùng `rm -rf`. Đây là hành vi của môi trường đã thử, không xác định policy mọi sandbox Codex.
-Trong môi trường ấy, có thể dùng `mktemp -d` để dựng chỗ thử rồi **để reviewer giữ lại** thư mục —
-reviewer không phải là bên dọn.
+Trong môi trường ấy, có thể dùng `mktemp -d` để dựng chỗ thử. Ví dụ tạo thư mục dưới một gốc
+đã chọn: `mktemp -d -p <goc-rieng>`. Lệnh này chỉ tạo thư mục; không thu hiện vật, đặt hạn lưu
+hay tự dọn các bản sao.
 
-**Nhưng giữ lại KHÔNG có nghĩa là giữ mãi.** Trên runner sống lâu, mỗi lượt và mỗi lần chạy lại
-để lại nguyên một bản sao kho cộng prompt và evidence; `/tmp` phình dần và vật liệu review cũ nằm
-lại. Việc dọn thuộc **phiên điều phối**, sau khi đã thu hiện vật (`VERDICT.md`, `HINT.patch`, log),
-và phải theo ba chốt: cấp thư mục dưới **một gốc riêng của lượt** (`mktemp -d -p <goc-rieng>`);
-chỉ xoá đường dẫn **nằm trong gốc ấy** sau khi giải symlink, đường nào không nhận ra thì **fail-close
-— bỏ qua, đừng xoá**; và đặt hạn lưu (theo số lượt hoặc theo tuổi). Chưa có cổng nào trong kho
-cưỡng chế ba chốt này — đây là thao tác của người điều phối, nói thẳng ra để không ai tưởng đã có
-cơ chế.
+Các bản sao được giữ lại chiếm dung lượng và lưu cả vật liệu review cũ trên runner sống lâu.
+Về quyền ghi, phân công và vòng đời công việc, xem protocol §4/§8/§13 cùng chỉ thị điều phối
+của lượt. Adapter này không ấn định bên dọn, tập đường dẫn được phép xoá hoặc hạn lưu.
 
 ## Khi PAT là chính tài khoản tác giả PR
 

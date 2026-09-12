@@ -78,13 +78,22 @@ base_sha_ghi_chu: >-
   commit ấy chứ không phải "nhánh mặc định hiện tại" — một mốc trôi làm tiêu chú chết đúng lúc
   merge. Đo: `85fcbf8` là tổ tiên của `dc02c9b` (`merge-base --is-ancestor` rc=0).
 start_from_sha: 6b46012abd2a059029ae267740f2fcc0de120797
-reviewed_sha_required: KHONG_DO_DUOC_LUC_CAP
+reviewed_sha_required: 6b46012abd2a059029ae267740f2fcc0de120797
 reviewed_sha_required_ghi_chu: >-
-  CỐ Ý để KHÔNG ĐO ĐƯỢC, không bịa. Head phải review là head SAU commit merge `dc02c9b` vào
-  nhánh packet, và commit ấy CHƯA TỒN TẠI lúc cấp lease. Gõ một chuỗi 40 hex tự nghĩ ra vào đây
-  là dựng một MỎ NEO GIẢ: reviewer sẽ đọc một head khác với head mà lease tưởng đang nói tới, và
-  không ai phát hiện — đúng lỗi phiên này đã tự bắt được ở gen 2 trước khi commit. Head thật sẽ
-  được ghi vào `VERDICT.md` và vào biên nhận của lượt 3.
+  BẰNG `start_from_sha`, tức head TẠI LÚC CẤP — và đó là QUY ƯỚC CỦA KHO, không phải tiện tay:
+  đo 48 lease có cả hai trường ⇒ **44 BẰNG / 4 LỆCH**. Cổng `check` đòi đúng 40 hex thường và
+  nói thẳng lý do (*"SHA ngắn hoặc lệch dạng là mỏ neo GIẢ"*), nên trường này KHÔNG có chỗ cho
+  trạng thái thứ ba.
+  BẢN ĐẦU CỦA TỆP NÀY GHI `KHONG_DO_DUOC_LUC_CAP` và cổng chặn `rc=8`. Lý lẽ khi ấy — *"head
+  phải review là head SAU merge, chưa tồn tại"* — ĐÚNG về sự việc nhưng SAI về trường: `6b46012`
+  là một commit THẬT, đã đẩy, và nó là MỐC BẮT ĐẦU chứ không phải lời khai về head cuối. Ghi một
+  SHA thật vào một trường nghĩa là "neo từ đâu" không phải bịa; bịa là gõ một chuỗi hex không ứng
+  với commit nào — đúng lỗi phiên này đã tự bắt ở gen 2. Hai thứ khác nhau, và bản đầu gộp chúng.
+  GIỚI HẠN, khai thẳng vì cổng không khai hộ: head mà lượt 3 THỰC SỰ review là head SAU commit
+  merge `dc02c9b` vào nhánh packet, và commit ấy CHƯA TỒN TẠI lúc cấp. Nên `reviewed_sha_required`
+  ở đây là **cận dưới**, không phải head cuối; head thật được ghi vào `VERDICT.md` và vào biên
+  nhận của lượt 3. Đừng đọc trường này thành "lượt 3 phải review đúng `6b46012`" — `M8` của chính
+  packet này cấm review một bản sắp bị thay.
 
 authority_basis: '§2 — start/pause/resume/reroute/override/authorize thuộc chủ kho'
 recorded_by: claude-session

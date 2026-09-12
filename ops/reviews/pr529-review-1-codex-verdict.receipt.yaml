@@ -1,0 +1,206 @@
+# BIÊN NHẬN GIAO HÀNG — cross-review LƯỢT 1 của PR #529 (packet #523,
+# QUY-TRINH-LAP-REVIEW-VA-DIEU-KIEN-DUNG revision 2), KHÁC NỀN (codex), phân theo LỚP, trên head
+# `2c466ac`. `changes_requested`, 1 P1 + 4 P2 + 0 P3 = 5 LỚP, 8 THỂ HIỆN.
+#
+# BIÊN NHẬN NÀY VIẾT NGƯỢC THỜI GIAN, và lý do phải nói thẳng: lúc lượt 1 chạy, write set của
+# lease gen 1 là ĐÚNG HAI tệp skill, `ops/reviews/` KHÔNG nằm trong đó — nên `VERDICT.md` không
+# có đường vào kho. `EVIDENCE.md` của lượt ấy đã khai đúng điều đó ở mục KHÔNG ĐO ĐƯỢC (2), và
+# nói rằng mở write set là quyết định của chủ kho. Chủ kho cấp `ops/reviews/` ở generation 2;
+# tệp verdict vào kho ở commit `3109a79`, và biên nhận này ra đời cùng lượt ghi sổ ấy.
+# Đừng đọc "lượt 1" thành "biên nhận có từ lượt 1".
+
+schema_version: 2
+receipt_id: pr529-review-1-codex-20260912-a6c9f26c
+kind: review_delivery_receipt
+packet_id: '523'
+packet_slug: 'QUY-TRINH-LAP-REVIEW-VA-DIEU-KIEN-DUNG'
+# `packet_id` là SỐ HIỆU ISSUE vì đó là khoá `packet_loop.py bien-nhan --packet` tra, so BẰNG
+# tuyệt đối (không prefix, không casefold). Tiền lệ số trong kho: '249', '298', '405', '522'.
+# Tên đọc được giữ ở `packet_slug` nên tra bằng tên cũng khớp.
+lease_id: quy-trinh-lap-review-r2-exec-1-claude-20260912
+lease_id_ghi_chu: >-
+  Lease của generation 1 — lượt review này chạy DƯỚI lease ấy, nên trường này ghi lease ĐANG HIỆU
+  LỰC LÚC ĐO, không phải lease gen 2 đang mở lúc viết biên nhận
+  (`quy-trinh-lap-review-r2-exec-2-claude-20260912`). Hai thứ khác nhau: một cái nói việc được
+  cấp phép lúc nào, một cái nói ai đang giữ bút lúc ghi sổ.
+phase_key: QUY-TRINH-LAP-REVIEW-R2-GEN1-PHIEN-20260912
+luot: 1
+role: reviewer
+provider: codex
+executor_provider: claude
+cross_provider: true
+assurance: advisory_review
+assurance_ghi_chu: >-
+  KHÔNG phải `cross_approved`: verdict là `changes_requested`, không có approve nào để mang mức
+  ấy. Mức khai ở đây là mức của một lượt review ĐÃ CHẠY và ĐÃ CÓ PHÁT HIỆN, không phải mức của
+  một lượt đã chấp thuận.
+verdict: changes_requested
+verdict_path: ops/reviews/pr529-review-1-codex-verdict.md
+verdict_sha256: 9695e0ebd787bcc8f915b6b28fea6c60404dfe07ad39f4b8fe787e89de11c400
+verdict_bytes: 29201
+reviewed_sha: 2c466acaa8e6d3324311784ae14cda7a402b51b8
+reviewed_base: 85fcbf8aea75f0577f47d7332c02a50f993a9d1b
+evidence_url: https://github.com/ducthangho/tra-luat/blob/3109a79ca5acd9354dda0328a7169052fb1dd9be/ops/reviews/pr529-review-1-codex-verdict.md
+evidence_url_ghi_chu: >-
+  Neo BLOB ghim `3109a79` — commit ĐẦU TIÊN chứa tệp verdict (đo bằng `git cat-file -e`).
+  `2c466ac` là tổ tiên của `3109a79` (đo `merge-base --is-ancestor` rc=0). Bản chiếu công khai
+  trên PR #529 đăng TRƯỚC commit này và đã nói thẳng rằng nguồn có thẩm quyền là tệp có băm, chứ
+  không phải comment.
+verdict_sha256_do_tu_dau: >-
+  Đo từ BLOB (`git show 3109a79:<đường dẫn> | sha256sum`), không chỉ từ tệp trên đĩa — nên nó
+  chứng minh bản TRONG KHO khớp, không chỉ chứng minh bản sao khớp chính nó. Vòng tròn còn lại:
+  không chứng minh bản trong kho khớp thứ reviewer sinh ra trong sandbox, vì băm gốc cũng do
+  phiên này đo. Cắt được vòng ấy cần một client thứ hai — container này không có (REST tới
+  `repos/…` bị proxy chặn 403; đường đọc MCP chuẩn hoá thực thể HTML). Trạng thái đúng:
+  bản trong kho ĐÃ ĐO; tính trung thực của bước chép là KHÔNG ĐO ĐƯỢC.
+
+phan_loai_finding: theo_lop
+phan_loai_finding_ghi_chu: >-
+  `so_p1`/`so_p2`/`so_p3` đếm số LỚP (một lớp = một cơ chế sinh cùng hình dạng lỗi), `so_the_hien`
+  là tổng THỂ HIỆN, `findings_ids` là slug LỚP. Đây chính là phép đếm mà packet #523 viết vào
+  adapter (`M5`), nên biên nhận phải dùng đúng nó — 5 lớp / 8 thể hiện, không phải "8 finding".
+so_p1: 1
+so_p2: 4
+so_p3: 0
+so_the_hien: 8
+findings_ids:
+  - sai-dai-luong-hoi-tu
+  - gop-dieu-kien-dung-review-class
+  - thieu-hop-dong-ban-va-theo-lop
+  - mat-dau-vet-thu-hep-pham-vi
+  - phep-do-doctrine-khong-du-rang
+
+noi_dung_do_duoc_van_dung:
+  - 'P1 `sai-dai-luong-hoi-tu`: `M5` bị viết thành mức NGHIÊM TRỌNG chứ không phải tỉ lệ VÁ THẬT ⇒ mất hẳn chốt dừng. Đây là lớp GỐC của lượt: bản thi công đọc `M1`–`M7` từ một dòng ngoặc đơn của r2 mà KHÔNG đọc r1, nên năm lớp cùng một nguồn.'
+  - 'P2 `gop-dieu-kien-dung-review-class`: luật hành động gộp `routine` với `systemic` khi còn P2 — hai điều kiện dừng khác nhau bị nhập một.'
+  - 'P2 `thieu-hop-dong-ban-va-theo-lop`: định nghĩa lớp CÓ MẶT mà không buộc bàn giao kế hoạch đóng lớp; khung verdict ở `cross-review/SKILL.md:400` không có mục BẢNG LỚP, không có ánh xạ thể hiện, không có cột bản vá theo lớp / lý do vá lẻ.'
+  - 'P2 `mat-dau-vet-thu-hep-pham-vi`: chống cắt đường dẫn chưa giữ DẤU VẾT của việc cắt tiêu chí hay chuyển lỗi sang nợ.'
+  - 'P2 `phep-do-doctrine-khong-du-rang`: `A13` tự phán ĐẠT bằng một scanner KHÔNG phát hiện hai phép ĐỎ mà chính SPEC bắt buộc. Reviewer chạy đối chứng DƯƠNG (`rc=6` trên cụm §12 đã nằm trong danh sách) để chứng minh đã gọi đúng scanner, rồi đo hai đột biến bị SPEC cấm vẫn `rc=0`. Đây là phép đo có răng, không phải đọc code.'
+  - 'BẢNG SĂN: 6 hướng độc lập, mỗi hướng có lệnh + output thật; bốn hướng đầu kết luận KHÔNG PHẢI LỖI và nói rõ vì sao — reviewer liệt kê CẢ cái khớp, không chỉ cái sai.'
+
+model_reviewer_identity:
+  provider: openai_codex
+  surface: codex_cli
+  transport: machine
+  model_yeu_cau: 'KHONG_KHAI — không truyền `-m`; một `--model` không tồn tại vẫn trả rc=0 nên truyền tên đoán là tự tạo lỗ'
+  model_da_chay: 'KHONG_DO_DUOC — `codex exec` không xuất `modelUsage`. Không có lời tự khai model trong VERDICT.md lượt này, nên ở đây KHÔNG có gì để đối chiếu, kể cả một lời khai.'
+  effort: 'KHONG_KHAI'
+  session_run_id: a6c9f26c
+  run_id_day_du: a6c9f26c2ce0447ca250850f2c498815
+  prompt_sha256: b100f771fb5f0b3abe8599e90ddcbbcbf55dc835855362771b7ee70943ab1bb4
+  bat_dau_utc: '2026-09-12T14:37:43.336142+00:00'
+  ket_thuc_utc: '2026-09-12T14:46:12.483856+00:00'
+  thoi_luong_giay: 509.148
+  ma_thoat: 0
+  trang_thai: xong
+  stdout_byte: 369
+  stdout_sha256: b17a9636db329364088ceaa990495f2b6c31741cc91fb3a151d5ba89fd2f0d6e
+  stderr_byte: 387455
+  stderr_sha256: a5e003b8f4ba98d7c73bb35bd6be4acc5a1f277f07e8fce26947b0f3bd63188a
+  so_lan_chet_truoc_khi_xong: 0
+  prompt_kin_hoan_toan: false
+  prompt_kin_hoan_toan_nghia_la_gi: >-
+    `false` KHÔNG nghĩa là neo prompt hỏng. `launcher.py` có HAI lớp: (1) băm LẠI tệp prompt ngay
+    trước khi sinh con và `Chan(MA_PROMPT)` nếu lệch — lớp này ĐÃ CHẠY, `prompt_sha256` ở trên là
+    băm đã khớp `--expected-prompt-sha256`; (2) thay `{PROMPT_FILE}` bằng một BẢN CHỤP bất biến để
+    con không mở lại đường dẫn gốc. Lượt này truyền prompt làm ĐỐI SỐ nên lớp (2) không áp dụng —
+    không có tệp nào cho con mở lại, nên cửa sổ TOCTOU sau khi sinh con không tồn tại theo đường
+    ấy. Khác `#526` lượt 3 (`true`, đi qua `{PROMPT_FILE}`); ghi ra để không ai đọc hai giá trị
+    khác nhau thành "một lượt kín, một lượt hở".
+  probe: 'workspace=DAT (.git là thư mục) · ghi=DAT (ghi-readback-xoá) · spawn=DAT (rc=0, output 18B) — ba probe của đường PHÓNG, không phải của `doctor`'
+  nguon_cac_scalar_tren: >-
+    ĐỐI CHIẾU ĐƯỢC với `run.json` (NGOÀI kho: `/tmp/claude-0/runs523/a6c9f26c/run.json`, launcher
+    `version 1.5.0`): `run_id`/`short_id`, `prompt_sha256`, `bat_dau_utc`, `ket_thuc_utc`,
+    `thoi_luong_giay`, `ma_thoat`, `trang_thai`, `transport` (`machine`), `worktree_sach: true`,
+    `head` (`2c466ac`), `commit_goc` (`394e9346`), `remotes` (`github.com/ducthangho/tra-luat`),
+    `workspace` (`/tmp/claude-0/rv523/cay-kho`), ba probe đều `DAT`, `so_muc_ban: 0`.
+    KHÔNG có khoá nào trong đó chứng thực MODEL thực chạy.
+  vi_sao_ba_so_nay_duoc_ghi: >-
+    `trang_thai=xong` CHỈ nghĩa là con thoát mã 0, KHÔNG nghĩa việc đã làm — kho đã đo được một
+    lượt `xong`/`ma_thoat=0` mà agent dừng ngay bước đầu. Thứ tố cáo là THỜI LƯỢNG và KÍCH THƯỚC
+    ĐẦU RA: 509,148 s và 387 455 B stderr, khác hẳn ca no-op ~43 giây / stderr vài KB.
+
+nang_luc_do_cua_goi:
+  mirror: >-
+    Mirror git ĐẦY ĐỦ trong sandbox NGOÀI kho (`/tmp/claude-0/rv523/`): `kho.git` bare +
+    `cay-kho` detached đúng `2c466ac`, `is-shallow=false`, `core.abbrev 7` đã ghim, `origin` đã
+    `remote set-url` về `https://github.com/ducthangho/tra-luat` (clone từ đường dẫn cục bộ để
+    lại `origin` là đường dẫn và `launcher.py` từ chối `rc=11`).
+  so_hai_nguon_truoc_khi_clone: >-
+    Chạy TRÊN KHO NGUỒN, TRƯỚC bước clone (trong sandbox phép so ấy vô nghĩa vì không có mạng):
+    `ls-remote --heads` 357 ↔ `for-each-ref refs/remotes/origin` 357, `comm -23` = 0 dòng ⇒ KHÔNG
+    MÙ. So bằng TẬP TÊN, không bằng `wc -l`. Tập ref mirror so kho nguồn: THIẾU 0, thừa 1
+    (`claude/vigilant-bell-jbcso5`, nhánh chỉ định của phiên) ⇒ mirror là SUPERSET, không mù —
+    chiều lệch mới là kết luận, không phải con số.
+  doi_chieu_cong_nen_sandbox: >-
+    Tại CÙNG MỘT COMMIT (nền dựng bằng `git worktree --detach` tại đúng `reviewed_sha`, sandbox
+    là clone — hai vế khác ĐÚNG MỘT biến, vì đây là phép đo MÔI TRƯỜNG chứ không phải đo delta
+    mã): `doctrine-scan` 0/0 · `idiom-ba-ten` 0/0 · `adr-song` 0/0 · `doc-claims-check` 0/0.
+    Bốn mã thoát bằng nhau CHƯA chứng minh môi trường tương đương; đã đối chiếu ĐÚNG bốn cổng
+    đó, không khái quát hơn.
+  chua_do_duoc: >-
+    Sandbox không có mạng. Mọi sự kiện GitHub (comment, CI, `thu-hoi`, merge), `ls-remote`, và
+    byte thật trên GitHub đều KHÔNG ĐO ĐƯỢC từ trong đó — chỉ có trong `EVIDENCE.md`, tức nguồn (b).
+
+hien_vat_reviewer_vao_kho:
+  duong_dan: KHONG_CO
+  ghi_chu: >-
+    Reviewer ghi `probes/review_checks.py` và các tệp output trong sandbox NGOÀI kho; chúng chết
+    theo container. Nội dung kết luận (lệnh + output thật của cả 6 hướng) đã được gói vào chính
+    `VERDICT.md`, nên nó tra được; các tệp probe thì KHÔNG.
+
+tuan_thu_cam_cua_reviewer:
+  cay_kho_sach: true
+  commit_them_ngoai_head: 0
+  bang_chung: >-
+    `run.json` `worktree_sach: true`. Phiên điều phối đo ĐỘC LẬP sau khi lượt kết thúc, ở CẢ HAI
+    phía: `git -C cay-kho status --porcelain` RỖNG và `git -C cay-kho log --oneline 2c466ac..HEAD`
+    RỖNG; kho THẬT cũng `status --porcelain` RỖNG. Đột biến của reviewer chạy trên văn bản quy
+    trình lành tính và phục hồi byte gốc — reviewer tự khai đúng điều đó ở đầu BẢNG SĂN.
+
+github_submitter_identity:
+  actor: ducthangho
+  la_tac_gia_PR: true
+  ghi_chu: >-
+    `ADR-0040`: verdict do tài khoản tác giả PR vận chuyển KHÔNG là merge authorization. Bản chiếu
+    đăng bằng MCP GitHub với `GITHUB_PAT` của chủ kho nên nó KHÔNG mang trạng thái review chính
+    thức của GitHub; điều đó được ghi thẳng trong chính bản chiếu. Danh tính MODEL reviewer
+    (codex/OpenAI) tách khỏi danh tính người đăng — đừng suy identity từ tài khoản GitHub.
+  phien_van_chuyen: https://claude.ai/code/session_01HZNBRUZKM2mbeA8sVyjcKQ
+
+anchor:
+  loai: canonical_ancestry
+  cuong_do: vua
+  mo_ta: >-
+    Blob verdict ghim `3109a79`. Head đã review `2c466ac` là tổ tiên của `3109a79` (đo
+    `merge-base --is-ancestor` rc=0); giữa hai commit có hai bản vá `f01a350` và `56cfce5`.
+  gioi_han: >-
+    `3109a79` CHƯA vào master lúc viết biên nhận — PR #529 còn mở. Quan hệ tổ tiên tới canonical
+    chỉ thành lập sau khi land, và CHỈ vững khi land bằng merge commit hoặc fast-forward; squash
+    phá quan hệ ấy và làm `evidence_url` thành blob không tra được. Vì thế `cuong_do: vua`,
+    không phải `cao`.
+
+khong_do_duoc:
+  - 'Model thật của `codex exec`: không có `modelUsage`, và lượt này KHÔNG có cả lời tự khai trong VERDICT.md.'
+  - '`run.json`/`stdout.log`/`stderr.log` KHÔNG vào kho (`prompt.snapshot` đã bị xoá theo mặc định vì nó chứa nội dung prompt) ⇒ mọi scalar runtime ở trên là ATTESTATION của phiên điều phối, đối chiếu được với `run.json` trong container này nhưng KHÔNG tái lập được sau khi container bị thu hồi.'
+  - '`gate`/`thu-hoi` trên `2c466ac`: `M10` khai `N = 0` nên phiên KHÔNG gọi CI tay; lượt tự động chưa kết luận lúc viết `EVIDENCE.md`. Trạng thái đúng là KHÔNG ĐO ĐƯỢC, không phải xanh.'
+  - 'Không cổng nào canh `M1`–`M10` — chúng là CHỮ. `docs/PROTOCOL_DA_PHIEN.md` §20 ghi `ADR-0037` là `0 cổng`. Chính packet #523 khai thẳng điều này trong adapter.'
+  - '`grep -i` KHÔNG tin được với dấu tiếng Việt: hai lần gọi cho hai kết quả khác nhau trên CÙNG một tệp cho `gọi tên`/`GỌI TÊN`. Mọi phép đo văn bản của lượt này dùng `python casefold`. Nguyên nhân của lệch ấy KHÔNG được khai — hai phép grep của chính phiên đã bất đồng, nên không có cơ sở để chỉ nguyên nhân.'
+  - 'Tính trung thực của bước CHÉP verdict từ sandbox vào kho: xem `verdict_sha256_do_tu_dau`.'
+
+codex_connector_cung_head:
+  kich_luc: 'KHÔNG — PR #529 ở trạng thái draft, connector chỉ kích khi bỏ draft'
+  hoan_tat_luc: KHONG_AP_DUNG
+  ket_qua: 'Không có review object của connector trên head này.'
+
+delivered: true
+delivered_by: claude-session
+authoritative_source: repo_file
+receipt_written_by: claude-session
+receipt_written_at_utc: null  # KHÔNG ĐO ĐƯỢC — git chỉ cho commit time, không đo giờ tạo/sửa receipt.
+recorder_cung_la_nguoi_thi_cong: true
+receipt_khong_khai:
+  - 'Không khai model đã chạy — codex không đo được.'
+  - 'Không khai CI xanh trên `2c466ac`.'
+  - 'Không khai năm lớp đã được vá — bản vá nằm ở `f01a350` và verdict lượt 2 mới là chỗ phán chúng; biên nhận này chỉ ghi lượt 1.'
+  - 'Không khai mức `cross_approved`: verdict là `changes_requested`.'

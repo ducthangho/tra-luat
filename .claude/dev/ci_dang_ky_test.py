@@ -675,9 +675,25 @@ def phan_chung():
             ("toan-tu-tuong-thich-sau-ghim", 1, [_ruff, _p('python -m pip install --upgrade "ruff~=0.16.0"')]),
             ("toan-tu-khac-sau-ghim", 1, [_ruff, _p('python -m pip install --upgrade "ruff!=0.15.15"')]),
             ("toan-tu-lon-hon-mot-minh", 1, [_p('python -m pip install "ruff>=0.16"')]),
-            ("dry-run", 1, [_p("python -m pip install --dry-run ruff==0.15.15")]),
-            ("doi-dich-target", 1, [_p("python -m pip install --target isolated ruff==0.15.15")])]:
+            ("go-cai-khong-hieu", 1, [_p("python -m pip install ruff==0.15.15\npip uninstall -y ruff")])]:
         _FX.append((_t, {"gate": {"steps": [_ruff]}, "gate-registry": {"steps": _b + [_reg]}}, _m))
+    # MOI PHAN TU cua mot TAP la MOT CUA. Do duoc: 5/7 co (reviewer luot 5) + 15/16 trinh (tu
+    # liet ke tiep) SONG SOT = 20, vi hai tap chi co fixture cho 3 phan tu. Ban va DAU sinh
+    # fixture TU CHINH TAP va thanh TE HON — 21 song, boi bo mot phan tu thi ca cua no BIEN MAT
+    # theo: "bang nhau TU CHUNG MINH", lop ma `A5(a)` cam va `_MAU_BASE456` da neo cung de tranh.
+    # Nay ky vong NEO DOC LAP + chot doi no BANG tap that (bo phan tu => ca hanh vi do).
+    _CO_KV = ("--dry-run", "--target", "-t", "--prefix", "--root", "--python", "--user")
+    _TQ_KV = ("pip", "pip3", "pipx", "uv", "poetry", "conda", "mamba", "apt", "apt-get",
+              "apk", "brew", "npm", "yarn", "cargo", "python", "python3")
+    _them("tap-co-huy-khop-ky-vong", set(_CO_KV) == _CO_HUY_BANG_CHUNG)
+    _them("tap-trinh-ql-khop-ky-vong", set(_TQ_KV) == _TRINH_QL_GOI)
+    for _co in _CO_KV:
+        _FX.append(("co-huy-" + _co.lstrip("-"), {"gate": {"steps": [_ruff]}, "gate-registry":
+                    {"steps": [_p(f"python -m pip install {_co} tmp ruff==0.15.15"), _reg]}}, 1))
+    for _tq in _TQ_KV:
+        _FX.append(("trinh-ql-" + _tq, {"gate": {"steps": [_ruff]}, "gate-registry":
+                    {"steps": [_p(f"python -m pip install ruff==0.15.15\n{_tq} remove ruff"),
+                               _reg]}}, 1))
     for _ten, _jobs, _mong in _FX:
         _loi = len(loi_ruff_ci(_wf(_jobs))[0])
         _them("ruff-ci-" + _ten, (_loi == 0) if _mong == 0 else (_loi >= 1))

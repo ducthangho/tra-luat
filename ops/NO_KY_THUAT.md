@@ -1453,9 +1453,14 @@ Phép đo ba bản trên **cùng một bộ 10 control** (dựng trong MỘT l�
 Hai câu hỏi khác nhau, đừng gộp: *"bản vá ấy có sinh lỗi mới không"* (**có** — reviewer đúng) và
 *"trong ba hiện vật đã đo, giữ cái nào làm mặc định"*. Phép đo quyết định câu thứ hai:
 
-- **`v6` cấp tín dụng giả cho CẢ BA lớp ngoại lệ của chính kho** — `BoQuaNen`, `TinHieuChotCa`, **`Chan`**
-  — vì không tên nào mang hậu tố `Error`/`Exception`. `Chan` là lớp mà `ops/lease_publish.py` ném **khắp
-  nơi**, nên đó không phải ca lý thuyết. `v8` bắt được cả ba (**3/3** so **0/3**).
+- **`v6` cấp tín dụng giả cho CẢ BỐN lớp ngoại lệ của chính kho** — `BoQuaNen`, `Chan`, `HetNganSachDay`,
+  `TinHieuChotCa` — vì không tên nào mang hậu tố `Error`/`Exception`. `Chan` là lớp mà
+  `ops/lease_publish.py` ném **khắp nơi**, nên đó không phải ca lý thuyết. Đo ghim trên blob
+  `13a2af8c…` của `36f68c7`: `v6` bỏ sót **4/4**, `v8` bắt **4/4** (bỏ sót **0/4**).
+
+  > **ĐÍNH CHÍNH.** Bản đầu của dòng này ghi **3/3** và liệt kê ba lớp. Sai: bộ lọc base class của
+  > phép đo đầu bỏ mất `HetNganSachDay`. Đo lại bằng cách **ghim blob** (`git show 36f68c7:…`) thay vì
+  > tin cây đang checkout ⇒ **4**. Kết luận không đổi, chỉ mạnh hơn.
 - Tập lọt của `v6` là **KHÔNG BIÊN**: "mọi lớp thiếu hậu tố". Tập lọt của `v8` nhỏ hơn, và hồi quy của nó
   **ĐẾM ĐƯỢC**: `8` trong `454` lời gọi `bang()`/`chot()` của tệp test trùng hình dạng `^<định danh>: `,
   trải trên **4 ca** — `t96` (4 thông điệp), `t133`, `t136`, `t151`. Ai dùng bộ đo trên bốn ca ấy phải

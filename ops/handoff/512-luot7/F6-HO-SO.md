@@ -173,9 +173,11 @@ Vòng 8 xếp bản vá `v8` là **`VÁ SINH LỖI MỚI`**, và **đúng**: nó
 Nhưng đó là câu hỏi *"bản vá có sinh lỗi mới không"*, khác câu hỏi *"trong ba hiện vật đã đo, giữ cái nào
 làm mặc định"*. Phép đo trả lời câu thứ hai:
 
-- **`v6` cấp tín dụng giả cho CẢ BA lớp ngoại lệ của chính kho** — `BoQuaNen`, `TinHieuChotCa`, **`Chan`**
-  — vì không tên nào mang hậu tố `Error`/`Exception`. `Chan` là lớp `ops/lease_publish.py` ném **khắp
-  nơi**. Đo: `v6` bỏ sót **3/3**, `v8` bắt **3/3**.
+- **`v6` cấp tín dụng giả cho CẢ BỐN lớp ngoại lệ của chính kho** — `BoQuaNen`, `Chan`,
+  `HetNganSachDay`, `TinHieuChotCa`. `Chan` là lớp `ops/lease_publish.py` ném **khắp nơi**.
+  Đo ghim blob `13a2af8c…`: `v6` bỏ sót **4/4**, `v8` bỏ sót **0/4**.
+  (**ĐÍNH CHÍNH**: bản đầu ghi `3/3` — bộ lọc base class bỏ mất `HetNganSachDay`; đo lại bằng
+  `git show 36f68c7:…` thay vì tin cây đang checkout.)
 - Tập lọt của `v6` **không có biên** ("mọi lớp thiếu hậu tố"); hồi quy của `v8` thì **đếm được**:
   **`8` trong `454`** lời gọi `bang()`/`chot()` trùng hình dạng `^<định danh>: `, trải trên **4 ca** —
   `t96` (4 thông điệp), `t133`, `t136`, `t151`.

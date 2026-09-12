@@ -119,39 +119,68 @@ tự nói lý do trên stderr.
 
 ## Vòng lặp vá → review → dừng
 
-`§8` và `§13` quy định mức review và định nghĩa hoàn tất; `§12` quy định điều kiện dừng và ngưỡng.
-Mục này chỉ nói **phiên phải làm gì với BẢNG LỚP mà reviewer trả về** — không nhắc lại ngưỡng nào.
+`§8`/`§13` quy định mức review và định nghĩa hoàn tất; `§12` quy định điều kiện dừng. Mục này chỉ nói
+**phiên phải làm gì với BẢNG LỚP mà reviewer trả về** — bảng ánh xạ `review_class → điều kiện dừng` nằm
+ở `cross-review/SKILL.md`, đọc ở đó, đừng nhớ theo lần trước.
 
-**Điều kiện dừng đọc theo `review_class` của lease, không theo cảm giác đã đủ.** Lớp cao nhất
-(`sensitive`) đòi một `approve` **tường minh**; một lượt không tìm ra gì mà thiếu bảng săn thì `§8` xếp
-là *chưa đo*, không phải *đã sạch*. Lặp vá → review cho tới khi hết lớp P1 và P2, hoặc có `approve`.
-
-**Đơn vị là LỚP, không phải từng lỗi.** `cross-review` sinh ra bảng ấy; đây là bên ĐỌC nó:
+**ĐỌC BẢNG LỚP TRƯỚC KHI SỬA DÒNG NÀO.** Không mở tệp sản phẩm trước khi đã đọc xong cột *bản vá theo
+lớp | lý do vá lẻ* của từng lớp. Mở tệp trước rồi phân loại sau là cách vá lẻ len vào mà không ai thấy.
 
 | reviewer trả về | phiên làm gì |
 |---|---|
-| lớp P1 hoặc P2 còn mở | vá THEO LỚP rồi mở vòng mới |
-| cùng một lớp nêu **lần thứ BA** | **CẤM vá lẻ lần nữa** — xem dưới |
-| `approve` + bảng săn đủ | dừng vòng lặp; sang phần merge |
+| lớp P1/P2 còn mở, lớp khai **bản vá theo lớp** | thực hiện ĐÚNG bản vá theo lớp ấy |
+| lớp khai **lý do vá lẻ** | vá lẻ ĐƯỢC, nhưng lý do phải đứng vững ở vòng sau |
+| cùng một lớp sang vòng thứ **BA** | **CẤM vá lẻ lần nữa** — xem `M4` dưới |
+| `approve` + bảng săn đủ | dừng vòng lặp |
 | `blocked` | dừng, xuất handoff, **hỏi chủ kho** |
 
-**Một lớp nêu lần thứ BA nghĩa là hai bản vá trước KHÔNG trúng gốc.** Vá lẻ lần thứ ba là mua thêm một
-lượt để thua theo cùng cách. Lúc ấy đổi CÁCH TIẾP CẬN: liệt kê HẾT đường vào của lớp TRƯỚC khi sửa, và
-nếu lớp ấy không đóng được trong phạm vi packet thì nói thẳng — nó là một nợ, và nợ thuộc packet khác.
+### `M4` — lớp sang vòng thứ BA thì CẤM vá lẻ
 
-**Vá theo LỚP, đừng vá theo danh sách reviewer chỉ.** Reviewer nêu những thể hiện họ thấy; cơ chế sinh
-ra chúng thường có đường vào mà không ai nêu. Tự liệt kê hết đường vào trước, đóng cả loạt, và cho mỗi
-đường một chốt riêng — ba chốt không phân biệt được bằng đầu vào là bộ TƯƠNG ĐƯƠNG, tức chỉ đo một cái.
+Lớp xuất hiện ở **vòng thứ ba** ⇒ **CẤM** vá lẻ lần nữa. Phải **đổi cách làm**, hoặc vào Review Rescue
+Checkpoint (`ADR-0037`). Đây là **nghĩa vụ**, không phải một lời khuyên để cân nhắc: `§12` dùng chữ
+bắt buộc, và adapter không được phát biểu yếu hơn doctrine.
 
-**KHÔNG hội tụ thì đo bằng PHÂN HẠNG, không bằng số lượt.** Dãy lớp P1/P2 qua các vòng phải đi xuống.
-Số lỗi giảm mà hạng không giảm thì chưa hội tụ; hạng giảm mà cùng một slug vẫn còn thì cũng chưa.
+**ĐƠN VỊ LÀ LỚP, KHÔNG PHẢI FINDING.** Ba finding **cùng một lớp** trong **MỘT** vòng là **lần 1** của
+lớp ấy, không phải lần 3. Đếm nhầm đơn vị làm ngưỡng bắn sai lúc — sớm thì chặn oan một chuỗi đang hội
+tụ, muộn thì để vá lẻ chạy thêm hai vòng.
 
-**Thu hẹp phạm vi để lấy `approve` là LÁCH, không phải hội tụ.** Bỏ một đường dẫn khỏi diff cho lớp
-biến mất thì lớp vẫn sống, chỉ là ngoài tầm nhìn của lượt sau. Đổi write set là **revision mới** theo
-`§3.2`/`§5`, không phải một quyết định trong vòng lặp.
+### `M5` — tín hiệu KHÔNG HỘI TỤ tính từ PHÂN HẠNG, không từ TỔNG
 
-**Rescue Checkpoint: DỪNG và HỎI.** Chạm checkpoint thì phiên không tự chọn đường đi tiếp — nó xuất
-handoff kèm phép đo rồi chờ chủ kho quyết. Điều kiện chạm và các đường ra ở `ADR-0037`.
+```
+tỉ lệ VÁ THẬT = (số finding vòng trước được phán ĐÃ VÁ THẬT) ÷ (số finding vòng trước)
+```
+
+**Hai vòng LIÊN TIẾP có tỉ lệ `< 50 %` ⇒ DỪNG và hỏi chủ kho.** Đây là điều kiện dừng bắt buộc, không
+phải một chỉ báo để tham khảo.
+
+Mẫu số là **số finding vòng trước**, và phân hạng lấy từ mục đối chiếu của verdict
+(`ĐÃ VÁ THẬT` / `VÁ HỜ` / `VÁ SINH LỖI MỚI` / `CHƯA VÁ`). Giữ ánh xạ thể hiện khi đếm; đừng cộng trùng
+một thể hiện vào hai lớp.
+
+**Vì sao PHÂN HẠNG chứ không TỔNG — đo trên dữ liệu thật của `#508`** (`13 → 12 → 11` finding; `VÁ
+THẬT` `4` rồi `3`):
+
+| luật | vòng 3 |
+|---|---|
+| theo **TỔNG** (*"số lượng không cải thiện"*) | **KHÔNG bắn** — 13 → 12 → 11 vẫn là đang giảm |
+| theo **PHÂN HẠNG** (`4/13 = 31 %`, rồi `3/12 = 25 %`) | **BẮN** — cả hai vòng `< 50 %` |
+
+Hai luật cho **hai kết luận KHÁC NHAU trên cùng một dữ liệu**; đó chính là thứ luật này mua được. Một
+luật mới cho cùng kết quả với luật cũ thì không mua được gì.
+
+Hệ quả dễ đọc ngược, nói thẳng: một chuỗi có **tỉ lệ vá thật cao** mà **hạng chưa giảm** thì `M5`
+**KHÔNG** bắn — nó vẫn đang hội tụ, chỉ chưa xong. Đừng dùng hạng thay cho tỉ lệ.
+
+### `M6` — thu hẹp phạm vi là `chua_do_duoc`, KHÔNG phải một bản vá
+
+Một vòng làm finding biến mất bằng cách **thu hẹp phạm vi** (bỏ một đường dẫn khỏi diff, cắt một tiêu
+chí, hạ một mục tiêu) thì phải **khai thẳng**: nó là một mục **`chua_do_duoc`**, và **KHÔNG** được tính
+là đã vá. Lớp vẫn sống, chỉ là ra ngoài tầm nhìn của lượt sau.
+
+Giữ **dấu vết**: khai lớp nào biến mất vì thu hẹp, phạm vi nào bị cắt, và lớp ấy chuyển thành nợ tên
+gì. Không có dấu vết thì *"0 P1 + 0 P2"* mua được bằng cách cắt bớt tiêu chí. Reviewer được yêu cầu
+**gọi tên** đúng chuyện này. Đổi write set là **revision mới** theo `§3.2`/`§5`, không phải một quyết
+định trong vòng lặp.
 
 ## Sau khi đã QUYẾT MERGE — ba mệnh đề TÁCH RỜI
 
@@ -161,37 +190,34 @@ handoff kèm phép đo rồi chờ chủ kho quyết. Điều kiện chạm và 
 2. Nghĩa vụ còn lại **VẪN CÓ**: phải có **CI hậu merge**. Đây KHÔNG phải *"merge rồi khỏi đo"*.
 3. Ngoại lệ duy nhất là **PHÁT HIỆN LỖI** — lúc ấy mở vòng mới và **khai lý do**.
 
-Mệnh đề 2 tồn tại vì viết yếu đi là mở đường merge rồi không ai đo gì. Mệnh đề 3 tồn tại vì bỏ nó là
-khai *"merge rồi không review nữa bất kể gì"*.
-
 **Bẫy đã đo khi đọc CI hậu merge:** huỷ một job trong lượt hậu merge làm kết luận **mức RUN** thành
-`cancelled` dù job kia `success` — nền không có đường huỷ MỘT job. Nên đọc CI hậu merge ở **mức JOB**,
-đừng đọc `conclusion` của run: một job xanh nằm trong một run bị huỷ trông y hệt một lượt chưa bao giờ
-xanh.
+`cancelled` dù job kia `success` — nền không có đường huỷ MỘT job. Đọc CI hậu merge ở **mức JOB**: một
+job xanh trong một run bị huỷ trông y hệt một lượt chưa bao giờ xanh.
 
 ## Ba loại chi CI — và `N = 0` cho giai đoạn TRƯỚC merge
 
-| loại | là gì | ngân sách |
-|---|---|---|
-| **(a)** | CI gác cổng do nền **tự bắn** theo push/PR, cộng lượt **CI hậu merge** | không tính vào `N` |
-| **(b)** | lượt CI **gọi tay** trong lúc lặp vá → review | **`N = 0` TRƯỚC merge** |
-| **(c)** | CI thăm dò: gọi tay `workflow_dispatch`, lane nền-khác, hay full CI **trước merge** | **CẤM** |
+| loại | là gì | ngân sách | ghi vết |
+|---|---|---|---|
+| **(a)** | CI gác cổng do nền **tự bắn** theo push/PR, cộng lượt **CI hậu merge** | không đụng, không tính vào `N` | — |
+| **(b)** | CI dùng làm **nhạc cụ đo**, gọi tay trong lúc lặp vá → review | đúng **`N`** lượt, `N` **đóng băng trong đặc tả**; **`N = 0` TRƯỚC merge** | **mỗi lượt ghi `run_id` vào biên nhận** |
+| **(c)** | CI **thăm dò**: `workflow_dispatch`, lane nền-khác, hay full CI gọi tay trước merge | **CẤM** | — |
 
-`N = 0` là điểm khác bản trước của mục này. Để `N` mở kèm câu *"đóng băng trong đặc tả"* thì một phiên
-vẫn tự cấp cho mình vài lượt full CI mà vẫn đúng chữ — đúng hình dạng *"ngoại lệ thành thường lệ"*.
+`run_id` của hàng (b) là thứ làm *"đã chi mấy lượt"* **đếm được**; bỏ nó thì `N` là lời hứa. Và `N = 0`
+cho giai đoạn trước merge là điểm khác bản trước: để `N` mở kèm câu *"đóng băng trong đặc tả"* thì một
+phiên vẫn tự cấp cho mình vài lượt full CI mà vẫn đúng chữ — đúng hình dạng *"ngoại lệ thành thường lệ"*.
 
 **Ca đối chiếu, đo được:** chuỗi `#512` ba vòng cuối **không** gọi `workflow_dispatch` lượt nào và chỉ
-nhận lượt tự động ⇒ luật này cho ra **ĐẠT** trên chuỗi ấy. Một luật làm một chuỗi đã tuân thủ thành
-*vi phạm* là luật viết sai, không phải chuỗi sai.
+nhận lượt tự động ⇒ luật này cho ra **ĐẠT** trên chuỗi ấy. Một luật làm một chuỗi đã tuân thủ thành *vi
+phạm* là luật viết sai, không phải chuỗi sai.
 
 Nhắc một điều đã đo và dễ đọc ngược: gắn nhãn để xin một lane khác **không tự sinh lượt chạy nào** khi
-workflow không khai loại sự kiện gắn nhãn. Nhãn chỉ được đọc ở lượt bắn KẾ TIẾP — nên "đã gắn nhãn"
-không phải "đã có lượt đo".
+workflow không khai loại sự kiện gắn nhãn. Nhãn chỉ được đọc ở lượt bắn KẾ TIẾP — *"đã gắn nhãn"* không
+phải *"đã có lượt đo"*.
 
-**KHÔNG CỔNG NÀO CƯỠNG CHẾ MỤC NÀY.** Cả phần vòng lặp, phần hậu-merge và ba loại chi CI ở trên đều là
-**chữ**, tức kỷ luật đọc — y như các mục khác của skill này. Cưỡng chế chi CI bằng máy là packet riêng
-(`CONG-CHAN-CHI-CI-SOM`); cổng đọc một hằng số trần duy nhất là nợ `SO-CANON-CHUA-TON-TAI`. Ai tin ở
-đây đã có cơ chế sẽ bỏ đúng bước kiểm bằng tay mà mục này đang đòi.
+**KHÔNG CỔNG NÀO CƯỠNG CHẾ MỤC NÀY.** Cả vòng lặp, phần hậu-merge và ba loại chi CI ở trên đều là
+**chữ**, tức **kỷ luật đọc**. `§20` ghi `ADR-0037` và ADR trần vòng là **`0 cổng`**; cưỡng chế chi CI
+nằm ở packet `CONG-CHAN-CHI-CI-SOM`; cổng đọc một hằng số trần duy nhất là nợ `SO-CANON-CHUA-TON-TAI`.
+Ai tin ở đây đã có cơ chế sẽ bỏ đúng bước kiểm bằng tay mà mục này đang đòi.
 
 ## Chặn cứng
 

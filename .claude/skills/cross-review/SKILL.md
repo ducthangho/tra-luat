@@ -368,30 +368,51 @@ phiên mà chẩn đoán nhầm; chỉ lộ khi cross-review dựng phản chứ
 
 Dọn xong mới đo, và đo lại **nền** trước khi nghi bản vá của mình.
 
-## BẢNG LỚP — đếm theo LỚP, không theo từng lỗi
+## Điều kiện dừng — ánh xạ theo `review_class`, BA lớp phân biệt được
 
-`§8` quy định hạng nào là hạng nào; mục này chỉ nói **đơn vị đếm**, vì đếm sai đơn vị làm mọi phép so
-giữa các lượt vô nghĩa.
+`§3.2` đã có trục `review_class`; bảng này chỉ ánh xạ nó sang điều kiện dừng, không tạo trục mới.
 
-**Một LỚP = một CƠ CHẾ sinh ra cùng một hình dạng lỗi.** Cùng một cơ chế hiện ở năm chỗ là **một
-lớp, năm thể hiện** — không phải năm lỗi. Hạng của lớp là hạng CAO NHẤT trong các thể hiện của nó.
+| `review_class` | điều kiện dừng |
+|---|---|
+| `routine` | **0 P1**. P2 còn lại thành **nợ CÓ TÊN** ghi trong Issue của packet |
+| `systemic` | **0 P1 + 0 P2** |
+| `sensitive` | **`approve` tường minh** của reviewer khác nền |
+
+**Hàng `sensitive` KHÔNG được đọc thành *"hết P1 và P2"*.** *"Vắng mặt vì sạch"* và *"vắng mặt vì chưa
+nhìn tới"* nhìn **giống hệt nhau**; một `approve` phân biệt được hai thứ đó, còn *"không thấy lỗi"* thì
+không. Đây là lý do hàng thứ ba khác hai hàng trên về KIỂU, không chỉ về mức.
+
+## BẢNG LỚP — nghĩa vụ mỗi vòng, không phải gợi ý
+
+Verdict **phải** mang mục `BẢNG LỚP`. **Mỗi finding thuộc ĐÚNG MỘT `lop_loi`** — finding không có lớp
+thì verdict **thiếu**, không phải "chưa phân loại".
+
+| `lop_loi` | các slug thuộc lớp | **bản vá theo lớp** \| lý do vá lẻ |
+|---|---|---|
+
+Cột thứ ba là cột có răng: mỗi lớp phải khai **một thay đổi đóng cả lớp**, hoặc khai **lý do** vì sao
+lớp ấy buộc phải vá lẻ. Bỏ cột ấy thì bảng tụt xuống thành bảng phân loại thuần — phân hạng xong rồi
+ai cũng vá lẻ như cũ, tức không ép đổi cách làm gì cả.
+
+**Đơn vị đếm, vì đếm sai đơn vị làm mọi phép so giữa các lượt vô nghĩa:**
 
 | trường | đếm gì |
 |---|---|
 | `so_p1` · `so_p2` · `so_p3` | số **LỚP** ở mỗi hạng |
-| `so_the_hien` | tổng số **THỂ HIỆN** của mọi lớp |
+| `so_the_hien` | tổng số **THỂ HIỆN** |
 | `findings_ids` | slug của **LỚP**, kebab-case |
 
-**KHÔNG đổi định nghĩa P1/P2/P3.** Chúng đang dùng được, và đổi là làm mọi verdict cũ không so được
-với verdict mới.
+Một LỚP = một **CƠ CHẾ** sinh cùng một hình dạng lỗi; cùng cơ chế hiện ở năm chỗ là **một lớp, năm thể
+hiện**. Hạng của lớp là hạng **CAO NHẤT** trong các thể hiện.
+
+**KHÔNG đổi định nghĩa P1/P2/P3** — chúng đang dùng được, đổi là làm mọi verdict cũ không so được.
 
 **Slug là KHOÁ ĐẾM, giữ NGUYÊN qua các lượt cho cùng một lớp.** Mô tả đổi thoải mái. Đặt slug mới cho
-một lớp cũ là làm hỏng phép đếm — chốt đếm lặp-cùng-một-lớp của `packet_loop.py` đọc đúng khoá ấy, nên
-đổi slug là vô hiệu hoá chính cái chốt đang canh *"bản vá không trúng gốc"*. Ngưỡng và tên trường của
-chốt ấy nằm ở `§12` và `packet_loop.py --help`; đừng chép số vào đây.
+một lớp cũ là vô hiệu hoá chính chốt đang canh *"bản vá không trúng gốc"*; ngưỡng và tên trường của chốt
+ấy ở `§12` và `packet_loop.py --help` — đừng chép số vào đây.
 
-Vì sao đơn vị này quan trọng: một lớp nêu lần thứ BA nghĩa là hai bản vá trước đều không trúng gốc, và
-`work-packet` đọc đúng con số ấy để quyết **đổi cách tiếp cận** thay vì vá lẻ lần nữa.
+**Reviewer phải GỌI TÊN khi một vòng đóng finding bằng cách CẮT TIÊU CHÍ** hoặc thu hẹp phạm vi, chứ
+đừng ghi nhận nó là đã vá. Xem mục cùng tên ở `work-packet`.
 
 ## Khung `VERDICT.md` bắt reviewer sinh ra
 

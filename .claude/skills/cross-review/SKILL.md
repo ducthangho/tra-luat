@@ -230,7 +230,7 @@ git -C "$RV" status --porcelain    # in thay đổi Git đang thấy trong workt
 1. **Clone từ ĐƯỜNG DẪN cục bộ để lại `origin` là đường dẫn, và `launcher.py` từ chối với `rc=11`**
    (`kho lech: mong doi github.com/<chủ>/<kho>, thuc te (khong co remote)`) khi
    kiểm bằng `--expected-repo`. `remote set-url` đổi chuỗi remote mà chốt này đọc;
-   hợp đồng neo danh tính kho xem protocol §4/§8.
+   chi tiết các cờ neo kho xem `docs/GOI_AGENT_DA_NEN.md`, mục "Neo theo *kho*, không theo đường dẫn".
 2. **`git fetch origin <nhánh>` gãy nếu nhánh chỉ tồn tại dưới dạng remote-tracking ở nguồn cục bộ**
    (`couldn't find remote ref`). Vô hại khi commit đã có sẵn trong clone, nhưng đừng đọc nó thành
    "sandbox hỏng" — kiểm bằng `rev-parse HEAD`, không bằng mã thoát của `fetch`.
@@ -285,7 +285,9 @@ cd "$R/cay-kho"            && "$PY" scripts/tl.py doc-claims-check --strict; ech
 git -C <kho> worktree remove /tmp/nen-<reviewed_sha> --force
 ```
 
-Mỗi mã thoát thuộc một lần chạy của cổng trên cây tương ứng. Hai mã bằng nhau chưa chứng minh
+Mỗi dòng `echo` in mã thoát của chuỗi `cd && "$PY" ...` ngay trước nó. Nếu `cd` lỗi,
+cổng chưa chạy và số in là mã lỗi của `cd`; bản thân `echo` vẫn có thể trả 0. Khi `cd`
+thành công, số in là mã thoát của lời gọi Python. Hai mã bằng nhau chưa chứng minh
 môi trường tương đương; hai mã khác nhau chưa định vị được nguyên nhân.
 
 **Phạm vi của phép so ref.** Yêu cầu kiểm nguồn và báo cáo giới hạn xem protocol §8 và
@@ -462,16 +464,16 @@ sau khi cây đã đổi); tệp trong `cay/` dùng được cả năm lượt. 
 hợp đồng patch-as-hint xem protocol §8/§13. Ví dụ sinh diff đối xứng cho layout `cay/`:
 
 ```bash
-diff -u --label a/cay/<tep> --label b/cay/<tep> <ban goc> cay/<tep>
+diff -u --label a/cay/<tep> --label b/cay/<tep> <ban goc> cay/<tep> > GOI_Y_VA.diff
 patch --dry-run -p1 -d <cay tam chua BAN GOC> < GOI_Y_VA.diff   # kiểm layout cay/
 ```
 
 ## Cú pháp ghi verdict lên PR
 
 ```bash
-gh pr review 56 --request-changes --body-file verdict.md
-gh pr review 56 --approve         --body-file verdict.md
-gh pr comment 56 --body-file verdict.md          # verdict blocked, hoặc phần bằng chứng dài
+gh pr review 56 --request-changes --body-file VERDICT.md
+gh pr review 56 --approve         --body-file VERDICT.md
+gh pr comment 56 --body-file VERDICT.md          # verdict blocked, hoặc phần bằng chứng dài
 ```
 
 Các lệnh `gh` trên ghi review hoặc comment. Với MCP GitHub,
@@ -494,7 +496,8 @@ trong state; thiếu/sai/không khớp trả mã khác 0. Quy tắc exact head v
 thuộc protocol §8/§13.
 
 `--finding-id` nhận slug kebab-case làm khóa đếm; `--finding-desc` là mô tả tự do.
-Slug sai dạng hoặc thiếu khiến lệnh trả mã khác 0, không suy slug từ mô tả.
+Nhánh kiểm finding chặn slug sai dạng; chỉ đòi có slug với verdict `changes_requested`.
+`approve` và `blocked` có thể không có finding; lệnh không suy slug từ mô tả.
 Cách giữ danh tính finding qua các lượt xem protocol §8/§12/§13.
 
 `--help` cho ý nghĩa từng mã thoát.

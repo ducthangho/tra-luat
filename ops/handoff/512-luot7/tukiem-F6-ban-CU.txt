@@ -1,0 +1,12 @@
+dot bien                               dich   ket            chi tiet
+CTRL-ngoai-le-Exception-TRAN           t160   GIET THAT      rc=1, chot ca dich: Exception: CONTROL vo can, khong lien quan A/B
+CTRL-ngoai-le-Error-TRAN               t160   GIET THAT      rc=1, chot ca dich: Error: CONTROL vo can, ten lop dung bang Error
+CTRL-ngoai-le-RuntimeError             t160   TIN DUNG GIA   chet vi ngoai le VO CAN: RuntimeError: CONTROL vo can, co tien to
+CTRL-chet-DUNG-chot-ca-dich            t160   GIET THAT      rc=1, chot ca dich: chẩn đoán phải giữ đúng vế 'không-actor=(rc=0, 2/2)': None
+
+  LECH  CTRL-ngoai-le-Exception-TRAN       mong_doi=TIN DUNG GIA   thuc_te=GIET THAT
+  LECH  CTRL-ngoai-le-Error-TRAN           mong_doi=TIN DUNG GIA   thuc_te=GIET THAT
+  DAT   CTRL-ngoai-le-RuntimeError         mong_doi=TIN DUNG GIA   thuc_te=TIN DUNG GIA
+  DAT   CTRL-chet-DUNG-chot-ca-dich        mong_doi=GIET THAT      thuc_te=GIET THAT
+
+TU KIEM: 2/4 ca dung phan hang — LECH: [('CTRL-ngoai-le-Exception-TRAN', 'TIN DUNG GIA', 'GIET THAT'), ('CTRL-ngoai-le-Error-TRAN', 'TIN DUNG GIA', 'GIET THAT')]

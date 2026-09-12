@@ -1,0 +1,113 @@
+# Lease EXECUTOR — QUY-TRINH-LAP-REVIEW-VA-DIEU-KIEN-DUNG revision 3 (#523). Ghi HỘ chủ kho.
+# THAY gen 1 vì WRITE SET ĐỔI (thêm ops/reviews/) và vì trần được nâng tường minh.
+schema_version: 2
+event: executor_lease_granted
+
+packet_issue: 523
+mission_issue: 499
+granted_by: ducthangho
+granted_on_instruction: https://github.com/ducthangho/tra-luat/issues/523#issuecomment-5646812840
+leased_at_utc: 2026-09-12T15:30:00Z
+lease_expires_at_utc: 2026-09-13T08:15:00Z
+
+packet_id: QUY-TRINH-LAP-REVIEW-VA-DIEU-KIEN-DUNG
+revision: 3
+generation: 2
+lease_id: quy-trinh-lap-review-r2-exec-2-claude-20260912
+role: executor
+provider: claude
+executor: claude
+environment: cloud
+risk: sensitive
+assurance_target: cross_approved
+access: read-write
+
+spec_path: ops/specs/QUY-TRINH-LAP-REVIEW-VA-DIEU-KIEN-DUNG-r3.md
+spec_sha256: 40f39595e0750c84daf7a78232f860ad3724b3e9826f2d361f35cb94ab56fc4b
+spec_hash: 40f39595e0750c84daf7a78232f860ad3724b3e9826f2d361f35cb94ab56fc4b
+
+write_set:
+  - .claude/skills/cross-review/SKILL.md
+  - .claude/skills/work-packet/SKILL.md
+  - ops/reviews/
+
+write_set_da_do_truoc_khi_cap: >-
+  Quét sau `fetch --prune` refspec rộng; so TẬP TÊN hai nguồn `comm -23` = 0 ⇒ không mù.
+  Hai tệp skill: NGƯỜI_GIỮ 1 = chính lease gen 1 của packet này (được gen 2 này thay).
+  `ops/reviews/`: NGƯỜI_GIỮ 1 = `tran-vong-review-len-muoi-exec-3-claude-20260912` (lease gen 3
+  của #522, CÒN HẠN tới 2026-09-13T08:15:00Z dù #522 ĐÃ LAND) — xem `chong_lan_write_set` dưới.
+  PHÁT HIỆN VỀ CHÍNH BỘ QUÉT, đo được: `ai-dang-giu` so CHUỖI CHÍNH XÁC, KHÔNG nở prefix.
+  Cùng một lease: truy vấn `ops/reviews/` ⇒ NGƯỜI_GIỮ 1; truy vấn `ops/reviews/README.md`
+  (tệp DƯỚI prefix ấy) ⇒ NGƯỜI_GIỮ 0. Số 0 ấy là SỐ KHÔNG GIẢ. Ai dùng lệnh này để "dọn
+  đường" cho một TỆP phải truy vấn cả các PREFIX tổ tiên của nó, không chỉ đường dẫn đầy đủ.
+
+chong_lan_write_set: >-
+  `ops/reviews/` đang bị lease gen 3 của #522 giữ. #522 ĐÃ LAND (merge commit 63075a7, CI hậu
+  merge ubuntu success) nên không phiên nào còn ghi dưới lease ấy — nhưng lease KHÔNG TỰ CHẾT
+  khi packet đã land, đó là nợ CÓ TÊN `AG-T0-01B-thu-hoi-lease-chua-co-duong`. Phiên này KHÔNG
+  tự viết bản thu hồi: `_KHOA_THU_HOI_BAT_BUOC` đòi `thu_hoi_boi` là trường THẨM QUYỀN và bản
+  ghi đi qua cổng tiếp nhận M4 riêng. Nên chồng lấn này được KHAI THẲNG ở đây thay vì che, và
+  quyết định thuộc chủ kho.
+
+branch: claude/quy-trinh-lap-review-r2
+branch_ownership: exclusive
+target_branch_neu_land: master
+base_sha: 85fcbf8aea75f0577f47d7332c02a50f993a9d1b
+start_from_sha: 56cfce52b917866e3396dabbf2041a4aabbada6e
+reviewed_sha_required: 56cfce52b917866e3396dabbf2041a4aabbada6e
+
+authority_basis: '§2 — start/pause/resume/reroute/override/authorize thuộc chủ kho'
+recorded_by: claude-session
+recorder_is_dispatcher: false
+recorder_cung_la_nguoi_thi_cong: true
+recorder_xung_dot_loi_ich: >-
+  Phiên ghi lease này CŨNG là phiên thi công và CŨNG là phiên soạn r3 — tự viết phạm vi rồi tự
+  dùng. Thu hẹp bằng: hai chỉ thị đều có dấu vết bền của chủ kho; trần được nâng TƯỜNG MINH chứ
+  không do phiên tự gỡ; cross-review phải KHÁC NỀN và `sensitive` đòi approve tường minh. Phần
+  KHÔNG thu hẹp được: chính phiên này phát biểu A14-A16, nên reviewer phải đọc chúng như đối
+  tượng đáng nghi.
+
+run_minutes: 1440
+heartbeat_required_minutes: 30
+attempts_used: 0
+attempts_limit: 10
+
+nang_tran:
+  same_failure_limit: 2 -> 10
+  attempts_limit: 3 -> 10
+  ai_nang: ducthangho
+  tran_cu: same_failure_limit 2 · attempts_limit 3
+  tran_moi: same_failure_limit 10 · attempts_limit 10
+  can_cu: https://github.com/ducthangho/tra-luat/issues/523#issuecomment-5646812840
+  xac_nhan_khuon: 'chủ kho xác nhận "Nâng như #522"'
+  ghi_chu: >-
+    Nâng KHÔNG chữa lớp nào; chỉ cho phép ĐO TIẾP. Hai lớp còn mở ở lượt 2 đã được vá tại 56cfce5
+    và CHƯA được review. `phep-do-doctrine-khong-du-rang` vẫn là nợ về CƠ CHẾ ĐO.
+
+reviewer_provider: codex
+review_class: sensitive
+effective_review_class: sensitive
+
+depends_on: []
+thay_the_cho:
+  - quy-trinh-lap-review-r2-exec-1-claude-20260912
+
+ly_do_cap: >-
+  Hai phép đo. (1) Hiện vật review không vào được kho: write set r2 là ĐÚNG HAI tệp skill, nên hai
+  VERDICT.md của lượt 1-2 (sha256 9695e0eb..., 6e753b6e...) chết theo container — tiền lệ đã trả
+  giá ở lượt 1-2 của #522. (2) M7 của chính packet này đòi ghi run_id vào BIÊN NHẬN mà r2 không cấp
+  đường ghi biên nhận, tức tạo một nghĩa vụ KHÔNG THI HÀNH ĐƯỢC. Cộng chỉ thị nâng trần sau khi
+  packet về blocked vì chốt đếm lặp-cùng-lớp (trần 2) chạm ở hai slug.
+
+viec_trong_lease:
+  - 'M1-M10: giữ nguyên từ r1/r2 — ĐỌC r1 cho định nghĩa đầy đủ, đừng đọc dòng liệt kê của r2.'
+  - 'M11: hiện vật cross-review sống trong git (VERDICT.md + receipt v2 + hàng Mục lục).'
+  - 'M12: M7 thi hành được; N=0 thì biên nhận khai 0 TƯỜNG MINH.'
+
+dieu_kien_dung:
+  - 'S1 cần đường dẫn thứ TƯ ngoài hai tệp skill + prefix ops/reviews/.'
+  - 'S2 dòng thêm của HAI tệp skill > 300 (ADR-0044; trần dòng KHÔNG được nâng).'
+  - 'S3 muốn đụng docs/PROTOCOL_DA_PHIEN.md (doctrine-scan) hay .claude/hooks/**.'
+  - 'S4 muốn vá packet_loop.py / doctrine-scan — KHÔNG trong write set; nợ riêng.'
+  - 'S5 muốn sửa VERDICT.md của một lượt đã giao (chúng neo theo băm).'
+  - 'S6 muốn đổi định nghĩa P1/P2/P3 hay đổi slug của một lớp cũ.'

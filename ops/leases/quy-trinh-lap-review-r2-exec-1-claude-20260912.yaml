@@ -63,6 +63,10 @@ effective_review_class: sensitive
 depends_on:
   - TRAN-VONG-REVIEW-LEN-BON
 thay_the_cho: []
+da_bi_thay_the: quy-trinh-lap-review-r2-exec-2-claude-20260912
+# Gen 1 HẾT hiệu lực: write set đổi (thêm `ops/reviews/`) và trần được nâng tường minh, nên
+# §3.2/§5 đòi revision + generation mới. Hồ sơ này GIỮ NGUYÊN phần còn lại làm dấu vết; chỉ
+# dòng trên được thêm, đúng chốt hai chiều của `_kiem_bia_mo`.
 
 ly_do_cap: >-
   Đo 12-09-2026 trên 3c7df6d: hai quy định vận hành của chủ kho (kiểm head drift trước vòng dự đoán là

@@ -92,6 +92,57 @@ PY="$(command -v python3 || command -v python || command -v py)"
 
 Mục này **KHÔNG thay** `docs/PROTOCOL_DA_PHIEN.md` §8; nó chỉ nói chọn bậc nào và cú pháp đo model thực sự đã chạy.
 
+## Reviewer là `codex` — model, effort, quota: bốn phép đo, không phải giả định
+
+Bảng bậc ở trên là của reviewer **`claude`**. Khi reviewer là `codex` thì cú pháp và các chỗ gãy khác
+hẳn; dưới đây đo 12-09-2026 trên chuỗi #518.
+
+```bash
+codex exec -m <model> -c model_reasoning_effort="xhigh" \
+  --cd <sandbox> --sandbox workspace-write --skip-git-repo-check "<prompt>"
+```
+
+1. **`model_reasoning_effort=max` KHÔNG tồn tại.** API trả HTTP 400: *"Unsupported value: 'max' is not
+   supported with the 'gpt-5.3-codex-spark' model. Supported values are: 'low', 'medium', 'high', and
+   'xhigh'."* Muốn "cao nhất" thì viết `xhigh`.
+2. **Tài khoản ChatGPT chỉ mở một tập model nhỏ.** `gpt-5.3-codex`, `gpt-5.1-codex-max`, `gpt-5-codex`
+   đều trả 400 *"not supported when using Codex with a ChatGPT account"*. Lỗi ấy **khác** lỗi hết
+   quota — đọc nhầm thì đi sai hướng chữa.
+3. **Quota tính RIÊNG theo model, và thông điệp hạn của nó KHÔNG phải phép đo.** `gpt-6-astra` báo
+   *"try again at Sep 15th"*, rồi **chạy được sau ~4 giờ**; cùng lúc ấy `gpt-5.3-codex-spark` mới là
+   model đang cạn. Đường connector GitHub (`@codex review`) có quota **thứ ba**, cạn độc lập. Muốn
+   biết đường nào còn sống thì **probe một câu** trên từng model, đừng tin dòng chữ hạn.
+4. **Bằng chứng model/effort THẬT nằm ở đầu `stderr.log` của chính lượt chạy**, không ở lời khai của
+   reviewer:
+
+```bash
+grep -E '^model:|^reasoning effort:' <run-root>/<short_id>/stderr.log | head -2
+```
+
+Cùng doctrine với `modelUsage` của lane `claude`: khai `xhigh` mà đo ra `none` là ca đã xảy ra thật
+trong kho (finding `effort` của `r368`).
+
+### `launcher.py run` để lại `dang_chay` VĨNH VIỄN khi container chết
+
+Đo hai lần trong cùng phiên: container remote khởi động lại giữa lượt ⇒ `run.json` giữ nguyên
+`trang_thai: dang_chay`, `ma_thoat: null`, `pid` trỏ một tiến trình **không còn tồn tại**. Đọc mỗi
+`run.json` sẽ báo nhầm là "đang chạy". Ba phép đo phân biệt được, và cần **cả ba**:
+
+```bash
+ps -p "$(python3 -c 'import json;print(json.load(open("<run>/run.json"))["pid"])')" >/dev/null && echo SONG || echo CHET
+ls -la <goi>/VERDICT.md          # mtime con nhich khong
+tail -3 <run>/stderr.log         # `Connection refused` + `Reconnecting... n/5` = da bi cat mang
+```
+
+Đây là lý do mục *"BẮT reviewer ghi `VERDICT.md` TĂNG DẦN"* ở dưới đáng giá gấp đôi trên nền remote:
+lượt chết vì container còn mất trắng nhanh hơn lượt chết vì bộ lọc.
+
+### Sandbox codex TỪ CHỐI lệnh dạng `rm -rf`
+
+`Rejected("... rejected: rm -f style commands are not permitted. Use a safer approach")`. Reviewer mất
+một lượt gọi vì dọn thư mục tạm bằng lệnh ấy. Báo trước trong `PROMPT.md`: dựng thư mục tạm bằng
+`mktemp -d` rồi **cứ để đó**, đừng dọn.
+
 ## Khi PAT là chính tài khoản tác giả PR
 
 `pull_request_review_write` với `event=REQUEST_CHANGES` sẽ bị GitHub từ chối:
@@ -369,6 +420,26 @@ VẤN ĐỀ:
 ```
 
 Bảng đo **chỉ liệt kê cái lệch là bảng giấu công** — đòi cả cái khớp.
+
+**HINT.patch — đường thứ hai, đã đo 6/6 trên chuỗi #518 (12-09-2026).** Bảy lượt review, sáu lượt có
+finding; mỗi lượt nộp **một** tệp `HINT.patch` và phiên chính áp NGUYÊN bằng `patch -p0 --fuzz=0`:
+**rc=0 cả sáu lượt**, 13 hunk tổng cộng, không lượt nào phải sửa tay. Đó là đối chứng cho câu ngay
+dưới — **không phải bác nó**: hai đợt đo khác điều kiện, và điều kiện mới là thứ đáng chép.
+
+Bốn điều kiện, viết thẳng vào `PROMPT.md`; bỏ cái nào cũng rơi về ca hỏng của #250/#252:
+
+- `patch -p0` tính từ **gốc cây làm việc** (`cay-kho/`), không `-p1`, không đường dẫn `a/`–`b/`;
+- reviewer **tự kiểm trước khi nộp** (`cd cay-kho && patch -p0 --dry-run < ../HINT.patch`) và **báo lại
+  số hunk + số tệp** trong verdict;
+- reviewer **KHÔNG sửa cây thật** — chỉ ghi `HINT.patch`; mọi lần áp thử ở clone tạm. Đây chính là ca
+  hỏng thứ hai của #250 ("reviewer sửa thẳng vào cây nên diff đọc thành đã áp");
+- **mỗi hunk thuộc đúng một finding**, và thân finding phải nói hunk nào đóng nó. Vá phải đóng cả
+  LỚP: lớp có N thể hiện thì HINT chạm đủ N và liệt kê đủ N vị trí — *"các chỗ khác tương tự"* là
+  không đạt.
+
+Nói thẳng với reviewer rằng bản vá sẽ bị đo lại `--fuzz=0` từng hunk, nên hunk nào không áp được
+nguyên byte sẽ lộ. Và đừng để HINT chứa `RELEASE_MANIFEST.json`: phiên chính tái sinh bằng tooling,
+HINT chỉ mang thay đổi **nội dung**.
 
 **Gói vá: đòi CÂY ĐÃ SỬA, đừng đòi diff.** Đo trên bốn lượt của PR #250 và một lượt của #252: định
 dạng diff hỏng **2/5 lượt** (đường dẫn hai chiều bất đối xứng ⇒ `patch` từ chối cả gói; hoặc reviewer

@@ -106,3 +106,70 @@ in `str(ex)` nên danh tính lớp CHẾT ngay tại đó) ⇒ **thay đổi wri
 - `shellcheck` **vắng sẵn** trong container ⇒ phải tự cài, xem §ĐIỀU KIỆN ĐO.
 - **Thông báo "background command completed (exit code 0)" của harness là vỏ shell nền thoát, KHÔNG phải
   lượt chạy xong.** Đã gặp hai lần trong lượt này. Đo bằng `pgrep` + đếm `<<< ra` + chờ dòng `SUITE_RC=`.
+
+---
+
+# CẬP NHẬT 13:40Z — VÒNG 7 ĐÃ XONG
+
+`VERDICT.rvwin512-7.md` sha256 **`f3604ab0be75919e5146bd5ccaf6dc738cc73b19d10e8714f6243ecc0d363d4e`**
+(hiện vật trong thư mục này — vòng 1–5 đã mất, vòng 6–7 nay CÓ trong git).
+
+`verdict: changes_requested` · `so_p1: 1` · `so_p2: 0` · `so_p3: 0` · `so_the_hien: 38`
+`reviewed_sha: 36f68c7` · `reviewed_base: bb7013c` · không nộp HINT.
+
+Lượt chạy: phóng 13:10:20Z, `XONG VERDICT` 13:25:15Z (~8,5 phút), 24 280 byte, **0** chữ ký mất mạng.
+Container KHÔNG recycle lần này — khác hẳn vòng 6 (phóng bốn lần).
+
+## Bảy lớp sau vòng 7
+
+| lớp | trạng thái canonical | căn cứ reviewer |
+|---|---|---|
+| F1 · F3 · F4 · F5 | **ĐÃ VÁ THẬT**, không thoái lui | control mỗi ca `1/1`; mutant chết đúng chốt (phạm vi POSIX, **không** ngoại suy Windows) |
+| **F2** | **ĐÃ VÁ THẬT** | `N10` SỐNG ở `353eae1`, CHẾT ở `36f68c7` với `consumer t125 phải nối đủ bốn tệp vào đúng tee: []` |
+| **F7** | **ĐÃ VÁ THẬT** | `N01 N02 N12 N17 N18` — cùng phép biến đổi trên **hai head**: SỐNG 6/6 ở `353eae1`, CHẾT đúng chốt 6/6 ở `36f68c7` |
+| **F6** | **VÁ HỜ, P1** | `F6.5` `StopIteration` vẫn được cấp `GIET THAT` · `F6.6` lời khai gói log không khớp · `F6.N01–N36` số bảng EVIDENCE bỏ sót |
+
+**`so_the_hien: 38` KHÔNG phải 38 lỗi thực thi** — reviewer nói rõ: 36 trong số đó là các con số bảng
+`EVIDENCE` bỏ sót, tính riêng **theo đúng lời mời của tác giả**, và phần lớn đo lại **khớp**. Lỗi số thật
+chỉ có hai: `N31` và `N32` (xem dưới).
+
+## Đã xử sau vòng 7
+
+- **F6.5 — ĐÃ VÁ, bằng cách ĐẢO CHIỀU phép đo** (không thêm tên vào danh sách): đo **hình dạng mà
+  `main()` in ra** thay vì đoán tên ngoại lệ, cộng chốt **fail-close** cho chính hợp đồng in ấy.
+  Ba phép đo trong `F6-HO-SO.md` §CẬP NHẬT SAU VÒNG 7. Bản mới **7/7** rc=0; bản vá vòng 6 trên **cùng
+  7 control** ⇒ **5/7** rc=1; đổi hợp đồng in ⇒ bộ đo **TỰ CHẶN** rc=1; catalogue đo lại **16/16**,
+  không ca nào đổi phân hạng.
+- **F6.6 — ĐÍNH CHÍNH lời khai**, không sửa mã: log `153/155` **có thật và ở trong kho**
+  (`suite-36f68c7-THIEU-shellcheck.log`); lỗi ở khâu **đóng gói sandbox**, không phải hiện vật thiếu.
+- **`N31` — lỗi thật trong thông điệp commit `36f68c7`**: tiêu đề ghi *"5 mutant sống"*, trong khi chính
+  thân commit liệt kê **SÁU** (`N01 N02 N10 N12 N17 N18`). Con số `5` chép lại từ `TRANG_THAI` vòng 6 mà
+  không đếm. Đính chính bằng hồ sơ; **không** sửa lịch sử.
+- **`N32` — `dư 386` SAI**, đúng là **`dư 399`** (`1500 − 1101`). `386` chỉ đúng với con số `1114` mà
+  chính tôi đã thừa nhận sai. `418` của lease gen 1 là dư của head CŨ `353eae1` (`1500 − 1082`) — **đúng ở
+  chỗ của nó**, không kéo sang head mới.
+
+## `KHÔNG ĐO ĐƯỢC` mà vòng 7 khai — đọc trước khi tin bất cứ ô xanh nào
+
+- **Reviewer KHÔNG chạy được full wrapper**: installer `actionlint` `rc=4`, sandbox không ra mạng. Nên
+  ba tổng kết `CHA/A/B` của **lượt reviewer độc lập** là `KHÔNG ĐO ĐƯỢC`. Reviewer **không** mượn log của
+  tác giả, không mượn `rc=0` của script bọc, không mượn control `1/1` để thay. Đúng kỷ luật.
+- **`doctrine-scan 7/0` và `adr-song 47/47` tại HEAD**: `KHÔNG ĐO ĐƯỢC` từ phía reviewer — hai lệnh ấy đòi
+  đọc `CLAUDE.md`/`PROTOCOL`/`AGENTS`/`skills`, đều nằm trong danh sách CẤM ĐỌC của prompt. Reviewer từ
+  chối nhận lời khai làm sự thật. **Đây là chi phí có thật của ràng buộc cấm đọc** — nên biết mà tính.
+- **Windows / `A2` `A3` `A4` / ngưỡng 15 phút**: `KHÔNG ĐO ĐƯỢC`. Các mốc thời gian Windows trong docstring
+  (`N07` `N11`–`N15` `N17` `N18` `N30`) **thiếu log nguồn trong kho** — đó là nợ hồ sơ có thật.
+- **`A5`**: `KHÔNG ĐẠT` — `1101 > 300`. Override lên 1500 **không đổi nhãn nghiệm thu đóng băng**.
+- **Phần chống giả mạo tín hiệu của catalogue**: `KHÔNG ĐO ĐƯỢC đầy đủ`; reviewer **không tự soạn mã giả
+  mạo**, đúng ràng buộc đã giao. `F6.5` đo ngoại lệ không hậu tố, **không phải** phép giả mạo.
+
+## Việc kế tiếp
+
+- **Vòng 8** để xác nhận `F6` đóng. Sẽ là **7/10** vòng sau khi phóng.
+- **Lease gen 2 ĐÃ SOẠN nhưng CHƯA ĐẨY**: nhánh `ops/cap-lease-504`, commit cục bộ, bia mộ **hai chiều**
+  đã khớp, `lease_publish.py check` ⇒ **`ĐĂNG ĐƯỢC` rc=0**. Còn thiếu **đúng một thứ**: URL chỉ thị bền của
+  chủ kho cho `granted_on_instruction` và `nang_tran.can_cu`. Cổng **không** xác thực trường ấy, nên để
+  placeholder là mỏ neo BỊA — không đẩy.
+  **Chú ý:** khối `nang_tran` của gen 1 tự bó phạm vi *"Chỉ lease …exec-1…, generation 1"*, nên gen 2
+  **KHÔNG tự thừa hưởng** trần `S2=1500`; phải cấp LẠI. Đọc một override hết phạm vi thành còn hiệu lực
+  chính là tự nâng trần.

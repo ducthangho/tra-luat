@@ -1,0 +1,18 @@
+dot bien                               dich   ket            chi tiet
+CTRL-ngoai-le-Exception-TRAN           t160   TIN DUNG GIA   chet vi ngoai le VO CAN: Exception: CONTROL vo can, khong lien quan A/B
+CTRL-ngoai-le-Error-TRAN               t160   TIN DUNG GIA   chet vi ngoai le VO CAN: Error: CONTROL vo can, ten lop dung bang Error
+CTRL-ngoai-le-RuntimeError             t160   TIN DUNG GIA   chet vi ngoai le VO CAN: RuntimeError: CONTROL vo can, co tien to
+CTRL-chet-DUNG-chot-ca-dich            t160   GIET THAT      rc=1, chot ca dich: chẩn đoán phải giữ đúng vế 'không-actor=(rc=0, 2/2)': None
+CTRL-StopIteration-khong-hau-to        t160   GIET THAT      rc=1, chot ca dich: StopIteration: CONTROL vo can, khong co hau to Error/Excepti
+CTRL-lop-tu-dinh-nghia-ten-la          t160   GIET THAT      rc=1, chot ca dich: Bung: CONTROL vo can, ten lop khong theo quy uoc nao
+CTRL-GeneratorExit                     t160   TIN DUNG GIA   rc=1 nhung ĐỎ=[] — khong phai ca dich
+
+  DAT   CTRL-ngoai-le-Exception-TRAN       mong_doi=TIN DUNG GIA   thuc_te=TIN DUNG GIA
+  DAT   CTRL-ngoai-le-Error-TRAN           mong_doi=TIN DUNG GIA   thuc_te=TIN DUNG GIA
+  DAT   CTRL-ngoai-le-RuntimeError         mong_doi=TIN DUNG GIA   thuc_te=TIN DUNG GIA
+  DAT   CTRL-chet-DUNG-chot-ca-dich        mong_doi=GIET THAT      thuc_te=GIET THAT
+  LECH  CTRL-StopIteration-khong-hau-to    mong_doi=TIN DUNG GIA   thuc_te=GIET THAT
+  LECH  CTRL-lop-tu-dinh-nghia-ten-la      mong_doi=TIN DUNG GIA   thuc_te=GIET THAT
+  DAT   CTRL-GeneratorExit                 mong_doi=TIN DUNG GIA   thuc_te=TIN DUNG GIA
+
+TU KIEM: 5/7 ca dung phan hang — LECH: [('CTRL-StopIteration-khong-hau-to', 'TIN DUNG GIA', 'GIET THAT'), ('CTRL-lop-tu-dinh-nghia-ten-la', 'TIN DUNG GIA', 'GIET THAT')]

@@ -72,3 +72,73 @@ Nên đóng hẳn = sửa `main()` phát một dấu riêng cho `TinHieuChotCa` 
 
 Trạng thái đúng của F6 sau lượt này: **ĐÃ VÁ THẬT phần đo được, CÒN NỢ phần chống giả mạo tín hiệu** —
 không phải "F6 đã đóng".
+
+---
+
+# CẬP NHẬT SAU VÒNG 7 — bản vá trên KHÔNG ĐỦ, và nó hụt đúng chỗ chính nó cảnh báo
+
+Cross-review vòng 7 (`VERDICT.rvwin512-7.md`, sha256 `f3604ab0be75919e5146bd5ccaf6dc738cc73b19d10e8714f6243ecc0d363d4e`)
+giữ **F6 = VÁ HỜ, P1**, finding **F6.5**: `raise StopIteration(...)` vẫn được cấp `GIET THAT`.
+
+**Vì sao hụt, nói thẳng:** bản vá vòng 6 chỉ nới regex cho tiền tố thành tuỳ chọn, nhưng **vẫn đoán TÊN
+ngoại lệ** qua hậu tố `Error|Exception`. `StopIteration` không mang hậu tố ấy. Đó đúng là bệnh
+**"danh sách CẤM không bao giờ đủ"** của `CLAUDE.md` — và tệp này, ở bản trước, **đã trích đúng bài học
+"vá theo LỖ, không vá theo danh sách thể hiện" rồi vẫn mắc lại nó**. Thêm `StopIteration` vào danh sách
+chỉ để lại `GeneratorExit`, `KeyboardInterrupt`, `SystemExit`, và **mọi lớp tự định nghĩa**.
+
+## Bản vá thứ hai — ĐẢO CHIỀU phép đo
+
+Thôi đoán TÊN; đo **HÌNH DẠNG mà `main()` thật sự in ra**. `main()` có đúng hai nhánh:
+
+```
+except AssertionError as ex: hong.append((fn.__name__, str(ex)))                        <- CHỐT ca đích
+except Exception       as ex: hong.append((fn.__name__, f"{type(ex).__name__}: {ex}"))  <- VÔ CAN
+```
+
+Nên dấu của "vô can" là: chi tiết **bắt đầu bằng một ĐỊNH DANH Python (có thể có chấm) rồi `: `**.
+Mọi tên lớp ngoại lệ đều là định danh Python ⇒ phép này phủ **toàn bộ** nhánh thứ hai. **Không còn danh
+sách nào để mà thiếu.**
+
+`_DANG_VO_CAN = re.compile(r"^[A-Za-z_][A-Za-z0-9_]*(?:\.[A-Za-z_][A-Za-z0-9_]*)*: ")`
+
+## Chốt FAIL-CLOSE cho chính giả định ấy
+
+Phép trên **neo vào hợp đồng in của `main()`**. Trước đây bộ đo giả định hợp đồng ấy **âm thầm**; nay nó
+**ĐO**: `_kiem_hop_dong_main(NGUON)` đòi cả hai mảnh nguyên văn còn trong nguồn, và **`SystemExit` ngay
+lập tức** nếu thiếu — chứ không im lặng phân hạng sai. Một bộ đo tự tắt khi mất giả định của nó là bộ đo
+không tồn tại đúng lúc nó cần nhất.
+
+## Răng — ba phép đo, chạy được
+
+| phép đo | kết quả | rc |
+|---|---|---|
+| bản MỚI, 7 control | **7/7 đúng phân hạng** | **0** |
+| `dotbien512_VA_VONG6.py` — **cùng 7 control**, khác đúng **một dòng** phép đo | **5/7**; ĐỎ đúng ở `StopIteration` **và** lớp tự định nghĩa `Bung` | **1** |
+| đổi hợp đồng in của `main()` trong cây giả lập | bộ đo **TỰ CHẶN**, in `CHAN: main() không còn in theo hai hình dạng…` | **1** |
+| catalogue 16 đột biến, đo lại bằng bộ đo mới | `16/16 giết thật`, **không ca nào đổi phân hạng** | **0** |
+
+Ba control mới cố ý **không mang hậu tố** `Error`/`Exception` — chúng là phản chứng cho **chính cách vá
+cũ**: bất kỳ bản vá nào còn đoán TÊN ngoại lệ sẽ ĐỎ ở đó. Reviewer khai một thể hiện (`StopIteration`);
+đo lại ra **hai** (thêm lớp tự định nghĩa `Bung`).
+
+**Nói cho đúng về `CTRL-GeneratorExit`:** nó ra `TIN DUNG GIA` qua một **đường KHÁC** — `GeneratorExit`
+là `BaseException` nên `except Exception` của `main()` không bắt, không sinh dòng `ĐỎ` nào, và ca rơi vào
+nhánh `ĐỎ=[] — không phải ca đích`. Nó **không** chứng minh phép `_DANG_VO_CAN`; giữ lại vì nó chặn một
+đường tín dụng khống khác. Đừng đọc `7/7` thành "bảy phép đo cho cùng một chốt".
+
+## Vẫn CÒN NỢ — phạm vi không đổi
+
+Bộ đo chạy **ngoài tiến trình** và đọc **chuỗi**. Một `except Exception as e: raise AssertionError(f"…")`
+**trong tệp test** vẫn giả được tín hiệu chốt. Vòng 7 xếp việc ấy là `KHÔNG ĐO ĐƯỢC` (reviewer không tự
+soạn mã giả mạo, đúng ràng buộc đã giao). Đóng hẳn đòi `main()` phát dấu riêng cho một lớp tín hiệu ⇒
+**thay đổi write set** ⇒ vẫn là **đề xuất cho chủ kho**, không tự làm.
+
+Trạng thái F6 sau lượt này: **ĐÃ VÁ THẬT phần "ngoại lệ vô can" (đo được, phủ toàn nhánh), CÒN NỢ phần
+chống giả mạo tín hiệu.** Không viết mạnh hơn.
+
+## F6.6 — đính chính lời khai, không phải sửa mã
+
+Vòng 7 đúng: `EVIDENCE.rvwin512-7.md` nói **cả hai** log ở `do-cua-tac-gia/`, nhưng gói giao cho reviewer
+chỉ có **một**. Log `153/155` có thật và **nằm trong kho** tại `ops/handoff/512-luot7/suite-36f68c7-THIEU-shellcheck.log`;
+lỗi là ở **khâu đóng gói sandbox**, không phải hiện vật thiếu. Lượt sau: đóng gói ĐỦ, hoặc khai rõ tệp nào
+không nằm trong gói.

@@ -1,0 +1,19 @@
+dot bien                               dich   ket            chi tiet
+giet-chi-PID-khong-giet-cay            t154   GIET THAT      rc=1, chot ca dich: `_giet_ca_cay` KHÔNG thu hồi được CHÁU: nhịp còn tăng 1->21;
+bo-start_new_session                   t154   GIET THAT      rc=1, chot ca dich: con phải là LÃNH ĐẠO một nhóm RIÊNG, kẻo cú giết cây nhắm và
+bo-chot-selector-khong-khop            t155   GIET THAT      rc=1, chot ca dich: selector không khớp ca nào phải trả rc=3, đo được rc=0; stdo
+AB_HAN_GIAY-ghi-tay-420                t156   GIET THAT      rc=1, chot ca dich: hạn ngoài 420s phải ≥ trần t137 480s + suite đã đo 350s — nế
+tee-chi-in-o-cuoi                      t157   GIET THAT      rc=1, chot ca dich: tee KHÔNG đưa dòng của con lên stdout trong 15 s: bắt được '
+tee-bo-tien-to                         t157   GIET THAT      rc=1, chot ca dich: dòng teed phải mang tiền tố ở ĐẦU dòng: ['>>> vao t_gia_dang
+ngan-sach-cap-lai-han-toi-thieu        t156   GIET THAT      rc=1, chot ca dich: dãy 4 lệnh × 0.25s phải tiêu hết ngân sách 0.6s và DỪNG, đo 
+M09-tee-bo-flush-CA-HAI-print          t157   GIET THAT      rc=1, chot ca dich: tee KHÔNG đưa dòng của con lên stdout trong 15 s: bắt được '
+M10-ngan-sach-chi-cap-lai-khi-CAN      t156   GIET THAT      rc=1, chot ca dich: hết ngân sách GIỮA hai lệnh phải ném HetNganSachDay trước lệ
+M11-nhanh-can-tra-ket-do-dang          t156   GIET THAT      rc=1, chot ca dich: hết ngân sách GIỮA hai lệnh phải ném HetNganSachDay trước lệ
+M13-killpg-khong-chot-truong-nhom      t154   GIET THAT      rc=1, chot ca dich: không được giết nhóm khi cùng nhóm runner hoặc con không phả
+M15-classifier-tra-KHOP-khi-lech       t160   GIET THAT      rc=1, chot ca dich: mọi lệch phải làm CHÍNH t125 đỏ, chưa rõ nguyên nhân: ((0, '
+M16-consumer-bo-classifier-gan-KHOP    t160   GIET THAT      rc=1, chot ca dich: mọi lệch phải làm CHÍNH t125 đỏ, chưa rõ nguyên nhân: ((0, '
+M17-consumer-nhan-ca-trang-thai-CHUA-RO t160   GIET THAT      rc=1, chot ca dich: mọi lệch phải làm CHÍNH t125 đỏ, chưa rõ nguyên nhân: ((0, '
+M14-moi-truong-con-khong-TAT-DEM       t158   GIET THAT      rc=1, chot ca dich: môi trường THỰC ở t125 phải tắt đệm cả hai vế, giữ nền và ch
+T137_TRAN-bo-chan-doan                 t156   GIET THAT      rc=1, chot ca dich: trần t137 phải gồm ĐỦ ba hạn trong: 360 vs 180+180+120
+
+TONG: giet that 16/16 — tin dung gia 0, song sot 0, chan 0

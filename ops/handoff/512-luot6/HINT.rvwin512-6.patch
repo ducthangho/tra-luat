@@ -1,0 +1,76 @@
+--- ops/lease_publish_test.py
++++ ops/lease_publish_test.py
+@@ -6196,7 +6196,9 @@
+ 
+     So hàm riêng không khóa được wiring: bỏ classifier, nuốt kết quả lệch hay
+     cho cổng nhận trạng thái chưa rõ đều từng qua t160 cũ. Đo cả vế khớp và các
+-    dạng lệch; không cho một lần retry thay thế bằng chứng của toàn suite.
++    dạng lệch, giữ đúng nhãn A/B, và kiểm bốn luồng tee tại consumer. Mỗi thành phần
++    của tuple phải có chiều chỉ riêng nó thay đổi. Không cho một lần retry thay thế
++    bằng chứng của toàn suite, dù retry dùng run hay Popen trực tiếp.
+     """
+     from unittest import mock
+     a = (0, "2", "2", frozenset(), frozenset())
+@@ -6219,19 +6221,34 @@
+             p = mock.Mock(returncode=k[0])
+             p.poll.return_value = k[0]
+             return p
+-        loi = None
++        loi, tee = None, mock.Mock()
++        phan_loai = mock.Mock(wraps=_phan_loai_lech_ab)
+         with mock.patch.object(sys, "argv", [sys.argv[0]]), \
+                 mock.patch.dict(globals(), {"_mo_con_nhom_rieng": sinh_gia,
+-                                            "_theo_duoi_va_in": mock.Mock()}), \
+-                mock.patch.object(subprocess, "run") as chay_them:
++                                            "_theo_duoi_va_in": tee,
++                                            "_phan_loai_lech_ab": phan_loai}), \
++                mock.patch.object(subprocess, "run") as chay_them, \
++                mock.patch.object(subprocess, "Popen") as mo_them:
+             try:
+                 t125_AB_toan_suite_KHONG_doi_verdict_theo_ambient_actor()
+             except AssertionError as ex:
+                 loi = str(ex)
++        cac_cap_da_so = list(phan_loai.call_args_list)
++        bang(cac_cap_da_so == [mock.call(*cap)],
++             f"classifier phải nhận đúng tuple theo nhãn không-actor rồi có-actor: {cac_cap_da_so!r}")
+         bang(len(da_sinh) == 2 and all(x[0][-1] == CO_AB for x in da_sinh),
+              f"phải đo đúng hai lượt TOÀN SUITE qua t125: {da_sinh!r}")
+-        bang(not chay_them.called,
+-             "t125 không được tự đo lại ca riêng rồi dùng nó để loại trừ rò actor")
++        bang(not chay_them.called and not mo_them.called,
++             "t125 không được mở thêm tiến trình bằng run/Popen ngoài hai vế A/B")
++        duong_tee = sorted((x.args[0].name, x.args[1]) for x in tee.call_args_list)
++        bang(duong_tee == [("A.err", "[A err]"), ("A.out", "[A]"),
++                          ("B.err", "[B err]"), ("B.out", "[B]")],
++             f"consumer t125 phải nối đủ bốn tệp vào đúng tee: {duong_tee!r}")
++        if cap[0] != cap[1]:
++            for nhan, k in zip(("không-actor", "có-actor"), cap):
++                can = f"{nhan}=(rc={k[0]}, {k[1]}/{k[2]})"
++                bang(loi is not None and can in loi,
++                     f"chẩn đoán phải giữ đúng vế {can!r}: {loi!r}")
+         return loi
+ 
+     bang(do((a, a)) is None, "hai vế khớp phải qua consumer t125")
+@@ -6241,13 +6258,15 @@
+             ((do_x, do_y), ("t_x", "t_y")),
+             ((bo_x, bo_y), ("t_x", "t_y", "BỎ QUA")),
+             ((a, (1, *a[1:])), ("rc=0", "rc=1")),
+-            ((a, (0, "1", "2", a[3], a[4])), ("1/2", "2/2"))):
+-        loi = do(cap)
+-        bang(loi is not None and LECH_CHUA_RO in loi,
+-             f"mọi lệch phải làm CHÍNH t125 đỏ, chưa rõ nguyên nhân: {cap!r}: {loi!r}")
+-        bang("CHƯA loại trừ rò GITHUB_ACTOR" in loi and "[A]/[B]" in loi
+-             and all(x in loi for x in can_co),
+-             f"phải giữ bằng chứng gốc và khả năng rò actor trong chẩn đoán: {loi!r}")
++            ((a, (0, "1", "2", a[3], a[4])), ("1/2", "2/2")),
++            ((do_x, (1, "1", "3", do_x[3], do_x[4])), ("1/2", "1/3"))):
++        for hai_ve in (cap, cap[::-1]):
++            loi = do(hai_ve)
++            bang(loi is not None and LECH_CHUA_RO in loi,
++                 f"mọi lệch phải làm CHÍNH t125 đỏ, chưa rõ nguyên nhân: {hai_ve!r}: {loi!r}")
++            bang("CHƯA loại trừ rò GITHUB_ACTOR" in loi and "[A]/[B]" in loi
++                 and all(x in loi for x in can_co),
++                 f"phải giữ bằng chứng gốc và khả năng rò actor trong chẩn đoán: {loi!r}")
+ 
+ 
+ @ca

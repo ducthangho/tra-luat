@@ -138,12 +138,14 @@ def loi_launcher_windows(source=None):
     return [message for ok, message in checks if not ok], len(checks)
 
 
-# F01 (cross-review #463 luot 1) — DANH SACH CHO PHEP, khong phai vet chuoi.
-# Ban truoc dung regex `pip install ... ruff` nen bo sot `pip3`, option dat TRUOC `install`,
-# va lenh noi dong => job ay bi LOAI khoi phep kiem pin/probe (im lang, khong bao gi).
-# Cung ho "danh sach CAM khong bao gio du — phai dao thanh danh sach CHO PHEP".
-_RUFF_SPEC = re.compile(r"^ruff(==|>=|<=|~=|!=|>|<|$)")
-_RUFF_NHAC = re.compile(r"\bruff\b")
+# F01 — DANH SACH CHO PHEP, khong phai vet chuoi (regex `pip install ... ruff` bo sot
+# `pip3`, option TRUOC `install`, lenh noi dong). `_TRINH_QL_GOI` nhan dien UNG VIEN chu
+# khong cho phep; khe con lai: trinh NGOAI tap nay VA khong dung dong tu nao trong
+# ("install","add","sync") thi van vo hinh — tap nay se thieu, no chi thu hep khe.
+_TRINH_QL_GOI = frozenset({"pip", "pip3", "pipx", "uv", "poetry", "conda", "mamba",
+                           "apt", "apt-get", "apk", "brew", "npm", "yarn", "cargo",
+                           "python", "python3"})
+_RUFF_NHAC = re.compile(r"\bruff\b", re.I)   # PEP 503: ten goi khong phan biet hoa/thuong
 
 
 def _dong_logic(run):
@@ -159,56 +161,68 @@ def _dong_logic(run):
     return ra
 
 
-def _phan_loai_cai_ruff(run):
-    """GHIM | KHONG_GHIM | KHONG_PHAN_TICH_DUOC | KHONG — theo CAU TRUC lenh, khong theo chuoi.
+def _chuan_ten(t):
+    """PEP 503: bo extras, ha chu thuong, gom `-` `_` `.` — de `Ruff` va `ruff[all]` cung ve mot."""
+    t = re.split(r"\[", t, 1)[0]
+    return re.sub(r"[-_.]+", "-", t.strip().lower())
 
-    Fail-close: dong nhac `ruff` kem `install` ma KHONG khop dang duoc ho tro thi tra
-    KHONG_PHAN_TICH_DUOC — "chua chung minh duoc" khac "da chung minh la dung".
+
+def _phan_loai_cai_ruff(run):
+    """GHIM | KHONG_GHIM | KHONG_PHAN_TICH_DUOC | KHONG cho MOT than `run`.
+
+    SUA THEO LOP — ba nguyen nhan goc, khong phai bay ban va rieng cho bay bien the:
+    (1) chua chuan hoa ten => `_chuan_ten` (PEP 503, bo extras); (2) tra ve NGAY sau
+    lenh dau => nay duyet HET moi dong lay ket qua XAU NHAT, nen `upgrade` o dong sau
+    trong CUNG buoc khong con lot; (3) `--dry-run` khong cai gi => KHONG_PHAN_TICH_DUOC.
     """
+    ket = "KHONG"; vet = None
     for dong in _dong_logic(run):
         if not _RUFF_NHAC.search(dong): continue
         try: tok = shlex.split(dong)
         except ValueError: tok = dong.split()
-        # `install` KHONG phai tu khoa duy nhat: `poetry add ruff` cai that ma khong co no.
-        # Ban dau bo cham tra KHONG cho dong ay => VO HINH. Danh sach CHO PHEP phai liet ke
-        # ca DONG TU cai dat, roi moi thu nao nhac `ruff` ma khong khop => fail-close.
+        # CHAY cong cu KHAC CAI cong cu: chi la ung vien khi dong mang DONG TU cai dat
+        # HOAC mo dau bang trinh quan ly goi da biet — thieu chot nay thi chinh dong probe
+        # `ruff --version` dau doc ca buoc (da do: ci.yml that tut xuong RUFF CI 0/3).
         dt = next((t for t in ("install", "add", "sync") if t in tok), None)
+        la_tqg = bool(tok) and tok[0] in _TRINH_QL_GOI
+        if dt is None and not la_tqg:
+            continue
         if dt is None:
-            return "KHONG_PHAN_TICH_DUOC", dong
-        i = tok.index(dt)
-        dau = tok[:i]
+            ket, vet = "KHONG_PHAN_TICH_DUOC", dong; continue
+        i = tok.index(dt); dau = tok[:i]
         hop_le = dt == "install" and (
-            dau[:1] in (["pip"], ["pip3"])
-            or dau[:2] == ["uv", "pip"]
+            dau[:1] in (["pip"], ["pip3"]) or dau[:2] == ["uv", "pip"]
             or dau[:3] in (["python", "-m", "pip"], ["python3", "-m", "pip"]))
-        if not hop_le:
-            return "KHONG_PHAN_TICH_DUOC", dong
-        spec = next((t for t in tok[i + 1:] if _RUFF_SPEC.match(t)), None)
+        if not hop_le or "--dry-run" in tok:
+            ket, vet = "KHONG_PHAN_TICH_DUOC", dong; continue
+        spec = next((t for t in tok[i + 1:]
+                     if _chuan_ten(t.split("==")[0]) == "ruff"), None)
         if spec is None: continue
-        return ("GHIM" if spec == "ruff==0.15.15" else "KHONG_GHIM"), dong
-    return "KHONG", None
+        ten, _, ban = spec.partition("==")
+        moi_l = "GHIM" if (_chuan_ten(ten) == "ruff" and ban == "0.15.15") else "KHONG_GHIM"
+        # XAU NHAT thang: mot dong hong trong buoc lam ca buoc khong chung minh duoc.
+        thu_tu = {"KHONG": 0, "GHIM": 1, "KHONG_GHIM": 2, "KHONG_PHAN_TICH_DUOC": 3}
+        if thu_tu[moi_l] > thu_tu[ket]: ket, vet = moi_l, dong
+    return ket, vet
 
 
-def _buoc_bi_tat(step):
-    """`if:` la hang FALSE (bool hoac chuoi) => buoc khong chay, khong tinh la provisioning."""
-    dk = step.get("if")
-    return dk is False or (isinstance(dk, str) and dk.strip().lower() in ("false", "${{ false }}"))
-
+def _buoc_co_dieu_kien(step):
+    """DAO DANH SACH: chi buoc VO DIEU KIEN moi chung minh duoc no CHAY. Ban truoc liet
+    ke hai cach viet false nen `if: '0'`, `if: '${{false}}'`, `if: runner.os == 'Linux'`
+    deu lot — doan truoc moi cach viet dieu kien la thua tu trong thiet ke.
+    """
+    return step.get("if") is not None
 
 
 def loi_ruff_ci(source=None):
     """Hợp đồng Ruff của CI, đọc MỌI job — packet #463 tách `test registry` khỏi `jobs.gate`.
 
-    Ba chốt, cùng số với bản trước (`RUFF CI: n/3` không đổi nghĩa):
-      1. mọi job có bước cài Ruff đều ghim `ruff==0.15.15`;
-      2. mọi job có bước cài Ruff đều in probe `ruff --version` (dòng riêng);
-      3. đúng MỘT job chạy `ci_dang_ky_test.py --chay`, và Ruff được cài trong CÙNG job ấy,
-         TRƯỚC bước đó — không job nào có bước ⇒ lỗi.
-    Vì sao 1–2 đo trên MỌI job cài Ruff chứ không chỉ job registry: hai phản chứng
-    `ruff-pin-required`/`ruff-version-probe-required` đột biến bản Ruff ĐẦU TIÊN trong tệp
-    (`replace(..., 1)`), tức bản ở `gate`; nếu chỉ soi job registry thì cả hai LỌT — đo được
-    trên YAML tách trong bộ nhớ khi soạn packet #463.
-    Tương thích lùi: `ci.yml` chưa tách (mọi thứ trong `gate`) vẫn trả `[]`.
+    Ba chốt, cùng số với bản trước (`RUFF CI: n/3` không đổi nghĩa): (1) mọi job cài Ruff
+    đều ghim `ruff==0.15.15`; (2) mọi job cài Ruff đều in probe `ruff --version` (dòng
+    riêng); (3) đúng MỘT job chạy `--chay`, Ruff cài trong CÙNG job ấy và TRƯỚC bước đó.
+    Vì sao 1–2 đo trên MỌI job: hai phản chứng `ruff-pin-required`/`ruff-version-probe-
+    required` đột biến bản Ruff ĐẦU TIÊN trong tệp, tức bản ở `gate` — chỉ soi job registry
+    thì cả hai LỌT. Tương thích lùi: `ci.yml` chưa tách vẫn trả `[]`.
     """
     source = CI_WORKFLOW.read_text(encoding="utf-8") if source is None else source
     try:
@@ -221,7 +235,9 @@ def loi_ruff_ci(source=None):
     runs_theo_job = {jn: [(x.get("run") if isinstance(x.get("run"), str) else "") for x in bs]
                      for jn, bs in buoc_theo_job.items()}
     # Phan loai TUNG BUOC; buoc bi `if: false` khong tinh la provisioning.
-    loai_theo_job = {jn: [("KHONG", None) if _buoc_bi_tat(x)
+    loai_theo_job = {jn: [(("KHONG_PHAN_TICH_DUOC", "buoc co dieu kien")
+                           if _RUFF_NHAC.search(str(x.get("run") or "")) else ("KHONG", None))
+                          if _buoc_co_dieu_kien(x)
                           else _phan_loai_cai_ruff(x.get("run") if isinstance(x.get("run"), str) else "")
                           for x in bs]
                      for jn, bs in buoc_theo_job.items()}
@@ -229,8 +245,8 @@ def loi_ruff_ci(source=None):
                     if any(l != "KHONG" for l, _ in loai_theo_job[jn])}
     job_registry = [jn for jn, runs in runs_theo_job.items()
                     if any("ci_dang_ky_test.py --chay" in x for x in runs)]
-    # THIEU GHIM = khong co buoc GHIM, HOAC co buoc KHONG_GHIM / KHONG_PHAN_TICH_DUOC.
-    # Ve thu hai bat ca "upgrade khong ghim dat SAU buoc da ghim" va ca dang cai la.
+    # THIEU GHIM = khong co buoc GHIM, HOAC co buoc KHONG_GHIM / KHONG_PHAN_TICH_DUOC —
+    # ve thu hai bat "upgrade khong ghim dat SAU buoc da ghim" va dang cai la.
     thieu_ghim = [jn for jn in job_cai_ruff
                   if not any(l == "GHIM" for l, _ in loai_theo_job[jn])
                   or any(l in ("KHONG_GHIM", "KHONG_PHAN_TICH_DUOC") for l, _ in loai_theo_job[jn])]
@@ -422,7 +438,16 @@ def chay_moi(moi=MOI, cach_ly=CACH_LY, chay_mot=_chay_that,
 
 def phan_chung():
     """Mỗi chốt dùng một bản sao fixture riêng dưới /tmp."""
-    cases, names = [], ["i-thieu-so", "ii-mat-tep", "iii-mat-loi-goi", "iv-vi-tri-la"]
+    # F02 luot 3 — MOT danh sach, MOT diem noi; ten va ket qua o CUNG mot tuple.
+    # Hai ban va truoc giu HAI danh sach song song roi canh bang DO DAI, va reviewer do
+    # duoc chot ay KHONG bat lech THU TU: bo ten cuoi truoc `zip` ra 64/64 True, dao thu
+    # tu ten ra 65/65 True. Nay khong con `zip`, khong con danh sach thu hai — LOP loi
+    # chet theo CAU TRUC. Kem chot ten trung (dau hieu copy-paste lam bang doc sai).
+    KQ = []
+    def _them(ten, ok):
+        if any(t == ten for t, _ in KQ):
+            raise AssertionError(f"trung ten ca phan chung: {ten}")
+        KQ.append((ten, bool(ok)))
     with tempfile.TemporaryDirectory(prefix="ci-dang-ky-") as d:
         base = pathlib.Path(d)
         for i, kind in enumerate(("thieu", "mat_tep", "mat_loi_goi", "vi_tri_la")):
@@ -440,57 +465,62 @@ def phan_chung():
                     DA_NOI.add(".claude/dev/a_test.py"); wf = ""
                 else:
                     (r / "la").mkdir(); (r / "la/x_test.py").touch()
-                cases.append(bool(kiem(r, reg, wf)[0]))
+                _them(("i-thieu-so", "ii-mat-tep", "iii-mat-loi-goi", "iv-vi-tri-la")[i], bool(kiem(r, reg, wf)[0]))
             finally:
                 DA_NOI.clear(); DA_NOI.update(old)
         # (a) Bản sao sổ cách ly mất slug phải đỏ.
         mutant_cu = {".claude/dev/a_test.py": {"slug": "", "ly_do": "đỏ trên CI"}}
-        cases.append(bool(kiem(r, reg, wf, mutant_cu)[0]))
+        _them("a-cach-ly-thieu-slug", bool(kiem(r, reg, wf, mutant_cu)[0]))
         mutant = {".claude/dev/a_test.py": {"slug": "nợ", "ly_do": "đỏ trên CI",
                                                 "log": "log-r3"}}
-        cases.append(bool(kiem(r, reg, wf, mutant)[0]))
+        _them("r4-thieu-moi-truong", bool(kiem(r, reg, wf, mutant)[0]))
         # r5: neo môi trường ngoài đúng nguồn giá trị phải đỏ ở tầng cấu trúc.
         mutant = {".claude/dev/a_test.py": {"slug": "nợ", "ly_do": "đỏ trên CI",
                     "moi_truong": "github-actions/lin-typo", "log": "log-r3"}}
-        cases.append(any("môi trường không hợp lệ" in x for x in kiem(r, reg, wf, mutant)[0]))
+        _them("r5-moi-truong-sai-tap", any("môi trường không hợp lệ" in x for x in kiem(r, reg, wf, mutant)[0]))
         # r5: xoá run thật, giữ nguyên lệnh trong YAML comment vẫn phải đỏ.
         yml = r / ".github/workflows/comment.yml"
         yml.write_text("jobs:\n  x:\n    steps:\n      # - run: python .claude/dev/a_test.py\n", encoding="utf-8")
         old = set(DA_NOI); DA_NOI.clear(); DA_NOI.add(".claude/dev/a_test.py")
-        try: cases.append(any("CI không gọi mục" in x for x in kiem(r, reg)[0]))
+        try: _them("r5-comment-gia-loi-goi", any("CI không gọi mục" in x for x in kiem(r, reg)[0]))
         finally: DA_NOI.clear(); DA_NOI.update(old)
         old = set(DA_NOI); DA_NOI.clear(); DA_NOI.add(".claude/dev/a_test.py")
         for level in ("step", "job", "expr", "normal"):
             yml.write_text("jobs:\n  x:\n" + ("    if: false\n" if level == "job" else "") + "    steps:\n      - " + (("if: ${{ false }}\n        " if level == "expr" else "if: false\n        ") if level in ("step", "expr") else "") + "run: python .claude/dev/a_test.py\n", encoding="utf-8")
-            found = any("CI không gọi mục" in x for x in kiem(r, reg)[0]); cases.append(found if level != "normal" else not found)
+            found = any("CI không gọi mục" in x for x in kiem(r, reg)[0])
+            _them({"step": "r5-step-if-false", "job": "r5-job-if-false",
+                   "expr": "r5-step-if-literal-expr", "normal": "r5-normal-step"}[level],
+                  found if level != "normal" else not found)
         DA_NOI.clear(); DA_NOI.update(old)
         # (b) Bản sao chương trình cách ly chuyển xanh phải bị yêu cầu gỡ.
         green = base / "green_test.py"
         green.write_text("print('1/1')\n", encoding="utf-8")
         p = subprocess.run([sys.executable, green], text=True, stdout=subprocess.PIPE)
         xanh = p.returncode == 0 and bang_chung_xanh(p.stdout, r"^(\d+)/(\d+)$")
-        cases.append(not cach_ly_chap_nhan(xanh, "github-actions/linux", "github-actions/linux"))
+        _them("b-cach-ly-chuyen-xanh", not cach_ly_chap_nhan(xanh, "github-actions/linux", "github-actions/linux"))
         # r4: bỏ phép so làm bản xanh bắn ở môi trường khác; đúng ra phải là None.
-        cases.append((not xanh) is not cach_ly_chap_nhan(xanh, "github-actions/linux", None))
+        _them("r4-bo-so-moi-truong", (not xanh) is not cach_ly_chap_nhan(xanh, "github-actions/linux", None))
         # r4: đột biến đổi trạng thái thứ ba thành ĐẠT phải bị bắt.
-        cases.append(cach_ly_chap_nhan(xanh, "github-actions/linux", None) is None and True is not None)
+        _them("r4-khong-do-duoc-thanh-dat", cach_ly_chap_nhan(xanh, "github-actions/linux", None) is None and True is not None)
     # Hai chiều bằng chứng: rc đỏ dù có dòng xanh; rc xanh nhưng thiếu dòng xanh.
-    cases += [not (1 == 0 and bang_chung_xanh("TỔNG: ĐẠT", r"TỔNG: ĐẠT")),
-              not (0 == 0 and bang_chung_xanh("", r"TỔNG: ĐẠT"))]
+    _them("rc-do-ban-in-xanh", not (1 == 0 and bang_chung_xanh("TỔNG: ĐẠT", r"TỔNG: ĐẠT")))
+    _them("rc-xanh-thieu-ban-in", not (0 == 0 and bang_chung_xanh("", r"TỔNG: ĐẠT")))
     # r6 (#401): VỊ TỪ trung thực rồi mà NƠI TIÊU THỤ vẫn làm tròn lên được — đó là
     # khuyết tật đã sống sót qua r4 và r5. Nên canh cả hai tầng.
-    cases += [dem_la_do(None, True) is True, dem_la_do(None, False) is False,
-              dem_la_do(False, False) is True, dem_la_do(True, True) is False]
+    _them("r6-vi-tu-none-trong-ci-la-do", dem_la_do(None, True) is True)
+    _them("r6-vi-tu-none-ngoai-ci-khong-do", dem_la_do(None, False) is False)
+    _them("r6-vi-tu-da-xanh-van-do", dem_la_do(False, False) is True)
+    _them("r6-vi-tu-cach-ly-hop-le-khong-do", dem_la_do(True, True) is False)
     # r6: `trong_ci` phải ĐỘC LẬP với `moi_truong_hien_tai` — thiếu RUNNER_OS vẫn là CI,
     # còn không có GITHUB_ACTIONS thì dù có RUNNER_OS vẫn KHÔNG phải CI.
-    cases += [trong_ci({"GITHUB_ACTIONS": "true"}) is True,
-              trong_ci({"RUNNER_OS": "Linux"}) is False,
-              trong_ci({"GITHUB_ACTIONS": "false", "RUNNER_OS": "Linux"}) is False]
-    cases += [moi_truong_hien_tai({"GITHUB_ACTIONS": "true", "RUNNER_OS": "Linux"}) == MOI_TRUONG_CI,
-              moi_truong_hien_tai({"GITHUB_ACTIONS": "true", "RUNNER_OS": "Windows"}) == MOI_TRUONG_WINDOWS,
-              moi_truong_hien_tai({"GITHUB_ACTIONS": "true", "RUNNER_OS": "macOS"}) is None,
-              cach_ly_chap_nhan(True, MOI_TRUONG_CI, MOI_TRUONG_WINDOWS) is True,
-              cach_ly_chap_nhan(False, MOI_TRUONG_CI, MOI_TRUONG_WINDOWS) is False]
+    _them("r6-trong-ci-khong-doi-runner-os", trong_ci({"GITHUB_ACTIONS": "true"}) is True)
+    _them("r6-thieu-github-actions-khong-phai-ci", trong_ci({"RUNNER_OS": "Linux"}) is False)
+    _them("r6-github-actions-false-khong-phai-ci", trong_ci({"GITHUB_ACTIONS": "false", "RUNNER_OS": "Linux"}) is False)
+    _them("wp430-nhan-linux", moi_truong_hien_tai({"GITHUB_ACTIONS": "true", "RUNNER_OS": "Linux"}) == MOI_TRUONG_CI)
+    _them("wp430-nhan-windows", moi_truong_hien_tai({"GITHUB_ACTIONS": "true", "RUNNER_OS": "Windows"}) == MOI_TRUONG_WINDOWS)
+    _them("wp430-runner-la-fail-close", moi_truong_hien_tai({"GITHUB_ACTIONS": "true", "RUNNER_OS": "macOS"}) is None)
+    _them("wp430-windows-xanh-that", cach_ly_chap_nhan(True, MOI_TRUONG_CI, MOI_TRUONG_WINDOWS) is True)
+    _them("wp430-windows-do-that", cach_ly_chap_nhan(False, MOI_TRUONG_CI, MOI_TRUONG_WINDOWS) is False)
     # r6: TẦNG TIÊU THỤ — gọi chính `chay_moi` với bộ chạy giả. Gỡ phép cộng ở đó ra thì
     # ba ca này ĐỎ; đó là điều mà đột biến canh-vị-từ `r4-khong-do-duoc-thanh-dat` KHÔNG
     # bắt được, và là lý do nợ N6 lọt cổng trên windows-latest.
@@ -520,20 +550,20 @@ def phan_chung():
     # Cách dựng từng ô: `chap_nhan is None` cần nền KHÁC neo; `True` cần nền KHỚP neo
     # và bộ test ĐỎ (cách ly còn hiệu lực); `False` cần nền KHỚP neo và bộ test XANH
     # (đã hết nợ, phải đòi gỡ khỏi cách ly).
-    MIEN_DEM = [(None, True, 1), (None, False, 0),
-                (True, True, 0), (True, False, 0),
-                (False, True, 1), (False, False, 1)]
-    for _cn, _ci, _mong in MIEN_DEM:
+    MIEN_DEM = [(None, True, 1, "none-trong-ci"), (None, False, 0, "none-ngoai-ci"),
+                (True, True, 0, "cach-ly-hop-le-trong-ci"), (True, False, 0, "cach-ly-hop-le-ngoai-ci"),
+                (False, True, 1, "da-xanh-trong-ci"), (False, False, 1, "da-xanh-ngoai-ci")]
+    for _cn, _ci, _mong, _o in MIEN_DEM:
         _nen = None if _cn is None else "github-actions/linux"
         _kq = (0, "1/1\n") if _cn is False else (1, "0/1\n")
-        cases.append(_dem(_ci, _nen, _kq)[0] == _mong)
+        _them("r6-TIEU-THU-o-" + _o, _dem(_ci, _nen, _kq)[0] == _mong)
     known = _dem(True, MOI_TRUONG_WINDOWS, (1, "0/1\n"))
     unknown = _dem(True, "github-actions/macos", (1, "0/1\n"))
     windows = _dem(True, MOI_TRUONG_WINDOWS, (1, "0/1\n"), MOI_TRUONG_WINDOWS)
-    cases += [known[0] == 1 and "KHÔNG CÁCH LY" in known[1],
-              unknown[0] == 1 and "KHÔNG ĐO ĐƯỢC" in unknown[1],
-              windows[0] == 0 and "CÁCH LY" in windows[1],
-              cach_ly_chap_nhan(True, MOI_TRUONG_CI, "github-actions/macos") is None]
+    _them("wp430-known-other-consumer", known[0] == 1 and "KHÔNG CÁCH LY" in known[1])
+    _them("wp430-unknown-consumer", unknown[0] == 1 and "KHÔNG ĐO ĐƯỢC" in unknown[1])
+    _them("wp430-windows-anchor-positive", windows[0] == 0 and "CÁCH LY" in windows[1])
+    _them("wp430-unknown-predicate", cach_ly_chap_nhan(True, MOI_TRUONG_CI, "github-actions/macos") is None)
     # ── packet #456: SO DANG KY PHAN BIET DUOC NEN ────────────────────────────────────
     # Di qua chinh `chay_moi`, khong goi thang `mau_theo_nen`: khuyet tat "lam tron" nam o
     # NOI TIEU THU gia tri, va do la bai hoc r6/#401 da tra gia ba lan trong tep nay.
@@ -562,105 +592,86 @@ def phan_chung():
                             doc_trong_ci=lambda: True,
                             doc_nen_windows=lambda: la_windows)
 
-    cases += [_dem_nen(_WIN456, False) == 1, _dem_nen(_WIN456, True) == 0,
-              _dem_nen(_LNX456, True) == 0, _dem_nen(_LNX456, False) == 0,
-              _dem_nen(_RONG456, True) == 1,
-              # M4: duong Linux phai giong BASE tung dau vao, ke ca dau vao xau.
-              _dem_nen(_RONG456, False) == 0,
-              MOI[_P456] == _MAU_BASE456,
-              all(bang_chung_xanh(x, MOI[_P456]) is bang_chung_xanh(x, _MAU_BASE456)
-                  for x in (_LNX456, _RONG456, _WIN456))]
+    _them("p456-dong-windows-tren-linux-la-DO", _dem_nen(_WIN456, False) == 1)
+    _them("p456-dong-windows-tren-windows-DAT", _dem_nen(_WIN456, True) == 0)
+    _them("p456-dong-linux-tren-windows-DAT", _dem_nen(_LNX456, True) == 0)
+    _them("p456-dong-linux-tren-linux-khong-doi", _dem_nen(_LNX456, False) == 0)
+    _them("p456-dot-bien-0-tren-0-DO-tren-windows", _dem_nen(_RONG456, True) == 1)
+    # M4: duong Linux phai giong BASE tung dau vao, ke ca dau vao xau.
+    _them("p456-linux-nhan-0-tren-0-Y-HET-base", _dem_nen(_RONG456, False) == 0)
+    _them("p456-mau-linux-KHONG-DOI-so-voi-base", MOI[_P456] == _MAU_BASE456)
+    _them("p456-linux-A-B-tung-dau-vao-khop-base",
+          all(bang_chung_xanh(x, MOI[_P456]) is bang_chung_xanh(x, _MAU_BASE456)
+              for x in (_LNX456, _RONG456, _WIN456)))
     try:
         launcher_source = LAUNCHER_WORKFLOW.read_text(encoding="utf-8")
-        cases.append(giet_windows_311_launcher_workflow(launcher_source))
-        cases.append(not loi_launcher_windows(
-            launcher_source.replace("fromJSON(", "fromJSON( ", 1))[0])
         ci_source = CI_WORKFLOW.read_text(encoding="utf-8")
-        cases += [bool(loi_ruff_ci(
-                      ci_source.replace("ruff==0.15.15", "ruff", 1))[0]),
-                  bool(loi_ruff_ci(
-                      ci_source.replace("ruff --version", "ruff --help", 1))[0])]
     except OSError:
-        cases += [False, False, False, False]
-    # A7 packet #463 — `loi_ruff_ci` đọc MỌI job: bốn fixture của đặc tả + hai ca biên.
-    # YAML tối thiểu dựng tại chỗ, không đọc tệp, để ca không đổi màu theo bố cục `ci.yml` hôm nay.
+        launcher_source = ci_source = ""        # doc khong duoc = DO, khong phai bo qua
+    _them("windows_311_launcher_workflow",
+          bool(launcher_source) and giet_windows_311_launcher_workflow(launcher_source))
+    _them("launcher-semantic-spacing", bool(launcher_source) and not loi_launcher_windows(
+          launcher_source.replace("fromJSON(", "fromJSON( ", 1))[0])
+    _them("ruff-pin-required", bool(ci_source)
+          and bool(loi_ruff_ci(ci_source.replace("ruff==0.15.15", "ruff", 1))[0]))
+    _them("ruff-version-probe-required", bool(ci_source)
+          and bool(loi_ruff_ci(ci_source.replace("ruff --version", "ruff --help", 1))[0]))
+    # A7 #463 — bốn fixture của đặc tả + hai ca biên; YAML tối thiểu dựng tại chỗ để ca
+    # không đổi màu theo bố cục `ci.yml` hôm nay.
     _ruff = {"name": "cài Ruff 0.15.15 và in probe dương",
              "run": "python -m pip install --quiet ruff==0.15.15\nruff --version\n"}
     _reg = {"name": "test registry", "run": "python .claude/dev/ci_dang_ky_test.py --chay"}
     _khac = {"name": "khác", "run": "python x.py"}
     def _p(lenh): return {"name": "cài Ruff (biến thể)", "run": lenh + "\nruff --version\n"}
     def _wf(jobs): return yaml.safe_dump({"on": "push", "jobs": jobs}, sort_keys=False)
-    _RUFF_TEN = ["ruff-ci-chua-tach-tuong-thich-lui", "ruff-ci-da-tach-dung",
-                 "ruff-ci-da-tach-thieu-ruff", "ruff-ci-da-tach-ruff-sau-registry",
-                 "ruff-ci-khong-job-nao-chay-registry", "ruff-ci-hai-job-chay-registry"]
-    _ruff_fx = [
-        (_wf({"gate": {"steps": [_ruff, _khac, _reg]}}), 0),                                   # chưa tách
-        (_wf({"gate": {"steps": [_ruff, _khac]}, "gate-registry": {"steps": [_ruff, _reg]}}), 0),  # tách đúng ← ca đổi màu
-        (_wf({"gate": {"steps": [_ruff, _khac]}, "gate-registry": {"steps": [_reg]}}), 1),     # thiếu Ruff
-        (_wf({"gate": {"steps": [_ruff, _khac]}, "gate-registry": {"steps": [_reg, _ruff]}}), 1),  # Ruff sau
-        (_wf({"gate": {"steps": [_ruff, _khac]}}), 1),                                          # không job nào
-        (_wf({"gate": {"steps": [_ruff, _reg]}, "gate-registry": {"steps": [_ruff, _reg]}}), 1),   # hai job
+    # Moi fixture la mot bo ba (ten, dau vao, ky vong) — xem chu thich F02 dau ham.
+    _FX = [
+        ("chua-tach-tuong-thich-lui", {"gate": {"steps": [_ruff, _khac, _reg]}}, 0),
+        ("da-tach-dung", {"gate": {"steps": [_ruff, _khac]}, "gate-registry": {"steps": [_ruff, _reg]}}, 0),
+        ("da-tach-thieu-ruff", {"gate": {"steps": [_ruff, _khac]}, "gate-registry": {"steps": [_reg]}}, 1),
+        ("da-tach-ruff-sau-registry", {"gate": {"steps": [_ruff, _khac]}, "gate-registry": {"steps": [_reg, _ruff]}}, 1),
+        ("khong-job-nao-chay-registry", {"gate": {"steps": [_ruff, _khac]}}, 1),
+        ("hai-job-chay-registry", {"gate": {"steps": [_ruff, _reg]}, "gate-registry": {"steps": [_ruff, _reg]}}, 1),
     ]
-    # F01 — bay dau vao chinh bo cham TUNG BO SOT. Ca `apt` cham nhanh FAIL-CLOSE
-    # (`KHONG_PHAN_TICH_DUOC`): thieu no thi dot bien "bo fail-close" SONG SOT — da do.
-    for _ten_f01, _b in [("pip3", [_p("pip3 install ruff")]),
-                         ("option-truoc-install", [_p("python -m pip --quiet install ruff")]),
-                         ("lenh-noi-dong", [_p("python -m pip install \\\n  ruff")]),
-                         ("buoc-if-false", [dict(_ruff, **{"if": "false"})]),
-                         ("upgrade-khong-ghim-sau-pin", [_ruff, _p("python -m pip install --upgrade ruff")]),
-                         ("comment-chua-pin", [_p("# ruff==0.15.15")]),
-                         ("dang-cai-khong-phan-tich-duoc", [_ruff, _p("apt-get install -y ruff")]),
-                         ("poetry-add-khong-phan-tich-duoc", [_ruff, _p("poetry add ruff")])]:
-        _ruff_fx.append((_wf({"gate": {"steps": [_ruff]},
-                              "gate-registry": {"steps": _b + [_reg]}}), 1))
-        _RUFF_TEN.append("ruff-ci-" + _ten_f01)
-    names += ["a-cach-ly-thieu-slug", "r4-thieu-moi-truong", "r5-moi-truong-sai-tap",
-              "r5-comment-gia-loi-goi", "r5-step-if-false", "r5-job-if-false",
-              "r5-step-if-literal-expr", "r5-normal-step", "b-cach-ly-chuyen-xanh",
-              "r4-bo-so-moi-truong", "r4-khong-do-duoc-thanh-dat",
-              "rc-do-ban-in-xanh", "rc-xanh-thieu-ban-in",
-              "r6-vi-tu-none-trong-ci-la-do", "r6-vi-tu-none-ngoai-ci-khong-do",
-              "r6-vi-tu-da-xanh-van-do", "r6-vi-tu-cach-ly-hop-le-khong-do",
-              "r6-trong-ci-khong-doi-runner-os", "r6-thieu-github-actions-khong-phai-ci",
-              "r6-github-actions-false-khong-phai-ci",
-              "wp430-nhan-linux", "wp430-nhan-windows", "wp430-runner-la-fail-close",
-              "wp430-windows-xanh-that", "wp430-windows-do-that",
-              "r6-TIEU-THU-o-none-trong-ci", "r6-TIEU-THU-o-none-ngoai-ci",
-              "r6-TIEU-THU-o-cach-ly-hop-le-trong-ci",
-               "r6-TIEU-THU-o-cach-ly-hop-le-ngoai-ci",
-               "r6-TIEU-THU-o-da-xanh-trong-ci", "r6-TIEU-THU-o-da-xanh-ngoai-ci",
-               "wp430-known-other-consumer", "wp430-unknown-consumer",
-               "wp430-windows-anchor-positive", "wp430-unknown-predicate",
-              "p456-dong-windows-tren-linux-la-DO",
-              "p456-dong-windows-tren-windows-DAT",
-              "p456-dong-linux-tren-windows-DAT",
-              "p456-dong-linux-tren-linux-khong-doi",
-              "p456-dot-bien-0-tren-0-DO-tren-windows",
-              "p456-linux-nhan-0-tren-0-Y-HET-base",
-              "p456-mau-linux-KHONG-DOI-so-voi-base",
-              "p456-linux-A-B-tung-dau-vao-khop-base",
-               "windows_311_launcher_workflow", "launcher-semantic-spacing",
-               "ruff-pin-required", "ruff-version-probe-required"]
-    # F02 (cross-review #463 luot 1) — HAI DANH SACH SONG SONG MAT CUNG CHI SO.
-    # Ban truoc noi 6 ket qua fixture vao CUOI `cases` nhung 6 ten vao `names` TRUOC 47 ten
-    # con lai => 53 ten lech ca. Tong 57/57 van dung nen loi KHONG LO KHI XANH; chi lo khi
-    # dot bien: go chot thu tu Ruff thi chuong trinh in `windows_311_launcher_workflow: LOT`.
-    # Chua theo CAU TRUC, khong chi doi thu tu: tu day moi fixture noi TEN va KET QUA o CUNG
-    # MOT CHO qua `_them`, nen khong the lech nua. Chot canh giu lai o duoi.
-    def _them(ten, ok):
-        names.append(ten); cases.append(ok)
-        if len(names) != len(cases):                      # bat bien, khong bao gio duoc gay
-            raise AssertionError(f"names/cases lech: {len(names)} vs {len(cases)}")
-    for _ten, (_s, _n) in zip(_RUFF_TEN, _ruff_fx):
-        _loi = len(loi_ruff_ci(_s)[0])
-        _them(_ten, (_loi == 0) if _n == 0 else (_loi >= 1))
-    # CHOT CANH cho chinh lop loi nay: hai danh sach phai dai bang nhau TRUOC khi zip.
-    # `zip` cat im lang theo ben ngan hon, nen thieu chot nay thi lech do dai cung khong lo.
-    if len(names) != len(cases):
-        raise AssertionError(f"phan_chung: names {len(names)} != cases {len(cases)}")
-    for name, ok in zip(names, cases): print(f"ĐỘT BIẾN {name}: {'ĐỎ đúng' if ok else 'LỌT'}")
-    print(f"PHẢN CHỨNG: {sum(cases)}/{len(cases)} đỏ đúng")
-    return all(cases)
+    for _t, _b in [("pip3", [_p("pip3 install ruff")]),
+                   ("option-truoc-install", [_p("python -m pip --quiet install ruff")]),
+                   ("lenh-noi-dong", [_p("python -m pip install \\\n  ruff")]),
+                   ("buoc-if-false", [dict(_ruff, **{"if": "false"})]),
+                   ("upgrade-khong-ghim-sau-pin", [_ruff, _p("python -m pip install --upgrade ruff")]),
+                   ("comment-chua-pin", [_p("# ruff==0.15.15")]),
+                   ("dang-cai-khong-phan-tich-duoc", [_ruff, _p("apt-get install -y ruff")]),
+                   ("poetry-add-khong-phan-tich-duoc", [_ruff, _p("poetry add ruff")]),
+                   # moi dau vao deu tung LOT qua mot ban bo cham truoc do
+                   ("ten-goi-viet-hoa", [_p("python -m pip install Ruff")]),
+                   ("extras", [_p("python -m pip install ruff[all]")]),
+                   ("upgrade-cung-buoc-dong-sau", [_p("python -m pip install ruff==0.15.15\npython -m pip install --upgrade ruff")]),
+                   ("dry-run", [_p("python -m pip install --dry-run ruff==0.15.15")]),
+                   ("if-so-khong", [dict(_ruff, **{"if": "0"})]),
+                   ("if-bieu-thuc-false", [dict(_ruff, **{"if": "${{false}}"})]),
+                   ("if-chi-linux", [dict(_ruff, **{"if": "runner.os == 'Linux'"})])]:
+        _FX.append((_t, {"gate": {"steps": [_ruff]}, "gate-registry": {"steps": _b + [_reg]}}, 1))
+    # CHIEU NHAN — do duoc: bo `_chuan_ten` / bo `_TRINH_QL_GOI` deu SONG SOT qua 72 ca vi moi
+    # fixture bien the deu doi DO, tuc ta chi dang do FAIL-CLOSE. Hai ban ghim duoi day HOP LE.
+    for _t, _b in [("ghim-ten-viet-hoa", [_p("python -m pip install Ruff==0.15.15")]),
+                   ("ghim-extras", [_p("python -m pip install ruff[all]==0.15.15")])]:
+        _FX.append((_t, {"gate": {"steps": [_ruff]}, "gate-registry": {"steps": _b + [_reg]}}, 0))
+    # Fail-open cua `_TRINH_QL_GOI`: dong trinh-quan-ly-goi cham ruff bang DONG TU ta khong
+    # hieu (`uninstall`) phai la KHONG_PHAN_TICH_DUOC — bo qua thi gate nhan buoc da go ruff.
+    _FX.append(("go-cai-sau-khi-ghim",
+                {"gate": {"steps": [_ruff]},
+                 "gate-registry": {"steps": [_p("python -m pip install ruff==0.15.15\n"
+                                                "python -m pip uninstall -y ruff"), _reg]}}, 1))
+    for _ten, _jobs, _mong in _FX:
+        _loi = len(loi_ruff_ci(_wf(_jobs))[0])
+        _them("ruff-ci-" + _ten, (_loi == 0) if _mong == 0 else (_loi >= 1))
+    # Bang ten KHONG con ton tai: 47 ten cu tung nam o day, cach cho sinh ket qua hang
+    # tram dong. Do la chinh nguon lech ma F02 to cao — nay moi ca noi ten VA ket qua o
+    # CUNG mot loi goi `_them`, nen khong con danh sach nao de dong bo, khong con `zip`
+    # de cat im lang, va khong con phep canh do dai nao phai tin.
+    for ten, ok in KQ:
+        print(f"ĐỘT BIẾN {ten}: {'ĐỎ đúng' if ok else 'LỌT'}")
+    print(f"PHẢN CHỨNG: {sum(ok for _, ok in KQ)}/{len(KQ)} đỏ đúng")
+    return all(ok for _, ok in KQ)
 
 
 def main():

@@ -270,8 +270,9 @@ khong_do_duoc:
   - muc: 'URL uỷ quyền bền cho `99aef14` (`authorization_url`)'
     ly_do: >-
       Chỉ thị chọn phương án 2 nằm trong phiên điều phối, KHÔNG có review/comment GitHub nào mang
-      nó. Nay ghi `authorization_url: null` thay vì bỏ khoá — bỏ khoá làm khe hở VÔ HÌNH với cả
-      người đọc lẫn máy. Không dựng hiện vật sau sự việc để lấp ô trống.
+      nó. Nay ghi `authorization_url: null` để khoản thiếu bằng chứng dễ thấy hơn. Cả khoá vắng
+      lẫn giá trị null đều phát hiện được khi đối chiếu schema; cả hai vẫn thiếu URL bền. Bản vá
+      chưa thêm cổng kiểm land evidence. Không dựng hiện vật giả sau sự việc để lấp ô trống.
   - muc: 'Byte thật của comment trên GitHub'
     ly_do: >-
       Đường ĐỌC của MCP chuẩn hoá thực thể HTML trong thân issue/comment, và container không có

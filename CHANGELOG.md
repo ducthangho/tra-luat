@@ -32,8 +32,9 @@ Hai clone dựng từ cùng một nguồn, trong một lệnh, cùng SHA `880292
 **Bốn số trên TRÔI theo head, và đó là tính chất chứ không phải lỗi** — ghi ra đây vì một reviewer
 đã đo ở head khác rồi chấm bảng này sai. `#516` land thêm 2 biên nhận, nên trên `7718863` cùng hai
 lệnh ấy cho `100 ĐẠT / tổng 153` và `200 KHÔNG ĐO ĐƯỢC` (đo lại, cả hai). Bảng neo `8802924`; ai
-đo ở head khác mà thấy số khác thì **đó là bằng chứng neo đang làm đúng việc của nó**, không phải
-bằng chứng bảng sai. Cặp `0 vi phạm` so `KHÔNG ĐO ĐƯỢC` — thứ kết luận thật sự nằm ở đây — **không
+đo ở head khác mà thấy số khác thì **chưa đủ cơ sở kết luận bảng sai**; vẫn phải đo lại
+tại chính `8802924` để xác minh bảng. Chênh lệch giữa hai head tự nó không chứng minh bảng đúng.
+Cặp `0 vi phạm` so `KHÔNG ĐO ĐƯỢC` — thứ kết luận thật sự nằm ở đây — **không
 đổi** qua cả hai head.
 
 Hai sai độc lập chồng lên nhau trong một câu:
@@ -58,8 +59,9 @@ ghi `authorization_url: null`. Tệp của #493 là **tệp duy nhất bỏ hẳ
 
 Khối `uy_quyen` của nó CÓ khai trung thực *"KHÔNG có hiện vật GitHub cho câu này"* — nhưng khai trung
 thực về một khoá thiếu **không phải là có khoá ấy**, và `khong_do_duoc` cũng không liệt nó. Tiền lệ
-`plat-x8` cho thấy quy ước đúng là **viết khoá ra và để `null`**: có khoá thì khe hở ĐO ĐƯỢC, bỏ khoá
-thì nó vô hình.
+`plat-x8` là tiền lệ **viết khoá ra và để `null`** để ghi rõ khoản thiếu bằng chứng. Cả khoá vắng
+lẫn giá trị `null` đều có thể phát hiện bằng cách đối chiếu schema; bản vá chỉ làm khoản thiếu dễ
+thấy hơn. Nó chưa cung cấp `<durable-url>` và chưa thêm cổng kiểm land evidence.
 
 **Vá**: ghi `authorization_url: null` + một mục `khong_do_duoc` + chú thích ngay tại khoá. **KHÔNG bịa
 URL**: uỷ quyền cho `99aef14` là chỉ thị trong phiên; dựng một comment "uỷ quyền" trên #493 sau khi nó
@@ -87,7 +89,9 @@ mà vắng mặt** — chưa ai viết.
   hai biến thể lane PR nhường chỗ cho biến thể lane LAND.
 - `gate (windows-latest)`: **BỊ HUỶ Ở TRẦN**. 20:24:50Z → 21:25:07Z = **60 phút 17 giây**, đúng
   `timeout-minutes: 60` (`ci.yml:64`). Bộ đếm bước: **21 thành công · 1 BỊ HUỶ · 22 không chạy**
-  (22 bước sau chỗ huỷ không bao giờ khởi động). Bước bị huỷ là **số 20,
+  (`skipped` gồm cả bước bị loại bởi điều kiện: `PR head contains required EOL base` nằm TRƯỚC
+  bước bị huỷ và chỉ chạy ở sự kiện `pull_request`). Chưa có run JSON trong gói để phân rã
+  22 bước theo nguyên nhân; không quy tất cả cho việc huỷ. Bước bị huỷ là **số 20,
   `lease-publish selftest (đo lại setup sau G5)`**.
 - `thu-hoi` trên `4965f0a`: thành công.
 

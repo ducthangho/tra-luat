@@ -206,10 +206,13 @@ Trigger reviewer bot của kho: comment `@codex review` trên PR.
 
 ## Lấy diff của ĐÚNG head SHA
 
+Trong ví dụ, `<base_sha>` và `<reviewed_sha>` là hai OID đã chốt cho lượt.
+`gh pr view` in metadata tại lúc gọi; hai lệnh Git dùng trực tiếp cặp OID ấy.
+
 ```bash
 gh pr view 56 --json headRefOid,headRefName,state,statusCheckRollup
-gh pr diff 56 > diff.patch
-git diff --numstat <base_sha> <head_sha> > numstat.txt
+git diff <base_sha> <reviewed_sha> > diff.patch
+git diff --numstat <base_sha> <reviewed_sha> > numstat.txt
 ```
 
 Hợp đồng `reviewed_sha` và xử lý khi head đổi: xem protocol §8/§13.
@@ -220,6 +223,7 @@ Ví dụ dưới dùng clone rời và checkout detached. Worktree dùng chung k
 quyền reviewer và yêu cầu cách ly xem protocol §8/§13.
 
 ```bash
+RV=<thu-muc-clone-rieng>
 git clone -q <nguồn> "$RV"
 git -C "$RV" remote set-url origin https://github.com/<chủ>/<kho>   # BẮT BUỘC — xem (1)
 git -C "$RV" fetch -q origin <nhánh>
@@ -313,11 +317,14 @@ bị xoá trên máy chủ cộng một nhánh mới chưa fetch), và `refs/rem
 đếm lệch sẵn 1 mà chẳng ai mù. Bản đầu của chính mục này đếm bằng `wc -l` **ngay dưới một câu trỏ về
 doctrine cấm làm thế** — cross-review PR #261 bắt (P1).
 
-Sau khi clone, thứ kiểm được trong sandbox chỉ là *mirror có nhận đủ cái kho nguồn đang có không*:
+Sau khi clone, ví dụ dưới đối chiếu tên và OID của các ref `refs/remotes/origin/*`
+(trừ ref tên `HEAD`) giữa kho nguồn và clone. Nó không kiểm mọi namespace ref
+hoặc tính toàn vẹn mọi object; dòng cuối chỉ đọc cờ shallow:
 
 ```bash
-diff <(git -C <kho> for-each-ref --format='%(refname:lstrip=3)' refs/remotes/origin | grep -v '^HEAD$' | sort) \
-     <(git -C "$R/cay-kho" for-each-ref --format='%(refname:lstrip=3)' refs/remotes/origin | grep -v '^HEAD$' | sort)
+diff <(git -C <kho> for-each-ref --format='%(refname:lstrip=3) %(objectname)' refs/remotes/origin | grep -v '^HEAD ' | sort) \
+     <(git -C "$R/cay-kho" for-each-ref --format='%(refname:lstrip=3) %(objectname)' refs/remotes/origin | grep -v '^HEAD ' | sort)
+echo "ref diff rc=$?"
 git -C "$R/cay-kho" rev-parse --is-shallow-repository        # true/false về shallow
 ```
 
@@ -455,8 +462,9 @@ nguyên nhân khác biệt với #250/#252 hay chứng minh từng điều kiệ
   §8/§13. Adapter không đặt thêm quy tắc nghiệm thu theo hunk hay theo lớp.
 
 Để áp thử, dùng clone tạm với cùng lệnh `patch -p0 --fuzz=0` ở trên.
-Về tệp phái sinh và tooling sinh `RELEASE_MANIFEST.json`, xem protocol §9 và `CLAUDE.md`
-mục "Quy ước deploy".
+Về tệp phái sinh, xem protocol §9 và `CLAUDE.md`, mục "Quy ước deploy".
+Cú pháp sinh manifest tạm nằm ở protocol §10.2 (`release-manifest --root … --out …`);
+các cờ được mô tả bởi `--help` của lệnh `scripts/tl.py release-manifest`.
 
 **Lane tệp và lane diff — phép đo #250/#252.** Trên bốn lượt #250 và một lượt #252,
 định dạng diff hỏng **2/5 lượt** (đường dẫn hai chiều bất đối xứng, hoặc diff được lấy
@@ -482,11 +490,14 @@ Nơi ghi, khai transport và điều kiện hoàn tất: xem protocol §8/§13.
 
 ## Ghi lại lượt review
 
+`<reviewed_sha>` dưới đây là giá trị `reviewed_sha` trong `VERDICT.md` của lượt.
+Lệnh dưới truyền trực tiếp OID ấy vào `record-review`.
+
 ```bash
 PY="$(command -v python3 || command -v python || command -v py)"   # CLAUDE.md: nhận CẢ BA tên
 "$PY"  .claude/dev/packet_loop.py record-review --packet 55 --provider codex \
     --verdict changes_requested \
-    --reviewed-sha $(gh pr view 56 --json headRefOid -q .headRefOid) \
+    --reviewed-sha <reviewed_sha> \
     --finding-id url-alias      --finding-desc "mô tả tự do, KHÔNG tham gia phép đếm" \
     --finding-id van-tay-lach   --finding-desc "mỗi lỗi một slug ổn định"
 ```

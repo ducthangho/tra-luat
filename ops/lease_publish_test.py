@@ -6021,11 +6021,25 @@ def t157_tee_dua_dong_con_LEN_NGAY_trong_luc_con_CON_DANG_CHAY():
               "f = open(sys.argv[1], 'a', encoding='utf-8')\n"
               "f.write('>>> vao t_gia_dang_chay 2026-01-01T00:00:00Z' + chr(10)); f.flush()\n"
               "time.sleep(30)\n")
-        p = _mo_con_nhom_rieng([sys.executable, "-c", ma, str(log)], nen,
-                              subprocess.DEVNULL, subprocess.DEVNULL)
         dung, khoa = threading.Event(), threading.Lock()
         luu = io.BytesIO()
         bat = io.TextIOWrapper(luu, encoding="utf-8", newline="\n")
+        # Hiệu chuẩn chính phép đọc sẽ dùng bên dưới: phải phân biệt write và flush.
+        # Đổi capture về StringIO sẽ đỏ ở đây, kể cả khi đồng thời bỏ flush của tee.
+        try:
+            bat.write("kiem-dem")
+            bang(luu.getvalue().decode("utf-8") == "",
+                 "capture mất răng: thấy dữ liệu CHƯA flush")
+            bat.flush()
+            bang(luu.getvalue().decode("utf-8") == "kiem-dem",
+                 "capture hỏng: không thấy dữ liệu ĐÃ flush")
+            bat.seek(0)
+            bat.truncate(0)
+        except Exception:
+            bat.close()
+            raise
+        p = _mo_con_nhom_rieng([sys.executable, "-c", ma, str(log)], nen,
+                              subprocess.DEVNULL, subprocess.DEVNULL)
         cu = sys.stdout
         t = threading.Thread(target=_theo_duoi_va_in, args=(log, "[GIA]", dung, khoa), daemon=True)
         try:
@@ -6070,7 +6084,7 @@ def t158_tee_chi_song_khi_con_KHONG_DEM_nen_moi_truong_con_phai_TAT_DEM():
     vào (kẻo vá một lỗ mà mở lỗ khác — chính bất biến của t125).
 
     ĐỘT BIẾN LÀM CA NÀY ĐỎ: `_moi_truong_con_ab` trả `dict(nen)` trần; t125 truyền `mt` thay cho
-    `_moi_truong_con_ab(mt)` (chốt thứ ba vẫn xanh nhưng chiều CÓ biến sẽ đỏ nếu đo qua helper).
+    `_moi_truong_con_ab(mt)` (seam gọi CHÍNH t125 phía dưới kiểm wiring và hai môi trường tại Popen).
     """
     # Quan sát bytes bên DƯỚI `TextIOWrapper` có đệm, KHÔNG dùng `StringIO`: cross-review lượt 3
     # (F2.1) đo được `StringIO.getvalue()` thấy cả dữ liệu CHƯA xả, nên một phép bắt như thế không
@@ -6079,6 +6093,32 @@ def t158_tee_chi_song_khi_con_KHONG_DEM_nen_moi_truong_con_phai_TAT_DEM():
     import io
     import threading
     mt_nen = {k: v for k, v in os.environ.items() if k != "GITHUB_ACTOR"}
+
+    # Gọi consumer thật, chỉ thay tiến trình/tee bằng seam. Không để PYTHONUNBUFFERED
+    # của wrapper che mất việc t125 thôi gọi helper. CO_AB cũng không được bỏ phép đo này.
+    from unittest import mock
+    moi_truong = []
+    nen_kiem = {k: v for k, v in os.environ.items() if k in ("TMPDIR", "TEMP", "TMP")}
+    nen_kiem.update(AB_GIU="giu", GITHUB_ACTOR="ambient")
+    khong_actor = {k: v for k, v in nen_kiem.items() if k != "GITHUB_ACTOR"}
+    def sinh_gia(lenh, env, stdout, stderr):
+        moi_truong.append(dict(env))
+        stdout.write("lease_publish: 1/1 đạt; đã chạy=1, bỏ qua=0\n")
+        stdout.flush()
+        p = mock.Mock(returncode=0)
+        p.poll.return_value = 0
+        return p
+    with mock.patch.dict(os.environ, nen_kiem, clear=True), \
+            mock.patch.object(sys, "argv", [sys.argv[0]]), \
+            mock.patch.dict(globals(), {"_mo_con_nhom_rieng": sinh_gia,
+                                        "_theo_duoi_va_in": mock.Mock()}):
+        t125_AB_toan_suite_KHONG_doi_verdict_theo_ambient_actor()
+    bang(len(moi_truong) == 2, f"t125 phải sinh đúng hai vế: {moi_truong}")
+    a, b = moi_truong
+    bang(a == dict(khong_actor, PYTHONUNBUFFERED="1")
+         and b == dict(a, GITHUB_ACTOR="ke-la-mat-khong-co-quyen"),
+         f"môi trường THỰC ở t125 phải tắt đệm cả hai vế, giữ nền và chỉ khác GITHUB_ACTOR: {a}, {b}")
+
     bang("PYTHONUNBUFFERED" in _moi_truong_con_ab({}) and _moi_truong_con_ab({})["PYTHONUNBUFFERED"] == "1",
          f"`_moi_truong_con_ab` phải TẮT ĐỆM cho lượt con: {_moi_truong_con_ab({})!r}")
     bang("GITHUB_ACTOR" not in _moi_truong_con_ab({"A": "1"}),
@@ -6115,6 +6155,7 @@ def t158_tee_chi_song_khi_con_KHONG_DEM_nen_moi_truong_con_phai_TAT_DEM():
             return ("t_do_dem_158" in thay), con_song, nhat_ky
 
     thay_dem, song_dem, _ = do({k: v for k, v in mt_nen.items() if k != "PYTHONUNBUFFERED"})
+    bang(song_dem, "chiều CÒN ĐỆM phải có con sống; con chết sớm không chứng minh đệm giữ dòng")
     bang(not thay_dem,
          "phản chứng MẤT RĂNG: con CÒN ĐỆM mà tee đã thấy dòng — nghĩa là phép đo này không còn phân "
          "biệt được hai đường, và câu 'phải tắt đệm' trong `_moi_truong_con_ab` thành vô căn cứ; "
@@ -6281,6 +6322,42 @@ def t156_han_NGOAI_khong_nho_hon_tong_han_TRONG_va_duoi_tran_cung():
     bang(het_tai == (1, 1) and da_goi == [["lenh1"]],
          f"hết ngân sách GIỮA hai lệnh phải ném HetNganSachDay trước lệnh #1: "
          f"het_tai={het_tai}, da_goi={da_goi}")
+
+
+@ca
+def t159_t137_can_do_DU_ket_qua_va_dung_nhan_than_timeout():
+    """Khóa consumer t137 bằng dãy đủ/thiếu và timeout thân thứ hai.
+
+    Dùng workflow thật và actionlint thật; seam chỉ thay bộ chạy dãy shellcheck để
+    tạo kết quả dở dang/timeout tất định. t137 thường vẫn chạy ShellCheck thật.
+    Bỏ chốt len(ket), hoặc quay nhãn timeout về len(ket), phải làm CHÍNH ca này đỏ.
+    """
+    from unittest import mock
+
+    def do(kieu):
+        da_goi, loi = [], None
+        def day_gia(cac_lenh, ngan_sach):
+            da_goi.extend(cac_lenh)
+            chot(len(cac_lenh) == 2, f"fixture t137 phải có hai thân shell: {cac_lenh}")
+            if kieu == "treo":
+                raise subprocess.TimeoutExpired(cac_lenh[1], ngan_sach)
+            ket = [subprocess.CompletedProcess(l, 0, "", "") for l in cac_lenh]
+            return ket if kieu == "du" else ket[:1]
+        with mock.patch.dict(globals(), {"_chay_day_lenh_trong_ngan_sach": day_gia}):
+            try:
+                t137_M9_workflow_admission_hop_dong_tinh_va_actionlint_shellcheck()
+            except TinHieuChotCa as ex:
+                loi = str(ex)
+        bang(len(da_goi) == 2, f"chưa tới consumer shellcheck ở t137: {loi}")
+        return loi
+
+    bang(do("du") is None, "t137 phải nhận đủ hai kết quả xanh")
+    thieu = do("thieu")
+    bang(thieu is not None and "shellcheck chỉ trả 1/2 kết quả" in thieu,
+         f"t137 phải từ chối kết quả dở dang 1/2: {thieu!r}")
+    treo = do("treo")
+    bang(treo is not None and "shellcheck TREO trên thân run #1:" in treo,
+         f"timeout lệnh thứ hai phải ghi run #1 từ ex.cmd: {treo!r}")
 
 
 CO_CHI_CA = "--chi-ca="   # `--chi-ca=t01_` ⇒ chỉ chạy ca có tên bắt đầu bằng tiền tố ấy (M3 packet #504 dùng để sinh lượt con rẻ)

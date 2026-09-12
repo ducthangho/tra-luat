@@ -184,27 +184,33 @@ def r25_hop_dong_loi_api(m):
     _doi_loi(m, m.kiem_ket_qua, "claude-opus-5", {"is_error": False, "modelUsage": {None: {}}})
     _doi_loi(m, m.chon, "routine", ["scripts/x.py"], 0, 1, ("claude-opus-5",))
 def r26_duong_dan_bi_chan_nham(m):
-    for path in ("..foo.py", "..a/b.py", "...x"):
-        _bac(m, "routine", [path])
-    _bac(m, "routine", ["ops/..bar.md"])
+    for path in ("..foo.py", "..a/b.py", "...x", "..ops/x.py"):
+        if m._chuan_hoa_duong(path) != path: raise AssertionError("bị stripped: %s" % path)
+        if _bac(m, "routine", [path]) != BAC[2]: raise AssertionError("không thành khong-biet: %s" % path)
+    if m._chuan_hoa_duong("ops/..bar.md") != "ops/..bar.md": raise AssertionError("bị stripped: ops/..bar.md")
+    if _bac(m, "routine", ["ops/..bar.md"]) != BAC[0]: raise AssertionError("ops/..bar.md sai điểm")
 def r27_duong_dan_thoat_repo(m):
     for path in ("..", "../x", "../../etc/passwd", "ops/../../x"):
         _doi_loi(m, m.chon, "routine", [path], 0, 1)
 def r28_so_bang_nhau_exact_match(m):
     kq1 = m.chon("routine", [".claude/settings.json"], 0, 1)
     if "chạm vùng cong" not in kq1[2]: raise AssertionError("sai vùng .claude/settings.json")
+    if m._vung(".claude/settings.json") != "cong": raise AssertionError(".claude/settings.json không là cong")
     kq2 = m.chon("routine", ["RELEASE_MANIFEST.json"], 0, 1)
     if "chạm vùng cong" not in kq2[2]: raise AssertionError("sai vùng RELEASE_MANIFEST.json")
+    if m._vung("RELEASE_MANIFEST.json") != "cong": raise AssertionError("RELEASE_MANIFEST.json không là cong")
     kq3 = m.chon("routine", ["docs/PROTOCOL_DA_PHIEN.md"], 0, 1)
     if "chạm vùng giao-thuc" not in kq3[2]: raise AssertionError("sai vùng docs/PROTOCOL_DA_PHIEN.md")
+    if m._vung("docs/PROTOCOL_DA_PHIEN.md") != "giao-thuc": raise AssertionError("docs/PROTOCOL_DA_PHIEN.md không là giao-thuc")
     kq4 = m.chon("routine", [".gitignore"], 0, 1)
     if "khong-biet" in kq4[2] or "cong" in kq4[2] or "giao-thuc" in kq4[2]: raise AssertionError("sai vùng .gitignore")
-    if _bac(m, "routine", ["tmp/.claude/settings.json.bak"]) != BAC[2]: raise AssertionError("tmp/.claude/settings.json.bak không là khong-biet")
-    if _bac(m, "routine", ["x/RELEASE_MANIFEST.json"]) != BAC[2]: raise AssertionError("x/RELEASE_MANIFEST.json không là khong-biet")
-    if _bac(m, "routine", ["docs/PROTOCOL_DA_PHIEN.md.orig"]) != BAC[0]: raise AssertionError("docs/PROTOCOL_DA_PHIEN.md.orig không là tai-lieu")
-    if _bac(m, "routine", ["vendor/.gitignore"]) != BAC[2]: raise AssertionError("vendor/.gitignore không là khong-biet")
-    if _bac(m, "routine", ["a/b/.claude/settings.json"]) != BAC[2]: raise AssertionError("a/b/.claude/settings.json không là khong-biet")
-    if _bac(m, "routine", ["ops/RELEASE_MANIFEST.json.tmp"]) != BAC[0]: raise AssertionError("ops/RELEASE_MANIFEST.json.tmp không là dev")
+    if m._vung(".gitignore") != "dev": raise AssertionError(".gitignore không là dev")
+    if m._vung("tmp/.claude/settings.json.bak") != "khong-biet": raise AssertionError("tmp/.claude/settings.json.bak không là khong-biet")
+    if m._vung("x/RELEASE_MANIFEST.json") != "khong-biet": raise AssertionError("x/RELEASE_MANIFEST.json không là khong-biet")
+    if m._vung("docs/PROTOCOL_DA_PHIEN.md.orig") != "tai-lieu": raise AssertionError("docs/PROTOCOL_DA_PHIEN.md.orig không là tai-lieu")
+    if m._vung("vendor/.gitignore") != "khong-biet": raise AssertionError("vendor/.gitignore không là khong-biet")
+    if m._vung("a/b/.claude/settings.json") != "khong-biet": raise AssertionError("a/b/.claude/settings.json không là khong-biet")
+    if m._vung("ops/RELEASE_MANIFEST.json.tmp") != "dev": raise AssertionError("ops/RELEASE_MANIFEST.json.tmp không là dev")
 
 CA = [(h.__name__, h) for h in (r01_bon_bac_biet_truoc, r02_khong_biet_day_len_cao_nhat, r03_banh_coc_hai_chieu,
     r04_dinh_danh_allow_list, r05_chin_fixture_hai_rig, r06_json_mo_ho_phai_do, r07_don_dieu_moi_to_hop,
@@ -217,7 +223,7 @@ CA = [(h.__name__, h) for h in (r01_bon_bac_biet_truoc, r02_khong_biet_day_len_c
     r26_duong_dan_bi_chan_nham, r27_duong_dan_thoat_repo, r28_so_bang_nhau_exact_match)]
 def _db(tim, thay, *dich): return tim, thay, list(dich)
 DOT_BIEN = {
-    "bo_nhanh_khong_biet": _db('    if "khong-biet" in cac_vung: cong(3, "chạm vùng khong-biet")', '    if "khong-biet" in cac_vung: pass', "r02_khong_biet_day_len_cao_nhat", "r28_so_bang_nhau_exact_match"),
+    "bo_nhanh_khong_biet": _db('    if "khong-biet" in cac_vung: cong(3, "chạm vùng khong-biet")', '    if "khong-biet" in cac_vung: pass', "r02_khong_biet_day_len_cao_nhat", "r26_duong_dan_bi_chan_nham"),
     "bo_banh_coc": _db("        if truoc > chi_so:", "        if False and truoc > chi_so:", "r03_banh_coc_hai_chieu", "r18_cli_bac_truoc_fail_close"),
     "nhan_bi_danh": _db('MO_HINH_CHO_PHEP = ("claude-opus-5", "claude-fable-5")', 'MO_HINH_CHO_PHEP = ("claude-opus-5", "claude-fable-5", "opus", "fable", "sonnet")', "r04_dinh_danh_allow_list"),
     "tin_subtype_success": _db('    model_usage = ket_qua_json.get("modelUsage")', '    if ket_qua_json.get("subtype") == "success":\n        return "modelUsage: ĐẠT (đột biến tin subtype)"\n    model_usage = ket_qua_json.get("modelUsage")', "r05_chin_fixture_hai_rig", "r13_tut_giua_chung_bi_chan", "r14_khong_co_model_phu_van_dat"),
@@ -263,6 +269,9 @@ DOT_BIEN = {
         '    if ".claude/settings.json" in path or "RELEASE_MANIFEST.json" in path or path.startswith(\n            (".github/workflows/", ".github/checks/", ".claude/hooks/",\n                        ".claude/dev/packet_loop", "ops/lease_publish")): return "cong"\n    if "docs/PROTOCOL_DA_PHIEN.md" in path or path.startswith(\n            ("docs/adr/", ".claude/skills/", ".claude/agents/")): return "giao-thuc"\n    if path.startswith("scripts/"): return "runtime"\n    if ".gitignore" in path',
         'r28_so_bang_nhau_exact_match'
     ),
+    "dot_names_become_known": _db('    return "khong-biet"', '    if path.startswith(".."): return "dev"\n    return "khong-biet"', 'r26_duong_dan_bi_chan_nham'),
+    "normalizer_strips_leading_dots": _db('    return chuan', '    return chuan.lstrip(".")', 'r01_bon_bac_biet_truoc', 'r21_ghim_bien_duoi_tuyet_doi', 'r26_duong_dan_bi_chan_nham', 'r28_so_bang_nhau_exact_match'),
+    "same_score_wrong_zone": _db('    if path == ".gitignore" or path.startswith((".claude/dev/", "ops/")): return "dev"', '    if path == ".gitignore" or path.startswith((".claude/dev/", "ops/")) or path.endswith(".orig"): return "dev"', 'r28_so_bang_nhau_exact_match'),
 }
 def _chay(m):
     dat, ly = {}, {}

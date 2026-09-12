@@ -176,6 +176,13 @@ khong_do_duoc:
   - 'Trạng thái Windows của merge commit `dc02c9b`: `gate (windows-latest)` bị HUỶ theo chỉ thị chủ kho (lỗi đã biết, tiết kiệm runner) ⇒ KHÔNG ĐO ĐƯỢC. Đừng suy xanh từ việc `gate (ubuntu-latest)` success.'
 
 codex_connector_cung_head:
+  kich_luc: 'KHÔNG ghi nhận trên head của lượt này trong hồ sơ'
+  hoan_tat_luc: KHONG_AP_DUNG
+  ket_qua: >-
+    Lượt connector được ghi dưới đây chấm head land `dd62c88`, không chấm reviewed_sha
+    `91bbc82`. Kết quả ấy được giữ riêng ở `codex_connector_head_land`.
+
+codex_connector_head_land:
   kich_luc: 'CÓ — phiên điều phối gọi tay bằng comment `@codex review` lúc 15:25:48Z 12-09-2026, trên head cuối `dd62c88` (không phải head của lượt này)'
   hoan_tat_luc: '2026-09-12T15:30:00Z'
   ket_qua: >-

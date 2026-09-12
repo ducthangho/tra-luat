@@ -4014,6 +4014,63 @@ def t126_dau_da_dang_la_HIEN_VAT_SUA_DUOC_chu_khong_phai_ban_ghi_git():
              f"lại mục `danh_doi`, đừng nới lời khẳng định cho vừa.")
 
 
+LECH_KHOP, LECH_ACTOR, LECH_CHAP_CHON = "KHỚP", "LỆCH_THEO_ACTOR", "LỆCH_DO_CHẬP_CHỜN"
+
+
+def _phan_loai_lech_ab(ket_a, ket_b, do_lai_tuan_tu):
+    """Hai vế A/B lệch — LỆCH VÌ ACTOR, hay lệch vì một ca CHẬP CHỜN? Trả `(ket_luan, thông điệp)`.
+
+    VÌ SAO CẦN HÀM NÀY. `t125` khai hai vế khác nhau ĐÚNG một biến `GITHUB_ACTOR`. Lời khai ấy đúng
+    về MÔI TRƯỜNG và sai về THỰC TẾ CHẠY: hai vế còn khác nhau ở chỗ chúng chạy SONG SONG và tranh
+    tài nguyên. Nên một ca chập chờn đủ để hai vế lệch, và bản trước kết luận thẳng *"có helper kế
+    thừa actor"* — một lời khai MẠNH HƠN PHÉP ĐO.
+
+    Đo được trên CI 12-09-2026, head `e6feddb`, lượt `gate (ubuntu-latest)`: hai vế cho `153/153` và
+    `152/153`, ca lệch là `t139`, và lý do ĐỎ thật (đọc được nhờ tee) là
+    `S8-bo-deadline: kỳ vọng GIET, thực SONG (seam: KhoObject._con_thoi_gian)` — một mutant về
+    deadline sống sót, KHÔNG phải rò rỉ actor. Sáu phép thử tại chỗ không tái hiện được: `t139` riêng
+    (có/không actor, có/không `GITHUB_ACTIONS`), ba lần dưới 6 tiến trình chiếm CPU trên 4 lõi, và cả
+    hai vế chạy song song với môi trường giống CI — tất cả QUA.
+
+    CƠ CHẾ PHÂN BIỆT: đo lại ĐÚNG tập ca lệch, TUẦN TỰ (không song song), trong CẢ HAI môi trường.
+    · hai môi trường vẫn cho kết quả KHÁC nhau ⇒ verdict THẬT SỰ theo actor ⇒ `LỆCH_THEO_ACTOR`;
+    · hai môi trường cho kết quả GIỐNG nhau ⇒ lệch ban đầu do chập chờn/tải ⇒ `LỆCH_DO_CHẬP_CHỜN`.
+    Cả hai đều làm ca ĐỎ — đây KHÔNG phải đường làm cổng xanh, mà là đường làm CHẨN ĐOÁN đúng. Bất
+    biến `t125` bảo vệ là *"verdict không đổi theo actor ambient"*; một ca chập chờn làm bất biến ấy
+    KHÔNG ĐO ĐƯỢC, và "không đo được" phải ĐỎ chứ không được im lặng đổi thành một nguyên nhân khác.
+
+    `do_lai_tuan_tu(ten_ca)` trả `(ket_khong_actor, ket_co_actor)` cho MỘT ca; `None` ở một vế nghĩa
+    là chính phép đo lại không đo được, và khi ấy kết luận là `LỆCH_DO_CHẬP_CHỜN` kèm khai rõ — không
+    được nâng thành `LỆCH_THEO_ACTOR` vì thiếu bằng chứng.
+    """
+    if ket_a == ket_b:
+        return LECH_KHOP, "hai vế khớp"
+    lech_do = sorted(set(ket_a[3]) ^ set(ket_b[3]))
+    lech_bo = sorted(set(ket_a[4]) ^ set(ket_b[4]))
+    chung = f"không-actor=(rc={ket_a[0]}, {ket_a[1]}/{ket_a[2]}), có-actor=(rc={ket_b[0]}, {ket_b[1]}/{ket_b[2]})"
+    if not lech_do and not lech_bo:
+        return (LECH_ACTOR,
+                f"verdict ĐỔI theo `GITHUB_ACTOR` mà KHÔNG ca nào đổi nhãn — lệch ở SỐ ĐẾM hoặc rc; {chung}")
+    theo_actor, do_lai = [], {}
+    for ten in lech_do + lech_bo:
+        a, b = do_lai_tuan_tu(ten)
+        do_lai[ten] = (a, b)
+        if a is None or b is None:
+            continue
+        if a != b:
+            theo_actor.append(ten)
+    if theo_actor:
+        return (LECH_ACTOR,
+                f"verdict của bộ test ĐỔI theo `GITHUB_ACTOR` — đo lại TUẦN TỰ vẫn lệch ở {theo_actor!r}; "
+                f"một helper đang kế thừa biến ấy thay vì dựng môi trường con hermetic. {chung}; "
+                f"đo lại: {do_lai!r}")
+    return (LECH_CHAP_CHON,
+            f"hai vế A/B lệch, nhưng đo lại TUẦN TỰ trong CẢ HAI môi trường cho kết quả GIỐNG nhau ⇒ "
+            f"KHÔNG quy cho `GITHUB_ACTOR`: ca lệch là CHẬP CHỜN dưới tải song song, nên bất biến "
+            f"'verdict không đổi theo actor' KHÔNG ĐO ĐƯỢC ở lượt này. {chung}; "
+            f"ca lệch ĐỎ={lech_do!r} BỎ QUA={lech_bo!r}; đo lại: {do_lai!r}")
+
+
 def _mo_con_nhom_rieng(lenh, env, stdout, stderr):
     """`Popen` cho con làm LÃNH ĐẠO một nhóm tiến trình RIÊNG, để `_giet_ca_cay` với tới được CHÁU.
 
@@ -4280,13 +4337,25 @@ def t125_AB_toan_suite_KHONG_doi_verdict_theo_ambient_actor():
                     pass
     khong_actor, co_actor = ket_qua["KHÔNG actor"], ket_qua["CÓ actor lạ"]
 
-    bang(khong_actor == co_actor,
-         "verdict của bộ test ĐỔI theo `GITHUB_ACTOR` của môi trường — "
-         "một helper nào đó đang kế thừa nó thay vì dựng môi trường con hermetic. "
-         f"không-actor=(rc={khong_actor[0]}, {khong_actor[1]}/{khong_actor[2]}), "
-         f"có-actor=(rc={co_actor[0]}, {co_actor[1]}/{co_actor[2]}), "
-         f"lệch ở ca ĐỎ: {sorted(khong_actor[3] ^ co_actor[3])}, "
-         f"lệch ở ca BỎ QUA: {sorted(khong_actor[4] ^ co_actor[4])}")
+    def do_lai_tuan_tu(ten_ca):
+        """Đo lại ĐÚNG một ca, TUẦN TỰ (không song song), trong cả hai môi trường."""
+        ra = []
+        for mt in (nen, dict(nen, GITHUB_ACTOR="ke-la-mat-khong-co-quyen")):
+            try:
+                q = subprocess.run([sys.executable, str(Path(__file__).resolve()),
+                                    CO_AB, CO_CHI_CA + ten_ca],
+                                   capture_output=True, text=True, env=mt, timeout=AB_HAN_GIAY)
+            except subprocess.SubprocessError:
+                ra.append(None)
+                continue
+            m = re.search(r"lease_publish: (\d+)/(\d+) đạt", q.stdout)
+            ra.append(None if not m else (q.returncode, m.group(1), m.group(2),
+                                          frozenset(re.findall(r"(?m)^  ĐỎ  (\w+):", q.stdout)),
+                                          frozenset(re.findall(r"(?m)^  BỎ QUA (\w+):", q.stdout))))
+        return ra[0], ra[1]
+
+    ket_luan, thong_diep = _phan_loai_lech_ab(khong_actor, co_actor, do_lai_tuan_tu)
+    bang(ket_luan == LECH_KHOP, thong_diep)
 
 
 
@@ -6164,6 +6233,50 @@ def t158_tee_chi_song_khi_con_KHONG_DEM_nen_moi_truong_con_phai_TAT_DEM():
     bang(thay_tat and song_tat,
          f"với môi trường của lượt con (đã TẮT ĐỆM), tee phải thấy dòng TRONG LÚC con còn chạy: "
          f"thay={thay_tat} con_song={song_tat}; giết: {nhat_ky}")
+
+
+@ca
+def t160_lech_AB_phai_PHAN_BIET_loi_actor_voi_ca_chap_chon():
+    """`t125` không được quy MỌI lệch A/B cho `GITHUB_ACTOR` — phản chứng cho `_phan_loai_lech_ab`.
+
+    VÌ SAO CA NÀY TỒN TẠI, và nó là lỗi tác giả TỰ TÌM trên log CI: lượt `gate (ubuntu-latest)` của
+    head `e6feddb` ĐỎ với thông điệp *"verdict ĐỔI theo GITHUB_ACTOR"*, trong khi lý do ĐỎ thật của
+    lượt con — đọc được nhờ tee — là một mutant deadline sống sót ở `t139`. Lời khai của `t125` khi ấy
+    MẠNH HƠN phép đo: nó thấy hai vế lệch và gọi thẳng đó là rò rỉ actor.
+
+    Ba chiều, dùng đầu vào BỊA nên tất định và chạy trong một phần giây:
+    · hai vế khớp ⇒ `KHỚP`;
+    · lệch, mà đo lại TUẦN TỰ vẫn lệch ⇒ `LỆCH_THEO_ACTOR` (rò rỉ thật vẫn phải bị bắt);
+    · lệch, mà đo lại TUẦN TỰ khớp ⇒ `LỆCH_DO_CHẬP_CHỜN` (KHÔNG được quy cho actor).
+    Cộng chốt thứ tư: phép đo lại KHÔNG đo được (`None`) thì KHÔNG được nâng thành lỗi actor.
+
+    ĐỘT BIẾN LÀM CA NÀY ĐỎ: cho `_phan_loai_lech_ab` luôn trả `LỆCH_THEO_ACTOR` khi hai vế lệch (tức
+    bản trước); bỏ nhánh `None`; đảo hai nhánh kết luận.
+    """
+    A = (0, "153", "153", frozenset(), frozenset())
+    B_do = (1, "152", "153", frozenset({"t139_x"}), frozenset())
+    bang(_phan_loai_lech_ab(A, A, lambda t: (None, None))[0] == LECH_KHOP,
+         "hai vế giống nhau phải là KHỚP")
+
+    # đo lại TUẦN TỰ vẫn lệch ⇒ rò rỉ actor THẬT, phải bắt
+    kl, td = _phan_loai_lech_ab(A, B_do, lambda t: ((0, "1", "1", frozenset(), frozenset()),
+                                                   (1, "0", "1", frozenset({t}), frozenset())))
+    bang(kl == LECH_ACTOR and "t139_x" in td, f"đo lại còn lệch thì phải kết luận THEO ACTOR: {kl} · {td[:160]}")
+
+    # đo lại TUẦN TỰ khớp ⇒ chập chờn, KHÔNG quy cho actor
+    giong = (0, "1", "1", frozenset(), frozenset())
+    kl, td = _phan_loai_lech_ab(A, B_do, lambda t: (giong, giong))
+    bang(kl == LECH_CHAP_CHON and "KHÔNG quy cho" in td and "CHẬP CHỜN" in td,
+         f"đo lại khớp thì phải kết luận CHẬP CHỜN và nói rõ không quy cho actor: {kl} · {td[:160]}")
+
+    # KHÔNG ĐO ĐƯỢC ở phép đo lại: không được nâng thành lỗi actor
+    kl, td = _phan_loai_lech_ab(A, B_do, lambda t: (None, giong))
+    bang(kl == LECH_CHAP_CHON,
+         f"phép đo lại không đo được thì KHÔNG được nâng thành lỗi actor: {kl} · {td[:160]}")
+
+    # và mọi kết luận LỆCH đều phải làm ca ĐỎ — không có đường nào biến lệch thành xanh
+    for kl_thu in (LECH_ACTOR, LECH_CHAP_CHON):
+        bang(kl_thu != LECH_KHOP, f"{kl_thu} không được đồng nghĩa với KHỚP")
 
 
 @ca

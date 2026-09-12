@@ -113,6 +113,43 @@ cụ.** Ba phép đo phân biệt được, và cần cả ba: `ps -p <pid>` · 
   vòng **không có cổng nào canh**, y như trần 2. Đếm vòng hiện là đếm TAY.
 - **F6 ở trên** — `dotbien512.py` cần vá, nhưng nó ngoài write set nên đi hồ sơ riêng.
 
+## CẬP NHẬT 11:30Z — master ĐÃ TRÔI, và hai biến thể của `rc=12`
+
+**`origin/master` giờ là `bb7013c` ("Merge pull request #472")**, không còn `015ffcc` như bảng Neo ở trên
+ghi. Con số `015ffcc` trong bảng ấy vẫn ĐÚNG như một phép đo **tại thời điểm review vòng 6** — đó là base
+mà reviewer đã đo — nhưng nó **không còn là master hiện tại**. Đo lại 11:30Z: **cả bốn** nhánh
+`ops/handoff-512-luot6` · `claude/windows-lease-suite` · `ops/cap-lease-522-523` · `ops/cap-lease-504`
+đều **CÓ DRIFT**. Đừng suy trạng thái drift từ tệp này — `git merge-base --is-ancestor origin/master <nhánh>`
+là phép đo, tệp này chỉ là ảnh chụp.
+
+**`rc=12` của cổng `thu-hoi` có HAI biến thể, hai thông điệp, cùng một cách chữa — đừng nhầm chúng là một:**
+
+| thông điệp | nghĩa | đã gặp ở |
+|---|---|---|
+| `workflow_sha <X> != S <Y> — định nghĩa không neo canonical` | base của PR (`S`) cũ hơn master mà định nghĩa workflow được lấy từ master hiện tại | PR #525 (`83deec1a`), #512 (`7964097`, `8239554`) |
+| `KHÔNG_XÁC_ĐỊNH: S <X> không phải tổ tiên của H <Y>` | master hiện tại không nằm trong head PR | PR #528 (`083a977`) |
+
+Cách chữa cho cả hai: **merge `origin/master` vào nhánh** (merge commit, KHÔNG rebase, KHÔNG force — nhánh
+có thể có phiên khác làm việc trên đó). Cả hai đều **không** phải lỗi nội dung PR.
+
+## Ràng buộc phối hợp từ #472 (merged `bb7013c` lúc 11:22:31Z) — cho phiên làm #522
+
+Chủ kho đã thông báo nền canonical trên #512. Phần **liên quan tới packet khác, không phải #504**, chép
+lại đây vì nó sẽ mất nếu chỉ nằm trong một comment:
+
+- `#472` land ba tệp: `scripts/tl_core/release.py`, `scripts/tl_selftest.py` (**hồi quy `r357`**),
+  `RELEASE_MANIFEST.json`. **Không** thêm nội dung adapter `.agents`.
+- `#522`/`#526` **có overlap ở selftest + manifest**. Khi tích hợp `#522`: **giữ `r357` của `#472`**, đối
+  chiếu slot `r291`, và **tái sinh manifest TỪ CÂY TÍCH HỢP** — **không ghép hash manifest thủ công**.
+- Thông báo ấy **không cấp lease hay quyền mới**, và **không** yêu cầu packet nhận tin chạy CI.
+
+Nhắc kèm từ `CLAUDE.md` §Quy ước deploy mục 5, vì nó là cái bẫy đúng chỗ này: `RELEASE_MANIFEST.json` băm
+**nội dung** từng tệp, nên sửa một tệp đã có trong manifest cũng làm sha lệch dù `file_count` không đổi —
+và **lane PR KHÔNG bắt được** (lane WORKER sinh manifest tạm từ chính cây nên hấp thụ mọi thay đổi) ⇒ PR
+xanh, master ĐỎ. Muốn biết trước khi merge thì chạy đúng lệnh của lane LAND:
+`python scripts/tl.py release-verify RELEASE_MANIFEST.json --strict --json`, đòi `ok=true` và
+`expected == checked`.
+
 ## Hiện vật trong thư mục này
 
 | tệp | là gì |

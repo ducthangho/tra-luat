@@ -1,0 +1,87 @@
+# Lease EXECUTOR — QUY-TRINH-LAP-REVIEW-VA-DIEU-KIEN-DUNG revision 2 (#523). Ghi HỘ chủ kho.
+schema_version: 2
+event: executor_lease_granted
+
+packet_issue: 523
+mission_issue: 499
+granted_by: ducthangho
+granted_on_instruction: https://github.com/ducthangho/tra-luat/issues/523#issuecomment-5644648238
+leased_at_utc: 2026-09-12T08:15:00Z
+lease_expires_at_utc: 2026-09-13T08:15:00Z
+
+packet_id: QUY-TRINH-LAP-REVIEW-VA-DIEU-KIEN-DUNG
+revision: 2
+generation: 1
+lease_id: quy-trinh-lap-review-r2-exec-1-claude-20260912
+role: executor
+provider: claude
+executor: claude
+environment: cloud
+risk: sensitive
+assurance_target: cross_approved
+access: read-write
+
+spec_path: ops/specs/QUY-TRINH-LAP-REVIEW-VA-DIEU-KIEN-DUNG-r2.md
+spec_sha256: 4ada6921503da3748ef54b019633e440d21a8f23c3c15f7e1064fe8f3ae85a58
+spec_hash: 4ada6921503da3748ef54b019633e440d21a8f23c3c15f7e1064fe8f3ae85a58
+
+write_set:
+  - .claude/skills/cross-review/SKILL.md
+  - .claude/skills/work-packet/SKILL.md
+
+write_set_da_do_truoc_khi_cap: >-
+  08:12:36Z 12-09-2026, `lease_publish.py ai-dang-giu` trên CẢ HAI tệp skill: rc=0, NGƯỜI_GIỮ 0.
+  25 lease từng giữ chúng đều HẾT_HẠN; gần nhất verdict-khong-boc-hoi-exec-1-claude-20260908 hết hạn
+  2026-09-09T03:32:58Z. Cổng tự fail-close hai lần trước đó và đã chữa bằng fetch, không bỏ qua.
+
+branch: claude/quy-trinh-lap-review-r2
+branch_ownership: exclusive
+target_branch_neu_land: master
+base_sha: 3c7df6d678e11090a1623f871dcd484250a4b68b
+start_from_sha: 3c7df6d678e11090a1623f871dcd484250a4b68b
+reviewed_sha_required: 3c7df6d678e11090a1623f871dcd484250a4b68b
+
+authority_basis: '§2 — start/pause/resume/reroute/override/authorize thuộc chủ kho'
+recorded_by: claude-session
+recorder_is_dispatcher: false
+recorder_cung_la_nguoi_thi_cong: false
+recorder_xung_dot_loi_ich: >-
+  Phiên ghi lease này SOẠN đặc tả r2 và là phiên đã VẬN HÀNH quy trình mới suốt #512/#517/#520, nên nó
+  có động cơ viết luật vừa khít cách mình đã làm. A12 của đặc tả chặn đúng chỗ ấy: luật mới phải cho
+  ra "đạt" trên chuỗi #512 đã tuân thủ, và nếu nó biến chuỗi ấy thành vi phạm thì luật viết sai.
+  Cross-review phải là phiên KHÁC NỀN.
+
+run_minutes: 1440
+heartbeat_required_minutes: 30
+attempts_used: 0
+attempts_limit: 3
+
+reviewer_provider: codex
+review_class: sensitive
+effective_review_class: sensitive
+
+depends_on:
+  - TRAN-VONG-REVIEW-LEN-BON
+thay_the_cho: []
+
+ly_do_cap: >-
+  Đo 12-09-2026 trên 3c7df6d: hai quy định vận hành của chủ kho (kiểm head drift trước vòng dự đoán là
+  cuối; sau khi quyết merge thì chỉ cần CI hậu merge) KHÔNG có dòng nào trong kho, và
+  .claude/skills/cross-review/SKILL.md:113 đang nói NGƯỢC một phần ("head đổi thì làm lại"). #512 đã
+  trả giá hai lượt thu-hoi ĐỎ vì chưa ai ghi chốt drift thành nghĩa vụ.
+
+viec_trong_lease:
+  - 'M1-M7: giữ nguyên từ r1 (điều kiện dừng theo review_class; sensitive phải approve; BẢNG LỚP; lớp lần 3 cấm vá lẻ; không hội tụ đo bằng PHÂN HẠNG; chống lách thu hẹp phạm vi; ba loại chi CI).'
+  - 'M8: kiểm drift trước vòng dự đoán là cuối + sửa câu dòng 113 để phân biệt hai nguyên nhân head đổi.'
+  - 'M9: sau khi quyết merge — không vòng review mới, VẪN phải CI hậu merge, phát hiện lỗi thì mở vòng.'
+  - 'M10: chi CI loại (b) = 0 trước merge; workflow_dispatch / lane windows gọi tay trước merge là (c) CẤM.'
+  - 'A10-A13: mỗi ca một phép làm ĐỎ; A12 có ca đối chiếu bắt buộc trên chuỗi #512.'
+
+dieu_kien_dung:
+  - 'S1 cần đường dẫn thứ ba ngoài hai tệp skill.'
+  - 'S2 dòng thêm > 300 (ADR-0044).'
+  - 'S3 muốn sửa docs/PROTOCOL_DA_PHIEN.md — skill là adapter MỎNG, doctrine-scan sẽ ĐỎ.'
+  - 'S4 muốn chép con số trần vào skill thay vì TRỎ ADR.'
+  - 'S5 TRAN-VONG-REVIEW-LEN-BON (#522) chưa land — skill trỏ trần nên ADR phải land trước.'
+  - 'S6 trần MƯỜI vòng review; vượt thì đòi khối nang_tran của chủ kho.'
+  - 'S7 muốn viết cổng cưỡng chế chi CI (packet riêng CONG-CHAN-CHI-CI-SOM).'

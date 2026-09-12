@@ -1,0 +1,83 @@
+# Lease EXECUTOR — TRAN-VONG-REVIEW-LEN-BON revision 2 (#522). Ghi HỘ chủ kho; phiên KHÔNG tự cấp.
+schema_version: 2
+event: executor_lease_granted
+
+packet_issue: 522
+mission_issue: 499
+granted_by: ducthangho
+granted_on_instruction: https://github.com/ducthangho/tra-luat/issues/522#issuecomment-5644646795
+leased_at_utc: 2026-09-12T08:15:00Z
+lease_expires_at_utc: 2026-09-13T08:15:00Z
+
+packet_id: TRAN-VONG-REVIEW-LEN-BON
+revision: 2
+generation: 1
+lease_id: tran-vong-review-len-muoi-exec-1-claude-20260912
+role: executor
+provider: claude
+executor: claude
+environment: cloud
+risk: sensitive
+assurance_target: cross_approved
+access: read-write
+
+spec_path: ops/specs/TRAN-VONG-REVIEW-LEN-BON-r2.md
+spec_sha256: 7d2c383279e6557937664e45718629fdc9625ee936acacbbab84ff69b209d6d0
+spec_hash: 7d2c383279e6557937664e45718629fdc9625ee936acacbbab84ff69b209d6d0
+
+write_set:
+  - docs/adr/0048-tran-vong-review-len-muoi.md
+  - docs/PROTOCOL_DA_PHIEN.md
+
+write_set_da_do_truoc_khi_cap: >-
+  08:12:36Z 12-09-2026, `lease_publish.py ai-dang-giu` trên CẢ HAI đường dẫn: rc=0, NGƯỜI_GIỮ 0.
+  349 ref origin sau fetch --prune; hai fail-close của chính cổng đã bắt trước đó (nhánh cục bộ tụt
+  sau, rồi cache thiếu nhánh máy chủ) và đã chữa bằng fetch, không bằng cách bỏ qua.
+
+branch: claude/tran-vong-review-len-muoi
+branch_ownership: exclusive
+target_branch_neu_land: master
+base_sha: 3c7df6d678e11090a1623f871dcd484250a4b68b
+start_from_sha: 3c7df6d678e11090a1623f871dcd484250a4b68b
+reviewed_sha_required: 3c7df6d678e11090a1623f871dcd484250a4b68b
+
+authority_basis: '§2 — start/pause/resume/reroute/override/authorize thuộc chủ kho'
+recorded_by: claude-session
+recorder_is_dispatcher: false
+recorder_cung_la_nguoi_thi_cong: false
+recorder_xung_dot_loi_ich: >-
+  Phiên ghi lease này cũng là phiên SOẠN đặc tả r2 và là phiên đang dùng trần được nâng (#512 đã dùng
+  4 vòng). Tức có động cơ bênh con số cao. Vì thế đặc tả khai thẳng rằng phép đo chỉ biện hộ "cao hơn
+  4", còn 10 là quyết định chủ kho; và cross-review phải là phiên KHÁC NỀN.
+
+run_minutes: 1440
+heartbeat_required_minutes: 30
+attempts_used: 0
+attempts_limit: 3
+
+reviewer_provider: codex
+review_class: sensitive
+effective_review_class: sensitive
+
+depends_on: []
+thay_the_cho: []
+
+ly_do_cap: >-
+  ADR-0043 khai trần canon trục VÒNG là HAI; §20 ghi nó 0 cổng. Thực tiễn đo được vượt xa: #508 dùng
+  13 vòng, #512 dùng 4. Chủ kho chỉ thị 12-09-2026 nâng trần lên 10. r1 của đặc tả (trần 4) chưa từng
+  được cấp packet nên r2 thay nó, không sửa hợp đồng đang chạy.
+
+viec_trong_lease:
+  - 'M1: ADR-0048 khai trần trục VÒNG là MƯỜI, trỏ ADR-0043 là tiền nhiệm, giữ nguyên hai trục kia.'
+  - 'M2: ADR khai luật hiệu lực theo thời điểm đóng băng, có MỐC và thứ NEO (spec_hash).'
+  - 'M3: §20 đúng một dòng cho ADR mới; dòng ADR-0043 đổi trạng thái, KHÔNG xoá.'
+  - 'M4: giữ nguyên nghĩa vụ khối nang_tran khi vượt trần MỚI.'
+  - 'M5: ADR ghi bảng bốn PR làm số biện hộ, kèm câu khai giới hạn của phép đo.'
+
+dieu_kien_dung:
+  - 'S1 cần đường dẫn thứ ba ngoài hai đường trong write_set.'
+  - 'S2 dòng thêm > 300 (ADR-0044).'
+  - 'S3 muốn sửa docs/adr/0043-*.md hoặc bốn đặc tả đã đóng băng có chép con số cũ.'
+  - 'S4 muốn viết cổng so-canon trong packet này (nợ riêng SO-CANON-CHUA-TON-TAI).'
+  - 'S5 muốn đổi trục LỜI GỌI hay ATTEMPT.'
+  - 'S6 trần MƯỜI vòng review (ADR-0048 sau khi land; trước đó ADR-0043 + khối nang_tran).'

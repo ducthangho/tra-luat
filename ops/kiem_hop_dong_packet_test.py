@@ -58,6 +58,16 @@ CA = [
     ("t9-ADR-tha-nhung-nguong-cung-muc-VAN-bi-bat", SPEC_OK,
      LEASE_OK.replace("trần dòng thêm theo `A8` của đặc tả đã ghim bằng `spec_hash`",
                       "KHÔNG đổi ADR-0044, cột `additions` ≤ 400"), True, 4),
+    # `R6-F03` — tham chieu va nguong CUNG mot gia tri: tha lan xuat hien la dinh danh,
+    # nhung lan sau dau `≤` VAN phai bi bat. Ban tru theo GIA TRI tha ca hai.
+    ("t10-tham-chieu-cung-so-voi-nguong", SPEC_OK,
+     LEASE_OK.replace("trần dòng thêm theo `A8` của đặc tả đã ghim bằng `spec_hash`",
+                      "căn cứ Issue #400, cột `additions` ≤ 400"), True, 4),
+    # `R6-F04` — vi pham chi nam trong `dieu_kien_dung`, khoi kia SACH: neu khoi ay khong
+    # duoc quet thi ca nay xanh, va do dung la ca thieu ma reviewer bat duoc.
+    ("t11-vi-pham-CHI-o-dieu_kien_dung", SPEC_OK,
+     LEASE_OK.replace("  - 'Vượt trần `A8` của đặc tả ⇒ DỪNG và hỏi chủ kho.'",
+                      "  - 'A8 — vượt 400 dòng thêm ⇒ DỪNG và hỏi chủ kho.'"), True, 4),
     ("t7-tham-chieu-trong-muc-A8-KHONG-bi-bat", SPEC_OK,
      LEASE_OK.replace("- 'A8 — đúng 2 đường dẫn;",
                       "- 'A8 — căn cứ Issue #463, comment 5645742072, run 34680281474;"), True, 0),
@@ -99,7 +109,23 @@ def main():
         hong += [] if ok else ["dot-bien-noi-danh-sach"]
         print(f"{'ĐẠT ' if ok else 'HỎNG'}  {'dot-bien-noi-danh-sach-CHO-PHEP':44s} rc={rc} "
               f"(nới danh sách ⇒ t4 phải THÔI đỏ; nếu vẫn 4 thì t4 đang đo thứ khác)")
-    print(f"\nPHẢN CHỨNG CỔNG: {len(CA) + 1 - len(hong)}/{len(CA) + 1} đạt"
+    # DOT BIEN 2 (`R6-F04`): bo mot phan tu khoi `KHOI_NGHIA_VU` — chot 5 phai bat.
+    goc2 = CONG.read_text(encoding="utf-8")
+    cu2 = 'KHOI_NGHIA_VU = ("viec_trong_lease", "dieu_kien_dung")\n#'
+    if goc2.count(cu2) != 1:
+        print("HỎNG  dot-bien-bo-khoi-nghia-vu: khong dinh vi duoc"); hong.append("dot-bien-bo-khoi")
+    else:
+        CONG.write_text(goc2.replace(cu2, 'KHOI_NGHIA_VU = ("viec_trong_lease",)\n#', 1),
+                        encoding="utf-8")
+        try:
+            rc, out = chay(SPEC_OK, LEASE_OK, True)
+        finally:
+            CONG.write_text(goc2, encoding="utf-8")
+        ok = rc == 4 and "KHOI_NGHIA_VU" in out
+        hong += [] if ok else ["dot-bien-bo-khoi"]
+        print(f"{'ĐẠT ' if ok else 'HỎNG'}  {'dot-bien-bo-khoi-nghia-vu':44s} rc={rc} "
+              f"(bo mot khoi ⇒ chot 5 phai CHAN [4])")
+    print(f"\nPHẢN CHỨNG CỔNG: {len(CA) + 2 - len(hong)}/{len(CA) + 2} đạt"
           + (f" · HỎNG: {hong}" if hong else ""))
     return 1 if hong else 0
 

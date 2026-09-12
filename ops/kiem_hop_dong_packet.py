@@ -32,6 +32,9 @@ import argparse, hashlib, pathlib, re, sys
 # khong dong. Phan DONG duoc theo cau truc la chot 2 (dac ta neu tran DUNG MOT lan):
 # co dung mot nguon thi khong con ban sao nao de troi.
 KHOI_NGHIA_VU = ("viec_trong_lease", "dieu_kien_dung")
+# `R6-F04`: bo rieng `dieu_kien_dung` khoi tap tren van cho bo test 10/10 — moi PHAN TU cua
+# tap nay cung la mot cua. Ky vong NEO DOC LAP; chot 5 doi hai ben bang nhau.
+KHOI_NGHIA_VU_KY_VONG = ("viec_trong_lease", "dieu_kien_dung")
 NEO_TIEU_CHI = re.compile(r"\b(A[1-9]|M[1-9]|additions|dòng thêm)\b")
 # Nguong: so >= 3 chu so, hoac thap phan kieu Viet (`36,00`, `0,60`).
 # Bien phai chan GIUA MOT SO PHIEN BAN (`0.15.15`) chu KHONG chan dau cham CAU
@@ -108,14 +111,23 @@ def kiem(spec: pathlib.Path, lease: pathlib.Path, nghiem_ngat: bool = False):
         for muc in re.split(r"(?m)^\s*-\s", khoi):
             if not NEO_TIEU_CHI.search(muc):
                 continue
-            # Ten rieng: `bo_qua` la danh sach chot KHONG AP DUNG cua ham — trung ten
-            # o day tung lam chot `--nghiem-ngat` bao mot `run_id` la "chot bi bo qua".
-            la_tham_chieu = set(THAM_CHIEU.findall(muc))
-            so = sorted(set(NGUONG.findall(muc)) - la_tham_chieu)
+            # `R6-F03` — tru THAM CHIEU theo VI TRI, khong theo GIA TRI. Ban truoc lam
+            # `set(NGUONG) - set(THAM_CHIEU)` nen mot muc ghi `Issue #400 ... ≤ 400` duoc THA:
+            # tham chieu `#400` hop thuc hoa luon con so 400 dung sau `≤`. Nay xet tung LAN
+            # XUAT HIEN theo span. (Ten `la_tham_chieu` cung tranh trung `bo_qua` cua ham —
+            # va cham ten ay tung lam `--nghiem-ngat` bao mot `run_id` la "chot bi bo qua".)
+            nhip_tc = {m.span(1) for m in THAM_CHIEU.finditer(muc)}
+            so = sorted({m.group(1) for m in NGUONG.finditer(muc)
+                         if m.span(1) not in nhip_tc})
             if so:
                 nhan = NEO_TIEU_CHI.search(muc).group(1)
                 loi.append((4, f"lease `{ten}` muc vien `{nhan}` CHEP nguong {so} — phai TRO "
                                f"toi dac ta da ghim bang `spec_hash`, khong chep so"))
+
+    # ── chot 5: tap khoi nghia vu khop ky vong neo doc lap (`R6-F04`) ───────────
+    if tuple(KHOI_NGHIA_VU) != tuple(KHOI_NGHIA_VU_KY_VONG):
+        loi.append((4, f"KHOI_NGHIA_VU {tuple(KHOI_NGHIA_VU)} lech ky vong "
+                       f"{tuple(KHOI_NGHIA_VU_KY_VONG)}"))
 
     # ── chot 4: spec_hash tro dung byte dac ta ──────────────────────────────────
     h = re.search(r"(?m)^spec_hash:\s*([0-9a-f]{64})\s*$", lv)
@@ -146,6 +158,10 @@ def main(argv=None):
     if not loi:
         print(f"DAT: {a.spec.name} + {a.lease.name} — "
               f"{len(bo_qua)} chot bo qua, phan con lai khop")
+        # `R6-F08` — khai GIOI HAN ngay tren duong DAT, vi day la cho nguoi doc ket luan.
+        print("GIOI HAN: chot 2 dem DUNG MOT mau Markdown; mot nghia vu tran viet khac cach "
+              "(vd \"Cot additions khong duoc vuot 400 dong.\") KHONG duoc dem. Day la kiem "
+              "DINH DANG, KHONG phai bang chung 'dac ta chi co mot nghia vu tran'.")
         return 0
     return max(ma for ma, _ in loi)
 

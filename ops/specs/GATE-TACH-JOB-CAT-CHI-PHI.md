@@ -1,16 +1,15 @@
-# Đặc tả packet — GATE-TACH-JOB-CAT-CHI-PHI (revision 18)
+# Đặc tả packet — GATE-TACH-JOB-CAT-CHI-PHI (revision 19)
 
 - `packet_id`: **GATE-TACH-JOB-CAT-CHI-PHI**; ID bền theo `PROTOCOL §3.2` là `wp<packet_issue>`.
 - `packet_issue`: **#463**
 - `mission_issue`: **#467** (*"bốn packet treo sau #456: GATE → LO-319 → 2A → 2B"*)
-- `revision`: **18** · `generation`: 1 · soạn **11:3xZ 11-09-2026**; `A5` r13 **10:0xZ 12-09-2026**;
+- `revision`: **19** · `generation`: 1 · soạn **11:3xZ 11-09-2026**; `A5` r13 **10:0xZ 12-09-2026**;
   r14 (A8 400 + F03/F04/F05) **11:4xZ 12-09-2026**; r15 (F04 lượt 2 — **XOÁ** câu bị thay thay vì
   nối thêm đính chính) **13:5xZ 12-09-2026**; r16 (`R3-F04` lượt 3 — cửa THỨ BA của cùng lớp ấy ở
   `A5`, ánh xạ manifest hai lane của `A2`, và bẫy `on:` là boolean ở `A3(3)`) **14:2xZ 12-09-2026**;
   r17 (trần `A8` `400 → 430`, ngoại lệ CÓ PHẠM VI thứ hai) **14:4xZ 12-09-2026**;
-  r18 (`R4-F01`/`R4-F02` lượt 4 — trường `revision` đã đứng ở `15` từ r16 trong khi tiêu đề
-  ghi `17`; và lease còn CHÉP ngưỡng của `A1`/`A8`. Cả hai nay do MÁY canh:
-  `ops/kiem_hop_dong_packet.py`) **15:1xZ 12-09-2026**
+  r18 (`R4-F01`/`R4-F02`) **15:1xZ 12-09-2026**;
+  r19 (`R6-F05` — phân bổ `N` nêu một chỗ; số ô manifest suy từ CHIỀU) **16:1xZ 12-09-2026**;
 - `depends_on`: **`[wp502, wp504]`** — xem `write_set`. **`wp504`** là `WINDOWS-LEASE-SUITE` (lease
   sống, cấp `14:05Z 11-09-2026`), **KHÔNG** còn là `T125-RA-JOB-RIENG`: đặc tả ấy đã **RÚT** vì `#504`
   nhận cùng vấn đề bằng đường chủ kho chọn (song song hoá `t125` trong bộ test, giữ nguyên ngữ nghĩa)
@@ -205,8 +204,11 @@ tách (`gate-registry`), thay vì phải giữ hai trường hợp.
 ## `nghiem_thu`
 
 **Ràng buộc chi phí CI (chỉ thị chủ kho 11-09-2026).** Packet này được chi **đúng `N = 2`** lượt
-`workflow_dispatch`: **một** lượt nền tại `start_from_sha`, **một** lượt sau tách. Mỗi lần chi ghi
-`run_id` vào biên nhận. **Vượt `N` ⇒ revision**, không tự chi thêm. Lượt `pull_request` tự bắn là
+`workflow_dispatch`. **PHÂN BỔ hai suất ấy nêu ĐÚNG MỘT CHỖ — tại `A1`** — và chỗ này chỉ nêu
+TRẦN. *(Bản trước phân bổ ở cả hai chỗ: câu ở đây ghi "một nền + một sau tách" trong khi `A1` đã
+chuyển suất nền sang đột biến gộp-lại; làm cả hai cần BA dispatch. Cross-review lượt 6 `R6-F05`
+bắt đúng chỗ đó — cùng lớp "nhắc lại một hằng số ở hai chỗ" mà r17 đã đóng cho trần `A8`.)*
+Mỗi lần chi ghi `run_id` vào biên nhận. **Vượt `N` ⇒ revision**, không tự chi thêm. Lượt `pull_request` tự bắn là
 **cổng**, không tính vào `N`. **Cấm tuyệt đối lượt "chạy thử xem sao".**
 Căn cứ: G8 — **965,10** phút tính tiền (**48,3 %** hạn mức tháng) bị **8** lượt `cancelled` tiêu mà
 **không lượt nào cho một kết quả hoàn tất hợp lệ**. *(Nói vậy chứ không nói "thu 0 thông tin":
@@ -498,9 +500,12 @@ chứng dispatch `expected = 6`, bỏ **1** ⇒ `equality = False`.
 manifest ghi `run_id`, `run_attempt`, tập job, SHA định nghĩa workflow. Ràng buộc *"cùng một mẫu"*
 áp **trong** một ô ấy, **không** bắc cầu sang ô khác.
 **Khoá đúng số ô, vì bản r15 đầu ghi *"`A2` đọc lane dispatch"* và như thế là bỏ mất nửa nghĩa vụ
-của `A2`** (cross-review lượt 3 `R3-F04`): `A2` đo trên **CẢ HAI** lane (xem `A2`), `A5` chỉ lane
-PR ⇒ **6** ô cho `A2` (2 lane × trước/sau, trong đó cặp dispatch có thể là `KHÔNG ĐO ĐƯỢC` theo
-`A1`) và **2** ô cho `A5`. Một manifest dùng chung sẽ buộc một ô đọc mẫu của ô khác.
+của `A2`** (cross-review lượt 3 `R3-F04`): `A2` đo trên **CẢ HAI** lane (xem `A2`), `A5` chỉ lane PR.
+**Số ô SUY TỪ CHIỀU, không khai rời:** `A2` = 2 lane × {trước, sau} = **4** ô (cặp dispatch có thể
+`KHÔNG ĐO ĐƯỢC` theo `A1`); `A5` = 1 lane × {trước, sau} = **2** ô; tổng **6**. Một manifest dùng
+chung sẽ buộc một ô đọc mẫu của ô khác.
+*(Bản r16 khai thẳng "6 ô cho `A2`" cạnh chính hai chiều cho tích 4 — `R6-F05`. Một con số khai
+rời khỏi cách tính nó thì không phép đo nào bắt được lúc nó lệch; nên ở đây nêu CHIỀU trước.)*
 
 **(6) Nền `A5` KHÔNG được công nhận chỉ vì `ci.yml` bằng byte.** Tải do **cả cây** quyết định, không
 chỉ định nghĩa workflow. Nền hợp lệ khi **một trong hai**: (a) sinh lại tại đúng `start_from_sha`

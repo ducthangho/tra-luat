@@ -101,7 +101,7 @@ bản ghi thứ hai cho cùng một ca. Hai chốt ấy giết cả lớp giả 
 ĐƯỢC**; đó là thẩm quyền phá huỷ không hoàn tác được, và `ops/nhanh_don_duoc_test.py` là cổng duy
 nhất canh nó. `§8`: path không rõ thì lấy mức chặt nhất.
 
-`ADR-0044` cho `sensitive`: **≤ 3 tệp, ≤ 300 dòng thêm**. Packet này **1 tệp**; ước dòng ở `chua_do_duoc` #3.
+`ADR-0044` cho `sensitive`: **≤ 3 tệp, ≤ 300 dòng thêm**. Packet này **1 tệp**. **Trần dòng thêm đã được chủ kho BỎ cho packet này** — xem A8; ước dòng ở `chua_do_duoc` #3 là ảnh chụp lúc soạn, KHÔNG còn là ràng buộc.
 
 ## `write_set`
 
@@ -148,7 +148,7 @@ ops/specs/CHAM-DOT-BIEN-MIEN-NHIEM-CA-VO-CAN.md   rc=0   NGƯỜI_GIỮ 0: khôn
 | M4 | Tắt ký commit ở **MỌI** kho bộ test dựng: `kho_bare` (dòng 25–66) **và** repo `src` thứ hai trong `chay_dot_bien` (dòng 186–192). Sửa một chỗ thì tám ca qua còn suite đầy đủ vẫn chết ở lần commit nguồn mutant. | `write_set` #1 |
 | M5 | Bộ chấm có **ca tự kiểm cho chính nó** — không có thì nó là thứ duy nhất trong tệp không ai canh. | `write_set` #1 |
 | M6 | **Kênh kết quả riêng**, vì **lớp ngoại lệ KHÔNG qua được ranh giới tiến trình**: bộ chấm gọi tiến trình con rồi đọc **chuỗi trên stdout**, object ngoại lệ chết ở biên. Lượt con phát kết quả ra kênh riêng; bộ chấm đọc **kênh ấy**. | `write_set` #1 |
-| M7 | **Bản ghi neo vào LƯỢT, và ca do KHUNG đóng dấu.** Mỗi bản ghi mang `(tên ca · tên mutant · số lần thử · rc · dấu phiên)`; bộ chấm chỉ nhận bản ghi neo đúng lượt nó vừa phóng. **Dấu phiên phải NGẪU NHIÊN và SINH MỚI MỖI LƯỢT** — mang và so một dấu là chưa đủ: một dấu tái dùng qua hai lần chạy cùng `(mutant, lần thử, rc)` làm bản ghi cũ được nhận lại, và ca *"bỏ so dấu"* vẫn xanh. Cấm lấy mốc thời gian độ phân giải thấp làm dấu (trùng khi chạy nhanh), và đòi bản ghi **đóng lượt**. **Tên ca do khung đóng dấu từ trạng thái của chính khung**, KHÔNG lấy từ đối số người gọi — nên không lời gọi nào tự khai mình là ca khác. **Đúng một** bản ghi cho mỗi ca; cái thứ hai ⇒ `KHÔNG ĐO ĐƯỢC`. | `write_set` #1 |
+| M7 | **Bản ghi neo vào LƯỢT, và ca do KHUNG đóng dấu.** Mỗi bản ghi **ca** mang `(tên ca · tên mutant · số lần thử · dấu phiên)`; `rc` neo ở mức **LƯỢT**, nằm trong bản ghi **đóng lượt** và được so với mã thoát THẬT của tiến trình con — không lặp lại trong từng bản ghi ca. *(Sửa 12-09-2026: câu gốc liệt kê `rc` vào bản ghi ca, lệch với thứ mã thực sự ghi.)* bộ chấm chỉ nhận bản ghi neo đúng lượt nó vừa phóng. **Dấu phiên phải NGẪU NHIÊN và SINH MỚI MỖI LƯỢT** — mang và so một dấu là chưa đủ: một dấu tái dùng qua hai lần chạy cùng `(mutant, lần thử, rc)` làm bản ghi cũ được nhận lại, và ca *"bỏ so dấu"* vẫn xanh. Cấm lấy mốc thời gian độ phân giải thấp làm dấu (trùng khi chạy nhanh), và đòi bản ghi **đóng lượt**. **Tên ca do khung đóng dấu từ trạng thái của chính khung**, KHÔNG lấy từ đối số người gọi — nên không lời gọi nào tự khai mình là ca khác. **Đúng một** bản ghi cho mỗi ca; cái thứ hai ⇒ `KHÔNG ĐO ĐƯỢC`. | `write_set` #1 |
 
 ## `nghiem_thu`
 
@@ -274,7 +274,8 @@ xanh ở cả hai vế của đột biến **không** được tính vào `11`.
 Hai số phải **BẰNG NHAU**; không tin `rc=0` suông.
 **Phép làm ĐỎ:** bất kỳ mutant nào tụt khỏi `giết`.
 
-**A8 (toàn packet) — `ADR-0044`.** `git diff --numstat` ⇒ **1 tệp**, cột `additions` ≤ **300**.
+**A8 (toàn packet) — `ADR-0044`.** `git diff --numstat` ⇒ **1 tệp**. Trần **dòng thêm** đã được chủ kho **BỎ** (11-09-2026, #513 comment 5637719340, sau ba lần trượt `300→429`, `500→536`, `650→658`): `so_tep = 1` là chốt **DUY NHẤT** còn hiệu lực. `so_tep` ràng buộc **lúc REVIEW** — sau khi vòng lặp review đóng, một lần `git merge master` hợp lệ sẽ làm phép đếm này lớn hơn 1 mà **không** vi phạm A8; đo phần của packet bằng `git diff --numstat <start_from_sha> HEAD -- <write_set>`.
+*(Sửa 12-09-2026 theo cross-review trên PR #508: câu cũ còn khai `≤ 300` sau khi trần ấy đã bị bỏ, nên một reviewer đọc đặc tả sẽ mở finding đúng — và đã mở thật.)*
 Vượt ⇒ **DỪNG và hỏi chủ kho**, không tự xin ngoại lệ.
 
 ## `hinh_dang_ke_thua`
@@ -311,7 +312,7 @@ chưa đạt để tự cấp thẩm quyền. Người quyết vẫn là chủ k
    Lượt nền `8/8` sạch nên có cơ sở tin, nhưng *"có cơ sở tin"* không phải *"đã đo"*.
 3. **Ước dòng thêm chưa phải phép đo.** 14 `assert` → `chot()` + lớp ngoại lệ + bộ chấm ba trạng thái
    + chạy lại có trần + **≥ 12** ca tự kiểm + **≥ 12** đột biến. Ước **≈ 150–260** dòng thêm trên tệp
-   **233** dòng (đo 06:2xZ 11-09-2026). Trần `ADR-0044` là **300**; vượt thì **DỪNG** — A8.
+   **233** dòng (đo 06:2xZ 11-09-2026). *(Câu gốc viết "trần `ADR-0044` là **300**; vượt thì **DỪNG** — A8". Trần ấy đã bị chủ kho BỎ ngày 11-09-2026 sau ba lần trượt; giữ nguyên ước tính làm hồ sơ, nhưng nó KHÔNG còn là điều kiện dừng.)*
 4. **`A5c(3)` chỉ đo được ca mã sản phẩm gọi ĐÚNG hàm phát của khung.** Nếu mutant sửa thẳng trạng
    thái khung (gán lại tên ca đang chạy, hoặc thay chính hàm phát), cơ chế đóng dấu **không** chặn
    được. Không có phản chứng nào trong packet này cho đường ấy.

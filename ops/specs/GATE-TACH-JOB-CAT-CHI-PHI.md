@@ -138,7 +138,11 @@ nghĩa trôi. Cấp chồng là tự tạo cửa sổ hai writer. Phiên cấp l
 tất**, và `#504` là thứ làm nó hoàn tất. Chạy trước `#504` thì vế TRƯỚC của `A5` vẫn `KHÔNG ĐO ĐƯỢC`
 (xem `chua_do_duoc` #0).
 
-**Thứ tự chuỗi: `#502 → T125 → GATE → LO → 2A → 2B`.** Tệp #2 cũng nằm trong write set của `LO-319`,
+**Thứ tự chuỗi: `#502 → #504 → GATE → LO → 2A → 2B`.**
+*(Sửa 12-09-2026 theo cross-review trên PR #508: dòng này còn dẫn `T125-RA-JOB-RIENG` sau khi
+đặc tả ấy đã **RÚT** — người điều phối đọc nó sẽ chờ một packet không còn tồn tại, hoặc xếp
+`GATE` khác với `depends_on: [wp502, wp504]` mà chính tệp này khai ở đầu. Đúng lớp "con số/tên
+đã trôi mà câu văn còn giữ" mà `hinh_dang_ke_thua` của tệp này đang đếm.)* Tệp #2 cũng nằm trong write set của `LO-319`,
 `MUTANT-WINDOWS-SUBAGENT-GHI-DETECT`, `MUTANT-WINDOWS-NHANH-DON-DUOC`; `§5` exclusion theo ĐƯỜNG DẪN
 ⇒ bốn packet **nối tiếp**. GATE đi trước ba packet kia vì `A7` của chúng viết MỘT LẦN theo bố cục sau
 tách (`gate-registry`), thay vì phải giữ hai trường hợp.

@@ -153,7 +153,18 @@ def _doc_kenh_xac_thuc(duong: Path, dau_phien: str, mutant: str, lan_thu: int, d
         if any(r.get(k) != v for k, v in neo.items()):
             ten_bg = r.get("ca") if isinstance(r.get("ca"), str) else "dong_luot"
             return KHONG_DO_DUOC, f"ban ghi khong neo dung luot: {ten_bg}"
-        co_ca, co_dong = "ca" in r, bool(r.get("dong_luot"))
+        # R13-F02 (luot 13, codex trong PR) — `bool(...)` la mot phep EP KIEU, va
+        # ep kieu o day chinh la cap tin dung cho thu KHONG dung dinh dang. Do
+        # duoc tren ban truoc: mot kenh du 8 ca, `T1=DO_CHOT`, dong luot khai
+        # `{"dong_luot": 1}` hoac `{"dong_luot": "yes"}` deu tra GIET.
+        # Kenh la HOP DONG: dau dong phai la bool JSON `true`, khong phai bat cu
+        # thu gi truthy. Mot writer hong hoac mot ban ghi meo phai lam suite DO,
+        # khong duoc nhan tin dung. Cung ho `nhan-rc-bool` (loai `bool` khoi `int`
+        # cho `rc`) — o day la chieu NGUOC: doi DUNG bool, khong nhan thay the.
+        co_dong = r.get("dong_luot") is True
+        if "dong_luot" in r and not co_dong:
+            return KHONG_DO_DUOC, f"dau dong luot khong phai bool true: {r.get('dong_luot')!r}"
+        co_ca = "ca" in r
         if co_ca and co_dong:
             return KHONG_DO_DUOC, "ban ghi vua mang ten ca vua khai dong luot"
         if co_dong:
@@ -1637,6 +1648,13 @@ def r517_kenh_phai_duoc_xac_thuc_truoc_khi_tin(d: Path):
         "khong-phai-object": doc(k_null),
         "utf8-hong": doc(k_byte),
         "json-long-qua-sau": doc(k_sau),
+        # R13-F02 — dau dong luot phai la bool JSON `true`, khong phai "thu
+        # truthy". `bool(...)` la mot phep EP KIEU, va ep kieu o day chinh la
+        # cap tin dung cho thu khong dung dinh dang.
+        "dong-luot-int": doc(_ke("dlint.jsonl", _du_ca(ph, {"T1": NHAN_DO_CHOT})
+                                 + [_ban_ghi(ph, dong_luot=1, rc=1)])),
+        "dong-luot-chuoi": doc(_ke("dlstr.jsonl", _du_ca(ph, {"T1": NHAN_DO_CHOT})
+                                   + [_ban_ghi(ph, dong_luot="yes", rc=1)])),
     }
     # PHAI so CA TRANG THAI LAN LY DO. Chi so trang thai thi VO FAIL-CLOSE che mat
     # tung chot: go mot phep xac thuc, ngoai le roi vao vo va VAN ra KHONG DO DUOC
@@ -1654,6 +1672,8 @@ def r517_kenh_phai_duoc_xac_thuc_truoc_khi_tin(d: Path):
         "khong-phai-object":  (KHONG_DO_DUOC, "khong phai object"),
         "utf8-hong":          (KHONG_DO_DUOC, "khong doc duoc kenh"),
         "json-long-qua-sau":  (KHONG_DO_DUOC, "bo doc kenh nem RecursionError"),
+        "dong-luot-int":      (KHONG_DO_DUOC, "dau dong luot khong phai bool true: 1"),
+        "dong-luot-chuoi":    (KHONG_DO_DUOC, "dau dong luot khong phai bool true: 'yes'"),
     }
     chot({t: v[0] for t, v in ket.items()} == {t: v[0] for t, v in LY_DO.items()}, "r517")
     chot(all(LY_DO[t][1] in ket[t][1] for t in LY_DO), "r517")
@@ -2328,6 +2348,10 @@ DOT_BIEN_TU_KIEM = [
      "        if False:\n            return KHONG_DO_DUOC, \"co ban ghi SAU ban ghi dong luot\""),
     ("bo-tach-ca-voi-dong-luot", ("r517",),
      "        if co_ca and co_dong:", "        if False:"),
+    # R13-F02 — quay ve ep kieu: moi thu truthy lai duoc nhan la dau dong.
+    ("ep-kieu-dau-dong-luot", ("r517",),
+     '        co_dong = r.get("dong_luot") is True',
+     '        co_dong = bool(r.get("dong_luot"))'),
     ("bo-xac-thuc-nhan", ("r517",),
      "        if nhan not in NHAN_HOP_LE:", "        if False:"),
     ("bo-xac-thuc-kieu-ten-ca", ("r517",),

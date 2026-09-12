@@ -314,10 +314,27 @@ Bộ test nào phóng tiến trình con mà bị giết giữa chừng sẽ **b�
 lượt bị giết để lại **526 tiến trình `ban_sao_*` còn sống**, RAM `14,5/16 GB`, và mọi phép đo sau đó
 chậm theo — suýt thành kết luận *"bộ kiểm chậm 5 lần"* trong khi nguyên nhân thật là một lỗi đệ quy.
 
-```bash
-pkill -9 -f "<mau ten tep con>" 2>/dev/null || true   # `|| true`: pkill tra 1 khi khong khop,
-ps -eo cmd | grep -c "[m]au"                          # va no se cat ca chuoi `&&`
+**Mẫu PHẢI TỰ LOẠI TRỪ.** `pkill -f` khớp **toàn bộ dòng lệnh**, mà trong shell headless dòng lệnh
+của chính `bash -c '...'` **chứa cái mẫu bạn vừa gõ** — nên `pkill` giết luôn shell đang chạy nó, và
+mọi lệnh phía sau **không bao giờ chạy**. Phản chứng hai chiều, chạy được:
+
 ```
+bash -c 'pkill -9 -f "mau_xyz"   ; echo CHAY'   -> khong in gi, shell tu chet
+bash -c 'pkill -9 -f "[m]au_xyz" ; echo CHAY'   -> CHAY, rc=0
+```
+
+Dùng ngoặc vuông (`[b]an_sao_`) hoặc chọn PID con tường minh:
+
+```bash
+pkill -9 -f "[m]au_ten_tep_con" 2>/dev/null || true   # `|| true`: pkill tra 1 khi khong khop
+ps -eo cmd | grep -c "[m]au_ten_tep_con"              # dem lai de CO SO, dung tin lenh giet
+```
+
+**Ghi cả cái sai, vì nguyên nhân sai trong tài liệu tệ hơn không ghi:** bản đầu của mục này đổ cho
+*"`pkill` trả 1 khi không khớp nên cắt cả chuỗi"* và chỉ thêm `|| true`. Sai — `|| true` che mã thoát
+nhưng **không cứu được một shell đã chết**. Người viết câu ấy vừa bị chính lỗi ấy vài lần trong cùng
+phiên mà chẩn đoán nhầm; chỉ lộ khi cross-review dựng phản chứng ở trên. Cùng họ *"kết luận từ một
+đường hỏng"*.
 
 Dọn xong mới đo, và đo lại **nền** trước khi nghi bản vá của mình.
 
@@ -331,6 +348,14 @@ reviewed_sha: <sha>
 
 ## ĐỐI CHIẾU LƯỢT TRƯỚC        <- BO QUA o luot 1; BAT BUOC tu luot 2
 - <slug luot truoc>: ĐÃ VÁ THẬT | VÁ HỜ | VÁ SINH LỖI MỚI | CHƯA VÁ — <bang chung TU DO>
+
+## BẢNG SĂN                     <- BAT BUOC; thieu khoi nay thi `approve` = KHÔNG ĐO ĐƯỢC
+HƯỚNG 1: <ten>
+  giả thuyết : <neu ... thi ... sai>
+  lệnh       : <lenh da chay>
+  output     : <output that, cat gon>
+  kết luận   : LỖI | KHÔNG PHẢI LỖI | KHÔNG ĐO ĐƯỢC
+HƯỚNG 2: ...                    <- lap toi DU N huong DOC LAP (N do prompt dat, >= 6)
 
 ## BẢNG ĐO                      <- moi con so da do, KE CA cai khop
 | khẳng định | PR khai | đo được | khớp? |

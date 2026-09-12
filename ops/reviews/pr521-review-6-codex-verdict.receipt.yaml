@@ -113,9 +113,14 @@ nang_luc_do_cua_goi:
     Mirror git ĐẦY ĐỦ trong sandbox: `kho.git` bare + `cay-kho` detached đúng `e849e2e`,
     non-shallow, `core.abbrev 7` đã ghim, `origin` đã `remote set-url` về URL HTTPS thật.
     `ops/dung_goi_review.sh` đối chiếu ba tập ref nguồn/mirror/cay-kho và in `lech=0/0`.
-  so_hai_nguon_truoc_khi_clone: >-
-    `ops/dung_goi_review.sh` so ba tập ref và chốt `GOI DU DE TAI DO`; số ref của lượt này khớp
-    ba phía. Đây là phép so TẬP TÊN+OID giữa các bản sao, KHÔNG phải phép so với máy chủ GitHub.
+  chup_remote_va_doi_chieu_ref_cua_goi: >-
+    Theo mã `ops/dung_goi_review.sh`, `nguon-refs.tsv` lấy tên+OID bằng `git ls-remote --heads`
+    từ remote `origin` của kho nguồn lúc dựng gói; sau khi dựng mirror và cây làm việc,
+    script so tên+OID trong hai bản sao với tập nguồn đã chụp.
+    Cần tách bước chụp remote của bên dựng gói với bước reviewer so các TSV ngoại tuyến:
+    bước sau không hỏi lại GitHub tại lúc review. Việc script đã chạy trên GitHub và ba tập
+    đã khớp trong gói lịch sử là (b) theo phiên điều phối; các TSV gốc của lượt này không
+    có trong kho để kiểm lại. Mã script mô tả phép so, không chứng thực lần chạy lịch sử.
   doi_chieu_cong_nen_sandbox: >-
     Reviewer dựng clone SẠCH, ĐẦY ĐỦ, NGOÀI cây review rồi chạy chín cổng nền; kết quả đầy đủ
     nằm trong mục `## Phép đo nền` của chính tệp verdict. Phiên điều phối chạy cùng bộ cổng tại

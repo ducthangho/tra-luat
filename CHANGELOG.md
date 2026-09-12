@@ -113,14 +113,21 @@ chân Windows cho trạng thái thứ ba: **BỊ HUỶ**, không phải `pass`, 
 chấm connector codex ở Finding 1. Trạng thái đúng của #514: **`merged` + ubuntu xanh + Windows
 KHÔNG ĐO ĐƯỢC**.
 
-Đây là nợ đã khai của Issue #504 (`[WINDOWS-LEASE-SUITE]`), KHÔNG phải lỗi của #514: bản vá của
-#514 không chạm `ci.yml`, không chạm `ops/lease_publish*`. **KHÔNG nâng `timeout-minutes`** —
+Đặc tả `WINDOWS-LEASE-SUITE` của #504 đã ghi triệu chứng Windows chạm trần trước #514.
+Diff của #514 không chạm `ci.yml` hay `ops/lease_publish*`, nhưng có thêm 17 cặp verdict/biên nhận
+và cập nhật mục lục `ops/reviews/README.md`; `ops/lease_publish_test.py` đọc các dữ liệu đó ở `t26`
+và `t27`. Mã suite không đổi chưa loại trừ ảnh hưởng của đầu vào thay đổi. Gói này chưa cung cấp
+đối chứng Windows để xác định #514 có góp phần vào lần huỷ này hay không. **KHÔNG nâng `timeout-minutes`** —
 `ci.yml:63` đã ghi sẵn *"NÂNG TRẦN KHÔNG CHỮA NGUYÊN NHÂN"*.
 
-Thứ phiên này thêm được vào #504 là một dữ kiện mà các lần trước chưa có: **TÊN BƯỚC** chỗ đồng hồ
-chạm trần (`lease-publish selftest`, bước 20) và **thời điểm** (60:17). Chưa đo được các lần huỷ
-TRƯỚC đó chết ở bước nào — `list_workflow_runs` lọc theo `branch: master` chỉ trả về 2 lượt gate
-trong 30 lượt gần nhất, nên **không** khẳng định "vẫn bước ấy"; đó là câu chưa có phép đo.
+Phiên này bổ sung ATTESTATION cho run `34644073109`: bước 20 `lease-publish selftest` bị huỷ,
+thời lượng job 60:17. Tại `8802924`, `ops/specs/WINDOWS-LEASE-SUITE.md` đã ghi bước 20 còn chưa xong
+khi các job Windows của run `34439063235` và `34552510232` bị huỷ; tên bước không phải dữ kiện
+lần đầu xuất hiện trong hồ sơ #504. Các số lịch sử trong đặc tả vẫn là tường thuật, chưa được
+reviewer offline đối chiếu với API/log gốc. Mẫu `list_workflow_runs` được phiên điều phối tường
+thuật (lọc `branch: master`, 2 lượt gate trong 30 lượt) chỉ mô tả phần kết quả ấy. Nó không đủ
+xác lập rằng các lần trước chưa biết bước bị huỷ, cũng không đủ kết luận mọi lần huỷ đều xảy ra
+ở cùng bước hoặc cùng nguyên nhân.
 
 # ★ dev-side — r369: ghi sổ #511 — hai verdict codex chấm CHÍNH hồ sơ r367 của #510; 5 P2 vá rồi approve; merge theo luật chung "approve ⇒ land" (2026-09-11)
 

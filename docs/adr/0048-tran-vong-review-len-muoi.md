@@ -17,9 +17,20 @@ của nó, và trần ATTEMPT giữ nguyên. Nâng nhầm trục kia là nâng C
 ## Vượt trần MỚI vẫn phải khai `nang_tran`
 
 Nâng trần **không** bỏ cơ chế vượt trần. Vượt trần mười vẫn đòi khối `nang_tran` khai `ai_nang`
-(phải là chủ kho, theo thẩm quyền §2 của protocol), `can_cu`, `tran_cu` và `tran_moi`; không có khối
-ấy thì cổng đăng lease từ chối. Một trần không có đường vượt được khai báo là một trần người ta sẽ đi
-vòng quanh, và một trần vượt được trong im lặng thì không phải trần.
+(phải là chủ kho, theo thẩm quyền §2 của protocol), `can_cu`, `tran_cu` và `tran_moi`. Một trần
+không có đường vượt được khai báo là một trần người ta sẽ đi vòng quanh, và một trần vượt được trong
+im lặng thì không phải trần.
+
+**Nghĩa vụ ấy KHÔNG có cổng nào cưỡng chế — nói thẳng, vì bản đầu của ADR này khai ngược.** Bản đầu
+viết *"không có khối ấy thì cổng đăng lease từ chối"*, chép lời khai của `ADR-0043`. Đo lại
+12-09-2026: `ops/lease_publish.py` có **0** lần nhắc `nang_tran`, `ai_nang`, `can_cu`, `tran_cu`,
+`tran_moi`; quét cả kho `--include=*.py` cũng **0** tệp. Câu ấy hứa một chốt máy không tồn tại, và
+nó mâu thuẫn với chính mục *Nợ* ở cuối tệp này. Người cấp lease và người review phải kiểm khối
+`nang_tran` **bằng tay**; ai tin có cổng sẽ bỏ đúng bước kiểm ấy.
+
+Nghĩa vụ giữ nguyên, chỉ lời khai về cưỡng chế bị hạ xuống đúng mức đo được. Đây là lớp lỗi *"chép
+lời khai cưỡng chế từ chính sách cũ sang chính sách mới mà không đối chiếu hành vi sản phẩm"* —
+ADR kế nhiệm nào chép lại câu này phải đo lại trước, đừng chép tiếp.
 
 ## Số biện hộ — và giới hạn của nó
 

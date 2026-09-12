@@ -1,7 +1,7 @@
 # ★ dev-side — r372: ghi sổ #517 — ba verdict codex chấm CHÍNH hồ sơ r371 của #516, review PHÂN THEO LỚP theo chỉ thị chủ kho; HINT của reviewer cũng là lời khai (lượt 1 tự sinh một lỗi, lượt 2 bắt) (2026-09-12)
 
 Nối tiếp r371 (chốt tới `f4da553`, #517). Mục này là vế bookkeeping ADR-0034 của CHÍNH #517: 3 verdict + 3 biên nhận v2
-vào `ops/reviews/`, 3 hàng mục lục + 10 cảnh báo + 1 đoạn nguồn, manifest tái sinh. Tiền lệ r364/r367/r369/r371.
+vào `ops/reviews/`, 3 hàng mục lục + 11 cảnh báo + 1 đoạn nguồn, manifest tái sinh. Tiền lệ r364/r367/r369/r371.
 
 **Không nâng `VERSION`.** Vẫn `1.36.68` từ r336.
 
@@ -81,8 +81,8 @@ Không lease, không `guard --action merge` (PR hồ sơ); sổ local gen4 `uy_q
 - **P1 "Do not certify a third Codex review round" — ĐÚNG về canon, receipt chưa ghi đủ.** `docs/PROTOCOL_DA_PHIEN.md:597-600`
   ("tối đa hai lượt Codex … lượt hai chưa approve phải chuyển sang checkpoint, không tiếp tục gọi Codex theo quán tính"),
   `:806-808` (stop condition review budget → Review Rescue Checkpoint), `ops/KE_HOACH_THI_CONG_DA_PROVIDER.md` §10 (trần
-  canon **2 vòng**, đếm theo VÒNG; hiện **TỰ NGUYỆN** — `review_rounds_used` không có trần cưỡng chế), `ADR-0043` (vượt trần
-  phải có khối `nang_tran` khai `ai_nang` thuộc người có thẩm quyền, `can_cu`, `tran_cu`). #517 chạy **3 vòng**; vòng 3 phóng
+  canon **2 vòng**, đếm theo VÒNG; phần bộ đếm ở §10 đã bị ADR-0043:24-28 đính chính, xem NỢ), `ADR-0043` (vượt trần
+  phải có khối `nang_tran` khai `ai_nang` thuộc người có thẩm quyền, `can_cu`, `tran_cu`, `tran_moi`). #517 chạy **3 vòng**; vòng 3 phóng
   theo chỉ thị chủ kho trong phiên chat 02:2xZ ("lặp vá, cross-review … cho tới hết P1, P2 hoặc approve") — lời của người có
   thẩm quyền nhưng là (b) thuật lại, đưa ra TRƯỚC vòng 1, và **không có khối `nang_tran` nào được ghi trước khi phóng**.
   Commit 3 (`5475a64`): receipt 3 hạ `assurance` `cross_approved` → `cross_reviewed`, khối `nang_tran_adr_0043` ghi HẬU KỲ,
@@ -100,8 +100,9 @@ Không lease, không `guard --action merge` (PR hồ sơ); sổ local gen4 `uy_q
 ## Phạm vi — Git/băm/byte (a); lịch sử thao tác và thời điểm chạy cổng (b)
 
 - Commit 5: áp HINT lượt 1 codex của #520 (2 lớp P2 / 17 thể hiện — nhãn nguồn bị nâng thành đo; câu tổng hợp đổi tập
-  đối tượng) — PORT bằng tay lên head đã đổi (HINT viết cho `5ca3bb2`; 9/17 hunk FAILED trên `52e032b` vì commit 3–4 đã đổi
-  receipt 3/README/CHANGELOG); `receipt_written_at_utc` của 3 receipt đặt `null` (giờ đặt tay không phải phép đo).
+  đối tượng) — PORT bằng tay lên head đã đổi (HINT viết cho `5ca3bb2`; commit 3–4 đã đổi receipt 3/README/CHANGELOG).
+  (c) Reviewer lượt 2 #520 replay trên bản sao sạch `52e032b`: 7/17 hunk FAILED, cả áp thật lẫn dry-run; không tái lập
+  con số 9/17 trong lời khai tác giả. `receipt_written_at_utc` của 3 receipt đặt `null` (giờ đặt tay không phải phép đo).
   **Lỗi executor tự bắt khi port:** commit 3 và 4 chạy generator trên README ĐÃ CÓ hàng pr517 (khôi phục từ HEAD thay vì
   từ base) ⇒ chèn TRÙNG 16 dòng mỗi lần (771 → 787 → 803); t27 chỉ kiểm có mặt nên không bắt. Commit 5 dựng lại README từ
   `origin/master` rồi sinh một lần: 756 → 772 dòng đúng (1 đoạn + 1 trống + 11 cảnh báo + 3 mục lục = 16).
@@ -127,7 +128,8 @@ sống trong `scratch/` của sandbox, chưa vào kho, chưa có packet.
 
 ## NỢ (mở ở r372)
 
-- **Cổng trần vòng review ADR-0043** — `review_rounds_used` không có trần cưỡng chế (KE_HOACH §10 tự khai "TỰ NGUYỆN");
+- **Cổng trần vòng review ADR-0043** — theo ADR-0043:24-28, lời khai ở KE_HOACH §10 về `review_rounds_used` đã bị bác:
+  phép đo được ADR ghi lại là KHÔNG có bộ đếm ấy, không phải có bộ đếm nhưng thiếu trần. Hồ sơ này chưa đo lại mã hiện tại;
   connector đề nghị test sổ từ chối `luot: 3` không void khi thiếu khối `nang_tran` — đụng gate code, ngoài PR hồ sơ.
 - **Receipt `pr516-review-3` (r371) khai `cross_approved` cho vòng 3 của #516 (5 vòng) không có `nang_tran`** — cùng khuyết
   tật, KHÔNG có xác nhận riêng của chủ kho; đã land, chưa đính chính (tiền lệ `pr510-review-2`).

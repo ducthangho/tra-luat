@@ -135,7 +135,7 @@ delivered: true
 delivered_by: claude-session
 authoritative_source: repo_file
 receipt_written_by: claude-session
-receipt_written_at_utc: null  # KHÔNG ĐO ĐƯỢC; giá trị đặt tay trước đây (04:10:00Z / 04:40:00Z) không phải timestamp đo — giờ ghi đo được là commit time của receipt trong git
+receipt_written_at_utc: null  # KHÔNG ĐO ĐƯỢC; 04:10:00Z là giá trị đặt tay. Git chỉ cho commit time, không đo giờ tạo/sửa receipt.
 receipt_khong_khai:
   - 'Không khai model đã chạy — codex không đo được.'
   - 'Không khai đây là trạng thái cuối của #517 — head đã merge là da04323 (lượt 3).'

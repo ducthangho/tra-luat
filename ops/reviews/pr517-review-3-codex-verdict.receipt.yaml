@@ -1,4 +1,4 @@
-# BIÊN NHẬN GIAO HÀNG — cross-review HỒ SƠ LƯỢT 3 (LƯỢT CUỐI, HẸP) của PR #517, KHÁC NỀN (codex), theo lớp, trên head `da04323` — head ĐÃ MERGE vào master (`f4da553`, merge commit, cha `157b368` + `da04323`); approve 0/0/0; vòng 3 VƯỢT trần 2 vòng ADR-0043, khối nang_tran ghi HẬU KỲ sau khi chủ kho xác nhận 04:2xZ ⇒ cross_approved có điều kiện.
+# BIÊN NHẬN GIAO HÀNG — cross-review HỒ SƠ LƯỢT 3 (LƯỢT CUỐI, HẸP) của PR #517, KHÁC NỀN (codex), theo lớp, trên head `da04323` — head ĐÃ MERGE vào master (`f4da553`, merge commit, cha `157b368` + `da04323`); approve 0/0/0; vòng 3 VƯỢT trần 2 vòng ADR-0043, khối nang_tran hậu kỳ đã có ở 5475a64, được cập nhật ở 52e032b theo xác nhận chủ kho 04:2xZ (b) thuật lại ⇒ cross_approved có điều kiện.
 # Biên nhận viết SAU khi #517 merge (`f4da553`, 03:54:51Z 12-09-2026) — trả nợ ADR-0034 cho chính PR hồ sơ (tiền lệ r364/r367/r369/r371).
 
 schema_version: 2
@@ -100,6 +100,7 @@ anchor:
 nang_tran_adr_0043:
   ghi_hau_ky: true
   tran_cu: 2
+  tran_moi: null  # KHÔNG ĐO ĐƯỢC từ căn cứ kèm; không lấy số vòng đã dùng làm trần được duyệt.
   vong_da_dung: 3
   ai_nang: ducthangho
   can_cu: 'chỉ thị chủ kho trong phiên chat 04:2xZ 12-09-2026: "Khôi phục cross-approved cho #517, tôi đồng ý nâng trần khi có đề nghị trong phiên này" — (b) thuật lại, ghi công khai ở PR #520 comment 5643435742; chỉ thị 02:2xZ ("lặp vá … cho tới hết P1, P2 hoặc approve") là căn cứ executor dùng lúc phóng vòng 3 nhưng KHÔNG được ghi thành khối trước khi phóng'
@@ -111,9 +112,9 @@ verdict_usage_caveats:
   - id: VONG-3-VUOT-TRAN-2-VONG-ADR-0043-nang_tran-GHI-HAU-KY-chu-kho-xac-nhan-04-2xZ-12-09
     muc: P2
     mo_ta: >-
-      Trần canon `ADR-0043` / `ops/KE_HOACH_THI_CONG_DA_PROVIDER.md` §10 = 2 vòng review mỗi PR (đếm theo VÒNG; hiện TỰ NGUYỆN, `review_rounds_used` không có trần cưỡng chế); `docs/PROTOCOL_DA_PHIEN.md:597-600,806-808`. #517 chạy 3 vòng (0/3/1 → 0/1/0 → approve). Vòng 3 phóng 03:27Z theo chỉ thị chủ kho 02:2xZ ("lặp vá, cross-review … cho tới hết P1, P2 hoặc approve") mà KHÔNG có khối `nang_tran` (ai_nang/can_cu/tran_cu) ghi trước khi phóng. Connector Codex trên #520 (thread discussion_r3995065526) bắt ⇒ executor hạ receipt này xuống cross_reviewed ở 5475a64. Chủ kho xác nhận nâng trần 04:2xZ 12-09 ("Khôi phục cross-approved cho #517, tôi đồng ý nâng trần khi có đề nghị trong phiên này", ghi ở #520 comment 5643435742) ⇒ khôi phục cross_approved; khối `nang_tran_adr_0043` bên dưới ghi HẬU KỲ với `khoi_nay_co_truoc_khi_phong_vong_3: false`. Merge f4da553 vẫn đứng trên chỉ thị chủ kho (ADR-0040, khai báo).
+      Trần canon `ADR-0043` / `ops/KE_HOACH_THI_CONG_DA_PROVIDER.md` §10 = 2 vòng review mỗi PR (đếm theo VÒNG; ADR-0043:24-28 đính chính lời khai về `review_rounds_used` ở §10: theo phép đo được ADR ghi lại, bộ đếm ấy không tồn tại; hồ sơ này chưa đo lại mã hiện tại); `docs/PROTOCOL_DA_PHIEN.md:597-600,806-808`. #517 chạy 3 vòng (0/3/1 → 0/1/0 → approve). Vòng 3 phóng 03:27Z theo chỉ thị chủ kho 02:2xZ ("lặp vá, cross-review … cho tới hết P1, P2 hoặc approve") mà KHÔNG có khối `nang_tran` (ai_nang/can_cu/tran_cu/tran_moi) ghi trước khi phóng. Connector Codex trên #520 (thread discussion_r3995065526) bắt ⇒ executor hạ receipt này xuống cross_reviewed ở 5475a64. Chủ kho xác nhận nâng trần 04:2xZ 12-09 ("Khôi phục cross-approved cho #517, tôi đồng ý nâng trần khi có đề nghị trong phiên này", ghi ở #520 comment 5643435742) ⇒ khôi phục cross_approved; khối `nang_tran_adr_0043` của receipt ghi HẬU KỲ với `khoi_nay_co_truoc_khi_phong_vong_3: false`. Căn cứ kèm chưa nêu `tran_moi` bằng số; `vong_da_dung: 3` là số vòng thực chạy, không thay cho trần được duyệt. Khối này chưa chứng minh đủ điều kiện ADR-0043; `cross_approved` ở đây ghi nhận yêu cầu khôi phục theo lời tác giả thuật lại. Merge f4da553 vẫn đứng trên chỉ thị chủ kho (ADR-0040, khai báo).
     phai_lam_gi_khi_chay_lai: >-
-      Đọc cross_approved này kèm điều kiện: nâng trần được xác nhận SAU vòng 3, không trước; chỉ thị là (b) thuật lại từ phiên chat, bản ghi công khai là comment 5643435742. Receipt pr516-review-3 (r371) cùng khuyết tật, không có xác nhận riêng — đã land, ghi nợ. Nợ cổng: chặn `luot: 3` không void khi thiếu nang_tran.
+      Đọc cross_approved này kèm điều kiện: nâng trần được xác nhận SAU vòng 3, không trước; chỉ thị là (b) thuật lại từ phiên chat, bản ghi công khai là comment 5643435742. Receipt pr516-review-3 (r371) cùng khuyết tật, không có xác nhận riêng — đã land, ghi nợ. Muốn xác nhận khối đầy đủ ADR-0043 cần bổ sung trần mới bằng số và căn cứ cho số ấy; `tran_moi: null` chỉ khai chưa đo được. Nợ cổng: đếm vòng hợp lệ và kiểm đủ ai_nang/can_cu/tran_cu/tran_moi khi vượt trần.
   - id: APPROVE-HO-SO-la-dieu-kien-DUNG-merge-theo-CHI-THI-chu-kho-02-2xZ-12-09
     muc: P2
     mo_ta: >-
@@ -153,7 +154,7 @@ delivered: true
 delivered_by: claude-session
 authoritative_source: repo_file
 receipt_written_by: claude-session
-receipt_written_at_utc: null  # KHÔNG ĐO ĐƯỢC; giá trị đặt tay trước đây (04:10:00Z / 04:40:00Z) không phải timestamp đo — giờ ghi đo được là commit time của receipt trong git
+receipt_written_at_utc: null  # KHÔNG ĐO ĐƯỢC; 04:10:00Z / 04:35:00Z / 04:40:00Z là giá trị đặt tay. Git chỉ cho commit time, không đo giờ tạo/sửa receipt.
 receipt_khong_khai:
   - 'Không khai model đã chạy — codex không đo được.'
   - 'Không khai lượt 3 đã đo lại mọi phép đo của lượt 1–2 — lượt hẹp, xem caveat.'

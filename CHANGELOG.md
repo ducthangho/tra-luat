@@ -1,3 +1,149 @@
+# ★ dev-side — r372: ghi sổ #517 — ba verdict codex chấm CHÍNH hồ sơ r371 của #516, review PHÂN THEO LỚP theo chỉ thị chủ kho; HINT của reviewer cũng là lời khai (lượt 1 tự sinh một lỗi, lượt 2 bắt) (2026-09-12)
+
+Nối tiếp r371 (chốt tới `f4da553`, #517). Mục này là vế bookkeeping ADR-0034 của CHÍNH #517: 3 verdict + 3 biên nhận v2
+vào `ops/reviews/`, 3 hàng mục lục + 11 cảnh báo + 1 đoạn nguồn, manifest tái sinh. Tiền lệ r364/r367/r369/r371.
+
+**Không nâng `VERSION`.** Vẫn `1.36.68` từ r336.
+
+**Điểm mới so bốn PR hồ sơ trước: finding PHÂN THEO LỚP.** Chỉ thị chủ kho 02:2xZ 12-09-2026: *"#517: bỏ draft,
+cross-review (tìm, phân theo lớp, không theo từng lỗi). Nếu chưa xanh thì lặp vá, cross-review …, đăng verdict, cho tới
+hết P1, P2 hoặc approve. Không chạy CI, full CI, CI cho Windows cho tới merge."* Prompt reviewer định nghĩa LỚP = một
+cơ chế sinh cùng hình dạng lỗi ở nhiều chỗ; mỗi lớp có slug, hạng (= hạng cao nhất của thể hiện), bảng thể hiện
+`tệp:dòng · khai · đo`, một cách chữa chung + HINT cho cả lớp; `so_p*` đếm số LỚP, `so_the_hien` đếm tổng. Receipt v2
+thêm ba trường `phan_loai_finding: theo_lop` + `phan_loai_finding_ghi_chu` và `so_the_hien`; `findings_ids` là slug lớp.
+Kết quả đo được: lượt 1 gom **21 thể hiện vào 4 lớp** thay vì 21 finding rời — và HINT theo lớp (20 hunk / 6 tệp) áp một
+lần sạch; lượt 2 đối chiếu theo lớp với bảng từng thể hiện (20/21 ĐÃ VÁ THẬT). Không gọi tay lượt CI nào suốt ba lượt;
+CI PR tự chạy theo push.
+
+**Tác giả thuật lại lần chọn số r372 trên KHO NGUỒN** (04:02Z 12-09-2026): hai nguồn ref khớp (`ls-remote --heads` 346 /
+`for-each-ref` trừ HEAD 346, `comm` 0/0); tiêu đề đầu `CHANGELOG.md` trên mọi ref: `r370` ở 2 ref (`claude/vaerr-514-…`
+và `-wip`, phiên khác, chưa land), `r371` ở 2 ref (`master`, nhánh #517), `r372` **0 ref**, `r373` 0 ref. Các số này là
+lịch sử thuật lại, KHÔNG ĐO ĐƯỢC từ gói review. Nhánh r370 của phiên khác vẫn mở ⇒ PR nào land sau phải merge master và
+chạy lại 4 cổng.
+
+**GIỚI HẠN NGUỒN.** Như r367/r369/r371: (a) **tự đo được** — số Git, băm/byte tệp, số lớp/số thể hiện đếm từ tiêu đề
+`### … [Px]` và bảng thể hiện, cổng chạy lại từ hiện vật trong kho; (b) **thuật lại** — sự kiện GitHub (run CI, comment,
+connector, merge, `thu-hoi` rc=12), chỉ thị chủ kho trong phiên chat, probe quota codex; (c) **kết quả cũ thuật lại** —
+mutant/3 lối land/bộ kiểm nội dung mà reviewer chạy trong sandbox. Scalar runtime trong `model_reviewer_identity` đối chiếu
+được với `run.json` NGOÀI kho (`scratchpad/runs/{a488739c,6b193c07,702e1fb2}`, CÓ khoá `thoi_luong_giay`); model đã chạy
+KHÔNG ĐO ĐƯỢC.
+
+## Ba lượt review hồ sơ #517 — Git/băm/byte/số lớp/thể hiện (a); runtime đối chiếu log ngoài kho; sự kiện (b), kết quả sandbox cũ (c)
+
+| lượt | run | head / base | verdict (LỚP) | thể hiện | assurance | HINT |
+|---|---|---|---|---|---|---|
+| 1 | `a488739c` · 1 687,481 s (02:34:04 → 03:02:12Z) | `86f87b2` / `46d9561` | `changes_requested` 0 P1 / **3 P2** / 1 P3 | 21 | `cross_reviewed` | `292c42b6…` 56 938 B, 20 hunk / 6 tệp |
+| 2 | `6b193c07` · 986,278 s (03:07:42 → 03:24:08Z) | `458314a` / `46d9561` | `changes_requested` 0/**1**/0 — VÁ SINH LỖI MỚI của HINT lượt 1 | 1 | `cross_reviewed` | `f7de8c04…` 1 399 B, 1 hunk |
+| 3 (hẹp) | `702e1fb2` · 476,868 s (03:27:03 → 03:35:00Z) | `da04323` / `157b368` | `approve` 0/0/0 | 0 | `cross_approved` (vượt trần 2 vòng — chủ kho xác nhận nâng trần hậu kỳ, xem dưới) | `dcd44ce6…` 289 B, 0 hunk |
+
+**Bốn lớp lượt 1** (đều lời khai HỒ SƠ r371 rộng hơn phép đo — lần thứ NĂM liên tiếp, chuỗi PR được chấm
+r363→r366→r367→r369→r371): `nguon-thuat-lai-bi-nang-thanh-do` (10 thể hiện — nhãn (b)/(c) bị nâng thành (a) khi tổng hợp,
+kể cả câu quota/probe tác giả vừa sửa ở `86f87b2`) · `template-khong-khoa-theo-luot` (4 — caveat lỗi đọc launcher gán cho
+receipt lượt 3 trong khi lời tự khai ở verdict lượt 2; mô tả gói lượt 1 khai có verdict các lượt #516 trước; HINT5 "4 dòng"
+không phải "một dòng") · `tong-hop-doi-tap-doi-tuong` (6 — "4 mutant khi có 5" thay vì "3 ĐỎ/5"; "7 tệp không đổi qua merge"
+khi chỉ 4 tệp pr511 bằng byte; chuỗi bốn PR hồ sơ) · `dem-dong-cong-them-duoi-lf` (1 — V5 83 dòng, không phải 84).
+Executor áp NGUYÊN HINT (`patch -p0 --fuzz=0` rc=0, 6 tệp bằng byte bản reviewer, 0 `.rej`) tại `458314a`.
+
+**Lượt 2 — HINT của reviewer cũng là lời khai.** ĐỐI CHIẾU theo lớp với bảng 21 thể hiện: 20 ĐÃ VÁ THẬT; thể hiện
+CHANGELOG:32 VÁ SINH LỖI MỚI — HINT lượt 1 đã thay chuỗi `r366→r367→r369→r371` bằng `r364→…` trong khi số r của PR được chấm
+phải lấy tại `reviewed_sha` của verdict (`git show 5a29d35:CHANGELOG.md | head -1` = **r363**; r364 là mục GHI SỔ #500).
+Replay HINT lượt 1 (20/20 hunk, 6/6 tệp bằng byte) chứng minh tác giả không thêm chữ: lỗi là của chính đề nghị reviewer.
+Reviewer lượt 2 tự dựng bộ kiểm nội dung (`semantics.py`, không phải cổng sản phẩm): mutant trả câu quota cũ về / đảo
+caveat launcher về lượt 3 / đổi 3 ĐỎ→4 ĐỎ đều mới ĐỎ ở kiểm nội dung trong khi v2/t26/t27/release 0/0/0/0 — đúng giới hạn
+cổng đã công khai từ r367. HINT lượt 2 (1 hunk) áp nguyên tại `da04323`.
+
+**Master trôi giữa hai lượt.** PR #519 (chỉ `.claude/hooks/subagent_ghi_detect{,_test}.py`) land vào master `157b368`
+trong lúc lượt 2 chạy ⇒ `thu-hoi` trên `458314a` ĐỎ `rc=12 workflow_sha 157b368 != S 46d9561`. Merge `origin/master` vào
+nhánh ⇒ `8a18429` (không xung đột; manifest KHÔNG đổi vì `.claude/**` không nằm trong manifest); `thu-hoi` success. Reviewer
+lượt 2 cũng tự đo `origin/master` trong gói = `157b368` ≠ base được giao và ghi là thông tin ngoài diff (merge-base vẫn
+`46d9561`, diff ba chấm bằng byte). Vì head đổi, lượt 3 là lượt HẸP trên `da04323`: 1 thể hiện còn mở ĐÃ VÁ THẬT; merge
+không đổi hồ sơ (ngoài 13 tệp chỉ 2 tệp hooks); cổng HEAD; 3 lối land lên `157b368`.
+
+**Theo tác giả, lần phóng đầu lượt 3 bị executor giết** (thời điểm giết KHÔNG ĐO ĐƯỢC) (run `e5d5f4fa`, 03:26:28Z) vì EVIDENCE.md ghi numstat manifest
+"5/5" trong khi đúng là 3/3 — sửa EVIDENCE rồi phóng lại (`702e1fb2`). Ghi vì đây là đúng lớp *lời khai rộng hơn phép đo*
+do tác giả thuật lại; stderr ghi hoạt động tới 03:26:51Z và tạo VERDICT pending, không có verdict CHỐT trong gói; không có trong gói lượt 3 trước.
+
+**Codex connector trên `896bfbf`** (bỏ draft 02:27:14Z, Completed 02:41:20Z — head TRƯỚC `86f87b2`): 1 P1 "giữ commit neo
+trong tổ tiên" đo trên `38d6326` — object không tồn tại (`git cat-file -t` fatal trên worktree lẫn mirror): squash tổng hợp
+của connector, cùng hình dạng `6fe742e` (#516) và `403fe12` (#460); trên lịch sử thật `8fd3f48` là tổ tiên mọi head. Đã
+reply + resolve TRƯỚC khi phóng lượt 1 (trả nợ "đọc connector trước khi merge" lần thứ hai liên tiếp).
+
+**Merge `f4da553` (03:54:51Z, merge commit `157b368` + `da04323`, không squash)** theo chỉ thị chủ kho 02:2xZ + luật chung
+~14:4xZ 11-09; lúc merge `gate (ubuntu-latest)` job 103490507437 success (03:54:21Z), `thu-hoi` job 103490472949 success.
+Không lease, không `guard --action merge` (PR hồ sơ); sổ local gen4 `uy_quyen_merge.jsonl` có dòng KHAI BÁO cho `da04323`.
+
+## Codex connector trên `5ca3bb2` (bỏ draft 04:10Z, Completed 04:18:06Z) — hai P1, đọc TRƯỚC lượt review nào kết thúc
+
+- **P1 "Preserve the verdict-anchor commit in ancestry" — KHÔNG ÁP DỤNG, đã đo.** Connector đo trên `87839aa` — object
+  không tồn tại (`git cat-file -t` fatal sau fetch): squash tổng hợp của connector, lần thứ TƯ cùng hình dạng (`403fe12`
+  #460, `6fe742e` #516, `38d6326` #517). Lịch sử thật `5ca3bb2 → 606b5ed → f4da553`, neo là tổ tiên, v2 108/0. Reply +
+  resolve.
+- **P1 "Do not certify a third Codex review round" — ĐÚNG về canon, receipt chưa ghi đủ.** `docs/PROTOCOL_DA_PHIEN.md:597-600`
+  ("tối đa hai lượt Codex … lượt hai chưa approve phải chuyển sang checkpoint, không tiếp tục gọi Codex theo quán tính"),
+  `:806-808` (stop condition review budget → Review Rescue Checkpoint), `ops/KE_HOACH_THI_CONG_DA_PROVIDER.md` §10 (trần
+  canon **2 vòng**, đếm theo VÒNG; phần bộ đếm ở §10 đã bị ADR-0043:24-28 đính chính, xem NỢ), `ADR-0043` (vượt trần
+  phải có khối `nang_tran` khai `ai_nang` thuộc người có thẩm quyền, `can_cu`, `tran_cu`, `tran_moi`). #517 chạy **3 vòng**; vòng 3 phóng
+  theo chỉ thị chủ kho trong phiên chat 02:2xZ ("lặp vá, cross-review … cho tới hết P1, P2 hoặc approve") — lời của người có
+  thẩm quyền nhưng là (b) thuật lại, đưa ra TRƯỚC vòng 1, và **không có khối `nang_tran` nào được ghi trước khi phóng**.
+  Commit 3 (`5475a64`): receipt 3 hạ `assurance` `cross_approved` → `cross_reviewed`, khối `nang_tran_adr_0043` ghi HẬU KỲ,
+  caveat P1. **Chủ kho xác nhận nâng trần 04:2xZ 12-09** trong phiên chat (*"Khôi phục cross-approved cho #517, tôi đồng ý
+  nâng trần khi có đề nghị trong phiên này"*; ghi công khai ở #520 comment 5643435742) ⇒ commit 4: khôi phục
+  `cross_approved`, khối `nang_tran_adr_0043` giữ `khoi_nay_co_truoc_khi_phong_vong_3: false` + thêm
+  `chu_kho_xac_nhan_hau_ky: true`, caveat hạ P1 → P2
+  `VONG-3-VUOT-TRAN-2-VONG-ADR-0043-nang_tran-GHI-HAU-KY-chu-kho-xac-nhan-04-2xZ-12-09`. Xác nhận ấy cũng cho phép phiên này
+  vượt trần cho các PR nó lái (gồm #520) với điều kiện ghi khối `nang_tran` viện dẫn comment ấy TRƯỚC khi phóng.
+  Merge `f4da553` đứng trên chỉ thị chủ kho (ADR-0040, khai báo). Cùng khuyết tật ở
+  receipt ĐÃ LAND `pr516-review-3` (r371: lượt 3 của #516 khai `cross_approved` khi #516 chạy 5 vòng) — không sửa receipt đã
+  land, ghi nợ. Bài học: **HINT/chỉ thị/luật đều là lời khai cho tới khi được ghi đúng chỗ luật đòi** — executor đã đọc
+  "lặp tới approve" thành nâng trần mà không ghi khối luật đòi, y hệt lớp `nguon-thuat-lai-bi-nang-thanh-do`.
+
+## Phạm vi — Git/băm/byte (a); lịch sử thao tác và thời điểm chạy cổng (b)
+
+- Commit 5: áp HINT lượt 1 codex của #520 (2 lớp P2 / 17 thể hiện — nhãn nguồn bị nâng thành đo; câu tổng hợp đổi tập
+  đối tượng) — PORT bằng tay lên head đã đổi (HINT viết cho `5ca3bb2`; commit 3–4 đã đổi receipt 3/README/CHANGELOG).
+  (c) Reviewer lượt 2 #520 replay trên bản sao sạch `52e032b`: 7/17 hunk FAILED, cả áp thật lẫn dry-run; không tái lập
+  con số 9/17 trong lời khai tác giả. `receipt_written_at_utc` của 3 receipt đặt `null` (giờ đặt tay không phải phép đo).
+  **Lỗi executor tự bắt khi port:** commit 3 và 4 chạy generator trên README ĐÃ CÓ hàng pr517 (khôi phục từ HEAD thay vì
+  từ base) ⇒ chèn TRÙNG 16 dòng mỗi lần (771 → 787 → 803); t27 chỉ kiểm có mặt nên không bắt. Commit 5 dựng lại README từ
+  `origin/master` rồi sinh một lần: 756 → 772 dòng đúng (1 đoạn + 1 trống + 11 cảnh báo + 3 mục lục = 16).
+- Commit 3 `5475a64`: hạ receipt 3 theo connector; commit 4: khôi phục `cross_approved` theo xác nhận chủ kho (receipt 3 +
+  README + CHANGELOG mục connector + NỢ), manifest tái sinh; 4 cổng chạy lại — số ở mô tả PR.
+- Commit 1 `606b5ed`: 3 verdict NGUYÊN BYTE (`cmp` với `VERDICT.rvhs517-{1,2,3}.md` trong sandbox khớp) —
+  `pr517-review-1` sha256 `a97d5d94…` 131 162 B (655 dòng) · `-2` `49516ae2…` 27 355 B (187) · `-3` `7c068a44…` 12 451 B
+  (106); số dòng = số LF, tệp kết thúc LF (bài học `dem-dong-cong-them-duoi-lf`). `git log --all --diff-filter=A` ⇒ đúng 1
+  commit ⇒ neo blob `evidence_url` = `606b5ed`.
+- Commit 2: 3 biên nhận v2 (`cross_reviewed` / `cross_reviewed` / `cross_approved` — hạ ở commit 3, khôi phục ở commit 4), README (1 đoạn nguồn
+  PR #517, 10 hàng cảnh báo — 11 từ commit 3, 3 hàng mục lục — 756 → 771 dòng; 772 sau commit 5, xem lỗi trùng hàng ở trên),
+  mục r372 này, `RELEASE_MANIFEST.json` tái sinh.
+- Gate tại chỗ trước commit 2: `bien_nhan_v2 --root .` **108 ĐẠT v2 (105 tại `f4da553` + 3) · 11/11 miễn trừ legacy · 42 NỢ
+  đóng băng · 0 vi phạm · 0 KHÔNG ĐO ĐƯỢC · tổng 161**, TỔNG ĐẠT; t26/t27 QUA. `release-verify --strict --json`,
+  `doc-claims-check --strict`, doctrine-scan, `git diff --check` chạy SAU khi tái sinh manifest — số ở mô tả PR.
+
+## Giới hạn cổng — lần thứ tư xác nhận lại, và một cách bù
+
+`so_p2`/`verdict_bytes`/`assurance` đổi đều SỐNG qua 4 cổng (lượt 1 đo lại M3/M4/M5). Cái mới: reviewer lượt 2 chứng minh
+một **bộ kiểm NỘI DUNG** (đối chiếu receipt ↔ verdict ↔ Git: owner của caveat, số mutant từ bảng nguồn, chuỗi r từ
+`reviewed_sha`) bắt được cả ba lớp lời khai mà 4 cổng bỏ lọt. Đó là phác thảo cho nợ "cổng so_p*/verdict_bytes" — nhưng nó
+sống trong `scratch/` của sandbox, chưa vào kho, chưa có packet.
+
+## NỢ (mở ở r372)
+
+- **Cổng trần vòng review ADR-0043** — theo ADR-0043:24-28, lời khai ở KE_HOACH §10 về `review_rounds_used` đã bị bác:
+  phép đo được ADR ghi lại là KHÔNG có bộ đếm ấy, không phải có bộ đếm nhưng thiếu trần. Hồ sơ này chưa đo lại mã hiện tại;
+  connector đề nghị test sổ từ chối `luot: 3` không void khi thiếu khối `nang_tran` — đụng gate code, ngoài PR hồ sơ.
+- **Receipt `pr516-review-3` (r371) khai `cross_approved` cho vòng 3 của #516 (5 vòng) không có `nang_tran`** — cùng khuyết
+  tật, KHÔNG có xác nhận riêng của chủ kho; đã land, chưa đính chính (tiền lệ `pr510-review-2`).
+- **Cổng nội dung receipt** (so_p*/verdict_bytes/assurance/owner caveat/chuỗi r) — bốn lần xác nhận giới hạn; lượt 2 #517
+  có bản phác `semantics.py` ngoài kho; chưa có packet.
+- **Cổng cấu trúc verdict lượt ≥ 2** (`bien_nhan_v2` chưa từ chối `cross_approved` khi verdict thiếu bốn trạng thái canonical)
+  — nợ r369/r371, chưa đổi.
+- **Receipt `pr510-review-2` (r367) `cross_approved` với verdict thiếu mục ĐỐI CHIẾU** — chưa đính chính.
+- **#512 dừng ở S6** (4 finding connector đã kiểm, trần 2 vòng) — chờ chủ kho nâng trần + chọn phạm vi vá; hai verdict #512
+  chưa vào kho.
+- **Chưa có reviewer dự phòng khác nền** (`doctor`: `openai-llm`, `antigravity` THIẾU) — lộ ra khi codex báo hết quota
+  11-09; (b) probe 12-09 chạy được là tác giả thuật lại; thiếu log probe nên KHÔNG ĐO ĐƯỢC thời lượng giới hạn quota.
+- **Nhánh r370 (`vaerr-514`) của phiên khác chưa land** — chạm README/CHANGELOG; PR land sau merge master + chạy lại 4 cổng.
+- Nợ r371 còn nguyên: `SO-LEASE-KHONG-NAM-MOT-CHO`, `AG-T0-01B`.
 # ★ dev-side — r371: ghi sổ #516 — năm verdict codex chấm CHÍNH hồ sơ r369 của #511; lượt 5 approve nhưng codex báo HẾT QUOTA lúc kết thúc (ma_thoat=1) — thông điệp "try again Sep 15th" KHÔNG phải phép đo: (b) tác giả thuật lại probe 12-09 chạy được (2026-09-11)
 
 Nối tiếp r369 (chốt tới `46d9561`, #516). Mục này là vế bookkeeping ADR-0034 của CHÍNH #516: 5 verdict + 5 biên nhận v2

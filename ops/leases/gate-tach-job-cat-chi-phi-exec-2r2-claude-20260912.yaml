@@ -100,6 +100,7 @@ effective_review_class: sensitive
 
 thay_the_cho:
   - gate-tach-job-cat-chi-phi-exec-2-claude-20260912
+da_bi_thay_the: gate-tach-job-cat-chi-phi-exec-2r3-claude-20260912
 ly_do_thu_hoi: >-
   Khong thu hoi vi loi thi cong. Dac ta len revision 13: A5 cua r12 KHONG THOA DUOC —
   no doi luot NEN hop le (moi job success) ma nen tien-tach khong the hop le vi job

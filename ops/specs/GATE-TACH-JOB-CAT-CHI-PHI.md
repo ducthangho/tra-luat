@@ -1,9 +1,9 @@
-# Đặc tả packet — GATE-TACH-JOB-CAT-CHI-PHI (revision 13)
+# Đặc tả packet — GATE-TACH-JOB-CAT-CHI-PHI (revision 14)
 
 - `packet_id`: **GATE-TACH-JOB-CAT-CHI-PHI**; ID bền theo `PROTOCOL §3.2` là `wp<packet_issue>`.
 - `packet_issue`: **#463**
 - `mission_issue`: **#467** (*"bốn packet treo sau #456: GATE → LO-319 → 2A → 2B"*)
-- `revision`: **13** · `generation`: 1 · soạn **11:3xZ 11-09-2026**, sửa `A5` **10:0xZ 12-09-2026**
+- `revision`: **14** · `generation`: 1 · soạn **11:3xZ 11-09-2026**; `A5` r13 **10:0xZ 12-09-2026**; r14 (A8 400 + F03/F04/F05) **11:4xZ 12-09-2026**
 - `depends_on`: **`[wp502, wp504]`** — xem `write_set`. **`wp504`** là `WINDOWS-LEASE-SUITE` (lease
   sống, cấp `14:05Z 11-09-2026`), **KHÔNG** còn là `T125-RA-JOB-RIENG`: đặc tả ấy đã **RÚT** vì `#504`
   nhận cùng vấn đề bằng đường chủ kho chọn (song song hoá `t125` trong bộ test, giữ nguyên ngữ nghĩa)
@@ -226,6 +226,14 @@ hàng của nhiều runner; nếu nó **không** giảm dù `max(job)` giảm, �
 **Không** quy thời gian chờ thành phút tính tiền — chờ không tính tiền.
 
 **A2 (M2) — độ phủ không đổi, đo bằng TẬP HỢP, trên HAI loại cò.**
+
+**MIỀN của `A2`, khai r14 (cross-review lượt 1 `F03`).** Tương đương chỉ đòi hỏi trên **những lượt mà
+mọi bước tiền nhiệm đều xanh**. Ngoài miền ấy hành vi **CÓ ĐỔI**, và đổi có lợi lẫn có hại: `success()`
+ngầm phụ thuộc các bước trước **trong cùng job**, mà `packet-loop selftest` mất **3** tiền nhiệm và
+`test registry` mất **5** khi dời sang job riêng. Nếu `codex credential selftest` đỏ thì **trước** tách
+cả hai bị `skipped`, **sau** tách hai job độc lập vẫn chạy. Đó là **thay đổi hợp đồng**, không phải
+bypass: cổng tổng vẫn có job đỏ. Khai thẳng ở đây để không ai đọc *"độ phủ không đổi"* rộng hơn phép
+đo. Ca khoá bắt buộc: **một tiền nhiệm đỏ** cùng **đối chứng mọi tiền nhiệm xanh**.
 Lấy `(job, tên bước, nền, conclusion)` của lượt TRƯỚC và lượt SAU; **bỏ cột `job`**, so **tập**
 `(tên bước, nền, conclusion)`. Hai tập phải **bằng nhau**. Làm HAI lần:
 
@@ -432,7 +440,40 @@ lợi** cho packet. Điều đó không làm `r12` đúng trở lại; nó chỉ
 **`A1` KHÔNG đổi** — ngưỡng tuyệt đối `≤ 0,60 × timeout-minutes` trên `windows-latest`, chỉ cần lượt
 SAU, và đó là chỗ **một** lượt `workflow_dispatch` được chi.
 
-*(Căn cứ: chỉ thị chủ kho 12-09-2026, `#463` comment 5645249537.)*
+**SỬA r14 — ba chỗ r13 ĐỔI MIỀN ĐO MÀ GIỮ NGHĨA VỤ CỦA MIỀN CŨ.** Cross-review lượt 1 bắt đúng
+(`F04`, `F05`), và đây là lỗi của chính bản sửa r13; ghi cả cái sai vì nguyên nhân sai trong đặc tả
+tệ hơn không ghi.
+
+**(i) Ca phản chứng phải nhắm một instance THỰC SỰ TỒN TẠI trên lane đang đo.** `A5(1)` bắt ca
+*"bỏ một job Windows khỏi mẫu ⇒ `KHÔNG ĐO ĐƯỢC`"*. Trên lane PR không nhãn `windows` có **0** job
+Windows, nên ca ấy là **phép không đổi dữ liệu** — nó không thể làm tiêu chí đỏ. Đo được: PR
+`expected = 3`, bỏ Windows xoá **0** instance, `equality = True`; đối chứng dispatch `expected = 6`,
+bỏ **1** ⇒ `equality = False`. **Mất răng, đo được, không phải khác lời văn.**
+⇒ Phát biểu lại: ca âm bắt buộc là *"bỏ một instance BẤT KỲ thuộc tập kỳ vọng CỦA CHÍNH LANE ẤY"*.
+Trên lane PR đó là một job ubuntu; trên lane dispatch, ca Windows giữ nguyên.
+
+**(ii) MỖI LANE MỘT MANIFEST — không dùng chung.** r13 để `A2` bắt cặp dispatch, `A5` dùng cặp PR,
+mà câu *"manifest dùng CHUNG cho `A2` và `A5`"* vẫn đứng ⇒ không có lịch đo nhất quán.
+⇒ `A2` và `A5` mỗi tiêu chí có manifest **của lane mình** (`run_id`, `run_attempt`, tập job, SHA định
+nghĩa workflow). Ràng buộc *"cùng một mẫu"* áp **trong** một lane, không bắc cầu giữa hai lane.
+
+**(iii) `A1` KHÔNG được miễn nền bằng câu của `A5`.** r13 viết `A1` *"chỉ cần lượt SAU"* — sai, vì
+`A1` là ngưỡng tuyệt đối trên **`windows-latest`**, mà nền `A5` nay chỉ Ubuntu nên không cấp thời
+lượng Windows cho bất kỳ nghĩa vụ nào của `A1`.
+⇒ Nói cho đúng: `A1` đo trên **một** lượt `workflow_dispatch` SAU tách (ngân sách `N` chi ở đây), và
+nền tiền-tách của `A1` là **`KHÔNG ĐO ĐƯỢC`** — có căn cứ, vì job Windows tiền-tách chạm trần. Khai
+`KHÔNG ĐO ĐƯỢC` là kết quả hợp lệ; **suy nó thành xanh thì không**.
+
+**(iv) `F05` — nền `A5` KHÔNG được công nhận chỉ vì `ci.yml` bằng byte.** r13 neo nền vào một head
+khác `start_from_sha`; hai cây còn khác các tệp khác, và tải do **cả cây** quyết định chứ không chỉ
+định nghĩa workflow.
+⇒ Nền `A5` hợp lệ khi **một trong hai**: (a) sinh lại tại đúng `start_from_sha` trên lane PR; hoặc
+(b) tái dùng một lượt PR tiền-tách **và** khai đủ ba thứ: `ci.yml` bằng byte · danh sách tệp khác
+giữa hai cây · lập luận vì sao khác biệt ấy không đổi tải của các bước được đo. Thiếu bất kỳ mục nào
+⇒ **`KHÔNG ĐO ĐƯỢC`**, không phải "coi như tương đương".
+
+*(Căn cứ: chỉ thị chủ kho 12-09-2026, `#463` comment 5645249537 và 5645742072; cross-review lượt 1
+`F04`/`F05`, verdict tại comment 5645603860.)*
 
 **Một manifest phép đo dùng CHUNG cho `A2` và `A5`** — cùng `run_id`, cùng `run_attempt`, cùng tập
 job — để hai tiêu chí không đọc hai mẫu khác nhau rồi cùng báo xanh.
@@ -509,8 +550,16 @@ Hai phản chứng sẵn có `ruff-pin-required` và `ruff-version-probe-require
 **Phép làm ĐỎ:** đột biến `loi_ruff_ci` quay về đọc `jobs.gate` ⇒ ca **2** ĐỎ.
 
 **A8 (toàn packet) — không đụng gì khác.** `git diff --numstat` chỉ hiện đúng **2** đường dẫn, cột
-`additions` ≤ **300**. Đường thứ ba ⇒ **DỪNG và hỏi chủ kho**, không tự xin ngoại lệ, không tự mở
-write set (`§3.2`: *"agent không tự mở write set"*).
+`additions` ≤ **400** (r14 — ngoại lệ CÓ PHẠM VI, xem dưới). Đường thứ ba ⇒ **DỪNG và hỏi chủ kho**,
+không tự xin ngoại lệ, không tự mở write set (`§3.2`: *"agent không tự mở write set"*).
+
+**Ngoại lệ trần dòng, r14 — chỉ thị chủ kho 12-09-2026, `#463` comment 5645742072.** Trần `ADR-0044`
+cho `sensitive` là `300`; packet này được nới lên **`400`**, **RIÊNG** nó, **KHÔNG** đổi `ADR-0044`,
+**KHÔNG** là tiền lệ. `so_tep = 2` **không** nới — bán kính ảnh hưởng vẫn là chốt, và `S1` nguyên vẹn.
+Căn cứ đo được: tại `d4ba096` `additions = 302`, đã nén hết chỗ nén được (`304 → 302`). Hai lối còn
+lại đều **xoá phép đo**: cắt chú thích thì mất bài học *"vì sao đột biến thứ ba từng sống sót"*; bỏ ca
+`apt` thì đột biến `khong-fail-close` **sống lại** ⇒ nhánh fail-close thành không đo được. Nới trần là
+lối duy nhất giữ được cả phản chứng lẫn bài học.
 
 **A9 — KHÔNG lease nào còn giữ write set TRƯỚC khi bắt tay.**
 `ai-dang-giu` trên **cả hai** đường dẫn, chạy **sau** phép canh hai nguồn ref

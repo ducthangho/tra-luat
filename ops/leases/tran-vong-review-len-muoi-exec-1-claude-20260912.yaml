@@ -61,6 +61,12 @@ effective_review_class: sensitive
 
 depends_on: []
 thay_the_cho: []
+da_bi_thay_the: tran-vong-review-len-muoi-exec-3-claude-20260912
+# Gen 1 HẾT hiệu lực: write set đổi (thêm scripts/tl_selftest.py + RELEASE_MANIFEST.json +
+# ops/reviews/) nên §3.2 và §5 đòi revision + generation mới. Hồ sơ này GIỮ NGUYÊN phần còn
+# lại làm dấu vết; chỉ dòng trên được thêm, đúng chốt hai chiều của `_kiem_bia_mo`.
+# Gen 2 là bản NÂNG TRẦN cấp bằng comment (issues/522#issuecomment-5644974229), không có tệp
+# lease riêng — nên chuỗi thay thế trên đĩa là gen 1 -> gen 3, và nói thẳng vậy.
 
 ly_do_cap: >-
   ADR-0043 khai trần canon trục VÒNG là HAI; §20 ghi nó 0 cổng. Thực tiễn đo được vượt xa: #508 dùng

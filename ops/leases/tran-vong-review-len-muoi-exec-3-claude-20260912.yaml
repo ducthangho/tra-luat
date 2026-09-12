@@ -1,0 +1,147 @@
+# Lease EXECUTOR — TRAN-VONG-REVIEW-LEN-BON revision 3 (#522). Ghi HỘ chủ kho; phiên KHÔNG tự cấp.
+# THAY gen 1 vì WRITE SET ĐỔI. §3.2 và §5 của protocol đều đòi: đổi write set ⇒ revision mới,
+# generation mới, cấp lại lease. Không nới write set của một lease đang chạy.
+schema_version: 2
+event: executor_lease_granted
+
+packet_issue: 522
+mission_issue: 499
+granted_by: ducthangho
+granted_on_instruction: https://github.com/ducthangho/tra-luat/issues/522#issuecomment-5645452551
+leased_at_utc: 2026-09-12T11:00:00Z
+lease_expires_at_utc: 2026-09-13T08:15:00Z
+
+packet_id: TRAN-VONG-REVIEW-LEN-BON
+revision: 3
+generation: 3
+lease_id: tran-vong-review-len-muoi-exec-3-claude-20260912
+role: executor
+provider: claude
+executor: claude
+environment: cloud
+risk: sensitive
+assurance_target: cross_approved
+access: read-write
+
+spec_path: ops/specs/TRAN-VONG-REVIEW-LEN-BON-r3.md
+spec_sha256: cb46085f9cc66da142a18f0ad2104009608fc94e00fbf1881d1fd6fbcc1424de
+spec_hash: cb46085f9cc66da142a18f0ad2104009608fc94e00fbf1881d1fd6fbcc1424de
+
+write_set:
+  - docs/adr/0048-tran-vong-review-len-muoi.md
+  - docs/PROTOCOL_DA_PHIEN.md
+  - scripts/tl_selftest.py
+  - RELEASE_MANIFEST.json
+  - ops/reviews/
+
+write_set_da_do_truoc_khi_cap: >-
+  Quét TOÀN KHO sau `fetch --unshallow origin '+refs/heads/*:refs/remotes/origin/*'` (kho container
+  này là clone NÔNG với refspec rộng nhưng đệm chỉ có 2/353 ref — ca thứ BA của doctrine
+  `for-each-ref đọc bộ đệm`), và sau khi so TẬP TÊN hai nguồn: `ls-remote --heads` 353 ↔
+  `for-each-ref refs/remotes/origin` 354, `comm -23` = 0 dòng ⇒ KHÔNG MÙ (một ref thừa cục bộ là
+  nhánh chỉ định chưa push, vô hại). `lease_publish.py ai-dang-giu`:
+  `scripts/tl_selftest.py` rc=0 NGƯỜI_GIỮ 0 (4 hit đều HẾT_HẠN);
+  `RELEASE_MANIFEST.json` rc=0 NGƯỜI_GIỮ 0 (8 hit đều HẾT_HẠN).
+  Một fail-close của chính cổng đã bắt trước đó (nhánh `master` cục bộ tụt sau 248 commit, rc=12) và
+  đã chữa bằng đúng lệnh cổng in ra, không bằng cách bỏ qua.
+  BỘ QUÉT ĐÃ BỊ HỎI MỘT CA BIẾT TRƯỚC ĐÁP ÁN trước khi tin nó: `docs/adr/0048-*.md` ⇒ rc=11,
+  CÒN_HẠN, NGƯỜI_GIỮ 1 = tran-vong-review-len-muoi-exec-1-claude-20260912. Nó phân biệt được, nên
+  hai lời khai NGƯỜI_GIỮ 0 ở trên có răng.
+
+branch: claude/tran-vong-review-len-muoi
+branch_ownership: exclusive
+target_branch_neu_land: master
+base_sha: 3c7df6d678e11090a1623f871dcd484250a4b68b
+start_from_sha: a3f5f2144128a6488dd133f5d7b497d8cb494d8e
+reviewed_sha_required: a3f5f2144128a6488dd133f5d7b497d8cb494d8e
+
+# `base_sha` giữ nguyên bản gốc như gen 2 đã khai. `origin/master` nay là
+# 015ffcc09d76fbc9cdfbc3d2ee0735c3ead8d364 và ĐÃ là tổ tiên của head (đo:
+# `merge-base --is-ancestor` rc=0 sau khi `--unshallow` — trước đó phép hỏi lịch sử không tin được).
+# `reviewed_sha_required` neo head lúc cấp; verdict của từng lượt neo head THỰC SỰ đã đọc, và lượt
+# này sẽ đọc head SAU khi vá r291 — nói thẳng để không ai đọc dòng trên thành "chỉ được review đúng
+# a3f5f21".
+
+authority_basis: '§2 — start/pause/resume/reroute/override/authorize thuộc chủ kho'
+recorded_by: claude-session
+recorder_is_dispatcher: false
+recorder_cung_la_nguoi_thi_cong: true
+recorder_xung_dot_loi_ich: >-
+  Phiên ghi lease này CŨNG là phiên sẽ thi công packet, và cũng là phiên SOẠN đặc tả r3 — tức nó tự
+  viết ra phạm vi rồi tự dùng. Đó là xung đột thật, ghi ra thay vì che. Ba thứ thu hẹp nó:
+  (1) hai đường thêm vào write set không do phiên chọn mà do PHÉP ĐO chỉ ra (r291 đỏ, và tệp chữa
+  r291 bị manifest ghim theo nội dung) — đã tái hiện delta hai vế trong một lệnh;
+  (2) chỉ thị nới là của chủ kho, có dấu vết bền ở granted_on_instruction;
+  (3) cross-review phải là phiên KHÁC NỀN (codex), và `sensitive` đòi approve tường minh.
+  Phần KHÔNG thu hẹp được: chính phiên này phát biểu A6/A8 — nếu nó viết ngưỡng lỏng thì không cổng
+  nào bắt. Reviewer phải đọc A6/A8 như một đối tượng đáng nghi, không như tiền đề.
+
+run_minutes: 1440
+heartbeat_required_minutes: 30
+attempts_used: 0
+attempts_limit: 10
+
+nang_tran:
+  same_failure_limit: 2 -> 10
+  attempts_limit: 3 -> 10
+  ai_nang: ducthangho
+  can_cu: https://github.com/ducthangho/tra-luat/issues/522#issuecomment-5644974229
+  ghi_chu: >-
+    Chép nguyên khối nang_tran mà chủ kho cấp cho gen 2; gen 3 không nâng thêm gì. Nâng trần này
+    KHÔNG chữa lớp a2-doan-cach-viet-so — nó vẫn là nợ SO-CANON-CHUA-TON-TAI.
+
+ngoai_le_adr_0044:
+  ai_nang: ducthangho
+  tran_cu: 3 tệp
+  tran_moi: 4 tệp
+  khong_nang: trần 300 dòng thêm GIỮ NGUYÊN; trục LỜI GỌI và trần ATTEMPT GIỮ NGUYÊN
+  can_cu: >-
+    Hai đường thêm là CHI PHÍ BẮT BUỘC của M1, không phải mở rộng phạm vi. Đo được: tệp ADR mới là
+    Markdown thứ 73 dưới docs/ trong khi scripts/tl_selftest.py đấm cứng 72 (dòng 21276, 21279) ⇒
+    r291_docs_ngoai_goi ĐỎ; và tệp chữa r291 nằm trong RELEASE_MANIFEST.json ghim theo NỘI DUNG
+    (manifest sha256 b65bc7519e9781b88a01432a124092a6bb05d5fd07b1b3fd468ade6e3e9c1ce8, size
+    2137906, khớp đĩa) ⇒ phải tái sinh manifest. Không có tổ hợp 3 tệp nào vừa thoả M1 vừa để gate
+    xanh. Chỉ thị chủ kho: issues/522#issuecomment-5645452551.
+  pham_vi: chỉ packet #522; hết hiệu lực khi #522 terminal; KHÔNG áp cho packet nào khác
+  khong_tinh_vao_bon_tep: >-
+    ops/reviews/ là hiện vật review bất biến — ci.yml đã khai chúng "không phải mã sống để CI chạy".
+    Nói thẳng ra đây để phép đếm của A6 không mơ hồ.
+
+reviewer_provider: codex
+review_class: sensitive
+effective_review_class: sensitive
+
+depends_on: []
+thay_the_cho:
+  - tran-vong-review-len-muoi-exec-1-claude-20260912
+
+ly_do_cap: >-
+  r2 KHÔNG thi hành được, đo bằng số. Phép đo DELTA hai vế dựng trong MỘT lệnh (hai clone rời, cùng
+  các bước, cùng ghim core.abbrev 7, chạy song song — thuốc của doctrine chống "rig tự đẻ hồi quy"):
+  nền 015ffcc docs md = 72, `tl.py --selftest` rc=0 với 1709/1709 và 0 FAIL;
+  head packet a3f5f21 docs md = 73, rc=1 với 1708/1709 và đúng 1 FAIL = r291_docs_ngoai_goi.
+  Trên CI cùng ca ấy: gate run 34685943174 trên a3f5f21 failure, run 34684537107 trên 7059cbb
+  failure; thu-hoi success cả hai. Bàn giao của phiên r2 ghi gate còn
+  in_progress ⇒ KHÔNG ĐO ĐƯỢC; đo lại thì nó đã completed/failure TỪ TRƯỚC lúc bàn giao.
+  Nên nền XANH và delta là của packet. Chữa r291 đòi đường thứ ba và thứ tư ⇒ đổi write set ⇒
+  revision 3 + generation 3 + cấp lại lease, theo đúng §3.2 và §5.
+
+viec_trong_lease:
+  - 'M1: ADR-0048 khai trần trục VÒNG là MƯỜI, trỏ ADR-0043 là tiền nhiệm, giữ nguyên hai trục kia.'
+  - 'M2: ADR khai luật hiệu lực theo thời điểm đóng băng, có MỐC và thứ NEO (spec_hash).'
+  - 'M3: §20 đúng một dòng cho ADR mới; dòng ADR-0043 đổi trạng thái, KHÔNG xoá.'
+  - 'M4: giữ nguyên nghĩa vụ khối nang_tran khi vượt trần MỚI.'
+  - 'M5: ADR ghi bảng bốn PR làm số biện hộ, kèm câu khai giới hạn của phép đo.'
+  - 'M6: r291_docs_ngoai_goi ĐẠT với 73 Markdown dưới docs/, bằng khối KÊ KHAI SLOT đúng nếp tệp ấy.'
+  - 'M7: RELEASE_MANIFEST.json khớp cây; release-verify --strict ok=true, expected == checked.'
+  - 'M8: hiện vật cross-review (verdict có băm + biên nhận) sống trong git, không chỉ trong container.'
+
+dieu_kien_dung:
+  - 'S1 cần đường dẫn thứ NĂM ngoài bốn đường exact + prefix ops/reviews/ trong write_set.'
+  - 'S2 dòng thêm > 300 (ADR-0044; trần dòng KHÔNG được nâng).'
+  - 'S3 muốn sửa docs/adr/0043-*.md, bốn đặc tả đã đóng băng chép con số cũ, hay r1/r2 của đặc tả này.'
+  - 'S4 muốn viết cổng so-canon trong packet này (nợ riêng SO-CANON-CHUA-TON-TAI).'
+  - 'S5 muốn đổi trục LỜI GỌI hay ATTEMPT.'
+  - 'S6 muốn đổi CƠ CHẾ của r291 (tính số thay vì đấm cứng) — nợ riêng R291-DAM-SO-CUNG.'
+  - 'S7 muốn chạm ca nào khác trong scripts/tl_selftest.py ngoài khối r291.'
+  - 'S8 trần MƯỜI vòng review (ADR-0048 sau khi land; trước đó ADR-0043 + khối nang_tran).'

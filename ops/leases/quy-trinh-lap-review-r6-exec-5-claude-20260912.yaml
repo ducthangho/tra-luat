@@ -218,3 +218,17 @@ dieu_kien_dung:
   - 'S10 MỚI — phát hiện cho thấy A9'' (một phép đo) CŨNG bỏ lọt một cấu hình. DỪNG: đó là quyết
      định thiết kế của chủ kho, không phải chỗ executor tự đổi công thức lần thứ ba.'
   - 'S11 MỚI — muốn tự định nghĩa P1/P2/P3 để lấp nợ DINH-NGHIA-PHAN-HANG-KHONG-CO-NGUON.'
+
+da_bi_thay_the: quy-trinh-lap-review-r7-exec-6-claude-20260912
+da_bi_thay_the_ly_do: >-
+  LÀM SẠCH ĐẶC TẢ, KHÔNG đổi phân công: `M16` và `N1`–`N8` của r6 giữ NGUYÊN VĂN, `write_set` giữ
+  ba đường, `nang_tran` không đổi. Lượt 5 trả `blocked` lần thứ BA với 2 LỚP / 4 THỂ HIỆN (giảm từ
+  9 LỚP / 18 THỂ HIỆN), và lớp `dac-ta-r5-giu-luat-cu-trai-tieu-chi-moi` chỉ thẳng vào HAI hiện vật
+  mà lease này neo: `SPEC:114–115` của r6 còn nguyên câu vận hành *"Phép đếm đúng là … CỘNG …"* kèm
+  con trỏ `A9` — thứ r6 đã rút — và `dieu_kien_dung` của CHÍNH tệp lease này vẫn là danh sách gen 4
+  (`S7` trỏ `A1'`/`A2'`, `S9` trỏ `A9'`/`A17'`/`A18'`/`A19`/`A20`, `S11`), thiếu `S9'`/`S10'`/`S11'`
+  mà `SPEC:307–315` đã phát biểu ⇒ spec và lease KHÔNG THỐNG NHẤT về stop routing.
+  Soạn r7 đo thêm được HAI đường vào nữa mà lượt 5 không nêu: câu *"kế thừa `S1`–`S8` của lease gen
+  3"* kéo về `S2` của gen 3 (chính công thức CỘNG đã rút) và `S8` của gen 3 (neo vào `A17` đã rút).
+  BỐN đường, không phải một — nên r7 bỏ hẳn cơ chế kế thừa qua con trỏ thay vì vá từng câu.
+  Lease gen 6 neo `ops/specs/…-r7.md`, `spec_sha256` `19a43804…` (đo TỪ BLOB).

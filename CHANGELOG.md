@@ -256,6 +256,141 @@ văn; nợ cổng vẫn chưa có packet.
 - **Hai PR hồ sơ song song lại chạm README/CHANGELOG** (r370 nhánh `vaerr-514` · r371 nhánh này) — PR land sau merge
   master + chạy lại 4 cổng.
 - Nợ r369 còn nguyên: `SO-LEASE-KHONG-NAM-MOT-CHO`, `AG-T0-01B`.
+# ★ dev-side — r370: hai finding P1 của connector codex trên #514 — một BÁC bằng phản chứng clone nông, một ĐÚNG: `authorization_url` vắng hẳn khỏi land evidence (2026-09-11)
+
+## Bối cảnh — và một lỗi quy trình của chính tôi, ghi trước
+
+#514 (`r368`, ghi sổ #493) merge lúc `20:24:42Z` thành `8802924`. Bỏ draft lúc `20:24:1x` đã **tự
+kích hoạt** connector codex review trên `4965f0a` lúc `20:24:20Z`. Tức tôi merge **22 giây** sau khi
+một lượt review bắt đầu, và review ấy chạy tới `20:39:24Z` — sau merge 15 phút.
+
+Đây là mục *"Gate xanh KHÔNG phải đã được review"* của `CLAUDE.md` (PR #104/#105: hai finding thật
+vào master vì merge trước khi mở phần review), tái phát với một biến thể: lần này review **chưa tồn
+tại** lúc tôi quyết định merge, nó được sinh ra bởi **chính thao tác bỏ draft**. Nên chốt cũ ("đọc
+review trước khi merge") không đủ — phải thêm: **bỏ draft là một hành vi KÍCH HOẠT, không phải một
+thay đổi trạng thái trơ**. Lần merge được tường thuật ở đây không đủ chứng minh **không có
+cổng nào canh**: cần phân biệt cổng tồn tại, đường thao tác mà nó phủ và trạng thái thực thi
+của nó trong lần ấy. Khi chưa đối chiếu các cấu hình và log tương ứng, chưa kết luận có hay
+không có cổng tự động đợi connector hoàn tất. Việc kiểm tra lượt review sau khi bỏ draft,
+đọc kết quả trước khi merge là kỷ luật thao tác cần tuân thủ.
+
+Nội dung `4965f0a` đã qua 11 lượt cross-review codex (lượt 11 `approve`, 0 P1/0 P2/0 P3), nên việc
+merge không phải là bỏ qua review — nhưng connector chấm bằng prompt khác và **tìm ra một thứ đúng
+mà 11 lượt kia không tìm ra**. Đó là lý do mục này tồn tại.
+
+## Finding 1 — BÁC, và nó tái hiện đúng bẫy clone nông của `CLAUDE.md`
+
+Lời khai của connector: trên một checkout độc lập của `4965f0a`, `98f931bc3cd5…` không phải tổ tiên
+của HEAD, nên `ops/bien_nhan_v2.py` báo **cả 17 receipt mới là VI PHẠM**, và `canonical_ancestry` của
+chúng vô hiệu hoá cổng receipt.
+
+Hai clone dựng từ cùng một nguồn, trong một lệnh, cùng SHA `8802924`:
+
+| clone | `merge-base --is-ancestor 98f931bc… HEAD` | `bien_nhan_v2` |
+|---|---|---|
+| đầy đủ | **rc=0** — LÀ tổ tiên | 98 ĐẠT v2 · **0 vi phạm** · **0 KHÔNG ĐO ĐƯỢC** · tổng 151 |
+| `--depth=1 --branch master` | `fatal: Not a valid commit name`, **rc=128** | 98 ĐẠT v2 · 0 vi phạm · **196 KHÔNG ĐO ĐƯỢC** ⇒ `TỔNG: KHÔNG ĐO ĐƯỢC` |
+
+**Bốn số trên TRÔI theo head, và đó là tính chất chứ không phải lỗi** — ghi ra đây vì một reviewer
+đã đo ở head khác rồi chấm bảng này sai. `#516` land thêm 2 biên nhận, nên trên `7718863` cùng hai
+lệnh ấy cho `100 ĐẠT / tổng 153` và `200 KHÔNG ĐO ĐƯỢC` (đo lại, cả hai). Bảng neo `8802924`; ai
+đo ở head khác mà thấy số khác thì **chưa đủ cơ sở kết luận bảng sai**; vẫn phải đo lại
+tại chính `8802924` để xác minh bảng. Chênh lệch giữa hai head tự nó không chứng minh bảng đúng.
+Cặp `0 vi phạm` so `KHÔNG ĐO ĐƯỢC` — thứ kết luận thật sự nằm ở đây — **không
+đổi** qua cả hai head.
+
+Hai điều phép tái dựng ở bảng trên phân biệt được:
+
+1. **Nguồn**: trong phép tái dựng, `--depth=1` làm thiếu lịch sử để hỏi — đúng cơ chế được mô tả
+   trong mục *"cắt độ sâu làm hỏng phép hỏi LỊCH SỬ"* của `CLAUDE.md`. Chưa có log checkout và
+   lệnh gốc của connector trong gói để xác minh đó là nguyên nhân của chính lượt review ấy.
+2. **Phân loại**: ở clone nông đã đo, cổng nói **`KHÔNG ĐO ĐƯỢC`**, không nói `vi phạm`.
+   Gọi kết quả này là "violation" sẽ gộp trạng thái thứ ba vào sai, tức `None → False`.
+
+Phép tái dựng bác lời khai về ancestry trên cây đầy đủ và xác nhận cách cổng phân loại khi thiếu
+lịch sử. Nó chưa xác định connector thực sự đã chạy và đọc đầu ra nào. Cơ chế tái hiện được
+không tự chứng minh nguyên nhân của một lượt chạy khác.
+
+## Finding 2 — ĐÚNG. `authorization_url` vắng HẲN khỏi `ops/land/pr493-land-evidence.yaml`
+
+`docs/PROTOCOL_DA_PHIEN.md:478` liệt `authorization_url: <durable-url>` trong schema land evidence,
+và cùng mục nói thẳng: *"chat transcript hoặc lời tự khai không thay thế GitHub object, commit và
+workflow run."*
+
+Đo tiền lệ trên `8802924` — **8/8 tệp `ops/land/*.yaml` khác đều CÓ khoá này**: 7 tệp trỏ một URL
+`#pullrequestreview-…` bền (`pr468` `pr477` `pr478` `pr480` `pr487` `pr489` `pr491`), và `plat-x8`
+ghi `authorization_url: null`. Tệp của #493 là **tệp duy nhất bỏ hẳn khoá**.
+
+Khối `uy_quyen` của nó CÓ khai trung thực *"KHÔNG có hiện vật GitHub cho câu này"* — nhưng khai trung
+thực về một khoá thiếu **không phải là có khoá ấy**, và `khong_do_duoc` cũng không liệt nó. Tiền lệ
+`plat-x8` là tiền lệ **viết khoá ra và để `null`** để ghi rõ khoản thiếu bằng chứng. Cả khoá vắng
+lẫn giá trị `null` đều có thể phát hiện bằng cách đối chiếu schema; bản vá chỉ làm khoản thiếu dễ
+thấy hơn. Nó chưa cung cấp `<durable-url>` và chưa thêm cổng kiểm land evidence.
+
+**Vá**: ghi `authorization_url: null` + một mục `khong_do_duoc` + chú thích ngay tại khoá. **KHÔNG bịa
+URL**: uỷ quyền cho `99aef14` là chỉ thị trong phiên; dựng một comment "uỷ quyền" trên #493 sau khi nó
+đã merge là **bịa provenance**, không phải vá.
+
+## Vì sao nó lọt — và đây mới là nợ
+
+**Phép grep không đo đủ phạm vi đọc của các cổng.** Đo trên `8802924`: grep `ops/*.py` ·
+`.claude/dev/*.py` · `scripts/tl_core/*.py` · `.github/workflows/*.yml` cho `ops/land` và
+`land_operator` ⇒ **0 nơi**. Tuy nhiên, tại cùng SHA, bước `eol-policy survey` trong `ci.yml`
+chạy `python .githooks/eol_policy.py --all --json`: nó đọc blob trong index và kiểm EOL của cả
+9 tệp `ops/land/*.yaml`, gồm tệp #493. Kiểm EOL không xác minh schema hay URL uỷ quyền.
+
+Theo tường thuật của phiên điều phối, khoản thiếu khoá đã đi qua **gate PR** (44/44), **gate
+master** (44/44 chân ubuntu) và **11 lượt cross-review codex**; lượt 11 có nhiệm vụ *"tự nhất quán
+của land evidence"* và báo *"không mâu thuẫn"*. Đây là ATTESTATION về các lượt chạy ngoài gói.
+Việc không báo finding không chứng minh cả 11 lượt đều chưa đối chiếu schema hoặc tệp cùng loại;
+chưa có đầy đủ log của chúng trong gói để xác minh từng thao tác review.
+
+Nợ cần canh là schema/URL uỷ quyền: phản chứng bỏ dòng `authorization_url` trên bản sao r370 vẫn
+cho `bien_nhan_v2` ĐẠT. Không dùng kết quả ấy, hoặc grep 0 nơi, để kết luận mọi cổng đều không đọc
+thư mục. Giữ slug lịch sử `khong-cong-nao-doc-ops-land`; mô tả nợ ở đây giới hạn lại phạm vi của nó.
+
+## Gate hậu-merge của #514 trên master (`8802924`)
+
+- `gate (ubuntu-latest)`: **44/44 bước = 40 thành công + 4 không chạy theo điều kiện**, 0 thất bại,
+  0 bị huỷ. 20:24:49Z → 20:46:34Z. Bốn bước không chạy: `PR head contains required EOL base`
+  (`if: github.event_name == 'pull_request'`), `gate lifecycle selftest` (nền không có cgroup), và
+  hai biến thể lane PR nhường chỗ cho biến thể lane LAND.
+- `gate (windows-latest)`: **BỊ HUỶ Ở TRẦN**. 20:24:50Z → 21:25:07Z = **60 phút 17 giây**, đúng
+  `timeout-minutes: 60` (`ci.yml:64`). Bộ đếm bước: **21 thành công · 1 BỊ HUỶ · 22 không chạy**
+  (`skipped` gồm cả bước bị loại bởi điều kiện: `PR head contains required EOL base` nằm TRƯỚC
+  bước bị huỷ và chỉ chạy ở sự kiện `pull_request`). Chưa có run JSON trong gói để phân rã
+  22 bước theo nguyên nhân; không quy tất cả cho việc huỷ. Bước bị huỷ là **số 20,
+  `lease-publish selftest (đo lại setup sau G5)`**.
+- `thu-hoi` trên `4965f0a`: thành công.
+
+**Nguồn của bốn số Windows ở trên, và giới hạn của chúng**: `actions/runs/34644073109`, đọc qua API
+GitHub trong phiên. Với người đọc **từ trong kho**, chúng là **ATTESTATION, KHÔNG tái lập được** —
+gói review không mang `run.json` nào của lượt CI, và reviewer không có mạng. Nói đúng ra: chúng là
+`KHÔNG ĐO ĐƯỢC` từ bên trong kho. Ghi rõ vì chính mục này đang tố cáo việc trình bày một trạng thái
+thứ ba như thể nó là kết quả đo, nên nó không được phép phạm cùng lỗi ở đoạn dưới của chính nó.
+
+**Vì vậy `landed` của #514 CHƯA đủ điều kiện theo §10.2** — điều kiện đòi gate hậu-merge XANH, mà
+chân Windows cho trạng thái thứ ba: **BỊ HUỶ**, không phải `pass`, cũng không phải `fail`. Nói
+"gate hậu-merge xanh" ở đây là gộp trạng thái thứ ba vào `pass` — đúng lỗi mà mục r370 này vừa
+chấm connector codex ở Finding 1. Trạng thái đúng của #514: **`merged` + ubuntu xanh + Windows
+KHÔNG ĐO ĐƯỢC**.
+
+Đặc tả `WINDOWS-LEASE-SUITE` của #504 đã ghi triệu chứng Windows chạm trần trước #514.
+Diff của #514 không chạm `ci.yml` hay `ops/lease_publish*`, nhưng có thêm 17 cặp verdict/biên nhận
+và cập nhật mục lục `ops/reviews/README.md`; `ops/lease_publish_test.py` đọc các dữ liệu đó ở `t26`
+và `t27`. Mã suite không đổi chưa loại trừ ảnh hưởng của đầu vào thay đổi. Gói này chưa cung cấp
+đối chứng Windows để xác định #514 có góp phần vào lần huỷ này hay không. **KHÔNG nâng `timeout-minutes`** —
+`ci.yml:63` đã ghi sẵn *"NÂNG TRẦN KHÔNG CHỮA NGUYÊN NHÂN"*.
+
+Phiên này bổ sung ATTESTATION cho run `34644073109`: bước 20 `lease-publish selftest` bị huỷ,
+thời lượng job 60:17. Tại `8802924`, `ops/specs/WINDOWS-LEASE-SUITE.md` đã ghi bước 20 còn chưa xong
+khi các job Windows của run `34439063235` và `34552510232` bị huỷ; tên bước không phải dữ kiện
+lần đầu xuất hiện trong hồ sơ #504. Các số lịch sử trong đặc tả vẫn là tường thuật, chưa được
+reviewer offline đối chiếu với API/log gốc. Mẫu `list_workflow_runs` được phiên điều phối tường
+thuật (lọc `branch: master`, 2 lượt gate trong 30 lượt) chỉ mô tả phần kết quả ấy. Nó không đủ
+xác lập rằng các lần trước chưa biết bước bị huỷ, cũng không đủ kết luận mọi lần huỷ đều xảy ra
+ở cùng bước hoặc cùng nguyên nhân.
+
 # ★ dev-side — r369: ghi sổ #511 — hai verdict codex chấm CHÍNH hồ sơ r367 của #510; 5 P2 vá rồi approve; merge theo luật chung "approve ⇒ land" (2026-09-11)
 
 Nối tiếp r367 (chốt tới `b98531e`, #510). Merge sau đó chưa có mục: **#511** — vế bookkeeping ADR-0034 của #510/#505,

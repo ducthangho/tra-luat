@@ -23,10 +23,31 @@ im lặng thì không phải trần.
 
 **Nghĩa vụ ấy KHÔNG có cổng nào cưỡng chế — nói thẳng, vì bản đầu của ADR này khai ngược.** Bản đầu
 viết *"không có khối ấy thì cổng đăng lease từ chối"*, chép lời khai của `ADR-0043`. Đo lại
-12-09-2026: `ops/lease_publish.py` có **0** lần nhắc `nang_tran`, `ai_nang`, `can_cu`, `tran_cu`,
-`tran_moi`; quét cả kho `--include=*.py` cũng **0** tệp. Câu ấy hứa một chốt máy không tồn tại, và
-nó mâu thuẫn với chính mục *Nợ* ở cuối tệp này. Người cấp lease và người review phải kiểm khối
-`nang_tran` **bằng tay**; ai tin có cổng sẽ bỏ đúng bước kiểm ấy.
+12-09-2026, **đếm RIÊNG từng tên** vì chúng có phạm vi khác nhau:
+
+| tên | `ops/lease_publish.py` | số tệp `*.py` toàn kho |
+|---|---:|---:|
+| `nang_tran` | 0 | 0 |
+| `ai_nang` | 0 | 0 |
+| `tran_cu` | 0 | 0 |
+| `tran_moi` | 0 | 0 |
+| `review_rounds_used` | 0 | 0 |
+| `can_cu` | **7** | **11** |
+
+Bốn tên RIÊNG của cơ chế vượt trần — `nang_tran`, `ai_nang`, `tran_cu`, `tran_moi` — cùng bộ đếm
+`review_rounds_used` đều **vắng mặt hoàn toàn**. `can_cu` thì KHÔNG: nó có mặt, nhưng thuộc cơ chế
+**thu hồi lease** (`ops/lease_publish.py:960`, `1062`–`1067` đòi `can_cu` là một URL Issue comment),
+không phải cơ chế vượt trần. Nên kết luận *"không có cổng nào cưỡng chế `nang_tran`"* vẫn đứng, còn
+lời khai *"cả năm tên đều 0"* thì **sai** — và bản trước của chính đoạn này đã viết đúng câu sai ấy.
+
+Ghi cả cái sai vì nó là một lớp lỗi có tên: **gộp nhiều tên trường khác phạm vi vào một con số 0**.
+Một tên dùng chung với cơ chế khác sẽ khác 0 mà chẳng chứng minh gì về cơ chế đang xét; đếm gộp thì
+vừa khai sai, vừa che mất điều đó. Đếm riêng từng tên, và phân biệt *token có mặt* với *cơ chế có
+cưỡng chế*.
+
+Câu hứa cũ hứa một chốt máy không tồn tại, và nó mâu thuẫn với chính mục *Nợ* ở cuối tệp này. Người
+cấp lease và người review phải kiểm khối `nang_tran` **bằng tay**; ai tin có cổng sẽ bỏ đúng bước
+kiểm ấy.
 
 Nghĩa vụ giữ nguyên, chỉ lời khai về cưỡng chế bị hạ xuống đúng mức đo được. Đây là lớp lỗi *"chép
 lời khai cưỡng chế từ chính sách cũ sang chính sách mới mà không đối chiếu hành vi sản phẩm"* —

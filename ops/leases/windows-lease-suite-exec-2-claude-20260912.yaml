@@ -1,0 +1,148 @@
+# LEASE GENERATION 2 — packet wp504 (alias WINDOWS-LEASE-SUITE). Thẩm quyền cấp: chủ kho `ducthangho`.
+# Hồ sơ do phiên `claude` SOẠN và GHI HỘ; phiên KHÔNG tự cấp — `ops/lease_publish.py` chỉ nhận
+# `NGUOI_CO_THAM_QUYEN = ("ducthangho",)` và TỪ CHỐI mọi tên provider.
+#
+# VÌ SAO GEN 2: gen 1 hết hạn 2026-09-12T14:05:00Z. Vòng review 7 đã phóng lúc 13:10Z và chắc chắn
+# chạy quá mốc đó; áp HINT của vòng 7 sau 14:05Z mà không có generation mới là làm việc KHÔNG CÓ
+# LEASE. Chỉ thị chủ kho: phiên chat 12-09-2026 ~12:50Z, chọn "cấp gen 2 ngay để chạy liền mạch".
+schema_version: 2
+event: executor_lease_granted
+
+packet_issue: 504
+mission_issue: 499
+granted_by: ducthangho
+granted_on_instruction: 'https://github.com/ducthangho/tra-luat/issues/504#issuecomment-5646460376'
+leased_at_utc: '2026-09-12T14:22:00Z'
+lease_expires_at_utc: '2026-09-13T14:22:00Z'
+
+packet_id: wp504
+packet_alias: WINDOWS-LEASE-SUITE
+revision: 1
+generation: 2
+lease_id: windows-lease-suite-exec-2-claude-20260912
+role: executor
+provider: claude
+executor: claude
+model: fable-5.1
+effort: xhigh
+reviewer_model: gpt-6-astra
+reviewer_effort: xhigh
+reviewer_hint_patch: true
+environment: cloud
+risk: sensitive
+assurance_target: cross_approved
+access: read-write
+
+# Spec KHÔNG đổi giữa hai generation — cùng tệp, cùng băm, đo lại lúc cấp trên bb7013c.
+spec_path: ops/specs/WINDOWS-LEASE-SUITE.md
+spec_sha256: 6af324a368550eda667c67315052cf4fe1a1fb861e2c0da77202163deb34d105
+spec_hash: 6af324a368550eda667c67315052cf4fe1a1fb861e2c0da77202163deb34d105
+
+# Write set GIỮ NGUYÊN hai đường của gen 1 — gen 2 KHÔNG mở rộng quyền, chỉ gia hạn.
+write_set:
+  - ops/lease_publish_test.py
+  - ops/chay_lease_publish_test.sh
+depends_on:
+  - M9-FETCH-AUTH
+
+branch: claude/windows-lease-suite
+branch_ownership: exclusive
+target_branch_neu_land: master
+
+# 3 MỎ NEO = origin/master lúc cấp gen 2. KHÁC gen 1 (b98531e) vì master đã trôi và nhánh PR đã
+# merge master về (commit 1db6af2) — neo cũ không còn mô tả đúng base của PR.
+base_sha: bb7013c7669da19304a8769e5b25f8c1f8951e9c
+start_from_sha: bb7013c7669da19304a8769e5b25f8c1f8951e9c
+reviewed_sha_required: bb7013c7669da19304a8769e5b25f8c1f8951e9c
+
+authority_basis: '§2 — start/pause/resume/reroute/override/authorize thuộc chủ kho'
+recorded_by: claude-session
+recorder_is_dispatcher: false
+recorder_cung_la_nguoi_thi_cong: true
+recorder_xung_dot_loi_ich: >-
+  Phiên ghi lease này cũng là phiên thi công packet — giữ nguyên xung đột đã khai ở gen 1. Cross-review
+  phải là phiên `codex` KHÁC; trần vòng 10 (S6), đã dùng 6 trước lượt này, vòng 7 đang chạy.
+
+run_minutes: 1440
+write_set_hash: 392ac6a961861fecb3a005dcf0a5b31f5aaffec8d8cae0b764d4bf108b9ad134
+heartbeat_at: '2026-09-12T14:22:00Z'
+lease_until: '2026-09-13T14:22:00Z'
+heartbeat_required_minutes: 30
+attempts_used: 0
+attempts_limit: 3
+
+reviewer_provider: codex
+review_class: sensitive
+effective_review_class: sensitive
+
+# BIA MỘ HAI CHIỀU (`_kiem_bia_mo`, ops/lease_publish.py:595-615). Gen 2 khai `thay_the_cho` gen 1 VÀ
+# tệp gen 1 mang dòng `da_bi_thay_the: windows-lease-suite-exec-2-claude-20260912`. Thiếu một chiều
+# thì cổng CHẶN. Đây là cơ chế DUY NHẤT tắt lease cũ sớm (CLAUDE.md, đo 28-08-2026); không làm thì
+# hai lease cùng giữ một write set tới 14:05Z = cửa sổ hai writer, đúng thứ write-set exclusion chặn.
+thay_the_cho:
+  - windows-lease-suite-exec-1-claude-20260911
+ly_do_thu_hoi: >-
+  Không phải reroute và không phải thu hồi vì sai phạm: cùng packet, cùng phiên thi công, cùng write
+  set — chỉ là GIA HẠN. Gen 1 hết 14:05:00Z trong khi vòng review 7 (phóng 13:10:20Z) chắc chắn chạy
+  quá mốc. Thu hồi gen 1 tại đây để không có hai lease cùng hiệu lực trên cùng hai đường dẫn.
+
+write_set_da_do_truoc_khi_cap: >-
+  ĐO LẠI 14:19Z 12-09-2026, NGAY TRƯỚC khi cấp — không dùng số của lần đo 13:14Z, vì gen 1 đã HẾT HẠN
+  lúc 14:05:00Z giữa hai lần đo nên tập người giữ đã đổi. Kho: `is-shallow-repository` = false (trước đó
+  kho NÔNG 682/2135 commit trên master, đã `--unshallow`; kho nông làm `merge-base --is-ancestor` trả SAI).
+  Hai nguồn ref so bằng TẬP TÊN qua `comm`: 356/356, `comm -23` RỖNG và `comm -13` RỖNG ⇒ KHÔNG MÙ.
+  `ai-dang-giu` lần đầu trả CHAN [12] NHÁNH_CỤC_BỘ_TỤT_SAU (`master` cục bộ tụt 28 commit) — cổng
+  fail-close ĐÚNG, vì lệnh quét `refs/heads/*` nên một nhánh cục bộ cũ làm phép quét MÙ; chữa bằng
+  `git branch -f master refs/remotes/origin/master` (đã kiểm ahead=0 trước khi ép), rồi đo lại.
+  KẾT QUẢ trên CẢ HAI đường: `NGƯỜI_GIỮ 1` = chính `windows-lease-suite-exec-2-claude-20260912` (bản
+  nháp cục bộ của lượt này); gen 1 hiện `HẾT_HẠN`; KHÔNG packet nào khác giữ hai đường ấy. Mọi mục khác
+  trong danh sách đều `HẾT_HẠN`.
+ly_do_cap: >-
+  Gia hạn để đóng nốt vòng review 7 của PR #512. Head tại lúc cấp: 36f68c7e95e0de1fcf8e2311db33a164816db20f
+  (merge master 1db6af2 + áp NGUYÊN VĂN HINT vòng 6 tại 36f68c7). Đo trên head ấy: suite 155/155 ở CHA và
+  cả hai vế [A]/[B]; doctrine-scan rc=0; adr-song rc=0; catalogue 16 đột biến 16/16 giết thật bằng bộ đo
+  ĐÃ VÁ F6. CI tự động: `thu-hoi` success, `gate` đang chạy.
+
+viec_trong_lease:
+  - 'Áp HINT của vòng review 7 nếu verdict là changes_requested, trong ĐÚNG hai đường write set.'
+  - 'Chạy lại cổng tại chỗ và đòi BẰNG CHỨNG DƯƠNG: ba dòng N/N hai số bằng nhau (CHA + [A] + [B]).'
+  - 'Mở tiếp vòng review nếu còn P1/P2, trong trần S6 = 10 vòng.'
+  - 'KHÔNG chạy CI tay. Chỉ nhận lượt tự động do push sinh ra; full CI khi merge.'
+
+dieu_kien_dung:
+  - 'S1 cần đường dẫn thứ ba (kể cả ci.yml).'
+  - 'S2 dòng thêm > 300.'
+  - 'S3 ca treo nằm trong ops/lease_publish.py — DỪNG, revision.'
+  - 'S4 muốn skip/cách ly/nâng timeout-minutes.'
+  - 'S5 origin/master chạm một trong hai đường sau bb7013c.'
+  - 'S6 trần vòng review.'
+
+# NÂNG TRẦN `S2` — PHẢI CẤP LẠI, KHÔNG TỰ THỪA HƯỞNG. Khối `nang_tran` của gen 1 tự giới hạn phạm vi:
+# "Chỉ lease `windows-lease-suite-exec-1-claude-20260911`, generation 1 — chủ kho nói 'cho phiên này'".
+# Đọc một override hết phạm vi thành còn hiệu lực là tự nâng trần, tức đúng thứ `S2` sinh ra để chặn.
+nang_tran:
+  truc: S2
+  ai_nang: ducthangho
+  tran_cu: 300
+  tran_moi: 1500
+  khi_nao: 'khi cấp generation 2, 12-09-2026'
+  pham_vi: >-
+    Chỉ lease `windows-lease-suite-exec-2-claude-20260912`, generation 2. KHÔNG đổi `ADR-0044`, KHÔNG áp
+    cho packet khác. Cấp LẠI chứ không kế thừa: khối của gen 1 tự bó vào generation 1.
+  phep_do: >-
+    Tổng cột `additions` của `git diff --numstat origin/master...HEAD --
+    ops/lease_publish_test.py ops/chay_lease_publish_test.sh`.
+  do_luc_nang: >-
+    head `36f68c7e95e0de1fcf8e2311db33a164816db20f`: 2 đường, +1101/−27 (1095 + 6). 1101 <= 1500, dư 399.
+    ĐÍNH CHÍNH: thông điệp commit 36f68c7 ghi 1114 và con số ấy SAI — phiên đã CỘNG +32 của patch vào
+    1076 thay vì ĐO LẠI sau commit; patch +32/−13 thay thế 13 dòng vốn đã là dòng THÊM của chính PR nên
+    delta thật ở cột "thêm" là +19. Ba mỏ neo nay nhất quán: 353eae1 so b98531e = 1076+6 = 1082, khớp
+    đúng con số vòng 6. KHÔNG phải lỗi do kho nông; merge-base = bb7013c = chính origin/master.
+  can_cu: >-
+    Chỉ thị chủ kho phiên chat 12-09-2026, nguyên văn "1. theo khuyến nghị" / "2. đẩy đi".
+    Dấu vết BỀN (do phiên GHI HỘ, có khai rõ trong chính comment):
+    https://github.com/ducthangho/tra-luat/issues/504#issuecomment-5646460376
+  khong_nang_them: >-
+    Vượt 1500, hoặc chạm S1/S3/S4/S5, thì DỪNG và hỏi lại chủ kho. Phiên KHÔNG tự nới thêm.
+  truc_khac_nang_rieng: >-
+    Trục VÒNG (S6 / ADR-0043) nâng lên 10 là một phép nâng RIÊNG, ghi riêng — không gộp vào đây.

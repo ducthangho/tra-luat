@@ -144,3 +144,13 @@ nang_tran:
   truc_khac_nang_rieng: >-
     Trục VÒNG (S6 / ADR-0043) được nâng RIÊNG lên 10 ở packet #522. ADR-0043 tách ba trục vì nâng
     nhầm trục là nâng chi phí chứ không nâng kỷ luật — nên hai lần nâng ghi riêng, không gộp.
+
+# BIA MỘ — chiều NGƯỢC của `thay_the_cho` trong `windows-lease-suite-exec-2-claude-20260912.yaml`.
+# `_kiem_bia_mo` (ops/lease_publish.py:595-615) đòi ĐỦ HAI CHIỀU, nên dòng dưới không phải một lời
+# chú thích lịch sự mà là ĐIỀU KIỆN để gen 2 đăng được.
+#
+# Lý do thu hồi sớm: gen 1 hết 2026-09-12T14:05:00Z, trong khi vòng review 7 (phóng 13:10:20Z) chắc
+# chắn chạy quá mốc đó. Để hai lease cùng hiệu lực trên CÙNG hai đường write set là tự mở cửa sổ hai
+# writer — đúng thứ write-set exclusion sinh ra để chặn, và đúng nợ `AG-T0-01B-thu-hoi-lease-chua-co-duong`.
+# Cùng packet, cùng phiên thi công, cùng write set: đây là GIA HẠN, không phải reroute, không phải kỷ luật.
+da_bi_thay_the: windows-lease-suite-exec-2-claude-20260912

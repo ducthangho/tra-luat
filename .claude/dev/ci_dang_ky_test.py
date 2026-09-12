@@ -169,12 +169,18 @@ def _phan_loai_cai_ruff(run):
         if not _RUFF_NHAC.search(dong): continue
         try: tok = shlex.split(dong)
         except ValueError: tok = dong.split()
-        if "install" not in tok: continue
-        i = tok.index("install")
+        # `install` KHONG phai tu khoa duy nhat: `poetry add ruff` cai that ma khong co no.
+        # Ban dau bo cham tra KHONG cho dong ay => VO HINH. Danh sach CHO PHEP phai liet ke
+        # ca DONG TU cai dat, roi moi thu nao nhac `ruff` ma khong khop => fail-close.
+        dt = next((t for t in ("install", "add", "sync") if t in tok), None)
+        if dt is None:
+            return "KHONG_PHAN_TICH_DUOC", dong
+        i = tok.index(dt)
         dau = tok[:i]
-        hop_le = (dau[:1] in (["pip"], ["pip3"], ["uv"])
-                  or dau[:3] in (["python", "-m", "pip"], ["python3", "-m", "pip"])
-                  or dau[:4] in (["uv", "pip"],) )
+        hop_le = dt == "install" and (
+            dau[:1] in (["pip"], ["pip3"])
+            or dau[:2] == ["uv", "pip"]
+            or dau[:3] in (["python", "-m", "pip"], ["python3", "-m", "pip"]))
         if not hop_le:
             return "KHONG_PHAN_TICH_DUOC", dong
         spec = next((t for t in tok[i + 1:] if _RUFF_SPEC.match(t)), None)
@@ -603,7 +609,8 @@ def phan_chung():
                          ("buoc-if-false", [dict(_ruff, **{"if": "false"})]),
                          ("upgrade-khong-ghim-sau-pin", [_ruff, _p("python -m pip install --upgrade ruff")]),
                          ("comment-chua-pin", [_p("# ruff==0.15.15")]),
-                         ("dang-cai-khong-phan-tich-duoc", [_ruff, _p("apt-get install -y ruff")])]:
+                         ("dang-cai-khong-phan-tich-duoc", [_ruff, _p("apt-get install -y ruff")]),
+                         ("poetry-add-khong-phan-tich-duoc", [_ruff, _p("poetry add ruff")])]:
         _ruff_fx.append((_wf({"gate": {"steps": [_ruff]},
                               "gate-registry": {"steps": _b + [_reg]}}), 1))
         _RUFF_TEN.append("ruff-ci-" + _ten_f01)

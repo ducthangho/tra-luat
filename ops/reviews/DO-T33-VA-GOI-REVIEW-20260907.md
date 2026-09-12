@@ -4,16 +4,23 @@ Ngày `2026-09-07`. Vá hai nợ còn lại sau khi PR #468 đạt verdict `appr
 
 ## 1. `t33_workflow_dang_lease_phai_qua_actionlint` — nay ĐÃ ĐO
 
-Full-gate ngày `2026-09-07` cho `lease rc=1` ở **cả hai vế**. Tôi đã ghi đúng rằng đó là
-fail-close chứ không phải hồi quy, nhưng phải nói thêm một điều quan trọng: **ca `t33` khi ấy
-không đỏ, cũng không xanh — nó KHÔNG CHẠY.**
+Full-gate ngày `2026-09-07` cho `lease rc=1` ở **cả hai vế**. Đó là fail-close chứ không phải
+hồi quy. Nhưng nói cho chính xác: **ca `t33` khi ấy ĐÃ CHẠY và ĐỎ** ở tiền điều kiện thiếu
+`actionlint` — assertion tại `ops/lease_publish_test.py:1359–1363` (bản `b416830`) bắn **trước** `subprocess.run`
+ở dòng 1364. Thứ **chưa chạy** là **thao tác lint workflow** bên trong hàm, không phải bản thân ca.
 
-`ops/lease_publish_test.py:1338` nói rõ chủ ý: *"`actionlint` phải XANH … và THIẾU công cụ là
+> Bản đầu của tài liệu này viết *"không đỏ, cũng không xanh — nó KHÔNG CHẠY"*. Lời khai này sai về
+> mặt mã nguồn (assertion đánh rơi ca thành ĐỎ t33), nhưng xin lưu ý: **không có log của lần chạy
+> hỏng đó**. Các tệp trong `ops/reviews/log-t33-20260907/` hoàn toàn là log chạy lại **thành công**
+> (đạt 121/121). Việc "ĐỎ t33" là báo cáo lịch sử chưa kiểm chứng (historical unverified report) của
+> executor kết hợp với phân tích mã nguồn, chứ không được chứng minh bằng các log đang giữ.
+
+`ops/lease_publish_test.py:1338` (bản `b416830`) nói rõ chủ ý: *"`actionlint` phải XANH … và THIẾU công cụ là
 ĐỎ."* Vậy `rc=1` là hành vi ĐÚNG, không phải lỗi mã. Cách đóng là **cài công cụ rồi đo**, không
 phải nới phép kiểm.
 
 Đã cài bằng **script ghim sẵn của kho** `ops/cai_actionlint.sh` (`AL_VER=1.7.7`, đúng bản CI ghim
-ở `.github/workflows/ci.yml:97`), có đối chiếu băm — `rc=0`.
+ở `.github/workflows/ci.yml:97` bản `b416830`), có đối chiếu băm — `rc=0`.
 
 > Tự khai: lần đầu tôi cài bằng `curl` tuỳ tiện, **không đối chiếu băm**. Đó đúng thứ kỷ luật của
 > kho này bác bỏ. Đã gỡ bản ấy và cài lại bằng script của kho trước khi đo.
@@ -38,7 +45,7 @@ installer hay băm archive để đối chiếu độc lập. Suy `rc=0` từ `m
 luận có điều kiện, không phải phép đo `rc` của tiến trình đã chạy.
 
 CI **đã** cài `actionlint` từ trước (`ci.yml:98`, `duyet-phan-chung.yml:54`,
-`ops-publish-lease.yml`). Nên đây chưa bao giờ là lỗ hổng của kho — chỉ là container chạy gate
+`ops-publish-lease.yml` bản `b416830`). Nên đây chưa bao giờ là lỗ hổng của kho — chỉ là container chạy gate
 thiếu công cụ. Nợ nằm ở chỗ dựng môi trường đo, và mục 2 vá đúng chỗ đó.
 
 ## 2. `ops/dung_goi_review.sh` — chuẩn hoá việc dựng gói
@@ -71,12 +78,12 @@ Bản đầu của tài liệu này (và các báo cáo tôi gửi chủ kho) vi
 **Sai.** Cross-review PR #477 (P3 `chan-doan-ai-dang-giu-chi-heads-khong-dung`) bắt được, và tôi
 đã đọc lại mã để xác nhận:
 
-- `_cac_ref_cuc_bo` (`ops/lease_publish.py:307–321`) chạy
+- `_cac_ref_cuc_bo` (`ops/lease_publish.py:307–321` bản `b416830`) chạy
   `for-each-ref refs/heads refs/remotes` — **đọc CẢ HAI** — và tính tên nhánh từ cả
   `refs/remotes/origin/*`.
 - `_quet_lease_toan_kho` đọc trọn danh sách ấy.
 
-Tôi tin **banner của CLI** (`ops/lease_publish.py:937` in `PHẠM_VI: quét refs/heads/*`) thay vì đọc
+Tôi tin **banner của CLI** (`ops/lease_publish.py:937` bản `b416830` in `PHẠM_VI: quét refs/heads/*`) thay vì đọc
 mã. Banner không phản ánh hết hành vi.
 
 Hệ quả về nguyên nhân lịch sử, nói ở mức **giả thuyết** chứ không phải kết luận: cross-review
@@ -130,7 +137,7 @@ Cross-review PR #477 (P3 `so-do-lich-su-thieu-hien-vat-tai-tinh`) chỉ ra đún
 | `sau.lease-sau-cai-actionlint.out` / `.err` | stdout/stderr vế sau `f77f198`, 8649 B |
 | `moi-truong-va-rc.txt` | lệnh, hai SHA đầy đủ, `rc` hai vế, bản `actionlint`/`shellcheck`, cách cài |
 
-Hai stdout khác nhau **32 dòng** trước chuẩn hoá; sau khi chuẩn hoá tên thư mục tạm ngẫu nhiên
+Hai stdout khác nhau **16 vị trí dòng (32 dòng cộng/trừ trong diff)** trước chuẩn hoá; sau khi chuẩn hoá tên thư mục tạm ngẫu nhiên
 (`sed -E 's/lp_[a-z0-9_]+/LP/g'`) thì **giống hệt, 49/49 dòng**.
 
 Vẫn chưa kiểm lại được, ghi rõ: TSV và manifest của lần đo `305`/`2131` **không còn** — chúng ở
@@ -154,7 +161,7 @@ lại từng phản chứng:
 
 | finding | mức | lỗi | sau khi vá |
 |---|---|---|---|
-| `actionlint-co-mat-khong-phai-dung-ban` | **P1** | `if ! command -v actionlint` bỏ qua installer ghim — trái `ops/cai_actionlint.sh:14` *"co mat != dung ban"*; rc trong đối số `printf` không làm `set -e` kích hoạt | luôn gọi installer ghim; bắt `rc` bằng assignment |
+| `actionlint-co-mat-khong-phai-dung-ban` | **P1** | `if ! command -v actionlint` bỏ qua installer ghim — trái `ops/cai_actionlint.sh:14` (bản `b416830`) *"co mat != dung ban"*; rc trong đối số `printf` không làm `set -e` kích hoạt | luôn gọi installer ghim; bắt `rc` bằng assignment |
 | `shellcheck-thieu-van-giao-goi-xanh` | P2 | chỉ ghi `THIEU` rồi đi tiếp, dù thiếu nó thì `actionlint` bỏ luật `SC*` trong im lặng | shellcheck vào danh sách BẮT BUỘC ⇒ `loi 4` |
 | `remote-doi-ten-loi-van-khai-url-that` | P2 | hai `\|\| true` nuốt lỗi ⇒ `origin` trỏ sai mà vẫn `rc=0` | `\|\| loi 5` + đọc lại `origin` và đối chiếu |
 | `manifest-loc-hau-to-bo-sot-tep-con` | P2 | `grep -v '  \./ARTIFACTS\.sha256$'` chỉ neo cuối dòng ⇒ thư mục tên `nested  .` làm tệp con bị loại | `find ... ! -path './ARTIFACTS.sha256'` |
@@ -204,3 +211,47 @@ Phản chứng tự đo sau khi vá:
 | `shellcheck` giả đặt sẵn trong `cong-cu` | — | `rc=0`, chọn `/usr/bin/shellcheck` |
 | `actionlint(){ echo 1.7.70; }; export -f` | — | `rc=0`, ghi `1.7.7` |
 | đường xanh | — | `rc=0`, `306/306/306` |
+
+## GIỚI HẠN CỦA `ops/dung_goi_review.sh` — hợp đồng đầu vào, tự khai
+
+Cross-review #477 lượt 6 (`gioi-han-dung-goi-chua-tu-khai`) chỉ ra tài liệu này thiếu phần tự khai
+điều kiện môi trường và quyền sở hữu thư mục đầu ra. Bổ sung, kèm báo cáo lịch sử chưa kiểm chứng (historical unverified report) do không còn lưu log đối chứng.
+
+### Chỉ `actionlint` được ghim — ba công cụ còn lại TIN VÀO PATH ĐẦU VÀO
+
+`actionlint` luôn được cài bằng `ops/cai_actionlint.sh` (bản ghim + đối chiếu băm) và gọi bằng
+đường dẫn đã cài (có thể là tương đối nếu `$R` tương đối). Nhưng `shellcheck`, `git`, `python3` chỉ được resolve bằng `type -P` trên
+`$PATH` người gọi đưa vào cho mục đích ghi nhận phiên bản. Thêm vào đó, việc gọi `git` thực tế trong script là gọi trực tiếp theo tên bare name, có thể bị thay thế bởi function/alias của shell. `type -P` bỏ qua function/alias/builtin — nó **không** xác thực nguồn gốc công cụ dùng để chạy.
+
+Báo cáo lịch sử chưa kiểm chứng (historical unverified report): đặt một `shellcheck` giả đầu PATH ⇒ script **`rc=0`**, `cong-cu.txt` ghi
+`version: 9.9.9` từ bản giả. Nói cách khác: **PATH và môi trường shell đầu vào là đầu vào TIN CẬY của hợp đồng.**
+Người gọi phải cấp môi trường sạch; script không thay được việc đó.
+
+### `$R` là thư mục CHUYÊN DỤNG, và script CÓ XOÁ trong đó
+
+Câu *"không xoá gì cả"* ở mục vá `rm -rf` chỉ đúng cho **thư mục cài công cụ**. Script vẫn
+`rm -rf "$R/kho.git"` và `rm -rf "$R/cay-kho"` — đó là hành vi có từ bản đầu, không phải hồi quy.
+
+Các chốt symlink chỉ nhìn **thành phần con** (`$R/cong-cu`, `$R/kho.git`, `$R/cay-kho`).
+Chúng **KHÔNG** nhìn `$R` chính nó, cũng không nhìn các thành phần cha.
+
+Báo cáo lịch sử chưa kiểm chứng (historical unverified report): `$R` là symlink tới một đích **đã có** `kho.git/` và `cay-kho/` chứa dữ liệu ⇒ script
+`rc=0`, dựng gói bình thường, và **hai sentinel trong hai thư mục ấy BỊ XOÁ**; sentinel ở thư mục
+không liên quan còn nguyên. Gọi thẳng vào đích (không qua symlink) cho **cùng kết quả** — nên đây
+là hành vi ghi đè theo TÊN đầu ra, không phải lỗi riêng do symlink.
+
+**Hợp đồng đầu vào, nói thẳng:** người gọi phải đưa một `$R` **mới, chuyên dụng**, mà cả nó lẫn
+đường dẫn cha đều đáng tin và **không chứa dữ liệu cần giữ**. Script không bảo vệ được thư mục
+của người gọi.
+
+### Nền đã báo cáo, và nền chưa báo cáo
+
+Mọi số trong báo cáo lịch sử chưa kiểm chứng này dựa trên chạy **Linux + Bash** trong container của phiên. **Chưa có** phép đo
+nào trên macOS hay Windows native. Ngoài ra, báo cáo lịch sử chưa kiểm chứng cũng ghi nhận lần dựng đầu trong container này **đỏ vì `tar` không
+đổi được owner** — cần `TAR_OPTIONS` phù hợp; đó là điều kiện môi trường, không phải lỗi script.
+
+### Chưa xử lý
+
+- Đua (race) khi symlink bị đổi giữa hai lần kiểm.
+- Quyền sở hữu đầy đủ của thư mục đầu ra.
+Hai việc này thuộc phạm vi mở rộng hợp đồng đầu vào, là **packet riêng** nếu chủ kho muốn làm.

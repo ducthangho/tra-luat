@@ -7018,21 +7018,30 @@ def t162_A1_muoi_control_cua_bo_cham_dung_phan_hang():
 # THẲNG control nào phân biệt nó; những chốt CHƯA có control phân biệt được khai ở
 # `t163` là `chưa đo`, không đếm vào số nào.
 DOT_BIEN_TU_KIEM_512 = [
-    # (tên, control phân biệt, [(neo CŨ, bản MỚI), …])
+    # (tên, control phân biệt, [(neo CŨ, bản MỚI), …], kỳ vọng)
+    #
+    # HAI cực kỳ vọng, và chúng đo hai đại lượng NGƯỢC nhau — gộp một cực là mất hẳn một nửa:
+    #   "DO"   gỡ chốt ⇒ ca đích phải ĐỎ            (A3 · A8 · M5: chốt CÓ RĂNG)
+    #   "XANH" biến đổi ⇒ phân hạng KHÔNG ĐỔI       (A2: bộ chấm KHÔNG đọc nội dung thông điệp)
+    # Mục `XANH` chạy TRỌN `t161` + `t162` (catalogue + 10 control), không lọc xuống một control:
+    # `A2` của đặc tả đòi so phân hạng trên CÙNG tập control VÀ catalogue.
+    ("A2-lam-rong-chi_tiet-tren-KENH", "", [
+        ('        ban_ghi = dict(self._neo, ca=self._ca_dang_chay, nhan=nhan, chi_tiet=chi_tiet)',
+         '        ban_ghi = dict(self._neo, ca=self._ca_dang_chay, nhan=nhan, chi_tiet="")')], "XANH"),
     ("doi-thu-tu-except-TinHieuChotCa-sau-AssertionError", "CTRL-DUONG-chet-dung-chot-ca-dich",
-     [("\n        except TinHieuChotCa as ex:", "\n        except _KhongAiNem512 as ex:")]),
+     [("\n        except TinHieuChotCa as ex:", "\n        except _KhongAiNem512 as ex:")], "DO"),
     ("bo-chot-DO_KHAC-trong-bo-cham", "CTRL-ngoai-le-Exception-TRAN",
      [("    khac = sorted(t for t, n in theo_ca.items() if n == NHAN_DO_KHAC)",
-       "    khac = []")]),
+       "    khac = []")], "DO"),
     ("dong-luot-ghi-rc-0-cung", "CTRL-DUONG-chet-dung-chot-ca-dich",
      [('        ban_ghi = dict(self._neo, dong_luot=True, rc=rc)',
-       '        ban_ghi = dict(self._neo, dong_luot=True, rc=0)')]),
+       '        ban_ghi = dict(self._neo, dong_luot=True, rc=0)')], "DO"),
     ("dong-luot-KHONG-ghi-gi", "CTRL-DUONG-chet-dung-chot-ca-dich",
      [("    def dong_luot(self, rc: int) -> None:\n        import json",
-       "    def dong_luot(self, rc: int) -> None:\n        self._f.close(); return\n        import json")]),
+       "    def dong_luot(self, rc: int) -> None:\n        self._f.close(); return\n        import json")], "DO"),
     ("dong-luot-ghi-1-thay-vi-bool-true", "CTRL-DUONG-chet-dung-chot-ca-dich",
      [('        ban_ghi = dict(self._neo, dong_luot=True, rc=rc)',
-       '        ban_ghi = dict(self._neo, dong_luot=1, rc=rc)')]),
+       '        ban_ghi = dict(self._neo, dong_luot=1, rc=rc)')], "DO"),
     # HAI neo, và lý do là một phép ĐO chứ không phải một lời khai: hai điểm vật hoá `dich`
     # (`_ten_day_du_512` và `doc_kenh`) là một bộ TƯƠNG ĐƯƠNG, không phải hai chốt độc lập —
     # gỡ riêng nửa nào cũng `rc=0` và KHÔNG control nào lệch, chỉ gỡ CẢ HAI mới lệch
@@ -7042,7 +7051,7 @@ DOT_BIEN_TU_KIEM_512 = [
      [("    return tuple(fn.__name__ for fn in CA if fn.__name__.startswith(tien_to))",
        "    return (fn.__name__ for fn in CA if fn.__name__.startswith(tien_to))"),
       ("        return _doc_kenh_xac_thuc(duong, dau_phien, mutant, lan_thu, tuple(dich),",
-       "        return _doc_kenh_xac_thuc(duong, dau_phien, mutant, lan_thu, dich,")]),
+       "        return _doc_kenh_xac_thuc(duong, dau_phien, mutant, lan_thu, dich,")], "DO"),
 ]
 # Chốt của bộ chấm mà HIỆN CHƯA có control phân biệt được — khai thẳng, không đếm là đã đo.
 # Mỗi dòng là một chốt fail-close thật trong `_doc_kenh_xac_thuc`; để gỡ nó mà thấy lệch thì
@@ -7084,7 +7093,7 @@ def t163_A2_A3_A8_M5_dot_bien_tu_kiem_cho_chinh_bo_cham():
     goc_kho = HERE.parent
     giet, hong = 0, []
     with San() as s:
-        for ten, ctrl, cap in DOT_BIEN_TU_KIEM_512:
+        for ten, ctrl, cap, ky_vong in DOT_BIEN_TU_KIEM_512:
             truoc_hong = len(hong)
             nguon_mut, xau_neo = nguon, []
             for cu, moi in cap:
@@ -7109,20 +7118,48 @@ def t163_A2_A3_A8_M5_dot_bien_tu_kiem_cho_chinh_bo_cham():
             tep = d / "ops" / "lease_publish_test.py"
             tep.write_text(nguon_mut, encoding="utf-8")
             mt = {k: v for k, v in os.environ.items() if k != "GITHUB_ACTOR"}
-            mt.update({"PYTHONDONTWRITEBYTECODE": "1", CO_TU_KIEM_CTRL: ctrl})
+            mt.update({"PYTHONDONTWRITEBYTECODE": "1"})
+            if ctrl:
+                mt[CO_TU_KIEM_CTRL] = ctrl
+            else:
+                mt.pop(CO_TU_KIEM_CTRL, None)
             for b in (KENH_ENV, DAU_PHIEN_ENV, MUTANT_ENV, LAN_THU_ENV):
                 mt.pop(b, None)
-            r = subprocess.run([sys.executable, "-B", str(tep), f"{CO_CHI_CA}t162"],
-                               capture_output=True, text=True, env=mt, timeout=600)
-            ra = r.stdout + r.stderr
+            # Mục `XANH` phải đi qua CẢ catalogue lẫn 10 control; mục `DO` chỉ cần ca chứa control
+            # phân biệt. KHÔNG dùng `--chi-ca=t16` cho gọn: tiền tố ấy khớp cả `t163` ⇒ tự đệ quy.
+            cac_ca_con = ["t161", "t162"] if ky_vong == "XANH" else ["t162"]
+            rcs, ra = [], ""
+            for ca_con in cac_ca_con:
+                r = subprocess.run([sys.executable, "-B", str(tep), f"{CO_CHI_CA}{ca_con}"],
+                                   capture_output=True, text=True, env=mt, timeout=900)
+                rcs.append(r.returncode)
+                ra += r.stdout + r.stderr
             # BA chốt độc lập, không gộp — bản mẫu #513 đã đo được rằng thiếu bất kỳ chốt nào là
             # một đường cấp TÍN DỤNG GIẢ: (1) `t162` phải là ca ĐỎ; (2) tiến trình con phải THẬT
             # SỰ thoát 1 — bỏ ghi nhận danh sách đỏ thì nó vẫn in "ĐỎ" mà rc về 0; (3) đúng dòng
             # `LỆCH` của control phân biệt phải có mặt, kẻo `t162` đỏ vì một lý do khác hẳn.
-            do_dung_ca = f"  ĐỎ  t162" in ra
+            if ky_vong == "XANH":
+                # A2 — phân hạng KHÔNG ĐỔI: mọi lượt con phải rc=0, và không dòng `LỆCH` nào.
+                # Thêm chốt DƯƠNG để một bản "không chạy gì" không lọt: phải thấy đủ hai dòng
+                # tổng kết của `t161` và `t162`, kẻo `rc=0` vì ca không được chạy.
+                lech = [x.strip() for x in ra.splitlines() if x.startswith("  LỆCH")]
+                co_du = ("catalog 512: mẫu số=16" in ra) and ("control 512: 10/10" in ra)
+                if any(rcs):
+                    hong.append(f"{ten}: kỳ vọng XANH mà rc={rcs}")
+                elif lech:
+                    hong.append(f"{ten}: kỳ vọng XANH mà có LỆCH: {lech[:3]}")
+                elif not co_du:
+                    hong.append(f"{ten}: rc=0 nhưng KHÔNG thấy đủ hai dòng tổng kết t161+t162")
+                else:
+                    giet += 1
+                _nhat_ky_ca("    tukiem", f"{ten:52}",
+                            f"{'XANH_DUNG' if len(hong) == truoc_hong else 'XANH_SAI':11}",
+                            f"rc={rcs}")
+                continue
+            do_dung_ca = "  ĐỎ  t162" in ra
             co_dong_lech = any(x.startswith("  LỆCH") and ctrl in x for x in ra.splitlines())
-            if r.returncode != 1:
-                hong.append(f"{ten}: con rc={r.returncode} != 1 (control {ctrl})")
+            if rcs != [1]:
+                hong.append(f"{ten}: con rc={rcs} != [1] (control {ctrl})")
             elif not do_dung_ca:
                 hong.append(f"{ten}: t162 KHÔNG đỏ (control {ctrl})")
             elif not co_dong_lech:
@@ -7134,10 +7171,11 @@ def t163_A2_A3_A8_M5_dot_bien_tu_kiem_cho_chinh_bo_cham():
             # trước nó — một dòng nhật ký nói dối đúng lúc người đọc cần nó nhất.
             _nhat_ky_ca("    tukiem", f"{ten:52}",
                         f"{'GIET' if len(hong) == truoc_hong else 'KHONG_GIET':11}", f"ctrl={ctrl}")
-    print(f"tự kiểm bộ chấm 512: gỡ chốt giết {giet}/{len(DOT_BIEN_TU_KIEM_512)} · "
+    print(f"tự kiểm bộ chấm 512: đạt {giet}/{len(DOT_BIEN_TU_KIEM_512)} "
+          f"(6 mục DO gỡ-chốt + 1 mục XANH bất-biến-A2) · "
           f"chốt CHƯA có control phân biệt: {len(CHOT_CHUA_CO_CONTROL_512)} (khai, không đếm là đã đo)")
     chot(not hong, f"đột biến tự kiểm KHÔNG làm ca đích đỏ đúng lý do: {hong}")
-    chot(giet == len(DOT_BIEN_TU_KIEM_512) == 6, f"mẫu số tự kiểm phải cố định 6: {giet}")
+    chot(giet == len(DOT_BIEN_TU_KIEM_512) == 7, f"mẫu số tự kiểm phải cố định 7: {giet}")
 
 
 CO_CHI_CA = "--chi-ca="   # `--chi-ca=t01_` ⇒ chỉ chạy ca có tên bắt đầu bằng tiền tố ấy (M3 packet #504 dùng để sinh lượt con rẻ)

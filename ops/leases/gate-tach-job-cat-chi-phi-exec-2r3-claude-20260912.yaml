@@ -169,3 +169,5 @@ dieu_kien_dung:
      `pull_request` tự bắn là CỔNG, không tính vào N. CẤM tuyệt đối lượt "chạy thử xem sao".'
   - 'Đóng packet khi chưa có `approve` TƯỜNG MINH — `review_class = sensitive`; "0 P1 + 0 P2"
      KHÔNG đủ, vì "vắng mặt vì sạch" và "vắng mặt vì chưa nhìn tới" nhìn giống hệt nhau.'
+
+da_bi_thay_the: gate-tach-job-cat-chi-phi-exec-2r4-claude-20260912

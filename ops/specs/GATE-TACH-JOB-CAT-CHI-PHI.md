@@ -1,9 +1,11 @@
-# Đặc tả packet — GATE-TACH-JOB-CAT-CHI-PHI (revision 14)
+# Đặc tả packet — GATE-TACH-JOB-CAT-CHI-PHI (revision 15)
 
 - `packet_id`: **GATE-TACH-JOB-CAT-CHI-PHI**; ID bền theo `PROTOCOL §3.2` là `wp<packet_issue>`.
 - `packet_issue`: **#463**
 - `mission_issue`: **#467** (*"bốn packet treo sau #456: GATE → LO-319 → 2A → 2B"*)
-- `revision`: **14** · `generation`: 1 · soạn **11:3xZ 11-09-2026**; `A5` r13 **10:0xZ 12-09-2026**; r14 (A8 400 + F03/F04/F05) **11:4xZ 12-09-2026**
+- `revision`: **15** · `generation`: 1 · soạn **11:3xZ 11-09-2026**; `A5` r13 **10:0xZ 12-09-2026**;
+  r14 (A8 400 + F03/F04/F05) **11:4xZ 12-09-2026**; r15 (F04 lượt 2 — **XOÁ** câu bị thay thay vì
+  nối thêm đính chính) **13:5xZ 12-09-2026**
 - `depends_on`: **`[wp502, wp504]`** — xem `write_set`. **`wp504`** là `WINDOWS-LEASE-SUITE` (lease
   sống, cấp `14:05Z 11-09-2026`), **KHÔNG** còn là `T125-RA-JOB-RIENG`: đặc tả ấy đã **RÚT** vì `#504`
   nhận cùng vấn đề bằng đường chủ kho chọn (song song hoá `t125` trong bộ test, giữ nguyên ngữ nghĩa)
@@ -90,6 +92,10 @@ phép đo trả lời câu ấy, và `A1` ĐỎ là **KẾT QUẢ ĐO**, không 
 
 `sensitive` ⇒ `ADR-0044`: **≤ 3 tệp và ≤ 300 dòng THÊM** — cột `additions` của `git diff --numstat`,
 **KHÔNG** phải `adds − deletes`. Thước sai đã trả giá: `+351/−351` có ròng `0` mà `additions = 351 > 300`.
+**TRẦN HIỆU LỰC CỦA PACKET NÀY LÀ `400`, KHÔNG PHẢI `300`** — ngoại lệ CÓ PHẠM VI do chủ kho cấp
+(12-09-2026, `#463` comment 5645742072), phát biểu đầy đủ tại `A8`. `so_tep = 2` **không** được nới.
+Nêu ngay ở đây vì mục này là chỗ người đọc gặp trần TRƯỚC, và r14 chỉ sửa con số ở `A8` nên hai chỗ
+khai hai trần khác nhau — cross-review lượt 2 `F04` bắt đúng hình dạng ấy.
 
 Ước ĐÚNG THƯỚC, từ số đo khối trên `ci.yml`:
 
@@ -101,12 +107,14 @@ phép đo trả lời câu ấy, và `A1` ĐỎ là **KẾT QUẢ ĐO**, không 
 | **hai job mới** | **158** | **100** |
 
 Cộng hai bước dời (≈4 dòng), sửa `loi_ruff_ci` (ước +15–25) và phản chứng mới (ước +15)
-⇒ **ước `135`–`200` dòng thêm**. Dưới `300`, biên ≥ `100`.
+⇒ **ước `135`–`200` dòng thêm**. Dưới trần hiệu lực `400`; ước này soạn trước khi có phản chứng
+`A7` và bộ đột biến của nó, nên nó là **ước cũ**, không phải hạn mức — hạn mức là `400` ở `A8`.
 
 **KHÔNG có lối thoát composite.** Bản trước đề nghị rút phần thiết lập thành
 `.github/actions/…` khi chật trần. Lối ấy thêm **một đường dẫn thứ ba** vào write set, tức
 **vi phạm chính `A8`** (đòi đúng **2** đường). Một đặc tả không được đồng thời cấm và mời một
-phương án. **Vượt `300` ⇒ DỪNG và hỏi chủ kho**, không tự xin ngoại lệ, không tự mở write set.
+phương án. **Vượt trần hiệu lực `400` ⇒ DỪNG và hỏi chủ kho**, không tự xin ngoại lệ, không tự mở
+write set.
 
 ## `write_set`
 
@@ -134,9 +142,13 @@ Hai packet **cố ý KHÔNG** nằm ở đây: bản vá bộ chấm đột bi�
 nghĩa trôi. Cấp chồng là tự tạo cửa sổ hai writer. Phiên cấp lease **đo lại**, không chép dòng này.
 
 **Vì sao nối tiếp SAU `#504`.** Không phải vì chồng write set — `#504` **không** ghi `ci.yml` (nó khai
-`ci.yml` là ngoài phạm vi) — mà vì **NỀN ĐO**: `A1`/`A5` của packet này cần một lượt Windows **hoàn
-tất**, và `#504` là thứ làm nó hoàn tất. Chạy trước `#504` thì vế TRƯỚC của `A5` vẫn `KHÔNG ĐO ĐƯỢC`
-(xem `chua_do_duoc` #0).
+`ci.yml` là ngoài phạm vi) — mà vì **PHÉP ĐO CỦA `A1`**: `A1` đòi `max(thời lượng job)` trên
+`windows-latest` của lượt **SAU tách**, và một job `cancelled` vì chạm trần **không cho thời lượng
+nào**, tức `A1` thành `KHÔNG ĐO ĐƯỢC`. `#504` hạ tải, nên nó là thứ làm lượt SAU có cơ hoàn tất.
+**Nói hẹp cho đúng:** lý do này **không** còn áp cho `A5` — từ r13 `A5` đo trên lane `pull_request`
+ubuntu-only nên nó không cần lượt Windows nào; và nền tiền-tách của `A1` là `KHÔNG ĐO ĐƯỢC` **dù**
+`#504` có land hay không (job Windows tiền-tách chạm trần — xem `A1`). Thứ `#504` mua là vế **SAU**
+của `A1`, không phải vế TRƯỚC của `A5`.
 
 **Thứ tự chuỗi: `#502 → #504 → GATE → LO → 2A → 2B`.**
 *(Sửa 12-09-2026 theo cross-review trên PR #508: dòng này còn dẫn `T125-RA-JOB-RIENG` sau khi
@@ -212,13 +224,24 @@ cả** job của lượt, **không** lấy tổng.
 - **Nền LỊCH SỬ:** G2 (`34429604548`) — `max(job) = 40,63` phút, `success`. Nó chứng minh job Windows
   **từng** hoàn tất, và `40,63 > 36,00` (G4). **Nó KHÔNG phải nền nghiệm thu**: nó thuộc tải
   **trước `#492`**.
-- **Nền NGHIỆM THU:** lượt sinh lại tại `start_from_sha` theo `A5(3)`, dưới tải **hiện tại**. Nền ấy
-  **có thể KHÔNG hợp lệ** (xem `chua_do_duoc` #0) — khi đó **DỪNG và hỏi chủ kho**, không mượn
-  `40,63`.
+- **Nền NGHIỆM THU: `KHÔNG ĐO ĐƯỢC`, và đó là kết luận cuối, không phải một việc chưa làm.** Nền
+  tiền-tách trên `windows-latest` **không tồn tại được** dưới tải hiện tại: job Windows tiền-tách
+  chạm trần `timeout-minutes` — chính căn bệnh packet này chữa. Đo trên run `34680281474` (`push`
+  tại `3c7df6d`, tốn **0** ngân sách dispatch): `gate (windows-latest) cancelled 60,17 phút`. Chi
+  một dispatch cho nền là đốt ~121 phút tính tiền để xác nhận điều đã biết. Khai `KHÔNG ĐO ĐƯỢC`
+  là kết quả hợp lệ; **suy nó thành xanh thì không**, và **không** được mượn `40,63` thay chỗ.
+
+**`A1` vì thế là NGƯỠNG TUYỆT ĐỐI trên lượt SAU** — đó đúng là thứ một ngưỡng tuyệt đối dùng để
+làm, và là chỗ **một** lượt `workflow_dispatch` của ngân sách `N` được chi.
 **Phép làm ĐỎ:** `max(job)` Windows của lượt sau tách vượt `0,60 ×` trần.
-**Đột biến bắt buộc:** gộp hai job mới trở lại `gate` ⇒ `max(job)` phải **tăng trở lại mức chưa
-tách của CHÍNH nền nghiệm thu** ⇒ `A1` ĐỎ. **KHÔNG** đòi nó tái tạo `40,63` — số ấy của cây cũ,
-tải cũ, và đòi như thế là biến một đột biến thành phép so với một hằng số đã chết.
+
+**Đột biến bắt buộc — và giá của nó, khai thẳng.** Gộp hai job mới trở lại `gate` ⇒ `max(job)` phải
+vượt `0,60 ×` trần ⇒ `A1` ĐỎ. Nó đo so **ngưỡng tuyệt đối**, **không** so một nền — nền ấy
+`KHÔNG ĐO ĐƯỢC` (trên), và neo một đột biến vào hằng số đã chết `40,63` là biến phép đo thành nghi lễ.
+Nhưng đột biến này đòi **một lượt `workflow_dispatch` thứ hai** trên một commit gộp-lại. Ngân sách
+`N = 2` vừa được giải phóng đúng một suất (nền không còn phải chi), nên **suất ấy dành cho đột biến
+này**. Chủ kho **không** cấp suất ⇒ đột biến `A1` là **`KHÔNG ĐO ĐƯỢC`**, ghi thẳng vào biên nhận và
+vào `chua_do_duoc`; **không** được ghi `A1` là `ĐẠT` trơn khi đột biến của nó chưa từng chạy.
 
 **Kèm, công bố nhưng KHÔNG đặt ngưỡng** (chưa có nền cùng đơn vị): thời gian đầu-cuối của cả lượt
 (`run.created_at → run.updated_at` khi `status = completed`). Đây là phép đo duy nhất thấy được xếp
@@ -237,9 +260,11 @@ bypass: cổng tổng vẫn có job đỏ. Khai thẳng ở đây để không a
 Lấy `(job, tên bước, nền, conclusion)` của lượt TRƯỚC và lượt SAU; **bỏ cột `job`**, so **tập**
 `(tên bước, nền, conclusion)`. Hai tập phải **bằng nhau**. Làm HAI lần:
 
-- lượt `workflow_dispatch` SAU tách trên nhánh packet (cả hai nền) so lượt `workflow_dispatch`
-  **TRƯỚC tách trên CÙNG nhánh tại `start_from_sha`** — **cùng base, cùng event, cùng lane**;
-  executor phóng lượt nền TRƯỚC khi đẩy commit tách. (Đây là hai lượt của ngân sách `N = 2`.)
+- **lane `workflow_dispatch` — CÓ ĐIỀU KIỆN, vì nền của nó là nền `KHÔNG ĐO ĐƯỢC` của `A1`.**
+  Lượt SAU tách (cả hai nền) so lượt TRƯỚC tách trên CÙNG nhánh tại `start_from_sha`. Lượt SAU là
+  lượt `A1` đã chi; lượt TRƯỚC **không được chi thêm** — job Windows tiền-tách chạm trần nên nó
+  không cho một nền hợp lệ (xem `A1`). Không có nền dispatch ⇒ lane này đi **nhánh nền KHÔNG hợp
+  lệ** ở dưới, trạng thái `ĐẠT CÓ ĐIỀU KIỆN`; **không** được ghi `ĐẠT` trơn.
 - lượt `pull_request` của chính PR packet so lượt `pull_request` gần nhất mà `ci.yml` nền **BẰNG
   BYTE** `ci.yml` của `start_from_sha` — đây là lượt DUY NHẤT chứng minh các job **có mặt trên PR**,
   tức chứng minh không ai đã thêm điều kiện chỉ-dispatch (xem `A3`).
@@ -405,8 +430,9 @@ GIÁ TRỊ sau.**
   **Phép làm ĐỎ cho (a)–(e):** bỏ một job Windows khỏi mẫu ⇒ `A5` phải `KHÔNG ĐO ĐƯỢC`.
 
 **(2)** Lượt **SAU tách** phải hợp lệ theo (1), rồi công bố `Σ(phút job × hệ số nền)`.
-**(3)** Lượt **TRƯỚC** — nền để so — **phải được sinh lại tại lúc thi công** trên `start_from_sha`,
-và cũng phải hợp lệ theo (1).
+**(3)** Lượt **TRƯỚC** — nền để so — phải hợp lệ theo (1) **và** thoả `(6)`: hoặc **sinh lại** tại
+đúng `start_from_sha` trên lane PR, hoặc **tái dùng** một lượt PR tiền-tách kèm đủ ba lời khai của
+`(6)(b)`. **Không** có đường thứ ba, và thiếu bất kỳ mục nào của `(6)(b)` là `KHÔNG ĐO ĐƯỢC`.
 
 **LANE SO SÁNH = `pull_request` (ubuntu-only) — sửa r13, và lý do là một phép đo, không phải tiện.**
 `r12` đòi nền hợp lệ theo (1), trong đó `(f)` đòi **mọi job `success`**. Nền ấy **KHÔNG TỒN TẠI** trên
@@ -437,46 +463,33 @@ công bố phải nói cả hai câu; nói mỗi câu đầu là tái tạo đú
 **Chiều sai, khai cho đúng:** nền hụt làm **tỉ lệ tăng trông LỚN HƠN** thực, tức sai về phía **bất
 lợi** cho packet. Điều đó không làm `r12` đúng trở lại; nó chỉ nói rủi ro nằm ở đâu.
 
-**`A1` KHÔNG đổi** — ngưỡng tuyệt đối `≤ 0,60 × timeout-minutes` trên `windows-latest`, chỉ cần lượt
-SAU, và đó là chỗ **một** lượt `workflow_dispatch` được chi.
+**`A5` KHÔNG cấp nền cho `A1`.** Nền `A5` nay chỉ Ubuntu, nên nó không cho thời lượng
+`windows-latest` cho bất kỳ nghĩa vụ nào của `A1`. Hai tiêu chí đo hai đại lượng trên hai lane; xem
+`A1` cho ngưỡng tuyệt đối và cho nền `KHÔNG ĐO ĐƯỢC` của nó.
 
-**SỬA r14 — ba chỗ r13 ĐỔI MIỀN ĐO MÀ GIỮ NGHĨA VỤ CỦA MIỀN CŨ.** Cross-review lượt 1 bắt đúng
-(`F04`, `F05`), và đây là lỗi của chính bản sửa r13; ghi cả cái sai vì nguyên nhân sai trong đặc tả
-tệ hơn không ghi.
+**(4) Ca âm phải nhắm một instance THỰC SỰ TỒN TẠI trên lane đang đo.** Ca âm bắt buộc của `A5(1)`
+là *"bỏ một instance BẤT KỲ thuộc tập kỳ vọng CỦA CHÍNH LANE ẤY"* — trên lane PR đó là một job
+ubuntu; trên lane dispatch, một job Windows. **Không** được ghi cứng *"bỏ một job Windows"*: trên
+lane PR không nhãn `windows` có **0** job Windows nên phép ấy **không đổi dữ liệu**, tức không thể
+làm tiêu chí đỏ. Đo được: PR `expected = 3`, bỏ Windows xoá **0** instance, `equality = True`; đối
+chứng dispatch `expected = 6`, bỏ **1** ⇒ `equality = False`.
 
-**(i) Ca phản chứng phải nhắm một instance THỰC SỰ TỒN TẠI trên lane đang đo.** `A5(1)` bắt ca
-*"bỏ một job Windows khỏi mẫu ⇒ `KHÔNG ĐO ĐƯỢC`"*. Trên lane PR không nhãn `windows` có **0** job
-Windows, nên ca ấy là **phép không đổi dữ liệu** — nó không thể làm tiêu chí đỏ. Đo được: PR
-`expected = 3`, bỏ Windows xoá **0** instance, `equality = True`; đối chứng dispatch `expected = 6`,
-bỏ **1** ⇒ `equality = False`. **Mất răng, đo được, không phải khác lời văn.**
-⇒ Phát biểu lại: ca âm bắt buộc là *"bỏ một instance BẤT KỲ thuộc tập kỳ vọng CỦA CHÍNH LANE ẤY"*.
-Trên lane PR đó là một job ubuntu; trên lane dispatch, ca Windows giữ nguyên.
+**(5) MỖI LANE MỘT MANIFEST — `A2` và `A5` KHÔNG dùng chung.** Mỗi tiêu chí có manifest **của lane
+mình** (`run_id`, `run_attempt`, tập job, SHA định nghĩa workflow). Ràng buộc *"cùng một mẫu"* áp
+**trong** một lane, **không** bắc cầu giữa hai lane — `A2` đọc lane dispatch, `A5` đọc lane PR, nên
+một manifest dùng chung sẽ buộc một trong hai đọc mẫu của lane kia.
 
-**(ii) MỖI LANE MỘT MANIFEST — không dùng chung.** r13 để `A2` bắt cặp dispatch, `A5` dùng cặp PR,
-mà câu *"manifest dùng CHUNG cho `A2` và `A5`"* vẫn đứng ⇒ không có lịch đo nhất quán.
-⇒ `A2` và `A5` mỗi tiêu chí có manifest **của lane mình** (`run_id`, `run_attempt`, tập job, SHA định
-nghĩa workflow). Ràng buộc *"cùng một mẫu"* áp **trong** một lane, không bắc cầu giữa hai lane.
+**(6) Nền `A5` KHÔNG được công nhận chỉ vì `ci.yml` bằng byte.** Tải do **cả cây** quyết định, không
+chỉ định nghĩa workflow. Nền hợp lệ khi **một trong hai**: (a) sinh lại tại đúng `start_from_sha`
+trên lane PR; hoặc (b) tái dùng một lượt PR tiền-tách **và** khai đủ ba thứ: `ci.yml` bằng byte ·
+danh sách tệp khác giữa hai cây · lập luận vì sao khác biệt ấy không đổi tải của các bước được đo.
+Thiếu bất kỳ mục nào ⇒ **`KHÔNG ĐO ĐƯỢC`**, không phải "coi như tương đương".
 
-**(iii) `A1` KHÔNG được miễn nền bằng câu của `A5`.** r13 viết `A1` *"chỉ cần lượt SAU"* — sai, vì
-`A1` là ngưỡng tuyệt đối trên **`windows-latest`**, mà nền `A5` nay chỉ Ubuntu nên không cấp thời
-lượng Windows cho bất kỳ nghĩa vụ nào của `A1`.
-⇒ Nói cho đúng: `A1` đo trên **một** lượt `workflow_dispatch` SAU tách (ngân sách `N` chi ở đây), và
-nền tiền-tách của `A1` là **`KHÔNG ĐO ĐƯỢC`** — có căn cứ, vì job Windows tiền-tách chạm trần. Khai
-`KHÔNG ĐO ĐƯỢC` là kết quả hợp lệ; **suy nó thành xanh thì không**.
-
-**(iv) `F05` — nền `A5` KHÔNG được công nhận chỉ vì `ci.yml` bằng byte.** r13 neo nền vào một head
-khác `start_from_sha`; hai cây còn khác các tệp khác, và tải do **cả cây** quyết định chứ không chỉ
-định nghĩa workflow.
-⇒ Nền `A5` hợp lệ khi **một trong hai**: (a) sinh lại tại đúng `start_from_sha` trên lane PR; hoặc
-(b) tái dùng một lượt PR tiền-tách **và** khai đủ ba thứ: `ci.yml` bằng byte · danh sách tệp khác
-giữa hai cây · lập luận vì sao khác biệt ấy không đổi tải của các bước được đo. Thiếu bất kỳ mục nào
-⇒ **`KHÔNG ĐO ĐƯỢC`**, không phải "coi như tương đương".
-
-*(Căn cứ: chỉ thị chủ kho 12-09-2026, `#463` comment 5645249537 và 5645742072; cross-review lượt 1
-`F04`/`F05`, verdict tại comment 5645603860.)*
-
-**Một manifest phép đo dùng CHUNG cho `A2` và `A5`** — cùng `run_id`, cùng `run_attempt`, cùng tập
-job — để hai tiêu chí không đọc hai mẫu khác nhau rồi cùng báo xanh.
+*(Căn cứ (4)–(6): chỉ thị chủ kho 12-09-2026, `#463` comment 5645249537 và 5645742072; cross-review
+lượt 1 `F04`/`F05`, verdict tại comment 5645603860. Ba mục này là LUẬT của `A5`, không phải phụ lục
+đính chính — bản r14 để chúng đứng cạnh câu chúng thay thế, và cross-review lượt 2 `F04` bắt đúng
+chỗ đó: một đặc tả mang hai nghĩa vụ ngược nhau thì người thi công chọn nghĩa vụ nào cũng "đúng
+đặc tả".)*
 
 Đơn vị: **phút tính tiền** = Σ phút tường của job × hệ số nền.
 **Phép làm ĐỎ:** bất kỳ điều kiện nào của (1) hỏng ⇒ `KHÔNG ĐO ĐƯỢC` ⇒ ĐỎ.
@@ -530,8 +543,12 @@ nửa đầu là một lời khai thiếu nửa sau, và nửa sau đã giết C
 | sau khi `#504` land | **1** — `#504` **không** thêm job nào (nó sửa trong bộ test) | `gate (ubuntu-latest)` |
 | **sau khi packet này land** | **3** | thêm `gate-registry (ubuntu-latest)` · `gate-packet-loop (ubuntu-latest)` |
 
-Chủ kho cập nhật ruleset **MỘT lần** — sau khi packet này land. `#504` **không** thêm job nào (nó sửa
-trong bộ test), nên pha của nó **không** đổi tập context.
+Chủ kho cập nhật ruleset **MỘT lần**, và **thời điểm là TRƯỚC lần merge của chính PR packet này** —
+theo đúng nghĩa vụ thời gian ở `(b0)` và thứ tự an toàn ở đó (job mới phải đã sinh check đúng tên
+trên PR ⇒ mới chuyển require sang nó ⇒ readback ⇒ merge). Cột *"sau khi packet này land"* trong bảng
+là **pha của `ci.yml`**, không phải mốc cập nhật ruleset: `ci.yml` có 3 job sau khi land, còn ruleset
+phải require đủ 3 context **trước** đó, nếu không thì chính lần merge này không bị hai job mới chặn.
+`#504` **không** thêm job nào (nó sửa trong bộ test), nên pha của nó **không** đổi tập context.
 **Bản trước khai HAI lần và BỐN job** vì nó giả định `T125-RA-JOB-RIENG` (đã RÚT) sẽ thêm job
 `gate-t125`. Số `4` và nghĩa vụ *"hai lần"* đều **hết hiệu lực** cùng đặc tả ấy.
 
@@ -550,7 +567,7 @@ Hai phản chứng sẵn có `ruff-pin-required` và `ruff-version-probe-require
 **Phép làm ĐỎ:** đột biến `loi_ruff_ci` quay về đọc `jobs.gate` ⇒ ca **2** ĐỎ.
 
 **A8 (toàn packet) — không đụng gì khác.** `git diff --numstat` chỉ hiện đúng **2** đường dẫn, cột
-`additions` ≤ **400** (r14 — ngoại lệ CÓ PHẠM VI, xem dưới). Đường thứ ba ⇒ **DỪNG và hỏi chủ kho**,
+`additions` ≤ **400** (ngoại lệ CÓ PHẠM VI, xem dưới; đây là trần hiệu lực DUY NHẤT của packet). Đường thứ ba ⇒ **DỪNG và hỏi chủ kho**,
 không tự xin ngoại lệ, không tự mở write set (`§3.2`: *"agent không tự mở write set"*).
 
 **Ngoại lệ trần dòng, r14 — chỉ thị chủ kho 12-09-2026, `#463` comment 5645742072.** Trần `ADR-0044`
@@ -597,18 +614,19 @@ Kế thừa nguyên trạng; packet này **không** đóng thêm mục nào, và
 
 ## `chua_do_duoc`
 
-0. **NỀN LỊCH SỬ ≠ NỀN NGHIỆM THU, và nợ về nền hiện tại CHƯA bị bác.**
+0. **VẾ SAU CỦA `A1` CÓ HOÀN TẤT ĐƯỢC TRÊN WINDOWS KHÔNG — chưa ai đo, và đó là nợ còn lại.**
+   *(Mục này đã được thu hẹp ở r15. Vế TRƯỚC của `A1` **không** còn là nợ: nó là một kết luận
+   `KHÔNG ĐO ĐƯỢC` đã có căn cứ, phát biểu tại `A1`. Vế TRƯỚC của `A5` cũng **không** còn là nợ: từ
+   r13 `A5` đo trên lane `pull_request` ubuntu-only. Bản r14 vẫn để cả hai đứng ở đây như nợ mở
+   trong khi thân đặc tả đã kết luận khác — cross-review lượt 2 `F04` bắt đúng chỗ đó.)*
    G1/G2 bác đúng **một** mệnh đề — *"job Windows chưa hoàn tất lần nào"* — bằng 18 lượt `success`,
-   gần nhất `34429604548`. Đó là **nền lịch sử**, và nó **không** chứng minh có một nền **hợp lệ dưới
-   tải hiện tại**: cả **6** lượt Windows đã kết thúc **sau `#492`** trong hiện vật đều `cancelled`.
-   `A5(3)` đòi **sinh lại** nền tại `start_from_sha` *sau khi* `T125` land, trong khi `T125 A1(b)` cho
-   `ĐẠT CÓ ĐIỀU KIỆN` khi Windows **vẫn** `cancelled`. Hai điều ấy có thể cùng xảy ra ⇒ vế TRƯỚC của
-   `A5` có thể **vẫn** `KHÔNG ĐO ĐƯỢC` khi packet này tới lượt.
-   **Khi đó: DỪNG và hỏi chủ kho** — không chép nền lịch sử `40,63` làm nền nghiệm thu (khác tải),
-   và không tự nới `A5`. `A5` hiện **fail-close** (không còn ngoại lệ như bản cũ); fail-close là chặt
-   hơn, **không** phải bằng chứng rằng vòng phụ thuộc đã hết.
-   **Và đột biến của `A1`** (gộp hai job mới trở lại `gate`) **không tự trở về `40,63`** — số ấy của
-   cây cũ, tải cũ; đột biến chỉ phải làm `A1` ĐỎ, không phải khớp một con số lịch sử.
+   gần nhất `34429604548` (`max(job) = 40,63` phút). Đó là **nền lịch sử**, thuộc tải **trước
+   `#492`**; cả **6** lượt Windows đã kết thúc **sau `#492`** trong hiện vật đều `cancelled`.
+   Nên câu còn để ngỏ là: **sau tách, và sau khi `#504` hạ tải, job Windows có `success` không.**
+   Không thì `max(job)` không tồn tại và `A1` là `KHÔNG ĐO ĐƯỢC` ⇒ **DỪNG và hỏi chủ kho**; không
+   mượn `40,63` (khác tải) và không tự nới `A1`. Chỉ dấu hiện có — **không** phải nghiệm thu vì nó
+   đo tải 07-09: run `34161016911` tại `cb29eb5` (sau tách) cho **6/6** job `success`, `max(job)`
+   Windows **22,48** phút ≤ **36,00**.
 
 0b. **Tải còn tăng, và không ai canh tốc độ ấy — nợ RỘNG HƠN phần `#492`.**
    Ngoài `+1327` dòng của `#492` (mục #6), chi phí còn tăng **theo số biên nhận**: `t26`+`t27` tốn

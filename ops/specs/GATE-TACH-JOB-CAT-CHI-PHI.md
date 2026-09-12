@@ -1,9 +1,9 @@
-# Đặc tả packet — GATE-TACH-JOB-CAT-CHI-PHI (revision 12)
+# Đặc tả packet — GATE-TACH-JOB-CAT-CHI-PHI (revision 13)
 
 - `packet_id`: **GATE-TACH-JOB-CAT-CHI-PHI**; ID bền theo `PROTOCOL §3.2` là `wp<packet_issue>`.
 - `packet_issue`: **#463**
 - `mission_issue`: **#467** (*"bốn packet treo sau #456: GATE → LO-319 → 2A → 2B"*)
-- `revision`: **12** · `generation`: 1 · soạn **11:3xZ 11-09-2026**
+- `revision`: **13** · `generation`: 1 · soạn **11:3xZ 11-09-2026**, sửa `A5` **10:0xZ 12-09-2026**
 - `depends_on`: **`[wp502, wp504]`** — xem `write_set`. **`wp504`** là `WINDOWS-LEASE-SUITE` (lease
   sống, cấp `14:05Z 11-09-2026`), **KHÔNG** còn là `T125-RA-JOB-RIENG`: đặc tả ấy đã **RÚT** vì `#504`
   nhận cùng vấn đề bằng đường chủ kho chọn (song song hoá `t125` trong bộ test, giữ nguyên ngữ nghĩa)
@@ -399,6 +399,40 @@ GIÁ TRỊ sau.**
 **(2)** Lượt **SAU tách** phải hợp lệ theo (1), rồi công bố `Σ(phút job × hệ số nền)`.
 **(3)** Lượt **TRƯỚC** — nền để so — **phải được sinh lại tại lúc thi công** trên `start_from_sha`,
 và cũng phải hợp lệ theo (1).
+
+**LANE SO SÁNH = `pull_request` (ubuntu-only) — sửa r13, và lý do là một phép đo, không phải tiện.**
+`r12` đòi nền hợp lệ theo (1), trong đó `(f)` đòi **mọi job `success`**. Nền ấy **KHÔNG TỒN TẠI** trên
+lane hai nền dưới tải hiện tại, và đó là **lỗi cấu trúc của tiêu chí**, không phải xui một lượt: tại
+đúng `start_from_sha`, job Windows chạm trần `timeout-minutes` — **chính căn bệnh packet này chữa**.
+
+Đo trên run `34680281474` (`push` tại `3c7df6d`, tốn **0** ngân sách dispatch):
+
+```
+gate (windows-latest)   cancelled   60,17 phut  x2
+gate (ubuntu-latest)    success     29,40 phut  x1
+```
+
+⇒ `(f)` hỏng ⇒ `KHÔNG ĐO ĐƯỢC`. Mọi lượt tiền-tách trên `master/push` hoặc `workflow_dispatch` sẽ lặp
+đúng kết quả này; chi một dispatch cho nền là đốt ~121 phút tính tiền để xác nhận điều đã biết.
+
+**Nên `A5` đo trên lane `pull_request` không nhãn `windows`**, nơi ma trận giải ra **ubuntu-only** ⇒
+tập instance kỳ vọng `{gate/ubuntu}` (và sau tách: `{gate/ubuntu, gate-registry/ubuntu,
+gate-packet-loop/ubuntu}`), **cả hai** lượt hợp lệ theo (1), tốn **0** dispatch. Nó đo đúng đại lượng
+`A5` sinh ra để phơi: **chi phí thiết lập trả `N` lần thay vì một**.
+
+**NGHĨA VỤ KHAI KÈM — thiếu nó là lời khai rộng hơn phép đo:** Σ này là billing của **lane PR**,
+**KHÔNG** phải billing tuyệt đối của lane `master`. Billing lane `master` vẫn **`KHÔNG ĐO ĐƯỢC`**
+chừng nào job Windows chưa `success`, và packet này chính là thứ có thể làm nó đo được lần đầu. Bản
+công bố phải nói cả hai câu; nói mỗi câu đầu là tái tạo đúng lỗi *"đại lượng bị chặn trên trông giống
+đại lượng nhỏ"* mà `A5` sinh ra để chặn — chỉ đổi chiều.
+
+**Chiều sai, khai cho đúng:** nền hụt làm **tỉ lệ tăng trông LỚN HƠN** thực, tức sai về phía **bất
+lợi** cho packet. Điều đó không làm `r12` đúng trở lại; nó chỉ nói rủi ro nằm ở đâu.
+
+**`A1` KHÔNG đổi** — ngưỡng tuyệt đối `≤ 0,60 × timeout-minutes` trên `windows-latest`, chỉ cần lượt
+SAU, và đó là chỗ **một** lượt `workflow_dispatch` được chi.
+
+*(Căn cứ: chỉ thị chủ kho 12-09-2026, `#463` comment 5645249537.)*
 
 **Một manifest phép đo dùng CHUNG cho `A2` và `A5`** — cùng `run_id`, cùng `run_attempt`, cùng tập
 job — để hai tiêu chí không đọc hai mẫu khác nhau rồi cùng báo xanh.

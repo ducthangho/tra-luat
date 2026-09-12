@@ -1,0 +1,177 @@
+# LEASE EXECUTOR — packet #463 GATE-TACH-JOB-CAT-CHI-PHI (revision 13 — thay exec-2)
+# Ghi HỘ chủ kho. Thẩm quyền cấp thuộc `ducthangho` (§2); phiên claude chỉ SOẠN và GHI.
+# Chỉ thị gốc: phiên chat 12-09-2026 ("xử lý task #24, cấp lease, kết hợp xử lý 1 luôn"
+# + ba lựa chọn). Dấu vết BỀN đã đăng, neo ở `granted_on_instruction` — chính tệp lease
+# nháp của packet này dặn "Một câu trong khung chat KHÔNG phải dấu vết bền", nên comment
+# ấy tồn tại đúng để biến nó thành dấu vết.
+#
+# CHUỖI: #456 -> exec-1 -> exec-1r2 -> exec-1r3 -> exec-1r4 -> exec-2 -> exec-2r2 (tệp này).
+# `thay_the_cho` CHỈ nêu `exec-2` — tiền nhiệm TRỰC TIẾP và là mắt duy nhất còn CÒN_HẠN.
+# Mọi mắt trước đó đã HẾT_HẠN (r4 hạn 2026-09-08T10:17:12Z); `_kiem_bia_mo` đòi bia mộ HAI
+# CHIỀU nên giữ tên một lease hết hạn trong `thay_the_cho` sẽ làm `check` rc=8.
+# Bia mộ ngược đã đặt trong chính tệp `exec-2` (`da_bi_thay_the: …exec-2r2…`).
+
+schema_version: 2
+event: executor_lease_granted
+
+packet_issue: 463
+mission_issue: 467
+granted_by: ducthangho
+granted_on_instruction: 'https://github.com/ducthangho/tra-luat/issues/463#issuecomment-5645249537'
+leased_at_utc: '2026-09-12T10:13:48Z'
+lease_expires_at_utc: '2026-09-13T10:13:48Z'
+
+packet_id: GATE-TACH-JOB-CAT-CHI-PHI
+revision: 13
+generation: 1
+lease_id: gate-tach-job-cat-chi-phi-exec-2r2-claude-20260912
+role: executor
+provider: claude
+executor: claude
+model: fable-5.1
+effort: xhigh
+# Trường KHAI BÁO — `packet_loop` không đọc chúng; chúng ghi ý định để phiên review neo theo.
+reviewer_model: gpt-6-astra
+reviewer_effort: xhigh
+reviewer_hint_patch: true
+environment: cloud
+risk: sensitive
+assurance_target: cross_approved
+access: read-write
+
+spec_path: ops/specs/GATE-TACH-JOB-CAT-CHI-PHI.md
+spec_sha256: ddae494f17c871be10978e6cbeb2a313af55cb9aade76fa221f28aa03a432ab1
+spec_hash: ddae494f17c871be10978e6cbeb2a313af55cb9aade76fa221f28aa03a432ab1
+
+# HAI tệp, không ký tự đại diện. `loi_ruff_ci` trong tệp #2 khoá cứng `jobs.gate`; tách job
+# mà không sửa nó thì bước `test registry` tự đỏ.
+write_set:
+  - .github/workflows/ci.yml
+  - .claude/dev/ci_dang_ky_test.py
+
+# `depends_on` của đặc tả r12 là `[wp502, wp504]`. ĐO 08:5xZ 12-09-2026 — KHÔNG suy từ trạng
+# thái Issue, vì `open` KHÔNG phải "chưa làm":
+#   · `wp502` BO-CONG-DUYET-KHAC-DANH-TINH — **ĐÃ LAND**. Merge `26e2555d36c48b3c0f625ae50ab2cfb62b6cb858`
+#     (PR #506, 06:1xZ 11-09-2026) là TỔ TIÊN của `origin/master`; cả 4 tệp write_set của nó đã MẤT
+#     khỏi master và `ci_dang_ky_test.py` nhắc `duyet_danh_tinh` **0** lần. Issue #502 còn `open` chỉ
+#     vì PR hồ sơ ADR-0034 chưa xong — đó là ghi sổ, không phải việc chưa làm. Nên phụ thuộc NGUY
+#     HIỂM NHẤT (chồng lấn write set thật trên `.claude/dev/ci_dang_ky_test.py`) đã **THOẢ**, không
+#     cần miễn.
+#   · `wp504` WINDOWS-LEASE-SUITE — còn `open`, `proposed`, chưa có lease. Chủ kho **MIỄN** (chỉ thị
+#     12-09-2026, neo ở `granted_on_instruction`). Miễn được vì nó là phụ thuộc **THỨ TỰ**: write set
+#     của nó (`ops/lease_publish_test.py`, `ops/chay_lease_publish_test.sh`) **KHÔNG giao** với write
+#     set này; nó vào `depends_on` vì cùng nhắm trần Windows, không vì tranh tệp.
+# Ngoại lệ áp cho RIÊNG lần cấp này; KHÔNG sửa `depends_on` của đặc tả r12, KHÔNG là tiền lệ.
+depends_on: []
+ngoai_le_depends_on: >-
+  wp502 ĐÃ LAND (merge 26e2555, tổ tiên của origin/master; 4/4 tệp write_set đã xoá;
+  ci_dang_ky_test.py nhắc duyet_danh_tinh 0 lần) — phụ thuộc chồng lấn write set THOẢ, không miễn.
+  MIỄN riêng wp504: phụ thuộc THỨ TỰ, write set không giao — chủ kho 12-09-2026,
+  https://github.com/ducthangho/tra-luat/issues/463#issuecomment-5644870372.
+
+branch: claude/gate-tach-job-cat-chi-phi
+branch_ownership: exclusive
+target_branch_neu_land: master
+
+# 3 MỎ NEO — ĐO LẠI lúc cấp, không chép số của lease r4 (`d28c4b1`, đã cũ 5 ngày).
+# Head `origin/master` lúc cấp = `3c7df6d` (merge PR #508, 07:16:06Z 12-09-2026).
+base_sha: 3c7df6d678e11090a1623f871dcd484250a4b68b
+start_from_sha: 3c7df6d678e11090a1623f871dcd484250a4b68b
+reviewed_sha_required: 3c7df6d678e11090a1623f871dcd484250a4b68b
+
+authority_basis: '§2 — start/pause/resume/reroute/override/authorize thuộc chủ kho'
+recorded_by: claude-session
+recorder_is_dispatcher: false
+
+run_minutes: 1440
+# `write_set_hash` = sha256 các đường dẫn write_set đã sort, nối bằng LF, có LF cuối.
+# Khớp ĐÚNG giá trị của lease r4 — cùng write set thì cùng băm; đó là phép tự kiểm, không
+# phải trùng hợp.
+write_set_hash: 0f7b869da648e9b21023e461925efd0d45bca58fb308a8fcc82bc55ad9f66ef0
+heartbeat_at: '2026-09-12T10:13:48Z'
+lease_until: '2026-09-13T10:13:48Z'
+heartbeat_required_minutes: 30
+attempts_used: 0
+attempts_limit: 3
+
+reviewer_provider: codex
+review_class: sensitive
+effective_review_class: sensitive
+
+thay_the_cho:
+  - gate-tach-job-cat-chi-phi-exec-2-claude-20260912
+ly_do_thu_hoi: >-
+  Khong thu hoi vi loi thi cong. Dac ta len revision 13: A5 cua r12 KHONG THOA DUOC —
+  no doi luot NEN hop le (moi job success) ma nen tien-tach khong the hop le vi job
+  Windows cham tran timeout-minutes, dung can benh packet nay chua. Do tren run
+  34680281474 (push tai 3c7df6d): windows cancelled 60,17 phut · ubuntu success 29,40
+  phut. Chu kho chon lane so sanh `pull_request` (ubuntu-only), #463 comment 5645249537.
+  spec_hash doi 49844d77 -> ddae494f nen lease phai cap lai.
+
+# A9 — ĐO, không khai. Chạy 08:5xZ 12-09-2026 SAU phép canh hai nguồn ref (so bằng TẬP TÊN,
+# không bằng `wc -l`): 351 máy chủ / 352 cục bộ, `comm -23` RỖNG ⇒ không mù.
+#   ai-dang-giu .github/workflows/ci.yml         rc=0  NGƯỜI_GIỮ 0
+#   ai-dang-giu .claude/dev/ci_dang_ky_test.py   rc=0  NGƯỜI_GIỮ 0
+# Cảnh báo đặc tả nêu sẵn và đã gặp lại THẬT trong phiên này ở packet khác: công cụ quét
+# `refs/heads/*`, nên nhánh cục bộ tụt sau cho ra `CHAN [12]`, KHÔNG phải `NGƯỜI_GIỮ 0`.
+# Đã đồng bộ mọi nhánh cục bộ về `origin/` TRƯỚC khi đo.
+write_set_da_do_truoc_khi_cap: >-
+  08:5xZ 12-09-2026, sau canh hai nguồn ref (351/352, comm -23 RỖNG) và sau khi đồng bộ
+  nhánh cục bộ: cả hai đường dẫn rc=0, NGƯỜI_GIỮ 0. Chuỗi lease cũ #456→exec-1r4 đều HẾT_HẠN.
+
+ly_do_cap: >-
+  Task #24 của phiên 12-09-2026: chi phí CI. Đo được cùng rig, một lệnh hai vế — bộ
+  `ops/nhanh_don_duoc_test.py` đi từ 37 s (nền a639e48) lên 194 s (sau wp513) = 5,2×.
+  Hệ quả đo trên lượt master `34680281474` (head 3c7df6d, 12-09-2026): bước 16
+  `test registry` chiếm 16,05 phút / 29,40 phút của job ubuntu = 54,6 %. Trên lane Windows
+  của master, job chạm trần 60 phút và bị huỷ — ba lượt master liên tiếp trước đó
+  (a153c94, f4da553, 157b368) cùng hình dạng; riêng a153c94 đo được windows 60,53 phút
+  cancelled ở bước 20 trong khi ubuntu 30,65 phút success. Mỗi lần merge vào master vì vậy
+  đốt ~121 phút TÍNH TIỀN (60,5 × hệ số 2) mà KHÔNG trả verdict Windows nào.
+  Packet này là đường đã có đặc tả đóng băng cho nợ ấy. Nó cắt WALL-CLOCK bằng cách tách
+  job, KHÔNG cắt tổng công — và nói thẳng cái giá: phút tính tiền TĂNG.
+
+viec_trong_lease:
+  - 'M1 — tách `test registry` và `packet-loop selftest` sang job riêng, CÙNG ma trận nền với `gate`.'
+  - 'M2 — giữ độ phủ: tập `(tên bước, nền, conclusion)` sau khi tách BẰNG ĐÚNG tập trước khi
+     tách, đo trên CẢ lượt `workflow_dispatch` LẪN lượt `pull_request`. So bằng TẬP, không bằng `wc -l`.'
+  - 'M3 — không thêm mặt điều kiện nào, đo bằng CẤU TRÚC: bộ ba (`if` mức job, `matrix.os`,
+     `timeout-minutes`) của mỗi job mới BẰNG của `gate`; tập (tên bước, `if` bước) trước/sau BẰNG
+     NHAU; `on:`/`concurrency:` không đổi. Đếm `${{ }}` KHÔNG đủ — `if:` viết không có dấu nội suy lọt.'
+  - 'M4 — `timeout-minutes: 60` giữ nguyên trên MỌI job.'
+  - 'M5 — ĐO và CÔNG BỐ phút tính tiền, neo đúng lượt (A5).'
+  - 'M6 — cập nhật branch protection/ruleset cho tên job mới. Tách job mà không làm việc này là
+     THÁO CỔNG bằng một thao tác trông như tối ưu hoá.'
+  - 'M7 — sửa `loi_ruff_ci` trong `.claude/dev/ci_dang_ky_test.py`: tìm bước `test registry` trong
+     MỌI job, đòi Ruff cài trong CÙNG job và TRƯỚC bước ấy; không job nào có bước ⇒ lỗi; tương
+     thích với `ci.yml` chưa tách; kèm phản chứng (A7).'
+  - 'A1 — `max(thời lượng job)` trên `windows-latest` ≤ 0,60 × `timeout-minutes` = 36,00 phút.
+     Đơn vị: `completed_at − started_at` của JOB qua `list_workflow_jobs`; lấy `max`, KHÔNG lấy tổng.'
+  - 'A8 — `git diff --numstat` hiện ĐÚNG 2 đường dẫn, cột `additions` ≤ 300 (KHÔNG phải ròng).
+     Đường thứ ba ⇒ DỪNG và hỏi chủ kho.'
+  - 'NGHĨA VỤ THÊM (chỉ thị chủ kho 12-09-2026, quyết định 3): lượt cross-review phải phủ CẢ
+     `ops/nhanh_don_duoc_test.py` đã land tại 3c7df6d — head `f9dc17c` được merge mà CHƯA lượt
+     review nào chạy trên nó (Codex chỉ chạy trên `94c416d`). Đây là nghĩa vụ ĐỌC, KHÔNG mở write
+     set; phát hiện nào cần vá thì đi bằng packet riêng.'
+
+dieu_kien_dung:
+  - 'S1 — đường dẫn thứ BA trong write set, kể cả `ops/nhanh_don_duoc_test.py`. Chủ kho đã chọn
+     "chỉ #463 như đặc tả" (12-09-2026), nên cắt TỔNG CÔNG không thuộc packet này.'
+  - 'Nâng `timeout-minutes` — đã nâng HAI lần (25→45→60); lần kế là lần thứ BA, §12 đòi xem lại
+     CÁCH LÀM. `ci.yml:63` tự kết luận "NÂNG TRẦN KHÔNG CHỮA NGUYÊN NHÂN".'
+  - 'HẠ `timeout-minutes` để "ép kỷ luật" — biến job chậm thành `cancelled`, tức đổi một vấn đề
+     đọc được lấy một vấn đề vô hình.'
+  - 'Thêm bất kỳ mặt ĐIỀU KIỆN nào (theo diff / theo nhãn / `paths:` / `if:` mức job kể cả viết
+     không có dấu nội suy). Kho đã trả giá HAI lần; PR #247 đóng không merge. Tách job là thêm
+     JOB, không thêm ĐIỀU KIỆN.'
+  - 'Rút phần thiết lập thành `.github/actions/…` composite — thêm đường dẫn thứ ba ⇒ vi phạm
+     chính A8. Vượt 300 dòng thêm ⇒ DỪNG và hỏi chủ kho.'
+  - 'Đụng hàm nào trong `.claude/dev/ci_dang_ky_test.py` NGOÀI `loi_ruff_ci` và phản chứng của nó.'
+  - 'Song song hoá TRONG `test registry` — nợ có tên SONG-SONG-HOA-TRONG-TEST-REGISTRY.'
+  - 'Đổi tập bước hoặc đổi lệnh của bất kỳ bước nào — packet này chỉ đổi bước ấy nằm trong JOB nào.'
+  - 'Viết cú pháp `${{ }}` trong comment của `run:` — GitHub nội suy TOÀN BỘ thân `run` trước khi
+     shell thấy nó; kho đã bị từ chối cả tệp vì đúng chuyện đó (run 31971137920, 0 job).'
+  - 'Chi quá N = 2 lượt `workflow_dispatch` (một nền tại `start_from_sha`, một sau tách). Lượt
+     `pull_request` tự bắn là CỔNG, không tính vào N. CẤM tuyệt đối lượt "chạy thử xem sao".'
+  - 'Đóng packet khi chưa có `approve` TƯỜNG MINH — `review_class = sensitive`; "0 P1 + 0 P2"
+     KHÔNG đủ, vì "vắng mặt vì sạch" và "vắng mặt vì chưa nhìn tới" nhìn giống hệt nhau.'

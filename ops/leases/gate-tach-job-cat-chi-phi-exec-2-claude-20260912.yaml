@@ -98,7 +98,11 @@ review_class: sensitive
 effective_review_class: sensitive
 
 thay_the_cho: []
-ly_do_thu_hoi: null
+da_bi_thay_the: gate-tach-job-cat-chi-phi-exec-2r2-claude-20260912
+ly_do_thu_hoi: >-
+  Thay bang exec-2r2: dac ta len revision 13 (A5 doi lane so sanh sang pull_request
+  ubuntu-only) nen spec_hash doi 49844d77 -> ddae494f. Bia mo HAI CHIEU: exec-2r2 khai
+  `thay_the_cho` ten lease nay. #463 comment 5645249537.
 
 # A9 — ĐO, không khai. Chạy 08:5xZ 12-09-2026 SAU phép canh hai nguồn ref (so bằng TẬP TÊN,
 # không bằng `wc -l`): 351 máy chủ / 352 cục bộ, `comm -23` RỖNG ⇒ không mù.

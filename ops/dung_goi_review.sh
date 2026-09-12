@@ -13,9 +13,9 @@
 #       goi chi mang 3 ten nhanh. Reviewer khong tai do duoc khang dinh toan kho.
 #       DINH CHINH (cross-review PR #477, P3): ban dau tep nay ghi nguyen nhan la
 #       "`ai-dang-giu` CHI QUET refs/heads/*". DIEU DO SAI. `_cac_ref_cuc_bo`
-#       (`ops/lease_publish.py:307-321`) chay `for-each-ref refs/heads refs/remotes` va
+#       (`ops/lease_publish.py:307-321` ban b416830) chay `for-each-ref refs/heads refs/remotes` va
 #       tinh ten tu CA `refs/remotes/origin/*`; `_quet_lease_toan_kho` doc het danh sach ay.
-#       Banner CLI (`:937`) in "quet refs/heads/*" nen de tin nham — do la loi doc banner
+#       Banner CLI (`:937` ban b416830) in "quet refs/heads/*" nen de tin nham — do la loi doc banner
 #       thay vi doc ma. Nguyen nhan LICH SU cua goi 3 ref: CHUA XAC THUC DUOC (hien vat luot
 #       12 khong con). Cross-review #477 luot 2 do: `--bare --no-local` TU NO khong quyet dinh
 #       — bare tu nguon co 306 local head thi giu du 306; bare tu clone thuong (1 local head)
@@ -29,8 +29,8 @@
 #
 #   full-gate 2026-09-07, `t33_workflow_dang_lease_phai_qua_actionlint`
 #       chay trong container THIEU `actionlint` -> bo lease rc=1. Noi cho chinh xac: ca t33
-#       DA CHAY va DO o tien dieu kien (assertion o lease_publish_test.py:1359-1363 ban TRUOC
-#       subprocess.run dong 1364). Thu CHUA CHAY la thao tac LINT WORKFLOW ben trong ham.
+#       DA CHAY va DO o tien dieu kien (assertion o lease_publish_test.py:1359-1363 ban b416830,
+#       ngay truoc subprocess.run dong 1364). Thu CHUA CHAY la thao tac LINT WORKFLOW ben trong ham.
 #       Cong cu phai duoc cai TRUOC khi do.
 #
 # Nen chua o TANG: hanh vi dung goi nam trong MOT script chay duoc, tu do va tu khai
@@ -57,7 +57,8 @@ mkdir -p "$R"
 # dung cung R, manifest tang 2142 -> 2154 -> 2166 (+12 tep, +7.385.648 byte moi lan).
 # Chot nay phai o DAY chu khong o buoc cong cu: dat muon thi script da `rm -rf` va clone lai
 # `kho.git`/`cay-kho` roi moi tu choi, lam HONG manifest cua lan dung truoc (do duoc: 1520/2136).
-# KHONG xoa gi — `$R` khong thuoc so huu cua script; nguoi goi phai dung mot `$R` MOI.
+# Khong xoa toan bo $R — $R khong thuoc so huu cua script; nguoi goi phai dung mot $R MOI.
+# (Luu y: script van rm -rf kho.git va cay-kho ben trong).
 for cu in "$R"/cong-cu/actionlint.?????? "$R"/ARTIFACTS.sha256; do
   [ -e "$cu" ] || continue
   loi 4 "goi da duoc dung truoc (thay '$cu') — dung mot \$R MOI. Script khong xoa thu muc no khong tao ra."
@@ -114,7 +115,7 @@ N_MIRROR=$(wc -l < "$R/mirror-refs.tsv"); N_CAY=$(wc -l < "$R/cay-kho-refs.tsv")
 N_L1=$(wc -l < "$R/refs-lech-mirror.tsv");  N_L2=$(wc -l < "$R/refs-lech-cay-kho.tsv")
 
 # ---- 5. Cong cu bat buoc: LUON goi installer ghim, KHONG tin PATH ----
-#    `ops/cai_actionlint.sh:14` viet ro: "KHONG co nhanh thoat som `da co actionlint tren
+#    `ops/cai_actionlint.sh:14` (ban b416830) viet ro: "KHONG co nhanh thoat som `da co actionlint tren
 #    PATH thi thoi`: co mat != dung ban." Ban dau tep nay CO nhanh ay -> cross-review PR #477
 #    do duoc bon ca `wrong-version`/`invalid-pin`/`empty-pin`/`broken-binary` deu rc=0.
 #    Nen: luon cai ban ghim, va bat rc bang ASSIGNMENT chu khong trong doi so `printf`

@@ -6,7 +6,7 @@ Ngày `2026-09-07`. Vá hai nợ còn lại sau khi PR #468 đạt verdict `appr
 
 Full-gate ngày `2026-09-07` cho `lease rc=1` ở **cả hai vế**. Đó là fail-close chứ không phải
 hồi quy. Nhưng nói cho chính xác: **ca `t33` khi ấy ĐÃ CHẠY và ĐỎ** ở tiền điều kiện thiếu
-`actionlint` — assertion tại `ops/lease_publish_test.py:1359–1363` bắn **trước** `subprocess.run`
+`actionlint` — assertion tại `ops/lease_publish_test.py:1359–1363` (bản `b416830`) bắn **trước** `subprocess.run`
 ở dòng 1364. Thứ **chưa chạy** là **thao tác lint workflow** bên trong hàm, không phải bản thân ca.
 
 > Bản đầu của tài liệu này viết *"không đỏ, cũng không xanh — nó KHÔNG CHẠY"*. Sai, và bị chính
@@ -14,12 +14,12 @@ hồi quy. Nhưng nói cho chính xác: **ca `t33` khi ấy ĐÃ CHẠY và Đ�
 > Cross-review #477 lượt 6 (`t33-khong-chay-van-con-o-mo-dau`) bắt được rằng bảng đã sửa nhưng
 > lời mở đầu thì chưa.
 
-`ops/lease_publish_test.py:1338` nói rõ chủ ý: *"`actionlint` phải XANH … và THIẾU công cụ là
+`ops/lease_publish_test.py:1338` (bản `b416830`) nói rõ chủ ý: *"`actionlint` phải XANH … và THIẾU công cụ là
 ĐỎ."* Vậy `rc=1` là hành vi ĐÚNG, không phải lỗi mã. Cách đóng là **cài công cụ rồi đo**, không
 phải nới phép kiểm.
 
 Đã cài bằng **script ghim sẵn của kho** `ops/cai_actionlint.sh` (`AL_VER=1.7.7`, đúng bản CI ghim
-ở `.github/workflows/ci.yml:97`), có đối chiếu băm — `rc=0`.
+ở `.github/workflows/ci.yml:97` bản `b416830`), có đối chiếu băm — `rc=0`.
 
 > Tự khai: lần đầu tôi cài bằng `curl` tuỳ tiện, **không đối chiếu băm**. Đó đúng thứ kỷ luật của
 > kho này bác bỏ. Đã gỡ bản ấy và cài lại bằng script của kho trước khi đo.
@@ -44,7 +44,7 @@ installer hay băm archive để đối chiếu độc lập. Suy `rc=0` từ `m
 luận có điều kiện, không phải phép đo `rc` của tiến trình đã chạy.
 
 CI **đã** cài `actionlint` từ trước (`ci.yml:98`, `duyet-phan-chung.yml:54`,
-`ops-publish-lease.yml`). Nên đây chưa bao giờ là lỗ hổng của kho — chỉ là container chạy gate
+`ops-publish-lease.yml` bản `b416830`). Nên đây chưa bao giờ là lỗ hổng của kho — chỉ là container chạy gate
 thiếu công cụ. Nợ nằm ở chỗ dựng môi trường đo, và mục 2 vá đúng chỗ đó.
 
 ## 2. `ops/dung_goi_review.sh` — chuẩn hoá việc dựng gói
@@ -77,12 +77,12 @@ Bản đầu của tài liệu này (và các báo cáo tôi gửi chủ kho) vi
 **Sai.** Cross-review PR #477 (P3 `chan-doan-ai-dang-giu-chi-heads-khong-dung`) bắt được, và tôi
 đã đọc lại mã để xác nhận:
 
-- `_cac_ref_cuc_bo` (`ops/lease_publish.py:307–321`) chạy
+- `_cac_ref_cuc_bo` (`ops/lease_publish.py:307–321` bản `b416830`) chạy
   `for-each-ref refs/heads refs/remotes` — **đọc CẢ HAI** — và tính tên nhánh từ cả
   `refs/remotes/origin/*`.
 - `_quet_lease_toan_kho` đọc trọn danh sách ấy.
 
-Tôi tin **banner của CLI** (`ops/lease_publish.py:937` in `PHẠM_VI: quét refs/heads/*`) thay vì đọc
+Tôi tin **banner của CLI** (`ops/lease_publish.py:937` bản `b416830` in `PHẠM_VI: quét refs/heads/*`) thay vì đọc
 mã. Banner không phản ánh hết hành vi.
 
 Hệ quả về nguyên nhân lịch sử, nói ở mức **giả thuyết** chứ không phải kết luận: cross-review
@@ -160,7 +160,7 @@ lại từng phản chứng:
 
 | finding | mức | lỗi | sau khi vá |
 |---|---|---|---|
-| `actionlint-co-mat-khong-phai-dung-ban` | **P1** | `if ! command -v actionlint` bỏ qua installer ghim — trái `ops/cai_actionlint.sh:14` *"co mat != dung ban"*; rc trong đối số `printf` không làm `set -e` kích hoạt | luôn gọi installer ghim; bắt `rc` bằng assignment |
+| `actionlint-co-mat-khong-phai-dung-ban` | **P1** | `if ! command -v actionlint` bỏ qua installer ghim — trái `ops/cai_actionlint.sh:14` (bản `b416830`) *"co mat != dung ban"*; rc trong đối số `printf` không làm `set -e` kích hoạt | luôn gọi installer ghim; bắt `rc` bằng assignment |
 | `shellcheck-thieu-van-giao-goi-xanh` | P2 | chỉ ghi `THIEU` rồi đi tiếp, dù thiếu nó thì `actionlint` bỏ luật `SC*` trong im lặng | shellcheck vào danh sách BẮT BUỘC ⇒ `loi 4` |
 | `remote-doi-ten-loi-van-khai-url-that` | P2 | hai `\|\| true` nuốt lỗi ⇒ `origin` trỏ sai mà vẫn `rc=0` | `\|\| loi 5` + đọc lại `origin` và đối chiếu |
 | `manifest-loc-hau-to-bo-sot-tep-con` | P2 | `grep -v '  \./ARTIFACTS\.sha256$'` chỉ neo cuối dòng ⇒ thư mục tên `nested  .` làm tệp con bị loại | `find ... ! -path './ARTIFACTS.sha256'` |

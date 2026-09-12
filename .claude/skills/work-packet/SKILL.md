@@ -117,6 +117,82 @@ Vào `reviewing` phải khai `--head-sha` là **exact head** đưa ra review. B�
 `--help` cho danh sách đầy đủ và ý nghĩa từng mã thoát. Mã thoát khác 0 ⇒ dừng và báo người; script
 tự nói lý do trên stderr.
 
+## Vòng lặp vá → review → dừng
+
+`§8` và `§13` quy định mức review và định nghĩa hoàn tất; `§12` quy định điều kiện dừng và ngưỡng.
+Mục này chỉ nói **phiên phải làm gì với BẢNG LỚP mà reviewer trả về** — không nhắc lại ngưỡng nào.
+
+**Điều kiện dừng đọc theo `review_class` của lease, không theo cảm giác đã đủ.** Lớp cao nhất
+(`sensitive`) đòi một `approve` **tường minh**; một lượt không tìm ra gì mà thiếu bảng săn thì `§8` xếp
+là *chưa đo*, không phải *đã sạch*. Lặp vá → review cho tới khi hết lớp P1 và P2, hoặc có `approve`.
+
+**Đơn vị là LỚP, không phải từng lỗi.** `cross-review` sinh ra bảng ấy; đây là bên ĐỌC nó:
+
+| reviewer trả về | phiên làm gì |
+|---|---|
+| lớp P1 hoặc P2 còn mở | vá THEO LỚP rồi mở vòng mới |
+| cùng một lớp nêu **lần thứ BA** | **CẤM vá lẻ lần nữa** — xem dưới |
+| `approve` + bảng săn đủ | dừng vòng lặp; sang phần merge |
+| `blocked` | dừng, xuất handoff, **hỏi chủ kho** |
+
+**Một lớp nêu lần thứ BA nghĩa là hai bản vá trước KHÔNG trúng gốc.** Vá lẻ lần thứ ba là mua thêm một
+lượt để thua theo cùng cách. Lúc ấy đổi CÁCH TIẾP CẬN: liệt kê HẾT đường vào của lớp TRƯỚC khi sửa, và
+nếu lớp ấy không đóng được trong phạm vi packet thì nói thẳng — nó là một nợ, và nợ thuộc packet khác.
+
+**Vá theo LỚP, đừng vá theo danh sách reviewer chỉ.** Reviewer nêu những thể hiện họ thấy; cơ chế sinh
+ra chúng thường có đường vào mà không ai nêu. Tự liệt kê hết đường vào trước, đóng cả loạt, và cho mỗi
+đường một chốt riêng — ba chốt không phân biệt được bằng đầu vào là bộ TƯƠNG ĐƯƠNG, tức chỉ đo một cái.
+
+**KHÔNG hội tụ thì đo bằng PHÂN HẠNG, không bằng số lượt.** Dãy lớp P1/P2 qua các vòng phải đi xuống.
+Số lỗi giảm mà hạng không giảm thì chưa hội tụ; hạng giảm mà cùng một slug vẫn còn thì cũng chưa.
+
+**Thu hẹp phạm vi để lấy `approve` là LÁCH, không phải hội tụ.** Bỏ một đường dẫn khỏi diff cho lớp
+biến mất thì lớp vẫn sống, chỉ là ngoài tầm nhìn của lượt sau. Đổi write set là **revision mới** theo
+`§3.2`/`§5`, không phải một quyết định trong vòng lặp.
+
+**Rescue Checkpoint: DỪNG và HỎI.** Chạm checkpoint thì phiên không tự chọn đường đi tiếp — nó xuất
+handoff kèm phép đo rồi chờ chủ kho quyết. Điều kiện chạm và các đường ra ở `ADR-0037`.
+
+## Sau khi đã QUYẾT MERGE — ba mệnh đề TÁCH RỜI
+
+Đọc đủ ba, đừng gộp; bỏ mệnh đề nào cũng đổi nghĩa cả mục:
+
+1. Head đổi tiếp **KHÔNG** kéo theo một vòng cross-review mới.
+2. Nghĩa vụ còn lại **VẪN CÓ**: phải có **CI hậu merge**. Đây KHÔNG phải *"merge rồi khỏi đo"*.
+3. Ngoại lệ duy nhất là **PHÁT HIỆN LỖI** — lúc ấy mở vòng mới và **khai lý do**.
+
+Mệnh đề 2 tồn tại vì viết yếu đi là mở đường merge rồi không ai đo gì. Mệnh đề 3 tồn tại vì bỏ nó là
+khai *"merge rồi không review nữa bất kể gì"*.
+
+**Bẫy đã đo khi đọc CI hậu merge:** huỷ một job trong lượt hậu merge làm kết luận **mức RUN** thành
+`cancelled` dù job kia `success` — nền không có đường huỷ MỘT job. Nên đọc CI hậu merge ở **mức JOB**,
+đừng đọc `conclusion` của run: một job xanh nằm trong một run bị huỷ trông y hệt một lượt chưa bao giờ
+xanh.
+
+## Ba loại chi CI — và `N = 0` cho giai đoạn TRƯỚC merge
+
+| loại | là gì | ngân sách |
+|---|---|---|
+| **(a)** | CI gác cổng do nền **tự bắn** theo push/PR, cộng lượt **CI hậu merge** | không tính vào `N` |
+| **(b)** | lượt CI **gọi tay** trong lúc lặp vá → review | **`N = 0` TRƯỚC merge** |
+| **(c)** | CI thăm dò: gọi tay `workflow_dispatch`, lane nền-khác, hay full CI **trước merge** | **CẤM** |
+
+`N = 0` là điểm khác bản trước của mục này. Để `N` mở kèm câu *"đóng băng trong đặc tả"* thì một phiên
+vẫn tự cấp cho mình vài lượt full CI mà vẫn đúng chữ — đúng hình dạng *"ngoại lệ thành thường lệ"*.
+
+**Ca đối chiếu, đo được:** chuỗi `#512` ba vòng cuối **không** gọi `workflow_dispatch` lượt nào và chỉ
+nhận lượt tự động ⇒ luật này cho ra **ĐẠT** trên chuỗi ấy. Một luật làm một chuỗi đã tuân thủ thành
+*vi phạm* là luật viết sai, không phải chuỗi sai.
+
+Nhắc một điều đã đo và dễ đọc ngược: gắn nhãn để xin một lane khác **không tự sinh lượt chạy nào** khi
+workflow không khai loại sự kiện gắn nhãn. Nhãn chỉ được đọc ở lượt bắn KẾ TIẾP — nên "đã gắn nhãn"
+không phải "đã có lượt đo".
+
+**KHÔNG CỔNG NÀO CƯỠNG CHẾ MỤC NÀY.** Cả phần vòng lặp, phần hậu-merge và ba loại chi CI ở trên đều là
+**chữ**, tức kỷ luật đọc — y như các mục khác của skill này. Cưỡng chế chi CI bằng máy là packet riêng
+(`CONG-CHAN-CHI-CI-SOM`); cổng đọc một hằng số trần duy nhất là nợ `SO-CANON-CHUA-TON-TAI`. Ai tin ở
+đây đã có cơ chế sẽ bỏ đúng bước kiểm bằng tay mà mục này đang đòi.
+
 ## Chặn cứng
 
 ```bash

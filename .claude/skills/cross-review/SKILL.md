@@ -110,7 +110,37 @@ gh pr diff 56 > diff.patch
 git diff --numstat <base_sha> <head_sha> > numstat.txt
 ```
 
-Verdict neo `reviewed_sha`; head đổi thì làm lại, đừng review bản đã cũ.
+Verdict neo `reviewed_sha`. **Head đổi thì hỏi VÌ SAO nó đổi trước khi quyết làm gì** — hai nguyên
+nhân dưới đây đòi hai hành động KHÁC nhau, và bản trước của dòng này chỉ mô tả nguyên nhân thứ nhất
+rồi áp cách xử lý của nó cho cả hai:
+
+| head đổi vì | hành động |
+|---|---|
+| **TÁC GIẢ ĐẨY COMMIT MỚI** vào nhánh packet | bản duyệt cũ hết hiệu lực. **Làm lại** vòng review trên head mới; đừng review bản đã cũ. |
+| **BASE TRÔI** (nhánh mặc định tiến lên, nhánh packet không tự đổi) | KHÔNG phải "làm lại vòng cũ". **Merge nhánh mặc định vào nhánh packet TRƯỚC**, rồi mở vòng trên head SAU merge, và verdict neo head ấy. |
+
+**Đo `base` TRƯỚC vòng mà bạn dự đoán sẽ ra `approve`** — đây là nghĩa vụ, không phải gợi ý:
+
+```bash
+git fetch -q origin <nhánh mặc định>
+git merge-base --is-ancestor origin/<nhánh mặc định> HEAD   # rc khác 0 ⇒ CÓ DRIFT
+```
+
+Có drift mà phóng luôn thì tốn trọn một vòng: lượt review neo một head sắp bị thay, và cổng tiếp nhận
+có thể ĐỎ vì base cũ chứ không vì nội dung. Đo được trên `#512`: **hai** lượt cổng ĐỎ liên tiếp cùng
+một chẩn đoán *base không phải tổ tiên của head*, chữa bằng một lần merge base rồi xanh ngay.
+
+**Giới hạn, khai thẳng:** *"dự đoán vòng này là cuối"* là **phán đoán của phiên, không đo được** — nợ
+có tên `DIEU-KIEN-VONG-CUOI-KHONG-DO-DUOC`. Cách đóng nó thành phép đo là đo drift ở MỌI vòng, nhưng
+chi phí ấy chưa ai đo. Không cổng nào cưỡng chế mục này; nó là kỷ luật đọc.
+
+**Ca THỨ BA chưa có luật, đo được 12-09-2026 trên `#522`:** head đổi vì **hiện vật của CHÍNH lượt
+review** — verdict và biên nhận mà protocol buộc commit, cộng một hàng mục lục mà cổng `t27` đòi. Đo:
+`approve` neo `7bdd8ad`, head được merge `73558aa`, `diff` giữa hai cái là **đúng ba tệp**
+`ops/reviews/**`, không có thay đổi sản phẩm nào. Xếp nó vào *"tác giả đẩy commit"* sẽ tạo một vòng
+lặp không bao giờ đóng — mỗi vòng sinh hiện vật, hiện vật làm head đổi, head đổi lại đòi một vòng.
+Bảng trên **chưa** phân xử ca này; nợ có tên `HEAD-DOI-VI-HIEN-VAT-REVIEW`, và cách giải quyết thuộc
+chủ kho qua một revision mới, không thuộc phiên đang chạy.
 
 ## Dựng mirror trong sandbox — cú pháp nền, và ba chỗ đã gãy thật
 
@@ -337,6 +367,31 @@ phiên mà chẩn đoán nhầm; chỉ lộ khi cross-review dựng phản chứ
 đường hỏng"*.
 
 Dọn xong mới đo, và đo lại **nền** trước khi nghi bản vá của mình.
+
+## BẢNG LỚP — đếm theo LỚP, không theo từng lỗi
+
+`§8` quy định hạng nào là hạng nào; mục này chỉ nói **đơn vị đếm**, vì đếm sai đơn vị làm mọi phép so
+giữa các lượt vô nghĩa.
+
+**Một LỚP = một CƠ CHẾ sinh ra cùng một hình dạng lỗi.** Cùng một cơ chế hiện ở năm chỗ là **một
+lớp, năm thể hiện** — không phải năm lỗi. Hạng của lớp là hạng CAO NHẤT trong các thể hiện của nó.
+
+| trường | đếm gì |
+|---|---|
+| `so_p1` · `so_p2` · `so_p3` | số **LỚP** ở mỗi hạng |
+| `so_the_hien` | tổng số **THỂ HIỆN** của mọi lớp |
+| `findings_ids` | slug của **LỚP**, kebab-case |
+
+**KHÔNG đổi định nghĩa P1/P2/P3.** Chúng đang dùng được, và đổi là làm mọi verdict cũ không so được
+với verdict mới.
+
+**Slug là KHOÁ ĐẾM, giữ NGUYÊN qua các lượt cho cùng một lớp.** Mô tả đổi thoải mái. Đặt slug mới cho
+một lớp cũ là làm hỏng phép đếm — chốt đếm lặp-cùng-một-lớp của `packet_loop.py` đọc đúng khoá ấy, nên
+đổi slug là vô hiệu hoá chính cái chốt đang canh *"bản vá không trúng gốc"*. Ngưỡng và tên trường của
+chốt ấy nằm ở `§12` và `packet_loop.py --help`; đừng chép số vào đây.
+
+Vì sao đơn vị này quan trọng: một lớp nêu lần thứ BA nghĩa là hai bản vá trước đều không trúng gốc, và
+`work-packet` đọc đúng con số ấy để quyết **đổi cách tiếp cận** thay vì vá lẻ lần nữa.
 
 ## Khung `VERDICT.md` bắt reviewer sinh ra
 

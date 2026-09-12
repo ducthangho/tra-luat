@@ -4260,11 +4260,11 @@ def t125_AB_toan_suite_KHONG_doi_verdict_theo_ambient_actor():
             vao = re.findall(r"(?m)^>>> vao (\S+) ", out)
             ra = set(re.findall(r"(?m)^<<< ra (\S+) ", out))
             treo = [x for x in vao if x not in ra]
-            bang(False, f"lượt {nhan}: lượt con KHÔNG XONG trong {AB_HAN_GIAY}s — kết quả thu hồi "
+            chot(False, f"lượt {nhan}: lượt con KHÔNG XONG trong {AB_HAN_GIAY}s — kết quả thu hồi "
                         f"({nhat_ky_giet}); ca treo (vao không ra): {treo!r}; đã xong {len(ra)} ca; "
                         f"stdout cuối={out[-300:]!r}; stderr cuối={err[-300:]!r}")
         m = re.search(r"lease_publish: (\d+)/(\d+) đạt", out)
-        bang(m, f"lượt {nhan}: KHÔNG ĐO ĐƯỢC dòng tổng kết; rc={p.returncode}, "
+        chot(m, f"lượt {nhan}: KHÔNG ĐO ĐƯỢC dòng tổng kết; rc={p.returncode}, "
                 f"stdout={out[-400:]!r}, stderr={err[-400:]!r}")
         do = frozenset(re.findall(r"(?m)^  ĐỎ  (\w+):", out))
         # Giữ cả tập BỎ QUA: cùng số lượng chưa chứng minh cùng tập ca đã đo.
@@ -4310,7 +4310,7 @@ def t125_AB_toan_suite_KHONG_doi_verdict_theo_ambient_actor():
     khong_actor, co_actor = ket_qua["KHÔNG actor"], ket_qua["CÓ actor lạ"]
 
     ket_luan, thong_diep = _phan_loai_lech_ab(khong_actor, co_actor)
-    bang(ket_luan == LECH_KHOP, thong_diep)
+    chot(ket_luan == LECH_KHOP, thong_diep)
 
 
 
@@ -4326,7 +4326,17 @@ WORKFLOW_THU_HOI = HERE.parent / ".github" / "workflows" / "ops-thu-hoi-admissio
 
 
 class TinHieuChotCa(AssertionError):
-    """Tín hiệu của CHÍNH ca A0 — không `except` nào trong mã sản phẩm hay fixture dựng được nó."""
+    """Tín hiệu "chốt của CHÍNH ca đang chạy hỏng" — mã hạ tầng và fixture KHÔNG bao giờ ném lớp này.
+
+    M1 (packet #530) MỞ RỘNG phạm vi: trước đó lớp này chỉ phục vụ khối `A0`/`t139`, nay là tín hiệu
+    của mọi ca dùng `chot()` — gồm 9 ca của packet #504 (`t125` `t153`–`t160`). Nhờ vậy `main()` phân
+    được "ca đích chết ĐÚNG chốt của nó" với "ca chết vì một ngoại lệ VÔ CAN" — thứ mà `AssertionError`
+    trần KHÔNG phân biệt được, và là nguyên nhân CẤU TRÚC của lớp F6 trên PR #512
+    (`ops/NO_KY_THUAT.md` §23).
+
+    `bang()` GIỮ NGUYÊN cho hạ tầng và cho các ca ngoài hai nhóm trên: một `AssertionError` trần là
+    bằng chứng YẾU HƠN, và `main()` xếp nó vào `DO_KHAC` đúng vì thế.
+    """
 
 
 def chot(dk, msg):
@@ -5841,16 +5851,16 @@ def t153_nhat_ky_tung_ca_vao_ra_cap_doi_va_khong_dem():
         p.wait(timeout=30)  # M4 t153=0.250 s; 30 s là trần cho con chỉ chạy t01, chưa đọc PIPE
     except subprocess.TimeoutExpired:
         p.kill(); p.wait(timeout=5)
-        bang(False, "con t01 của t153 không kết thúc trong 30 s — đã kill")
+        chot(False, "con t01 của t153 không kết thúc trong 30 s — đã kill")
     out, err = p.communicate(timeout=5)  # chỉ đọc SAU khi con kết thúc (M3)
     vao = re.findall(r"(?m)^>>> vao (\S+) \d{4}-\d\d-\d\dT\d\d:\d\d:\d\dZ$", out)
     ra = re.findall(r"(?m)^<<< ra (\S+) \d+\.\d{3}s (QUA|DO|BO_QUA)$", out)
-    bang(vao == ["t01_lease_hop_le_thi_QUA"], f"lượt con phải chạy ĐÚNG một ca t01_: vao={vao!r}; rc={p.returncode}; "
+    chot(vao == ["t01_lease_hop_le_thi_QUA"], f"lượt con phải chạy ĐÚNG một ca t01_: vao={vao!r}; rc={p.returncode}; "
                                               f"stdout={out[-300:]!r}; stderr={err[-200:]!r}")
-    bang([x for x, _ in ra] == vao and ra[0][1] == "QUA", f"mỗi `vao` phải có đúng một `ra` cùng tên, kết QUA: ra={ra!r}")
-    bang(out.index(">>> vao ") < out.index("<<< ra "), "`<<< ra` phải in SAU `>>> vao`")
+    chot([x for x, _ in ra] == vao and ra[0][1] == "QUA", f"mỗi `vao` phải có đúng một `ra` cùng tên, kết QUA: ra={ra!r}")
+    chot(out.index(">>> vao ") < out.index("<<< ra "), "`<<< ra` phải in SAU `>>> vao`")
     m = re.search(r"lease_publish: (\d+)/(\d+) đạt", out)
-    bang(m and m.group(1) == m.group(2) == "1" and p.returncode == 0,
+    chot(m and m.group(1) == m.group(2) == "1" and p.returncode == 0,
          f"dòng tổng kết phải còn khớp regex của t125 và là 1/1, rc=0: m={m and m.group(0)!r}, rc={p.returncode}")
 
 
@@ -5933,16 +5943,16 @@ def t154_giet_ca_cay_thu_hoi_CHAU_chu_khong_chi_CON():
         # ── CHIỀU 1: giết ĐÚNG PID con ⇒ cháu còn sống (phản chứng có răng)
         p1, nhip1, pid1 = sinh("chieu1")
         try:
-            bang(doi_nhip(nhip1), "fixture hỏng: cháu chiều 1 không đập nhịp trong 15 s — chưa đo được gì")
+            chot(doi_nhip(nhip1), "fixture hỏng: cháu chiều 1 không đập nhịp trong 15 s — chưa đo được gì")
             gp = getattr(os, "getpgid", None)
             if gp is not None:
-                bang(gp(p1.pid) == p1.pid and gp(p1.pid) != gp(0),
+                chot(gp(p1.pid) == p1.pid and gp(p1.pid) != gp(0),
                      f"con phải là LÃNH ĐẠO một nhóm RIÊNG, kẻo cú giết cây nhắm vào nhóm của chính runner: "
                      f"nhom_con={gp(p1.pid)} pid={p1.pid} nhom_minh={gp(0)}")
             p1.kill()
             p1.wait(timeout=5)
             dap, a, b = con_dap(nhip1)
-            bang(dap, f"phản chứng MẤT RĂNG: giết đúng PID con mà cháu đã im (nhịp {a}->{b}); "
+            chot(dap, f"phản chứng MẤT RĂNG: giết đúng PID con mà cháu đã im (nhịp {a}->{b}); "
                       f"cháu phải sống sót cú giết PID, nếu không thì chiều 2 không chứng minh gì")
         finally:
             if p1.poll() is None:
@@ -5952,11 +5962,11 @@ def t154_giet_ca_cay_thu_hoi_CHAU_chu_khong_chi_CON():
         # ── CHIỀU 2: `_giet_ca_cay` ⇒ cháu im
         p2, nhip2, pid2 = sinh("chieu2")
         try:
-            bang(doi_nhip(nhip2), "fixture hỏng: cháu chiều 2 không đập nhịp trong 15 s")
+            chot(doi_nhip(nhip2), "fixture hỏng: cháu chiều 2 không đập nhịp trong 15 s")
             nhat_ky = _giet_ca_cay(p2)
-            bang(p2.poll() is not None, f"con chưa chết sau `_giet_ca_cay`: {nhat_ky}")
+            chot(p2.poll() is not None, f"con chưa chết sau `_giet_ca_cay`: {nhat_ky}")
             dap, a, b = con_dap(nhip2)
-            bang(not dap, f"`_giet_ca_cay` KHÔNG thu hồi được CHÁU: nhịp còn tăng {a}->{b}; "
+            chot(not dap, f"`_giet_ca_cay` KHÔNG thu hồi được CHÁU: nhịp còn tăng {a}->{b}; "
                           f"nhật ký giết: {nhat_ky}")
         finally:
             if p2.poll() is None:
@@ -5974,7 +5984,7 @@ def t154_giet_ca_cay_thu_hoi_CHAU_chu_khong_chi_CON():
                     mock.patch.object(os, "killpg") as kg, \
                     mock.patch.dict(globals(), {"_nap_launcher_thu_hoi": mock.Mock()}) as _:
                 _giet_ca_cay(p)
-                bang(not kg.called and not _nap_launcher_thu_hoi.called,
+                chot(not kg.called and not _nap_launcher_thu_hoi.called,
                      "không được giết nhóm khi cùng nhóm runner hoặc con không phải trưởng nhóm")
 
         # Dùng nguyên văn hai fixture đã có; không sáng tác thêm mã đối kháng.
@@ -6001,13 +6011,13 @@ def t154_giet_ca_cay_thu_hoi_CHAU_chu_khong_chi_CON():
                     het = time.monotonic() + 15
                     while not pid_tep.exists() and time.monotonic() < het:
                         time.sleep(0.05)
-                    bang(pid_tep.exists(), f"fixture {dau} chưa ghi PID cháu")
+                    chot(pid_tep.exists(), f"fixture {dau} chưa ghi PID cháu")
                     pid = int(pid_tep.read_text(encoding="utf-8"))
                     khoa_pid = thu_hoi._khoa_danh_tinh(pid)
-                    bang(khoa_pid is not None and thu_hoi._con_song_dung_khoa(pid, khoa_pid),
+                    chot(khoa_pid is not None and thu_hoi._con_song_dung_khoa(pid, khoa_pid),
                          f"fixture {dau}: chưa đo được cháu sống trước thu hồi")
                     nhat_ky = _giet_ca_cay(p)
-                    bang(p.poll() is not None and not thu_hoi._con_song_dung_khoa(pid, khoa_pid),
+                    chot(p.poll() is not None and not thu_hoi._con_song_dung_khoa(pid, khoa_pid),
                          f"fixture {dau}: cháu sống sau thu hồi: {nhat_ky}")
                 finally:
                     if pid is not None and khoa_pid is not None:
@@ -6052,10 +6062,10 @@ def t157_tee_dua_dong_con_LEN_NGAY_trong_luc_con_CON_DANG_CHAY():
         # Đổi capture về StringIO sẽ đỏ ở đây, kể cả khi đồng thời bỏ flush của tee.
         try:
             bat.write("kiem-dem")
-            bang(luu.getvalue().decode("utf-8") == "",
+            chot(luu.getvalue().decode("utf-8") == "",
                  "capture mất răng: thấy dữ liệu CHƯA flush")
             bat.flush()
-            bang(luu.getvalue().decode("utf-8") == "kiem-dem",
+            chot(luu.getvalue().decode("utf-8") == "kiem-dem",
                  "capture hỏng: không thấy dữ liệu ĐÃ flush")
             bat.seek(0)
             bat.truncate(0)
@@ -6082,15 +6092,15 @@ def t157_tee_dua_dong_con_LEN_NGAY_trong_luc_con_CON_DANG_CHAY():
             t.join(timeout=5)
             nhat_ky = _giet_ca_cay(p)
             bat.close()
-        bang("t_gia_dang_chay" in thay,
+        chot("t_gia_dang_chay" in thay,
              f"tee KHÔNG đưa dòng của con lên stdout trong 15 s: bắt được {thay!r}; giết: {nhat_ky}")
-        bang(con_song is True,
+        chot(con_song is True,
              f"dòng chỉ lên SAU khi con kết thúc — đúng chỗ mù mà job bị huỷ giữa t125 sẽ rơi vào: "
              f"con_song={con_song}; bắt được {thay!r}")
         dong = [x for x in thay.splitlines() if "t_gia_dang_chay" in x]
-        bang(dong and dong[0].startswith("[GIA] "),
+        chot(dong and dong[0].startswith("[GIA] "),
              f"dòng teed phải mang tiền tố ở ĐẦU dòng: {dong!r}")
-        bang(not re.search(r"(?m)^>>> vao ", thay),
+        chot(not re.search(r"(?m)^>>> vao ", thay),
              f"dòng teed KHÔNG được khớp regex nhật ký của CHA (`^>>> vao`), kẻo nhật ký con lẫn "
              f"thành nhật ký cha: {thay!r}")
 
@@ -6137,15 +6147,15 @@ def t158_tee_chi_song_khi_con_KHONG_DEM_nen_moi_truong_con_phai_TAT_DEM():
             mock.patch.dict(globals(), {"_mo_con_nhom_rieng": sinh_gia,
                                         "_theo_duoi_va_in": mock.Mock()}):
         t125_AB_toan_suite_KHONG_doi_verdict_theo_ambient_actor()
-    bang(len(moi_truong) == 2, f"t125 phải sinh đúng hai vế: {moi_truong}")
+    chot(len(moi_truong) == 2, f"t125 phải sinh đúng hai vế: {moi_truong}")
     a, b = moi_truong
-    bang(a == dict(khong_actor, PYTHONUNBUFFERED="1")
+    chot(a == dict(khong_actor, PYTHONUNBUFFERED="1")
          and b == dict(a, GITHUB_ACTOR="ke-la-mat-khong-co-quyen"),
          f"môi trường THỰC ở t125 phải tắt đệm cả hai vế, giữ nền và chỉ khác GITHUB_ACTOR: {a}, {b}")
 
-    bang("PYTHONUNBUFFERED" in _moi_truong_con_ab({}) and _moi_truong_con_ab({})["PYTHONUNBUFFERED"] == "1",
+    chot("PYTHONUNBUFFERED" in _moi_truong_con_ab({}) and _moi_truong_con_ab({})["PYTHONUNBUFFERED"] == "1",
          f"`_moi_truong_con_ab` phải TẮT ĐỆM cho lượt con: {_moi_truong_con_ab({})!r}")
-    bang("GITHUB_ACTOR" not in _moi_truong_con_ab({"A": "1"}),
+    chot("GITHUB_ACTOR" not in _moi_truong_con_ab({"A": "1"}),
          "`_moi_truong_con_ab` không được mang `GITHUB_ACTOR` vào — đó là bất biến của t125")
 
     ma = "import sys,time\nprint('>>> vao t_do_dem_158 2026-01-01T00:00:00Z')\ntime.sleep(8)\n"  # KHÔNG flush
@@ -6179,13 +6189,13 @@ def t158_tee_chi_song_khi_con_KHONG_DEM_nen_moi_truong_con_phai_TAT_DEM():
             return ("t_do_dem_158" in thay), con_song, nhat_ky
 
     thay_dem, song_dem, _ = do({k: v for k, v in mt_nen.items() if k != "PYTHONUNBUFFERED"})
-    bang(song_dem, "chiều CÒN ĐỆM phải có con sống; con chết sớm không chứng minh đệm giữ dòng")
-    bang(not thay_dem,
+    chot(song_dem, "chiều CÒN ĐỆM phải có con sống; con chết sớm không chứng minh đệm giữ dòng")
+    chot(not thay_dem,
          "phản chứng MẤT RĂNG: con CÒN ĐỆM mà tee đã thấy dòng — nghĩa là phép đo này không còn phân "
          "biệt được hai đường, và câu 'phải tắt đệm' trong `_moi_truong_con_ab` thành vô căn cứ; "
          "hãy ĐO LẠI rồi sửa lời khai, đừng mừng vì ca xanh")
     thay_tat, song_tat, nhat_ky = do(_moi_truong_con_ab(mt_nen))
-    bang(thay_tat and song_tat,
+    chot(thay_tat and song_tat,
          f"với môi trường của lượt con (đã TẮT ĐỆM), tee phải thấy dòng TRONG LÚC con còn chạy: "
          f"thay={thay_tat} con_song={song_tat}; giết: {nhat_ky}")
 
@@ -6234,25 +6244,25 @@ def t160_lech_AB_phai_giu_bang_chung_va_CHAN_tai_consumer_t125():
             except AssertionError as ex:
                 loi = str(ex)
         cac_cap_da_so = list(phan_loai.call_args_list)
-        bang(cac_cap_da_so == [mock.call(*cap)],
+        chot(cac_cap_da_so == [mock.call(*cap)],
              f"classifier phải nhận đúng tuple theo nhãn không-actor rồi có-actor: {cac_cap_da_so!r}")
-        bang(len(da_sinh) == 2 and all(x[0][-1] == CO_AB for x in da_sinh),
+        chot(len(da_sinh) == 2 and all(x[0][-1] == CO_AB for x in da_sinh),
              f"phải đo đúng hai lượt TOÀN SUITE qua t125: {da_sinh!r}")
-        bang(not chay_them.called and not mo_them.called,
+        chot(not chay_them.called and not mo_them.called,
              "t125 không được mở thêm tiến trình bằng run/Popen ngoài hai vế A/B")
         duong_tee = sorted((x.args[0].name, x.args[1]) for x in tee.call_args_list)
-        bang(duong_tee == [("A.err", "[A err]"), ("A.out", "[A]"),
+        chot(duong_tee == [("A.err", "[A err]"), ("A.out", "[A]"),
                           ("B.err", "[B err]"), ("B.out", "[B]")],
              f"consumer t125 phải nối đủ bốn tệp vào đúng tee: {duong_tee!r}")
         if cap[0] != cap[1]:
             for nhan, k in zip(("không-actor", "có-actor"), cap):
                 can = f"{nhan}=(rc={k[0]}, {k[1]}/{k[2]})"
-                bang(loi is not None and can in loi,
+                chot(loi is not None and can in loi,
                      f"chẩn đoán phải giữ đúng vế {can!r}: {loi!r}")
         return loi
 
-    bang(do((a, a)) is None, "hai vế khớp phải qua consumer t125")
-    bang(do((do_x, do_x)) is None, "t125 so bất biến, không thay verdict của từng ca con")
+    chot(do((a, a)) is None, "hai vế khớp phải qua consumer t125")
+    chot(do((do_x, do_x)) is None, "t125 so bất biến, không thay verdict của từng ca con")
     for cap, can_co in (
             ((a, do_x), ("t_x", "rc=0, 2/2", "rc=1, 1/2")),
             ((do_x, do_y), ("t_x", "t_y")),
@@ -6262,9 +6272,9 @@ def t160_lech_AB_phai_giu_bang_chung_va_CHAN_tai_consumer_t125():
             ((do_x, (1, "1", "3", do_x[3], do_x[4])), ("1/2", "1/3"))):
         for hai_ve in (cap, cap[::-1]):
             loi = do(hai_ve)
-            bang(loi is not None and LECH_CHUA_RO in loi,
+            chot(loi is not None and LECH_CHUA_RO in loi,
                  f"mọi lệch phải làm CHÍNH t125 đỏ, chưa rõ nguyên nhân: {hai_ve!r}: {loi!r}")
-            bang("CHƯA loại trừ rò GITHUB_ACTOR" in loi and "[A]/[B]" in loi
+            chot("CHƯA loại trừ rò GITHUB_ACTOR" in loi and "[A]/[B]" in loi
                  and all(x in loi for x in can_co),
                  f"phải giữ bằng chứng gốc và khả năng rò actor trong chẩn đoán: {loi!r}")
 
@@ -6295,20 +6305,20 @@ def t155_chon_ca_khong_khop_hoac_RONG_thi_KHONG_XANH():
         return p.returncode, p.stdout, p.stderr
 
     rc, out, err = chay_con(CO_CHI_CA + "t01_")
-    bang(rc == 0 and re.search(r"lease_publish: 1/1 đạt", out),
+    chot(rc == 0 and re.search(r"lease_publish: 1/1 đạt", out),
          f"prefix hợp lệ phải còn chạy đúng một ca: rc={rc}, stdout={out[-300:]!r}, stderr={err[-200:]!r}")
 
     rc, out, err = chay_con(CO_AB, CO_CHI_CA + "t01_")
-    bang(rc == 0 and re.search(r"lease_publish: 1/1 đạt", out),
+    chot(rc == 0 and re.search(r"lease_publish: 1/1 đạt", out),
          f"đường CO_AB phải còn chạy ca: rc={rc}, stdout={out[-300:]!r}, stderr={err[-200:]!r}")
 
     for co, ten in ((CO_CHI_CA + "zzz_khong_co_ca_nao_ten_the_nay_", "không khớp ca nào"),
                     (CO_CHI_CA, "RỖNG")):
         rc, out, err = chay_con(co)
-        bang(rc == RC_CHON_CA_SAI,
+        chot(rc == RC_CHON_CA_SAI,
              f"selector {ten} phải trả rc={RC_CHON_CA_SAI}, đo được rc={rc}; "
              f"stdout={out[-300:]!r}, stderr={err[-300:]!r}")
-        bang(not re.search(r"lease_publish: \d+/\d+ đạt", out + err),
+        chot(not re.search(r"lease_publish: \d+/\d+ đạt", out + err),
              f"selector {ten} KHÔNG được in dòng tổng kết (đọc thành một kết quả): "
              f"stdout={out[-300:]!r}, stderr={err[-300:]!r}")
 
@@ -6328,15 +6338,15 @@ def t156_han_NGOAI_khong_nho_hon_tong_han_TRONG_va_duoi_tran_cung():
     ĐỘT BIẾN LÀM CA NÀY ĐỎ: ghi tay `AB_HAN_GIAY = 420`; bỏ `CD_HAN_TONG_GIAY` khỏi `T137_TRAN_GIAY`;
     nâng `AB_HAN_GIAY` lên quá `AB_TRAN_CUNG_GIAY` cho "khỏi treo".
     """
-    bang(T137_TRAN_GIAY == AL_HAN_GIAY + SC_HAN_TONG_GIAY + CD_HAN_TONG_GIAY,
+    chot(T137_TRAN_GIAY == AL_HAN_GIAY + SC_HAN_TONG_GIAY + CD_HAN_TONG_GIAY,
          f"trần t137 phải gồm ĐỦ ba hạn trong: {T137_TRAN_GIAY} vs "
          f"{AL_HAN_GIAY}+{SC_HAN_TONG_GIAY}+{CD_HAN_TONG_GIAY}")
-    bang(AB_HAN_GIAY >= T137_TRAN_GIAY + AB_SUITE_DO_DUOC_GIAY,
+    chot(AB_HAN_GIAY >= T137_TRAN_GIAY + AB_SUITE_DO_DUOC_GIAY,
          f"hạn ngoài {AB_HAN_GIAY}s phải ≥ trần t137 {T137_TRAN_GIAY}s + suite đã đo "
          f"{AB_SUITE_DO_DUOC_GIAY}s — nếu không, con bị giết dù mọi lệnh còn trong hạn riêng")
-    bang(AB_HAN_GIAY > 540,
+    chot(AB_HAN_GIAY > 540,
          f"hạn ngoài phải vượt 540 s (tổng hạn trong của riêng t137 mà cross-review đã đo): {AB_HAN_GIAY}")
-    bang(AB_HAN_GIAY < AB_TRAN_CUNG_GIAY,
+    chot(AB_HAN_GIAY < AB_TRAN_CUNG_GIAY,
          f"hạn ngoài {AB_HAN_GIAY}s phải nằm DƯỚI trần cứng {AB_TRAN_CUNG_GIAY}s — nâng trần cho tới "
          f"khi hết treo là đổi cổng lấy sự im lặng")
 
@@ -6357,9 +6367,9 @@ def t156_han_NGOAI_khong_nho_hon_tong_han_TRONG_va_duoi_tran_cung():
     t0 = time.monotonic()
     for _ in range(so_goi):
         r = subprocess.run([sys.executable, "-c", ma_lint, str(tre)], timeout=han_moi_goi)
-        bang(r.returncode == 0, "lint giả đứng-một-mình phải rc=0")
+        chot(r.returncode == 0, "lint giả đứng-một-mình phải rc=0")
     rieng = time.monotonic() - t0
-    bang(rieng > ngoai_cu,
+    chot(rieng > ngoai_cu,
          f"phản chứng MẤT RĂNG: công việc hợp lệ {rieng:.2f}s không vượt hạn ngoài kiểu cũ "
          f"{ngoai_cu:.2f}s, nên ca này không đo được gì")
 
@@ -6377,11 +6387,11 @@ def t156_han_NGOAI_khong_nho_hon_tong_han_TRONG_va_duoi_tran_cung():
             return qua_han, p.returncode, o.read_text(encoding="utf-8", errors="replace")
 
     qua_han, rc, out = chay_long(ngoai_moi)
-    bang(not qua_han and rc == 0 and "LINT GIA XONG" in out,
+    chot(not qua_han and rc == 0 and "LINT GIA XONG" in out,
          f"hạn ngoài DẪN XUẤT {ngoai_moi:.2f}s phải để con làm xong việc hợp lệ ({rieng:.2f}s): "
          f"qua_han={qua_han}, rc={rc}, out={out[-200:]!r}")
     qua_han_cu, rc_cu, _ = chay_long(ngoai_cu)
-    bang(qua_han_cu,
+    chot(qua_han_cu,
          f"hạn ngoài kiểu CŨ {ngoai_cu:.2f}s phải giết con dù việc còn hợp lệ — không lệch thì ca này "
          f"không chứng minh vì sao cần dẫn xuất: qua_han={qua_han_cu}, rc={rc_cu}")
 
@@ -6402,10 +6412,10 @@ def t156_han_NGOAI_khong_nho_hon_tong_han_TRONG_va_duoi_tran_cung():
         except subprocess.TimeoutExpired:
             het_tai = -1
         do_thoi[n] = time.monotonic() - t0
-        bang(het_tai is not None,
+        chot(het_tai is not None,
              f"dãy {n} lệnh × {tre_lenh}s phải tiêu hết ngân sách {ngan_sach}s và DỪNG, "
              f"đo được {do_thoi[n]:.2f}s mà không báo hết ngân sách")
-    bang(do_thoi[24] < do_thoi[4] + ngan_sach + 1.0,
+    chot(do_thoi[24] < do_thoi[4] + ngan_sach + 1.0,
          f"trần của dãy TRÔI THEO SỐ LỆNH: 4 lệnh {do_thoi[4]:.2f}s vs 24 lệnh {do_thoi[24]:.2f}s — "
          f"ngân sách TỔNG phải cắt ở {ngan_sach}s bất kể n, nếu không thì `T137_TRAN_GIAY` là số bịa")
 
@@ -6422,7 +6432,7 @@ def t156_han_NGOAI_khong_nho_hon_tong_han_TRONG_va_duoi_tran_cung():
             _chay_day_lenh_trong_ngan_sach([["lenh1"], ["lenh2"]], 0.6, chay=chay_xong)
         except HetNganSachDay as ex:
             het_tai = (ex.chi_so, ex.da_chay)
-    bang(het_tai == (1, 1) and da_goi == [["lenh1"]],
+    chot(het_tai == (1, 1) and da_goi == [["lenh1"]],
          f"hết ngân sách GIỮA hai lệnh phải ném HetNganSachDay trước lệnh #1: "
          f"het_tai={het_tai}, da_goi={da_goi}")
 
@@ -6451,16 +6461,683 @@ def t159_t137_can_do_DU_ket_qua_va_dung_nhan_than_timeout():
                 t137_M9_workflow_admission_hop_dong_tinh_va_actionlint_shellcheck()
             except TinHieuChotCa as ex:
                 loi = str(ex)
-        bang(len(da_goi) == 2, f"chưa tới consumer shellcheck ở t137: {loi}")
+        chot(len(da_goi) == 2, f"chưa tới consumer shellcheck ở t137: {loi}")
         return loi
 
-    bang(do("du") is None, "t137 phải nhận đủ hai kết quả xanh")
+    chot(do("du") is None, "t137 phải nhận đủ hai kết quả xanh")
     thieu = do("thieu")
-    bang(thieu is not None and "shellcheck chỉ trả 1/2 kết quả" in thieu,
+    chot(thieu is not None and "shellcheck chỉ trả 1/2 kết quả" in thieu,
          f"t137 phải từ chối kết quả dở dang 1/2: {thieu!r}")
     treo = do("treo")
-    bang(treo is not None and "shellcheck TREO trên thân run #1:" in treo,
+    chot(treo is not None and "shellcheck TREO trên thân run #1:" in treo,
          f"timeout lệnh thứ hai phải ghi run #1 từ ex.cmd: {treo!r}")
+
+
+# =====================================================================================
+# M2 · M3 · M6 (packet #530) — KÊNH KẾT QUẢ RIÊNG cho lượt con, thay cho việc SUY lý do
+# một mutant chết bằng cách đọc CHUỖI trên stdout.
+#
+# VÌ SAO. Catalog đột biến của packet #504 đột biến CHÍNH tệp này (tee, killpg, ngân sách,
+# selector), nên nó KHÔNG chạy được trong tiến trình như `t139` làm với `lease_publish.py`:
+# phải sinh tiến trình con. Mà lớp ngoại lệ KHÔNG qua được ranh giới tiến trình, nên bộ đo
+# cũ (`ops/handoff/512-luot7/dotbien512.py`) phải đoán từ hình dạng chuỗi `main()` in ra.
+# Ba lượt vá, ba lượt cùng một hình dạng lỗi, và vòng 8 chỉ ra lý do CẤU TRÚC: hai miền
+# chuỗi "thông điệp assertion" và "tên lớp + thông điệp" GIAO NHAU — `t96: …` là tiền tố
+# tên ca BÌNH THƯỜNG có sẵn trong cây. Không có biên nào để siết. Nợ: `ops/NO_KY_THUAT.md` §23.
+#
+# NÊN: lượt con phát kết quả ra một KÊNH RIÊNG (tệp JSONL), mang NHÃN do `main()` gán theo
+# LỚP NGOẠI LỆ THẬT nó bắt được — không phải theo chuỗi. Bản mẫu đã land ở packet #513
+# (`ops/nhanh_don_duoc_test.py` trên master); đây là PORT, không phải thiết kế mới.
+#
+# KHÁC bản mẫu ĐÚNG MỘT CHỖ, và nói ra vì nó là thay đổi có chủ đích: bản mẫu có BA nhãn
+# (`DAT`/`DO_CHOT`/`DO_KHAC`), suite này có BỐN vì nó có kết cục `BO_QUA` THẬT (ca phụ thuộc
+# nền bỏ qua khi dẫn xuất được lý do từ `runs-on`). Gộp `BO_QUA` vào `DAT` hay vào `DO_KHAC`
+# đều là đổi ngữ nghĩa của 155 ca — `ngoai_pham_vi` #5 của đặc tả cấm.
+#
+# MÔ HÌNH TIN CẬY, khai đúng mức: kênh bảo vệ khỏi một TẬP LỖI KHAI TƯỜNG MINH (ngoại lệ vô
+# can, bản ghi méo, thiếu bản ghi, rc lệch, ca lạ). Nó KHÔNG chống được mã CÙNG interpreter
+# sửa thẳng trạng thái khung. Bản mẫu #513 khai đúng giới hạn ấy và packet này kế thừa NGUYÊN,
+# không khai mạnh hơn.
+KENH_ENV = "LPT_KENH"
+DAU_PHIEN_ENV = "LPT_DAU_PHIEN"
+MUTANT_ENV = "LPT_MUTANT"
+LAN_THU_ENV = "LPT_LAN_THU"
+NHAN_DAT, NHAN_BO_QUA, NHAN_DO_CHOT, NHAN_DO_KHAC = "DAT", "BO_QUA", "DO_CHOT", "DO_KHAC"
+NHAN_HOP_LE = frozenset({NHAN_DAT, NHAN_BO_QUA, NHAN_DO_CHOT, NHAN_DO_KHAC})
+GIET, KHONG_GIET, KHONG_DO_DUOC = "GIET", "KHONG_GIET", "KHONG_DO_DUOC"
+
+
+def sinh_dau_phien() -> str:
+    """Dấu phiên NGẪU NHIÊN, SINH MỚI MỖI LƯỢT.
+
+    KHÔNG được lấy mốc thời gian độ phân giải giây: hai lượt chạy nhanh sẽ trùng. KHÔNG được
+    lấy bộ đếm tăng: mọi dấu vẫn KHÁC nhau nên phép so "hai dấu khác nhau" mù với nó.
+    """
+    import secrets
+    return secrets.token_hex(16)
+
+
+class KhungPhat:
+    """Phát kết quả từng ca ra kênh riêng.
+
+    TÊN CA DO KHUNG ĐÓNG DẤU từ trạng thái của chính khung (`_ca_dang_chay`), KHÔNG lấy từ đối
+    số người gọi. Nhờ vậy mã đang chạy trong ca `X` chỉ tạo được bản ghi mang tên `X` — tức một
+    bản ghi THỨ HAI của `X` (⇒ KHÔNG ĐO ĐƯỢC vì trùng ca), chứ không đoạt được danh tính ca khác.
+    """
+
+    def __init__(self, duong: Path, dau_phien: str, mutant: str, lan_thu: int):
+        self._f = duong.open("a", encoding="utf-8", newline="\n")
+        self._neo = {"dau_phien": dau_phien, "mutant": mutant, "lan_thu": lan_thu}
+        self._ca_dang_chay = None
+
+    def vao_ca(self, ten: str) -> None:
+        self._ca_dang_chay = ten
+
+    def phat(self, nhan: str, chi_tiet: str = "") -> None:
+        import json
+        ban_ghi = dict(self._neo, ca=self._ca_dang_chay, nhan=nhan, chi_tiet=chi_tiet)
+        self._f.write(json.dumps(ban_ghi, ensure_ascii=False, sort_keys=True) + "\n")
+        self._f.flush()
+
+    def dong_luot(self, rc: int) -> None:
+        import json
+        ban_ghi = dict(self._neo, dong_luot=True, rc=rc)
+        self._f.write(json.dumps(ban_ghi, ensure_ascii=False, sort_keys=True) + "\n")
+        self._f.flush()
+        self._f.close()
+
+
+def _mo_kenh():
+    """Mở kênh khi và chỉ khi CẢ BỐN biến môi trường có mặt; thiếu một biến ⇒ KHÔNG mở.
+
+    Fail-close về phía "không phát": một lượt người-gõ-tay chạy suite không có kênh vẫn phải
+    xanh bình thường. Còn thiếu biến trong một lượt ĐO thì bộ chấm sẽ thấy "kênh không tồn tại"
+    và trả KHÔNG ĐO ĐƯỢC — ồn ào, đúng hướng.
+    """
+    duong = os.environ.get(KENH_ENV)
+    if not duong:
+        return None
+    try:
+        khung = KhungPhat(Path(duong), os.environ[DAU_PHIEN_ENV],
+                          os.environ[MUTANT_ENV], int(os.environ[LAN_THU_ENV]))
+    except (KeyError, ValueError, OSError):
+        return None
+    # KÊNH CHỈ THUỘC TIẾN TRÌNH ĐƯỢC TRAO NÓ — xoá bốn biến khỏi `os.environ` NGAY sau khi mở, nên
+    # không CHÁU nào thừa kế được. Đây là chốt CẤU TRÚC, không phải một `env.pop` rải ở từng chỗ gọi:
+    # tệp này sinh tiến trình con của CHÍNH nó ở 18 chỗ, và một chỗ quên là một phép đo mất.
+    #
+    # ĐÃ ĐO, không phải phòng xa: `t155` (ca đo chốt selector) phóng một lượt con với tiền tố SAI.
+    # Với mutant `bo-chot-selector-khong-khop`, lượt con ấy KHÔNG còn thoát sớm nên nó chạy TRỌN 157
+    # ca và ghi tiếp vào ĐÚNG tệp kênh của cha — sau cả bản ghi đóng lượt. Bộ chấm trả
+    # `KHONG_DO_DUOC: "có bản ghi SAU bản ghi đóng lượt"` cho một mutant ĐÃ BỊ GIẾT THẬT
+    # (`catalog 512: giết=15, KHÔNG ĐO ĐƯỢC=1`). Tức đây là một phép đo BỊ MẤT, đúng hình dạng
+    # "đột biến bị giết không phải đột biến bị giết ĐÚNG LÝ DO" ở chiều ngược lại.
+    for b in (KENH_ENV, DAU_PHIEN_ENV, MUTANT_ENV, LAN_THU_ENV):
+        os.environ.pop(b, None)
+    return khung
+
+
+def doc_kenh(duong: Path, dau_phien: str, mutant: str, lan_thu: int, dich,
+             tien_to: str, rc_that=None):
+    """Vỏ FAIL-CLOSE: mọi ngoại lệ BẤT NGỜ thành KHÔNG ĐO ĐƯỢC, không thoát ra.
+
+    Để một ngoại lệ thoát ra thì lượt CHẠY LẠI của `M3` biến mất — bản mẫu #513 đã trả giá
+    đúng chỗ này (F01 lượt 7). `KHÔNG ĐO ĐƯỢC` làm ca ĐỎ chứ không cấp tín dụng, nên đây là
+    hướng an toàn.
+
+    `dich` được VẬT HOÁ ở đây. Bản mẫu đã trả giá BA lượt liền vì chuyện này (#513 F01/F04/F07):
+    phép xác thực đọc `dich` nhiều lần, nên một iterator MỘT-LẦN-ĐỌC bị lần đọc đầu TIÊU THỤ,
+    `set(dich)` cuối cùng ra RỖNG và phép so `do_chot == set(dich)` lại ĐÚNG khi KHÔNG ca nào
+    chết ⇒ GIẾT GIẢ.
+
+    NÓI ĐÚNG MỨC, vì lời khai đầu của phiên này rộng hơn phép đo: `tuple(dich)` ở đây và
+    `tuple(...)` trong `_ten_day_du_512` KHÔNG phải hai chốt ĐỘC LẬP — chúng là một bộ TƯƠNG
+    ĐƯƠNG. Phép đo, ghi thẳng ở đây để nó không trôi theo một tệp hồ sơ nào: chạy `--chi-ca=t162`
+    với `LPT_TU_KIEM_CTRL=CTRL-DUONG-chet-dung-chot-ca-dich` trên ba bản — gỡ riêng nửa
+    `_ten_day_du_512` ⇒ `rc=0`, 0 control lệch; gỡ riêng nửa `doc_kenh` ⇒ `rc=0`, 0 control lệch
+    (nửa còn lại HẤP THỤ); gỡ CẢ HAI ⇒ `rc=1` và control dương lệch `GIET → KHONG_GIET`. Nên
+    `bo-CA-HAI-chot-vat-hoa-dich` ở `M5` đo ĐÚNG MỘT thứ, và con số mutant tự kiểm KHÔNG được đọc
+    thành "sáu chốt độc lập". Bản chiếu của phép đo nằm ở nhánh hồ sơ `ops/handoff-530` (nhánh là
+    thứ trôi và bị xoá; ba con số trên đây là thứ tái lập được từ chính tệp này).
+    """
+    try:
+        return _doc_kenh_xac_thuc(duong, dau_phien, mutant, lan_thu, tuple(dich),
+                                  tien_to, rc_that)
+    except Exception as exc:                  # noqa: BLE001 — fail-close CÓ CHỦ ĐÍCH
+        return KHONG_DO_DUOC, f"bộ đọc kênh ném {type(exc).__name__}: {exc}"
+
+
+def _doc_kenh_xac_thuc(duong: Path, dau_phien: str, mutant: str, lan_thu: int, dich,
+                       tien_to: str, rc_that=None):
+    """Đọc kênh và phân BA trạng thái. Mỗi nhánh từ chối đều nêu LÝ DO.
+
+    Nếp: XÁC THỰC trước, TIN sau. Chỉ nhận bản ghi neo ĐÚNG lượt vừa phóng
+    `(dau_phien, mutant, lan_thu)`; thiếu bản ghi đóng lượt ⇒ KHÔNG ĐO ĐƯỢC, vì một lượt bị
+    giết giữa chừng vẫn có thể để lại đủ số bản ghi ca.
+    """
+    import json
+    if not duong.exists():
+        return KHONG_DO_DUOC, "kênh không tồn tại"
+    try:
+        noi_dung = duong.read_text(encoding="utf-8")
+    except (OSError, UnicodeDecodeError) as exc:
+        return KHONG_DO_DUOC, f"không đọc được kênh: {type(exc).__name__}: {exc}"
+    neo = {"dau_phien": dau_phien, "mutant": mutant, "lan_thu": lan_thu}
+    theo_ca, chi_tiet, dong = {}, {}, None
+    for dong_txt in noi_dung.split("\n"):
+        if not dong_txt.strip():
+            continue
+        try:
+            r = json.loads(dong_txt)
+        except json.JSONDecodeError:
+            return KHONG_DO_DUOC, "bản ghi không phải JSON"
+        if not isinstance(r, dict):
+            return KHONG_DO_DUOC, f"bản ghi không phải object: {type(r).__name__}"
+        if dong is not None:
+            return KHONG_DO_DUOC, "có bản ghi SAU bản ghi đóng lượt"
+        if any(r.get(k) != v for k, v in neo.items()):
+            ten_bg = r.get("ca") if isinstance(r.get("ca"), str) else "dong_luot"
+            return KHONG_DO_DUOC, f"bản ghi không neo đúng lượt: {ten_bg}"
+        # `bool(...)` là một phép ÉP KIỂU, và ép kiểu ở đây chính là cấp tín dụng cho thứ KHÔNG
+        # đúng định dạng. Kênh là HỢP ĐỒNG: dấu đóng phải là bool JSON `true`.
+        co_dong = r.get("dong_luot") is True
+        if "dong_luot" in r and not co_dong:
+            return KHONG_DO_DUOC, f"dấu đóng lượt không phải bool true: {r.get('dong_luot')!r}"
+        co_ca = "ca" in r
+        if co_ca and co_dong:
+            return KHONG_DO_DUOC, "bản ghi vừa mang tên ca vừa khai đóng lượt"
+        if co_dong:
+            dong = r
+            continue
+        ca_ten = r.get("ca")
+        if ca_ten is None:
+            return KHONG_DO_DUOC, "bản ghi thiếu tên ca"
+        if not isinstance(ca_ten, str):
+            return KHONG_DO_DUOC, f"tên ca không phải chuỗi: {type(ca_ten).__name__}"
+        if ca_ten in theo_ca:
+            return KHONG_DO_DUOC, f"bản ghi TRÙNG cho ca {ca_ten}"
+        nhan = r.get("nhan")
+        if nhan not in NHAN_HOP_LE:
+            return KHONG_DO_DUOC, f"nhãn không hợp lệ cho ca {ca_ten}: {nhan!r}"
+        ct = r.get("chi_tiet", "")
+        if not isinstance(ct, str):
+            return KHONG_DO_DUOC, f"chi tiết không phải chuỗi cho ca {ca_ten}"
+        theo_ca[ca_ten] = nhan
+        chi_tiet[ca_ten] = ct
+    if dong is None:
+        return KHONG_DO_DUOC, "thiếu bản ghi đóng lượt"
+    # `rc` là MỘT CHIỀU NEO, không phải trang trí: thiếu nó thì một lượt con khai "xong rc=0"
+    # trong khi tiến trình THẬT thoát 1 vẫn được nhận. `bool` là con của `int` nên phải loại
+    # RIÊNG, kẻo `True` so bằng `1` và lọt qua phép neo.
+    if not isinstance(dong.get("rc"), int) or isinstance(dong.get("rc"), bool):
+        return KHONG_DO_DUOC, "bản ghi đóng lượt thiếu rc kiểu int"
+    if rc_that is not None and dong["rc"] != rc_that:
+        return KHONG_DO_DUOC, f"rc đóng lượt {dong['rc']} != rc tiến trình {rc_that}"
+    if not theo_ca:
+        return KHONG_DO_DUOC, "kênh KHÔNG có bản ghi ca nào"
+    # Lượt con được phóng với `--chi-ca=<tiền tố>`, nên MỌI ca trong kênh phải khớp tiền tố ấy.
+    # Tiền tố lấy từ BỘ CHẤM (đối số nó vừa truyền), không lấy từ lời khai của lượt con.
+    la = sorted(t for t in theo_ca if not t.startswith(tien_to))
+    if la:
+        return KHONG_DO_DUOC, f"kênh có ca KHÔNG khớp tiền tố {tien_to!r}: {la}"
+    # `dich` là DỮ LIỆU MÔ TẢ và phải được XÁC THỰC. Phép so `do_chot == set(dich)` ĐÚNG khi CẢ
+    # HAI vế rỗng, nên một mục khai `dich=()` được cấp GIẾT trong khi KHÔNG ca nào chết và đột
+    # biến không đổi một byte nào — bản mẫu #513 đã đo được đúng lỗ này (F01 lượt 10). Hướng từ
+    # chối là KDD chứ không phải KHONG_GIET: descriptor sai là lỗi CẤU HÌNH, không phải kết luận
+    # về sức mạnh của bộ test.
+    if not dich:
+        return KHONG_DO_DUOC, "đích RỖNG: không cấp GIẾT khi không ca nào phải chết"
+    vang = sorted(set(dich) - set(theo_ca))
+    if vang:
+        return KHONG_DO_DUOC, f"đích KHÔNG có mặt trong kênh: {vang}"
+    # ĐÂY là chốt trung tâm của packet: một ca chết vì ngoại lệ KHÔNG phải `TinHieuChotCa` là
+    # trạng thái THỨ BA, không phải "không giết" và tuyệt đối không phải "giết".
+    khac = sorted(t for t, n in theo_ca.items() if n == NHAN_DO_KHAC)
+    if khac:
+        ct = "; ".join(f"{c}: {chi_tiet.get(c, '')[:160]}" for c in khac)
+        return KHONG_DO_DUOC, f"ca ĐỎ vì ngoại lệ KHÔNG phải TinHieuChotCa: {khac} | {ct}"
+    do_chot = {t for t, n in theo_ca.items() if n == NHAN_DO_CHOT}
+    if do_chot == set(dich):
+        return GIET, ""
+    return KHONG_GIET, f"tập ca đỏ-chốt {sorted(do_chot)} != đích {sorted(dich)}"
+
+
+# =====================================================================================
+# M4 (packet #530) — CATALOG ĐỘT BIẾN VÀO TRONG TỆP TEST, không giữ ở `ops/handoff/**`.
+# Bản mẫu `#513` đặt `DOT_BIEN_TU_KIEM` ngay trong tệp test, nhờ đó write set là MỘT đường và
+# bộ chấm được canh bởi CÙNG một suite. Thư mục handoff là chỗ ephemeral, không phải nhà của
+# một bộ đo — bộ đo cũ `dotbien512.py` sống ở đó và đã trôi khỏi mọi cổng suốt bốn vòng review.
+#
+# BA TRẠNG THÁI, và chỗ khác hẳn bộ đo cũ: "ca đích chết vì ngoại lệ VÔ CAN" không còn là
+# `TIN DUNG GIA` suy từ chuỗi, nó là `KHONG_DO_DUOC` đo từ NHÃN trên kênh.
+#   GIET          ca đích chết ĐÚNG bằng `TinHieuChotCa`
+#   KHONG_GIET    không ca nào chết (mutant sống sót) — hoặc tập chết ≠ đích
+#   KHONG_DO_DUOC mọi đường không kết luận được: ngoại lệ vô can, kênh méo, rc lệch, ca lạ
+#
+# `dich` KHÔNG ghi cứng tên ca đầy đủ: tên ca là thứ TRÔI (đổi tên ca là việc thường), nên
+# `dich` dẫn xuất từ `CA` của tiến trình CHA theo tiền tố — tức từ một nguồn mà mutant KHÔNG
+# chạm được. Tiền tố không còn khớp ca nào ⇒ `dich` rỗng ⇒ `KHONG_DO_DUOC` (fail-close).
+# PHÉP CẮT BẢNG — vì catalog nay NẰM TRONG chính tệp bị đột biến, mỗi mẫu neo xuất hiện ÍT NHẤT
+# HAI lần: một ở mã THẬT, một ở chính bảng dữ liệu dưới đây. Đếm trên toàn tệp thì mọi neo đều
+# "không duy nhất" — đo được: 2/10 control ĐỎ đúng vì lý do ấy ở lượt chạy đầu.
+# Bản mẫu `#513` đã trả giá HAI lần ở đúng chỗ này, và cả hai bài học được port nguyên:
+#   · cắt RIÊNG từng bảng, KHÔNG cắt "tất cả phía dưới" — cắt rộng tạo VÙNG MÙ thật (ở bản mẫu,
+#     `main`/`chay_tu_kiem` từng nằm ngoài tầm đột biến mà không ai biết);
+#   · phép cắt phải NEO THEO ĐẦU DÒNG và phải TỰ KIỂM về CẤU TRÚC, kẻo nó nuốt tròn cả bảng thật.
+# Hai vùng cắt, và chúng CỐ Ý liền khối dữ liệu: `_ctrl_am` (mã) đặt TRƯỚC `NEO_T160_CTRL` để
+# không có mã nào rơi vào vùng cắt.
+_VUNG_CAT_512 = (
+    ("\nDOT_BIEN_512 = [\n", "DOT_BIEN_512 = [\n"),
+    ("\nNEO_T160_CTRL = ", "NEO_T160_CTRL = "),
+    ("\nDOT_BIEN_TU_KIEM_512 = [\n", "DOT_BIEN_TU_KIEM_512 = [\n"),
+)
+
+
+def _cat_bang_512(nguon: str):
+    """Trả `(cac_manh_MA, cac_manh_BANG)` theo thứ tự xen kẽ, hoặc ném `TinHieuChotCa` nếu cắt hỏng.
+
+    FAIL-CLOSE theo CẤU TRÚC: mỗi vùng phải mở đúng một gán ở cột 0 và đóng bằng `\\n]\\n` ở cột 0.
+    """
+    ma, bang, vi = [], [], 0
+    for dau_khoi, mo_dau in _VUNG_CAT_512:
+        i = nguon.index(dau_khoi, vi) + 1
+        j = nguon.index("\n]\n", i) + len("\n]\n")
+        khoi = nguon[i:j]
+        chot(khoi.startswith(mo_dau) and khoi.endswith("\n]\n"),
+             f"phép cắt bảng hỏng ở {mo_dau!r}: {khoi[:40]!r}…{khoi[-8:]!r}")
+        ma.append(nguon[vi:i])
+        bang.append(khoi)
+        vi = j
+    ma.append(nguon[vi:])
+    chot("CONTROL_512 = [\n" in bang[1], "vùng cắt thứ hai KHÔNG chứa bảng CONTROL_512")
+    return ma, bang
+
+
+def _dot_bien_nguon_512(nguon: str, cu: str, moi: str):
+    """Thay `cu`→`moi` CHỈ trong phần MÃ (ngoài hai bảng), và trả `(nguồn mới, số lần khớp ngoài bảng)`."""
+    ma, bang = _cat_bang_512(nguon)
+    dem = sum(m.count(cu) for m in ma)
+    if dem != 1:
+        return None, dem
+    ra = []
+    for k, m in enumerate(ma):
+        ra.append(m.replace(cu, moi, 1) if m.count(cu) else m)
+        if k < len(bang):
+            ra.append(bang[k])
+    return "".join(ra), dem
+
+
+DOT_BIEN_512 = [
+    # (tên, tiền tố ca đích, neo CŨ, bản MỚI)
+    ("giet-chi-PID-khong-giet-cay", "t154",
+     '    buoc = []\n    killpg, getpgid = getattr(os, "killpg", None), getattr(os, "getpgid", None)',
+     '    p.kill(); p.wait(timeout=cho_giay); return "DOT BIEN: chi giet PID"\n'
+     '    buoc = []\n    killpg, getpgid = getattr(os, "killpg", None), getattr(os, "getpgid", None)'),
+    ("bo-start_new_session", "t154",
+     '        them["start_new_session"] = True', '        pass  # DOT BIEN: khong tach nhom'),
+    ("bo-chot-selector-khong-khop", "t155",
+     '        if not tien_to or not cac_ca:', '        if False:  # DOT BIEN'),
+    ("AB_HAN_GIAY-ghi-tay-420", "t156",
+     'AB_HAN_GIAY = _han_ngoai_toi_thieu(AL_HAN_GIAY, SC_HAN_TONG_GIAY, CD_HAN_TONG_GIAY,\n'
+     '                                   AB_SUITE_DO_DUOC_GIAY, AB_DU_PHONG_GIAY)      # 950',
+     'AB_HAN_GIAY = 420  # DOT BIEN'),
+    ("tee-chi-in-o-cuoi", "t157",
+     "                for d in dong:\n                    with khoa:\n"
+     "                        print(f\"{tien_to} {d.decode('utf-8', 'replace').rstrip(chr(13))}\", flush=True)",
+     "                for d in dong:\n                    if xong:  # DOT BIEN: chi in khi con da xong\n"
+     "                        with khoa:\n"
+     "                            print(f\"{tien_to} {d.decode('utf-8', 'replace').rstrip(chr(13))}\", flush=True)"),
+    ("tee-bo-tien-to", "t157",
+     "                        print(f\"{tien_to} {d.decode('utf-8', 'replace').rstrip(chr(13))}\", flush=True)",
+     "                        print(f\"{d.decode('utf-8', 'replace').rstrip(chr(13))}\", flush=True)"),
+    ("ngan-sach-cap-lai-han-toi-thieu", "t156",
+     "        con_lai = het - time.monotonic()\n        if con_lai <= 0:\n"
+     "            raise HetNganSachDay(i, len(ket), ngan_sach_giay)\n"
+     "        ket.append(chay(lenh, capture_output=True, text=True, timeout=con_lai))",
+     "        con_lai = het - time.monotonic()\n"
+     "        ket.append(chay(lenh, capture_output=True, text=True, timeout=max(1.0, con_lai)))"),
+    # BỐN mutant reviewer tìm ra SỐNG SÓT trên `8ffd062` (M09–M13) — phải CHẾT trên bản HINT.
+    ("M09-tee-bo-flush-CA-HAI-print", "t157",
+     "print(f\"{tien_to} {d.decode('utf-8', 'replace').rstrip(chr(13))}\", flush=True)",
+     "print(f\"{tien_to} {d.decode('utf-8', 'replace').rstrip(chr(13))}\")"),
+    ("M10-ngan-sach-chi-cap-lai-khi-CAN", "t156",
+     "        con_lai = het - time.monotonic()\n        if con_lai <= 0:\n"
+     "            raise HetNganSachDay(i, len(ket), ngan_sach_giay)\n"
+     "        ket.append(chay(lenh, capture_output=True, text=True, timeout=con_lai))",
+     "        con_lai = het - time.monotonic()\n        if con_lai <= 0:\n            con_lai = 1.0\n"
+     "        ket.append(chay(lenh, capture_output=True, text=True, timeout=con_lai))"),
+    ("M11-nhanh-can-tra-ket-do-dang", "t156",
+     "        if con_lai <= 0:\n            raise HetNganSachDay(i, len(ket), ngan_sach_giay)",
+     "        if con_lai <= 0:\n            return ket"),
+    ("M13-killpg-khong-chot-truong-nhom", "t154",
+     "        if nhom_con is not None and nhom_con == p.pid and nhom_con != nhom_minh:",
+     "        if nhom_con is not None:"),
+    # VÒNG 6: mọi lệch A/B là CHƯA RÕ NGUYÊN NHÂN và phải bị CHẶN ở CONSUMER.
+    ("M15-classifier-tra-KHOP-khi-lech", "t160", "    return (LECH_CHUA_RO,", "    return (LECH_KHOP,"),
+    ("M16-consumer-bo-classifier-gan-KHOP", "t160",
+     "    ket_luan, thong_diep = _phan_loai_lech_ab(khong_actor, co_actor)",
+     "    ket_luan, thong_diep = LECH_KHOP, 'DOT BIEN: bo classifier'"),
+    ("M17-consumer-nhan-ca-trang-thai-CHUA-RO", "t160",
+     "    chot(ket_luan == LECH_KHOP, thong_diep)",
+     "    chot(ket_luan in (LECH_KHOP, LECH_CHUA_RO), thong_diep)"),
+    ("M14-moi-truong-con-khong-TAT-DEM", "t158",
+     '    return dict(nen, PYTHONUNBUFFERED="1")', '    return dict(nen)'),
+    ("T137_TRAN-bo-chan-doan", "t156",
+     'T137_TRAN_GIAY = AL_HAN_GIAY + SC_HAN_TONG_GIAY + CD_HAN_TONG_GIAY       # 480',
+     'T137_TRAN_GIAY = AL_HAN_GIAY + SC_HAN_TONG_GIAY  # DOT BIEN'),
+]
+
+# =====================================================================================
+# A1 — CONTROL cho CHÍNH bộ chấm. Bài học #355/#359 của kho: "đột biến bị giết KHÔNG phải đột
+# biến bị giết ĐÚNG LÝ DO", và một thước đo dựng ra để chống bị lừa thì cũng bị lừa được. Nên
+# bộ chấm phải chạy những ca mà ta BIẾT TRƯỚC đáp án, TRƯỚC khi ai được tin một con số nó in.
+# Mỗi control là một ĐỘT BIẾN THẬT đi qua ĐÚNG đường mà catalog dùng — không phải phép thử
+# regex trên chuỗi bịa. Tám ca ÂM ở đây là tám cách mà bộ đo CŨ (đọc chuỗi) cấp tín dụng giả.
+def _ctrl_am(ten: str, than: str):
+    """Control ÂM: chèn một `raise` VÔ CAN vào đầu `t160`, giữ nguyên phần còn lại của ca."""
+    return (ten, "t160", NEO_T160_CTRL,
+            "    from unittest import mock\n" + than + "\n"
+            '    a = (0, "2", "2", frozenset(), frozenset())', KHONG_DO_DUOC)
+
+
+NEO_T160_CTRL = '    from unittest import mock\n    a = (0, "2", "2", frozenset(), frozenset())'
+
+
+CONTROL_512 = [
+    # (tên, tiền tố, neo CŨ, bản MỚI, trạng thái MONG ĐỢI)
+    _ctrl_am("CTRL-ngoai-le-Exception-TRAN", '    raise Exception("CONTROL vo can")'),
+    _ctrl_am("CTRL-ngoai-le-Error-TRAN",
+             '    class Error(Exception): pass\n    raise Error("CONTROL ten lop dung bang Error")'),
+    _ctrl_am("CTRL-ngoai-le-RuntimeError", '    raise RuntimeError("CONTROL co tien to")'),
+    # Ba ca không có hậu tố `Error`/`Exception` — phản chứng cho MỌI bản vá còn đoán TÊN ngoại lệ.
+    _ctrl_am("CTRL-StopIteration-khong-hau-to", '    raise StopIteration("CONTROL khong hau to")'),
+    _ctrl_am("CTRL-lop-tu-dinh-nghia-ten-la",
+             '    class Bung(Exception): pass\n    raise Bung("CONTROL ten lop khong theo quy uoc")'),
+    _ctrl_am("CTRL-GeneratorExit", '    raise GeneratorExit("CONTROL BaseException")'),
+    # F6.7 — định danh Python HỢP LỆ nhưng KHÔNG ASCII: `[A-Za-z_]` của bộ đo cũ không phủ.
+    _ctrl_am("CTRL-ten-lop-UNICODE",
+             '    class Bùng(Exception): pass\n    raise Bùng("CONTROL dinh danh Unicode")'),
+    # F6.8 — thông điệp RỖNG: bộ đo cũ đòi `": "` nên `.strip()` làm nó TRƯỢT.
+    _ctrl_am("CTRL-thong-diep-RONG", '    raise Exception("")'),
+    # Ca DƯƠNG thứ nhất. Thiếu nó thì một bản vá "cho mọi thứ là KHÔNG ĐO ĐƯỢC" vẫn qua tám ca
+    # trên — một chốt LUÔN ĐỎ cũng là chốt hỏng.
+    ("CTRL-DUONG-chet-dung-chot-ca-dich", "t160",
+     "    return (LECH_CHUA_RO,", "    return (LECH_KHOP,", GIET),
+    # M1b — ca DƯƠNG thứ hai, và nó là chỗ hai miền chuỗi GIAO NHAU (F6.9). `t96` nằm NGOÀI chín
+    # ca của M1 nên vẫn dùng `bang()` ⇒ ném `AssertionError` TRẦN ⇒ `main()` xếp `DO_KHAC`. Nếu
+    # control chỉ ĐẢO boolean thì nó sẽ ra `KHONG_DO_DUOC`, tức đo SAI đại lượng.
+    # Đường ĐÚNG, và đặc tả M1b chỉ đúng đường này: đột biến control CHUYỂN TÍN HIỆU cho RIÊNG
+    # fixture ấy (`bang` → `chot`) cùng lúc với việc đảo boolean. Thông điệp giữ NGUYÊN VĂN —
+    # nó bắt đầu bằng `t96: `, trùng đúng hình dạng "<định danh>: " mà bộ đo cũ dùng làm dấu của
+    # NGOẠI LỆ VÔ CAN. Bộ chấm mới KHÔNG đọc chuỗi, nên nó phải trả `GIET`.
+    # KHÔNG được chữa bằng cách nới `main()` nhận mọi `AssertionError` là `DO_CHOT` — nới thế là
+    # phá chính M1, và chốt M5 `noi-AssertionError-thanh-DO_CHOT` dưới đây canh đúng điều đó.
+    ("CTRL-DUONG-M1b-chot-that-t96", "t96",
+     '    bang(mod._lease_cham_duong({"write_set": [duong]}, duong),',
+     '    chot(not mod._lease_cham_duong({"write_set": [duong]}, duong),', GIET),
+]
+
+
+def _cay_mut_512(uniq: str) -> Path:
+    """Cây TỐI THIỂU ngoài kho cho một lượt mutant: chỉ những gì các ca đích thật sự đọc.
+
+    `t154` (sau HINT #504) NẠP `.claude/dev/launcher.py` và đọc nguyên văn fixture `t63`/`t66` từ
+    `launcher_test.py`; thiếu chúng thì mutant chết vì `FileNotFoundError` — tức `KHONG_DO_DUOC`,
+    một phép đo mất chứ không phải một mutant sống.
+    """
+    import shutil
+    goc_kho = HERE.parent
+    d = Path(tempfile.mkdtemp(prefix=f"mut512-{uniq}-"))
+    (d / "ops").mkdir()
+    for t in ("lease_publish.py", "cai_actionlint.sh", "chay_lease_publish_test.sh"):
+        if (goc_kho / "ops" / t).exists():
+            shutil.copy2(goc_kho / "ops" / t, d / "ops" / t)
+    shutil.copytree(goc_kho / ".github", d / ".github")
+    (d / ".claude" / "dev").mkdir(parents=True)
+    for t in ("launcher.py", "launcher_test.py"):
+        shutil.copy2(goc_kho / ".claude" / "dev" / t, d / ".claude" / "dev" / t)
+    return d
+
+
+def _ten_day_du_512(tien_to: str) -> tuple:
+    """Tên ca ĐẦY ĐỦ khớp tiền tố, đọc từ `CA` của tiến trình CHA — nguồn mutant không chạm được."""
+    return tuple(fn.__name__ for fn in CA if fn.__name__.startswith(tien_to))
+
+
+def _chay_mot_mutant_512(ten: str, tien_to: str, cu: str, moi: str, nguon: str,
+                         doc=None, han_giay: int = 600):
+    """Chạy MỘT mutant và trả `(trạng thái, lý do)`.
+
+    M3 — `KHONG_DO_DUOC` ⇒ chạy lại ĐÚNG MỘT lần; lần hai vẫn vậy ⇒ trả `KHONG_DO_DUOC` kèm lý do.
+    KHÔNG đường nào biến `KHONG_DO_DUOC` thành `GIET`.
+
+    `dich` được VẬT HOÁ TRƯỚC vòng lặp hai lần thử. Bản mẫu `#513` trả giá ba lượt vì chuyện này:
+    một `dich` đọc-một-lần bị lần thử ĐẦU tiêu thụ, nên lần thử thứ hai so với tập RỖNG và phép so
+    `do_chot == set(dich)` lại đúng khi không ca nào chết. Chốt ở đây ĐỘC LẬP với chốt trong
+    `doc_kenh`: bỏ một trong hai đều có đầu vào phân biệt được.
+    `doc` cho phép M5 thay bộ đọc kênh bằng một bản đã đột biến — KHÔNG có đường nào để mã sản
+    phẩm hay mutant đặt nó.
+    """
+    import shutil
+    doc = doc or doc_kenh
+    dich = _ten_day_du_512(tien_to)
+    nguon_mut, dem_ngoai_bang = _dot_bien_nguon_512(nguon, cu, moi)
+    if nguon_mut is None:
+        return KHONG_DO_DUOC, f"neo khớp {dem_ngoai_bang} lần NGOÀI bảng, phải đúng 1"
+    ly_do = "chưa chạy"
+    for lan_thu in (1, 2):
+        uniq = f"{ten[:12]}-{lan_thu}-{int(time.monotonic() * 1000) % 1000000}"
+        d = _cay_mut_512(uniq)
+        try:
+            tep = d / "ops" / "lease_publish_test.py"
+            tep.write_text(nguon_mut, encoding="utf-8")
+            kenh = d / "kenh.jsonl"
+            dau_phien = sinh_dau_phien()
+            mt = {k: v for k, v in os.environ.items() if k != "GITHUB_ACTOR"}
+            mt.update({"PYTHONDONTWRITEBYTECODE": "1", KENH_ENV: str(kenh),
+                       DAU_PHIEN_ENV: dau_phien, MUTANT_ENV: ten, LAN_THU_ENV: str(lan_thu)})
+            try:
+                r = subprocess.run([sys.executable, "-B", str(tep), f"{CO_CHI_CA}{tien_to}"],
+                                   capture_output=True, text=True, env=mt, timeout=han_giay)
+                rc_that = r.returncode
+            except subprocess.TimeoutExpired:
+                ly_do = f"lượt con quá hạn {han_giay}s"
+                continue
+            trang_thai, ly_do = doc(kenh, dau_phien, ten, lan_thu, dich, tien_to, rc_that)
+            if trang_thai != KHONG_DO_DUOC:
+                return trang_thai, ly_do
+        finally:
+            shutil.rmtree(d, ignore_errors=True)
+    return KHONG_DO_DUOC, ly_do
+
+
+def _bang_mutant_512(muc, nguon, doc=None):
+    """Chạy một danh sách mục và trả `[(tên, trạng thái, lý do)]`. In từng dòng ngay, có xả."""
+    ra = []
+    for ten, tien_to, cu, moi in ((m[0], m[1], m[2], m[3]) for m in muc):
+        t0 = time.monotonic()
+        trang_thai, ly_do = _chay_mot_mutant_512(ten, tien_to, cu, moi, nguon, doc=doc)
+        _nhat_ky_ca("    mut", f"{ten:38}", f"{tien_to:5}", f"{trang_thai:14}",
+                    f"{time.monotonic() - t0:6.2f}s", ly_do.replace("\n", " ")[:120])
+        ra.append((ten, trang_thai, ly_do))
+    return ra
+
+
+@ca
+def t161_A4_catalog_16_mutant_512_giet_that_khong_tin_dung_gia():
+    """A4 — 16 mutant của packet #504 phải `GIET` cả 16, `0` sống sót, `0` KHÔNG ĐO ĐƯỢC.
+
+    Mẫu số CỐ ĐỊNH: một catalog tự co giãn theo dữ liệu là một catalog không đo gì.
+    """
+    nguon = Path(__file__).read_text(encoding="utf-8")
+    ra = _bang_mutant_512(DOT_BIEN_512, nguon)
+    dem = {t: sum(1 for _, x, _ in ra if x == t) for t in (GIET, KHONG_GIET, KHONG_DO_DUOC)}
+    xau = [f"{n}: {t} — {l[:140]}" for n, t, l in ra if t != GIET]
+    print(f"catalog 512: mẫu số={len(ra)}, giết={dem[GIET]}, không giết={dem[KHONG_GIET]}, "
+          f"KHÔNG ĐO ĐƯỢC={dem[KHONG_DO_DUOC]}")
+    chot(len(ra) == len(DOT_BIEN_512) == 16, f"mẫu số phải cố định 16: {len(ra)}")
+    chot(sum(dem.values()) == 16, f"ba số hạng không cộng đúng tổng: {dem}")
+    chot(not xau, f"mutant KHÔNG ra GIET: {xau}")
+
+
+@ca
+def t162_A1_muoi_control_cua_bo_cham_dung_phan_hang():
+    """A1 — mười control, mỗi ca một đáp án BIẾT TRƯỚC. Đối TỪNG ca, không đếm tổng.
+
+    Tám control ÂM là tám đường mà bộ đo cũ (đọc chuỗi stdout) cấp `GIET` cho một ca chết vì ngoại
+    lệ VÔ CAN. Hai control DƯƠNG chặn hướng ngược: một bộ chấm luôn trả `KHONG_DO_DUOC` cũng sai.
+    """
+    nguon = Path(__file__).read_text(encoding="utf-8")
+    # M5 lọc xuống ĐÚNG MỘT control khi `t163` phóng ca này trên một bản bộ chấm đã đột biến —
+    # chạy trọn 10 control cho mỗi mục tự kiểm là 60 lượt con cho một phép đo cần 6. Lượt thường
+    # KHÔNG đặt biến này, nên mẫu số mặc định vẫn là 10 và chốt mẫu số dưới đây vẫn có răng.
+    chi_mot = os.environ.get(CO_TU_KIEM_CTRL, "")
+    muc = [m for m in CONTROL_512 if m[0] == chi_mot] if chi_mot else list(CONTROL_512)
+    chot(bool(muc), f"{CO_TU_KIEM_CTRL}={chi_mot!r} không khớp control nào")
+    ra = _bang_mutant_512(muc, nguon)
+    mong = [m[4] for m in muc]
+    lech = [f"{n}: mong_doi={m}, thuc_te={t} — {l[:140]}"
+            for (n, t, l), m in zip(ra, mong) if t != m]
+    for (n, t, l), m in zip(ra, mong):
+        print(f"  {'ĐẠT ' if t == m else 'LỆCH'}  {n:36} mong_đợi={m:14} thực_tế={t}")
+    print(f"control 512: {len(ra) - len(lech)}/{len(ra)} ca đúng phân hạng")
+    chot(len(ra) == len(muc) and (chi_mot or len(CONTROL_512) == 10),
+         f"mẫu số control phải cố định 10 khi chạy đầy đủ: {len(ra)}/{len(CONTROL_512)}")
+    chot(not lech, f"control LỆCH phân hạng: {lech}")
+
+
+# =====================================================================================
+# M5 (packet #530) — ĐỘT BIẾN TỰ KIỂM CHO CHÍNH BỘ CHẤM, gồm ca GỠ CHỐT.
+# Thiếu khối này là lặp lại đúng `F6.10` của vòng 8: chốt fail-close KHÔNG có mutant canh
+# chính nó. Và bài học #359 của kho nói mạnh hơn — "một thước đo dựng ra để chống bị lừa
+# thì cũng bị lừa được", nên bộ chấm mới phải tự chứng minh từng chốt của nó CÓ RĂNG.
+#
+# MỖI mục phải có ĐẦU VÀO PHÂN BIỆT ĐƯỢC: một control mà việc gỡ đúng chốt ấy (và chỉ chốt
+# ấy) làm phân hạng LỆCH. Không có control phân biệt thì chốt đó chưa được đo — và khai
+# "đã có mutant" cho nó là đúng lỗi "ca có MẶT khác ca có ĐO". Sáu mục dưới đây mỗi mục nêu
+# THẲNG control nào phân biệt nó; những chốt CHƯA có control phân biệt được khai ở
+# `t163` là `chưa đo`, không đếm vào số nào.
+DOT_BIEN_TU_KIEM_512 = [
+    # (tên, control phân biệt, [(neo CŨ, bản MỚI), …])
+    ("doi-thu-tu-except-TinHieuChotCa-sau-AssertionError", "CTRL-DUONG-chet-dung-chot-ca-dich",
+     [("\n        except TinHieuChotCa as ex:", "\n        except _KhongAiNem512 as ex:")]),
+    ("bo-chot-DO_KHAC-trong-bo-cham", "CTRL-ngoai-le-Exception-TRAN",
+     [("    khac = sorted(t for t, n in theo_ca.items() if n == NHAN_DO_KHAC)",
+       "    khac = []")]),
+    ("dong-luot-ghi-rc-0-cung", "CTRL-DUONG-chet-dung-chot-ca-dich",
+     [('        ban_ghi = dict(self._neo, dong_luot=True, rc=rc)',
+       '        ban_ghi = dict(self._neo, dong_luot=True, rc=0)')]),
+    ("dong-luot-KHONG-ghi-gi", "CTRL-DUONG-chet-dung-chot-ca-dich",
+     [("    def dong_luot(self, rc: int) -> None:\n        import json",
+       "    def dong_luot(self, rc: int) -> None:\n        self._f.close(); return\n        import json")]),
+    ("dong-luot-ghi-1-thay-vi-bool-true", "CTRL-DUONG-chet-dung-chot-ca-dich",
+     [('        ban_ghi = dict(self._neo, dong_luot=True, rc=rc)',
+       '        ban_ghi = dict(self._neo, dong_luot=1, rc=rc)')]),
+    # HAI neo, và lý do là một phép ĐO chứ không phải một lời khai: hai điểm vật hoá `dich`
+    # (`_ten_day_du_512` và `doc_kenh`) là một bộ TƯƠNG ĐƯƠNG, không phải hai chốt độc lập —
+    # gỡ riêng nửa nào cũng `rc=0` và KHÔNG control nào lệch, chỉ gỡ CẢ HAI mới lệch
+    # (`GIET → KHONG_GIET`). Nên mục này tính là ĐÚNG MỘT chốt được đo, và CLAUDE.md nói thẳng
+    # điều phải nói ở đây: chốt nào không phân biệt được bằng đầu vào thì ta chỉ đang đo một cái.
+    ("bo-CA-HAI-chot-vat-hoa-dich", "CTRL-DUONG-chet-dung-chot-ca-dich",
+     [("    return tuple(fn.__name__ for fn in CA if fn.__name__.startswith(tien_to))",
+       "    return (fn.__name__ for fn in CA if fn.__name__.startswith(tien_to))"),
+      ("        return _doc_kenh_xac_thuc(duong, dau_phien, mutant, lan_thu, tuple(dich),",
+       "        return _doc_kenh_xac_thuc(duong, dau_phien, mutant, lan_thu, dich,")]),
+]
+# Chốt của bộ chấm mà HIỆN CHƯA có control phân biệt được — khai thẳng, không đếm là đã đo.
+# Mỗi dòng là một chốt fail-close thật trong `_doc_kenh_xac_thuc`; để gỡ nó mà thấy lệch thì
+# phải có một control sinh ĐÚNG hình dạng kênh ấy, và đặc tả đóng băng mẫu số control ở 10.
+CHOT_CHUA_CO_CONTROL_512 = (
+    "bản ghi không phải JSON", "bản ghi không phải object", "bản ghi TRÙNG cho ca",
+    "tên ca không phải chuỗi", "nhãn không hợp lệ", "chi tiết không phải chuỗi",
+    "kênh có ca KHÔNG khớp tiền tố", "đích RỖNG", "đích KHÔNG có mặt trong kênh",
+)
+
+
+class _KhongAiNem512(AssertionError):
+    """Chỉ để mutant `doi-thu-tu-except-…` thu HẸP nhánh bắt của `main()`; KHÔNG ai ném lớp này.
+
+    Đổi nhãn nhánh thay vì đổi THỨ TỰ hai nhánh: đổi thứ tự là một lỗi cú pháp-ngữ nghĩa mà
+    Python không báo, còn thay bằng một lớp KHÔNG AI NÉM thì hiệu ứng y hệt (mọi
+    `TinHieuChotCa` rơi xuống nhánh `AssertionError` ⇒ `DO_KHAC`) mà đo được sạch.
+    """
+
+
+CO_TU_KIEM_CTRL = "LPT_TU_KIEM_CTRL"   # tên MỘT control; `t162` chỉ chạy control ấy
+
+
+@ca
+def t163_A2_A3_A8_M5_dot_bien_tu_kiem_cho_chinh_bo_cham():
+    """M5 · A3 — gỡ một chốt của bộ chấm thì ca đích phải ĐỎ. Sáu mục, mỗi mục một control phân biệt.
+
+    A2 ở đây, và ĐÚNG RANH GIỚI mà đặc tả rev 3 chỉ định: phép biến đổi đặt ở trường `chi_tiet`
+    TRÊN KÊNH, **sau** khi `main()` đã xác định loại kết quả của ca — giữ nguyên tên ca, loại tín
+    hiệu, nhãn, neo và `rc`. Rev 2 từng đòi làm rỗng thông điệp ở HÀM CHỐT và đó là SAI: thông điệp
+    của một số ca LÀ DỮ LIỆU MÀ CA KIỂM (`t159` đọc chẩn đoán của `t137`), nên làm rỗng ở đó đổi
+    ngữ nghĩa ca, trái `ngoai_pham_vi` #5. Đo được: 59 `bang→chot` rồi `--chi-ca=t159` ⇒ `1/1 rc=0`;
+    làm rỗng tại `bang()`/`chot()` ⇒ `0/1 rc=1`.
+
+    A8 nằm ở mục `dong-luot-ghi-rc-0-cung`: `rc` trên kênh lệch mã thoát THẬT ⇒ `KHONG_DO_DUOC`.
+    """
+    import shutil
+    nguon = Path(__file__).read_text(encoding="utf-8")
+    goc_kho = HERE.parent
+    giet, hong = 0, []
+    with San() as s:
+        for ten, ctrl, cap in DOT_BIEN_TU_KIEM_512:
+            truoc_hong = len(hong)
+            nguon_mut, xau_neo = nguon, []
+            for cu, moi in cap:
+                buoc, dem = _dot_bien_nguon_512(nguon_mut, cu, moi)
+                if buoc is None:
+                    xau_neo.append(f"neo khớp {dem} lần NGOÀI bảng, phải đúng 1: {cu[:60]!r}")
+                else:
+                    nguon_mut = buoc
+            if xau_neo:
+                hong.append(f"{ten}: {xau_neo}")
+                _nhat_ky_ca("    tukiem", f"{ten:52}", f"{'NEO_XAU':11}", f"{xau_neo}")
+                continue
+            d = s / f"tukiem512-{giet}-{len(hong)}-{ten[:20]}"
+            (d / "ops").mkdir(parents=True)
+            for t in ("lease_publish.py", "cai_actionlint.sh", "chay_lease_publish_test.sh"):
+                if (goc_kho / "ops" / t).exists():
+                    shutil.copy2(goc_kho / "ops" / t, d / "ops" / t)
+            shutil.copytree(goc_kho / ".github", d / ".github")
+            (d / ".claude" / "dev").mkdir(parents=True)
+            for t in ("launcher.py", "launcher_test.py"):
+                shutil.copy2(goc_kho / ".claude" / "dev" / t, d / ".claude" / "dev" / t)
+            tep = d / "ops" / "lease_publish_test.py"
+            tep.write_text(nguon_mut, encoding="utf-8")
+            mt = {k: v for k, v in os.environ.items() if k != "GITHUB_ACTOR"}
+            mt.update({"PYTHONDONTWRITEBYTECODE": "1", CO_TU_KIEM_CTRL: ctrl})
+            for b in (KENH_ENV, DAU_PHIEN_ENV, MUTANT_ENV, LAN_THU_ENV):
+                mt.pop(b, None)
+            r = subprocess.run([sys.executable, "-B", str(tep), f"{CO_CHI_CA}t162"],
+                               capture_output=True, text=True, env=mt, timeout=600)
+            ra = r.stdout + r.stderr
+            # BA chốt độc lập, không gộp — bản mẫu #513 đã đo được rằng thiếu bất kỳ chốt nào là
+            # một đường cấp TÍN DỤNG GIẢ: (1) `t162` phải là ca ĐỎ; (2) tiến trình con phải THẬT
+            # SỰ thoát 1 — bỏ ghi nhận danh sách đỏ thì nó vẫn in "ĐỎ" mà rc về 0; (3) đúng dòng
+            # `LỆCH` của control phân biệt phải có mặt, kẻo `t162` đỏ vì một lý do khác hẳn.
+            do_dung_ca = f"  ĐỎ  t162" in ra
+            co_dong_lech = any(x.startswith("  LỆCH") and ctrl in x for x in ra.splitlines())
+            if r.returncode != 1:
+                hong.append(f"{ten}: con rc={r.returncode} != 1 (control {ctrl})")
+            elif not do_dung_ca:
+                hong.append(f"{ten}: t162 KHÔNG đỏ (control {ctrl})")
+            elif not co_dong_lech:
+                hong.append(f"{ten}: t162 đỏ nhưng KHÔNG vì control {ctrl} — lý do khác")
+            else:
+                giet += 1
+            # In kết quả CỦA CHÍNH mục này, không phải một biểu thức dẫn từ bộ đếm luỹ kế: bản
+            # trước đọc `giet` (tổng) nên mục ĐỎ đầu tiên vẫn in `GIET` nếu đã có mục xanh nào
+            # trước nó — một dòng nhật ký nói dối đúng lúc người đọc cần nó nhất.
+            _nhat_ky_ca("    tukiem", f"{ten:52}",
+                        f"{'GIET' if len(hong) == truoc_hong else 'KHONG_GIET':11}", f"ctrl={ctrl}")
+    print(f"tự kiểm bộ chấm 512: gỡ chốt giết {giet}/{len(DOT_BIEN_TU_KIEM_512)} · "
+          f"chốt CHƯA có control phân biệt: {len(CHOT_CHUA_CO_CONTROL_512)} (khai, không đếm là đã đo)")
+    chot(not hong, f"đột biến tự kiểm KHÔNG làm ca đích đỏ đúng lý do: {hong}")
+    chot(giet == len(DOT_BIEN_TU_KIEM_512) == 6, f"mẫu số tự kiểm phải cố định 6: {giet}")
 
 
 CO_CHI_CA = "--chi-ca="   # `--chi-ca=t01_` ⇒ chỉ chạy ca có tên bắt đầu bằng tiền tố ấy (M3 packet #504 dùng để sinh lượt con rẻ)
@@ -6496,24 +7173,45 @@ def main() -> int:
             return RC_CHON_CA_SAI
     else:
         cac_ca = list(CA)
+    khung = _mo_kenh()      # M2 (#530): None khi không có kênh — lượt gõ tay vẫn chạy như cũ
     for fn in cac_ca:
+        if khung is not None:
+            khung.vao_ca(fn.__name__)   # M2: KHUNG đóng dấu tên ca, không phải thân ca
         _nhat_ky_ca(">>> vao", fn.__name__, datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"))
         t0 = time.monotonic()
         ket = "QUA"
         try:
             fn()
             qua += 1
+            nhan, chi_tiet_kenh = NHAN_DAT, ""
         except BoQuaNen as ex:
             try: ly_do = _ly_do_bo_qua_workflow(ex.tep, ex.ten_job)
             except Exception: ly_do = ""
             if ly_do:
                 bo_qua.append((fn.__name__, ly_do)); ket = "BO_QUA"
+                nhan, chi_tiet_kenh = NHAN_BO_QUA, ly_do
             else:
                 hong.append((fn.__name__, "bỏ qua không dẫn xuất được từ runs-on")); ket = "DO"
-        except AssertionError as ex:
+                # KHÔNG dẫn xuất được lý do là hỏng HẠ TẦNG, không phải chốt của ca ⇒ DO_KHAC.
+                nhan, chi_tiet_kenh = NHAN_DO_KHAC, "bỏ qua không dẫn xuất được từ runs-on"
+        except TinHieuChotCa as ex:
+            # M1 · M6 (#530) — PHẢI đứng TRƯỚC `except AssertionError`, vì `TinHieuChotCa` là CON của
+            # nó: đảo thứ tự hai nhánh này là xoá sạch danh tính lớp tín hiệu và tái sinh đúng lỗ F6.
+            # Ba dòng `hong.append(...)` của bốn nhánh dưới GIỮ NGUYÊN BYTE đầu ra (`  ĐỎ  …`), vì
+            # `t125` đọc chúng bằng regex; thứ MỚI chỉ là nhãn phát trên KÊNH.
             hong.append((fn.__name__, str(ex))); ket = "DO"
+            nhan, chi_tiet_kenh = NHAN_DO_CHOT, str(ex)
+        except AssertionError as ex:
+            # `bang()` — hạ tầng và các ca NGOÀI packet #504. Một `AssertionError` trần KHÔNG chứng
+            # minh được là chốt của ca đích, nên nó KHÔNG được cấp `DO_CHOT`. Ca nào muốn mang tín
+            # hiệu ấy thì gọi `chot()`; đó là toàn bộ ý của M1, và nới nhánh này là phá M1.
+            hong.append((fn.__name__, str(ex))); ket = "DO"
+            nhan, chi_tiet_kenh = NHAN_DO_KHAC, f"AssertionError trần: {ex}"
         except Exception as ex:  # noqa: BLE001
             hong.append((fn.__name__, f"{type(ex).__name__}: {ex}")); ket = "DO"
+            nhan, chi_tiet_kenh = NHAN_DO_KHAC, f"{type(ex).__name__}: {ex}"
+        if khung is not None:
+            khung.phat(nhan, chi_tiet_kenh)
         _nhat_ky_ca("<<< ra", fn.__name__, f"{time.monotonic() - t0:.3f}s", ket)
         if ket == "DO":
             # In LÝ DO ngay tại chỗ (M4 lần 2, packet #504): danh sách `  ĐỎ  …` chỉ in ở cuối suite, nên khi job
@@ -6524,7 +7222,12 @@ def main() -> int:
     for ten, ly in hong:
         print(f"  ĐỎ  {ten}: {ly}")
     print(_dong_tong_ket(qua, len(cac_ca) - len(bo_qua), len(bo_qua)))
-    return 1 if hong else 0
+    rc = 1 if hong else 0
+    if khung is not None:
+        # Bản ghi đóng lượt mang `rc` mà hàm này SẮP trả; bộ chấm so nó với mã thoát THẬT của
+        # tiến trình con. Hai số lệch ⇒ KHÔNG ĐO ĐƯỢC (A8).
+        khung.dong_luot(rc)
+    return rc
 
 
 if __name__ == "__main__":

@@ -1,3 +1,115 @@
+# ★ dev-side — r373: ghi sổ #521 — bốn verdict codex của chuỗi tám lượt cross-review adapter `cross-review`; lượt 8 là lượt đầu tiên KHAI TẬP VẬT THỂ rồi chứng minh phép quét có răng (2026-09-12)
+
+Nối tiếp r372 (chốt tới `f4da553`, #517). Mục này là vế bookkeeping ADR-0034 của **#521** (merge `dc02c9b`):
+4 verdict + 4 biên nhận v2 vào `ops/reviews/`, 4 hàng mục lục + 10 cảnh báo + 1 đoạn nguồn, manifest tái sinh.
+Tiền lệ r364/r367/r369/r371/r372.
+
+**Không nâng `VERSION`.** Vẫn `1.36.68` từ r336.
+
+## Phạm vi ghi sổ — và vì sao nó KHÔNG phải cả tám lượt
+
+Chuỗi #521 chạy **tám** lượt cross-review. Chỉ **bốn** lượt (5→8) có tệp trong `ops/reviews/`, vì chỉ bốn
+lượt ấy còn **gói review** (`VERDICT.md`, `HINT.patch`, `run.json`, `ARTIFACTS.sha256`) trong container của
+phiên này. Gói của lượt 1–4 đã chết theo container phiên trước; thứ còn lại là **bản chiếu trên PR**.
+
+**Không dựng tệp verdict từ bản chiếu.** Lý do đã trả giá trong kho (mục *"TẦNG VẬN CHUYỂN CŨNG CHUẨN HOÁ
+CHUỖI"* của `CLAUDE.md`): một bản chiếu đi qua tầng vận chuyển không chứng minh được là nguyên văn, và
+`ops/reviews/` là thư mục của **nguyên văn neo băm**. Bốn lượt đầu vì thế chỉ có mặt ở đây, dưới nhãn
+**(b) thuật lại**, kèm các con số lấy từ bản chiếu:
+
+| lượt | head | kết luận | thể hiện | HINT | nguồn |
+|---:|---|---|---:|---|---|
+| 1 | `88c038c9` | `changes_requested` 0/4/0 | 18 | 9 hunk | (b) bản chiếu trên PR |
+| 2 | `74dd1f74` | `changes_requested` 0/1/0 | 1 | 1 hunk | (b) |
+| 3 | `e185cc8` | **`approve` 0/0/0** | 0 | rỗng | (b) |
+| — | `e185cc8` | connector codex, lượt KHÁC cùng nền | **4 P2** | — | (b) |
+| 4 | `156efdb9` | `changes_requested` 0/3/0 | 9 | 4 hunk | (b) |
+| **5** | `36acc52` | `changes_requested` 0/3/0 | **65** | 43 hunk | **(a) tệp có băm** |
+| **6** | `e849e2e` | `changes_requested` 0/3/0 | 7 | 5 hunk | **(a)** |
+| **7** | `aaef55b` | `changes_requested` 0/4/0 | 5 | 5 hunk | **(a)** |
+| **8** | `91bbc82` | **`approve` 0/0/0** | 0 | **rỗng 0 byte** | **(a)** |
+
+## Vì sao chuỗi này đáng ghi: lượt 3 `approve` rồi một reviewer khác tìm ra 4 P2
+
+Lượt 3 trả `approve` 0/0/0 trên `e185cc8`. Ngay sau đó **connector codex trên GitHub** — cùng nền, prompt
+khác, phạm vi khác — chấm ĐÚNG head ấy và ra **4 P2**, tất cả trong cùng một tệp. Phiên chính kiểm cả bốn
+và **nhận cả bốn**. Lượt 5 đọc lại PROMPT lượt 3 NGUYÊN BẢN cạnh bốn finding và kết luận **cả bốn là BỎ
+SÓT**, không phải giới hạn phạm vi được giao.
+
+Đó là lý do bốn lượt tiếp theo tồn tại, và là lý do lượt 8 bị đòi thứ mà bảy lượt trước không bị đòi:
+**khai TẬP VẬT THỂ, rồi chứng minh phép quét bắt được một thể hiện bơm vào.**
+
+## Mô thức đo được: bản vá ĐÚNG mà HẸP, ba lượt liên tiếp
+
+Ba lượt 5→6→7 lặp đúng một hình dạng — reviewer chỉ ra N thể hiện, bản vá đóng đúng N, lượt sau tìm thêm
+**một đường của CÙNG lớp mà không ai chỉ**:
+
+- `va-qua-tay-mat-cong-cu`: lượt 6 khai *"1 thể hiện, H1 đóng cả lớp"* → lượt 7 tìm ra thể hiện thứ hai;
+- `lenh-khong-noi-hien-vat`: lượt 6 khai *"4 thể hiện, H3/H4 đóng đủ"* → lượt 7 tìm ra thể hiện thứ năm;
+- `loi-khai-vuot-phep-do`: lượt 5 khai lớp này còn **0** → lượt 6 tìm **2** → lượt 7 tìm thêm **1**.
+
+Cùng bài học đã ghi cho packet #513 (`CLAUDE.md`, lượt 10→13): *đừng vá theo danh sách đường mà reviewer
+liệt kê — TỰ liệt kê hết đường TRƯỚC*. Ở đây nó tái phát **ba lần trong một PR**, và mỗi bản vá đều ĐÚNG
+và CÓ RĂNG ở chỗ nó phủ.
+
+Lớp `adapter-chep-doctrine` còn nặng hơn: **tái phát BỐN lần** trước khi lượt 6 đóng được. Mỗi lần vá một
+finding thì lại viết thêm luật vào adapter — mà adapter phải MỎNG (chỉ cú pháp/công cụ; quy tắc review
+nằm ở `docs/PROTOCOL_DA_PHIEN.md`). `doctrine-scan` **rc=0 ở CẢ HAI phía** của bản vá 43 hunk: nó khớp
+CHUỖI, không đọc nghĩa. Mutation M1 của lượt 5 (`0 → 6 → 0`) chỉ chứng minh cổng có răng với CHUỖI.
+
+## Lớp có giá trị nhất: `neo-sha-tu-head-dong` (lượt 7)
+
+Hai tuyến trong adapter lấy lại head PR bằng `gh pr view --json headRefOid` **ngay tại lúc gọi** rồi dùng
+nó làm SHA của dữ liệu đang review — `gh pr diff` + `git diff <base> <head_sha>`, và
+`record-review --reviewed-sha $(gh pr view … -q .headRefOid)`. Head đổi giữa lúc reviewer đọc và lúc ghi
+thì artifact neo vào một revision **khác** với revision đã review. Đó không phải rủi ro lý thuyết: trong
+chính chuỗi này head đổi sau **mỗi** lần áp HINT. Nay cả hai dùng `<reviewed_sha>` đã chốt trong `VERDICT.md`.
+
+## Lượt 8 — khai tập, rồi đo răng của chính phép quét
+
+Lượt 8 là lượt đầu tiên trả lời được câu *"bảng 0 dòng của anh duyệt bao nhiêu thứ?"*:
+
+- kiểm kê **520 dòng** ⇒ **23 fence + 93 đơn vị** ngoài fence, **0 dòng không trắng bỏ ngoài hai tập**;
+- `va-qua-tay-mat-cong-cu` duyệt **400 ứng viên con trỏ**, gồm đủ **45 dấu §**, 26 lần nhắc tệp Git,
+  60 đường/hiện vật mẫu; `don-vi-byte` lấy **242 token chứa số** làm chỉ mục dư;
+- **8 đột biến**, mỗi lớp khai 0 dòng có một đột biến riêng bơm một thể hiện của ĐÚNG lớp ấy rồi cho thấy
+  bảng chuyển `0 → 1 → 0`. Đáng đọc nhất là **M2**: đổi con trỏ sang một heading **CÓ THẬT nhưng không
+  chứa nội dung đã hứa** — đích tồn tại cả ba lần, chỉ cột *thiếu nội dung* chuyển `0→1→0`, tức oracle
+  phân biệt được *đích tồn tại* với *đích chứa thứ đã hứa*. Và **M8** nhắm đúng câu HINT lượt 7 vừa viết:
+  giữ lời hứa *"tên và OID"* nhưng bỏ `%(objectname)` ⇒ `echo diff` `1 → 0 → 1`;
+- reviewer **tự phân hạng oracle của mình**: M2/M3/M5/M8 có oracle nội dung đích hoặc hành vi độc lập;
+  M1/M4/M6/M7 còn cần đối chiếu NGHĨA câu, và nói thẳng không được quảng bá thành bộ chứng minh ngữ nghĩa
+  tự động. Khôi phục đủ **8/8** (sha256 trước/sau bằng nhau, cả 8 `git diff --exit-code` rc=0).
+
+## Đo — và chỗ KHÔNG ĐO ĐƯỢC
+
+Cổng trên head land `dd62c88`: `gate` **success** · `thu-hoi` **success**. Tại chỗ sau khi áp HINT lượt 7:
+`idiom_py_test` ĐẠT · `doctrine-scan` 7 tệp / 0 chỗ · `adr-song` 48/48 · `bien_nhan_v2` 0 vi phạm ·
+`eol_policy --all` 2085 scanned / 2063 checked / 22 skipped / 0 vi phạm · `doc-claims-check --strict`
+`ok=true` · `golden-test` `ok=true` · `release-verify --strict` `ok=true` **180 == 180** ·
+`lease_publish_test` **155/155** (với `actionlint` 1.7.7 trên PATH; thiếu nó thì `t33`/`t137` trả
+`KHÔNG ĐO ĐƯỢC` và bộ test ra 145/147 — **môi trường**, delta so master = 0).
+
+**`gate (windows-latest)` trên merge commit `dc02c9b` bị HUỶ** theo chỉ thị chủ kho (lỗi đã biết, tiết kiệm
+runner) ⇒ trạng thái Windows của `dc02c9b` là **KHÔNG ĐO ĐƯỢC**. Đừng suy xanh từ việc ubuntu xanh.
+
+**Model thực chạy KHÔNG ĐO ĐƯỢC** cho cả bốn lượt: `codex exec` không xuất `modelUsage`. `gpt-6-astra` và
+`xhigh` là **giá trị TRUYỀN VÀO** (`-m` và `-c model_reasoning_effort`), không phải phép đo.
+Các scalar runtime (ID, prompt digest, mốc thời gian, mã thoát, byte+hash stdout/stderr) đối chiếu được với
+`run.json` **ngoài kho** — `run.json` của bốn lượt này **không có khoá `thoi_luong_giay`**, nên thời lượng
+trong biên nhận là hiệu hai mốc, tính lại lúc viết.
+
+**Mọi liên kết `evidence/...` trong bốn tệp verdict là liên kết NỘI BỘ GÓI**, không phải đường dẫn trong
+kho; gói đã chết theo container. Đây là cảnh báo được nâng lên mục lục cho cả bốn verdict.
+
+## Không có mục nào khác
+
+`VERSION` không đổi; `scripts/` không đổi; `docs/` không đổi. Thay đổi của chính #521 (`.claude/skills/
+cross-review/SKILL.md`) đã land ở `dc02c9b` và **không nằm trong `RELEASE_MANIFEST.json`** (`.claude/**`
+bị loại khỏi gói) — nhưng `CHANGELOG.md` thì CÓ, nên manifest phải tái sinh cho chính mục này.
+
+---
+
 # ★ dev-side — r372: ghi sổ #517 — ba verdict codex chấm CHÍNH hồ sơ r371 của #516, review PHÂN THEO LỚP theo chỉ thị chủ kho; HINT của reviewer cũng là lời khai (lượt 1 tự sinh một lỗi, lượt 2 bắt) (2026-09-12)
 
 Nối tiếp r371 (chốt tới `f4da553`, #517). Mục này là vế bookkeeping ADR-0034 của CHÍNH #517: 3 verdict + 3 biên nhận v2

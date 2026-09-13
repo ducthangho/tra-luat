@@ -1,0 +1,55 @@
+schema_version: 2
+kind: review_delivery_receipt
+receipt_id: gate463-r22-g3-review11-claude
+packet_id: GATE-TACH-JOB-CAT-CHI-PHI
+packet_issue: 463
+revision: 22
+generation: 3
+lease_id: gate-tach-job-cat-chi-phi-exec-4-codex-20260913-r22
+provider: claude
+role: reviewer
+verdict: changes_requested
+reviewed_sha: f4005d203d2ac457322cef46ad63a694c749269a
+reviewed_tree: 1a7b17f1f97000eb635820ade4e3f0e7ee1a7a98
+verdict_path: ops/reviews/gate-tach-job-cat-chi-phi-review-11-claude-verdict.md
+verdict_sha256: 23e9ecd5c25720918643503948b470c109f9cf7807b2767e563ea674e1010523
+evidence_url: https://github.com/ducthangho/tra-luat/blob/47fd6ded22577ccce94765149bd9e72b967402e8/ops/reviews/gate-tach-job-cat-chi-phi-review-11-claude-verdict.md
+model_reviewer_identity:
+  provider: anthropic_claude
+  surface: claude_code
+  transport: machine/local
+  model: claude-fable-5
+  effort: max
+  session_run_id: ba4580e8-43e9-4cf9-9f49-5beffee6f679
+  phien_doc_lap: true
+  neo_boi_launcher: true
+github_submitter_identity:
+  actor: ducthangho
+  recorded_by: codex
+  reviewer_is_submitter_identity: false
+anchor:
+  loai: canonical_ancestry
+  cuong_do: Immutable Git blob; ancestry measured against evidence-branch HEAD, NOT
+    master; no required-check authority.
+  evidence_branch: codex/gate-463-review-evidence-20260913
+  evidence_commit: 47fd6ded22577ccce94765149bd9e72b967402e8
+model_output_path: ops/reviews/gate-tach-job-cat-chi-phi-review-11-claude-model-output.json
+model_output_sha256: fddaca7660fc03c9a59b0c94dea603fbc71873204849beb2d3b7e3dfe7ff65d8
+launcher_run_sha256: a054f5b6a88705cd473824d1f1ed05ea730822630ed26a2064f4879f7c9566b3
+model_validation: 'modelUsage: ĐẠT; tập model chính=[''claude-fable-5'']; mô hình
+  phụ bỏ qua=[''claude-haiku-4-5-20251001'']'
+hunt_table_validation: passed
+source_and_review_trees_clean: true
+review_axes:
+- spec
+- standards_security
+review_classes:
+- installer_domain
+- lexer_composition_order
+- consumer_spec_workflow
+ci: not_run
+A1: not_run
+A5: not_run
+merge_authorized: false
+transport_note: Canonical launcher transport is machine/local; machine in reviewer
+  prose is the generic label, not a different execution surface.

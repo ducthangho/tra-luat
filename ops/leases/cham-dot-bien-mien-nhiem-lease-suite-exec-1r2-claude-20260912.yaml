@@ -99,6 +99,12 @@ effective_review_class: sensitive
 # 8c610f7). `_kiem_bia_mo` đòi đủ hai chiều.
 thay_the_cho:
   - cham-dot-bien-mien-nhiem-lease-suite-exec-1-claude-20260912
+
+# BIA MỘ CHIỀU NGƯỢC (thêm 2026-09-13T01:48:00Z). `_kiem_bia_mo` đòi ĐỦ HAI CHIỀU, và cả hai chiều
+# được đặt trong CÙNG MỘT commit — làm lệch nhau tạo một cửa sổ mà `ai-dang-giu` trả
+# `CHAN [12] KHÔNG_XÁC_ĐỊNH: bia mộ một chiều`, đã đo đúng như vậy khi cấp `exec-1`.
+# Lý do thay: trần `S2` của lease này (1000) đã CHẶN công việc — xem `ly_do_thu_hoi` trong `exec-1r3`.
+da_bi_thay_the: cham-dot-bien-mien-nhiem-lease-suite-exec-1r3-claude-20260913
 ly_do_thu_hoi: >-
   KHÔNG phải reroute, KHÔNG phải kỷ luật, và KHÔNG phải thu hồi vì packet đã land: đây là một REVISION
   của cùng generation 1 cho cùng phiên thi công. `exec-1` bị thay vì nó KHÔNG mang hai khối `nang_tran`

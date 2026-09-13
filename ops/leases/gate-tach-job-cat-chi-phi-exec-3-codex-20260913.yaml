@@ -1,0 +1,87 @@
+# Ghi hộ chỉ thị chủ kho; authority tại granted_on_instruction.
+schema_version: 2
+event: executor_lease_granted
+packet_issue: 463
+mission_issue: 467
+granted_by: ducthangho
+granted_on_instruction: https://github.com/ducthangho/tra-luat/issues/463#issuecomment-5650909160
+recorded_by: codex
+recorder_is_dispatcher: false
+leased_at_utc: '2026-09-13T03:49:31Z'
+lease_expires_at_utc: '2026-09-13T16:55:00Z'
+packet_id: GATE-TACH-JOB-CAT-CHI-PHI
+revision: 21
+generation: 2
+lease_id: gate-tach-job-cat-chi-phi-exec-3-codex-20260913
+role: executor
+provider: codex
+executor: codex
+model: gpt-6-astra
+effort: xhigh
+reviewer_provider: claude
+environment: local
+execution_surface: codex_desktop
+transport: machine
+risk: sensitive
+review_class: sensitive
+effective_review_class: sensitive
+assurance_target: cross_approved
+access: read-write
+spec_path: ops/specs/GATE-TACH-JOB-CAT-CHI-PHI.md
+spec_sha256: decdb1a1ae794508f0be6d680342bbf7c46b7353e0708f16b522567e8cc56d96
+spec_hash: decdb1a1ae794508f0be6d680342bbf7c46b7353e0708f16b522567e8cc56d96
+prompt_path: ops/prompts/handoff-463-codex-executor-20260913.md
+prompt_sha256_required: d7d0447d93a53db3080a7ddf87b09c17d5b986be59d5c1def38bccd4a23c7f4f
+write_set: &id001
+- .github/workflows/ci.yml
+- .claude/dev/ci_dang_ky_test.py
+effective_write_set: *id001
+write_set_hash: 0f7b869da648e9b21023e461925efd0d45bca58fb308a8fcc82bc55ad9f66ef0
+branch: codex/gate-tach-job-cat-chi-phi-g2
+branch_ownership: exclusive
+base_sha: 3bbc6b46c2fb6066fa64088308ce30fe40f87aa5
+start_from_sha: 3bbc6b46c2fb6066fa64088308ce30fe40f87aa5
+reviewed_sha_required: 3bbc6b46c2fb6066fa64088308ce30fe40f87aa5
+canonical_sha_at_grant: 32f95f0240df74e1ae7739ae1fe8d257686604bd
+heartbeat_at: '2026-09-13T03:49:31Z'
+lease_until: '2026-09-13T16:55:00Z'
+heartbeat_required_minutes: 30
+run_minutes: 90
+attempts_used: 0
+attempts_limit: 1
+depends_on:
+- wp502
+- wp504
+dependency_evidence:
+  wp502: 26e2555d36c48b3c0f625ae50ab2cfb62b6cb858
+  wp504: 85fcbf8aea75f0577f47d7332c02a50f993a9d1b
+thay_the_cho:
+- gate-tach-job-cat-chi-phi-exec-2r10-claude-20260912
+ly_do_thu_hoi: Chủ kho cấp quyền chuyển executor claude sang codex theo hồ sơ bàn
+  giao và chỉ thị mới, ghi tại granted_on_instruction. Giữ nguyên nội dung nghiệm
+  thu và spec r21; generation 2 ghi danh tính/bề mặt thực thi mới. Không reset lịch
+  sử stable finding hoặc review budget.
+viec_dau_tien: Phát biểu miền cú pháp mà loi_ruff_ci nhận và từ chối trong một câu,
+  fail-close ngoài miền, xem lại cách biểu diễn theo §12 trước khi sửa mã.
+dieu_kien_dung:
+- Không biểu diễn đúng M7/A7 trong hai path với additions <=500 thì dừng.
+- Không nới A8 lần thứ tư, không mở đường dẫn sản phẩm thứ ba.
+- Không chạy CI dưới mọi hình thức, không mở PR hoặc gọi workflow.
+- Không merge, land, deploy hoặc gọi LIVE.
+- Một lượt xem lại kiến trúc; không nối vòng vá cùng stable finding để lách §12.
+write_set_da_do_truoc_khi_cap:
+  source_root: C:\Users\admin\Documents\Codex\2026-09-13\gate-463-codex-source
+  source_scope: fresh independent full remote clone; shared checkout unchanged
+  full_ref_sha256: dcf70a52f0f39a1aaa9af133982656d5bf876d01e73df16391934a0df5e8e832
+  remote_heads: 371
+  missing_remote_branch_names: []
+  ci:
+    rc: 11
+    holders:
+    - gate-tach-job-cat-chi-phi-exec-2r10-claude-20260912
+    evidence_sha256: 0d85fea81bf51b173d0612b65dbd86647225d67fb5b270b0c8247ddb47d73474
+  registry:
+    rc: 11
+    holders:
+    - gate-tach-job-cat-chi-phi-exec-2r10-claude-20260912
+    evidence_sha256: 56542eaa2ffd8d42feb01f3db62f5da4f0b030074e29ac5f8699bb5660e6a9e4

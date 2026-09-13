@@ -271,3 +271,12 @@ dieu_kien_dung:
      do reviewer ĐỌC, KHÔNG lần nào do bộ quét của executor — và bộ quét ấy MÙ HAI LẦN theo hai cách
      khác nhau (lượt 5: mẫu đòi dấu phẩy trên, văn bản viết không dấu; lượt 8: mẫu đòi dấu ngoặc
      ngược, chuỗi YAML viết TRẦN — và chính dòng S8 ở trên là dòng lọt).'
+
+da_bi_thay_the: quy-trinh-lap-review-r11-exec-10-codex-20260913
+da_bi_thay_the_ly_do: >-
+  ĐỔI EXECUTOR: `claude` -> `codex`, và reviewer đổi theo thành `claude`. `§3.2` nói thẳng đổi
+  EXECUTOR tạo revision mới và làm lease cũ mất hiệu lực, nên việc này đi bằng revision 11 +
+  generation 10 + cấp lại lease, KHÔNG bằng một lần bàn giao. Cross-review phải KHÁC NỀN.
+  Lease gen 10 cũng sửa THỂ HIỆN CUỐI của lớp `dac-ta-r5-…` mà lượt 9 đo được: `LEASE:130` còn câu
+  *"Luật chung **nay** là `M17` của r8"* — chữ "nay" trao vai trò VẬN HÀNH cho một cơ chế r10 đã gỡ.
+  Lease gen 10 neo `ops/specs/…-r11.md`, `spec_sha256` `42b0f477…` (đo TỪ BLOB).

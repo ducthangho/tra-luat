@@ -267,3 +267,17 @@ dieu_kien_dung:
      chứa một tên tiêu chí đã rút ở NGOÀI Phụ lục A. DỪNG và chuyển tên ấy vào Phụ lục A, hoặc viết
      lại câu theo nghĩa vụ hiện hành `N1`-`N8`. KHÔNG dán nhãn tại chỗ để xin miễn — `M17` bản r8 đã
      thử cách ấy và lượt 7 đo được nó vừa CHO LỌT (label/table laundering) vừa BẮT OAN.'
+
+da_bi_thay_the: quy-trinh-lap-review-r10-exec-9-claude-20260913
+da_bi_thay_the_ly_do: >-
+  r10 GỠ HẲN cổng quét tên theo khuyến nghị lượt 8 (*"Bỏ cổng phân vùng tên… reviewer ĐỌC NGHĨA có
+  quyền chặn"*), và lượt 8 đo được BA thứ hỏng trong CHÍNH TỆP LEASE NÀY:
+  · `dieu_kien_dung` mục `S8` còn một tên tiêu chí ĐÃ RÚT viết TRẦN — và executor khai tệp này có
+    ZERO tên như vậy. Lời khai ấy SAI vì bộ quét của executor ĐÒI DẤU NGOẶC NGƯỢC, mà chuỗi YAML nháy
+    đơn viết tên TRẦN. Đo thẳng: mẫu đòi ngoặc ⇒ 0 khớp; mẫu tên trần ⇒ 1 dòng. Đây là LẦN THỨ BA
+    cùng một hình dạng `bo-do-bang-chi-kiem-ten-khong-kiem-nghia`.
+  · `S13'` trỏ tới cơ chế mà r10 vừa gỡ ⇒ một điều kiện dừng neo vào thứ không còn tồn tại.
+  · chú giải `reviewed_sha_required` còn mô tả head CŨ trong khi hai trường neo máy đã sang head
+    khác — lớp P3 `chu-giai-lease-neo-head-cu` của lượt 8.
+  Lease gen 9 sửa cả ba, phát biểu lại `S13'` theo `M17-GO`, và neo `ops/specs/…-r10.md`,
+  `spec_sha256` `8bfa0a9e…` (đo TỪ BLOB).

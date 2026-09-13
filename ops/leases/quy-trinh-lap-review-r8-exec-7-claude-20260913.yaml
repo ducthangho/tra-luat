@@ -259,3 +259,20 @@ dieu_kien_dung:
      KHÁI NIỆM (công thức, con trỏ, câu vận hành), rồi mới đóng băng. Lý do có thật và đo được:
      trước khi đóng băng r6, phép quét dùng mẫu toàn tên CÓ dấu phẩy trên cho 0 dòng, trong khi văn
      bản còn sót viết `A9` KHÔNG có dấu ấy — một finding lọt vào một đặc tả ĐÃ ĐÓNG BĂNG.'
+
+da_bi_thay_the: quy-trinh-lap-review-r9-exec-8-claude-20260913
+da_bi_thay_the_ly_do: >-
+  r9 ĐỔI CƠ CHẾ, không vá cơ chế cũ lần hai. Lượt 7 phán lớp
+  `dac-ta-r5-giu-luat-cu-trai-tieu-chi-moi` là VÁ SINH LỖI MỚI: phần NỘI DUNG đã đóng thật — cả ba
+  đoạn prose vận hành của lượt 6 được xét RIÊNG và phán đã sửa thật, và reviewer đọc toàn bộ
+  spec/lease rồi khai không còn câu nào lấy tiêu chí đã rút làm nghĩa vụ vận hành — nhưng CHÍNH
+  `M17` (bản r8) đẻ ba lỗi: nhãn theo VỊ TRÍ hợp thức hoá phần còn lại của đơn vị
+  (`label_laundering`, `table_laundering`), `M17` BẮT OAN lịch sử hợp lệ (`valid_history=false`),
+  và `S12'` CHƯA được chiếu sang lease (`closure.py`: spec `true`, lease `false`).
+  Hai lỗi đầu kéo nhau theo HAI CHIỀU NGƯỢC NHAU — nới cho hết bắt oan thì mở lại cửa laundering —
+  nên vá lần hai là chọn một điểm trên một đường đánh đổi KHÔNG CÓ ĐIỂM TỐT.
+  `M17'` của r9 thay bằng PHÂN VÙNG TÀI LIỆU: mọi tên tiêu chí đã rút chỉ được ở trong Phụ lục A;
+  phần thân đặc tả VÀ TOÀN BỘ TỆP LEASE không được chứa tên nào. TỆP LEASE NÀY có NĂM dòng như vậy;
+  lease gen 8 có ZERO — đó là một phép đo, không phải lời hứa.
+  Lease gen 8 neo `ops/specs/…-r9.md`, `spec_sha256` `507191df…` (đo TỪ BLOB), và chiếu ĐẦY ĐỦ `S12'`
+  cộng `S13'` mới.

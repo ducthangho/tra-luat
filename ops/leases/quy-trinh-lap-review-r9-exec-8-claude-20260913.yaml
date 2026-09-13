@@ -1,0 +1,269 @@
+# Lease EXECUTOR — QUY-TRINH-LAP-REVIEW-VA-DIEU-KIEN-DUNG revision 9 (#523). Ghi HỘ chủ kho.
+# THAY gen 7 vì r9 ĐỔI CƠ CHẾ (`M17'` PHÂN VÙNG TÀI LIỆU thay cho `M17` DÁN NHÃN TỪNG CÂU), và
+# `M17'` áp cho CẢ TỆP LEASE: lease KHÔNG được chứa một tên tiêu chí đã rút nào. gen 7 có NĂM dòng
+# như vậy; tệp này ZERO. `M16` và `N1`–`N8` vẫn NGUYÊN VĂN, `write_set` ba đường, `nang_tran` không đổi.
+schema_version: 2
+event: executor_lease_granted
+
+packet_issue: 523
+mission_issue: 499
+granted_by: ducthangho
+granted_on_instruction: https://github.com/ducthangho/tra-luat/pull/529#issuecomment-5649986848
+leased_at_utc: 2026-09-13T01:45:00Z
+lease_expires_at_utc: 2026-09-13T20:00:00Z
+
+packet_id: QUY-TRINH-LAP-REVIEW-VA-DIEU-KIEN-DUNG
+revision: 9
+generation: 8
+lease_id: quy-trinh-lap-review-r9-exec-8-claude-20260913
+role: executor
+provider: claude
+executor: claude
+environment: cloud
+risk: sensitive
+assurance_target: cross_approved
+access: read-write
+
+spec_path: ops/specs/QUY-TRINH-LAP-REVIEW-VA-DIEU-KIEN-DUNG-r9.md
+spec_sha256: 507191dff0f8aee9734dfbea2bbe7c54a8d8f02cbf8224e37a132e168d10b229
+spec_hash: 507191dff0f8aee9734dfbea2bbe7c54a8d8f02cbf8224e37a132e168d10b229
+spec_hash_do_tu_dau: >-
+  Đo TỪ BLOB: `git show claude/spec-quy-trinh-r9-20260913:ops/specs/…-r9.md | sha256sum`, và đối
+  chiếu với bản trên đĩa — hai phép khớp. Không lấy băm của tệp lease này làm `spec_hash`, và
+  không bịa một băm để lấp ô trống (bài học `spec_hash` của kho: protocol §3.2 đòi trường này, mà
+  trên master chỉ 2/74 lease có nó).
+
+write_set:
+  - .claude/skills/cross-review/SKILL.md
+  - .claude/skills/work-packet/SKILL.md
+  - ops/reviews/
+
+write_set_da_do_truoc_khi_cap: >-
+  Quét sau `fetch` refspec rộng; so TẬP TÊN hai nguồn (`ls-remote --heads` 358 ↔ `for-each-ref`
+  358, `comm -23` = 0 cả hai chiều) ⇒ KHÔNG MÙ; `is-shallow=false`.
+  `ai-dang-giu` cho cả ba đường (SAU khi đồng bộ `master` cục bộ — lệnh fail-close `rc=12` đúng
+  lúc nhánh cục bộ tụt 12 commit, và đó là chốt LÀM VIỆC, không phải lỗi):
+    .claude/skills/cross-review/SKILL.md  NGƯỜI_GIỮ 1 = gen 2 của packet này (gen 3 này thay)
+    .claude/skills/work-packet/SKILL.md   NGƯỜI_GIỮ 1 = gen 2 của packet này (gen 3 này thay)
+    ops/reviews/                          NGƯỜI_GIỮ 2 = gen 2 này + lease gen 3 của #522
+  Nhắc lại phát hiện đã ghi ở gen 2, vì nó vẫn đúng và vẫn dễ sập: `ai-dang-giu` so CHUỖI CHÍNH
+  XÁC, KHÔNG nở prefix — truy vấn `ops/reviews/` ⇒ 1, truy vấn `ops/reviews/README.md` ⇒ 0, và số
+  0 ấy là SỐ KHÔNG GIẢ.
+
+hai_writer_da_xay_ra_tren_write_set_nay: >-
+  ĐÂY LÀ LÝ DO r4 TỒN TẠI, không phải một ghi chú lề. PR #521 land vào master lúc
+  2026-09-12T15:31:01Z và sửa +247/−147 đúng `.claude/skills/cross-review/SKILL.md` — đường dẫn
+  mà lease gen 1 của packet này giữ từ 2026-09-12T08:14:57Z ⇒ cửa sổ hai writer ~7h16m.
+  `merge-tree --write-tree 6b46012 dc02c9b` ⇒ rc=1, CONFLICT, 2 hunk / 82 dòng.
+  Quét NỘI DUNG mọi `ops/leases/*` trên 358 ref tìm `write_set` chứa đường dẫn ấy ⇒ 36 tệp lease,
+  KHÔNG tệp nào thuộc #521. Hai khả năng — #521 không có lease, hoặc lease của nó sống trên một
+  nhánh `ops/**` đã xoá (nợ `SO-LEASE-KHONG-NAM-MOT-CHO`) — KHÔNG phân biệt được từ dữ liệu hiện
+  có, nên trạng thái là KHÔNG ĐO ĐƯỢC. Chủ kho chốt CHỈ GHI NHẬN: không mở packet cho vụ ấy,
+  không đi tìm thêm. Ghi vào lease để lần sau không ai đọc bản đo thành một kết luận về #521.
+
+ket_qua_luot_6_va_vi_sao_gen_7: >-
+  Lượt 6 (`run 5740a7d0`, 847,52 s, `ma_thoat=0`, stderr 538 266 B, `gpt-6-astra`) trả **`blocked`**
+  LẦN THỨ TƯ: 0 P1 + 3 P2 = 3 LỚP, 8 THỂ HIỆN. verdict `sha256 1b318232…` (28 394 B) vào kho ở
+  `e16382b`. `N1`–`N5` ĐẠT · `N6` KHÔNG ĐO ĐƯỢC (lần hai) · `N7`/`N8` ĐẠT.
+  BỐN ĐƯỜNG r7 ĐÓNG LÀ CÓ THẬT — reviewer xác nhận `four_old_routes_closed` cả bốn `true`, và `H6`
+  đo `N1`–`N8` **byte_identical** giữa r6 và r7 ⇒ lời khai "giữ NGUYÊN VĂN" của r7 là ĐÚNG.
+  NHƯNG LỚP `dac-ta-r5-giu-luat-cu-trai-tieu-chi-moi` = **VÁ HỜ**, 3 thể hiện, và HAI trong ba nằm
+  trong CHÍNH TỆP LEASE gen 6 (`base_sha_ghi_chu` và `recorder_xung_dot_loi_ich`) — gen 7 sửa cả hai
+  TẠI CHỖ, và r8 dựng `M17` để đóng CẢ LỚP thay vì vá từng điểm lần thứ tư.
+  HAI LỚP CÒN LẠI:
+  · `bien-nhan-thieu-so-ci-da-chi` (3 thể hiện) — biên nhận lượt 6 ĐÃ khôi phục khối CI mà biên nhận
+    lượt 5 bỏ sót; còn lại là ledger khai MỐC MỞ PACKET SAI. Đây là LỜI KHAI SAI ĐO ĐƯỢC của
+    executor: ledger lấy `14:32:59Z` (commit thi công đầu) làm mốc mở packet, trong khi lease gen 1
+    ghi `leased_at_utc: 2026-09-12T08:15:00Z` ⇒ cửa sổ bỏ mất **2 h 26 m 10 s**. MỐC MỞ PACKET LÀ
+    LEASE, KHÔNG PHẢI COMMIT. Đã tự đo lại và xác nhận reviewer đúng.
+  · `phep-do-doctrine-khong-du-rang` (2 thể hiện) — `S4` cấm, `packet_loop.py` NGOÀI write set.
+    gen 7 KHÔNG chạm. CẦN CHỦ KHO quyết: mở packet riêng hoặc nới write set.
+  VÌ SAO PHÉP QUÉT CỦA EXECUTOR CHO XANH LẦN THỨ HAI — nguyên nhân KHÁC lần trước, nên bài học cũ
+  không che được: lượt 5 hỏng vì quét theo TÊN; lượt 6 đã sửa đúng chỗ đó (chốt theo KHÁI NIỆM,
+  miễn trừ theo VỊ TRÍ CẤU TRÚC, hai đột biến chứng minh răng — chốt ấy SẠCH THẬT), nhưng luật THỨ BA
+  (viện dẫn tiêu chí đã rút) bị executor TỰ HẠ xuống thành BÁO CÁO vì regex không tách được câu VẬN
+  HÀNH với câu KỂ LẠI LỊCH SỬ — rồi chính executor phân loại 10 đoạn và SAI 3.
+  Hạ một chốt xuống thành báo cáo rồi tự mình làm người phán là BỎ chốt, không phải GIỮ chốt.
+  `M17` của r8 chữa đúng chỗ ấy bằng cách ĐẢO sang danh sách CHO PHÉP có dấu nhận biết CÚ PHÁP, nên
+  phép tách không còn cần đọc ý nghĩa câu.
+
+ket_qua_luot_3_cu: >-
+  [LỊCH SỬ] — khối này kể lại lượt 3; mọi tiêu chí nêu bên dưới đều ĐÃ RÚT ở r6 và KHÔNG còn
+  hiệu lực. Giữ tên để đối chiếu giữa các lượt, không để viện dẫn (`M17` của r8).
+  Lượt 3 (`run 4cc3e2a3`, 651,8 s) trả **`blocked`**: 0 P1 + **8 P2** = 8 LỚP, 11 THỂ HIỆN, verdict
+  `sha256 aeac04b8…` (36 177 B) đã vào kho ở `f938612`.
+  HAI finding nhắm vào TIÊU CHÍ của r4 — `a9-bo-sot-delta-trong-merge` và `a17-whitelist-bo-roi-m8`
+  — nên packet KHÔNG được tự vá, và `§3.2` đưa nó qua revision mới. Chủ kho chốt hai quyết định
+  (comment `5647309978`): giữ `M8` + kê vào whitelist; và MỘT phép đo duy nhất cho phạm vi delta duy nhất.
+  BA LỜI KHAI CỦA PHIÊN THI CÔNG BỊ BÁC ở lượt 3 và đã RÚT: (a) một tiêu chí nay đã rút (Phụ lục A
+  của r9) khai `+39/−0`, thật là **+55/−0**
+  (`grep -c '^+[^+]'` bỏ sót 16 dòng TRỐNG; `numstat` nói 55 từ đầu); (b) *"cộng đôi là fail-closed"* — BỊ BÁC bằng fixture cho `4 ≤ 300 ĐẠT` trong khi delta thật 305; (c) *"0 tín dụng
+  giả"* — CHƯA THIẾT LẬP: `dat = rc != 0` là MỘT mã thoát cho HAI tiêu chí, và một oracle SAI ĐÍCH
+  qua được đối chứng dương rồi vẫn báo 7/7.
+  BỐN lớp CÒN VÁ ĐƯỢC ở gen 4: `con-tro-dinh-nghia-phan-hang-sai-dich` (bỏ con trỏ sai + khai nợ) ·
+  `dem-dot-bien-khong-theo-tieu-chi-dich` · `bo-doc-bang-vuot-ranh-gioi-muc` ·
+  `bo-do-bang-chi-kiem-ten-khong-kiem-nghia` (ba lớp sau ở BỘ ĐO, là nháp, bản vá sống trong
+  `EVIDENCE.md`) · cộng `bien-nhan-thieu-so-ci-da-chi` ở biên nhận lượt 4.
+  MỘT lớp KHÔNG vá được: `phep-do-doctrine-khong-du-rang` — `S4`, `packet_loop.py` ngoài write set.
+
+chong_lan_write_set: >-
+  `ops/reviews/` vẫn bị lease gen 3 của #522 (`tran-vong-review-len-muoi-exec-3-claude-20260912`)
+  giữ, CÒN HẠN tới 2026-09-13T08:15:00Z dù #522 ĐÃ LAND (merge 63075a7, CI hậu merge ubuntu
+  success). Lease KHÔNG TỰ CHẾT khi packet đã land — nợ CÓ TÊN
+  `AG-T0-01B-thu-hoi-lease-chua-co-duong`. Phiên này KHÔNG tự viết bản thu hồi:
+  `_KHOA_THU_HOI_BAT_BUOC` đòi `thu_hoi_boi` là trường THẨM QUYỀN và bản ghi đi qua cổng tiếp
+  nhận M4 riêng. Khai thẳng thay vì che; quyết định thuộc chủ kho.
+
+branch: claude/quy-trinh-lap-review-r2
+branch_ownership: exclusive
+target_branch_neu_land: master
+base_sha: dc02c9beed42bd2ea44a80a2e34e1bbe3acfc6c5
+base_sha_ghi_chu: >-
+  ĐỔI so gen 2 (`85fcbf8`) và đó là chủ đích: `dc02c9b` là master SAU khi #521 land, tức mốc mà
+  phạm vi delta neo vào. **`N3`** đo `git diff <base_sha>..<head>` bằng MỘT phép đo endpoint, nên
+  `base_sha` phải là chính commit ấy chứ không phải "nhánh mặc định hiện tại" — một mốc trôi làm
+  tiêu chí chết đúng lúc merge. Đo: `85fcbf8` là tổ tiên của `dc02c9b` (`merge-base --is-ancestor`
+  rc=0).
+  SỬA Ở gen 7: bản gen 6 của khối này viết một tiêu chí ĐÃ RÚT làm CĂN CỨ VẬN HÀNH cho `base_sha`.
+  Lượt 6 đo được và gọi đúng tên — đó là thể hiện thứ HAI của lớp
+  `dac-ta-r5-giu-luat-cu-trai-tieu-chi-moi`. Luật chung nay là `M17` của r8.
+start_from_sha: a4451ddb634da481581eea339282c1fe01c851b5
+reviewed_sha_required: a4451ddb634da481581eea339282c1fe01c851b5
+reviewed_sha_required_ghi_chu: >-
+  BẰNG `start_from_sha` (`00ac525`), tức head TẠI LÚC CẤP — quy ước của kho, đo được: 48 lease có
+  cả hai trường ⇒ **44 BẰNG / 4 LỆCH**. Cổng `check` đòi đúng 40 hex thường và nói thẳng lý do
+  (*"SHA ngắn hoặc lệch dạng là mỏ neo GIẢ"*), nên trường này không có chỗ cho trạng thái thứ ba —
+  gen 3 đã thử ghi `KHONG_DO_DUOC_LUC_CAP` và bị chặn `rc=8`.
+  `00ac525` là merge của `origin/master` `d706abd` (PR #533, 3 commit, chỉ chạm
+  `.claude/dev/chon_reviewer*.py`) vào head lượt 5 `4ca745f`. Phép merge ấy KHÔNG phải trang trí:
+  nó là bản vá cho `thu-hoi` ĐỎ — log của run `34710812695` nói thẳng
+  `workflow_sha d706abd != S dc02c9b — định nghĩa không neo canonical`, `exit code 12`, tức BASE
+  DRIFT chứ không phải lỗi của diff. Cùng nguyên nhân với lần đỏ ở `6b46012`, và lượt ngay sau khi
+  merge master (`7f028a7`) **success** ⇒ HAI điểm xác nhận, không phải một suy đoán.
+  GIỚI HẠN GIỮ NGUYÊN từ gen 5: đây là **cận dưới**, không phải head cuối. Đừng đọc trường này
+  thành *"lượt 6 phải review đúng `00ac525`"*.
+authority_basis: '§2 — start/pause/resume/reroute/override/authorize thuộc chủ kho'
+recorded_by: claude-session
+recorder_is_dispatcher: false
+recorder_cung_la_nguoi_thi_cong: true
+phan_cong_gen_5: >-
+  `M16` của r6. Executor khai NGHĨA VỤ + PHẢN CHỨNG NÊN TỒN TẠI (mô tả bằng lời) + DỮ KIỆN THÔ
+  (`git diff --numstat`, `rc` của cổng CÓ SẴN trong kho). Reviewer dựng PHÉP ĐO, chạy, phán.
+  Executor **KHÔNG** nộp probe làm bằng chứng nghiệm thu và **KHÔNG** tự phán `ĐẠT` (`ngoai_pham_vi`
+  11). Executor vẫn đo cho riêng mình — nhưng đó là việc nội bộ, không có thẩm quyền.
+  BA CHỐT giữ cho phân công này không thành đường thoát: `N7` (nghĩa vụ mơ hồ = THIẾU, và reviewer
+  khai thẳng nghĩa vụ nào không dựng nổi thước VÌ VĂN BẢN) · `N8` (không dựng được thước =
+  KHÔNG ĐO ĐƯỢC, KHÔNG phải ĐẠT) · executor vẫn chịu trách nhiệm về BẢN VÁ.
+
+recorder_xung_dot_loi_ich: >-
+  Phiên ghi lease này CŨNG là phiên thi công, CŨNG soạn r4, và CŨNG là phiên đã TRÌNH ba phương
+  án (A)/(B)/(C) cho chủ kho chọn — tức nó viết cả thực đơn lẫn món. Thu hẹp bằng: chỉ thị chọn
+  (B) có dấu vết bền (comment 5647027599) và bản đo mà lựa chọn dựa vào cũng có dấu vết bền
+  (comment 5647008786) nên kiểm lại được; dưới `M16` thì **REVIEWER** dựng phép đo và phép đo ấy có
+  thẩm quyền, nên lời khai "tối thiểu vẫn đủ răng" không mua được bằng văn xuôi — executor không còn
+  tự đặt số ca cho chính mình; cross-review phải KHÁC NỀN và `sensitive` đòi approve tường minh.
+  SỬA Ở gen 7: bản gen 6 của khối này còn viết một tiêu chí ĐÃ RÚT "buộc BẢY" phép làm ĐỎ — một con
+  số do MÔ HÌNH CŨ đặt ra, trong khi từ r6 executor không dựng phép làm ĐỎ nữa. Lượt 6 đo được; đó là
+  thể hiện thứ BA của lớp `dac-ta-r5-giu-luat-cu-trai-tieu-chi-moi`.
+  XUNG ĐỘT LỢI ÍCH NAY ĐÃ HẸP HƠN HẲN, và đó là mục đích của r6: phiên này **không còn dựng phép
+  đo** cho các nghĩa vụ mà nó bị chấm. Nó vẫn soạn r6 và vẫn ghi hộ lease — nên phần còn lại là:
+  phiên này phát biểu `N1`–`N8`, tức nó vẫn chọn ĐO CÁI GÌ dù không còn chọn ĐO THẾ NÀO.
+  BẰNG CHỨNG ĐO ĐƯỢC rằng sự nghi ấy đúng chỗ, và nó là lý do r6 tồn tại: ở gen 3 VÀ gen 4, ba tiêu
+  chí do chính phiên viết đều bị bác — **hai lượt liên tiếp, cùng ba tiêu chí**. Nên đừng nhận
+  `N1`–`N8` vì chúng đọc có lý; hãy kiểm bằng `N7`: nghĩa vụ nào **không dựng nổi thước từ văn bản**
+  là nghĩa vụ THIẾU, và đó là một finding hợp lệ về chính đặc tả này.
+  Hai chỗ đáng soi nhất của gen 5: (a) `N2` tự khai nó KHÔNG phát hiện được sai NỘI DUNG trong một
+  nhóm đúng — lời khai giới hạn ấy có thể đang dùng để MIỄN một nghĩa vụ; (b) khai *"r6 có thể không
+  cần bản vá nào mới"* — kiểm xem đó là kết luận đúng của việc đổi phân công, hay là một cách bỏ dở.
+
+run_minutes: 1440
+heartbeat_required_minutes: 30
+attempts_used: 0
+attempts_limit: 10
+
+nang_tran:
+  same_failure_limit: 2 -> 10
+  attempts_limit: 3 -> 10
+  ai_nang: ducthangho
+  tran_cu: same_failure_limit 2 · attempts_limit 3
+  tran_moi: same_failure_limit 10 · attempts_limit 10
+  can_cu: https://github.com/ducthangho/tra-luat/issues/523#issuecomment-5646812840
+  xac_nhan_khuon: 'chủ kho xác nhận "Nâng như #522"'
+  ghi_chu: >-
+    KẾ THỪA từ gen 2, r4 KHÔNG xin thêm lượt nào. Nâng KHÔNG chữa lớp nào; chỉ cho phép ĐO TIẾP.
+    Ba lớp của lượt 2 đã vá tại `56cfce5` và CHƯA được review lượt nào — lượt 3 sẽ là lượt đầu
+    tiên chấm chúng, cùng lúc chấm phép hoà giải (B).
+
+reviewer_provider: codex
+review_class: sensitive
+effective_review_class: sensitive
+
+depends_on: []
+thay_the_cho:
+  - quy-trinh-lap-review-r8-exec-7-claude-20260913
+
+ly_do_cap: >-
+  MỘT phép đo: PR #521 land và sửa cùng một tệp trong write set của packet này, cho 2 hunk xung
+  đột / 82 dòng, và hai hunk là hai chỉ thị TRÁI NHAU (#521 được giao GỠ doctrine khỏi adapter;
+  #523 được giao VIẾT bảng điều kiện dừng + BẢNG LỚP vào adapter). Ba lối ra cơ học đều MẤT hành
+  vi được giao: `theirs` mất trọn M1-M3 (đo: 8/10 mẫu của A1+A2 vắng trên master); `ours` hoàn
+  nguyên việc #521 trả 8 lượt cross-review để làm; giữ cả hai đưa lại vào adapter đúng loại prose
+  mà #521 gỡ, và `doctrine-scan` KHÔNG bắt được (chính lượt 2 của packet này đã đo và đã viết
+  giới hạn ấy vào skill). Chủ kho chọn (B) hoà giải ⇒ ĐỔI ACCEPTANCE ⇒ §3.2/§5 đòi revision mới,
+  generation mới, cấp lại lease.
+
+viec_trong_lease:
+  - 'M1-M12: giữ nguyên từ r1/r2/r3 — ĐỌC r1 cho định nghĩa đầy đủ, đừng đọc dòng liệt kê tóm tắt.'
+  - 'M13: hoà giải, KHÔNG chọn phía — giữ cấu trúc con trỏ của #521 VÀ mang phần bắt buộc của #523.'
+  - 'M14: mỗi chốt rút gọn phải có một đột biến làm tiêu chí ĐÍCH ĐỎ, đọc RIÊNG từng tiêu chí — CẤM luật `rc != 0`.'
+  - 'M15: con trỏ phải CHỨA thứ nó hứa; thiếu thì khai NỢ, không tự định nghĩa và không trỏ bừa.'
+
+chep_tu_spec: >-
+  `dieu_kien_dung` dưới đây CHÉP từ mục cùng tên của `…-r7.md` (spec_sha256 `19a43804…`), KHÔNG kế
+  thừa qua con trỏ tới một lease đời trước. Đó là bản vá theo KIẾN TRÚC cho lớp
+  `dac-ta-r5-giu-luat-cu-trai-tieu-chi-moi` của lượt 5: gen 5 hỏng vì nó GIỮ danh sách của gen 4
+  trong khi spec đã phát biểu danh sách khác, và r6 lại bảo *"kế thừa `S1`–`S8` của lease gen 3"* —
+  câu ấy kéo về `S2` (công thức CỘNG ĐÃ RÚT) và `S8` (neo một tiêu chí ĐÃ RÚT) của gen 3. BỐN đường
+  vào, không phải một; lượt 5 chỉ ra hai, hai đường còn lại đo được khi soạn r7.
+  Nên từ gen 6: spec là bản có thẩm quyền DUY NHẤT, lease chép đúng nó, và không còn chỗ để hai
+  tệp trôi lệch nhau.
+
+dieu_kien_dung:
+  - 'S1 cần đường dẫn thứ TƯ ngoài hai tệp skill + prefix ops/reviews/.'
+  - 'S2 (phát biểu theo N3) — tổng dòng thêm của HAI tệp sản phẩm, đo từ base_sha tới head cuối,
+     > 300. KHÔNG cộng hai khoảng: bản S2 của lease gen 3 còn viết "trước merge + sau merge", và
+     câu ấy ĐÃ RÚT, không được kế thừa.'
+  - 'S3 muốn đụng docs/PROTOCOL_DA_PHIEN.md hay .claude/hooks/**.'
+  - 'S4 muốn vá packet_loop.py / doctrine-scan — KHÔNG trong write set; nợ riêng.'
+  - 'S5 muốn sửa VERDICT.md của một lượt đã giao (chúng neo theo băm).'
+  - 'S6 muốn đổi định nghĩa P1/P2/P3 hay đổi slug của một lớp cũ.'
+  - 'S7 — một ca làm ĐỎ của A1''/A2'' KHÔNG đỏ được, tức một chốt MẤT RĂNG khi rút gọn. DỪNG và báo
+     chủ kho; KHÔNG nới A1''/A2'' cho hết đỏ, và KHÔNG dựng lại bản dài để lách. (A1''/A2'' CÒN hiệu
+     lực dưới r6/r7 — lượt 3 và lượt 4 đều phán chúng còn răng.)'
+  - 'S8 ĐÃ RÚT — KHÔNG có S8 trong r7. S8 của lease gen 3 neo vào A17, mà A17/A17'' đã bị rút ở r6;
+     một điều kiện dừng trỏ tới tiêu chí không còn tồn tại thì KHÔNG dừng được gì. Số S8 ĐỂ TRỐNG
+     có chủ đích — KHÔNG đánh số lại S9''-S11'' xuống, vì các slug ấy là KHOÁ ĐẾM giữa các lượt.'
+  - 'S9'' — reviewer dựng được thước cho một nghĩa vụ N1-N6 và nghĩa vụ ấy KHÔNG ĐẠT theo thước đó,
+     mà cách chữa đòi đổi chính nghĩa vụ. DỪNG và báo chủ kho; KHÔNG viết lại nghĩa vụ cho vừa bản
+     vá. (Đổi so S9 của gen 4: S9 cũ nói về "phép làm ĐỎ của executor mất răng", mà từ r6 executor
+     không dựng phép làm ĐỎ nữa — S9 cũ không còn đối tượng.)'
+  - 'S10'' — reviewer khai một nghĩa vụ là KHÔNG ĐO ĐƯỢC VÌ VĂN BẢN (N7). Đó là nghĩa vụ THIẾU:
+     DỪNG, báo chủ kho, và không tự bồi thêm chữ vào nghĩa vụ giữa lượt để lách.'
+  - 'S11'' — executor thấy mình đang muốn nộp một probe làm bằng chứng, hoặc muốn tự phán ĐẠT. Đó
+     là dấu hiệu đang tụt về mô hình r1-r5: DỪNG và đọc lại ngoai_pham_vi 11.'
+  - 'S12'' MỚI ở r7 — chuẩn bị đóng băng một revision mà phép quét "còn sót luật cũ" chỉ khớp theo
+     TÊN tiêu chí. Đó không phải phép đo; nó là phép dò chính tả. DỪNG và dựng lại phép quét theo
+     KHÁI NIỆM (công thức, con trỏ, câu vận hành), rồi mới đóng băng. Lý do có thật và đo được:
+     trước khi đóng băng r6, phép quét dùng mẫu toàn tên CÓ dấu phẩy trên cho 0 dòng, trong khi văn
+     bản còn sót viết CÙNG TÊN ẤY KHÔNG có dấu phẩy trên — một finding lọt vào một đặc tả ĐÃ ĐÓNG BĂNG.'
+  - 'S12'' (r7, SIẾT ở r8, CHIẾU ĐẦY ĐỦ SANG LEASE ở gen 8) — chuẩn bị đóng băng một revision mà
+     phép quét "còn sót luật cũ" chỉ khớp theo TÊN tiêu chí, HOẶC hạ một luật của phép quét xuống
+     thành "báo cáo để người đọc tự phán". Cả hai đều là BỎ chốt.
+     VÌ SAO DÒNG NÀY TỒN TẠI Ở ĐÂY: lượt 7 đo được `closure.py` cho spec `true` mà lease `false` —
+     tức spec DỪNG còn lease KHÔNG DỪNG. Đó là thể hiện THỨ BA của lớp
+     `dac-ta-r5-giu-luat-cu-trai-tieu-chi-moi` ở lượt 7, và nó tồn tại vì gen 7 chỉ nói "chép r7"
+     thay vì chép ĐỦ vế mới. Một điều kiện dừng chỉ có ở MỘT phía thì không dừng được gì.'
+  - 'S13'' MỚI ở gen 8 — `M17''` của r9: chuẩn bị đóng băng mà TỆP LEASE hoặc phần thân đặc tả còn
+     chứa một tên tiêu chí đã rút ở NGOÀI Phụ lục A. DỪNG và chuyển tên ấy vào Phụ lục A, hoặc viết
+     lại câu theo nghĩa vụ hiện hành `N1`-`N8`. KHÔNG dán nhãn tại chỗ để xin miễn — `M17` bản r8 đã
+     thử cách ấy và lượt 7 đo được nó vừa CHO LỌT (label/table laundering) vừa BẮT OAN.'

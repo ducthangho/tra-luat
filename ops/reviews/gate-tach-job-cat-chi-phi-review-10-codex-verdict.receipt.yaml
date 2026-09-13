@@ -1,0 +1,70 @@
+# BIÊN NHẬN GIAO HÀNG — cross-review LƯỢT 10 của packet GATE-TACH-JOB-CAT-CHI-PHI (#463).
+#
+# LƯỢT CUỐI của phiên executor `claude`. Sau lượt này packet được BÀN GIAO cho executor `codex`
+# theo chỉ thị chủ kho 13-09-2026; lease mới phải do chủ kho cấp (§3.2/§4), và reviewer khi ấy
+# phải đổi sang `claude` vì §8 đòi danh tính khác executor.
+#
+# §12 — LẦN THỨ TƯ: finding P2 vẫn mang ĐÚNG stable slug của lượt 7/8/9/10. Lượt 9 đã DỪNG một
+# lần và chủ kho quyết rút phạm vi (bỏ chốt env); quyết định ấy ĐÃ VÁ THẬT theo chính reviewer.
+# Nhưng lớp diễn giải argv của chốt 1-3 vẫn chưa đóng, và reviewer nhắc lại §12 nguyên văn:
+# *"Cùng stable finding qua nhiều lượt vẫn cần xử lý theo §12; không biến các sửa nhỏ đã thử
+# thành lời hứa hội tụ."* Nên gói bàn giao đặt câu hỏi BIỂU DIỄN HỢP ĐỒNG lên trước, không đặt
+# danh sách cửa lên trước.
+#
+# MỘT LỜI KHAI CỦA PHIÊN THI CÔNG ĐÃ BỊ REVIEWER BÁC, và ghi lại vì nó là bài học: lượt 9 tôi
+# khai "không đột biến nào giết được nhánh ý thức trích dẫn". Reviewer DỰNG ĐƯỢC một đột biến
+# có răng cho đúng nhánh ấy, 0 dòng tăng. Lời khai đúng lẽ ra phải hẹp hơn: *với BỘ FIXTURE HIỆN
+# CÓ* thì không đo được — chứ không phải "không thể dựng". Khai phủ định rộng hơn phép đo là
+# đúng lớp lỗi mà kho đã trả giá nhiều lần.
+
+schema_version: 1
+kind: review_delivery_receipt
+packet_id: GATE-TACH-JOB-CAT-CHI-PHI
+packet_issue: 463
+revision: 21
+lease_id: gate-tach-job-cat-chi-phi-exec-2r10-claude-20260912
+provider: codex
+role: reviewer
+verdict: changes_requested
+reviewed_sha: 3bbc6b46c2fb6066fa64088308ce30fe40f87aa5
+verdict_path: ops/reviews/gate-tach-job-cat-chi-phi-review-10-codex-verdict.md
+verdict_sha256: 752e27e09886fea4b0b07f50d284369e87ae1bb270f7694e4944ffb8bf85039d
+verdict_bytes: 33313
+finding_theo_muc:
+  P1: 0
+  P2: 1
+  P3: 0
+so_huong_san: 11
+doi_chieu_luot_9:
+  env_bo_theo_quyet_dinh_chu_kho: ĐÃ VÁ THẬT trong phạm vi quyết định — bốn ca đỏ cũ nay xanh, tám ca
+    bị bỏ đã liệt kê; bốn fixture A7 + pin + probe + cùng-job/trước-registry còn đúng màu và còn răng;
+    KHÔNG mất nghĩa vụ env nào mà M7/A7 thực sự ghi.
+  ba_benh_lexer: 'ĐÃ VÁ THẬT với ca cũ — đối chiếu A/B mã lượt 9 và head: hai inline-config TOML trước
+    báo thiếu probe nay [], toán tử được quote thành token dữ liệu, registry tab và probe -mruff chuyển
+    từ lỗi sang [].'
+  stable_slug: VÁ HỜ ở cấp LỚP LỖI — triệu chứng lượt 9 đã vá thật, nhưng lớp diễn giải argv/cấp bằng
+    chứng của chính chốt 1-3 chưa đóng (H2/H3/H4/H5/H6/H8/H9/H10/H11).
+  loi_khai_bi_bac: 'Lời khai lượt 9 ''không đột biến nào giết được nhánh ý thức trích dẫn'' là SAI ở mức
+    khái quát — reviewer dựng được đột biến có răng với 0 dòng tăng. Đúng phải là: với BỘ FIXTURE HIỆN
+    CÓ thì không đo được.'
+dieu_kien_dung_12:
+  so_luot_cung_hinh_dang: 4
+  trich_reviewer: Cùng stable finding qua nhiều lượt vẫn cần xử lý theo §12; không biến các sửa nhỏ đã
+    thử thành lời hứa hội tụ.
+ban_giao:
+  executor_ke_tiep: codex
+  reviewer_ke_tiep: claude
+  lease_moi: 'BẮT BUỘC — exec-2r10 ghi executor: claude; chủ kho cấp, kèm bia mộ hai chiều'
+  head_ban_giao: 3bbc6b46c2fb6066fa64088308ce30fe40f87aa5
+  master_da_di_truoc_base: 53
+  master_cham_write_set: false
+  merge_tree_xung_dot: 0
+evidence_channel: repo_file
+authoritative_source: repo_file
+delivered: true
+delivered_by: claude-session
+receipt_written_by: claude-session
+khong_khai:
+- 'Không khai model/effort thực sự đã chạy: verdict ghi rõ không tự xác minh được qua tool.'
+- Không khai A1/A5 — CẤM chạy CI, nên KHÔNG ĐO ĐƯỢC.
+- 'Không khai packet sẵn sàng land: còn 1 P2 mở, chưa có approve tường minh (review_class = sensitive).'

@@ -1,0 +1,63 @@
+# BIÊN NHẬN GIAO HÀNG — cross-review LƯỢT 8 của packet GATE-TACH-JOB-CAT-CHI-PHI (#463).
+#
+# HIỆN VẬT NÀY LÀ BẢN ĐO LẠI, KHÔNG PHẢI BẢN GỐC — và lý do phải ghi, vì nó là một sự cố:
+# lượt chạy lần 1 HOÀN TẤT (`ma_thoat=0`, 970,2 s, 17:33:20Z→17:49:30Z) và reviewer đã viết
+# xong verdict. Nhưng vòng giám sát của phiên thi công đọc kết luận bằng `tail -n 5 VERDICT.md`
+# trong khi dòng `verdict:` nằm ở DÒNG 1 của khung, nên nó luôn đọc ra RỖNG, tưởng lượt chưa
+# xong, và phóng lần 2 bằng một PHIÊN MỚI. Phiên mới làm đúng bước 1 của PROMPT
+# (`cat > VERDICT.md`) và XOÁ SẠCH 9 hướng đã đo: 12 218 B -> 178 B.
+# Chốt dựng ra để chống MẤT bằng chứng bị chính vòng lặp phá.
+#
+# Phục hồi bằng PHÁT LẠI đúng 38 lệnh đã ghi trong `runs/c758323b/stdout.log` của lần 1
+# (đã audit: không lệnh nào ghi ra ngoài sandbox). Mã thoát khớp bản ghi ở 37/38 lệnh; lệnh
+# lệch là `review/ops_previous.py` (`mkdir` không idempotent) — khối của nó được ĐO LẠI riêng
+# rồi chèn về đúng vị trí, có ghi chú HTML ngay tại chỗ trong tệp verdict.
+# Nên: nội dung finding là văn bản LITERAL do chính reviewer viết trong
+# `review/finalize_verdict.py`; các số trong bảng săn là ĐO LẠI, không phải chép.
+
+schema_version: 1
+kind: review_delivery_receipt
+packet_id: GATE-TACH-JOB-CAT-CHI-PHI
+packet_issue: 463
+revision: 21
+lease_id: gate-tach-job-cat-chi-phi-exec-2r10-claude-20260912
+provider: codex
+role: reviewer
+verdict: changes_requested
+reviewed_sha: 22f0e6f2d5d091f63a71a45ff0906d8b50947546
+verdict_path: ops/reviews/gate-tach-job-cat-chi-phi-review-8-codex-verdict.md
+verdict_sha256: ae7c4ddac20ecc5006ded7893ecc2c2b89436c278b3224f3f0b19180cddadaed
+verdict_bytes: 42658
+finding_theo_muc:
+  P1: 0
+  P2: 2
+  P3: 1
+so_huong_san: 9
+phan_lop:
+  A: 'VÁ SINH LỖI MỚI — ba cửa lượt 7 đã có răng riêng, nhưng lộ thêm BỐN cửa: cờ trình Python trước -m;
+    probe so CHUỖI nguyên văn; ghép lệnh bằng && hoặc ; ; env đo một chiều (chặn oan tên vô hại ở bước
+    vô can, bỏ lọt giá trị xấu dưới tên trong bảng).'
+  B: CHƯA VÁ trên head — hai tệp ops/kiem_hop_dong_packet*.py không tồn tại ở HEAD, chỉ ở nhánh ops/cap-lease-463.
+    Không đòi mở đường dẫn thứ ba.
+  C: ĐÃ VÁ THẬT — fixture da-tach-thieu-ruff nay là [_khac, _reg]; đột biến sentinel -1 thành 0 làm đúng
+    ca đó LỌT.
+  F_G: 'Nợ thật của tệp đã land, NGOÀI write set; reviewer xác nhận lập luận không sửa trong #463 là đúng
+    lease và A8/S1.'
+hien_vat_la_ban_do_lai: true
+phat_lai_khop_ma_thoat: 37/38
+run_id_goc: c758323b
+run_ma_thoat: 0
+run_thoi_luong_giay: 970.242
+run_bat_dau_utc: '2026-09-12T17:33:20Z'
+run_ket_thuc_utc: '2026-09-12T17:49:30Z'
+prompt_sha256: 004a2e7c8fabd2aa6b2b7e29dde8ca79fbbc43e4c7fa95af2085bd1880f6bd6d
+evidence_channel: repo_file
+authoritative_source: repo_file
+delivered: true
+delivered_by: claude-session
+receipt_written_by: claude-session
+khong_khai:
+- Không khai đây là hiện vật byte-gốc của lượt chạy — xem đầu tệp. Bản gốc đã bị xoá và KHÔNG khôi phục
+  được.
+- 'Không khai model/effort thực sự đã chạy: verdict ghi rõ không tự xác minh được qua tool.'
+- Không khai A1/A5 — CẤM chạy CI ở giai đoạn này, nên KHÔNG ĐO ĐƯỢC.

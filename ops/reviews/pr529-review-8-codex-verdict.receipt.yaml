@@ -27,9 +27,9 @@ verdict_sha256: 5407e2ab6b9a4fee832d75f85f3f2475956a60c91836eb0eea9ac057a4088c19
 verdict_bytes: 25981
 reviewed_sha: a4451ddb634da481581eea339282c1fe01c851b5
 reviewed_base: dc02c9beed42bd2ea44a80a2e34e1bbe3acfc6c5
-evidence_url: PENDING
+evidence_url: https://github.com/ducthangho/tra-luat/blob/4608f16712118e688e785e1d91e197dbcae09a8d/ops/reviews/pr529-review-8-codex-verdict.md
 evidence_url_ghi_chu: >-
-  Neo BLOB ghim `b6488d350abfb53e7a408ddcabc8539a3ba9e532` — commit ĐẦU TIÊN chứa tệp verdict, đo
+  Neo BLOB ghim `4608f16712118e688e785e1d91e197dbcae09a8d` — commit ĐẦU TIÊN chứa tệp verdict, đo
   bằng `git log --diff-filter=A`, điền trong MỘT commit RIÊNG.
   KHÔNG điền rồi `--amend`: amend là phép ĐỔI SHA, và ở lượt 3 nó đã làm `evidence_url` trỏ một
   commit mồ côi chưa từng đẩy.

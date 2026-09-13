@@ -131,18 +131,20 @@ base_sha_ghi_chu: >-
   KHÔNG vô hiệu hoá câu cuối. Luật hiện hành là `M17-GO` của r10: KHÔNG có cổng quét tên; việc phán
   một câu có đang lấy luật cũ làm nghĩa vụ vận hành hay không là **phép ĐỌC NGHĨA, thuộc REVIEWER,
   mỗi lượt**.
-start_from_sha: abb79dfae7634da99a07a0c30095769973ed04d4
-reviewed_sha_required: abb79dfae7634da99a07a0c30095769973ed04d4
+start_from_sha: c08d845a88dc588eb839fc5bb7ee7b50b4ac481f
+reviewed_sha_required: c08d845a88dc588eb839fc5bb7ee7b50b4ac481f
 reviewed_sha_required_ghi_chu: >-
-  BẰNG `start_from_sha` (`abb79df`), tức head TẠI LÚC CẤP — quy ước của kho, đo được: 48 lease có cả
+  BẰNG `start_from_sha` (`c08d845`), tức head TẠI LÚC CẤP — quy ước của kho, đo được: 48 lease có cả
   hai trường ⇒ **44 BẰNG / 4 LỆCH**. Cổng `check` đòi đúng 40 hex thường và nói thẳng lý do (*"SHA
   ngắn hoặc lệch dạng là mỏ neo GIẢ"*), nên trường này không có chỗ cho trạng thái thứ ba.
-  `abb79df` là head SAU khi verdict và biên nhận lượt 8 vào kho.
-  SỬA Ở gen 9 — LỚP P3 `chu-giai-lease-neo-head-cu`: bản gen 8 của khối chú giải này vẫn mô tả head
-  `00ac525` (head của lượt 6) trong khi HAI trường neo máy ở trên đã sang head khác. Lượt 8 đo được
-  và xếp P3. Chú giải lệch trường neo là một mỏ neo GIẢ cho người đọc, dù máy vẫn đọc đúng trường.
+  `c08d845` là head SAU khi verdict + biên nhận lượt 9 vào kho VÀ sau khi merge `origin/master`
+  (`32f95f0`, PR #531). Phép merge ấy giải một xung đột THUẦN CỘNG THÊM ở Mục lục `ops/reviews/`:
+  giữ CẢ HAI, đếm được 9 hàng `pr529` + 4 hàng `pr521` = 13, không mất hàng nào.
+  LỚP `chu-giai-lease-neo-head-cu` (lượt 8 mở, lượt 9 phán ĐÃ VÁ THẬT) sinh ra vì gen 8 để chú giải
+  mô tả head CŨ trong khi hai trường neo máy đã sang head khác. gen 10 giữ nếp ấy: chú giải này và
+  hai trường neo máy **cùng** trỏ `c08d845`, đo được bằng một phép so chuỗi.
   GIỚI HẠN GIỮ NGUYÊN: đây là **cận dưới**, không phải head cuối. Đừng đọc thành *"lượt 9 phải review
-  đúng `abb79df`"*.
+  đúng `c08d845`"*.
 authority_basis: '§2 — start/pause/resume/reroute/override/authorize thuộc chủ kho'
 recorded_by: claude-session
 recorder_is_dispatcher: false

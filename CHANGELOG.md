@@ -126,6 +126,40 @@ trong biên nhận là hiệu hai mốc, tính lại lúc viết.
 **Mọi liên kết `evidence/...` trong bốn tệp verdict là liên kết NỘI BỘ GÓI**, không phải đường dẫn trong
 kho; gói đã chết theo container. Đây là cảnh báo được nâng lên mục lục cho cả bốn verdict.
 
+## Trần trục LỜI GỌI Codex — vượt, hạ, rồi nâng hậu kỳ
+
+Connector codex trên #531 bắt một P1 **đúng**, và nó là lỗi của phiên điều phối chứ không của hồ sơ:
+`docs/PROTOCOL_DA_PHIEN.md:597` và `:806-816` đặt trần `codex_review_calls_used` = **HAI** lượt Codex
+mỗi PR, còn `ADR-0048` (dòng 11-12) khai **tường minh** rằng nó nâng trần trục **VÒNG** lên MƯỜI và trục
+**LỜI GỌI** *"giữ nguyên trần của nó"*. Phiên này nâng nhầm trục trong đầu: **#521 dùng 8 lượt**,
+**#531 dùng 5**.
+
+Trình tự, ghi đủ vì bản thân trình tự là dữ kiện:
+
+| bước | việc | hiện vật |
+|---|---|---|
+| 1 | connector bắt P1 | thread `PRRT_kwDOTNeRjc6h0DKH` trên #531, head `d846159` |
+| 2 | phiên đo lại nguồn ⇒ connector ĐÚNG | `PROTOCOL:597`, `:806-816`, `ADR-0048:11-12` |
+| 3 | **HẠ** `pr521-review-8` về `cross_reviewed` (fail-closed) | `23c8445` |
+| 4 | chủ kho **cho phép nâng trần trục LỜI GỌI** | #531 comment 5649687034 |
+| 5 | khôi phục `cross_approved` + khối `nang_tran_truc_loi_goi` | mục này |
+
+Ba điều kiện phải đọc kèm, và cả ba đã vào cảnh báo mục lục:
+
+- **hậu kỳ**: uỷ quyền có SAU khi tám lượt đã chạy ⇒ `khoi_nay_co_truoc_khi_phong: false`. Nó hợp thức
+  hoá hậu kỳ, **không** biến tám lượt ấy thành "đã trong ngân sách lúc phóng". Đúng khuyết tật mà
+  receipt `pr517-review-3` đã khai cho trục VÒNG; chép lại đây thay vì im.
+- **con số do PHIÊN đặt, không phải chủ kho**: chủ kho cho phép nâng nhưng **không đọc ra một số**.
+  `10` là đề xuất của phiên, chọn theo hai phép đo — phủ mức dùng thực (8 và 5), và khớp con số
+  `ADR-0048` vừa đặt cho trục VÒNG nên hai trục không lệch tuỳ tiện. Tiền lệ #517 bị chê đúng chỗ này
+  (*"căn cứ kèm chưa nêu `tran_moi` bằng số"*), nên lần này có số và có người đặt số.
+- **chưa cổng nào cưỡng chế**: `bien_nhan_v2` không đọc bộ đếm nào; `codex_review_calls_used` sống
+  trong state của `packet_loop`, không trong biên nhận. Nợ đã khai, chưa chữa.
+
+Phạm vi: **chỉ** trục LỜI GỌI, **chỉ** cho #521 và #531. Không đụng trần ATTEMPT, không đụng executor
+ceiling 30%, không thành luật chung — muốn thành luật chung thì phải đi qua một ADR như `ADR-0048` đã
+làm cho trục VÒNG.
+
 ## Không có mục nào khác
 
 `VERSION` không đổi; `scripts/` không đổi; `docs/` không đổi. Thay đổi của chính #521 (`.claude/skills/

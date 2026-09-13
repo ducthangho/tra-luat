@@ -249,3 +249,17 @@ dieu_kien_dung:
      KHÁI NIỆM (công thức, con trỏ, câu vận hành), rồi mới đóng băng. Lý do có thật và đo được:
      trước khi đóng băng r6, phép quét dùng mẫu toàn tên CÓ dấu phẩy trên cho 0 dòng, trong khi văn
      bản còn sót viết `A9` KHÔNG có dấu ấy — một finding lọt vào một đặc tả ĐÃ ĐÓNG BĂNG.'
+
+da_bi_thay_the: quy-trinh-lap-review-r8-exec-7-claude-20260913
+da_bi_thay_the_ly_do: >-
+  LÀM SẠCH VĂN XUÔI, KHÔNG đổi phân công: `M16` và `N1`–`N8` giữ NGUYÊN VĂN — lượt 6 ĐÃ ĐO điều đó
+  (`H6` cho `byte_identical` giữa r6 và r7), nên đây không phải lời khai suông.
+  Lượt 6 trả `blocked` lần thứ TƯ (3 LỚP / 8 THỂ HIỆN) và phán lớp
+  `dac-ta-r5-giu-luat-cu-trai-tieu-chi-moi` là **VÁ HỜ**: bốn đường r7 đóng là CÓ THẬT, nhưng r7 đóng
+  DANH SÁCH `dieu_kien_dung` mà bỏ sót VĂN XUÔI quanh nó.
+  HAI trong ba thể hiện nằm trong CHÍNH TỆP LEASE NÀY: `base_sha_ghi_chu` để một tiêu chí ĐÃ RÚT làm
+  CĂN CỨ VẬN HÀNH cho `base_sha`, và `recorder_xung_dot_loi_ich` còn viết tiêu chí ấy "buộc BẢY" phép
+  làm ĐỎ — một con số do MÔ HÌNH CŨ đặt ra, trong khi từ r6 executor không dựng phép làm ĐỎ nữa.
+  Lease gen 7 sửa cả hai TẠI CHỖ; luật chung là `M17` của r8 — đảo danh sách CẤM thành danh sách
+  CHO PHÉP, vì ba lần vá theo ĐIỂM (r6 bảng khai, r7 bốn đường + danh sách) đều hụt.
+  Lease gen 7 neo `ops/specs/…-r8.md`, `spec_sha256` `e69d6a99…` (đo TỪ BLOB).

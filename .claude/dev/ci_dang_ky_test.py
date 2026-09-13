@@ -147,19 +147,25 @@ _TRINH_PY = re.compile(r"^python(?:3(?:\.\d+)?)?$")
 
 def _cuoi_thay_lenh(run, start):
     """Tìm biên $(...) theo quote/ngoặc; không thực thi nội dung."""
-    i, depth, quote = start + 2, 1, ""
+    i, depth, quote, word = start + 2, 1, "", False
     while i < len(run):
         c = run[i]
         if c == "\\" and quote != "'":
+            word |= run[i + 1:i + 2] != "\n"
             i += 2
             continue
         if quote:
             if c == quote: quote = ""
+        elif c == "#" and not word:
+            end = run.find("\n", i)
+            i = len(run) if end < 0 else end
+            continue
         elif c in "'\"": quote = c
         elif c == "(": depth += 1
         elif c == ")":
             depth -= 1
             if depth == 0: return i
+        word = bool(quote) or c not in " \t\n;|&()"
         i += 1
     raise ValueError("command substitution chưa đóng")
 
@@ -171,23 +177,27 @@ def _dong_logic(run, depth=0):
     """
     if depth > 16: raise ValueError("lồng command substitution ngoài miền")
     out, cur, quote, bad, before, here, i = [], "", "", False, False, None, 0
-    need, compound = False, False
+    need, compound, word = False, False, False
     def emit(op=""):
-        nonlocal cur, bad, before, need, compound
+        nonlocal cur, bad, before, need, compound, word
         argv = shlex.split(cur)
         if not argv and op in (";", "&&"): raise ValueError("thiếu lệnh")
         if argv: need = op == "&&"
         after = op not in ("", "\n", ";", "&&")
         compound |= after
         if argv: out.append((argv, bad or before or after))
-        cur, bad, before = "", False, after
+        cur, bad, before, word = "", False, after, False
     run = run or ""
     while i < len(run):
         c = run[i]
+        if not quote and ord(c) < 32 and c not in "\n\t":
+            raise ValueError("ký tự điều khiển ngoài miền")
         if c == "\\" and quote != "'":
             if i + 1 == len(run): raise ValueError("escape chưa đóng")
             nxt = run[i + 1]
-            if nxt != "\n": cur += c + nxt
+            if not quote and ord(nxt) < 32 and nxt not in "\n\t":
+                raise ValueError("ký tự điều khiển escape ngoài miền")
+            if nxt != "\n": cur += c + nxt; word = True
             i += 2; continue
         if quote != "'" and run[i:i + 2] == "$(":
             end = _cuoi_thay_lenh(run, i)
@@ -195,7 +205,7 @@ def _dong_logic(run, depth=0):
             if any(_nhan_lenh(t).related for t, _ in inner):
                 raise ValueError("lệnh liên quan trong command substitution ngoài miền")
             # Chỉ giá trị opaque được bỏ qua; argv động của installer vẫn mang cờ bad.
-            cur += "__THAY_LENH__"; bad = True; i = end + 1
+            cur += "__THAY_LENH__"; bad = True; word = True; i = end + 1
             continue
         if quote != "'" and c == "`": raise ValueError("backtick ngoài miền")
         if quote:
@@ -204,13 +214,15 @@ def _dong_logic(run, depth=0):
             elif quote == '"' and c in "$`": bad = True
         elif c in "'\"":
             quote = c; cur += c
-        elif c == "#" and (not cur or cur[-1].isspace()):
+        elif c == "#" and not word:
             while i < len(run) and run[i] != "\n": i += 1
             continue
+        elif c in "()":
+            raise ValueError("ngoặc trần ngoài miền lệnh đơn")
         elif run[i:i + 2] == "<<":
             m = re.match(r"<<(-?)[ \t]*(['\"]?)([A-Za-z_][A-Za-z0-9_]*)\2", run[i:])
             if m is None or here is not None: raise ValueError("heredoc ngoài miền")
-            here = (m[3], bool(m[1]), bool(m[2])); bad = True; cur += " <heredoc>"
+            here = (m[3], bool(m[1]), bool(m[2])); bad = True; word = True; cur += " <heredoc>"
             i += m.end(); continue
         elif c in ";&|\n":
             end = i + 1
@@ -230,7 +242,8 @@ def _dong_logic(run, depth=0):
         else:
             cur += c
             if c in "$`()<>*?[]{}": bad = True
-            if c in "(){}": compound = True
+            if c in "{}": compound = True
+        word = bool(quote) or c not in " \t"
         i += 1
     if quote or here: raise ValueError("trích dẫn chưa đóng")
     emit()
@@ -258,9 +271,6 @@ def _lenh_ruff(tok):
 
 def _chuan_ten(t):
     return re.sub(r"[-_.]+", "-", t.lower())
-
-def _cham_ruff(tok):
-    return any((m := _TEN_GOI.fullmatch(t)) and _chuan_ten(m[1]) == "ruff" for t in tok)
 
 class _LenhRuff:
     """Một kết quả nhận dạng dùng chung; KHONG chỉ được cấp cho dạng đã nhận biết."""
@@ -380,20 +390,8 @@ def _doc_run_ruff(run):
     return result, trace, probe, registry, any_probe
 
 
-def _loai_mot_dong(tok):
-    return _nhan_lenh(tok).kind
-
-
 def _phan_loai_cai_ruff(run):
     return _doc_run_ruff(run)[:2]
-
-
-def _probe_sau_ghim(run):
-    return _doc_run_ruff(run)[2]
-
-
-def _la_registry(run):
-    return _doc_run_ruff(run)[3]
 
 
 def _buoc_co_dieu_kien(step):
@@ -426,6 +424,8 @@ def loi_ruff_ci(source=None):
     Chỉ _LENH_OPAQUE, script/Python -c/stdin và assignment là ngoài phạm vi cài đặt;
     mọi lệnh khác ngoài grammar bị từ chối. Không kiểm env hoặc mô phỏng runtime.
     $(...) chỉ nhận lệnh opaque được phân tích đệ quy; backtick và heredoc động bị từ chối.
+    Ngoặc trần, C0 ngoài nháy (trừ tab/newline) bị từ chối; dữ liệu nháy/heredoc giữ nguyên.
+    Comment chỉ mở tại đầu từ chưa quote/escape, kể cả trong $(...).
     Shell không khai hoặc chuỗi bash/sh/pwsh/powershell; shell khác/null/template ngoài miền.
     Mọi bước run đều qua chốt shell trước khi phân tích thân, kể cả thân opaque/rỗng.
     Cài: pip/pip3, uv pip, python [cờ] -m pip + install + cờ cho phép + một Ruff requirement.
@@ -1037,6 +1037,33 @@ def phan_chung():
         _errors = loi_ruff_ci(_wf({"gate": {"steps": [_ruff, _step, _reg]}}))[0]
         _them("ruff-ci-nguyen-nhan-" + _t,
               any("ngoài miền cú pháp" in m and "gate/bước 2" in m for m in _errors))
+    # R13 lexical-boundary: consumer tự từ chối; không mượn lỗi runtime của shell.
+    for _t, _run in [
+        ("cr-installer", "pip\rinstall ruff==0.15.15\nruff --version"),
+        ("cr-probe", _PIN + "\nruff\r--version"),
+        ("cr-pin", _PIN + "\r\nruff --version"),
+        ("cr-prefix", "python\r-m\rpip install ruff==0.15.15\nruff --version"),
+    ]:
+        _FX.append((_t, {"gate": {"steps": [{"run": _run}, _reg]}}, None, 1))
+    for _t, _run, _want in [
+        ("ngoac-sau-dollar-escape", r"echo \$(pip install ruff)", 1),
+        ("comment-nuot-ngoac", "V=$(echo hi # )\nX=1", 1),
+        ("comment-dong-sau", "V=$(echo hi # )\n)", 0),
+        ("hash-trong-tu", "V=$(echo hi#)", 0),
+        ("hash-sau-blank-escape", r"V=$(echo hi\ #)", 0),
+        ("hash-sau-nhay", "V=$(echo ''#)", 0),
+        ("hash-sau-escape-noi-dong", "V=$(echo hi\\\n#)", 0),
+        ("hash-sau-blank-noi-dong", "V=$(echo hi \\\n# )", 1),
+        ("ngoac-tran-opaque", "echo hi (there)", 1),
+        ("ngoac-escape-opaque", r"echo hi \(there\)", 0),
+        ("hash-sau-blank-escape-khong-che-cai", r"echo hi\ #; pip install ruff", 1),
+    ]:
+        _FX.append((_t, {"gate": {"steps": [_ruff, {"run": _run}, _reg]}}, None, _want))
+    for _i, _c in enumerate(("\r", "\f", "\v", "\0")):
+        for _t, _run, _want in [("tran", "echo hi" + _c, 1), ("escape", "echo hi\\" + _c, 1),
+                               ("nhay", "echo 'hi" + _c + "'", 0),
+                               ("heredoc", "cat <<'END'\n" + _c + "\nEND\n", 0)]:
+            _FX.append((f"c0-{_i}-{_t}", {"gate": {"steps": [_ruff, {"run": _run}, _reg]}}, None, _want))
     for _ten, _jobs, _env, _mong in _FX:
         _loi = len(loi_ruff_ci(_wf(_jobs, _env))[0])
         _them("ruff-ci-" + _ten, (_loi == 0) if _mong == 0 else (_loi >= 1))

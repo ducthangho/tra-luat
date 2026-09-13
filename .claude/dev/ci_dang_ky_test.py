@@ -234,6 +234,11 @@ def _dong_logic(run, depth=0):
                 raise ValueError("ký tự điều khiển escape ngoài miền")
             if nxt != "\n": cur += c + nxt; word = True
             i += 2; continue
+        if quote != "'" and c == "$":
+            while run[i + 1:i + 3] == "\\\n": run = run[:i + 1] + run[i + 3:]
+            nxt = run[i + 1:i + 2]
+            if nxt == "[" or (not quote and nxt in ("'", '"')):
+                raise ValueError("expansion ngoài miền")
         if quote != "'" and run[i:i + 2] == "${":
             m = re.match(r"\$\{[A-Za-z_][A-Za-z0-9_]*(?::-[A-Za-z0-9_ ./+-]*)?\}", run[i:])
             if m is None: raise ValueError("parameter expansion ngoài miền hoặc chưa đóng")
@@ -461,7 +466,12 @@ def _shell_trong_mien(data, job, step):
     if any(not isinstance(scope, dict) for scope in scopes): return False
     for scope in scopes:
         if "shell" in scope:
-            return scope["shell"] in ("bash", "sh", "pwsh", "powershell")
+            if scope["shell"] in ("pwsh", "powershell"):
+                lines = step.get("run", "").splitlines()
+                return bool(lines) and all(re.fullmatch(
+                    r"[ \t]*[A-Za-z_][A-Za-z0-9_./-]*(?:[ \t]+[A-Za-z0-9_./:=+-]+)*[ \t]*", line)
+                    and line.split()[0].lower() not in _KHUNG_SHELL | {"return", "exit"} for line in lines)
+            return scope["shell"] in ("bash", "sh")
     return True
 
 
@@ -479,12 +489,17 @@ def loi_ruff_ci(source=None):
     Opaque: _LENH_OPAQUE, script/Python -c/stdin, assignment; không đọc thân script/env.
     List nhận newline/;/&&/||/|/& đủ hai vế, redirect </>/>> có đích, if/then/elif/else/fi
     và { list; } cân bằng với condition/body khác rỗng; compound chỉ dành cho opaque.
-    Parameter chỉ nhận ${TEN} hoặc ${TEN:-literal} với literal gồm chữ/số/_/space/./slash/+/-;
-    kể cả trong nháy kép; các expansion khác ngoài miền. Quoting và nối dòng theo POSIX.
+    Parameter nhận $TEN (ASCII), $0..$9/$@/$*/$#/$?/$-/$! /$$, ${TEN} hoặc ${TEN:-literal}
+    với literal gồm chữ/số/_/space/./slash/+/-; kể cả trong nháy kép. $[ bị từ chối cả trong
+    nháy kép; $' và $" ngoài nháy bị từ chối (không hỗ trợ ANSI-C/locale/arithmetic).
+    Ngoài các tiền tố expansion được kiểm, $ là literal; quote/escape giữ dữ liệu nguyên dạng.
+    Quoting và nối dòng theo POSIX hạn chế nêu trên.
     $(...) chỉ nhận lệnh opaque được phân tích đệ quy; backtick và heredoc động bị từ chối.
     Ngoặc trần, C0 ngoài nháy (trừ tab/newline) bị từ chối; dữ liệu nháy/heredoc giữ nguyên.
     Comment chỉ mở tại đầu từ chưa quote/escape, kể cả trong $(...).
-    Shell không khai hoặc chuỗi bash/sh/pwsh/powershell; shell khác/null/template ngoài miền.
+    Shell không khai hoặc bash/sh dùng grammar trên. pwsh/powershell chỉ nhận ít nhất một
+    invocation/line bằng từ ASCII theo _shell_trong_mien, không quote/expansion/toán tử/khối;
+    không hỗ trợ cú pháp PowerShell tổng quát. Shell khác/null/template ngoài miền.
     Mọi bước run đều qua chốt shell trước khi phân tích thân, kể cả thân opaque/rỗng.
     Cài: pip/pip3, uv pip, python [cờ] -m pip + install + cờ cho phép + một Ruff requirement.
     Extras phải quote; global option trước install bị từ chối, không biến thành KHONG.
@@ -1069,9 +1084,26 @@ def phan_chung():
         for _bi, _body in enumerate(("x=1", "echo hi", "python setup.py", "")):
             _FX.append((f"shell-vo-can-{_si}-{_bi}", {"gate": {"steps": [
                 _ruff, {"shell": _shell, "run": _body}, _reg]}}, None, 1))
+    # R16: assignment không thuộc miền argv ASCII của PowerShell; hai đối chứng POSIX giữ xanh.
     for _shell in ("bash", "sh", "pwsh", "powershell"):
-        _FX.append(("shell-vo-can-hop-le-" + _shell, {"gate": {"steps": [
-            _ruff, {"shell": _shell, "run": "x=1"}, _reg]}}, None, 0))
+        _ngoai = _shell not in ("bash", "sh")
+        _FX.append(("shell-vo-can-" + ("ngoai-mien-" if _ngoai else "hop-le-") + _shell,
+                    {"gate": {"steps": [_ruff, {"shell": _shell, "run": "x=1"}, _reg]}}, None, int(_ngoai)))
+    for _shell in ("pwsh", "powershell"):
+        for _i, (_body, _want) in enumerate((("if true; then echo hi; fi", 1), ("", 1), (_PIN, 0),
+                                            ("pwsh -NoProfile -File scripts/don-nhanh_test.ps1", 0))):
+            _FX.append((f"shell-carrier-{_shell}-{_i}", {"gate": {"steps": [
+                _ruff, {"shell": _shell, "run": _body}, _reg]}}, None, _want))
+        for _level in ("job", "workflow"):
+            _defaults = {"run": {"shell": _shell}}
+            _job = {"steps": [_ruff, {"run": "if true; then echo hi; fi"}, _reg],
+                    **({"defaults": _defaults} if _level == "job" else {})}
+            _errors = loi_ruff_ci(_wf({"gate": _job}, defaults=_defaults if _level == "workflow" else None))[0]
+            _them(f"ruff-ci-shell-carrier-{_shell}-{_level}", bool(_errors))
+        for _i, _body in enumerate(("return +", "exit -", "IF true", "echo 'text'", 'echo "$X"',
+                                   "echo hi | wc", "echo hi\necho", "echo hi\n\n")):
+            _FX.append((f"shell-carrier-boundary-{_shell}-{_i}", {"gate": {"steps": [
+                _ruff, {"shell": _shell, "run": _body}, _reg]}}, None, int(_i != 6)))
     # Cùng vị từ -1 phải được tiêu thụ cả khi job phụ không có một lệnh cài nào.
     for _i, _tail in enumerate(("", " --help", " --chay --mutant windows_311_launcher_workflow")):
         _FX.append((f"registry-ngoai-hop-dong-job-phu-{_i}", {
@@ -1123,7 +1155,7 @@ def phan_chung():
                                ("heredoc", "cat <<'END'\n" + _c + "\nEND\n", 0)]:
             _FX.append((f"c0-{_i}-{_t}", {"gate": {"steps": [_ruff, {"run": _run}, _reg]}}, None, _want))
     # R15: cú pháp ngoài miền không được KHONG hóa qua lệnh opaque.
-    for _op in (";", "&", "&&", "|", "||", ";;", ";;;", "&&||", "|&"):
+    for _op in (";", "&", "&&", "|", "||", ";;", ";;;", "&&||", "|&", "|||"):
         for _pos, _run, _want in [("dau", _op + " echo hi", 1),
                                  ("giua", "echo hi " + _op + " echo ok", int(_op not in (";", "&", "&&", "|", "||"))),
                                  ("cuoi", "echo hi " + _op, int(_op not in (";", "&")))]:
@@ -1162,6 +1194,35 @@ def phan_chung():
         ("group-pipe-incomplete", "{ echo hi |\n}", 1),
     ]:
         _FX.append(("syntax-" + _t, {"gate": {"steps": [_ruff, {"run": _run}, _reg]}}, None, _want))
+    # R16: ca cô lập từng chốt; không để một lỗi khuôn khác che đột biến của chốt ấy.
+    for _t, _run in [
+        ("header-group-semicolon", "{ ; echo hi; }"), ("header-group-and", "{ && echo hi; }"),
+        ("inline-header-isolated", "if true; then if false; fi"),
+        ("condition-compound-isolated", "if true\nif false; then echo a; fi\nthen echo b; fi"),
+    ]:
+        _FX.append(("guard-" + _t, {"gate": {"steps": [_ruff, {"run": _run}, _reg]}}, None, 1))
+    for _i, _key in enumerate(("for", "while", "until", "do", "done", "case", "esac", "function",
+                               "select", "coproc", "time", "!", '"fi"', r"\f\i")):
+        _FX.append((f"guard-unsupported-keyword-{_i}", {"gate": {"steps": [
+            _ruff, {"run": _key + " echo hi"}, _reg]}}, None, 1))
+    for _i, _target in enumerate(("\nwc", "; echo ok", "| wc", "& echo ok", "< file", "> file", "# comment")):
+        _FX.append((f"guard-redirect-boundary-{_i}", {"gate": {"steps": [
+            _ruff, {"run": "echo hi > " + _target}, _reg]}}, None, 1))
+    for _i, _run in enumerate(("echo $[1+2", "X=$[", 'echo "$[1+2"', "echo $[1+2]",
+                               "echo $'\\'", "echo $'ok'", 'echo $"ok"', "echo $((1+2))")):
+        _FX.append((f"guard-expansion-outside-{_i}", {"gate": {"steps": [
+            _ruff, {"run": _run}, _reg]}}, None, 1))
+    for _i, _suffix in enumerate(("[1+2", "{X", "'\\'", '"ok"')):
+        _FX.append((f"guard-expansion-continuation-{_i}", {"gate": {"steps": [
+            _ruff, {"run": "echo $\\\n" + _suffix}, _reg]}}, None, 1))
+    for _i, _run in enumerate(("echo '$[1+2'", r"echo \$[1+2", 'echo "$"', "echo $",
+                               'echo "$\'ok\'"', "echo '$\"ok\"'", r"echo \$\'ok\'")):
+        _FX.append((f"guard-expansion-data-{_i}", {"gate": {"steps": [
+            _ruff, {"run": _run}, _reg]}}, None, 0))
+    for _i, _parameter in enumerate(("$X", "$NAME_2", "$0", "$9", "$@", "$*", "$#", "$?", "$-", "$!", "$$")):
+        for _j, _run in enumerate(("echo " + _parameter, 'echo "' + _parameter + '"', "V=" + _parameter)):
+            _FX.append((f"parameter-bare-{_i}-{_j}", {"gate": {"steps": [
+                _ruff, {"run": _run}, _reg]}}, None, 0))
     for _ten, _jobs, _env, _mong in _FX:
         _loi = len(loi_ruff_ci(_wf(_jobs, _env))[0])
         _them("ruff-ci-" + _ten, (_loi == 0) if _mong == 0 else (_loi >= 1))

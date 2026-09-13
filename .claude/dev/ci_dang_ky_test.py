@@ -401,13 +401,23 @@ def _buoc_co_dieu_kien(step):
 
 
 def _shell_trong_mien(data, job, step):
-    """Chỉ họ shell có argv chung trong grammar; không nhận shell template/Python/cmd."""
+    """Giải ưu tiên step → job → workflow; khai shell thì phải là chuỗi trong miền."""
     try:
-        shell = step.get("shell", job.get("defaults", {}).get("run", {}).get("shell",
-                         data.get("defaults", {}).get("run", {}).get("shell")))
+        scopes = (step, job.get("defaults", {}).get("run", {}), data.get("defaults", {}).get("run", {}))
     except AttributeError:
         return False
-    return shell in (None, "bash", "sh", "pwsh", "powershell")
+    if any(not isinstance(scope, dict) for scope in scopes): return False
+    for scope in scopes:
+        if "shell" in scope:
+            return scope["shell"] in ("bash", "sh", "pwsh", "powershell")
+    return True
+
+
+def _doc_buoc_ruff(data, job, step):
+    # Ngôn ngữ phải được nhận TRƯỚC khi đọc thân: không dùng kết quả misparse để miễn kiểm.
+    if "run" in step and not _shell_trong_mien(data, job, step):
+        return "KHONG_PHAN_TICH_DUOC", "shell ngoài miền", False, -1, False
+    return _doc_run_ruff(step.get("run", ""))
 
 
 def loi_ruff_ci(source=None):
@@ -416,7 +426,8 @@ def loi_ruff_ci(source=None):
     Chỉ _LENH_OPAQUE, script/Python -c/stdin và assignment là ngoài phạm vi cài đặt;
     mọi lệnh khác ngoài grammar bị từ chối. Không kiểm env hoặc mô phỏng runtime.
     $(...) chỉ nhận lệnh opaque được phân tích đệ quy; backtick và heredoc động bị từ chối.
-    Shell mặc định hoặc bash/sh/pwsh/powershell; shell template và các shell khác ngoài miền.
+    Shell không khai hoặc chuỗi bash/sh/pwsh/powershell; shell khác/null/template ngoài miền.
+    Mọi bước run đều qua chốt shell trước khi phân tích thân, kể cả thân opaque/rỗng.
     Cài: pip/pip3, uv pip, python [cờ] -m pip + install + cờ cho phép + một Ruff requirement.
     Extras phải quote; global option trước install bị từ chối, không biến thành KHONG.
     Probe: ruff / python [cờ] -m ruff / uv run ruff / uvx ruff, hậu tố đúng --version.
@@ -433,12 +444,7 @@ def loi_ruff_ci(source=None):
            for j in jobs.values() for s in j["steps"]):
         return ["CI YAML step/run ngoài miền"], 3
     steps = {jn: [s for s in j.get("steps", []) if isinstance(s, dict)] for jn, j in jobs.items()}
-    runs = {jn: [s.get("run", "") if isinstance(s.get("run", ""), str) else "" for s in bs] for jn, bs in steps.items()}
-    parsed = {jn: [_doc_run_ruff(r) for r in rs] for jn, rs in runs.items()}
-    for jn, ps in parsed.items():
-        for i, p in enumerate(ps):
-            if (p[0] != "KHONG" or p[3] or p[4]) and not _shell_trong_mien(data, jobs[jn], steps[jn][i]):
-                ps[i] = ("KHONG_PHAN_TICH_DUOC", "shell ngoài miền", False, -1, False)
+    parsed = {jn: [_doc_buoc_ruff(data, jobs[jn], s) for s in bs] for jn, bs in steps.items()}
     kinds = {jn: [p[0] for p in ps] for jn, ps in parsed.items()}
     for jn, ks in kinds.items():
         for i, kind in enumerate(ks):
@@ -462,8 +468,10 @@ def loi_ruff_ci(source=None):
         ri = next((i for i, k in enumerate(kinds[jn]) if k == "GHIM"), -1)
         before = (0 <= ri < gi and not _buoc_co_dieu_kien(steps[jn][gi])
                   and jobs[jn].get("if") is None)
+    outside = [f"{jn}/bước {i + 1}" for jn, ks in kinds.items() for i, k in enumerate(ks) if k == "KHONG_PHAN_TICH_DUOC"]
+    reason = f"; ngoài miền cú pháp: {outside}" if outside else ""
     checks = [
-        (installs and not bad_pin, f"CI không ghim Ruff 0.15.15 (job: {bad_pin or 'không job nào cài Ruff'})"),
+        (installs and not bad_pin, f"CI không chứng minh ghim Ruff 0.15.15 (job: {bad_pin or 'không job nào cài Ruff'}{reason})"),
         (installs and not bad_probe, f"CI không in probe Ruff --version (job: {bad_probe or 'không job nào cài Ruff'})"),
         (before, "CI không provision Ruff trước test registry trong cùng job "
                  f"(job chạy test registry: {callers or 'KHÔNG CÓ'})"),
@@ -824,9 +832,10 @@ def phan_chung():
     def _p(lenh): return {"name": "cài Ruff (biến thể)", "run": lenh + "\nruff --version\n"}
     _probe_truoc = {"name": "cài Ruff (probe trước)",  # probe dat TRUOC lenh cai
                     "run": "ruff --version\npython -m pip install --quiet ruff==0.15.15\n"}
-    def _wf(jobs, env=None):
+    def _wf(jobs, env=None, defaults=None):
         d = {"on": "push", "jobs": jobs}
         if env: d["env"] = env
+        if defaults is not None: d["defaults"] = defaults
         return yaml.safe_dump(d, sort_keys=False)
     _FX = [
         ("chua-tach-tuong-thich-lui", {"gate": {"steps": [_ruff, _khac, _reg]}}, None, 0),
@@ -997,6 +1006,37 @@ def phan_chung():
                                                "steps": [_ruff, _reg]}}, None, 1))
     _FX.append(("shell-step-uu-tien", {"gate": {"defaults": {"run": {"shell": "python"}},
                       "steps": [dict(_ruff, shell="bash"), dict(_reg, shell="bash")]}}, None, 0))
+    # R12: vỏ ngôn ngữ không được miễn kiểm chỉ vì thân trông như dữ liệu/script.
+    for _si, _shell in enumerate(("python", "cmd", "bash {0}", "${{ matrix.shell }}")):
+        for _bi, _body in enumerate(("x=1", "echo hi", "python setup.py", "")):
+            _FX.append((f"shell-vo-can-{_si}-{_bi}", {"gate": {"steps": [
+                _ruff, {"shell": _shell, "run": _body}, _reg]}}, None, 1))
+    for _shell in ("bash", "sh", "pwsh", "powershell"):
+        _FX.append(("shell-vo-can-hop-le-" + _shell, {"gate": {"steps": [
+            _ruff, {"shell": _shell, "run": "x=1"}, _reg]}}, None, 0))
+    # Cùng vị từ -1 phải được tiêu thụ cả khi job phụ không có một lệnh cài nào.
+    for _i, _tail in enumerate(("", " --help", " --chay --mutant windows_311_launcher_workflow")):
+        _FX.append((f"registry-ngoai-hop-dong-job-phu-{_i}", {
+            "gate": {"steps": [_ruff, _reg]}, "phu": {"steps": [
+                {"run": "python .claude/dev/ci_dang_ky_test.py" + _tail}]}}, None, 1))
+    for _t, _jobs, _defaults, _want in [
+        ("workflow-shell-ngoai-mien", {"gate": {"steps": [_ruff, _reg]}}, {"run": {"shell": "python"}}, 1),
+        ("workflow-shell-hop-le", {"gate": {"steps": [_ruff, _reg]}}, {"run": {"shell": "bash"}}, 0),
+        ("job-de-workflow", {"gate": {"defaults": {"run": {"shell": "bash"}}, "steps": [_ruff, _reg]}},
+         {"run": {"shell": "python"}}, 0),
+        ("step-de-hai-cap", {"gate": {"defaults": {"run": {"shell": "cmd"}},
+         "steps": [dict(_ruff, shell="bash"), dict(_reg, shell="bash")]}}, {"run": {"shell": "python"}}, 0),
+        ("workflow-shell-null", {"gate": {"steps": [_ruff, _reg]}}, {"run": {"shell": None}}, 1),
+        ("job-shell-null", {"gate": {"defaults": {"run": {"shell": None}}, "steps": [_ruff, _reg]}}, None, 1),
+        ("step-shell-null", {"gate": {"steps": [dict(_ruff, shell=None), _reg]}}, None, 1),
+        ("workflow-run-sai-kieu", {"gate": {"steps": [_ruff, _reg]}}, {"run": []}, 1),
+    ]:
+        _errors = loi_ruff_ci(_wf(_jobs, defaults=_defaults))[0]
+        _them("ruff-ci-" + _t, bool(_errors) == bool(_want))
+    for _t, _step in [("lexer", {"run": "echo hi 2>&1"}), ("shell", {"shell": "python", "run": "x=1"})]:
+        _errors = loi_ruff_ci(_wf({"gate": {"steps": [_ruff, _step, _reg]}}))[0]
+        _them("ruff-ci-nguyen-nhan-" + _t,
+              any("ngoài miền cú pháp" in m and "gate/bước 2" in m for m in _errors))
     for _ten, _jobs, _env, _mong in _FX:
         _loi = len(loi_ruff_ci(_wf(_jobs, _env))[0])
         _them("ruff-ci-" + _ten, (_loi == 0) if _mong == 0 else (_loi >= 1))

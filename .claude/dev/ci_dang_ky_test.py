@@ -170,19 +170,54 @@ def _cuoi_thay_lenh(run, start):
     raise ValueError("command substitution chưa đóng")
 
 
+def _kiem_khuon_shell(items):
+    """Opaque vẫn phải thuộc grammar: list, if/then/elif/else/fi, nhóm { list; }.
+    Mỗi condition/body phải có lệnh; không nhận compound trong condition hoặc header lồng inline.
+    """
+    stack = []
+    for argv, op, key in items:
+        tail = argv[1:] if key else argv
+        if key in ("if", "{"):
+            if stack and stack[-1][1] == "condition": raise ValueError("compound trong condition ngoài miền")
+            stack.append([key, "condition" if key == "if" else "group", False])
+        elif key in ("then", "elif", "else", "fi", "}"):
+            if not stack: raise ValueError("từ khóa đóng không có khối")
+            frame = stack[-1]
+            expected = {"then": {"condition"}, "elif": {"body"}, "else": {"body"},
+                        "fi": {"body", "else"}, "}": {"group"}}[key]
+            if frame[1] not in expected or not frame[2]: raise ValueError("khối sai thứ tự hoặc rỗng")
+            if key in ("fi", "}"):
+                if tail: raise ValueError("đối số sau từ khóa đóng")
+                stack.pop()
+                if stack: stack[-1][2] = True
+                continue
+            frame[1], frame[2] = {"then": "body", "elif": "condition", "else": "else"}[key], False
+        elif key or argv[0] in _KHUNG_SHELL:
+            raise ValueError("cấu trúc shell ngoài miền")
+        if key and not tail and op != "\n": raise ValueError("header thiếu lệnh")
+        if key and tail and tail[0] in _KHUNG_SHELL: raise ValueError("header lồng inline ngoài miền")
+        if tail and stack: stack[-1][2] = True
+    if stack: raise ValueError("khối shell chưa đóng")
+
+
 def _dong_logic(run, depth=0):
-    """Lệnh tĩnh: quoting POSIX, nối dòng, newline/;/&&; không đo runtime của script.
+    """Lexer đóng cho lệnh trực tiếp và cấu trúc opaque do _kiem_khuon_shell nhận.
     Giữ cờ ngoài miền cùng argv; không dựng argv bằng split() khi lexer thất bại.
     Heredoc là dữ liệu của lệnh gọi: bỏ qua thân, không nhận mã nhúng thành lệnh shell.
     """
     if depth > 16: raise ValueError("lồng command substitution ngoài miền")
     out, cur, quote, bad, before, here, i = [], "", "", False, False, None, 0
-    need, compound, word = False, False, False
+    need, compound, word, items = False, False, False, []
     def emit(op=""):
         nonlocal cur, bad, before, need, compound, word
         argv = shlex.split(cur)
-        if not argv and op in (";", "&&"): raise ValueError("thiếu lệnh")
-        if argv: need = op == "&&"
+        if op not in ("", "\n", ";", "&", "&&", "|", "||"): raise ValueError("toán tử ngoài miền")
+        if not argv and op not in ("", "\n"): raise ValueError("thiếu lệnh")
+        if argv:
+            key = argv[0] if argv[0] in _KHUNG_SHELL and re.match(re.escape(argv[0]) + r"(?:\s|$)", cur.lstrip()) else ""
+            if need and key in ("then", "elif", "else", "fi", "}"): raise ValueError("thiếu toán hạng trước từ khóa")
+            items.append((argv, op, key))
+            need = op in ("&&", "||", "|")
         after = op not in ("", "\n", ";", "&&")
         compound |= after
         if argv: out.append((argv, bad or before or after))
@@ -199,6 +234,11 @@ def _dong_logic(run, depth=0):
                 raise ValueError("ký tự điều khiển escape ngoài miền")
             if nxt != "\n": cur += c + nxt; word = True
             i += 2; continue
+        if quote != "'" and run[i:i + 2] == "${":
+            m = re.match(r"\$\{[A-Za-z_][A-Za-z0-9_]*(?::-[A-Za-z0-9_ ./+-]*)?\}", run[i:])
+            if m is None: raise ValueError("parameter expansion ngoài miền hoặc chưa đóng")
+            cur += "__THAM_SO__"; bad = True; word = True; i += m.end()
+            continue
         if quote != "'" and run[i:i + 2] == "$(":
             end = _cuoi_thay_lenh(run, i)
             inner = _dong_logic(run[i + 2:end], depth + 1)
@@ -222,8 +262,21 @@ def _dong_logic(run, depth=0):
         elif run[i:i + 2] == "<<":
             m = re.match(r"<<(-?)[ \t]*(['\"]?)([A-Za-z_][A-Za-z0-9_]*)\2", run[i:])
             if m is None or here is not None: raise ValueError("heredoc ngoài miền")
+            if i + m.end() < len(run) and run[i + m.end()] not in " \t\n;&|<>": raise ValueError("delimiter heredoc ngoài miền")
             here = (m[3], bool(m[1]), bool(m[2])); bad = True; word = True; cur += " <heredoc>"
             i += m.end(); continue
+        elif c in "<>":
+            end = i + 1
+            while end < len(run) and run[end] in "<>": end += 1
+            if run[i:end] not in ("<", ">", ">>"): raise ValueError("redirect ngoài miền")
+            target = end
+            while target < len(run):
+                if run[target] in " \t": target += 1
+                elif run[target:target + 2] == "\\\n": target += 2
+                else: break
+            if target == len(run) or run[target] in "\n;|&<>#": raise ValueError("redirect thiếu đích")
+            cur += run[i:end]; bad = True; word = False; i = end
+            continue
         elif c in ";&|\n":
             end = i + 1
             if c != "\n":
@@ -247,7 +300,8 @@ def _dong_logic(run, depth=0):
         i += 1
     if quote or here: raise ValueError("trích dẫn chưa đóng")
     emit()
-    if need: raise ValueError("thiếu vế phải &&")
+    if need: raise ValueError("thiếu vế phải toán tử")
+    _kiem_khuon_shell(items)
     control = {"if", "then", "elif", "else", "fi", "for", "while", "until", "do", "done", "case", "esac", "function", "select", "coproc", "time", "!", "[[", "]]"}
     conditional = compound or any(t[0] in control for t, _ in out)
     return [(t, b or conditional) for t, b in out]
@@ -420,9 +474,13 @@ def _doc_buoc_ruff(data, job, step):
 
 def loi_ruff_ci(source=None):
     """M7/A7: chỉ lệnh trực tiếp trong YAML, không suy hành vi bên trong script được gọi.
-    Miền: lệnh đơn argv tĩnh, quoting POSIX hợp lệ, nối dòng, newline/;/&&, và mẫu dưới đây;
-    Chỉ _LENH_OPAQUE, script/Python -c/stdin và assignment là ngoài phạm vi cài đặt;
-    mọi lệnh khác ngoài grammar bị từ chối. Không kiểm env hoặc mô phỏng runtime.
+    Miền: các mẫu argv tĩnh dưới đây và lệnh opaque trong grammar đóng của _dong_logic;
+    mọi run ngoài grammar đều bị từ chối trước khi phân loại cài đặt, không mô phỏng runtime.
+    Opaque: _LENH_OPAQUE, script/Python -c/stdin, assignment; không đọc thân script/env.
+    List nhận newline/;/&&/||/|/& đủ hai vế, redirect </>/>> có đích, if/then/elif/else/fi
+    và { list; } cân bằng với condition/body khác rỗng; compound chỉ dành cho opaque.
+    Parameter chỉ nhận ${TEN} hoặc ${TEN:-literal} với literal gồm chữ/số/_/space/./slash/+/-;
+    kể cả trong nháy kép; các expansion khác ngoài miền. Quoting và nối dòng theo POSIX.
     $(...) chỉ nhận lệnh opaque được phân tích đệ quy; backtick và heredoc động bị từ chối.
     Ngoặc trần, C0 ngoài nháy (trừ tab/newline) bị từ chối; dữ liệu nháy/heredoc giữ nguyên.
     Comment chỉ mở tại đầu từ chưa quote/escape, kể cả trong $(...).
@@ -1059,11 +1117,51 @@ def phan_chung():
         ("hash-sau-blank-escape-khong-che-cai", r"echo hi\ #; pip install ruff", 1),
     ]:
         _FX.append((_t, {"gate": {"steps": [_ruff, {"run": _run}, _reg]}}, None, _want))
-    for _i, _c in enumerate(("\r", "\f", "\v", "\0")):
+    for _i, _c in enumerate(("\r", "\f", "\v", "\0") + tuple(chr(n) for n in range(32) if n not in (0, 9, 10, 11, 12, 13))):
         for _t, _run, _want in [("tran", "echo hi" + _c, 1), ("escape", "echo hi\\" + _c, 1),
                                ("nhay", "echo 'hi" + _c + "'", 0),
                                ("heredoc", "cat <<'END'\n" + _c + "\nEND\n", 0)]:
             _FX.append((f"c0-{_i}-{_t}", {"gate": {"steps": [_ruff, {"run": _run}, _reg]}}, None, _want))
+    # R15: cú pháp ngoài miền không được KHONG hóa qua lệnh opaque.
+    for _op in (";", "&", "&&", "|", "||", ";;", ";;;", "&&||", "|&"):
+        for _pos, _run, _want in [("dau", _op + " echo hi", 1),
+                                 ("giua", "echo hi " + _op + " echo ok", int(_op not in (";", "&", "&&", "|", "||"))),
+                                 ("cuoi", "echo hi " + _op, int(_op not in (";", "&")))]:
+            _FX.append((f"syntax-op-{_op}-{_pos}", {"gate": {"steps": [_ruff, {"run": _run}, _reg]}}, None, _want))
+    for _t, _run, _want in [
+        ("and-or", "echo hi && || echo hi", 1), ("pipe-comment", "echo hi | # x", 1),
+        ("or-noi-dong", "echo hi ||\n# x\necho ok", 0), ("pipe-noi-dong", "echo hi |\nwc -l", 0),
+        ("redirect-eof", "echo hi >", 1), ("redirect-comment", "echo hi > # x", 1),
+        ("redirect-list", "echo hi > ; echo ok", 1), ("redirect-append-eof", "echo hi >>", 1),
+        ("redirect-input-eof", "cat <", 1), ("redirect-input", "cat < file", 0),
+        ("redirect-noi-dong-eof", "echo hi > \\\n", 1),
+        ("redirect-noi-dong-comment", "echo hi > \\\n# x", 1),
+        ("redirect-noi-dong-dich", "echo hi > \\\nfile", 0),
+        ("heredoc-delimiter-ghep", "cat <<'END'foo\nx\nEND\n", 1),
+        ("redirect-target", "echo hi > file", 0), ("redirect-append", "echo hi >> file", 0),
+        ("redirect-fd", "echo hi 2>/dev/null", 0), ("redirect-quoted", "echo '>'", 0),
+        ("redirect-unsupported", "echo hi <> file", 1),
+        ("parameter-eof", "V=${x", 1), ("parameter-double", 'echo "${x"', 1),
+        ("parameter-single", "echo '${x'", 0), ("parameter-ok", "V=${X}", 0),
+        ("parameter-fallback", 'echo "${X:-KHONG CO}"', 0), ("parameter-unsupported", "echo ${X:?bad}", 1),
+        ("if-eof", "if echo hi", 1), ("then-orphan", "then echo hi", 1),
+        ("fi-orphan", "echo hi; fi", 1), ("if-body-eof", "if echo hi; then echo yes", 1),
+        ("if-empty-cond", "if; then echo hi; fi", 1), ("if-empty-body", "if true; then; fi", 1),
+        ("if-empty-cond-nl", "if\nthen echo hi; fi", 1), ("if-empty-body-nl", "if true; then\nfi", 1),
+        ("if-wrong-phase", "if true; else echo hi; fi", 1),
+        ("fi-tail", "if true; then echo hi; fi echo bad", 1),
+        ("if-cond-compound", "if if true; then echo hi; fi; then echo bye; fi", 1),
+        ("if-inline-header", "if true; then if false; then echo hi; fi; fi", 1),
+        ("if-nested-body", "if true; then\nif false; then echo hi; fi\nfi", 0),
+        ("if-empty-else", "if true; then echo hi; else; fi", 1),
+        ("if-then-operand", "if true && then echo hi; fi", 1),
+        ("if-ok", "if true; then echo hi; else echo bye; fi", 0),
+        ("elif-ok", "if true; then echo a; elif false; then echo b; fi", 0),
+        ("group-eof", "{ echo hi", 1), ("group-orphan", "echo hi; }", 1),
+        ("group-empty", "{\n}", 1), ("group-ok", "echo hi || { cat file; exit 1; }", 0),
+        ("group-pipe-incomplete", "{ echo hi |\n}", 1),
+    ]:
+        _FX.append(("syntax-" + _t, {"gate": {"steps": [_ruff, {"run": _run}, _reg]}}, None, _want))
     for _ten, _jobs, _env, _mong in _FX:
         _loi = len(loi_ruff_ci(_wf(_jobs, _env))[0])
         _them("ruff-ci-" + _ten, (_loi == 0) if _mong == 0 else (_loi >= 1))

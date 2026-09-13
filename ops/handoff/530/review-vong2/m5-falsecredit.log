@@ -1,0 +1,19 @@
+m5-kdd-unrelated
+rc=0
+    tukiem A2-lam-rong-chi_tiet-tren-KENH                       XANH_DUNG   rc=[0, 0] kenh=['KHONG_GIET', 'KHONG_GIET']
+    tukiem doi-thu-tu-except-TinHieuChotCa-sau-AssertionError   GIET        ctrl=CTRL-DUONG-chet-dung-chot-ca-dich
+    tukiem bo-chot-DO_KHAC-trong-bo-cham                        GIET        ctrl=CTRL-ngoai-le-Exception-TRAN
+    tukiem dong-luot-ghi-rc-0-cung                              GIET        ctrl=CTRL-DUONG-chet-dung-chot-ca-dich
+    tukiem dong-luot-KHONG-ghi-gi                               GIET        ctrl=CTRL-DUONG-chet-dung-chot-ca-dich
+    tukiem dong-luot-ghi-1-thay-vi-bool-true                    GIET        ctrl=CTRL-DUONG-chet-dung-chot-ca-dich
+    tukiem bo-CA-HAI-chot-vat-hoa-dich                          GIET        ctrl=CTRL-DUONG-chet-dung-chot-ca-dich
+tự kiểm bộ chấm 512: đạt 7/7 (6 mục DO gỡ-chốt + 1 mục XANH bất-biến-A2) · chốt bộ đọc: 3 có đầu vào phân biệt (t164) · 4 bị chốt sau hấp thụ · 2 còn NỢ tự kiểm
+lease_publish: 1/1 đạt; đã chạy=1, bỏ qua=0
+m5-unrelated-child
+rc=1
+control 512: 0/1 ca đúng phân hạng
+!!! do t162_A1_muoi_control_cua_bo_cham_dung_phan_hang Exception: control LỆCH phân hạng: ["CTRL-DUONG-chet-dung-chot-ca-dich: mong_doi=GIET, thuc_te=KHONG_DO_DUOC — ca ĐỎ vì ngoại lệ KHÔNG phải TinHieuChotCa: ['t160_lech_AB_phai_giu_bang_chung_va_CHAN_tai_consumer_t125'] | t160_lech_AB_phai_giu_bang_chun"]
+lease_publish: 0/1 đạt; đã chạy=1, bỏ qua=0
+actual child records {"ca": "t162_A1_muoi_control_cua_bo_cham_dung_phan_hang", "chi_tiet": "Exception: control LỆCH phân hạng: [\"CTRL-DUONG-chet-dung-chot-ca-dich: mong_doi=GIET, thuc_te=KHONG_DO_DUOC — ca ĐỎ vì ngoại lệ KHÔNG phải TinHieuChotCa: ['t160_lech_AB_phai_giu_bang_chung_va_CHAN_tai_consumer_t125'] | t160_lech_AB_phai_giu_bang_chun\"]", "dau_phien": "dp", "lan_thu": 1, "mutant": "mt", "nhan": "DO_KHAC"}
+{"dau_phien": "dp", "dong_luot": true, "lan_thu": 1, "mutant": "mt", "rc": 1}
+

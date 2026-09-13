@@ -1,0 +1,2 @@
+{"ca": "t162_A1_muoi_control_cua_bo_cham_dung_phan_hang", "chi_tiet": "Exception: control LỆCH phân hạng: [\"CTRL-DUONG-chet-dung-chot-ca-dich: mong_doi=GIET, thuc_te=KHONG_DO_DUOC — ca ĐỎ vì ngoại lệ KHÔNG phải TinHieuChotCa: ['t160_lech_AB_phai_giu_bang_chung_va_CHAN_tai_consumer_t125'] | t160_lech_AB_phai_giu_bang_chun\"]", "dau_phien": "dp", "lan_thu": 1, "mutant": "mt", "nhan": "DO_KHAC"}
+{"dau_phien": "dp", "dong_luot": true, "lan_thu": 1, "mutant": "mt", "rc": 1}

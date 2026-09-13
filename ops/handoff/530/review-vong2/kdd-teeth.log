@@ -1,0 +1,34 @@
+kdd-teeth-rc-match
+rc=1
+    tukiem A2-lam-rong-chi_tiet-tren-KENH                       XANH_DUNG   rc=[0, 0] kenh=['KHONG_GIET', 'KHONG_GIET']
+    tukiem doi-thu-tu-except-TinHieuChotCa-sau-AssertionError   GIET        ctrl=CTRL-DUONG-chet-dung-chot-ca-dich
+    tukiem bo-chot-DO_KHAC-trong-bo-cham                        GIET        ctrl=CTRL-ngoai-le-Exception-TRAN
+    tukiem dong-luot-ghi-rc-0-cung                              KHONG_GIET  ctrl=CTRL-DUONG-chet-dung-chot-ca-dich
+    tukiem dong-luot-KHONG-ghi-gi                               GIET        ctrl=CTRL-DUONG-chet-dung-chot-ca-dich
+    tukiem dong-luot-ghi-1-thay-vi-bool-true                    GIET        ctrl=CTRL-DUONG-chet-dung-chot-ca-dich
+    tukiem bo-CA-HAI-chot-vat-hoa-dich                          GIET        ctrl=CTRL-DUONG-chet-dung-chot-ca-dich
+tự kiểm bộ chấm 512: đạt 6/7 (6 mục DO gỡ-chốt + 1 mục XANH bất-biến-A2) · chốt bộ đọc: 3 có đầu vào phân biệt (t164) · 4 bị chốt sau hấp thụ · 2 còn NỢ tự kiểm
+!!! do t163_A2_A3_A8_M5_dot_bien_tu_kiem_cho_chinh_bo_cham đột biến tự kiểm KHÔNG làm ca đích đỏ đúng lý do: ['dong-luot-ghi-rc-0-cung: con rc=[0] != [1] (control CTRL-DUONG-chet-dung-chot-ca-dich)']
+lease_publish: 0/1 đạt; đã chạy=1, bỏ qua=0
+kdd-teeth-closing-present
+rc=0
+    tukiem A2-lam-rong-chi_tiet-tren-KENH                       XANH_DUNG   rc=[0, 0] kenh=['KHONG_GIET', 'KHONG_GIET']
+    tukiem doi-thu-tu-except-TinHieuChotCa-sau-AssertionError   GIET        ctrl=CTRL-DUONG-chet-dung-chot-ca-dich
+    tukiem bo-chot-DO_KHAC-trong-bo-cham                        GIET        ctrl=CTRL-ngoai-le-Exception-TRAN
+    tukiem dong-luot-ghi-rc-0-cung                              GIET        ctrl=CTRL-DUONG-chet-dung-chot-ca-dich
+    tukiem dong-luot-KHONG-ghi-gi                               GIET        ctrl=CTRL-DUONG-chet-dung-chot-ca-dich
+    tukiem dong-luot-ghi-1-thay-vi-bool-true                    GIET        ctrl=CTRL-DUONG-chet-dung-chot-ca-dich
+    tukiem bo-CA-HAI-chot-vat-hoa-dich                          GIET        ctrl=CTRL-DUONG-chet-dung-chot-ca-dich
+tự kiểm bộ chấm 512: đạt 7/7 (6 mục DO gỡ-chốt + 1 mục XANH bất-biến-A2) · chốt bộ đọc: 3 có đầu vào phân biệt (t164) · 4 bị chốt sau hấp thụ · 2 còn NỢ tự kiểm
+lease_publish: 1/1 đạt; đã chạy=1, bỏ qua=0
+kdd-teeth-true-flag
+rc=0
+    tukiem A2-lam-rong-chi_tiet-tren-KENH                       XANH_DUNG   rc=[0, 0] kenh=['KHONG_GIET', 'KHONG_GIET']
+    tukiem doi-thu-tu-except-TinHieuChotCa-sau-AssertionError   GIET        ctrl=CTRL-DUONG-chet-dung-chot-ca-dich
+    tukiem bo-chot-DO_KHAC-trong-bo-cham                        GIET        ctrl=CTRL-ngoai-le-Exception-TRAN
+    tukiem dong-luot-ghi-rc-0-cung                              GIET        ctrl=CTRL-DUONG-chet-dung-chot-ca-dich
+    tukiem dong-luot-KHONG-ghi-gi                               GIET        ctrl=CTRL-DUONG-chet-dung-chot-ca-dich
+    tukiem dong-luot-ghi-1-thay-vi-bool-true                    GIET        ctrl=CTRL-DUONG-chet-dung-chot-ca-dich
+    tukiem bo-CA-HAI-chot-vat-hoa-dich                          GIET        ctrl=CTRL-DUONG-chet-dung-chot-ca-dich
+tự kiểm bộ chấm 512: đạt 7/7 (6 mục DO gỡ-chốt + 1 mục XANH bất-biến-A2) · chốt bộ đọc: 3 có đầu vào phân biệt (t164) · 4 bị chốt sau hấp thụ · 2 còn NỢ tự kiểm
+lease_publish: 1/1 đạt; đã chạy=1, bỏ qua=0

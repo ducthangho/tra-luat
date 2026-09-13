@@ -1,0 +1,33 @@
+unguarded-live
+rc=1
+!!! do t160_lech_AB_phai_giu_bang_chung_va_CHAN_tai_consumer_t125 chẩn đoán phải giữ đúng vế 'không-actor=(rc=0, 2/2)': None
+lease_publish: 0/1 đạt; đã chạy=1, bỏ qua=0
+false-close-marker original= ('KHONG_DO_DUOC', 'dấu đóng lượt không phải bool true: False') guard-removed= ('GIET', '')
+nontext-detail original= ('KHONG_DO_DUOC', 'chi tiết không phải chuỗi cho ca t160_lech_AB_phai_giu_bang_chung_va_CHAN_tai_consumer_t125') guard-removed= ('GIET', '')
+prefix-mismatch original= ('KHONG_DO_DUOC', "kênh có ca KHÔNG khớp tiền tố 't159': ['t160_lech_AB_phai_giu_bang_chung_va_CHAN_tai_consumer_t125']") guard-removed= ('GIET', '')
+target-absent original= ('KHONG_DO_DUOC', "đích KHÔNG có mặt trong kênh: ['t159_t137_can_do_DU_ket_qua_va_dung_nhan_than_timeout']") guard-removed= ('KHONG_GIET', "tập ca đỏ-chốt ['t160_lech_AB_phai_giu_bang_chung_va_CHAN_tai_consumer_t125'] != đích ['t159_t137_can_do_DU_ket_qua_va_dung_nhan_than_timeout', 't160_lech_AB_phai_giu_bang_chung_va_CHAN_tai_consumer_t125']")
+unguarded-combined-t161
+rc=0
+catalog 512: mẫu số=16, giết=16, không giết=0, KHÔNG ĐO ĐƯỢC=0
+lease_publish: 1/1 đạt; đã chạy=1, bỏ qua=0
+unguarded-combined-t162
+rc=0
+control 512: 12/12 ca đúng phân hạng
+lease_publish: 1/1 đạt; đã chạy=1, bỏ qua=0
+unguarded-combined-t163
+rc=0
+    tukiem A2-lam-rong-chi_tiet-tren-KENH                       XANH_DUNG   rc=[0, 0] kenh=['KHONG_GIET', 'KHONG_GIET']
+    tukiem doi-thu-tu-except-TinHieuChotCa-sau-AssertionError   GIET        ctrl=CTRL-DUONG-chet-dung-chot-ca-dich
+    tukiem bo-chot-DO_KHAC-trong-bo-cham                        GIET        ctrl=CTRL-ngoai-le-Exception-TRAN
+    tukiem dong-luot-ghi-rc-0-cung                              GIET        ctrl=CTRL-DUONG-chet-dung-chot-ca-dich
+    tukiem dong-luot-KHONG-ghi-gi                               GIET        ctrl=CTRL-DUONG-chet-dung-chot-ca-dich
+    tukiem dong-luot-ghi-1-thay-vi-bool-true                    GIET        ctrl=CTRL-DUONG-chet-dung-chot-ca-dich
+    tukiem bo-CA-HAI-chot-vat-hoa-dich                          GIET        ctrl=CTRL-DUONG-chet-dung-chot-ca-dich
+tự kiểm bộ chấm 512: đạt 7/7 (6 mục DO gỡ-chốt + 1 mục XANH bất-biến-A2) · chốt bộ đọc: 3 có đầu vào phân biệt (t164) · 4 bị chốt sau hấp thụ · 2 còn NỢ tự kiểm
+lease_publish: 1/1 đạt; đã chạy=1, bỏ qua=0
+unguarded-combined-t164
+rc=1
+chốt fail-close của bộ đọc: 12/13 đầu vào cho KHÔNG ĐO ĐƯỢC
+!!! do t164_M5_chot_fail_close_cua_bo_doc_kenh_deu_co_dau_vao_phan_biet chốt fail-close KHÔNG giữ: ["ca KHÔNG khớp tiền tố: KHONG_GIET — tập ca đỏ-chốt ['t01_la'] != đích ['t160_lech_AB_phai_giu_bang_chung_va_CHAN_tai_consumer_t125']"]
+  ĐỎ  t164_M5_chot_fail_close_cua_bo_doc_kenh_deu_co_dau_vao_phan_biet: chốt fail-close KHÔNG giữ: ["ca KHÔNG khớp tiền tố: KHONG_GIET — tập ca đỏ-chốt ['t01_la'] != đích ['t160_lech_AB_phai_giu_bang_chung_va_CHAN_tai_consumer_t125']"]
+lease_publish: 0/1 đạt; đã chạy=1, bỏ qua=0

@@ -1,0 +1,4 @@
+non-UTF8 stdout ('GIET', '') readings= [('GIET', '')]
+spawn OSError ('KHONG_DO_DUOC', 'lỗi vận chuyển OSError: reviewer transport') attempts= 2
+_cay_mut_512 ESCAPED OSError reviewer setup attempts= 1
+sinh_dau_phien ESCAPED OSError reviewer setup attempts= 1

@@ -1,0 +1,107 @@
+GUARD 0 kênh không tồn tại
+guard-00
+rc=0
+chốt fail-close của bộ đọc: 13/13 đầu vào cho KHÔNG ĐO ĐƯỢC
+lease_publish: 1/1 đạt; đã chạy=1, bỏ qua=0
+GUARD 1 bản ghi không phải object
+guard-01
+rc=0
+chốt fail-close của bộ đọc: 13/13 đầu vào cho KHÔNG ĐO ĐƯỢC
+lease_publish: 1/1 đạt; đã chạy=1, bỏ qua=0
+GUARD 2 có bản ghi SAU bản ghi đóng lượt
+guard-02
+rc=1
+chốt fail-close của bộ đọc: 12/13 đầu vào cho KHÔNG ĐO ĐƯỢC
+!!! do t164_M5_chot_fail_close_cua_bo_doc_kenh_deu_co_dau_vao_phan_biet chốt fail-close KHÔNG giữ: ['bản ghi SAU đóng lượt: GIET — ']
+  ĐỎ  t164_M5_chot_fail_close_cua_bo_doc_kenh_deu_co_dau_vao_phan_biet: chốt fail-close KHÔNG giữ: ['bản ghi SAU đóng lượt: GIET — ']
+lease_publish: 0/1 đạt; đã chạy=1, bỏ qua=0
+GUARD 3 bản ghi không neo đúng lượt
+guard-03
+rc=1
+chốt fail-close của bộ đọc: 12/13 đầu vào cho KHÔNG ĐO ĐƯỢC
+!!! do t164_M5_chot_fail_close_cua_bo_doc_kenh_deu_co_dau_vao_phan_biet chốt fail-close KHÔNG giữ: ['neo sai lượt: GIET — ']
+  ĐỎ  t164_M5_chot_fail_close_cua_bo_doc_kenh_deu_co_dau_vao_phan_biet: chốt fail-close KHÔNG giữ: ['neo sai lượt: GIET — ']
+lease_publish: 0/1 đạt; đã chạy=1, bỏ qua=0
+GUARD 4 dấu đóng lượt không phải bool true
+guard-04
+rc=0
+chốt fail-close của bộ đọc: 13/13 đầu vào cho KHÔNG ĐO ĐƯỢC
+lease_publish: 1/1 đạt; đã chạy=1, bỏ qua=0
+GUARD 5 bản ghi vừa mang tên ca vừa khai đóng lượt
+guard-05
+rc=0
+chốt fail-close của bộ đọc: 13/13 đầu vào cho KHÔNG ĐO ĐƯỢC
+lease_publish: 1/1 đạt; đã chạy=1, bỏ qua=0
+GUARD 6 bản ghi thiếu tên ca
+guard-06
+rc=0
+chốt fail-close của bộ đọc: 13/13 đầu vào cho KHÔNG ĐO ĐƯỢC
+lease_publish: 1/1 đạt; đã chạy=1, bỏ qua=0
+GUARD 7 tên ca không phải chuỗi
+guard-07
+rc=0
+chốt fail-close của bộ đọc: 13/13 đầu vào cho KHÔNG ĐO ĐƯỢC
+lease_publish: 1/1 đạt; đã chạy=1, bỏ qua=0
+GUARD 8 bản ghi TRÙNG
+guard-08
+rc=1
+chốt fail-close của bộ đọc: 12/13 đầu vào cho KHÔNG ĐO ĐƯỢC
+!!! do t164_M5_chot_fail_close_cua_bo_doc_kenh_deu_co_dau_vao_phan_biet chốt fail-close KHÔNG giữ: ['ca TRÙNG: GIET — ']
+  ĐỎ  t164_M5_chot_fail_close_cua_bo_doc_kenh_deu_co_dau_vao_phan_biet: chốt fail-close KHÔNG giữ: ['ca TRÙNG: GIET — ']
+lease_publish: 0/1 đạt; đã chạy=1, bỏ qua=0
+GUARD 9 nhãn không hợp lệ
+guard-09
+rc=1
+chốt fail-close của bộ đọc: 12/13 đầu vào cho KHÔNG ĐO ĐƯỢC
+!!! do t164_M5_chot_fail_close_cua_bo_doc_kenh_deu_co_dau_vao_phan_biet chốt fail-close KHÔNG giữ: ["nhãn không hợp lệ: KHONG_GIET — tập ca đỏ-chốt [] != đích ['t160_lech_AB_phai_giu_bang_chung_va_CHAN_tai_consumer_t125']"]
+  ĐỎ  t164_M5_chot_fail_close_cua_bo_doc_kenh_deu_co_dau_vao_phan_biet: chốt fail-close KHÔNG giữ: ["nhãn không hợp lệ: KHONG_GIET — tập ca đỏ-chốt [] != đích ['t160_lech_AB_phai_giu_bang_chung_va_CHAN_tai_consumer_t125']"]
+lease_publish: 0/1 đạt; đã chạy=1, bỏ qua=0
+GUARD 10 chi tiết không phải chuỗi
+guard-10
+rc=0
+chốt fail-close của bộ đọc: 13/13 đầu vào cho KHÔNG ĐO ĐƯỢC
+lease_publish: 1/1 đạt; đã chạy=1, bỏ qua=0
+GUARD 11 thiếu bản ghi đóng lượt
+guard-11
+rc=0
+chốt fail-close của bộ đọc: 13/13 đầu vào cho KHÔNG ĐO ĐƯỢC
+lease_publish: 1/1 đạt; đã chạy=1, bỏ qua=0
+GUARD 12 bản ghi đóng lượt thiếu rc kiểu int
+guard-12
+rc=1
+chốt fail-close của bộ đọc: 12/13 đầu vào cho KHÔNG ĐO ĐƯỢC
+!!! do t164_M5_chot_fail_close_cua_bo_doc_kenh_deu_co_dau_vao_phan_biet chốt fail-close KHÔNG giữ: ['rc đóng lượt là bool: GIET — ']
+  ĐỎ  t164_M5_chot_fail_close_cua_bo_doc_kenh_deu_co_dau_vao_phan_biet: chốt fail-close KHÔNG giữ: ['rc đóng lượt là bool: GIET — ']
+lease_publish: 0/1 đạt; đã chạy=1, bỏ qua=0
+GUARD 13 rc đóng lượt
+guard-13
+rc=0
+chốt fail-close của bộ đọc: 13/13 đầu vào cho KHÔNG ĐO ĐƯỢC
+lease_publish: 1/1 đạt; đã chạy=1, bỏ qua=0
+GUARD 14 kênh KHÔNG có bản ghi ca nào
+guard-14
+rc=0
+chốt fail-close của bộ đọc: 13/13 đầu vào cho KHÔNG ĐO ĐƯỢC
+lease_publish: 1/1 đạt; đã chạy=1, bỏ qua=0
+GUARD 15 kênh có ca KHÔNG khớp tiền tố
+guard-15
+rc=0
+chốt fail-close của bộ đọc: 13/13 đầu vào cho KHÔNG ĐO ĐƯỢC
+lease_publish: 1/1 đạt; đã chạy=1, bỏ qua=0
+GUARD 16 đích RỖNG
+guard-16
+rc=1
+chốt fail-close của bộ đọc: 12/13 đầu vào cho KHÔNG ĐO ĐƯỢC
+!!! do t164_M5_chot_fail_close_cua_bo_doc_kenh_deu_co_dau_vao_phan_biet chốt fail-close KHÔNG giữ: ["đích RỖNG: KHONG_GIET — tập ca đỏ-chốt ['t160_lech_AB_phai_giu_bang_chung_va_CHAN_tai_consumer_t125'] != đích []"]
+  ĐỎ  t164_M5_chot_fail_close_cua_bo_doc_kenh_deu_co_dau_vao_phan_biet: chốt fail-close KHÔNG giữ: ["đích RỖNG: KHONG_GIET — tập ca đỏ-chốt ['t160_lech_AB_phai_giu_bang_chung_va_CHAN_tai_consumer_t125'] != đích []"]
+lease_publish: 0/1 đạt; đã chạy=1, bỏ qua=0
+GUARD 17 đích KHÔNG có mặt trong kênh
+guard-17
+rc=0
+chốt fail-close của bộ đọc: 13/13 đầu vào cho KHÔNG ĐO ĐƯỢC
+lease_publish: 1/1 đạt; đã chạy=1, bỏ qua=0
+GUARD 18 ca ĐỎ vì ngoại lệ KHÔNG phải TinHieuChotCa
+guard-18
+rc=0
+chốt fail-close của bộ đọc: 13/13 đầu vào cho KHÔNG ĐO ĐƯỢC
+lease_publish: 1/1 đạt; đã chạy=1, bỏ qua=0

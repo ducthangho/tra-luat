@@ -1,0 +1,16 @@
+absorption-live
+rc=1
+!!! do t160_lech_AB_phai_giu_bang_chung_va_CHAN_tai_consumer_t125 chẩn đoán phải giữ đúng vế 'không-actor=(rc=0, 2/2)': None
+lease_publish: 0/1 đạt; đã chạy=1, bỏ qua=0
+mixed-record original= ('KHONG_DO_DUOC', 'bản ghi vừa mang tên ca vừa khai đóng lượt')
+mixed-record guard-removed= ('GIET', '')
+absorption-t164-mixed
+rc=0
+chốt fail-close của bộ đọc: 13/13 đầu vào cho KHÔNG ĐO ĐƯỢC
+lease_publish: 1/1 đạt; đã chạy=1, bỏ qua=0
+outer-wrapper original= ('KHONG_DO_DUOC', "bộ đọc kênh ném TypeError: unhashable type: 'list'")
+outer-wrapper guard-removed ESCAPED TypeError unhashable type: 'list'
+absorption-t164-wrapper
+rc=0
+chốt fail-close của bộ đọc: 13/13 đầu vào cho KHÔNG ĐO ĐƯỢC
+lease_publish: 1/1 đạt; đã chạy=1, bỏ qua=0

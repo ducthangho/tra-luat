@@ -1,0 +1,7 @@
+materialization-live
+rc=0
+lease_publish: 1/1 đạt; đã chạy=1, bỏ qua=0
+direct original ('KHONG_GIET', "tập ca đỏ-chốt [] != đích ['t160_lech_AB_phai_giu_bang_chung_va_CHAN_tai_consumer_t125']")
+direct remove-B ('GIET', '')
+retry original readings= [('GIET', ''), ('GIET', '')] result= ('GIET', '')
+retry remove-A readings= [('GIET', ''), ('KHONG_DO_DUOC', 'đích RỖNG: không cấp GIẾT khi không ca nào phải chết')] result= ('KHONG_DO_DUOC', 'đích RỖNG: không cấp GIẾT khi không ca nào phải chết')

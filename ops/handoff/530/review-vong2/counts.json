@@ -1,0 +1,231 @@
+{
+  "changed_paths": [
+    "M\t.claude/dev/chon_reviewer.py",
+    "M\t.claude/dev/chon_reviewer_test.py",
+    "M\tops/lease_publish_test.py"
+  ],
+  "numstat": [
+    "1\t1\t.claude/dev/chon_reviewer.py",
+    "49\t4\t.claude/dev/chon_reviewer_test.py",
+    "995\t61\tops/lease_publish_test.py"
+  ],
+  "tree": "98ffde01a2bf14eb5150aa09044323ed20c71121",
+  "refs": {
+    "heads": 8,
+    "remotes": 365,
+    "tags": 39
+  },
+  "master_commits": 2178,
+  "shallow": "false",
+  "tables": {
+    "CA": 159,
+    "DOT_BIEN_512": 16,
+    "CONTROL_512": 10,
+    "CONTROL_BO_SUNG_512": 2,
+    "DOT_BIEN_TU_KIEM_512": 7,
+    "_VUNG_CAT_512": 4,
+    "CHOT_CO_DAU_VAO_PHAN_BIET_512": 3,
+    "CHOT_BI_HAP_THU_512": 4,
+    "NO_CHUA_CO_TU_KIEM_512": 2
+  },
+  "control_expected": {
+    "KHONG_DO_DUOC": 8,
+    "GIET": 2
+  },
+  "selftest_expected": {
+    "XANH": 1,
+    "DO": 6
+  },
+  "selftest_channel": {
+    "KHONG_GIET": 1,
+    "KHONG_DO_DUOC": 4,
+    "GIET": 2
+  },
+  "removed_name_exists": false,
+  "anchors26": {
+    "1": 16,
+    "2": 8,
+    "3": 2
+  },
+  "anchors28": {
+    "1": 18,
+    "2": 8,
+    "3": 2
+  },
+  "executables": [
+    6403,
+    89,
+    5848,
+    342,
+    349,
+    2315,
+    6075,
+    6303,
+    6369,
+    5911,
+    4287,
+    6007,
+    6167,
+    6380,
+    6998,
+    7260,
+    2402,
+    2317
+  ],
+  "signal_counts": {
+    "dc02c9b": 493,
+    "540b6f1": 503,
+    "a1c7d7f": 503,
+    "d5e7e7d": 504,
+    "3f1cda1": 504,
+    "36f68c7": 493
+  },
+  "added_lines": {
+    "dc02c9b": {},
+    "540b6f1": {
+      "code_data": 471,
+      "docstring": 89,
+      "blank": 67,
+      "comment": 137
+    },
+    "a1c7d7f": {
+      "code_data": 498,
+      "docstring": 89,
+      "blank": 67,
+      "comment": 148
+    },
+    "d5e7e7d": {
+      "code_data": 591,
+      "docstring": 118,
+      "blank": 82,
+      "comment": 204
+    },
+    "3f1cda1": {
+      "code_data": 591,
+      "docstring": 118,
+      "blank": 82,
+      "comment": 204
+    },
+    "36f68c7": {}
+  },
+  "historical_case_counts": {
+    "dc02c9b": 155,
+    "540b6f1": 158,
+    "a1c7d7f": 158,
+    "d5e7e7d": 159,
+    "3f1cda1": 159,
+    "36f68c7": 155
+  },
+  "m1_per_case": {
+    "t125_AB_toan_suite_KHONG_doi_verdict_theo_ambient_actor": {
+      "before": {
+        "bang": 3
+      },
+      "after": {
+        "chot": 3
+      }
+    },
+    "t153_nhat_ky_tung_ca_vao_ra_cap_doi_va_khong_dem": {
+      "before": {
+        "bang": 5
+      },
+      "after": {
+        "chot": 5
+      }
+    },
+    "t154_giet_ca_cay_thu_hoi_CHAU_chu_khong_chi_CON": {
+      "before": {
+        "bang": 10
+      },
+      "after": {
+        "chot": 10
+      }
+    },
+    "t157_tee_dua_dong_con_LEN_NGAY_trong_luc_con_CON_DANG_CHAY": {
+      "before": {
+        "bang": 6
+      },
+      "after": {
+        "chot": 6
+      }
+    },
+    "t158_tee_chi_song_khi_con_KHONG_DEM_nen_moi_truong_con_phai_TAT_DEM": {
+      "before": {
+        "bang": 7
+      },
+      "after": {
+        "chot": 7
+      }
+    },
+    "t160_lech_AB_phai_giu_bang_chung_va_CHAN_tai_consumer_t125": {
+      "before": {
+        "bang": 9
+      },
+      "after": {
+        "chot": 9
+      }
+    },
+    "t155_chon_ca_khong_khop_hoac_RONG_thi_KHONG_XANH": {
+      "before": {
+        "bang": 4
+      },
+      "after": {
+        "chot": 4
+      }
+    },
+    "t156_han_NGOAI_khong_nho_hon_tong_han_TRONG_va_duoi_tran_cung": {
+      "before": {
+        "bang": 11
+      },
+      "after": {
+        "chot": 11
+      }
+    },
+    "t159_t137_can_do_DU_ket_qua_va_dung_nhan_than_timeout": {
+      "before": {
+        "bang": 4,
+        "chot": 1
+      },
+      "after": {
+        "chot": 5
+      }
+    }
+  },
+  "old_case_AST_changes": [],
+  "v1": {
+    "bytes": 24341,
+    "sha256": "4505cdcededc159bba50def24658668e7f3b7397803d418881e0c2bfcf7aaacc",
+    "duration_s": 1801.441,
+    "recomputed_duration_s": 1801.441344,
+    "reported_stderr_bytes": 677628,
+    "rc": 0
+  },
+  "A5": {
+    "summary_rows": [
+      [
+        "[B]",
+        "159",
+        "159",
+        "159",
+        "0"
+      ],
+      [
+        "[A]",
+        "159",
+        "159",
+        "159",
+        "0"
+      ],
+      [
+        "",
+        "159",
+        "159",
+        "159",
+        "0"
+      ]
+    ],
+    "red_rows": 0,
+    "case_exits": 159,
+    "rc_file": "wrapper rc=0"
+  }
+}

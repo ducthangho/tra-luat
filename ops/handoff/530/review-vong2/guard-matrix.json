@@ -1,0 +1,97 @@
+[
+  {
+    "index": 0,
+    "guard": "kênh không tồn tại",
+    "t164_rc": 0
+  },
+  {
+    "index": 1,
+    "guard": "bản ghi không phải object",
+    "t164_rc": 0
+  },
+  {
+    "index": 2,
+    "guard": "có bản ghi SAU bản ghi đóng lượt",
+    "t164_rc": 1
+  },
+  {
+    "index": 3,
+    "guard": "bản ghi không neo đúng lượt",
+    "t164_rc": 1
+  },
+  {
+    "index": 4,
+    "guard": "dấu đóng lượt không phải bool true",
+    "t164_rc": 0
+  },
+  {
+    "index": 5,
+    "guard": "bản ghi vừa mang tên ca vừa khai đóng lượt",
+    "t164_rc": 0
+  },
+  {
+    "index": 6,
+    "guard": "bản ghi thiếu tên ca",
+    "t164_rc": 0
+  },
+  {
+    "index": 7,
+    "guard": "tên ca không phải chuỗi",
+    "t164_rc": 0
+  },
+  {
+    "index": 8,
+    "guard": "bản ghi TRÙNG",
+    "t164_rc": 1
+  },
+  {
+    "index": 9,
+    "guard": "nhãn không hợp lệ",
+    "t164_rc": 1
+  },
+  {
+    "index": 10,
+    "guard": "chi tiết không phải chuỗi",
+    "t164_rc": 0
+  },
+  {
+    "index": 11,
+    "guard": "thiếu bản ghi đóng lượt",
+    "t164_rc": 0
+  },
+  {
+    "index": 12,
+    "guard": "bản ghi đóng lượt thiếu rc kiểu int",
+    "t164_rc": 1
+  },
+  {
+    "index": 13,
+    "guard": "rc đóng lượt",
+    "t164_rc": 0
+  },
+  {
+    "index": 14,
+    "guard": "kênh KHÔNG có bản ghi ca nào",
+    "t164_rc": 0
+  },
+  {
+    "index": 15,
+    "guard": "kênh có ca KHÔNG khớp tiền tố",
+    "t164_rc": 0
+  },
+  {
+    "index": 16,
+    "guard": "đích RỖNG",
+    "t164_rc": 1
+  },
+  {
+    "index": 17,
+    "guard": "đích KHÔNG có mặt trong kênh",
+    "t164_rc": 0
+  },
+  {
+    "index": 18,
+    "guard": "ca ĐỎ vì ngoại lệ KHÔNG phải TinHieuChotCa",
+    "t164_rc": 0
+  }
+]

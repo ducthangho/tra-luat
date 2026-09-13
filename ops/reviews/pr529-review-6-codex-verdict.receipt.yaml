@@ -1,0 +1,274 @@
+# BIÊN NHẬN GIAO HÀNG — cross-review LƯỢT 6 của PR #529 (packet #523,
+# QUY-TRINH-LAP-REVIEW-VA-DIEU-KIEN-DUNG revision 7), KHÁC NỀN (codex), trên `00ac525`.
+# **`blocked`** — 0 P1 + 3 P2 + 0 P3 = 3 LỚP, 8 THỂ HIỆN.
+#
+# BIÊN NHẬN NÀY KHÔI PHỤC KHỐI CI mà biên nhận lượt 5 ĐÃ BỎ SÓT — chính là thể hiện thứ nhất của
+# lớp `bien-nhan-thieu-so-ci-da-chi` ở lượt này. Nghĩa vụ áp từ receipt 4 TRỞ ĐI, không chỉ receipt 4.
+
+schema_version: 2
+receipt_id: pr529-review-6-codex-20260913-5740a7d0
+kind: review_delivery_receipt
+packet_id: '523'
+packet_slug: 'QUY-TRINH-LAP-REVIEW-VA-DIEU-KIEN-DUNG'
+lease_id: quy-trinh-lap-review-r7-exec-6-claude-20260912
+phase_key: QUY-TRINH-LAP-REVIEW-R7-GEN6-PHIEN-20260913
+luot: 6
+role: reviewer
+provider: codex
+executor_provider: claude
+cross_provider: true
+assurance: advisory_review
+assurance_ghi_chu: >-
+  KHÔNG phải `cross_approved`: verdict là `blocked`. `sensitive` đòi `approve` TƯỜNG MINH, và `N8`
+  làm `N6` = KHÔNG ĐO ĐƯỢC **tự nó** chặn approve — lần thứ HAI liên tiếp.
+verdict: blocked
+verdict_path: ops/reviews/pr529-review-6-codex-verdict.md
+verdict_sha256: 1b3182327349f596fc00f8538af8a7598bfc7cc9647ab0874b71e7c0fbc2c293
+verdict_bytes: 28394
+reviewed_sha: 00ac525df3f874cb0034622983c8c64f3b5ffc0a
+reviewed_base: dc02c9beed42bd2ea44a80a2e34e1bbe3acfc6c5
+evidence_url: PENDING
+evidence_url_ghi_chu: >-
+  Điền trong MỘT commit RIÊNG sau khi biết commit ĐẦU TIÊN chứa tệp verdict (`git log --diff-filter=A`).
+  KHÔNG điền rồi `--amend`: amend là phép ĐỔI SHA, và ở lượt 3 nó đã làm `evidence_url` trỏ một
+  commit mồ côi chưa từng đẩy.
+
+ngan_sach_ci_loai_b: 0
+ngan_sach_ci_loai_b_nguon: >-
+  `M10` của chính packet này: chi CI loại (b) = 0 trước merge; `workflow_dispatch` và lane `windows`
+  gọi tay trước merge là loại (c) CẤM. Cộng chỉ thị chủ kho nguyên văn trong phiên:
+  *"CI Window gặp lỗi đã biết, để đỡ tốn tiền, không chạy CI Windows"*.
+da_chi_ci_loai_b: 0
+da_chi_ci_loai_b_run_id: []
+da_chi_ci_loai_b_do_the_nao: >-
+  Đếm từ trường `event` của TỪNG bản ghi `actions_list`, KHÔNG qua bộ lọc — vì bộ lọc đo được là
+  không đáng tin (`branch`, `workflow_id`, `event` đều từng bị bỏ qua; `event` có tác dụng lúc
+  `21:25:14Z` rồi bị bỏ qua lúc `21:43:38Z`/`21:44:07Z`; NGUYÊN NHÂN KHÔNG BIẾT, và giả thuyết
+  `minimal_output` đã bị BÁC bằng phép thử một biến). Trên 212 bản ghi gộp (hai trang, đã khử trùng
+  theo `id`): `workflow_dispatch` = **0** trong cửa sổ, và 29 lượt thuộc packet đều là
+  `push`/`pull_request`/`pull_request_target`. `launcher-windows.yml` KHÔNG có lượt nào cho packet.
+da_chi_ci_loai_b_gioi_han: >-
+  KHAI THẲNG BỐN GIỚI HẠN, và ba trong bốn là do lượt 6 BÁC lời khai của tôi chứ không phải tôi tự
+  thấy:
+  (1) MỐC MỞ PACKET TÔI LẤY SAI — ledger khai `14:32:59Z` (commit thi công ĐẦU TIÊN) trong khi lease
+      gen 1 ghi `leased_at_utc: 2026-09-12T08:15:00Z`. Mốc mở packet là LEASE, không phải COMMIT.
+      Đầu cửa sổ ledger (`10:41:10Z`) do đó BỎ MẤT **2 h 26 m 10 s** kể từ mốc ĐÃ BIẾT, và câu
+      *"phủ trọn vòng đời packet"* trong ledger là LỜI KHAI SAI ĐO ĐƯỢC. Đã tự đo lại và xác nhận:
+      `leased_at_utc` = `08:15:00Z`, chênh tới `10:41:10Z` đúng `2:26:10`.
+  (2) RAW TOÀN KHO VẮNG — reviewer tái đếm được `0 dispatch` trong 29 bản ghi ĐƯỢC NỘP, nhưng KHÔNG
+      tái đếm được `0/127` toàn kho, không kiểm được phân trang, và tổng `212` so với "hai trang ×100"
+      chưa được giải thích trong gói. Ba workflow "chưa từng chạy" là KẾT LUẬN SAU LỌC, không phải raw
+      cho phép kiểm việc lọc có bỏ sót.
+  (3) THIẾU `run_attempt`/jobs ⇒ KHÔNG phân biệt được lượt chạy lại, và KHÔNG chứng minh được số lượt
+      **loại (b)** — chỉ chứng minh được số sự kiện `dispatch`. Adapter xếp `workflow_dispatch` vào ví
+      dụ loại (c); "không có dispatch" KHÔNG đồng nhất mọi loại chi với 0.
+  (4) LEDGER ĐO "THỨ CÒN LẠI TRONG LỊCH SỬ", không đo "mọi lượt đã chi" — một run bị xoá vẫn có thể đã
+      tiêu lượt. Tôi CÓ khai giới hạn này trong ledger, và reviewer chỉ đúng chỗ tôi sai: khai giới hạn
+      rồi VẪN kết luận *"trọn vòng đời / mọi head / chưa từng một lần"* là DÙNG LỜI KHAI GIỚI HẠN ĐỂ
+      MIỄN NGHĨA VỤ. Trạng thái đúng của tổng thực đã chi là **KHÔNG ĐO ĐƯỢC**.
+  Số PHÚT billable KHÔNG phải đơn vị của `N6` — reviewer nói rõ thiếu phút KHÔNG phải lý do chặn.
+  Không lượt nào trong phiên này gọi `workflow_dispatch`, full CI hay lane `windows`; reviewer cũng
+  khai *"Không cáo buộc đã có chạy tay hay lane Windows"*.
+
+phan_loai_finding: theo_lop
+phan_loai_finding_ghi_chu: >-
+  `so_p1`/`so_p2`/`so_p3` đếm LỚP; `so_the_hien` đếm THỂ HIỆN. Reviewer gom ba đoạn prose của lớp
+  `dac-ta-r5-giu-luat-cu-trai-tieu-chi-moi` thành MỘT lớp / 3 thể hiện và nói rõ đó là *"cùng cơ chế
+  để phần giải thích cũ tiếp tục cấp nghĩa vụ sau khi rút tiêu chí, không phải ba lớp mới"*. Với
+  `bien-nhan-thieu-so-ci-da-chi` nó cũng gom raw thiếu + provenance thiếu + kết luận vượt tập quan sát
+  vào MỘT thể hiện suy luận, *"không đếm mỗi workflow hay mỗi trường thiếu thành một finding"*.
+so_p1: 0
+so_p2: 3
+so_p3: 0
+so_the_hien: 8
+findings_ids:
+  - slug: dac-ta-r5-giu-luat-cu-trai-tieu-chi-moi
+    hang: P2
+    the_hien: 3
+    doi_chieu: VÁ HỜ
+    vi_tri: ['SPEC:287-291', 'LEASE:121-125', 'LEASE:155-160']
+    ghi_chu: >-
+      SLUG GIỮ NGUYÊN — là khoá đếm giữa các lượt. Bốn đường tôi khai đã đóng là CÓ THẬT
+      (`four_old_routes_closed` cả bốn `true`), nhưng còn đường THỨ NĂM và hai chỗ trong lease:
+      `A18` vẫn quyết phép đo và cách dừng ở mục `chua_do_duoc` 5; `A17` vẫn làm căn cứ vận hành cho
+      `base_sha`; `A18` còn buộc BẢY ca ở khối xung đột lợi ích. Cả ba là PROSE GIẢI THÍCH, nằm
+      NGOÀI danh sách `dieu_kien_dung` mà tôi đã làm sạch.
+  - slug: phep-do-doctrine-khong-du-rang
+    hang: P2
+    the_hien: 2
+    doi_chieu: CHƯA VÁ
+    ghi_chu: >-
+      `S4` cấm packet này vá `packet_loop.py`; reviewer xác nhận `S4` cấm là ĐÚNG **và** vẫn giữ lớp
+      là finding hiện hành — hai thứ không loại trừ nhau, và nó KHÔNG dùng `S4` để miễn finding.
+      Hai phản chứng còn SỐNG: chép `ADR-0043:5` (101 ký tự) ⇒ `rc=0`; chép `§5.1` (2 501 ký tự) ⇒
+      `rc=0`. Đối chứng `§12` ⇒ `rc=6` ⇒ scanner CÓ chạy, CÓ độ nhạy một phần. CẦN CHỦ KHO quyết.
+  - slug: bien-nhan-thieu-so-ci-da-chi
+    hang: P2
+    the_hien: 3
+    ghi_chu: >-
+      Lớp LỊCH SỬ có thể hiện hiện hành, KHÔNG phải slug thứ ba của mục đối chiếu bắt buộc hai lớp.
+      (1) receipt lượt 5 thiếu nguyên khối ngân sách/số đã chi/run — biên nhận NÀY khôi phục;
+      (2) ledger lấy commit làm mốc mở packet thay vì lease ⇒ LỜI KHAI SAI ĐO ĐƯỢC;
+      (3) ledger dùng tổng hợp không kèm raw để khẳng định `0` và *"chưa từng chạy"*.
+
+loi_khai_bi_bac:
+  - loi_khai: >-
+      "r7 đóng cả lớp `dac-ta-r5-giu-luat-cu-trai-tieu-chi-moi` theo KIẾN TRÚC — bốn đường vào, và
+      r7 đóng cả bốn."
+    phan_do: >-
+      NỬA ĐÚNG, và nửa sai mới là phần đáng ghi. Bốn đường ĐÚNG là đã đóng (reviewer xác nhận). Nhưng
+      tôi khai đóng cả **CƠ CHẾ**, trong khi tôi chỉ đóng **DANH SÁCH `dieu_kien_dung`** — cơ chế thật
+      là *"prose giải thích tiếp tục cấp nghĩa vụ sau khi tiêu chí đã rút"*, và prose ấy còn sống ở ba
+      chỗ khác. Nguyên văn reviewer: *"sai là tuyên bố đã đóng cả cơ chế trong khi còn prose vận hành
+      ngoài danh sách đó"*.
+  - loi_khai: >-
+      "Ledger CI phủ TRỌN vòng đời packet, mốc mở `14:32:59Z`."
+    phan_do: >-
+      BỊ BÁC, và tôi đã TỰ ĐO LẠI và xác nhận reviewer đúng: lease gen 1 `leased_at_utc: 08:15:00Z`.
+      Mốc mở packet là LEASE, không phải COMMIT ĐẦU TIÊN. Cửa sổ bỏ mất `2 h 26 m 10 s`.
+      Đây đúng lớp *"lời khai rộng hơn phép đo"* — và nó nằm trong chính hiện vật tôi dựng để ĐÓNG `N6`.
+  - loi_khai: >-
+      "`EVIDENCE.md` kê đủ delta."
+    phan_do: >-
+      THIẾU: `EVIDENCE.md` chỉ tóm hai nhóm skill/review, còn `numstat` đầy đủ có thêm
+      `.claude/dev/chon_reviewer.py` `+1/−1` và `chon_reviewer_test.py` `+49/−4`. Reviewer tự liệt kê
+      cả hai, so blob với `d706abd` và xác nhận đúng là phần master merge vào — nên nó KHÔNG gọi đó là
+      executor viết ngoài phạm vi, và trần sản phẩm vẫn `201/300`. Nhưng bản tóm của tôi đã bỏ một
+      nhóm, và reviewer phải tự tìm ra.
+
+vi_sao_phep_quet_cua_toi_lai_cho_xanh_LAN_THU_HAI: >-
+  ĐÂY LÀ PHẦN ĐÁNG GHI NHẤT CỦA LƯỢT NÀY, vì nó là lần thứ HAI LIÊN TIẾP cùng một kết cục với một
+  nguyên nhân KHÁC — nên bài học cũ không che được nó.
+  Lượt 5: tôi quét theo TÊN (`A9'` có dấu phẩy trên) trong khi văn bản viết `A9` không dấu ⇒ 0 dòng.
+  Lượt 6: tôi ĐÃ SỬA đúng chỗ đó — viết chốt theo KHÁI NIỆM (`K1` công thức CỘNG, `K3` con trỏ kế
+  thừa), có miễn trừ theo VỊ TRÍ CẤU TRÚC (hàng bảng RÚT) chứ không theo cụm từ, và có HAI đột biến
+  chứng minh răng (bơm lại công thức ⇒ đỏ; bơm lại câu kế thừa ⇒ đỏ) cộng đối chứng dương trên chính
+  r6 (đỏ đúng hai chỗ `112` và `305`). Chốt ấy SẠCH THẬT, và reviewer xác nhận bốn đường đã đóng.
+  CHỖ HỎNG NẰM Ở LUẬT THỨ BA: `K2` (viện dẫn tiêu chí đã rút) tôi thấy regex không tách được câu
+  VẬN HÀNH với câu KỂ LẠI LỊCH SỬ, nên tôi **tự hạ nó xuống thành BÁO CÁO cho người đọc** — rồi
+  chính tôi đọc **cả 10 đoạn** `K2` thành *lịch sử*, trong đó **BA đoạn là VẬN HÀNH**.
+  HÌNH DẠNG: hạ một chốt xuống thành báo cáo rồi tự mình làm người phán là **BỎ chốt**, không phải
+  GIỮ chốt — và nó tệ hơn không có chốt, vì bản báo cáo cho cảm giác đã soi tới nơi. Cùng họ với
+  *"một phép kiểm không thể đỏ thì không phải bằng chứng"*, chỉ khác chỗ: phép kiểm này CÓ THỂ đỏ,
+  nhưng tôi đã tháo ngòi nó bằng tay.
+  KÈM MỘT PHÉP ĐO SUÝT SAI THEO CHIỀU NGƯỢC LẠI, ghi ra vì nó cân bằng bức tranh: tôi suýt tố `S11'`
+  trỏ sai `ngoai_pham_vi` 11; đo ra nó ĐÚNG — tệp có HAI danh sách đánh số và tôi nhìn nhầm danh
+  sách. Cùng một thói quen (đọc bằng mắt thay vì đo) hỏng được cả hai chiều: bỏ sót VÀ tố oan.
+
+doi_chieu_luot_truoc:
+  - slug: dac-ta-r5-giu-luat-cu-trai-tieu-chi-moi
+    phan: VÁ HỜ
+  - slug: phep-do-doctrine-khong-du-rang
+    phan: CHƯA VÁ
+
+nghia_vu_N1_N8:
+  N1: ĐẠT
+  N2: ĐẠT
+  N3: ĐẠT
+  N4: ĐẠT
+  N5: ĐẠT
+  N6: KHÔNG ĐO ĐƯỢC
+  N7: ĐẠT
+  N8: ĐẠT
+nghia_vu_ghi_chu: >-
+  `N7` ĐẠT nghĩa là `missing_text_prevents_measurement=[]` — reviewer dựng được thước cho CẢ SÁU
+  nghĩa vụ TỪ VĂN BẢN. Nên `N6` KHÔNG ĐO ĐƯỢC là **thiếu DỮ KIỆN**, không phải thiếu chữ, và reviewer
+  từ chối xếp nó vào `N7`. `N8` ĐẠT nghĩa là chốt ĐÃ THI HÀNH: `N6` tự nó chặn approve.
+  `H6` đo `N1`–`N8` **byte_identical** giữa r6 và r7 ⇒ lời khai *"giữ NGUYÊN VĂN"* của r7 là ĐÚNG.
+
+model_reviewer_identity:
+  provider: openai_codex
+  surface: codex_cli
+  transport: machine
+  model_yeu_cau: KHONG_KHAI
+  model_da_chay: >-
+    `gpt-6-astra` theo header CLI trong `stderr.log` của lượt phóng. GIỚI HẠN: reviewer TỰ KHAI trong
+    verdict rằng nó *"không có header CLI/modelUsage của lượt này để xác thực model cụ thể"* và
+    *"không suy danh tính model/effort thực thi từ receipt cũ"*. Nên đây là phép đo từ PHÍA EXECUTOR
+    (stderr của tiến trình đã phóng), KHÔNG phải lời tự xác thực của reviewer, và KHÔNG có `modelUsage`.
+  effort: KHONG_KHAI
+  session_run_id: 5740a7d0
+  run_id_day_du: 5740a7d0a03147d1a9311b4fa283b1e7
+  prompt_sha256: 4f387ba1124f07ba3568b7b614bff42a6c06693f0449a2aaa83c8a72ba1c86a3
+  bat_dau_utc: '2026-09-13T00:30:05.518732+00:00'
+  ket_thuc_utc: '2026-09-13T00:44:13.040817+00:00'
+  thoi_luong_giay: 847.52
+  ma_thoat: 0
+  trang_thai: xong
+  stdout_byte: 585
+  stdout_sha256: 124576bf2a8adfe5f296b26444d28fe13a36183bf1231fa7d36003c96b241d50
+  stderr_byte: 538266
+  stderr_sha256: eecdef87cb50a510a7783c2ea86cdc551f9348dfc0ece6c0685736e9d767ec9a
+  so_lan_chet_truoc_khi_xong: 0
+  prompt_kin_hoan_toan: false
+  neo_kho: >-
+    `--expected-head 00ac525df3f874cb0034622983c8c64f3b5ffc0a` · `--require-clean` ·
+    `--expected-prompt-sha256` đi CẶP với `--prompt-file` · `--deadline-utc 2026-09-13T01:15:04Z`.
+    `run.json` ghi `worktree_sach: true`, `workspace: /tmp/claude-0/rv523g/cay`,
+    `provider: openai_codex`, `execution_surface: codex_cli`, probe `workspace`/`ghi` đều ĐẠT.
+  lan_phong_hong_truoc_do: >-
+    MỘT lần, và ghi ra vì cách nó hỏng là bài học: lượt phóng đầu dùng cờ `--thu-muc-ra`/`--nhan`
+    KHÔNG TỒN TẠI (đúng là `--run-root`/`--name`) ⇒ launcher thoát `rc=2` và **0 `run.json`** được
+    sinh — trong khi thông báo nền vẫn báo *"exit code 0"* vì đó là mã của SHELL NỀN, không phải của
+    launcher. Phát hiện được vì đo SỰ TỒN TẠI của `run.json`, không tin mã thoát được thuật lại.
+
+bang_san:
+  so_huong: 6
+  doc_lap_voi_N1_N8: true
+  ids: ['H1 S12′ có răng hay chỉ là lời khuyên', 'H2 bỏ kế thừa có mất ràng buộc',
+        'H3 khoảng trống S8 và S12 ngoài bullet', 'H4 parity từng điều kiện spec↔lease',
+        'H5 hai chiều thay thế gen5↔gen6', 'H6 r7 có lén đổi nghĩa vụ khi khai giữ NGUYÊN VĂN']
+  khong_lop_moi_tu_sau_huong: true
+  ket_qua_dang_chu_y: >-
+    `H1`: `S12'` có răng **ở nghĩa vụ đọc**, KHÔNG có cổng máy — `gate_mentions_S12=false`,
+    `gate_reads_dieu_kien_dung=false`. Reviewer KHÔNG biến giả thuyết thành finding và KHÔNG tự phán
+    tôi vi phạm `S12'`. `H5`: `_kiem_bia_mo` gốc `rc=0`, xoá backlink `rc=8`, backlink sai `rc=8` ⇒
+    bia mộ hai chiều CÓ đối chứng cả dương lẫn âm. `H2`: bỏ kế thừa KHÔNG làm mất ràng buộc nào.
+
+tuan_thu_cam_cua_reviewer: >-
+  Không gọi mạng, không push, không chạm kho thật; `cay/` giữ `status --porcelain` rỗng; đột biến chỉ
+  ở bộ nhớ và `review-artifacts/`; commit/tree thử nằm trong kho Git RIÊNG của reviewer.
+  KHÔNG tự soạn payload nhạy cảm — reviewer khai thẳng *"không có phép thử kiểu đó được tự soạn trong
+  lượt này"* và mô tả bằng lời đường đo nếu điều phối muốn.
+sai_sot_thuoc_cua_reviewer_tu_khai: >-
+  Reviewer TỰ KHAI và TỰ SỬA CÔNG KHAI hai lỗi thước của chính nó, đánh dấu output ấy KHÔNG dùng làm
+  finding: `N5` lần đầu tìm nhầm heading `3.2. `; `H5` lần đầu thiếu Git rồi thiếu ref chứa blob.
+  Ghi vào đây vì đó là thứ phân biệt một reviewer ĐO với một reviewer PHÁN.
+reviewer_khong_muon_so_cua_executor: >-
+  Nguyên văn: *"các số 1710/1710 và CI success trong EVIDENCE không được biến thành kết quả reviewer
+  tự chạy"*. Reviewer KHÔNG chạy lại full selftest/release-verify và KHÔNG truy cập CI live ở lượt này.
+
+github_submitter_identity:
+  actor: ducthangho
+  la_tac_gia_PR: true
+  ghi_chu: '`ADR-0040`: verdict do tài khoản tác giả PR vận chuyển KHÔNG là merge authorization.'
+  phien_van_chuyen: https://claude.ai/code/session_01HZNBRUZKM2mbeA8sVyjcKQ
+anchor:
+  loai: canonical_ancestry
+  cuong_do: vua
+  mo_ta: >-
+    Blob verdict ghim ở commit ĐẦU TIÊN chứa tệp; `00ac525` là tổ tiên của commit ấy.
+    Hiện vật lượt chạy neo kèm: `run_id` `5740a7d0a03147d1a9311b4fa283b1e7`, `ma_thoat` 0,
+    `trang_thai` `xong`, `thoi_luong_giay` 847,52, `stderr` 538 266 B.
+  gioi_han: >-
+    `00ac525` CHƯA vào master — PR còn mở, `blocked` lần thứ TƯ. Mỏ neo canonical chỉ thành lập sau
+    khi land bằng merge commit hoặc fast-forward.
+  hien_vat_on_dinh: >-
+    `mtime` của VERDICT.md = `00:43:36Z`, TRƯỚC `ket_thuc_utc` = `00:44:13Z` 37 giây; ba phép băm
+    cách nhau 6 s cho CÙNG `1b318232…` / 28 394 B. (Lượt 3 đã trả giá vì đọc một bản chưa ổn định.)
+
+khong_do_duoc:
+  - Tổng CI thực đã chi của packet — ledger chỉ chứng minh phép đếm trên TẬP 29 BẢN GHI đã nộp.
+  - Mốc mở Issue chính xác (raw chưa có); mốc ĐÃ BIẾT và dùng được là lease gen 1 `08:15:00Z`.
+  - Hành vi thực tế của executor trước lúc đóng băng r6/r7 đối với `S12'` — không có trace.
+  - Sự tuân thủ runtime của agent nói chung; và tính đúng tổng quát của mô hình "adapter tối thiểu".
+
+delivered: true
+delivered_by: claude-session
+authoritative_source: repo_file
+receipt_written_by: claude-session
+receipt_written_at_utc: null  # KHÔNG ĐO ĐƯỢC — git chỉ cho commit time.
+recorder_cung_la_nguoi_thi_cong: true
+receipt_khong_khai: >-
+  KHÔNG khai `cross_approved`, KHÔNG khai lớp nào đã đóng, và KHÔNG khai `N6` đã đóng. Ba lớp còn mở;
+  một trong ba (`phep-do-doctrine-khong-du-rang`) nằm NGOÀI write set và cần chủ kho quyết.

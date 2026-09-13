@@ -1,0 +1,60 @@
+# BIÊN NHẬN GIAO HÀNG — cross-review LƯỢT 9 của packet GATE-TACH-JOB-CAT-CHI-PHI (#463).
+#
+# LƯỢT NÀY LÀ HIỆN VẬT GỐC (khác lượt 8, vốn là bản đo lại): vòng giám sát đã được vá sau sự cố
+# lượt 8 — đọc kết luận bằng `grep -m1` trên TOÀN tệp thay vì `tail -n 5`, cộng sao lưu trước mỗi
+# lần phóng. Đo được hiệu lực của bản vá ấy: lần 1 xong lúc 01:48:13Z, vòng lặp ĐỌC ĐƯỢC dòng
+# `verdict:` và DỪNG — không có lần 2, không có phiên mới nào ghi đè.
+#
+# ĐIỀU KIỆN DỪNG §12: finding P2 còn lại mang ĐÚNG slug của lượt 7 và lượt 8. Ba lượt liên tiếp,
+# cùng MỘT hình dạng (15 cửa: 3 + 4 + 8), mỗi bản vá đều ĐÚNG và có răng nhưng HẸP. Reviewer tự
+# kết luận độc lập: *"Cùng hình dạng qua nhiều lượt cần xem lại cách biểu diễn hợp đồng theo §12,
+# không chỉ nối thêm ca lẻ."* Phiên thi công DỪNG và hỏi chủ kho thay vì vá lần thứ tư.
+
+schema_version: 1
+kind: review_delivery_receipt
+packet_id: GATE-TACH-JOB-CAT-CHI-PHI
+packet_issue: 463
+revision: 21
+lease_id: gate-tach-job-cat-chi-phi-exec-2r10-claude-20260912
+provider: codex
+role: reviewer
+verdict: changes_requested
+reviewed_sha: dcd70395399808ef2acb02fae84993898bd3dccc
+verdict_path: ops/reviews/gate-tach-job-cat-chi-phi-review-9-codex-verdict.md
+verdict_sha256: 76493b22c0a088a7a08dd9796bf4828c9fa6a8a93f6527a6c514836bbf879d45
+verdict_bytes: 32483
+finding_theo_muc:
+  P1: 0
+  P2: 1
+  P3: 0
+so_huong_san: 10
+doi_chieu_luot_8:
+  ruff-khuon-chua-chung-minh-provisioning: VÁ SINH LỖI MỚI — ca cũ có răng đúng, nhưng H1-H8/H10 còn phản
+    ví dụ; codec utf_8 nay bị CHẶN OAN (lượt 8 nhận, head từ chối, Python chạy thật rc=0).
+  ruff-phan-chung-ghim-nhan-tin-dung-tu-probe: 'ĐÃ VÁ THẬT — bỏ chốt ghim: main rc=1, chỉ ruff-pin-required
+    LỌT trong 111 ca.'
+  rang-luot7-nhan-bo-khong-chay-la-nen-sach: ĐÃ VÁ THẬT — known-answer trả (False, 0, set()), predicate
+    nền False.
+  B_cong_cu_kiem_hop_dong: CHƯA VÁ trên HEAD nhưng ĐÚNG S1/A8 — thêm vào packet là đường dẫn thứ ba; reviewer
+    xác nhận không yêu cầu làm vậy.
+dieu_kien_dung_12:
+  hinh_dang: hợp đồng TĨNH đọc YAML tự nhận chứng minh được điều RUNTIME (shell + khởi động Python) sẽ
+    xảy ra
+  so_luot_lap: 3
+  so_cua_da_do:
+    luot_7: 3
+    luot_8: 4
+    luot_9: 8
+  goc: chốt thứ TƯ (env) do phiên thi công tự thêm ở lượt 7, KHÔNG có trong M7 của lease cũng KHÔNG có
+    trong A7 của spec r21 (A7 chỉ đòi 4 fixture về BỐ CỤC JOB).
+  trich_reviewer: Cùng hình dạng qua nhiều lượt cần xem lại cách biểu diễn hợp đồng theo §12, không chỉ
+    nối thêm ca lẻ.
+evidence_channel: repo_file
+authoritative_source: repo_file
+delivered: true
+delivered_by: claude-session
+receipt_written_by: claude-session
+khong_khai:
+- 'Không khai model/effort thực sự đã chạy: verdict ghi rõ không tự xác minh được qua tool.'
+- Không khai A1/A5 — CẤM chạy CI ở giai đoạn này, nên KHÔNG ĐO ĐƯỢC.
+- 'Không khai packet đã sẵn sàng land: còn 1 P2 mở và chưa có approve tường minh (review_class = sensitive).'

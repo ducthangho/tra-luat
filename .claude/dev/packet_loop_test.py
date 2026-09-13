@@ -2736,11 +2736,14 @@ def case_wp320_invalid_inputs(c: Ctx):
     bad.write_text("{", encoding="utf-8")
     missing = c.tmp / "missing.json"
     missing.write_text('{"he_dieu_hanh": "Windows"}', encoding="utf-8")
-    
+    missing_file_path = c.tmp / "nonexistent.json"
+    if missing_file_path.exists():
+        raise AssertionError("WP320 diagnostic: Missing file fixture already exists")
+
     inputs = [
         ("absent flag/environment", [], {BIEN_BC: ""},
          ["không có ảnh môi trường", "''"]),
-        ("missing file", ["--bang-chung-moi-truong", "nonexistent.json"], None,
+        ("missing file", ["--bang-chung-moi-truong", str(missing_file_path)], None,
          ["không có ảnh môi trường", "nonexistent.json"]),
         ("malformed JSON", ["--bang-chung-moi-truong", str(bad)], None,
          ["không đọc được", "JSONDecodeError"]),
@@ -2753,17 +2756,17 @@ def case_wp320_invalid_inputs(c: Ctx):
         sd = c.sd()
         _doi(0, *c.init(sd)[0:1], b"", "init")
         rc, o, e = run(c.script, ["begin-attempt", "--packet", 55, "--provider", EXECUTOR] + args, sd, env_extra=env_extra)
-        
+
         err_msg = _txt(e)
         msgs.add(err_msg)
-        
+
         if rc != 10:
             raise AssertionError(f"WP320 diagnostic {name}: expected rc=10, got {rc}. err: {err_msg!r}")
-            
+
         for substr in expected_substrs:
             if substr not in err_msg:
                 raise AssertionError(f"WP320 diagnostic {name}: expected {substr!r} in {err_msg!r}")
-                
+
         st = json.loads((sd / "wp55.json").read_text(encoding="utf-8"))
         if st["attempts_used"] != 0 or st["attempt_open"]:
             raise AssertionError(f"WP320 diagnostic {name}: state not isolated (attempts={st['attempts_used']}, open={st['attempt_open']})")

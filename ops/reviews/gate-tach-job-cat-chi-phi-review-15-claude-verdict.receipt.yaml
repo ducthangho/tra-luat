@@ -1,0 +1,70 @@
+schema_version: 2
+kind: review_delivery_receipt
+receipt_id: gate463-r23-g4-review15-claude
+packet_id: GATE-TACH-JOB-CAT-CHI-PHI
+packet_issue: 463
+revision: 23
+generation: 4
+lease_id: gate-tach-job-cat-chi-phi-exec-5-codex-20260914-r23
+provider: claude
+role: reviewer
+verdict: changes_requested
+reviewed_sha: e5e8e2390db1c4a68ad0ee6febdf7d6ed0a39582
+reviewed_tree: 2046f927fe8375c0bd98f2dc2d6a23fab1c14da9
+verdict_path: ops/reviews/gate-tach-job-cat-chi-phi-review-15-claude-verdict.md
+verdict_sha256: 36f700a3c08e1d2b3bb53db4bdc8f4f015abdb7c66cfabbf0245788edc6229e0
+evidence_url: https://github.com/ducthangho/tra-luat/blob/ca5e9cda856d1ed2cb94ab024a6f2fdd784cf309/ops/reviews/gate-tach-job-cat-chi-phi-review-15-claude-verdict.md
+model_reviewer_identity:
+  provider: anthropic_claude
+  surface: claude_code
+  transport: machine/local
+  model: claude-fable-5
+  effort: max
+  session_run_id: 14967d80-0caf-4723-997b-d543fb7396ab
+  phien_doc_lap: true
+  neo_boi_launcher: true
+github_submitter_identity:
+  actor: ducthangho
+  recorded_by: codex
+  reviewer_is_submitter_identity: false
+anchor:
+  loai: canonical_ancestry
+  cuong_do: Immutable Git blob; ancestry measured against evidence-branch HEAD, NOT
+    master; no required-check authority.
+  evidence_branch: codex/gate-463-review-evidence-20260913
+  evidence_commit: ca5e9cda856d1ed2cb94ab024a6f2fdd784cf309
+model_output_path: ops/reviews/gate-tach-job-cat-chi-phi-review-15-claude-model-output.json
+model_output_sha256: 62d323e2b855a45859b36fe42a8d86f0488ff96bde5d243aeaeae978e3f48510
+launcher_run_sha256: 2a559d5331743455d34e6916c98b92045f8064385945687f059709fba3a97526
+model_validation: 'modelUsage: ĐẠT; tập model chính=[''claude-fable-5'']; mô hình
+  phụ bỏ qua=[''claude-haiku-4-5-20251001'']'
+hunt_table_validation: passed
+source_and_review_trees_clean: true
+review_axes:
+- spec
+- standards_security
+review_classes:
+- installer_domain
+- lexer_composition_order
+- consumer_spec_workflow
+ci: not_run
+A1: not_run
+A5: not_run
+merge_authorized: false
+transport_note: 'Canonical launcher and reviewer transport: machine/local.'
+master_at_review_start: c16bd3293a9d2dc7a8a789b99d77057cb02ce374
+master_at_delivery: c16bd3293a9d2dc7a8a789b99d77057cb02ce374
+integration_with_new_master: not_measured
+clean_observation_note: Git HEAD/tree/status checked at completion; this does not
+  prove no writes during the run.
+unaccepted_addendum:
+  status: failed
+  reason: model yêu cầu 'claude-fable-5' có mặt nhưng còn mô hình LẠ ['claude-opus-4-8',
+    'claude-opus-5']; mô hình phụ=[]
+  verdict_path: ops/reviews/gate-tach-job-cat-chi-phi-review-15-claude-addendum-IDENTITY-FAILED.md
+  verdict_sha256: 90d3e4db81d8b71109c07d007a9fac86d5fbec9218870b126b1676e9b0be1b8c
+  model_output_path: ops/reviews/gate-tach-job-cat-chi-phi-review-15-claude-addendum-IDENTITY-FAILED-model-output.json
+  model_output_sha256: 5a322108b3d72f7b65e82f69d67d3befe01ed3276070b782b982554e327333d7
+  validation_path: ops/reviews/gate-tach-job-cat-chi-phi-review-15-claude-addendum-IDENTITY-FAILED-validation.json
+  assurance_granted: false
+  supersedes_main: false

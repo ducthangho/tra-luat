@@ -1,9 +1,9 @@
-# Đặc tả packet — GATE-TACH-JOB-CAT-CHI-PHI (revision 21)
+# Đặc tả packet — GATE-TACH-JOB-CAT-CHI-PHI (revision 22)
 
 - `packet_id`: **GATE-TACH-JOB-CAT-CHI-PHI**; ID bền theo `PROTOCOL §3.2` là `wp<packet_issue>`.
 - `packet_issue`: **#463**
 - `mission_issue`: **#467** (*"bốn packet treo sau #456: GATE → LO-319 → 2A → 2B"*)
-- `revision`: **21** · `generation`: 1 · soạn **11:3xZ 11-09-2026**; `A5` r13 **10:0xZ 12-09-2026**;
+- `revision`: **22** · `generation`: 3 · soạn **11:3xZ 11-09-2026**; `A5` r13 **10:0xZ 12-09-2026**;
   r14 (A8 400 + F03/F04/F05) **11:4xZ 12-09-2026**; r15 (F04 lượt 2 — **XOÁ** câu bị thay thay vì
   nối thêm đính chính) **13:5xZ 12-09-2026**; r16 (`R3-F04` lượt 3 — cửa THỨ BA của cùng lớp ấy ở
   `A5`, ánh xạ manifest hai lane của `A2`, và bẫy `on:` là boolean ở `A3(3)`) **14:2xZ 12-09-2026**;
@@ -17,7 +17,21 @@
   sống, cấp `14:05Z 11-09-2026`), **KHÔNG** còn là `T125-RA-JOB-RIENG`: đặc tả ấy đã **RÚT** vì `#504`
   nhận cùng vấn đề bằng đường chủ kho chọn (song song hoá `t125` trong bộ test, giữ nguyên ngữ nghĩa)
   thay vì tách job. **Packet này không được cấp lease trước khi cả hai land.**
-- `executor`: claude · `environment`: cloud
+- `executor`: codex · `environment`: local
+- `execution_surface`: codex_desktop · `transport`: machine · `model`: gpt-6-astra · `effort`: xhigh.
+- `reviewer_provider`: claude; review độc lập theo hợp đồng sensitive.
+- Chỉ thị hiện hành của chủ kho: https://github.com/ducthangho/tra-luat/issues/463#issuecomment-5652199891 — tiếp tục sau checkpoint §12 và nâng
+  trần dòng riêng packet theo A8. Không đổi trần thời gian run, không reset lịch sử finding/review.
+- Chỉ thị tiếp tục và vòng review theo lớp lỗi: https://github.com/ducthangho/tra-luat/issues/463#issuecomment-5652442299.
+  Lặp vá, review Claude độc lập và đăng từng verdict đến approve trên exact SHA; giữ lịch sử
+  stable finding, cho tiếp tục checkpoint theo chỉ thị này thay giới hạn một attempt của bản nháp.
+  Mỗi run giữ checkpoint 90 phút; không CI trước merge, không tự merge/land/deploy/LIVE.
+- Miền công khai: các lệnh cài Ruff/probe/registry khai báo trực tiếp trong YAML là chuỗi lệnh
+  đơn với đối số tĩnh, quoting POSIX hợp lệ, ngăn bằng newline, `;` hoặc `&&`, khớp grammar
+  invocation được công bố trong consumer; dạng liên quan ngoài miền phải bị từ chối.
+  Không chứng minh cài ẩn trong script/`python -c`; không thêm chốt env.
+- Chỉ thị chi phí đang hiệu lực: KHÔNG chạy CI dưới mọi hình thức, không mở PR/dispatch.
+  A1/A5 chưa đo được; các lệnh kiểm tra cục bộ nêu trong handoff vẫn được phép.
 - `risk`: **sensitive** · `review_class`: **sensitive** (`.github/workflows/` — `PROTOCOL §8` loại trừ
   tường minh khỏi patch-as-hint; đây là ĐỊNH NGHĨA của cổng, không phải mã dưới cổng)
 - `base_sha`: đo lại tại lúc cấp lease. Ba mỏ neo (`base_sha` · `start_from_sha` ·
@@ -126,8 +140,8 @@ cách chữa không phải sửa cho khớp mà là **thôi nhắc lại con s�
 `.github/actions/…` khi chật trần. Lối ấy thêm **một đường dẫn thứ ba** vào write set, tức
 **vi phạm chính `A8`** (đòi đúng **2** đường). Một đặc tả không được đồng thời cấm và mời một
 phương án. **Vượt trần hiệu lực (con số ở `A8`) ⇒ DỪNG và hỏi chủ kho**, không tự xin ngoại lệ, không tự mở
-write set. Luật này **đã chạy thật ba lần** (`300 → 400` r14, `400 → 430` r17, `430 → 500` r20+r21):
-cả ba lần phiên thi công dừng ở số đo và hỏi, không tự nới.
+write set. Chỉ thị hiện hành về hạn mức được neo tại A8; mọi thay đổi tiếp theo cần authority
+của chủ kho, không suy từ các ngoại lệ lịch sử.
 
 ## `write_set`
 
@@ -598,44 +612,16 @@ Hai phản chứng sẵn có `ruff-pin-required` và `ruff-version-probe-require
 **Phép làm ĐỎ:** đột biến `loi_ruff_ci` quay về đọc `jobs.gate` ⇒ ca **2** ĐỎ.
 
 **A8 (toàn packet) — không đụng gì khác.** `git diff --numstat` chỉ hiện đúng **2** đường dẫn, cột
-`additions` ≤ **500** (ngoại lệ CÓ PHẠM VI, xem dưới; đây là trần hiệu lực DUY NHẤT của packet). Đường thứ ba ⇒ **DỪNG và hỏi chủ kho**,
+`additions` ≤ **1000** (ngoại lệ CÓ PHẠM VI, xem dưới; đây là trần hiệu lực DUY NHẤT của packet). Đường thứ ba ⇒ **DỪNG và hỏi chủ kho**,
 không tự xin ngoại lệ, không tự mở write set (`§3.2`: *"agent không tự mở write set"*).
 
-**Ngoại lệ trần dòng — BA lần, đều CÓ PHẠM VI, đều do chủ kho quyết sau khi phiên thi công DỪNG
-và hỏi.** Trần `ADR-0044` cho `sensitive` là `300`; packet này lên **`400`** (r14, `#463` comment
-5645742072), rồi **`430`** (r17, sau cross-review lượt 3), rồi **`450`** (r20, sau lượt 6), nâng tiếp thành **`500`** ở r21 — **vẫn là lần nới thứ BA**, chỉ là con số cuối cùng của nó.
-**RIÊNG** packet này,
-**KHÔNG** đổi `ADR-0044`, **KHÔNG** là tiền lệ.
-**Căn cứ lần thứ hai, đo được:** tại `12ca9b3` `additions = 414`, phân rã `ci.yml` **154** +
-`ci_dang_ky_test.py` **260**. Vế `ci.yml` **không nén được** — nó là 9 bước thiết lập nhân đôi cho
-hai job mới, và lối composite bị **chính `A8`** cấm vì thêm đường dẫn thứ ba. Vế còn lại có `84`
-dòng chú thích; cắt `14` dòng là đủ xuống `400` nhưng mất phần ghi **VÌ SAO** ba đột biến từng sống
-sót — đúng lý lẽ mà lần nới thứ nhất đã dùng để bác lối ấy. Bỏ bớt fixture thì **đo được là mất
-răng**: bỏ nhóm toán tử PEP 440 ⇒ đột biến `l3-quay-ve-tach-bang-hai-dau-bang` sống lại; bỏ
-`ghim-noi-dong` ⇒ survivor `l3-bo-noi-dong-logic` của reviewer sống lại. `so_tep = 2` **không** nới — bán kính ảnh hưởng vẫn là chốt, và `S1` nguyên vẹn.
-Căn cứ đo được: tại `d4ba096` `additions = 302`, đã nén hết chỗ nén được (`304 → 302`). Hai lối còn
-lại đều **xoá phép đo**: cắt chú thích thì mất bài học *"vì sao đột biến thứ ba từng sống sót"*; bỏ ca
-`apt` thì đột biến `khong-fail-close` **sống lại** ⇒ nhánh fail-close thành không đo được. Nới trần là
-lối duy nhất giữ được cả phản chứng lẫn bài học.
-**Căn cứ lần thứ ba (`430 → 450` ở r20, chốt ở `500` tại r21), đo tại `201bd7a` = `438`:** lượt nới này trả cho một bản vá
-**ĐƠN GIẢN HƠN** — lớp `A` của cross-review lượt 6 **XOÁ** ba danh sách CẤM (`_TRINH_QL_GOI` 16 ·
-`_CO_HUY_BANG_CHUNG` 7 · `_TOAN_TU` 10 = **33** cửa) và thay bằng **một** khuôn được công nhận,
-mặc định fail-close. `additions` vẫn tăng vì nó đếm cả dòng VIẾT LẠI, không đếm độ phức tạp.
-Lý do buộc phải đảo, đo được trước khi vá: `pdm|rye|hatch remove ruff` và
-`--install-option=--prefix=/x` đều ra `GHIM`; `--target=tmp` và `-ttmp` lọt vì phép so là BẰNG
-TOKEN. Cấp fixture cho từng phần tử chỉ khoá chặt một danh sách **chứng minh được là không đủ**.
-**Vì sao con số cuối là `500` chứ không phải `450`:** chỉ thị chủ kho 12-09-2026, nguyên văn
-*"Nâng trần lên 500 cho PR này"* (dấu vết bền: `#463` comment 5647249353), đến **sau** khi r20 đã
-chốt `450`. Lý do đo được: lượt 6 còn **bốn lớp chưa đóng** trên cây packet (`B`/`C`/`D` nằm ở
-nhánh `ops/cap-lease-463` chứ **không** ở nhánh packet; `E` còn mở), mỗi lớp đóng bằng phản chứng
-có răng nên còn thêm dòng. `450` cho biên **12** dòng trên số hiện tại — đủ hẹp để hẹn thêm một
-lần hỏi **giữa** vòng lặp vá, mà mỗi lần hỏi là một lần đứt mạch chứ không phải một lần kiểm soát.
-`500` là cùng MỘT lần nới, chốt ở con số không phải hỏi lại.
-**Và nói thẳng vế chống, vì đây là lần thứ BA của cùng một hình dạng.** `CLAUDE.md` đòi *"đếm hình
-dạng lỗi, đừng chỉ đếm lỗi: cùng một hình dạng lặp ba lần trở lên thì câu hỏi đúng là 'có nên làm
-việc này không'"*. Câu ấy đã được hỏi và chủ kho đã trả lời. Bất biến **còn** giữ: *"đúng 2 đường
-dẫn"* và *"dừng và hỏi, không tự nới"* — cả ba lần đều chạy thật. Bất biến **không** còn giữ:
-*"trần dòng nói trước một giới hạn"*.
+**Ngoại lệ trần dòng do chủ kho cấp riêng cho packet này.** Nội dung nguyên văn chỉ thị ngày
+13-09-2026 được ghi tại https://github.com/ducthangho/tra-luat/issues/463#issuecomment-5652199891. Trong ngữ cảnh
+checkpoint vừa dừng vì A8, số này là trần `additions` ở A8; không phải số attempt hoặc phút/run.
+Chỉ thị mới thay hạn mức dòng cũ và cho tiếp tục checkpoint; không đổi ADR-0044 hay protocol
+chung, không mở đường dẫn thứ ba, không cho phép CI và không tự biến kiểm tra xanh thành approve.
+Lịch sử bốn vòng stable finding và lượt Codex đã dừng được giữ tại Issue #463; không reset
+bộ đếm để đổi tên lượt. Phải đóng lớp nhận dạng miền trước khi xin review độc lập.
 
 **A9 — KHÔNG lease nào còn giữ write set TRƯỚC khi bắt tay.**
 `ai-dang-giu` trên **cả hai** đường dẫn, chạy **sau** phép canh hai nguồn ref
@@ -673,11 +659,10 @@ Kế thừa nguyên trạng; packet này **không** đóng thêm mục nào, và
 
 ## `chua_do_duoc`
 
-0a1. **TRẦN `A8` CỦA PACKET NÀY KHÔNG DI TRUYỀN — và chưa ai đo cái giá của việc nới ba lần.**
-   `500` là ngoại lệ CÓ PHẠM VI thứ BA, **riêng** packet này. Packet kế của lane (`LO-319`, `2A`,
-   `2B`) bắt đầu lại từ trần `ADR-0044` cho lớp của nó; ai chép `500` sang là tự cấp một ngoại lệ
-   chưa ai duyệt. **Chưa đo được:** trần dòng còn giữ được bao nhiêu tác dụng sau ba lần nới. Không
-   có cổng nào canh chuyện này; nó là kỷ luật của người cấp.
+0a1. **TRẦN A8 KHÔNG DI TRUYỀN.** Ngoại lệ chỉ áp dụng packet này theo chỉ thị được neo ở A8.
+   Các packet kế tiếp dùng trần của lớp review tương ứng trừ khi chủ kho cấp ngoại lệ riêng.
+   Việc tăng trần không chứng minh đã đóng lớp lỗi; consumer vẫn phải fail-close và reviewer
+   sensitive phải approve tường minh.
 
 0. **VẾ SAU CỦA `A1` CÓ HOÀN TẤT ĐƯỢC TRÊN WINDOWS KHÔNG — chưa ai đo, và đó là nợ còn lại.**
    *(Mục này đã được thu hẹp ở r15. Vế TRƯỚC của `A1` **không** còn là nợ: nó là một kết luận

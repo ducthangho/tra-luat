@@ -1,0 +1,245 @@
+# BIÊN NHẬN GIAO HÀNG — cross-review LƯỢT 9 của PR #529 (packet #523,
+# QUY-TRINH-LAP-REVIEW-VA-DIEU-KIEN-DUNG revision 10), KHÁC NỀN (codex), trên `abb79df`.
+# **`blocked`** — 0 P1 + 3 P2 + 1 P3 = 4 LỚP MỞ, 9 THỂ HIỆN.
+#
+# TỆP NÀY ĐƯỢC VIẾT TAY TỪNG TRƯỜNG, KHÔNG dựng bằng phép thay chuỗi từ biên nhận lượt trước —
+# vì lượt 9 mở một lớp P3 MỚI đúng về việc ấy: biên nhận lượt 8 do tôi dựng bằng sed từ biên nhận
+# lượt 7 nên nó mang DỮ LIỆU CỦA LƯỢT 6 VÀ 7, và reviewer đo được BA mâu thuẫn nội bộ.
+
+schema_version: 2
+receipt_id: pr529-review-9-codex-20260913-e70957e8
+kind: review_delivery_receipt
+packet_id: '523'
+packet_slug: 'QUY-TRINH-LAP-REVIEW-VA-DIEU-KIEN-DUNG'
+lease_id: quy-trinh-lap-review-r10-exec-9-claude-20260913
+phase_key: QUY-TRINH-LAP-REVIEW-R10-GEN9-PHIEN-20260913
+luot: 9
+role: reviewer
+provider: codex
+executor_provider: claude
+cross_provider: true
+assurance: advisory_review
+assurance_ghi_chu: >-
+  KHÔNG phải `cross_approved`: verdict là `blocked`. `sensitive` đòi `approve` TƯỜNG MINH, và `N8`
+  làm `N6` = KHÔNG ĐO ĐƯỢC **tự nó** chặn approve — lần thứ TƯ liên tiếp.
+verdict: blocked
+verdict_path: ops/reviews/pr529-review-9-codex-verdict.md
+verdict_sha256: 78a923e39bc48c8bf09d5c661075568432702e51ca803038183fa04146699c22
+verdict_bytes: 26067
+reviewed_sha: abb79dfae7634da99a07a0c30095769973ed04d4
+reviewed_base: dc02c9beed42bd2ea44a80a2e34e1bbe3acfc6c5
+evidence_url: PENDING
+evidence_url_ghi_chu: >-
+  Điền trong MỘT commit RIÊNG sau khi biết commit ĐẦU TIÊN chứa tệp verdict
+  (`git log --diff-filter=A`). KHÔNG điền rồi `--amend`: amend là phép ĐỔI SHA, và ở lượt 3 nó đã
+  làm `evidence_url` trỏ một commit mồ côi chưa từng đẩy.
+
+ngan_sach_ci_loai_b: 0
+ngan_sach_ci_loai_b_nguon: >-
+  `M10` của packet, cộng chỉ thị chủ kho nguyên văn: *"Không CI, full CI, Windows CI do lỗi đã biết"*.
+  NGÂN SÁCH là con số CHỦ KHO ĐẶT, nên `0` ở đây có căn cứ.
+da_chi_ci_loai_b: KHONG_DO_DUOC
+da_chi_ci_loai_b_run_id: []
+da_chi_ci_loai_b_do_the_nao: >-
+  Đếm từ trường `event` của TỪNG bản ghi `actions_list`, KHÔNG qua bộ lọc (bộ lọc đo được là không
+  đáng tin: `branch`/`workflow_id`/`event` đều từng bị bỏ qua; nguyên nhân KHÔNG BIẾT; giả thuyết
+  `minimal_output` ĐÃ BỊ BÁC bằng phép thử một biến).
+  Ledger bản 4 nộp **253** bản ghi thô, cửa sổ BẢN GHI ĐƯỢC NỘP `08:15:01Z…21:42:48Z`:
+  `workflow_dispatch` = **0**; 29 lượt thuộc packet đều `push`/`pull_request`/`pull_request_target`;
+  `launcher-windows.yml` KHÔNG có lượt nào cho packet; `run_attempt != 1` có 2 lượt, cả hai KHÔNG
+  thuộc packet. ĐÓ LÀ TOÀN BỘ THỨ ĐO ĐƯỢC — nó KHÔNG suy ra `da_chi_ci_loai_b = 0`.
+da_chi_ci_loai_b_gioi_han: >-
+  Lượt 9 CÔNG NHẬN bản 4 sửa được một thứ (`submitted_range_matches=true` — cửa sổ khai nay KHỚP
+  bản ghi thực nộp), nhưng vẫn còn HAI chỗ chưa đóng, và cả hai là lời khai của tôi:
+  (1) `stale_proven_claim` — trong tệp vẫn còn câu nói tập 253 phủ từ `06:16:03Z`. Bản 4 sửa KHOÁ
+      nhưng bỏ sót một câu VĂN XUÔI mang chính lời khai cũ.
+  (2) HAI khoá cùng hậu tố `trong_cua_so` nhưng một khoá đếm trên tập **283** còn khoá kia trên tập
+      **253** ⇒ cùng một hậu tố mang hai phạm vi khác nhau. Bản 4 đã tách `cua_so_*` nhưng KHÔNG
+      tách nốt hậu tố của khoá kết quả.
+  Cộng hai giới hạn đứng nguyên: không phân loại được (a)/(b)/(c) cho từng lượt; ledger đo THỨ CÒN
+  LẠI trong lịch sử nên không chứng minh được tính đầy đủ tuyệt đối.
+  Không lượt nào của phiên gọi `workflow_dispatch`, full CI hay lane `windows`.
+
+phan_loai_finding: theo_lop
+phan_loai_finding_ghi_chu: >-
+  `so_p1`/`so_p2`/`so_p3` đếm LỚP; `so_the_hien` đếm THỂ HIỆN. Lượt 9 nói rõ lớp
+  `chu-giai-lease-neo-head-cu` **ĐÃ VÁ THẬT** và **KHÔNG đếm vào số mở**.
+so_p1: 0
+so_p2: 3
+so_p3: 1
+so_the_hien: 9
+
+findings_ids:
+  - slug: dac-ta-r5-giu-luat-cu-trai-tieu-chi-moi
+    hang: P2
+    the_hien: 1
+    doi_chieu: VÁ HỜ
+    ghi_chu: >-
+      ĐI LÊN so lượt 8 (VÁ SINH LỖI MỚI). Việc GỠ cơ chế ở r10 **có tác dụng đo được**:
+      `appendix_heading_present=false`, KHÔNG thấy sáu tiêu chí r5 được cấp lại, và lỗi BẮT OAN theo
+      vùng đã hết. Reviewer đọc TRỌN 446 dòng spec + 273 dòng lease.
+      CÒN ĐÚNG MỘT ĐƯỜNG: `LEASE:130`, cuối `base_sha_ghi_chu`, còn câu *"Luật chung **nay** là
+      `M17` của r8"*. Chữ **"nay"** trao vai trò VẬN HÀNH cho một cơ chế r10 đã gỡ — nên đây KHÔNG
+      phải chỉ nhắc tên trong lịch sử. Phần đầu khối nói `N3` đúng KHÔNG vô hiệu hoá câu cuối.
+      Reviewer nói thẳng: *"vì vậy là VÁ HỜ, không phải một cơ chế mới sinh thêm lỗi"*.
+  - slug: bien-nhan-thieu-so-ci-da-chi
+    hang: P2
+    the_hien: 3
+    doi_chieu: VÁ HỜ
+    ghi_chu: >-
+      `submitted_range_matches=true` — cửa sổ ledger nay KHỚP bản ghi thực nộp (thể hiện lượt 8 nêu
+      đã đóng). Ba thể hiện còn mở: receipt lượt 5 cả ba khoá `MISSING` và `supplement_named_candidates=[]`
+      (cần chủ kho) · `stale_proven_claim` còn một câu văn xuôi mang lời khai cũ · hai khoá cùng hậu
+      tố `trong_cua_so` dùng hai tập khác nhau (283 so 253).
+  - slug: phep-do-doctrine-khong-du-rang
+    hang: P2
+    the_hien: 2
+    doi_chieu: CHƯA VÁ
+    ghi_chu: >-
+      `unchanged_since_review8=true`. Gốc `rc=0` · chép đoạn trần ADR-0048 `rc=0` · chép toàn `§5.1`
+      `rc=0` · đối chứng `§12` `rc=6`. `S4` cấm. CẦN CHỦ KHO — nêu lần thứ NĂM.
+  - slug: bien-nhan-luot-8-lan-du-lieu-luot-6
+    hang: P3
+    the_hien: 3
+    doi_chieu: LỚP MỚI
+    ghi_chu: >-
+      LỚP MỚI, và nó là về CHÍNH BIÊN NHẬN CỦA TÔI. Xem `loi_cua_toi_bi_bac` bên dưới.
+
+lop_da_dong_that_o_luot_nay:
+  - slug: chu-giai-lease-neo-head-cu
+    phan: ĐÃ VÁ THẬT
+    bang_chung: >-
+      `measure.py semantic`: hai trường neo máy đều `abb79dfae7634da99a07a0c30095769973ed04d4`,
+      `current_head_prose_matches=true`. Head cũ chỉ còn trong đoạn KỂ LẠI lỗi của gen 8.
+      Reviewer khai rõ **KHÔNG đếm lớp này vào số mở**.
+
+loi_cua_toi_bi_bac: >-
+  LỚP P3 MỚI `bien-nhan-luot-8-lan-du-lieu-luot-6` LÀ LỖI CỦA TÔI, và nguyên nhân đúng là thứ tôi
+  đã làm: **tôi dựng biên nhận lượt 8 bằng PHÉP THAY CHUỖI từ biên nhận lượt 7**, nên nó mang dữ
+  liệu của lượt 6 và 7. Ba mâu thuẫn NỘI BỘ, reviewer đo được mà không cần bất kỳ dữ kiện runtime nào:
+  (1) `doi_chieu_luot_truoc` (dòng 168–172) ghi lớp đặc tả **VÁ HỜ**, trong khi `findings_ids` VÀ
+      chính verdict lượt 8 ghi **VÁ SINH LỖI MỚI** — hai nơi, hai nhãn, cùng một lớp cùng một lượt.
+  (2) `bang_san` (dòng 225–238) chép NGUYÊN SÁU hướng của lượt 6 (`hunt_ids_equal_receipt6=true`),
+      kể cả `khong_lop_moi_tu_sau_huong=true` — trong khi lượt 8 thực tế CÓ một lớp P3 mới sinh ra
+      từ bảng săn và dùng sáu hướng KHÁC.
+  (3) `anchor.mo_ta` (dòng 259–262) gắn run của lượt 8 nhưng ghi **847,52 s / 538 266 B**, trong khi
+      `model_reviewer_identity` của CÙNG tệp ghi **807,77 s / 544 140 B**.
+  HÌNH DẠNG: **dựng một hiện vật bằng cách chép hiện vật trước rồi thay vài chuỗi** thì mọi trường
+  KHÔNG nằm trong danh sách thay sẽ ở lại — và danh sách thay là thứ tôi ĐOÁN, y hệt hai lần bộ quét
+  mù trước đó. Cùng gốc `bo-do-bang-chi-kiem-ten-khong-kiem-nghia`, lần này đổi đối tượng từ *quét*
+  sang *dựng*.
+  CHỮA: biên nhận lượt 9 này viết TAY TỪNG TRƯỜNG. Biên nhận lượt 8 **KHÔNG được sửa** (cấm sửa hiện
+  vật đã giao); dòng này là bản đính chính tra ngược được.
+
+doi_chieu_luot_truoc:
+  - slug: dac-ta-r5-giu-luat-cu-trai-tieu-chi-moi
+    phan: VÁ HỜ
+  - slug: bien-nhan-thieu-so-ci-da-chi
+    phan: VÁ HỜ
+  - slug: phep-do-doctrine-khong-du-rang
+    phan: CHƯA VÁ
+  - slug: chu-giai-lease-neo-head-cu
+    phan: ĐÃ VÁ THẬT
+
+nghia_vu_N1_N8:
+  N1: ĐẠT
+  N2: ĐẠT
+  N3: ĐẠT
+  N4: ĐẠT
+  N5: ĐẠT
+  N6: KHÔNG ĐO ĐƯỢC
+  N7: ĐẠT
+  N8: ĐẠT
+nghia_vu_ghi_chu: >-
+  Reviewer khai rõ phạm vi: *"`N1`–`N5` và `N7`/`N8` ĐẠT **trong miền phép đo đã khai**"*. `N6`
+  KHÔNG ĐO ĐƯỢC tự chặn approve.
+
+model_reviewer_identity:
+  provider: openai_codex
+  surface: codex_cli
+  transport: machine
+  model_yeu_cau: KHONG_KHAI
+  model_da_chay: >-
+    KHÔNG ĐO ĐƯỢC ở phía reviewer — nó tự khai *"không có header lượt gọi độc lập để chứng thực model
+    chi tiết, nên không khai model/effort cụ thể"*. Phía executor chỉ đọc được header CLI trong
+    `stderr.log` của tiến trình đã phóng, KHÔNG phải lời tự xác thực của reviewer, và KHÔNG có
+    `modelUsage`.
+  effort: KHONG_KHAI
+  session_run_id: e70957e8
+  run_id_day_du: e70957e800ae40618a0411f0be043fc3
+  prompt_sha256: 03acef6610b31fc44386e10409514e5a648768e88db651d9991050d44177ef46
+  bat_dau_utc: '2026-09-13T02:26:43.891000+00:00'
+  ket_thuc_utc: '2026-09-13T02:41:42.644717+00:00'
+  thoi_luong_giay: 898.75
+  ma_thoat: 0
+  trang_thai: xong
+  stdout_byte: 505
+  stdout_sha256: 2bc229a9dbbfd5f05686c1d964d96fa53cee7e36b654cc882b4b6b64d3386b29
+  stderr_byte: 1217456
+  stderr_sha256: d3233063be4d01217a9178b374132166a63e6408b5eadbf7a7f8f8f8bab50e67
+  so_lan_chet_truoc_khi_xong: 0
+  prompt_kin_hoan_toan: false
+  neo_kho: >-
+    `--expected-head abb79dfae7634da99a07a0c30095769973ed04d4` · `--require-clean` ·
+    `--expected-prompt-sha256` đi CẶP với `--prompt-file` · `--deadline-utc 2026-09-13T03:16:41Z`.
+    `run.json` ghi `worktree_sach: true`, `workspace: /tmp/claude-0/rv523j/cay`,
+    `provider: openai_codex`, `execution_surface: codex_cli`.
+
+bang_san:
+  so_huong: 6
+  doc_lap_voi_N1_N8: true
+  ghi_chu: >-
+    SÁU hướng của LƯỢT NÀY, KHÔNG chép của lượt trước — đây chính là chỗ biên nhận lượt 8 sai, nên
+    ghi cẩn thận: reviewer lượt 9 đo `M17-GO` (gỡ cổng có đúng/có mất gì), ledger bản 4, parity
+    spec↔lease, receipt5/7/8, phép đọc nghĩa toàn 446 dòng spec + 273 dòng lease, và scanner doctrine.
+  ket_qua_dang_chu_y: >-
+    Phép ĐỌC NGHĨA đã được thực sự làm — reviewer khai đọc TRỌN 446 dòng spec và 273 dòng lease, và
+    chính phép đọc ấy (không phải một bộ quét) tìm ra `LEASE:130`. Đó là bằng chứng ỦNG HỘ quyết định
+    gỡ cổng ở r10: nghĩa vụ đọc có thi hành được thật.
+
+sai_sot_thuoc_cua_reviewer_tu_khai: >-
+  Reviewer TỰ KHAI và TỰ SỬA CÔNG KHAI BA lỗi thước của chính nó, giữ output sai và đánh dấu KHÔNG
+  dùng làm finding: `N5` ban đầu tìm token `write_set` thay vì câu *"Write set"* ở `§5`; `H2` ban đầu
+  giả định lease nằm CÙNG ref với spec nên `StopIteration`; `H3` ban đầu tìm toàn đoạn khiến từ trong
+  câu phủ định/lịch sử che mutant. Nó cũng khai một lệnh đọc gộp bị CẮT và đã đọc lại riêng, và
+  *"không tự nhận đã thấy phần bị cắt"*.
+
+tuan_thu_cam_cua_reviewer: >-
+  Không mạng, không push, không sửa `cay/` hay `mir/`; script và bản sao đột biến ở `review-artifacts/`.
+
+github_submitter_identity:
+  actor: ducthangho
+  la_tac_gia_PR: true
+  ghi_chu: '`ADR-0040`: verdict do tài khoản tác giả PR vận chuyển KHÔNG là merge authorization.'
+  phien_van_chuyen: https://claude.ai/code/session_01HZNBRUZKM2mbeA8sVyjcKQ
+
+anchor:
+  loai: canonical_ancestry
+  cuong_do: vua
+  mo_ta: >-
+    Blob verdict ghim ở commit ĐẦU TIÊN chứa tệp; `abb79df` là tổ tiên của commit ấy. Hiện vật lượt
+    chạy neo kèm: `run_id` `e70957e800ae40618a0411f0be043fc3`, `ma_thoat` 0, `trang_thai` `xong`,
+    `thoi_luong_giay` **898,75**, `stderr` **1 217 456 B**.
+    (Ba con số này đo TỪ `run.json` và từ chính tệp log của LƯỢT NÀY — không chép từ biên nhận trước,
+    vì đó đúng là lỗi lượt 9 vừa bắt ở biên nhận lượt 8.)
+  gioi_han: >-
+    `abb79df` CHƯA vào master — PR còn mở, `blocked` lần thứ BẢY. Mỏ neo canonical chỉ thành lập sau
+    khi land bằng merge commit hoặc fast-forward.
+  hien_vat_on_dinh: >-
+    `mtime` của VERDICT.md = `02:41:32Z`, TRƯỚC `ket_thuc_utc` = `02:41:42Z` 10 giây; ba phép băm
+    cách nhau 5 s cho CÙNG `78a923e3…` / 26 067 B.
+
+khong_do_duoc:
+  - Tổng CI thực đã chi của packet — ledger chỉ chứng minh phép đếm trên TẬP 253 BẢN GHI đã nộp.
+  - Phân loại (a)/(b)/(c) cho từng lượt — không trường nào của API cấp dữ kiện ấy.
+  - Model cụ thể reviewer đã chạy — reviewer tự khai không có header để chứng thực.
+
+delivered: true
+delivered_by: claude-session
+authoritative_source: repo_file
+receipt_written_by: claude-session
+receipt_written_at_utc: null  # KHÔNG ĐO ĐƯỢC — git chỉ cho commit time.
+recorder_cung_la_nguoi_thi_cong: true
+receipt_khong_khai: >-
+  KHÔNG khai `cross_approved`, KHÔNG khai lớp nào ngoài `chu-giai-lease-neo-head-cu` đã đóng, và
+  KHÔNG khai `N6` đã đóng. Ba lớp P2 + một lớp P3 còn mở; HAI trong số đó cần CHỦ KHO.

@@ -42,6 +42,22 @@ wrapper: BA dòng `lease_publish: 161/161 đạt; đã chạy=161, bỏ qua=0` (
 doctrine-scan rc=0 (7 tệp, 0 chỗ chép)   ·   adr-song rc=0 (48/48)
 ```
 
+**Lượt CI TỰ ĐỘNG trên chính head này** (do push sinh ra, KHÔNG ai gọi tay), đọc bằng
+`pull_request_read get_check_runs` chứ không bằng `get_status`:
+
+| check | kết quả | thời lượng |
+|---|---|---|
+| `gate (ubuntu-latest)` | **success** | `02:32:39Z → 03:10:40Z` = **38,0** phút |
+| `thu-hoi` | **success** | 17 giây |
+| `mo` | `skipped` | — |
+
+`thu-hoi` xanh **xác nhận** chẩn đoán trôi nền ở mục "KHÔNG chạy CI" bên dưới: merge master chữa được,
+tức nó không phải lỗi nội dung. Đây là phép ĐO trên lượt đã chạy, không phải suy từ việc push thành công.
+
+Con số `38,0` phút khớp hai lần đo trước (`38,1` và `38,4`) ⇒ ổn định, không phải một lượt bất thường.
+Nó KHÔNG nói gì về Windows: Windows **chưa từng chạy** cho mã này ⇒ `KHÔNG ĐO ĐƯỢC`, và theo chỉ thị
+chủ kho đó là **lỗi đã biết**, không gác packet này.
+
 **ĐIỀU KIỆN ĐO — một con số không ghi điều kiện thì sẽ trôi mà không ai biết:** `AL_VER=1.7.7` (wrapper
 tự cài `actionlint`; thiếu biến này wrapper thoát **2** trước khi chạy gì) và `shellcheck 0.9.0` CÓ MẶT.
 Thiếu `shellcheck` thì `t137`/`t159` fail-close `KHÔNG ĐO ĐƯỢC` — đó là **nền đo**, không phải hồi quy.

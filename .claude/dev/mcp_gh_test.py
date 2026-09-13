@@ -586,9 +586,15 @@ def tim_vi_tri(src: str, old: str) -> list[int]:
                 raise ValueError("Có mã khác cùng dòng với bảng MUTATIONS")
 
     lines = io.StringIO(src, newline="").readlines()
-    truoc = "".join(lines[:bat_dau - 1])
-    sau = "".join(lines[ket_thuc:])
-    offset_sau = sum(len(l) for l in lines[:ket_thuc])
+    start_char_offset = len(lines[bat_dau - 1].encode("utf-8")[:node_mutations.col_offset].decode("utf-8"))
+    end_char_offset = len(lines[ket_thuc - 1].encode("utf-8")[:node_mutations.end_col_offset].decode("utf-8"))
+
+    start_idx = sum(len(l) for l in lines[:bat_dau - 1]) + start_char_offset
+    end_idx = sum(len(l) for l in lines[:ket_thuc - 1]) + end_char_offset
+
+    truoc = src[:start_idx]
+    sau = src[end_idx:]
+    offset_sau = end_idx
 
     matches = []
     i = truoc.find(old)
@@ -690,9 +696,25 @@ def d13_moi_mau_dot_bien_phai_khop_dung_mot_cho():
         loi_ap_dung_khong_thay = True
     assert loi_ap_dung_khong_thay
 
-    ma_gia_unicode = 's="a\u2028b"\r\nMUTATIONS=("needle",)\r\nx="needle"\n'
-    assert tim_vi_tri(ma_gia_unicode, "needle") == [ma_gia_unicode.rfind("needle")]
-    assert tim_vi_tri(ma_gia_unicode, "('needle',)") == []
+    ma_gia_inline = "MUTATIONS=() # needle\nx='needle'\n"
+    assert tim_vi_tri(ma_gia_inline, "needle") == [15, 25]
+    loi_2 = False
+    try:
+        ap_dung_dot_bien(ma_gia_inline, "needle", "2")
+    except ValueError:
+        loi_2 = True
+    assert loi_2
+
+    assert ap_dung_dot_bien(ma_gia_inline, "x='needle'", "x='2'") == "MUTATIONS=() # needle\nx='2'\n"
+
+    ma_gia_table = "MUTATIONS=('needle',) # needle\nx='needle'\n"
+    assert tim_vi_tri(ma_gia_table, "needle") == [24, 34]
+    assert ap_dung_dot_bien(ma_gia_table, "x='needle'", "x='2'") == "MUTATIONS=('needle',) # needle\nx='2'\n"
+
+    for nl in ("\n", "\r\n", "\r"):
+        ma_u = f's="a\u2028b"{nl}MUTATIONS=("✓",) # needle{nl}x="needle"{nl}'
+        assert tim_vi_tri(ma_u, "needle") == [ma_u.find("needle", ma_u.find("#")), ma_u.find("needle", ma_u.find("x="))]
+        assert tim_vi_tri(ma_u, "('✓',)") == []
 
 # Đăng ký xong mới đóng băng; runner không sửa tuple này.
 CASES = (
@@ -784,8 +806,9 @@ MUTATIONS = (
     ("d13_bo_loi_cung_dong", "test", '            if not (node.end_lineno < bat_dau or node.lineno > ket_thuc):\n                raise ValueError("Có mã khác cùng dòng với bảng MUTATIONS")', '            if False:\n                pass', "D13-duy-nhat-toan-bang"),
     ("d13_bo_loi_ap_dung_nhieu", "test", '    if len(matches) != 1:\n        raise ValueError(f"Khớp {len(matches)} lần")', '    if False:\n        pass', "D13-duy-nhat-toan-bang"),
     ("d13_loi_splitlines", "test", '    lines = io.StringIO(src, newline="").readlines()', '    lines = src.splitlines(True)', "D13-duy-nhat-toan-bang"),
-    ("d13_loi_bo_qua_loai_tru_bang", "test", '    truoc = "".join(lines[:bat_dau - 1])\n    sau = "".join(lines[ket_thuc:])', '    truoc = "".join(lines)\n    sau = ""', "D13-duy-nhat-toan-bang"),
+    ("d13_loi_bo_qua_loai_tru_bang", "test", '    truoc = src[:start_idx]\n    sau = src[end_idx:]\n    offset_sau = end_idx', '    truoc = src\n    sau = ""\n    offset_sau = 0', "D13-duy-nhat-toan-bang"),
     ("d13_loi_sai_vi_tri_thay_the", "test", '    return src[:i] + new + src[i + len(old):]', '    return src[:i] + new + src[i + len(old) - 1:]', "D13-duy-nhat-toan-bang"),
+    ("d13_loi_cuoi_dong", "test", '    end_idx = sum(len(l) for l in lines[:ket_thuc - 1]) + end_char_offset', '    end_idx = sum(len(l) for l in lines[:ket_thuc])', "D13-duy-nhat-toan-bang"),
 )
 
 

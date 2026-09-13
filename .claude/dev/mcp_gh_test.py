@@ -714,7 +714,8 @@ def d13_moi_mau_dot_bien_phai_khop_dung_mot_cho():
     for nl in ("\n", "\r\n", "\r"):
         ma_u = f's="a\u2028b"{nl}MUTATIONS=("✓",) # needle{nl}x="needle"{nl}'
         assert tim_vi_tri(ma_u, "needle") == [ma_u.find("needle", ma_u.find("#")), ma_u.find("needle", ma_u.find("x="))]
-        assert tim_vi_tri(ma_u, "('✓',)") == []
+        assert ma_u.count("✓") == 1
+        assert tim_vi_tri(ma_u, "✓") == []
 
 # Đăng ký xong mới đóng băng; runner không sửa tuple này.
 CASES = (

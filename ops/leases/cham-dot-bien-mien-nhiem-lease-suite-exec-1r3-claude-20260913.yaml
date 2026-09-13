@@ -105,6 +105,12 @@ effective_review_class: sensitive
 # `CHAN [12]` vì bia mộ chỉ có một chiều. `_kiem_bia_mo` đòi đủ hai chiều.
 thay_the_cho:
   - cham-dot-bien-mien-nhiem-lease-suite-exec-1r2-claude-20260912
+
+# BIA MỘ CHIỀU NGƯỢC (thêm 2026-09-13T02:33:00Z, CÙNG COMMIT với lease thay nó). `_kiem_bia_mo` đòi
+# ĐỦ HAI CHIỀU; lệch nhau tạo một cửa sổ mà `ai-dang-giu` trả `CHAN [12] bia mộ một chiều`.
+# Lý do thay KHÁC hẳn ba lần trước: đây là REROUTE — chủ kho đổi vai Executor sang `codex`, không phải
+# nới một tham số. Xem `ly_do_thu_hoi` trong `exec-2`.
+da_bi_thay_the: cham-dot-bien-mien-nhiem-lease-suite-exec-2-codex-20260913
 ly_do_thu_hoi: >-
   KHÔNG phải reroute, KHÔNG phải kỷ luật, và KHÔNG phải thu hồi vì packet đã land: đây là một REVISION
   của cùng generation 1 cho cùng phiên thi công. `exec-1r2` bị thay vì trần `S2` của nó (1000) đã CHẶN

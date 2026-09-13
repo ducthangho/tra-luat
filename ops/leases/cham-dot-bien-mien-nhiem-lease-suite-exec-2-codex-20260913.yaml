@@ -1,0 +1,235 @@
+# LEASE GENERATION 2 — packet wp530 (alias CHAM-DOT-BIEN-MIEN-NHIEM-LEASE-SUITE).
+#
+# GENERATION 2 — 2026-09-13T02:33:00Z. Thay `cham-dot-bien-mien-nhiem-lease-suite-exec-1r3-claude-20260913`.
+#
+# VÌ SAO LÀ GENERATION CHỨ KHÔNG PHẢI REVISION THỨ TƯ: ba bản trước đổi THAM SỐ (trần `S2`, trần `S6`)
+# cho cùng một người thi công. Bản này đổi PHÂN CÔNG — chủ kho reroute vai Executor từ `claude` sang
+# `codex` (chỉ thị `issues/530#issuecomment-5650262276`). Đổi ai làm là đổi generation; giữ nguyên số
+# generation ở đây sẽ làm hồ sơ đọc như thể cùng một phiên vẫn đang chạy, và `attempts_used` sẽ mang
+# số của một người khác.
+#
+# VAI REVIEWER LẬT NGƯỢC, và đây không phải chuyện hình thức: cross-review phải KHÁC NỀN với người
+# thi công. `codex` thi công ⇒ reviewer là `claude`. Giữ `reviewer_provider: codex` ở một lease mà
+# executor cũng là `codex` là tự huỷ toàn bộ giá trị của cross-review.
+#
+# GIỮ NGUYÊN — reroute KHÔNG cấp quyền sửa những thứ này: `spec_path`, `spec_sha256`/`spec_hash`
+# (đặc tả rev 3 ĐÓNG BĂNG), `write_set`, `write_set_hash`, ba mỏ neo `dc02c9b`, `branch`,
+# `granted_by`, `viec_trong_lease` (`M1`…`M6`), `dieu_kien_dung` (`S1`…`S8`).
+#
+# HAI KHỐI `nang_tran` PHẢI KHAI LẠI, giá trị KHÔNG ĐỔI (`S2 = 1500`, `S6 = 10`): `pham_vi` của chúng
+# ghi thẳng *"KHÔNG kế thừa sang generation hay revision sau — mỗi bản phải cấp LẠI"*. Bỏ chúng ở đây
+# thì trần lặng lẽ tụt về canon (`ADR-0044` 300 dòng, `ADR-0043` 2 vòng) trong khi đã dùng 1292 dòng
+# và 3 vòng — lease sẽ tự mâu thuẫn ngay lúc cấp.
+#
+# Mốc cấp/hết hạn ĐẶT LẠI (+24 giờ). Nói thẳng vì nó là một sự nới: người thi công mới bắt đầu từ
+# đầu lượt của mình, nên mốc cũ (`2026-09-14T01:48:00Z`) không còn khớp phạm vi việc.
+# Thẩm quyền cấp: chủ kho `ducthangho`. Hồ sơ do phiên `claude` SOẠN và GHI HỘ; phiên KHÔNG tự cấp —
+# `ops/lease_publish.py` chỉ nhận `NGUOI_CO_THAM_QUYEN = ("ducthangho",)` và TỪ CHỐI mọi tên provider.
+#
+# VIỆC LÀ MỘT PORT, KHÔNG PHẢI THIẾT KẾ MỚI: kiến trúc đã land ở packet #513
+# (CHAM-DOT-BIEN-MIEN-NHIEM-CA-VO-CAN, closed-completed). `ops/nhanh_don_duoc_test.py` trên master đã có
+# TinHieuChotCa, chot(), ba trạng thái, kênh JSONL neo (dấu phiên, mutant, lần thử), dong_luot(rc) so với
+# mã thoát THẬT, và DOT_BIEN_TU_KIEM. #513 loại `ops/lease_publish_test.py` khỏi phạm vi vì #503 giữ nó
+# ⇒ packet này là hệ quả đoán được của một write-set exclusion, không phải khuyết tật mới.
+schema_version: 2
+event: executor_lease_granted
+
+packet_issue: 530
+mission_issue: 467
+granted_by: ducthangho
+granted_on_instruction: 'https://github.com/ducthangho/tra-luat/issues/530#issuecomment-5650262276'
+leased_at_utc: '2026-09-13T02:33:00Z'
+lease_expires_at_utc: '2026-09-14T02:33:00Z'
+
+packet_id: wp530
+packet_alias: CHAM-DOT-BIEN-MIEN-NHIEM-LEASE-SUITE
+revision: 3
+generation: 2
+lease_id: cham-dot-bien-mien-nhiem-lease-suite-exec-2-codex-20260913
+role: executor
+provider: codex
+executor: codex
+model: gpt-6-astra
+effort: xhigh
+reviewer_model: fable-5.1
+reviewer_effort: xhigh
+reviewer_hint_patch: true
+environment: cloud
+risk: sensitive
+assurance_target: cross_approved
+access: read-write
+
+# Spec ĐÓNG BĂNG revision 3. Neo theo BĂM, không theo nhánh: tệp hiện ở nhánh `ops/handoff-512-luot7`,
+# CHƯA trên master — băm là thứ định danh, tên nhánh là thứ trôi và bị xoá.
+spec_path: ops/specs/CHAM-DOT-BIEN-MIEN-NHIEM-LEASE-SUITE.md
+spec_sha256: 47c3b1fe70da6976cf802436fa8883c2ba48ac8f706b3d9ec103deaeb5f37778
+spec_hash: 47c3b1fe70da6976cf802436fa8883c2ba48ac8f706b3d9ec103deaeb5f37778
+
+# MỘT đường. Catalogue + control đi VÀO tệp test theo khuôn #513, nên write set không cần đường thứ hai.
+write_set:
+  - ops/lease_publish_test.py
+depends_on: []
+
+branch: claude/cham-dot-bien-mien-nhiem-lease-suite
+branch_ownership: exclusive
+target_branch_neu_land: master
+
+base_sha: dc02c9beed42bd2ea44a80a2e34e1bbe3acfc6c5
+start_from_sha: dc02c9beed42bd2ea44a80a2e34e1bbe3acfc6c5
+reviewed_sha_required: dc02c9beed42bd2ea44a80a2e34e1bbe3acfc6c5
+
+authority_basis: '§2 — start/pause/resume/reroute/override/authorize thuộc chủ kho'
+recorded_by: claude-session
+recorder_is_dispatcher: false
+recorder_cung_la_nguoi_thi_cong: false
+recorder_xung_dot_loi_ich: >-
+  ĐỔI SO GEN 1, và đổi theo hướng NHẸ ĐI ở một trục, NẶNG LÊN ở một trục khác — khai cả hai.
+  NHẸ ĐI: phiên ghi lease này (`claude`) KHÔNG còn là người thi công, nên `recorder_cung_la_nguoi_thi_cong`
+  chuyển `true → false`. NẶNG LÊN: chính phiên ấy giờ là REVIEWER của gen 2, và nó là phiên đã VIẾT
+  đặc tả rev 1→3 VÀ đã viết toàn bộ bản vá ba vòng đang nằm ở head `a1f18bd`. Tức reviewer sẽ review
+  MÃ CỦA CHÍNH MÌNH nếu dùng lại đúng phiên này.
+  CHỐT: cross-review gen 2 phải là một phiên `claude` KHÁC, không phải phiên đã soạn bản vá. Lời khai
+  này là kỷ luật của người ghi — `ops/lease_publish.py` KHÔNG đọc trường nào ở đây và không cổng nào
+  cưỡng chế được điều đó (đo: grep `recorder_` trên cổng ⇒ 0 dòng quyết định).
+  Ràng buộc của đặc tả rev 3 GIỮ NGUYÊN và áp cho người thi công MỚI: MỌI tiêu chí nghiệm thu phải
+  chạy qua `main()` THẬT và phải nói rõ tác động ở RANH GIỚI NÀO.
+
+run_minutes: 1440
+write_set_hash: 94d43dbfd09ef93bc4e24aeaae23e66641567dcfd65e8b88aa5f67422e5a25fd
+write_set_hash_cach_tinh: >-
+  `sha256` của các đường dẫn ĐÃ SẮP XẾP, nối bằng LF, có LF cuối, mã hoá utf-8 — cùng công thức
+  và cùng cách ghi như `wp461-be-mat-thu-hai-cua-codex-exec-1r2-claude-20260907.yaml`. CÔNG THỨC
+  ĐÃ ĐƯỢC KIỂM, không nhận từ trí nhớ: chạy lại trên HAI lease có sẵn cho ra đúng băm đã công bố
+  (GATE #463, hai đường, ⇒ 0f7b869d…9f66ef0; wp461, bốn đường, ⇒ 8c8b4729…03774c0d) — 2/2. Nhưng
+  `ops/lease_publish.py` KHÔNG đọc trường này (grep `write_set_hash` trên cổng: 0 dòng), nên đây là
+  kỷ luật của người ghi, không phải của cổng.
+heartbeat_at: '2026-09-13T02:33:00Z'
+lease_until: '2026-09-14T02:33:00Z'
+heartbeat_required_minutes: 30
+attempts_used: 0
+attempts_limit: 3
+
+reviewer_provider: claude
+review_class: sensitive
+effective_review_class: sensitive
+
+# BIA MỘ HAI CHIỀU — cả hai chiều đặt trong CÙNG MỘT COMMIT. Bài học đã trả giá ở revision trước:
+# đặt `da_bi_thay_the` lên lease CŨ trước khi lease MỚI tới được một ref ⇒ `ai-dang-giu` trả
+# `CHAN [12]` vì bia mộ chỉ có một chiều. `_kiem_bia_mo` đòi đủ hai chiều.
+thay_the_cho:
+  - cham-dot-bien-mien-nhiem-lease-suite-exec-1r3-claude-20260913
+ly_do_thu_hoi: >-
+  ĐÂY LÀ REROUTE — và đó là khác biệt với cả ba lần thay trước, nên nói thẳng kẻo hồ sơ đọc như một
+  chuỗi revision đều nhau. `exec-1r3` không sai và không hết hạn; chủ kho đổi PHÂN CÔNG vai Executor
+  từ `claude` sang `codex` (chỉ thị `issues/530#issuecomment-5650262276`). Vì thế generation tăng
+  1 → 2, `attempts_used` đặt lại 0, và vai reviewer lật từ `codex` sang `claude`.
+  KHÔNG phải kỷ luật, KHÔNG phải thu hồi vì packet đã land (packet CHƯA land — PR #532 còn draft).
+  Chuỗi đầy đủ: windows-lease-suite-exec-2 (của #504) -> exec-1 -> exec-1r2 -> exec-1r3 -> exec-2.
+write_set_da_do_truoc_khi_cap: >-
+  ĐO LẠI 02:3xZ 13-09-2026, ngay trước khi cấp generation 2 — không chép số của `exec-1r3`, và lần này
+  con số CHỨNG MINH vì sao không được chép: `exec-1r3` khai 369/369 lúc 01:2xZ, đo lại ra **370/370**.
+  Kho `is-shallow-repository` = false; hai nguồn ref so bằng TẬP TÊN qua `comm`, `comm -23` RỖNG và
+  `comm -13` RỖNG ⇒ KHÔNG MÙ. So bằng TẬP chứ không bằng `wc -l`: lực lượng bằng nhau vẫn có thể mù.
+  `ai-dang-giu ops/lease_publish_test.py` ⇒ NGƯỜI_GIỮ 1 =
+  cham-dot-bien-mien-nhiem-lease-suite-exec-1r3-claude-20260913 (chính lease bị generation này thay).
+  S5 đã đo: `git log dc02c9b..origin/master -- ops/lease_publish_test.py` RỖNG ⇒ master chưa chạm write
+  set kể từ mỏ neo, kể cả sau khi nhánh packet merge `origin/master` 32f95f0 để đóng TRÔI NỀN của
+  cổng `thu-hoi`. Riêng .github/workflows/ci.yml và .claude/dev/ci_dang_ky_test.py do #463 giữ
+  (exclusive) ⇒ packet này TUYỆT ĐỐI không chạm hai đường ấy.
+  MỘT CÁCH MÙ CÓ THẬT, giữ lại từ lần cấp trước vì nó sẽ tái phát: bộ quét đọc `refs/heads/*`, nên một
+  nhánh `master` CỤC BỘ tụt sau làm cổng trả `CHAN [12] NHÁNH_CỤC_BỘ_TỤT_SAU` — cổng TỪ CHỐI
+  (fail-close đúng), không phải nói sai; chữa bằng `git branch -f master refs/remotes/origin/master`
+  rồi đo lại.
+trang_thai_ban_giao: >-
+  head `a1f18bd8bb008900a7c85c5a582ee331e8161ae8` (PR #532, draft). S2 = +1292/-61 trên trần 1500 ⇒ dư
+  208. S6 = 3/10 vòng, trong đó vòng 3 mới chỉ VÁ — CHƯA có cross-review nào cho head này. Cổng tại chỗ
+  đo lúc bàn giao: `161/161` ba dòng (CHA + [A] + [B]) với hai số BẰNG NHAU, 0 dòng ĐỎ, WRAPPER_RC=0;
+  `doctrine-scan` rc=0; `adr-song` rc=0. Điều kiện đo: AL_VER=1.7.7, shellcheck 0.9.0 có mặt — thiếu
+  `shellcheck` thì `t137`/`t159` fail-close KHÔNG ĐO ĐƯỢC, đó là NỀN ĐO chứ không phải hồi quy.
+  Hồ sơ đầy đủ: nhánh `ops/handoff-530`, thư mục `ops/handoff/530/`.
+ly_do_cap: >-
+  Lớp F6 của #512, mở qua ba vòng cross-review (6, 7, 8) và xác nhận còn mở ở vòng 9, 10: bộ đo đột biến
+  SUY lý do một mutant chết bằng cách phân tích CHUỖI trên stdout của main(). Ba lượt vá, ba lượt cùng một
+  hình dạng; vòng 8 chỉ ra lý do CẤU TRÚC — hai miền chuỗi "thông điệp assertion" và "tên lớp + thông
+  điệp" GIAO NHAU, nên một phép đo trên chuỗi không thể tách chúng. Nợ có tên: ops/NO_KY_THUAT.md §23.
+
+# HAI TRẦN ĐƯỢC NÂNG, cùng một chỉ thị. Khai theo `ADR-0043`: `ai_nang` thuộc người có thẩm quyền,
+# `can_cu`, `tran_cu`, `tran_moi`.
+#
+# KHAI THẲNG MỘT LỜI KHAI CỦA `ADR-0043` MÀ PHÉP ĐO BÁC, kẻo người sau tin một cổng không tồn tại:
+# ADR ấy viết *"không có khối `nang_tran` thì cổng đăng lease từ chối"*. Đo 12-09-2026 —
+# `grep -nE "nang_tran|tran_moi|tran_cu|ai_nang|review_round" ops/lease_publish.py` ⇒ **0 dòng**;
+# `grep -nE "nang_tran|tran_moi|review_round|so-canon" .claude/dev/packet_loop.py` ⇒ **0 dòng**.
+# Không cổng nào đọc khối này và không cổng nào canh trần vòng ⇒ đúng nợ `SO-CANON-CHUA-TON-TAI`,
+# đếm vòng là đếm TAY, và khối dưới đây là KỶ LUẬT CỦA NGƯỜI GHI chứ không phải điều kiện máy chặn.
+nang_tran:
+  - truc: S2
+    ai_nang: ducthangho
+    tran_cu: 1000
+    tran_moi: 1500
+    khi_nao: 'khai LẠI khi cấp generation 2, 2026-09-13T02:33:00Z; giá trị KHÔNG đổi so revision 3'
+    can_cu: 'https://github.com/ducthangho/tra-luat/issues/530#issuecomment-5650024451'
+    tran_cu_o_dau: >-
+      `exec-1r3` (nâng 1000 -> 1500 lúc 2026-09-13T01:48:00Z), tức mức ĐANG HIỆU LỰC. Chuỗi đầy đủ của
+      trục này: `ADR-0044` 300 (canon cho packet sensitive: ≤ 3 tệp và ≤ 300 dòng thêm) -> `exec-1r2`
+      1000 -> `exec-1r3` 1500. Generation 2 KHÔNG nâng thêm; nó KHAI LẠI mức 1500 vì `pham_vi` cấm kế
+      thừa. Ghi `tran_cu: 1000` ở đây là ghi đúng cột 'trần ngay trước lần cấp gần nhất trên trục', và
+      giữ nguyên để người đọc thấy được cả ba bậc thay vì chỉ bậc cuối.
+    pham_vi: >-
+      CHỈ lease `cham-dot-bien-mien-nhiem-lease-suite-exec-2-codex-20260913`. KHÔNG đổi `ADR-0044`,
+      KHÔNG áp cho packet khác, KHÔNG kế thừa sang generation hay revision sau — mỗi bản phải cấp LẠI.
+    phep_do: >-
+      Cột `additions` của `git diff --numstat dc02c9beed42bd2ea44a80a2e34e1bbe3acfc6c5 -- ops/lease_publish_test.py`.
+      Một đường, nên không có phép cộng nào để làm sai. LƯU Ý một chỗ dễ đọc nhầm đã gặp thật: cùng
+      lệnh ấy BỎ `-- <đường dẫn>` cho ra 3 tệp (+1/−1 .claude/dev/chon_reviewer.py, +49/−4
+      chon_reviewer_test.py) — hai tệp kia đến từ MERGE master vào nhánh, KHÔNG phải sửa của packet;
+      cross-review vòng 2 đã đo và kết luận đúng như vậy. Phép đo của trục này là phép đo CÓ LỌC ĐƯỜNG.
+    do_luc_nang: >-
+      head `3f1cda17aa254e1a10afa12aa387bc782a945c6f`: 1 tệp, +995/−61 ⇒ 995 <= 1000, chỉ còn DƯ 5 dòng
+      thêm. Chi phí của bốn `P2` vòng 2 đo trên chính cấu trúc tệp: mục `DOT_BIEN_TU_KIEM_512` = 6,3
+      dòng/mục (44 dòng / 7 mục), `t164` = 145 dòng / 13 fixture (fixture MỚI cần KÊNH THẬT nên đắt hơn
+      một dòng dữ liệu). Cần 6 fixture phân biệt + 4 mục tự kiểm + sửa ranh giới đo của `t163` + đưa hai
+      bước I/O vào phạm vi bắt lỗi từng attempt + sửa hai bảng phân loại đã bị phép đo bác ⇒ 100–150
+      dòng. 5 < 100 ⇒ `S2` CHẶN. Reviewer nói thẳng: "Phần >5 dòng cần executor xử lý S2 với chủ kho,
+      không phải lý do giảm finding." Dư sau vòng 3 ước 355–405.
+  - truc: S6
+    ai_nang: ducthangho
+    tran_cu: 2
+    tran_moi: 10
+    khi_nao: 'khai LẠI khi cấp generation 2, 2026-09-13T02:33:00Z; giá trị KHÔNG đổi so revision 3'
+    can_cu: 'https://github.com/ducthangho/tra-luat/issues/530#issuecomment-5650024451'
+    tran_cu_o_dau: 'ADR-0043 — trần canon cho một PR packet là HAI vòng review hợp lệ.'
+    pham_vi: >-
+      CHỈ lease này. Khối này KHÔNG phải một lần nâng mới — nó được KHAI LẠI vì `pham_vi` của khối `S6`
+      trong `exec-1r3` ghi thẳng "KHÔNG kế thừa sang generation hay revision sau". Bỏ nó ở đây thì trần
+      lặng lẽ tụt về canon = 2 trong khi ĐÃ DÙNG 3 vòng, tức lease tự mâu thuẫn ngay lúc cấp.
+      Phiên KHÔNG tự nới: chạm 10 mà chưa có `approve` tường minh ⇒ DỪNG và hỏi lại.
+    phep_do: >-
+      Đếm TAY số vòng cross-review hợp lệ đã đăng verdict cho PR #532, ghi số vòng `k/10` vào từng
+      `VERDICT.md`. Không có bộ đếm nào trong kho (xem khai ở chú thích trên).
+    do_luc_nang: >-
+      PR #532 head a1f18bd: 3/10 vòng đã dùng — nhưng vòng 3 mới chỉ VÁ, CHƯA có cross-review nào cho
+      head này, nên việc ĐẦU TIÊN của executor mới là chạy vòng 3.
+      Lịch sử: Vòng 1 (head a1c7d7f) 0 P1 · 4 P2 · 2 P3, đã vá cả sáu
+      lớp ở d5e7e7d. Vòng 2 (head 3f1cda1, run c8070bbc, 2044.185s) `changes_requested`: 0 P1 · 4 P2 ·
+      1 P3 · 6 NỢ — BA trong bốn P2 là LẶP LẠI lớp của vòng 1 (bản vá ĐÚNG nhưng HẸP) và một lớp
+      (`m5-van-cham-chet-bang-chuoi`) là lỗ MỚI do chính bản vá vòng 1 mở ra.
+
+viec_trong_lease:
+  - 'M1: 59 lời gọi bang() của 9 ca #504 (t125 3 · t153 5 · t154 10 · t155 4 · t156 11 · t157 6 · t158 7 · t159 4 · t160 9) đổi sang chot() ⇒ ném TinHieuChotCa. bang() GIỮ NGUYÊN cho hạ tầng và ca ngoài #504.'
+  - 'M1b: control dương t96 nằm NGOÀI chín ca nên vẫn ném AssertionError trần — phải chuyển tín hiệu cho RIÊNG fixture ấy, KHÔNG nới bộ chấm nhận mọi AssertionError.'
+  - 'M2: main() phát KÊNH kết quả riêng theo khuôn #513 — bản ghi mỗi ca mang (tên ca · nhãn · chi tiết), neo (dấu phiên · mutant · lần thử), cộng bản ghi đóng lượt mang rc so với mã thoát THẬT của con. Tên ca do KHUNG đóng dấu.'
+  - 'M3: BA trạng thái. KHÔNG ĐO ĐƯỢC ⇒ chạy lại ĐÚNG MỘT lần; lần hai vẫn vậy ⇒ ĐỎ. Không đường nào biến KHÔNG ĐO ĐƯỢC thành GIẾT.'
+  - 'M4: catalogue 16 mutant + 10 control đi VÀO tệp test, khuôn DOT_BIEN_TU_KIEM.'
+  - 'M5: đột biến tự kiểm cho CHÍNH bộ chấm, gồm ca GỠ CHỐT — gỡ ra thì một ca đích phải ĐỎ.'
+  - 'M6: bộ chấm THÔI đọc hình dạng chuỗi để phân biệt chốt với ngoại lệ vô can.'
+
+dieu_kien_dung:
+  - 'S1 cần đường dẫn thứ hai.'
+  - 'S2 dòng thêm vượt trần ADR-0044.'
+  - 'S3 phải sửa ops/lease_publish.py.'
+  - 'S4 muốn skip/cách ly/vô hiệu một ca, hoặc nâng timeout-minutes.'
+  - 'S5 origin/master chạm ops/lease_publish_test.py sau dc02c9b.'
+  - 'S6 chạm trần vòng review của ADR-0043 — chỉ thị không nêu số nên lấy trần mặc định, KHÔNG tự nới.'
+  - 'S7 review_class = sensitive ⇒ chỉ đóng khi có approve TƯỜNG MINH; "0 P1 + 0 P2" KHÔNG đủ.'
+  - 'S8 phải chạm .github/workflows/ci.yml hoặc .claude/dev/ci_dang_ky_test.py — #463 đang giữ, exclusive.'

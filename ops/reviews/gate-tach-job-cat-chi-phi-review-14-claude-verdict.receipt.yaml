@@ -1,0 +1,96 @@
+schema_version: 2
+kind: review_delivery_receipt
+receipt_id: gate463-r23-g4-review14-claude
+packet_id: GATE-TACH-JOB-CAT-CHI-PHI
+packet_issue: 463
+revision: 23
+generation: 4
+lease_id: gate-tach-job-cat-chi-phi-exec-5-codex-20260914-r23
+provider: claude
+role: reviewer
+verdict: changes_requested
+reviewed_sha: 86b0feb1959c78affbe8cd59fb2f47df36437e82
+reviewed_tree: 8c16548e844c4adfdf2134535e23efee400ba8fe
+verdict_path: ops/reviews/gate-tach-job-cat-chi-phi-review-14-claude-verdict.md
+verdict_sha256: 2b0b2d9138aadfb5c96a052540b0e02d9e7d48b4dea91944b513460d1259e1b6
+evidence_url: https://github.com/ducthangho/tra-luat/blob/4b13f56a4e8bb43149cbddc2aec9e2a8f1468e0d/ops/reviews/gate-tach-job-cat-chi-phi-review-14-claude-verdict.md
+model_reviewer_identity:
+  provider: anthropic_claude
+  surface: claude_code
+  transport: machine/local
+  model: claude-fable-5
+  effort: max
+  session_run_id: 5fe3ff30-a9cf-47f0-b745-43216fa3feef
+  phien_doc_lap: true
+  neo_boi_launcher: true
+github_submitter_identity:
+  actor: ducthangho
+  recorded_by: codex
+  reviewer_is_submitter_identity: false
+anchor:
+  loai: canonical_ancestry
+  cuong_do: Immutable Git blob; ancestry measured against evidence-branch HEAD, NOT
+    master; no required-check authority.
+  evidence_branch: codex/gate-463-review-evidence-20260913
+  evidence_commit: 4b13f56a4e8bb43149cbddc2aec9e2a8f1468e0d
+model_output_path: ops/reviews/gate-tach-job-cat-chi-phi-review-14-claude-model-output.json
+model_output_sha256: 03933542282399fc06a94d5479f68e6aafed1cf8d0b860a8deb18d9148762377
+launcher_run_sha256: 6ec1c30cc55ad37e41e7579004432f9d8aa56cf8ed8e0b732e3816649b0354ec
+model_validation: 'modelUsage: ĐẠT; tập model chính=[''claude-fable-5'']; mô hình
+  phụ bỏ qua=[]'
+hunt_table_validation: passed
+source_and_review_trees_clean: true
+review_axes:
+- spec
+- standards_security
+review_classes:
+- installer_domain
+- lexer_composition_order
+- consumer_spec_workflow
+ci: not_run
+A1: not_run
+A5: not_run
+merge_authorized: false
+transport_note: 'Canonical launcher and reviewer transport: machine/local.'
+clarification_of_same_review: true
+initial_verdict: approve
+initial_verdict_path: ops/reviews/gate-tach-job-cat-chi-phi-review-14-claude-original-verdict.md
+initial_verdict_sha256: 1bb273cd37b67f79e0359f1777d60712c3e0fc2030f5ea189018bd687e5e7d88
+initial_model_output_path: ops/reviews/gate-tach-job-cat-chi-phi-review-14-claude-original-model-output.json
+initial_model_output_sha256: cd8fd9d625627f5c04626a92ce7c55d073b68e3a3d1f4c774fb5f6b54097563d
+initial_launcher_run_sha256: d369efdd2e9ad68450dd9cfa9110454c0a3d7dfb2f3ebe9b53e31d67d38cd4cf
+hunt_table_source: ops/reviews/gate-tach-job-cat-chi-phi-review-14-claude-original-verdict.md
+initial_verdict_superseded: true
+master_at_review_start: 9938e7c92a90a1476063c64d8afd73b9bafc7a14
+master_at_delivery: c16bd3293a9d2dc7a8a789b99d77057cb02ce374
+master_drift:
+  before: 7ddcb08ce18ff890187ed2628c0e83132fa225febeb0093dcd00561b245ce87b
+  after: f8bc7220247585d5990970299f3da18a960ed53ef96e3b19ab9f74269392fc1e
+  changes:
+  - ref: HEAD
+    before: 9938e7c92a90a1476063c64d8afd73b9bafc7a14
+    after: c16bd3293a9d2dc7a8a789b99d77057cb02ce374
+  - ref: refs/heads/master
+    before: 9938e7c92a90a1476063c64d8afd73b9bafc7a14
+    after: c16bd3293a9d2dc7a8a789b99d77057cb02ce374
+  - ref: refs/pull/529/merge
+    before: e80f302d942c607c1e131cffcf29c7ee253052fb
+    after: 0ba0775669af1fe6c27951dff9b17018430e91c0
+  - ref: refs/pull/535/merge
+    before: b4aea355061cdb8369c79ab60819c005619aa8b2
+    after: null
+  audit: passed
+  changed_paths:
+  - .claude/dev/packet_loop.py
+  - .claude/dev/packet_loop_test.py
+  product_lease_spec_refs_unchanged: true
+  remote_cache_names_oids_equal: true
+  a9: unique_exec5_both
+  master: c16bd3293a9d2dc7a8a789b99d77057cb02ce374
+  prior_master: 9938e7c92a90a1476063c64d8afd73b9bafc7a14
+  product_head: 86b0feb1959c78affbe8cd59fb2f47df36437e82
+  merge_base_unchanged: true
+  integration_with_new_master: not_measured
+  land_exception: 'not_claimed: CI not_run; drift touches called packet_loop suite,
+    protocol5.1 trigger5'
+integration_with_new_master: not_measured

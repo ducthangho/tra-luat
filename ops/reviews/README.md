@@ -781,3 +781,5 @@ Giới hạn phải nói thẳng, vì trang này **không** chữa hết: ngư�
 bằng đường dẫn tuyệt đối vẫn không đi ngang qua đây. Rào duy nhất còn lại cho họ là dòng
 mở đầu của chính mục lục này và thói quen đọc thư mục trước khi đọc tệp. Muốn chặt hơn
 thì phải có bộ đọc cưỡng chế — chưa làm, và đừng khai là đã làm.
+
+- #463 r22/g3, review11 Claude: [changes_requested](gate-tach-job-cat-chi-phi-review-11-claude-verdict.md), exact SHA `f4005d203d2ac457322cef46ad63a694c749269a`; [receipt](gate-tach-job-cat-chi-phi-review-11-claude-verdict.receipt.yaml). CI not_run.

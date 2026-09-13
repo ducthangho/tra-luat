@@ -590,21 +590,15 @@ jobs:
         run: python scripts/tl_boot.py --version
 
   gate-registry:
-    # packet #463 (GATE-TACH-JOB-CAT-CHI-PHI): tách khỏi `gate` để cắt wall-clock của job dài nhất.
-    # Đo 06-09-2026 (run 34045664423): job Windows 43,20 phút, hai bước nặng = 63,5 % tổng bước.
-    # Cùng ma trận nền, cùng `timeout-minutes`, cùng tiền tố 9 bước thiết lập với `gate` — KHÔNG thêm
-    # một mặt điều kiện nào (kho đã trả giá hai lần cho logic điều kiện của workflow, xem cuối `gate`).
-    # Trần 60 và lịch sử nâng trần: xem chú thích ở `gate`. Phút TÍNH TIỀN tăng vì trả tiền thiết lập
-    # ba lần thay vì một — con số đo ở PR của packet. Consumer `loi_ruff_ci`
-    # (.claude/dev/ci_dang_ky_test.py) đọc MỌI job, không chỉ `gate`.
+    # packet #463 (GATE-TACH-JOB-CAT-CHI-PHI): tách khỏi `gate` để cắt wall-clock của job dài nhất
+    # (đo 06-09-2026, run 34045664423: Windows 43,20 phút, hai bước nặng = 63,5 % tổng bước). Cùng
+    # ma trận/`timeout-minutes`/tiền tố 9 bước với `gate`, KHÔNG thêm mặt điều kiện nào; phút TÍNH
+    # TIỀN tăng vì trả tiền thiết lập ba lần. Consumer `loi_ruff_ci` đọc MỌI job, không chỉ `gate`.
     # Bước `test registry` (41,0 % tổng bước Windows) sống ở đây.
     strategy:
       fail-fast: false
       matrix:
-        # Windows tốn GẤP ĐÔI phút. Chạy nó ở nơi thật sự cần: trước khi vào master,
-        # khi gọi tay, hoặc khi PR được gắn nhãn `windows` (dùng cho PR đụng đường
-        # phụ thuộc nền). PR thường vẫn được Linux soi mỗi lần đẩy.
-        # KHÔNG phải nới gate: master vẫn luôn qua CẢ HAI nền trước khi phát hành.
+        # Vì sao Windows có điều kiện: xem chú thích cùng chỗ ở job `gate` (bản gốc).
         os: ${{ fromJSON(
               (github.event_name == 'workflow_dispatch'
                || github.ref == 'refs/heads/master'
@@ -622,24 +616,16 @@ jobs:
         run: |
           git config --global core.autocrlf false
           git config --global core.eol lf
-          # r226 — NGƯỠNG L2 CỦA doc-claims-check PHẢI TẤT ĐỊNH. `sha_lens` lấy từ `git rev-parse --short`,
-          # mà git tự nới độ dài viết tắt theo SỐ OBJECT của kho. ĐO trên chính kho này: clone `--depth 1`
-          # → 7 · clone đủ lịch sử (281 commit, 17.783 object) → 8. Mà 8 đúng bằng độ dài tiền tố UUID
-          # notebook (743ed200, 45739ff7, dbe706a0…) ⇒ ngưỡng trôi lên 8 thì 18 tiền tố UUID bị hô
-          # SHA_NOT_A_COMMIT và ca r218_docclaims_l2_sha_khong_ton_tai (mồi `deadbee`, 7 ký tự) cũng đỏ
-          # theo. Ghim 7 = giữ ĐÚNG ngưỡng mọi phép đo của r218 dựa vào, KHÔNG phải nới lỏng guard.
+          # r226 — vì sao ghim `core.abbrev 7`: xem chú thích cùng bước ở job `gate`.
           git config --global core.abbrev 7
       - uses: actions/checkout@v4
         with:
-          # r226 — `fetch-depth` mặc định (1) làm L2 MÙ: `cat-file -e` trượt với mọi SHA cũ nên trích dẫn
-          # ĐÚNG bị hô sai (đo: `ad413e7`/`78d6bfe` — cả hai là commit thật 09-07 và 07-07 — bị gắn cờ
-          # SHA_NOT_A_COMMIT trên clone `--depth 1`). Guard chỉ kết luận được khi có lịch sử để tra.
+          # r226 — vì sao `fetch-depth: 0`: xem chú thích cùng bước ở job `gate`.
           fetch-depth: 0
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      # G5 cần PyYAML + actionlint + shellcheck nhưng phải đứng trước phép test/compile
-      # đầu tiên. T6 chỉ cho phép đúng allowlist setup nhỏ trước G5.
+      # Vì sao cài trước phép test đầu tiên (G5/T6): xem job `gate`.
       - name: cài PyYAML + jsonschema (cổng đăng lease + validator verdict cần)
         run: python -m pip install --quiet PyYAML==6.0.3 jsonschema==4.26.0
       - name: cài actionlint cho G5
@@ -668,21 +654,15 @@ jobs:
         run: python .claude/dev/ci_dang_ky_test.py --chay
 
   gate-packet-loop:
-    # packet #463 (GATE-TACH-JOB-CAT-CHI-PHI): tách khỏi `gate` để cắt wall-clock của job dài nhất.
-    # Đo 06-09-2026 (run 34045664423): job Windows 43,20 phút, hai bước nặng = 63,5 % tổng bước.
-    # Cùng ma trận nền, cùng `timeout-minutes`, cùng tiền tố 9 bước thiết lập với `gate` — KHÔNG thêm
-    # một mặt điều kiện nào (kho đã trả giá hai lần cho logic điều kiện của workflow, xem cuối `gate`).
-    # Trần 60 và lịch sử nâng trần: xem chú thích ở `gate`. Phút TÍNH TIỀN tăng vì trả tiền thiết lập
-    # ba lần thay vì một — con số đo ở PR của packet. Consumer `loi_ruff_ci`
-    # (.claude/dev/ci_dang_ky_test.py) đọc MỌI job, không chỉ `gate`.
+    # packet #463 (GATE-TACH-JOB-CAT-CHI-PHI): tách khỏi `gate` để cắt wall-clock của job dài nhất
+    # (đo 06-09-2026, run 34045664423: Windows 43,20 phút, hai bước nặng = 63,5 % tổng bước). Cùng
+    # ma trận/`timeout-minutes`/tiền tố 9 bước với `gate`, KHÔNG thêm mặt điều kiện nào; phút TÍNH
+    # TIỀN tăng vì trả tiền thiết lập ba lần. Consumer `loi_ruff_ci` đọc MỌI job, không chỉ `gate`.
     # Bước `packet-loop selftest` (22,5 % tổng bước Windows) sống ở đây.
     strategy:
       fail-fast: false
       matrix:
-        # Windows tốn GẤP ĐÔI phút. Chạy nó ở nơi thật sự cần: trước khi vào master,
-        # khi gọi tay, hoặc khi PR được gắn nhãn `windows` (dùng cho PR đụng đường
-        # phụ thuộc nền). PR thường vẫn được Linux soi mỗi lần đẩy.
-        # KHÔNG phải nới gate: master vẫn luôn qua CẢ HAI nền trước khi phát hành.
+        # Vì sao Windows có điều kiện: xem chú thích cùng chỗ ở job `gate` (bản gốc).
         os: ${{ fromJSON(
               (github.event_name == 'workflow_dispatch'
                || github.ref == 'refs/heads/master'
@@ -700,24 +680,16 @@ jobs:
         run: |
           git config --global core.autocrlf false
           git config --global core.eol lf
-          # r226 — NGƯỠNG L2 CỦA doc-claims-check PHẢI TẤT ĐỊNH. `sha_lens` lấy từ `git rev-parse --short`,
-          # mà git tự nới độ dài viết tắt theo SỐ OBJECT của kho. ĐO trên chính kho này: clone `--depth 1`
-          # → 7 · clone đủ lịch sử (281 commit, 17.783 object) → 8. Mà 8 đúng bằng độ dài tiền tố UUID
-          # notebook (743ed200, 45739ff7, dbe706a0…) ⇒ ngưỡng trôi lên 8 thì 18 tiền tố UUID bị hô
-          # SHA_NOT_A_COMMIT và ca r218_docclaims_l2_sha_khong_ton_tai (mồi `deadbee`, 7 ký tự) cũng đỏ
-          # theo. Ghim 7 = giữ ĐÚNG ngưỡng mọi phép đo của r218 dựa vào, KHÔNG phải nới lỏng guard.
+          # r226 — vì sao ghim `core.abbrev 7`: xem chú thích cùng bước ở job `gate`.
           git config --global core.abbrev 7
       - uses: actions/checkout@v4
         with:
-          # r226 — `fetch-depth` mặc định (1) làm L2 MÙ: `cat-file -e` trượt với mọi SHA cũ nên trích dẫn
-          # ĐÚNG bị hô sai (đo: `ad413e7`/`78d6bfe` — cả hai là commit thật 09-07 và 07-07 — bị gắn cờ
-          # SHA_NOT_A_COMMIT trên clone `--depth 1`). Guard chỉ kết luận được khi có lịch sử để tra.
+          # r226 — vì sao `fetch-depth: 0`: xem chú thích cùng bước ở job `gate`.
           fetch-depth: 0
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      # G5 cần PyYAML + actionlint + shellcheck nhưng phải đứng trước phép test/compile
-      # đầu tiên. T6 chỉ cho phép đúng allowlist setup nhỏ trước G5.
+      # Vì sao cài trước phép test đầu tiên (G5/T6): xem job `gate`.
       - name: cài PyYAML + jsonschema (cổng đăng lease + validator verdict cần)
         run: python -m pip install --quiet PyYAML==6.0.3 jsonschema==4.26.0
       - name: cài actionlint cho G5

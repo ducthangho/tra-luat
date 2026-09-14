@@ -1,0 +1,94 @@
+# Ghi hộ chỉ thị tiếp tục của chủ kho, không mở rộng sản phẩm.
+schema_version: 2
+event: executor_lease_granted
+packet_issue: 463
+mission_issue: 467
+granted_by: ducthangho
+granted_on_instruction: https://github.com/ducthangho/tra-luat/issues/463#issuecomment-5657673695
+recorded_by: codex
+recorder_is_dispatcher: false
+leased_at_utc: '2026-09-14T01:13:16.469859+00:00'
+lease_expires_at_utc: '2026-09-14T09:13:16.469859+00:00'
+packet_id: GATE-TACH-JOB-CAT-CHI-PHI
+revision: 24
+generation: 5
+lease_id: gate-tach-job-cat-chi-phi-exec-6-codex-20260914-r24
+role: executor
+provider: codex
+executor: codex
+model: gpt-6-astra
+effort: xhigh
+reviewer_provider: claude
+environment: local
+execution_surface: codex_desktop
+transport: machine
+risk: sensitive
+review_class: sensitive
+effective_review_class: sensitive
+assurance_target: cross_approved
+access: read-write
+spec_path: ops/specs/GATE-TACH-JOB-CAT-CHI-PHI.md
+spec_sha256: 79ba77c35b74c86d0ccc5ad4c1a8ca27b6e53935222095adda016cba76edc121
+spec_hash: 79ba77c35b74c86d0ccc5ad4c1a8ca27b6e53935222095adda016cba76edc121
+prompt_path: ops/prompts/handoff-463-codex-executor-20260913.md
+prompt_sha256_required: d7d0447d93a53db3080a7ddf87b09c17d5b986be59d5c1def38bccd4a23c7f4f
+write_set: &id001
+- .github/workflows/ci.yml
+- .claude/dev/ci_dang_ky_test.py
+effective_write_set: *id001
+write_set_hash: 0f7b869da648e9b21023e461925efd0d45bca58fb308a8fcc82bc55ad9f66ef0
+branch: codex/gate-tach-job-cat-chi-phi-g5
+branch_ownership: exclusive
+base_sha: ff146f16f26f1eb59d7a3839d5cc48811b13daac
+start_from_sha: ff146f16f26f1eb59d7a3839d5cc48811b13daac
+reviewed_sha_required: ff146f16f26f1eb59d7a3839d5cc48811b13daac
+canonical_sha_at_grant: c16bd3293a9d2dc7a8a789b99d77057cb02ce374
+heartbeat_at: '2026-09-14T01:13:16.469859+00:00'
+lease_until: '2026-09-14T09:13:16.469859+00:00'
+heartbeat_required_minutes: 30
+run_minutes: 90
+attempts_used: 0
+depends_on:
+- wp502
+- wp504
+dependency_evidence:
+  wp502: 26e2555d36c48b3c0f625ae50ab2cfb62b6cb858
+  wp504: 85fcbf8aea75f0577f47d7332c02a50f993a9d1b
+thay_the_cho:
+- gate-tach-job-cat-chi-phi-exec-5-codex-20260914-r23
+ly_do_thu_hoi: Heartbeat exec5 quá hạn sau gián đoạn; chủ kho yêu cầu tiếp tục. Không
+  hồi sinh generation4.
+viec_dau_tien: Đóng nhận dạng họ installer trước khi xét grammar đối số; ngoài miền
+  không được biến thành KHONG. Giữ phạm vi chỉ khai báo trực tiếp trong YAML.
+dieu_kien_dung:
+- Chỉ hai path sản phẩm; additions không vượt A8 của spec hiện hành.
+- Không CI, không mở PR, không workflow dispatch.
+- Không merge, land, deploy hoặc LIVE.
+- Giữ lịch sử finding/review; tiếp tục vòng vá/review theo chỉ thị chủ kho, checkpoint
+  mỗi run 90 phút.
+write_set_da_do_truoc_khi_cap:
+  source_root: C:\Users\admin\.codex\visualizations\2026\09\13\01a098aa-a18c-7843-bdb6-3f2043f9d4d9\gate463-r22-source
+  full_ref_sha256: 6ad247df39e598e5ee58318879213a6afa423ba5ac018e2a204d183037c28c88
+  remote_heads: 374
+  missing_remote_branch_names: []
+  ci:
+    rc: 11
+    last_line: 'NGƯỜI_GIỮ 1: gate-tach-job-cat-chi-phi-exec-5-codex-20260914-r23'
+    evidence_sha256: 866644ed67e12ec06d460fe65312ae8db746e73c401ebc343e3a81338b9ded20
+  registry:
+    rc: 11
+    last_line: 'NGƯỜI_GIỮ 1: gate-tach-job-cat-chi-phi-exec-5-codex-20260914-r23'
+    evidence_sha256: 06e38cc8c6011757595e6cf5e02b4f27683e2f34e3b935b3c8e037ff41500d5a
+previous_architecture_attempts_used: 1
+run_started_at_utc: '2026-09-14T01:13:16.469859+00:00'
+run_deadline_utc: '2026-09-14T02:43:16.469859+00:00'
+max_additions: 1000
+review_loop_authorized_until: explicit_approve
+review_loop_authority: https://github.com/ducthangho/tra-luat/issues/463#issuecomment-5657673695
+previous_timed_out_runs: 1
+previous_interrupted_review_runs: 1
+prior_generation: 4
+prior_product_head: ff146f16f26f1eb59d7a3839d5cc48811b13daac
+prior_completed_review: 16
+prior_incomplete_review: 12
+history_preserved: true

@@ -83,3 +83,5 @@ prohibited_actions:
 - Windows CI
 closure_status: 'Explicit owner-approved bounded write-set; no claim of computed dispatcher closure; missing
   policy/derived-fields debt #473 must be reported before execution'
+
+da_bi_thay_the: wp538-r2-g2-codex-windows

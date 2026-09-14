@@ -1,0 +1,63 @@
+schema_version: 2
+kind: review_delivery_receipt
+receipt_id: gate463-r25-g6-review26-claude
+packet_id: GATE-TACH-JOB-CAT-CHI-PHI
+packet_issue: 463
+revision: 25
+generation: 6
+lease_id: gate-tach-job-cat-chi-phi-exec-7-codex-20260914-r25
+provider: claude
+role: reviewer
+verdict: approve
+assurance: cross_approved
+reviewed_sha: e3b997b60976acdb99ced3f87494dd351887d15d
+reviewed_tree: 1a6b352c0a269a9973099d5e6fbf93414489a253
+verdict_path: ops/reviews/gate-tach-job-cat-chi-phi-review-26-claude-verdict.md
+verdict_sha256: 8fa0b3d06436a5b210a9c47b1da363d093af2235c4e48f2ae59b5393d204f187
+evidence_url: https://github.com/ducthangho/tra-luat/blob/441f17f3e44e1deccacfdec1c7e2343611201632/ops/reviews/gate-tach-job-cat-chi-phi-review-26-claude-verdict.md
+model_reviewer_identity:
+  provider: anthropic_claude
+  surface: claude_code
+  transport: machine/local
+  model: claude-opus-4-8
+  effort: max
+  session_run_id: 4874a9ee-1dec-41e4-ab0a-15d1bee7d83f
+  phien_doc_lap: true
+  neo_boi_launcher: true
+github_submitter_identity:
+  actor: ducthangho
+  recorded_by: codex
+  reviewer_is_submitter_identity: false
+anchor:
+  loai: canonical_ancestry
+  cuong_do: Immutable Git blob; ancestry measured against evidence-branch HEAD, NOT
+    master; no required-check authority.
+  evidence_branch: codex/gate-463-review-evidence-20260913
+  evidence_commit: 441f17f3e44e1deccacfdec1c7e2343611201632
+raw_archive_path: ops/reviews/gate-tach-job-cat-chi-phi-review-26-claude-raw.zip
+raw_archive_sha256: 6800c90ab0ebd9b4806d4bfafb92c15825f8096991aa9111931859f4938df5a4
+raw_verdict_sha256: 8fa0b3d06436a5b210a9c47b1da363d093af2235c4e48f2ae59b5393d204f187
+raw_model_output_sha256: ac708e48fb4280daa46737256840cf563f86aa4fd9922129c73d9a3b97e481d3
+eol_normalization: Git text blobs use LF; original bytes preserved in raw ZIP.
+model_output_path: ops/reviews/gate-tach-job-cat-chi-phi-review-26-claude-model-output.json
+model_output_sha256: ac708e48fb4280daa46737256840cf563f86aa4fd9922129c73d9a3b97e481d3
+launcher_run_sha256: b2dea0e299a12042a535ad8632f144279dd64d806c726323240e2fb7eab22c77
+model_validation: 'modelUsage: ĐẠT; tập model chính=[''claude-opus-4-8'']; mô hình
+  phụ bỏ qua=[]'
+hunt_table_validation: passed
+source_and_review_trees_clean: true
+review_axes:
+- spec
+- standards_security
+review_classes:
+- installer_domain
+- lexer_composition_order
+- consumer_spec_workflow
+ci: not_run
+A1: not_run
+A5: not_run
+merge_authorized: false
+master_at_review_start: c16bd3293a9d2dc7a8a789b99d77057cb02ce374
+master_at_delivery: c16bd3293a9d2dc7a8a789b99d77057cb02ce374
+integration_with_new_master: not_measured
+clean_observation_note: HEAD/tree/status checked at completion.

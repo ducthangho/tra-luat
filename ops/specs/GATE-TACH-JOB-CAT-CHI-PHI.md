@@ -1,9 +1,9 @@
-# Đặc tả packet — GATE-TACH-JOB-CAT-CHI-PHI (revision 24)
+# Đặc tả packet — GATE-TACH-JOB-CAT-CHI-PHI (revision 25)
 
 - `packet_id`: **GATE-TACH-JOB-CAT-CHI-PHI**; ID bền theo `PROTOCOL §3.2` là `wp<packet_issue>`.
 - `packet_issue`: **#463**
 - `mission_issue`: **#467** (*"bốn packet treo sau #456: GATE → LO-319 → 2A → 2B"*)
-- `revision`: **24** · `generation`: 5 · soạn **11:3xZ 11-09-2026**; `A5` r13 **10:0xZ 12-09-2026**;
+- `revision`: **25** · `generation`: 6 · soạn **11:3xZ 11-09-2026**; `A5` r13 **10:0xZ 12-09-2026**;
   r14 (A8 400 + F03/F04/F05) **11:4xZ 12-09-2026**; r15 (F04 lượt 2 — **XOÁ** câu bị thay thay vì
   nối thêm đính chính) **13:5xZ 12-09-2026**; r16 (`R3-F04` lượt 3 — cửa THỨ BA của cùng lớp ấy ở
   `A5`, ánh xạ manifest hai lane của `A2`, và bẫy `on:` là boolean ở `A3(3)`) **14:2xZ 12-09-2026**;
@@ -28,6 +28,8 @@
   Mỗi run giữ checkpoint 90 phút; không CI trước merge, không tự merge/land/deploy/LIVE.
 - Tiếp tục generation 5 sau heartbeat exec5 quá hạn: https://github.com/ducthangho/tra-luat/issues/463#issuecomment-5657673695.
   Candidate giữ SHA `ff146f16f26f1eb59d7a3839d5cc48811b13daac`; r24 chỉ thay neo điều phối, giữ scope/acceptance và lịch sử R1–R16.
+- Tiếp tục generation 6 theo chỉ thị mới: https://github.com/ducthangho/tra-luat/issues/463#issuecomment-5661648084.
+  Candidate giữ SHA `e3b997b60976acdb99ced3f87494dd351887d15d`; giữ nguyên scope/A8 và toàn bộ lịch sử R1–R25.
 - Miền công khai: các lệnh cài Ruff/probe/registry khai báo trực tiếp trong YAML là chuỗi lệnh
   đơn với đối số tĩnh, quoting POSIX hợp lệ, ngăn bằng newline, `;` hoặc `&&`, khớp grammar
   invocation được công bố trong consumer; dạng liên quan ngoài miền phải bị từ chối.

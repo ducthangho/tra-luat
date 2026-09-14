@@ -289,12 +289,16 @@ def _dong_logic(run, depth=0):
             emit(run[i:end]); i = end
             if c == "\n" and here:
                 tag, tabs, quoted = here; here = None
+                carry = ""
                 while i < len(run):
                     end = run.find("\n", i); end = len(run) if end < 0 else end
                     line = run[i:end]; i = min(end + 1, len(run))
-                    if (line.lstrip("\t") if tabs else line) == tag: break
-                    if not quoted and ("$(" in line or "`" in line):
+                    if not carry and (line.lstrip("\t") if tabs else line) == tag: break
+                    logical = carry + line
+                    if not quoted and ("$(" in logical or "`" in logical):
                         raise ValueError("heredoc có command substitution ngoài miền")
+                    slashes = len(logical) - len(logical.rstrip("\\"))
+                    carry = logical[:-1] if not quoted and slashes % 2 else ""
                 else: raise ValueError("heredoc chưa đóng")
             continue
         else:
@@ -1193,6 +1197,12 @@ def phan_chung():
         ("escape-eof", "echo hi\\", 1),
         ("second-heredoc", "cat <<'A' <<'B'\nx\nB\n", 1),
         ("heredoc-dynamic-delimiter", "cat <<$X\nx\n$X\n", 1),
+        ("heredoc-backtick", "cat <<END\n`pip install ruff`\nEND\n", 1),
+        ("heredoc-continuation-substitution", "cat <<END\nx $\\\n(pip install ruff)\nEND\n", 1),
+        ("heredoc-even-backslash-no-join", "cat <<END\nx $\\\\\n(echo data)\nEND\n", 0),
+        ("heredoc-quoted-no-join", "cat <<'END'\nx $\\\n(pip install ruff)\nEND\n", 0),
+        ("heredoc-continuation-hides-terminator", "cat <<END\nx\\\nEND\n", 1),
+        ("heredoc-pending-at-eof", "cat <<'END'", 1),
         ("heredoc-unclosed", "cat <<'E'\nx\n", 1),
         ("parameter-eof", "V=${x", 1), ("parameter-double", 'echo "${x"', 1),
         ("parameter-single", "echo '${x'", 0), ("parameter-ok", "V=${X}", 0),

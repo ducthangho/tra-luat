@@ -5,6 +5,7 @@ from __future__ import annotations
 import http.server
 import importlib
 import importlib.util
+import ast
 import contextlib
 import io
 import json
@@ -496,14 +497,23 @@ def d8_quy_trach_nhiem_ba_dieu_kien():
     assert loi_d8(("c",), mutants, {"m": ("d",)})[0] == ["m"]
     assert loi_d8(("c",), mutants, {"m": ()})[1] == ["m"]
     assert loi_d8(("c", "d"), mutants, {"m": ("c",)})[2] == ["d"]
+def dem_dong_khong_trang(duong: pathlib.Path) -> int:
+    return sum(1 for line in duong.open(encoding="utf-8") if line.strip())
+
 def d9_ngan_sach_dong_khong_trang():
+    # Lịch sử (bảo tồn nguyên trạng ý nghĩa):
     # Khác bốn lần #319 nâng để chứa dòng ĐÃ VIẾT, trần 779 không mua dòng hiện có: tổng đã vừa 759.
     # Biên 20 cố ý rộng hơn ~50% neo đo được 13 dòng (D13: 9; try/finally: 4).
     # Chọn (A): đếm cả chú thích; xoá chú thích vẫn mua được chỗ, nhưng loại chúng sẽ tạo áp lực xoá tri thức kho coi trọng.
     # Chạm trần 779 lần nữa thì câu hỏi đúng là "tệp này có nên TÁCH ĐÔI không", KHÔNG phải "nâng lên bao nhiêu" — §12 biến lần chạm kế tiếp thành câu hỏi KIẾN TRÚC.
-    tong = sum(sum(1 for line in path.open(encoding="utf-8") if line.strip())
-               for path in (NGUON, pathlib.Path(__file__)))
-    assert tong <= 779, f"hai tệp mã dùng {tong}/779 dòng không-trắng"
+    with tempfile.TemporaryDirectory() as d:
+        path = pathlib.Path(d) / "thu.py"
+        path.write_text("a = 1\n\nb = 2\n", encoding="utf-8")
+        assert dem_dong_khong_trang(path) == 2, "phải bỏ qua dòng trắng"
+    tong = sum(dem_dong_khong_trang(path) for path in (NGUON, pathlib.Path(__file__)))
+    TRAN, BIEN = 1000, 108
+    assert tong <= TRAN, f"hai tệp mã dùng {tong}/{TRAN} dòng không-trắng"
+    assert TRAN - tong <= BIEN, f"biên {TRAN - tong} > {BIEN}: nâng trần phải kèm lý do, hoặc TÁCH tệp"
 
 def d10_main_khong_chay_ca_phai_do():
     da_chay = []
@@ -544,14 +554,168 @@ def d12_mau_dot_bien_phai_duy_nhat():
     assert MUTATIONS is cu
     assert errors and errors[0].startswith("trung: KHÔNG_ĐO_ĐƯỢC (mẫu xuất hiện ")
 
+def tim_vi_tri(src: str, old: str) -> list[int]:
+    try:
+        tree = ast.parse(src)
+    except Exception as e:
+        raise ValueError("Lỗi cú pháp") from e
+
+    node_mutations = None
+    for node in tree.body:
+        if isinstance(node, ast.Assign):
+            for target in node.targets:
+                if isinstance(target, ast.Name) and target.id == "MUTATIONS":
+                    if node_mutations is not None:
+                        raise ValueError("Nhiều bảng MUTATIONS")
+                    node_mutations = node
+        elif isinstance(node, ast.AnnAssign) and isinstance(node.target, ast.Name) and node.target.id == "MUTATIONS":
+            raise ValueError("Bảng MUTATIONS có kiểu")
+
+    if node_mutations is None:
+        i = src.find(old)
+        matches = []
+        while i != -1:
+            matches.append(i)
+            i = src.find(old, i + 1)
+        return matches
+
+    bat_dau, ket_thuc = node_mutations.lineno, node_mutations.end_lineno
+    for node in tree.body:
+        if node is not node_mutations:
+            if not (node.end_lineno < bat_dau or node.lineno > ket_thuc):
+                raise ValueError("Có mã khác cùng dòng với bảng MUTATIONS")
+
+    lines = io.StringIO(src, newline="").readlines()
+    start_char_offset = len(lines[bat_dau - 1].encode("utf-8")[:node_mutations.col_offset].decode("utf-8"))
+    end_char_offset = len(lines[ket_thuc - 1].encode("utf-8")[:node_mutations.end_col_offset].decode("utf-8"))
+
+    start_idx = sum(len(l) for l in lines[:bat_dau - 1]) + start_char_offset
+    end_idx = sum(len(l) for l in lines[:ket_thuc - 1]) + end_char_offset
+
+    truoc = src[:start_idx]
+    sau = src[end_idx:]
+    offset_sau = end_idx
+
+    matches = []
+    i = truoc.find(old)
+    while i != -1:
+        matches.append(i)
+        i = truoc.find(old, i + 1)
+
+    i = sau.find(old)
+    while i != -1:
+        matches.append(offset_sau + i)
+        i = sau.find(old, i + 1)
+
+    return matches
+
+def ap_dung_dot_bien(src: str, old: str, new: str) -> str:
+    matches = tim_vi_tri(src, old)
+    if len(matches) != 1:
+        raise ValueError(f"Khớp {len(matches)} lần")
+    i = matches[0]
+    return src[:i] + new + src[i + len(old):]
+
 def mau_dot_bien_khong_duy_nhat(mutants, sources):
-    return [(name, sources[target].count(old)) for name, target, old, _, _ in mutants if sources[target].count(old) != 1]
+    bad = []
+    for name, target, old, _, _ in mutants:
+        src = sources[target]
+        c = len(tim_vi_tri(src, old))
+        if c != 1:
+            bad.append((name, c))
+    return bad
 
 def d13_moi_mau_dot_bien_phai_khop_dung_mot_cho():
     sources = {"app": NGUON.read_text(encoding="utf-8"), "test": pathlib.Path(__file__).read_text(encoding="utf-8")}
     bad = mau_dot_bien_khong_duy_nhat(MUTATIONS, sources)
     assert not bad, "mẫu đột biến phải khớp đúng một chỗ: " + ", ".join(f"{name}={count}" for name, count in bad)
+
     assert mau_dot_bien_khong_duy_nhat((("trung", "test", "x", "y", "D13"),), {"test": "xx"}) == [("trung", 2)]
+    assert mau_dot_bien_khong_duy_nhat((("thieu", "test", "x", "y", "D13"),), {"test": "zz"}) == [("thieu", 0)]
+
+    ma_gia = "import sys\n# binh luan\na = 1\nMUTATIONS = (\n  ('a = 1', '2'),\n)\nb = 1\nc = 1"
+
+    assert tim_vi_tri(ma_gia, "a = 1") == [ma_gia.index("a = 1")]
+    assert tim_vi_tri(ma_gia, "b = 1") == [ma_gia.index("b = 1")]
+
+    tat_ca_1 = []
+    i = ma_gia.find("1")
+    while i != -1:
+        if i < ma_gia.index("MUTATIONS") or i > ma_gia.index("b = 1") - 1:
+            tat_ca_1.append(i)
+        i = ma_gia.find("1", i + 1)
+
+    assert tim_vi_tri(ma_gia, "1") == tat_ca_1
+    assert tim_vi_tri(ma_gia, "('a = 1', '2')") == []
+
+    loi_cu_phap = False
+    try:
+        tim_vi_tri("a = (1", "1")
+    except ValueError:
+        loi_cu_phap = True
+    assert loi_cu_phap
+
+    loi_nhieu_bang = False
+    try:
+        tim_vi_tri("MUTATIONS = ()\nMUTATIONS = ()", "1")
+    except ValueError:
+        loi_nhieu_bang = True
+    assert loi_nhieu_bang
+
+    loi_co_kieu = False
+    try:
+        tim_vi_tri("MUTATIONS: tuple = ()", "1")
+    except ValueError:
+        loi_co_kieu = True
+    assert loi_co_kieu
+
+    loi_cung_dong = False
+    try:
+        tim_vi_tri("a = 1; MUTATIONS = ()", "1")
+    except ValueError:
+        loi_cung_dong = True
+    assert loi_cung_dong
+
+    dich = ap_dung_dot_bien(ma_gia, "a = 1", "a = 2")
+    assert dich == ma_gia.replace("a = 1", "a = 2", 1)
+
+    dich_sau = ap_dung_dot_bien(ma_gia, "b = 1", "b = 2")
+    assert dich_sau == ma_gia[:ma_gia.index("b = 1")] + "b = 2" + ma_gia[ma_gia.index("b = 1") + 5:]
+
+    loi_ap_dung_khong_duy_nhat = False
+    try:
+        ap_dung_dot_bien(ma_gia, "1", "2")
+    except ValueError:
+        loi_ap_dung_khong_duy_nhat = True
+    assert loi_ap_dung_khong_duy_nhat
+
+    loi_ap_dung_khong_thay = False
+    try:
+        ap_dung_dot_bien(ma_gia, "khong_co_chuoi_nay", "2")
+    except ValueError:
+        loi_ap_dung_khong_thay = True
+    assert loi_ap_dung_khong_thay
+
+    ma_gia_inline = "MUTATIONS=() # needle\nx='needle'\n"
+    assert tim_vi_tri(ma_gia_inline, "needle") == [15, 25]
+    loi_2 = False
+    try:
+        ap_dung_dot_bien(ma_gia_inline, "needle", "2")
+    except ValueError:
+        loi_2 = True
+    assert loi_2
+
+    assert ap_dung_dot_bien(ma_gia_inline, "x='needle'", "x='2'") == "MUTATIONS=() # needle\nx='2'\n"
+
+    ma_gia_table = "MUTATIONS=('needle',) # needle\nx='needle'\n"
+    assert tim_vi_tri(ma_gia_table, "needle") == [24, 34]
+    assert ap_dung_dot_bien(ma_gia_table, "x='needle'", "x='2'") == "MUTATIONS=('needle',) # needle\nx='2'\n"
+
+    for nl in ("\n", "\r\n", "\r"):
+        ma_u = f's="a\u2028b"{nl}MUTATIONS=("✓",) # needle{nl}x="needle"{nl}'
+        assert tim_vi_tri(ma_u, "needle") == [ma_u.find("needle", ma_u.find("#")), ma_u.find("needle", ma_u.find("x="))]
+        assert ma_u.count("✓") == 1
+        assert tim_vi_tri(ma_u, "✓") == []
 
 # Đăng ký xong mới đóng băng; runner không sửa tuple này.
 CASES = (
@@ -621,8 +785,9 @@ MUTATIONS = (
     ("d8_bo_dieu_kien_a", "test", "[name for name, target in targets.items()\n         if target not in kill_sets.get(name, ())]", "[]", "D8"),
     ("d8_bo_dieu_kien_b", "test", "        [name for name in targets if not kill_sets.get(name, ())],\n        [case for case", "        [],\n        [case for case", "D8"),
     ("d8_bo_dieu_kien_c", "test", "        [case for case in cases if case not in targets.values()],\n    )", "        [],\n    )", "D8"),
-    ("d9_dem_ca_dong_trang", "test", '    tong = sum(sum(1 for line in path.open(encoding="utf-8") if line.strip())\n               for path in (NGUON, pathlib.Path(__file__)))', '    tong = sum(sum(1 for line in path.open(encoding="utf-8"))\n               for path in (NGUON, pathlib.Path(__file__)))', "D9"),
-    ("d9_vuot_ngan_sach", "test", '               for path in (NGUON, pathlib.Path(__file__)))\n    assert tong <= 779, f"hai tệp mã dùng {tong}/779 dòng không-trắng"', '               for path in (NGUON, pathlib.Path(__file__)))\n    assert tong < 0, f"hai tệp mã dùng {tong}/779 dòng không-trắng"', "D9"),
+    ("d9_dem_ca_dong_trang", "test", 'def dem_dong_khong_trang(duong: pathlib.Path) -> int:\n    return sum(1 for line in duong.open(encoding="utf-8") if line.strip())', 'def dem_dong_khong_trang(duong: pathlib.Path) -> int:\n    return sum(1 for line in duong.open(encoding="utf-8"))', "D9"),
+    ("d9_vuot_ngan_sach", "test", '    assert tong <= TRAN, f"hai tệp mã dùng {tong}/{TRAN} dòng không-trắng"', '    assert tong < 0, f"hai tệp mã dùng {tong}/{TRAN} dòng không-trắng"', "D9"),
+    ("d9_nang_ngan_sach_vo_ly", "test", '    TRAN, BIEN = 1000, 108', '    TRAN, BIEN = 1200, 108', "D9"),
     ("d10_main_luon_xanh", "test", "def ma_thoat(xanh):\n    return 0 if xanh else 1", "def ma_thoat(xanh):\n    return 0", "D10-main"),
     ("d11_ep_rc_xanh", "test", "def ma_thoat(xanh):\n    return 0 if xanh else 1", "def ma_thoat(xanh):\n    return 0", "D11-gate"),
     ("d11_phan_dinh_xanh", "test", "return not any(\"ĐỎ\" in line or \"KHÔNG_ĐO_ĐƯỢC\" in line for line in lines)", "return True", "D11-gate"),
@@ -633,8 +798,18 @@ MUTATIONS = (
     ("d11_hau_to_dot_bien_xanh", "test", 'def dong_dot_bien(kill_sets, mutants, failed, errors=()):\n    if failed:\n        return "ĐỘT BIẾN   : KHÔNG_ĐO_ĐƯỢC (nền đỏ)"\n    ok = _co_dot_bien(mutants) and len(kill_sets) == len(mutants) and not errors\n    return f"ĐỘT BIẾN   : đã đo {len(kill_sets)}/{len(mutants)} tập giết · " + ("ĐẠT" if ok else "ĐỎ")', 'def dong_dot_bien(kill_sets, mutants, failed, errors=()):\n    if failed:\n        return "ĐỘT BIẾN   : KHÔNG_ĐO_ĐƯỢC (nền đỏ)"\n    ok = _co_dot_bien(mutants) and len(kill_sets) == len(mutants) and not errors\n    return f"ĐỘT BIẾN   : đã đo {len(kill_sets)}/{len(mutants)} tập giết · " + "ĐẠT"', "D11-gate"),
     ("d11_hau_to_ca_xanh", "test", '    lines = [f"CA         : {len(ran) - len(failed)}/{len(cases)} đạt · {len(failed)} đỏ · "\n             + ("ĐẠT" if _du_ca(tuple(name for name, _ in cases), ran) and not failed else "ĐỎ")]', '    lines = [f"CA         : {len(ran) - len(failed)}/{len(cases)} đạt · {len(failed)} đỏ · "\n             + "ĐẠT"]', "D11-gate"),
     ("d12_bo_khoi_phuc", "test", "    finally:\n        MUTATIONS = cu\n    assert MUTATIONS is cu", "    finally:\n        pass\n    assert MUTATIONS is cu", "D12-duy-nhat"),
-    ("d12_bo_chot_duy_nhat", "test", "        if src.count(old) != 1:\n            errors.append", "        if src.count(old) < 1:\n            errors.append", "D12-duy-nhat"),
-    ("d13_bo_chot_duy_nhat", "test", "def mau_dot_bien_khong_duy_nhat(mutants, sources):\n    return [(name, sources[target].count(old)) for name, target, old, _, _ in mutants if sources[target].count(old) != 1]", "def mau_dot_bien_khong_duy_nhat(mutants, sources):\n    return [(name, sources[target].count(old)) for name, target, old, _, _ in mutants if sources[target].count(old) < 1]", "D13-duy-nhat-toan-bang"),
+    ("d12_bo_chot_duy_nhat", "test", "        matches = tim_vi_tri(src, old)\n        if len(matches) != 1:\n            errors.append", "        matches = tim_vi_tri(src, old)\n        if len(matches) < 1:\n            errors.append", "D12-duy-nhat"),
+    ("d13_bo_chot_duy_nhat", "test", "        if c != 1:\n            bad.append((name, c))", "        if c < 1:\n            bad.append((name, c))", "D13-duy-nhat-toan-bang"),
+    ("d13_bo_chot_khong_cho", "test", "        if c != 1:\n            bad.append((name, c))", "        if c > 1:\n            bad.append((name, c))", "D13-duy-nhat-toan-bang"),
+    ("d13_bo_loi_cu_phap", "test", '    except Exception as e:\n        raise ValueError("Lỗi cú pháp") from e', '    except Exception as e:\n        return []', "D13-duy-nhat-toan-bang"),
+    ("d13_bo_loi_nhieu_bang", "test", '                    if node_mutations is not None:\n                        raise ValueError("Nhiều bảng MUTATIONS")', '                    if node_mutations is not None:\n                        pass', "D13-duy-nhat-toan-bang"),
+    ("d13_bo_loi_bang_co_kieu", "test", '        elif isinstance(node, ast.AnnAssign) and isinstance(node.target, ast.Name) and node.target.id == "MUTATIONS":\n            raise ValueError("Bảng MUTATIONS có kiểu")', '        elif False:\n            pass', "D13-duy-nhat-toan-bang"),
+    ("d13_bo_loi_cung_dong", "test", '            if not (node.end_lineno < bat_dau or node.lineno > ket_thuc):\n                raise ValueError("Có mã khác cùng dòng với bảng MUTATIONS")', '            if False:\n                pass', "D13-duy-nhat-toan-bang"),
+    ("d13_bo_loi_ap_dung_nhieu", "test", '    if len(matches) != 1:\n        raise ValueError(f"Khớp {len(matches)} lần")', '    if False:\n        pass', "D13-duy-nhat-toan-bang"),
+    ("d13_loi_splitlines", "test", '    lines = io.StringIO(src, newline="").readlines()', '    lines = src.splitlines(True)', "D13-duy-nhat-toan-bang"),
+    ("d13_loi_bo_qua_loai_tru_bang", "test", '    truoc = src[:start_idx]\n    sau = src[end_idx:]\n    offset_sau = end_idx', '    truoc = src\n    sau = ""\n    offset_sau = 0', "D13-duy-nhat-toan-bang"),
+    ("d13_loi_sai_vi_tri_thay_the", "test", '    return src[:i] + new + src[i + len(old):]', '    return src[:i] + new + src[i + len(old) - 1:]', "D13-duy-nhat-toan-bang"),
+    ("d13_loi_cuoi_dong", "test", '    end_idx = sum(len(l) for l in lines[:ket_thuc - 1]) + end_char_offset', '    end_idx = sum(len(l) for l in lines[:ket_thuc])', "D13-duy-nhat-toan-bang"),
 )
 
 
@@ -656,10 +831,11 @@ def chay_dot_bien():
     root = sys.modules[__name__]
     for i, (name, target_file, old, new, target_case) in enumerate(MUTATIONS):
         src = app_src if target_file == "app" else test_src
-        if src.count(old) != 1:
-            errors.append(f"{name}: KHÔNG_ĐO_ĐƯỢC (mẫu xuất hiện {src.count(old)} lần)")
+        matches = tim_vi_tri(src, old)
+        if len(matches) != 1:
+            errors.append(f"{name}: KHÔNG_ĐO_ĐƯỢC (mẫu xuất hiện {len(matches)} lần)")
             continue
-        mutated = src.replace(old, new, 1)
+        mutated = ap_dung_dot_bien(src, old, new)
         with tempfile.TemporaryDirectory() as d:
             folder = pathlib.Path(d)
             try:

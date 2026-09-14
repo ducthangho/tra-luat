@@ -2731,7 +2731,62 @@ def case_adr_song_KHO_THAT_xanh(c: Ctx):
         raise AssertionError(f"đòi hai số bằng nhau = {n}; được: {s!r}")
 
 
+def case_wp320_invalid_inputs(c: Ctx):
+    bad = c.tmp / "bad.json"
+    bad.write_text("{", encoding="utf-8")
+    missing = c.tmp / "missing.json"
+    missing.write_text('{"he_dieu_hanh": "Windows"}', encoding="utf-8")
+    missing_file_path = c.tmp / "nonexistent.json"
+    if missing_file_path.exists():
+        raise AssertionError("WP320 diagnostic: Missing file fixture already exists")
+
+    inputs = [
+        ("absent flag/environment", [], {BIEN_BC: ""},
+         ["không có ảnh môi trường", "''"]),
+        ("missing file", ["--bang-chung-moi-truong", str(missing_file_path)], None,
+         ["không có ảnh môi trường", "nonexistent.json"]),
+        ("malformed JSON", ["--bang-chung-moi-truong", str(bad)], None,
+         ["không đọc được", "JSONDecodeError"]),
+        ("missing required fields", ["--bang-chung-moi-truong", str(missing)], None,
+         ["thiếu trường của `doctor --json`"]),
+    ]
+
+    msgs = set()
+    for name, args, env_extra, expected_substrs in inputs:
+        sd = c.sd()
+        _doi(0, *c.init(sd)[0:1], b"", "init")
+        rc, o, e = run(c.script, ["begin-attempt", "--packet", 55, "--provider", EXECUTOR] + args, sd, env_extra=env_extra)
+
+        err_msg = _txt(e)
+        msgs.add(err_msg)
+
+        if rc != 10:
+            raise AssertionError(f"WP320 diagnostic {name}: expected rc=10, got {rc}. err: {err_msg!r}")
+
+        for substr in expected_substrs:
+            if substr not in err_msg:
+                raise AssertionError(f"WP320 diagnostic {name}: expected {substr!r} in {err_msg!r}")
+
+        st = json.loads((sd / "wp55.json").read_text(encoding="utf-8"))
+        if st["attempts_used"] != 0 or st["attempt_open"]:
+            raise AssertionError(f"WP320 diagnostic {name}: state not isolated (attempts={st['attempts_used']}, open={st['attempt_open']})")
+
+    if len(msgs) != 4:
+        raise AssertionError(f"WP320 diagnostic: Expected 4 distinct messages, got {len(msgs)}: {msgs!r}")
+
+def case_wp320_valid_evidence(c: Ctx):
+    sd = c.sd()
+    _doi(0, *c.init(sd)[0:1], b"", "init")
+    rc, o, e = run(c.script, ["begin-attempt", "--packet", 55, "--provider", EXECUTOR], sd)
+    _doi(0, rc, e, "WP320 clean valid evidence")
+    st = json.loads((sd / "wp55.json").read_text(encoding="utf-8"))
+    if st["attempts_used"] != 1 or not st["attempt_open"]:
+        raise AssertionError("WP320 diagnostic: Clean input phải increment lượt")
+
+
 CASES = [
+    ("wp320_invalid_inputs", case_wp320_invalid_inputs),
+    ("wp320_valid_evidence", case_wp320_valid_evidence),
     ("init_KHONG_duoc_tu_cap_lease", case_init_KHONG_duoc_tu_cap_lease),
     ("tu_cap_lease_bang_ten_provider_bi_chan", case_tu_cap_lease_bang_ten_provider_bi_chan),
     ("lease_da_het_han_khong_ghi_duoc", case_lease_da_het_han_khong_ghi_duoc),
@@ -3266,6 +3321,11 @@ CASES += [(f"ac19_{ten}", _ca_doctrine(nd, f"ac19_{ten}", 0)) for ten, nd in LOP
 # Đột biến nới ngưỡng: mỗi cái BẮT BUỘC giết đúng những ca dưới đây. Ca không
 # chết được nghĩa là nó không đo cái nó khai.
 MUTANTS = {
+    "wp320_overwrite_diagnostic": (
+        "    if d is not None and (not isinstance(d, dict) or not {\"thieu_bat_buoc\", \"chua_xac_thuc\", \"he_dieu_hanh\"} <= d.keys()):\n",
+        "    if not isinstance(d, dict) or not {\"thieu_bat_buoc\", \"chua_xac_thuc\", \"he_dieu_hanh\"} <= d.keys():\n",
+        ["wp320_invalid_inputs"],
+    ),
     # --- dòng bảng phải THUỘC một bảng: đột biến dựng lại bản cũ -----------------
     #
     # Bản cũ đếm mọi dòng khớp `^| \`ADR-NNNN\` |` ở cột 0, bất kể nó có nằm trong

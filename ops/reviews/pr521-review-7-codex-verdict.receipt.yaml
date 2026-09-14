@@ -1,0 +1,191 @@
+# BIÊN NHẬN GIAO HÀNG — cross-review lượt 7 của PR #521 (adapter `cross-review`), KHÁC NỀN
+# (codex), review THEO LỚP, trên head `aaef55b`. changes_requested 0/4/0, 5 thể hiện.
+#
+# Theo phiên điều phối thuật lại, #521 là PR adapter đi riêng (tiền lệ `3184773`), không có
+# Packet Issue được dẫn. `packet_id` là số PR; `lease_id: KHONG_CO` chỉ ghi chưa tìm thấy
+# hiện vật lease riêng #521 trong snapshot, không chứng minh chưa từng được cấp lease.
+
+schema_version: 2
+receipt_id: pr521-review-7-codex-20260912-730ed330
+kind: review_delivery_receipt
+packet_id: '521'
+packet_slug: 'ADAPTER-CROSS-REVIEW-CODEX-HINT'
+lease_id: KHONG_CO
+lease_id_ghi_chu: >-
+  Quét snapshot 360 refs/heads của gói lúc 2026-09-12T16:17:21Z chưa tìm thấy lease riêng
+  #521. Không suy từ đó rằng đường adapter không có người giữ hoặc #521 chưa từng có lease:
+  ref `ops/cap-lease-522-523` chứa các lease #523 có write_set giữ chính đường ấy, từ gen 1
+  `quy-trinh-lap-review-r2-exec-1-claude-20260912` (leased_at_utc 2026-09-12T08:15:00Z),
+  rồi gen 2 và gen 3. Quét master đơn lẻ bỏ sót chúng; ref đã xoá/lịch sử ngoài snapshot
+  và quyền thực tế tại từng thời điểm KHÔNG ĐO ĐƯỢC. Không gán lease của #523 cho #521.
+phase_key: PR521-ADAPTER-CROSS-REVIEW-LUOT7-PHIEN-20260912
+luot: 7
+role: reviewer
+provider: codex
+executor_provider: claude
+cross_provider: true
+assurance: cross_reviewed
+assurance_ghi_chu: >-
+  `cross_reviewed` — lượt này `changes_requested`, KHÔNG phải approve, nên KHÔNG được khai `cross_approved`.
+verdict: changes_requested
+verdict_path: ops/reviews/pr521-review-7-codex-verdict.md
+verdict_sha256: 05aa41634a82c7f8103385627857d2f8da0a67d02da9ab6ef57efddc9fbab99f
+verdict_bytes: 26491
+reviewed_sha: aaef55bf77f061015d46b14411475d7f448beb05
+reviewed_base: bb7013c7669da19304a8769e5b25f8c1f8951e9c
+evidence_url: https://github.com/ducthangho/tra-luat/blob/e759a7e21646a8fa2b8aac689c05d66bb488c3a8/ops/reviews/pr521-review-7-codex-verdict.md
+evidence_url_ghi_chu: >-
+  Neo BLOB ghim `e759a7e` — commit ĐẦU TIÊN chứa tệp verdict này. Bản chiếu công khai trên PR
+  #521 (nếu có) đăng SAU commit ấy; nguồn có thẩm quyền là TỆP CÓ BĂM trong kho, không phải comment.
+
+verdict_usage_caveats:
+  - id: LIEN-KET-NOI-BO-GOI-KHONG-TRA-DUOC-gom-ca-HINT-patch-va-duong-cay-kho
+    mo_ta: 'Như lượt 5, và kiểm kê ĐỦ cho lượt này: các liên kết `evidence/...` CỘNG một liên kết `HINT.patch` (tệp trong gói, không vào kho). Mọi liên kết tương đối trong tệp này là KHÔNG TRA ĐƯỢC.'
+  - id: BA-LOP-CU-VAN-CON-THE-HIEN-SONG-sau-HINT-luot-6
+    mo_ta: 'Ba lớp mà lượt 6 khai ''đóng đủ N thể hiện'' đều còn thể hiện sống, tìm ra ở lượt 7. Đọc bảng ''đóng lớp'' của BẤT KỲ lượt nào trong chuỗi này như một lời khai về TẬP ĐÃ DUYỆT, không như một lời khai về tập TỒN TẠI — lượt 6 đã khai 506/506 dòng theo 14 vùng, lượt 7 khai 509/509 dòng và 23 fence; lượt 8 kê chi tiết hơn theo từng lớp.'
+
+phan_loai_finding: theo_lop
+phan_loai_finding_ghi_chu: >-
+  `so_p1`/`so_p2`/`so_p3` đếm số LỚP (một lớp = một cơ chế sinh cùng hình dạng lỗi), `so_the_hien`
+  là tổng thể hiện, `findings_ids` là slug LỚP. Chỉ thị chủ kho cho đợt này là "tìm, phân theo lớp
+  lỗi, không theo lỗi riêng lẻ".
+so_p1: 0
+so_p2: 4
+so_p3: 0
+so_the_hien: 5
+findings_ids: 
+  - va-qua-tay-mat-cong-cu
+  - lenh-khong-noi-hien-vat
+  - loi-khai-vuot-phep-do
+  - neo-sha-tu-head-dong
+
+hint_patch:
+  so_hunk: 5
+  so_tep: 1
+  ap_bang: 'patch -p0 --fuzz=0'
+  ket_qua_ap: 'rc=0, không fuzz, không offset'
+  ghi_chu: >-
+    Phiên chính áp NGUYÊN, không sửa tay hunk nào; dry-run strict chạy TRƯỚC khi áp thật, cùng chế độ `--fuzz=0` với lần áp.
+
+noi_dung_do_duoc_van_dung:
+  - 'ĐỐI CHIẾU LƯỢT TRƯỚC — theo verdict lượt 7, replay NGUYÊN HINT lượt 6 (5 hunk) lên blob `e849e2eb341801155cd20341b9f77b5116329dcc`: rc=0, kết quả bằng byte HEAD `aaef55bf77f061015d46b14411475d7f448beb05`; năm hunk đều ĐÃ VÁ THẬT ở thể hiện chúng phủ.'
+  - 'Lớp MỚI `neo-sha-tu-head-dong` — phát hiện có giá trị nhất của cả chuỗi: HAI tuyến trong adapter lấy lại head PR bằng `gh pr view --json headRefOid` NGAY TẠI LÚC GỌI rồi dùng nó làm SHA của dữ liệu đang review (`gh pr diff` + `git diff <base> <head_sha>`, và `record-review --reviewed-sha $(gh pr view …)`). Theo verdict lượt 7, Git và packet_loop thật cùng gh stand-in tái hiện việc artifact bị neo vào revision KHÁC khi head đổi giữa lúc đọc và lúc ghi. Git xác nhận các head của chuỗi đổi qua các commit áp HINT; đó không phải bằng chứng race này đã xảy ra trên GitHub. Verdict nói rõ không quan sát race trên dịch vụ thật.'
+  - 'Ba lớp cũ còn thể hiện SỐNG sau HINT lượt 6, đúng hình dạng ''vá đúng chỗ được chỉ rồi bỏ sót đường tiếp theo'': con trỏ thứ hai (`§9` trong khi cú pháp `release-manifest` thật nằm ở §10.2 L699–709) · `"$RV"` dùng trước khi biến được cấp giá trị · `diff` hai danh sách ref chỉ so TÊN mà câu dẫn đọc thành ''mirror nhận đủ cái kho nguồn đang có''.'
+  - 'HINT sửa phép so ref thành `tên + objectname` và in `ref diff rc=`, kèm câu khai thẳng nó KHÔNG kiểm mọi namespace ref lẫn toàn vẹn mọi object — thu hẹp đúng phạm vi, không thu hẹp tới mức vô nghĩa.'
+
+model_reviewer_identity:
+  provider: openai_codex
+  surface: codex_cli
+  transport: machine
+  model_yeu_cau: 'gpt-6-astra — truyền tường minh bằng `-m` trên dòng lệnh `codex exec`'
+  model_da_chay: 'KHONG_DO_DUOC — `codex exec` không xuất `modelUsage`; reviewer TỰ KHAI "Codex, dựa trên GPT-6 theo chỉ thị phiên" trong VERDICT.md. Lời tự khai, không phải phép đo.'
+  effort: 'xhigh — truyền bằng `-c model_reasoning_effort="xhigh"`; GIÁ TRỊ YÊU CẦU, effort thực chạy KHÔNG ĐO ĐƯỢC'
+  session_run_id: 730ed330
+  run_id_day_du: 730ed33051424ea5b1fde4b7e5767aa0
+  prompt_sha256: 4fad857646fb96c68f8b659a56b8154951a418ded5e56ff5a227a45c8f4e531d
+  bat_dau_utc: '2026-09-12T13:50:32.315394+00:00'
+  ket_thuc_utc: '2026-09-12T14:16:10.118972+00:00'
+  thoi_luong_giay: 1537.804
+  ma_thoat: 0
+  trang_thai: xong
+  stdout_byte: 308
+  stdout_sha256: c5b7fd64365c9c6fc655f3c473c2011b9a6ee18b701a3482cf0c5286b9d2f0ae
+  stderr_byte: 694262
+  stderr_sha256: c7d6dab6b1b1a8b1b851b2ca98371a8c424eb9db9999266b3973d065bb2bd12a
+  so_lan_chet_truoc_khi_xong: 0
+  nguon_cac_scalar_tren: >-
+    ĐỐI CHIẾU ĐƯỢC với `run.json` (NGOÀI kho, trong container phiên điều phối):
+    `run_id`/`short_id`, `prompt_sha256` (khớp `--expected-prompt-sha256` mà launcher chốt TRƯỚC
+    khi sinh con), `bat_dau_utc`, `ket_thuc_utc`, `ma_thoat`, `trang_thai`, `transport` (`machine`),
+    `worktree_sach: true`, `head` (`aaef55b`), `commit_goc` (`394e9346`), `remotes`
+    (`github.com/ducthangho/tra-luat`), ba probe `workspace`/`ghi`/`spawn` đều `DAT`.
+    `thoi_luong_giay` là hiệu hai mốc thời gian trong chính `run.json`, tính lại tại lúc viết biên
+    nhận — `run.json` của các lượt này KHÔNG có khoá `thoi_luong_giay` sẵn.
+    `stdout_byte`/`stderr_byte` và hai sha256 đo lại trực tiếp trên hai tệp log.
+    KHÔNG khoá nào trong đó chứng thực MODEL thực chạy.
+  vi_sao_ba_so_nay_duoc_ghi: >-
+    `trang_thai=xong` CHỈ nghĩa là con thoát mã 0, KHÔNG nghĩa việc đã làm — kho đã đo được một
+    lượt `xong`/`ma_thoat=0` mà agent dừng ngay bước đầu. Thứ tố cáo là THỜI LƯỢNG và KÍCH THƯỚC
+    ĐẦU RA: 1537.804 s và 694262 B stderr.
+
+nang_luc_do_cua_goi:
+  mirror: >-
+    Mirror git ĐẦY ĐỦ trong sandbox: `kho.git` bare + `cay-kho` detached đúng `aaef55b`,
+    non-shallow, `core.abbrev 7` đã ghim, `origin` đã `remote set-url` về URL HTTPS thật.
+    `ops/dung_goi_review.sh` đối chiếu ba tập ref nguồn/mirror/cay-kho và in `lech=0/0`.
+  chup_remote_va_doi_chieu_ref_cua_goi: >-
+    Theo mã `ops/dung_goi_review.sh`, `nguon-refs.tsv` lấy tên+OID bằng `git ls-remote --heads`
+    từ remote `origin` của kho nguồn lúc dựng gói; sau khi dựng mirror và cây làm việc,
+    script so tên+OID trong hai bản sao với tập nguồn đã chụp.
+    Cần tách bước chụp remote của bên dựng gói với bước reviewer so các TSV ngoại tuyến:
+    bước sau không hỏi lại GitHub tại lúc review. Việc script đã chạy trên GitHub và ba tập
+    đã khớp trong gói lịch sử là (b) theo phiên điều phối; các TSV gốc của lượt này không
+    có trong kho để kiểm lại. Mã script mô tả phép so, không chứng thực lần chạy lịch sử.
+  doi_chieu_cong_nen_sandbox: >-
+    Reviewer dựng clone SẠCH, ĐẦY ĐỦ, NGOÀI cây review rồi chạy chín cổng nền; kết quả đầy đủ
+    nằm trong mục `## Phép đo nền` của chính tệp verdict. Phiên điều phối chạy cùng bộ cổng tại
+    chỗ sau khi áp HINT. Hai mã thoát bằng nhau CHƯA chứng minh môi trường tương đương.
+  chua_do_duoc: >-
+    Sandbox không có mạng. Mọi sự kiện GitHub (comment, CI, `thu-hoi`, merge, connector),
+    `ls-remote`, và byte thật trên GitHub đều KHÔNG ĐO ĐƯỢC từ trong đó.
+
+hien_vat_reviewer_vao_kho:
+  duong_dan: KHONG_CO
+  ghi_chu: >-
+    Reviewer ghi thư mục `evidence/` trong sandbox NGOÀI kho (log từng phép đo, script, bảng kiểm
+    kê); chúng chết theo container. Kết luận đã được gói vào chính `VERDICT.md`, và các liên kết
+    `evidence/...` trong verdict là liên kết NỘI BỘ GÓI — chúng KHÔNG tra được từ kho này.
+
+tuan_thu_cam_cua_reviewer:
+  cay_kho_sach: true
+  commit_them_ngoai_head: 0
+  bang_chung: >-
+    `run.json` `worktree_sach: true`. Reviewer tự khai trong mục kiểm cuối rằng cây review còn
+    đúng HEAD/tree, adapter bằng byte blob HEAD và `git status --porcelain` rỗng. Phiên điều phối
+    đo độc lập phía kho thật: `git status --porcelain` RỖNG trước mỗi lần áp HINT.
+
+github_submitter_identity:
+  actor: ducthangho
+  la_tac_gia_PR: true
+  ghi_chu: >-
+    `ADR-0040`: verdict do tài khoản tác giả PR vận chuyển KHÔNG là merge authorization. Bản chiếu
+    (nếu đăng) đi bằng MCP GitHub với `GITHUB_PAT` của chủ kho nên nó KHÔNG mang trạng thái review
+    chính thức của GitHub. Danh tính MODEL reviewer (codex/OpenAI) tách khỏi danh tính người đăng.
+  phien_van_chuyen: https://claude.ai/code/session_012KBPdsckzqhbnufu7JBSZz
+
+anchor:
+  loai: canonical_ancestry
+  cuong_do: cao
+  mo_ta: >-
+    Blob verdict ghim `e759a7e`. Head đã review `aaef55b` là tổ tiên của `e759a7e`:
+    #521 đã land vào `master` bằng MERGE COMMIT `dc02c9b` (không squash), nên quan hệ tổ tiên tới
+    canonical đã THÀNH LẬP, không còn chờ.
+  gioi_han: >-
+    `cuong_do: cao` chỉ nói quan hệ tổ tiên đã thành lập, KHÔNG nói nội dung verdict đã được kiểm
+    bởi bên thứ ba. Viết lại ref `master` có thể làm mất quan hệ tổ tiên đã kiểm, nhưng
+    không tự làm mất commit/blob ghim nếu chúng còn được ref khác giữ. Khả năng tra URL
+    trên GitHub cần đo riêng; phép kiểm object trong snapshot không chứng thực dịch vụ.
+
+khong_do_duoc:
+  - 'Model thật của `codex exec`: không có `modelUsage`, chỉ có lời tự khai trong VERDICT.md. Effort thực chạy cũng vậy — `xhigh` là GIÁ TRỊ TRUYỀN VÀO.'
+  - '`run.json`/`stdout.log`/`stderr.log`/`prompt.snapshot` KHÔNG vào kho ⇒ mọi scalar runtime ở trên là ATTESTATION của phiên điều phối, đối chiếu được với run.json trong container này nhưng KHÔNG tái lập được sau khi container bị thu hồi.'
+  - 'Bốn `VERDICT.md` của lượt 1–4 KHÔNG còn tra được — gói review của chúng chết theo container phiên trước. Chỉ còn bản chiếu trên PR #521, mà bản chiếu đi qua tầng vận chuyển nên KHÔNG chứng minh được là nguyên văn. Không dựng tệp verdict từ bản chiếu.'
+  - 'Thư mục `evidence/` mà verdict này dẫn tới nằm NGOÀI kho và đã/sẽ chết theo container. Mọi liên kết `evidence/...` trong tệp verdict là liên kết nội bộ gói, KHÔNG tra được từ kho.'
+  - 'Trạng thái Windows của merge commit `dc02c9b`: `gate (windows-latest)` bị HUỶ theo chỉ thị chủ kho (lỗi đã biết, tiết kiệm runner) ⇒ KHÔNG ĐO ĐƯỢC. Đừng suy xanh từ việc `gate (ubuntu-latest)` success.'
+
+codex_connector_cung_head:
+  kich_luc: 'KHÔNG trên head của lượt này'
+  hoan_tat_luc: KHONG_AP_DUNG
+  ket_qua: >-
+    Connector chỉ kích khi mở PR, bỏ draft, hoặc có comment `@codex review`; không lần nào rơi đúng head của lượt này. Lượt connector duy nhất trước đó chấm `e185cc8` (trước lượt 5) và ra 4 P2, cả bốn đã vá.
+
+delivered: true
+delivered_by: claude-session
+authoritative_source: repo_file
+receipt_written_by: claude-session
+receipt_written_at_utc: null  # KHÔNG ĐO ĐƯỢC — git chỉ cho commit time, không đo giờ tạo/sửa receipt.
+receipt_khong_khai:
+  - 'Không khai model đã chạy — codex không đo được.'
+  - 'Không khai CI live xanh: `gate`/`thu-hoi` được ĐO RIÊNG trên head cuối `dd62c88`, không suy từ verdict này.'
+  - '`changes_requested` nói toàn lượt còn finding, không suy rằng mọi lớp đều còn mở. Cần đọc riêng kết luận từng lớp trên reviewed_sha với kết quả trên bản đã áp HINT; lượt sau kiểm lại bản vá.'
+  - 'Không khai bốn lượt 1–4 đã được ghi sổ — chúng chỉ có trong CHANGELOG dưới nhãn (b) thuật lại.'

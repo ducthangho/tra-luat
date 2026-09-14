@@ -4675,7 +4675,7 @@ def _trich_xuat_powershell_74a(noi_dung: str) -> str:
             if in_sec and re.match(r"^#{1,6}[ \t]+", line): in_sec = False
             if m:
                 f_char, f_len = m.group(1)[0], len(m.group(1))
-                if in_sec and m.group(2).strip().lower() == "powershell": cur = []
+                if in_sec and m.group(2).rstrip("\r\n").strip(" \t") == "powershell": cur = []
         else:
             if m and m.group(1)[0] == f_char and len(m.group(1)) >= f_len and not m.group(2).rstrip("\r\n").strip(" \t"):
                 if cur is not None: blocks.append("".join(cur)); cur = None
@@ -4694,14 +4694,15 @@ def _loc_lenh_truoc_record_post(doan_code: str) -> str:
     import re
     py = r"(?:python|python3|py)"
     script = r"(?:\S*[/\\])?packet_loop\.py"
-    ws = r"\s+"
+    ws = r"[ \t]+"
+    opt = r"[ \t]*"
     patterns = [
-        r"\$Begin\s*=\s*" + py + ws + script + ws + r"begin-attempt" + ws + r"--packet" + ws + r"\S+" + ws + r"--provider" + ws + r"\S+",
-        r"if\s*\(\$LASTEXITCODE\s*-ne\s*0\)\s*\{\s*exit\s+\$LASTEXITCODE\s*\}",
-        r"if\s*\(\$Begin\s*-notmatch\s*'nonce=\(\[0-9a-f\]\{32\}\)'\)\s*\{\s*throw\s+'begin-attempt không in nonce hợp lệ'\s*\}",
-        r"\$AttemptNonce\s*=\s*\$Matches\[1\]",
-        py + ws + script + ws + r"chup-anh-doctor" + ws + r"--packet" + ws + r"\S+" + ws + r"--out" + ws + r"\S+",
-        py + ws + script + ws + r"record-post" + ws + r"--packet" + ws + r"\S+" + ws + r"--for" + ws + r"reviewing" + ws + r"--comment-id" + ws + r"\S+"
+        r"\$Begin" + opt + r"=" + opt + py + ws + script + ws + r"begin-attempt" + ws + r"--packet" + ws + r"<issue>" + ws + r"--provider" + ws + r"<executor-provider>",
+        r"if" + opt + r"\(\$LASTEXITCODE" + ws + r"-ne" + ws + r"0\)" + opt + r"\{" + opt + r"exit" + ws + r"\$LASTEXITCODE" + opt + r"\}",
+        r"if" + opt + r"\(\$Begin" + ws + r"-notmatch" + ws + r"'nonce=\(\[0-9a-f\]\{32\}\)'\)" + opt + r"\{" + opt + r"throw" + ws + r"'begin-attempt không in nonce hợp lệ'" + opt + r"\}",
+        r"\$AttemptNonce" + opt + r"=" + opt + r"\$Matches\[1\]",
+        py + ws + script + ws + r"chup-anh-doctor" + ws + r"--packet" + ws + r"<issue>" + ws + r"--out" + ws + r"<doctor-signed.json>",
+        py + ws + script + ws + r"record-post" + ws + r"--packet" + ws + r"<issue>" + ws + r"--for" + ws + r"reviewing" + ws + r"--comment-id" + ws + r"<recorded-github-comment-id>"
     ]
     stmts = _ps_statements(doan_code)
     if len(stmts) < 6:
@@ -4818,12 +4819,12 @@ def case_trich_xuat_74a_chong_nhieu(c: Ctx):
     _kiem_residual_placeholder("@'\n<residual>\n'@")
     _kiem_residual_placeholder('@"\n<residual>\n"@')
 
-    cmd_b = "$Begin = python packet_loop.py begin-attempt --packet 55 --provider claude"
+    cmd_b = "$Begin = python packet_loop.py begin-attempt --packet <issue> --provider <executor-provider>"
     cmd_e = "if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }"
     cmd_c = "if ($Begin -notmatch 'nonce=([0-9a-f]{32})') { throw 'begin-attempt không in nonce hợp lệ' }"
     cmd_a = "$AttemptNonce = $Matches[1]"
-    cmd_d = "python .claude/dev/packet_loop.py chup-anh-doctor --packet 55 --out doc.json"
-    cmd_r = "python packet_loop.py record-post --packet 55 --for reviewing --comment-id 123"
+    cmd_d = "python .claude/dev/packet_loop.py chup-anh-doctor --packet <issue> --out <doctor-signed.json>"
+    cmd_r = "python packet_loop.py record-post --packet <issue> --for reviewing --comment-id <recorded-github-comment-id>"
 
     valid_code = f"{cmd_b}\n{cmd_e}\n{cmd_c}\n{cmd_a}\n{cmd_d} # doctor\n# c\n{cmd_r}"
     assert _loc_lenh_truoc_record_post(valid_code) == f"{cmd_b}\n{cmd_e}\n{cmd_c}\n{cmd_a}\n{cmd_d} # doctor\n# c"
@@ -4832,6 +4833,8 @@ def case_trich_xuat_74a_chong_nhieu(c: Ctx):
     loi(lambda: _loc_lenh_truoc_record_post(f"{cmd_b}\n{cmd_e}\n{cmd_c}\n{cmd_a}\n{cmd_d}\nexit 0\n{cmd_r}"), "lệnh 6 sai template")
     loi(lambda: _loc_lenh_truoc_record_post(f"{cmd_d}\n{cmd_b}\n{cmd_r}"), "thiếu lệnh")
     loi(lambda: _loc_lenh_truoc_record_post(f"{cmd_b}\n{cmd_e}\n{cmd_c}\n{cmd_a}\n{cmd_d} ; exit 0\n{cmd_r}"), "lệnh 6 sai template")
+    loi(lambda: _loc_lenh_truoc_record_post(f"{cmd_b}\n{cmd_e}\n{cmd_c}\n{cmd_a}\npython .claude/dev/packet_loop.py chup-anh-doctor --packet <issue> --out <doctor-signed.json>|Get-Date\n{cmd_r}"), "lệnh 5 sai template")
+    loi(lambda: _trich_xuat_powershell_74a("#### 7.4a Thứ tự state trước khi gọi reviewer\n```powershell\xa0\n```\n"), "không tìm thấy khối powershell")
 
 
 def case_windows_only_skip_khoa(c: Ctx):

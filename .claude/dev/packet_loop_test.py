@@ -4612,28 +4612,87 @@ def case_dot_bien_test_neo_chet_van_DO(c: Ctx):
 
 def _trich_xuat_powershell_74a(noi_dung: str) -> str:
     import re
-    m_heads = list(re.finditer(r"^(#{1,4}[ \t]+7\.4a Thứ tự state trước khi gọi reviewer)$", noi_dung, re.M))
+    m_heads = list(re.finditer(r"^#### 7\.4a Thứ tự state trước khi gọi reviewer\r?$", noi_dung, re.M))
     if len(m_heads) != 1:
         raise AssertionError("không tìm thấy duy nhất một mục #### 7.4a đúng chuẩn")
+
     start = m_heads[0].end()
-    in_fence = False
-    end = len(noi_dung)
-    for m in re.finditer(r"^(```|#{1,4}[ \t]+)", noi_dung[start:], re.M):
-        if m.group(1).startswith("```"):
-            in_fence = not in_fence
-        elif not in_fence:
-            end = start + m.start()
-            break
-    phan = noi_dung[start:end]
-    opens = list(re.finditer(r"^```powershell[ \t]*$", phan, re.M | re.I))
-    if not opens:
-        raise AssertionError("không tìm thấy khối powershell sau 7.4a")
-    if len(opens) > 1:
-        raise AssertionError("duplicate powershell fence")
-    closes = list(re.finditer(r"^```[ \t]*$", phan[opens[0].end():], re.M))
-    if not closes:
+    lines = noi_dung[start:].splitlines(keepends=True)
+
+    active_fence_char = None
+    active_fence_len = 0
+    powershell_blocks = []
+    current_ps_block = None
+
+    for line in lines:
+        m_fence = re.match(r"^(`{3,}|~{3,})(.*)$", line)
+        if not active_fence_char:
+            if re.match(r"^#{1,6}[ \t]+", line):
+                break
+            if m_fence:
+                active_fence_char = m_fence.group(1)[0]
+                active_fence_len = len(m_fence.group(1))
+                info = m_fence.group(2).strip()
+                if info.lower() == "powershell":
+                    current_ps_block = []
+        else:
+            is_closing = m_fence and m_fence.group(1)[0] == active_fence_char and len(m_fence.group(1)) >= active_fence_len and not m_fence.group(2).strip()
+            if is_closing:
+                if current_ps_block is not None:
+                    powershell_blocks.append("".join(current_ps_block))
+                    current_ps_block = None
+                active_fence_char = None
+                active_fence_len = 0
+            else:
+                if current_ps_block is not None:
+                    current_ps_block.append(line)
+
+    if active_fence_char:
         raise AssertionError("unclosed fence")
-    return phan[opens[0].end():opens[0].end() + closes[0].start()].strip()
+
+    if not powershell_blocks:
+        raise AssertionError("không tìm thấy khối powershell sau 7.4a")
+    if len(powershell_blocks) > 1:
+        raise AssertionError("duplicate powershell fence")
+
+    return powershell_blocks[0].strip()
+
+
+def _loc_lenh_truoc_record_post(doan_code: str) -> str:
+    import re
+    lines = doan_code.splitlines()
+    py = r"(?:python|python3|py)"
+    script = r"\S*packet_loop\.py"
+    ws = r"\s+"
+    re_begin = re.compile(r"^\s*(?:\$\w+\s*=\s*)?" + py + ws + script + ws + r"begin-attempt(?=\s|$)")
+    re_doctor = re.compile(r"^\s*" + py + ws + script + ws + r"chup-anh-doctor(?=\s|$)")
+    re_record = re.compile(r"^\s*" + py + ws + script + ws + r"record-post(?=\s|$)")
+
+    begin_indices = []
+    doctor_indices = []
+    record_indices = []
+
+    for i, line in enumerate(lines):
+        if line.lstrip().startswith("#"):
+            continue
+        if re_begin.search(line):
+            begin_indices.append(i)
+        if re_doctor.search(line):
+            doctor_indices.append(i)
+        if re_record.search(line):
+            record_indices.append(i)
+
+    if len(begin_indices) != 1 or len(doctor_indices) != 1 or len(record_indices) != 1:
+        raise AssertionError(f"thiếu hoặc thừa begin={len(begin_indices)} doctor={len(doctor_indices)} record={len(record_indices)}")
+
+    begin_index = begin_indices[0]
+    doctor_index = doctor_indices[0]
+    record_index = record_indices[0]
+
+    if not (begin_index < record_index and doctor_index < record_index):
+        raise AssertionError("thứ tự lệnh sai")
+
+    return "\n".join(lines[:record_index]).strip()
 
 
 def _kiem_residual_placeholder(lenh: str):
@@ -4655,11 +4714,10 @@ def case_luong_canonical_chay_that(c: Ctx):
 
     doan_code = _trich_xuat_powershell_74a(ke_hoach_md.read_text(encoding="utf-8"))
 
-    truoc_record_post = doan_code.split("record-post")[0]
-    lenh_da_loc = truoc_record_post.rsplit("python", 1)[0].strip()
+    lenh_da_loc = _loc_lenh_truoc_record_post(doan_code)
 
-    if not lenh_da_loc or "begin-attempt" not in lenh_da_loc or "nonce" not in lenh_da_loc:
-        raise AssertionError("tiền tố chạy lệnh rỗng hoặc thiếu logic nonce/begin-attempt")
+    if not lenh_da_loc or "nonce" not in lenh_da_loc:
+        raise AssertionError("tiền tố chạy lệnh rỗng hoặc thiếu logic nonce")
 
     sd = c.sd()
     rc, _, e = c.init(sd)
@@ -4698,6 +4756,8 @@ def case_trich_xuat_74a_chong_nhieu(c: Ctx):
 
     loi(lambda: _trich_xuat_powershell_74a("#### 7.4a\n```powershell\n```\n"), "đúng chuẩn")
     loi(lambda: _trich_xuat_powershell_74a("#### 7.4a — SAI\n```powershell\n```\n"), "đúng chuẩn")
+    loi(lambda: _trich_xuat_powershell_74a("### 7.4a Thứ tự state trước khi gọi reviewer\n```powershell\n```\n"), "đúng chuẩn")
+    loi(lambda: _trich_xuat_powershell_74a("##### 7.4a Thứ tự state trước khi gọi reviewer\n```powershell\n```\n"), "đúng chuẩn")
 
     t_chuan = "#### 7.4a Thứ tự state trước khi gọi reviewer\n"
     assert _trich_xuat_powershell_74a(t_chuan + "```powershell\n# #### comment\n```\n#### 8.0\n") == "# #### comment"
@@ -4705,8 +4765,27 @@ def case_trich_xuat_74a_chong_nhieu(c: Ctx):
     loi(lambda: _trich_xuat_powershell_74a(t_chuan + "```powershell\n```\n```powershell\n```\n"), "duplicate powershell fence")
     loi(lambda: _trich_xuat_powershell_74a(t_chuan + "```powershell\n"), "unclosed fence")
 
+    loi(lambda: _trich_xuat_powershell_74a(t_chuan + "```\n#### 8.0\n```powershell\n```\n"), "không tìm thấy khối")
+    loi(lambda: _trich_xuat_powershell_74a(t_chuan + "```\n#### 8.0\n"), "unclosed fence")
+    loi(lambda: _trich_xuat_powershell_74a(t_chuan + "````\n```powershell\n```\n````\n"), "không tìm thấy khối")
+    assert _trich_xuat_powershell_74a(t_chuan + "~~~powershell\n#### 8.0\n~~~\n") == "#### 8.0"
+
     loi(lambda: _kiem_residual_placeholder("cmd <residual> \n# comment <harmless>"), "residual placeholder")
     _kiem_residual_placeholder("# comment <harmless>\n\n")
+
+    cmd_b = "$Begin = python packet_loop.py begin-attempt"
+    cmd_d = "python .claude/dev/packet_loop.py chup-anh-doctor"
+    cmd_r = "python packet_loop.py record-post"
+
+    loi(lambda: _loc_lenh_truoc_record_post(f"{cmd_b}\n{cmd_r}"), "thiếu hoặc thừa")
+    loi(lambda: _loc_lenh_truoc_record_post(f"{cmd_d}\n{cmd_r}"), "thiếu hoặc thừa")
+
+    valid_code = f"{cmd_b}\n$Begin -notmatch 'begin-attempt'\n{cmd_d} # doctor comment\n# python packet_loop.py record-post begin-attempt chup-anh-doctor\n{cmd_r}"
+    expected_out = f"{cmd_b}\n$Begin -notmatch 'begin-attempt'\n{cmd_d} # doctor comment\n# python packet_loop.py record-post begin-attempt chup-anh-doctor"
+    assert _loc_lenh_truoc_record_post(valid_code) == expected_out
+
+    loi(lambda: _loc_lenh_truoc_record_post(f"# {cmd_b}\n{cmd_d}\n{cmd_r}"), "thiếu hoặc thừa")
+    loi(lambda: _loc_lenh_truoc_record_post(f"$Begin -notmatch 'begin-attempt'\n{cmd_d}\n{cmd_r}"), "thiếu hoặc thừa")
 
 
 def case_windows_only_skip_khoa(c: Ctx):

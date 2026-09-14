@@ -4626,23 +4626,47 @@ def _trich_code_ps(lenh: str) -> list[tuple[int, str, str]]:
             continue
         j, n = 0, len(line)
         code = []
+        in_quote = None
         while j < n:
             if in_block:
                 if line[j:j+2] == "#>":
                     in_block = False
                     j += 2
+                    code.append(" ")
                 else:
                     j += 1
             else:
-                if line[j:j+2] == "<#":
-                    in_block = True
-                    j += 2
-                elif line[j:j+2] in ("@'", '@"'):
-                    in_here = line[j+1]
-                    j += 2
-                else:
+                if in_quote:
                     code.append(line[j])
-                    j += 1
+                    if in_quote == '"' and line[j] == '`' and j + 1 < n:
+                        code.append(line[j+1])
+                        j += 2
+                    elif line[j] == in_quote:
+                        if j + 1 < n and line[j+1] == in_quote:
+                            code.append(line[j+1])
+                            j += 2
+                        else:
+                            in_quote = None
+                            j += 1
+                    else:
+                        j += 1
+                else:
+                    if line[j:j+2] == "<#":
+                        in_block = True
+                        j += 2
+                        code.append(" ")
+                    elif line[j:j+2] in ("@'", '@"'):
+                        in_here = line[j+1]
+                        j += 2
+                    elif line[j] in ("'", '"'):
+                        in_quote = line[j]
+                        code.append(line[j])
+                        j += 1
+                    elif line[j] == "#":
+                        break
+                    else:
+                        code.append(line[j])
+                        j += 1
         res.append((i, line, "".join(code)))
     return res
 
@@ -4657,7 +4681,7 @@ def _trich_xuat_powershell_74a(noi_dung: str) -> str:
     powershell_blocks = []
     current_ps_block = None
     for line in lines:
-        m_fence = re.match(r"^(`{3,}|~{3,})(.*)$", line)
+        m_fence = re.match(r"^ {0,3}(`{3,}|~{3,})(.*)$", line)
         if not active_fence_char:
             if line.rstrip("\r\n") == "#### 7.4a Thứ tự state trước khi gọi reviewer":
                 count_heading += 1
@@ -4785,12 +4809,13 @@ def case_trich_xuat_74a_chong_nhieu(c: Ctx):
             return
         raise AssertionError(f"lọt {match}")
 
+    t_chuan = "#### 7.4a Thứ tự state trước khi gọi reviewer\n"
     loi(lambda: _trich_xuat_powershell_74a("#### 7.4a\n```powershell\n```\n"), "đúng chuẩn")
+    assert _trich_xuat_powershell_74a("\t```powershell\n" + t_chuan + "```powershell\n# ok\n```\n") == "# ok"
     loi(lambda: _trich_xuat_powershell_74a("#### 7.4a — SAI\n```powershell\n```\n"), "đúng chuẩn")
     loi(lambda: _trich_xuat_powershell_74a("### 7.4a Thứ tự state trước khi gọi reviewer\n```powershell\n```\n"), "đúng chuẩn")
     loi(lambda: _trich_xuat_powershell_74a("##### 7.4a Thứ tự state trước khi gọi reviewer\n```powershell\n```\n"), "đúng chuẩn")
 
-    t_chuan = "#### 7.4a Thứ tự state trước khi gọi reviewer\n"
     assert _trich_xuat_powershell_74a(t_chuan + "```powershell\n# #### comment\n```\n#### 8.0\n") == "# #### comment"
     loi(lambda: _trich_xuat_powershell_74a(t_chuan + "\n#### 8.0\n```powershell\n```\n"), "không tìm thấy khối powershell")
     loi(lambda: _trich_xuat_powershell_74a(t_chuan + "```powershell\n```\n```powershell\n```\n"), "duplicate powershell fence")
@@ -4803,8 +4828,15 @@ def case_trich_xuat_74a_chong_nhieu(c: Ctx):
 
     loi(lambda: _trich_xuat_powershell_74a("````\n" + t_chuan + "````\n"), "không tìm thấy duy nhất một mục")
     loi(lambda: _trich_xuat_powershell_74a("````\n" + t_chuan), "không tìm thấy duy nhất một mục")
+    loi(lambda: _trich_xuat_powershell_74a("   ````\n" + t_chuan + "```powershell\n```\n   ````\n"), "không tìm thấy duy nhất một mục")
+    loi(lambda: _trich_xuat_powershell_74a("   ````\n" + t_chuan + "```powershell\n```\n"), "unclosed fence")
 
-    loi(lambda: _kiem_residual_placeholder("cmd <residual> \n# comment <harmless>"), "residual placeholder")
+    _kiem_residual_placeholder("cmd # <harmless>")
+    loi(lambda: _kiem_residual_placeholder("cmd '<harmless>'"), "residual placeholder")
+    loi(lambda: _kiem_residual_placeholder('cmd "<harmless>"'), "residual placeholder")
+    loi(lambda: _kiem_residual_placeholder('cmd "a`"b # " <harmless>'), "residual placeholder")
+    loi(lambda: _kiem_residual_placeholder('cmd "a""b # " <harmless>'), "residual placeholder")
+    loi(lambda: _kiem_residual_placeholder("cmd 'a''b # ' <harmless>"), "residual placeholder")
     _kiem_residual_placeholder("# comment <harmless>\n\n")
     _kiem_residual_placeholder("<# <residual> #>")
     _kiem_residual_placeholder("@'\n<residual>\n'@")
@@ -4828,6 +4860,11 @@ def case_trich_xuat_74a_chong_nhieu(c: Ctx):
     loi(lambda: _loc_lenh_truoc_record_post(f"{cmd_b}\n<# {cmd_d} #>\n{cmd_r}"), "thiếu hoặc thừa")
     loi(lambda: _loc_lenh_truoc_record_post(f"{cmd_b}\n@'\n{cmd_d}\n'@\n{cmd_r}"), "thiếu hoặc thừa")
     loi(lambda: _loc_lenh_truoc_record_post(f'{cmd_b}\n@"\n{cmd_d}\n"@\n{cmd_r}'), "thiếu hoặc thừa")
+    loi(lambda: _loc_lenh_truoc_record_post(f"{cmd_b}\npython .claude/dev/pack<# giuagiuagiua #>et_loop.py chup-anh-doctor\n{cmd_r}"), "thiếu hoặc thừa")
+
+    valid_code_2 = f'{cmd_b} # <harmless>\n$Begin -notmatch "# begin-attempt"\n{cmd_d} # <harmless>\n{cmd_r}'
+    expected_out_2 = f'{cmd_b} # <harmless>\n$Begin -notmatch "# begin-attempt"\n{cmd_d} # <harmless>'
+    assert _loc_lenh_truoc_record_post(valid_code_2) == expected_out_2
 
 
 def case_windows_only_skip_khoa(c: Ctx):

@@ -467,7 +467,9 @@ def _shell_trong_mien(data, job, step):
     for scope in scopes:
         if "shell" in scope:
             if scope["shell"] in ("pwsh", "powershell"):
-                lines = step.get("run", "").splitlines()
+                body = step.get("run", "")
+                lines = body.split("\n") if body else []
+                if body.endswith("\n"): lines.pop()
                 return bool(lines) and all(re.fullmatch(
                     r"[ \t]*[A-Za-z_][A-Za-z0-9_./-]*(?:[ \t]+[A-Za-z0-9_./:=+-]+)*[ \t]*", line)
                     and line.split()[0].lower() not in _KHUNG_SHELL | {"return", "exit"} for line in lines)
@@ -498,7 +500,7 @@ def loi_ruff_ci(source=None):
     Ngoặc trần, C0 ngoài nháy (trừ tab/newline) bị từ chối; dữ liệu nháy/heredoc giữ nguyên.
     Comment chỉ mở tại đầu từ chưa quote/escape, kể cả trong $(...).
     Shell không khai hoặc bash/sh dùng grammar trên. pwsh/powershell chỉ nhận ít nhất một
-    invocation/line bằng từ ASCII theo _shell_trong_mien, không quote/expansion/toán tử/khối;
+    invocation/dòng LF bằng từ ASCII theo _shell_trong_mien, không quote/expansion/toán tử/khối;
     không hỗ trợ cú pháp PowerShell tổng quát. Shell khác/null/template ngoài miền.
     Mọi bước run đều qua chốt shell trước khi phân tích thân, kể cả thân opaque/rỗng.
     Cài: pip/pip3, uv pip, python [cờ] -m pip + install + cờ cho phép + một Ruff requirement.
@@ -1104,6 +1106,20 @@ def phan_chung():
                                    "echo hi | wc", "echo hi\necho", "echo hi\n\n")):
             _FX.append((f"shell-carrier-boundary-{_shell}-{_i}", {"gate": {"steps": [
                 _ruff, {"shell": _shell, "run": _body}, _reg]}}, None, int(_i != 6)))
+    # R17: cô lập từng lớp ký tự; đối chứng dương và biên LF đi qua consumer thật.
+    for _shell in ("pwsh", "powershell"):
+        _am = ["echo $X", 'echo "ok"', "echo hi; wc", "echo {x}", "2fa.sh x", "echo a&echo b"]
+        _am += ["echo a" + c + "b" for c in "!\"#$%&'()*,;<>?@[\\]^`{|}~\x7fé\u00a0"]
+        _am += [c + "file.sh arg" for c in "0123456789./-"]
+        _am += ["file" + c + ".sh arg" for c in ":=+"]
+        _am += ["echo hi" + c + "echo ok" for c in "\v\f\x1c\x1d\x1e\r\x85\u2028\u2029"]
+        _am += ["\necho hi", "echo hi\n\necho ok", "echo hi\n\n", "\n"]
+        _duong = ["echo hi\n", "echo hi\necho ok\n", "echo\taA09_./:=+-", "_x.sh arg",
+                  "X.sh arg", "a0_./-a.sh arg", " \techo hi \t"]
+        for _want, _bodies in ((1, _am), (0, _duong)):
+            for _i, _body in enumerate(_bodies):
+                _FX.append((f"shell-carrier-alphabet-{_shell}-{_want}-{_i}", {"gate": {"steps": [
+                    _ruff, {"shell": _shell, "run": _body}, _reg]}}, None, _want))
     # Cùng vị từ -1 phải được tiêu thụ cả khi job phụ không có một lệnh cài nào.
     for _i, _tail in enumerate(("", " --help", " --chay --mutant windows_311_launcher_workflow")):
         _FX.append((f"registry-ngoai-hop-dong-job-phu-{_i}", {

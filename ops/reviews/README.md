@@ -791,3 +791,5 @@ thì phải có bộ đọc cưỡng chế — chưa làm, và đừng khai là 
 - #463 r23/g4, review15 Claude: [changes_requested](gate-tach-job-cat-chi-phi-review-15-claude-verdict.md), exact SHA `e5e8e2390db1c4a68ad0ee6febdf7d6ed0a39582`; [receipt](gate-tach-job-cat-chi-phi-review-15-claude-verdict.receipt.yaml). CI not_run.
 
 - #463 r23/g4, review16 Claude: [changes_requested](gate-tach-job-cat-chi-phi-review-16-claude-verdict.md), exact SHA `ff146f16f26f1eb59d7a3839d5cc48811b13daac`; [receipt](gate-tach-job-cat-chi-phi-review-16-claude-verdict.receipt.yaml). CI not_run.
+
+- #463 r24/g5 review17 Claude: output `approve` **không được chấp nhận** vì permission denial; [audit note](gate-tach-job-cat-chi-phi-review-17-permission-invalid.md), raw archive `gate-tach-job-cat-chi-phi-review-17-permission-invalid-raw.zip`.

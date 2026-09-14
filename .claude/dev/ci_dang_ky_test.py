@@ -7,6 +7,7 @@ import json
 import os
 import pathlib
 import re
+import shlex
 import subprocess
 import sys
 import tempfile
@@ -137,26 +138,425 @@ def loi_launcher_windows(source=None):
     return [message for ok, message in checks if not ok], len(checks)
 
 
-def loi_ruff_ci(source=None):
-    source = CI_WORKFLOW.read_text(encoding="utf-8") if source is None else source
+_TIEN_TO_CAI = (["pip"], ["pip3"], ["uv", "pip"],
+                ["python", "-m", "pip"], ["python3", "-m", "pip"])
+_TUY_CHON_AN_TOAN = frozenset({"--quiet", "-q", "--no-cache-dir",
+                               "--disable-pip-version-check", "--no-input"})
+_TEN_GOI = re.compile(r"^([A-Za-z0-9](?:[A-Za-z0-9._-]*[A-Za-z0-9])?)(?:\[([A-Za-z0-9](?:[A-Za-z0-9._,-]*[A-Za-z0-9])?)\])?(.*)$")
+_TRINH_PY = re.compile(r"^python(?:3(?:\.\d+)?)?$")
+
+def _cuoi_thay_lenh(run, start):
+    """Tìm biên $(...) theo quote/ngoặc; không thực thi nội dung."""
+    i, depth, quote, word = start + 2, 1, "", False
+    while i < len(run):
+        c = run[i]
+        if c == "\\" and quote != "'":
+            word |= run[i + 1:i + 2] != "\n"
+            i += 2
+            continue
+        if quote:
+            if c == quote: quote = ""
+        elif c == "#" and not word:
+            end = run.find("\n", i)
+            i = len(run) if end < 0 else end
+            continue
+        elif c in "'\"": quote = c
+        elif c == "(": depth += 1
+        elif c == ")":
+            depth -= 1
+            if depth == 0: return i
+        word = bool(quote) or c not in " \t\n;|&()"
+        i += 1
+    raise ValueError("command substitution chưa đóng")
+
+
+def _kiem_khuon_shell(items):
+    """Opaque vẫn phải thuộc grammar: list, if/then/elif/else/fi, nhóm { list; }.
+    Mỗi condition/body phải có lệnh; không nhận compound trong condition hoặc header lồng inline.
+    """
+    stack = []
+    for argv, op, key in items:
+        tail = argv[1:] if key else argv
+        if key in ("if", "{"):
+            if stack and stack[-1][1] == "condition": raise ValueError("compound trong condition ngoài miền")
+            stack.append([key, "condition" if key == "if" else "group", False])
+        elif key in ("then", "elif", "else", "fi", "}"):
+            if not stack: raise ValueError("từ khóa đóng không có khối")
+            frame = stack[-1]
+            expected = {"then": {"condition"}, "elif": {"body"}, "else": {"body"},
+                        "fi": {"body", "else"}, "}": {"group"}}[key]
+            if frame[1] not in expected or not frame[2]: raise ValueError("khối sai thứ tự hoặc rỗng")
+            if key in ("fi", "}"):
+                if tail: raise ValueError("đối số sau từ khóa đóng")
+                stack.pop()
+                if stack: stack[-1][2] = True
+                continue
+            frame[1], frame[2] = {"then": "body", "elif": "condition", "else": "else"}[key], False
+        elif key or argv[0] in _KHUNG_SHELL:
+            raise ValueError("cấu trúc shell ngoài miền")
+        if key and not tail and op != "\n": raise ValueError("header thiếu lệnh")
+        if key and tail and tail[0] in _KHUNG_SHELL: raise ValueError("header lồng inline ngoài miền")
+        if tail and stack: stack[-1][2] = True
+    if stack: raise ValueError("khối shell chưa đóng")
+
+
+def _dong_logic(run, depth=0):
+    """Lexer đóng cho lệnh trực tiếp và cấu trúc opaque do _kiem_khuon_shell nhận.
+    Giữ cờ ngoài miền cùng argv; không dựng argv bằng split() khi lexer thất bại.
+    Heredoc là dữ liệu của lệnh gọi: bỏ qua thân, không nhận mã nhúng thành lệnh shell.
+    """
+    if depth > 16: raise ValueError("lồng command substitution ngoài miền")
+    out, cur, quote, bad, before, here, i = [], "", "", False, False, None, 0
+    need, compound, word, items = False, False, False, []
+    def emit(op=""):
+        nonlocal cur, bad, before, need, compound, word
+        argv = shlex.split(cur)
+        if op not in ("", "\n", ";", "&", "&&", "|", "||"): raise ValueError("toán tử ngoài miền")
+        if not argv and op not in ("", "\n"): raise ValueError("thiếu lệnh")
+        if argv:
+            key = argv[0] if argv[0] in _KHUNG_SHELL and re.match(re.escape(argv[0]) + r"(?:\s|$)", cur.lstrip()) else ""
+            if need and key in ("then", "elif", "else", "fi", "}"): raise ValueError("thiếu toán hạng trước từ khóa")
+            items.append((argv, op, key))
+            need = op in ("&&", "||", "|")
+        after = op not in ("", "\n", ";", "&&")
+        compound |= after
+        if argv: out.append((argv, bad or before or after))
+        cur, bad, before, word = "", False, after, False
+    run = run or ""
+    while i < len(run):
+        c = run[i]
+        if not quote and ord(c) < 32 and c not in "\n\t":
+            raise ValueError("ký tự điều khiển ngoài miền")
+        if c == "\\" and quote != "'":
+            if i + 1 == len(run): raise ValueError("escape chưa đóng")
+            nxt = run[i + 1]
+            if not quote and ord(nxt) < 32 and nxt not in "\n\t":
+                raise ValueError("ký tự điều khiển escape ngoài miền")
+            if nxt != "\n": cur += c + nxt; word = True
+            i += 2; continue
+        if quote != "'" and c == "$":
+            while run[i + 1:i + 3] == "\\\n": run = run[:i + 1] + run[i + 3:]
+            nxt = run[i + 1:i + 2]
+            if nxt == "[" or (not quote and nxt in ("'", '"')):
+                raise ValueError("expansion ngoài miền")
+        if quote != "'" and run[i:i + 2] == "${":
+            m = re.match(r"\$\{[A-Za-z_][A-Za-z0-9_]*(?::-[A-Za-z0-9_ ./+-]*)?\}", run[i:])
+            if m is None: raise ValueError("parameter expansion ngoài miền hoặc chưa đóng")
+            cur += "__THAM_SO__"; bad = True; word = True; i += m.end()
+            continue
+        if quote != "'" and run[i:i + 2] == "$(":
+            end = _cuoi_thay_lenh(run, i)
+            inner = _dong_logic(run[i + 2:end], depth + 1)
+            if any(_nhan_lenh(t).related for t, _ in inner):
+                raise ValueError("lệnh liên quan trong command substitution ngoài miền")
+            # Chỉ giá trị opaque được bỏ qua; argv động của installer vẫn mang cờ bad.
+            cur += "__THAY_LENH__"; bad = True; word = True; i = end + 1
+            continue
+        if quote != "'" and c == "`": raise ValueError("backtick ngoài miền")
+        if quote:
+            cur += c
+            if c == quote: quote = ""
+            elif quote == '"' and c in "$`": bad = True
+        elif c in "'\"":
+            quote = c; cur += c
+        elif c == "#" and not word:
+            while i < len(run) and run[i] != "\n": i += 1
+            continue
+        elif c in "()":
+            raise ValueError("ngoặc trần ngoài miền lệnh đơn")
+        elif run[i:i + 2] == "<<":
+            m = re.match(r"<<(-?)[ \t]*(['\"]?)([A-Za-z_][A-Za-z0-9_]*)\2", run[i:])
+            if m is None or here is not None: raise ValueError("heredoc ngoài miền")
+            if i + m.end() < len(run) and run[i + m.end()] not in " \t\n;&|<>": raise ValueError("delimiter heredoc ngoài miền")
+            here = (m[3], bool(m[1]), bool(m[2])); bad = True; word = True; cur += " <heredoc>"
+            i += m.end(); continue
+        elif c in "<>":
+            end = i + 1
+            while end < len(run) and run[end] in "<>": end += 1
+            if run[i:end] not in ("<", ">", ">>"): raise ValueError("redirect ngoài miền")
+            target = end
+            while target < len(run):
+                if run[target] in " \t": target += 1
+                elif run[target:target + 2] == "\\\n": target += 2
+                else: break
+            if target == len(run) or run[target] in "\n;|&<>#": raise ValueError("redirect thiếu đích")
+            cur += run[i:end]; bad = True; word = False; i = end
+            continue
+        elif c in ";&|\n":
+            end = i + 1
+            if c != "\n":
+                while end < len(run) and run[end] in ";&|": end += 1
+            emit(run[i:end]); i = end
+            if c == "\n" and here:
+                tag, tabs, quoted = here; here = None
+                carry = ""
+                while i < len(run):
+                    end = run.find("\n", i); end = len(run) if end < 0 else end
+                    line = run[i:end]; i = min(end + 1, len(run))
+                    if not carry and (line.lstrip("\t") if tabs else line) == tag: break
+                    scan_line = line.lstrip("\t") if tabs else line
+                    logical = carry + scan_line
+                    if not quoted and ("$(" in logical or "`" in logical):
+                        raise ValueError("heredoc có command substitution ngoài miền")
+                    slashes = len(logical) - len(logical.rstrip("\\"))
+                    carry = logical[:-1] if not quoted and slashes % 2 else ""
+                else: raise ValueError("heredoc chưa đóng")
+            continue
+        else:
+            cur += c
+            if c in "$`()<>*?[]{}": bad = True
+            if c in "{}": compound = True
+        word = bool(quote) or c not in " \t"
+        i += 1
+    if quote or here: raise ValueError("trích dẫn chưa đóng")
+    emit()
+    if need: raise ValueError("thiếu vế phải toán tử")
+    _kiem_khuon_shell(items)
+    control = {"if", "then", "elif", "else", "fi", "for", "while", "until", "do", "done", "case", "esac", "function", "select", "coproc", "time", "!", "[[", "]]"}
+    conditional = compound or any(t[0] in control for t, _ in out)
+    return [(t, b or conditional) for t, b in out]
+
+def _doi_so_python(tok):
+    if not tok or not _TRINH_PY.fullmatch(tok[0]): return None
+    i = 1
+    while i < len(tok):
+        if tok[i] in ("-u", "-B", "-I", "-E", "-s", "-S", "-O", "-OO", "-q"): i += 1
+        elif tok[i:i + 2] == ["-X", "utf8"]: i += 2
+        else: break
+    return tok[i:]
+
+def _lenh_ruff(tok):
+    for prefix in (["ruff"], ["uv", "run", "ruff"], ["uvx", "ruff"]):
+        if tok[:len(prefix)] == prefix: return tok[len(prefix):]
+    p = _doi_so_python(tok) or []
+    if p[:2] == ["-m", "ruff"]: return p[2:]
+    if p[:1] == ["-mruff"]: return p[1:]
+    return None
+
+def _chuan_ten(t):
+    return re.sub(r"[-_.]+", "-", t.lower())
+
+class _LenhRuff:
+    """Một kết quả nhận dạng dùng chung; KHONG chỉ được cấp cho dạng đã nhận biết."""
+    def __init__(self, kind="KHONG", probe=False, registry=0, related=False):
+        self.kind, self.probe, self.registry, self.related = kind, probe, registry, related
+
+
+# Đây là grammar của lệnh ngoài phạm vi cài đặt, không phải danh sách cấm installer.
+# Chương trình/script được gọi là opaque theo chỉ thị chủ kho; không giải nghĩa thân.
+_LENH_OPAQUE = frozenset({
+    "git", "echo", "printf", "cat", "set", "test", "[", "exit", "return", "true", "false",
+    "mkdir", "pwd", "ls", "wc", "sed", "awk", "rg", "chmod", "chown", "id", "cp", "mv", "rm", "sleep",
+    "actionlint", "shellcheck", "bash", "sh", "pwsh", "powershell", "node",
+})
+_KHUNG_SHELL = frozenset({"if", "then", "elif", "else", "fi", "for", "while", "until", "do", "done",
+                         "case", "esac", "function", "select", "coproc", "time", "!", "{", "}"})
+
+
+def _ten_tep(t):
+    return t.replace("\\", "/").rsplit("/", 1)[-1]
+
+
+def _cai_truc_tiep(args):
+    """Nhận dạng họ installer đã xảy ra TRƯỚC khi kiểm grammar đối số."""
+    if args in (["--version"], ["-V"]):
+        return _LenhRuff(related=True)
+    if args[:1] != ["install"]:
+        return _LenhRuff("KHONG_PHAN_TICH_DUOC", related=True)
+    args = args[1:]
+    reqs = [t for t in args if not t.startswith("-")]
+    if not reqs or any(t.startswith("-") and t not in _TUY_CHON_AN_TOAN for t in args):
+        return _LenhRuff("KHONG_PHAN_TICH_DUOC", related=True)
+    parsed = [_TEN_GOI.fullmatch(t) for t in reqs]
+    if any(m is None or m[3].startswith("[") for m in parsed):
+        return _LenhRuff("KHONG_PHAN_TICH_DUOC", related=True)
+    if any(m[2] and any(not re.fullmatch(r"[A-Za-z0-9](?:[A-Za-z0-9._-]*[A-Za-z0-9])?", x)
+                       for x in m[2].split(",")) for m in parsed):
+        return _LenhRuff("KHONG_PHAN_TICH_DUOC", related=True)
+    ruff = [m for m in parsed if _chuan_ten(m[1]) == "ruff"]
+    if not ruff:
+        # Các package khác chỉ nhận tên/extras và pin literal; URL/file/marker là ngoài miền.
+        valid = all(not m[3] or re.fullmatch(r"==[A-Za-z0-9.+_-]+", m[3]) for m in parsed)
+        return _LenhRuff("KHONG" if valid else "KHONG_PHAN_TICH_DUOC", related=True)
+    if len(reqs) != 1:
+        return _LenhRuff("KHONG_PHAN_TICH_DUOC", related=True)
+    return _LenhRuff("GHIM" if ruff[0][3] == "==0.15.15" else "KHONG_GHIM", related=True)
+
+
+def _nhan_lenh(tok):
+    """Phân hoạch đóng: invocation được nhận, chương trình opaque, hoặc ngoài miền."""
+    unknown = _LenhRuff("KHONG_PHAN_TICH_DUOC", related=True)
+    if not tok:
+        return _LenhRuff()
+    if tok[0] in _KHUNG_SHELL:
+        inner = _nhan_lenh(tok[1:])
+        return unknown if inner.related else inner
+    if tok[0] == "sudo":
+        inner = _nhan_lenh(tok[1:])
+        return unknown if inner.related else inner
+    py = _doi_so_python(tok)
+    if py is not None:
+        if py[:1] in (["-c"], ["-"]) or py in (["--version"], ["-V"], ["--help"], ["-h"]):
+            return _LenhRuff()
+        if py[:2] == ["-m", "py_compile"]:
+            return _LenhRuff()
+        if py[:2] == ["-m", "pip"]:
+            return _cai_truc_tiep(py[2:])
+        if py[:1] == ["-mpip"]:
+            return _cai_truc_tiep(py[1:])
+        module = py[:2] == ["-m", "ci_dang_ky_test"] or py[:1] == ["-mci_dang_ky_test"]
+        file = bool(py) and _ten_tep(py[0]) == "ci_dang_ky_test.py"
+        if module or file:
+            tail = py[2:] if py[:1] == ["-m"] else py[1:]
+            return _LenhRuff(registry=1 if tail == ["--chay"] else -1, related=True)
+        if py and not py[0].startswith("-") and _ten_tep(py[0]).endswith(".py"):
+            return _LenhRuff()
+    probe = _lenh_ruff(tok)
+    if probe is not None:
+        return _LenhRuff(probe=probe == ["--version"], related=True)
+    if tok[0] in ("pip", "pip3"):
+        return _cai_truc_tiep(tok[1:])
+    if tok[:2] == ["uv", "pip"]:
+        return _cai_truc_tiep(tok[2:])
+    # Ngoài whitelist không được suy KHONG từ việc không nhìn thấy token Ruff.
+    # Vì vậy global option, đường dẫn executable lạ và installer chưa biết đều đỏ,
+    # kể cả khi tên package nằm trong đối số động hoặc requirements file.
+    if tok[0] in _LENH_OPAQUE or _ten_tep(tok[0]).endswith((".sh", ".ps1", ".py", ".js")):
+        return _LenhRuff()
+    if all(re.match(r"^[A-Za-z_][A-Za-z0-9_]*=", t) for t in tok):
+        return _LenhRuff()
+    return unknown
+
+
+def _doc_run_ruff(run):
+    """Một lần tokenize/nhận dạng cho cả ba consumer: pin, probe và registry."""
+    order = {"KHONG": 0, "GHIM": 1, "KHONG_GHIM": 2, "KHONG_PHAN_TICH_DUOC": 3}
+    result, trace, pinned, probe, registry, any_probe = "KHONG", None, False, False, 0, False
     try:
-        data = yaml.safe_load(source) or {}
-    except yaml.YAMLError as e:
-        return [f"CI YAML lỗi khi kiểm Ruff: {e}"], 1
-    steps = (((data.get("jobs") or {}).get("gate") or {}).get("steps") or [])
-    runs = [s.get("run", "") for s in steps if isinstance(s, dict)]
-    joined = "\n".join(x for x in runs if isinstance(x, str))
-    ruff_i = next((i for i, x in enumerate(runs) if "ruff==0.15.15" in x), -1)
-    gate_i = next((i for i, x in enumerate(runs)
-                   if "ci_dang_ky_test.py --chay" in x), -1)
+        commands = _dong_logic(run)
+    except ValueError as exc:
+        return "KHONG_PHAN_TICH_DUOC", str(exc), False, -1, False
+    for tok, bad in commands:
+        item = _nhan_lenh(tok)
+        kind = "KHONG_PHAN_TICH_DUOC" if bad and item.related else item.kind
+        if order[kind] > order[result]:
+            result, trace = kind, " ".join(tok)
+        if kind == "GHIM":
+            pinned = True
+        if not bad and item.probe and pinned:
+            probe = True
+        any_probe |= not bad and item.probe
+        flag = -1 if bad and item.registry else item.registry
+        if flag == -1 or registry == -1:
+            registry = -1
+        elif flag == 1:
+            registry = 1
+    return result, trace, probe, registry, any_probe
+
+
+def _phan_loai_cai_ruff(run):
+    return _doc_run_ruff(run)[:2]
+
+
+def _buoc_co_dieu_kien(step):
+    return step.get("if") is not None
+
+
+def _shell_trong_mien(data, job, step):
+    """Giải ưu tiên step → job → workflow; khai shell thì phải là chuỗi trong miền."""
+    try:
+        scopes = (step, job.get("defaults", {}).get("run", {}), data.get("defaults", {}).get("run", {}))
+    except AttributeError:
+        return False
+    if any(not isinstance(scope, dict) for scope in scopes): return False
+    for scope in scopes:
+        if "shell" in scope:
+            if scope["shell"] in ("pwsh", "powershell"):
+                body = step.get("run", "")
+                lines = body.split("\n") if body else []
+                if body.endswith("\n"): lines.pop()
+                return bool(lines) and all(re.fullmatch(
+                    r"[ \t]*[A-Za-z_][A-Za-z0-9_./-]*(?:[ \t]+[A-Za-z0-9_./:=+-]+)*[ \t]*", line)
+                    and line.split()[0].lower() not in _KHUNG_SHELL | {"return", "exit"} for line in lines)
+            return scope["shell"] in ("bash", "sh")
+    return True
+
+
+def _doc_buoc_ruff(data, job, step):
+    # Ngôn ngữ phải được nhận TRƯỚC khi đọc thân: không dùng kết quả misparse để miễn kiểm.
+    if "run" in step and not _shell_trong_mien(data, job, step):
+        return "KHONG_PHAN_TICH_DUOC", "shell ngoài miền", False, -1, False
+    return _doc_run_ruff(step.get("run", ""))
+
+
+def loi_ruff_ci(source=None):
+    """M7/A7: chỉ lệnh trực tiếp trong YAML, không suy hành vi bên trong script được gọi.
+    Miền: các mẫu argv tĩnh dưới đây và lệnh opaque trong grammar đóng của _dong_logic;
+    mọi run ngoài grammar đều bị từ chối trước khi phân loại cài đặt, không mô phỏng runtime.
+    Opaque: _LENH_OPAQUE, script/Python -c/stdin, assignment; không đọc thân script/env.
+    List nhận newline/;/&&/||/|/& đủ hai vế, redirect </>/>> có đích, if/then/elif/else/fi
+    và { list; } cân bằng với condition/body khác rỗng; compound chỉ dành cho opaque.
+    Parameter nhận $TEN (ASCII), $0..$9/$@/$*/$#/$?/$-/$! /$$, ${TEN} hoặc ${TEN:-literal}
+    với literal gồm chữ/số/_/space/./slash/+/-; kể cả trong nháy kép. $[ bị từ chối cả trong
+    nháy kép; $' và $" ngoài nháy bị từ chối (không hỗ trợ ANSI-C/locale/arithmetic).
+    Ngoài các tiền tố expansion được kiểm, $ là literal; quote/escape giữ dữ liệu nguyên dạng.
+    Quoting và nối dòng theo POSIX hạn chế nêu trên.
+    $(...) chỉ nhận lệnh opaque được phân tích đệ quy; backtick và heredoc động bị từ chối.
+    Ngoặc trần, C0 ngoài nháy (trừ tab/newline) bị từ chối; dữ liệu nháy/heredoc giữ nguyên.
+    Comment chỉ mở tại đầu từ chưa quote/escape, kể cả trong $(...).
+    Shell không khai hoặc bash/sh dùng grammar trên. pwsh/powershell chỉ nhận ít nhất một
+    invocation/dòng LF bằng từ ASCII theo _shell_trong_mien, không quote/expansion/toán tử/khối;
+    không hỗ trợ cú pháp PowerShell tổng quát. Shell khác/null/template ngoài miền.
+    Mọi bước run đều qua chốt shell trước khi phân tích thân, kể cả thân opaque/rỗng.
+    Cài: pip/pip3, uv pip, python [cờ] -m pip + install + cờ cho phép + một Ruff requirement.
+    Extras phải quote; global option trước install bị từ chối, không biến thành KHONG.
+    Probe: ruff / python [cờ] -m ruff / uv run ruff / uvx ruff, hậu tố đúng --version.
+    Registry: python [cờ] <đường dẫn ci_dang_ky_test.py> hoặc -m ci_dang_ky_test, đúng --chay.
+    """
+    source = CI_WORKFLOW.read_text(encoding="utf-8") if source is None else source
+    try: data = yaml.safe_load(source) or {}
+    except yaml.YAMLError as e: return [f"CI YAML lỗi khi kiểm Ruff: {e}"], 1
+    if not isinstance(data, dict) or not isinstance(data.get("jobs"), dict): return ["CI YAML thiếu jobs"], 3
+    if any(not isinstance(j, dict) or not isinstance(j.get("steps"), list) for j in data["jobs"].values()):
+        return ["CI YAML jobs/steps ngoài miền"], 3
+    jobs = data["jobs"]
+    if any(not isinstance(s, dict) or ("run" in s and not isinstance(s["run"], str))
+           for j in jobs.values() for s in j["steps"]):
+        return ["CI YAML step/run ngoài miền"], 3
+    steps = {jn: [s for s in j.get("steps", []) if isinstance(s, dict)] for jn, j in jobs.items()}
+    parsed = {jn: [_doc_buoc_ruff(data, jobs[jn], s) for s in bs] for jn, bs in steps.items()}
+    kinds = {jn: [p[0] for p in ps] for jn, ps in parsed.items()}
+    for jn, ks in kinds.items():
+        for i, kind in enumerate(ks):
+            if kind != "KHONG" and (_buoc_co_dieu_kien(steps[jn][i]) or jobs[jn].get("if") is not None):
+                ks[i] = "KHONG_PHAN_TICH_DUOC"
+    installs = [jn for jn, ks in kinds.items() if any(k != "KHONG" for k in ks)]
+    bad_pin = [jn for jn in installs if "GHIM" not in kinds[jn] or any(k not in ("KHONG", "GHIM") for k in kinds[jn])]
+    bad_probe = []
+    for jn in installs:
+        pinned, probed = False, False
+        for i, kind in enumerate(kinds[jn]):
+            if not _buoc_co_dieu_kien(steps[jn][i]):
+                probed |= parsed[jn][i][2] or (pinned and parsed[jn][i][4])
+                pinned |= kind == "GHIM"
+        if not probed: bad_probe.append(jn)
+    registry = {jn: [p[3] for p in ps] for jn, ps in parsed.items()}
+    callers = [jn for jn, flags in registry.items() if 1 in flags]
+    before = False
+    if len(callers) == 1 and not any(-1 in flags for flags in registry.values()):
+        jn = callers[0]; gi = registry[jn].index(1)
+        ri = next((i for i, k in enumerate(kinds[jn]) if k == "GHIM"), -1)
+        before = (0 <= ri < gi and not _buoc_co_dieu_kien(steps[jn][gi])
+                  and jobs[jn].get("if") is None)
+    outside = [f"{jn}/bước {i + 1}" for jn, ks in kinds.items() for i, k in enumerate(ks) if k == "KHONG_PHAN_TICH_DUOC"]
+    reason = f"; ngoài miền cú pháp: {outside}" if outside else ""
     checks = [
-        ("ruff==0.15.15" in joined, "CI không ghim Ruff 0.15.15"),
-        (bool(re.search(r"(?m)^\s*ruff --version\s*$", joined)),
-         "CI không in probe Ruff --version"),
-        (0 <= ruff_i < gate_i, "CI không provision Ruff trước test registry"),
+        (installs and not bad_pin, f"CI không chứng minh ghim Ruff 0.15.15 (job: {bad_pin or 'không job nào cài Ruff'}{reason})"),
+        (installs and not bad_probe, f"CI không in probe Ruff --version (job: {bad_probe or 'không job nào cài Ruff'})"),
+        (before, "CI không provision Ruff trước test registry trong cùng job "
+                 f"(job chạy test registry: {callers or 'KHÔNG CÓ'})"),
     ]
     return [message for ok, message in checks if not ok], len(checks)
-
 
 def giet_windows_311_launcher_workflow(source):
     anchor = "'3.13'"
@@ -327,7 +727,14 @@ def chay_moi(moi=MOI, cach_ly=CACH_LY, chay_mot=_chay_that,
 
 def phan_chung():
     """Mỗi chốt dùng một bản sao fixture riêng dưới /tmp."""
-    cases, names = [], ["i-thieu-so", "ii-mat-tep", "iii-mat-loi-goi", "iv-vi-tri-la"]
+    # F02 luot 3 — MOT danh sach, MOT diem noi; ten va ket qua o CUNG mot tuple. Hai ban va truoc
+    # giu HAI danh sach song song canh bang DO DAI, khong bat lech THU TU (bo ten cuoi ra 64/64
+    # True, dao thu tu ra 65/65 True). Khong con `zip` — lop loi chet theo CAU TRUC.
+    KQ = []
+    def _them(ten, ok):
+        if any(t == ten for t, _ in KQ):
+            raise AssertionError(f"trung ten ca phan chung: {ten}")
+        KQ.append((ten, bool(ok)))
     with tempfile.TemporaryDirectory(prefix="ci-dang-ky-") as d:
         base = pathlib.Path(d)
         for i, kind in enumerate(("thieu", "mat_tep", "mat_loi_goi", "vi_tri_la")):
@@ -345,57 +752,62 @@ def phan_chung():
                     DA_NOI.add(".claude/dev/a_test.py"); wf = ""
                 else:
                     (r / "la").mkdir(); (r / "la/x_test.py").touch()
-                cases.append(bool(kiem(r, reg, wf)[0]))
+                _them(("i-thieu-so", "ii-mat-tep", "iii-mat-loi-goi", "iv-vi-tri-la")[i], bool(kiem(r, reg, wf)[0]))
             finally:
                 DA_NOI.clear(); DA_NOI.update(old)
         # (a) Bản sao sổ cách ly mất slug phải đỏ.
         mutant_cu = {".claude/dev/a_test.py": {"slug": "", "ly_do": "đỏ trên CI"}}
-        cases.append(bool(kiem(r, reg, wf, mutant_cu)[0]))
+        _them("a-cach-ly-thieu-slug", bool(kiem(r, reg, wf, mutant_cu)[0]))
         mutant = {".claude/dev/a_test.py": {"slug": "nợ", "ly_do": "đỏ trên CI",
                                                 "log": "log-r3"}}
-        cases.append(bool(kiem(r, reg, wf, mutant)[0]))
+        _them("r4-thieu-moi-truong", bool(kiem(r, reg, wf, mutant)[0]))
         # r5: neo môi trường ngoài đúng nguồn giá trị phải đỏ ở tầng cấu trúc.
         mutant = {".claude/dev/a_test.py": {"slug": "nợ", "ly_do": "đỏ trên CI",
                     "moi_truong": "github-actions/lin-typo", "log": "log-r3"}}
-        cases.append(any("môi trường không hợp lệ" in x for x in kiem(r, reg, wf, mutant)[0]))
+        _them("r5-moi-truong-sai-tap", any("môi trường không hợp lệ" in x for x in kiem(r, reg, wf, mutant)[0]))
         # r5: xoá run thật, giữ nguyên lệnh trong YAML comment vẫn phải đỏ.
         yml = r / ".github/workflows/comment.yml"
         yml.write_text("jobs:\n  x:\n    steps:\n      # - run: python .claude/dev/a_test.py\n", encoding="utf-8")
         old = set(DA_NOI); DA_NOI.clear(); DA_NOI.add(".claude/dev/a_test.py")
-        try: cases.append(any("CI không gọi mục" in x for x in kiem(r, reg)[0]))
+        try: _them("r5-comment-gia-loi-goi", any("CI không gọi mục" in x for x in kiem(r, reg)[0]))
         finally: DA_NOI.clear(); DA_NOI.update(old)
         old = set(DA_NOI); DA_NOI.clear(); DA_NOI.add(".claude/dev/a_test.py")
         for level in ("step", "job", "expr", "normal"):
             yml.write_text("jobs:\n  x:\n" + ("    if: false\n" if level == "job" else "") + "    steps:\n      - " + (("if: ${{ false }}\n        " if level == "expr" else "if: false\n        ") if level in ("step", "expr") else "") + "run: python .claude/dev/a_test.py\n", encoding="utf-8")
-            found = any("CI không gọi mục" in x for x in kiem(r, reg)[0]); cases.append(found if level != "normal" else not found)
+            found = any("CI không gọi mục" in x for x in kiem(r, reg)[0])
+            _them({"step": "r5-step-if-false", "job": "r5-job-if-false",
+                   "expr": "r5-step-if-literal-expr", "normal": "r5-normal-step"}[level],
+                  found if level != "normal" else not found)
         DA_NOI.clear(); DA_NOI.update(old)
         # (b) Bản sao chương trình cách ly chuyển xanh phải bị yêu cầu gỡ.
         green = base / "green_test.py"
         green.write_text("print('1/1')\n", encoding="utf-8")
         p = subprocess.run([sys.executable, green], text=True, stdout=subprocess.PIPE)
         xanh = p.returncode == 0 and bang_chung_xanh(p.stdout, r"^(\d+)/(\d+)$")
-        cases.append(not cach_ly_chap_nhan(xanh, "github-actions/linux", "github-actions/linux"))
+        _them("b-cach-ly-chuyen-xanh", not cach_ly_chap_nhan(xanh, "github-actions/linux", "github-actions/linux"))
         # r4: bỏ phép so làm bản xanh bắn ở môi trường khác; đúng ra phải là None.
-        cases.append((not xanh) is not cach_ly_chap_nhan(xanh, "github-actions/linux", None))
+        _them("r4-bo-so-moi-truong", (not xanh) is not cach_ly_chap_nhan(xanh, "github-actions/linux", None))
         # r4: đột biến đổi trạng thái thứ ba thành ĐẠT phải bị bắt.
-        cases.append(cach_ly_chap_nhan(xanh, "github-actions/linux", None) is None and True is not None)
+        _them("r4-khong-do-duoc-thanh-dat", cach_ly_chap_nhan(xanh, "github-actions/linux", None) is None and True is not None)
     # Hai chiều bằng chứng: rc đỏ dù có dòng xanh; rc xanh nhưng thiếu dòng xanh.
-    cases += [not (1 == 0 and bang_chung_xanh("TỔNG: ĐẠT", r"TỔNG: ĐẠT")),
-              not (0 == 0 and bang_chung_xanh("", r"TỔNG: ĐẠT"))]
+    _them("rc-do-ban-in-xanh", not (1 == 0 and bang_chung_xanh("TỔNG: ĐẠT", r"TỔNG: ĐẠT")))
+    _them("rc-xanh-thieu-ban-in", not (0 == 0 and bang_chung_xanh("", r"TỔNG: ĐẠT")))
     # r6 (#401): VỊ TỪ trung thực rồi mà NƠI TIÊU THỤ vẫn làm tròn lên được — đó là
     # khuyết tật đã sống sót qua r4 và r5. Nên canh cả hai tầng.
-    cases += [dem_la_do(None, True) is True, dem_la_do(None, False) is False,
-              dem_la_do(False, False) is True, dem_la_do(True, True) is False]
+    _them("r6-vi-tu-none-trong-ci-la-do", dem_la_do(None, True) is True)
+    _them("r6-vi-tu-none-ngoai-ci-khong-do", dem_la_do(None, False) is False)
+    _them("r6-vi-tu-da-xanh-van-do", dem_la_do(False, False) is True)
+    _them("r6-vi-tu-cach-ly-hop-le-khong-do", dem_la_do(True, True) is False)
     # r6: `trong_ci` phải ĐỘC LẬP với `moi_truong_hien_tai` — thiếu RUNNER_OS vẫn là CI,
     # còn không có GITHUB_ACTIONS thì dù có RUNNER_OS vẫn KHÔNG phải CI.
-    cases += [trong_ci({"GITHUB_ACTIONS": "true"}) is True,
-              trong_ci({"RUNNER_OS": "Linux"}) is False,
-              trong_ci({"GITHUB_ACTIONS": "false", "RUNNER_OS": "Linux"}) is False]
-    cases += [moi_truong_hien_tai({"GITHUB_ACTIONS": "true", "RUNNER_OS": "Linux"}) == MOI_TRUONG_CI,
-              moi_truong_hien_tai({"GITHUB_ACTIONS": "true", "RUNNER_OS": "Windows"}) == MOI_TRUONG_WINDOWS,
-              moi_truong_hien_tai({"GITHUB_ACTIONS": "true", "RUNNER_OS": "macOS"}) is None,
-              cach_ly_chap_nhan(True, MOI_TRUONG_CI, MOI_TRUONG_WINDOWS) is True,
-              cach_ly_chap_nhan(False, MOI_TRUONG_CI, MOI_TRUONG_WINDOWS) is False]
+    _them("r6-trong-ci-khong-doi-runner-os", trong_ci({"GITHUB_ACTIONS": "true"}) is True)
+    _them("r6-thieu-github-actions-khong-phai-ci", trong_ci({"RUNNER_OS": "Linux"}) is False)
+    _them("r6-github-actions-false-khong-phai-ci", trong_ci({"GITHUB_ACTIONS": "false", "RUNNER_OS": "Linux"}) is False)
+    _them("wp430-nhan-linux", moi_truong_hien_tai({"GITHUB_ACTIONS": "true", "RUNNER_OS": "Linux"}) == MOI_TRUONG_CI)
+    _them("wp430-nhan-windows", moi_truong_hien_tai({"GITHUB_ACTIONS": "true", "RUNNER_OS": "Windows"}) == MOI_TRUONG_WINDOWS)
+    _them("wp430-runner-la-fail-close", moi_truong_hien_tai({"GITHUB_ACTIONS": "true", "RUNNER_OS": "macOS"}) is None)
+    _them("wp430-windows-xanh-that", cach_ly_chap_nhan(True, MOI_TRUONG_CI, MOI_TRUONG_WINDOWS) is True)
+    _them("wp430-windows-do-that", cach_ly_chap_nhan(False, MOI_TRUONG_CI, MOI_TRUONG_WINDOWS) is False)
     # r6: TẦNG TIÊU THỤ — gọi chính `chay_moi` với bộ chạy giả. Gỡ phép cộng ở đó ra thì
     # ba ca này ĐỎ; đó là điều mà đột biến canh-vị-từ `r4-khong-do-duoc-thanh-dat` KHÔNG
     # bắt được, và là lý do nợ N6 lọt cổng trên windows-latest.
@@ -425,20 +837,20 @@ def phan_chung():
     # Cách dựng từng ô: `chap_nhan is None` cần nền KHÁC neo; `True` cần nền KHỚP neo
     # và bộ test ĐỎ (cách ly còn hiệu lực); `False` cần nền KHỚP neo và bộ test XANH
     # (đã hết nợ, phải đòi gỡ khỏi cách ly).
-    MIEN_DEM = [(None, True, 1), (None, False, 0),
-                (True, True, 0), (True, False, 0),
-                (False, True, 1), (False, False, 1)]
-    for _cn, _ci, _mong in MIEN_DEM:
+    MIEN_DEM = [(None, True, 1, "none-trong-ci"), (None, False, 0, "none-ngoai-ci"),
+                (True, True, 0, "cach-ly-hop-le-trong-ci"), (True, False, 0, "cach-ly-hop-le-ngoai-ci"),
+                (False, True, 1, "da-xanh-trong-ci"), (False, False, 1, "da-xanh-ngoai-ci")]
+    for _cn, _ci, _mong, _o in MIEN_DEM:
         _nen = None if _cn is None else "github-actions/linux"
         _kq = (0, "1/1\n") if _cn is False else (1, "0/1\n")
-        cases.append(_dem(_ci, _nen, _kq)[0] == _mong)
+        _them("r6-TIEU-THU-o-" + _o, _dem(_ci, _nen, _kq)[0] == _mong)
     known = _dem(True, MOI_TRUONG_WINDOWS, (1, "0/1\n"))
     unknown = _dem(True, "github-actions/macos", (1, "0/1\n"))
     windows = _dem(True, MOI_TRUONG_WINDOWS, (1, "0/1\n"), MOI_TRUONG_WINDOWS)
-    cases += [known[0] == 1 and "KHÔNG CÁCH LY" in known[1],
-              unknown[0] == 1 and "KHÔNG ĐO ĐƯỢC" in unknown[1],
-              windows[0] == 0 and "CÁCH LY" in windows[1],
-              cach_ly_chap_nhan(True, MOI_TRUONG_CI, "github-actions/macos") is None]
+    _them("wp430-known-other-consumer", known[0] == 1 and "KHÔNG CÁCH LY" in known[1])
+    _them("wp430-unknown-consumer", unknown[0] == 1 and "KHÔNG ĐO ĐƯỢC" in unknown[1])
+    _them("wp430-windows-anchor-positive", windows[0] == 0 and "CÁCH LY" in windows[1])
+    _them("wp430-unknown-predicate", cach_ly_chap_nhan(True, MOI_TRUONG_CI, "github-actions/macos") is None)
     # ── packet #456: SO DANG KY PHAN BIET DUOC NEN ────────────────────────────────────
     # Di qua chinh `chay_moi`, khong goi thang `mau_theo_nen`: khuyet tat "lam tron" nam o
     # NOI TIEU THU gia tri, va do la bai hoc r6/#401 da tra gia ba lan trong tep nay.
@@ -467,56 +879,393 @@ def phan_chung():
                             doc_trong_ci=lambda: True,
                             doc_nen_windows=lambda: la_windows)
 
-    cases += [_dem_nen(_WIN456, False) == 1, _dem_nen(_WIN456, True) == 0,
-              _dem_nen(_LNX456, True) == 0, _dem_nen(_LNX456, False) == 0,
-              _dem_nen(_RONG456, True) == 1,
-              # M4: duong Linux phai giong BASE tung dau vao, ke ca dau vao xau.
-              _dem_nen(_RONG456, False) == 0,
-              MOI[_P456] == _MAU_BASE456,
-              all(bang_chung_xanh(x, MOI[_P456]) is bang_chung_xanh(x, _MAU_BASE456)
-                  for x in (_LNX456, _RONG456, _WIN456))]
+    _them("p456-dong-windows-tren-linux-la-DO", _dem_nen(_WIN456, False) == 1)
+    _them("p456-dong-windows-tren-windows-DAT", _dem_nen(_WIN456, True) == 0)
+    _them("p456-dong-linux-tren-windows-DAT", _dem_nen(_LNX456, True) == 0)
+    _them("p456-dong-linux-tren-linux-khong-doi", _dem_nen(_LNX456, False) == 0)
+    _them("p456-dot-bien-0-tren-0-DO-tren-windows", _dem_nen(_RONG456, True) == 1)
+    # M4: duong Linux phai giong BASE tung dau vao, ke ca dau vao xau.
+    _them("p456-linux-nhan-0-tren-0-Y-HET-base", _dem_nen(_RONG456, False) == 0)
+    _them("p456-mau-linux-KHONG-DOI-so-voi-base", MOI[_P456] == _MAU_BASE456)
+    _them("p456-linux-A-B-tung-dau-vao-khop-base",
+          all(bang_chung_xanh(x, MOI[_P456]) is bang_chung_xanh(x, _MAU_BASE456)
+              for x in (_LNX456, _RONG456, _WIN456)))
     try:
         launcher_source = LAUNCHER_WORKFLOW.read_text(encoding="utf-8")
-        cases.append(giet_windows_311_launcher_workflow(launcher_source))
-        cases.append(not loi_launcher_windows(
-            launcher_source.replace("fromJSON(", "fromJSON( ", 1))[0])
         ci_source = CI_WORKFLOW.read_text(encoding="utf-8")
-        cases += [bool(loi_ruff_ci(
-                      ci_source.replace("ruff==0.15.15", "ruff", 1))[0]),
-                  bool(loi_ruff_ci(
-                      ci_source.replace("ruff --version", "ruff --help", 1))[0])]
     except OSError:
-        cases += [False, False, False, False]
-    names += ["a-cach-ly-thieu-slug", "r4-thieu-moi-truong", "r5-moi-truong-sai-tap",
-              "r5-comment-gia-loi-goi", "r5-step-if-false", "r5-job-if-false",
-              "r5-step-if-literal-expr", "r5-normal-step", "b-cach-ly-chuyen-xanh",
-              "r4-bo-so-moi-truong", "r4-khong-do-duoc-thanh-dat",
-              "rc-do-ban-in-xanh", "rc-xanh-thieu-ban-in",
-              "r6-vi-tu-none-trong-ci-la-do", "r6-vi-tu-none-ngoai-ci-khong-do",
-              "r6-vi-tu-da-xanh-van-do", "r6-vi-tu-cach-ly-hop-le-khong-do",
-              "r6-trong-ci-khong-doi-runner-os", "r6-thieu-github-actions-khong-phai-ci",
-              "r6-github-actions-false-khong-phai-ci",
-              "wp430-nhan-linux", "wp430-nhan-windows", "wp430-runner-la-fail-close",
-              "wp430-windows-xanh-that", "wp430-windows-do-that",
-              "r6-TIEU-THU-o-none-trong-ci", "r6-TIEU-THU-o-none-ngoai-ci",
-              "r6-TIEU-THU-o-cach-ly-hop-le-trong-ci",
-               "r6-TIEU-THU-o-cach-ly-hop-le-ngoai-ci",
-               "r6-TIEU-THU-o-da-xanh-trong-ci", "r6-TIEU-THU-o-da-xanh-ngoai-ci",
-               "wp430-known-other-consumer", "wp430-unknown-consumer",
-               "wp430-windows-anchor-positive", "wp430-unknown-predicate",
-              "p456-dong-windows-tren-linux-la-DO",
-              "p456-dong-windows-tren-windows-DAT",
-              "p456-dong-linux-tren-windows-DAT",
-              "p456-dong-linux-tren-linux-khong-doi",
-              "p456-dot-bien-0-tren-0-DO-tren-windows",
-              "p456-linux-nhan-0-tren-0-Y-HET-base",
-              "p456-mau-linux-KHONG-DOI-so-voi-base",
-              "p456-linux-A-B-tung-dau-vao-khop-base",
-               "windows_311_launcher_workflow", "launcher-semantic-spacing",
-               "ruff-pin-required", "ruff-version-probe-required"]
-    for name, ok in zip(names, cases): print(f"ĐỘT BIẾN {name}: {'ĐỎ đúng' if ok else 'LỌT'}")
-    print(f"PHẢN CHỨNG: {sum(cases)}/{len(cases)} đỏ đúng")
-    return all(cases)
+        launcher_source = ci_source = ""        # doc khong duoc = DO, khong phai bo qua
+    _them("windows_311_launcher_workflow",
+          bool(launcher_source) and giet_windows_311_launcher_workflow(launcher_source))
+    _them("launcher-semantic-spacing", bool(launcher_source) and not loi_launcher_windows(
+          launcher_source.replace("fromJSON(", "fromJSON( ", 1))[0])
+    # Doi DUNG LOAI thong diep, khong phai `bool(loi)`: bo ghim lam CA ghim LAN probe do, nen ca
+    # cu van xanh khi da XOA HAN chot ghim — do duoc 102/102 (luot 8, P2 #2).
+    _them("ruff-pin-required", bool(ci_source) and any("ghim Ruff" in m for m in
+          loi_ruff_ci(ci_source.replace("ruff==0.15.15", "ruff", 1))[0]))
+    _them("ruff-version-probe-required", bool(ci_source) and any("probe Ruff" in m for m in
+          loi_ruff_ci(ci_source.replace("ruff --version", "ruff --help", 1))[0]))
+    _ruff = {"name": "cài Ruff 0.15.15 và in probe dương",
+             "run": "python -m pip install --quiet ruff==0.15.15\nruff --version\n"}
+    _reg = {"name": "test registry", "run": "python .claude/dev/ci_dang_ky_test.py --chay"}
+    _khac = {"name": "khác", "run": "python x.py"}
+    def _p(lenh): return {"name": "cài Ruff (biến thể)", "run": lenh + "\nruff --version\n"}
+    _probe_truoc = {"name": "cài Ruff (probe trước)",  # probe dat TRUOC lenh cai
+                    "run": "ruff --version\npython -m pip install --quiet ruff==0.15.15\n"}
+    def _wf(jobs, env=None, defaults=None):
+        d = {"on": "push", "jobs": jobs}
+        if env: d["env"] = env
+        if defaults is not None: d["defaults"] = defaults
+        return yaml.safe_dump(d, sort_keys=False)
+    _FX = [
+        ("chua-tach-tuong-thich-lui", {"gate": {"steps": [_ruff, _khac, _reg]}}, None, 0),
+        ("da-tach-dung", {"gate": {"steps": [_ruff, _khac]}, "gate-registry": {"steps": [_ruff, _reg]}}, None, 0),
+        ("da-tach-thieu-ruff", {"gate": {"steps": [_ruff, _khac]}, "gate-registry": {"steps": [_khac, _reg]}}, None, 1),
+        ("da-tach-ruff-sau-registry", {"gate": {"steps": [_ruff, _khac]}, "gate-registry": {"steps": [_reg, _ruff]}}, None, 1),
+        ("khong-job-nao-chay-registry", {"gate": {"steps": [_ruff, _khac]}}, None, 1),
+        ("hai-job-chay-registry", {"gate": {"steps": [_ruff, _reg]}, "gate-registry": {"steps": [_ruff, _reg]}}, None, 1),
+        ("probe-truoc-cai", {"gate": {"steps": [_ruff, _khac]},   # THU TU trong cung than `run`
+                             "gate-registry": {"steps": [_probe_truoc, _reg]}}, None, 1),
+    ]
+    _g = {"steps": [_ruff, _khac]}
+    _pm = dict(_ruff, run="python -m pip install --quiet ruff==0.15.15\npython -m ruff --version\n")
+    _pc = dict(_ruff, run="python -m pip install --quiet ruff==0.15.15\nruff   --version\n")
+    _toml = dict(_ruff, run='python -m pip install --quiet ruff==0.15.15\nprintf "%s\\n" "[lint]\n'
+                            'select = [\\"E\\"]  # chu thich" > ruff.toml\nruff --version\n')
+    _nhay = dict(_ruff, run='python -m pip install --quiet ruff==0.15.15\necho "a ; b && c | d"\n'
+                            'ruff --version\n')
+    _tab = dict(_reg, run="python .claude/dev/ci_dang_ky_test.py\t--chay")
+    _pmm = dict(_ruff, run="python -m pip install --quiet ruff==0.15.15\npython -mruff --version\n")
+    _FX += [
+        ("probe-dang-module", {"gate": _g, "gate-registry": {"steps": [_pm, _reg]}}, None, 0),
+        ("probe-thua-khoang-trang", {"gate": _g, "gate-registry": {"steps": [_pc, _reg]}}, None, 0),
+        ("toml-nhieu-dong-va-thang", {"gate": _g, "gate-registry": {"steps": [_toml, _reg]}}, None, 0),
+        ("toan-tu-trong-dau-nhay", {"gate": _g, "gate-registry": {"steps": [_nhay, _reg]}}, None, 0),
+        ("registry-ngan-bang-tab", {"gate": _g, "gate-registry": {"steps": [_ruff, _tab]}}, None, 0),
+        ("probe-mruff-lien", {"gate": _g, "gate-registry": {"steps": [_pmm, _reg]}}, None, 0),
+    ]
+    for _t, _b in [("buoc-if-false", {"if": "false"}), ("if-so-khong", {"if": "0"}),
+                   ("if-bieu-thuc-false", {"if": "${{false}}"}),
+                   ("if-chi-linux", {"if": "runner.os == 'Linux'"})]:
+        _FX.append((_t, {"gate": {"steps": [_ruff]},
+                         "gate-registry": {"steps": [dict(_ruff, **_b), _reg]}}, None, 1))
+    _PIN = "python -m pip install ruff==0.15.15"
+    _KPT = "KHONG_PHAN_TICH_DUOC"
+    for _t, _run, _nhan in [
+            ("ghim-chuan", _PIN, "GHIM"),
+            ("tien-to-pip", "pip install ruff==0.15.15", "GHIM"),
+            ("tien-to-pip3", "pip3 install ruff==0.15.15", "GHIM"),
+            ("tien-to-uv-pip", "uv pip install ruff==0.15.15", "GHIM"),
+            ("tien-to-python3", "python3 -m pip install ruff==0.15.15", "GHIM"),
+            ("tuy-chon-quiet", "python -m pip install --quiet ruff==0.15.15", "GHIM"),
+            ("tuy-chon-q", "python -m pip install -q ruff==0.15.15", "GHIM"),
+            ("tuy-chon-no-cache-dir", "python -m pip install --no-cache-dir ruff==0.15.15", "GHIM"),
+            ("tuy-chon-disable-pip-version-check",
+             "python -m pip install --disable-pip-version-check ruff==0.15.15", "GHIM"),
+            ("tuy-chon-no-input", "python -m pip install --no-input ruff==0.15.15", "GHIM"),
+            ("ten-hoa-thuong", "python -m pip install Ruff==0.15.15", "GHIM"),
+            ("extras", 'python -m pip install "ruff[all]==0.15.15"', "GHIM"),
+            ("noi-dong", "python -m pip install \\\n  ruff==0.15.15", "GHIM"),
+            ("chay-ruff-khong-phai-cai", "ruff check .", "KHONG"),
+            ("chay-module", "python -m ruff --version", "KHONG"),
+            ("chay-module-py3", "python3 -m ruff check .", "KHONG"),
+            ("chay-uv-run", "uv run ruff --version", "KHONG"),
+            ("chay-uvx", "uvx ruff check .", "KHONG"),
+            ("chay-co-trinh-u", "python3 -u -m ruff --version", "KHONG"),
+            ("chay-co-trinh-B", "python -B -m ruff check .", "KHONG"),
+            ("chay-co-trinh-X", "python3 -X utf8 -m ruff --version", "KHONG"),
+            ("chay-mruff-lien", "python3 -mruff --version", "KHONG"),
+            ("ghep-toan-tu-va", _PIN + " && ruff --version", "GHIM"),
+            ("ghep-toan-tu-cham-phay", _PIN + " ; ruff --version", "GHIM"),
+            ("comment-khong-tinh", "# " + _PIN, "KHONG"),
+            ("khong-ghim", "python -m pip install ruff", "KHONG_GHIM"),
+            ("toan-tu-lon-hon", 'python -m pip install "ruff>=0.16"', "KHONG_GHIM"),
+            ("toan-tu-la", 'python -m pip install "ruff<>0.16"', "KHONG_GHIM"),
+            ("extras-khong-ghim", 'python -m pip install "ruff[all]"', "KHONG_GHIM"),
+            ("co-gan-bang", "python -m pip install --target=tmp ruff==0.15.15", _KPT),
+            ("co-ngan-lien", "python -m pip install -ttmp ruff==0.15.15", _KPT),
+            ("co-chua-biet", "python -m pip install --no-such-flag ruff==0.15.15", _KPT),
+            ("cai-them-goi-khac", _PIN + " requests", _KPT),
+            ("hai-ban-ruff", _PIN + ' "ruff>=0.16"', _KPT),
+            ("go-cai", _PIN + "\npip uninstall -y ruff", _KPT),
+            ("trinh-ngoai-khuon", _PIN + "\npdm remove ruff", _KPT),
+            ("upgrade-sau-ghim", _PIN + "\npython -m pip install --upgrade ruff", _KPT),
+            ("tuy-chon-truoc-install", "python -m pip --quiet install ruff==0.15.15", _KPT)]:
+        _them("nhan-" + _t, _phan_loai_cai_ruff(_run + "\nruff --version\n")[0] == _nhan)
+    _them("tap-tien-to-khop-ky-vong", list(_TIEN_TO_CAI) == [
+        ["pip"], ["pip3"], ["uv", "pip"], ["python", "-m", "pip"], ["python3", "-m", "pip"]])
+    _them("tap-tuy-chon-khop-ky-vong", _TUY_CHON_AN_TOAN == {
+        "--quiet", "-q", "--no-cache-dir", "--disable-pip-version-check", "--no-input"})
+    # Miền M7 đã chốt ở Issue #463 comment 5651040630: lệnh trực tiếp; ngoài miền phải đỏ.
+    for _t, _run, _want in [
+        ("module-sai-hoa", _PIN + "\npython -m Ruff --version", 1),
+        ("module-extras", _PIN + "\npython -m 'ruff[all]' --version", 1),
+        ("probe-help-version", _PIN + "\nruff --help --version", 1),
+        ("probe-subcommand-version", _PIN + "\nruff check --version", 1),
+        ("extras-sai-ky-tu", "pip install 'ruff[!]==0.15.15'\nruff --version", 1),
+        ("extras-dau-phay-treo", "pip install 'ruff[all,]==0.15.15'\nruff --version", 1),
+        ("quote-chua-dong", _PIN + "\nruff --version\n'", 1),
+        ("noi-giua-token", "pi\\\np install ruff==0.15.15\nruff --version", 0),
+        ("ansi-c-ngoai-mien", "pip install $'ruff==0.15.15'\nruff --version", 1),
+        ("probe-truoc-va-sau", "ruff --version\n" + _PIN + "\nruff --version", 0),
+        ("or-ngoai-mien", _PIN + " || ruff --version", 1),
+        ("pipe-ngoai-mien", _PIN + " | ruff --version", 1),
+        ("background-ngoai-mien", _PIN + " & ruff --version", 1),
+        ("requirement-dong", 'pip install "$PACKAGE"\nruff --version', 1),
+        ("extras-glob-khong-quote", "pip install ruff[all]==0.15.15\nruff --version", 1),
+    ]:
+        _FX.append((_t, {"gate": {"steps": [{"run": _run}, _reg]}}, None, _want))
+    for _t, _run in [("and-thieu-trai", "&& " + _PIN), ("and-thieu-phai", _PIN + " &&"),
+                     ("than-ham", "f() {\n" + _PIN + "\n}"), ("nhom-lenh", "{\n" + _PIN + "\n}"),
+                     ("ten-goi-dong", 'pip install "r${X}ff==0.15.15"'), ("dau-cham-phay-rong", "; " + _PIN)]:
+        _FX.append((_t, {"gate": {"steps": [_ruff, {"run": _run}, _reg]}}, None, 1))
+    _FX += [
+        ("registry-module", {"gate": {"steps": [_ruff, {"run": "python -m ci_dang_ky_test --chay"}]}}, None, 0),
+        ("registry-if", {"gate": {"steps": [_ruff, dict(_reg, **{"if": "false"})]}}, None, 1),
+        ("toml-if-vo-can", {"gate": {"steps": [_ruff, {"if": "false", "run": "printf x > ruff.toml"}, _reg]}}, None, 0),
+        ("heredoc-la-du-lieu", {"gate": {"steps": [_ruff, {"run": "cat <<'END'\npip install ruff==0.15.14\nEND\n"}, _reg]}}, None, 0),
+    ]
+    # Lớp nhận dạng: một job đúng KHÔNG được che installer ngoài miền ở job khác.
+    for _t, _run in [
+        ("pip-global-dong", 'pip --quiet install "$PACKAGE"'),
+        ("module-global-dong", 'python -m pip --quiet install "$PACKAGE"'),
+        ("python-flag-dong", 'python -u -m pip install "$PACKAGE"'),
+        ("pip3-global-dong", 'pip3 -q install "$PACKAGE"'),
+        ("uv-global-dong", 'uv --quiet pip install "$PACKAGE"'),
+        ("uv-pip-global-dong", 'uv pip --quiet install "$PACKAGE"'),
+        ("executable-path", '/usr/bin/pip install "$PACKAGE"'),
+        ("executable-exe", 'pip.exe install "$PACKAGE"'),
+        ("installer-la", 'poetry add "$PACKAGE"'),
+        ("trinh-dong", '"$INSTALLER" install ruff'),
+        ("requirement-file", "pip install -r requirements.txt"),
+        ("dependency-file", "pip install ./wheel.whl"),
+        ("prefix-env", 'env PACKAGE=ruff pip install "$PACKAGE"'),
+        ("prefix-assignment", 'PACKAGE=ruff pip install "$PACKAGE"'),
+        ("prefix-command", 'command pip install "$PACKAGE"'),
+        ("prefix-sudo", 'sudo pip install "$PACKAGE"'),
+        ("thay-lenh-assignment", 'X=$(pip install "$PACKAGE")'),
+        ("thay-lenh-echo", 'echo "$(python -m pip install ruff)"'),
+        ("thay-lenh-long", 'echo "$(echo "$(pip install ruff)")"'),
+        ("backtick", 'echo `pip install ruff`'),
+        ("heredoc-dong", 'cat <<END\n$(pip install ruff)\nEND\n'),
+    ]:
+        _FX.append((_t, {"gate": {"steps": [_ruff, _reg]},
+                         "khac": {"steps": [{"run": _run}]}}, None, 1))
+    # Đối chứng dương cho ranh giới script/dữ liệu; không đọc thân script hay env.
+    for _t, _run in [
+        ("script-opaque", "bash setup.sh"),
+        ("python-c-opaque", "python -c 'print(\"pip install ruff\")'"),
+        ("python-file-opaque", "python setup.py"),
+        ("assignment-opaque", 'PACKAGE="ruff==0.15.14"'),
+        ("du-lieu-thay-lenh", "echo '$(pip install ruff)'"),
+        ("thay-lenh-opaque", 'ID="$(id -u)"'),
+        ("thay-lenh-git", 'HEAD_SHA=$(git rev-parse HEAD)'),
+        ("goi-khac-tinh", "pip install PyYAML==6.0.3 jsonschema==4.26.0"),
+    ]:
+        _FX.append((_t, {"gate": {"steps": [_ruff, {"run": _run}, _reg]}}, None, 0))
+    for _t, _prefix in [("python-u", "python -u -m pip"), ("python-X", "python -X utf8 -m pip"),
+                        ("python-B", "python3 -B -m pip"), ("python-minor", "python3.12 -m pip"),
+                        ("mpip-lien", "python -mpip")]:
+        _FX.append((_t, {"gate": {"steps": [_p(_prefix + " install ruff==0.15.15"), _reg]}}, None, 0))
+    _install, _probe = {"run": _PIN}, {"run": "ruff --version"}
+    for _t, _steps, _want in [
+        ("probe-buoc-sau", [_install, _probe, _reg], 0),
+        ("probe-hai-phia", [_probe, _install, _probe, _reg], 0),
+        ("probe-chi-buoc-truoc", [_probe, _install, _reg], 1),
+        ("probe-buoc-co-dieu-kien", [_install, dict(_probe, **{"if": "false"}), _reg], 1),
+        ("registry-cung-buoc-ngoai-mien", [{"run": _PIN + "\nruff --version\n" + _reg["run"]}], 1),
+        ("run-sai-kieu", [_ruff, {"run": ["pip", "install", "ruff"]}, _reg], 1),
+        ("step-sai-kieu", [_ruff, "pip install ruff", _reg], 1),
+    ]:
+        _FX.append((_t, {"gate": {"steps": _steps}}, None, _want))
+    _FX.append(("registry-job-co-dieu-kien", {"gate": {"if": "false", "steps": [_ruff, _reg]}}, None, 1))
+    for _shell in ("python", "cmd", "bash {0}", "${{ matrix.shell }}"):
+        _FX.append(("shell-ngoai-mien-" + _shell,
+                    {"gate": {"steps": [dict(_ruff, shell=_shell), _reg]}}, None, 1))
+    _FX.append(("shell-job-ngoai-mien", {"gate": {"defaults": {"run": {"shell": "python"}},
+                                               "steps": [_ruff, _reg]}}, None, 1))
+    _FX.append(("shell-step-uu-tien", {"gate": {"defaults": {"run": {"shell": "python"}},
+                      "steps": [dict(_ruff, shell="bash"), dict(_reg, shell="bash")]}}, None, 0))
+    # R12: vỏ ngôn ngữ không được miễn kiểm chỉ vì thân trông như dữ liệu/script.
+    for _si, _shell in enumerate(("python", "cmd", "bash {0}", "${{ matrix.shell }}")):
+        for _bi, _body in enumerate(("x=1", "echo hi", "python setup.py", "")):
+            _FX.append((f"shell-vo-can-{_si}-{_bi}", {"gate": {"steps": [
+                _ruff, {"shell": _shell, "run": _body}, _reg]}}, None, 1))
+    # R16: assignment không thuộc miền argv ASCII của PowerShell; hai đối chứng POSIX giữ xanh.
+    for _shell in ("bash", "sh", "pwsh", "powershell"):
+        _ngoai = _shell not in ("bash", "sh")
+        _FX.append(("shell-vo-can-" + ("ngoai-mien-" if _ngoai else "hop-le-") + _shell,
+                    {"gate": {"steps": [_ruff, {"shell": _shell, "run": "x=1"}, _reg]}}, None, int(_ngoai)))
+    for _shell in ("pwsh", "powershell"):
+        for _i, (_body, _want) in enumerate((("if true; then echo hi; fi", 1), ("", 1), (_PIN, 0),
+                                            ("pwsh -NoProfile -File scripts/don-nhanh_test.ps1", 0))):
+            _FX.append((f"shell-carrier-{_shell}-{_i}", {"gate": {"steps": [
+                _ruff, {"shell": _shell, "run": _body}, _reg]}}, None, _want))
+        for _level in ("job", "workflow"):
+            _defaults = {"run": {"shell": _shell}}
+            _job = {"steps": [_ruff, {"run": "if true; then echo hi; fi"}, _reg],
+                    **({"defaults": _defaults} if _level == "job" else {})}
+            _errors = loi_ruff_ci(_wf({"gate": _job}, defaults=_defaults if _level == "workflow" else None))[0]
+            _them(f"ruff-ci-shell-carrier-{_shell}-{_level}", bool(_errors))
+        for _i, _body in enumerate(("return +", "exit -", "IF true", "echo 'text'", 'echo "$X"',
+                                   "echo hi | wc", "echo hi\necho", "echo hi\n\n")):
+            _FX.append((f"shell-carrier-boundary-{_shell}-{_i}", {"gate": {"steps": [
+                _ruff, {"shell": _shell, "run": _body}, _reg]}}, None, int(_i != 6)))
+    # R17: cô lập từng lớp ký tự; đối chứng dương và biên LF đi qua consumer thật.
+    for _shell in ("pwsh", "powershell"):
+        _am = ["echo $X", 'echo "ok"', "echo hi; wc", "echo {x}", "2fa.sh x", "echo a&echo b"]
+        _am += ["echo a" + c + "b" for c in "!\"#$%&'()*,;<>?@[\\]^`{|}~\x7fé\u00a0"]
+        _am += [c + "file.sh arg" for c in "0123456789./-"]
+        _am += ["file" + c + ".sh arg" for c in ":=+"]
+        _am += ["echo hi" + c + "echo ok" for c in "\v\f\x1c\x1d\x1e\r\x85\u2028\u2029"]
+        _am += ["\necho hi", "echo hi\n\necho ok", "echo hi\n\n", "\n"]
+        _duong = ["echo hi\n", "echo hi\necho ok\n", "echo\taA09_./:=+-", "_x.sh arg",
+                  "X.sh arg", "a0_./-a.sh arg", " \techo hi \t"]
+        for _want, _bodies in ((1, _am), (0, _duong)):
+            for _i, _body in enumerate(_bodies):
+                _FX.append((f"shell-carrier-alphabet-{_shell}-{_want}-{_i}", {"gate": {"steps": [
+                    _ruff, {"shell": _shell, "run": _body}, _reg]}}, None, _want))
+    # Cùng vị từ -1 phải được tiêu thụ cả khi job phụ không có một lệnh cài nào.
+    for _i, _tail in enumerate(("", " --help", " --chay --mutant windows_311_launcher_workflow")):
+        _FX.append((f"registry-ngoai-hop-dong-job-phu-{_i}", {
+            "gate": {"steps": [_ruff, _reg]}, "phu": {"steps": [
+                {"run": "python .claude/dev/ci_dang_ky_test.py" + _tail}]}}, None, 1))
+    for _t, _jobs, _defaults, _want in [
+        ("workflow-shell-ngoai-mien", {"gate": {"steps": [_ruff, _reg]}}, {"run": {"shell": "python"}}, 1),
+        ("workflow-shell-hop-le", {"gate": {"steps": [_ruff, _reg]}}, {"run": {"shell": "bash"}}, 0),
+        ("job-de-workflow", {"gate": {"defaults": {"run": {"shell": "bash"}}, "steps": [_ruff, _reg]}},
+         {"run": {"shell": "python"}}, 0),
+        ("step-de-hai-cap", {"gate": {"defaults": {"run": {"shell": "cmd"}},
+         "steps": [dict(_ruff, shell="bash"), dict(_reg, shell="bash")]}}, {"run": {"shell": "python"}}, 0),
+        ("workflow-shell-null", {"gate": {"steps": [_ruff, _reg]}}, {"run": {"shell": None}}, 1),
+        ("job-shell-null", {"gate": {"defaults": {"run": {"shell": None}}, "steps": [_ruff, _reg]}}, None, 1),
+        ("step-shell-null", {"gate": {"steps": [dict(_ruff, shell=None), _reg]}}, None, 1),
+        ("workflow-run-sai-kieu", {"gate": {"steps": [_ruff, _reg]}}, {"run": []}, 1),
+    ]:
+        _errors = loi_ruff_ci(_wf(_jobs, defaults=_defaults))[0]
+        _them("ruff-ci-" + _t, bool(_errors) == bool(_want))
+    for _t, _step in [("lexer", {"run": "echo hi 2>&1"}), ("shell", {"shell": "python", "run": "x=1"})]:
+        _errors = loi_ruff_ci(_wf({"gate": {"steps": [_ruff, _step, _reg]}}))[0]
+        _them("ruff-ci-nguyen-nhan-" + _t,
+              any("ngoài miền cú pháp" in m and "gate/bước 2" in m for m in _errors))
+    # R13 lexical-boundary: consumer tự từ chối; không mượn lỗi runtime của shell.
+    for _t, _run in [
+        ("cr-installer", "pip\rinstall ruff==0.15.15\nruff --version"),
+        ("cr-probe", _PIN + "\nruff\r--version"),
+        ("cr-pin", _PIN + "\r\nruff --version"),
+        ("cr-prefix", "python\r-m\rpip install ruff==0.15.15\nruff --version"),
+    ]:
+        _FX.append((_t, {"gate": {"steps": [{"run": _run}, _reg]}}, None, 1))
+    for _t, _run, _want in [
+        ("ngoac-sau-dollar-escape", r"echo \$(pip install ruff)", 1),
+        ("comment-nuot-ngoac", "V=$(echo hi # )\nX=1", 1),
+        ("comment-dong-sau", "V=$(echo hi # )\n)", 0),
+        ("hash-trong-tu", "V=$(echo hi#)", 0),
+        ("hash-sau-blank-escape", r"V=$(echo hi\ #)", 0),
+        ("hash-sau-nhay", "V=$(echo ''#)", 0),
+        ("hash-sau-escape-noi-dong", "V=$(echo hi\\\n#)", 0),
+        ("hash-sau-blank-noi-dong", "V=$(echo hi \\\n# )", 1),
+        ("ngoac-tran-opaque", "echo hi (there)", 1),
+        ("ngoac-escape-opaque", r"echo hi \(there\)", 0),
+        ("hash-sau-blank-escape-khong-che-cai", r"echo hi\ #; pip install ruff", 1),
+    ]:
+        _FX.append((_t, {"gate": {"steps": [_ruff, {"run": _run}, _reg]}}, None, _want))
+    for _i, _c in enumerate(("\r", "\f", "\v", "\0") + tuple(chr(n) for n in range(32) if n not in (0, 9, 10, 11, 12, 13))):
+        for _t, _run, _want in [("tran", "echo hi" + _c, 1), ("escape", "echo hi\\" + _c, 1),
+                               ("nhay", "echo 'hi" + _c + "'", 0),
+                               ("heredoc", "cat <<'END'\n" + _c + "\nEND\n", 0)]:
+            _FX.append((f"c0-{_i}-{_t}", {"gate": {"steps": [_ruff, {"run": _run}, _reg]}}, None, _want))
+    # R15: cú pháp ngoài miền không được KHONG hóa qua lệnh opaque.
+    for _op in (";", "&", "&&", "|", "||", ";;", ";;;", "&&||", "|&", "|||"):
+        for _pos, _run, _want in [("dau", _op + " echo hi", 1),
+                                 ("giua", "echo hi " + _op + " echo ok", int(_op not in (";", "&", "&&", "|", "||"))),
+                                 ("cuoi", "echo hi " + _op, int(_op not in (";", "&")))]:
+            _FX.append((f"syntax-op-{_op}-{_pos}", {"gate": {"steps": [_ruff, {"run": _run}, _reg]}}, None, _want))
+    for _t, _run, _want in [
+        ("and-or", "echo hi && || echo hi", 1), ("pipe-comment", "echo hi | # x", 1),
+        ("or-noi-dong", "echo hi ||\n# x\necho ok", 0), ("pipe-noi-dong", "echo hi |\nwc -l", 0),
+        ("redirect-eof", "echo hi >", 1), ("redirect-comment", "echo hi > # x", 1),
+        ("redirect-list", "echo hi > ; echo ok", 1), ("redirect-append-eof", "echo hi >>", 1),
+        ("redirect-input-eof", "cat <", 1), ("redirect-input", "cat < file", 0),
+        ("redirect-noi-dong-eof", "echo hi > \\\n", 1),
+        ("redirect-noi-dong-comment", "echo hi > \\\n# x", 1),
+        ("redirect-noi-dong-dich", "echo hi > \\\nfile", 0),
+        ("heredoc-delimiter-ghep", "cat <<'END'foo\nx\nEND\n", 1),
+        ("redirect-target", "echo hi > file", 0), ("redirect-append", "echo hi >> file", 0),
+        ("redirect-fd", "echo hi 2>/dev/null", 0), ("redirect-quoted", "echo '>'", 0),
+        ("redirect-unsupported", "echo hi <> file", 1),
+        ("command-substitution-depth-limit", "X=" + "$(echo " * 17 + "hi" + ")" * 17, 1),
+        ("escape-eof", "echo hi\\", 1),
+        ("second-heredoc", "cat <<'A' <<'B'\nx\nB\n", 1),
+        ("heredoc-dynamic-delimiter", "cat <<$X\nx\n$X\n", 1),
+        ("heredoc-backtick", "cat <<END\n`pip install ruff`\nEND\n", 1),
+        ("heredoc-continuation-substitution", "cat <<END\nx $\\\n(pip install ruff)\nEND\n", 1),
+        ("heredoc-even-backslash-no-join", "cat <<END\nx $\\\\\n(echo data)\nEND\n", 0),
+        ("heredoc-quoted-no-join", "cat <<'END'\nx $\\\n(pip install ruff)\nEND\n", 0),
+        ("heredoc-continuation-hides-terminator", "cat <<END\nx\\\nEND\n", 1),
+        ("heredoc-dash-tab-continuation-substitution", "cat <<-END\n\tx $\\\n\t(pip install ruff)\n\tEND\n", 1),
+        ("heredoc-dash-space-no-strip", "cat <<-END\nx $\\\n (echo data)\n\tEND\n", 0),
+        ("heredoc-pending-at-eof", "cat <<'END'", 1),
+        ("heredoc-unclosed", "cat <<'E'\nx\n", 1),
+        ("parameter-eof", "V=${x", 1), ("parameter-double", 'echo "${x"', 1),
+        ("parameter-single", "echo '${x'", 0), ("parameter-ok", "V=${X}", 0),
+        ("parameter-fallback", 'echo "${X:-KHONG CO}"', 0), ("parameter-unsupported", "echo ${X:?bad}", 1),
+        ("if-eof", "if echo hi", 1), ("then-orphan", "then echo hi", 1),
+        ("fi-orphan", "echo hi; fi", 1), ("if-body-eof", "if echo hi; then echo yes", 1),
+        ("if-empty-cond", "if; then echo hi; fi", 1), ("if-empty-body", "if true; then; fi", 1),
+        ("if-empty-cond-nl", "if\nthen echo hi; fi", 1), ("if-empty-body-nl", "if true; then\nfi", 1),
+        ("if-wrong-phase", "if true; else echo hi; fi", 1),
+        ("fi-tail", "if true; then echo hi; fi echo bad", 1),
+        ("if-cond-compound", "if if true; then echo hi; fi; then echo bye; fi", 1),
+        ("if-inline-header", "if true; then if false; then echo hi; fi; fi", 1),
+        ("if-nested-body", "if true; then\nif false; then echo hi; fi\nfi", 0),
+        ("if-empty-else", "if true; then echo hi; else; fi", 1),
+        ("if-then-operand", "if true && then echo hi; fi", 1),
+        ("if-ok", "if true; then echo hi; else echo bye; fi", 0),
+        ("elif-ok", "if true; then echo a; elif false; then echo b; fi", 0),
+        ("group-eof", "{ echo hi", 1), ("group-orphan", "echo hi; }", 1),
+        ("group-empty", "{\n}", 1), ("group-ok", "echo hi || { cat file; exit 1; }", 0),
+        ("group-pipe-incomplete", "{ echo hi |\n}", 1),
+    ]:
+        _FX.append(("syntax-" + _t, {"gate": {"steps": [_ruff, {"run": _run}, _reg]}}, None, _want))
+    # R16: ca cô lập từng chốt; không để một lỗi khuôn khác che đột biến của chốt ấy.
+    for _t, _run in [
+        ("header-group-semicolon", "{ ; echo hi; }"), ("header-group-and", "{ && echo hi; }"),
+        ("inline-header-isolated", "if true; then if false; fi"),
+        ("condition-compound-isolated", "if true\nif false; then echo a; fi\nthen echo b; fi"),
+    ]:
+        _FX.append(("guard-" + _t, {"gate": {"steps": [_ruff, {"run": _run}, _reg]}}, None, 1))
+    for _i, _key in enumerate(("for", "while", "until", "do", "done", "case", "esac", "function",
+                               "select", "coproc", "time", "!", '"fi"', r"\f\i")):
+        _FX.append((f"guard-unsupported-keyword-{_i}", {"gate": {"steps": [
+            _ruff, {"run": _key + " echo hi"}, _reg]}}, None, 1))
+    for _i, _target in enumerate(("\nwc", "; echo ok", "| wc", "& echo ok", "< file", "> file", "# comment")):
+        _FX.append((f"guard-redirect-boundary-{_i}", {"gate": {"steps": [
+            _ruff, {"run": "echo hi > " + _target}, _reg]}}, None, 1))
+    for _i, _run in enumerate(("echo $[1+2", "X=$[", 'echo "$[1+2"', "echo $[1+2]",
+                               "echo $'\\'", "echo $'ok'", 'echo $"ok"', "echo $((1+2))")):
+        _FX.append((f"guard-expansion-outside-{_i}", {"gate": {"steps": [
+            _ruff, {"run": _run}, _reg]}}, None, 1))
+    for _i, _suffix in enumerate(("[1+2", "{X", "'\\'", '"ok"')):
+        _FX.append((f"guard-expansion-continuation-{_i}", {"gate": {"steps": [
+            _ruff, {"run": "echo $\\\n" + _suffix}, _reg]}}, None, 1))
+    for _i, _run in enumerate(("echo '$[1+2'", r"echo \$[1+2", 'echo "$"', "echo $",
+                               'echo "$\'ok\'"', "echo '$\"ok\"'", r"echo \$\'ok\'")):
+        _FX.append((f"guard-expansion-data-{_i}", {"gate": {"steps": [
+            _ruff, {"run": _run}, _reg]}}, None, 0))
+    for _i, _parameter in enumerate(("$X", "$NAME_2", "$0", "$9", "$@", "$*", "$#", "$?", "$-", "$!", "$$")):
+        for _j, _run in enumerate(("echo " + _parameter, 'echo "' + _parameter + '"', "V=" + _parameter)):
+            _FX.append((f"parameter-bare-{_i}-{_j}", {"gate": {"steps": [
+                _ruff, {"run": _run}, _reg]}}, None, 0))
+    for _ten, _jobs, _env, _mong in _FX:
+        _loi = len(loi_ruff_ci(_wf(_jobs, _env))[0])
+        _them("ruff-ci-" + _ten, (_loi == 0) if _mong == 0 else (_loi >= 1))
+    # Bang ten KHONG con ton tai: 47 ten cu tung nam o day, cach cho sinh ket qua hang tram dong —
+    # chinh nguon lech F02 to cao. Nay ten VA ket qua o CUNG mot `_them`, khong con `zip` de cat im.
+    for ten, ok in KQ:
+        print(f"ĐỘT BIẾN {ten}: {'ĐỎ đúng' if ok else 'LỌT'}")
+    print(f"PHẢN CHỨNG: {sum(ok for _, ok in KQ)}/{len(KQ)} đỏ đúng")
+    return all(ok for _, ok in KQ)
 
 
 def main():

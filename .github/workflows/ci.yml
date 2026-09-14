@@ -129,8 +129,6 @@ jobs:
         run: python -m py_compile scripts/tl.py scripts/tl_boot.py scripts/gen_instructions.py scripts/tl_core/__init__.py scripts/tl_core/deterministic.py scripts/tl_core/jsonio.py scripts/tl_core/workflow.py scripts/tl_core/release.py scripts/tl_core/live.py scripts/tl_core/zip_ingest.py scripts/tl_core/ocr.py scripts/tl_core/chunking.py scripts/tl_core/command_registry.py
       - name: "codex credential selftest (packet #300)"
         run: python .claude/dev/codex_cred_test.py
-      - name: packet-loop selftest
-        run: python .claude/dev/packet_loop_test.py
       # CONG LUOC DO v2 CHO BIEN NHAN REVIEW (PROTOCOL §8, dong 453-458). Dac ta co tu
       # `2f84531` (18-08-2026) va KHONG AI THI CONG: do tren `3bc2895`, 62 bien nhan / 10
       # khai v2 / chi 4 du truong, va `t26` chi kiem verdict path + bam. Chinh hai bien nhan
@@ -139,10 +137,6 @@ jobs:
       # va do chinh la bai hoc `ops/kiem_trang_quyet_dinh.sh` con dang no.
       - name: bien-nhan v2 selftest
         run: python ops/bien_nhan_v2_test.py
-      # Sổ ở ci_dang_ky_test.py được đối chiếu với phép tìm tệp trên cây. Các tệp dưới
-      # ops/reviews/** là hiện vật review bất biến, không phải mã sống để CI chạy.
-      - name: test registry (phạm vi + các bộ chưa được nối)
-        run: python .claude/dev/ci_dang_ky_test.py --chay
       # HOP DONG IDIOM BA TEN (packet #345, ke nhiem #337). Cung doctrine voi hai buoc
       # duoi: guard khong noi vao duong TU DONG thi guard chi la tai lieu (bai hoc r225).
       # Bo phan chung cua #337 song o thu muc tam, ngoai kho, khong cong => se chet theo
@@ -594,3 +588,129 @@ jobs:
           PY
       - name: tl_boot smoke
         run: python scripts/tl_boot.py --version
+
+  gate-registry:
+    # packet #463 (GATE-TACH-JOB-CAT-CHI-PHI): tách khỏi `gate` để cắt wall-clock của job dài nhất
+    # (đo 06-09-2026, run 34045664423: Windows 43,20 phút, hai bước nặng = 63,5 % tổng bước). Cùng
+    # ma trận/`timeout-minutes`/tiền tố 9 bước với `gate`, KHÔNG thêm mặt điều kiện nào; phút TÍNH
+    # TIỀN tăng vì trả tiền thiết lập ba lần. Consumer `loi_ruff_ci` đọc MỌI job, không chỉ `gate`.
+    # Bước `test registry` (41,0 % tổng bước Windows) sống ở đây.
+    strategy:
+      fail-fast: false
+      matrix:
+        # Vì sao Windows có điều kiện: xem chú thích cùng chỗ ở job `gate` (bản gốc).
+        os: ${{ fromJSON(
+              (github.event_name == 'workflow_dispatch'
+               || github.ref == 'refs/heads/master'
+               || contains(github.event.pull_request.labels.*.name, 'windows'))
+              && '["ubuntu-latest","windows-latest"]'
+              || '["ubuntu-latest"]') }}
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 60
+    env:
+      PYTHONIOENCODING: utf-8
+      PYTHONUTF8: "1"
+      PYTHONDONTWRITEBYTECODE: "1"
+    steps:
+      - name: Force LF checkout (hash parity với manifest)
+        run: |
+          git config --global core.autocrlf false
+          git config --global core.eol lf
+          # r226 — vì sao ghim `core.abbrev 7`: xem chú thích cùng bước ở job `gate`.
+          git config --global core.abbrev 7
+      - uses: actions/checkout@v4
+        with:
+          # r226 — vì sao `fetch-depth: 0`: xem chú thích cùng bước ở job `gate`.
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      # Vì sao cài trước phép test đầu tiên (G5/T6): xem job `gate`.
+      - name: cài PyYAML + jsonschema (cổng đăng lease + validator verdict cần)
+        run: python -m pip install --quiet PyYAML==6.0.3 jsonschema==4.26.0
+      - name: cài actionlint cho G5
+        shell: bash
+        env:
+          AL_VER: 1.7.7
+        run: bash ops/cai_actionlint.sh
+      - name: cài shellcheck cho G5 (cài xong đo lại)
+        shell: bash
+        run: bash ops/cai_cong_cu.sh shellcheck
+      - name: cài rg cho G5 (cài xong đo lại)
+        shell: bash
+        run: bash ops/cai_cong_cu.sh rg
+      - name: G5 kiem ban ke cong cu + T1..T8 (packet #290)
+        shell: bash
+        run: |
+          python ops/cong_cu.py kiem-tra --json
+          python ops/cong_cu_test.py
+      - name: cài Ruff 0.15.15 và in probe dương
+        run: |
+          python -m pip install --quiet ruff==0.15.15
+          ruff --version
+      # Sổ ở ci_dang_ky_test.py được đối chiếu với phép tìm tệp trên cây. Các tệp dưới
+      # ops/reviews/** là hiện vật review bất biến, không phải mã sống để CI chạy.
+      - name: test registry (phạm vi + các bộ chưa được nối)
+        run: python .claude/dev/ci_dang_ky_test.py --chay
+
+  gate-packet-loop:
+    # packet #463 (GATE-TACH-JOB-CAT-CHI-PHI): tách khỏi `gate` để cắt wall-clock của job dài nhất
+    # (đo 06-09-2026, run 34045664423: Windows 43,20 phút, hai bước nặng = 63,5 % tổng bước). Cùng
+    # ma trận/`timeout-minutes`/tiền tố 9 bước với `gate`, KHÔNG thêm mặt điều kiện nào; phút TÍNH
+    # TIỀN tăng vì trả tiền thiết lập ba lần. Consumer `loi_ruff_ci` đọc MỌI job, không chỉ `gate`.
+    # Bước `packet-loop selftest` (22,5 % tổng bước Windows) sống ở đây.
+    strategy:
+      fail-fast: false
+      matrix:
+        # Vì sao Windows có điều kiện: xem chú thích cùng chỗ ở job `gate` (bản gốc).
+        os: ${{ fromJSON(
+              (github.event_name == 'workflow_dispatch'
+               || github.ref == 'refs/heads/master'
+               || contains(github.event.pull_request.labels.*.name, 'windows'))
+              && '["ubuntu-latest","windows-latest"]'
+              || '["ubuntu-latest"]') }}
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 60
+    env:
+      PYTHONIOENCODING: utf-8
+      PYTHONUTF8: "1"
+      PYTHONDONTWRITEBYTECODE: "1"
+    steps:
+      - name: Force LF checkout (hash parity với manifest)
+        run: |
+          git config --global core.autocrlf false
+          git config --global core.eol lf
+          # r226 — vì sao ghim `core.abbrev 7`: xem chú thích cùng bước ở job `gate`.
+          git config --global core.abbrev 7
+      - uses: actions/checkout@v4
+        with:
+          # r226 — vì sao `fetch-depth: 0`: xem chú thích cùng bước ở job `gate`.
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      # Vì sao cài trước phép test đầu tiên (G5/T6): xem job `gate`.
+      - name: cài PyYAML + jsonschema (cổng đăng lease + validator verdict cần)
+        run: python -m pip install --quiet PyYAML==6.0.3 jsonschema==4.26.0
+      - name: cài actionlint cho G5
+        shell: bash
+        env:
+          AL_VER: 1.7.7
+        run: bash ops/cai_actionlint.sh
+      - name: cài shellcheck cho G5 (cài xong đo lại)
+        shell: bash
+        run: bash ops/cai_cong_cu.sh shellcheck
+      - name: cài rg cho G5 (cài xong đo lại)
+        shell: bash
+        run: bash ops/cai_cong_cu.sh rg
+      - name: G5 kiem ban ke cong cu + T1..T8 (packet #290)
+        shell: bash
+        run: |
+          python ops/cong_cu.py kiem-tra --json
+          python ops/cong_cu_test.py
+      - name: cài Ruff 0.15.15 và in probe dương
+        run: |
+          python -m pip install --quiet ruff==0.15.15
+          ruff --version
+      - name: packet-loop selftest
+        run: python .claude/dev/packet_loop_test.py

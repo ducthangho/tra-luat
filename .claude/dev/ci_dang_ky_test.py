@@ -1192,6 +1192,7 @@ def phan_chung():
         ("command-substitution-depth-limit", "X=" + "$(echo " * 17 + "hi" + ")" * 17, 1),
         ("escape-eof", "echo hi\\", 1),
         ("second-heredoc", "cat <<'A' <<'B'\nx\nB\n", 1),
+        ("heredoc-dynamic-delimiter", "cat <<$X\nx\n$X\n", 1),
         ("heredoc-unclosed", "cat <<'E'\nx\n", 1),
         ("parameter-eof", "V=${x", 1), ("parameter-double", 'echo "${x"', 1),
         ("parameter-single", "echo '${x'", 0), ("parameter-ok", "V=${X}", 0),

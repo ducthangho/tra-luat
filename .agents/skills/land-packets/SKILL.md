@@ -11,6 +11,11 @@ Nguồn Bash/Python: [.claude adapter](../../../.claude/skills/land-packets/SKIL
 Nền này là `openai_codex / codex_cli / machine`; không coi frontmatter của Claude là
 cơ chế chặn tự kích hoạt trên Codex. Điều kiện gọi skill nằm ở §13.
 
+Admission trước heavy gate dùng nhánh Linux/WSL hoặc handoff của
+[work-packet](../work-packet/SKILL.md), theo §10.2.1; native Git xanh không chứng minh
+admission native chạy được. Diff/numstat đọc từ scratch của đúng run bằng cú pháp
+[cross-review](../cross-review/SKILL.md), giữ `$ReviewRoot` và `$Scratch` tường minh.
+
 ## Đọc trạng thái và full fence
 
 `$Scratch`, `$MergeOid` và các ID lấy từ assignment; scratch ngoài checkout.

@@ -559,8 +559,10 @@ về executor/rework, còn commit mới luôn làm verdict/CI/authorization củ
 
 Mức review được ghi tường minh:
 
-1. `cross_approved`: cặp Executor–Reviewer khác provider, runtime/transport và evidence được
-   protocol công nhận; Claude–Codex là một cặp, tên tool hoặc model khác nhau chưa đủ.
+1. `cross_approved`: Claude review Codex hoặc Codex review Claude là cặp khác provider
+   được protocol công nhận khi runtime/transport, tính độc lập và evidence đủ. Tổng quát,
+   assurance xét cặp Executor–Reviewer thực tế theo hợp đồng provider; tên tool hoặc model
+   khác nhau chưa đủ, cùng provider vẫn không thành cross-provider.
 2. `human_audited`: người audit có danh tính bền trên GitHub, độc lập với Executor/tác giả, tự đọc spec/diff, ghi
    evidence audit và verdict bền, đồng thời neo cả hai vào exact `reviewed_sha`.
 3. `same_provider_approved`: cùng provider trong điều kiện fallback được canon cho phép,
@@ -705,6 +707,8 @@ Sau run, đối chiếu trạng thái terminal/rc con, launcher rc, lỗi permis
 evidence và verdict; cùng exact SHA/tree ở đầu/cuối. Output phải ổn định sau khi writer
 kết thúc, ghi path/size/hash và xác minh lại trước bàn giao. Timeout, output dở dang hoặc
 launcher rc=0 nhưng con lỗi không là review hoàn chỉnh. GitHub actor chỉ là submitter (§7).
+Producer và consumer phải cùng trỏ hiện vật của đúng run trong scratch riêng; ghi rõ nguồn
+code/Git và đường dẫn hiện vật, không chọn JSON, diff hay numstat theo cwd ngầm định.
 
 ### 8.2 Phạm vi phép đo và checkout read-only
 
@@ -843,6 +847,12 @@ Probe toàn bộ dependency mà heavy command thực sự gọi trong **chính r
 Python đúng executable và modules, jq, actionlint, shell cùng helper/transitive tools. Ghi
 version/path, import/probe command và rc; thiếu dependency thì chưa bắt đầu heavy gate.
 Windows host xanh không chứng minh WSL/Linux/container xanh; từng runtime cần probe riêng.
+Riêng admission hiện dùng bộ giải Git với PATH `/usr/bin:/bin`: native Windows chưa được
+hỗ trợ. Nhận diện giới hạn trước khi gọi checker; không sửa PATH/consumer để lách chốt.
+Chỉ dùng Linux/WSL được Packet cấp, với mã canonical tại S, object H và dependency đã đo
+trong runtime đó. Không có lane phù hợp hoặc chưa có receipt dương thì ghi admission
+`not_measured`, bàn giao canonical S/H, hash code, command/lỗi và bước còn thiếu; dừng
+trước heavy gate. Receipt trên H đã commit không chứng nhận phần sửa chưa đóng băng.
 
 #### 10.2.2 Identity và provenance CI
 

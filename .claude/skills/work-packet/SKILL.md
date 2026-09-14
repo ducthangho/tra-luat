@@ -86,18 +86,37 @@ Chọn lệnh theo protocol §10.1/§10.2 và Packet: `/gate-targeted` hoặc `/
 `$CANON` là checkout mã canonical đã ghim, `$S` là OID của nó, `$H` là candidate có trong
 object store của `$CANON`; `$SCRATCH` ở ngoài checkout. Ví dụ Bash, giữ rc cả khi bật `set -e`:
 
+Admission này cần Linux/POSIX; Git Bash với Python native Windows không đáp ứng bộ giải
+Git `/usr/bin:/bin` của checker. Nhánh không hỗ trợ và handoff theo §10.2.1. Khi dùng WSL
+được cấp, probe trong distribution đã chọn; `$CANON` là clone Linux đọc được object store
+(không giả định linked worktree Windows dùng được trong WSL). Bootstrap chuẩn bị clone tại
+`$S`, có object `$H`; không fetch/checkout cây nguồn từ đoạn dưới.
+
+Lưu khối sau thành `$ADMISSION_SCRIPT` ngoài checkout, chạy bằng
+`bash "$ADMISSION_SCRIPT" "$CANON" "$S" "$H" "$SCRATCH"`. Bốn đối số là đường dẫn/OID
+đã xác minh, không dùng đường dẫn Windows trong shell Linux:
+
 ```bash
+set -eu
+CANON="$1"; S="$2"; H="$3"; SCRATCH="$4"
+PY="$(command -v python3)"
+"$PY" -B -c 'import os,shutil,sys; print(sys.executable,sys.version); g=shutil.which("git",path="/usr/bin:/bin"); print("admission git",g); sys.exit(0 if os.name=="posix" and g else "unsupported admission runtime")'
+/usr/bin/git --version
+"$PY" -B -c 'import yaml; print("PyYAML",yaml.__version__)'
+bash --version
+test "$(git -C "$CANON" rev-parse HEAD)" = "$S"
+"$PY" -B -c 'import hashlib,pathlib,subprocess,sys; r,s=sys.argv[1:]; b=subprocess.run(["git","-C",r,"show",s+":ops/lease_publish.py"],check=True,capture_output=True).stdout; p=pathlib.Path(r)/"ops/lease_publish.py"; assert p.read_bytes()==b, "canonical checker bytes differ"; print("CANONICAL_CHECKER",s,hashlib.sha256(b).hexdigest())' "$CANON" "$S"
 ANCESTRY_RC=0
 git -C "$CANON" merge-base --is-ancestor "$S" "$H" || ANCESTRY_RC=$?
 printf 'ancestor rc=%s\n' "$ANCESTRY_RC"
 case "$ANCESTRY_RC" in 0) ;; 1) exit 1 ;; *) exit "$ANCESTRY_RC" ;; esac
 ADMISSION_RC=0
-"$PY" "$CANON/ops/lease_publish.py" kiem-thu-hoi-github "$H" \
+"$PY" -B "$CANON/ops/lease_publish.py" kiem-thu-hoi-github "$H" \
   --root "$CANON" --canonical-base "$S" --nhanh-mac-dinh master \
   --receipt "$SCRATCH/local-admission.json" || ADMISSION_RC=$?
 printf 'local admission rc=%s\n' "$ADMISSION_RC"
 test "$ADMISSION_RC" -eq 0 || exit "$ADMISSION_RC"
-git show -s --format=%B "$H" > "$SCRATCH/candidate-message.txt"
+git -C "$CANON" show -s --format=%B "$H" > "$SCRATCH/candidate-message.txt"
 ```
 
 Đọc output/receipt theo §10.2.1; ví dụ không tạo receipt workflow. Đo dependency trong runtime

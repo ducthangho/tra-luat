@@ -20,6 +20,10 @@ PY="$(command -v python3 || command -v python || command -v py)"   # CLAUDE.md: 
 
 Dưới đây chỉ có cú pháp của nền.
 
+`$SOURCE` là đường dẫn tuyệt đối checkout/code đã cấp; `$SCRATCH` là thư mục tuyệt đối
+riêng của run ngoài checkout (§8.1–§8.2). Các ví dụ xuất/đọc hiện vật dùng cùng hai biến
+này, kể cả khi cwd ở nơi khác. `$MODEL`, `$EFFORT`, `$PROMPT`, `$SANDBOX` lấy từ assignment.
+
 ## Kiểm tra công cụ
 
 Đo tool trong phiên đang chạy; lần đo container ngày 17-08-2026 không quyết định capability
@@ -71,7 +75,7 @@ Ví dụ gọi bộ chọn:
 
 ```bash
 PY="$(command -v python3 || command -v python || command -v py)"
-"$PY" .claude/dev/chon_reviewer.py --review-class sensitive \
+"$PY" -B "$SOURCE/.claude/dev/chon_reviewer.py" --review-class sensitive \
   --effective-review-class sensitive \
   --duong-dan a.py,b.md --so-dong 120 --luot 2 \
   --bac-truoc claude-fable-5,max --json
@@ -96,7 +100,7 @@ Cú pháp đọc `modelUsage` từ JSON bằng vị từ dùng chung với CI:
 
 ```bash
 PY="$(command -v python3 || command -v python || command -v py)"
-"$PY" -c 'import json,runpy,sys; m=runpy.run_path(".claude/dev/chon_reviewer.py"); print(m["kiem_ket_qua"](sys.argv[1],json.load(open(sys.argv[2],encoding="utf-8"))))' <id> reviewer.json
+"$PY" -B -c 'import json,pathlib,runpy,sys; m=runpy.run_path(str(pathlib.Path(sys.argv[1])/".claude/dev/chon_reviewer.py")); print(m["kiem_ket_qua"](sys.argv[2],json.loads(pathlib.Path(sys.argv[3]).read_text(encoding="utf-8"))))' "$SOURCE" "$MODEL" "$SCRATCH/reviewer.json"
 ```
 
 Mục này **KHÔNG thay** `docs/PROTOCOL_DA_PHIEN.md` §8; nó chỉ nói chọn bậc nào và cú pháp đo model thực sự đã chạy.
@@ -157,11 +161,11 @@ Các phép kiểm dưới đây thu thêm dấu hiệu; chưa chứng minh phả
 PY="$(command -v python3 || command -v python || command -v py)"   # CLAUDE.md: nhan CA BA ten
 "$PY" -m json.tool <run>/run.json      # doc pid va khoa_danh_tinh; loi doc != tien trinh chet
 
-# Chay tu goc clone: goi cung ham launcher, khong thay bang `ps -o lstart`.
+# Nguon launcher tu SOURCE da cap, khong thay bang `ps -o lstart`.
 # Tren Linux, ham doc TOAN ban ghi /proc/<pid>/stat, cat sau dau ')' cuoi cung;
 # ten tien trinh co khoang trang, dau ')' hoac xuong dong van duoc xu ly cung cach.
 # rc=1 / KHONG_DO_DUOC: ham khong doc duoc khoa; khong suy ra tien trinh da chet.
-"$PY" -c 'import runpy,sys; k=runpy.run_path(".claude/dev/launcher.py")["_khoa_danh_tinh"](int(sys.argv[1])); print(k or "KHONG_DO_DUOC"); sys.exit(0 if k else 1)' <pid>
+"$PY" -B -c 'import pathlib,runpy,sys; k=runpy.run_path(str(pathlib.Path(sys.argv[1])/".claude/dev/launcher.py"))["_khoa_danh_tinh"](int(sys.argv[2])); print(k or "KHONG_DO_DUOC"); sys.exit(0 if k else 1)' "$SOURCE" "$PID"
 ps -p <pid> -o pid=,stat=   # `Z` = zombie da thoat; PID ton tai KHONG chung minh dung tien trinh
 
 # Hai mau moc gio + kich thuoc, cach nhau mot khoang da dinh — mot mau khong do duoc chuyen dong.
@@ -207,12 +211,12 @@ Packet/protocol §8/§13. Cú pháp này không chứng minh model/effort của 
 ## Lấy diff của ĐÚNG head SHA
 
 Trong ví dụ, `<base_sha>` và `<reviewed_sha>` là hai OID đã chốt cho lượt.
-`gh pr view` in metadata tại lúc gọi; hai lệnh Git dùng trực tiếp cặp OID ấy.
+`gh pr view` in metadata tại lúc gọi; `$BASE_SHA` và `$REVIEWED_SHA` chứa hai OID ấy.
 
 ```bash
 gh pr view 56 --json headRefOid,headRefName,state,statusCheckRollup
-git diff <base_sha> <reviewed_sha> > diff.patch
-git diff --numstat <base_sha> <reviewed_sha> > numstat.txt
+git -C "$SOURCE" diff "$BASE_SHA" "$REVIEWED_SHA" > "$SCRATCH/diff.patch"
+git -C "$SOURCE" diff --numstat "$BASE_SHA" "$REVIEWED_SHA" > "$SCRATCH/numstat.txt"
 ```
 
 Hợp đồng `reviewed_sha` và xử lý khi head đổi: xem protocol §8/§13.
@@ -310,11 +314,11 @@ Mirror chỉ chứa ref đã được nạp từ nguồn. Ví dụ phép so sau 
 nhánh `ls-remote` cần kết nối đến remote đó:
 
 ```bash
-cd <kho>
-git ls-remote --heads origin | sed 's#.*refs/heads/##' | sort            > /tmp/mc
-git for-each-ref --format='%(refname:lstrip=3)' refs/remotes/origin \
-    | grep -v '^HEAD$' | sort                                           > /tmp/cb
-comm -23 /tmp/mc /tmp/cb        # tên có ở nguồn remote, thiếu ở bộ đệm cục bộ
+set -o pipefail
+git -C "$SOURCE" ls-remote --heads origin | sed 's#.*refs/heads/##' | sort > "$SCRATCH/remote-head-names.txt"
+git -C "$SOURCE" for-each-ref --format='%(refname:lstrip=3)' refs/remotes/origin \
+    | grep -v '^HEAD$' | sort > "$SCRATCH/cached-head-names.txt"
+comm -23 "$SCRATCH/remote-head-names.txt" "$SCRATCH/cached-head-names.txt"
 ```
 
 **So bằng TẬP TÊN, không bằng `wc -l`** — hai tập cùng lực lượng vẫn có thể lệch (một nhánh cục bộ đã
@@ -477,16 +481,16 @@ sau khi cây đã đổi); tệp trong `cay/` dùng được cả năm lượt. 
 hợp đồng patch-as-hint xem protocol §8/§13. Ví dụ sinh diff đối xứng cho layout `cay/`:
 
 ```bash
-diff -u --label a/cay/<tep> --label b/cay/<tep> <ban goc> cay/<tep> > GOI_Y_VA.diff
-patch --dry-run -p1 -d <cay tam chua BAN GOC> < GOI_Y_VA.diff   # kiểm layout cay/
+diff -u --label "a/cay/$FILE" --label "b/cay/$FILE" "$SOURCE/$FILE" "$SCRATCH/cay/$FILE" > "$SCRATCH/GOI_Y_VA.diff"
+patch --dry-run -p1 -d "$SCRATCH/cay-tam" < "$SCRATCH/GOI_Y_VA.diff"   # kiểm layout cay/
 ```
 
 ## Cú pháp ghi verdict lên PR
 
 ```bash
-gh pr review 56 --request-changes --body-file VERDICT.md
-gh pr review 56 --approve         --body-file VERDICT.md
-gh pr comment 56 --body-file VERDICT.md          # verdict blocked, hoặc phần bằng chứng dài
+gh pr review 56 --request-changes --body-file "$SCRATCH/VERDICT.md"
+gh pr review 56 --approve         --body-file "$SCRATCH/VERDICT.md"
+gh pr comment 56 --body-file "$SCRATCH/VERDICT.md"  # verdict blocked, hoặc phần bằng chứng dài
 ```
 
 Các lệnh `gh` trên ghi review hoặc comment. Với MCP GitHub,
@@ -548,21 +552,21 @@ gh api graphql -F query=@"$SCRATCH/query.graphql" -f id="$RUN_NODE_ID" > "$SCRAT
 
 `WorkflowRun.file` nullable; cấu trúc tham chiếu ở [GitHub Actions GraphQL](https://docs.github.com/en/graphql/reference/actions).
 Phân loại missing/errors và kiểm OID của URL theo §10.2.2. Khi đã xác minh repo/path/OID,
-dùng `git cat-file blob "$DEFINITION_OID:$WORKFLOW_PATH"` lấy bytes và SHA-256 bằng Python;
+dùng `git -C "$SOURCE" cat-file blob "$DEFINITION_OID:$WORKFLOW_PATH"` lấy bytes và SHA-256 bằng Python;
 không lấy blob từ checkout hiện tại. Fetch object thuộc bước bootstrap/cấp dữ liệu §8.1.
 Jobs của đúng attempt: `gh api --paginate --slurp "repos/ducthangho/tra-luat/actions/runs/$RUN_ID/attempts/$ATTEMPT/jobs?per_page=100"`.
 `--slurp` giữ các page thành mảng ngoài; không parse output nhiều page như một JSON object.
 
 ## Ruff và cache
 
-Hai lệnh Python sau minh họa hai phép đo riêng của protocol §8.2, chạy tại checkout đã cấp;
+Hai lệnh Python sau minh họa hai phép đo riêng của protocol §8.2, trỏ checkout đã cấp;
 `$SCRATCH` nằm ngoài cây. Lệnh contract gọi consumer hiện hữu, không chạy toàn suite:
 
 ```bash
 export PYTHONDONTWRITEBYTECODE=1
 export PYTHONPYCACHEPREFIX="$SCRATCH/pycache"
-"$PY" -B -c 'import runpy,sys; m=runpy.run_path(".claude/dev/ci_dang_ky_test.py"); errors,count=m["loi_ruff_ci"](); print("RUFF_CONTRACT",count,errors); sys.exit(bool(errors) or count == 0)'
-"$PY" -m ruff check --no-cache --select F scripts/tl.py
+"$PY" -B -c 'import pathlib,runpy,sys; m=runpy.run_path(str(pathlib.Path(sys.argv[1])/".claude/dev/ci_dang_ky_test.py")); errors,count=m["loi_ruff_ci"](); print("RUFF_CONTRACT",count,errors); sys.exit(bool(errors) or count == 0)' "$SOURCE"
+"$PY" -m ruff check --no-cache --select F "$SOURCE/scripts/tl.py"
 ```
 
 Rc của từng command được ghi riêng; điều kiện delta/bare lint và tiêu chí mutant riêng

@@ -34,6 +34,18 @@ git -C $ReviewRoot ls-files --others --ignored --exclude-standard
 Ghi rc của từng command ngay sau chạy; snapshot bytes/hash và giới hạn quan sát ở §8.2.
 Trust path/capability theo §8.1; không có lệnh tự chấp nhận trust trong adapter này.
 
+Ví dụ diff/numstat giữ raw bytes trong scratch của run, với `$BaseSha` từ assignment:
+
+```powershell
+$Py = (Get-Command python -ErrorAction Stop).Source
+& $Py -B -c 'import pathlib,subprocess,sys; r,b,h,o=sys.argv[1:]; p=subprocess.run(["git","-C",r,"diff",b,h],check=True,capture_output=True); (pathlib.Path(o)/"diff.patch").write_bytes(p.stdout); p=subprocess.run(["git","-C",r,"diff","--numstat",b,h],check=True,capture_output=True); (pathlib.Path(o)/"numstat.txt").write_bytes(p.stdout)' $ReviewRoot $BaseSha $ReviewedSha $Scratch
+$DiffArtifactsRc = $LASTEXITCODE
+```
+
+`$ReviewRoot`/`$Scratch` là đường dẫn tuyệt đối. Khi đọc `modelUsage` lane Claude qua nguồn,
+truyền `$ReviewRoot` vào đối số SOURCE và JSON đúng `$Scratch/reviewer.json`; producer và
+consumer cùng run theo §8.1. Không đọc JSON trùng tên ở cwd.
+
 ## Runtime và Ruff
 
 ```powershell
@@ -41,13 +53,13 @@ $Py = (Get-Command python -ErrorAction Stop).Source
 codex --version
 $env:PYTHONDONTWRITEBYTECODE = '1'
 $env:PYTHONPYCACHEPREFIX = Join-Path $Scratch 'pycache'
-& $Py -B -c 'import runpy,sys; m=runpy.run_path(".claude/dev/ci_dang_ky_test.py"); errors,count=m["loi_ruff_ci"](); print("RUFF_CONTRACT",count,errors); sys.exit(bool(errors) or count == 0)'
+& $Py -B -c 'import pathlib,runpy,sys; m=runpy.run_path(str(pathlib.Path(sys.argv[1])/".claude/dev/ci_dang_ky_test.py")); errors,count=m["loi_ruff_ci"](); print("RUFF_CONTRACT",count,errors); sys.exit(bool(errors) or count == 0)' $ReviewRoot
 $RuffContractRc = $LASTEXITCODE
-& $Py -m ruff check --no-cache --select F scripts/tl.py
+& $Py -m ruff check --no-cache --select F (Join-Path $ReviewRoot 'scripts/tl.py')
 $RuffLintRc = $LASTEXITCODE
 ```
 
-Hai lệnh Ruff chạy từ checkout được giao. Pin/probe và bare lint là hai scope của §8.2;
+Hai lệnh Ruff trỏ checkout được giao, không phụ thuộc cwd. Pin/probe và bare lint là hai scope của §8.2;
 tiêu chí A7/mutant riêng xem §10.2.3. Cú pháp `launcher.py run --prompt-file` và mẫu Codex
 ở nguồn, mục “Reviewer là codex”; schema đầy đủ ở `docs/GOI_AGENT_DA_NEN.md`.
 Đọc header thật bằng `Get-Content -LiteralPath $StderrLog -TotalCount 80`; đối chiếu
@@ -64,7 +76,7 @@ gh api graphql -F "query=@$QueryFile" -f "id=$RunNodeId"
 $ProvenanceRc = $LASTEXITCODE
 gh api --paginate --slurp "repos/ducthangho/tra-luat/actions/runs/$RunId/attempts/$Attempt/jobs?per_page=100"
 $JobsRc = $LASTEXITCODE
-git cat-file blob "${DefinitionOid}:$WorkflowPath"
+git -C $ReviewRoot cat-file blob "${DefinitionOid}:$WorkflowPath"
 ```
 
 Khối `cat-file` minh họa đọc; để lưu bytes/hash dùng Python `subprocess` như work-packet.

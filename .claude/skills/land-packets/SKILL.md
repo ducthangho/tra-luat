@@ -24,6 +24,11 @@ PY="$(command -v python3 || command -v python || command -v py)"   # CLAUDE.md: 
 
 Dưới đây chỉ có cú pháp của nền.
 
+Admission trước heavy gate: dùng mục “Gate” của [work-packet](../work-packet/SKILL.md)
+với runtime Linux đã probe; nhánh native Windows/handoff ở protocol §10.2.1 và
+[adapter PowerShell](../../../.agents/skills/work-packet/SKILL.md). Diff/numstat và consumer
+model dùng SOURCE/SCRATCH của đúng run theo [cross-review](../cross-review/SKILL.md).
+
 ## `land prepare` — mặc định, DRY
 
 ```bash

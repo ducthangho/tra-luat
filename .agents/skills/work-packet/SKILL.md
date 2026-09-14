@@ -33,7 +33,8 @@ executable đã probe (ví dụ `C:/Python313/python.exe` trên host có đườ
 ## Local admission và capability
 
 `$Canon` chứa mã ở `$S` và object `$H`; điều kiện dùng/giới hạn receipt ở protocol §10.2.1.
-Ví dụ này không fetch hay chạy workflow:
+**Native Windows chưa hỗ trợ admission**: checker giải Git qua `/usr/bin:/bin`.
+Phép ancestry native dưới đây chỉ đo đồ thị; không gọi checker bằng `$Py` native sau nó:
 
 ```powershell
 git -C $Canon merge-base --is-ancestor $S $H
@@ -43,15 +44,35 @@ switch ($AncestorRc) {
     1 { throw 'ancestor=false' }
     default { throw "ancestry not_measured rc=$AncestorRc" }
 }
-& $Py -B (Join-Path $Canon 'ops/lease_publish.py') kiem-thu-hoi-github $H --root $Canon --canonical-base $S --nhanh-mac-dinh master --receipt (Join-Path $Scratch 'local-admission.json')
-$AdmissionRc = $LASTEXITCODE
-if ($AdmissionRc -ne 0) { throw "admission rc=$AdmissionRc" }
 ```
 
-Đọc marker/receipt, không chỉ rc (§10.2.1). Probe modules bằng `& $Py -B -c 'import yaml'`
+Nếu Packet cho phép WSL, bootstrapper chọn `$WslDistro`, clone tại `$CanonWsl` chứa mã
+canonical `$S`/object `$H`, scratch `$ScratchWsl` và script `$AdmissionScriptWsl`, tất cả
+đường dẫn tuyệt đối theo Linux. Script là nguyên khối Bash mục “Gate” của
+[work-packet nguồn](../../../.claude/skills/work-packet/SKILL.md), lưu ngoài checkout.
+Không dùng `.git` linked worktree chứa đường dẫn Windows làm object store WSL.
+
+```powershell
+wsl --list --quiet
+wsl -d $WslDistro --exec bash $AdmissionScriptWsl $CanonWsl $S $H $ScratchWsl
+$AdmissionRc = $LASTEXITCODE
+if ($AdmissionRc -ne 0) { throw "WSL admission incomplete rc=$AdmissionRc; inspect output" }
+wsl -d $WslDistro --exec cat "$ScratchWsl/local-admission.json"
+$ReceiptReadRc = $LASTEXITCODE
+if ($ReceiptReadRc -ne 0) { throw "receipt not_measured rc=$ReceiptReadRc" }
+```
+
+Script probe Python/modules, Git tối thiểu và Bash trong chính WSL, đối chiếu bytes checker
+với blob tại `$S`, rồi mới đo ancestry/admission. Đọc marker và receipt S/H/T theo §10.2.1;
+WSL rc=0 hoặc đọc được JSON chưa tự đủ bằng chứng. Không có lane được cấp/probe không đạt:
+ghi admission `not_measured` và handoff S/H, code hash, lỗi thực, dependency còn thiếu theo
+§10.2.1; không thử sửa runtime hoặc dùng kết quả ancestry thay admission.
+
+Probe modules native cho command native bằng `& $Py -B -c 'import yaml'`
 và các module của command thực; `Get-Command git, jq, actionlint`, `git --version`,
 `jq --version`, `actionlint -version`, `$PSVersionTable.PSVersion` cho tool/shell.
-Probe WSL (nếu Packet dùng WSL) phải chạy bên trong distribution đó theo §10.2.1.
+Probe heavy gate nào vẫn phải đủ tools của chính command đó theo §10.2.1; probe admission
+ở trên không xác nhận jq/actionlint hay toàn bộ heavy gate.
 
 ## Local checks và evidence
 

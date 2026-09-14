@@ -4610,110 +4610,66 @@ def case_dot_bien_test_neo_chet_van_DO(c: Ctx):
         raise AssertionError("không tìm thấy mỏ neo: neo test-harness chết đã bị nuốt")
 
 
-def _trich_code_ps(lenh: str) -> list[tuple[int, str, str]]:
-    lines = lenh.splitlines()
-    in_block = False
-    in_here = None
-    res = []
-    for i, line in enumerate(lines):
-        if not in_block and not in_here and line.lstrip().startswith("#"):
-            res.append((i, line, ""))
-            continue
-        if in_here:
-            if line.startswith(in_here + "@"):
-                in_here = None
-            res.append((i, line, ""))
-            continue
-        j, n = 0, len(line)
-        code = []
-        in_quote = None
-        while j < n:
-            if in_block:
-                if line[j:j+2] == "#>":
-                    in_block = False
-                    j += 2
-                    code.append(" ")
-                else:
-                    j += 1
-            else:
-                if in_quote:
-                    code.append(line[j])
-                    if in_quote == '"' and line[j] == '`' and j + 1 < n:
-                        code.append(line[j+1])
-                        j += 2
-                    elif line[j] == in_quote:
-                        if j + 1 < n and line[j+1] == in_quote:
-                            code.append(line[j+1])
-                            j += 2
-                        else:
-                            in_quote = None
-                            j += 1
-                    else:
-                        j += 1
-                else:
-                    if line[j:j+2] == "<#":
-                        in_block = True
-                        j += 2
-                        code.append(" ")
-                    elif line[j:j+2] in ("@'", '@"'):
-                        in_here = line[j+1]
-                        j += 2
-                    elif line[j] in ("'", '"'):
-                        in_quote = line[j]
-                        code.append(line[j])
-                        j += 1
-                    elif line[j] == "#":
-                        break
-                    else:
-                        code.append(line[j])
-                        j += 1
-        res.append((i, line, "".join(code)))
-    return res
+def _ps_statements(script: str):
+    statements, code, start = [], [], 0
+    i, n, q, here, block = 0, len(script), None, None, False
+    while i < n:
+        c = script[i]
+        if block:
+            if script[i:i+2] == "#>": block, i = False, i + 2; code.append(" ")
+            else: i += 1
+        elif here:
+            if script[i:].startswith(("\n" + here + "@", "\r\n" + here + "@")):
+                here, i = None, i + (4 if c == '\r' else 3)
+            else: i += 1
+        elif q:
+            code.append(c)
+            if c == '`' and q == '"' and i + 1 < n: code.append(script[i+1]); i += 2
+            elif c == q and i + 1 < n and script[i+1] == q: code.append(script[i+1]); i += 2
+            elif c == q: q, i = None, i + 1
+            else: i += 1
+        elif script[i:i+2] == "<#": block, i = True, i + 2; code.append(" ")
+        elif script[i:i+2] in ("@'", '@"'): here, i = script[i+1], i + 2
+        elif c in "'\"": q, i = c, i + 1; code.append(c)
+        elif c == "#":
+            while i < n and script[i] != "\n": i += 1
+        elif c == "`" and i + 1 < n:
+            if script[i+1] in "\r\n": code.append(" "); i += 3 if script[i+1:i+3]=="\r\n" else 2
+            else: code.extend([c, script[i+1]]); i += 2
+        elif c in ";\n":
+            if s := "".join(code).strip(): statements.append((start, i, s))
+            start, code, i = i + 1, [], i + 1
+        else: code.append(c); i += 1
+    if s := "".join(code).strip(): statements.append((start, n, s))
+    return statements
 
 
 def _trich_xuat_powershell_74a(noi_dung: str) -> str:
     import re
     lines = noi_dung.splitlines(keepends=True)
-    active_fence_char = None
-    active_fence_len = 0
-    in_section = False
-    count_heading = 0
-    powershell_blocks = []
-    current_ps_block = None
+    f_char, f_len, in_sec, n_head, blocks, cur = None, 0, False, 0, [], None
     for line in lines:
-        m_fence = re.match(r"^ {0,3}(`{3,}|~{3,})(.*)$", line)
-        if not active_fence_char:
+        m = re.match(r"^ {0,3}(`{3,}|~{3,})(.*)$", line)
+        if not f_char:
             if line.rstrip("\r\n") == "#### 7.4a Thứ tự state trước khi gọi reviewer":
-                count_heading += 1
-                in_section = True
+                n_head, in_sec = n_head + 1, True
                 continue
-            if in_section and re.match(r"^#{1,6}[ \t]+", line):
-                in_section = False
-            if m_fence:
-                active_fence_char = m_fence.group(1)[0]
-                active_fence_len = len(m_fence.group(1))
-                if in_section and m_fence.group(2).strip().lower() == "powershell":
-                    current_ps_block = []
+            if in_sec and re.match(r"^#{1,6}[ \t]+", line): in_sec = False
+            if m:
+                f_char, f_len = m.group(1)[0], len(m.group(1))
+                if in_sec and m.group(2).strip().lower() == "powershell": cur = []
         else:
-            is_closing = m_fence and m_fence.group(1)[0] == active_fence_char and len(m_fence.group(1)) >= active_fence_len and not m_fence.group(2).strip()
-            if is_closing:
-                if current_ps_block is not None:
-                    powershell_blocks.append("".join(current_ps_block))
-                    current_ps_block = None
-                active_fence_char = None
-                active_fence_len = 0
-            else:
-                if current_ps_block is not None:
-                    current_ps_block.append(line)
-    if count_heading != 1:
-        raise AssertionError("không tìm thấy duy nhất một mục #### 7.4a đúng chuẩn")
-    if active_fence_char:
-        raise AssertionError("unclosed fence")
-    if not powershell_blocks:
-        raise AssertionError("không tìm thấy khối powershell sau 7.4a")
-    if len(powershell_blocks) > 1:
-        raise AssertionError("duplicate powershell fence")
-    return powershell_blocks[0].strip()
+            if m and m.group(1)[0] == f_char and len(m.group(1)) >= f_len and not m.group(2).rstrip("\r\n").strip(" \t"):
+                if cur is not None: blocks.append("".join(cur)); cur = None
+                f_char, f_len = None, 0
+            elif cur is not None: cur.append(line)
+    errs = []
+    if n_head != 1: errs.append("không tìm thấy duy nhất một mục #### 7.4a đúng chuẩn")
+    if f_char: errs.append("unclosed fence")
+    if not blocks: errs.append("không tìm thấy khối powershell sau 7.4a")
+    elif len(blocks) > 1: errs.append("duplicate powershell fence")
+    if errs: raise AssertionError(" | ".join(errs))
+    return blocks[0].strip()
 
 
 def _loc_lenh_truoc_record_post(doan_code: str) -> str:
@@ -4724,36 +4680,39 @@ def _loc_lenh_truoc_record_post(doan_code: str) -> str:
     re_begin = re.compile(r"^\s*(?:\$\w+\s*=\s*)?" + py + ws + script + ws + r"begin-attempt(?=\s|$)")
     re_doctor = re.compile(r"^\s*" + py + ws + script + ws + r"chup-anh-doctor(?=\s|$)")
     re_record = re.compile(r"^\s*" + py + ws + script + ws + r"record-post(?=\s|$)")
+    re_exit = re.compile(r"^(?:exit|return|throw)(?:\s+.*)?$", re.IGNORECASE)
 
-    begin_indices = []
-    doctor_indices = []
-    record_indices = []
+    begin_idx = doctor_idx = record_idx = cut_end = -1
 
-    for i, _, code in _trich_code_ps(doan_code):
-        if re_begin.search(code):
-            begin_indices.append(i)
-        if re_doctor.search(code):
-            doctor_indices.append(i)
-        if re_record.search(code):
-            record_indices.append(i)
+    for idx, (s_start, s_end, code_str) in enumerate(_ps_statements(doan_code)):
+        if re_exit.match(code_str):
+            if doctor_idx == -1 or record_idx == -1:
+                raise AssertionError(f"unconditional active {code_str.split()[0]} statement before doctor/record")
+        if re_begin.search(code_str):
+            if begin_idx != -1:
+                raise AssertionError("duplicate begin-attempt")
+            begin_idx = idx
+        if re_doctor.search(code_str):
+            if doctor_idx != -1:
+                raise AssertionError("duplicate chup-anh-doctor")
+            doctor_idx = idx
+        if re_record.search(code_str):
+            if record_idx != -1:
+                raise AssertionError("duplicate record-post")
+            record_idx = idx
+            cut_end = s_start
 
-    if len(begin_indices) != 1 or len(doctor_indices) != 1 or len(record_indices) != 1:
-        raise AssertionError(f"thiếu hoặc thừa begin={len(begin_indices)} doctor={len(doctor_indices)} record={len(record_indices)}")
-
-    begin_index = begin_indices[0]
-    doctor_index = doctor_indices[0]
-    record_index = record_indices[0]
-
-    if not (begin_index < record_index and doctor_index < record_index):
+    if begin_idx == -1 or doctor_idx == -1 or record_idx == -1:
+        raise AssertionError("thiếu hoặc thừa")
+    if not (begin_idx < doctor_idx < record_idx):
         raise AssertionError("thứ tự lệnh sai")
 
-    lines = doan_code.splitlines()
-    return "\n".join(lines[:record_index]).strip()
+    return doan_code[:cut_end].strip()
 
 
 def _kiem_residual_placeholder(lenh: str):
     import re
-    for _, _, code in _trich_code_ps(lenh):
+    for _, _, code in _ps_statements(lenh):
         if re.search(r"<[^>]+>", code):
             raise AssertionError(f"residual placeholder trong lệnh: {code}")
 
@@ -4798,6 +4757,20 @@ def case_luong_canonical_chay_that(c: Ctx):
 
     _doi(0, p.returncode, p.stderr, f"luồng canonical chạy thất bại (stdout={_txt(p.stdout)!r})")
 
+    import json as _json
+    try:
+        doc_data = _json.loads((sd / "doctor-signed.json").read_text(encoding="utf-8"))
+    except Exception as ex:
+        raise AssertionError(f"không đọc được doctor-signed.json: {ex}")
+    st = _json.loads((sd / "wp55.json").read_text(encoding="utf-8"))
+    neo = st["attempt_anchor"]
+    if doc_data.get("nonce") != neo["nonce"]:
+        raise AssertionError("nonce không khớp")
+    if doc_data.get("attempt") != neo["attempt"]:
+        raise AssertionError("attempt không khớp")
+    if doc_data.get("chu_ky") != ky_ban_ghi_luot(doc_data, st["hmac_key"]):
+        raise AssertionError("chữ ký không khớp")
+
 
 def case_trich_xuat_74a_chong_nhieu(c: Ctx):
     def loi(func, match):
@@ -4829,7 +4802,8 @@ def case_trich_xuat_74a_chong_nhieu(c: Ctx):
     loi(lambda: _trich_xuat_powershell_74a("````\n" + t_chuan + "````\n"), "không tìm thấy duy nhất một mục")
     loi(lambda: _trich_xuat_powershell_74a("````\n" + t_chuan), "không tìm thấy duy nhất một mục")
     loi(lambda: _trich_xuat_powershell_74a("   ````\n" + t_chuan + "```powershell\n```\n   ````\n"), "không tìm thấy duy nhất một mục")
-    loi(lambda: _trich_xuat_powershell_74a("   ````\n" + t_chuan + "```powershell\n```\n"), "unclosed fence")
+    loi(lambda: _trich_xuat_powershell_74a("   ````\n" + t_chuan + "```powershell\n```\n"), "không tìm thấy duy nhất một mục #### 7.4a đúng chuẩn | unclosed fence")
+    loi(lambda: _trich_xuat_powershell_74a("````\n````\xa0\n" + t_chuan + "```powershell\n```\n````\n"), "không tìm thấy duy nhất một mục")
 
     _kiem_residual_placeholder("cmd # <harmless>")
     loi(lambda: _kiem_residual_placeholder("cmd '<harmless>'"), "residual placeholder")
@@ -4865,6 +4839,14 @@ def case_trich_xuat_74a_chong_nhieu(c: Ctx):
     valid_code_2 = f'{cmd_b} # <harmless>\n$Begin -notmatch "# begin-attempt"\n{cmd_d} # <harmless>\n{cmd_r}'
     expected_out_2 = f'{cmd_b} # <harmless>\n$Begin -notmatch "# begin-attempt"\n{cmd_d} # <harmless>'
     assert _loc_lenh_truoc_record_post(valid_code_2) == expected_out_2
+
+    loi(lambda: _loc_lenh_truoc_record_post(f"{cmd_d}\n{cmd_b}\n{cmd_r}"), "thứ tự lệnh sai")
+    loi(lambda: _loc_lenh_truoc_record_post(f"{cmd_b}\n{cmd_d} ; {cmd_d}\n{cmd_r}"), "duplicate")
+    loi(lambda: _loc_lenh_truoc_record_post(f"{cmd_b}\n`# {cmd_d}\n{cmd_r}"), "thiếu hoặc thừa")
+    loi(lambda: _loc_lenh_truoc_record_post(f"{cmd_b}\nexit 0\n{cmd_d}\n{cmd_r}"), "unconditional active exit")
+
+    valid_cond = f"{cmd_b}\nif ($LASTEXITCODE) {{ exit 0 }}\n{cmd_d}\n{cmd_r}"
+    assert _loc_lenh_truoc_record_post(valid_cond) == f"{cmd_b}\nif ($LASTEXITCODE) {{ exit 0 }}\n{cmd_d}"
 
 
 def case_windows_only_skip_khoa(c: Ctx):

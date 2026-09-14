@@ -12,7 +12,7 @@ verdict: changes_requested
 reviewed_sha: ff146f16f26f1eb59d7a3839d5cc48811b13daac
 reviewed_tree: f405a78c241100fe14a0d824e1483a78bdb69357
 verdict_path: ops/reviews/gate-tach-job-cat-chi-phi-review-16-claude-verdict.md
-verdict_sha256: 5fb00e3e00fed838d24b4da338b57992b105382a5e6f0fd8047881818b40dbf9
+verdict_sha256: 403cb31e3ab435491e4fa2c6b1063e43cb42237673839a3c29198479288f44e7
 evidence_url: https://github.com/ducthangho/tra-luat/blob/68603d7877e1fc4cede91a979fd48964c2fafb85/ops/reviews/gate-tach-job-cat-chi-phi-review-16-claude-verdict.md
 model_reviewer_identity:
   provider: anthropic_claude
@@ -57,3 +57,12 @@ master_at_delivery: c16bd3293a9d2dc7a8a789b99d77057cb02ce374
 integration_with_new_master: not_measured
 clean_observation_note: Git HEAD/tree/status checked at completion; this does not
   prove no writes during the run.
+raw_archive_path: ops/reviews/gate-tach-job-cat-chi-phi-review-16-claude-raw.zip
+raw_archive_sha256: d0fd68901bbd65217bc7015107ff4a1e8422a47d615b2d3c0ff2902d3c5efa31
+raw_verdict_sha256: 5fb00e3e00fed838d24b4da338b57992b105382a5e6f0fd8047881818b40dbf9
+raw_model_output_sha256: f46ff09a053f229502ef9d474c9e2693e166cf4213e879bd6ecad17cac1b94a8
+eol_normalization: Git .gitattributes normalizes CRLF to LF; canonical blob hashes
+  above; exact reviewer bytes preserved in raw ZIP and independently hash-verified.
+delivery_timing_note: Review completed within deadline. Executor heartbeat is overdue
+  after interruption; this is authorized evidence delivery only, no product write
+  or lease revival.

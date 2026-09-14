@@ -797,3 +797,5 @@ thì phải có bộ đọc cưỡng chế — chưa làm, và đừng khai là 
 - #463 r24/g5, review18 Claude: [changes_requested](gate-tach-job-cat-chi-phi-review-18-claude-verdict.md), exact SHA `79b75cdb6cf2737c3bd911ee7313969c2cfce62e`; [receipt](gate-tach-job-cat-chi-phi-review-18-claude-verdict.receipt.yaml). CI not_run.
 
 - #463 r24/g5, review19 Claude: [changes_requested](gate-tach-job-cat-chi-phi-review-19-claude-verdict.md), exact SHA `27f0d3054ee02e0584d00d750888737eac40585a`; [receipt](gate-tach-job-cat-chi-phi-review-19-claude-verdict.receipt.yaml). CI not_run.
+
+- #463 r24/g5, review20 Claude: [changes_requested](gate-tach-job-cat-chi-phi-review-20-claude-verdict.md), exact SHA `b881c6d1acd481925ef96c05fb9109e95df340fe`; [receipt](gate-tach-job-cat-chi-phi-review-20-claude-verdict.receipt.yaml). CI not_run.

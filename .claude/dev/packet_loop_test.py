@@ -3993,6 +3993,11 @@ MUTANTS = {
         "",
         ["ac19_bang_vai_tro_THAT_van_bi_bat"],
     ),
+    "luong_canonical_chay_that_dao_os_name": (
+        '    assert os.name == "nt", "phải chạy trên Windows"\n',
+        '    assert os.name != "nt", "phải chạy trên Windows"  # đột biến\n',
+        ["luong_canonical_chay_that"],
+    ),
 }
 
 # Phân loại là KHAI BÁO: tên chỉ có mặt ở đây mới được sửa test harness.
@@ -4006,6 +4011,7 @@ MUTANTS_NHAM_TEST = frozenset({
     "moc_kiem_noi_vo_dieu_kien",
     "moc_kiem_to_vo_dieu_kien",
     "phan_loai_lai_dot_bien_test_bang_suy_luan",
+    "luong_canonical_chay_that_dao_os_name",
 })
 
 
@@ -4604,7 +4610,64 @@ def case_dot_bien_test_neo_chet_van_DO(c: Ctx):
         raise AssertionError("không tìm thấy mỏ neo: neo test-harness chết đã bị nuốt")
 
 
+def case_luong_canonical_chay_that(c: Ctx):
+    if platform.system() != "Windows":
+        raise BoQua("chỉ đo lệnh pwsh trên Windows")
+    assert os.name == "nt", "phải chạy trên Windows"
+
+    ke_hoach_md = ROOT / "ops" / "KE_HOACH_THI_CONG_CLAUDE_CODEX.md"
+    if not ke_hoach_md.is_file():
+        if (ROOT / ".git").exists():
+            raise AssertionError("thiếu kế hoạch thi công trong repo thật")
+        return
+
+    noi_dung = ke_hoach_md.read_text(encoding="utf-8")
+    phan_74a = noi_dung.find("#### 7.4a")
+    if phan_74a == -1:
+        raise AssertionError("không tìm thấy mục #### 7.4a")
+
+    bat_dau_fence = noi_dung.find("```powershell", phan_74a)
+    if bat_dau_fence == -1:
+        raise AssertionError("không tìm thấy khối powershell sau 7.4a")
+
+    ket_thuc_fence = noi_dung.find("```", bat_dau_fence + 13)
+    if ket_thuc_fence == -1:
+        raise AssertionError("không tìm thấy điểm đóng khối powershell")
+
+    doan_code = noi_dung[bat_dau_fence + 13:ket_thuc_fence].strip()
+
+    truoc_record_post = doan_code.split("record-post")[0]
+    lenh_da_loc = truoc_record_post.rsplit("python", 1)[0].strip()
+
+    if not lenh_da_loc or "begin-attempt" not in lenh_da_loc or "nonce" not in lenh_da_loc:
+        raise AssertionError("tiền tố chạy lệnh rỗng hoặc thiếu logic nonce/begin-attempt")
+
+    sd = c.sd()
+    rc, _, e = c.init(sd)
+    _doi(0, rc, e, "init")
+
+    lenh_da_loc = lenh_da_loc.replace("<issue>", "55")
+    lenh_da_loc = lenh_da_loc.replace("<executor-provider>", EXECUTOR)
+    sd_ps = "'" + str(sd).replace("'", "''") + "'"
+    doctor_ps = "'" + str(sd / "doctor-signed.json").replace("'", "''") + "'"
+    lenh_da_loc = lenh_da_loc.replace("packet_loop.py ", f"packet_loop.py --state-dir {sd_ps} ")
+    lenh_da_loc = lenh_da_loc.replace("<doctor-signed.json>", doctor_ps)
+
+    env = os.environ.copy()
+    env["PYTHONDONTWRITEBYTECODE"] = "1"
+    env[BIEN_BC] = anh_doctor()
+
+    try:
+        p = subprocess.run(["pwsh", "-NoProfile", "-Command", lenh_da_loc], cwd=str(ROOT), capture_output=True, env=env)
+    except OSError:
+        raise AssertionError("thiếu pwsh trên Windows")
+
+    _doi(0, p.returncode, p.stderr, f"luồng canonical chạy thất bại (stdout={_txt(p.stdout)!r})")
+
+
+
 CASES += [
+    ("luong_canonical_chay_that", case_luong_canonical_chay_that),
     ("phan_loai_dot_bien_san_pham_neo_trung_test_van_DO",
      case_phan_loai_dot_bien_san_pham_neo_trung_test_van_DO),
     ("dot_bien_test_khai_bao_chay_va_giet_dung_ca",

@@ -1,0 +1,59 @@
+schema_version: 2
+kind: review_delivery_receipt
+receipt_id: gate463-r23-g4-review16-claude
+packet_id: GATE-TACH-JOB-CAT-CHI-PHI
+packet_issue: 463
+revision: 23
+generation: 4
+lease_id: gate-tach-job-cat-chi-phi-exec-5-codex-20260914-r23
+provider: claude
+role: reviewer
+verdict: changes_requested
+reviewed_sha: ff146f16f26f1eb59d7a3839d5cc48811b13daac
+reviewed_tree: f405a78c241100fe14a0d824e1483a78bdb69357
+verdict_path: ops/reviews/gate-tach-job-cat-chi-phi-review-16-claude-verdict.md
+verdict_sha256: 5fb00e3e00fed838d24b4da338b57992b105382a5e6f0fd8047881818b40dbf9
+evidence_url: https://github.com/ducthangho/tra-luat/blob/68603d7877e1fc4cede91a979fd48964c2fafb85/ops/reviews/gate-tach-job-cat-chi-phi-review-16-claude-verdict.md
+model_reviewer_identity:
+  provider: anthropic_claude
+  surface: claude_code
+  transport: machine/local
+  model: claude-fable-5
+  effort: max
+  session_run_id: 485b58af-cf37-41ca-b173-2f2b315e1099
+  phien_doc_lap: true
+  neo_boi_launcher: true
+github_submitter_identity:
+  actor: ducthangho
+  recorded_by: codex
+  reviewer_is_submitter_identity: false
+anchor:
+  loai: canonical_ancestry
+  cuong_do: Immutable Git blob; ancestry measured against evidence-branch HEAD, NOT
+    master; no required-check authority.
+  evidence_branch: codex/gate-463-review-evidence-20260913
+  evidence_commit: 68603d7877e1fc4cede91a979fd48964c2fafb85
+model_output_path: ops/reviews/gate-tach-job-cat-chi-phi-review-16-claude-model-output.json
+model_output_sha256: f46ff09a053f229502ef9d474c9e2693e166cf4213e879bd6ecad17cac1b94a8
+launcher_run_sha256: 403c40447f3e8e7b37ade70a20b308f8e142420abb6228e3a511b42c47f55ca0
+model_validation: 'modelUsage: ĐẠT; tập model chính=[''claude-fable-5'']; mô hình
+  phụ bỏ qua=[''claude-haiku-4-5-20251001'']'
+hunt_table_validation: passed
+source_and_review_trees_clean: true
+review_axes:
+- spec
+- standards_security
+review_classes:
+- installer_domain
+- lexer_composition_order
+- consumer_spec_workflow
+ci: not_run
+A1: not_run
+A5: not_run
+merge_authorized: false
+transport_note: 'Canonical launcher and reviewer transport: machine/local.'
+master_at_review_start: c16bd3293a9d2dc7a8a789b99d77057cb02ce374
+master_at_delivery: c16bd3293a9d2dc7a8a789b99d77057cb02ce374
+integration_with_new_master: not_measured
+clean_observation_note: Git HEAD/tree/status checked at completion; this does not
+  prove no writes during the run.

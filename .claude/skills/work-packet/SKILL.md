@@ -8,14 +8,18 @@ argument-hint: "[so-issue-packet]"
 
 **Đọc trước, không làm theo trí nhớ:** `docs/PROTOCOL_DA_PHIEN.md` §13 (trình tự bắt buộc, điều kiện
 từ chối việc, định nghĩa hoàn tất) · §3.2 (schema packet) · §5 (write set) · §7 (handoff) ·
-§12 (điều kiện dừng). Quy trình sửa code và quy ước deploy của kho: `CLAUDE.md`.
+§12 (điều kiện dừng) · §3.2.1 (spec nguồn và ba mốc Git) · §10.2.1–§10.2.3
+(preflight, provenance và evidence thiếu). Quy trình sửa code của kho: `CLAUDE.md`.
 
 Tệp này **không tóm tắt** những mục trên. Tóm tắt là bản sao, và bản sao thì trôi lệch — ba lượt
 review liên tiếp đã bắt được đúng lỗi đó ở chính adapter này. Nay có chốt cơ học:
 
 ```bash
 PY="$(command -v python3 || command -v python || command -v py)"   # CLAUDE.md: nhận CẢ BA tên
-"$PY"  .claude/dev/packet_loop.py doctrine-scan --root .
+"$PY" .claude/dev/packet_loop.py doctrine-scan --root . \
+  --path .agents/skills/work-packet/SKILL.md \
+  --path .agents/skills/cross-review/SKILL.md \
+  --path .agents/skills/land-packets/SKILL.md
 ```
 
 Dưới đây chỉ có cú pháp của nền.
@@ -26,7 +30,13 @@ Dưới đây chỉ có cú pháp của nền.
 gh api graphql -f query='{repository(owner:"ducthangho",name:"tra-luat"){issue(number:55){body}}}'
 ```
 
-Không dùng `gh issue view -q .body`. Tái lập `spec_hash` theo công thức ghi ở cuối chính Issue đó.
+`gh issue view 55 --json body --jq .body` cũng lấy body; `-q` riêng không chọn JSON output.
+Công thức `spec_hash` và nguồn blob: protocol §3.2.1. Ví dụ lưu bytes blob ra scratch bằng
+Python (các biến Bash dưới đây do phiên điền từ assignment, không chạy nguyên placeholder):
+
+```bash
+"$PY" -c 'import hashlib,pathlib,subprocess,sys; b=subprocess.run(["git","show",sys.argv[1]+":"+sys.argv[2]],check=True,capture_output=True).stdout; pathlib.Path(sys.argv[3]).write_bytes(b); print(hashlib.sha256(b).hexdigest())' "$SPEC_OID" "$SPEC_PATH" "$SCRATCH/spec.md"
+```
 
 ## Dựng worktree
 
@@ -34,7 +44,7 @@ Không dùng `gh issue view -q .body`. Tái lập `spec_hash` theo công thức 
 git rev-parse --is-shallow-repository        # đòi false trước khi tin bất kỳ phép so lịch sử nào
 git config core.autocrlf false && git config core.eol lf && git config core.abbrev 7
 export PYTHONDONTWRITEBYTECODE=1
-export PYTHONPYCACHEPREFIX=<ngoài cây>
+export PYTHONPYCACHEPREFIX="$SCRATCH/pycache"
 ```
 
 ## Công cụ — nhánh packet KHÔNG mang công cụ của kho
@@ -48,10 +58,7 @@ Lấy công cụ TỪ NHÁNH CHÍNH, đừng chạy cả hook phiên chỉ để
 cài phụ thuộc Python và đã đo được một lần làm hỏng môi trường đang tốt:
 
 ```bash
-D="$(mktemp -d)"
-git show origin/master:.claude/dev/launcher.py > "$D/launcher.py"
-PY="$(command -v python3 || command -v python || command -v py)"   # CLAUDE.md: nhận CẢ BA tên
-"$PY" "$D/launcher.py" doctor              # bằng chứng DƯƠNG, chạy được từ mọi nhánh
+"$PY" "$CANON/.claude/dev/launcher.py" doctor
 ```
 
 **Vắng mặt là một QUAN SÁT; "môi trường không có" là một KẾT LUẬN.** Trước khi báo với
@@ -75,9 +82,32 @@ if [ -n "${TEN_BIEN:-}" ]; then echo "có, ${#TEN_BIEN} ký tự"; else echo "ch
 
 ## Gate
 
-`/gate`. Đọc mã thoát trực tiếp từng tiến trình, không qua pipe — `rc` của pipe là `rc` của lệnh cuối.
+Chọn lệnh theo protocol §10.1/§10.2 và Packet: `/gate-targeted` hoặc `/gate` khi scope cho phép.
+`$CANON` là checkout mã canonical đã ghim, `$S` là OID của nó, `$H` là candidate có trong
+object store của `$CANON`; `$SCRATCH` ở ngoài checkout. Ví dụ Bash, giữ rc cả khi bật `set -e`:
 
-## Máy trạng thái — mọi chuyển động đi qua đây
+```bash
+ANCESTRY_RC=0
+git -C "$CANON" merge-base --is-ancestor "$S" "$H" || ANCESTRY_RC=$?
+printf 'ancestor rc=%s\n' "$ANCESTRY_RC"
+case "$ANCESTRY_RC" in 0) ;; 1) exit 1 ;; *) exit "$ANCESTRY_RC" ;; esac
+ADMISSION_RC=0
+"$PY" "$CANON/ops/lease_publish.py" kiem-thu-hoi-github "$H" \
+  --root "$CANON" --canonical-base "$S" --nhanh-mac-dinh master \
+  --receipt "$SCRATCH/local-admission.json" || ADMISSION_RC=$?
+printf 'local admission rc=%s\n' "$ADMISSION_RC"
+test "$ADMISSION_RC" -eq 0 || exit "$ADMISSION_RC"
+git show -s --format=%B "$H" > "$SCRATCH/candidate-message.txt"
+```
+
+Đọc output/receipt theo §10.2.1; ví dụ không tạo receipt workflow. Đo dependency trong runtime
+đích bằng `git --version`, `"$PY" --version`, import các module command dùng, `jq --version`,
+`actionlint -version` và phiên bản shell. Tập cần probe lấy từ command thật (§10.2.1).
+
+## Cú pháp máy trạng thái
+
+Chọn đường điều phối theo protocol §3/§4 và authority của Packet; bảng lệnh này mô tả runtime
+hiện có, không thay một ngoại lệ được cấp riêng bằng việc ghi tay state.
 
 ```bash
 PY="$(command -v python3 || command -v python || command -v py)"   # CLAUDE.md: nhận CẢ BA tên
@@ -135,8 +165,53 @@ gh issue comment 55 --body-file heartbeat.md
 
 Nhịp và nội dung tối thiểu do lease của đợt khai; đọc chính comment cấp lease, đừng nhớ theo lần trước.
 
+### Body file và exact readback
+
+Theo protocol §7, khi có quyền đăng Issue comment, lưu ví dụ Python dưới thành
+`$SCRATCH/post_comment.py`; gọi bằng `"$PY" "$SCRATCH/post_comment.py" 55 "$SCRATCH/heartbeat.md" "$SCRATCH"`.
+`-F body=@...` là cú pháp đọc file của [gh api](https://cli.github.com/manual/gh_api).
+Ví dụ chỉ hỗ trợ Issue comment của kho này; review PR dùng endpoint của review.
+
+```python
+import hashlib
+import json
+from pathlib import Path
+import subprocess
+import sys
+
+issue, body_file, out_dir = sys.argv[1:]
+if not issue.isdecimal() or int(issue) < 1:
+    raise SystemExit("invalid issue")
+out = Path(out_dir)
+body_path = Path(body_file).resolve()
+body = body_path.read_bytes()
+body.decode("utf-8")
+repo = "repos/ducthangho/tra-luat"
+
+def api(args, filename):
+    result = subprocess.run(["gh", "api", *args], capture_output=True)
+    (out / filename).write_bytes(result.stdout)
+    print(filename, "rc=", result.returncode)
+    result.check_returncode()
+    return json.loads(result.stdout)
+
+posted = api(["--method", "POST", f"{repo}/issues/{issue}/comments",
+              "-F", "body=@" + str(body_path)], "posted.json")
+comment_id = posted["id"]
+if type(comment_id) is not int or comment_id < 1:
+    raise SystemExit("invalid comment ID; inspect posted.json before retry")
+readback = api([f"{repo}/issues/comments/{comment_id}"], "readback.json")
+actual = readback["body"].encode("utf-8")
+if readback["id"] != comment_id or actual != body:
+    raise SystemExit("readback mismatch; preserve both responses")
+print("COMMENT_READBACK", comment_id, hashlib.sha256(body).hexdigest())
+```
+
 ## Đọc log CI
 
 ```bash
 gh api repos/ducthangho/tra-luat/actions/jobs/<id>/logs
 ```
+
+Identity/attempt/provenance và fallback endpoint: protocol §10.2.2–§10.2.3; cú pháp truy vấn
+`WorkflowRun.file` nằm trong `.claude/skills/cross-review/SKILL.md`, mục “Provenance CI”.

@@ -1,13 +1,14 @@
 ---
 name: cross-review
-description: Review chéo khác nền một PR packet của protocol đa phiên (tra-luat) trên nền Claude Code. Chỉ chứa cú pháp và công cụ của nền; mọi quy tắc review, mức assurance và tiêu chí hoàn tất nằm ở docs/PROTOCOL_DA_PHIEN.md.
+description: Adapter review packet trên nền Claude Code. Provider, assurance và quyền của lượt lấy từ Packet và docs/PROTOCOL_DA_PHIEN.md; tệp này chỉ chứa cú pháp, công cụ và con trỏ.
 argument-hint: "[so-issue-packet] [so-PR]"
 ---
 
 # Adapter `cross-review` — Claude Code
 
 **Đọc trước:** `docs/PROTOCOL_DA_PHIEN.md` §8 (mức review, quyền của người review, xử lý quota) và
-§13 (trigger, hai trục, dạng verdict, nơi ghi verdict, định nghĩa hoàn tất).
+§13 (trigger, hai trục, dạng verdict, nơi ghi verdict, định nghĩa hoàn tất) · §8.1–§8.3
+(bootstrap, receipt, cache và lịch sử lớp) · §10.2.1–§10.2.3 (CI plan/provenance).
 
 Tệp này **không tóm tắt** những mục trên — đợt đầu của chính adapter này chép §13 rồi ghi sai nơi
 đăng verdict. Chốt cơ học:
@@ -21,15 +22,12 @@ Dưới đây chỉ có cú pháp của nền.
 
 ## Kiểm tra công cụ
 
-Skill này chạy được hay không phụ thuộc `codex` (hoặc provider reviewer được chỉ định),
-mà container phiên **không có sẵn** (đo 17-08-2026: `codex` vắng, `gh` vắng — hook phiên
-không chạy vì `CLAUDE_PROJECT_DIR` không được đặt khi kho gắn giữa phiên).
+Đo tool trong phiên đang chạy; lần đo container ngày 17-08-2026 không quyết định capability
+của phiên mới. Bootstrap và quyền cài/trust xem protocol §8.1; ví dụ chỉ probe:
 
 ```bash
 PY="$(command -v python3 || command -v python || command -v py)"   # CLAUDE.md: nhận CẢ BA tên
 "$PY"  .claude/dev/launcher.py doctor            # kiểm tra toàn bộ công cụ (CONG_CU)
-npm install -g @openai/codex                     # nếu doctor báo `khong codex`
-"$PY"  .claude/dev/launcher.py chuan-bi          # CODEX_AUTH_JSON -> ~/.codex/auth.json
 codex --version                                  # bằng chứng THẬT về phiên bản codex CLI
 ```
 
@@ -84,14 +82,15 @@ Nếu lease có `effective_review_class`, đút **cả hai** trường bằng `-
 Phóng Claude reviewer headless, cấp đúng công cụ cần để review, và giữ JSON nguyên vẹn:
 
 ```bash
-claude --model <id> --effort <bac> --output-format json --allowedTools Bash Read Write Edit Glob Grep --permission-mode acceptEdits --add-dir <sandbox> -p < PROMPT.md > reviewer.json
+claude --model "$MODEL" --effort "$EFFORT" --output-format json \
+  --permission-mode default --add-dir "$SANDBOX" -p < "$PROMPT" > "$SCRATCH/reviewer.json"
 ```
 
 Mẫu trên đưa prompt qua stdin; kích thước prompt không cộng vào một đối số argv và nội dung
 không nằm trong dòng lệnh tiến trình. Phép đo 27-08-2026 từng chạy được cả dạng argv và stdin,
 nhưng không xác định kích thước prompt tối đa. Dưới root, `--dangerously-skip-permissions`
 báo *"cannot be used with root/sudo privileges for security reasons"* rồi thoát `rc=1`
-sau `1.151s`; ví dụ dùng `--allowedTools` cùng `--permission-mode`.
+sau `1.151s`; ví dụ dùng permission mode mặc định. Quyền/capability bootstrap theo §8.1.
 
 Cú pháp đọc `modelUsage` từ JSON bằng vị từ dùng chung với CI:
 
@@ -202,7 +201,8 @@ của lượt. Adapter này không ấn định bên dọn, tập đường dẫ
 lại là **comment** (`add_issue_comment`). Comment không mang trạng thái review chính thức
 của GitHub. Cách khai transport và xác định assurance xem protocol §8/§13.
 
-Trigger reviewer bot của kho: comment `@codex review` trên PR.
+Cú pháp trigger bot qua comment là `@codex review`; quyền dispatch và provider của lượt ở
+Packet/protocol §8/§13. Cú pháp này không chứng minh model/effort của bot.
 
 ## Lấy diff của ĐÚNG head SHA
 
@@ -223,12 +223,15 @@ Ví dụ dưới dùng clone rời và checkout detached. Worktree dùng chung k
 quyền reviewer và yêu cầu cách ly xem protocol §8/§13.
 
 ```bash
-RV=<thu-muc-clone-rieng>
-git clone -q <nguồn> "$RV"
-git -C "$RV" remote set-url origin https://github.com/<chủ>/<kho>   # BẮT BUỘC — xem (1)
-git -C "$RV" fetch -q origin <nhánh>
-git -C "$RV" checkout -q --detach <exact-sha>
-git -C "$RV" status --porcelain    # in thay đổi Git đang thấy trong worktree
+# REMOTE, RV, BRANCH, REVIEWED_SHA lấy từ assignment; bước bootstrap (§8.1).
+git -c core.longpaths=true clone --no-checkout "$REMOTE" "$RV"
+git -C "$RV" remote get-url origin
+git -C "$RV" config core.abbrev 7
+git -C "$RV" config core.longpaths true
+git -C "$RV" fetch -q origin "$BRANCH"
+git -C "$RV" checkout -q --detach "$REVIEWED_SHA"
+git -C "$RV" rev-parse HEAD 'HEAD^{tree}'
+git -C "$RV" status --porcelain=v1 --untracked-files=all --ignored=matching
 ```
 
 1. **Clone từ ĐƯỜNG DẪN cục bộ để lại `origin` là đường dẫn, và `launcher.py` từ chối với `rc=11`**
@@ -240,12 +243,14 @@ git -C "$RV" status --porcelain    # in thay đổi Git đang thấy trong workt
    "sandbox hỏng" — kiểm bằng `rev-parse HEAD`, không bằng mã thoát của `fetch`.
 3. **Phiên headless NGOÀI kho không kế thừa `.claude/settings.json`** — nó in
    `Ignoring N permissions.allow entries: this workspace has not been trusted`.
-   `--allowedTools` ở ví dụ Claude phía trên truyền danh sách công cụ tường minh.
+   Đọc lỗi trust thực và xử lý bootstrap theo §8.1, không tự chuyển sang acceptEdits.
 
 Hai lệnh sau quan sát thay đổi Git còn lại và commit mới ở thời điểm kiểm:
-`git -C "$RV" status --porcelain` và `git -C "$RV" log --oneline <head>..HEAD`;
+`git -C "$RV" status --porcelain=v1 --untracked-files=all --ignored=matching`
+và `git -C "$RV" log --oneline <head>..HEAD`;
 có thể chạy cùng phép đọc trên kho nguồn. Output rỗng không chứng minh cả lượt không ghi:
-thay đổi đã hoàn nguyên, tệp bị Git bỏ qua và lịch sử thao tác không nằm trong hai output ấy.
+thay đổi đã hoàn nguyên và lịch sử thao tác không nằm trong hai output ấy. Đo bytes của
+ignored/untracked bằng snapshot hash riêng theo §8.2; status chỉ cho biết tên/trạng thái.
 
 ## Chạy nền kia trong sandbox
 
@@ -264,13 +269,14 @@ ngoài kho và sau 40 phút chưa có kết luận. Phạm vi đọc/ghi và yê
 và working clone dưới cùng thư mục `$R`:
 
 ```bash
-R=<sandbox>
-git clone --quiet --bare --no-local <kho> "$R/kho.git"
-git -C "$R/kho.git" fetch --quiet <kho> '+refs/remotes/origin/*:refs/heads/*'   # nap DU ref
+# R, SOURCE, REMOTE, REVIEWED_SHA do bootstrapper điền từ assignment (§8.1).
+git clone --quiet --bare --no-local "$SOURCE" "$R/kho.git"
+git -C "$R/kho.git" fetch --quiet "$SOURCE" '+refs/remotes/origin/*:refs/heads/*'
 git clone --quiet "$R/kho.git" "$R/cay-kho"
 git -C "$R/cay-kho" fetch --quiet origin '+refs/heads/*:refs/remotes/origin/*'
+git -C "$R/cay-kho" remote set-url origin "$REMOTE"  # endpoint thật trong assignment (§8.1)
 git -C "$R/cay-kho" config core.abbrev 7        # BAT BUOC — xem duoi
-git -C "$R/cay-kho" checkout --quiet <reviewed_sha>
+git -C "$R/cay-kho" checkout --quiet "$REVIEWED_SHA"
 ```
 
 `core.abbrev` điều khiển độ dài SHA viết tắt mà `doc-claims-check` đọc.
@@ -282,11 +288,10 @@ Yêu cầu đối chiếu môi trường xem protocol §8. Ví dụ worktree n�
 cùng commit với clone để giảm một nguồn khác biệt khi đọc kết quả:
 
 ```bash
-git -C <kho> worktree add --detach /tmp/nen-<reviewed_sha> <reviewed_sha>
+# NEN là clone đối chứng đã bootstrap ngoài repo được review (§8.1).
 PY="$(command -v python3 || command -v python || command -v py)"   # CLAUDE.md: nhận CẢ BA tên
-cd /tmp/nen-<reviewed_sha> && "$PY" scripts/tl.py doc-claims-check --strict; echo "nen     rc=$?"
+cd "$NEN"                && "$PY" scripts/tl.py doc-claims-check --strict; echo "nen     rc=$?"
 cd "$R/cay-kho"            && "$PY" scripts/tl.py doc-claims-check --strict; echo "sandbox rc=$?"
-git -C <kho> worktree remove /tmp/nen-<reviewed_sha> --force
 ```
 
 Mỗi dòng `echo` in mã thoát của chuỗi `cd && "$PY" ...` ngay trước nó. Nếu `cd` lỗi,
@@ -518,3 +523,56 @@ Cách giữ danh tính finding qua các lượt xem protocol §8/§12/§13.
 ```bash
 gh api repos/ducthangho/tra-luat/actions/jobs/<id>/logs
 ```
+
+## Provenance CI
+
+Theo protocol §10.2.2, `$RUN_NODE_ID` lấy từ raw REST response của đúng run. Query dưới
+dùng với `gh api` trong Bash hoặc PowerShell; `query.graphql` đặt ngoài checkout:
+
+```graphql
+query($id: ID!) {
+  node(id: $id) {
+    ... on WorkflowRun {
+      databaseId
+      runAttempt
+      event
+      file { path repositoryFileUrl }
+    }
+  }
+}
+```
+
+```bash
+gh api graphql -F query=@"$SCRATCH/query.graphql" -f id="$RUN_NODE_ID" > "$SCRATCH/workflow-run.json"
+```
+
+`WorkflowRun.file` nullable; cấu trúc tham chiếu ở [GitHub Actions GraphQL](https://docs.github.com/en/graphql/reference/actions).
+Phân loại missing/errors và kiểm OID của URL theo §10.2.2. Khi đã xác minh repo/path/OID,
+dùng `git cat-file blob "$DEFINITION_OID:$WORKFLOW_PATH"` lấy bytes và SHA-256 bằng Python;
+không lấy blob từ checkout hiện tại. Fetch object thuộc bước bootstrap/cấp dữ liệu §8.1.
+Jobs của đúng attempt: `gh api --paginate --slurp "repos/ducthangho/tra-luat/actions/runs/$RUN_ID/attempts/$ATTEMPT/jobs?per_page=100"`.
+`--slurp` giữ các page thành mảng ngoài; không parse output nhiều page như một JSON object.
+
+## Ruff và cache
+
+Hai lệnh Python sau minh họa hai phép đo riêng của protocol §8.2, chạy tại checkout đã cấp;
+`$SCRATCH` nằm ngoài cây. Lệnh contract gọi consumer hiện hữu, không chạy toàn suite:
+
+```bash
+export PYTHONDONTWRITEBYTECODE=1
+export PYTHONPYCACHEPREFIX="$SCRATCH/pycache"
+"$PY" -B -c 'import runpy,sys; m=runpy.run_path(".claude/dev/ci_dang_ky_test.py"); errors,count=m["loi_ruff_ci"](); print("RUFF_CONTRACT",count,errors); sys.exit(bool(errors) or count == 0)'
+"$PY" -m ruff check --no-cache --select F scripts/tl.py
+```
+
+Rc của từng command được ghi riêng; điều kiện delta/bare lint và tiêu chí mutant riêng
+ở protocol §8.2/§10.2.3. Snapshot: `git diff --binary`, `git diff --cached --binary`,
+`git ls-files --others --exclude-standard`, `git ls-files --others --ignored --exclude-standard`;
+ghép với SHA/tree và hash bytes của files theo §8.2, không chỉ dùng output status rỗng.
+
+## Vận chuyển verdict và đọc lại
+
+Protocol §7 quy định receipt; ví dụ Python body-file/raw JSON/exact readback trong
+`.claude/skills/work-packet/SKILL.md`, mục “Body file và exact readback”, dùng được khi
+đăng verdict dạng Issue comment theo assignment. `gh pr review --body-file` ở trên
+không tự tạo delivery receipt; review đã đăng đọc qua endpoint PR reviews đúng object ID.

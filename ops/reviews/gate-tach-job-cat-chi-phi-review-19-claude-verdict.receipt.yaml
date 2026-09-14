@@ -1,0 +1,65 @@
+schema_version: 2
+kind: review_delivery_receipt
+receipt_id: gate463-r24-g5-review19-claude
+packet_id: GATE-TACH-JOB-CAT-CHI-PHI
+packet_issue: 463
+revision: 24
+generation: 5
+lease_id: gate-tach-job-cat-chi-phi-exec-6-codex-20260914-r24
+provider: claude
+role: reviewer
+verdict: changes_requested
+reviewed_sha: 27f0d3054ee02e0584d00d750888737eac40585a
+reviewed_tree: 43a566b03470bd9a706cd0241c6cbde2df12d370
+verdict_path: ops/reviews/gate-tach-job-cat-chi-phi-review-19-claude-verdict.md
+verdict_sha256: 17d25e47b1f9192a7d34c121d82e4270333d15251257b6915339291e77006956
+evidence_url: https://github.com/ducthangho/tra-luat/blob/119186328f8927c7788361c7d64807450eedef02/ops/reviews/gate-tach-job-cat-chi-phi-review-19-claude-verdict.md
+model_reviewer_identity:
+  provider: anthropic_claude
+  surface: claude_code
+  transport: machine/local
+  model: claude-fable-5
+  effort: max
+  session_run_id: 1914e7c4-4459-439b-b04e-c0a3e16b9f05
+  phien_doc_lap: true
+  neo_boi_launcher: true
+github_submitter_identity:
+  actor: ducthangho
+  recorded_by: codex
+  reviewer_is_submitter_identity: false
+anchor:
+  loai: canonical_ancestry
+  cuong_do: Immutable Git blob; ancestry measured against evidence-branch HEAD, NOT
+    master; no required-check authority.
+  evidence_branch: codex/gate-463-review-evidence-20260913
+  evidence_commit: 119186328f8927c7788361c7d64807450eedef02
+raw_archive_path: ops/reviews/gate-tach-job-cat-chi-phi-review-19-claude-raw.zip
+raw_archive_sha256: 0fccbe9b0913bf705bc0ce784f2b0a328f8f471a18aff28000f91563cb7783b9
+raw_verdict_sha256: 17d25e47b1f9192a7d34c121d82e4270333d15251257b6915339291e77006956
+raw_model_output_sha256: c7b3cd689b8453b6b66b95c02c3542567a83117d1b8a47e35c392a2dbed70c10
+eol_normalization: Git text blobs use LF per .gitattributes; original bytes preserved
+  in the raw ZIP.
+model_output_path: ops/reviews/gate-tach-job-cat-chi-phi-review-19-claude-model-output.json
+model_output_sha256: c7b3cd689b8453b6b66b95c02c3542567a83117d1b8a47e35c392a2dbed70c10
+launcher_run_sha256: 44ed3322dc1e7f47dc67878c26e35d7d8ad991913955c434316b4f472ffda372
+model_validation: 'modelUsage: ĐẠT; tập model chính=[''claude-fable-5'']; mô hình
+  phụ bỏ qua=[''claude-haiku-4-5-20251001'']'
+hunt_table_validation: passed
+source_and_review_trees_clean: true
+review_axes:
+- spec
+- standards_security
+review_classes:
+- installer_domain
+- lexer_composition_order
+- consumer_spec_workflow
+ci: not_run
+A1: not_run
+A5: not_run
+merge_authorized: false
+transport_note: 'Canonical launcher and reviewer transport: machine/local.'
+master_at_review_start: c16bd3293a9d2dc7a8a789b99d77057cb02ce374
+master_at_delivery: c16bd3293a9d2dc7a8a789b99d77057cb02ce374
+integration_with_new_master: not_measured
+clean_observation_note: Git HEAD/tree/status checked at completion; this does not
+  prove no writes during the run.

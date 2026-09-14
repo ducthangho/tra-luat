@@ -4610,9 +4610,41 @@ def case_dot_bien_test_neo_chet_van_DO(c: Ctx):
         raise AssertionError("không tìm thấy mỏ neo: neo test-harness chết đã bị nuốt")
 
 
+def _trich_xuat_powershell_74a(noi_dung: str) -> str:
+    import re
+    m_heads = list(re.finditer(r"^(#{1,4}[ \t]+7\.4a Thứ tự state trước khi gọi reviewer)$", noi_dung, re.M))
+    if len(m_heads) != 1:
+        raise AssertionError("không tìm thấy duy nhất một mục #### 7.4a đúng chuẩn")
+    start = m_heads[0].end()
+    in_fence = False
+    end = len(noi_dung)
+    for m in re.finditer(r"^(```|#{1,4}[ \t]+)", noi_dung[start:], re.M):
+        if m.group(1).startswith("```"):
+            in_fence = not in_fence
+        elif not in_fence:
+            end = start + m.start()
+            break
+    phan = noi_dung[start:end]
+    opens = list(re.finditer(r"^```powershell[ \t]*$", phan, re.M | re.I))
+    if not opens:
+        raise AssertionError("không tìm thấy khối powershell sau 7.4a")
+    if len(opens) > 1:
+        raise AssertionError("duplicate powershell fence")
+    closes = list(re.finditer(r"^```[ \t]*$", phan[opens[0].end():], re.M))
+    if not closes:
+        raise AssertionError("unclosed fence")
+    return phan[opens[0].end():opens[0].end() + closes[0].start()].strip()
+
+
+def _kiem_residual_placeholder(lenh: str):
+    import re
+    for line in lenh.splitlines():
+        line = line.strip()
+        if line and not line.startswith("#") and re.search(r"<[^>]+>", line):
+            raise AssertionError(f"residual placeholder trong lệnh: {line}")
+
+
 def case_luong_canonical_chay_that(c: Ctx):
-    if platform.system() != "Windows":
-        raise BoQua("chỉ đo lệnh pwsh trên Windows")
     assert os.name == "nt", "phải chạy trên Windows"
 
     ke_hoach_md = ROOT / "ops" / "KE_HOACH_THI_CONG_CLAUDE_CODEX.md"
@@ -4621,20 +4653,7 @@ def case_luong_canonical_chay_that(c: Ctx):
             raise AssertionError("thiếu kế hoạch thi công trong repo thật")
         return
 
-    noi_dung = ke_hoach_md.read_text(encoding="utf-8")
-    phan_74a = noi_dung.find("#### 7.4a")
-    if phan_74a == -1:
-        raise AssertionError("không tìm thấy mục #### 7.4a")
-
-    bat_dau_fence = noi_dung.find("```powershell", phan_74a)
-    if bat_dau_fence == -1:
-        raise AssertionError("không tìm thấy khối powershell sau 7.4a")
-
-    ket_thuc_fence = noi_dung.find("```", bat_dau_fence + 13)
-    if ket_thuc_fence == -1:
-        raise AssertionError("không tìm thấy điểm đóng khối powershell")
-
-    doan_code = noi_dung[bat_dau_fence + 13:ket_thuc_fence].strip()
+    doan_code = _trich_xuat_powershell_74a(ke_hoach_md.read_text(encoding="utf-8"))
 
     truoc_record_post = doan_code.split("record-post")[0]
     lenh_da_loc = truoc_record_post.rsplit("python", 1)[0].strip()
@@ -4653,6 +4672,8 @@ def case_luong_canonical_chay_that(c: Ctx):
     lenh_da_loc = lenh_da_loc.replace("packet_loop.py ", f"packet_loop.py --state-dir {sd_ps} ")
     lenh_da_loc = lenh_da_loc.replace("<doctor-signed.json>", doctor_ps)
 
+    _kiem_residual_placeholder(lenh_da_loc)
+
     env = os.environ.copy()
     env["PYTHONDONTWRITEBYTECODE"] = "1"
     env[BIEN_BC] = anh_doctor()
@@ -4665,9 +4686,44 @@ def case_luong_canonical_chay_that(c: Ctx):
     _doi(0, p.returncode, p.stderr, f"luồng canonical chạy thất bại (stdout={_txt(p.stdout)!r})")
 
 
+def case_trich_xuat_74a_chong_nhieu(c: Ctx):
+    def loi(func, match):
+        try:
+            func()
+        except AssertionError as e:
+            if match not in str(e):
+                raise AssertionError(f"có lỗi nhưng không khớp {match!r}: {e}")
+            return
+        raise AssertionError(f"lọt {match}")
+
+    loi(lambda: _trich_xuat_powershell_74a("#### 7.4a\n```powershell\n```\n"), "đúng chuẩn")
+    loi(lambda: _trich_xuat_powershell_74a("#### 7.4a — SAI\n```powershell\n```\n"), "đúng chuẩn")
+
+    t_chuan = "#### 7.4a Thứ tự state trước khi gọi reviewer\n"
+    assert _trich_xuat_powershell_74a(t_chuan + "```powershell\n# #### comment\n```\n#### 8.0\n") == "# #### comment"
+    loi(lambda: _trich_xuat_powershell_74a(t_chuan + "\n#### 8.0\n```powershell\n```\n"), "không tìm thấy khối powershell")
+    loi(lambda: _trich_xuat_powershell_74a(t_chuan + "```powershell\n```\n```powershell\n```\n"), "duplicate powershell fence")
+    loi(lambda: _trich_xuat_powershell_74a(t_chuan + "```powershell\n"), "unclosed fence")
+
+    loi(lambda: _kiem_residual_placeholder("cmd <residual> \n# comment <harmless>"), "residual placeholder")
+    _kiem_residual_placeholder("# comment <harmless>\n\n")
+
+
+def case_windows_only_skip_khoa(c: Ctx):
+    goc_sys = platform.system
+    platform.system = lambda: "Linux"
+    try:
+        ket = chay_suite(c.script, c.tmp, chi_chay={"luong_canonical_chay_that"})
+        if not isinstance(ket.get("luong_canonical_chay_that"), BoQua):
+            raise AssertionError("chay_suite không ngắt WINDOWS_ONLY thành BoQua")
+    finally:
+        platform.system = goc_sys
+
 
 CASES += [
     ("luong_canonical_chay_that", case_luong_canonical_chay_that),
+    ("trich_xuat_74a_chong_nhieu", case_trich_xuat_74a_chong_nhieu),
+    ("windows_only_skip_khoa", case_windows_only_skip_khoa),
     ("phan_loai_dot_bien_san_pham_neo_trung_test_van_DO",
      case_phan_loai_dot_bien_san_pham_neo_trung_test_van_DO),
     ("dot_bien_test_khai_bao_chay_va_giet_dung_ca",
@@ -4675,11 +4731,15 @@ CASES += [
     ("dot_bien_test_neo_chet_van_DO", case_dot_bien_test_neo_chet_van_DO),
 ]
 
+WINDOWS_ONLY = {"luong_canonical_chay_that"}
 
 def chay_suite(script: Path, tmp: Path, chi_chay=None):
     ket = {}
     for ten, fn in CASES:
         if chi_chay and ten not in chi_chay:
+            continue
+        if ten in WINDOWS_ONLY and platform.system() != "Windows":
+            ket[ten] = BoQua("chỉ đo lệnh pwsh trên Windows")
             continue
         d = tmp / ten
         d.mkdir(parents=True, exist_ok=True)

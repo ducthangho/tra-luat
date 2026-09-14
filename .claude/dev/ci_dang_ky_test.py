@@ -294,7 +294,8 @@ def _dong_logic(run, depth=0):
                     end = run.find("\n", i); end = len(run) if end < 0 else end
                     line = run[i:end]; i = min(end + 1, len(run))
                     if not carry and (line.lstrip("\t") if tabs else line) == tag: break
-                    logical = carry + line
+                    scan_line = line.lstrip("\t") if tabs else line
+                    logical = carry + scan_line
                     if not quoted and ("$(" in logical or "`" in logical):
                         raise ValueError("heredoc có command substitution ngoài miền")
                     slashes = len(logical) - len(logical.rstrip("\\"))
@@ -1202,6 +1203,8 @@ def phan_chung():
         ("heredoc-even-backslash-no-join", "cat <<END\nx $\\\\\n(echo data)\nEND\n", 0),
         ("heredoc-quoted-no-join", "cat <<'END'\nx $\\\n(pip install ruff)\nEND\n", 0),
         ("heredoc-continuation-hides-terminator", "cat <<END\nx\\\nEND\n", 1),
+        ("heredoc-dash-tab-continuation-substitution", "cat <<-END\n\tx $\\\n\t(pip install ruff)\n\tEND\n", 1),
+        ("heredoc-dash-space-no-strip", "cat <<-END\nx $\\\n (echo data)\n\tEND\n", 0),
         ("heredoc-pending-at-eof", "cat <<'END'", 1),
         ("heredoc-unclosed", "cat <<'E'\nx\n", 1),
         ("parameter-eof", "V=${x", 1), ("parameter-double", 'echo "${x"', 1),

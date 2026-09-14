@@ -4611,37 +4611,55 @@ def case_dot_bien_test_neo_chet_van_DO(c: Ctx):
 
 
 def _ps_statements(script: str):
-    statements, code, start = [], [], 0
-    i, n, q, here, block = 0, len(script), None, None, False
+    stmts, cur, state, start, i, n = [], [], "N", 0, 0, len(script)
     while i < n:
         c = script[i]
-        if block:
-            if script[i:i+2] == "#>": block, i = False, i + 2; code.append(" ")
-            else: i += 1
-        elif here:
-            if script[i:].startswith(("\n" + here + "@", "\r\n" + here + "@")):
-                here, i = None, i + (4 if c == '\r' else 3)
-            else: i += 1
-        elif q:
-            code.append(c)
-            if c == '`' and q == '"' and i + 1 < n: code.append(script[i+1]); i += 2
-            elif c == q and i + 1 < n and script[i+1] == q: code.append(script[i+1]); i += 2
-            elif c == q: q, i = None, i + 1
-            else: i += 1
-        elif script[i:i+2] == "<#": block, i = True, i + 2; code.append(" ")
-        elif script[i:i+2] in ("@'", '@"'): here, i = script[i+1], i + 2
-        elif c in "'\"": q, i = c, i + 1; code.append(c)
-        elif c == "#":
-            while i < n and script[i] != "\n": i += 1
-        elif c == "`" and i + 1 < n:
-            if script[i+1] in "\r\n": code.append(" "); i += 3 if script[i+1:i+3]=="\r\n" else 2
-            else: code.extend([c, script[i+1]]); i += 2
-        elif c in ";\n":
-            if s := "".join(code).strip(): statements.append((start, i, s))
-            start, code, i = i + 1, [], i + 1
-        else: code.append(c); i += 1
-    if s := "".join(code).strip(): statements.append((start, n, s))
-    return statements
+        if state == "N":
+            if script.startswith("<#", i): state = "B"; cur.extend([" ", " "]); i += 1
+            elif c == "#": state = "L"; cur.append(" ")
+            elif script.startswith("@'\n", i) or script.startswith("@'\r\n", i): state = "H1"; cur.extend(["@", "'"]); i += 1
+            elif script.startswith('@"\n', i) or script.startswith('@"\r\n', i): state = "H2"; cur.extend(["@", '"']); i += 1
+            elif c == "'": state = "S1"; cur.append(c)
+            elif c == '"': state = "S2"; cur.append(c)
+            elif c == "`": state = "E"
+            elif c in ";\n":
+                txt = "".join(cur).strip()
+                if txt: stmts.append((start, i, txt))
+                cur, start = [], i + 1
+            else: cur.append(c)
+        elif state == "L":
+            if c == "\n": state = "N"; continue
+            else: cur.append(" ")
+        elif state == "B":
+            if script.startswith("#>", i): state = "N"; cur.extend([" ", " "]); i += 1
+            else: cur.append(" " if c != "\n" else "\n")
+        elif state == "S1":
+            cur.append(c)
+            if c == "'":
+                if i+1 < n and script[i+1] == "'": cur.append("'"); i += 1
+                else: state = "N"
+        elif state == "S2":
+            cur.append(c)
+            if c == '"':
+                if i+1 < n and script[i+1] == '"': cur.append('"'); i += 1
+                else: state = "N"
+            elif c == "`": state = "E2"
+        elif state == "E":
+            state = "N"
+            if c == "\n": cur.append(" ")
+            elif c == "\r" and i+1 < n and script[i+1] == "\n": cur.append(" "); i += 1
+            else: cur.extend(["`", c])
+        elif state == "E2": state = "S2"; cur.append(c)
+        elif state == "H1":
+            if c == "\n" and script.startswith("'@", i+1): state = "N"; cur.extend(["\n", "'", "@"]); i += 2
+            else: cur.append(" " if c != "\n" else "\n")
+        elif state == "H2":
+            if c == "\n" and script.startswith('"@', i+1): state = "N"; cur.extend(["\n", '"', "@"]); i += 2
+            else: cur.append(" " if c != "\n" else "\n")
+        i += 1
+    txt = "".join(cur).strip()
+    if txt: stmts.append((start, n, txt))
+    return stmts
 
 
 def _trich_xuat_powershell_74a(noi_dung: str) -> str:
@@ -4677,37 +4695,21 @@ def _loc_lenh_truoc_record_post(doan_code: str) -> str:
     py = r"(?:python|python3|py)"
     script = r"(?:\S*[/\\])?packet_loop\.py"
     ws = r"\s+"
-    re_begin = re.compile(r"^\s*(?:\$\w+\s*=\s*)?" + py + ws + script + ws + r"begin-attempt(?=\s|$)")
-    re_doctor = re.compile(r"^\s*" + py + ws + script + ws + r"chup-anh-doctor(?=\s|$)")
-    re_record = re.compile(r"^\s*" + py + ws + script + ws + r"record-post(?=\s|$)")
-    re_exit = re.compile(r"^(?:exit|return|throw)(?:\s+.*)?$", re.IGNORECASE)
-
-    begin_idx = doctor_idx = record_idx = cut_end = -1
-
-    for idx, (s_start, s_end, code_str) in enumerate(_ps_statements(doan_code)):
-        if re_exit.match(code_str):
-            if doctor_idx == -1 or record_idx == -1:
-                raise AssertionError(f"unconditional active {code_str.split()[0]} statement before doctor/record")
-        if re_begin.search(code_str):
-            if begin_idx != -1:
-                raise AssertionError("duplicate begin-attempt")
-            begin_idx = idx
-        if re_doctor.search(code_str):
-            if doctor_idx != -1:
-                raise AssertionError("duplicate chup-anh-doctor")
-            doctor_idx = idx
-        if re_record.search(code_str):
-            if record_idx != -1:
-                raise AssertionError("duplicate record-post")
-            record_idx = idx
-            cut_end = s_start
-
-    if begin_idx == -1 or doctor_idx == -1 or record_idx == -1:
-        raise AssertionError("thiếu hoặc thừa")
-    if not (begin_idx < doctor_idx < record_idx):
-        raise AssertionError("thứ tự lệnh sai")
-
-    return doan_code[:cut_end].strip()
+    patterns = [
+        r"\$Begin\s*=\s*" + py + ws + script + ws + r"begin-attempt" + ws + r"--packet" + ws + r"\S+" + ws + r"--provider" + ws + r"\S+",
+        r"if\s*\(\$LASTEXITCODE\s*-ne\s*0\)\s*\{\s*exit\s+\$LASTEXITCODE\s*\}",
+        r"if\s*\(\$Begin\s*-notmatch\s*'nonce=\(\[0-9a-f\]\{32\}\)'\)\s*\{\s*throw\s+'begin-attempt không in nonce hợp lệ'\s*\}",
+        r"\$AttemptNonce\s*=\s*\$Matches\[1\]",
+        py + ws + script + ws + r"chup-anh-doctor" + ws + r"--packet" + ws + r"\S+" + ws + r"--out" + ws + r"\S+",
+        py + ws + script + ws + r"record-post" + ws + r"--packet" + ws + r"\S+" + ws + r"--for" + ws + r"reviewing" + ws + r"--comment-id" + ws + r"\S+"
+    ]
+    stmts = _ps_statements(doan_code)
+    if len(stmts) < 6:
+        raise AssertionError("thiếu lệnh")
+    for idx, pat in enumerate(patterns):
+        if not re.fullmatch(pat, stmts[idx][2]):
+            raise AssertionError(f"lệnh {idx+1} sai template: {stmts[idx][2]}")
+    return doan_code[:stmts[5][0]].strip()
 
 
 def _kiem_residual_placeholder(lenh: str):
@@ -4816,37 +4818,20 @@ def case_trich_xuat_74a_chong_nhieu(c: Ctx):
     _kiem_residual_placeholder("@'\n<residual>\n'@")
     _kiem_residual_placeholder('@"\n<residual>\n"@')
 
-    cmd_b = "$Begin = python packet_loop.py begin-attempt"
-    cmd_d = "python .claude/dev/packet_loop.py chup-anh-doctor"
-    cmd_r = "python packet_loop.py record-post"
+    cmd_b = "$Begin = python packet_loop.py begin-attempt --packet 55 --provider claude"
+    cmd_e = "if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }"
+    cmd_c = "if ($Begin -notmatch 'nonce=([0-9a-f]{32})') { throw 'begin-attempt không in nonce hợp lệ' }"
+    cmd_a = "$AttemptNonce = $Matches[1]"
+    cmd_d = "python .claude/dev/packet_loop.py chup-anh-doctor --packet 55 --out doc.json"
+    cmd_r = "python packet_loop.py record-post --packet 55 --for reviewing --comment-id 123"
 
-    loi(lambda: _loc_lenh_truoc_record_post(f"{cmd_b}\n{cmd_r}"), "thiếu hoặc thừa")
-    loi(lambda: _loc_lenh_truoc_record_post(f"{cmd_d}\n{cmd_r}"), "thiếu hoặc thừa")
+    valid_code = f"{cmd_b}\n{cmd_e}\n{cmd_c}\n{cmd_a}\n{cmd_d} # doctor\n# c\n{cmd_r}"
+    assert _loc_lenh_truoc_record_post(valid_code) == f"{cmd_b}\n{cmd_e}\n{cmd_c}\n{cmd_a}\n{cmd_d} # doctor\n# c"
 
-    valid_code = f"{cmd_b}\n$Begin -notmatch 'begin-attempt'\n{cmd_d} # doctor comment\n# python packet_loop.py record-post begin-attempt chup-anh-doctor\n{cmd_r}"
-    expected_out = f"{cmd_b}\n$Begin -notmatch 'begin-attempt'\n{cmd_d} # doctor comment\n# python packet_loop.py record-post begin-attempt chup-anh-doctor"
-    assert _loc_lenh_truoc_record_post(valid_code) == expected_out
-
-    loi(lambda: _loc_lenh_truoc_record_post(f"# {cmd_b}\n{cmd_d}\n{cmd_r}"), "thiếu hoặc thừa")
-    loi(lambda: _loc_lenh_truoc_record_post(f"$Begin -notmatch 'begin-attempt'\n{cmd_d}\n{cmd_r}"), "thiếu hoặc thừa")
-
-    loi(lambda: _loc_lenh_truoc_record_post(f"{cmd_b}\npython evilpacket_loop.py chup-anh-doctor\n{cmd_r}"), "thiếu hoặc thừa")
-    loi(lambda: _loc_lenh_truoc_record_post(f"{cmd_b}\n<# {cmd_d} #>\n{cmd_r}"), "thiếu hoặc thừa")
-    loi(lambda: _loc_lenh_truoc_record_post(f"{cmd_b}\n@'\n{cmd_d}\n'@\n{cmd_r}"), "thiếu hoặc thừa")
-    loi(lambda: _loc_lenh_truoc_record_post(f'{cmd_b}\n@"\n{cmd_d}\n"@\n{cmd_r}'), "thiếu hoặc thừa")
-    loi(lambda: _loc_lenh_truoc_record_post(f"{cmd_b}\npython .claude/dev/pack<# giuagiuagiua #>et_loop.py chup-anh-doctor\n{cmd_r}"), "thiếu hoặc thừa")
-
-    valid_code_2 = f'{cmd_b} # <harmless>\n$Begin -notmatch "# begin-attempt"\n{cmd_d} # <harmless>\n{cmd_r}'
-    expected_out_2 = f'{cmd_b} # <harmless>\n$Begin -notmatch "# begin-attempt"\n{cmd_d} # <harmless>'
-    assert _loc_lenh_truoc_record_post(valid_code_2) == expected_out_2
-
-    loi(lambda: _loc_lenh_truoc_record_post(f"{cmd_d}\n{cmd_b}\n{cmd_r}"), "thứ tự lệnh sai")
-    loi(lambda: _loc_lenh_truoc_record_post(f"{cmd_b}\n{cmd_d} ; {cmd_d}\n{cmd_r}"), "duplicate")
-    loi(lambda: _loc_lenh_truoc_record_post(f"{cmd_b}\n`# {cmd_d}\n{cmd_r}"), "thiếu hoặc thừa")
-    loi(lambda: _loc_lenh_truoc_record_post(f"{cmd_b}\nexit 0\n{cmd_d}\n{cmd_r}"), "unconditional active exit")
-
-    valid_cond = f"{cmd_b}\nif ($LASTEXITCODE) {{ exit 0 }}\n{cmd_d}\n{cmd_r}"
-    assert _loc_lenh_truoc_record_post(valid_cond) == f"{cmd_b}\nif ($LASTEXITCODE) {{ exit 0 }}\n{cmd_d}"
+    loi(lambda: _loc_lenh_truoc_record_post(f"{cmd_b}\n{cmd_r}"), "thiếu lệnh")
+    loi(lambda: _loc_lenh_truoc_record_post(f"{cmd_b}\n{cmd_e}\n{cmd_c}\n{cmd_a}\n{cmd_d}\nexit 0\n{cmd_r}"), "lệnh 6 sai template")
+    loi(lambda: _loc_lenh_truoc_record_post(f"{cmd_d}\n{cmd_b}\n{cmd_r}"), "thiếu lệnh")
+    loi(lambda: _loc_lenh_truoc_record_post(f"{cmd_b}\n{cmd_e}\n{cmd_c}\n{cmd_a}\n{cmd_d} ; exit 0\n{cmd_r}"), "lệnh 6 sai template")
 
 
 def case_windows_only_skip_khoa(c: Ctx):

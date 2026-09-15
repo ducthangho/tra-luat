@@ -3682,6 +3682,10 @@ MUTANTS = {
         "    dot_bien_test = ten_mut in MUTANTS_NHAM_TEST\n",
         "    dot_bien_test = all(t in goc_test for t, _ in cap)  # đột biến: suy từ văn bản\n",
         ["phan_loai_dot_bien_san_pham_neo_trung_test_van_DO"]),
+    "bo_qua_html_guard_trong_trich_xuat": (
+        "            if html_end:\n",
+        "            if False:\n",
+        ["trich_xuat_74a_chong_nhieu"]),
     "bien_nhan_bo_nhanh_valueerror": (
         "        except ValueError:\n", "        except RuntimeError:\n",
         ["bien_nhan_git_gia_duong_dan_nul_giu_fallback"]),
@@ -4669,8 +4673,17 @@ def _ps_statements(script: str):
 def _trich_xuat_powershell_74a(noi_dung: str) -> str:
     import re
     lines = noi_dung.splitlines(keepends=True)
-    f_char, f_len, in_sec, n_head, blocks, cur = None, 0, False, 0, [], None
+    f_char, f_len, in_sec, n_head, blocks, cur, html_end = None, 0, False, 0, [], None, None
     for line in lines:
+        if not f_char:
+            if html_end:
+                if html_end.search(line): html_end = None
+                continue
+            mh = re.match(r"(?i)^ {0,3}(?:(<!--)|<(pre|script|style|textarea)(?:[ \t>]|$))", line)
+            if mh:
+                end_re = re.compile(r"-->" if mh.group(1) else f"(?i)</{mh.group(2)}>")
+                if not end_re.search(line): html_end = end_re
+                continue
         m = re.match(r"^ {0,3}(`{3,}|~{3,})(.*)$", line)
         if not f_char:
             if line.rstrip("\r\n") == "#### 7.4a Thứ tự state trước khi gọi reviewer":
@@ -4848,6 +4861,14 @@ def case_trich_xuat_74a_chong_nhieu(c: Ctx):
     loi(lambda: _loc_lenh_truoc_record_post(f"{cmd_b}\n{cmd_e}\n{cmd_c}\n{cmd_a}\n{cmd_d} ; exit 0\n{cmd_r}"), "lệnh 6 sai template")
     loi(lambda: _loc_lenh_truoc_record_post(f"{cmd_b}\n{cmd_e}\n{cmd_c}\n{cmd_a}\npython .claude/dev/packet_loop.py chup-anh-doctor --packet <issue> --out <doctor-signed.json>|Get-Date\n{cmd_r}"), "lệnh 5 sai template")
     loi(lambda: _trich_xuat_powershell_74a("#### 7.4a Thứ tự state trước khi gọi reviewer\n```powershell\xa0\n```\n"), "không tìm thấy khối powershell")
+
+    loi(lambda: _trich_xuat_powershell_74a(f"<!--\n{t_chuan}```powershell\nc\n```\n-->\n"), "không tìm thấy duy nhất")
+    loi(lambda: _trich_xuat_powershell_74a(f"<pre>\n{t_chuan}```powershell\nc\n```\n</pre>\n"), "không tìm thấy duy nhất")
+    loi(lambda: _trich_xuat_powershell_74a(f"<SCRIPT>\n{t_chuan}```powershell\nc\n```\n</SCRIPT>\n"), "không tìm thấy duy nhất")
+    loi(lambda: _trich_xuat_powershell_74a(f"<TeXtArEa>\n{t_chuan}```powershell\nc\n```\n</textarea>\n"), "không tìm thấy duy nhất")
+    assert _trich_xuat_powershell_74a(f"<!--\n{t_chuan}```powershell\nc\n```\n-->\n{t_chuan}```powershell\n# ok\n```\n") == "# ok"
+    assert _trich_xuat_powershell_74a(f"<textarea>\n{t_chuan}```powershell\nc\n```\n</textarea>\n{t_chuan}```powershell\n# ok\n```\n") == "# ok"
+    loi(lambda: _trich_xuat_powershell_74a(f"<!--\n{t_chuan}```powershell\nc\n```\n"), "không tìm thấy duy nhất")
 
     # R8 Assertions
     loi(lambda: _loc_lenh_truoc_record_post(f"\xa0{valid_code}"), "lệnh 1 sai template")

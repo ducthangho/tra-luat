@@ -4615,8 +4615,9 @@ def _ps_statements(script: str):
     while i < n:
         c = script[i]
         if state == "N":
-            if script.startswith("<#", i): state = "B"; cur.extend([" ", " "]); i += 1
-            elif c == "#": state = "L"; cur.append(" ")
+            is_new = not cur or script[i-1] in " \t\r\n"
+            if is_new and script.startswith("<#", i): state = "B"; cur.extend([" ", " "]); i += 1
+            elif is_new and c == "#": state = "L"; cur.append(" ")
             elif script.startswith("@'\n", i) or script.startswith("@'\r\n", i): state = "H1"; cur.extend(["@", "'"]); i += 1
             elif script.startswith('@"\n', i) or script.startswith('@"\r\n', i): state = "H2"; cur.extend(["@", '"']); i += 1
             elif c == "'": state = "S1"; cur.append(c)
@@ -4829,6 +4830,16 @@ def case_trich_xuat_74a_chong_nhieu(c: Ctx):
 
     valid_code = f"{cmd_b}\n{cmd_e}\n{cmd_c}\n{cmd_a}\n{cmd_d} # doctor\n# c\n{cmd_r}"
     assert _loc_lenh_truoc_record_post(valid_code) == f"{cmd_b}\n{cmd_e}\n{cmd_c}\n{cmd_a}\n{cmd_d} # doctor\n# c"
+
+    vc = valid_code.replace("<executor-provider>", "<executor-provider> # tail")
+    assert _loc_lenh_truoc_record_post(vc) == vc[:vc.rfind(cmd_r)].strip()
+    vc = valid_code.replace("chup-anh-doctor --packet", "chup-anh-doctor <# note #> --packet")
+    assert _loc_lenh_truoc_record_post(vc) == vc[:vc.rfind(cmd_r)].strip()
+    vc = f"# start\n{valid_code}"
+    assert _loc_lenh_truoc_record_post(vc) == vc[:vc.rfind(cmd_r)].strip()
+
+    loi(lambda: _loc_lenh_truoc_record_post(valid_code.replace("<executor-provider>", "<executor-provider>#tail|Mark")), "lệnh 1 sai template")
+    loi(lambda: _loc_lenh_truoc_record_post(valid_code.replace("chup-anh-doctor --packet", "chup-anh-doctor<# note #>--packet")), "lệnh 5 sai template")
 
     loi(lambda: _loc_lenh_truoc_record_post(f"{cmd_b}\n{cmd_r}"), "thiếu lệnh")
     loi(lambda: _loc_lenh_truoc_record_post(f"{cmd_b}\n{cmd_e}\n{cmd_c}\n{cmd_a}\n{cmd_d}\nexit 0\n{cmd_r}"), "lệnh 6 sai template")

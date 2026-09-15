@@ -4611,23 +4611,23 @@ def case_dot_bien_test_neo_chet_van_DO(c: Ctx):
 
 
 def _ps_statements(script: str):
-    stmts, cur, state, start, i, n = [], [], "N", 0, 0, len(script)
+    stmts, cur, state, start, i, n, tb = [], [], "N", 0, 0, len(script), True
     while i < n:
-        c = script[i]
+        c, os = script[i], state
         if state == "N":
-            is_new = not cur or script[i-1] in " \t\r\n"
-            if is_new and script.startswith("<#", i): state = "B"; cur.extend([" ", " "]); i += 1
-            elif is_new and c == "#": state = "L"; cur.append(" ")
+            if tb and script.startswith("<#", i): state = "B"; cur.extend([" ", " "]); i += 1
+            elif tb and c == "#": state = "L"; cur.append(" ")
             elif script.startswith("@'\n", i) or script.startswith("@'\r\n", i): state = "H1"; cur.extend(["@", "'"]); i += 1
             elif script.startswith('@"\n', i) or script.startswith('@"\r\n', i): state = "H2"; cur.extend(["@", '"']); i += 1
             elif c == "'": state = "S1"; cur.append(c)
             elif c == '"': state = "S2"; cur.append(c)
-            elif c == "`": state = "E"
+            elif c == "`": state = "E"; tb = False
             elif c in ";\n":
                 txt = "".join(cur).strip(" \t\r\n")
                 if txt: stmts.append((start, i, txt))
-                cur, start = [], i + 1
-            else: cur.append(c)
+                cur, start = [], i + 1; tb = True
+            elif c in " \t\r": cur.append(c); tb = True
+            else: cur.append(c); tb = c in ")]}"
         elif state == "L":
             if c == "\n": state = "N"; continue
             else: cur.append(" ")
@@ -4657,6 +4657,7 @@ def _ps_statements(script: str):
         elif state == "H2":
             if c == "\n" and script.startswith('"@', i+1): state = "N"; cur.extend(["\n", '"', "@"]); i += 2
             else: cur.append(" " if c != "\n" else "\n")
+        if state == "N" and os in ("B", "S1", "S2", "H1", "H2"): tb = True
         i += 1
     if state in ("B", "S1", "S2", "H1", "H2", "E", "E2"):
         raise AssertionError("unfinished")
@@ -4831,10 +4832,10 @@ def case_trich_xuat_74a_chong_nhieu(c: Ctx):
     valid_code = f"{cmd_b}\n{cmd_e}\n{cmd_c}\n{cmd_a}\n{cmd_d} # doctor\n# c\n{cmd_r}"
     assert _loc_lenh_truoc_record_post(valid_code) == f"{cmd_b}\n{cmd_e}\n{cmd_c}\n{cmd_a}\n{cmd_d} # doctor\n# c"
 
-    vc = valid_code.replace("<executor-provider>", "<executor-provider> # tail")
-    assert _loc_lenh_truoc_record_post(vc) == vc[:vc.rfind(cmd_r)].strip()
-    vc = valid_code.replace("chup-anh-doctor --packet", "chup-anh-doctor <# note #> --packet")
-    assert _loc_lenh_truoc_record_post(vc) == vc[:vc.rfind(cmd_r)].strip()
+    for f, t in [("<executor-provider>", "<executor-provider> # tail"), ("chup-anh-doctor --packet", "chup-anh-doctor <# note #> --packet"), ("}", "}# harmless"), ("}", "}<# harmless #>"), (")", ")<# harmless #>"), ("hợp lệ' }", "hợp lệ'<# harmless #> }")]:
+        vc = valid_code.replace(f, t, 1)
+        assert _loc_lenh_truoc_record_post(vc) == vc[:vc.rfind(cmd_r)].strip()
+    assert _ps_statements("'x'# comment")[-1][2] == "'x'"
     vc = f"# start\n{valid_code}"
     assert _loc_lenh_truoc_record_post(vc) == vc[:vc.rfind(cmd_r)].strip()
 

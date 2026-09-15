@@ -4002,6 +4002,8 @@ MUTANTS = {
         '    assert os.name != "nt", "phải chạy trên Windows"  # đột biến\n',
         ["luong_canonical_chay_that"],
     ),
+    "74a_splitlines_sai": ('    p = re.split(r\'(\\r\\n|\\r|\\n)\', noi_dung); lines = [p[i]+p[i+1] for i in range(0,len(p)-1,2)]+([p[-1]] if p[-1] else [])', '    lines = noi_dung.splitlines(keepends=True)', ["trich_xuat_74a_chong_nhieu"]),
+    "74a_raw_closing_cung_ten": ('            if mh:\n                end_re = re.compile(r"-->" if mh.group(1) else r"(?i)</(?:pre|script|style|textarea)>")', '            if mh:\n                end_re = re.compile(r"-->" if mh.group(1) else f"(?i)</{mh.group(2)}>")', ["trich_xuat_74a_chong_nhieu"]),
 }
 
 # Phân loại là KHAI BÁO: tên chỉ có mặt ở đây mới được sửa test harness.
@@ -4016,7 +4018,7 @@ MUTANTS_NHAM_TEST = frozenset({
     "moc_kiem_to_vo_dieu_kien",
     "phan_loai_lai_dot_bien_test_bang_suy_luan",
     "luong_canonical_chay_that_dao_os_name",
-    "bo_qua_html_guard_trong_trich_xuat",
+    "bo_qua_html_guard_trong_trich_xuat", "74a_splitlines_sai", "74a_raw_closing_cung_ten",
 })
 
 
@@ -4673,7 +4675,7 @@ def _ps_statements(script: str):
 
 def _trich_xuat_powershell_74a(noi_dung: str) -> str:
     import re
-    lines = noi_dung.splitlines(keepends=True)
+    p = re.split(r'(\r\n|\r|\n)', noi_dung); lines = [p[i]+p[i+1] for i in range(0,len(p)-1,2)]+([p[-1]] if p[-1] else [])
     f_char, f_len, in_sec, n_head, blocks, cur, html_end = None, 0, False, 0, [], None, None
     for line in lines:
         if not f_char:
@@ -4682,7 +4684,7 @@ def _trich_xuat_powershell_74a(noi_dung: str) -> str:
                 continue
             mh = re.match(r"(?i)^ {0,3}(?:(<!--)|<(pre|script|style|textarea)(?:[ \t\v\f\r\n>]|$))", line)
             if mh:
-                end_re = re.compile(r"-->" if mh.group(1) else f"(?i)</{mh.group(2)}>")
+                end_re = re.compile(r"-->" if mh.group(1) else r"(?i)</(?:pre|script|style|textarea)>")
                 if not end_re.search(line): html_end = end_re
                 continue
         m = re.match(r"^ {0,3}(`{3,}|~{3,})(.*)$", line)
@@ -4863,13 +4865,13 @@ def case_trich_xuat_74a_chong_nhieu(c: Ctx):
     loi(lambda: _loc_lenh_truoc_record_post(f"{cmd_b}\n{cmd_e}\n{cmd_c}\n{cmd_a}\npython .claude/dev/packet_loop.py chup-anh-doctor --packet <issue> --out <doctor-signed.json>|Get-Date\n{cmd_r}"), "lệnh 5 sai template")
     loi(lambda: _trich_xuat_powershell_74a("#### 7.4a Thứ tự state trước khi gọi reviewer\n```powershell\xa0\n```\n"), "không tìm thấy khối powershell")
 
-    loi(lambda: _trich_xuat_powershell_74a(f"<!--\n{t_chuan}```powershell\nc\n```\n-->\n"), "không tìm thấy duy nhất")
-    loi(lambda: _trich_xuat_powershell_74a(f"<pre\f\n{t_chuan}```powershell\nc\n```\n</pre>\n"), "không tìm thấy duy nhất")
-    loi(lambda: _trich_xuat_powershell_74a(f"<SCRIPT\v\n{t_chuan}```powershell\nc\n```\n</SCRIPT>\n"), "không tìm thấy duy nhất")
-    loi(lambda: _trich_xuat_powershell_74a(f"<TeXtArEa>\n{t_chuan}```powershell\nc\n```\n</textarea>\n"), "không tìm thấy duy nhất")
-    assert _trich_xuat_powershell_74a(f"<!--\n{t_chuan}```powershell\nc\n```\n-->\n{t_chuan}```powershell\n# ok\n```\n") == "# ok"
-    assert _trich_xuat_powershell_74a(f"<textarea>\n{t_chuan}```powershell\nc\n```\n</textarea>\n{t_chuan}```powershell\n# ok\n```\n") == "# ok"
+    for tg, sp, cl in [("<!--", "", "-->"), ("<pre", "\f", "</pre>"), ("<SCRIPT", "\v", "</SCRIPT>"), ("<TeXtArEa", "", "</textarea>")]: loi(lambda t=tg, s=sp, c=cl: _trich_xuat_powershell_74a(f"{t}{s}\n{t_chuan}```powershell\nc\n```\n{c}\n"), "không tìm thấy duy nhất")
     loi(lambda: _trich_xuat_powershell_74a(f"<!--\n{t_chuan}```powershell\nc\n```\n"), "không tìm thấy duy nhất")
+    for s in "\v\f\x1c\x1d\x1e\x85\u2028\u2029":
+        loi(lambda s=s: _trich_xuat_powershell_74a(f"<!--\n-->{s}{t_chuan}```powershell\nc\n```\n"), "không tìm thấy")
+    for o, c in ((o, c) for o in ["pre", "script", "style", "textarea"] for c in ["pre", "script", "style", "textarea"]):
+        assert _trich_xuat_powershell_74a(f"<{o}>\n{t_chuan}```powershell\nc\n```\n</{c}>\n{t_chuan}```powershell\n# ok\n```\n") == "# ok"
+    assert _trich_xuat_powershell_74a(f"<!--\n{t_chuan}```powershell\nc\n```\n-->\n{t_chuan}```powershell\n# ok\n```\n") == "# ok"
 
     # R8 Assertions
     loi(lambda: _loc_lenh_truoc_record_post(f"\xa0{valid_code}"), "lệnh 1 sai template")

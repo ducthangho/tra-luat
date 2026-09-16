@@ -1,3 +1,112 @@
+# ★ dev-side — r374: ghi sổ #540 và #538 — ba verdict claude ra khỏi THƯ MỤC CON và lần đầu bị cổng chấm (2026-09-16)
+
+Nối tiếp r373 (chốt tới `dc02c9b`, #521). Mục này là vế bookkeeping ADR-0034 của **hai** packet land liền
+nhau: **#540** (merge `c8f6676`, PR #542) và **#538** (merge `6bd5600`, PR #539). 3 verdict + 3 biên nhận v2
+lên TẦNG ĐẦU `ops/reviews/`, 3 hàng mục lục + 9 cảnh báo + 1 đoạn nguồn, manifest tái sinh.
+Tiền lệ r364/r367/r369/r371/r372/r373.
+
+**Phạm vi nguồn của mục r374:** (a) ĐO ĐƯỢC trong kho: băm/byte ba verdict, `reviewed_sha`, `numstat`,
+và kết quả cổng chạy tại chỗ trong chính lượt này; (b) THUẬT LẠI: chỉ thị merge của chủ kho trong phiên
+chat, biên bản bàn giao của executor codex cho #540 (số đo trên máy Windows thật), và việc phiên agy chạy
+trên máy cá nhân của chủ kho; (c) SỐ CI đọc từ `actions_list`/`get_job_logs` theo `head_sha`.
+
+**Không nâng `VERSION`.** Vẫn `1.36.68` từ r336.
+
+## Việc chính: đóng một caveat mà cả ba biên nhận đều tự khai
+
+Cả ba biên nhận khai cùng một caveat `HIEN-VAT-TRONG-THU-MUC-CON-NAM-NGOAI-TAM-BA-CONG`. Nội dung nó
+đo được, không suy diễn: ba cổng chạm `ops/reviews/` đều glob **TẦNG ĐẦU** —
+`tm.glob("*.receipt.yaml")` ở `ops/bien_nhan_v2.py` dòng 879 và 989, `thu_muc.glob("*.receipt.yaml")` và
+`thu_muc.glob("*-verdict.md")` ở `t26`/`t27` trong `ops/lease_publish_test.py`. Hiện vật nằm ở
+`ops/reviews/wp538/` và `ops/reviews/wp540/` nên **không cổng nào chạm tới**.
+
+Lúc review, đặt ở thư mục con là **bắt buộc**: `write_set` của cả ba lease liệt kê đúng thư mục con ấy,
+và `ops/reviews/README.md` không nằm trong write set nào. Reviewer đã đo bù bằng cách chạy `bien_nhan_v2`
+trên một BẢN SAO tạm ở tầng đầu (ĐẠT) — tức tệp hợp lược đồ; thứ thiếu là **cổng tự động chạm nó mỗi
+lượt**. Mục này cấp đúng thứ ấy.
+
+**Đo được sau khi chuyển:** `ops/lease_publish_test.py` → `155/155 đạt; đã chạy=155, bỏ qua=0`, `rc=0`.
+`t26` và `t27` ĐẠT — đây là **lần đầu** ba verdict này được một cổng chấm.
+
+## Một phát hiện của chính lượt bookkeeping: hai verdict WP538 CHƯA TỪNG có trên master
+
+Bản kế hoạch bookkeeping viết là "CHUYỂN hiện vật từ thư mục con lên tầng đầu". Đo lại thì chỉ **một**
+trong ba là chuyển thật:
+
+| tệp | trước lượt này | thao tác |
+|---|---|---|
+| `wp540-review-1-claude-verdict.md` | có trên `master` tại `ops/reviews/wp540/` (vào theo merge `c8f6676`) | `git mv` lên tầng đầu |
+| `wp538-review-1-claude-verdict.md` | **KHÔNG có trên `master`** — chỉ sống ở nhánh `claude/review-wp538-20260916` | mang vào kho, đặt thẳng tầng đầu |
+| `wp538-review-2-claude-verdict.md` | **KHÔNG có trên `master`** — chỉ sống ở nhánh `claude/review-wp538-luot2-20260916` | mang vào kho, đặt thẳng tầng đầu |
+
+Lý do cấu trúc: PR #539 merge nhánh **mã** của executor (`codex/wp538-r1-g1`), còn verdict sống trên nhánh
+**review** riêng, và nhánh review không được merge. Nên caveat kia còn nhẹ hơn sự thật: hiện vật WP538
+không chỉ ngoài tầm cổng, nó **ngoài kho**. Cùng họ bài học *"sổ lease không nằm một chỗ"* — nhánh `ops/**`
+và nhánh review đều là nơi hiện vật ở lại sau khi packet land. Nhánh bị xoá là mất hẳn.
+
+## Băm verdict giữ nguyên từng byte
+
+Tệp verdict là **nguyên văn neo băm**, không được sửa. Đo lại sau khi chuyển:
+
+| tệp | sha256 | byte | kết luận | head đã review |
+|---|---|---:|---|---|
+| `wp540-review-1-claude-verdict.md` | `0ddcd42e…` | 9 854 | `approve` 0/0/1 | `7c7ad450` |
+| `wp538-review-1-claude-verdict.md` | `8d778449…` | 9 682 | `changes_requested` 0/1/1 | `f2aa1f9f` |
+| `wp538-review-2-claude-verdict.md` | `d4c386a8…` | 7 571 | `approve` 0/0/1 | `7c21bf60` |
+
+Trong biên nhận, đổi **hai** trường: `verdict_path` bỏ đoạn thư mục con (vì `t26` băm tệp mà
+`verdict_path` trỏ tới, và `t27` so ĐƯỜNG DẪN ĐẦY ĐỦ), và `evidence_url` neo lại. `verdict_sha256` không đụng.
+
+**Vế `evidence_url` là một lời khai của chính mục này bị cổng bác, và đáng ghi hơn kết quả.** Bản đầu của
+đoạn này viết *"`evidence_url` cũng không đụng — nó neo blob tại commit cũ, sửa nó là gãy mỏ neo"*. Nghe hợp
+lý, và sai. `ops/bien_nhan_v2.py:803` so **đường dẫn phân tích từ URL** với `verdict_path` và ĐỎ khi lệch:
+*"mỏ neo KHÔNG neo thứ nó khai"*. Chú thích ngay trên dòng ấy nói rõ vì sao nó tồn tại — hai trường cùng nói
+về MỘT tệp mà không ai so chúng với nhau thì một biên nhận trỏ `verdict_path` bất kỳ vẫn qua. Nên giữ
+`evidence_url` cũ không phải là bảo toàn mỏ neo; nó là để lại **hai** địa chỉ mâu thuẫn.
+
+Hệ quả là mục này land bằng **hai commit**, không phải một: commit đầu chuyển tệp và sửa `verdict_path`;
+commit sau neo `evidence_url` vào **chính commit đầu**, nơi tệp đã nằm ở tầng đầu với đúng băm ấy. Phải tách
+vì URL phải chứa một SHA chưa tồn tại lúc soạn. Mỏ neo `canonical_ancestry` đo tổ tiên so với **HEAD của cây
+đang kiểm** (`ops/bien_nhan_v2.py:818`), không so `master`, nên neo vào commit đầu là hợp lệ ngay trên nhánh.
+
+**Phần văn khai caveat trong biên nhận cố ý KHÔNG viết lại**, dù nay nó đã cũ. Biên nhận đã giao là bản ghi
+trung thực của trạng thái lúc review; đính chính đi vào hiện vật MỚI — ở đây là mục CHANGELOG này và bảng
+cảnh báo trong `ops/reviews/README.md`, nơi mỗi hàng nói thẳng caveat ấy **ĐÃ ĐÓNG bởi hồ sơ này**.
+
+## Ba verdict đều `advisory_review`, KHÔNG `cross_approved` — và đó là nợ, không phải kết luận
+
+Cả ba lượt review chạy TRONG phiên điều phối chứ không phải một tiến trình claude riêng neo bởi
+`launcher.py run`, nên không có `session_run_id`. `ASSURANCE_CAN_DOC_LAP` đòi `session_run_id` hoặc
+`phien_doc_lap` cho mọi mức trong nó. CHECKOUT riêng thì có thật; CONTEXT thì không — chính phiên ấy soạn
+spec và ghi hộ lease.
+
+Bản đầu của biên nhận #540 **đã khai `cross_approved` và bị `bien_nhan_v2` TỪ CHỐI**; mức được hạ về
+`advisory_review` ở một commit đính chính riêng, tệp verdict không bị đụng. Đáng ghi vì chính biên nhận ấy
+đã mang sẵn caveat nói ra giới hạn này, rồi trường `assurance` bên trên vẫn khai vượt — đúng lớp `F3` của
+cross-review PR #455. **Viết ra một giới hạn không làm cho nó được tuân thủ; chỉ một cổng đọc được trường
+ấy mới làm.** Đường đạt `cross_approved` cho cả hai packet vẫn mở, chưa đi.
+
+## `gate (windows)` đỏ trên cả hai lượt — đỏ SẴN trên nền, không phải của hai packet này
+
+Phân loại bằng phép đo hai vế, cùng bước cùng dòng kết:
+
+| head | bước đỏ | dòng kết |
+|---|---|---|
+| `7c21bf60` (PR #539) | #18 `lease-publish selftest` | `lease_publish: 133/148 đạt; đã chạy=148, bỏ qua=7` |
+| `19de5669` (**master**, base của PR #539) | #18 `lease-publish selftest` | `lease_publish: 133/148 đạt; đã chạy=148, bỏ qua=7` |
+
+15 ca đỏ, gốc chung `KHÔNG_XÁC_ĐỊNH: không thấy git trong PATH tối thiểu /usr/bin:/bin` —
+`ops/lease_publish.py:1106` ghi cứng một PATH kiểu Unix không tồn tại trên Windows. **Delta so nền = 0.**
+Chủ kho đã cấp packet riêng **WP541** cho lớp lỗi này; không packet nào ở đây mở rộng phạm vi để vá nó.
+Bước #15 `idiom-ba-ten selftest` XANH trên CẢ HAI nền, tức bản vá #538 đứng vững trên Windows thật.
+
+Ghi kèm hai điều để lần sau đỡ mất công: **14/15** ca nêu PATH, còn `t150` có nguyên nhân KHÁC (Q13,
+`ops/thu-hoi/_ngoai-le-closure.retired.yaml` có ở `refs/heads/meta-pol-hong` mà policy vắng) — nên vá PATH
+xong cổng **vẫn chưa xanh**, đừng đọc thành bản vá hỏng. Và đây là lần **thứ hai** cùng hình dạng: verdict
+`ops/reviews/don-nhanh-base-review-7-claude-verdict.md` đã ghi đúng lớp lỗi ấy ở `don-nhanh.ps1:128`
+(`Chay-KichBan`), windows 3/21. Theo doctrine của kho — đếm HÌNH DẠNG, không đếm lỗi — đáng quét cả kho
+tìm chỗ thứ ba trước khi vá chỗ thứ hai.
+
 # ★ dev-side — r373: ghi sổ #521 — bốn verdict codex của chuỗi tám lượt cross-review adapter `cross-review`; lượt 8 khai tập theo từng lớp và chứng minh phép quét có răng (2026-09-12)
 
 Nối tiếp r372 (chốt tới `f4da553`, #517). Mục này là vế bookkeeping ADR-0034 của **#521** (merge `dc02c9b`):

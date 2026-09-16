@@ -32,7 +32,7 @@ assurance_ghi_chu: >-
   (co session_run_id), hoac mot quyet dinh cua chu kho.
 
 verdict: approve
-verdict_path: ops/reviews/wp540/wp540-review-1-claude-verdict.md
+verdict_path: ops/reviews/wp540-review-1-claude-verdict.md
 verdict_sha256: 0ddcd42ef0f271ec7c5ff476797bb5b14cf0d6b8fd53f8785a9af07a5f93da5e
 verdict_bytes: 9854
 reviewed_sha: 7c7ad450258c640bc207c17f7f5a60077081419c

@@ -35,11 +35,12 @@ reviewed_base_nguon: >-
   `immutable_acceptance_baseline` cua lease g3, doc tu blob tren `ops/cap-lease-538-r3`,
   KHONG phai merge-base tu tinh.
 
-evidence_url: PENDING
+evidence_url: https://github.com/ducthangho/tra-luat/blob/d4adb9f66b0b62d92f3fb6884fd5028248be027e/ops/reviews/wp538/wp538-review-1-claude-verdict.md
 evidence_url_ghi_chu: >-
-  Dien trong MOT commit RIENG sau khi do duoc commit DAU TIEN chua tep verdict bang
-  `git log --diff-filter=A`. KHONG dien roi `--amend`: amend la phep DOI SHA, va o mot luot
-  truoc no da lam `evidence_url` tro mot commit mo coi chua tung duoc day.
+  Neo BLOB ghim `d4adb9f66b0b62d92f3fb6884fd5028248be027e` — commit DAU TIEN chua tep verdict,
+  do bang `git log --diff-filter=A -- ops/reviews/wp538/wp538-review-1-claude-verdict.md`
+  (tra DUNG MOT dong). Dien trong MOT commit RIENG. KHONG dien roi `--amend`: amend la phep
+  DOI SHA, va o mot luot truoc no da lam `evidence_url` tro mot commit mo coi chua tung duoc day.
 
 ngan_sach_ci_loai_b: 0
 ngan_sach_ci_loai_b_nguon: >-

@@ -1383,17 +1383,65 @@ def cmd_doi_chieu_uy_quyen(a, state_dir: Path) -> int:
     return RC_OK
 
 
+# Số từ tối thiểu để nguồn đối chiếu có nghĩa. Dưới ngưỡng này thì tập n-gram rỗng
+# hoặc gần rỗng, và cổng sẽ "sạch" vì KHÔNG ĐO ĐƯỢC chứ không vì cây sạch.
+_PROTO_TU_TOI_THIEU = 200
+
+
+def _doc_nguon_protocol(root: Path) -> list[str]:
+    """Văn bản logic của `docs/PROTOCOL_DA_PHIEN.md` DƯỚI `root` (bỏ code fence).
+
+    FAIL-CLOSE, và đây là điểm khác bản trước. Bản trước trả `[]` cho BỐN tình huống
+    khác hẳn nhau — tệp vắng, không đọc được, quá ngắn, rỗng sau khi bỏ fence — rồi
+    người gọi viết `if proto_words:` nên cả bốn đều thành "bỏ qua trong im lặng". Đo
+    được cả bốn: chép nguyên văn 25 từ vào adapter mà cổng vẫn `rc=0`. Một cổng tự tắt
+    khi thiếu nguồn là cổng không tồn tại đúng lúc nó cần nhất.
+
+    Chính hàm `cmd_doctrine_scan` đã fail-close cho tệp ĐÍCH (`_die(RC_ARG, ...)` khi
+    `read_text` ném) — bản trước đặt chính sách NGƯỢC LẠI cho tệp NGUỒN, cùng một cặp
+    ngoại lệ, cách nhau mười lăm dòng.
+
+    KHÔNG còn fallback ra `Path(__file__).parents[2]`. Fallback ấy làm `--root` KHÔNG
+    điều khiển cơ sở so sánh: quét cây X mà đo theo protocol của cây chứa SCRIPT. Cùng
+    hình dạng với lỗi `t24` đã ghi trong `CLAUDE.md`. Đo được: hai ca test mới đỏ CHỈ
+    nhờ fallback này, vì `_repo_gia` không hề dựng `docs/`.
+    """
+    p = root / "docs" / "PROTOCOL_DA_PHIEN.md"
+    if not p.is_file():
+        _die(RC_ARG, f"KHÔNG ĐO ĐƯỢC: thiếu nguồn đối chiếu {p} — `doctrine-scan` so "
+                     f"adapter với protocol DƯỚI `--root`; không có nó thì phép đo "
+                     f"không tồn tại, và `rc=0` ở đây sẽ là lời khai sai")
+    try:
+        raw = p.read_text(encoding="utf-8")
+    except (OSError, UnicodeDecodeError) as e:
+        _die(RC_ARG, f"KHÔNG ĐO ĐƯỢC: không đọc được nguồn đối chiếu {p}: {e}")
+    khong_code = re.sub(r"```[\s\S]*?```", " ", raw)
+    phang, _ = _phang_ca_tep(khong_code)
+    tu = phang.split()
+    if len(tu) < _PROTO_TU_TOI_THIEU:
+        _die(RC_ARG, f"KHÔNG ĐO ĐƯỢC: nguồn đối chiếu {p} chỉ còn {len(tu)} từ sau khi "
+                     f"bỏ code fence (tối thiểu {_PROTO_TU_TOI_THIEU}) — tập n-gram quá "
+                     f"nghèo để kết luận, `rc=0` sẽ là 'chưa đo' chứ không phải 'sạch'")
+    return tu
+
+
 def cmd_doctrine_scan(a, state_dir: Path) -> int:
     root = Path(a.root)
     muc_tieu: list[Path] = []
     skills = root / ".claude" / "skills"
     if skills.is_dir():
         muc_tieu.extend(sorted(skills.rglob("*.md")))
+    agents_skills = root / ".agents" / "skills"
+    if agents_skills.is_dir():
+        muc_tieu.extend(sorted(agents_skills.rglob("*.md")))
     claude_md = root / "CLAUDE.md"
     if claude_md.is_file():
         muc_tieu.append(claude_md)
     for extra in a.path or []:
         muc_tieu.append(Path(extra))
+
+    proto_words = _doc_nguon_protocol(root)
+    proto_cache: dict[int, set[tuple[str, ...]]] = {}
 
     dinh: list[tuple[str, str, str, int]] = []
     for f in muc_tieu:
@@ -1414,6 +1462,64 @@ def cmd_doctrine_scan(a, state_dir: Path) -> int:
                 while tu != -1:
                     dinh.append((str(f), nhom, cum, _dong_tai(ban_do, tu)))
                     tu = phang.find(kim, tu + len(kim))
+
+        # `proto_words` luôn khác rỗng: `_doc_nguon_protocol` fail-close.
+        # Giữ nhánh này thì cửa thứ năm lại mở ra trong im lặng.
+        if True:
+            file_words = phang.split()
+            is_claude_md = (f.name == "CLAUDE.md")
+            # Ngưỡng n-gram: 10 từ cho skills/adapters, 15 từ cho CLAUDE.md.
+            # VÌ SAO CLAUDE.md CẦN NGƯỠNG 15 (đo được, không phải võ đoán — LỚP 4):
+            # CLAUDE.md có dẫn chứng câu bài học nguyên văn dài đúng 13 từ từ protocol
+            # ("cùng họ cổng vắng mặt trông giống cổng xanh, đổi đối tượng: một").
+            # Đo trên master: ngưỡng 10 có 11 hits, 11 có 7 hits, 12 có 4 hits,
+            # 13 có 2 hits, 14 có 0 hits, 15 có 0 hits. Ngưỡng 15 là cận an toàn
+            # tối thiểu để không bắt oan câu dẫn giải bài học trong CLAUDE.md,
+            # trong khi vẫn chặn đứng việc sao chép đoạn dài (>= 15 từ).
+            # Các adapter trong .claude/skills và .agents/skills không được dẫn giải
+            # câu chữ dài như vậy nên giữ ngưỡng nghiêm ngặt 10 từ.
+            threshold = 15 if is_claude_md else 10
+            if len(file_words) >= threshold and len(proto_words) >= threshold:
+                if threshold not in proto_cache:
+                    proto_cache[threshold] = {
+                        tuple(proto_words[i : i + threshold])
+                        for i in range(len(proto_words) - threshold + 1)
+                    }
+                proto_set = proto_cache[threshold]
+                matched_indices = set()
+                for i in range(len(file_words) - threshold + 1):
+                    ngram = tuple(file_words[i : i + threshold])
+                    if ngram in proto_set:
+                        for idx in range(i, i + threshold):
+                            matched_indices.add(idx)
+
+                if matched_indices:
+                    word_spans = []
+                    cur_pos = 0
+                    for w in file_words:
+                        idx = phang.find(w, cur_pos)
+                        word_spans.append((idx, idx + len(w)))
+                        cur_pos = idx + len(w)
+
+                    sorted_indices = sorted(matched_indices)
+                    ranges = []
+                    start = sorted_indices[0]
+                    prev = sorted_indices[0]
+                    for idx in sorted_indices[1:]:
+                        if idx == prev + 1:
+                            prev = idx
+                        else:
+                            ranges.append((start, prev))
+                            start = idx
+                            prev = idx
+                    ranges.append((start, prev))
+
+                    for start_w, end_w in ranges:
+                        so_tu = end_w - start_w + 1
+                        bat_dau_char = word_spans[start_w][0]
+                        dong_dinh = _dong_tai(ban_do, bat_dau_char)
+                        doan_chep = " ".join(file_words[start_w : end_w + 1])
+                        dinh.append((str(f), "chep-protocol", f"({so_tu} từ) {doan_chep[:60]}...", dong_dinh))
 
     if dinh:
         for f, nhom, cum, i in dinh:

@@ -1,0 +1,121 @@
+# Lease — WP540 WINDOWS-R523-CROSS-DRIVE revision 2 / generation 2. Ghi HO chu kho.
+# THAY g1 vi DOI MUC ASSURANCE: same_provider_approved -> cross_approved, va reviewer
+# codex/xhigh -> claude. §3.2: doi acceptance tao revision moi => r2 + g2 + cap lai lease.
+# Executor VAN LA CODEX. Ly do khong phai 'cho chac hon' ma la §8 dong 580 — xem khoa
+# `vi_sao_len_cross_approved`. Tep nay viet TUNG TRUONG, khong sed tu g1.
+schema_version: 2
+event: executor_lease_granted
+packet_issue: 540
+packet_id: WINDOWS-R523-CROSS-DRIVE
+mission_issue: 499
+revision: 2
+generation: 2
+lease_id: wp540-r2-g2-claude-review
+granted_by: ducthangho
+granted_on_instruction: https://github.com/ducthangho/tra-luat/issues/540#issuecomment-5694699451
+recorded_by: claude-session
+recorder_is_dispatcher: false
+leased_at_utc: '2026-09-16T08:50:28Z'
+lease_expires_at_utc: '2026-09-17T08:50:28Z'
+role: executor
+provider: codex
+executor: codex
+model: gpt-6-astra
+effort: high
+execution_surface: codex_cli
+transport: machine
+environment: local
+operating_system: Windows
+shell: PowerShell
+risk: sensitive
+review_class: sensitive
+effective_review_class: sensitive
+assurance_target: cross_approved
+reviewer_provider: claude
+reviewer_model: KHONG_KHAI
+reviewer_effort: KHONG_KHAI
+reviewer_independence: fresh session/context/checkout; no executor context fork; read-only source
+cross_reviewer_requirement: 'Reviewer PHAI khac provider voi executor (executor=codex => reviewer=claude).
+  Dieu kien cua g1 ''same model, xhigh > high'' KHONG con ap: do la phep tang EFFORT, khong phai phep
+  doi PROVIDER — nen mot luot xhigh cung nen KHONG con thoa A6 o revision nay. CLI header/receipt phai
+  chung minh danh tinh; mat bang chung hoac fallback thi khong nhan approve.'
+vi_sao_len_cross_approved: 'docs/PROTOCOL_DA_PHIEN.md §8 dong 580: ''same_provider_approved van khong
+  thay cross_approved cho class sensitive.'' Do TRUC TIEP tren base 19de5669 cua chinh r2 (sed -n ''580p'')
+  — khong chep tu tri nho. WP540 la sensitive. Ngoai le same-provider cua chu kho o g1 (same_provider_authority,
+  issuecomment-5675140912) hop le va KHONG BI RUT; theo dong 580 no khong THAY cross_approved o class
+  nay, va dieu kien sinh ra no (phia claude het quota) khong con: phien claude dang chay. Ke hoach reviewer
+  cua g1 KHONG bi goi la sai — no chi khong con la muc tieu.'
+same_provider_authority_cua_g1: https://github.com/ducthangho/tra-luat/issues/540#issuecomment-5675140912
+spec_path: ops/specs/wp540-windows-r523-r2.md
+spec_ref: claude/spec-wp540-r2-20260916
+spec_hash: f767d09ee2b00f12c4103b9601f3c281af43f3730e6b0b1fed1a739182abf803
+spec_sha256: f767d09ee2b00f12c4103b9601f3c281af43f3730e6b0b1fed1a739182abf803
+prompt_path: ops/specs/wp540-windows-r523-r2.md
+prompt_sha256_required: f767d09ee2b00f12c4103b9601f3c281af43f3730e6b0b1fed1a739182abf803
+branch: codex/wp540-r1-g1
+branch_ownership: exclusive
+target_branch_neu_land: master
+base_sha: 19de56693d06813e6743a30113d0fb87bff3e196
+start_from_sha: 9963a03a88a6936eadb208e7c602d0ae63fefc96
+immutable_acceptance_baseline: 19de56693d06813e6743a30113d0fb87bff3e196
+reviewed_sha_required: 9963a03a88a6936eadb208e7c602d0ae63fefc96
+reviewed_sha_required_note: 'Head THUC TE cua codex/wp540-r1-g1 luc cap (do bang git rev-parse), KHONG
+  ke thua mo neo cu cua g1 (19de5669). DO DUOC va phai doc dung: tai thoi diem cap, head ay CHUA CO VIEC
+  SAN PHAM nao — diff 19de5669..9963a03 = dung 2 duong phoi hop (+76 lease, +33 spec), ops/nhanh_don_duoc_test.py
+  chua bi dung, khong co PR. Nen day la mo neo DUOI, va verdict cuoi PHAI neo dung SHA ung vien that khi
+  no ton tai.'
+write_set:
+- ops/nhanh_don_duoc_test.py
+- ops/specs/wp540-windows-r523-r1.md
+- ops/leases/wp540-r1-g1-codex-windows.yaml
+- ops/specs/wp540-windows-r523-r2.md
+- ops/leases/wp540-r2-g2-claude-review.yaml
+- ops/reviews/wp540/
+related_packets:
+- 538
+- 466
+thay_the_cho:
+- wp540-r1-g1-codex-windows
+succession_note: r2 thay r1 trong CUNG packet. Lease g1 DA HET HAN luc 2026-09-16T05:17:24Z truoc khi
+  bi thay the. Lease cu nhan bia mo hai chieu tren BAN SAO o nhanh ops nay; ban GOC tren codex/wp540-r1-g1
+  KHONG bi sua vi nhanh ay exclusive cua executor. Spec r1 GIU NGUYEN tren dia lam ho so.
+run_minutes: 90
+heartbeat_required_minutes: 30
+attempts_limit: class-based owner-directed loop; no reset of prior history
+review_calls_limit: until approve or zero P1/P2; per-run deadline and infrastructure checkpoints remain
+manual_ci_budget: 0
+manual_ci_budget_vi_sao_doi: 'g1 dat 2; g2 dat 0 theo chi thi dang dung cua chu kho, nguyen van: ''CI
+  Window gap loi da biet, de do ton tien, khong chay CI Windows'' va ''Khong CI, full CI, Windows CI do
+  loi da biet''. Ngan sach nay chi phoi CI GOI TAY (workflow_dispatch, full CI goi tay, lane windows goi
+  tay). No KHONG chi phoi required check tu dong ban theo push/PR, va KHONG chi phoi CI hau merge — nen
+  A7 cua spec GIU NGUYEN va KHONG duoc doc thanh ''A7 duoc mien''. Khong co mien tru nao duoc cap o day.'
+prohibited_actions:
+- self_review
+- self_approve
+- deploy
+- LIVE
+- ruleset mutation
+- admin bypass
+- secret disclosure
+- CI before readiness
+- workflow_dispatch
+- manual full CI
+- Windows CI
+closure_status: 'Explicit owner-approved bounded write-set; no claim of computed dispatcher closure; missing
+  policy/derived-fields debt #473 must be reported before execution'
+orchestration: owner-authorized manual issue/receipt journal; no packet_loop state claim
+ci_policy: review+admission before PR/full CI; no redundant dispatch; required post-merge CI authorized
+land_authority_note: Owner grants land outcome; exact candidate receipt with separate deadline required
+  before merge; no automatic executor role authority.
+cham_gi_o_g2: 'g2 KHONG cap quyen GHI moi cho SAN PHAM: no doi NGUOI REVIEW va MUC ASSURANCE. Executor
+  van codex, write_set san pham van dung mot tep ops/nhanh_don_duoc_test.py, review_class van sensitive,
+  base van 19de5669, A1-A5 va A7 nguyen van. Hai duong THEM vao write_set la hien vat phoi hop cua CHINH
+  r2/g2 (spec r2 + lease g2), khong phai vung san pham moi.'
+write_set_da_quet_toan_kho: 'DO TRUOC KHI CAP: ai-dang-giu tren refs/heads + refs/remotes (389 ref; comm
+  -23 giua ls-remote --heads va for-each-ref RONG nen tap ref khong mu) cho ca bon duong => NGUOI_GIU
+  0, rc=0, khong KHONG_XAC_DINH. Bo quet duoc HIEU CHINH truoc bang mot ca BIET TRUOC DAP AN (.claude/skills/cross-review/SKILL.md
+  => dung NGUOI_GIU 1: wp538-r3-g3-claude-review), theo bai hoc ''dong ket luan cua bo quet tu viet khong
+  phai du lieu no do''.'
+chua_co_ung_vien_de_review: 'DO DUOC luc cap: WP540 chua co viec san pham. Nen cross-review CHUA CHAY
+  DUOC hom nay — g2 dat muc tieu assurance TRUOC khi viec chay, dung thu tu chu kho chon (''Cap r3/g3
+  truoc roi moi review''). Day KHONG phai loi khai rang da co mot luot review nao.'

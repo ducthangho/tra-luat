@@ -43,6 +43,13 @@ fi
 GOC="${CLAUDE_PROJECT_DIR:-$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)}"
 cd "$GOC"
 
+# M4 / L4: Cưỡng chế UTF-8 tránh lỗi cp1258/charmap trên Windows
+export PYTHONUTF8=1
+export PYTHONIOENCODING=utf-8
+
+# M4 / A4: Ghim phiên bản actionlint đồng bộ với 4 chỗ trong .github/workflows/ci.yml
+AL_VER="1.7.7"
+
 # `command -v` chứ không `which`: có sẵn ở mọi shell POSIX và không phụ thuộc gói ngoài.
 co() { command -v "$1" >/dev/null 2>&1; }
 
@@ -152,6 +159,19 @@ if ! co_chay rg; then
     echo "[session-start] rg: $(rg --version | head -1)"
   else
     echo "[session-start] CANH BAO: KHONG cai duoc rg — tra cuu ma se gay giua chung"
+  fi
+fi
+
+# --- actionlint (M4 / L2): cài actionlint bản ghim để kiểm tra workflow GitHub Actions
+if ! co_chay actionlint; then
+  echo "[session-start] cai actionlint $AL_VER ..."
+  AL_DICH="${HOME}/.local/bin"
+  mkdir -p "$AL_DICH" 2>/dev/null || AL_DICH="/tmp/actionlint"
+  if AL_VER="$AL_VER" AL_DICH="$AL_DICH" bash "$GOC/ops/cai_actionlint.sh" >/dev/null 2>&1; then
+    export PATH="$AL_DICH:$PATH"
+    echo "[session-start] actionlint: $(actionlint --version 2>/dev/null | head -1)"
+  else
+    echo "[session-start] CANH BAO: KHONG cai duoc actionlint — kiem tra GitHub Actions workflow se gay giua chung"
   fi
 fi
 
@@ -599,5 +619,14 @@ elif [ "$MA" -ne 0 ]; then
   echo "[session-start] doctor thoat $MA — xem bang tren"
   exit 1
 fi
+
+# --- GHI DẤU VẾT HOOK ĐÃ CHẠY (M3 / M4)
+# Ghi vào thư mục an toàn đã có trong .gitignore để không làm dơ worktree.
+for d in "$GOC/.claude/.packet_state" "$GOC/.tl_state" "$GOC/.claude"; do
+  if mkdir -p "$d" 2>/dev/null; then
+    date -u +"%Y-%m-%dT%H:%M:%SZ" > "$d/session-start.ran" 2>/dev/null || true
+    break
+  fi
+done
 
 echo "[session-start] xong"

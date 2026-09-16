@@ -5915,6 +5915,108 @@ def t148_doctor_chay_agy_models_MOT_lan_cho_ca_CONG_CU_lan_KHA_NANG():
 
 
 @ca
+def t149_doctor_do_actionlint_va_shellcheck():
+    """A1 / M1: doctor đo actionlint và shellcheck, không tính vào DUNG_DUOC."""
+    m = _tai_launcher_thu()
+    al = [c for c in m.CONG_CU if c.get("ten") == "actionlint"]
+    sc = [c for c in m.CONG_CU if c.get("ten") == "shellcheck"]
+    bang(len(al) == 1 and len(sc) == 1 and al[0]["bat_buoc"] is False and sc[0]["bat_buoc"] is False, "M1: tool co mat va khong bat buoc")
+    # Ca am: thieu tool tuy chon van thoat 0
+    m.CONG_CU, m.MODULE_PY, m.KHA_NANG = [dict(al[0]), dict(sc[0])], [], []
+    m._cac_duong_dan = lambda _c, _e: []
+    rc, d = _doctor_json(m)
+    cc = {c["ten"]: c for c in d["cong_cu"]}
+    bang(rc == 0 and cc["actionlint"]["co"] is False and bool(cc["actionlint"].get("lenh_cai")), "ca am actionlint co=False co lenh_cai")
+    bang(cc["shellcheck"]["co"] is False, "ca am shellcheck co=False")
+    # Ca duong: co tool tren PATH
+    m._cac_duong_dan = lambda c, _e: [(c["ten"], f"/bin/{c['ten']}")]
+    m._phien_ban = lambda d, **kw: (True, "1.7.7" if "actionlint" in d else "0.10.0", False)
+    _, d2 = _doctor_json(m)
+    cc2 = {c["ten"]: c for c in d2["cong_cu"]}
+    bang(cc2["actionlint"]["co"] is True and cc2["actionlint"]["phien_ban"] == "1.7.7", "ca duong actionlint co=True ban 1.7.7")
+    bang(cc2["shellcheck"]["co"] is True, "ca duong shellcheck co=True")
+
+
+@ca
+def t150_doctor_do_bien_utf8_in_ca_khi_xanh():
+    """A2 / M2: doctor đo hai biến UTF-8, in ra KỂ CẢ KHI XANH, cảnh báo khi thiếu."""
+    m = _tai_launcher_thu()
+    m.CONG_CU, m.MODULE_PY, m.KHA_NANG = [], [], []
+    in_dong = []
+    m._in_an_toan = lambda msg="": in_dong.append(msg) or True
+    # Ca 1: xanh ca hai -> khong im lang, in du, khong canh bao
+    m._doc_moi_truong = lambda: ({"PYTHONUTF8": "1", "PYTHONIOENCODING": "utf-8"}, {})
+    rc = m.lenh_doctor(argparse.Namespace(json=False, workspace=None, kiem_song=False, doi_kha_dung=False))
+    txt_x = "\n".join(in_dong)
+    bang(rc == 0 and "BIEN UTF-8" in txt_x and "PYTHONUTF8      : 1" in txt_x and "CANH BAO" not in txt_x, f"xanh in du: {txt_x}")
+    # Ca 2: thieu PYTHONUTF8 -> canh bao
+    in_dong.clear()
+    m._doc_moi_truong = lambda: ({"PYTHONIOENCODING": "utf-8"}, {})
+    rc_v = m.lenh_doctor(argparse.Namespace(json=False, workspace=None, kiem_song=False, doi_kha_dung=False))
+    txt_v = "\n".join(in_dong)
+    bang(rc_v == 0 and "BIEN UTF-8" in txt_v and "CANH BAO" in txt_v, f"thieu phai canh bao: {txt_v}")
+    # Ca 3: json output
+    mj = _tai_launcher_thu()
+    mj.CONG_CU, mj.MODULE_PY, mj.KHA_NANG = [], [], []
+    rc_j, dj = _doctor_json(mj)
+    bang("bien_utf8" in dj, f"json phai co bien_utf8: {dj.keys()}")
+
+
+@ca
+def t151_m3_phan_biet_da_chay_voi_tep_moi():
+    """A3 / M3: phân biệt ĐÃ CHẠY với TỆP MỚI."""
+    m = _tai_launcher_thu()
+    MASTER = "#!/bin/bash\n# hook-nang-luc: codex-auth-restore\necho hi\n"
+    with San() as s:
+        cay = s / "cay_test"
+        (cay / ".claude" / "hooks").mkdir(parents=True)
+        (cay / ".claude" / "hooks" / "session-start.sh").write_text(MASTER, encoding="utf-8")
+        m._git = lambda ws, *a: ((0, MASTER, "") if "session-start.sh" in a[-1] else (1, "", ""))
+        # Ca (a): hook khop master nhung CHUA CHAY (chua co dau vet)
+        tt_h, _ = m._do_hook_cu(str(cay))
+        tt_c, mo_ta_c = m._do_hook_da_chay(str(cay))
+        bang(tt_h == "DUNG_DUOC" and tt_c == "CHUA_CHAY" and "CHƯA CHẠY" in mo_ta_c, f"ca (a) CHUA_CHAY: {tt_c}")
+        # Ca (b): tao dau vet -> DA_CHAY
+        vd = cay / ".claude" / ".packet_state"
+        vd.mkdir(parents=True)
+        (vd / "session-start.ran").write_text("2026-09-17T00:00:00Z\n", encoding="utf-8")
+        tt_c2, mo_ta_c2 = m._do_hook_da_chay(str(cay))
+        bang(tt_c2 == "DA_CHAY" and "ĐÃ CHẠY" in mo_ta_c2, f"ca (b) DA_CHAY: {tt_c2}")
+        tt_kws, _ = m._do_hook_da_chay(None)
+        bang(tt_kws == "KHONG_DO_DUOC", f"None ws phai KHONG_DO_DUOC: {tt_kws}")
+
+
+@ca
+def t152_hook_cai_dat_va_khop_al_ver_ci():
+    """A4 / M4: hook cài và đặt actionlint, AL_VER khớp 4 chỗ trong ci.yml."""
+    goc = Path(__file__).resolve().parents[2]
+    hook_txt = (goc / ".claude" / "hooks" / "session-start.sh").read_text(encoding="utf-8", errors="replace")
+    ci_txt = (goc / ".github" / "workflows" / "ci.yml").read_text(encoding="utf-8", errors="replace")
+    m_hook = re.search(r'^\s*AL_VER=["\']?([0-9]+\.[0-9]+\.[0-9]+)["\']?', hook_txt, re.MULTILINE)
+    bang(bool(m_hook), f"hook phai ghim AL_VER: {hook_txt[:200]}")
+    al_ver = m_hook.group(1)
+    ci_vers = re.findall(r'^\s*AL_VER:\s*([0-9]+\.[0-9]+\.[0-9]+)', ci_txt, re.MULTILINE)
+    bang(len(ci_vers) == 4 and all(v == al_ver for v in ci_vers), f"ci.yml 4 cho phai khop {al_ver}: {ci_vers}")
+    bang("PYTHONUTF8=1" in hook_txt and "PYTHONIOENCODING=utf-8" in hook_txt, "hook phai export UTF-8")
+    bang("cai_actionlint.sh" in hook_txt and "CANH BAO" in hook_txt, "hook phai co cai_actionlint va CANH BAO")
+
+
+@ca
+def t153_doctor_do_duong_dan_kho_co_dau_cach_hoac_phi_ascii():
+    """A5 / M5: doctor ĐO đường dẫn kho: có dấu cách hoặc ngoài ASCII thì nêu ra; âm thì không."""
+    m = _tai_launcher_thu()
+    for d, sub in [("/duong dan/kho", "dau cach"), ("/duong_dan/\u0111\u1ed9/kho", "ky tu ngoai ASCII"),
+                  ("D:/Qu\u1ed1c h\u1ed9i/tra-luat", "dau cach")]:
+        co, mo = m._kiem_tra_duong_dan_kho(d)
+        bang(co is True and sub in mo and "6 ca da biet se do" in mo, f"phai canh bao cho {d}: {mo}")
+    co4, mo4 = m._kiem_tra_duong_dan_kho("/opt/tra-luat/repo_pure_ascii")
+    bang(co4 is False and mo4 == "", f"ca am phai False, '': {mo4}")
+    co5, mo5 = m._kiem_tra_duong_dan_kho(None)
+    bang(co5 is False and mo5 == "", "None ws phai False, ''")
+
+
+
+@ca
 def r01_worktree_that_bi_chan():
     with San() as s:
         wt = tao_worktree(s); dau = s / "da-chay"; rr = s / "runs"
@@ -6857,6 +6959,22 @@ def r349_backend_PDF_du_phong_chay_thi_dung_noi_la_bi_chan():
 # ------------------------------------------------------ tự đột biến: có răng không
 
 DOT_BIEN = [
+    ("m1_xoa_actionlint_khoi_cong_cu",
+     ('    {"ten": "actionlint", "bat_buoc": False, "ung_vien": ["actionlint"],',
+      '    {"ten": "actionlint_disabled", "bat_buoc": False, "ung_vien": ["actionlint"],'),
+     ["t149_doctor_do_actionlint_va_shellcheck"]),
+    ("m2_im_lang_khi_bien_utf8_xanh",
+     ('        # M2: LUẬT ĐỌC BIẾN UTF-8 TRƯỚC KHI KẾT LUẬN — in KỂ CẢ khi mọi thứ xanh.\n        b_u8 = _do_bien_utf8(moi_truong)\n        _in_an_toan("BIEN UTF-8 (chong loi charmap/cp1258 tren Windows):")',
+      '        # M2: ĐỘT BIẾN IM LẶNG KHI XANH\n        b_u8 = _do_bien_utf8(moi_truong)\n        if b_u8["canh_bao"]:\n            _in_an_toan("BIEN UTF-8 (chong loi charmap/cp1258 tren Windows):")'),
+     ["t150_doctor_do_bien_utf8_in_ca_khi_xanh"]),
+    ("m3_doc_bam_tep_thay_vi_dau_vet",
+     ('    for rel in _CAC_DUONG_VET_HOOK:\n        tep = goc / rel\n        if tep.is_file():',
+      '    for rel in _CAC_DUONG_VET_HOOK:\n        tep = goc / rel\n        if duong.is_file():  # doc bam/tep thay vi dau vet'),
+     ["t151_m3_phan_biet_da_chay_voi_tep_moi"]),
+    ("m5_bo_kiem_tra_ngoai_ascii",
+     ('    co_ngoai_ascii = any(ord(c) > 127 for c in duong)',
+      '    co_ngoai_ascii = False  # dot bien bo kiem tra ngoai ascii'),
+     ["t153_doctor_do_duong_dan_kho_co_dau_cach_hoac_phi_ascii"]),
     ("bo_ky_ban_ghi_luot",
      ('    if khoa_ky:\n        ban_ghi["chu_ky"] = ky_ban_ghi_luot(ban_ghi, khoa_ky)',
       '    if False:\n        ban_ghi["chu_ky"] = ky_ban_ghi_luot(ban_ghi, khoa_ky)'),

@@ -1949,6 +1949,12 @@ CONG_CU = [
              "Darwin": "curl -fsSL https://antigravity.google/cli/install.sh | bash",
              "Linux": "curl -fsSL https://antigravity.google/cli/install.sh | bash"},
      "xac_thuc": ["models"]},
+    {"ten": "actionlint", "bat_buoc": False, "ung_vien": ["actionlint"],
+     "vi_sao": "kiem tra cu phap va schema cua GitHub Actions workflow (M1)",
+     "cai": {"*": "winget/brew install actionlint, hoac bash ops/cai_actionlint.sh"}},
+    {"ten": "shellcheck", "bat_buoc": False, "ung_vien": ["shellcheck"],
+     "vi_sao": "tinh huong va bat loi shell script trong kho (M1)",
+     "cai": {"*": "winget/brew/apt-get install shellcheck"}},
 ]
 
 # MODULE PYTHON — bảng RIÊNG, cố ý không nhét vào `CONG_CU`.
@@ -3646,6 +3652,67 @@ def _do_launcher_cu(ws: str | None) -> tuple[str, str]:
             f"cu hon master; ket qua/so luot chay co the THIEU TRUONG ma khong bao gi")
 
 
+# --- M3: DẤU VẾT HOOK ĐÃ CHẠY ----------------------------------------------------
+_CAC_DUONG_VET_HOOK = (Path(".claude/.packet_state/session-start.ran"),
+                       Path(".tl_state/session-start.ran"),
+                       Path(".claude/session-start.ran"), Path(".git/session-start.ran"))
+
+
+def _do_hook_da_chay(ws: str | None) -> tuple[str, str]:
+    """Hook phiên đã CHẠY chưa (M3) — đo bằng dấu vết hook để lại."""
+    if not ws:
+        return ("KHONG_DO_DUOC", "khong xac dinh duoc workspace")
+    duong = Path(ws) / ".claude" / "hooks" / "session-start.sh"
+    if not duong.exists():
+        return ("KHONG_DO_DUOC", "cay nay KHONG co .claude/hooks/session-start.sh")
+    goc = Path(ws)
+    for rel in _CAC_DUONG_VET_HOOK:
+        tep = goc / rel
+        if tep.is_file():
+            try:
+                noi_dung = tep.read_text(encoding="utf-8", errors="replace").strip()
+            except OSError:
+                noi_dung = ""
+            return ("DA_CHAY", f"ĐÃ CHẠY (dấu vết: {rel.as_posix()}" + (f" lúc {noi_dung})" if noi_dung else ")"))
+    return ("CHUA_CHAY", "CHƯA CHẠY — hook chua chay lan nao trong cay nay (chua co dau vet)")
+
+
+# --- M2: ĐO HAI BIẾN UTF-8 -------------------------------------------------------
+def _do_bien_utf8(moi_truong: dict[str, str] | None = None) -> dict:
+    """Đo hai biến môi trường UTF-8 (M2). Cảnh báo khi thiếu PYTHONUTF8 hoặc PYTHONIOENCODING."""
+    mt = _env_da_chuan(moi_truong)
+    u8, enc = mt.get("PYTHONUTF8"), mt.get("PYTHONIOENCODING")
+    import locale
+    try:
+        ma_nen = locale.getpreferredencoding(False).lower()
+    except Exception:
+        ma_nen = "unknown"
+    thieu = [f"PYTHONUTF8={u8 or '<chua dat>'}" for _ in [1] if u8 != "1"]
+    if not enc or enc.lower() != "utf-8":
+        thieu.append(f"PYTHONIOENCODING={enc or '<chua dat>'}")
+    canh_bao = ((f"chua dat du hai bien UTF-8 ({', '.join(thieu)}) — nen dat PYTHONUTF8=1 "
+                 f"va PYTHONIOENCODING=utf-8 de tranh loi doc ma charmap/cp1258 tren Windows")
+                if thieu else None)
+    return {"PYTHONUTF8": u8, "PYTHONIOENCODING": enc, "ma_nen": ma_nen,
+            "nen_la_utf8": ma_nen in ("utf-8", "utf_8"), "canh_bao": canh_bao}
+
+
+# --- M5: ĐO ĐƯỜNG DẪN KHO -------------------------------------------------------
+def _kiem_tra_duong_dan_kho(ws: str | None) -> tuple[bool, str]:
+    """Đo đường dẫn kho (M5): có dấu cách hoặc ký tự ngoài ASCII thì nêu ra."""
+    if not ws:
+        return False, ""
+    duong = str(Path(ws).resolve())
+    co_dau_cach = " " in duong
+    co_ngoai_ascii = any(ord(c) > 127 for c in duong)
+    if co_dau_cach or co_ngoai_ascii:
+        loai = ("dau cach va ky tu ngoai ASCII" if co_dau_cach and co_ngoai_ascii
+                else "dau cach" if co_dau_cach else "ky tu ngoai ASCII")
+        return True, (f"duong dan kho chua {loai} ('{duong}'): "
+                      f"6 ca da biet se do (lop B: t35-t40 trong lease_publish_test)")
+    return False, ""
+
+
 KHA_NANG = [
     {"ten": "codex", "do": lambda ws, ks=False: _do_codex(ks),
      "vi_sao": "reviewer cross-provider (§8) — executor claude thi reviewer PHAI la codex",
@@ -3664,6 +3731,9 @@ KHA_NANG = [
      "vi_sao": "hook cu hon master = thieu chot ma master da co (nguyen nhan goc 15-08)",
      "khac_phuc": "git show origin/master:.claude/hooks/session-start.sh > <tep>  "
                   "roi chay no; hoac merge master vao nhanh nay"},
+    {"ten": "hook-da-chay", "do": lambda ws, ks=False: _do_hook_da_chay(ws),
+     "vi_sao": "hook phien da thuc su CHAY chua (M3) — do bang dau vet de lai, tach khoi hook-phien",
+     "khac_phuc": "chay .claude/hooks/session-start.sh de thiet lap moi truong"},
     {"ten": "openai-llm", "do": lambda ws, ks=False: _do_openai_llm(_MOI_TRUONG_DA_DOC, ks),
      "vi_sao": "provider openai_api qua execution_surface llm_cli (§4, §5 ops/OPENAI_LLM_PROVIDER.md)",
      "khac_phuc": "pip install llm && export OPENAI_API_KEY=... (hoac llm keys set openai)"},
@@ -3714,7 +3784,7 @@ def lenh_chuan_bi(a) -> int:
 # `SAP_HET_HAN` KHÔNG có trong đây: nếu không chạy `--kiem-song` thì nó cũng chỉ là
 # `CO_CREDENTIAL` kèm cảnh báo, và hạn lấy từ JWT KHÔNG xác thực chữ ký — lời khai đó
 # đủ để HẠ nhãn (fail-closed), không đủ để NÂNG.
-DA_CHUNG_MINH_KHA_DUNG = frozenset({"DUNG_DUOC"})
+DA_CHUNG_MINH_KHA_DUNG = frozenset({"DUNG_DUOC", "DA_CHAY"})
 
 
 def _ma_doctor(thieu_bat_buoc, chua_xac_thuc, doi_kha_dung: bool,
@@ -3976,6 +4046,8 @@ def lenh_doctor(a) -> int:
         # `CO_CREDENTIAL`. Hệ quả: tầng ĐO đã thôi nâng nhãn, nhưng tầng TIÊU THỤ
         # nâng lại nguyên vẹn — `ok_kha_dung=true` cho đúng credential mà lệnh gọi
         # thật trả 401. Sửa một đầu mà để đầu kia y nguyên thì chưa sửa gì.
+        b_u8 = _do_bien_utf8(moi_truong)
+        co_nd, mo_ta_nd = _kiem_tra_duong_dan_kho(ws)
         _in_an_toan(json.dumps({"ok": not thieu_bat_buoc,
                                 # `chua_do_bat_buoc` cũng phủ định `ok_kha_dung`:
                                 # "khả dụng" là nhãn ĐÃ CHỨNG MINH, mà công cụ bắt
@@ -3994,7 +4066,9 @@ def lenh_doctor(a) -> int:
                                 "thieu_bat_buoc": thieu_bat_buoc,
                                 "kha_nang": kha_nang, "chua_xac_thuc": chua_xac_thuc,
                                 "chua_chung_minh": chua_chung_minh,
-                                "bien_moi_truong": bien},
+                                "bien_moi_truong": bien,
+                                "bien_utf8": b_u8,
+                                "duong_dan_nguy_hiem": mo_ta_nd if co_nd else None},
                                ensure_ascii=False, indent=2))
         return ma_thoat
     else:
@@ -4046,6 +4120,17 @@ def lenh_doctor(a) -> int:
         for vt, ds in bien["nhom_trung_gia_tri"].items():
             _in_an_toan(f"  NGHI GIU CHO  {vt}  {len(ds)} bien cung gia tri: "
                         f"{', '.join(ds)}")
+        # M2: LUẬT ĐỌC BIẾN UTF-8 TRƯỚC KHI KẾT LUẬN — in KỂ CẢ khi mọi thứ xanh.
+        b_u8 = _do_bien_utf8(moi_truong)
+        _in_an_toan("BIEN UTF-8 (chong loi charmap/cp1258 tren Windows):")
+        _in_an_toan(f"  PYTHONUTF8      : {b_u8['PYTHONUTF8'] or '<chua dat>'}")
+        _in_an_toan(f"  PYTHONIOENCODING: {b_u8['PYTHONIOENCODING'] or '<chua dat>'}")
+        if b_u8["canh_bao"]:
+            _in_an_toan(f"  CANH BAO        : {b_u8['canh_bao']}")
+        # M5: Đo đường dẫn kho (có dấu cách hoặc ký tự ngoài ASCII)
+        co_nd, mo_ta_nd = _kiem_tra_duong_dan_kho(ws)
+        if co_nd:
+            _in_an_toan(f"  CANH BAO DUONG DAN: {mo_ta_nd}")
         if chua_do_bat_buoc:
             _in_an_toan("CHUA DO DUOC: "
                         + ", ".join(chua_do_bat_buoc))

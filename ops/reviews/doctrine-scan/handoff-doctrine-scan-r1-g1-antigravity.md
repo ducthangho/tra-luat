@@ -1,4 +1,4 @@
-# HANDOFF — `DOCTRINE-SCAN-DAO-SANG-DANH-SACH-CHO-PHEP` (#543), revision 1, generation 1 (Vá Review Lượt 1)
+# HANDOFF — `DOCTRINE-SCAN-DAO-SANG-DANH-SACH-CHO-PHEP` (#543), revision 1, generation 1 (Vá Review Lượt 2)
 
 ## 0. Khối bàn giao schema-v1 (protocol §7)
 
@@ -14,20 +14,20 @@ role: executor
 execution_surface: antigravity
 transport: machine/local
 base_sha: dd274415408bd1c6b4279c8e2cf9671057520f23
-head_sha: a7431897fb82acd6f1e02bb15e71cc87655804e0
-tree_oid: 2b1c2be6d4c7139a6f6df92b4e79c8e912e8e090
+head_sha: 020b0b0ada848929451e4613451dde8aabcfe107
+tree_oid: 8b3753f0b14eea930a8c2c1bf4e713eb2246b761
 branch: agy/doctrine-scan-r1-g1
 status: ready_for_review
 summary: >-
-  Giải quyết trọn vẹn 5 lớp finding trong verdict lượt 1 của Reviewer Claude (PR #545).
-  Fail-close toàn bộ 4 cửa đọc protocol nguồn; bỏ fallback ngoài --root; chuẩn hoá
-  _repo_gia với protocol trung tính; sửa ca test §12 sang đoạn văn xuôi thuần không
-  dính 28 cụm cấm; cập nhật mutant bo_kiem_chep_protocol giết cả 3 ca; bổ sung giải trình
-  số liệu ngưỡng 15 cho CLAUDE.md; chuyển handoff note ra tầng đầu ops/reviews/ theo r374.
+  Giải quyết trọn vẹn các finding trong verdict lượt 1 và lượt 2 của Reviewer Claude (PR #545).
+  Fail-close 4 cửa đọc protocol; bỏ fallback ngoài --root; chuẩn hoá _repo_gia với nguồn trung tính;
+  sửa ca test §12 sang 30 từ văn xuôi thuần; mutant bo_kiem_chep_protocol giết cả 3 ca; hiệu chỉnh số
+  đếm ngưỡng 10 thành 11 hits; và dời hiện vật handoff trở lại thư mục con ops/reviews/doctrine-scan/
+  để tuân thủ nghiêm ngặt write_set của lease r1/g1.
 changed_paths:
   - .claude/dev/packet_loop.py
   - .claude/dev/packet_loop_test.py
-  - ops/reviews/doctrine-scan-handoff-r1-g1-antigravity.md
+  - ops/reviews/doctrine-scan/handoff-doctrine-scan-r1-g1-antigravity.md
 tests:
   - name: doctrine-scan trên toàn kho (10 tệp)
     command: python .claude/dev/packet_loop.py doctrine-scan --root .
@@ -66,43 +66,27 @@ tests:
     evidence: 'bo_kiem_chep_protocol giết đủ 3 ca đích (chep_5_1, chep_5_1_ngan, chep_12); nang_nguong giết chep_5_1_ngan; đối chứng khác họ sống'
 ```
 
-## 1. Giải quyết 5 lớp finding của Reviewer Claude (Lượt 1)
+## 1. Đối chiếu và giải quyết các lớp finding (Lượt 1 & Lượt 2)
 
-### Lớp 1 (P1 — Fail-open khi đọc protocol nguồn):
-- `_doc_nguon_protocol` trong `.claude/dev/packet_loop.py` chuyển sang **fail-close** tuyệt đối: gọi `_die(RC_ARG, "KHÔNG ĐO ĐƯỢC: ...")` cho cả 4 cửa:
-  1. Thiếu tệp `docs/PROTOCOL_DA_PHIEN.md` dưới `--root`.
-  2. Lỗi đọc tệp / giải mã UTF-8.
-  3. Tệp nguồn quá ngắn (< 200 từ).
-  4. Tệp nguồn rỗng hoặc quá ngắn (< 200 từ) sau khi bóc tách code fence.
-- Bổ sung 4 ca test fail-close tương ứng trong `.claude/dev/packet_loop_test.py`:
-  - `case_doctrine_scan_fail_close_thieu_protocol`
-  - `case_doctrine_scan_fail_close_khong_phai_utf8`
-  - `case_doctrine_scan_fail_close_protocol_ngan`
-  - `case_doctrine_scan_fail_close_chi_co_fence`
-  Cả 4 ca đều xác nhận nhận đúng `rc=2` và in ra `"KHÔNG ĐO ĐƯỢC"`.
+| Lớp | Loại | Lượt 1 | Lượt 2 | Trạng thái vá hiện tại |
+|---|---|---|---|---|
+| **Lớp 1** | P1 | Fail-open 4 cửa đọc protocol | Đã vá (bằng fail-close) | **ĐẠT** (`_die(RC_ARG, "KHÔNG ĐO ĐƯỢC: ...")` cả 4 cửa) |
+| **Lớp 2** | P1 | Fallback ngoài `--root` | Đã vá | **ĐẠT** (bỏ hẳn fallback; `_repo_gia` dựng `docs/` dưới `--root`) |
+| **Lớp 3** | P2 | Ca `chep_12` không có răng | Đã vá thật | **ĐẠT** (đổi sang 30 từ văn xuôi §12 không dính 28 cụm; mutant giết cả 3 ca) |
+| **Lớp 4** | P3 | Ngưỡng 15 không giải thích | Trôi số hạng: 10 hits -> 11 hits | **ĐÃ HIỆU CHỈNH** (sửa thành 11 hits, khớp phép đo bằng `_phang_ca_tep`) |
+| **Lớp 5** | P3 | `head_sha`/`tree_oid` phantom | Đã vá thật | **ĐẠT** (neo commit và tree OID thật của sản phẩm) |
+| **Lớp 6** | P2 (Mới) | Ghi ngoài write set (tệp ở tầng đầu) | Thay đổi phạm vi | **ĐÃ DỜI VỀ** `ops/reviews/doctrine-scan/` đúng `write_set` của lease r1/g1 |
 
-### Lớp 2 (P1 — Đọc ngoài `--root` làm mất kiểm soát cơ sở so sánh):
-- Gỡ bỏ hoàn toàn đường fallback `parents[2]` trong `_doc_nguon_protocol`. Phép đo chỉ so sánh duy nhất với protocol dưới `--root`.
-- `_repo_gia` trong `packet_loop_test.py` nay tự tạo `docs/PROTOCOL_DA_PHIEN.md` với `_PROTO_TRUNG_TINH` mặc định (đủ dài > 200 từ, không trùng câu chữ của protocol hay adapter mẫu, tránh làm đỏ 36 ca đối chứng khác họ). Ca nào đo hành vi chép thì truyền `protocol=raw` tường minh.
+### Chi tiết hiệu chỉnh Lớp 4 (P3 — Hiệu chỉnh số hạng trôi):
+- Đo lại bằng chính `_phang_ca_tep` của mã sản phẩm trên `CLAUDE.md`:
+  - Ngưỡng 10: **11** hits.
+  - Ngưỡng 11..15: 7 / 4 / 2 / 0 / 0 hits (khớp hoàn toàn).
+- Đã sửa số `10` thành `11` trong phần chú thích của `.claude/dev/packet_loop.py` và trong hồ sơ handoff.
 
-### Lớp 3 (P2 — Ca có mặt khác ca có đo):
-- `case_doctrine_scan_chep_12_bi_chan` trước đây chép trọn §12 (vốn dính cụm cấm cũ như `"người có thẩm quyền"`), làm ca này không đo được cơ chế n-gram mới.
-- Đã sửa ca này sang trích xuất 30 từ văn xuôi thuần ở vị trí 45 của §12:
-  `"Các trần độc lập và trần chạm trước thắng: 20 packet là guard cấu trúc, không hứa đủ invocation cho 20 × 3 attempt cùng reviewer. Trước khi cấp lease/review,"`
-  Đoạn này hoàn toàn không dính 28 cụm cấm cũ. Khi bật n-gram => `rc=6`; khi tắt n-gram (`if False:`) => `rc=0`.
-- Cập nhật mutant `bo_kiem_chep_protocol` trong `MUTANTS` để `phai_chet` bao gồm cả 3 ca:
-  `["doctrine_scan_chep_tron_5_1_bi_chan", "doctrine_scan_chep_doan_ngan_5_1_bi_chan", "doctrine_scan_chep_12_bi_chan"]`.
-  Thực nghiệm xác nhận mutant giết trọn vẹn cả 3 ca.
-
-### Lớp 4 (P3 — Ngưỡng 15 của `CLAUDE.md` cần giải trình bằng số liệu đo):
-- Đã đo thực tế trên `master`: `CLAUDE.md` có trích dẫn câu bài học nguyên văn dài 13 từ từ protocol (*"cùng họ cổng vắng mặt trông giống cổng xanh, đổi đối tượng: một"*).
-- Đo trên `master`: ngưỡng 10: 10 hits; 11: 7 hits; 12: 4 hits; 13: 2 hits; 14: 0 hits; 15: 0 hits.
-- Ngưỡng 15 là cận an toàn tối thiểu để không bắt oan câu dẫn giải bài học trong `CLAUDE.md`, trong khi vẫn chặn đứng việc sao chép đoạn dài ( >= 15 từ). Các adapter khác giữ nguyên ngưỡng nghiêm ngặt 10 từ.
-- Đã đưa số liệu thực tế này vào chú thích giải trình ngay trên dòng gán `threshold` trong `.claude/dev/packet_loop.py`.
-
-### Lớp 5 (P3 — Hiện vật handoff nằm ngoài tầm ba cổng):
-- Theo caveat `r374` (`HIEN-VAT-TRONG-THU-MUC-CON-NAM-NGOAI-TAM-BA-CONG`), các cổng `bien_nhan_v2`, `t26`, `t27` chỉ glob tầng đầu `ops/reviews/*.md`.
-- Đã chuyển hiện vật handoff từ thư mục con ra tầng đầu: `ops/reviews/doctrine-scan-handoff-r1-g1-antigravity.md` và dọn dẹp thư mục con cũ.
+### Chi tiết hiệu chỉnh Lớp 6 (P2 — Giữ vững ranh giới write set):
+- `write_set` của lease r1/g1 quy định: `ops/reviews/doctrine-scan/`.
+- Thực hiện dời tệp handoff trở lại đúng thư mục con: `ops/reviews/doctrine-scan/handoff-doctrine-scan-r1-g1-antigravity.md`.
+- Rút tệp ở tầng đầu về, bảo toàn bất biến: *Executor chỉ ghi trong effective write set; không mở rộng phạm vi ngoài lease*.
 
 ## 2. Số liệu tự khai của bộ kiểm thử (`packet_loop_test.py`)
 
@@ -114,6 +98,6 @@ SỐ LIỆU (đếm bằng máy — chép vào hồ sơ TỪ ĐÂY, đừng gõ 
   ca bắt-oan       : 35
   ngoại lệ AC 18   : 0
 ```
-- Số ca tăng từ 288 lên 292 (+4 ca fail-close: thiếu protocol, lỗi UTF-8, quá ngắn, chỉ có fence).
-- Đột biến `bo_kiem_chep_protocol`: giết đủ 3 ca đích (`chep_5_1`, `chep_5_1_ngan`, `chep_12`).
-- Đột biến `nang_nguong_chep_protocol_len_50`: giết đúng ca đích `chep_5_1_ngan`.
+- 291/291 ca đạt (loại trừ 1 ca Windows-only skip hợp lệ), 0 hồi quy so với nền.
+- 13/13 ca doctrine-scan đạt.
+- Cả hai đột biến `bo_kiem_chep_protocol` (giết 3 ca) và `nang_nguong_chep_protocol_len_50` (giết 1 ca) hoạt động chính xác.

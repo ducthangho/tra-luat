@@ -1,0 +1,163 @@
+# LEASE — MOI-TRUONG-CONG-CU-DO-DUOC revision 1 / generation 1
+# Executor antigravity (chay tren may chu kho), reviewer claude => khac provider.
+# Ghi HO theo chi thi chu kho; phien claude KHONG tu cap lease.
+
+schema_version: 2
+event: executor_lease_granted
+packet_issue: 546
+packet_id: MOI-TRUONG-CONG-CU-DO-DUOC
+mission_issue: KHONG_CO
+revision: 1
+generation: 1
+lease_id: moi-truong-r1-g1-antigravity
+granted_by: ducthangho
+granted_on_instruction: https://github.com/ducthangho/tra-luat/issues/546#issuecomment-5701097997
+granted_on_instruction_nguyen_van: 'Chu kho, phien dieu phoi 16-09-2026: "Mo packet moi truong/cong
+  cu di" · "Mo Issue cho packet moi truong di, executor la agy." · "#546 dong bang spec, cap lease
+  va mo worktree de agy thuc thi". Yeu cau goc cung phien: "moi truong luon phai du cong cu, bien
+  moi truong can thiet de chay". Sau quyet dinh cua vong 1 soan-spec duoc duyet bang "Dong y cac
+  khuyen nghi".'
+recorded_by: claude-session
+recorder_is_dispatcher: false
+leased_at_utc: '2026-09-16T16:43:29Z'
+lease_expires_at_utc: '2026-09-17T16:43:29Z'
+role: executor
+provider: google_antigravity
+executor: antigravity
+model: KHONG_KHAI
+effort: KHONG_KHAI
+execution_surface: antigravity
+transport: machine/local
+environment: local
+operating_system: Windows
+risk: sensitive
+review_class: sensitive
+effective_review_class: sensitive
+review_class_vi_sao: 'docs/PROTOCOL_DA_PHIEN.md:668 neu DICH DANH "launcher hoac gate lifecycle".
+  Packet sua chinh launcher.py va hook phien — bien gioi credential va duong khoi dong phien.
+  Khong khai thap hon duoc.'
+
+assurance_target: human_audited
+assurance_target_vi_sao: '§8:668 cho sensitive doi Codex cross_approved HOAC human_audited. DO SONG
+  16-09: codex kiem song HONG rc=1 (anh chup token bi vong xoay vo hieu) + het quota; claude
+  CHUA_XAC_THUC; doctor --kiem-song rc=12. Va "antigravity" xuat hien 0 lan trong PROTOCOL nen no
+  chua phai provider hop le cho cross_approved. Chu kho quyet human_audited cho luot nay. No co
+  ten: PROTOCOL-CHUA-BIET-ANTIGRAVITY.'
+reviewer_provider: claude
+reviewer_model: KHONG_KHAI
+reviewer_effort: KHONG_KHAI
+reviewer_independence: 'fresh session/context/checkout; no executor context fork; read-only source.
+  CHU Y: luot review cua #543 da cho thay mot lop hong THU HAI — reviewer viet HINT roi executor ap
+  gan nguyen ban thi reviewer dang tu cham ban va cua minh. O packet nay, neu reviewer cap HINT thi
+  PHAI khai vong tron ay ngay dau verdict.'
+cross_reviewer_requirement: 'Reviewer PHAI khac provider voi executor: executor google_antigravity,
+  reviewer anthropic_claude. Khac provider la DIEU KIEN CAN, khong phai dieu kien DU — xem
+  assurance_target.'
+
+spec_path: ops/specs/moi-truong-cong-cu-do-duoc-r1.md
+spec_ref: claude/spec-moi-truong-r1-20260916
+spec_hash: fde49145f3a0988e47aa5c68486ee207d5dcbf0a5c87041eb4ee43ec4859ffcc
+spec_bytes: 18990
+prompt_path: ops/specs/moi-truong-cong-cu-do-duoc-r1.md
+
+branch: agy/moi-truong-r1-g1
+branch_ownership: exclusive
+target_branch_neu_land: master
+base_sha: dd274415408bd1c6b4279c8e2cf9671057520f23
+start_from_sha: dd274415408bd1c6b4279c8e2cf9671057520f23
+immutable_acceptance_baseline: dd274415408bd1c6b4279c8e2cf9671057520f23
+reviewed_sha_required: dd274415408bd1c6b4279c8e2cf9671057520f23
+reviewed_sha_required_note: 'Mo neo DUOI luc cap — chua co ung vien. Verdict cuoi PHAI neo dung SHA
+  ung vien that khi no ton tai, khong dung lai con so nay.'
+
+write_set:
+- .claude/dev/launcher.py
+- .claude/hooks/session-start.sh
+- .claude/dev/launcher_test.py
+write_set_vi_sao_DUNG_BA: 'Dac ta da DONG BANG khai DUNG ba duong, va ADR-0044 cho sensitive la
+  <= 3 tep / <= 300 dong them. Lease KHONG duoc rong hon spec: no rong hon la tu noi pham vi, dung
+  thu LOP 6 cua #543 da bat.'
+write_set_da_quet_toan_kho: 'DO NGAY TRUOC KHI CAP (16-09 ~16:4xZ): so tap ten ref hai nguon
+  (ls-remote vs for-each-ref) => comm -23 RONG, khong mu; roi ai-dang-giu cho TUNG duong =>
+  NGUOI_GIU 0, rc=0, khong KHONG_XAC_DINH.'
+
+KHUYET_DA_BIET_cua_spec_r1:
+  ten: SPEC-KHONG-CAP-DUONG-CHO-HANDOFF
+  mo_ta: 'Spec r1 khai write set DUNG ba duong ma khong cap duong nao cho hien vat handoff §7.
+    Nen o luot nay handoff KHONG ghi thanh tep trong kho — executor dang no lam COMMENT tren Issue
+    #546. Day la khuyet cua dac ta, phat hien luc cap lease, va phai sua bang REVISION 2 chu KHONG
+    bang viec executor tu ghi ra ngoai write set. #543 da tra gia dung cho nay (LOP 6).'
+  phai_sua_o: revision 2
+
+khong_duoc_cham:
+- docs/PROTOCOL_DA_PHIEN.md
+- .claude/settings.json
+- .claude/dev/packet_loop.py          # write set dang mo cua #543
+- .claude/dev/packet_loop_test.py     # write set dang mo cua #543
+- ops/lease_publish.py                # WP541
+- ops/lease_publish_test.py
+- ops/cai_actionlint.sh
+- .github/workflows/**
+- scripts/tl.py
+- RELEASE_MANIFEST.json
+
+DIEM_NOI_VOI_543_phai_giu_nguyen:
+  vi_sao: '#546 va #543 giao write set RONG nen chay song song duoc (§5). NHUNG packet_loop_test.py
+    (write set cua #543) phu thuoc launcher.py (write set cua packet nay) theo BON duong. Lam hong
+    mot trong bon la lam #543 DO ma khong ai ngo.'
+  bon_diem:
+  - 'case_ma_in_thang_gioi_han_cung_principal (packet_loop_test.py:1359) DOC MA NGUON launcher.py
+    va doi co du BA chuoi: "chong VO Y", "chong PHAT LAI", "cung principal" — GIU NGUYEN ba chuoi'
+  - 'run_json_that (packet_loop_test.py:165) CHAY THAT `launcher.py run --workspace ... --void-reason ...`
+    — dung lam hong lenh `run`'
+  - 'from launcher import ky_ban_ghi_luot (launcher.py:98) — dung doi chu ky ham'
+  - 'hai thu muc dot bien chep launcher.py'
+  chot_bat_buoc: 'CHAY packet_loop_test.py nhu phep doi chieu CHEO truoc khi day, KHONG chi
+    launcher_test.py. Day la thieu sot cua spec r1 (A8 khong doi no) — ghi vao revision 2, nhung
+    executor VAN PHAI chay.'
+
+related_packets:
+- 543
+- 541
+nguon_finding: 'Bon lo do duoc trong phien dieu phoi 16-09-2026, khong phai gia dinh: L1 doctor
+  khong do actionlint/shellcheck (grep CONG_CU = 0 muc); L2 hook khong cai chung (grep = 0 dong);
+  L3 hook co the khong chay lan nao (CLAUDE_PROJECT_DIR khong dat) va muc hook-phien so BAM TEP chu
+  khong do "da chay chua"; L4 112 loi goi thieu encoding= / 23 tep ma song. Do hai ve tren may
+  Windows that cua chu kho: khong bien 109/148, hai bien UTF-8 126/148, CI windows 133/148, va
+  CI \ sau = RONG.'
+
+run_minutes: 120
+heartbeat_required_minutes: 30
+attempts_limit: class-based owner-directed loop; no reset of prior history
+review_calls_limit: until approve or zero P1/P2
+manual_ci_budget: 0
+prohibited_actions:
+- self_review
+- self_approve
+- merge
+- land
+- deploy
+- LIVE
+- ruleset mutation
+- admin bypass
+- secret disclosure
+- workflow_dispatch
+- manual full CI
+- Windows CI
+- noi write set qua ba duong (phai DUNG va xin revision)
+- vuot 300 dong them ma khong xin ngoai le ADR-0044 TRUOC khi day
+- sua .claude/settings.json de hook de chay hon
+- ghi hien vat ra ngoai write set (bai hoc LOP 6 cua #543)
+
+dieu_kien_dung:
+- 'Vuot 300 dong them => DUNG, xin chu kho khai ngoai le ADR-0044 TRUOC khi day.'
+- 'Mot muc tieu M1..M6 can sua tep ngoai ba duong => DUNG; do la phat hien ve chinh dac ta, phai di
+  qua revision moi (§3.2), khong duoc lang le noi write set.'
+- 'Cung mot hinh dang loi lap lan thu BA => DUNG, hoi "co nen lam viec nay khong", khong hoi "va the nao".'
+
+closure_status: 'Explicit owner-approved bounded write-set; no claim of computed dispatcher closure.'
+orchestration: owner-authorized manual issue/receipt journal; no packet_loop state claim
+ci_policy: 'KHONG CI tay, manual_ci_budget = 0 theo rang buoc thuong truc cua chu kho ("CI Window gap
+  loi da biet, de do ton tien, khong chay CI Windows"). Executor PHAI chay cong TAI CHO va bao so do
+  cua minh. Luu y: container/may co the THIEU actionlint — do la chinh lo L1 packet nay sinh ra de
+  vá; cai bang `AL_VER=1.7.7 bash ops/cai_actionlint.sh` roi DO lai, dung suy tu tai lieu.'

@@ -1,0 +1,161 @@
+# BIEN NHAN GIAO HANG — cross-review LUOT 3 cua packet #543
+# (DOCTRINE-SCAN-DAO-SANG-DANH-SACH-CHO-PHEP revision 1 / generation 1), KHAC NEN
+# (claude review antigravity), tren `6eb7175`. **`approve`** — 0 P1 / 0 P2 / 0 P3 mo.
+
+schema_version: 2
+receipt_id: doctrine-scan-review-3-claude-20260916-273d0c65
+kind: review_delivery_receipt
+packet_id: '543'
+packet_slug: 'DOCTRINE-SCAN-DAO-SANG-DANH-SACH-CHO-PHEP'
+lease_id: doctrine-scan-r1-g1-antigravity
+phase_key: P543-R1-GEN1-PHIEN-20260916
+luot: 3
+role: reviewer
+provider: claude
+executor_provider: antigravity
+cross_provider: true
+
+assurance: advisory_review
+assurance_ghi_chu: >-
+  VERDICT la `approve` — phan doan ve MA. MUC ASSURANCE la `advisory_review`, KHONG phai
+  `cross_approved`, vi HAI ly do doc lap nhau: (a) khong co `session_run_id` — codex kiem song
+  HONG rc=1 + het quota, claude CHUA_XAC_THUC, `doctor --kiem-song` rc=12; (b) HAI trong SAU lop
+  duoc dong bang ban va cua CHINH REVIEWER, nen ket qua do dung nhung VONG TRON. A6 cua spec
+  CHUA THOA.
+
+verdict: approve
+verdict_path: ops/reviews/doctrine-scan-review-3-claude-verdict.md
+verdict_sha256: 273d0c65bf45573a8fb4c93cbc7e1fcc8b91e370dde1136856a7bad6ca8b76af
+verdict_bytes: 7715
+reviewed_sha: 6eb7175c47796fe87528f4a5ddf8541af51c0201
+reviewed_base: dd274415408bd1c6b4279c8e2cf9671057520f23
+reviewed_sha_vi_sao: 'Neo DAU NHANH THAT agy/doctrine-scan-r1-g1 sau hai commit va luot 2.'
+
+evidence_url: https://github.com/ducthangho/tra-luat/blob/7d8bb69ac02b54075d63a9915e12e6d2bf28b513/ops/reviews/doctrine-scan-review-3-claude-verdict.md
+evidence_url_ghi_chu: >-
+  Neo BLOB ghim `7d8bb69ac02b54075d63a9915e12e6d2bf28b513` — commit DAU TIEN chua tep verdict
+  luot 3. Dien trong MOT commit RIENG; KHONG amend.
+
+doi_chieu_luot_truoc:
+  luot_2_verdict: changes_requested
+  luot_2_tren_sha: fe9047ec4339aa20ec739d11fbccae7c11e8075c
+  luot_2_so: '0 P1 / 1 P2 / 1 P3'
+  lop_4: 'DA DONG — agy sua 10 -> 11; do lai doc lap 6/6 nguong khop'
+  lop_6: 'DA DONG — agy doi handoff VE ops/reviews/doctrine-scan/; delta that 3 duong, tat ca trong write set'
+  lop_1_va_2: 'giu nguyen, khong hoi quy — nhung van VONG TRON (ban va cua reviewer)'
+  lop_3_va_5: 'do lai tren head moi: van dung'
+
+phan_loai_finding: theo_lop
+so_lop_mo: 0
+so_p1: 0
+so_p2: 0
+so_p3: 0
+so_lop_da_xu_ly_ca_ba_luot: 6
+findings_ids: []
+
+bang_san:
+  - huong: 'LOP 4 — kiem lai loi khai so cua agy'
+    lenh: 'nap _phang_ca_tep TU MA SAN PHAM, dem n-gram CLAUDE.md vs protocol, nguong 10..15'
+    ket_qua: '11/7/4/2/0/0 — KHOP 6/6 (luot 2 lech dung nguong 10)'
+    thanh: 'LOP 4 DONG'
+  - huong: 'LOP 4 — dung MOT dong do doi that khong'
+    lenh: 'git diff fe9047e..6eb7175 -- .claude/dev/packet_loop.py'
+    ket_qua: 'dung 1 dong, va dung dong chu thich so'
+    thanh: 'khong co thay doi lén'
+  - huong: 'LOP 6 — con ghi ngoai write set khong'
+    lenh: 'git diff --numstat 5097480..6eb7175'
+    ket_qua: '3 duong, TAT CA trong write set'
+    thanh: 'LOP 6 DONG'
+  - huong: 'LOP 5 — dinh danh tren head moi'
+    lenh: 'git cat-file -e 020b0b0; rev-parse 020b0b0^{tree}; merge-base --is-ancestor'
+    ket_qua: 'ca hai CO; tree khop; la to tien'
+    thanh: 'van dung'
+  - huong: 'LOP 3 — rang con nguyen khong (hoi quy)'
+    lenh: "dot bien `if True:` -> `if False:`; chay packet_loop_test"
+    ket_qua: 'ca BA ca duong DO'
+    thanh: 'khong hoi quy'
+  - huong: 'LOP 1/2 — hoi quy bon cua fail-open'
+    lenh: 'doctrine-scan --root <cay>, 4 bien the nguon'
+    ket_qua: 'cua 2,3,4 rc=2 + KHONG DO DUOC; doi chung rc=6'
+    thanh: 'khong hoi quy'
+  - huong: 'delta so nen, cung rig clone'
+    lenh: 'packet_loop_test.py tren dd27441 va tren 6eb7175'
+    ket_qua: '282/282 -> 291/291; +9 ca, 0 hoi quy'
+    thanh: 'KHOP'
+
+cong_da_chay_tren_cay_ung_vien:
+  doctrine_scan: 'rc=0'
+  adr_song: 'rc=0'
+  packet_loop_test: 'rc=0 — 291/291'
+  lease_publish_test: 'rc=0 — 155/155'
+  bien_nhan_v2: 'rc=0'
+  doc_claims_check_strict: 'rc=0 (core.abbrev=7)'
+  release_verify_strict: 'rc=0 — ok=true, expected == checked == 180'
+  git_diff_check: 'rc=0'
+  ghi_chu: 'A7 DU BO tu luot 2 tro di.'
+
+ci_tu_dong_tren_ung_vien: 'KHONG CO — nhanh chua mo PR, chua co luot CI nao tren 6eb7175'
+
+model_reviewer_identity:
+  provider: anthropic_claude
+  surface: claude_code
+  transport: machine/local
+  model_yeu_cau: claude-opus-5
+  model_da_chay: 'claude-opus-5 (phien dieu phoi, khong phai tien trinh CLI rieng)'
+  effort: KHONG_KHAI
+  KHONG_do_duoc: 'Khong co `session_run_id`: `doctor --kiem-song` tra rc=12.'
+  xung_dot_loi_ich_da_khai: >-
+    HAI tang. (1) Phien nay soan spec r1 va ghi ho lease g1. (2) NANG HON: phien nay viet HINT
+    patch ma agy da ap gan nhu nguyen ban, nen dang tu cham ban va cua chinh minh cho LOP 1 va
+    LOP 2. Khai o DAU VERDICT.md, khong giau trong bien nhan.
+
+github_submitter_identity:
+  actor: ducthangho
+  ghi_chu: 'Ban chieu dang qua MCP github. Nguon co tham quyen la TEP CO BAM trong kho.'
+
+anchor:
+  loai: canonical_ancestry
+  cuong_do: thap
+  mo_ta: >-
+    Blob verdict ghim tren nhanh claude/review-543-luot3-20260916, commit 7d8bb69 — to tien cua
+    HEAD dang kiem. Quan he to tien voi master CHUA CO: #543 chua land.
+  gioi_han: >-
+    cuong_do thap vi mo neo hien chi la mot nhanh, khong phai tag luu-tru/*. Manh len cao khi #543
+    land bang merge commit hoac fast-forward; squash pha quan he to tien.
+
+pham_vi_approve: >-
+  `approve` nay la DIEU KIEN DUNG cua vong va->review, KHONG phai merge authorization. No noi:
+  moi lop da neu deu dong, va khong tim them duoc lop nao. No KHONG noi "da duoc xac nhan doc lap"
+  — xem caveat dau tien. Ba luot cong lai: agy va dung 4/4 thu thuoc phan minh (LOP 3, 4, 5, 6);
+  LOP 1 va LOP 2 dong bang ban va cua reviewer.
+
+verdict_usage_caveats:
+  - id: APPROVE-CO-HAI-LOP-DONG-BANG-BAN-VA-CUA-CHINH-REVIEWER
+    muc: P1
+    mo_ta: >-
+      packet_loop.py cua agy lech ban HINT cua reviewer dung 11 dong; thong diep fail-close la
+      nguyen van cau reviewer viet; bo do bon cua fail-open cung do reviewer viet. LOP 1 va LOP 2
+      vi the KHONG duoc doc nhu "da xac nhan doc lap" — ket qua do DUNG nhung VONG TRON. Chi
+      LOP 3, 4, 5, 6 la phan doan doc lap that. Muon dong hai lop kia can mot luot cua provider
+      KHAC, hoac mot nguoi khac dung lai bo do tu dau.
+  - id: LUOT-REVIEW-KHONG-CO-run.json-NEN-DOC-LAP-CHI-DUOC-LAP-LUAN
+    muc: P2
+    mo_ta: >-
+      Chay TRONG phien dieu phoi, khong co session_run_id. CHECKOUT rieng co that (clone chu KHONG
+      phai worktree — bai hoc rig chay_cac_probe), con CONTEXT thi khong. A6 cua spec van CHUA THOA.
+  - id: SAU-LOP-LA-TAP-DA-DUYET-KHONG-PHAI-TAP-TON-TAI
+    muc: P3
+    mo_ta: >-
+      Ba luot tim duoc sau lop va dong het. Doc "sau lop" nhu tap DA DUYET, khong nhu tap TON TAI —
+      dung cach kho da doc cac bang "dong lop" cua chuoi #521. `approve` nay khong khai da vet can.
+  - id: A6-CUA-SPEC-DOI-HIEN-VAT-VAO-THU-MUC-CON
+    muc: P3
+    mo_ta: >-
+      A6 doi verdict vao ops/reviews/doctrine-scan/ — dung caveat
+      HIEN-VAT-TRONG-THU-MUC-CON-NAM-NGOAI-TAM-BA-CONG vua dong o r374 (bien_nhan_v2 dong 879 va
+      989, t26/t27 deu glob tang dau). Verdict va bien nhan vi the dat o TANG DAU. Can revision 2
+      sua cau ay — va phai sua bang REVISION, khong bang executor tu doi (bai hoc LOP 6).
+
+nguon_co_tham_quyen: >-
+  TEP CO BAM trong kho (`verdict_path` + `verdict_sha256` o tren). Moi comment tren GitHub chi la
+  BAN CHIEU.

@@ -2187,22 +2187,25 @@ def r523_ban_sao_tuong_doi_khong_duoc_lam_lech_kenh(d: Path):
         "raise SystemExit(1)\n"
     ).replace("@@GOC@@", str(Path(__file__).resolve()))
 
-    goc = (d / "thuc-te").resolve()
-    goc.mkdir(parents=True, exist_ok=True)
-
-    def chay(duong_vao):
+    # WP540 — temp mac dinh/supplied co the khac o dia voi cwd tren Windows;
+    # relpath khi do nem ValueError. Chi fixture con can cung o dia voi cwd.
+    # Context don fixture ca khi chot do, khong doi cwd hay temp policy toan cuc.
+    with tempfile.TemporaryDirectory(prefix="r523-", dir=Path.cwd()) as td:
         m = _nap_ban_sao(d / f"bs-{secrets.token_hex(4)}")
-        bs = goc / Path(m.__file__).stem
-        bs.mkdir(parents=True, exist_ok=True)
+        bs = Path(td).resolve() / Path(m.__file__).stem
+        bs.mkdir()
         (bs / Path(m.__file__).name).write_text(STUB, encoding="utf-8", newline="\n")
-        return m.chay_mot_mutant(duong_vao(bs), Path(m.__file__).stem, ("T1",))
 
-    tuyet_doi = chay(lambda bs: bs)
-    tuong_doi = chay(lambda bs: Path(os.path.relpath(bs, Path.cwd())))
-    chot(tuyet_doi == (GIET, "", 1), "r523")
-    # Chot THAT: cach VIET khong duoc doi ket qua. Thieu chot nay thi mot ban
-    # "va" bang cach tu choi moi duong tuong doi van qua.
-    chot(tuong_doi == tuyet_doi, "r523")
+        duong_tuong_doi = Path(os.path.relpath(bs, Path.cwd()))
+        chot(not duong_tuong_doi.is_absolute() and duong_tuong_doi.resolve() == bs, "r523")
+        tuyet_doi = m.chay_mot_mutant(bs, Path(m.__file__).stem, ("T1",))
+        chot(tuyet_doi == (GIET, "", 1), "r523")
+        # Cung fixture vat ly, nhung kenh phat append phai sach cho luot so sanh.
+        (bs / ".ket-qua-1.jsonl").unlink()
+        tuong_doi = m.chay_mot_mutant(duong_tuong_doi, Path(m.__file__).stem, ("T1",))
+        # Chot THAT: cach VIET khong duoc doi ket qua. Thieu chot nay thi mot ban
+        # "va" bang cach tu choi moi duong tuong doi van qua.
+        chot(tuong_doi == tuyet_doi, "r523")
 
 
 TU_KIEM = [

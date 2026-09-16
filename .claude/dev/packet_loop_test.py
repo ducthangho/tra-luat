@@ -23,6 +23,7 @@ import importlib.util
 import json
 import os
 import platform
+import re
 import subprocess
 import sys
 import tempfile
@@ -1498,6 +1499,76 @@ def case_doctrine_scan_repo_that_sach(c: Ctx):
     _doi(0, rc, e, f"adapter thật phải sạch; stderr={_txt(e)}")
 
 
+def case_doctrine_scan_chep_tron_5_1_bi_chan(c: Ctx):
+    """A1 — Chép trọn §5.1 của protocol vào adapter ⇒ phải ĐỎ (rc=6)."""
+    proto = ROOT / "docs" / "PROTOCOL_DA_PHIEN.md"
+    raw = proto.read_text(encoding="utf-8")
+    m = re.search(r"(## 5\.1 .*?)(?=\n## |\Z)", raw, re.DOTALL)
+    if not m:
+        raise AssertionError("không tìm thấy §5.1 trong protocol")
+    sec_5_1 = m.group(1)
+    r = _repo_gia(c.tmp, f"# Adapter\n\n{sec_5_1}\n", ten="sec_5_1")
+    rc, _, e = run(c.script, ["doctrine-scan", "--root", r])
+    _doi(6, rc, e, "chép trọn §5.1 phải ĐỎ (rc=6)")
+
+
+def case_doctrine_scan_chep_doan_ngan_5_1_bi_chan(c: Ctx):
+    """A1 — Chép đoạn ngắn 29 từ từ §5.1 (không dính 28 cụm cấm) ⇒ phải ĐỎ (rc=6)."""
+    proto = ROOT / "docs" / "PROTOCOL_DA_PHIEN.md"
+    raw = proto.read_text(encoding="utf-8")
+    m = re.search(r"## 5\.1\s+.*?\n(.*?)(?=\n## |\Z)", raw, re.DOTALL)
+    if not m:
+        raise AssertionError("không tìm thấy §5.1 trong protocol")
+    lines = [
+        line.strip()
+        for line in m.group(1).splitlines()
+        if line.strip() and not line.strip().startswith(("#", "```", "-"))
+    ]
+    words = " ".join(lines).split()
+    doan = " ".join(words[:29])
+    r = _repo_gia(c.tmp, f"# Adapter\n\n{doan}\n", ten="sec_5_1_ngan")
+    rc, _, e = run(c.script, ["doctrine-scan", "--root", r])
+    _doi(6, rc, e, "chép đoạn ngắn 29 từ của §5.1 phải ĐỎ (rc=6)")
+
+
+def case_doctrine_scan_chep_12_bi_chan(c: Ctx):
+    """A1 — Chép §12 của protocol vào adapter ⇒ phải ĐỎ (rc=6)."""
+    proto = ROOT / "docs" / "PROTOCOL_DA_PHIEN.md"
+    raw = proto.read_text(encoding="utf-8")
+    m = re.search(r"(## 12\.\s+.*?)(?=\n## 13|\Z)", raw, re.DOTALL)
+    if not m:
+        raise AssertionError("không tìm thấy §12 trong protocol")
+    sec_12 = m.group(1)
+    r = _repo_gia(c.tmp, f"# Adapter\n\n{sec_12}\n", ten="sec_12")
+    rc, _, e = run(c.script, ["doctrine-scan", "--root", r])
+    _doi(6, rc, e, "chép §12 phải ĐỎ (rc=6)")
+
+
+def case_doctrine_scan_adr_0048_khong_phai_chep_protocol(c: Ctx):
+    """A1 — Đoạn trần ADR-0048 không thuộc PROTOCOL_DA_PHIEN.md ⇒ phải XANH (rc=0)."""
+    adr_48 = ROOT / "docs" / "adr" / "0048-tran-vong-review-len-muoi.md"
+    raw = adr_48.read_text(encoding="utf-8")
+    doan_adr = "\n".join(
+        l for l in raw.splitlines() if not l.startswith(">") and "PROTOCOL" not in l
+    )[:400]
+    r = _repo_gia(c.tmp, f"# Adapter\n\n{doan_adr}\n", ten="adr_48")
+    rc, o, e = run(c.script, ["doctrine-scan", "--root", r])
+    _doi(0, rc, e, "đoạn trần ADR-0048 không phải chép protocol nên phải XANH (rc=0)")
+
+
+def case_doctrine_scan_con_tro_thuan_tuy_xanh(c: Ctx):
+    """A4 — Con trỏ thuần tuý nhắc §3.2, §8, assurance_target, reviewed_sha ⇒ phải XANH (rc=0)."""
+    nd = (
+        "# Adapter chuẩn\n\n"
+        "Đọc trước: `docs/PROTOCOL_DA_PHIEN.md` §3.2 và §8.\n"
+        "Quy định về assurance_target và reviewed_sha xem tại protocol.\n"
+        "Mọi hành vi tuân thủ stop condition tại §12.\n"
+    )
+    r = _repo_gia(c.tmp, nd, ten="con_tro")
+    rc, o, e = run(c.script, ["doctrine-scan", "--root", r])
+    _doi(0, rc, e, "con trỏ thuần tuý phải XANH (rc=0)")
+
+
 # --- (d) stdout an toàn dưới codepage không UTF-8 ------------------------------
 
 
@@ -2859,6 +2930,11 @@ CASES = [
     ("doctrine_scan_bom_cum_tu_do", case_doctrine_scan_bom_cum_tu_do),
     ("doctrine_scan_bat_doctrine_THAT_tu_protocol", case_doctrine_scan_bat_doctrine_THAT_tu_protocol),
     ("doctrine_scan_repo_that_sach", case_doctrine_scan_repo_that_sach),
+    ("doctrine_scan_chep_tron_5_1_bi_chan", case_doctrine_scan_chep_tron_5_1_bi_chan),
+    ("doctrine_scan_chep_doan_ngan_5_1_bi_chan", case_doctrine_scan_chep_doan_ngan_5_1_bi_chan),
+    ("doctrine_scan_chep_12_bi_chan", case_doctrine_scan_chep_12_bi_chan),
+    ("doctrine_scan_adr_0048_khong_phai_chep_protocol", case_doctrine_scan_adr_0048_khong_phai_chep_protocol),
+    ("doctrine_scan_con_tro_thuan_tuy_xanh", case_doctrine_scan_con_tro_thuan_tuy_xanh),
     ("stdout_cp1252", case_stdout_cp1252),
     ("stdout_cp1258", case_stdout_cp1258),
     ("cross_review_co_cu_phap_ghi_verdict_len_pr", case_cross_review_co_cu_phap_ghi_verdict_len_pr),
@@ -4004,6 +4080,16 @@ MUTANTS = {
     ),
     "74a_splitlines_sai": ('    p = re.split(r\'(\\r\\n|\\r|\\n)\', noi_dung); lines = [p[i]+p[i+1] for i in range(0,len(p)-1,2)]+([p[-1]] if p[-1] else [])', '    lines = noi_dung.splitlines(keepends=True)', ["trich_xuat_74a_chong_nhieu"]),
     "74a_raw_closing_cung_ten": ('            if mh:\n                end_re = re.compile(r"-->" if mh.group(1) else r"(?i)</(?:pre|script|style|textarea)>")', '            if mh:\n                end_re = re.compile(r"-->" if mh.group(1) else f"(?i)</{mh.group(2)}>")', ["trich_xuat_74a_chong_nhieu"]),
+    "bo_kiem_chep_protocol": (
+        "        if proto_words:",
+        "        if False:  # bo_kiem_chep_protocol",
+        ["doctrine_scan_chep_tron_5_1_bi_chan"],
+    ),
+    "nang_nguong_chep_protocol_len_50": (
+        "            threshold = 15 if is_claude_md else 10",
+        "            threshold = 50  # nang_nguong_chep_protocol_len_50",
+        ["doctrine_scan_chep_doan_ngan_5_1_bi_chan"],
+    ),
 }
 
 # Phân loại là KHAI BÁO: tên chỉ có mặt ở đây mới được sửa test harness.

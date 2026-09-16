@@ -1383,17 +1383,41 @@ def cmd_doi_chieu_uy_quyen(a, state_dir: Path) -> int:
     return RC_OK
 
 
+def _doc_nguon_protocol(root: Path) -> list[str]:
+    """Đọc và chuẩn hoá văn bản logic của docs/PROTOCOL_DA_PHIEN.md (bỏ code fences)."""
+    p = root / "docs" / "PROTOCOL_DA_PHIEN.md"
+    if not p.is_file():
+        fallback = Path(__file__).resolve().parents[2] / "docs" / "PROTOCOL_DA_PHIEN.md"
+        if fallback.is_file():
+            p = fallback
+        else:
+            return []
+    try:
+        raw = p.read_text(encoding="utf-8")
+    except (OSError, UnicodeDecodeError):
+        return []
+    khong_code = re.sub(r"```[\s\S]*?```", " ", raw)
+    phang, _ = _phang_ca_tep(khong_code)
+    return phang.split()
+
+
 def cmd_doctrine_scan(a, state_dir: Path) -> int:
     root = Path(a.root)
     muc_tieu: list[Path] = []
     skills = root / ".claude" / "skills"
     if skills.is_dir():
         muc_tieu.extend(sorted(skills.rglob("*.md")))
+    agents_skills = root / ".agents" / "skills"
+    if agents_skills.is_dir():
+        muc_tieu.extend(sorted(agents_skills.rglob("*.md")))
     claude_md = root / "CLAUDE.md"
     if claude_md.is_file():
         muc_tieu.append(claude_md)
     for extra in a.path or []:
         muc_tieu.append(Path(extra))
+
+    proto_words = _doc_nguon_protocol(root)
+    proto_cache: dict[int, set[tuple[str, ...]]] = {}
 
     dinh: list[tuple[str, str, str, int]] = []
     for f in muc_tieu:
@@ -1414,6 +1438,52 @@ def cmd_doctrine_scan(a, state_dir: Path) -> int:
                 while tu != -1:
                     dinh.append((str(f), nhom, cum, _dong_tai(ban_do, tu)))
                     tu = phang.find(kim, tu + len(kim))
+
+        if proto_words:
+            file_words = phang.split()
+            is_claude_md = (f.name == "CLAUDE.md")
+            threshold = 15 if is_claude_md else 10
+            if len(file_words) >= threshold and len(proto_words) >= threshold:
+                if threshold not in proto_cache:
+                    proto_cache[threshold] = {
+                        tuple(proto_words[i : i + threshold])
+                        for i in range(len(proto_words) - threshold + 1)
+                    }
+                proto_set = proto_cache[threshold]
+                matched_indices = set()
+                for i in range(len(file_words) - threshold + 1):
+                    ngram = tuple(file_words[i : i + threshold])
+                    if ngram in proto_set:
+                        for idx in range(i, i + threshold):
+                            matched_indices.add(idx)
+
+                if matched_indices:
+                    word_spans = []
+                    cur_pos = 0
+                    for w in file_words:
+                        idx = phang.find(w, cur_pos)
+                        word_spans.append((idx, idx + len(w)))
+                        cur_pos = idx + len(w)
+
+                    sorted_indices = sorted(matched_indices)
+                    ranges = []
+                    start = sorted_indices[0]
+                    prev = sorted_indices[0]
+                    for idx in sorted_indices[1:]:
+                        if idx == prev + 1:
+                            prev = idx
+                        else:
+                            ranges.append((start, prev))
+                            start = idx
+                            prev = idx
+                    ranges.append((start, prev))
+
+                    for start_w, end_w in ranges:
+                        so_tu = end_w - start_w + 1
+                        bat_dau_char = word_spans[start_w][0]
+                        dong_dinh = _dong_tai(ban_do, bat_dau_char)
+                        doan_chep = " ".join(file_words[start_w : end_w + 1])
+                        dinh.append((str(f), "chep-protocol", f"({so_tu} từ) {doan_chep[:60]}...", dong_dinh))
 
     if dinh:
         for f, nhom, cum, i in dinh:

@@ -1,3 +1,101 @@
+# ★ dev-side — r375: land packet #543 (doctrine-scan đảo sang danh sách CHO PHÉP) và ghi sổ ba lượt review (2026-09-16)
+
+Nối tiếp r374 (ghi sổ #540 và #538). Mục này là vế bookkeeping ADR-0034 của packet **#543**
+`DOCTRINE-SCAN-DAO-SANG-DANH-SACH-CHO-PHEP`, land trong merge `2e84f3f` (PR #545), executor
+**antigravity**, reviewer **claude**, **ba** lượt cross-review.
+
+**Phạm vi nguồn của mục r375:** (a) ĐO ĐƯỢC trong kho: băm/byte ba verdict và HINT patch, `numstat`,
+`reviewed_sha`, và mọi `rc` của cổng chạy tại chỗ trong chính lượt này; (b) THUẬT LẠI, không tự đo được
+từ kho: chỉ thị merge của chủ kho trong phiên chat (*"#543 merge và land, sau đó hoàn thành bookeeping"*),
+và việc phiên agy chạy trên máy cá nhân của chủ kho; (c) SỐ CI: đọc từ `actions_list` theo `head_sha`,
+không suy từ `git push`.
+
+**Không nâng `VERSION`.** Vẫn `1.36.68` từ r336.
+
+## Packet đã land
+
+| | |
+|---|---|
+| merge | `2e84f3f`, PR #545 |
+| head đã review | `6eb7175c` |
+| base | `dd274415` |
+| `numstat` | 5 tệp · **+633 / −1** |
+| tệp do executor viết | `.claude/dev/packet_loop.py` +106 · `.claude/dev/packet_loop_test.py` +169/−1 · `ops/reviews/doctrine-scan/handoff-…md` +103 = **+378** |
+| tệp do phiên điều phối viết (vào theo nhánh lease) | `ops/leases/doctrine-scan-r1-g1-antigravity.yaml` +108 · `ops/specs/…-r1.md` +147 |
+| A/B cùng rig **clone** | `dd27441` **282/282** → `6eb7175` **291/291** (+9 ca, 0 hồi quy) |
+| CI trên head, đọc theo `head_sha` | `gate (ubuntu-latest)` · `gate-registry` · `gate-packet-loop` (run `35121043312`) · `thu-hoi` (`35121078702`, `35121039639`) — **success** cả bốn |
+| `launcher (Windows that)` | **skipped** — đúng ràng buộc thường trực của chủ kho: không chạy CI Windows |
+
+## Ba lượt review, sáu LỚP
+
+| lượt | verdict | băm | byte | kết luận |
+|---|---|---|---:|---|
+| 1 | `doctrine-scan-review-1-claude-verdict.md` | `467467c9…` | 11 786 | `changes_requested` · 2 LỚP P1 / 1 P2 / 2 P3 |
+| 2 | `doctrine-scan-review-2-claude-verdict.md` | `08efee75…` | 9 315 | `changes_requested` · 0 P1 / 1 P2 / 1 P3 |
+| 3 | `doctrine-scan-review-3-claude-verdict.md` | `273d0c65…` | 7 715 | **`approve`** · 0 P1 / 0 P2 / 0 P3 mở |
+
+Kèm `ops/reviews/doctrine-scan/HINT-543-luot1.patch` (`fde1b894…`, 7 751 B, 7 hunk, +62/−15) — bản vá gợi ý
+của lượt 1, **đã chạy tại chỗ** trước khi giao.
+
+Vào kho: **11 hàng cảnh báo** + **3 hàng mục lục** + 1 đoạn phạm vi nguồn trong `ops/reviews/README.md`
+(`t27` ĐỎ nếu bảng dưới thiếu hàng). Caveat nặng nhất, chép nguyên id để tra được:
+`APPROVE-CO-HAI-LOP-DONG-BANG-BAN-VA-CUA-CHINH-REVIEWER`.
+
+**Cả ba biên nhận khai `advisory_review`, KHÔNG khai `cross_approved`** — trong khi lease khai
+`assurance_target: cross_approved`. Đọc đúng chỗ lệch ấy, đừng đọc rộng hơn: hai lý do độc lập nhau.
+(a) không có `session_run_id` — đo sống cùng phiên: `codex` kiểm sống HỎNG `rc=1` (ảnh chụp token bị vòng
+xoay vô hiệu) cộng hết quota, `claude` `CHƯA_XÁC_THỰC`, `doctor --kiem-song` `rc=12`; (b) **HAI trong SÁU
+lớp** được đóng bằng chính bản vá của reviewer — `packet_loop.py` của agy lệch bản HINT đúng **11 dòng**,
+và thông điệp fail-close là **nguyên văn** câu reviewer viết. Bốn phép đo của LỚP 1 và LỚP 2 vì thế ĐÚNG
+nhưng **vòng tròn**. `approve` này là **điều kiện DỪNG** của vòng vá→review, **không phải** giấy phép merge;
+giấy phép merge là chỉ thị của chủ kho.
+
+## Bài học của chính lượt ghi sổ: CHÉP tệp verdict vào kho làm cổng biên nhận ĐỎ
+
+Bản làm đầu tiên `git checkout <nhánh review> -- ops/reviews/…` để mang bảy tệp vào nhánh bookkeeping —
+nội dung khớp từng byte, cây trông đúng hệt. `bien_nhan_v2` vẫn **ĐỎ**, đúng ba vi phạm:
+
+```
+commit `bc5d0c6e4d3d…` CÓ THẬT nhưng KHÔNG phải tổ tiên của HEAD
+commit `80d816130fda…` CÓ THẬT nhưng KHÔNG phải tổ tiên của HEAD
+commit `7d8bb69ac02b…` CÓ THẬT nhưng KHÔNG phải tổ tiên của HEAD
+```
+
+`evidence_url` của mỗi biên nhận neo vào commit ĐẦU TIÊN chứa tệp verdict, và chốt `canonical_ancestry`
+đòi mỏ neo ấy **với tới được từ HEAD** — *"một nhánh rẽ hay commit dangling không phải canonical ancestry"*.
+Chép tệp chỉ mang NỘI DUNG, không mang LỊCH SỬ, nên nó phá đúng thứ mỏ neo dùng để chứng minh.
+
+Chữa bằng **merge** ba nhánh review thay vì chép (`--no-ff`, giải xung đột `README.md` bằng cách giữ CẢ HAI
+vế, hàng lượt 3 lên trên theo nếp bảng). Đo lại: `bien_nhan_v2` **`rc=0`** —
+`124 ĐẠT v2 · 11/11 miễn trừ legacy · 42 NỢ đóng băng · 0 vi phạm · 0 KHÔNG ĐO ĐƯỢC · tổng 177`,
+so với `121 ĐẠT · 3 vi phạm` của bản chép.
+
+Cùng họ với bài học *"đếm sự CÓ MẶT thay vì KHẢ NĂNG"*, đổi đối tượng: **một tệp có mặt đúng nội dung
+không chứng minh mỏ neo của nó còn tra được.** Lần sau land hiện vật review: **merge nhánh, đừng chép tệp** —
+và nếu buộc phải chép thì phải soạn biên nhận MỚI neo vào commit mới, không được giữ `evidence_url` cũ.
+
+Một con số đã suýt trôi trong chính mục này: câu phạm vi nguồn của `README.md` viết sẵn *"nguồn cho 3 cảnh
+báo"* từ lượt 1; sau khi gộp đủ ba lượt tôi sửa thành 7 — vẫn SAI. Đếm bằng máy ra **11**. Đúng thói
+*"lời khai rộng/hẹp hơn phép đo"*: số trong câu văn phải ĐO, đừng nhẩm.
+
+## Cổng chạy tại chỗ trên nhánh bookkeeping (đọc `rc` trực tiếp, không qua pipe)
+
+| cổng | rc | bằng chứng dương |
+|---|---:|---|
+| `bien_nhan_v2 --root .` | 0 | `124 ĐẠT v2 · 0 vi phạm · 0 KHÔNG ĐO ĐƯỢC · tổng 177` |
+| `packet_loop.py doctrine-scan --root .` | 0 | `sạch — đã quét 10 tệp, 0 chỗ chép doctrine` |
+| `packet_loop.py adr-song --root .` | 0 | `48 ADR trên đĩa, 48 dòng trong §20, khớp 1–1` |
+| `tl.py doc-claims-check --strict` | 0 | `strict: true`, 0 vi phạm |
+| `git diff --check` | 0 | sạch |
+| `tl.py release-verify RELEASE_MANIFEST.json --strict --json` | 0 | `ok=true`, `expected_file_count == checked_file_count`, `package_hash_match=true` |
+
+`core.abbrev` ghim **7** trước khi chạy (mục 6 §Quy ước deploy) — không ghim thì `doc-claims-check --strict`
+đỏ giả theo kích thước kho.
+
+**`CHANGELOG.md` NẰM TRONG `RELEASE_MANIFEST.json`** nên mục này làm sha của nó lệch ⇒ đã tái sinh manifest
+(mục 5 §Quy ước deploy, bài học r356). `ops/**` và `.claude/**` KHÔNG trong manifest, nên bảy tệp review và
+`packet_loop.py` của packet không đụng `file_count`.
+
 # ★ dev-side — r374: ghi sổ #540 và #538 — ba verdict claude ra khỏi THƯ MỤC CON và lần đầu bị cổng chấm (2026-09-16)
 
 Nối tiếp r373 (chốt tới `dc02c9b`, #521). Mục này là vế bookkeeping ADR-0034 của **hai** packet land liền

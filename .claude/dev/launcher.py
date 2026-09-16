@@ -3654,26 +3654,36 @@ def _do_launcher_cu(ws: str | None) -> tuple[str, str]:
 
 # --- M3: DẤU VẾT HOOK ĐÃ CHẠY ----------------------------------------------------
 _CAC_DUONG_VET_HOOK = (Path(".claude/.packet_state/session-start.ran"),
-                       Path(".tl_state/session-start.ran"),
-                       Path(".claude/session-start.ran"), Path(".git/session-start.ran"))
+                       Path(".tl_state/session-start.ran"))
+
+_HAN_DAU_VET_HOOK_GIAY = 12 * 3600
 
 
-def _do_hook_da_chay(ws: str | None) -> tuple[str, str]:
-    """Hook phiên đã CHẠY chưa (M3) — đo bằng dấu vết hook để lại."""
+def _do_hook_da_chay(ws: str | None, bay_gio: float | None = None) -> tuple[str, str]:
+    """Hook phiên đã CHẠY chưa (M3) — đo bằng dấu vết, VÀ đo cả ĐỘ TƯƠI của dấu vết."""
     if not ws:
         return ("KHONG_DO_DUOC", "khong xac dinh duoc workspace")
     duong = Path(ws) / ".claude" / "hooks" / "session-start.sh"
     if not duong.exists():
         return ("KHONG_DO_DUOC", "cay nay KHONG co .claude/hooks/session-start.sh")
     goc = Path(ws)
+    bay_gio = time.time() if bay_gio is None else bay_gio
     for rel in _CAC_DUONG_VET_HOOK:
         tep = goc / rel
-        if tep.is_file():
-            try:
-                noi_dung = tep.read_text(encoding="utf-8", errors="replace").strip()
-            except OSError:
-                noi_dung = ""
-            return ("DA_CHAY", f"ĐÃ CHẠY (dấu vết: {rel.as_posix()}" + (f" lúc {noi_dung})" if noi_dung else ")"))
+        if not tep.is_file():
+            continue
+        try:
+            noi_dung = tep.read_text(encoding="utf-8", errors="replace").strip()
+            tuoi = bay_gio - tep.stat().st_mtime
+        except OSError as e:
+            return ("KHONG_DO_DUOC", f"co dau vet {rel.as_posix()} nhung khong doc duoc: {e}")
+        if tuoi > _HAN_DAU_VET_HOOK_GIAY:
+            gio = int(tuoi // 3600)
+            return ("KHONG_DO_DUOC",
+                    f"KHÔNG ĐO ĐƯỢC — dau vet {rel.as_posix()} CU {gio}h "
+                    f"(> {_HAN_DAU_VET_HOOK_GIAY // 3600}h, ghi luc {noi_dung or '?'}): no chung minh "
+                    f"hook TUNG chay, khong chung minh hook chay cho phien nay")
+        return ("DA_CHAY", f"ĐÃ CHẠY (dấu vết: {rel.as_posix()}" + (f" lúc {noi_dung})" if noi_dung else ")"))
     return ("CHUA_CHAY", "CHƯA CHẠY — hook chua chay lan nao trong cay nay (chua co dau vet)")
 
 

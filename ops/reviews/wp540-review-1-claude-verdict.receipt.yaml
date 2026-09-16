@@ -37,7 +37,7 @@ verdict_sha256: 0ddcd42ef0f271ec7c5ff476797bb5b14cf0d6b8fd53f8785a9af07a5f93da5e
 verdict_bytes: 9854
 reviewed_sha: 7c7ad450258c640bc207c17f7f5a60077081419c
 reviewed_base: 19de56693d06813e6743a30113d0fb87bff3e196
-evidence_url: https://github.com/ducthangho/tra-luat/blob/b8e2b893c32252b23d49c155fce2af6c2c38486c/ops/reviews/wp540/wp540-review-1-claude-verdict.md
+evidence_url: https://github.com/ducthangho/tra-luat/blob/ab27f786a45de5df7aae23f7df7b4c4fb8eecb92/ops/reviews/wp540-review-1-claude-verdict.md
 evidence_url_ghi_chu: >-
   Neo BLOB ghim `b8e2b893c32252b23d49c155fce2af6c2c38486c` — commit DAU TIEN chua tep verdict, do
   bang `git log --diff-filter=A -- ops/reviews/wp540/wp540-review-1-claude-verdict.md` (tra DUNG

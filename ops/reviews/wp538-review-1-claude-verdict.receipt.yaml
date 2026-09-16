@@ -35,7 +35,7 @@ reviewed_base_nguon: >-
   `immutable_acceptance_baseline` cua lease g3, doc tu blob tren `ops/cap-lease-538-r3`,
   KHONG phai merge-base tu tinh.
 
-evidence_url: https://github.com/ducthangho/tra-luat/blob/d4adb9f66b0b62d92f3fb6884fd5028248be027e/ops/reviews/wp538/wp538-review-1-claude-verdict.md
+evidence_url: https://github.com/ducthangho/tra-luat/blob/ab27f786a45de5df7aae23f7df7b4c4fb8eecb92/ops/reviews/wp538-review-1-claude-verdict.md
 evidence_url_ghi_chu: >-
   Neo BLOB ghim `d4adb9f66b0b62d92f3fb6884fd5028248be027e` — commit DAU TIEN chua tep verdict,
   do bang `git log --diff-filter=A -- ops/reviews/wp538/wp538-review-1-claude-verdict.md`

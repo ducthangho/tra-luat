@@ -150,7 +150,7 @@ prohibited_actions:
 - noi write set qua ba duong (phai DUNG va xin revision)
 - vuot 300 dong them ma khong xin ngoai le ADR-0044 TRUOC khi day
 - sua .claude/settings.json de hook de chay hon
-- ghi hien vat ra ngoai write set (bai hoc LOP 6 cua #543)
+- 'ghi hien vat ra ngoai write set (bai hoc LOP 6 cua #543)'
 
 dieu_kien_dung:
 - 'Vuot 300 dong them => DUNG, xin chu kho khai ngoai le ADR-0044 TRUOC khi day.'

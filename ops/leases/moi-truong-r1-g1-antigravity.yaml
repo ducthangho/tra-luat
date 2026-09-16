@@ -59,6 +59,9 @@ spec_ref: claude/spec-moi-truong-r1-20260916
 spec_hash: fde49145f3a0988e47aa5c68486ee207d5dcbf0a5c87041eb4ee43ec4859ffcc
 spec_bytes: 18990
 prompt_path: ops/specs/moi-truong-cong-cu-do-duoc-r1.md
+prompt_sha256_required: fde49145f3a0988e47aa5c68486ee207d5dcbf0a5c87041eb4ee43ec4859ffcc
+prompt_sha256_ghi_chu: 'prompt_path == spec_path nen bam TRUNG spec_hash. Cong chan dung khi
+  thieu truong nay: tro vao mot tep khong neo bam thi tep doi luc nao cung khong ai biet.'
 
 branch: agy/moi-truong-r1-g1
 branch_ownership: exclusive

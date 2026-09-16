@@ -76,7 +76,7 @@ thay_the_cho:
 - wp538-r4-g4-antigravity
 thay_the_cho_ly_do: 'Packet #538 da LAND o merge 6bd5600 (PR #539). Lease r4/g4 van con
   hieu luc toi 2026-09-17T09:30:24Z va van giu 13 duong, trong do co
-  docs/PROTOCOL_DA_PHIEN.md — do duoc 18:3xZ 16-09: NGUOI_GIU 2. Thu hoi de quyen ghi khong
+  docs/PROTOCOL_DA_PHIEN.md — do duoc 16-09-2026 (lan do dau): NGUOI_GIU 2. Thu hoi de quyen ghi khong
   song sot sau khi viec da xong.'
 
 khong_duoc_cham:
@@ -107,3 +107,22 @@ closure_status: 'Owner-directed retirement of a landed packet lease; no work aut
 orchestration: owner-authorized manual issue/receipt journal; no packet_loop state claim
 ci_policy: 'Khong CI tay. Lease nay khong sinh dien tich ma nen khong co cong nao phai chay
   ngoai cong dang lease.'
+
+# Bang chung DO SAU khi thu hoi — them vao chinh tep lease de no khong song trong comment.
+bang_chung_thu_hoi:
+  cau_hoi: 'ai-dang-giu docs/PROTOCOL_DA_PHIEN.md'
+  dien_bien:
+  - 'lan do dau, truoc khi sua   => rc=11, NGUOI_GIU 2'
+  - 'sau ban va DAU (ghi ban sao da gan dau vao mot nhanh MOI) => VAN 2, khong doi'
+  - 'sau khi gan dau vao 2 REF GOC => rc=11, NGUOI_GIU 1 (lo ra ban sao THU TU)'
+  - 'sau khi gan dau ban sao thu tu => rc=0, NGUOI_GIU 0'
+  vi_sao_ban_va_dau_khong_an_thua: 'lenh_ai_dang_giu (ops/lease_publish.py:1856-1859) danh gia
+    dieu kien CON_HAN-va-chua-chet tren TUNG BAN SAO TEP roi moi gom theo lease_id. Nen MOT ban
+    sao chua gan dau o BAT KY ref nao cung du giu nguyen quyen ghi. Bia mo chi lam cam dung ban
+    sao no duoc ghi vao.'
+  so_ban_sao_da_gan_dau: 4
+  ban_sao_thu_tu: 'ops/cap-lease-538-r3 — KHONG co trong lan liet ke dau tien, lo ra o lan do
+    THU HAI sau khi tap ref cuc bo doi. Tap ban sao chi biet duoc bang mot phep quet, va chinh
+    phep quet ay cung troi theo tap ref dang co.'
+  thu_tu_bat_buoc: 'Day bia mo TRUOC khi gan dau vao lease cu => check tra CHAN [8]. Cong KHONG
+    tu sua ho so cu; lease CU phai mang dau TRUOC.'

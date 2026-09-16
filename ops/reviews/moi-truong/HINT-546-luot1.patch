@@ -1,0 +1,194 @@
+--- .claude/dev/launcher.py
++++ .claude/dev/launcher.py
+@@ -3653,27 +3653,55 @@
+ 
+ 
+ # --- M3: DẤU VẾT HOOK ĐÃ CHẠY ----------------------------------------------------
++# Danh sach nay phai KHOP voi nhanh ghi trong `.claude/hooks/session-start.sh`.
++# Bat doi xung writer/reader la mot cua ho: doc mot duong khong ai ghi thi vo hai,
++# nhung GHI mot duong khong ai doc thi dau vet mat, va ghi vao duong KHONG duoc
++# gitignore thi lam ban `git status --porcelain` — phep kiem ma cross-review doi rong.
++# Do duoc: `git check-ignore` => `.claude/.packet_state/` va `.tl_state/` DUOC ignore,
++# `.claude/session-start.ran` va `.git/session-start.ran` thi KHONG.
+ _CAC_DUONG_VET_HOOK = (Path(".claude/.packet_state/session-start.ran"),
+-                       Path(".tl_state/session-start.ran"),
+-                       Path(".claude/session-start.ran"), Path(".git/session-start.ran"))
++                       Path(".tl_state/session-start.ran"))
+ 
++# Dau vet CU hon nguong nay khong con chung minh duoc gi ve phien DANG chay.
++_HAN_DAU_VET_HOOK_GIAY = 12 * 3600
+ 
+-def _do_hook_da_chay(ws: str | None) -> tuple[str, str]:
+-    """Hook phiên đã CHẠY chưa (M3) — đo bằng dấu vết hook để lại."""
++
++def _do_hook_da_chay(ws: str | None, bay_gio: float | None = None) -> tuple[str, str]:
++    """Hook phiên đã CHẠY chưa (M3) — đo bằng dấu vết, VÀ đo cả ĐỘ TƯƠI của dấu vết.
++
++    NOI THANG PHAM VI: dau vet chung minh "hook DA TUNG chay trong cay nay va con
++    tuoi", KHONG chung minh "hook da chay cho PHIEN NAY". Hai cau do khac nhau, va
++    bo do nay chi tra loi duoc cau thu nhat — nen ca thu ba la `KHONG_DO_DUOC`, khong
++    phai `DA_CHAY`.
++
++    Vi sao can nguong: ban truoc chi hoi `tep.is_file()`. Do duoc — mot tep dau vet
++    TU TAO BANG TAY (hook chua tung chay) va mot dau vet CU 30 NGAY deu cho `DA_CHAY`,
++    va no con IN RA moc gio cu ay ma khong phan xet gi. Do dung benh "dem su CO MAT
++    thay vi KHA NANG" ma chinh packet nay sinh ra de vá.
++    """
+     if not ws:
+         return ("KHONG_DO_DUOC", "khong xac dinh duoc workspace")
+     duong = Path(ws) / ".claude" / "hooks" / "session-start.sh"
+     if not duong.exists():
+         return ("KHONG_DO_DUOC", "cay nay KHONG co .claude/hooks/session-start.sh")
+     goc = Path(ws)
++    bay_gio = time.time() if bay_gio is None else bay_gio
+     for rel in _CAC_DUONG_VET_HOOK:
+         tep = goc / rel
+-        if tep.is_file():
+-            try:
+-                noi_dung = tep.read_text(encoding="utf-8", errors="replace").strip()
+-            except OSError:
+-                noi_dung = ""
+-            return ("DA_CHAY", f"ĐÃ CHẠY (dấu vết: {rel.as_posix()}" + (f" lúc {noi_dung})" if noi_dung else ")"))
++        if not tep.is_file():
++            continue
++        try:
++            noi_dung = tep.read_text(encoding="utf-8", errors="replace").strip()
++            tuoi = bay_gio - tep.stat().st_mtime
++        except OSError as e:
++            return ("KHONG_DO_DUOC", f"co dau vet {rel.as_posix()} nhung khong doc duoc: {e}")
++        if tuoi > _HAN_DAU_VET_HOOK_GIAY:
++            gio = int(tuoi // 3600)
++            return ("KHONG_DO_DUOC",
++                    f"KHÔNG ĐO ĐƯỢC — dau vet {rel.as_posix()} CU {gio}h "
++                    f"(> {_HAN_DAU_VET_HOOK_GIAY // 3600}h, ghi luc {noi_dung or '?'}): no chung minh "
++                    f"hook TUNG chay, khong chung minh hook chay cho phien nay")
++        return ("DA_CHAY", f"ĐÃ CHẠY (dấu vết: {rel.as_posix()}" + (f" lúc {noi_dung})" if noi_dung else ")"))
+     return ("CHUA_CHAY", "CHƯA CHẠY — hook chua chay lan nao trong cay nay (chua co dau vet)")
+ 
+ 
+--- .claude/dev/launcher_test.py
++++ .claude/dev/launcher_test.py
+@@ -6017,6 +6017,40 @@
+ 
+ 
+ @ca
++def t154_m3_dau_vet_CU_KHONG_con_la_DA_CHAY():
++    """M3: dau vet CU hon nguong => KHONG_DO_DUOC, khong phai DA_CHAY.
++
++    PHAN CHUNG DA CHAY tren head 8765d43 TRUOC khi co chot nay: mot dau vet tu tao
++    bang tay va mot dau vet CU 30 NGAY deu cho `DA_CHAY`, va doctor con IN RA moc gio
++    cu ay ma khong phan xet gi. "Co dau vet" va "hook chay cho phien nay" la HAI cau
++    hoi khac nhau; bo do chi tra loi duoc cau thu nhat nen ca thu ba phai la
++    KHONG_DO_DUOC — dung doctrine `None != False`.
++    """
++    m = _tai_launcher_thu()
++    MASTER = "#!/bin/bash\n# hook-nang-luc: codex-auth-restore\necho hi\n"
++    with San() as s:
++        cay = s / "cay_tuoi"
++        (cay / ".claude" / "hooks").mkdir(parents=True)
++        (cay / ".claude" / "hooks" / "session-start.sh").write_text(MASTER, encoding="utf-8")
++        vd = cay / ".claude" / ".packet_state"
++        vd.mkdir(parents=True)
++        vet = vd / "session-start.ran"
++        vet.write_text("2026-08-17T00:00:00Z\n", encoding="utf-8")
++        gio = vet.stat().st_mtime
++        # Ca (a): dau vet TUOI => DA_CHAY (khong bat oan)
++        tt_a, _ = m._do_hook_da_chay(str(cay), bay_gio=gio + 60)
++        bang(tt_a == "DA_CHAY", f"dau vet tuoi phai DA_CHAY: {tt_a}")
++        # Ca (b): dau vet CU hon nguong => KHONG_DO_DUOC
++        tt_b, mo_b = m._do_hook_da_chay(str(cay), bay_gio=gio + m._HAN_DAU_VET_HOOK_GIAY + 60)
++        bang(tt_b == "KHONG_DO_DUOC" and "KHÔNG ĐO ĐƯỢC" in mo_b,
++             f"dau vet CU phai KHONG_DO_DUOC: {tt_b} · {mo_b}")
++        # Ca (c): khong co dau vet nao => CHUA_CHAY (van phan biet duoc voi (b))
++        vet.unlink()
++        tt_c, _ = m._do_hook_da_chay(str(cay), bay_gio=gio)
++        bang(tt_c == "CHUA_CHAY", f"khong dau vet phai CHUA_CHAY: {tt_c}")
++
++
++@ca
+ def r01_worktree_that_bi_chan():
+     with San() as s:
+         wt = tao_worktree(s); dau = s / "da-chay"; rr = s / "runs"
+@@ -6968,9 +7002,14 @@
+       '        # M2: ĐỘT BIẾN IM LẶNG KHI XANH\n        b_u8 = _do_bien_utf8(moi_truong)\n        if b_u8["canh_bao"]:\n            _in_an_toan("BIEN UTF-8 (chong loi charmap/cp1258 tren Windows):")'),
+      ["t150_doctor_do_bien_utf8_in_ca_khi_xanh"]),
+     ("m3_doc_bam_tep_thay_vi_dau_vet",
+-     ('    for rel in _CAC_DUONG_VET_HOOK:\n        tep = goc / rel\n        if tep.is_file():',
+-      '    for rel in _CAC_DUONG_VET_HOOK:\n        tep = goc / rel\n        if duong.is_file():  # doc bam/tep thay vi dau vet'),
++     ('    for rel in _CAC_DUONG_VET_HOOK:\n        tep = goc / rel\n        if not tep.is_file():\n            continue',
++      '    for rel in _CAC_DUONG_VET_HOOK:\n        tep = goc / rel\n        if not duong.is_file():  # doc tep hook thay vi dau vet\n            continue'),
+      ["t151_m3_phan_biet_da_chay_voi_tep_moi"]),
++    # Chot DO TUOI phai co rang RIENG: bo nguong => dau vet CU lai thanh DA_CHAY.
++    ("m3b_bo_kiem_do_tuoi_dau_vet",
++     ('        if tuoi > _HAN_DAU_VET_HOOK_GIAY:',
++      '        if False:  # bo kiem do tuoi'),
++     ["t154_m3_dau_vet_CU_KHONG_con_la_DA_CHAY"]),
+     ("m5_bo_kiem_tra_ngoai_ascii",
+      ('    co_ngoai_ascii = any(ord(c) > 127 for c in duong)',
+       '    co_ngoai_ascii = False  # dot bien bo kiem tra ngoai ascii'),
+--- .claude/hooks/session-start.sh
++++ .claude/hooks/session-start.sh
+@@ -41,6 +41,7 @@
+ fi
+ 
+ GOC="${CLAUDE_PROJECT_DIR:-$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)}"
++PATH_GOC="$PATH"   # chup PATH cua PHIEN truoc khi hook tu noi PATH cho rieng no
+ cd "$GOC"
+ 
+ # M4 / L4: Cưỡng chế UTF-8 tránh lỗi cp1258/charmap trên Windows
+@@ -50,6 +51,23 @@
+ # M4 / A4: Ghim phiên bản actionlint đồng bộ với 4 chỗ trong .github/workflows/ci.yml
+ AL_VER="1.7.7"
+ 
++# --- GHI DAU VET SOM (M3) — PHAI truoc moi duong `exit` cua hook.
++# Do duoc: ban truoc dat khoi nay o CUOI tep, SAU nhanh `exit 1` khi thieu cong cu
++# bat buoc. Chay that trong container nay: hook thoat rc=1, da cai xong actionlint,
++# ma KHONG de lai dau vet nao => `doctor` khai `CHUA CHAY` cho mot lan hook DA CHAY.
++# "Hook co chay khong" va "hook co THANH CONG khong" la HAI cau hoi; dau vet tra loi
++# cau thu nhat, nen no phai duoc ghi NGAY, khong doi ket qua.
++ghi_dau_vet_hook() {
++  for d in "$GOC/.claude/.packet_state" "$GOC/.tl_state"; do
++    if mkdir -p "$d" 2>/dev/null; then
++      date -u +"%Y-%m-%dT%H:%M:%SZ" > "$d/session-start.ran" 2>/dev/null || true
++      return 0
++    fi
++  done
++  return 1
++}
++ghi_dau_vet_hook || echo "[session-start] CANH BAO: khong ghi duoc dau vet hook"
++
+ # `command -v` chứ không `which`: có sẵn ở mọi shell POSIX và không phụ thuộc gói ngoài.
+ co() { command -v "$1" >/dev/null 2>&1; }
+ 
+@@ -168,8 +186,16 @@
+   AL_DICH="${HOME}/.local/bin"
+   mkdir -p "$AL_DICH" 2>/dev/null || AL_DICH="/tmp/actionlint"
+   if AL_VER="$AL_VER" AL_DICH="$AL_DICH" bash "$GOC/ops/cai_actionlint.sh" >/dev/null 2>&1; then
++    # `export PATH` nay chi song trong TIEN TRINH HOOK. Neu $AL_DICH khong nam san
++    # tren PATH cua PHIEN thi cong cu CO MAT ma phien KHONG DUNG DUOC — dung benh
++    # "co mat != dung duoc". Nen kiem trong mot shell SACH, khong co PATH da noi.
+     export PATH="$AL_DICH:$PATH"
+-    echo "[session-start] actionlint: $(actionlint --version 2>/dev/null | head -1)"
++    if env -u PATH PATH="$PATH_GOC" command -v actionlint >/dev/null 2>&1; then
++      echo "[session-start] actionlint: $(actionlint --version 2>/dev/null | head -1)"
++    else
++      echo "[session-start] CANH BAO: da cai actionlint vao $AL_DICH nhung PHIEN KHONG thay no"
++      echo "[session-start]   (PATH cua phien khong chua $AL_DICH). Them vao PATH roi mo lai phien."
++    fi
+   else
+     echo "[session-start] CANH BAO: KHONG cai duoc actionlint — kiem tra GitHub Actions workflow se gay giua chung"
+   fi
+@@ -620,13 +646,4 @@
+   exit 1
+ fi
+ 
+-# --- GHI DẤU VẾT HOOK ĐÃ CHẠY (M3 / M4)
+-# Ghi vào thư mục an toàn đã có trong .gitignore để không làm dơ worktree.
+-for d in "$GOC/.claude/.packet_state" "$GOC/.tl_state" "$GOC/.claude"; do
+-  if mkdir -p "$d" 2>/dev/null; then
+-    date -u +"%Y-%m-%dT%H:%M:%SZ" > "$d/session-start.ran" 2>/dev/null || true
+-    break
+-  fi
+-done
+-
+ echo "[session-start] xong"

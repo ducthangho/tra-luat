@@ -109,3 +109,13 @@ write_set_va_cham_da_do: 'DO DUOC TRUOC KHI CAP, va day la mot canh bao that: wr
   giai NGHIA, khong phai mot phep merge. Reviewer phai doc ca hai huong.'
 cham_gi_o_g3: 'g3 KHONG cap quyen GHI moi: no doi NGUOI REVIEW va MUC ASSURANCE. Executor van codex, write_set
   giu nguyen tung duong, review_class van sensitive.'
+
+# SUA LECH 16-09-2026 — khong phai loi khai moi.
+# Ban sao cua CHINH lease nay tren nhanh `claude/bia-mo-wp538-g3-20260916` DA mang dong
+# duoi day; ban sao nay thieu. `ai-dang-giu` danh gia tung BAN SAO roi moi gom theo
+# lease_id, nen mot ban sao thieu dau du de lease DA CHET van bi dem la NGUOI GIU —
+# do duoc 18:3xZ 16-09: NGUOI_GIU 2 tren docs/PROTOCOL_DA_PHIEN.md.
+# r4/g4 da khai `thay_the_cho` tro nguoc ve day tu luc cap, nen hai chieu da du.
+da_bi_thay_the: wp538-r4-g4-antigravity
+da_bi_thay_the_ly_do: 'r4/g4 doi EXECUTOR codex -> antigravity theo §3.2 vi codex het quota.
+  Dong nay chep tu ban sao tren nhanh bia-mo-wp538-g3; truoc do HAI ban sao LECH nhau.'

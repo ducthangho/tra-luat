@@ -1431,11 +1431,32 @@ CUM_TU_THU = [
 ]
 
 
-def _repo_gia(tmp: Path, noi_dung: str, ten="demo") -> Path:
+# Nguồn đối chiếu TRUNG TÍNH cho cây giả: đủ dài để qua `_PROTO_TU_TOI_THIEU`, và cố ý
+# KHÔNG chứa câu chữ nào của protocol thật lẫn của các adapter mẫu — nên nó không tự sinh
+# phát hiện. Dùng protocol THẬT làm mặc định là sai: nó nặng, và nó buộc các ca đối chứng
+# vốn "khác họ" phải phụ thuộc vào đường đọc protocol, làm 36 phép kiểm đột biến đỏ (đo được).
+_PROTO_TRUNG_TINH = ("man xanh luc bao phu trien doi thoai nguyen so bay muoi hai "
+                     "cau chuyen ve mot chiec thuyen go tren song vang " * 20)
+
+
+def _repo_gia(tmp: Path, noi_dung: str, ten="demo", protocol: str | None = None) -> Path:
+    """Cây giả cho `doctrine-scan`, NAY luôn có nguồn đối chiếu dưới `--root`.
+
+    Bản trước chỉ dựng `.claude/skills/<ten>/SKILL.md`, nên mọi ca dùng nó đo theo protocol
+    của kho THẬT qua fallback `parents[2]`; `--root` chỉ góp phần adapter. Đo được: gỡ
+    fallback thì `doctrine_scan_chep_tron_5_1_bi_chan` và `..._chep_doan_ngan_...` ĐỎ ngay
+    — hai ca ấy chưa từng đo cây mà chúng khai là đang đo.
+
+    `protocol=None` ⇒ ghi nguồn TRUNG TÍNH (ca không nói gì về chép). Ca nào đo hành vi chép
+    thì truyền protocol THẬT vào, tường minh, để người đọc thấy nguồn so sánh là gì.
+    """
     r = tmp / f"repo_{abs(hash(noi_dung)) % 10**8}_{ten}"
     d = r / ".claude" / "skills" / ten
     d.mkdir(parents=True, exist_ok=True)
     (d / "SKILL.md").write_text(noi_dung, encoding="utf-8", newline="\n")
+    (r / "docs").mkdir(parents=True, exist_ok=True)
+    (r / "docs" / "PROTOCOL_DA_PHIEN.md").write_text(
+        protocol if protocol is not None else _PROTO_TRUNG_TINH, encoding="utf-8", newline="\n")
     return r
 
 
@@ -1507,7 +1528,7 @@ def case_doctrine_scan_chep_tron_5_1_bi_chan(c: Ctx):
     if not m:
         raise AssertionError("không tìm thấy §5.1 trong protocol")
     sec_5_1 = m.group(1)
-    r = _repo_gia(c.tmp, f"# Adapter\n\n{sec_5_1}\n", ten="sec_5_1")
+    r = _repo_gia(c.tmp, f"# Adapter\n\n{sec_5_1}\n", ten="sec_5_1", protocol=raw)
     rc, _, e = run(c.script, ["doctrine-scan", "--root", r])
     _doi(6, rc, e, "chép trọn §5.1 phải ĐỎ (rc=6)")
 
@@ -1526,22 +1547,77 @@ def case_doctrine_scan_chep_doan_ngan_5_1_bi_chan(c: Ctx):
     ]
     words = " ".join(lines).split()
     doan = " ".join(words[:29])
-    r = _repo_gia(c.tmp, f"# Adapter\n\n{doan}\n", ten="sec_5_1_ngan")
+    r = _repo_gia(c.tmp, f"# Adapter\n\n{doan}\n", ten="sec_5_1_ngan", protocol=raw)
     rc, _, e = run(c.script, ["doctrine-scan", "--root", r])
     _doi(6, rc, e, "chép đoạn ngắn 29 từ của §5.1 phải ĐỎ (rc=6)")
 
 
 def case_doctrine_scan_chep_12_bi_chan(c: Ctx):
-    """A1 — Chép §12 của protocol vào adapter ⇒ phải ĐỎ (rc=6)."""
+    """A1 — Chép đoạn văn xuôi thuần §12 (không dính 28 cụm cấm) ⇒ phải ĐỎ (rc=6).
+
+    Khác bản trước: bản trước chép trọn §12 (vốn chứa cả cụm cấm cũ như 'người có
+    thẩm quyền'), nên khi tắt n-gram (`bo_kiem_chep_protocol`), ca này vẫn XANH.
+    Đoạn này lấy 30 từ văn xuôi thuần ở §12 không dính bất kỳ cụm nào trong 28 cụm cấm
+    cũ, chứng minh cơ chế so sánh n-gram mới thật sự đo được hành vi chép.
+    """
     proto = ROOT / "docs" / "PROTOCOL_DA_PHIEN.md"
     raw = proto.read_text(encoding="utf-8")
     m = re.search(r"(## 12\.\s+.*?)(?=\n## 13|\Z)", raw, re.DOTALL)
     if not m:
         raise AssertionError("không tìm thấy §12 trong protocol")
     sec_12 = m.group(1)
-    r = _repo_gia(c.tmp, f"# Adapter\n\n{sec_12}\n", ten="sec_12")
+    words = [w for w in sec_12.split() if not w.startswith("#")]
+    doan = " ".join(words[45:75])
+    r = _repo_gia(c.tmp, f"# Adapter\n\n{doan}\n", ten="sec_12_ngan", protocol=raw)
     rc, _, e = run(c.script, ["doctrine-scan", "--root", r])
-    _doi(6, rc, e, "chép §12 phải ĐỎ (rc=6)")
+    _doi(6, rc, e, "chép đoạn ngắn §12 không dính cụm cấm phải ĐỎ (rc=6)")
+
+
+def case_doctrine_scan_fail_close_thieu_protocol(c: Ctx):
+    """Fail-close: thiếu docs/PROTOCOL_DA_PHIEN.md dưới --root ⇒ phải ĐỎ (rc=2)."""
+    r = c.tmp / "repo_thieu_proto"
+    d = r / ".claude" / "skills" / "demo"
+    d.mkdir(parents=True, exist_ok=True)
+    (d / "SKILL.md").write_text(SACH, encoding="utf-8", newline="\n")
+    rc, _, e = run(c.script, ["doctrine-scan", "--root", r])
+    _doi(2, rc, e, "thiếu PROTOCOL_DA_PHIEN.md phải ĐỎ (rc=2)")
+    if "KHÔNG ĐO ĐƯỢC" not in _txt(e):
+        raise AssertionError(f"đỏ mà không nói KHÔNG ĐO ĐƯỢC: {_txt(e)!r}")
+
+
+def case_doctrine_scan_fail_close_khong_phai_utf8(c: Ctx):
+    """Fail-close: PROTOCOL_DA_PHIEN.md lỗi UTF-8 ⇒ phải ĐỎ (rc=2)."""
+    r = c.tmp / "repo_proto_khong_utf8"
+    d = r / ".claude" / "skills" / "demo"
+    d.mkdir(parents=True, exist_ok=True)
+    (d / "SKILL.md").write_text(SACH, encoding="utf-8", newline="\n")
+    (r / "docs").mkdir(parents=True, exist_ok=True)
+    (r / "docs" / "PROTOCOL_DA_PHIEN.md").write_bytes(b"\x80\x81\xff\xfe")
+    rc, _, e = run(c.script, ["doctrine-scan", "--root", r])
+    _doi(2, rc, e, "PROTOCOL_DA_PHIEN.md lỗi UTF-8 phải ĐỎ (rc=2)")
+    if "KHÔNG ĐO ĐƯỢC" not in _txt(e):
+        raise AssertionError(f"đỏ mà không nói KHÔNG ĐO ĐƯỢC: {_txt(e)!r}")
+
+
+def case_doctrine_scan_fail_close_protocol_ngan(c: Ctx):
+    """Fail-close: PROTOCOL_DA_PHIEN.md quá ngắn (< 200 từ) ⇒ phải ĐỎ (rc=2)."""
+    proto_ngan = "tu " * 50
+    r = _repo_gia(c.tmp, SACH, ten="proto_ngan", protocol=proto_ngan)
+    rc, _, e = run(c.script, ["doctrine-scan", "--root", r])
+    _doi(2, rc, e, "PROTOCOL_DA_PHIEN.md quá ngắn (< 200 từ) phải ĐỎ (rc=2)")
+    if "KHÔNG ĐO ĐƯỢC" not in _txt(e):
+        raise AssertionError(f"đỏ mà không nói KHÔNG ĐO ĐƯỢC: {_txt(e)!r}")
+
+
+def case_doctrine_scan_fail_close_chi_co_fence(c: Ctx):
+    """Fail-close: PROTOCOL_DA_PHIEN.md chỉ có code fence (bỏ fence rỗng/<200 từ) ⇒ phải ĐỎ (rc=2)."""
+    proto_fence = "```markdown\n" + ("noi dung trong fence " * 100) + "\n```\n"
+    r = _repo_gia(c.tmp, SACH, ten="proto_fence", protocol=proto_fence)
+    rc, _, e = run(c.script, ["doctrine-scan", "--root", r])
+    _doi(2, rc, e, "PROTOCOL_DA_PHIEN.md chỉ có fence phải ĐỎ (rc=2)")
+    if "KHÔNG ĐO ĐƯỢC" not in _txt(e):
+        raise AssertionError(f"đỏ mà không nói KHÔNG ĐO ĐƯỢC: {_txt(e)!r}")
+
 
 
 def case_doctrine_scan_adr_0048_khong_phai_chep_protocol(c: Ctx):
@@ -2933,6 +3009,10 @@ CASES = [
     ("doctrine_scan_chep_tron_5_1_bi_chan", case_doctrine_scan_chep_tron_5_1_bi_chan),
     ("doctrine_scan_chep_doan_ngan_5_1_bi_chan", case_doctrine_scan_chep_doan_ngan_5_1_bi_chan),
     ("doctrine_scan_chep_12_bi_chan", case_doctrine_scan_chep_12_bi_chan),
+    ("doctrine_scan_fail_close_thieu_protocol", case_doctrine_scan_fail_close_thieu_protocol),
+    ("doctrine_scan_fail_close_khong_phai_utf8", case_doctrine_scan_fail_close_khong_phai_utf8),
+    ("doctrine_scan_fail_close_protocol_ngan", case_doctrine_scan_fail_close_protocol_ngan),
+    ("doctrine_scan_fail_close_chi_co_fence", case_doctrine_scan_fail_close_chi_co_fence),
     ("doctrine_scan_adr_0048_khong_phai_chep_protocol", case_doctrine_scan_adr_0048_khong_phai_chep_protocol),
     ("doctrine_scan_con_tro_thuan_tuy_xanh", case_doctrine_scan_con_tro_thuan_tuy_xanh),
     ("stdout_cp1252", case_stdout_cp1252),
@@ -4081,9 +4161,11 @@ MUTANTS = {
     "74a_splitlines_sai": ('    p = re.split(r\'(\\r\\n|\\r|\\n)\', noi_dung); lines = [p[i]+p[i+1] for i in range(0,len(p)-1,2)]+([p[-1]] if p[-1] else [])', '    lines = noi_dung.splitlines(keepends=True)', ["trich_xuat_74a_chong_nhieu"]),
     "74a_raw_closing_cung_ten": ('            if mh:\n                end_re = re.compile(r"-->" if mh.group(1) else r"(?i)</(?:pre|script|style|textarea)>")', '            if mh:\n                end_re = re.compile(r"-->" if mh.group(1) else f"(?i)</{mh.group(2)}>")', ["trich_xuat_74a_chong_nhieu"]),
     "bo_kiem_chep_protocol": (
-        "        if proto_words:",
+        "        if True:",
         "        if False:  # bo_kiem_chep_protocol",
-        ["doctrine_scan_chep_tron_5_1_bi_chan"],
+        ["doctrine_scan_chep_tron_5_1_bi_chan",
+         "doctrine_scan_chep_doan_ngan_5_1_bi_chan",
+         "doctrine_scan_chep_12_bi_chan"],
     ),
     "nang_nguong_chep_protocol_len_50": (
         "            threshold = 15 if is_claude_md else 10",

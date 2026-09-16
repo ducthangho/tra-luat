@@ -563,6 +563,7 @@ Hai lệnh Python sau minh họa hai phép đo riêng của protocol §8.2, tr�
 `$SCRATCH` nằm ngoài cây. Lệnh contract gọi consumer hiện hữu, không chạy toàn suite:
 
 ```bash
+PY="$(command -v python3 || command -v python || command -v py)"
 export PYTHONDONTWRITEBYTECODE=1
 export PYTHONPYCACHEPREFIX="$SCRATCH/pycache"
 "$PY" -B -c 'import pathlib,runpy,sys; m=runpy.run_path(str(pathlib.Path(sys.argv[1])/".claude/dev/ci_dang_ky_test.py")); errors,count=m["loi_ruff_ci"](); print("RUFF_CONTRACT",count,errors); sys.exit(bool(errors) or count == 0)' "$SOURCE"

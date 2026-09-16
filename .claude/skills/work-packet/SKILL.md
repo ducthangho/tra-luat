@@ -35,6 +35,7 @@ Công thức `spec_hash` và nguồn blob: protocol §3.2.1. Ví dụ lưu bytes
 Python (các biến Bash dưới đây do phiên điền từ assignment, không chạy nguyên placeholder):
 
 ```bash
+PY="$(command -v python3 || command -v python || command -v py)"
 "$PY" -c 'import hashlib,pathlib,subprocess,sys; b=subprocess.run(["git","show",sys.argv[1]+":"+sys.argv[2]],check=True,capture_output=True).stdout; pathlib.Path(sys.argv[3]).write_bytes(b); print(hashlib.sha256(b).hexdigest())' "$SPEC_OID" "$SPEC_PATH" "$SCRATCH/spec.md"
 ```
 
@@ -58,6 +59,7 @@ Lấy công cụ TỪ NHÁNH CHÍNH, đừng chạy cả hook phiên chỉ để
 cài phụ thuộc Python và đã đo được một lần làm hỏng môi trường đang tốt:
 
 ```bash
+PY="$(command -v python3 || command -v python || command -v py)"
 "$PY" "$CANON/.claude/dev/launcher.py" doctor
 ```
 
@@ -99,7 +101,7 @@ Lưu khối sau thành `$ADMISSION_SCRIPT` ngoài checkout, chạy bằng
 ```bash
 set -eu
 CANON="$1"; S="$2"; H="$3"; SCRATCH="$4"
-PY="$(command -v python3)"
+PY="$(command -v python3 || command -v python || command -v py)"
 "$PY" -B -c 'import os,shutil,sys; print(sys.executable,sys.version); g=shutil.which("git",path="/usr/bin:/bin"); print("admission git",g); sys.exit(0 if os.name=="posix" and g else "unsupported admission runtime")'
 /usr/bin/git --version
 "$PY" -B -c 'import yaml; print("PyYAML",yaml.__version__)'

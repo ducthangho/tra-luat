@@ -1472,7 +1472,7 @@ def cmd_doctrine_scan(a, state_dir: Path) -> int:
             # VÌ SAO CLAUDE.md CẦN NGƯỠNG 15 (đo được, không phải võ đoán — LỚP 4):
             # CLAUDE.md có dẫn chứng câu bài học nguyên văn dài đúng 13 từ từ protocol
             # ("cùng họ cổng vắng mặt trông giống cổng xanh, đổi đối tượng: một").
-            # Đo trên master: ngưỡng 10 có 10 hits, 11 có 7 hits, 12 có 4 hits,
+            # Đo trên master: ngưỡng 10 có 11 hits, 11 có 7 hits, 12 có 4 hits,
             # 13 có 2 hits, 14 có 0 hits, 15 có 0 hits. Ngưỡng 15 là cận an toàn
             # tối thiểu để không bắt oan câu dẫn giải bài học trong CLAUDE.md,
             # trong khi vẫn chặn đứng việc sao chép đoạn dài (>= 15 từ).

@@ -1,0 +1,132 @@
+# Lease — WP538 SKILL-PREFLIGHT-REVIEW-LAND revision 4 / generation 4. Ghi HO chu kho.
+# THAY g3 vi DOI EXECUTOR: codex -> antigravity (codex het quota). §3.2 => r4 + g4 + cap lai.
+# Reviewer VAN LA CLAUDE va assurance VAN LA cross_approved: agy la google_antigravity,
+# reviewer la anthropic_claude, van khac provider. Tep nay viet TUNG TRUONG, khong sed tu g3.
+schema_version: 2
+event: executor_lease_granted
+packet_issue: 538
+packet_id: SKILL-PREFLIGHT-REVIEW-LAND
+mission_issue: 499
+revision: 4
+generation: 4
+lease_id: wp538-r4-g4-antigravity
+granted_by: ducthangho
+granted_on_instruction: https://github.com/ducthangho/tra-luat/issues/538#issuecomment-5695202718
+recorded_by: claude-session
+recorder_is_dispatcher: false
+leased_at_utc: '2026-09-16T09:30:24Z'
+lease_expires_at_utc: '2026-09-17T09:30:24Z'
+role: executor
+provider: google_antigravity
+executor: antigravity
+model: KHONG_KHAI
+effort: KHONG_KHAI
+execution_surface: antigravity
+transport: machine/local
+vi_sao_doi_executor: '§3.2: doi EXECUTOR tao revision moi va lam lease cu mat hieu luc. Chi thi chu kho
+  nguyen van: ''#539 la cac loi don gian, hay cho anti gravity sua (agy) vi Codex da het quota khong sua
+  duoc nua''. KHONG phai thu tuc suong: g3 khai executor codex va branch_ownership exclusive cho codex,
+  nen de agy ghi vao dung nhanh ay ma khong doi lease la GHI NGOAI THAM QUYEN. model/effort de KHONG_KHAI
+  vi chua do duoc header runtime cua agy; receipt phai chung minh danh tinh that khi chay.'
+environment: local
+operating_system: KHONG_KHAI
+risk: sensitive
+review_class: sensitive
+effective_review_class: sensitive
+assurance_target: cross_approved
+reviewer_provider: claude
+reviewer_model: KHONG_KHAI
+reviewer_effort: KHONG_KHAI
+reviewer_independence: fresh session/context/checkout; no executor context fork; read-only source
+cross_reviewer_requirement: 'Reviewer PHAI khac provider voi executor. O r4 executor la google_antigravity
+  va reviewer la anthropic_claude => van KHAC provider, nen doi executor KHONG pha duoc muc cross_approved.
+  Dieu kien ''xhigh > high cua CUNG model'' cua r2 van KHONG ap: do la phep tang EFFORT, khong phai phep
+  doi PROVIDER.'
+spec_path: ops/specs/wp538-skill-preflight-review-land-r4.md
+spec_ref: claude/spec-wp538-r4-20260916
+spec_hash: 7ee56b6c602877ca4b58722c8c097fddc3fb04e43e32fea1e92acd36725934ab
+spec_sha256: 7ee56b6c602877ca4b58722c8c097fddc3fb04e43e32fea1e92acd36725934ab
+prompt_path: ops/specs/wp538-skill-preflight-review-land-r4.md
+prompt_sha256_required: 7ee56b6c602877ca4b58722c8c097fddc3fb04e43e32fea1e92acd36725934ab
+branch: codex/wp538-r1-g1
+branch_ownership: exclusive
+branch_ownership_chuyen_giao: 'Quyen ghi nhanh codex/wp538-r1-g1 CHUYEN TU codex SANG antigravity o g4.
+  Codex KHONG con quyen ghi nhanh nay. GIU NGUYEN TEN nhanh vi do la head cua PR #539 — doi nhanh la bo
+  PR; ten nhanh mang dau vet lich su, con quyen ghi di theo VAI executor.'
+target_branch_neu_land: master
+base_sha: c66415aa8dabb48a23fc23751a1eb54aab0330eb
+start_from_sha: f2aa1f9fd0dc0d7914c2f5ce34563f60fdec3f72
+immutable_acceptance_baseline: c66415aa8dabb48a23fc23751a1eb54aab0330eb
+reviewed_sha_required: f2aa1f9fd0dc0d7914c2f5ce34563f60fdec3f72
+reviewed_sha_required_note: 'Head THUC TE cua PR #539 luc cap g4 (do bang pull_request_read: head.sha
+  f2aa1f9f, khong doi tu luc cap g3). Day la mo neo DUOI: agy se day them commit, nen verdict cuoi PHAI
+  neo SHA ung vien that sau khi agy lam xong, khong dung lai con so nay.'
+write_set:
+- docs/PROTOCOL_DA_PHIEN.md
+- .claude/skills/work-packet/SKILL.md
+- .claude/skills/cross-review/SKILL.md
+- .claude/skills/land-packets/SKILL.md
+- .agents/skills/work-packet/SKILL.md
+- .agents/skills/cross-review/SKILL.md
+- .agents/skills/land-packets/SKILL.md
+- ops/specs/wp538-skill-preflight-review-land-r2.md
+- ops/leases/wp538-r2-g2-codex-windows.yaml
+- ops/reviews/wp538/
+- ops/leases/wp538-r1-g1-codex-windows.yaml
+- ops/specs/wp538-skill-preflight-review-land-r4.md
+- ops/leases/wp538-r4-g4-antigravity.yaml
+write_set_thuc_te_se_cham: 'Viec cua r4 chi cham HAI tep san pham: .claude/skills/work-packet/SKILL.md
+  va .claude/skills/cross-review/SKILL.md (bon khoi idiom ba ten). Cong mot merge commit tu origin/master.
+  Write set giu day du cua g3 de khong thu hep quyen giua chung packet, nhung g4 KHONG cap vung san pham
+  moi: hai duong THEM chi la spec r4 + lease g4.'
+viec_cua_r4: '1) work-packet/SKILL.md:100 — thay PY="$(command -v python3)" bang idiom BA TEN nguyen van
+  tu .claude/dev/idiom_py_test.py:55: PY="$(command -v python3 || command -v python || command -v py)".
+  2) Them dung dong ay lam DONG DAU cua ba khoi THIEU_GAN: work-packet/SKILL.md:38, :61 va cross-review/SKILL.md:566
+  — gan phai dung TRUOC lan dung "$PY" dau tien, vi cong to ca GAN_MUON. 3) Merge origin/master (19de5669)
+  bang MERGE COMMIT, khong rebase khong force-push (nhanh nay la head cua mot PR dang mo). CHOT: python3
+  .claude/dev/idiom_py_test.py phai ve 7/7 dat 0 DO — dung con so ma origin/master cho, doc rc TRUC TIEP
+  khong qua pipe. CAM sua .claude/dev/idiom_py_test.py.'
+delta_da_do: 'Do MOT BIEN, cung container cung lenh, chi khac commit: origin/master => 7/7 dat 0 do; f2aa1f9f
+  => 5/7 dat 2 do (ba_nen_path, hop_dong_khoi). Nen hai ca do la DELTA CUA PACKET, khong phai do san.
+  Nguon CI: run 34914089592, gate (ubuntu-latest) failure. thu-hoi rieng biet rc=12: ''workflow_sha 19de5669
+  != S c66415aa'' = base drift.'
+related_packets:
+- 523
+- 463
+- 540
+thay_the_cho:
+- wp538-r3-g3-claude-review
+succession_note: r4 thay r3 trong CUNG packet. g3 CHUA het han (toi 2026-09-17T08:30:00Z) nhung mat hieu
+  luc theo §3.2 vi doi executor. Bia mo hai chieu dat tren nhanh claude/bia-mo-wp538-g3-20260916 — NGOAI
+  khong gian ops/**, vi dat ban sao lease vao chinh push len nhanh dang lam workflow co dang lai no (do
+  duoc o run 35073577270 va 35076204065). _kiem_bia_mo goi _quet_lease_toan_kho theo REF nen van thay.
+  Spec r3 GIU NGUYEN tren dia.
+run_minutes: 90
+heartbeat_required_minutes: 30
+attempts_limit: class-based owner-directed loop; no reset of prior history
+review_calls_limit: until approve or zero P1/P2; per-run deadline and infrastructure checkpoints remain
+manual_ci_budget: 0
+prohibited_actions:
+- merge
+- land
+- deploy
+- LIVE
+- ruleset mutation
+- secret disclosure
+- workflow_dispatch
+- manual full CI
+- Windows CI
+closure_status: 'Explicit owner-approved bounded write-set; no claim of computed dispatcher closure; missing
+  policy/derived-fields debt #473 must be reported before execution'
+orchestration: owner-authorized manual issue/receipt journal; no packet_loop state claim
+ci_policy: no CI/full CI/Windows CI before pre-merge readiness; no PR or dispatch during loop
+ngan_sach_dong_adr_0044: 'r4 KHAI ngan sach DONG, dong finding P2 adr-0044-khai-ngoai-le-chi-phu-mot-trong-hai-nguong
+  cua luot cross-review claude. Nguong bi vuot: 300 dong them; do duoc +772; boi so 2,6x. Ly do khai o
+  spec r4. THUA NHAN +772 nam TREN diem PLAT-X4 (+721 => 3 vong / 8 finding) ma chinh ADR dan lam bang
+  chung ''da qua lon''. KHAI chu KHONG mien tru.'
+finding_p3_chua_dong: 'hien-vat-review-wp538-khong-co-trong-kho DA DONG MOT PHAN bang ops/reviews/wp538/wp538-review-1-claude-verdict.md
+  (sha256 8d778449...) va bien nhan v2. Phan CON LAI KHONG duoc doc la da dong: bien_nhan_v2 (dong 879,
+  989) va t26/t27 deu glob TANG DAU, nen hien vat o thu muc con khong cong nao cham. Dong han doi quyet
+  dinh chu kho.'
+cham_gi_o_g4: g4 doi NGUOI THI CONG va CHU SO HUU NHANH. Reviewer van claude, assurance van cross_approved,
+  review_class van sensitive, base van c66415aa, manual_ci_budget van 0.

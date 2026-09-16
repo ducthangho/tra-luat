@@ -514,7 +514,7 @@ def _doc_anh_moi_truong(duong):
 def _kiem_anh_moi_truong(duong, can_sach: bool, d=None, *, kiem_tuoi=True) -> dict:
     """Nền dùng chung; tuổi chỉ ở begin-attempt, nơi touch vẫn qua mặt được."""
     d, loi = _doc_anh_moi_truong(duong) if d is None else (d, "")
-    if not isinstance(d, dict) or not {"thieu_bat_buoc", "chua_xac_thuc", "he_dieu_hanh"} <= d.keys():
+    if d is not None and (not isinstance(d, dict) or not {"thieu_bat_buoc", "chua_xac_thuc", "he_dieu_hanh"} <= d.keys()):
         d, loi = None, "ảnh môi trường thiếu trường của `doctor --json`"
     if d is None:
         _die(RC_MOI_TRUONG, f"KHÔNG ĐỌC ĐƯỢC: {loi}")

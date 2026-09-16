@@ -130,3 +130,17 @@ finding_p3_chua_dong: 'hien-vat-review-wp538-khong-co-trong-kho DA DONG MOT PHAN
   dinh chu kho.'
 cham_gi_o_g4: g4 doi NGUOI THI CONG va CHU SO HUU NHANH. Reviewer van claude, assurance van cross_approved,
   review_class van sensitive, base van c66415aa, manual_ci_budget van 0.
+
+# THU HOI 16-09-2026 theo chi thi chu kho (issue #538, comment 5702669239).
+# Packet #538 DA LAND o merge 6bd5600 (PR #539), nhung lease nay con hieu luc toi
+# 2026-09-17T09:30:24Z va van giu 13 duong, trong do co docs/PROTOCOL_DA_PHIEN.md.
+# Do duoc 18:3xZ 16-09: ai-dang-giu docs/PROTOCOL_DA_PHIEN.md => rc=11, NGUOI_GIU 2.
+#
+# NOI THANG CHO KHIEN CUONG: `da_bi_thay_the`/`thay_the_cho` la co che KE NHIEM
+# (doi revision/generation/executor). O day no bi dung de dien dat HOAN TAT — khong co
+# "the he 5" nao cua WP538 ca. Dung ve hieu luc, sai ve ngu nghia, va do la bang chung
+# song cho no AG-T0-01B-thu-hoi-lease-chua-co-duong: kho can mot truong `da_hoan_tat`
+# rieng do `_phan_loai_lease` doc. NO VAN MO.
+da_bi_thay_the: wp538-thu-hoi-sau-land
+da_bi_thay_the_ly_do: 'Packet #538 da land (merge 6bd5600, PR #539). Thu hoi tuong minh
+  theo chi thi chu kho de quyen ghi khong song sot sau khi viec da xong.'

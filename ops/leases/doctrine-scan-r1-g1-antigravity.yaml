@@ -1,0 +1,108 @@
+# Lease — DOCTRINE-SCAN-DAO-SANG-DANH-SACH-CHO-PHEP r1/g1. Ghi HO chu kho.
+# Executor antigravity (chay tren may chu kho), reviewer claude => khac provider nen
+# cross_approved DAT DUOC, trong khi codex het quota. Viet TUNG TRUONG, khong sed.
+schema_version: 2
+event: executor_lease_granted
+packet_issue: 543
+packet_id: DOCTRINE-SCAN-DAO-SANG-DANH-SACH-CHO-PHEP
+mission_issue: 499
+revision: 1
+generation: 1
+lease_id: doctrine-scan-r1-g1-antigravity
+granted_by: ducthangho
+granted_on_instruction: https://github.com/ducthangho/tra-luat/issues/543
+granted_on_instruction_nguyen_van: 'Chu kho, phien dieu phoi 16-09-2026: ''doctrine-scan: mo phien moi,
+  lam luon di'', noi tiep quyet dinh truoc do ''Mo packet rieng cho doctrine-scan''. Va: ''antigravity
+  da cai tren may local, neu can cho toi Prompt de toi va tren agy hoac mo phien moi, chay tren local
+  de chay agy''.'
+recorded_by: claude-session
+recorder_is_dispatcher: false
+leased_at_utc: '2026-09-16T10:57:23Z'
+lease_expires_at_utc: '2026-09-17T10:57:23Z'
+role: executor
+provider: google_antigravity
+executor: antigravity
+model: KHONG_KHAI
+effort: KHONG_KHAI
+execution_surface: antigravity
+transport: machine/local
+environment: local
+operating_system: Windows
+risk: sensitive
+review_class: sensitive
+effective_review_class: sensitive
+review_class_vi_sao: Packet sua mot CONG cuong che protocol (doctrine-scan). Mot cong bi noi long am tham
+  thi moi adapter sau do di qua ma khong ai biet — nen class sensitive, khong phai routine.
+assurance_target: cross_approved
+reviewer_provider: claude
+reviewer_model: KHONG_KHAI
+reviewer_effort: KHONG_KHAI
+reviewer_independence: fresh session/context/checkout; no executor context fork; read-only source
+cross_reviewer_requirement: 'Reviewer PHAI khac provider voi executor: executor google_antigravity, reviewer
+  anthropic_claude => khac provider, thoa §8 muc 1. Day la ly do chon agy lam executor: no lam cho cross_approved
+  DAT DUOC, trong khi codex het quota.'
+spec_path: ops/specs/doctrine-scan-dao-sang-danh-sach-cho-phep-r1.md
+spec_ref: claude/spec-doctrine-scan-r1-20260916
+spec_hash: 60dbefa1f617be36ecd4ac93743d9def0ddc063f06ae09e7af0e002c7c80b0cf
+spec_sha256: 60dbefa1f617be36ecd4ac93743d9def0ddc063f06ae09e7af0e002c7c80b0cf
+prompt_path: ops/specs/doctrine-scan-dao-sang-danh-sach-cho-phep-r1.md
+prompt_sha256_required: 60dbefa1f617be36ecd4ac93743d9def0ddc063f06ae09e7af0e002c7c80b0cf
+branch: agy/doctrine-scan-r1-g1
+branch_ownership: exclusive
+target_branch_neu_land: master
+base_sha: 19de56693d06813e6743a30113d0fb87bff3e196
+start_from_sha: 19de56693d06813e6743a30113d0fb87bff3e196
+immutable_acceptance_baseline: 19de56693d06813e6743a30113d0fb87bff3e196
+reviewed_sha_required: 19de56693d06813e6743a30113d0fb87bff3e196
+reviewed_sha_required_note: Mo neo DUOI luc cap — chua co ung vien. Verdict cuoi PHAI neo dung SHA ung
+  vien that khi no ton tai, khong dung lai con so nay.
+write_set:
+- .claude/dev/packet_loop.py
+- .claude/dev/packet_loop_test.py
+- ops/specs/doctrine-scan-dao-sang-danh-sach-cho-phep-r1.md
+- ops/leases/doctrine-scan-r1-g1-antigravity.yaml
+- ops/reviews/doctrine-scan/
+write_set_da_quet_toan_kho: 'DO TRUOC KHI CAP: ai-dang-giu tren refs/heads + refs/remotes cho tung duong
+  => NGUOI_GIU 0, rc=0, khong KHONG_XAC_DINH. Bo quet duoc hieu chinh truoc bang mot ca BIET TRUOC DAP
+  AN.'
+khong_duoc_cham:
+- docs/PROTOCOL_DA_PHIEN.md
+- '.claude/skills/**  (write set dang mo cua #538)'
+- '.agents/skills/**  (write set dang mo cua #538)'
+- .github/workflows/**
+- scripts/tl.py
+- ops/nhanh_don_duoc_test.py  (#540)
+- RELEASE_MANIFEST.json
+related_packets:
+- 523
+- 538
+- 540
+nguon_finding: 'phep-do-doctrine-khong-du-rang, P2 / 2 the hien, mo o luot cross-review thu 9 cua PR #529
+  (packet #523), CHUA VA. S4 cua #523 CAM chinh packet ay viet cong nay.'
+run_minutes: 90
+heartbeat_required_minutes: 30
+attempts_limit: class-based owner-directed loop; no reset of prior history
+review_calls_limit: until approve or zero P1/P2
+manual_ci_budget: 0
+prohibited_actions:
+- self_review
+- self_approve
+- merge
+- land
+- deploy
+- LIVE
+- ruleset mutation
+- admin bypass
+- secret disclosure
+- workflow_dispatch
+- manual full CI
+- Windows CI
+- sua docs/PROTOCOL_DA_PHIEN.md de cong de xanh hon
+- noi bang cam cu roi goi do la da dao sang danh sach cho phep
+closure_status: 'Explicit owner-approved bounded write-set; no claim of computed dispatcher closure; missing
+  policy/derived-fields debt #473 must be reported before execution'
+orchestration: owner-authorized manual issue/receipt journal; no packet_loop state claim
+ci_policy: 'Khong CI tay. CHU Y DO DUOC luc cap: CI cua kho DANG HONG O TANG HA TANG — moi job can runner
+  (gate, gate-registry, gate-packet-loop, thu-hoi) chet sau ~2 giay, KHONG LOG, tren CA hai workflow va
+  CA hai loai su kien (pull_request va pull_request_target). Nen executor PHAI chay cong TAI CHO va bao
+  so do cua minh; dung doi CI xanh, va dung doc CI do thanh ''ban va sai''.'

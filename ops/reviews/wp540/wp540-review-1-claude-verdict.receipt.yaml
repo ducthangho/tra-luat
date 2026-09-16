@@ -18,11 +18,18 @@ provider: claude
 executor_provider: codex
 cross_provider: true
 
-assurance: cross_approved
+assurance: advisory_review
 assurance_ghi_chu: >-
-  `review_class: sensitive` doi `approve` TUONG MINH va khong P1/P2. Do duoc: 0 P1, 0 P2.
-  Cap reviewer/executor KHAC PROVIDER (anthropic_claude cham openai_codex) nen thoa §8 muc 1.
-  Muc nay KHONG phu cac so do Windows cua executor — xem `pham_vi_approve`.
+  VERDICT la `approve` (0 P1, 0 P2) — do la phan doan ve MA. Nhung MUC ASSURANCE ghi o day
+  KHONG phai `cross_approved`, va day la mot DINH CHINH cua chinh phien nay: ban dau toi khai
+  `cross_approved`, cong `bien_nhan_v2` TU CHOI voi ly do dung — 'khai cross_approved ma KHONG
+  co bang chung phien doc lap (khong co session_run_id lan phien_doc_lap)'. Toi KHONG khai
+  `phien_doc_lap` vi no se SAI: phien nay dong thoi soan spec r2 va ghi ho lease g2.
+  Cai tro treu dang ghi: chinh bien nhan nay da co san caveat noi ra gioi han ay, roi van khai
+  vuot o truong ben tren — dung lop F3 cua cross-review PR #455 ma caveat do dan lai.
+  DOC CHO DUNG: WP540 co mot VERDICT approve khac nen, nhung packet CHUA DAT muc
+  `cross_approved`. Muon dat thi can mot phien claude DOC LAP neo bang `launcher.py run`
+  (co session_run_id), hoac mot quyet dinh cua chu kho.
 
 verdict: approve
 verdict_path: ops/reviews/wp540/wp540-review-1-claude-verdict.md
@@ -188,7 +195,7 @@ verdict_usage_caveats:
       CHECKOUT that su rieng (mirror bare + cay detached tai 7c7ad450, porcelain rong, comm -23
       rong), con CONTEXT thi khong — phien nay dong thoi soan spec r2 va ghi ho lease g2. Cung LOP
       voi F3 cua cross-review PR #455. Khac provider thi VAN THAT: diff do codex viet.
-      Vi the bien nhan nay khai `cross_approved` DUA TREN cap provider, va khai thang gioi han nay
+      Vi the bien nhan nay khai `advisory_review`, KHONG khai `cross_approved` — xem `assurance_ghi_chu`
       de nguoi doc tu tru hao.
   - id: SO-DO-WINDOWS-LA-LOI-KHAI-CUA-EXECUTOR-KHONG-PHAI-PHEP-DO-CUA-REVIEWER
     muc: P3

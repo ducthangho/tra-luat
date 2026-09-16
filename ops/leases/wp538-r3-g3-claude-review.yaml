@@ -109,3 +109,11 @@ write_set_va_cham_da_do: 'DO DUOC TRUOC KHI CAP, va day la mot canh bao that: wr
   giai NGHIA, khong phai mot phep merge. Reviewer phai doc ca hai huong.'
 cham_gi_o_g3: 'g3 KHONG cap quyen GHI moi: no doi NGUOI REVIEW va MUC ASSURANCE. Executor van codex, write_set
   giu nguyen tung duong, review_class van sensitive.'
+da_bi_thay_the: wp538-r4-g4-antigravity
+da_bi_thay_the_ly_do: 'r4/g4 doi EXECUTOR codex -> antigravity theo §3.2 vi codex het quota.
+  Lease nay CHUA het han (toi 2026-09-17T08:30:00Z) nhung mat hieu luc theo §3.2. Bia mo ghi
+  de du HAI CHIEU cho _kiem_bia_mo. Reviewer va assurance KHONG doi o g4.'
+bia_mo_dat_boi: 'phien claude ghi ho, tren nhanh claude/bia-mo-wp538-g3-20260916 — NGOAI
+  khong gian ops/** co chu dich: dat ban sao lease vao chinh push len nhanh dang lam workflow
+  ops-publish-lease co DANG LAI no (do duoc o run 35073577270 va 35076204065). _kiem_bia_mo
+  goi _quet_lease_toan_kho theo REF nen van thay bia mo o day.'

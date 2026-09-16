@@ -13,9 +13,9 @@ provider: google_antigravity
 role: executor
 execution_surface: antigravity
 transport: machine/local
-base_sha: 19de56693d06813e6743a30113d0fb87bff3e196
-head_sha: f53ac68ed780e9b2b726e0443a3c222d514cd9c1
-tree_oid: 630290f8ee0d3cd216cff0cd9c5e1a288903ccf1
+base_sha: dd274415408bd1c6b4279c8e2cf9671057520f23
+head_sha: 5097480e131400695ab0f1c58df51e584a1ad3e0
+tree_oid: 3b486d70c873429adf1ce85b6344a6ebddf23f6f
 branch: agy/doctrine-scan-r1-g1
 status: ready_for_review
 summary: >-

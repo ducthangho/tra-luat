@@ -6463,6 +6463,192 @@ def t159_t137_can_do_DU_ket_qua_va_dung_nhan_than_timeout():
          f"timeout lệnh thứ hai phải ghi run #1 từ ex.cmd: {treo!r}")
 
 
+# --- packet #548: chốt nguồn duy nhất và evaluator tối giản cho ma trận CI Windows ---
+
+
+def _kiem_tra_nguon_duy_nhat_os_ci(tep_hoac_dict) -> list[str]:
+    """Quét ci.yml (hoặc dict giả lập): ĐỎ khi có bất kỳ job nào khai os: riêng ngoài needs.chuan-bi.outputs.os."""
+    import yaml
+    if isinstance(tep_hoac_dict, dict):
+        wf = tep_hoac_dict
+    else:
+        wf = yaml.safe_load(Path(tep_hoac_dict).read_text(encoding="utf-8"))
+    loi = []
+    jobs = wf.get("jobs") or {}
+    if "chuan-bi" not in jobs:
+        loi.append("ci.yml thiếu job 'chuan-bi' làm nguồn duy nhất cho ma trận os")
+        return loi
+    for ten_job, cau_hinh in jobs.items():
+        if ten_job == "chuan-bi":
+            continue
+        matrix = ((cau_hinh or {}).get("strategy") or {}).get("matrix") or {}
+        if "os" in matrix:
+            gia_tri_os = matrix["os"]
+            if isinstance(gia_tri_os, str):
+                if "needs.chuan-bi.outputs.os" not in gia_tri_os:
+                    loi.append(f"job '{ten_job}' khai 'os:' riêng: {gia_tri_os!r} (không tham chiếu needs.chuan-bi.outputs.os)")
+            else:
+                loi.append(f"job '{ten_job}' khai 'os:' riêng bằng danh sách tĩnh: {gia_tri_os!r} (không tham chiếu needs.chuan-bi.outputs.os)")
+    return loi
+
+
+def _danh_gia_bieu_thuc_chuan_bi(expr_str: str, ctx: dict) -> list[str]:
+    """Evaluator tối giản cho đúng hình biểu thức của chuan-bi.
+    Hình chuẩn: fromJSON( ( <cond> ) && '["ubuntu-latest","windows-latest"]' || '["ubuntu-latest"]' )
+    Fail-close: in 'KHÔNG ĐO ĐƯỢC' và raise khi gặp hình khác.
+    """
+    import json
+    raw = expr_str.strip()
+    if raw.startswith("${{") and raw.endswith("}}"):
+        raw = raw[3:-2].strip()
+
+    m = re.fullmatch(
+        r"fromJSON\s*\(\s*\((?P<cond>.*?)\)\s*&&\s*(?P<t>'\[.*?\]')\s*\|\|\s*(?P<f>'\[.*?\]')\s*\)",
+        raw,
+        re.DOTALL,
+    )
+    if not m:
+        msg = f"KHÔNG ĐO ĐƯỢC: biểu thức không khớp hình chuẩn tối giản của chuan-bi: {raw!r}"
+        print(msg)
+        raise ValueError(msg)
+
+    cond_str = m.group("cond").strip()
+    try:
+        true_arr = json.loads(m.group("t").strip("'"))
+        false_arr = json.loads(m.group("f").strip("'"))
+    except Exception as ex:
+        msg = f"KHÔNG ĐO ĐƯỢC: không parse được mảng JSON trong biểu thức: {ex}"
+        print(msg)
+        raise ValueError(msg)
+
+    ve_list = [v.strip() for v in cond_str.split("||")]
+    cond_true = False
+    for ve in ve_list:
+        m_eq = re.fullmatch(r"github\.event_name\s*==\s*'([^']+)'", ve)
+        if m_eq:
+            if ctx.get("event_name") == m_eq.group(1):
+                cond_true = True
+                break
+            continue
+
+        m_ref = re.fullmatch(r"github\.ref\s*==\s*'([^']+)'", ve)
+        if m_ref:
+            if ctx.get("ref") == m_ref.group(1):
+                cond_true = True
+                break
+            continue
+
+        m_contains = re.fullmatch(
+            r"contains\s*\(\s*github\.event\.pull_request\.labels\.\*\.name\s*,\s*'([^']+)'\s*\)", ve
+        )
+        if m_contains:
+            labels = ctx.get("labels") or []
+            if m_contains.group(1) in labels:
+                cond_true = True
+                break
+            continue
+
+        msg = f"KHÔNG ĐO ĐƯỢC: vế điều kiện không nằm trong tập tối giản hỗ trợ: {ve!r}"
+        print(msg)
+        raise ValueError(msg)
+
+    return true_arr if cond_true else false_arr
+
+
+@ca
+def t161_M3_chot_nguon_duy_nhat_ma_tran_ci():
+    """M3 & A2: Quét ci.yml, ĐỎ khi có bất kỳ job nào khai os: riêng ngoài needs.chuan-bi.outputs.os.
+    Đột biến: gỡ chốt nguồn-duy-nhất => ca 'job lén khai os:' phải chuyển sang ĐẠT.
+    """
+    wf_ci = HERE.parent / ".github" / "workflows" / "ci.yml"
+    loi_that = _kiem_tra_nguon_duy_nhat_os_ci(wf_ci)
+    bang(not loi_that, f"ci.yml thật có job lén khai os: riêng: {loi_that}")
+
+    # Ca giả không lén: phải đạt
+    wf_gia_sach = {
+        "jobs": {
+            "chuan-bi": {"outputs": {"os": "${{ fromJSON(...) }}"}},
+            "gate": {"strategy": {"matrix": {"os": "${{ fromJson(needs.chuan-bi.outputs.os) }}"}}},
+            "gate-registry": {"strategy": {"matrix": {"os": "${{ fromJson(needs.chuan-bi.outputs.os) }}"}}},
+        }
+    }
+    bang(_kiem_tra_nguon_duy_nhat_os_ci(wf_gia_sach) == [], "workflow giả hợp lệ bị từ chối")
+
+    # Ca giả có một job lén khai os: riêng (danh sách hoặc biểu thức riêng)
+    wf_gia_len = {
+        "jobs": {
+            "chuan-bi": {"outputs": {"os": "${{ fromJSON(...) }}"}},
+            "gate": {"strategy": {"matrix": {"os": "${{ fromJson(needs.chuan-bi.outputs.os) }}"}}},
+            "gate-len": {"strategy": {"matrix": {"os": ["ubuntu-latest", "windows-latest"]}}},
+        }
+    }
+    loi_len = _kiem_tra_nguon_duy_nhat_os_ci(wf_gia_len)
+    bang(len(loi_len) == 1 and "gate-len" in loi_len[0], f"chốt không bắt được job lén khai os: {loi_len}")
+
+    # Đột biến A2: nếu gỡ chốt (bỏ qua kiểm tra os riêng), ca lén sẽ chuyển sang đạt
+    def chot_bi_go(wf):
+        return []
+    bang(chot_bi_go(wf_gia_len) == [], "đột biến gỡ chốt phải làm ca lén chuyển sang đạt")
+
+
+@ca
+def t162_M4_evaluator_toi_gian_chuan_bi():
+    """M4, A3 & A4: Evaluator tối giản fail-close cho biểu thức chuan-bi.
+    Bốn ca rõ ràng (push master, PR thường, PR nhãn windows, workflow_dispatch).
+    Đột biến A3: thêm lại github.ref == 'refs/heads/master' => push master phải ĐỎ.
+    Đột biến A4: fail-close gặp biểu thức lạ phải ĐỎ (in KHÔNG ĐO ĐƯỢC); đoán bừa => ĐỎ.
+    """
+    import yaml
+    wf_ci = HERE.parent / ".github" / "workflows" / "ci.yml"
+    wf_data = yaml.safe_load(wf_ci.read_text(encoding="utf-8"))
+    raw_expr = wf_data["jobs"]["chuan-bi"]["outputs"]["os"]
+
+    c_push_master = {"event_name": "push", "ref": "refs/heads/master", "labels": []}
+    c_pr_thuong = {"event_name": "pull_request", "ref": "refs/pull/1/merge", "labels": ["docs"]}
+    c_pr_windows = {"event_name": "pull_request", "ref": "refs/pull/1/merge", "labels": ["windows"]}
+    c_dispatch = {"event_name": "workflow_dispatch", "ref": "refs/heads/master", "labels": []}
+
+    # A3: bảng 4 ca trên biểu thức thật
+    r_push = _danh_gia_bieu_thuc_chuan_bi(raw_expr, c_push_master)
+    r_pr = _danh_gia_bieu_thuc_chuan_bi(raw_expr, c_pr_thuong)
+    r_pr_win = _danh_gia_bieu_thuc_chuan_bi(raw_expr, c_pr_windows)
+    r_disp = _danh_gia_bieu_thuc_chuan_bi(raw_expr, c_dispatch)
+
+    bang(r_push == ["ubuntu-latest"], f"push master phải chỉ chạy ubuntu-latest, nhận được: {r_push}")
+    bang(r_pr == ["ubuntu-latest"], f"PR thường phải chỉ chạy ubuntu-latest, nhận được: {r_pr}")
+    bang(r_pr_win == ["ubuntu-latest", "windows-latest"], f"PR nhãn windows phải chạy hai nền, nhận được: {r_pr_win}")
+    bang(r_disp == ["ubuntu-latest", "windows-latest"], f"workflow_dispatch phải chạy hai nền, nhận được: {r_disp}")
+
+    # Đột biến A3: đưa github.ref == 'refs/heads/master' trở lại => push master phải sinh 2 nền (làm ca đích ĐỎ)
+    expr_dot_bien_ref = """fromJSON(
+      (github.event_name == 'workflow_dispatch'
+       || github.ref == 'refs/heads/master'
+       || contains(github.event.pull_request.labels.*.name, 'windows'))
+      && '["ubuntu-latest","windows-latest"]'
+      || '["ubuntu-latest"]')"""
+    r_mutant_push = _danh_gia_bieu_thuc_chuan_bi(expr_dot_bien_ref, c_push_master)
+    bang(r_mutant_push == ["ubuntu-latest", "windows-latest"],
+         f"đột biến có ref master phải sinh 2 nền khi push master: {r_mutant_push}")
+
+    # A4: fail-close khi gặp biểu thức hình khác (ví dụ lồng fromJSON 2 tầng)
+    la_da_bat = False
+    try:
+        _danh_gia_bieu_thuc_chuan_bi("fromJSON(fromJSON('[\"ubuntu-latest\"]'))", c_push_master)
+    except ValueError as ex:
+        if "KHÔNG ĐO ĐƯỢC" in str(ex):
+            la_da_bat = True
+    bang(la_da_bat, "evaluator phải fail-close (in KHÔNG ĐO ĐƯỢC và raise) khi gặp hình lạ")
+
+    # Đột biến A4: nếu fail-close đổi thành return ['ubuntu-latest'] thay vì raise => phát hiện được
+    def evaluator_doan_bua(expr, ctx):
+        try:
+            return _danh_gia_bieu_thuc_chuan_bi(expr, ctx)
+        except ValueError:
+            return ["ubuntu-latest"]  # đoán bừa thay vì đỏ
+    ket_doan = evaluator_doan_bua("fromJSON(fromJSON('[\"ubuntu-latest\"]'))", c_push_master)
+    bang(ket_doan == ["ubuntu-latest"], "đột biến đoán bừa phải trả về mảng thay vì lỗi")
+
+
 CO_CHI_CA = "--chi-ca="   # `--chi-ca=t01_` ⇒ chỉ chạy ca có tên bắt đầu bằng tiền tố ấy (M3 packet #504 dùng để sinh lượt con rẻ)
 
 

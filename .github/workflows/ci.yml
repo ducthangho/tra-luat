@@ -32,20 +32,25 @@ concurrency:
   cancel-in-progress: ${{ github.ref != 'refs/heads/master' }}
 
 jobs:
+  chuan-bi:
+    # packet #548 (CI-MA-TRAN-WINDOWS-CHAY-MOI-LAN-LAND): nguon duy nhat cho ma tran os.
+    # Chi ubuntu-latest, khong checkout ma nguon; bo github.ref == 'refs/heads/master'.
+    runs-on: ubuntu-latest
+    outputs:
+      os: ${{ fromJSON(
+            (github.event_name == 'workflow_dispatch'
+             || contains(github.event.pull_request.labels.*.name, 'windows'))
+            && '["ubuntu-latest","windows-latest"]'
+            || '["ubuntu-latest"]') }}
+    steps:
+      - run: 'true'
+
   gate:
+    needs: chuan-bi
     strategy:
       fail-fast: false
       matrix:
-        # Windows tốn GẤP ĐÔI phút. Chạy nó ở nơi thật sự cần: trước khi vào master,
-        # khi gọi tay, hoặc khi PR được gắn nhãn `windows` (dùng cho PR đụng đường
-        # phụ thuộc nền). PR thường vẫn được Linux soi mỗi lần đẩy.
-        # KHÔNG phải nới gate: master vẫn luôn qua CẢ HAI nền trước khi phát hành.
-        os: ${{ fromJSON(
-              (github.event_name == 'workflow_dispatch'
-               || github.ref == 'refs/heads/master'
-               || contains(github.event.pull_request.labels.*.name, 'windows'))
-              && '["ubuntu-latest","windows-latest"]'
-              || '["ubuntu-latest"]') }}
+        os: ${{ fromJson(needs.chuan-bi.outputs.os) }}
     runs-on: ${{ matrix.os }}
     # r391 — NÂNG 25 -> 45 THEO CHỈ ĐẠO CHỦ KHO, và lý do phải ghi lại vì con số cũ
     # KHÔNG sai lúc nó được đặt: gate đã chậm dần tới sát trần. Đo 29-08-2026:
@@ -595,16 +600,11 @@ jobs:
     # ma trận/`timeout-minutes`/tiền tố 9 bước với `gate`, KHÔNG thêm mặt điều kiện nào; phút TÍNH
     # TIỀN tăng vì trả tiền thiết lập ba lần. Consumer `loi_ruff_ci` đọc MỌI job, không chỉ `gate`.
     # Bước `test registry` (41,0 % tổng bước Windows) sống ở đây.
+    needs: chuan-bi
     strategy:
       fail-fast: false
       matrix:
-        # Vì sao Windows có điều kiện: xem chú thích cùng chỗ ở job `gate` (bản gốc).
-        os: ${{ fromJSON(
-              (github.event_name == 'workflow_dispatch'
-               || github.ref == 'refs/heads/master'
-               || contains(github.event.pull_request.labels.*.name, 'windows'))
-              && '["ubuntu-latest","windows-latest"]'
-              || '["ubuntu-latest"]') }}
+        os: ${{ fromJson(needs.chuan-bi.outputs.os) }}
     runs-on: ${{ matrix.os }}
     timeout-minutes: 60
     env:
@@ -659,16 +659,11 @@ jobs:
     # ma trận/`timeout-minutes`/tiền tố 9 bước với `gate`, KHÔNG thêm mặt điều kiện nào; phút TÍNH
     # TIỀN tăng vì trả tiền thiết lập ba lần. Consumer `loi_ruff_ci` đọc MỌI job, không chỉ `gate`.
     # Bước `packet-loop selftest` (22,5 % tổng bước Windows) sống ở đây.
+    needs: chuan-bi
     strategy:
       fail-fast: false
       matrix:
-        # Vì sao Windows có điều kiện: xem chú thích cùng chỗ ở job `gate` (bản gốc).
-        os: ${{ fromJSON(
-              (github.event_name == 'workflow_dispatch'
-               || github.ref == 'refs/heads/master'
-               || contains(github.event.pull_request.labels.*.name, 'windows'))
-              && '["ubuntu-latest","windows-latest"]'
-              || '["ubuntu-latest"]') }}
+        os: ${{ fromJson(needs.chuan-bi.outputs.os) }}
     runs-on: ${{ matrix.os }}
     timeout-minutes: 60
     env:

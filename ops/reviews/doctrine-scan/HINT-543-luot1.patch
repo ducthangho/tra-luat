@@ -1,0 +1,141 @@
+--- a/.claude/dev/packet_loop.py
++++ b/.claude/dev/packet_loop.py
+@@ -1383,22 +1383,46 @@
+     return RC_OK
+ 
+ 
++# Số từ tối thiểu để nguồn đối chiếu có nghĩa. Dưới ngưỡng này thì tập n-gram rỗng
++# hoặc gần rỗng, và cổng sẽ "sạch" vì KHÔNG ĐO ĐƯỢC chứ không vì cây sạch.
++_PROTO_TU_TOI_THIEU = 200
++
++
+ def _doc_nguon_protocol(root: Path) -> list[str]:
+-    """Đọc và chuẩn hoá văn bản logic của docs/PROTOCOL_DA_PHIEN.md (bỏ code fences)."""
++    """Văn bản logic của `docs/PROTOCOL_DA_PHIEN.md` DƯỚI `root` (bỏ code fence).
++
++    FAIL-CLOSE, và đây là điểm khác bản trước. Bản trước trả `[]` cho BỐN tình huống
++    khác hẳn nhau — tệp vắng, không đọc được, quá ngắn, rỗng sau khi bỏ fence — rồi
++    người gọi viết `if proto_words:` nên cả bốn đều thành "bỏ qua trong im lặng". Đo
++    được cả bốn: chép nguyên văn 25 từ vào adapter mà cổng vẫn `rc=0`. Một cổng tự tắt
++    khi thiếu nguồn là cổng không tồn tại đúng lúc nó cần nhất.
++
++    Chính hàm `cmd_doctrine_scan` đã fail-close cho tệp ĐÍCH (`_die(RC_ARG, ...)` khi
++    `read_text` ném) — bản trước đặt chính sách NGƯỢC LẠI cho tệp NGUỒN, cùng một cặp
++    ngoại lệ, cách nhau mười lăm dòng.
++
++    KHÔNG còn fallback ra `Path(__file__).parents[2]`. Fallback ấy làm `--root` KHÔNG
++    điều khiển cơ sở so sánh: quét cây X mà đo theo protocol của cây chứa SCRIPT. Cùng
++    hình dạng với lỗi `t24` đã ghi trong `CLAUDE.md`. Đo được: hai ca test mới đỏ CHỈ
++    nhờ fallback này, vì `_repo_gia` không hề dựng `docs/`.
++    """
+     p = root / "docs" / "PROTOCOL_DA_PHIEN.md"
+     if not p.is_file():
+-        fallback = Path(__file__).resolve().parents[2] / "docs" / "PROTOCOL_DA_PHIEN.md"
+-        if fallback.is_file():
+-            p = fallback
+-        else:
+-            return []
++        _die(RC_ARG, f"KHÔNG ĐO ĐƯỢC: thiếu nguồn đối chiếu {p} — `doctrine-scan` so "
++                     f"adapter với protocol DƯỚI `--root`; không có nó thì phép đo "
++                     f"không tồn tại, và `rc=0` ở đây sẽ là lời khai sai")
+     try:
+         raw = p.read_text(encoding="utf-8")
+-    except (OSError, UnicodeDecodeError):
+-        return []
++    except (OSError, UnicodeDecodeError) as e:
++        _die(RC_ARG, f"KHÔNG ĐO ĐƯỢC: không đọc được nguồn đối chiếu {p}: {e}")
+     khong_code = re.sub(r"```[\s\S]*?```", " ", raw)
+     phang, _ = _phang_ca_tep(khong_code)
+-    return phang.split()
++    tu = phang.split()
++    if len(tu) < _PROTO_TU_TOI_THIEU:
++        _die(RC_ARG, f"KHÔNG ĐO ĐƯỢC: nguồn đối chiếu {p} chỉ còn {len(tu)} từ sau khi "
++                     f"bỏ code fence (tối thiểu {_PROTO_TU_TOI_THIEU}) — tập n-gram quá "
++                     f"nghèo để kết luận, `rc=0` sẽ là 'chưa đo' chứ không phải 'sạch'")
++    return tu
+ 
+ 
+ def cmd_doctrine_scan(a, state_dir: Path) -> int:
+@@ -1439,7 +1463,9 @@
+                     dinh.append((str(f), nhom, cum, _dong_tai(ban_do, tu)))
+                     tu = phang.find(kim, tu + len(kim))
+ 
+-        if proto_words:
++        # `proto_words` luôn khác rỗng: `_doc_nguon_protocol` fail-close.
++        # Giữ nhánh này thì cửa thứ năm lại mở ra trong im lặng.
++        if True:
+             file_words = phang.split()
+             is_claude_md = (f.name == "CLAUDE.md")
+             threshold = 15 if is_claude_md else 10
+--- a/.claude/dev/packet_loop_test.py
++++ b/.claude/dev/packet_loop_test.py
+@@ -1431,11 +1431,32 @@
+ ]
+ 
+ 
+-def _repo_gia(tmp: Path, noi_dung: str, ten="demo") -> Path:
++# Nguồn đối chiếu TRUNG TÍNH cho cây giả: đủ dài để qua `_PROTO_TU_TOI_THIEU`, và cố ý
++# KHÔNG chứa câu chữ nào của protocol thật lẫn của các adapter mẫu — nên nó không tự sinh
++# phát hiện. Dùng protocol THẬT làm mặc định là sai: nó nặng, và nó buộc các ca đối chứng
++# vốn "khác họ" phải phụ thuộc vào đường đọc protocol, làm 36 phép kiểm đột biến đỏ (đo được).
++_PROTO_TRUNG_TINH = ("man xanh luc bao phu trien doi thoai nguyen so bay muoi hai "
++                     "cau chuyen ve mot chiec thuyen go tren song vang " * 20)
++
++
++def _repo_gia(tmp: Path, noi_dung: str, ten="demo", protocol: str | None = None) -> Path:
++    """Cây giả cho `doctrine-scan`, NAY luôn có nguồn đối chiếu dưới `--root`.
++
++    Bản trước chỉ dựng `.claude/skills/<ten>/SKILL.md`, nên mọi ca dùng nó đo theo protocol
++    của kho THẬT qua fallback `parents[2]`; `--root` chỉ góp phần adapter. Đo được: gỡ
++    fallback thì `doctrine_scan_chep_tron_5_1_bi_chan` và `..._chep_doan_ngan_...` ĐỎ ngay
++    — hai ca ấy chưa từng đo cây mà chúng khai là đang đo.
++
++    `protocol=None` ⇒ ghi nguồn TRUNG TÍNH (ca không nói gì về chép). Ca nào đo hành vi chép
++    thì truyền protocol THẬT vào, tường minh, để người đọc thấy nguồn so sánh là gì.
++    """
+     r = tmp / f"repo_{abs(hash(noi_dung)) % 10**8}_{ten}"
+     d = r / ".claude" / "skills" / ten
+     d.mkdir(parents=True, exist_ok=True)
+     (d / "SKILL.md").write_text(noi_dung, encoding="utf-8", newline="\n")
++    (r / "docs").mkdir(parents=True, exist_ok=True)
++    (r / "docs" / "PROTOCOL_DA_PHIEN.md").write_text(
++        protocol if protocol is not None else _PROTO_TRUNG_TINH, encoding="utf-8", newline="\n")
+     return r
+ 
+ 
+@@ -1507,7 +1528,7 @@
+     if not m:
+         raise AssertionError("không tìm thấy §5.1 trong protocol")
+     sec_5_1 = m.group(1)
+-    r = _repo_gia(c.tmp, f"# Adapter\n\n{sec_5_1}\n", ten="sec_5_1")
++    r = _repo_gia(c.tmp, f"# Adapter\n\n{sec_5_1}\n", ten="sec_5_1", protocol=raw)
+     rc, _, e = run(c.script, ["doctrine-scan", "--root", r])
+     _doi(6, rc, e, "chép trọn §5.1 phải ĐỎ (rc=6)")
+ 
+@@ -1526,7 +1547,7 @@
+     ]
+     words = " ".join(lines).split()
+     doan = " ".join(words[:29])
+-    r = _repo_gia(c.tmp, f"# Adapter\n\n{doan}\n", ten="sec_5_1_ngan")
++    r = _repo_gia(c.tmp, f"# Adapter\n\n{doan}\n", ten="sec_5_1_ngan", protocol=raw)
+     rc, _, e = run(c.script, ["doctrine-scan", "--root", r])
+     _doi(6, rc, e, "chép đoạn ngắn 29 từ của §5.1 phải ĐỎ (rc=6)")
+ 
+@@ -1539,7 +1560,7 @@
+     if not m:
+         raise AssertionError("không tìm thấy §12 trong protocol")
+     sec_12 = m.group(1)
+-    r = _repo_gia(c.tmp, f"# Adapter\n\n{sec_12}\n", ten="sec_12")
++    r = _repo_gia(c.tmp, f"# Adapter\n\n{sec_12}\n", ten="sec_12", protocol=raw)
+     rc, _, e = run(c.script, ["doctrine-scan", "--root", r])
+     _doi(6, rc, e, "chép §12 phải ĐỎ (rc=6)")
+ 
+@@ -4081,7 +4102,7 @@
+     "74a_splitlines_sai": ('    p = re.split(r\'(\\r\\n|\\r|\\n)\', noi_dung); lines = [p[i]+p[i+1] for i in range(0,len(p)-1,2)]+([p[-1]] if p[-1] else [])', '    lines = noi_dung.splitlines(keepends=True)', ["trich_xuat_74a_chong_nhieu"]),
+     "74a_raw_closing_cung_ten": ('            if mh:\n                end_re = re.compile(r"-->" if mh.group(1) else r"(?i)</(?:pre|script|style|textarea)>")', '            if mh:\n                end_re = re.compile(r"-->" if mh.group(1) else f"(?i)</{mh.group(2)}>")', ["trich_xuat_74a_chong_nhieu"]),
+     "bo_kiem_chep_protocol": (
+-        "        if proto_words:",
++        "        if True:",
+         "        if False:  # bo_kiem_chep_protocol",
+         ["doctrine_scan_chep_tron_5_1_bi_chan"],
+     ),

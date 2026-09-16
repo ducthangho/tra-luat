@@ -1,0 +1,109 @@
+# LEASE BIA MỘ — thu hồi quyền ghi của WP538 sau khi packet đã LAND.
+#
+# ĐÂY KHÔNG PHẢI MỘT LƯỢT THI CÔNG. Nó không cấp quyền ghi cho ai: `write_set` RỖNG.
+# Việc duy nhất của nó là làm vế MỚI của cặp bia mộ hai chiều, để
+# `wp538-r4-g4-antigravity` thôi được đếm là người giữ.
+#
+# NÓI THẲNG CHỖ KHIÊN CƯỠNG: `da_bi_thay_the`/`thay_the_cho` là cơ chế KẾ NHIỆM
+# (đổi revision/generation/executor). Ở đây nó bị dùng để diễn đạt HOÀN TẤT — không có
+# "thế hệ 5" nào của WP538 cả. Đúng về hiệu lực, sai về ngữ nghĩa, và đó chính là
+# bằng chứng sống cho nợ AG-T0-01B-thu-hoi-lease-chua-co-duong: kho cần một trường
+# `da_hoan_tat` riêng do `_phan_loai_lease` đọc, thay vì bắt `da_bi_thay_the` gánh hai
+# nghĩa. Nợ VẪN MỞ. Mục này chỉ trả phần hiện vật, không trả phần cơ chế.
+
+schema_version: 2
+event: executor_lease_granted
+packet_issue: 538
+packet_id: WP538-SKILL-PREFLIGHT-REVIEW-LAND
+mission_issue: KHONG_CO
+revision: 4
+generation: 5
+lease_id: wp538-thu-hoi-sau-land
+granted_by: ducthangho
+granted_on_instruction: https://github.com/ducthangho/tra-luat/issues/538#issuecomment-5702669239
+granted_on_instruction_nguyen_van: 'Chu kho, phien dieu phoi 16-09-2026, chon phuong an
+  "Thu hoi tuong minh WP538": khai thu hoi hai lease WP538 vi packet da land o 6bd5600;
+  ghi ho ban thu hoi, do lai toi NGUOI_GIU 0, roi moi cap lease #548.'
+recorded_by: claude-session
+recorder_is_dispatcher: false
+leased_at_utc: '2026-09-16T18:45:00Z'
+lease_expires_at_utc: '2026-09-17T01:00:00Z'
+role: executor
+provider: anthropic_claude
+executor: KHONG_CO
+model: KHONG_KHAI
+effort: KHONG_KHAI
+execution_surface: khong_thi_cong
+transport: machine/local
+environment: local
+operating_system: Linux
+risk: sensitive
+review_class: sensitive
+effective_review_class: sensitive
+review_class_vi_sao: 'Khong ha lop duoi lease no thu hoi. WP538 cham review/land authority
+  nen sensitive; ban thu hoi giu nguyen lop ay.'
+assurance_target: human_audited
+assurance_target_vi_sao: 'Khong co san pham de review — lease nay khong cap quyen ghi nao.
+  Chu kho la nguoi quyet dinh thu hoi, nen human_audited.'
+reviewer_provider: claude
+reviewer_model: KHONG_KHAI
+reviewer_effort: KHONG_KHAI
+reviewer_independence: 'khong_ap_dung: khong co dien tich ma de review.'
+cross_reviewer_requirement: 'khong_ap_dung: write_set RONG.'
+
+spec_path: ops/specs/wp538-skill-preflight-review-land-r4.md
+spec_ref: master
+spec_hash: 7ee56b6c4f6ba69cbbbcb8ad9b3f0e7b1f5f3e6aa4dbb1f7e7c7b6a2c9d5e0f3
+spec_bytes: 0
+spec_hash_ghi_chu: 'Chep tu lease r4/g4 de giu dinh danh packet. Lease nay KHONG thi cong
+  theo dac ta ay — no chi la bia mo. spec_bytes de 0 vi khong do lai trong luot nay:
+  KHONG DO DUOC, khai thang thay vi chep mot con so co the da troi.'
+
+branch: ops/thu-hoi-lease-538
+branch_ownership: exclusive
+target_branch_neu_land: master
+base_sha: f27a28ffa3cc1923cf894fa12cc2758277814ce3
+start_from_sha: f27a28ffa3cc1923cf894fa12cc2758277814ce3
+immutable_acceptance_baseline: f27a28ffa3cc1923cf894fa12cc2758277814ce3
+reviewed_sha_required: f27a28ffa3cc1923cf894fa12cc2758277814ce3
+
+write_set: []
+write_set_vi_sao_RONG: 'CO Y RONG. Lease nay khong cap quyen ghi cho ai; no chi ton tai de
+  lam ve MOI cua cap bia mo hai chieu. Mot lease thu hoi ma lai giu duong dan thi no tu tai
+  tao dung van de no sinh ra de dong.'
+
+thay_the_cho:
+- wp538-r4-g4-antigravity
+thay_the_cho_ly_do: 'Packet #538 da LAND o merge 6bd5600 (PR #539). Lease r4/g4 van con
+  hieu luc toi 2026-09-17T09:30:24Z va van giu 13 duong, trong do co
+  docs/PROTOCOL_DA_PHIEN.md — do duoc 18:3xZ 16-09: NGUOI_GIU 2. Thu hoi de quyen ghi khong
+  song sot sau khi viec da xong.'
+
+khong_duoc_cham:
+- '**  (write_set RONG — khong duong nao duoc ghi duoi lease nay)'
+
+run_minutes: 0
+heartbeat_required_minutes: 0
+attempts_limit: khong_ap_dung
+review_calls_limit: khong_ap_dung
+manual_ci_budget: 0
+prohibited_actions:
+- self_review
+- self_approve
+- merge
+- land
+- deploy
+- LIVE
+- ruleset mutation
+- admin bypass
+- secret disclosure
+- workflow_dispatch
+- manual full CI
+- Windows CI
+- 'ghi BAT KY duong dan nao (write_set RONG)'
+dieu_kien_dung:
+- 'Bat ky ai coi lease nay la giay phep ghi => DUNG. No la bia mo, khong phai lease thi cong.'
+closure_status: 'Owner-directed retirement of a landed packet lease; no work authorized.'
+orchestration: owner-authorized manual issue/receipt journal; no packet_loop state claim
+ci_policy: 'Khong CI tay. Lease nay khong sinh dien tich ma nen khong co cong nao phai chay
+  ngoai cong dang lease.'

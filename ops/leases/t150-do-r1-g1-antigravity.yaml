@@ -37,6 +37,8 @@ operating_system: Windows
 risk: sensitive
 review_class: sensitive
 effective_review_class: sensitive
+spec_thay_the_ghi_chu: 'Lease nay neo r2. r1 (34aa11fa) da bi thay vi khai review_class routine ma
+  cong bac — xem §D7 cua r2. Nhanh r1 giu lam dau vet, KHONG sua de.'
 review_class_vi_sao: 'DO, khong phai suy: cong tu tinh sensitive va BAC ban nhap khai routine
   (rc=10, "effective_review_class=routine khong bang lop cong tinh duoc sensitive cho role=executor").
   Goi thang _tinh_lop_tu_write_set: no tra sensitive cho MOI dau vao da thu, ke ca mot tep docs thuan
@@ -57,12 +59,12 @@ reviewer_independence: 'Nguoi audit doc lap voi executor, tu doc spec va bien ba
 cross_reviewer_requirement: 'Packet routine: KHONG doi cross-provider. Nhung van CAM self_review va
   self_approve — nguoi chay script khong duoc tu nghiem thu bien ban cua chinh minh.'
 
-spec_path: ops/specs/wp552-t150-traceback-ro-r1.md
-spec_ref: claude/spec-552-r1-20260917
-spec_hash: 34aa11fabecf59cfe29734d0588f171d6f32b79379a0877786ee10bff884c8bf
-spec_bytes: 15932
-prompt_path: ops/specs/wp552-t150-traceback-ro-r1.md
-prompt_sha256_required: 34aa11fabecf59cfe29734d0588f171d6f32b79379a0877786ee10bff884c8bf
+spec_path: ops/specs/wp552-t150-traceback-ro-r2.md
+spec_ref: claude/spec-552-r2-20260917
+spec_hash: 08666fe6484377f2c4f13c7393771bec2587ee480727f3c2c4fe7936b9251d4c
+spec_bytes: 20973
+prompt_path: ops/specs/wp552-t150-traceback-ro-r2.md
+prompt_sha256_required: 08666fe6484377f2c4f13c7393771bec2587ee480727f3c2c4fe7936b9251d4c
 
 branch: agy/t150-do-r1-g1
 branch_ownership: exclusive

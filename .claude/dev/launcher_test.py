@@ -5915,6 +5915,159 @@ def t148_doctor_chay_agy_models_MOT_lan_cho_ca_CONG_CU_lan_KHA_NANG():
 
 
 @ca
+def t149_doctor_do_actionlint_va_shellcheck():
+    """A1 / M1: doctor đo actionlint và shellcheck, không tính vào DUNG_DUOC."""
+    m = _tai_launcher_thu()
+    al = [c for c in m.CONG_CU if c.get("ten") == "actionlint"]
+    sc = [c for c in m.CONG_CU if c.get("ten") == "shellcheck"]
+    bang(len(al) == 1 and len(sc) == 1 and al[0]["bat_buoc"] is False and sc[0]["bat_buoc"] is False, "M1: tool co mat va khong bat buoc")
+    bang(m.DA_CHUNG_MINH_KHA_DUNG == frozenset({"DUNG_DUOC"}), "DA_CHUNG_MINH_KHA_DUNG chi chua DUNG_DUOC")
+    # Ca am: thieu tool tuy chon van thoat 0
+    m.CONG_CU, m.MODULE_PY, m.KHA_NANG = [dict(al[0]), dict(sc[0])], [], []
+    m._cac_duong_dan = lambda _c, _e: []
+    rc, d = _doctor_json(m)
+    cc = {c["ten"]: c for c in d["cong_cu"]}
+    bang(rc == 0 and cc["actionlint"]["co"] is False and bool(cc["actionlint"].get("lenh_cai")), "ca am actionlint co=False co lenh_cai")
+    bang(cc["shellcheck"]["co"] is False, "ca am shellcheck co=False")
+    # Ca duong: co tool tren PATH
+    m._cac_duong_dan = lambda c, _e: [(c["ten"], f"/bin/{c['ten']}")]
+    m._phien_ban = lambda d, **kw: (True, "1.7.7" if "actionlint" in d else "0.10.0", False)
+    _, d2 = _doctor_json(m)
+    cc2 = {c["ten"]: c for c in d2["cong_cu"]}
+    bang(cc2["actionlint"]["co"] is True and cc2["actionlint"]["phien_ban"] == "1.7.7", "ca duong actionlint co=True ban 1.7.7")
+    bang(cc2["shellcheck"]["co"] is True, "ca duong shellcheck co=True")
+
+
+@ca
+def t150_doctor_do_bien_utf8_in_ca_khi_xanh():
+    """A2 / M2: doctor đo hai biến UTF-8, in ra KỂ CẢ KHI XANH, cảnh báo khi thiếu."""
+    m = _tai_launcher_thu()
+    m.CONG_CU, m.MODULE_PY, m.KHA_NANG = [], [], []
+    in_dong = []
+    goc_in = m._in_an_toan
+    m._in_an_toan = lambda msg="": in_dong.append(msg)
+    m._doc_moi_truong = lambda: ({"PYTHONUTF8": "1", "PYTHONIOENCODING": "utf-8"}, {})
+    rc = m.lenh_doctor(argparse.Namespace(json=False, workspace=None, kiem_song=False, doi_kha_dung=False))
+    bang(rc == 0 and "BIEN UTF-8" in "\n".join(in_dong) and not any("CANH BAO" in d and "UTF-8" in d for d in in_dong), "xanh in du khong canh bao")
+    in_dong.clear()
+    m._doc_moi_truong = lambda: ({"PYTHONIOENCODING": "utf-8"}, {})
+    rc_v = m.lenh_doctor(argparse.Namespace(json=False, workspace=None, kiem_song=False, doi_kha_dung=False))
+    bang(rc_v == 0 and any("CANH BAO" in d and "UTF-8" in d for d in in_dong), "thieu phai canh bao")
+    m._in_an_toan = goc_in
+    bang("bien_utf8" in _doctor_json(m)[1], "json phai co bien_utf8")
+
+
+@ca
+def t151_m3_phan_biet_da_chay_voi_tep_moi():
+    """A3 / M3: phân biệt ĐÃ CHẠY với TỆP MỚI; phân biệt cuc_bo và remote."""
+    m = _tai_launcher_thu()
+    MASTER = "#!/bin/bash\n# hook-nang-luc: codex-auth-restore\necho hi\n"
+    with San() as s:
+        cay = s / "cay_test"
+        (cay / ".claude" / "hooks").mkdir(parents=True)
+        (cay / ".claude" / "hooks" / "session-start.sh").write_text(MASTER, encoding="utf-8")
+        m._git = lambda ws, *a: ((0, MASTER, "") if "session-start.sh" in a[-1] else (1, "", ""))
+        tt_h, _ = m._do_hook_cu(str(cay))
+        tt_c, mo_ta_c = m._do_hook_da_chay(str(cay))
+        bang(tt_h == "DUNG_DUOC" and tt_c == "CHUA_CHAY" and "CHƯA CHẠY" in mo_ta_c, f"ca (a) CHUA_CHAY: {tt_c}")
+        vd = cay / ".claude" / ".packet_state"
+        vd.mkdir(parents=True)
+        (vd / "session-start.ran").write_text("2026-09-17T00:00:00Z cuc_bo\n", encoding="utf-8")
+        bang(m._do_hook_da_chay(str(cay))[0] == "DA_CHAY" and "bo qua theo thiet ke" in m._do_hook_da_chay(str(cay))[1], "ca (b) cuc_bo DA_CHAY")
+        (vd / "session-start.ran").write_text("2026-09-17T00:00:00Z remote\n", encoding="utf-8")
+        bang(m._do_hook_da_chay(str(cay))[0] == "DA_CHAY" and "bo qua" not in m._do_hook_da_chay(str(cay))[1], "ca (c) remote DA_CHAY")
+        tt_kws, _ = m._do_hook_da_chay(None)
+        bang(tt_kws == "KHONG_DO_DUOC", f"None ws phai KHONG_DO_DUOC: {tt_kws}")
+        # Lop 4: hook-da-chay DA_CHAY khong vao chua_chung_minh; CHUA_CHAY thi vao
+        m.CONG_CU, m.MODULE_PY = [], []
+        m.KHA_NANG = [{"ten": "hook-da-chay", "do": lambda *_: ("DA_CHAY", "da chay"), "vi_sao": ""}]
+        bang("hook-da-chay" not in _doctor_json(m)[1]["chua_chung_minh"], "DA_CHAY khong vao chua_chung_minh")
+        m.KHA_NANG = [{"ten": "hook-da-chay", "do": lambda *_: ("CHUA_CHAY", "chua chay"), "vi_sao": ""}]
+        bang("hook-da-chay" in _doctor_json(m)[1]["chua_chung_minh"], "CHUA_CHAY phai vao chua_chung_minh")
+
+
+@ca
+def t152_hook_cai_dat_va_khop_al_ver_ci():
+    """A4 / M4: hook cài actionlint, export UTF-8; khóa giới hạn tiến trình con không đổi biến ở cha."""
+    goc = Path(__file__).resolve().parents[2]
+    hook_path = goc / ".claude" / "hooks" / "session-start.sh"
+    hook_txt = hook_path.read_text(encoding="utf-8", errors="replace")
+    ci_txt = (goc / ".github" / "workflows" / "ci.yml").read_text(encoding="utf-8", errors="replace")
+    m_hook = re.search(r'^\s*AL_VER=["\']?([0-9]+\.[0-9]+\.[0-9]+)["\']?', hook_txt, re.MULTILINE)
+    bang(bool(m_hook), f"hook phai ghim AL_VER: {hook_txt[:200]}")
+    al_ver = m_hook.group(1)
+    ci_vers = re.findall(r'^\s*AL_VER:\s*([0-9]+\.[0-9]+\.[0-9]+)', ci_txt, re.MULTILINE)
+    bang(len(ci_vers) == 4 and all(v == al_ver for v in ci_vers), f"ci.yml 4 cho phai khop {al_ver}: {ci_vers}")
+    bang("PYTHONUTF8=1" in hook_txt and "PYTHONIOENCODING=utf-8" in hook_txt, "hook phai export UTF-8")
+    bang("cai_actionlint.sh" in hook_txt and "CANH BAO" in hook_txt, "hook phai co cai_actionlint va CANH BAO")
+    # Lop 2: Do hanh vi gioi han tien trinh — hook chay nhu con khong doi duoc bien o cha
+    bash = (shutil.which("bash") if not LA_WINDOWS else
+            ("C:/Program Files/Git/bin/bash.exe" if Path("C:/Program Files/Git/bin/bash.exe").exists() else shutil.which("bash")))
+    if bash:
+        p = subprocess.run([bash, "-c", f"unset PYTHONUTF8; '{hook_path.as_posix()}' >/dev/null 2>&1 || true; echo -n \"${{PYTHONUTF8:-<chua dat>}}\""],
+                           capture_output=True, text=True)
+        bang(p.stdout == "<chua dat>", f"tien trinh cha phai <chua dat>: {p.stdout}")
+
+
+@ca
+def t153_doctor_do_duong_dan_kho_co_dau_cach_hoac_phi_ascii():
+    """A5 / M5: doctor ĐO đường dẫn kho: có dấu cách hoặc ngoài ASCII thì nêu ra; âm thì không."""
+    m = _tai_launcher_thu()
+    for d, sub in [("/duong dan/kho", "dau cach"), ("/duong_dan/\u0111\u1ed9/kho", "ky tu ngoai ASCII"),
+                  ("D:/Qu\u1ed1c h\u1ed9i/tra-luat", "dau cach")]:
+        co, mo = m._kiem_tra_duong_dan_kho(d)
+        bang(co is True and sub in mo and "6 ca da biet se do" in mo, f"phai canh bao cho {d}: {mo}")
+    co4, mo4 = m._kiem_tra_duong_dan_kho("/opt/tra-luat/repo_pure_ascii")
+    co5, mo5 = m._kiem_tra_duong_dan_kho(None)
+    bang(co4 is False and mo4 == "" and co5 is False and mo5 == "", "ca am va None ws phai False, ''")
+
+
+@ca
+def t154_m3_dau_vet_CU_KHONG_con_la_DA_CHAY():
+    """M3 / Lop 1: dau vet CU hon nguong => KHONG_DO_DUOC, khong phai DA_CHAY."""
+    m = _tai_launcher_thu()
+    MASTER = "#!/bin/bash\n# hook-nang-luc: codex-auth-restore\necho hi\n"
+    with San() as s:
+        cay = s / "cay_tuoi"
+        (cay / ".claude" / "hooks").mkdir(parents=True)
+        (cay / ".claude" / "hooks" / "session-start.sh").write_text(MASTER, encoding="utf-8")
+        vd = cay / ".claude" / ".packet_state"
+        vd.mkdir(parents=True)
+        vet = vd / "session-start.ran"
+        vet.write_text("2026-08-17T00:00:00Z\n", encoding="utf-8")
+        gio = vet.stat().st_mtime
+        # Ca (a): dau vet TUOI => DA_CHAY
+        tt_a, _ = m._do_hook_da_chay(str(cay), bay_gio=gio + 60)
+        bang(tt_a == "DA_CHAY", f"dau vet tuoi phai DA_CHAY: {tt_a}")
+        # Ca (b): dau vet CU hon nguong => KHONG_DO_DUOC
+        tt_b, mo_b = m._do_hook_da_chay(str(cay), bay_gio=gio + m._HAN_DAU_VET_HOOK_GIAY + 60)
+        bang(tt_b == "KHONG_DO_DUOC" and "KHÔNG ĐO ĐƯỢC" in mo_b, f"dau vet CU phai KHONG_DO_DUOC: {tt_b} · {mo_b}")
+        # Ca (c): khong dau vet => CHUA_CHAY
+        vet.unlink()
+        tt_c, _ = m._do_hook_da_chay(str(cay), bay_gio=gio)
+        bang(tt_c == "CHUA_CHAY", f"khong dau vet phai CHUA_CHAY: {tt_c}")
+
+
+@ca
+def t155_m3_hook_cuc_bo_ghi_dau_vet_truoc_cong_remote():
+    """Lop 8: hook cuc bo (khong co CLAUDE_CODE_REMOTE) phai ghi dau vet cuc_bo truoc khi thoat o cong."""
+    goc = Path(__file__).resolve().parents[2]
+    hook_path = goc / ".claude" / "hooks" / "session-start.sh"
+    bash = (shutil.which("bash") if not LA_WINDOWS else
+            ("C:/Program Files/Git/bin/bash.exe" if Path("C:/Program Files/Git/bin/bash.exe").exists() else shutil.which("bash")))
+    if not bash:
+        return "bo qua vi khong co bash"
+    with San() as s:
+        p = subprocess.run(
+            [bash, "-c", f"unset CLAUDE_CODE_REMOTE; CLAUDE_PROJECT_DIR='{s.as_posix()}' '{hook_path.as_posix()}' >/dev/null 2>&1 || true"],
+            capture_output=True, text=True)
+        vet = s / ".claude" / ".packet_state" / "session-start.ran"
+        bang(vet.is_file(), "Lop 8: hook cuc bo phai ghi dau vet truoc khi thoat")
+        truong = vet.read_text(encoding="utf-8").strip().split()
+        bang(len(truong) >= 2 and truong[1] == "cuc_bo", f"Lop 8: dau vet phai mang nhan cuc_bo, thuc te: {truong}")
+
+
+@ca
 def r01_worktree_that_bi_chan():
     with San() as s:
         wt = tao_worktree(s); dau = s / "da-chay"; rr = s / "runs"
@@ -6857,6 +7010,30 @@ def r349_backend_PDF_du_phong_chay_thi_dung_noi_la_bi_chan():
 # ------------------------------------------------------ tự đột biến: có răng không
 
 DOT_BIEN = [
+    ("m1_xoa_actionlint_khoi_cong_cu",
+     ('    {"ten": "actionlint", "bat_buoc": False, "ung_vien": ["actionlint"],',
+      '    {"ten": "actionlint_disabled", "bat_buoc": False, "ung_vien": ["actionlint"],'),
+     ["t149_doctor_do_actionlint_va_shellcheck"]),
+    ("m2_im_lang_khi_bien_utf8_xanh",
+     ('        # M2: LUẬT ĐỌC BIẾN UTF-8 TRƯỚC KHI KẾT LUẬN — in KỂ CẢ khi mọi thứ xanh.\n        b_u8 = _do_bien_utf8(moi_truong)\n        _in_an_toan("BIEN UTF-8 (chong loi charmap/cp1258 tren Windows):")',
+      '        # M2: ĐỘT BIẾN IM LẶNG KHI XANH\n        b_u8 = _do_bien_utf8(moi_truong)\n        if b_u8["canh_bao"]:\n            _in_an_toan("BIEN UTF-8 (chong loi charmap/cp1258 tren Windows):")'),
+     ["t150_doctor_do_bien_utf8_in_ca_khi_xanh"]),
+    ("m3_doc_bam_tep_thay_vi_dau_vet",
+     ('    for rel in _CAC_DUONG_VET_HOOK:\n        tep = goc / rel\n        if not tep.is_file():\n            continue',
+      '    for rel in _CAC_DUONG_VET_HOOK:\n        tep = goc / rel\n        if not duong.is_file():  # doc tep hook thay vi dau vet\n            continue'),
+     ["t151_m3_phan_biet_da_chay_voi_tep_moi"]),
+    ("m3b_bo_kiem_do_tuoi_dau_vet",
+     ('        if tuoi > _HAN_DAU_VET_HOOK_GIAY:',
+      '        if False:  # bo kiem do tuoi'),
+     ["t154_m3_dau_vet_CU_KHONG_con_la_DA_CHAY"]),
+    ("m4_noi_long_da_chung_minh_kha_dung",
+     ('DA_CHUNG_MINH_KHA_DUNG = frozenset({"DUNG_DUOC"})',
+      'DA_CHUNG_MINH_KHA_DUNG = frozenset({"DUNG_DUOC", "DA_CHAY"})'),
+     ["t149_doctor_do_actionlint_va_shellcheck"]),
+    ("m5_bo_kiem_tra_ngoai_ascii",
+     ('    co_ngoai_ascii = any(ord(c) > 127 for c in duong)',
+      '    co_ngoai_ascii = False  # dot bien bo kiem tra ngoai ascii'),
+     ["t153_doctor_do_duong_dan_kho_co_dau_cach_hoac_phi_ascii"]),
     ("bo_ky_ban_ghi_luot",
      ('    if khoa_ky:\n        ban_ghi["chu_ky"] = ky_ban_ghi_luot(ban_ghi, khoa_ky)',
       '    if False:\n        ban_ghi["chu_ky"] = ky_ban_ghi_luot(ban_ghi, khoa_ky)'),

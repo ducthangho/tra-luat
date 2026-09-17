@@ -21297,10 +21297,16 @@ def run() -> int:
         # không"*, không phải *"vá thế nào"*. Cách chữa là cho ca này TÍNH số docs từ cây và chỉ
         # ratchet phần thực sự là bất biến (số tệp trong GÓI); việc ấy ngoài phạm vi packet #522
         # (`S6` của lease gen 3 chặn đúng chỗ này).
-        ok3 = int(j.get("file_count") or 0) == len(paths) and len(paths) + 73 == 253
+        # KÊ KHAI SLOT (PR #550 — ADR-0049, packet #548 r2): 73 → **74** Markdown dưới `docs/`.
+        # Thêm ĐÚNG MỘT tệp dev-side/ngoài gói:
+        #   + `docs/adr/0049-cong-hai-nen-truoc-phat-hanh-khong-phai-moi-lan-land.md`
+        # `docs/PROTOCOL_DA_PHIEN.md` (dòng §20) là sửa, không thêm. `RELEASE_MANIFEST.json` có đổi
+        # trong cùng PR ấy, nhưng CHỈ vì băm của CHÍNH TỆP NÀY đổi — không tệp runtime nào được thêm
+        # nên `file_count` giữ **180** và trần Package 200 không nhúc nhích; cây thật = 180 + 74 = **254**.
+        ok3 = int(j.get("file_count") or 0) == len(paths) and len(paths) + 74 == 254
         d = root / "docs"
         tren_dia = sorted(d.rglob("*.md")) if d.is_dir() else []
-        ok4 = (len(tren_dia) == 73
+        ok4 = (len(tren_dia) == 74
                and all(not _rel209._release_should_include(q, root) for q in tren_dia)
                and all(set(q.relative_to(root).parts) & _rel209._RELEASE_EXCLUDE_DIRS == {"docs"}
                        for q in tren_dia))

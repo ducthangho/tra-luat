@@ -3677,10 +3677,7 @@ def _do_hook_da_chay(ws: str | None, bay_gio: float | None = None) -> tuple[str,
             return ("KHONG_DO_DUOC", f"co dau vet {rel.as_posix()} nhung khong doc duoc: {e}")
         if tuoi > _HAN_DAU_VET_HOOK_GIAY:
             gio = int(tuoi // 3600)
-            return ("KHONG_DO_DUOC",
-                    f"KHÔNG ĐO ĐƯỢC — dau vet {rel.as_posix()} CU {gio}h "
-                    f"(> {_HAN_DAU_VET_HOOK_GIAY // 3600}h, ghi luc {noi_dung or '?'}): no chung minh "
-                    f"hook TUNG chay, khong chung minh hook chay cho phien nay")
+            return ("KHONG_DO_DUOC", f"KHÔNG ĐO ĐƯỢC — dau vet {rel.as_posix()} CU {gio}h (> {_HAN_DAU_VET_HOOK_GIAY // 3600}h, ghi luc {noi_dung or '?'}): no chung minh hook TUNG chay, khong chung minh hook chay cho phien nay")
         nhanh = " [bo qua theo thiet ke tren may cuc bo]" if "cuc_bo" in noi_dung else ""
         return ("DA_CHAY", f"ĐÃ CHẠY (dấu vết: {rel.as_posix()}" + (f" lúc {noi_dung}{nhanh})" if noi_dung else ")"))
     return ("CHUA_CHAY", "CHƯA CHẠY — hook chua chay lan nao trong cay nay (chua co dau vet)")
@@ -3699,9 +3696,7 @@ def _do_bien_utf8(moi_truong: dict[str, str] | None = None) -> dict:
     thieu = [f"PYTHONUTF8={u8 or '<chua dat>'}" for _ in [1] if u8 != "1"]
     if not enc or enc.lower() != "utf-8":
         thieu.append(f"PYTHONIOENCODING={enc or '<chua dat>'}")
-    canh_bao = ((f"chua dat du hai bien UTF-8 ({', '.join(thieu)}) — nen dat PYTHONUTF8=1 "
-                 f"va PYTHONIOENCODING=utf-8 de tranh loi doc ma charmap/cp1258 tren Windows")
-                if thieu else None)
+    canh_bao = ((f"chua dat du hai bien UTF-8 ({', '.join(thieu)}) — nen dat PYTHONUTF8=1 va PYTHONIOENCODING=utf-8 de tranh loi doc ma charmap/cp1258 tren Windows") if thieu else None)
     return {"PYTHONUTF8": u8, "PYTHONIOENCODING": enc, "ma_nen": ma_nen,
             "nen_la_utf8": ma_nen in ("utf-8", "utf_8"), "canh_bao": canh_bao}
 
@@ -3716,8 +3711,7 @@ def _kiem_tra_duong_dan_kho(ws: str | None) -> tuple[bool, str]:
     co_ngoai_ascii = any(ord(c) > 127 for c in duong)
     if co_dau_cach or co_ngoai_ascii:
         loai = "dau cach va ky tu ngoai ASCII" if co_dau_cach and co_ngoai_ascii else "dau cach" if co_dau_cach else "ky tu ngoai ASCII"
-        return True, (f"duong dan kho chua {loai} ('{duong}'): "
-                      f"6 ca da biet se do (lop B: t35-t40 trong lease_publish_test)")
+        return True, f"duong dan kho chua {loai} ('{duong}'): 6 ca da biet se do (lop B: t35-t40 trong lease_publish_test)"
     return False, ""
 
 

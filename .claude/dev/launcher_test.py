@@ -5973,11 +5973,9 @@ def t151_m3_phan_biet_da_chay_voi_tep_moi():
         vd = cay / ".claude" / ".packet_state"
         vd.mkdir(parents=True)
         (vd / "session-start.ran").write_text("2026-09-17T00:00:00Z cuc_bo\n", encoding="utf-8")
-        tt_c2, mo_ta_c2 = m._do_hook_da_chay(str(cay))
-        bang(tt_c2 == "DA_CHAY" and "bo qua theo thiet ke" in mo_ta_c2, f"ca (b) cuc_bo DA_CHAY: {mo_ta_c2}")
+        bang(m._do_hook_da_chay(str(cay))[0] == "DA_CHAY" and "bo qua theo thiet ke" in m._do_hook_da_chay(str(cay))[1], "ca (b) cuc_bo DA_CHAY")
         (vd / "session-start.ran").write_text("2026-09-17T00:00:00Z remote\n", encoding="utf-8")
-        tt_c3, mo_ta_c3 = m._do_hook_da_chay(str(cay))
-        bang(tt_c3 == "DA_CHAY" and "bo qua" not in mo_ta_c3, f"ca (c) remote DA_CHAY: {mo_ta_c3}")
+        bang(m._do_hook_da_chay(str(cay))[0] == "DA_CHAY" and "bo qua" not in m._do_hook_da_chay(str(cay))[1], "ca (c) remote DA_CHAY")
         tt_kws, _ = m._do_hook_da_chay(None)
         bang(tt_kws == "KHONG_DO_DUOC", f"None ws phai KHONG_DO_DUOC: {tt_kws}")
         # Lop 4: hook-da-chay DA_CHAY khong vao chua_chung_minh; CHUA_CHAY thi vao
@@ -6002,13 +6000,16 @@ def t152_hook_cai_dat_va_khop_al_ver_ci():
     bang(len(ci_vers) == 4 and all(v == al_ver for v in ci_vers), f"ci.yml 4 cho phai khop {al_ver}: {ci_vers}")
     bang("PYTHONUTF8=1" in hook_txt and "PYTHONIOENCODING=utf-8" in hook_txt, "hook phai export UTF-8")
     bang("cai_actionlint.sh" in hook_txt and "CANH BAO" in hook_txt, "hook phai co cai_actionlint va CANH BAO")
-    # Lop 2: Do hanh vi gioi han tien trinh — hook chay nhu con khong doi duoc bien o cha
+    # Lop 2 & Lop 8: hook chay con khong doi bien cha; phai ghi dau vet cuc_bo truoc cong remote
     bash = (shutil.which("bash") if not LA_WINDOWS else
             ("C:/Program Files/Git/bin/bash.exe" if Path("C:/Program Files/Git/bin/bash.exe").exists() else shutil.which("bash")))
     if bash:
-        p = subprocess.run([bash, "-c", f"unset PYTHONUTF8; '{hook_path.as_posix()}' >/dev/null 2>&1 || true; echo -n \"${{PYTHONUTF8:-<chua dat>}}\""],
-                           capture_output=True, text=True)
-        bang(p.stdout == "<chua dat>", f"tien trinh cha phai <chua dat>: {p.stdout}")
+        with San() as s:
+            p = subprocess.run([bash, "-c", f"unset PYTHONUTF8 CLAUDE_CODE_REMOTE; CLAUDE_PROJECT_DIR='{s.as_posix()}' '{hook_path.as_posix()}' >/dev/null 2>&1 || true; echo -n \"${{PYTHONUTF8:-<chua dat>}}\""],
+                               capture_output=True, text=True)
+            bang(p.stdout == "<chua dat>", f"tien trinh cha phai <chua dat>: {p.stdout}")
+            vet = s / ".claude" / ".packet_state" / "session-start.ran"
+            bang(vet.is_file() and "cuc_bo" in vet.read_text(encoding="utf-8"), "Lop 8: hook cuc bo phai ghi dau vet")
 
 
 @ca

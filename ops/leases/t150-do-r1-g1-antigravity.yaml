@@ -1,0 +1,150 @@
+# LEASE — WP552-WINDOWS-T150-TRACEBACK-RO revision 1 / generation 1
+# Packet DO, khong phai packet VA: san pham la bien ban do co so.
+# Ghi HO theo chi thi chu kho; phien claude KHONG tu cap lease — hanh vi cap la
+# `git push` len nhanh `ops/**`, va push do CHU KHO thuc hien.
+
+schema_version: 2
+event: executor_lease_granted
+packet_issue: 552
+packet_id: WP552-WINDOWS-T150-TRACEBACK-RO
+mission_issue: KHONG_CO
+revision: 1
+generation: 1
+lease_id: t150-do-r1-g1-antigravity
+granted_by: ducthangho
+
+# PHAI DIEN TRUOC KHI PUSH — cong KHONG cuong che truong nay, protocol thi co (§3.2).
+# Dat URL comment chi thi cua chu kho tren #552.
+granted_on_instruction: CHUA_CO_URL_CHU_KHO_PHAI_DIEN
+granted_on_instruction_nguyen_van: 'Chu kho, phien dieu phoi 17-09-2026: "mo packet rieng cho t150"
+  · "dong y ca bon, viet spec di" · "soan lenh cap lease cho #552".'
+recorded_by: claude-session
+recorder_is_dispatcher: false
+
+leased_at_utc: '2026-09-17T18:00:00Z'
+lease_expires_at_utc: '2026-09-18T18:00:00Z'
+
+role: executor
+provider: google_antigravity
+executor: antigravity
+model: KHONG_KHAI
+effort: KHONG_KHAI
+execution_surface: antigravity
+transport: machine/local
+environment: local
+operating_system: Windows
+
+risk: sensitive
+review_class: sensitive
+effective_review_class: sensitive
+review_class_vi_sao: 'DO, khong phai suy: cong tu tinh sensitive va BAC ban nhap khai routine
+  (rc=10, "effective_review_class=routine khong bang lop cong tinh duoc sensitive cho role=executor").
+  Goi thang _tinh_lop_tu_write_set: no tra sensitive cho MOI dau vao da thu, ke ca mot tep docs thuan
+  — _BANG_LOP co 7 muc, TAT CA deu la sensitive, va mac dinh cua next() cung la sensitive, nen gia
+  tri khoi tao "routine" trong ham KHONG BAO GIO toi duoc. Spec r1 cua #552 khai routine; cong bac.
+  Lease theo CONG, khong theo spec. Chenh nay da bao chu kho; sua spec thi di qua r2, khong sua de.'
+
+assurance_target: human_audited
+assurance_target_vi_sao: '§8 cho routine: "mac dinh dung phien Claude moi doc lap hoac human".
+  Executor la antigravity, khong phai Claude, nen duong "phien Claude moi" khong ap thang duoc.
+  Va "antigravity" xuat hien 0 lan trong PROTOCOL (do tai #548) nen chua phai provider hop le cho
+  cross_approved. Chon human_audited — chat hon muc routine doi hoi, co chu dich.'
+reviewer_provider: human
+reviewer_model: KHONG_AP_DUNG
+reviewer_effort: KHONG_AP_DUNG
+reviewer_independence: 'Nguoi audit doc lap voi executor, tu doc spec va bien ban, tu chay lai
+  script do neu can, neo verdict vao exact reviewed_sha.'
+cross_reviewer_requirement: 'Packet routine: KHONG doi cross-provider. Nhung van CAM self_review va
+  self_approve — nguoi chay script khong duoc tu nghiem thu bien ban cua chinh minh.'
+
+spec_path: ops/specs/wp552-t150-traceback-ro-r1.md
+spec_ref: claude/spec-552-r1-20260917
+spec_hash: 34aa11fabecf59cfe29734d0588f171d6f32b79379a0877786ee10bff884c8bf
+spec_bytes: 15932
+prompt_path: ops/specs/wp552-t150-traceback-ro-r1.md
+prompt_sha256_required: 34aa11fabecf59cfe29734d0588f171d6f32b79379a0877786ee10bff884c8bf
+
+branch: agy/t150-do-r1-g1
+branch_ownership: exclusive
+target_branch_neu_land: master
+base_sha: a612c70cbc56d0e3a8c580f4759eddf215af82fb
+start_from_sha: a612c70cbc56d0e3a8c580f4759eddf215af82fb
+start_from_sha_vi_sao: 'origin/master luc cap. Packet nay KHONG phu thuoc #540 hay #548 — write set
+  roi han, xem write_set_da_quet_toan_kho.'
+immutable_acceptance_baseline: a612c70cbc56d0e3a8c580f4759eddf215af82fb
+reviewed_sha_required: a612c70cbc56d0e3a8c580f4759eddf215af82fb
+reviewed_sha_required_note: 'Mo neo DUOI luc cap — chua co ung vien. Verdict cuoi PHAI neo dung SHA
+  ung vien that khi no ton tai, KHONG dung lai con so nay.'
+
+write_set:
+- ops/do_t150_windows.py
+- ops/DO_VI_SAO_T150_DO_TREN_WINDOWS_20260917.md
+write_set_vi_sao_HAI: 'Ca hai la TEP MOI. Packet DO khong can quyen ghi len thu no dang do, nen no
+  KHONG lay ops/lease_publish.py hay ops/lease_publish_test.py — hai duong ay thuoc vung tranh chap
+  #541/#548. He qua: #552 chay SONG SONG #541, khong xep hang sau.'
+write_set_da_quet_toan_kho: 'DO 17:22:35Z 17-09-2026, SAU khi sua remote.origin.fetch ve
+  +refs/heads/*:refs/remotes/origin/* (xem canh bao duoi). Chot so hai nguon ref chay TRUOC:
+  ls-remote 422 ten nhanh, for-each-ref 422, comm -23 RONG. ai-dang-giu cho tung duong:
+  ops/do_t150_windows.py rc=0 NGUOI_GIU 0; ops/DO_VI_SAO_T150_...md rc=0 NGUOI_GIU 0.
+  Doi chieu (KHONG trong write set): ops/lease_publish.py rc=0; ops/lease_publish_test.py rc=11
+  NGUOI_GIU 1 = ci-windows-r2-g2-antigravity, han 2026-09-18T17:00:00Z.
+  CANH BAO NEN DO: lan quet dau 17:20Z tra rc=12 KHONG_XAC_DINH cho MOI duong. Nguyen nhan:
+  clone --depth 1 siet remote.origin.fetch thanh mot-nhanh, khien rev-parse "<nhanh>@{upstream}"
+  THAT BAI du refs/remotes/origin/<nhanh> co that va dung SHA; cong doc %(upstream) qua
+  for-each-ref nen thay rong roi fail-close. PHAI kiem refspec TRUOC khi tin bat ky ket qua quet nao.'
+
+khong_duoc_cham:
+- ops/lease_publish.py
+- ops/lease_publish_test.py
+- .github/workflows/ci.yml
+- .github/workflows/ops-publish-lease.yml
+- docs/PROTOCOL_DA_PHIEN.md
+- docs/adr/0049-cong-hai-nen-truoc-phat-hanh-khong-phai-moi-lan-land.md
+- scripts/tl_selftest.py
+- scripts/tl.py
+- RELEASE_MANIFEST.json
+- .claude/dev/launcher.py
+- .claude/hooks/session-start.sh
+
+hinh_dang_ke_thua: 'khong_ap_dung — #552 khong phai packet khac phuc cua packet nao; no la anh em
+  tach ra tu #541 sau mot phep do. Hai doctrine DANG ap, khai o spec: (1) "ghi mot nguyen nhan sai
+  vao doctrine con te hon khong ghi gi" — vi sao ket qua PHU DINH D5 duoc ghi thanh muc rieng;
+  (2) "nghi ra duoc phep thu ma KHONG CHAY no thi phep thu ay KHONG TON TAI" — vi sao N5 (fail-close
+  cua chinh script) la tieu chi chu khong phai loi hua trong docstring.'
+
+run_minutes: 60
+heartbeat_required_minutes: 30
+attempts_limit: class-based owner-directed loop; no reset of prior history
+review_calls_limit: until approve or zero P1/P2
+manual_ci_budget: 0
+
+prohibited_actions:
+- self_review
+- self_approve
+- merge
+- land
+- deploy
+- LIVE
+- ruleset mutation
+- admin bypass
+- secret disclosure
+- workflow_dispatch
+- manual full CI
+- Windows CI
+- 'VA t150 — packet nay chi DO. Va la packet SAU, spec rieng, neo vao so cua bien ban nay.'
+- 'cham ops/lease_publish.py hoac ops/lease_publish_test.py, KE CA sua tam roi hoan nguyen'
+- 'noi write set qua HAI duong (phai DUNG va xin revision)'
+- 'ket luan "do codex page" ma khong kem phep do — D5 da bac gia thuyet ay tren ly thuyet'
+- 'viet dau bo-qua-CI nguyen van trong thong diep commit, ke ca khi trich dan'
+- 'doc rc qua pipe (`| tail` roi `$?`)'
+
+dieu_kien_dung:
+- 'Vuot 2 tep => DUNG, xin chu kho khai ngoai le TRUOC khi day.'
+- 'Can sua ops/lease_publish_test.py de in tron `e` => DUNG. Script phai tu goi main() cua module
+   da nap, dung cach _goi_main lam, chu KHONG va cho cat chuoi trong tep test.'
+- 'Script chay tren nen KHONG phai win32 ma van in mot ket luan => DUNG, do la N5 do.'
+- 'Khong tra loi duoc mot trong bon cau loi (N1-N4) => ghi KHONG DO DUOC kem ly do, DUNG SUY,
+   KHONG lam tron. Bien ban thieu mot cau ma khong khai la KHONG DO DUOC thi verdict la blocked.'
+
+closure_status: 'Explicit owner-approved bounded write-set (2 duong, ca hai la tep MOI); no claim of
+  computed dispatcher closure.'

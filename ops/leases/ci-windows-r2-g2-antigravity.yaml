@@ -1,0 +1,215 @@
+# LEASE — CI-MA-TRAN-WINDOWS-CHAY-MOI-LAN-LAND revision 2 / generation 2
+# Executor antigravity (chay tren may chu kho), reviewer claude => khac provider.
+# Ghi HO theo chi thi chu kho; phien claude KHONG tu cap lease.
+# THAY THE gen 1: r1 bi BLOCKED o cross-review luot 4 vi chinh dac ta thieu (§3.2).
+
+schema_version: 2
+event: executor_lease_granted
+packet_issue: 548
+packet_id: CI-MA-TRAN-WINDOWS-CHAY-MOI-LAN-LAND
+mission_issue: KHONG_CO
+revision: 2
+generation: 2
+lease_id: ci-windows-r2-g2-antigravity
+thay_the_cho: ci-windows-r1-g1-antigravity
+thay_the_vi_sao: 'Cross-review luot 4 ra verdict BLOCKED vi hai khiem khuyet cua chinh dac ta r1,
+  khong phai cua ban va. D1: A1 doi grep -c ''os: ${{ fromJSON'' = 1, ma chuoi ay chi ton tai khi
+  chuan-bi.outputs boc fromJSON — dung con bug P1 lam 3 job gate skipped; tuc A1 doi GIU loi.
+  D2: M5 them docs/adr/0049 => docs/**/*.md 73 -> 74 => r291_docs_ngoai_goi DO vi
+  scripts/tl_selftest.py:21300 dam cung so 73 => gate (ubuntu) FAILURE that (job 105289776267,
+  buoc 26). Tep ay NGOAI write set r1 (vi pham L2) va nam TRONG RELEASE_MANIFEST.json nen keo
+  theo duong thu sau. §3.2: doi acceptance va write set => revision moi, lease cu mat hieu luc.'
+granted_by: ducthangho
+granted_on_instruction: https://github.com/ducthangho/tra-luat/issues/548#issuecomment-5718136928
+granted_on_instruction_nguyen_van: 'Chu kho, phien dieu phoi 17-09-2026: "Soan spec r2 di" ·
+  "Dong y ca bay, viet spec di" · "Dang ban chieu chi thi va soan lease gen 2 di". Bay quyet dinh
+  duoc duyet liet ke nguyen van trong ban chieu tai issuecomment-5718136928.'
+recorded_by: claude-session
+recorder_is_dispatcher: false
+leased_at_utc: '2026-09-17T17:00:00Z'
+lease_expires_at_utc: '2026-09-18T17:00:00Z'
+role: executor
+provider: google_antigravity
+executor: antigravity
+model: KHONG_KHAI
+effort: KHONG_KHAI
+execution_surface: antigravity
+transport: machine/local
+environment: local
+operating_system: Windows
+risk: sensitive
+review_class: sensitive
+effective_review_class: sensitive
+review_class_vi_sao: 'docs/PROTOCOL_DA_PHIEN.md §8 neu DICH DANH "workflow/CI authority". Packet sua
+  chinh ma tran cua ci.yml va cham docs/PROTOCOL_DA_PHIEN.md. Khong khai thap hon duoc. Gen 2 con
+  cham them scripts/tl_selftest.py (legacy harness dung chung) va RELEASE_MANIFEST.json (duong
+  phat hanh) nen cang khong ha duoc.'
+
+assurance_target: human_audited
+assurance_target_vi_sao: '§8 cho sensitive doi Codex cross_approved HOAC human_audited. "antigravity"
+  van xuat hien 0 lan trong docs/PROTOCOL_DA_PHIEN.md (do 17-09-2026) nen chua phai provider hop le
+  cho cross_approved. No co ten: PROTOCOL-CHUA-BIET-ANTIGRAVITY, dang xu o packet rieng #551.
+  Chu kho quyet human_audited — KHONG doi o gen 2.'
+reviewer_provider: claude
+reviewer_model: KHONG_KHAI
+reviewer_effort: KHONG_KHAI
+reviewer_independence: 'fresh session/context/checkout; no executor context fork; read-only source.
+  CHU Y — do duoc o gen 1: luot 1 KHONG co vong tron (reviewer khong cap HINT nao). Luot 2, 3, 4 CO:
+  reviewer de xuat hinh dang va executor ap theo, nen phan quyet ve HINH DANG ban va khong co gia tri
+  doc lap. Moi verdict PHAI khai do lech ay ngay dau tep.'
+cross_reviewer_requirement: 'Reviewer PHAI khac provider voi executor: executor google_antigravity,
+  reviewer anthropic_claude. Khac provider la DIEU KIEN CAN, khong phai DU — xem assurance_target.'
+
+spec_path: ops/specs/ci-ma-tran-windows-chay-moi-lan-land-r2.md
+spec_ref: claude/spec-548-r2-20260917
+spec_hash: f825cf30f11f9f84440d8c2cad795f32931997335cff1fe9d5ac1dd04017c06f
+spec_bytes: 17510
+prompt_path: ops/specs/ci-ma-tran-windows-chay-moi-lan-land-r2.md
+prompt_sha256_required: f825cf30f11f9f84440d8c2cad795f32931997335cff1fe9d5ac1dd04017c06f
+
+branch: agy/ci-windows-r1-g1
+branch_ownership: exclusive
+branch_vi_sao_GIU_TEN_CU: 'Nhanh lam viec GIU NGUYEN ten tu gen 1 vi cong viec M1-M7 da thi cong xong
+  tren do va 4 finding da dong. Doi ten nhanh se vut bo lich su ay ma khong mua duoc gi. Ten nhanh
+  KHONG phai dinh danh cua lease.'
+target_branch_neu_land: master
+base_sha: a612c70cbc56d0e3a8c580f4759eddf215af82fb
+start_from_sha: 2ee0e218de7ec9342ede79190447c40522c532cb
+start_from_sha_vi_sao: 'KHAC base_sha co chu dich: gen 2 tiep tuc tren cong viec da co, khong lam lai
+  tu dau. 2ee0e218de7e la head luc cap (do 16:52Z 17-09-2026), da chua merge base a612c70 cung 4 ban
+  va da dong P2-a, P2-b, P3 (luot 1) va P1 (luot 3).'
+immutable_acceptance_baseline: a612c70cbc56d0e3a8c580f4759eddf215af82fb
+reviewed_sha_required: 2ee0e218de7ec9342ede79190447c40522c532cb
+reviewed_sha_required_note: 'Mo neo DUOI luc cap — day la HEAD hien tai, KHONG phai ung vien.
+  Ung vien that chua ton tai vi M8/M9 chua thi cong. Verdict cuoi PHAI neo dung SHA ung vien
+  that khi no ton tai, khong dung lai con so nay.'
+
+write_set:
+- .github/workflows/ci.yml
+- ops/lease_publish_test.py
+- docs/adr/0049-cong-hai-nen-truoc-phat-hanh-khong-phai-moi-lan-land.md
+- docs/PROTOCOL_DA_PHIEN.md
+- scripts/tl_selftest.py
+- RELEASE_MANIFEST.json
+
+ngoai_le_adr_0044:
+  ai_nang: ducthangho
+  tran_goc: '3 tep (class sensitive)'
+  tran_da_duyet_cho_r1: '4 tep'
+  tran_moi: '6 tep'
+  tran_dong_them: '300 — GIU NGUYEN, khong xin noi'
+  can_cu: 'D2 trong spec r2: M5 them mot tep docs/**/*.md => r291_docs_ngoai_goi DO => can
+    scripts/tl_selftest.py de ke khai slot; tep ay nam TRONG RELEASE_MANIFEST.json (do: True,
+    file_count 180) => keo theo phai tai sinh manifest. Tien le y het: packet #522 phai di qua
+    revision 3 vi dung chuyen nay.'
+  do_luc_cap: 'numstat so a612c70 tai 2ee0e218de7e = 4 tep, +273 / -24 (do 16:52Z 17-09-2026).
+    M8/M9 them vai dong. CON SO NAY CHONG DO MOT CAU VE THAM QUYEN — do lai ngay truoc khi day.'
+
+PHAM_VI_TREN_PROTOCOL:
+  duong: docs/PROTOCOL_DA_PHIEN.md
+  duoc_phep: 'DUNG MOT DONG: mot hang moi trong bang §20 cho ADR-0049. Da thi cong o gen 1, do
+    +1/-0 — GIU NGUYEN, khong sua them.'
+  cam: 'Cham bat ky dong nao khac cua protocol => DUNG, di qua revision moi (§3.2).'
+
+PHAM_VI_TREN_TL_SELFTEST:
+  duong: scripts/tl_selftest.py
+  duoc_phep: 'CHI ke khai slot cua r291_docs_ngoai_goi: 73 -> 74 va 253 -> 254, theo dung NEP cua
+    khoi chu thich tep ay (neu dung ten tep duoc them). KHONG sua ca nao khac.'
+  cam: 'Sua bat ky ca nao khac, hoac doi nguong cua ca khac => DUNG, xin rieng.'
+  vi_sao_phai_co: 'Phan chung DA CHAY: gate (ubuntu-latest) tren 6d46e6fc16ca FAILURE o buoc 26
+    tl selftest, job 105289776267. docs/**/*.md do duoc 73 tren a612c70 va 74 tren head.'
+
+PHAM_VI_TREN_MANIFEST:
+  duong: RELEASE_MANIFEST.json
+  duoc_phep: 'Tai sinh bang `python3 scripts/tl.py release-manifest` SAU khi sua tl_selftest.py.'
+  cam: 'Sua tay. Va diff cua manifest phai CHI chua scripts/tl_selftest.py; file_count phai GIU 180.
+    Manifest doi them tep khac la dau hieu da cham ngoai write set => DUNG.'
+
+write_set_da_quet_toan_kho: 'DO 16:52Z 17-09-2026, sau khi chua hai nhanh cuc bo tut sau (cong
+  ai-dang-giu fail-close dung luat va in san lenh chua). Bon duong cu: rc=11, NGUOI_GIU 1 =
+  ci-windows-r1-g1-antigravity — tuc chinh gen 1 cua packet nay, KHONG phai xung dot voi packet khac;
+  gen 1 mat hieu luc theo §3.2 va duoc danh da_bi_thay_the HAI CHIEU cung luc cap gen 2.
+  Hai duong moi: scripts/tl_selftest.py rc=0 NGUOI_GIU 0; RELEASE_MANIFEST.json rc=0 NGUOI_GIU 0.
+  QUET LAI ca sau ngay truoc khi day — con so tren se troi.'
+
+khong_duoc_cham:
+- .github/workflows/launcher-windows.yml
+- scripts/deploy-package.sh
+- scripts/deploy-package.ps1
+- ops/lease_publish.py
+- .claude/dev/launcher.py
+- .claude/dev/launcher_test.py
+- .claude/hooks/session-start.sh
+- .claude/dev/packet_loop.py
+- .claude/dev/packet_loop_test.py
+- scripts/tl.py
+- ops/specs/ci-ma-tran-windows-chay-moi-lan-land-r1.md
+- ops/reviews/ci-windows-review-1-claude-verdict.md
+- ops/reviews/ci-windows-review-2-claude-verdict.md
+- ops/reviews/ci-windows-review-3-claude-verdict.md
+- ops/reviews/ci-windows-review-4-claude-verdict.md
+
+khong_duoc_cham_vi_sao_them_5_duong: 'ops/lease_publish.py giu nguyen tu gen 1 — no WP541 co phien
+  rieng, KHONG phai viec cua packet nay du gen 2 nay co cham ops/. Nam tep con lai la dac ta da dong
+  bang va bon verdict DA GIAO: sua de la lam bam trong lease/verdict tro vao thu khong con ton tai.'
+
+viec_con_lai_o_gen_2:
+- 'M8: ke khai slot r291_docs_ngoai_goi 73 -> 74 va 253 -> 254 trong scripts/tl_selftest.py'
+- 'M9: tai sinh RELEASE_MANIFEST.json; diff CHI chua tl_selftest.py, file_count GIU 180'
+- 'A10: do tren head cuoi — chuan-bi success VA ba job gate CO CHAY (skipped = KHONG DO DUOC)'
+- 'A11: docs/**/*.md = 74, r291 DAT, tl.py --selftest N/N hai so BANG NHAU'
+da_thi_cong_o_gen_1_GIU_NGUYEN:
+- 'M1, M2, M2b: ci.yml — job chuan-bi, ba consumer doc needs.chuan-bi.outputs.os, outputs la CHUOI'
+- 'M3, M3b, M4: ops/lease_publish_test.py — chot nguon duy nhat, chot outputs khong boc fromJson,
+   evaluator fail-close'
+- 'M5, M6: docs/adr/0049 — doi tieu chuan gate, phan mat mat, trang thai WP541 tai thoi diem land'
+- 'M7: docs/PROTOCOL_DA_PHIEN.md — mot hang §20 cho ADR-0049'
+
+hinh_dang_ke_thua:
+  TIEU-CHI-THEO-GIA-TRI-TUYET-DOI: 2
+  DOT-BIEN-TAUTOLOGY: 2
+  vi_sao: 'Luat L4: packet khac phuc phai chep bo dem hinh dang loi tu ho so tien nhiem, keo chot
+    "lap lan thu BA thi hoi CO NEN LAM KHONG" mat tac dung dung luc can nhat. Ca hai hinh dang deu
+    da xay ra HAI lan o gen 1 — lan sau gap la DA CHAM TRAN.'
+
+run_minutes: 120
+heartbeat_required_minutes: 30
+attempts_limit: class-based owner-directed loop; no reset of prior history
+review_calls_limit: until approve or zero P1/P2
+manual_ci_budget: 0
+prohibited_actions:
+- self_review
+- self_approve
+- merge
+- land
+- deploy
+- LIVE
+- ruleset mutation
+- admin bypass
+- secret disclosure
+- workflow_dispatch
+- manual full CI
+- Windows CI
+- 'noi write set qua SAU duong (phai DUNG va xin revision)'
+- 'cham dong nao khac cua docs/PROTOCOL_DA_PHIEN.md ngoai mot hang §20'
+- 'sua ca nao khac cua scripts/tl_selftest.py ngoai ke khai slot r291'
+- 'sua tay RELEASE_MANIFEST.json (phai tai sinh bang release-manifest)'
+- 'vuot 300 dong them ma khong xin ngoai le ADR-0044 TRUOC khi day'
+- 'viet cu phap bieu thuc Actions trong comment cua `run`'
+- 'viet dau bo-qua-CI nguyen van trong thong diep commit, ke ca khi trich dan'
+- 'ma hoa dot bien thanh mot ham cuc bo trong tep test (day la cach tautology ra doi)'
+- 'doc rc qua pipe (`| tail` roi `$?`) — no RC-QUA-PIPE-KHONG-CO-CHOT'
+
+dieu_kien_dung:
+- 'Vuot 6 tep hoac 300 dong them => DUNG, xin chu kho khai ngoai le TRUOC khi day.'
+- 'Can cham dong nao khac cua protocol ngoai mot hang §20 => DUNG, revision moi (§3.2).'
+- 'A10 cho skipped o bat ky job nao trong ba => KHONG DO DUOC, KHONG duoc doc thanh dat; DUNG va bao.'
+- 'Mot trong hai hinh dang o hinh_dang_ke_thua lap lan thu BA => DUNG, hoi "co nen lam viec nay
+   khong", khong hoi "va the nao".'
+
+closure_status: 'Explicit owner-approved bounded write-set (6 duong); no claim of computed dispatcher
+  closure.'
+orchestration: owner-authorized manual issue/receipt journal; no packet_loop state claim
+ci_policy: 'KHONG CI tay, manual_ci_budget = 0. Phep do duy nhat cho A10 la luot PR TU DONG — no tu
+  ban khi executor push. Nghich ly da biet va da chon cach song chung: packet sua duong Windows ma
+  khong duoc chay Windows de nghiem thu. A9 chi do duoc SAU merge.'

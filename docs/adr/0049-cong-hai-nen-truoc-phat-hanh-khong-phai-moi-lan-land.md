@@ -16,14 +16,17 @@ Từ quyết định grilling 2026-07-09 (#8), `ci.yml` chạy cả `ubuntu-late
 
 1. **Đổi cò Windows trong `ci.yml`:** Bỏ điều kiện `github.ref == 'refs/heads/master'`. Windows chỉ còn kích hoạt khi gọi tay qua `workflow_dispatch` hoặc khi PR có nhãn `windows` (dành cho các thay đổi chạm mã phụ thuộc nền tảng).
 2. **Khử trùng lặp qua job `chuan-bi`:** Thêm job `chuan-bi` (chạy trên `ubuntu-latest`, không checkout mã nguồn), tính danh sách nền một lần và xuất qua `outputs.os`. Ba job `gate`, `gate-registry`, `gate-packet-loop` khai `needs: chuan-bi` và đọc `needs.chuan-bi.outputs.os`.
-3. **Cổng hai nền chuyển về `deploy-package.*`:** Trước khi phát hành gói (`tl drive-push` lên LIVE), người vận hành bắt buộc phải chạy bộ cổng kiểm tra tại chỗ của `deploy-package.ps1` / `deploy-package.sh` (8 cổng: `--selftest`, `doc-claims-check`, `doctrine-scan`, `adr-song`, `workflow-audit`, `golden-test`, `determinism-audit`, `release-verify`). Cổng này chặn thật khi đỏ (dòng 234: `Bad 'GATE ĐỎ — DỪNG, không build/không đẩy'`).
+3. **Cổng hai nền tại chỗ của `deploy-package.*`:** Trước khi phát hành gói (`tl drive-push` lên LIVE), người vận hành bắt buộc phải chạy bộ cổng kiểm tra tại chỗ của `deploy-package.ps1` / `deploy-package.sh` (8 cổng: `selftest`, `gen_inst`, `workflow`, `golden`, `docclaims`, `determinism`, `relcheck`, `relverify`). Cổng này chặn thật khi đỏ (dòng 234: `Bad 'GATE ĐỎ — DỪNG, không build/không đẩy'`).
 
 ## 3. Phần mất mát & Rủi ro đã nhận
 
 - **Mất soi Windows tự động cho ~22 bước test:** Việc bỏ Windows khỏi mỗi lần land vào `master` đồng nghĩa ~22 bước kiểm thử trong `ci.yml` (như `lease_publish_test`, `ci_dang_ky_test`, `packet-loop selftest`) không còn được chạy tự động trên Windows sau mỗi commit vào master.
-- **Cổng Windows đang đỏ biến mất khỏi CI không phải vì được chữa:** Tại commit `f27a28f` và `a612c70`, lane Windows trên `master` đang đỏ sẵn 15 ca ở `lease-publish selftest` (nợ WP541 do hardcode `/usr/bin:/bin`). Việc bỏ Windows khỏi `master` làm tín hiệu đỏ này biến mất khỏi CI, nhưng ADR-0049 **KHÔNG** chữa nợ WP541 mà chuyển việc bảo đảm sang các cổng tại chỗ trước phát hành. Nợ WP541 vẫn còn nguyên.
-- **Đường nhãn `windows` không tự sinh run khi PR đứng yên:** `ci.yml` dùng trigger `pull_request` mặc định (không khai `types: [labeled]`). Việc gắn nhãn `windows` lên một PR đang đứng yên sẽ không tự kích hoạt build; nhãn chỉ có hiệu lực ở lần push kế tiếp (`synchronize`) hoặc khi tạo PR đã có nhãn. Đây là rủi ro vận hành do người điều phối nhận và chịu trách nhiệm.
-- Đây là **rủi ro đã nhận** (K4), được chấp nhận để đổi lấy việc bảo toàn hạn mức CI và phục hồi tín hiệu đọc được. Nợ có tên `BATTERY-DEPLOY-HEP-HON-LANE-CI` ghi nhận việc mở rộng danh mục kiểm thử của script deploy khi cần thiết.
+- **Cổng Windows đang đỏ biến mất khỏi CI không phải vì được chữa:** Tại thời điểm land (commit `a612c70`, run `35232106589`, job `105238582317`), lane `gate (windows-latest)` trên `master` đang đỏ sẵn 15 ca ở bước 18 `lease-publish selftest` (`133/148 đạt`, do `shutil.which("git", path="/usr/bin:/bin")` hardcode tại `ops/lease_publish.py:1106`, nợ WP541). Việc bỏ Windows khỏi `master` làm tín hiệu đỏ này biến mất khỏi CI, nhưng ADR-0049 **KHÔNG** chữa nợ WP541. Nợ WP541 vẫn còn nguyên và được xử lý ở packet riêng.
+- **Độ phủ Windows tự động về 0 trên thực tế cho `ops/`, `scripts/`, `.github/`:**
+  - `ci.yml` dùng trigger `pull_request` mặc định (không khai `types: [labeled]`), nên gắn nhãn `windows` lên PR đang đứng yên không tự kích hoạt run mới mà chỉ ăn ở lần push kế tiếp (`synchronize`) hoặc khi tạo PR đã có nhãn.
+  - Dưới chính sách `manual_ci_budget: 0` (cấm `workflow_dispatch`), Windows tự động không còn chạy cho `ops/**`, `scripts/**`, `.github/**` (WP541 là bằng chứng sống).
+  - 8 cổng tại chỗ của `deploy-package.*` là script chạy tay và **không bao gồm** `lease_publish_test` hay các test của `ops/`, nên không thay thế được toàn bộ lane CI bị gỡ.
+  - Đây là **rủi ro đã nhận** (K4), được chấp nhận để bảo toàn hạn mức CI. Người điều phối và người phát hành chịu trách nhiệm khi thay đổi chạm mã phụ thuộc nền tảng. Nợ có tên `BATTERY-DEPLOY-HEP-HON-LANE-CI` ghi nhận việc mở rộng danh mục kiểm thử của script deploy khi cần thiết.
 
 ## 4. Lời khai trung thực về Windows CI khi land
 

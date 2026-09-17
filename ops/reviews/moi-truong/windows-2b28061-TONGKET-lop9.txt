@@ -1,0 +1,79 @@
+NGUON: chu kho dan nguyen van tu phien PS7 17-09-2026, may Windows cua chu kho.
+Khong go lai, khong bien tap. Phan chu thich cua git ve detached HEAD giu nguyen.
+
+PS7 D:\Quốc hội\tl546> pwsh -NoProfile -File D:\thu546\do546-lop9.ps1 -Kho "D:\Quốc hội\tl546"
+KHO (chi doc): D:\Quốc hội\tl546
+SANDBOX      : D:\Quốc hội\tl546 do546 lop9
+BASH         : C:\Program Files\Git\bin\bash.exe
+PAYLOAD      : D:\Quốc hội\tl546 do546 lop9\do546-lop9.sh
+
+UNAME    : MINGW64_NT-10.0-26200
+PYTHON   : python (3.13.1)
+KHO OK   : co commit 2b28061 (cay lam viec KHONG bi dung toi)
+CLONE    : /d/Quốc hội/tl546  ->  /d/Quốc hội/tl546 do546 lop9/kho
+Note: switching to '81f7067c6f1676b533739ec7753dde2be420f98e'.
+
+You are in 'detached HEAD' state. You can look around, make experimental
+changes and commit them, and you can discard any commits you make in this
+state without impacting any branches by switching back to a branch.
+
+If you want to create a new branch to retain commits you create, you may
+do so (now or later) by using -c with the switch command. Example:
+
+  git switch -c <new-branch-name>
+
+Or undo this operation with:
+
+  git switch -
+
+Turn off this advice by setting config variable advice.detachedHead to false
+
+HEAD     : 2b28061d9b078605eb9d45c860fe672430833ab3
+CAY BAN  : 0 dong (0 = sach)
+NEN CO DAU CACH: co  <= day la bien dang do
+
+================= N1: BO TEST DAY DU (hoi quy) =================
+N1 rc=0   (rc=1 la BINH THUONG: t53 do san tren nen)
+172/172 ca DA CHAY QUA (tong 189, bo qua 17, hong 0) - KHONG DU: 17 ca BO QUA, chua do gi
+(log day du: /d/Quốc hội/tl546 do546 lop9/N1.log)
+
+================= N2: t150 o duong CO DAU CACH =================
+  chay tai: /d/Quốc hội/tl546 do546 lop9/kho
+  N2 => LAP t150_doctor_do_bien_utf8_in_ca_khi_xanh: 1/1 qua, 0 bo qua, 0 hong
+
+================= N3: DOT BIEN quay ve dang RONG cu =================
+  (phai BI GIET: day chinh la LOP 9)
+    TRUOC=1 SAU=0
+  N3 => LAP t150_doctor_do_bien_utf8_in_ca_khi_xanh: 0/1 qua, 0 bo qua, 1 hong
+
+================= N4: DOT BIEN go canh bao UTF-8 =================
+  (phai BI GIET: ve khang dinh thu hai con rang)
+    TRUOC=1 SAU=0
+  N4 => LAP t150_doctor_do_bien_utf8_in_ca_khi_xanh: 0/1 qua, 0 bo qua, 1 hong
+
+================= TONG KET =================
+DOC THE NAY:
+  N2 phai '1/1 qua'          — LOP 9 dong tren Windows
+  N3 phai '0/1 qua, 1 hong'  — dot bien BI GIET
+  N4 phai '0/1 qua, 1 hong'  — dot bien BI GIET
+  Dong nao bat dau '!!!' la KHONG DO DUOC, khong phai DAT hay HONG.
+
+RC TONG  : 0
+PS7 D:\Quốc hội\tl546>
+
+-----------------------------------------------------------------------------
+GHI CHU VE MOT DIEU KHONG DO DUOC TU PHIEN NAY
+-----------------------------------------------------------------------------
+Tep N1.log day du nam tren Drive (_HOP_NAP, fileId 1g46B-V5D0SdM2IcPUaMVUAr74uySKiRY,
+1999 byte theo sieu du lieu Drive). Phien nay doc no qua MCP Google Drive va ban ve
+DA BI CHUAN HOA kieu Markdown: dau gach duoi bi thoat (\_), moi dong ket thuc bang hai
+dau cach. Do la tao tac cua DUONG DOC, dung lop loi ma CLAUDE.md da ghi ("duong doc
+cung chuan hoa"). Vi vay KHONG khai sha256 cua N1.log o day: byte that cua no la
+KHONG DO DUOC tu phien nay. Noi dung thong tin thi tra duoc — 17 ca bo qua deu la ca
+POSIX thuan, va dong tong ket trung khop voi ban dan tren.
+
+17 ca bo qua tren Windows (doc tu N1.log, tinh theo NOI DUNG chu khong theo byte):
+  t03 t28 t33 t50 t51 t55 t60 t63 t67 t66 t76 t72 t108 t125 t126
+  r351_co_chi_thi_thi_KHONG_duoc_dat_moc
+  r351_KHONG_co_chi_thi_thi_van_phai_dat_moc
+Khong ca nao trong so do la t53 hay t73 — tuc hai ca ay DA CHAY va DAT.

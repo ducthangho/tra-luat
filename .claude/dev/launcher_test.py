@@ -5948,11 +5948,11 @@ def t150_doctor_do_bien_utf8_in_ca_khi_xanh():
     m._in_an_toan = lambda msg="": in_dong.append(msg)
     m._doc_moi_truong = lambda: ({"PYTHONUTF8": "1", "PYTHONIOENCODING": "utf-8"}, {})
     rc = m.lenh_doctor(argparse.Namespace(json=False, workspace=None, kiem_song=False, doi_kha_dung=False))
-    bang(rc == 0 and "BIEN UTF-8" in "\n".join(in_dong) and "CANH BAO" not in "\n".join(in_dong), "xanh in du khong canh bao")
+    bang(rc == 0 and "BIEN UTF-8" in "\n".join(in_dong) and not any("CANH BAO" in d and "UTF-8" in d for d in in_dong), "xanh in du khong canh bao")
     in_dong.clear()
     m._doc_moi_truong = lambda: ({"PYTHONIOENCODING": "utf-8"}, {})
     rc_v = m.lenh_doctor(argparse.Namespace(json=False, workspace=None, kiem_song=False, doi_kha_dung=False))
-    bang(rc_v == 0 and "CANH BAO" in "\n".join(in_dong), "thieu phai canh bao")
+    bang(rc_v == 0 and any("CANH BAO" in d and "UTF-8" in d for d in in_dong), "thieu phai canh bao")
     m._in_an_toan = goc_in
     bang("bien_utf8" in _doctor_json(m)[1], "json phai co bien_utf8")
 

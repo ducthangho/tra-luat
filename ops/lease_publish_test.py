@@ -6492,10 +6492,26 @@ def _kiem_tra_nguon_duy_nhat_os_ci(tep_hoac_dict) -> list[str]:
     return loi
 
 
+def _kiem_tra_outputs_ci_khong_boc_fromjson(wf_path_or_dict):
+    """Outputs của job bắt buộc phải là chuỗi. Bọc fromJson/fromJSON sẽ làm GitHub Actions crash."""
+    import yaml
+    if isinstance(wf_path_or_dict, dict):
+        d = wf_path_or_dict
+    else:
+        d = yaml.safe_load(wf_path_or_dict.read_text(encoding="utf-8")) or {}
+    loi = []
+    for ten_job, job in (d.get("jobs") or {}).items():
+        outputs = (job or {}).get("outputs") or {}
+        for k, v in outputs.items():
+            if "fromjson(" in str(v).lower():
+                loi.append(f"job '{ten_job}' output '{k}' bọc fromJson/fromJSON: {v!r} (outputs chỉ nhận chuỗi)")
+    return loi
+
+
 def _danh_gia_bieu_thuc_chuan_bi(expr_str: str, ctx: dict) -> list[str]:
     """Evaluator tối giản cho đúng hình biểu thức của chuan-bi.
-    Hình chuẩn: fromJSON( ( <cond> ) && '["ubuntu-latest","windows-latest"]' || '["ubuntu-latest"]' )
-    Fail-close: in 'KHÔNG ĐO ĐƯỢC' và raise khi gặp hình khác.
+    Hình chuẩn: ( <cond> ) && '["ubuntu-latest","windows-latest"]' || '["ubuntu-latest"]'
+    Fail-close: in 'KHÔNG ĐO ĐƯỢC' và raise khi gặp hình khác (kể cả bọc fromJSON ngoài).
     """
     import json
     raw = expr_str.strip()
@@ -6503,7 +6519,7 @@ def _danh_gia_bieu_thuc_chuan_bi(expr_str: str, ctx: dict) -> list[str]:
         raw = raw[3:-2].strip()
 
     m = re.fullmatch(
-        r"fromJSON\s*\(\s*\((?P<cond>.*?)\)\s*&&\s*(?P<t>'\[.*?\]')\s*\|\|\s*(?P<f>'\[.*?\]')\s*\)",
+        r"\(\s*(?P<cond>.*?)\)\s*&&\s*(?P<t>'\[.*?\]')\s*\|\|\s*(?P<f>'\[.*?\]')",
         raw,
         re.DOTALL,
     )
@@ -6557,27 +6573,34 @@ def _danh_gia_bieu_thuc_chuan_bi(expr_str: str, ctx: dict) -> list[str]:
 
 @ca
 def t161_M3_chot_nguon_duy_nhat_ma_tran_ci():
-    """M3 & A2: Quét ci.yml, ĐỎ khi có bất kỳ job nào khai os: riêng ngoài needs.chuan-bi.outputs.os.
-    Đã kiểm chứng: ca dương trên workflow thật + ca giả hợp lệ, ca âm trên workflow giả lén khai os riêng.
+    """M3, A2 & P1: Quét ci.yml:
+    1. ĐỎ khi có bất kỳ job nào khai os: riêng ngoài needs.chuan-bi.outputs.os.
+    2. ĐỎ khi outputs của bất kỳ job nào bọc fromJSON/fromJson (outputs chỉ nhận chuỗi, sequence làm Actions crash).
+    Đột biến: workflow giả có job khai os riêng hoặc bọc fromJSON output => chốt phải bắt được.
     """
     wf_ci = HERE.parent / ".github" / "workflows" / "ci.yml"
     loi_that = _kiem_tra_nguon_duy_nhat_os_ci(wf_ci)
     bang(not loi_that, f"ci.yml thật có job lén khai os: riêng: {loi_that}")
 
+    # Chốt P1: outputs của ci.yml thật không được bọc fromJson/fromJSON
+    loi_output = _kiem_tra_outputs_ci_khong_boc_fromjson(wf_ci)
+    bang(not loi_output, f"ci.yml thật có output bọc fromJson: {loi_output}")
+
     # Ca giả không lén: phải đạt
     wf_gia_sach = {
         "jobs": {
-            "chuan-bi": {"outputs": {"os": "${{ fromJSON(...) }}"}},
+            "chuan-bi": {"outputs": {"os": "${{ (...) }}"}},
             "gate": {"strategy": {"matrix": {"os": "${{ fromJson(needs.chuan-bi.outputs.os) }}"}}},
             "gate-registry": {"strategy": {"matrix": {"os": "${{ fromJson(needs.chuan-bi.outputs.os) }}"}}},
         }
     }
     bang(_kiem_tra_nguon_duy_nhat_os_ci(wf_gia_sach) == [], "workflow giả hợp lệ bị từ chối")
+    bang(_kiem_tra_outputs_ci_khong_boc_fromjson(wf_gia_sach) == [], "workflow giả hợp lệ bị từ chối ở outputs")
 
     # Ca giả có một job lén khai os: riêng (danh sách hoặc biểu thức riêng)
     wf_gia_len = {
         "jobs": {
-            "chuan-bi": {"outputs": {"os": "${{ fromJSON(...) }}"}},
+            "chuan-bi": {"outputs": {"os": "${{ (...) }}"}},
             "gate": {"strategy": {"matrix": {"os": "${{ fromJson(needs.chuan-bi.outputs.os) }}"}}},
             "gate-len": {"strategy": {"matrix": {"os": ["ubuntu-latest", "windows-latest"]}}},
         }
@@ -6585,13 +6608,23 @@ def t161_M3_chot_nguon_duy_nhat_ma_tran_ci():
     loi_len = _kiem_tra_nguon_duy_nhat_os_ci(wf_gia_len)
     bang(len(loi_len) == 1 and "gate-len" in loi_len[0], f"chốt không bắt được job lén khai os: {loi_len}")
 
+    # Đột biến P1: nếu có job bọc fromJSON vào output => chốt phải bắt được
+    wf_gia_output_fromjson = {
+        "jobs": {
+            "chuan-bi": {"outputs": {"os": "${{ fromJSON('[\"ubuntu-latest\"]') }}"}}
+        }
+    }
+    loi_output_dot_bien = _kiem_tra_outputs_ci_khong_boc_fromjson(wf_gia_output_fromjson)
+    bang(len(loi_output_dot_bien) == 1 and "chuan-bi" in loi_output_dot_bien[0],
+         f"chốt không bắt được output bọc fromJSON: {loi_output_dot_bien}")
+
 
 @ca
 def t162_M4_evaluator_toi_gian_chuan_bi():
     """M4, A3 & A4: Evaluator tối giản fail-close cho biểu thức chuan-bi.
     Bốn ca rõ ràng (push master, PR thường, PR nhãn windows, workflow_dispatch).
     Đột biến A3: biểu thức chứa github.ref == 'refs/heads/master' => push master sinh 2 nền thay vì 1.
-    Chốt fail-close A4: gặp biểu thức hình lạ bắt buộc phải in KHÔNG ĐO ĐƯỢC và raise ValueError.
+    Chốt fail-close A4: gặp biểu thức hình lạ (kể cả bọc fromJSON) bắt buộc phải in KHÔNG ĐO ĐƯỢC và raise ValueError.
     """
     import yaml
     wf_ci = HERE.parent / ".github" / "workflows" / "ci.yml"
@@ -6615,24 +6648,23 @@ def t162_M4_evaluator_toi_gian_chuan_bi():
     bang(r_disp == ["ubuntu-latest", "windows-latest"], f"workflow_dispatch phải chạy hai nền, nhận được: {r_disp}")
 
     # Đột biến A3: đưa github.ref == 'refs/heads/master' trở lại => push master phải sinh 2 nền (làm ca đích ĐỎ)
-    expr_dot_bien_ref = """fromJSON(
-      (github.event_name == 'workflow_dispatch'
+    expr_dot_bien_ref = """(github.event_name == 'workflow_dispatch'
        || github.ref == 'refs/heads/master'
        || contains(github.event.pull_request.labels.*.name, 'windows'))
       && '["ubuntu-latest","windows-latest"]'
-      || '["ubuntu-latest"]')"""
+      || '["ubuntu-latest"]'"""
     r_mutant_push = _danh_gia_bieu_thuc_chuan_bi(expr_dot_bien_ref, c_push_master)
     bang(r_mutant_push == ["ubuntu-latest", "windows-latest"],
          f"đột biến có ref master phải sinh 2 nền khi push master: {r_mutant_push}")
 
-    # A4: fail-close khi gặp biểu thức hình khác (ví dụ lồng fromJSON 2 tầng)
+    # A4: fail-close khi gặp biểu thức hình khác (ví dụ bọc fromJSON ở ngoài như lỗi P1)
     la_da_bat = False
     try:
-        _danh_gia_bieu_thuc_chuan_bi("fromJSON(fromJSON('[\"ubuntu-latest\"]'))", c_push_master)
+        _danh_gia_bieu_thuc_chuan_bi("fromJSON('[\"ubuntu-latest\"]')", c_push_master)
     except ValueError as ex:
         if "KHÔNG ĐO ĐƯỢC" in str(ex):
             la_da_bat = True
-    bang(la_da_bat, "evaluator phải fail-close (in KHÔNG ĐO ĐƯỢC và raise) khi gặp hình lạ")
+    bang(la_da_bat, "evaluator phải fail-close (in KHÔNG ĐO ĐƯỢC và raise) khi gặp hình lạ (kể cả bọc fromJSON)")
 
 
 CO_CHI_CA = "--chi-ca="   # `--chi-ca=t01_` ⇒ chỉ chạy ca có tên bắt đầu bằng tiền tố ấy (M3 packet #504 dùng để sinh lượt con rẻ)

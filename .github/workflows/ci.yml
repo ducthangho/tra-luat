@@ -37,11 +37,10 @@ jobs:
     # Chi ubuntu-latest, khong checkout ma nguon; bo github.ref == 'refs/heads/master'.
     runs-on: ubuntu-latest
     outputs:
-      os: ${{ fromJSON(
-            (github.event_name == 'workflow_dispatch'
-             || contains(github.event.pull_request.labels.*.name, 'windows'))
-            && '["ubuntu-latest","windows-latest"]'
-            || '["ubuntu-latest"]') }}
+      os: ${{ (github.event_name == 'workflow_dispatch'
+               || contains(github.event.pull_request.labels.*.name, 'windows'))
+              && '["ubuntu-latest","windows-latest"]'
+              || '["ubuntu-latest"]' }}
     steps:
       - run: 'true'
 

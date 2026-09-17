@@ -3653,9 +3653,7 @@ def _do_launcher_cu(ws: str | None) -> tuple[str, str]:
 
 
 # --- M3: DẤU VẾT HOOK ĐÃ CHẠY ----------------------------------------------------
-_CAC_DUONG_VET_HOOK = (Path(".claude/.packet_state/session-start.ran"),
-                       Path(".tl_state/session-start.ran"))
-
+_CAC_DUONG_VET_HOOK = (Path(".claude/.packet_state/session-start.ran"), Path(".tl_state/session-start.ran"))
 _HAN_DAU_VET_HOOK_GIAY = 12 * 3600
 
 
@@ -3683,7 +3681,8 @@ def _do_hook_da_chay(ws: str | None, bay_gio: float | None = None) -> tuple[str,
                     f"KHÔNG ĐO ĐƯỢC — dau vet {rel.as_posix()} CU {gio}h "
                     f"(> {_HAN_DAU_VET_HOOK_GIAY // 3600}h, ghi luc {noi_dung or '?'}): no chung minh "
                     f"hook TUNG chay, khong chung minh hook chay cho phien nay")
-        return ("DA_CHAY", f"ĐÃ CHẠY (dấu vết: {rel.as_posix()}" + (f" lúc {noi_dung})" if noi_dung else ")"))
+        nhanh = " [bo qua theo thiet ke tren may cuc bo]" if "cuc_bo" in noi_dung else ""
+        return ("DA_CHAY", f"ĐÃ CHẠY (dấu vết: {rel.as_posix()}" + (f" lúc {noi_dung}{nhanh})" if noi_dung else ")"))
     return ("CHUA_CHAY", "CHƯA CHẠY — hook chua chay lan nao trong cay nay (chua co dau vet)")
 
 
@@ -3716,8 +3715,7 @@ def _kiem_tra_duong_dan_kho(ws: str | None) -> tuple[bool, str]:
     co_dau_cach = " " in duong
     co_ngoai_ascii = any(ord(c) > 127 for c in duong)
     if co_dau_cach or co_ngoai_ascii:
-        loai = ("dau cach va ky tu ngoai ASCII" if co_dau_cach and co_ngoai_ascii
-                else "dau cach" if co_dau_cach else "ky tu ngoai ASCII")
+        loai = "dau cach va ky tu ngoai ASCII" if co_dau_cach and co_ngoai_ascii else "dau cach" if co_dau_cach else "ky tu ngoai ASCII"
         return True, (f"duong dan kho chua {loai} ('{duong}'): "
                       f"6 ca da biet se do (lop B: t35-t40 trong lease_publish_test)")
     return False, ""
@@ -3794,7 +3792,7 @@ def lenh_chuan_bi(a) -> int:
 # `SAP_HET_HAN` KHÔNG có trong đây: nếu không chạy `--kiem-song` thì nó cũng chỉ là
 # `CO_CREDENTIAL` kèm cảnh báo, và hạn lấy từ JWT KHÔNG xác thực chữ ký — lời khai đó
 # đủ để HẠ nhãn (fail-closed), không đủ để NÂNG.
-DA_CHUNG_MINH_KHA_DUNG = frozenset({"DUNG_DUOC", "DA_CHAY"})
+DA_CHUNG_MINH_KHA_DUNG = frozenset({"DUNG_DUOC"})
 
 
 def _ma_doctor(thieu_bat_buoc, chua_xac_thuc, doi_kha_dung: bool,
@@ -3997,7 +3995,9 @@ def lenh_doctor(a) -> int:
             tt, mo_ta = "KHONG_DO_DUOC", f"{type(e).__name__}"
         kha_nang.append({"ten": k["ten"], "trang_thai": tt, "chi_tiet": mo_ta,
                          "vi_sao": k["vi_sao"], "khac_phuc": k.get("khac_phuc", "")})
-        if tt in ("CHUA_XAC_THUC", "CAN_CHUAN_BI"):
+        if k["ten"] == "hook-da-chay" and tt == "DA_CHAY":
+            pass
+        elif tt in ("CHUA_XAC_THUC", "CAN_CHUAN_BI"):
             chua_xac_thuc.append(k["ten"])
         elif tt not in DA_CHUNG_MINH_KHA_DUNG:
             chua_chung_minh.append(k["ten"])

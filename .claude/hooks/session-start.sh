@@ -33,35 +33,36 @@
 # tăng, còn tên thì tự nói nó là gì khi báo động.
 set -euo pipefail
 
-# Chỉ chạy trong môi trường remote. Máy cá nhân đã có sẵn công cụ theo ý người
-# dùng; cài đè vào đó là vượt quyền.
-if [ "${CLAUDE_CODE_REMOTE:-}" != "true" ]; then
-  echo "[session-start] khong phai moi truong remote — bo qua"
-  exit 0
-fi
-
 GOC="${CLAUDE_PROJECT_DIR:-$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)}"
-PATH_GOC="$PATH"   # chup PATH cua PHIEN truoc khi hook tu noi PATH cho rieng no
-cd "$GOC"
-
-# M4 / L4: Cưỡng chế UTF-8 tránh lỗi cp1258/charmap trên Windows
-export PYTHONUTF8=1
-export PYTHONIOENCODING=utf-8
-
-# M4 / A4: Ghim phiên bản actionlint đồng bộ với 4 chỗ trong .github/workflows/ci.yml
-AL_VER="1.7.7"
-
-# --- GHI DAU VET SOM (M3) — PHAI truoc moi duong `exit` cua hook.
 ghi_dau_vet_hook() {
+  local nhan="${1:-chay}"
   for d in "$GOC/.claude/.packet_state" "$GOC/.tl_state"; do
     if mkdir -p "$d" 2>/dev/null; then
-      date -u +"%Y-%m-%dT%H:%M:%SZ" > "$d/session-start.ran" 2>/dev/null || true
+      printf "%s %s\n" "$(date -u +"%Y-%m-%dT%H:%M:%SZ")" "$nhan" > "$d/session-start.ran" 2>/dev/null || true
       return 0
     fi
   done
   return 1
 }
-ghi_dau_vet_hook || echo "[session-start] CANH BAO: khong ghi duoc dau vet hook"
+
+# Chỉ chạy trong môi trường remote. Máy cá nhân đã có sẵn công cụ theo ý người
+# dùng; cài đè vào đó là vượt quyền.
+if [ "${CLAUDE_CODE_REMOTE:-}" != "true" ]; then
+  ghi_dau_vet_hook "cuc_bo" || true
+  echo "[session-start] khong phai moi truong remote — bo qua"
+  exit 0
+fi
+
+ghi_dau_vet_hook "remote" || echo "[session-start] CANH BAO: khong ghi duoc dau vet hook"
+PATH_GOC="$PATH"   # chup PATH cua PHIEN truoc khi hook tu noi PATH cho rieng no
+cd "$GOC"
+
+# M4 / L4: Cưỡng chế UTF-8 tránh lỗi cp1258/charmap trên Windows (source hook de co o shell cha)
+export PYTHONUTF8=1
+export PYTHONIOENCODING=utf-8
+
+# M4 / A4: Ghim phiên bản actionlint đồng bộ với 4 chỗ trong .github/workflows/ci.yml
+AL_VER="1.7.7"
 
 # `command -v` chứ không `which`: có sẵn ở mọi shell POSIX và không phụ thuộc gói ngoài.
 co() { command -v "$1" >/dev/null 2>&1; }
@@ -185,8 +186,7 @@ if ! co_chay actionlint; then
     if env -u PATH PATH="$PATH_GOC" command -v actionlint >/dev/null 2>&1; then
       echo "[session-start] actionlint: $(actionlint --version 2>/dev/null | head -1)"
     else
-      echo "[session-start] CANH BAO: da cai actionlint vao $AL_DICH nhung PHIEN KHONG thay no"
-      echo "[session-start]   (PATH cua phien khong chua $AL_DICH). Them vao PATH roi mo lai phien."
+      echo "[session-start] CANH BAO: da cai actionlint vao $AL_DICH nhung PHIEN KHONG thay no (chua co trong PATH)"
     fi
   else
     echo "[session-start] CANH BAO: KHONG cai duoc actionlint — kiem tra GitHub Actions workflow se gay giua chung"

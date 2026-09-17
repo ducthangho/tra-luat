@@ -1,0 +1,14 @@
+kho    : D:\Quốc hội\tl546
+nhanh  : HEAD
+HEAD   : b61b3ce472f8
+bash   : C:\Program Files\Git\bin\bash.exe
+AL_VER : 1.7.7
+luc    : 2026-09-17T15:33:08.2379637+07:00
+pwsh   : 7.6.6
+os     : Microsoft Windows 10.0.26200
+
+V0 : rc_bash=0  rc_trong=1  N/N=KHONG DO DUOC (bo test chua chay xong)
+V1 : rc_bash=0  rc_trong=1  N/N=lease_publish: 133/148
+V2 : rc_bash=0  rc_trong=1  N/N=KHONG DO DUOC (bo test chua chay xong)
+V3 : rc_bash=1  KHONG CO moc "=== RC =" — tai trong dung truoc khi toi cuoi  N/N=lease_publish: 133/148
+V4 : rc_bash=0  LOP 7 TAI HIEN — hook bo qua o dong 40  |  CO dau vet

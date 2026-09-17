@@ -1,0 +1,15 @@
+kho    : D:\Quốc hội\tl546
+HEAD   : 81f7067c6f16  (nhanh: HEAD)
+bash   : C:\Program Files\Git\bin\bash.exe
+ca     : t155_m3_hook_cuc_bo_ghi_dau_vet_truoc_cong_remote
+luc    : 2026-09-17T19:38:19.1238661+07:00
+pwsh   : 7.6.6
+os     : Microsoft Windows 10.0.26200
+
+N1 : rc=1  169/172 ca DA CHAY QUA (tong 189, bo qua 17, hong 3)
+N2 : rc=0  LAP t155_m3_hook_cuc_bo_ghi_dau_vet_truoc_cong_remote: 1/1 qua, 0 bo qua, 0 hong  =>  DAT
+N3 : rc=0  LAP t155_m3_hook_cuc_bo_ghi_dau_vet_truoc_cong_remote: 0/1 qua, 0 bo qua, 1 hong  =>  DAT — dot bien BI GIET
+N4 : rc=0  LAP t155_m3_hook_cuc_bo_ghi_dau_vet_truoc_cong_remote: 0/1 qua, 0 bo qua, 1 hong  =>  DAT — dot bien BI GIET
+
+DOC THE NAO: N2 phai DAT va CA N3 LAN N4 phai DAT (dot bien bi giet).
+N3 hoac N4 "SONG SOT" => chot khong co rang, LOP 8 chua dong that.

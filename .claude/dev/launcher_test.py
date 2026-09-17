@@ -6000,16 +6000,13 @@ def t152_hook_cai_dat_va_khop_al_ver_ci():
     bang(len(ci_vers) == 4 and all(v == al_ver for v in ci_vers), f"ci.yml 4 cho phai khop {al_ver}: {ci_vers}")
     bang("PYTHONUTF8=1" in hook_txt and "PYTHONIOENCODING=utf-8" in hook_txt, "hook phai export UTF-8")
     bang("cai_actionlint.sh" in hook_txt and "CANH BAO" in hook_txt, "hook phai co cai_actionlint va CANH BAO")
-    # Lop 2 & Lop 8: hook chay con khong doi bien cha; phai ghi dau vet cuc_bo truoc cong remote
+    # Lop 2: Do hanh vi gioi han tien trinh — hook chay nhu con khong doi duoc bien o cha
     bash = (shutil.which("bash") if not LA_WINDOWS else
             ("C:/Program Files/Git/bin/bash.exe" if Path("C:/Program Files/Git/bin/bash.exe").exists() else shutil.which("bash")))
     if bash:
-        with San() as s:
-            p = subprocess.run([bash, "-c", f"unset PYTHONUTF8 CLAUDE_CODE_REMOTE; CLAUDE_PROJECT_DIR='{s.as_posix()}' '{hook_path.as_posix()}' >/dev/null 2>&1 || true; echo -n \"${{PYTHONUTF8:-<chua dat>}}\""],
-                               capture_output=True, text=True)
-            bang(p.stdout == "<chua dat>", f"tien trinh cha phai <chua dat>: {p.stdout}")
-            vet = s / ".claude" / ".packet_state" / "session-start.ran"
-            bang(vet.is_file() and "cuc_bo" in vet.read_text(encoding="utf-8"), "Lop 8: hook cuc bo phai ghi dau vet")
+        p = subprocess.run([bash, "-c", f"unset PYTHONUTF8; '{hook_path.as_posix()}' >/dev/null 2>&1 || true; echo -n \"${{PYTHONUTF8:-<chua dat>}}\""],
+                           capture_output=True, text=True)
+        bang(p.stdout == "<chua dat>", f"tien trinh cha phai <chua dat>: {p.stdout}")
 
 
 @ca
@@ -6049,6 +6046,25 @@ def t154_m3_dau_vet_CU_KHONG_con_la_DA_CHAY():
         vet.unlink()
         tt_c, _ = m._do_hook_da_chay(str(cay), bay_gio=gio)
         bang(tt_c == "CHUA_CHAY", f"khong dau vet phai CHUA_CHAY: {tt_c}")
+
+
+@ca
+def t155_m3_hook_cuc_bo_ghi_dau_vet_truoc_cong_remote():
+    """Lop 8: hook cuc bo (khong co CLAUDE_CODE_REMOTE) phai ghi dau vet cuc_bo truoc khi thoat o cong."""
+    goc = Path(__file__).resolve().parents[2]
+    hook_path = goc / ".claude" / "hooks" / "session-start.sh"
+    bash = (shutil.which("bash") if not LA_WINDOWS else
+            ("C:/Program Files/Git/bin/bash.exe" if Path("C:/Program Files/Git/bin/bash.exe").exists() else shutil.which("bash")))
+    if not bash:
+        return "bo qua vi khong co bash"
+    with San() as s:
+        p = subprocess.run(
+            [bash, "-c", f"unset CLAUDE_CODE_REMOTE; CLAUDE_PROJECT_DIR='{s.as_posix()}' '{hook_path.as_posix()}' >/dev/null 2>&1 || true"],
+            capture_output=True, text=True)
+        vet = s / ".claude" / ".packet_state" / "session-start.ran"
+        bang(vet.is_file(), "Lop 8: hook cuc bo phai ghi dau vet truoc khi thoat")
+        truong = vet.read_text(encoding="utf-8").strip().split()
+        bang(len(truong) >= 2 and truong[1] == "cuc_bo", f"Lop 8: dau vet phai mang nhan cuc_bo, thuc te: {truong}")
 
 
 @ca

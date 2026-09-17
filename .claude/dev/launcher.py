@@ -3678,7 +3678,8 @@ def _do_hook_da_chay(ws: str | None, bay_gio: float | None = None) -> tuple[str,
         if tuoi > _HAN_DAU_VET_HOOK_GIAY:
             gio = int(tuoi // 3600)
             return ("KHONG_DO_DUOC", f"KHÔNG ĐO ĐƯỢC — dau vet {rel.as_posix()} CU {gio}h (> {_HAN_DAU_VET_HOOK_GIAY // 3600}h, ghi luc {noi_dung or '?'}): no chung minh hook TUNG chay, khong chung minh hook chay cho phien nay")
-        nhanh = " [bo qua theo thiet ke tren may cuc bo]" if "cuc_bo" in noi_dung else ""
+        truong = noi_dung.split()
+        nhanh = " [bo qua theo thiet ke tren may cuc bo]" if len(truong) > 1 and truong[1] == "cuc_bo" else ""
         return ("DA_CHAY", f"ĐÃ CHẠY (dấu vết: {rel.as_posix()}" + (f" lúc {noi_dung}{nhanh})" if noi_dung else ")"))
     return ("CHUA_CHAY", "CHƯA CHẠY — hook chua chay lan nao trong cay nay (chua co dau vet)")
 

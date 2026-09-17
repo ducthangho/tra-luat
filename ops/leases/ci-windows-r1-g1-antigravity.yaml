@@ -10,6 +10,12 @@ mission_issue: KHONG_CO
 revision: 1
 generation: 1
 lease_id: ci-windows-r1-g1-antigravity
+da_bi_thay_the: ci-windows-r2-g2-antigravity
+da_bi_thay_the_vi_sao: 'Cross-review luot 4 ra BLOCKED vi khiem khuyet cua chinh dac ta r1
+  (A1 doi giu con bug P1; M5 lam r291 DO ma tep phai sua nam ngoai write set). §3.2: doi
+  acceptance va write set => revision moi, lease nay mat hieu luc. Thay bang gen 2 neo
+  spec_hash f825cf30f11f9f84440d8c2cad795f32931997335cff1fe9d5ac1dd04017c06f.'
+da_bi_thay_the_luc_utc: '2026-09-17T17:00:00Z'
 granted_by: ducthangho
 granted_on_instruction: https://github.com/ducthangho/tra-luat/issues/548#issuecomment-5702832795
 granted_on_instruction_nguyen_van: 'Chu kho, phien dieu phoi 16-09-2026: "Mo packet sua ma tran

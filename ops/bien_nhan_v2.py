@@ -142,11 +142,27 @@ _NEO_LUAT_CHEP_TAY = (
     ("ASSURANCE_CUA_NGUOI", "docs/PROTOCOL_DA_PHIEN.md",
      "`human_audited`: người audit có danh tính bền trên GitHub"),
     ("ASSURANCE_CUA_MO_HINH", "docs/PROTOCOL_DA_PHIEN.md",
-     "`cross_approved`: Claude review Codex hoặc Codex review Claude"),
+     "`cross_approved`: reviewer và executor dùng hai họ model độc lập phục vụ lượt chạy (ví dụ họ Claude review họ Codex hoặc ngược lại)"),
 )
 ASSURANCE_CAM_THEO_PROVIDER = {
     "openai_chatgpt": frozenset({"cross_approved", "same_provider_approved", "human_audited"}),
 }
+# BẢNG CHO PHÉP ánh xạ provider sang họ model mặc định (M5). Biên nhận có thể khai đè
+# bằng trường model có bằng chứng đo lường (`do_may`) hoặc audit (`khai_co_audit`).
+HO_MODEL_MAC_DINH = {
+    "anthropic_claude": "claude",
+    "openai_codex": "gpt",
+    "openai_chatgpt": "gpt",
+    "openai_api": "gpt",
+    "google_antigravity": "gemini",
+    "anthropic": "claude",
+    "claude": "claude",
+    "codex": "gpt",
+    "chatgpt": "gpt",
+    "antigravity": "gemini",
+    "agy": "gemini",
+}
+
 
 # LƯỢC ĐỒ TỪNG BẢNG NGUỒN — tên cột theo thứ tự. `lenh` là bộ tên lệnh (tuple chuỗi), cột
 # khác là chuỗi không rỗng. Cross-review lượt 7 (`R7-01`, P2) đo được trên 68 biên nhận nguyên
@@ -629,6 +645,48 @@ def _bam(p: Path) -> str:
     return hashlib.sha256(p.read_bytes()).hexdigest()
 
 
+def _ho_model_cua_ten(ten: str) -> str:
+    """Chuẩn hoá tên/chuỗi thành họ model chính tắc."""
+    t = (ten or "").lower().strip()
+    if not t:
+        return ""
+    if "claude" in t:
+        return "claude"
+    if "gpt" in t or "o1" in t or "o3" in t or "codex" in t:
+        return "gpt"
+    if "gemini" in t:
+        return "gemini"
+    return t
+
+
+def _giai_ho_model_reviewer(d: dict) -> tuple[str, str]:
+    """Trả về (họ model, mức bằng chứng) của reviewer."""
+    mri = d.get("model_reviewer_identity")
+    if not isinstance(mri, dict):
+        mri = {}
+    bc = _chuoi(mri.get("model_evidence")) or _chuoi(mri.get("bang_chung_model")) or ""
+    khai_ho = _chuoi(mri.get("model_family")) or _chuoi(mri.get("ho_model"))
+    if khai_ho:
+        return _ho_model_cua_ten(khai_ho), bc
+    khai_model = _chuoi(mri.get("canonical_model")) or _chuoi(mri.get("model"))
+    if khai_model:
+        return _ho_model_cua_ten(khai_model), bc
+    prov = _chuan_hoa_provider(_chuoi(mri.get("provider")) or _chuoi(d.get("provider")) or "")
+    return HO_MODEL_MAC_DINH.get(prov, _ho_model_cua_ten(prov)), bc
+
+
+def _giai_ho_model_executor(d: dict) -> str:
+    """Trả về họ model của executor."""
+    khai_ho = _chuoi(d.get("executor_model_family")) or _chuoi(d.get("executor_ho_model"))
+    if khai_ho:
+        return _ho_model_cua_ten(khai_ho)
+    khai_model = _chuoi(d.get("executor_model"))
+    if khai_model:
+        return _ho_model_cua_ten(khai_model)
+    prov = _chuan_hoa_provider(_chuoi(d.get("executor_provider")) or "")
+    return HO_MODEL_MAC_DINH.get(prov, _ho_model_cua_ten(prov))
+
+
 def _thieu(d: dict) -> list[str]:
     """Trả danh sách lý do tệp KHÔNG đạt v2. Rỗng = đạt (theo CẤU TRÚC)."""
     loi = [msg for _, kt in YEU_CAU for msg in [kt(d)] if msg]
@@ -666,6 +724,20 @@ def _thieu(d: dict) -> list[str]:
                 f"khai `{khai}` mà KHÔNG có bằng chứng phiên độc lập ({ly_do}) — mức ấy hàm ý "
                 f"một lượt review có thẩm quyền; dùng `review_deferred`, hoặc khai "
                 f"`phien_doc_lap` kèm căn cứ")
+        if khai == "cross_approved":
+            ho_rev, bc_rev = _giai_ho_model_reviewer(d)
+            ho_exec = _giai_ho_model_executor(d)
+            if ho_rev and ho_exec and ho_rev == ho_exec:
+                loi.append(
+                    f"khai `cross_approved` mà hai bên cùng họ model `{ho_rev}` — `cross_approved` "
+                    f"đòi hai họ model độc lập")
+            if bc_rev == "khai_co_audit":
+                co_audit = bool(_chuoi(mri.get("nguoi_audit")) or _chuoi(mri.get("audit_actor"))
+                                or _chuoi(d.get("nguoi_audit")) or _chuoi(d.get("audit_actor")))
+                if not co_audit:
+                    loi.append(
+                        "khai `cross_approved` với mức bằng chứng `khai_co_audit` mà thiếu "
+                        "người audit xác nhận")
     return loi
 
 

@@ -102,7 +102,7 @@ NEO_LUAT_DONG_BANG = (
     ("ASSURANCE_CUA_NGUOI", "docs/PROTOCOL_DA_PHIEN.md",
      "`human_audited`: người audit có danh tính bền trên GitHub"),
     ("ASSURANCE_CUA_MO_HINH", "docs/PROTOCOL_DA_PHIEN.md",
-     "`cross_approved`: Claude review Codex hoặc Codex review Claude"),
+     "`cross_approved`: reviewer và executor dùng hai họ model độc lập phục vụ lượt chạy (ví dụ họ Claude review họ Codex hoặc ngược lại)"),
 )
 # BA nguồn mà cổng đọc — chép tay để rig không hỏi cổng "anh cần gì" rồi chép đúng thứ cổng nói.
 NGUON_PHU = ("AGENTS.md", "docs/PROTOCOL_DA_PHIEN.md", ".claude/dev/launcher.py")
@@ -112,7 +112,7 @@ NGUON_PHU = ("AGENTS.md", "docs/PROTOCOL_DA_PHIEN.md", ".claude/dev/launcher.py"
 # mà hợp đồng đã khác, và một biên nhận lịch sử nguyên byte bị gương từ chối trong khi gốc nhận.
 HANG_PARITY = ("PROVIDER_CHO_PHEP", "PROVIDER_HOP_DONG", "PROVIDER_BI_DANH", "PROVIDER_NGUON_HONG",
                "ALLOWLIST_CUTOVER", "NO_DA_DO", "ANCHOR_LOAI_CHO_PHEP", "ASSURANCE_CAM_THEO_PROVIDER",
-               "ASSURANCE_CUA_NGUOI", "ASSURANCE_CUA_MO_HINH", "VAN_CHUYEN_NGUOI")
+               "ASSURANCE_CUA_NGUOI", "ASSURANCE_CUA_MO_HINH", "VAN_CHUYEN_NGUOI", "HO_MODEL_MAC_DINH")
 
 
 class TinHieuChotCa(AssertionError):
@@ -2210,6 +2210,42 @@ def c45_neo_canonical_ancestry_KHONG_song_sot_qua_land_bang_SQUASH():
                         "thành câu trả lời 'không phải tổ tiên'")
 
 
+@ca
+def c49_cross_approved_cung_ho_model_phai_bi_tu_choi():
+    """M6 / A4: cross_approved mà hai bên cùng họ model thì cổng PHẢI từ chối."""
+    d = v2_du()
+    d["assurance"] = "cross_approved"
+    d["executor_provider"] = "openai_codex"
+    loi = bnv2._thieu(d)
+    bang(any("cùng họ model" in x for x in loi),
+         f"`cross_approved` cùng họ model (`gpt`) phải BỊ TỪ CHỐI: {loi}")
+
+
+@ca
+def c50_cross_approved_khai_co_audit_thieu_nguoi_audit_phai_bi_tu_choi():
+    """M6 / A5: cross_approved khai_co_audit mà thiếu người audit thì cổng PHẢI từ chối."""
+    d = v2_du()
+    d["assurance"] = "cross_approved"
+    d["executor_provider"] = "anthropic_claude"
+    d["model_reviewer_identity"]["model_evidence"] = "khai_co_audit"
+    loi = bnv2._thieu(d)
+    bang(any("thiếu người audit" in x for x in loi),
+         f"`cross_approved` khai_co_audit thiếu người audit phải BỊ TỪ CHỐI: {loi}")
+
+
+@ca
+def c51_cross_approved_khac_ho_model_co_audit_phai_QUA():
+    """M6: cross_approved khác họ model và có người audit xác nhận thì ĐẠT."""
+    d = v2_du()
+    d["assurance"] = "cross_approved"
+    d["executor_provider"] = "anthropic_claude"
+    d["model_reviewer_identity"]["model_evidence"] = "khai_co_audit"
+    d["model_reviewer_identity"]["nguoi_audit"] = "ducthangho"
+    loi = [x for x in bnv2._thieu(d) if "cross_approved" in x or "họ model" in x or "người audit" in x]
+    bang(loi == [],
+         f"`cross_approved` hợp lệ (khác họ model + có audit) không được dính lỗi họ/audit: {loi}")
+
+
 _mri_that = bnv2._mri
 _thieu_that = bnv2._thieu
 
@@ -2736,6 +2772,19 @@ def _dot_bien():
                              '        if v.get("transport") is not None:'),
        "c34_MOI_truong_attestation_phai_la_CHUOI_khong_chi_truthy",
        "`transport: null` lọt vì bị gộp vào nhánh VẮNG — hành vi đã công bố mà không ai canh",
+       doi_chung="c18_neo_git_DUNG_thi_qua")
+    # M7 / A6 — hai chốt họ model và người audit cho cross_approved
+    do("m62_bo_chot_cung_ho_model",
+       lambda: _dot_bien_tep("            if ho_rev and ho_exec and ho_rev == ho_exec:",
+                             "            if False:"),
+       "c49_cross_approved_cung_ho_model_phai_bi_tu_choi",
+       "gỡ chốt chặn cùng họ model — ca đích phải đỏ",
+       doi_chung="c18_neo_git_DUNG_thi_qua")
+    do("m63_bo_chot_thieu_nguoi_audit",
+       lambda: _dot_bien_tep('            if bc_rev == "khai_co_audit":',
+                             "            if False:"),
+       "c50_cross_approved_khai_co_audit_thieu_nguoi_audit_phai_bi_tu_choi",
+       "gỡ chốt chặn thiếu người audit — ca đích phải đỏ",
        doi_chung="c18_neo_git_DUNG_thi_qua")
 
     # R7-03 — TỰ KIỂM RIG: reviewer bơm mất hàng `_BE_MAT_BI_DANH` vào RIÊNG bản launcher mà rig

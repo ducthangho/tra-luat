@@ -6493,7 +6493,7 @@ def _kiem_tra_nguon_duy_nhat_os_ci(tep_hoac_dict) -> list[str]:
 
 
 def _kiem_tra_outputs_ci_khong_boc_fromjson(wf_path_or_dict):
-    """Outputs của job bắt buộc phải là chuỗi. Bọc fromJson/fromJSON sẽ làm GitHub Actions crash."""
+    """Outputs của job bắt buộc phải là chuỗi. Bọc fromJson/fromJSON hoặc chiếu mảng (.*.) sẽ làm Actions crash."""
     import yaml
     if isinstance(wf_path_or_dict, dict):
         d = wf_path_or_dict
@@ -6503,8 +6503,14 @@ def _kiem_tra_outputs_ci_khong_boc_fromjson(wf_path_or_dict):
     for ten_job, job in (d.get("jobs") or {}).items():
         outputs = (job or {}).get("outputs") or {}
         for k, v in outputs.items():
-            if "fromjson(" in str(v).lower():
+            v_str = str(v).lower()
+            if "fromjson(" in v_str:
                 loi.append(f"job '{ten_job}' output '{k}' bọc fromJson/fromJSON: {v!r} (outputs chỉ nhận chuỗi)")
+            raw_v = str(v).strip()
+            if re.fullmatch(r"\$\{\{\s*[\w.]+\.\*\.[\w.]+\s*\}\}", raw_v):
+                loi.append(f"job '{ten_job}' output '{k}' chiếu mảng qua '.*.': {v!r} (trả sequence làm outputs crash)")
+            if re.fullmatch(r"\$\{\{\s*needs\.\w+\.outputs\s*\}\}", raw_v):
+                loi.append(f"job '{ten_job}' output '{k}' truyền đối tượng outputs: {v!r} (trả object làm outputs crash)")
     return loi
 
 
@@ -6617,6 +6623,16 @@ def t161_M3_chot_nguon_duy_nhat_ma_tran_ci():
     loi_output_dot_bien = _kiem_tra_outputs_ci_khong_boc_fromjson(wf_gia_output_fromjson)
     bang(len(loi_output_dot_bien) == 1 and "chuan-bi" in loi_output_dot_bien[0],
          f"chốt không bắt được output bọc fromJSON: {loi_output_dot_bien}")
+
+    # Đột biến P3-MỚI: nếu có job chiếu mảng labels.*.name trực tiếp vào output => chốt phải bắt được
+    wf_gia_proj = {
+        "jobs": {
+            "chuan-bi": {"outputs": {"os": "${{ github.event.pull_request.labels.*.name }}"}}
+        }
+    }
+    loi_proj = _kiem_tra_outputs_ci_khong_boc_fromjson(wf_gia_proj)
+    bang(len(loi_proj) == 1 and "chuan-bi" in loi_proj[0],
+         f"chốt không bắt được output chiếu mảng .*. trực tiếp: {loi_proj}")
 
 
 @ca

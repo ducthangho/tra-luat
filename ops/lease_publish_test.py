@@ -6558,7 +6558,7 @@ def _danh_gia_bieu_thuc_chuan_bi(expr_str: str, ctx: dict) -> list[str]:
 @ca
 def t161_M3_chot_nguon_duy_nhat_ma_tran_ci():
     """M3 & A2: Quét ci.yml, ĐỎ khi có bất kỳ job nào khai os: riêng ngoài needs.chuan-bi.outputs.os.
-    Đột biến: gỡ chốt nguồn-duy-nhất => ca 'job lén khai os:' phải chuyển sang ĐẠT.
+    Đã kiểm chứng: ca dương trên workflow thật + ca giả hợp lệ, ca âm trên workflow giả lén khai os riêng.
     """
     wf_ci = HERE.parent / ".github" / "workflows" / "ci.yml"
     loi_that = _kiem_tra_nguon_duy_nhat_os_ci(wf_ci)
@@ -6585,18 +6585,13 @@ def t161_M3_chot_nguon_duy_nhat_ma_tran_ci():
     loi_len = _kiem_tra_nguon_duy_nhat_os_ci(wf_gia_len)
     bang(len(loi_len) == 1 and "gate-len" in loi_len[0], f"chốt không bắt được job lén khai os: {loi_len}")
 
-    # Đột biến A2: nếu gỡ chốt (bỏ qua kiểm tra os riêng), ca lén sẽ chuyển sang đạt
-    def chot_bi_go(wf):
-        return []
-    bang(chot_bi_go(wf_gia_len) == [], "đột biến gỡ chốt phải làm ca lén chuyển sang đạt")
-
 
 @ca
 def t162_M4_evaluator_toi_gian_chuan_bi():
     """M4, A3 & A4: Evaluator tối giản fail-close cho biểu thức chuan-bi.
     Bốn ca rõ ràng (push master, PR thường, PR nhãn windows, workflow_dispatch).
-    Đột biến A3: thêm lại github.ref == 'refs/heads/master' => push master phải ĐỎ.
-    Đột biến A4: fail-close gặp biểu thức lạ phải ĐỎ (in KHÔNG ĐO ĐƯỢC); đoán bừa => ĐỎ.
+    Đột biến A3: biểu thức chứa github.ref == 'refs/heads/master' => push master sinh 2 nền thay vì 1.
+    Chốt fail-close A4: gặp biểu thức hình lạ bắt buộc phải in KHÔNG ĐO ĐƯỢC và raise ValueError.
     """
     import yaml
     wf_ci = HERE.parent / ".github" / "workflows" / "ci.yml"
@@ -6638,15 +6633,6 @@ def t162_M4_evaluator_toi_gian_chuan_bi():
         if "KHÔNG ĐO ĐƯỢC" in str(ex):
             la_da_bat = True
     bang(la_da_bat, "evaluator phải fail-close (in KHÔNG ĐO ĐƯỢC và raise) khi gặp hình lạ")
-
-    # Đột biến A4: nếu fail-close đổi thành return ['ubuntu-latest'] thay vì raise => phát hiện được
-    def evaluator_doan_bua(expr, ctx):
-        try:
-            return _danh_gia_bieu_thuc_chuan_bi(expr, ctx)
-        except ValueError:
-            return ["ubuntu-latest"]  # đoán bừa thay vì đỏ
-    ket_doan = evaluator_doan_bua("fromJSON(fromJSON('[\"ubuntu-latest\"]'))", c_push_master)
-    bang(ket_doan == ["ubuntu-latest"], "đột biến đoán bừa phải trả về mảng thay vì lỗi")
 
 
 CO_CHI_CA = "--chi-ca="   # `--chi-ca=t01_` ⇒ chỉ chạy ca có tên bắt đầu bằng tiền tố ấy (M3 packet #504 dùng để sinh lượt con rẻ)

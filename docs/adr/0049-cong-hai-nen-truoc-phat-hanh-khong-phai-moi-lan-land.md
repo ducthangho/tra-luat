@@ -21,6 +21,8 @@ Từ quyết định grilling 2026-07-09 (#8), `ci.yml` chạy cả `ubuntu-late
 ## 3. Phần mất mát & Rủi ro đã nhận
 
 - **Mất soi Windows tự động cho ~22 bước test:** Việc bỏ Windows khỏi mỗi lần land vào `master` đồng nghĩa ~22 bước kiểm thử trong `ci.yml` (như `lease_publish_test`, `ci_dang_ky_test`, `packet-loop selftest`) không còn được chạy tự động trên Windows sau mỗi commit vào master.
+- **Cổng Windows đang đỏ biến mất khỏi CI không phải vì được chữa:** Tại commit `f27a28f` và `a612c70`, lane Windows trên `master` đang đỏ sẵn 15 ca ở `lease-publish selftest` (nợ WP541 do hardcode `/usr/bin:/bin`). Việc bỏ Windows khỏi `master` làm tín hiệu đỏ này biến mất khỏi CI, nhưng ADR-0049 **KHÔNG** chữa nợ WP541 mà chuyển việc bảo đảm sang các cổng tại chỗ trước phát hành. Nợ WP541 vẫn còn nguyên.
+- **Đường nhãn `windows` không tự sinh run khi PR đứng yên:** `ci.yml` dùng trigger `pull_request` mặc định (không khai `types: [labeled]`). Việc gắn nhãn `windows` lên một PR đang đứng yên sẽ không tự kích hoạt build; nhãn chỉ có hiệu lực ở lần push kế tiếp (`synchronize`) hoặc khi tạo PR đã có nhãn. Đây là rủi ro vận hành do người điều phối nhận và chịu trách nhiệm.
 - Đây là **rủi ro đã nhận** (K4), được chấp nhận để đổi lấy việc bảo toàn hạn mức CI và phục hồi tín hiệu đọc được. Nợ có tên `BATTERY-DEPLOY-HEP-HON-LANE-CI` ghi nhận việc mở rộng danh mục kiểm thử của script deploy khi cần thiết.
 
 ## 4. Lời khai trung thực về Windows CI khi land

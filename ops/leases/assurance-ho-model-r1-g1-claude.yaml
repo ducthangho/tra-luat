@@ -16,6 +16,20 @@ generation: 1
 lease_id: assurance-ho-model-r1-g1-claude
 thay_the_cho: []
 
+# BIA MO — dat 2026-09-18T07:4xZ. Lease nay HET HIEU LUC.
+da_bi_thay_the: assurance-ho-model-r2-g2-claude
+da_bi_thay_the_luc_utc: '2026-09-18T07:45:00Z'
+da_bi_thay_the_vi_sao: >-
+  §3.2: doi WRITE SET va ACCEPTANCE => revision moi, lease cu mat hieu luc. Ba can cu, do
+  duoc tren d705623 luc 07:35Z 18-09-2026:
+  D1 — M4 them docs/adr/0050 => docs/**/*.md 74 -> 75 => r291_docs_ngoai_goi DO
+  (tl_selftest.py:21306 dam cung 'len(paths) + 74 == 254'). Chinh lease NAY da mang san khoi
+  canh_bao_r291 noi truoc chuyen ay va CO Y khong cap san hai duong.
+  D2 — tl_selftest.py nam TRONG RELEASE_MANIFEST.json (file_count 180) => keo theo duong thu sau.
+  D3 — A7 cua r1 TU MAU THUAN: luc dong bang nen 48/48 nen '49/49' = 48+1; ADR-0049 da land
+  theo #548 nen nen nay 49/49, va sau khi them ADR-0050 con so dung la 50/50.
+  Chi thi chu kho: 'Cap Revision 2 cho Packet #551 di.'
+
 granted_by: ducthangho
 granted_on_instruction: https://github.com/ducthangho/tra-luat/issues/551#issuecomment-5723022674
 granted_on_instruction_nguyen_van: 'Chu kho, phien dieu phoi 17->18-09-2026: "Cap lease cho #551

@@ -39,7 +39,11 @@ def inn(*p):
         except Exception: print(van.encode("ascii", "backslashreplace").decode("ascii"), flush=True)
 
 SHA_G1   = "2f70869a0537843e9cae78618ee7ae8c261d972d"
-SHA_BASE = "d705623162b75b7340ee7cca54ac2d2abbddbb6f"
+# KHONG ghim base. Spec r3 N6' khai do numstat so d705623 — NHUNG spec CUNG bao executor
+# `git merge origin/master`. Sau merge, phep do so d705623 NUOT ca phan master mang vao:
+# do that 18-09 tren ban va g2 cua agy cho 5 tep / +812, trong khi viec cua agy la 2 tep / +353.
+# Mot chot nhu the se bao "vuot tran" cho mot ban va KHONG vuot. Base dung la MERGE-BASE.
+SHA_BASE_SPEC = "d705623162b75b7340ee7cca54ac2d2abbddbb6f"
 TRAN_TEP, TRAN_DONG = 2, 400          # N7' cua spec r3
 MAU_WIN  = 'if nen_thuc == "windows":'
 CA15  = "t129 t130 t131 t132 t133 t136 t138 t139 t144 t145 t146 t147 t149 t150 t151".split()
@@ -276,9 +280,25 @@ if loi:
 
 # ---------------- 1. kich thuoc (N7' cua spec r3) ----------------
 inn(""); inn("-" * 78); inn("1. KICH THUOC — tran spec r3: <= 2 tep va <= 400 dong them")
-rc, ns, er = git(goc, "diff", "--numstat", SHA_BASE, head)
+rc_mb, mb, er_mb = git(goc, "merge-base", "origin/master", head)
+if rc_mb or not mb:
+    ket("N7' kich thuoc", KDD, f"khong tinh duoc merge-base voi origin/master: {er_mb[:70]}")
+    ns, rc = "", 1
+else:
+    ghi("merge_base", mb)
+    inn(f"  merge-base(origin/master, HEAD) = {mb[:12]}")
+    if mb != SHA_BASE_SPEC:
+        inn(f"  LUU Y: khac base ma spec r3 khai ({SHA_BASE_SPEC[:12]}) — vi nhanh da merge master.")
+        inn(f"         Do so base cu se NUOT phan master mang vao. Dung merge-base moi la viec cua executor.")
+        rc_x, ns_x, _ = git(goc, "diff", "--numstat", SHA_BASE_SPEC, head)
+        if not rc_x:
+            h = [l.split("\t") for l in ns_x.splitlines() if l.strip()]
+            a = sum(int(x[0]) for x in h if x[0].isdigit())
+            ghi("numstat_theo_base_spec", {"tep": len(h), "them": a})
+            inn(f"         (doi chieu: so base spec = {len(h)} tep / +{a} — con so ay KHONG dung de cham)")
+    rc, ns, er = git(goc, "diff", "--numstat", mb, head)
 if rc:
-    ket("N7' kich thuoc", KDD, f"git diff loi: {er[:80]}")
+    pass
 else:
     hang = [l.split("\t") for l in ns.splitlines() if l.strip()]
     them = sum(int(h[0]) for h in hang if h[0].isdigit())

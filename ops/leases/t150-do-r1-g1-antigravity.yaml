@@ -15,14 +15,18 @@ granted_by: ducthangho
 
 # PHAI DIEN TRUOC KHI PUSH — cong KHONG cuong che truong nay, protocol thi co (§3.2).
 # Dat URL comment chi thi cua chu kho tren #552.
-granted_on_instruction: CHUA_CO_URL_CHU_KHO_PHAI_DIEN
+granted_on_instruction: https://github.com/ducthangho/tra-luat/issues/552
+granted_on_instruction_ghi_chu: 'TRO VAO ISSUE, KHONG phai vao mot comment chi thi. Protocol
+  §3.2 doi mot chi thi neo duoc; chu kho CHUA dang comment nao tren #552. Chi thi that nam trong
+  phien dieu phoi (nguyen van o truong duoi). Khai thang cho ro thay vi bia mot URL — cong KHONG
+  cuong che truong nay nen mot URL sai se di qua ma khong ai biet.'
 granted_on_instruction_nguyen_van: 'Chu kho, phien dieu phoi 17-09-2026: "mo packet rieng cho t150"
   · "dong y ca bon, viet spec di" · "soan lenh cap lease cho #552".'
 recorded_by: claude-session
 recorder_is_dispatcher: false
 
-leased_at_utc: '2026-09-17T18:00:00Z'
-lease_expires_at_utc: '2026-09-18T18:00:00Z'
+leased_at_utc: '2026-09-18T15:32:00Z'
+lease_expires_at_utc: '2026-09-19T15:32:00Z'
 
 role: executor
 provider: google_antigravity
@@ -69,12 +73,12 @@ prompt_sha256_required: 08666fe6484377f2c4f13c7393771bec2587ee480727f3c2c4fe7936
 branch: agy/t150-do-r1-g1
 branch_ownership: exclusive
 target_branch_neu_land: master
-base_sha: a612c70cbc56d0e3a8c580f4759eddf215af82fb
-start_from_sha: a612c70cbc56d0e3a8c580f4759eddf215af82fb
-start_from_sha_vi_sao: 'origin/master luc cap. Packet nay KHONG phu thuoc #540 hay #548 — write set
+base_sha: eb15657dae7a5f0e494a1dca50fdd6d8a55ed7d3
+start_from_sha: eb15657dae7a5f0e494a1dca50fdd6d8a55ed7d3
+start_from_sha_vi_sao: 'origin/master luc cap (do lai 18-09, a612c70 da tut 13 commit). Packet nay KHONG phu thuoc #540 hay #548 — write set
   roi han, xem write_set_da_quet_toan_kho.'
-immutable_acceptance_baseline: a612c70cbc56d0e3a8c580f4759eddf215af82fb
-reviewed_sha_required: a612c70cbc56d0e3a8c580f4759eddf215af82fb
+immutable_acceptance_baseline: eb15657dae7a5f0e494a1dca50fdd6d8a55ed7d3
+reviewed_sha_required: eb15657dae7a5f0e494a1dca50fdd6d8a55ed7d3
 reviewed_sha_required_note: 'Mo neo DUOI luc cap — chua co ung vien. Verdict cuoi PHAI neo dung SHA
   ung vien that khi no ton tai, KHONG dung lai con so nay.'
 
@@ -84,16 +88,24 @@ write_set:
 write_set_vi_sao_HAI: 'Ca hai la TEP MOI. Packet DO khong can quyen ghi len thu no dang do, nen no
   KHONG lay ops/lease_publish.py hay ops/lease_publish_test.py — hai duong ay thuoc vung tranh chap
   #541/#548. He qua: #552 chay SONG SONG #541, khong xep hang sau.'
-write_set_da_quet_toan_kho: 'DO 17:22:35Z 17-09-2026, SAU khi sua remote.origin.fetch ve
-  +refs/heads/*:refs/remotes/origin/* (xem canh bao duoi). Chot so hai nguon ref chay TRUOC:
-  ls-remote 422 ten nhanh, for-each-ref 422, comm -23 RONG. ai-dang-giu cho tung duong:
-  ops/do_t150_windows.py rc=0 NGUOI_GIU 0; ops/DO_VI_SAO_T150_...md rc=0 NGUOI_GIU 0.
-  Doi chieu (KHONG trong write set): ops/lease_publish.py rc=0; ops/lease_publish_test.py rc=11
-  NGUOI_GIU 1 = ci-windows-r2-g2-antigravity, han 2026-09-18T17:00:00Z.
-  CANH BAO NEN DO: lan quet dau 17:20Z tra rc=12 KHONG_XAC_DINH cho MOI duong. Nguyen nhan:
-  clone --depth 1 siet remote.origin.fetch thanh mot-nhanh, khien rev-parse "<nhanh>@{upstream}"
-  THAT BAI du refs/remotes/origin/<nhanh> co that va dung SHA; cong doc %(upstream) qua
-  for-each-ref nen thay rong roi fail-close. PHAI kiem refspec TRUOC khi tin bat ky ket qua quet nao.'
+write_set_da_quet_toan_kho: 'DO LAI 18-09-2026 truoc khi day (ban quet 17-09 da cu: kho khi
+  ay 422 nhanh, nay 440). Chot so HAI NGUON chay TRUOC, so bang TAP TEN chu khong bang wc -l:
+  ls-remote 440 / for-each-ref 440, comm -23 RONG.
+  ai-dang-giu tung duong (chay tu ban lease_publish.py cua origin/master, --root vao kho that):
+    ops/do_t150_windows.py                            rc=11 NGUOI_GIU 1 = t150-do-r1-g1-antigravity
+    ops/DO_VI_SAO_T150_DO_TREN_WINDOWS_20260917.md    rc=11 NGUOI_GIU 1 = t150-do-r1-g1-antigravity
+  NGUOI_GIU 1 ay la CHINH BAN NHAP NAY tren refs/heads/claude/nhap-lease-552-20260917 — tu no, khong
+  phai xung dot. KHONG nguoi giu thu ba nao.
+  Doi chieu (KHONG trong write set, de thay hai duong tranh chap that su nam o dau):
+    ops/lease_publish.py       rc=11 NGUOI_GIU 1 = wp541-path-r1-g1-antigravity
+    ops/lease_publish_test.py  rc=11 NGUOI_GIU 2 = ci-windows-r2-g2-antigravity, wp541-path-r1-g1-antigravity
+  HAI LAN FAIL-CLOSE trong lan quet nay, ca hai deu DUNG va deu dang ghi:
+   (1) rc=12 NHANH_CUC_BO_TUT_SAU: master cuc bo tut 5 commit sau origin/master. ai-dang-giu quet
+       refs/heads/* nen mot nhanh cuc bo cu lam phep quet mu. Chua: git branch -f master origin/master.
+   (2) rc=12 KHONG_XAC_DINH: cache thieu nhanh may chu claude/review-541-luot4-20260918 — mot nhanh
+       XUAT HIEN GIUA hai lan quet, cach lan fetch truoc 8 phut. Cong bat duoc; neu no im lang thi
+       lan quet nay da bo sot mot nhanh review dang mang verdict changes_requested cho #541.
+       Day dung bai hoc "for-each-ref doc BO DEM, khong hoi may chu" — va lan nay bo dem sai that.'
 
 khong_duoc_cham:
 - ops/lease_publish.py

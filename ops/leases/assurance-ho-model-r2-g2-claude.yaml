@@ -1,0 +1,240 @@
+# LEASE — ASSURANCE-NEO-VAO-HO-MODEL revision 2 / generation 2
+# Executor claude, reviewer codex (Q5 giu nguyen tu r1).
+# Ghi HO theo chi thi chu kho; phien claude KHONG tu cap lease.
+# THAY THE gen 1: §3.2 — doi WRITE SET (4 -> 6) va ACCEPTANCE (A3/A7 neu lai theo DELTA).
+#
+# CAP TRONG NGOAI LE §5 do chu kho khai, va ngoai le ay nay PHU BON duong (khong phai mot).
+
+schema_version: 2
+event: executor_lease_granted
+packet_issue: 551
+packet_id: ASSURANCE-NEO-VAO-HO-MODEL
+mission_issue: KHONG_CO
+revision: 2
+generation: 2
+lease_id: assurance-ho-model-r2-g2-claude
+thay_the_cho: assurance-ho-model-r1-g1-claude
+thay_the_vi_sao: 'Ba can cu, deu DO DUOC tren d705623 luc 07:35Z 18-09-2026. D1: M4 them
+  docs/adr/0050 => docs/**/*.md 74 -> 75 => r291_docs_ngoai_goi DO (tl_selftest.py:21306 dam cung
+  "len(paths) + 74 == 254", :21309 "len(tren_dia) == 74"). Chinh lease gen 1 da mang san khoi
+  canh_bao_r291 noi truoc chuyen ay va CO Y khong cap san hai duong — nay no xay ra that.
+  D2: tl_selftest.py nam TRONG RELEASE_MANIFEST.json (file_count 180) nen sua no keo theo phai tai
+  sinh manifest => duong thu SAU. D3: A7 cua r1 TU MAU THUAN — luc r1 dong bang nen la 48/48 nen
+  "49/49" = 48 + ADR-0050; ADR-0049 da land theo #548 nen nen nay la 49/49, va sau khi them ADR-0050
+  con so dung phai la 50/50. Doi 49/49 sau khi them mot ADR la doi packet DUNG THEM ADR.'
+
+granted_by: ducthangho
+granted_on_instruction: https://github.com/ducthangho/tra-luat/issues/551#issuecomment-5726836582
+granted_on_instruction_nguyen_van: 'Chu kho, phien dieu phoi 18-09-2026: "Cap Revision 2 cho Packet
+  #551 di. Review lai ban va #541 cua agy di. Co cac PR nao da review xanh, co the merge duoc".
+  Ban chieu day du tai issuecomment-5726836582.'
+recorded_by: claude-session
+recorder_is_dispatcher: false
+
+leased_at_utc: '2026-09-18T07:45:00Z'
+lease_expires_at_utc: '2026-09-19T07:45:00Z'
+
+role: executor
+provider: anthropic_claude
+executor: claude
+model: claude-opus-5
+effort: KHONG_KHAI
+execution_surface: claude_code
+transport: machine/local
+environment: cloud
+operating_system: Linux
+
+risk: sensitive
+review_class: sensitive
+effective_review_class: sensitive
+review_class_vi_sao: '§8 neu DICH DANH "review/land authority". Packet sua CHINH luat assurance (§8)
+  va CHINH cong doc luat ay (ops/bien_nhan_v2.py). Gen 2 con cham scripts/tl_selftest.py (legacy
+  harness dung chung) va RELEASE_MANIFEST.json (duong phat hanh) nen cang khong ha duoc.'
+
+assurance_target: cross_approved
+assurance_target_fallback: human_audited
+assurance_target_vi_sao: 'Q5 giu nguyen: cap claude(executor) <-> codex(reviewer), khac provider VA
+  khac ho model. RUI RO DA BIET (C4 cua spec r2): doctor do 07:18Z 18-09 bao codex SAP_HET_HAN (anh
+  chup CU 207.6h). Codex chan that => assurance TUT ve human_audited voi chu kho la nguoi audit, va
+  dieu do PHAI duoc KHAI, khong lam tron.'
+reviewer_provider: codex
+reviewer_model: KHONG_KHAI
+reviewer_effort: KHONG_KHAI
+cross_reviewer_requirement: 'Reviewer PHAI khac provider VA khac ho model voi executor. Dung agy o
+  packet nay la TU CAP cho minh thu minh dang di xin (agy chay duoc model ho Claude — xem
+  ops/specs/ag-t0-01b-r3.md:47-51).'
+
+spec_path: ops/specs/assurance-neo-vao-ho-model-r2.md
+spec_ref: claude/spec-551-r2-20260918
+spec_hash: 567e68745b6d22aa4e095062f886f90810ff5f004a6b74b6da967d5dcff54192
+spec_bytes: 11936
+prompt_path: ops/specs/assurance-neo-vao-ho-model-r2.md
+prompt_sha256_required: 567e68745b6d22aa4e095062f886f90810ff5f004a6b74b6da967d5dcff54192
+
+branch: claude/assurance-ho-model-r2-g2
+branch_ownership: exclusive
+target_branch_neu_land: master
+base_sha: d705623162b75b7340ee7cca54ac2d2abbddbb6f
+start_from_sha: d705623162b75b7340ee7cca54ac2d2abbddbb6f
+start_from_sha_vi_sao: 'origin/master luc cap. Gen 1 KHONG thi cong dong nao (nhanh lam viec chua
+  ai mo), nen gen 2 bat dau tu dau — khac #548 gen 2, noi cong viec da co san.'
+immutable_acceptance_baseline: d705623162b75b7340ee7cca54ac2d2abbddbb6f
+reviewed_sha_required: d705623162b75b7340ee7cca54ac2d2abbddbb6f
+reviewed_sha_required_note: 'Mo neo DUOI luc cap — nhanh lam viec CHUA TON TAI. Verdict PHAI neo
+  dung SHA ung vien that khi no ton tai; dung lai con so nay la khai sai.'
+
+write_set:
+- docs/PROTOCOL_DA_PHIEN.md
+- ops/bien_nhan_v2.py
+- ops/bien_nhan_v2_test.py
+- docs/adr/0050-assurance-neo-vao-ho-model-khong-phai-hang-cong-cu.md
+- scripts/tl_selftest.py
+- RELEASE_MANIFEST.json
+
+ngoai_le_5_write_set_giao_nhau:
+  ai_cap: ducthangho
+  neo_chi_thi_goc: https://github.com/ducthangho/tra-luat/issues/551#issuecomment-5723022674
+  neo_chi_thi_mo_rong: https://github.com/ducthangho/tra-luat/issues/551#issuecomment-5726836582
+  chi_thi_goc_nguyen_van: 'Anh cho ngoai le §5, cap ngay'
+  MO_RONG_O_GEN_2: 'Ngoai le goc (gen 1) phu DUNG MOT duong: docs/PROTOCOL_DA_PHIEN.md. Gen 2 them
+    hai duong vao write set, va CA HAI cung do ci-windows-r2-g2-antigravity giu => ngoai le nay nay
+    phu BON duong. Cung CAN CU, cung HAN. Khai ra thay vi de no im lang rong ra.'
+  duong_bi_giao:
+  - docs/PROTOCOL_DA_PHIEN.md
+  - scripts/tl_selftest.py
+  - RELEASE_MANIFEST.json
+  nguoi_giu_con_lai: ci-windows-r2-g2-antigravity
+  nguoi_giu_het_han_utc: '2026-09-18T17:00:00Z'
+  do_luc_cap: 'DO 07:39Z 18-09-2026, sau khi fetch du ref (may chu 434 / cache 434, comm -23 RONG),
+    doc rc TRUC TIEP:
+      docs/PROTOCOL_DA_PHIEN.md   rc=11  NGUOI_GIU 2: assurance-ho-model-r1-g1-claude, ci-windows-r2-g2-antigravity
+      ops/bien_nhan_v2.py         rc=11  NGUOI_GIU 1: assurance-ho-model-r1-g1-claude
+      ops/bien_nhan_v2_test.py    rc=11  NGUOI_GIU 1: assurance-ho-model-r1-g1-claude
+      docs/adr/0050-...md         rc=11  NGUOI_GIU 1: assurance-ho-model-r1-g1-claude
+      scripts/tl_selftest.py      rc=11  NGUOI_GIU 1: ci-windows-r2-g2-antigravity
+      RELEASE_MANIFEST.json       rc=11  NGUOI_GIU 1: ci-windows-r2-g2-antigravity
+    Ba duong giua la CHINH gen 1 cua packet nay, nay da khai tu HAI CHIEU.'
+  can_cu: 'Packet #548 DA LAND: merge d705623162b75b7340ee7cca54ac2d2abbddbb6f, CI hau merge run
+    35255237751 = success, bookkeeping TUNG MUC da duyet (bien nhan
+    ops/reviews/ci-windows-review-5-claude-verdict.receipt.yaml, PR #553). Executor cua #548 HET
+    VIEC; nhanh agy/ci-windows-r1-g1 da merge. Cua so hai writer la HINH THUC, khong phai thuc chat.'
+  pham_vi_CHINH_XAC: 'Noi DUNG MOT dieu: §5 chay tuan tu khi write set giao nhau. KHONG noi: tran
+    ADR-0044 (khai rieng duoi), tran dong them 250, same_provider_approved cho sensitive (Q10),
+    manual_ci_budget, khong_duoc_cham.'
+  het_hieu_luc_utc: '2026-09-18T17:00:00Z'
+  KHONG_khai: 'KHONG khai rang cua so hai writer da dong tren SO. ai-dang-giu VAN tra rc=11 cho ba
+    duong ay toi 17:00:00Z. Thu doi la THAM QUYEN, khong phai con so.'
+  no_van_con: 'AG-T0-01B-thu-hoi-lease-chua-co-duong KHONG dong bang ngoai le nay. Day la lan THU BA
+    trong mot ngay phai di vong (#551 gen 1, #541, va nay #551 gen 2) — tin hieu MANH nen mo packet
+    kich hoat so ops/thu-hoi/ (ADR-0047), chu khong phai cap ngoai le lan thu tu.'
+
+ngoai_le_adr_0044:
+  ai_nang: ducthangho
+  tran_goc: '3 tep (class sensitive)'
+  tran_da_duyet_cho_r1: '4 tep'
+  tran_moi: '6 tep'
+  tran_dong_them: '250 — GIU NGUYEN, khong xin noi'
+  can_cu: 'D1 + D2 trong spec r2.'
+  vi_sao_tran_dong_KHONG_can_noi: 'M8 la ke khai slot (hai hang so + mot khoi chu thich ~5-8 dong);
+    M9 la tai sinh manifest va diff cua no chi la MOT bam doi (file_count giu 180 vi khong tep
+    runtime nao duoc them). Vuot 250 khi do that => DUNG va xin, KHONG tu noi.'
+  CON_SO_NAY_CHONG_DO_MOT_CAU_VE_THAM_QUYEN: 'Do lai numstat NGAY TRUOC khi day.'
+
+PHAM_VI_TREN_TL_SELFTEST:
+  duong: scripts/tl_selftest.py
+  duoc_phep: 'CHI ke khai slot cua r291_docs_ngoai_goi: 74 -> 75 va 254 -> 255, theo dung NEP cua
+    khoi chu thich tep ay (neu DICH DANH tep duoc them). KHONG sua ca nao khac.'
+  cam: 'Sua bat ky ca nao khac, hoac doi nguong cua ca khac => DUNG, xin rieng.'
+
+PHAM_VI_TREN_MANIFEST:
+  duong: RELEASE_MANIFEST.json
+  duoc_phep: 'Tai sinh bang `python3 scripts/tl.py release-manifest` SAU khi sua tl_selftest.py.'
+  cam: 'Sua tay. Va diff cua manifest phai CHI chua scripts/tl_selftest.py; file_count phai GIU 180.'
+
+PHAM_VI_TREN_PROTOCOL:
+  duong: docs/PROTOCOL_DA_PHIEN.md
+  duoc_phep: 'M1/M2 (§8 — neo cross_approved vao HO MODEL, ba muc bang chung model) va M3 (dung MOT
+    hang §20 cho ADR-0050).'
+  cam: 'Cham dong nao khac => DUNG, di qua revision moi (§3.2).'
+
+khong_duoc_cham:
+- ops/lease_publish.py
+- ops/lease_publish_test.py
+- ops/specs/assurance-neo-vao-ho-model-r1.md
+- ops/specs/doctrine-scan-dao-sang-danh-sach-cho-phep-r1.md
+- ops/specs/ag-t0-01b-r3.md
+- .github/workflows/ci.yml
+- .claude/dev/launcher.py
+- .claude/dev/packet_loop.py
+- scripts/tl.py
+- docs/adr/0043-cong-doc-lap-cua-nguoi-audit.md
+- docs/adr/0047-so-thu-hoi-lease-tren-trunk.md
+- docs/adr/0049-cong-hai-nen-truoc-phat-hanh-khong-phai-moi-lan-land.md
+khong_duoc_cham_vi_sao: 'ops/lease_publish*.py dang la write set cua #541 (lease
+  wp541-path-r1-g1-antigravity, con han toi 2026-09-19T00:00:00Z) — cham vao la cua so hai writer
+  THAT, khong phai hinh thuc. Ba dac ta la hien vat DA DONG BANG, hai trong so do la nguon cua chinh
+  mau thuan packet nay giai quyet. ci.yml thuoc no CONG-BIEN-NHAN-KHONG-CHAY-TRONG-CI (Q4).'
+
+hinh_dang_ke_thua:
+  TIEU-CHI-THEO-GIA-TRI-TUYET-DOI: 3
+  R291-DAM-SO-CUNG: 3
+  TIEU-CHI-NEU-TRUONG-CHUA-AI-DO: 1
+  DA_CHAM_TRAN: 'HAI hinh dang dau nay o muc BA. Chot "lap lan thu BA => DUNG, hoi CO NEN LAM VIEC
+    NAY KHONG, khong hoi VA THE NAO" DA CHAM TRAN. Spec r2 khai thang dieu do va chon va lan thu ba
+    CO KHAI, kem de xuat mo packet rieng cho no R291-DAM-SO-CUNG. Neu executor gap hinh dang thu tu
+    => DUNG, khong va.'
+
+run_minutes: 180
+heartbeat_required_minutes: 30
+attempts_limit: class-based owner-directed loop; no reset of prior history
+review_calls_limit: until approve or zero P1/P2
+same_failure_limit: 2
+manual_ci_budget: 0
+
+prohibited_actions:
+- self_review
+- self_approve
+- merge
+- land
+- deploy
+- LIVE
+- ruleset mutation
+- admin bypass
+- secret disclosure
+- workflow_dispatch
+- manual full CI
+- Windows CI
+- 'noi write set qua SAU duong (phai DUNG va xin revision)'
+- 'sua bat ky dac ta da dong bang nao trong khong_duoc_cham'
+- 'doc lai / sua verdict da giao cua #546, #538, #540 — luat moi KHONG hoi to (Q3)'
+- 'noi same_provider_approved cho class sensitive (Q10)'
+- 'dao ASSURANCE_CAM_THEO_PROVIDER tu CAM sang CHO PHEP (no rieng)'
+- 'noi ops/bien_nhan_v2.py vao CI lam cong chan (no rieng)'
+- 'sua ca nao khac cua scripts/tl_selftest.py ngoai ke khai slot r291'
+- 'sua tay RELEASE_MANIFEST.json (phai tai sinh bang release-manifest)'
+- 'ma hoa dot bien thanh mot ham cuc bo trong tep test (day la cach tautology ra doi)'
+- 'doc rc qua pipe (`| tail` roi `$?`) — no RC-QUA-PIPE-KHONG-CO-CHOT'
+- 'viet dau bo-qua-CI nguyen van trong thong diep commit, ke ca khi trich dan'
+- 'sua tay .claude/.packet_state*'
+
+dieu_kien_dung:
+- 'Vuot 6 tep hoac 250 dong them => DUNG, xin chu kho khai ngoai le TRUOC khi day.'
+- 'Tieu chi nao trong A3/A7 ma ban neu lai theo DELTA doi Y DINH chu khong chi doi con so => DUNG,
+  xin revision 3.'
+- 'Codex khong chay duoc => DUNG va bao; assurance tut ve human_audited PHAI do chu kho quyet.'
+- 'Phat hien mot bien nhan CU bi luat moi tu choi (A3 lech) => DUNG va bao. Do la C3, chua ai do
+  tung bien nhan; no co the la LUAT MOI sai chu khong phai bien nhan sai.'
+- 'Can cham ops/lease_publish*.py => DUNG TUYET DOI: #541 dang giu that, khong phai hinh thuc.'
+- 'Gap hinh dang loi THU TU cua TIEU-CHI-THEO-GIA-TRI-TUYET-DOI hoac R291-DAM-SO-CUNG => DUNG, hoi
+  "co nen lam viec nay khong". Hai hinh dang ay DA o muc BA.'
+
+xung_dot_loi_ich_da_khai: >-
+  Phien claude nay SOAN ca dac ta r1 lan r2 va GHI HO ca hai lease. Neu chinh phien nay lam executor
+  thi moi phan quyet ve HINH DANG ban va se khong co gia tri doc lap — dung do lech da xay ra o #548
+  (verdict luot 5 phai khai VONG TRON) va o #541 luot 2 (loi khuyen sai cua reviewer thanh khuyet tat
+  cua ban va). Khuyen: giao cho mot phien claude KHAC lam executor. Neu chu kho quyet nguoc lai thi
+  verdict PHAI khai do lech ay ngay dau tep.
+
+closure_status: 'Explicit owner-approved bounded write-set (6 duong); no claim of computed dispatcher
+  closure.'
+orchestration: owner-authorized manual issue/receipt journal; no packet_loop state claim

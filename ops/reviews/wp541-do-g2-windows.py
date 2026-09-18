@@ -46,6 +46,12 @@ SHA_G1   = "2f70869a0537843e9cae78618ee7ae8c261d972d"
 SHA_BASE_SPEC = "d705623162b75b7340ee7cca54ac2d2abbddbb6f"
 TRAN_TEP, TRAN_DONG = 2, 400          # N7' cua spec r3
 MAU_WIN  = 'if nen_thuc == "windows":'
+# Ca ngoai pham vi r3 §ngoai_pham_vi — do CHINH SPEC khai, khong phai bo do tu quyet.
+# Do la DANH SACH CHO PHEP: ca do nao KHONG nam trong day va KHONG phai "thieu cong cu"
+# thi la TRUOT. Danh sach cam thi bao gio cung thieu; danh sach cho phep thi biet truoc.
+NGOAI_PHAM_VI = set("t131 t132 t150 t125 t35 t36 t37 t38 t39 t40".split())
+# Ca cua CHINH packet nay. Mot ca o day ma DO thi khong bao gio duoc bo qua.
+CA_PACKET = set("t165 t166 t167 t168 t169 t170 t171 t172 t173".split())
 CA15  = "t129 t130 t131 t132 t133 t136 t138 t139 t144 t145 t146 t147 t149 t150 t151".split()
 CAMOI = "t165 t166 t167 t168".split()
 
@@ -324,6 +330,30 @@ inn(""); inn(f"  === {len(do_het)} CA DO ===")
 for t in sorted(do_het, key=so_ca):
     inn(f"   {t.split('_')[0]:7} {t}"); inn(f"           {do_het[t][:150]}")
 ghi("do_ly_do", {t: do_het[t][:300] for t in do_het})
+# ---- CHOT: moi ca DO phai GIAI THICH DUOC ----
+# Thieu chot nay, bo do in danh sach do roi van thoat rc=0. Do dung la loi da xay ra:
+# luot Windows 19-09 co t171 DO ma bo do bao "DAT 10 | TRUOT 0" va rc=0.
+def _khoa(t): return t.split("_")[0]
+do_packet, do_la, do_thieu_cong_cu = [], [], []
+for t in sorted(do_het, key=so_ca):
+    k, ly = _khoa(t), do_het[t]
+    if k in CA_PACKET:                              do_packet.append(t)
+    elif "KHÔNG ĐO ĐƯỢC" in ly or "thiếu `" in ly:  do_thieu_cong_cu.append(t)
+    elif k in NGOAI_PHAM_VI:                        pass
+    else:                                           do_la.append(t)
+ghi("do_packet", do_packet); ghi("do_la", do_la); ghi("do_thieu_cong_cu", do_thieu_cong_cu)
+inn("")
+inn(f"  ca DO thuoc CHINH packet nay : {[_khoa(x) for x in do_packet] or 'khong co'}")
+inn(f"  ca DO ngoai pham vi (r3 khai): {[_khoa(x) for x in sorted(do_het, key=so_ca) if _khoa(x) in NGOAI_PHAM_VI]}")
+inn(f"  ca DO vi THIEU CONG CU       : {[_khoa(x) for x in do_thieu_cong_cu] or 'khong co'}")
+inn(f"  ca DO LA (khong giai thich duoc): {[_khoa(x) for x in do_la] or 'khong co'}")
+ket("Khong ca nao cua PACKET bi DO", DAT if not do_packet else TRUOT,
+    "" if not do_packet else f"DO: {[_khoa(x) for x in do_packet]} — ban va CHUA xong")
+ket("Moi ca DO deu giai thich duoc", DAT if not do_la else TRUOT,
+    "" if not do_la else f"la: {[_khoa(x) for x in do_la]}")
+if do_thieu_cong_cu:
+    ket("Cong cu day du de do", KDD, f"thieu cong cu cho {[_khoa(x) for x in do_thieu_cong_cu]}")
+
 bq = sorted({t for t, _ in RX_BO_QUA.findall(out_n)}, key=so_ca); ghi("ca_bo_qua", bq)
 inn(""); inn(f"  BO QUA ({len(bq)}): {[x.split('_')[0] for x in bq]}")
 

@@ -18,7 +18,7 @@ $Url       = 'https://github.com/ducthangho/tra-luat'
 $ShaVa     = '2f70869'                          # HEAD mong cua ban va
 $NhanhRv   = 'claude/review-541-luot3-20260918' # nhanh mang script do
 $DuongPy   = 'ops/reviews/wp541-do-n7-windows.py'
-$BlobMong  = 'f13264075dcb9190057a1b13cd56e27613300082'   # git blob OID cua script
+$BlobMong  = '91d935342210a0f5a8b659a6ad9a9b969a0af4e7'   # git blob OID cua script
 $Log       = Join-Path $Base ('wp541-n7-' + (Get-Date -Format 'yyyyMMdd-HHmmss') + '.log')
 
 function Dung($ly_do) {

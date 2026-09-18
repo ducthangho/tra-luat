@@ -23,6 +23,12 @@ thay_the_vi_sao: 'Ba can cu, deu DO DUOC tren d705623 luc 07:35Z 18-09-2026. D1:
   "49/49" = 48 + ADR-0050; ADR-0049 da land theo #548 nen nen nay la 49/49, va sau khi them ADR-0050
   con so dung phai la 50/50. Doi 49/49 sau khi them mot ADR la doi packet DUNG THEM ADR.'
 
+da_bi_thay_the: assurance-ho-model-r3-g3-antigravity
+da_bi_thay_the_luc_utc: '2026-09-18T10:30:00Z'
+da_bi_thay_the_vi_sao: '§3.2 — doi EXECUTOR (claude -> antigravity) VA reviewer (codex ->
+  claude) theo chi thi chu kho tai issuecomment-5728658540, cong acceptance phai doi vi
+  verdict luot 1 ra changes_requested voi 7 LOP ma A1..A12 cua r2 khong dong duoc cai nao.
+  Ban va f4684e45 KHONG bi bo — gen 3 lay no lam start_from_sha.'
 granted_by: ducthangho
 granted_on_instruction: https://github.com/ducthangho/tra-luat/issues/551#issuecomment-5726836582
 granted_on_instruction_nguyen_van: 'Chu kho, phien dieu phoi 18-09-2026: "Cap Revision 2 cho Packet

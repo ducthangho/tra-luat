@@ -16,7 +16,7 @@ Vi sao co ban 3: ban 2 loc ten ca bang r"(t\\d+)(_\\S*)" nen BO SOT moi ten dang
 Ban 3 bat ten DAY DU `\\S+`, doi chieu HAI nguon doc lap, va con doi chieu voi
 SO HOC tu dong tong ket. Lech => bao KHONG_DO_DUOC cho phan liet ke, khong im lang.
 """
-import json, os, re, shutil, subprocess, sys, tempfile
+import contextlib, io, json, os, re, shutil, subprocess, sys, tempfile
 from pathlib import Path
 
 os.environ.setdefault("PYTHONUTF8", "1")
@@ -284,25 +284,42 @@ sys.path.insert(0, str(goc))
 import importlib.util
 spec = importlib.util.spec_from_file_location("lp541", str(tep))
 lp = importlib.util.module_from_spec(spec); spec.loader.exec_module(lp)
-try:
-    duong = lp._git_exe_toi_thieu()
-    inn("  _git_exe_toi_thieu()         ->", repr(duong))
-    ghi("giai_that", duong); ghi("giai_that_la_exe", bool(duong) and duong.lower().endswith(".exe"))
-except Exception as e:
-    inn("  _git_exe_toi_thieu() NEM     ->", type(e).__name__, str(e)[:150])
-    ghi("giai_that", None); ghi("giai_that_la_exe", False)
 
-with tempfile.TemporaryDirectory() as tmp:
-    shim = Path(tmp)/"shim"; shim.mkdir()
-    for n in ("git.bat","git.cmd","git.py"): (shim/n).write_text("@echo off\r\n", encoding="utf-8")
-    cwdk = Path(tmp)/"cwd"; cwdk.mkdir(); pf = Path(tmp)/"pf"; pf.mkdir()
-    kq = lp._git_windows(path=str(shim), program_files=str(pf), cwd=str(cwdk))
-    inn("  shim-only o PATH ngoai cwd   ->", repr(kq), "(mong None)")
-    ghi("tu_choi_shim", kq is None)
-    (shim/"git.exe").write_text("x", encoding="utf-8")
-    kq2 = lp._git_windows(path=str(shim), program_files=str(pf), cwd=str(cwdk))
-    inn("  DOI CHUNG DUONG: them git.exe->", repr(kq2))
-    ghi("doi_chung_duong", bool(kq2) and kq2.lower().endswith("git.exe"))
+# _git_windows GHI CHAN DOAN THANG RA stderr (lease_publish.py: sys.stderr.write khi
+# %ProgramFiles% khong phan giai). Do la HANH VI DUNG cua ban va, va phep probe duoi
+# day CO Y tao ra dung canh ay, nen dong chan doan chac chan bay ra.
+# Bat no lai va GHI NHAN thanh du lieu, dung de no roi ra stderr cua tien trinh:
+# Windows PowerShell 5.1 voi `2>&1` + $ErrorActionPreference='Stop' bien MOI dong
+# stderr cua tien trinh con thanh loi CHI MANG — mot dong chan doan giet ca luot do.
+# Da xay ra that 18-09-2026 tren may chu kho: bo test chay xong, N7 khong bao gio chay.
+_err = io.StringIO()
+with contextlib.redirect_stderr(_err):
+    try:
+        duong = lp._git_exe_toi_thieu()
+        ghi("giai_that", duong); ghi("giai_that_la_exe", bool(duong) and duong.lower().endswith(".exe"))
+        _nem = None
+    except Exception as e:
+        _nem = f"{type(e).__name__}: {str(e)[:150]}"
+        duong = None; ghi("giai_that", None); ghi("giai_that_la_exe", False)
+
+    with tempfile.TemporaryDirectory() as tmp:
+        shim = Path(tmp)/"shim"; shim.mkdir()
+        for n in ("git.bat","git.cmd","git.py"): (shim/n).write_text("@echo off\r\n", encoding="utf-8")
+        cwdk = Path(tmp)/"cwd"; cwdk.mkdir(); pf = Path(tmp)/"pf"; pf.mkdir()
+        cd1, cd2 = [], []
+        kq  = lp._git_windows(path=str(shim), program_files=str(pf), cwd=str(cwdk), chan_doan=cd1)
+        (shim/"git.exe").write_text("x", encoding="utf-8")
+        kq2 = lp._git_windows(path=str(shim), program_files=str(pf), cwd=str(cwdk), chan_doan=cd2)
+
+if _nem: inn("  _git_exe_toi_thieu() NEM     ->", _nem)
+else:    inn("  _git_exe_toi_thieu()         ->", repr(duong))
+inn("  shim-only o PATH ngoai cwd   ->", repr(kq), "(mong None)")
+ghi("tu_choi_shim", kq is None)
+inn("  DOI CHUNG DUONG: them git.exe->", repr(kq2))
+ghi("doi_chung_duong", bool(kq2) and kq2.lower().endswith("git.exe"))
+ghi("chan_doan_probe", cd1 + cd2)
+ghi("stderr_probe", _err.getvalue().strip().splitlines())
+inn("  chan doan ban va ghi lai     ->", (cd1 + cd2) or "(khong co)")
 
 # ---------- 4. N7 ----------
 inn(""); inn("-" * 78); inn("N7 - dot bien tren BAN SAO TAM (cay that KHONG bi dung toi)")

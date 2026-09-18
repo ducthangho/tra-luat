@@ -58,3 +58,28 @@ Khớp với lần trước: trên Windows của chủ kho sáng `18-09`, `t125`
 doctrine *"đếm HÌNH DẠNG lỗi, đừng chỉ đếm lỗi"* của kho: hai lần là **tín hiệu**, ba lần là bẫy.
 Đề xuất mở packet riêng cho `t125` trước khi nó chặn lần thứ ba — và **không** gộp vào #541, vì
 #541 đã khai `t125` là `ngoai_pham_vi` ở spec r3 và đang sát trần kích thước.
+
+---
+
+## KẾT QUẢ — đo `2026-09-18T16:13Z`
+
+| | |
+|---|---|
+| lượt chạy lại | `attempt 2` → **success** |
+| comment | id `5732802890`, `2026-09-18T16:13:13Z`, `github-actions[bot]` |
+| toàn vẹn | body cục bộ **14785 byte** ↔ body **đã đến** 14785 byte — `diff` **khớp từng byte** |
+
+Băm đo trên **thứ ĐÃ ĐẾN** (đọc ngược về qua API), không dừng ở *"lời gọi trả thành công"*.
+
+**Một lưu ý về chính phép `diff` này, kẻo lần sau đọc sai:** kho đã ghi rằng đường ĐỌC của GitHub
+từng chuẩn hoá thực thể HTML (`'`→`&#39;` …) và biến phép diff thành máy sinh phát hiện giả. Lần
+này **không** có lệch nào — nhưng nếu lần sau thấy lệch kiểu thực thể HTML thì đó là **tạo tác của
+công cụ đọc**, đừng ghi thành finding. Chỉ lệch về KÝ TỰ THẬT mới đáng kể.
+
+**Trạng thái packet sau lượt này:** lease `wp541-path-r2-g2-antigravity` nay **vừa được cấp vừa có
+bản chiếu công bố**. Chỗ trống ở §1 của chỉ thị executor
+(`ops/prompts/wp541-exec-2-antigravity-20260918.md`) **đã đóng** — agy đi tìm comment lease trên
+#541 nay sẽ thấy. Phần còn lại của chỉ thị ấy vẫn đúng nguyên: nguồn có thẩm quyền vẫn là TỆP
+LEASE CÓ BĂM, comment chỉ là bản chiếu.
+
+**Cái KHÔNG đổi:** `t125` vẫn chưa được chẩn đoán, và nợ đề xuất packet riêng cho nó vẫn mở.

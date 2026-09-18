@@ -223,6 +223,17 @@ branch_thuc_te:
   KHONG_phai_revision: '§3.2 liet ke objective / acceptance / write set / dependency / executor /
     environment. Ten nhanh KHONG nam trong do, nen day la DINH CHINH HO SO, khong phai revision moi.'
 
+# ===== THAY THE — them 18-09-2026 =====
+# Dau HAI CHIEU: lease moi khai `thay_the_cho: wp541-path-r1-g1-antigravity`, lease nay khai dong
+# duoi. Cong cuong che ca hai chieu (_kiem_bia_mo, lease_publish.py:606-615) — thieu mot chieu thi
+# lease moi bi BAC. Vi sao can: _phan_loai_lease chi biet HAN, nen mot lease da xong viec van
+# "CON_HAN" va van giu write set; chi `lenh_ai_dang_giu` doc `da_bi_thay_the`. Kho da tra gia mot
+# lan (#355: packet da merge ma lease van giu hai duong them ~18 gio).
+da_bi_thay_the: wp541-path-r2-g2-antigravity
+da_bi_thay_the_vi_sao: 'Spec r3 (3920f23f…) mo rong pham vi => PROTOCOL:300 buoc revision moi,
+  generation moi va CAP LAI lease. g1 het vai tro; quyen ghi chuyen sang g2. Ban va cua g1
+  (2f70869a) KHONG bi vut — g2 tiep tuc tren chinh nhanh fix_issue_541 va PR #554.'
+
 closure_status: 'Owner-directed grant with a KNOWN, DECLARED write-set overlap on
   ops/lease_publish_test.py; no claim of a clean whole-repo scan and no claim of computed dispatcher
   closure. Overlap is held off by DIEU_KIEN_BAT_DAU, which is discipline, not a gate.'

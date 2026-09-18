@@ -64,6 +64,10 @@ WORKFLOW_DANG = HERE.parent / ".github" / "workflows" / "ops-publish-lease.yml"
 
 RC_OK, RC_THAM_SO, RC_TU_CAP, RC_DA_DANG, RC_NOI_DUNG, RC_NEO, RC_LOP = 0, 2, 4, 9, 8, 6, 10
 
+# Dấu phân cách cho fixture N10 (`t171`); `t173` canh chính hằng này. KHÔNG được là ":" —
+# đường tuyệt đối Windows mang dấu hai chấm của Ổ ĐĨA nên `f"{a}:{b}"` bị chính nó cắt nát.
+PHAN_CACH_THU_N10 = "|"
+
 CA: list = []
 
 
@@ -6885,16 +6889,42 @@ def t170_N9_path_boc_nhay_kep_va_khoang_trang():
 
 
 @ca
-def t171_N10_path_posix_dau_cham_phay_trong_ten():
-    """N10 (M5): Dấu ';' trong tên thư mục không làm hỏng tách PATH trên posix."""
+def t171_N10_path_dung_DUNG_dau_phan_cach_duoc_truyen():
+    """N10 (M5): phép tách PATH dùng ĐÚNG dấu được truyền, KHÔNG suy từ NỘI DUNG chuỗi.
+
+    BẢN TRƯỚC ĐỎ TRÊN WINDOWS vì FIXTURE, không vì mã: nó ghép `f"{la}:{d}"` từ đường TUYỆT
+    ĐỐI rồi truyền `phan_cach=":"`. Trên Windows dấu ấy là ký tự Ổ ĐĨA — đo 19-09-2026, tách
+    "C:/x/a:C:/x/b" theo ":" ra ['C','/x/a','C','/x/b'], thư mục chứa `git.exe` KHÔNG nằm
+    trong đó. Cùng họ hằng chỉ-POSIX của `t136`, đổi cửa: hằng ĐƯỜNG DẪN thành hằng DẤU PHÂN
+    CÁCH; `t173` nay canh cả hai. Nay dùng dấu không đụng cú pháp đường dẫn nền nào nên chạy
+    được CẢ HAI nền.
+
+    ĐỘT BIẾN LÀM CA NÀY ĐỎ: `sep = ";" if ";" in path_val else os.pathsep` — suy từ nội dung.
+    """
     lp = _nap_cong()
     with San() as s:
         la, d, cw, pf = s / "co;dau-cham-phay", s / "dung", s / "cwd", s / "pf"
         la.mkdir(); d.mkdir(); cw.mkdir(); pf.mkdir()
         (d / "git.exe").write_text("x")
-        path_posix = f"{la}:{d}"
-        kq = lp._git_windows(path=path_posix, program_files=str(pf), cwd=str(cw), phan_cach=":")
-        chot(kq == str((d / "git.exe").resolve()), f"Không được tách theo ';' khi phan_cach=':': {kq}")
+        mong = str((d / "git.exe").resolve())
+
+        kq = lp._git_windows(path=f"{la}{PHAN_CACH_THU_N10}{d}", program_files=str(pf),
+                             cwd=str(cw), phan_cach=PHAN_CACH_THU_N10)
+        chot(kq == mong,
+             f"phải tách theo {PHAN_CACH_THU_N10!r} đã truyền, không suy từ ';' trong tên: {kq}")
+
+        # ĐỐI CHỨNG DƯƠNG — thiếu nó thì một hàm luôn trả None cũng qua được chiều trên.
+        d2 = s / "khong-dau"; d2.mkdir(); (d2 / "git.exe").write_text("x")
+        kq2 = lp._git_windows(path=str(d2), program_files=str(pf), cwd=str(cw),
+                              phan_cach=PHAN_CACH_THU_N10)
+        chot(kq2 == str((d2 / "git.exe").resolve()), f"đối chứng dương: {kq2}")
+
+        # Vế POSIX: chỉ ở đó ':' là dấu phân cách THẬT và không đụng ký tự ổ đĩa. Trên
+        # Windows vế này KHÔNG dựng được — khai thẳng thay vì để ĐỎ giả.
+        if os.pathsep == ":":
+            kq3 = lp._git_windows(path=f"{la}:{d}", program_files=str(pf), cwd=str(cw),
+                                  phan_cach=":")
+            chot(kq3 == mong, f"posix: không được tách theo ';' khi phan_cach=':': {kq3}")
 
 
 @ca
@@ -6923,12 +6953,26 @@ def t172_N11_chan_doan_chuyen_kenh_stderr_0_byte():
 
 
 @ca
-def t173_N12_sentinel_tuyet_doi_hai_nen():
-    """N12 (M7): Sentinel schema hồ sơ adapter phải tuyệt đối trên cả hai nền POSIX và Windows."""
+def t173_N12_hang_fixture_dung_tren_CA_HAI_nen():
+    """N12 (M7): hằng trong fixture phải đúng CẢ HAI nền — đường dẫn VÀ dấu phân cách.
+
+    Bản trước chỉ canh hằng ĐƯỜNG DẪN; cùng lớp lỗi thoát qua cửa khác (`t171` ghép PATH bằng
+    hằng ":"). Nay đóng theo LỚP, hai cửa. ĐỘT BIẾN: sentinel về "/khong/co/git" (cửa 1) HOẶC
+    `PHAN_CACH_THU_N10` về ":" (cửa 2).
+    """
     from pathlib import PurePosixPath, PureWindowsPath
-    s = "//khong-co/git"
+
+    s = "//khong-co/git"                                    # cửa 1 — hằng ĐƯỜNG DẪN
     chot(PurePosixPath(s).is_absolute() and PureWindowsPath(s).is_absolute(),
          f"Sentinel {s!r} phải tuyệt đối trên cả PurePosixPath và PureWindowsPath")
+
+    chot(PHAN_CACH_THU_N10 != ":",                          # cửa 2 — hằng DẤU PHÂN CÁCH
+         "dấu phân cách fixture KHÔNG được là ':' — đường tuyệt đối Windows mang dấu hai chấm "
+         f"của ổ đĩa nên chuỗi tự cắt nát; đang là {PHAN_CACH_THU_N10!r}")
+    mau = "C:/x/a" + PHAN_CACH_THU_N10 + "C:/x/b"
+    chot(mau.split(PHAN_CACH_THU_N10) == ["C:/x/a", "C:/x/b"],
+         f"ghép/tách bằng {PHAN_CACH_THU_N10!r} phải giữ nguyên đường Windows: "
+         f"{mau.split(PHAN_CACH_THU_N10)}")
 
 
 CO_CHI_CA = "--chi-ca="   # `--chi-ca=t01_` ⇒ chỉ chạy ca có tên bắt đầu bằng tiền tố ấy (M3 packet #504 dùng để sinh lượt con rẻ)

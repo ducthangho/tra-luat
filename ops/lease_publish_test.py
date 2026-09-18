@@ -5009,7 +5009,7 @@ def t136_A2_adapter_nguon_ghim_danh_tinh_profile_duyet_va_khong_doc_config_kho()
         khac = dict(hoso, proxy="http://proxy.noi-bo:3128")
         rc, td = _ma_chan(mod, mod.kham_pha_nguon, ep, hoso=khac, da_duyet=[digest], giao_thuc_cho_phep=("file",))
         chot(rc == 12 and "CHƯA được duyệt" in td, f"hồ sơ khác approved phải 12: {rc} {td}")
-        rc, td = _ma_chan(mod, mod.kham_pha_nguon, ep, hoso=dict(hoso, git_path="/khong/co/git"), da_duyet=[digest], giao_thuc_cho_phep=("file",))
+        rc, td = _ma_chan(mod, mod.kham_pha_nguon, ep, hoso=dict(hoso, git_path="//khong-co/git"), da_duyet=[digest], giao_thuc_cho_phep=("file",))
         chot(rc == 12 and "không khớp executable" in td, f"git_path lệch phải 12: {rc} {td}")
         # F08: cùng fixture t136; mỏ neo digest không thay validator miền key/type.
         # Giá trị vô hại ở khoá ngoài schema; không helper, không rewrite, không endpoint khác.
@@ -6849,6 +6849,86 @@ def t168_N4_posix_khong_hoi_quy_usr_bin_git():
         # Đột biến: đổi nhánh POSIX sang hằng số khác không tồn tại
         rc_mut, out_mut = _ma_chan(lp, lp._git_exe_toi_thieu, nen="posix", path=str(cay / "nonexistent_bin"))
         chot(rc_mut == 12, f"N4: mutant đổi path POSIX sang thư mục khác phải ném Chan 12, nhận: {rc_mut}")
+
+
+@ca
+def t169_N8_cong_cu_git_chi_nhan_git_exe():
+    """N8 (M3): CONG_CU_GIT chỉ nhận git.exe; .bat/.cmd/.py/.txt bị từ chối; có đối chứng dương."""
+    lp = _nap_cong()
+    with San() as s:
+        d, cw, pf = s / "ngoai", s / "cwd", s / "pf"
+        d.mkdir(); cw.mkdir(); pf.mkdir()
+        f_exe = d / "git.exe"; f_exe.write_text("x")
+        kq_duong = lp._git_windows(cong_cu_git=str(f_exe), path="", program_files=str(pf), cwd=str(cw))
+        chot(kq_duong == str(f_exe.resolve()), f"git.exe phải nhận: {kq_duong}")
+        for ten in ("git.bat", "git.cmd", "git.py", "khong-phai-git.txt"):
+            f_bad = d / ten; f_bad.write_text("x")
+            kq = lp._git_windows(cong_cu_git=str(f_bad), path="", program_files=str(pf), cwd=str(cw))
+            chot(kq is None, f"{ten} phải bị từ chối ở bước 1 CONG_CU_GIT: {kq}")
+
+
+@ca
+def t170_N9_path_boc_nhay_kep_va_khoang_trang():
+    """N9 (M4): PATH bọc nháy kép hoặc có khoảng trắng thừa được nhận; mục rỗng bỏ qua."""
+    lp = _nap_cong()
+    with San() as s:
+        d, cw, pf = s / "thu muc co cach", s / "cwd", s / "pf"
+        d.mkdir(); cw.mkdir(); pf.mkdir()
+        (d / "git.exe").write_text("x")
+        kq1 = lp._git_windows(path=str(d), program_files=str(pf), cwd=str(cw))
+        chot(kq1 == str((d / "git.exe").resolve()), f"PATH không nháy phải nhận: {kq1}")
+        kq2 = lp._git_windows(path=f'"{d}"', program_files=str(pf), cwd=str(cw))
+        chot(kq2 == str((d / "git.exe").resolve()), f"PATH có nháy kép phải nhận: {kq2}")
+        path_hon_hop = f'   ;  "{d}"  ;  ;  '
+        kq3 = lp._git_windows(path=path_hon_hop, program_files=str(pf), cwd=str(cw), phan_cach=";")
+        chot(kq3 == str((d / "git.exe").resolve()), f"PATH có khoảng trắng và mục rỗng phải nhận: {kq3}")
+
+
+@ca
+def t171_N10_path_posix_dau_cham_phay_trong_ten():
+    """N10 (M5): Dấu ';' trong tên thư mục không làm hỏng tách PATH trên posix."""
+    lp = _nap_cong()
+    with San() as s:
+        la, d, cw, pf = s / "co;dau-cham-phay", s / "dung", s / "cwd", s / "pf"
+        la.mkdir(); d.mkdir(); cw.mkdir(); pf.mkdir()
+        (d / "git.exe").write_text("x")
+        path_posix = f"{la}:{d}"
+        kq = lp._git_windows(path=path_posix, program_files=str(pf), cwd=str(cw), phan_cach=":")
+        chot(kq == str((d / "git.exe").resolve()), f"Không được tách theo ';' khi phan_cach=':': {kq}")
+
+
+@ca
+def t172_N11_chan_doan_chuyen_kenh_stderr_0_byte():
+    """N11 (M6): Chuyển kênh stderr sang chan_doan (0 byte khi có chan_doan, ghi stderr khi None)."""
+    import io
+    lp = _nap_cong()
+    with San() as s:
+        cw, pf = s / "cwd", s / "pf"
+        cw.mkdir(); pf.mkdir()
+        buf = io.StringIO(); old_err = sys.stderr; ds = []
+        try:
+            sys.stderr = buf
+            kq = lp._git_windows(path="", program_files=str(pf), cwd=str(cw), chan_doan=ds)
+            chot(kq is None and len(buf.getvalue()) == 0, f"stderr phải 0 byte khi có chan_doan: {buf.getvalue()!r}")
+            chot(len(ds) > 0 and "KHÔNG_ĐO_ĐƯỢC" in ds[0], f"ds phải nhận thông báo chẩn đoán: {ds}")
+        finally:
+            sys.stderr = old_err
+        buf2 = io.StringIO()
+        try:
+            sys.stderr = buf2
+            kq = lp._git_windows(path="", program_files=str(pf), cwd=str(cw), chan_doan=None)
+            chot(kq is None and len(buf2.getvalue()) > 0 and "KHÔNG_ĐO_ĐƯỢC" in buf2.getvalue(), "stderr phải có thông báo")
+        finally:
+            sys.stderr = old_err
+
+
+@ca
+def t173_N12_sentinel_tuyet_doi_hai_nen():
+    """N12 (M7): Sentinel schema hồ sơ adapter phải tuyệt đối trên cả hai nền POSIX và Windows."""
+    from pathlib import PurePosixPath, PureWindowsPath
+    s = "//khong-co/git"
+    chot(PurePosixPath(s).is_absolute() and PureWindowsPath(s).is_absolute(),
+         f"Sentinel {s!r} phải tuyệt đối trên cả PurePosixPath và PureWindowsPath")
 
 
 CO_CHI_CA = "--chi-ca="   # `--chi-ca=t01_` ⇒ chỉ chạy ca có tên bắt đầu bằng tiền tố ấy (M3 packet #504 dùng để sinh lượt con rẻ)

@@ -1101,13 +1101,13 @@ def kiem_metadata_retired(duong: str, mode: str, loai: str, noi_dung: bytes, bay
 
 
 def _git_windows(path=None, system_root=None, program_files=None, cwd=None,
-                 cong_cu_git=None, chan_doan=None) -> str | None:
+                 cong_cu_git=None, chan_doan=None, phan_cach=None) -> str | None:
     """Windows: giải executable `git` theo danh sách ứng viên có thứ tự (Q4.1 / M1).
     Thứ tự:
-      1. CONG_CU_GIT — biến môi trường tường minh, nếu có.
+      1. CONG_CU_GIT — biến môi trường tường minh (chỉ nhận git.exe, nếu có).
       2. Thư mục cài Git phân giải từ %ProgramFiles% (và registry nếu đọc được).
       3. git.exe trên PATH thật — đường CHÓT (chỉ chấp nhận git.exe, không qua PATHEXT).
-    Ở MỌI BƯỚC: loại ứng viên nằm trong cwd, loại ứng viên nằm dưới %SystemRoot%.
+    Ở MỌI BƯỚC: chỉ chấp nhận git.exe, loại ứng viên nằm trong cwd, loại ứng viên nằm dưới %SystemRoot%.
     Khi bước 2 (%ProgramFiles%) không phân giải, chẩn đoán ghi KHÔNG_ĐO_ĐƯỢC chứ không
     im lặng rơi xuống bước 3 (N3b).
     Không thấy gì thì trả None để _git_exe_toi_thieu ném Chan(RC_KHONG_XAC_DINH).
@@ -1149,7 +1149,7 @@ def _git_windows(path=None, system_root=None, program_files=None, cwd=None,
 
     # 1. CONG_CU_GIT
     chi_dinh = env.get("CONG_CU_GIT") if cong_cu_git is None else cong_cu_git
-    if chi_dinh and hop_le(chi_dinh):
+    if chi_dinh and Path(chi_dinh).name.lower() == "git.exe" and hop_le(chi_dinh):
         return str(Path(chi_dinh).resolve())
 
     # 2. %ProgramFiles%
@@ -1173,14 +1173,16 @@ def _git_windows(path=None, system_root=None, program_files=None, cwd=None,
     thong_bao_pf = "KHÔNG_ĐO_ĐƯỢC: không thấy git hợp lệ dưới %ProgramFiles%, rơi xuống PATH"
     if chan_doan is not None:
         chan_doan.append(thong_bao_pf)
-    sys.stderr.write(thong_bao_pf + "\n")
+    else:
+        sys.stderr.write(thong_bao_pf + "\n")
 
     # 3. git.exe trên PATH thật — đường CHÓT
     # Tường minh kiểm tra git.exe, không qua shutil.which / PATHEXT để loại trừ hoàn toàn .bat/.cmd/.py
     path_val = env.get("PATH", "") if path is None else path
-    ds_thu_muc = [d for d in path_val.split(";" if ";" in path_val else os.pathsep) if d]
-    for d in ds_thu_muc:
-        if trong_cwd(d) or duoi_system_root(d):
+    sep = os.pathsep if phan_cach is None else phan_cach
+    for d_raw in path_val.split(sep):
+        d = d_raw.strip().strip('"')
+        if not d or trong_cwd(d) or duoi_system_root(d):
             continue
         cand = Path(d) / "git.exe"
         if hop_le(cand):

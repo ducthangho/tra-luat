@@ -7,7 +7,7 @@
 # PACKET DO, KHONG phai packet VA. San pham la BIEN BAN CO SO. Mot ban va lam t125 xanh
 # KHONG phai san pham va se bi tu choi.
 
-trang_thai_ban_ghi: 'BAN NHAP. check da chay; chua day len ops/**.'
+trang_thai_ban_ghi: 'DA CAP. Day len ops/cap-lease-562 theo chi thi chu kho "cap lease #562 di".'
 
 schema_version: 2
 event: executor_lease_granted
@@ -29,8 +29,8 @@ granted_on_instruction_nguyen_van: 'Chu kho, phien dieu phoi 18-09-2026: "mo pac
 recorded_by: claude-session
 recorder_is_dispatcher: false
 
-leased_at_utc: '2026-09-18T16:57:00Z'
-lease_expires_at_utc: '2026-09-20T16:57:00Z'
+leased_at_utc: '2026-09-18T17:06:00Z'
+lease_expires_at_utc: '2026-09-20T17:06:00Z'
 lease_expires_vi_sao_48_GIO: 'Khac cac lease truoc (24 gio) VI PHEP DO NAY DAI. Spec §chua_do_duoc
   muc 2: 5 cau hinh x N=10 x 2 ve = 100 luot con; can duoi THO ~3,2 gio tren ubuntu va ~9,7 gio
   tren Windows. Do moi la PHEP NHAN, chua do. 24 gio la ep executor cat N de kip han — tuc ep no
@@ -80,7 +80,7 @@ spec_bytes: 14213
 prompt_path: ops/specs/wp562-t125-ab-lech-r1.md
 prompt_sha256_required: 02c43ae171738e038391ba4a4e15b8808a3055903ccd4a7985c3597d641c8c34
 spec_base_sha_da_cu: 'Spec r1 khai base_sha eb15657dae7a (do 16:25Z 18-09). origin/master da di
-  sang 45150bb39b0a (merge PR #556) truoc luc soan lease nay. Lease neo start_from_sha vao master
+  sang 2aaf49f402cc (HAI lan troi trong ~40 phut: eb15657 -> 45150bb -> 2aaf49f; kho dang chay nhanh hom nay). Lease neo start_from_sha vao master
   HIEN TAI. Khuyet tat KHONG doi giua hai SHA: #556 chi them ho so review, khong cham
   ops/lease_publish_test.py. Neu chu kho muon spec neo lai base thi di qua r2; lease nay KHONG tu
   sua spec.'
@@ -88,12 +88,12 @@ spec_base_sha_da_cu: 'Spec r1 khai base_sha eb15657dae7a (do 16:25Z 18-09). orig
 branch: agy/t125-do-r1-g1
 branch_ownership: exclusive
 target_branch_neu_land: master
-base_sha: 45150bb39b0abe672be2cd15665b36b78d7405ff
-start_from_sha: 45150bb39b0abe672be2cd15665b36b78d7405ff
+base_sha: 2aaf49f402ccfdaa8d6d608e3a5482ed54dc6e1b
+start_from_sha: 2aaf49f402ccfdaa8d6d608e3a5482ed54dc6e1b
 start_from_sha_vi_sao: 'origin/master luc cap (2026-09-18T16:57:00Z). Packet nay KHONG phu thuoc #541 hay #552 —
   write set roi han, ca hai duong deu la tep MOI.'
-immutable_acceptance_baseline: 45150bb39b0abe672be2cd15665b36b78d7405ff
-reviewed_sha_required: 45150bb39b0abe672be2cd15665b36b78d7405ff
+immutable_acceptance_baseline: 2aaf49f402ccfdaa8d6d608e3a5482ed54dc6e1b
+reviewed_sha_required: 2aaf49f402ccfdaa8d6d608e3a5482ed54dc6e1b
 reviewed_sha_required_note: 'Mo neo DUOI luc cap — chua co ung vien. Verdict cuoi PHAI neo dung SHA
   ung vien that khi no ton tai, KHONG dung lai con so nay.'
 
@@ -190,6 +190,30 @@ dieu_kien_dung:
 - 'Tim thay nguyen nhan => VAN DUNG o day. Packet nay DO, khong VA. Va la packet SAU, spec rieng,
    neo vao so cua bien ban nay.'
 - 'Mot hinh dang loi lap lan thu BA => DUNG, hoi "co nen lam viec nay khong", khong hoi "va the nao".'
+
+MO_NEO_DA_NEO_LAI:
+  do_luc: '2026-09-18T17:06:00Z'
+  vi_sao: 'Ban nhap neo 45150bb luc 16:57Z; den luc cap (2026-09-18T17:06:00Z) master da sang 2aaf49f402cc.
+    Neo lai vao master HIEN TAI thay vi de executor bat dau tu mot base da tut. Da kiem
+    45150bb VAN la to tien cua 2aaf49f (merge-base --is-ancestor rc=0), nen khong co lich su
+    nao bi viet lai — chi la kho dang chay nhanh.'
+  bai_hoc: 'Mo neo trong lease la thu HET HAN NHANH. Quet mot lan roi soan dan trong nua gio la
+    du de no cu. Phai quet LAI ngay truoc lan day, va con so trong lease phai la con so cua lan
+    quet AY — khong phai cua lan quet luc bat dau soan.'
+
+CHONG_LAN_DA_TU_HET:
+  do_luc: '2026-09-18T17:06:00Z'
+  viec_gi: 'Luc soan (16:57Z), ci-windows-r2-g2-antigravity (#548) con CON_HAN va giu
+    ops/lease_publish_test.py. Den luc cap, no da HET_HAN tu nhien (han 17:00:00Z) —
+    NGUOI_GIU tren duong ay tu 2 xuong 1.'
+  vi_sao_ghi: 'Chu kho da chi thi "thu hoi lease cua #548". Phien nay KHONG lam, va day la ly do
+    do duoc: (a) co che duy nhat la da_bi_thay_the, ma no DOI mot lease ke nhiem tro nguoc bang
+    thay_the_cho — #548 DA LAND nen khong co ke nhiem; (b) ep mot bia mo MOT CHIEU thi cong bac,
+    va phep do tren nhanh vut di cho thay ai-dang-giu tra rc=12 KHONG_XAC_DINH cho dung
+    ops/lease_publish_test.py — tuc lam MU dung duong ma executor #541 buoc phai do truoc khi cham.
+    (c) No tu het sau 6 phut. Doi 6 phut re hon mot cong hong.
+    No that su can dong la AG-T0-01B-thu-hoi-lease-chua-co-duong; chu kho da chi thi mo packet
+    rieng cho so ops/thu-hoi/ o mot phien khac.'
 
 closure_status: 'Owner-directed grant on a CLEAN whole-repo scan (both paths rc=0, NGUOI_GIU 0) —
   no overlap declared and none found. Measurement-only packet; no authority files in the write set.

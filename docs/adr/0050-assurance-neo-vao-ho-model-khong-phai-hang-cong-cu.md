@@ -1,6 +1,6 @@
 # ADR-0050 — cross_approved neo vào họ model, không vào hãng công cụ
 
-- **Trạng thái:** Accepted (2026-09-17, chỉ thị chủ kho `ducthangho`, thực thi theo Packet #551)
+- **Trạng thái:** Accepted (2026-09-18, quyết định kiến trúc do Đặc tả r2 đề xuất, chủ kho `ducthangho` phê duyệt tại https://github.com/ducthangho/tra-luat/issues/551#issuecomment-5726836582, thực thi theo Packet #551)
 
 `cross_approved` trong `docs/PROTOCOL_DA_PHIEN.md` §8 được định nghĩa lại: neo vào **HỌ MODEL đã phục vụ lượt chạy**, không neo vào **HÃNG CÔNG CỤ** (`provider`).
 

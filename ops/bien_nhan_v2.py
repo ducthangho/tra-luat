@@ -147,20 +147,12 @@ _NEO_LUAT_CHEP_TAY = (
 ASSURANCE_CAM_THEO_PROVIDER = {
     "openai_chatgpt": frozenset({"cross_approved", "same_provider_approved", "human_audited"}),
 }
-# BẢNG CHO PHÉP ánh xạ provider sang họ model mặc định (M5). Biên nhận có thể khai đè
-# bằng trường model có bằng chứng đo lường (`do_may`) hoặc audit (`khai_co_audit`).
+# Mức bằng chứng model và bảng họ model mặc định cho cross_approved (ADR-0050, PR #551).
+MUC_BANG_CHUNG_MODEL = frozenset({"do_may", "khai_co_audit", "khong_do_duoc"})
+HO_MODEL_CHO_PHEP = frozenset({"claude", "gpt", "gemini"})
 HO_MODEL_MAC_DINH = {
-    "anthropic_claude": "claude",
-    "openai_codex": "gpt",
-    "openai_chatgpt": "gpt",
-    "openai_api": "gpt",
-    "google_antigravity": "gemini",
-    "anthropic": "claude",
-    "claude": "claude",
-    "codex": "gpt",
-    "chatgpt": "gpt",
-    "antigravity": "gemini",
-    "agy": "gemini",
+    "anthropic_claude": "claude", "openai_codex": "gpt", "openai_chatgpt": "gpt",
+    "anthropic": "claude", "claude": "claude", "codex": "gpt", "chatgpt": "gpt",
 }
 
 
@@ -646,45 +638,40 @@ def _bam(p: Path) -> str:
 
 
 def _ho_model_cua_ten(ten: str) -> str:
-    """Chuẩn hoá tên/chuỗi thành họ model chính tắc."""
+    """Chuẩn hoá tên/chuỗi thành họ model chính tắc trong HO_MODEL_CHO_PHEP (P2-1, P3-1)."""
     t = (ten or "").lower().strip()
     if not t:
         return ""
     if "claude" in t:
         return "claude"
-    if "gpt" in t or "o1" in t or "o3" in t or "codex" in t:
+    if ("gpt" in t or "codex" in t or t == "o1" or t.startswith("o1-")
+            or t == "o3" or t.startswith("o3-") or "/o1" in t or "/o3" in t):
         return "gpt"
     if "gemini" in t:
         return "gemini"
-    return t
+    return ""
 
 
 def _giai_ho_model_reviewer(d: dict) -> tuple[str, str]:
     """Trả về (họ model, mức bằng chứng) của reviewer."""
-    mri = d.get("model_reviewer_identity")
-    if not isinstance(mri, dict):
-        mri = {}
+    mri = d.get("model_reviewer_identity") if isinstance(d.get("model_reviewer_identity"), dict) else {}
     bc = _chuoi(mri.get("model_evidence")) or _chuoi(mri.get("bang_chung_model")) or ""
-    khai_ho = _chuoi(mri.get("model_family")) or _chuoi(mri.get("ho_model"))
-    if khai_ho:
-        return _ho_model_cua_ten(khai_ho), bc
-    khai_model = _chuoi(mri.get("canonical_model")) or _chuoi(mri.get("model"))
-    if khai_model:
-        return _ho_model_cua_ten(khai_model), bc
+    khai = (_chuoi(mri.get("model_family")) or _chuoi(mri.get("ho_model"))
+            or _chuoi(mri.get("canonical_model")) or _chuoi(mri.get("model")))
+    if khai:
+        return _ho_model_cua_ten(khai), bc
     prov = _chuan_hoa_provider(_chuoi(mri.get("provider")) or _chuoi(d.get("provider")) or "")
-    return HO_MODEL_MAC_DINH.get(prov, _ho_model_cua_ten(prov)), bc
+    return HO_MODEL_MAC_DINH.get(prov, ""), bc
 
 
 def _giai_ho_model_executor(d: dict) -> str:
     """Trả về họ model của executor."""
-    khai_ho = _chuoi(d.get("executor_model_family")) or _chuoi(d.get("executor_ho_model"))
-    if khai_ho:
-        return _ho_model_cua_ten(khai_ho)
-    khai_model = _chuoi(d.get("executor_model"))
-    if khai_model:
-        return _ho_model_cua_ten(khai_model)
+    khai = (_chuoi(d.get("executor_model_family")) or _chuoi(d.get("executor_ho_model"))
+            or _chuoi(d.get("executor_model")))
+    if khai:
+        return _ho_model_cua_ten(khai)
     prov = _chuan_hoa_provider(_chuoi(d.get("executor_provider")) or "")
-    return HO_MODEL_MAC_DINH.get(prov, _ho_model_cua_ten(prov))
+    return HO_MODEL_MAC_DINH.get(prov, "")
 
 
 def _thieu(d: dict) -> list[str]:
@@ -727,17 +714,39 @@ def _thieu(d: dict) -> list[str]:
         if khai == "cross_approved":
             ho_rev, bc_rev = _giai_ho_model_reviewer(d)
             ho_exec = _giai_ho_model_executor(d)
+            if not ho_rev:
+                loi.append("khai `cross_approved` mà không xác định được họ model của reviewer")
+            if not ho_exec:
+                loi.append("khai `cross_approved` mà không xác định được họ model của executor")
             if ho_rev and ho_exec and ho_rev == ho_exec:
                 loi.append(
                     f"khai `cross_approved` mà hai bên cùng họ model `{ho_rev}` — `cross_approved` "
                     f"đòi hai họ model độc lập")
-            if bc_rev == "khai_co_audit":
+            override_rev = bool(_chuoi(mri.get("model_family")) or _chuoi(mri.get("ho_model"))
+                                or _chuoi(mri.get("canonical_model")) or _chuoi(mri.get("model")))
+            if override_rev and not bc_rev:
+                loi.append("khai đè model cho `cross_approved` mà thiếu mức bằng chứng model (`model_evidence`)")
+            elif bc_rev and bc_rev not in MUC_BANG_CHUNG_MODEL:
+                loi.append(f"mức bằng chứng model `{bc_rev}` ngoài danh sách CHO PHÉP")
+            elif bc_rev == "khong_do_duoc":
+                loi.append("khai `cross_approved` với mức bằng chứng `khong_do_duoc` — "
+                           "không đủ điều kiện cho cross_approved")
+            elif bc_rev == "khai_co_audit":
                 co_audit = bool(_chuoi(mri.get("nguoi_audit")) or _chuoi(mri.get("audit_actor"))
                                 or _chuoi(d.get("nguoi_audit")) or _chuoi(d.get("audit_actor")))
                 if not co_audit:
                     loi.append(
                         "khai `cross_approved` với mức bằng chứng `khai_co_audit` mà thiếu "
                         "người audit xác nhận")
+            elif bc_rev == "do_may":
+                co_ref = bool(_chuoi(mri.get("model_evidence_ref"))
+                              or _chuoi(mri.get("telemetry_path"))
+                              or _chuoi(d.get("model_evidence_ref"))
+                              or _chuoi(d.get("telemetry_path")))
+                if not co_ref:
+                    loi.append(
+                        "khai `cross_approved` với mức bằng chứng `do_may` mà thiếu "
+                        "tham chiếu đo lường (`model_evidence_ref`)")
     return loi
 
 

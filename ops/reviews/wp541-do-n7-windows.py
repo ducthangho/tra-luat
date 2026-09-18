@@ -18,6 +18,16 @@ from pathlib import Path
 # trinh con, roi van boc them mot lop in an toan — hai lop, vi lop mot co the that bai.
 os.environ.setdefault("PYTHONUTF8", "1")
 os.environ.setdefault("PYTHONIOENCODING", "utf-8")
+# Console Windows mac dinh la cp125x: no DIEN byte UTF-8 thanh rac ("a€"" thay vi
+# dau gach dai). Khong giet phep do, nhung lam ban tin hieu. Dat codepage 65001 tu
+# trong script de nguoi chay khong phai nho `chcp`.
+if sys.platform == "win32":
+    try:
+        import ctypes
+        ctypes.windll.kernel32.SetConsoleOutputCP(65001)
+        ctypes.windll.kernel32.SetConsoleCP(65001)
+    except Exception:
+        pass
 for luong in (sys.stdout, sys.stderr):
     try: luong.reconfigure(encoding="utf-8", errors="replace")
     except Exception: pass
@@ -34,7 +44,7 @@ def inn(*phan):
         except Exception:
             print(van.encode("ascii", "backslashreplace").decode("ascii"))
 
-SHA_MONG = "2f708690"
+SHA_MONG = (sys.argv[2] if len(sys.argv) > 2 else "2f708690")   # doi so 2: SHA mong, neu head hop le da doi
 MAU_DOT_BIEN = 'if nen_thuc == "windows":'
 CA_15 = "t129 t130 t131 t132 t133 t136 t138 t139 t144 t145 t146 t147 t149 t150 t151".split()
 CA_MOI = "t165 t166 t167 t168".split()

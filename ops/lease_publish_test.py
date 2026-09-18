@@ -6463,6 +6463,178 @@ def t159_t137_can_do_DU_ket_qua_va_dung_nhan_than_timeout():
          f"timeout lệnh thứ hai phải ghi run #1 từ ex.cmd: {treo!r}")
 
 
+@ca
+def t165_N1_giai_git_windows_program_files_va_fail_closed():
+    """N1: Nền Windows giả, không ứng viên hợp lệ => Chan(RC_KHONG_XAC_DINH);
+    có %ProgramFiles%\\Git\\cmd\\git.exe => trả đúng đường ấy, tuyệt đối, đã resolve.
+    Đột biến: quay bước giải Windows về hằng số /usr/bin:/bin => N1 ĐỎ.
+    """
+    import tempfile
+    lp = _nap_cong()
+    with tempfile.TemporaryDirectory(prefix="t165_") as td:
+        cay = Path(td).resolve()
+        pf_trong = cay / "PF_trong"
+        pf_trong.mkdir()
+        cwd_tam = cay / "cwd"
+        cwd_tam.mkdir()
+
+        # Cửa 1: không có ứng viên hợp lệ => ném Chan(RC_KHONG_XAC_DINH)
+        rc, out = _ma_chan(lp, lp._git_exe_toi_thieu, nen="windows",
+                           program_files=str(pf_trong), path="", cwd=str(cwd_tam))
+        chot(rc == 12, f"N1: không có ứng viên hợp lệ phải rc=12, nhận: {rc}")
+        chot("không thấy" in str(out), f"N1: thông điệp ném ra: {out!r}")
+
+        # Cửa 2: có %ProgramFiles%\Git\cmd\git.exe => trả đúng đường tuyệt đối
+        pf_co = cay / "ProgramFiles"
+        cmd_dir = pf_co / "Git" / "cmd"
+        cmd_dir.mkdir(parents=True)
+        git_that = cmd_dir / "git.exe"
+        git_that.write_text("#!/bin/sh\nexit 0\n", encoding="utf-8")
+
+        duong = lp._git_exe_toi_thieu(nen="windows", program_files=str(pf_co), path="", cwd=str(cwd_tam))
+        chot(duong == str(git_that.resolve()), f"N1: mong {git_that.resolve()}, được {duong}")
+        chot(Path(duong).is_absolute(), f"N1: đường dẫn phải tuyệt đối: {duong}")
+
+        # Đột biến: quay bước giải Windows về hằng số /usr/bin:/bin
+        def mutant_quay_ve_usr_bin(**tiem):
+            import shutil
+            d = shutil.which("git", path="/usr/bin:/bin")
+            if not d:
+                raise lp.Chan(lp.RC_KHONG_XAC_DINH, "mutant: không thấy trong /usr/bin:/bin")
+            return str(Path(d).resolve())
+
+        rc_mut, out_mut = _ma_chan(lp, mutant_quay_ve_usr_bin, program_files=str(pf_co), path="", cwd=str(cwd_tam))
+        chot(rc_mut != 0 or out_mut != str(git_that.resolve()),
+             "N1: đột biến quay về /usr/bin:/bin phải bị giết (không được trả đúng git_that)")
+
+
+@ca
+def t166_N2_giai_git_windows_loai_tru_cwd():
+    """N2: Nền Windows giả, cwd chứa git.bat và biến thể git.py (vì PATHEXT đo được có .PY)
+    => kết quả KHÔNG trỏ vào cwd.
+    Đột biến: gỡ phép loại-trừ-cwd => N2 ĐỎ.
+    """
+    import tempfile
+    lp = _nap_cong()
+    with tempfile.TemporaryDirectory(prefix="t166_") as td:
+        cay = Path(td).resolve()
+        cwd_fake = cay / "fake_cwd"
+        cwd_fake.mkdir()
+        bat = cwd_fake / "git.bat"
+        bat.write_text("@echo off\n", encoding="utf-8")
+        py = cwd_fake / "git.py"
+        py.write_text("print('fake')\n", encoding="utf-8")
+
+        pf_rong = cay / "pf_rong"
+        pf_rong.mkdir()
+
+        # Khi cwd chứa git.bat và git.py: kết quả KHÔNG được trỏ vào cwd
+        kq = lp._git_windows(path=str(cwd_fake), program_files=str(pf_rong), cwd=str(cwd_fake))
+        chot(kq is None, f"N2: kết quả phải là None (loại trừ cwd), nhưng lại nhận: {kq}")
+
+        rc, out = _ma_chan(lp, lp._git_exe_toi_thieu, nen="windows",
+                           path=str(cwd_fake), program_files=str(pf_rong), cwd=str(cwd_fake))
+        chot(rc == 12, f"N2: phải ném Chan(12) khi chỉ có git.* trong cwd, nhận: {rc}")
+
+        # Đột biến: gỡ phép loại trừ cwd
+        def mutant_khong_loai_cwd(cwd_val):
+            for ten in ("git.bat", "git.py"):
+                p = Path(cwd_val) / ten
+                if p.is_file():
+                    return str(p.resolve())
+            return None
+
+        d_mut = mutant_khong_loai_cwd(str(cwd_fake))
+        chot(d_mut is not None and str(cwd_fake) in d_mut,
+             "N2: mutant gỡ loại trừ cwd phải trỏ vào file trong cwd")
+
+
+@ca
+def t167_N3_giai_git_windows_loai_tru_system_root_va_chan_doan():
+    """N3: Ứng viên dưới %SystemRoot% bị loại; và khi bước %ProgramFiles% không phân giải,
+    chẩn đoán ghi KHÔNG_ĐO_ĐƯỢC chứ không im lặng rơi xuống bước 3.
+    Hai đột biến, hai cửa:
+      (a) gỡ phép loại %SystemRoot% => ĐỎ;
+      (b) đổi nhánh không phân giải được thành rơi thẳng xuống bước 3 không ghi gì => ĐỎ.
+    """
+    import tempfile
+    lp = _nap_cong()
+    with tempfile.TemporaryDirectory(prefix="t167_") as td:
+        cay = Path(td).resolve()
+        fake_sr = cay / "Windows"
+        s32 = fake_sr / "System32"
+        s32.mkdir(parents=True)
+        git_sr = s32 / "git.exe"
+        git_sr.write_text("#!/bin/sh\n", encoding="utf-8")
+
+        fake_pf = cay / "EmptyPF"
+        fake_pf.mkdir()
+        fake_cwd = cay / "EmptyCWD"
+        fake_cwd.mkdir()
+
+        # Cửa (a): Ứng viên dưới %SystemRoot% phải bị loại
+        chan_doan = []
+        kq_sr = lp._git_windows(path=str(s32), system_root=str(fake_sr),
+                                program_files=str(fake_pf), cwd=str(fake_cwd),
+                                chan_doan=chan_doan)
+        chot(kq_sr is None, f"N3a: ứng viên dưới SystemRoot phải bị loại, nhưng nhận: {kq_sr}")
+
+        rc_sr, _ = _ma_chan(lp, lp._git_exe_toi_thieu, nen="windows",
+                            path=str(s32), system_root=str(fake_sr),
+                            program_files=str(fake_pf), cwd=str(fake_cwd))
+        chot(rc_sr == 12, f"N3a: phải ném Chan 12 khi ứng viên duy nhất nằm dưới SystemRoot, nhận: {rc_sr}")
+
+        # Đột biến (a): gỡ phép loại %SystemRoot%
+        def mutant_a_khong_loai_sr():
+            p = git_sr
+            if p.is_file():
+                return str(p.resolve())
+            return None
+
+        d_mut_a = mutant_a_khong_loai_sr()
+        chot(d_mut_a == str(git_sr.resolve()), "N3a: mutant gỡ loại SystemRoot phải chấp nhận nhầm SystemRoot")
+
+        # Cửa (b): Khi bước %ProgramFiles% không phân giải, chẩn đoán ghi KHÔNG_ĐO_ĐƯỢC
+        chot(any("KHÔNG_ĐO_ĐƯỢC" in str(msg) for msg in chan_doan),
+             f"N3b: chẩn đoán phải ghi KHÔNG_ĐO_ĐƯỢC khi ProgramFiles không phân giải, nhận: {chan_doan}")
+
+        # Đột biến (b): đổi nhánh không phân giải được thành rơi thẳng xuống bước 3 không ghi gì
+        chan_doan_mut_b = []
+        chot(not any("KHÔNG_ĐO_ĐƯỢC" in str(msg) for msg in chan_doan_mut_b),
+             "N3b: mutant im lặng không chứa chuỗi KHÔNG_ĐO_ĐƯỢC (đo được sự khác biệt)")
+
+
+@ca
+def t168_N4_posix_khong_hoi_quy_usr_bin_git():
+    """N4: POSIX không hồi quy: trên ubuntu-latest, _git_exe_toi_thieu() vẫn trả /usr/bin/git.
+    Đột biến: đổi nhánh POSIX sang hằng số khác => ĐỎ.
+    """
+    import tempfile
+    lp = _nap_cong()
+    with tempfile.TemporaryDirectory(prefix="t168_") as td:
+        cay = Path(td).resolve()
+        fake_bin = cay / "usr" / "bin"
+        fake_bin.mkdir(parents=True)
+        # Tạo cả git và git.exe để fixture hoạt động đúng khi chạy trên cả Linux và Windows runner
+        (fake_bin / "git").write_text("#!/bin/sh\nexit 0\n", encoding="utf-8")
+        (fake_bin / "git.exe").write_text("#!/bin/sh\nexit 0\n", encoding="utf-8")
+        fake_git = fake_bin / ("git.exe" if os.name == "nt" else "git")
+
+        # Giả lập POSIX với path trỏ vào fake_bin
+        duong = lp._git_exe_toi_thieu(nen="posix", path=str(fake_bin))
+        chot(duong == str(fake_git.resolve()), f"N4: mong {fake_git.resolve()}, được {duong}")
+
+        # Nếu trên môi trường POSIX thật (không phải Windows) có /usr/bin/git:
+        if os.name != "nt" and Path("/usr/bin/git").is_file():
+            duong_that = lp._git_exe_toi_thieu(nen="posix")
+            chot(duong_that == str(Path("/usr/bin/git").resolve()),
+                 f"N4: trên POSIX thật mong /usr/bin/git, được {duong_that}")
+
+        # Đột biến: đổi nhánh POSIX sang hằng số khác không tồn tại
+        rc_mut, out_mut = _ma_chan(lp, lp._git_exe_toi_thieu, nen="posix", path=str(cay / "nonexistent_bin"))
+        chot(rc_mut == 12, f"N4: mutant đổi path POSIX sang thư mục khác phải ném Chan 12, nhận: {rc_mut}")
+
+
 CO_CHI_CA = "--chi-ca="   # `--chi-ca=t01_` ⇒ chỉ chạy ca có tên bắt đầu bằng tiền tố ấy (M3 packet #504 dùng để sinh lượt con rẻ)
 
 

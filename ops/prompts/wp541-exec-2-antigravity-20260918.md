@@ -42,8 +42,8 @@ Nếu preflight của bạn đi tìm một comment công bố lease trên Issue 
   vi cấp là lần `git push` lên `ops/**`**, comment chỉ là **bản chiếu**.
 - Workflow `ops — đăng lease bằng git` chạy lượt `35365260980` và **ĐỎ ở bước `tự kiểm cổng
   trước khi tin nó`**, nên bước `đăng` bị `skipped`. Fail-close đúng thiết kế.
-- Nguyên nhân đỏ là **`t125`**, một ca **chập chờn** — không phải lease sai, không phải mã bạn sẽ
-  sửa. Chi tiết ở §7.
+- Ca làm đỏ là **`t125`**, và trạng thái đúng của nó là **`LỆCH_CHƯA_RÕ_NGUYÊN_NHÂN`** — không phải
+  lease sai, không phải mã bạn sẽ sửa, và **cũng không phải "flake"**. Chi tiết ở §7.
 
 **Nguồn có thẩm quyền là TỆP LEASE CÓ BĂM trong kho**, không phải comment. Lease thật:
 
@@ -198,23 +198,37 @@ tự mở. Đừng xin lại, cũng đừng tự nâng tiếp.
 ## 7. `t125` — ĐỌC TRƯỚC KHI HOẢNG
 
 `t125_AB_toan_suite_KHONG_doi_verdict_theo_ambient_actor` chạy **toàn bộ suite hai lượt** (có/không
-`GITHUB_ACTOR`) rồi so. Nó **chập chờn** và đã chặn hai phép đo khác nhau trong một ngày:
+`GITHUB_ACTOR`) rồi so **TẬP TÊN** ca đỏ. Khi hai vế lệch, nó trả `LỆCH_CHƯA_RÕ_NGUYÊN_NHÂN` và
+chặn cổng. Nó đã chặn **ba** lần đo được, không phải hai:
 
-- Windows của chủ kho, 18-09: ĐỎ, ca lệch `t156`.
-- CI lượt đăng lease g2, `15:54Z`: ĐỎ, ca lệch `t139` — `S8-bo-deadline: kỳ vọng GIET, thực SONG
-  (seam: KhoObject._con_thoi_gian)`, tức một đột biến **hạn chót**, phụ thuộc thời gian/tải.
+- **CI `e6feddb` (12-09)** — đã ghi sẵn trong docstring của `_phan_loai_lech_ab`: ĐỎ, ca lệch
+  `t139`, cùng mutant `S8-bo-deadline`. Tức chuyện này **không mới**.
+- **Windows của chủ kho, 18-09**: ĐỎ, ca lệch `t156_han_NGOAI_khong_nho_hon_tong_han_TRONG…`.
+- **CI lượt đăng lease g2, 18-09 `15:54Z`**: ĐỎ, ca lệch `t139` — `S8-bo-deadline: kỳ vọng GIET,
+  thực SONG (seam: KhoObject._con_thoi_gian)`.
+
+**Cả ba ca lệch đều thuộc họ HẠN CHÓT** (`t156` đo quan hệ giữa hạn ngoài và tổng hạn trong;
+`S8-bo-deadline` đột biến đúng chốt `if con <= 0`, seam `_con_thoi_gian`). Đó là một **hình dạng
+đo được**, KHÔNG phải một nguyên nhân đã chứng minh.
 
 Phép đo tách nguyên nhân: lượt `ops/cap-lease-541-g2` (`15:54:30Z`) **ĐỎ** còn lượt
 `ops/cap-lease-541` (`15:55:04Z`) **XANH** — cách nhau **34 giây**, `lease_publish.py` và
 `lease_publish_test.py` **giống từng byte** trên hai nhánh (blob `8a58066385` và `06701deb6e`).
 
-**Ba điều cho bạn:**
+**Bốn điều cho bạn:**
 
 1. `t125` **NGOÀI PHẠM VI** r3. Đừng sửa nó. Đừng "ổn định hoá" nó. Đừng nới nó.
-2. Thấy `t125` đỏ ⇒ **KHÔNG** đọc thành hồi quy của mình. Đo lại; nếu `t139`/`t156` chỉ đỏ ở một
-   trong hai nhánh A/B thì đó là chập chờn.
-3. Nhưng **đừng dùng "chắc là flake" làm lá chắn.** Nếu một ca đỏ **lặp lại ổn định** qua nhiều
-   lượt, hoặc đỏ với lý do khác hẳn hai lý do trên, thì đó là chuyện khác — báo lại kèm log.
+2. Thấy `t125` đỏ ⇒ **KHÔNG** đọc thành hồi quy của mình — miễn là bạn chứng minh được bằng phép
+   đo, không bằng cảm giác: `git diff` của bạn có chạm `lease_publish.py` hay `lease_publish_test.py`
+   theo cách ảnh hưởng ca lệch không? Không chạm ⇒ không phải bạn. **Nhưng dừng ở đó**, đừng đi tiếp
+   một bước nữa để kết luận nó là gì.
+3. **Đừng gọi nó là "flake" — kể cả khi nó trông y hệt.** Đây không phải lời khuyên phong cách: mã
+   của chính ca ấy (`_phan_loai_lech_ab`) ra lệnh như vậy, nguyên văn *"t125 phải ĐỎ ngay, không
+   chạy thêm chẩn đoán thiếu ngân sách tổng, thu hồi cây hoặc tee rồi **gọi nó là chập chờn**"*, và
+   *"một lần đo lại khớp, **kể cả tuần tự**, cũng không loại trừ rò actor phụ thuộc thứ tự ca hoặc
+   tải"*. Trạng thái đúng là `LỆCH_CHƯA_RÕ_NGUYÊN_NHÂN`. Chủ kho đã cho mở packet riêng để ĐO nó.
+4. Nếu bạn thấy `t125` đỏ, **báo lại kèm log `[A]`/`[B]` nguyên văn** và đi tiếp phần việc không
+   phụ thuộc nó. Đừng tự chạy lại để lấy màu xanh, đừng nới hạn.
 
 ---
 
@@ -287,6 +301,16 @@ chép sẵn.
 **Phạm vi thiệt hại: không có.** Con số ấy nằm trong một câu GIẢI THÍCH vì sao phải `merge` thay vì
 `rebase`; lý lẽ ấy là `2f70869a` là `reviewed_sha` của bốn lượt review, và nó đúng dù 5 hay 13.
 Không tiêu chí nghiệm thu nào, không chỉ thị nào đổi theo con số này.
+
+### Đính chính thứ hai — chữ "chập chờn" trong spec r3 `:287` và trong bản đầu của chỉ thị này
+
+Spec r3 `chua_do_duoc` mục 2 viết *"`t125` chập chờn"*. **Nhãn ấy sai**, dù câu sau nó (*"chưa ai
+biết nguyên nhân"*) thì đúng. Mã của chính ca ấy cấm nhãn đó — xem §7. Trạng thái đúng là
+`LỆCH_CHƯA_RÕ_NGUYÊN_NHÂN`.
+
+Bản đầu của chỉ thị này (`d9ec2012…`) chép lại nhãn sai ấy ở ba chỗ và còn dạy bạn cách đọc một
+lệch A/B thành "chập chờn". **Đã sửa trong bản bạn đang đọc.** Ghi ra đây thay vì sửa lặng lẽ, vì
+nếu bạn đã đọc bản cũ thì phải biết chỗ nào đã đổi.
 
 **Spec r3 và lease g2 CHƯA sửa, có chủ đích.** Sửa spec làm đổi `spec_hash`, kéo theo phải cấp lại
 lease — cái giá ấy lớn hơn một con số mô tả. Chủ kho quyết có cần r4 hay không. Tới lúc đó, **tệp

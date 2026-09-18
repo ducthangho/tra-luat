@@ -90,9 +90,12 @@ start_from_sha_vi_sao: 'Ban va r2/g2 DA THI CONG M1-M9 va da qua ca 7 cong tai c
   agy bat dau tu no, VIEC DAU TIEN la merge origin/master (eb15657) vao nhanh — f4684e45 khong con la
   hau due cua master nen thu-hoi se CHAN [12]. Merge, KHONG rebase, KHONG force-push.'
 immutable_acceptance_baseline: eb15657dae7a5f0e494a1dca50fdd6d8a55ed7d3
-reviewed_sha_required: KHONG_DO_DUOC_LUC_CAP
-reviewed_sha_required_note: 'Mo neo DUOI luc cap — head ung vien chua ton tai. Verdict PHAI neo dung
-  SHA ung vien that khi no ton tai.'
+reviewed_sha_required: f4684e45d77bf7c4aa9144b92b8043bb1774de68
+reviewed_sha_required_note: 'Mo neo SAN luc cap — day la start_from_sha (ban va r2/g2 da co), KHONG
+  phai head ung vien cuoi. Head that se moi hon vi agy con phai merge origin/master roi va 7 LOP.
+  Verdict PHAI neo dung SHA ung vien THAT khi no ton tai; dung lai con so nay la khai sai. Cong
+  lease_publish check doi sha40 hex nen truong nay khong nhan duoc chuoi KHONG_DO_DUOC — do la han
+  che cua LUOC DO, khong phai mot loi khai rang head da co.'
 
 write_set:
 - docs/PROTOCOL_DA_PHIEN.md

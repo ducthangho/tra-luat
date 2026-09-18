@@ -2223,18 +2223,14 @@ def c49_cross_approved_cung_ho_model_phai_bi_tu_choi():
 
 @ca
 def c50_cross_approved_khai_co_audit_thieu_nguoi_audit_phai_bi_tu_choi():
-    d = v2_du(); d["assurance"] = "cross_approved"; d["executor_provider"] = "anthropic_claude"
-    d["model_reviewer_identity"]["model_evidence"] = "khai_co_audit"
+    d = v2_du(); d["assurance"] = "cross_approved"; d["executor_provider"] = "anthropic_claude"; d["model_reviewer_identity"]["model_evidence"] = "khai_co_audit"
     bang(any("thiếu người audit" in x for x in bnv2._thieu(d)), "thiếu audit phải bị từ chối")
 
 
 @ca
 def c51_cross_approved_khac_ho_model_co_audit_phai_QUA():
-    d = v2_du(); d["assurance"] = "cross_approved"; d["executor_provider"] = "anthropic_claude"
-    d["model_reviewer_identity"]["model_evidence"] = "khai_co_audit"
-    d["model_reviewer_identity"]["nguoi_audit"] = "ducthangho"
-    loi = [x for x in bnv2._thieu(d) if "cross_approved" in x or "họ model" in x or "người audit" in x]
-    bang(loi == [], f"cross_approved hợp lệ dính lỗi: {loi}")
+    d = v2_du(); d["assurance"] = "cross_approved"; d["executor_provider"] = "anthropic_claude"; d["model_reviewer_identity"]["model_evidence"] = "khai_co_audit"; d["model_reviewer_identity"]["nguoi_audit"] = "ducthangho"
+    bang([x for x in bnv2._thieu(d) if "cross_approved" in x or "họ model" in x or "người audit" in x] == [], "cross_approved hợp lệ dính lỗi")
 
 
 @ca
@@ -2257,32 +2253,50 @@ def c54_cross_approved_model_la_phai_bi_tu_choi():
 
 @ca
 def c55_cross_approved_muc_bang_chung_la_phai_bi_tu_choi():
-    d = v2_du(); d["assurance"] = "cross_approved"; d["executor_provider"] = "anthropic_claude"
-    d["model_reviewer_identity"]["model_evidence"] = "xin_the"
+    d = v2_du(); d["assurance"] = "cross_approved"; d["executor_provider"] = "anthropic_claude"; d["model_reviewer_identity"]["model_evidence"] = "xin_the"
     bang(any("ngoài danh sách CHO PHÉP" in x for x in bnv2._thieu(d)), "mức lạ phải bị từ chối")
 
 
 @ca
 def c56_cross_approved_khong_do_duoc_phai_bi_tu_choi():
-    d = v2_du(); d["assurance"] = "cross_approved"; d["executor_provider"] = "anthropic_claude"
-    d["model_reviewer_identity"]["model_evidence"] = "khong_do_duoc"
+    d = v2_du(); d["assurance"] = "cross_approved"; d["executor_provider"] = "anthropic_claude"; d["model_reviewer_identity"]["model_evidence"] = "khong_do_duoc"
     bang(any("không đủ điều kiện cho cross_approved" in x for x in bnv2._thieu(d)), "khong_do_duoc phải bị từ chối")
 
 
 @ca
 def c57_cross_approved_do_may_thieu_ref_phai_bi_tu_choi():
-    d = v2_du(); d["assurance"] = "cross_approved"; d["executor_provider"] = "anthropic_claude"
-    d["model_reviewer_identity"]["model_evidence"] = "do_may"
+    d = v2_du(); d["assurance"] = "cross_approved"; d["executor_provider"] = "anthropic_claude"; d["model_reviewer_identity"]["model_evidence"] = "do_may"
     bang(any("thiếu tham chiếu đo lường" in x for x in bnv2._thieu(d)), "do_may thiếu ref phải bị từ chối")
 
 
 @ca
 def c58_cross_approved_do_may_co_ref_phai_QUA():
-    d = v2_du(); d["assurance"] = "cross_approved"; d["executor_provider"] = "anthropic_claude"
-    d["model_reviewer_identity"]["model_evidence"] = "do_may"
-    d["model_reviewer_identity"]["model_evidence_ref"] = "runs/a1b2/telemetry.json"
-    loi = [x for x in bnv2._thieu(d) if "cross_approved" in x or "họ model" in x or "đo lường" in x]
-    bang(loi == [], f"do_may có ref dính lỗi: {loi}")
+    d = v2_du(); d["assurance"] = "cross_approved"; d["executor_provider"] = "anthropic_claude"; d["model_reviewer_identity"]["model_evidence"] = "do_may"; d["model_reviewer_identity"]["model_evidence_ref"] = "runs/a1b2/telemetry.json"
+    bang([x for x in bnv2._thieu(d) if "cross_approved" in x or "họ model" in x or "đo lường" in x] == [], "do_may có ref dính lỗi")
+
+
+@ca
+def c59_cross_approved_executor_khai_de_thieu_evidence_phai_bi_tu_choi():
+    d = v2_du(); d["assurance"] = "cross_approved"; d["executor_provider"] = "google_antigravity"; d["executor_model"] = "gemini-2.5-pro"
+    bang(any("khai đè model executor cho `cross_approved` mà thiếu mức bằng chứng" in x for x in bnv2._thieu(d)), "executor khai đè thiếu evidence phải bị từ chối")
+
+
+@ca
+def c60_cross_approved_executor_do_may_co_ref_phai_QUA():
+    d = v2_du(); d["assurance"] = "cross_approved"; d["executor_provider"] = "google_antigravity"; d["executor_model"] = "gemini-2.5-pro"; d["executor_model_evidence"] = "do_may"; d["executor_model_evidence_ref"] = "runs/c3d4/telemetry.json"
+    bang([x for x in bnv2._thieu(d) if "cross_approved" in x or "họ model" in x or "đo lường" in x or "bằng chứng" in x] == [], "executor do_may có ref dính lỗi")
+
+
+@ca
+def c61_ho_model_cho_phep_phai_quyet_dinh_nhan_dien():
+    bang(bnv2._ho_model_cua_ten("gemini-2.5-pro") == "gemini", "gemini phải nhận diện được")
+    goc = bnv2.HO_MODEL_CHO_PHEP
+    try:
+        bnv2.HO_MODEL_CHO_PHEP = frozenset({"claude", "gpt"})
+        bang(bnv2._ho_model_cua_ten("gemini-2.5-pro") == "", "gỡ gemini khỏi CHO_PHEP phải trả về rỗng")
+    finally:
+        bnv2.HO_MODEL_CHO_PHEP = goc
+
 
 
 _mri_that = bnv2._mri
@@ -2813,32 +2827,26 @@ def _dot_bien():
        "`transport: null` lọt vì bị gộp vào nhánh VẮNG — hành vi đã công bố mà không ai canh",
        doi_chung="c18_neo_git_DUNG_thi_qua")
     # M7 / A6 — các chốt họ model và mức bằng chứng cho cross_approved
-    do("m62_bo_chot_cung_ho_model",
-       lambda: _dot_bien_tep("            if ho_rev and ho_exec and ho_rev == ho_exec:", "            if False:"),
+    do("m62_bo_chot_cung_ho_model", lambda: _dot_bien_tep("            if ho_rev and ho_exec and ho_rev == ho_exec:", "            if False:"),
        "c49_cross_approved_cung_ho_model_phai_bi_tu_choi", "gỡ chốt cùng họ model", doi_chung="c18_neo_git_DUNG_thi_qua")
-    do("m63_bo_chot_thieu_nguoi_audit",
-       lambda: _dot_bien_tep('            elif bc_rev == "khai_co_audit":', '            elif False and bc_rev == "khai_co_audit":'),
+    do("m63_bo_chot_thieu_nguoi_audit", lambda: _dot_bien_tep('                elif bc == "khai_co_audit":', '                elif False and bc == "khai_co_audit":'),
        "c50_cross_approved_khai_co_audit_thieu_nguoi_audit_phai_bi_tu_choi", "gỡ chốt thiếu audit", doi_chung="c18_neo_git_DUNG_thi_qua")
-    do("m64_bo_chot_thieu_ho_executor",
-       lambda: _dot_bien_tep("            if not ho_exec:", "            if False:"),
+    do("m64_bo_chot_thieu_ho_executor", lambda: _dot_bien_tep("            if not ho_exec:", "            if False:"),
        "c52_cross_approved_thieu_executor_phai_bi_tu_choi", "gỡ chốt thiếu executor", doi_chung="c18_neo_git_DUNG_thi_qua")
-    do("m65_bo_chot_antigravity_khong_khai_model",
-       lambda: _dot_bien_tep('    "anthropic_claude": "claude",', '    "google_antigravity": "gemini", "anthropic_claude": "claude",',
-                             bo_qua_parity=("HO_MODEL_MAC_DINH",)),
+    do("m65_bo_chot_antigravity_khong_khai_model", lambda: _dot_bien_tep('    "anthropic_claude": "claude",', '    "google_antigravity": "gemini", "anthropic_claude": "claude",', bo_qua_parity=("HO_MODEL_MAC_DINH",)),
        "c53_cross_approved_antigravity_khong_khai_model_phai_bi_tu_choi", "antigravity ngầm định gemini", doi_chung="c18_neo_git_DUNG_thi_qua")
-    do("m66_noi_bang_nhan_dien_model_la",
-       lambda: _dot_bien_tep('    if "gemini" in t:\n        return "gemini"\n    return ""',
-                             '    if "gemini" in t:\n        return "gemini"\n    return t'),
+    do("m66_noi_bang_nhan_dien_model_la", lambda: _dot_bien_tep('    if "gemini" in t and "gemini" in HO_MODEL_CHO_PHEP:\n        return "gemini"\n    return ""', '    if "gemini" in t and "gemini" in HO_MODEL_CHO_PHEP:\n        return "gemini"\n    return t'),
        "c54_cross_approved_model_la_phai_bi_tu_choi", "nới nhận diện model lạ", doi_chung="c18_neo_git_DUNG_thi_qua")
-    do("m67_bo_chot_muc_bang_chung_la",
-       lambda: _dot_bien_tep("            elif bc_rev and bc_rev not in MUC_BANG_CHUNG_MODEL:", "            elif False:"),
+    do("m67_bo_chot_muc_bang_chung_la", lambda: _dot_bien_tep("                elif bc and bc not in MUC_BANG_CHUNG_MODEL:", "                elif False:"),
        "c55_cross_approved_muc_bang_chung_la_phai_bi_tu_choi", "gỡ chốt mức lạ", doi_chung="c18_neo_git_DUNG_thi_qua")
-    do("m68_bo_chot_khong_do_duoc",
-       lambda: _dot_bien_tep('            elif bc_rev == "khong_do_duoc":', "            elif False:"),
+    do("m68_bo_chot_khong_do_duoc", lambda: _dot_bien_tep('                elif bc == "khong_do_duoc":', "                elif False:"),
        "c56_cross_approved_khong_do_duoc_phai_bi_tu_choi", "gỡ chốt khong_do_duoc", doi_chung="c18_neo_git_DUNG_thi_qua")
-    do("m69_bo_chot_do_may_thieu_ref",
-       lambda: _dot_bien_tep('            elif bc_rev == "do_may":', "            elif False:"),
+    do("m69_bo_chot_do_may_thieu_ref", lambda: _dot_bien_tep('                elif bc == "do_may":', "                elif False:"),
        "c57_cross_approved_do_may_thieu_ref_phai_bi_tu_choi", "gỡ chốt do_may thiếu ref", doi_chung="c18_neo_git_DUNG_thi_qua")
+    do("m70_bo_chot_executor_khai_de_thieu_evidence", lambda: _dot_bien_tep("                if ov and not bc:", "                if False:"),
+       "c59_cross_approved_executor_khai_de_thieu_evidence_phai_bi_tu_choi", "gỡ chốt khai đè thiếu evidence", doi_chung="c18_neo_git_DUNG_thi_qua")
+    do("m71_xoa_gemini_khoi_ho_model_cho_phep", lambda: _dot_bien_tep('HO_MODEL_CHO_PHEP = frozenset({"claude", "gpt", "gemini"})', 'HO_MODEL_CHO_PHEP = frozenset({"claude", "gpt"})', bo_qua_parity=("HO_MODEL_CHO_PHEP",)),
+       "c61_ho_model_cho_phep_phai_quyet_dinh_nhan_dien", "xoá gemini khỏi HO_MODEL_CHO_PHEP", doi_chung="c18_neo_git_DUNG_thi_qua")
 
     # R7-03 — TỰ KIỂM RIG: reviewer bơm mất hàng `_BE_MAT_BI_DANH` vào RIÊNG bản launcher mà rig
     # chép (qua `shutil.copyfile`), bốn hằng parity cũ vẫn bằng nhau. Nay rig phải bắt được điều

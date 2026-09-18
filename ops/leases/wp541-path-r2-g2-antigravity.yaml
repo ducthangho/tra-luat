@@ -7,7 +7,7 @@
 #
 # CHONG LAN CO THAT — DOC TRUOC KHI DAY: xem CHONG_LAN_DA_BIET va DIEU_KIEN_BAT_DAU.
 
-trang_thai_ban_ghi: 'BAN NHAP. check da chay; chua day len ops/**.'
+trang_thai_ban_ghi: 'DA CAP. Day len ops/cap-lease-541-g2 theo chi thi chu kho "cap lease g2 di".'
 
 schema_version: 2
 event: executor_lease_granted
@@ -41,8 +41,8 @@ granted_on_instruction_nguyen_van: 'Chu kho, phien dieu phoi 18-09-2026: "t136 g
 recorded_by: claude-session
 recorder_is_dispatcher: false
 
-leased_at_utc: '2026-09-18T15:50:00Z'
-lease_expires_at_utc: '2026-09-19T15:50:00Z'
+leased_at_utc: '2026-09-18T15:54:00Z'
+lease_expires_at_utc: '2026-09-19T15:54:00Z'
 
 role: executor
 provider: google_antigravity
@@ -155,6 +155,25 @@ CHONG_LAN_DA_BIET:
   rui_ro_neu_bo_qua: 'Hai writer tren cung mot tep = dung thu ma write-set exclusion sinh ra de chan
     (#227: cua so hai writer ~23,75h). DIEU_KIEN_BAT_DAU la thu duy nhat dung giua lease nay va cua
     so ay — no la KY LUAT, KHONG phai cong. Khong may nao cuong che no.'
+
+THU_HOI_G1_CAN_HAI_LAN_DAY:
+  do_luc: '2026-09-18T15:52:48Z'
+  hien_tuong: 'Sau khi danh dau da_bi_thay_the tren nhanh NHAP, ai-dang-giu VAN dem
+    wp541-path-r1-g1-antigravity la NGUOI_GIU. Khong phai cong hong.'
+  nguyen_nhan_DO_DUOC: 'Ton tai HAI ban cua cung mot lease tren HAI ref, va bo quet doc TUNG ref:
+      refs/heads/claude/nhap-lease-541-g2-20260918  -> CON_HAN · DA_BI_THAY_THE
+      refs/heads/ops/cap-lease-541                  -> CON_HAN          (chua co dau)
+    Ban CHUA co dau van CON_HAN nen van giu write set.'
+  he_qua_van_hanh: 'Cap g2 phai la HAI lan day, khong phai mot:
+      (1) ops/cap-lease-541-g2  <- lease g2 (lan day nay)
+      (2) ops/cap-lease-541     <- ban g1 DA mang dau, dat vao dung ref g1 dang song
+    Thieu (2) thi g1 giu ca hai duong them ~8 gio toi han 2026-09-19T00:00:00Z — dung khuyet tat
+    #355 ma dau thay the sinh ra de chua.'
+  thu_tu_va_vi_sao: 'Day (1) TRUOC roi moi (2): lam nguoc thi co mot khoang khong lease nao giu
+    write set. Hai ben deu cung executor (antigravity) nen chong lan ngan la vo hai, con khoang
+    trong thi khong.'
+  KHONG_khai: 'KHONG khai rang dau thay the "tu dong thu hoi lease". No chi thu hoi BAN NAM O REF
+    MA NO DUOC GHI VAO. Doc mot ban lease khong kem TEN REF la doc thieu mot nua.'
 
 khong_duoc_cham:
 - .github/workflows/ci.yml

@@ -1175,15 +1175,16 @@ def _git_windows(path=None, system_root=None, program_files=None, cwd=None,
         chan_doan.append(thong_bao_pf)
     sys.stderr.write(thong_bao_pf + "\n")
 
-    # 3. PATH thật (đường CHÓT)
+    # 3. shutil.which("git") trên PATH thật — đường CHÓT
+    import shutil
     path_val = env.get("PATH", "") if path is None else path
     ds_thu_muc = [d for d in path_val.split(";" if ";" in path_val else os.pathsep) if d]
-    ds_khao_sat = [cw] + ds_thu_muc
-    for d in ds_khao_sat:
-        for ten in ("git.exe", "git.cmd", "git.bat", "git.py", "git"):
-            cand = Path(d) / ten
-            if hop_le(cand):
-                return str(cand.resolve())
+    for d in ds_thu_muc:
+        if trong_cwd(d) or duoi_system_root(d):
+            continue
+        cand = shutil.which(os.path.join(d, "git")) or shutil.which(os.path.join(d, "git.exe"))
+        if cand and hop_le(cand):
+            return str(Path(cand).resolve())
     return None
 
 
@@ -1199,9 +1200,10 @@ def _git_exe_toi_thieu(*, nen: str | None = None, **tiem) -> str:
         if not duong:
             raise Chan(RC_KHONG_XAC_DINH, "KHÔNG_XÁC_ĐỊNH: không thấy `git` hợp lệ cho Windows")
         return duong
-    duong = shutil.which("git", path=tiem.get("path", "/usr/bin:/bin"))
+    path_posix = tiem.get("path", "/usr/bin:/bin")
+    duong = shutil.which("git", path=path_posix)
     if not duong:
-        raise Chan(RC_KHONG_XAC_DINH, "KHÔNG_XÁC_ĐỊNH: không thấy `git` trong PATH tối thiểu /usr/bin:/bin")
+        raise Chan(RC_KHONG_XAC_DINH, f"KHÔNG_XÁC_ĐỊNH: không thấy `git` trong PATH tối thiểu {path_posix}")
     return str(Path(duong).resolve())
 
 

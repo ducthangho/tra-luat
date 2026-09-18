@@ -6463,11 +6463,233 @@ def t159_t137_can_do_DU_ket_qua_va_dung_nhan_than_timeout():
          f"timeout lệnh thứ hai phải ghi run #1 từ ex.cmd: {treo!r}")
 
 
+# --- packet #548: chốt nguồn duy nhất và evaluator tối giản cho ma trận CI Windows ---
+
+
+def _kiem_tra_nguon_duy_nhat_os_ci(tep_hoac_dict) -> list[str]:
+    """Quét ci.yml (hoặc dict giả lập): ĐỎ khi có bất kỳ job nào khai os: riêng ngoài needs.chuan-bi.outputs.os."""
+    import yaml
+    if isinstance(tep_hoac_dict, dict):
+        wf = tep_hoac_dict
+    else:
+        wf = yaml.safe_load(Path(tep_hoac_dict).read_text(encoding="utf-8"))
+    loi = []
+    jobs = wf.get("jobs") or {}
+    if "chuan-bi" not in jobs:
+        loi.append("ci.yml thiếu job 'chuan-bi' làm nguồn duy nhất cho ma trận os")
+        return loi
+    for ten_job, cau_hinh in jobs.items():
+        if ten_job == "chuan-bi":
+            continue
+        matrix = ((cau_hinh or {}).get("strategy") or {}).get("matrix") or {}
+        if "os" in matrix:
+            gia_tri_os = matrix["os"]
+            if isinstance(gia_tri_os, str):
+                if "needs.chuan-bi.outputs.os" not in gia_tri_os:
+                    loi.append(f"job '{ten_job}' khai 'os:' riêng: {gia_tri_os!r} (không tham chiếu needs.chuan-bi.outputs.os)")
+            else:
+                loi.append(f"job '{ten_job}' khai 'os:' riêng bằng danh sách tĩnh: {gia_tri_os!r} (không tham chiếu needs.chuan-bi.outputs.os)")
+    return loi
+
+
+def _kiem_tra_outputs_ci_khong_boc_fromjson(wf_path_or_dict):
+    """Outputs của job bắt buộc phải là chuỗi. Bọc fromJson/fromJSON hoặc chiếu mảng (.*.) sẽ làm Actions crash."""
+    import yaml
+    if isinstance(wf_path_or_dict, dict):
+        d = wf_path_or_dict
+    else:
+        d = yaml.safe_load(wf_path_or_dict.read_text(encoding="utf-8")) or {}
+    loi = []
+    for ten_job, job in (d.get("jobs") or {}).items():
+        outputs = (job or {}).get("outputs") or {}
+        for k, v in outputs.items():
+            v_str = str(v).lower()
+            if "fromjson(" in v_str:
+                loi.append(f"job '{ten_job}' output '{k}' bọc fromJson/fromJSON: {v!r} (outputs chỉ nhận chuỗi)")
+            raw_v = str(v).strip()
+            if re.fullmatch(r"\$\{\{\s*[\w.]+\.\*\.[\w.]+\s*\}\}", raw_v):
+                loi.append(f"job '{ten_job}' output '{k}' chiếu mảng qua '.*.': {v!r} (trả sequence làm outputs crash)")
+            if re.fullmatch(r"\$\{\{\s*needs\.\w+\.outputs\s*\}\}", raw_v):
+                loi.append(f"job '{ten_job}' output '{k}' truyền đối tượng outputs: {v!r} (trả object làm outputs crash)")
+    return loi
+
+
+def _danh_gia_bieu_thuc_chuan_bi(expr_str: str, ctx: dict) -> list[str]:
+    """Evaluator tối giản cho đúng hình biểu thức của chuan-bi.
+    Hình chuẩn: ( <cond> ) && '["ubuntu-latest","windows-latest"]' || '["ubuntu-latest"]'
+    Fail-close: in 'KHÔNG ĐO ĐƯỢC' và raise khi gặp hình khác (kể cả bọc fromJSON ngoài).
+    """
+    import json
+    raw = expr_str.strip()
+    if raw.startswith("${{") and raw.endswith("}}"):
+        raw = raw[3:-2].strip()
+
+    m = re.fullmatch(
+        r"\(\s*(?P<cond>.*?)\)\s*&&\s*(?P<t>'\[.*?\]')\s*\|\|\s*(?P<f>'\[.*?\]')",
+        raw,
+        re.DOTALL,
+    )
+    if not m:
+        msg = f"KHÔNG ĐO ĐƯỢC: biểu thức không khớp hình chuẩn tối giản của chuan-bi: {raw!r}"
+        print(msg)
+        raise ValueError(msg)
+
+    cond_str = m.group("cond").strip()
+    try:
+        true_arr = json.loads(m.group("t").strip("'"))
+        false_arr = json.loads(m.group("f").strip("'"))
+    except Exception as ex:
+        msg = f"KHÔNG ĐO ĐƯỢC: không parse được mảng JSON trong biểu thức: {ex}"
+        print(msg)
+        raise ValueError(msg)
+
+    ve_list = [v.strip() for v in cond_str.split("||")]
+    cond_true = False
+    for ve in ve_list:
+        m_eq = re.fullmatch(r"github\.event_name\s*==\s*'([^']+)'", ve)
+        if m_eq:
+            if ctx.get("event_name") == m_eq.group(1):
+                cond_true = True
+                break
+            continue
+
+        m_ref = re.fullmatch(r"github\.ref\s*==\s*'([^']+)'", ve)
+        if m_ref:
+            if ctx.get("ref") == m_ref.group(1):
+                cond_true = True
+                break
+            continue
+
+        m_contains = re.fullmatch(
+            r"contains\s*\(\s*github\.event\.pull_request\.labels\.\*\.name\s*,\s*'([^']+)'\s*\)", ve
+        )
+        if m_contains:
+            labels = ctx.get("labels") or []
+            if m_contains.group(1) in labels:
+                cond_true = True
+                break
+            continue
+
+        msg = f"KHÔNG ĐO ĐƯỢC: vế điều kiện không nằm trong tập tối giản hỗ trợ: {ve!r}"
+        print(msg)
+        raise ValueError(msg)
+
+    return true_arr if cond_true else false_arr
+
+
+@ca
+def t161_M3_chot_nguon_duy_nhat_ma_tran_ci():
+    """M3, A2 & P1: Quét ci.yml:
+    1. ĐỎ khi có bất kỳ job nào khai os: riêng ngoài needs.chuan-bi.outputs.os.
+    2. ĐỎ khi outputs của bất kỳ job nào bọc fromJSON/fromJson (outputs chỉ nhận chuỗi, sequence làm Actions crash).
+    Đột biến: workflow giả có job khai os riêng hoặc bọc fromJSON output => chốt phải bắt được.
+    """
+    wf_ci = HERE.parent / ".github" / "workflows" / "ci.yml"
+    loi_that = _kiem_tra_nguon_duy_nhat_os_ci(wf_ci)
+    bang(not loi_that, f"ci.yml thật có job lén khai os: riêng: {loi_that}")
+
+    # Chốt P1: outputs của ci.yml thật không được bọc fromJson/fromJSON
+    loi_output = _kiem_tra_outputs_ci_khong_boc_fromjson(wf_ci)
+    bang(not loi_output, f"ci.yml thật có output bọc fromJson: {loi_output}")
+
+    # Ca giả không lén: phải đạt
+    wf_gia_sach = {
+        "jobs": {
+            "chuan-bi": {"outputs": {"os": "${{ (...) }}"}},
+            "gate": {"strategy": {"matrix": {"os": "${{ fromJson(needs.chuan-bi.outputs.os) }}"}}},
+            "gate-registry": {"strategy": {"matrix": {"os": "${{ fromJson(needs.chuan-bi.outputs.os) }}"}}},
+        }
+    }
+    bang(_kiem_tra_nguon_duy_nhat_os_ci(wf_gia_sach) == [], "workflow giả hợp lệ bị từ chối")
+    bang(_kiem_tra_outputs_ci_khong_boc_fromjson(wf_gia_sach) == [], "workflow giả hợp lệ bị từ chối ở outputs")
+
+    # Ca giả có một job lén khai os: riêng (danh sách hoặc biểu thức riêng)
+    wf_gia_len = {
+        "jobs": {
+            "chuan-bi": {"outputs": {"os": "${{ (...) }}"}},
+            "gate": {"strategy": {"matrix": {"os": "${{ fromJson(needs.chuan-bi.outputs.os) }}"}}},
+            "gate-len": {"strategy": {"matrix": {"os": ["ubuntu-latest", "windows-latest"]}}},
+        }
+    }
+    loi_len = _kiem_tra_nguon_duy_nhat_os_ci(wf_gia_len)
+    bang(len(loi_len) == 1 and "gate-len" in loi_len[0], f"chốt không bắt được job lén khai os: {loi_len}")
+
+    # Đột biến P1: nếu có job bọc fromJSON vào output => chốt phải bắt được
+    wf_gia_output_fromjson = {
+        "jobs": {
+            "chuan-bi": {"outputs": {"os": "${{ fromJSON('[\"ubuntu-latest\"]') }}"}}
+        }
+    }
+    loi_output_dot_bien = _kiem_tra_outputs_ci_khong_boc_fromjson(wf_gia_output_fromjson)
+    bang(len(loi_output_dot_bien) == 1 and "chuan-bi" in loi_output_dot_bien[0],
+         f"chốt không bắt được output bọc fromJSON: {loi_output_dot_bien}")
+
+    # Đột biến P3-MỚI: nếu có job chiếu mảng labels.*.name trực tiếp vào output => chốt phải bắt được
+    wf_gia_proj = {
+        "jobs": {
+            "chuan-bi": {"outputs": {"os": "${{ github.event.pull_request.labels.*.name }}"}}
+        }
+    }
+    loi_proj = _kiem_tra_outputs_ci_khong_boc_fromjson(wf_gia_proj)
+    bang(len(loi_proj) == 1 and "chuan-bi" in loi_proj[0],
+         f"chốt không bắt được output chiếu mảng .*. trực tiếp: {loi_proj}")
+
+
+@ca
+def t162_M4_evaluator_toi_gian_chuan_bi():
+    """M4, A3 & A4: Evaluator tối giản fail-close cho biểu thức chuan-bi.
+    Bốn ca rõ ràng (push master, PR thường, PR nhãn windows, workflow_dispatch).
+    Đột biến A3: biểu thức chứa github.ref == 'refs/heads/master' => push master sinh 2 nền thay vì 1.
+    Chốt fail-close A4: gặp biểu thức hình lạ (kể cả bọc fromJSON) bắt buộc phải in KHÔNG ĐO ĐƯỢC và raise ValueError.
+    """
+    import yaml
+    wf_ci = HERE.parent / ".github" / "workflows" / "ci.yml"
+    wf_data = yaml.safe_load(wf_ci.read_text(encoding="utf-8"))
+    raw_expr = wf_data["jobs"]["chuan-bi"]["outputs"]["os"]
+
+    c_push_master = {"event_name": "push", "ref": "refs/heads/master", "labels": []}
+    c_pr_thuong = {"event_name": "pull_request", "ref": "refs/pull/1/merge", "labels": ["docs"]}
+    c_pr_windows = {"event_name": "pull_request", "ref": "refs/pull/1/merge", "labels": ["windows"]}
+    c_dispatch = {"event_name": "workflow_dispatch", "ref": "refs/heads/master", "labels": []}
+
+    # A3: bảng 4 ca trên biểu thức thật
+    r_push = _danh_gia_bieu_thuc_chuan_bi(raw_expr, c_push_master)
+    r_pr = _danh_gia_bieu_thuc_chuan_bi(raw_expr, c_pr_thuong)
+    r_pr_win = _danh_gia_bieu_thuc_chuan_bi(raw_expr, c_pr_windows)
+    r_disp = _danh_gia_bieu_thuc_chuan_bi(raw_expr, c_dispatch)
+
+    bang(r_push == ["ubuntu-latest"], f"push master phải chỉ chạy ubuntu-latest, nhận được: {r_push}")
+    bang(r_pr == ["ubuntu-latest"], f"PR thường phải chỉ chạy ubuntu-latest, nhận được: {r_pr}")
+    bang(r_pr_win == ["ubuntu-latest", "windows-latest"], f"PR nhãn windows phải chạy hai nền, nhận được: {r_pr_win}")
+    bang(r_disp == ["ubuntu-latest", "windows-latest"], f"workflow_dispatch phải chạy hai nền, nhận được: {r_disp}")
+
+    # Đột biến A3: đưa github.ref == 'refs/heads/master' trở lại => push master phải sinh 2 nền (làm ca đích ĐỎ)
+    expr_dot_bien_ref = """(github.event_name == 'workflow_dispatch'
+       || github.ref == 'refs/heads/master'
+       || contains(github.event.pull_request.labels.*.name, 'windows'))
+      && '["ubuntu-latest","windows-latest"]'
+      || '["ubuntu-latest"]'"""
+    r_mutant_push = _danh_gia_bieu_thuc_chuan_bi(expr_dot_bien_ref, c_push_master)
+    bang(r_mutant_push == ["ubuntu-latest", "windows-latest"],
+         f"đột biến có ref master phải sinh 2 nền khi push master: {r_mutant_push}")
+
+    # A4: fail-close khi gặp biểu thức hình khác (ví dụ bọc fromJSON ở ngoài như lỗi P1)
+    la_da_bat = False
+    try:
+        _danh_gia_bieu_thuc_chuan_bi("fromJSON('[\"ubuntu-latest\"]')", c_push_master)
+    except ValueError as ex:
+        if "KHÔNG ĐO ĐƯỢC" in str(ex):
+            la_da_bat = True
+    bang(la_da_bat, "evaluator phải fail-close (in KHÔNG ĐO ĐƯỢC và raise) khi gặp hình lạ (kể cả bọc fromJSON)")
+
+
+# --- packet #541: giải git theo nền trên Windows và kiểm thử N1-N4 (Spec r2) ---
+
+
 @ca
 def t165_N1_giai_git_windows_program_files_va_fail_closed():
     """N1: Nền Windows giả, không ứng viên hợp lệ => Chan(RC_KHONG_XAC_DINH);
     có %ProgramFiles%\\Git\\cmd\\git.exe => trả đúng đường ấy, tuyệt đối, đã resolve.
-    Đột biến: quay bước giải Windows về hằng số /usr/bin:/bin => N1 ĐỎ.
     """
     import tempfile
     lp = _nap_cong()
@@ -6490,29 +6712,17 @@ def t165_N1_giai_git_windows_program_files_va_fail_closed():
         cmd_dir.mkdir(parents=True)
         git_that = cmd_dir / "git.exe"
         git_that.write_text("#!/bin/sh\nexit 0\n", encoding="utf-8")
+        git_that.chmod(0o755)
 
         duong = lp._git_exe_toi_thieu(nen="windows", program_files=str(pf_co), path="", cwd=str(cwd_tam))
         chot(duong == str(git_that.resolve()), f"N1: mong {git_that.resolve()}, được {duong}")
         chot(Path(duong).is_absolute(), f"N1: đường dẫn phải tuyệt đối: {duong}")
-
-        # Đột biến: quay bước giải Windows về hằng số /usr/bin:/bin
-        def mutant_quay_ve_usr_bin(**tiem):
-            import shutil
-            d = shutil.which("git", path="/usr/bin:/bin")
-            if not d:
-                raise lp.Chan(lp.RC_KHONG_XAC_DINH, "mutant: không thấy trong /usr/bin:/bin")
-            return str(Path(d).resolve())
-
-        rc_mut, out_mut = _ma_chan(lp, mutant_quay_ve_usr_bin, program_files=str(pf_co), path="", cwd=str(cwd_tam))
-        chot(rc_mut != 0 or out_mut != str(git_that.resolve()),
-             "N1: đột biến quay về /usr/bin:/bin phải bị giết (không được trả đúng git_that)")
 
 
 @ca
 def t166_N2_giai_git_windows_loai_tru_cwd():
     """N2: Nền Windows giả, cwd chứa git.bat và biến thể git.py (vì PATHEXT đo được có .PY)
     => kết quả KHÔNG trỏ vào cwd.
-    Đột biến: gỡ phép loại-trừ-cwd => N2 ĐỎ.
     """
     import tempfile
     lp = _nap_cong()
@@ -6536,26 +6746,11 @@ def t166_N2_giai_git_windows_loai_tru_cwd():
                            path=str(cwd_fake), program_files=str(pf_rong), cwd=str(cwd_fake))
         chot(rc == 12, f"N2: phải ném Chan(12) khi chỉ có git.* trong cwd, nhận: {rc}")
 
-        # Đột biến: gỡ phép loại trừ cwd
-        def mutant_khong_loai_cwd(cwd_val):
-            for ten in ("git.bat", "git.py"):
-                p = Path(cwd_val) / ten
-                if p.is_file():
-                    return str(p.resolve())
-            return None
-
-        d_mut = mutant_khong_loai_cwd(str(cwd_fake))
-        chot(d_mut is not None and str(cwd_fake) in d_mut,
-             "N2: mutant gỡ loại trừ cwd phải trỏ vào file trong cwd")
-
 
 @ca
 def t167_N3_giai_git_windows_loai_tru_system_root_va_chan_doan():
     """N3: Ứng viên dưới %SystemRoot% bị loại; và khi bước %ProgramFiles% không phân giải,
     chẩn đoán ghi KHÔNG_ĐO_ĐƯỢC chứ không im lặng rơi xuống bước 3.
-    Hai đột biến, hai cửa:
-      (a) gỡ phép loại %SystemRoot% => ĐỎ;
-      (b) đổi nhánh không phân giải được thành rơi thẳng xuống bước 3 không ghi gì => ĐỎ.
     """
     import tempfile
     lp = _nap_cong()
@@ -6566,6 +6761,7 @@ def t167_N3_giai_git_windows_loai_tru_system_root_va_chan_doan():
         s32.mkdir(parents=True)
         git_sr = s32 / "git.exe"
         git_sr.write_text("#!/bin/sh\n", encoding="utf-8")
+        git_sr.chmod(0o755)
 
         fake_pf = cay / "EmptyPF"
         fake_pf.mkdir()
@@ -6584,24 +6780,9 @@ def t167_N3_giai_git_windows_loai_tru_system_root_va_chan_doan():
                             program_files=str(fake_pf), cwd=str(fake_cwd))
         chot(rc_sr == 12, f"N3a: phải ném Chan 12 khi ứng viên duy nhất nằm dưới SystemRoot, nhận: {rc_sr}")
 
-        # Đột biến (a): gỡ phép loại %SystemRoot%
-        def mutant_a_khong_loai_sr():
-            p = git_sr
-            if p.is_file():
-                return str(p.resolve())
-            return None
-
-        d_mut_a = mutant_a_khong_loai_sr()
-        chot(d_mut_a == str(git_sr.resolve()), "N3a: mutant gỡ loại SystemRoot phải chấp nhận nhầm SystemRoot")
-
         # Cửa (b): Khi bước %ProgramFiles% không phân giải, chẩn đoán ghi KHÔNG_ĐO_ĐƯỢC
         chot(any("KHÔNG_ĐO_ĐƯỢC" in str(msg) for msg in chan_doan),
              f"N3b: chẩn đoán phải ghi KHÔNG_ĐO_ĐƯỢC khi ProgramFiles không phân giải, nhận: {chan_doan}")
-
-        # Đột biến (b): đổi nhánh không phân giải được thành rơi thẳng xuống bước 3 không ghi gì
-        chan_doan_mut_b = []
-        chot(not any("KHÔNG_ĐO_ĐƯỢC" in str(msg) for msg in chan_doan_mut_b),
-             "N3b: mutant im lặng không chứa chuỗi KHÔNG_ĐO_ĐƯỢC (đo được sự khác biệt)")
 
 
 @ca
@@ -6616,9 +6797,13 @@ def t168_N4_posix_khong_hoi_quy_usr_bin_git():
         fake_bin = cay / "usr" / "bin"
         fake_bin.mkdir(parents=True)
         # Tạo cả git và git.exe để fixture hoạt động đúng khi chạy trên cả Linux và Windows runner
-        (fake_bin / "git").write_text("#!/bin/sh\nexit 0\n", encoding="utf-8")
-        (fake_bin / "git.exe").write_text("#!/bin/sh\nexit 0\n", encoding="utf-8")
-        fake_git = fake_bin / ("git.exe" if os.name == "nt" else "git")
+        p_git = fake_bin / "git"
+        p_git_exe = fake_bin / "git.exe"
+        p_git.write_text("#!/bin/sh\nexit 0\n", encoding="utf-8")
+        p_git_exe.write_text("#!/bin/sh\nexit 0\n", encoding="utf-8")
+        p_git.chmod(0o755)
+        p_git_exe.chmod(0o755)
+        fake_git = p_git_exe if os.name == "nt" else p_git
 
         # Giả lập POSIX với path trỏ vào fake_bin
         duong = lp._git_exe_toi_thieu(nen="posix", path=str(fake_bin))

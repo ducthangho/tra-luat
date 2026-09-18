@@ -26,6 +26,13 @@ thay_the_vi_sao: 'Ba can cu (D1/D2/D3 cua spec r3). D1: chi thi chu kho doi exec
   van co BA lo fail-open. Dung ca §3.2 goi ten: "finding cho thay chinh spec thieu thi verdict la
   blocked va di qua revision moi". D3: base_sha troi d705623 -> eb15657 sau khi PR #553 land.'
 
+da_bi_thay_the: assurance-ho-model-r4-g4-claude
+da_bi_thay_the_luc_utc: '2026-09-18T18:40:00Z'
+da_bi_thay_the_vi_sao: '§3.2 — doi EXECUTOR (antigravity -> claude) theo chi thi chu kho tai
+  issuecomment-5734378960, vi agy het quota. Cong: assurance_target phai HA tu cross_approved
+  xuong human_audited, vi khong con provider nao KHAC HO MODEL de review (codex het quota,
+  agy het quota, claude la executor) — do la doi ACCEPTANCE, mot truong §3.2 khac cung neu dich
+  danh. Ban va 6bcf2663 cua agy KHONG bi bo — gen 4 lay no lam start_from_sha.'
 granted_by: ducthangho
 granted_on_instruction: https://github.com/ducthangho/tra-luat/issues/551#issuecomment-5728658540
 granted_on_instruction_nguyen_van: 'Chu kho, phien dieu phoi 18-09-2026 10:2xZ: "Do codex het quota,

@@ -31,11 +31,12 @@ thay_the_cho_vi_sao: 'Dau HAI CHIEU. Lease cu da mang dong `da_bi_thay_the: wp54
   chi biet HAN, nen g1 (han 2026-09-19T00:00:00Z) se VAN giu ca hai duong them ~8 gio sau khi het
   vai tro; chi `lenh_ai_dang_giu` doc `da_bi_thay_the`. Kho da tra gia mot lan o #355.'
 
-granted_on_instruction: https://github.com/ducthangho/tra-luat/issues/541
-granted_on_instruction_ghi_chu: 'KHONG phai URL comment — TRO VAO ISSUE. Chi thi den tu phien dieu
-  phoi (chat), chua duoc dang thanh comment tren #541. Cong KHONG cuong che truong nay, nen mot URL
-  sai se di qua ma khong ai biet; khai thang thay vi bia. Chu kho NEN dang mot comment chi thi cho
-  g2 de co dau vet kiem toan dung §3.2 — lease g1 cung de trong dung cho nay.'
+granted_on_instruction: https://github.com/ducthangho/tra-luat/issues/541#issuecomment-5733505690
+granted_on_instruction_ghi_chu: 'DA DONG 18-09-2026T17:1xZ. Truoc do truong nay tro vao ISSUE
+  chu khong vao mot comment chi thi, va lease khai thang do la mot cho trong. Chu kho chi thi
+  "dang comment chi thi len #541 va #562"; phien claude soan va dang HO bang token cua chu kho,
+  nen GitHub hien tac gia la ducthangho — chinh comment ay noi ro dieu do, khong giau. Comment
+  chep NGUYEN VAN sau chi thi theo thu tu thoi gian, va khai ca cai no KHONG cap phep.'
 granted_on_instruction_nguyen_van: 'Chu kho, phien dieu phoi 18-09-2026: "t136 gop vao #541 luon" ·
   "soan spec r3 di" · "antigravity, soan lease g2 di".'
 recorded_by: claude-session

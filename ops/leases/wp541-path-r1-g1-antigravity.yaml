@@ -143,7 +143,8 @@ prohibited_actions:
 - workflow_dispatch
 - manual full CI
 - Windows CI
-- 'CHAM ops/lease_publish_test.py TRUOC khi lease #548 nha duong ay — xem DIEU_KIEN_BAT_DAU'
+# DA GO 18-09-2026 boi ngoai_le_5_write_set_giao_nhau (chi thi chu kho, issuecomment-5723577503).
+# Dong cu: "CHAM ops/lease_publish_test.py TRUOC khi lease #548 nha duong ay".
 - 'VA t150 — no thuoc #552, nguyen nhan KHAC (do: 14 ca PATH, 1 ca t150 KHAC)'
 - 'dat _git_windows vao ops/cong_cu.py — Issue #541 khai write set "only" hai tep'
 - 'thay phep giai co dinh bang PATH thua ke KHONG gioi han (nguyen van Issue #541)'
@@ -153,6 +154,8 @@ prohibited_actions:
 - 'doc rc qua pipe (`| tail` roi `$?`)'
 
 DIEU_KIEN_BAT_DAU:
+  TRANG_THAI: 'DA GO 2026-09-18T01:2xZ boi ngoai_le_5_write_set_giao_nhau. Luat duoi day GIU
+    NGUYEN VAN de tra cuu — no KHONG con rang buoc executor. Xem khoi ngoai le o cuoi tep.'
   xep_sau: 548
   duong_bi_chan: ops/lease_publish_test.py
   luat: 'Executor DUOC bat tay NGAY tren ops/lease_publish.py (duong nay ranh, rc=0). Executor
@@ -162,8 +165,9 @@ DIEU_KIEN_BAT_DAU:
   cap_lease_KHAC_bat_dau: 'Lease nay cap QUYEN, khong phai lenh khoi dong (§4).'
 
 dieu_kien_dung:
-- 'ai-dang-giu cho ops/lease_publish_test.py con tra rc=11 ma can sua tep ay => DUNG, cho, bao chu
-   kho. KHONG sua song song.'
+- 'DA GO 18-09: dong cu doi DUNG khi ai-dang-giu tra rc=11 cho ops/lease_publish_test.py.
+   Ngoai le §5 cua chu kho thay no. ai-dang-giu VAN se tra rc=11 / NGUOI_GIU 2 toi 17:00:00Z —
+   do KHONG phai bo quet hong, va KHONG con la dieu kien dung.'
 - 'Vuot 2 tep hoac 300 dong them => DUNG, xin ngoai le ADR-0044 TRUOC khi day.'
 - 'Can cham ops/cong_cu.py de dung chung voi _bash_windows => DUNG. Issue #541 khai "only" hai tep;
    doi write set la revision moi (§3.2).'
@@ -171,6 +175,53 @@ dieu_kien_dung:
    DUY NHAT con lai, vi gate(windows) da THOI chay khi push master tu #548 (do: ci.yml tren
    d705623 bo dieu kien github.ref == refs/heads/master).'
 - 'Mot hinh dang loi lap lan thu BA => DUNG, hoi "co nen lam viec nay khong", khong hoi "va the nao".'
+
+
+# =====================================================================================
+# NGOAI LE §5 — WRITE SET GIAO NHAU. Them 18-09-2026 theo chi thi chu kho.
+# =====================================================================================
+ngoai_le_5_write_set_giao_nhau:
+  ai_cap: ducthangho
+  neo_chi_thi: https://github.com/ducthangho/tra-luat/issues/541#issuecomment-5723577503
+  chi_thi_nguyen_van: 'Cho ngoai le §5 luon, ban giao P1 cho agy di'
+  chi_thi_nguyen_van_ghi_chu: 'Chu kho viet co dau: "Cho ngoại lệ §5 luôn, bàn giao P1 cho
+    agy đi". Tep lease nay theo quy uoc khong dau cua kho; ban co dau la ban chuan.'
+  ghi_boi: claude-session
+  duong_bi_giao: ops/lease_publish_test.py
+  nguoi_giu_con_lai: ci-windows-r2-g2-antigravity
+  nguoi_giu_het_han_utc: '2026-09-18T17:00:00Z'
+  do_luc_cap: 'ai-dang-giu ops/lease_publish_test.py => rc=11 · NGUOI_GIU 2:
+    ci-windows-r2-g2-antigravity, wp541-path-r1-g1-antigravity (do 01:21Z 18-09-2026, sau khi
+    fetch du ref: may chu 432 / cache 432, comm -23 RONG).'
+  can_cu: 'Packet #548 DA LAND: merge d705623162b75b7340ee7cca54ac2d2abbddbb6f, CI hau merge run
+    35255237751 = success, bookkeeping TUNG MUC da duyet (bien nhan
+    ops/reviews/ci-windows-review-5-claude-verdict.receipt.yaml). Executor cua #548 HET VIEC;
+    nhanh agy/ci-windows-r1-g1 da merge. Cua so hai writer la HINH THUC, khong phai thuc chat.'
+  go_cai_gi: 'DIEU_KIEN_BAT_DAU (xem TRANG_THAI cua khoi ay) VA dong prohibited_actions tuong ung
+    VA dong dau cua dieu_kien_dung. Executor duoc cham ops/lease_publish_test.py NGAY.'
+  KHONG_noi_cai_gi: 'write_set van DUNG 2 duong · tran ADR-0044 (2 tep / 300 dong them) ·
+    manual_ci_budget 0 · khong_duoc_cham · cam va t150 (thuoc #552) · cam dat _git_windows vao
+    ops/cong_cu.py · cam self_review / self_approve / merge / land / deploy / LIVE.'
+  het_hieu_luc_utc: '2026-09-18T17:00:00Z'
+  het_hieu_luc_vi_sao: 'Sau moc ay lease #548 tu het han, cua so tu dong, ngoai le thanh vo nghia.'
+  KHONG_khai: 'KHONG khai rang cua so hai writer da dong tren SO. ai-dang-giu VAN tra rc=11 /
+    NGUOI_GIU 2 toi 17:00:00Z. Thu doi la THAM QUYEN, khong phai con so.'
+  no_van_con: 'AG-T0-01B-thu-hoi-lease-chua-co-duong KHONG dong bang ngoai le nay. Day la lan THU
+    HAI trong mot ngay phai di vong vi khong co duong thu hoi lease (lan dau: #551). Hai lan trong
+    mot ngay la tin hieu nen mo packet kich hoat so ops/thu-hoi/ (ADR-0047), chu khong phai cap
+    ngoai le lan thu BA — dung doctrine "dem HINH DANG loi, dung chi dem loi".'
+
+# Nhanh THAT khac ten lease khai — ghi nhan, khong doi (P2-1 cua verdict luot 1).
+branch_thuc_te:
+  lease_khai: agy/wp541-path-r1-g1
+  agy_day: fix_issue_541
+  pull_request: 554
+  do_luc: '01:21Z 18-09-2026 — nhanh agy/wp541-path-r1-g1 ton tai 0 tren origin'
+  quyet_dinh: 'GIU nguyen ten fix_issue_541. Cong viec va PR da song o do; doi ten la vut lich su
+    ma khong mua duoc gi (cung ly le #548 dung khi giu ten nhanh cu o gen 2). Ten nhanh KHONG phai
+    dinh danh cua lease. Ghi o day de moi phep tra theo ho so khong bi truot.'
+  KHONG_phai_revision: '§3.2 liet ke objective / acceptance / write set / dependency / executor /
+    environment. Ten nhanh KHONG nam trong do, nen day la DINH CHINH HO SO, khong phai revision moi.'
 
 closure_status: 'Owner-directed grant with a KNOWN, DECLARED write-set overlap on
   ops/lease_publish_test.py; no claim of a clean whole-repo scan and no claim of computed dispatcher

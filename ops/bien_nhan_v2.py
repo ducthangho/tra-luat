@@ -652,12 +652,28 @@ def _ho_model_cua_ten(ten: str) -> str:
     return ""
 
 
+def _nguon_tra_model(d: dict, vai: str):
+    """(`sub`, bảng (nguồn, tiền tố)) theo thứ tự tra — `M17`, đóng `P2` của verdict lượt 3.
+
+    Bên trong khối `model_<vai>_identity`, khoá tra KHÔNG mang tiền tố, cho CẢ HAI vai. Bản trước
+    áp `pre` cho cả `sub` lẫn `d`, nên `model_reviewer_identity: {model: …}` CHẠY (vai reviewer có
+    `pre` rỗng) còn `model_executor_identity: {model: …}` thì KHÔNG — đòi `executor_model`. Đòi một
+    khoá mang lại tên vai bên trong khối đã tên là vai ấy vừa dư thừa vừa BẤT ĐỐI XỨNG, và thông
+    điệp lỗi *"không xác định được họ model của executor"* đọc như "bạn chưa khai" trong khi người
+    ta ĐÃ khai — dẫn người đọc đi sai hướng ở đúng trường mà `cross_approved` treo lên.
+
+    Tiền tố chỉ còn nghĩa ở mức top-level `d`, nơi hai vai dùng CHUNG một không gian tên nên phải
+    có gì đó phân biệt. Trả về MỘT bảng để hai phép tra bên dưới không thể trôi lệch nhau."""
+    sub = d.get(f"model_{vai}_identity") if isinstance(d.get(f"model_{vai}_identity"), dict) else {}
+    return sub, ((sub, ""), (d, f"{vai}_" if vai == "executor" else ""))
+
+
 def _giai_ho_va_bc(d: dict, vai: str) -> tuple[str, str, bool]:
     """Trả về (họ model, mức bằng chứng, có_khai_đè) cho 'reviewer' hoặc 'executor' (P1-MOI)."""
-    sub = d.get(f"model_{vai}_identity") if isinstance(d.get(f"model_{vai}_identity"), dict) else {}
+    sub, nguon = _nguon_tra_model(d, vai)
     pre = f"{vai}_" if vai == "executor" else ""
-    khai = next((_chuoi(s.get(k)) for s in (sub, d) for k in (f"{pre}model_family", f"{pre}ho_model", f"{pre}canonical_model", f"{pre}model") if _chuoi(s.get(k))), "")
-    bc = next((_chuoi(s.get(k)) for s in (sub, d) for k in (f"{pre}model_evidence", f"{pre}bang_chung_model") if _chuoi(s.get(k))), "")
+    khai = next((_chuoi(s.get(p + k)) for s, p in nguon for k in ("model_family", "ho_model", "canonical_model", "model") if _chuoi(s.get(p + k))), "")
+    bc = next((_chuoi(s.get(p + k)) for s, p in nguon for k in ("model_evidence", "bang_chung_model") if _chuoi(s.get(p + k))), "")
     if khai:
         return _ho_model_cua_ten(khai), bc, True
     return HO_MODEL_MAC_DINH.get(_chuan_hoa_provider(_chuoi(sub.get("provider")) or _chuoi(d.get(f"{pre}provider")) or ""), ""), bc, False

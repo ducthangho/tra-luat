@@ -2299,6 +2299,39 @@ def c61_ho_model_cho_phep_phai_quyet_dinh_nhan_dien():
 
 
 
+@ca
+def c62_khoi_model_executor_identity_phai_doi_xung_voi_khoi_reviewer():
+    """`M17` — `P2` của verdict lượt 3. Bên trong khối đã mang tên vai, khoá KHÔNG mang tiền tố.
+
+    Bản trước áp tiền tố `executor_` cho khoá tra CẢ TRONG `sub` lẫn `d`, nên
+    `model_reviewer_identity: {model: …}` CHẠY (vai reviewer tiền tố rỗng) còn
+    `model_executor_identity: {model: …}` thì KHÔNG — và thông điệp *"không xác định được họ model
+    của executor"* đọc như "bạn chưa khai" trong khi người ta ĐÃ khai.
+
+    Đo trên CẢ 184 biên nhận trước khi đổi: dạng CÓ tiền tố bên trong `sub` xuất hiện **0** lần,
+    nên bỏ nó không thu hẹp ai trong thực tế."""
+    d = v2_du(); d["assurance"] = "cross_approved"
+    d["model_executor_identity"] = {"model": "gemini-2.5-pro"}
+    bang(bnv2._giai_ho_va_bc(d, "executor")[0] == "gemini",
+         "model_executor_identity {model: …} phải nhận diện được họ model")
+    e = v2_du(); e["assurance"] = "cross_approved"
+    e["model_reviewer_identity"] = dict(e.get("model_reviewer_identity") or {}, model="gpt-5")
+    bang(bnv2._giai_ho_va_bc(e, "reviewer")[0] == "gpt",
+         "ĐỐI CHỨNG: khối reviewer vẫn phải nhận diện được bằng cùng cách viết")
+
+
+@ca
+def c63_muc_bang_chung_RONG_KHONG_khai_de_phai_QUA():
+    """`M21` — đóng `S2`. `A14` của r3 viết *"RỖNG ⇒ CHẶN"*, RỘNG HƠN mã: mã chỉ chặn RỖNG khi CÓ
+    khai đè (`ov and not bc`). Đo được **50/50** biên nhận `cross_approved` thật có mức bằng chứng
+    RỖNG mà vẫn QUA — nên `A14` và `A3` chưa bao giờ thật sự loại trừ nhau.
+
+    Ca này là ĐỐI CHỨNG BIẾT TRƯỚC ĐÁP ÁN cho `A14`: nó CHẶN nghĩa là `A3` sắp vỡ."""
+    d = v2_du(); d["assurance"] = "cross_approved"; d["executor_provider"] = "openai_codex"
+    bang([x for x in bnv2._thieu(d) if "bằng chứng" in x] == [],
+         "không khai đè + bằng chứng RỖNG phải QUA — nếu CHẶN thì 50 biên nhận cũ sắp đỏ")
+
+
 _mri_that = bnv2._mri
 _thieu_that = bnv2._thieu
 
@@ -2847,6 +2880,13 @@ def _dot_bien():
        "c59_cross_approved_executor_khai_de_thieu_evidence_phai_bi_tu_choi", "gỡ chốt khai đè thiếu evidence", doi_chung="c18_neo_git_DUNG_thi_qua")
     do("m71_xoa_gemini_khoi_ho_model_cho_phep", lambda: _dot_bien_tep('HO_MODEL_CHO_PHEP = frozenset({"claude", "gpt", "gemini"})', 'HO_MODEL_CHO_PHEP = frozenset({"claude", "gpt"})', bo_qua_parity=("HO_MODEL_CHO_PHEP",)),
        "c61_ho_model_cho_phep_phai_quyet_dinh_nhan_dien", "xoá gemini khỏi HO_MODEL_CHO_PHEP", doi_chung="c18_neo_git_DUNG_thi_qua")
+    # `M17`/`A18` — đột biến TRẢ `pre` VỀ ÁP CHO CẢ `sub`, tức đúng hành vi cũ sinh ra `P2`.
+    # Nó phải làm ĐÚNG `c62` đỏ và phải phân hạng `giet_that`; chết vì một lỗi khác là TÍN DỤNG GIẢ.
+    do("m72_tra_tien_to_ve_ap_cho_ca_sub", lambda: _dot_bien_tep(
+        'return sub, ((sub, ""), (d, f"{vai}_" if vai == "executor" else ""))',
+        'return sub, ((sub, f"{vai}_" if vai == "executor" else ""), (d, f"{vai}_" if vai == "executor" else ""))'),
+       "c62_khoi_model_executor_identity_phai_doi_xung_voi_khoi_reviewer",
+       "áp lại tiền tố vai cho khoá tra BÊN TRONG khối model_<vai>_identity", doi_chung="c18_neo_git_DUNG_thi_qua")
 
     # R7-03 — TỰ KIỂM RIG: reviewer bơm mất hàng `_BE_MAT_BI_DANH` vào RIÊNG bản launcher mà rig
     # chép (qua `shutil.copyfile`), bốn hằng parity cũ vẫn bằng nhau. Nay rig phải bắt được điều

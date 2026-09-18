@@ -25,3 +25,17 @@ Mặt khác, ở tầng schema, `docs/PROTOCOL_DA_PHIEN.md` đã có trường `
 3. **Bảng cho phép ánh xạ mặc định**: Cổng `ops/bien_nhan_v2.py` duy trì bảng ánh xạ mặc định từ `provider → họ model mặc định`, đồng thời cho phép biên nhận khai đè bằng trường model có bằng chứng đo lường hoặc audit hợp lệ.
 4. **Bất biến an toàn giữ nguyên**: `same_provider_approved` vẫn **không** thay thế `cross_approved` cho Review Class `sensitive`.
 5. **Không hồi tố**: Quyết định này áp dụng cho các lượt review và biên nhận phát sinh từ thời điểm đóng băng đặc tả #551 trở đi; không đọc lại hay thay đổi mức bảo chứng của các biên nhận đã land trong lịch sử.
+
+## Hai hành vi ĐÃ CÓ mà chưa ai khai — khai ở đây (Packet #551 revision 4)
+
+Cả hai do verdict lượt 3 (`sha256 935a0c3792c5221eba24455188ecd0b873718c6c8e72134031269b8bd6f54dc0`) đo được trên `ops/bien_nhan_v2.py`. Chúng **không phải sơ hở**; chúng là chủ ý chưa được viết ra. Một hành vi đúng mà im lặng vẫn dẫn người đọc đi sai hướng, nên nó được khai ở đây thay vì bị sửa đi.
+
+6. **Một người audit bảo chứng cho CẢ HAI vai.** Khi mức bằng chứng là `khai_co_audit`, cổng chấp nhận trường `nguoi_audit` / `audit_actor` **không mang tiền tố vai** ở mức top-level của biên nhận, cho cả vai `reviewer` lẫn vai `executor`. Nghĩa là **một** trường audit duy nhất thoả cho cả hai bên. Đây là chủ ý — một biên nhận, một người audit — chứ không phải chỗ quên. Hệ quả phải biết: biên nhận khi ấy **không phân biệt được** *"đã audit cả hai model"* với *"đã audit một model"*. Ai cần phân biệt thì khai thêm `executor_nguoi_audit` riêng; cổng đọc cả hai dạng.
+
+   Ca đo: `khai_co_audit` + `nguoi_audit` chỉ ở top-level ⇒ **QUA** · `khai_co_audit` + `executor_nguoi_audit` riêng ⇒ **QUA** · `khai_co_audit` + không có người audit nào ⇒ **CHẶN** (đối chứng).
+
+7. **Khoá model ở top-level tính là KHAI ĐÈ của vai reviewer.** `model` · `ho_model` · `model_family` · `canonical_model` đặt ở mức top-level của biên nhận (không nằm trong `model_reviewer_identity`) được cổng đọc là khai đè model của **vai reviewer**, nên kéo theo đòi `model_evidence`. Lý do: ở top-level hai vai dùng chung một không gian tên, và vai `executor` đã có tiền tố riêng (`executor_model`, …) để tự phân biệt; phần còn lại thuộc về reviewer.
+
+   Ca đo: thêm khoá top-level `model` ⇒ **CHẶN** *"khai đè model reviewer … thiếu mức bằng chứng"* · thêm `ho_model` ⇒ **CHẶN**. Đo trên dữ liệu thật của kho: **0/184** biên nhận hiện có mang khoá ấy ở top-level ⇒ đây là **nới phạm vi chưa khai**, không phải hồi quy. Bên trong khối `model_<vai>_identity` thì ngược lại: khoá **không** mang tiền tố, cho cả hai vai — xem mục 8.
+
+8. **Khối `model_<vai>_identity` tra khoá KHÔNG tiền tố, đối xứng hai vai.** Bên trong `model_reviewer_identity` và `model_executor_identity`, cổng đọc `model_family` · `ho_model` · `canonical_model` · `model` · `model_evidence` · `bang_chung_model` **không** mang tiền tố vai. Tiền tố `executor_` chỉ còn nghĩa ở mức top-level. Trước revision 4, tiền tố bị áp cho cả bên trong khối, nên `model_executor_identity: {model: …}` bị **bỏ qua lặng lẽ** trong khi `model_reviewer_identity: {model: …}` chạy — bất đối xứng ở đúng trường mà `cross_approved` treo lên. Đo trước khi đổi: dạng **có** tiền tố bên trong khối xuất hiện **0/184** lần, nên việc thôi đọc nó không thu hẹp biên nhận nào đang tồn tại.

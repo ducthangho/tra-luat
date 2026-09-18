@@ -1,4 +1,5 @@
-verdict: approve
+verdict: changes_requested
+verdict_truoc: approve            # RUT LAI 18-09-2026 — xem §RUT LAI o cuoi tep
 reviewed_sha: 2f708690
 
 # CROSS-REVIEW LƯỢT 3 — packet #541 `WP541-PATH-TOI-THIEU-THEO-NEN` **r1 / gen 1**
@@ -9,7 +10,7 @@ reviewed_sha: 2f708690
 | `base_sha` | `d705623162b7` — `merge-base` = `d705623162b7`, đúng base của lease |
 | lease | `wp541-path-r1-g1-antigravity`, `spec_hash fc6e814d…1162075` |
 | lượt trước | `e60c757aa535` → `changes_requested` (1 lớp P1 · 1 lớp P2) |
-| kết luận | **`approve`** — **0 P1 · 0 P2** · **2 P3** |
+| kết luận | ~~`approve`~~ → **`changes_requested`** (rút lại 18-09-2026) — xem §RÚT LẠI |
 | assurance | **`advisory_review`** — trần cứng, xem cuối tệp |
 
 ## HAI LỚP CỦA LƯỢT 2 — ĐÓNG CẢ HAI, ĐO ĐỘC LẬP
@@ -176,3 +177,83 @@ Cần một lượt audit của người, độc lập với executor, tự đ�
 Tệp này trong kho, có băm. Bản đăng trên GitHub chỉ là **bản chiếu**.
 Verdict lượt 1 và lượt 2 giữ nguyên trên đĩa; lượt này **không rút** điều gì của chúng — hai lớp mở
 của lượt 2 nay đóng bằng phép đo, không bằng lời khai.
+
+
+---
+
+# RÚT LẠI — verdict lượt 3 đổi từ `approve` sang `changes_requested` (18-09-2026)
+
+**Lượt 4** (`claude/review-541-luot4-20260918`, verdict `074fd01`) chấm **cùng một
+`reviewed_sha` `2f70869a`** và ra `changes_requested` — **1 P1 · 1 P2 · 2 P3**.
+
+Tôi **không nhận lời khai**. Đo lại độc lập, rig riêng, và **chạy cặp ca đối chứng
+trước** (biết trước đáp án) rồi mới tin ca nào:
+
+```
+=== CA DOI CHUNG ===
+  git.exe ngoai cwd  -> NHAN   OK
+  git.exe TRONG cwd  -> None   OK
+
+=== P1: buoc 1 CONG_CU_GIT co kiem duoi tep khong? ===
+  CONG_CU_GIT=git.exe                      -> NHAN
+  CONG_CU_GIT=git.bat                      -> NHAN
+  CONG_CU_GIT=git.cmd                      -> NHAN
+  CONG_CU_GIT=git.py                       -> NHAN
+  CONG_CU_GIT=khong-phai-git-chut-nao.txt  -> NHAN
+
+=== P2: muc PATH co dau nhay kep ===
+  PATH=khong nhay   -> NHAN
+  PATH=co nhay kep  -> None (TU CHOI)
+
+=== P3-1: mot dau ';' trong TEN thu muc, tren posix ===
+  os.pathsep=':', mot muc chua ';' -> None (MAT muc git.exe hop le)
+```
+
+**Cả ba tái hiện.** Verdict `approve` với một P1 còn sống là verdict SAI, bất kể ai
+tìm ra nó.
+
+## Vì sao lượt 3 trượt — nói cho đúng, đừng nói cho nhẹ
+
+Lượt 4 viết rất công bằng rằng đây là *"hướng lượt 3 không săn, không phải phản bác
+lượt 3"*. Điều ấy đúng về sự kiện nhưng **không gỡ tội cho verdict**: tôi đã đo bước
+2 và bước 3 rất kỹ, rồi kết luận cho **cả hàm**.
+
+Bước 1 (`CONG_CU_GIT`) nằm ngay trên hai bước tôi đo, trong cùng một hàm, và chính
+docstring khai *"chỉ chấp nhận git.exe, không qua PATHEXT"* — một câu đọc như bất
+biến của cả hàm trong khi nó chỉ đúng cho **một trong ba** bước. Tôi đọc câu ấy và
+không thử nó. Đây đúng bài học kho đã ghi: **"vá đúng chỗ được chỉ rồi bỏ sót đường
+thứ ba"** — lần này ở phía review: *đo đúng chỗ mình nghĩ tới, rồi kết luận cho
+những chỗ mình không nghĩ tới*. Ba bước là ba ĐƯỜNG VÀO; tôi phải tự liệt kê hết
+đường TRƯỚC khi chấm, thay vì liệt kê những đường lượt 2 đã chỉ.
+
+Và mô hình đe doạ tự nó đã tố cáo chỗ hở: PATH bị coi là KHÔNG đáng tin (chỉ
+`git.exe`, loại `cwd`, loại `%SystemRoot%`), còn `CONG_CU_GIT` — **cũng là một biến
+môi trường** — chỉ bị kiểm VỊ TRÍ, không kiểm KIỂU. Ai đặt được biến này thì đặt
+được biến kia.
+
+## P3-2 — lượt 4 sửa lưng lượt 3, và lượt 4 đúng
+
+Lượt 3 gọi `sys.stderr.write` vô điều kiện là *"lỗi của BỘ ĐO, không phải bản vá"*.
+Lượt 4 gọi đó là **đúng một nửa**, và đúng: bộ đo phải chịu được stderr, **nhưng**
+một hàm thư viện ghi chẩn đoán mà người gọi **không tắt được** — ở một nhánh BÌNH
+THƯỜNG (máy chưa cài Git dưới `%ProgramFiles%`) — là khuyết tật của hàm. Bằng chứng:
+nó đã cắn **hai phiên đo độc lập** (lượt 3 commit `7d25003`; lượt 4 vòng đầu). Biên
+nhận Windows của lượt 3 (`wp541-do-windows-that-20260918.md` §7) đã tự nâng nó thành
+P3 trước khi đọc lượt 4 — hai đường độc lập cùng chỉ một chỗ.
+
+## Phần lượt 3 ĐO ĐƯỢC vẫn đứng nguyên
+
+Không rút lại phép đo nào, chỉ rút lại KẾT LUẬN:
+
+- `P1-2` và `P2-MỚI` của lượt 2 **đóng thật** — lượt 4 đo độc lập và xác nhận.
+- Trên **Windows thật** (18-09-2026, quyền Administrator): `rc=0`; N1–N4 (`t165`–
+  `t168`) **QUA cả bốn**; N7 truoc=1/sau=0, `t165` ĐỎ **đúng lý do**; giải đường dẫn
+  thật trả `C:\Program Files\Git\cmd\git.exe`; 15 ca CI: **11 xanh**, 4 đỏ với
+  nguyên nhân đã đọc mã và **không ca nào** còn chữ ký PATH.
+- `t136`: `rc` đúng, **lý do sai**, vì fixture tiêm hằng chỉ-POSIX `/khong/co/git`
+  (`is_absolute()` True trên POSIX, **False** trên Windows).
+
+Bốn việc trên phải vào **một spec revision mới (r3)** của #541: P1 (bước 1 kiểm
+`git.exe`), P2 (bóc nháy kép trong mục PATH), P3-1 (tách PATH theo `os.pathsep`),
+P3-2 (chỉ ghi stderr khi `chan_doan is None`), cộng `t136` mà chủ kho đã chỉ thị gộp
+vào. Write set KHÔNG đổi (vẫn 2 tệp).

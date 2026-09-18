@@ -19,11 +19,12 @@ generation: 1
 lease_id: t125-do-r1-g1-antigravity
 granted_by: ducthangho
 
-granted_on_instruction: https://github.com/ducthangho/tra-luat/issues/562
-granted_on_instruction_ghi_chu: 'TRO VAO ISSUE, KHONG phai vao mot comment chi thi. Chu kho chua
-  dang comment nao tren #562 — chinh Issue ay do phien nay soan theo chi thi chat. Cong KHONG
-  cuong che truong nay nen mot URL sai se di qua ma khong ai biet; khai thang thay vi bia. Day la
-  cho trong THU BA lien tiep (xem #541 g1, g2) — no khong tu dong.'
+granted_on_instruction: https://github.com/ducthangho/tra-luat/issues/562#issuecomment-5733505871
+granted_on_instruction_ghi_chu: 'DA DONG 18-09-2026T17:1xZ — day la cho trong THU BA lien tiep
+  va no da khong tu dong, dung nhu lease nay khai luc cap. Phien claude soan va dang HO comment
+  bang token cua chu kho, nen GitHub hien tac gia la ducthangho; chinh comment ay noi ro dieu do.
+  Luu y them: Issue #562 CUNG do phien ay soan theo chi thi chat — comment khai ca dieu nay de
+  khong ai doc no thanh mot yeu cau tu phat cua chu kho.'
 granted_on_instruction_nguyen_van: 'Chu kho, phien dieu phoi 18-09-2026: "mo packet rieng cho t125"
   · "soan spec cho #562" · "soan lease cho #562 di".'
 recorded_by: claude-session

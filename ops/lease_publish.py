@@ -1106,7 +1106,7 @@ def _git_windows(path=None, system_root=None, program_files=None, cwd=None,
     Thứ tự:
       1. CONG_CU_GIT — biến môi trường tường minh, nếu có.
       2. Thư mục cài Git phân giải từ %ProgramFiles% (và registry nếu đọc được).
-      3. shutil.which("git") trên PATH thật — đường CHÓT.
+      3. git.exe trên PATH thật — đường CHÓT (chỉ chấp nhận git.exe, không qua PATHEXT).
     Ở MỌI BƯỚC: loại ứng viên nằm trong cwd, loại ứng viên nằm dưới %SystemRoot%.
     Khi bước 2 (%ProgramFiles%) không phân giải, chẩn đoán ghi KHÔNG_ĐO_ĐƯỢC chứ không
     im lặng rơi xuống bước 3 (N3b).
@@ -1175,16 +1175,16 @@ def _git_windows(path=None, system_root=None, program_files=None, cwd=None,
         chan_doan.append(thong_bao_pf)
     sys.stderr.write(thong_bao_pf + "\n")
 
-    # 3. shutil.which("git") trên PATH thật — đường CHÓT
-    import shutil
+    # 3. git.exe trên PATH thật — đường CHÓT
+    # Tường minh kiểm tra git.exe, không qua shutil.which / PATHEXT để loại trừ hoàn toàn .bat/.cmd/.py
     path_val = env.get("PATH", "") if path is None else path
     ds_thu_muc = [d for d in path_val.split(";" if ";" in path_val else os.pathsep) if d]
     for d in ds_thu_muc:
         if trong_cwd(d) or duoi_system_root(d):
             continue
-        cand = shutil.which(os.path.join(d, "git")) or shutil.which(os.path.join(d, "git.exe"))
-        if cand and hop_le(cand):
-            return str(Path(cand).resolve())
+        cand = Path(d) / "git.exe"
+        if hop_le(cand):
+            return str(cand.resolve())
     return None
 
 

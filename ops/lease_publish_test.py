@@ -6721,8 +6721,10 @@ def t165_N1_giai_git_windows_program_files_va_fail_closed():
 
 @ca
 def t166_N2_giai_git_windows_loai_tru_cwd():
-    """N2: Nền Windows giả, cwd chứa git.bat và biến thể git.py (vì PATHEXT đo được có .PY)
-    => kết quả KHÔNG trỏ vào cwd.
+    """N2: Nền Windows giả:
+    1. cwd chứa git.bat, git.py, git.exe => kết quả KHÔNG trỏ vào cwd (loại trừ cwd).
+    2. Thư mục PATH ngoài cwd chỉ chứa git.bat/cmd/py (không có git.exe) => bị từ chối (P1-2 / P2-MỚI).
+    3. Thư mục PATH ngoài cwd có git.exe hợp lệ => trả đúng đường tuyệt đối ấy.
     """
     import tempfile
     lp = _nap_cong()
@@ -6734,17 +6736,46 @@ def t166_N2_giai_git_windows_loai_tru_cwd():
         bat.write_text("@echo off\n", encoding="utf-8")
         py = cwd_fake / "git.py"
         py.write_text("print('fake')\n", encoding="utf-8")
+        exe_cwd = cwd_fake / "git.exe"
+        exe_cwd.write_text("#!/bin/sh\nexit 0\n", encoding="utf-8")
+        exe_cwd.chmod(0o755)
 
         pf_rong = cay / "pf_rong"
         pf_rong.mkdir()
 
-        # Khi cwd chứa git.bat và git.py: kết quả KHÔNG được trỏ vào cwd
+        # Cửa 1: Khi PATH trỏ vào cwd (chứa git.bat, git.py, git.exe) => kết quả KHÔNG được trỏ vào cwd
         kq = lp._git_windows(path=str(cwd_fake), program_files=str(pf_rong), cwd=str(cwd_fake))
-        chot(kq is None, f"N2: kết quả phải là None (loại trừ cwd), nhưng lại nhận: {kq}")
+        chot(kq is None, f"N2 cửa 1: kết quả phải là None (loại trừ cwd), nhưng lại nhận: {kq}")
 
         rc, out = _ma_chan(lp, lp._git_exe_toi_thieu, nen="windows",
                            path=str(cwd_fake), program_files=str(pf_rong), cwd=str(cwd_fake))
-        chot(rc == 12, f"N2: phải ném Chan(12) khi chỉ có git.* trong cwd, nhận: {rc}")
+        chot(rc == 12, f"N2 cửa 1: phải ném Chan(12) khi chỉ có git.* trong cwd, nhận: {rc}")
+
+        # Cửa 2 (P2-MỚI): Thư mục PATH ngoài cwd chỉ có git.bat, git.cmd, git.py (không có git.exe)
+        path_bat = cay / "path_ngoai_chi_co_bat"
+        path_bat.mkdir()
+        (path_bat / "git.bat").write_text("@echo off\n", encoding="utf-8")
+        (path_bat / "git.cmd").write_text("@echo off\n", encoding="utf-8")
+        (path_bat / "git.py").write_text("print('fake')\n", encoding="utf-8")
+
+        kq_bat = lp._git_windows(path=str(path_bat), program_files=str(pf_rong), cwd=str(cwd_fake))
+        chot(kq_bat is None, f"N2 cửa 2: PATH ngoài cwd chỉ có git.bat/cmd/py phải bị từ chối, nhận: {kq_bat}")
+
+        rc_bat, out_bat = _ma_chan(lp, lp._git_exe_toi_thieu, nen="windows",
+                                   path=str(path_bat), program_files=str(pf_rong), cwd=str(cwd_fake))
+        chot(rc_bat == 12, f"N2 cửa 2: phải ném Chan(12) khi PATH ngoài chỉ có git.bat/cmd/py, nhận: {rc_bat}")
+
+        # Cửa 3: Thư mục PATH ngoài cwd có git.exe hợp lệ => phải nhận đúng git.exe đó
+        path_exe = cay / "path_ngoai_co_exe"
+        path_exe.mkdir()
+        git_exe_that = path_exe / "git.exe"
+        git_exe_that.write_text("#!/bin/sh\nexit 0\n", encoding="utf-8")
+        git_exe_that.chmod(0o755)
+
+        kq_exe = lp._git_windows(path=f"{path_bat}{os.pathsep}{path_exe}",
+                                program_files=str(pf_rong), cwd=str(cwd_fake))
+        chot(kq_exe == str(git_exe_that.resolve()),
+             f"N2 cửa 3: mong nhận {git_exe_that.resolve()}, nhận được: {kq_exe}")
 
 
 @ca

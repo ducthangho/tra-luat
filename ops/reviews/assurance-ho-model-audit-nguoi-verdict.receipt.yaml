@@ -1,0 +1,216 @@
+# BIÊN NHẬN — lượt `human_audited` của `ASSURANCE-NEO-VAO-HO-MODEL` (#551 / PR #557).
+#
+# ĐÂY LÀ MỨC ASSURANCE THẬT SỰ ĐẠT ĐƯỢC CỦA PACKET NÀY, và nó YẾU HƠN khuôn `PLAT-M4`.
+# Ba lượt cross-review trước (lượt 1/2/3) đều `changes_requested` và đều neo head CŨ hơn.
+# `cross_approved` KHÔNG đạt được: codex hết quota review, agy hết quota, claude là executor.
+# Chữ ký chủ kho THAY cho `cross_approved`, KHÔNG cộng vào nó.
+
+schema_version: 2
+receipt_id: assurance-ho-model-audit-nguoi-ducthangho-20260919-1f120b4a
+kind: review_delivery_receipt
+packet_id: '551'
+packet_slug: 'ASSURANCE-NEO-VAO-HO-MODEL'
+packet_issue: 551
+luot: 4
+lease_id: null
+lease_ghi_chu: >-
+  KHÔNG có lease cho lượt audit này, và đó là ĐÚNG. Lease là công cụ cấp việc cho một PHIÊN
+  agent; chủ kho không tự cấp lease cho chính mình. Thẩm quyền đến từ §2, không từ một tệp YAML.
+provider: human
+role: auditor
+nguoi_audit: ducthangho
+executor_provider: claude
+verdict: approve
+cross_provider: false
+assurance_dat: human_audited
+assurance_KHONG_dat: cross_approved
+assurance_ghi_chu: >-
+  `human_audited` là MỘT TRONG HAI đường §8 cho class `sensitive`; đường kia đo được là KHÔNG
+  ĐẠT ĐƯỢC. Đây không phải một mức hạ, nhưng lượt NÀY yếu hơn một lượt `human_audited` chuẩn —
+  xem `dang_boi` và `muc_bao_chung_YEU_HON_khuon`.
+reviewed_sha: 13407c7bbf44ec2d1af49a013478a38e2824e6fc
+base_sha: 2aaf49f402ccfdaa8d6d608e3a5482ed54dc6e1b
+merge_commit: dc85dd0a34188238aa6537ce843ff3688e488fd3
+target_pull_request: 557
+review_class_hieu_luc: sensitive
+review_class_ghi_chu: >-
+  GIỮ `sensitive` là quyết định CÓ CHỦ Ý (spec r4 `Đ4`): packet sửa CHÍNH cổng đọc luật
+  assurance, nên hạ lớp ở đúng packet ấy là tự nới luật cho mình.
+
+# ---- NGUỒN CÓ THẨM QUYỀN: ĐẢO CHIỀU SO VỚI VERDICT CỦA MÔ HÌNH ----
+authoritative_source: github_comment
+authoritative_source_ghi_chu: >-
+  Với verdict của một MÔ HÌNH, nguồn có thẩm quyền là tệp có băm trong kho và comment là bản
+  chiếu. Ở đây NGƯỢC LẠI: §8 đòi DANH TÍNH BỀN TRÊN GITHUB của người audit. Nhưng xem
+  `muc_bao_chung_YEU_HON_khuon` — ở lượt này chính cái neo ấy đã ĐO ĐƯỢC là không phân biệt nổi.
+evidence_channel: github_comment
+evidence_url: https://github.com/ducthangho/tra-luat/blob/315979e71fc7f7280bd4799432edea7503c9b29b/ops/reviews/assurance-ho-model-audit-nguoi-verdict.md
+nguon_co_tham_quyen_url: https://github.com/ducthangho/tra-luat/pull/557#issuecomment-5739262446
+evidence_url_vi_sao_KHONG_tro_vao_comment: >-
+  `evidence_url` phải là BLOB thì `anchor.loai: canonical_ancestry` mới ĐO ĐƯỢC. Nguồn có
+  thẩm quyền thật của lượt `human_audited` là COMMENT, và nó nằm ở `nguon_co_tham_quyen_url`.
+  Hai trường tách ra chứ không gộp, để đừng ai đọc blob thành thẩm quyền.
+posted_comment_id: 5739262446
+posted_at_utc: '2026-09-19T04:11:39Z'
+author_association: OWNER
+author_association_KHONG_LA_BANG_CHUNG: >-
+  ĐO ĐƯỢC trong chính lượt này: comment do PHIÊN AGENT đăng trả về `author_association: OWNER`
+  y hệt comment chủ kho tự gõ, vì phiên chạy bằng credential chủ kho. Trường này có mặt ở đây
+  để tra cứu, KHÔNG phải để chứng minh ai đã ký. Nợ #566.
+
+
+verdict_path: ops/reviews/assurance-ho-model-audit-nguoi-verdict.md
+verdict_sha256: 1f120b4a76a1c2b8c406475e13520a989947c07491f22cc647a9ee491569c171
+verdict_bytes: 5701
+verdict_path_ghi_chu: >-
+  Bản CHIẾU để tra ngoại tuyến. Băm này là băm của bản chiếu, KHÔNG phải của comment gốc.
+
+# ---- ĐO THỨ ĐÃ ĐẾN, không dừng ở lời khai ----
+doi_chieu_boi_phien_chinh:
+  cach_do: >-
+    Đọc NGƯỢC comment về qua API ngay sau khi đăng, thay vì tin giá trị trả về của lời gọi.
+  so_lan_VERDICT: 1
+  so_lan_Reviewed_commit: 1
+  quy_uoc_KHOP: >-
+    Quy ước của kho là "đúng hai dòng, mỗi dòng xuất hiện ĐÚNG MỘT LẦN". Lượt này KHỚP. Khuôn
+    `PLAT-M4` từng đặt `Reviewed commit:` HAI lần và biên nhận của nó phải khai ra chỗ lệch ấy;
+    lượt này kiểm trước khi đăng nên không lặp lại.
+  sha_khop_head: true
+
+# ---- BA ÁNH XẠ v2 BẮT BUỘC ----
+# `model_reviewer_identity` giả định reviewer là một MÔ HÌNH. Lượt này reviewer là NGƯỜI, nên
+# các trường model được khai `khong_ap_dung` thay vì bịa một giá trị cho hợp lệ. Đây là một chỗ
+# lược đồ v2 chưa lường tới vai `human`; khai ra thay vì làm tròn.
+model_reviewer_identity:
+  provider: human
+  surface: manual_audit
+  transport: human
+  model_yeu_cau: khong_ap_dung
+  model_da_chay: khong_ap_dung
+  model_evidence: khong_ap_dung
+  effort: KHONG_KHAI
+  KHONG_do_duoc: >-
+    Không có `session_run_id`: đây là lượt của người, không phải một lượt chạy máy. Và xem
+    `muc_bao_chung_YEU_HON_khuon` — comment nguồn do PHIÊN AGENT đăng hộ, nên ngay cả danh tính
+    người ký cũng không kiểm chứng được bằng máy.
+  phien_doc_lap: true
+  phien_doc_lap_can_cu: >-
+    Bên độc lập là CHỦ KHO — một người ở ngoài phiên agent — và các quyết định của họ có mỏ neo
+    BỀN, trích nguyên văn: chọn `human_audited` thay vì hạ `review_class` (phiên điều phối
+    19-09-2026); chốt trần 300 tại issues/551#issuecomment-5734920075; chỉ thị merge tại
+    pull/557#issuecomment-5739222832; chỉ thị soạn và đăng hộ audit.
+  phien_doc_lap_GIOI_HAN_phai_doc_kem: >-
+    "Độc lập" ở đây CHỈ có nghĩa: người quyết định nằm ngoài phiên agent. Nó KHÔNG có nghĩa là
+    một lượt chạy độc lập đã tái kiểm. Đo được ba giới hạn: (a) chủ kho KHÔNG tự chạy lại phép
+    đo nào — họ chạy bộ đo do phiên agent viết, trên máy mình, rồi chấp nhận kết quả;
+    (b) comment mang chữ ký do chính phiên agent đăng hộ; (c) không có `session_run_id` vì đây
+    không phải một lượt chạy máy. Ai đọc `human_audited` ở biên nhận này thành "đã có một vòng
+    kiểm độc lập bằng máy" là đọc SAI.
+
+  # ---- KHAI THẲNG: AI ĐĂNG, VÀ VÌ SAO ĐIỀU ĐÓ QUAN TRỌNG ----
+  dang_boi: phien_agent_dang_ho
+  dang_boi_chi_thi_nguyen_van: >-
+    Chủ kho, phiên điều phối 19-09-2026: "Soạn verdict .md cho tôi ký đi", rồi "Đăng hộ tôi luôn đi".
+  muc_bao_chung_YEU_HON_khuon: >-
+    Khuôn `plat-m4-human-audit-ducthangho-verdict.receipt.yaml` khai `tac_gia: ducthangho,
+    author_association OWNER — không phải bot, không phải phiên agent`. Biên nhận NÀY cố ý KHÔNG
+    khai câu ấy, vì nó đã được ĐO là không kiểm chứng được: phiên agent đăng comment 5739262446
+    rồi đọc ngược về qua API, phản hồi trả `user.login = ducthangho` và
+    `author_association = OWNER` — Y HỆT một comment chủ kho tự gõ. Nguyên nhân: phiên agent chạy
+    bằng credential chủ kho (kho ghi từ 2026-08-26: `get_me -> ducthangho`). Nên `author_association`
+    KHÔNG phân biệt được người với máy, và thẩm quyền lượt này neo vào CHỈ THỊ trong phiên chứ
+    không vào tác giả comment. Nợ riêng: #566.
+  KHONG_duoc_dung_lam_tien_le: >-
+    Đừng dùng lượt này làm tiền lệ cho việc phiên agent đăng hộ chữ ký người. Khuôn chuẩn đòi chủ
+    kho TỰ ĐĂNG; lượt này không đạt điều đó và khai thẳng ra.
+  xung_dot_loi_ich_da_khai: >-
+    Chủ kho là người đọc độc lập DUY NHẤT còn lại của cả chuỗi packet, và comment mang chữ ký
+    của họ lại do chính phiên agent bị audit đăng hộ. Mức độc lập vì thế mỏng hơn một lượt
+    `human_audited` chuẩn.
+
+github_submitter_identity:
+  actor: ducthangho
+  ghi_chu: >-
+    Comment đăng qua MCP github bởi PHIÊN AGENT, không phải chủ kho tự gõ. `actor` ở đây là tài
+    khoản mà credential thuộc về, KHÔNG phải bằng chứng ai đã gõ. Xem #566.
+
+anchor:
+  loai: canonical_ancestry
+  cuong_do: thap
+  mo_ta: 'Blob bản chiếu verdict, ghim trên commit 315979e71fc7f7280bd4799432edea7503c9b29b.'
+  gioi_han: >-
+    Mỏ neo này trỏ vào BẢN CHIẾU, KHÔNG vào nguồn có thẩm quyền. Nguồn thật là comment
+    5739262446 (xem `nguon_co_tham_quyen_url`). Lược đồ v2 có đúng loại cho nó —
+    `protected_evidence_ref` — nhưng cổng `bien_nhan_v2` KHÔNG có đường đo cho loại ấy nên nó
+    rơi vào trạng thái thứ ba và làm cổng ĐỎ. Nên lượt này neo `canonical_ancestry` cho ĐO ĐƯỢC,
+    và khai thẳng rằng thứ được neo yếu hơn thứ có thẩm quyền. Đây là một KHE của lược đồ v2
+    với vai `human`, không phải một lựa chọn cho tiện — ghi vào #566.
+
+# ---- NHỮNG GÌ CHỮ KÝ NÀY CHẤP NHẬN — nêu TƯỜNG MINH trong thân comment ----
+da_chap_nhan_tuong_minh:
+- id: r330-lech-chua-ro-nguyen-nhan
+  noi_dung: >-
+    `r330_deploy_msg_khong_chay_lenh` lệch trên Windows. Bốn lượt trên cùng một máy: nền
+    2aaf49f4 ĐỎ 2/2; ứng viên 13407c7 ĐỎ 1 lượt, XANH 1 lượt. Hai tệp ca ấy đọc GIỐNG NHAU TỪNG
+    BYTE ở hai vế (deploy-package.sh 693ef9a46dca7d9c, .ps1 03bcccba890844e6) và diff
+    tl_selftest.py giữa hai vế đúng 13 dòng kê khai slot r291 => lệch KHÔNG đến từ bản vá. Căn cứ
+    ký là "ứng viên không tệ hơn nền", KHÔNG phải "đã xanh". Nợ #565.
+- id: S1-S2-dong-bang-sua-dac-ta
+  noi_dung: >-
+    M20 RÚT M16/A16 (mất đối tượng khi packet bỏ cross_approved); M21 SỬA LỜI A14 ("RỖNG => CHẶN"
+    rộng hơn mã; mã chỉ chặn RỖNG khi CÓ khai đè). Hai tiêu chí được GỠ và VIẾT LẠI, không phải
+    được THOẢ.
+- id: xung-dot-loi-ich-muc-cao-nhat
+  noi_dung: >-
+    Một phiên claude soạn CẢ BỐN đặc tả, ghi hộ CẢ BỐN lease, viết CẢ BA verdict, VÀ là executor,
+    VÀ đăng hộ chính comment audit này. Không còn vòng độc lập nào bằng máy.
+- id: kich-thuoc-293-tren-250
+  noi_dung: >-
+    +293 dòng thêm, vượt con số 250 mà gen 3 tự đặt. Trần áp dụng là 300 theo ADR-0044:5; chủ kho
+    chốt tại issues/551#issuecomment-5734920075.
+- id: cross-approved-khong-dat-duoc
+  noi_dung: >-
+    codex hết quota review, agy hết quota, claude là executor => không còn bên thứ hai khác họ
+    model. Chữ ký THAY cho cross_approved, không cộng vào nó.
+
+bang_chung_may_tren_exact_head:
+  ci_run_truoc_merge: 35420260669
+  gate_ubuntu: success
+  gate_windows: KHONG_DO_DUOC
+  gate_windows_ly_do: >-
+    manual_ci_budget 0 (chỉ thị chủ kho "khong chay CI Windows"), cộng chỉ thị "Không chạy CI,
+    full CI cho đến khi merge". Là CHỌN KHÔNG ĐO, KHÔNG phải "đã đo và xanh".
+  job_muc_JOB: '4/4 success, tất cả ubuntu-latest'
+  ci_run_hau_merge: 35421262607
+  ci_hau_merge: '4/4 success; release-verify strict (lane LAND) CHẠY và ĐẠT'
+  bien_nhan_v2: '131 ĐẠT v2 · 0 vi phạm · 0 KHÔNG ĐO ĐƯỢC · tổng 184 — Y HỆT nền'
+  bien_nhan_v2_test: '63/63 ca · 74/74 đột biến CÓ RĂNG; m72 -> c62 = giet_that'
+  tl_selftest_linux: '1710/1710'
+  tl_selftest_windows: '1709/1710 ở 3/4 lượt — xem caveat r330'
+  numstat: '6 tệp, +293/-18 so 2aaf49f4'
+
+verdict_usage_caveats:
+- id: khong-doc-thanh-cross-provider
+  noi_dung: >-
+    ĐỪNG đọc lượt này thành cross-review, và đừng viện nó làm tiền lệ "packet sensitive land được
+    bằng chữ ký người". Nó land được vì §8 cho human_audited NGANG HÀNG với cross_approved — và vì
+    đường kia ĐO ĐƯỢC là bị chặn. Packet khác phải tự chứng minh lại, không thừa hưởng.
+- id: chu-ky-nay-do-phien-agent-dang-ho
+  noi_dung: >-
+    Comment nguồn do PHIÊN AGENT đăng hộ theo chỉ thị, KHÔNG phải chủ kho tự gõ. Khuôn PLAT-M4 đòi
+    chủ kho tự đăng. Ai đọc sau phải biết khác biệt đó và KHÔNG dùng lượt này làm tiền lệ cho việc
+    agent đăng hộ chữ ký người.
+- id: author-association-khong-phan-biet-duoc
+  noi_dung: >-
+    ĐO ĐƯỢC trong chính lượt này: comment do phiên agent đăng trả về author_association OWNER y hệt
+    comment chủ kho tự gõ, vì phiên chạy bằng credential chủ kho. Nên ĐỪNG dùng trường ấy làm bằng
+    chứng "người đã ký" ở bất kỳ biên nhận nào. Nợ #566.
+- id: no-r330-van-mo
+  noi_dung: >-
+    `approve` này KHÔNG đóng #565. Ca r330 vẫn lệch chưa rõ nguyên nhân trên Windows, và vì gate
+    windows-latest đang tắt nên không cổng nào thấy nó. Packet kế tiếp chạm scripts/tl_selftest.py
+    phải biết điều đó.
+- id: no-agy-attest-van-mo
+  noi_dung: >-
+    KHÔNG đóng AGY-CHUA-ATTEST-MODEL-TUNG-LUOT. Họ model thật của agy ở lượt sinh 6bcf2663 vẫn
+    không có bằng chứng máy; packet này chỉ thôi phụ thuộc vào nó.

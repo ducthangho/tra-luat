@@ -25,6 +25,7 @@ os.environ["PYTHONUTF8"] = "1"
 os.environ["PYTHONIOENCODING"] = "utf-8"
 import shutil
 import re as _RE
+from pathlib import Path as _PATH   # #566 c67 — tránh va tên sẵn có
 import subprocess
 import sys
 import tempfile
@@ -829,13 +830,20 @@ def _ghi_bn(tmp: Path, d: dict, ten="a-verdict.receipt.yaml"):
 
 @ca
 def c24_anchor_KHONG_CO_DUONG_DO_vao_trang_thai_THU_BA():
-    """`protected_evidence_ref` · `check_object`: cổng CHƯA có đường đo ⇒ KHÔNG ĐO ĐƯỢC.
+    """`check_object`: cổng CHƯA có đường đo ⇒ KHÔNG ĐO ĐƯỢC.
 
     R3-02 đo được nhánh này gỡ đi mà suite vẫn `25/25 · 16/16` — mọi ca cũ đều dùng
     `canonical_ancestry`, nên hai loại kia CÓ MẶT trong danh sách cho phép mà chưa từng
     được ai chạm. Ca đo TỪNG loại RIÊNG và neo cả MÃ THOÁT: "vào `chua_do`" mà CLI vẫn
-    `rc=0` thì cổng vẫn xanh, đúng bệnh `c21` từng bắt."""
-    for loai in ("protected_evidence_ref", "check_object"):
+    `rc=0` thì cổng vẫn xanh, đúng bệnh `c21` từng bắt.
+
+    #566 `M3` THU HẸP ca này: `protected_evidence_ref` KHÔNG còn ở trạng thái thứ ba —
+    nó nay có đường đo (đối chiếu `posted_comment_id` với `nguon_co_tham_quyen_url`), và
+    `c67` đo nó. Đây là đổi HỢP ĐỒNG có chủ ý, không phải nới cổng: loại ấy là mỏ neo ĐÚNG
+    cho một audit của người, mà để nó làm cổng ĐỎ thì người ta đi khai `canonical_ancestry`
+    trên blob BẢN CHIẾU để "cho đo được" — tức mỏ neo trỏ vào bản sao thay vì nguồn có
+    thẩm quyền. `check_object` GIỮ NGUYÊN trạng thái thứ ba, nên ca này vẫn có răng."""
+    for loai in ("check_object",):
         with tempfile.TemporaryDirectory() as t:
             tmp = Path(t)
             sha, bam, duong = _kho_git(tmp, "noi dung verdict\n")
@@ -1798,6 +1806,11 @@ def _bn_human(sha, bam, duong):
                                     "KHONG_do_duoc": "audit thủ công — không có session máy để neo"}
     d["github_submitter_identity"] = {"actor": "nguoi-audit"}
     d["assurance"] = "human_audited"
+    # #566 `M1` — AI ĐĂNG. `author_association` trả `OWNER` cho CẢ comment người tự gõ LẪN
+    # comment phiên agent đăng hộ (đo 04:11Z 19-09), nên nó không phân biệt được hai thứ;
+    # `dang_boi` là lời khai DUY NHẤT về việc ấy. Fixture khai `chu_kho_tu_dang` — giá trị
+    # KHÔNG đòi trích chỉ thị, để ca (c) đo đúng đường DƯƠNG tối thiểu.
+    d["dang_boi"] = "chu_kho_tu_dang"
     return d
 
 
@@ -1808,8 +1821,8 @@ def c41_human_audit_theo_PROTOCOL_8_QUA_va_muc_MO_HINH_cho_nguoi_bi_chan():
     Phân vùng suy từ HỢP ĐỒNG vận chuyển, hai chiều: (c) người audit khai đủ §8 phải QUA cả trong
     tiến trình lẫn CLI; (d) người khai mức của MÔ HÌNH phải ĐỎ; (e) người không khai độc lập phải
     ĐỎ; (f) MÔ HÌNH khai `human_audited` phải ĐỎ — mặt thứ ba của cùng lớp, chưa ai chỉ; (g) bằng
-    chứng human chỉ là comment GitHub ⇒ `protected_evidence_ref` ⇒ trạng thái THỨ BA, không phải
-    sạch, không phải vi phạm. Oracle (a)/(b) chép tay từ protocol và bảng chuyển tiếp."""
+    chứng human là comment GitHub ⇒ `protected_evidence_ref` ⇒ #566 `M3` cấp đường đo, nên nay đo
+    HAI CHIỀU (khớp hai nguồn ⇒ QUA, lệch id ⇒ ĐỎ) thay vì rơi vào trạng thái thứ ba. Oracle (a)/(b) chép tay từ protocol và bảng chuyển tiếp."""
     # (a) oracle phân vùng đóng băng.
     bang(bnv2.VAN_CHUYEN_NGUOI == VAN_CHUYEN_NGUOI_DONG_BANG
          and tuple(sorted(bnv2.ASSURANCE_CUA_NGUOI)) == ASSURANCE_CUA_NGUOI_DONG_BANG
@@ -1874,17 +1887,28 @@ def c41_human_audit_theo_PROTOCOL_8_QUA_va_muc_MO_HINH_cho_nguoi_bi_chan():
             n, loi = _kiem(tmp, allowlist={}, no_da_do={})
             bang(n >= 1 and any("KHÔNG được tự tạo `human_audited`" in x for x in loi),
                  f"mô hình {prov!r} khai `human_audited` phải ĐỎ, được: {loi}")
-    # (g) TRẠNG THÁI THỨ BA: evidence của người audit chỉ là comment GitHub.
-    with tempfile.TemporaryDirectory() as t:
-        tmp = Path(t)
+    # (g) #566 `M3` ĐỔI HỢP ĐỒNG ở đây: bằng chứng của người audit là một comment GitHub,
+    # và `protected_evidence_ref` nay CÓ đường đo — đối chiếu `posted_comment_id` với
+    # `nguon_co_tham_quyen_url`. Trước đây nó rơi vào trạng thái thứ ba nên làm cổng ĐỎ, và
+    # hệ quả THẬT là người ta đi khai `canonical_ancestry` trên blob BẢN CHIẾU để "cho đo
+    # được" — mỏ neo trỏ vào bản sao thay vì nguồn có thẩm quyền. Hai chiều, cả hai đều chịu
+    # lực: khớp ⇒ QUA, lệch id ⇒ ĐỎ. Thiếu chiều ÂM thì chốt chỉ còn là kiểm hình dạng.
+    def _human_neo_comment(tmp, cid, url_id):
         sha, bam, duong = _kho_git(tmp, "noi dung verdict\n")
         d = _bn_human(sha, bam, duong)
         d["anchor"]["loai"] = "protected_evidence_ref"
-        d["evidence_url"] = "https://github.com/o/r/pull/1#issuecomment-1"
+        d["posted_comment_id"] = cid
+        d["nguon_co_tham_quyen_url"] = f"https://github.com/o/r/pull/1#issuecomment-{url_id}"
         _ghi_bn(tmp, d)
-        loi, tk = bnv2.kiem(tmp, allowlist={}, no_da_do={})
-        bang(not loi and any("CHƯA có đường đo" in x for x in (tk.get("chua_do") or [])),
-             f"evidence human không đo được phải là trạng thái THỨ BA: loi={loi} chua_do={tk.get('chua_do')}")
+        return bnv2.kiem(tmp, allowlist={}, no_da_do={})
+    with tempfile.TemporaryDirectory() as t:
+        loi, tk = _human_neo_comment(Path(t), "5739262446", "5739262446")
+        bang(not loi and not tk.get("chua_do"),
+             f"`protected_evidence_ref` khớp hai nguồn phải QUA: loi={loi} chua_do={tk.get('chua_do')}")
+    with tempfile.TemporaryDirectory() as t:
+        loi, _ = _human_neo_comment(Path(t), "5739262446", "9999999999")
+        bang(any("KHÔNG khớp id" in x for x in loi),
+             f"id trong URL lệch `posted_comment_id` phải ĐỎ, được: {loi}")
 
 
 @ca
@@ -2332,6 +2356,129 @@ def c63_muc_bang_chung_RONG_KHONG_khai_de_phai_QUA():
          "không khai đè + bằng chứng RỖNG phải QUA — nếu CHẶN thì 50 biên nhận cũ sắp đỏ")
 
 
+
+def _nguoi_du(dang_boi="chu_kho_tu_dang"):
+    """Fixture `human_audited` ĐẠT tối thiểu — dựng RIÊNG, không sửa `v2_du()`.
+
+    `v2_du()` là fixture của vai MÔ HÌNH (`provider: openai_codex`). Nhét `human_audited`
+    vào nó sẽ va `ASSURANCE_CUA_NGUOI` ở `_muc_cam_theo_provider` và ca đỏ vì một lý do
+    KHÁC — đúng lớp "ca chết vì lỗi vô can" mà #568 vừa trả giá.
+    """
+    d = v2_du()
+    d["assurance"] = "human_audited"
+    d["model_reviewer_identity"] = {"provider": "human", "surface": "manual_audit",
+                                    "phien_doc_lap": True}
+    d["transport"] = "human"
+    if dang_boi is not None:
+        d["dang_boi"] = dang_boi
+    return d
+
+
+def _loi_dang_boi(d):
+    return [x for x in bnv2._thieu(d) if "dang_boi" in x]
+
+
+@ca
+def c64_human_audited_thieu_dang_boi_phai_CHAN():
+    """#566 `M1` — lời khai AI ĐĂNG phải BẮT BUỘC, không phải tuỳ nghi.
+
+    `Đ1` đo được 04:11Z 19-09: phiên agent chạy bằng credential chủ kho nên comment nó đăng
+    trả `author_association: OWNER` Y HỆT comment chủ kho tự gõ. Không có phép ĐO nào phân
+    biệt được; thứ duy nhất còn lại là một lời KHAI — và một lời khai không bắt buộc thì
+    vắng mặt trong im lặng.
+    """
+    bang(_loi_dang_boi(_nguoi_du(dang_boi=None)) != [],
+         "human_audited thiếu `dang_boi` phải CHẶN")
+    bang(_loi_dang_boi(_nguoi_du()) == [],
+         "ĐỐI CHỨNG: có `dang_boi` hợp lệ thì phải QUA — nếu chặn thì chốt bắt oan")
+
+
+@ca
+def c65_dang_boi_trong_anh_xa_con_KHONG_tinh_la_co():
+    """#566 `M1`, mặt THỨ HAI — đặt SAI CHỖ cũng là thiếu.
+
+    `Đ2` là ca THẬT, không phải giả định: một regex làm thụt `dang_boi` (cùng ba khoá khác)
+    vào `model_reviewer_identity`, và cổng VẪN XANH y hệt cả trước lẫn sau — `132 ĐẠT v2 /
+    tổng 185`. Nếu chốt `M1` cũng tra trong ánh xạ con thì nó sẽ HỢP THỨC HOÁ đúng cái lỗi
+    nó sinh ra để bắt.
+    """
+    d = _nguoi_du(dang_boi=None)
+    d["model_reviewer_identity"]["dang_boi"] = "chu_kho_tu_dang"
+    loi = _loi_dang_boi(d)
+    bang(loi != [], "`dang_boi` nằm trong `model_reviewer_identity` KHÔNG được tính là có")
+    bang(any("TOP-LEVEL" in x for x in loi),
+         "thông báo phải NÓI RA nó nằm sai chỗ — một lý do sai đẩy người đọc đi sửa nhầm chỗ")
+    bang(_loi_dang_boi(_nguoi_du(dang_boi="ai_do_dang_ho")) != [],
+         "giá trị ngoài danh sách CHO PHÉP phải CHẶN")
+
+
+@ca
+def c66_phien_agent_dang_ho_phai_trich_duoc_chi_thi():
+    """#566 `M2` — "agent đăng hộ" mà không trích được chỉ thị thì không ai kiểm lại được."""
+    bang(_loi_dang_boi(_nguoi_du(dang_boi="phien_agent_dang_ho")) != [],
+         "`phien_agent_dang_ho` thiếu `dang_boi_chi_thi_nguyen_van` phải CHẶN")
+    d = _nguoi_du(dang_boi="phien_agent_dang_ho")
+    d["dang_boi_chi_thi_nguyen_van"] = "Đăng hộ tôi luôn đi"
+    bang(_loi_dang_boi(d) == [], "có trích chỉ thị thì QUA")
+    d2 = _nguoi_du(dang_boi="phien_agent_dang_ho"); d2["dang_boi_chi_thi_nguyen_van"] = "   "
+    bang(_loi_dang_boi(d2) != [], "trích RỖNG (chỉ khoảng trắng) vẫn là thiếu")
+    # ĐỐI CHỨNG PHÂN BIỆT HAI GIÁ TRỊ: `chu_kho_tu_dang` KHÔNG đòi trích. Thiếu chốt này
+    # thì một đột biến "đòi trích cho MỌI giá trị" vẫn giết được ca — tức hai chốt thành
+    # bộ TƯƠNG ĐƯƠNG và ta chỉ đang đo một thứ.
+    bang(_loi_dang_boi(_nguoi_du(dang_boi="chu_kho_tu_dang")) == [],
+         "`chu_kho_tu_dang` KHÔNG đòi trích chỉ thị")
+
+
+@ca
+def c67_protected_evidence_ref_co_duong_do_va_doi_chieu_HAI_nguon():
+    """#566 `M3` — cấp đường đo, và đo bằng ĐỐI CHIẾU chứ không bằng hình dạng.
+
+    Trước đây loại này rơi vào trạng thái thứ ba nên làm cổng ĐỎ, và hệ quả THẬT là người
+    ta đi khai `canonical_ancestry` trên blob BẢN CHIẾU — mỏ neo trỏ vào bản sao thay vì
+    nguồn có thẩm quyền. Một chốt cấm cả việc ĐÚNG thì người ta đi vòng quanh nó.
+    """
+    def dung(cid="5739262446", url=None):
+        d = _nguoi_du()
+        d["anchor"] = {"loai": "protected_evidence_ref", "cuong_do": "trung_binh"}
+        d["posted_comment_id"] = cid
+        d["nguon_co_tham_quyen_url"] = (url if url is not None else
+                                        f"https://github.com/o/r/pull/557#issuecomment-{cid}")
+        return d
+    # LỌC theo CHỦ ĐỀ, không lấy trọn đầu ra: `_neo_git` còn tra `reviewed_sha` trong git,
+    # mà fixture dùng sha giả nên nó luôn sinh một mục `KHÔNG ĐO ĐƯỢC` vô can. Lấy trọn thì
+    # ĐỐI CHỨNG "hai trường khớp nhau thì QUA" không bao giờ xanh được, và ca sẽ đỏ vì một
+    # lý do KHÔNG PHẢI thứ nó đo — đúng lớp "tín dụng giả" mà #568 vừa trả giá, lật ngược.
+    _CHU_DE = ("protected_evidence_ref", "posted_comment_id", "nguon_co_tham_quyen_url",
+               "CHƯA có đường đo")
+
+    def neo_loi(d):
+        # MỘT lời gọi, gộp CẢ HAI danh sách: `loi` và `chua_do_duoc`. Gọi hai lần rồi ghép
+        # là đọc nguồn HAI LẦN cho cùng một quyết định — #359 đã trả giá cho hình dạng ấy.
+        loi, chua = bnv2._neo_git(_PATH("."), "t", d)
+        return [x for x in list(loi) + list(chua) if any(k in x for k in _CHU_DE)]
+    # (1) KHÔNG còn nằm ở trạng thái thứ ba
+    bang(all("CHƯA có đường đo" not in x for x in neo_loi(dung())),
+         "`protected_evidence_ref` phải có đường đo, không còn là trạng thái thứ ba")
+    bang(neo_loi(dung()) == [], "ĐỐI CHỨNG: hai trường khớp nhau thì QUA")
+    # (2) thiếu trường ⇒ CHẶN
+    d = dung(); d.pop("posted_comment_id")
+    bang(neo_loi(d) != [], "thiếu `posted_comment_id` phải CHẶN")
+    d = dung(); d.pop("nguon_co_tham_quyen_url")
+    bang(neo_loi(d) != [], "thiếu `nguon_co_tham_quyen_url` phải CHẶN")
+    # (3) URL không phải comment ⇒ CHẶN
+    bang(neo_loi(dung(url="https://github.com/o/r/pull/557")) != [],
+         "URL không trỏ comment phải CHẶN")
+    # (4) ĐÚNG DẠNG mà TRỎ COMMENT KHÁC ⇒ vẫn CHẶN. Đây là chốt chịu lực: thiếu nó thì
+    #     phép đo chỉ còn là kiểm hình dạng, và mỏ neo trỏ đâu cũng được.
+    bang(neo_loi(dung(url="https://github.com/o/r/pull/557#issuecomment-9999999999")) != [],
+         "id trong URL lệch `posted_comment_id` phải CHẶN")
+    # (5) `check_object` VẪN ở trạng thái thứ ba — packet CỐ Ý không cấp đường đo cho nó
+    d = dung(); d["anchor"]["loai"] = "check_object"
+    bang(any("CHƯA có đường đo" in x for x in neo_loi(d)),
+         "`check_object` phải GIỮ trạng thái thứ ba — khai đã cấp cho cả hai là lời khai "
+         "rộng hơn phép đo")
+
+
 _mri_that = bnv2._mri
 _thieu_that = bnv2._thieu
 
@@ -2498,9 +2645,12 @@ def _dot_bien():
        # NEO THÊM DÒNG SAU: `loai = _doc_loai(a)` có ở CẢ `_anchor_loai` (schema) lẫn
        # `_neo_git` (dispatch); chốt "khớp đúng 1 chỗ" vừa bắt được bản đầu nhắm nhầm
        # (báo `gian_giao` thay vì lặng lẽ đột biến sai chỗ).
-       lambda: _dot_bien_tep('    loai = _doc_loai(a)\n    if loai in (',
+       # #566 — NEO ĐỔI theo cấu trúc nhánh mới (`if loai == "protected_evidence_ref":`).
+       # Ý nghĩa GIỮ NGUYÊN: dispatch đọc THÔ, không chuẩn hoá, nên `" canonical_ancestry "`
+       # qua được chốt hình dạng rồi trốn khỏi phép đo git.
+       lambda: _dot_bien_tep('    loai = _doc_loai(a)\n    if loai == "protected',
                              '    loai = (a.get("loai") if isinstance(a, dict) else "")\n'
-                             '    if loai in ('),
+                             '    if loai == "protected'),
        "c27_loai_CO_KHOANG_TRANG_khong_duoc_tron_khoi_phep_do",
        "hai cách đọc cùng một trường ⇒ qua schema rồi trốn dispatch",
        doi_chung="c18_neo_git_DUNG_thi_qua")
@@ -2541,8 +2691,9 @@ def _dot_bien():
     # --- R3-02: BA NHÁNH trong `_neo_git` mà reviewer gỡ được với suite XANH (`25/25 · 16/16`).
     # Chúng là nhánh BÊN TRONG một hàm, không phải một tên tra được ⇒ chỉ mức tệp với tới.
     do("m15_bo_nhanh_hai_loai_anchor_khong_co_duong_do",
-       lambda: _dot_bien_tep('if loai in ("protected_evidence_ref", "check_object"):',
-                             "if False:"),
+       # #566 — NEO ĐỔI: nhánh hai-loại đã tách làm hai. Ý nghĩa đột biến GIỮ NGUYÊN:
+       # một loại cổng không đo được thì TRỐN luôn khỏi phép đo.
+       lambda: _dot_bien_tep('    if loai == "check_object":', "    if False:"),
        "c24_anchor_KHONG_CO_DUONG_DO_vao_trang_thai_THU_BA",
        "loại mỏ neo cổng không đo được thì TRỐN luôn khỏi phép đo",
        doi_chung="c18_neo_git_DUNG_thi_qua")
@@ -2887,6 +3038,39 @@ def _dot_bien():
         'return sub, ((sub, f"{vai}_" if vai == "executor" else ""), (d, f"{vai}_" if vai == "executor" else ""))'),
        "c62_khoi_model_executor_identity_phai_doi_xung_voi_khoi_reviewer",
        "áp lại tiền tố vai cho khoá tra BÊN TRONG khối model_<vai>_identity", doi_chung="c18_neo_git_DUNG_thi_qua")
+
+    # ---- #566 `M6` — BỐN đường vào, BỐN đột biến RIÊNG -----------------------
+    # Gỡ từng cái phải làm ĐÚNG MỘT ca đỏ. Nếu hai đột biến không phân biệt được
+    # bằng đầu vào thì chúng là bộ TƯƠNG ĐƯƠNG và ta chỉ đang đo MỘT thứ — đó là
+    # lý do `c66` mang một đối chứng `chu_kho_tu_dang` KHÔNG đòi trích chỉ thị.
+    do("m73_bo_chot_bat_buoc_dang_boi", lambda: _dot_bien_tep(
+        "        if khai in ASSURANCE_CUA_NGUOI:",
+        "        if False:"),
+       "c64_human_audited_thieu_dang_boi_phai_CHAN",
+       "human_audited thiếu `dang_boi` vẫn QUA — lời khai AI ĐĂNG lại vắng mặt trong im lặng",
+       doi_chung="c18_neo_git_DUNG_thi_qua")
+    do("m74_dang_boi_tra_ca_TRONG_anh_xa_con", lambda: _dot_bien_tep(
+        '            db = _chuoi(d.get("dang_boi")) or ""',
+        '            db = _chuoi(d.get("dang_boi")) or _chuoi((d.get("model_reviewer_identity") or {}).get("dang_boi")) or ""'),
+       "c65_dang_boi_trong_anh_xa_con_KHONG_tinh_la_co",
+       "tra `dang_boi` cả trong khối model_<vai>_identity — HỢP THỨC HOÁ đúng lỗi `Đ2` sinh ra để bắt",
+       doi_chung="c64_human_audited_thieu_dang_boi_phai_CHAN")
+    do("m75_bo_doi_trich_chi_thi", lambda: _dot_bien_tep(
+        '            elif db in DANG_BOI_DOI_CHI_THI and not (_chuoi(d.get("dang_boi_chi_thi_nguyen_van"))',
+        '            elif False and not (_chuoi(d.get("dang_boi_chi_thi_nguyen_van"))'),
+       "c66_phien_agent_dang_ho_phai_trich_duoc_chi_thi",
+       "`phien_agent_dang_ho` không cần trích chỉ thị — một lời khai không ai kiểm lại được",
+       doi_chung="c64_human_audited_thieu_dang_boi_phai_CHAN")
+    do("m76_neo_comment_chi_kiem_HINH_DANG_khong_doi_chieu", lambda: _dot_bien_tep(
+        "        if mc.group(1) != cid:",
+        "        if False:"),
+       "c67_protected_evidence_ref_co_duong_do_va_doi_chieu_HAI_nguon",
+       "bỏ phép đối chiếu id — mỏ neo `protected_evidence_ref` trỏ comment NÀO cũng qua",
+       # ĐỐI CHỨNG phải ĐỘC LẬP với thứ đột biến gỡ. Bản đầu dùng `c41`, và harness từ chối
+       # cấp tín dụng vì `c41` phần (g) đo ĐÚNG phép đối chiếu ấy nên nó đỏ theo — "đột biến
+       # phá cả cổng". Đó là chốt chống tín dụng giả chạy đúng. `c18` đi đường
+       # `canonical_ancestry`, m76 không chạm, nên nó nói được "cổng còn nguyên vẹn".
+       doi_chung="c18_neo_git_DUNG_thi_qua")
 
     # R7-03 — TỰ KIỂM RIG: reviewer bơm mất hàng `_BE_MAT_BI_DANH` vào RIÊNG bản launcher mà rig
     # chép (qua `shutil.copyfile`), bốn hằng parity cũ vẫn bằng nhau. Nay rig phải bắt được điều

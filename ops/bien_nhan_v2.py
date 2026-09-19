@@ -85,6 +85,11 @@ _HEX40 = re.compile(r"\A[0-9a-f]{40}\Z")
 _HEX64 = re.compile(r"\A[0-9a-f]{64}\Z")
 # `blob/<40hex>/<đường dẫn>` trong `evidence_url` của mỏ neo `canonical_ancestry`.
 _BLOB_URL = re.compile(r"/blob/([0-9a-f]{40})/(.+)\Z")
+# #566 `M3` — id comment GitHub trong một URL. HAI dạng, vì đó là hai hiện vật KHÁC nhau:
+# `#issuecomment-<số>` (comment trên issue/PR) và `#discussion_r<số>` (comment review trên
+# diff). Neo `\Z` để một URL có đuôi thừa không lọt; bắt NHÓM để còn đối chiếu với
+# `posted_comment_id` — chỉ kiểm hình dạng thì một URL đúng dạng trỏ comment KHÁC vẫn qua.
+_COMMENT_URL = re.compile(r"#(?:issuecomment-|discussion_r)(\d+)\Z")
 
 # `ANCHOR_KHOA` ĐÃ BỎ: sau khi tách `anchor` thành ba yêu cầu độc lập, không đường nào
 # đọc nó nữa. Giữ lại một hằng chết là để dành chỗ cho một đột biến KHÔNG CÓ RĂNG —
@@ -518,6 +523,24 @@ ASSURANCE_CUA_MO_HINH = frozenset({"cross_approved", "same_provider_approved"})
 # cấm phân biệt CÁCH VIẾT, không phân biệt THẨM QUYỀN.
 ANCHOR_LOAI_CHO_PHEP = frozenset({"canonical_ancestry", "protected_evidence_ref", "check_object"})
 
+# --- #566 (`Đ1`/`Đ2`) — AI ĐĂNG lời khai `human_audited` -----------------------
+# Đo 04:11Z 19-09-2026: phiên agent chạy bằng credential chủ kho, nên comment do NÓ đăng
+# trả `author_association: OWNER` Y HỆT comment chủ kho tự gõ. Trường ấy KHÔNG phân biệt
+# được hai thứ. Nên cơ chế `human_audited` không có cách nào ĐO ai gõ — thứ duy nhất còn
+# lại là một lời KHAI, và lời khai thì phải BẮT BUỘC, nếu không nó vắng mặt trong im lặng.
+#
+# `Đ2` là bằng chứng chạy được cho chữ "im lặng" ấy: một regex làm thụt nhầm bốn khoá (gồm
+# `dang_boi`) vào `model_reviewer_identity`, và cổng VẪN XANH y hệt cả trước lẫn sau
+# (`132 ĐẠT v2 / tổng 185`) — vì không ai đọc `dang_boi`. Lời khai quan trọng nhất của một
+# biên nhận `human_audited` hiện không có chốt nào canh.
+#
+# DANH SÁCH CHO PHÉP, không phải danh sách cấm — bài học `doctrine-scan`: một danh sách cấm
+# phải đoán trước mọi cách viết của kẻ gian nên thua từ trong thiết kế.
+DANG_BOI_CHO_PHEP = frozenset({"chu_kho_tu_dang", "phien_agent_dang_ho"})
+# Giá trị nào BẮT BUỘC kèm trích chỉ thị: "agent đăng hộ" mà không trích được chỉ thị thì
+# không kiểm lại được, tức lại là một lời khai không ai đo.
+DANG_BOI_DOI_CHI_THI = frozenset({"phien_agent_dang_ho"})
+
 # --- Danh sách 1: miễn trừ legacy, ĐÓNG BĂNG tại cutover `2f84531` (11 tệp) -------------
 ALLOWLIST_CUTOVER = {
     "doctor-github-mcp-review-6-codex-verdict.receipt.yaml":
@@ -717,6 +740,31 @@ def _thieu(d: dict) -> list[str]:
             loi.append(
                 f"provider `{prov}` KHÔNG được tự tạo `{khai}` — {cam[khai]}; nhận một tên vào "
                 f"danh sách CHO PHÉP không mang theo quyền của tên khác")
+        if khai in ASSURANCE_CUA_NGUOI:
+            # #566 `M1`/`M2` — AI ĐĂNG. Đọc ở TOP-LEVEL và CHỈ top-level: `Đ2` là ca thật
+            # một regex làm `dang_boi` thụt vào `model_reviewer_identity`, và cổng không
+            # kêu. Nếu ở đây cũng tra cả trong ánh xạ con thì chốt này sẽ HỢP THỨC HOÁ
+            # đúng cái lỗi nó sinh ra để bắt.
+            db = _chuoi(d.get("dang_boi")) or ""
+            if not db:
+                trong_sub = any(isinstance(d.get(k), dict) and d[k].get("dang_boi") is not None
+                                for k in ("model_reviewer_identity", "model_executor_identity"))
+                them_ly = (" — tìm thấy `dang_boi` BÊN TRONG một khối "
+                           "`model_<vai>_identity`; nó phải nằm ở TOP-LEVEL" if trong_sub else "")
+                loi.append(f"khai `{khai}` mà thiếu `dang_boi` ở top-level{them_ly}. "
+                           f"`author_association` trả `OWNER` cho CẢ comment người tự gõ LẪN "
+                           f"comment phiên agent đăng hộ, nên nó không phân biệt được hai thứ; "
+                           f"`dang_boi` là lời khai DUY NHẤT về việc ấy và phải có mặt "
+                           f"(CHO PHÉP: {sorted(DANG_BOI_CHO_PHEP)})")
+            elif db not in DANG_BOI_CHO_PHEP:
+                loi.append(f"`dang_boi`={db!r} ngoài danh sách CHO PHÉP "
+                           f"{sorted(DANG_BOI_CHO_PHEP)}")
+            elif db in DANG_BOI_DOI_CHI_THI and not (_chuoi(d.get("dang_boi_chi_thi_nguyen_van"))
+                                                     or ""):
+                loi.append(f"`dang_boi: {db}` mà thiếu/rỗng "
+                           f"`dang_boi_chi_thi_nguyen_van` — một lời khai \"agent đăng hộ\" "
+                           f"không trích được chỉ thị thì không ai kiểm lại được, tức lại là "
+                           f"một lời khai không có phép đo")
         if khai in ASSURANCE_CAN_DOC_LAP and (tu_khai_trong_phien or not co_bang_chung):
             ly_do = ("tự khai chạy trong phiên điều phối" if tu_khai_trong_phien
                      else "không có `session_run_id` lẫn `phien_doc_lap`")
@@ -845,10 +893,43 @@ def _neo_git(root: Path, ten: str, d: dict):
     # khoảng trắng. Cross-review vòng 2 (R2-01) đo được. Hai cách đọc cùng một trường là
     # cùng lớp với "hai bản trôi lệch": lỗi không nằm ở phép so nào, nó nằm ở việc có HAI.
     loai = _doc_loai(a)
-    if loai in ("protected_evidence_ref", "check_object"):
-        # Cổng KHÔNG có đường đo cho hai loại này. Bản trước LẶNG LẼ bỏ qua ⇒ ghép loại ấy
-        # với một URL bất kỳ là thành "v2 hợp lệ". Nay nó vào trạng thái THỨ BA — và trạng
-        # thái thứ ba làm cổng ĐỎ (rc=2), không phải "sạch".
+    if loai == "protected_evidence_ref":
+        # #566 `M3` — CẤP đường đo, thay vì để loại này nằm mãi ở trạng thái thứ ba.
+        # Đây là loại mỏ neo ĐÚNG cho một audit của người (comment được bảo vệ), nhưng
+        # trước đây cổng không đo được nên nó làm cổng ĐỎ — và hệ quả thực tế là người ta
+        # đi khai `canonical_ancestry` trên một blob BẢN CHIẾU để "cho đo được", tức mỏ neo
+        # trỏ vào bản sao chứ không vào nguồn có thẩm quyền. Một chốt cấm cả việc ĐÚNG thì
+        # người ta sẽ đi vòng quanh nó — cùng bài học với `ops-don-ref`.
+        #
+        # PHÉP ĐO: hai trường phải CÓ và phải NÓI CÙNG MỘT THỨ. Đây là chốt ĐỐI CHIẾU HAI
+        # NGUỒN, không phải chốt hình dạng: `posted_comment_id` là số GitHub cấp, còn
+        # `nguon_co_tham_quyen_url` là URL người viết — bắt chúng khớp nghĩa là một trong
+        # hai sai thì lộ. Chỉ kiểm hình dạng URL thì một URL đúng dạng trỏ comment KHÁC vẫn
+        # qua, và đó đúng là thứ mỏ neo này phải chặn.
+        cid = _chuoi(d.get("posted_comment_id")) or ""
+        nguon = _chuoi(d.get("nguon_co_tham_quyen_url")) or ""
+        if not cid or not nguon:
+            thieu = " và ".join(t for t, v in (("`posted_comment_id`", cid),
+                                               ("`nguon_co_tham_quyen_url`", nguon)) if not v)
+            loi.append(f"{ten}: khai `anchor.loai: protected_evidence_ref` nhưng thiếu {thieu} "
+                       f"— mỏ neo kiểu này ĐO bằng cách đối chiếu hai trường ấy, thiếu một "
+                       f"trường là không đo được")
+            return loi, chua
+        mc = _COMMENT_URL.search(nguon)
+        if not mc:
+            loi.append(f"{ten}: `nguon_co_tham_quyen_url`={nguon!r} KHÔNG phải URL comment "
+                       f"GitHub (`#issuecomment-<số>` hoặc `#discussion_r<số>`) — mỏ neo "
+                       f"`protected_evidence_ref` phải trỏ ĐÚNG hiện vật được bảo vệ")
+            return loi, chua
+        if mc.group(1) != cid:
+            loi.append(f"{ten}: `posted_comment_id`={cid!r} KHÔNG khớp id trong "
+                       f"`nguon_co_tham_quyen_url` ({mc.group(1)!r}) — hai trường cùng nói về "
+                       f"MỘT comment mà nói khác nhau thì một trong hai sai, cổng không chọn hộ")
+        return loi, chua
+    if loai == "check_object":
+        # `check_object` VẪN ở trạng thái thứ ba — #566 CỐ Ý chỉ cấp đường đo cho
+        # `protected_evidence_ref`. Khai "đã cấp đường đo cho cả hai" là một lời khai rộng
+        # hơn phép đo, đúng lớp lỗi packet này sinh ra để chặn.
         chua.append(f"{ten}: `anchor.loai: {loai}` — cổng CHƯA có đường đo cho loại mỏ neo "
                     f"này, nên KHÔNG kết luận được nó hợp lệ")
         return loi, chua

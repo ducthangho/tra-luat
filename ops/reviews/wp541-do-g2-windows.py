@@ -261,7 +261,11 @@ ghi("symlink_duoc", symlink_duoc)
 inn("  Administrator:", quyen, "| tao symlink duoc:", symlink_duoc)
 
 loi = []
-if sys.platform != "win32": loi.append(f"KHONG phai Windows (sys.platform={sys.platform!r})")
+# Cong kich thuoc la phep do tren LICH SU GIT, khong dinh gi den nen. Cho phep
+# --chi-kich-thuoc chay o moi nen de con TU KIEM duoc chinh cong nay (da dung
+# de tai dung ca hai ve cua su co nen-cu 19-09). Moi chot CHUC NANG van doi Windows.
+if sys.platform != "win32" and "--chi-kich-thuoc" not in sys.argv:
+    loi.append(f"KHONG phai Windows (sys.platform={sys.platform!r})")
 if not tep.is_file():  loi.append(f"khong thay {tep}")
 if not tept.is_file(): loi.append(f"khong thay {tept}")
 if not shutil.which("git"): loi.append("khong co `git` trong PATH")
@@ -286,9 +290,43 @@ if loi:
 
 # ---------------- 1. kich thuoc (N7' cua spec r3) ----------------
 inn(""); inn("-" * 78); inn("1. KICH THUOC — tran spec r3: <= 2 tep va <= 400 dong them")
-rc_mb, mb, er_mb = git(goc, "merge-base", "origin/master", head)
+# VE NEN PHAI TUOI — va phai CHUNG MINH duoc la tuoi, khong phai gia dinh.
+# Bai hoc tra gia 19-09-2026: clone tai dung chi fetch nhanh ban va, `origin/master`
+# dung yen tu 14-09 (c16bd32, sau 97 commit). merge-base roi ve dung dinh master cu,
+# nen diff NUOT ca 97 commit master: do ra 46 tep / +7118 thay vi 2 tep / +397 —
+# CUNG MOT COMMIT 0ea95de. Mot tieu chi DELTA ma ve nen khong tuoi thi khong sai
+# lech mot chut, no sai ca mot bac do lon.
+# Cho nen: nen khong chung minh duoc la tuoi => KHONG DO DUOC (rc=3), KHONG phai TRUOT.
+# TRUOT la mot PHAN QUYET ve ban va; phan quyet chi duoc phep phat ra khi da do duoc.
+rc_lr, out_lr, er_lr = git(goc, "ls-remote", "origin", "refs/heads/master")
+rc_lm, lm, er_lm     = git(goc, "rev-parse", "origin/master")
+rm = out_lr.split()[0] if (not rc_lr and out_lr.strip()) else ""
+if not rm:
+    ket("N7' kich thuoc", KDD,
+        f"khong hoi duoc master tren remote (ls-remote rc={rc_lr}): {er_lr[:60]} "
+        f"— khong chung minh duoc ve nen con tuoi")
+    rc_mb, mb, ns, rc = 1, "", "", 1
+elif rc_lm or not lm:
+    ket("N7' kich thuoc", KDD, f"khong doc duoc origin/master trong clone: {er_lm[:60]}")
+    rc_mb, mb, ns, rc = 1, "", "", 1
+elif lm != rm:
+    # Dem xem tut lai bao xa, neu dem duoc — con so nay noi ro muc do sai lech.
+    rc_c, sau, _ = git(goc, "rev-list", "--count", f"{lm}..{rm}")
+    xa = f", tut lai {sau} commit" if (not rc_c and sau.strip().isdigit()) else ""
+    inn(f"  origin/master trong clone : {lm[:12]}")
+    inn(f"  master tren remote        : {rm[:12]}{xa}")
+    ghi("master_clone", lm); ghi("master_remote", rm)
+    ket("N7' kich thuoc", KDD,
+        f"ve nen CU: origin/master={lm[:12]} != remote={rm[:12]}{xa} "
+        f"— chay `git -C <kho> fetch origin master` roi do lai")
+    rc_mb, mb, ns, rc = 1, "", "", 1
+else:
+    inn(f"  ve nen TUOI: origin/master = {lm[:12]} == master tren remote")
+    ghi("master_clone", lm); ghi("master_remote", rm)
+    rc_mb, mb, er_mb = git(goc, "merge-base", "origin/master", head)
 if rc_mb or not mb:
-    ket("N7' kich thuoc", KDD, f"khong tinh duoc merge-base voi origin/master: {er_mb[:70]}")
+    if mb == "" and rm and lm == rm:
+        ket("N7' kich thuoc", KDD, f"khong tinh duoc merge-base voi origin/master: {er_mb[:70]}")
     ns, rc = "", 1
 else:
     ghi("merge_base", mb)
@@ -314,6 +352,17 @@ else:
     inn(f"    TONG: {len(hang)} tep, +{them}, -{xoa}   (tran: {TRAN_TEP} tep / {TRAN_DONG} dong them)")
     ket("N7' kich thuoc", DAT if (len(hang) <= TRAN_TEP and them <= TRAN_DONG) else TRUOT,
         f"{len(hang)} tep / +{them}")
+
+# Cong nhanh: do RIENG kich thuoc (vai giay) roi dung. Dung khi can xac minh lai
+# ve nen ma khong muon tra 20-45 phut cho ca bo test.
+if "--chi-kich-thuoc" in sys.argv:
+    inn(""); inn("=" * 78)
+    inn("--chi-kich-thuoc: CHI do cong kich thuoc. Day KHONG phai mot luot nghiem thu.")
+    inn("-" * 78)
+    for _t, _tt, _ct in chot: inn(f"  {_tt:14} {_t}" + (f"   {_ct}" if _ct else ""))
+    _k = sum(1 for _, t, _ in chot if t == KDD)
+    _r = sum(1 for _, t, _ in chot if t == TRUOT)
+    sys.exit(3 if _k else (1 if _r else 0))
 
 # ---------------- 2. bo test day du ----------------
 inn(""); inn("-" * 78); inn("2. BO TEST DAY DU (10-40 phut)")

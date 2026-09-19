@@ -142,11 +142,19 @@ _NEO_LUAT_CHEP_TAY = (
     ("ASSURANCE_CUA_NGUOI", "docs/PROTOCOL_DA_PHIEN.md",
      "`human_audited`: người audit có danh tính bền trên GitHub"),
     ("ASSURANCE_CUA_MO_HINH", "docs/PROTOCOL_DA_PHIEN.md",
-     "`cross_approved`: Claude review Codex hoặc Codex review Claude"),
+     "`cross_approved`: reviewer và executor dùng hai họ model độc lập phục vụ lượt chạy (ví dụ họ Claude review họ Codex hoặc ngược lại)"),
 )
 ASSURANCE_CAM_THEO_PROVIDER = {
     "openai_chatgpt": frozenset({"cross_approved", "same_provider_approved", "human_audited"}),
 }
+# Mức bằng chứng model và bảng họ model mặc định cho cross_approved (ADR-0050, PR #551).
+MUC_BANG_CHUNG_MODEL = frozenset({"do_may", "khai_co_audit", "khong_do_duoc"})
+HO_MODEL_CHO_PHEP = frozenset({"claude", "gpt", "gemini"})
+HO_MODEL_MAC_DINH = {
+    "anthropic_claude": "claude", "openai_codex": "gpt", "openai_chatgpt": "gpt",
+    "anthropic": "claude", "claude": "claude", "codex": "gpt", "chatgpt": "gpt",
+}
+
 
 # LƯỢC ĐỒ TỪNG BẢNG NGUỒN — tên cột theo thứ tự. `lenh` là bộ tên lệnh (tuple chuỗi), cột
 # khác là chuỗi không rỗng. Cross-review lượt 7 (`R7-01`, P2) đo được trên 68 biên nhận nguyên
@@ -629,6 +637,56 @@ def _bam(p: Path) -> str:
     return hashlib.sha256(p.read_bytes()).hexdigest()
 
 
+def _ho_model_cua_ten(ten: str) -> str:
+    """Chuẩn hoá tên/chuỗi thành họ model chính tắc trong HO_MODEL_CHO_PHEP (P2-1, P3-1, P2-MOI)."""
+    t = (ten or "").lower().strip()
+    if not t:
+        return ""
+    if "claude" in t and "claude" in HO_MODEL_CHO_PHEP:
+        return "claude"
+    if ("gpt" in t or "codex" in t or t in ("o1", "o3") or t.startswith(("o1-", "o3-"))
+            or "/o1" in t or "/o3" in t) and "gpt" in HO_MODEL_CHO_PHEP:
+        return "gpt"
+    if "gemini" in t and "gemini" in HO_MODEL_CHO_PHEP:
+        return "gemini"
+    return ""
+
+
+def _nguon_tra_model(d: dict, vai: str):
+    """(`sub`, bảng (nguồn, tiền tố)) theo thứ tự tra — `M17`, đóng `P2` của verdict lượt 3.
+
+    Bên trong khối `model_<vai>_identity`, khoá tra KHÔNG mang tiền tố, cho CẢ HAI vai. Bản trước
+    áp `pre` cho cả `sub` lẫn `d`, nên `model_reviewer_identity: {model: …}` CHẠY (vai reviewer có
+    `pre` rỗng) còn `model_executor_identity: {model: …}` thì KHÔNG — đòi `executor_model`. Đòi một
+    khoá mang lại tên vai bên trong khối đã tên là vai ấy vừa dư thừa vừa BẤT ĐỐI XỨNG, và thông
+    điệp lỗi *"không xác định được họ model của executor"* đọc như "bạn chưa khai" trong khi người
+    ta ĐÃ khai — dẫn người đọc đi sai hướng ở đúng trường mà `cross_approved` treo lên.
+
+    Tiền tố chỉ còn nghĩa ở mức top-level `d`, nơi hai vai dùng CHUNG một không gian tên nên phải
+    có gì đó phân biệt. Trả về MỘT bảng để hai phép tra bên dưới không thể trôi lệch nhau."""
+    sub = d.get(f"model_{vai}_identity") if isinstance(d.get(f"model_{vai}_identity"), dict) else {}
+    return sub, ((sub, ""), (d, f"{vai}_" if vai == "executor" else ""))
+
+
+def _giai_ho_va_bc(d: dict, vai: str) -> tuple[str, str, bool]:
+    """Trả về (họ model, mức bằng chứng, có_khai_đè) cho 'reviewer' hoặc 'executor' (P1-MOI)."""
+    sub, nguon = _nguon_tra_model(d, vai)
+    pre = f"{vai}_" if vai == "executor" else ""
+    khai = next((_chuoi(s.get(p + k)) for s, p in nguon for k in ("model_family", "ho_model", "canonical_model", "model") if _chuoi(s.get(p + k))), "")
+    bc = next((_chuoi(s.get(p + k)) for s, p in nguon for k in ("model_evidence", "bang_chung_model") if _chuoi(s.get(p + k))), "")
+    if khai:
+        return _ho_model_cua_ten(khai), bc, True
+    return HO_MODEL_MAC_DINH.get(_chuan_hoa_provider(_chuoi(sub.get("provider")) or _chuoi(d.get(f"{pre}provider")) or ""), ""), bc, False
+
+
+def _giai_ho_model_reviewer(d: dict) -> tuple[str, str]:
+    return _giai_ho_va_bc(d, "reviewer")[:2]
+
+
+def _giai_ho_model_executor(d: dict) -> str:
+    return _giai_ho_va_bc(d, "executor")[0]
+
+
 def _thieu(d: dict) -> list[str]:
     """Trả danh sách lý do tệp KHÔNG đạt v2. Rỗng = đạt (theo CẤU TRÚC)."""
     loi = [msg for _, kt in YEU_CAU for msg in [kt(d)] if msg]
@@ -666,6 +724,33 @@ def _thieu(d: dict) -> list[str]:
                 f"khai `{khai}` mà KHÔNG có bằng chứng phiên độc lập ({ly_do}) — mức ấy hàm ý "
                 f"một lượt review có thẩm quyền; dùng `review_deferred`, hoặc khai "
                 f"`phien_doc_lap` kèm căn cứ")
+        if khai == "cross_approved":
+            ho_rev, bc_rev, ov_rev = _giai_ho_va_bc(d, "reviewer")
+            ho_exec, bc_exec, ov_exec = _giai_ho_va_bc(d, "executor")
+            if not ho_rev:
+                loi.append("khai `cross_approved` mà không xác định được họ model của reviewer")
+            if not ho_exec:
+                loi.append("khai `cross_approved` mà không xác định được họ model của executor")
+            if ho_rev and ho_exec and ho_rev == ho_exec:
+                loi.append(
+                    f"khai `cross_approved` mà hai bên cùng họ model `{ho_rev}` — `cross_approved` "
+                    f"đòi hai họ model độc lập")
+            for vai, ho, bc, ov in (("reviewer", ho_rev, bc_rev, ov_rev),
+                                    ("executor", ho_exec, bc_exec, ov_exec)):
+                sub = d.get(f"model_{vai}_identity") if isinstance(d.get(f"model_{vai}_identity"), dict) else {}
+                pre = f"{vai}_" if vai == "executor" else ""
+                if ov and not bc:
+                    loi.append(f"khai đè model {vai} cho `cross_approved` mà thiếu mức bằng chứng model (`model_evidence`)")
+                elif bc and bc not in MUC_BANG_CHUNG_MODEL:
+                    loi.append(f"mức bằng chứng model {vai} `{bc}` ngoài danh sách CHO PHÉP")
+                elif bc == "khong_do_duoc":
+                    loi.append(f"khai `cross_approved` với mức bằng chứng {vai} `khong_do_duoc` — không đủ điều kiện cho cross_approved")
+                elif bc == "khai_co_audit":
+                    if not any(_chuoi(s.get(k)) for s in (sub, d) for k in (f"{pre}nguoi_audit", f"{pre}audit_actor", "nguoi_audit", "audit_actor")):
+                        loi.append(f"khai `cross_approved` với mức bằng chứng {vai} `khai_co_audit` mà thiếu người audit xác nhận")
+                elif bc == "do_may":
+                    if not any(_chuoi(s.get(k)) for s in (sub, d) for k in (f"{pre}model_evidence_ref", f"{pre}telemetry_path", "model_evidence_ref", "telemetry_path")):
+                        loi.append(f"khai `cross_approved` với mức bằng chứng {vai} `do_may` mà thiếu tham chiếu đo lường (`model_evidence_ref`)")
     return loi
 
 

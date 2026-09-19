@@ -559,10 +559,7 @@ về executor/rework, còn commit mới luôn làm verdict/CI/authorization củ
 
 Mức review được ghi tường minh:
 
-1. `cross_approved`: Claude review Codex hoặc Codex review Claude là cặp khác provider
-   được protocol công nhận khi runtime/transport, tính độc lập và evidence đủ. Tổng quát,
-   assurance xét cặp Executor–Reviewer thực tế theo hợp đồng provider; tên tool hoặc model
-   khác nhau chưa đủ, cùng provider vẫn không thành cross-provider.
+1. `cross_approved`: reviewer và executor dùng hai họ model độc lập phục vụ lượt chạy (ví dụ họ Claude review họ Codex hoặc ngược lại); neo vào họ model đã phục vụ lượt chạy, không neo vào hãng công cụ. Cùng một họ model dù qua hai vỏ công cụ khác nhau (như Antigravity đặt model Claude được Claude Code review) vẫn là `same_provider_approved`, không thành `cross_approved`. Ba mức bằng chứng họ model: `do_may` (máy đo từng lượt chạy), `khai_co_audit` (người khai kèm người audit xác nhận; mức này bắt buộc phải tự khai là yếu hơn `do_may` ngay tại chỗ dùng), hoặc `khong_do_duoc`.
 2. `human_audited`: người audit có danh tính bền trên GitHub, độc lập với Executor/tác giả, tự đọc spec/diff, ghi
    evidence audit và verdict bền, đồng thời neo cả hai vào exact `reviewed_sha`.
 3. `same_provider_approved`: cùng provider trong điều kiện fallback được canon cho phép,
@@ -1389,6 +1386,7 @@ Lệnh tái lập cột ấy nằm trong `ops/HOAN_THIEN_KE_HOACH_20260822.md` �
 | `ADR-0047` | Nguồn tin cậy cho cổng đọc lease: danh tính ghim, hồ sơ tiến trình, toàn vẹn object | Proposed | **0 cổng** (đo 08-09-2026, `origin/master` `585c7d5`: chưa có adapter/digest/băm object); `adr-song` chỉ canh đăng ký/trạng thái |
 | `ADR-0048` | Trần trục VÒNG nâng theo chỉ thị chủ kho 12-09-2026, thay số của `ADR-0043`; hiệu lực neo theo `spec_hash` đóng băng, không hồi tố | Accepted | **0 cổng** — `so-canon` vẫn chưa tồn tại (nợ cùng tên) |
 | `ADR-0049` | Cổng hai nền trước phát hành, không phải mỗi lần land | Accepted | có nhắc: `ci.yml` · `deploy-package.*` |
+| `ADR-0050` | `cross_approved` neo vào họ model, không vào hãng công cụ; ba mức bằng chứng model | Accepted | `ops/bien_nhan_v2.py` (`_NEO_LUAT_CHEP_TAY` + chốt tách họ model) |
 
 ### B. ADR ngoài phạm vi protocol — thuộc `scripts/tl.py` và đường phát hành
 

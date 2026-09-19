@@ -21297,16 +21297,17 @@ def run() -> int:
         # không"*, không phải *"vá thế nào"*. Cách chữa là cho ca này TÍNH số docs từ cây và chỉ
         # ratchet phần thực sự là bất biến (số tệp trong GÓI); việc ấy ngoài phạm vi packet #522
         # (`S6` của lease gen 3 chặn đúng chỗ này).
-        # KÊ KHAI SLOT (PR #550 — ADR-0049, packet #548 r2): 73 → **74** Markdown dưới `docs/`.
+        # KÊ KHAI SLOT (Packet #551 r2 — ADR-0050): 74 → **75** Markdown dưới `docs/`.
         # Thêm ĐÚNG MỘT tệp dev-side/ngoài gói:
-        #   + `docs/adr/0049-cong-hai-nen-truoc-phat-hanh-khong-phai-moi-lan-land.md`
+        #   + `docs/adr/0050-assurance-neo-vao-ho-model-khong-phai-hang-cong-cu.md`
+        # Đây là lần thứ BA cùng một cách sập (R291-DAM-SO-CUNG = 3: #522, #548, #551).
         # `docs/PROTOCOL_DA_PHIEN.md` (dòng §20) là sửa, không thêm. `RELEASE_MANIFEST.json` có đổi
-        # trong cùng PR ấy, nhưng CHỈ vì băm của CHÍNH TỆP NÀY đổi — không tệp runtime nào được thêm
-        # nên `file_count` giữ **180** và trần Package 200 không nhúc nhích; cây thật = 180 + 74 = **254**.
-        ok3 = int(j.get("file_count") or 0) == len(paths) and len(paths) + 74 == 254
+        # trong cùng packet, nhưng CHỈ vì băm của CHÍNH TỆP NÀY đổi — không tệp runtime nào được thêm
+        # nên `file_count` giữ **180** và trần Package 200 không nhúc nhích; cây thật = 180 + 75 = **255**.
+        ok3 = int(j.get("file_count") or 0) == len(paths) and len(paths) + 75 == 255
         d = root / "docs"
         tren_dia = sorted(d.rglob("*.md")) if d.is_dir() else []
-        ok4 = (len(tren_dia) == 74
+        ok4 = (len(tren_dia) == 75
                and all(not _rel209._release_should_include(q, root) for q in tren_dia)
                and all(set(q.relative_to(root).parts) & _rel209._RELEASE_EXCLUDE_DIRS == {"docs"}
                        for q in tren_dia))

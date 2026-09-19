@@ -113,7 +113,10 @@ ngoai_le_adr_0044:
   can_cu: 'ADR-0044:5 — tran class sensitive'
   tran_cu: '3 tep'
   tran_moi: '4 tep'
-  tran_dong_them: '300 — KHONG NOI'
+  tran_dong_them: '420 — NOI tai luot thi cong, xem ngoai_le_tran_dong ben duoi'
+  tran_dong_them_BAN_DAU: '300 — KHONG NOI luc cap lease. Do lai luc thi cong ra 412
+    => DUNG va xin lai, dung nhu chinh lease nay doi. Giu CA HAI con so o day de lan
+    sau doc duoc DIEN BIEN, khong phai chi doc ket qua.'
   vi_sao: 'Ba duong dau la MOT thay doi khong tach duoc (them chot vao cong thi phai co ca test va
     dot bien cho no — M14 cua #551 cam gop chot de lach; va mot luat moi phai co ADR thi adr-song
     moi xanh). Duong thu TU la DUNG MOT hang §20 cho ADR moi, va thieu no thi adr-song DO (rc=9) —
@@ -173,3 +176,22 @@ hinh_dang_ke_thua:
   CO-HOI-TAI-PHAT-DA-BIET: 'LOI-KHAI-RONG-HON-PHEP-DO o day = khai rang cong M1 "dong duoc lo
     dang_boi" trong khi no chi dong duoc IM LANG, khong dong duoc CO TINH khi credential dung chung
     (M4 phai noi thang). Da dung ba lan; gap lan thu TU => DUNG.'
+
+ngoai_le_tran_dong:
+  ai_nang: ducthangho
+  neo_chi_thi: https://github.com/ducthangho/tra-luat/issues/566#issuecomment-5742831906
+  chi_thi_nguyen_van: 'Cap ngoai le 300 -> 420'
+  can_cu: 'ADR-0044:5 — tran DONG THEM cho class sensitive'
+  tran_cu: '300 dong them'
+  tran_moi: '420 dong them'
+  do_luc_xin: '412 dong them / 4 tep, do bang `git diff --cached --numstat` luc 15:0xZ 19-09-2026'
+  phan_ra: 'ops/bien_nhan_v2_test.py 200 (4 ca c64-c67 + 4 dot bien m73-m76 + cap nhat c24/c41 +
+    neo lai m9/m15) · docs/adr/0051-...md 126 (M4; thieu thi adr-song DO rc=9) ·
+    ops/bien_nhan_v2.py 85 (M1+M2+M3+_COMMENT_URL) · docs/PROTOCOL_DA_PHIEN.md 1 (M5).
+    Ma SAN PHAM chi chiem 85/412.'
+  VI_SAO_DUNG_LAI_THAY_VI_LAM_TRON: 'Truong CON_SO_NAY_CHONG_DO_MOT_CAU_VE_THAM_QUYEN o khoi
+    ngoai_le_adr_0044 doi dung dieu nay. Tien le da tra gia (CLAUDE.md, PLAT-X8): cung mot con so
+    troi lan thu TU, o o "tran ADR-0044" trong than PR, khai mot cong DAT trong khi so that da
+    vuot va can ngoai le nguoi giu kho — no khong sai mot chu so, no KHAI SAI RANG MOT THAM QUYEN
+    DA CO. Phep thu de nhan ra: "con so nay co dang chong do mot cau ve THAM QUYEN khong". O day CO.'
+  VUOT_420_THI_SAO: 'DUNG va xin lai lan nua. Khong tu noi tiep.'

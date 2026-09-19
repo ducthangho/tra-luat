@@ -64,6 +64,10 @@ WORKFLOW_DANG = HERE.parent / ".github" / "workflows" / "ops-publish-lease.yml"
 
 RC_OK, RC_THAM_SO, RC_TU_CAP, RC_DA_DANG, RC_NOI_DUNG, RC_NEO, RC_LOP = 0, 2, 4, 9, 8, 6, 10
 
+# Dấu phân cách cho fixture N10 (`t171`); `t173` canh chính hằng này. KHÔNG được là ":" —
+# đường tuyệt đối Windows mang dấu hai chấm của Ổ ĐĨA nên `f"{a}:{b}"` bị chính nó cắt nát.
+PHAN_CACH_THU_N10 = "|"
+
 CA: list = []
 
 
@@ -5009,7 +5013,7 @@ def t136_A2_adapter_nguon_ghim_danh_tinh_profile_duyet_va_khong_doc_config_kho()
         khac = dict(hoso, proxy="http://proxy.noi-bo:3128")
         rc, td = _ma_chan(mod, mod.kham_pha_nguon, ep, hoso=khac, da_duyet=[digest], giao_thuc_cho_phep=("file",))
         chot(rc == 12 and "CHƯA được duyệt" in td, f"hồ sơ khác approved phải 12: {rc} {td}")
-        rc, td = _ma_chan(mod, mod.kham_pha_nguon, ep, hoso=dict(hoso, git_path="/khong/co/git"), da_duyet=[digest], giao_thuc_cho_phep=("file",))
+        rc, td = _ma_chan(mod, mod.kham_pha_nguon, ep, hoso=dict(hoso, git_path="//khong-co/git"), da_duyet=[digest], giao_thuc_cho_phep=("file",))
         chot(rc == 12 and "không khớp executable" in td, f"git_path lệch phải 12: {rc} {td}")
         # F08: cùng fixture t136; mỏ neo digest không thay validator miền key/type.
         # Giá trị vô hại ở khoá ngoài schema; không helper, không rewrite, không endpoint khác.
@@ -6681,6 +6685,294 @@ def t162_M4_evaluator_toi_gian_chuan_bi():
         if "KHÔNG ĐO ĐƯỢC" in str(ex):
             la_da_bat = True
     bang(la_da_bat, "evaluator phải fail-close (in KHÔNG ĐO ĐƯỢC và raise) khi gặp hình lạ (kể cả bọc fromJSON)")
+
+
+# --- packet #541: giải git theo nền trên Windows và kiểm thử N1-N4 (Spec r2) ---
+
+
+@ca
+def t165_N1_giai_git_windows_program_files_va_fail_closed():
+    """N1: Nền Windows giả, không ứng viên hợp lệ => Chan(RC_KHONG_XAC_DINH);
+    có %ProgramFiles%\\Git\\cmd\\git.exe => trả đúng đường ấy, tuyệt đối, đã resolve.
+    """
+    import tempfile
+    lp = _nap_cong()
+    with tempfile.TemporaryDirectory(prefix="t165_") as td:
+        cay = Path(td).resolve()
+        pf_trong = cay / "PF_trong"
+        pf_trong.mkdir()
+        cwd_tam = cay / "cwd"
+        cwd_tam.mkdir()
+
+        # Cửa 1: không có ứng viên hợp lệ => ném Chan(RC_KHONG_XAC_DINH)
+        rc, out = _ma_chan(lp, lp._git_exe_toi_thieu, nen="windows",
+                           program_files=str(pf_trong), path="", cwd=str(cwd_tam))
+        chot(rc == 12, f"N1: không có ứng viên hợp lệ phải rc=12, nhận: {rc}")
+        chot("không thấy" in str(out), f"N1: thông điệp ném ra: {out!r}")
+
+        # Cửa 2: có %ProgramFiles%\Git\cmd\git.exe => trả đúng đường tuyệt đối
+        pf_co = cay / "ProgramFiles"
+        cmd_dir = pf_co / "Git" / "cmd"
+        cmd_dir.mkdir(parents=True)
+        git_that = cmd_dir / "git.exe"
+        git_that.write_text("#!/bin/sh\nexit 0\n", encoding="utf-8")
+        git_that.chmod(0o755)
+
+        duong = lp._git_exe_toi_thieu(nen="windows", program_files=str(pf_co), path="", cwd=str(cwd_tam))
+        chot(duong == str(git_that.resolve()), f"N1: mong {git_that.resolve()}, được {duong}")
+        chot(Path(duong).is_absolute(), f"N1: đường dẫn phải tuyệt đối: {duong}")
+
+
+@ca
+def t166_N2_giai_git_windows_loai_tru_cwd():
+    """N2: Nền Windows giả:
+    1. cwd chứa git.bat, git.py, git.exe => kết quả KHÔNG trỏ vào cwd (loại trừ cwd).
+    2. Thư mục PATH ngoài cwd chỉ chứa git.bat/cmd/py (không có git.exe) => bị từ chối (P1-2 / P2-MỚI).
+    3. Thư mục PATH ngoài cwd có git.exe hợp lệ => trả đúng đường tuyệt đối ấy.
+    """
+    import tempfile
+    lp = _nap_cong()
+    with tempfile.TemporaryDirectory(prefix="t166_") as td:
+        cay = Path(td).resolve()
+        cwd_fake = cay / "fake_cwd"
+        cwd_fake.mkdir()
+        bat = cwd_fake / "git.bat"
+        bat.write_text("@echo off\n", encoding="utf-8")
+        py = cwd_fake / "git.py"
+        py.write_text("print('fake')\n", encoding="utf-8")
+        exe_cwd = cwd_fake / "git.exe"
+        exe_cwd.write_text("#!/bin/sh\nexit 0\n", encoding="utf-8")
+        exe_cwd.chmod(0o755)
+
+        pf_rong = cay / "pf_rong"
+        pf_rong.mkdir()
+
+        # Cửa 1: Khi PATH trỏ vào cwd (chứa git.bat, git.py, git.exe) => kết quả KHÔNG được trỏ vào cwd
+        kq = lp._git_windows(path=str(cwd_fake), program_files=str(pf_rong), cwd=str(cwd_fake))
+        chot(kq is None, f"N2 cửa 1: kết quả phải là None (loại trừ cwd), nhưng lại nhận: {kq}")
+
+        rc, out = _ma_chan(lp, lp._git_exe_toi_thieu, nen="windows",
+                           path=str(cwd_fake), program_files=str(pf_rong), cwd=str(cwd_fake))
+        chot(rc == 12, f"N2 cửa 1: phải ném Chan(12) khi chỉ có git.* trong cwd, nhận: {rc}")
+
+        # Cửa 2 (P2-MỚI): Thư mục PATH ngoài cwd chỉ có git.bat, git.cmd, git.py (không có git.exe)
+        path_bat = cay / "path_ngoai_chi_co_bat"
+        path_bat.mkdir()
+        (path_bat / "git.bat").write_text("@echo off\n", encoding="utf-8")
+        (path_bat / "git.cmd").write_text("@echo off\n", encoding="utf-8")
+        (path_bat / "git.py").write_text("print('fake')\n", encoding="utf-8")
+
+        kq_bat = lp._git_windows(path=str(path_bat), program_files=str(pf_rong), cwd=str(cwd_fake))
+        chot(kq_bat is None, f"N2 cửa 2: PATH ngoài cwd chỉ có git.bat/cmd/py phải bị từ chối, nhận: {kq_bat}")
+
+        rc_bat, out_bat = _ma_chan(lp, lp._git_exe_toi_thieu, nen="windows",
+                                   path=str(path_bat), program_files=str(pf_rong), cwd=str(cwd_fake))
+        chot(rc_bat == 12, f"N2 cửa 2: phải ném Chan(12) khi PATH ngoài chỉ có git.bat/cmd/py, nhận: {rc_bat}")
+
+        # Cửa 3: Thư mục PATH ngoài cwd có git.exe hợp lệ => phải nhận đúng git.exe đó
+        path_exe = cay / "path_ngoai_co_exe"
+        path_exe.mkdir()
+        git_exe_that = path_exe / "git.exe"
+        git_exe_that.write_text("#!/bin/sh\nexit 0\n", encoding="utf-8")
+        git_exe_that.chmod(0o755)
+
+        kq_exe = lp._git_windows(path=f"{path_bat}{os.pathsep}{path_exe}",
+                                program_files=str(pf_rong), cwd=str(cwd_fake))
+        chot(kq_exe == str(git_exe_that.resolve()),
+             f"N2 cửa 3: mong nhận {git_exe_that.resolve()}, nhận được: {kq_exe}")
+
+
+@ca
+def t167_N3_giai_git_windows_loai_tru_system_root_va_chan_doan():
+    """N3: Ứng viên dưới %SystemRoot% bị loại; và khi bước %ProgramFiles% không phân giải,
+    chẩn đoán ghi KHÔNG_ĐO_ĐƯỢC chứ không im lặng rơi xuống bước 3.
+    """
+    import tempfile
+    lp = _nap_cong()
+    with tempfile.TemporaryDirectory(prefix="t167_") as td:
+        cay = Path(td).resolve()
+        fake_sr = cay / "Windows"
+        s32 = fake_sr / "System32"
+        s32.mkdir(parents=True)
+        git_sr = s32 / "git.exe"
+        git_sr.write_text("#!/bin/sh\n", encoding="utf-8")
+        git_sr.chmod(0o755)
+
+        fake_pf = cay / "EmptyPF"
+        fake_pf.mkdir()
+        fake_cwd = cay / "EmptyCWD"
+        fake_cwd.mkdir()
+
+        # Cửa (a): Ứng viên dưới %SystemRoot% phải bị loại
+        chan_doan = []
+        kq_sr = lp._git_windows(path=str(s32), system_root=str(fake_sr),
+                                program_files=str(fake_pf), cwd=str(fake_cwd),
+                                chan_doan=chan_doan)
+        chot(kq_sr is None, f"N3a: ứng viên dưới SystemRoot phải bị loại, nhưng nhận: {kq_sr}")
+
+        rc_sr, _ = _ma_chan(lp, lp._git_exe_toi_thieu, nen="windows",
+                            path=str(s32), system_root=str(fake_sr),
+                            program_files=str(fake_pf), cwd=str(fake_cwd))
+        chot(rc_sr == 12, f"N3a: phải ném Chan 12 khi ứng viên duy nhất nằm dưới SystemRoot, nhận: {rc_sr}")
+
+        # Cửa (b): Khi bước %ProgramFiles% không phân giải, chẩn đoán ghi KHÔNG_ĐO_ĐƯỢC
+        chot(any("KHÔNG_ĐO_ĐƯỢC" in str(msg) for msg in chan_doan),
+             f"N3b: chẩn đoán phải ghi KHÔNG_ĐO_ĐƯỢC khi ProgramFiles không phân giải, nhận: {chan_doan}")
+
+
+@ca
+def t168_N4_posix_khong_hoi_quy_usr_bin_git():
+    """N4: POSIX không hồi quy: trên ubuntu-latest, _git_exe_toi_thieu() vẫn trả /usr/bin/git.
+    Đột biến: đổi nhánh POSIX sang hằng số khác => ĐỎ.
+    """
+    import tempfile
+    lp = _nap_cong()
+    with tempfile.TemporaryDirectory(prefix="t168_") as td:
+        cay = Path(td).resolve()
+        fake_bin = cay / "usr" / "bin"
+        fake_bin.mkdir(parents=True)
+        # Tạo cả git và git.exe để fixture hoạt động đúng khi chạy trên cả Linux và Windows runner
+        p_git = fake_bin / "git"
+        p_git_exe = fake_bin / "git.exe"
+        p_git.write_text("#!/bin/sh\nexit 0\n", encoding="utf-8")
+        p_git_exe.write_text("#!/bin/sh\nexit 0\n", encoding="utf-8")
+        p_git.chmod(0o755)
+        p_git_exe.chmod(0o755)
+        fake_git = p_git_exe if os.name == "nt" else p_git
+
+        # Giả lập POSIX với path trỏ vào fake_bin
+        duong = lp._git_exe_toi_thieu(nen="posix", path=str(fake_bin))
+        chot(duong == str(fake_git.resolve()), f"N4: mong {fake_git.resolve()}, được {duong}")
+
+        # Nếu trên môi trường POSIX thật (không phải Windows) có /usr/bin/git:
+        if os.name != "nt" and Path("/usr/bin/git").is_file():
+            duong_that = lp._git_exe_toi_thieu(nen="posix")
+            chot(duong_that == str(Path("/usr/bin/git").resolve()),
+                 f"N4: trên POSIX thật mong /usr/bin/git, được {duong_that}")
+
+        # Đột biến: đổi nhánh POSIX sang hằng số khác không tồn tại
+        rc_mut, out_mut = _ma_chan(lp, lp._git_exe_toi_thieu, nen="posix", path=str(cay / "nonexistent_bin"))
+        chot(rc_mut == 12, f"N4: mutant đổi path POSIX sang thư mục khác phải ném Chan 12, nhận: {rc_mut}")
+
+
+@ca
+def t169_N8_cong_cu_git_chi_nhan_git_exe():
+    """N8 (M3): CONG_CU_GIT chỉ nhận git.exe; .bat/.cmd/.py/.txt bị từ chối; có đối chứng dương."""
+    lp = _nap_cong()
+    with San() as s:
+        d, cw, pf = s / "ngoai", s / "cwd", s / "pf"
+        d.mkdir(); cw.mkdir(); pf.mkdir()
+        f_exe = d / "git.exe"; f_exe.write_text("x")
+        kq_duong = lp._git_windows(cong_cu_git=str(f_exe), path="", program_files=str(pf), cwd=str(cw))
+        chot(kq_duong == str(f_exe.resolve()), f"git.exe phải nhận: {kq_duong}")
+        for ten in ("git.bat", "git.cmd", "git.py", "khong-phai-git.txt"):
+            f_bad = d / ten; f_bad.write_text("x")
+            kq = lp._git_windows(cong_cu_git=str(f_bad), path="", program_files=str(pf), cwd=str(cw))
+            chot(kq is None, f"{ten} phải bị từ chối ở bước 1 CONG_CU_GIT: {kq}")
+
+
+@ca
+def t170_N9_path_boc_nhay_kep_va_khoang_trang():
+    """N9 (M4): PATH bọc nháy kép hoặc có khoảng trắng thừa được nhận; mục rỗng bỏ qua."""
+    lp = _nap_cong()
+    with San() as s:
+        d, cw, pf = s / "thu muc co cach", s / "cwd", s / "pf"
+        d.mkdir(); cw.mkdir(); pf.mkdir()
+        (d / "git.exe").write_text("x")
+        kq1 = lp._git_windows(path=str(d), program_files=str(pf), cwd=str(cw))
+        chot(kq1 == str((d / "git.exe").resolve()), f"PATH không nháy phải nhận: {kq1}")
+        kq2 = lp._git_windows(path=f'"{d}"', program_files=str(pf), cwd=str(cw))
+        chot(kq2 == str((d / "git.exe").resolve()), f"PATH có nháy kép phải nhận: {kq2}")
+        path_hon_hop = f'   ;  "{d}"  ;  ;  '
+        kq3 = lp._git_windows(path=path_hon_hop, program_files=str(pf), cwd=str(cw), phan_cach=";")
+        chot(kq3 == str((d / "git.exe").resolve()), f"PATH có khoảng trắng và mục rỗng phải nhận: {kq3}")
+
+
+@ca
+def t171_N10_path_dung_DUNG_dau_phan_cach_duoc_truyen():
+    """N10 (M5): phép tách PATH dùng ĐÚNG dấu được truyền, KHÔNG suy từ NỘI DUNG chuỗi.
+
+    BẢN TRƯỚC ĐỎ TRÊN WINDOWS vì FIXTURE, không vì mã: nó ghép `f"{la}:{d}"` từ đường TUYỆT
+    ĐỐI rồi truyền `phan_cach=":"`. Trên Windows dấu ấy là ký tự Ổ ĐĨA — đo 19-09-2026, tách
+    "C:/x/a:C:/x/b" theo ":" ra ['C','/x/a','C','/x/b'], thư mục chứa `git.exe` KHÔNG nằm
+    trong đó. Cùng họ hằng chỉ-POSIX của `t136`, đổi cửa: hằng ĐƯỜNG DẪN thành hằng DẤU PHÂN
+    CÁCH; `t173` nay canh cả hai. Nay dùng dấu không đụng cú pháp đường dẫn nền nào nên chạy
+    được CẢ HAI nền.
+
+    ĐỘT BIẾN LÀM CA NÀY ĐỎ: `sep = ";" if ";" in path_val else os.pathsep` — suy từ nội dung.
+    """
+    lp = _nap_cong()
+    with San() as s:
+        la, d, cw, pf = s / "co;dau-cham-phay", s / "dung", s / "cwd", s / "pf"
+        la.mkdir(); d.mkdir(); cw.mkdir(); pf.mkdir()
+        (d / "git.exe").write_text("x")
+        mong = str((d / "git.exe").resolve())
+
+        kq = lp._git_windows(path=f"{la}{PHAN_CACH_THU_N10}{d}", program_files=str(pf),
+                             cwd=str(cw), phan_cach=PHAN_CACH_THU_N10)
+        chot(kq == mong,
+             f"phải tách theo {PHAN_CACH_THU_N10!r} đã truyền, không suy từ ';' trong tên: {kq}")
+
+        # ĐỐI CHỨNG DƯƠNG — thiếu nó thì một hàm luôn trả None cũng qua được chiều trên.
+        d2 = s / "khong-dau"; d2.mkdir(); (d2 / "git.exe").write_text("x")
+        kq2 = lp._git_windows(path=str(d2), program_files=str(pf), cwd=str(cw),
+                              phan_cach=PHAN_CACH_THU_N10)
+        chot(kq2 == str((d2 / "git.exe").resolve()), f"đối chứng dương: {kq2}")
+
+        # Vế POSIX: chỉ ở đó ':' là dấu phân cách THẬT và không đụng ký tự ổ đĩa. Trên
+        # Windows vế này KHÔNG dựng được — khai thẳng thay vì để ĐỎ giả.
+        if os.pathsep == ":":
+            kq3 = lp._git_windows(path=f"{la}:{d}", program_files=str(pf), cwd=str(cw),
+                                  phan_cach=":")
+            chot(kq3 == mong, f"posix: không được tách theo ';' khi phan_cach=':': {kq3}")
+
+
+@ca
+def t172_N11_chan_doan_chuyen_kenh_stderr_0_byte():
+    """N11 (M6): Chuyển kênh stderr sang chan_doan (0 byte khi có chan_doan, ghi stderr khi None)."""
+    import io
+    lp = _nap_cong()
+    with San() as s:
+        cw, pf = s / "cwd", s / "pf"
+        cw.mkdir(); pf.mkdir()
+        buf = io.StringIO(); old_err = sys.stderr; ds = []
+        try:
+            sys.stderr = buf
+            kq = lp._git_windows(path="", program_files=str(pf), cwd=str(cw), chan_doan=ds)
+            chot(kq is None and len(buf.getvalue()) == 0, f"stderr phải 0 byte khi có chan_doan: {buf.getvalue()!r}")
+            chot(len(ds) > 0 and "KHÔNG_ĐO_ĐƯỢC" in ds[0], f"ds phải nhận thông báo chẩn đoán: {ds}")
+        finally:
+            sys.stderr = old_err
+        buf2 = io.StringIO()
+        try:
+            sys.stderr = buf2
+            kq = lp._git_windows(path="", program_files=str(pf), cwd=str(cw), chan_doan=None)
+            chot(kq is None and len(buf2.getvalue()) > 0 and "KHÔNG_ĐO_ĐƯỢC" in buf2.getvalue(), "stderr phải có thông báo")
+        finally:
+            sys.stderr = old_err
+
+
+@ca
+def t173_N12_hang_fixture_dung_tren_CA_HAI_nen():
+    """N12 (M7): hằng trong fixture phải đúng CẢ HAI nền — đường dẫn VÀ dấu phân cách.
+
+    Bản trước chỉ canh hằng ĐƯỜNG DẪN; cùng lớp lỗi thoát qua cửa khác (`t171` ghép PATH bằng
+    hằng ":"). Nay đóng theo LỚP, hai cửa. ĐỘT BIẾN: sentinel về "/khong/co/git" (cửa 1) HOẶC
+    `PHAN_CACH_THU_N10` về ":" (cửa 2).
+    """
+    from pathlib import PurePosixPath, PureWindowsPath
+
+    s = "//khong-co/git"                                    # cửa 1 — hằng ĐƯỜNG DẪN
+    chot(PurePosixPath(s).is_absolute() and PureWindowsPath(s).is_absolute(),
+         f"Sentinel {s!r} phải tuyệt đối trên cả PurePosixPath và PureWindowsPath")
+
+    chot(PHAN_CACH_THU_N10 != ":",                          # cửa 2 — hằng DẤU PHÂN CÁCH
+         "dấu phân cách fixture KHÔNG được là ':' — đường tuyệt đối Windows mang dấu hai chấm "
+         f"của ổ đĩa nên chuỗi tự cắt nát; đang là {PHAN_CACH_THU_N10!r}")
+    mau = "C:/x/a" + PHAN_CACH_THU_N10 + "C:/x/b"
+    chot(mau.split(PHAN_CACH_THU_N10) == ["C:/x/a", "C:/x/b"],
+         f"ghép/tách bằng {PHAN_CACH_THU_N10!r} phải giữ nguyên đường Windows: "
+         f"{mau.split(PHAN_CACH_THU_N10)}")
 
 
 CO_CHI_CA = "--chi-ca="   # `--chi-ca=t01_` ⇒ chỉ chạy ca có tên bắt đầu bằng tiền tố ấy (M3 packet #504 dùng để sinh lượt con rẻ)

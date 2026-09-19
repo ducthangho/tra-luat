@@ -59,6 +59,23 @@ author_association_KHONG_LA_BANG_CHUNG: >-
   để tra cứu, KHÔNG phải để chứng minh ai đã ký. Nợ #566.
 
 
+# ---- KHAI THẲNG: AI ĐĂNG, VÀ VÌ SAO ĐIỀU ĐÓ QUAN TRỌNG ----
+dang_boi: phien_agent_dang_ho
+dang_boi_chi_thi_nguyen_van: >-
+  Chủ kho, phiên điều phối 19-09-2026: "Soạn verdict .md cho tôi ký đi", rồi "Đăng hộ tôi luôn đi".
+muc_bao_chung_YEU_HON_khuon: >-
+  Khuôn `plat-m4-human-audit-ducthangho-verdict.receipt.yaml` khai `tac_gia: ducthangho,
+  author_association OWNER — không phải bot, không phải phiên agent`. Biên nhận NÀY cố ý KHÔNG
+  khai câu ấy, vì nó đã được ĐO là không kiểm chứng được: phiên agent đăng comment 5739262446
+  rồi đọc ngược về qua API, phản hồi trả `user.login = ducthangho` và
+  `author_association = OWNER` — Y HỆT một comment chủ kho tự gõ. Nguyên nhân: phiên agent chạy
+  bằng credential chủ kho (kho ghi từ 2026-08-26: `get_me -> ducthangho`). Nên `author_association`
+  KHÔNG phân biệt được người với máy, và thẩm quyền lượt này neo vào CHỈ THỊ trong phiên chứ
+  không vào tác giả comment. Nợ riêng: #566.
+KHONG_duoc_dung_lam_tien_le: >-
+  Đừng dùng lượt này làm tiền lệ cho việc phiên agent đăng hộ chữ ký người. Khuôn chuẩn đòi chủ
+  kho TỰ ĐĂNG; lượt này không đạt điều đó và khai thẳng ra.
+
 verdict_path: ops/reviews/assurance-ho-model-audit-nguoi-verdict.md
 verdict_sha256: 1f120b4a76a1c2b8c406475e13520a989947c07491f22cc647a9ee491569c171
 verdict_bytes: 5701
@@ -107,22 +124,6 @@ model_reviewer_identity:
     không phải một lượt chạy máy. Ai đọc `human_audited` ở biên nhận này thành "đã có một vòng
     kiểm độc lập bằng máy" là đọc SAI.
 
-  # ---- KHAI THẲNG: AI ĐĂNG, VÀ VÌ SAO ĐIỀU ĐÓ QUAN TRỌNG ----
-  dang_boi: phien_agent_dang_ho
-  dang_boi_chi_thi_nguyen_van: >-
-    Chủ kho, phiên điều phối 19-09-2026: "Soạn verdict .md cho tôi ký đi", rồi "Đăng hộ tôi luôn đi".
-  muc_bao_chung_YEU_HON_khuon: >-
-    Khuôn `plat-m4-human-audit-ducthangho-verdict.receipt.yaml` khai `tac_gia: ducthangho,
-    author_association OWNER — không phải bot, không phải phiên agent`. Biên nhận NÀY cố ý KHÔNG
-    khai câu ấy, vì nó đã được ĐO là không kiểm chứng được: phiên agent đăng comment 5739262446
-    rồi đọc ngược về qua API, phản hồi trả `user.login = ducthangho` và
-    `author_association = OWNER` — Y HỆT một comment chủ kho tự gõ. Nguyên nhân: phiên agent chạy
-    bằng credential chủ kho (kho ghi từ 2026-08-26: `get_me -> ducthangho`). Nên `author_association`
-    KHÔNG phân biệt được người với máy, và thẩm quyền lượt này neo vào CHỈ THỊ trong phiên chứ
-    không vào tác giả comment. Nợ riêng: #566.
-  KHONG_duoc_dung_lam_tien_le: >-
-    Đừng dùng lượt này làm tiền lệ cho việc phiên agent đăng hộ chữ ký người. Khuôn chuẩn đòi chủ
-    kho TỰ ĐĂNG; lượt này không đạt điều đó và khai thẳng ra.
   xung_dot_loi_ich_da_khai: >-
     Chủ kho là người đọc độc lập DUY NHẤT còn lại của cả chuỗi packet, và comment mang chữ ký
     của họ lại do chính phiên agent bị audit đăng hộ. Mức độc lập vì thế mỏng hơn một lượt

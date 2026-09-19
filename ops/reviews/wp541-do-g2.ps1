@@ -49,7 +49,7 @@ trap {
 # ---------------------------------------------------------------- hang so DA DO
 $Url        = 'https://github.com/ducthangho/tra-luat'
 $ShaVa      = '2f70869'        # HEAD mong cua ban va (nhanh fix_issue_541)
-$ShaBoDo    = '0ee9b4dcc3d2886202a719e60ff7bbf12660c05b0937d8eccca10a9e460a94b3'      # SHA-256 cua bo do Python nhung ben duoi
+$ShaBoDo    = 'fa4c557df710ef81a30caafb8f7e9c2d5e07adfc3547a69883118917275049b3'      # SHA-256 cua bo do Python nhung ben duoi
 
 # Hai goi nay da DO tu container review 18-09-2026: tai duoc, va bam dung nhu ghi.
 # Chung CHI duoc tai khi may ban THIEU cong cu do. May ban da co ca hai o luot truoc,
@@ -209,7 +209,7 @@ $B64 = @(
 'IGFneSBjaG8gNSB0ZXAgLyArODEyLCB0cm9uZyBraGkgdmllYyBjdWEgYWd5IGxhIDIgdGVwIC8gKzM1My4KIyBNb3QgY2hv',
 'dCBuaHUgdGhlIHNlIGJhbyAidnVvdCB0cmFuIiBjaG8gbW90IGJhbiB2YSBLSE9ORyB2dW90LiBCYXNlIGR1bmcgbGEgTUVS',
 'R0UtQkFTRS4KU0hBX0JBU0VfU1BFQyA9ICJkNzA1NjIzMTYyYjc1YjczNDBlZTdjY2E1NGFjMmQyYWJiZGRiYjZmIgpCQU5f',
-'Qk9fRE8gPSAiMjAyNi0wOS0xOWMiICAgICAgICAgICAgICAjIGRvaSBNT0kga2hpIHN1YSBibyBkbyAtIGxvZyB0dSBraGFp',
+'Qk9fRE8gPSAiMjAyNi0wOS0xOWQiICAgICAgICAgICAgICAjIGRvaSBNT0kga2hpIHN1YSBibyBkbyAtIGxvZyB0dSBraGFp',
 'IGJhbiBuYW8KVFJBTl9URVAsIFRSQU5fRE9ORyA9IDIsIDQwMCAgICAgICAgICAjIE43JyBjdWEgc3BlYyByMwpNQVVfV0lO',
 'ICA9ICdpZiBuZW5fdGh1YyA9PSAid2luZG93cyI6JwojIENhIG5nb2FpIHBoYW0gdmkgcjMgwqduZ29haV9waGFtX3ZpIOKA',
 'lCBkbyBDSElOSCBTUEVDIGtoYWksIGtob25nIHBoYWkgYm8gZG8gdHUgcXV5ZXQuCiMgRG8gbGEgREFOSCBTQUNIIENITyBQ',
@@ -603,16 +603,28 @@ G -C "$Kho" config remote.origin.fetch '+refs/heads/*:refs/remotes/origin/*' | O
 # clone tu mot kho cuc bo ($Nguon), va fetch tu do thi "tuoi" chi tuoi bang kho cuc bo ay.
 G -C "$Kho" remote set-url origin "$Url" | Out-Null
 Write-Host "fetch ban va $Nhanh + nen master ..."
-G -C "$Kho" fetch --quiet origin $Nhanh | Out-Null
-# FETCH CA master. Bai hoc 19-09-2026: clone tai dung chi fetch nhanh ban va, nen
+# FETCH CA master. Bai hoc 19-09-2026 (a): clone tai dung chi fetch nhanh ban va, nen
 # `origin/master` dung yen tu 14-09; merge-base roi ve dinh master cu va cong kich thuoc
-# do ra 46 tep / +7118 thay cho 2 tep / +397 - CUNG MOT COMMIT. Bo do nay gio fail-close
-# (nen cu => KHONG DO DUOC chu khong phan quyet TRUOT), va day la ve con lai: lam nen tuoi.
-G -C "$Kho" fetch --quiet origin '+refs/heads/master:refs/remotes/origin/master' | Out-Null
+# do ra 46 tep / +7118 thay cho 2 tep / +397 - CUNG MOT COMMIT. Bo do gio fail-close
+# (nen cu => KHONG DO DUOC chu khong phan quyet TRUOT); day la ve con lai: lam nen tuoi.
+#
+# Bai hoc 19-09-2026 (b), tra gia ngay trong lan sua (a): KHONG dung FETCH_HEAD nua.
+# FETCH_HEAD la trang thai NGAM do lan fetch CUOI CUNG de lai. Them mot lenh fetch phia
+# tren no - dung mot dong, khong dong gi den dong checkout - da lam `checkout FETCH_HEAD`
+# lay master thay vi nhanh ban va, va luot do di do nham cay. Fetch thang vao ref CO TEN
+# roi checkout chinh ref do: khong con thu tu nao doi duoc ket qua.
+G -C "$Kho" fetch --quiet origin "+refs/heads/master:refs/remotes/origin/master" | Out-Null
+G -C "$Kho" fetch --quiet origin "+refs/heads/${Nhanh}:refs/remotes/origin/${Nhanh}" | Out-Null
 $mLoc = (G -C "$Kho" rev-parse --short=12 origin/master) | Select-Object -First 1
 Write-Host "nen  : origin/master = $mLoc"
-G -C "$Kho" checkout --quiet -B do-tam FETCH_HEAD | Out-Null
-G -C "$Kho" reset --hard --quiet FETCH_HEAD | Out-Null
+G -C "$Kho" checkout --quiet -B do-tam "refs/remotes/origin/$Nhanh" | Out-Null
+G -C "$Kho" reset --hard --quiet "refs/remotes/origin/$Nhanh" | Out-Null
+# Chot ngay tai day, truoc khi tra 20-45 phut: cay dang o dung nhanh duoc yeu cau chua?
+$hNhanh = (G -C "$Kho" rev-parse "refs/remotes/origin/$Nhanh") | Select-Object -First 1
+$hHead  = (G -C "$Kho" rev-parse HEAD) | Select-Object -First 1
+if ($hHead -ne $hNhanh) {
+    Dung "checkout SAI CAY: HEAD=$hHead nhung $Nhanh=$hNhanh - dung lai, khong do"
+}
 
 $head = (G -C "$Kho" rev-parse --short HEAD) | Select-Object -First 1
 # KHONG ghim SHA. Ban va g2 chua ton tai luc viet tep nay, va ghim mot SHA se lam

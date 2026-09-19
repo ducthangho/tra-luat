@@ -16,6 +16,26 @@ BASH_NEN = HERE / "bash_nen.py"
 CAI_SH = HERE / "cai_cong_cu.sh"
 sys.path.insert(0, str(HERE))
 import lease_publish_test as lpt  # noqa: E402 — tái dùng _goi_actionlint_gia/_bam_tep
+import bash_nen  # noqa: E402 — MỘT bộ giải `bash` dùng chung (#570)
+
+
+def _bash_dung_duoc(viec: str) -> str:
+    """`bash` ĐÃ CHỨNG MINH làm được việc, hoặc ném kèm CHẨN ĐOÁN.
+
+    KHÔNG `shutil.which("bash")`. Đo 19/20-09-2026 trên Windows thật (#570): nó trả
+    `C:\\Windows\\system32\\bash.EXE` — bộ phóng WSL — và ở đây nó làm
+    `./cai_cong_cu.sh` TREO 60s rồi giết cả suite trong `batch_behavior_test()`, TRƯỚC
+    vòng lặp ca. Tức tệp này CHƯA TỪNG chạy được trên Windows, và năm ca `T23`-`T27`
+    sinh ra để đo Windows thì chưa từng đo ở đó — đúng bệnh "ca có MẶT khác ca có ĐO".
+    """
+    duong, chan_doan = bash_nen.tim_bash()
+    if not duong:
+        raise BoQuaMoiTruong(
+            f"KHÔNG ĐO ĐƯỢC: không `bash` nào làm được việc cho {viec}. Chẩn đoán: "
+            + "; ".join(f"{c['duong']}: {c['ly_do']}" for c in chan_doan)
+            or "không có ứng viên nào")
+    return duong
+
 
 CA: list = []
 
@@ -221,9 +241,7 @@ def t4_sai_ban_phai_neu_ro_ban_mong_doi_va_ban_thay():
 @ca
 def t5_cai_cong_cu_khong_thoat_som_khi_da_co_tren_PATH():
     """T5: `cai_cong_cu.sh` KHÔNG thoát sớm khi công cụ đã có trên PATH."""
-    bash = shutil.which("bash")
-    if not bash:
-        raise BoQuaMoiTruong("KHÔNG ĐO ĐƯỢC: thiếu `bash` để chạy ops/cai_cong_cu.sh")
+    bash = _bash_dung_duoc("ops/cai_cong_cu.sh")
     with tempfile.TemporaryDirectory() as tmp:
         tmp = Path(tmp)
         path_gia = tmp / "path-gia"  # actionlint SAI bản đã có sẵn TRƯỚC khi cài
@@ -373,7 +391,7 @@ def t13_actionlint_bien_mat_giua_probe_va_canary():
         bk = ghi_ban_ke(tmp, {"actionlint": {"bat_buoc": True, "ban_ghim": "1.7.7",
             "probe": mot_probe("actionlint"), "canary": "actionlint_shellcheck", "chinh_sach": "blocking"}})
         rc, out, _ = chay("kiem-tra", "--ban-ke", str(bk),
-                          env=dict(os.environ, PATH=str(d), CONG_CU_BASH=shutil.which("bash") or ""))
+                          env=dict(os.environ, PATH=str(d), CONG_CU_BASH=_bash_dung_duoc("canary") or ""))
         bang(json.loads(out)["trang_thai_tong"] == "KHONG_DO_DUOC" and "khong goi duoc" in out,
              f"canary mất executable bị nuốt: {rc}\n{out}")
 
@@ -559,6 +577,12 @@ DOT_BIEN = {
         "    da_sach = [t for t in CHUA_CHUYEN if t not in co_loi_goi]\n",
         "    da_sach = []  # đột biến: bỏ chiều ngược của ratchet\n",
         "BASH_NEN", (), "t26_ratchet_phai_NGAN_di_chu_khong_muc_ra"),
+    "bn_bo_han_treo": ("ops/bash_nen.py",
+        '        return False, f"phép argv: rc={rc} — {ra.strip()[:200]}"\n',
+        '        if rc == -998:\n'
+        '            return True, "đột biến: coi QUÁ HẠN là đạt"\n'
+        '        return False, f"phép argv: rc={rc} — {ra.strip()[:200]}"\n',
+        "BASH_NEN", (), "t28_bash_nen_tu_choi_bash_TREO_trong_han"),
     "bn_quet_theo_chuoi": ("ops/bash_nen.py",
         "            dong = _loi_goi_tran(than)\n",
         "            dong = [i for i, l in enumerate(than.splitlines(), 1)\n"
@@ -869,9 +893,7 @@ def _chay_batch(crlf: bool):
     `crlf=True` cho python giả in CRLF — đúng thứ Git Bash trên Windows nhận từ python
     native (text mode). Tái hiện được trên Linux, nên t23 đo được ở đây, không đợi lane
     windows-latest."""
-    bash = shutil.which("bash")
-    if not bash:
-        raise BoQuaMoiTruong("KHÔNG ĐO ĐƯỢC batch: thiếu bash")
+    bash = _bash_dung_duoc("batch")
     with tempfile.TemporaryDirectory(prefix="cong-cu-batch-") as td:
         root = Path(td); ops = root / "ops"; ops.mkdir(); out = root / "installed"
         fake_bin = root / "fake-bin"; fake_bin.mkdir(); pip_ready = root / "pip-ready"
@@ -1164,7 +1186,17 @@ _BASH_NEN_GIA_KHONG_MO_TEP = _BASH_NEN_GIA_DUNG.replace(
     'if True:\n')
 
 
-def _goi_do_nang_luc(gia_than: str, tmp: Path):
+# Mat hong THU BA cua cung bo phong WSL, do duoc o `570-do-3` (20-09-2026, Windows that):
+# no KHONG tra `rc=127` ma TREO — `subprocess.run([bash, "./cai_cong_cu.sh", "--bat-buoc"])`
+# het han 60s, roi `TemporaryDirectory` chet tiep bang `WinError 32`, va ca suite nay chet
+# trong `batch_behavior_test()` TRUOC vong lap ca. Han cua `_do_nang_luc` la thu DUY NHAT
+# chan mat ay, va truoc r2 no dung do MAY — khong ca nao canh.
+_BASH_NEN_GIA_TREO = '''import time
+time.sleep(600)
+'''
+
+
+def _goi_do_nang_luc(gia_than: str, tmp: Path, han=None):
     """Chạy `_do_nang_luc` của `BASH_NEN` (có thể ĐÃ ĐỘT BIẾN) trên một `bash` giả.
 
     Ứng viên giả là `[python, gia.py]` chứ không phải một tệp thực thi: Windows không
@@ -1174,7 +1206,7 @@ def _goi_do_nang_luc(gia_than: str, tmp: Path):
     gia.write_text(gia_than, encoding="utf-8")
     ma = ("import runpy, json, sys\n"
           f"m = runpy.run_path({str(BASH_NEN)!r})\n"
-          f"dat, ly_do = m['_do_nang_luc']([{sys.executable!r}, {str(gia)!r}])\n"
+          f"dat, ly_do = m['_do_nang_luc']([{sys.executable!r}, {str(gia)!r}], han={han!r})\n"
           "print('KQ ' + json.dumps([dat, ly_do]))\n")
     p = subprocess.run([sys.executable, "-c", ma], cwd=GOC, capture_output=True,
                        text=True, timeout=120)
@@ -1231,6 +1263,38 @@ def t24_bash_nen_tu_choi_bash_khong_mo_duoc_duong_dan_ban_dia():
              "`t35`-`t40` nhận `rc=127` ở #570")
         bang("đường dẫn bản địa" in (ly_do_xau or ""),
              f"từ chối ĐÚNG nhưng LÝ DO không nêu phép mở đường dẫn: {ly_do_xau!r}")
+
+
+@ca
+def t28_bash_nen_tu_choi_bash_TREO_trong_han():
+    '''Phep NANG LUC phai TU CHOI mot `bash` KHONG BAO GIO TRA — trong han, khong treo theo.
+
+    Day la mat hong THU BA cua bo phong WSL va la mat DAT nhat: no khong tra `rc=127` ma
+    TREO, nen no khong lam mot ca do — no giet CA SUITE truoc khi ca nao kip chay. Do duoc
+    o `570-do-3`: `ops/cong_cu_test.py` chet trong `batch_behavior_test()` dung nhu the, va
+    vi the `T23`-`T27` chua tung chay tren Windows du chung sinh ra de do Windows.
+
+    Han truyen vao ngan de suite chay nhanh; con so SAN PHAM la `_HAN_GIAY`, va ca nay doi
+    no la mot so duong huu han — mot han bi go thi khong phai "cham hon", ma la mat chot.
+    '''
+    with tempfile.TemporaryDirectory() as tmp:
+        tmp = Path(tmp)
+        dat, ly_do = _goi_do_nang_luc(_BASH_NEN_GIA_TREO, tmp, han=3)
+        bang(not dat, "bash gia TREO ma van duoc NHAN — han khong chan duoc mat treo")
+        bang("rc=-998" in (ly_do or "") or "qua han" in (ly_do or "") or "quá hạn" in (ly_do or ""),
+             f"tu choi DUNG nhung LY DO khong neu QUA HAN: {ly_do!r} — doc nham mat treo "
+             f"thanh mot loi khac thi lan sau khong ai tim dung cho")
+        ma = ("import runpy\n"
+              f"m = runpy.run_path({str(BASH_NEN)!r})\n"
+              "print('HAN', m['_HAN_GIAY'])\n")
+        p = subprocess.run([sys.executable, "-c", ma], cwd=GOC, capture_output=True,
+                           text=True, timeout=60)
+        dung(p.returncode == 0 and "HAN " in p.stdout,
+             f"khong doc duoc `_HAN_GIAY`: rc={p.returncode} {p.stderr}")
+        han = float(p.stdout.split("HAN ")[-1].strip())
+        bang(0 < han < 3600,
+             f"`_HAN_GIAY` = {han!r} — han san pham phai la so duong huu han; go no ra la "
+             f"mat chot DUY NHAT chan mat treo, khong phai 'chay cham hon'")
 
 
 def _quet(goc) -> tuple:

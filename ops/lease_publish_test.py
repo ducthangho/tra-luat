@@ -1269,24 +1269,51 @@ def _bash_posix() -> str:
 
     Nói rõ phạm vi: bước được đo chạy trong job `runs-on: ubuntu-latest`, nên Windows chỉ
     là nơi bộ test tình cờ chạy. Nhưng "tình cờ" mà báo finding giả thì vẫn phải chữa.
+
+    HỢP NHẤT (#570, revision 2). Thân cũ của hàm này là bộ giải RIÊNG thứ nhất trong ba
+    bộ giải độc lập cho cùng một khuyết tật, và nó lọc theo TÊN: danh sách Git Bash cộng
+    một phép loại chuỗi `"system32"`. Phép đo `570-do-2` trên Windows thật cho thấy lọc
+    theo tên KHÔNG diễn tả nổi khuyết tật — thứ phân biệt được là HÀNH VI:
+
+        C:\Windows\system32\bash.EXE        -> $0=/bin/bash  $#=0   (đối số biến mất)
+        C:\Program Files\Git\bin\bash.exe     -> $0=t40        $#=3
+
+    Nên nay hàm này uỷ quyền cho `ops/bash_nen.py`, nơi quyết bằng phép thử NĂNG LỰC. Giữ
+    nguyên HỢP ĐỒNG cũ — trả chuỗi rỗng khi không có — vì các ca gọi nó đang đọc như vậy.
     """
-    import os
-    import shutil
-    if os.name != "nt":
-        return "bash"
-    ung_vien = [
-        r"C:\Program Files\Git\bin\bash.exe",
-        r"C:\Program Files (x86)\Git\bin\bash.exe",
-        r"C:\Program Files\Git\usr\bin\bash.exe",
-    ]
-    for d in ung_vien:
-        if Path(d).is_file():
-            return d
-    tim = shutil.which("bash")
-    # `System32\bash.exe` LÀ WSL. Nhận nó là tự chuốc một finding giả.
-    if tim and "system32" not in tim.replace("/", "\\").lower():
-        return tim
-    return ""
+    import bash_nen
+    duong, _ = bash_nen.tim_bash()
+    return duong or ""
+
+
+def _bash_cho_cai_actionlint() -> str:
+    """`bash` ĐÃ CHỨNG MINH làm được việc, cho sáu ca `t35`-`t40`. FAIL-CLOSE, không bỏ qua.
+
+    VÌ SAO KHÔNG `shutil.which("bash")` (Issue #570, đo 19-09-2026 trên Windows thật).
+    Nó trả `C:\\Windows\\system32\\bash.EXE` — bộ phóng WSL — và sáu ca chết TRƯỚC dòng
+    đầu của `ops/cai_actionlint.sh` với `rc=127`. Sáu lời khai của chúng khi ấy
+    ("không cưỡng chế bản ghim", "loại archive bị suy từ suffix", …) là QUY SAI NGUYÊN
+    NHÂN: không lời nào được đo. `ops/cai_actionlint.sh` LÀNH — trên Git Bash cùng máy,
+    26/26 khẳng định ĐẠT và 6/6 đột biến bị giết đúng lý do.
+
+    Đây là lần thứ BA cùng khuyết tật (`t32` → `_bash_posix`; `_bash_windows` của
+    `ops/cong_cu.py`; nay sáu ca này), nên chốt KHÔNG phải một bộ giải riêng thứ tư:
+    `ops/bash_nen.py` là MỘT bộ giải dùng chung, và nó quyết bằng phép thử NĂNG LỰC chứ
+    không bằng một danh sách tên — vì phép đo cho thấy không lọc theo tên nào diễn tả nổi
+    "con bash này làm hỏng argv".
+
+    Thiếu bash dùng được ⇒ ĐỎ kèm CHẨN ĐOÁN, KHÔNG `return` sớm: một ca `return` sớm vẫn
+    được harness đếm là ĐẠT (bệnh `t24`), và đó đúng là cách sáu ca này vô dụng suốt.
+    """
+    import bash_nen
+    duong, chan_doan = bash_nen.tim_bash()
+    bang(duong,
+         "KHÔNG ĐO ĐƯỢC: không `bash` nào làm được việc. Chẩn đoán từng ứng viên: "
+         + ("; ".join(f"{c['duong']}: {c['ly_do']}" for c in chan_doan)
+            or "không tìm thấy ứng viên nào")
+         + ". Cấp một `bash` POSIX thật (Git for Windows) cho runner; "
+           "`C:\\Windows\\System32\\bash.exe` là bộ phóng WSL và KHÔNG dùng được.")
+    return duong
 
 
 def _chay_than(than: str, cay: Path, truoc: str, nay: str, mac_dinh: str = "master"):
@@ -1573,11 +1600,9 @@ def t35_script_cai_actionlint_phai_TU_CHOI_ban_sai():
          f"không thấy {kich} — hành vi cài `actionlint` phải nằm trong MỘT script chạy "
          f"được thì ca này mới đo được nó; không có script thì không có gì để đo")
 
-    bash = shutil.which("bash")
     # FAIL-CLOSE khi thiếu công cụ, đúng lối `t33`: một cổng tự tắt lúc thiếu công cụ là
-    # cổng không tồn tại đúng lúc nó cần nhất. Chữa bằng cách cấp `bash` cho runner.
-    bang(bash, "KHÔNG ĐO ĐƯỢC: thiếu `bash` để chạy `ops/cai_actionlint.sh`. Cấp `bash` "
-               "cho runner (bước gọi bộ test khai `shell: bash`), đừng bỏ qua ca này.")
+    # cổng không tồn tại đúng lúc nó cần nhất. Và KHÔNG `shutil.which` — xem #570.
+    bash = _bash_cho_cai_actionlint()
 
     def chay(ver, goi, dich, them=None):
         mt = dict(os.environ)
@@ -1763,8 +1788,7 @@ def t36_giai_nen_phai_chiu_duoc_duong_dan_mang_DAU_HAI_CHAM():
 
     kich = HERE.parent / "ops" / "cai_actionlint.sh"
     bang(kich.is_file(), f"không thấy {kich}")
-    bash = shutil.which("bash")
-    bang(bash, "KHÔNG ĐO ĐƯỢC: thiếu `bash` để chạy `ops/cai_actionlint.sh`")
+    bash = _bash_cho_cai_actionlint()
 
     VER = "1.7.7"
     with tempfile.TemporaryDirectory() as tam:
@@ -1837,8 +1861,7 @@ def t37_goi_tai_ve_phai_qua_DOI_CHIEU_BAM_truoc_khi_chay():
 
     kich = HERE.parent / "ops" / "cai_actionlint.sh"
     bang(kich.is_file(), f"không thấy {kich}")
-    bash = shutil.which("bash")
-    bang(bash, "KHÔNG ĐO ĐƯỢC: thiếu `bash`")
+    bash = _bash_cho_cai_actionlint()
 
     VER = "1.7.7"
     loi = []
@@ -1923,8 +1946,7 @@ def t38_bam_phai_dung_khi_DUONG_DAN_co_dau_cheo_nguoc():
 
     kich = HERE.parent / "ops" / "cai_actionlint.sh"
     bang(kich.is_file(), f"không thấy {kich}")
-    bash = shutil.which("bash")
-    bang(bash, "KHÔNG ĐO ĐƯỢC: thiếu `bash`")
+    bash = _bash_cho_cai_actionlint()
 
     VER = "1.7.7"
     with tempfile.TemporaryDirectory() as tam:
@@ -1979,8 +2001,7 @@ def t39_loai_archive_phai_do_NOI_DUNG_khong_doan_tu_ten():
 
     kich = HERE.parent / "ops" / "cai_actionlint.sh"
     bang(kich.is_file(), f"không thấy {kich}")
-    bash = shutil.which("bash")
-    bang(bash, "KHÔNG ĐO ĐƯỢC: thiếu `bash`")
+    bash = _bash_cho_cai_actionlint()
 
     VER = "1.7.7"
     loi = []
@@ -2029,8 +2050,7 @@ def t40_wrapper_phai_CAI_truoc_CHAY_va_giu_rc_cua_bo_test():
     import tempfile
     from pathlib import Path as _P
 
-    bash = shutil.which("bash")
-    bang(bash, "KHÔNG ĐO ĐƯỢC: thiếu `bash`")
+    bash = _bash_cho_cai_actionlint()
     wrapper = HERE.parent / "ops" / "chay_lease_publish_test.sh"
     installer = HERE.parent / "ops" / "cai_actionlint.sh"
     bang(wrapper.is_file(), f"không thấy {wrapper}")

@@ -93,7 +93,7 @@ def _chay(argv, han=_HAN_GIAY):
         return -999, f"không spawn được: {type(e).__name__}: {e}"
 
 
-def _do_nang_luc(argv_ung_vien, thu_muc_tam=None):
+def _do_nang_luc(argv_ung_vien, thu_muc_tam=None, han=None):
     """Ứng viên có LÀM ĐƯỢC VIỆC không — hai phép chạy thật. Trả (đạt, lý_do).
 
     `argv_ung_vien` là một DANH SÁCH chứ không phải một đường dẫn: bộ test cần bơm được
@@ -106,10 +106,17 @@ def _do_nang_luc(argv_ung_vien, thu_muc_tam=None):
       · truyền argv đúng mà không mở nổi đường dẫn bản địa -> chỉ (2) bắt.
     """
     argv_ung_vien = list(argv_ung_vien)
+    # `han` tham số hoá CHỈ để ca test chạy nhanh; mặc định là `_HAN_GIAY` của sản phẩm.
+    # Mặt TREO là dạng hỏng THỨ BA của bộ phóng WSL, đo được ở `570-do-3`: nó làm
+    # `./cai_cong_cu.sh` treo tới 60s thay vì trả `rc=127`. Hạn ở đây là thứ DUY NHẤT chặn
+    # nó, nên nó phải có ca canh — trước r2 nó đúng do MAY, không do thiết kế.
+    han = _HAN_GIAY if han is None else han
 
     # (1) TRUNG THỰC ARGV.
-    rc, ra = _chay(argv_ung_vien + ["-c", _SCRIPT_ARGV, _NHAN_ARGV, *_DOI_SO])
+    rc, ra = _chay(argv_ung_vien + ["-c", _SCRIPT_ARGV, _NHAN_ARGV, *_DOI_SO], han=han)
     if rc != 0:
+        # `rc == -998` là QUÁ HẠN, tức ứng viên TREO. Nó phải rơi vào nhánh TỪ CHỐI này,
+        # không được coi là "không kết luận được rồi cho qua".
         return False, f"phép argv: rc={rc} — {ra.strip()[:200]}"
     doc = dict(re.findall(r"^(BN0|BNSO|BN1)=(.*)$", ra, re.M))
     if doc.get("BN0") != _NHAN_ARGV:
@@ -131,7 +138,7 @@ def _do_nang_luc(argv_ung_vien, thu_muc_tam=None):
             os.chmod(tep, 0o755)
         except OSError:
             pass
-        rc, ra = _chay(argv_ung_vien + [str(tep)])
+        rc, ra = _chay(argv_ung_vien + [str(tep)], han=han)
         if rc != 0 or _DAU_CHAY not in ra:
             return False, (f"phép mở đường dẫn bản địa: rc={rc} — không chạy được "
                            f"{str(tep)!r}: {ra.strip()[:200]}")
@@ -206,13 +213,19 @@ def ung_vien(path=None, system_root=None, program_files=None, git=None):
 _CACHE = {}
 
 
-def tim_bash(dung_cache=True, **ep):
+def tim_bash(dung_cache=True, tat_ca=False, **ep):
     """Đường dẫn `bash` ĐÃ CHỨNG MINH làm được việc, hoặc None. Trả (đường, chẩn_đoán).
 
     None KHÔNG phải "không có bash" — nó là KHÔNG ĐO ĐƯỢC, và người gọi phải ĐỎ chứ
     không được bỏ qua ca. Chẩn đoán kèm theo để thông điệp lỗi nói được VÌ SAO.
+
+    `tat_ca=True` thử MỌI ứng viên thay vì dừng ở cái đầu tiên đạt. Đường sản xuất KHÔNG
+    dùng nó (thử thừa là trả tiền vô ích), nhưng CHẨN ĐOÁN thì cần: r1 của spec đòi log
+    Windows cho thấy `C:\\Windows\\system32\\bash.EXE` đã được THỬ rồi bị TỪ CHỐI, mà
+    với đường dừng-sớm thì Git Bash đạt trước nên System32 chưa từng được chạm — tức tiêu
+    chí ấy đòi một thứ CLI không sinh ra được. Đây là chỗ sinh ra nó.
     """
-    khoa = json.dumps(sorted(ep.items()), default=str)
+    khoa = json.dumps([sorted(ep.items()), bool(tat_ca)], default=str)
     if dung_cache and khoa in _CACHE:
         return _CACHE[khoa]
     chan_doan = []
@@ -222,7 +235,8 @@ def tim_bash(dung_cache=True, **ep):
         chan_doan.append({"duong": u, "dat": dat, "ly_do": ly_do})
         if dat and ket is None:
             ket = u
-            break
+            if not tat_ca:
+                break
     kq = (ket, chan_doan)
     if dung_cache:
         _CACHE[khoa] = kq
@@ -275,16 +289,17 @@ CHO_PHEP = ("ops/bash_nen.py",)
 # Chiều thứ hai là thứ bắt danh sách phải NGẮN đi. Thiếu nó thì ratchet thành nghĩa trang:
 # ai vá xong cũng quên xoá tên mình, và cổng dần hết ý nghĩa mà vẫn xanh.
 CHUA_CHUYEN = {
-    "ops/lease_publish_test.py":
-        "7 lời gọi: 1 trong `_bash_posix()` + 6 ở `t35`-`t40` (#570). Đang bị lease "
-        "`wp541-path-r2-g2-antigravity` (#541) giữ tới 2026-09-20T15:54:00Z — chạm vào "
-        "lúc này là tự mở cửa sổ hai writer.",
     "ops/cong_cu.py":
-        "1 lời gọi trong `_bash_windows()`. Hợp nhất vào tệp này được, nhưng lease g2 của "
-        "#541 khai `ops/cong_cu.py` trong `khong_duoc_cham`.",
-    "ops/cong_cu_test.py":
-        "3 lời gọi trong giàn của chính bộ test công cụ.",
+        "1 lời gọi trong `_bash_windows()` — bộ giải RIÊNG thứ hai. Hợp nhất vào tệp này "
+        "được, nhưng lease `wp541-path-r3-g3-claude` khai `ops/cong_cu.py` trong "
+        "`khong_duoc_cham`, và #570 không mở write set qua đường ấy. Mục này là thứ CÒN LẠI "
+        "duy nhất; khi nó rời đi thì `CHO_PHEP` là chỗ cuối cùng còn lời gọi trần.",
 }
+# ĐÃ RỜI DANH SÁCH (r2, #570) — ghi lại để người sau thấy ratchet đã NGẮN đi thật:
+#   `ops/lease_publish_test.py` — 7 lời gọi (6 ở `t35`-`t40` + 1 trong `_bash_posix`);
+#                                 `_bash_posix` nay uỷ quyền cho `tim_bash()`.
+#   `ops/cong_cu_test.py`       — 3 lời gọi; nay đi qua `_bash_dung_duoc()`.
+# `t26` là thứ ĐỎ nếu ai để tên chúng nằm lại đây sau khi đã sạch.
 
 # Ảnh chụp ĐÔNG CỨNG của các bản cũ, giữ để đối chiếu review — không phải mã đang sống.
 _BO_QUA_THU_MUC = ("ops/reviews/",)
@@ -343,14 +358,17 @@ def main(argv=None):
     sub = p.add_subparsers(dest="lenh", required=True)
     q = sub.add_parser("tim", help="tìm `bash` làm được việc")
     q.add_argument("--json", action="store_true")
+    q.add_argument("--tat-ca", dest="tat_ca", action="store_true",
+                   help="CHẨN ĐOÁN: thử MỌI ứng viên thay vì dừng ở cái đầu tiên đạt")
     r = sub.add_parser("quet", help="cổng: chặn lời gọi `bash` trần mới trong ops/**")
     r.add_argument("--root", default=".")
     r.add_argument("--json", action="store_true")
     a = p.parse_args(argv)
 
     if a.lenh == "tim":
-        duong, chan_doan = tim_bash()
+        duong, chan_doan = tim_bash(tat_ca=getattr(a, "tat_ca", False))
         out = {"duong": duong, "chan_doan": chan_doan,
+               "da_thu_moi_ung_vien": bool(getattr(a, "tat_ca", False)),
                "trang_thai": "CO" if duong else "KHONG_DO_DUOC"}
         print(json.dumps(out, ensure_ascii=False, indent=2) if a.json
               else (duong or "KHONG_DO_DUOC"))

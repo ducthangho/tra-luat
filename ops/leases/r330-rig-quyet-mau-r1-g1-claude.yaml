@@ -1,0 +1,167 @@
+# LEASE — R330-RIG-QUYET-MAU-VA-NGOAI-LE-BI-NUOT revision 1 / generation 1
+# Executor CLAUDE. KHONG CO reviewer may. Ghi HO theo chi thi chu kho.
+#
+# DOC KY TRUOC KHI LAM: phien thi cong KHONG DO DUOC ban va co lam r330 xanh tren
+# may chu kho hay khong (khong co Windows, khong co WSL). Xem C1 cua dac ta va
+# KHONG_DUOC_KHAI ben duoi — loi khai dung la "nguyen nhan da xac dinh, ban va
+# CHUA duoc xac nhan tren nen that".
+
+schema_version: 2
+event: executor_lease_granted
+packet_issue: 565
+packet_id: R330-RIG-QUYET-MAU-VA-NGOAI-LE-BI-NUOT
+mission_issue: KHONG_CO
+revision: 1
+generation: 1
+lease_id: r330-rig-quyet-mau-r1-g1-claude
+thay_the_cho: []
+thay_the_vi_sao: 'Generation DAU. Khong co lease tien nhiem.'
+
+granted_by: ducthangho
+granted_on_instruction: https://github.com/ducthangho/tra-luat/issues/565#issuecomment-5742376675
+granted_on_instruction_nguyen_van: 'Chu kho, phien dieu phoi 19-09-2026 ~14:0xZ, tra loi qua hop
+  chon cua phien (KHONG go van xuoi — khai thang cach chi thi den). Cau hoi: "r330 (#565) da co
+  nguyen nhan goc va ban va nho. Nhung scripts/tl_selftest.py nam TRONG RELEASE_MANIFEST.json —
+  sua no phai tai sinh manifest, ma lane PR KHONG bat duoc (release-verify strict (lane LAND) chi
+  chay tren master). Anh cap lease #565 the nao?" Nhan phuong an DA CHON, nguyen van: "Cap rong —
+  va ca _t110". Mo ta phuong an ay ma chu kho doc truoc khi chon: "Them muc tieu: _t110 phai IN ra
+  kieu ngoai le khi nuot, khong chi khi co TL_SELFTEST_DEBUG. Rong hon nhung dong ca lop — moi ca
+  trong tl_selftest, khong rieng r330." Chi thi rieng cho luot nay: "Dong bang dac ta #565 va ghi
+  lease di". Ban chieu: issues/565#issuecomment-5742376675.'
+recorded_by: claude-session
+recorder_is_dispatcher: false
+
+leased_at_utc: '2026-09-19T16:02:00Z'
+lease_expires_at_utc: '2026-09-20T16:02:00Z'
+
+role: executor
+provider: anthropic_claude
+executor: claude
+model: KHONG_KHAI
+model_vi_sao_KHONG_bat_buoc: 'assurance_target la human_audited, khong phai cross_approved, nen
+  tinh chinh dang cua no KHONG treo vao viec hai ben khac ho model (ket luan #551 r4 / M20 da dong
+  bang). Khai mot ho model o day la mot loi khai khong cong nao doc.'
+effort: KHONG_KHAI
+
+assurance_target: human_audited
+assurance_target_vi_sao: 'cross_approved KHONG DAT DUOC, khong phai "chua do duoc". Can cu do duoc
+  16:0xZ 19-09-2026: codex het quota review — chatgpt-codex-connector[bot] dang nguyen van "You
+  have reached your Codex usage limits for code reviews" tren PR #567 (comment 5741527193, 11:38Z);
+  agy het quota (chi thi chu kho, dot #551); claude LA executor.'
+assurance_target_HE_QUA_PHAI_KHAI: 'Packet nay KHONG LAND DUOC BANG MAY. Buoc land doi chu kho DOC
+  verdict va diff roi xac nhan. Executor KHONG duoc khai human_audited ho chu kho.'
+assurance_target_fallback: advisory_review
+reviewer_provider: KHONG_CO
+
+review_class: sensitive
+effective_review_class: sensitive
+review_class_vi_sao: 'Cham scripts/tl_selftest.py — legacy harness DUNG CHUNG, protocol §5 neu dich
+  danh no. Va cham RELEASE_MANIFEST.json, tuc cham duong phat hanh.'
+
+spec_ref: ops/specs/r330-rig-quyet-mau-va-ngoai-le-bi-nuot-r1.md
+spec_path: ops/specs/r330-rig-quyet-mau-va-ngoai-le-bi-nuot-r1.md
+prompt_path: ops/specs/r330-rig-quyet-mau-va-ngoai-le-bi-nuot-r1.md
+prompt_sha256_required: 64a4d2f0eea7657c284958cc1ecc372e3d42feb6621e8bb7ad3124e0cafa0618
+spec_hash: 64a4d2f0eea7657c284958cc1ecc372e3d42feb6621e8bb7ad3124e0cafa0618
+spec_hash_do_nhu_the_nao: 'sha256sum ops/specs/r330-rig-quyet-mau-va-ngoai-le-bi-nuot-r1.md tren
+  nhanh ops/cap-lease-565, 11 942 B. Do lai TRUOC khi tin con so nay.'
+
+branch: claude/r330-rig-quyet-mau-r1
+branch_ownership: exclusive
+
+start_from_sha: dc85dd0a34188238aa6537ce843ff3688e488fd3
+start_from_sha_vi_sao: 'HEAD cua origin/master luc cap. Nen DA DUOC DO tren chinh commit nay luc
+  15:58Z 19-09-2026 trong container thi cong: tl --selftest rc=0, 1710/1710, va r330 [OK].
+  r330 xanh tren Linux la bang chung DUONG cho chan doan "chi Windows" — khong co WSL thi khong
+  co ai giu handle, nen TemporaryDirectory.__exit__ khong nem.'
+reviewed_sha_required: dc85dd0a34188238aa6537ce843ff3688e488fd3
+reviewed_sha_required_note: 'Mo neo SAN luc cap — day la start_from_sha, KHONG phai head ung vien
+  cuoi. Verdict / ho so audit PHAI neo dung SHA ung vien THAT khi no ton tai.'
+
+write_set:
+- scripts/tl_selftest.py
+- RELEASE_MANIFEST.json
+write_set_do_luc_cap: 'ai-dang-giu luc 15:58Z 19-09-2026, rc doc TRUC TIEP:
+    scripts/tl_selftest.py   NGUOI_GIU 0: khong co
+    RELEASE_MANIFEST.json    NGUOI_GIU 0: khong co
+  Khong giao voi packet nao dang mo: #566 giu ops/bien_nhan_v2*.py + docs/**; #568 giu
+  ops/nhanh_don_duoc_test.py; #541 giu ops/lease_publish*.py.'
+write_set_VI_SAO_CO_MANIFEST: 'scripts/tl_selftest.py NAM TRONG RELEASE_MANIFEST.json (CLAUDE.md
+  §Quy uoc deploy muc 5 neu dich danh), nen sua NOI DUNG no lam sha256 lech du file_count KHONG
+  doi. Do 15:58Z: file_count = 180.'
+
+KHONG_XIN_NGOAI_LE:
+  adr_0044: 'HAI tep, trong tran ADR-0044:5 cho class sensitive (<= 3 tep va <= 300 dong them).
+    KHONG xin ngoai le nao.'
+  neu_vuot: 'Do >300 dong luc thi cong => DUNG va xin lai, KHONG tu lam tron. Tien le da tra gia
+    trong CHINH dot nay: #566 do ra 412, da dung, da xin, duoc noi len 420. Va tien le xa hon
+    (CLAUDE.md, PLAT-X8): cung mot con so troi lan thu TU thi o "tran ADR-0044" trong than PR khai
+    mot cong DAT trong khi so that da vuot — no khong sai mot chu so, no KHAI SAI RANG MOT THAM
+    QUYEN DA CO.'
+  do_lai_khi_nao: 'NGAY TRUOC khi day, bang `git diff --cached --numstat`.'
+
+PHAM_VI_TREN_TL_SELFTEST:
+  duong: scripts/tl_selftest.py
+  duoc_phep: 'CHI hai cho: (1) than ham `_goi` trong `_c330_deploy_msg_khong_chay_lenh` — doi
+    TemporaryDirectory context manager thanh mkdtemp + finally rmtree(ignore_errors=True);
+    (2) than ham `_t110` — them dong IN kieu ngoai le va thong diep. Cong ca `rXXX` MOI khoa M1
+    va M2/M4.'
+  cam: 'Sua bat ky ca rXXX nao KHAC => DUNG, xin rieng. Doi hanh vi phan loai cua _t110 (van phai
+    cases.append((name, False))) => vi pham M3.'
+
+PHAM_VI_TREN_MANIFEST:
+  duong: RELEASE_MANIFEST.json
+  duoc_phep: 'Tai sinh bang `python3 scripts/tl.py release-manifest` SAU khi sua tl_selftest.py.'
+  cam: 'Sua tay. file_count phai GIU 180.'
+  BAY_DA_BIET: 'Lane PR KHONG bat duoc lech manifest — release-verify strict (lane LAND) trong
+    ci.yml co `if: github.ref == refs/heads/master`, con lane WORKER sinh manifest TAM tu chinh cay
+    nen no HAP THU moi thay doi noi dung => PR XANH, master DO. Phai chay TAI CHO dung lenh cua
+    lane LAND TRUOC khi merge: `python3 scripts/tl.py release-verify RELEASE_MANIFEST.json
+    --strict --json`, doi ok=true VA expected == checked.'
+
+cam_tuyet_doi:
+- 'Bo `bash` khoi r330 hoac ghim no ve Git Bash — r330 sinh ra de do HANH VI BACKTICK cua bash;
+  doi bo thong dich la doi thu no do. Alias WSL chay bash DUNG, chi DON DEP la hong.'
+- 'Them retry cho rmtree — che tin hieu, va khong can vi thu muc tam do HDH don.'
+- 'Doi _t110 thanh NEM ra ngoai — se lam MOT ca ha tang giet ca luot chay 1710 ca. Phai IN, khong
+  phai NEM.'
+- 'Ghi lai golden khi chua kiem `git diff -- references/golden/` — R6 cam.'
+
+KHONG_DUOC_KHAI:
+  loi_khai_sai: '"Da chua r330."'
+  loi_khai_dung: '"Nguyen nhan da xac dinh; ban va CHUA duoc xac nhan tren nen that."'
+  vi_sao: 'C1 cua dac ta: phien thi cong khong co Windows, khong co WSL. D1 la suy luan tu BA phep
+    do khop nhau (ma · 16/20 handle · 3 do/1 xanh), KHONG phai quan sat truc tiep. Chi mot luot
+    chay tren may chu kho SAU khi va moi dong duoc cau ay.'
+  hinh_dang: 'LOI-KHAI-RONG-HON-PHEP-DO — da dem 3 lan trong dot nay.'
+
+khong_duoc_cham:
+- ops/bien_nhan_v2.py
+- ops/bien_nhan_v2_test.py
+- ops/nhanh_don_duoc_test.py
+- ops/lease_publish.py
+- ops/lease_publish_test.py
+- docs/PROTOCOL_DA_PHIEN.md
+- ops/specs/r330-rig-quyet-mau-va-ngoai-le-bi-nuot-r1.md
+- scripts/deploy-package.sh
+- scripts/deploy-package.ps1
+- .github/workflows/ci.yml
+- .claude/dev/launcher.py
+- .claude/dev/packet_loop.py
+- scripts/tl.py
+khong_duoc_cham_vi_sao: 'ops/bien_nhan_v2*.py + docs/PROTOCOL_DA_PHIEN.md: lease #566 giu.
+  ops/nhanh_don_duoc_test.py: lease #568 giu. ops/lease_publish*.py: #541 giu THAT.
+  deploy-package.sh/.ps1: hai tep ma r330 DOC — do duoc chung GIONG NHAU TUNG BYTE o hai ve
+  (693ef9a46dca7d9c va 03bcccba890844e6), tuc chung KHONG phai nguyen nhan; sua chung la doi thu
+  ca ay do. Dac ta da dong bang: sua de la lam bam trong lease tro vao hu vo.'
+
+hinh_dang_ke_thua:
+  RIG-QUYET-MAU-CUA-PHEP-DO: 5
+  NGOAI-LE-BI-NUOT-LANG: 2
+  LOI-KHAI-RONG-HON-PHEP-DO: 3
+  GIA-THUYET-CHUA-KIEM-VIET-NHU-DA-KIEM: 1
+  nguon: 'Chep tu CLAUDE.md (bon ca rig 24-08) + #566 + #568.'
+  DA_CHAM_TRAN: 'RIG-QUYET-MAU-CUA-PHEP-DO o muc NAM — DA VUOT nguong "lap ba lan thi hoi CO NEN
+    LAM THE NAY KHONG". Vi the M1 chua bang KIEN TRUC (khong de don dep nam tren duong quyet dinh)
+    chu KHONG bang mot `try`. NGOAI-LE-BI-NUOT-LANG o muc HAI; gap cai THU BA thi day la benh he
+    thong cua kho va phai co cong chung, khong va tung tep nua.'

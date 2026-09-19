@@ -220,3 +220,11 @@ closure_status: 'Owner-directed grant with a KNOWN, DECLARED write-set overlap o
   g3 lease lapses at 2026-09-20T17:00:00Z. Also declares PRE-LEASE work already merged into the
   branch under the owner "Va di" instruction. No claim of a clean whole-repo scan; no claim of
   computed dispatcher closure; no claim that Windows acceptance has been measured yet.'
+
+# ── BIA MO (them 20-09-2026 theo chi thi chu kho "Sua cau ay trong revision di") ────
+# Lease nay bi thay boi g2 vi DIEU_KIEN_BAT_DAU cua no viet mot dieu kien KHONG BAO GIO
+# THOA DUOC: "cho toi khi ai-dang-giu tra rc=0 / NGUOI_GIU 0", trong khi chinh lease nay
+# luon giu ops/lease_publish_test.py. Y dinh la "khong con nguoi giu NAO KHAC".
+# Mot dieu kien khong thoa duoc se bi dien giai lai trong im lang — do la cach mot chot
+# chet ma van trong nhu con song. g2 viet lai cau ay, va spec len revision 2.
+da_bi_thay_the: wp570-bash-nen-r2-g2-claude

@@ -49,33 +49,70 @@ xac_minh_quan_he_voi_candidate:
 
 # ─────────────────────── HAU MERGE GATE — KHONG DO DUOC ───────────────────────
 hau_merge_gate:
-  trang_thai: KHONG_DO_DUOC
-  KHONG_phai: 'KHONG phai "dat". KHONG phai "truot". Cong KHONG CHAY.'
-  do_duoc:
-    chuan_bi: 'failure sau 2 giay, khong buoc nao chay'
-    gate: skipped
-    gate_packet_loop: skipped
-    gate_registry: skipped
-  nguyen_nhan_NGUYEN_VAN: >-
-    "The job was not started because recent account payments have failed or your spending limit
-    needs to be increased. Please check the 'Billing & plans' section in your settings"
-  nguon_bang_chung: 'GET /repos/ducthangho/tra-luat/check-runs/105936674625/annotations
-    (annotation_level: failure). Log job tra BlobNotFound — nhung annotation VAN con.
-    Bai hoc: "khong lay duoc log" KHONG BANG "khong do duoc"; con duong khac.'
-  cung_nguyen_nhan_voi: 'Workflow `ops — dang lease bang git` that bai tren 979e740
-    (check-run 105924997324) mang DUNG CUNG annotation. Hai su kien khac nhau, mot nguyen nhan,
-    mot tai khoan. Truoc khi co bang chung nay, gia thuyet dang xet la ba khoa YAML moi cua lan
-    gia han cham phai phep quet cua cong — gia thuyet ay SAI, va da duoc dinh chinh.'
-  he_qua: 'Theo ky luat ba trang thai cua kho, trang thai thu ba lam cong DO. Master hien
-    KHONG co bang chung cong xanh sau merge. Day la mot su that ve TAI KHOAN, khong phai ve
-    ban va: chinh candidate 2a67968b da co DU nam cong xanh truoc merge
-    (chuan-bi, gate, gate-packet-loop, gate-registry, thu-hoi).'
+  trang_thai: DANG_DO_LAI
+  # ── LAN 1 (attempt 1), 2026-09-19T17:25 ──────────────────────────────────────
+  lan_1:
+    ket_qua: 'chuan-bi failure sau 2 giay | gate, gate-packet-loop, gate-registry skipped'
+    nguyen_nhan_NGUYEN_VAN: >-
+      "The job was not started because recent account payments have failed or your spending
+      limit needs to be increased. Please check the 'Billing & plans' section in your settings"
+    nghia_la: 'Job CHUA TUNG khoi dong. KHONG phai "dat", KHONG phai "truot" — KHONG DO DUOC.'
+    nguon: 'GET /repos/ducthangho/tra-luat/check-runs/105936674625/annotations'
+  # ── LAN 2 (attempt 2), sau khi chu kho chua billing ─────────────────────────
+  lan_2:
+    kich_hoat: 'POST /actions/runs/35458025667/rerun-failed-jobs, 2026-09-19T~17:47Z, http 201.
+      Day la CHAY LAI cac job hong cua mot lan chay DA TON TAI — KHONG phai workflow_dispatch
+      (khong khoi dong workflow moi), KHONG phai "manual full CI" (cung run, cung commit).
+      Chi thi chu kho: "Thu lai di, Actions da hoat dong lai". Chi thi cu "Khong chay CI ...
+      cho den khi merge" da het hieu luc theo chinh loi no: merge da xay ra luc 17:25:02Z.'
+    ket_qua_den_luc_ghi:
+      chuan_bi: 'success   <- lan 1 la failure, va KHONG doi mot dong ma nao'
+      gate_packet_loop: success
+      gate: 'dang chay'
+      gate_registry: 'dang chay'
+    da_xac_nhan: 'chuan-bi chuyen failure -> success ma khong doi ma => chan doan billing DUNG.'
+  DINH_CHINH_1_cua_chinh_tep_nay: >-
+    Ban NHAP dau tien cua tep nay khai rang workflow `ops — dang lease bang git` hong tren
+    979e740 CUNG MOT nguyen nhan billing, va dung o do. Dung mot phan, va dung o do la THIEU.
+    Khi Actions chay lai va bam lai run 35456596332 (nhanh ops/cap-lease-541-g3), job VAN hong
+    — nhung voi mot nguyen nhan KHAC HAN. Billing chan ATTEMPT 1; lease g1 het han chan
+    ATTEMPT 2. HAI nguyen nhan doc lap chong len nhau, va cai thu hai chi lo ra SAU khi cai
+    thu nhat duoc go. Bai hoc ve PHEP DO chu khong phai ve cong: mot nguyen nhan tim thay som
+    KHONG chung minh rang khong con nguyen nhan nao khac.
+
+  nguyen_nhan_thu_hai:
+    doc_duoc_nguyen_van: >-
+      ##[group] ops/leases/wp541-path-r1-g1-antigravity.yaml
+      / CHAN [8]: lease da het han luc 2026-09-19T00:00:00+00:00 — dang mot lease chet thi
+      nguoi nhan tuong co quyen ma khong co
+      / (roi van chay tiep) hai lop GitHub DA QUA cho lease wp541-path-r3-g3-claude tren #541
+      / da dang comment 5744088645 len #541
+      / ##[error]Process completed with exit code 1
+    la_gi: 'Workflow duyet MOI tep lease trong diff cua nhanh. ops/cap-lease-541-g3 la nhanh
+      MOI, nen moc so roi ve diem re khoi master, va diff ay keo theo ca lease g1 da het han
+      tu 2026-09-19T00:00:00Z. Cong tu choi dang mot lease chet — DUNG viec cua no — roi
+      `if [ "$BI_CHAN" != "0" ]; then exit 1` lam CA job do.'
+    da_co_tien_le: 'Chinh workflow ay mang chu thich ve CUNG HINH DANG tu #195, nguyen van:
+      "Mot lease cu CHUA TUNG DANG ma da het han nam trong cay lam ca luot chay rc=8 => MOI
+      lease moi khong dang duoc, tu 18-08-2026 toi 20-08-2026 ma khong ai biet."
+      Cach chua khi ay: chi quet phan DIFF thay vi ca ops/leases/.'
+    vi_sao_cach_chua_ay_KHONG_du: 'No khong phu duong NHANH MOI. Voi nhanh moi, `before` toan
+      so 0 nen moc so roi ve diem re khoi nhanh mac dinh, va lease cu lai lot vao diff.'
+    hau_qua_lan_nay_NHE_HON_195: 'Lease g3 VAN dang duoc — comment 5744088645,
+      github-actions[bot], 2026-09-19T17:51:40Z. Chi exit code la do. Nhung mot job DO sau khi
+      da lam DUNG viec la thu se day nguoi ta bo qua mau do.'
+    KHONG_phai_viec_cua_land_nay: 'Sua .github/workflows/** nam trong `khong_duoc_cham` cua
+      lease. Ghi ra day de no CO TEN, khong phai de tu chua.'
+
+  CHUA_DUOC_GHI_LA_XANH: 'Hai cong con dang chay. Muc nay phai duoc CAP NHAT bang so do that
+    khi chung xong. Cho toi luc ay, trang thai van la DANG_DO_LAI, khong duoc lam tron thanh
+    "dat" — dung khuyet tat #401 (cong lam tron LEN trang thai thu ba).'
 
 KHONG_DUOC_GOI_LA_LANDED: >-
   PROTOCOL:1079 nguyen van: "Het han hoac thieu quyen cho buoc con lai thi dung buoc ay va
   handoff; khong goi `landed`/Packet complete/Mission complete khi thieu bang chung tuong ung."
-  Bang chung hau-merge gate dang THIEU. Nen packet #541 CHUA duoc goi la landed, du merge da
-  xay ra va du ban va da xanh tron ven tren Windows that. Merge xong KHAC voi land xong.
+  Den luc ghi dong nay, hai cong `gate` va `gate-registry` van dang chay. Bang chung CHUA DU.
+  Packet #541 CHUA duoc goi la landed. Merge xong KHAC land xong.
 
 # ─────────────────────── QUYEN XIN CAP — chua duoc cap ───────────────────────
 uy_quyen:
@@ -86,6 +123,9 @@ uy_quyen:
   thao_tac_hau_merge_xin_duoc_phep:
     - 'Ghi va day chinh tep land-evidence nay vao ops/land/ tren master.'
     - 'Doc lai hau-merge gate khi no chay duoc, roi CAP NHAT muc hau_merge_gate bang so do that.'
+    - 'Chay lai cac JOB HONG cua mot lan chay DA TON TAI, khi va chi khi mot hong hoc ha tang
+       (vi du billing) da duoc go va chu kho chi thi. KHONG phai workflow_dispatch, KHONG phai
+       full CI. Da lam mot lan 19-09 theo chi thi "Thu lai di, Actions da hoat dong lai".'
     - 'Dang mot comment bookkeeping len #541 va #554 neo merge_commit va trang thai gate.'
     - 'Dong Issue #541 — CHI khi hau_merge_gate khong con KHONG_DO_DUOC.'
   thao_tac_KHONG_xin:
@@ -97,8 +137,12 @@ uy_quyen:
 
 # ─────────────────────── CAC KHOAN CON MO SAU LAND ───────────────────────
 con_mo:
-  hau_merge_gate: 'KHONG_DO_DUOC vi billing. Chan viec goi landed. Chu kho xu ly o Settings;
-    KHONG phai viec cua executor.'
+  hau_merge_gate: 'DANG_DO_LAI. Billing da duoc chu kho chua; chuan-bi va gate-packet-loop nay
+    XANH, hai cong gate va gate-registry dang chay. Van chan viec goi landed cho toi khi du.'
+  workflow_dang_lease: 'Job `dang` VAN exit 1 sau khi billing thong — nguyen nhan thu hai:
+    lease g1 het han nam trong diff cua nhanh moi. Lease g3 van dang duoc (comment 5744088645).
+    Xem hau_merge_gate.nguyen_nhan_thu_hai. Can mot packet rieng cho duong nhanh-moi cua
+    ops-publish-lease.yml; KHONG sua o day.'
   chin_ca_do_ngoai_pham_vi: 't35-t40 -> #570 | t125 -> #562 | t150 -> #552 | t131, t132 -> CHUA CO CHO'
   lech_executor_khong_hoi_to: 'Lease g3 (cap 17:00Z) da khai dung executor tu day tro di, nhung
     hai commit 0ea95de va 2a67968b van ra doi trong khoang lease g2 da mat hieu luc theo §3.2.

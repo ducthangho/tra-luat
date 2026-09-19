@@ -220,3 +220,8 @@ closure_status: 'Owner-directed grant with a KNOWN, DECLARED write-set overlap o
   g3 lease lapses at 2026-09-20T17:00:00Z. Also declares PRE-LEASE work already merged into the
   branch under the owner "Va di" instruction. No claim of a clean whole-repo scan; no claim of
   computed dispatcher closure; no claim that Windows acceptance has been measured yet.'
+
+# ── BIA MO (them 20-09-2026 theo chi thi chu kho) ──────────────────────────────────
+# Nguoi ke nhiem: wp570-bash-nen-r2-g2-claude (ops/cap-lease-570-g2). Ly do: DIEU_KIEN_BAT_DAU
+# cua lease nay viet mot dieu kien KHONG BAO GIO thoa duoc — xem g2 va spec r2 §0.
+da_bi_thay_the: wp570-bash-nen-r2-g2-claude

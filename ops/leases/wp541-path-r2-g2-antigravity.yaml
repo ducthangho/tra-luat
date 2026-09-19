@@ -7,7 +7,8 @@
 #
 # CHONG LAN CO THAT — DOC TRUOC KHI DAY: xem CHONG_LAN_DA_BIET va DIEU_KIEN_BAT_DAU.
 
-trang_thai_ban_ghi: 'DA CAP. Day len ops/cap-lease-541-g2 theo chi thi chu kho "cap lease g2 di".'
+trang_thai_ban_ghi: 'DA CAP 18-09, DA GIA HAN 19-09. Day len ops/cap-lease-541-g2 theo chi thi
+  chu kho "cap lease g2 di" roi "gia han lease g2 di". Xem GIA_HAN_1.'
 
 schema_version: 2
 event: executor_lease_granted
@@ -43,7 +44,59 @@ recorded_by: claude-session
 recorder_is_dispatcher: false
 
 leased_at_utc: '2026-09-18T15:54:00Z'
-lease_expires_at_utc: '2026-09-19T15:54:00Z'
+lease_expires_at_utc: '2026-09-20T15:54:00Z'
+
+GIA_HAN_1:
+  chi_thi_nguyen_van: 'gia han lease g2 di'
+  chi_thi_luc: '2026-09-19T14:5xZ'
+  han_cu: '2026-09-19T15:54:00Z'
+  han_moi: '2026-09-20T15:54:00Z'
+  vi_sao: 'Con dung MOT viec truoc khi audit: chay lai phep do Windows tren ung vien MOI
+    (2a67968b, sau khi hoa master). Han cu con ~50 phut ma luot do ay mat 20-45 phut, va
+    human_audited chua dong. Het han khong chan chu kho audit, nhung no NHA write set —
+    ma write set con phai giu neu phep do lai bat ra viec.'
+  KHONG_DOI_GI: 'PROTOCOL_DA_PHIEN.md:185 nguyen van: "Gia han/thay lease khong doi baseline
+    nghiem thu." Lan gia han nay KHONG cham: immutable_acceptance_baseline (d705623), base_sha,
+    spec_hash (3920f23f), spec_path, write_set, muc tieu, acceptance, risk, review_class,
+    assurance_target, prohibited_actions, dieu_kien_dung. Chi doi DUY NHAT truong thoi han.'
+  revision_van_la_2_vi_sao: 'PROTOCOL §3.2 liet ke cai gi tao revision moi: objective,
+    acceptance, write set, dependency, executor, environment. THOI HAN khong nam trong do,
+    va :185 goi ten "gia han" nhu mot hanh vi hop le rieng. Nen day la gia han TAI CHO,
+    khong phai revision 3.'
+
+# ─────────────────────────────────────────────────────────────────────────────────────
+# LECH DA BIET — KHAI THANG, KHONG GIAU. Doc truoc khi dung lease nay lam can cu.
+LECH_EXECUTOR:
+  truong_khai: 'executor: antigravity'
+  thuc_te: 'Antigravity het quota giua chung. Chu kho chi thi (19-09, nguyen van): "agy da het
+    quota, hay ra soat, scan xem agy da va #541 toi dau va ke thua tu day. Hay chuyen thanh
+    executor va va not tu day". Tu do, executor THUC TE cua packet nay la mot phien claude —
+    chinh phien da soan spec r3. Hai commit sau do la cua no:
+      0ea95de  fix(#541): t171 do SAI CANH tren Windows
+      2a67968b merge: hoa origin/master vao fix_issue_541 (theo ke_hoach_rebase)
+    Phan giai git Windows (ops/lease_publish.py, +104/-4) VAN la cua antigravity, khong doi
+    mot byte.'
+  vi_sao_DAY_LA_VAN_DE: 'PROTOCOL §3.2 nguyen van: "Doi objective, acceptance, write set,
+    dependency, EXECUTOR hoac environment tao revision moi va lam lease cu MAT HIEU LUC."
+    Doc thang thi lease nay da mat hieu luc tu luc doi executor, va mot lan gia han KHONG
+    chua duoc dieu do — gia han keo dai mot thu, no khong lam thu ay hop le tro lai.'
+  KHONG_KHAI: 'KHONG khai rang gia han nay da chua lech tren. No KHONG chua. Ban ghi nay chi
+    lam cho lech ay DOC DUOC thay vi nam im trong mot truong sai. Muon dung han thi phai la
+    revision 3 / generation 3 voi executor: claude, va cap lai lease — quyet dinh cua chu kho,
+    khong phai cua phien nay.'
+  he_qua_KHAC_da_do_duoc: 'cross_reviewer_requirement cua chinh lease nay cam phien claude da
+    soan spec r3 dong vai reviewer cho ban va g2. Phien ay nay CUNG la executor. Nen no bi cam
+    hai lan, va assurance_target: human_audited cang phai la NGUOI that.'
+
+LECH_MO_NEO_REVIEW:
+  truong_khai: 'reviewed_sha_required: 2f70869a0537843e9cae78618ee7ae8c261d972d'
+  thuc_te: 'Ung vien g2 nay da ton tai: 2a67968ba578cfee020661ffc466a3f69a0b1ab2.'
+  vi_sao_KHONG_sua_o_day: 'reviewed_sha_required_note cua chinh lease nay da luong truoc:
+    "Mo neo DUOI luc cap — ung vien cua g2 chua ton tai. Verdict cuoi PHAI neo dung SHA ung
+    vien that khi no ton tai, KHONG dung lai con so nay." Chu kho chi thi "gia han", khong
+    chi thi doi mo neo; phien nay khong tu doi mot truong BAT_BUOC cua cong. Khai o day de
+    nguoi audit khong neo nham vao 2f70869a.'
+
 
 role: executor
 provider: google_antigravity

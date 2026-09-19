@@ -1,0 +1,135 @@
+# LEASE BIA MO — WP541-PATH-TOI-THIEU-THEO-NEN revision 4 / generation 4
+#
+# LEASE NAY KHONG CAP QUYEN CHO AI. `write_set` RONG co chu dich: `_lease_cham_duong` khong
+# khop duong nao, nen no giu SO KHONG tep. No ton tai vi DUNG MOT ly do — mang chieu nguoc
+# cua bia mo hai chieu de `wp541-path-r3-g3-claude` thoi giu write set sau khi packet DA LAND.
+#
+# VI SAO PHAI LA MOT LEASE. Do duoc 19-09-2026T18:45Z:
+#  · `ops/lease_publish.py:929` SO_THU_HOI_KICH_HOAT = False, va `kiem-thu-hoi-github` chan
+#    "KHONG_XAC_DINH: che do CHUA KICH HOAT doi tap revocation RONG" — do la job `thu-hoi`
+#    chay tren MOI PR (`pull_request_target`). Ghi vao so thu hoi se lam check ay DO toan kho.
+#  · `_bia_mo_doi_xung` co BA ket qua: khong dau => con giu; dau CO nguoi tro nguoc => chet;
+#    dau MA KHONG ai tro nguoc => `False` => `ai-dang-giu` nem rc=12 KHONG_XAC_DINH cho moi
+#    duong lease ay cham. Nen mot dau MOT CHIEU lam gay bo quet ca kho.
+#  · Do thu cuc bo: danh dau mot ban g3 thoi thi `NGUOI_GIU` KHONG doi — g3 song tren HAI ref
+#    (`ops/cap-lease-541-g3` va `claude/nhap-lease-541-g3-20260919`), ca hai deu phai mang dau.
+# Tuc: khong co duong nghi huu nao KHONG can nguoi ke nhiem. Do dung no
+# `AG-T0-01B-thu-hoi-lease-chua-co-duong` ma kho da khai, va lease nay la cai gia cua no.
+
+trang_thai_ban_ghi: 'DA CAP 19-09-2026T18:50Z. Day len ops/cap-lease-541-g4 theo chi thi chu kho.'
+
+schema_version: 2
+event: executor_lease_granted
+packet_issue: 541
+packet_id: WP541-PATH-TOI-THIEU-THEO-NEN
+mission_issue: KHONG_CO
+revision: 4
+generation: 4
+lease_id: wp541-path-r4-g4-bia-mo
+granted_by: ducthangho
+
+thay_the_cho: wp541-path-r3-g3-claude
+thay_the_cho_vi_sao: 'Dau HAI CHIEU. Ban g3 da mang dong `da_bi_thay_the: wp541-path-r4-g4-bia-mo`
+  TRUOC khi lease nay duoc dang — `_kiem_bia_mo` cuong che chieu ay va se bac rc=8 neu thieu.
+  Do duoc 18:47Z: cong doc tu REF chu khong doc cay lam viec, nen ban da danh dau phai nam tren
+  mot ref DA DAY thi check moi qua. Vi the g4 va ban g3 da danh dau di trong CUNG mot lan day.'
+
+granted_on_instruction: https://github.com/ducthangho/tra-luat/issues/570#issuecomment-5744382252
+granted_on_instruction_nguyen_van: 'Chu kho, phien dieu phoi 19-09-2026: "Thu hoi g3 di", va khi
+  duoc hoi ro ve ba duong (thu hoi nhu thiet ke / chi gia han lease #570 / lam ca hai) da chon
+  "Thu hoi g3 nhu thiet ke" — tuc cho phep cham hai ref cua #541.'
+granted_on_instruction_ghi_chu: 'Chi thi nam trong phien dieu phoi cua packet #570, nen comment
+  duoc neo la comment cua #570. Khai ro de nguoi doc sau khong tuong chi thi phat ra o #541.
+  Comment ay la BAN GHI, khong phai nguon goc.'
+recorded_by: claude-session
+recorder_is_dispatcher: false
+
+leased_at_utc: '2026-09-19T18:50:00Z'
+lease_expires_at_utc: '2026-09-20T18:50:00Z'
+han_de_xuat_vi_sao: 'Han khong mang y nghia van hanh nao o day: `write_set` RONG nen lease giu
+  so khong duong, con lai ket qua cua `_bia_mo_doi_xung` tra theo TEN lease chu khong theo han.
+  Dat 24 gio cho khop hinh dang cac lease khac, khong phai vi can quyen den luc ay.'
+
+role: executor
+provider: KHONG_AP_DUNG
+executor: KHONG_AI
+executor_vi_sao: 'Lease bia mo. Khong phien nao duoc bat dau viec duoi no. Packet #541 da LAND
+  (PR #554, merge e1324285). Viec moi cua #541 phai di qua mot revision/generation MOI.'
+model: KHONG_AP_DUNG
+effort: KHONG_AP_DUNG
+execution_surface: KHONG_AP_DUNG
+transport: KHONG_AP_DUNG
+environment: KHONG_AP_DUNG
+operating_system: KHONG_AP_DUNG
+
+risk: sensitive
+review_class: sensitive
+effective_review_class: sensitive
+review_class_vi_sao: 'Giu nguyen lop cua g3. Mot bia mo khong duoc dung de HA lop: no khong sua
+  ma, nhung no THAY DOI ai duoc ghi vao hai tep nhay cam nhat cua kho.'
+
+assurance_target: human_audited
+assurance_target_vi_sao: 'Giu nguyen cua g3. Khong co viec thi cung khong co gi de review, nhung
+  ha muc bao dam trong mot lease thu hoi la mo mot duong di vong cho lan sau.'
+reviewer_provider: human
+reviewer_model: KHONG_AP_DUNG
+reviewer_effort: KHONG_AP_DUNG
+reviewer_independence: KHONG_AP_DUNG
+cross_reviewer_requirement: 'CAM self_review va self_approve. Lease nay do phien claude cua packet
+  #570 soan HO theo chi thi chu kho; phien ay KHONG duoc dong vai reviewer cho no.'
+
+branch: ops/cap-lease-541-g4
+branch_ownership: exclusive
+target_branch_neu_land: KHONG_LAND
+
+base_sha: e1324285eea1b7bf2719a301332fdaa3a94c17f9
+base_sha_vi_sao: 'origin/master sau khi PR #554 cua #541 da merge — tuc trang thai ma packet da
+  hoan tat. Bia mo neo vao dung diem ket thuc ay.'
+reviewed_sha_required: e1324285eea1b7bf2719a301332fdaa3a94c17f9
+reviewed_sha_required_note: 'Truong BAT BUOC cua cong. Khong co ung vien nao de review — lease
+  nay khong cap viec — nen no neo vao chinh commit land cua #541.'
+
+write_set: []
+write_set_vi_sao: 'RONG CO CHU DICH. `_lease_cham_duong` khong khop duong nao, nen lease nay giu
+  SO KHONG tep. Day la diem mau chot: mot bia mo KHONG duoc am tham giu lai thu ma no vua nha.'
+write_set_da_quet_toan_kho: 'KHONG AP DUNG — write set rong thi khong co gi de quet. Phep quet
+  co y nghia o day la phep do SAU khi day: `ai-dang-giu ops/lease_publish_test.py` phai thoi dem
+  wp541-path-r3-g3-claude la NGUOI_GIU, va do la tieu chi nghiem thu duy nhat cua lease nay.'
+
+khong_duoc_cham:
+- moi duong dan trong kho (write set rong)
+
+run_minutes: 0
+heartbeat_required_minutes: 0
+attempts_limit: 0
+review_calls_limit: 0
+manual_ci_budget: 0
+
+prohibited_actions:
+- self_review
+- self_approve
+- merge
+- land
+- deploy
+- LIVE
+- ruleset mutation
+- admin bypass
+- secret disclosure
+- workflow_dispatch
+- manual full CI
+- Windows CI
+- 'BAT DAU BAT KY VIEC NAO duoi lease nay — no la bia mo, khong phai giay phep'
+- 'NOI write_set — mot bia mo co write set la mot lease tra hinh'
+
+dieu_kien_dung:
+- 'Sau khi day, `ai-dang-giu` cho ops/lease_publish.py va ops/lease_publish_test.py van dem
+   wp541-path-r3-g3-claude la NGUOI_GIU => bia mo CHUA du (con ref chua mang dau). DUNG va do
+   tiep tung ref, dung suy.'
+- '`ai-dang-giu` tra rc=12 KHONG_XAC_DINH => co mot ban g3 mang dau MOT CHIEU. DUNG ngay va dat
+   not chieu nguoc — do la trang thai gay, khong phai trang thai trung gian chap nhan duoc.'
+
+closure_status: 'Tombstone-only grant. Grants nothing, holds nothing, starts nothing. Exists to
+  carry the reverse half of the two-way marker so wp541-path-r3-g3-claude stops holding
+  ops/lease_publish.py and ops/lease_publish_test.py after packet #541 landed in PR #554. The
+  revocation ledger remains the right long-term answer and remains INACTIVE
+  (SO_THU_HOI_KICH_HOAT = False); this lease is the price of that debt, not a substitute for it.'

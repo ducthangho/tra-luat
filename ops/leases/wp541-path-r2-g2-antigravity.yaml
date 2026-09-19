@@ -25,6 +25,17 @@ vi_sao_revision_2_generation_2: 'docs/PROTOCOL_DA_PHIEN.md:300 nguyen van: "Mo r
   nen KHONG duoc chay tiep duoi lease g1. Day KHONG phai vi g1 lam sai: g1 dat N1-N4 tren Windows
   that. Xem thay_the_cho.'
 
+da_bi_thay_the: wp541-path-r3-g3-claude
+da_bi_thay_the_vi_sao: 'Ve THU HAI cua dau hai chieu cho lease g3. Cong _kiem_bia_mo
+  (ops/lease_publish.py:606-615) cuong che CA HAI chieu: thieu dong nay thi g3 BI BAC — do duoc,
+  `check` tra rc=8 dung nhu the khi thu voi g3 ma chua co no.
+  Vi sao bi thay the: executor doi that (antigravity het quota, chu kho chuyen cho mot phien
+  claude). PROTOCOL §3.2 noi doi executor tao revision moi va lam lease cu MAT HIEU LUC. Lan gia
+  han 19-09 da KHAI lech ay o truong LECH_EXECUTOR nhung khong chua duoc no; g3 la cai chua.
+  KHONG khai rang dau nay "tu dong thu hoi lease". No chi thu hoi BAN NAM O REF MA NO DUOC GHI
+  VAO. Ban g2 dang song o refs/heads/ops/cap-lease-541-g2 — dau phai duoc day len DUNG ref ay,
+  la lan day THU HAI khi cap g3.'
+
 thay_the_cho: wp541-path-r1-g1-antigravity
 thay_the_cho_vi_sao: 'Dau HAI CHIEU. Lease cu da mang dong `da_bi_thay_the: wp541-path-r2-g2-antigravity`
   (cung nhanh nhap nay). Cong cuong che ca hai chieu — _kiem_bia_mo, ops/lease_publish.py:606-615;

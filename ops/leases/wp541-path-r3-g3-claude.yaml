@@ -1,0 +1,315 @@
+# LEASE — WP541-PATH-TOI-THIEU-THEO-NEN revision 3 / generation 3
+# BAN NHAP. Ghi HO theo chi thi chu kho ("soan cho toi"). Phien claude KHONG tu cap viec cho minh.
+#
+# CHUA PUSH len nhanh ops/**. Hanh vi CAP la lan `git push` len ops/**, va lan day do la viec cua
+# chu kho. Nhanh nay la claude/nhap-lease-541-g3-20260919 — mot BAN NHAP, khong mang quyen nao.
+#
+# DOC HAI MUC NAY TRUOC: VI_SAO_REVISION_3 va CAI_LEASE_NAY_KHONG_LAM_DUOC.
+
+trang_thai_ban_ghi: 'BAN NHAP — CHUA CAP. Soan 19-09-2026 theo chi thi chu kho "soan cho toi",
+  sau khi lan gia han 19-09 KHAI ra LECH_EXECUTOR ma khong chua duoc no.'
+
+schema_version: 2
+event: executor_lease_granted
+packet_issue: 541
+packet_id: WP541-PATH-TOI-THIEU-THEO-NEN
+mission_issue: KHONG_CO
+revision: 3
+generation: 3
+lease_id: wp541-path-r3-g3-claude
+granted_by: ducthangho
+
+VI_SAO_REVISION_3: 'PROTOCOL §3.2 nguyen van: "Doi objective, acceptance, write set, dependency,
+  EXECUTOR hoac environment tao revision moi va lam lease cu MAT HIEU LUC."
+  Executor DA DOI that. Antigravity het quota giua chung; chu kho chi thi (19-09, nguyen van):
+  "agy da het quota ... Hay chuyen thanh executor va va not tu day". Tu do executor thuc te la
+  mot phien claude — chinh phien da soan spec r3.
+  Lan gia han 19-09 da KHAI lech ay (truong LECH_EXECUTOR cua lease g2) nhung KHONG chua duoc:
+  gia han keo dai mot thu, no khong lam thu ay hop le tro lai. Lease nay la cai chua.
+  KHONG phai vi g2 lam sai. Phan giai git Windows cua antigravity (ops/lease_publish.py, +104/-4)
+  dat toan bo N8-N12 tren Windows that va khong doi mot byte trong ung vien cuoi.'
+
+CAI_LEASE_NAY_KHONG_LAM_DUOC: 'KHONG hoi to. Hai commit 0ea95deb4b7e va 2a67968ba578 duoc tao ra
+  khi lease g2 — theo §3.2 — da mat hieu luc vi doi executor. Mot lease cap SAU khong the
+  hop-le-hoa NGUOC mot hanh vi da xay ra. Lease nay chi lam hai viec:
+    (1) khai DUNG SU THAT ve executor tu day tro di;
+    (2) cap quyen cho phan viec CON LAI.
+  Ai doc ho so nay phai biet: khoang tu luc doi executor den luc cap lease nay la mot khoang
+  KHONG DUOC CAP PHEP DUNG QUY CACH. Khong giau, khong to hong. Chu kho quyet xu ly ra sao.'
+
+thay_the_cho: wp541-path-r2-g2-antigravity
+thay_the_cho_vi_sao: 'Dau HAI CHIEU. Cong cuong che ca hai chieu — _kiem_bia_mo,
+  ops/lease_publish.py:606-615; thieu mot chieu thi lease nay BI BAC. TRUOC KHI CAP phai ghi
+  "da_bi_thay_the: wp541-path-r3-g3-claude" vao lease g2.
+  Va no lam viec that chu khong phai nghi le: _phan_loai_lease chi biet HAN, nen g2 (han
+  2026-09-20T15:54:00Z sau lan gia han) VAN giu ca hai duong write set toi moc ay neu khong co
+  dau; chi lenh ai-dang-giu doc "da_bi_thay_the". Kho da tra gia mot lan o #355.
+
+  CAP LEASE NAY CAN HAI LAN DAY, khong phai mot — bai hoc da do duoc khi cap g2:
+    (1) ops/cap-lease-541-g3  <- lease g3 (tep nay)
+    (2) ops/cap-lease-541-g2  <- ban g2 DA mang dau, dat vao dung ref g2 dang song
+  Day (1) TRUOC roi (2): lam nguoc thi co mot khoang khong lease nao giu write set. Dau thay the
+  chi thu hoi BAN NAM O REF MA NO DUOC GHI VAO — doc mot ban lease khong kem TEN REF la doc
+  thieu mot nua.'
+
+granted_on_instruction: 'CHUA_CO — ban nhap. Chu kho chi thi "soan cho toi" (19-09), tuc SOAN,
+  khong phai CAP. Truong nay phai tro vao mot COMMENT CHI THI that truoc khi day len ops/**.
+  KHONG duoc de no tro vao Issue — g1 tung lam the va lease khai thang do la mot cho trong.'
+granted_on_instruction_nguyen_van: 'Chu kho 19-09-2026: "Soan cho toi" — tra loi cho de nghi
+  cua phien nay rang muon dung han thi phai la revision 3 / generation 3 voi executor: claude.'
+
+granted_on_instruction_ghi_chu: 'DA DONG 18-09-2026T17:1xZ. Truoc do truong nay tro vao ISSUE
+  chu khong vao mot comment chi thi, va lease khai thang do la mot cho trong. Chu kho chi thi
+  "dang comment chi thi len #541 va #562"; phien claude soan va dang HO bang token cua chu kho,
+  nen GitHub hien tac gia la ducthangho — chinh comment ay noi ro dieu do, khong giau. Comment
+  chep NGUYEN VAN sau chi thi theo thu tu thoi gian, va khai ca cai no KHONG cap phep.'
+recorded_by: claude-session
+recorder_is_dispatcher: false
+
+leased_at_utc: '2026-09-19T23:59:00Z'          # GIA DINH cua ban nhap — VIET LAI luc cap
+lease_expires_at_utc: '2026-09-20T23:59:00Z'   # GIA DINH cua ban nhap — VIET LAI luc cap
+han_de_xuat_vi_sao: 'Viec con lai KHONG phai thi cong: human audit cua chu kho, va neu audit ra
+  finding thi moi can cham write set. 24h du cho ca hai. Ngan hon thi phai gia han lan nua;
+  dai hon thi giu write set qua muc can.'
+
+
+# ─────────────────────────────────────────────────────────────────────────────────────
+# LECH DA BIET — KHAI THANG, KHONG GIAU. Doc truoc khi dung lease nay lam can cu.
+role: executor
+provider: anthropic
+executor: claude
+executor_vi_sao: 'DAY LA THAY DOI DUY NHAT ve NOI DUNG so voi lease g2. Moi truong khac —
+  spec_hash, write_set, base_sha, immutable_acceptance_baseline, muc tieu, acceptance, risk,
+  review_class, prohibited_actions, dieu_kien_dung — giu NGUYEN. Doi mot truong ma phai len
+  revision moi nghe nang tay, nhung §3.2 khong cho chon: executor nam trong danh sach.'
+model: 'KHONG_KHAI — dien luc cap'
+effort: 'KHONG_KHAI — dien luc cap'
+execution_surface: claude-code
+transport: cloud
+environment: cloud
+operating_system: 'linux (executor) — nen DICH van la Windows; xem PHEP_DO_TREN_NEN_DICH'
+environment_vi_sao: 'Doi so voi g2 (local/antigravity). Phien claude chay tren ha tang dam may,
+  KHONG co Windows. He qua DO DUOC va phai khai: executor nay KHONG tu chay duoc N8-N12 tren nen
+  dich. Moi phep do Windows deu do CHU KHO chay tren may minh roi gui log ve. Xem
+  PHEP_DO_TREN_NEN_DICH.'
+
+PHEP_DO_TREN_NEN_DICH:
+  hinh_dang: 'Executor soan MOT tep .ps1 tu-du (tu lo cong cu, tu lay kho, tu chay, tu in);
+    chu kho chay tren Windows that roi gui log ve; executor doc log.'
+  bo_do_hien_co: 'ops/reviews/wp541-do-g2.ps1 tren nhanh claude/do-541-g2-20260918 (PR nhap #569,
+    CI xanh). Bo do Python nhung trong no, ban 2026-09-19e, sha256 0b8d09a5f9bf4d8e...'
+  rang_buoc_da_tra_gia: 'Log PHAI TU KHAI: sha256 bo do, ban, va ref nao tro toi HEAD. Ngay
+    19-09 mot luot do nhanh KHAC bang ban do CU da bi doc nham thanh ket qua cua ung vien —
+    mat mot vong moi phat hien. Dong "ref tro toi HEAD" sinh ra tu do.'
+  KHONG_khai: 'KHONG khai rang executor nay "do duoc tren Windows". No KHONG do duoc. No soan
+    phep do va doc ket qua; nguoi bam nut la chu kho.'
+
+
+risk: sensitive
+review_class: sensitive
+effective_review_class: sensitive
+review_class_vi_sao: 'Giu nguyen g1. §8 liet ke "review/land authority" va "gate lifecycle";
+  ops/lease_publish.py trung ca hai. Va DO DUOC: _tinh_lop_tu_write_set tra sensitive cho MOI dau
+  vao — _BANG_LOP co 7 muc, ca 7 sensitive, va mac dinh cua next() cung sensitive, nen gia tri khoi
+  tao "routine" trong ham KHONG BAO GIO toi duoc (do lai 15:40Z 18-09 tren origin/master). Cong
+  khong nhan lop nao thap hon; khai lech thi bac rc=10.'
+
+assurance_target: human_audited
+assurance_target_vi_sao: 'Giu nguyen g1. §8 cho sensitive: Codex cross_approved HOAC human_audited.
+  "antigravity" xuat hien 0 lan trong PROTOCOL nen chua phai provider hop le cho cross_approved.
+  BON luot review cua g1 deu la phien claude => tran cung cua chung la advisory_review, KHONG phai
+  human_audited. Muon dat human_audited cho g2 thi phai co NGUOI audit that.'
+reviewer_provider: human
+reviewer_model: KHONG_AP_DUNG
+reviewer_effort: KHONG_AP_DUNG
+reviewer_independence: 'fresh session/context/checkout; khong fork context cua executor; read-only
+  nguon. Nguoi audit tu doc spec r3 va diff, tu chay lai N8-N12, neo verdict vao exact reviewed_sha.'
+cross_reviewer_requirement: 'CAM self_review va self_approve. O g3 rang buoc SIET THEM MOT NAC:
+  phien claude duoc cap lease nay vua SOAN SPEC r3 vua la EXECUTOR. O g2 no bi cam mot lan (soan
+  spec); nay bi cam HAI lan. Tran cung cua moi luot review do no lam ra la advisory_review, va
+  no KHONG duoc tu tuyen ban va cua minh dat.
+  Ke ca mot phien claude KHAC cung khong du: assurance_target la human_audited, va bon luot
+  review cua g1/g2 deu la phien claude — da chung minh tran ay khong voi toi human_audited.
+  Nguoi audit phai la NGUOI.'
+
+spec_path: ops/specs/wp541-path-toi-thieu-theo-nen-r3.md
+spec_ref: claude/spec-541-r3-20260918
+spec_hash: 3920f23f9635e46899dac4157a8d1e7eb49a3dee64996ca9fe0644e87b1a379d
+spec_bytes: 25212
+prompt_path: ops/specs/wp541-path-toi-thieu-theo-nen-r3.md
+prompt_sha256_required: 3920f23f9635e46899dac4157a8d1e7eb49a3dee64996ca9fe0644e87b1a379d
+spec_hash_do_nhu_the_nao: 'Bam DOC NGUOC VE tu may chu sau khi day (git cat-file blob
+  FETCH_HEAD:<duong>), khong lay tu ban tren dia; hai ban da doi chieu GIONG TUNG BYTE.'
+
+branch: fix_issue_541
+branch_vi_sao: 'Khai DUNG nhanh THAT ngay tu dau. g1 khai agy/wp541-path-r1-g1 con agy day len
+  fix_issue_541 — lech ay thanh P2-1 cua verdict luot 1 va phai dinh chinh ho so ve sau. Khong lap
+  lai. PR #554 va bon luot review deu song tren nhanh nay.'
+branch_ownership: exclusive
+target_branch_neu_land: master
+
+base_sha: d705623162b75b7340ee7cca54ac2d2abbddbb6f
+base_sha_vi_sao: 'GIU NGUYEN d705623 y het g1 va g2. PROTOCOL:185: "Gia han/thay lease khong
+  doi baseline nghiem thu. Doi baseline can quyet dinh ben va revision." Revision thi co day,
+  nhung KHONG co quyet dinh ben nao ve baseline — va doi no se doi Y NGHIA cua tran 400 dong.
+  DOC KEM DINH CHINH 1 (comment tren #541, 18-09): cach DO tran ay la `git diff --numstat` so
+  MERGE-BASE, khong so hang so nay. Hai thu khac nhau: d705623 la MOC LICH SU cua packet; con
+  phep do thi dung merge-base vi nhanh da duoc LENH hoa master. Sau khi hoa, merge-base chinh
+  la origin/master, va so do van la 2 tep / +397 / -5 — do duoc, khong doi.
+  So theo d705623 nay la 23 tep / +3624 va con so ay KHONG dung de cham.'
+start_from_sha: 2a67968ba578cfee020661ffc466a3f69a0b1ab2
+start_from_sha_vi_sao: 'Dinh hien tai cua fix_issue_541. g3 TIEP TUC tren do, khong lam lai.
+  KHAC g2 (khai 2f70869a, dinh cua g1).'
+
+immutable_acceptance_baseline: d705623162b75b7340ee7cca54ac2d2abbddbb6f
+reviewed_sha_required: 2a67968ba578cfee020661ffc466a3f69a0b1ab2
+reviewed_sha_required_note: 'KHAC g2. Lease g2 khai 2f70869a va tu goi do la "mo neo DUOI luc
+  cap — ung vien cua g2 chua ton tai". Nay ung vien DA ton tai va da duoc do tron ven tren
+  Windows that (DAT 12 / TRUOT 0 / KHONG DO DUOC 0, bien ban tren PR #554). Nen neo dung no.
+  2a67968b la merge commit: cha 1 = 0ea95deb4b7e (va t171), cha 2 = dc85dd0a3418 (origin/master).'
+
+xep_tang:
+  tren_pr: 554
+  vi_sao_phai_khai: 'start_from_sha 2f70869a KHONG phai to tien cua origin/master — g2 moc tren mot
+    PR CHUA MERGE. ADR-0044 doi khai xep_tang khi base_sha khong phai to tien nhanh mac dinh;
+    base_sha o day (d705623) THI LA to tien, nen chot ay khong tu ban. Khai o day vi SU THAT la
+    cong viec dang xep tang, va cong KHONG cuong che dieu do (grep xep_tang trong
+    ops/lease_publish.py => 0 dong). Dung suy "cong im lang" thanh "khong xep tang".'
+  thu_tu_land: 'MOT PR duy nhat (#554) mang ca g1 lan g2. Khong mo PR thu hai — ADR-0044 nguyen van:
+    "khong tu mo hai PR chong lan".'
+  ke_hoach_rebase: 'HOA origin/master vao fix_issue_541 bang MERGE, KHONG rebase. Ly do do duoc:
+    2f70869a la reviewed_sha cua BON luot review; rebase lam ca bon verdict tro vao SHA khong tra
+    duoc. origin/master da di 13 commit ke tu d705623 (do 15:27Z 18-09).'
+
+write_set:
+- ops/lease_publish.py
+- ops/lease_publish_test.py
+write_set_KHONG_DOI: 'Y HET g1. Issue #541 nguyen van: write set "only" hai tep. r3 mo rong MUC TIEU
+  chu KHONG mo rong write set.'
+
+write_set_da_quet_toan_kho: 'DO 2026-09-19T16:0xZ, doc rc TRUC TIEP (khong qua pipe), sau khi
+  dong bo nhanh cuc bo theo dung loi cong.
+    ops/lease_publish.py       rc=11  NGUOI_GIU 1: wp541-path-r2-g2-antigravity
+    ops/lease_publish_test.py  rc=11  NGUOI_GIU 1: wp541-path-r2-g2-antigravity
+  NGUOI_GIU duy nhat la CHINH LEASE MA lease nay THAY THE. Dat dau hai chieu xong thi
+  ai-dang-giu se thoi tinh no. Khong con writer nao khac — khac han luc cap g2, khi con
+  ci-windows-r2-g2-antigravity tren duong thu hai.
+  KHAI THANG mot lan chan da gap: lan quet dau tra rc=12 NHANH_CUC_BO_TUT_SAU (master va
+  ops/cap-lease-541-g2 cuc bo tut sau origin). Cong fail-close DUNG — no tu choi do bang mot
+  ban do cu. Chua bang `git branch -f <ten> refs/remotes/origin/<ten>` roi do lai.
+  Truoc khi CAP phai do LAI: con so tren la cua luc soan, khong phai luc cap.'
+
+CHONG_LAN_DA_BIET:
+  trang_thai: 'KHONG CON chong lan voi packet khac luc soan.'
+  da_do: 'ai-dang-giu tra dung MOT nguoi giu cho ca hai duong: wp541-path-r2-g2-antigravity,
+    tuc chinh lease bi thay the. Lease ci-windows-r2-g2-antigravity (#548) tung giu
+    ops/lease_publish_test.py da HET HAN 2026-09-18T17:00:00Z.'
+  canh_bao: 'Con so ay la cua LUC SOAN. Do lai truoc khi cap — mot nhanh moi xuat hien giua hai
+    lan quet da tung lam mu ca phep quet (bai hoc ghi trong lease g2).'
+
+THU_HOI_G1_CAN_HAI_LAN_DAY:
+  do_luc: '2026-09-18T15:52:48Z'
+  hien_tuong: 'Sau khi danh dau da_bi_thay_the tren nhanh NHAP, ai-dang-giu VAN dem
+    wp541-path-r1-g1-antigravity la NGUOI_GIU. Khong phai cong hong.'
+  nguyen_nhan_DO_DUOC: 'Ton tai HAI ban cua cung mot lease tren HAI ref, va bo quet doc TUNG ref:
+      refs/heads/claude/nhap-lease-541-g2-20260918  -> CON_HAN · DA_BI_THAY_THE
+      refs/heads/ops/cap-lease-541                  -> CON_HAN          (chua co dau)
+    Ban CHUA co dau van CON_HAN nen van giu write set.'
+  he_qua_van_hanh: 'Cap g2 phai la HAI lan day, khong phai mot:
+      (1) ops/cap-lease-541-g2  <- lease g2 (lan day nay)
+      (2) ops/cap-lease-541     <- ban g1 DA mang dau, dat vao dung ref g1 dang song
+    Thieu (2) thi g1 giu ca hai duong them ~8 gio toi han 2026-09-19T00:00:00Z — dung khuyet tat
+    #355 ma dau thay the sinh ra de chua.'
+  thu_tu_va_vi_sao: 'Day (1) TRUOC roi moi (2): lam nguoc thi co mot khoang khong lease nao giu
+    write set. Hai ben deu cung executor (antigravity) nen chong lan ngan la vo hai, con khoang
+    trong thi khong.'
+  KHONG_khai: 'KHONG khai rang dau thay the "tu dong thu hoi lease". No chi thu hoi BAN NAM O REF
+    MA NO DUOC GHI VAO. Doc mot ban lease khong kem TEN REF la doc thieu mot nua.'
+
+khong_duoc_cham:
+- .github/workflows/ci.yml
+- .github/workflows/ops-publish-lease.yml
+- docs/PROTOCOL_DA_PHIEN.md
+- docs/adr/0044-nguong-kich-thuoc-packet-theo-do-luong.md
+- docs/adr/0049-cong-hai-nen-truoc-phat-hanh-khong-phai-moi-lan-land.md
+- ops/cong_cu.py
+- ops/specs/wp541-path-toi-thieu-theo-nen-r3.md
+- scripts/tl_selftest.py
+- scripts/tl.py
+- RELEASE_MANIFEST.json
+- .claude/dev/launcher.py
+- .claude/hooks/session-start.sh
+
+hinh_dang_ke_thua: 'PACKET KHAC PHUC CUA CHINH MINH — g2 sua nhung gi review tim thay o g1. Ba
+  doctrine dang ap, khai o spec r3 §hinh_dang_ke_thua:
+   (1) "Va dung cho duoc chi roi bo sot duong thu ba" — chinh luot 3 dinh: do ky buoc 2 va buoc 3
+       roi ket luan cho CA HAM, trong khi buoc 1 nam ngay tren do. _git_windows co BA buoc = BA
+       duong vao; M3-M6 phai duoc kiem tren CA BA, khong chi o buoc bi chi ten.
+   (2) "Dot bien bi giet khong phai bi giet DUNG LY DO" — N8-N12 moi ca neo LY DO, khong chi neo rc.
+       t136 la ca that vua bi bat bang dung ky luat nay: rc dung (12), ly do sai.
+   (3) "Ghi mot nguyen nhan sai vao doctrine con te hon khong ghi gi" — r3 dinh chinh bang chan doan
+       cua chinh r2 thay vi lang le sua.'
+
+run_minutes: 120
+heartbeat_required_minutes: 30
+attempts_limit: class-based owner-directed loop; no reset of prior history
+review_calls_limit: until approve or zero P1/P2
+manual_ci_budget: 0
+
+prohibited_actions:
+- self_review
+- self_approve
+- merge
+- land
+- deploy
+- LIVE
+- ruleset mutation
+- admin bypass
+- secret disclosure
+- workflow_dispatch
+- manual full CI
+- Windows CI
+- 'CHAM ops/lease_publish_test.py TRUOC khi ai-dang-giu cho duong ay tra rc=0 — xem DIEU_KIEN_BAT_DAU'
+- 'REBASE nhanh fix_issue_541 — no vut reviewed_sha cua bon luot review. Hoa master bang MERGE.'
+- 'VA t150 — no thuoc #552, lease t150-do-r1-g1-antigravity da cap 18-09 (comment 5732323948)'
+- 'PHIEN DUOC CAP LEASE NAY TU REVIEW hay TU TUYEN ban va cua minh — xem cross_reviewer_requirement'
+- 'Khai rang lease nay hop-le-hoa NGUOC hai commit 0ea95de / 2a67968b — xem CAI_LEASE_NAY_KHONG_LAM_DUOC'
+- 'Sua ops/specs/wp541-path-toi-thieu-theo-nen-r3.md — spec DONG BANG boi spec_hash; sai thi
+   ghi DINH CHINH nhu lan truoc, khong sua spec'
+- 'VA t131 / t132 / t35-t40 / t125 — deu NGOAI PHAM VI r3, xem spec §ngoai_pham_vi.
+   Cap nhat 19-09: t35-t40 nay co packet rieng #570; t125 o #562; t150 o #552.'
+- 'dat _git_windows vao ops/cong_cu.py — Issue #541 khai write set "only" hai tep'
+- 'thay phep giai co dinh bang PATH thua ke KHONG gioi han (nguyen van Issue #541)'
+- 'BO HAN chan doan N3b khi lam M6 — M6 doi CHUYEN KENH (chi ghi stderr khi chan_doan is None),
+   KHONG phai bit mieng. N11 co HAI dot bien de bat dung viec nay.'
+- 'noi write set qua HAI duong (phai DUNG va xin revision)'
+- 'vuot 2 tep hoac 400 dong them so d705623 — tran MOI do r3 khai theo cua ADR-0044 tu mo'
+- 'viet dau bo-qua-CI nguyen van trong thong diep commit, ke ca khi trich dan'
+- 'doc rc qua pipe (`| tail` roi `$?`)'
+
+DIEU_KIEN_BAT_DAU:
+  luat: 'Do ai-dang-giu cho TUNG duong write set NGAY TRUOC moi lan cham, doc rc TRUC TIEP, va
+    doc ca `da_bi_thay_the`. "Het han" KHONG phai "da nha" — lease gia han duoc, va lease g2 da
+    duoc gia han that mot lan (19-09, toi 2026-09-20T15:54:00Z).'
+  rieng_o_g3: 'Sau khi dat dau hai chieu, nguoi giu duy nhat con lai phai la chinh lease nay.
+    Neu ai-dang-giu van dem g2 thi dau MOI ghi duoc len MOT ref — xem thay_the_cho_vi_sao,
+    can HAI lan day.'
+  cap_lease_KHAC_bat_dau: 'Lease cap QUYEN, khong phai lenh khoi dong (§4).'
+
+dieu_kien_dung:
+- 'Vuot 2 tep hoac 400 dong them (do `git diff --numstat` so d705623) => DUNG, handoff, KHONG tu noi.
+   Nhac: g1 da dung +270/400, tuc con ~130 dong cho ca sau muc tieu. Du toan cua r3 la ~410 —
+   CO Y sat tran de phai do that. Do TRUOC khi mo review, dung do sau.'
+- 'Nam ca cua M8 khong phan biet duoc bang DAU VAO => khai thang do la bo TUONG DUONG, dung gia vo
+   co nam chot. Bao lai, dung tu quyet.'
+- 'Mot ca nao cua M8 khong dung duoc tham so tiem de chay tren ubuntu-latest => DUNG va bao. Do la
+   con duong DUY NHAT con lai: #548 da go Windows khoi cong master (ADR-0049), va manual_ci_budget=0.'
+- 'Can cham ops/cong_cu.py, workflow, hay bat ky duong nao ngoai write set => DUNG, xin revision.'
+- 'Mot hinh dang loi lap lan thu BA => DUNG, hoi "co nen lam viec nay khong", khong hoi "va the nao".'
+
+closure_status: 'Owner-directed grant with a KNOWN, DECLARED write-set overlap on
+  ops/lease_publish_test.py held off by DIEU_KIEN_BAT_DAU (discipline, not a gate) until the #548
+  lease lapses at 17:00:00Z; supersedes wp541-path-r1-g1-antigravity via a two-way marker the gate
+  does enforce. No claim of a clean whole-repo scan; no claim of computed dispatcher closure. Size
+  budget raised from 300 to 400 added lines under the escape hatch ADR-0044 opens for itself, with
+  the reason declared in spec r3, not here.'

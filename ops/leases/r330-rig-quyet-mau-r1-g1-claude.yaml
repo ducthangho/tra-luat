@@ -19,6 +19,7 @@ thay_the_vi_sao: 'Generation DAU. Khong co lease tien nhiem.'
 
 granted_by: ducthangho
 granted_on_instruction: https://github.com/ducthangho/tra-luat/issues/565#issuecomment-5742376675
+granted_on_instruction_ban_chieu_day_du: https://github.com/ducthangho/tra-luat/issues/565#issuecomment-5743325559
 granted_on_instruction_nguyen_van: 'Chu kho, phien dieu phoi 19-09-2026 ~14:0xZ, tra loi qua hop
   chon cua phien (KHONG go van xuoi — khai thang cach chi thi den). Cau hoi: "r330 (#565) da co
   nguyen nhan goc va ban va nho. Nhung scripts/tl_selftest.py nam TRONG RELEASE_MANIFEST.json —

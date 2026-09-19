@@ -44,7 +44,7 @@ SHA_G1   = "2f70869a0537843e9cae78618ee7ae8c261d972d"
 # do that 18-09 tren ban va g2 cua agy cho 5 tep / +812, trong khi viec cua agy la 2 tep / +353.
 # Mot chot nhu the se bao "vuot tran" cho mot ban va KHONG vuot. Base dung la MERGE-BASE.
 SHA_BASE_SPEC = "d705623162b75b7340ee7cca54ac2d2abbddbb6f"
-BAN_BO_DO = "2026-09-19d"              # doi MOI khi sua bo do - log tu khai ban nao
+BAN_BO_DO = "2026-09-19e"              # doi MOI khi sua bo do - log tu khai ban nao
 TRAN_TEP, TRAN_DONG = 2, 400          # N7' cua spec r3
 MAU_WIN  = 'if nen_thuc == "windows":'
 # Ca ngoai pham vi r3 §ngoai_pham_vi — do CHINH SPEC khai, khong phai bo do tu quyet.
@@ -157,22 +157,62 @@ def do_n9(goi, sig, tept):
           and kq.get("PATH rong") == "None" and kq.get("PATH chi khoang trang") == "None")
     return (DAT if ok else TRUOT), ("" if ok else "xem bang"), kq
 
+# Dau phan cach dung DE THU. Phai KHAC os.pathsep tren CA HAI nen (';' Windows, ':' POSIX)
+# thi hai gia thuyet "tach theo dau duoc truyen" va "tach theo os.pathsep" moi roi ra nhau.
+THU_N10 = "|"
+
 def do_n10(goi, sig, tept):
-    """Mot dau ';' trong TEN thu muc khong duoc lam mat muc git.exe hop le o muc kia."""
-    co_sep = any(("cach" in k) or ("sep" in k.lower()) for k in sig.parameters)
-    if os.pathsep == ";" and not co_sep:
-        return (KDD, "tren Windows os.pathsep DA la ';' va ham khong nhan tham so dau phan cach "
-                     "-> khong tach duoc hai gia thuyet", {"os.pathsep": os.pathsep, "co tham so sep": co_sep})
+    """Ham phai tach PATH theo dau phan cach DUOC TRUYEN, khong theo os.pathsep cua nen.
+
+    Ban cu do "mot dau ';' trong TEN thu muc" va dat DAT tren Windows du ham sai. No
+    degenerate: tren Windows os.pathsep DA la ';', nen 'C:/a;b' that su CO NGHIA la hai
+    muc — "tach dung" va "tach sai" cho ra cung ket qua, phep do khong the do nao. No
+    da cham DAT cho 95831685 trong khi t171 cua chinh ban va ay DO vi dung khuyet tat ay.
+    Mot cong khong the do thi khong phai cong.
+    """
+    ten_sep = next((k for k in ("phan_cach", "dau_phan_cach", "sep") if k in sig.parameters), None)
+    if ten_sep is None:
+        # Khong co tham so thi tren Windows KHONG con duong nao tach hai gia thuyet.
+        if os.pathsep == ";":
+            return (KDD, "tren Windows os.pathsep DA la ';' va ham khong nhan tham so dau phan cach "
+                         "-> khong tach duoc hai gia thuyet",
+                    {"os.pathsep": os.pathsep, "tham so sep": None})
+        with tempfile.TemporaryDirectory() as t:
+            la = Path(t)/"co;dau"; la.mkdir()
+            d, cw, pf = _san(t)
+            (d/"git.exe").write_text("x", encoding="utf-8")
+            r, _  = goi(path=str(la) + os.pathsep + str(d), program_files=str(pf), cwd=str(cw))
+            r0, _ = goi(path=str(d), program_files=str(pf), cwd=str(cw))
+        kq = {"os.pathsep": os.pathsep, "tham so sep": None,
+              "co muc chua ';'": "NHAN" if r else "None",
+              "doi chung duong (khong co ';')": "NHAN" if r0 else "None"}
+        if not r0:
+            return KDD, "doi chung duong hong", kq
+        return (DAT if r else TRUOT), ("" if r else "muc git.exe hop le bi MAT"), kq
+
     with tempfile.TemporaryDirectory() as t:
-        la = Path(t)/"co;dau"; la.mkdir()
+        la = Path(t)/"co;dau"; la.mkdir()          # ';' nam trong TEN, khong phai dau phan cach
         d, cw, pf = _san(t)
         (d/"git.exe").write_text("x", encoding="utf-8")
-        r, _ = goi(path=str(la) + os.pathsep + str(d), program_files=str(pf), cwd=str(cw))
-        r0, _ = goi(path=str(d), program_files=str(pf), cwd=str(cw))     # doi chung duong
-    kq = {"co muc chua ';'": "NHAN" if r else "None", "doi chung (khong co ';')": "NHAN" if r0 else "None"}
-    if not r0:
-        return KDD, "doi chung duong hong", kq
-    return (DAT if r else TRUOT), ("" if r else "muc git.exe hop le bi MAT"), kq
+        noi = str(la) + THU_N10 + str(d)
+        kw = dict(program_files=str(pf), cwd=str(cw))
+        r_chinh, _ = goi(path=noi,      **{ten_sep: THU_N10},   **kw)   # tach dung  -> NHAN
+        r_duong, _ = goi(path=str(d),   **{ten_sep: THU_N10},   **kw)   # doi chung duong
+        r_phanbiet, _ = goi(path=noi,   **{ten_sep: os.pathsep}, **kw)  # tach theo os.pathsep -> mat
+    kq = {"os.pathsep": os.pathsep, "tham so sep": ten_sep, "dau thu": THU_N10,
+          f"noi bang {THU_N10!r}, {ten_sep}={THU_N10!r}":       "NHAN" if r_chinh else "None",
+          f"doi chung duong (mot muc, {ten_sep}={THU_N10!r})":  "NHAN" if r_duong else "None",
+          f"phan biet: noi bang {THU_N10!r}, {ten_sep}={os.pathsep!r}": "NHAN" if r_phanbiet else "None"}
+    if not r_duong:
+        return KDD, "doi chung duong hong: mot muc hop le ma khong tim ra git.exe", kq
+    # Cong phai CO THE do. Neu ca hai dau phan cach deu ra NHAN thi phep do khong phan
+    # biet duoc gi — dung bao DAT, bao thang la khong do duoc.
+    if r_phanbiet:
+        return (KDD, f"phep do KHONG phan biet duoc: noi bang {THU_N10!r} ma tach theo "
+                     f"{os.pathsep!r} VAN tim ra git.exe", kq)
+    return ((DAT, "", kq) if r_chinh else
+            (TRUOT, f"tach theo os.pathsep thay vi theo {ten_sep} duoc truyen", kq))
+
 
 def do_n11(goi, sig, tept):
     """Truyen chan_doan => thu duoc thong bao VA stderr IM. Khong truyen => stderr VAN co."""
@@ -379,67 +419,69 @@ if "--chi-kich-thuoc" in sys.argv:
     _r = sum(1 for _, t, _ in chot if t == TRUOT)
     sys.exit(3 if _k else (1 if _r else 0))
 
+CHI_PROBE = "--chi-probe" in sys.argv    # bo qua bo test + N7; giu 0, 1, 3
 # ---------------- 2. bo test day du ----------------
-inn(""); inn("-" * 78); inn("2. BO TEST DAY DU (10-40 phut)")
-rc_n, out_n = chay(["ops/lease_publish_test.py"], goc)
-ghi("rc_suite", rc_n)
-m = RX_TONG.search(out_n)
-inn("  rc =", rc_n, "|", m.group(0) if m else "(KHONG doc duoc dong tong ket)")
-if m:
-    ghi("dat", int(m.group(1))); ghi("tren", int(m.group(2))); ghi("bo_qua_so", int(m.group(4)))
-do_het, gc, tin = doc_do(out_n)
-ghi("so_ca_do", len(do_het)); ghi("liet_ke_day_du", tin)
-for g in gc: inn("   *", g)
-inn(""); inn(f"  === {len(do_het)} CA DO ===")
-for t in sorted(do_het, key=so_ca):
-    inn(f"   {t.split('_')[0]:7} {t}"); inn(f"           {do_het[t][:150]}")
-ghi("do_ly_do", {t: do_het[t][:300] for t in do_het})
-# ---- CHOT: moi ca DO phai GIAI THICH DUOC ----
-# Thieu chot nay, bo do in danh sach do roi van thoat rc=0. Do dung la loi da xay ra:
-# luot Windows 19-09 co t171 DO ma bo do bao "DAT 10 | TRUOT 0" va rc=0.
-def _khoa(t): return t.split("_")[0]
-do_packet, do_la, do_thieu_cong_cu = [], [], []
-for t in sorted(do_het, key=so_ca):
-    k, ly = _khoa(t), do_het[t]
-    if k in CA_PACKET:                              do_packet.append(t)
-    elif "KHÔNG ĐO ĐƯỢC" in ly or "thiếu `" in ly:  do_thieu_cong_cu.append(t)
-    elif k in NGOAI_PHAM_VI:                        pass
-    else:                                           do_la.append(t)
-ghi("do_packet", do_packet); ghi("do_la", do_la); ghi("do_thieu_cong_cu", do_thieu_cong_cu)
-inn("")
-inn(f"  ca DO thuoc CHINH packet nay : {[_khoa(x) for x in do_packet] or 'khong co'}")
-inn(f"  ca DO ngoai pham vi (r3 khai): {[_khoa(x) for x in sorted(do_het, key=so_ca) if _khoa(x) in NGOAI_PHAM_VI]}")
-inn(f"  ca DO vi THIEU CONG CU       : {[_khoa(x) for x in do_thieu_cong_cu] or 'khong co'}")
-inn(f"  ca DO LA (khong giai thich duoc): {[_khoa(x) for x in do_la] or 'khong co'}")
-ket("Khong ca nao cua PACKET bi DO", DAT if not do_packet else TRUOT,
-    "" if not do_packet else f"DO: {[_khoa(x) for x in do_packet]} — ban va CHUA xong")
-ket("Moi ca DO deu giai thich duoc", DAT if not do_la else TRUOT,
-    "" if not do_la else f"la: {[_khoa(x) for x in do_la]}")
-if do_thieu_cong_cu:
-    ket("Cong cu day du de do", KDD, f"thieu cong cu cho {[_khoa(x) for x in do_thieu_cong_cu]}")
+if not CHI_PROBE:
+    inn(""); inn("-" * 78); inn("2. BO TEST DAY DU (10-40 phut)")
+    rc_n, out_n = chay(["ops/lease_publish_test.py"], goc)
+    ghi("rc_suite", rc_n)
+    m = RX_TONG.search(out_n)
+    inn("  rc =", rc_n, "|", m.group(0) if m else "(KHONG doc duoc dong tong ket)")
+    if m:
+        ghi("dat", int(m.group(1))); ghi("tren", int(m.group(2))); ghi("bo_qua_so", int(m.group(4)))
+    do_het, gc, tin = doc_do(out_n)
+    ghi("so_ca_do", len(do_het)); ghi("liet_ke_day_du", tin)
+    for g in gc: inn("   *", g)
+    inn(""); inn(f"  === {len(do_het)} CA DO ===")
+    for t in sorted(do_het, key=so_ca):
+        inn(f"   {t.split('_')[0]:7} {t}"); inn(f"           {do_het[t][:150]}")
+    ghi("do_ly_do", {t: do_het[t][:300] for t in do_het})
+    # ---- CHOT: moi ca DO phai GIAI THICH DUOC ----
+    # Thieu chot nay, bo do in danh sach do roi van thoat rc=0. Do dung la loi da xay ra:
+    # luot Windows 19-09 co t171 DO ma bo do bao "DAT 10 | TRUOT 0" va rc=0.
+    def _khoa(t): return t.split("_")[0]
+    do_packet, do_la, do_thieu_cong_cu = [], [], []
+    for t in sorted(do_het, key=so_ca):
+        k, ly = _khoa(t), do_het[t]
+        if k in CA_PACKET:                              do_packet.append(t)
+        elif "KHÔNG ĐO ĐƯỢC" in ly or "thiếu `" in ly:  do_thieu_cong_cu.append(t)
+        elif k in NGOAI_PHAM_VI:                        pass
+        else:                                           do_la.append(t)
+    ghi("do_packet", do_packet); ghi("do_la", do_la); ghi("do_thieu_cong_cu", do_thieu_cong_cu)
+    inn("")
+    inn(f"  ca DO thuoc CHINH packet nay : {[_khoa(x) for x in do_packet] or 'khong co'}")
+    inn(f"  ca DO ngoai pham vi (r3 khai): {[_khoa(x) for x in sorted(do_het, key=so_ca) if _khoa(x) in NGOAI_PHAM_VI]}")
+    inn(f"  ca DO vi THIEU CONG CU       : {[_khoa(x) for x in do_thieu_cong_cu] or 'khong co'}")
+    inn(f"  ca DO LA (khong giai thich duoc): {[_khoa(x) for x in do_la] or 'khong co'}")
+    ket("Khong ca nao cua PACKET bi DO", DAT if not do_packet else TRUOT,
+        "" if not do_packet else f"DO: {[_khoa(x) for x in do_packet]} — ban va CHUA xong")
+    ket("Moi ca DO deu giai thich duoc", DAT if not do_la else TRUOT,
+        "" if not do_la else f"la: {[_khoa(x) for x in do_la]}")
+    if do_thieu_cong_cu:
+        ket("Cong cu day du de do", KDD, f"thieu cong cu cho {[_khoa(x) for x in do_thieu_cong_cu]}")
 
-bq = sorted({t for t, _ in RX_BO_QUA.findall(out_n)}, key=so_ca); ghi("ca_bo_qua", bq)
-inn(""); inn(f"  BO QUA ({len(bq)}): {[x.split('_')[0] for x in bq]}")
+    bq = sorted({t for t, _ in RX_BO_QUA.findall(out_n)}, key=so_ca); ghi("ca_bo_qua", bq)
+    inn(""); inn(f"  BO QUA ({len(bq)}): {[x.split('_')[0] for x in bq]}")
 
-inn(""); inn("  N1-N4 (t165-t168), tieu chi nghiem thu cua r2, nay la chi bao hoi quy:")
-b4 = {t: mau_ca(out_n, t) for t in CAMOI}; ghi("ca_moi", b4)
-for t in CAMOI: inn(f"     {t}: {b4[t]}")
-ket("N1-N4 (t165-t168)", DAT if all(v == "QUA" for v in b4.values())
-    else (KDD if any(v is None for v in b4.values()) else TRUOT), str(b4))
+    inn(""); inn("  N1-N4 (t165-t168), tieu chi nghiem thu cua r2, nay la chi bao hoi quy:")
+    b4 = {t: mau_ca(out_n, t) for t in CAMOI}; ghi("ca_moi", b4)
+    for t in CAMOI: inn(f"     {t}: {b4[t]}")
+    ket("N1-N4 (t165-t168)", DAT if all(v == "QUA" for v in b4.values())
+        else (KDD if any(v is None for v in b4.values()) else TRUOT), str(b4))
 
-inn(""); inn("  15 ca tung do tren CI:")
-b15 = {t: mau_ca(out_n, t) for t in CA15}; ghi("ca15", b15)
-inn("    " + "  ".join(f"{t}:{b15[t]}" for t in CA15))
+    inn(""); inn("  15 ca tung do tren CI:")
+    b15 = {t: mau_ca(out_n, t) for t in CA15}; ghi("ca15", b15)
+    inn("    " + "  ".join(f"{t}:{b15[t]}" for t in CA15))
 
-# t136 — N12 do GIAN TIEP qua ket qua ca
-t136_ten = next((t for t in do_het if t.startswith("t136")), None)
-if b15.get("t136") == "QUA":
-    ket("N12 t136 (qua ket qua ca)", DAT, "t136 QUA")
-elif b15.get("t136") is None:
-    ket("N12 t136 (qua ket qua ca)", KDD, "khong thay t136 trong log")
-else:
-    ly = do_het.get(t136_ten, "")
-    ket("N12 t136 (qua ket qua ca)", TRUOT, f"DO: {ly[:90]}")
+    # t136 — N12 do GIAN TIEP qua ket qua ca
+    t136_ten = next((t for t in do_het if t.startswith("t136")), None)
+    if b15.get("t136") == "QUA":
+        ket("N12 t136 (qua ket qua ca)", DAT, "t136 QUA")
+    elif b15.get("t136") is None:
+        ket("N12 t136 (qua ket qua ca)", KDD, "khong thay t136 trong log")
+    else:
+        ly = do_het.get(t136_ten, "")
+        ket("N12 t136 (qua ket qua ca)", TRUOT, f"DO: {ly[:90]}")
 
 # ---------------- 3. probe THANG vao ham ----------------
 inn(""); inn("-" * 78); inn("3. PROBE THANG — goi _git_windows voi tham so tiem")
@@ -470,40 +512,100 @@ ket("RIG doi chung (biet truoc dap an)", DAT if rig_ok else KDD,
 if not rig_ok:
     inn(""); inn("KHONG DO DUOC: rig sai, moi chot duoi se vo nghia."); sys.exit(3)
 
+# --- MOI CONG PHAI TU CHUNG MINH NO CO THE DO ---
+# Bai hoc dat nhat cua packet nay: do_n10 ban cu cham DAT cho 95831685 trong khi t171
+# cua chinh ban va ay DO vi dung khuyet tat ma N10 sinh ra de bat. No degenerate —
+# tren Windows os.pathsep DA la ';' nen "tach dung" va "tach sai" cho cung ket qua.
+# Mot cong khong the DO thi khong phai cong, va no nguy hiem hon khong co cong: no
+# phat ra mot chu DAT.
+#
+# Nen truoc khi DUNG nam cong nay de phan quyet, bat tung cong giet mot dot bien da
+# biet trong. Cong nao khong giet duoc thi ket qua that cua no bi HA xuong KHONG DO
+# DUOC — khong cho no noi DAT nua. Dot bien chay tren BAN SAO TAM; cay that khong bi
+# dung toi (cung ky luat nhu N7).
+DOT_BIEN_TU_KIEM = [
+    ("N8", "ops/lease_publish.py",
+     'if chi_dinh and Path(chi_dinh).name.lower() == "git.exe" and hop_le(chi_dinh):',
+     "if chi_dinh and hop_le(chi_dinh):"),
+    ("N9", "ops/lease_publish.py",
+     "d = d_raw.strip().strip('\"')", "d = d_raw.strip()"),
+    ("N10", "ops/lease_publish.py",
+     "sep = os.pathsep if phan_cach is None else phan_cach", "sep = os.pathsep"),
+    ("N11", "ops/lease_publish.py", "if chan_doan is not None:", "if False:"),
+    ("N12", "ops/lease_publish_test.py",
+     'git_path="//khong-co/git"', 'git_path="/khong-co/git"'),
+]
+inn(""); inn("  tu kiem cong — moi cong phai giet duoc mot dot bien da biet:")
+giet = {}
+for ma, duong, tim, thay in DOT_BIEN_TU_KIEM:
+    _ten, _ham = next(((a, b) for a, b in PROBE if a.startswith(ma + " ")), (None, None))
+    if _ham is None:
+        giet[ma] = None; inn(f"    {ma:4} KHONG DO DUOC: khong tim thay probe ten '{ma} ...'"); continue
+    try:
+        with tempfile.TemporaryDirectory() as _t:
+            _c = Path(_t)/"cay"; shutil.copytree(goc/"ops", _c/"ops")
+            _f = _c/duong; _nd = _f.read_text(encoding="utf-8")
+            if _nd.count(tim) != 1:
+                giet[ma] = None
+                inn(f"    {ma:4} KHONG DO DUOC: mau dot bien khop {_nd.count(tim)} lan (mong 1)"
+                    f" — ma nguon da doi, dot bien nay het y nghia"); continue
+            _f.write_text(_nd.replace(tim, thay, 1), encoding="utf-8")
+            _sp = importlib.util.spec_from_file_location("lp_db_" + ma, str(_c/"ops"/"lease_publish.py"))
+            _m = importlib.util.module_from_spec(_sp); _sp.loader.exec_module(_m)
+            def _goi_db(**kw):
+                _e = io.StringIO()
+                with contextlib.redirect_stderr(_e):
+                    return _m._git_windows(**kw), _e.getvalue()
+            _tt, _ct, _ = _ham(_goi_db, inspect.signature(_m._git_windows),
+                               _c/"ops"/"lease_publish_test.py")
+        giet[ma] = (_tt == TRUOT)
+        inn(f"    {ma:4} dot bien -> {_tt:14} {'GIET DUOC' if _tt == TRUOT else 'SONG SOT'}"
+            + (f"   ({_ct})" if _ct else ""))
+    except Exception as _e:
+        giet[ma] = None; inn(f"    {ma:4} KHONG DO DUOC: {type(_e).__name__}: {_e}")
+ghi("cong_giet_duoc_dot_bien", giet)
+
 for ten, (tt, ct, dl) in [(t, f(goi, sig, tept)) for t, f in PROBE]:
     ghi("probe_" + ten.split()[0].lower(), dl)
     if isinstance(dl, dict):
         for k, v in dl.items(): inn(f"    {k:34}: {v}")
-    ket(ten, tt, ct)
+    ma = ten.split()[0]
+    if giet.get(ma) is not True and tt == DAT:
+        # DAT tu mot cong chua chung minh duoc la biet DO thi khong dang tin hon KDD.
+        ket(ten, KDD, f"cong KHONG giet duoc dot bien cua chinh no ({giet.get(ma)!r})"
+                      f" -> chu DAT nay khong co gia tri")
+    else:
+        ket(ten, tt, ct)
 
 # ---------------- 4. N7 dot bien tren BAN SAO TAM ----------------
-inn(""); inn("-" * 78); inn("4. N7 — dot bien tren BAN SAO TAM (cay that KHONG bi dung toi)")
-truoc = tep.read_text(encoding="utf-8").count(MAU_WIN)
-ghi("n7_truoc", truoc); inn(f"  so dong khop {MAU_WIN!r}: TRUOC = {truoc} [mong 1]")
-if truoc != 1:
-    ket("N7 dot bien nhanh Windows", KDD, f"mau xuat hien {truoc} lan, khong phai 1")
-else:
-    with tempfile.TemporaryDirectory() as tmp:
-        sao = Path(tmp)/"cay"
-        shutil.copytree(goc, sao, ignore=shutil.ignore_patterns(".git", "__pycache__", "*.pyc"))
-        f2 = sao/"ops"/"lease_publish.py"
-        f2.write_text(f2.read_text(encoding="utf-8").replace(MAU_WIN, "if False:"), encoding="utf-8")
-        sau = f2.read_text(encoding="utf-8").count(MAU_WIN); ghi("n7_sau", sau)
-        inn(f"  SAU (da dot bien) = {sau} [mong 0]")
-        if sau != 0:
-            ket("N7 dot bien nhanh Windows", KDD, "dot bien KHONG ap duoc")
-        else:
-            rc_m, out_m = chay(["ops/lease_publish_test.py"], sao)
-            m165 = mau_ca(out_m, "t165"); dm, _, _ = doc_do(out_m)
-            ten165 = next((t for t in dm if t.startswith("t165")), None)
-            ly = (dm.get(ten165) or "")
-            ghi("n7_t165", m165); ghi("n7_ly_do", ly[:200])
-            inn(f"  t165 sau dot bien: {m165} | {ly[:110]}")
-            dung_ly_do = "PATH t" in ly or "/usr/bin" in ly
-            ket("N7 dot bien nhanh Windows", DAT if (m165 == "DO" and dung_ly_do) else
-                (TRUOT if m165 == "DO" else KDD),
-                "giet dung ly do" if (m165 == "DO" and dung_ly_do)
-                else ("DO nhung KHONG dung ly do -> tin dung gia" if m165 == "DO" else "khong doc duoc t165"))
+if not CHI_PROBE:
+    inn(""); inn("-" * 78); inn("4. N7 — dot bien tren BAN SAO TAM (cay that KHONG bi dung toi)")
+    truoc = tep.read_text(encoding="utf-8").count(MAU_WIN)
+    ghi("n7_truoc", truoc); inn(f"  so dong khop {MAU_WIN!r}: TRUOC = {truoc} [mong 1]")
+    if truoc != 1:
+        ket("N7 dot bien nhanh Windows", KDD, f"mau xuat hien {truoc} lan, khong phai 1")
+    else:
+        with tempfile.TemporaryDirectory() as tmp:
+            sao = Path(tmp)/"cay"
+            shutil.copytree(goc, sao, ignore=shutil.ignore_patterns(".git", "__pycache__", "*.pyc"))
+            f2 = sao/"ops"/"lease_publish.py"
+            f2.write_text(f2.read_text(encoding="utf-8").replace(MAU_WIN, "if False:"), encoding="utf-8")
+            sau = f2.read_text(encoding="utf-8").count(MAU_WIN); ghi("n7_sau", sau)
+            inn(f"  SAU (da dot bien) = {sau} [mong 0]")
+            if sau != 0:
+                ket("N7 dot bien nhanh Windows", KDD, "dot bien KHONG ap duoc")
+            else:
+                rc_m, out_m = chay(["ops/lease_publish_test.py"], sao)
+                m165 = mau_ca(out_m, "t165"); dm, _, _ = doc_do(out_m)
+                ten165 = next((t for t in dm if t.startswith("t165")), None)
+                ly = (dm.get(ten165) or "")
+                ghi("n7_t165", m165); ghi("n7_ly_do", ly[:200])
+                inn(f"  t165 sau dot bien: {m165} | {ly[:110]}")
+                dung_ly_do = "PATH t" in ly or "/usr/bin" in ly
+                ket("N7 dot bien nhanh Windows", DAT if (m165 == "DO" and dung_ly_do) else
+                    (TRUOT if m165 == "DO" else KDD),
+                    "giet dung ly do" if (m165 == "DO" and dung_ly_do)
+                    else ("DO nhung KHONG dung ly do -> tin dung gia" if m165 == "DO" else "khong doc duoc t165"))
 
 # ---------------- KET LUAN ----------------
 inn(""); inn("=" * 78)

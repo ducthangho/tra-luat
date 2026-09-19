@@ -16,7 +16,7 @@ MOI chot am deu co DOI CHUNG DUONG. Mot chot chi do chieu "phai tu choi" thi mot
 
 Dot bien chay tren BAN SAO TAM; cay that khong bi dung toi.
 """
-import contextlib, importlib.util, inspect, io, json, os, re, shutil, subprocess, sys, tempfile
+import contextlib, hashlib, importlib.util, inspect, io, json, os, re, shutil, subprocess, sys, tempfile
 from pathlib import Path, PurePosixPath, PureWindowsPath
 
 os.environ.setdefault("PYTHONUTF8", "1")
@@ -44,6 +44,7 @@ SHA_G1   = "2f70869a0537843e9cae78618ee7ae8c261d972d"
 # do that 18-09 tren ban va g2 cua agy cho 5 tep / +812, trong khi viec cua agy la 2 tep / +353.
 # Mot chot nhu the se bao "vuot tran" cho mot ban va KHONG vuot. Base dung la MERGE-BASE.
 SHA_BASE_SPEC = "d705623162b75b7340ee7cca54ac2d2abbddbb6f"
+BAN_BO_DO = "2026-09-19c"              # doi MOI khi sua bo do - log tu khai ban nao
 TRAN_TEP, TRAN_DONG = 2, 400          # N7' cua spec r3
 MAU_WIN  = 'if nen_thuc == "windows":'
 # Ca ngoai pham vi r3 §ngoai_pham_vi — do CHINH SPEC khai, khong phai bo do tu quyet.
@@ -238,6 +239,15 @@ if not _ok:
 goc = Path(sys.argv[1]).resolve() if len(sys.argv) > 1 else Path.cwd()
 tep, tept = goc / "ops" / "lease_publish.py", goc / "ops" / "lease_publish_test.py"
 inn(""); inn("-" * 78); inn("0. NEN DO")
+# MOI LOG PHAI TU KHAI no do CAI GI bang BO DO NAO. Bai hoc 19-09-2026: mot luot do
+# gui ve duoc doc nhu ket qua cua ban va dang xet, nhung that ra la ban do CU chay
+# tren nhanh KHAC. Doc ra thi mat mot vong; log tu khai thi thay ngay dong dau.
+try:
+    _tu = hashlib.sha256(Path(__file__).read_bytes()).hexdigest()
+except Exception as _e:
+    _tu = f"khong tu bam duoc: {_e}"
+ghi("bo_do_sha256", _tu)
+inn(f"  BO DO        : sha256 {_tu[:16]}  (ban {BAN_BO_DO})")
 inn("  sys.platform :", sys.platform, "| python", sys.version.split()[0])
 inn("  os.pathsep   :", repr(os.pathsep), "| PATHEXT:", repr(os.environ.get("PATHEXT"))[:60])
 inn("  ProgramFiles :", repr(os.environ.get("ProgramFiles")), "| SystemRoot:", repr(os.environ.get("SystemRoot")))
@@ -282,6 +292,11 @@ elif la_hau_due:
 else:
     the_he = "?"; loi.append(f"HEAD={head[:8]} KHONG phai g1 va KHONG phai hau due cua {SHA_G1[:8]} — rebase? nham nhanh?")
 ghi("the_he", the_he)
+rc_r, refs, _ = git(goc, "for-each-ref", "--points-at", head or "HEAD",
+                    "--format=%(refname:short)")
+dsr = [x for x in refs.splitlines() if x.strip() and x.strip() != "do-tam"]
+ghi("ref_tro_toi_head", dsr)
+inn(f"  ref tro toi HEAD: {', '.join(dsr) if dsr else '(khong ref nao - HEAD roi tu do)'}")
 
 if loi:
     inn(""); inn("KHONG DO DUOC: nen do sai, KHONG in ket luan nao.")

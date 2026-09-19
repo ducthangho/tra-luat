@@ -9,8 +9,9 @@
 # Do RIENG probe + tu kiem cong (vai giay, khong chay bo test):
 #     powershell -NoProfile -ExecutionPolicy Bypass -File "wp541-do-g2.ps1" -ChiProbe
 #
-# Nhanh mac dinh la claude/va-541-t171-20260919 (ban va dang do). Doi nhanh khac:
-#     ... -Nhanh fix_issue_541
+# Nhanh mac dinh la fix_issue_541 - nhanh mang ung vien g2 (lease g2 khai dung nhanh
+# nay). Ung vien nay gio la mot merge commit: 0ea95de + origin/master. Doi nhanh khac:
+#     ... -Nhanh <ten-nhanh>
 #
 # Khong can tai them tep nao. Bo do Python nam NGAY TRONG tep nay (base64) va
 # duoc kiem toan ven bang SHA-256 truoc khi chay.
@@ -25,7 +26,7 @@ param(
     [string]$Nguon   = '',     # kho co san dung lam nguon clone (nhanh hon). Mac dinh: <Base>\tl546
     [string]$Kho     = '',     # clone RIENG de do.                            Mac dinh: <Base>\tl541-do
     [string]$Py      = '',     # duong dan python neu muon chi dinh
-    [string]$Nhanh   = 'claude/va-541-t171-20260919',  # nhanh mang ban va can do
+    [string]$Nhanh   = 'fix_issue_541',       # nhanh mang ban va can do
     [switch]$ChiGiaiNen,       # chi ghi bo do Python ra dia roi dung (de doc/kiem)
     [switch]$ChiKichThuoc,     # CHI do cong kich thuoc (vai giay) roi dung - khong chay bo test
     [switch]$ChiProbe,         # CHI do muc 0,1,3 (vai giay): tu kiem cong + probe thang

@@ -1,0 +1,114 @@
+# LAND AUTHORITY + LAND EVIDENCE — PR #554, packet #541 (WINDOWS-LEASE-PUBLISH).
+#
+# BAN NHAP. Soan theo chi thi chu kho "soan land authority di, toi da merge".
+# CHUA duoc cap. Executor lease KHONG thay duoc land authority (PROTOCOL:255).
+#
+# HAI VE TRONG MOT TEP, y nhu 9 tep ops/land/* da co:
+#   - uy_quyen / authorized_*  : cai duoc cap phep
+#   - merge_* / hau_merge      : cai da thuc su xay ra, do duoc
+#
+# DOC MUC `hau_merge_gate` VA `KHONG_DUOC_GOI_LA_LANDED` TRUOC MOI THU KHAC.
+
+schema_version: 1
+mission_id: KHONG-CO-MISSION
+packet_id: PR554-WP541-LAND
+generation: 1
+provider: anthropic
+role: land_operator
+session_id: https://claude.ai/code/session_015diBngheEgZLBopnn4K13P
+recorded_by: claude
+trang_thai_ban_ghi: 'BAN NHAP — CHUA CAP. Merge DA xay ra (chu kho tu bam), nhung quyen cho
+  cac thao tac HAU MERGE thi chua duoc cap. Tep nay xin quyen ay va ghi san bang chung.'
+
+# ─────────────────────────── MERGE — DA XAY RA, DO DUOC ───────────────────────────
+authorized_head_sha: 2a67968ba578cfee020661ffc466a3f69a0b1ab2
+approver: ducthangho
+authorization_url: https://github.com/ducthangho/tra-luat/pull/554#issuecomment-5743814734
+authorization_url_la_gi: 'Bien ban HUMAN AUDIT, verdict `approved`, neo dung
+  2a67968ba578cfee020661ffc466a3f69a0b1ab2, dang 2026-09-19T17:14:04Z duoi ten ducthangho.
+  Day la mot GitHub object ben, khong phai loi tu khai trong phien — khac ca pr493 (null).
+  NHUNG doc ky muc `doc_lap` cua chinh bien ban ay: no TU KHAI rang tieu chi
+  reviewer_independence KHONG duoc thoa day du.'
+
+merge_method: merge
+merge_commit: e1324285eea1b7bf2719a301332fdaa3a94c17f9
+merged_at: '2026-09-19T17:25:02Z'
+merged_by: ducthangho
+hai_cha: dc85dd0a34188238aa6537ce843ff3688e488fd3 2a67968ba578cfee020661ffc466a3f69a0b1ab2
+tree: ce4bf799652ddddf7c17f5dd690eb0675e628ddd
+target: master
+
+xac_minh_quan_he_voi_candidate:
+  cha_1_la_target_truoc_merge: 'dc85dd0a3418 == origin/master truoc luc merge. DUNG.'
+  cha_2_la_candidate: '2a67968ba578 == authorized_head_sha. DUNG, khong lech mot bit.'
+  tree_khop: 'tree cua merge commit (ce4bf79965) GIONG HET tree cua candidate 2a67968ba578.
+    Nghia la merge KHONG mang vao thu gi ngoai candidate — do duoc, khong phai tin loi.'
+  candidate_la_to_tien_cua_master: 'ROI. git merge-base --is-ancestor 2a67968b <master> = 0.'
+  ai_bam: 'ducthangho. KHONG phai phien claude — lease g3 cam `merge` va `land`, va phien nay
+    la executor cua chinh ban va, nen tu merge se dung hinh dang self_approve.'
+
+# ─────────────────────── HAU MERGE GATE — KHONG DO DUOC ───────────────────────
+hau_merge_gate:
+  trang_thai: KHONG_DO_DUOC
+  KHONG_phai: 'KHONG phai "dat". KHONG phai "truot". Cong KHONG CHAY.'
+  do_duoc:
+    chuan_bi: 'failure sau 2 giay, khong buoc nao chay'
+    gate: skipped
+    gate_packet_loop: skipped
+    gate_registry: skipped
+  nguyen_nhan_NGUYEN_VAN: >-
+    "The job was not started because recent account payments have failed or your spending limit
+    needs to be increased. Please check the 'Billing & plans' section in your settings"
+  nguon_bang_chung: 'GET /repos/ducthangho/tra-luat/check-runs/105936674625/annotations
+    (annotation_level: failure). Log job tra BlobNotFound — nhung annotation VAN con.
+    Bai hoc: "khong lay duoc log" KHONG BANG "khong do duoc"; con duong khac.'
+  cung_nguyen_nhan_voi: 'Workflow `ops — dang lease bang git` that bai tren 979e740
+    (check-run 105924997324) mang DUNG CUNG annotation. Hai su kien khac nhau, mot nguyen nhan,
+    mot tai khoan. Truoc khi co bang chung nay, gia thuyet dang xet la ba khoa YAML moi cua lan
+    gia han cham phai phep quet cua cong — gia thuyet ay SAI, va da duoc dinh chinh.'
+  he_qua: 'Theo ky luat ba trang thai cua kho, trang thai thu ba lam cong DO. Master hien
+    KHONG co bang chung cong xanh sau merge. Day la mot su that ve TAI KHOAN, khong phai ve
+    ban va: chinh candidate 2a67968b da co DU nam cong xanh truoc merge
+    (chuan-bi, gate, gate-packet-loop, gate-registry, thu-hoi).'
+
+KHONG_DUOC_GOI_LA_LANDED: >-
+  PROTOCOL:1079 nguyen van: "Het han hoac thieu quyen cho buoc con lai thi dung buoc ay va
+  handoff; khong goi `landed`/Packet complete/Mission complete khi thieu bang chung tuong ung."
+  Bang chung hau-merge gate dang THIEU. Nen packet #541 CHUA duoc goi la landed, du merge da
+  xay ra va du ban va da xanh tron ven tren Windows that. Merge xong KHAC voi land xong.
+
+# ─────────────────────── QUYEN XIN CAP — chua duoc cap ───────────────────────
+uy_quyen:
+  loai_nguon: 'CHUA_CO. Chu kho chi thi "soan land authority di" — SOAN, khong phai CAP.'
+  pham_vi_xin: 'CHI cac thao tac HAU MERGE. Merge da xong va do chu kho tu lam; tep nay khong
+    xin quyen merge.'
+  han_xin: 'Den 2026-09-20T17:00:00Z — trung han lease g3, de hai quyen khong lech nhau.'
+  thao_tac_hau_merge_xin_duoc_phep:
+    - 'Ghi va day chinh tep land-evidence nay vao ops/land/ tren master.'
+    - 'Doc lai hau-merge gate khi no chay duoc, roi CAP NHAT muc hau_merge_gate bang so do that.'
+    - 'Dang mot comment bookkeeping len #541 va #554 neo merge_commit va trang thai gate.'
+    - 'Dong Issue #541 — CHI khi hau_merge_gate khong con KHONG_DO_DUOC.'
+  thao_tac_KHONG_xin:
+    - 'deploy / LIVE / ruleset mutation / admin bypass'
+    - 'Chay lai hay bam lai bat ky job CI nao — chu kho da chi thi "Khong chay CI".'
+    - 'Cham billing hay bat ky thu gi trong Settings cua tai khoan.'
+    - 'Sua .github/workflows/** de cong thoi do — do la bit mieng cong, khong phai chua.'
+    - 'Goi `landed` khi hau_merge_gate con KHONG_DO_DUOC.'
+
+# ─────────────────────── CAC KHOAN CON MO SAU LAND ───────────────────────
+con_mo:
+  hau_merge_gate: 'KHONG_DO_DUOC vi billing. Chan viec goi landed. Chu kho xu ly o Settings;
+    KHONG phai viec cua executor.'
+  chin_ca_do_ngoai_pham_vi: 't35-t40 -> #570 | t125 -> #562 | t150 -> #552 | t131, t132 -> CHUA CO CHO'
+  lech_executor_khong_hoi_to: 'Lease g3 (cap 17:00Z) da khai dung executor tu day tro di, nhung
+    hai commit 0ea95de va 2a67968b van ra doi trong khoang lease g2 da mat hieu luc theo §3.2.
+    Merge KHONG chua dieu do; approved cung KHONG. No van la mot khoang khong duoc cap phep
+    dung quy cach, va gio no da nam trong lich su master.'
+  comment_audit_co_duoi_thua: 'Bien ban audit issuecomment-5743814734 bi lop trung gian noi
+    them 4 dong "_Generated by Claude Code_" vao moi lan ghi (ca POST lan PATCH). 74 dong dau
+    dung tung ky tu ban chu kho duyet. Chua go duoc tu phia API.'
+
+chuoi_ho_so_dung_o_dau: >-
+  Tep nay KHONG tu sinh mat xich tiep theo. No ghi nhan merge va xin quyen hau-merge. Viec goi
+  `landed`, dong #541, hay tuyen Packet complete deu doi bang chung hau-merge gate ma hien
+  KHONG CO. Chu kho quyet buoc ke tiep.

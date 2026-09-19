@@ -1100,12 +1100,112 @@ def kiem_metadata_retired(duong: str, mode: str, loai: str, noi_dung: bytes, bay
     return d
 
 
-def _git_exe_toi_thieu() -> str:
-    """Executable `git` giải MỘT lần bằng đường tuyệt đối trong PATH tối thiểu (Q4.1)."""
+def _git_windows(path=None, system_root=None, program_files=None, cwd=None,
+                 cong_cu_git=None, chan_doan=None, phan_cach=None) -> str | None:
+    """Windows: giải executable `git` theo danh sách ứng viên có thứ tự (Q4.1 / M1).
+    Thứ tự:
+      1. CONG_CU_GIT — biến môi trường tường minh (chỉ nhận git.exe, nếu có).
+      2. Thư mục cài Git phân giải từ %ProgramFiles% (và registry nếu đọc được).
+      3. git.exe trên PATH thật — đường CHÓT (chỉ chấp nhận git.exe, không qua PATHEXT).
+    Ở MỌI BƯỚC: chỉ chấp nhận git.exe, loại ứng viên nằm trong cwd, loại ứng viên nằm dưới %SystemRoot%.
+    Khi bước 2 (%ProgramFiles%) không phân giải, chẩn đoán ghi KHÔNG_ĐO_ĐƯỢC chứ không
+    im lặng rơi xuống bước 3 (N3b).
+    Không thấy gì thì trả None để _git_exe_toi_thieu ném Chan(RC_KHONG_XAC_DINH).
+    """
+    env = os.environ
+    sr = env.get("SystemRoot", "") if system_root is None else str(system_root)
+    sr_norm = os.path.normcase(os.path.abspath(sr)).rstrip("\\/") if sr else None
+
+    cw = os.getcwd() if cwd is None else str(cwd)
+    cw_norm = os.path.normcase(os.path.abspath(cw)).rstrip("\\/") if cw else None
+
+    def duoi_system_root(u):
+        if not sr_norm:
+            return False
+        q = os.path.normcase(os.path.abspath(str(u)))
+        return q == sr_norm or q.startswith(sr_norm + os.sep) or q.startswith(sr_norm + "/")
+
+    def trong_cwd(u):
+        if not cw_norm:
+            return False
+        q = os.path.normcase(os.path.abspath(str(u)))
+        return q == cw_norm or q.startswith(cw_norm + os.sep) or q.startswith(cw_norm + "/")
+
+    def hop_le(u):
+        if not u:
+            return False
+        p = Path(u)
+        if not p.is_file():
+            return False
+        try:
+            r = p.resolve()
+        except Exception:
+            r = p
+        if duoi_system_root(p) or duoi_system_root(r):
+            return False
+        if trong_cwd(p) or trong_cwd(r):
+            return False
+        return True
+
+    # 1. CONG_CU_GIT
+    chi_dinh = env.get("CONG_CU_GIT") if cong_cu_git is None else cong_cu_git
+    if chi_dinh and Path(chi_dinh).name.lower() == "git.exe" and hop_le(chi_dinh):
+        return str(Path(chi_dinh).resolve())
+
+    # 2. %ProgramFiles%
+    pf = env.get("ProgramFiles", r"C:\Program Files") if program_files is None else program_files
+    ung_vien_pf = [
+        Path(pf) / "Git" / "cmd" / "git.exe",
+        Path(pf) / "Git" / "bin" / "git.exe",
+        Path(pf) / "Git" / "mingw64" / "bin" / "git.exe",
+    ]
+    if program_files is None and "ProgramFiles(x86)" in env:
+        pf86 = env["ProgramFiles(x86)"]
+        ung_vien_pf += [
+            Path(pf86) / "Git" / "cmd" / "git.exe",
+            Path(pf86) / "Git" / "bin" / "git.exe",
+        ]
+    for u in ung_vien_pf:
+        if hop_le(u):
+            return str(Path(u).resolve())
+
+    # Bước 2 không phân giải: chẩn đoán ghi KHÔNG_ĐO_ĐƯỢC chứ không im lặng rơi xuống bước 3 (N3b)
+    thong_bao_pf = "KHÔNG_ĐO_ĐƯỢC: không thấy git hợp lệ dưới %ProgramFiles%, rơi xuống PATH"
+    if chan_doan is not None:
+        chan_doan.append(thong_bao_pf)
+    else:
+        sys.stderr.write(thong_bao_pf + "\n")
+
+    # 3. git.exe trên PATH thật — đường CHÓT
+    # Tường minh kiểm tra git.exe, không qua shutil.which / PATHEXT để loại trừ hoàn toàn .bat/.cmd/.py
+    path_val = env.get("PATH", "") if path is None else path
+    sep = os.pathsep if phan_cach is None else phan_cach
+    for d_raw in path_val.split(sep):
+        d = d_raw.strip().strip('"')
+        if not d or trong_cwd(d) or duoi_system_root(d):
+            continue
+        cand = Path(d) / "git.exe"
+        if hop_le(cand):
+            return str(cand.resolve())
+    return None
+
+
+def _git_exe_toi_thieu(*, nen: str | None = None, **tiem) -> str:
+    """Executable `git` giải MỘT lần bằng đường tuyệt đối trong PATH tối thiểu (Q4.1 / M1)."""
     import shutil
-    duong = shutil.which("git", path="/usr/bin:/bin")
+    nen_thuc = nen
+    if nen_thuc is None:
+        t = sys.platform
+        nen_thuc = "windows" if (t.startswith("win") or t in ("mingw", "msys", "cygwin")) else "posix"
+    if nen_thuc == "windows":
+        duong = _git_windows(**tiem)
+        if not duong:
+            raise Chan(RC_KHONG_XAC_DINH, "KHÔNG_XÁC_ĐỊNH: không thấy `git` hợp lệ cho Windows")
+        return duong
+    path_posix = tiem.get("path", "/usr/bin:/bin")
+    duong = shutil.which("git", path=path_posix)
     if not duong:
-        raise Chan(RC_KHONG_XAC_DINH, "KHÔNG_XÁC_ĐỊNH: không thấy `git` trong PATH tối thiểu /usr/bin:/bin")
+        raise Chan(RC_KHONG_XAC_DINH, f"KHÔNG_XÁC_ĐỊNH: không thấy `git` trong PATH tối thiểu {path_posix}")
     return str(Path(duong).resolve())
 
 

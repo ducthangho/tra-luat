@@ -266,3 +266,22 @@ xung_dot_loi_ich_da_khai: >-
 closure_status: 'Explicit owner-approved bounded write-set (6 duong); no claim of computed dispatcher
   closure.'
 orchestration: owner-authorized manual issue/receipt journal; no packet_loop state claim
+
+# ---- BIA MO (dat 19-09-2026, sau khi packet DA LAND) -------------------------
+da_bi_thay_the: human-audited-khai-ai-dang-r1-g1-claude
+da_bi_thay_the_vi_sao: 'THU HOI SOM. Packet ASSURANCE-NEO-VAO-HO-MODEL da LAND (merge dc85dd0a,
+  CI hau merge run 35421262607 4/4 success). Lease nay het han tu nhien luc 2026-09-19T18:40:00Z
+  nhung van giu ba duong (docs/PROTOCOL_DA_PHIEN.md, ops/bien_nhan_v2.py, ops/bien_nhan_v2_test.py)
+  ma packet #566 can — tuc write-set exclusion dang chan CHINH CHU cua no, khong chan mot writer
+  thu hai. Chi thi chu kho, nhan phuong an nguyen van: "Bia mo hai chieu — cap lease ngay". Ban
+  chieu: https://github.com/ducthangho/tra-luat/issues/566#issuecomment-5742660381'
+da_bi_thay_the_XUYEN_PACKET: 'NOI THANG: ke vi thuoc packet KHAC (#566, HUMAN-AUDITED-KHAI-AI-DANG),
+  khong phai mot revision sau cua chinh packet nay. `thay_the_cho` von nghia la "ban sua doi sau thay
+  ban truoc cua CUNG packet"; _kiem_bia_mo (ops/lease_publish.py:595) KHONG doi cung packet_id nen
+  may CHO PHEP — va cai "cho phep" ay la mot KHE cua co che, khong phai mot tinh nang. Dung nhu the
+  la co chu y va co uy quyen, KHONG duoc lay lam tien le tu dong.'
+da_bi_thay_the_NO_VAN_CON: 'AG-T0-01B-thu-hoi-lease-chua-co-duong. Day la lan LACH THU BAY (#551 gen
+  1, #541, #551 gen 2, gen 3, gen 4, #566). Chot "lap ba lan thi hoi CO NEN LAM KHONG" da bi vuot tu
+  lau. Duong chua THAT van la kich hoat so thu hoi ops/thu-hoi/ (ADR-0047, SO_THU_HOI_KICH_HOAT =
+  False tai ops/lease_publish.py:929) — hien bi chan boi lease CON SONG THAT cua #541 tren
+  ops/lease_publish.py, tuc mot chan §5 DUNG, khong phai no.'

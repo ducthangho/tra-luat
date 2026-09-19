@@ -313,3 +313,11 @@ closure_status: 'Owner-directed grant with a KNOWN, DECLARED write-set overlap o
   does enforce. No claim of a clean whole-repo scan; no claim of computed dispatcher closure. Size
   budget raised from 300 to 400 added lines under the escape hatch ADR-0044 opens for itself, with
   the reason declared in spec r3, not here.'
+
+# ── BIA MO (them 19-09-2026 theo chi thi chu kho "Thu hoi g3 di") ──────────────────
+# Packet #541 DA LAND (PR #554, merge e1324285). "Da land" KHONG phai "da nha": lease nay
+# con giu ops/lease_publish.py va ops/lease_publish_test.py toi 2026-09-20T17:00:00Z.
+# Nguoi ke nhiem: ops/leases/wp541-path-r4-g4-bia-mo.yaml (write_set RONG, khong cap gi).
+# So thu hoi KHONG dung duoc: SO_THU_HOI_KICH_HOAT = False, va ghi vao so lam job `thu-hoi`
+# (chay tren MOI PR) tra KHONG_XAC_DINH. Bia mo hai chieu la duong duy nhat chay duoc.
+da_bi_thay_the: wp541-path-r4-g4-bia-mo

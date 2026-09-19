@@ -49,7 +49,7 @@ xac_minh_quan_he_voi_candidate:
 
 # ─────────────────────── HAU MERGE GATE — KHONG DO DUOC ───────────────────────
 hau_merge_gate:
-  trang_thai: DANG_DO_LAI
+  trang_thai: DO_ROI_NHUNG_CON_MOT_CONG_DO
   # ── LAN 1 (attempt 1), 2026-09-19T17:25 ──────────────────────────────────────
   lan_1:
     ket_qua: 'chuan-bi failure sau 2 giay | gate, gate-packet-loop, gate-registry skipped'
@@ -65,11 +65,11 @@ hau_merge_gate:
       (khong khoi dong workflow moi), KHONG phai "manual full CI" (cung run, cung commit).
       Chi thi chu kho: "Thu lai di, Actions da hoat dong lai". Chi thi cu "Khong chay CI ...
       cho den khi merge" da het hieu luc theo chinh loi no: merge da xay ra luc 17:25:02Z.'
-    ket_qua_den_luc_ghi:
+    ket_qua_CUOI:
       chuan_bi: 'success   <- lan 1 la failure, va KHONG doi mot dong ma nao'
+      gate: success
       gate_packet_loop: success
-      gate: 'dang chay'
-      gate_registry: 'dang chay'
+      gate_registry: 'FAILURE   <- cong duy nhat con do'
     da_xac_nhan: 'chuan-bi chuyen failure -> success ma khong doi ma => chan doan billing DUNG.'
   DINH_CHINH_1_cua_chinh_tep_nay: >-
     Ban NHAP dau tien cua tep nay khai rang workflow `ops — dang lease bang git` hong tren
@@ -104,15 +104,48 @@ hau_merge_gate:
     KHONG_phai_viec_cua_land_nay: 'Sua .github/workflows/** nam trong `khong_duoc_cham` cua
       lease. Ghi ra day de no CO TEN, khong phai de tu chua.'
 
-  CHUA_DUOC_GHI_LA_XANH: 'Hai cong con dang chay. Muc nay phai duoc CAP NHAT bang so do that
-    khi chung xong. Cho toi luc ay, trang thai van la DANG_DO_LAI, khong duoc lam tron thanh
-    "dat" — dung khuyet tat #401 (cong lam tron LEN trang thai thu ba).'
+  cong_con_DO:
+    ten: 'gate-registry (ubuntu-latest)'
+    check_run_id: 105939636823
+    dong_chet_NGUYEN_VAN: "CASE T6: DO — OSError: [Errno 39] Directory not empty: '/tmp/tmp_nkl1xu8/work/.git'"
+    la_loi_gi: 'Loi DON DEP thu muc tam, KHONG phai mot khang dinh ve hanh vi cua ma. T1-T5 va
+      T7-T8 deu DAT; chi T6 do, va do vi khong xoa duoc mot .git trong TemporaryDirectory.'
+    o_tep_nao: 'ops/nhanh_don_duoc_test.py, ham T6() dong 343.'
+    CO_PHAI_DO_BAN_VA_KHONG:
+      ket_luan: 'KHONG co bang chung nao noi la do ban va. Va co ba bang chung nguoc lai.'
+      bang_chung_1: 'Tep ops/nhanh_don_duoc_test.py KHONG nam trong write set cua #541 va
+        KHONG bi ban va cham: `git diff --name-only dc85dd0a..2a67968b | grep -c nhanh_don_duoc`
+        = 0.'
+      bang_chung_2: 'CUNG MOT TREE da xanh HAI lan trong ngay. tree cua merge commit e1324285
+        (ce4bf79965) GIONG HET tree cua candidate 2a67968b, ma gate-registry tren 2a67968b =
+        success. gate-registry tren dc85dd0a (master truoc merge) cung = success.
+        Cung tree, khac ket qua => ket qua KHONG do tree quyet dinh.'
+      bang_chung_3: 'Tep nay DA CO mot Issue mo ve hanh vi le thuoc runner: #568 "No: bo phan
+        hang dot bien tu kiem cua ops/nhanh_don_duoc_test.py tra TIN DUNG GIA tren runner ma...".'
+    KHONG_DUOC_GOI_LA_FLAKE: >-
+      Ba bang chung tren noi rang ket qua khong do TREE quyet dinh. Chung KHONG noi nguyen nhan
+      la gi. "Chap chon" / "flake" KHONG phai mot nguyen nhan — no la mot cai ten dat cho viec
+      chua tim ra nguyen nhan, va dat ten nhu the la cach nhanh nhat de thoi tim. Trang thai
+      dung o day la: CONG DO, NGUYEN NHAN CHUA RO, va co bang chung manh rang no KHONG den tu
+      ban va #541. Khac han "khong sao dau".
+    KHONG_phai_viec_cua_land_nay: 'ops/nhanh_don_duoc_test.py nam ngoai write set. Chua no o day
+      la mo rong pham vi. Can mot packet rieng, hoac gop vao #568 neu chu kho thay cung goc.'
+    da_bam_lai_bao_nhieu_lan: 'MOT. Va lan ay la de go hong hoc ha tang (billing) — job lan 1
+      chet TRUOC khi bat ky than test nao chay. Lan do nay thi than test DA chay va T6 do that.
+      KHONG tu bam lai lan nua de "xem no co xanh khong": bam lai cho toi khi xanh la che mat
+      phep do, khong phai lam phep do.'
+
+  CHUA_DUOC_GHI_LA_XANH: 'Ba tren bon cong xanh. Ba KHONG phai bon. Khong duoc lam tron len
+    thanh "dat" — dung khuyet tat #401 (cong lam tron LEN trang thai thu ba).'
 
 KHONG_DUOC_GOI_LA_LANDED: >-
   PROTOCOL:1079 nguyen van: "Het han hoac thieu quyen cho buoc con lai thi dung buoc ay va
   handoff; khong goi `landed`/Packet complete/Mission complete khi thieu bang chung tuong ung."
-  Den luc ghi dong nay, hai cong `gate` va `gate-registry` van dang chay. Bang chung CHUA DU.
+  `gate-registry` DO tren master sau merge. Du co bang chung manh rang no khong den tu ban va
+  #541, mot cong DO van la mot cong DO: bang chung hau-merge gate CHUA DU.
   Packet #541 CHUA duoc goi la landed. Merge xong KHAC land xong.
+  Chu kho quyet: hoac mo packet cho gate-registry, hoac khai tuong minh rang land nay di kem
+  mot cong do da duoc dinh danh. KHONG duoc im lang coi nhu no xanh.
 
 # ─────────────────────── QUYEN XIN CAP — chua duoc cap ───────────────────────
 uy_quyen:
@@ -137,8 +170,11 @@ uy_quyen:
 
 # ─────────────────────── CAC KHOAN CON MO SAU LAND ───────────────────────
 con_mo:
-  hau_merge_gate: 'DANG_DO_LAI. Billing da duoc chu kho chua; chuan-bi va gate-packet-loop nay
-    XANH, hai cong gate va gate-registry dang chay. Van chan viec goi landed cho toi khi du.'
+  hau_merge_gate: 'chuan-bi, gate, gate-packet-loop XANH sau khi chua billing. gate-registry
+    DO tai CASE T6 (loi don dep thu muc tam), o mot tep NGOAI write set, tren cung mot tree da
+    xanh hai lan. Nguyen nhan CHUA RO. Van chan viec goi landed.'
+  gate_registry_do: 'Can mot cho: packet rieng, hoac gop #568 neu chu kho thay cung goc.
+    KHONG duoc dat ten la "flake" roi bo qua.'
   workflow_dang_lease: 'Job `dang` VAN exit 1 sau khi billing thong — nguyen nhan thu hai:
     lease g1 het han nam trong diff cua nhanh moi. Lease g3 van dang duoc (comment 5744088645).
     Xem hau_merge_gate.nguyen_nhan_thu_hai. Can mot packet rieng cho duong nhanh-moi cua

@@ -12,6 +12,7 @@ import yaml
 HERE = Path(__file__).resolve().parent
 GOC = HERE.parent
 SCRIPT = HERE / "cong_cu.py"
+BASH_NEN = HERE / "bash_nen.py"
 CAI_SH = HERE / "cai_cong_cu.sh"
 sys.path.insert(0, str(HERE))
 import lease_publish_test as lpt  # noqa: E402 — tái dùng _goi_actionlint_gia/_bam_tep
@@ -531,6 +532,38 @@ DOT_BIEN = {
         '        ghi_chu_pham_vi = "da quet canary toan bo (khong co nghia moi canary dat)"\n',
         '        ghi_chu_pham_vi = "   "  # đột biến\n',
         "SCRIPT", _PHU, "t24_pham_vi_mot_cong_cu_va_toan_bo"),
+    # ── #570: mỗi ca T23..T27 đúng MỘT đột biến. `BASH_NEN` là biến được patch, nên
+    # bản đột biến nằm ở thư mục tạm riêng — không bao giờ chạm tệp thật.
+    "bn_bo_kiem_argv0": ("ops/bash_nen.py",
+        '    if doc.get("BN0") != _NHAN_ARGV:\n',
+        '    if False:  # đột biến: bỏ phép kiểm `$0`\n',
+        "BASH_NEN", (), "t23_bash_nen_tu_choi_bash_nuot_argv"),
+    "bn_bo_kiem_so_doi_so": ("ops/bash_nen.py",
+        '    if doc.get("BNSO") != str(len(_DOI_SO)):\n',
+        '    if False:  # đột biến: bỏ phép đếm đối số\n',
+        "BASH_NEN", (), "t23_bash_nen_tu_choi_bash_nuot_argv"),
+    "bn_bo_kiem_doi_so_1": ("ops/bash_nen.py",
+        '    if doc.get("BN1") != _DOI_SO[0]:\n',
+        '    if False:  # đột biến: bỏ phép kiểm `$1`\n',
+        "BASH_NEN", (), "t23_bash_nen_tu_choi_bash_nuot_argv"),
+    "bn_bo_kiem_mo_tep": ("ops/bash_nen.py",
+        "        if rc != 0 or _DAU_CHAY not in ra:\n",
+        "        if False:  # đột biến: bỏ phép mở đường dẫn bản địa\n",
+        "BASH_NEN", (), "t24_bash_nen_tu_choi_bash_khong_mo_duoc_duong_dan_ban_dia"),
+    "bn_cong_cho_qua_moi_noi": ("ops/bash_nen.py",
+        "    moi = {t: d for t, d in co_loi_goi.items()\n"
+        "           if t not in CHO_PHEP and t not in CHUA_CHUYEN}\n",
+        "    moi = {}  # đột biến: cổng không chặn lời gọi trần mới nữa\n",
+        "BASH_NEN", (), "t25_cong_chan_loi_goi_bash_tran_MOI"),
+    "bn_ratchet_mot_chieu": ("ops/bash_nen.py",
+        "    da_sach = [t for t in CHUA_CHUYEN if t not in co_loi_goi]\n",
+        "    da_sach = []  # đột biến: bỏ chiều ngược của ratchet\n",
+        "BASH_NEN", (), "t26_ratchet_phai_NGAN_di_chu_khong_muc_ra"),
+    "bn_quet_theo_chuoi": ("ops/bash_nen.py",
+        "            dong = _loi_goi_tran(than)\n",
+        "            dong = [i for i, l in enumerate(than.splitlines(), 1)\n"
+        "                    if 'which(\"bash\")' in l]  # đột biến: đo CHUỖI, không đo cấu trúc\n",
+        "BASH_NEN", (), "t27_cong_khong_bao_dong_gia_tren_CHU_THICH"),
 }
 
 def _chay_1_ca(fn):
@@ -1061,6 +1094,239 @@ def _tu_kiem_gian_giao() -> int:
         return 1
     print(f"  ok  crash vô can → tin_dung_gia ({str(ct).splitlines()[0][:90]})")
     return 0
+
+
+# --------------------------------------------------------- T23..T27 (#570) bash_nen
+# Issue #570, đo 19-09-2026 trên Windows thật: `shutil.which("bash")` trả
+# `C:\Windows\system32\bash.EXE` — bộ phóng WSL — nên `t35`-`t40` của
+# `ops/lease_publish_test.py` chết TRƯỚC dòng đầu của `ops/cai_actionlint.sh` với
+# `rc=127`, và sáu lời khai của chúng là QUY SAI NGUYÊN NHÂN.
+#
+# Đó là lần thứ BA cùng khuyết tật (`t32` · `_bash_windows` · nay sáu ca kia), và lần
+# thứ ba nó được chữa bằng một bộ giải RIÊNG. `ops/bash_nen.py` là bộ giải DÙNG CHUNG
+# cộng một CỔNG chặn bản sao thứ tư. Năm ca dưới đây neo năm thuộc tính khác nhau của
+# nó; mỗi ca có ĐÚNG MỘT đột biến trong `DOT_BIEN`.
+
+_BASH_NEN_GIA_DUNG = '''import sys
+a = sys.argv[1:]
+if a and a[0] == "-c":
+    nhan, con = a[2], a[3:]
+    print("BN0=%s" % nhan); print("BNSO=%s" % len(con))
+    print("BN1=%s" % (con[0] if con else ""))
+    raise SystemExit(0)
+try:
+    t = open(a[0], encoding="utf-8").read()
+except OSError:
+    print("/bin/bash: %s: No such file or directory" % a[0], file=sys.stderr)
+    raise SystemExit(127)
+for d in t.splitlines():
+    if "BN_DA_CHAY_TU_TEP" in d and not d.startswith("#"):
+        print("BN_DA_CHAY_TU_TEP")
+raise SystemExit(0)
+'''
+
+_BN_IN_GOC = ('    print("BN0=%s" % nhan); print("BNSO=%s" % len(con))\n'
+              '    print("BN1=%s" % (con[0] if con else ""))\n')
+
+
+def _bn_gia_doi_in(moi: str) -> str:
+    return _BASH_NEN_GIA_DUNG.replace(_BN_IN_GOC, moi)
+
+
+# BA con giả, mỗi con hỏng ĐÚNG MỘT chốt con của phép argv. Vì sao cần cả ba: đột biến
+# đầu tiên viết cho ca này chỉ gỡ phép đếm `$#` và nó SỐNG SÓT — hai chốt kia vẫn bắt
+# được con giả mang trọn chữ ký WSL. Tức "phép argv" không phải MỘT cửa mà là BA, và
+# `CLAUDE.md` đã ghi đúng hình dạng ấy: vá/đo theo cửa được gọi tên rồi bỏ sót cửa kế
+# tiếp. Mỗi cửa nay có một đột biến riêng; gỡ cửa nào thì ca này ĐỎ vì con giả của cửa ấy.
+_BASH_NEN_GIA_SAI_ARGV0 = _bn_gia_doi_in(
+    '    print("BN0=/bin/bash"); print("BNSO=%s" % len(con))\n'
+    '    print("BN1=%s" % (con[0] if con else ""))\n')
+_BASH_NEN_GIA_SAI_SO = _bn_gia_doi_in(
+    '    print("BN0=%s" % nhan); print("BNSO=0")\n'
+    '    print("BN1=%s" % (con[0] if con else ""))\n')
+_BASH_NEN_GIA_SAI_DOI_SO_1 = _bn_gia_doi_in(
+    '    print("BN0=%s" % nhan); print("BNSO=%s" % len(con))\n'
+    '    print("BN1=lac-de")\n')
+
+# Chữ ký ĐO ĐƯỢC của bộ phóng WSL (#570 lượt 2): `-c <thân> <nhãn> A B C` cho
+# `$0=/bin/bash`, `$#=0`, `$1` rỗng — đối số bị nối vào THÂN SCRIPT thay vì truyền làm
+# tham số. Nhưng nó VẪN mở được tệp, nên chỉ phép (1) bắt được nó.
+_BASH_NEN_GIA_NUOT_ARGV = _BASH_NEN_GIA_DUNG.replace(
+    '    print("BN0=%s" % nhan); print("BNSO=%s" % len(con))\n'
+    '    print("BN1=%s" % (con[0] if con else ""))\n',
+    '    print("BN0=/bin/bash"); print("BNSO=0"); print("BN1=")\n')
+
+# Mặt kia của cùng bộ phóng ấy: argv đúng nhưng KHÔNG mở nổi đường dẫn bản địa
+# (`rc=127 No such file or directory`). Chỉ phép (2) bắt được. Hai đột biến riêng ở dưới
+# chứng minh hai phép KHÔNG suy ra nhau — gỡ phép nào thì ca của phép ấy ĐỎ.
+_BASH_NEN_GIA_KHONG_MO_TEP = _BASH_NEN_GIA_DUNG.replace(
+    'try:\n    t = open(a[0], encoding="utf-8").read()\nexcept OSError:\n',
+    'if True:\n')
+
+
+def _goi_do_nang_luc(gia_than: str, tmp: Path):
+    """Chạy `_do_nang_luc` của `BASH_NEN` (có thể ĐÃ ĐỘT BIẾN) trên một `bash` giả.
+
+    Ứng viên giả là `[python, gia.py]` chứ không phải một tệp thực thi: Windows không
+    tạo được `.exe` giả, mà ca này phải đo được trên CHÍNH nền sinh ra khuyết tật.
+    """
+    gia = tmp / f"bash_gia_{abs(hash(gia_than)) % 10 ** 8}.py"
+    gia.write_text(gia_than, encoding="utf-8")
+    ma = ("import runpy, json, sys\n"
+          f"m = runpy.run_path({str(BASH_NEN)!r})\n"
+          f"dat, ly_do = m['_do_nang_luc']([{sys.executable!r}, {str(gia)!r}])\n"
+          "print('KQ ' + json.dumps([dat, ly_do]))\n")
+    p = subprocess.run([sys.executable, "-c", ma], cwd=GOC, capture_output=True,
+                       text=True, timeout=120)
+    # GIÀN GIÁO: đoạn `python -c` do CHÍNH ca này soạn. Nó chết ⇒ chưa đo được gì.
+    dung(p.returncode == 0 and "KQ " in p.stdout,
+         f"gọi _do_nang_luc hỏng: rc={p.returncode}\n{p.stdout}\n{p.stderr}")
+    dong = [l for l in p.stdout.splitlines() if l.startswith("KQ ")][-1]
+    return json.loads(dong[3:])
+
+
+@ca
+def t23_bash_nen_tu_choi_bash_nuot_argv():
+    """Phép NĂNG LỰC phải TỪ CHỐI một `bash` không truyền đúng đối số vị trí.
+
+    Đây là chữ ký đo được của `C:\\Windows\\system32\\bash.EXE` ở #570 lượt 2, và là thứ
+    KHÔNG lọc theo tên nào diễn tả nổi — nên ca này đo HÀNH VI, không đo đường dẫn.
+    Có CA DƯƠNG: một `bash` giả trung thực phải được NHẬN, nếu không thì "luôn từ chối"
+    cũng qua hết ca âm.
+    """
+    with tempfile.TemporaryDirectory() as tmp:
+        tmp = Path(tmp)
+        dat_dung, ly_do_dung = _goi_do_nang_luc(_BASH_NEN_GIA_DUNG, tmp)
+        bang(dat_dung, f"bash giả TRUNG THỰC mà bị từ chối: {ly_do_dung!r} — "
+                       f"mọi ca âm bên dưới sẽ vô nghĩa")
+        for ten, than in (("chữ ký WSL đầy đủ", _BASH_NEN_GIA_NUOT_ARGV),
+                          ("chỉ sai `$0`", _BASH_NEN_GIA_SAI_ARGV0),
+                          ("chỉ sai `$#`", _BASH_NEN_GIA_SAI_SO),
+                          ("chỉ sai `$1`", _BASH_NEN_GIA_SAI_DOI_SO_1)):
+            dat_xau, ly_do_xau = _goi_do_nang_luc(than, tmp)
+            bang(not dat_xau,
+                 f"bash giả ({ten}) mà vẫn được NHẬN — đúng bộ phóng WSL đã làm "
+                 f"`t35`-`t40` đỏ ở #570")
+            bang("argv" in (ly_do_xau or ""),
+                 f"từ chối ĐÚNG ({ten}) nhưng LÝ DO không nêu phép argv: "
+                 f"{ly_do_xau!r} — mã thoát đúng mà lý do sai thì người gọi khẳng "
+                 f"định nhầm chuyện")
+
+
+@ca
+def t24_bash_nen_tu_choi_bash_khong_mo_duoc_duong_dan_ban_dia():
+    """Phép NĂNG LỰC phải TỪ CHỐI một `bash` không mở nổi đường dẫn bản địa.
+
+    Mặt thứ hai của cùng bộ phóng WSL: `bash D:\\...\\x.sh` ⇒ `rc=127 No such file or
+    directory`. Ứng viên giả ở đây TRUYỀN ĐÚNG argv, nên chỉ phép (2) bắt được nó —
+    đó là bằng chứng hai phép không suy ra nhau.
+    """
+    with tempfile.TemporaryDirectory() as tmp:
+        tmp = Path(tmp)
+        dat_dung, ly_do_dung = _goi_do_nang_luc(_BASH_NEN_GIA_DUNG, tmp)
+        bang(dat_dung, f"bash giả TRUNG THỰC mà bị từ chối: {ly_do_dung!r}")
+        dat_xau, ly_do_xau = _goi_do_nang_luc(_BASH_NEN_GIA_KHONG_MO_TEP, tmp)
+        bang(not dat_xau,
+             "bash giả KHÔNG mở được đường dẫn bản địa mà vẫn được NHẬN — đúng cách "
+             "`t35`-`t40` nhận `rc=127` ở #570")
+        bang("đường dẫn bản địa" in (ly_do_xau or ""),
+             f"từ chối ĐÚNG nhưng LÝ DO không nêu phép mở đường dẫn: {ly_do_xau!r}")
+
+
+def _quet(goc) -> tuple:
+    p = subprocess.run([sys.executable, str(BASH_NEN), "quet", "--root", str(goc),
+                        "--json"], cwd=GOC, capture_output=True, text=True, timeout=120)
+    dung(p.stdout.strip().startswith("{"),
+         f"`quet --json` không in JSON: rc={p.returncode}\n{p.stdout}\n{p.stderr}")
+    return p.returncode, json.loads(p.stdout)
+
+
+def _cay_quet(tmp: Path, them=None, bo_loi_goi_o=None):
+    """Cây giả để quét: đủ các tệp `CHUA_CHUYEN` mà chính module đang khai.
+
+    Đọc danh sách TỪ MODULE chứ không chép cứng — ratchet sinh ra để NGẮN đi, và một
+    ca chép cứng danh sách sẽ đỏ oan đúng lúc ai đó vá xong một mục.
+    """
+    (tmp / "ops").mkdir(parents=True, exist_ok=True)
+    _, bao = _quet(tmp)          # lượt này chỉ để đọc `chua_chuyen` của module
+    dung(isinstance(bao.get("chua_chuyen"), list) and bao["chua_chuyen"],
+         f"không đọc được `chua_chuyen` từ module: {bao}")
+    for rel in bao["chua_chuyen"]:
+        p = tmp / rel
+        p.parent.mkdir(parents=True, exist_ok=True)
+        than = "import shutil\n"
+        than += "X = 1\n" if rel == bo_loi_goi_o else 'b = shutil.which("bash")\n'
+        p.write_text(than, encoding="utf-8")
+    for ten, than in (them or {}).items():
+        p = tmp / "ops" / ten
+        p.write_text(than, encoding="utf-8")
+    return bao["chua_chuyen"]
+
+
+@ca
+def t25_cong_chan_loi_goi_bash_tran_MOI():
+    """Cổng phải ĐỎ khi có lời gọi `bash` trần ở một tệp ngoài danh sách cho phép.
+
+    Không có ca này thì `ops/bash_nen.py` chỉ là bộ giải thứ BA nằm cạnh hai bộ cũ, và
+    bản sao thứ tư sẽ lặng lẽ ra đời — đúng thứ chủ kho quyết phải chặn ở #570.
+    """
+    with tempfile.TemporaryDirectory() as tmp:
+        tmp = Path(tmp)
+        _cay_quet(tmp)
+        rc, bao = _quet(tmp)
+        bang(rc == 0 and bao["trang_thai"] == "DAT",
+             f"NỀN đã phải SẠCH mà cổng báo {bao.get('trang_thai')} rc={rc}: "
+             f"{bao.get('ly_do')} — ca âm bên dưới sẽ vô nghĩa")
+        (tmp / "ops" / "tep_moi.py").write_text(
+            'import shutil\nb = shutil.which("bash")\n', encoding="utf-8")
+        rc, bao = _quet(tmp)
+        bang(rc == 2 and bao["trang_thai"] == "DO",
+             f"thêm lời gọi trần MỚI mà cổng vẫn rc={rc} {bao.get('trang_thai')}")
+        bang("ops/tep_moi.py" in json.dumps(bao.get("ngoai_danh_sach"), ensure_ascii=False),
+             f"cổng ĐỎ nhưng không nêu ĐÚNG tệp vi phạm: {bao.get('ngoai_danh_sach')}")
+
+
+@ca
+def t26_ratchet_phai_NGAN_di_chu_khong_muc_ra():
+    """Cổng phải ĐỎ khi một mục `CHUA_CHUYEN` KHÔNG còn lời gọi trần nào.
+
+    Chiều ngược của ratchet. Thiếu nó thì danh sách thành nghĩa trang: ai vá xong cũng
+    quên xoá tên mình, cổng dần hết ý nghĩa mà vẫn xanh — đúng hình dạng "cổng vắng mặt
+    trông giống cổng xanh" mà kho đã ghi sổ.
+    """
+    with tempfile.TemporaryDirectory() as tmp:
+        tmp = Path(tmp)
+        ds = _cay_quet(tmp)
+        rc, _ = _quet(tmp)
+        bang(rc == 0, f"NỀN đã phải SẠCH mà rc={rc}")
+        tmp2 = Path(tempfile.mkdtemp(dir=tmp))
+        _cay_quet(tmp2, bo_loi_goi_o=ds[0])
+        rc, bao = _quet(tmp2)
+        bang(rc == 2 and bao["trang_thai"] == "DO",
+             f"mục ratchet {ds[0]!r} đã sạch mà cổng vẫn rc={rc} {bao.get('trang_thai')}")
+        bang(ds[0] in bao.get("muc_ratchet_da_sach", []),
+             f"cổng ĐỎ nhưng không nêu đúng mục đã sạch: {bao.get('muc_ratchet_da_sach')}")
+
+
+@ca
+def t27_cong_khong_bao_dong_gia_tren_CHU_THICH():
+    """Cổng KHÔNG được ĐỎ vì một tệp chỉ NHẮC TỚI lời gọi trần trong chú thích/docstring.
+
+    Bản đầu của cổng khớp regex trên văn bản thô và đếm luôn hai lần nhắc trong chính
+    docstring của `ops/bash_nen.py`. `t43` của kho đã ĐỎ oan y hệt vì một câu văn xuôi
+    có nhắc cụm marker, và `CLAUDE.md` chép lại: một cổng báo động giả là cổng sẽ bị
+    tắt, rồi cả ca chết theo. Nên cổng đo CẤU TRÚC bằng `ast`, không đo chuỗi.
+    """
+    with tempfile.TemporaryDirectory() as tmp:
+        tmp = Path(tmp)
+        _cay_quet(tmp, them={"chi_nhac.py":
+                             '"""Tài liệu có nhắc shutil.which("bash") để giải thích."""\n'
+                             '# và shutil.which("bash") trong một chú thích\n'
+                             'GHI_CHU = \'shutil.which("bash")\'\n'})
+        rc, bao = _quet(tmp)
+        bang(rc == 0 and bao["trang_thai"] == "DAT",
+             f"tệp chỉ NHẮC TỚI trong chú thích/chuỗi mà cổng ĐỎ: rc={rc} "
+             f"{bao.get('ly_do')} — báo động giả")
 
 
 def main() -> int:

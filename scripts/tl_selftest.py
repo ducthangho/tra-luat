@@ -9097,10 +9097,39 @@ def run() -> int:
     import io as _io110, contextlib as _ctx110, tempfile as _tf110
     from pathlib import Path as _P110
 
+    # #565 `M2`/`M4` — KHI NUỐT MỘT NGOẠI LỆ THÌ PHẢI NÓI RA NÓ LÀ NGOẠI LỆ GÌ.
+    #
+    # Bản trước chỉ in khi có `TL_SELFTEST_DEBUG`, nên không đặt biến ấy thì MỌI ca chết vì
+    # HẠ TẦNG (`PermissionError`, `TimeoutExpired`, `OSError`, `ImportError`) trông Y HỆT một
+    # ca thất bại vì MÃ SAI. Hai thứ ấy cần hai cách xử khác nhau, mà log không phân biệt nổi.
+    #
+    # Đã trả giá đo được: `r330_deploy_msg_khong_chay_lenh` chập chờn trên Windows suốt BỐN
+    # lượt đo của đợt #551, và mỗi lượt chỉ để lại đúng một dòng `[FAIL] r330` trần. Nguyên
+    # nhân thật là `TemporaryDirectory.__exit__` ném `PermissionError [WinError 32]` vì WSL
+    # còn giữ handle trên cwd — đo 16/20 = 80%. Bốn lượt ấy mất công vì DÒNG NÀY im lặng.
+    #
+    # NÉM ra ngoài thì KHÔNG được: một ca hạ tầng sẽ giết cả lượt chạy 1710 ca. Phải IN.
+    # Và phép PHÂN LOẠI không đổi một chút nào — `cases` vẫn nhận `(name, False)`, đúng thứ
+    # tự, đúng số lượng; dòng in chỉ ĐI KÈM.
+    _TRAN_CHAN_DOAN_110 = 400
+
+    def _goi_loi_110(exc):
+        """Kiểu VÀ thông điệp, một dòng, và KHAI RÕ khi phải cắt.
+
+        Thân ngoại lệ có thể NHIỀU DÒNG (một `AssertionError` của `run()` mang cả stdout lẫn
+        stderr của lệnh con), nên dừng ở dòng đầu là tái lập đúng bệnh đang chữa, chỉ nhỏ hơn.
+        Nuốt lặng phần dư cũng vậy — cắt thì phải nói đã cắt BAO NHIÊU ký tự.
+        """
+        than = f"{type(exc).__name__}: {exc}".replace("\n", " | ").strip() or "(rong)"
+        if len(than) <= _TRAN_CHAN_DOAN_110:
+            return than
+        return f"{than[:_TRAN_CHAN_DOAN_110]} …[CAT {len(than) - _TRAN_CHAN_DOAN_110} ky tu]"
+
     def _t110(name, fn):
         try:
             cases.append((name, bool(fn())))
-        except Exception:
+        except Exception as _e110:      # noqa: BLE001
+            print(f"  [LOI-VO-CAN?] {name}: {_goi_loi_110(_e110)}", flush=True)
             if os.environ.get("TL_SELFTEST_DEBUG"):
                 import traceback as _tb110; _tb110.print_exc()
             cases.append((name, False))
@@ -22360,13 +22389,32 @@ def run() -> int:
                 '(cần `gws auth login` có quyền GHI Drive)"; exit 3; }')
 
         def _goi(line):
-            """True ⇔ `gws` BỊ GỌI khi chạy đúng dòng đó với drive-push hỏng."""
-            with _tf330.TemporaryDirectory() as _td:
+            """True ⇔ `gws` BỊ GỌI khi chạy đúng dòng đó với drive-push hỏng.
+
+            #565 `M1` — DỌN DẸP KHÔNG ĐƯỢC NẰM TRÊN ĐƯỜNG QUYẾT ĐỊNH. Bản trước dùng
+            `TemporaryDirectory()` làm CONTEXT MANAGER, mà `ignore_cleanup_errors` mặc định
+            `False` ⇒ `__exit__` NÉM. Trên Windows `_bash` là alias WSL (đo: `uname -s` →
+            `Linux`), và WSL GIỮ HANDLE trên cwd sau khi tiến trình con trả về — đo 16/20 =
+            80% thư mục tạm không xoá được, `PermissionError [WinError 32]` trên chính THƯ
+            MỤC. `_t110` nuốt lỗi ấy thành `False`, nên ca ĐỎ vì RIG chứ không vì thứ nó đo.
+            `_goi` được gọi HAI lần mỗi lượt ⇒ P(≥1 lần hỏng) ≈ 0,96; quan sát thực 3 đỏ /
+            1 xanh trên bốn lượt. Trên Linux không có WSL nên ca luôn [OK] — đó là lý do CI
+            chưa bao giờ thấy.
+
+            Chữa bằng KIẾN TRÚC chứ không bằng một `try` bọc thêm: đọc kết quả XONG rồi mới
+            dọn, và dọn là việc BỎ QUA ĐƯỢC. Hình dạng `RIG-QUYET-MAU-CUA-PHEP-DO` đã đếm
+            tới NĂM lần trong kho này, quá ngưỡng "lặp ba lần thì hỏi có nên làm thế không".
+            """
+            _td = _tf330.mkdtemp()
+            try:
                 _sp = os.path.join(_td, "p.sh")
                 with open(_sp, "w", encoding="utf-8", newline="\n") as _f:
                     _f.write("bad(){ :; }\ngws(){ echo CALLED >> goi.txt; }\nTL=false\nZIP=x\n" + line + "\n")
                 _sp330.run([_bash, "p.sh"], cwd=_td, capture_output=True, timeout=60)
+                # ĐỌC TRƯỚC, DỌN SAU. Đảo thứ tự là đọc một thư mục vừa bị xoá.
                 return os.path.exists(os.path.join(_td, "goi.txt"))
+            finally:
+                _sh330.rmtree(_td, ignore_errors=True)
         return okA and okB and okC and _goi(_old) and not _goi(_new[0])
     _t110("r330_deploy_msg_khong_chay_lenh", _c330_deploy_msg_khong_chay_lenh)
 
@@ -22407,6 +22455,70 @@ def run() -> int:
         ok4 = any(ln.strip() == ".codex/" for ln in _gi.splitlines())
         return ok1 and ok2 and ok3 and ok4
     _t110("r331_codex_ngoai_cay_phat_hanh", _c331_codex_ngoai_cay_phat_hanh)
+
+    # ═══ r379 — RIG KHÔNG ĐƯỢC QUYẾT MÀU, và NGOẠI LỆ KHÔNG ĐƯỢC BỊ NUỐT LẶNG ═══
+    def _c379_rig_khong_quyet_mau_va_ngoai_le_khong_bi_nuot_lang():
+        """Packet #565. Hai khuyết tật CÙNG GỐC — rig quyết màu thay vì nội dung được đo.
+
+        VẾ A (`M1`) — `_goi` của `r330` để `TemporaryDirectory.__exit__` quyết màu. Đo trên máy
+          chủ kho 10:53Z 19-09-2026: 16/20 = 80% thư mục tạm không xoá được (`PermissionError
+          [WinError 32]` trên chính THƯ MỤC, vì `_bash` là alias WSL và WSL giữ handle trên cwd).
+          Ca này KHÔNG chạy lại `r330` — nó đo HÌNH DẠNG của `_goi` trên AST: dọn dẹp phải nằm
+          trong `finally` và phải `ignore_errors`, và `return` phải đứng TRƯỚC nó.
+        VẾ B (`M2`/`M4`) — `_t110` phải IN kiểu VÀ thông điệp khi nuốt, KHÔNG điều kiện
+          `TL_SELFTEST_DEBUG`. Đo THẲNG bằng cách gọi `_goi_loi_110` — nó là sản phẩm, không
+          phải bản sao.
+
+        HAI VẾ PHẢI PHÂN BIỆT ĐƯỢC BẰNG ĐẦU VÀO. Một đột biến gỡ vế A không được làm vế B đỏ và
+        ngược lại; nếu không chúng là bộ TƯƠNG ĐƯƠNG và ca này chỉ đang đo MỘT thứ (bài học đo
+        được ở #566 lượt này: `m76` phải đổi đối chứng vì đối chứng cũ đỏ theo).
+        """
+        import ast as _ast379
+        cay = _ast379.parse((_ROOT209 / "scripts" / "tl_selftest.py").read_text(encoding="utf-8"))
+        goi = next((n for n in _ast379.walk(cay)
+                    if isinstance(n, _ast379.FunctionDef) and n.name == "_goi"), None)
+        if goi is None:
+            return False                      # KHÔNG ĐO ĐƯỢC ⇒ ĐỎ, không phải "sạch"
+        # A1 — KHÔNG còn `with TemporaryDirectory()`; `mkdtemp` + `finally`.
+        okA1 = (not any(isinstance(n, _ast379.With) and any(
+                    isinstance(i.context_expr, _ast379.Call)
+                    and getattr(i.context_expr.func, "attr", "") == "TemporaryDirectory"
+                    for i in n.items) for n in _ast379.walk(goi))
+                and any(isinstance(n, _ast379.Call)
+                        and getattr(n.func, "attr", "") == "mkdtemp" for n in _ast379.walk(goi)))
+        thu = [n for n in _ast379.walk(goi) if isinstance(n, _ast379.Try) and n.finalbody]
+        # A1b — dọn nằm trong `finally` VÀ bỏ qua lỗi: `rmtree(..., ignore_errors=True)`.
+        okA1b = any(
+            isinstance(c, _ast379.Call) and getattr(c.func, "attr", "") == "rmtree"
+            and any(k.arg == "ignore_errors" and getattr(k.value, "value", False) is True
+                    for k in c.keywords)
+            for t in thu for n in t.finalbody for c in _ast379.walk(n))
+        # A2 — ĐỌC TRƯỚC, DỌN SAU: `return` phải nằm trong THÂN `try`, không nằm sau `finally`.
+        #      Đây là vế PHÂN BIỆT với A1: một bản vá dọn đúng mà đọc SAU khi dọn vẫn sai.
+        okA2 = any(isinstance(n, _ast379.Return) for t in thu for n in _ast379.walk(t.body[0])
+                   if t.body) or any(isinstance(n, _ast379.Return)
+                                     for t in thu for b in t.body for n in _ast379.walk(b))
+        # B — `_goi_loi_110` mang KIỂU và THÔNG ĐIỆP, và KHAI khi cắt.
+        try:
+            raise RuntimeError("MOC-B-dong-mot\nMOC-B-dong-hai")
+        except RuntimeError as e:
+            goi_ra = _goi_loi_110(e)
+        okB1 = "RuntimeError" in goi_ra and "MOC-B-dong-mot" in goi_ra
+        okB2 = "MOC-B-dong-hai" in goi_ra           # dòng THỨ HAI phải tới nơi
+        # SỐ KÝ TỰ CẮT phải tính từ THỨ ĐƯỢC ĐỊNH DẠNG, không từ thông điệp thô. Bản đầu
+        # của ca này đòi `"37"` — đúng phần đuôi mà quên tiền tố `"ValueError: "` (12 ký tự),
+        # nên số thật là 49 và ca ĐỎ vì CHÍNH NÓ tính sai, không vì sản phẩm sai. Ghi lại vì
+        # đó đúng lớp "lời khai rộng hơn phép đo", chỉ ở quy mô một hằng số.
+        _than379 = f"ValueError: {'x' * (_TRAN_CHAN_DOAN_110 + 37)}"
+        try:
+            raise ValueError("x" * (_TRAN_CHAN_DOAN_110 + 37))
+        except ValueError as e:
+            dai = _goi_loi_110(e)
+        okB3 = "CAT" in dai and str(len(_than379) - _TRAN_CHAN_DOAN_110) in dai
+        okB4 = _goi_loi_110(ValueError("ngan")) == "ValueError: ngan"
+        return okA1 and okA1b and okA2 and okB1 and okB2 and okB3 and okB4
+    _t110("r379_rig_khong_quyet_mau_va_ngoai_le_khong_bi_nuot_lang",
+          _c379_rig_khong_quyet_mau_va_ngoai_le_khong_bi_nuot_lang)
 
     def _c300_dac_ta_khop_ma():
         # Chống trôi prose↔mã: enum trong tài liệu/thẻ phải khớp hằng trong lookup_ops.

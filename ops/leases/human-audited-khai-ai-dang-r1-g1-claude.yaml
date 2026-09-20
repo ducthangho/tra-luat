@@ -44,6 +44,13 @@ granted_on_instruction_nguyen_van: 'Chu kho, phien dieu phoi 19-09-2026 ~14:0xZ.
   issues/566#issuecomment-5741393245: (1) ngoai le ADR-0044 "Cap ngoai le 3 -> 4 tep"; (2) executor
   va muc bao chung "Executor claude + human_audited". Ban chieu day du cua luot nay:
   issues/566#issuecomment-5742660381.'
+da_bi_thay_the: human-audited-khai-ai-dang-r1-g2-claude
+da_bi_thay_the_vi_sao: 'Lease nay HET HAN TU NHIEN luc 2026-09-20T14:30:00Z trong khi viec chua
+  land. Chu kho chi thi cap generation moi (20-09 ~15:1xZ, ban chieu issuecomment-5750675477).
+  Dong nay la ve CON LAI cua bia mo hai chieu ma _kiem_bia_mo doi — KHONG phai mot lan thu hoi
+  som: khi ghi dong nay, ai-dang-giu tren ops/bien_nhan_v2.py va docs/PROTOCOL_DA_PHIEN.md deu
+  da tra rc=0 NGUOI_GIU 0. Ke vi la CUNG packet, khac han lan lach XUYEN PACKET ma chinh lease
+  nay da dung (thay assurance-ho-model-r4-g4-claude cua #551) — bo dem giu nguyen o BAY.'
 recorded_by: claude-session
 recorder_is_dispatcher: false
 

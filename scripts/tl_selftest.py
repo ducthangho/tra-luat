@@ -25121,17 +25121,76 @@ def run() -> int:
         return normal and cat == "killed"
     _t110("r378_l7_claim_khop_tung_byte", _c378_claim_khop_byte)
 
+    # r378 (#574) — phản chứng dựng bằng GIÁN TIẾP THƯ MỤC, KHÔNG bằng symlink TỆP.
+    #
+    # Vì sao đổi: symlink TỆP đòi SeCreateSymbolicLinkPrivilege, nên trên Windows thiếu đặc quyền
+    # `link.symlink_to(outside)` ném `OSError [WinError 1314]`, `_t110` bắt rồi hạ ca xuống False.
+    # Ca ĐỎ vì RIG, không vì mã — đo được trên máy chủ kho 20-09-2026 ở CẢ HAI vế nền `dc85dd0a`
+    # và ứng viên `8c425b1`, nên nó không phải hồi quy của #565. Đó là hình dạng
+    # RIG-QUYET-MAU-CUA-PHEP-DO, đã đếm 5 lần trong kho ⇒ quá ngưỡng ba lần ⇒ phải chữa bằng
+    # KIẾN TRÚC (bỏ hẳn nhu cầu đặc quyền khỏi đường chính), không bằng một `try` bọc thêm.
+    #
+    # Mẫu KHÔNG tự nghĩ ra: lấy nguyên hình dạng của `_c41_fragment_read_error` trong CHÍNH tệp
+    # này — junction (`mklink /J`) trên Windows, directory symlink trên POSIX, cả hai KHÔNG đòi
+    # đặc quyền — cộng đúng bộ tên lỗi của nó. #574 đoán đúng cơ chế ("junction chỉ làm được cho
+    # THƯ MỤC") nhưng kết luận kèm theo ("giả thuyết, CHƯA CHẠY") HẸP HƠN phép đo: mẫu ấy đã tồn
+    # tại và đang xanh. Lời khai lệch phép đo theo chiều HẸP cũng là lệch.
+    #
+    # Chủ kho chốt cách xử `KHÔNG ĐO ĐƯỢC`: **ĐỎ — fail loud như `_c41`**. Dựng không được thì ném
+    # `AssertionError` CÓ TÊN, không tha êm. Giá phải trả, ghi thẳng: trên nền không dựng nổi
+    # reparse point, suite ĐỎ vì MÔI TRƯỜNG — nhưng nó NÓI RA lý do bằng một tên đọc được thay vì
+    # đỏ câm, và `_t110` in `[LOI-VO-CAN?] <ca>: <kiểu lỗi>` ra stdout.
+    def _r378_gian_tiep(link_dir, dich):
+        """Dựng gián tiếp THƯ MỤC trỏ `link_dir` -> `dich`. Không đòi đặc quyền trên cả hai nền."""
+        import os as _os378g
+        import subprocess as _sp378g
+        if _os378g.name == "nt":
+            jr = _sp378g.run(
+                [_os378g.environ.get("COMSPEC", "cmd.exe"), "/d", "/c", "mklink", "/J",
+                 str(link_dir), str(dich)],
+                capture_output=True, text=True, encoding="utf-8", errors="replace")
+            if jr.returncode != 0:
+                raise AssertionError(
+                    f"JUNCTION_CREATE_FAILED:{jr.returncode}:{jr.stderr.strip()}")
+        else:
+            try:
+                link_dir.symlink_to(dich, target_is_directory=True)
+            except OSError as exc:
+                raise AssertionError("DIRECTORY_SYMLINK_CREATE_FAILED") from exc
+
+    def _r378_go_gian_tiep(link_dir):
+        """Junction gỡ bằng `rmdir`, symlink thư mục gỡ bằng `unlink` — hai nền, hai lệnh."""
+        import os as _os378u
+        if _os378u.name == "nt":
+            link_dir.rmdir()
+        else:
+            link_dir.unlink()
+
+    def _r378_kiem_thoat(target, root):
+        """Tiền đề phải CÓ THẬT trước khi đo (M4).
+
+        Thiếu chốt này thì ca có thể XANH vì phản chứng chưa từng tồn tại — đúng bệnh
+        'ca có MẶT khác ca có ĐO' mà `t24` đã trả giá. `_c41` gọi nó là PATH_MISMATCH_NOT_CREATED;
+        giữ nguyên tên để hai chỗ đọc như một."""
+        if target.resolve(strict=True).is_relative_to(root.resolve(strict=True)):
+            raise AssertionError("PATH_MISMATCH_NOT_CREATED")
+
     def _c378_resolve_phai_o_trong_kho():
         import tempfile as _tf378
         with _tf378.TemporaryDirectory() as td:
             root = Path(td) / "repo"
             root.mkdir()
-            outside = Path(td) / "outside.py"
-            outside.write_text("x = 1\n", encoding="utf-8")
-            link = root / "r378_escape.py"
+            outside = Path(td) / "outside"
+            outside.mkdir()
+            (outside / "r378_escape.py").write_text("x = 1\n", encoding="utf-8")
+            link_dir = root / "r378_ngoai"
+            _r378_gian_tiep(link_dir, outside)
             try:
-                link.symlink_to(outside)
-                body = "r378_escape.py:99999999"
+                _r378_kiem_thoat(link_dir / "r378_escape.py", root)
+                # Có dấu `/` nên L7 đi nhánh `root / repo_fname` — tường minh, KHÔNG qua `pyindex`.
+                # Cố ý: `rglob` của pathlib BỎ thư mục là liên kết, nên một chỉ mục quét cây sẽ
+                # không thấy tệp này và ca sẽ xanh vì lý do sai.
+                body = "r378_ngoai/r378_escape.py:99999999"
                 oracle = lambda r: _r378_expect(
                     [(x["claim"], x["reason"]) for x in _r378_l7(r)]
                     == [(body, "PYLOC_FILE_MISSING")])
@@ -25144,8 +25203,64 @@ def run() -> int:
                                      body, oracle, root=root)
                 return normal and cat == "killed"
             finally:
-                link.unlink(missing_ok=True)
+                _r378_go_gian_tiep(link_dir)
     _t110("r378_l7_resolve_phai_o_trong_kho", _c378_resolve_phai_o_trong_kho)
+
+    def _c378_dung_hong_thi_do_co_ten():
+        """A4 — dựng không được thì ĐỎ CÓ TÊN, không nuốt thành `False` câm.
+
+        Ép hỏng bằng một đích ĐÃ TỒN TẠI: POSIX ném `FileExistsError` (một `OSError`), Windows
+        cho `mklink` mã thoát khác 0. Hai nền hai đường, cùng một hợp đồng."""
+        import tempfile as _tf378
+        with _tf378.TemporaryDirectory() as td:
+            dich = Path(td) / "dich"
+            dich.mkdir()
+            ke = Path(td) / "ke"
+            ke.mkdir()
+            try:
+                _r378_gian_tiep(ke, dich)
+            except AssertionError as exc:
+                return str(exc).split(":", 1)[0] in (
+                    "JUNCTION_CREATE_FAILED", "DIRECTORY_SYMLINK_CREATE_FAILED")
+            return False
+    _t110("r378_dung_gian_tiep_hong_thi_do_co_ten", _c378_dung_hong_thi_do_co_ten)
+
+    def _c378_tien_de_khong_thoat_thi_do():
+        """A5 — gián tiếp dựng xong mà `resolve()` KHÔNG thoát khỏi `root` thì phải ném.
+
+        Đây là chốt chống 'ca có MẶT khác ca có ĐO': trỏ liên kết vào một thư mục NẰM TRONG
+        `root` thì phản chứng không tồn tại, và ca đo an ninh sẽ xanh mà chẳng đo gì."""
+        import tempfile as _tf378
+        with _tf378.TemporaryDirectory() as td:
+            root = Path(td) / "repo"
+            root.mkdir()
+            trong = root / "trong"
+            trong.mkdir()
+            (trong / "r378_escape.py").write_text("x = 1\n", encoding="utf-8")
+            link_dir = root / "r378_ngoai"
+            _r378_gian_tiep(link_dir, trong)
+            try:
+                _r378_kiem_thoat(link_dir / "r378_escape.py", root)
+            except AssertionError as exc:
+                return str(exc) == "PATH_MISMATCH_NOT_CREATED"
+            finally:
+                _r378_go_gian_tiep(link_dir)
+            return False
+    _t110("r378_tien_de_khong_thoat_thi_do", _c378_tien_de_khong_thoat_thi_do)
+
+    def _c378_chet_vi_moi_truong_khong_la_giet():
+        """A6 — mutant chết vì MÔI TRƯỜNG phải rơi vào TÍN DỤNG GIẢ, không phải giết thật.
+
+        Bài học #355/#359: phân hạng theo CHUỖI thông điệp thì bất kỳ `except` nào cũng giả mạo
+        được tín hiệu. `_r378_classify` chỉ cấp `killed` cho `_R378SaiKyVong` — một LỚP RIÊNG mà
+        mã triển khai không dùng. Ca này đo đúng điều đó bằng một `AssertionError` mang tên lỗi
+        môi trường của chính packet này."""
+        def _oracle_chet_vi_moi_truong(_r):
+            raise AssertionError("JUNCTION_CREATE_FAILED:1:fixture")
+        cat = _r378_classify(*_R378_REGEX, ".claude/dev/launcher.py:1",
+                             _oracle_chet_vi_moi_truong)
+        return cat == "false_credit:AssertionError"
+    _t110("r378_chet_vi_moi_truong_khong_la_giet", _c378_chet_vi_moi_truong_khong_la_giet)
 
     def _c378_giu_con_tro_cham_gach_cheo():
         body = "./scripts/tl.py:99999999\n../scripts/tl.py:99999999"

@@ -890,7 +890,84 @@ def kiem(lease: dict, tep=None, goc=None) -> tuple:
     return lease, neo
 
 
+def _tien_kiem_mien_dang(lease) -> None:
+    """Tiền kiểm miền cho `kiem_github` (M2) — và PHẠM VI THẬT của nó, đã ĐO.
+
+    Lời khai đầu tiên viết ở đây là *"thiếu trường sẽ thành `KeyError` TRẦN thoát ra khỏi
+    cổng"*. **Phép đo BÁC câu ấy**, và nó bị bác bởi chính đột biến gỡ hàm này ra:
+
+        đột biến bỏ tiền kiểm  ·  thiếu `lease_id`      -> rc=8  (KHÔNG đổi)
+        đột biến bỏ tiền kiểm  ·  thiếu `packet_issue`  -> rc=8  (KHÔNG đổi)
+        đột biến bỏ tiền kiểm  ·  `packet_issue` SAI KIỂU -> rc=9  (ĐỔI, và đổi NGUY HIỂM)
+
+    Lý do hai ca đầu không đổi: `_do_dau_da_dang` vốn NUỐT mọi ngoại lệ không phải
+    `RC_DA_DANG`, nên `KeyError` chết ngay tại đó rồi `kiem()` dựng lại `rc=8` như cũ.
+    Tức hai ca ấy là **BỘ TƯƠNG ĐƯƠNG** — chúng không đo hàm này, chúng đo cái nuốt.
+
+    Thứ hàm này thật sự đóng là ca THỨ BA: `packet_issue: "579"` (chuỗi) vẫn dựng được URL
+    `issues/579/comments` hợp lệ, nên dò thấy dấu và trả `rc=9` — tức một lease SAI KIỂU
+    được cấp đường "đã đăng, bỏ qua" và **né sạch mọi chốt của `kiem()`**. Đó là một lỗ
+    thật, và nó là lý do duy nhất đã đo được để hàm này tồn tại.
+
+    `bool` bị loại tường minh vì `isinstance(True, int)` là `True` trong Python: một
+    `packet_issue: true` lọt phép kiểm kiểu ngây thơ rồi thành `issues/True` trên URL.
+    **KHÔNG ĐO:** chưa có phép đo cho riêng ca `bool`; nó suy từ cùng cơ chế với ca chuỗi.
+
+    Mã thoát giữ `RC_NOI_DUNG` (8) đúng bằng mã `kiem()` vốn trả cho cùng các ca ấy, nên
+    đường KHÔNG-CÓ-DẤU không đổi mã thoát (M3).
+    """
+    if not isinstance(lease, dict):
+        raise Chan(RC_NOI_DUNG, "tiền kiểm: lease không phải ánh xạ")
+    if not isinstance(lease.get("lease_id"), (str, int)) or isinstance(lease.get("lease_id"), bool):
+        raise Chan(RC_NOI_DUNG, "tiền kiểm: thiếu `lease_id` hoặc sai kiểu")
+    so = lease.get("packet_issue")
+    if isinstance(so, bool) or not isinstance(so, int):
+        raise Chan(RC_NOI_DUNG, "tiền kiểm: thiếu `packet_issue` hoặc sai kiểu (đòi số nguyên)")
+
+
+def _do_dau_da_dang(lease: dict) -> None:
+    """M1 — dò dấu "đã đăng" TRƯỚC, không chạm `kiem()`.
+
+    CÓ dấu ⇒ ném `Chan(RC_DA_DANG)` ngay. KHÔNG có dấu, hoặc KHÔNG ĐO ĐƯỢC vì bất cứ lý do
+    nào khác, ⇒ trả về lặng lẽ để `kiem_github` chạy TRỌN chuỗi cũ — chính chuỗi ấy sẽ dựng
+    lại đúng lỗi đó, đúng thứ tự, đúng mã thoát của `origin/master` (M3).
+
+    Vì sao nuốt mọi ngoại lệ KHÁC ở đây mà không phải là fail-open: hàm này KHÔNG phải một
+    cổng, nó là một phép DÒ. Nó chỉ có quyền nói "đã đăng rồi, bỏ qua"; nó không có quyền
+    nói "đạt". Mọi phán quyết từ chối vẫn do chuỗi cũ đưa ra, nguyên vẹn.
+    """
+    _tien_kiem_mien_dang(lease)
+    try:
+        _kiem_comment_da_co(_repo_github(), lease)
+    except Chan as c:
+        if c.ma == RC_DA_DANG:
+            raise
+    except Exception:  # noqa: BLE001 — xem docstring: dò, không phán
+        return
+
+
 def kiem_github(lease: dict, tep=None, goc=None) -> tuple:
+    """Kiểm một lease TRƯỚC khi đăng, gồm hai lớp GitHub mà `kiem()` không chạm.
+
+    THỨ TỰ LÀ NỘI DUNG, không phải chi tiết cài đặt. Bản trước gọi `kiem()` NGAY DÒNG ĐẦU,
+    mà `kiem()` ném `rc=8` khi lease hết hạn (`:885`) — nằm TRƯỚC chốt `rc=9` của
+    `_kiem_comment_da_co`. Hệ quả đo được 20-09-2026: một lease **đã đăng rồi mới hết hạn**
+    không bao giờ tới được đường `rc=9`; nó chết ở `rc=8`, và bước `đăng` của
+    `ops-publish-lease.yml` — vốn CÓ SẴN nhánh `rc=9` đúng — không bao giờ được gọi cho hình
+    dạng ấy. Hai lượt `35519177197` (#568) và `35519243379` (#566) đỏ vì đúng chuyện này,
+    cả hai đỏ SAU KHI lease mới đã đăng xong.
+
+    GIÁ PHẢI TRẢ, khai thẳng chứ không làm nhẹ (M4): với lease ĐÃ ĐĂNG, đường này trả `rc=9`
+    mà **KHÔNG** chạy `kiem()` nữa — nghĩa là các chốt tự cấp (`rc=4`), neo prompt (`rc=6`)
+    và băm không còn soi lease ấy trên đường này. Một tệp lease đã đăng rồi bị SỬA về sau sẽ
+    KHÔNG bị bắt ở đây. Đánh đổi có chủ đích: bản chiếu đã công bố mới là thứ người khác đọc,
+    và không ai được lợi khi một lượt CI đỏ vì một lease đã đăng đúng.
+
+    Giá thứ hai, nhỏ hơn và cũng phải khai: đường KHÔNG-CÓ-DẤU gọi `_kiem_comment_da_co` HAI
+    lần (một lần dò, một lần trong chuỗi cũ). Đổi một lời gọi API lấy việc giữ M3 đúng từng
+    mã thoát. KHÔNG ĐO: chi phí ấy chưa được đo trên một issue nhiều trang comment.
+    """
+    _do_dau_da_dang(lease)
     lease, neo = kiem(lease, tep, goc)
     repo = _repo_github()
     _kiem_loai_so_hieu(repo, lease["packet_issue"])

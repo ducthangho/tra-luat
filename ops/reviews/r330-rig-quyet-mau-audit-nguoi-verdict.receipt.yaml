@@ -36,9 +36,11 @@ assurance_ghi_chu: >-
   chủ kho, đợt #551), claude LÀ executor.
 reviewed_sha: 8c425b1934ec416dc9001da19b5f30eedcebd7d5
 base_sha: dc85dd0a34188238aa6537ce843ff3688e488fd3
-merge_commit: null
-merge_commit_ghi_chu: 'CHƯA merge. Packet chưa có PR — xem `chua_co_pull_request`.'
-target_pull_request: null
+merge_commit: a270aea8d51792c1300b2add580e95df1ff02dd6
+merge_commit_ghi_chu: >-
+  ĐÃ MERGE lúc 04:50Z 20-09-2026 qua PR #573, SAU khi biên nhận này được viết. Khối `land` ở
+  cuối tệp là phần ghi THÊM, viết trên chính nhánh hồ sơ này trước khi nó được land.
+target_pull_request: 573
 review_class_hieu_luc: sensitive
 review_class_ghi_chu: >-
   Lease khai `review_class: sensitive` vì packet chạm `scripts/tl_selftest.py` (legacy harness
@@ -245,13 +247,14 @@ bang_chung_may_tren_exact_head:
     merge", không phải sơ suất. Cổng đã chạy là cổng chạy TẠI CHỖ, liệt kê ở trên.
 
 chua_co_pull_request:
-  trang_thai: 'Chưa mở PR cho `claude/r330-rig-quyet-mau-r1` lẫn cho nhánh bookkeeping này.'
+  trang_thai_luc_viet: 'Chưa mở PR cho `claude/r330-rig-quyet-mau-r1` lẫn cho nhánh hồ sơ này.'
   vi_sao: >-
-    Mở PR sẽ bắn `gate`. Chỉ thị chủ kho đang hiệu lực: "Không chạy CI, full CI cho đến khi
-    merge". Phiên agent KHÔNG tự mở PR dưới chỉ thị ấy.
-  he_qua_phai_khai: >-
-    Không có `run_id` nào để neo. Mọi số cổng trong biên nhận này là số ĐO TẠI CHỖ trên container
-    agent (Linux) và trên máy chủ kho (Windows). Không được đọc thành "CI đã xanh".
+    Mở PR sẽ bắn `gate`. Chỉ thị chủ kho khi ấy: "Không chạy CI, full CI cho đến khi merge".
+    Phiên agent KHÔNG tự mở PR dưới chỉ thị ấy.
+  DA_THAY_DOI: >-
+    Chủ kho ra chỉ thị "Merge cả hai nhánh đi" lúc ~04:2xZ 20-09-2026 ⇒ mở PR là ĐÚNG lúc ấy,
+    vì "cho đến khi merge" chính là mốc này. PR #573 mở 04:32Z, merge 04:50Z. Giữ mục này thay
+    vì xoá, để người đọc sau thấy điều kiện đã đổi chứ không tưởng biên nhận tự mâu thuẫn.
 
 verdict_usage_caveats:
 - id: khong-doc-thanh-cross-provider
@@ -310,3 +313,143 @@ receipt_khong_khai:
 nguon_co_tham_quyen: >-
   COMMENT trên GitHub (`nguon_co_tham_quyen_url`) — ngược chiều với verdict của một mô hình.
   `verdict_path` + `verdict_sha256` chỉ là BẢN CHIẾU để tra ngoại tuyến.
+
+# ---------------------------------------------------------------------------
+# LAND — §13.1. Viết SAU khi chủ kho ra chỉ thị merge và SAU khi CI hậu merge xong.
+# Mọi số dưới đây đo trong chính phiên này, 04:50Z–05:2xZ 20-09-2026.
+# ---------------------------------------------------------------------------
+land:
+  pull_request: 573
+  uy_quyen_merge: >-
+    Chủ kho ducthangho, phiên điều phối 20-09-2026, nguyên văn: "Merge cả hai nhánh đi".
+    Uỷ quyền đã ghi cho head 9950177ab3a96de57b9aa0616e251ade7bad300b TRƯỚC khi merge, và
+    lời gọi merge neo `expectedHeadSha` đúng SHA ấy — không merge được một head khác.
+  merged_by: ducthangho
+  merged_at_utc: '2026-09-20T04:50:2xZ'
+  phuong_thuc: merge_commit
+  merge_commit: a270aea8d51792c1300b2add580e95df1ff02dd6
+  merge_parents:
+    - e1324285eea1b7bf2719a301332fdaa3a94c17f9   # target trước
+    - 9950177ab3a96de57b9aa0616e251ade7bad300b   # candidate
+  merge_tree: 81608851cd59bc6bf95e21294bd70554c21b59bb
+  merge_tree_VI_SAO_DANG_KE: >-
+    Băm cây này TRÙNG băm cây mà phiên đã chạy trọn bộ cổng TẠI CHỖ trước khi mở PR. Nghĩa là
+    `selftest 1711/1711`, `release-verify --strict 180==180`, `lease_publish_test 166/166` là
+    số đo trên CHÍNH thứ nay nằm trên master, không phải trên một cây gần giống. Đây là chốt
+    chống đúng lớp lỗi "đo một cây, đẩy một cây khác".
+  quan_he_da_xac_minh:
+    candidate_la_to_tien_cua_merge: true
+    target_truoc_la_to_tien_cua_merge: true
+    master_hien_tai_bang_merge_commit: true
+
+  head_da_doi_TRUOC_merge:
+    head_cu: 8c425b1934ec416dc9001da19b5f30eedcebd7d5
+    head_moi: 9950177ab3a96de57b9aa0616e251ade7bad300b
+    vi_sao: >-
+      Cổng `thu-hoi` ĐỎ trên head cũ, `CHAN [12]: KHÔNG_XÁC_ĐỊNH: S e1324285eea1 không phải
+      tổ tiên của H 8c425b1934ec`. Nhánh rẽ từ `dc85dd0a`, master đã đi 8 commit ⇒ quan hệ tổ
+      tiên đứt. Chữa bằng MERGE `origin/master` vào nhánh, không bằng re-run — và re-run cũng
+      không được phép (`manual_ci_budget: 0`).
+    xac_minh_sau_khi_chua: '`merge-base --is-ancestor origin/master HEAD` rc=0'
+    khong_phai_do_san: >-
+      ĐO được là của PR NÀY, không phải nền: cùng cổng ấy trả `success` ngay ở lượt kế tiếp sau
+      khi merge, mà không ai đụng vào mã sản phẩm.
+
+  full_ref_fence:
+    do_truoc_utc: '2026-09-20T04:3xZ (trước khi mở PR #573)'
+    so_ref_truoc: 968
+    sha256_truoc: 64b8f08e8c485a5612e18033f6ec97406715fd9a41c194e4c711ec1caf7c4953
+    do_sau_utc: '2026-09-20T04:5xZ (ngay sau merge, TRƯỚC mọi thao tác ghi khác của phiên)'
+    so_ref_sau: 969
+    sha256_sau: e0f8984c63077c0e0acd3fec85476d8eb0f021004e927da734f468a284ca9736
+    ref_doi: 4
+    ref_doi_chi_tiet:
+      - 'HEAD: e1324285eea1 -> a270aea8d517'
+      - 'refs/heads/master: e1324285eea1 -> a270aea8d517'
+      - 'refs/heads/claude/r330-rig-quyet-mau-r1: 8c425b1934ec -> 9950177ab3a9  (merge master vào nhánh)'
+      - 'refs/pull/573/head: VẮNG -> 9950177ab3a9  (PR mới mở)'
+    ket_luan: 'Đúng 4 ref, mỗi ref giải thích được. Không ref lạ, không ghi ngoài dự kiến.'
+
+  ci_hau_merge:
+    run_id: 35490150852
+    head_sha: a270aea8d51792c1300b2add580e95df1ff02dd6
+    bat_dau_utc: '2026-09-20T04:50:31Z'
+    ket_thuc_utc: '2026-09-20T05:11:35Z'
+    ket_luan: success
+    so_job: 4
+    job:
+      - {ten: 'chuan-bi', nen: ubuntu-latest, ket_qua: success}
+      - {ten: 'gate (ubuntu-latest)', nen: ubuntu-latest, ket_qua: success}
+      - {ten: 'gate-registry (ubuntu-latest)', nen: ubuntu-latest, ket_qua: success}
+      - {ten: 'gate-packet-loop (ubuntu-latest)', nen: ubuntu-latest, ket_qua: success}
+    buoc_dang_ke:
+      buoc_36_release_verify_strict_lane_LAND: >-
+        success — lane DUY NHẤT bắt được lệch manifest. Lane PR KHÔNG bắt được: nó có
+        `if: github.ref == refs/heads/master`, còn lane WORKER sinh manifest TẠM từ chính cây
+        nên HẤP THỤ mọi thay đổi nội dung. Đó là lý do phiên chạy đúng lệnh này TẠI CHỖ trước
+        khi merge, thay vì tin lane PR.
+      buoc_27_tl_selftest_co_bang_chung: 'success'
+      buoc_37_lane_WORKER: 'skipped — đúng, vì đây là lượt master'
+      buoc_11_PR_head_contains_required_EOL_base: >-
+        skipped — ĐÚNG như phải thế trên lượt master, vì bước ấy có
+        `if: github.event_name == pull_request`. Tiêu chí "không bước nào skipped" CHỈ áp cho
+        lượt PR; bê nguyên sang lượt master là tự báo động giả.
+      buoc_21_gate_lifecycle_nen_khong_cgroup: 'skipped — nền CÓ cgroup, đúng nhánh loại trừ'
+    windows: KHONG_CHAY
+    windows_ghi_chu: >-
+      4/4 job đều `ubuntu-latest`, 0 job windows — đúng như packet #548 đã đổi cho lượt master.
+      Không phát sinh phút Windows nào. Đây là CHỌN KHÔNG ĐO, không phải "đã đo và xanh".
+
+  nen_do_san_da_loai_tru:
+    quan_sat: >-
+      Lượt master NGAY TRƯỚC (`e1324285`, merge PR #554 của packet #541) có
+      `conclusion: failure` — run 35458025667, attempt 2, job `gate-registry`.
+    nguyen_nhan_do_duoc: >-
+      "CASE T6: ĐỎ — OSError: [Errno 39] Directory not empty: '/tmp/.../work/.git'" ⇒ "7/8" ⇒
+      "CI_DANG_KY ops/nhanh_don_duoc_test.py: ĐỎ rc=1". Tệp ấy thuộc packet #568 (PR #572,
+      phiên khác), KHÔNG thuộc write set #565.
+    ket_qua_luot_nay: >-
+      `gate-registry` trên a270aea = success. Ca T6 KHÔNG tái diễn. Nên lượt này không phải
+      "xanh nhờ may": nó xanh ở đúng job đã đỏ, mà #565 không đụng tệp gây đỏ.
+    vi_sao_ghi_vao_day: >-
+      Ghi để người đọc sau KHÔNG đọc "master từng đỏ" thành "bản vá này làm đỏ". Và để biết ca
+      T6 là một chập chờn CHƯA có nguyên nhân — nó thuộc #568, không thuộc packet này.
+
+  trang_thai_theo_10_2_4:
+    merged: true
+    landed: true
+    landed_can_cu: >-
+      Kết quả đã vào canonical ở đúng SHA được duyệt (9950177, parent thứ hai của a270aea),
+      CI hậu merge 4/4 xanh gồm `release-verify strict (lane LAND)`, ref fence chỉ đổi 4 ref
+      giải thích được, và cây merge trùng băm cây đã chạy cổng.
+    packet_complete: false
+    packet_complete_vi_sao_KHONG: >-
+      §10.2.4 đòi "không còn open work/lease". Lease `r330-rig-quyet-mau-r1-g1-claude` VẪN CÒN
+      HIỆU LỰC tới 2026-09-20T16:02:00Z: `ai-dang-giu scripts/tl_selftest.py` đo lúc 05:0xZ trả
+      `rc=11 · NGƯỜI_GIỮ 1`. Xem `lease_chua_thu_hoi_duoc`.
+
+  lease_chua_thu_hoi_duoc:
+    lease_id: r330-rig-quyet-mau-r1-g1-claude
+    het_han_utc: '2026-09-20T16:02:00Z'
+    do_luc_utc: '2026-09-20T05:0xZ'
+    ai_dang_giu: 'rc=11 · NGƯỜI_GIỮ 1 trên scripts/tl_selftest.py'
+    vi_sao_khong_thu_hoi_duoc: >-
+      Đây là nợ `AG-T0-01B-thu-hoi-lease-chua-co-duong` hiện ra thành một ca SỐNG, lần thứ hai
+      đo được trong kho (lần trước: packet #548). Hai đường tồn tại, không đường nào dùng được
+      trong quyền của phiên này:
+      (a) BIA MỘ HAI CHIỀU — cơ chế KẾ TỤC revision, và `_kiem_bia_mo` không đòi cùng `packet_id`
+      nên VẪN chạy được xuyên packet; nhưng đó là một KHE, và đợt này đã lách nó BẢY lần. Chủ kho
+      được hỏi và đã CHỌN KHÔNG đi đường ấy.
+      (b) SỔ THU HỒI `ops/thu-hoi/` (wp488 / ADR-0047) — đường chữa THẬT, và cửa đã mở vì
+      `ops/lease_publish.py` nay NGƯỜI_GIỮ 0 sau khi #541 land. Nhưng nó bị chặn ở chỗ CHỈ CHỦ
+      KHO mở được: `ops/lease_publish.py:937` `PROFILE_ADAPTER_DA_DUYET = frozenset()`, chú thích
+      ngay tại đó khai "Rỗng có chủ đích ở A0: … cho tới khi chủ kho duyệt một manifest
+      (ADR-0047 lớp 2)", và ADR-0047 lớp 2 CẤM executor tự đo rồi tự đăng ký
+      ("executor không tự duyệt"). Kèm `DESCRIPTOR_Q13_SHA256 = None` và `BIA_MO_LICH_SU = ()`
+      cùng dạng rỗng-có-chủ-đích. ADR-0047 trạng thái `Proposed`.
+    ket_luan: >-
+      KHÔNG CÓ ĐƯỜNG THU HỒI SỚM trong quyền của phiên này. Lease tự hết hiệu lực lúc
+      2026-09-20T16:02:00Z.
+    he_qua: >-
+      Packet kế tiếp chạm `scripts/tl_selftest.py` — cụ thể là nợ `r378` vừa mở (Issue #574) —
+      KHÔNG cấp lease được trước mốc ấy, trừ khi chủ kho chọn một trong hai đường trên.

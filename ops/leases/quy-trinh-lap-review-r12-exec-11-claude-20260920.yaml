@@ -1,0 +1,142 @@
+# LEASE — QUY-TRINH-LAP-REVIEW-VA-DIEU-KIEN-DUNG revision 12 / generation 11
+# Executor claude, reviewer HUMAN (chu kho) => assurance human_audited.
+# Ghi HO theo chi thi chu kho; phien claude KHONG tu cap lease cho minh.
+# THAY THE gen 10: §3.2 — r12 doi objective, acceptance, write set VA executor.
+
+schema_version: 2
+event: executor_lease_granted
+
+packet_issue: 523
+mission_issue: 499
+granted_by: ducthangho
+granted_on_instruction: https://github.com/ducthangho/tra-luat/pull/529#issuecomment-5751125101
+granted_on_instruction_nguyen_van: >-
+  'Review Rescue Checkpoint theo §12 — di duong (a), tach slice on. Pham vi: land tron 201 dong cua
+  .claude/skills/cross-review/SKILL.md va .claude/skills/work-packet/SKILL.md. KHONG mang theo ho so
+  review cua packet. [...] Cap executor lease cho phien claude, write set DUNG hai tep skill tren,
+  han <gio UTC>. Assurance: human_audited — toi tu doc diff va ky. Phien claude ghi ho lease, neo vao
+  comment nay.'
+granted_on_instruction_da_doc_nguoc: >-
+  Doc lai comment qua API sau khi chu kho bao da dang, thay vi tin loi bao. author_association=OWNER,
+  created_at=2026-09-20T16:36:19Z, id=5751125101.
+han_khong_co_trong_chi_thi: >-
+  Comment giu NGUYEN placeholder 'han <gio UTC>' — chu kho dan lai ban nhap ke ca cho trong. Phien
+  nay KHONG tu dat han (dat han la tu dinh pham vi tham quyen cua chinh minh); da HOI va chu kho chot
+  12h => 2026-09-21T05:00:00Z. Ghi ra day de nguoi doc sau khong tuong con so nay suy ra tu comment.
+recorded_by: claude-session
+recorder_is_dispatcher: false
+
+leased_at_utc: 2026-09-20T17:00:00Z
+lease_expires_at_utc: 2026-09-21T05:00:00Z
+
+packet_id: QUY-TRINH-LAP-REVIEW-VA-DIEU-KIEN-DUNG
+revision: 12
+generation: 11
+lease_id: quy-trinh-lap-review-r12-exec-11-claude-20260920
+role: executor
+provider: anthropic_claude
+executor: claude
+reviewer_provider: human
+environment: cloud
+risk: sensitive
+review_class: sensitive
+assurance_target: human_audited
+effective_review_class: sensitive
+effective_review_class_ai_tinh: >-
+  Truong PHAI SINH theo §3.2 — khong phai lua chon cua executor. Cong `lease_publish check` TU TINH
+  lop tu role/write_set va DOI lease khai bang gia tri no tinh duoc; o day cong tra 'sensitive'.
+  Ghi lai dung gia tri cong tinh, khong ha lop (executor khong duoc ha lop theo §8).
+access: read-write
+
+spec_path: ops/specs/QUY-TRINH-LAP-REVIEW-VA-DIEU-KIEN-DUNG-r12.md
+spec_sha256: 9fc90435ad7c8b4ae93d19f8b163c5cffca9168e3df6043d8fe54ab880fe8059
+spec_hash: 9fc90435ad7c8b4ae93d19f8b163c5cffca9168e3df6043d8fe54ab880fe8059
+spec_hash_do_tu_dau: >-
+  Do TU BLOB: `git show claude/spec-quy-trinh-r12-20260920:ops/specs/…-r12.md | sha256sum` => 11580 B.
+  KHONG lay bam cua tep lease nay lam spec_hash, va KHONG bia mot bam de lap o trong.
+
+base_sha: 395bc7b1be6c275d8de697f8d8541bb36a290c9e
+start_from_sha: 395bc7b1be6c275d8de697f8d8541bb36a290c9e
+immutable_acceptance_baseline: 395bc7b1be6c275d8de697f8d8541bb36a290c9e
+reviewed_sha_required: 395bc7b1be6c275d8de697f8d8541bb36a290c9e
+reviewed_sha_required_nghia: >-
+  Luc CAP lease, head ung vien chua ton tai, nen truong nay dat bang base_sha theo tien le cua kho
+  (vd lease t125-do-r1-g1-antigravity). No KHONG phai loi khai rang da co ai review SHA ay. Khi PR
+  co head cuoi, chu kho ky tren DUNG head do va bien nhan human_audited neo vao head do; neu head
+  khac base_sha thi bien nhan phai ghi head that, khong duoc chep lai con so o day.
+master_da_troi_trong_luc_soan: >-
+  Nen cong cua r12 do luc origin/master = 700ca8c. Giua luc soan spec va luc cap lease, master tien
+  sang 395bc7b1 (PR #571, ops/bash_nen.py). Do lai: KHONG cham hai tep skill (diff rong) nen phan
+  tich hop nhat ba chieu van dung; NHUNG co cham ops/lease_publish_test.py nen nen cua cong ay phai
+  DO LAI truoc khi so delta. Ghi ra thay vi de im lang — day dung la lop "so hang troi ma quan he
+  van dung" ma kho da tra gia.
+base_sha_ghi_chu: >-
+  origin/master luc cap lease, viet day du o truong reviewed_sha_required khi mo PR. Khong cau nao
+  trong tep nay trao vai tro VAN HANH cho bat ky co che nao r10 da go — M17/M17' da GO han o r10 va
+  chi duoc nhac trong phan KE LAI lich su.
+
+write_set:
+  - .claude/skills/cross-review/SKILL.md
+  - .claude/skills/work-packet/SKILL.md
+
+write_set_bo_gi_so_gen_10: >-
+  BO prefix `ops/reviews/` cua r3-r11. Checkpoint noi ro 'KHONG mang theo ho so review cua packet'.
+  He qua phai noi truoc: bien nhan human_audited cua luot nay nam o ops/reviews/, tuc NGOAI write set
+  r12 — no di bang mot PR bookkeeping rieng (tien le #567 cho #551). Dung doc thanh 'slice thieu bien nhan'.
+
+write_set_da_do_truoc_khi_cap: >-
+  Do luc 2026-09-20T16:47:35Z, NGAY TRUOC khi cap (mo neo trong lease het han nhanh).
+  Chot hai nguon ref TRUOC moi phep quet: `ls-remote --heads` 485 ↔ `for-each-ref` 485,
+  `comm -23` = 0 VA `comm -13` = 0, `is-shallow=false` => KHONG MU.
+  `ai-dang-giu`, rc doc TRUC TIEP tung tien trinh (khong qua pipe):
+    .claude/skills/cross-review/SKILL.md   rc=0  NGUOI_GIU 0
+    .claude/skills/work-packet/SKILL.md    rc=0  NGUOI_GIU 0
+  Ca hai duong RANH. Moi lease cu cua packet nay da het han 2026-09-14T12:00:00Z (qua 6 ngay).
+
+khong_khai_bia_mo: >-
+  KHONG khai `thay_the_cho` / `da_bi_thay_the`. `_bia_mo_doi_xung` doi dau HAI CHIEU, ma lease gen 10
+  nam tren nhanh ops/cap-lease-522-523 va phien nay KHONG duoc sua hien vat da dang. Mot bia mo MOT
+  CHIEU lam `ai-dang-giu` tra rc=12 KHONG_XAC_DINH — tuc lam MU dung duong minh dang can do.
+  Gen 10 mat hieu luc theo §3.2 (doi executor/write set/acceptance), va no da HET HAN — khong can
+  bia mo de tat no.
+khong_chep_posted_comment_id: >-
+  KHONG chep `posted_comment_id` cua lease cu. Truong ay thuoc ve lan dang CUA NO.
+
+assurance_yeu_hon_o_cho_nao: >-
+  human_audited KHONG phai mot lan ha nguong — §8 cho class sensitive HAI duong ngang hang, va
+  cross_approved do duoc la KHONG DAT DUOC (codex het han token access_token=-24.9h; agy khong co CLI
+  trong container). NHUNG no yeu hon r6-r11 theo mot cach phai khai: M16 cua r6 dat 'reviewer dung
+  PHEP DO' lam tru, va chin luot codex da dung thuoc that. Mot luot audit cua NGUOI khong dung thuoc —
+  no xac nhan 'toi da doc va chap nhan'. Chu ky ay KHONG thay duoc phep do TIM.
+
+dieu_kien_dung:
+- 'S1 — can duong dan thu BA ngoai hai tep skill. DUNG, xin revision.'
+- 'S2 — tong dong them cua HAI tep san pham, do tu base_sha toi head cuoi, > 300 (tran ADR-0044 cho
+   sensitive). KHONG cong hai khoang.'
+- 'S3 — muon dung docs/PROTOCOL_DA_PHIEN.md hay .claude/hooks/**.'
+- 'S4 — muon va packet_loop.py / doctrine-scan: KHONG trong write set; no rieng #583.'
+- 'S5 — muon sua VERDICT.md hoac bien nhan cua mot luot da giao (neo theo bam).'
+- 'S6 — muon doi dinh nghia P1/P2/P3 hay doi slug cua mot lop cu (slug la khoa dem).'
+- 'S7 — hop nhat ba chieu lam MAT mot muc cua master hoac cua #529 ma khong co cho dat lai. DUNG va
+   bao chu kho; KHONG bo bot cho het xung dot.'
+- 'S8 DA RUT tu r7 — so de trong co chu dich, KHONG danh so lai.'
+- 'S12 phay — chuan bi dong bang ma phep quet "con sot luat cu" chi khop theo TEN, hoac ha mot luat
+   xuong thanh "bao cao de nguoi doc tu phan". Do la phep do chinh ta, khong phai phep do.'
+- 'S13 (moi o r12) — muon va BAT KY lop nao trong bon lop mo de lay approve. Do la LACH checkpoint:
+   chung da thanh no co Issue (#582, #583), va va le o day lam slice phinh dung thu checkpoint sinh
+   ra de cat. DUNG.'
+- 'S14 (moi o r12) — chu kho KHONG doc duoc tron diff hai tep truoc khi ky, hoac muon ky dua tren tom
+   tat cua executor. human_audited §8 doi nguoi audit TU DOC spec/diff; mot chu ky tren ban tom tat
+   la KHONG DO DUOC, khong phai approve.'
+
+no_chuyen_ra_ngoai_slice:
+- 'dac-ta-r5-giu-luat-cu-trai-tieu-chi-moi  -> #582 (LEASE:130)'
+- 'bien-nhan-thieu-so-ci-da-chi             -> #582 (ledger + receipt5)'
+- 'bien-nhan-luot-8-lan-du-lieu-luot-6      -> #582 (receipt8)'
+- 'phep-do-doctrine-khong-du-rang           -> #583 (bo quet, packet rieng theo S4)'
+
+chua_do_duoc:
+- 'Tap lop mo lay tu findings_ids cua LUOT 9. Neu mot finding luot 1-8 nham vao NOI DUNG SKILL tung
+   bi bo im lang thay vi va, no khong hien trong tap ay va lease nay khong thay.'
+- 'Hop nhat ba chieu co the lam mat noi dung theo cach cong khong thay: doctrine-scan va
+   doc-claims-check khong do "du muc hay chua". A2/A3 cua r12 la KY LUAT DOC, khong phai cong.'

@@ -25,6 +25,12 @@ generation: 3
 lease_id: wp570-bash-nen-r3-g3-claude
 granted_by: ducthangho
 
+# BIA MO CHIEU NGUOC — dat 20-09-2026T16:1xZ, trong CUNG lan day voi lease ke nhiem.
+da_bi_thay_the: wp570-bash-nen-r4-g4-claude
+da_bi_thay_the_vi_sao: 'r4 mo PHAM VI QUET cua cong tu `ops/**` ra toan cay (§3.2: doi
+  acceptance => revision moi). g3 KHONG lam sai — no dong dung thu r3 mo ta; thu chi ra cho
+  hep la mot luot cross-review do duoc tren 05ec2eb5.'
+
 thay_the_cho: wp570-bash-nen-r2-g2-claude
 thay_the_cho_vi_sao: 'Dau HAI CHIEU. g2 mang dong `da_bi_thay_the: wp570-bash-nen-r3-g3-claude`
   trong CUNG lan day nay; `_kiem_bia_mo` cuong che chieu ay va bac rc=8 neu thieu. Cong doc tu REF

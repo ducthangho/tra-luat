@@ -7,7 +7,10 @@
 #   - uy_quyen / authorized_*  : cai duoc cap phep
 #   - merge_* / hau_merge      : cai da thuc su xay ra, do duoc
 #
-# DOC MUC `hau_merge_gate` VA `KHONG_DUOC_GOI_LA_LANDED` TRUOC MOI THU KHAC.
+# DOC MUC `LANDED`, `dieu_kien_gate` VA `hau_merge_gate` TRUOC MOI THU KHAC.
+#
+# PACKET NAY DA LANDED (2026-09-20T07:5xZ, duong (b)) — KEM MOT CONG DO DA DINH DANH.
+# Vet ay duoc KHAI, khong xoa. Xem LANDED va LANDED_KHONG_XAC_LAP.
 
 schema_version: 1
 mission_id: KHONG-CO-MISSION
@@ -139,7 +142,24 @@ hau_merge_gate:
   CHUA_DUOC_GHI_LA_XANH: 'Ba tren bon cong xanh. Ba KHONG phai bon. Khong duoc lam tron len
     thanh "dat" — dung khuyet tat #401 (cong lam tron LEN trang thai thu ba).'
 
-KHONG_DUOC_GOI_LA_LANDED: >-
+LANDED: >-
+  CO. Packet #541 LANDED, chot 2026-09-20T07:5xZ theo duong (b) chu kho chon.
+  Vet di kem duoc KHAI TUONG MINH chu khong xoa: mot cong DO tren chinh merge commit
+  e1324285 (gate-registry, CASE T6), da dinh danh, da co cho xu ly (#568).
+  Xac minh lai luc chot: ca 2a67968b lan e1324285 DEU la to tien cua origin/master (a062a43b).
+
+LANDED_KHONG_XAC_LAP:
+  - 'KHONG hoi to. 0ea95de va 2a67968b ra doi khi lease g2 — theo §3.2 — da mat hieu luc vi
+     doi executor. Khong land nao hop-le-hoa NGUOC khoang ay.'
+  - 'KHONG tuyen CASE T6 da chua. No thuoc #568 va van mo. PR #572 co gate-registry xanh,
+     nhung diff cua no CHUA cham T6 — lan xanh ay khong chung minh gi.'
+  - 'KHONG dua tep nay len master. No con o PR #576 (draft, CI xanh sach). Land authority cap
+     quyen HAU MERGE, KHONG cap quyen merge — #576 cho chu kho.'
+  - 'KHONG dong cac packet khac: t35-t40 -> #570 | t125 -> #562 | T6 -> #568 |
+     t131, t132 -> CHUA CO CHO.'
+
+# Giu nguyen ban ghi CU de nguoi doc sau thay no da tung noi gi, va vi sao doi.
+KHONG_DUOC_GOI_LA_LANDED_ban_truoc_khi_chot: >-
   PROTOCOL:1079 nguyen van: "Het han hoac thieu quyen cho buoc con lai thi dung buoc ay va
   handoff; khong goi `landed`/Packet complete/Mission complete khi thieu bang chung tuong ung."
   `gate-registry` DO tren master sau merge. Du co bang chung manh rang no khong den tu ban va
@@ -197,7 +217,14 @@ dieu_kien_gate:
     a: '`gate-registry` co mot phep do ON DINH tren merge commit hoac hau due truc tiep cua no.'
     b: 'Chu kho khai tuong minh rang land nay di kem mot cong do DA DUOC DINH DANH va DA CO CHO
        xu ly (#568), va chap nhan vet ay trong ho so.'
-  chua_chon: 'Chu kho CHUA chon (a) hay (b) luc cap. Cho toi khi chon, `landed` chua duoc goi.'
+  DA_CHON: 'Duong (b), 2026-09-20T07:5xZ. Chi thi chu kho nguyen van: "chon (b), dang
+    bookkeeping va dong #541". Neo: https://github.com/ducthangho/tra-luat/issues/541#issuecomment-5748487871'
+  ba_dieu_kien_cua_b_deu_thoa_DO_DUOC:
+    cong_do_DA_DINH_DANH: 'gate-registry · CASE T6 · OSError [Errno 39] Directory not empty,
+      nem tu td.cleanup() o ops/nhanh_don_duoc_test.py:343'
+    DA_CO_CHO: '#568, lease chan-doan-tin-dung-gia-r1-g1-claude, phien tiep nhan dang chay,
+      PR #572 mo'
+    DA_GHI_VAO_HO_SO: 'chinh tep nay — muc hau_merge_gate va CAP_NHAT_1'
 
 # ─────────────────────── CAC KHOAN CON MO SAU LAND ───────────────────────
 con_mo:

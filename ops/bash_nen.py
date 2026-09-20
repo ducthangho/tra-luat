@@ -225,7 +225,16 @@ def tim_bash(dung_cache=True, tat_ca=False, **ep):
     với đường dừng-sớm thì Git Bash đạt trước nên System32 chưa từng được chạm — tức tiêu
     chí ấy đòi một thứ CLI không sinh ra được. Đây là chỗ sinh ra nó.
     """
-    khoa = json.dumps([sorted(ep.items()), bool(tat_ca)], default=str)
+    # KHOA CACHE PHAI GOM MOI TRUONG (#570 r4, N19). `ung_vien()` doc `CONG_CU_BASH`,
+    # `PATH`, `SystemRoot`, `ProgramFiles` tu `os.environ` khi tham so la None — nen mot
+    # khoa chi gom `ep` se tra ket qua KHONG khop moi truong hien tai, IM LANG.
+    # ĐO ĐƯỢC (cross-review 05ec2eb5, executor do lai): goi `tim_bash()`; dat `CONG_CU_BASH`
+    # sang mot bash THAT o duong khac; goi lai => van tra duong CU. Khoa cu: `[[], false]`.
+    # Nut ghi de ma module TU KHAI la co, bi chinh cache nuot.
+    _ENV_ANH_HUONG = ("CONG_CU_BASH", "PATH", "SystemRoot", "ProgramFiles")
+    moi_truong = {k: os.environ.get(k) for k in _ENV_ANH_HUONG}
+    khoa = json.dumps([sorted(ep.items()), bool(tat_ca), sorted(moi_truong.items())],
+                      default=str)
     if dung_cache and khoa in _CACHE:
         return _CACHE[khoa]
     chan_doan = []
@@ -254,29 +263,66 @@ def tim_bash(dung_cache=True, tat_ca=False, **ep):
 # cả lớp báo động giả ấy chết theo KIẾN TRÚC chứ không theo một bản vá regex.
 _TEN_WHICH = ("which",)
 _TEN_SPAWN = ("run", "Popen", "call", "check_output", "check_call")
+# CACH VIET Windows cua dung khuyet tat Windows. Bo sot no la bo sot dung cho can chan —
+# va `ung_vien()` ngay trong tep nay cung dung `("bash.exe", "bash")`.
+_HANG_BASH = ("bash", "bash.exe")
+# Doi so co the den bang TEN thay vi VI TRI. `shutil.which(cmd="bash")` va
+# `subprocess.run(args=["bash", ...])` deu hop le va deu lot qua ban chi doc `args[0]`.
+_KHOA_WHICH = ("cmd",)
+_KHOA_SPAWN = ("args",)
 
 
 def _la_hang_bash(nut):
     import ast as _ast
-    return isinstance(nut, _ast.Constant) and nut.value == "bash"
+    return isinstance(nut, _ast.Constant) and nut.value in _HANG_BASH
+
+
+def _doi_so_dau(nut, khoa):
+    """Doi so DAU TIEN cua mot lenh goi, du no den bang VI TRI hay bang TEN."""
+    if nut.args:
+        return nut.args[0]
+    for kw in nut.keywords:
+        if kw.arg in khoa:
+            return kw.value
+    return None
 
 
 def _loi_goi_tran(than: str):
-    """Số dòng của mọi lời gọi phân giải `bash` theo TÊN. Ném `SyntaxError` nếu không
-    phân tích được — người gọi biến nó thành KHÔNG ĐO ĐƯỢC, KHÔNG bỏ qua tệp."""
+    """Số dòng các lời gọi phân giải `bash` theo TÊN mà hàm này PHỦ. Ném `SyntaxError`
+    nếu không phân tích được — người gọi biến nó thành KHÔNG ĐO ĐƯỢC, KHÔNG bỏ qua tệp.
+
+    PHẠM VI, KHAI CHO ĐÚNG — bản trước viết *"mọi lời gọi"* và đó là một **lời khai rộng
+    hơn phép đo**, đúng lớp lỗi kho đã đặt tên. Cross-review trên `05ec2eb5` cho ăn 12 hình
+    dạng và đo được **BẮT 3 / LỌT 9**; phiên executor đo lại và ra **y hệt**.
+
+    PHỦ (mỗi hình dạng có một khẳng định riêng trong `t33`):
+      · `which("bash")` · `which("bash.exe")` · `which(cmd="bash")`
+      · `run`/`Popen`/`call`/`check_output`/`check_call` với phần tử đầu là hằng `bash`,
+        dù danh sách đến bằng VỊ TRÍ hay bằng `args=`.
+
+    **KHÔNG PHỦ**, và khai thẳng ra đây thay vì để người đọc tưởng đã kín:
+      · `shell=True` với chuỗi lệnh (`run("bash -c ...", shell=True)`);
+      · `os.system` / `os.execvp` / `os.spawn*`;
+      · tên `bash` đi qua BIẾN TRUNG GIAN, nối chuỗi, hay một danh sách dựng nơi khác.
+    Ba nhóm ấy cần phân tích luồng dữ liệu, không phải khớp cây cú pháp. Chúng là **nợ có
+    tên**, không phải chỗ đã kín. Ai mở rộng thì thêm hình dạng vào `t33` TRƯỚC.
+    """
     import ast
     cay = ast.parse(than)
     dong = set()
     for nut in ast.walk(cay):
-        if not isinstance(nut, ast.Call) or not nut.args:
+        if not isinstance(nut, ast.Call):
             continue
         ten = (nut.func.attr if isinstance(nut.func, ast.Attribute)
                else nut.func.id if isinstance(nut.func, ast.Name) else None)
-        if ten in _TEN_WHICH and _la_hang_bash(nut.args[0]):
-            dong.add(nut.lineno)
-        elif ten in _TEN_SPAWN and isinstance(nut.args[0], (ast.List, ast.Tuple)) \
-                and nut.args[0].elts and _la_hang_bash(nut.args[0].elts[0]):
-            dong.add(nut.lineno)
+        if ten in _TEN_WHICH:
+            dau = _doi_so_dau(nut, _KHOA_WHICH)
+            if dau is not None and _la_hang_bash(dau):
+                dong.add(nut.lineno)
+        elif ten in _TEN_SPAWN:
+            dau = _doi_so_dau(nut, _KHOA_SPAWN)
+            if isinstance(dau, (ast.List, ast.Tuple)) and dau.elts and _la_hang_bash(dau.elts[0]):
+                dong.add(nut.lineno)
     return sorted(dong)
 
 # CHỈ tệp này được phép chứa lời gọi trần — nó LÀ bộ giải.
@@ -288,7 +334,24 @@ CHO_PHEP = ("ops/bash_nen.py",)
 #   · tệp TRONG `CHUA_CHUYEN` mà KHÔNG còn lời gọi trần nào ⇒ ĐỎ (danh sách đã mục).
 # Chiều thứ hai là thứ bắt danh sách phải NGẮN đi. Thiếu nó thì ratchet thành nghĩa trang:
 # ai vá xong cũng quên xoá tên mình, và cổng dần hết ý nghĩa mà vẫn xanh.
-CHUA_CHUYEN = {}
+# NGAY GO la BAT BUOC cho moi muc (#570 r4, N17). Mot danh sach khong co ngay go la mot
+# nghia trang — dung thu N5 sinh ra de chan, chi cham hon.
+_NGAY_GO = "2026-12-31"
+CHUA_CHUYEN = {
+    ".claude/dev/launcher_test.py":
+        f"7 lời gọi. Dòng 6004-6005 là BẢN SAO THỨ TƯ THẬT: `shutil.which(\"bash\")` cộng "
+        f"một đường Git Bash GHI CỨNG (`C:/Program Files/Git/bin/bash.exe`) — tức một bộ "
+        f"giải RIÊNG quyết bằng ĐƯỜNG DẪN, đúng hình dạng vừa bị gỡ khỏi `_bash_posix` (r2) "
+        f"và `_bash_windows` (r3). Ngoài write set của #570. NGÀY GỠ {_NGAY_GO}.",
+    ".claude/hooks/session_start.py":
+        f"1 lời gọi (dòng 58). CHẠY Ở MỌI PHIÊN, nên đây là mục đáng gỡ sớm nhất. Ngoài "
+        f"write set của #570. NGÀY GỠ {_NGAY_GO}.",
+    ".claude/hooks/subagent_ghi_detect_test.py":
+        f"2 lời gọi. Ngoài write set của #570. NGÀY GỠ {_NGAY_GO}.",
+    "scripts/tl_selftest.py":
+        f"1 lời gọi (dòng 22376). `scripts/**` là runtime phát hành, đụng vào cần packet "
+        f"riêng. Ngoài write set của #570. NGÀY GỠ {_NGAY_GO}.",
+}
 # RỖNG TỪ r3 (#570, 20-09-2026). Đây là trạng thái ĐÍCH của ratchet, không phải một danh sách
 # chưa ai điền: `CHO_PHEP` nay là chỗ DUY NHẤT trong `ops/**` còn lời gọi trần, và nó là chính
 # bộ giải. Thêm một tên vào đây là đi LÙI — chỉ làm khi có phép đo nói rõ vì sao không chuyển
@@ -310,17 +373,35 @@ CHUA_CHUYEN = {}
 _BO_QUA_THU_MUC = ("ops/reviews/",)
 
 
+# Khong quet: `.git/` (khong phai ma nguon) va `ops/reviews/` (anh chup DONG CUNG cua cac
+# ban cu, giu de doi chieu review — khong phai ma dang song).
+_BO_QUA_TOAN_CAY = (".git/", "ops/reviews/")
+
+
 def quet(goc: Path):
-    """Quét `ops/**`. Trả (rc, báo_cáo). Ba trạng thái, không phải hai."""
+    """Quét TOÀN CÂY kho. Trả (rc, báo_cáo). Ba trạng thái, không phải hai.
+
+    PHẠM VI MỞ Ở r4 (#570, N17), và lý do là một phép đo chứ không phải một ý hay.
+    Bản r3 chỉ quét `ops/**` — trong khi PR của chính packet này mở đầu bằng *"một bộ giải
+    dùng chung + một CỔNG chặn bản sao thứ tư"*. Cross-review trên `05ec2eb5` chạy CHÍNH
+    `_loi_goi_tran` của PR trên toàn cây và đo được **11 lời gọi / 4 tệp NGOÀI `ops/**`**,
+    trong đó `.claude/dev/launcher_test.py:6004` là một bộ giải riêng quyết bằng ĐƯỜNG DẪN
+    GHI CỨNG. Tức bản sao thứ tư **đã sống sẵn ngoài hàng rào** trước khi hàng rào dựng lên.
+
+    Cái giá, khai thẳng: ratchet **DÀI RA** (0 → 4 mục), đi ngược tinh thần "ratchet phải
+    NGẮN đi". Nhưng thứ phải ngắn đi là **số lời gọi trần CHƯA ĐƯỢC NHÌN THẤY**, không phải
+    độ dài danh sách — và con số ấy nay về 0. Mỗi mục mang NGÀY GỠ; N5 (chiều ngược) vẫn bắt
+    việc quên xoá khi một mục đã sạch.
+    """
     goc = Path(goc)
-    thu_muc = goc / "ops"
-    if not thu_muc.is_dir():
+    if not (goc / "ops").is_dir():
         return RC_KHONG_DO_DUOC, {"trang_thai": "KHONG_DO_DUOC",
-                                  "ly_do": f"không thấy {thu_muc}"}
+                                  "ly_do": f"không thấy {goc / 'ops'} — cây không phải gốc kho"}
+    thu_muc = goc
     co_loi_goi = {}
     for tep in sorted(thu_muc.rglob("*.py")):
         rel = tep.relative_to(goc).as_posix()
-        if any(rel.startswith(x) for x in _BO_QUA_THU_MUC):
+        if any(rel.startswith(x) for x in _BO_QUA_TOAN_CAY):
             continue
         try:
             than = tep.read_text(encoding="utf-8")
@@ -336,7 +417,7 @@ def quet(goc: Path):
     moi = {t: d for t, d in co_loi_goi.items()
            if t not in CHO_PHEP and t not in CHUA_CHUYEN}
     da_sach = [t for t in CHUA_CHUYEN if t not in co_loi_goi]
-    bao = {"da_quet": str(thu_muc), "co_loi_goi_tran": co_loi_goi,
+    bao = {"da_quet": str(thu_muc), "pham_vi": "toan-cay", "co_loi_goi_tran": co_loi_goi,
            "ngoai_danh_sach": moi, "muc_ratchet_da_sach": sorted(da_sach),
            "cho_phep": list(CHO_PHEP), "chua_chuyen": sorted(CHUA_CHUYEN)}
     if moi:

@@ -585,6 +585,27 @@ DOT_BIEN = {
         "            )  # đột biến: mọi TimeoutExpired đều bị coi là đồng hồ nhảy\n",
         "TEP_TEST", ("ops/lease_publish_test.py", "ops/bash_nen.py"),
         "t32_dong_ho_nhay_la_KHONG_DO_DUOC_chu_khong_phai_tin_dung_gia"),
+    # Thu `_HANG_BASH` ve dung "bash" => `which("bash.exe")` lai lot. `t33` chot (1) DO.
+    "t33_bo_bash_exe": ("ops/bash_nen.py",
+        '_HANG_BASH = ("bash", "bash.exe")\n',
+        '_HANG_BASH = ("bash",)  # đột biến: bỏ cách viết Windows\n',
+        "BASH_NEN", (), "t33_do_phu_cua_cong_do_duoc_THEO_HINH_DANG"),
+    # Bo doc doi so KEYWORD => `which(cmd=)` va `run(args=)` lai lot. `t33` chot (1) DO.
+    "t33_bo_doi_so_keyword": ("ops/bash_nen.py",
+        "    for kw in nut.keywords:\n        if kw.arg in khoa:\n            return kw.value\n",
+        "    if False:  # đột biến: chỉ đọc đối số VỊ TRÍ\n        pass\n",
+        "BASH_NEN", (), "t33_do_phu_cua_cong_do_duoc_THEO_HINH_DANG"),
+    # Go moi truong khoi khoa cache => CONG_CU_BASH bi nuot lai. `t34` DO.
+    "t34_khoa_cache_bo_moi_truong": ("ops/bash_nen.py",
+        "    khoa = json.dumps([sorted(ep.items()), bool(tat_ca), sorted(moi_truong.items())],\n"
+        "                      default=str)\n",
+        "    khoa = json.dumps([sorted(ep.items()), bool(tat_ca)], default=str)  # đột biến\n",
+        "BASH_NEN", (), "t34_cache_tim_bash_phai_theo_doi_MOI_TRUONG"),
+    # Thu pham vi ve `ops/**` => ban sao thu tu ngoai hang rao lai lot. `t35` chot (1) DO.
+    "t35_thu_pham_vi_ve_ops": ("ops/bash_nen.py",
+        "    thu_muc = goc\n",
+        '    thu_muc = goc / "ops"  # đột biến: thu phạm vi về `ops/**` như bản r3\n',
+        "BASH_NEN", (), "t35_cong_phai_quet_TOAN_CAY_chu_khong_chi_ops"),
     "t23_bo_cat_CR_ten_cong_cu": ("ops/cai_cong_cu.sh",
         "    cong_cu=\"${cong_cu%$'\\r'}\"\n",
         "    :  # đột biến: không cắt CR\n",
@@ -1566,27 +1587,31 @@ def _quet(goc, bo_quet=None) -> tuple:
 _RATCHET_GIA = "ops/muc_ratchet_gia_t26.py"
 
 
-def _bash_nen_co_chua_chuyen(tmp: Path) -> Path:
-    """Bản sao `bash_nen.py` có `CHUA_CHUYEN` chứa ĐÚNG MỘT mục GIẢ, trả đường dẫn bản ấy.
+def _bash_nen_voi_chua_chuyen(tmp: Path, muc: dict, ten="bash_nen_tuy_bien.py") -> Path:
+    """Bản sao `bash_nen.py` với `CHUA_CHUYEN` đặt theo `muc`. Trả đường dẫn bản ấy.
 
-    VÌ SAO PHẢI CÓ (đo 20-09-2026, N14): `_cay_quet` bản cũ đọc `CHUA_CHUYEN` TỪ MODULE rồi
-    `dung()` nếu nó rỗng. Ý định đúng — không chép cứng danh sách, vì ratchet sinh ra để NGẮN
-    đi. Nhưng nó gắn ca vào một TRẠNG THÁI NHẤT THỜI của kho, nên đúng lúc ratchet chạm ĐÍCH
-    (`CHUA_CHUYEN` rỗng) thì `t26`/`t27` chết bằng lỗi giàn giáo — tức hai ca canh ratchet tắt
-    ngay khi ratchet thành công. Một cổng chỉ sống được khi kho còn bẩn thì không phải cổng.
-
-    Nay ca dựng DANH SÁCH CỦA RIÊNG NÓ trên một bản sao tạm. Nó đo LUẬT của cổng, không đo
-    danh sách hiện thời — và vì thế nó vẫn ĐỎ được khi `CHUA_CHUYEN` thật đã rỗng vĩnh viễn.
-    Đột biến `bn_ratchet_mot_chieu` vẫn cắn được vì nó mutate cùng tệp nguồn ấy.
+    Vì sao cần: các ca dựng cây GIẢ không thể thoả một `CHUA_CHUYEN` khoá theo đường dẫn
+    THẬT của kho — chiều ngược của ratchet sẽ báo "mục đã sạch" và làm nền ĐỎ oan. Ca phải
+    đo LUẬT của cổng, không đo danh sách hiện thời.
     """
     than = Path(BASH_NEN).read_text(encoding="utf-8")
-    neo = "CHUA_CHUYEN = {}\n"
-    dung(neo in than,
-         f"không thấy mỏ neo `CHUA_CHUYEN = {{}}` trong {BASH_NEN} — mỏ neo đã trôi")
-    ban = tmp / "bash_nen_co_muc.py"
-    ban.write_text(than.replace(neo, f"CHUA_CHUYEN = {{{_RATCHET_GIA!r}: 'mục giả của t26'}}\n", 1),
-                   encoding="utf-8")
+    i = than.index("CHUA_CHUYEN = {")
+    j = than.index("\n}\n", i) + len("\n}\n") if than[i:].startswith("CHUA_CHUYEN = {\n") \
+        else than.index("\n", i) + 1
+    ban = tmp / ten
+    ban.write_text(than[:i] + f"CHUA_CHUYEN = {muc!r}\n" + than[j:], encoding="utf-8")
     return ban
+
+
+def _bash_nen_co_chua_chuyen(tmp: Path) -> Path:
+    """Bản sao `bash_nen.py` có `CHUA_CHUYEN` chứa ĐÚNG MỘT mục GIẢ.
+
+    Từ r4 nó uỷ quyền cho `_bash_nen_voi_chua_chuyen`: mỏ neo cũ (`CHUA_CHUYEN = {}`) biến
+    mất khi r4 nạp bốn mục thật vào danh sách, và một helper neo theo HÌNH DẠNG NGUỒN sẽ gãy
+    mỗi lần danh sách đổi. Neo theo TÊN BIẾN thì không.
+    """
+    return _bash_nen_voi_chua_chuyen(tmp, {_RATCHET_GIA: "mục giả của t26"},
+                                     ten="bash_nen_co_muc.py")
 
 
 def _cay_quet(tmp: Path, them=None, bo_loi_goi_o=None, bo_quet=None):
@@ -1623,14 +1648,23 @@ def t25_cong_chan_loi_goi_bash_tran_MOI():
         # Cây `ops/` RỖNG là nền đúng cho ca này. Bản cũ gọi `_cay_quet`, tức dựng sẵn các tệp
         # `CHUA_CHUYEN` mà kho đang khai — từ r3 danh sách ấy RỖNG nên lời gọi ấy chỉ còn là
         # một phụ thuộc vào trạng thái nhất thời của kho, không thêm gì cho điều ca này đo.
-        (tmp / "ops").mkdir(parents=True, exist_ok=True)
-        rc, bao = _quet(tmp)
+        #
+        # GỐC QUÉT là `cay`, KHÔNG phải `tmp`: từ r4 cổng quét TOÀN CÂY, nên bản sao bộ quét
+        # đặt trong gốc quét sẽ bị chính nó quét. Dưới mã thật vô hại (`ast` không thấy lời
+        # gọi nào), nhưng nó khiến MỌI đột biến của bộ quét chạm vào ca này qua đường giàn
+        # giáo chứ không qua chốt — `bn_quet_theo_chuoi` giết oan t25 và t35 đúng vì thế.
+        cay = tmp / "cay"
+        (cay / "ops").mkdir(parents=True, exist_ok=True)
+        # `CHUA_CHUYEN` RỖNG cho cây giả: danh sách thật khoá theo đường dẫn THẬT của kho,
+        # nên trên cây này mọi mục đều "đã sạch" và chiều ngược của ratchet làm nền ĐỎ oan.
+        bq = _bash_nen_voi_chua_chuyen(tmp, {})
+        rc, bao = _quet(cay, bq)
         bang(rc == 0 and bao["trang_thai"] == "DAT",
              f"NỀN đã phải SẠCH mà cổng báo {bao.get('trang_thai')} rc={rc}: "
              f"{bao.get('ly_do')} — ca âm bên dưới sẽ vô nghĩa")
-        (tmp / "ops" / "tep_moi.py").write_text(
+        (cay / "ops" / "tep_moi.py").write_text(
             'import shutil\nb = shutil.which("bash")\n', encoding="utf-8")
-        rc, bao = _quet(tmp)
+        rc, bao = _quet(cay, bq)
         bang(rc == 2 and bao["trang_thai"] == "DO",
              f"thêm lời gọi trần MỚI mà cổng vẫn rc={rc} {bao.get('trang_thai')}")
         bang("ops/tep_moi.py" in json.dumps(bao.get("ngoai_danh_sach"), ensure_ascii=False),
@@ -1675,12 +1709,14 @@ def t27_cong_khong_bao_dong_gia_tren_CHU_THICH():
     """
     with tempfile.TemporaryDirectory() as tmp:
         tmp = Path(tmp)
-        (tmp / "ops").mkdir(parents=True, exist_ok=True)
-        (tmp / "ops" / "chi_nhac.py").write_text(
+        cay = tmp / "cay"                         # gốc quét ≠ chỗ để bản sao — xem `t25`
+        (cay / "ops").mkdir(parents=True, exist_ok=True)
+        bq = _bash_nen_voi_chua_chuyen(tmp, {})   # xem chú thích ở `t25`
+        (cay / "ops" / "chi_nhac.py").write_text(
             '"""Tài liệu có nhắc shutil.which("bash") để giải thích."""\n'
             '# và shutil.which("bash") trong một chú thích\n'
             'GHI_CHU = \'shutil.which("bash")\'\n', encoding="utf-8")
-        rc, bao = _quet(tmp)
+        rc, bao = _quet(cay, bq)
         bang(rc == 0 and bao["trang_thai"] == "DAT",
              f"tệp chỉ NHẮC TỚI trong chú thích/chuỗi mà cổng ĐỎ: rc={rc} "
              f"{bao.get('ly_do')} — báo động giả")
@@ -1819,6 +1855,173 @@ def t32_dong_ho_nhay_la_KHONG_DO_DUOC_chu_khong_phai_tin_dung_gia():
     bang(tt2 == "tin_dung_gia",
          f"(2) quá hạn THẬT (thời lượng dương) bị NUỐT thành {tt2!r} — phép nhận diện quá "
          f"rộng thì nó nuốt đúng thứ `t28` sinh ra để đo, và cổng thành trang trí\n{p.stdout}")
+
+
+_HINH_DANG_PHU = {
+    "which_chuoi":     'import shutil\nb = shutil.which("bash")\n',
+    "which_bash_exe":  'import shutil\nb = shutil.which("bash.exe")\n',
+    "which_keyword":   'import shutil\nb = shutil.which(cmd="bash")\n',
+    "run_list":        'import subprocess\nsubprocess.run(["bash", "-c", "x"])\n',
+    "run_keyword":     'import subprocess\nsubprocess.run(args=["bash", "-c", "x"])\n',
+    "popen_list":      'import subprocess\nsubprocess.Popen(["bash", "-c", "x"])\n',
+}
+_HINH_DANG_KHONG_PHU = {
+    "shell_true":      'import subprocess\nsubprocess.run("bash -c x", shell=True)\n',
+    "os_system":       'import os\nos.system("bash -c x")\n',
+    "bien_trung_gian": 'import shutil\nt = "bash"\nb = shutil.which(t)\n',
+}
+
+
+@ca
+def t33_do_phu_cua_cong_do_duoc_THEO_HINH_DANG():
+    """Mỗi hình dạng lời gọi một khẳng định riêng — và docstring phải khai ĐÚNG phạm vi.
+
+    SINH TỪ CROSS-REVIEW trên `05ec2eb5` (finding F1). Bản cũ khai *"số dòng của MỌI lời gọi
+    phân giải `bash` theo TÊN"*. Reviewer cho ăn 12 hình dạng: **BẮT 3 / LỌT 9**. Phiên này
+    đo lại và ra **y hệt** — không nhận lời khai, đo lại.
+
+    Hình dạng lọt đáng kể nhất là `shutil.which("bash.exe")`: đúng CÁCH VIẾT Windows của đúng
+    khuyết tật Windows mà packet này sinh ra để chặn, và `ung_vien()` ngay trong `bash_nen.py`
+    cũng dùng `("bash.exe", "bash")`. `t25` chỉ đo ĐÚNG MỘT hình dạng, nên độ phủ chưa từng
+    được đo — *"nghĩ ra được phép thử mà không chạy thì phép thử ấy không tồn tại"*.
+
+    BA CHỐT:
+      (1) mọi hình dạng ĐƯỢC KHAI LÀ PHỦ đều bị bắt;
+      (2) hình dạng KHÔNG phủ vẫn lọt — và docstring phải NÓI RA. Chốt này chống việc khai
+          rộng hơn phép đo: nếu ai mở rộng hàm mà quên sửa docstring, (2) không bắt được,
+          nhưng (3) bắt;
+      (3) docstring KHÔNG được chứa chữ "mọi lời gọi" — lời khai phải khớp phép đo.
+    """
+    # NAP TU `BASH_NEN` chu khong dung `bash_nen` da import: bo dot bien tro `BASH_NEN` sang
+    # mot ban sao da mutate, ma module da nap thi khong doi theo. Do la ly do
+    # `t33_bo_bash_exe` SONG SOT o luot do dau — dung bay da mac o `t29`/`t31`/`t32`.
+    import runpy
+    _m = runpy.run_path(str(BASH_NEN))
+    _loi_goi_tran = _m["_loi_goi_tran"]
+
+    for ten, than in _HINH_DANG_PHU.items():
+        bang(bool(_loi_goi_tran(than)),
+             f"(1) hình dạng `{ten}` ĐƯỢC KHAI là phủ mà cổng KHÔNG bắt:\n{than}")
+    for ten, than in _HINH_DANG_KHONG_PHU.items():
+        bang(not _loi_goi_tran(than),
+             f"(2) hình dạng `{ten}` được khai là KHÔNG phủ mà cổng lại bắt — nếu đã mở rộng "
+             f"được thì phải sửa docstring VÀ chuyển nó sang `_HINH_DANG_PHU`:\n{than}")
+    tai_lieu = (_loi_goi_tran.__doc__ or "")
+    tom_tat = tai_lieu.strip().splitlines()[0].lower() if tai_lieu.strip() else ""
+    # ĐO DÒNG TÓM TẮT, KHÔNG ĐO CẢ THÂN. Bản đầu của chốt này cấm chuỗi "mọi lời gọi" trên
+    # TOÀN docstring — và nó ĐỎ oan ngay, vì docstring mới TRÍCH DẪN chính câu cũ để giải
+    # thích vì sao câu ấy sai. Đúng bẫy `CLAUDE.md` đã ghi: dấu bỏ-qua-CI trong commit
+    # message vẫn kích hoạt KỂ CẢ khi đang trích dẫn để giải thích; nháy ngược không phải
+    # hàng rào. Lời KHAI của một hàm nằm ở DÒNG TÓM TẮT; phần sau là diễn giải.
+    bang("mọi lời gọi" not in tom_tat,
+         f"(3) DÒNG TÓM TẮT của docstring lại khai `mọi lời gọi` — lời khai RỘNG HƠN phép đo, "
+         f"đúng lớp lỗi cross-review vừa bắt: {tom_tat!r}")
+    bang("phủ" in tom_tat,
+         f"(3) dòng tóm tắt không nói rõ đây là PHẠM VI ĐƯỢC PHỦ: {tom_tat!r}")
+    bang("KHÔNG PHỦ" in tai_lieu,
+         "(3) docstring không liệt kê thứ nó KHÔNG phủ — người đọc sẽ tưởng đã kín")
+
+
+@ca
+def t34_cache_tim_bash_phai_theo_doi_MOI_TRUONG():
+    """Đặt `CONG_CU_BASH` SAU lần gọi đầu thì lần sau phải THẤY, không bị cache nuốt.
+
+    SINH TỪ CROSS-REVIEW (finding F3). `ung_vien()` đọc `CONG_CU_BASH`/`PATH`/`SystemRoot`/
+    `ProgramFiles` từ `os.environ` khi tham số là `None`, nhưng khoá cache cũ là `[[], false]`
+    — chỉ `ep` và `tat_ca`. Đo được: gọi `tim_bash()`, đặt `CONG_CU_BASH` sang một bash THẬT ở
+    đường khác, gọi lại ⇒ vẫn trả đường CŨ, **không một dòng cảnh báo**. Nút ghi đè mà chính
+    module tự khai bị chính cache của nó nuốt.
+
+    Chạy trong TIẾN TRÌNH CON: ca này đụng `os.environ` và `_CACHE` toàn cục, làm bẩn tiến
+    trình chạy suite thì các ca sau đo nhầm.
+    """
+    ma = ("import json, os, shutil, sys, tempfile, runpy\n"
+          f"m = runpy.run_path({str(BASH_NEN)!r})\n"
+          "that, _ = m['tim_bash']()\n"
+          "if not that:\n"
+          "    print('KQ ' + json.dumps(['BO_QUA', 'khong co bash nao dung duoc'])); raise SystemExit(0)\n"
+          "tmp = tempfile.mkdtemp(); khac = os.path.join(tmp, 'bash')\n"
+          "shutil.copy2(that, khac); os.chmod(khac, 0o755)\n"
+          "os.environ['CONG_CU_BASH'] = khac\n"
+          "sau, _ = m['tim_bash']()\n"
+          "print('KQ ' + json.dumps(['OK', that, khac, sau]))\n")
+    p = subprocess.run([sys.executable, "-c", ma], cwd=GOC, capture_output=True,
+                       text=True, timeout=180)
+    dung(p.returncode == 0 and "KQ " in p.stdout,
+         f"giàn giáo hỏng: rc={p.returncode}\n{p.stdout}\n{p.stderr}")
+    kq = json.loads([l for l in p.stdout.splitlines() if l.startswith("KQ ")][-1][3:])
+    if kq[0] == "BO_QUA":
+        raise BoQuaMoiTruong(f"KHÔNG_ĐO_ĐƯỢC: {kq[1]}")
+    _, truoc, khac, sau = kq
+    bang(sau == khac,
+         f"`CONG_CU_BASH` đặt SAU lần gọi đầu bị cache NUỐT: trước={truoc!r}, đặt={khac!r}, "
+         f"nhận={sau!r}. Khoá cache phải gồm môi trường (#570 r4 N19).")
+
+
+@ca
+def t35_cong_phai_quet_TOAN_CAY_chu_khong_chi_ops():
+    """Cổng phải thấy lời gọi trần ở NGOÀI `ops/**`.
+
+    SINH TỪ CROSS-REVIEW (finding F2), và nó bác một câu của chính packet này. PR mở đầu bằng
+    *"một bộ giải dùng chung + một CỔNG chặn bản sao thứ tư"*. Nhưng bản sao thứ tư **đã sống
+    sẵn ngoài hàng rào**: `.claude/dev/launcher_test.py:6004` phân giải `bash` bằng
+    `shutil.which` cộng một đường Git Bash **GHI CỨNG** — đúng hình dạng vừa bị gỡ khỏi
+    `_bash_posix` (r2) và `_bash_windows` (r3).
+
+    Hai chốt:
+      (1) máy quét phải TỚI ĐƯỢC một tệp ngoài `ops/` — bản r3 quét `ops/**` nên nó lọt;
+      (2) `ops/reviews/` vẫn được bỏ qua (ảnh chụp đông cứng), kẻo mở phạm vi kéo theo báo
+          động giả trên mã đã chết.
+
+    CA NÀY ĐO PHẠM VI, KHÔNG ĐO PHÁN QUYẾT — và đó là một sửa lỗi có số đo, không phải
+    khẩu vị. Bản đầu của chốt (1) khẳng định `rc == 2` và tên tệp có trong `ngoai_danh_sach`,
+    tức nó khẳng định lại ĐÚNG thuộc tính mà `t25` đã trói: "cổng chặn được lời gọi trần mới".
+    Hệ quả đo được: đột biến `bn_cong_cho_qua_moi_noi` (`moi = {}`) giết CẢ `t25` lẫn ca này,
+    bán kính 2/38 — hai ca cùng trói một thuộc tính thì bán kính không còn đọc được, và
+    `_ket_luan_ban_kinh` ĐỎ đúng lý.
+    Nên chốt (1) nay đọc `co_loi_goi_tran` — thứ có TRƯỚC bộ lọc danh sách cho phép. Nó hỏng
+    khi và chỉ khi máy quét KHÔNG TỚI tệp ấy, tức đúng thuộc tính phạm vi (`t35_thu_pham_vi_ve_ops`
+    giết nó, bán kính 1/38) và không hỏng vì phán quyết đổi.
+
+    NỢ CÓ TÊN, khai thẳng: phép hợp "bẩn NGOÀI `ops/` ⇒ cổng ĐỎ" không còn ca NÀO đo trọn
+    trong một lượt. Nó là hội của hai sự kiện có cổng riêng — phạm vi (ca này) và phán quyết
+    (`t25`) — nên một khuyết tật chỉ tha tệp ngoài `ops/` ở KHÂU LỌC sẽ lọt cả hai. Chưa đo
+    được khuyết tật ấy; ghi ra đây thay vì giả vờ đã trói.
+    """
+    with tempfile.TemporaryDirectory() as tmp:
+        tmp = Path(tmp)
+        cay = tmp / "cay"                        # gốc quét ≠ chỗ để bản sao — xem `t25`
+        (cay / "ops").mkdir(parents=True)
+        # `CHUA_CHUYEN` RỖNG: cây giả không có tệp thật nào của kho, nên giữ danh sách thật
+        # sẽ làm chiều ngược của ratchet báo "mục đã sạch" và nền ĐỎ oan.
+        bq = _bash_nen_voi_chua_chuyen(tmp, {})
+        rc, bao = _quet(cay, bq)
+        bang(rc == 0, f"NỀN phải SẠCH mà rc={rc}: {bao.get('ly_do')}")
+        bang(bao.get("pham_vi") == "toan-cay",
+             f"báo cáo không khai phạm vi toàn cây: {bao.get('pham_vi')!r}")
+
+        ngoai = cay / ".claude" / "dev"
+        ngoai.mkdir(parents=True)
+        (ngoai / "mot_bo_giai_rieng.py").write_text(
+            'import shutil\nb = shutil.which("bash")\n', encoding="utf-8")
+        rc, bao = _quet(cay, bq)
+        bang(".claude/dev/mot_bo_giai_rieng.py" in (bao.get("co_loi_goi_tran") or {}),
+             f"(1) máy quét KHÔNG TỚI tệp ngoài `ops/` — bản sao thứ tư mọc ngoài hàng rào "
+             f"đúng như cross-review đo được. Đã thấy: "
+             f"{sorted((bao.get('co_loi_goi_tran') or {}))}")
+
+        (ngoai / "mot_bo_giai_rieng.py").unlink()
+        anh = cay / "ops" / "reviews"
+        anh.mkdir(parents=True)
+        (anh / "ban_cu.py").write_text('import shutil\nb = shutil.which("bash")\n',
+                                       encoding="utf-8")
+        rc, bao = _quet(cay, bq)
+        bang(rc == 0 and bao["trang_thai"] == "DAT",
+             f"(2) `ops/reviews/` là ảnh chụp ĐÔNG CỨNG, không được làm cổng đỏ: rc={rc} "
+             f"{bao.get('ly_do')}")
+        bang("ops/reviews/ban_cu.py" not in (bao.get("co_loi_goi_tran") or {}),
+             f"(2) `ops/reviews/` phải được BỎ QUA, không phải được tha ở khâu lọc: "
+             f"{sorted((bao.get('co_loi_goi_tran') or {}))}")
 
 
 def _chay_tien_kiem(fn):

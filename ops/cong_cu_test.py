@@ -589,8 +589,17 @@ DOT_BIEN = {
         '        return False, f"phép argv: rc={rc} — {ra.strip()[:200]}"\n',
         "BASH_NEN", (), "t28_bash_nen_tu_choi_bash_TREO_trong_han"),
     "bn_ban_kinh_giau_ly_do": ("ops/cong_cu_test.py",
-        '        dong += [f"        · {t} [{ket[t][0]}] {ket[t][1]}" for t in oan]\n',
-        '        dong += []  # đột biến: giấu LÝ DO, chỉ còn TÊN — đúng bản trước 20-09\n',
+        '    chi_tiet = [f"        · {t} [{tt}] {ly}" for t, (tt, ly) in sorted(ket.items()) if tt != "qua"]\n',
+        '    chi_tiet = []  # đột biến: giấu LÝ DO, chỉ còn dòng đầu — đúng bản trước 20-09\n',
+        "TEP_TEST", ("ops/lease_publish_test.py", "ops/bash_nen.py"),
+        "t29_ban_kinh_qua_RONG_phai_neu_LY_DO_tung_ca_oan"),
+    "bn_ban_kinh_gia_ve_som": ("ops/cong_cu_test.py",
+        '    elif gia:\n'
+        '        dau = [f"  ĐỎ  {ten_db}: ca {gia} chết bằng lỗi VÔ CAN (tín dụng giả) ⇒ bán kính "\n'
+        '               f"không đọc được"]\n',
+        '    elif gia:\n'
+        '        return ([f"  ĐỎ  {ten_db}: ca {gia} chết bằng lỗi VÔ CAN (tín dụng giả) ⇒ bán kính "\n'
+        '                 f"không đọc được"], 1)  # đột biến: nhánh `gia` về SỚM, bỏ lý do\n',
         "TEP_TEST", ("ops/lease_publish_test.py", "ops/bash_nen.py"),
         "t29_ban_kinh_qua_RONG_phai_neu_LY_DO_tung_ca_oan"),
     "bn_quet_theo_chuoi": ("ops/bash_nen.py",
@@ -662,23 +671,35 @@ def _ket_luan_ban_kinh(ten_db, ca_dich, ket, tong_ca):
     oan = [t for t in chet if t != ca_dich]
     bk = f"{len(chet)}/{tong_ca}"
     gia = sorted(t for t, (tt, _) in ket.items() if tt == "tin_dung_gia")
+
     if tt_dich == "bo_qua":
-        return ([f"  KHÔNG_ĐO_ĐƯỢC {ten_db}: đích '{ca_dich}' bị BỎ QUA — {ket[ca_dich][1]}"], 1)
-    if tt_dich == "tin_dung_gia":
-        return ([f"  ĐỎ  {ten_db}: TÍN DỤNG GIẢ — đích '{ca_dich}' chết KHÔNG PHẢI bằng chốt "
-                 f"của nó: {ket[ca_dich][1]}"], 1)
-    if tt_dich != "giet_that":
-        return ([f"  ĐỎ  {ten_db}: đích '{ca_dich}' vẫn XANH ⇒ đột biến không giết được gì"], 1)
-    if gia:
-        return ([f"  ĐỎ  {ten_db}: ca {gia} chết bằng lỗi VÔ CAN (tín dụng giả) ⇒ bán kính "
-                 f"không đọc được"], 1)
-    if oan:
-        dong = [f"  ĐỎ  {ten_db}: giết THÊM {oan} ngoài đích '{ca_dich}' (bán kính {bk}). "
-                f"CHƯA phân biệt được 'ca đích trói nhầm thuộc tính' với 'đột biến nằm trên "
-                f"ĐƯỜNG CHUNG của giàn giáo' — đọc lý do từng ca dưới đây rồi mới kết luận:"]
-        dong += [f"        · {t} [{ket[t][0]}] {ket[t][1]}" for t in oan]
-        return (dong, 1)
-    return ([f"  ok  {ten_db} → giết đúng '{ca_dich}' · bán kính {bk}"], 0)
+        dau = [f"  KHÔNG_ĐO_ĐƯỢC {ten_db}: đích '{ca_dich}' bị BỎ QUA — {ket[ca_dich][1]}"]
+    elif tt_dich == "tin_dung_gia":
+        dau = [f"  ĐỎ  {ten_db}: TÍN DỤNG GIẢ — đích '{ca_dich}' chết KHÔNG PHẢI bằng chốt "
+               f"của nó: {ket[ca_dich][1]}"]
+    elif tt_dich != "giet_that":
+        dau = [f"  ĐỎ  {ten_db}: đích '{ca_dich}' vẫn XANH ⇒ đột biến không giết được gì"]
+    elif gia:
+        dau = [f"  ĐỎ  {ten_db}: ca {gia} chết bằng lỗi VÔ CAN (tín dụng giả) ⇒ bán kính "
+               f"không đọc được"]
+    elif oan:
+        dau = [f"  ĐỎ  {ten_db}: giết THÊM {oan} ngoài đích '{ca_dich}' (bán kính {bk}). "
+               f"CHƯA phân biệt được 'ca đích trói nhầm thuộc tính' với 'đột biến nằm trên "
+               f"ĐƯỜNG CHUNG của giàn giáo' — đọc lý do dưới đây rồi mới kết luận:"]
+    else:
+        return ([f"  ok  {ten_db} → giết đúng '{ca_dich}' · bán kính {bk}"], 0)
+
+    # MỘT đường ra cho MỌI nhánh ĐỎ: đổ toàn bộ ca không `qua`, kèm LÝ DO.
+    #
+    # Bản 20-09 sáng chỉ gắn lý do vào nhánh `oan` — đúng nhánh mà log Windows lượt 3 chỉ
+    # ra — rồi lượt 5 rơi vào nhánh `gia` và lai KHÔNG đọc được gì: `t22_bash_lay_ca_system_root`
+    # in ra ca `t2_canary_thieu_shellcheck_phai_SUY_GIAM` chết "bằng lỗi VÔ CAN" mà không nói
+    # lỗi ấy là gì. Tức bản vá ĐÚNG nhưng HẸP, và khuyết tật sống nguyên ở nhánh anh em.
+    # `CLAUDE.md` goi dung ten no: "va dung cho duoc chi roi bo sot duong thu ba" — chua theo
+    # danh sach nguoi khac liet ke, phai TU liet ke het duong roi dong ca loat.
+    # Nen do KHONG con la dac quyen cua mot nhanh: he ĐỎ thi in het.
+    chi_tiet = [f"        · {t} [{tt}] {ly}" for t, (tt, ly) in sorted(ket.items()) if tt != "qua"]
+    return (dau + chi_tiet, 1)
 
 
 def _do_ban_kinh(ten_dot_bien):
@@ -1369,27 +1390,51 @@ def t29_ban_kinh_qua_RONG_phai_neu_LY_DO_tung_ca_oan():
     Windows sau cũng chỉ đọc được đúng chừng ấy — một phép đo KHÔNG SỐNG SÓT qua chính
     cái nó định chẩn đoán.
 
-    Ba chốt, mỗi chốt một mệnh đề độc lập:
-      (1) bán kính rộng vẫn ĐỎ — vá này KHÔNG được nới cổng;
-      (2) báo cáo nêu TÊN ca oan;
-      (3) báo cáo nêu LÝ DO ca oan ấy chết — đây là chốt mới, và là thứ bản cũ thiếu.
-    Kèm đối chứng âm: bán kính đúng 1 thì XANH, để chốt (1) không phải thứ luôn đỏ."""
+    LƯỢT 5 CHO THẤY BẢN VÁ ĐẦU CỦA CHÍNH CA NÀY LÀ HẸP, và đó là lý do ca có hình dạng hôm
+    nay. Bản sáng 20-09 chỉ gắn lý do vào nhánh `oan` — đúng nhánh log lượt 3 chỉ ra. Lượt 5
+    rơi vào nhánh ANH EM (`gia`, ca oan chết bằng lỗi vô can) và lại không đọc được gì:
+    `t22_bash_lay_ca_system_root` in ra `t2_canary_thieu_shellcheck_phai_SUY_GIAM` "chết bằng
+    lỗi VÔ CAN" mà không nói lỗi ấy là gì. `CLAUDE.md` gọi đúng tên: *"vá đúng chỗ được chỉ
+    rồi bỏ sót đường thứ ba"* — bản vá ĐÚNG mà HẸP. Nên nay lý do thuộc MỌI nhánh ĐỎ.
+
+    Hai nhánh, mỗi nhánh có đột biến RIÊNG nên phân biệt được bằng ĐẦU VÀO (không phải một
+    bộ tương đương đội lốt hai chốt):
+      (1) nhánh `oan` — `bn_ban_kinh_giau_ly_do` xoá khối chi tiết;
+      (2) nhánh `gia` — `bn_ban_kinh_gia_ve_som` cho nhánh ấy về SỚM, bỏ qua khối chi tiết.
+    Mỗi nhánh đòi ba thứ: vẫn ĐỎ (không nới cổng) · nêu TÊN ca oan · nêu LÝ DO nó chết.
+    Kèm đối chứng âm: bán kính đúng 1 thì XANH, để các chốt trên không phải thứ luôn đỏ."""
     p = subprocess.run([sys.executable, str(TEP_TEST), "--tu-kiem-ban-kinh"],
                        cwd=GOC, capture_output=True, text=True, timeout=120)
     dung(p.returncode == 0 and "LOI=" in p.stdout,
          f"không chạy được cửa tự kiểm: rc={p.returncode}\n{p.stdout}\n{p.stderr}")
-    kh_rong, kh_hep = p.stdout.split("LOI=")[1], p.stdout.split("LOI=")[2]
+    khuc = p.stdout.split("LOI=")
+    dung(len(khuc) == 4, f"cửa tự kiểm phải in ĐÚNG ba kịch bản, đọc được {len(khuc)-1}:\n{p.stdout}")
+    kh_rong, kh_vo_can, kh_hep = khuc[1], khuc[2], khuc[3]
+
+    # (1) nhánh `oan` — bán kính rộng, mọi ca chết bằng chốt của chính nó
     bang(kh_rong.startswith("1"),
          f"bán kính 2/3 mà KHÔNG tính lỗi ⇒ cổng đã bị nới:\n{p.stdout}")
-    bang("ca_oan_gia" in kh_rong, f"báo cáo không nêu TÊN ca oan:\n{p.stdout}")
+    bang("ca_oan_gia" in kh_rong, f"nhánh `oan` không nêu TÊN ca oan:\n{p.stdout}")
     bang("giàn giáo phóng công cụ giả hỏng: rc=1" in kh_rong,
-         "báo cáo nêu tên ca oan nhưng KHÔNG nêu LÝ DO nó chết — đúng khuyết tật mà "
-         f"nghiệm thu Windows phơi ra; không có lý do thì không chẩn đoán được:\n{p.stdout}")
+         "nhánh `oan` nêu tên ca oan nhưng KHÔNG nêu LÝ DO nó chết — đúng khuyết tật mà "
+         f"nghiệm thu Windows lượt 3 phơi ra:\n{p.stdout}")
     bang("trói nhầm thứ" not in kh_rong,
          "báo cáo vẫn KHẲNG ĐỊNH nguyên nhân là 'trói nhầm thứ' trong khi nó mới chỉ "
          f"ĐẾM — lời khai rộng hơn phép đo:\n{p.stdout}")
+
+    # (2) nhánh `gia` — ca oan chết bằng lỗi VÔ CAN. Đây là nhánh mà bản vá sáng 20-09 BỎ SÓT,
+    #     và nghiệm thu Windows lượt 5 rơi đúng vào nó: in tên ca mà không nói lỗi là gì.
+    bang(kh_vo_can.startswith("1"),
+         f"nhánh `gia` KHÔNG tính lỗi ⇒ cổng đã bị nới:\n{p.stdout}")
+    bang("ca_oan_vo_can" in kh_vo_can, f"nhánh `gia` không nêu TÊN ca oan:\n{p.stdout}")
+    bang("gọi _bash_windows hỏng: rc=1" in kh_vo_can,
+         "nhánh `gia` nêu tên ca chết bằng lỗi VÔ CAN nhưng KHÔNG nêu lỗi ấy là gì. Đúng "
+         "hình dạng 'vá đúng chỗ được chỉ rồi bỏ sót đường thứ ba': lý do phải thuộc MỌI "
+         f"nhánh ĐỎ, không phải đặc quyền của nhánh `oan`:\n{p.stdout}")
+
+    # (3) đối chứng âm — bán kính đúng 1 thì XANH, để (1) và (2) không phải thứ luôn đỏ
     bang(kh_hep.startswith("0"),
-         f"bán kính đúng 1 mà vẫn báo lỗi ⇒ chốt (1) luôn đỏ, tức không đo gì:\n{p.stdout}")
+         f"bán kính đúng 1 mà vẫn báo lỗi ⇒ các chốt trên luôn đỏ, tức không đo gì:\n{p.stdout}")
 
 
 def _quet(goc) -> tuple:
@@ -1531,6 +1576,13 @@ _KET_GIA_RONG = {
     "ca_oan_gia": ("giet_that", "giàn giáo phóng công cụ giả hỏng: rc=1"),
     "ca_xanh_gia": ("qua", None),
 }
+_KET_GIA_VO_CAN = {
+    # Nhanh `gia`: mot ca oan chet bang LOI VO CAN. Luot do Windows `570-do-5` roi dung vao
+    # day, va ban truoc in ten ca ma KHONG in loi ay la gi.
+    "ca_dich_gia": ("giet_that", "chốt của chính nó"),
+    "ca_oan_vo_can": ("tin_dung_gia", "giàn giáo hỏng: gọi _bash_windows hỏng: rc=1"),
+    "ca_xanh_gia": ("qua", None),
+}
 _KET_GIA_HEP = {
     "ca_dich_gia": ("giet_that", "chốt của chính nó"),
     "ca_xanh_gia": ("qua", None),
@@ -1545,7 +1597,7 @@ def _in_tu_kiem_ban_kinh():
     Tức nếu chỉ có lời gọi trong tiến trình thì `t29` là ca KHÔNG CÓ ĐỘT BIẾN NÀO, đúng
     thứ tệp này tồn tại để tố cáo. Cửa này cho `t29` hỏi lại chính câu ấy QUA một tiến
     trình con đọc mã từ `GOC`, nên `bn_ban_kinh_giau_ly_do` mới có chỗ cắn."""
-    for ket, tong in ((_KET_GIA_RONG, 3), (_KET_GIA_HEP, 2)):
+    for ket, tong in ((_KET_GIA_RONG, 3), (_KET_GIA_VO_CAN, 3), (_KET_GIA_HEP, 2)):
         dong, loi = _ket_luan_ban_kinh("db_gia", "ca_dich_gia", ket, tong)
         print(f"LOI={loi}")
         for d in dong:

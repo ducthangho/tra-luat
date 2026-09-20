@@ -84,10 +84,24 @@ def _bash_windows(path=None, system_root=None, program_files=None, git=None):
     fail-close chứ không đoán. Bốn tham số chỉ để test ép nền — chúng đi thẳng sang
     `ung_vien()`, nơi có đúng bốn tham số cùng tên và cùng nghĩa."""
     import sys as _sys
-    _here = str(Path(__file__).resolve().parent)
-    if _here not in _sys.path:
-        _sys.path.insert(0, _here)
-    import bash_nen
+    _here = Path(__file__).resolve().parent
+    if str(_here) not in _sys.path:
+        _sys.path.insert(0, str(_here))
+    try:
+        import bash_nen
+    except ImportError as ex:
+        # FAIL-CLOSE CO LY DO, khong phai `ModuleNotFoundError` tran.
+        # ĐO ĐƯỢC 20-09-2026 tren Windows that (bo do `570-do-6`): `_chay_batch` cua bo test
+        # chep `cong_cu.py` sang mot cay tam MA KHONG chep `bash_nen.py`, nen nhanh du phong
+        # duoi day no `ModuleNotFoundError` va giet ca suite TRUOC vong lap ca. Linux khong
+        # bat duoc: nhanh ay nam trong `except OSError`, ma tren Linux `subprocess.run` chay
+        # duoc script shebang nen no KHONG BAO GIO toi.
+        # Mot cay thieu bo giai la cay HONG, khong phai cay "khong co bash" — nen noi ro ra
+        # thay vi de nguoi doc di truy mot `ImportError` khong ten.
+        raise RuntimeError(
+            f"thieu bo giai dung chung: khong import duoc `bash_nen` tu {_here}. "
+            f"Moi cay mang `ops/cong_cu.py` phai mang ca `ops/bash_nen.py` (#570 N14). "
+            f"Goc: {type(ex).__name__}: {ex}") from ex
     ep = {k: v for k, v in (("path", path), ("system_root", system_root),
                             ("program_files", program_files), ("git", git))
           if v is not None}
@@ -101,7 +115,13 @@ def _chay(argv, timeout=20):
     argv = [sys.executable, *argv[1:]] if argv and argv[0] == "python" else argv
     if os.name == "nt" and argv and argv[0] == "bash":
         # Xem `_bash_windows`: đường dẫn TUYỆT ĐỐI để CreateProcess không rẽ vào System32.
-        bash_gb = _bash_windows()
+        # Cửa gọi THỨ NHẤT trong hai cửa — cửa kia ở nhánh dự phòng dưới. Cả hai phải xử lý
+        # `RuntimeError` như nhau, kẻo một cây thiếu `bash_nen.py` làm hỏng ĐÚNG MỘT cửa và
+        # ta lại đi vá cửa được chỉ rồi bỏ sót cửa còn lại — hình dạng kho đã ghi sổ.
+        try:
+            bash_gb = _bash_windows()
+        except RuntimeError as ex_bn:
+            return None, "", f"thieu_bo_giai:{ex_bn}"
         argv = [bash_gb, *argv[1:]] if bash_gb else argv
     try:
         p = subprocess.run(argv, capture_output=True, text=True, timeout=timeout)
@@ -112,13 +132,18 @@ def _chay(argv, timeout=20):
     except OSError as ex:
         # Python native tren Windows khong chay truc tiep script shebang khong co `.exe`;
         # duong lui nay giu probe script dung duoc trong Git Bash, binary that van di duong tren.
-        # MOT bo giai cho CA HAI nen (#570 r3, N14). Ban cu re nhanh: Windows thi qua
-        # `_bash_windows`, con lai thi `shutil.which("bash")` TRAN — tuc dung nen nao khong
-        # sinh ra khuyet tat thi van phan giai theo TEN. Do la cho bo giai thu tu se moc len.
-        # `_bash_windows` nay chi con la mot lop mong tren `tim_bash()`, dung duoc moi nen.
-        bash = _bash_windows()
-        if os.name == "nt" and bash:
-            for d in os.environ.get("PATH", "").split(os.pathsep):
+        # MOT bo giai (#570 r3, N14). Ban cu re nhanh: Windows thi qua `_bash_windows`, con
+        # lai thi `shutil.which("bash")` TRAN — tuc nen khong sinh ra khuyet tat van phan giai
+        # theo TEN, va do la cho bo giai thu tu se moc len.
+        # Ban cu con MOT loi nua, chi thay khi doc ky: gia tri tinh o nhanh `else` ay KHONG BAO
+        # GIO duoc dung, vi vong lap duoi bi chan boi `os.name == "nt"`. Tuc no la ma chet dang
+        # tinh toan. Nay chi tinh khi SE dung.
+        if os.name == "nt":
+            try:
+                bash = _bash_windows()
+            except RuntimeError as ex_bn:
+                return None, "", f"thieu_bo_giai:{ex_bn}"
+            for d in (os.environ.get("PATH", "").split(os.pathsep) if bash else []):
                 ung = Path(d) / argv[0]
                 if ung.is_file():
                     try:

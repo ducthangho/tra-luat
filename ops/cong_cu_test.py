@@ -445,6 +445,15 @@ def _dung_cay_dot_bien(ten, tep, tim, thay, phu_thuoc=()):
         dich.chmod(0o755)
     return cay, dich
 
+# MOT NGUON SU THAT cho cau hoi "cay nao mang `ops/cong_cu.py` thi phai mang gi nua".
+# Co HAI cho trong tep nay dung cay tam chua `cong_cu.py`: bo dot bien (`_PHU` duoi) va
+# `_chay_batch`. Ban 20-09 sang va DUNG cho thu nhat — vi bao cao ban kinh chi vao no — roi
+# BO SOT cho thu hai, va cho thu hai chet tren Windows (`570-do-6`). Do la lan thu hai cua
+# cung hinh dang trong packet nay, va lan thu BA cua hinh dang me "va dung cho duoc chi roi
+# bo sot duong ke tiep". Nen khong va diem thu ba nua: ca hai cho doc CHUNG hang duoi day,
+# va `t30` lam DO neu no rong.
+KEM_THEO_CONG_CU = ("ops/bash_nen.py",)
+
 # `ops/bash_nen.py` NAM TRONG day tu r3 (#570, N14): `ops/cong_cu.py` nay import no, nen mot
 # cay dot bien thieu no se lam ban mutate chet vi ImportError — stdout RONG, va ca doc dau ra
 # do chet bang `JSONDecodeError`. Do la mot cai chet VO CAN: bo phan hang xep dung la
@@ -452,7 +461,7 @@ def _dung_cay_dot_bien(ten, tep, tim, thay, phu_thuoc=()):
 # DO DUOC 20-09-2026: thieu dong nay => `t13_actionlint_bien_mat_giua_probe_va_canary` chet
 # `JSONDecodeError` duoi MOI dot bien ho SCRIPT. No chi lo ra vi bao cao ban kinh nay in LY DO
 # (N16); ban truoc chi in TEN ca oan va se khong ai tim ra duoc nguyen nhan tu do.
-_PHU = ("ops/cong_cu.yaml", "ops/canary/actionlint_shellcheck.yml", "ops/bash_nen.py")
+_PHU = ("ops/cong_cu.yaml", "ops/canary/actionlint_shellcheck.yml") + KEM_THEO_CONG_CU
 
 # ten_dot_bien -> (tep_muc_tieu, tim, thay, bien_toan_cuc_can_patch, phu_thuoc, ten_ca_dich)
 DOT_BIEN = {
@@ -549,6 +558,13 @@ DOT_BIEN = {
         "        return None  # đột biến: loại lại theo ĐƯỜNG DẪN\n"
         "    return duong\n",
         "SCRIPT", _PHU, "t22_bash_windows_quyet_bang_NANG_LUC_chu_khong_bang_DUONG_DAN"),
+    # Go fail-close CO LY DO, tra ve `ModuleNotFoundError` tran — dung hinh dang ma
+    # `570-do-6` bat duoc tren Windows. `t30` chot (3) phai DO.
+    "t30_go_fail_close_bo_giai": ("ops/cong_cu.py",
+        "        raise RuntimeError(\n",
+        "        raise ex  # đột biến: trả lại `ModuleNotFoundError` trần, bỏ lý do\n"
+        "        raise RuntimeError(\n",
+        "SCRIPT", _PHU, "t30_cay_tam_mang_cong_cu_phai_mang_ca_BO_GIAI"),
     "t23_bo_cat_CR_ten_cong_cu": ("ops/cai_cong_cu.sh",
         "    cong_cu=\"${cong_cu%$'\\r'}\"\n",
         "    :  # đột biến: không cắt CR\n",
@@ -1001,6 +1017,17 @@ def _chay_batch(crlf: bool):
         fake_bin = root / "fake-bin"; fake_bin.mkdir(); pip_ready = root / "pip-ready"
         shutil.copy2(CAI_SH, ops / "cai_cong_cu.sh")
         shutil.copy2(SCRIPT, ops / "cong_cu.py")
+        for rel in KEM_THEO_CONG_CU:
+            # `_GOC_THAT` chu KHONG `GOC`: `GOC` bi mot so dot bien tro sang cay tam, va cay ay
+            # chi mang dung nhung tep dot bien ay khai. Doc phu thuoc qua `GOC` bien mot dot
+            # bien cua HO KHAC thanh `FileNotFoundError` o day — mot cai chet VO CAN lam ban
+            # kinh khong doc duoc. DO DUOC 20-09-2026: `t6_day_g5_sau_py_compile` va
+            # `t21_git_regex_cat_hau_to` (ca hai bp=GOC, phu_thuoc RIENG khong co bash_nen.py)
+            # keo `t23_batch...` va `t30` chet nhu the.
+            # Va day la ly do KHONG them ten vao hai danh sach ay: lam the la va DIEM thu tu
+            # cua cung mot hinh dang. Doc tu snapshot bat bien thi moi dot bien tuong lai — ke
+            # ca dot bien chua ai viet — deu khong dung toi duoc cho nay.
+            shutil.copy2(_GOC_THAT / rel, ops / Path(rel).name)
         name = "batch-path-t21"
         manifest = {"schema_version": 1, "cong_cu": {name: {
             "bat_buoc": True, "ban_ghim": "1.2.3",
@@ -1590,6 +1617,67 @@ def t27_cong_khong_bao_dong_gia_tren_CHU_THICH():
         bang(rc == 0 and bao["trang_thai"] == "DAT",
              f"tệp chỉ NHẮC TỚI trong chú thích/chuỗi mà cổng ĐỎ: rc={rc} "
              f"{bao.get('ly_do')} — báo động giả")
+
+
+@ca
+def t30_cay_tam_mang_cong_cu_phai_mang_ca_BO_GIAI():
+    """Một cây chỉ có `cong_cu.py` mà thiếu `bash_nen.py` phải hỏng CÓ LÝ DO, không âm thầm.
+
+    CA NÀY SINH TỪ MỘT PHÉP ĐO, và phép đo ấy phải chạy trên Windows mới thấy. Bộ đo
+    `570-do-6` (20-09-2026, máy chủ kho, HEAD 785ef33): `_chay_batch` chép `cong_cu.py` sang
+    cây tạm mà KHÔNG chép `bash_nen.py`; nhánh dự phòng của `_chay` nổ `ModuleNotFoundError`
+    và giết cả suite TRƯỚC vòng lặp ca — đúng khuyết tật N12 vừa chữa xong, tái sinh bởi N14.
+
+    VÌ SAO LINUX MÙ: nhánh ấy nằm trong `except OSError`, mà trên Linux `subprocess.run` chạy
+    được script shebang nên nó KHÔNG BAO GIỜ tới. Cả suite Linux xanh 31/31 trong khi mã đang
+    hỏng trên nền mà packet này sinh ra để phục vụ.
+
+    Ba chốt:
+      (1) `KEM_THEO_CONG_CU` khác rỗng — nếu ai làm nó rỗng thì hai cây tạm lại thiếu;
+      (2) cây ĐỦ: `_bash_windows` chạy được, trả chuỗi hoặc None, KHÔNG ném;
+      (3) cây THIẾU: ném `RuntimeError` NÊU TÊN `bash_nen`, chứ không phải `ModuleNotFoundError`
+          trần. Fail-close có lý do — `None ≠ False`, và một cây hỏng khác một máy không có bash.
+    """
+    bang(bool(KEM_THEO_CONG_CU),
+         "`KEM_THEO_CONG_CU` RỖNG ⇒ mọi cây tạm mang `cong_cu.py` sẽ lại thiếu bộ giải; "
+         "đó đúng là cách khuyết tật `570-do-6` quay lại")
+    ma = ("import runpy, sys, json\n"
+          "m = runpy.run_path(sys.argv[1])\n"
+          "try:\n"
+          "    r = m['_bash_windows']()\n"
+          "    print('KQ ' + json.dumps(['ok', r]))\n"
+          "except RuntimeError as ex:\n"
+          "    print('KQ ' + json.dumps(['RuntimeError', str(ex)]))\n"
+          "except Exception as ex:\n"
+          "    print('KQ ' + json.dumps([type(ex).__name__, str(ex)]))\n")
+
+    def hoi(ops_dir: Path):
+        p = subprocess.run([sys.executable, "-c", ma, str(ops_dir / "cong_cu.py")],
+                           cwd=GOC, capture_output=True, text=True, timeout=180)
+        dung(p.returncode == 0 and "KQ " in p.stdout,
+             f"giàn giáo hỏng khi hỏi cây {ops_dir}: rc={p.returncode}\n{p.stdout}\n{p.stderr}")
+        return json.loads([l for l in p.stdout.splitlines() if l.startswith("KQ ")][-1][3:])
+
+    with tempfile.TemporaryDirectory() as tmp:
+        tmp = Path(tmp)
+        du = tmp / "du" / "ops"; du.mkdir(parents=True)
+        shutil.copy2(SCRIPT, du / "cong_cu.py")
+        for rel in KEM_THEO_CONG_CU:
+            shutil.copy2(_GOC_THAT / rel, du / Path(rel).name)   # xem chu thich o `_chay_batch`
+        thieu = tmp / "thieu" / "ops"; thieu.mkdir(parents=True)
+        shutil.copy2(SCRIPT, thieu / "cong_cu.py")
+
+        kieu, chi_tiet = hoi(du)
+        bang(kieu == "ok",
+             f"cây ĐỦ phụ thuộc mà `_bash_windows` vẫn hỏng: {kieu}: {chi_tiet}")
+
+        kieu, chi_tiet = hoi(thieu)
+        bang(kieu == "RuntimeError",
+             f"cây THIẾU `bash_nen.py` phải hỏng bằng RuntimeError CÓ LÝ DO, nhận được "
+             f"{kieu}: {chi_tiet} — một `ModuleNotFoundError` trần đẩy người đọc đi truy "
+             f"nhầm chỗ, đúng thứ `570-do-6` bắt được")
+        bang("bash_nen" in chi_tiet,
+             f"RuntimeError không nêu tên tệp thiếu: {chi_tiet!r}")
 
 
 def main() -> int:

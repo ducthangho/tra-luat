@@ -20,6 +20,15 @@ generation: 2
 lease_id: wp570-bash-nen-r2-g2-claude
 granted_by: ducthangho
 
+# BIA MO CHIEU NGUOC — dat 20-09-2026T07:5xZ, trong CUNG lan day voi lease ke nhiem.
+# `_kiem_bia_mo` doi HAI CHIEU: lease moi khai `thay_the_cho`, lease cu mang dong nay. Thieu mot
+# chieu thi cong bac rc=8. Va vi cong doc tu REF chu khong doc cay lam viec, hai tep KHONG duoc
+# di hai lan day — do la bai hoc da tra gia o #355.
+da_bi_thay_the: wp570-bash-nen-r3-g3-claude
+da_bi_thay_the_vi_sao: 'r3 mo write set sang `ops/cong_cu.py` (§3.2: doi write set => revision
+  moi, generation moi, cap lai lease). g2 KHONG lam gi sai — no loai duong ay dung luc lease
+  wp541-path-r3-g3-claude con giu. Lease do da bi thu hoi; do 20-09T07:5xZ cho NGUOI_GIU 0.'
+
 thay_the_cho: wp570-bash-nen-r1-g1-claude
 thay_the_cho_vi_sao: 'Dau HAI CHIEU. g1 da mang dong `da_bi_thay_the: wp570-bash-nen-r2-g2-claude`
   TRUOC khi lease nay duoc dang; `_kiem_bia_mo` cuong che chieu ay va bac rc=8 neu thieu. Hai tep

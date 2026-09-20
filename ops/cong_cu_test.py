@@ -565,6 +565,14 @@ DOT_BIEN = {
         "        raise ex  # đột biến: trả lại `ModuleNotFoundError` trần, bỏ lý do\n"
         "        raise RuntimeError(\n",
         "SCRIPT", _PHU, "t30_cay_tam_mang_cong_cu_phai_mang_ca_BO_GIAI"),
+    # Nuot MOI ngoai le o `_chay_tien_kiem` — mot tien kiem hong THAT se thanh im lang.
+    # `t31` chot (3) phai DO.
+    "t31_tien_kiem_nuot_moi_loi": ("ops/cong_cu_test.py",
+        "    except BoQuaMoiTruong as ex:\n        return (fn.__name__, str(ex))\n",
+        "    except Exception as ex:  # đột biến: nuốt MỌI lỗi, kể cả chốt nghiệp vụ\n"
+        "        return (fn.__name__, str(ex))\n",
+        "TEP_TEST", ("ops/lease_publish_test.py", "ops/bash_nen.py"),
+        "t31_tien_kiem_KHONG_DO_DUOC_khong_duoc_giet_ca_suite"),
     "t23_bo_cat_CR_ten_cong_cu": ("ops/cai_cong_cu.sh",
         "    cong_cu=\"${cong_cu%$'\\r'}\"\n",
         "    :  # đột biến: không cắt CR\n",
@@ -1089,7 +1097,18 @@ def python_alias_behavior_test() -> None:
     """Probe `python` dùng interpreter chạy cong_cu.py, không đòi alias trên PATH."""
     with tempfile.TemporaryDirectory(prefix="cong-cu-python3-") as td:
         root = Path(td); only = root / "bin"; only.mkdir()
-        (only / "python3").symlink_to(sys.executable)
+        try:
+            (only / "python3").symlink_to(sys.executable)
+        except OSError as ex:
+            # Windows doi SeCreateSymbolicLinkPrivilege (Developer Mode hoac shell nang quyen).
+            # Thieu no thi day la KHONG DO DUOC, KHONG phai DO — va nhat dinh khong phai ly do
+            # de giet ca suite. ĐO ĐƯỢC 20-09-2026 tren may chu kho: cung ma nay chay TRON luc
+            # 13:33 (`570-do-5`, 32/32) roi `WinError 1314` luc 18:07 (`570-do-7`) — ham GIONG
+            # HET tung byte o ca hai lan, nen khac biet la TRANG THAI MAY, khong phai ma.
+            # Vi sao doi trang thai: KHONG DO DUOC, va khong dung gia thuyet cho no.
+            raise BoQuaMoiTruong(
+                f"khong tao duoc symlink de dung cay chi-co-python3: {type(ex).__name__}: {ex}. "
+                f"Tren Windows can Developer Mode hoac shell nang quyen. KHONG_DO_DUOC.") from ex
         bk = ghi_ban_ke(root, {"python": {"bat_buoc": True, "ban_ghim": None,
             "probe": [{"ten": "mac_dinh", "lenh": ["python", "--version"],
                        "regex": r"Python\s+(\d+\.\d+\.\d+)"}]}})
@@ -1680,9 +1699,71 @@ def t30_cay_tam_mang_cong_cu_phai_mang_ca_BO_GIAI():
              f"RuntimeError không nêu tên tệp thiếu: {chi_tiet!r}")
 
 
+@ca
+def t31_tien_kiem_KHONG_DO_DUOC_khong_duoc_giet_ca_suite():
+    """Tiền kiểm thiếu MÔI TRƯỜNG thì bỏ qua có ghi nhận; hỏng NGHIỆP VỤ thì vẫn giết.
+
+    BA LẦN suite này báo cáo ĐÚNG BẰNG KHÔNG trên Windows, và cả ba đều vì một tiền kiểm
+    chết TRƯỚC vòng lặp ca — không lần nào vì một ca đo được điều gì:
+      · `570-do-3` — `batch_behavior_test`, WSL bash làm `./cai_cong_cu.sh` treo 60s;
+      · `570-do-6` — `batch_behavior_test`, cây tạm thiếu `bash_nen.py` (N14 gây ra);
+      · `570-do-7` — `python_alias_behavior_test`, `WinError 1314` thiếu đặc quyền symlink.
+    Ba nguyên nhân khác hẳn nhau, một chỗ hỏng: LỜI GỌI nằm ngoài mọi khung bắt lỗi. Nên chữa
+    ở chỗ gọi, không chữa từng nguyên nhân — nguyên nhân thứ tư sẽ lại khác.
+
+    `None ≠ False`: bỏ qua KHÔNG được lặng lẽ thành xanh. Nó phải hiện ra VÀ kéo mã thoát.
+    Ba chốt, mỗi chốt một đầu vào riêng:
+      (1) `BoQuaMoiTruong` ⇒ trả (tên, lý do), KHÔNG ném — suite đi tiếp;
+      (2) chạy trót lọt ⇒ trả None;
+      (3) chốt NGHIỆP VỤ hỏng ⇒ VẪN ném — một tiền kiểm hỏng thật thì phải giết, đó là việc
+          của nó, và nếu (3) mất thì hàm này biến mọi hỏng hóc thành im lặng.
+    """
+    p = subprocess.run([sys.executable, str(TEP_TEST), "--tu-kiem-tien-kiem"],
+                       cwd=GOC, capture_output=True, text=True, timeout=120)
+    dung(p.returncode == 0 and "TK1 " in p.stdout,
+         f"không chạy được cửa tự kiểm tiền kiểm: rc={p.returncode}\n{p.stdout}\n{p.stderr}")
+    doc = {l[:3]: json.loads(l[4:]) for l in p.stdout.splitlines()
+           if l[:3] in ("TK1", "TK2", "TK3")}
+
+    bang(doc.get("TK1") and doc["TK1"][0] == "thieu_moi_truong",
+         f"(1) `BoQuaMoiTruong` phải được GHI NHẬN, nhận về {doc.get('TK1')!r}\n{p.stdout}")
+    bang("thiếu thứ để đo" in (doc["TK1"][1] or ""),
+         f"(1) không giữ lý do: {doc['TK1']!r}")
+    bang(doc.get("TK2") is None,
+         f"(2) tiền kiểm chạy trót lọt mà vẫn bị đếm là bỏ qua: {doc.get('TK2')!r}")
+    bang(doc.get("TK3", [None])[0] == "NEM",
+         "(3) chốt NGHIỆP VỤ hỏng mà `_chay_tien_kiem` NUỐT — một tiền kiểm hỏng thật phải "
+         f"giết; nuốt nó là biến cổng thành trang trí: {doc.get('TK3')!r}")
+
+
+def _chay_tien_kiem(fn):
+    """Chay mot TIEN KIEM (ngoai `CA`) voi BA trang thai, tra (ten, ly_do) neu bo qua.
+
+    VI SAO CO HAM NAY — do duoc, khong phai lo xa. `main()` ban cu goi hai tien kiem NGOAI
+    moi khung bat loi, nen bat ky thu gi chung nem deu giet CA SUITE truoc vong lap ca. Hai
+    lan da xay ra that, ca hai deu tren Windows va ca hai deu KHONG phai loi nghiep vu:
+      · `570-do-3`/`570-do-6`: `batch_behavior_test` chet (WSL bash treo, roi thieu `bash_nen`);
+      · `570-do-7`: `python_alias_behavior_test` chet `WinError 1314` — thieu dac quyen symlink.
+    Moi lan, mot suite 33 ca bao cao DUNG BANG KHONG. Do chinh la benh N12 sinh ra de giet,
+    va no quay lai bang mot nguyen nhan khac — nen chua o CHO GOI chu khong chua tung nguyen
+    nhan mot.
+
+    `BoQuaMoiTruong` => bo qua, DEM RIENG va IN RA (khong duoc lang le bo). Moi thu khac VAN
+    nem: mot tien kiem hong vi ly do NGHIEP VU thi phai giet, do la viec cua no.
+    """
+    try:
+        fn()
+        return None
+    except BoQuaMoiTruong as ex:
+        return (fn.__name__, str(ex))
+
+
 def main() -> int:
-    batch_behavior_test()
-    python_alias_behavior_test()
+    tien_kiem_bo_qua = [x for x in (_chay_tien_kiem(batch_behavior_test),
+                                    _chay_tien_kiem(python_alias_behavior_test)) if x]
+    # TACH KHOI `bo_qua` cua CA: `bo_qua` la MAU SO (`len(CA) - len(bo_qua)`), ma tien kiem
+    # KHONG nam trong `CA`. Gop vao la lam con so noi doi — dung loai loi ma tep nay ton tai
+    # de to cao. In rieng, dem rieng.
     qua, hong, bo_qua = 0, [], []
     for fn in CA:
         try:
@@ -1694,11 +1775,14 @@ def main() -> int:
             hong.append((fn.__name__, str(ex)))
         except Exception as ex:  # noqa: BLE001
             hong.append((fn.__name__, f"{type(ex).__name__}: {ex}"))
+    for ten, ly in tien_kiem_bo_qua:
+        print(f"  BỎ QUA (TIỀN KIỂM) {ten}: {ly}")
     for ten, ly in bo_qua:
         print(f"  BỎ QUA {ten}: {ly}")
     for ten, ly in hong:
         print(f"  ĐỎ  {ten}: {ly}")
-    print(f"\ncong_cu_test: {qua}/{len(CA) - len(bo_qua)} đạt; tổng={len(CA)}, bỏ qua={len(bo_qua)}")
+    print(f"\ncong_cu_test: {qua}/{len(CA) - len(bo_qua)} đạt; tổng={len(CA)}, "
+          f"bỏ qua={len(bo_qua)}, tiền kiểm bỏ qua={len(tien_kiem_bo_qua)}")
 
     loi_db = _tu_kiem_phan_hang()
     loi_db += _tu_kiem_gian_giao()
@@ -1715,8 +1799,11 @@ def main() -> int:
         for dong in cac_dong:
             print(dong)
         loi_db += loi
-    print(f"\nSỐ LIỆU: ca={len(CA)} · đột biến={len(DOT_BIEN)} · lỗi đột biến={loi_db}")
-    return 1 if (hong or loi_db) else 0
+    print(f"\nSỐ LIỆU: ca={len(CA)} · đột biến={len(DOT_BIEN)} · lỗi đột biến={loi_db}"
+          f" · tiền kiểm bỏ qua={len(tien_kiem_bo_qua)}")
+    # Tien kiem bi bo qua KEO ma thoat khac 0. `KHONG_DO_DUOC` khong duoc lang le thanh XANH —
+    # `None != False`. No chi thoi giet CA SUITE, chu khong thoi la mot tin hieu.
+    return 1 if (hong or loi_db or tien_kiem_bo_qua) else 0
 
 _KET_GIA_RONG = {
     "ca_dich_gia": ("giet_that", "chốt của chính nó"),
@@ -1734,6 +1821,28 @@ _KET_GIA_HEP = {
     "ca_dich_gia": ("giet_that", "chốt của chính nó"),
     "ca_xanh_gia": ("qua", None),
 }
+
+
+def _in_tu_kiem_tien_kiem():
+    """Cua de DOT BIEN cham toi duoc `_chay_tien_kiem` — cung ly do voi cua ban kinh:
+    `t31` goi ham ay, ma bo dot bien mutate mot BAN SAO tren dia, nen phai hoi qua tien
+    trinh con doc ma tu `TEP_TEST` thi `t31_tien_kiem_nuot_moi_loi` moi co cho can."""
+    def thieu_moi_truong():
+        raise BoQuaMoiTruong("thiếu thứ để đo")
+
+    def chay_duoc():
+        return None
+
+    def hong_nghiep_vu():
+        bang(False, "chốt nghiệp vụ hỏng")
+
+    print("TK1 " + json.dumps(_chay_tien_kiem(thieu_moi_truong)))
+    print("TK2 " + json.dumps(_chay_tien_kiem(chay_duoc)))
+    try:
+        r = _chay_tien_kiem(hong_nghiep_vu)
+        print("TK3 " + json.dumps(["NUOT", r]))
+    except BaseException as ex:                     # noqa: BLE001 — ĐO cái gì thoát ra
+        print("TK3 " + json.dumps(["NEM", type(ex).__name__]))
 
 
 def _in_tu_kiem_ban_kinh():
@@ -1754,5 +1863,8 @@ def _in_tu_kiem_ban_kinh():
 if __name__ == "__main__":
     if "--tu-kiem-ban-kinh" in sys.argv[1:]:
         _in_tu_kiem_ban_kinh()
+        sys.exit(0)
+    if "--tu-kiem-tien-kiem" in sys.argv[1:]:
+        _in_tu_kiem_tien_kiem()
         sys.exit(0)
     sys.exit(main())

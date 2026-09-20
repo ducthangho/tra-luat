@@ -1,0 +1,152 @@
+# LEASE BIA MO — WP570-BASH-NEN-MOT-BO-GIAI revision 5 / generation 5
+#
+# LEASE NAY KHONG CAP QUYEN CHO AI. `write_set` RONG co chu dich: `_lease_cham_duong` khong
+# khop duong nao, nen no giu SO KHONG tep. No ton tai vi DUNG MOT ly do — mang chieu nguoc cua
+# bia mo hai chieu de `wp570-bash-nen-r4-g4-claude` thoi giu write set sau khi packet DA LAND.
+#
+# VI SAO PHAI LA MOT LEASE, chep lai tu wp541-path-r4-g4-bia-mo vi ly le khong doi:
+#  · `SO_THU_HOI_KICH_HOAT = False`, nen ghi vao so thu hoi se lam `kiem-thu-hoi-github` DO
+#    toan kho — job `thu-hoi` chay tren MOI PR.
+#  · `_bia_mo_doi_xung` co BA ket qua: khong dau => con giu; dau CO nguoi tro nguoc => chet;
+#    dau MA KHONG ai tro nguoc => rc=12 KHONG_XAC_DINH cho moi duong lease ay cham. Mot dau
+#    MOT CHIEU lam gay bo quet ca kho.
+# Tuc: khong co duong nghi huu nao KHONG can nguoi ke nhiem. Do dung no
+# `AG-T0-01B-thu-hoi-lease-chua-co-duong`, va lease nay la cai gia cua no.
+#
+# KHAC ca #541 o MOT diem da do: `wp570-bash-nen-r4-g4-claude` song tren DUNG MOT ref
+# (`refs/remotes/origin/ops/cap-lease-570-g4`), nen mot dau la du. g3 cua #541 song tren HAI ref
+# va phai danh dau ca hai. Dung suy tu ca nay sang ca khac — phai DEM ref moi lan.
+
+trang_thai_ban_ghi: 'DA CAP 2026-09-20T19:44Z. Day len ops/cap-lease-570-g5 theo chi thi chu kho.'
+
+schema_version: 2
+event: executor_lease_granted
+packet_issue: 570
+packet_id: WP570-BASH-NEN-MOT-BO-GIAI
+mission_issue: KHONG_CO
+revision: 5
+generation: 5
+lease_id: wp570-bash-nen-r5-g5-bia-mo
+granted_by: ducthangho
+
+thay_the_cho: wp570-bash-nen-r4-g4-claude
+thay_the_cho_vi_sao: 'Dau HAI CHIEU. Ban g4 DA mang dong `da_bi_thay_the: wp570-bash-nen-r5-g5-bia-mo`
+  truoc khi lease nay di qua `check` — commit 60b2a835 tren ops/cap-lease-570-g4, day luc 19:4xZ.
+  `_kiem_bia_mo` cuong che chieu ay va bac rc=8 neu thieu, va no doc tu REF chu khong doc cay lam
+  viec, nen hai ve di trong HAI lan day chu khong mot.'
+
+granted_on_instruction: https://github.com/ducthangho/tra-luat/issues/570#issuecomment-5752188461
+granted_on_instruction_nguyen_van: 'Chu kho, phien dieu phoi 2026-09-20: "thu hoi som lease g4 cua
+  #570 bang bia mo di".'
+granted_on_instruction_ghi_chu: 'Comment duoc neo la BAN GHI cua chi thi, khong phai nguon goc —
+  cung quy uoc voi wp541-path-r4-g4-bia-mo. Chi thi phat ra trong phien dieu phoi; phien claude
+  soan va dang HO bang token chu kho, va da khai ro dieu do trong chinh comment ay.'
+recorded_by: claude-session
+recorder_is_dispatcher: false
+
+XUNG_DOT_LOI_ICH: 'KHAI TRUOC, khong de ai phai tu tim ra. Phien soan lease nay CUNG LA phien da
+  soan dac ta wp584 (ops/specs/BAN-CHIEU-LEASE-CHIEU-LAI.md, sha256 5d842addef89b7a601b5ee67f0b2
+  57c5e561d84b347a27325a8d761249670eef), va wp584 bi chan boi dung ops/lease_publish_test.py.
+  Thu hoi g4 CO LOI truc tiep cho packet ma phien nay soan spec.
+  Ba chot de cai loi ay khong thanh quyen, ca ba deu do duoc:
+   1. `write_set` RONG — lease nay khong cap gi cho ai, ke ca phien nay.
+   2. Thu hoi g4 KHONG lam ops/lease_publish_test.py ranh: windows-fixture-posix-r1-g1-claude
+      (#578) van giu toi 2026-09-21T10:30:00Z. Tieu chi nghiem thu duoi day doi NGUOI_GIU tut
+      tu 2 xuong 1, KHONG doi no ve 0 — neu no ve 0 thi co gi do sai.
+   3. Cap lease cho wp584 van la quyet dinh rieng cua chu kho, va van phai do lai `ai-dang-giu`
+      tai luc cap chu khong chep con so cua hom nay.'
+
+leased_at_utc: '2026-09-20T19:44:00Z'
+lease_expires_at_utc: '2026-09-21T19:44:00Z'
+han_de_xuat_vi_sao: 'Han khong mang y nghia van hanh nao: `write_set` RONG nen lease giu so khong
+  duong, con `_bia_mo_doi_xung` tra ket qua theo TEN lease chu khong theo han. Dat 24 gio cho khop
+  hinh dang cac lease khac, khong phai vi can quyen den luc ay.'
+
+role: executor
+provider: KHONG_AP_DUNG
+executor: KHONG_AI
+executor_vi_sao: 'Lease bia mo. Khong phien nao duoc bat dau viec duoi no. Packet #570 da LAND
+  (PR #571, merge 395bc7b1be6c275d8de697f8d8541bb36a290c9e, merged_by ducthangho,
+  2026-09-20T16:25:58Z). Viec moi cua #570 phai di qua mot revision/generation MOI.'
+model: KHONG_AP_DUNG
+effort: KHONG_AP_DUNG
+execution_surface: KHONG_AP_DUNG
+transport: KHONG_AP_DUNG
+environment: KHONG_AP_DUNG
+operating_system: KHONG_AP_DUNG
+
+risk: sensitive
+review_class: sensitive
+effective_review_class: sensitive
+review_class_vi_sao: 'Giu nguyen lop cua g4. Mot bia mo khong duoc dung de HA lop: no khong sua ma,
+  nhung no THAY DOI ai duoc ghi vao hai tep nhay cam nhat cua kho. Kem mot phep do: voi write_set
+  RONG, `_tinh_lop_tu_write_set` tra `sensitive` cho moi dau vao, nen `effective_review_class`
+  BUOC phai la sensitive — khai thap hon se bi `_kiem_lop_review` bac rc=10.'
+
+assurance_target: human_audited
+assurance_target_vi_sao: 'Giu nguyen cua g4. Khong co viec thi cung khong co gi de review, nhung ha
+  muc bao dam trong mot lease thu hoi la mo mot duong di vong cho lan sau.'
+reviewer_provider: human
+reviewer_model: KHONG_AP_DUNG
+reviewer_effort: KHONG_AP_DUNG
+reviewer_independence: KHONG_AP_DUNG
+cross_reviewer_requirement: 'CAM self_review va self_approve. Lease nay do phien claude soan HO theo
+  chi thi chu kho; phien ay KHONG duoc dong vai reviewer cho no. Rang buoc RIENG o day: chinh phien
+  ay da chay mot luot advisory_review tren PR #571 cua packet #570 (comment 5750891123) — nen no bi
+  cam hai lan, va `assurance_target: human_audited` cang phai la NGUOI that.'
+
+branch: ops/cap-lease-570-g5
+branch_ownership: exclusive
+target_branch_neu_land: KHONG_LAND
+
+base_sha: 395bc7b1be6c275d8de697f8d8541bb36a290c9e
+base_sha_vi_sao: 'origin/master tai commit LAND cua #570 (PR #571). Bia mo neo vao dung diem ket
+  thuc cua packet, khong neo vao dau master hien tai — dau ay da di tiep vi viec cua packet KHAC.'
+reviewed_sha_required: 395bc7b1be6c275d8de697f8d8541bb36a290c9e
+reviewed_sha_required_note: 'Truong BAT BUOC cua cong. Khong co ung vien nao de review — lease nay
+  khong cap viec — nen no neo vao chinh commit land cua #570.'
+
+write_set: []
+write_set_vi_sao: 'RONG CO CHU DICH. `_lease_cham_duong` khong khop duong nao, nen lease nay giu SO
+  KHONG tep. Day la diem mau chot: mot bia mo KHONG duoc am tham giu lai thu ma no vua nha.'
+write_set_da_quet_toan_kho: 'KHONG AP DUNG — write set rong thi khong co gi de quet. Phep quet co y
+  nghia o day la phep do SAU khi day, ghi o `dieu_kien_dung`.'
+
+khong_duoc_cham:
+- moi duong dan trong kho (write set rong)
+
+run_minutes: 0
+heartbeat_required_minutes: 0
+attempts_limit: 0
+review_calls_limit: 0
+manual_ci_budget: 0
+
+prohibited_actions:
+- self_review
+- self_approve
+- merge
+- land
+- deploy
+- LIVE
+- ruleset mutation
+- admin bypass
+- secret disclosure
+- workflow_dispatch
+- manual full CI
+- Windows CI
+- 'BAT DAU BAT KY VIEC NAO duoi lease nay — no la bia mo, khong phai giay phep'
+- 'NOI write_set — mot bia mo co write set la mot lease tra hinh'
+
+dieu_kien_dung:
+- 'Sau khi day, `ai-dang-giu ops/lease_publish_test.py` phai tut tu NGUOI_GIU 2 xuong NGUOI_GIU 1,
+   va ten con lai phai la windows-fixture-posix-r1-g1-claude (#578). Ve 0 la SAI — #578 van giu.'
+- '`ai-dang-giu` tra rc=12 KHONG_XAC_DINH => co mot ban g4 mang dau MOT CHIEU. DUNG ngay va dat not
+   chieu nguoc — do la trang thai GAY, khong phai trang thai trung gian chap nhan duoc.'
+- 'Neu `ai-dang-giu ops/lease_publish.py` cung doi trang thai theo huong khong luong truoc thi DUNG:
+   lease nay khong duoc dong cham gi den duong ay ngoai viec g4 thoi giu.'
+
+closure_status: 'Tombstone-only grant. Grants nothing, holds nothing, starts nothing. Exists to carry
+  the reverse half of the two-way marker so wp570-bash-nen-r4-g4-claude stops holding
+  ops/lease_publish.py and ops/lease_publish_test.py after packet #570 landed in PR #571. The
+  revocation ledger remains the right long-term answer and remains INACTIVE
+  (SO_THU_HOI_KICH_HOAT = False); this lease is the price of that debt, not a substitute for it.'

@@ -221,6 +221,24 @@ git -C "$SOURCE" diff --numstat "$BASE_SHA" "$REVIEWED_SHA" > "$SCRATCH/numstat.
 
 Hợp đồng `reviewed_sha` và xử lý khi head đổi: xem protocol §8/§13.
 
+`§8`/`§13` cho hợp đồng, **không** phân xử VÌ SAO head đổi — mà hai nguyên nhân đòi hai hành động
+ngược nhau, nên bảng này ở lại:
+
+| head đổi vì | hành động |
+|---|---|
+| **tác giả đẩy commit mới** vào nhánh packet | bản duyệt cũ hết hiệu lực ⇒ **làm lại** vòng trên head mới |
+| **base trôi** (nhánh mặc định tiến lên) | **merge base TRƯỚC**, rồi mở vòng trên head SAU merge |
+
+**Đo `base` trước vòng mà bạn dự đoán sẽ ra `approve`** — nghĩa vụ, không phải gợi ý:
+
+```bash
+git merge-base --is-ancestor origin/<nhánh mặc định> HEAD   # rc khác 0 ⇒ CÓ DRIFT
+```
+
+Hai nợ CÓ TÊN, chưa ai đóng: `DIEU-KIEN-VONG-CUOI-KHONG-DO-DUOC` (*"dự đoán vòng này là cuối"* là
+phán đoán của phiên, không đo được) · `HEAD-DOI-VI-HIEN-VAT-REVIEW` (head đổi vì hiện vật của CHÍNH
+lượt review — bảng trên chưa phân xử; xếp vào hàng thứ nhất tạo vòng lặp không bao giờ đóng).
+
 ## Dựng mirror trong sandbox — cú pháp nền, và ba chỗ đã gãy thật
 
 Ví dụ dưới dùng clone rời và checkout detached. Worktree dùng chung kho Git với cây nguồn;
@@ -421,6 +439,50 @@ phiên mà chẩn đoán nhầm; chỉ lộ khi cross-review dựng phản chứ
 
 Việc dọn và trình tự phép đo theo chỉ thị điều phối của lượt; các lệnh trên chỉ minh họa
 chọn tiến trình bằng mẫu và quan sát danh sách còn lại.
+
+## Điều kiện dừng theo `review_class`
+
+Trục `review_class`: xem protocol `§3.2`. Bảng này chỉ ánh xạ nó sang điều kiện dừng.
+
+| `review_class` | điều kiện dừng |
+|---|---|
+| `routine` | **0 P1**; P2 còn lại thành **nợ CÓ TÊN** trong Issue của packet |
+| `systemic` | **0 P1 + 0 P2** |
+| `sensitive` | **`approve` tường minh** của reviewer khác nền |
+
+Hàng `sensitive` **KHÔNG** được đọc thành *"hết P1 và P2"*: *"vắng mặt vì sạch"* và *"vắng mặt vì
+chưa nhìn tới"* nhìn giống hệt nhau, và chỉ một `approve` phân biệt được hai thứ đó.
+
+## `BẢNG LỚP`
+
+Verdict **phải** mang mục này. **Mỗi finding thuộc ĐÚNG MỘT `lop_loi`** — finding không có lớp thì
+verdict **thiếu**, không phải *"chưa phân loại"*.
+
+| `lop_loi` | các slug thuộc lớp | **bản vá theo lớp** \| lý do vá lẻ |
+|---|---|---|
+
+Cột thứ ba là cột có răng: mỗi lớp khai **một thay đổi đóng cả lớp**, hoặc khai **lý do** phải vá lẻ.
+Bỏ nó thì bảng tụt xuống thành bảng phân loại thuần.
+
+| trường | đếm gì |
+|---|---|
+| `so_p1` · `so_p2` · `so_p3` | số **LỚP** ở mỗi hạng |
+| `so_the_hien` | tổng số **THỂ HIỆN** |
+| `findings_ids` | slug của **LỚP**, kebab-case |
+
+Một LỚP = một **cơ chế** sinh cùng hình dạng lỗi; hạng của lớp là hạng **cao nhất** trong các thể
+hiện. Slug là **khoá đếm** — giữ NGUYÊN qua các lượt cho cùng một lớp. Ngưỡng lặp lại: xem protocol
+`§12`.
+
+**`P1`/`P2`/`P3` KHÔNG có nguồn định nghĩa có thẩm quyền trong kho — nợ `DINH-NGHIA-PHAN-HANG-KHONG-CO-NGUON`.**
+Đo được: `§8` chứa `P1` nhưng **không** `P2`/`P3`; `§12` **không** chứa cả ba. Bản trước của dòng này
+trỏ *"định nghĩa P1/P2/P3: xem `§8`/`§12`"* và đó là một **con trỏ sai đích** — nó dẫn người đọc tới
+nội dung assurance/budget thay cho định nghĩa severity. Dùng ba hạng theo cách chúng đang được dùng
+trong `ops/reviews/**`, và **đừng** tự định nghĩa chúng ở đây: một adapter tự định nghĩa thứ doctrine
+chưa định nghĩa là dựng một nguồn thứ hai sẽ trôi lệch.
+
+**Reviewer phải GỌI TÊN khi một vòng đóng finding bằng cách CẮT TIÊU CHÍ** hoặc thu hẹp phạm vi, chứ
+đừng ghi nhận nó là đã vá.
 
 ## Ví dụ trình bày `VERDICT.md`
 

@@ -61,46 +61,38 @@ def nen_hien_tai():
     return t or "unknown"
 
 def _bash_windows(path=None, system_root=None, program_files=None, git=None):
-    """Windows: KHÔNG để CreateProcess tự tra `bash`. Nó tra `%SystemRoot%\\System32` TRƯỚC
-    PATH, mà `System32\\bash.exe` là bộ PHÓNG WSL — không phải GNU bash: thiếu distro thì
-    `bash --version` rc=1, có distro thì trả bash của distro, đằng nào cũng không phải Git
-    Bash mà hook SessionStart cần. Đo 02-09-2026, run 33612364175 lane windows-latest: bước
-    G5 chạy TRONG Git Bash mà probe bash vẫn `rc=1, mong [0]`, `ban_thay: null`.
+    """`bash` ĐÃ CHỨNG MINH làm được việc — uỷ quyền cho `ops/bash_nen.py::tim_bash()`.
 
-    Thứ tự: `CONG_CU_BASH` → PATH (loại mọi ứng viên nằm DƯỚI SystemRoot — đó là một tệp
-    cụ thể do HĐH cấp, không phải danh sách cấm theo tên) → Git for Windows cạnh `git`
-    (`<Git>\\bin`, `<Git>\\usr\\bin`) → `%ProgramFiles%\\Git` (cùng hai vị trí launcher
-    đã dùng). Không thấy gì thì trả None để probe hỏng THẬT, không đoán.
-    Tham số chỉ để test ép nền: mặc định đọc từ môi trường lúc gọi."""
-    env = os.environ
-    chi_dinh = env.get("CONG_CU_BASH")
-    if chi_dinh and Path(chi_dinh).is_file():
-        return chi_dinh
-    path = env.get("PATH", "") if path is None else path
-    sr = env.get("SystemRoot", "") if system_root is None else system_root
-    sr_norm = os.path.normcase(os.path.abspath(sr)).rstrip("\\/") if sr else None
+    HỢP NHẤT (#570 revision 3, N14). Thân cũ của hàm này là bộ giải RIÊNG thứ HAI trong ba
+    bộ giải độc lập cho cùng một khuyết tật, và là bộ cuối cùng còn sót sau khi `_bash_posix`
+    hợp nhất ở r2. Nó quyết bằng ĐƯỜNG DẪN: loại mọi ứng viên nằm dưới `%SystemRoot%`.
 
-    def duoi_system_root(u):
-        if not sr_norm:
-            return False
-        q = os.path.normcase(os.path.abspath(str(u)))
-        return q == sr_norm or q.startswith(sr_norm + os.sep) or q.startswith(sr_norm + "/")
+    VÌ SAO BỎ CÁCH ẤY — đo được, không phải sở thích:
+    · `CLAUDE.md`: *"danh sách CẤM không bao giờ đủ — phải đảo thành danh sách CHO PHÉP"*.
+      Loại theo vị trí là một danh sách cấm đội lốt; nó phân biệt CHỖ ĐỨNG, không phân biệt
+      NĂNG LỰC. Một `bash` POSIX thật đặt dưới `%SystemRoot%` bị nó từ chối oan, còn một bộ
+      phóng WSL đặt chỗ khác thì nó nhận.
+    · Nghiệm thu Windows `570-do-5` (20-09-2026, máy chủ kho) cho thấy phép NĂNG LỰC bắt
+      đúng thứ cần bắt, và nêu được LÝ DO: `C:\\Windows\\system32\\bash.exe` ⇒ `dat=false`,
+      *"phép argv: `$0` là '/bin/bash', mong 'bn-argv-probe' — đối số vị trí KHÔNG tới nơi"*.
+      Còn `C:\\Program Files\\Git\\bin\\bash.exe` ⇒ `dat=true`. Tên không nói được điều đó.
 
-    ung_vien = []
-    for d in path.split(os.pathsep):
-        if d:
-            ung_vien += [Path(d) / "bash.exe", Path(d) / "bash"]
-    git = shutil.which("git", path=path) if git is None else git
-    if git:
-        g = Path(git).resolve()
-        for goc_git in (g.parent.parent, g.parent.parent.parent):
-            ung_vien += [goc_git / "bin" / "bash.exe", goc_git / "usr" / "bin" / "bash.exe"]
-    pf = env.get("ProgramFiles", r"C:\Program Files") if program_files is None else program_files
-    ung_vien += [Path(pf) / "Git" / "bin" / "bash.exe", Path(pf) / "Git" / "usr" / "bin" / "bash.exe"]
-    for u in ung_vien:
-        if u.is_file() and not duoi_system_root(u):
-            return str(u)
-    return None
+    `ung_vien()` VẪN xếp ứng viên dưới `%SystemRoot%` xuống CUỐI — nhưng đó là THỨ TỰ THỬ
+    (để phép đắt ít phải chạy), KHÔNG phải quyết định. Thứ loại là `_do_nang_luc`.
+
+    Trả `None` khi không ứng viên nào làm được việc, giữ nguyên HỢP ĐỒNG cũ: người gọi
+    fail-close chứ không đoán. Bốn tham số chỉ để test ép nền — chúng đi thẳng sang
+    `ung_vien()`, nơi có đúng bốn tham số cùng tên và cùng nghĩa."""
+    import sys as _sys
+    _here = str(Path(__file__).resolve().parent)
+    if _here not in _sys.path:
+        _sys.path.insert(0, _here)
+    import bash_nen
+    ep = {k: v for k, v in (("path", path), ("system_root", system_root),
+                            ("program_files", program_files), ("git", git))
+          if v is not None}
+    duong, _ = bash_nen.tim_bash(**ep)
+    return duong
 
 def _chay(argv, timeout=20):
     """Trả (rc, output, lỗi-khởi-chạy); timeout là ĐÃ chạy nhưng hỏng, khác không mở được."""
@@ -120,7 +112,11 @@ def _chay(argv, timeout=20):
     except OSError as ex:
         # Python native tren Windows khong chay truc tiep script shebang khong co `.exe`;
         # duong lui nay giu probe script dung duoc trong Git Bash, binary that van di duong tren.
-        bash = _bash_windows() if os.name == "nt" else (os.environ.get("CONG_CU_BASH") or shutil.which("bash"))
+        # MOT bo giai cho CA HAI nen (#570 r3, N14). Ban cu re nhanh: Windows thi qua
+        # `_bash_windows`, con lai thi `shutil.which("bash")` TRAN — tuc dung nen nao khong
+        # sinh ra khuyet tat thi van phan giai theo TEN. Do la cho bo giai thu tu se moc len.
+        # `_bash_windows` nay chi con la mot lop mong tren `tim_bash()`, dung duoc moi nen.
+        bash = _bash_windows()
         if os.name == "nt" and bash:
             for d in os.environ.get("PATH", "").split(os.pathsep):
                 ung = Path(d) / argv[0]

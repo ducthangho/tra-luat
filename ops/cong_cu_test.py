@@ -445,7 +445,14 @@ def _dung_cay_dot_bien(ten, tep, tim, thay, phu_thuoc=()):
         dich.chmod(0o755)
     return cay, dich
 
-_PHU = ("ops/cong_cu.yaml", "ops/canary/actionlint_shellcheck.yml")
+# `ops/bash_nen.py` NAM TRONG day tu r3 (#570, N14): `ops/cong_cu.py` nay import no, nen mot
+# cay dot bien thieu no se lam ban mutate chet vi ImportError — stdout RONG, va ca doc dau ra
+# do chet bang `JSONDecodeError`. Do la mot cai chet VO CAN: bo phan hang xep dung la
+# `tin_dung_gia`, nhung 12 bao cao ban kinh thanh khong doc duoc.
+# DO DUOC 20-09-2026: thieu dong nay => `t13_actionlint_bien_mat_giua_probe_va_canary` chet
+# `JSONDecodeError` duoi MOI dot bien ho SCRIPT. No chi lo ra vi bao cao ban kinh nay in LY DO
+# (N16); ban truoc chi in TEN ca oan va se khong ai tim ra duoc nguyen nhan tu do.
+_PHU = ("ops/cong_cu.yaml", "ops/canary/actionlint_shellcheck.yml", "ops/bash_nen.py")
 
 # ten_dot_bien -> (tep_muc_tieu, tim, thay, bien_toan_cuc_can_patch, phu_thuoc, ten_ca_dich)
 DOT_BIEN = {
@@ -529,11 +536,19 @@ DOT_BIEN = {
         "GOC", ("ops/cong_cu.py", ".github/workflows/ci.yml", "ops/canary/actionlint_shellcheck.yml"),
         "t21_git_for_windows_hau_to_nha_cung_cap_phai_DAT_va_bat_tron"),
     # #445 gen 4 — bỏ chốt loại SystemRoot: bộ phóng WSL ở đầu PATH lại được chọn.
-    "t22_bash_lay_ca_system_root": ("ops/cong_cu.py",
-        "        if u.is_file() and not duoi_system_root(u):\n",
-        "        if u.is_file():  # đột biến: không loại SystemRoot\n",
-        "SCRIPT", _PHU, "t22_bash_windows_khong_lay_bo_phong_wsl_o_system_root"),
-    # #445 gen 4 — bỏ cắt CR khi đọc tên công cụ: stdout CRLF của python lại thành 'rg\r'.
+    # Dot bien nay TAI SINH phep loc theo TEN ma N14 vua go bo. No la phan chung cho ca lop
+    # khuyet tat, khong chi cho mot dong: he co bat ky thu gi loc ung vien theo VI TRI truoc
+    # khi phep nang luc chay, `t22` phai DO.
+    "t22_lay_lai_loc_theo_ten": ("ops/cong_cu.py",
+        "    duong, _ = bash_nen.tim_bash(**ep)\n    return duong\n",
+        "    import os as _os\n"
+        "    duong, _ = bash_nen.tim_bash(**ep)\n"
+        "    _sr = ep.get('system_root') or _os.environ.get('SystemRoot', '')\n"
+        "    if duong and _sr and _os.path.normcase(_os.path.abspath(str(duong))).startswith(\n"
+        "            _os.path.normcase(_os.path.abspath(_sr)).rstrip('\\\\/')):\n"
+        "        return None  # đột biến: loại lại theo ĐƯỜNG DẪN\n"
+        "    return duong\n",
+        "SCRIPT", _PHU, "t22_bash_windows_quyet_bang_NANG_LUC_chu_khong_bang_DUONG_DAN"),
     "t23_bo_cat_CR_ten_cong_cu": ("ops/cai_cong_cu.sh",
         "    cong_cu=\"${cong_cu%$'\\r'}\"\n",
         "    :  # đột biến: không cắt CR\n",
@@ -746,63 +761,71 @@ def t21_git_for_windows_hau_to_nha_cung_cap_phai_DAT_va_bat_tron():
             bang(thay == mong, f"{dong!r}: mong token {mong!r}, bản kê đọc thành {thay!r}")
 
 @ca
-def t22_bash_windows_khong_lay_bo_phong_wsl_o_system_root():
-    """`_bash_windows` phải bỏ qua `%SystemRoot%\\System32\\bash.exe` (bộ phóng WSL) dù nó
-    đứng ĐẦU PATH, và tìm được Git Bash cạnh `git` khi PATH không có bash nào khác.
+def t22_bash_windows_quyet_bang_NANG_LUC_chu_khong_bang_DUONG_DAN():
+    """`_bash_windows` phải NHẬN một `bash` POSIX THẬT nằm dưới `%SystemRoot%`.
 
-    Chạy trên mọi nền: hàm nhận tham số ép PATH/SystemRoot/git, còn `_chay` chỉ gọi nó
-    khi `os.name == "nt"` — mặt ấy do lane windows-latest đo thật."""
+    CA NÀY THAY THẾ `t22_bash_windows_khong_lay_bo_phong_wsl_o_system_root`, và phép đo nó
+    đòi là phép **ĐẢO NGƯỢC** của ca cũ. Ca cũ khẳng định: ứng viên dưới `%SystemRoot%` bị
+    LOẠI. Sau N14 mệnh đề ấy KHÔNG còn đúng, và không đúng có chủ đích — `CLAUDE.md`:
+    *"danh sách CẤM không bao giờ đủ"*. Loại theo vị trí phân biệt CHỖ ĐỨNG chứ không phân
+    biệt NĂNG LỰC: nó từ chối oan một `bash` thật đặt nhầm chỗ, và nhận một bộ phóng WSL đặt
+    đúng chỗ. Thứ ra quyết định nay là `_do_nang_luc`.
+
+    Giữ nguyên ca cũ là CẤM (spec r3 N15): một ca còn MẶT mà không còn ĐO chính là bệnh `t24`
+    kho đã ghi sổ — nó vẫn được đếm ĐẠT trong khi không khẳng định gì về mã đang chạy.
+
+    Ba chốt, phân biệt được bằng ĐẦU VÀO:
+      (A) `bash` THẬT đặt dưới `%SystemRoot%` ⇒ được NHẬN. Mã cũ trả `None` ở đây.
+      (B) `_bash_windows` trả ĐÚNG thứ `tim_bash` trả — tức nó uỷ quyền, không tự quyết.
+      (C) một tệp TÊN là `bash` nhưng KHÔNG chạy được ⇒ `None`. Chốt (A) mà thiếu (C) thì
+          chỉ chứng minh "nhận bừa", không chứng minh "quyết bằng năng lực".
+    """
+    that, _ = bash_nen.tim_bash()
+    if not that:
+        raise BoQuaMoiTruong("máy chạy test không có `bash` nào làm được việc — KHÔNG_ĐO_ĐƯỢC; "
+                             "ca này cần một bash THẬT để đặt vào vị trí bị cấm cũ")
+    sr = str(Path(that).resolve().parent)
     with tempfile.TemporaryDirectory() as tmp:
         tmp = Path(tmp)
-        sr = tmp / "Windows"; sys32 = sr / "System32"
-        wsl = bin_gia(sys32, "bash.exe", "#!/bin/sh\necho 'Windows Subsystem for Linux has no installed distributions.'\nexit 1\n")
-        git_dir = tmp / "Git"; gb_usr = git_dir / "usr" / "bin"; gb_bin = git_dir / "bin"
-        gb1 = bin_gia(gb_usr, "bash.exe", "#!/bin/sh\necho 'GNU bash, version 5.2.37(1)-release (x86_64-pc-msys)'\n")
-        gb2 = bin_gia(gb_bin, "bash.exe", "#!/bin/sh\necho 'GNU bash, version 5.2.37(1)-release (x86_64-pc-msys)'\n")
-        git_exe = bin_gia(git_dir / "cmd", "git.exe", "#!/bin/sh\necho 'git version 2.55.0.windows.5'\n")
-        ma = (
-            "import runpy, sys, os\n"
-            f"m = runpy.run_path({str(SCRIPT)!r})\n"
-            "f = m['_bash_windows']\n"
-            f"sr = {str(sr)!r}; s32 = {str(sys32)!r}; usr = {str(gb_usr)!r}; g = {str(git_exe)!r}; pf = {str(tmp / 'khong-co')!r}\n"
-            "sep = os.pathsep\n"
-            # (a) System32 đứng ĐẦU PATH, Git Bash đứng sau ⇒ phải chọn Git Bash
-            "print('A', f(path=s32 + sep + usr, system_root=sr, program_files=pf, git=''))\n"
-            # (b) PATH CHỈ có System32, không bash nào khác; `git` biết ⇒ suy Git Bash cạnh git
-            "print('B', f(path=s32, system_root=sr, program_files=pf, git=g))\n"
-            # (c) không có gì ngoài WSL ⇒ None, KHÔNG đoán
-            "print('C', f(path=s32, system_root=sr, program_files=pf, git=''))\n"
-            # (d) đối chứng: SystemRoot rỗng thì không có gì để loại, bash đầu PATH được chọn
-            "print('D', f(path=usr, system_root='', program_files=pf, git=''))\n"
-        )
+        xau = tmp / "khong-chay-duoc"
+        xau.mkdir()
+        for ten in ("bash", "bash.exe"):
+            t = xau / ten
+            t.write_text("khong phai chuong trinh\n", encoding="utf-8")
+            try:
+                t.chmod(0o755)
+            except OSError:
+                pass
+        ma = ("import runpy, sys, json\n"
+              f"sys.path.insert(0, {str(HERE)!r})\n"
+              f"m = runpy.run_path({str(SCRIPT)!r})\n"
+              "f = m['_bash_windows']\n"
+              "import bash_nen\n"
+              f"sr = {sr!r}; xau = {str(xau)!r}\n"
+              "print('A ' + json.dumps(f(path=sr, system_root=sr, program_files=xau, git='')))\n"
+              "print('B ' + json.dumps(bash_nen.tim_bash(path=sr, system_root=sr,"
+              " program_files=xau, git='')[0]))\n"
+              "print('C ' + json.dumps(f(path=xau, system_root=sr, program_files=xau, git='')))\n")
         env = dict(os.environ); env.pop("CONG_CU_BASH", None)
         p = subprocess.run([sys.executable, "-c", ma], env=env, cwd=GOC,
-                           capture_output=True, text=True, timeout=60)
-        # GIÀN GIÁO, không phải chốt nghiệp vụ: đoạn `python -c` trên do CHÍNH ca này
-        # soạn ra. Nó chết ⇒ bốn phép so A/B/C/D bên dưới CHƯA CHẠY ⇒ `dung()`, để
-        # không ai được cấp tín dụng giết cho một crash vô can (R5-01).
-        dung(p.returncode == 0, f"gọi _bash_windows hỏng: rc={p.returncode}\n{p.stdout}\n{p.stderr}")
-        kq = dict(l.split(" ", 1) for l in p.stdout.splitlines() if " " in l)
-        # So sau khi resolve CẢ HAI vế: trên windows-latest, tempfile trả tên ngắn 8.3
-        # (`RUNNER~1`) còn `_bash_windows` resolve() thành `runneradmin` (run 33630217222, B đỏ oan).
-        chuan = lambda x: os.path.normcase(str(Path(x).resolve())) if x and x != "None" else x
-        bang(chuan(kq.get("A")) == chuan(gb1), f"(A) System32 đứng đầu PATH mà chọn {kq.get('A')!r}, mong {str(gb1)!r}")
-        bang(chuan(kq.get("B")) == chuan(gb2), f"(B) không suy được Git Bash cạnh git: {kq.get('B')!r}, mong {str(gb2)!r}")
-        bang(kq.get("C") == "None", f"(C) chỉ có WSL mà vẫn trả {kq.get('C')!r} — đoán thay vì hỏng thật")
-        bang(chuan(kq.get("D")) == chuan(gb1), f"(D) đối chứng SystemRoot rỗng: {kq.get('D')!r}")
-        bang(str(wsl) not in p.stdout, f"bộ phóng WSL lọt vào kết quả: {p.stdout}")
-
-# --------------------------------------------------------------- T16/T17 (#391)
-# LUẬT: thêm một công cụ/gói vào bất kỳ mã nào của kho thì phải khai nó trong
-# `ops/cong_cu.yaml` kèm lệnh cài cho MỌI nền mà cổng chạy trên đó. Luật viết trong
-# tài liệu KHÔNG CHẠY — nên nó nằm ở đây, dạng ca test.
-#
-# Sinh ra vì `from jsonschema` vào kho ở `47a50395` mà không ai khai: `gate` ĐỎ liên
-# tục từ đó với `ModuleNotFoundError`, và bốn vòng cross-review không thấy vì cả bốn
-# chạy trong container có sẵn gói.
+                           capture_output=True, text=True, timeout=300)
+        dung(p.returncode == 0 and "A " in p.stdout,
+             f"gọi _bash_windows hỏng: rc={p.returncode}\n{p.stdout}\n{p.stderr}")
+        doc = {l[0]: json.loads(l[2:]) for l in p.stdout.splitlines()
+               if l[:2] in ("A ", "B ", "C ")}
+        bang(doc.get("A") is not None,
+             f"(A) `bash` THẬT ({that!r}) đặt dưới %SystemRoot% bị TỪ CHỐI — đó là quyết theo "
+             f"ĐƯỜNG DẪN, đúng thứ N14 gỡ bỏ. Nhận về: {doc.get('A')!r}\n{p.stdout}")
+        bang(Path(doc["A"]).resolve().parent == Path(sr).resolve(),
+             f"(A) nhận một đường KHÁC chỗ đã dựng: {doc['A']!r}, mong dưới {sr!r}")
+        bang(doc.get("A") == doc.get("B"),
+             f"(B) `_bash_windows` KHÔNG uỷ quyền: nó trả {doc.get('A')!r} còn `tim_bash` trả "
+             f"{doc.get('B')!r}. Hai câu trả lời khác nhau nghĩa là còn một bộ giải thứ hai.")
+        bang(doc.get("C") is None,
+             f"(C) một tệp chỉ TÊN là `bash` mà không chạy được vẫn được nhận: {doc.get('C')!r} "
+             f"⇒ không phải 'quyết bằng năng lực', chỉ là 'thôi không lọc nữa'")
 
 _THU_MUC_QUET = (".claude/dev", "ops")
-
 
 def _goi_ngoai(goc: Path, thu_muc=_THU_MUC_QUET) -> dict:
     """Tự dẫn xuất tập module BÊN THỨ BA mà kho import. KHÔNG ghi cứng tên nào.
@@ -839,7 +862,6 @@ def _goi_ngoai(goc: Path, thu_muc=_THU_MUC_QUET) -> dict:
                     continue
                 ra.setdefault(t, []).append(str(q.relative_to(goc)))
     return ra
-
 
 # Tên gói phân phối khác tên module import ở một số gói; ánh xạ ĐÚNG chỗ lệch, không
 # nới phép so. Thiếu ánh xạ mà tên lệch thì ca ĐỎ — đó là hành vi mong muốn.
@@ -1437,22 +1459,50 @@ def t29_ban_kinh_qua_RONG_phai_neu_LY_DO_tung_ca_oan():
          f"bán kính đúng 1 mà vẫn báo lỗi ⇒ các chốt trên luôn đỏ, tức không đo gì:\n{p.stdout}")
 
 
-def _quet(goc) -> tuple:
-    p = subprocess.run([sys.executable, str(BASH_NEN), "quet", "--root", str(goc),
+def _quet(goc, bo_quet=None) -> tuple:
+    """`bo_quet` cho phép chạy MỘT BẢN SAO của `bash_nen.py` thay vì bản thật — xem
+    `_bash_nen_co_chua_chuyen`. Mặc định vẫn là bản thật, nên mọi ca cũ không đổi nghĩa."""
+    p = subprocess.run([sys.executable, str(bo_quet or BASH_NEN), "quet", "--root", str(goc),
                         "--json"], cwd=GOC, capture_output=True, text=True, timeout=120)
     dung(p.stdout.strip().startswith("{"),
          f"`quet --json` không in JSON: rc={p.returncode}\n{p.stdout}\n{p.stderr}")
     return p.returncode, json.loads(p.stdout)
 
 
-def _cay_quet(tmp: Path, them=None, bo_loi_goi_o=None):
-    """Cây giả để quét: đủ các tệp `CHUA_CHUYEN` mà chính module đang khai.
+_RATCHET_GIA = "ops/muc_ratchet_gia_t26.py"
+
+
+def _bash_nen_co_chua_chuyen(tmp: Path) -> Path:
+    """Bản sao `bash_nen.py` có `CHUA_CHUYEN` chứa ĐÚNG MỘT mục GIẢ, trả đường dẫn bản ấy.
+
+    VÌ SAO PHẢI CÓ (đo 20-09-2026, N14): `_cay_quet` bản cũ đọc `CHUA_CHUYEN` TỪ MODULE rồi
+    `dung()` nếu nó rỗng. Ý định đúng — không chép cứng danh sách, vì ratchet sinh ra để NGẮN
+    đi. Nhưng nó gắn ca vào một TRẠNG THÁI NHẤT THỜI của kho, nên đúng lúc ratchet chạm ĐÍCH
+    (`CHUA_CHUYEN` rỗng) thì `t26`/`t27` chết bằng lỗi giàn giáo — tức hai ca canh ratchet tắt
+    ngay khi ratchet thành công. Một cổng chỉ sống được khi kho còn bẩn thì không phải cổng.
+
+    Nay ca dựng DANH SÁCH CỦA RIÊNG NÓ trên một bản sao tạm. Nó đo LUẬT của cổng, không đo
+    danh sách hiện thời — và vì thế nó vẫn ĐỎ được khi `CHUA_CHUYEN` thật đã rỗng vĩnh viễn.
+    Đột biến `bn_ratchet_mot_chieu` vẫn cắn được vì nó mutate cùng tệp nguồn ấy.
+    """
+    than = Path(BASH_NEN).read_text(encoding="utf-8")
+    neo = "CHUA_CHUYEN = {}\n"
+    dung(neo in than,
+         f"không thấy mỏ neo `CHUA_CHUYEN = {{}}` trong {BASH_NEN} — mỏ neo đã trôi")
+    ban = tmp / "bash_nen_co_muc.py"
+    ban.write_text(than.replace(neo, f"CHUA_CHUYEN = {{{_RATCHET_GIA!r}: 'mục giả của t26'}}\n", 1),
+                   encoding="utf-8")
+    return ban
+
+
+def _cay_quet(tmp: Path, them=None, bo_loi_goi_o=None, bo_quet=None):
+    """Cây giả để quét: đủ các tệp `CHUA_CHUYEN` mà BỘ QUÉT ĐANG DÙNG khai.
 
     Đọc danh sách TỪ MODULE chứ không chép cứng — ratchet sinh ra để NGẮN đi, và một
     ca chép cứng danh sách sẽ đỏ oan đúng lúc ai đó vá xong một mục.
     """
     (tmp / "ops").mkdir(parents=True, exist_ok=True)
-    _, bao = _quet(tmp)          # lượt này chỉ để đọc `chua_chuyen` của module
+    _, bao = _quet(tmp, bo_quet)   # lượt này chỉ để đọc `chua_chuyen` của module
     dung(isinstance(bao.get("chua_chuyen"), list) and bao["chua_chuyen"],
          f"không đọc được `chua_chuyen` từ module: {bao}")
     for rel in bao["chua_chuyen"]:
@@ -1476,7 +1526,10 @@ def t25_cong_chan_loi_goi_bash_tran_MOI():
     """
     with tempfile.TemporaryDirectory() as tmp:
         tmp = Path(tmp)
-        _cay_quet(tmp)
+        # Cây `ops/` RỖNG là nền đúng cho ca này. Bản cũ gọi `_cay_quet`, tức dựng sẵn các tệp
+        # `CHUA_CHUYEN` mà kho đang khai — từ r3 danh sách ấy RỖNG nên lời gọi ấy chỉ còn là
+        # một phụ thuộc vào trạng thái nhất thời của kho, không thêm gì cho điều ca này đo.
+        (tmp / "ops").mkdir(parents=True, exist_ok=True)
         rc, bao = _quet(tmp)
         bang(rc == 0 and bao["trang_thai"] == "DAT",
              f"NỀN đã phải SẠCH mà cổng báo {bao.get('trang_thai')} rc={rc}: "
@@ -1500,12 +1553,17 @@ def t26_ratchet_phai_NGAN_di_chu_khong_muc_ra():
     """
     with tempfile.TemporaryDirectory() as tmp:
         tmp = Path(tmp)
-        ds = _cay_quet(tmp)
-        rc, _ = _quet(tmp)
+        # Danh sách RIÊNG của ca, không phải `CHUA_CHUYEN` hiện thời của kho — từ r3 nó RỖNG,
+        # và một ca chỉ ĐỎ được khi kho còn bẩn thì tắt đúng lúc ratchet thành công.
+        bq = _bash_nen_co_chua_chuyen(tmp)
+        cay = Path(tempfile.mkdtemp(dir=tmp))
+        ds = _cay_quet(cay, bo_quet=bq)
+        bang(ds == [_RATCHET_GIA], f"bản sao không mang đúng mục giả: {ds}")
+        rc, _ = _quet(cay, bq)
         bang(rc == 0, f"NỀN đã phải SẠCH mà rc={rc}")
-        tmp2 = Path(tempfile.mkdtemp(dir=tmp))
-        _cay_quet(tmp2, bo_loi_goi_o=ds[0])
-        rc, bao = _quet(tmp2)
+        cay2 = Path(tempfile.mkdtemp(dir=tmp))
+        _cay_quet(cay2, bo_loi_goi_o=ds[0], bo_quet=bq)
+        rc, bao = _quet(cay2, bq)
         bang(rc == 2 and bao["trang_thai"] == "DO",
              f"mục ratchet {ds[0]!r} đã sạch mà cổng vẫn rc={rc} {bao.get('trang_thai')}")
         bang(ds[0] in bao.get("muc_ratchet_da_sach", []),
@@ -1523,10 +1581,11 @@ def t27_cong_khong_bao_dong_gia_tren_CHU_THICH():
     """
     with tempfile.TemporaryDirectory() as tmp:
         tmp = Path(tmp)
-        _cay_quet(tmp, them={"chi_nhac.py":
-                             '"""Tài liệu có nhắc shutil.which("bash") để giải thích."""\n'
-                             '# và shutil.which("bash") trong một chú thích\n'
-                             'GHI_CHU = \'shutil.which("bash")\'\n'})
+        (tmp / "ops").mkdir(parents=True, exist_ok=True)
+        (tmp / "ops" / "chi_nhac.py").write_text(
+            '"""Tài liệu có nhắc shutil.which("bash") để giải thích."""\n'
+            '# và shutil.which("bash") trong một chú thích\n'
+            'GHI_CHU = \'shutil.which("bash")\'\n', encoding="utf-8")
         rc, bao = _quet(tmp)
         bang(rc == 0 and bao["trang_thai"] == "DAT",
              f"tệp chỉ NHẮC TỚI trong chú thích/chuỗi mà cổng ĐỎ: rc={rc} "

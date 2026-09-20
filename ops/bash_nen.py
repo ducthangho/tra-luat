@@ -288,17 +288,22 @@ CHO_PHEP = ("ops/bash_nen.py",)
 #   · tệp TRONG `CHUA_CHUYEN` mà KHÔNG còn lời gọi trần nào ⇒ ĐỎ (danh sách đã mục).
 # Chiều thứ hai là thứ bắt danh sách phải NGẮN đi. Thiếu nó thì ratchet thành nghĩa trang:
 # ai vá xong cũng quên xoá tên mình, và cổng dần hết ý nghĩa mà vẫn xanh.
-CHUA_CHUYEN = {
-    "ops/cong_cu.py":
-        "1 lời gọi trong `_bash_windows()` — bộ giải RIÊNG thứ hai. Hợp nhất vào tệp này "
-        "được, nhưng lease `wp541-path-r3-g3-claude` khai `ops/cong_cu.py` trong "
-        "`khong_duoc_cham`, và #570 không mở write set qua đường ấy. Mục này là thứ CÒN LẠI "
-        "duy nhất; khi nó rời đi thì `CHO_PHEP` là chỗ cuối cùng còn lời gọi trần.",
-}
-# ĐÃ RỜI DANH SÁCH (r2, #570) — ghi lại để người sau thấy ratchet đã NGẮN đi thật:
-#   `ops/lease_publish_test.py` — 7 lời gọi (6 ở `t35`-`t40` + 1 trong `_bash_posix`);
-#                                 `_bash_posix` nay uỷ quyền cho `tim_bash()`.
-#   `ops/cong_cu_test.py`       — 3 lời gọi; nay đi qua `_bash_dung_duoc()`.
+CHUA_CHUYEN = {}
+# RỖNG TỪ r3 (#570, 20-09-2026). Đây là trạng thái ĐÍCH của ratchet, không phải một danh sách
+# chưa ai điền: `CHO_PHEP` nay là chỗ DUY NHẤT trong `ops/**` còn lời gọi trần, và nó là chính
+# bộ giải. Thêm một tên vào đây là đi LÙI — chỉ làm khi có phép đo nói rõ vì sao không chuyển
+# được, và kèm ngày gỡ.
+#
+# ĐÃ RỜI DANH SÁCH — ghi lại để người sau thấy ratchet đã NGẮN đi thật, chứ không phải bị xoá:
+#   `ops/lease_publish_test.py` (r2) — 7 lời gọi (6 ở `t35`-`t40` + 1 trong `_bash_posix`);
+#                                      `_bash_posix` nay uỷ quyền cho `tim_bash()`.
+#   `ops/cong_cu_test.py`       (r2) — 3 lời gọi; nay đi qua `_bash_dung_duoc()`.
+#   `ops/cong_cu.py`            (r3) — 2 lời gọi: `_bash_windows()` (bộ giải RIÊNG thứ hai,
+#                                      quyết bằng ĐƯỜNG DẪN) và nhánh dự phòng của `_chay`
+#                                      vốn rẽ sang `shutil.which("bash")` trần trên nền
+#                                      KHÔNG phải Windows. Mục thứ hai đáng nhớ: bản cũ chỉ
+#                                      gác nền SINH RA khuyết tật, nên nền kia vẫn phân giải
+#                                      theo TÊN — đúng chỗ bộ giải thứ tư sẽ mọc lên.
 # `t26` là thứ ĐỎ nếu ai để tên chúng nằm lại đây sau khi đã sạch.
 
 # Ảnh chụp ĐÔNG CỨNG của các bản cũ, giữ để đối chiếu review — không phải mã đang sống.

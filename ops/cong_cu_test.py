@@ -573,6 +573,18 @@ DOT_BIEN = {
         "        return (fn.__name__, str(ex))\n",
         "TEP_TEST", ("ops/lease_publish_test.py", "ops/bash_nen.py"),
         "t31_tien_kiem_KHONG_DO_DUOC_khong_duoc_giet_ca_suite"),
+    # Bo han phep nhan dien => thoi luong AM lai roi vao "loi vo can". `t32` chot (1) DO.
+    "t32_bo_nhan_dong_ho_nhay": ("ops/cong_cu_test.py",
+        "        if _la_dong_ho_nhay(ex):\n",
+        "        if False:  # đột biến: bỏ hẳn phép nhận diện đồng hồ nhảy\n",
+        "TEP_TEST", ("ops/lease_publish_test.py", "ops/bash_nen.py"),
+        "t32_dong_ho_nhay_la_KHONG_DO_DUOC_chu_khong_phai_tin_dung_gia"),
+    # NOI phep nhan dien ra MOI timeout => nuot ca qua han THAT. `t32` chot (2) DO.
+    "t32_noi_ra_moi_timeout": ("ops/cong_cu_test.py",
+        "            and ex.timeout is not None and ex.timeout < 0)\n",
+        "            )  # đột biến: mọi TimeoutExpired đều bị coi là đồng hồ nhảy\n",
+        "TEP_TEST", ("ops/lease_publish_test.py", "ops/bash_nen.py"),
+        "t32_dong_ho_nhay_la_KHONG_DO_DUOC_chu_khong_phai_tin_dung_gia"),
     "t23_bo_cat_CR_ten_cong_cu": ("ops/cai_cong_cu.sh",
         "    cong_cu=\"${cong_cu%$'\\r'}\"\n",
         "    :  # đột biến: không cắt CR\n",
@@ -648,6 +660,32 @@ DOT_BIEN = {
         "BASH_NEN", (), "t27_cong_khong_bao_dong_gia_tren_CHU_THICH"),
 }
 
+def _la_dong_ho_nhay(ex) -> bool:
+    """`TimeoutExpired` mang thời lượng ÂM — chữ ký của ĐỒNG HỒ NHẢY LÙI, không phải quá hạn.
+
+    `TimeoutExpired.timeout` là con số `subprocess` in ra trong thông điệp. Một lượt chờ THẬT
+    không thể hết hạn sau một khoảng ÂM: nó nghĩa là phép trừ hạn chót đi ngược, tức mốc thời
+    gian nhảy lùi giữa chừng.
+
+    ĐO ĐƯỢC 20-09-2026, nghiệm thu Windows `570-do-8` (máy chủ kho, 22:18 giờ máy, HEAD
+    05ec2eb): `t28_bash_nen_tu_choi_bash_TREO_trong_han` chết
+        TimeoutExpired: ... timed out after -232.95556909999868 seconds
+    trên một `subprocess.run(..., timeout=120)`. Kho đã có sổ một bài học họ hàng — đo hạn chót
+    XUYÊN TRẠNG THÁI NGỦ của máy trên Windows cần `QueryUnbiasedInterruptTime` — và chữ ký này
+    KHỚP hình dạng ấy.
+
+    NHƯNG KHỚP HÌNH DẠNG KHÔNG PHẢI ĐÃ ĐO. Vì sao mốc thời gian nhảy vẫn là `KHÔNG ĐO ĐƯỢC`:
+    lượt ấy không ghi lại trạng thái nguồn của máy, và không có phản chứng. Hàm này KHÔNG
+    khẳng định nguyên nhân — nó chỉ tách một cái chết ĐO ĐƯỢC LÀ BẤT THƯỜNG ra khỏi đống "lỗi
+    vô can" chung chung, để lượt sau đọc được ngay thay vì đi truy con số âm.
+
+    HẸP CÓ CHỦ ĐÍCH. Chỉ thời lượng ÂM mới tính. Một `timeout` DƯƠNG là quá hạn THẬT — có thể
+    là đúng thứ ca đang đo — và nuốt nó sẽ biến cổng thành trang trí. `t32` chốt cả hai chiều.
+    """
+    return (isinstance(ex, subprocess.TimeoutExpired)
+            and ex.timeout is not None and ex.timeout < 0)
+
+
 def _chay_1_ca(fn):
     """Trả (trạng_thái, chi_tiết) với BỐN trạng thái, không phải hai.
 
@@ -676,6 +714,16 @@ def _chay_1_ca(fn):
             return "tin_dung_gia", f"chốt của ca khác ({nguon!r}): {ex}"
         return "giet_that", str(ex)
     except Exception as ex:  # noqa: BLE001 — chết dưới đột biến là DỮ LIỆU, không phải kết luận
+        if _la_dong_ho_nhay(ex):
+            # KHÔNG ĐO ĐƯỢC, không phải tín dụng giả: ca này chưa chạy xong vì MỐC THỜI GIAN
+            # nhảy, nên quy nó vào bán kính của một đột biến là quy sai nguyên nhân.
+            # `bo_qua` cho ca ĐÍCH vẫn làm `_ket_luan_ban_kinh` báo KHÔNG_ĐO_ĐƯỢC và tính lỗi —
+            # cổng KHÔNG bị nới, chỉ thôi đổ tội cho đột biến.
+            return "bo_qua", (
+                f"KHÔNG ĐO ĐƯỢC: `{type(ex).__name__}` mang thời lượng ÂM ({ex.timeout}s) — "
+                f"mốc thời gian nhảy lùi giữa lượt chờ, ca chưa chạy xong. Nguyên nhân của cú "
+                f"nhảy: CHƯA ĐO. Chạy lại khi máy không ngủ để biến nó thành một phép đo. "
+                f"Lệnh: {ex.cmd!r}")
         return "tin_dung_gia", f"{type(ex).__name__}: {ex}"
     finally:
         _CA_DANG_CHAY = None
@@ -1736,6 +1784,43 @@ def t31_tien_kiem_KHONG_DO_DUOC_khong_duoc_giet_ca_suite():
          f"giết; nuốt nó là biến cổng thành trang trí: {doc.get('TK3')!r}")
 
 
+@ca
+def t32_dong_ho_nhay_la_KHONG_DO_DUOC_chu_khong_phai_tin_dung_gia():
+    """Thời lượng ÂM ⇒ KHÔNG ĐO ĐƯỢC; thời lượng DƯƠNG ⇒ vẫn là tín dụng giả.
+
+    SINH TỪ PHÉP ĐO, không từ lo xa. Nghiệm thu Windows `570-do-8` (HEAD 05ec2eb):
+        t28_bash_nen_tu_choi_bash_TREO_trong_han [tin_dung_gia]
+        TimeoutExpired: ... timed out after -232.95556909999868 seconds
+    trên một `subprocess.run(..., timeout=120)`. Một lượt chờ THẬT không thể hết hạn sau một
+    khoảng ÂM — đó là phép trừ hạn chót đi ngược, tức mốc thời gian nhảy lùi. Xếp nó chung với
+    "lỗi vô can" làm mất đúng thứ đọc được, và đổ cái chết ấy vào bán kính của một đột biến
+    vô can là QUY SAI NGUYÊN NHÂN.
+
+    CHỐT (2) LÀ CHỐT QUAN TRỌNG HƠN. Nới phép nhận diện ra mọi `TimeoutExpired` sẽ nuốt luôn
+    quá hạn THẬT — mà quá hạn thật chính là thứ `t28` sinh ra để đo (bash giả treo 600s). Lúc
+    ấy cổng thành trang trí. Nên hai chốt có hai đột biến RIÊNG, phân biệt bằng ĐẦU VÀO.
+
+    KHÔNG NỚI CỔNG: `bo_qua` cho ca ĐÍCH vẫn làm `_ket_luan_ban_kinh` báo KHÔNG_ĐO_ĐƯỢC và
+    tính lỗi. Bản vá chỉ thôi đổ tội cho đột biến, không thôi báo động.
+    """
+    p = subprocess.run([sys.executable, str(TEP_TEST), "--tu-kiem-dong-ho"],
+                       cwd=GOC, capture_output=True, text=True, timeout=120)
+    dung(p.returncode == 0 and "DH1 " in p.stdout,
+         f"không chạy được cửa tự kiểm đồng hồ: rc={p.returncode}\n{p.stdout}\n{p.stderr}")
+    doc = {l[:3]: json.loads(l[4:]) for l in p.stdout.splitlines() if l[:3] in ("DH1", "DH2")}
+
+    tt, ly = doc.get("DH1", [None, None])
+    bang(tt == "bo_qua",
+         f"(1) thời lượng ÂM phải là KHÔNG ĐO ĐƯỢC (`bo_qua`), nhận về {tt!r}\n{p.stdout}")
+    bang("ÂM" in (ly or "") and "-232.95" in (ly or ""),
+         f"(1) lý do không nêu chữ ký đo được (thời lượng ÂM + con số): {ly!r}")
+
+    tt2, ly2 = doc.get("DH2", [None, None])
+    bang(tt2 == "tin_dung_gia",
+         f"(2) quá hạn THẬT (thời lượng dương) bị NUỐT thành {tt2!r} — phép nhận diện quá "
+         f"rộng thì nó nuốt đúng thứ `t28` sinh ra để đo, và cổng thành trang trí\n{p.stdout}")
+
+
 def _chay_tien_kiem(fn):
     """Chay mot TIEN KIEM (ngoai `CA`) voi BA trang thai, tra (ten, ly_do) neu bo qua.
 
@@ -1823,6 +1908,18 @@ _KET_GIA_HEP = {
 }
 
 
+def _in_tu_kiem_dong_ho():
+    """Cua de DOT BIEN cham toi duoc phep nhan dien dong ho nhay (xem `_in_tu_kiem_ban_kinh`)."""
+    def am():
+        raise subprocess.TimeoutExpired(cmd=["gia-am"], timeout=-232.95)
+
+    def duong():
+        raise subprocess.TimeoutExpired(cmd=["gia-duong"], timeout=120)
+
+    print("DH1 " + json.dumps(_chay_1_ca(am)))
+    print("DH2 " + json.dumps(_chay_1_ca(duong)))
+
+
 def _in_tu_kiem_tien_kiem():
     """Cua de DOT BIEN cham toi duoc `_chay_tien_kiem` — cung ly do voi cua ban kinh:
     `t31` goi ham ay, ma bo dot bien mutate mot BAN SAO tren dia, nen phai hoi qua tien
@@ -1866,5 +1963,8 @@ if __name__ == "__main__":
         sys.exit(0)
     if "--tu-kiem-tien-kiem" in sys.argv[1:]:
         _in_tu_kiem_tien_kiem()
+        sys.exit(0)
+    if "--tu-kiem-dong-ho" in sys.argv[1:]:
+        _in_tu_kiem_dong_ho()
         sys.exit(0)
     sys.exit(main())

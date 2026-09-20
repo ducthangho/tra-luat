@@ -2262,6 +2262,82 @@ def r524_chan_doan_cua_con_khong_duoc_mat_o_lop_phan_hang(d: Path):
     chot([ca for ca, _ in _khoi_chan_doan(stdout, "DO_CHOT")] == ["r512"], "r524")
 
 
+def r525_nhanh_thu_ba_phai_noi_vi_sao_ca_khi_con_chet_truoc_khi_in(d: Path):
+    """#568 r2/M6 — ca SUY BIEN cua nhanh THU BA: con chet TRUOC khi in duoc gi.
+
+    Benh: r1 dong ba nhanh in nhan o ca THUONG cua chung, roi bo sot ca SUY BIEN
+    cua nhanh thu ba. Khi con chet vi mot ngoai le KHONG bat duoc, CPython thoat
+    rc=1 va stdout RONG — khong nhan nao. Dinh tuyen: `do_khac` rong nen bo qua
+    nhanh mot; `rc != 1` SAI vi rc DUNG BANG 1 nen bo qua nhanh hai; `do_chot ==
+    dich` sai nen bo qua nhanh ba; roi vao `else`, in nhan tran roi lap `kh_chot`
+    RONG => stderr mang nguyen nhan BI VUT.
+
+    Ca nay goi CHINH `chay_dot_bien_tu_kiem`, chi thay `run` bang do gia kich ban
+    hoa (stdout, rc, STDERR) — tuc do DUONG PHAN HANG that. Do gia cua `r516` luon
+    tra stderr RONG, nen no di QUA duong nay ma khong thay gi; day la ly do lo song
+    sot qua ca mot bo test co 80 dot bien.
+
+    HAI o, va chung phai phan biet duoc bang DAU VAO — neu khong thi hai chot la
+    bo TUONG DUONG va ta chi dang do MOT thu:
+      (P2) suy bien: stdout RONG  => PHAI in stderr (mang chuoi moc)
+      (P1) thuong  : co DO_CHOT   => PHAI in CHOT, va KHONG duoc in stderr
+    """
+    m = _nap_ban_sao(d)
+    MOC = "MOC-STDERR-R525"
+    tb = ("Traceback (most recent call last):\n"
+          '  File "nhanh_don_duoc_test.py", line 1, in <module>\n'
+          f"ModuleNotFoundError: No module named '{MOC}'\n")
+    DICH = ("r515",)
+    kich = {
+        "suy-bien": ("", 1, tb),
+        "thuong": ("TU KIEM r511: DO_CHOT — chot cua ca r511 that bai\n"
+                   "TU KIEM: 23/24\n", 1, tb),
+    }
+
+    def run_gia(args, cwd, check=True, env=None):
+        out, rc, err = kich[Path(cwd).name]
+        return subprocess.CompletedProcess(args, rc, out, err)
+
+    m.run = run_gia
+
+    def ghep(*phan):
+        """Ghep neo LUC CHAY — viet nguyen van thi chinh than ca nay lam chuoi ay
+        xuat hien THEM mot lan ngoai bang, va phep doi neo duy nhat se bac het."""
+        return "".join(phan)
+
+    NEO = ghep("    if not ", "duong.exists():")
+    m.DOT_BIEN_TU_KIEM = [(ten, DICH, NEO, "    pass") for ten in kich]
+    with contextlib.redirect_stdout(io.StringIO()) as ra:
+        giet, hong = m.chay_dot_bien_tu_kiem()
+    dong_in = ra.getvalue()
+
+    # Tach theo TUNG MUC: mot chuoi co mat "o dau do" khong chung minh no o DUNG
+    # muc can no — dung benh "loi khai rong hon phep do".
+    khoi = {}
+    hien = None
+    for dong in dong_in.splitlines():
+        if dong.startswith("DOT BIEN TU KIEM "):
+            # "DOT BIEN TU KIEM <ten>" — BON tu roi moi toi ten, nen chi so 4.
+            # Ban dau viet 3 va lay ra "KIEM": ca DO tren ma CHUA dot bien, roi
+            # keo ca bang xuong 2/82 vi moi mutant khac cung thay r525 trong
+            # `do_chot`. Mot ca do vi ly do VO CAN — dung benh ho hang.
+            hien = dong.split()[4]
+            khoi[hien] = []
+        elif hien:
+            khoi[hien].append(dong)
+    chot(set(khoi) == set(kich), "r525")          # ca hai o deu THAT SU chay
+    sb, th = "\n".join(khoi["suy-bien"]), "\n".join(khoi["thuong"])
+
+    # (P2) suy bien: nguyen nhan PHAI toi noi
+    chot(MOC in sb, "r525")
+    chot("ModuleNotFoundError" in sb, "r525")
+    # (P1) thuong: van in CHOT, va KHONG duoc nuot stderr vao day
+    chot("CHOT r511" in th, "r525")
+    chot(MOC not in th, "r525")
+    # PHAN HANG KHONG DOI: ca hai deu la `hong`, khong o nao thanh GIET
+    chot((giet, hong) == (0, 2), "r525")
+
+
 TU_KIEM = [
     ("r501", r501_tin_hieu_chot_khong_gia_mao_duoc, True),
     ("r502", r502_assert_ha_tang_khong_duoc_cap_lop_chot, True),
@@ -2287,6 +2363,7 @@ TU_KIEM = [
     ("r522", r522_loi_phong_ngoai_oserror_cung_phai_o_lai_vong, True),
     ("r523", r523_ban_sao_tuong_doi_khong_duoc_lam_lech_kenh, True),
     ("r524", r524_chan_doan_cua_con_khong_duoc_mat_o_lop_phan_hang, True),
+    ("r525", r525_nhanh_thu_ba_phai_noi_vi_sao_ca_khi_con_chet_truoc_khi_in, True),
 ]
 
 # ---- A6: MOI ca tu kiem phai co MOT dot bien rieng lam no DO --------------
@@ -2453,6 +2530,14 @@ DOT_BIEN_TU_KIEM = [
     ("chan-doan-cat-lang-khong-khai", ("r524",),
      '    return f"{than[:TRAN_CHAN_DOAN]} \u2026[CAT {len(than) - TRAN_CHAN_DOAN} ky tu]"',
      "    return than[:TRAN_CHAN_DOAN]"),
+    # #568 r2/M6 — HAI duong cua nhanh thu ba, moi duong mot dot bien RIENG.
+    # Chung phan biet duoc bang DAU VAO: (1) go han phep in stderr o ca suy bien;
+    # (2) in stderr KE CA khi co DO_CHOT, tuc xoa han phan biet P1/P2.
+    ("chan-doan-bo-stderr-o-ca-suy-bien", ("r525",),
+     '                    print(f"    stderr: {_goi_chan_doan(p.stderr)}")',
+     "                    pass"),
+    ("chan-doan-xoa-phan-biet-P1-P2", ("r525",),
+     "                if kh_chot:", "                if False:"),
     ("bo-chuan-hoa-ban-sao", ("r523",),
      "    ban_sao = Path(ban_sao).resolve()",
      "    pass"),
@@ -2587,7 +2672,11 @@ DOT_BIEN_TU_KIEM = [
      "            if do_chot:\n                do_khac = set()"),
     ("tu-dot-bien-bo-so-rc-con", ("r516",),
      "            elif p.returncode != 1:", "            elif False:"),
-    ("tu-dot-bien-nhan-moi-tap-ca", ("r516",),
+    # r2/M6 — r525 cung lai CHINH `chay_dot_bien_tu_kiem`, nen hai dot bien vao
+    # vi tu cap GIET giet CA no. Ghi du `dich` la ghi SU THAT da do, va no lam
+    # dot bien CHAT HON: runner doi `do_chot == set(dich)` BANG NHAU, nen muc nay
+    # gio phai giet ca hai ca moi duoc cong.
+    ("tu-dot-bien-nhan-moi-tap-ca", ("r516", "r525"),
      "            elif do_chot == set(dich):", "            elif True:"),
     # F01 (luot 5) — TAP DO RONG duoc chuan hoa thanh dich: con chet ma KHONG in
     # chot nao van duoc ghi cong GIET.
@@ -2596,7 +2685,7 @@ DOT_BIEN_TU_KIEM = [
      "            elif do_chot == set(dich):", "            elif set(dich) <= do_chot:"),
     ("tu-dot-bien-nhan-giao-khac-rong", ("r516",),
      "            elif do_chot == set(dich):", "            elif do_chot & set(dich):"),
-    ("tu-dot-bien-nhan-tap-rong-lam-dich", ("r516",),
+    ("tu-dot-bien-nhan-tap-rong-lam-dich", ("r516", "r525"),
      "            elif do_chot == set(dich):",
      "            elif do_chot == set(dich) or not do_chot:"),
     # F01 (luot 5) — rc NGOAI {0,1} duoc chuan hoa thanh 1: con in dung chot roi
@@ -2622,8 +2711,9 @@ DOT_BIEN_TU_KIEM = [
 NHOM_BAT_BUOC = frozenset({"r501", "r502", "r503", "r504", "r505", "r506",
                            "r507", "r508", "r509", "r510", "r511", "r512",
                            "r513", "r514", "r515", "r516", "r517", "r518",
-                           "r519", "r520", "r521", "r522", "r523", "r524"})
-SAN_NHOM = 24
+                           "r519", "r520", "r521", "r522", "r523", "r524",
+                           "r525"})
+SAN_NHOM = 25
 
 
 TRAN_CHAN_DOAN = 400
@@ -2759,10 +2849,24 @@ def chay_dot_bien_tu_kiem():
                 hong += 1
                 print(f"DOT BIEN TU KIEM {ten} | {','.join(dich)} | 0 — ca do THUC TE: "
                       f"{','.join(sorted(do_chot)) or '(rong)'}")
-                # Duong vao THU BA. Biet ca NAO do van chua noi vi SAO no do, ma
-                # day dung la nhanh "dot bien giet nham ca khac" — can nhat.
-                for ca, than in kh_chot:
-                    print(f"    CHOT {ca}: {_goi_chan_doan(than)}")
+                # Duong vao THU BA co DUNG HAI duong, va r1 chi dong duong dau.
+                # Liet ke het TRUOC khi va: `kh_chot` khac rong (P1) hoac RONG
+                # (P2) — vet can, vi mot tap chi co hai kha nang ay.
+                if kh_chot:
+                    # P1 — ca THUONG: biet ca NAO do van chua noi vi SAO no do,
+                    # ma day dung la nhanh "dot bien giet nham ca khac" — can nhat.
+                    for ca, than in kh_chot:
+                        print(f"    CHOT {ca}: {_goi_chan_doan(than)}")
+                else:
+                    # P2 — r2/M6. CA SUY BIEN cua CHINH nhanh nay, r1 de ho.
+                    # `main` duoi CHI_TU_KIEM tra `1 if chay_tu_kiem() else 0`, va
+                    # `chay_tu_kiem` in DO_CHOT hoac DO_KHAC cho MOI ca hong. Nen
+                    # rc=1 ma KHONG nhan nao <=> con chet NGOAI ham ay (loi muc
+                    # module: SyntaxError / NameError / ImportError) — luc do
+                    # stdout RONG con stderr mang nguyen nhan.
+                    # Bo qua day la tai lap DUNG benh (B) ma packet nay sinh ra de
+                    # chua, chi nho hon: mot nhan tran khong noi nguyen nhan.
+                    print(f"    stderr: {_goi_chan_doan(p.stderr)}")
     return giet, hong
 
 

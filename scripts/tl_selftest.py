@@ -22474,7 +22474,41 @@ def run() -> int:
         được ở #566 lượt này: `m76` phải đổi đối chứng vì đối chứng cũ đỏ theo).
         """
         import ast as _ast379
-        cay = _ast379.parse((_ROOT209 / "scripts" / "tl_selftest.py").read_text(encoding="utf-8"))
+        import inspect as _in379
+        import textwrap as _tw379
+        # ĐO ĐÚNG THỨ CẦN ĐO, ĐỪNG MƯỢN CẢ TỆP LÀM ĐẦU VÀO. Bản đầu của ca này `ast.parse`
+        # NGUYÊN `scripts/tl_selftest.py` (2 153 584 B, 30 340 dòng) chỉ để tìm một hàm ~30
+        # dòng. Ngày 20-09-2026 01:35Z nó ĐỎ trên máy chủ kho:
+        #     SyntaxError: invalid syntax (<unknown>, line 1602)
+        # trong khi CHÍNH tệp ấy đang chạy — tức thứ ĐỌC ĐƯỢC khác thứ đang THỰC THI. Cùng
+        # commit, cùng máy, cùng python, lượt 00:55Z cùng ngày thì ca này XANH. **NGUYÊN NHÂN
+        # CHƯA BIẾT.** Kho có sẵn một lớp sự cố cùng hình dạng — `scripts/tl_boot.py`: *"strip
+        # NUL phòng mount NUL-pad #51435 … Cắt cụt thật → SyntaxError"* — nhưng đó là GIẢ
+        # THUYẾT, không phải phép đo; chớ đọc nó thành lời giải thích (CLAUDE.md: một nguyên
+        # nhân sai trong doctrine tệ hơn không ghi).
+        #
+        # Hai việc làm ngay, CẢ HAI độc lập với nguyên nhân:
+        #   (1) lấy NGUỒN CỦA HÀM qua `inspect` thay vì đọc tệp 2 MB — bề mặt đầu vào từ
+        #       30 340 dòng xuống còn thân `_c330…`, và phép tra `_goi` hết mơ hồ;
+        #   (2) khi vẫn hỏng thì chẩn đoán phải NÊU được nó đã đọc GÌ. `ast.parse` không có
+        #       `filename=` nên in `<unknown>` — một chẩn đoán không gọi được tên đầu vào của
+        #       chính nó. Nay ném kèm đường dẫn, số byte và băm của tệp trên đĩa; `_t110` (vế
+        #       B của chính ca này) sẽ in ra, nên một lượt đỏ là đủ để biết.
+        try:
+            _src379 = _tw379.dedent(_in379.getsource(_c330_deploy_msg_khong_chay_lenh))
+            cay = _ast379.parse(_src379, filename="<nguon _c330 lay qua inspect>")
+        except Exception as _e379:
+            import hashlib as _h379
+            _p379 = _ROOT209 / "scripts" / "tl_selftest.py"
+            try:
+                _b379 = _p379.read_bytes()
+                _tt379 = (f"{len(_b379)} byte · sha256/16 "
+                          f"{_h379.sha256(_b379).hexdigest()[:16]}")
+            except Exception as _e2379:
+                _tt379 = f"KHONG DOC DUOC ({type(_e2379).__name__}: {_e2379})"
+            raise RuntimeError(
+                f"khong lay/parse duoc nguon `_c330_deploy_msg_khong_chay_lenh` "
+                f"({type(_e379).__name__}: {_e379}) | tep tren dia {_p379}: {_tt379}") from None
         goi = next((n for n in _ast379.walk(cay)
                     if isinstance(n, _ast379.FunctionDef) and n.name == "_goi"), None)
         if goi is None:

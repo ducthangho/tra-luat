@@ -25,6 +25,16 @@ generation: 4
 lease_id: wp570-bash-nen-r4-g4-claude
 granted_by: ducthangho
 
+da_bi_thay_the: wp570-bash-nen-r5-g5-bia-mo
+da_bi_thay_the_vi_sao: 'Ve THU NHAT cua dau hai chieu. Packet #570 da LAND (PR #571, merge
+  395bc7b1, 2026-09-20T16:25:58Z), nhung lease khong tu chet khi packet xong — no `AG-T0-01B`
+  ma kho da khai o #355. Do luc 2026-09-20T19:33Z: `ai-dang-giu ops/lease_publish_test.py` van
+  dem lease nay la NGUOI_GIU, han con toi 2026-09-21T01:55:00Z.
+  Chi thi chu kho, ban ghi: https://github.com/ducthangho/tra-luat/issues/570#issuecomment-5752188461
+  `_kiem_bia_mo` doc tu REF chu khong doc cay lam viec, nen dong nay phai nam tren mot ref DA DAY
+  TRUOC khi `wp570-bash-nen-r5-g5-bia-mo` di qua `check`. Vi the hai lan day, khong phai mot.
+  Lease nay song tren DUNG MOT ref (da do: chi refs/remotes/origin/ops/cap-lease-570-g4), nen mot
+  dau la du — khac ca g3 cua #541 von song tren hai ref va phai danh dau ca hai.'
 thay_the_cho: wp570-bash-nen-r3-g3-claude
 thay_the_cho_vi_sao: 'Dau HAI CHIEU. g2 mang dong `da_bi_thay_the: wp570-bash-nen-r3-g3-claude`
   trong CUNG lan day nay; `_kiem_bia_mo` cuong che chieu ay va bac rc=8 neu thieu. Cong doc tu REF

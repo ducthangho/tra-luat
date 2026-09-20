@@ -1,0 +1,142 @@
+# LEASE — CHAN-DOAN-TIN-DUNG-GIA revision 2 / generation 1
+# REVISION MOI vi DOI CLOSURE: r1 khai M2 dung cho nhanh `p.returncode != 1`; ca can
+# dong co rc == 1, tuc NGOAI CHU cua r1. PROTOCOL_DA_PHIEN.md:300.
+# Executor CLAUDE. KHONG CO reviewer may. Ghi HO theo chi thi chu kho.
+#
+# DOC KY TRUOC KHI LAM: r2 KHONG chua CASE T6, KHONG chua nguyen nhan (A), KHONG lam
+# PR #567 merge duoc. No dong DUNG MOT duong ma r1 de ho. Xem KHONG_HUA_GI.
+
+schema_version: 2
+event: executor_lease_granted
+packet_issue: 568
+packet_id: CHAN-DOAN-TIN-DUNG-GIA
+mission_issue: KHONG_CO
+revision: 2
+generation: 1
+lease_id: chan-doan-tin-dung-gia-r2-g1-claude
+thay_the_cho: chan-doan-tin-dung-gia-r1-g2-claude
+thay_the_vi_sao: 'Ke vi TRONG CUNG MOT PACKET — dung nghia goc cua truong nay ("ban sau thay ban
+  truoc cua CUNG packet"). r1-g2 CON HAN toi 2026-09-21T15:25:00Z va giu DUNG cung write set
+  (ops/nhanh_don_duoc_test.py, do 17:2xZ 20-09: rc=11 NGUOI_GIU 1). Cap chong ma khong ke vi la
+  tu dung CUA SO HAI WRITER — dung thu write-set exclusion sinh ra de chan (#227).'
+thay_the_DAY_KHONG_PHAI_KHE_AG_T0_01B: 'Phan biet cho ro keo dem nham thanh mot lan lach: khe ma
+  CLAUDE.md to cao la dung thay_the_cho XUYEN PACKET de thu hoi som mot lease con hieu luc
+  (_kiem_bia_mo KHONG doi cung packet_id). O day CUNG packet_id CHAN-DOAN-TIN-DUNG-GIA, va viec
+  thu hoi som la CO CHU Y, duoc chu kho chi thi, vi hai revision cua cung mot packet khong the
+  cung giu mot duong. No AG-T0-01B-thu-hoi-lease-chua-co-duong VAN MO va KHONG duoc dem them mot
+  lan lach nao tu muc nay.'
+
+granted_by: ducthangho
+granted_on_instruction: https://github.com/ducthangho/tra-luat/issues/568#issuecomment-5752115356
+granted_on_instruction_nguyen_van: 'Chu kho, phien dieu phoi 20-09-2026 ~17:2xZ, GO VAN XUOI
+  (khong qua hop chon): "Cap r2 di". Chi thi den NGAY SAU khi phien bao: PR #572 da xanh ca ba
+  required tren eb4a9ab, va phien ra ra mot khuyet tat NGOAI closure M1-M5 nen TU CHOI tu va, de
+  nghi mot revision. Du kien va phan chung chay duoc: issues/568#issuecomment-5749389651.
+  Ban chieu day du: issues/568#issuecomment-5752115356.'
+recorded_by: claude-session
+recorder_is_dispatcher: false
+
+leased_at_utc: '2026-09-20T17:30:00Z'
+lease_expires_at_utc: '2026-09-21T17:30:00Z'
+
+role: executor
+provider: anthropic_claude
+executor: claude
+model: KHONG_KHAI
+model_vi_sao_KHONG_bat_buoc: 'assurance_target la human_audited, khong phai cross_approved, nen
+  tinh chinh dang cua no KHONG treo vao viec hai ben khac ho model. Ket luan da duoc #551 r4 (M20)
+  dong bang. Khai mot ho model o day se la mot loi khai KHONG cong nao doc.'
+effort: KHONG_KHAI
+
+assurance_target: human_audited
+assurance_target_vi_sao: 'Giu nguyen muc cua r1. Can cu khong doi: codex het quota review, agy het
+  quota, claude LA executor. cross_approved doi HAI HO MODEL DOC LAP — khong con ben thu hai.
+  KHONG DAT DUOC, khong phai "chua do duoc".'
+assurance_target_HE_QUA_PHAI_KHAI: 'Packet nay KHONG LAND DUOC BANG MAY. §8 cho class sensitive doi
+  cross_approved HOAC human_audited. Buoc land doi chu kho DOC verdict va diff roi xac nhan.
+  Executor KHONG duoc khai human_audited ho chu kho.'
+assurance_target_fallback: advisory_review
+reviewer_provider: KHONG_CO
+reviewer_provider_vi_sao: 'Khong con provider nao khac ho model con quota.'
+
+review_class: sensitive
+effective_review_class: sensitive
+review_class_vi_sao: 'Van cham CHINH bo phan hang dot bien — tuc cham cong DO RANG cua mot cong
+  khac. Ha lop review o dung cho ay la tu noi luat cho minh.'
+
+spec_ref: ops/specs/chan-doan-tin-dung-gia-r2.md
+spec_path: ops/specs/chan-doan-tin-dung-gia-r2.md
+prompt_path: ops/specs/chan-doan-tin-dung-gia-r2.md
+prompt_sha256_required: 43cb42b908ae72c8a423d6f94901a086c5ad889f0bb444a24b8908bc13aa7724
+spec_hash: 43cb42b908ae72c8a423d6f94901a086c5ad889f0bb444a24b8908bc13aa7724
+spec_hash_do_nhu_the_nao: 'sha256sum ops/specs/chan-doan-tin-dung-gia-r2.md tren nhanh
+  ops/cap-lease-568, 8 321 B. Do lai TRUOC khi tin con so nay.'
+
+branch: claude/chan-doan-tin-dung-gia-r2
+branch_ownership: exclusive
+
+start_from_sha: eb4a9aba05ecd82d028497d2352615877f6f5ac6
+start_from_sha_vi_sao: 'Head cua PR #572 sau khi hoa base gen 2. r2 xay TREN ban va r1 chu khong
+  thay the no: M1-M5 da thi cong va dang cho audit; r2 chi them M6. Cat tu master se lam mat ban
+  va r1 khoi cay lam viec cua r2.'
+reviewed_sha_required: eb4a9aba05ecd82d028497d2352615877f6f5ac6
+reviewed_sha_required_note: 'Mo neo SAN luc cap — day la start_from_sha, KHONG phai head ung vien
+  cuoi. Ho so audit cua r2 PHAI neo head ung vien THAT khi no ton tai.'
+
+write_set:
+- ops/nhanh_don_duoc_test.py
+write_set_MOT_DUONG: 'MOT tep, y nhu r1. Nam gon trong tran ADR-0044:5 cho class sensitive
+  (<= 3 tep va <= 300 dong them). KHONG xin ngoai le nao.'
+
+QUAN_HE_VOI_PR_572: 'PR #572 mang r1, ba required XANH tren eb4a9ab, dang CHO AUDIT NGUOI. r2
+  KHONG dung vao no: nhanh rieng claude/chan-doan-tin-dung-gia-r2 cat tu eb4a9ab, PR rieng.
+  He qua cua ke vi, noi thang: sau khi bia mo co hieu luc, r1 KHONG con quyen GHI. PR #572 van
+  AUDIT VA MERGE DUOC BINH THUONG — mat quyen GHI khong phai mat quyen LAND. Neu audit tim ra cho
+  can sua, cho ay di duoi r2.'
+
+KHONG_HUA_GI:
+  khong_chua_T6: 'CASE T6 la no RIENG, CHUA CO CHU. Chua ai do duoc no cung goc voi packet nay —
+    xem issuecomment-5744407812, trang thai KHONG DO DUOC. r2 khong cham T6.'
+  khong_chua_nguyen_nhan_A: 'r506 chet vi loi VO CAN tren runner: KHONG TAI HIEN DUOC. Va mot thu
+    chua dung duoc phan chung la DOAN.'
+  khong_lam_567_merge_duoc: 'gate-registry la required status check cua ruleset. r2 dong mot duong
+    chan doan, no KHONG bao dam cong se xanh.'
+  duong_nay_CHUA_TUNG_BAN: 'Trong moi luot CI da quan sat duoc, ca rc=1 + stdout rong CHUA XAY RA.
+    r2 dong mot duong co that nhung chua ban — dung khai no da chua mot su co nao.'
+
+cam_tuyet_doi:
+- 'Noi bo phan hang de mot ca chet VO CAN van duoc tinh GIET — dung lai lo #355/#359.'
+- 'Doi run(check=True) sang nem TinHieuChotCa — DAO NGUOC phan biet ma #355 tra gia de co.'
+- 'Them timeout / retry cho r506 — la ban va cho (A), tuc DOAN; retry con che mat tin hieu.'
+- 'Sua M1-M5 cua r1. Chung da thi cong va dang cho audit; mo lai la lam bang chung cua #572 het han.'
+
+khong_duoc_cham:
+- ops/nhanh_don_duoc.py
+- ops/lease_publish.py
+- ops/lease_publish_test.py
+- ops/bien_nhan_v2.py
+- ops/bien_nhan_v2_test.py
+- docs/PROTOCOL_DA_PHIEN.md
+- ops/specs/chan-doan-tin-dung-gia-r1.md
+- ops/specs/chan-doan-tin-dung-gia-r2.md
+- .github/workflows/ci.yml
+- .claude/dev/launcher.py
+- .claude/dev/packet_loop.py
+- scripts/tl.py
+- scripts/tl_selftest.py
+- RELEASE_MANIFEST.json
+khong_duoc_cham_vi_sao: 'ops/specs/chan-doan-tin-dung-gia-r2.md: dac ta DA DONG BANG — sua no la
+  lam bam trong lease tro vao hu vo; dinh chinh di bang mot revision MOI.
+  ops/nhanh_don_duoc_test.py KHONG nam trong danh sach nay — no LA write set.'
+
+hinh_dang_ke_thua:
+  LOI-KHAI-RONG-HON-PHEP-DO: 3
+  TIN-HIEU-DO-CHINH-MA-TEST-GIA-MAO: 2
+  VA-DUNG-CHO-DUOC-CHI-ROI-BO-SOT-DUONG-THU-BA: 2
+  nguon: 'Chep tu #355/#359 va #566, cong lan tai phat o CHINH r1 cua packet nay.'
+  VI_SAO_NANG_LEN_2: 'Lan mot la #513 luot 10->13. Lan HAI la chinh r1: no dong BA nhanh in nhan o
+    ca THUONG cua chung, roi bo sot ca SUY BIEN cua nhanh thu ba (kh_chot RONG). Bai hoc chat hon:
+    dong mot nhanh o ca thuong KHONG phai la dong nhanh ay.'
+  CO-HOI-TAI-PHAT-DA-BIET: 'M6 them DUONG THU TU vao cung mot cho. Phai TU LIET KE HET duong TRUOC
+    khi va, va cho moi duong mot chot RIENG phan biet duoc bang dau vao — hai chot khong phan biet
+    duoc la bo TUONG DUONG, va ta chi dang do MOT thu.'

@@ -37,6 +37,13 @@ granted_on_instruction_nguyen_van: 'Chu kho, phien dieu phoi 20-09-2026 ~15:1xZ,
 granted_on_instruction_gen1_giu_lai: 'Chi thi cap gen 1 (19-09, issuecomment-5742306811) van la
   can cu cho PHAM VI cua packet — executor claude, muc human_audited, mot tep, khong CI. Gen 2
   KHONG mo rong bat ky thu gi trong so do.'
+da_bi_thay_the: chan-doan-tin-dung-gia-r2-g1-claude
+da_bi_thay_the_vi_sao: 'Bi ke vi boi r2-g1 TRONG CUNG PACKET. r2 doi CLOSURE (dong ca rc=1 +
+  stdout rong ma r1 de ho) nen phai la revision moi; hai revision cua cung mot packet KHONG the
+  cung giu ops/nhanh_don_duoc_test.py. Thu hoi som la CO CHU Y, theo chi thi chu kho
+  "Cap r2 di" (issues/568#issuecomment-5752115356). VIEC CUA r1 KHONG bi huy: PR #572 giu
+  nguyen head eb4a9ab, ba required XANH, va van AUDIT VA MERGE DUOC — mat quyen GHI khong phai
+  mat quyen LAND.'
 recorded_by: claude-session
 recorder_is_dispatcher: false
 

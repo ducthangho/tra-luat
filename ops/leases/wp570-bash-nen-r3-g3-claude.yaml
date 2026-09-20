@@ -1,0 +1,260 @@
+# LEASE — WP570-BASH-NEN-MOT-BO-GIAI revision 3 / generation 3
+#
+# Soan boi phien claude dieu phoi theo chi thi chu kho "Cap lease r3/g3 di, roi chuyen
+# cong_cu.py" (phien 20-09-2026 ~07:4xZ). Hanh vi CAP la lan `git push` len `ops/**`.
+#
+# CHI THI NAY LA CHI THI TRONG PHIEN, khong phai comment GitHub co san. Phien nay da TU CHOI
+# lam viec ay o luot truoc khi chua co chi thi cap quyen ro rang — no khai rang "chu kho chon
+# CONG VIEC chu chua chi thi CAP QUYEN, va toi khong suy cai sau tu cai truoc", roi rut lai
+# mot cau minh vua viet ("tru khi anh muon dung thi toi lam tiep") vi im lang khong phai dong y.
+# Chi thi tren la cau tra loi cho dung cho ay.
+#
+# KHAI THANG NGAY DAU: executor cua lease nay la CHINH phien da soan no. Day KHONG phai tu cap
+# viec — chu kho ra chi thi — nhung no la mot canh phai noi ro, va no quyet dinh
+# `cross_reviewer_requirement` ben duoi: phien nay KHONG duoc dong vai reviewer cho ban cua no.
+
+trang_thai_ban_ghi: 'DA CAP 20-09-2026. Day len ops/cap-lease-570-g3 theo chi thi chu kho.'
+
+schema_version: 2
+event: executor_lease_granted
+packet_issue: 570
+packet_id: WP570-BASH-NEN-MOT-BO-GIAI
+mission_issue: KHONG_CO
+revision: 3
+generation: 3
+lease_id: wp570-bash-nen-r3-g3-claude
+granted_by: ducthangho
+
+thay_the_cho: wp570-bash-nen-r2-g2-claude
+thay_the_cho_vi_sao: 'Dau HAI CHIEU. g2 mang dong `da_bi_thay_the: wp570-bash-nen-r3-g3-claude`
+  trong CUNG lan day nay; `_kiem_bia_mo` cuong che chieu ay va bac rc=8 neu thieu. Cong doc tu REF
+  chu khong doc cay lam viec, nen hai tep KHONG duoc di hai lan day.'
+vi_sao_revision_3_generation_3: 'docs/PROTOCOL_DA_PHIEN.md §3.2: doi WRITE SET tao revision moi,
+  generation moi va cap lai lease. r3 doi that: `ops/cong_cu.py` VAO write set va RA khoi
+  `khong_duoc_cham`; them N14/N15/N16.
+  Day KHONG phai vi g2 lam sai. Ly do g2 loai `ops/cong_cu.py` la DUNG LUC AY — lease
+  `wp541-path-r3-g3-claude` giu duong ay. Lease do nay DA BI THU HOI bang bia mo hai chieu, va
+  do 20-09T05:05Z cho `ai-dang-giu ops/cong_cu.py` rc=0 NGUOI_GIU 0. Tuc dieu kien doi, khong
+  phai phan doan doi. Xem spec r3 §0.'
+
+granted_on_instruction: https://github.com/ducthangho/tra-luat/issues/570#issuecomment-5748094664
+granted_on_instruction_nguyen_van: 'Chu kho, phien dieu phoi 19-09-2026, theo thu tu thoi gian:
+  "Mot bo giai + cong chan ban sao" · "Co — gui bo do luot 2" · "Gui dinh di da. Va di" ·
+  "Thu lai di" · "Cap lease #570 di" · "Sua cau ay trong revision di, roi lam tiep" ·
+  "Cap nhat trang thai, cho toi script de test tren may Windows. Va #570, #571" (kem bon lua
+  chon duoc chon, trong do co "Chuyen not loi goi tran ops/cong_cu.py") ·
+  "Cap lease r3/g3 di, roi chuyen cong_cu.py".'
+granted_on_instruction_ghi_chu: 'Cac chi thi la chi thi TRONG PHIEN dieu phoi, khong phai comment
+  GitHub co san tu truoc. Comment duoc neo o tren la BAN GHI, khong phai nguon goc — no chung minh
+  chi thi TON TAI va noi dung la gi, no khong chung minh chi thi duoc phat ra tai do. Khai ro vi
+  mot chuoi neo trong ma khong ai doc duoc la mot cho trong, va kho da tra gia cho kieu cho trong
+  ay o lease g2 cua #541.'
+recorded_by: claude-session
+recorder_is_dispatcher: false
+
+leased_at_utc: '2026-09-20T07:50:00Z'
+lease_expires_at_utc: '2026-09-21T01:55:00Z'
+han_de_xuat_vi_sao: 'GIU NGUYEN moc het han cua g2 (2026-09-21T01:55:00Z), KHONG gia han.
+  Mot revision la de doi PHAM VI, khong phai de executor tu keo dai thoi han cua chinh minh;
+  gop hai viec ay vao mot lan day thi lan sau khong ai tach duoc chung. Con ~18 gio, du cho N14.'
+
+role: executor
+provider: anthropic
+executor: claude
+model: KHONG_KHAI
+effort: KHONG_KHAI
+execution_surface: claude-code-remote
+transport: cloud
+environment: cloud
+operating_system: Linux
+environment_vi_sao: 'Phien chay tren container Linux. Day la mot GIOI HAN THAT, khong phai chi
+  tiet hanh chinh: packet nay do hanh vi PHU THUOC NEN, va nen sinh ra khuyet tat la Windows.
+  ADR-0049 da go lane Windows khoi `master`, nen nghiem thu Windows di bang CONG TAI CHO tren
+  may chu kho (N9 cua spec), khong bang CI. Dung doc "cong xanh" rong hon the.'
+
+risk: sensitive
+review_class: sensitive
+effective_review_class: sensitive
+review_class_vi_sao: '`_tinh_lop_tu_write_set` tra sensitive cho MOI dau vao (do lai tren
+  origin/master 19-09: `_BANG_LOP` co 7 muc, ca 7 sensitive, va mac dinh cua next() cung
+  sensitive). Cong khong nhan lop nao thap hon; khai lech thi bac rc=10.'
+
+assurance_target: human_audited
+assurance_target_vi_sao: '§8 cho sensitive: Codex cross_approved HOAC human_audited. Phien nay LA
+  tac gia cua ops/bash_nen.py va cua nam ca T23..T27, nen moi luot review do chinh no chay deu bi
+  chan cung la advisory_review. Muon human_audited thi phai co NGUOI audit that.'
+reviewer_provider: human
+reviewer_model: KHONG_AP_DUNG
+reviewer_effort: KHONG_AP_DUNG
+reviewer_independence: 'fresh session/context/checkout; khong fork context cua executor; nguon
+  read-only. Nguoi audit tu doc spec r1 va diff, tu chay lai N1-N10, neo verdict vao exact
+  reviewed_sha.'
+cross_reviewer_requirement: 'CAM self_review va self_approve. Rang buoc CU THE o day: phien soan
+  lease nay CUNG LA executor VA la tac gia cua ban va dang nam trong PR #571 — no khong duoc dong
+  vai reviewer cho chinh ban ay duoi bat ky nhan nao.'
+
+spec_path: ops/specs/wp570-bash-nen-mot-bo-giai-r3.md
+spec_ref: claude/spec-570-r3-20260920
+spec_hash: e5727f21eecb211f2e2ac41480c6a69be24779dba9ae5172c7dab13ada52bd37
+spec_bytes: 19207
+prompt_path: ops/specs/wp570-bash-nen-mot-bo-giai-r3.md
+prompt_sha256_required: e5727f21eecb211f2e2ac41480c6a69be24779dba9ae5172c7dab13ada52bd37
+spec_hash_do_nhu_the_nao: 'Bam DOC NGUOC VE tu may chu sau khi day (`git cat-file blob
+  FETCH_HEAD:<duong>`), khong lay tu ban tren dia; hai ban da doi chieu GIONG TUNG BYTE.'
+
+branch: claude/va-570-bash-nen-20260919
+branch_vi_sao: 'Nhanh DA TON TAI va dang mang PR #571. Khai dung nhanh THAT ngay tu dau — lech
+  giua nhanh khai va nhanh that la P2-1 cua mot verdict o #541 va phai dinh chinh ho so ve sau.'
+branch_ownership: exclusive
+target_branch_neu_land: master
+
+base_sha: a062a43ba1662453b5cc964e3dedc4252df6e7e7
+base_sha_vi_sao: 'origin/master tai luc cap g3. Nhanh packet DA HOA master HAI LAN trong phien
+  20-09 theo chi thi chu kho (a270aea8 roi a062a43b), nen `git merge-base --is-ancestor
+  origin/master HEAD` tra DUNG — do ngay truoc khi day. Lan hoa thu hai la bat buoc: master nhay
+  GIUA hai lan do, va chuoi `&&` truoc lenh push da chan mot lan day se lam `thu-hoi` DO vi
+  DRIFT chu khong vi ban va.'
+start_from_sha: 58b8b256f92636adfe5d92d4c25dd62664b66aee
+start_from_sha_vi_sao: 'Head hien tai cua PR #571. N1-N13 da nam o day va da xanh tren CA Linux
+  LAN Windows (bo do `570-do-5`); packet TIEP TUC tren do, khong lam lai tu dau.'
+immutable_acceptance_baseline: dc85dd0a34188238aa6537ce843ff3688e488fd3
+reviewed_sha_required: 58b8b256f92636adfe5d92d4c25dd62664b66aee
+reviewed_sha_required_note: 'Neo DUOI luc cap, tro vao head hien tai. Verdict cuoi PHAI neo dung
+  SHA ung vien THAT khi N7/N8 da lam xong, KHONG dung lai con so nay.'
+
+write_set:
+- ops/bash_nen.py
+- ops/cong_cu.py
+- ops/cong_cu_test.py
+- ops/lease_publish_test.py
+
+write_set_CONG_VIEC_TRUOC_LEASE: 'KHAI THANG: `ops/bash_nen.py` (tep MOI) va `ops/cong_cu_test.py`
+  DA duoc thay doi o PR #571 (010fb281) theo chi thi "Va di" cua chu kho, luc packet nay CHUA co
+  lease nao. Lease r1 bao trum chung VE SAU. No KHONG hop thuc hoa nguoc phan viec da lam; ghi ra
+  day de khong ai doc nham rang phan ay da di qua mot cong lease.'
+
+write_set_da_quet_toan_kho: 'DO 20-09-2026T07:5xZ, doc rc TRUC TIEP (khong qua pipe).
+  Chot so hai nguon ref chay TRUOC, so bang TAP TEN chu khong bang wc -l:
+    ls-remote 475 ten nhanh / for-each-ref 475, comm -23 RONG => phep quet KHONG mu.
+  ai-dang-giu tung duong:
+    ops/bash_nen.py            rc=11  NGUOI_GIU 1: wp570-bash-nen-r2-g2-claude (chinh packet nay)
+    ops/cong_cu.py             rc=0   NGUOI_GIU 0: khong co
+    ops/cong_cu_test.py        rc=11  NGUOI_GIU 1: wp570-bash-nen-r2-g2-claude (chinh packet nay)
+    ops/lease_publish_test.py  rc=11  NGUOI_GIU 1: wp570-bash-nen-r2-g2-claude (chinh packet nay)
+  LAN NAY LA MOT LAN QUET SACH: khong duong nao co NGUOI GIU NAO KHAC. Duong moi
+  (ops/cong_cu.py) hoan toan tu do — day la dieu kien r2 nêu ma luc ay chua thoa.'
+
+write_set_CONG_VIEC_TRUOC_LEASE_r3: 'KHAI THANG: `ops/cong_cu.py` CHUA duoc cham lan nao duoi
+  danh nghia packet nay. Lease nay cap quyen TRUOC, roi moi lam — nguoc voi tinh the cua r1/r2,
+  noi lease bao trum ve sau phan viec da lam theo chi thi "Va di". Ghi ra de doi chieu duoc.'
+
+CHONG_LAN_DA_BIET:
+  trang_thai: 'KHONG CON. Do 20-09T07:5xZ: ca bon duong deu khong co NGUOI GIU NAO KHAC.'
+  lich_su: 'g2 khai chong lan tren ops/lease_publish_test.py voi lease wp541-path-r3-g3-claude.
+    Lease do da bi THU HOI SOM 19-09T18:5xZ bang bia mo hai chieu (lease ke nhiem
+    wp541-path-r4-g4-bia-mo, write_set RONG). Chinh viec thu hoi ay la thu mo duong cho r3:
+    no tra `ops/cong_cu.py` ve NGUOI_GIU 0.'
+  canh_bao_giu_lai: '"Het han" KHONG phai "da nha" va "da land" cung KHONG phai "da nha" — kho
+    da ghi so chuyen nay o #355. Cau ay van dung, chi la lan nay khong co ai de ap vao.'
+
+DIEU_KIEN_BAT_DAU:
+  xep_sau: KHONG_CO
+  luat: 'Executor KHONG duoc cham BAT KY duong nao trong write_set chung nao `ai-dang-giu` cho
+    duong ay con cho thay MOT NGUOI GIU NAO KHAC ngoai lease cua CHINH packet nay. Phai DO truoc
+    MOI lan cham, doc `rc` TRUC TIEP, va doc ca `da_bi_thay_the`. "Het han" KHONG phai "da nha";
+    "da land" cung KHONG phai "da nha".
+    CAU NAY tung bi viet SAI o r1 (doi `rc=0` / `NGUOI_GIU 0`, ma lease cua chinh packet LUON giu
+    cac duong ay nen dieu kien khong bao gio thoa duoc). r2 da sua; r3 giu nguyen ban da sua.
+    Giu ca ban ghi ve cai sai thay vi xoa: mot dieu kien khong thoa duoc se bi nguoi sau dien giai
+    lai trong im lang, va do la cach mot chot chet ma van trong nhu con song.
+    DO 20-09T07:5xZ: ca bon duong deu THOA (ba duong do chinh lease packet giu, mot duong trong).'
+  cap_lease_KHAC_bat_dau: 'Lease cap QUYEN, khong phai lenh khoi dong (§4).'
+
+khong_duoc_cham:
+- .github/workflows/ci.yml
+- .github/workflows/ops-publish-lease.yml
+- .github/workflows/ops-thu-hoi-admission.yml
+- docs/PROTOCOL_DA_PHIEN.md
+- ops/cai_actionlint.sh
+- ops/chay_lease_publish_test.sh
+- ops/lease_publish.py
+- ops/specs/wp570-bash-nen-mot-bo-giai-r1.md
+- ops/specs/wp570-bash-nen-mot-bo-giai-r2.md
+- scripts/tl.py
+- scripts/tl_selftest.py
+- RELEASE_MANIFEST.json
+
+hinh_dang_ke_thua_r3: 'r3 DONG not lan thu HAI cua bang o spec §2 — `_bash_windows()` trong
+  `ops/cong_cu.py`, bo giai RIENG cuoi cung con sot. Sau N14, `ops/**` chi con MOT bo giai, va
+  khong con bo loc theo TEN nao RA QUYET DINH. Do la ly do packet nay ton tai; giu lai mot bo
+  giai thu hai la giu lai dung cho khuyet tat tai sinh.'
+
+hinh_dang_ke_thua: 'LAN THU BA CUA CUNG MOT KHUYET TAT, khong phai packet khac phuc cua chinh
+  minh. Ba doctrine dang ap:
+   (1) "Hinh dang lap lan thu BA thi hoi CO NEN LAM VIEC NAY KHONG" — ban va thu tu theo kieu cu
+       (them bo giai rieng thu ba) da bi TU CHOI co chu dich; chu kho quyet mot bo giai + mot cong.
+   (2) "Danh sach CAM khong bao gio du" — hai bo giai cu loc theo TEN; bo giai moi quyet bang
+       phep thu NANG LUC, va phep do luot 2 la bang chung rang khong loc theo ten nao dien ta noi
+       khuyet tat that.
+   (3) "Dot bien bi giet khong phai bi giet DUNG LY DO" — dot bien dau tien cho T23 SONG SOT vi no
+       chi go mot trong BA chot con cua phep argv. Da tach thanh ba dot bien rieng. Moi tieu chi
+       N1-N10 neo LY DO, khong chi neo rc.'
+
+run_minutes: 120
+heartbeat_required_minutes: 30
+attempts_limit: class-based owner-directed loop; no reset of prior history
+review_calls_limit: until approve or zero P1/P2
+manual_ci_budget: 0
+
+prohibited_actions:
+- self_review
+- self_approve
+- merge
+- land
+- deploy
+- LIVE
+- ruleset mutation
+- admin bypass
+- secret disclosure
+- workflow_dispatch
+- manual full CI
+- Windows CI
+- 'CHAM ops/lease_publish_test.py TRUOC khi ai-dang-giu cho duong ay tra rc=0 — xem DIEU_KIEN_BAT_DAU'
+- 'VA t131 / t132 / t150 / t125 / t171 — deu NGOAI PHAM VI, xem spec r3 §6'
+- 'NHET LAI mot phep loc theo TEN vao `ops/cong_cu.py` de no chay duoc sau N14 — do la tai sinh
+   dung khuyet tat packet nay sinh ra de giet; gap tinh the ay thi DUNG va bao (spec r3 §7)'
+- 'GIU NGUYEN `t22` lam canh sau N14 — mot ca con MAT ma khong con DO la benh `t24`; N15 doi
+   viet lai no cho do HANH VI MOI, kem dot bien rieng'
+- 'GIA HAN lease cua chinh minh nhan danh revision — r3 giu nguyen moc het han cua g2'
+- 'SUA ops/cai_actionlint.sh — da DO la LANH; sua no la va mot khuyet tat khong ton tai'
+- 'VA bang cach `cygpath` hoa duong dan — phep do da BAC gia thuyet dang duong dan'
+- 'DUNG mot bo loc theo TEN lam thu RA QUYET DINH trong bo giai (System32, %SystemRoot%, …);
+   loc theo ten chi duoc dung de XEP THU TU thu'
+- 'NOI danh sach CHO_PHEP cua cong de cho mot loi goi tran moi di qua'
+- 'DUNG giai thich cho hai cho KHONG DO DUOC cua marshalling argv WSL — khai thang, dung dung'
+- 'viet dau bo-qua-CI nguyen van trong thong diep commit, ke ca khi trich dan'
+- 'doc rc qua pipe (`| tail` roi `$?`)'
+- 'dot bien tren TEP THAT — moi dot bien chay tren BAN SAO tam'
+
+dieu_kien_dung:
+- 'Mot hinh dang loi lap lan thu BA => DUNG, hoi "co nen lam viec nay khong", khong hoi "va the nao".'
+- 'Ba chot con cua N2 khong phan biet duoc bang DAU VAO => khai thang do la bo TUONG DUONG, dung
+   gia vo co ba chot. Bao lai, dung tu quyet.'
+- 'Can cham bat ky duong nao ngoai write set => DUNG, xin revision.'
+- 'Sau N14, neu `ops/cong_cu.py` can mot phep loc theo TEN de chay duoc => DUNG va bao.'
+- 'Hop nhat xong ma ban kinh dot bien tren Windows VAN khong doc duoc => DUNG. Do la lan thu BA
+   cua cung mot hinh dang, va cau hoi dung luc ay la "co nen do bang ban kinh khong", khong phai
+   "noi nguong the nao".'
+- 'Nghiem thu Windows (N9) khong chay duoc => KHONG ket luan "da xanh". Khai KHONG DO DUOC va bao.'
+- 'ai-dang-giu tra rc khac 0 cho ops/lease_publish_test.py khi toi luc lam N7/N8 => DUNG va bao,
+   khong suy tu moc thoi gian.'
+
+closure_status: 'Owner-directed grant, revision 3. KHAC hai lan truoc o mot cho quan trong:
+  day la mot lan quet SACH — do 20-09T07:5xZ, khong duong nao trong write_set co NGUOI GIU NAO
+  KHAC, va duong MOI (`ops/cong_cu.py`) co NGUOI_GIU 0. Khong con chong lan de khai.
+  Khai thang ba dieu: (1) executor cua lease nay VAN la phien da soan no, nen `assurance_target`
+  giu `human_audited` va phien nay khong duoc dong vai reviewer; (2) han het KHONG duoc gia —
+  giu nguyen moc cua g2; (3) viec hop nhat `_bash_windows` MAT phep so truoc/sau cho cau hoi
+  "vi sao ban kinh `t22` doi giua hai luot Windows" — cau hoi ay BI BO LAI o trang thai KHONG DO
+  DUOC, khong phai da duoc tra loi. Chu kho da duoc bao cai gia nay truoc khi ra chi thi.
+  Khong khai gi ve nghiem thu Windows cua chinh N14: no CHUA duoc do.'

@@ -13,6 +13,11 @@ HERE = Path(__file__).resolve().parent
 GOC = HERE.parent
 SCRIPT = HERE / "cong_cu.py"
 BASH_NEN = HERE / "bash_nen.py"
+# Chinh tep nay, lam DUONG DAN — de dot bien `bn_ban_kinh_giau_ly_do` co cho cam ma KHONG
+# phai patch `GOC`. Do duoc 20-09-2026: patch `GOC` keo `t6` chet `tin_dung_gia` (cay tam
+# thieu thu `t6` can) va lam ban kinh KHONG DOC DUOC — dung bay "co lap 3 ho" ghi o dau
+# `DOT_BIEN`: moi dot bien chi duoc patch DUNG mot bien.
+TEP_TEST = HERE / "cong_cu_test.py"
 CAI_SH = HERE / "cai_cong_cu.sh"
 sys.path.insert(0, str(HERE))
 import lease_publish_test as lpt  # noqa: E402 — tái dùng _goi_actionlint_gia/_bam_tep
@@ -583,6 +588,11 @@ DOT_BIEN = {
         '            return True, "đột biến: coi QUÁ HẠN là đạt"\n'
         '        return False, f"phép argv: rc={rc} — {ra.strip()[:200]}"\n',
         "BASH_NEN", (), "t28_bash_nen_tu_choi_bash_TREO_trong_han"),
+    "bn_ban_kinh_giau_ly_do": ("ops/cong_cu_test.py",
+        '        dong += [f"        · {t} [{ket[t][0]}] {ket[t][1]}" for t in oan]\n',
+        '        dong += []  # đột biến: giấu LÝ DO, chỉ còn TÊN — đúng bản trước 20-09\n',
+        "TEP_TEST", ("ops/lease_publish_test.py", "ops/bash_nen.py"),
+        "t29_ban_kinh_qua_RONG_phai_neu_LY_DO_tung_ca_oan"),
     "bn_quet_theo_chuoi": ("ops/bash_nen.py",
         "            dong = _loi_goi_tran(than)\n",
         "            dong = [i for i, l in enumerate(than.splitlines(), 1)\n"
@@ -621,6 +631,55 @@ def _chay_1_ca(fn):
         return "tin_dung_gia", f"{type(ex).__name__}: {ex}"
     finally:
         _CA_DANG_CHAY = None
+
+def _ket_luan_ban_kinh(ten_db, ca_dich, ket, tong_ca):
+    """Đọc một lượt đo bán kính thành (các_dòng_in, số_lỗi). Hàm THUẦN, không in, không I/O.
+
+    TÁCH KHỎI `main()` có lý do đo được, không phải cho gọn: bản cũ nằm inline nên đây là
+    mảnh DUY NHẤT của bộ đo mà không ca nào gọi được — tức phần PHÁN QUYẾT không có phản
+    chứng, đúng chỗ dễ sai nhất. Nay `t29` gọi thẳng vào đây.
+
+    VÀ nó sửa một lời khai RỘNG HƠN PHÉP ĐO mà nghiệm thu Windows 20-09-2026 phơi ra
+    (bộ đo `570-do-3`, log của chủ kho, HEAD 42dd49db). Trên Windows, đột biến
+    `t22_bash_lay_ca_system_root` giết đích CỘNG 8 ca khác (bán kính 9/31) trong khi trên
+    Linux nó đúng 1/31. Bản cũ in thẳng "⇒ trói nhầm thứ" — một KẾT LUẬN VỀ NGUYÊN NHÂN
+    cho thứ nó mới chỉ ĐẾM. Có ít nhất hai nguyên nhân cho cùng con số ấy:
+      (a) ca đích trói nhầm thuộc tính — đột biến rơi vào chỗ nhiều ca cùng đo;
+      (b) đột biến nằm trên ĐƯỜNG CHUNG của giàn giáo — `_bash_windows()` là thứ `_chay()`
+          dùng để phóng MỌI công cụ giả khi `os.name == "nt"`, nên gỡ chốt của nó thì mọi
+          ca có subprocess đều chết, và chúng chết bằng CHỐT CỦA CHÍNH MÌNH nên vẫn xếp
+          `giet_that`, không phải `tin_dung_gia`.
+    Hai thứ ấy đòi hai cách chữa ngược nhau, và bản cũ KHÔNG in đủ dữ liệu để phân biệt:
+    nó chỉ in TÊN ca oan, không in ca ấy chết vì gì. Nên lượt Windows kế tiếp sẽ lại đọc
+    được đúng chừng ấy. `CLAUDE.md`: "ghi một nguyên nhân sai vào doctrine còn tệ hơn
+    không ghi gì".
+
+    ĐỎ vẫn là ĐỎ — hàm này KHÔNG nới cổng, nó chỉ thôi khẳng định thứ chưa đo và in kèm
+    lý do từng ca oan để lượt sau CHẨN ĐOÁN được thay vì đoán.
+    """
+    tt_dich = ket[ca_dich][0]
+    chet = sorted(t for t, (tt, _) in ket.items() if tt in ("giet_that", "tin_dung_gia"))
+    oan = [t for t in chet if t != ca_dich]
+    bk = f"{len(chet)}/{tong_ca}"
+    gia = sorted(t for t, (tt, _) in ket.items() if tt == "tin_dung_gia")
+    if tt_dich == "bo_qua":
+        return ([f"  KHÔNG_ĐO_ĐƯỢC {ten_db}: đích '{ca_dich}' bị BỎ QUA — {ket[ca_dich][1]}"], 1)
+    if tt_dich == "tin_dung_gia":
+        return ([f"  ĐỎ  {ten_db}: TÍN DỤNG GIẢ — đích '{ca_dich}' chết KHÔNG PHẢI bằng chốt "
+                 f"của nó: {ket[ca_dich][1]}"], 1)
+    if tt_dich != "giet_that":
+        return ([f"  ĐỎ  {ten_db}: đích '{ca_dich}' vẫn XANH ⇒ đột biến không giết được gì"], 1)
+    if gia:
+        return ([f"  ĐỎ  {ten_db}: ca {gia} chết bằng lỗi VÔ CAN (tín dụng giả) ⇒ bán kính "
+                 f"không đọc được"], 1)
+    if oan:
+        dong = [f"  ĐỎ  {ten_db}: giết THÊM {oan} ngoài đích '{ca_dich}' (bán kính {bk}). "
+                f"CHƯA phân biệt được 'ca đích trói nhầm thuộc tính' với 'đột biến nằm trên "
+                f"ĐƯỜNG CHUNG của giàn giáo' — đọc lý do từng ca dưới đây rồi mới kết luận:"]
+        dong += [f"        · {t} [{ket[t][0]}] {ket[t][1]}" for t in oan]
+        return (dong, 1)
+    return ([f"  ok  {ten_db} → giết đúng '{ca_dich}' · bán kính {bk}"], 0)
+
 
 def _do_ban_kinh(ten_dot_bien):
     tep, tim, thay, bp, phu_thuoc, ca_dich = DOT_BIEN[ten_dot_bien]
@@ -1297,6 +1356,42 @@ def t28_bash_nen_tu_choi_bash_TREO_trong_han():
              f"mat chot DUY NHAT chan mat treo, khong phai 'chay cham hon'")
 
 
+@ca
+def t29_ban_kinh_qua_RONG_phai_neu_LY_DO_tung_ca_oan():
+    """Phán quyết bán kính phải in LÝ DO của từng ca oan, không chỉ TÊN.
+
+    Ca này sinh ra từ một phép đo, không từ lo xa. Nghiệm thu Windows 20-09-2026 (bộ đo
+    `570-do-3`, HEAD 42dd49db) cho `t22_bash_lay_ca_system_root` bán kính **9/31** trong
+    khi Linux cho **1/31**. Bản cũ in đúng một dòng — danh sách 8 TÊN — rồi khẳng định
+    "⇒ trói nhầm thứ". Cầm dòng ấy trong tay vẫn KHÔNG trả lời được câu hỏi quyết định
+    cách chữa: 8 ca ấy chết vì ca đích trói nhầm thuộc tính, hay vì đột biến nằm trên
+    ĐƯỜNG CHUNG mà giàn giáo phóng mọi công cụ giả đi qua? Không in lý do thì lượt
+    Windows sau cũng chỉ đọc được đúng chừng ấy — một phép đo KHÔNG SỐNG SÓT qua chính
+    cái nó định chẩn đoán.
+
+    Ba chốt, mỗi chốt một mệnh đề độc lập:
+      (1) bán kính rộng vẫn ĐỎ — vá này KHÔNG được nới cổng;
+      (2) báo cáo nêu TÊN ca oan;
+      (3) báo cáo nêu LÝ DO ca oan ấy chết — đây là chốt mới, và là thứ bản cũ thiếu.
+    Kèm đối chứng âm: bán kính đúng 1 thì XANH, để chốt (1) không phải thứ luôn đỏ."""
+    p = subprocess.run([sys.executable, str(TEP_TEST), "--tu-kiem-ban-kinh"],
+                       cwd=GOC, capture_output=True, text=True, timeout=120)
+    dung(p.returncode == 0 and "LOI=" in p.stdout,
+         f"không chạy được cửa tự kiểm: rc={p.returncode}\n{p.stdout}\n{p.stderr}")
+    kh_rong, kh_hep = p.stdout.split("LOI=")[1], p.stdout.split("LOI=")[2]
+    bang(kh_rong.startswith("1"),
+         f"bán kính 2/3 mà KHÔNG tính lỗi ⇒ cổng đã bị nới:\n{p.stdout}")
+    bang("ca_oan_gia" in kh_rong, f"báo cáo không nêu TÊN ca oan:\n{p.stdout}")
+    bang("giàn giáo phóng công cụ giả hỏng: rc=1" in kh_rong,
+         "báo cáo nêu tên ca oan nhưng KHÔNG nêu LÝ DO nó chết — đúng khuyết tật mà "
+         f"nghiệm thu Windows phơi ra; không có lý do thì không chẩn đoán được:\n{p.stdout}")
+    bang("trói nhầm thứ" not in kh_rong,
+         "báo cáo vẫn KHẲNG ĐỊNH nguyên nhân là 'trói nhầm thứ' trong khi nó mới chỉ "
+         f"ĐẾM — lời khai rộng hơn phép đo:\n{p.stdout}")
+    bang(kh_hep.startswith("0"),
+         f"bán kính đúng 1 mà vẫn báo lỗi ⇒ chốt (1) luôn đỏ, tức không đo gì:\n{p.stdout}")
+
+
 def _quet(goc) -> tuple:
     p = subprocess.run([sys.executable, str(BASH_NEN), "quet", "--root", str(goc),
                         "--json"], cwd=GOC, capture_output=True, text=True, timeout=120)
@@ -1424,31 +1519,41 @@ def main() -> int:
             print(f"  ĐỎ  {ten_db}: {ex}")
             loi_db += 1
             continue
-        tt_dich = ket[ca_dich][0]
-        chet = sorted(t for t, (tt, _) in ket.items() if tt in ("giet_that", "tin_dung_gia"))
-        oan = [t for t in chet if t != ca_dich]
-        bk = f"{len(chet)}/{len(CA)}"
-        gia = sorted(t for t, (tt, _) in ket.items() if tt == "tin_dung_gia")
-        if tt_dich == "bo_qua":
-            print(f"  KHÔNG_ĐO_ĐƯỢC {ten_db}: đích '{ca_dich}' bị BỎ QUA — {ket[ca_dich][1]}")
-            loi_db += 1
-        elif tt_dich == "tin_dung_gia":
-            print(f"  ĐỎ  {ten_db}: TÍN DỤNG GIẢ — đích '{ca_dich}' chết KHÔNG PHẢI bằng chốt của nó: "
-                  f"{ket[ca_dich][1]}")
-            loi_db += 1
-        elif tt_dich != "giet_that":
-            print(f"  ĐỎ  {ten_db}: đích '{ca_dich}' vẫn XANH ⇒ đột biến không giết được gì")
-            loi_db += 1
-        elif gia:
-            print(f"  ĐỎ  {ten_db}: ca {gia} chết bằng lỗi VÔ CAN (tín dụng giả) ⇒ bán kính không đọc được")
-            loi_db += 1
-        elif oan:
-            print(f"  ĐỎ  {ten_db}: giết THÊM {oan} ngoài đích '{ca_dich}' (bán kính {bk}) ⇒ trói nhầm thứ")
-            loi_db += 1
-        else:
-            print(f"  ok  {ten_db} → giết đúng '{ca_dich}' · bán kính {bk}")
+        cac_dong, loi = _ket_luan_ban_kinh(ten_db, ca_dich, ket, len(CA))
+        for dong in cac_dong:
+            print(dong)
+        loi_db += loi
     print(f"\nSỐ LIỆU: ca={len(CA)} · đột biến={len(DOT_BIEN)} · lỗi đột biến={loi_db}")
     return 1 if (hong or loi_db) else 0
 
+_KET_GIA_RONG = {
+    "ca_dich_gia": ("giet_that", "chốt của chính nó"),
+    "ca_oan_gia": ("giet_that", "giàn giáo phóng công cụ giả hỏng: rc=1"),
+    "ca_xanh_gia": ("qua", None),
+}
+_KET_GIA_HEP = {
+    "ca_dich_gia": ("giet_that", "chốt của chính nó"),
+    "ca_xanh_gia": ("qua", None),
+}
+
+
+def _in_tu_kiem_ban_kinh():
+    """Cửa để ĐỘT BIẾN chạm tới được phần phán quyết.
+
+    `t29` gọi `_ket_luan_ban_kinh` TRONG TIẾN TRÌNH, mà bộ đột biến của tệp này mutate
+    một BẢN SAO trên đĩa rồi trỏ `GOC` vào đó — mutate đĩa không đổi được hàm đã nạp.
+    Tức nếu chỉ có lời gọi trong tiến trình thì `t29` là ca KHÔNG CÓ ĐỘT BIẾN NÀO, đúng
+    thứ tệp này tồn tại để tố cáo. Cửa này cho `t29` hỏi lại chính câu ấy QUA một tiến
+    trình con đọc mã từ `GOC`, nên `bn_ban_kinh_giau_ly_do` mới có chỗ cắn."""
+    for ket, tong in ((_KET_GIA_RONG, 3), (_KET_GIA_HEP, 2)):
+        dong, loi = _ket_luan_ban_kinh("db_gia", "ca_dich_gia", ket, tong)
+        print(f"LOI={loi}")
+        for d in dong:
+            print(d)
+
+
 if __name__ == "__main__":
+    if "--tu-kiem-ban-kinh" in sys.argv[1:]:
+        _in_tu_kiem_ban_kinh()
+        sys.exit(0)
     sys.exit(main())

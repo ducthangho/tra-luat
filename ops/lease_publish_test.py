@@ -1275,8 +1275,8 @@ def _bash_posix() -> str:
     một phép loại chuỗi `"system32"`. Phép đo `570-do-2` trên Windows thật cho thấy lọc
     theo tên KHÔNG diễn tả nổi khuyết tật — thứ phân biệt được là HÀNH VI:
 
-        C:\Windows\system32\bash.EXE        -> $0=/bin/bash  $#=0   (đối số biến mất)
-        C:\Program Files\Git\bin\bash.exe     -> $0=t40        $#=3
+        C:\\Windows\\system32\\bash.EXE      -> $0=/bin/bash  $#=0   (đối số biến mất)
+        C:\\Program Files\\Git\\bin\\bash.exe -> $0=t40        $#=3
 
     Nên nay hàm này uỷ quyền cho `ops/bash_nen.py`, nơi quyết bằng phép thử NĂNG LỰC. Giữ
     nguyên HỢP ĐỒNG cũ — trả chuỗi rỗng khi không có — vì các ca gọi nó đang đọc như vậy.

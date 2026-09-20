@@ -110,9 +110,49 @@ CHONG_LAN_DA_BIET:
 
 DIEU_KIEN_BAT_DAU:
   luat: 'KHONG duoc cham ops/lease_publish_test.py cho toi khi `ai-dang-giu` cho DUNG duong ay
-    tra rc=0 / NGUOI_GIU 0. Phai DO truoc MOI lan cham, doc rc TRUC TIEP (khong qua pipe), va
-    doc ca truong `da_bi_thay_the`. "Het han" KHONG phai "da nha" — lease gia han duoc, va lease
-    #541 g2 da duoc gia han that mot lan.'
+    KHONG CON NGUOI GIU NAO NGOAI CHINH lease nay — tuc DUNG MOT ten, va ten ay la
+    windows-fixture-posix-r1-g1-claude. Phai DO truoc MOI lan cham, doc rc TRUC TIEP (khong qua
+    pipe), va doc ca truong `da_bi_thay_the`. "Het han" KHONG phai "da nha" — lease gia han duoc,
+    va lease #541 g2 da duoc gia han that mot lan.'
+  doc_the_nao:
+  - 'rc=11, DUNG MOT ten, ten ay la lease nay              => CUA MO.'
+  - 'rc=11, tu HAI ten tro len, hay mot ten KHAC           => CUA DONG. Cho.'
+  - 'rc=12 NHANH_CUC_BO_TUT_SAU                            => CHUA BIET GI CA. Chua bang lenh no
+     in ra roi DO LAI. Do KHONG phai "cua mo".'
+  - 'rc=0, NGUOI_GIU 0                                     => CUA MO, nhung DUNG LAI va hoi vi sao
+     lease nay bien mat khoi so — mot lease tu dung khoi so la mot su kien, khong phai tin mung.'
+  DINH_CHINH_1:
+    sua_gi: 'Muc `luat` ban dau viet "tra rc=0 / NGUOI_GIU 0".'
+    vi_sao: 'Dieu kien ay KHONG BAO GIO THOA DUOC. Chinh hanh vi cap lease nay la ghi mot lease
+      GIU ops/lease_publish_test.py, nen sau khi #570 nha luc 2026-09-21T01:55:00Z thi phep do
+      van tra rc=11 / NGUOI_GIU 1. Doc nguyen van thi packet tu khoa minh vinh vien.'
+    do_duoc: '2026-09-20T15:14Z, doc rc TRUC TIEP: "NGUOI_GIU 2: windows-fixture-posix-r1-g1-claude,
+      wp570-bash-nen-r3-g3-claude", RC=11. Nguoi giu THU NHAT la chinh lease nay.'
+    ai_sua: 'Chu kho ducthangho, chi thi 2026-09-20: "sua DIEU_KIEN_BAT_DAU di, soan commit cho
+      toi duyet". Phien executor NEU khuyet tat va CHO; no KHONG tu doc lai dieu kien cho nhe di
+      de mo khoa cho chinh minh.'
+    KHONG_phai_revision_moi: 'Theo §3.2: muc tieu, tieu chi nghiem thu, write set, phu thuoc,
+      executor va moi truong deu KHONG doi. Chi dieu kien BAT DAU duoc noi cho dung y DA KHAI o
+      CHONG_LAN_DA_BIET — chan HAI writer tren mot tep, chu khong phai chan CHINH MINH. Nen
+      lease_id, revision 1 va generation 1 GIU NGUYEN, khong phai cap lai, khong co bia mo nao
+      phai dat. PROTOCOL:300 khong ap vao day vi pham vi va closure khong doi.'
+    KHUYET_TAT_SONG_SINH:
+      o_dau: 'ops/specs/windows-fixture-posix-t131-t132-r1.md, muc "Dieu kien dung", dong cuoi
+        mang DUNG cung loi: "`ai-dang-giu` cho `ops/lease_publish_test.py` tra khac `rc=0` /
+        `NGUOI_GIU 0` => chua duoc cham". Cung mot loi soan thao, viet hai lan o hai van ban.'
+      chu_kho_quyet: 'Duong (A), 2026-09-20: DINH_CHINH_1 la dinh chinh CUA CHU KHO cho CA HAI
+        van ban — lease nay VA dong "Dieu kien dung" cuoi cua spec r1. Duong (B) — ra spec r2 roi
+        neo lai lease vao bam moi — da duoc trinh va chu kho KHONG chon.'
+      spec_KHONG_doi_byte: 'Spec r1 giu NGUYEN BYTE: spec_hash c326d5a0477f (day du o truong
+        spec_hash tren) khong doi, spec_bytes 5559 khong doi, gate `check` van rc=0. Khong ai sua
+        mot van ban da dong bang qua duong lease.'
+      vi_sao_KHONG_phai_noi_spec_bang_lease: 'Hinh dang bi cam la EXECUTOR tu noi rang buoc
+        cua chinh minh. O day nguoi sua la CHU KHO, tren van ban CUA MINH, sua mot loi soan thao
+        DO DUOC (rc=11 luc 2026-09-20T15:14Z), va dong duoc sua nam o "Dieu kien dung" — ky luat
+        thi cong — chu KHONG phai o tieu chi nghiem thu N1–N6. N1–N6 khong doi mot chu.
+        Phien executor NEU khuyet tat ra va CHO; no khong tu quyet.'
+      neu_co_spec_r2_ve_sau: 'Bat ky revision nao cua spec sau nay PHAI chep dinh chinh nay vao
+        than spec, de khong ai phai doc lease moi biet dieu kien that su la gi.'
   cong_hay_chan_rc12: 'ai-dang-giu hay tra rc=12 NHANH_CUC_BO_TUT_SAU. Do la fail-close DUNG —
     no tu choi do bang mot ban do cu. Chua bang dung lenh no in ra roi DO LAI, dung bo qua.'
   lam_duoc_ngay: 'Soan ban va dang DE XUAT (chua ghi vao tep); dung phep do phan biet M1/M2;
@@ -135,7 +175,8 @@ prohibited_actions:
 - secret disclosure
 - workflow_dispatch
 - manual full CI
-- 'CHAM ops/lease_publish_test.py TRUOC khi ai-dang-giu cho duong ay tra rc=0 — xem DIEU_KIEN_BAT_DAU'
+- 'CHAM ops/lease_publish_test.py TRUOC khi ai-dang-giu cho duong ay KHONG CON nguoi giu nao
+   NGOAI chinh lease nay — xem DIEU_KIEN_BAT_DAU va DINH_CHINH_1'
 - 'CHAM ops/lease_publish.py — day la MA SAN PHAM. Neu phep do cho thay khuyet tat nam o do thi
    DUNG va xin revision; dung va len qua duong test.'
 - 'CHAM ops/bash_nen.py — thuoc write set #570. DUOC doc va DUOC goi, KHONG duoc sua.'

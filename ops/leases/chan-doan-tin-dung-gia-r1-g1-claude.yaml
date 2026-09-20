@@ -29,6 +29,11 @@ granted_on_instruction_nguyen_van: 'Chu kho, phien dieu phoi 19-09-2026 ~13:2xZ,
   human_audited". Cau hoi phu ve thu tu voi #566, nhan DA CHON nguyen van: "Lam #568 truoc, #566
   sau". Cong chi thi dung truoc cung phien: "Va #565, #566,#567 khong CI". Ban chieu day du tai
   issues/568#issuecomment-5742306811.'
+da_bi_thay_the: chan-doan-tin-dung-gia-r1-g2-claude
+da_bi_thay_the_vi_sao: 'Lease nay HET HAN TU NHIEN luc 2026-09-20T13:35:00Z trong khi viec chua
+  land. Chu kho chi thi cap generation moi (20-09 ~15:1xZ, ban chieu issuecomment-5750677073).
+  Dong nay la ve CON LAI cua bia mo hai chieu ma _kiem_bia_mo doi — KHONG phai mot lan thu hoi
+  som: khi ghi dong nay, ai-dang-giu ops/nhanh_don_duoc_test.py da tra rc=0 NGUOI_GIU 0.'
 recorded_by: claude-session
 recorder_is_dispatcher: false
 

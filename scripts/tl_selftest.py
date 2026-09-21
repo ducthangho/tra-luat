@@ -25312,17 +25312,54 @@ def run() -> int:
     _t110("r378_tien_de_khong_thoat_thi_do", _c378_tien_de_khong_thoat_thi_do)
 
     def _c378_chet_vi_moi_truong_khong_la_giet():
-        """A6 — mutant chết vì MÔI TRƯỜNG phải rơi vào TÍN DỤNG GIẢ, không phải giết thật.
+        """A6 — khoá TRỌN hợp đồng ba hạng của `_r378_classify`, không chỉ một hạng.
 
         Bài học #355/#359: phân hạng theo CHUỖI thông điệp thì bất kỳ `except` nào cũng giả mạo
         được tín hiệu. `_r378_classify` chỉ cấp `killed` cho `_R378SaiKyVong` — một LỚP RIÊNG mà
-        mã triển khai không dùng. Ca này đo đúng điều đó bằng một `AssertionError` mang tên lỗi
-        môi trường của chính packet này."""
+        mã triển khai không dùng.
+
+        BẢN TRƯỚC CHỈ ĐO MỘT HẠNG, và cross-review codex lượt 2 chứng minh thế là chưa đủ
+        (`phan-hang-giet-gia-thieu-doi-chung`). Nó dựng HAI đột biến độc lập, cả hai **sống sót
+        `1715/1715`**:
+
+            m7: `except _R378SaiKyVong` -> `except RuntimeError`
+                Với lỗi mỏ neo THẬT (`R378_MUTATION_ANCHOR_COUNT:0`): bản đúng cho
+                `false_credit:RuntimeError`, m7 cho `killed` — **mà oracle CHƯA TỪNG CHẠY**
+                (`oracle_calls=0`). Một mutant không chạy nổi vẫn được tính là đã giết.
+
+            m9: nhánh `return "survived"` -> `return "killed"`
+                Oracle thoả HOÀN TOÀN mà vẫn khai `killed`.
+
+        Cả hai lọt vì ca cũ chỉ tiêm `AssertionError`, và các ca khác chỉ tiêm `AttributeError`.
+        Không hạng nào trong hai hạng còn lại có đối chứng. Một hợp đồng ba nhánh mà chỉ đo một
+        nhánh thì hai nhánh kia sẽ âm thầm hở.
+
+        Ca này nay đo CẢ BA, và mỗi vế có một đột biến riêng làm nó ĐỎ:
+            (a) oracle ném lỗi MÔI TRƯỜNG        -> `false_credit:AssertionError`
+            (b) khâu DỰNG mutant hỏng thật       -> `false_credit:RuntimeError`, oracle chạy 0 lần
+            (c) oracle THOẢ, không bất đồng gì   -> `survived`
+        """
         def _oracle_chet_vi_moi_truong(_r):
             raise AssertionError("JUNCTION_CREATE_FAILED:1:fixture")
-        cat = _r378_classify(*_R378_REGEX, ".claude/dev/launcher.py:1",
-                             _oracle_chet_vi_moi_truong)
-        return cat == "false_credit:AssertionError"
+        if _r378_classify(*_R378_REGEX, ".claude/dev/launcher.py:1",
+                          _oracle_chet_vi_moi_truong) != "false_credit:AssertionError":
+            return False
+
+        # (b) Mỏ neo KHÔNG tồn tại trong `workflow.py` ⇒ `_r378_mutant` ném `RuntimeError`
+        # THẬT (`R378_MUTATION_ANCHOR_COUNT:0`) TRƯỚC khi oracle kịp chạy. Đếm lời gọi để
+        # chứng minh đúng điều ấy — `killed` ở đây là tín dụng cho một phép thử chưa xảy ra.
+        goi = []
+        def _oracle_dem(_r):
+            goi.append(1)
+        cat_neo = _r378_classify("R378_MO_NEO_KHONG_BAO_GIO_TON_TAI_TRONG_TEP_NAY",
+                                 "x", ".claude/dev/launcher.py:1", _oracle_dem)
+        if cat_neo != "false_credit:RuntimeError" or goi:
+            return False
+
+        # (c) Oracle thoả hoàn toàn ⇒ `survived`. Thiếu vế này thì một bộ phân hạng khai
+        # `killed` cho MỌI thứ vẫn xanh, và mọi con số đột biến của packet thành vô nghĩa.
+        return _r378_classify(*_R378_REGEX, ".claude/dev/launcher.py:1",
+                              lambda _r: None) == "survived"
     _t110("r378_chet_vi_moi_truong_khong_la_giet", _c378_chet_vi_moi_truong_khong_la_giet)
 
     def _c378_giu_con_tro_cham_gach_cheo():

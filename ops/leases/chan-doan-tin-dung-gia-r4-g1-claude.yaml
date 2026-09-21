@@ -1,0 +1,154 @@
+# LEASE — CHAN-DOAN-TIN-DUNG-GIA revision 4 / generation 1
+# REVISION MOI vi DOI CLOSURE: r4 them tieu chi nghiem thu moi (A20-A28) va SUA ma da thi cong
+# o r1 lan r3. PROTOCOL_DA_PHIEN.md:300.
+# Executor CLAUDE. Ghi HO theo chi thi chu kho.
+#
+# DOC KY TRUOC KHI LAM: r4 chua BA benh do CROSS-REVIEW CODEX tim ra, khong phai executor tu
+# thay. No KHONG dung vao P1 ve r508 (do la closure #593 va la cau hoi kien truc dang cho chu
+# kho). Xem KHONG_HUA_GI.
+
+schema_version: 2
+event: executor_lease_granted
+packet_issue: 568
+packet_id: CHAN-DOAN-TIN-DUNG-GIA
+mission_issue: KHONG_CO
+revision: 4
+generation: 1
+lease_id: chan-doan-tin-dung-gia-r4-g1-claude
+
+thay_the_cho: KHONG_CO
+thay_the_cho_vi_sao: 'Lease truoc cua #568 (chan-doan-tin-dung-gia-r3-g1-claude) DA CHET roi, bi
+  chan-doan-tin-dung-gia-r3-g2-bia-mo ke vi tu 2026-09-21T05:5xZ. Khong con gi de ke vi, nen
+  truong nay RONG chu khong tro bua vao mot lease da chet.'
+
+granted_by: ducthangho
+granted_on_instruction: https://github.com/ducthangho/tra-luat/issues/568#issuecomment-5758387158
+granted_on_instruction_nguyen_van: 'Chu kho, phien dieu phoi 2026-09-21, GO VAN XUOI: "Cap r4 cho
+  #568 di. Nhung # PR nao chua review thi cross review boi codex di".'
+recorded_by: claude-session
+recorder_is_dispatcher: false
+
+NGUON_CAP_VIEC: 'Luot CROSS-REVIEW tren CODEX (reviewer cross-provider, ho model KHAC executor)
+  chay tren reviewed_sha 1486689, verdict changes_requested. Executor da TAI HIEN bang phan chung
+  CHAY DUOC tung finding, khong nhan theo loi. Ba finding thuoc closure #568 la noi dung revision
+  nay. Chi tiet: pull/596#issuecomment-5757583861.
+  DU KIEN DANG DOC THANG: ca ba benh do MOT REVIEWER KHAC HO MODEL tim ra, khong phai executor tu
+  thay. Ba luot tu kiem cua chinh executor da KHONG bat duoc chung.'
+
+DUONG_DA_SACH_DO_THE_NAO: '#593 TU NHA duong bang bia mo hai chieu dau-phien-trung-lam-do-cong-
+  r1-g2-bia-mo (ban chieu: issues/593#issuecomment-5758350999). Do ngay sau do:
+  `ai-dang-giu ops/nhanh_don_duoc_test.py` => rc=0, NGUOI_GIU 0.
+  DAY KHONG PHAI KHE AG-T0-01B: lease nay KHONG dat thay_the_cho tro sang lease nao cua #593.
+  No AG-T0-01B-thu-hoi-lease-chua-co-duong VAN MO.'
+
+leased_at_utc: '2026-09-21T09:30:00Z'
+lease_expires_at_utc: '2026-09-22T09:30:00Z'
+
+role: executor
+provider: anthropic_claude
+executor: claude
+model: KHONG_KHAI
+model_vi_sao_KHONG_bat_buoc: 'assurance_target la human_audited. Ket luan da duoc #551 r4 (M20)
+  dong bang.'
+effort: KHONG_KHAI
+
+assurance_target: human_audited
+assurance_target_vi_sao: 'Luot cross-review DA chay va tra changes_requested, tuc CHUA dat
+  cross_approved. Sau khi va, mot luot review MOI tren head ung vien co the nang muc — nhung do
+  la phep do phai lam roi moi khai, khong duoc khai truoc.'
+assurance_target_HE_QUA_PHAI_KHAI: 'Packet nay KHONG LAND DUOC BANG MAY. Executor KHONG duoc khai
+  muc nao ho chu kho.'
+assurance_target_fallback: advisory_review
+reviewer_provider: codex
+reviewer_provider_vi_sao: 'Executor la claude (anthropic_claude) nen reviewer PHAI khac ho model.
+  Da chung minh kha dung bang loi goi THAT: codex-cli 0.155.1, rc=0. LUU Y: `launcher.py doctor`
+  bao CHUA_XAC_THUC token HET HAN -40.5h, nhung loi goi that van chay (token tu lam moi) — tin
+  doctor se la khai KHONG DO DUOC cho mot thu do duoc.'
+
+review_class: sensitive
+effective_review_class: sensitive
+review_class_vi_sao: 'Cham CHINH bo phan hang dot bien va bo doc ket qua cua con. B1 la mot duong
+  CAP GIET GIA — tuc mot lo an ninh cua cong, khong phai mot loi thuong.'
+
+spec_ref: ops/specs/chan-doan-tin-dung-gia-r4.md
+spec_path: ops/specs/chan-doan-tin-dung-gia-r4.md
+prompt_path: ops/specs/chan-doan-tin-dung-gia-r4.md
+prompt_sha256_required: bbdbff5abb77b6cd12175633a9501463f37c60411d4611b9402fe81b5760d2c7
+spec_hash: bbdbff5abb77b6cd12175633a9501463f37c60411d4611b9402fe81b5760d2c7
+spec_hash_do_nhu_the_nao: 'sha256sum ops/specs/chan-doan-tin-dung-gia-r4.md tren nhanh
+  ops/cap-lease-568, 9 290 B. Do lai TRUOC khi tin con so nay.'
+
+branch: claude/chan-doan-tin-dung-gia-r4
+branch_ownership: exclusive
+
+start_from_sha: 6c761c406cd254cd4f138f2442374badcf9bb795
+start_from_sha_vi_sao: 'Head PR #596. r4 xay TREN r1+r2+r3+#593: cat tu master lam mat ca bon
+  khoi cay lam viec, va A28 phai do trong DUNG bang dot bien ma #593 de lai (89 muc). Neo vao
+  master roi khai mot con so la con so cua mot bang khac.'
+reviewed_sha_required: 6c761c406cd254cd4f138f2442374badcf9bb795
+reviewed_sha_required_note: 'Mo neo SAN luc cap — day la start_from_sha, KHONG phai head ung vien
+  cuoi. Luot cross-review sau khi va PHAI ghi exact reviewed_sha cua head THAT.'
+
+write_set:
+- ops/nhanh_don_duoc_test.py
+write_set_MOT_DUONG: 'MOT tep. Trong tran ADR-0044:5 cho class sensitive. KHONG xin ngoai le.'
+
+KHONG_HUA_GI:
+  khong_dung_vao_P1_r508: 'P1 cua luot review — "r508 bien tien de khong do duoc thanh DO_CHOT" —
+    thuoc closure #593, KHONG phai #568. Va no la mot CAU HOI KIEN TRUC dang cho chu kho: bo phan
+    hang chi co DAT/DO_CHOT/DO_KHAC, KHONG co nhan KHONG DO DUOC o muc CA. Dong dung no doi mot
+    trong hai: them trang thai thu ba o muc ca (doi kien truc), hoac dinh chinh A1/A3 cua dac ta
+    #593. Ca hai deu la revision moi. r4 KHONG dung vao.'
+  khong_doi_huong_cat: 'Huong cat cua _goi_chan_doan van NGOAI pham vi, y nhu r3.'
+  khong_chua_T6: 'CASE T6 la no RIENG, chua co chu.'
+  khong_chua_nguyen_nhan_A: 'r506 chet vi loi VO CAN tren runner: KHONG TAI HIEN DUOC.'
+  khong_don_bon_diem_con_lai: 'Bon diem invalid escape sequence con lai cua kho la no rieng.'
+  khong_hua_cong_xanh: 'r4 bit mot duong cap GIET GIA. No KHONG bao dam cong se xanh.'
+
+cam_tuyet_doi:
+- 'Bo hoac vo hieu hoa mot ca test de lam xanh.'
+- 'Soan bo dau vao cua A20 bang tay. No PHAI duoc SINH tu chinh danh sach tam ky tu tach dong,
+  va phai co mot dot bien bo bot mot ky tu khoi danh sach de chung minh chot bat duoc. Soan tay
+  ma thieu mot ky tu thi chot xanh ma van ho dung ky tu do — xem CO_HOI_TAI_PHAT_DA_BIET.'
+- 'Khai A24 bang mot phep do chi doc nguon MOT duong. Mot duong thi dot bien thay dung duong ay
+  se song sot, va loi khai "xac thuc danh tinh" lai rong hon phep do — dung benh B3 lan hai.'
+- 'Khai cross_approved khi luot codex tren head ung vien chua chay hoac chua tra approve.'
+
+khong_duoc_cham:
+- ops/nhanh_don_duoc.py
+- ops/lease_publish.py
+- ops/lease_publish_test.py
+- ops/bien_nhan_v2.py
+- ops/bien_nhan_v2_test.py
+- .claude/dev/packet_loop_test.py
+- docs/PROTOCOL_DA_PHIEN.md
+- ops/specs/chan-doan-tin-dung-gia-r1.md
+- ops/specs/chan-doan-tin-dung-gia-r2.md
+- ops/specs/chan-doan-tin-dung-gia-r3.md
+- ops/specs/chan-doan-tin-dung-gia-r4.md
+- ops/specs/dau-phien-trung-lam-do-cong-r1.md
+- .github/workflows/ci.yml
+- .claude/dev/launcher.py
+- .claude/dev/packet_loop.py
+- scripts/tl.py
+- scripts/tl_selftest.py
+- RELEASE_MANIFEST.json
+khong_duoc_cham_vi_sao: 'ops/specs/chan-doan-tin-dung-gia-r4.md: dac ta DA DONG BANG.
+  ops/nhanh_don_duoc_test.py KHONG nam trong danh sach nay — no LA write set.'
+
+hinh_dang_ke_thua:
+  LOI-KHAI-RONG-HON-PHEP-DO: 6
+  TIN-HIEU-DO-CHINH-MA-TEST-GIA-MAO: 4
+  VA-DUNG-CHO-DUOC-CHI-ROI-BO-SOT-DUONG-THU-BA: 2
+  nguon: 'Chep tu dau-phien-trung-lam-do-cong-r1-g1-claude, cong ba benh cua luot cross-review.'
+  VI_SAO_LOI_KHAI_RONG_LEN_6: 'B1 — M3 cua r1 khai "tap ten ca KHONG DOI so bo doc cu"; do duoc
+    la SAI. B3 — A14 khai "chan duong doc ban chep sach"; hai chot cua no chi xac thuc HINH DANG
+    nen mot ban chep sach qua mat duoc.'
+  VI_SAO_TEST_GIA_MAO_LEN_4: 'B2 — hai nhanh in chuyen tiep KHONG co dot bien nao canh, nen
+    r516/r524/r525 xanh ma khong do gi o do. Bo tron ca hai dong ma moi ca van DAT.'
+  NGUONG_DA_VUOT_TU_LAU: 'Ca ba hinh dang deu da vuot xa nguong "lan thu ba => DUNG va hoi".
+    Executor da dung va hoi; r4 ton tai la KET QUA cua lan dung ay.'
+  CO_HOI_TAI_PHAT_DA_BIET: 'A20 so hai tap tren "mot bo dau vao co du tam ky tu tach dong". Neu bo
+    ay do executor TU SOAN va THIEU mot ky tu, chot se XANH ma van ho dung ky tu do — dung hinh
+    dang LOI-KHAI-RONG-HON-PHEP-DO lan thu BAY. Bo dau vao phai duoc SINH tu chinh danh sach, va
+    phai co mot dot bien bo bot mot ky tu khoi danh sach de chung minh chot co rang.'

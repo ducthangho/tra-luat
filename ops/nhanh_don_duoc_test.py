@@ -2596,7 +2596,12 @@ DOT_BIEN_TU_KIEM = [
     ("chan-doan-nuot-ca-ranh-gioi", ("r524",),
      '    ranh = re.compile(r"^(?:TU KIEM|DOT BIEN|MUTANT|LOI:)")',
      '    ranh = re.compile(r"^(?!)")'),
-    ("chan-doan-cat-lang-khong-khai", ("r524",),
+    # r3/M9 — `dich` nang len ("r524","r525"): o `suy-bien-dai` MOI cung chot
+    # rang cha PHAI noi la no da cat, nen dot bien nay giet THAT ca hai. Khai
+    # dung hai ten la khai CHAT HON, khong phai noi long: bo cham doi tap ca do
+    # BANG DUNG `dich`, nen thieu mot ten la ca DO. Ca chet bang DO_CHOT — chot
+    # cua chinh no — chu khong phai mot loi VO CAN. Da do: 84/85 -> 85/85.
+    ("chan-doan-cat-lang-khong-khai", ("r524", "r525"),
      '    return f"{than[:TRAN_CHAN_DOAN]} \u2026[CAT {len(than) - TRAN_CHAN_DOAN} ky tu]"',
      "    return than[:TRAN_CHAN_DOAN]"),
     # #568 r2/M6 — HAI duong cua nhanh thu ba, moi duong mot dot bien RIENG.

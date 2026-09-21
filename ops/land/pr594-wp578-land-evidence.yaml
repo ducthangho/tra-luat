@@ -283,9 +283,24 @@ con_mo:
   DINH_CHINH_3_cho_lease: 'Lease khai `assurance_target_vi_sao: cross_approved KHONG DAT DUOC —
     codex het quota`. Codex da chay duoc luc 08:05Z. Cau ay loi thoi (ket luan cuoi khong doi:
     van khong phai cross_approved). CHUA SUA.'
-  thu_hoi_do_tren_PR_601: 'Luot thu-hoi thu hai tren PR #601 DO vi "The job was not started
-    because recent account payments have failed". Job chay 2 giay, chua tung khoi dong; cung
-    check da XANH tren dung commit ay 27 phut truoc. Khong re-run duoc: manual_ci_budget 0.'
+  CI_cua_PR_601_bi_gian_doan_thanh_toan:
+    hinh_dang: 'Actions KHONG KHOI DONG DUOC job vi tai khoan — KHONG phai do noi dung PR.
+      Annotation nguyen van tren moi job do: "The job was not started because recent account
+      payments have failed or your spending limit needs to be increased."'
+    dien_bien_do_duoc:
+    - 'head 9387078, luot 1 (13:57Z): BON cong that CHAY va XANH — chuan-bi, gate,
+       gate-packet-loop, gate-registry; thu-hoi cung xanh (16 giay, job chay that).'
+    - 'head 9387078, luot 2 (14:24Z, sinh ra do ready_for_review): thu-hoi DO sau 2 GIAY —
+       job chua tung khoi dong. Cung check da xanh tren DUNG commit ay 27 phut truoc.'
+    - 'head d202271 (14:37Z, sau khi day ban va ba finding P1): chuan-bi DO 2 giay, thu-hoi DO
+       2 giay, va gate/gate-packet-loop/gate-registry deu SKIPPED vi chuan-bi la tien de.
+       Tuc tren head ay KHONG CO bang chung cong nao — "chua do duoc", KHONG phai "do va do".'
+    - 'Chu kho bao da xu ly thanh toan (2026-09-21, sau 15:28Z). Commit mang muc nay chinh la
+       cu day kich hoat phep do lai.'
+    da_lam_gi_trong_luc_do: 'DUNG day. Moi cu day luc ay chi sinh them mot luot toan skipped,
+      lam nhieu ho so ma khong them mot phep do nao. KHONG re-run tay: manual_ci_budget 0.'
+    KHONG_khai: 'Muc nay KHONG khai rang luot CI tren head mang chinh no la xanh. Ket qua that
+      la thu ma luot chay tren head nay noi ra, doc sau khi no xong.'
 
 DINH_CHINH_SAU_REVIEW:
   nguon: 'Cross-review codex tren PR #601, 2026-09-21T14:33Z, ba finding P1.'

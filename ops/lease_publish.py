@@ -911,7 +911,11 @@ def _tien_kiem_mien_dang(lease) -> None:
 
     `bool` bị loại tường minh vì `isinstance(True, int)` là `True` trong Python: một
     `packet_issue: true` lọt phép kiểm kiểu ngây thơ rồi thành `issues/True` trên URL.
-    **KHÔNG ĐO:** chưa có phép đo cho riêng ca `bool`; nó suy từ cùng cơ chế với ca chuỗi.
+    CA `bool` NAY ĐÃ ĐO — `t178` giữ nó bằng SỐ LỜI GỌI GitHub (`0`), không bằng mã thoát
+    (mã thoát là `8` ở cả bản đúng lẫn bản gỡ chốt). Câu "KHÔNG ĐO" ở đây là lời khai của
+    bản trước, đã hết hiệu lực từ `M11`; cross-review lượt 2 bắt nó còn sót
+    (`post-fix-boolean-evidence-claims-drift`). Giới hạn CÒN đúng: mới đo qua adapter giả,
+    chưa đo trên một endpoint HTTP thật.
 
     HÀM NÀY KHÔNG PHÁN, NÓ CHỈ LÀM PHÉP DÒ CÂM. `Chan` nó ném được `_do_dau_da_dang` bắt
     lại và nuốt; hệ quả là dữ liệu thiếu miền làm phép dò NHƯỜNG quyền phán cho chuỗi
@@ -930,8 +934,6 @@ def _tien_kiem_mien_dang(lease) -> None:
     SAI khi mắc hai. `t177` chỉ dựng từng lỗi riêng nên không bắt được. `t180` khoá ca hai
     lỗi đồng thời.
     """
-    if not isinstance(lease, dict):
-        raise Chan(RC_NOI_DUNG, "tiền kiểm: lease không phải ánh xạ")
     if not isinstance(lease.get("lease_id"), (str, int)) or isinstance(lease.get("lease_id"), bool):
         raise Chan(RC_NOI_DUNG, "tiền kiểm: thiếu `lease_id` hoặc sai kiểu")
     so = lease.get("packet_issue")
@@ -955,6 +957,26 @@ def _do_dau_da_dang(lease: dict) -> None:
     kiểm là chặn phép dò CHẠM MẠNG rồi trả `rc=9` cho một lease hỏng miền, và răng ấy đo
     bằng SỐ LỜI GỌI GitHub (`t178`), không đo bằng mã thoát.
     """
+    # CHỐT HÌNH DẠNG đứng NGOÀI `try` — có chủ đích, và khác hẳn chốt MIỀN bên dưới.
+    #
+    # Cross-review lượt 2 bắt (`unposted-error-precedence-changes`, lần thứ hai cùng slug):
+    # bản vá lượt 1 đưa CẢ `_tien_kiem_mien_dang` vào trong `try`, nên `Chan` nó ném cho một
+    # `lease` KHÔNG PHẢI ánh xạ cũng bị nuốt — rồi `kiem()` gọi `.get()` trên thứ không có
+    # phương thức ấy và một `AttributeError` TRẦN thoát ra khỏi cổng. Đo được năm hình dạng:
+    # `None` · `[]` · `True` · `55` · `"55"`.
+    #
+    # KHAI CHO ĐÚNG, ĐỪNG PHÓNG ĐẠI: nền `origin/master` CŨNG vỡ y hệt ở đây, nên đây KHÔNG
+    # phải hồi quy mới — nó là việc đánh mất một chốt mà chính lượt 1 vừa thêm vào. Và phạm vi
+    # đã đo được là API `kiem_github`; đường CLI có `_doc_yaml` giữ chốt ánh xạ và đo ra `rc=8`.
+    #
+    # Vì sao HAI chốt chứ không một:
+    #   HÌNH DẠNG (không phải dict) -> không ai phán được gì về nó, kể cả `kiem()`. Fail-close
+    #                                  NGAY, ngoài `try`.
+    #   MIỀN (dict thiếu/sai trường) -> `kiem()` phán được, và phán ĐÚNG THỨ TỰ hơn. Nhường
+    #                                  lại: nuốt trong `try`.
+    # Gộp hai thứ ấy làm một là lý do lượt 1 sai theo chiều này và lượt 0 sai theo chiều kia.
+    if not isinstance(lease, dict):
+        raise Chan(RC_NOI_DUNG, "tiền kiểm: lease không phải ánh xạ")
     try:
         _tien_kiem_mien_dang(lease)
         _kiem_comment_da_co(_repo_github(), lease)

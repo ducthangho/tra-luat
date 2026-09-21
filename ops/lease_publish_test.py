@@ -7070,8 +7070,17 @@ def _do_kiem_github(lease, co_dau: bool, **k):
     """
     dau = "**Lease `" + str(lease.get("lease_id", "")) + "`**"
     than = dau + " — bản chiếu" if co_dau else "khong lien quan"
-    gh = GhGia(comments={55: [{"id": 7, "body": than,
-                               "user": {"login": "github-actions[bot]"}}]})
+    # Khoá comment phải theo ĐÚNG `packet_issue` của lease, không ghim cứng 55.
+    # Cross-review lượt 2 bắt (`github-fixture-hardcodes-issue`): bản trước ghim 55, nên một
+    # lease khai `packet_issue=579` với `co_dau=True` thật ra được thử như KHÔNG CÓ DẤU —
+    # đo được `(rc=0, 3 lời gọi)` qua helper so với `(rc=9, 1 lời gọi)` khi gọi thẳng.
+    # Các ca hiện hành đều dùng 55 nên KHÔNG ca nào đang xanh giả; đây là cái bẫy cho ca sau.
+    # Chỉ suy khoá khi `packet_issue` là số nguyên HỢP LỆ — ca miền sai kiểu phải đi tới mã
+    # sản phẩm, không được để chính fixture chặn trước (ép `int()` ở đây sẽ tạo tín dụng giả).
+    so = lease.get("packet_issue")
+    khoa = so if isinstance(so, int) and not isinstance(so, bool) else 55
+    gh = GhGia(comments={khoa: [{"id": 7, "body": than,
+                                 "user": {"login": "github-actions[bot]"}}]})
     ex, _mod = _goi_lop_gh(gh, "kiem_github", lease, env_them=ENV_GITHUB, **k)
     return (0 if ex is None else ex.ma), len(gh.calls)
 
@@ -7281,8 +7290,16 @@ def t180_hai_loi_cung_luc_thi_tien_kiem_KHONG_duoc_cuop_quyen_phan():
     có thể sai về THỨ TỰ khi hai lỗi gặp nhau. Cùng họ bài học "vá đúng chỗ được chỉ rồi bỏ
     sót đường thứ ba".
 
-    ĐỘT BIẾN LÀM CA NÀY ĐỎ: đưa `_tien_kiem_mien_dang` trở ra NGOÀI `try`, hoặc bỏ `return`
-    ở nhánh `Chan` không phải `RC_DA_DANG` để tiền kiểm ném lại.
+    ĐỘT BIẾN LÀM CA NÀY ĐỎ: đưa `_tien_kiem_mien_dang` trở ra NGOÀI `try` ⇒ `rc` 4 → 8.
+    Đã chạy: nó giết ĐÚNG ca này, `t174`–`t179` đều QUA.
+
+    CÔNG THỨC THỨ HAI CỦA BẢN TRƯỚC LÀ SAI, và đây là lý do nó bị gỡ: bản trước ghi "bỏ
+    `return` ở nhánh `Chan` để tiền kiểm ném lại". Python KHÔNG tự ném lại một ngoại lệ đã
+    bắt — hàm chạy hết rồi trả `None`, nên cả bảy ca vẫn QUA. Cross-review lượt 2 chạy thật
+    và bắt được (`t180-equivalent-mutation-recipe`). Muốn công thức ấy có răng thì phải viết
+    "thay `return` bằng `raise`", mà bản ấy có thể giết luôn `t179` nên không được khai là
+    một chốt độc lập. Một công thức đột biến KHÔNG CHẠY được thì nó không chứng minh gì —
+    đúng bài học "NGHĨ RA được phép thử mà KHÔNG CHẠY nó thì phép thử ấy KHÔNG TỒN TẠI".
     """
     lease = _lease_579(granted_by="codex", packet_issue="55")
     ma, goi = _do_kiem_github(lease, co_dau=False)
@@ -7294,6 +7311,81 @@ def t180_hai_loi_cung_luc_thi_tien_kiem_KHONG_duoc_cuop_quyen_phan():
     chot(goi == 0,
          f"tiền kiểm vẫn phải chặn TRƯỚC khi chạm mạng, nhưng đã có {goi} lời gọi GitHub. "
          f"Nhường quyền PHÁN không có nghĩa là nhường luôn quyền DÒ.")
+
+
+@ca
+def t181_cua_CUOI_van_phai_chan_khi_API_comment_hong():
+    """A15 — phép DÒ sớm KHÔNG thay được cửa `_kiem_comment_da_co` ở CUỐI `kiem_github`.
+
+    CA NÀY SINH RA TỪ MỘT ĐỘT BIẾN SỐNG SÓT, cross-review codex lượt 2 dựng
+    (`final-comment-gate-mutant-survives`). Đột biến `I` bỏ ĐÚNG lời gọi cuối
+    `_kiem_comment_da_co(repo, lease)`, giữ nguyên phép dò sớm — và **sống sót 173/173**.
+
+    Vì sao cả 173 ca cũ đều mù: một lease HỢP LỆ với endpoint `comments` HỎNG thì phép dò
+    sớm NUỐT lỗi (đúng thiết kế — nó chỉ có quyền nói "đã đăng rồi"), rồi `kiem()` chạy trọn
+    và KHÔNG chạm mạng. Thứ duy nhất còn lại để chặn là cửa CUỐI. Bỏ nó đi thì
+    "KHÔNG ĐO ĐƯỢC" lặng lẽ thành "CHO QUA" — đúng thứ `None ≠ False` sinh ra để chặn.
+
+    Các ca cũ không chạm được cửa ấy, từng ca một:
+        `t179` lease TỰ CẤP  -> `kiem()` ném `rc=4` TRƯỚC khi tới cuối
+        `t48`  gọi thẳng helper comment, không qua `kiem_github`
+        `t174`/`t176` có dấu -> phép dò sớm đã ném `rc=9`, không đi tiếp
+        `t177` có đi tới cuối nhưng KHÔNG khẳng định số lời gọi, nên `3 -> 2` lọt
+
+    Đo được, và hai vế khác nhau ở CẢ HAI trục:
+        bản đúng -> `rc=8`, 3 lời gọi   (cửa cuối chặn)
+        đột biến -> `rc=0`, 2 lời gọi   (lọt, và thiếu đúng một lời gọi)
+
+    Ca này KHÔNG thay `t179`: `t179` chứng minh phép dò không được TỰ PHÁN, ca này chứng minh
+    cửa cuối không được VẮNG MẶT. Hai giai đoạn khác nhau của cùng một đường.
+
+    ĐỘT BIẾN LÀM CA NÀY ĐỎ: bỏ `_kiem_comment_da_co(repo, lease)` ở cuối `kiem_github`.
+    """
+    lease = _lease_579()
+    gh = GhGia(comments={55: []}, loi_comment={55})
+    ex, _mod = _goi_lop_gh(gh, "kiem_github", lease, env_them=ENV_GITHUB)
+    ma = 0 if ex is None else ex.ma
+    chot(ma == RC_NOI_DUNG,
+         f"lease hợp lệ + endpoint `comments` HỎNG: cửa cuối phải chặn bằng "
+         f"rc={RC_NOI_DUNG}, được rc={ma}. rc=0 nghĩa là một lease CHƯA đo được dấu đã được "
+         f"cho qua — phép dò sớm nuốt lỗi là ĐÚNG, nhưng chỉ khi còn cửa cuối đỡ phía sau.")
+    chot(len(gh.calls) == 3,
+         f"phải có đúng 3 lời gọi GitHub (dò sớm + loại số hiệu + cửa cuối), có "
+         f"{len(gh.calls)}. Thiếu một lời gọi là dấu hiệu một cửa đã biến mất — và mã thoát "
+         f"một mình KHÔNG phân biệt được chuyện đó.")
+
+
+@ca
+def t182_lease_KHONG_PHAI_anh_xa_thi_chan_co_ten_chu_khong_vo_tran():
+    """A16 — chốt HÌNH DẠNG phải fail-close, không để `AttributeError` TRẦN thoát khỏi cổng.
+
+    Cross-review lượt 2 bắt (`unposted-error-precedence-changes`, lần thứ HAI cùng slug).
+    Bản vá lượt 1 đưa CẢ `_tien_kiem_mien_dang` vào trong `try` của `_do_dau_da_dang`, nên
+    `Chan` nó ném cho một `lease` không phải ánh xạ cũng bị nuốt; `kiem()` sau đó gọi
+    `.get()` trên thứ không có phương thức ấy và ngoại lệ TRẦN thoát ra.
+
+    KHAI CHO ĐÚNG PHẠM VI: nền `origin/master` CŨNG vỡ y hệt ở đây, nên đây KHÔNG phải hồi
+    quy mới — nó là việc đánh mất một chốt mà chính lượt 1 vừa thêm. Và đường CLI có
+    `_doc_yaml` giữ chốt ánh xạ riêng (đo được `rc=8`), nên đừng khai thành "YAML đi lọt".
+
+    Ca này khoá đúng MỘT thứ: API `kiem_github` nhận thứ không phải ánh xạ thì phải ra
+    `Chan(RC_NOI_DUNG)` CÓ TÊN, không phải một `AttributeError` vỡ trần.
+
+    ĐỘT BIẾN LÀM CA NÀY ĐỎ: đưa chốt `isinstance(lease, dict)` trở vào TRONG `try` (tức
+    khôi phục bản vá lượt 1) ⇒ ngoại lệ trần thoát ra, `chot` bắt được kiểu KHÁC `Chan`.
+    """
+    for nhan, xau in (("None", None), ("danh sách", []), ("bool", True),
+                      ("số nguyên", 55), ("chuỗi", "55")):
+        gh = GhGia(comments={55: []})
+        ex, _mod = _goi_lop_gh(gh, "kiem_github", xau, env_them=ENV_GITHUB)
+        chot(ex is not None and getattr(ex, "ma", None) == RC_NOI_DUNG,
+             f"lease là {nhan}: phải ném `Chan(rc={RC_NOI_DUNG})` có tên, nhận "
+             f"{type(ex).__name__ if ex is not None else 'KHÔNG NÉM GÌ'}"
+             f"{'' if ex is None else ' ma=' + str(getattr(ex, 'ma', '?'))}. "
+             f"Một ngoại lệ TRẦN thoát khỏi cổng là fail-open đội lốt sự cố.")
+        chot(len(gh.calls) == 0,
+             f"lease là {nhan}: chốt hình dạng phải chặn TRƯỚC khi chạm mạng, có "
+             f"{len(gh.calls)} lời gọi.")
 
 
 CO_CHI_CA = "--chi-ca="   # `--chi-ca=t01_` ⇒ chỉ chạy ca có tên bắt đầu bằng tiền tố ấy (M3 packet #504 dùng để sinh lượt con rẻ)

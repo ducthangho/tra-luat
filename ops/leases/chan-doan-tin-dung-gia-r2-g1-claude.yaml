@@ -33,6 +33,15 @@ granted_on_instruction_nguyen_van: 'Chu kho, phien dieu phoi 20-09-2026 ~17:2xZ,
   required tren eb4a9ab, va phien ra ra mot khuyet tat NGOAI closure M1-M5 nen TU CHOI tu va, de
   nghi mot revision. Du kien va phan chung chay duoc: issues/568#issuecomment-5749389651.
   Ban chieu day du: issues/568#issuecomment-5752115356.'
+da_bi_thay_the: chan-doan-tin-dung-gia-r3-g1-claude
+da_bi_thay_the_vi_sao: 'Bi ke vi boi r3-g1 TRONG CUNG PACKET. r3 doi CLOSURE (them tieu chi "0
+  canh bao escape-sequence" va sua kich thich cua ca r525 do CHINH r2 thi cong) nen phai la
+  revision moi; hai revision cua cung mot packet KHONG the cung giu ops/nhanh_don_duoc_test.py.
+  Thu hoi som la CO CHU Y, theo chi thi chu kho "Hinh A, cap r3 di"
+  (issues/568#issuecomment-5755499181). VIEC CUA r2 KHONG bi huy: PR #590 giu nguyen head
+  45ea292, ba required XANH, va van AUDIT VA MERGE DUOC — mat quyen GHI khong phai mat quyen LAND.
+  Khuyet tat ma r3 chua CO trong #590 va da duoc khai cong khai tai
+  issues/568#issuecomment-5755428171 de nguoi audit doc truoc khi quyet.'
 recorded_by: claude-session
 recorder_is_dispatcher: false
 

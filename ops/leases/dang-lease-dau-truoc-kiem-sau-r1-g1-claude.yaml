@@ -25,6 +25,12 @@ thay_the_vi_sao: 'Generation DAU cua packet nay — khong co lease tien nhiem de
   CHI dung cho lease CON SONG. Viet bia mo vao mot lease DA HET HAN la dua mot tep chet vao tap
   quet cua buoc `dang` => rc=8 => ca luot exit 1. Do la benh M8 se ghi vao CLAUDE.md.'
 
+da_bi_thay_the: dang-lease-dau-truoc-kiem-sau-r2-g2-claude
+da_bi_thay_the_vi_sao: 'Ve THU NHAT cua dau hai chieu. g2 THU HEP write set: bo
+  ops/lease_publish_test.py ra khoi pham vi cua generation nay. Ly do o THU_HEP_VI_SAO cua g2.
+  Lease nay CON SONG luc dat bia (het han 2026-09-21T19:48:00Z), nen dat bia o day KHONG dua mot
+  tep chet vao tap quet cua buoc `dang` — dung chinh canh bao ma g1 tu ghi o thay_the_vi_sao.'
+
 granted_by: ducthangho
 granted_on_instruction: https://github.com/ducthangho/tra-luat/issues/579#issuecomment-5752218930
 granted_on_instruction_nguyen_van: 'Chu kho, phien dieu phoi 20-09-2026 ~19:3xZ, nguyen van:

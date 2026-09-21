@@ -4,7 +4,7 @@
 CHÍNH lệnh qua subprocess (không import) — doctrine `lease_publish_test.py`."""
 from __future__ import annotations
 
-import json, os, shutil, subprocess, sys, tempfile
+import json, os, runpy, shutil, subprocess, sys, tempfile
 from pathlib import Path
 
 import yaml
@@ -660,8 +660,8 @@ DOT_BIEN = {
         "        if False:  # đột biến: bỏ phép mở đường dẫn bản địa\n",
         "BASH_NEN", (), "t24_bash_nen_tu_choi_bash_khong_mo_duoc_duong_dan_ban_dia"),
     "bn_cong_cho_qua_moi_noi": ("ops/bash_nen.py",
-        "    moi = {t: d for t, d in co_loi_goi.items()\n"
-        "           if t not in CHO_PHEP and t not in CHUA_CHUYEN}\n",
+        # NEO LAI o r7 vong 2: lop A gop ba bang mien tru nen dong cu bien mat.
+        "    moi = {t: d for t, d in co_loi_goi.items() if t not in _MIEN_TRU}\n",
         "    moi = {}  # đột biến: cổng không chặn lời gọi trần mới nữa\n",
         "BASH_NEN", (), "t25_cong_chan_loi_goi_bash_tran_MOI"),
     "bn_ratchet_mot_chieu": ("ops/bash_nen.py",
@@ -710,6 +710,31 @@ DOT_BIEN = {
     # `tin_dung_gia` — do la bo phan hang lam viec, khong phai mot phien toa.
     # CHEP TU `_GOC_THAT`: mot dot bien khac co the da tro `GOC` sang cay tam (bai hoc t6/t21).
 
+    # SAU DOT BIEN CHO NAM LOP CUA VONG 2 — moi lop it nhat mot dot bien.
+    "bn_cho_phep_vo_han": ("ops/bash_nen.py",
+        "    for _bang in (CHO_PHEP, CHUA_CHUYEN, ANH_CHUP_DONG_CUNG):\n",
+        "    for _bang in (CHUA_CHUYEN,):  # đột biến: CHO_PHEP thành vé VÔ HẠN trở lại\n",
+        "BASH_NEN", (), "t40_moi_MIEN_TRU_deu_mang_HAN_NGACH_va_dem_theo_LOI_GOI"),
+    "bn_dem_theo_DONG": ("ops/bash_nen.py",
+        "            ban_ghi.append((nut.lineno, nut.col_offset))\n",
+        "            ban_ghi.append((nut.lineno, 0))  # đột biến: đếm theo DÒNG, gộp cùng dòng\n",
+        "BASH_NEN", (), "t40_moi_MIEN_TRU_deu_mang_HAN_NGACH_va_dem_theo_LOI_GOI"),
+    "bn_ton_trong_ignore_cua_MAY": ("ops/bash_nen.py",
+        '                 "--exclude-per-directory=.gitignore", "-z", "--", "*.py"],\n',
+        '                 "--exclude-standard", "-z", "--", "*.py"],  # đột biến: nghe cả cấu hình máy\n',
+        "BASH_NEN", (), "t41_chi_ton_trong_luat_ignore_CUA_KHO"),
+    "bn_bo_executable_kw": ("ops/bash_nen.py",
+        '                dinh = any(kw.arg == "executable" and _la_hang_bash(kw.value)\n',
+        '                dinh = any(False and _la_hang_bash(kw.value)  # đột biến: bỏ `executable=`\n',
+        "BASH_NEN", (), "t33_do_phu_cua_cong_do_duoc_THEO_HINH_DANG"),
+    "bn_khong_giai_callee": ("ops/bash_nen.py",
+        "        loai = _loai_loi_goi(nut, stdlib)\n",
+        "        loai = _loai_theo_TEN_khong_giai_callee(nut)  # đột biến: nhận theo TÊN\n",
+        "BASH_NEN", (), "t33_do_phu_cua_cong_do_duoc_THEO_HINH_DANG"),
+    "t39_bo_phep_so_bang": (str(TEP_TEST.relative_to(GOC)),
+        "            if not all(isinstance(o, _ast.Eq) for o in con.ops):\n                continue\n",
+        "            pass  # đột biến: thôi đòi phép so BẰNG, ca âm `!=` bị bắt oan\n",
+        "TEP_TEST", _KEM_TEP_TEST, "t39_chi_CA_PHAN_QUYET_duoc_chot_tren_rc_va_trang_thai"),
     # HAI DOT BIEN CHO CHINH LUAT N22 — mot luat khong the DO thi khong phai luat.
     # Chung dot bien TEP TEST, nen `bp` la `TEP_TEST` chu khong phai `BASH_NEN`.
     "t39_bo_phep_quet": (str(TEP_TEST.relative_to(GOC)),
@@ -1919,11 +1944,21 @@ _HINH_DANG_PHU = {
     # cho ca hai: cong vua mo ra toan cay bi di vong bang MOT PHIM SHIFT.
     "which_HOA":       'import shutil\nb = shutil.which("BASH.EXE")\n',
     "run_hoa_thuong":  'import subprocess\nsubprocess.run(["Bash.exe"])\n',
+    # LOP E, vong 2. `executable=` GHI DE chuong trinh that su chay, du `args[0]` ghi ten khac.
+    "executable_kw":   'import subprocess\nsubprocess.run(["x"], executable="bash")\n',
+    "executable_HOA":  'import subprocess\nsubprocess.Popen(["x"], executable="BASH.EXE")\n',
+    "alias_module":    'import subprocess as sp\nsp.run(["bash"])\n',
+    "from_import":     'from shutil import which\nwhich("bash")\n',
+    "from_import_as":  'from shutil import which as w\nw("bash")\n',
 }
 _HINH_DANG_KHONG_PHU = {
     "shell_true":      'import subprocess\nsubprocess.run("bash -c x", shell=True)\n',
     "os_system":       'import os\nos.system("bash -c x")\n',
     "bien_trung_gian": 'import shutil\nt = "bash"\nb = shutil.which(t)\n',
+    # HUONG NGUOC cua lop E: nhan dien theo TEN ma khong giai CALLEE thi bat OAN. Hai dong
+    # duoi KHONG goi stdlib nao — chung la API cua nguoi khac trung ten.
+    "run_khong_stdlib":   'runner.run(["bash"])\n',
+    "which_khong_stdlib": 'matcher.which("bash")\n',
 }
 
 
@@ -2138,16 +2173,18 @@ def t35_cong_phai_quet_TOAN_CAY_chu_khong_chi_ops():
              f"{sorted((bao.get('co_loi_goi_tran') or {}))}")
 
         (ngoai / "mot_bo_giai_rieng.py").unlink()
-        anh = cay / "ops" / "reviews"
-        anh.mkdir(parents=True)
-        (anh / "ban_cu.py").write_text('import shutil\nb = shutil.which("bash")\n',
-                                       encoding="utf-8")
+        # (2) ĐỔI Ở r7 VÒNG 2. Trước đây chốt này dùng `ops/reviews/` — nhưng lớp A vừa GỠ
+        # miễn trừ theo TIỀN TỐ của `ops/reviews/` và thay bằng KIỂM KÊ tường minh, nên một
+        # tệp review MỚI nay phải ĐỎ (đó là `t40`). Thứ còn lại là bỏ qua đúng nghĩa: `.git/`
+        # — không phải mã nguồn, không ai review nó, và mở phạm vi toàn cây không được kéo
+        # theo báo động giả trên đó.
+        gitdir = cay / ".git"
+        gitdir.mkdir(parents=True, exist_ok=True)
+        (gitdir / "hook_cu.py").write_text('import shutil\nb = shutil.which("bash")\n',
+                                           encoding="utf-8")
         rc, bao = _quet(cay, bq)
-        bang(rc == 0 and bao["trang_thai"] == "DAT",
-             f"(2) `ops/reviews/` là ảnh chụp ĐÔNG CỨNG, không được làm cổng đỏ: rc={rc} "
-             f"{bao.get('ly_do')}")
-        bang("ops/reviews/ban_cu.py" not in (bao.get("co_loi_goi_tran") or {}),
-             f"(2) `ops/reviews/` phải được BỎ QUA, không phải được tha ở khâu lọc: "
+        bang(".git/hook_cu.py" not in (bao.get("co_loi_goi_tran") or {}),
+             f"(2) `.git/` phải được BỎ QUA — nó không phải mã nguồn: "
              f"{sorted((bao.get('co_loi_goi_tran') or {}))}")
 
 
@@ -2310,8 +2347,16 @@ def t38_khoa_cache_gom_THU_MUC_LAM_VIEC():
           "            try: shutil.copy2(os.path.join(os.path.dirname(that), x), d)\n"
           "            except OSError: pass\n"
           "    duong.append(dich)\n"
+          # CÔ LẬP MỌI ĐƯỜNG DỰ PHÒNG. Trên Windows, `b/` KHÔNG thật sự trống nếu
+          # `ung_vien()` còn tìm lại được Git Bash qua `git` trên PATH hay qua
+          # `%ProgramFiles%` — khi ấy chốt `t2 is None` hỏng vì bộ giải làm ĐÚNG, không
+          # phải vì cache. Cross-review codex trên `1253e3a` chỉ ra chỗ này.
+          "trong = tempfile.mkdtemp()\n"
           "os.environ['CONG_CU_BASH'] = os.path.basename(that)\n"
           "os.environ['PATH'] = '.'\n"
+          "os.environ['ProgramFiles'] = trong\n"
+          "os.environ['ProgramFiles(x86)'] = trong\n"
+          "os.environ['SystemRoot'] = trong\n"
           "os.chdir(os.path.join(goc, 'a')); t1, _ = m['tim_bash']()\n"
           "os.chdir(os.path.join(goc, 'b')); t2, _ = m['tim_bash']()\n"
           "print('KQ ' + json.dumps(['OK', t1, t2, duong]))\n")
@@ -2404,6 +2449,13 @@ def _chot_DO_cua_cong_trong(than: str):
         for con in _ast.walk(nut.args[0]):
             if not isinstance(con, _ast.Compare):
                 continue
+            # PHẢI LÀ PHÉP SO BẰNG. Bản đầu chỉ hỏi "có `rc` và có `2` không", nên
+            # `bang(rc != 2, …)` — một ca ÂM hoàn toàn hợp lệ — bị xếp là "khẳng định cổng
+            # ĐỎ" và bị ép vào `CA_PHAN_QUYET`. Cross-review codex trên `1253e3a` chỉ ra,
+            # executor đo lại: cả `==` lẫn `!=` đều ra dòng [3]. Một luật bắt oan là luật
+            # sẽ bị tắt, và khi ấy cả sáu lần lặp nó sinh ra để chặn sẽ quay lại.
+            if not all(isinstance(o, _ast.Eq) for o in con.ops):
+                continue
             ten = {n.id for n in _ast.walk(con) if isinstance(n, _ast.Name)}
             hang = {n.value for n in _ast.walk(con) if isinstance(n, _ast.Constant)}
             if ("rc" in ten and 2 in hang) or (_TT_DO in hang and "trang_thai" in _nhan(con)):
@@ -2420,6 +2472,19 @@ def _nhan(nut) -> str:
         for n in _ast.walk(nut)
         if (isinstance(n, _ast.Constant) and isinstance(n.value, str))
         or isinstance(n, _ast.Attribute))
+
+
+_MAU_TOAN_TU = {
+    # PHAI bat: khang dinh cong DO
+    "eq_rc":   "def f():\n    rc, bao = _quet(a, b)\n    bang(rc == 2, 'x')\n",
+    "eq_tt":   'def f():\n    rc, bao = _quet(a, b)\n    bang(bao["trang_thai"] == "DO", "x")\n',
+    # KHONG duoc bat: ca AM hoan toan hop le
+    "ne_rc":   "def f():\n    rc, bao = _quet(a, b)\n    bang(rc != 2, 'x')\n",
+    "ne_tt":   'def f():\n    rc, bao = _quet(a, b)\n    bang(bao["trang_thai"] != "DO", "x")\n',
+    # KHONG duoc bat: khong dung toi cong
+    "khong_quet": "def f():\n    bang(rc == 2, 'x')\n",
+}
+_MAU_MONG = {"eq_rc": True, "eq_tt": True, "ne_rc": False, "ne_tt": False, "khong_quet": False}
 
 
 def _in_tu_kiem_luat_phan_quyet():
@@ -2444,8 +2509,118 @@ def _in_tu_kiem_luat_phan_quyet():
             co_chot[nut.name] = dong
             if nut.name not in CA_PHAN_QUYET:
                 ngoai[nut.name] = dong
-    rong = [t for t in CA_PHAN_QUYET if t in ten_ca and t not in co_chot]
-    print("KQ " + json.dumps([ngoai, sorted(rong)], ensure_ascii=False))
+    # MỌI khoá vắng khỏi `co_chot` đều là CHẾT — kể cả khoá mà HÀM đã bị xoá hoặc đổi tên.
+    # Bản đầu lọc `t in ten_ca` trước, nên xoá một ca vẫn để lại miễn trừ chết mà tự kiểm
+    # không thấy: codex đo được `KQ [{}, []]` rc=0 sau khi gỡ `t25` khỏi một bản sao.
+    # Hệ quả có chủ đích: một tên GÕ SAI trong danh sách sẽ ĐỎ ngay, thay vì im lặng.
+    rong = [t for t in CA_PHAN_QUYET if t not in co_chot]
+    # MAU THU TOAN TU. Khong co chung thi dot bien `t39_bo_phep_so_bang` SONG SOT: hom nay
+    # khong ca that nao viet `bang(rc != 2, ...)`, nen go phep doi `==` chang doi gi ca.
+    # Dung bai toan `t26`/`t39_de_ten_chet` da gap — thu chieu nguoc sinh ra de bat phai
+    # duoc TAO RA, khong the cho no tinh co xuat hien.
+    mau = {k: bool(_chot_DO_cua_cong_trong(v)) for k, v in _MAU_TOAN_TU.items()}
+    print("KQ " + json.dumps([ngoai, sorted(rong), mau], ensure_ascii=False))
+
+
+@ca
+def t40_moi_MIEN_TRU_deu_mang_HAN_NGACH_va_dem_theo_LOI_GOI():
+    """THUỘC TÍNH: miễn trừ là HẠN NGẠCH ĐẾM ĐƯỢC, và đơn vị đếm là LỜI GỌI chứ không phải DÒNG.
+
+    SINH TỪ CROSS-REVIEW CODEX vòng 2 trên `1253e3a`, và từ một lượt QUÉT THEO LỚP của
+    executor — hai nguồn độc lập ra **cùng ba thực thể**. Chủ kho chỉ thị: *"cross-review tìm
+    kiếm, phân theo lớp, không phải từng lỗi riêng lẻ"*.
+
+    LỚP: *miễn trừ khai theo TƯ CÁCH THÀNH VIÊN thay vì theo HẠN NGẠCH*. Vòng 1 mới vá MỘT
+    thực thể (`CHUA_CHUYEN`); lớp có BA, và cả ba đều đo được trên cây giả:
+      · `CHO_PHEP`          thêm bản sao thứ NĂM vào CHÍNH bộ giải  ⇒ `rc=0 DAT`
+      · `_BO_QUA_TOAN_CAY`  ba tệp bẩn trong `ops/reviews/`         ⇒ `rc=0 DAT`, báo cáo RỖNG
+      · đơn vị đếm          hai lời gọi CÙNG MỘT DÒNG               ⇒ đếm thành MỘT
+    `CHO_PHEP` là chỗ đau nhất: packet này tồn tại để chặn BẢN SAO THỨ TƯ, mà nơi được miễn
+    trừ vô hạn lại đúng là nơi BẢN SAO THỨ NĂM mọc — trong tệp không ai nghi ngờ nhất.
+    """
+    with tempfile.TemporaryDirectory() as tmp:
+        tmp = Path(tmp)
+        cay = tmp / "cay"
+        (cay / "ops").mkdir(parents=True)
+        bq = _bash_nen_voi_chua_chuyen(tmp, {})
+        bn = runpy.run_path(str(bq))
+
+        # MỌI bảng miễn trừ phải mang hạn ngạch SỐ. Đọc từ module đã nạp, không chép cứng —
+        # một bảng mới thêm sau này cũng phải đi qua chốt này.
+        moi_muc = {}
+        for ten_bang in ("CHO_PHEP", "CHUA_CHUYEN", "ANH_CHUP_DONG_CUNG"):
+            for duong, muc in bn[ten_bang].items():
+                moi_muc[f"{ten_bang}:{duong}"] = bn["_so_cho_phep"](muc)[0]
+        thieu = sorted(k for k, v in moi_muc.items() if not isinstance(v, int))
+        bang(not thieu,
+             f"có mục miễn trừ KHÔNG mang hạn ngạch số: {thieu}. Một miễn trừ khai theo TƯ "
+             f"CÁCH THÀNH VIÊN là lớp khuyết tật vòng này tìm ra BA thực thể.")
+
+        rc0, bao0 = _quet(cay, bq)
+        bang("ops/bash_nen.py" in (bao0.get("so_cho_phep") or {}),
+             f"`CHO_PHEP` KHÔNG nằm trong bảng hạn ngạch gộp — nó lại thành vé VÔ HẠN: "
+             f"{sorted((bao0.get('so_cho_phep') or {}))}. Đây là nơi BẢN SAO THỨ NĂM mọc.")
+
+        # đơn vị đếm là LỜI GỌI: hai lời gọi trên MỘT dòng phải ra HAI bản ghi
+        hai = bn["_loi_goi_tran"](
+            'import shutil\nb = (shutil.which("bash"), shutil.which("bash"))\n')
+        bang(len(hai) == 2,
+             f"hai lời gọi CÙNG MỘT DÒNG phải là HAI bản ghi, đo được {hai} — tập DÒNG gộp "
+             f"chúng thành một, nên một bản sao thêm vào đúng dòng cũ sẽ vô hình")
+
+        # `ops/reviews/` không còn là miễn trừ theo TIỀN TỐ
+        (cay / "ops" / "reviews" / "moi").mkdir(parents=True)
+        (cay / "ops" / "reviews" / "moi" / "helper.py").write_text(
+            'import shutil\nshutil.which("bash")\n', encoding="utf-8")
+        rc, bao = _quet(cay, bq)
+        bang("ops/reviews/moi/helper.py" in (bao.get("co_loi_goi_tran") or {}),
+             f"tệp review MỚI phải ĐƯỢC QUÉT TỚI, không được tha theo tiền tố: đã thấy "
+             f"{sorted((bao.get('co_loi_goi_tran') or {}))}")
+
+
+@ca
+def t41_chi_ton_trong_luat_ignore_CUA_KHO():
+    """THUỘC TÍNH: danh sách tệp chỉ theo `.gitignore` NẰM TRONG CÂY, không theo cấu hình máy.
+
+    SINH TỪ CROSS-REVIEW CODEX vòng 2, và ca này tồn tại vì BẢN VÁ VÒNG 1 CỦA CHÍNH PACKET
+    NÀY đã đóng một thực thể rồi MỞ một thực thể khác CÙNG LỚP. Lớp: *phán quyết phụ thuộc
+    trạng thái LOCAL của máy chạy, không phụ thuộc cây ứng viên*.
+
+    `--exclude-standard` = `.gitignore` trong cây **cộng** `.git/info/exclude` **cộng**
+    `core.excludesFile` TOÀN CỤC. Đo được trên cùng MỘT cây: `rc=2 DO` đổi thành `rc=0 DAT`
+    sau khi đặt `core.excludesFile`. Tức tôi đổi "phụ thuộc thư mục rác" thành "phụ thuộc
+    cấu hình git CÁ NHÂN" — cùng lớp, khác mặt. Không quét theo lớp thì không ai thấy.
+    """
+    with tempfile.TemporaryDirectory() as tmp:
+        tmp = Path(tmp)
+        cay = tmp / "cay"
+        (cay / "ops").mkdir(parents=True)
+        for l in (["init", "-q"], ["config", "user.email", "t@t"], ["config", "user.name", "t"]):
+            subprocess.run(["git", "-C", str(cay)] + l, capture_output=True, timeout=60)
+        bq = _bash_nen_voi_chua_chuyen(tmp, {})
+        (cay / "ops" / "ban.py").write_text(
+            'import shutil\nshutil.which("bash")\n', encoding="utf-8")
+
+        def thay():
+            return "ops/ban.py" in (_quet(cay, bq)[1].get("co_loi_goi_tran") or {})
+
+        dung(thay(), "NỀN: tệp bẩn chưa theo dõi phải được QUÉT TỚI")
+        ngoai = tmp / "gitignore_toan_cuc"
+        ngoai.write_text("ban.py\n", encoding="utf-8")
+        subprocess.run(["git", "-C", str(cay), "config", "core.excludesFile", str(ngoai)],
+                       capture_output=True, timeout=60)
+        bang(thay(), "`core.excludesFile` TOÀN CỤC của máy KHÔNG được đổi phán quyết")
+        (cay / ".git" / "info").mkdir(exist_ok=True)
+        (cay / ".git" / "info" / "exclude").write_text("ban.py\n", encoding="utf-8")
+        bang(thay(), "`.git/info/exclude` (không nằm trong cây) KHÔNG được đổi phán quyết")
+        # CHIỀU KIA — "`.gitignore` TRONG CÂY phải ĐƯỢC tôn trọng" — KHÔNG chốt ở đây, vì
+        # `t37` đã trói đúng thuộc tính ấy. Chốt lại nó làm hai ca cùng chết dưới một đột
+        # biến (`bn_quet_ca_tep_bi_ignore`, bán kính 2/44 — cổng landing đã từ chối đẩy).
+        # Ranh giới: `t37` = luật ignore CỦA KHO có hiệu lực · `t41` = luật của MÁY thì KHÔNG.
+        # Đây là lần thứ BẢY của hình dạng "hai ca cùng trói một thuộc tính"; khác sáu lần
+        # trước ở chỗ nó KHÔNG phải chốt trên phán quyết nên `t39` (N22) không bắt được —
+        # đúng phần NỢ CÓ TÊN mà N22 đã khai: nó thu hẹp cửa, không đóng cửa.
+
 
 
 @ca
@@ -2468,16 +2643,22 @@ def t39_chi_CA_PHAN_QUYET_duoc_chot_tren_rc_va_trang_thai():
                        cwd=GOC, capture_output=True, text=True, timeout=180)
     dung(p.returncode == 0 and "KQ " in p.stdout,
          f"giàn giáo hỏng: rc={p.returncode}\n{p.stdout[-800:]}\n{p.stderr[-800:]}")
-    ngoai, rong = json.loads(
+    ngoai, rong, mau = json.loads(
         [l for l in p.stdout.splitlines() if l.startswith("KQ ")][-1][3:])
+    lech = {k: v for k, v in mau.items() if v != _MAU_MONG[k]}
+    bang(not lech,
+         f"(0) luật đọc SAI mẫu thử toán tử: {lech} (mong {_MAU_MONG}). `==` là khẳng định "
+         f"cổng ĐỎ; `!=` là một ca ÂM hoàn toàn hợp lệ và KHÔNG được ép vào `CA_PHAN_QUYET`. "
+         f"Một luật bắt oan là luật sẽ bị tắt.")
     bang(not ngoai,
          f"(1) ca NGOÀI `CA_PHAN_QUYET` mà chốt trên phán quyết ĐỎ của cổng: {ngoai}. "
          f"Ca ấy phải đo THUỘC TÍNH của riêng nó — `t35` đọc `co_loi_goi_tran`, `t34` đọc "
          f"`chan_doan` — chứ không khẳng định lại thứ `t25` đã trói. Nếu nó THẬT SỰ là một "
          f"phán quyết mới, khai tên vào `CA_PHAN_QUYET` kèm lý do đo được.")
     bang(not rong,
-         f"(2) tên trong `CA_PHAN_QUYET` mà KHÔNG còn chốt ĐỎ nào: {rong}. Xoá khỏi danh "
-         f"sách — danh sách phải NGẮN đi, không được thành nghĩa trang.")
+         f"(2) tên trong `CA_PHAN_QUYET` mà KHÔNG còn chốt ĐỎ nào: {rong}. Hoặc ca ấy đã "
+         f"thôi khẳng định ĐỎ, hoặc HÀM đã bị xoá/đổi tên, hoặc tên gõ SAI — cả ba đều để "
+         f"lại một miễn trừ CHẾT. Xoá khỏi danh sách; nó phải NGẮN đi, không thành nghĩa trang.")
 
 
 

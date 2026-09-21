@@ -305,8 +305,15 @@ def _liet_ke_py(goc: Path):
     if (goc / ".git").exists():
         try:
             pc = subprocess.run(
+                # `--exclude-per-directory=.gitignore` thay cho `--exclude-standard`.
+                # `--exclude-standard` = `.gitignore` trong cây CỘNG `.git/info/exclude`
+                # CỘNG `core.excludesFile` TOÀN CỤC. Tức phán quyết phụ thuộc cấu hình git
+                # CÁ NHÂN của người chạy — đo được: cùng một cây, `rc=2 DO` đổi thành
+                # `rc=0 DAT` sau khi đặt `core.excludesFile`. Bản vá vòng 1 đóng "phụ thuộc
+                # thư mục rác" rồi MỞ "phụ thuộc cấu hình cá nhân" — cùng lớp, khác mặt.
+                # Cờ dưới đây chỉ đọc `.gitignore` NẰM TRONG CÂY, tức luật của KHO.
                 ["git", "-C", str(goc), "ls-files", "--cached", "--others",
-                 "--exclude-standard", "-z", "--", "*.py"],
+                 "--exclude-per-directory=.gitignore", "-z", "--", "*.py"],
                 capture_output=True, text=True, timeout=60)
             if pc.returncode == 0:
                 ten = [x for x in pc.stdout.split("\0") if x]
@@ -378,24 +385,118 @@ def _loi_goi_tran(than: str):
     """
     import ast
     cay = ast.parse(than)
-    dong = set()
+    stdlib = _bang_ten_stdlib(cay)
+    ban_ghi = []
     for nut in ast.walk(cay):
         if not isinstance(nut, ast.Call):
             continue
-        ten = (nut.func.attr if isinstance(nut.func, ast.Attribute)
-               else nut.func.id if isinstance(nut.func, ast.Name) else None)
-        if ten in _TEN_WHICH:
+        loai = _loai_loi_goi(nut, stdlib)
+        if loai is None:
+            continue
+        dinh = False
+        if loai == "which":
             dau = _doi_so_dau(nut, _KHOA_WHICH)
-            if dau is not None and _la_hang_bash(dau):
-                dong.add(nut.lineno)
-        elif ten in _TEN_SPAWN:
+            dinh = dau is not None and _la_hang_bash(dau)
+        else:
             dau = _doi_so_dau(nut, _KHOA_SPAWN)
-            if isinstance(dau, (ast.List, ast.Tuple)) and dau.elts and _la_hang_bash(dau.elts[0]):
-                dong.add(nut.lineno)
-    return sorted(dong)
+            dinh = (isinstance(dau, (ast.List, ast.Tuple)) and dau.elts
+                    and _la_hang_bash(dau.elts[0]))
+            # `executable=` GHI ĐÈ chương trình thật sự chạy, bất kể `args[0]` ghi gì.
+            # Không cộng dồn khi CẢ HAI cùng tên `bash` — một lời gọi là MỘT bản ghi.
+            if not dinh:
+                dinh = any(kw.arg == "executable" and _la_hang_bash(kw.value)
+                           for kw in nut.keywords)
+        if dinh:
+            ban_ghi.append((nut.lineno, nut.col_offset))
+    # MỘT BẢN GHI CHO MỖI `ast.Call`, không phải cho mỗi DÒNG. Tập dòng cũ gộp hai lời gọi
+    # trên cùng một dòng thành một — đo được: `(which("bash"), which("bash"))` ra `[2]`.
+    return sorted(set(ban_ghi))
 
-# CHỈ tệp này được phép chứa lời gọi trần — nó LÀ bộ giải.
-CHO_PHEP = ("ops/bash_nen.py",)
+
+# Nhận diện theo TÊN mà không giải được CALLEE thì sai CẢ HAI HƯỚNG — đo được cả hai:
+#   lọt:     `subprocess.run(["x"], executable="bash")`  ⇒ `[]`
+#   bắt oan: `runner.run(["bash"])`, `matcher.which("bash")` ⇒ `[2]`
+# Nên phải biết cái tên ấy có THẬT SỰ trỏ vào `subprocess`/`shutil` hay không.
+_MODULE_CHU = {"subprocess": _TEN_SPAWN, "shutil": _TEN_WHICH}
+
+
+def _bang_ten_stdlib(cay):
+    """Bảng tên cục bộ → (module_chuẩn, hàm_hoặc_None), dựng từ các câu `import` của tệp.
+
+    Chịu được bốn cách viết, và `t33` chốt từng cách:
+      `import subprocess`            → subprocess          → (subprocess, None)
+      `import subprocess as sp`      → sp                  → (subprocess, None)
+      `from shutil import which`     → which               → (shutil, which)
+      `from shutil import which as w`→ w                   → (shutil, which)
+    Không cố giải biến, không cố giải gán chuyền tay — đó là phân tích LUỒNG DỮ LIỆU và nó
+    nằm trong phần KHÔNG PHỦ đã khai ở trên.
+    """
+    import ast
+    bang = {}
+    for nut in ast.walk(cay):
+        if isinstance(nut, ast.Import):
+            for a in nut.names:
+                if a.name in _MODULE_CHU:
+                    bang[a.asname or a.name] = (a.name, None)
+        elif isinstance(nut, ast.ImportFrom) and nut.module in _MODULE_CHU:
+            for a in nut.names:
+                bang[a.asname or a.name] = (nut.module, a.name)
+    return bang
+
+
+def _loai_theo_TEN_khong_giai_callee(nut):
+    """Bản CŨ — nhận diện CHỈ theo TÊN. Giữ lại làm ĐÍCH CHO ĐỘT BIẾN, không dùng ở đường thật.
+
+    Nó sai CẢ HAI HƯỚNG và cả hai đều đo được: lọt `run(["x"], executable="bash")`, và bắt
+    OAN `runner.run(["bash"])` / `matcher.which("bash")` — những API chẳng liên quan stdlib.
+    """
+    import ast
+    ten = (nut.func.attr if isinstance(nut.func, ast.Attribute)
+           else nut.func.id if isinstance(nut.func, ast.Name) else None)
+    if ten in _TEN_WHICH:
+        return "which"
+    if ten in _TEN_SPAWN:
+        return "spawn"
+    return None
+
+
+def _loai_loi_goi(nut, stdlib):
+    """"which" | "spawn" | None — callee có trỏ vào `shutil`/`subprocess` thật không."""
+    import ast
+    if isinstance(nut.func, ast.Attribute) and isinstance(nut.func.value, ast.Name):
+        muc = stdlib.get(nut.func.value.id)
+        if not muc or muc[1] is not None:
+            return None
+        mod, _ = muc
+        if nut.func.attr in _MODULE_CHU[mod]:
+            return "which" if mod == "shutil" else "spawn"
+        return None
+    if isinstance(nut.func, ast.Name):
+        muc = stdlib.get(nut.func.id)
+        if muc and muc[1] is not None and muc[1] in _MODULE_CHU[muc[0]]:
+            return "which" if muc[0] == "shutil" else "spawn"
+    return None
+
+# CHỈ tệp này được phép chứa lời gọi trần — nó LÀ bộ giải. NHƯNG CÓ HẠN NGẠCH, không phải
+# một tấm vé vô hạn: cross-review codex trên `1253e3a` chỉ ra, và executor đo lại thấy đúng —
+# thêm `BAN_SAO_THU_NAM = shutil.which("bash")` vào CHÍNH tệp này thì cổng vẫn `rc=0 DAT`.
+# Packet này tồn tại để chặn BẢN SAO THỨ TƯ, mà chỗ miễn trừ vô hạn lại đúng là nơi BẢN SAO
+# THỨ NĂM sẽ mọc — trong tệp không ai nghi ngờ nhất.
+# HẠN NGẠCH = 0, và đó là một PHÉP ĐO: bộ giải phân giải `bash` bằng ỨNG VIÊN + phép thử
+# NĂNG LỰC, nó không `which("bash")` lần nào. `which("git", …)` không tính vì không phải `bash`.
+CHO_PHEP = {
+    "ops/bash_nen.py": (0, "bộ giải — quyết bằng NĂNG LỰC nên KHÔNG có lời gọi `bash` trần nào"),
+}
+
+# ẢNH CHỤP ĐÔNG CỨNG. `ops/reviews/**` từng được bỏ qua bằng TIỀN TỐ, tức miễn trừ vô hạn:
+# ba tệp bẩn thêm vào đó cho `rc=0 DAT` và `co_loi_goi_tran` RỖNG (đo được). Nay là KIỂM KÊ
+# TƯỜNG MINH — đúng hai tệp, đúng số lời gọi; một tệp review MỚI mang lời gọi trần sẽ ĐỎ.
+ANH_CHUP_DONG_CUNG = {
+    "ops/reviews/goi-va-lease-hoi-toan-kho-1/lease_publish_test.py":
+        (7, "ảnh chụp verdict đông cứng — `t26` băm lại mỗi lượt, KHÔNG được sửa một byte"),
+    "ops/reviews/goi-va-lease-hoi-toan-kho-2/lease_publish_test.py":
+        (7, "ảnh chụp verdict đông cứng — như trên"),
+}
 
 # RATCHET. Mỗi mục là một tệp CHƯA chuyển sang `tim_bash`, kèm lý do đo được. Cổng ĐỎ theo
 # CẢ HAI chiều:
@@ -450,7 +551,9 @@ _BO_QUA_THU_MUC = ("ops/reviews/",)
 
 # Khong quet: `.git/` (khong phai ma nguon) va `ops/reviews/` (anh chup DONG CUNG cua cac
 # ban cu, giu de doi chieu review — khong phai ma dang song).
-_BO_QUA_TOAN_CAY = (".git/", "ops/reviews/")
+# CHỈ `.git/` — nó không phải mã nguồn, không ai review nó. `ops/reviews/` đã RỜI khỏi đây
+# sang `ANH_CHUP_DONG_CUNG` để chịu hạn ngạch như mọi miễn trừ khác.
+_BO_QUA_TOAN_CAY = (".git/",)
 
 
 def quet(goc: Path):
@@ -490,13 +593,19 @@ def quet(goc: Path):
         if dong:
             co_loi_goi[rel] = dong
 
-    moi = {t: d for t, d in co_loi_goi.items()
-           if t not in CHO_PHEP and t not in CHUA_CHUYEN}
+    # MỘT LUẬT ĐẾM CHO MỌI BẢNG MIỄN TRỪ (r7 vòng 2). Ba bảng, ba ý nghĩa khác nhau —
+    # `CHO_PHEP` vĩnh viễn, `CHUA_CHUYEN` có ngày gỡ, `ANH_CHUP_DONG_CUNG` bất biến — nhưng
+    # CÙNG MỘT LUẬT: mỗi mục mang hạn ngạch, và lệch chiều nào cũng ĐỎ. Miễn trừ khai theo
+    # TƯ CÁCH THÀNH VIÊN là lớp khuyết tật mà vòng này tìm ra BA thực thể.
+    _MIEN_TRU = {}
+    for _bang in (CHO_PHEP, CHUA_CHUYEN, ANH_CHUP_DONG_CUNG):
+        _MIEN_TRU.update(_bang)
+    moi = {t: d for t, d in co_loi_goi.items() if t not in _MIEN_TRU}
     # RATCHET THEO SỐ LẦN, không theo tư cách thành viên (r7). Lệch CHIỀU NÀO cũng ĐỎ:
     # nhiều hơn = bản sao mới mọc trên đúng tệp mang nợ; ít hơn = đã vá mà quên hạ con số,
     # và một con số không còn đúng thì lần sau không ai dám tin nó.
     lech_so = {}
-    for t, muc in CHUA_CHUYEN.items():
+    for t, muc in _MIEN_TRU.items():
         cho_phep, _ = _so_cho_phep(muc)
         if cho_phep is None:
             continue
@@ -504,11 +613,13 @@ def quet(goc: Path):
         if thay and thay != cho_phep:
             lech_so[t] = {"khai": cho_phep, "do_duoc": thay,
                           "dong": co_loi_goi.get(t, [])}
+    # `da_sach` CHỈ áp cho `CHUA_CHUYEN` — đó là ratchet có NGÀY GỠ, phải ngắn đi. `CHO_PHEP`
+    # hạn ngạch 0 nên "sạch" là trạng thái ĐÚNG của nó, và `ANH_CHUP_DONG_CUNG` bất biến.
     da_sach = [t for t in CHUA_CHUYEN if t not in co_loi_goi]
     bao = {"da_quet": str(thu_muc), "pham_vi": "toan-cay", "nguon_tep": nguon_tep, "co_loi_goi_tran": co_loi_goi,
            "ngoai_danh_sach": moi, "muc_ratchet_da_sach": sorted(da_sach), "lech_so_loi_goi": lech_so,
-           "cho_phep": list(CHO_PHEP), "chua_chuyen": sorted(CHUA_CHUYEN),
-           "so_cho_phep": {t: _so_cho_phep(m)[0] for t, m in sorted(CHUA_CHUYEN.items())}}
+           "cho_phep": sorted(CHO_PHEP), "anh_chup": sorted(ANH_CHUP_DONG_CUNG), "chua_chuyen": sorted(CHUA_CHUYEN),
+           "so_cho_phep": {t: _so_cho_phep(m)[0] for t, m in sorted(_MIEN_TRU.items())}}
     if moi:
         bao["trang_thai"] = "DO"
         bao["ly_do"] = (

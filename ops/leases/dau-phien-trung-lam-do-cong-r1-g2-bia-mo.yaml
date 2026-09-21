@@ -1,0 +1,111 @@
+# LEASE BIA MO — DAU-PHIEN-TRUNG-LAM-DO-CONG revision 1 / generation 2
+#
+# LEASE NAY KHONG CAP QUYEN CHO AI. `write_set` RONG co chu dich: `_lease_cham_duong` khong khop
+# duong nao, nen no giu SO KHONG tep. No ton tai vi DUNG MOT ly do — mang chieu nguoc cua bia mo
+# hai chieu de `dau-phien-trung-lam-do-cong-r1-g1-claude` THOI GIU ops/nhanh_don_duoc_test.py,
+# nhuong duong cho revision 4 cua #568.
+#
+# VI SAO PHAI LA MOT LEASE (chep lai tu wp570-bash-nen-r5-g5-bia-mo, ly le khong doi):
+#  · `SO_THU_HOI_KICH_HOAT = False`, nen ghi vao so thu hoi se lam `kiem-thu-hoi-github` DO toan
+#    kho — job `thu-hoi` chay tren MOI PR.
+#  · `_bia_mo_doi_xung` co BA ket qua: khong dau => con giu; dau CO nguoi tro nguoc => chet; dau
+#    MA KHONG ai tro nguoc => rc=12 KHONG_XAC_DINH cho moi duong lease ay cham.
+# Tuc: khong co duong nghi huu nao KHONG can nguoi ke nhiem. Do dung no
+# `AG-T0-01B-thu-hoi-lease-chua-co-duong`, va lease nay la cai gia cua no. No ay VAN MO.
+#
+# DEM REF, KHONG SUY: dau-phien-trung-lam-do-cong-r1-g1-claude song tren DUNG MOT ref
+# (ops/cap-lease-593), nen mot dau la du.
+
+trang_thai_ban_ghi: 'DA CAP 2026-09-21T09:2xZ. Day len ops/cap-lease-593 theo chi thi chu kho.'
+
+schema_version: 2
+event: executor_lease_granted
+packet_issue: 593
+packet_id: DAU-PHIEN-TRUNG-LAM-DO-CONG
+mission_issue: KHONG_CO
+revision: 1
+generation: 2
+lease_id: dau-phien-trung-lam-do-cong-r1-g2-bia-mo
+granted_by: ducthangho
+
+thay_the_cho: dau-phien-trung-lam-do-cong-r1-g1-claude
+thay_the_cho_vi_sao: 'Dau HAI CHIEU. Ban g1 DA mang dong
+  `da_bi_thay_the: dau-phien-trung-lam-do-cong-r1-g2-bia-mo` truoc khi lease nay di qua `check` —
+  commit b14f211 tren ops/cap-lease-593, day rieng mot lan.'
+thay_the_DAY_KHONG_PHAI_KHE_AG_T0_01B: 'CUNG packet_id DAU-PHIEN-TRUNG-LAM-DO-CONG. Khe ma
+  CLAUDE.md to cao la dung thay_the_cho XUYEN PACKET de thu hoi som mot lease con hieu luc.
+  O day cung packet, va viec thu hoi som la CO CHU Y, duoc chu kho chi thi.
+  NOI THANG cho khong dep: #568 r4 la packet KHAC, va no la ly do #593 phai nha duong. Neu r4 tu
+  dat `thay_the_cho` tro sang lease cua #593 thi DO MOI la khe. Bia mo nay tranh dung cho ay: no
+  la lease cua CHINH #593, tu nha duong cua minh, roi r4 xin duong trong tay khong.'
+
+granted_on_instruction: https://github.com/ducthangho/tra-luat/issues/593#issuecomment-5758350999
+granted_on_instruction_nguyen_van: 'Chu kho, phien dieu phoi 2026-09-21: "Cap r4 cho #568 di.
+  Nhung # PR nao chua review thi cross review boi codex di". Revision 4 cua #568 doi DUNG duong ma
+  lease g1 dang giu, nen chi thi ay bao ham viec #593 nha duong.'
+granted_on_instruction_ghi_chu: 'Comment duoc neo la BAN GHI cua chi thi, khong phai nguon goc —
+  cung quy uoc voi wp570-bash-nen-r5-g5-bia-mo. Phien claude soan va dang HO bang token chu kho,
+  va khai ro dieu do trong chinh comment ay.'
+recorded_by: claude-session
+recorder_is_dispatcher: false
+
+cai_gia_phai_khai: 'PR #596 CHUA duoc audit khi bia mo nay co hieu luc. Sau day #593 KHONG con
+  quyen GHI: audit tim ra cho can sua thi phai xin chu kho cap generation MOI (r1-g3).
+  Bu lai, do duoc: M1-M3 du, A1-A9 deu DAT, va NAM check tren 6c761c4 deu XANH — gate,
+  gate-registry, gate-packet-loop, chuan-bi, thu-hoi — mergeable_state clean.
+  VIEC CUA #593 KHONG BI HUY: PR #596 giu nguyen head 6c761c4 va van AUDIT VA MERGE DUOC.'
+cai_gia_CO_HE_THONG: 'DAY LA LAN THU HAI trong phien nay mot packet phai nha duong cho packet sau
+  (lan dau: chan-doan-tin-dung-gia-r3-g2-bia-mo). Voi MOT duong duy nhat va nhieu packet noi tiep,
+  MOI packet dang bay deu mat quyen ghi khi packet ke tiep bat dau — ke ca khi PR cua no chua ai
+  doc. Da khai len #593 de chu kho de y. KHONG tu de xuat doi co che: do la thay doi kien truc,
+  can packet rieng.'
+
+leased_at_utc: '2026-09-21T09:20:00Z'
+lease_expires_at_utc: '2026-09-22T06:00:00Z'
+lease_expires_vi_sao: 'Giu DUNG han cu cua g1. Bia mo khong duoc song lau hon cai no chon.'
+
+role: executor
+provider: anthropic_claude
+executor: claude
+model: KHONG_KHAI
+effort: KHONG_KHAI
+
+assurance_target: human_audited
+assurance_target_vi_sao: 'Khong doi muc cua #593. Lease nay khong thi cong gi nen khong tu sinh ra
+  muc bao dam nao. Luot cross-review codex tren 1486689 tra changes_requested, nen #593 VAN CHUA
+  len cross_approved.'
+assurance_target_HE_QUA_PHAI_KHAI: 'Packet #593 VAN KHONG LAND DUOC BANG MAY.'
+assurance_target_fallback: advisory_review
+reviewer_provider: codex
+reviewer_provider_ghi_chu: 'Da chay MOT luot tren 1486689, verdict changes_requested. Finding
+  trong pham vi da xu o d51110e. Ba finding con lai thuoc closure #568 — chinh la viec cua r4.'
+
+review_class: sensitive
+effective_review_class: sensitive
+review_class_vi_sao: 'Giu nguyen lop cua #593. Ha lop o mot lease thu hoi la tu noi luat cho minh.'
+
+spec_ref: ops/specs/dau-phien-trung-lam-do-cong-r1.md
+spec_path: ops/specs/dau-phien-trung-lam-do-cong-r1.md
+prompt_path: ops/specs/dau-phien-trung-lam-do-cong-r1.md
+prompt_sha256_required: e41767b9f1b103185d1482c31ccd923f39e9777a76600ba85a7f6fe7ac38cbf9
+spec_hash: e41767b9f1b103185d1482c31ccd923f39e9777a76600ba85a7f6fe7ac38cbf9
+spec_hash_do_nhu_the_nao: 'sha256sum ops/specs/dau-phien-trung-lam-do-cong-r1.md tren nhanh
+  ops/cap-lease-593, 8 530 B. Do lai TRUOC khi tin con so nay.'
+
+branch: ops/cap-lease-593
+branch_ownership: shared
+
+start_from_sha: 6c761c406cd254cd4f138f2442374badcf9bb795
+start_from_sha_vi_sao: 'Head PR #596 luc bia mo co hieu luc. Ghi de neo BAN GHI, khong de cap
+  quyen ghi — write_set RONG.'
+reviewed_sha_required: 6c761c406cd254cd4f138f2442374badcf9bb795
+
+write_set: []
+write_set_RONG_CO_CHU_DICH: 'Lease nay KHONG cap quyen ghi cho bat ky duong nao. Sau khi no co
+  hieu luc, `ai-dang-giu ops/nhanh_don_duoc_test.py` phai tra NGUOI_GIU 0 — do la phep do xac
+  nhan bia mo da an.'
+
+cam_tuyet_doi:
+- 'Dung lease nay de GHI bat cu tep nao. No khong cap quyen ghi.'
+- 'Keo dai lease_expires_at_utc qua han cu cua g1.'
+- 'Dem muc nay nhu mot lan lach AG-T0-01B da duoc cho phep. No AY VAN MO.'

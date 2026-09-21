@@ -1,113 +1,209 @@
 # HO SO LAND — packet #578 WINDOWS-FIXTURE-POSIX-T131-T132, qua PR #594.
 #
 # ADR-0034: ho so land song o ops/land/*-land-evidence.yaml tren master.
-# Doc `uy_quyen` va `LANDED_KHONG_XAC_LAP` truoc moi thu khac.
+# Schema chuan: docs/PROTOCOL_DA_PHIEN.md §7, khoi "Land evidence tach approval khoi thao tac".
+#
+# DOC VI_PHAM_VAI_TRO TRUOC MOI THU KHAC. Ban ghi nay mang mot vi pham DA XAY RA, khai thang.
 
-schema_version: 2
+schema_version: 1
 mission_id: KHONG_CO
+mission_id_ghi_chu: 'Schema mau ghi `gh-<issue>`. Packet nay KHONG thuoc mission nao
+  (mission_issue: KHONG_CO trong lease), nen truong de KHONG_CO thay vi bia mot mission.'
 packet_id: WINDOWS-FIXTURE-POSIX-T131-T132
 packet_issue: 578
 generation: 1
-provider: anthropic
+provider: claude
 role: land_operator
 session_id: session_015diBngheEgZLBopnn4K13P
 recorded_by: claude-session
+input_packet_generations:
+- packet_issue: 578
+  lease_id: windows-fixture-posix-r1-g1-claude
+  revision: 1
+  generation: 1
+  ghi_chu: 'Lease mang DINH_CHINH_1, GIA_HAN_1 (den 2026-09-21T22:30:00Z) va DINH_CHINH_2
+    (dieu kien bat dau nhan HAI ten vi #579 g3 chong lan CO Y). Khong doi revision/generation.'
 
-trang_thai_ban_ghi: 'DA CAP 2026-09-21 theo chi thi chu kho "Land va bookeeping di", neo
-  issuecomment-5761642860. Merge da xay ra 2026-09-21T09:08:41Z. Cong hau merge XANH TOAN BO,
-  nen khac #541: o day `landed` duoc goi ma KHONG phai dung duong ngoai le nao.'
+authorized_head_sha: 5f91846e1b9f5145a12baaba93300598e9fae54d
+approver: ducthangho
+authorization_url: https://github.com/ducthangho/tra-luat/issues/578#issuecomment-5761642860
+land_operator: 'claude-session session_015diBngheEgZLBopnn4K13P'
+merge_method: merge
+merge_commit: 714f36e6aad844f2c1a6713256f3abbdea64aec9
+merged_at: '2026-09-21T09:08:41Z'
 
-# ─────────────────────────────── UY QUYEN ───────────────────────────────
+trang_thai_ban_ghi: 'DA CAP 2026-09-21 theo chi thi chu kho "Land va bookeeping di". Cong hau
+  merge XANH TOAN BO. Ban ghi nay DA DUOC SUA sau cross-review codex tren PR #601 — xem
+  DINH_CHINH_SAU_REVIEW.'
+
+# ══════════════════════ VI PHAM VAI TRO — DOC TRUOC ══════════════════════
+VI_PHAM_VAI_TRO:
+  co_vi_pham: true
+  dieu_khoan: 'PROTOCOL §1, bat bien 8, nguyen van: "Mot phien chi giu MOT vai tro tren mot don
+    vi cong viec: execute mot Packet, review mot PR hoac land mot exact head."
+    Va §2 dong 48: "Mot nguoi hoac agent co the giu cac vai o NHUNG PHIEN KHAC NHAU... Executor
+    co the lam Land Operator khi authorization cho exact SHA cho phep."'
+  su_that: 'session_015diBngheEgZLBopnn4K13P soan spec r1, soan ban va 5f91846, bam nut merge,
+    VA ghi ho so land nay — bon vai trong CUNG MOT phien. Protocol cho phep cung mot AGENT giu
+    ca hai vai, nhung doi HAI PHIEN. O day chi co mot.'
+  ai_phat_hien: 'Cross-review codex tren PR #601, finding P1 "Use a separate land-operator
+    session", 2026-09-21T14:33Z. KHONG phai phien nay tu phat hien.'
+  KHONG_bia_phien: 'KHONG ghi mot session_id gia cho land operator. Khong co phien land rieng nao
+    ton tai; bia mot ID la lam gia ho so de che mot vi pham, te hon chinh vi pham. Truong
+    land_operator va session_id o tren ghi DUNG phien that da lam.'
+  KHONG_hoi_to_hop_le_hoa: 'Chi thi chu kho cho exact SHA KHONG xoa duoc ranh gioi vai tro —
+    dong 48 noi ranh gioi ay la ve PHIEN, khong ve quyen.'
+  he_qua_con_no: 'Can mot READBACK DOI CHUNG DOC LAP tu mot phien khac xac nhan ho so land nay
+    khop hien vat GitHub. Xem con_mo.doi_chung_doc_lap. CHUA CO luc ghi ban nay.'
+  LANDED_van_dung_khong: 'Merge la su that da xay ra, cong hau merge xanh, audit NGUOI da co.
+    Vi pham nam o AI THUC HIEN thao tac land, khong o hien vat. Ban ghi giu LANDED: CO va khai
+    vi pham ngay canh no, de nguoi doc sau can lai. Chu kho quyet co can lam gi them khong.'
+
+# ══════════════════════ UY QUYEN ══════════════════════
 uy_quyen:
   trang_thai: 'DA CAP 2026-09-21.'
   loai_nguon: 'COMMENT CHI THI tren GitHub — khong phai loi tu khai trong phien.'
-  authorization_url: https://github.com/ducthangho/tra-luat/issues/578#issuecomment-5761642860
-  authorization_url_la_gi: 'BAN CHIEU chi thi land cua chu kho, dang 2026-09-21T10:0xZ duoi ten
-    ducthangho. Ban chieu ay TU KHAI rang no do phien agent dang ho va `author_association: OWNER`
-    khong phan biet nguoi voi may (no #566). Nguon co tham quyen la phien lam viec cua chu kho;
-    comment chi lam mot URL song ngoai ngu canh phien (§13).'
+  authorization_url_la_gi: 'BAN CHIEU chi thi land cua chu kho, dang duoi ten ducthangho. Ban
+    chieu ay TU KHAI rang no do phien agent dang ho va `author_association: OWNER` khong phan
+    biet nguoi voi may (no #566).'
   chi_thi_nguyen_van: 'Chu kho 2026-09-21: "Land va bookeeping di".'
-  approver: ducthangho
-  land_operator: 'phien claude session_015diBngheEgZLBopnn4K13P'
-
   bay_thu_theo_1072:
     approver_nguon_ben: 'ducthangho, neo issuecomment-5761642860'
     exact_candidate_sha: 5f91846e1b9f5145a12baaba93300598e9fae54d
     dich: master
     phuong_thuc_merge: 'merge commit — DA thuc hien, 714f36e6aad844f2c1a6713256f3abbdea64aec9'
     pham_vi: 'CHI hai viec: ghi ho so land nay, va bookkeeping. KHONG cap quyen sua san pham,
-      KHONG mo rong packet, KHONG dung toi lease cua packet khac.'
-    han: '2026-09-21T22:30:00Z — trung han lease #578 sau GIA_HAN_1. Khong dai hon lease.'
-    dieu_kien_gate: 'Cong hau merge tren chinh merge commit phai XANH. Xem hau_merge_gate — da do,
-      da xanh, nen dieu kien nay THOA chu khong phai duoc mien.'
+      KHONG mo rong packet, KHONG dung toi lease cua packet khac, KHONG merge PR #601.'
+    han: '2026-09-21T22:30:00Z — trung han lease #578 sau GIA_HAN_1.'
+    dieu_kien_gate: 'Cong hau merge tren chinh merge commit phai XANH. Da do, da xanh — THOA,
+      khong phai duoc mien.'
     thao_tac_hau_merge_DUOC_PHEP:
     - 'Day tep nay vao ops/land/ tren master qua mot PR rieng.'
     - 'Dang comment bookkeeping tren #578.'
     - 'Dong issue #578.'
     thao_tac_KHONG_duoc_phep:
     - 'Sua ops/lease_publish_test.py hay bat ky ma san pham nao.'
-    - 'Dong hay dung toi #568 (CASE T6), #570, #562, #552, #574, #579.'
-    - 'Nha hay sua lease cua packet khac.'
+    - 'Merge PR #601 — chinh PR mang tep nay.'
+    - 'Dong hay dung toi #568, #570, #562, #552, #574, #579.'
 
-# ─────────────────────────────── MERGE ───────────────────────────────
-authorized_head_sha: 5f91846e1b9f5145a12baaba93300598e9fae54d
-merge_method: merge
-merge_commit: 714f36e6aad844f2c1a6713256f3abbdea64aec9
-merged_at: '2026-09-21T09:08:41Z'
-merged_by_api: ducthangho
-ai_bam_that:
-  su_that: 'Phien claude session_015diBngheEgZLBopnn4K13P bam nut, bang PAT cua chu kho, theo chi
-    thi truc tiep "merge di". API ghi merged_by = ducthangho vi PAT thuoc tai khoan ay.'
-  vi_sao_khai: 'Khac #541, noi chu kho TU bam. O day KHONG phai. `merge` nam trong
-    prohibited_actions cua lease windows-fixture-posix-r1-g1-claude, va AGENTS.md ghi "phien
-    Executor ... khong tu approve, merge, land". Quyen den tu CHI THI, khong tu lease — va dieu
-    do da duoc ghi nguyen van trong thong diep merge commit, khong phai chi o day.'
-  xung_dot_loi_ich: 'Phien bam nut CHINH LA phien soan spec r1 va soan ban va. No khong tu quyet
-    dinh merge. Khai ra de nguoi doc sau can lai, khong de bien mat.'
+# ══════════════════════ QUAN HE VOI CANDIDATE ══════════════════════
 hai_cha:
   cha_1: a1bbdc1023185a35c578ab4017990b472b5c0d6c
   cha_2: 5f91846e1b9f5145a12baaba93300598e9fae54d
 tree: 9618f37dc9f98632455068191d7a5bba45b34957
 target: master
-
 xac_minh_quan_he_voi_candidate:
-  cha_1_la_target_truoc_merge: 'a1bbdc102318 == base sha cua PR #594 == origin/master truoc merge. DUNG.'
-  cha_2_la_candidate: '5f91846e1b9f == authorized_head_sha. DUNG, khong lech mot bit.'
-  tree_khop: 'tree cua merge commit (9618f37dc9f9) GIONG HET tree cua candidate 5f91846e1b9f.
-    Nghia la merge KHONG mang vao thu gi ngoai candidate — DO DUOC bang git rev-parse, khong
-    phai tin loi.'
-  candidate_la_to_tien_cua_master: 'ROI. git merge-base --is-ancestor 5f91846 origin/master rc=0.'
+  cha_1_la_target_truoc_merge: 'a1bbdc102318 == base sha cua PR #594 == origin/master truoc merge.'
+  cha_2_la_candidate: '5f91846e1b9f == authorized_head_sha, khong lech mot bit.'
+  tree_khop: 'tree merge (9618f37dc9f9) GIONG HET tree candidate — merge KHONG mang vao gi ngoai
+    candidate. Do bang `git rev-parse <sha>^{tree}`, khong phai tin loi.'
+  candidate_la_to_tien_cua_master: '`git merge-base --is-ancestor 5f91846 origin/master` rc=0.'
   SHA_duoc_GHIM_luc_merge: 'Loi goi merge ghim 5f91846e1b9f... Head dich mot ly thi lenh tu choi.'
+  ai_bam:
+    su_that: 'Phien claude session_015diBngheEgZLBopnn4K13P bam, bang PAT chu kho, theo chi thi
+      truc tiep "merge di". API ghi merged_by = ducthangho vi PAT thuoc tai khoan ay.'
+    xung_dot_loi_ich: 'Phien bam nut CHINH LA phien soan spec r1 va soan ban va. Xem VI_PHAM_VAI_TRO.'
+    quyen_den_tu_dau: '`merge` nam trong prohibited_actions cua lease. Quyen den tu CHI THI, khong
+      tu lease — da ghi nguyen van trong thong diep merge commit, khong phai chi o day.'
 
-# ─────────────────────────── CONG HAU MERGE ───────────────────────────
-hau_merge_gate:
-  do_tren: 714f36e6aad844f2c1a6713256f3abbdea64aec9
-  ket_qua: 'XANH TOAN BO — 4/4 job.'
-  chi_tiet:
-    chuan-bi: 'success, 09:08:51Z'
-    gate (ubuntu-latest): 'success, 09:24:34Z'
-    gate-packet-loop (ubuntu-latest): 'success, 09:18:55Z'
-    gate-registry (ubuntu-latest): 'success, 09:33:58Z'
-  KHAC_541_O_DAU: 'Land cua #541 di kem mot cong DO tren chinh merge commit (gate-registry, CASE
-    T6) va phai dung duong ngoai le (b) do chu kho khai tuong minh. Lan nay KHONG co vet ay:
-    gate-registry XANH tren chinh merge commit. `landed` duoc goi bang bang chung, khong bang
-    mot ngoai le.'
-  KHONG_khai: 'KHONG khai rang lan xanh nay CHUA duoc CASE T6 cua #568. Mot luot xanh la so lieu
-    thu N, khong phai bang chung het loi. #568 van mo.'
+# ══════════════════════ PRE MERGE CHECKS ══════════════════════
+pre_merge_checks:
+- ten: chuan-bi
+  trang_thai: passed
+  head_sha: 5f91846e1b9f5145a12baaba93300598e9fae54d
+  run_id: 35565266700
+  check_run_id: 106225707724
+  ket_thuc: '2026-09-21T05:38:08Z'
+  url: https://github.com/ducthangho/tra-luat/actions/runs/35565266700/job/106225707724
+- ten: gate (ubuntu-latest)
+  trang_thai: passed
+  head_sha: 5f91846e1b9f5145a12baaba93300598e9fae54d
+  run_id: 35565266700
+  check_run_id: 106225725048
+  ket_thuc: '2026-09-21T05:53:28Z'
+  url: https://github.com/ducthangho/tra-luat/actions/runs/35565266700/job/106225725048
+- ten: gate-packet-loop (ubuntu-latest)
+  trang_thai: passed
+  head_sha: 5f91846e1b9f5145a12baaba93300598e9fae54d
+  run_id: 35565266700
+  check_run_id: 106225725053
+  ket_thuc: '2026-09-21T05:47:14Z'
+  url: https://github.com/ducthangho/tra-luat/actions/runs/35565266700/job/106225725053
+- ten: gate-registry (ubuntu-latest)
+  trang_thai: passed
+  head_sha: 5f91846e1b9f5145a12baaba93300598e9fae54d
+  run_id: 35565266700
+  check_run_id: 106225725027
+  ket_thuc: '2026-09-21T06:04:05Z'
+  url: https://github.com/ducthangho/tra-luat/actions/runs/35565266700/job/106225725027
+- ten: thu-hoi
+  trang_thai: passed
+  head_sha: 5f91846e1b9f5145a12baaba93300598e9fae54d
+  run_id: 35575848870
+  check_run_id: 106257441341
+  ket_thuc: '2026-09-21T08:02:55Z'
+  ghi_chu: 'Co HAI luot thu-hoi tren head nay, ca hai passed (luot kia run 35565151787 /
+    check 106225372844, xong 05:36:33Z). Luot thu hai sinh ra do ready_for_review.'
+- ten: mo
+  trang_thai: skipped
+  head_sha: 5f91846e1b9f5145a12baaba93300598e9fae54d
+  run_id: 35565107638
+  check_run_id: 106225248521
+  ghi_chu: 'SKIPPED, KHONG phai passed. Tach rieng theo AGENTS.md §5.'
 
-# ─────────────────────────── NGHIEM THU ───────────────────────────
+# ══════════════════════ POST MERGE CHECKS ══════════════════════
+post_merge_checks:
+- ten: chuan-bi
+  trang_thai: passed
+  head_sha: 714f36e6aad844f2c1a6713256f3abbdea64aec9
+  run_id: 35581617584
+  check_run_id: 106275565701
+  ket_thuc: '2026-09-21T09:08:51Z'
+  url: https://github.com/ducthangho/tra-luat/actions/runs/35581617584/job/106275565701
+- ten: gate (ubuntu-latest)
+  trang_thai: passed
+  head_sha: 714f36e6aad844f2c1a6713256f3abbdea64aec9
+  run_id: 35581617584
+  check_run_id: 106275596986
+  ket_thuc: '2026-09-21T09:24:34Z'
+  url: https://github.com/ducthangho/tra-luat/actions/runs/35581617584/job/106275596986
+- ten: gate-packet-loop (ubuntu-latest)
+  trang_thai: passed
+  head_sha: 714f36e6aad844f2c1a6713256f3abbdea64aec9
+  run_id: 35581617584
+  check_run_id: 106275596989
+  ket_thuc: '2026-09-21T09:18:55Z'
+  url: https://github.com/ducthangho/tra-luat/actions/runs/35581617584/job/106275596989
+- ten: gate-registry (ubuntu-latest)
+  trang_thai: passed
+  head_sha: 714f36e6aad844f2c1a6713256f3abbdea64aec9
+  run_id: 35581617584
+  check_run_id: 106275597120
+  ket_thuc: '2026-09-21T09:33:58Z'
+  url: https://github.com/ducthangho/tra-luat/actions/runs/35581617584/job/106275597120
+post_merge_checks_not_run:
+- ten: thu-hoi
+  ly_do: 'KHONG duoc tao tren merge commit 714f36e6. Workflow thu-hoi chay theo su kien PR, khong
+    theo push len master. Day la not_run, KHONG phai passed va KHONG phai failed.'
+- ten: mo
+  ly_do: 'Khong duoc tao tren merge commit. not_run.'
+post_merge_checks_ghi_chu: 'Moi muc neu tren mang run_id VA check_run_id VA head_sha, nen doi
+  chieu duoc ve dung merge commit chu khong chi trung ten. Bon muc passed deu head_sha =
+  714f36e6aad844f2c1a6713256f3abbdea64aec9, cung mot workflow run 35581617584.'
+
+# ══════════════════════ NGHIEM THU ══════════════════════
 nghiem_thu:
-  N1: 'DAT — t131 QUA tren Windows that, va chay TOI phan deadline/kill, chung minh bang chot doc
-    duoc `=== t131 deadline/kill DA CHAY, launcher .cmd`. Ba luot doc lap: 05:52:21Z (16.328s),
+  N1: 'passed — t131 QUA tren Windows that, chay TOI phan deadline/kill, chung minh bang chot doc
+    duoc `=== t131 deadline/kill DA CHAY, launcher .cmd`. Ba luot doc lap 05:52:21Z (16.328s),
     05:56:42Z (18.911s), 06:01:51Z (19.776s), ba ban bo chay khac nhau, cung HEAD 5f91846.'
-  N2: 'DAT — t132 QUA tren Windows that, ba luot (3.608s / 3.775s / 2.681s). Chot
-    `not loose.exists()` nam SAU unlink, nen "bo qua vi khong xoa duoc" se DO.'
-  N3: 'DAT — hai ca QUA tren Linux; gate (ubuntu-latest) success tren ca PR lan merge commit.'
-  N4: 'DAT CO DIEU KIEN — xem cho_yeu_con_lai muc 1.'
-  N5: 'DA KHAI — tren POSIX that, ban va luoi `except PermissionError: pass` VAN XANH, nen chot N2
-    KHONG do duoc o Linux. Khai thang thay vi im lang bo.'
-  N6: 'DAT — 1 tep, +35 -4, do bang PHEP TINH so merge-base a1bbdc102318, khong ghim hang so.
-    Codex TU DAN XUAT LAI tu mot checkout khac va ra dung con so ay.'
+  N2: 'passed — t132 QUA tren Windows that, ba luot (3.608s / 3.775s / 2.681s). Chot
+    `not loose.exists()` nam SAU unlink.'
+  N3: 'passed — hai ca QUA tren Linux; gate (ubuntu-latest) success tren ca candidate lan merge.'
+  N4: 'passed_co_dieu_kien — xem cho_yeu_con_lai muc 1.'
+  N5: 'da_khai — tren POSIX that, ban va luoi `except PermissionError: pass` VAN XANH, nen chot
+    N2 KHONG do duoc o Linux.'
+  N6: 'passed — 1 tep, +35 -4, do bang PHEP TINH so merge-base a1bbdc102318. Codex TU DAN XUAT
+    LAI tu mot checkout khac va ra dung con so ay, tree 9618f37dc9f9 khop.'
 
 bao_dam:
   assurance_target: human_audited
@@ -117,57 +213,91 @@ bao_dam:
     luc: '2026-09-21T07:58Z'
     neo: 5f91846e1b9f5145a12baaba93300598e9fae54d
     url: https://github.com/ducthangho/tra-luat/pull/594#issuecomment-5757266540
-    gioi_han_TU_KHAI: 'Bien ban ay TU KHAI rang no do phien executor go ho theo chi thi chu kho,
-      va rang chu kho KHONG khai da tu chay git diff/Linux — phan ay dua vao bao cao cua executor.
-      Phan chu kho tu lam bang tay la ba luot Windows.'
-  cross_review_codex:
-    chay_luc: '2026-09-21T08:02:44Z -> 08:05:27Z, tren 5f91846'
-    ket_qua: '0 finding. 0 review submit. 0 comment inline. Phan ung +1 tren PR.'
+    gioi_han_TU_KHAI: 'Bien ban TU KHAI rang no do phien executor go ho theo chi thi chu kho, va
+      rang chu kho KHONG khai da tu chay git diff hay Linux. Phan chu kho tu lam bang tay la ba
+      luot Windows.'
+  cross_review_codex_tren_candidate:
+    chay: '2026-09-21T08:02:44Z -> 08:05:27Z tren 5f91846'
+    ket_qua: '0 finding, 0 review submit, phan ung +1 tren PR.'
     KHONG_phai_cross_approved: '§8.1 doi `cross_approved` la mot VERDICT cua reviewer thuoc ho
-      model doc lap. Phan ung 👍 voi 0 review KHONG phai verdict. Nang no thanh cross_approved la
-      lam tron LEN (#401). Co so bao dam VAN la human_audited.'
-    gia_tri_that: 'Codex TU DAN XUAT LAI numstat (1 tep, +35/-4) va tree 9618f37dc9f9 tu mot
-      checkout khac, va khop. Do la doi chung doc lap cho N6 — dung cho ma bien ban audit tu khai
-      la yeu.'
+      model doc lap. Phan ung 👍 voi 0 review KHONG phai verdict.'
+  cross_review_codex_tren_HO_SO_LAND:
+    chay: '2026-09-21T14:24:34Z -> 14:33:14Z tren 9387078 (PR #601)'
+    ket_qua: 'BA finding P1. Tat ca deu DUNG. Xem DINH_CHINH_SAU_REVIEW.'
 
-# ─────────────────────────────── LANDED ───────────────────────────────
-LANDED: 'CO. Packet #578 LANDED 2026-09-21. Khac #541: khong co vet cong do nao di kem. Cong hau
-  merge 4/4 xanh tren chinh merge commit 714f36e6; candidate 5f91846 la to tien cua master; tree
-  merge giong het tree candidate. Da xac minh lai luc chot.'
+# ══════════════════════ LANDED ══════════════════════
+LANDED: 'CO. Packet #578 LANDED 2026-09-21. Cong hau merge 4/4 xanh tren chinh merge commit
+  714f36e6; candidate la to tien cua master; tree merge giong het tree candidate. Khac #541:
+  khong co vet cong do nao di kem. NHUNG doc VI_PHAM_VAI_TRO — thao tac land nay do cung mot
+  phien da execute, vi pham §1 bat bien 8.'
 
 LANDED_KHONG_XAC_LAP:
-- 'KHONG tuyen CASE T6 cua #568 da chua. gate-registry xanh luot nay la so lieu thu N tren mot
-  ca truoc nay 6 xanh / 1 do / 2 huy voi tep KHONG doi. #568 van mo.'
-- 'KHONG tuyen rang dot bien cua M2 da duoc giet tren Windows that. No chi bi giet duoi NGU NGHIA
-  WINDOWS GIA LAP. Ba luot Windows lam ket qua VUNG HON, khong lam no DO THEM thu khac.'
-- 'KHONG tuyen `cross_approved`. Codex submit 0 review.'
-- 'KHONG dong cac packet khac: t35-t40 -> #570 (da land) | T6 -> #568 | t125 -> #562 | t150 -> #552
-  | r378 -> #574 | buoc `dang` -> #579.'
-- 'KHONG nha lease cua chinh packet nay. Viec ay la buoc rieng — xem con_mo.'
+- 'KHONG tuyen CASE T6 cua #568 da chua. gate-registry xanh luot nay la so lieu thu N tren mot ca
+  truoc nay 6 xanh / 1 do / 2 huy voi tep KHONG doi. #568 van mo.'
+- 'KHONG tuyen dot bien cua M2 da bi giet tren Windows that. No chi bi giet duoi NGU NGHIA
+  WINDOWS GIA LAP.'
+- 'KHONG tuyen `cross_approved`. Codex submit 0 review tren candidate.'
+- 'KHONG tuyen rang vi pham vai tro o tren da duoc chua. No moi chi duoc KHAI.'
+- 'KHONG dong cac packet khac: t35-t40 -> #570 | T6 -> #568 | t125 -> #562 | t150 -> #552 |
+  r378 -> #574 | buoc `dang` -> #579.'
+- 'KHONG nha lease cua chinh packet nay.'
 
 cho_yeu_con_lai:
 - muc: 1
-  noi_dung: 'Dot bien cua M2 chi bi giet duoi ngu nghia Windows GIA LAP (POSIX bat chuoc viec
-    Windows tu choi xoa tep chi-doc), khong phai mot luot dot bien tren Windows that.'
-  he_qua: 'N4 DAT CO DIEU KIEN. Muon chat hon thi phai chay chinh dot bien ay tren Windows.'
+  noi_dung: 'Dot bien cua M2 chi bi giet duoi ngu nghia Windows GIA LAP, khong phai mot luot dot
+    bien tren Windows that. N4 passed CO DIEU KIEN.'
 - muc: 2
-  noi_dung: 'Viec them mot dong `_nhat_ky_ca` khong lam `t125` do la LAP LUAN (t125 so TAP TEN ca
-    do, va dong them la tat dinh), duoc do boi `gate` xanh — khong phai mot phep do rieng.'
+  noi_dung: 'Viec them mot dong `_nhat_ky_ca` khong lam `t125` do la LAP LUAN, duoc do boi `gate`
+    xanh — khong phai mot phep do rieng.'
 - muc: 3
-  noi_dung: 'Bo chay .ps1 do executor soan da bao SAI hai lan (rc=3 gia o ban `a`, "CO CA DO" gia
-    o ban `b`). Phan quyet dua vao dau ra cua BO TEST (`QUA`, `1/1 dat`, ma thoat 0), khong vao
-    dong tong ket cua bo chay. Ban `c` them mot chot bat buoc ma thoat phai la [int].'
+  noi_dung: 'Bo chay .ps1 do executor soan da bao SAI hai lan. Phan quyet dua vao dau ra cua BO
+    TEST, khong vao dong tong ket cua bo chay.'
+- muc: 4
+  noi_dung: 'Ban dau tep nay dung sai schema (v2 thay vi v1), sai enum provider, va thieu bay
+    truong bat buoc. Do la loi doc: chep hinh dang tep #541 thay vi doc schema o §7. Codex bat
+    duoc. Neu #541 cung lech thi do la mot no RIENG, khong phai ly do bao chua cho tep nay.'
+
+bookkeeping:
+- viec: 'Comment bookkeeping tren #578'
+  url: https://github.com/ducthangho/tra-luat/issues/578#issuecomment-5761686575
+  trang_thai: DA_LAM
+- viec: 'Day ho so land len master'
+  qua: 'PR #601'
+  trang_thai: CHUA_XONG
+  ghi_chu: 'Merge #601 KHONG nam trong quyen uy quyen nay cap. Cho chu kho.'
+- viec: 'Dong issue #578'
+  trang_thai: CHUA_LAM
+  ghi_chu: 'Dong sau khi #601 len master. Dong truoc la dong mot packet co ho so land CHUA land —
+    dung hinh dang PROTOCOL:1079 cam.'
+- viec: 'No ky thuat packet nay SINH RA'
+  trang_thai: KHONG_CO
+  ghi_chu: 'Ban va khong them TODO, khong noi long ca nao, khong tat cong nao, khong cham ma
+    san pham.'
 
 con_mo:
+  doi_chung_doc_lap: 'Can mot phien KHAC doc lai ho so nay va doi chieu voi hien vat GitHub, de
+    bu cho VI_PHAM_VAI_TRO. CHUA CO. Chu kho quyet.'
   nha_lease_som: 'Lease windows-fixture-posix-r1-g1-claude con toi 2026-09-21T22:30:00Z nhung
-    phan GHI da xong. Packet #579 dang giu CUNG ops/lease_publish_test.py toi 19:48:00Z duoi chong
-    lan KHAI CO Y, va DINH_CHINH_2 noi thang write-set exclusion tren duong ay nay la "KY LUAT,
-    KHONG phai cong". Nha som bang bia mo hai chieu se go han the hai writer cho ho — dung viec
-    #570 da lam cho #578 luc 19:46Z ngay 20-09. CHUA LAM: doi chu kho.'
-  DINH_CHINH_3: 'Lease khai `assurance_target_vi_sao: cross_approved KHONG DAT DUOC — codex het
-    quota`. Codex da chay duoc luc 08:05Z. Cau ay loi thoi (du ket luan cuoi khong doi: van khong
-    phai cross_approved). CHUA SUA: phien executor khong tu sua lease de tu nang ho so cua minh.'
+    phan GHI da xong. #579 giu CUNG ops/lease_publish_test.py toi 19:48:00Z duoi chong lan KHAI
+    CO Y. Nha som bang bia mo hai chieu se go han the hai writer cho ho. CHUA LAM: doi chu kho.'
+  DINH_CHINH_3_cho_lease: 'Lease khai `assurance_target_vi_sao: cross_approved KHONG DAT DUOC —
+    codex het quota`. Codex da chay duoc luc 08:05Z. Cau ay loi thoi (ket luan cuoi khong doi:
+    van khong phai cross_approved). CHUA SUA.'
+  thu_hoi_do_tren_PR_601: 'Luot thu-hoi thu hai tren PR #601 DO vi "The job was not started
+    because recent account payments have failed". Job chay 2 giay, chua tung khoi dong; cung
+    check da XANH tren dung commit ay 27 phut truoc. Khong re-run duoc: manual_ci_budget 0.'
 
-chuoi_ho_so_dung_o_dau: 'Tep nay ghi nhan merge, cong hau merge xanh, va chot LANDED. No KHONG tu
-  sinh mat xich tiep theo. Hai viec o `con_mo` doi chi thi chu kho. Viec dong #578 nam trong
-  thao_tac_hau_merge_DUOC_PHEP va duoc lam cung luc voi bookkeeping.'
+DINH_CHINH_SAU_REVIEW:
+  nguon: 'Cross-review codex tren PR #601, 2026-09-21T14:33Z, ba finding P1.'
+  F1_vai_tro: 'DUNG. Da them khoi VI_PHAM_VAI_TRO. KHONG bia session_id land operator.'
+  F2_schema: 'DUNG. schema_version 2 -> 1; provider anthropic -> claude (enum §7 la
+    claude|codex|human|github-actions); them input_packet_generations, approver,
+    authorization_url, land_operator, pre_merge_checks, post_merge_checks, bookkeeping o TOP
+    LEVEL. Loi goc: chep hinh dang tep pr554 thay vi doc schema.'
+  F3_danh_tinh_cong: 'DUNG. hau_merge_gate cu chi co ten + gio. Nay moi muc mang run_id,
+    check_run_id, head_sha va URL, va tach rieng not_run khoi passed.'
+  KHONG_mat_gi: 'Moi gioi han va no con mo cua ban truoc duoc giu nguyen, khong muc nao bi bo khi
+    doi hinh dang — dung dieu codex canh bao.'
+
+chuoi_ho_so_dung_o_dau: 'Tep nay ghi nhan merge, cong hau merge, va chot LANDED kem mot vi pham
+  vai tro da khai. No KHONG tu sinh mat xich tiep theo. Moi viec o `con_mo` doi chi thi chu kho.'

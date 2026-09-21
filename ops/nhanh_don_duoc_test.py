@@ -32,6 +32,18 @@ class TinHieuChotCa(AssertionError):
     pass
 
 
+class TinHieuKhongDoDuoc(Exception):
+    """#593 M2 — TIEN DE cua phep do khong dung duoc => KHONG DO DUOC.
+
+    KHONG phai DAT, va KHONG phai "chot that bai". Ba trang thai chu khong hai:
+    mot ca khong do duoc thi phai noi the, chu khong duoc lam tron len DAT (loi
+    #401) cung khong duoc gia lam mot chot sai. No KHONG ke thua `TinHieuChotCa`
+    nen `chay_tu_kiem` xep no vao DO_KHAC — do la lop DUNG: ca do vi mot le
+    KHONG PHAI chot cua no. Nho M2 cua r1 va M6 cua r2, cha in nguyen thong diep
+    nay ra chu khong chi ten ca.
+    """
+
+
 def chot(dieu_kien, ten_ca: str = "") -> None:
     if not dieu_kien:
         raise TinHieuChotCa(f"chot cua ca {ten_ca} that bai")
@@ -47,6 +59,39 @@ MUTANT_ENV = "NHANH_DON_DUOC_MUTANT"
 LAN_THU_ENV = "NHANH_DON_DUOC_LAN_THU"
 NHAN_DAT, NHAN_DO_CHOT, NHAN_DO_KHAC = "DAT", "DO_CHOT", "DO_KHAC"
 GIET, KHONG_GIET, KHONG_DO_DUOC = "GIET", "KHONG_GIET", "KHONG_DO_DUOC"
+
+
+# #593 — TRAN lan rut lai. Voi khong gian 256 (tuc duoi dot bien
+# `entropy-giu-mot-byte`) xac suat CA 64 lan deu trung la (1/256)^64, tuc 0 tren
+# moi thang do thuc te. Voi khong gian 1 (bo sinh HANG) thi no CAN, va do la
+# duong duy nhat toi `TinHieuKhongDoDuoc` — chan tren ton tai de khong bao gio
+# co vong lap khong chan.
+TRAN_RUT_DAU_PHIEN = 64
+
+
+def _hai_dau_phien_phan_biet() -> tuple[str, str]:
+    """#593 M1 — HAI dau phien KHAC NHAU, do duoc thay vi cau may.
+
+    Benh: `r508` mo dau bang `sinh_dau_phien(), sinh_dau_phien()` roi dung ngay.
+    Tinh phan biet ay la TIEN DE cua ca — ca do rang `doc_kenh` tra KHONG_DO_DUOC
+    khi ban ghi mang dau phien KHAC — chu KHONG phai thu ca ay do. Duoi dot bien
+    `entropy-giu-mot-byte` khong gian tut xuong 256, nen 1/256 luot hai lan rut
+    TRUNG nhau; ban ghi hoa ra KHOP dau phien dang hoi, va `r508` chet vi mot le
+    VO CAN. Dung hinh dang TIN DUNG GIA ma kho nay dat ten, lan nay NAM BEN
+    TRONG mot ca test. Do 200 000 cap, hai luot: 0,3840% va 0,3615%; ly thuyet
+    1/256 = 0,3906%. Hau qua: `gate-registry` — mot REQUIRED CHECK — do ~1/256
+    luot tren MOI head, MOI nhanh.
+
+    Chua bang cach bien tien de NGAM thanh tien de DO DUOC, ba trang thai.
+    """
+    dau = sinh_dau_phien()
+    for _ in range(TRAN_RUT_DAU_PHIEN):
+        khac = sinh_dau_phien()
+        if khac != dau:
+            return dau, khac
+    raise TinHieuKhongDoDuoc(
+        f"khong rut duoc HAI dau phien PHAN BIET sau {TRAN_RUT_DAU_PHIEN} lan — "
+        "khong gian sinh qua hep, tien de cua r508 khong dung duoc")
 
 
 def sinh_dau_phien() -> str:
@@ -1021,7 +1066,28 @@ def r508_ban_ghi_luot_TRUOC_chi_khac_dau_phien(d: Path):
     TRUOC thi chot so ten mutant da bac no roi, nen go chot dau phien KHONG doi mau
     gi va ca tro thanh xanh-vo-nghia.
     """
-    ph_that, ph_khac = sinh_dau_phien(), sinh_dau_phien()
+    # #593 M1 — TIEN DE, khong phai thu ca nay do. Xem `_hai_dau_phien_phan_biet`.
+    try:
+        ph_that, ph_khac = _hai_dau_phien_phan_biet()
+    except TinHieuKhongDoDuoc as e:
+        # DO DUOC o luot chay dau, va no la MOT KHUYET TAT CUA CHINH BAN VA NAY:
+        # hai dot bien CO SAN — `dau-phien-thanh-moc-giay` va (moi) ha tran xuong
+        # 0 — lam bo sinh SUY BIEN, `TinHieuKhongDoDuoc` thoat ra, va bo phan hang
+        # xep no vao DO_KHAC = "chet vi loi VO CAN" = TIN DUNG GIA. Tuc ban va
+        # chong chap lai SINH ra dung hinh dang ma packet nay di chua.
+        #
+        # Phan biet phai giu cho ro: tran CAN co HAI nghia khac han.
+        #   · Duoi mot bo sinh NGAU NHIEN NHUNG HEP (khong gian 256, tuc dot bien
+        #     `entropy-giu-mot-byte`) tran KHONG BAO GIO can — (1/256)^64.
+        #   · Tran chi can khi bo sinh SUY BIEN (hang, hoac moc giay). Do khong
+        #     phai "toi khong do duoc" ma la CHINH phat hien r508 phai bao: mot bo
+        #     sinh khong cho noi hai dau phan biet la mot bo sinh HONG.
+        # Nen o DAY no phai ra DO_CHOT — chot cua CHINH ca nay.
+        #
+        # Trang thai THU BA van ton tai va van do duoc: no song o HOP DONG cua
+        # `_hai_dau_phien_phan_biet`, va `r527` do thang no. Cai bi cam la de no
+        # THOAT RA khoi r508 thanh mot loi vo can.
+        raise TinHieuChotCa(f"chot cua ca r508 that bai: bo sinh SUY BIEN — {e}") from None
     k = _kenh_tam(_du_ca(ph_khac, {"T1": NHAN_DO_CHOT})
                   + [_ban_ghi(ph_khac, dong_luot=True, rc=1)], d)
     tt, _ = doc_kenh(k, ph_that, "m", 1, ("T1",))
@@ -2406,6 +2472,87 @@ def r526_ma_nguon_khong_duoc_sinh_canh_bao_escape_sequence(d: Path):
     chot(_dem_canh_bao_escape(mau_ban, "<mau-ban>") >= 1, "r526")
 
 
+def r527_tien_de_hai_dau_phien_phai_do_duoc_ba_trang_thai(d: Path):
+    """#593 M3/A1-A3 — `_hai_dau_phien_phan_biet` phai co BA trang thai phan
+    biet duoc BANG DAU VAO, va chan tren phai CO THAT.
+
+    Ba o, moi o mot bo sinh khac nhau — neu hai o khong phan biet duoc bang dau
+    vao thi chung la bo TUONG DUONG va ta chi dang do MOT thu:
+      (1) bo sinh HANG, khong gian 1  => KHONG DO DUOC, khong DAT, khong treo
+      (2) chan tren do duoc bang SO LAN GOI nguon = 1 + TRAN (chot bang HANG SO,
+          khong bang chinh `TRAN_RUT_DAU_PHIEN` — chot theo bien la tu noi mot
+          dang thuc, dot bien ha tran xuong 0 se van "dung")
+      (3) khong gian 256, gieo TAT DINH => luon ra hai dau KHAC, 1 000 luot
+    """
+    m = _nap_ban_sao(d)
+
+    # (1) + (2) — bo sinh HANG, va DEM so lan goi.
+    dem = {"n": 0}
+
+    def hang():
+        dem["n"] += 1
+        return "DAU-PHIEN-HANG"
+
+    m.sinh_dau_phien = hang
+    try:
+        m._hai_dau_phien_phan_biet()
+    except m.TinHieuKhongDoDuoc as e:
+        chot("PHAN BIET" in str(e), "r527")        # noi RO vi sao, khong nhan tran
+    except m.TinHieuChotCa:
+        chot(False, "r527")   # A3: KHONG duoc gia lam mot chot sai
+    else:
+        chot(False, "r527")   # A1: KHONG duoc lang le tra ve mot cap TRUNG
+    # A1 — chan tren CO THAT: 1 lan rut dau + dung TRAN lan rut lai, khong hon.
+    # 65 viet bang HANG SO co chu dich: xem docstring.
+    chot(dem["n"] == 65, "r527")
+
+    # (3) — khong gian 256, gieo tat dinh. Dung `random` chu khong `secrets`:
+    # phep do nay phai LAP LAI DUOC, khong duoc doi theo luot chay.
+    import random as _r
+    rng = _r.Random(20260921)
+    m.sinh_dau_phien = lambda: f"{rng.randrange(256):02x}" * 16
+    for _ in range(1000):
+        a, b = m._hai_dau_phien_phan_biet()
+        chot(a != b, "r527")
+
+
+def r528_tien_de_khong_con_chap_duoi_chinh_dot_bien(d: Path):
+    """#593 A9 — CHOT DUY NHAT chung minh benh DA HET, va no phai co doi chung.
+
+    Phai chay duoi CHINH bo sinh cua dot bien `entropy-giu-mot-byte`. Duoi ma
+    thuong khong gian la 2**128 nen "0 lan trung" dung mot cach VO NGHIA: mot
+    phep do khong phan biet duoc "da chua" voi "chua tung benh" la mot phep do
+    RONG. Do la vi sao ca nay do HAI VE bang CUNG mot bo sinh:
+      (a) HINH DANG CU (hai lan rut doc lap) PHAI con chap — neu khong thi phep
+          do nay mu, va moi con so cua ve (b) vo nghia
+      (b) HINH DANG MOI (qua `_hai_dau_phien_phan_biet`) phai 0 lan
+
+    N = 100 000 va ty le 1/256 => ve (a) ky vong ~390 lan. Xac suat no ra 0 la
+    (255/256)**100000, tuc e**-390 — khong phai mot rui ro ta dang chay.
+    """
+    m = _nap_ban_sao(d)
+    N = 100_000
+    # Y HET `thay` cua muc `entropy-giu-mot-byte` trong DOT_BIEN_TU_KIEM.
+    m.sinh_dau_phien = lambda: secrets.token_hex(16)[-2:] * 16
+
+    cu = sum(1 for _ in range(N) if m.sinh_dau_phien() == m.sinh_dau_phien())
+    chot(cu > 0, "r528")        # (a) phep do CO RANG
+
+    moi = 0
+    for _ in range(N):
+        try:
+            a, b = m._hai_dau_phien_phan_biet()
+        except m.TinHieuKhongDoDuoc:
+            # Khong gian 256 ma VAN can tran la mot that bai cua CHINH ca nay,
+            # nen no phai ra DO_CHOT. De `TinHieuKhongDoDuoc` thoat ra thi bo
+            # phan hang xep vao DO_KHAC = "chet vi loi VO CAN" = TIN DUNG GIA,
+            # va mutant thanh `hong` du `dich` ghi dung ten. Da do that.
+            chot(False, "r528")
+        if a == b:
+            moi += 1
+    chot(moi == 0, "r528")      # (b) hai so BANG NHAU: 0 tren 100 000
+
+
 TU_KIEM = [
     ("r501", r501_tin_hieu_chot_khong_gia_mao_duoc, True),
     ("r502", r502_assert_ha_tang_khong_duoc_cap_lop_chot, True),
@@ -2433,6 +2580,8 @@ TU_KIEM = [
     ("r524", r524_chan_doan_cua_con_khong_duoc_mat_o_lop_phan_hang, True),
     ("r525", r525_nhanh_thu_ba_phai_noi_vi_sao_ca_khi_con_chet_truoc_khi_in, True),
     ("r526", r526_ma_nguon_khong_duoc_sinh_canh_bao_escape_sequence, True),
+    ("r527", r527_tien_de_hai_dau_phien_phai_do_duoc_ba_trang_thai, True),
+    ("r528", r528_tien_de_khong_con_chap_duoi_chinh_dot_bien, True),
 ]
 
 # ---- A6: MOI ca tu kiem phai co MOT dot bien rieng lam no DO --------------
@@ -2629,6 +2778,25 @@ DOT_BIEN_TU_KIEM = [
     # duoc dong cha, tuc loi khai "bi cat" cua o `suy-bien-dai` thanh SAI.
     ("chan-doan-noi-tran-ma-khong-doi-huong-cat", ("r525",),
      "TRAN_CHAN_DOAN = 400", "TRAN_CHAN_DOAN = 100000"),
+    # --- #593 --------------------------------------------------------------
+    # A1 — can tran ma LANG LE tra ve mot cap TRUNG thay vi khai KHONG DO DUOC.
+    # Chi giet r527: duoi bo sinh THAT (khong gian 256) duong `raise` gan nhu
+    # khong bao gio toi, nen r528 mu voi dot bien nay — do la ly do no la mot
+    # dot bien RIENG chu khong gop.
+    ("dau-phien-can-tran-ma-lang-le-tra-cap-trung", ("r527",),
+     "    raise TinHieuKhongDoDuoc(", "    return dau, dau\n    raise TinHieuKhongDoDuoc("),
+    # A9 — bo PHEP SO, tuc bo vong rut lai. Day la dot bien tai lap DUNG benh
+    # goc: `_hai_dau_phien_phan_biet` tro lai thanh hai lan rut doc lap.
+    ("dau-phien-bo-vong-rut-lai", ("r527", "r528"),
+     "        if khac != dau:", "        if True:"),
+    # A1 — ha tran xuong 0: chan tren khong con "tren" nua. r527 bat bang SO LAN
+    # GOI (chot theo HANG SO 65, khong theo bien), r528 bat vi khong gian 256 ma
+    # van can tran.
+    # `dich` co r508: ha tran xuong 0 lam moi bo sinh thanh "suy bien" duoi mat
+    # `_hai_dau_phien_phan_biet`, nen r508 cung chet — bang CHOT cua chinh no, sau
+    # khi da sua duong thoat DO_KHAC. Khai du BA ten la khai CHAT HON.
+    ("dau-phien-ha-tran-xuong-khong", ("r508", "r527", "r528"),
+     "TRAN_RUT_DAU_PHIEN = 64", "TRAN_RUT_DAU_PHIEN = 0"),
     ("bo-chuan-hoa-ban-sao", ("r523",),
      "    ban_sao = Path(ban_sao).resolve()",
      "    pass"),
@@ -2803,8 +2971,8 @@ NHOM_BAT_BUOC = frozenset({"r501", "r502", "r503", "r504", "r505", "r506",
                            "r507", "r508", "r509", "r510", "r511", "r512",
                            "r513", "r514", "r515", "r516", "r517", "r518",
                            "r519", "r520", "r521", "r522", "r523", "r524",
-                           "r525", "r526"})
-SAN_NHOM = 26
+                           "r525", "r526", "r527", "r528"})
+SAN_NHOM = 28
 
 
 TRAN_CHAN_DOAN = 400

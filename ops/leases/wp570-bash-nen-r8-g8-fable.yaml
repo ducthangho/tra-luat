@@ -67,6 +67,18 @@ XUNG_DOT_LOI_ICH: 'KHAI TRUOC. Ban va dang nam trong #581 do phien CLAUDE viet (
   o phan ay. `assurance_target` giu `human_audited`: doi executor KHONG lam Fable tu duyet duoc.
   "Toi approve" trong chi thi nghia la CODEX HET FINDING cong CHU KHO NGHIEM THU.'
 
+da_bi_thay_the: wp570-bash-nen-r9-g9-fable
+da_bi_thay_the_vi_sao: 'Ve THU NHAT cua dau hai chieu. Chu kho quyet THU HEP N17: danh sach tep
+  la INDEX (`git ls-files --cached`), khong hon — de giet CA LOP "phan quyet phu thuoc trang
+  thai LOCAL cua may" bang KIEN TRUC thay vi va mat thu tu. Doi tieu chi nghiem thu =>
+  `docs/PROTOCOL_DA_PHIEN.md` §3.2 doi revision moi, generation moi.
+  g8 VAN CON HAN (het 2026-09-22T00:20:00Z) va VAN DANG GIU ba duong — do 2026-09-21T18:19Z,
+  rc doc TRUC TIEP: ops/bash_nen.py rc=11 · ops/cong_cu.py rc=11 · ops/cong_cu_test.py rc=11,
+  deu NGUOI_GIU 1 la g8. Nen day la mot lan THAY THE THAT.
+  DA DEM REF: tep lease g8 song tren DUNG MOT nhanh (refs/heads/ops/cap-lease-570-g8 va ban
+  theo doi cua chinh no), nen MOT dau la du. Dem lai moi lan, khong suy tu ca khac.
+  `_kiem_bia_mo` doc tu REF chu khong doc cay lam viec => HAI lan day, khong phai mot.'
+
 thay_the_cho: wp570-bash-nen-r7-g7-claude
 thay_the_cho_vi_sao: 'Dau HAI CHIEU. g7 DA mang dong `da_bi_thay_the: wp570-bash-nen-r8-g8-fable`
   truoc khi lease nay di qua `check` — commit 9cdfc2c tren ops/cap-lease-570-g7, day rieng mot lan.

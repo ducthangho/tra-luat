@@ -79,8 +79,8 @@ trang_thai_ban_ghi: 'DA CAP 2026-09-21T13:55:15Z (SAU merge — xem uy_quyen.aut
   duong DA DO DUOC tu log job va artifact (xem danh_tinh_CI_10_2_2). Uy quyen ben la PHE CHUAN HAU KIEM (xem
   authorization_url_BAN_CHAT). Vong lap cross-review DA DUNG tai b94182b + ban va nay vi cham stop condition §12
   (SAU loi goi codex tren tran HAI — xem VI_PHAM_3_VUOT_TRAN_TRUC_LOI_GOI), KHONG phai vi da approve; CHUA co
-  cross_approved. Ban ghi nay DA DUOC SUA chin lan sau review tren PR #601 — xem DINH_CHINH_SAU_REVIEW, _VONG_2,
-  _VONG_3, _VONG_4, _VONG_5, _VONG_6, _VONG_7, _VONG_8 (hai vong cuoi KHONG co codex: chi ra soat Fable; _VONG_8 va 5 finding
+  cross_approved. Ban ghi nay DA DUOC SUA muoi lan sau review tren PR #601 — xem DINH_CHINH_SAU_REVIEW, _VONG_2,
+  _VONG_3, _VONG_4, _VONG_5, _VONG_6, _VONG_7, _VONG_8, _VONG_9, _VONG_10 (bon vong cuoi KHONG co codex: chi ra soat Fable; _VONG_8 va 5 finding
   cua vong 7 va doi luat cam token sang luat DUNG).'
 
 # ══════════════════════ VI PHAM VAI TRO — DOC TRUOC ══════════════════════
@@ -1011,9 +1011,16 @@ con_mo:
       m55_khong_dai: 'Bon luot lien tiep cung bo bien_nhan_v2 tren b94182b / a479699 / 85f974b / e6eabed: dat / dat / DO /
         dat = 3 dat, 1 do; cong phep do tai cho hai ve (cua phien chinh) delta 0. Ten giu nguyen LECH_CHUA_RO_NGUYEN_NHAN:
         khong dai KHONG co nghia la da biet nguyen nhan.'
-      gate_registry_bi_huy_hai_lan: 'gate-registry bi HUY o b94182b (18:12:39Z) va 85f974b (19:12:28Z) vi cu day ke tiep
-        thay the luot dang chay; a479699 la head DUY NHAT xanh tron bon cong. Moi vong va giet cong dang chay cua head
-        truoc — do la chi phi cua nhip va day, ghi de chu kho thay.'
+      gate_registry_bi_huy_LIET_KE_khong_dem_tran: 'LIET KE thay vi DEM, de con so khong tu loi thoi:
+        b94182b check-run 106447555242 CANCELLED 18:12:39Z · 85f974b 106472329982 CANCELLED 19:12:28Z ·
+        e6eabed 106477801432 CANCELLED 19:34:07Z. Tinh den head b246aac, do ~20:0xZ.
+        NGUYEN NHAN DO DUOC (vong 9): gate-registry chay ~25-27 phut — a479699 18:12:50->18:38:03 = 25m13s;
+        b246aac 19:34:17->20:00:46 = 26m29s. Cu day cach nhau DUOI cua so ay moi giet cong dang chay cua head
+        truoc; cach xa hon thi KHONG (85f974b day +45 phut sau a479699, giet 0 cong). Tuc day la tao tac cua
+        NHIP DAY, KHONG phai tinh chat cua quy trinh.
+        XANH TRON BON CONG: trong bon head b94182b..e6eabed thi a479699 la duy nhat; tinh ca b246aac thi co HAI
+        (a479699 18:38:03Z, b246aac 20:00:46Z). b246aac xanh tron vi khong co cu day nao sau no trong cua so
+        27 phut — dung la bang chung cho nguyen nhan tren.'
     da_lam_gi_trong_luc_do: 'DUNG day. Moi cu day luc ay chi sinh them mot luot toan skipped,
       lam nhieu ho so ma khong them mot phep do nao. KHONG re-run tay: manual_ci_budget 0.'
     KHONG_khai: 'Muc nay KHONG khai (1) gate-registry 106477801432 cua head e6eabed — con chay luc do ~19:3xZ, doc sau
@@ -1022,6 +1029,38 @@ con_mo:
       dien_bien_do_duoc. Moi con so o day la CI cua PR #601 (PR mang ho so), KHONG phai cong hau merge cua packet #578
       (714f36e6 / run 35581617584) va KHONG phai bang chung cho `landed` cua #578; cong DO o 85f974b cung KHONG doi muc bao
       dam nao (khong len, khong xuong).'
+
+DINH_CHINH_SAU_REVIEW_VONG_10:
+  nguon: 'Vong 9 cua vong lap, tren head b246aac. KHONG co luot codex (da cham stop condition §12).
+    Phep do: executor Fable 5.1 — CUNG HO Anthropic voi executor, soat NOI BO, KHONG phai cross-review.
+    Ket qua: P1 x1, P2 x3, P3 x2.'
+  P1_so_dong_trong_thong_diep_commit: 'CHAP NHAN, lop A. Thong diep commit b246aac khai tep 1304 dong; do
+    lai `git show b246aac:<tep> | wc -l` = 1330. Lech dung 26 = kich thuoc khoi VONG_9 ma phien chinh chen
+    SAU khi da soan thong diep roi KHONG do lai. Sai su that do duoc => P1, du tac dong thap nhat (metadata,
+    khong cham muc bao dam). KHONG viet lai lich su; dinh chinh tai day. Goc chung voi P2_1/P2_3/P3_2:
+    viet -> them -> khong do lai.'
+  P2_1_dem_tran_tu_loi_thoi: 'CHAP NHAN. "Huy HAI lan" DUNG luc commit 19:33:26Z; lan thu ba (e6eabed
+    106477801432) xay ra 19:34:07Z, tuc 41 giay SAU. Da doi tu DEM TRAN sang LIET KE ID + gio.'
+  P2_2_thieu_pham_vi: 'CHAP NHAN, lop B. Cau "a479699 la head DUY NHAT xanh tron" co pham vi o mot cho
+    nhung thieu o hai cho khac; nay b246aac cung 4/4. Da them pham vi va ghi ca hai head.'
+  P2_3_header_sua_nua_chung: 'CHAP NHAN, lop B. Header doi so lan nhung danh sach van dung o _VONG_8 va van
+    ghi "hai vong cuoi khong co codex" trong khi da la ba. Da sua ca hai.'
+  P3_1_thong_diep_commit_trich_cum_vua_loai: 'CHAP NHAN, lop B, NGOAI write set. Thong diep commit b246aac
+    trich lai chinh cum vua bi loai khoi tep vi "goi y cau tao", ngay trong cau noi ve viec loai no. Cung
+    hinh dang "trich cai cam trong cau noi ve cai cam" nhung muc VO HAI: khong phai token, khong kich hoat
+    gi (do: 0 su kien mention, 0 comment bot sau 18:13:05Z). Khong sua lich su. Ghi no.'
+  P3_2_dem_truoc_khi_do: 'CHAP NHAN, lop B, ngoai write set. Thong diep commit b246aac dem "ba trong bon
+    vong" trong khi luc viet moi do duoc HAI; cai thu ba con `conclusion None` theo chinh KHONG_khai cua tep.
+    Sau do thanh dung — nhung dung-sau-khi-doan KHONG phai da-do. Ghi no.'
+  TIEN_DE_SAI_DA_BI_BAC: 'Phien chinh tung ket luan "moi cu day giet mot cong => voi rieng du kien ay vong
+    lap KHONG KET THUC DUOC", va dung no de de nghi DUNG vong lap som cong doi luat xu ly P2/P3 thanh
+    chi-ghi-no. Executor bac bang phep do thoi luong cong va khoang cach cac cu day. Ket luan dung: vong lap
+    KET THUC DUOC bang cach doi NHIP (cho cong xong roi hay day), khong can doi luat.
+    DANG GHI VI: executor da bac mot lap luan THIEN VE LAM IT HON — tuc no khong chieu theo huong de chiu.
+    Va lop loi la "ket luan tu mot phep do DUNG nhung PHAM VI qua rong", cung ho voi nhieu muc truoc trong
+    chinh ho so nay. Ban va vong 10 duoc day luc moi cong cua b246aac da xong (20:00:46Z) => ton 0 cong.'
+  KHONG_mat_gi: 'LANDED van CHUA. LANDED_KHONG_XAC_LAP giu 19, CON_THIEU_DE_GOI_LANDED giu 9. Khong nang
+    muc bao dam nao. Khong khai cross_approved, khong khai human_audited.'
 
 DINH_CHINH_SAU_REVIEW_VONG_9:
   nguon: 'Vong 8 cua vong lap, tren head e6eabed. KHONG co luot codex nao — da cham stop condition §12
@@ -1043,8 +1082,10 @@ DINH_CHINH_SAU_REVIEW_VONG_9:
     — b94182b DAT, a479699 DAT, 85f974b DO, e6eabed DAT => 3/1. Cong phep do tai cho HAI VE trong MOT
     lenh (origin/master va 85f974b) deu 74/74 TONG: DAT, delta 0. KHONG dai KHONG dong nghia DA BIET
     NGUYEN NHAN — ten giu nguyen LECH_CHUA_RO_NGUYEN_NHAN, va KHONG goi la "chap chon".
-    GIA CUA NHIP VA DAY: moi cu day giet cong dang chay cua head truoc; gate-registry bi huy HAI lan;
-    a479699 la head DUY NHAT xanh tron bon cong. Do la chi phi do duoc cua viec va nhieu vong lien tiep.'
+    GIA CUA NHIP VA DAY (DA DUOC THU HEP O VONG 10): luc viet ghi "moi cu day giet cong dang chay" va
+    "bi huy HAI lan" — DUNG tai thoi diem ay (19:33:26Z) nhung PHAM VI qua rong. Vong 9 do duoc: cong chay
+    ~25-27 phut, nen chi cu day trong cua so ay moi giet. Xem gate_registry_bi_huy_LIET_KE_khong_dem_tran
+    va DINH_CHINH_SAU_REVIEW_VONG_10.TIEN_DE_SAI_DA_BI_BAC.'
   KHONG_mat_gi: 'LANDED van CHUA. LANDED_KHONG_XAC_LAP giu 19, CON_THIEU_DE_GOI_LANDED giu 9. Khong
     nang muc bao dam nao (khong len, khong xuong). Khong khai cross_approved, khong khai human_audited.
     Kiem sau khi ghi, ca ba = 0: mention bot / du chuoi kich hoat / mo ta cau tao.'

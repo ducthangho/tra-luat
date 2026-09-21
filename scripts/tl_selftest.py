@@ -25358,8 +25358,33 @@ def run() -> int:
 
         # (c) Oracle thoả hoàn toàn ⇒ `survived`. Thiếu vế này thì một bộ phân hạng khai
         # `killed` cho MỌI thứ vẫn xanh, và mọi con số đột biến của packet thành vô nghĩa.
+        if _r378_classify(*_R378_REGEX, ".claude/dev/launcher.py:1",
+                          lambda _r: None) != "survived":
+            return False
+
+        # (d) CÙNG THÔNG ĐIỆP, KHÁC LỚP ⇒ vẫn phải là TÍN DỤNG GIẢ.
+        #
+        # Ba vế trên vẫn CHƯA đủ, và cross-review lượt 3 chứng minh bằng đột biến `m10`:
+        # bắt mọi `Exception` rồi chỉ nhìn chuỗi `R378_EXPECTATION_MISMATCH` — **sống sót
+        # 1715/1715**. Lọt vì cả ba vế trên đều dùng THÔNG ĐIỆP KHÁC với oracle đúng
+        # (`JUNCTION_CREATE_FAILED`, `R378_MUTATION_ANCHOR_COUNT`), nên không vế nào phân
+        # biệt được "bắt đúng LỚP" với "bắt mọi thứ rồi so CHUỖI".
+        #
+        # Đây là lần thứ BA cùng một slug (`phan-hang-giet-gia-thieu-doi-chung`): lượt 2
+        # đóng `m7`/`m9`, lượt 3 phơi `m10`. Mỗi lần vá đúng chỗ được chỉ rồi còn một cửa
+        # không ai chỉ — đúng bài học "vá đúng chỗ được chỉ rồi bỏ sót đường thứ ba", và
+        # lần này chính nó lặp ba lần.
+        #
+        # Vế này lấy ĐÚNG thông điệp mà oracle đúng sinh ra, rồi ném lại bằng một lớp KHÁC.
+        # Phân hạng theo LỚP ⇒ `false_credit:RuntimeError` (đúng). Phân hạng theo CHUỖI ⇒
+        # `killed` (sai) ⇒ ca ĐỎ. Đó là thứ duy nhất tách được hai cách cài đặt ấy.
+        def _oracle_cung_thong_diep_khac_lop(_r):
+            try:
+                _r378_expect(False)
+            except _R378SaiKyVong as exc:
+                raise RuntimeError(str(exc)) from None
         return _r378_classify(*_R378_REGEX, ".claude/dev/launcher.py:1",
-                              lambda _r: None) == "survived"
+                              _oracle_cung_thong_diep_khac_lop) == "false_credit:RuntimeError"
     _t110("r378_chet_vi_moi_truong_khong_la_giet", _c378_chet_vi_moi_truong_khong_la_giet)
 
     def _c378_giu_con_tro_cham_gach_cheo():

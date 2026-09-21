@@ -913,8 +913,22 @@ def _tien_kiem_mien_dang(lease) -> None:
     `packet_issue: true` lọt phép kiểm kiểu ngây thơ rồi thành `issues/True` trên URL.
     **KHÔNG ĐO:** chưa có phép đo cho riêng ca `bool`; nó suy từ cùng cơ chế với ca chuỗi.
 
-    Mã thoát giữ `RC_NOI_DUNG` (8) đúng bằng mã `kiem()` vốn trả cho cùng các ca ấy, nên
-    đường KHÔNG-CÓ-DẤU không đổi mã thoát (M3).
+    HÀM NÀY KHÔNG PHÁN, NÓ CHỈ LÀM PHÉP DÒ CÂM. `Chan` nó ném được `_do_dau_da_dang` bắt
+    lại và nuốt; hệ quả là dữ liệu thiếu miền làm phép dò NHƯỜNG quyền phán cho chuỗi
+    `kiem()` cũ, đúng thứ tự cũ, đúng mã thoát cũ (M3).
+
+    BẢN TRƯỚC ĐẶT HÀM NÀY NGOÀI `try` VÀ ĐÓ LÀ MỘT HỒI QUY THẬT, do cross-review codex
+    lượt 1 bắt (`unposted-error-precedence-changes`). Khi ấy `Chan(8)` ở đây thoát ra khỏi
+    cả `kiem_github`, cướp quyền phán của `kiem()`. Phản chứng chạy được: một lease CHƯA
+    ĐĂNG vừa tự cấp (`kiem()` trả `rc=4`) vừa có `packet_issue` sai kiểu —
+
+        nền `origin/master`   -> rc=4   (`kiem()` bắt authority trước)
+        bản cũ của packet này -> rc=8   (tiền kiểm bắn trước, ĐỔI thứ tự lỗi)
+        bản này               -> rc=4   (nhường lại, khớp nền)
+
+    Docstring cũ khai "không đổi mã thoát (M3)" và câu ấy ĐÚNG khi lease chỉ mắc MỘT lỗi,
+    SAI khi mắc hai. `t177` chỉ dựng từng lỗi riêng nên không bắt được. `t180` khoá ca hai
+    lỗi đồng thời.
     """
     if not isinstance(lease, dict):
         raise Chan(RC_NOI_DUNG, "tiền kiểm: lease không phải ánh xạ")
@@ -935,13 +949,19 @@ def _do_dau_da_dang(lease: dict) -> None:
     Vì sao nuốt mọi ngoại lệ KHÁC ở đây mà không phải là fail-open: hàm này KHÔNG phải một
     cổng, nó là một phép DÒ. Nó chỉ có quyền nói "đã đăng rồi, bỏ qua"; nó không có quyền
     nói "đạt". Mọi phán quyết từ chối vẫn do chuỗi cũ đưa ra, nguyên vẹn.
+
+    `_tien_kiem_mien_dang` nằm TRONG `try` là có chủ đích, và bản trước để nó ngoài — xem
+    docstring hàm ấy. Nuốt `Chan` của tiền kiểm KHÔNG làm mất răng của nó: răng của tiền
+    kiểm là chặn phép dò CHẠM MẠNG rồi trả `rc=9` cho một lease hỏng miền, và răng ấy đo
+    bằng SỐ LỜI GỌI GitHub (`t178`), không đo bằng mã thoát.
     """
-    _tien_kiem_mien_dang(lease)
     try:
+        _tien_kiem_mien_dang(lease)
         _kiem_comment_da_co(_repo_github(), lease)
     except Chan as c:
         if c.ma == RC_DA_DANG:
             raise
+        return
     except Exception:  # noqa: BLE001 — xem docstring: dò, không phán
         return
 

@@ -7148,8 +7148,15 @@ def t178_tien_kiem_mien_chan_TRUOC_khi_cham_mang():
     Nên ca này đo thêm SỐ LỜI GỌI GitHub, thứ mà mã thoát không phân biệt được: tiền kiểm
     chặn trước khi chạm mạng ⇒ **0** lời gọi. Đó là răng riêng của ca thứ ba.
 
-    KHÔNG ĐO: riêng ca `packet_issue: True` (`bool` là `int` trong Python) chưa có phép đo;
-    nó suy từ cùng cơ chế với ca chuỗi, và suy không phải đo.
+    CA `bool` NAY DA DO — và nó là ca DUY NHẤT giữ răng cho chốt `isinstance(so, bool)`.
+    Cross-review codex lượt 1 dựng đột biến G (gỡ đúng điều kiện `bool` ấy, giữ nguyên mọi
+    thứ khác) và nó **SỐNG SÓT 172/172**: ba ca cũ đều không chạm nhánh bool, vì với chuỗi
+    `"55"` thì `not isinstance(so, int)` đã đủ ném. Đó là khoảng TRỐNG của bộ test — đúng
+    thứ docstring bản trước tự khai là "KHÔNG ĐO" rồi để nguyên.
+
+    `packet_issue: True` lọt phép kiểm kiểu ngây thơ vì `isinstance(True, int)` là `True`,
+    rồi thành `issues/True/comments` trên URL. Đột biến G làm ca này ĐỎ qua SỐ LỜI GỌI
+    (0 -> 1), không qua mã thoát — mã thoát vẫn là 8 ở cả hai bên.
     """
     thieu_id = _lease_579()
     del thieu_id["lease_id"]
@@ -7158,7 +7165,8 @@ def t178_tien_kiem_mien_chan_TRUOC_khi_cham_mang():
 
     for nhan, lease in (("thiếu `lease_id`", thieu_id),
                         ("thiếu `packet_issue`", thieu_so),
-                        ("`packet_issue` sai kiểu", _lease_579(packet_issue="55"))):
+                        ("`packet_issue` sai kiểu", _lease_579(packet_issue="55")),
+                        ("`packet_issue` là `bool`", _lease_579(packet_issue=True))):
         ma, goi = _do_kiem_github(lease, co_dau=True)
         chot(ma == RC_NOI_DUNG,
              f"{nhan}: phải cho rc={RC_NOI_DUNG}, được rc={ma}. "
@@ -7220,6 +7228,41 @@ def t179_do_dau_KHONG_DO_DUOC_thi_nhuong_lai_cho_chuoi_cu():
          f"ngoại lệ lạ từ phép dò cũng phải nhường cho `kiem()` (rc={RC_TU_CAP}), được rc={ma}. "
          f"Nhánh nuốt của `_do_dau_da_dang` tồn tại đúng để chuyện này KHÔNG thành một phán "
          f"quyết; bỏ nó đi thì một lỗi lạ sẽ thoát ra khỏi cổng dưới dạng vỡ trần.")
+
+
+@ca
+def t180_hai_loi_cung_luc_thi_tien_kiem_KHONG_duoc_cuop_quyen_phan():
+    """M3 — đường KHÔNG-CÓ-DẤU phải giữ ĐÚNG THỨ TỰ LỖI của nền, kể cả khi lease mắc HAI lỗi.
+
+    CA NÀY SINH RA TỪ MỘT HỒI QUY THẬT, do cross-review codex lượt 1 bắt
+    (`unposted-error-precedence-changes`). Bản trước của packet này đặt
+    `_tien_kiem_mien_dang` NGOÀI `try` của `_do_dau_da_dang`, nên `Chan(8)` của tiền kiểm
+    thoát ra khỏi cả `kiem_github` và phán thay `kiem()`.
+
+    Một lỗi thì không thấy. HAI lỗi mới thấy — lease vừa TỰ CẤP (`kiem()` trả `rc=4`) vừa
+    có `packet_issue` SAI KIỂU (tiền kiểm trả `rc=8`):
+
+        nền `origin/master`   -> rc=4   `kiem()` bắt authority trước
+        bản trước             -> rc=8   tiền kiểm bắn trước — ĐỔI THỨ TỰ LỖI
+        bản này               -> rc=4   tiền kiểm nhường lại, khớp nền
+
+    `t177` không bắt được vì nó dựng từng lỗi RIÊNG; một cổng đúng trên mỗi lỗi đơn lẻ vẫn
+    có thể sai về THỨ TỰ khi hai lỗi gặp nhau. Cùng họ bài học "vá đúng chỗ được chỉ rồi bỏ
+    sót đường thứ ba".
+
+    ĐỘT BIẾN LÀM CA NÀY ĐỎ: đưa `_tien_kiem_mien_dang` trở ra NGOÀI `try`, hoặc bỏ `return`
+    ở nhánh `Chan` không phải `RC_DA_DANG` để tiền kiểm ném lại.
+    """
+    lease = _lease_579(granted_by="codex", packet_issue="55")
+    ma, goi = _do_kiem_github(lease, co_dau=False)
+    chot(ma == RC_TU_CAP,
+         f"lease vừa tự cấp vừa sai kiểu `packet_issue`: phải giữ mã của NỀN là "
+         f"rc={RC_TU_CAP} (`kiem()` bắt authority trước), được rc={ma}. "
+         f"rc={RC_NOI_DUNG} nghĩa là tiền kiểm miền đã cướp quyền phán của `kiem()` — "
+         f"đúng hồi quy mà M3 khai là không có.")
+    chot(goi == 0,
+         f"tiền kiểm vẫn phải chặn TRƯỚC khi chạm mạng, nhưng đã có {goi} lời gọi GitHub. "
+         f"Nhường quyền PHÁN không có nghĩa là nhường luôn quyền DÒ.")
 
 
 CO_CHI_CA = "--chi-ca="   # `--chi-ca=t01_` ⇒ chỉ chạy ca có tên bắt đầu bằng tiền tố ấy (M3 packet #504 dùng để sinh lượt con rẻ)

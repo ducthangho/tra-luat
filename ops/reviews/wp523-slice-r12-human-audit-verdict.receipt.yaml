@@ -135,8 +135,14 @@ anchor:
     Chay HAI lan, tren ca cap CU va cap MOI, de con so khong bi cu:
     (cu)  `git merge --squash 82c8deb` tu a1bbdc1 => cf8c04b2, mot cha duy nhat;
           `merge-base --is-ancestor cc9fec2d cf8c04b2` => rc=1;
-    (moi) `git merge --squash b8031e7` tu a1bbdc1 => e13b6ac4, mot cha duy nhat;
-          `merge-base --is-ancestor 7da12e6f e13b6ac4` => rc=1;
+    (moi) `git merge --squash <head luc do>` tu a1bbdc1 => mot cha duy nhat;
+          `merge-base --is-ancestor 7da12e6f <squash>` => rc=1.
+          Lan do nay chay tren head b8031e7, roi head doi (mot lan `--amend` de chinh chinh khoi
+          nay). KHONG chay lai va KHONG can chay lai: thu phep do chung minh la "7da12e6f khong
+          phai to tien cua BAT KY squash nao cua nhanh nay len a1bbdc1", va khong commit nao them
+          vao nhanh khoi phuc duoc quan he ay — squash theo dinh nghia bo het lich su trung gian.
+          Ghi ro head da dung thay vi lam tron, vi mot con so khong kem DIEU KIEN DO se troi ma
+          khong ai biet.
     ca hai lan:
     `ops/bien_nhan_v2.py --root .` tren cay ay => rc=1, "132 DAT v2 · 1 vi pham · tong 186",
     TONG: DO, voi dung mot dong: "commit cc9fec2d5007... CO THAT nhung KHONG phai to tien cua HEAD".

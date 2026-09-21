@@ -2977,6 +2977,86 @@ def r536_con_khong_duoc_doat_so_do_cua_cha(d: Path):
     chot("CHA BO" not in m._goi_chan_doan("stderr binh thuong " + NHAN_GIA), "r536")
 
 
+def r537_chuan_hoa_than_khong_duoc_sua_noi_dung(d: Path):
+    r"""#568 r5 / cross-review luot 3 tren 7d0b012 — go dau phan cach, khong `lstrip`.
+
+    Ban truoc dung `lstrip(" —-")` — mot TAP KY TU, nen no an het dau cach va
+    dau gach o dau than KE CA khi chung la NOI DUNG. Do duoc truoc khi va:
+
+        "TU KIEM r1: DO_CHOT — -42"            -> than "42"       (mat dau AM)
+        "TU KIEM r1: DO_CHOT — --gio-cao-nhat" -> than "gio-cao-nhat"
+
+    Mot con so doi dau la SUA NOI DUNG chan doan. BON o:
+      (1) dau phan cach ` — ` bi go, than con NGUYEN (ke ca dau am)
+      (2) dau phan cach ` - ` (dang cac ca dung) cung duoc go, va CHI MOT
+      (3) than khong co dau phan cach thi KHONG bi cat xen
+      (4) HAI CHIEU cua `CHUAN_HOA_THAN_BO_DONG_TRANG_VA_KHOANG_TRANG`
+    """
+    m = _nap_ban_sao(d)
+    L = chr(10)
+
+    # (1) dau AM phai con
+    t1 = m._khoi_chan_doan("TU KIEM r1: DO_CHOT — -42" + L + "TU KIEM: 0/1", "DO_CHOT")[0][1]
+    chot(str(t1) == "-42", "r537")
+    t1b = m._khoi_chan_doan("TU KIEM r1: DO_CHOT — --gio-cao-nhat" + L + "TU KIEM: 0/1",
+                            "DO_CHOT")[0][1]
+    chot(str(t1b) == "--gio-cao-nhat", "r537")
+
+    # (2) dang ` - ` cung duoc go, va CHI MOT dau
+    t2 = m._khoi_chan_doan("TU KIEM r1: DO_KHAC - -7" + L + "TU KIEM: 0/1", "DO_KHAC")[0][1]
+    chot(str(t2) == "-7", "r537")
+
+    # (3) khong co dau phan cach thi khong duoc cat xen ky tu nao
+    t3 = m._khoi_chan_doan("TU KIEM r1: DO_KHAC:x" + L + "TU KIEM: 0/1", "DO_KHAC")[0][1]
+    chot(str(t3) == ":x", "r537")
+
+    # (4) HAI CHIEU: dong TRANG trong than bi loai va KHONG dem — do la LOI KHAI
+    t4 = m._khoi_chan_doan("TU KIEM r1: DO_KHAC - a" + L + "" + L + "b" + L + "TU KIEM: 0/1",
+                           "DO_KHAC")[0][1]
+    bi_bo = ("" not in str(t4).split(L)) and t4.bo_qua == 0
+    chot(bi_bo == m.CHUAN_HOA_THAN_BO_DONG_TRANG_VA_KHOANG_TRANG, "r537")
+
+
+def r538_bien_phai_cua_nhan_phai_co(d: Path):
+    r"""#568 r5 / cross-review luot 3 tren 7d0b012 — `DO_CHOT` thieu bien PHAI.
+
+    `ranh` cu bat `TU KIEM r\d+: DO_CHOT` KHONG co bien phai, nen mot dong THAN
+    la `TU KIEM r512: DO_CHOT_fake-root` cung dong khoi va bien mat IM LANG. Do
+    duoc truoc khi va: than chi con 'first', `bo_qua == 0`.
+
+    Cung the voi ba ho kia: ban ghi THAT cua chung con dai hon hinh ma luot 2 da
+    siet (`MUTANT: giet = <so> `, `CASE T<n>: DO - `,
+    `DOT BIEN TU KIEM <ten>: NEO KHONG DUY NHAT `), nen mot dong than chi trung
+    phan DAU van lot qua. Ca nay do CA BON, moi ho mot ve GIA.
+    """
+    m = _nap_ban_sao(d)
+    L = chr(10)
+    gia = [
+        "TU KIEM r512: DO_CHOT_fake-root",
+        "MUTANT: giet = root-cause",
+        "CASE T6: DO root-cause",
+        "DOT BIEN TU KIEM abc: root-cause",
+    ]
+    for dong in gia:
+        t = m._khoi_chan_doan(
+            "TU KIEM r506: DO_KHAC - first" + L + dong + L + "TU KIEM: 0/1" + L, "DO_KHAC")[0][1]
+        chot(dong in str(t), "r538")
+        chot(t.bo_qua == 0, "r538")
+    # chieu nguoc — BAN GHI THAT cua ca bon ho VAN phai dong khoi
+    that = [
+        "TU KIEM r512: DAT",
+        "MUTANT: giet = 1 · khong giet = 0",
+        "CASE T6: DO - gia mao",
+        "DOT BIEN TU KIEM abc: NEO KHONG DUY NHAT (0)",
+    ]
+    for dong in that:
+        t = m._khoi_chan_doan(
+            "TU KIEM r506: DO_KHAC - first" + L + dong + L + "chi tiet" + L
+            + "TU KIEM: 0/1" + L, "DO_KHAC")[0][1]
+        chot("chi tiet" not in str(t), "r538")
+        chot(t.bo_qua == 1, "r538")
+
+
 TU_KIEM = [
     ("r501", r501_tin_hieu_chot_khong_gia_mao_duoc, True),
     ("r502", r502_assert_ha_tang_khong_duoc_cap_lop_chot, True),
@@ -3014,6 +3094,8 @@ TU_KIEM = [
     ("r534", r534_nhan_bo_dong_phai_song_qua_tran, True),
     ("r535", r535_moi_ho_tien_to_deu_phai_dung_hinh, True),
     ("r536", r536_con_khong_duoc_doat_so_do_cua_cha, True),
+    ("r537", r537_chuan_hoa_than_khong_duoc_sua_noi_dung, True),
+    ("r538", r538_bien_phai_cua_nhan_phai_co, True),
 ]
 
 # ---- A6: MOI ca tu kiem phai co MOT dot bien rieng lam no DO --------------
@@ -3180,19 +3262,16 @@ DOT_BIEN_TU_KIEM = [
     # #568 r4 — `dich` len ("r524","r530"): tu khi `r530` do NHANH DO_KHAC o LOP
     # CHA, dot bien vut than chan doan giet THAT ca hai. Chet bang DO_CHOT, chot
     # cua chinh chung.
-    ("chan-doan-chi-lay-ten-ca", ("r524", "r530", "r531", "r534", "r536"),
-     '            khoi.append([m.group(1), [m.group(2).lstrip(" \u2014-").strip()], 0])',
+    ("chan-doan-chi-lay-ten-ca", ("r524", "r530", "r531", "r534", "r536", "r537"),
+     '            khoi.append([m.group(1), [_go_dau_phan_cach(m.group(2))], 0])',
      '            khoi.append([m.group(1), [""], 0])'),
-    ("chan-doan-dung-o-dong-dau", ("r524", "r531", "r533", "r535", "r536"),
+    ("chan-doan-dung-o-dong-dau", ("r524", "r531", "r533", "r535", "r536", "r537", "r538"),
      "        elif dang_mo:", "        elif False:"),
     # #568 r5 — NEO DOI theo M13: dong `ranh` da hep lai, nen neo CU dem ra 0 va
     # muc nay CHET LANG (bao "NEO KHONG DUY NHAT (0)" roi thanh `hong`). Mot dot
     # bien chet lang la mot cho mu — do dung thu ma bang nay ton tai de chan.
     # Chung mot dong neo voi `chan-doan-tra-ranh-gioi-ve-ban-rong` la binh thuong:
     # hai muc thay HAI thu khac nhau nen phan biet duoc bang dau vao.
-    ("chan-doan-nuot-ca-ranh-gioi", ("r524", "r531", "r533", "r534", "r535", "r536"),
-     '    ranh = re.compile(r"^(?:TU KIEM r\\d+: (?:DAT$|DO_CHOT|DO_KHAC)|TU KIEM: \\d+/\\d+$|DOT BIEN TU KIEM (?:\\S+ \\||\\S+: |: )|MUTANT: giet = |CASE T\\d+: DO )")',
-     '    ranh = re.compile(r"^(?!)")'),
     # r3/M9 — `dich` nang len ("r524","r525"): o `suy-bien-dai` MOI cung chot
     # rang cha PHAI noi la no da cat, nen dot bien nay giet THAT ca hai. Khai
     # dung hai ten la khai CHAT HON, khong phai noi long: bo cham doi tap ca do
@@ -3227,19 +3306,56 @@ DOT_BIEN_TU_KIEM = [
     ("chan-doan-noi-tran-ma-khong-doi-huong-cat", ("r525", "r536"),
      "TRAN_CHAN_DOAN = 400", "TRAN_CHAN_DOAN = 100000"),
     # --- #568 r5 ------------------------------------------------------------
+    ("chan-doan-quay-ve-lstrip-tap-ky-tu", ("r537",),
+     '    return re.sub(r"^ ?[\\u2014-] ?", "", than, count=1)',
+     '    return than.lstrip(" \\u2014-").strip()'),
+    # #568 r5 luot 3 — o day TUNG co `chan-doan-go-nhieu-hon-mot-dau-phan-cach`
+    # (bo `count=1`). Da BO vi no la DOT BIEN TUONG DUONG, va luot day du chung
+    # minh: no SONG SOT voi `child rc=0`. Ly do: mau neo `^` (khong `re.M`) chi
+    # khop duoc o vi tri 0, nen `re.sub` VON da thay toi da mot lan — `count=1`
+    # khong them rang buoc nao. Giu `count=1` trong ma la de NOI RO y dinh, va
+    # cho nay ghi lai rang no KHONG phai mot rang buoc do duoc.
+    ("chan-doan-lat-khai-chuan-hoa-than", ("r537",),
+     "CHUAN_HOA_THAN_BO_DONG_TRANG_VA_KHOANG_TRANG = True",
+     "CHUAN_HOA_THAN_BO_DONG_TRANG_VA_KHOANG_TRANG = False"),
+    # #568 r5 luot 3 — CA CUM dot bien cua dong `ranh` dung chung MOT neo, va neo
+    # ay duoc sinh TU CHINH DONG THAT (script, khong go tay), vi luot 3 do duoc:
+    # doi dong that ma quen bang thi CA NAM muc dem ra 0 va CHET LANG.
+    # `dich` o day de tam ('r531'); luot day du se nang dung theo phep do.
+    ("chan-doan-nuot-ca-ranh-gioi", ("r524", "r531", "r533", "r534", "r535", "r536", "r537", "r538"),
+     '    ranh = re.compile(r"^(?:TU KIEM r\\d+: (?:DAT$|DO_CHOT(?: |$)|DO_KHAC(?: |$))|TU KIEM: \\d+/\\d+$|DOT BIEN TU KIEM (?:\\S+ \\||\\S+: NEO KHONG DUY NHAT |: KHONG DO DUOC )|MUTANT: giet = \\d+ |CASE T\\d+: DO - )")',
+     '    ranh = re.compile(r"^(?!)")'),
+    ("chan-doan-tra-ranh-gioi-ve-ban-rong", ("r531", "r533", "r535", "r538"),
+     '    ranh = re.compile(r"^(?:TU KIEM r\\d+: (?:DAT$|DO_CHOT(?: |$)|DO_KHAC(?: |$))|TU KIEM: \\d+/\\d+$|DOT BIEN TU KIEM (?:\\S+ \\||\\S+: NEO KHONG DUY NHAT |: KHONG DO DUOC )|MUTANT: giet = \\d+ |CASE T\\d+: DO - )")',
+     '    ranh = re.compile(r"^(?:TU KIEM|DOT BIEN|MUTANT|LOI:)")'),
+    ("chan-doan-ranh-gioi-noi-long-ve-tien-to-tran", ("r533", "r535", "r538"),
+     '    ranh = re.compile(r"^(?:TU KIEM r\\d+: (?:DAT$|DO_CHOT(?: |$)|DO_KHAC(?: |$))|TU KIEM: \\d+/\\d+$|DOT BIEN TU KIEM (?:\\S+ \\||\\S+: NEO KHONG DUY NHAT |: KHONG DO DUOC )|MUTANT: giet = \\d+ |CASE T\\d+: DO - )")',
+     '    ranh = re.compile(r"^(?:TU KIEM r\\d+: (?:DAT$|DO_CHOT(?: |$)|DO_KHAC(?: |$))|TU KIEM: \\d+/\\d+$|DOT BIEN |MUTANT: giet = \\d+ |CASE T\\d+: DO - )")'),
+    ("chan-doan-noi-long-ho-tu-kiem", ("r535", "r538"),
+     '    ranh = re.compile(r"^(?:TU KIEM r\\d+: (?:DAT$|DO_CHOT(?: |$)|DO_KHAC(?: |$))|TU KIEM: \\d+/\\d+$|DOT BIEN TU KIEM (?:\\S+ \\||\\S+: NEO KHONG DUY NHAT |: KHONG DO DUOC )|MUTANT: giet = \\d+ |CASE T\\d+: DO - )")',
+     '    ranh = re.compile(r"^(?:TU KIEM r\\d+: |TU KIEM: \\d+/\\d+$|DOT BIEN TU KIEM (?:\\S+ \\||\\S+: NEO KHONG DUY NHAT |: KHONG DO DUOC )|MUTANT: giet = \\d+ |CASE T\\d+: DO - )")'),
+    ("chan-doan-noi-long-ho-mutant", ("r535", "r538"),
+     '    ranh = re.compile(r"^(?:TU KIEM r\\d+: (?:DAT$|DO_CHOT(?: |$)|DO_KHAC(?: |$))|TU KIEM: \\d+/\\d+$|DOT BIEN TU KIEM (?:\\S+ \\||\\S+: NEO KHONG DUY NHAT |: KHONG DO DUOC )|MUTANT: giet = \\d+ |CASE T\\d+: DO - )")',
+     '    ranh = re.compile(r"^(?:TU KIEM r\\d+: (?:DAT$|DO_CHOT(?: |$)|DO_KHAC(?: |$))|TU KIEM: \\d+/\\d+$|DOT BIEN TU KIEM (?:\\S+ \\||\\S+: NEO KHONG DUY NHAT |: KHONG DO DUOC )|MUTANT: |CASE T\\d+: DO - )")'),
+    ("chan-doan-noi-long-ho-case-t", ("r535", "r538"),
+     '    ranh = re.compile(r"^(?:TU KIEM r\\d+: (?:DAT$|DO_CHOT(?: |$)|DO_KHAC(?: |$))|TU KIEM: \\d+/\\d+$|DOT BIEN TU KIEM (?:\\S+ \\||\\S+: NEO KHONG DUY NHAT |: KHONG DO DUOC )|MUTANT: giet = \\d+ |CASE T\\d+: DO - )")',
+     '    ranh = re.compile(r"^(?:TU KIEM r\\d+: (?:DAT$|DO_CHOT(?: |$)|DO_KHAC(?: |$))|TU KIEM: \\d+/\\d+$|DOT BIEN TU KIEM (?:\\S+ \\||\\S+: NEO KHONG DUY NHAT |: KHONG DO DUOC )|MUTANT: giet = \\d+ |CASE T\\d+: )")'),
+    ("chan-doan-bo-bien-phai-cua-nhan", ("r538",),
+     '    ranh = re.compile(r"^(?:TU KIEM r\\d+: (?:DAT$|DO_CHOT(?: |$)|DO_KHAC(?: |$))|TU KIEM: \\d+/\\d+$|DOT BIEN TU KIEM (?:\\S+ \\||\\S+: NEO KHONG DUY NHAT |: KHONG DO DUOC )|MUTANT: giet = \\d+ |CASE T\\d+: DO - )")',
+     '    ranh = re.compile(r"^(?:TU KIEM r\\d+: (?:DAT$|DO_CHOT|DO_KHAC)|TU KIEM: \\d+/\\d+$|DOT BIEN TU KIEM (?:\\S+ \\||\\S+: NEO KHONG DUY NHAT |: KHONG DO DUOC )|MUTANT: giet = \\d+ |CASE T\\d+: DO - )")'),
+    ("chan-doan-noi-long-duoi-ban-ghi-dot-bien", ("r538",),
+     '    ranh = re.compile(r"^(?:TU KIEM r\\d+: (?:DAT$|DO_CHOT(?: |$)|DO_KHAC(?: |$))|TU KIEM: \\d+/\\d+$|DOT BIEN TU KIEM (?:\\S+ \\||\\S+: NEO KHONG DUY NHAT |: KHONG DO DUOC )|MUTANT: giet = \\d+ |CASE T\\d+: DO - )")',
+     '    ranh = re.compile(r"^(?:TU KIEM r\\d+: (?:DAT$|DO_CHOT(?: |$)|DO_KHAC(?: |$))|TU KIEM: \\d+/\\d+$|DOT BIEN TU KIEM (?:\\S+ \\||\\S+: |: )|MUTANT: giet = \\d+ |CASE T\\d+: DO - )")'),
     # #568 r5 (cross-review P2 tren be5c3f2) — HOI QUY ve dung ban truoc khi va:
     # `DOT BIEN ` la tien to TRAN. Dot bien nay tai lap CHINH phep do cua reviewer,
     # nen no la neo GIU cho ban va khoi bi go lai ma khong ai thay.
-    ("chan-doan-ranh-gioi-noi-long-ve-tien-to-tran", ("r533", "r535"),
-     '    ranh = re.compile(r"^(?:TU KIEM r\\d+: (?:DAT$|DO_CHOT|DO_KHAC)|TU KIEM: \\d+/\\d+$|DOT BIEN TU KIEM (?:\\S+ \\||\\S+: |: )|MUTANT: giet = |CASE T\\d+: DO )")',
-     '    ranh = re.compile(r"^(?:TU KIEM (?:r\\d+): |TU KIEM: \\d+/\\d+|DOT BIEN |MUTANT: |CASE T\\d+: )")'),
     # Lat LOI KHAI ma khong doi hanh vi — chieu thu hai cua o (4) r533.
     ("chan-doan-lat-khai-dong-ranh-gioi-khong-dem", ("r533",),
      "DONG_RANH_GIOI_DUNG_HINH_KHONG_DUOC_DEM = True",
      "DONG_RANH_GIOI_DUNG_HINH_KHONG_DUOC_DEM = False"),
     # Doi HANH VI ma khong doi loi khai: dem ca dong ranh gioi. Dau vao BINH
     # THUONG cung sinh nhan, nen o (4) cua r533 va o (1) cua r531 deu DO.
-    ("chan-doan-dem-ca-dong-ranh-gioi", ("r531", "r533", "r534", "r535", "r536"),
+    ("chan-doan-dem-ca-dong-ranh-gioi", ("r531", "r533", "r534", "r535", "r536", "r537", "r538"),
      "            dang_mo = False\n", "            dang_mo = False\n            bo_qua += 1\n"),
     # Bo phep giu nhan BO QUA ngoai tran: than dai lam nhan bi cat, mat so dong.
     ("chan-doan-de-tran-nuot-nhan-bo-qua", ("r531", "r533", "r534", "r536"),
@@ -3258,18 +3374,9 @@ DOT_BIEN_TU_KIEM = [
      '    return getattr(than, "bo_qua", 0)',
      '    return int((re.search(r"\\[BO QUA (\\d+) dong\\]", str(than)) or ["", "0"])[1])'),
     # Vut SIEU DU LIEU luc dong goi: `bo_qua` luon 0, nen khong bao gio khai.
-    ("chan-doan-vut-so-dong-bo-luc-dong-goi", ("r531", "r533", "r534", "r535", "r536"),
+    ("chan-doan-vut-so-dong-bo-luc-dong-goi", ("r531", "r533", "r534", "r535", "r536", "r538"),
      "        o.bo_qua = bo_qua", "        o.bo_qua = 0"),
     # Noi long TUNG ho tien to — moi ho mot muc, phan biet duoc bang dau vao.
-    ("chan-doan-noi-long-ho-tu-kiem", ("r535",),
-'    ranh = re.compile(r"^(?:TU KIEM r\\d+: (?:DAT$|DO_CHOT|DO_KHAC)|TU KIEM: \\d+/\\d+$|DOT BIEN TU KIEM (?:\\S+ \\||\\S+: |: )|MUTANT: giet = |CASE T\\d+: DO )")',
-     '    ranh = re.compile(r"^(?:TU KIEM r\\d+: |TU KIEM: \\d+/\\d+$|DOT BIEN TU KIEM (?:\\S+ \\||\\S+: |: )|MUTANT: giet = |CASE T\\d+: DO )")'),
-    ("chan-doan-noi-long-ho-mutant", ("r535",),
-'    ranh = re.compile(r"^(?:TU KIEM r\\d+: (?:DAT$|DO_CHOT|DO_KHAC)|TU KIEM: \\d+/\\d+$|DOT BIEN TU KIEM (?:\\S+ \\||\\S+: |: )|MUTANT: giet = |CASE T\\d+: DO )")',
-     '    ranh = re.compile(r"^(?:TU KIEM r\\d+: (?:DAT$|DO_CHOT|DO_KHAC)|TU KIEM: \\d+/\\d+$|DOT BIEN TU KIEM (?:\\S+ \\||\\S+: |: )|MUTANT: |CASE T\\d+: DO )")'),
-    ("chan-doan-noi-long-ho-case-t", ("r535",),
-'    ranh = re.compile(r"^(?:TU KIEM r\\d+: (?:DAT$|DO_CHOT|DO_KHAC)|TU KIEM: \\d+/\\d+$|DOT BIEN TU KIEM (?:\\S+ \\||\\S+: |: )|MUTANT: giet = |CASE T\\d+: DO )")',
-     '    ranh = re.compile(r"^(?:TU KIEM r\\d+: (?:DAT$|DO_CHOT|DO_KHAC)|TU KIEM: \\d+/\\d+$|DOT BIEN TU KIEM (?:\\S+ \\||\\S+: |: )|MUTANT: giet = |CASE T\\d+: )")'),
     # #568 r5 — luot day du (99 dot bien) bao rc=1 voi SAU muc lech `dich`:
     # chan-doan-chi-lay-ten-ca, chan-doan-dung-o-dong-dau,
     # chan-doan-nuot-ca-ranh-gioi, chan-doan-cat-lang-khong-khai,
@@ -3280,16 +3387,13 @@ DOT_BIEN_TU_KIEM = [
     # Bai hoc ghi lai de khong lap: TU KIEM 32/32 KHONG thay duoc luot day du.
     # `dich` o sau muc tren duoc nang len TU PHEP DO, khong tu suy doan.
     # M13/A29 — tra ranh gioi ve ban RONG. O (2) cua r531 mat lai than.
-    ("chan-doan-tra-ranh-gioi-ve-ban-rong", ("r531", "r533", "r535"),
-     '    ranh = re.compile(r"^(?:TU KIEM r\\d+: (?:DAT$|DO_CHOT|DO_KHAC)|TU KIEM: \\d+/\\d+$|DOT BIEN TU KIEM (?:\\S+ \\||\\S+: |: )|MUTANT: giet = |CASE T\\d+: DO )")',
-     '    ranh = re.compile(r"^(?:TU KIEM|DOT BIEN|MUTANT|LOI:)")'),
     # M13/A29 — bo phep DEM: mat lai im lang o o (3).
-    ("chan-doan-bo-dem-phan-bi-bo", ("r531", "r533", "r534", "r535", "r536"),
+    ("chan-doan-bo-dem-phan-bi-bo", ("r531", "r533", "r534", "r535", "r536", "r538"),
      "        elif dong.strip():", "        elif False:"),
     # M13/A30 — KHAI ca khi KHONG mat: dong rong cuoi chuoi cung duoc dem, nen
     # dau vao BINH THUONG sinh nhan. Day la dot bien canh chieu (1) — chieu ma
     # mot ca chi kiem "co mat thi co nhan" se BO SOT.
-    ("chan-doan-khai-bo-qua-ca-khi-khong-mat", ("r531", "r533", "r534", "r535", "r536"),
+    ("chan-doan-khai-bo-qua-ca-khi-khong-mat", ("r531", "r533", "r534", "r535", "r536", "r538"),
      "        elif dong.strip():", "        else:"),
     # M14/A32 — lat LOI KHAI ma khong doi hanh vi.
     ("chan-doan-lat-loi-khai-stderr-sau-chot", ("r532",),
@@ -3536,8 +3640,8 @@ NHOM_BAT_BUOC = frozenset({"r501", "r502", "r503", "r504", "r505", "r506",
                            "r519", "r520", "r521", "r522", "r523", "r524",
                            "r525", "r526", "r527", "r528", "r529", "r530",
                            "r531", "r532", "r533", "r534", "r535",
-                           "r536"})
-SAN_NHOM = 36
+                           "r536", "r537", "r538"})
+SAN_NHOM = 38
 
 
 # #568 r4 / B1 — `str.splitlines()` coi CHIN ky tu NGOAI `\n` la het dong, con
@@ -3578,6 +3682,15 @@ CHAN_DOAN_STDERR_KHI_DA_CO_CHOT = False
 # tuc lai khai RONG hon phep do — dung benh ma A30 cam.
 DONG_RANH_GIOI_DUNG_HINH_KHONG_DUOC_DEM = True
 
+# #568 r5 / cross-review luot 3 tren 7d0b012 — hai phep CHUAN HOA than ma ban
+# truoc lam LANG. Chung KHONG mat noi dung chan doan, nhung "khong mat gi dang
+# ke" van la mot LOI KHAI, va loi khai thi phai co ten va phai do duoc:
+#   (1) dong TRANG trong than bi loai, KHONG dem vao `bo_qua`;
+#   (2) khoang trang dau/cuoi moi dong than bi bo.
+# Dem (1) vao `bo_qua` se sinh nhan tren dau vao co dong trang binh thuong, tuc
+# khai RONG hon phep do. Nen ta KHAI, khong lam tron. Chot hai chieu o `r537`.
+CHUAN_HOA_THAN_BO_DONG_TRANG_VA_KHOANG_TRANG = True
+
 TRAN_CHAN_DOAN = 400
 
 
@@ -3602,6 +3715,22 @@ class ThanChanDoan(str):
         o = super().__new__(cls, s)
         o.bo_qua = bo_qua
         return o
+
+
+def _go_dau_phan_cach(than: str) -> str:
+    """Go DUNG MOT dau phan cach giua nhan va than. KHONG dung `lstrip`.
+
+    #568 r5 / cross-review luot 3 tren 7d0b012. Ban truoc dung
+    `lstrip(" \u2014-")`, tuc mot TAP KY TU — no an het moi dau cach va moi dau
+    gach o DAU THAN, ke ca khi chung la NOI DUNG. Do duoc:
+
+        "TU KIEM r1: DO_CHOT \u2014 -42"            -> than "42"
+        "TU KIEM r1: DO_CHOT \u2014 --gio-cao-nhat" -> than "gio-cao-nhat"
+
+    Mot dau AM bien mat la SUA NOI DUNG chan doan, khong phai chuan hoa dinh
+    dang — nguoi doc log nhan mot con so KHAC voi con so con bao.
+    """
+    return re.sub(r"^ ?[\u2014-] ?", "", than, count=1)
 
 
 def _so_dong_bo(than) -> int:
@@ -3661,7 +3790,7 @@ def _khoi_chan_doan(stdout: str, nhan: str) -> list[tuple[str, str]]:
     # Ban ghi THAT cua bo do luon la `DOT BIEN TU KIEM <ten> | `, `... <ten>: `
     # hoac `DOT BIEN TU KIEM: `. Siet ve DUNG ba hinh ay thi dong than tren roi
     # khoi tap ranh gioi va duoc GIU nguyen — khong mat, nen khong can nhan.
-    ranh = re.compile(r"^(?:TU KIEM r\d+: (?:DAT$|DO_CHOT|DO_KHAC)|TU KIEM: \d+/\d+$|DOT BIEN TU KIEM (?:\S+ \||\S+: |: )|MUTANT: giet = |CASE T\d+: DO )")
+    ranh = re.compile(r"^(?:TU KIEM r\d+: (?:DAT$|DO_CHOT(?: |$)|DO_KHAC(?: |$))|TU KIEM: \d+/\d+$|DOT BIEN TU KIEM (?:\S+ \||\S+: NEO KHONG DUY NHAT |: KHONG DO DUOC )|MUTANT: giet = \d+ |CASE T\d+: DO - )")
     khoi: list[list] = []
     # `dang_mo` la CO TRANG THAI, khong phai `khoi` khac rong: gap ranh gioi thi
     # khoi phai DONG HAN. Ban dau chi BO QUA dong ranh gioi roi nhat tiep, nen
@@ -3678,7 +3807,7 @@ def _khoi_chan_doan(stdout: str, nhan: str) -> list[tuple[str, str]]:
             if khoi and bo_qua:
                 khoi[-1][2] = bo_qua
             bo_qua = 0
-            khoi.append([m.group(1), [m.group(2).lstrip(" —-").strip()], 0])
+            khoi.append([m.group(1), [_go_dau_phan_cach(m.group(2))], 0])
             dang_mo = True
         elif ranh.match(dong):
             dang_mo = False

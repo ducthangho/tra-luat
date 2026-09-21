@@ -99,7 +99,7 @@ start_from_sha: 714f36e6aad844f2c1a6713256f3abbdea64aec9
 start_from_sha_vi_sao: 'HEAD cua origin/master luc cap (merge PR #594 cua packet #578). Merge-base
   cua nhanh lam viec cung la SHA nay.'
 
-reviewed_sha_required: 94d3cd9
+reviewed_sha_required: 94d3cd94174e78f2337cb32cb7016921bf2e890b
 reviewed_sha_required_note: 'Head THAT cua claude/va-dang-lease-20260920 luc cap. Day KHONG phai
   mo neo san: ung vien da ton tai va da qua NAM luot cross-review. Luot audit cua NGUOI phai neo
   lai theo head that truoc khi ket luan — vong lap con mo nen se co commit moi.'

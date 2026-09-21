@@ -79,8 +79,8 @@ trang_thai_ban_ghi: 'DA CAP 2026-09-21T13:55:15Z (SAU merge — xem uy_quyen.aut
   duong DA DO DUOC tu log job va artifact (xem danh_tinh_CI_10_2_2). Uy quyen ben la PHE CHUAN HAU KIEM (xem
   authorization_url_BAN_CHAT). Vong lap cross-review DA DUNG tai b94182b + ban va nay vi cham stop condition §12
   (SAU loi goi codex tren tran HAI — xem VI_PHAM_3_VUOT_TRAN_TRUC_LOI_GOI), KHONG phai vi da approve; CHUA co
-  cross_approved. Ban ghi nay DA DUOC SUA muoi mot lan sau review tren PR #601 — xem DINH_CHINH_SAU_REVIEW, _VONG_2,
-  _VONG_3, _VONG_4, _VONG_5, _VONG_6, _VONG_7, _VONG_8, _VONG_9, _VONG_10, _VONG_11 (nam vong cuoi KHONG co codex: chi ra soat Fable; _VONG_8 va 5 finding
+  cross_approved. Ban ghi nay DA DUOC SUA muoi hai lan sau review tren PR #601 — xem DINH_CHINH_SAU_REVIEW, _VONG_2,
+  _VONG_3, _VONG_4, _VONG_5, _VONG_6, _VONG_7, _VONG_8, _VONG_9, _VONG_10, _VONG_11, _VONG_12 (sau vong cuoi KHONG co codex: chi ra soat Fable; _VONG_8 va 5 finding
   cua vong 7 va doi luat cam token sang luat DUNG).'
 
 # ══════════════════════ VI PHAM VAI TRO — DOC TRUOC ══════════════════════
@@ -1024,14 +1024,49 @@ con_mo:
         27 phut — dung la bang chung cho nguyen nhan tren.'
     da_lam_gi_trong_luc_do: 'DUNG day. Moi cu day luc ay chi sinh them mot luot toan skipped,
       lam nhieu ho so ma khong them mot phep do nao. KHONG re-run tay: manual_ci_budget 0.'
-    KHONG_khai: 'CAP NHAT VONG 10 — hai muc cu DA HET hieu luc: (1) gate-registry 106477801432 cua e6eabed nay
-      DA DOC: CANCELLED 19:34:07Z; (2) CI cua head sau e6eabed (b246aac) nay DA DO: 4/4 xanh, gate-registry
-      106485286443 success 20:00:46Z — xem gate_registry_bi_huy_LIET_KE_khong_dem_tran.
-      CON KHONG KHAI: CI cua head DANG mang ban va nay (head sau e20edde) — chua ton tai luc viet. Ket qua cac head TRUOC
-      (9387078, d202271, 85559f0, 7becd26, 8ffe96a, 80d4dd4, b94182b, a479699, 85f974b, va e6eabed tru gate-registry) ghi o
-      dien_bien_do_duoc. Moi con so o day la CI cua PR #601 (PR mang ho so), KHONG phai cong hau merge cua packet #578
-      (714f36e6 / run 35581617584) va KHONG phai bang chung cho `landed` cua #578; cong DO o 85f974b cung KHONG doi muc bao
-      dam nao (khong len, khong xuong).'
+    PHAM_VI_THEO_LUAT_khong_theo_danh_sach: 'LUAT, de muc nay khong the loi thoi lan nua:
+      Muc `dien_bien_do_duoc` ghi CI cua cac head #601 TU 9387078 DEN head cha cua head hien tai.
+      CI cua CHINH head dang mang ban va — theo CAU TAO — chua ton tai luc viet, nen KHONG BAO GIO
+      duoc khai o day; no se duoc ghi o ban va KE TIEP, hoac khong bao gio neu day la ban va cuoi.
+      VI SAO PHAI LA LUAT chu khong phai danh sach: ho so nay ghi dien bien CI cua CHINH PR mang no,
+      ma moi ban va sinh mot head moi voi CI moi — nen mot DANH SACH head luon cham dung mot head va
+      chi day du sau ban va CUOI CUNG. Vong 8, 9 va 10 deu bat dung mot cho nay (head e6eabed, roi
+      b246aac, roi e20edde), moi lan va bang cach them mot dong — va lan sau lai thieu head ke tiep.
+      Doi sang LUAT la cach dong ca LOP, giong nhu doi DEM sang LIET KE o
+      gate_registry_bi_huy_LIET_KE_khong_dem_tran.
+      Ghi kem, do duoc: CI cua e20edde (head vong 10 do) — run 35648…, chuan-bi 106498292593 success
+      20:12:06Z, gate-packet-loop 106498338225 success 20:22:13Z, gate 106498338177 success 20:25:59Z,
+      gate-registry 106498338285 success 20:38:51Z, thu-hoi 106498282336 success, mo 106498277746 skipped
+      => 4/4 xanh. CI cua 06724b1: chuan-bi 106510…, gate, gate-packet-loop, gate-registry 106510454227
+      success 21:14:31Z => cung 4/4 xanh (ghi duoc vi ban va nay soan SAU khi chung xong).
+      XANH TRON BON CONG, cap nhat: a479699 (18:38:03Z), b246aac (20:00:46Z), e20edde (20:38:51Z),
+      06724b1 (21:14:31Z) — BON head, tat ca deu la head KHONG bi cu day ke tiep chen vao trong cua so
+      ~27 phut cua gate-registry.
+      MOI CON SO O DAY la CI cua PR #601 (PR mang ho so), KHONG phai cong hau merge cua packet #578
+      (714f36e6 / run 35581617584), va KHONG phai bang chung cho `landed` cua #578. Cong DO o 85f974b
+      KHONG doi muc bao dam nao — khong len, khong xuong.'
+
+DINH_CHINH_SAU_REVIEW_VONG_12:
+  nguon: 'Vong 11 cua vong lap, tren head 06724b1. KHONG co luot codex (da cham stop condition §12).
+    Phep do: executor Fable 5.1 — cung ho Anthropic, soat NOI BO, KHONG phai cross-review.
+    Ket qua: P1 x0, P2 x1, P3 x1 — tot nhat tu dau vong lap.'
+  xu_huong: 'a479699 0/3/4 — 85f974b 0/2/3 — e6eabed 0/2/2 — b246aac 1/3/2 — e20edde 0/1/2 —
+    06724b1 0/1/1. Don dieu giam tru mot buoc, va buoc ay la loi cua phien chinh da va.'
+  P2_1_DONG_CA_LOP_thay_vi_va_mot_lan: 'CHAP NHAN, lop B — VA BANG MOT LUAT, khong bang mot dong moi.
+    Finding: CI cua e20edde khong co trong tep du thong diep commit 06724b1 DA dung ket qua ay.
+    Day la lan thu BA cung mot cho: vong 8 bat thieu e6eabed, vong 9 bat thieu b246aac, vong 11 bat
+    thieu e20edde. Moi lan truoc deu va bang cach THEM MOT DONG — va lan sau lai thieu head ke tiep.
+    NGUYEN NHAN CAU TAO: ho so ghi dien bien CI cua CHINH PR mang no; moi ban va sinh mot head moi voi
+    CI moi; nen mot DANH SACH head luon cham dung mot head va chi day du sau ban va CUOI CUNG.
+    CHUA: doi khoa `KHONG_khai` thanh `PHAM_VI_THEO_LUAT_khong_theo_danh_sach` — phat bieu pham vi bang
+    LUAT (tu 9387078 den head CHA cua head hien tai; CI cua chinh head dang mang ban va theo CAU TAO
+    khong bao gio khai o day). Cung hinh dang voi viec doi DEM sang LIET KE o vong 9.
+    Ghi kem CI do duoc cua e20edde va 06724b1 vi ban va nay soan SAU khi ca hai xong.'
+  P3_1_ton_du_menh_de_cu: 'CHAP NHAN, lop A. Trong cung khoa, cau "…va e6eabed TRU gate-registry" la tan
+    du cua ban cu, mau thuan voi chinh hai cho vua va o vong 10 (gate-registry ay DA doc: CANCELLED
+    19:34:07Z). Da bo cung voi viec viet lai khoa thanh luat.'
+  KHONG_mat_gi: 'LANDED van CHUA. LANDED_KHONG_XAC_LAP giu 19, CON_THIEU_DE_GOI_LANDED giu 9. Khong nang
+    muc bao dam nao. Khong khai cross_approved, khong khai human_audited.'
 
 DINH_CHINH_SAU_REVIEW_VONG_11:
   nguon: 'Vong 10 cua vong lap, tren head e20edde. KHONG co luot codex (da cham stop condition §12).

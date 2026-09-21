@@ -168,8 +168,20 @@ anchor:
         bang · 1 vi pham · 0 KHONG DO DUOC · tong 186", TONG: DO, va dong DO neu DUNG
         `7da12e6f1ac0...` — tuc OID trong thong bao BANG OID phan tich tu evidence_url, KHONG
         phai `cc9fec2d`.
+    (4) MO NEO DOI LAN THU HAI (7da12e6f -> 5c9abef1, vi ban chieu phai thu hep loi khai
+        "GitHub cat") => phan chung CHAY LAI lan nua, tren head 462a85d luc 2026-09-21T16:5xZ.
+        Day la lan DAU TIEN muc nay lam dung thu no vua rut ra o (3):
+        `git merge --squash 462a85d` tu a1bbdc1 => 074ed4e7c0cdd38749c7cc4ceeb3ffca0f2d94fc,
+        so cha = 1; `merge-base --is-ancestor 5c9abef1 074ed4e7` => rc=1.
+        `ops/bien_nhan_v2.py --root .` => rc=1, "132 DAT v2 · 11/11 mien tru legacy · 42 NO dong
+        bang · 1 vi pham · 0 KHONG DO DUOC · tong 186", TONG: DO, dong DO neu DUNG
+        `5c9abef1ef36...` — BANG OID phan tich tu evidence_url hien tai.
+        Doi chieu hinh dang MERGE tren cung head: rc=0, "133 DAT v2 · 0 vi pham · tong 186",
+        TONG: DAT. Hai chieu, khong phai mot.
     TUNG LAN, khong gop:
-    lan (1) cho dong DO neu `cc9fec2d5007...`; lan (3) cho dong DO neu `7da12e6f1ac0...`.
+    lan (1) cho dong DO neu `cc9fec2d5007...`; lan (3) cho dong DO neu `7da12e6f1ac0...`;
+    lan (4) cho dong DO neu `5c9abef1ef36...`. Ba OID khac nhau cho ba cap khac nhau — day la
+    thu ban truoc lam mat khi gop thanh mot cau.
     Ban TRUOC cua muc nay viet "ca hai lan ... cc9fec2d" — tuc CHEP dong cua cap CU sang cho cap
     MOI. SAI, va codex bat duoc (P2 tren #597, dong 130). Lan (2) khong ghi lai dong DO nao, nen
     o do khong co so lieu de chep; cai da xay ra la suy ra roi viet nhu da do.

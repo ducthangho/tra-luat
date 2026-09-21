@@ -2999,17 +2999,17 @@ DOT_BIEN_TU_KIEM = [
     # #568 r4 — `dich` len ("r524","r530"): tu khi `r530` do NHANH DO_KHAC o LOP
     # CHA, dot bien vut than chan doan giet THAT ca hai. Chet bang DO_CHOT, chot
     # cua chinh chung.
-    ("chan-doan-chi-lay-ten-ca", ("r524", "r530"),
+    ("chan-doan-chi-lay-ten-ca", ("r524", "r530", "r531"),
      '            khoi.append((m.group(1), [m.group(2).lstrip(" \u2014-").strip()]))',
      '            khoi.append((m.group(1), [""]))'),
-    ("chan-doan-dung-o-dong-dau", ("r524",),
+    ("chan-doan-dung-o-dong-dau", ("r524", "r531"),
      "        elif dang_mo:", "        elif False:"),
     # #568 r5 — NEO DOI theo M13: dong `ranh` da hep lai, nen neo CU dem ra 0 va
     # muc nay CHET LANG (bao "NEO KHONG DUY NHAT (0)" roi thanh `hong`). Mot dot
     # bien chet lang la mot cho mu — do dung thu ma bang nay ton tai de chan.
     # Chung mot dong neo voi `chan-doan-tra-ranh-gioi-ve-ban-rong` la binh thuong:
     # hai muc thay HAI thu khac nhau nen phan biet duoc bang dau vao.
-    ("chan-doan-nuot-ca-ranh-gioi", ("r524",),
+    ("chan-doan-nuot-ca-ranh-gioi", ("r524", "r531"),
      '    ranh = re.compile(r"^(?:TU KIEM (?:r\\d+): |TU KIEM: \\d+/\\d+|DOT BIEN |MUTANT: |CASE T\\d+: )")',
      '    ranh = re.compile(r"^(?!)")'),
     # r3/M9 — `dich` nang len ("r524","r525"): o `suy-bien-dai` MOI cung chot
@@ -3017,7 +3017,7 @@ DOT_BIEN_TU_KIEM = [
     # dung hai ten la khai CHAT HON, khong phai noi long: bo cham doi tap ca do
     # BANG DUNG `dich`, nen thieu mot ten la ca DO. Ca chet bang DO_CHOT — chot
     # cua chinh no — chu khong phai mot loi VO CAN. Da do: 84/85 -> 85/85.
-    ("chan-doan-cat-lang-khong-khai", ("r524", "r525"),
+    ("chan-doan-cat-lang-khong-khai", ("r524", "r525", "r531"),
      '    return f"{than[:TRAN_CHAN_DOAN]} \u2026[CAT {len(than) - TRAN_CHAN_DOAN} ky tu]"',
      "    return than[:TRAN_CHAN_DOAN]"),
     # #568 r2/M6 — HAI duong cua nhanh thu ba, moi duong mot dot bien RIENG.
@@ -3026,7 +3026,7 @@ DOT_BIEN_TU_KIEM = [
     ("chan-doan-bo-stderr-o-ca-suy-bien", ("r525",),
      '                    print(f"    stderr: {_goi_chan_doan(p.stderr)}")',
      "                    pass"),
-    ("chan-doan-xoa-phan-biet-P1-P2", ("r525",),
+    ("chan-doan-xoa-phan-biet-P1-P2", ("r525", "r532"),
      "                if kh_chot:", "                if False:"),
     # --- #568 r3 ---------------------------------------------------------
     # A13 — bo `r` khoi MOT docstring la du lam ban ca tep. r526 do TOAN TEP nen
@@ -3046,6 +3046,15 @@ DOT_BIEN_TU_KIEM = [
     ("chan-doan-noi-tran-ma-khong-doi-huong-cat", ("r525",),
      "TRAN_CHAN_DOAN = 400", "TRAN_CHAN_DOAN = 100000"),
     # --- #568 r5 ------------------------------------------------------------
+    # #568 r5 — luot day du (99 dot bien) bao rc=1 voi SAU muc lech `dich`:
+    # chan-doan-chi-lay-ten-ca, chan-doan-dung-o-dong-dau,
+    # chan-doan-nuot-ca-ranh-gioi, chan-doan-cat-lang-khong-khai,
+    # chan-doan-xoa-phan-biet-P1-P2, tu-dot-bien-nhan-moi-tap-ca.
+    # Nguyen nhan: r531/r532 la ca MOI cua r5, va chung do THAT cac dot bien cu
+    # ay; `dich` cu do do HEP hon phep do. Bo cham doi `do_chot == set(dich)`
+    # BANG DUNG, nen khai thieu mot ten la HONG — dung nhu thiet ke.
+    # Bai hoc ghi lai de khong lap: TU KIEM 32/32 KHONG thay duoc luot day du.
+    # `dich` o sau muc tren duoc nang len TU PHEP DO, khong tu suy doan.
     # M13/A29 — tra ranh gioi ve ban RONG. O (2) cua r531 mat lai than.
     ("chan-doan-tra-ranh-gioi-ve-ban-rong", ("r531",),
      '    ranh = re.compile(r"^(?:TU KIEM (?:r\\d+): |TU KIEM: \\d+/\\d+|DOT BIEN |MUTANT: |CASE T\\d+: )")',
@@ -3265,7 +3274,7 @@ DOT_BIEN_TU_KIEM = [
     # vi tu cap GIET giet CA no. Ghi du `dich` la ghi SU THAT da do, va no lam
     # dot bien CHAT HON: runner doi `do_chot == set(dich)` BANG NHAU, nen muc nay
     # gio phai giet ca hai ca moi duoc cong.
-    ("tu-dot-bien-nhan-moi-tap-ca", ("r516", "r525"),
+    ("tu-dot-bien-nhan-moi-tap-ca", ("r516", "r525", "r532"),
      "            elif do_chot == set(dich):", "            elif True:"),
     # F01 (luot 5) — TAP DO RONG duoc chuan hoa thanh dich: con chet ma KHONG in
     # chot nao van duoc ghi cong GIET.

@@ -7260,6 +7260,37 @@ def t178_tien_kiem_mien_chan_TRUOC_khi_cham_mang():
     `packet_issue: True` lọt phép kiểm kiểu ngây thơ vì `isinstance(True, int)` là `True`,
     rồi thành `issues/True/comments` trên URL. Đột biến G làm ca này ĐỎ qua SỐ LỜI GỌI
     (0 -> 1), không qua mã thoát — mã thoát vẫn là 8 ở cả hai bên.
+
+    TRỤC `lease_id` SAI KIỂU — THÊM Ở LƯỢT 5, và nó đóng một đột biến SỐNG SÓT.
+
+    Cross-review lượt 4 dựng đột biến **`L`** (gỡ chốt `lease_id` khỏi `_tien_kiem_mien_dang`)
+    và nó **sống `176/176`**. Reviewer KHÔNG thổi thành P2, vì theo luật "đừng tự soạn nội dung
+    tấn công" họ chỉ có đầu vào THIẾU `lease_id` lấy nguyên từ ca này — mà đầu vào ấy là **bộ
+    tương đương** (xem bảng trên). Họ mô tả đúng hình dạng còn thiếu và giao điều phối đo hộ.
+
+    Phiên điều phối đo, và `L` **KHÔNG** phải bộ tương đương. Sáu hình dạng SAI KIỂU của
+    `lease_id`, đo trực tiếp qua `kiem_github` với một `GOI_GH` giả đếm lời gọi:
+
+        hình dạng                     nền          L
+        None · [] · {} · True · 1.5 · b"x"
+          mã thoát                    rc=8         rc=8      <- GIỐNG HỆT
+          số lời gọi GitHub           0            1         <- KHÁC
+
+    VÀ HAI BẢN NHÁP ĐẦU CỦA CÁC VẾ ẤY TỰ SẬP ĐÚNG LỚP CHÚNG ĐANG ĐO — cả hai ĐỎ ngay trên
+    NỀN, vì cả hai chốt trên một đại lượng MÙ. Chi tiết ở chú thích ngay tại vòng lặp.
+
+    Bài học, lần thứ hai trong cùng packet sau `t184` vế (b): **khi một trục có đại lượng MÙ
+    và một đại lượng CÓ RĂNG, chốt phải nằm trên cái CÓ RĂNG, và phải đo ở ĐÚNG ĐƠN VỊ mà
+    chốt sản phẩm bảo vệ.** Đo ở đơn vị cao hơn (cổng tổng) thì lời gọi của thứ khác trộn
+    vào và phép đo mất sạch sức phân biệt.
+
+    Tức `L` sống sót vì **mọi ca cũ chốt trên `rc`, mà `rc` mù đúng chỗ này** — y hệt lý do
+    đột biến `G` từng sống: cả hai đổi thứ mã thoát không nói được. Và hậu quả thật là thứ
+    docstring của `_tien_kiem_mien_dang` tự khai làm lý do tồn tại: một lease hỏng miền được
+    cho phép **CHẠM MẠNG**.
+
+    Ba vế dưới đây khoá trục ấy. Chúng KHÔNG thay bốn vế trên: bốn vế kia đo trục
+    `packet_issue`, ba vế này đo trục `lease_id`, và `L` chỉ chết ở trục thứ hai.
     """
     thieu_id = _lease_579()
     del thieu_id["lease_id"]
@@ -7276,6 +7307,43 @@ def t178_tien_kiem_mien_chan_TRUOC_khi_cham_mang():
              f"rc={RC_DA_DANG} nghĩa là một lease hỏng miền được cấp đường bỏ qua.")
         chot(goi == 0,
              f"{nhan}: tiền kiểm phải chặn TRƯỚC khi hỏi GitHub, nhưng đã có {goi} lời gọi")
+
+    # TRỤC `lease_id` SAI KIỂU — ba hình dạng, mỗi hình dạng một lý do khác nhau để lọt.
+    # Xem docstring: đây là thứ duy nhất giết được đột biến `L`, và nó giết bằng SỐ LỜI GỌI
+    # chứ không bằng mã thoát (mã thoát là 8 ở cả hai bên — đã đo).
+    # ĐO THẲNG `_do_dau_da_dang`, KHÔNG đo `kiem_github` — và hai bản nháp trước đã sai đúng
+    # chỗ này, cả hai lần đều ĐỎ NGAY TRÊN NỀN. Ghi lại vì cái sai ấy thuộc đúng lớp ca này đo.
+    #
+    #   nháp 1  chốt `ma == RC_NOI_DUNG`, `co_dau=True`  -> nền ĐỎ: `lease_id=True` cho rc=9.
+    #           Đúng hành vi: đồ giả dựng dấu `**Lease `<lease_id>`**`, nên với `True` dấu
+    #           thành ``**Lease `True`**`` và CỬA CUỐI tìm thấy nó. Bốn vế `packet_issue` ở
+    #           trên không dính vì `kiem()` tự từ chối kiểu sai của `packet_issue` trước đó;
+    #           `lease_id` không có chốt tương ứng trong `kiem()`.
+    #   nháp 2  chốt `goi == 0` trên `kiem_github`, `co_dau=False` -> nền vẫn ĐỎ: `lease_id`
+    #           hợp lệ về mặt `kiem()` nên CHUỖI CŨ chạy tiếp và tự nó gọi 2 lần. Số lời gọi
+    #           của CỔNG TỔNG trộn lời gọi của phép dò với lời gọi của `kiem()`.
+    #
+    # Thứ `_tien_kiem_mien_dang` bảo vệ là PHÉP DÒ, nên phải đo PHÉP DÒ. Đo tại đó thì tách
+    # bạch, và không phụ thuộc vào việc `_lease_579()` có bao nhiêu trường hợp lệ:
+    #
+    #     `_do_dau_da_dang` với `lease_id` sai kiểu     nền: 0 lời gọi     L: 1 lời gọi
+    #     `kiem_github` cùng đầu vào ấy                 nền: rc=8          L: rc=8   <- MÙ
+    #
+    # Đó là lý do `L` sống `176/176` qua bốn lượt: mọi ca đều chốt trên `rc`, mà `rc` mù.
+    for nhan, lid in (("`lease_id` là `None`", None),
+                      ("`lease_id` là danh sách", ["wp579-thu"]),
+                      ("`lease_id` là `bool`", True),
+                      ("`lease_id` là ánh xạ", {"x": 1}),
+                      ("`lease_id` là số thực", 1.5)):
+        gh = GhGia(comments={55: []})
+        _ex, _mod = _goi_lop_gh(gh, "_do_dau_da_dang", _lease_579(lease_id=lid),
+                                env_them=ENV_GITHUB)
+        chot(len(gh.calls) == 0,
+             f"{nhan}: tiền kiểm phải chặn PHÉP DÒ trước khi nó chạm mạng, nhưng phép dò đã "
+             f"gọi GitHub {len(gh.calls)} lần. MÃ THOÁT của cổng tổng KHÔNG phân biệt được "
+             f"chuyện này — nền và đột biến `L` đều cho rc=8; chỉ số lời gọi của PHÉP DÒ "
+             f"phân biệt (0 so 1). Một lease hỏng miền chạm được mạng là đúng thứ "
+             f"`_tien_kiem_mien_dang` tự khai làm lý do tồn tại.")
 
 
 @ca

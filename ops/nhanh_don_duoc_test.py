@@ -286,28 +286,35 @@ def _kho_that(remote: Path, khi: str) -> None:
     thong diep ay khong noi duoc kho bien mat luc nao. Chot nay dat o hai moc va
     mang theo DU KIEN: buoc nao, thu muc con gi, va git noi gi.
     """
-    # KHONG lay `remote` lam `cwd`: neu no da bien mat thi `subprocess` nem
-    # `FileNotFoundError` — mot ngoai le VO DANH, dung lop benh #568 chua, va
-    # chot nay se tu tro thanh mot cai bay. Do duoc: ban dau cua chinh chot nay
-    # sap voi `[Errno 2]` thay vi khai duoc kho da bien mat. Chay `git -C` tu
-    # mot thu muc CHAC CHAN con, va bat `OSError` ngay tai cho.
-    neo = Path(__file__).parent
+    # KHONG phong tien trinh. Ban truoc cua chot nay goi `git rev-parse` HAI lan
+    # moi `kho_bare()`, tuc them hai tien trinh tren duong ma hang chuc ca va 112
+    # tien trinh con deu di qua. `gate-registry` CHUYEN TU XANH (7d0b012) SANG DO
+    # (0c89a6e) ngay o commit them chot ay, voi
+    #     VO CAN r506: OSError: [Errno 39] Directory not empty: '.../remote.git'
+    # Chua chung minh duoc co che, nhung mot phep DO khong duoc lam doi TAI cua
+    # thu no dang do — do la loi thiet ke cua chot, khong phai xui. Nay chot doc
+    # DAU HIEU tren dia: mot kho bare co `HEAD`, `objects/`, `refs/`.
+    # KHONG lay `remote` lam `cwd` (ban dau cua chot nay sap voi `FileNotFoundError`
+    # vo danh khi thu muc bien mat — dung lop benh no di chua).
     try:
-        ra = run(["git", "-C", str(remote), "rev-parse", "--is-bare-repository"],
-                 neo, check=False)
-        rc, ra_out, ra_err = ra.returncode, ra.stdout.strip(), ra.stderr.strip()
+        dau_hieu = {
+            "ton tai": remote.is_dir(),
+            "HEAD": (remote / "HEAD").is_file(),
+            "objects/": (remote / "objects").is_dir(),
+            "refs/": (remote / "refs").is_dir(),
+        }
     except OSError as exc:
-        rc, ra_out, ra_err = None, "", f"{type(exc).__name__}: {exc}"
-    if rc == 0 and ra_out == "true":
+        raise AssertionError(
+            f"kho bare hong {khi}: {remote} | KHONG DOC DUOC: {type(exc).__name__}: {exc}")
+    if all(dau_hieu.values()):
         return
     try:
         co = sorted(x.name for x in remote.iterdir())
     except OSError as exc:
         co = f"KHONG DOC DUOC THU MUC: {type(exc).__name__}: {exc}"
+    thieu = sorted(k for k, v in dau_hieu.items() if not v)
     raise AssertionError(
-        f"kho bare hong {khi}: {remote}"
-        f" | ton tai={remote.exists()} | thu muc con={co}"
-        f" | rc={rc} | stdout={ra_out!r} | stderr={ra_err!r}")
+        f"kho bare hong {khi}: {remote} | thieu={thieu} | thu muc con={co}")
 
 
 def kho_bare(*, mac_dinh: str = "main", a: bool = False, b: bool = False,

@@ -1,0 +1,151 @@
+# LEASE — DAU-PHIEN-TRUNG-LAM-DO-CONG revision 1 / generation 1
+# Packet MOI. KHONG ke vi ai: khong co thay_the_cho.
+# Executor CLAUDE. Ghi HO theo chi thi chu kho.
+#
+# DOC KY TRUOC KHI LAM: packet nay chua DUNG MOT thu — tien de ngam cua r508. No KHONG cham
+# r509, KHONG doi sinh_dau_phien(), KHONG noi `dich` cua entropy-giu-mot-byte. Xem KHONG_HUA_GI.
+
+schema_version: 2
+event: executor_lease_granted
+packet_issue: 593
+packet_id: DAU-PHIEN-TRUNG-LAM-DO-CONG
+mission_issue: KHONG_CO
+revision: 1
+generation: 1
+lease_id: dau-phien-trung-lam-do-cong-r1-g1-claude
+
+granted_by: ducthangho
+granted_on_instruction: https://github.com/ducthangho/tra-luat/issues/593#issuecomment-5757298080
+granted_on_instruction_nguyen_van: 'Chu kho, phien dieu phoi 2026-09-21, GO VAN XUOI: "Va #591,
+  #593 di, sau khi va thi chay 1 luot cross-review tren codex, neu chua co script chay test tren
+  may Windows cua toi thi cho script luon".
+  Chi thi den SAU khi executor da khai vat can o issues/593#issuecomment-5755843760 — rang cap
+  lease luc ops/nhanh_don_duoc_test.py con do r3 giu se lam CUA DONG cho ca hai. Chu kho van chi
+  thi tien hanh, nen viec r3 nha duong la he qua bao ham.'
+recorded_by: claude-session
+recorder_is_dispatcher: false
+
+DUONG_DA_SACH_DO_THE_NAO: '#568 r3 TU NHA duong bang bia mo hai chieu
+  chan-doan-tin-dung-gia-r3-g2-bia-mo (ban chieu: issues/568#issuecomment-5757287569). Do ngay
+  sau do: `ai-dang-giu ops/nhanh_don_duoc_test.py` => rc=0, NGUOI_GIU 0.
+  DAY KHONG PHAI KHE AG-T0-01B: lease nay KHONG dat thay_the_cho tro sang lease nao cua #568.
+  Thu hoi XUYEN PACKET mot lease con hieu luc moi la khe ay. O day #568 tu nha duong cua minh
+  bang lease cua CHINH no, roi #593 xin mot duong TRONG TAY KHONG. No
+  AG-T0-01B-thu-hoi-lease-chua-co-duong VAN MO va khong duoc dem them mot lan lach nao tu day.'
+
+leased_at_utc: '2026-09-21T06:00:00Z'
+lease_expires_at_utc: '2026-09-22T06:00:00Z'
+
+role: executor
+provider: anthropic_claude
+executor: claude
+model: KHONG_KHAI
+model_vi_sao_KHONG_bat_buoc: 'assurance_target la human_audited, khong phai cross_approved, nen
+  tinh chinh dang cua no KHONG treo vao viec hai ben khac ho model. Ket luan da duoc #551 r4
+  (M20) dong bang.'
+effort: KHONG_KHAI
+
+assurance_target: human_audited
+assurance_target_vi_sao: 'Cung can cu voi #568: codex het quota review, agy het quota, claude LA
+  executor. cross_approved doi HAI HO MODEL DOC LAP phuc vu luot chay.
+  GHI CHU cho luot nay: chu kho chi thi chay MOT luot cross-review tren codex sau khi va. Neu
+  luot ay chay THAT va co bang chung du theo §8, muc bao dam CO THE len cross_approved — nhung
+  do la phep do phai lam roi moi khai, khong duoc khai truoc. Cho toi khi co bang chung, muc van
+  la human_audited.'
+assurance_target_HE_QUA_PHAI_KHAI: 'Packet nay KHONG LAND DUOC BANG MAY. §8 cho class sensitive
+  doi cross_approved HOAC human_audited. Executor KHONG duoc khai muc nao ho chu kho.'
+assurance_target_fallback: advisory_review
+reviewer_provider: codex
+reviewer_provider_vi_sao: 'Chu kho chi thi cross-review tren codex. Executor la claude
+  (anthropic_claude), nen reviewer PHAI khac ho model — codex la lua chon dung theo §8.
+  CHUA CHUNG MINH KHA DUNG luc cap: `launcher.py doctor` ket luan THIEU codex (CLI chua cai).
+  Credential CO (bien CODEX_AUTH_JSON). Neu khong goi duoc that thi khai KHONG DO DUOC, khong
+  duoc khai cross_approved.'
+
+review_class: sensitive
+effective_review_class: sensitive
+review_class_vi_sao: 'Cham CHINH bo phan hang dot bien va bang DOT_BIEN_TU_KIEM — tuc cham cong
+  DO RANG cua mot cong khac. Ha lop o dung cho ay la tu noi luat cho minh.'
+
+spec_ref: ops/specs/dau-phien-trung-lam-do-cong-r1.md
+spec_path: ops/specs/dau-phien-trung-lam-do-cong-r1.md
+prompt_path: ops/specs/dau-phien-trung-lam-do-cong-r1.md
+prompt_sha256_required: e41767b9f1b103185d1482c31ccd923f39e9777a76600ba85a7f6fe7ac38cbf9
+spec_hash: e41767b9f1b103185d1482c31ccd923f39e9777a76600ba85a7f6fe7ac38cbf9
+spec_hash_do_nhu_the_nao: 'sha256sum ops/specs/dau-phien-trung-lam-do-cong-r1.md tren nhanh
+  ops/cap-lease-593, 8 530 B. Do lai TRUOC khi tin con so nay.'
+
+branch: claude/dau-phien-trung-lam-do-cong-r1
+branch_ownership: exclusive
+
+start_from_sha: 9361a4760c063b392e8288b9378d878c00b39054
+start_from_sha_vi_sao: 'Head PR #591. Ban va nay xay TREN r1+r2+r3 chu khong thay the chung: cat
+  tu master se lam mat ca ba khoi cay lam viec, va entropy-giu-mot-byte phai duoc do trong DUNG
+  bang dot bien ma r3 de lai (85 muc). Neo vao master roi khai "85/85" se la mot con so cua mot
+  bang khac.'
+reviewed_sha_required: 9361a4760c063b392e8288b9378d878c00b39054
+reviewed_sha_required_note: 'Mo neo SAN luc cap — day la start_from_sha, KHONG phai head ung
+  vien cuoi. Ho so audit PHAI neo head ung vien THAT khi no ton tai. Luot cross-review codex
+  cung phai ghi exact reviewed_sha cua head THAT, khong phai so nay.'
+
+write_set:
+- ops/nhanh_don_duoc_test.py
+write_set_MOT_DUONG: 'MOT tep. Nam gon trong tran ADR-0044:5 cho class sensitive (<= 3 tep va
+  <= 300 dong them). KHONG xin ngoai le nao.'
+
+KHONG_HUA_GI:
+  khong_cham_r509: 'r509 MOI la ca that su do bo sinh, va entropy-giu-mot-byte PHAI tiep tuc
+    giet dung no voi dich = ("r509",). A4 cua dac ta cuong che dieu nay.'
+  khong_doi_bo_sinh: 'KHONG doi sinh_dau_phien() hay secrets.token_hex. Bo sinh KHONG SAI; cho
+    sai la mot ca coi tinh phan biet la chuyen duong nhien.'
+  khong_noi_dich: 'KHONG noi dich cua entropy-giu-mot-byte thanh ("r508","r509"). Da BAC bang so
+    o §3 dac ta: chay thang vi tu phan hang o :2936 cho thay no DAO cho chap chon — do 255/256
+    thay vi 1/256.'
+  khong_chua_cua_568: 'KHONG chua CASE T6, khong chua nguyen nhan (A) cua r506, khong dung vao
+    M7-M9 cua r3.'
+  khong_don_canh_bao_con_lai: 'Bon diem invalid escape sequence con lai cua kho la no rieng, da
+    khai o #568. Ngoai write set.'
+  khong_hua_gate_registry_xanh: 'Packet nay bo mot duong do ~1/256. No KHONG bao dam cong se
+    xanh — con duong do khac ma ta chua do thi van con.'
+
+cam_tuyet_doi:
+- 'Bo hoac vo hieu hoa mot ca test de lam xanh. Chua bao gio la duong.'
+- 'Khai A9 DAT khi no chay duoi MA THUONG thay vi duoi dot bien. Duoi ma thuong khong gian la
+  2^128 nen "0 lan do" dung mot cach VO NGHIA — phep do khong phan biet duoc "da chua" voi
+  "chua tung benh". Day la CO_HOI_TAI_PHAT_DA_BIET, xem duoi.'
+- 'De nhanh can-tren thanh vong lap khong chan. Cap chan phai khai KHONG DO DUOC, khong duoc
+  treo va khong duoc lam tron len DAT.'
+- 'Khai cross_approved khi luot codex chua chay that hoac chua co bang chung du theo §8.'
+
+khong_duoc_cham:
+- ops/nhanh_don_duoc.py
+- ops/lease_publish.py
+- ops/lease_publish_test.py
+- ops/bien_nhan_v2.py
+- ops/bien_nhan_v2_test.py
+- .claude/dev/packet_loop_test.py
+- docs/PROTOCOL_DA_PHIEN.md
+- ops/specs/dau-phien-trung-lam-do-cong-r1.md
+- ops/specs/chan-doan-tin-dung-gia-r1.md
+- ops/specs/chan-doan-tin-dung-gia-r2.md
+- ops/specs/chan-doan-tin-dung-gia-r3.md
+- .github/workflows/ci.yml
+- .claude/dev/launcher.py
+- .claude/dev/packet_loop.py
+- scripts/tl.py
+- scripts/tl_selftest.py
+- RELEASE_MANIFEST.json
+khong_duoc_cham_vi_sao: 'ops/specs/dau-phien-trung-lam-do-cong-r1.md: dac ta DA DONG BANG — sua
+  no la lam bam trong lease tro vao hu vo; dinh chinh bang mot revision MOI.
+  ops/nhanh_don_duoc_test.py KHONG nam trong danh sach nay — no LA write set.'
+
+hinh_dang_ke_thua:
+  LOI-KHAI-RONG-HON-PHEP-DO: 4
+  TIN-HIEU-DO-CHINH-MA-TEST-GIA-MAO: 3
+  VA-DUNG-CHO-DUOC-CHI-ROI-BO-SOT-DUONG-THU-BA: 2
+  nguon: 'Chep tu chan-doan-tin-dung-gia-r3-g1-claude luc mo packet nay.'
+  CO_HOI_TAI_PHAT_DA_BIET: 'A9 la chot DUY NHAT chung minh benh da het. Neu no chay duoi ma
+    thuong thay vi duoi dot bien entropy-giu-mot-byte, no se XANH ma khong do gi — dung hinh dang
+    TIN-HIEU-DO-CHINH-MA-TEST-GIA-MAO lan thu TU. Hinh dang ay dang o muc 3, tuc DA VUOT nguong
+    "lan thu ba => DUNG va hoi". Executor phai DO va KHAI ro A9 chay duoi dot bien, va phai co
+    mot dot bien rieng chung minh A9 co rang. Thieu mot trong hai la chua lam A9.'

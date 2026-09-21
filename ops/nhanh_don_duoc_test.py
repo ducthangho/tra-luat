@@ -278,11 +278,44 @@ def run(args: list[str], cwd: Path, check: bool = True, env: dict[str, str] | No
 def viet(path: Path, text: str) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(text, encoding="utf-8", newline="\n")
+def _kho_that(remote: Path, khi: str) -> None:
+    """Chot kho bare THAT SU la kho, kem trang thai thu muc khi no khong phai.
+
+    #568 — mot loi VO CAN khong ten la dung benh goi nay chua. `git push` bao
+    "does not appear to be a git repository" o mot buoc CACH XA cho tao kho, nen
+    thong diep ay khong noi duoc kho bien mat luc nao. Chot nay dat o hai moc va
+    mang theo DU KIEN: buoc nao, thu muc con gi, va git noi gi.
+    """
+    # KHONG lay `remote` lam `cwd`: neu no da bien mat thi `subprocess` nem
+    # `FileNotFoundError` — mot ngoai le VO DANH, dung lop benh #568 chua, va
+    # chot nay se tu tro thanh mot cai bay. Do duoc: ban dau cua chinh chot nay
+    # sap voi `[Errno 2]` thay vi khai duoc kho da bien mat. Chay `git -C` tu
+    # mot thu muc CHAC CHAN con, va bat `OSError` ngay tai cho.
+    neo = Path(__file__).parent
+    try:
+        ra = run(["git", "-C", str(remote), "rev-parse", "--is-bare-repository"],
+                 neo, check=False)
+        rc, ra_out, ra_err = ra.returncode, ra.stdout.strip(), ra.stderr.strip()
+    except OSError as exc:
+        rc, ra_out, ra_err = None, "", f"{type(exc).__name__}: {exc}"
+    if rc == 0 and ra_out == "true":
+        return
+    try:
+        co = sorted(x.name for x in remote.iterdir())
+    except OSError as exc:
+        co = f"KHONG DOC DUOC THU MUC: {type(exc).__name__}: {exc}"
+    raise AssertionError(
+        f"kho bare hong {khi}: {remote}"
+        f" | ton tai={remote.exists()} | thu muc con={co}"
+        f" | rc={rc} | stdout={ra_out!r} | stderr={ra_err!r}")
+
+
 def kho_bare(*, mac_dinh: str = "main", a: bool = False, b: bool = False,
              c_mot: bool = False, c_hai: bool = False):
     td = tempfile.TemporaryDirectory()
     root, remote, work = Path(td.name), Path(td.name) / "remote.git", Path(td.name) / "work"
     run(["git", "init", "--bare", str(remote)], root)
+    _kho_that(remote, "ngay sau `git init --bare`")
     run(["git", "init", "-b", mac_dinh, str(work)], root)
     run(["git", "config", "user.name", "test"], work)
     run(["git", "config", "user.email", "test@example.invalid"], work)
@@ -321,6 +354,12 @@ def kho_bare(*, mac_dinh: str = "main", a: bool = False, b: bool = False,
             run(["git", "commit", "-m", f"commit rieng {i}"], work)
         run(["git", "switch", mac_dinh], work)
     run(["git", "remote", "add", "origin", str(remote)], work)
+    # Windows (log chu kho, 2026-09-21): `git push --all origin` tra rc=128 voi
+    # "does not appear to be a git repository" cho DUNG duong vua `init --bare`
+    # thanh cong o tren — mot lan trong ba luot, tren CA #590 lan #591. Khong tai
+    # lap duoc tren Linux. Chua biet nguyen nhan, nen o day KHONG doan: chi DO
+    # ngay truoc khi day, de luot Windows sau NEU TEN duoc buoc that su hong.
+    _kho_that(remote, "ngay truoc `git push --all origin`")
     run(["git", "push", "--all", "origin"], work)
     run(["git", "symbolic-ref", "HEAD", f"refs/heads/{mac_dinh}"], remote)
     run(["git", "fetch", "origin"], work)

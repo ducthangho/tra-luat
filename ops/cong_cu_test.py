@@ -1924,27 +1924,56 @@ def t33_do_phu_cua_cong_do_duoc_THEO_HINH_DANG():
 
 @ca
 def t34_cache_tim_bash_phai_theo_doi_MOI_TRUONG():
-    """Đặt `CONG_CU_BASH` SAU lần gọi đầu thì lần sau phải THẤY, không bị cache nuốt.
+    """THUỘC TÍNH CA NÀY TRÓI: **khoá cache có gồm môi trường không** — không phải "trả về gì".
 
     SINH TỪ CROSS-REVIEW (finding F3). `ung_vien()` đọc `CONG_CU_BASH`/`PATH`/`SystemRoot`/
     `ProgramFiles` từ `os.environ` khi tham số là `None`, nhưng khoá cache cũ là `[[], false]`
-    — chỉ `ep` và `tat_ca`. Đo được: gọi `tim_bash()`, đặt `CONG_CU_BASH` sang một bash THẬT ở
-    đường khác, gọi lại ⇒ vẫn trả đường CŨ, **không một dòng cảnh báo**. Nút ghi đè mà chính
-    module tự khai bị chính cache của nó nuốt.
+    — chỉ `ep` và `tat_ca`. Nút ghi đè mà chính module tự khai bị chính cache của nó nuốt.
+
+    VIẾT LẠI Ở r6 (N20), và lý do là một PHÉP ĐO WINDOWS. Bản r4 chốt `sau == khac` — một
+    **kết quả**, trong khi thuộc tính là một **cơ chế**. Hai thứ ấy trùng nhau trên Linux và
+    TÁCH RA trên Windows: bộ đo `570-do-10` (máy chủ kho, HEAD `c0bc5a5`, chốt cây ĐẠT) đo được
+    `trước='C:\\Program Files\\Git\\bin\\bash.exe'`, `đặt='…\\Temp\\tmppjuaw8uq\\bash'`,
+    `nhận=trước` ⇒ ca ĐỎ. Và vì nó đỏ ĐỘC LẬP với mọi đột biến, nó tự cộng vào bán kính của
+    TỪNG đột biến: 19 dòng `ĐỎ … bán kính 2/38` — hệ quả của MỘT ca đỏ, không phải 19 khuyết tật.
+
+    Bản cũ KHÔNG nói được vì sao, vì nó vứt `chan_doan` đi (`sau, _ = tim_bash()`). Hai nguyên
+    nhân cùng dự đoán `nhận == trước`: (a) cache vẫn nuốt; (b) cache ĐÃ tính lại, có XÉT ứng
+    viên mới, nhưng ứng viên bị NĂNG LỰC từ chối nên bộ giải lùi về — tức `tim_bash` làm ĐÚNG.
+    Đây là lần thứ TƯ trong packet này một ca khẳng định KẾT QUẢ trong khi cần đo CƠ CHẾ
+    (`_ket_luan_ban_kinh`, `t33` chốt 3, `t35` chốt 1). Xem lease g6 `hinh_dang_ke_thua`.
+
+    BA CHỐT, theo đúng thứ tự:
+      (1) CHÍNH, độc lập nền — `chan_doan` của lần gọi THỨ HAI phải CHỨA đường ghi đè như một
+          ứng viên ĐÃ ĐƯỢC XÉT. Khoá cũ trả bản nhớ mà không hỏi ứng viên nào, nên nó sẽ vắng
+          mặt. `t34_khoa_cache_bo_moi_truong` giết ca này QUA CHỐT NÀY (đã đo, bán kính 1/38).
+      (2) ứng viên ghi đè được CHẤP NHẬN ⇒ chốt thêm `sau == khac`.
+      (3) bị TỪ CHỐI ⇒ KHÔNG ĐO ĐƯỢC, kèm `ly_do` lấy TỪ `chan_doan`. `None ≠ False`.
+
+    Và bản ghi đè phải được dựng cho CHẠY ĐƯỢC trước đã — giữ nguyên tên tệp kể cả `.exe`,
+    chép kèm `*.dll` cùng thư mục. Bỏ qua bước ấy là tự chế một ứng viên hỏng rồi đổ cho bộ giải.
 
     Chạy trong TIẾN TRÌNH CON: ca này đụng `os.environ` và `_CACHE` toàn cục, làm bẩn tiến
     trình chạy suite thì các ca sau đo nhầm.
     """
-    ma = ("import json, os, shutil, sys, tempfile, runpy\n"
+    ma = ("import json, os, shutil, sys, tempfile, runpy, glob\n"
           f"m = runpy.run_path({str(BASH_NEN)!r})\n"
           "that, _ = m['tim_bash']()\n"
           "if not that:\n"
           "    print('KQ ' + json.dumps(['BO_QUA', 'khong co bash nao dung duoc'])); raise SystemExit(0)\n"
-          "tmp = tempfile.mkdtemp(); khac = os.path.join(tmp, 'bash')\n"
+          # BAN GHI DE PHAI CHAY DUOC, khong phai mot tep tro. GIU NGUYEN TEN (ke ca `.exe`)
+          # va chep kem `*.dll` cung thu muc: tren Git for Windows, `bash.exe` nap
+          # `msys-2.0.dll` nam canh no, nen mot ban sao le KHONG chay duoc. Tren Linux khong
+          # co dll nao va ban sao le chay duoc — day dung la cho hai nen tach ra.
+          "tmp = tempfile.mkdtemp()\n"
+          "khac = os.path.join(tmp, os.path.basename(that))\n"
           "shutil.copy2(that, khac); os.chmod(khac, 0o755)\n"
+          "for d in glob.glob(os.path.join(os.path.dirname(that), '*.dll')):\n"
+          "    try: shutil.copy2(d, tmp)\n"
+          "    except OSError: pass\n"
           "os.environ['CONG_CU_BASH'] = khac\n"
-          "sau, _ = m['tim_bash']()\n"
-          "print('KQ ' + json.dumps(['OK', that, khac, sau]))\n")
+          "sau, cd = m['tim_bash']()\n"
+          "print('KQ ' + json.dumps(['OK', that, khac, sau, cd]))\n")
     p = subprocess.run([sys.executable, "-c", ma], cwd=GOC, capture_output=True,
                        text=True, timeout=180)
     dung(p.returncode == 0 and "KQ " in p.stdout,
@@ -1952,10 +1981,32 @@ def t34_cache_tim_bash_phai_theo_doi_MOI_TRUONG():
     kq = json.loads([l for l in p.stdout.splitlines() if l.startswith("KQ ")][-1][3:])
     if kq[0] == "BO_QUA":
         raise BoQuaMoiTruong(f"KHÔNG_ĐO_ĐƯỢC: {kq[1]}")
-    _, truoc, khac, sau = kq
+    _, truoc, khac, sau, chan_doan = kq
+
+    # CHOT CHINH — doc lap NEN. Thu N19 sua la KHOA CACHE, nen thu phai đo la "lần gọi thứ hai
+    # có XÉT ứng viên mới không", chứ không phải "nó trả về đường nào". Khoá cũ trả bản nhớ mà
+    # không hỏi ứng viên nào, nên đường ghi đè sẽ KHÔNG có mặt trong `chan_doan`.
+    cung = {os.path.normcase(os.path.abspath(str(x.get("duong")))) for x in chan_doan}
+    khac_chuan = os.path.normcase(os.path.abspath(khac))
+    bang(khac_chuan in cung,
+         f"`chan_doan` của lần gọi THỨ HAI KHÔNG chứa đường ghi đè ⇒ cache trả bản nhớ mà "
+         f"không xét ứng viên nào: đặt={khac!r}, đã xét={sorted(cung)}. "
+         f"Khoá cache phải gồm môi trường (#570 r6 N20).")
+
+    muc = next(x for x in chan_doan
+               if os.path.normcase(os.path.abspath(str(x.get("duong")))) == khac_chuan)
+    if not muc.get("dat"):
+        # BA TRANG THAI, khong phai hai. Ung vien ghi de bi NANG LUC tu choi thi bo giai lui ve
+        # ung vien khac — do la `tim_bash` LAM DUNG viec cua no, khong phai cache nuot. Ly do
+        # lay TU `chan_doan`, tuc DO DUOC, chu khong phai mot suy doan dan vao.
+        raise BoQuaMoiTruong(
+            f"KHÔNG_ĐO_ĐƯỢC: bản ghi đè ĐÃ ĐƯỢC XÉT nhưng bị NĂNG LỰC từ chối nên không thể "
+            f"chốt `sau == khac`. đặt={khac!r}, lý do={muc.get('ly_do')!r}. Chốt chính (cache "
+            f"có tính lại) ĐÃ ĐẠT ở trên.")
+
     bang(sau == khac,
-         f"`CONG_CU_BASH` đặt SAU lần gọi đầu bị cache NUỐT: trước={truoc!r}, đặt={khac!r}, "
-         f"nhận={sau!r}. Khoá cache phải gồm môi trường (#570 r4 N19).")
+         f"bản ghi đè ĐẠT cả hai phép mà `tim_bash` vẫn không trả nó: trước={truoc!r}, "
+         f"đặt={khac!r}, nhận={sau!r}.")
 
 
 @ca

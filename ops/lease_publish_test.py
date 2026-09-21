@@ -1346,8 +1346,32 @@ def t32_buoc_chon_lease_KHONG_duoc_quet_CA_THU_MUC():
     `posted_comment_id`, hạn `2026-08-18T17:45Z`.
 
     Hệ quả: từ 18-08 tới 20-08, MỌI lease mới không đăng được, và không ai biết — cổng
-    không nói dối, nó VẮNG MẶT. Chú thích cũ khai "chốt `posted_comment_id` lo phần
-    không đăng trùng": đúng cho lease ĐÃ đăng (rc=9), sai cho lease CHƯA TỪNG đăng.
+    không nói dối, nó VẮNG MẶT.
+
+    VẾ THỨ HAI CỦA CHÚ THÍCH CŨ Ở ĐÂY TỪNG SAI, và 20-09-2026 là lần đầu nó bị ĐO. Bản
+    trước viết: chú thích cũ khai "chốt `posted_comment_id` lo phần không đăng trùng" —
+    *"đúng cho lease ĐÃ đăng (rc=9), sai cho lease CHƯA TỪNG đăng"*. Vế in nghiêng đúng
+    một NỬA. Đo trên `origin/master` `a1bbdc10`, `kiem_github` với `_doc_gh` giả:
+
+        còn hạn + ĐÃ có dấu   -> rc=9    ✔ vế cũ đúng ở đây
+        HẾT HẠN + ĐÃ có dấu   -> rc=8    ✘ vế cũ SAI ở đây
+
+    Vì sao: `kiem_github` gọi `kiem()` ở dòng đầu, mà `kiem()` ném `rc=8` cho lease hết
+    hạn TRƯỚC khi `_kiem_comment_da_co` kịp chạy. Nên với một lease **đã đăng rồi mới hết
+    hạn**, đường `rc=9` KHÔNG BAO GIỜ tới được — nhánh `rc=9` của workflow có sẵn và viết
+    đúng, nó chỉ không bao giờ được gọi. Cùng họ *"cổng VẮNG MẶT trông giống cổng xanh"*,
+    đúng như đoạn ngay trên.
+
+    Nói cho đủ: `posted_comment_id` thôi làm dấu "đã đăng" từ packet #396 — dấu duy nhất
+    nay là chính comment trên Issue (`t126` ghim vị từ ấy). Nên câu trên bàn về một cơ chế
+    đã nghỉ; thứ còn sống là THỨ TỰ, và thứ tự mới là chỗ sai.
+
+    Packet #579 đảo thứ tự (dò dấu TRƯỚC, `kiem()` SAU) nên nay cả hai hình dạng đều `rc=9`;
+    `t174`/`t175` là cặp phản chứng ĐỎ NGƯỢC CHIỀU cho đúng chuyện đó.
+
+    CHƯA SỬA ĐƯỢC, khai thẳng: cùng câu sai ấy còn nằm ở
+    `.github/workflows/ops-publish-lease.yml` (khối chú thích của bước `tìm lease vừa đổi`).
+    Tệp đó CỐ Ý ngoài write set của packet này, nên bản vá để lại đúng một lời khai cũ ở đó.
 
     Và mọi lease đều đi bằng một nhánh MỚI theo `ops/README.md`, nên đường "dự phòng"
     ấy thật ra là đường CHÍNH — đúng lớp bệnh "nhánh không-thấy-thì-bỏ-qua nằm im tới
@@ -6993,6 +7017,209 @@ def t173_N12_hang_fixture_dung_tren_CA_HAI_nen():
     chot(mau.split(PHAN_CACH_THU_N10) == ["C:/x/a", "C:/x/b"],
          f"ghép/tách bằng {PHAN_CACH_THU_N10!r} phải giữ nguyên đường Windows: "
          f"{mau.split(PHAN_CACH_THU_N10)}")
+
+
+# ── #579 — THỨ TỰ trong `kiem_github` là NỘI DUNG, không phải chi tiết cài đặt ──────────
+# Năm ca dưới đây phủ ma trận 2×2 (hạn × dấu) cộng một ca miền. `_lease_579` dựng đúng
+# một lease tối thiểu; `_do_kiem_github` trả `(mã thoát, số lời gọi GitHub)` — số lời gọi
+# là thứ phân biệt "tiền kiểm chặn" với "chuỗi cũ chặn", mà mã thoát KHÔNG phân biệt được.
+
+def _lease_579(**doi):
+    mac_dinh = {"lease_id": "wp579-thu", "packet_issue": 55}
+    mac_dinh.update(doi)          # ca miền cần GHI ĐÈ `packet_issue`, không phải thêm vào
+    return lease_mau(**mac_dinh)
+
+
+def _do_kiem_github(lease, co_dau: bool, **k):
+    """Gọi `kiem_github` với GitHub giả; trả `(ma, so_loi_goi_gh)`.
+
+    `ma = 0` nghĩa là không ném. Trả kèm SỐ LỜI GỌI vì hai đường từ chối khác nhau có thể
+    cho cùng một mã: tiền kiểm miền chặn TRƯỚC khi chạm mạng (0 lời gọi), còn `kiem()`
+    chặn SAU khi phép dò đã hỏi Issue.
+    """
+    dau = "**Lease `" + str(lease.get("lease_id", "")) + "`**"
+    than = dau + " — bản chiếu" if co_dau else "khong lien quan"
+    gh = GhGia(comments={55: [{"id": 7, "body": than,
+                               "user": {"login": "github-actions[bot]"}}]})
+    ex, _mod = _goi_lop_gh(gh, "kiem_github", lease, env_them=ENV_GITHUB, **k)
+    return (0 if ex is None else ex.ma), len(gh.calls)
+
+
+@ca
+def t174_het_han_ma_DA_co_dau_thi_bo_qua_chu_khong_ket_toi_het_han():
+    """A1 — lease ĐÃ ĐĂNG rồi mới HẾT HẠN phải ra `rc=9` (bỏ qua), không phải `rc=8`.
+
+    Đây là hình dạng đã giết hai lượt `ops — đăng lease bằng git` ngày 20-09-2026
+    (`35519177197` của #568 và `35519243379` của #566): cả hai ĐỎ SAU KHI lease mới đã
+    đăng xong, tức việc chính đã thành và chỉ cái đuôi gãy. Nguyên nhân là THỨ TỰ —
+    `kiem()` ném `rc=8` cho lease hết hạn trước khi chốt `rc=9` kịp chạy.
+
+    Đo trên nền `a1bbdc10` (trước bản vá): hình dạng này cho `rc=8`.
+
+    ĐỘT BIẾN LÀM CA NÀY ĐỎ: đưa `_do_dau_da_dang` về SAU `kiem()` trong `kiem_github`
+    (tức khôi phục thứ tự cũ) ⇒ nhận 8 thay vì 9. Ca so MÃ THOÁT, không so chuỗi thông
+    điệp — bài học #355/#359: một `except` đổi kiểu giả được chuỗi, không giả được mã.
+    """
+    ma, _goi = _do_kiem_github(_lease_579(lease_expires_at_utc=khi_truoc(48)), co_dau=True)
+    chot(ma == RC_DA_DANG,
+         f"lease ĐÃ ĐĂNG rồi mới hết hạn phải cho rc={RC_DA_DANG} (bỏ qua), được rc={ma}. "
+         f"rc={RC_NOI_DUNG} nghĩa là `kiem()` vẫn chạy trước và chốt 'đã đăng' lại bị che.")
+
+
+@ca
+def t175_het_han_ma_KHONG_co_dau_thi_van_la_het_han():
+    """A2 — nửa BÙ của `t174`: hết hạn mà CHƯA TỪNG đăng thì vẫn phải `rc=8`.
+
+    Chống hồi quy #195 theo chiều ngược lại. Bản vá của #579 đảo thứ tự, và cách hỏng dễ
+    thấy nhất của một bản vá như vậy là trả `rc=9` VÔ ĐIỀU KIỆN — lúc đó mọi lease chết
+    đều được "bỏ qua" êm, và cổng chống đăng lease chết biến mất.
+
+    CẶP `t174`/`t175` PHẢI ĐỎ NGƯỢC CHIỀU NHAU. Chỉ một trong hai đỏ dưới một đột biến
+    nghĩa là chúng là bộ TƯƠNG ĐƯƠNG và ta chỉ đang đo MỘT thứ.
+
+    ĐỘT BIẾN LÀM CA NÀY ĐỎ: cho `_do_dau_da_dang` ném `Chan(RC_DA_DANG)` không cần dấu.
+    """
+    ma, _goi = _do_kiem_github(_lease_579(lease_expires_at_utc=khi_truoc(48)), co_dau=False)
+    chot(ma == RC_NOI_DUNG,
+         f"lease hết hạn mà CHƯA TỪNG đăng phải cho rc={RC_NOI_DUNG}, được rc={ma}. "
+         f"rc={RC_DA_DANG} ở đây nghĩa là cổng bỏ qua một lease chết — đúng bệnh #195.")
+
+
+@ca
+def t176_con_han_ma_DA_co_dau_van_bo_qua_nhu_cu():
+    """A3 — hành vi CŨ không được đổi: còn hạn + đã có dấu vẫn `rc=9`.
+
+    Vế này của chú thích `t32` vốn ĐÚNG (xem docstring `t32`), và bản vá phải giữ nguyên.
+    Đo cả trên nền `a1bbdc10` lẫn ứng viên: cùng `rc=9`.
+
+    ĐỘT BIẾN LÀM CA NÀY ĐỎ: bỏ hẳn tiền kiểm `_do_dau_da_dang` VÀ bỏ `_kiem_comment_da_co`
+    khỏi chuỗi sau — tức gỡ cả hai cửa chống đăng trùng.
+    """
+    ma, _goi = _do_kiem_github(_lease_579(), co_dau=True)
+    chot(ma == RC_DA_DANG,
+         f"còn hạn + đã có dấu phải cho rc={RC_DA_DANG}, được rc={ma} — chống đăng trùng đã hỏng")
+
+
+@ca
+def t177_con_han_KHONG_dau_thi_MOI_CHOT_cua_kiem_van_phai_chay():
+    """A4 — đường KHÔNG-CÓ-DẤU không được đổi một mã thoát nào.
+
+    Đây là chốt đắt nhất của packet: dò dấu TRƯỚC nghĩa là với lease ĐÃ ĐĂNG, các chốt của
+    `kiem()` (tự cấp, neo prompt, trường bắt buộc) KHÔNG còn soi nó trên đường này — giá đã
+    khai trong docstring `kiem_github`. Cái giá ấy chỉ chấp nhận được nếu đường KHÔNG-CÓ-DẤU
+    vẫn chạy đủ chốt. Ca này đo đúng điều đó, bằng BA ca tiêm cho BA mã thoát KHÁC NHAU.
+
+    ĐỘT BIẾN LÀM CA NÀY ĐỎ: cho tiền kiểm nuốt cả bốn hình dạng (ví dụ trả `Chan(RC_DA_DANG)`
+    ngay khi chưa dò được dấu) ⇒ cả ba mã đều thành 9.
+    """
+    ma, _goi = _do_kiem_github(_lease_579(), co_dau=False)
+    chot(ma == RC_OK, f"lease sạch, còn hạn, chưa đăng mà bị chặn: rc={ma}")
+
+    ma, _ = _do_kiem_github(_lease_579(granted_by="codex"), co_dau=False)
+    chot(ma == RC_TU_CAP, f"tự cấp phải cho rc={RC_TU_CAP}, được rc={ma}")
+
+    ma, _ = _do_kiem_github(_lease_579(prompt_path="ops/prompts/p.md"), co_dau=False)
+    chot(ma == RC_NEO, f"neo prompt không kiểm được phải cho rc={RC_NEO}, được rc={ma}")
+
+    thieu = _lease_579()
+    del thieu["granted_by"]
+    ma, _ = _do_kiem_github(thieu, co_dau=False)
+    chot(ma == RC_NOI_DUNG, f"thiếu trường bắt buộc phải cho rc={RC_NOI_DUNG}, được rc={ma}")
+
+
+@ca
+def t178_tien_kiem_mien_chan_TRUOC_khi_cham_mang():
+    """A5/M7 — `_tien_kiem_mien_dang` fail-close, và PHẠM VI THẬT của nó, đã ĐO.
+
+    Ba ca âm đều cho `rc=8` và KHÔNG ngoại lệ trần nào thoát ra. Nhưng chỉ nói thế là khai
+    RỘNG HƠN phép đo, nên ghi cho đúng — đột biến gỡ hẳn `_tien_kiem_mien_dang`:
+
+        thiếu `lease_id`        -> rc=8  KHÔNG đổi   (bộ tương đương)
+        thiếu `packet_issue`    -> rc=8  KHÔNG đổi   (bộ tương đương)
+        `packet_issue` SAI KIỂU -> rc=9  ĐỔI, và đổi NGUY HIỂM
+
+    Hai ca đầu không đổi vì `_do_dau_da_dang` vốn NUỐT mọi ngoại lệ không phải `RC_DA_DANG`:
+    `KeyError` chết ngay đó rồi `kiem()` dựng lại `rc=8`. Chúng đo CÁI NUỐT, không đo hàm ấy.
+
+    Thứ hàm ấy thật sự đóng là ca thứ BA: `packet_issue: "55"` (chuỗi) vẫn dựng được URL
+    `issues/55/comments` hợp lệ, nên phép dò thấy dấu và trả `rc=9` — một lease SAI KIỂU
+    được cấp đường "đã đăng, bỏ qua" và NÉ SẠCH mọi chốt của `kiem()`.
+
+    Nên ca này đo thêm SỐ LỜI GỌI GitHub, thứ mà mã thoát không phân biệt được: tiền kiểm
+    chặn trước khi chạm mạng ⇒ **0** lời gọi. Đó là răng riêng của ca thứ ba.
+
+    KHÔNG ĐO: riêng ca `packet_issue: True` (`bool` là `int` trong Python) chưa có phép đo;
+    nó suy từ cùng cơ chế với ca chuỗi, và suy không phải đo.
+    """
+    thieu_id = _lease_579()
+    del thieu_id["lease_id"]
+    thieu_so = _lease_579()
+    del thieu_so["packet_issue"]
+
+    for nhan, lease in (("thiếu `lease_id`", thieu_id),
+                        ("thiếu `packet_issue`", thieu_so),
+                        ("`packet_issue` sai kiểu", _lease_579(packet_issue="55"))):
+        ma, goi = _do_kiem_github(lease, co_dau=True)
+        chot(ma == RC_NOI_DUNG,
+             f"{nhan}: phải cho rc={RC_NOI_DUNG}, được rc={ma}. "
+             f"rc={RC_DA_DANG} nghĩa là một lease hỏng miền được cấp đường bỏ qua.")
+        chot(goi == 0,
+             f"{nhan}: tiền kiểm phải chặn TRƯỚC khi hỏi GitHub, nhưng đã có {goi} lời gọi")
+
+
+@ca
+def t179_do_dau_KHONG_DO_DUOC_thi_nhuong_lai_cho_chuoi_cu():
+    """Phép DÒ chỉ có quyền nói "đã đăng rồi"; nó KHÔNG có quyền nói "đạt", cũng KHÔNG có
+    quyền biến một sự cố mạng thành một phán quyết.
+
+    CA NÀY SINH RA TỪ MỘT ĐỘT BIẾN SỐNG SÓT, và đó là lý do nó tồn tại. Lượt đo đầu của
+    packet #579 dựng năm đột biến; bốn cái bị giết đúng ca của nó, còn cái thứ năm — cho
+    nhánh nuốt của `_do_dau_da_dang` ném `Chan(RC_DA_DANG)` — **sống sót 10/10**. Không
+    phải vì mã đúng: vì năm ca kia chỉ dựng hai hình dạng (`_kiem_comment_da_co` thấy dấu,
+    hoặc trả về êm), nên nhánh nuốt CHƯA TỪNG ĐƯỢC CHẠY. Đột biến sống sót ở đây là một
+    khoảng TRỐNG của bộ test, không phải một chứng cứ về mã.
+
+    Hình dạng còn thiếu: endpoint `comments` HỎNG. `_doc_gh` ném `Chan(RC_NOI_DUNG)`, tức
+    "KHÔNG ĐO ĐƯỢC" — và `None ≠ False`: không đo được dấu thì KHÔNG được kết luận gì về
+    dấu, phải nhường lại cho chuỗi cũ phán.
+
+    Đo bằng một lease CỐ Ý tự cấp (`granted_by` là tên provider), vì mã thoát của nó
+    (`rc=4`) chỉ đến được khi `kiem()` THẬT SỰ chạy. Đó là thứ phân biệt được ba hành vi mà
+    một mình `rc` không phân biệt nổi:
+
+        nhường lại cho chuỗi cũ (đúng)              -> rc=4   `kiem()` đã chạy
+        nuốt thành "đã đăng"                        -> rc=9   `kiem()` bị bỏ qua
+        ném thẳng lỗi KHÔNG ĐO ĐƯỢC của phép dò     -> rc=8   `kiem()` bị bỏ qua
+
+    ĐỘT BIẾN LÀM CA NÀY ĐỎ: cho nhánh nuốt ném `Chan(RC_DA_DANG)`; hoặc bỏ điều kiện
+    `if c.ma == RC_DA_DANG` để phép dò ném lại MỌI `Chan`.
+    """
+    lease = _lease_579(granted_by="codex")
+
+    def do(gia):
+        ex, _mod = _goi_lop_gh(gia, "kiem_github", lease, env_them=ENV_GITHUB)
+        return 0 if ex is None else ex.ma
+
+    # HÌNH DẠNG 1 — endpoint hỏng "tử tế": `_doc_gh` bọc thành `Chan(RC_NOI_DUNG)`.
+    ma = do(GhGia(comments={55: []}, loi_comment={55}))
+    chot(ma == RC_TU_CAP,
+         f"dò dấu KHÔNG ĐO ĐƯỢC thì phải nhường cho `kiem()` phán (rc={RC_TU_CAP} cho lease "
+         f"tự cấp), được rc={ma}. rc={RC_DA_DANG} nghĩa là một sự cố mạng được đọc thành "
+         f"'đã đăng rồi'; rc={RC_NOI_DUNG} nghĩa là phép dò tự phán thay cổng.")
+
+    # HÌNH DẠNG 2 — ngoại lệ KHÔNG PHẢI `Chan`, và đây mới là hình dạng chạm nhánh nuốt.
+    # ĐO ĐƯỢC: hình dạng 1 KHÔNG chạm nó, vì `_doc_gh` bắt `OSError` rồi bọc mọi thứ khác
+    # thành `Chan` — nên thêm mỗi hình dạng 1 thì đột biến "nhánh nuốt ném rc=9" vẫn SỐNG
+    # (đã đo: 11/11). Chỉ một ngoại lệ lọt qua `_doc_gh` mới phơi được nhánh ấy, và cách
+    # duy nhất dựng được nó từ đây là cho chính `GOI_GH` ném một lớp ngoài họ `OSError`.
+    def gh_no_tung(*_a):
+        raise RuntimeError("hỏng theo kiểu KHÔNG AI LƯỜNG TRƯỚC")
+
+    ma = do(gh_no_tung)
+    chot(ma == RC_TU_CAP,
+         f"ngoại lệ lạ từ phép dò cũng phải nhường cho `kiem()` (rc={RC_TU_CAP}), được rc={ma}. "
+         f"Nhánh nuốt của `_do_dau_da_dang` tồn tại đúng để chuyện này KHÔNG thành một phán "
+         f"quyết; bỏ nó đi thì một lỗi lạ sẽ thoát ra khỏi cổng dưới dạng vỡ trần.")
 
 
 CO_CHI_CA = "--chi-ca="   # `--chi-ca=t01_` ⇒ chỉ chạy ca có tên bắt đầu bằng tiền tố ấy (M3 packet #504 dùng để sinh lượt con rẻ)

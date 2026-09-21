@@ -23,9 +23,15 @@ chuẩn hoá ngầm:
 | bản **ĐÃ GỬI** | **1061** | LF × 19 | `…20260921` + LF |
 | ĐÃ ĐẾN sau khi đổi CRLF→LF | **1060** | LF × 18 | — |
 
-`1060 ≠ 1061`. Lệch đầu tiên ở **offset 1060**, đúng chỗ hết phần chung: **GitHub cắt dấu xuống
-dòng cuối** của thân comment. Nên câu đúng là *"khớp từng byte sau khi đổi CRLF sang LF **và** sau
-khi tính một LF cuối bị GitHub cắt"* — không phải *"khớp từng byte sau khi chuẩn hoá xuống dòng"*.
+`1060 ≠ 1061`. Lệch đầu tiên ở **offset 1060**, đúng chỗ hết phần chung: một dấu xuống dòng cuối
+đã bị cắt ở đâu đó trên đường đi. **LỚP NÀO CẮT THÌ KHÔNG ĐO ĐƯỢC.** Bản trước của đoạn này khai
+*"GitHub cắt"* — rộng hơn phép đo, và codex bắt (P2 trên #597, dòng 188): chủ kho **dán tay** văn
+bản này, nên clipboard, trình duyệt hay chính ô nhập đều có thể cắt dấu ấy **trước** khi GitHub
+nhận, và ba con số cùng ba băm dưới đây **tái hiện y hệt** dưới mọi khả năng đó — tức chúng không
+có khả năng phân định. Muốn gọi tên thủ phạm thì phải có **thân yêu cầu thô** hoặc một đường ghi
+độc lập bằng máy; lượt này không có. Nên câu đúng là *"khớp từng byte sau khi đổi CRLF sang LF
+**và** sau khi tính một LF cuối bị cắt ở một lớp **chưa xác định**"* — không phải *"khớp từng byte
+sau khi chuẩn hoá xuống dòng"*, cũng không phải *"GitHub cắt"*.
 Tập ký tự phi-ASCII giống hệt: 43 cả hai bên.
 
 Băm của **cả ba** thân, để lần sau không phải đoán:

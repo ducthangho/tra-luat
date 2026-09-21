@@ -25312,117 +25312,156 @@ def run() -> int:
     _t110("r378_tien_de_khong_thoat_thi_do", _c378_tien_de_khong_thoat_thi_do)
 
     def _c378_ma_tran_phan_hang():
-        """A6 — MA TRẬN ba trục cho `_r378_classify`. Thay bốn vế rời của r1.
+        """A6 — MA TRẬN cho `_r378_classify`. Mỗi nhãn là một HỌ, không phải một đại diện.
 
-        VÌ SAO LÀ MA TRẬN CHỨ KHÔNG PHẢI VẾ (e). Slug `phan-hang-giet-gia-thieu-doi-chung` đã
-        lặp **BỐN** lượt cross-review liên tiếp, và mỗi lượt đóng đúng cửa được chỉ rồi hở cửa
-        tiếp theo không ai chỉ:
+        LỊCH SỬ NGẮN, vì nó giải thích hình dạng hiện tại. Slug
+        `phan-hang-giet-gia-thieu-doi-chung` đã lặp NĂM lượt cross-review:
 
-            lượt 1  m5   — mất phủ CỦA CHỈ MỤC khi đổi fixture
-            lượt 2  m7/m9 — bộ phân hạng có BA hạng, ca chỉ canh MỘT
-            lượt 3  m10  — ba hạng đã canh, nhưng canh bằng THÔNG ĐIỆP
-            lượt 4  m11  — canh theo lớp, nhưng so bằng TÊN lớp (`type(exc).__name__`)
+            lượt 1  m5       mất phủ CỦA CHỈ MỤC khi đổi fixture
+            lượt 2  m7/m9    bộ phân hạng có BA hạng, ca chỉ canh MỘT
+            lượt 3  m10      ba hạng đã canh, nhưng canh bằng THÔNG ĐIỆP
+            lượt 4  m11      canh theo lớp, nhưng so bằng TÊN lớp
+            lượt 5  m12/m13/m14 + MẤT PHỦ m3
 
-        `m11` **sống toàn suite `1715/1715`**, đo được hai chiều: một lớp TRÙNG TÊN mà khác
-        `id()` ⇒ bản đúng cho `false_credit:_R378SaiKyVong`, `m11` cho `killed`; một lớp CON
-        thật ⇒ bản đúng cho `killed`, `m11` cho `false_credit`.
+        Lượt 5 là lượt đắt nhất, và nó bắt hai thứ KHÁC NHAU:
 
-        `CLAUDE.md`: *"cùng một hình dạng lặp ba lần trở lên thì câu hỏi đúng là 'có nên làm
-        việc này không', không phải 'vá thế nào'"*. Bốn vế rời không phủ được không gian; mỗi
-        vế chỉ là MỘT ĐIỂM, và mỗi lượt reviewer tìm được một điểm khác chưa ai chạm. Ma trận
-        phủ theo TRỤC, nên một cài đặt sai phải làm ít nhất một Ô đỏ dù sai theo chiều nào.
+        (a) **MẤT PHỦ.** Bản r2 thay TRỌN bốn vế rời của r1 bằng ma trận, và đánh rơi đối
+            chứng `AssertionError` mà vế (a) của r1 có. Đo được: `r1/m3` ⇒ `False` (bắt
+            được), `r2/m3` ⇒ `1715/1715` (SỐNG). Thay một bộ đo mà không kiểm bộ cũ còn bị
+            bắt không là một hồi quy PHỦ, và nó không lộ ra bằng đọc.
 
-        BA TRỤC:
-            LỚP        lớp THẬT · lớp CON · lớp TRÙNG TÊN khác `id()` · lớp THƯỜNG
-            THÔNG ĐIỆP giống hệt oracle đúng · khác · rỗng
-            OANCLE     có chạy và NÉM · có chạy và THOẢ · KHÔNG chạy (khâu dựng hỏng)
+        (b) **NHÃN RỘNG HƠN TẬP FIXTURE.** r2 lấy MỘT đại diện cho mỗi nhãn: `RuntimeError`
+            là toàn bộ lớp "thường"; lớp con duy nhất dựng CÙNG module; mọi ngoại lệ tạo
+            bằng MỘT đối số chuỗi. Nên ba cài đặt sai NẰM NGAY TRONG các trục r2 đã khai vẫn
+            qua cả 14 ô: `m12` (nhận diện bằng tuple/`ValueError`) lọt ở `LỚP=thường`, `m13`
+            (giới hạn lớp con theo module) lọt ở `LỚP=con`, `m14` (phân hạng theo `args`)
+            lọt ở thông điệp rỗng.
 
-        **`expected` của mỗi ô là DỮ LIỆU ghi sẵn, KHÔNG suy ra từ chính `_r378_classify`** —
-        nếu nó suy ra từ đó thì ma trận chỉ chứng minh bộ phân hạng nhất quán với chính nó.
-        Trục LỚP dùng cờ `bat_duoc` viết tay, và có một chốt tự kiểm so nó với `issubclass` để
-        bảng fixture không âm thầm trôi.
+        Tức lời khai của r2 — *"một cài đặt sai theo bất kỳ chiều nào phải làm ít nhất một ô
+        đỏ"* — RỘNG HƠN phép đo. Ma trận có trục, nhưng **mỗi trục chỉ có một điểm**, nên nó
+        vẫn là 14 ĐIỂM được sắp thành bảng. Đúng cái bẫy nó sinh ra để thoát.
 
-        GIỮ NGUYÊN NGỮ NGHĨA `except` CỦA PYTHON: lớp CON vẫn là `killed`. Ma trận đo bộ phân
-        hạng, nó KHÔNG tự quyết đổi sang so kiểu chính xác — việc ấy phải có đặc tả riêng.
+        NÊN BẢN NÀY ĐỔI BA THỨ:
 
-        MỖI Ô LÀ MỘT PHÉP ĐO CÓ TÊN: hỏng thì ném `AssertionError` nêu ĐÚNG toạ độ ô, kèm
-        `expected`/`observed` — không trả `False` câm, vì một ca trả `False` không nói được ô
-        nào hỏng, và khi có 14 ô thì đó là khác biệt giữa một phút và một giờ.
+          1. Mỗi nhãn mang một HỌ thành viên. Lớp "thường" gồm cả `AssertionError` (khôi phục
+             phủ `m3`), `ValueError` (khoá `m12`), `TypeError`, `KeyError`. Lớp "con" gồm cả
+             lớp con KHÁC module (khoá `m13`) và lớp ĐA KẾ THỪA. "Trùng tên" gồm cả một bản
+             là lớp con của `ValueError`.
+          2. Dạng đối số thành một TRỤC THẬT, không phải một chuỗi duy nhất: không đối số ·
+             chuỗi rỗng · thông điệp gốc · thông điệp khác · hai đối số · `None` (khoá `m14`).
+          3. Thu TẬP ô đỏ ĐẦY ĐỦ rồi mới ném, thay vì dừng ở ô hỏng đầu tiên. `A11` đòi so
+             TẬP ô của từng đột biến; dừng ở ô đầu thì không kiểm được điều đó.
 
-        ĐỘT BIẾN LÀM CA NÀY ĐỎ — ô ĐÃ ĐO, không phải ô ĐOÁN:
-            m7  `except _R378SaiKyVong` -> `except RuntimeError`   -> ô LỚP=thuong, TĐ=goc
-            m9  `return "survived"` -> `return "killed"`           -> ô ORACLE=thoa
-            m10 bắt mọi `Exception`, so CHUỖI thông điệp            -> (đo riêng, xem §8 của r2)
-            m11 so `type(exc).__name__`                             -> (đo riêng, xem §8 của r2)
-            mX  đổi lớp con thành so kiểu chính xác                 -> ô LỚP=lopcon
+        Và thêm một vế mà r2 thiếu: nhánh oracle THOẢ phải chốt SỐ LẦN GỌI, không chỉ chốt
+        kết quả — một cài đặt gọi oracle hai lần vẫn cho `survived`.
 
-        BẢN ĐẦU CỦA KHỐI NÀY ĐOÁN `m7 -> ô LỚP=that`, VÀ PHÉP ĐO BÁC NGAY. Lý do đáng ghi:
-        `_R378SaiKyVong` kế thừa **`RuntimeError`** (`:25024`). Nên `except RuntimeError` của
-        `m7` VẪN bắt được nó ⇒ ô `LỚP=that` xanh, và ô đỏ là `LỚP=thuong` — nơi một
-        `RuntimeError` TRẦN bị `m7` cấp `killed`. Một dòng "đột biến này giết ô kia" viết
-        trong docstring mà không chạy là đúng thứ `CLAUDE.md` gọi là *"nghĩ ra được phép thử
-        mà không chạy thì phép thử ấy không tồn tại"* — chỉ khác là ở đây nó còn tệ hơn, vì
-        nó ĐƯỢC viết ra và SAI, tức nó nói dối người đọc sau.
+        `expected` mỗi ô là DỮ LIỆU: suy từ cờ `bat_duoc` VIẾT TAY và `lop.__name__`, KHÔNG
+        từ `_r378_classify`. Có chốt tự kiểm so `bat_duoc` với `issubclass` để bảng fixture
+        không âm thầm trôi.
+
+        GIỮ NGUYÊN ngữ nghĩa `except` của Python: lớp CON vẫn là `killed`. Ma trận ĐO bộ phân
+        hạng; nó KHÔNG tự quyết đổi sang so kiểu chính xác.
+
+        PHẠM VI, KHAI CHO ĐÚNG — và r2 đã khai quá rộng đúng chỗ này: ma trận bảo đảm cho
+        MIỀN ĐÃ LIỆT KÊ dưới đây (11 lớp × 6 dạng đối số × 3 trạng thái oracle), KHÔNG cho
+        "mọi cài đặt sai có thể viết bằng Python". Một `m17` theo một chiều chưa ai nêu vẫn
+        có thể tồn tại; `A11` đòi bằng chứng cho các chiều ĐÃ BIẾT, không đòi bằng chứng phủ
+        định về những chiều chưa biết.
         """
-        class _LopCon(_R378SaiKyVong):
+        class _ConCungModule(_R378SaiKyVong):
             pass
 
-        # TRÙNG TÊN, khác `id()`, KHÔNG phải lớp con — đây là ô mà `m11` chết.
-        _LopTrungTen = type("_R378SaiKyVong", (Exception,), {})
+        class _DaKeThua(_R378SaiKyVong, ValueError):
+            pass
+
+        # Lớp CON nhưng khai `__module__` KHÁC — ô mà `m13` (giới hạn theo module) chết.
+        _ConKhacModule = type("_ConKhacModule", (_R378SaiKyVong,),
+                              {"__module__": "mot_module_hoan_toan_khac"})
+        # TRÙNG TÊN, khác `id()`, KHÔNG phải lớp con — ô mà `m11` chết.
+        _TrungTen = type("_R378SaiKyVong", (Exception,), {})
+        # Trùng tên VÀ là lớp con của một lớp thường — hai chiều cùng lúc.
+        _TrungTenCon = type("_R378SaiKyVong", (ValueError,), {})
 
         # (ten, lop, bat_duoc) — `bat_duoc` là DỮ LIỆU viết tay, không suy từ bộ phân hạng.
         LOP = (("that", _R378SaiKyVong, True),
-               ("lopcon", _LopCon, True),
-               ("trungten", _LopTrungTen, False),
-               ("thuong", RuntimeError, False))
+               ("con_cung_module", _ConCungModule, True),
+               ("con_khac_module", _ConKhacModule, True),
+               ("da_ke_thua", _DaKeThua, True),
+               ("thuong_runtime", RuntimeError, False),
+               ("thuong_assert", AssertionError, False),
+               ("thuong_value", ValueError, False),
+               ("thuong_type", TypeError, False),
+               ("thuong_key", KeyError, False),
+               ("trung_ten", _TrungTen, False),
+               ("trung_ten_con", _TrungTenCon, False))
+
         # Chốt tự kiểm bảng fixture: cờ viết tay phải khớp ngữ nghĩa `except` của Python.
         for ten, lop, bat_duoc in LOP:
             if issubclass(lop, _R378SaiKyVong) is not bat_duoc:
                 raise AssertionError(
                     f"R378_MA_TRAN_FIXTURE_TROI: lớp {ten!r} khai bat_duoc={bat_duoc} mà "
                     f"issubclass cho {issubclass(lop, _R378SaiKyVong)}")
-        # Trùng tên phải THẬT SỰ trùng tên, kẻo ô ấy đo nhầm thứ khác.
-        if _LopTrungTen.__name__ != _R378SaiKyVong.__name__:
-            raise AssertionError("R378_MA_TRAN_FIXTURE_TROI: lớp trùng tên không trùng tên")
-
-        TD = (("goc", "R378_EXPECTATION_MISMATCH"), ("khac", "MOT_THONG_DIEP_KHAC"), ("rong", ""))
-
-        def _do(toa_do, expected, old, new, oracle):
-            goi = []
-            def _bao(r):
-                goi.append(1)
-                return oracle(r)
-            quan_sat = _r378_classify(old, new, ".claude/dev/launcher.py:1", _bao)
-            if quan_sat != expected:
+        for ten in ("trung_ten", "trung_ten_con"):
+            lop = dict((a, b) for a, b, _c in LOP)[ten]
+            if lop.__name__ != _R378SaiKyVong.__name__:
                 raise AssertionError(
-                    f"R378_MA_TRAN_O_SAI[{toa_do}]: expected={expected!r} observed={quan_sat!r} "
-                    f"oracle_calls={len(goi)}")
-            return len(goi)
+                    f"R378_MA_TRAN_FIXTURE_TROI: lớp {ten!r} phải TRÙNG TÊN, đang là "
+                    f"{lop.__name__!r}")
+        if _ConKhacModule.__module__ == _R378SaiKyVong.__module__:
+            raise AssertionError("R378_MA_TRAN_FIXTURE_TROI: lớp con khác module lại cùng module")
 
-        # ---- KHỐI A: oracle CHẠY và NÉM. 4 lớp x 3 thông điệp = 12 ô. ----
+        # Trục ĐỐI SỐ. `R()` và `R("")` cùng hợp đồng nhưng KHÁC biểu diễn — r2 chỉ thử dạng
+        # sau, và đó là một trong ba chỗ `m14` lọt.
+        DOI_SO = (("khong_doi_so", ()),
+                  ("chuoi_rong", ("",)),
+                  ("thong_diep_goc", ("R378_EXPECTATION_MISMATCH",)),
+                  ("thong_diep_khac", ("MOT_THONG_DIEP_KHAC",)),
+                  ("hai_doi_so", ("a", "b")),
+                  ("doi_so_None", (None,)))
+
+        sai = []          # THU TẬP ĐẦY ĐỦ, không dừng ở ô đầu — xem docstring mục 3.
+
+        def _ghi(toa_do, expected, quan_sat, so_goi=None):
+            if quan_sat != expected:
+                sai.append(f"[{toa_do}] expected={expected!r} observed={quan_sat!r}"
+                           + (f" oracle_calls={so_goi}" if so_goi is not None else ""))
+
+        # ---- KHỐI A: oracle CHẠY và NÉM. 11 lớp x 6 dạng đối số = 66 ô. ----
         for ten, lop, bat_duoc in LOP:
-            for ten_td, td in TD:
+            for ten_ds, args in DOI_SO:
                 expected = "killed" if bat_duoc else "false_credit:" + lop.__name__
-                def _oracle(_r, lop=lop, td=td):
-                    raise lop(td)
-                n = _do(f"lop={ten},td={ten_td}", expected, *_R378_REGEX, _oracle)
-                if n != 1:
-                    raise AssertionError(
-                        f"R378_MA_TRAN_O_SAI[lop={ten},td={ten_td}]: oracle phải chạy ĐÚNG 1 "
-                        f"lần, chạy {n}")
+                goi = []
+                def _oracle(_r, lop=lop, args=args, goi=goi):
+                    goi.append(1)
+                    raise lop(*args)
+                quan_sat = _r378_classify(*_R378_REGEX, ".claude/dev/launcher.py:1", _oracle)
+                _ghi(f"lop={ten},ds={ten_ds}", expected, quan_sat, len(goi))
+                if len(goi) != 1:
+                    sai.append(f"[lop={ten},ds={ten_ds}] oracle phải chạy ĐÚNG 1 lần, "
+                               f"chạy {len(goi)}")
 
-        # ---- KHỐI B: oracle CHẠY và THOẢ ⇒ `survived`. Ô mà `m9` chết. ----
-        _do("oracle=thoa", "survived", *_R378_REGEX, lambda _r: None)
+        # ---- KHỐI B: oracle CHẠY và THOẢ ⇒ `survived`, VÀ đúng MỘT lần gọi. ----
+        # Vế số lần gọi là MỚI ở bản này: r2 chỉ chốt kết quả, nên một cài đặt gọi oracle hai
+        # lần vẫn cho `survived` và không ô nào đỏ.
+        goi_b = []
+        quan_sat_b = _r378_classify(*_R378_REGEX, ".claude/dev/launcher.py:1",
+                                    lambda _r: goi_b.append(1))
+        _ghi("oracle=thoa", "survived", quan_sat_b, len(goi_b))
+        if len(goi_b) != 1:
+            sai.append(f"[oracle=thoa] oracle phải chạy ĐÚNG 1 lần, chạy {len(goi_b)}")
 
-        # ---- KHỐI C: khâu DỰNG hỏng ⇒ tín dụng giả, và oracle KHÔNG được chạy lần nào. ----
+        # ---- KHỐI C: khâu DỰNG hỏng ⇒ tín dụng giả, và oracle KHÔNG chạy lần nào. ----
         goi_c = []
-        cat = _r378_classify("R378_MO_NEO_KHONG_BAO_GIO_TON_TAI_TRONG_TEP_NAY", "x",
-                             ".claude/dev/launcher.py:1", lambda _r: goi_c.append(1))
-        if cat != "false_credit:RuntimeError" or goi_c:
-            raise AssertionError(
-                f"R378_MA_TRAN_O_SAI[dung=hong]: expected='false_credit:RuntimeError' "
-                f"observed={cat!r} oracle_calls={len(goi_c)}. `killed` ở đây là tín dụng cho "
-                f"một phép thử CHƯA XẢY RA.")
+        quan_sat_c = _r378_classify("R378_MO_NEO_KHONG_BAO_GIO_TON_TAI_TRONG_TEP_NAY", "x",
+                                    ".claude/dev/launcher.py:1", lambda _r: goi_c.append(1))
+        _ghi("dung=hong", "false_credit:RuntimeError", quan_sat_c, len(goi_c))
+        if goi_c:
+            sai.append(f"[dung=hong] oracle KHÔNG được chạy, đã chạy {len(goi_c)} lần. "
+                       f"`killed` ở đây là tín dụng cho một phép thử CHƯA XẢY RA.")
+
+        if sai:
+            raise AssertionError("R378_MA_TRAN_O_SAI (%d/%d ô): %s"
+                                 % (len(sai), len(LOP) * len(DOI_SO) + 2, " | ".join(sai)))
         return True
     _t110("r378_ma_tran_phan_hang", _c378_ma_tran_phan_hang)
 

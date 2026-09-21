@@ -227,6 +227,33 @@ class GhGia:
 ENV_GITHUB = {"GITHUB_REPOSITORY": "o/r"}
 
 
+def _thong_diep_an_toan(ex) -> str:
+    """`str(ex)` của một ngoại lệ TUỲ BIẾN có thể NÉM, hoặc trả thứ KHÔNG PHẢI chuỗi.
+
+    Cross-review lượt 5 bắt (`helper-exception-formatting-escapes-own-assertion`): `_MaVang`
+    gọi `str(ex)` trước khi trả sentinel, và `_NgoaiLeLa.__str__` lại định dạng ngoại lệ gốc
+    lần nữa. Một ngoại lệ thuộc `Exception` mà `__str__` ném thì helper KHÔNG trả được kết
+    quả, và ngoại lệ trần thoát ra — **làm vỡ CẢ LỚP ca gọi helper**, không riêng một ca.
+    Đo được: họ 41 vị trí × `StringFails` cho `RAW = 41/41`.
+
+    Đây là chiều ĐỊNH DẠNG, xuyên mọi ca. Và nó cay đúng chỗ: đường CHẨN ĐOÁN — thứ dựng ra
+    để phép đo đọc được — lại là thứ làm vỡ phép đo.
+
+    THÔNG ĐIỆP DỰ PHÒNG CỐ Ý KHÔNG NÊU TÊN LỚP NÀO. Reviewer cảnh báo đúng chỗ này, và bản
+    thử đầu của chính họ đã dính: nếu dự phòng ghi tên lớp của lỗi ĐỊNH DẠNG (`__str__` ném
+    `RuntimeError`) thì một phép kiểm substring tìm tên lớp NGOÀI sẽ nhận nhầm. Tên lớp thật
+    chỉ sống ở `_MaVang.kieu` / `_NgoaiLeLa.kieu`, lấy từ `type(ex).__name__` — thứ không đi
+    qua `__str__`.
+    """
+    try:
+        td = ex.__str__()
+    except BaseException:  # noqa: BLE001 — đường chẩn đoán KHÔNG được làm vỡ phép đo
+        return "<__str__ hỏng>"
+    if not isinstance(td, str):
+        return "<__str__ trả thứ không phải chuỗi>"
+    return td
+
+
 class _MaVang:
     """`ma` của một ngoại lệ TRẦN: KHÔNG bằng bất kỳ mã thoát nào, và TỰ KHAI lớp khi in.
 
@@ -241,7 +268,9 @@ class _MaVang:
     __slots__ = ("kieu", "thong_diep")
 
     def __init__(self, ex):
-        self.kieu, self.thong_diep = type(ex).__name__, str(ex)
+        # `type(ex).__name__` KHÔNG đi qua `__str__`, nên tên lớp luôn đọc được kể cả khi
+        # định dạng hỏng. Thông điệp đi qua `_thong_diep_an_toan` — xem hàm ấy.
+        self.kieu, self.thong_diep = type(ex).__name__, _thong_diep_an_toan(ex)
 
     def __eq__(self, _other):
         return False
@@ -283,7 +312,9 @@ class _NgoaiLeLa:
         self.ngoai_le, self.kieu, self.ma = ex, type(ex).__name__, _MaVang(ex)
 
     def __str__(self):
-        return f"<ngoại lệ TRẦN {self.kieu}: {self.ngoai_le}>"
+        # Dùng BẢN CHỤP an toàn, KHÔNG định dạng lại `self.ngoai_le` — định dạng lần hai là
+        # đường thứ hai để `__str__` hỏng làm vỡ ca. Xem `_thong_diep_an_toan`.
+        return f"<ngoại lệ TRẦN {self.kieu}: {self.ma.thong_diep}>"
 
     __repr__ = __str__
 
@@ -7653,16 +7684,25 @@ def t184_chinh_HELPER_phai_doi_ngoai_le_TRAN_thanh_ca_DO_chu_khong_vo_tran():
     #
     # Nên vế (a) ép cổng tự ném: lease TỰ CẤP ⇒ `kiem()` ném `Chan(RC_TU_CAP)` của chính nó.
     lease_tu_cap = _lease_579(granted_by="codex")
-    ex, _m = _goi_lop_gh(GhGia(comments={55: []}), "kiem_github", lease_tu_cap,
-                         env_them=ENV_GITHUB)
-    chot(ex is not None and getattr(ex, "ma", None) == RC_TU_CAP,
-         f"(a) `Chan` của CHÍNH cổng phải đi qua nguyên vẹn với ma={RC_TU_CAP}, nhận {ex!r}. "
-         f"Nới helper mà làm hỏng đường cũ là đổi một lỗi lấy 20+ ca khác.")
+    ex, mod_a = _goi_lop_gh(GhGia(comments={55: []}), "kiem_github", lease_tu_cap,
+                            env_them=ENV_GITHUB)
+    # ĐÒI DANH TÍNH LỚP, không chỉ đòi "một đối tượng có `.ma` đúng". Cross-review lượt 5 bắt
+    # (`helper-contract-assertions-omit-code-domain-and-identity`): bản trước chỉ chốt
+    # `.ma == 4`, nên hai đột biến đều LỌT — `P_identity` đổi danh tính `Chan`, và `P_type`
+    # trả một PROXY có `.ma`. Cả hai giữ `.ma` đúng, nên một chốt đọc `.ma` không thấy gì.
+    chot(ex is not None and type(ex) is mod_a.Chan,
+         f"(a) helper phải trả về CHÍNH lớp `Chan` của module đang thử, nhận "
+         f"{type(ex).__name__!r}. Một đối tượng khác lớp mà có `.ma` đúng vẫn làm mọi ca "
+         f"dùng `ex.ma` xanh — đó là tín dụng giả ở tầng hợp đồng, không ở tầng giá trị.")
+    chot(getattr(ex, "ma", None) == RC_TU_CAP,
+         f"(a) `Chan` của CHÍNH cổng phải đi qua nguyên vẹn với ma={RC_TU_CAP}, nhận "
+         f"{getattr(ex, 'ma', None)!r}. Nới helper mà làm hỏng đường cũ là đổi một lỗi lấy "
+         f"20+ ca khác.")
 
     # (b) HÌNH DẠNG MỚI: ngoại lệ trần -> `_NgoaiLeLa`, không vỡ ra ngoài ca.
     def gh_tran(*_a):
         raise RuntimeError("hỏng theo kiểu KHÔNG AI LƯỜNG TRƯỚC")
-    ex, _m = _goi_lop_gh(gh_tran, "kiem_github", lease, env_them=ENV_GITHUB)
+    ex, _mod_b = _goi_lop_gh(gh_tran, "kiem_github", lease, env_them=ENV_GITHUB)
     chot(ex is not None and ex.__class__.__name__ == "_NgoaiLeLa",
          f"(b) ngoại lệ TRẦN phải thành `_NgoaiLeLa`, nhận {ex!r}. Vỡ ra ngoài ca nghĩa là "
          f"ca gọi sẽ đỏ vì runner chứ không vì `chot` của chính nó — đúng lớp tín dụng giả.")
@@ -7674,12 +7714,31 @@ def t184_chinh_HELPER_phai_doi_ngoai_le_TRAN_thanh_ca_DO_chu_khong_vo_tran():
     # thành XANH GIẢ. Tức vế `!=` đo đúng thứ KHÔNG AI DÙNG.
     # Bài học, và nó là bài học chung: chốt phải đo ĐÚNG TOÁN TỬ mà người gọi dùng. Python
     # KHÔNG suy `__ne__` ra từ `__eq__` khi cả hai được định nghĩa tường minh.
-    chot(not any(ma == m for m in (0, RC_TU_CAP, RC_NOI_DUNG, RC_DA_DANG)),
-         f"(b) `ma == <mã thoát>` phải SAI với mọi mã, nhận {ma!r}. Bằng một mã nào đó là "
-         f"biến một sự cố thành một phán quyết — và vì mọi ca đều chốt bằng `==`, chỗ này "
-         f"hỏng là cả loạt ca thành XANH GIẢ.")
-    chot(all(ma != m for m in (0, RC_TU_CAP, RC_NOI_DUNG, RC_DA_DANG)),
-         f"(b) `ma != <mã thoát>` phải ĐÚNG với mọi mã, nhận {ma!r}.")
+    # MIỀN MÃ PHẢI ĐẦY ĐỦ. Bản trước chỉ thử `{0, 4, 8, 9}`, trong khi `t177` thật sự chốt
+    # bằng `== 6` (`RC_NEO`). Cross-review lượt 5 đo: cho sentinel nhận RIÊNG `6` thì `t184`
+    # vẫn `PASS`, **và** một ngoại lệ trần ở lần gọi thứ ba của `t177` cũng thành ca XANH.
+    # Tức lỗ miền ở đây không dừng ở `t184` — nó mở một ca xanh giả ở ca KHÁC.
+    #
+    # Nên miền lấy TRỌN bảng mã thoát của cổng, không lấy một tập tiện tay. Hai đột biến
+    # `N3`/`N3b` chỉ chứng minh hai toán tử có răng trên tập ĐÃ THỬ; chúng không chứng minh
+    # mọi mã đều được phủ — đó là hai mệnh đề khác nhau.
+    # LẤY MIỀN TỪ CHÍNH MODULE SẢN PHẨM, không liệt kê tay. Liệt kê tay là một danh sách sẽ
+    # trôi: thêm một `RC_*` mới mà quên sửa ca thì miền hụt lại, và lỗ miền vừa vá tái sinh.
+    # Đọc `RC_*` từ module ⇒ mã mới TỰ ĐỘNG được phủ. Chốt `>= 9` giữ cho phép đọc ấy không
+    # âm thầm trả tập rỗng (bắt sai tên tiền tố, module nạp hụt).
+    MOI_MA = sorted({v for k, v in vars(_mod_b).items()
+                     if k.startswith("RC_") and isinstance(v, int) and not isinstance(v, bool)})
+    chot(len(MOI_MA) >= 9,
+         f"(b) miền mã đọc từ module phải có ít nhất 9 giá trị, đọc được {MOI_MA!r}. Tập rỗng "
+         f"hoặc hụt làm hai chốt dưới đây thành chốt KHÔNG THỂ ĐỎ.")
+    bang_nham = [m for m in MOI_MA if ma == m]
+    chot(not bang_nham,
+         f"(b) `ma == <mã thoát>` phải SAI với MỌI mã, nhưng bằng {bang_nham!r}. Bằng một mã "
+         f"nào đó là biến một sự cố thành một phán quyết — và vì mọi ca đều chốt bằng `==`, "
+         f"chỗ này hỏng là cả loạt ca thành XANH GIẢ.")
+    khac_nham = [m for m in MOI_MA if not (ma != m)]
+    chot(not khac_nham,
+         f"(b) `ma != <mã thoát>` phải ĐÚNG với MỌI mã, nhưng sai ở {khac_nham!r}.")
     chot("RuntimeError" in str(ma),
          f"(b) `str(ma)` phải NÊU TÊN LỚP đã thoát, nhận {str(ma)!r}. Không nêu thì ca gọi "
          f"vẫn ĐỎ, nhưng người đọc mất đúng thứ cần để biết đã hỏng ở đâu.")
@@ -7689,6 +7748,63 @@ def t184_chinh_HELPER_phai_doi_ngoai_le_TRAN_thanh_ca_DO_chu_khong_vo_tran():
     chot(ex is None,
          f"(c) không ném gì thì phải trả `None`, nhận {ex!r}. Trả một đối tượng ở đây làm mọi "
          f"ca dùng `ex is None` đỏ sai.")
+
+    # (e) ĐƯỜNG CHẨN ĐOÁN KHÔNG ĐƯỢC LÀM VỠ PHÉP ĐO.
+    #
+    # Cross-review lượt 5 bắt (`helper-exception-formatting-escapes-own-assertion`): bản
+    # trước gọi `str(ex)` thẳng trong `_MaVang.__init__` và định dạng lại ngoại lệ gốc trong
+    # `_NgoaiLeLa.__str__`. Một ngoại lệ thuộc `Exception` mà `__str__` NÉM thì helper không
+    # trả được kết quả và ngoại lệ trần thoát ra — **vỡ CẢ LỚP ca gọi helper**, không riêng
+    # một ca. Đo được: 41 vị trí × `StringFails` ⇒ `RAW = 41/41`.
+    #
+    # Hai hình dạng, vì `__str__` hỏng theo HAI kiểu khác nhau và một bản vá chỉ bọc `try`
+    # quanh lời gọi sẽ lọt kiểu thứ hai:
+    #     ném                      -> `<__str__ hỏng>`
+    #     trả thứ không phải chuỗi -> `<__str__ trả thứ không phải chuỗi>`
+    #
+    # VÀ CẢ HAI VẾ ĐỀU ĐÒI TÊN LỚP VẪN ĐỌC ĐƯỢC. Đó là điểm của bản vá: `type(ex).__name__`
+    # KHÔNG đi qua `__str__`, nên chẩn đoán còn nguyên kể cả khi định dạng chết. Một bản vá
+    # nuốt lỗi rồi trả chuỗi rỗng sẽ qua vế "không vỡ" mà trượt vế này.
+    class _StrNem(Exception):
+        def __str__(self):
+            raise ValueError("định dạng hỏng")
+
+    class _StrKhongChuoi(Exception):
+        def __str__(self):
+            return 12345          # noqa: RET504 — CỐ Ý trả thứ không phải chuỗi
+
+    for nhan, lop_hong in (("`__str__` NÉM", _StrNem),
+                           ("`__str__` trả thứ không phải chuỗi", _StrKhongChuoi)):
+        def _gh_hong(*_a, lop_hong=lop_hong):
+            raise lop_hong()
+        # PHẢI BẮT QUANH CHÍNH LỜI GỌI HELPER, và vế này đã tự sập một lần vì thiếu nó.
+        #
+        # Đột biến `P_str` (hoàn nguyên bản vá: `str(ex)` thẳng trong `_MaVang.__init__`) làm
+        # `ValueError` bật ra TỪ TRONG nhánh `except Exception` của helper — tức helper KHÔNG
+        # TRẢ VỀ. `chot` bên dưới không bao giờ chạy, nên ca đỏ bằng một traceback trần chứ
+        # không bằng tín hiệu của nó. Đo được: `P_str` ⇒ `176/177`, đỏ `t184`, thông điệp
+        # `ValueError: định dạng hỏng`.
+        #
+        # Đúng LỚP lỗi mà vế này sinh ra để đo, chỉ cao hơn một tầng — và nó cho thấy: muốn
+        # đo "X không thoát ra", phải BẮT, không thể đọc `ex` sau lời gọi. Mệnh đề thật của
+        # vế (e) là "helper LUÔN TRẢ VỀ", và mệnh đề ấy chỉ kiểm được từ phía người gọi.
+        try:
+            ex, _m = _goi_lop_gh(_gh_hong, "kiem_github", lease, env_them=ENV_GITHUB)
+        except BaseException as loi:   # noqa: BLE001 — ĐO "luôn trả về", nên phải bắt trọn
+            ex = None
+            chot(False,
+                 f"(e) {nhan}: helper NÉM `{type(loi).__name__}` thay vì TRẢ VỀ. Đường chẩn "
+                 f"đoán làm vỡ phép đo là hỏng cả lớp ca gọi helper, không riêng ca này.")
+        chot(ex is not None and ex.__class__.__name__ == "_NgoaiLeLa",
+             f"(e) {nhan}: helper phải TRẢ VỀ được, nhận {ex!r}. Ngoại lệ trần thoát ra ở đây "
+             f"làm vỡ mọi ca dùng helper, không riêng ca này.")
+        chot(ex.kieu == lop_hong.__name__,
+             f"(e) {nhan}: tên lớp phải còn đọc được, nhận {ex.kieu!r}. `type(ex).__name__` "
+             f"không đi qua `__str__` — mất nó là mất chẩn đoán đúng lúc cần nhất.")
+        chot(lop_hong.__name__ in str(ex.ma),
+             f"(e) {nhan}: `str(ma)` phải nêu tên lớp, nhận {str(ex.ma)!r}.")
+        chot(not any(ex.ma == m for m in MOI_MA),
+             f"(e) {nhan}: `ma` vẫn phải khác MỌI mã thoát, nhận {ex.ma!r}.")
 
     # (d) `KeyboardInterrupt` KHÔNG được nuốt.
     def gh_ngat(*_a):

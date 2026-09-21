@@ -142,6 +142,17 @@ r12 thành *"đã qua cùng mức soi như các lượt trước"* là đọc sa
 nằm ở **comment handoff** trên PR, neo bằng OID 40 ký tự, đo **sau khi commit** và **trước khi gọi review**; hai
 vế nền/head dựng trong MỘT lệnh.
 
+**Đích review là exact head của PR — nói cho chật, vì hai lượt đã va đúng chỗ này.** Một reviewer có thể dựng
+trong sandbox của mình một commit **tổng hợp** khác (GitHub test-merge, hoặc *squash* cây head lên base: cùng
+`tree`, **khác cha**). Object ấy (a) không nằm trên server nếu reviewer tự dựng, (b) đổi OID mỗi lần sinh lại, nên
+executor **không thể** đo trước nó và **không được** mượn bằng chứng của head cho nó theo cây. Luật: verdict neo
+`reviewed_sha` = **exact head** (đúng dòng `Reviewed commit:` của chính reviewer); reviewer dựng object khác thì
+**ghi OID + cha** vào verdict, executor `fetch` — fetch được thì đo và ghi thêm một hàng, không fetch được thì
+hàng ấy là `KHÔNG ĐO ĐƯỢC` trên chính OID đó, và executor đo **hình dạng** tương đương (`git commit-tree <tree>
+-p <base>`) làm bằng chứng tổ tiên, ghi rõ OID khác vì committer/timestamp khác. **Ca âm bắt buộc:** hai commit
+cùng `tree`, khác cha ⇒ bảng bằng chứng phải ghi **cả OID lẫn tree** cho từng hàng, và một hàng chỉ có tree
+khớp mà OID không được đo là **không đủ** — không được đọc thành ĐẠT.
+
 | cổng | `rc` nền | bằng chứng dương (nền) |
 |---|---|---|
 | `doctrine-scan` | **0** | `sạch — đã quét 10 tệp, 0 chỗ chép doctrine` |

@@ -23,6 +23,12 @@ revision: 2
 generation: 3
 lease_id: dang-lease-dau-truoc-kiem-sau-r2-g3-claude
 
+da_bi_thay_the: dang-lease-dau-truoc-kiem-sau-r6-g4-claude
+da_bi_thay_the_vi_sao: 'VE THU HAI cua dau hai chieu. g4 neo spec_hash cua r6; g3 neo r2, tuc TRE
+  BA REVISION. Dat bia luc g3 CON SONG (het han 19:48:00Z, dat luc ~16:00Z) — dung chot M8 ma
+  chinh packet nay viet: bia mo hai chieu CHI dung cho lease con song.
+  Ghi HO theo chi thi chu kho, neo o issuecomment-5763451274.'
+
 thay_the_cho: dang-lease-dau-truoc-kiem-sau-r2-g2-claude
 thay_the_vi_sao: 'Ve THU HAI cua dau hai chieu. g2 phai mang dong
   `da_bi_thay_the: dang-lease-dau-truoc-kiem-sau-r2-g3-claude` TRUOC khi lease nay duoc dem la

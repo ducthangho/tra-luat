@@ -25206,6 +25206,69 @@ def run() -> int:
                 _r378_go_gian_tiep(link_dir)
     _t110("r378_l7_resolve_phai_o_trong_kho", _c378_resolve_phai_o_trong_kho)
 
+    def _c378_pyindex_cung_phai_o_trong_kho():
+        """A7 (#574 lượt 2) — CỬA THỨ HAI của cùng chốt containment: nhánh `pyindex`.
+
+        CA NÀY SINH RA TỪ MỘT ĐỘT BIẾN SỐNG SÓT, do cross-review codex lượt 1 bắt
+        (`mat-phu-pyindex-khi-doi-fixture`). Khi đổi phản chứng sang GIÁN TIẾP THƯ MỤC, thân
+        tài liệu phải mang dấu `/` (`r378_ngoai/r378_escape.py`) để trỏ được vào trong liên
+        kết — mà L7 rẽ theo ĐÚNG dấu ấy:
+
+            có `/`    -> cands = [root / repo_fname, doc.parent / fname]   (tường minh)
+            không `/` -> cands = ctx["pyindex"].get(<tên trần>)            (chỉ mục)
+
+        Nên fixture mới chỉ còn đo cửa TƯỜNG MINH. Fixture CŨ (symlink TỆP, tên trần) đo cửa
+        CHỈ MỤC. Đổi xong thì cửa chỉ mục KHÔNG còn ca nào — đo được: đột biến gỡ chốt
+        containment vẫn **sống sót 1714/1714** trên head, trong khi nền bắt được.
+
+        Đó là HỒI QUY ĐỘ PHỦ của bản vá test, không phải lỗi runtime: chốt sản phẩm vẫn còn
+        nguyên. Nhưng một chốt không có ca canh là một chốt sẽ âm thầm hở lại — cùng bài học
+        `ĐỘT BIẾN SỐNG SÓT ... là khoảng TRỐNG của bộ test`.
+
+        DỰNG CỬA CHỈ MỤC MÀ KHÔNG CẦN ĐẶC QUYỀN: `pyindex` quét bằng `glob("*.py")` trên BỐN
+        thư mục cố định (`scripts`, `scripts/tl_core`, `scripts/_fallback`, `.`) — không phải
+        `rglob`, nên nó KHÔNG bỏ qua thư mục liên kết như `rglob` làm. Cho chính `root/scripts`
+        là gián tiếp thư mục trỏ RA NGOÀI root: `glob` liệt kê tệp bên ngoài, ứng viên
+        `root/scripts/<tên>.py` `resolve()` ra ngoài, và chốt containment phải loại nó.
+
+        Dùng lại NGUYÊN `_r378_gian_tiep` / `_r378_go_gian_tiep` / `_r378_kiem_thoat` của ca
+        trước — cùng hợp đồng hai nền, cùng tên lỗi, không dựng cơ chế thứ hai.
+
+        ĐỘT BIẾN LÀM CA NÀY ĐỎ: bỏ chốt `resolved.is_relative_to(root_resolved)`
+        (`scripts/tl_core/workflow.py`) ⇒ ứng viên ngoài kho được nhận, tệp CÓ THẬT nên L7
+        thôi báo `PYLOC_FILE_MISSING` ⇒ oracle vỡ. Đây là CÙNG đột biến mà
+        `r378_l7_resolve_phai_o_trong_kho` giết — có chủ đích: hai ca, hai CỬA, một chốt.
+        """
+        import tempfile as _tf378
+        with _tf378.TemporaryDirectory() as td:
+            root = Path(td) / "repo"
+            root.mkdir()
+            outside = Path(td) / "ngoai_scripts"
+            outside.mkdir()
+            (outside / "r378_pyidx.py").write_text("x = 1\n", encoding="utf-8")
+            link_dir = root / "scripts"
+            _r378_gian_tiep(link_dir, outside)
+            try:
+                # Tiền đề PHẢI có thật: ứng viên chỉ mục thoát khỏi root. Thiếu chốt này thì ca
+                # xanh vì phản chứng chưa từng tồn tại (`t24`: ca có MẶT khác ca có ĐO).
+                _r378_kiem_thoat(link_dir / "r378_pyidx.py", root)
+                # KHÔNG có dấu `/` ⇒ L7 bắt buộc đi nhánh `ctx["pyindex"]`.
+                body = "r378_pyidx.py:99999999"
+                oracle = lambda r: _r378_expect(
+                    [(x["claim"], x["reason"]) for x in _r378_l7(r)]
+                    == [(body, "PYLOC_FILE_MISSING")])
+                normal = True
+                try:
+                    oracle(_r378_run(body, root=root))
+                except _R378SaiKyVong:
+                    normal = False
+                cat = _r378_classify("if resolved.is_relative_to(root_resolved):", "if True:",
+                                     body, oracle, root=root)
+                return normal and cat == "killed"
+            finally:
+                _r378_go_gian_tiep(link_dir)
+    _t110("r378_l7_pyindex_cung_phai_o_trong_kho", _c378_pyindex_cung_phai_o_trong_kho)
+
     def _c378_dung_hong_thi_do_co_ten():
         """A4 — dựng không được thì ĐỎ CÓ TÊN, không nuốt thành `False` câm.
 

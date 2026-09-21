@@ -2552,6 +2552,39 @@ def r528_tien_de_khong_con_chap_duoi_chinh_dot_bien(d: Path):
             moi += 1
     chot(moi == 0, "r528")      # (b) hai so BANG NHAU: 0 tren 100 000
 
+    # (c) — CROSS-REVIEW CODEX, P2 tren 1486689, DA TAI HIEN: hai ve tren chi
+    # chung minh HAM da chua, KHONG chung minh CA THAT da chua. Noi lai benh goc
+    # vao chinh dong dau cua `r508` (`sinh_dau_phien(), sinh_dau_phien()`) ma giu
+    # ham nguyen ven thi CA HAI ve tren van DAT — do duoc, khong phai lo ngai.
+    # Do dung hinh dang TIN-HIEU-DO-CHINH-MA-TEST-GIA-MAO: chot mang ten A9 mà
+    # khong he cham vao thu A9 hua.
+    #
+    # Hai chot duoi day dong dung cho ay:
+    #   (c1) `r508` phai THAT SU di qua bo tien de — dem SO LAN GOI, tat dinh
+    #   (c2) va chay that N508 luot duoi bo sinh ay, khong chap lan nao
+    # N508 nho hon N vi moi luot `r508` dung he tep (~1,1 ms) chu khong chi rut
+    # so; chot (c2) KHONG can can duoi xac suat nao — duoi ma da chua no la 0
+    # voi xac suat 1 - (1/256)**64 moi luot.
+    that = m._hai_dau_phien_phan_biet
+    dem = {"n": 0}
+
+    def dem_goi():
+        dem["n"] += 1
+        return that()
+
+    m._hai_dau_phien_phan_biet = dem_goi
+    N508 = 2000
+    do = 0
+    for i in range(N508):
+        thu = d / f"r508-{i}"
+        thu.mkdir(parents=True, exist_ok=True)
+        try:
+            m.r508_ban_ghi_luot_TRUOC_chi_khac_dau_phien(thu)
+        except BaseException:
+            do += 1
+    chot(dem["n"] == N508, "r528")   # (c1) ca THAT co di qua bo tien de
+    chot(do == 0, "r528")            # (c2) va khong chap lan nao
+
 
 TU_KIEM = [
     ("r501", r501_tin_hieu_chot_khong_gia_mao_duoc, True),
@@ -2795,6 +2828,13 @@ DOT_BIEN_TU_KIEM = [
     # `dich` co r508: ha tran xuong 0 lam moi bo sinh thanh "suy bien" duoi mat
     # `_hai_dau_phien_phan_biet`, nen r508 cung chet — bang CHOT cua chinh no, sau
     # khi da sua duong thoat DO_KHAC. Khai du BA ten la khai CHAT HON.
+    # CROSS-REVIEW CODEX P2 — dot bien noi lai BENH GOC o dong goi cua `r508`,
+    # giu ham nguyen ven. Truoc khi co chot (c1) cua r528, dot bien nay SONG SOT
+    # tron ven: ca hai ve do cua A9 chi cham vao HAM. Khoi try/except o lai nen
+    # cu phap van dung; nhanh `except` chi khong bao gio chay nua.
+    ("dau-phien-r508-khong-di-qua-bo-tien-de", ("r528",),
+     "        ph_that, ph_khac = _hai_dau_phien_phan_biet()",
+     "        ph_that, ph_khac = sinh_dau_phien(), sinh_dau_phien()"),
     ("dau-phien-ha-tran-xuong-khong", ("r508", "r527", "r528"),
      "TRAN_RUT_DAU_PHIEN = 64", "TRAN_RUT_DAU_PHIEN = 0"),
     ("bo-chuan-hoa-ban-sao", ("r523",),

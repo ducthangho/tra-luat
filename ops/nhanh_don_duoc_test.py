@@ -2459,11 +2459,25 @@ def r526_ma_nguon_khong_duoc_sinh_canh_bao_escape_sequence(d: Path):
     se XANH trong khi tep that BAN, tuc hinh dang TIN-HIEU-DO-CHINH-MA-TEST-GIA
     -MAO lan thu TU. Hai chot dau chan dung cho do, va co dot bien rieng.
     """
+    import inspect as _ins
     nguon = Path(__file__).resolve()
     ma = nguon.read_text(encoding="utf-8")
-    # A14 — chung minh `ma` LA tep nay, khong phai mot hang sach chep tay.
+    # #568 r4 / M12 — CROSS-REVIEW CODEX, P2 tren 1486689, DA TAI HIEN: hai chot
+    # cu (`len > 50_000` va "ten ham co trong ma") chi xac thuc HINH DANG. Mot
+    # ban chep SACH dai hon 50 000 ky tu co chua ten ham ay thoa CA HAI, nen ca
+    # van DAT trong khi nguon dang chay BAN. Loi khai A14 rong hon phep do.
+    #
+    # KHONG the chung minh "van ban nay LA tep dang chay" tu chinh van ban. Thu
+    # chung minh duoc la: PHEP DOC chua bi thay. Nen doc bang HAI DUONG DOC LAP
+    # roi doi bang nhau TUNG BYTE — dot bien thay MOT duong van vo vi duong kia
+    # khong doi. Day la loi khai HEP HON va DUNG, thay cho loi khai rong cua A14.
+    #
+    # KHAI THANG cho no KHONG chung minh: neu ai do thay duong HAI bang chinh
+    # bieu thuc cua duong MOT, dang thuc thanh tam thuong va chot nay mu. Hai
+    # dot bien di kem chi dong duong "thay mot duong bang HANG SACH".
+    ma_2 = _ins.getsource(sys.modules[__name__])
+    chot(ma == ma_2, "r526")
     chot(len(ma) > 50_000, "r526")
-    chot("def r526_ma_nguon_khong_duoc_sinh_canh_bao_escape_sequence" in ma, "r526")
     # A13 — ve can do.
     chot(_dem_canh_bao_escape(ma, str(nguon)) == 0, "r526")
     # ... va phep do PHAI CO RANG. Dung `chr` de mau ban khong tu no lam chinh
@@ -2586,6 +2600,106 @@ def r528_tien_de_khong_con_chap_duoi_chinh_dot_bien(d: Path):
     chot(do == 0, "r528")            # (c2) va khong chap lan nao
 
 
+def r529_tach_dong_phai_bang_dung_bo_doc_cu(d: Path):
+    r"""#568 r4 / M10 — tap dong `_khoi_chan_doan` nhan phai BANG DUNG tap bo doc cu.
+
+    Benh (cross-review codex, P1 tren 1486689, da tai hien): ban truoc tach dong
+    bang `str.splitlines()`, von coi CHIN ky tu ngoai `
+` la het dong, trong khi
+    bo doc cu `re.findall(..., re.M)` thi KHONG — `$` voi re.M chi khop truoc `
+`
+    va o cuoi chuoi. Chenh lech ay cho MA SAN PHAM DOAT DUOC TEN CA:
+
+        stdout = "TU KIEM r501: DAT" + U+2028 + "TU KIEM r512: DO_CHOT" + LF
+        regex CU -> set()          splitlines -> {"r512"}
+
+    Voi rc=1 va dich=("r512",), cung mot dau vao chuyen tu `hong` sang GIET. Day
+    la mot duong CAP GIET GIA, dung lop loi ma `r511` ton tai de chan — va M3 cua
+    r1 tu khai "tap ten ca KHONG DOI so bo doc cu", loi khai ay SAI.
+
+    BA o, va o thu ba la DOI CHUNG DUONG — thieu no thi mot bo doc khong bao gio
+    nhan gi ca cung qua duoc o thu hai.
+    """
+    m = _nap_ban_sao(d)
+    # (1) Hang so phai DAN XUAT duoc tu chinh `splitlines` luc chay. Chep tay ma
+    #     thieu mot ky tu thi o (2) van xanh trong khi van ho dung ky tu do.
+    thua = {c for c in map(chr, range(0x110000))
+            if len(("a" + c + "b").splitlines()) > 1} - {chr(10)}
+    chot(set(m.KY_TU_TACH_DONG_LE) == thua, "r529")
+    # (2) Voi TUNG ky tu le, hai bo doc phai cho CUNG mot tap ten ca.
+    cu = re.compile(r"^TU KIEM (r\d+): DO_CHOT", re.M)
+    for c in m.KY_TU_TACH_DONG_LE:
+        s = ("TU KIEM r501: DAT" + c
+             + "TU KIEM r512: DO_CHOT - gia mao" + chr(10))
+        chot(set(cu.findall(s))
+             == {ca for ca, _ in m._khoi_chan_doan(s, "DO_CHOT")}, "r529")
+    # (3) DOI CHUNG DUONG: voi LF THAT, CA HAI bo doc phai thay r512.
+    s = ("TU KIEM r501: DAT" + chr(10)
+         + "TU KIEM r512: DO_CHOT - that" + chr(10))
+    chot(set(cu.findall(s)) == {"r512"}, "r529")
+    chot({ca for ca, _ in m._khoi_chan_doan(s, "DO_CHOT")} == {"r512"}, "r529")
+
+
+def r530_hai_nhanh_chuyen_tiep_con_lai_phai_co_dot_bien_canh(d: Path):
+    r"""#568 r4 / M11 — nhanh `DO_KHAC` va nhanh `rc != 1` phai THAT SU in chan doan.
+
+    Benh (cross-review codex, P2 tren 1486689, da tai hien): thay CA HAI dong
+    `print` chuyen tiep bang `pass` thi `r516 DAT`, `r524 DAT`, `r525 DAT`. Tuc
+    bo tron phan chuyen tiep o hai nhanh ay ma moi ca lien quan van xanh — dung
+    cai benh #568 cam ket khoa, va A1/A2 chua khoa duoc no o LOP CHA. `r524` chi
+    do hai helper; `r525` do nhanh CUOI; `r516` kiem phan hang nhung cho `stderr`
+    rong.
+
+    HAI o, phan biet duoc bang DAU VAO:
+      (P1) `vo-can` : stdout co DO_KHAC  => nhanh mot  => phai in "VO CAN <ca>: "
+      (P2) `rc-khac`: stdout RONG, rc=7  => nhanh hai  => phai in "stderr: "
+    """
+    m = _nap_ban_sao(d)
+    MOC_VC, MOC_SE = "MOC-VOCAN-R530", "MOC-STDERR-R530"
+    kich = {
+        "vo-can": ("TU KIEM r511: DO_KHAC - RuntimeError: " + MOC_VC + chr(10),
+                   1, ""),
+        "rc-khac": ("", 7, "Traceback ... OSError: " + MOC_SE + chr(10)),
+    }
+
+    def run_gia(args, cwd, check=True, env=None):
+        out, rc, err = kich[Path(cwd).name]
+        return subprocess.CompletedProcess(args, rc, out, err)
+
+    m.run = run_gia
+
+    def ghep(*phan):
+        """Ghep neo LUC CHAY: viet nguyen van thi chinh than ca nay lam chuoi ay
+        xuat hien THEM mot lan ngoai bang, va phep doi neo duy nhat se bac het."""
+        return "".join(phan)
+
+    NEO = ghep("    if not ", "duong.exists():")
+    m.DOT_BIEN_TU_KIEM = [(ten, ("r515",), NEO, "    pass") for ten in kich]
+    with contextlib.redirect_stdout(io.StringIO()) as ra:
+        giet, hong = m.chay_dot_bien_tu_kiem()
+    dong_in = ra.getvalue()
+
+    khoi, hien = {}, None
+    for dong in dong_in.split(chr(10)):
+        if dong.startswith("DOT BIEN TU KIEM "):
+            hien = dong.split()[4]     # BON tu roi moi toi ten
+            khoi[hien] = []
+        elif hien:
+            khoi[hien].append(dong)
+    chot(set(khoi) == set(kich), "r530")
+    vc, rk = chr(10).join(khoi["vo-can"]), chr(10).join(khoi["rc-khac"])
+
+    # (P1) nhanh DO_KHAC phai CHUYEN TIEP, khong chi neu ten ca.
+    chot("VO CAN r511" in vc, "r530")
+    chot(MOC_VC in vc, "r530")
+    # (P2) nhanh rc != 1 phai in stderr, va KHONG duoc lan sang o kia.
+    chot("stderr: " in rk, "r530")
+    chot(MOC_SE in rk, "r530")
+    chot(MOC_SE not in vc, "r530")
+    # PHAN HANG KHONG DOI: ca hai o deu `hong`.
+    chot((giet, hong) == (0, 2), "r530")
+
+
 TU_KIEM = [
     ("r501", r501_tin_hieu_chot_khong_gia_mao_duoc, True),
     ("r502", r502_assert_ha_tang_khong_duoc_cap_lop_chot, True),
@@ -2615,6 +2729,8 @@ TU_KIEM = [
     ("r526", r526_ma_nguon_khong_duoc_sinh_canh_bao_escape_sequence, True),
     ("r527", r527_tien_de_hai_dau_phien_phai_do_duoc_ba_trang_thai, True),
     ("r528", r528_tien_de_khong_con_chap_duoi_chinh_dot_bien, True),
+    ("r529", r529_tach_dong_phai_bang_dung_bo_doc_cu, True),
+    ("r530", r530_hai_nhanh_chuyen_tiep_con_lai_phai_co_dot_bien_canh, True),
 ]
 
 # ---- A6: MOI ca tu kiem phai co MOT dot bien rieng lam no DO --------------
@@ -2819,6 +2935,35 @@ DOT_BIEN_TU_KIEM = [
     # duoc dong cha, tuc loi khai "bi cat" cua o `suy-bien-dai` thanh SAI.
     ("chan-doan-noi-tran-ma-khong-doi-huong-cat", ("r525",),
      "TRAN_CHAN_DOAN = 400", "TRAN_CHAN_DOAN = 100000"),
+    # --- #568 r4 ------------------------------------------------------------
+    # M10/A20 — tra phep tach dong ve `splitlines()`, tuc mo lai duong CAP GIET
+    # GIA ma cross-review codex tim ra.
+    ("chan-doan-tach-dong-lai-nuot-dau-tach-unicode", ("r529",),
+     "    for dong in stdout.split(chr(10)):",
+     "    for dong in stdout.splitlines():"),
+    # M10/A20 — bo MOT ky tu khoi danh sach. Khong co chot (1) cua r529 — von DAN
+    # XUAT lai danh sach tu chinh `splitlines` luc chay — thi dot bien nay SONG
+    # SOT: o (2) chi lap tren danh sach, nen danh sach ngan di thi no kiem it di
+    # ma van xanh. Do dung hinh dang LOI-KHAI-RONG-HON-PHEP-DO.
+    ("chan-doan-bo-mot-ky-tu-khoi-danh-sach-tach-dong", ("r529",),
+     'KY_TU_TACH_DONG_LE = "\\r\\v\\f\\x1c\\x1d\\x1e\\x85\\u2028\\u2029"',
+     'KY_TU_TACH_DONG_LE = "\\r\\v\\f\\x1c\\x1d\\x1e\\x85\\u2028"'),
+    # M11/A22 — bo chuyen tiep o nhanh DO_KHAC.
+    ("chan-doan-bo-chuyen-tiep-o-nhanh-do-khac", ("r530",),
+     '                    print(f"    VO CAN {ca}: {_goi_chan_doan(than)}")',
+     "                    pass"),
+    # M11/A23 — bo chuyen tiep o nhanh `rc != 1`. NEO PHAI HAI DONG: dong `print`
+    # 16 dau cach la CHUOI CON cua dong 20 dau cach o nhanh P2, nen neo mot dong
+    # dem ra HAI lan ngoai bang va phep doi neo duy nhat bac het. Da do.
+    ("chan-doan-bo-chuyen-tiep-o-nhanh-rc-khac-1", ("r530",),
+     '                # rong va stderr la cho DUY NHAT con chan doan.\n'
+     '                print(f"    stderr: {_goi_chan_doan(p.stderr)}")',
+     "                pass"),
+    # M12/A24 — thay DUONG HAI bang mot hang sach. Duong MOT da co dot bien rieng
+    # (`chan-doan-r526-doc-hang-sach-thay-vi-tep-that`); hai duong, hai dot bien.
+    ("chan-doan-r526-doc-duong-hai-bang-hang-sach", ("r526",),
+     "    ma_2 = _ins.getsource(sys.modules[__name__])",
+     '    ma_2 = "x = 1" + chr(10)'),
     # --- #593 --------------------------------------------------------------
     # A1 — can tran ma LANG LE tra ve mot cap TRUNG thay vi khai KHONG DO DUOC.
     # Chi giet r527: duoi bo sinh THAT (khong gian 256) duong `raise` gan nhu
@@ -3019,9 +3164,22 @@ NHOM_BAT_BUOC = frozenset({"r501", "r502", "r503", "r504", "r505", "r506",
                            "r507", "r508", "r509", "r510", "r511", "r512",
                            "r513", "r514", "r515", "r516", "r517", "r518",
                            "r519", "r520", "r521", "r522", "r523", "r524",
-                           "r525", "r526", "r527", "r528"})
-SAN_NHOM = 28
+                           "r525", "r526", "r527", "r528", "r529", "r530"})
+SAN_NHOM = 30
 
+
+# #568 r4 / B1 — `str.splitlines()` coi CHIN ky tu NGOAI `\n` la het dong, con
+# bo doc cu (`re.findall(..., re.M)`) thi KHONG: `$` voi re.M chi khop truoc `\n`
+# va o cuoi chuoi. Chenh lech ay cho MA SAN PHAM DOAT DUOC TEN CA — mot chuoi
+# chua tung la dong ket qua thanh bang chung chot, tuc cap GIET GIA.
+#
+# Do duoc: stdout = "TU KIEM r501: DAT" + U+2028 + "TU KIEM r512: DO_CHOT" + LF
+#          regex CU -> set()      parser dung splitlines -> {"r512"}
+#
+# Hang so nay KHONG duoc chep tay. `r529` DAN XUAT lai no tu chinh `splitlines`
+# luc chay roi doi BANG NHAU — chep tay ma thieu mot ky tu thi chot van xanh
+# trong khi van ho dung ky tu do.
+KY_TU_TACH_DONG_LE = "\r\v\f\x1c\x1d\x1e\x85\u2028\u2029"
 
 TRAN_CHAN_DOAN = 400
 
@@ -3055,7 +3213,7 @@ def _khoi_chan_doan(stdout: str, nhan: str) -> list[tuple[str, str]]:
     # khoi phai DONG HAN. Ban dau chi BO QUA dong ranh gioi roi nhat tiep, nen
     # moi thu sau mot ca DAT lai chay nguoc vao khoi truoc no.
     dang_mo = False
-    for dong in stdout.splitlines():
+    for dong in stdout.split(chr(10)):
         m = dau.match(dong)
         if m:
             khoi.append((m.group(1), [m.group(2).lstrip(" —-").strip()]))

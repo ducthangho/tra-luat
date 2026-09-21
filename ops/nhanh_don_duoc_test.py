@@ -13,6 +13,7 @@ import shutil
 import subprocess
 import sys
 import tempfile
+import warnings
 from pathlib import Path
 sys.dont_write_bytecode = True
 HERE = Path(__file__).resolve().parent
@@ -2210,7 +2211,7 @@ def r523_ban_sao_tuong_doi_khong_duoc_lam_lech_kenh(d: Path):
 
 
 def r524_chan_doan_cua_con_khong_duoc_mat_o_lop_phan_hang(d: Path):
-    """#568 — bo phan hang phai CHUYEN TIEP chan doan cua con, khong chi ten ca.
+    r"""#568 — bo phan hang phai CHUYEN TIEP chan doan cua con, khong chi ten ca.
 
     Benh do duoc: `gate-registry` DO tren head 57f85a1 cua PR #567 voi dung mot
     dong `TIN DUNG GIA: ca chet vi loi VO CAN ['r506']`. Tu do KHONG cach nao
@@ -2288,8 +2289,18 @@ def r525_nhanh_thu_ba_phai_noi_vi_sao_ca_khi_con_chet_truoc_khi_in(d: Path):
           '  File "nhanh_don_duoc_test.py", line 1, in <module>\n'
           f"ModuleNotFoundError: No module named '{MOC}'\n")
     DICH = ("r515",)
+    # M9 (r3) — do gia CU luon tra `tb` NGAN (~130 ky tu) nen A8 xanh ma thuc te
+    # SAI: stderr THAT cua mot tien trinh con mang 425 ky tu canh bao dung TRUOC
+    # nguyen nhan, va `_goi_chan_doan` cat TU DAU. Kich thich HEP HON hien thuc
+    # la dung hinh dang TIN-HIEU-DO-CHINH-MA-TEST-GIA-MAO (lan thu 3, #568 r3).
+    # O thu ba dung stderr DUNG HINH DANG THAT: rac dai hon TRAN_CHAN_DOAN,
+    # nguyen nhan o CUOI.
+    RAC = (r"ban_sao.py:2213: SyntaxWarning: invalid escape sequence '\d'" "\n"
+           r'  """mot dong docstring dai, chep dung hinh dang that cua canh bao' "\n")
+    tb_dai = RAC * 4 + tb
     kich = {
         "suy-bien": ("", 1, tb),
+        "suy-bien-dai": ("", 1, tb_dai),
         "thuong": ("TU KIEM r511: DO_CHOT — chot cua ca r511 that bai\n"
                    "TU KIEM: 23/24\n", 1, tb),
     }
@@ -2334,8 +2345,65 @@ def r525_nhanh_thu_ba_phai_noi_vi_sao_ca_khi_con_chet_truoc_khi_in(d: Path):
     # (P1) thuong: van in CHOT, va KHONG duoc nuot stderr vao day
     chot("CHOT r511" in th, "r525")
     chot(MOC not in th, "r525")
-    # PHAN HANG KHONG DOI: ca hai deu la `hong`, khong o nao thanh GIET
-    chot((giet, hong) == (0, 2), "r525")
+    # (P3) A15 cua r3 — LOI KHAI TRUNG THUC ve mot HAN CHE, KHONG phai mot ca
+    # xanh ve mot kha nang. Voi `TRAN_CHAN_DOAN` hien tai va huong cat TU DAU,
+    # nguyen nhan nam o CUOI stderr KHONG toi duoc dong cha. Doi huong cat (cat
+    # tu giua / uu tien duoi / loc canh bao) la MO RONG PHAM VI, NGOAI closure
+    # r3 — xem dac ta 596e1614, luu y gan vao A15.
+    sbd = "\n".join(khoi["suy-bien-dai"])
+    chot(MOC not in sbd, "r525")            # nguyen nhan BI CAT — khai thang
+    chot("…[CAT " in sbd, "r525")           # va cha PHAI noi la no da cat
+    chot("SyntaxWarning" in sbd, "r525")    # cai toi noi la phan DAU, tuc rac
+    # PHAN HANG KHONG DOI: ca BA o deu la `hong`, khong o nao thanh GIET
+    chot((giet, hong) == (0, 3), "r525")
+
+
+def _dem_canh_bao_escape(ma: str, ten: str) -> int:
+    r"""Dem canh bao `invalid escape sequence` khi BIEN DICH `ma`.
+
+    Tach RIENG ra de `r526` do duoc HAI CHIEU bang CUNG mot phep do: ma that
+    phai ra 0, va mot mau BAN co chu phai ra >= 1. Mot phep do chi chay mot
+    chieu thi so 0 cua no khong phan biet duoc "sach" voi "khong do duoc gi".
+    """
+    with warnings.catch_warnings(record=True) as thu:
+        warnings.simplefilter("always")
+        compile(ma, ten, "exec")
+    return sum(1 for w in thu if "escape sequence" in str(w.message))
+
+
+def r526_ma_nguon_khong_duoc_sinh_canh_bao_escape_sequence(d: Path):
+    r"""#568 r3/M7+M8 — chinh tep nay phai bien dich SACH tren Python >= 3.12.
+
+    Benh do duoc tu goi chay Windows cua chu kho: hai docstring KHONG raw chua
+    `\d` (dong 2213 va 2723, do `18d6519` cua r1 dua vao) khien MOI tien trinh
+    con in 425 ky tu `SyntaxWarning` ra stderr TRUOC khi chay. `TRAN_CHAN_DOAN`
+    = 400 va `_goi_chan_doan` cat TU DAU, nen 100% ngan sach bi rac chiem va
+    nguyen nhan that bi cat sach. Hai nhanh doc `p.stderr` la nhanh `rc != 1`
+    (M2 cua r1) va nhanh P2 (M6 cua r2) — dung hai nhanh danh cho "con chet
+    truoc khi in duoc gi", tuc dung luc stderr la cho DUY NHAT con nguyen nhan.
+
+    So do do duoc: nen `dc85dd0a` = 0 canh bao, `18d6519` = 2, `45ea292` = 2;
+    `nen-*.err.txt` = 0 B con `ung-vien-*.err.txt` = 17 222 B moi luot.
+
+    Vo hinh tren Python 3.11 (DeprecationWarning, im lang mac dinh) va hien tu
+    3.12 (SyntaxWarning). CI ghim `python-version: "3.12"`, runner chay 3.12.14
+    — nen day KHONG phai mot lo ly thuyet.
+
+    A14 — phep do phai an DUNG tep dang chay. Doc mot BAN CHEP sach thi ca nay
+    se XANH trong khi tep that BAN, tuc hinh dang TIN-HIEU-DO-CHINH-MA-TEST-GIA
+    -MAO lan thu TU. Hai chot dau chan dung cho do, va co dot bien rieng.
+    """
+    nguon = Path(__file__).resolve()
+    ma = nguon.read_text(encoding="utf-8")
+    # A14 — chung minh `ma` LA tep nay, khong phai mot hang sach chep tay.
+    chot(len(ma) > 50_000, "r526")
+    chot("def r526_ma_nguon_khong_duoc_sinh_canh_bao_escape_sequence" in ma, "r526")
+    # A13 — ve can do.
+    chot(_dem_canh_bao_escape(ma, str(nguon)) == 0, "r526")
+    # ... va phep do PHAI CO RANG. Dung `chr` de mau ban khong tu no lam chinh
+    # tep nay ban tro lai — mot ca do "thanh cong" bang cach tai lap benh.
+    mau_ban = "x = " + chr(34) * 3 + chr(92) + "d" + chr(34) * 3 + chr(10)
+    chot(_dem_canh_bao_escape(mau_ban, "<mau-ban>") >= 1, "r526")
 
 
 TU_KIEM = [
@@ -2364,6 +2432,7 @@ TU_KIEM = [
     ("r523", r523_ban_sao_tuong_doi_khong_duoc_lam_lech_kenh, True),
     ("r524", r524_chan_doan_cua_con_khong_duoc_mat_o_lop_phan_hang, True),
     ("r525", r525_nhanh_thu_ba_phai_noi_vi_sao_ca_khi_con_chet_truoc_khi_in, True),
+    ("r526", r526_ma_nguon_khong_duoc_sinh_canh_bao_escape_sequence, True),
 ]
 
 # ---- A6: MOI ca tu kiem phai co MOT dot bien rieng lam no DO --------------
@@ -2538,6 +2607,23 @@ DOT_BIEN_TU_KIEM = [
      "                    pass"),
     ("chan-doan-xoa-phan-biet-P1-P2", ("r525",),
      "                if kh_chot:", "                if False:"),
+    # --- #568 r3 ---------------------------------------------------------
+    # A13 — bo `r` khoi MOT docstring la du lam ban ca tep. r526 do TOAN TEP nen
+    # mot neo la du: them neo thu hai cho docstring kia se la BO TUONG DUONG
+    # (cung giet dung r526, khong phan biet duoc bang dau vao).
+    ("chan-doan-bo-raw-o-docstring-khoi-chan-doan", ("r526",),
+     '    r\"\"\"Trich NGUYEN chan doan cua con cho tung ca mang `nhan` (DO_KHAC / DO_CHOT).',
+     '    \"\"\"Trich NGUYEN chan doan cua con cho tung ca mang `nhan` (DO_KHAC / DO_CHOT).'),
+    # A14 — cho r526 do mot HANG SACH thay vi tep dang chay. Khong co chot
+    # "`ma` LA tep nay" thi dot bien nay SONG SOT va r526 thanh mot ca xanh ve
+    # mot thu no khong he do.
+    ("chan-doan-r526-doc-hang-sach-thay-vi-tep-that", ("r526",),
+     '    ma = nguon.read_text(encoding="utf-8")',
+     '    ma = "x = 1" + chr(10)'),
+    # A15 — noi TRAN ma khong doi huong cat: nguyen nhan o CUOI stderr bong toi
+    # duoc dong cha, tuc loi khai "bi cat" cua o `suy-bien-dai` thanh SAI.
+    ("chan-doan-noi-tran-ma-khong-doi-huong-cat", ("r525",),
+     "TRAN_CHAN_DOAN = 400", "TRAN_CHAN_DOAN = 100000"),
     ("bo-chuan-hoa-ban-sao", ("r523",),
      "    ban_sao = Path(ban_sao).resolve()",
      "    pass"),
@@ -2712,15 +2798,15 @@ NHOM_BAT_BUOC = frozenset({"r501", "r502", "r503", "r504", "r505", "r506",
                            "r507", "r508", "r509", "r510", "r511", "r512",
                            "r513", "r514", "r515", "r516", "r517", "r518",
                            "r519", "r520", "r521", "r522", "r523", "r524",
-                           "r525"})
-SAN_NHOM = 25
+                           "r525", "r526"})
+SAN_NHOM = 26
 
 
 TRAN_CHAN_DOAN = 400
 
 
 def _khoi_chan_doan(stdout: str, nhan: str) -> list[tuple[str, str]]:
-    """Trich NGUYEN chan doan cua con cho tung ca mang `nhan` (DO_KHAC / DO_CHOT).
+    r"""Trich NGUYEN chan doan cua con cho tung ca mang `nhan` (DO_KHAC / DO_CHOT).
 
     #568 — ban truoc bat `^TU KIEM (r\d+): DO_KHAC` tuc CHI TEN CA roi vut phan
     con lai, trong khi con IN DU `DO_KHAC — <Kieu>: <thong diep>`. Cha giu

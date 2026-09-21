@@ -251,7 +251,34 @@ def _thong_diep_an_toan(ex) -> str:
         return "<__str__ hỏng>"
     if not isinstance(td, str):
         return "<__str__ trả thứ không phải chuỗi>"
-    return td
+    return _chuoi_thuan(td, "<không hạ được về chuỗi thuần>")
+
+
+def _chuoi_thuan(x, du_phong: str) -> str:
+    """Hạ `x` về một `str` THUẦN — không còn `__str__`/`__format__`/`__repr__` của ai cả.
+
+    VÌ SAO CẦN, và đây là chỗ bản vá lượt 5 còn HỞ: `isinstance(td, str)` **ĐÚNG với một LỚP
+    CON của `str`**, mà lớp con thì ghi đè được `__str__`, `__format__`, `__repr__`. Thông
+    điệp chẩn đoán sau đó đi vào một f-string của `chot`, và chính lúc ấy nó nổ — tức ca ĐỎ
+    vì đường chẩn đoán chứ không vì thứ nó đo. Cross-review lượt 6 đo: **RAW 82 / 96 phép**
+    trên hai họ `str` con hỏng định dạng.
+
+    Cùng LỚP với `_MaVang`: một giá trị TRÔNG NHƯ thứ ta cần mà mang theo một callback của
+    bên bị đo. Khác chỗ: `_MaVang` chặn ở tầng SO SÁNH, hàm này chặn ở tầng ĐỊNH DẠNG.
+
+    Ba cách hạ đều đo được là cho `str` thuần (đo 21-09, `SubHong(str)` ghi đè cả ba):
+    `str.__str__(x)` · `x[:]` · `"".join((x,))`. Ngược lại `str(x)`, `"%s" % (x,)`, `f"{x}"`
+    đều NÉM — chúng đi qua đúng cái callback đang muốn tránh. Dùng `str.__str__` vì nó tra
+    trên LỚP `str` dựng sẵn, không tra trên instance, nên không có đường nào che.
+
+    Vẫn bọc `try`: một lớp con có thể cài `__getattribute__` quái gở. Và chốt lại bằng
+    `type(...) is str` — "không ném" chưa phải "đã thuần".
+    """
+    try:
+        r = str.__str__(x)
+    except BaseException:  # noqa: BLE001 — cùng lý do: chẩn đoán không được làm vỡ phép đo
+        return du_phong
+    return r if type(r) is str else du_phong
 
 
 class _MaVang:
@@ -270,7 +297,11 @@ class _MaVang:
     def __init__(self, ex):
         # `type(ex).__name__` KHÔNG đi qua `__str__`, nên tên lớp luôn đọc được kể cả khi
         # định dạng hỏng. Thông điệp đi qua `_thong_diep_an_toan` — xem hàm ấy.
-        self.kieu, self.thong_diep = type(ex).__name__, _thong_diep_an_toan(ex)
+        # TÊN LỚP cũng phải hạ về chuỗi thuần: một metaclass đặt `__name__` thành `str`
+        # con là đủ để dòng `chot` nổ ở đúng chỗ nó đang tố cáo. Hai trường, MỘT cửa hạ —
+        # để không có trường nào "quên" như thông điệp đã từng quên.
+        self.kieu = _chuoi_thuan(getattr(type(ex), "__name__", "?"), "<tên lớp không đọc được>")
+        self.thong_diep = _thong_diep_an_toan(ex)
 
     def __eq__(self, _other):
         return False
@@ -319,13 +350,20 @@ class _NgoaiLeLa:
     __repr__ = __str__
 
 
-def _goi_lop_gh(gh: GhGia, ten: str, *args, env_them=None, bo_qua=()):
+def _goi_lop_gh(gh: GhGia, ten: str, *args, env_them=None, bo_qua=(), truoc_khi_chay=None):
     import os
     from unittest import mock
     mod = _nap_cong()
     mod.GOI_GH = gh
     for ten_bo_qua in bo_qua:
         setattr(mod, ten_bo_qua, lambda *a: None)
+    # `truoc_khi_chay(mod)` — móc DUY NHẤT cho fixture thấy module ĐANG chạy, trước khi cổng
+    # chạy. Có vì một lý do đo được: danh tính lớp `Chan` là THEO TỪNG LẦN NẠP, nên không có
+    # móc này thì không ca nào dựng nổi một `Chan` CỦA CHÍNH lần nạp ấy, và hợp đồng "ném
+    # `Chan` nào thì trả về CHÍNH đối tượng ấy" là không đo được. Cross-review lượt 6:
+    # `P_identity` (trả một `Chan` MỚI cùng lớp, cùng `.ma`) PASS — vì ca chỉ chốt LỚP.
+    if truoc_khi_chay is not None:
+        truoc_khi_chay(mod)
     # HERMETIC (packet #396, đóng N9). `clear=True` TRÔNG NHƯ cách ly nhưng nó cách ly
     # bằng chính bản sao đã mang `GITHUB_ACTOR` của runner. Đo 29-08-2026 trên `ef4098d4`:
     # `env -u GITHUB_ACTOR` ⇒ 123/124, `GITHUB_ACTOR=notebyme88` ⇒ 94/124 — chênh 29 ca,
@@ -346,6 +384,89 @@ def _goi_lop_gh(gh: GhGia, ten: str, *args, env_them=None, bo_qua=()):
     except Exception as ex:  # noqa: BLE001 — xem `_NgoaiLeLa`: đổi VỠ TRẦN thành ca ĐỎ
         return _NgoaiLeLa(ex), mod
     return None, mod
+
+
+class _DaTraVe:
+    """Nhãn "cổng TRẢ VỀ bình thường" — KHÔNG phải một mã thoát.
+
+    Vì sao cần một nhãn riêng thay vì dùng `0`: `RC_OK` CŨNG bằng `0`, nên `ma == 0` không
+    phân biệt được "không ném" với "ném `Chan(RC_OK)`". Hai trạng thái khác nhau mà cùng
+    một giá trị là đúng hình dạng đã làm `_MaVang` phải ra đời ở lượt 4.
+    """
+    __slots__ = ()
+
+    def __str__(self):
+        return "ĐÃ-TRẢ-VỀ (cổng không ném)"
+
+    __repr__ = __str__
+
+
+DA_TRA_VE = _DaTraVe()
+
+
+def _goi_dem_lop_gh(gh: GhGia, ten: str, lease, ket_qua_mong_doi, so_goi_mong_doi,
+                    nhan: str, *, env_them=None, **k):
+    """CỬA DUY NHẤT cho mọi ca muốn chốt SỐ LỜI GỌI GitHub. Chốt KẾT QUẢ trước, ĐẾM sau.
+
+    LỚP NÀY ĐÃ TRẢ GIÁ — cross-review lượt 6 (trục LỚP) bắt được, và nó bắt bằng PHÉP ĐO:
+
+        Đột biến `R_probe`: ném `ValueError` ngay đầu `_do_dau_da_dang`, CHỈ với đúng năm
+        đầu vào của vế `lease_id` sai kiểu (`"lease_id" in lease and not isinstance(..., str)`).
+        Chạy toàn suite trên head `94d3cd9` ⇒ **177/177, SỐNG SÓT.**
+
+    Vì sao nó sống: vế ấy bỏ giá trị trả về (`_ex`) rồi chỉ chốt `len(gh.calls) == 0`. Mà
+    **`0 lời gọi vì tiền kiểm chặn` và `0 lời gọi vì ngoại lệ bay ra trước mạng` là HAI
+    trạng thái khác nhau cho CÙNG một con số.** Số đếm không phân biệt được; nó chỉ biết
+    mạng chưa bị chạm, không biết VÌ SAO.
+
+    Cùng họ với `_MaVang` (lượt 4) và với `t179`/`t182`: một ca xanh vì thứ nó đo chết sớm.
+    Khác chỗ đắt: ở đây ca KHÔNG đỏ, nên không ai thấy gì cả.
+
+    CHỮA BẰNG KIẾN TRÚC, không bằng một chốt thêm ở đúng chỗ reviewer chỉ: cửa này chốt CẢ
+    HAI vế, nên không còn cách nào viết một chốt số lời gọi mà quên vế kết quả. `t185` đo
+    chính cửa này; `t186` cấm mọi chốt số lời gọi nằm NGOÀI cửa — không có `t186` thì ca
+    sau chỉ việc viết lại `chot(len(gh.calls) == 0, ...)` và lỗ mở lại trong im lặng.
+
+    `ket_qua_mong_doi`: một mã `RC_*`, hoặc `DA_TRA_VE` khi cổng phải trả về mà không ném.
+    """
+    ex, mod = _goi_lop_gh(gh, ten, lease, env_them=env_them, **k)
+    thuc = DA_TRA_VE if ex is None else ex.ma
+    chot(thuc == ket_qua_mong_doi,
+         f"{nhan}: cổng `{ten}` phải kết thúc bằng {ket_qua_mong_doi}, được {thuc}. "
+         f"Chốt SỐ LỜI GỌI phía sau chỉ có nghĩa khi cổng kết thúc ĐÚNG CÁCH — một phép dò "
+         f"chết sớm cũng cho 0 lời gọi, và số đếm KHÔNG phân biệt được hai chuyện đó.")
+    chot(len(gh.calls) == so_goi_mong_doi,
+         f"{nhan}: phải có đúng {so_goi_mong_doi} lời gọi GitHub, có {len(gh.calls)}.")
+    return mod
+
+
+def _goi_doi_tra_ve(ve: str, gh, ten: str, *args, **k):
+    """Gọi `_goi_lop_gh` và ĐÒI nó TRẢ VỀ. Helper NÉM ⇒ ca đỏ bằng `chot` của CHÍNH nó.
+
+    Mệnh đề đang đo là *"helper LUÔN trả về"*. Viết lời gọi trần thì đúng lúc mệnh đề ấy SAI,
+    ngoại lệ bay qua đầu `chot` và ca đỏ bằng traceback của runner — tức ca đỏ ĐÚNG nhưng
+    KHÔNG ĐO GÌ, và thông điệp không nêu được vế nào hỏng. Cross-review lượt 6 bắt đúng chỗ
+    này ở vế (b) của `t184`.
+
+    Cửa này là cách duy nhất trong tệp để đo một vế "phải trả về" — một vế, một cửa, nên
+    không còn vế nào có thể quên bọc.
+    """
+    try:
+        ex, _mod = _goi_lop_gh(gh, ten, *args, **k)
+    except BaseException as loi:  # noqa: BLE001 — ĐO "luôn trả về", nên phải bắt trọn
+        chot(False,
+             f"{ve} helper NÉM `{type(loi).__name__}` thay vì TRẢ VỀ. Hợp đồng của "
+             f"`_goi_lop_gh` là luôn trả về; ném nghĩa là mọi ca gọi nó sẽ đỏ bằng traceback "
+             f"của runner chứ không bằng `chot` của chính ca.")
+    return ex
+
+
+def _do_kiem_github_dem(lease, co_dau: bool, ket_qua_mong_doi, so_goi_mong_doi, nhan: str,
+                        **k):
+    """Như `_do_kiem_github` nhưng đi qua cửa đếm — dùng cho ca CÓ chốt số lời gọi."""
+    gh, _ = _dung_gh_579(lease, co_dau)
+    _goi_dem_lop_gh(gh, "kiem_github", lease, ket_qua_mong_doi, so_goi_mong_doi, nhan,
+                    env_them=ENV_GITHUB, **k)
 
 
 def _buoc_workflow(ten: str) -> dict:
@@ -7156,12 +7277,24 @@ def _lease_579(**doi):
 
 
 def _do_kiem_github(lease, co_dau: bool, **k):
-    """Gọi `kiem_github` với GitHub giả; trả `(ma, so_loi_goi_gh)`.
+    """Gọi `kiem_github` với GitHub giả; trả MỘT mã thoát (`0` nghĩa là không ném).
 
-    `ma = 0` nghĩa là không ném. Trả kèm SỐ LỜI GỌI vì hai đường từ chối khác nhau có thể
-    cho cùng một mã: tiền kiểm miền chặn TRƯỚC khi chạm mạng (0 lời gọi), còn `kiem()`
-    chặn SAU khi phép dò đã hỏi Issue.
+    CỐ Ý KHÔNG TRẢ SỐ LỜI GỌI — và đó là bản vá kiến trúc của lượt 6, không phải một lần
+    dọn dẹp. Bản trước trả `(ma, so_loi_goi)`, nên một ca chỉ việc lấy vế thứ hai rồi chốt
+    trên nó mà quên vế thứ nhất; đúng như thế đã xảy ra ở vế `lease_id` của `t178` và làm
+    đột biến `R_probe` SỐNG 177/177. Nay muốn chốt số lời gọi thì **bắt buộc** đi qua
+    `_do_kiem_github_dem`, mà cửa ấy chốt CẢ HAI vế. Lỗ chết theo hình dạng hàm, không
+    theo một chốt thêm ở đúng chỗ reviewer chỉ.
     """
+    gh, _ = _dung_gh_579(lease, co_dau)
+    ex, _mod = _goi_lop_gh(gh, "kiem_github", lease, env_them=ENV_GITHUB, **k)
+    return 0 if ex is None else ex.ma
+
+
+def _dung_gh_579(lease, co_dau: bool):
+    """Dựng `GhGia` cho bộ ca #579. TÁCH RA để đường CÓ đếm và đường KHÔNG đếm dùng CHUNG
+    một fixture — hai bản fixture song song là hai bản sẽ trôi lệch, và bên quên cập nhật
+    chính là bên đẩy lọt."""
     dau = "**Lease `" + str(lease.get("lease_id", "")) + "`**"
     than = dau + " — bản chiếu" if co_dau else "khong lien quan"
     # Khoá comment phải theo ĐÚNG `packet_issue` của lease, không ghim cứng 55.
@@ -7173,10 +7306,8 @@ def _do_kiem_github(lease, co_dau: bool, **k):
     # sản phẩm, không được để chính fixture chặn trước (ép `int()` ở đây sẽ tạo tín dụng giả).
     so = lease.get("packet_issue")
     khoa = so if isinstance(so, int) and not isinstance(so, bool) else 55
-    gh = GhGia(comments={khoa: [{"id": 7, "body": than,
-                                 "user": {"login": "github-actions[bot]"}}]})
-    ex, _mod = _goi_lop_gh(gh, "kiem_github", lease, env_them=ENV_GITHUB, **k)
-    return (0 if ex is None else ex.ma), len(gh.calls)
+    return GhGia(comments={khoa: [{"id": 7, "body": than,
+                                   "user": {"login": "github-actions[bot]"}}]}), khoa
 
 
 @ca
@@ -7194,7 +7325,7 @@ def t174_het_han_ma_DA_co_dau_thi_bo_qua_chu_khong_ket_toi_het_han():
     (tức khôi phục thứ tự cũ) ⇒ nhận 8 thay vì 9. Ca so MÃ THOÁT, không so chuỗi thông
     điệp — bài học #355/#359: một `except` đổi kiểu giả được chuỗi, không giả được mã.
     """
-    ma, _goi = _do_kiem_github(_lease_579(lease_expires_at_utc=khi_truoc(48)), co_dau=True)
+    ma = _do_kiem_github(_lease_579(lease_expires_at_utc=khi_truoc(48)), co_dau=True)
     chot(ma == RC_DA_DANG,
          f"lease ĐÃ ĐĂNG rồi mới hết hạn phải cho rc={RC_DA_DANG} (bỏ qua), được rc={ma}. "
          f"rc={RC_NOI_DUNG} nghĩa là `kiem()` vẫn chạy trước và chốt 'đã đăng' lại bị che.")
@@ -7213,7 +7344,7 @@ def t175_het_han_ma_KHONG_co_dau_thi_van_la_het_han():
 
     ĐỘT BIẾN LÀM CA NÀY ĐỎ: cho `_do_dau_da_dang` ném `Chan(RC_DA_DANG)` không cần dấu.
     """
-    ma, _goi = _do_kiem_github(_lease_579(lease_expires_at_utc=khi_truoc(48)), co_dau=False)
+    ma = _do_kiem_github(_lease_579(lease_expires_at_utc=khi_truoc(48)), co_dau=False)
     chot(ma == RC_NOI_DUNG,
          f"lease hết hạn mà CHƯA TỪNG đăng phải cho rc={RC_NOI_DUNG}, được rc={ma}. "
          f"rc={RC_DA_DANG} ở đây nghĩa là cổng bỏ qua một lease chết — đúng bệnh #195.")
@@ -7229,7 +7360,7 @@ def t176_con_han_ma_DA_co_dau_van_bo_qua_nhu_cu():
     ĐỘT BIẾN LÀM CA NÀY ĐỎ: bỏ hẳn tiền kiểm `_do_dau_da_dang` VÀ bỏ `_kiem_comment_da_co`
     khỏi chuỗi sau — tức gỡ cả hai cửa chống đăng trùng.
     """
-    ma, _goi = _do_kiem_github(_lease_579(), co_dau=True)
+    ma = _do_kiem_github(_lease_579(), co_dau=True)
     chot(ma == RC_DA_DANG,
          f"còn hạn + đã có dấu phải cho rc={RC_DA_DANG}, được rc={ma} — chống đăng trùng đã hỏng")
 
@@ -7246,18 +7377,18 @@ def t177_con_han_KHONG_dau_thi_MOI_CHOT_cua_kiem_van_phai_chay():
     ĐỘT BIẾN LÀM CA NÀY ĐỎ: cho tiền kiểm nuốt cả bốn hình dạng (ví dụ trả `Chan(RC_DA_DANG)`
     ngay khi chưa dò được dấu) ⇒ cả ba mã đều thành 9.
     """
-    ma, _goi = _do_kiem_github(_lease_579(), co_dau=False)
+    ma = _do_kiem_github(_lease_579(), co_dau=False)
     chot(ma == RC_OK, f"lease sạch, còn hạn, chưa đăng mà bị chặn: rc={ma}")
 
-    ma, _ = _do_kiem_github(_lease_579(granted_by="codex"), co_dau=False)
+    ma = _do_kiem_github(_lease_579(granted_by="codex"), co_dau=False)
     chot(ma == RC_TU_CAP, f"tự cấp phải cho rc={RC_TU_CAP}, được rc={ma}")
 
-    ma, _ = _do_kiem_github(_lease_579(prompt_path="ops/prompts/p.md"), co_dau=False)
+    ma = _do_kiem_github(_lease_579(prompt_path="ops/prompts/p.md"), co_dau=False)
     chot(ma == RC_NEO, f"neo prompt không kiểm được phải cho rc={RC_NEO}, được rc={ma}")
 
     thieu = _lease_579()
     del thieu["granted_by"]
-    ma, _ = _do_kiem_github(thieu, co_dau=False)
+    ma = _do_kiem_github(thieu, co_dau=False)
     chot(ma == RC_NOI_DUNG, f"thiếu trường bắt buộc phải cho rc={RC_NOI_DUNG}, được rc={ma}")
 
 
@@ -7332,12 +7463,7 @@ def t178_tien_kiem_mien_chan_TRUOC_khi_cham_mang():
                         ("thiếu `packet_issue`", thieu_so),
                         ("`packet_issue` sai kiểu", _lease_579(packet_issue="55")),
                         ("`packet_issue` là `bool`", _lease_579(packet_issue=True))):
-        ma, goi = _do_kiem_github(lease, co_dau=True)
-        chot(ma == RC_NOI_DUNG,
-             f"{nhan}: phải cho rc={RC_NOI_DUNG}, được rc={ma}. "
-             f"rc={RC_DA_DANG} nghĩa là một lease hỏng miền được cấp đường bỏ qua.")
-        chot(goi == 0,
-             f"{nhan}: tiền kiểm phải chặn TRƯỚC khi hỏi GitHub, nhưng đã có {goi} lời gọi")
+        _do_kiem_github_dem(lease, True, RC_NOI_DUNG, 0, nhan)
 
     # TRỤC `lease_id` SAI KIỂU — ba hình dạng, mỗi hình dạng một lý do khác nhau để lọt.
     # Xem docstring: đây là thứ duy nhất giết được đột biến `L`, và nó giết bằng SỐ LỜI GỌI
@@ -7367,14 +7493,16 @@ def t178_tien_kiem_mien_chan_TRUOC_khi_cham_mang():
                       ("`lease_id` là ánh xạ", {"x": 1}),
                       ("`lease_id` là số thực", 1.5)):
         gh = GhGia(comments={55: []})
-        _ex, _mod = _goi_lop_gh(gh, "_do_dau_da_dang", _lease_579(lease_id=lid),
-                                env_them=ENV_GITHUB)
-        chot(len(gh.calls) == 0,
-             f"{nhan}: tiền kiểm phải chặn PHÉP DÒ trước khi nó chạm mạng, nhưng phép dò đã "
-             f"gọi GitHub {len(gh.calls)} lần. MÃ THOÁT của cổng tổng KHÔNG phân biệt được "
-             f"chuyện này — nền và đột biến `L` đều cho rc=8; chỉ số lời gọi của PHÉP DÒ "
-             f"phân biệt (0 so 1). Một lease hỏng miền chạm được mạng là đúng thứ "
-             f"`_tien_kiem_mien_dang` tự khai làm lý do tồn tại.")
+        # `DA_TRA_VE`, KHÔNG phải một mã: phép DÒ là phép DÒ — nó nuốt mọi thứ và TRẢ VỀ.
+        # Vế kết quả này chính là thứ lượt 6 bắt được là THIẾU: bỏ nó ra thì `R_probe`
+        # (ném ngay đầu phép dò, đúng năm đầu vào này) SỐNG 177/177.
+        _goi_dem_lop_gh(gh, "_do_dau_da_dang", _lease_579(lease_id=lid),
+                        DA_TRA_VE, 0,
+                        f"{nhan}: tiền kiểm phải chặn PHÉP DÒ trước khi nó chạm mạng — và "
+                        f"phép dò phải TRẢ VỀ, không được vỡ. Mã thoát của cổng tổng KHÔNG "
+                        f"phân biệt được (nền và đột biến `L` đều rc=8); chỉ số lời gọi của "
+                        f"PHÉP DÒ phân biệt (0 so 1)",
+                        env_them=ENV_GITHUB)
 
 
 @ca
@@ -7472,15 +7600,12 @@ def t180_hai_loi_cung_luc_thi_tien_kiem_KHONG_duoc_cuop_quyen_phan():
     đúng bài học "NGHĨ RA được phép thử mà KHÔNG CHẠY nó thì phép thử ấy KHÔNG TỒN TẠI".
     """
     lease = _lease_579(granted_by="codex", packet_issue="55")
-    ma, goi = _do_kiem_github(lease, co_dau=False)
-    chot(ma == RC_TU_CAP,
-         f"lease vừa tự cấp vừa sai kiểu `packet_issue`: phải giữ mã của NỀN là "
-         f"rc={RC_TU_CAP} (`kiem()` bắt authority trước), được rc={ma}. "
-         f"rc={RC_NOI_DUNG} nghĩa là tiền kiểm miền đã cướp quyền phán của `kiem()` — "
-         f"đúng hồi quy mà M3 khai là không có.")
-    chot(goi == 0,
-         f"tiền kiểm vẫn phải chặn TRƯỚC khi chạm mạng, nhưng đã có {goi} lời gọi GitHub. "
-         f"Nhường quyền PHÁN không có nghĩa là nhường luôn quyền DÒ.")
+    _do_kiem_github_dem(
+        lease, False, RC_TU_CAP, 0,
+        f"lease vừa tự cấp vừa sai kiểu `packet_issue`: phải giữ mã của NỀN "
+        f"(`kiem()` bắt authority trước); rc={RC_NOI_DUNG} nghĩa là tiền kiểm miền đã cướp "
+        f"quyền phán của `kiem()` — đúng hồi quy mà M3 khai là không có. Và nhường quyền "
+        f"PHÁN không có nghĩa là nhường luôn quyền DÒ")
 
 
 @ca
@@ -7513,16 +7638,13 @@ def t181_cua_CUOI_van_phai_chan_khi_API_comment_hong():
     """
     lease = _lease_579()
     gh = GhGia(comments={55: []}, loi_comment={55})
-    ex, _mod = _goi_lop_gh(gh, "kiem_github", lease, env_them=ENV_GITHUB)
-    ma = 0 if ex is None else ex.ma
-    chot(ma == RC_NOI_DUNG,
-         f"lease hợp lệ + endpoint `comments` HỎNG: cửa cuối phải chặn bằng "
-         f"rc={RC_NOI_DUNG}, được rc={ma}. rc=0 nghĩa là một lease CHƯA đo được dấu đã được "
-         f"cho qua — phép dò sớm nuốt lỗi là ĐÚNG, nhưng chỉ khi còn cửa cuối đỡ phía sau.")
-    chot(len(gh.calls) == 3,
-         f"phải có đúng 3 lời gọi GitHub (dò sớm + loại số hiệu + cửa cuối), có "
-         f"{len(gh.calls)}. Thiếu một lời gọi là dấu hiệu một cửa đã biến mất — và mã thoát "
-         f"một mình KHÔNG phân biệt được chuyện đó.")
+    _goi_dem_lop_gh(
+        gh, "kiem_github", lease, RC_NOI_DUNG, 3,
+        "lease hợp lệ + endpoint `comments` HỎNG: cửa cuối phải chặn, và phải có đúng 3 lời "
+        "gọi (dò sớm + loại số hiệu + cửa cuối). Cho qua nghĩa là một lease CHƯA đo được dấu "
+        "được thả — phép dò sớm nuốt lỗi là ĐÚNG, nhưng chỉ khi còn cửa cuối đỡ phía sau; "
+        "thiếu một lời gọi là dấu hiệu một cửa đã biến mất",
+        env_them=ENV_GITHUB)
 
 
 @ca
@@ -7550,14 +7672,11 @@ def t182_lease_KHONG_PHAI_anh_xa_thi_chan_co_ten_chu_khong_vo_tran():
         # `_goi_lop_gh` nay TỰ đổi một ngoại lệ trần thành `_NgoaiLeLa` (lượt 4), nên ca này
         # dùng lại đường chung — không còn helper riêng. Lượt 3 vá bằng một helper cho RIÊNG
         # ca này; lượt 4 bắt `t179` mắc y hệt, tức bản vá ấy ĐÚNG mà HẸP. Xem `_NgoaiLeLa`.
-        ex, _mod = _goi_lop_gh(gh, "kiem_github", xau, env_them=ENV_GITHUB)
-        ma = None if ex is None else ex.ma
-        chot(ma == RC_NOI_DUNG,
-             f"lease là {nhan}: phải ném `Chan(rc={RC_NOI_DUNG})` có tên, được rc={ma}. "
-             f"Một ngoại lệ TRẦN thoát khỏi cổng là fail-open đội lốt sự cố.")
-        chot(len(gh.calls) == 0,
-             f"lease là {nhan}: chốt hình dạng phải chặn TRƯỚC khi chạm mạng, có "
-             f"{len(gh.calls)} lời gọi.")
+        _goi_dem_lop_gh(
+            gh, "kiem_github", xau, RC_NOI_DUNG, 0,
+            f"lease là {nhan}: phải ném `Chan(rc={RC_NOI_DUNG})` CÓ TÊN và chặn TRƯỚC khi "
+            f"chạm mạng. Một ngoại lệ TRẦN thoát khỏi cổng là fail-open đội lốt sự cố",
+            env_them=ENV_GITHUB)
 
 
 @ca
@@ -7699,10 +7818,42 @@ def t184_chinh_HELPER_phai_doi_ngoai_le_TRAN_thanh_ca_DO_chu_khong_vo_tran():
          f"{getattr(ex, 'ma', None)!r}. Nới helper mà làm hỏng đường cũ là đổi một lỗi lấy "
          f"20+ ca khác.")
 
+    # (a2) DANH TÍNH ĐỐI TƯỢNG, không chỉ danh tính LỚP. Lượt 6 bắt: `P_identity` trả một
+    # `Chan` MỚI (`mod.Chan(ex.ma, ex.thong_diep)`) — CÙNG lớp, CÙNG `.ma` — nên vế (a) ở
+    # trên vẫn PASS. Hợp đồng thật là "ném `Chan` NÀO thì trả về CHÍNH đối tượng ấy": mất
+    # đối tượng gốc là mất `__traceback__`, mất mọi thuộc tính ca sau có thể cần, và mở
+    # đường cho một helper "sửa lại" ngoại lệ trên đường ra.
+    #
+    # Đo được điều đó cần một `Chan` CỦA ĐÚNG lần nạp đang chạy — xem móc `truoc_khi_chay`.
+    giu = {}
+
+    def _gh_nem_chinh_no(*_a):
+        raise giu["ex"]
+
+    # CỔNG DÙNG Ở ĐÂY LÀ `_kiem_comment_da_co`, và đó là một phép ĐO chứ không phải tiện tay.
+    # Đo cả ba cổng với cùng fixture (21-09): `_kiem_comment_da_co` trả về CHÍNH đối tượng;
+    # `kiem_github` trả một `Chan` KHÁC tuy cùng `ma=6`; `_do_dau_da_dang` nuốt hẳn (trả
+    # `None`) vì nó là phép DÒ. Hai cái sau là HÀNH VI CỦA SẢN PHẨM, không phải lỗi helper —
+    # chốt danh tính lên chúng là chốt sai đơn vị, và ca sẽ đỏ vì một mệnh đề chưa ai khai.
+    ex_a2 = _goi_doi_tra_ve(
+        "(a2)", _gh_nem_chinh_no, "_kiem_comment_da_co", "o/r", _lease_579(),
+        env_them=ENV_GITHUB,
+        truoc_khi_chay=lambda m: giu.__setitem__("ex", m.Chan(m.RC_NEO, "a2-danh-tinh")))
+    chot(ex_a2 is giu["ex"],
+         f"(a2) helper phải trả về CHÍNH đối tượng `Chan` mà cổng đã ném, nhận một đối "
+         f"tượng khác (id {id(ex_a2)} so {id(giu['ex'])}). Cùng lớp và cùng `.ma` KHÔNG đủ: "
+         f"một bản sao làm mất `__traceback__` và cho phép sửa ngoại lệ trên đường ra, mà "
+         f"mọi ca đọc `ex.ma` đều không thấy gì.")
+
     # (b) HÌNH DẠNG MỚI: ngoại lệ trần -> `_NgoaiLeLa`, không vỡ ra ngoài ca.
     def gh_tran(*_a):
         raise RuntimeError("hỏng theo kiểu KHÔNG AI LƯỜNG TRƯỚC")
-    ex, _mod_b = _goi_lop_gh(gh_tran, "kiem_github", lease, env_them=ENV_GITHUB)
+    # BỌC — lượt 6 bắt (`helper-contract-raw-exception-escapes-own-assertion`): vế này đòi
+    # helper TRẢ VỀ, mà lời gọi trần thì "helper ném" giết ca TRƯỚC `chot`, nên ca đỏ bằng
+    # traceback của runner chứ không bằng chốt của chính nó. Vế (e) đã có mẫu đúng; nay mọi
+    # vế đòi TRẢ VỀ đều đi qua cùng một cửa, thay vì cửa ấy chỉ phục vụ một vế.
+    ex = _goi_doi_tra_ve("(b)", gh_tran, "kiem_github", lease, env_them=ENV_GITHUB)
+    _mod_b = _nap_cong()
     chot(ex is not None and ex.__class__.__name__ == "_NgoaiLeLa",
          f"(b) ngoại lệ TRẦN phải thành `_NgoaiLeLa`, nhận {ex!r}. Vỡ ra ngoài ca nghĩa là "
          f"ca gọi sẽ đỏ vì runner chứ không vì `chot` của chính nó — đúng lớp tín dụng giả.")
@@ -7817,6 +7968,201 @@ def t184_chinh_HELPER_phai_doi_ngoai_le_TRAN_thanh_ca_DO_chu_khong_vo_tran():
     chot(not bi_nuot,
          "(d) `KeyboardInterrupt` bị helper NUỐT. Một bộ test không dừng được bằng Ctrl-C là "
          "một bộ test giữ máy làm con tin; `except Exception` là CÓ CHỦ ĐÍCH, đừng nới.")
+
+
+@ca
+def t187_chan_doan_phai_ha_ve_CHUOI_THUAN_chu_khong_chi_isinstance():
+    """A22 — `_chuoi_thuan` đo theo HỌ. `isinstance(x, str)` KHÔNG đủ, và lượt 6 đo được.
+
+    Bản vá lượt 5 chốt `isinstance(td, str)` rồi trả nguyên `td`. Mà **lớp CON của `str` qua
+    được `isinstance`** và ghi đè được `__str__` / `__format__` / `__repr__`. Thông điệp ấy
+    sau đó vào f-string của `chot` — và nổ ở đúng dòng đang tố cáo một lỗi khác.
+    Cross-review lượt 6: **RAW 82 / 96 phép** trên hai họ `str` con hỏng định dạng.
+
+    HỌ, chứ không một đại diện — bài học `m12/m13/m14` của #574: một nhãn có MỘT thành viên
+    thì nhãn ấy rộng hơn tập fixture. Bảy thành viên dưới đây hỏng ở BẢY chỗ khác nhau, và
+    mỗi cái phải cho ra một `str` THUẦN.
+
+    Vế cuối là ĐỐI CHỨNG XANH: chuỗi thường phải đi qua NGUYÊN VẸN. Thiếu nó thì một cài đặt
+    trả hằng `"<x>"` cho mọi đầu vào cũng qua hết sáu vế trên.
+    """
+    class _StrHongStr(str):
+        def __str__(self): raise RuntimeError("str hỏng")
+
+    class _StrHongFormat(str):
+        def __format__(self, _spec): raise RuntimeError("format hỏng")
+
+    class _StrHongRepr(str):
+        def __repr__(self): raise RuntimeError("repr hỏng")
+
+    class _StrHongCaBa(str):
+        def __str__(self): raise RuntimeError("str hỏng")
+        def __format__(self, _spec): raise RuntimeError("format hỏng")
+        def __repr__(self): raise RuntimeError("repr hỏng")
+
+    class _StrHongGetAttr(str):
+        def __getattribute__(self, ten): raise RuntimeError("getattribute hỏng")
+
+    class _StrHongBase(str):
+        def __str__(self): raise KeyboardInterrupt("tín hiệu dừng từ đường chẩn đoán")
+
+    NOI_DUNG = "nội dung thật"
+    HO = (("str con hỏng `__str__`", _StrHongStr(NOI_DUNG)),
+          ("str con hỏng `__format__`", _StrHongFormat(NOI_DUNG)),
+          ("str con hỏng `__repr__`", _StrHongRepr(NOI_DUNG)),
+          ("str con hỏng CẢ BA", _StrHongCaBa(NOI_DUNG)),
+          ("str con hỏng `__getattribute__`", _StrHongGetAttr(NOI_DUNG)),
+          ("str con ném TÍN HIỆU DỪNG", _StrHongBase(NOI_DUNG)))
+    for nhan, x in HO:
+        r = _chuoi_thuan(x, "<dự phòng>")
+        chot(type(r) is str,
+             f"{nhan}: phải hạ về `str` THUẦN, nhận {type(r).__name__!r}. `isinstance` ĐÚNG "
+             f"với lớp con, nên nó KHÔNG phân biệt được — và lớp con mang theo callback của "
+             f"bên bị đo vào đúng f-string của `chot`.")
+        # Định dạng THẬT — không chỉ kiểm kiểu. `type(...) is str` mà vẫn nổ khi format thì
+        # phép kiểm trên chỉ là một lời khai về kiểu, không phải về dùng được.
+        try:
+            _ = f"thông điệp: {r}"
+        except BaseException as loi:  # noqa: BLE001
+            chot(False, f"{nhan}: kết quả đã là `str` thuần mà f-string vẫn ném "
+                        f"`{type(loi).__name__}` — phép kiểm kiểu ở trên không đủ.")
+
+    # ĐỐI CHỨNG XANH: chuỗi thường phải đi qua NGUYÊN VẸN, không bị thay bằng dự phòng.
+    thuong = _chuoi_thuan(NOI_DUNG, "<dự phòng>")
+    chot(thuong == NOI_DUNG and type(thuong) is str,
+         f"đối chứng: chuỗi thường phải giữ nguyên, nhận {thuong!r}. Một cài đặt trả hằng "
+         f"cho MỌI đầu vào cũng qua hết các vế trên — vế này là thứ duy nhất bác nó.")
+
+
+@ca
+def t185_cua_DEM_phai_chot_KET_QUA_truoc_khi_chot_SO_LOI_GOI():
+    """A20 — đo CHÍNH `_goi_dem_lop_gh`. Cửa mới phải TỰ NÓ có răng, không chỉ có mặt.
+
+    LỚP `CHOT-SO-LOI-GOI-MA-KHONG-CHOT-KET-QUA`, cross-review lượt 6 bắt được bằng phép đo:
+    đột biến `R_probe` ném `ValueError` ngay đầu `_do_dau_da_dang`, chỉ với đúng năm đầu vào
+    của vế `lease_id` sai kiểu, **SỐNG 177/177** trên head `94d3cd9`.
+
+    Ba vế, mỗi vế một cửa hỏng KHÁC NHAU — không phải ba cách viết của cùng một vế:
+
+      (a) cổng VỠ trước khi chạm mạng nhưng số lời gọi vẫn đúng ⇒ cửa phải ĐỎ ở vế KẾT QUẢ.
+          Đây là `R_probe` thu nhỏ. Bỏ vế kết quả khỏi cửa ⇒ vế này XANH.
+      (b) cổng kết thúc ĐÚNG mà số lời gọi SAI ⇒ cửa phải ĐỎ ở vế ĐẾM.
+          Bỏ vế đếm khỏi cửa ⇒ vế này XANH.
+      (c) cổng TRẢ VỀ (không ném) khi ca đòi `DA_TRA_VE` ⇒ cửa phải XANH.
+          Thiếu vế này thì (a) và (b) có thể đỏ vì cửa đỏ với MỌI thứ.
+
+    `DA_TRA_VE` là một nhãn RIÊNG chứ không phải `0`: `RC_OK` cũng bằng `0`, nên `ma == 0`
+    không phân biệt "không ném" với "ném `Chan(RC_OK)`" — cùng bệnh đã đẻ ra `_MaVang`.
+    """
+    class _ChotCa(AssertionError):
+        """Tín hiệu RIÊNG của ca này — mã ngoài KHÔNG giả được bằng một `AssertionError`."""
+
+    def _thu(ten_cong, lease, ket_qua_mong_doi, so_goi_mong_doi):
+        """Chạy cửa; trả `None` nếu XANH, hoặc thông điệp nếu cửa chốt ĐỎ."""
+        gh = GhGia(comments={55: []})
+        try:
+            _goi_dem_lop_gh(gh, ten_cong, lease, ket_qua_mong_doi, so_goi_mong_doi,
+                            "t185", env_them=ENV_GITHUB)
+        except AssertionError as loi:
+            return str(loi)
+        return None
+
+    # Ba hành vi ĐO ĐƯỢC của cổng, dùng làm nguyên liệu cho ba vế (đo 21-09 trên head này):
+    #   `_do_dau_da_dang` + lease hợp lệ  -> KHÔNG ném, 1 lời gọi
+    #   `kiem_github`     + lease hợp lệ  -> KHÔNG ném, 3 lời gọi
+    #   `kiem_github`     + lease TỰ CẤP  -> Chan(rc=4), 1 lời gọi
+    HOP_LE, TU_CAP = _lease_579(), _lease_579(granted_by="codex")
+
+    # (c) ĐỐI CHỨNG XANH trước — nếu nó đỏ thì (a)/(b) không chứng minh được gì.
+    #     `_do_dau_da_dang` với lease HỢP LỆ: phép dò hỏi Issue đúng 1 lần rồi TRẢ VỀ.
+    xanh = _thu("_do_dau_da_dang", HOP_LE, DA_TRA_VE, 1)
+    if xanh is not None:
+        raise _ChotCa(f"(c) đối chứng XANH lại ĐỎ: {xanh}. Mọi vế sau mất nghĩa.")
+
+    # (b) sai SỐ LỜI GỌI, kết quả vẫn đúng ⇒ phải đỏ ở vế ĐẾM.
+    do_dem = _thu("_do_dau_da_dang", HOP_LE, DA_TRA_VE, 99)
+    if do_dem is None:
+        raise _ChotCa("(b) cửa KHÔNG đỏ khi số lời gọi sai — vế ĐẾM không có răng.")
+    if "lời gọi GitHub" not in do_dem:
+        raise _ChotCa(f"(b) đỏ nhưng KHÔNG phải ở vế đếm: {do_dem}")
+
+    # (a) kết quả sai, số lời gọi vẫn đúng ⇒ phải đỏ ở vế KẾT QUẢ.
+    #     Lease TỰ CẤP làm `kiem_github` ném `Chan(rc=4)` sau ĐÚNG 1 lời gọi. Ca đòi
+    #     `DA_TRA_VE` + 1 lời gọi: vế ĐẾM khớp, vế KẾT QUẢ lệch. Đó chính là hình dạng của
+    #     `R_probe` — số đúng, kết cục sai — nên nếu cửa xanh ở đây thì cửa vô dụng.
+    do_kq = _thu("kiem_github", TU_CAP, DA_TRA_VE, 1)
+    if do_kq is None:
+        raise _ChotCa("(a) cửa KHÔNG đỏ khi cổng kết thúc SAI CÁCH trong lúc số lời gọi "
+                      "vẫn đúng. Đó CHÍNH LÀ hình dạng đã cho `R_probe` sống 177/177.")
+    if "kết thúc" not in do_kq:
+        raise _ChotCa(f"(a) đỏ nhưng KHÔNG phải ở vế kết quả: {do_kq}")
+
+
+@ca
+def t186_KHONG_ca_nao_duoc_chot_SO_LOI_GOI_ngoai_CUA():
+    """A21 — chốt CẤU TRÚC: cấm mọi so sánh `len(<x>.calls)` nằm ngoài `_goi_dem_lop_gh`.
+
+    Không có ca này thì bản vá lượt 6 chỉ sống tới lần ai đó viết lại
+    `chot(len(gh.calls) == 0, ...)` trong một ca mới — và lỗ mở lại trong im lặng, đúng cách
+    nó đã mở lần đầu. Cùng nếp với bài học "danh sách CẤM không bao giờ đủ": ở đây danh sách
+    CHO PHÉP chỉ có MỘT phần tử và biết trước, nên nó đóng được.
+
+    Đo bằng `ast`, KHÔNG bằng `grep`: câu hỏi là một SỰ KIỆN CẤU TRÚC ("có phép so sánh nào
+    trên `len(....calls)` không"), mà mẫu văn bản trả lời một câu KHÁC ("có chỗ nào TRÔNG
+    GIỐNG"). Chính tệp đặc tả của #574 vừa ghi hai lần trả giá cho việc lẫn hai câu ấy.
+
+    KHÔNG cấm mọi phép đọc `.calls`: `t48` chốt `not any(x[0] == "POST" for x in gh.calls)`
+    — đó là một VỊ TỪ về việc đã xảy ra, không phải một SỐ ĐẾM, và nó nằm chung biểu thức
+    với vế kết quả (`ex.ma == RC_NOI_DUNG`). Cấm nó là chặn oan một ca đang đo đúng.
+    """
+    import ast as _ast
+    nguon = Path(__file__).read_text(encoding="utf-8")
+    cay = _ast.parse(nguon)
+
+    CHO_PHEP = {"_goi_dem_lop_gh"}
+    pham = []
+
+    class _Di(_ast.NodeVisitor):
+        def __init__(self):
+            self.trong = []
+
+        def visit_FunctionDef(self, nut):
+            self.trong.append(nut.name)
+            self.generic_visit(nut)
+            self.trong.pop()
+
+        def visit_Compare(self, nut):
+            for ve in [nut.left] + list(nut.comparators):
+                if (isinstance(ve, _ast.Call) and isinstance(ve.func, _ast.Name)
+                        and ve.func.id == "len" and len(ve.args) == 1
+                        and isinstance(ve.args[0], _ast.Attribute)
+                        and ve.args[0].attr == "calls"):
+                    if not (self.trong and self.trong[-1] in CHO_PHEP):
+                        pham.append((nut.lineno, self.trong[-1] if self.trong else "<mức module>"))
+                    break
+            self.generic_visit(nut)
+
+    _Di().visit(cay)
+    chot(not pham,
+         "chốt SỐ LỜI GỌI phải đi qua `_goi_dem_lop_gh` — cửa ấy chốt CẢ vế KẾT QUẢ, và "
+         "thiếu vế kết quả là thứ đã cho đột biến `R_probe` sống 177/177. Vi phạm: "
+         + " · ".join(f"dòng {d} trong `{h}`" for d, h in pham))
+
+    # ĐỐI CHỨNG: bộ dò phải THẤY được hình dạng bị cấm, nếu không nó chỉ đang đếm số không.
+    thu = _ast.parse("def ca_gia():\n    chot(len(gh.calls) == 0, 'x')\n")
+    thay = []
+
+    class _Di2(_Di):
+        pass
+
+    d2 = _Di2()
+    pham.clear()
+    d2.visit(thu)
+    thay = list(pham)
+    pham.clear()
+    chot(len(thay) == 1,
+         f"bộ dò của chính ca này KHÔNG thấy hình dạng bị cấm khi bơm vào (thấy {len(thay)}). "
+         f"Một phép kiểm không thể ĐỎ thì không phải bằng chứng.")
 
 
 def main() -> int:

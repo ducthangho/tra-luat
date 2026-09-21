@@ -22,6 +22,20 @@ granted_on_instruction_nguyen_van: 'Chu kho, phien dieu phoi 2026-09-21, GO VAN 
   Chi thi den SAU khi executor da khai vat can o issues/593#issuecomment-5755843760 — rang cap
   lease luc ops/nhanh_don_duoc_test.py con do r3 giu se lam CUA DONG cho ca hai. Chu kho van chi
   thi tien hanh, nen viec r3 nha duong la he qua bao ham.'
+da_bi_thay_the: dau-phien-trung-lam-do-cong-r1-g2-bia-mo
+da_bi_thay_the_vi_sao: 'THOI GIU SOM, theo chi thi chu kho "Cap r4 cho #568 di". Revision 4 cua
+  #568 can DUNG duong ops/nhanh_don_duoc_test.py ma lease nay dang giu; hai packet KHONG the
+  cung giu mot duong.
+  CAI GIA PHAI KHAI THANG: PR #596 CHUA duoc audit. Sau bia mo nay #593 KHONG con quyen GHI, nen
+  neu audit tim ra cho can sua thi phai xin chu kho cap generation MOI (r1-g3).
+  Bu lai: viec THI CONG cua #593 DA XONG — M1-M3 du, A1-A9 deu DAT, va NAM required gate tren
+  6c761c4 deu XANH (gate, gate-registry, gate-packet-loop, chuan-bi, thu-hoi), mergeable_state
+  clean.
+  VIEC CUA #593 KHONG bi huy: PR #596 giu nguyen head 6c761c4 va van AUDIT VA MERGE DUOC — mat
+  quyen GHI khong phai mat quyen LAND.
+  DAY LA LAN THU HAI trong phien nay mot packet phai nha duong cho packet sau (lan dau:
+  chan-doan-tin-dung-gia-r3-g2-bia-mo). Hinh dang ay dang thanh mot cai gia co he thong: moi
+  packet dang bay deu mat quyen ghi khi packet ke tiep bat dau. Da bao chu kho.'
 recorded_by: claude-session
 recorder_is_dispatcher: false
 

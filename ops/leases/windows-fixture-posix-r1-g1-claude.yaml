@@ -144,18 +144,69 @@ CHONG_LAN_DA_BIET:
     lease nay va cua so ay — no la KY LUAT, KHONG phai cong. Khong may nao cuong che no.'
 
 DIEU_KIEN_BAT_DAU:
-  luat: 'KHONG duoc cham ops/lease_publish_test.py cho toi khi `ai-dang-giu` cho DUNG duong ay
-    KHONG CON NGUOI GIU NAO NGOAI CHINH lease nay — tuc DUNG MOT ten, va ten ay la
-    windows-fixture-posix-r1-g1-claude. Phai DO truoc MOI lan cham, doc rc TRUC TIEP (khong qua
-    pipe), va doc ca truong `da_bi_thay_the`. "Het han" KHONG phai "da nha" — lease gia han duoc,
-    va lease #541 g2 da duoc gia han that mot lan.'
+  luat: 'KHONG duoc cham ops/lease_publish_test.py cho toi khi `ai-dang-giu` cho DUNG duong ay ra
+    DUNG HAI ten, va hai ten ay la windows-fixture-posix-r1-g1-claude (lease nay) va
+    dang-lease-dau-truoc-kiem-sau-r2-g3-claude (#579). Xem DINH_CHINH_2 — ban dau cau nay doi
+    DUNG MOT ten. Phai DO truoc MOI lan cham, doc rc TRUC TIEP (khong qua pipe), va doc ca truong
+    `da_bi_thay_the`. "Het han" KHONG phai "da nha" — lease gia han duoc, va chinh lease nay da
+    duoc gia han that mot lan (GIA_HAN_1).'
   doc_the_nao:
-  - 'rc=11, DUNG MOT ten, ten ay la lease nay              => CUA MO.'
-  - 'rc=11, tu HAI ten tro len, hay mot ten KHAC           => CUA DONG. Cho.'
+  - 'rc=11, DUNG HAI ten, va hai ten ay dung la hai ten o `luat` => CUA MO. Hinh dang MONG DOI.'
+  - 'rc=11, tu BA ten tro len, hay mot ten LA               => CUA DONG. Cho va bao.'
+  - 'rc=11, DUNG MOT ten la lease nay                       => CUA MO, nhung DUNG LAI va hoi vi
+     sao lease #579 g3 bien mat khoi so — cung ly le voi gach dau dong "rc=0" ben duoi.'
   - 'rc=12 NHANH_CUC_BO_TUT_SAU                            => CHUA BIET GI CA. Chua bang lenh no
      in ra roi DO LAI. Do KHONG phai "cua mo".'
   - 'rc=0, NGUOI_GIU 0                                     => CUA MO, nhung DUNG LAI va hoi vi sao
      lease nay bien mat khoi so — mot lease tu dung khoi so la mot su kien, khong phai tin mung.'
+  DINH_CHINH_2:
+    sua_gi: 'Muc `luat` va `doc_the_nao` doi tu "DUNG MOT ten" sang "DUNG HAI ten". KHONG sua gi
+      khac — khong cham muc tieu, N1-N6, write_set, phu thuoc, executor, environment, spec_hash,
+      thoi han, prohibited_actions hay dieu_kien_dung.'
+    vi_sao: 'Chu kho cap cho #579 lease dang-lease-dau-truoc-kiem-sau-r2-g3-claude, chong lan CO Y
+      len cung duong nay, het han 2026-09-21T19:48:00Z. Doc nguyen van ban cu thi phep do ra
+      "rc=11, HAI ten" => CUA DONG, va packet nay tu khoa minh trong suot cua so vua duoc
+      GIA_HAN_1 mo ra. Cung hinh dang ma DINH_CHINH_1 sinh ra de chua, chi khac nguyen nhan.'
+    chi_thi_nguyen_van: 'Chu kho ducthangho, phien dieu phoi 21-09-2026 ~05:3xZ: "Cap g3 di",
+      roi chon duong co nhan nguyen van "Cap ngay + gia han #578" sau khi duoc trinh rang day la
+      "cua so hai writer — pha write-set exclusion, nen can anh chap nhan tuong minh rui ro ghi de
+      giua hai phien". Ban chieu:
+      https://github.com/ducthangho/tra-luat/issues/578#issuecomment-5755921952'
+    do_duoc: 'Truoc khi cap g3: ai-dang-giu ops/lease_publish_test.py rc=11 NGUOI_GIU 1 luc
+      2026-09-21T05:33:28Z. Sau khi cap: phai ra rc=11 NGUOI_GIU 2 voi dung hai ten o `luat`.
+      Phep do sau la mot tieu chi cua chinh lan sua nay, khong phai mot du doan.'
+    ai_sua: 'Chu kho. Phien executor KHONG tu doc lai dieu kien cho nhe di de mo khoa cho chinh
+      minh — va lan nay cung khong: nguoi noi long la nguoi dat ra dieu kien.'
+    KHONG_phai_revision_moi: 'Cung ly le §3.2 ma DINH_CHINH_1 va GIA_HAN_1 da dung: muc tieu, tieu
+      chi nghiem thu, write set, phu thuoc, executor va moi truong deu KHONG doi. lease_id,
+      revision 1 va generation 1 GIU NGUYEN; khong cap lai, khong co bia mo nao phai dat.'
+    KHAC_DINH_CHINH_1_O_DAU: 'DINH_CHINH_1 chua mot loi SOAN THAO — dieu kien cu khong bao gio
+      thoa duoc. DINH_CHINH_2 KHONG chua loi nao: dieu kien cu DUNG, no chi khong con phu hop voi
+      mot quyet dinh moi cua chu kho. Dung gop hai muc nay lam mot tien le.'
+    HE_QUA_PHAI_KHAI: 'Write-set exclusion tren duong nay bi HA xuong thanh mot PHAN VUNG khai san
+      (PHAN_VUNG_HAI_WRITER). Do la KY LUAT, KHONG phai cong — khong may nao cuong che no. Viet
+      "phan vung dong duoc rui ro" la mot loi khai rong hon phep do; cau dung la no THU HEP.'
+
+PHAN_VUNG_HAI_WRITER:
+  co_so: 'Do duoc, khong phai giao uoc bang loi. #578 da day 5f91846: 35 them / 4 xoa, hunk nam
+    dung trong t131 va t132 (dong ~4725-4800). #579 sua docstring t32 va NOI THEM t174-t179 cung
+    hai helper. Hai vung roi nhau tren cung mot tep.'
+  vung_cua_578: ['t131', 't132']
+  vung_cua_579: ['docstring cua t32', 't174', 't175', 't176', 't177', 't178', 't179',
+                 '_lease_579', '_do_kiem_github', 'dong dang ky ca moi o cuoi tep']
+  luat:
+    - '#578 KHONG cham t32/t174-t179/_lease_579/_do_kiem_github. #579 KHONG cham t131/t132.'
+    - 'KHONG ai `--force`, KHONG ai viet lai lich su nhanh cua ben kia.'
+    - 'Ben nao day sau thi merge master roi chay lai TRON bo, dung chi chay ca cua minh.'
+  vi_sao_song_duoc: 'A7 cua dac ta #579 r2 la BAT DANG THUC (N >= 172) chu khong phai dang thuc,
+    va N1/N2/N6 cua packet nay dem ca cua packet nay. Khong tieu chi nao cua hai ben doi mot TONG
+    SO CA tuyet doi. Neu ben nao dinh them mot chot doi tong so ca bang dung mot hang so thi phai
+    DUNG va bao — chot ay se do vi viec cua ben kia chu khong vi viec cua minh.'
+  hai_han_KHONG_bang_nhau: 'Lease nay het 22:30:00Z; lease #579 g3 het 19:48:00Z. Tu 19:48Z den
+    22:30Z packet nay lai la nguoi giu DUY NHAT, va luc do phep do se ra "rc=11, DUNG MOT ten".
+    Theo `doc_the_nao` thi do la CUA MO kem mot cau hoi — cau tra loi da biet truoc va nam o day,
+    nen dung doc no thanh mot su kien.'
+
   DINH_CHINH_1:
     sua_gi: 'Muc `luat` ban dau viet "tra rc=0 / NGUOI_GIU 0".'
     vi_sao: 'Dieu kien ay KHONG BAO GIO THOA DUOC. Chinh hanh vi cap lease nay la ghi mot lease

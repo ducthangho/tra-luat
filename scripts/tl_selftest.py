@@ -25311,81 +25311,120 @@ def run() -> int:
             return False
     _t110("r378_tien_de_khong_thoat_thi_do", _c378_tien_de_khong_thoat_thi_do)
 
-    def _c378_chet_vi_moi_truong_khong_la_giet():
-        """A6 — khoá TRỌN hợp đồng ba hạng của `_r378_classify`, không chỉ một hạng.
+    def _c378_ma_tran_phan_hang():
+        """A6 — MA TRẬN ba trục cho `_r378_classify`. Thay bốn vế rời của r1.
 
-        Bài học #355/#359: phân hạng theo CHUỖI thông điệp thì bất kỳ `except` nào cũng giả mạo
-        được tín hiệu. `_r378_classify` chỉ cấp `killed` cho `_R378SaiKyVong` — một LỚP RIÊNG mà
-        mã triển khai không dùng.
+        VÌ SAO LÀ MA TRẬN CHỨ KHÔNG PHẢI VẾ (e). Slug `phan-hang-giet-gia-thieu-doi-chung` đã
+        lặp **BỐN** lượt cross-review liên tiếp, và mỗi lượt đóng đúng cửa được chỉ rồi hở cửa
+        tiếp theo không ai chỉ:
 
-        BẢN TRƯỚC CHỈ ĐO MỘT HẠNG, và cross-review codex lượt 2 chứng minh thế là chưa đủ
-        (`phan-hang-giet-gia-thieu-doi-chung`). Nó dựng HAI đột biến độc lập, cả hai **sống sót
-        `1715/1715`**:
+            lượt 1  m5   — mất phủ CỦA CHỈ MỤC khi đổi fixture
+            lượt 2  m7/m9 — bộ phân hạng có BA hạng, ca chỉ canh MỘT
+            lượt 3  m10  — ba hạng đã canh, nhưng canh bằng THÔNG ĐIỆP
+            lượt 4  m11  — canh theo lớp, nhưng so bằng TÊN lớp (`type(exc).__name__`)
 
-            m7: `except _R378SaiKyVong` -> `except RuntimeError`
-                Với lỗi mỏ neo THẬT (`R378_MUTATION_ANCHOR_COUNT:0`): bản đúng cho
-                `false_credit:RuntimeError`, m7 cho `killed` — **mà oracle CHƯA TỪNG CHẠY**
-                (`oracle_calls=0`). Một mutant không chạy nổi vẫn được tính là đã giết.
+        `m11` **sống toàn suite `1715/1715`**, đo được hai chiều: một lớp TRÙNG TÊN mà khác
+        `id()` ⇒ bản đúng cho `false_credit:_R378SaiKyVong`, `m11` cho `killed`; một lớp CON
+        thật ⇒ bản đúng cho `killed`, `m11` cho `false_credit`.
 
-            m9: nhánh `return "survived"` -> `return "killed"`
-                Oracle thoả HOÀN TOÀN mà vẫn khai `killed`.
+        `CLAUDE.md`: *"cùng một hình dạng lặp ba lần trở lên thì câu hỏi đúng là 'có nên làm
+        việc này không', không phải 'vá thế nào'"*. Bốn vế rời không phủ được không gian; mỗi
+        vế chỉ là MỘT ĐIỂM, và mỗi lượt reviewer tìm được một điểm khác chưa ai chạm. Ma trận
+        phủ theo TRỤC, nên một cài đặt sai phải làm ít nhất một Ô đỏ dù sai theo chiều nào.
 
-        Cả hai lọt vì ca cũ chỉ tiêm `AssertionError`, và các ca khác chỉ tiêm `AttributeError`.
-        Không hạng nào trong hai hạng còn lại có đối chứng. Một hợp đồng ba nhánh mà chỉ đo một
-        nhánh thì hai nhánh kia sẽ âm thầm hở.
+        BA TRỤC:
+            LỚP        lớp THẬT · lớp CON · lớp TRÙNG TÊN khác `id()` · lớp THƯỜNG
+            THÔNG ĐIỆP giống hệt oracle đúng · khác · rỗng
+            OANCLE     có chạy và NÉM · có chạy và THOẢ · KHÔNG chạy (khâu dựng hỏng)
 
-        Ca này nay đo CẢ BA, và mỗi vế có một đột biến riêng làm nó ĐỎ:
-            (a) oracle ném lỗi MÔI TRƯỜNG        -> `false_credit:AssertionError`
-            (b) khâu DỰNG mutant hỏng thật       -> `false_credit:RuntimeError`, oracle chạy 0 lần
-            (c) oracle THOẢ, không bất đồng gì   -> `survived`
+        **`expected` của mỗi ô là DỮ LIỆU ghi sẵn, KHÔNG suy ra từ chính `_r378_classify`** —
+        nếu nó suy ra từ đó thì ma trận chỉ chứng minh bộ phân hạng nhất quán với chính nó.
+        Trục LỚP dùng cờ `bat_duoc` viết tay, và có một chốt tự kiểm so nó với `issubclass` để
+        bảng fixture không âm thầm trôi.
+
+        GIỮ NGUYÊN NGỮ NGHĨA `except` CỦA PYTHON: lớp CON vẫn là `killed`. Ma trận đo bộ phân
+        hạng, nó KHÔNG tự quyết đổi sang so kiểu chính xác — việc ấy phải có đặc tả riêng.
+
+        MỖI Ô LÀ MỘT PHÉP ĐO CÓ TÊN: hỏng thì ném `AssertionError` nêu ĐÚNG toạ độ ô, kèm
+        `expected`/`observed` — không trả `False` câm, vì một ca trả `False` không nói được ô
+        nào hỏng, và khi có 14 ô thì đó là khác biệt giữa một phút và một giờ.
+
+        ĐỘT BIẾN LÀM CA NÀY ĐỎ — ô ĐÃ ĐO, không phải ô ĐOÁN:
+            m7  `except _R378SaiKyVong` -> `except RuntimeError`   -> ô LỚP=thuong, TĐ=goc
+            m9  `return "survived"` -> `return "killed"`           -> ô ORACLE=thoa
+            m10 bắt mọi `Exception`, so CHUỖI thông điệp            -> (đo riêng, xem §8 của r2)
+            m11 so `type(exc).__name__`                             -> (đo riêng, xem §8 của r2)
+            mX  đổi lớp con thành so kiểu chính xác                 -> ô LỚP=lopcon
+
+        BẢN ĐẦU CỦA KHỐI NÀY ĐOÁN `m7 -> ô LỚP=that`, VÀ PHÉP ĐO BÁC NGAY. Lý do đáng ghi:
+        `_R378SaiKyVong` kế thừa **`RuntimeError`** (`:25024`). Nên `except RuntimeError` của
+        `m7` VẪN bắt được nó ⇒ ô `LỚP=that` xanh, và ô đỏ là `LỚP=thuong` — nơi một
+        `RuntimeError` TRẦN bị `m7` cấp `killed`. Một dòng "đột biến này giết ô kia" viết
+        trong docstring mà không chạy là đúng thứ `CLAUDE.md` gọi là *"nghĩ ra được phép thử
+        mà không chạy thì phép thử ấy không tồn tại"* — chỉ khác là ở đây nó còn tệ hơn, vì
+        nó ĐƯỢC viết ra và SAI, tức nó nói dối người đọc sau.
         """
-        def _oracle_chet_vi_moi_truong(_r):
-            raise AssertionError("JUNCTION_CREATE_FAILED:1:fixture")
-        if _r378_classify(*_R378_REGEX, ".claude/dev/launcher.py:1",
-                          _oracle_chet_vi_moi_truong) != "false_credit:AssertionError":
-            return False
+        class _LopCon(_R378SaiKyVong):
+            pass
 
-        # (b) Mỏ neo KHÔNG tồn tại trong `workflow.py` ⇒ `_r378_mutant` ném `RuntimeError`
-        # THẬT (`R378_MUTATION_ANCHOR_COUNT:0`) TRƯỚC khi oracle kịp chạy. Đếm lời gọi để
-        # chứng minh đúng điều ấy — `killed` ở đây là tín dụng cho một phép thử chưa xảy ra.
-        goi = []
-        def _oracle_dem(_r):
-            goi.append(1)
-        cat_neo = _r378_classify("R378_MO_NEO_KHONG_BAO_GIO_TON_TAI_TRONG_TEP_NAY",
-                                 "x", ".claude/dev/launcher.py:1", _oracle_dem)
-        if cat_neo != "false_credit:RuntimeError" or goi:
-            return False
+        # TRÙNG TÊN, khác `id()`, KHÔNG phải lớp con — đây là ô mà `m11` chết.
+        _LopTrungTen = type("_R378SaiKyVong", (Exception,), {})
 
-        # (c) Oracle thoả hoàn toàn ⇒ `survived`. Thiếu vế này thì một bộ phân hạng khai
-        # `killed` cho MỌI thứ vẫn xanh, và mọi con số đột biến của packet thành vô nghĩa.
-        if _r378_classify(*_R378_REGEX, ".claude/dev/launcher.py:1",
-                          lambda _r: None) != "survived":
-            return False
+        # (ten, lop, bat_duoc) — `bat_duoc` là DỮ LIỆU viết tay, không suy từ bộ phân hạng.
+        LOP = (("that", _R378SaiKyVong, True),
+               ("lopcon", _LopCon, True),
+               ("trungten", _LopTrungTen, False),
+               ("thuong", RuntimeError, False))
+        # Chốt tự kiểm bảng fixture: cờ viết tay phải khớp ngữ nghĩa `except` của Python.
+        for ten, lop, bat_duoc in LOP:
+            if issubclass(lop, _R378SaiKyVong) is not bat_duoc:
+                raise AssertionError(
+                    f"R378_MA_TRAN_FIXTURE_TROI: lớp {ten!r} khai bat_duoc={bat_duoc} mà "
+                    f"issubclass cho {issubclass(lop, _R378SaiKyVong)}")
+        # Trùng tên phải THẬT SỰ trùng tên, kẻo ô ấy đo nhầm thứ khác.
+        if _LopTrungTen.__name__ != _R378SaiKyVong.__name__:
+            raise AssertionError("R378_MA_TRAN_FIXTURE_TROI: lớp trùng tên không trùng tên")
 
-        # (d) CÙNG THÔNG ĐIỆP, KHÁC LỚP ⇒ vẫn phải là TÍN DỤNG GIẢ.
-        #
-        # Ba vế trên vẫn CHƯA đủ, và cross-review lượt 3 chứng minh bằng đột biến `m10`:
-        # bắt mọi `Exception` rồi chỉ nhìn chuỗi `R378_EXPECTATION_MISMATCH` — **sống sót
-        # 1715/1715**. Lọt vì cả ba vế trên đều dùng THÔNG ĐIỆP KHÁC với oracle đúng
-        # (`JUNCTION_CREATE_FAILED`, `R378_MUTATION_ANCHOR_COUNT`), nên không vế nào phân
-        # biệt được "bắt đúng LỚP" với "bắt mọi thứ rồi so CHUỖI".
-        #
-        # Đây là lần thứ BA cùng một slug (`phan-hang-giet-gia-thieu-doi-chung`): lượt 2
-        # đóng `m7`/`m9`, lượt 3 phơi `m10`. Mỗi lần vá đúng chỗ được chỉ rồi còn một cửa
-        # không ai chỉ — đúng bài học "vá đúng chỗ được chỉ rồi bỏ sót đường thứ ba", và
-        # lần này chính nó lặp ba lần.
-        #
-        # Vế này lấy ĐÚNG thông điệp mà oracle đúng sinh ra, rồi ném lại bằng một lớp KHÁC.
-        # Phân hạng theo LỚP ⇒ `false_credit:RuntimeError` (đúng). Phân hạng theo CHUỖI ⇒
-        # `killed` (sai) ⇒ ca ĐỎ. Đó là thứ duy nhất tách được hai cách cài đặt ấy.
-        def _oracle_cung_thong_diep_khac_lop(_r):
-            try:
-                _r378_expect(False)
-            except _R378SaiKyVong as exc:
-                raise RuntimeError(str(exc)) from None
-        return _r378_classify(*_R378_REGEX, ".claude/dev/launcher.py:1",
-                              _oracle_cung_thong_diep_khac_lop) == "false_credit:RuntimeError"
-    _t110("r378_chet_vi_moi_truong_khong_la_giet", _c378_chet_vi_moi_truong_khong_la_giet)
+        TD = (("goc", "R378_EXPECTATION_MISMATCH"), ("khac", "MOT_THONG_DIEP_KHAC"), ("rong", ""))
+
+        def _do(toa_do, expected, old, new, oracle):
+            goi = []
+            def _bao(r):
+                goi.append(1)
+                return oracle(r)
+            quan_sat = _r378_classify(old, new, ".claude/dev/launcher.py:1", _bao)
+            if quan_sat != expected:
+                raise AssertionError(
+                    f"R378_MA_TRAN_O_SAI[{toa_do}]: expected={expected!r} observed={quan_sat!r} "
+                    f"oracle_calls={len(goi)}")
+            return len(goi)
+
+        # ---- KHỐI A: oracle CHẠY và NÉM. 4 lớp x 3 thông điệp = 12 ô. ----
+        for ten, lop, bat_duoc in LOP:
+            for ten_td, td in TD:
+                expected = "killed" if bat_duoc else "false_credit:" + lop.__name__
+                def _oracle(_r, lop=lop, td=td):
+                    raise lop(td)
+                n = _do(f"lop={ten},td={ten_td}", expected, *_R378_REGEX, _oracle)
+                if n != 1:
+                    raise AssertionError(
+                        f"R378_MA_TRAN_O_SAI[lop={ten},td={ten_td}]: oracle phải chạy ĐÚNG 1 "
+                        f"lần, chạy {n}")
+
+        # ---- KHỐI B: oracle CHẠY và THOẢ ⇒ `survived`. Ô mà `m9` chết. ----
+        _do("oracle=thoa", "survived", *_R378_REGEX, lambda _r: None)
+
+        # ---- KHỐI C: khâu DỰNG hỏng ⇒ tín dụng giả, và oracle KHÔNG được chạy lần nào. ----
+        goi_c = []
+        cat = _r378_classify("R378_MO_NEO_KHONG_BAO_GIO_TON_TAI_TRONG_TEP_NAY", "x",
+                             ".claude/dev/launcher.py:1", lambda _r: goi_c.append(1))
+        if cat != "false_credit:RuntimeError" or goi_c:
+            raise AssertionError(
+                f"R378_MA_TRAN_O_SAI[dung=hong]: expected='false_credit:RuntimeError' "
+                f"observed={cat!r} oracle_calls={len(goi_c)}. `killed` ở đây là tín dụng cho "
+                f"một phép thử CHƯA XẢY RA.")
+        return True
+    _t110("r378_ma_tran_phan_hang", _c378_ma_tran_phan_hang)
 
     def _c378_giu_con_tro_cham_gach_cheo():
         body = "./scripts/tl.py:99999999\n../scripts/tl.py:99999999"

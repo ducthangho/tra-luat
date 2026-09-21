@@ -227,6 +227,35 @@ class GhGia:
 ENV_GITHUB = {"GITHUB_REPOSITORY": "o/r"}
 
 
+def _goi_bat_tron(gh: GhGia, ten: str, *args, env_them=None):
+    """Như `_goi_lop_gh` nhưng bắt TRỌN mọi ngoại lệ; trả `(ex, tên_lớp)`.
+
+    Vì sao cần một helper RIÊNG thay vì nới `_goi_lop_gh`: helper kia chỉ bắt `mod.Chan`, và
+    đó là CÓ CHỦ ĐÍCH — một ngoại lệ trần trong fixture của ca khác phải vỡ ra để thấy, không
+    được nuốt. Nới nó thành bắt trọn là che lỗi fixture của cả bộ.
+
+    Nhưng ca nào ĐO chính cái LỚP của ngoại lệ thì phải tự bắt trọn, nếu không ngoại lệ trần
+    sẽ thoát ra trước khi `chot` kịp chạy — và ca ấy đỏ vì runner toàn suite, chứ không vì
+    tín hiệu của chính nó. Cross-review lượt 3 bắt đúng chỗ này ở `t182`
+    (`t182-mutant-killed-before-own-assertion`).
+
+    Trả về `(None, "KHÔNG NÉM GÌ")` khi lời gọi chạy trót lọt.
+    """
+    import os
+    from unittest import mock
+    mod = _nap_cong()
+    mod.GOI_GH = gh
+    moi = dict(os.environ)
+    moi.pop("GITHUB_ACTOR", None)
+    moi.update(env_them or {})
+    try:
+        with mock.patch.dict(os.environ, moi, clear=True):
+            getattr(mod, ten)(*args)
+    except BaseException as ex:   # noqa: BLE001 — ĐO lớp, nên phải bắt trọn
+        return ex, type(ex).__name__
+    return None, "KHÔNG NÉM GÌ"
+
+
 def _goi_lop_gh(gh: GhGia, ten: str, *args, env_them=None, bo_qua=()):
     import os
     from unittest import mock
@@ -7377,15 +7406,79 @@ def t182_lease_KHONG_PHAI_anh_xa_thi_chan_co_ten_chu_khong_vo_tran():
     for nhan, xau in (("None", None), ("danh sách", []), ("bool", True),
                       ("số nguyên", 55), ("chuỗi", "55")):
         gh = GhGia(comments={55: []})
-        ex, _mod = _goi_lop_gh(gh, "kiem_github", xau, env_them=ENV_GITHUB)
-        chot(ex is not None and getattr(ex, "ma", None) == RC_NOI_DUNG,
-             f"lease là {nhan}: phải ném `Chan(rc={RC_NOI_DUNG})` có tên, nhận "
-             f"{type(ex).__name__ if ex is not None else 'KHÔNG NÉM GÌ'}"
+        # BẮT QUANH CHÍNH `kiem_github`, không dùng `_goi_lop_gh` — vì helper ấy chỉ bắt
+        # `mod.Chan`, nên một ngoại lệ TRẦN đi thẳng ra NGOÀI ca, trước khi `chot` kịp chạy.
+        # Cross-review lượt 3 bắt (`t182-mutant-killed-before-own-assertion`): đột biến J vẫn
+        # làm ca này đỏ, nhưng đỏ qua runner toàn suite chứ KHÔNG qua tín hiệu riêng của ca —
+        # trong khi docstring bản trước khai là "`chot` bắt được kiểu KHÁC `Chan`". Một ca đỏ
+        # vì lý do khác với lý do nó khai là một ca chưa chứng minh được điều nó nói.
+        ex, kieu = _goi_bat_tron(gh, "kiem_github", xau, env_them=ENV_GITHUB)
+        chot(ex is not None and kieu == "Chan" and getattr(ex, "ma", None) == RC_NOI_DUNG,
+             f"lease là {nhan}: phải ném `Chan(rc={RC_NOI_DUNG})` có tên, nhận {kieu}"
              f"{'' if ex is None else ' ma=' + str(getattr(ex, 'ma', '?'))}. "
              f"Một ngoại lệ TRẦN thoát khỏi cổng là fail-open đội lốt sự cố.")
         chot(len(gh.calls) == 0,
              f"lease là {nhan}: chốt hình dạng phải chặn TRƯỚC khi chạm mạng, có "
              f"{len(gh.calls)} lời gọi.")
+
+
+@ca
+def t183_do_dau_HONG_roi_PHUC_HOI_thi_cua_cuoi_van_phai_bo_qua():
+    """A17 — nhánh `RC_DA_DANG` của CỬA CUỐI: dò đầu KHÔNG ĐO ĐƯỢC, lần đọc cuối THẤY DẤU.
+
+    CA NÀY SINH RA TỪ MỘT ĐỘT BIẾN SỐNG SÓT, cross-review codex lượt 3 dựng
+    (`final-comment-already-posted-branch-mutant-survives`). Đột biến `K` giữ phép dò sớm,
+    giữ lời gọi cuối, giữ MỌI `Chan` khác — chỉ nuốt riêng `Chan(RC_DA_DANG)` đến từ cửa
+    cuối. Nó **sống sót `175/175`**, và `t181` không thấy vì `t181` dựng ca API hỏng **MÃI**.
+
+    Hình dạng còn thiếu, và nó là hình dạng THẬT của một sự cố mạng thoáng qua:
+
+        lần đọc 1 (phép dò sớm)  -> hỏng  => KHÔNG ĐO ĐƯỢC, phép dò NHƯỜNG lại
+        lần đọc 2 (cửa cuối)     -> lành  => THẤY DẤU  => phải `rc=9` (bỏ qua)
+
+    `K` cho `rc=0`, tức một lease ĐÃ ĐĂNG được cấp đường đăng LẠI. Đó đúng thứ chốt idempotent
+    sinh ra để chặn, và `t181` chỉ chặn được nửa kia của nó (`rc=8` khi hỏng mãi).
+
+    Hai ca giữ HAI phán quyết khác nhau của cùng một cửa, nên không ca nào thay được ca nào:
+        `t181` — hỏng MÃI       => `rc=8`, không được cho qua
+        `t183` — hỏng rồi LÀNH  => `rc=9`, phải bỏ qua
+
+    `len(gh.calls) == 3` một mình KHÔNG thấy `K`: cả bản đúng lẫn `K` đều gọi đủ ba lần. Thứ
+    phân biệt là MÃ THOÁT, nên ca này chốt mã — ngược với `t181` nơi số lời gọi mới là răng.
+
+    ĐỘT BIẾN LÀM CA NÀY ĐỎ: nuốt `Chan(RC_DA_DANG)` đến từ `_kiem_comment_da_co` ở cuối
+    `kiem_github` (giữ nguyên mọi `Chan` khác).
+    """
+    class GhHongMotLan(GhGia):
+        """Lần đọc `comments` ĐẦU hỏng, các lần sau lành. Dựng trên `GhGia` sẵn có —
+        không dựng cơ chế giả thứ hai."""
+        def __init__(self, *a, **k):
+            super().__init__(*a, **k)
+            self.lan_doc_comments = 0
+
+        def __call__(self, *args):
+            endpoint = next((x for x in args if str(x).startswith("repos/")), "")
+            if endpoint.endswith("/comments"):
+                self.lan_doc_comments += 1
+                if self.lan_doc_comments == 1:
+                    self.calls.append(args)
+                    return subprocess.CompletedProcess(args, 1, "", "comments hong tam thoi")
+            return super().__call__(*args)
+
+    lease = _lease_579()
+    dau = "**Lease `" + str(lease["lease_id"]) + "`**"
+    gh = GhHongMotLan(comments={55: [{"id": 7, "body": dau + " — bản chiếu",
+                                      "user": {"login": "github-actions[bot]"}}]})
+    ex, _mod = _goi_lop_gh(gh, "kiem_github", lease, env_them=ENV_GITHUB)
+    ma = 0 if ex is None else ex.ma
+    chot(ma == RC_DA_DANG,
+         f"dò đầu hỏng rồi cửa cuối phục hồi và THẤY DẤU: phải bỏ qua bằng rc={RC_DA_DANG}, "
+         f"được rc={ma}. rc=0 nghĩa là một lease ĐÃ ĐĂNG được cấp đường đăng LẠI — chốt "
+         f"idempotent đã hỏng ở đúng nhánh mà một sự cố mạng thoáng qua sẽ đi vào.")
+    chot(gh.lan_doc_comments >= 2,
+         f"ca này chỉ có nghĩa khi endpoint `comments` được đọc ÍT NHẤT HAI lần (dò sớm rồi "
+         f"cửa cuối), đọc {gh.lan_doc_comments} lần. Một lần nghĩa là phản chứng chưa từng "
+         f"tồn tại — ca xanh vì lý do sai.")
 
 
 CO_CHI_CA = "--chi-ca="   # `--chi-ca=t01_` ⇒ chỉ chạy ca có tên bắt đầu bằng tiền tố ấy (M3 packet #504 dùng để sinh lượt con rẻ)

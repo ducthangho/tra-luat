@@ -1,0 +1,178 @@
+# BIEN NHAN — luot human_audited cua packet #523 slice r12 (PR #585).
+#
+# DAO CHIEU nguon co tham quyen: voi verdict cua mot MO HINH, nguon la tep co bam trong kho
+# va comment la ban chieu. O day NGUOC LAI — §8 doi DANH TINH BEN TREN GITHUB, ma mot tep
+# trong kho khong mang duoc no. Comment la nguon; tep verdict la ban chieu.
+
+schema_version: 2
+receipt_id: wp523-slice-r12-human-audit-ducthangho-20260921
+kind: review_delivery_receipt
+packet_id: QUY-TRINH-LAP-REVIEW-VA-DIEU-KIEN-DUNG
+packet_issue: 523
+packet_slug: WP523-SLICE-R12
+revision: 12
+generation: 12
+lease_id: quy-trinh-lap-review-r12-exec-12-claude-20260921
+lease_ghi_chu: >-
+  Lease gen 12 la EXECUTOR lease cho hai tep skill. Bien nhan nay nam o ops/reviews/, tuc NGOAI
+  write set r12, va di bang mot PR bookkeeping RIENG (tien le #567 cho #551). Do truoc khi ghi:
+  `ai-dang-giu` ca hai duong dan moi (verdict.md va tep nay) tra rc=0 NGUOI_GIU 0 — khong va cham
+  write set voi ai.
+target_pull_request: 585
+
+provider: human
+role: auditor
+nguoi_audit: ducthangho
+executor_provider: anthropic_claude
+verdict: approve
+cross_provider: false
+assurance_dat: human_audited
+assurance_KHONG_dat: cross_approved
+assurance_ghi_chu: >-
+  §8 cho class sensitive HAI duong ngang hang: cross_approved hoac human_audited. Duong thu nhat
+  DO DUOC la khong dat duoc. Day KHONG phai mot lan ha nguong.
+cross_approved_khong_dat_duoc_HAI_NGUON: >-
+  Do bang HAI duong doc lap, khong phai mot:
+  (1) CLI trong container — `codex exec` tra rc=1 kem
+      "You have reached your usage limit ... try again at Sep 21st, 2026 1:04 AM" (do 18-09 va lap
+      lai 20-09; mui gio cua moc reset KHONG duoc thong diep khai => CHUA DO DUOC). Doc lai
+      21-09T07:58Z: `launcher.py doctor` van bao CHUA_XAC_THUC, access_token=-40.3h.
+  (2) Connector codex tren GitHub — `chatgpt-codex-connector[bot]` tu dang len ca BA PR luc
+      2026-09-20T19:37Z: "You have reached your Codex usage limits for code reviews."
+      comment_id 5752160098 (#585) · 5752159017 (#586) · 5752159353 (#587).
+  Hai nguon nay doc lap ve duong di (CLI cuc bo vs connector phia GitHub) va khop nhau. Doctrine cua
+  kho: mot cong cu that bai chua phai mot duong bi chan — phai thu it nhat hai client. Day la hai.
+  `agy`: KHONG co CLI trong container => khong goi duoc tu day; trang thai quota cua no la LOI KHAI
+  cua chu kho, CHUA DO.
+assurance_YEU_HON_o_cho_nao: >-
+  Phai khai: M16 cua r6 dat "reviewer dung PHEP DO" lam tru, va chin luot codex da dung thuoc that.
+  Mot luot audit cua NGUOI khong dung thuoc — no xac nhan "toi da doc va chap nhan". Chu ky ay
+  KHONG thay duoc phep do TIM. Dung doc approve nay thanh "da qua cung muc soi nhu chin luot truoc".
+
+review_class_hieu_luc: sensitive
+reviewed_sha: 27283d2e6ed57a6e97bf45e3179c157a59f0ff86
+base_sha: a1bbdc1023185a35c578ab4017990b472b5c0d6c
+pham_vi_da_ky_do_duoc: >-
+  `git diff --numstat a1bbdc1 27283d2` tren hai tep skill: 62 + 139 = 201 dong THEM, 0 dong XOA;
+  `--name-only` tra DUNG HAI tep. `merge-base(a1bbdc1, 27283d2)` = a1bbdc1, va ban hai cham so ban
+  ba cham cho md5 y het (eaa16fff3f7a538c926d93dda9c690c1) — nen link `compare` tren GitHub, tab
+  Files changed cua PR va lenh `git diff` cuc bo cung chi MOT diff. Do chu khong suy.
+
+model_reviewer_identity:
+  provider: human
+  surface: manual_audit
+  transport: human
+  phien_doc_lap: true
+  phien_doc_lap_can_cu: >-
+    Ben doc lap la CHU KHO — mot nguoi ngoai phien agent, tu doc diff hai tep tren exact
+    reviewed_sha, khong ke thua context cua phien executor.
+  phien_doc_lap_GIOI_HAN_phai_doc_kem: >-
+    "Doc lap" o day CHI co nghia: nguoi quyet dinh nam ngoai phien agent. No KHONG co nghia la
+    mot phep do doc lap da duoc dung.
+  KHONG_do_duoc: >-
+    (a) Khong co session_run_id: day la luot cua NGUOI, khong phai mot luot chay may — khong tien
+    trinh CLI, khong run.json, khong modelUsage.
+    (b) DANH TINH nguoi ky KHONG do duoc tu du lieu GitHub, va bien nhan nay KHONG trich
+    `author_association` lam bang chung manh. Ly do do duoc: comment issuecomment-5752170565 tren
+    CUNG PR nay do PHIEN EXECUTOR dang, ma doc nguoc qua API no tra `user.login: ducthangho` va
+    `author_association: OWNER` — Y HET mot comment chu kho tu go, vi phien di qua token cua chu
+    kho. Mot tin hieu khong phan biet duoc hai trang thai thi khong phai bang chung (cung lop
+    "dem su CO MAT thay vi KHA NANG"). Hai bien nhan human_audited tien le (plat-m4, slice-b-c)
+    deu trich dung truong nay; dieu do KHONG noi chung sai — trang thai dung la KHONG DO DUOC,
+    khong phai "hong". Muon co rang that thi phai ky bang thu executor khong tao duoc: mot review
+    state APPROVED, hoac mot commit ky GPG.
+    DAY KHONG PHAI NO MOI — va ban nhap dau cua chinh bien nhan nay khai sai nhu vay.
+    No DA CO TEN va DA MO: Issue #566 `HUMAN-AUDITED-NEO-VAO-TRUONG-KHONG-PHAN-BIET-DUOC`
+    (mo 2026-09-19, do tren comment 5739262446 cua PR #557), ho hang #338 (tach danh tinh).
+    #566 da liet ke bon huong chua va noi thang: khong huong nao dong duoc "co tinh" khi
+    credential dung chung. Khai "no moi" o day la dung thoi "hoi cho TIEN TAY thay vi hoi cho
+    KET LUAN DUOC GHI" — cai sai duoc giu lai trong tep nay thay vi xoa di.
+    (c) Bang chung THAT cua luot nay la viec chu kho THUC SU doc diff, va viec ay khong de lai
+    dau vet may nao.
+
+ai_dang_comment_ky:
+  khai: chu_kho_tu_dang
+  can_cu: >-
+    Phien executor nay KHONG goi `add_issue_comment` cho comment 5757310858 — no chi cung cap van
+    ban de chu kho tu dan, va chu kho bao da dang. Day la NHAT KY CUA PHIEN, khong phai du lieu
+    GitHub: xem muc (b) cua KHONG_do_duoc — GitHub khong phan biet duoc hai truong hop, nen cau
+    tren KHONG the xac minh tu phia GitHub. Khai ra de nguoi doc sau biet NGUON cua no.
+  phan_biet_voi_tien_le_r330: >-
+    Canh bao `author-association-khong-phan-biet-duoc` cua `r330-rig-quyet-mau-audit-nguoi-verdict`
+    dem so lan PHIEN AGENT DANG HO ("lan thu HAI sau #551; lan thu ba phai hoi"). Luot nay KHONG
+    phai mot lan nhu the, nen bo dem ay khong tang. Cung ly do, phien nay da TU CHOI dang ho
+    comment gia han lease gen 12: mot mo neo do chinh executor viet trong lot danh tinh chu kho
+    la tu cap quyen cho minh.
+
+github_submitter_identity:
+  actor: ducthangho
+  ghi_chu: >-
+    Ban chieu dang qua MCP github. Nguon co tham quyen la COMMENT tren GitHub — xem
+    nguon_co_tham_quyen_url. Xem them muc (b) cua KHONG_do_duoc: truong `actor` o day khong phan
+    biet duoc nguoi voi phien chay bang token cua nguoi.
+
+anchor:
+  loai: canonical_ancestry
+  cuong_do: thap
+  mo_ta: >-
+    Blob ban chieu verdict, ghim vao commit cc9fec2d cua chinh nhanh bookkeeping nay (commit THU
+    NHAT cua cap; bien nhan la commit thu hai, nen mo neo la TO TIEN cua HEAD).
+  gioi_han: >-
+    cuong_do THAP vi luot nay chua land. Manh len khi PR bookkeeping land vao master hoac khi co
+    tag luu-tru/*. Truoc luc land, "to tien cua HEAD" chi dung TRONG nhanh nay.
+
+authoritative_source: github_comment
+evidence_channel: repo_file
+evidence_url: https://github.com/ducthangho/tra-luat/blob/cc9fec2d5007cc058e7a57fc20d9f2a1ea286e61/ops/reviews/wp523-slice-r12-human-audit-verdict.md
+nguon_co_tham_quyen_url: https://github.com/ducthangho/tra-luat/pull/585#issuecomment-5757310858
+posted_comment_id: 5757310858
+posted_comment_do_duoc: >-
+  Doc nguoc qua API (khong nhan loi goi tra thanh cong): id=5757310858, user.login=ducthangho,
+  author_association=OWNER, created_at=2026-09-21T08:04:17Z, than dai 1078 byte.
+  Chuoi 'Reviewed commit:' xuat hien DUNG MOT LAN trong comment ky (luat PLAT-M4), va SHA day du
+  cung dung mot lan. Tren TOAN BO comment cua PR no xuat hien 3 lan — hai lan kia la cau HUONG DAN
+  do phien executor dang, khong phai chu ky; nen dung tim chu ky bang cach grep chuoi ay tren PR.
+evidence_url_vi_sao_KHONG_tro_vao_comment: >-
+  evidence_url phai la BLOB thi anchor.loai canonical_ancestry moi DO DUOC. Nguon co tham quyen
+  that cua luot human_audited la COMMENT, va no nam o nguon_co_tham_quyen_url.
+
+verdict_path: ops/reviews/wp523-slice-r12-human-audit-verdict.md
+verdict_sha256: a697ae05414ecab910dbb9ccf87fa9766b88597014e8df5f0a0de8b3b3e0d822
+verdict_bytes: 3500
+verdict_sha256_do_tu_dau: >-
+  Do TU BLOB: `git show cc9fec2d:ops/reviews/…verdict.md | sha256sum`, KHONG do tren ban lam viec.
+  Hai con so ay khac nhau that o luot nay: ban lam viec tung co CRLF (xem ban_chieu_KHONG_byte_khop).
+
+ban_chieu_KHONG_byte_khop_voi_comment: >-
+  Noi dung khop tung byte va tap ky tu phi-ASCII giong het (43/43), NHUNG xuong dong thi khong:
+  than comment den voi CRLF (18 cap, 1078 byte), ban gui dung LF (1061 byte), blob dung LF vi git
+  chuan hoa. Ghi ra vi luot do DAU cua chinh phien nay khai "CRLF trong ban da den: False" va do la
+  SAI — no mo tep o che do VAN BAN cua Python, ma universal newlines dich CR-LF thanh LF ngay luc
+  doc, nen phep kiem ay khong bao gio do duoc, bat ke du lieu. Thu bat duoc no la canh bao cua git
+  luc `git add`, khong phai phep do nao cua phien. Cung lop "phai biet minh dang dung o LOP NAO".
+
+no_chuyen_ra_ngoai_slice:
+- 'dac-ta-r5-giu-luat-cu-trai-tieu-chi-moi  -> #582'
+- 'bien-nhan-thieu-so-ci-da-chi             -> #582'
+- 'bien-nhan-luot-8-lan-du-lieu-luot-6      -> #582'
+- 'phep-do-doctrine-khong-du-rang           -> #583'
+
+verdict_usage_caveats:
+- id: khong-doc-thanh-cross-provider
+  noi_dung: >-
+    DUNG doc luot nay thanh cross-review. No land duoc vi §8 cho human_audited NGANG HANG voi
+    cross_approved, va vi duong kia do duoc la bi chan. Packet khac phai tu chung minh lai.
+- id: slice-land-kem-mot-lop-con-mo
+  noi_dung: >-
+    phep-do-doctrine-khong-du-rang VAN MO khi slice nay land — doctrine-scan con mu hai dang chep.
+    Danh doi CO CHU DICH va duoc khai, khong phai thu troi qua.
+- id: A2-A3-la-ky-luat-doc-khong-phai-cong
+  noi_dung: >-
+    Phep kiem "khong mat dong nao" cua executor so theo DONG. No khong chung minh mach van dung cho.
+    Viec do thuoc luot audit nay.
+- id: danh-tinh-nguoi-ky-khong-do-duoc
+  noi_dung: >-
+    Xem muc (b) cua model_reviewer_identity.KHONG_do_duoc. Dung dung bien nhan nay lam tien le cho
+    viec trich `author_association` nhu mot bang chung manh — no khong phan biet duoc nguoi voi
+    phien chay bang token cua nguoi. No da mo: #566 (ho hang #338). Khi chay lai: DUNG mo them
+    mot Issue nua cho cung chuyen nay.

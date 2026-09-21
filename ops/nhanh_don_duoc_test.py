@@ -2633,7 +2633,15 @@ DOT_BIEN_TU_KIEM = [
      '        run(["git", "config", "commit.gpgsign", "false"], src)', "        pass"),
     ("bo-kiem-ban-ghi-trung", ("r507", "r511"), "        if ca in theo_ca:", "        if False:"),
     # r509 do kem tu luot 2: bo so dau phien thi ban ghi luot MOT duoc nhan o luot HAI.
-    ("bo-so-dau-phien", ("r508", "r509"),
+    # #593 — `dich` len ba ten. Tu khi `r528` chay CHINH `r508` 2 000 luot (chot
+    # (c1)/(c2), them theo P2 cua cross-review codex), moi dot bien lam `r508` do
+    # qua mot duong ma `r528` KHONG de len deu giet ca `r528`. Muc nay dung the:
+    # no sua phep so dau phien trong `doc_kenh`, cho ma `r528` khong thay.
+    # Doi chung: `dau-phien-thanh-moc-giay` van 2/2, vi no sua CHINH
+    # `sinh_dau_phien` — thu ma `r528` de len bang bo sinh cua rieng no. Hai muc
+    # phan biet duoc bang dau vao, khong phai bo tuong duong.
+    # Ca ba deu chet bang DO_CHOT — chot cua chinh chung.
+    ("bo-so-dau-phien", ("r508", "r509", "r528"),
      '    neo = {"dau_phien": dau_phien, "mutant": mutant, "lan_thu": lan_thu}',
      '    neo = {"mutant": mutant, "lan_thu": lan_thu}'),
     # r508 cung do: dau theo moc giay thi ph_that va ph_khac cua r508 TRUNG nhau

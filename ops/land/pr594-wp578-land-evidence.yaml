@@ -79,8 +79,9 @@ trang_thai_ban_ghi: 'DA CAP 2026-09-21T13:55:15Z (SAU merge — xem uy_quyen.aut
   duong DA DO DUOC tu log job va artifact (xem danh_tinh_CI_10_2_2). Uy quyen ben la PHE CHUAN HAU KIEM (xem
   authorization_url_BAN_CHAT). Vong lap cross-review DA DUNG tai b94182b + ban va nay vi cham stop condition §12
   (SAU loi goi codex tren tran HAI — xem VI_PHAM_3_VUOT_TRAN_TRUC_LOI_GOI), KHONG phai vi da approve; CHUA co
-  cross_approved. Ban ghi nay DA DUOC SUA bay lan sau review tren PR #601 — xem DINH_CHINH_SAU_REVIEW, _VONG_2,
-  _VONG_3, _VONG_4, _VONG_5, _VONG_6, _VONG_7 (vong 7 KHONG co codex: chi ra soat Fable + su co chuoi kich hoat).'
+  cross_approved. Ban ghi nay DA DUOC SUA tam lan sau review tren PR #601 — xem DINH_CHINH_SAU_REVIEW, _VONG_2,
+  _VONG_3, _VONG_4, _VONG_5, _VONG_6, _VONG_7, _VONG_8 (hai vong cuoi KHONG co codex: chi ra soat Fable; _VONG_8 va 5 finding
+  cua vong 7 va doi luat cam token sang luat DUNG).'
 
 # ══════════════════════ VI PHAM VAI TRO — DOC TRUOC ══════════════════════
 VI_PHAM_VAI_TRO:
@@ -206,7 +207,7 @@ VI_PHAM_3_VUOT_TRAN_TRUC_LOI_GOI:
     16:13:39Z, 16:42:14Z, 17:19:17Z, 17:47:53Z). Hai comment dau mang footer tu khai phien agent, ba comment sau khong
     co footer — ai go tung comment KHONG DO DUOC tu object; phien chinh KHAI ca nam deu do phien nay go (qua PAT chu
     kho) theo chi thi ben 5763548340 "lặp tới khi có cross approval". Chi thi ay la GitHub object nhung KHONG phai ADR:
-    §12 d.1011 cam "gọi thêm bằng prompt/phiên khác để lách trần", §1 d.17 "Các bất biến không được hạ chuẩn", va
+    §12 d.1013 cam "gọi thêm bằng prompt/phiên khác để lách trần", §1 d.17 "Các bất biến không được hạ chuẩn", va
     tien le ADR-0048 cho thay doi mot tran phai qua ADR — ADR ay giu nguyen dung truc nay. Ban ghi KHONG phan xu chi
     thi chu kho co thang §12 hay khong; chu kho quyet.'
   review_rescue_checkpoint: 'BAT BUOC theo d.1011-1012 ke tu loi goi thu hai (5268963910, 16:09:34Z); ADR-0037 d.5-6
@@ -215,7 +216,8 @@ VI_PHAM_3_VUOT_TRAN_TRUC_LOI_GOI:
   da_dung: 'Vong lap DUNG tai b94182b + a479699 theo nghia: KHONG dang them review request cho codex, KHONG co review
     object thu bay (pulls/601/reviews van 6, do 18:45Z). NHUNG sau a479699 (18:11:22Z) codex VAN sinh output them MOT lan
     vi chuoi kich hoat lot vao comment 5765273026 — xem SU_CO_CHUOI_KICH_HOAT_TRONG_LOI_KHAI; ban a479699 ghi "KHONG goi
-    codex them" la dung luc commit va SAI 59 giay sau. Phien chinh KHAI da xoa chot dinh ky se goi vong 6; do lai
+    codex them" la dung luc commit (18:11:22Z), SAI 44 giay sau khi comment 5765273026 (18:12:06Z) duoc dang, va codex sinh
+    output 103 giay sau commit (5765285538, 18:13:05Z; 59 giay sau comment). Phien chinh KHAI da xoa chot dinh ky se goi vong 6; do lai
     (list_triggers ~2026-09-21T17:58Z): 5 Routine, khong Routine nao nham #601/codex; do lai ~18:46Z: 6 Routine (hai
     Routine moi 18:25Z cho #602/#586), van khong Routine nao nham #601/codex — chi chung minh BAY GIO khong con chot,
     khong chung minh TRUOC do co.'
@@ -236,9 +238,9 @@ VI_PHAM_3_VUOT_TRAN_TRUC_LOI_GOI:
 SU_CO_CHUOI_KICH_HOAT_TRONG_LOI_KHAI:
   co_su_co: true
   su_that_do_duoc: 'Comment 5765273026 tren #601 (API issues/601/comments), user ducthangho, khong footer, created_at
-    2026-09-21T18:12:06Z — 54 giay sau commit a479699 (18:11:22Z) — chua DUNG MOT dong mang chuoi kich hoat codex (chuoi
-    "@" + ten bot + " review", KHONG chep nguyen van o day theo luat moi), va dong ay CHINH LA cau tuyen bo rang comment
-    khong chua chuoi ay ("Khong co <chuoi> o cuoi comment nay"), chuoi nam trong dau nhay nguoc. Codex phan hoi bang comment
+    2026-09-21T18:12:06Z — 44 giay sau commit a479699 (18:11:22Z) — chua DUNG MOT dong mang chuoi kich hoat codex (tep nay
+    KHONG ket xuat chuoi ay duoi bat ky dang nao — muon biet chuoi nao thi xem chinh comment 5765273026), va dong ay CHINH
+    LA cau tuyen bo rang comment khong chua chuoi ay, chuoi nam trong dau nhay nguoc. Codex phan hoi bang comment
     5765285538 (chatgpt-codex-connector[bot], 18:13:05Z, +59s): mot task that co "View task", da chay `pwd`, `git
     status --short --branch`, `git rev-parse HEAD HEAD^{tree}`, `sed -n 990,1030p docs/PROTOCOL_DA_PHIEN.md`..., ket luan
     "Khong thuc hien them Codex review tren PR #601", "Khong goi make_pr". Tuc codex DA SINH OUTPUT/TOKEN them mot lan
@@ -257,9 +259,20 @@ SU_CO_CHUOI_KICH_HOAT_TRONG_LOI_KHAI:
     trich trong cau noi rang khong kich hoat. CLAUDE.md d.96 nguyen van: "dấu nháy ngược không phải hàng rào"; d.96-97:
     "Muốn nhắc tới nó thì viết tách chữ ... hoặc mô tả bằng lời"; va d.757-758 nguyen van: "cùng một hình dạng lặp ba lần
     trở lên thì câu hỏi đúng là "có nên làm việc này không", không phải "vá thế nào"." Quy tac ay CO SAN truoc su co.'
-  luat_ap_dung_tu_day: 'KHONG viet chuoi kich hoat codex nguyen van vao bat ky dau — tep, thong diep commit, comment — ke
-    ca trong dau nhay nguoc, ke ca khi trich dan de giai thich. Mo ta bang loi hoac tach chu. Hai cho trong tep nay tung
-    chep nguyen van (ai_goi, da_dung cua VI_PHAM_3) da duoc doi thanh mo ta o vong 6.'
+  lan_thu_TU_trong_chinh_luat_cam: 'Thong diep commit 85f974b (vong 6, day len origin 18:56:52Z, nam tren PR #601) mang
+    NUA token kich hoat — phan mention bot, KHONG kem lenh — ben trong mot mau grep dung de chung minh "tep = 0",
+    o dung cau ngay sau doan dat luat cam viet token ay. Do duoc (REST, ~19:05Z): timeline #601 KHONG co su kien `mentioned`
+    nao sau 17:47:53Z, KHONG comment codex nao sau 18:13:05Z (su kien cuoi la `committed` 18:56:52Z), pulls/601/reviews
+    van 6 => KHONG kich hoat, thiet hai = khong co. KHONG sua duoc vi commit da day; KHONG viet lai lich su. Day la lan thu
+    TU cung mot hinh dang (trich cai cam trong cau noi ve cai cam) va la lan dau no xay ra BEN TRONG chinh luat cam no —
+    nen luat "cẩn thận hơn" (ban vong 6) bi thay bang luat DUNG duoi day. Ai phat hien: ra soat Fable 5.1 vong 7 (#5),
+    phien chinh do lai va xac nhan.'
+  luat_dung_tu_day: 'Ho so nay KHONG BAO GIO ket xuat token kich hoat codex duoi bat ky dang nao — khong du chuoi, khong nua
+    chuoi, khong trong mau grep, khong trong dau nhay nguoc, khong mo ta cau tao. Nhac toi su co thi CHI neo bang ID comment
+    + moc gio (5765273026 18:12:06Z; 5765285538 18:13:05Z). Ap dung cho tep nay, thong diep commit va comment cua phien.
+    Vong 7 da ra soat lai toan khoi nay va bo cau mo ta cau tao chuoi (ban vong 6 con mot cau); hai cho tung chep nguyen
+    van (ai_goi, da_dung cua VI_PHAM_3) da doi thanh mo ta o vong 6. Kiem sau khi ghi (vong 7): grep -c tren tep cho
+    (a) mention bot, (b) du chuoi, (c) cau mo ta cau tao — ca ba = 0.'
   he_qua: 'Sua VI_PHAM_3.da_dung va DINH_CHINH_SAU_REVIEW_VONG_6.nguon ("ban cuoi") cho khop su that; them mot dong
     LANDED_KHONG_XAC_LAP. Khong doi `merged`, khong doi check-run, khong doi muc bao dam nao.'
   ai_phat_hien: 'Ra soat Fable 5.1 vong 6 (cung phien land, subagent), do REST luc 18:45Z; phien chinh tu kiem lai va xac
@@ -848,6 +861,9 @@ LANDED_KHONG_XAC_LAP:
 - 'KHONG tuyen run workflow_dispatch 35637741169 (18:20:24Z, co lane windows-latest) tren 714f36e6 la cong hau merge cua
   packet hay bang chung cho N4/moc Workflow definition — run KHAC (§10.2.2) — xem
   con_mo.workflow_dispatch_tren_merge_commit_SAU_head.'
+- 'KHONG tuyen luat "khong viet token kich hoat" cua vong 6 da duoc giu — thong diep commit 85f974b mang nua token trong
+  mau grep o dung cau dat luat (lan thu TU cung hinh dang; do: khong kich hoat, reviews van 6); khong sua duoc vi da day,
+  khong viet lai lich su — xem SU_CO_CHUOI_KICH_HOAT_TRONG_LOI_KHAI.lan_thu_TU_trong_chinh_luat_cam.'
 
 cho_yeu_con_lai:
 - muc: 1
@@ -931,6 +947,9 @@ con_mo:
     phien nay KHONG bam (manual_ci_budget 0). Day la run KHAC run/attempt/event voi cong hau merge (§10.2.2 d.860:
     "run ID, attempt, event ... của đúng run"): KHONG dua vao post_merge_checks, KHONG dung nang N4 (cho_yeu_con_lai muc
     1) hay moc Workflow definition. KET QUA CUOI CHUA DOC — khong khai.'
+  no_ngoai_packet_routine_586_mang_token: 'Lop F, KHONG sua o day: Routine trig_01YSJXisJCB2wY8oZWd1Rdtc ("DUNG goi codex tren
+    #586 — vuot tran §12", tao 2026-09-21T18:25:40Z, do list_triggers ~19:05Z) mang nguyen van token kich hoat codex HAI lan
+    trong prompt. Thuoc phien #586, khong thuoc packet nay; ghi de chu kho biet. Fable vong 7 phat hien.'
   CI_cua_PR_601_bi_gian_doan_thanh_toan:
     hinh_dang: 'Actions KHONG KHOI DONG DUOC job vi tai khoan — KHONG phai do noi dung PR.
       Annotation nguyen van tren moi job do: "The job was not started because recent account
@@ -966,6 +985,27 @@ con_mo:
       85559f0, 7becd26, 8ffe96a, va 80d4dd4 do do dang) ghi o dien_bien_do_duoc. Moi con
       so o day la CI cua PR #601 (PR mang ho so), KHONG phai cong hau merge cua packet #578 (714f36e6 / run
       35581617584) va KHONG phai bang chung cho `landed` cua #578.'
+
+DINH_CHINH_SAU_REVIEW_VONG_8:
+  nguon: 'Vong 7 cua vong lap, tren head 85f974b — KHONG co loi goi codex; nguon duy nhat la ra soat Fable 5.1 vong 7 (cung
+    phien land, subagent): P1 x0, P2 x2, P3 x3; phien chinh tu kiem ba muc nang nhat (#1, #3, #5) va xac nhan ca nam.
+    Executor Fable do lai tung so dong truoc khi ghi (PROTOCOL d.1013, d.1018; CLAUDE d.757-758).'
+  P2_1_44_giay: 'CHAP NHAN, lop A: SU_CO.su_that_do_duoc ghi "54 giay sau commit a479699" — 18:11:22Z -> 18:12:06Z = 44 giay.'
+  P2_2_d1013: 'CHAP NHAN, lop B: VI_PHAM_3.ai_goi dan "§12 d.1011" cho cum "gọi thêm bằng prompt/phiên khác để lách trần" —
+    cum ay o d.1013 (co san tu a479699, vong 6 bo sot).'
+  P3_3_ba_moc: 'CHAP NHAN, lop A: VI_PHAM_3.da_dung "SAI 59 giay sau" gan nham moc — 59 giay la comment->codex; viet lai
+    ba moc: commit->comment 44 s, comment->codex 59 s, commit->codex 103 s.'
+  P3_4_ban_sao_K1: 'CHAP NHAN, lop B: VONG_6.K1 van ghi "d.1015-1017" sau khi VONG_7.P3_4 sua VI_PHAM_3.dieu_khoan -> 1015-1018;
+    dong bo ban sao.'
+  P3_5_thong_diep_commit_85f974b: 'CHAP NHAN, lop B (ngoai write set): nua token trong mau grep o thong diep commit, do: khong
+    kich hoat. Khong sua lich su; ghi SU_CO.lan_thu_TU_trong_chinh_luat_cam + mot dong LANDED_KHONG_XAC_LAP; doi
+    luat_ap_dung_tu_day (cẩn thận hơn) thanh luat_dung_tu_day (khong ket xuat duoi bat ky dang nao, chi neo ID + gio) va
+    bo cau mo ta cau tao chuoi trong su_that_do_duoc.'
+  F_routine_586: 'Lop F: Routine #586 mang token nguyen van — KHONG sua, ghi con_mo.no_ngoai_packet_routine_586_mang_token.'
+  kiem_sau_khi_ghi: 'grep -c tren tep: (a) mention bot = 0, (b) du chuoi = 0, (c) cau mo ta cau tao = 0; YAML parse OK.'
+  KHONG_mat_gi: 'LANDED_KHONG_XAC_LAP tang tu 18 len 19 dong; CON_THIEU_DE_GOI_LANDED giu 9. LANDED van CHUA. Khong nang muc
+    bao dam nao; 1 du + 2 mot phan + 1 thieu khong doi; khong khai cross_approved/human_audited; ba vi pham + mot su co
+    (nay hai lan trong su co) da khai.'
 
 DINH_CHINH_SAU_REVIEW_VONG_7:
   nguon: 'Vong 6 cua vong lap, tren head a479699 — KHONG co loi goi codex (tran §12 da vuot); nguon duy nhat la ra soat Fable
@@ -1010,7 +1050,7 @@ DINH_CHINH_SAU_REVIEW_VONG_6:
     phai vi da approve; CHUA co cross_approved. Ban va nay KHONG phai ban cuoi (ban a479699 tuyen the) — vong 6 phai va
     them 7 finding va ghi SU_CO_CHUOI_KICH_HOAT_TRONG_LOI_KHAI.'
   K1_vuot_tran_truc_loi_goi: 'CHAP NHAN, lop D (codex K1, P1) — dieu kien dung that. Them VI_PHAM_3_VUOT_TRAN_TRUC_LOI_GOI:
-    §12 d.1011-1013, d.1015-1017, d.1021 trich nguyen van; ADR-0048 d.9-12 giu nguyen truc LOI GOI; SAU review codex tren
+    §12 d.1011-1013, d.1015-1018 (ban vong 6 ghi 1015-1017, sua vong 7), d.1021 trich nguyen van; ADR-0048 d.9-12 giu nguyen truc LOI GOI; SAU review codex tren
     #601 (khong phai NAM nhu brief phien chinh — phien chinh bo sot 5269792704 17:29:34Z), review thu sau 5270067564
     submitted_at 17:57:36Z (brief ghi 17:57:34Z — sai 2 giay; do API pulls/601/reviews). Tran 2, da dung 6, vuot tu lan 3.
     Review Rescue Checkpoint bat buoc, CHUA LAM. Bac H3 vong 4 van dung ve truc VONG nhung thieu truc LOI GOI — ghi ca

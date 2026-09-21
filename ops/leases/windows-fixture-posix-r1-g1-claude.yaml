@@ -30,9 +30,44 @@ recorded_by: claude-session
 recorder_is_dispatcher: false
 
 leased_at_utc: '2026-09-20T10:30:00Z'
-lease_expires_at_utc: '2026-09-21T10:30:00Z'
-han_vi_sao: '24 gio. Cua so thuc su chi mo sau 2026-09-21T01:55:00Z khi lease #570 het han, nen
-  phan dung duoc la ~8,5 gio cuoi. Ngan hon thi phai gia han; dai hon thi giu write set qua muc.'
+lease_expires_at_utc: '2026-09-21T22:30:00Z'
+han_vi_sao: '24 gio ban dau. Cua so thuc su chi mo sau 2026-09-21T01:55:00Z khi lease #570 het
+  han, nen phan dung duoc la ~8,5 gio cuoi. Ngan hon thi phai gia han; dai hon thi giu write set
+  qua muc. DA GIA HAN mot lan — xem GIA_HAN_1.'
+
+GIA_HAN_1:
+  chi_thi_nguyen_van: 'gia han lease di, soan commit cho toi duyet'
+  chi_thi_luc: '2026-09-21T05:4xZ'
+  han_cu: '2026-09-21T10:30:00Z'
+  han_moi: '2026-09-21T22:30:00Z'
+  dai_bao_nhieu: '12 gio, KHONG phai 24.'
+  vi_sao: 'Ban va da ap (5f91846, PR #594 draft) nhung packet chua DU: thieu (a) luot chay
+    t131/t132 tren WINDOWS THAT tren chinh nhanh ung vien, va (b) audit cua NGUOI
+    (assurance_target: human_audited — packet nay khong land duoc bang may). Het han khong chan
+    chu kho audit, nhung no NHA write set — ma write set con phai giu neu log Windows bat ra
+    viec phai sua. Do dung la ly do cua GIA_HAN_1 o lease #541 g2, cung hinh dang.'
+  vi_sao_12_gio_chu_khong_24: 'Packet #579 dang CHO dung duong nay. Lease #579 r2/g2 tu khai
+    ops/lease_publish_test.py "som nhat 2026-09-21T10:30:00Z" — tuc no da xep lich quanh HAN CU
+    cua lease nay. Moi gio gia han them la mot gio #579 bi day lui. 12 gio du cho: CI cua #594
+    chay xong, chu kho chay tep .ps1 va gui log, va phien nay sua neu log bat ra viec. Phan audit
+    cua NGUOI KHONG can write set, nen khong tinh vao han.'
+  HE_QUA_PHAI_KHAI_CHO_579: 'Lan gia han nay day #579 lui 12 gio tren duong ay. Chu kho da duoc
+    bao truoc khi duyet. Neu muon #579 di som hon thi cat han nay ngan lai — phien nay KHONG tu
+    quyet do.'
+  KHONG_DOI_GI: 'PROTOCOL_DA_PHIEN.md:185 nguyen van: "Gia han/thay lease khong doi baseline
+    nghiem thu." Lan gia han nay KHONG cham: muc tieu, tieu chi nghiem thu N1-N6, write_set,
+    phu thuoc, executor, environment, spec_hash (c326d5a0477f), spec_path, spec_bytes, risk,
+    review_class, assurance_target, prohibited_actions, dieu_kien_dung, DIEU_KIEN_BAT_DAU va
+    DINH_CHINH_1. Chi doi DUY NHAT truong thoi han, cong khoi GIA_HAN_1 nay.'
+  reviewed_sha_required_CO_Y_KHONG_DOI: 'Ung vien nay DA TON TAI: 5f91846e1b9f5145a12baaba93300598e9fae54d.
+    Truong reviewed_sha_required van la 40 so 0, va lan gia han nay CO Y khong viet SHA that vao
+    do — viet vao la DOI NEO NGHIEM THU trong mot lan gia han, dung thu 185 cam. Ghi chu san co
+    o reviewed_sha_required_note da noi dung viec phai lam: verdict cuoi PHAI neo dung SHA ung
+    vien THAT. No duoc neo o VERDICT, khong phai o day.'
+  revision_van_la_1_vi_sao: 'PROTOCOL §3.2 liet ke cai gi tao revision moi: objective, acceptance,
+    write set, dependency, executor, environment. THOI HAN khong nam trong do, nen day KHONG phai
+    revision moi, KHONG phai generation moi, khong phai cap lai lease, va khong co bia mo nao
+    phai dat. lease_id giu nguyen.'
 
 role: executor
 provider: anthropic

@@ -14,6 +14,20 @@ revision: 5
 generation: 1
 lease_id: chan-doan-tin-dung-gia-r5-g1-claude
 thay_the_cho: KHONG_CO
+da_bi_thay_the: chan-doan-tin-dung-gia-r5-g2-bia-mo
+da_bi_thay_the_vi_sao: 'THOI GIU SOM, theo chi thi chu kho 2026-09-21 go van xuoi "Thuc hien 2"
+  — tuc de nghi CAP r6 cho lop VAN-BAN-BI-THU-THANH-BANG-CHUNG-DO o BO CHAM. Revision 6 can
+  DUNG duong nay.
+  VI SAO PHAI LA REVISION MOI: P1 nam NGOAI closure M13/M14 cua r5. Bon luot cross-review doc
+  lap deu tra changes_requested voi CUNG mot P1, va executor TAI HIEN duoc tren bo cham THAT:
+  ba dot bien MOT CHUOI deu duoc cap 1/1 GIET trong khi KHONG ca nao chay. Vong lap khong the
+  toi approve trong pham vi r5, va do la gioi han cua LEASE chu khong phai cua ban va.
+  CAI GIA: PR #600 CHUA duoc audit. Sau bia mo r5 KHONG con quyen GHI len
+  ops/nhanh_don_duoc_test.py; audit doi sua thi phai xin cap r5-g3.
+  BU LAI, do duoc tai head c89d85f: luot day du XANH voi hai so bang nhau, va CA NAM check CI
+  tren e7f15cb deu XANH ke ca gate-registry — cong DUY NHAT thuc su chay tep nay voi day du bang
+  dot bien. Mat quyen GHI khong phai mat quyen LAND.
+  LAN THU TU trong phien nay. Hien tuong da ghi thanh NO CO TEN tai issue #599.'
 thay_the_cho_vi_sao: 'Lease truoc cua #568 (r4-g1) DA CHET, bi r4-g2-bia-mo ke vi. Khong con gi
   de ke vi, nen truong nay RONG chu khong tro bua vao mot lease da chet.'
 

@@ -1,11 +1,21 @@
 # Đặc tả packet — QUY-TRINH-LAP-REVIEW-VA-DIEU-KIEN-DUNG (revision 12)
 
-- `packet_id`: **QUY-TRINH-LAP-REVIEW-VA-DIEU-KIEN-DUNG**; ID bền `wp523`.
+- `packet_id`: **`wp523`** (ID bền theo §3.2) · `packet_slug`: **QUY-TRINH-LAP-REVIEW-VA-DIEU-KIEN-DUNG**.
+  **Bí danh lịch sử, đo được (21-09-2026):** chín biên nhận `ops/reviews/pr529-review-{1..9}-codex-verdict.receipt.yaml`
+  (nhánh `claude/quy-trinh-lap-review-r2`) khai `packet_id: '523'` + `packet_slug: <slug>`; `packet_loop.py bien-nhan`
+  so **bằng chuỗi** nên `--packet 523` ⇒ 9 · `--packet <slug>` ⇒ 9 · `--packet wp523` ⇒ **0, rc=11**. Biên nhận cũ
+  **giữ nguyên byte** (`S5`); biên nhận mới phải khai `packet_id: wp523` **và** `packet_slug` để cả hai khoá cùng tra
+  được. Lease gen 12 (#587) vẫn khai slug ở `packet_id` — ngoài tay executor, chủ kho neo lại cùng lúc với `spec_hash`.
 - `packet_issue`: **523** · `mission_issue`: **499**
 - `revision`: **12** · `generation`: **11** · soạn **20-09-2026**
-- `thay_the_cho`: **revision 11** (`spec_sha256`
-  `42b0f477b7db2b1cb954ee9a345c9fcc1a2fb805ec9c260461187180fdc4226b`, 474 dòng, nhánh
-  `claude/spec-quy-trinh-r11-20260913`). r11…r1 **giữ nguyên trên đĩa làm hồ sơ**.
+- `thay_the_cho`: **revision 11** — nguồn **bất biến** (đo 21-09-2026, clone đầy đủ):
+  commit `4a9c71a2e80b285679dd159e7a4efcb29a67a1a9` · path `ops/specs/QUY-TRINH-LAP-REVIEW-VA-DIEU-KIEN-DUNG-r11.md`
+  · blob `3bb25ae6169c5aeb4a1d600210c51f8794568815` · `sha256`
+  `42b0f477b7db2b1cb954ee9a345c9fcc1a2fb805ec9c260461187180fdc4226b` · 474 dòng. Lấy từ checkout mới:
+  `git fetch origin claude/spec-quy-trinh-r11-20260913 && git show 4a9c71a2e80b285679dd159e7a4efcb29a67a1a9:<path> | sha256sum`.
+  **Thứ định danh là OID + băm, không phải tên nhánh**: r11 **không có trên `master`**; commit trên chỉ tra được chừng
+  nào nhánh ấy (hoặc một tag `luu-tru/*`) còn giữ nó — gắn tag là việc chủ kho, phiên web không đẩy được tag.
+  r11…r1 **giữ nguyên trên đĩa làm hồ sơ**.
 - `executor`: **`claude`** · `reviewer_provider`: **`human` (chủ kho)** · `assurance_target`:
   **`human_audited`**
 - `review_class`: **`sensitive`** — không đổi.
@@ -24,8 +34,9 @@ nó cũng đã **hết hạn** `2026-09-14T12:00Z` từ trước.
 
 ## VÌ SAO CÓ r12 — một phép đếm, không phải một cảm giác
 
-Chín lượt cross-review cho một thay đổi **201 dòng, toàn tài liệu**. Verdict lượt 9: **`blocked`**,
-`0 P1 · 3 P2 · 1 P3 · 9 thể hiện`. Trần ADR-0048 là **mười** lượt ⇒ còn **đúng một**.
+Chín lượt cross-review **đã đo** (`bien-nhan --packet 523` ⇒ 9 biên nhận phân biệt được) cho một thay đổi
+**201 dòng, toàn tài liệu**. Verdict lượt 9: **`blocked`**, `0 P1 · 3 P2 · 1 P3 · 9 thể hiện`. Trần trục VÒNG và
+số lượt còn lại **suy từ `ADR-0048` tại preflight** — ADR ấy là nhà duy nhất của con số, spec này **không chép**.
 
 Phép đo quyết định — **không lớp mở nào là lỗi của nội dung skill**:
 
@@ -48,8 +59,12 @@ không**, không phải **vá thế nào**"*. Ở đây hình dạng ấy lặp 
 **M-SLICE:** đưa nội dung `M1`–`M10` của quy trình lặp review vào hai tệp skill, hợp nhất với bản
 master hiện hành, **không mang theo hồ sơ review của packet**.
 
-`M1`–`M16` và `M17-GO` của r11 **giữ nguyên** làm định nghĩa nội dung phải có. r12 **không** đổi một
-mục tiêu nội dung nào; nó chỉ **thu hẹp phạm vi giao hàng**.
+**Phạm vi `A2` là `M1`–`M10`, và chỉ thế.** `M11`/`M12` (r3) là nghĩa vụ về **hồ sơ review** (`ops/reviews/`,
+`run_id` trong biên nhận) — nằm ngoài write set r12 theo chính mục `write_set` dưới đây; `M13`–`M16` (r4) và `M17-GO`
+(r10) là nghĩa vụ **quy trình** của executor/reviewer (hoà giải, còn răng, con trỏ chứa thứ nó hứa, reviewer dựng
+thước, không dựng lại cổng quét tên). Chúng **giữ hiệu lực** làm ràng buộc cách làm, nhưng **không được `A2` đo** —
+khai ở `chua_do_duoc` 5. Quyết định *rút hẳn hay đưa vào acceptance* là đổi acceptance ⇒ §3.2 ⇒ **r13**, không vá
+tại chỗ. r12 **không** đổi một mục tiêu nội dung nào; nó chỉ **thu hẹp phạm vi giao hàng**.
 
 ## `write_set` — ĐÚNG HAI đường
 
@@ -101,27 +116,35 @@ r12 thành *"đã qua cùng mức soi như các lượt trước"* là đọc sa
 
 | # | nghĩa vụ | đo thế nào |
 |---|---|---|
-| `A1` | Diff cuối chạm **đúng hai** tệp trong write set, không tệp nào khác | `git diff --name-only` so `base_sha` |
+| `A1` | Diff cuối chạm **đúng hai** tệp trong write set, không tệp nào khác | `git diff --name-only <base_sha> <head>`; **r12 không gán `base_sha`** — xem `chua_do_duoc` 6: chừng nào r13 chưa chốt baseline thì `A1` là `KHÔNG ĐO ĐƯỢC`, không phải ĐẠT |
 | `A2` | Mọi mục `M1`–`M10` của r11 **có mặt** trong bản hợp nhất | đối chiếu chuỗi đặc trưng; kỷ luật đọc, **không** phải cổng |
 | `A3` | **Không mục nào của master bị mất** trong hợp nhất | đối chiếu chuỗi đặc trưng của phía master |
 | `A4` | Bảy cổng đạt, **delta so nền master = 0** | `rc` đọc TRỰC TIẾP từng tiến trình, **không qua pipe** |
 | `A5` | `release-verify --strict` giữ `ok=true`, `expected == checked` | `180 == 180` ở nền 20-09 |
-| `A6` | Chủ kho đọc **đúng diff hai tệp** trên exact `reviewed_sha` rồi ký | comment có `author_association: OWNER`, đọc ngược qua API |
+| `A6` | Chủ kho đọc **đúng diff hai tệp** trên exact `reviewed_sha` rồi ký | bản ghi bền (issue comment hoặc tệp biên nhận) mang **đủ**: `Reviewed commit: <40-hex>` đúng head, `spec_sha256` của r12, OID blob của **hai** tệp tại head ấy, và ít nhất một bằng chứng **tự đo** (lệnh + output). `author_association: OWNER` chỉ là điều kiện **cần** (nợ #566). Ca âm: comment OWNER ghi *"approve theo tóm tắt của executor"* ⇒ `S14`, không đếm. Hành vi ĐỌC của người là `KHÔNG ĐO ĐƯỢC` — không được viết thành "máy đã chứng minh" |
 
-**Nền đã đo (20-09-2026, `origin/master` `700ca8c`, `core.abbrev=7`):**
+**Nền đã đo (21-09-2026, hai vế dựng trong MỘT lệnh: nền `origin/master`
+`714f36e6aad844f2c1a6713256f3abbdea64aec9` và head `5497cf5b5fb7c364e57a63a9b4481deb18dd6b7b`; clone **đầy đủ**
+`is-shallow=false`, `core.abbrev=7`, `actionlint 1.7.7` + `shellcheck 0.9.0` **đã cài**, `rc` đọc trực tiếp):**
 
-| cổng | `rc` nền | ghi chú |
-|---|---|---|
-| `doctrine-scan` | **0** | sạch, quét 10 tệp |
-| `adr-song` | **0** | |
-| `doc-claims-check --strict` | **0** | |
-| `bien_nhan_v2` | **0** | `132 ĐẠT v2 · 0 vi phạm · 0 KHÔNG ĐO ĐƯỢC · tổng 185` |
-| `release-verify --strict` | **0** | `ok=true`, `180 == 180`, `package_hash_match=true` |
-| `git diff --check` | **0** | |
-| `lease_publish_test` | **1** | **ĐỎ SẴN 164/166** — `t137` và `t159`, cả hai `KHÔNG ĐO ĐƯỢC: thiếu shellcheck` |
+| cổng | `rc` nền | `rc` head | bằng chứng dương |
+|---|---|---|---|
+| `doctrine-scan` | **0** | **0** | sạch, quét 10 tệp |
+| `adr-song` | **0** | **0** | 50 ADR ↔ 50 dòng §20 |
+| `doc-claims-check --strict` | **0** | **0** | |
+| `bien_nhan_v2` | **0** | **0** | `132 ĐẠT v2 · 11/11 · 42 NỢ · 0 vi phạm · 0 KHÔNG ĐO ĐƯỢC · tổng 185` — **chỉ đúng trên clone đầy đủ**; cùng head trên clone `--depth 1` ⇒ `rc=2 · 264 KHÔNG ĐO ĐƯỢC · TỔNG: KHÔNG ĐO ĐƯỢC` (mỏ neo `canonical_ancestry` cần object) |
+| `release-verify --strict --json` | **0** | **0** | `ok=true`, `expected_file_count 180 == checked_file_count 180`, `package_hash_match=true` |
+| `git diff --check <base-40hex> <head-40hex> --` | — | **0** | **CÓ RANGE.** Bản không range chỉ soi worktree: kho rác commit một dòng có khoảng trắng đuôi, cây sạch ⇒ không range `rc=0`, có range `rc=2` — phép kiểm không thể đỏ không phải bằng chứng. `rc` không-range của các lượt trước **không** được dùng lại |
+| `lease_publish_test` | **0** | **0** | **`166/166` đạt, đã chạy=166, bỏ qua=0** với `actionlint 1.7.7` + `shellcheck 0.9.0` |
 
-`lease_publish_test` **đỏ sẵn vì container không có `shellcheck`**, không phải vì slice. Tiêu chí là
-**DELTA = 0**, không phải "0 tuyệt đối" — cùng doctrine với ngưỡng ruff ở `CLAUDE.md`.
+**`KHÔNG ĐO ĐƯỢC` ≠ ĐẠT, kể cả khi delta = 0.** Bản trước của bảng này nhận `lease_publish_test` `rc=1`
+(`164/166`, hai ca `KHÔNG ĐO ĐƯỢC: thiếu shellcheck`) làm cổng qua vì *đỏ sẵn, delta = 0* — sai: một ca chưa tới
+assertion thì **không đo gì**, và `164/166` thiếu công cụ ở lần đo này là `163/166` thiếu `actionlint` ở lần đo
+sau — số trôi theo rig, không theo mã. Luật cho `A4`: cổng nào in `KHÔNG ĐO ĐƯỢC` thì ghi **`not_measured`** và
+**cài công cụ rồi đo lại** (`AL_VER=1.7.7 bash ops/cai_actionlint.sh` · `bash ops/cai_cong_cu.sh shellcheck`);
+không cài được thì DỪNG khai ĐẠT cho cổng ấy. Chỉ ca **ĐỎ THẬT** (tới assertion và fail) mới được xét *đỏ sẵn,
+delta = 0* — cùng doctrine với ngưỡng ruff ở `CLAUDE.md`. Cài thêm công cụ có thể lộ ca đỏ mới của nền: ca ấy là
+ĐỎ, không được nuốt vào delta.
 
 `bien_nhan_v2` phải đo theo **bất biến**, không theo số tuyệt đối: `vi phạm == 0` và
 `KHÔNG ĐO ĐƯỢC == 0`; `miễn trừ legacy == 11/11`; `NỢ đóng băng` không tăng; `ĐẠT v2` **không giảm**
@@ -135,7 +158,8 @@ bản có thẩm quyền DUY NHẤT, và lease gen 11 phải chép **đúng** n�
 
 - **`S1`** — cần đường dẫn thứ BA ngoài hai tệp skill. DỪNG, xin revision.
 - **`S2`** — tổng dòng thêm của **HAI tệp sản phẩm**, đo từ `base_sha` tới head cuối, **> 300**
-  (trần ADR-0044 cho `sensitive`). **KHÔNG cộng hai khoảng.**
+  (trần ADR-0044 cho `sensitive`). **KHÔNG cộng hai khoảng.** r12 chưa gán `base_sha` (`chua_do_duoc` 6) ⇒
+  `S2` **chưa kích hoạt được**; đó là một `KHÔNG ĐO ĐƯỢC` phải khai, không phải "chưa chạm".
 - **`S3`** — muốn đụng `docs/PROTOCOL_DA_PHIEN.md` hay `.claude/hooks/**`.
 - **`S4`** — muốn vá `packet_loop.py` / `doctrine-scan`: KHÔNG trong write set; nợ riêng **#583**.
 - **`S5`** — muốn sửa `VERDICT.md` hoặc biên nhận của một lượt đã giao (neo theo băm).
@@ -154,8 +178,22 @@ bản có thẩm quyền DUY NHẤT, và lease gen 11 phải chép **đúng** n�
 
 ## `chua_do_duoc` — khai thẳng
 
-1. **Tập lớp mở lấy từ `findings_ids` của lượt 9.** Nếu một finding lượt 1–8 nhắm vào **nội dung
-   skill** từng bị bỏ im lặng thay vì vá, nó không hiện trong tập ấy và r12 không thấy.
+1. **Union `findings_ids` của cả chín lượt ĐÃ ĐO (21-09-2026)**, không chỉ lượt 9. Lệnh: đọc
+   `findings_ids` + `doi_chieu_luot_truoc[].phan` + `lop_da_dong_that_o_luot_nay` từ chín biên nhận trên nhánh
+   `claude/quy-trinh-lap-review-r2` (PyYAML, so slug bằng chuỗi). Kết quả: **17 slug**; **4 mở** ở lượt 9
+   (`dac-ta-r5-giu-luat-cu-trai-tieu-chi-moi` VÁ HỜ · `bien-nhan-thieu-so-ci-da-chi` VÁ HỜ ·
+   `phep-do-doctrine-khong-du-rang` CHƯA VÁ · `bien-nhan-luot-8-lan-du-lieu-luot-6` mới); **6** có
+   `ĐÃ VÁ THẬT` ngay trong **biên nhận** lượt sau (`sai-dai-luong-hoi-tu` `gop-dieu-kien-dung-review-class`
+   `thieu-hop-dong-ban-va-theo-lop` `mat-dau-vet-thu-hep-pham-vi` `bien-goi-y-thanh-menh-lenh`
+   `chu-giai-lease-neo-head-cu`); **7** của lượt 3–4 (`bo-doc-bang-vuot-ranh-gioi-muc`
+   `bo-do-bang-chi-kiem-ten-khong-kiem-nghia` `a9-bo-sot-delta-trong-merge` `a17-whitelist-bo-roi-m8`
+   `con-tro-dinh-nghia-phan-hang-sai-dich` `dem-dot-bien-khong-theo-tieu-chi-dich`
+   `doi-chung-a19-khong-chi-phoi-ket-luan`) chỉ có `ĐÃ VÁ THẬT` trong **`VERDICT.md`** lượt 4–5, **không có
+   dòng đối chiếu nào trong biên nhận** (biên nhận lượt 5 không có mục `doi_chieu_luot_truoc`). Tức 17/17 có
+   disposition nếu đọc VERDICT, nhưng **bộ đếm máy (`bien-nhan`) mù với 7 lớp ấy** — đó là lỗ thật. Không lớp nào
+   trong 13 lớp đóng là *"bỏ im lặng"*, nhưng kết luận này dựa trên **đọc**, chưa có ledger đóng băng: ledger ấy
+   là tệp trong `ops/reviews/` ⇒ ngoài write set r12 ⇒ **r13**. Đột biến cần có ở đó: xoá một slug chưa đóng khỏi
+   biên nhận lượt 9 phải làm checkpoint ĐỎ.
 2. **Hợp nhất ba chiều có thể làm mất nội dung theo cách cổng không thấy.** `doctrine-scan` và
    `doc-claims-check` không đo *"đủ mục hay chưa"*. `A2`/`A3` là **kỷ luật đọc**, không phải cổng —
    nói ra để không ai đọc chúng thành đã có máy canh.
@@ -163,3 +201,13 @@ bản có thẩm quyền DUY NHẤT, và lease gen 11 phải chép **đúng** n�
    land. Đánh đổi **có chủ đích và được khai**.
 4. **Không cổng nào cưỡng chế `M1`–`M10`** — chúng là chữ, tức kỷ luật đọc. Chính skill phải khai
    điều này (`ngoai_pham_vi` 2 của r3 đòi vậy).
+5. **`M11`–`M16` và `M17-GO` không được `A2` đo.** Một ứng viên bỏ `M16` khỏi hai tệp skill vẫn qua `A2`.
+   Đưa chúng vào acceptance hay rút hẳn là đổi acceptance ⇒ **r13**; r12 chỉ khai lỗ.
+6. **r12 KHÔNG gán `base_sha`** cho `A1`/`S2`, và ba nguồn hiện khai ba OID khác nhau: lease gen 11
+   `395bc7b1be6c275d8de697f8d8541bb36a290c9e` · lease gen 12 `a1bbdc1023185a35c578ab4017990b472b5c0d6c` ·
+   r13 nháp `S16` giữ `395bc7b1…`. Đo trên head slice #585 `27283d2e6ed57a6e97bf45e3179c157a59f0ff86`
+   (`merge-base` với `master` = `a1bbdc10…`): từ `395bc7b1` ⇒ **3 tệp** (thêm
+   `ops/specs/dang-lease-dau-truoc-kiem-sau-r1.md`, do master trôi) · từ `a1bbdc10` ⇒ **2 tệp** · cả hai đều
+   +201 dòng ở hai tệp sản phẩm. Chọn baseline là quyết định **thẩm quyền** (`PROTOCOL` §3.2.1 cấm dời baseline
+   bằng gia hạn lease) ⇒ **r13**, không lấp tại chỗ. Tới lúc đó `A1`/`S2` là `KHÔNG ĐO ĐƯỢC`; đột biến +301 dòng
+   phải làm `S2` đỏ **sau khi** baseline được gán.

@@ -25,6 +25,14 @@ granted_by: ducthangho
 granted_on_instruction: https://github.com/ducthangho/tra-luat/issues/568#issuecomment-5758387158
 granted_on_instruction_nguyen_van: 'Chu kho, phien dieu phoi 2026-09-21, GO VAN XUOI: "Cap r4 cho
   #568 di. Nhung # PR nao chua review thi cross review boi codex di".'
+da_bi_thay_the: chan-doan-tin-dung-gia-r4-g2-bia-mo
+da_bi_thay_the_vi_sao: 'THOI GIU SOM, theo chi thi chu kho "1. Dong y" (cap r5) kem "Lap quy
+  trinh: va, cross-review, dang verdict cho toi khi approve". Revision 5 can DUNG duong nay.
+  CAI GIA: PR #598 CHUA duoc audit. Sau bia mo r4 KHONG con quyen GHI; audit doi sua thi phai
+  xin cap r4-g3. Bu lai, do duoc: M10-M12 du, A20-A28 deu DAT, BA required gate tren 9ed0388
+  deu XANH cong chuan-bi va thu-hoi, mergeable clean.
+  LAN THU BA trong phien nay. Hien tuong da duoc ghi thanh NO CO TEN tai issue #599 theo dung
+  khuyen nghi cua executor: ghi lai, KHONG tu de xuat doi co che.'
 recorded_by: claude-session
 recorder_is_dispatcher: false
 

@@ -2894,7 +2894,10 @@ DOT_BIEN_TU_KIEM = [
     # #568 — BON duong vao cua r524, moi duong mot dot bien RIENG. Go tung cai
     # phai doi mau r524; neu hai cai khong phan biet duoc bang dau vao thi chung
     # la bo TUONG DUONG va ta chi dang do MOT thu.
-    ("chan-doan-chi-lay-ten-ca", ("r524",),
+    # #568 r4 — `dich` len ("r524","r530"): tu khi `r530` do NHANH DO_KHAC o LOP
+    # CHA, dot bien vut than chan doan giet THAT ca hai. Chet bang DO_CHOT, chot
+    # cua chinh chung.
+    ("chan-doan-chi-lay-ten-ca", ("r524", "r530"),
      '            khoi.append((m.group(1), [m.group(2).lstrip(" \u2014-").strip()]))',
      '            khoi.append((m.group(1), [""]))'),
     ("chan-doan-dung-o-dong-dau", ("r524",),
@@ -3112,7 +3115,10 @@ DOT_BIEN_TU_KIEM = [
      "    if thieu or len(NHOM_BAT_BUOC) < SAN_NHOM or tk_hong or tk_giet != len(DOT_BIEN_TU_KIEM):",
      "    if thieu or len(NHOM_BAT_BUOC) < SAN_NHOM or tk_hong:"),
     # ---- F01: BA chot cua bo cham tu dot bien, moi chot mot dot bien RIENG ----
-    ("tu-dot-bien-bo-loc-loi-vo-can", ("r516",),
+    # #568 r4 — `dich` len ("r516","r530"): `if do_khac:` -> `if False:` lam
+    # nhanh DO_KHAC KHONG BAO GIO chay, nen dong chuyen tiep cua no bien mat va
+    # `r530` do. Khai du hai ten la khai CHAT HON.
+    ("tu-dot-bien-bo-loc-loi-vo-can", ("r516", "r530"),
      "            if do_khac:", "            if False:"),
     # F01 — "chuan hoa" dau vao TRON: giu bo loc nhung xoa do_khac khi CO do_chot.
     # #568 — NEO DOI theo ban va (khoi trich chan doan thay cho mot re.findall).

@@ -1950,8 +1950,16 @@ def t34_cache_tim_bash_phai_theo_doi_MOI_TRUONG():
       (2) ứng viên ghi đè được CHẤP NHẬN ⇒ chốt thêm `sau == khac`.
       (3) bị TỪ CHỐI ⇒ KHÔNG ĐO ĐƯỢC, kèm `ly_do` lấy TỪ `chan_doan`. `None ≠ False`.
 
-    Và bản ghi đè phải được dựng cho CHẠY ĐƯỢC trước đã — giữ nguyên tên tệp kể cả `.exe`,
-    chép kèm `*.dll` cùng thư mục. Bỏ qua bước ấy là tự chế một ứng viên hỏng rồi đổ cho bộ giải.
+    Và bản ghi đè phải được dựng cho CHẠY ĐƯỢC trước đã — ƯU TIÊN một `bash` THẬT KHÁC đã có
+    sẵn trên máy (`tim_bash(tat_ca=True)`), chỉ CHÉP khi không có. Bỏ qua bước ấy là tự chế một
+    ứng viên hỏng rồi đổ cho bộ giải.
+
+    ĐO ĐƯỢC TRÊN WINDOWS (`570-do-12`, HEAD `2ae2a75`, chốt cây ĐẠT): bản chép bị từ chối vì
+    `C:\\Program Files\\Git\\bin\\bash.exe` là một **SHIM** giải `..\\usr\\bin\\bash.exe` TƯƠNG ĐỐI
+    với chính nó — chép đi chỗ khác thì đường tương đối trỏ ra hư vô. Giả thuyết trước đó
+    ("thiếu `msys-2.0.dll` bên cạnh") **ĐÃ BỊ BÁC** bằng chính phép đo ấy: `F_dll_chep_kem: []`.
+    Giữ lại cả giả thuyết sai lẫn lý do bác nó — `CLAUDE.md`: ghi một nguyên nhân sai vào
+    doctrine còn tệ hơn không ghi gì.
 
     Chạy trong TIẾN TRÌNH CON: ca này đụng `os.environ` và `_CACHE` toàn cục, làm bẩn tiến
     trình chạy suite thì các ca sau đo nhầm.
@@ -1961,19 +1969,32 @@ def t34_cache_tim_bash_phai_theo_doi_MOI_TRUONG():
           "that, _ = m['tim_bash']()\n"
           "if not that:\n"
           "    print('KQ ' + json.dumps(['BO_QUA', 'khong co bash nao dung duoc'])); raise SystemExit(0)\n"
-          # BAN GHI DE PHAI CHAY DUOC, khong phai mot tep tro. GIU NGUYEN TEN (ke ca `.exe`)
-          # va chep kem `*.dll` cung thu muc: tren Git for Windows, `bash.exe` nap
-          # `msys-2.0.dll` nam canh no, nen mot ban sao le KHONG chay duoc. Tren Linux khong
-          # co dll nao va ban sao le chay duoc — day dung la cho hai nen tach ra.
-          "tmp = tempfile.mkdtemp()\n"
-          "khac = os.path.join(tmp, os.path.basename(that))\n"
-          "shutil.copy2(that, khac); os.chmod(khac, 0o755)\n"
-          "for d in glob.glob(os.path.join(os.path.dirname(that), '*.dll')):\n"
-          "    try: shutil.copy2(d, tmp)\n"
-          "    except OSError: pass\n"
+          # BAN GHI DE PHAI CHAY DUOC, khong phai mot tep tro — N20 doi the. Uu tien MOT
+          # `bash` THAT KHAC da co san tren may, va chi CHEP khi khong co.
+          #
+          # VI SAO DOI CACH: ban dau ca nay chi CHEP `that` sang thu muc tam. Tren Linux ban
+          # sao chay duoc nen chot (2) co chay; tren Windows thi KHONG, va `570-do-12` do
+          # duoc LY DO THAT:
+          #     "Skipping command-line '...\\do570i-env-XXXX\\..\\usr\\bin\\bash.exe'
+          #      ('...' not found) Need a valid command-line"
+          # `C:\\Program Files\\Git\\bin\\bash.exe` la mot SHIM: no giai `..\\usr\\bin\\bash.exe`
+          # TUONG DOI voi CHINH NO. Chep no di cho khac thi duong tuong doi tro ra hu vo.
+          # (Gia thuyet truoc do — "thieu `msys-2.0.dll` ben canh" — DA BI BAC bang chinh
+          #  phep do ay: `F_dll_chep_kem: []`, thu muc `Git\\bin` khong co dll nao de chep.
+          #  Ghi lai ca gia thuyet sai lan ly do bac no, chu khong lang le thay chu.)
+          "ung = m['tim_bash'](tat_ca=True)[1]\n"
+          "khac = next((c['duong'] for c in ung if c.get('dat') and c['duong'] != that), None)\n"
+          "tu_chep = khac is None\n"
+          "if tu_chep:\n"
+          "    tmp = tempfile.mkdtemp()\n"
+          "    khac = os.path.join(tmp, os.path.basename(that))\n"
+          "    shutil.copy2(that, khac); os.chmod(khac, 0o755)\n"
+          "    for d in glob.glob(os.path.join(os.path.dirname(that), '*.dll')):\n"
+          "        try: shutil.copy2(d, tmp)\n"
+          "        except OSError: pass\n"
           "os.environ['CONG_CU_BASH'] = khac\n"
           "sau, cd = m['tim_bash']()\n"
-          "print('KQ ' + json.dumps(['OK', that, khac, sau, cd]))\n")
+          "print('KQ ' + json.dumps(['OK', that, khac, sau, cd, tu_chep]))\n")
     p = subprocess.run([sys.executable, "-c", ma], cwd=GOC, capture_output=True,
                        text=True, timeout=180)
     dung(p.returncode == 0 and "KQ " in p.stdout,
@@ -1981,7 +2002,7 @@ def t34_cache_tim_bash_phai_theo_doi_MOI_TRUONG():
     kq = json.loads([l for l in p.stdout.splitlines() if l.startswith("KQ ")][-1][3:])
     if kq[0] == "BO_QUA":
         raise BoQuaMoiTruong(f"KHÔNG_ĐO_ĐƯỢC: {kq[1]}")
-    _, truoc, khac, sau, chan_doan = kq
+    _, truoc, khac, sau, chan_doan, tu_chep = kq
 
     # CHOT CHINH — doc lap NEN. Thu N19 sua la KHOA CACHE, nen thu phai đo la "lần gọi thứ hai
     # có XÉT ứng viên mới không", chứ không phải "nó trả về đường nào". Khoá cũ trả bản nhớ mà
@@ -2001,8 +2022,8 @@ def t34_cache_tim_bash_phai_theo_doi_MOI_TRUONG():
         # lay TU `chan_doan`, tuc DO DUOC, chu khong phai mot suy doan dan vao.
         raise BoQuaMoiTruong(
             f"KHÔNG_ĐO_ĐƯỢC: bản ghi đè ĐÃ ĐƯỢC XÉT nhưng bị NĂNG LỰC từ chối nên không thể "
-            f"chốt `sau == khac`. đặt={khac!r}, lý do={muc.get('ly_do')!r}. Chốt chính (cache "
-            f"có tính lại) ĐÃ ĐẠT ở trên.")
+            f"chốt `sau == khac`. đặt={khac!r} ({'bản SAO' if tu_chep else 'bash THẬT khác'}), "
+            f"lý do={muc.get('ly_do')!r}. Chốt chính (cache có tính lại) ĐÃ ĐẠT ở trên.")
 
     bang(sau == khac,
          f"bản ghi đè ĐẠT cả hai phép mà `tim_bash` vẫn không trả nó: trước={truoc!r}, "

@@ -25322,6 +25322,10 @@ def run() -> int:
             lượt 3  m10      ba hạng đã canh, nhưng canh bằng THÔNG ĐIỆP
             lượt 4  m11      canh theo lớp, nhưng so bằng TÊN lớp
             lượt 5  m12/m13/m14 + MẤT PHỦ m3
+            (sau)   phiên điều phối TỰ ĐO khi soạn r3: `m10` và `m14` cho TẬP ô đỏ BẰNG NHAU
+                    (23 toạ độ, hai chiều rỗng) ⇒ một BỘ TƯƠNG ĐƯƠNG mà ma trận r2/r3-bản-đầu
+                    không phân biệt nổi. Không reviewer nào nêu; nó lộ ra vì `A11` đòi so TẬP
+                    chứ không so SỐ ĐẾM — và hai cái đó cùng cho `27` nên phép đếm im lặng.
 
         Lượt 5 là lượt đắt nhất, và nó bắt hai thứ KHÁC NHAU:
 
@@ -25348,7 +25352,9 @@ def run() -> int:
              lớp con KHÁC module (khoá `m13`) và lớp ĐA KẾ THỪA. "Trùng tên" gồm cả một bản
              là lớp con của `ValueError`.
           2. Dạng đối số thành một TRỤC THẬT, không phải một chuỗi duy nhất: không đối số ·
-             chuỗi rỗng · thông điệp gốc · thông điệp khác · hai đối số · `None` (khoá `m14`).
+             chuỗi rỗng · thông điệp gốc · thông điệp khác · hai đối số · **mốc KÈM đối số
+             thứ hai** · `None` (khoá `m14`, và tách `m10` khỏi `m14` — xem chú thích tại
+             `DOI_SO`).
           3. Thu TẬP ô đỏ ĐẦY ĐỦ rồi mới ném, thay vì dừng ở ô hỏng đầu tiên. `A11` đòi so
              TẬP ô của từng đột biến; dừng ở ô đầu thì không kiểm được điều đó.
 
@@ -25363,7 +25369,7 @@ def run() -> int:
         hạng; nó KHÔNG tự quyết đổi sang so kiểu chính xác.
 
         PHẠM VI, KHAI CHO ĐÚNG — và r2 đã khai quá rộng đúng chỗ này: ma trận bảo đảm cho
-        MIỀN ĐÃ LIỆT KÊ dưới đây (11 lớp × 6 dạng đối số × 3 trạng thái oracle), KHÔNG cho
+        MIỀN ĐÃ LIỆT KÊ dưới đây (11 lớp × 7 dạng đối số × 3 trạng thái oracle, 79 ô), KHÔNG cho
         "mọi cài đặt sai có thể viết bằng Python". Một `m17` theo một chiều chưa ai nêu vẫn
         có thể tồn tại; `A11` đòi bằng chứng cho các chiều ĐÃ BIẾT, không đòi bằng chứng phủ
         định về những chiều chưa biết.
@@ -25417,6 +25423,12 @@ def run() -> int:
                   ("thong_diep_goc", ("R378_EXPECTATION_MISMATCH",)),
                   ("thong_diep_khac", ("MOT_THONG_DIEP_KHAC",)),
                   ("hai_doi_so", ("a", "b")),
+                  # PHÂN GIẢI `m10` KHỎI `m14`. Đo 21-09: với 6 dạng trên, hai đột biến ấy cho
+                  # TẬP ô đỏ BẰNG NHAU (23 toạ độ, hai chiều rỗng) ⇒ ma trận không phân biệt
+                  # nổi "so bằng CHUỖI" với "so bằng `args`". Dạng này tách chúng: `str()` của
+                  # một ngoại lệ HAI đối số là `('...', 'x')` — CHỨA mốc, nên `m10` cấp `killed`
+                  # — trong khi `args` KHÁC tuple một phần tử, nên `m14` cấp tín dụng giả.
+                  ("moc_kem_doi_so_2", ("R378_EXPECTATION_MISMATCH", "x")),
                   ("doi_so_None", (None,)))
 
         sai = []          # THU TẬP ĐẦY ĐỦ, không dừng ở ô đầu — xem docstring mục 3.
@@ -25426,7 +25438,7 @@ def run() -> int:
                 sai.append(f"[{toa_do}] expected={expected!r} observed={quan_sat!r}"
                            + (f" oracle_calls={so_goi}" if so_goi is not None else ""))
 
-        # ---- KHỐI A: oracle CHẠY và NÉM. 11 lớp x 6 dạng đối số = 66 ô. ----
+        # ---- KHỐI A: oracle CHẠY và NÉM. 11 lớp x 7 dạng đối số = 77 ô. ----
         for ten, lop, bat_duoc in LOP:
             for ten_ds, args in DOI_SO:
                 expected = "killed" if bat_duoc else "false_credit:" + lop.__name__

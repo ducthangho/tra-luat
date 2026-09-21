@@ -227,33 +227,65 @@ class GhGia:
 ENV_GITHUB = {"GITHUB_REPOSITORY": "o/r"}
 
 
-def _goi_bat_tron(gh: GhGia, ten: str, *args, env_them=None):
-    """Như `_goi_lop_gh` nhưng bắt TRỌN mọi ngoại lệ; trả `(ex, tên_lớp)`.
+class _MaVang:
+    """`ma` của một ngoại lệ TRẦN: KHÔNG bằng bất kỳ mã thoát nào, và TỰ KHAI lớp khi in.
 
-    Vì sao cần một helper RIÊNG thay vì nới `_goi_lop_gh`: helper kia chỉ bắt `mod.Chan`, và
-    đó là CÓ CHỦ ĐÍCH — một ngoại lệ trần trong fixture của ca khác phải vỡ ra để thấy, không
-    được nuốt. Nới nó thành bắt trọn là che lỗi fixture của cả bộ.
+    Vì sao một LỚP chứ không phải `None`: mọi ca đều viết `chot(ma == RC_X, f"... được
+    rc={ma}")`. Với `None` thì ca ĐỎ đúng như mong muốn, nhưng thông điệp chỉ ra `rc=None`
+    và người đọc mất đúng thứ cần biết — ngoại lệ nào đã thoát ra. Lớp này giữ cả hai:
+    so sánh luôn SAI với mọi mã thoát, mà in ra thì nêu tên lớp và thông điệp.
 
-    Nhưng ca nào ĐO chính cái LỚP của ngoại lệ thì phải tự bắt trọn, nếu không ngoại lệ trần
-    sẽ thoát ra trước khi `chot` kịp chạy — và ca ấy đỏ vì runner toàn suite, chứ không vì
-    tín hiệu của chính nó. Cross-review lượt 3 bắt đúng chỗ này ở `t182`
-    (`t182-mutant-killed-before-own-assertion`).
-
-    Trả về `(None, "KHÔNG NÉM GÌ")` khi lời gọi chạy trót lọt.
+    `__eq__` luôn `False` là CÓ CHỦ ĐÍCH và đã kiểm: trong tệp này không ca nào chốt bằng
+    `ma != X`, nên không có đường nào biến nó thành một ca xanh giả. `t184` khoá cả hai vế.
     """
-    import os
-    from unittest import mock
-    mod = _nap_cong()
-    mod.GOI_GH = gh
-    moi = dict(os.environ)
-    moi.pop("GITHUB_ACTOR", None)
-    moi.update(env_them or {})
-    try:
-        with mock.patch.dict(os.environ, moi, clear=True):
-            getattr(mod, ten)(*args)
-    except BaseException as ex:   # noqa: BLE001 — ĐO lớp, nên phải bắt trọn
-        return ex, type(ex).__name__
-    return None, "KHÔNG NÉM GÌ"
+    __slots__ = ("kieu", "thong_diep")
+
+    def __init__(self, ex):
+        self.kieu, self.thong_diep = type(ex).__name__, str(ex)
+
+    def __eq__(self, _other):
+        return False
+
+    def __ne__(self, _other):
+        return True
+
+    def __hash__(self):
+        return id(self)
+
+    def __str__(self):
+        return f"KHÔNG-CÓ-MÃ (ngoại lệ TRẦN {self.kieu}: {self.thong_diep})"
+
+    __repr__ = __str__
+
+
+class _NgoaiLeLa:
+    """Thứ `_goi_lop_gh` trả về khi cổng ném một ngoại lệ KHÔNG PHẢI `Chan`.
+
+    ĐÂY LÀ BẢN VÁ THEO LỚP, KHÔNG THEO CA — và đó là điểm chính. Cross-review lượt 3 bắt
+    `t182` đỏ bằng `AttributeError` thoát ra TRƯỚC khi `chot` của nó chạy; lượt 3 vá bằng
+    một helper riêng cho MỘT ca. Lượt 4 bắt tiếp `t179` mắc y hệt (biến thể `X`) — tức bản
+    vá kia ĐÚNG mà HẸP, đúng hình dạng `VA-DUNG-CHO-DUOC-CHI-ROI-BO-SOT-DUONG-THU-BA` mà
+    `CLAUDE.md` đã trả giá ở #513.
+
+    Nên lần này không vá ca thứ hai: vá CÁI CỬA. `_goi_lop_gh` là đường DUY NHẤT mà 20+ ca
+    gọi vào cổng, nên đóng ở đó là đóng cả loạt — kể cả những ca chưa ai nghĩ tới.
+
+    Hợp đồng KHÔNG đổi với đường cũ: ném `Chan` ⇒ trả chính `Chan` ấy (mọi ca cũ nguyên
+    vẹn); không ném gì ⇒ trả `None`. CHỈ hình dạng thứ ba — ngoại lệ trần — đổi từ "vỡ ra
+    ngoài ca" thành "ca ĐỎ bằng chot của CHÍNH NÓ".
+
+    Bắt `Exception` chứ KHÔNG bắt `BaseException`: `KeyboardInterrupt` và `SystemExit` phải
+    đi thẳng ra, một bộ test nuốt chúng là một bộ test không dừng được.
+    """
+    __slots__ = ("ngoai_le", "kieu", "ma")
+
+    def __init__(self, ex):
+        self.ngoai_le, self.kieu, self.ma = ex, type(ex).__name__, _MaVang(ex)
+
+    def __str__(self):
+        return f"<ngoại lệ TRẦN {self.kieu}: {self.ngoai_le}>"
+
+    __repr__ = __str__
 
 
 def _goi_lop_gh(gh: GhGia, ten: str, *args, env_them=None, bo_qua=()):
@@ -280,6 +312,8 @@ def _goi_lop_gh(gh: GhGia, ten: str, *args, env_them=None, bo_qua=()):
             getattr(mod, ten)(*args)
     except mod.Chan as ex:
         return ex, mod
+    except Exception as ex:  # noqa: BLE001 — xem `_NgoaiLeLa`: đổi VỠ TRẦN thành ca ĐỎ
+        return _NgoaiLeLa(ex), mod
     return None, mod
 
 
@@ -7269,7 +7303,15 @@ def t179_do_dau_KHONG_DO_DUOC_thi_nhuong_lai_cho_chuoi_cu():
         ném thẳng lỗi KHÔNG ĐO ĐƯỢC của phép dò     -> rc=8   `kiem()` bị bỏ qua
 
     ĐỘT BIẾN LÀM CA NÀY ĐỎ: cho nhánh nuốt ném `Chan(RC_DA_DANG)`; hoặc bỏ điều kiện
-    `if c.ma == RC_DA_DANG` để phép dò ném lại MỌI `Chan`.
+    `if c.ma == RC_DA_DANG` để phép dò ném lại MỌI `Chan`; hoặc (biến thể `X` của
+    cross-review lượt 4) GỠ HẲN nhánh nuốt `except Exception` để `RuntimeError` của HÌNH
+    DẠNG 2 vỡ trần.
+
+    TÍN HIỆU CỦA CA NÀY, và lượt 4 phải bắt mới có: với biến thể `X`, ca từng đỏ bằng
+    `RuntimeError` THOÁT RA trước khi `chot` kịp chạy — tức đỏ đúng lúc cần mà đỏ vì một
+    lỗi VÔ CAN, y hệt `t182` ở lượt 3. Nay `_goi_lop_gh` đổi mọi ngoại lệ trần thành
+    `_NgoaiLeLa`, nên `ma` là `_MaVang` và `chot` bên dưới ĐỎ bằng thông điệp của CHÍNH ca,
+    có nêu tên lớp đã thoát. Bản vá nằm ở HELPER, không ở ca — xem `_NgoaiLeLa`.
     """
     lease = _lease_579(granted_by="codex")
 
@@ -7406,16 +7448,13 @@ def t182_lease_KHONG_PHAI_anh_xa_thi_chan_co_ten_chu_khong_vo_tran():
     for nhan, xau in (("None", None), ("danh sách", []), ("bool", True),
                       ("số nguyên", 55), ("chuỗi", "55")):
         gh = GhGia(comments={55: []})
-        # BẮT QUANH CHÍNH `kiem_github`, không dùng `_goi_lop_gh` — vì helper ấy chỉ bắt
-        # `mod.Chan`, nên một ngoại lệ TRẦN đi thẳng ra NGOÀI ca, trước khi `chot` kịp chạy.
-        # Cross-review lượt 3 bắt (`t182-mutant-killed-before-own-assertion`): đột biến J vẫn
-        # làm ca này đỏ, nhưng đỏ qua runner toàn suite chứ KHÔNG qua tín hiệu riêng của ca —
-        # trong khi docstring bản trước khai là "`chot` bắt được kiểu KHÁC `Chan`". Một ca đỏ
-        # vì lý do khác với lý do nó khai là một ca chưa chứng minh được điều nó nói.
-        ex, kieu = _goi_bat_tron(gh, "kiem_github", xau, env_them=ENV_GITHUB)
-        chot(ex is not None and kieu == "Chan" and getattr(ex, "ma", None) == RC_NOI_DUNG,
-             f"lease là {nhan}: phải ném `Chan(rc={RC_NOI_DUNG})` có tên, nhận {kieu}"
-             f"{'' if ex is None else ' ma=' + str(getattr(ex, 'ma', '?'))}. "
+        # `_goi_lop_gh` nay TỰ đổi một ngoại lệ trần thành `_NgoaiLeLa` (lượt 4), nên ca này
+        # dùng lại đường chung — không còn helper riêng. Lượt 3 vá bằng một helper cho RIÊNG
+        # ca này; lượt 4 bắt `t179` mắc y hệt, tức bản vá ấy ĐÚNG mà HẸP. Xem `_NgoaiLeLa`.
+        ex, _mod = _goi_lop_gh(gh, "kiem_github", xau, env_them=ENV_GITHUB)
+        ma = None if ex is None else ex.ma
+        chot(ma == RC_NOI_DUNG,
+             f"lease là {nhan}: phải ném `Chan(rc={RC_NOI_DUNG})` có tên, được rc={ma}. "
              f"Một ngoại lệ TRẦN thoát khỏi cổng là fail-open đội lốt sự cố.")
         chot(len(gh.calls) == 0,
              f"lease là {nhan}: chốt hình dạng phải chặn TRƯỚC khi chạm mạng, có "
@@ -7495,6 +7534,105 @@ def _nhat_ky_ca(*phan) -> None:
     regex của t125 đọc chúng; `ci_dang_ky_test.py` kiểm DA_NOI và wiring của wrapper.
     """
     print(*phan, flush=True)
+
+
+@ca
+def t184_chinh_HELPER_phai_doi_ngoai_le_TRAN_thanh_ca_DO_chu_khong_vo_tran():
+    """A18 — ĐO CHÍNH CÁI THƯỚC ĐO. Bốn vế, mỗi vế một đột biến riêng.
+
+    Vì sao ca này tồn tại: bản vá lượt 4 nằm trong `_goi_lop_gh`, tức một chốt do CHÍNH
+    phiên này dựng ra để chống bị lừa. `CLAUDE.md` đã trả giá đúng chỗ ấy ở #355/#359 —
+    *"thước đo do chính ta vừa dựng ra để chống bị lừa, và nó bị lừa"*. Một chốt không có ca
+    đo nó là một chốt sẽ âm thầm hở lại.
+
+    Ca này KHÔNG dùng cổng thật: nó tiêm thẳng một `GOI_GH` ném thứ cần ném, vì thứ đang đo
+    là HỢP ĐỒNG của helper, không phải hành vi của cổng.
+
+        (a) cổng ném `Chan`        -> trả về CHÍNH `Chan` ấy, `.ma` là số nguyên (hợp đồng CŨ)
+                                      — và `Chan` phải do CỔNG ném, không do fixture: xem
+                                      chú thích tại vế (a), danh tính lớp là theo lần NẠP
+        (b) cổng ném ngoại lệ trần -> trả `_NgoaiLeLa`, `.ma` KHÔNG bằng bất kỳ mã nào,
+                                      và `str(ma)` NÊU TÊN LỚP đã thoát
+        (c) cổng không ném gì      -> trả `None` (hợp đồng CŨ)
+        (d) `KeyboardInterrupt`    -> KHÔNG bị nuốt, đi thẳng ra
+
+    Vế (b) đòi CẢ HAI: so sánh sai VÀ in ra tên lớp. Thiếu vế in thì ca xanh cho một cài đặt
+    trả `None` — mà `None` làm mọi ca ĐỎ đúng lúc cần, chỉ mất đúng thứ người đọc phải biết.
+    Vế (d) là vế dễ mất nhất: nới `except Exception` thành `except BaseException` làm bộ test
+    không dừng được bằng Ctrl-C, và không ca nào khác thấy.
+
+    ĐỘT BIẾN LÀM CA NÀY ĐỎ, từng vế một:
+        (a) `except mod.Chan` -> gộp vào nhánh `_NgoaiLeLa`
+        (b) trả `None` thay cho `_NgoaiLeLa`  |  hoặc bỏ `__eq__`  |  hoặc `__str__` bỏ `self.kieu`
+        (c) trả `_NgoaiLeLa(None)` khi không ném gì
+        (d) `except Exception` -> `except BaseException`
+    """
+    lease = _lease_579()
+
+    # (a) HỢP ĐỒNG CŨ: `Chan` đi qua NGUYÊN VẸN.
+    #
+    # `Chan` PHẢI đến từ CHÍNH cổng, không được do fixture ném — và chỗ này đã trả giá ngay
+    # lần chạy đầu. Bản viết đầu dùng `raise _nap_cong().Chan(...)` trong một `GOI_GH` giả,
+    # và ca ĐỎ với `<ngoại lệ TRẦN Chan: cố ý>`. Không phải helper sai: `_nap_cong()` dựng
+    # một MODULE MỚI mỗi lần gọi, nên `Chan` của module fixture là một LỚP KHÁC với
+    # `mod.Chan` bên trong `_goi_lop_gh` — `except mod.Chan` không khớp, và đúng như thiết
+    # kế nó rơi vào `_NgoaiLeLa`.
+    #
+    # Ghi lại vì đây là một bẫy thật cho mọi ca sau: **danh tính lớp `Chan` là THEO TỪNG LẦN
+    # NẠP.** Đường sản phẩm không dính (cổng và mọi thứ nó gọi nằm trong cùng một module
+    # instance), nhưng bất kỳ fixture nào tự nạp module rồi ném `Chan` của bản sao ấy sẽ bị
+    # phân hạng là ngoại lệ trần — và sẽ trông y hệt một lỗi của helper.
+    #
+    # Nên vế (a) ép cổng tự ném: lease TỰ CẤP ⇒ `kiem()` ném `Chan(RC_TU_CAP)` của chính nó.
+    lease_tu_cap = _lease_579(granted_by="codex")
+    ex, _m = _goi_lop_gh(GhGia(comments={55: []}), "kiem_github", lease_tu_cap,
+                         env_them=ENV_GITHUB)
+    chot(ex is not None and getattr(ex, "ma", None) == RC_TU_CAP,
+         f"(a) `Chan` của CHÍNH cổng phải đi qua nguyên vẹn với ma={RC_TU_CAP}, nhận {ex!r}. "
+         f"Nới helper mà làm hỏng đường cũ là đổi một lỗi lấy 20+ ca khác.")
+
+    # (b) HÌNH DẠNG MỚI: ngoại lệ trần -> `_NgoaiLeLa`, không vỡ ra ngoài ca.
+    def gh_tran(*_a):
+        raise RuntimeError("hỏng theo kiểu KHÔNG AI LƯỜNG TRƯỚC")
+    ex, _m = _goi_lop_gh(gh_tran, "kiem_github", lease, env_them=ENV_GITHUB)
+    chot(ex is not None and ex.__class__.__name__ == "_NgoaiLeLa",
+         f"(b) ngoại lệ TRẦN phải thành `_NgoaiLeLa`, nhận {ex!r}. Vỡ ra ngoài ca nghĩa là "
+         f"ca gọi sẽ đỏ vì runner chứ không vì `chot` của chính nó — đúng lớp tín dụng giả.")
+    ma = ex.ma
+    # ĐO CẢ HAI TOÁN TỬ, và vế `==` mới là vế THẬT — chỗ này đã trả giá ngay trong lượt 4.
+    # Bản đầu chỉ chốt `all(ma != m ...)`. Đột biến `N3` cho `_MaVang.__eq__` trả `True` mà
+    # để nguyên `__ne__` ⇒ ca vẫn XANH, toàn suite **177/177**. Mà mọi ca trong tệp này chốt
+    # bằng `ma == RC_X`, nên với `N3` một ngoại lệ trần sẽ khớp MỌI mã thoát và cả loạt ca
+    # thành XANH GIẢ. Tức vế `!=` đo đúng thứ KHÔNG AI DÙNG.
+    # Bài học, và nó là bài học chung: chốt phải đo ĐÚNG TOÁN TỬ mà người gọi dùng. Python
+    # KHÔNG suy `__ne__` ra từ `__eq__` khi cả hai được định nghĩa tường minh.
+    chot(not any(ma == m for m in (0, RC_TU_CAP, RC_NOI_DUNG, RC_DA_DANG)),
+         f"(b) `ma == <mã thoát>` phải SAI với mọi mã, nhận {ma!r}. Bằng một mã nào đó là "
+         f"biến một sự cố thành một phán quyết — và vì mọi ca đều chốt bằng `==`, chỗ này "
+         f"hỏng là cả loạt ca thành XANH GIẢ.")
+    chot(all(ma != m for m in (0, RC_TU_CAP, RC_NOI_DUNG, RC_DA_DANG)),
+         f"(b) `ma != <mã thoát>` phải ĐÚNG với mọi mã, nhận {ma!r}.")
+    chot("RuntimeError" in str(ma),
+         f"(b) `str(ma)` phải NÊU TÊN LỚP đã thoát, nhận {str(ma)!r}. Không nêu thì ca gọi "
+         f"vẫn ĐỎ, nhưng người đọc mất đúng thứ cần để biết đã hỏng ở đâu.")
+
+    # (c) HỢP ĐỒNG CŨ: không ném gì -> `None`.
+    ex, _m = _goi_lop_gh(GhGia(comments={55: []}), "_kiem_comment_da_co", "o/r", lease)
+    chot(ex is None,
+         f"(c) không ném gì thì phải trả `None`, nhận {ex!r}. Trả một đối tượng ở đây làm mọi "
+         f"ca dùng `ex is None` đỏ sai.")
+
+    # (d) `KeyboardInterrupt` KHÔNG được nuốt.
+    def gh_ngat(*_a):
+        raise KeyboardInterrupt
+    bi_nuot = True
+    try:
+        _goi_lop_gh(gh_ngat, "kiem_github", lease, env_them=ENV_GITHUB)
+    except KeyboardInterrupt:
+        bi_nuot = False
+    chot(not bi_nuot,
+         "(d) `KeyboardInterrupt` bị helper NUỐT. Một bộ test không dừng được bằng Ctrl-C là "
+         "một bộ test giữ máy làm con tin; `except Exception` là CÓ CHỦ ĐÍCH, đừng nới.")
 
 
 def main() -> int:

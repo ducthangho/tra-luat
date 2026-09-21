@@ -12,31 +12,49 @@ tệp trong kho không mang được danh tính ấy. Nên:
 | tác giả | `ducthangho` · `author_association: OWNER` |
 | thời điểm | `2026-09-21T08:04:17Z` |
 
-## Phép đo bản ĐÃ ĐẾN — kèm một phép đo SAI đã bị bắt
+## Phép đo bản ĐÃ ĐẾN — kèm HAI phép đo SAI đã bị bắt
 
-Đọc ngược thân comment qua API rồi `diff` với bản đã gửi. Kết quả **sau khi chuẩn hoá xuống dòng**:
-khớp từng byte, và tập ký tự phi-ASCII giống hệt (43 ký tự cả hai bên).
+Đọc ngược thân comment qua API rồi so với bản đã gửi. Đo ở mức **BYTE**, không qua hàm nào có
+chuẩn hoá ngầm:
 
-**Nhưng "sau khi chuẩn hoá xuống dòng" KHÔNG phải một câu trang trí, và lượt đo đầu đã đọc nhầm nó.**
-Đo lại ở mức BYTE:
+| | byte | xuống dòng | kết thúc bằng |
+|---|---|---|---|
+| thân comment **ĐÃ ĐẾN** | **1078** | CRLF × 18, LF đơn 0 | `…20260921` — **không có LF cuối** |
+| bản **ĐÃ GỬI** | **1061** | LF × 19 | `…20260921` + LF |
+| ĐÃ ĐẾN sau khi đổi CRLF→LF | **1060** | LF × 18 | — |
 
-| | |
+`1060 ≠ 1061`. Lệch đầu tiên ở **offset 1060**, đúng chỗ hết phần chung: **GitHub cắt dấu xuống
+dòng cuối** của thân comment. Nên câu đúng là *"khớp từng byte sau khi đổi CRLF sang LF **và** sau
+khi tính một LF cuối bị GitHub cắt"* — không phải *"khớp từng byte sau khi chuẩn hoá xuống dòng"*.
+Tập ký tự phi-ASCII giống hệt: 43 cả hai bên.
+
+Băm của **cả ba** thân, để lần sau không phải đoán:
+
+| | sha256 |
 |---|---|
-| thân comment ĐÃ ĐẾN | **1078 byte**, xuống dòng **CRLF** — **18 cặp**, 0 LF đơn |
-| bản ĐÃ GỬI | **1061 byte**, **LF**, 0 CRLF |
-| blob của tệp này | **LF** (git chuẩn hoá khi commit) |
+| ĐÃ ĐẾN (nguyên bản, CRLF) | `f9b716734f8d6afb2e9fbebef9fbd10a4a101b40b28abef6130c3925e4df6e20` |
+| ĐÃ ĐẾN (đã đổi sang LF) | `0e51b2f271f766bd7431228d827c27e3490a03e91ca231c62f90a7a3ac54b4df` |
+| ĐÃ GỬI | `da8111b9cfdda3ce6a7b07411cae619b4c06e55b09d43bdd7380d08ac67b01f0` |
 
-Lượt đo đầu khai *"CRLF trong bản đã đến: False"*. **Sai.** Nó mở tệp ở chế độ VĂN BẢN của Python,
-mà universal newlines dịch `\r\n` thành `\n` **ngay lúc đọc** — nên phép kiểm `"\r\n" in s` không
-thể nào đúng, bất kể dữ liệu là gì. Một phép kiểm không bao giờ đỏ được thì không phải bằng chứng.
-Thứ bắt được nó không phải phép đo nào của tôi mà là cảnh báo của git (*"CRLF will be replaced by
-LF"*) lúc `git add`. Cùng lớp bài học *"phải biết mình đang đứng ở LỚP NÀO"*: lần này cái lớp làm
-mình mù chính là hàm `open()`.
+### Hai phép đo SAI, cùng MỘT hình dạng
 
-Nên câu đúng là: **nội dung khớp từng byte; xuống dòng thì không, và khác biệt ấy đo được là 18 cặp
-CRLF.** Không phải "khớp từng byte" trần trụi.
+**(1)** Lượt đầu khai *"CRLF trong bản đã đến: False"*. **Sai** — nó mở tệp ở chế độ **VĂN BẢN** của
+Python, mà universal newlines dịch CR-LF thành LF **ngay lúc đọc**, nên phép kiểm ấy **không bao giờ
+đỏ được**, bất kể dữ liệu. Thứ bắt được nó là cảnh báo của `git add`.
 
-Chép nguyên văn thân comment dưới đây (xuống dòng đổi sang LF, không đổi gì khác). Sửa tệp này
+**(2)** Bản đầu của chính mục này khai *"khớp từng byte sau khi chuẩn hoá xuống dòng"*. **Sai một
+byte** — phép so chạy `difflib` **sau khi `.rstrip("\n")` cả hai vế**, tức xoá đúng thứ đang cần đo.
+Thứ bắt được nó là cross-review codex (P2 trên PR #597).
+
+Cả hai đều là *chuẩn hoá làm mất bằng chứng rồi kết luận từ cái đã chuẩn hoá*, và **không lần nào
+phép đo của phiên tự bắt được**. Chốt rẻ rút ra: **so bằng `sha256` của BYTE THÔ**, đừng so bằng một
+hàm có chuẩn hoá ngầm bên trong (`open()` chế độ văn bản, `rstrip`, `splitlines`, so chuỗi đã strip).
+
+**KHÔNG sửa comment gốc cho khớp** — comment là nguồn có thẩm quyền; sửa nó là **thay** bằng chứng
+chứ không phải **vá**.
+
+Chép nguyên văn thân comment dưới đây (xuống dòng đổi sang LF và thêm lại LF cuối mà GitHub đã
+cắt — không đổi gì khác). Sửa tệp này
 **không** đổi được verdict — phải sửa ở comment.
 
 ---

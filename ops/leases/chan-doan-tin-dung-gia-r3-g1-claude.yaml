@@ -38,6 +38,20 @@ granted_on_instruction_nguyen_van: 'Chu kho, phien dieu phoi 21-09-2026, GO VAN 
   LAI "Hinh A". Day KHONG phai executor tu thu hep pham vi.
   Ban chieu day du: issues/568#issuecomment-5755499181.
   Phat hien goc, co day du chuoi do: issues/568#issuecomment-5755428171.'
+da_bi_thay_the: chan-doan-tin-dung-gia-r3-g2-bia-mo
+da_bi_thay_the_vi_sao: 'THOI GIU SOM, theo chi thi chu kho "Va #591, #593 di". Packet #593
+  (DAU-PHIEN-TRUNG-LAM-DO-CONG) can DUNG duong ops/nhanh_don_duoc_test.py ma lease nay dang giu;
+  hai packet KHONG the cung giu mot duong, va cap chong se lam ai-dang-giu tra NGUOI_GIU 2 — tuc
+  CUA DONG cho CA HAI. Nen r3 nha truoc.
+  CAI GIA PHAI KHAI THANG: PR #591 CHUA duoc audit. Sau bia mo nay r3 KHONG con quyen GHI, nen
+  neu audit tim ra cho can sua thi phai xin chu kho cap generation MOI (r3-g3). Bu lai: viec THI
+  CONG cua r3 DA XONG (M7-M9 du, A13-A19 deu DAT, ba required gate xanh tru gate-registry von do
+  vi nо #593 nhan), va lease nay dang sao cung het han 2026-09-22T04:45:00Z — bia mo chi keo som
+  cai von se tu xay ra trong 23 gio.
+  VIEC CUA r3 KHONG bi huy: PR #591 giu nguyen head 9361a47 va van AUDIT VA MERGE DUOC — mat
+  quyen GHI khong phai mat quyen LAND.
+  LECH SO VOI TIEN LE, khai de nguoi audit khong phai tu tim: wp570-bash-nen-r5-g5-bia-mo va
+  wp541-path-r4-g4-bia-mo deu dung SAU khi packet DA LAND. Day la lan dau dung TRUOC land.'
 recorded_by: claude-session
 recorder_is_dispatcher: false
 

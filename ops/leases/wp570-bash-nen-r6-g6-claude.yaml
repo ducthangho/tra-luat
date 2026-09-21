@@ -254,6 +254,26 @@ dieu_kien_dung:
 - 'Nghiem thu Windows khong chay duoc => KHONG ket luan "da xanh". Khai KHONG DO DUOC va bao.'
 - 'Bo do bao KHONG_DO_DUOC_CAY_KHAC => KHONG doc bat ky con so nao ben duoi no.'
 
+# ── THEM BOI MOT PHIEN KHAC, theo chi thi chu kho — doc ky truoc khi dung lease nay ──
+ghi_chu_chieu_lai: 'TRUONG TAI LIEU, khong phai truong cong. Khong cong nao doc no; no ton tai de
+  (a) ghi lai vi sao ban chieu cua lease nay den muon, va (b) LAM COT CHAM cho mot cu day — vi
+  workflow chi kich hoat theo `paths: ops/leases/**`, nen mot commit chi them tep spec KHONG goi
+  duoc cong. Do duoc: sau commit 0e8d5d7f (chi them ops/specs/...), nhanh nay van chi co DUNG MOT
+  luot chay, va do la luot DO cu.
+  CHUYEN GI DA XAY RA: luot 35551883182 (2026-09-21T01:44:33Z) DO o buoc "dang" voi
+  "hai lop GitHub chan (rc=6)". Tai hien tren cay chinh nhanh nay: CHAN [6] prompt_path
+  ops/specs/wp570-bash-nen-mot-bo-giai-r6.md khong co tep. Tep ay CO that, tren
+  claude/spec-570-r6-20260921, va sha256 cua no khop dung prompt_sha256_required — no chi khong
+  nam tren NHANH LEASE, ma cong doc --root . = head duoc day. Commit 0e8d5d7f da dat not tep ay,
+  va `check` sau do tra rc=0.
+  AI LAM: mot phien claude KHAC voi phien executor cua g6, theo chi thi chu kho 2026-09-21
+  ("them truong ghi chu vao lease g6 roi day di"), dang bang token chu kho.
+  KHONG DOI GI KHAC: khong mot truong nao cong doc bi cham — lease_id, packet_issue, granted_by,
+  lease_expires_at_utc, reviewed_sha_required, prompt_path, prompt_sha256_required, write_set,
+  review_class, effective_review_class, role, schema_version deu nguyen ven. Quyen han cua lease
+  nay khong doi mot ly. Doi chieu bang `git diff b9d31e29..HEAD -- ` chinh tep nay.
+  KHONG CHAM WRITE SET: ops/bash_nen.py, ops/cong_cu.py, ops/cong_cu_test.py khong bi dong toi.'
+
 closure_status: 'Owner-directed grant, revision 6, generation 6. Khac moi lan truoc cua chuoi nay
   o BA cho, ca ba deu do duoc: (1) day la lan cap tren nen NGUOI_GIU 0 that — g5 vua nha het, nen
   khong co bia mo va khong co chong lan; (2) write set RUT tu bon xuong ba duong, vi duong thu tu

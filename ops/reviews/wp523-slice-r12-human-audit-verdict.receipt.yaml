@@ -42,8 +42,16 @@ cross_approved_khong_dat_duoc_HAI_NGUON: >-
       comment_id 5752160098 (#585) · 5752159017 (#586) · 5752159353 (#587).
   Hai nguon nay doc lap ve duong di (CLI cuc bo vs connector phia GitHub) va khop nhau. Doctrine cua
   kho: mot cong cu that bai chua phai mot duong bi chan — phai thu it nhat hai client. Day la hai.
-  `agy`: KHONG co CLI trong container => khong goi duoc tu day; trang thai quota cua no la LOI KHAI
-  cua chu kho, CHUA DO.
+  NHUNG PHAM VI CUA KET LUAN PHAI BANG PHAM VI CUA PHEP DO, va ban truoc KHONG bang:
+  hai nguon tren chi chung minh **HAI CLIENT CUA CODEX khong dung duoc**, chung KHONG chung minh
+  `cross_approved` la khong dat duoc. §8 doi reviewer thuoc HO MODEL DOC LAP voi executor; executor
+  o day la claude, nen mot reviewer ho Gemini qua Antigravity CUNG thoa duong cross-provider.
+  Ma chinh khoi nay khai `agy` la CHUA DO: khong co CLI trong container nen khong goi duoc tu day,
+  va trang thai quota cua no la LOI KHAI cua chu kho. Phan chung cua codex (P2 tren #597, dong 46):
+  "Antigravity dung duoc trong khi ca hai client codex van hong" giu NGUYEN moi phep do da ghi ma
+  van lam `cross_approved` dat duoc => bo bang chung nay khong the do duoc ket luan ay.
+  Nen doc `assurance_KHONG_dat: cross_approved` o tren theo nghia HEP da duoc do: **duong CODEX
+  khong dung duoc**. Duong ANTIGRAVITY: KHONG DO DUOC, khong phai "da loai tru".
 assurance_YEU_HON_o_cho_nao: >-
   Phai khai: M16 cua r6 dat "reviewer dung PHEP DO" lam tru, va chin luot codex da dung thuoc that.
   Mot luot audit cua NGUOI khong dung thuoc — no xac nhan "toi da doc va chap nhan". Chu ky ay
@@ -107,20 +115,33 @@ ai_dang_comment_ky:
 github_submitter_identity:
   actor: ducthangho
   ghi_chu: >-
-    Ban chieu dang qua MCP github. Nguon co tham quyen la COMMENT tren GitHub — xem
-    nguon_co_tham_quyen_url. Xem them muc (b) cua KHONG_do_duoc: truong `actor` o day khong phan
-    biet duoc nguoi voi phien chay bang token cua nguoi.
+    HAI hien vat, HAI duong van chuyen khac nhau — dung gop:
+      (1) BAN CHIEU (tep `...verdict.md` trong kho) di bang GIT COMMIT + PUSH cua phien nay.
+          KHONG qua `add_issue_comment`, khong qua MCP github.
+      (2) COMMENT co tham quyen (5757310858) do CHU KHO TU DAN TAY — xem `ai_dang_comment_ky`,
+          `khai: chu_kho_tu_dang`. Duong van chuyen THAT cua no la KHONG DO DUOC tu phia GitHub.
+    Ban truoc cua truong nay viet "Ban chieu dang qua MCP github", mau thuan voi chinh
+    `ai_dang_comment_ky` ngay ben tren, va sai ca ve hien vat: bien nhan nay la loai DAO NGUOC
+    (nguon co tham quyen la COMMENT, hien vat trong kho chi la BAN CHIEU). Codex bat (P2 tren
+    #597, dong 112). Xem them muc (b) cua KHONG_do_duoc: truong `actor` o day khong phan biet
+    duoc nguoi voi phien chay bang token cua nguoi.
 
 anchor:
   loai: canonical_ancestry
   cuong_do: thap
   mo_ta: >-
-    Blob ban chieu verdict, ghim vao commit 7da12e6f cua chinh nhanh bookkeeping nay (commit THU
-    NHAT cua cap; bien nhan la commit thu hai, nen mo neo la TO TIEN cua HEAD).
-    MO NEO DA DOI MOT LAN: ban dau ghim cc9fec2d, nhung ban chieu verdict phai sua vi loi so hoc
-    byte (P2 cua codex) nen blob doi => phai ghim lai commit moi. Cap cu (cc9fec2/82c8deb) GIU
-    NGUYEN trong lich su nhanh, KHONG force-push — codex da neo review vao 82c8deb, viet lai lich
-    su se lam ban review ay tro thanh khong tra duoc.
+    Blob ban chieu verdict, ghim vao commit 5c9abef1ef36de50a52182064da8675b2e71a9ef cua chinh nhanh bookkeeping
+    nay. Mo neo luon la TO TIEN cua HEAD: commit ay chi mang ban chieu, bien nhan di o commit sau.
+    MO NEO DA DOI HAI LAN, va ca hai lan deu vi mot finding cua codex buoc ban chieu phai sua:
+      lan 1  cc9fec2d -> 7da12e6f : so hoc byte sai mot LF (P2, luot review tren 82c8deb).
+      lan 2  7da12e6f -> 5c9abef1ef36de50a52182064da8675b2e71a9ef : loi khai "GitHub cat LF cuoi" rong hon phep do
+             (P2 dong 188, luot review tren ffd11a7) => thu hep xuong KHONG DO DUOC.
+    Ca hai cap CU (cc9fec2/82c8deb va 7da12e6f/...) GIU NGUYEN trong lich su nhanh, KHONG
+    force-push — codex da neo review vao 82c8deb va ffd11a7; viet lai lich su lam cac ban review
+    ay tro thanh khong tra duoc.
+    HE QUA PHAI LAM MOI LAN MO NEO DOI, chu khong phai mot lan: phan chung squash o duoi mang OID
+    BEN TRONG, nen no phai CHAY LAI tren cap moi. Bo qua viec nay dung mot lan roi va do la
+    finding F1 cua chinh luot nay.
   gioi_han: >-
     cuong_do THAP vi luot nay chua land. Manh len khi PR bookkeeping land vao master hoac khi co
     tag luu-tru/*. Truoc luc land, "to tien cua HEAD" chi dung TRONG nhanh nay.
@@ -132,32 +153,50 @@ anchor:
     kho dung merge commit") — quy uoc, khong phai co che.
   phan_chung_squash_DA_CHAY: >-
     Khong nhan loi khai, da dung hinh dang squash va chay cong tren chinh no:
-    Chay HAI lan, tren ca cap CU va cap MOI, de con so khong bi cu:
-    (cu)  `git merge --squash 82c8deb` tu a1bbdc1 => cf8c04b2, mot cha duy nhat;
-          `merge-base --is-ancestor cc9fec2d cf8c04b2` => rc=1;
-    (moi) `git merge --squash <head luc do>` tu a1bbdc1 => mot cha duy nhat;
-          `merge-base --is-ancestor 7da12e6f <squash>` => rc=1.
-          Lan do nay chay tren head b8031e7, roi head doi (mot lan `--amend` de chinh chinh khoi
-          nay). KHONG chay lai va KHONG can chay lai: thu phep do chung minh la "7da12e6f khong
-          phai to tien cua BAT KY squash nao cua nhanh nay len a1bbdc1", va khong commit nao them
-          vao nhanh khoi phuc duoc quan he ay — squash theo dinh nghia bo het lich su trung gian.
-          Ghi ro head da dung thay vi lam tron, vi mot con so khong kem DIEU KIEN DO se troi ma
-          khong ai biet.
-    ca hai lan:
-    `ops/bien_nhan_v2.py --root .` tren cay ay => rc=1, "132 DAT v2 · 1 vi pham · tong 186",
-    TONG: DO, voi dung mot dong: "commit cc9fec2d5007... CO THAT nhung KHONG phai to tien cua HEAD".
-    Doi chieu vet merge: cung cong tren hinh dang merge => rc=0, 133 DAT v2, 0 vi pham. Hai chieu,
-    khong phai mot.
+    Chay BA lan, tren BA cap khac nhau, vi mo neo da doi va OID trong dong DO phai doi theo:
+    (1) cap CU: `git merge --squash 82c8deb` tu a1bbdc1 => cf8c04b2, mot cha duy nhat;
+        `merge-base --is-ancestor cc9fec2d cf8c04b2` => rc=1.
+    (2) cap MOI tren head b8031e7 (head doi ngay sau do vi mot lan `--amend` chinh chinh khoi
+        nay): squash mot cha duy nhat; `merge-base --is-ancestor 7da12e6f <squash>` => rc=1.
+        Ghi ro head da dung thay vi lam tron, vi mot con so khong kem DIEU KIEN DO se troi ma
+        khong ai biet.
+    (3) DO LAI tren head HIEN TAI ffd11a7 luc 2026-09-21T16:4xZ, de dong DO duoc ghi tu CHINH
+        cap dang dung chu khong chep tu cap cu:
+        `git merge --squash ffd11a7` tu a1bbdc1 => bcdefea76bed866dcb84999f21318ff08bd37653,
+        so cha = 1; `merge-base --is-ancestor 7da12e6f bcdefea7` => rc=1.
+        `ops/bien_nhan_v2.py --root .` => rc=1, "132 DAT v2 · 11/11 mien tru legacy · 42 NO dong
+        bang · 1 vi pham · 0 KHONG DO DUOC · tong 186", TONG: DO, va dong DO neu DUNG
+        `7da12e6f1ac0...` — tuc OID trong thong bao BANG OID phan tich tu evidence_url, KHONG
+        phai `cc9fec2d`.
+    TUNG LAN, khong gop:
+    lan (1) cho dong DO neu `cc9fec2d5007...`; lan (3) cho dong DO neu `7da12e6f1ac0...`.
+    Ban TRUOC cua muc nay viet "ca hai lan ... cc9fec2d" — tuc CHEP dong cua cap CU sang cho cap
+    MOI. SAI, va codex bat duoc (P2 tren #597, dong 130). Lan (2) khong ghi lai dong DO nao, nen
+    o do khong co so lieu de chep; cai da xay ra la suy ra roi viet nhu da do.
+    Doi chieu vet merge: cung cong tren hinh dang MERGE => rc=0, 133 DAT v2, 0 vi pham. Hai
+    chieu, khong phai mot.
+    BAI HOC CUA CHINH MUC NAY: mot phan chung co OID BEN TRONG thi khi mo neo doi, phan chung
+    PHAI CHAY LAI. Ket luan chung ("squash giet mo neo") song sot qua lan doi mo neo, va CHINH
+    DIEU DO lam cai lech kho thay — dung ho "mot quan he con dung KHONG chung minh cac so hang
+    con dung".
   dieu_kien_land_co_xay_ra_khong_DO_DUOC: >-
     12 commit gan nhat cua master: 7 la merge commit hai cha, 5 la commit thuong ben trong nhanh;
-    KHONG co squash. Va trong 171 bien nhan da land co blob-URL, 166 LA to tien cua master; 4 cai
-    khong phai (lease-dang-windows-review-1/2/3, plat-m4-review-1-codex) va ca bon nam trong
-    NO_DA_DO tuc da dong bang. Bien nhan NAY khong duoc dong bang: cong tu choi dong bang thu co
+    KHONG co squash. Ve mo neo, phai PHAN HOACH cho dung — ban truoc viet "trong 171 bien nhan DA
+    LAND ... 166 la to tien ... 4 cai khong phai", ma 166 + 4 = 170, KHONG phai 171. Codex bat
+    (P2 tren #597, dong 156). Do lai, tren HAI cay, cung mot script:
+      tren `origin/master` (CHUA co ung vien): 170 bien nhan co blob-URL
+        = 166 LA to tien + 4 KHONG phai + 0 KHONG DO DUOC.  Tong kiem dong.
+      tren cay ung vien ffd11a7:              171 bien nhan co blob-URL
+        = 167 LA to tien + 4 KHONG phai + 0 KHONG DO DUOC.  Tong kiem dong.
+    Bon cai KHONG phai to tien la lease-dang-windows-review-1/2/3 va plat-m4-review-1-codex,
+    GIONG NHAU o ca hai cay, va ca bon nam trong NO_DA_DO tuc da dong bang.
+    Nen con so DA LAND la 170, khong phai 171: cai thu 171 chinh la BIEN NHAN NAY — mot UNG VIEN
+    chua land. Gop no vao mau lich su vua lam phep cong khong dong vua thoi phong co mau. Bien nhan NAY khong duoc dong bang: cong tu choi dong bang thu co
     the DAT (bien_nhan_v2.py:1002). Nen rui ro la THAT nhung CO DIEU KIEN, va dieu kien ay do duoc.
 
 authoritative_source: github_comment
 evidence_channel: repo_file
-evidence_url: https://github.com/ducthangho/tra-luat/blob/7da12e6f1ac0f970a971917f655262e65a9511c9/ops/reviews/wp523-slice-r12-human-audit-verdict.md
+evidence_url: https://github.com/ducthangho/tra-luat/blob/5c9abef1ef36de50a52182064da8675b2e71a9ef/ops/reviews/wp523-slice-r12-human-audit-verdict.md
 nguon_co_tham_quyen_url: https://github.com/ducthangho/tra-luat/pull/585#issuecomment-5757310858
 posted_comment_id: 5757310858
 posted_comment_do_duoc: >-
@@ -171,8 +210,8 @@ evidence_url_vi_sao_KHONG_tro_vao_comment: >-
   that cua luot human_audited la COMMENT, va no nam o nguon_co_tham_quyen_url.
 
 verdict_path: ops/reviews/wp523-slice-r12-human-audit-verdict.md
-verdict_sha256: a60dededaf7c5a7a8c63c995a116bc1c7d775ba5f0acf1df9906c7e3db331e82
-verdict_bytes: 4606
+verdict_sha256: 3cef5f6ebb31246b4cddf3b79b42a5febf53bc759cf26360526b5d8d838f54e2
+verdict_bytes: 5333
 verdict_sha256_do_tu_dau: >-
   Do TU BLOB: `git show 7da12e6f:ops/reviews/…verdict.md | sha256sum`, KHONG do tren ban lam viec.
   Hai con so ay khac nhau that o luot nay: ban lam viec tung co CRLF (xem ban_chieu_KHONG_byte_khop).
@@ -183,9 +222,18 @@ ban_chieu_KHONG_byte_khop_voi_comment: >-
     than comment DA DEN : 1078 byte · CRLF x18 · LF don 0 · KET THUC bang '...20260921', KHONG co LF cuoi
     ban DA GUI          : 1061 byte · CRLF 0   · LF x19  · KET THUC bang '...20260921' + LF
     DA DEN sau CRLF->LF : 1060 byte
-  1060 KHAC 1061. Lech dau tien o offset 1060, tuc dung cho het phan chung: GITHUB CAT DAU XUONG
-  DONG CUOI cua than comment. Nen cau dung la "khop tung byte sau khi doi CRLF sang LF VA sau khi
-  tinh mot LF cuoi bi GitHub cat", chu KHONG phai "khop tung byte sau khi chuan hoa xuong dong".
+  1060 KHAC 1061. Lech dau tien o offset 1060, tuc dung cho het phan chung: mot dau xuong dong
+  CUOI da bi cat o dau do tren duong di. LOP NAO CAT THI **KHONG DO DUOC**. Ban truoc cua muc
+  nay khai "GITHUB CAT" — mot loi khai RONG HON phep do, codex bat (P2 tren #597, dong 188).
+  Ly do no khong dung duoc: chu kho DAN TAY van ban nay, nen clipboard, trinh duyet, hay chinh
+  o nhap deu co the cat dau ay TRUOC khi GitHub nhan. Ba con so va ba bam duoi day KHONG phan
+  biet duoc cac kha nang do — ap phep cat o BAT KY lop nao trong so do deu tai hien DUNG bo so
+  nay, nen chung khong co kha nang phan dinh. Muon co ten thu pham thi phai co THAN YEU CAU THO,
+  hoac mot duong ghi doc lap dang bang may (vd. dang bang API roi doc nguoc byte); lan nay KHONG
+  co ca hai. Nen cau dung la "khop tung byte sau khi doi CRLF sang LF VA sau khi tinh mot LF cuoi
+  bi cat o mot lop CHUA XAC DINH" — khong phai "khop tung byte sau khi chuan hoa xuong dong",
+  cung khong phai "GitHub cat". Cung ho bai hoc "phai biet minh dang dung o LOP NAO", va lan nay
+  cai sai la GAN TEN cho mot lop chua do duoc.
   Bam cua CA BA than, de lan sau khong phai doan:
     DA DEN (nguyen ban, CRLF) f9b716734f8d6afb2e9fbebef9fbd10a4a101b40b28abef6130c3925e4df6e20
     DA DEN (da doi sang LF)   0e51b2f271f766bd7431228d827c27e3490a03e91ca231c62f90a7a3ac54b4df

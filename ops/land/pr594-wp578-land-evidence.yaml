@@ -5,7 +5,8 @@
 # da co truoc tep nay), khong ADR nao dat.
 # Schema chuan: docs/PROTOCOL_DA_PHIEN.md §7, khoi "Land evidence tach approval khoi thao tac".
 #
-# DOC VI_PHAM_VAI_TRO TRUOC MOI THU KHAC. Ban ghi nay mang mot vi pham DA XAY RA, khai thang.
+# DOC VI_PHAM_VAI_TRO TRUOC MOI THU KHAC. Ban ghi nay mang BA vi pham DA XAY RA, khai thang: VI_PHAM_VAI_TRO,
+# VI_PHAM_2_CHONG_LAN_WRITE_SET, VI_PHAM_3_VUOT_TRAN_TRUC_LOI_GOI.
 
 schema_version: 1
 mission_id: KHONG_CO
@@ -28,7 +29,9 @@ mat_quan_sat_duoc_the_nao: 'Bon truong tren KHAI THEO LEASE windows-fixture-posi
   I2, lop B): lease 5aff55c d.77-78 ghi `claude-code` va `cloud`, nhung taxonomy ops/KE_HOACH_THI_CONG_DA_PROVIDER.md
   §2 d.32 nguyen van `| Claude Code | `anthropic_claude` | `claude_code` | machine/local |` — nen hai truong o tren
   ghi `claude_code` (gach duoi) va `machine/local`; `cloud` khong co trong cot Transport, no la gia tri cua truong
-  `environment` (§7 d.142 `environment: cloud | local`) va da ghi o do. `provider: claude` la enum cua §7 d.527, KHONG
+  `environment` (§3.2 d.142 `environment: cloud | local` — schema Work Packet Issue; ban truoc ghi "§7 d.142", sai muc:
+  schema land evidence §7 d.523-540 KHONG co bon truong execution_surface/transport/environment/operating_system,
+  bon truong nay la BO SUNG theo codex vong 1 F4 — Fable vong 5 #2) va da ghi o do. `provider: claude` la enum cua §7 d.527, KHONG
   doi. Lease van mang chinh ta cu — no cua lease, khong sua tu day.'
 role: land_operator
 session_id: session_015diBngheEgZLBopnn4K13P
@@ -74,8 +77,10 @@ trang_thai_ban_ghi: 'DA CAP 2026-09-21T13:55:15Z (SAU merge — xem uy_quyen.aut
   not_run; danh tinh §10.2.2 GAN DU: 1 moc DU (Run), 2 moc MOT PHAN (Checkout: SHA + tree, thieu parents; Gate
   output: thieu rc cac lenh ngoai tl-selftest), 1 moc THIEU (Workflow definition cua dung run ci.yml); noi dung
   duong DA DO DUOC tu log job va artifact (xem danh_tinh_CI_10_2_2). Uy quyen ben la PHE CHUAN HAU KIEM (xem
-  authorization_url_BAN_CHAT). Ban ghi nay DA DUOC SUA nam lan sau review tren PR #601 — xem DINH_CHINH_SAU_REVIEW,
-  _VONG_2, _VONG_3, _VONG_4, _VONG_5.'
+  authorization_url_BAN_CHAT). Vong lap cross-review DA DUNG tai b94182b + ban va nay vi cham stop condition §12
+  (SAU loi goi codex tren tran HAI — xem VI_PHAM_3_VUOT_TRAN_TRUC_LOI_GOI), KHONG phai vi da approve; CHUA co
+  cross_approved. Ban ghi nay DA DUOC SUA sau lan sau review tren PR #601 — xem DINH_CHINH_SAU_REVIEW, _VONG_2,
+  _VONG_3, _VONG_4, _VONG_5, _VONG_6.'
 
 # ══════════════════════ VI PHAM VAI TRO — DOC TRUOC ══════════════════════
 VI_PHAM_VAI_TRO:
@@ -158,7 +163,10 @@ DANH_TINH_GENERATION_INPUT_TRANH_CHAP:
     từ ops/leases/windows-fixture-posix-r1-g2-claude.yaml" — ban chieu ben cua grant g2.'
   - 'Events API: 2026-09-21T05:59:53Z PushEvent refs/heads/ops/cap-lease-578-g2 before c7679786f head 5aff55c16
     (va 05:59:51Z ops/cap-lease-578 before bd4354067 head 5aff55c16) — ref g2 bi ghi de ve 5aff55c (khong co g2, g1
-    khong bia mo). CLAUDE.md d.519: "ép lùi cũng làm commit thành không tra được y như xoá".'
+    khong bia mo). CLAUDE.md d.519: "ép lùi cũng làm commit thành không tra được y như xoá". GIOI HAN TAI DO (Fable
+    vong 5): su kien 05:59:53Z (g2) con trong ban JSON Events API luu luc 17:24Z; su kien 05:59:51Z (ops/cap-lease-578)
+    KHONG con trong ban luu nao va Events API luc ~17:56Z chi con lui toi ~15:22Z (tran ~300 su kien) — tu vong 5 KHONG
+    TAI DO DUOC, giu nguyen loi khai vong 3, khong nang cap.'
   - 'Lease #579 g3 (bot 5755989232, 05:51:02Z; nhanh fbb8dd1b van song tren ops/cap-lease-579, -g2, -g3) neo
     `lease_dang_giu: windows-fixture-posix-r1-g2-claude`, `het_han 19:48:00Z`; g4 (4e75ca7f) neo lai r1-g1.'
   ket_luan: 'Hai hien vat ben choi nhau: mot grant g2 do chu kho chi thi va bot chieu, roi bien mat khoi moi ref bang
@@ -167,6 +175,57 @@ DANH_TINH_GENERATION_INPUT_TRANH_CHAP:
     khai không thay thế GitHub object"). Chu kho quyet: (a) xac nhan g2 da bi thu hoi va dat bia mo tuong minh, hoac
     (b) xac nhan generation 2 moi la input — khi ay input_packet_generations phai sua. Phien nay KHONG cham lease.'
   ai_phat_hien: 'Ra soat Fable vong 3 (#2); ba vong codex KHONG tim ra.'
+
+# ══════════════════════ VI PHAM 3 — VUOT TRAN TRUC LOI GOI CODEX (§12) ══════════════════════
+VI_PHAM_3_VUOT_TRAN_TRUC_LOI_GOI:
+  co_vi_pham: true
+  dieu_khoan: 'PROTOCOL §12 d.1011-1013 nguyen van: "Hai lượt Codex review trên cùng PR là một stop condition riêng của
+    review budget. Review Rescue Checkpoint được kích hoạt khi chạm trần này hoặc khi PR chạm trần vòng review canon
+    của `ADR-0043` mà chưa approve. Chạm checkpoint không tự biến Packet thành thất bại nội dung và không cho phép gọi
+    thêm bằng prompt/phiên khác để lách trần."; d.1015-1017: "State giữ riêng `codex_review_calls_used`,
+    `codex_executor_calls_used` và `review_rounds_used`. `codex_review_calls_used` tăng khi launcher có bằng chứng lời
+    gọi review đã bắt đầu sinh output/token, kể cả timeout hoặc output sai schema; tối đa hai trên một PR. Lỗi
+    preflight, permission denial hoặc rate-limit trước khi model sinh output không tăng bộ đếm này."; d.1021: "Đổi
+    prompt, session hay tên attempt không reset các bộ đếm." ADR-0048 d.9-12 nguyen van: "nó tách ba trục VÒNG (canon,
+    kỷ luật) · LỜI GỌI (chi phí) · ATTEMPT (số lần tuyên bố DONE), giữ các trần độc lập, và giữ luật trần chạm trước
+    thắng. Hai trục kia **KHÔNG đổi** theo ADR này: `codex_review_calls_used` giữ nguyên trần của nó"; ADR-0043 d.5-6:
+    "Trục VÒNG (canon, kỷ luật) tách khỏi trục LỜI GỌI (chi phí) và trục ATTEMPT (số lần tuyên bố DONE); các trần độc
+    lập và trần chạm trước thắng."'
+  su_that: 'PR #601 co SAU review codex, ca sau deu sinh output that (API pulls/601/reviews do ~2026-09-21T17:58Z: moi
+    review state COMMENTED, than "Codex Review ... Reviewed commit", kem inline finding — API pulls/601/comments):
+    5267880804 tren 9387078 14:33:10Z (3 inline); 5268963910 tren 85559f0 16:09:34Z (4); 5269144128 tren 7becd26
+    16:25:08Z (4); 5269437418 tren 8ffe96a 16:56:34Z (4); 5269792704 tren 80d4dd4 17:29:34Z (3); 5270067564 tren
+    b94182b 17:57:36Z (3). Tran truc LOI GOI: HAI. Da dung: SAU. Vuot tu loi goi thu BA (5269144128, 16:25:08Z). Khong
+    loi goi nao thuoc dien "khong tang bo dem" cua d.1016-1017 (khong co preflight/permission/rate-limit truoc khi
+    sinh output). Sau review COMMENTED, 0 APPROVED => cung KHONG co cross_approved.'
+  ai_goi: 'Timeline #601 (API issues/601/timeline): review 1 sau ready_for_review 14:24:25Z + mentioned codex 14:24:39Z
+    (Codex tu chay khi PR duoc danh dau ready — than comment tom tat codex 5762074448 liet ke "Mark a draft as ready"
+    la mot trigger); review 2-6 moi lan sau MOT comment "@codex review" dang duoi ten ducthangho: 5763548340 16:03:54Z,
+    5763701779 16:13:37Z, 5764091836 16:42:12Z, 5764589939 17:19:15Z, 5764964513 17:47:52Z (mentioned codex 16:03:55Z,
+    16:13:39Z, 16:42:14Z, 17:19:17Z, 17:47:53Z). Hai comment dau mang footer tu khai phien agent, ba comment sau khong
+    co footer — ai go tung comment KHONG DO DUOC tu object; phien chinh KHAI ca nam deu do phien nay go (qua PAT chu
+    kho) theo chi thi ben 5763548340 "lặp tới khi có cross approval". Chi thi ay la GitHub object nhung KHONG phai ADR:
+    §12 d.1011 cam "gọi thêm bằng prompt/phiên khác để lách trần", §1 d.17 "Các bất biến không được hạ chuẩn", va
+    tien le ADR-0048 cho thay doi mot tran phai qua ADR — ADR ay giu nguyen dung truc nay. Ban ghi KHONG phan xu chi
+    thi chu kho co thang §12 hay khong; chu kho quyet.'
+  review_rescue_checkpoint: 'BAT BUOC theo d.1011-1012 ke tu loi goi thu hai (5268963910, 16:09:34Z); ADR-0037 d.5-6
+    (Accepted 2026-08-17; §20 d.1376: "Review Rescue Checkpoint và tách Stable Slice", 0 cong): "Một PR phải vào Review
+    Rescue Checkpoint khi đã dùng hết hai lượt Codex". CHUA LAM. Phien nay KHONG tu lam checkpoint — chu kho quyet.'
+  da_dung: 'Vong lap DUNG tai b94182b + ban va nay: KHONG goi codex them, khong dang "@codex review" nua. Phien chinh
+    KHAI da xoa chot dinh ky se goi vong 6; do lai (list_triggers ~2026-09-21T17:58Z): 5 Routine, khong Routine nao nham
+    #601/codex — chi chung minh BAY GIO khong con chot, khong chung minh TRUOC do co.'
+  lien_he_bac_H3: 'Bac codex H3 (DINH_CHINH_SAU_REVIEW_VONG_4.B) VAN DUNG tren truc VONG: tran canon 10 (ADR-0048), 0
+    hay 6 review deu duoi 10. Nhung bac ay chi kiem MOT truc; truc LOI GOI — dung truc ADR-0048 noi thang la KHONG nang
+    — chua bao gio duoc kiem, trong khi chinh khoi ay da liet ke du nam review. Lo nam trong lap luan cua phien chinh,
+    khong o codex. Cau "Chi thi ben cua chu kho ... KHONG xung dot voi tran canon 10" o khoi ay dung ve VONG nhung
+    XUNG DOT voi tran LOI GOI 2.'
+  ai_phat_hien: 'Codex vong 5, review 5270067564 (17:57:36Z, b94182b), inline 4064935136 (P1). Fable vong 3/4/5 va
+    phien chinh KHONG bat — cung mot lo nhin: dem review theo VONG, quen truc LOI GOI. Phien chinh do lai roi giao
+    executor Fable do lai; executor sua HAI so cua phien chinh: SAU review chu khong phai nam (phien chinh bo sot
+    5269792704 17:29:34Z), va 5270067564 submitted_at 17:57:36Z chu khong phai 17:57:34Z.'
+  he_qua: 'Khong doi `merged` va cac check-run da do. Vong lap cross-review DUNG vi stop condition §12, KHONG vi da
+    approve; CHUA co `cross_approved`. Them mot dong LANDED_KHONG_XAC_LAP va mot no CON_THIEU_DE_GOI_LANDED. Yeu cau
+    "add a fixture" cua codex la sua ma san pham — lop F, ghi o con_mo.no_ngoai_pham_vi_codex_vong_5.'
 
 # ══════════════════════ UY QUYEN ══════════════════════
 uy_quyen:
@@ -375,12 +434,23 @@ danh_tinh_CI_10_2_2:
         `identity.head_sha` va `identity_after.head_sha` cung = 714f36e6… Khop SHA log in ra.'
       tree_tu_artifact: 'Cung tep, khoa long `identity.tree_sha` = `identity_after.tree_sha` =
         9618f37dc9f98632455068191d7a5bba45b34957, kem `tracked_clean: true`, `worktree_clean: true`. Gia tri nay do
-        `.claude/dev/gate_lifecycle.py` d.70 tinh bang `git rev-parse HEAD^{tree}` NGAY TRONG JOB — tuc tree tu
-        artifact cua dung job/attempt theo §10.2.2 d.861, khong con la tu KHO. Khong co khoa `tree_sha` o cap cao
+        ham `_repo_identity` trong `.claude/dev/gate_lifecycle.py` (d.151-155; d.155 `tree = _git(root, "rev-parse",
+        "HEAD^{tree}")`, khoa `tree_sha` d.161; blob 0728f0a3 GIONG NHAU tai 714f36e6 va HEAD) tinh NGAY TRONG JOB —
+        tuc tree tu artifact cua dung job/attempt theo §10.2.2 d.861, khong con la tu KHO. (Ban truoc ghi "d.70" — d.70
+        cua tep ay chi la mot duong dan ADR trong `_CATALOG_POLICY_PATHS`; d.70 co `HEAD^{tree}` la cua
+        gate_lifecycle_test.py; codex vong 5 K2 + Fable vong 5 #1. Neo bang TEN HAM de khoi troi so dong.) Artifact
+        cung ghi `identity.runner_sha256` 637678bdf8354935ad965326899b7d5b07d3cd6fbf289ccfc79ad194b1a08810 = sha256
+        blob 0728f0a3 do tren KHO — job da chay dung gate_lifecycle.py ay. Khong co khoa `tree_sha` o cap cao
         nhat (27 khoa), chi o hai khoa long — ghi ro duong dan de khoi doc nham. Khop tree do tren KHO.'
-      not_measured: 'PARENTS: log khong in, artifact khong co khoa nao (`parents` khong ton tai o bat ky cap nao).
-        Parents o tren la tu `git cat-file -p` tren KHO cua dung SHA ma log va artifact in ra. Moc Checkout vi the
-        MOT PHAN, khong du.'
+      not_measured: 'PARENTS: log khong in (checkout `fetch-depth: 0`, log d.71 — job CO du lich su nhung khong in
+        parents), artifact khong co khoa nao (`parents` khong ton tai o bat ky cap nao). Parents o tren la tu `git
+        cat-file -p` tren KHO cua dung SHA ma log va artifact in ra. Moc Checkout vi the MOT PHAN, khong du.'
+      bo_tro_KHONG_doi_moc: 'Check-suite cua DUNG run (run JSON `check_suite_id` 96331398646 = `check_suite.id` cua ca
+        bon check-run; GET /repos/ducthangho/tra-luat/check-suites/96331398646 HTTP 200, do vong 5): `before`
+        a1bbdc1023185a35c578ab4017990b472b5c0d6c, `after` 714f36e6aad844f2c1a6713256f3abbdea64aec9, `head_commit.tree_id`
+        9618f37dc9f98632455068191d7a5bba45b34957, `latest_check_runs_count` 4. `before` cua su kien push trung cha_1; do
+        la GitHub object ve SU KIEN, KHONG phai parents "từ checkout/log/artifact của đúng job" (§10.2.2 d.861), va
+        khong noi gi ve cha_2. Ghi de doi chung, KHONG dung nang moc.'
     workflow_definition:
       repository_path: .github/workflows/ci.yml
       workflow_id: 309682866
@@ -389,9 +459,17 @@ danh_tinh_CI_10_2_2:
       sha256_bytes: d12b00a6a79243f848e852a59850ae458e58c8f2462fb480a80b0b26e571db0e
       nguon: '`git rev-parse <commit>:<path>` va `git cat-file blob | sha256sum` tren KHO.'
       not_measured: 'WorkflowRun.file.repositoryFileUrl: KHONG doc duoc — GraphQL bi tu choi tu
-        phien nay. §10.2.2 goi dung truong hop nay la not_measured cho provenance, va cam lay REST
-        head_sha hay workflow o HEAD hien tai thay vao. Danh tinh tren do TU KHO tai dung commit,
-        KHONG phai tu API cua dung run.'
+        phien nay (do lai vong 5, POST /graphql: "GitHub GraphQL is not available from Claude Code sessions"). §10.2.2
+        goi dung truong hop nay la not_measured cho provenance, va cam lay REST head_sha hay workflow o HEAD hien
+        tai thay vao. Danh tinh tren do TU KHO tai dung commit, KHONG phai tu API cua dung run.'
+      bo_tro_KHONG_thay_provenance: 'Artifact 10631555415 ghi `identity.catalog_policy_sha256`
+        7cb2b26b60d62f4afcc5e645aee5af7421b21e6e15d94962d33c19a852922679 = sha256 cua `git ls-files -s` tren 7 duong
+        `_CATALOG_POLICY_PATHS` (gate_lifecycle.py d.66-74, trong do `.github/workflows/ci.yml`), tinh trong job
+        (`_repo_identity` d.158, d.170). Tinh lai tren KHO tai 714f36e6 (read-tree vao index tam, ls-files -s: 10 dong,
+        dong 2 `100644 2ca2f9d88e21ae00477f627434fa4b852cc512f3 0 .github/workflows/ci.yml`) ra DUNG gia tri ay. Tuc
+        ci.yml TRONG CHECKOUT cua job la blob 2ca2f9d8 — nhung do la tep trong checkout, KHONG phai dinh nghia ma
+        GitHub da doc de chay run (§10.2.2 d.865: khong dong nhat checkout voi workflow-definition SHA). Moc van
+        THIEU.'
     gate_output:
       do_duoc: 'job/check-run ID va conclusion cho tung cong — xem post_merge_checks.'
       runner: 'API jobs: gate runner_id 1000005737, gate-packet-loop 1000005736, gate-registry 1000005738, chuan-bi
@@ -437,12 +515,16 @@ danh_tinh_CI_10_2_2:
         --format=%H` -> 8394f7411bfbeacdd1b6d5eafda21473f6487268. Tuc job test SYNTHETIC MERGE 8394f741, KHONG
         phai head 5f91846 — dung dieu §10.2.2 d.865-867 canh bao; subject cua no neu head/base dung candidate/
         target. Log chuan-bi 106225707724 (HTTP 200, 2 886 B): khong checkout.'
-      parents_tree_tu_object_ben: 'DO DUOC qua REST GET /repos/ducthangho/tra-luat/commits/8394f7411bfbeacdd1b6d5eafda21473f6487268
+      parents_tree_tu_object_ben_CHI_BO_TRO: 'REST GET /repos/ducthangho/tra-luat/commits/8394f7411bfbeacdd1b6d5eafda21473f6487268
         (HTTP 200) — object cua DUNG SHA log in ra: parents [a1bbdc1023185a35c578ab4017990b472b5c0d6c,
         5f91846e1b9f5145a12baaba93300598e9fae54d] = base/head PR #594; tree 9618f37dc9f98632455068191d7a5bba45b34957 =
         tree cua candidate; committer GitHub <noreply@github.com> 2026-09-21T05:37:18Z; message "Merge 5f91846e… into
-        a1bbdc10…"; files ops/lease_publish_test.py modified +35 -4. Dung dieu §10.2.2 d.866 doi: parents tro dung
-        head/base. (Ban truoc ghi "Chi suy duoc tu subject, khong phai phep do" — chua thu REST; Fable vong 4 #1.)'
+        a1bbdc10…"; files ops/lease_publish_test.py modified +35 -4. Parents tro dung head/base nhu §10.2.2 d.866 doi,
+        NHUNG d.866 doi gia tri ay "từ checkout/log/artifact tương ứng" cua dung job: REST chung minh GitHub GIU gi,
+        khong chung minh run da QUAN SAT gi. Chi la chung cu bo tro. (Ban vong 5 ghi "DO DUOC" nhu the lap duoc
+        not_measured — codex vong 5 K3 bat duoc, lop C; ban vong 4 ghi "Chi suy duoc tu subject" — chua thu REST,
+        Fable vong 4 #1.)'
+      moc_checkout: 'MOT PHAN — SHA tu log (8394f741); parents/tree chi tu REST object, khong tu job.'
       not_measured: 'Object khong co trong KHO cuc bo (`git cat-file -t 8394f7411bfb` -> Not a valid object name); ref
         pull/594/merge khong con trong ls-remote. Log khong in parents/tree; artifact run nay khong con (total_count 0).'
     workflow_definition:
@@ -572,7 +654,10 @@ nghiem_thu:
     05:56:42Z (18.911s), 06:01:51Z (19.776s), ba ban bo chay khac nhau, cung HEAD 5f91846.'
   N2: 'passed — t132 QUA tren Windows that, ba luot (3.608s / 3.775s / 2.681s). Chot
     `not loose.exists()` nam SAU unlink.'
-  N3: 'passed — hai ca QUA tren Linux; gate (ubuntu-latest) success tren ca candidate lan merge.'
+  N3: 'passed — hai ca QUA tren Linux; check-run gate (ubuntu-latest) success gan SHA candidate 5f91846 (job checkout
+    SYNTHETIC MERGE 8394f741, cung tree 9618f37 — xem danh_tinh_CI_10_2_2.pre_merge.checkout) va gan merge commit
+    714f36e6 (job checkout dung 714f36e6). Ban truoc ghi "success tren ca candidate" — §10.2.2 d.867-869 cam dong
+    nhat test synthetic merge voi test head; Fable vong 5 #3.'
   N4: 'passed_co_dieu_kien — xem cho_yeu_con_lai muc 1.'
   N5: 'da_khai — tren POSIX that, ban va luoi `except PermissionError: pass` VAN XANH, nen chot
     N2 KHONG do duoc o Linux.'
@@ -644,6 +729,8 @@ bao_dam:
       5762074448 tao 14:24:37Z (bi ghi de tai cho, gio cu khong doc lai duoc). Ban truoc ghi "14:24:34Z ->
       14:33:14Z" khong neo nguon (Fable vong 3 #10).'
     ket_qua: 'BA finding P1. Tat ca deu DUNG. Xem DINH_CHINH_SAU_REVIEW.'
+    tong_loi_goi: 'SAU review codex tren #601 (den 5270067564, 17:57:36Z, b94182b) — VUOT tran truc LOI GOI 2 cua §12
+      d.1016-1017 tu loi goi thu ba. Xem VI_PHAM_3_VUOT_TRAN_TRUC_LOI_GOI. Vong lap DUNG tai day.'
 
 # ══════════════════════ LANDED ══════════════════════
 # §10.2.4 dinh nghia `landed` = ket qua vao canonical o exact SHA duoc duyet + hau-merge gate
@@ -682,7 +769,10 @@ CON_THIEU_DE_GOI_LANDED:
 - 'Giai quyet uy quyen: `authorization_url` la PHE CHUAN HAU KIEM; nguon ben TRUOC thao tac ghi theo §13.1 chua co
   hien vat nao (xem authorization_TRUOC_thao_tac_ghi, uy_quyen.hai_cach_doc). Chu kho phan xu.'
 - 'Giai quyet VI_PHAM_2_CHONG_LAN_WRITE_SET: ai-dang-giu ops/lease_publish_test.py luc 17:04:25Z ra rc=11,
-  NGƯỜI_GIỮ 3 (#578 g1 toi 22:30:00Z; #579 g3 va g4, g4 toi 06:00:00Z 22-09). Chu kho quyet.'
+  NGƯỜI_GIỮ 3 (#578 g1 toi 22:30:00Z; #579 g3 va g4, g4 toi 06:00:00Z 22-09); do lai 17:56:42Z van rc=11, NGƯỜI_GIỮ 3.
+  Chu kho quyet.'
+- 'Giai quyet VI_PHAM_3_VUOT_TRAN_TRUC_LOI_GOI: Review Rescue Checkpoint theo §12 d.1011-1012 / ADR-0037 CHUA LAM;
+  KHONG goi codex them. Chu kho quyet di checkpoint hay phan xu chi thi "lặp tới khi có cross approval".'
 AI_GHI_LANDED_VE_SAU: 'Ai hoan tat not bookkeeping thi ghi chuyen trang `landed` NGAY LUC DO —
   trong comment dong #578 va/hoac mot commit tiep theo vao chinh tep nay. Tep nay CO Y khong tu
   tuyen landed cho tuong lai: mot ho so tu tuyen mot trang thai chua xay ra la thu #401 goi la
@@ -710,6 +800,10 @@ LANDED_KHONG_XAC_LAP:
   cung KHONG tuyen merge vo hieu — xem authorization_url_BAN_CHAT va uy_quyen.hai_cach_doc.'
 - 'KHONG tuyen moc Checkout va Gate output hau merge la DAT — moi moc mot phan (thieu parents tu job; thieu rc cac
   lenh ngoai tl-selftest) — xem danh_tinh_CI_10_2_2.HE_QUA_PHAI_KHAI.'
+- 'KHONG tuyen vong lap cross-review da XONG hay da co `cross_approved` — no DUNG vi cham stop condition §12 (SAU loi
+  goi codex tren tran HAI), khong vi approve; sau review deu COMMENTED — xem VI_PHAM_3_VUOT_TRAN_TRUC_LOI_GOI.'
+- 'KHONG tuyen moc Checkout TIEN merge (synthetic 8394f741) la DAT — parents/tree chi tu REST object, khong tu
+  checkout/log/artifact cua dung job — xem danh_tinh_CI_10_2_2.pre_merge.checkout.moc_checkout.'
 
 cho_yeu_con_lai:
 - muc: 1
@@ -780,6 +874,9 @@ con_mo:
     I3: validator tu choi `authorization_created_at > merged_at` nhung van cho ghi phe chuan hau kiem). Ca ba la SUA
     MA SAN PHAM (ops/lease_publish_test.py hoac validator), ngoai pham vi land authority ("CHI hai viec: ghi ho so
     land nay, va bookkeeping") — lop F. Ghi no co dia chi, KHONG tu lam. Chu kho mo packet rieng neu muon.'
+  no_ngoai_pham_vi_codex_vong_5: 'Codex vong 5 K1 (inline 4064935136) doi them fixture/validator cuong che tran
+    `codex_review_calls_used` = 2 tren mot PR. Sua ma san pham, ngoai pham vi land authority — lop F. Ghi no co dia
+    chi; ADR-0037 va ADR-0043 deu tu khai "0 cổng" (§20 d.1376, d.1382). KHONG tu lam.'
   CI_cua_PR_601_bi_gian_doan_thanh_toan:
     hinh_dang: 'Actions KHONG KHOI DONG DUOC job vi tai khoan — KHONG phai do noi dung PR.
       Annotation nguyen van tren moi job do: "The job was not started because recent account
@@ -810,11 +907,61 @@ con_mo:
        KHONG phai cong hau merge cua packet #578 (714f36e6 / run 35581617584) va KHONG phai bang chung cho `landed`.'
     da_lam_gi_trong_luc_do: 'DUNG day. Moi cu day luc ay chi sinh them mot luot toan skipped,
       lam nhieu ho so ma khong them mot phep do nao. KHONG re-run tay: manual_ci_budget 0.'
-    KHONG_khai: 'Muc nay KHONG khai ket qua CI cua head DANG mang ban va nay (head sau 80d4dd4) — doc sau khi no
-      xong. Ket qua cac head TRUOC (9387078, d202271, 85559f0, 7becd26, 8ffe96a, va 80d4dd4 do do dang) ghi o
-      dien_bien_do_duoc. Moi con
+    KHONG_khai: 'Muc nay KHONG khai ket qua CI cua head DANG mang ban va nay (head sau b94182b) — doc sau khi no
+      xong; CI cua b94182b cung KHONG khai (chua doc lai luc va vong 6). Ket qua cac head TRUOC (9387078, d202271,
+      85559f0, 7becd26, 8ffe96a, va 80d4dd4 do do dang) ghi o dien_bien_do_duoc. Moi con
       so o day la CI cua PR #601 (PR mang ho so), KHONG phai cong hau merge cua packet #578 (714f36e6 / run
       35581617584) va KHONG phai bang chung cho `landed` cua #578.'
+
+DINH_CHINH_SAU_REVIEW_VONG_6:
+  nguon: 'Vong 5 cua vong lap, tren head b94182b. (a) codex review 5270067564, submitted_at 2026-09-21T17:57:36Z — 3
+    finding (inline 4064935130 K2 so dong gate_lifecycle; 4064935136 K1 tran truc LOI GOI; 4064935146 K3 synthetic merge
+    chi REST); (b) ra soat Fable 5.1 vong 5 — cung phien land, subagent — 4 finding sua + 3 phep do bo tro + 1 gioi han
+    tai do. Phien chinh do lai truoc khi giao; executor do lai MOI so trong brief cua phien chinh truoc khi ghi, va sua
+    hai so cua phien chinh (xem K1). VONG LAP DUNG TAI DAY vi cham stop condition §12 (tran truc LOI GOI codex), KHONG
+    phai vi da approve; CHUA co cross_approved. Ban va nay la ban cuoi truoc khi cho chu kho.'
+  K1_vuot_tran_truc_loi_goi: 'CHAP NHAN, lop D (codex K1, P1) — dieu kien dung that. Them VI_PHAM_3_VUOT_TRAN_TRUC_LOI_GOI:
+    §12 d.1011-1013, d.1015-1017, d.1021 trich nguyen van; ADR-0048 d.9-12 giu nguyen truc LOI GOI; SAU review codex tren
+    #601 (khong phai NAM nhu brief phien chinh — phien chinh bo sot 5269792704 17:29:34Z), review thu sau 5270067564
+    submitted_at 17:57:36Z (brief ghi 17:57:34Z — sai 2 giay; do API pulls/601/reviews). Tran 2, da dung 6, vuot tu lan 3.
+    Review Rescue Checkpoint bat buoc, CHUA LAM. Bac H3 vong 4 van dung ve truc VONG nhung thieu truc LOI GOI — ghi ca
+    lo ay vao VONG_4.B. Fixture -> lop F.'
+  K2_so_dong_gate_lifecycle: 'CHAP NHAN, lop B (codex K2 P2 + Fable vong 5 #1, doc lap): "d.70" -> ham `_repo_identity`
+    d.151-155 (d.155 rev-parse HEAD^{tree}, khoa tree_sha d.161), sua HAI cho (tree_tu_artifact, VONG_5.Z2); d.70 co
+    HEAD^{tree} la cua gate_lifecycle_test.py. Neo them ten ham. Them runner_sha256 artifact = sha256 blob 0728f0a3.'
+  K3_synthetic_merge_chi_REST: 'CHAP NHAN, lop C (codex K3, P2). REST commit object 8394f741 chung minh GitHub giu gi,
+    khong chung minh run da quan sat gi (§10.2.2 d.866 doi "từ checkout/log/artifact"). Doi khoa thanh
+    parents_tree_tu_object_ben_CHI_BO_TRO, them moc_checkout: MOT PHAN cho pre_merge; them dong LANDED_KHONG_XAC_LAP.
+    Cung mot thuoc do voi parents hau merge tu KHO (Z1 vong 5) — truoc day hai cho dung hai chuan, nay mot.'
+  F2_sai_muc_142: 'CHAP NHAN, lop B (Fable vong 5 #2): "§7 d.142" -> "§3.2 d.142" (schema Work Packet Issue, §3.2 bat dau
+    d.126; §7 bat dau d.394). Schema land evidence §7 d.523-540 KHONG co bon truong execution_surface/transport/
+    environment/operating_system — chung la bo sung theo codex vong 1 F4, ghi ro de khong ai tuong la truong schema.'
+  F3_N3_synthetic: 'CHAP NHAN, lop A (Fable vong 5 #3): N3 ghi "gate success tren ca candidate lan merge" trong khi
+    pre_merge.checkout da do job checkout SYNTHETIC MERGE 8394f741 — §10.2.2 d.867-869 cam dong nhat. Sua N3: check-run
+    gan SHA 5f91846, job checkout 8394f741 cung tree 9618f37.'
+  F4_neo_ADR_0048: 'CHAP NHAN, lop B nho (Fable vong 5 #4): "(commit f1ae6ad)" — f1ae6ad 2026-09-12T11:18:06Z la commit
+    sau cham tep ADR (r291 ke khai slot); ADR duoc tao o 630e00f 2026-09-12T08:26:55Z. Ngay khong sai, neo lech; sua.'
+  F5_F7_bo_tro_khong_doi_moc: 'Ba phep do moi (Fable vong 5 #5-#7), deu la CHUNG CU BO TRO, KHONG doi moc nao:
+    (5) check-suite 96331398646 cua dung run: before a1bbdc1 / after 714f36e6 / head_commit.tree_id 9618f37 — object ve
+    su kien push, khong phai parents tu job; (6) artifact `identity.catalog_policy_sha256` 7cb2b26b… tinh lai tren KHO
+    tai 714f36e6 ra dung gia tri, chung minh ci.yml TRONG CHECKOUT cua job la blob 2ca2f9d8 — khong phai dinh nghia
+    GitHub da chay, moc Workflow definition van THIEU; (7) `identity.runner_sha256` 637678bd… = sha256 blob
+    gate_lifecycle.py 0728f0a3. Con so 1 DU + 2 MOT PHAN + 1 THIEU KHONG doi.'
+  F8_gioi_han_tai_do: 'Fable vong 5 #8: PushEvent 05:59:51Z ops/cap-lease-578 (before bd4354067) khong con trong ban
+    JSON nao da luu, va Events API luc ~17:56Z chi lui toi ~15:22Z — tu vong 5 KHONG TAI DO DUOC; ghi gioi han ngay tai
+    DANH_TINH_GENERATION_INPUT_TRANH_CHAP, giu loi khai vong 3, khong nang cap.'
+  da_kiem_thay_DUNG_vong_5: 'Fable vong 5 do lai va KHONG tim ra loi o: moi SHA/tree/blob/sha256 (git); 7 moc ket_thuc
+    check-run tien merge (API commits/5f91846/check-runs, total 7); so dong log 4 job hau merge + gate tien merge + 2
+    job thu-hoi (30 dong trich, dung het); 42/38/4 va 42/39/3 step; runner ID/OS/runtime; ba artifact (sha256 zip =
+    digest; noi dung JSON/receipt, 27 khoa, output_sha256 = sha256 .out); 7 comment #594 truoc merge + cau trich
+    5756037551/5757333045; 0 comment chu kho tren #578 giua 05:55:26Z-13:55:15Z; codex 5757295593/5757359263/reaction/
+    timeline #594; 5 review #601 + 7 inline vong 3-4; c7679786f/8394f741 qua REST; ba luot Windows (log, sha256, rc);
+    lease 5aff55c d.77-80/100-101/112, g4 4e75ca7f d.55-56/113, g3 fbb8dd1b khong bia mo; ai-dang-giu rc=11 NGƯỜI_GIỮ
+    3 (do lai 17:56:42Z); spec a487604 sha256 = spec_hash; blame f926835b; 11 tep ops/land mission_id; git grep
+    5f91846e1b9f; CI #601 sau head; moi trich dan so dong PROTOCOL/AGENTS/CLAUDE/KE_HOACH/ADR-0048 con lai (sed -n tung dong).'
+  KHONG_mat_gi: 'LANDED_KHONG_XAC_LAP tang tu 14 len 16 dong; CON_THIEU_DE_GOI_LANDED tang tu 8 len 9 (them VI_PHAM_3).
+    LANDED van CHUA. Khong nang muc bao dam nao; identity hau merge van 1 du + 2 mot phan + 1 thieu; identity tien
+    merge (ci.yml) ha ro thanh Checkout MOT PHAN. Ba vi pham da khai. Vong lap DUNG.'
 
 DINH_CHINH_SAU_REVIEW_VONG_5:
   nguon: 'Vong 4 cua vong lap, tren head 80d4dd4. (a) codex review 5269792704, 2026-09-21T17:29:34Z — 3 finding
@@ -831,13 +978,14 @@ DINH_CHINH_SAU_REVIEW_VONG_5:
     Executor do lai truoc khi ghi: 27 khoa cap cao nhat dung la KHONG co `tree_sha`; nhung khoa long
     `identity.tree_sha` va `identity_after.tree_sha` CO, = 9618f37dc9f98632455068191d7a5bba45b34957, kem
     `identity.head_sha` 714f36e6; `grep -o "tree_sha" tl-selftest-Linux.json` -> 2 lan. Gia tri do
-    .claude/dev/gate_lifecycle.py d.70 tinh bang `git rev-parse HEAD^{tree}` trong job. `parents` thi KHONG co o cap
+    .claude/dev/gate_lifecycle.py ham `_repo_identity` d.151-155 (d.155; ban vong 5 ghi "d.70" — sai, codex vong 5 K2 +
+    Fable vong 5 #1) tinh bang `git rev-parse HEAD^{tree}` trong job. `parents` thi KHONG co o cap
     nao — ve ay cua phien chinh dung. Nen: tree DUOC ghi tu artifact (nguon: dung job/attempt, §10.2.2 d.861), parents
     van not_measured; moc Checkout van MOT PHAN, con so 1+2+1 khong doi. Executor KHONG lam theo chi thi "dung vien
     artifact cho tree" vi phep do khong do chi thi ay — cung thai do vong 3 voi H3. Chu kho/phien chinh doc lai
     tl-selftest-Linux.json neu muon bac tiep.'
   A_ba_nhom_not_measured_do_duoc: 'CHAP NHAN, lop C (Fable #1, #2, #3): parents/tree synthetic merge 8394f741 qua REST
-    commit object; artifact thu-hoi cho OID dinh nghia du 40 ky tu + H/S/T du 40 + checker_rc 0 (moc Workflow
+    commit object (vong 6 ha lai: CHI BO TRO, moc Checkout tien merge van MOT PHAN — codex vong 5 K3); artifact thu-hoi cho OID dinh nghia du 40 ky tu + H/S/T du 40 + checker_rc 0 (moc Workflow
     definition DAT cho thu-hoi); artifact ci.yml cho command/rc/marker/output_sha256 cua tl-selftest + base_sha +
     identity.tree_sha. Moi so deu do lai bang tay (tai zip, sha256sum = digest, doc JSON).'
   B_codex_vong_4: 'I1 (P1): CHAP NHAN LOI, lop C — danh dau tranh chap NGAY TAI input_packet_generations, khong chon
@@ -870,7 +1018,8 @@ DINH_CHINH_SAU_REVIEW_VONG_4:
     4064427121) khai KE_HOACH_THI_CONG_DA_PROVIDER.md §10 "caps every PR at two model-review rounds" va doi ghi vong
     ba la vi pham. Do lai: (1) §10 d.250-252 `2 model review rounds` ghi 19-08-2026 (git blame f926835b) va §10 KHONG
     nhac ADR-0048 lan nao (grep -> 0); (2) docs/adr/0048-tran-vong-review-len-muoi.md, Accepted 2026-09-12 (commit
-    f1ae6ad), "Trần canon cho một PR packet là mười vòng review hợp lệ", thay dung mot con so cua ADR-0043; PROTOCOL
+    630e00f 2026-09-12T08:26:55Z; ban truoc neo f1ae6ad 11:18:06Z — commit sau cham tep ADR, Fable vong 5 #4), "Trần canon
+    cho một PR packet là mười vòng review hợp lệ", thay dung mot con so cua ADR-0043; PROTOCOL
     §20 d.1382 ghi ADR-0043 "con số trục VÒNG đã bị thay bởi ADR-0048", d.1387 ADR-0048 Accepted — tran canon hien
     hanh la MUOI, khong phai hai — VA ADR-0048 KHONG HOI TO, phai chung minh no AP DUNG cho #578: §20 d.1387 nguyen
     van "hiệu lực neo theo `spec_hash` đóng băng, không hồi tố"; ADR-0048 d.96-100: MOC 2026-09-12, THU NEO la
@@ -882,13 +1031,15 @@ DINH_CHINH_SAU_REVIEW_VONG_4:
     qua schema, exact-SHA và receipt validation", `ls ops/reviews | grep -E "601|594|578"` -> rong => 0 vong canon;
     theo cach doc cu cua §10 ("một lượt reviewer trả verdict trên một exact head") thi 4 (review 5267880804 14:33:10Z;
     5268963910 16:09:34Z; 5269144128 16:25:08Z; 5269437418 16:56:34Z; va tu vong 5 them 5269792704 17:29:34Z tren
-    80d4dd4 => 5). 0 hay 5 deu DUOI 10 => KHONG vuot tran theo bat ky cach doc nao. (4) ADR-0048 giu nghia vu khoi `nang_tran` (ai_nang, can_cu, tran_cu, tran_moi) khi vuot tran
+    80d4dd4 => 5; vong 6 them 5270067564 17:57:36Z tren b94182b => 6). 0 hay 6 deu DUOI 10 => KHONG vuot tran VONG
+    theo bat ky cach doc nao. NHUNG bac nay chi kiem truc VONG: truc LOI GOI (§12 d.1016-1017, tran HAI/PR; ADR-0048
+    d.11-12 giu nguyen) thi 6 loi goi da VUOT tu lan thu ba — xem VI_PHAM_3_VUOT_TRAN_TRUC_LOI_GOI (codex vong 5 K1). (4) ADR-0048 giu nghia vu khoi `nang_tran` (ai_nang, can_cu, tran_cu, tran_moi) khi vuot tran
     MOI — ghi nhan, chua ap dung vi chua gan 10; ADR ay cung tu khai khong co cong nao cuong che nghia vu ay. KHONG
     them VI_PHAM_3. Ai tim ra cai sai: executor Fable 5.1 (vong 3), KHONG phai reviewer; va phien chinh DA ket luan
     "H3 dung, nang nhat" theo codex TRUOC khi do lai — trich mot tai lieu ke hoach da cu thay vi hoi §20, dung dieu
     CLAUDE.md dan: "ADR nào đang hiệu lực — hỏi docs/PROTOCOL_DA_PHIEN.md §20, đừng hỏi trí nhớ". Ghi ca cai sai ay.
-    Chi thi ben cua chu kho (comment 5763548340, 16:03:54Z) "lặp tới khi có cross approval" KHONG xung dot voi tran
-    canon 10 o muc hien tai.'
+    Chi thi ben cua chu kho (comment 5763548340 tren #601, 16:03:54Z) "lặp tới khi có cross approval" KHONG xung dot
+    voi tran canon 10 o muc hien tai — nhung XUNG DOT voi tran truc LOI GOI 2; xem VI_PHAM_3.'
   C_so_lieu_vong_2: 'CHAP NHAN, lop A (codex H2 + Fable #5, #6): sua nguon VONG_3 (cung phien land; so finding Fable:
     12 dong bao cao, 2 trung codex G1/G2, 10 phan biet — 14 = phan biet, 16 = bao cao, cung mot chu "finding" da dung
     cho hai dai luong); 4h46m40s -> 4h46m34s.'
@@ -975,7 +1126,8 @@ DINH_CHINH_SAU_REVIEW:
 
 chuoi_ho_so_dung_o_dau: 'Tep nay ghi nhan merge (TRANG_THAI: merged), 4 check-run hau merge success, gate hau
   merge GAN DU theo §10.2.3 (identity 1 du + 2 mot phan + 1 thieu, noi dung dương da do) nhung CHUA xac lap, LANDED:
-  CHUA, kem HAI vi pham da khai (vai tro; chong lan write set — ba nguoi giu), mot uy quyen chi la PHE CHUAN HAU KIEM
+  CHUA, kem BA vi pham da khai (vai tro; chong lan write set — ba nguoi giu; vuot tran truc LOI GOI codex — vong lap
+  review DUNG vi stop condition §12, chua co cross_approved), mot uy quyen chi la PHE CHUAN HAU KIEM
   (nguon ben truoc thao tac: chua co hien vat), mot tranh chap danh tinh generation input (danh dau ngay tai truong
   canonical) va mot mission_id lech schema. No KHONG tu sinh mat xich tiep theo. Moi viec o `con_mo` doi chi
   thi chu kho.'

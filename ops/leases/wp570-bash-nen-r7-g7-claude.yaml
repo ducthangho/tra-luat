@@ -60,6 +60,19 @@ XUNG_DOT_LOI_ICH: 'KHAI TRUOC. Phien soan lease nay CUNG LA executor VA la tac g
   dang nam trong PR #581. Do la ly do `assurance_target` giu `human_audited` va
   `cross_reviewer_requirement` cam phien nay dong vai reviewer cho chinh ban ay.'
 
+da_bi_thay_the: wp570-bash-nen-r8-g8-fable
+da_bi_thay_the_vi_sao: 'Ve THU NHAT cua dau hai chieu. Chu kho chi thi doi EXECUTOR sang Fable
+  (phien 2026-09-21 ~16:1xZ: "Su dung fable7.1 executor cho #581 toi approve").
+  `docs/PROTOCOL_DA_PHIEN.md:115` doi revision + generation moi khi doi executor, nen g7 nhuong
+  cho g8. g7 VAN CON HAN (het 2026-09-21T19:55:00Z) va van dang GIU ba duong — do luc 16:17Z:
+  ops/bash_nen.py rc=11, ops/cong_cu.py rc=11, ops/cong_cu_test.py rc=11, deu NGUOI_GIU 1 la g7.
+  Nen day la mot lan THAY THE THAT, khac g7 (cap tren nen NGUOI_GIU 0 sau khi g6 het han).
+  `_kiem_bia_mo` doc tu REF chu khong doc cay lam viec, nen dong nay phai nam tren mot ref DA
+  DAY TRUOC khi g8 di qua `check`. Vi the HAI lan day, khong phai mot.
+  DA DEM REF: tep lease g7 song tren DUNG MOT nhanh (refs/heads/ops/cap-lease-570-g7 va ban
+  theo doi refs/remotes/origin/... cua chinh no), nen MOT dau la du. Dem lai moi lan, khong
+  suy tu ca khac — g3 cua #541 song tren HAI ref va phai danh dau ca hai.'
+
 leased_at_utc: '2026-09-21T11:55:00Z'
 lease_expires_at_utc: '2026-09-21T19:55:00Z'
 han_de_xuat_vi_sao: 'TAM (8) gio. g6 DA LO HAN luc 09:45Z truoc khi ban va bon finding kip

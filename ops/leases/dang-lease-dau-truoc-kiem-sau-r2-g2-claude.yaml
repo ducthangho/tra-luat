@@ -27,6 +27,15 @@ thay_the_vi_sao: 'Ve THU HAI cua dau hai chieu. g1 da mang dong
   `da_bi_thay_the: dang-lease-dau-truoc-kiem-sau-r2-g2-claude` TRUOC khi lease nay duoc dem la
   con hieu luc. g1 con song luc dat bia nen khong co tep chet nao vao tap quet cua buoc `dang`.'
 
+da_bi_thay_the: dang-lease-dau-truoc-kiem-sau-r2-g3-claude
+da_bi_thay_the_vi_sao: 'Ve THU NHAT cua dau hai chieu. g3 TRA LAI ops/lease_publish_test.py vao
+  write set — nhanh thu hai cua bang §2 trong dac ta r2. Lease nay CON SONG luc dat bia (het han
+  2026-09-21T19:48:00Z, dat luc ~05:45Z), nen dat bia o day KHONG dua mot tep chet vao tap quet
+  cua buoc `dang` — dung chot M8 ma chinh packet nay viet.'
+da_bi_thay_the_KHONG_phai_thu_hoi_vi_lam_sai: 'g2 lam DUNG viec cua no: no go mot the ket co that
+  va #578 da ghi duoc (5f91846) trong cua so no mo ra. No bi thay the vi da xong viec, khong phai
+  vi hong.'
+
 granted_by: ducthangho
 granted_on_instruction: https://github.com/ducthangho/tra-luat/issues/579#issuecomment-5752218930
 granted_on_instruction_nguyen_van: 'Chu kho, phien dieu phoi 20-09-2026 ~19:3xZ, nguyen van:

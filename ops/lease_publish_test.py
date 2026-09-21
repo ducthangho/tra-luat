@@ -4725,9 +4725,23 @@ def t131_S8_tam_tran_bound_tru_1_bound_bound_cong_1_va_deadline():
             chot(kho.commit(c3)[0] == tree3, "trước deadline phải đọc được")
         finally:
             kho.dong()
-        # subprocess IM LẶNG (không bao giờ trả header) phải bị ngắt và kill trong deadline thật
-        im = s / "git-im-lang.sh"
-        im.write_text("#!/bin/sh\nsleep 30\n", encoding="utf-8"); im.chmod(0o755)
+        # subprocess IM LẶNG (không bao giờ trả header) phải bị ngắt và kill trong deadline thật.
+        # Launcher phải là thứ NỀN NẠP ĐƯỢC: `.sh` + shebang là giao ước POSIX, còn Windows nạp
+        # thẳng một `.sh` cho `OSError [WinError 193] %1 is not a valid Win32 application` — đo
+        # được trên Windows 11 thật 20-09-2026 (#578 M1). Ca chết ở ĐÓ, tức bảy trần và phần
+        # deadline/kill mà docstring khai CHƯA TỪNG được đo trên Windows.
+        #
+        # `.cmd` vòng lặp thuần, và ba điều kiện của nó đều bị mã sản phẩm ép, không phải tuỳ ý:
+        # KHÔNG gọi lệnh ngoài (`self.env` dựng bằng `_env_rong` nên PATH chỉ có thư mục git,
+        # không có System32); KHÔNG đọc stdin (sản phẩm ghi oid rồi `close()`); KHÔNG ghi stdout
+        # (reader phải treo tới deadline). Đo được: ứng viên này chạy đúng dưới CHÍNH `self.env`
+        # ấy, nên `SystemRoot`/`COMSPEC` vắng mặt không chặn — thủ phạm KHÔNG nằm ở mã sản phẩm.
+        if os.name == "nt":
+            im = s / "git-im-lang.cmd"
+            im.write_text("@echo off\r\n:lap\r\ngoto lap\r\n", encoding="ascii")
+        else:
+            im = s / "git-im-lang.sh"
+            im.write_text("#!/bin/sh\nsleep 30\n", encoding="utf-8"); im.chmod(0o755)
         kho = mod.KhoObject(cay, deadline=time.monotonic() + 0.6)
         try:
             kho.git_exe = str(im)
@@ -4735,6 +4749,11 @@ def t131_S8_tam_tran_bound_tru_1_bound_bound_cong_1_va_deadline():
             rc, td = _ma_chan(mod, kho.doc, c3, "commit")
             troi = time.monotonic() - t0
             chot(rc == 12 and "kill" in td and troi < 5, f"subprocess im lặng phải bị kill trong deadline: rc={rc} sau {troi:.1f}s: {td}")
+            # N1: một dòng ĐỌC ĐƯỢC chứng minh ca đã TỚI phần deadline/kill. "Không ném" không
+            # phải bằng chứng — ca này từng chết trước đoạn này trên Windows mà suite vẫn chỉ
+            # thấy một dòng ĐỎ không nói được nó chết ở đâu. Cố ý TẤT ĐỊNH (không giờ, không
+            # đường dẫn tạm): t125 so TẬP TÊN ca đỏ, nhưng một dòng trôi vẫn là nợ.
+            _nhat_ky_ca("=== t131 deadline/kill DA CHAY, launcher", im.suffix)
         finally:
             kho.dong()
 
@@ -4763,7 +4782,19 @@ def t132_shallow_va_object_thieu_la_12_khong_phai_vang():
         # partial: xoá loose object của c1 khỏi store ⇒ ancestry chạm c1 ⇒ 12 'missing'
         loose = cay / ".git" / "objects" / c1[:2] / c1[2:]
         chot(loose.is_file(), "fixture cần loose object của c1")
-        loose.unlink()
+        # Git đặt loose object CHỈ-ĐỌC (đo được `mode=0o444`, `W_OK=False`). POSIX chỉ cần quyền
+        # ghi trên THƯ MỤC nên `unlink` chạy; Windows từ chối xoá tệp chỉ-đọc →
+        # `PermissionError [WinError 5] Access is denied` (#578 M2, đo trên Windows 11 thật).
+        # Giả thuyết "handle git còn mở" bị LOẠI TRỪ BẰNG PHÉP ĐO, không bằng lập luận: `chmod`
+        # một mình đã đủ, và một đối chứng riêng xác nhận nền ấy thật sự từ chối xoá tệp chỉ-đọc.
+        try:
+            loose.unlink()
+        except PermissionError:
+            os.chmod(loose, 0o666)
+            loose.unlink()
+        # N2: "đã xoá" KHÁC "bỏ qua vì không xoá được". Thiếu chốt này thì một bản vá
+        # `except PermissionError: pass` cũng làm ca XANH — và ca ấy thôi đo gì nữa.
+        chot(not loose.exists(), "loose object của c1 PHẢI biến mất trước khi đo 'missing'")
         kho = mod.KhoObject(cay)
         try:
             rc, td = _ma_chan(mod, kho.to_tien, c0, c2)

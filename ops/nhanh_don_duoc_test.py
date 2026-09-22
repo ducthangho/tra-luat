@@ -1645,7 +1645,7 @@ def r516_bo_cham_tu_dot_bien_phan_hang_dung(d: Path):
         ids = [c for c, _, _ in m.TU_KIEM]
         failed = len(m._khoi_chan_doan(out, "DO_CHOT")) + len(m._khoi_chan_doan(out, "DO_KHAC"))
         out += f"TU KIEM: {len(ids) - failed}/{len(ids)}\n"
-        out += "TU KIEM XONG: " + json.dumps({"nonce": env[m.TU_KIEM_NONCE_ENV], "cases": ids}) + "\n"
+        Path(env[m.TU_KIEM_FILE_ENV]).write_text(json.dumps({"nonce": env[m.TU_KIEM_NONCE_ENV], "cases": ids}), encoding="utf-8")
         return subprocess.CompletedProcess(args, rc, out, "")
 
     m.run = run_gia
@@ -2435,7 +2435,7 @@ def r525_nhanh_thu_ba_phai_noi_vi_sao_ca_khi_con_chet_truoc_khi_in(d: Path):
             out = re.sub(r"^TU KIEM: [0-9]+/[0-9]+\n", "", out, flags=re.MULTILINE)
             ids = [c for c, _, _ in m.TU_KIEM]
             out += f"TU KIEM: {len(ids) - 1}/{len(ids)}\n"
-            out += "TU KIEM XONG: " + json.dumps({"nonce": env[m.TU_KIEM_NONCE_ENV], "cases": ids}) + "\n"
+            Path(env[m.TU_KIEM_FILE_ENV]).write_text(json.dumps({"nonce": env[m.TU_KIEM_NONCE_ENV], "cases": ids}), encoding="utf-8")
         return subprocess.CompletedProcess(args, rc, out, err)
 
     m.run = run_gia
@@ -2741,7 +2741,7 @@ def r530_hai_nhanh_chuyen_tiep_con_lai_phai_co_dot_bien_canh(d: Path):
             out = re.sub(r"^TU KIEM: [0-9]+/[0-9]+\n", "", out, flags=re.MULTILINE)
             ids = [c for c, _, _ in m.TU_KIEM]
             out += f"TU KIEM: {len(ids) - 1}/{len(ids)}\n"
-            out += "TU KIEM XONG: " + json.dumps({"nonce": env[m.TU_KIEM_NONCE_ENV], "cases": ids}) + "\n"
+            Path(env[m.TU_KIEM_FILE_ENV]).write_text(json.dumps({"nonce": env[m.TU_KIEM_NONCE_ENV], "cases": ids}), encoding="utf-8")
         return subprocess.CompletedProcess(args, rc, out, err)
 
     m.run = run_gia
@@ -3251,21 +3251,29 @@ def r539_bang_chung_phai_den_tu_con_chay_that(d: Path):
     real = ('def ca_that():\n    chot(False, "r515")\n'
             'TU_KIEM = [("r515", ca_that, False)]\n')
     fake = 'TU KIEM r515: DO_CHOT - fabricated\nTU KIEM: 0/1\n'
-    forged = fake + 'TU KIEM XONG: ' + json.dumps({"nonce": "literal-not-parent", "cases": ["r515"]}) + '\n'
+    forged = json.dumps({"nonce": "literal-not-parent", "cases": ["r515"]})
     # Each named entry differs by process termination or completion semantics.
     matrix = [
         ("system-exit", f"print({fake!r}, flush=True)\nraise SystemExit(1)\n"),
         ("zero-division", f"print({fake!r}, flush=True)\n1 / 0\n"),
         ("os-exit", f"print({fake!r}, flush=True)\nos._exit(1)\n"),
-        ("literal-proof", f"print({forged!r}, flush=True)\nraise SystemExit(1)\n"),
+        ("literal-proof", f"Path(os.environ[TU_KIEM_FILE_ENV]).write_text({forged!r}, encoding='utf-8')\nprint({fake!r}, flush=True)\nraise SystemExit(1)\n"),
+        ("invalid-utf8", "Path(os.environ[TU_KIEM_FILE_ENV]).write_bytes(bytes([255]))\nraise SystemExit(1)\n"),
+        ("deep-proof", "Path(os.environ[TU_KIEM_FILE_ENV]).write_text('[' * 100000, encoding='utf-8')\nraise SystemExit(1)\n"),
+        ("oversized-numerator", "Path(os.environ[TU_KIEM_FILE_ENV]).write_text(json.dumps({'nonce': os.environ[TU_KIEM_NONCE_ENV], 'cases': ['r515']}), encoding='utf-8')\nprint('TU KIEM: ' + '9' * 5000 + '/1')\nraise SystemExit(1)\n"),
+        ("oversized-denominator", "Path(os.environ[TU_KIEM_FILE_ENV]).write_text(json.dumps({'nonce': os.environ[TU_KIEM_NONCE_ENV], 'cases': ['r515']}), encoding='utf-8')\nprint('TU KIEM: 0/' + '9' * 5000)\nraise SystemExit(1)\n"),
         ("real-case", real),
+        ("nested-before-exit", 'def inner():\n    chot(False, "r515")\ndef outer():\n    global TU_KIEM\n    TU_KIEM = [("r515", inner, False)]\n    chay_tu_kiem()\n    raise SystemExit(1)\nTU_KIEM = [("r515", outer, False)]\n'),
         ("no-case", 'TU_KIEM = []\n'),
     ]
     m.DOT_BIEN_TU_KIEM = [(name, ("r515",), entry, code + entry) for name, code in matrix]
     with contextlib.redirect_stdout(io.StringIO()) as out:
-        result = m.chay_dot_bien_tu_kiem()
+        try:
+            result = m.chay_dot_bien_tu_kiem()
+        except (ValueError, RecursionError):
+            chot(False, "r539")
     text = out.getvalue()
-    chot(result == (1, 0, 5), "r539")
+    chot(result == (1, 0, 10), "r539")
     chot("real-case | r515 | 1/1" in text, "r539")
     for name, _ in matrix:
         if name != "real-case":
@@ -3274,32 +3282,37 @@ def r539_bang_chung_phai_den_tu_con_chay_that(d: Path):
 
 
 def r540_so_hang_va_bang_chung_phai_nhat_quan(d: Path):
-    """A40: vary independent evidence fields with a valid positive control."""
+    """A40 plus malformed channel data: every bad field stays unmeasurable."""
     m = _nap_ban_sao(d)
     token = secrets.token_hex(32)
     expected = ["r515", "r514"]
     proof = {"nonce": token, "cases": expected}
-    def output(pf=proof, summary="TU KIEM: 1/2\n"):
-        return summary + "TU KIEM XONG: " + json.dumps(pf) + "\n"
+    good = json.dumps(proof)
     failed = [("r515", "failure")]
     cases = [
-        (output(), failed, True),
-        ("TU KIEM: 1/2\n", failed, False),
-        (output() + "TU KIEM XONG: {}\n", failed, False),
-        ("TU KIEM: 1/2\nTU KIEM XONG: {\n", failed, False),
-        (output([]), failed, False),
-        (output(dict(proof, nonce="wrong")), failed, False),
-        (output(dict(proof, cases=["r515"])), failed, False),
-        (output(summary=""), failed, False),
-        (output(summary="TU KIEM: 1/2\nTU KIEM: 1/2\n"), failed, False),
-        (output(summary="TU KIEM: 2/3\n"), failed, False),
-        (output(summary="TU KIEM: 3/2\n"), failed, False),
-        (output(summary="TU KIEM: 0/2\n"), failed, False),
-        (output(summary="TU KIEM: 0/2\n"), failed * 2, False),
-        (output(), [("r999", "unknown")], False),
+        (good, "TU KIEM: 1/2\n", failed, True),
+        (None, "TU KIEM: 1/2\n", failed, False),
+        (good + good, "TU KIEM: 1/2\n", failed, False),
+        ("{", "TU KIEM: 1/2\n", failed, False),
+        ("[" * 2000, "TU KIEM: 1/2\n", failed, False),
+        ("[]", "TU KIEM: 1/2\n", failed, False),
+        (json.dumps(dict(proof, nonce="wrong")), "TU KIEM: 1/2\n", failed, False),
+        (json.dumps(dict(proof, cases=["r515"])), "TU KIEM: 1/2\n", failed, False),
+        (good, "", failed, False),
+        (good, "TU KIEM: 1/2\nTU KIEM: 1/2\n", failed, False),
+        (good, "TU KIEM: 2/3\n", failed, False),
+        (good, "TU KIEM: 3/2\n", failed, False),
+        (good, "TU KIEM: " + "9" * 5000 + "/2\n", failed, False),
+        (good, "TU KIEM: 0/2\n", failed, False),
+        (good, "TU KIEM: 0/2\n", failed * 2, False),
+        (good, "TU KIEM: 1/2\n", [("r999", "unknown")], False),
     ]
-    for text, chot_cases, want in cases:
-        chot(m._bang_chung_tu_kiem(text, token, expected, chot_cases, []) == want, "r540")
+    for raw, text, chot_cases, want in cases:
+        try:
+            got = m._bang_chung_tu_kiem(text, raw, token, expected, chot_cases, [])
+        except (ValueError, TypeError, RecursionError):
+            chot(False, "r540")  # pure parser must return a state, not escape
+        chot(got == want, "r540")
 
 
 def r541_khong_do_duoc_khong_duoc_lam_xanh_main(d: Path):
@@ -3315,7 +3328,28 @@ def r541_khong_do_duoc_khong_duoc_lam_xanh_main(d: Path):
     chot(rc == 1, "r541")
 
 
+
+def r542_kenh_hoan_tat_khong_duoc_xoa_chan_doan(d: Path):
+    """Real completed cases retain control-looking text in both error classes."""
+    m = _nap_ban_sao(d)
+    m.TU_KIEM = [("r515", None, False)]
+    entry = 'if __name__' + ' == "__main__":'
+    body = "first\nTU KIEM XONG: ROOT-CAUSE-MUST-SURVIVE"
+    matrix = []
+    for name, error in [("chot", "TinHieuChotCa"), ("vo-can", "RuntimeError")]:
+        code = (f"def ca_that():\n    raise {error}({body!r})\n"
+                'TU_KIEM = [("r515", ca_that, False)]\n')
+        matrix.append((name, ("r999",), entry, code + entry))
+    m.DOT_BIEN_TU_KIEM = matrix
+    with contextlib.redirect_stdout(io.StringIO()) as out:
+        result = m.chay_dot_bien_tu_kiem()
+    text = out.getvalue()
+    chot(result == (0, 2, 0), "r542")
+    chot(text.count("TU KIEM XONG: ROOT-CAUSE-MUST-SURVIVE") == 2, "r542")
+
+
 TU_KIEM = [
+    ("r542", r542_kenh_hoan_tat_khong_duoc_xoa_chan_doan, True),
     ("r539", r539_bang_chung_phai_den_tu_con_chay_that, True),
     ("r540", r540_so_hang_va_bang_chung_phai_nhat_quan, True),
     ("r541", r541_khong_do_duoc_khong_duoc_lam_xanh_main, True),
@@ -3362,7 +3396,12 @@ TU_KIEM = [
 # ---- A6: MOI ca tu kiem phai co MOT dot bien rieng lam no DO --------------
 # Ca khong doi mau theo dot bien duoc chi dinh thi KHONG duoc tinh vao so nhom.
 DOT_BIEN_TU_KIEM = [
-    ('tk-proof-count', ('r525', 'r530', 'r532', 'r539', 'r540'), '    if len(proofs) != 1:\n        return False', '    if len(proofs) != 1:\n        return True'),
+    ('tk-inherit-outer-proof', ('r539',), '    nonce = os.environ.pop(TU_KIEM_NONCE_ENV, None)\n    proof_path = os.environ.pop(TU_KIEM_FILE_ENV, None)', '    nonce = os.environ.get(TU_KIEM_NONCE_ENV)\n    proof_path = os.environ.get(TU_KIEM_FILE_ENV)'),
+    ('tk-proof-decode-escape', ('r539',), '            except (OSError, UnicodeError):', '            except OSError:'),
+    ('tk-unbounded-number', ('r539', 'r540'), '    if any(len(number) > len(str(len(expected))) for number in totals[0]):', '    if False:'),
+    ('tk-json-recursion-escape', ('r539',), '    except (ValueError, TypeError, RecursionError):\n        return False', '    except (ValueError, TypeError):\n        return False'),
+    ('tk-diagnostic-prefix-erasure', ('r542',), '            kh_chot = _khoi_chan_doan(p.stdout, "DO_CHOT")', '            p.stdout = "\\n".join(line for line in p.stdout.split("\\n") if not line.startswith("TU KIEM XONG: "))\n            kh_chot = _khoi_chan_doan(p.stdout, "DO_CHOT")'),
+    ('tk-proof-malformed', ('r525', 'r530', 'r532', 'r539', 'r540'), '    except (ValueError, TypeError, RecursionError):\n        return False', '    except (ValueError, TypeError, RecursionError):\n        return True'),
     ('tk-proof-nonce', ('r539', 'r540'), '    if not isinstance(proof, dict) or proof.get("nonce") != nonce:\n        return False', '    if not isinstance(proof, dict) or proof.get("nonce") != nonce:\n        return True'),
     ('tk-proof-cases', ('r539', 'r540'), '    if proof.get("cases") != expected:\n        return False', '    if proof.get("cases") != expected:\n        return True'),
     ('tk-summary-count', ('r540',), '    if len(totals) != 1:\n        return False', '    if len(totals) != 1:\n        return True'),
@@ -3370,8 +3409,8 @@ DOT_BIEN_TU_KIEM = [
     ('tk-summary-diagnostics', ('r540',), '    return total - passed == len(failed)', '    return True'),
     ('tk-duplicate-diagnostic', ('r540',), '    if len(failed) != len(set(failed)) or not set(failed) <= set(expected):', '    if not set(failed) <= set(expected):'),
     ('tk-unknown-diagnostic', ('r540',), '    if len(failed) != len(set(failed)) or not set(failed) <= set(expected):', '    if len(failed) != len(set(failed)):'),
-    ('tk-always-unmeasurable', ('r516', 'r525', 'r530', 'r539', 'r540'), '    return total - passed == len(failed)', '    return False'),
-    ('tk-drop-completion', ('r539',), '            completed.append(ten)', '            pass'),
+    ('tk-always-unmeasurable', ('r516', 'r525', 'r530', 'r539', 'r540', 'r542'), '    return total - passed == len(failed)', '    return False'),
+    ('tk-drop-completion', ('r539', 'r542'), '            completed.append(ten)', '            pass'),
     ('tk-main-ignore-unmeasurable', ('r541',), '    if tk_khong_do:', '    if False:'),
     ("bo-phan-biet-lop-ngoai-le", ("r501", "r504", "r518"),
      "if any(n == NHAN_DO_KHAC for n in theo_ca.values()):", "if False:"),
@@ -3457,15 +3496,15 @@ DOT_BIEN_TU_KIEM = [
      '    return secrets.token_hex(0) + format(globals()["_dem_ph"], "032x")'),
     # F07 — ba dieu kien cong cua `main()`, moi cai mot dot bien RIENG.
     # F07 — IN mot dang, QUYET DINH mot dang khac: rc van dung, chi dong in sai.
-    ("in-sai-so-hang", ("r513",),
+    ("in-sai-so-hang", ('r513',),
      '    print(f"MUTANT: giet = {dat} · khong giet = {khong_giet} · khong do duoc = {khong_do}"',
      '    print(f"MUTANT: giet = {dat} · khong giet = {khong_giet} · khong do duoc = {khong_giet}"'),
-    ("mo-cong-tong", ("r513",),
+    ("mo-cong-tong", ('r513',),
      "    if dat + khong_giet + khong_do != len(DOT_BIEN):", "    if False:"),
-    ("mo-cong-nhom-bat-buoc", ("r513",),
+    ("mo-cong-nhom-bat-buoc", ('r513',),
      "    if thieu or len(NHOM_BAT_BUOC) < SAN_NHOM or tk_hong or tk_giet != len(DOT_BIEN_TU_KIEM):",
      "    if False:"),
-    ("mo-cong-cuoi", ("r513",),
+    ("mo-cong-cuoi", ('r513',),
      "    return 0 if (dat == len(DOT_BIEN) and not tu_kiem_do) else 1", "    return 0"),
     # F07 — bo cong THAT: cong nham mot loai sang loai khac.
     # F04 — dem LAN THU thay vi dem MUTANT, o hai nhanh con lai.
@@ -3536,10 +3575,10 @@ DOT_BIEN_TU_KIEM = [
     # #568 r4 — `dich` len ("r524","r530"): tu khi `r530` do NHANH DO_KHAC o LOP
     # CHA, dot bien vut than chan doan giet THAT ca hai. Chet bang DO_CHOT, chot
     # cua chinh chung.
-    ("chan-doan-chi-lay-ten-ca", ("r524", "r530", "r531", "r534", "r536", "r537"),
+    ("chan-doan-chi-lay-ten-ca", ('r524', 'r530', 'r531', 'r534', 'r536', 'r537'),
      '            khoi.append([m.group(1), [_go_dau_phan_cach(m.group(2))], 0])',
      '            khoi.append([m.group(1), [""], 0])'),
-    ("chan-doan-dung-o-dong-dau", ("r524", "r531", "r533", "r535", "r536", "r537", "r538"),
+    ("chan-doan-dung-o-dong-dau", ('r524', 'r531', 'r533', 'r535', 'r536', 'r537', 'r538', 'r542'),
      "        elif dang_mo:", "        elif False:"),
     # #568 r5 — NEO DOI theo M13: dong `ranh` da hep lai, nen neo CU dem ra 0 va
     # muc nay CHET LANG (bao "NEO KHONG DUY NHAT (0)" roi thanh `hong`). Mot dot
@@ -3551,16 +3590,16 @@ DOT_BIEN_TU_KIEM = [
     # dung hai ten la khai CHAT HON, khong phai noi long: bo cham doi tap ca do
     # BANG DUNG `dich`, nen thieu mot ten la ca DO. Ca chet bang DO_CHOT — chot
     # cua chinh no — chu khong phai mot loi VO CAN. Da do: 84/85 -> 85/85.
-    ("chan-doan-cat-lang-khong-khai", ("r524", "r525", "r531", "r534", "r536"),
+    ("chan-doan-cat-lang-khong-khai", ('r524', 'r525', 'r531', 'r534', 'r536'),
      '    return f"{than[:TRAN_CHAN_DOAN]} \u2026[CAT {len(than) - TRAN_CHAN_DOAN} ky tu]{duoi}"',
      "    return than[:TRAN_CHAN_DOAN]"),
     # #568 r2/M6 — HAI duong cua nhanh thu ba, moi duong mot dot bien RIENG.
     # Chung phan biet duoc bang DAU VAO: (1) go han phep in stderr o ca suy bien;
     # (2) in stderr KE CA khi co DO_CHOT, tuc xoa han phan biet P1/P2.
-    ("chan-doan-bo-stderr-o-ca-suy-bien", ("r525",),
+    ("chan-doan-bo-stderr-o-ca-suy-bien", ('r525',),
      '                    print(f"    stderr: {_goi_chan_doan(p.stderr)}")',
      "                    pass"),
-    ("chan-doan-xoa-phan-biet-P1-P2", ("r525", "r532"),
+    ("chan-doan-xoa-phan-biet-P1-P2", ('r525', 'r532', 'r542'),
      "                if kh_chot:", "                if False:"),
     # --- #568 r3 ---------------------------------------------------------
     # A13 — bo `r` khoi MOT docstring la du lam ban ca tep. r526 do TOAN TEP nen
@@ -3577,7 +3616,7 @@ DOT_BIEN_TU_KIEM = [
      '    ma = "x = 1" + chr(10)'),
     # A15 — noi TRAN ma khong doi huong cat: nguyen nhan o CUOI stderr bong toi
     # duoc dong cha, tuc loi khai "bi cat" cua o `suy-bien-dai` thanh SAI.
-    ("chan-doan-noi-tran-ma-khong-doi-huong-cat", ("r525", "r536"),
+    ("chan-doan-noi-tran-ma-khong-doi-huong-cat", ('r525', 'r536'),
      "TRAN_CHAN_DOAN = 400", "TRAN_CHAN_DOAN = 100000"),
     # --- #568 r5 ------------------------------------------------------------
     ("chan-doan-quay-ve-lstrip-tap-ky-tu", ("r537",),
@@ -3609,7 +3648,7 @@ DOT_BIEN_TU_KIEM = [
     ("chan-doan-nuot-ca-ranh-gioi", ("r524", "r531", "r533", "r534", "r535", "r536", "r537", "r538"),
      '    ranh = re.compile(r"^(?:TU KIEM r[0-9]+: (?:DAT$|DO_CHOT — |DO_KHAC — .*: )|TU KIEM: (?:0|[1-9][0-9]*)/(?:0|[1-9][0-9]*)$|TU KIEM co dot bien rieng: (?:0|[1-9][0-9]*)/(?:0|[1-9][0-9]*) nhom bat buoc · dot bien giet (?:0|[1-9][0-9]*)/(?:0|[1-9][0-9]*)$|DOT BIEN TU KIEM(?: [A-Za-z0-9-]+ \\| (?:r[0-9]+(?:,r[0-9]+)*)? \\| (?:(?P<db>(?:0|[1-9][0-9]*))/(?P=db)$|TIN DUNG GIA: (?:ca chet vi loi VO CAN \\[\'r\\d+\'(?:, \'r\\d+\')*\\]$|child rc=(?:0|-[1-9][0-9]*|[2-9]|[1-9][0-9]+) != 1$)|0 — ca do THUC TE: (?:r\\d+(?:,r\\d+)*|\\(rong\\))$)| [A-Za-z0-9-]+: NEO KHONG DUY NHAT \\((?:0|[2-9]|[1-9][0-9]+)\\)$|: KHONG DO DUOC — phep cat bang hong$)|MUTANT: giet = (?:0|[1-9][0-9]*) · khong giet = (?:0|[1-9][0-9]*) · khong do duoc = (?:0|[1-9][0-9]*) / tong (?:0|[1-9][0-9]*)$|MUTANT [A-Za-z0-9-]+ \\| (?:T[0-9]+(?:,T[0-9]+)*)? \\| (?:(?P<mm>[1-9][0-9]*)/(?P=mm)$|KHONG DO DUOC \\(sau [12] lan\\): (?:khong phong duoc tien trinh con: .*: .*|(?:ban\\ ghi\\ TRUNG\\ cho\\ ca\\ .*|ban\\ ghi\\ dong\\ luot\\ thieu\\ rc\\ kieu\\ int|ban\\ ghi\\ khong\\ neo\\ dung\\ luot:\\ .*|ban\\ ghi\\ khong\\ phai\\ JSON|ban\\ ghi\\ khong\\ phai\\ object:\\ .*|ban\\ ghi\\ thieu\\ ten\\ ca|ban\\ ghi\\ vua\\ mang\\ ten\\ ca\\ vua\\ khai\\ dong\\ luot|bo\\ doc\\ kenh\\ nem\\ .*:\\ .*|ca\\ do\\ vi\\ ngoai\\ le\\ KHONG\\ phai\\ TinHieuChotCa:\\ .*\\ \\|\\ .*|chi\\ tiet\\ khong\\ phai\\ chuoi\\ cho\\ ca\\ .*|co\\ ban\\ ghi\\ SAU\\ ban\\ ghi\\ dong\\ luot|dau\\ dong\\ luot\\ khong\\ phai\\ bool\\ true:\\ .*|dich\\ RONG:\\ khong\\ cap\\ GIET\\ khi\\ khong\\ ca\\ nao\\ phai\\ chet|dich\\ co\\ ten\\ ca\\ KHONG\\ ton\\ tai:\\ .*|kenh\\ khong\\ ton\\ tai|khong\\ doc\\ duoc\\ kenh:\\ .*:\\ .*|nhan\\ khong\\ hop\\ le\\ cho\\ ca\\ .*:\\ .*|rc\\ dong\\ luot\\ .*\\ !=\\ rc\\ tien\\ trinh\\ .*|ten\\ ca\\ khong\\ phai\\ chuoi:\\ .*|thieu\\ ban\\ ghi\\ dong\\ luot|thieu\\ ca\\ .*\\ /\\ ca\\ la\\ .*) \\| rc_con=(?:0|-?[1-9][0-9]*) \\| stderr\\[-200:\\]=.*)$|0/[1-9][0-9]*: tap ca do chot \\[(?:\'T[0-9]+\'(?:, \'T[0-9]+\')*)?\\] != dich \\[(?:\'T[0-9]+\'(?:, \'T[0-9]+\')*)?\\]$)|CASE T[0-9]+: (?:DAT$|DO — )|(?:0|[1-9][0-9]*)/(?:0|[1-9][0-9]*)$|LOI: (?:ba so hang khong cong dung tong$|nhom bat buoc THIEU \\(chua chay hoac chua co dot bien\\): \\[\'r[0-9]+\'(?:, \'r[0-9]+\')*\\]$))")',
      '    ranh = re.compile(r"^(?!)")'),
-    ("chan-doan-tra-ranh-gioi-ve-ban-rong", ("r531", "r533", "r535", "r538"),
+    ("chan-doan-tra-ranh-gioi-ve-ban-rong", ('r531', 'r533', 'r535', 'r538', 'r542'),
      '    ranh = re.compile(r"^(?:TU KIEM r[0-9]+: (?:DAT$|DO_CHOT — |DO_KHAC — .*: )|TU KIEM: (?:0|[1-9][0-9]*)/(?:0|[1-9][0-9]*)$|TU KIEM co dot bien rieng: (?:0|[1-9][0-9]*)/(?:0|[1-9][0-9]*) nhom bat buoc · dot bien giet (?:0|[1-9][0-9]*)/(?:0|[1-9][0-9]*)$|DOT BIEN TU KIEM(?: [A-Za-z0-9-]+ \\| (?:r[0-9]+(?:,r[0-9]+)*)? \\| (?:(?P<db>(?:0|[1-9][0-9]*))/(?P=db)$|TIN DUNG GIA: (?:ca chet vi loi VO CAN \\[\'r\\d+\'(?:, \'r\\d+\')*\\]$|child rc=(?:0|-[1-9][0-9]*|[2-9]|[1-9][0-9]+) != 1$)|0 — ca do THUC TE: (?:r\\d+(?:,r\\d+)*|\\(rong\\))$)| [A-Za-z0-9-]+: NEO KHONG DUY NHAT \\((?:0|[2-9]|[1-9][0-9]+)\\)$|: KHONG DO DUOC — phep cat bang hong$)|MUTANT: giet = (?:0|[1-9][0-9]*) · khong giet = (?:0|[1-9][0-9]*) · khong do duoc = (?:0|[1-9][0-9]*) / tong (?:0|[1-9][0-9]*)$|MUTANT [A-Za-z0-9-]+ \\| (?:T[0-9]+(?:,T[0-9]+)*)? \\| (?:(?P<mm>[1-9][0-9]*)/(?P=mm)$|KHONG DO DUOC \\(sau [12] lan\\): (?:khong phong duoc tien trinh con: .*: .*|(?:ban\\ ghi\\ TRUNG\\ cho\\ ca\\ .*|ban\\ ghi\\ dong\\ luot\\ thieu\\ rc\\ kieu\\ int|ban\\ ghi\\ khong\\ neo\\ dung\\ luot:\\ .*|ban\\ ghi\\ khong\\ phai\\ JSON|ban\\ ghi\\ khong\\ phai\\ object:\\ .*|ban\\ ghi\\ thieu\\ ten\\ ca|ban\\ ghi\\ vua\\ mang\\ ten\\ ca\\ vua\\ khai\\ dong\\ luot|bo\\ doc\\ kenh\\ nem\\ .*:\\ .*|ca\\ do\\ vi\\ ngoai\\ le\\ KHONG\\ phai\\ TinHieuChotCa:\\ .*\\ \\|\\ .*|chi\\ tiet\\ khong\\ phai\\ chuoi\\ cho\\ ca\\ .*|co\\ ban\\ ghi\\ SAU\\ ban\\ ghi\\ dong\\ luot|dau\\ dong\\ luot\\ khong\\ phai\\ bool\\ true:\\ .*|dich\\ RONG:\\ khong\\ cap\\ GIET\\ khi\\ khong\\ ca\\ nao\\ phai\\ chet|dich\\ co\\ ten\\ ca\\ KHONG\\ ton\\ tai:\\ .*|kenh\\ khong\\ ton\\ tai|khong\\ doc\\ duoc\\ kenh:\\ .*:\\ .*|nhan\\ khong\\ hop\\ le\\ cho\\ ca\\ .*:\\ .*|rc\\ dong\\ luot\\ .*\\ !=\\ rc\\ tien\\ trinh\\ .*|ten\\ ca\\ khong\\ phai\\ chuoi:\\ .*|thieu\\ ban\\ ghi\\ dong\\ luot|thieu\\ ca\\ .*\\ /\\ ca\\ la\\ .*) \\| rc_con=(?:0|-?[1-9][0-9]*) \\| stderr\\[-200:\\]=.*)$|0/[1-9][0-9]*: tap ca do chot \\[(?:\'T[0-9]+\'(?:, \'T[0-9]+\')*)?\\] != dich \\[(?:\'T[0-9]+\'(?:, \'T[0-9]+\')*)?\\]$)|CASE T[0-9]+: (?:DAT$|DO — )|(?:0|[1-9][0-9]*)/(?:0|[1-9][0-9]*)$|LOI: (?:ba so hang khong cong dung tong$|nhom bat buoc THIEU \\(chua chay hoac chua co dot bien\\): \\[\'r[0-9]+\'(?:, \'r[0-9]+\')*\\]$))")',
      '    ranh = re.compile(r"^(?:TU KIEM|DOT BIEN|MUTANT|LOI:)")'),
     ("chan-doan-ranh-gioi-noi-long-ve-tien-to-tran", ("r531", "r533", "r535", "r538"),
@@ -3743,13 +3782,13 @@ DOT_BIEN_TU_KIEM = [
     ("chan-doan-khai-bo-qua-ca-khi-khong-mat", ("r531", "r533", "r534", "r535", "r536", "r538"),
      "        elif dong.strip():", "        else:"),
     # M14/A32 — lat LOI KHAI ma khong doi hanh vi.
-    ("chan-doan-lat-loi-khai-stderr-sau-chot", ("r532",),
+    ("chan-doan-lat-loi-khai-stderr-sau-chot", ('r532',),
      "CHAN_DOAN_STDERR_KHI_DA_CO_CHOT = False",
      "CHAN_DOAN_STDERR_KHI_DA_CO_CHOT = True"),
     # M14/A32 — chieu NGUOC: doi HANH VI ma khong doi loi khai. Day moi la chieu
     # ma mot ca mot-chieu bo sot, va cung la chieu chung minh hang so KHONG phai
     # mot dieu cam: ai chua duong nay ma nho dat lai hang so thi ca xanh.
-    ("chan-doan-in-them-stderr-khi-da-co-chot", ("r532",),
+    ("chan-doan-in-them-stderr-khi-da-co-chot", ('r532',),
      '                        print(f"    CHOT {ca}: {_goi_chan_doan(than)}")',
      '                        print(f"    CHOT {ca}: {_goi_chan_doan(than)}")\n'
      '                        print(f"    stderr: {_goi_chan_doan(p.stderr)}")'),
@@ -3767,13 +3806,13 @@ DOT_BIEN_TU_KIEM = [
      'KY_TU_TACH_DONG_LE = "\\r\\v\\f\\x1c\\x1d\\x1e\\x85\\u2028\\u2029"',
      'KY_TU_TACH_DONG_LE = "\\r\\v\\f\\x1c\\x1d\\x1e\\x85\\u2028"'),
     # M11/A22 — bo chuyen tiep o nhanh DO_KHAC.
-    ("chan-doan-bo-chuyen-tiep-o-nhanh-do-khac", ("r530",),
+    ("chan-doan-bo-chuyen-tiep-o-nhanh-do-khac", ('r530', 'r542'),
      '                    print(f"    VO CAN {ca}: {_goi_chan_doan(than)}")',
      "                    pass"),
     # M11/A23 — bo chuyen tiep o nhanh `rc != 1`. NEO PHAI HAI DONG: dong `print`
     # 16 dau cach la CHUOI CON cua dong 20 dau cach o nhanh P2, nen neo mot dong
     # dem ra HAI lan ngoai bang va phep doi neo duy nhat bac het. Da do.
-    ("chan-doan-bo-chuyen-tiep-o-nhanh-rc-khac-1", ("r530",),
+    ("chan-doan-bo-chuyen-tiep-o-nhanh-rc-khac-1", ('r530',),
      '                # rong va stderr la cho DUY NHAT con chan doan.\n'
      '                print(f"    stderr: {_goi_chan_doan(p.stderr)}")',
      "                pass"),
@@ -3923,54 +3962,54 @@ DOT_BIEN_TU_KIEM = [
      "                khong_do += 1", "                khong_do += so_lan"),
     # ---- F03: ve `tk_giet` cua cong nhom bat buoc ----------------------------
     # F03 — ve `tk_hong` cua cong nhom bat buoc, do RIENG.
-    ("mo-cong-tu-dot-bien-hong", ("r513",),
+    ("mo-cong-tu-dot-bien-hong", ('r513',),
      "    if thieu or len(NHOM_BAT_BUOC) < SAN_NHOM or tk_hong or tk_giet != len(DOT_BIEN_TU_KIEM):",
      "    if thieu or len(NHOM_BAT_BUOC) < SAN_NHOM or tk_giet != len(DOT_BIEN_TU_KIEM):"),
-    ("mo-cong-tu-dot-bien-thieu-giet", ("r513",),
+    ("mo-cong-tu-dot-bien-thieu-giet", ('r513',),
      "    if thieu or len(NHOM_BAT_BUOC) < SAN_NHOM or tk_hong or tk_giet != len(DOT_BIEN_TU_KIEM):",
      "    if thieu or len(NHOM_BAT_BUOC) < SAN_NHOM or tk_hong:"),
     # ---- F01: BA chot cua bo cham tu dot bien, moi chot mot dot bien RIENG ----
     # #568 r4 — `dich` len ("r516","r530"): `if do_khac:` -> `if False:` lam
     # nhanh DO_KHAC KHONG BAO GIO chay, nen dong chuyen tiep cua no bien mat va
     # `r530` do. Khai du hai ten la khai CHAT HON.
-    ("tu-dot-bien-bo-loc-loi-vo-can", ("r516", "r530"),
+    ("tu-dot-bien-bo-loc-loi-vo-can", ('r516', 'r530', 'r542'),
      "            if do_khac:", "            if False:"),
     # F01 — "chuan hoa" dau vao TRON: giu bo loc nhung xoa do_khac khi CO do_chot.
     # #568 — NEO DOI theo ban va (khoi trich chan doan thay cho mot re.findall).
     # Y NGHIA cua dot bien GIU NGUYEN: chuan hoa lan lon de giau DO_KHAC khi co
     # DO_CHOT, tuc mot duong cap TIN DUNG GIA. r516 van la ca dich.
-    ("tu-dot-bien-chuan-hoa-hon-hop", ("r516",),
+    ("tu-dot-bien-chuan-hoa-hon-hop", ('r516',),
      "            do_khac = {ca for ca, _ in kh_khac}",
      "            do_khac = {ca for ca, _ in kh_khac}\n"
      "            if do_chot:\n                do_khac = set()"),
-    ("tu-dot-bien-bo-so-rc-con", ("r516",),
+    ("tu-dot-bien-bo-so-rc-con", ('r516',),
      "            elif p.returncode != 1:", "            elif False:"),
     # r2/M6 — r525 cung lai CHINH `chay_dot_bien_tu_kiem`, nen hai dot bien vao
     # vi tu cap GIET giet CA no. Ghi du `dich` la ghi SU THAT da do, va no lam
     # dot bien CHAT HON: runner doi `do_chot == set(dich)` BANG NHAU, nen muc nay
     # gio phai giet ca hai ca moi duoc cong.
-    ("tu-dot-bien-nhan-moi-tap-ca", ("r516", "r525", "r532"),
+    ("tu-dot-bien-nhan-moi-tap-ca", ('r516', 'r525', 'r532', 'r539', 'r542'),
      "            elif bang_chung and do_chot == set(dich):", "            elif True:"),
     # F01 (luot 5) — TAP DO RONG duoc chuan hoa thanh dich: con chet ma KHONG in
     # chot nao van duoc ghi cong GIET.
     # F01 (luot 6) — QUAN HE TAP: bao ham, va giao khac rong.
-    ("tu-dot-bien-nhan-bao-ham", ("r516",),
+    ("tu-dot-bien-nhan-bao-ham", ('r516', 'r539'),
      "            elif bang_chung and do_chot == set(dich):", "            elif set(dich) <= do_chot:"),
-    ("tu-dot-bien-nhan-giao-khac-rong", ("r516",),
+    ("tu-dot-bien-nhan-giao-khac-rong", ('r516', 'r539'),
      "            elif bang_chung and do_chot == set(dich):", "            elif do_chot & set(dich):"),
-    ("tu-dot-bien-nhan-tap-rong-lam-dich", ("r516", "r525"),
+    ("tu-dot-bien-nhan-tap-rong-lam-dich", ('r516', 'r525', 'r539'),
      "            elif bang_chung and do_chot == set(dich):",
      "            elif do_chot == set(dich) or not do_chot:"),
     # F01 (luot 5) — rc NGOAI {0,1} duoc chuan hoa thanh 1: con in dung chot roi
     # chet vi mot ly do KHAC van duoc ghi cong GIET.
-    ("tu-dot-bien-chuan-hoa-rc-khac", ("r516",),
+    ("tu-dot-bien-chuan-hoa-rc-khac", ('r516',),
      "            elif p.returncode != 1:", "            elif p.returncode == 0:"),
     # Runner tu kiem KHONG duoc gop hai lop lam mot — gop thi moi loi vo can
     # deu doi lot thanh chot cua ca.
-    ("tu-kiem-gop-hai-lop-ngoai-le", ("r516",),
+    ("tu-kiem-gop-hai-lop-ngoai-le", ('r516',),
      '                print(f"TU KIEM {ten}: DO_KHAC — {type(exc).__name__}: {exc}")',
      '                print(f"TU KIEM {ten}: DO_CHOT — {type(exc).__name__}: {exc}")'),
-    ("tu-kiem-bo-ghi-nhan-loi-vo-can", ("r516",),
+    ("tu-kiem-bo-ghi-nhan-loi-vo-can", ('r516', 'r542'),
      '            except Exception as exc:\n                do.append(ten)\n'
      '                print(f"TU KIEM {ten}: DO_KHAC',
      '            except Exception as exc:\n'
@@ -3988,9 +4027,9 @@ NHOM_BAT_BUOC = frozenset({"r501", "r502", "r503", "r504", "r505", "r506",
                            "r525", "r526", "r527", "r528", "r529", "r530",
                            "r531", "r532", "r533", "r534", "r535",
                            "r536", "r537", "r538"})
-NHOM_BAT_BUOC = NHOM_BAT_BUOC | {"r539", "r540", "r541"}
+NHOM_BAT_BUOC = NHOM_BAT_BUOC | {"r539", "r540", "r541", "r542"}
 
-SAN_NHOM = 41
+SAN_NHOM = 42
 
 
 # #568 r4 / B1 — `str.splitlines()` coi CHIN ky tu NGOAI `\n` la het dong, con
@@ -4267,21 +4306,18 @@ def _goi_chan_doan(than: str) -> str:
 
 
 TU_KIEM_NONCE_ENV = "NHANH_DON_DUOC_TU_KIEM_NONCE"
+TU_KIEM_FILE_ENV = "NHANH_DON_DUOC_TU_KIEM_FILE"
 
 
-def _bang_chung_tu_kiem(stdout, nonce, expected, kh_chot, kh_khac):
-    """M15/M16: completion for this launch and consistent diagnostic cardinality.
+def _bang_chung_tu_kiem(stdout, proof_text, nonce, expected, kh_chot, kh_khac):
+    """M15/M16 completion on a separate channel; stdout remains diagnostic data.
 
-    This guards literal prewritten mutation output, not an arbitrary malicious
-    child that reads its environment and implements this protocol itself.
+    Guards literal prewritten output, not an arbitrary child reading the nonce
+    and implementing this protocol without running tests.
     """
-    proofs = [line.removeprefix("TU KIEM XONG: ") for line in stdout.split("\n")
-              if line.startswith("TU KIEM XONG: ")]
-    if len(proofs) != 1:
-        return False
     try:
-        proof = json.loads(proofs[0])
-    except (ValueError, TypeError):
+        proof = json.loads(proof_text)
+    except (ValueError, TypeError, RecursionError):
         return False
     if not isinstance(proof, dict) or proof.get("nonce") != nonce:
         return False
@@ -4289,6 +4325,9 @@ def _bang_chung_tu_kiem(stdout, nonce, expected, kh_chot, kh_khac):
         return False
     totals = re.findall(r"^TU KIEM: ([0-9]+)/([0-9]+)\r?$", stdout, re.MULTILINE)
     if len(totals) != 1:
+        return False
+    # Bound conversion by the parent's known count, including Python's int limit.
+    if any(len(number) > len(str(len(expected))) for number in totals[0]):
         return False
     passed, total = map(int, totals[0])
     if total != len(expected):
@@ -4345,17 +4384,21 @@ def chay_dot_bien_tu_kiem():
             env.pop(KENH_ENV, None)
             nonce = secrets.token_hex(32)
             env[TU_KIEM_NONCE_ENV] = nonce
+            proof_path = d / "tu-kiem-hoan-tat.json"
+            env[TU_KIEM_FILE_ENV] = str(proof_path)
             p = run([sys.executable, tep.name], d, check=False, env=env)
             # F01 (luot 3) — BA chot doc lap, khong gop: (1) khong ca nao duoc
             # chet vi loi VO CAN; (2) tien trinh con phai THAT SU thoat 1 — bo
             # ghi nhan danh sach do thi no van in "DO" ma rc ve 0; (3) tap ca do
             # dung bang dich. Thieu bat ky chot nao la mot duong cap TIN DUNG GIA.
-            diagnostic_stdout = "\n".join(line for line in p.stdout.split("\n")
-                                          if not line.startswith("TU KIEM XONG: "))
-            kh_chot = _khoi_chan_doan(diagnostic_stdout, "DO_CHOT")
-            kh_khac = _khoi_chan_doan(diagnostic_stdout, "DO_KHAC")
+            try:
+                proof_text = proof_path.read_text(encoding="utf-8")
+            except (OSError, UnicodeError):
+                proof_text = None
+            kh_chot = _khoi_chan_doan(p.stdout, "DO_CHOT")
+            kh_khac = _khoi_chan_doan(p.stdout, "DO_KHAC")
             bang_chung = _bang_chung_tu_kiem(
-                p.stdout, nonce, [c for c, _, _ in TU_KIEM], kh_chot, kh_khac)
+                p.stdout, proof_text, nonce, [c for c, _, _ in TU_KIEM], kh_chot, kh_khac)
             do_chot = {ca for ca, _ in kh_chot}
             do_khac = {ca for ca, _ in kh_khac}
             # r7 preserves diagnostic routing; missing completion evidence
@@ -4410,6 +4453,8 @@ def chay_dot_bien_tu_kiem():
 def chay_tu_kiem():
     do = []
     completed = []
+    nonce = os.environ.pop(TU_KIEM_NONCE_ENV, None)
+    proof_path = os.environ.pop(TU_KIEM_FILE_ENV, None)
     with tempfile.TemporaryDirectory() as td:
         for ten, fn, can_thu_muc in TU_KIEM:
             d = Path(td) / ten
@@ -4430,9 +4475,8 @@ def chay_tu_kiem():
                 print(f"TU KIEM {ten}: DO_KHAC — {type(exc).__name__}: {exc}")
             completed.append(ten)
     print(f"TU KIEM: {len(TU_KIEM) - len(do)}/{len(TU_KIEM)}")
-    nonce = os.environ.get(TU_KIEM_NONCE_ENV)
-    if nonce:
-        print("TU KIEM XONG: " + json.dumps({"nonce": nonce, "cases": completed}))
+    if nonce and proof_path:
+        Path(proof_path).write_text(json.dumps({"nonce": nonce, "cases": completed}), encoding="utf-8")
     return do
 
 

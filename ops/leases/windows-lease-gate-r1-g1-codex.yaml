@@ -1,0 +1,39 @@
+schema_version: 2
+event: executor_lease_granted
+packet_issue: 607
+packet_id: WINDOWS-LEASE-GATE
+revision: 1
+generation: 1
+lease_id: windows-lease-gate-r1-g1-codex
+granted_by: ducthangho
+recorded_by: codex-desktop
+recorder_is_dispatcher: false
+authority_source: https://github.com/ducthangho/tra-luat/issues/607#issuecomment-5781264402
+granted_on_instruction_nguyen_van: Tôi là chủ kho, nếu cần thu hồi lease cũ hoặc bất
+  cứ phương án nào khả thi để merge và land thì đề xuất và thực hiện cho tôi. Đọc
+  kỹ skill
+leased_at_utc: '2026-09-22T17:51:03.593394+00:00'
+lease_expires_at_utc: '2026-09-23T14:37:00Z'
+role: executor
+provider: openai_codex
+executor: codex
+execution_surface: codex_desktop
+transport: machine
+model: KHONG_KHAI
+effort: KHONG_KHAI
+review_class: sensitive
+effective_review_class: sensitive
+assurance_target: human_audited
+reviewer_provider: openai_codex
+branch: codex/wp607-windows-gate-r1
+branch_ownership: exclusive
+start_from_sha: 714f36e6aad844f2c1a6713256f3abbdea64aec9
+reviewed_sha_required: 714f36e6aad844f2c1a6713256f3abbdea64aec9
+write_set:
+- ops/lease_publish.py
+- ops/lease_publish_test.py
+prompt_path: ops/specs/windows-lease-gate-r1.md
+prompt_sha256_required: 432046a98a2fb2de6f5180082770c246df07a7c165fd28999408c2013d18c77d
+spec_hash: 432046a98a2fb2de6f5180082770c246df07a7c165fd28999408c2013d18c77d
+TRAN_DONG_THEM: 300
+review_rounds_limit: 2

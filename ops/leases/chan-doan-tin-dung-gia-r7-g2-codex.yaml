@@ -1,0 +1,134 @@
+schema_version: 2
+event: executor_lease_granted
+packet_issue: 568
+packet_id: CHAN-DOAN-TIN-DUNG-GIA
+mission_issue: KHONG_CO
+revision: 7
+generation: 2
+lease_id: chan-doan-tin-dung-gia-r7-g2-codex
+thay_the_cho: chan-doan-tin-dung-gia-r6-g1-claude
+thay_the_cho_vi_sao: Owner explicitly requested lease transfer in current task.
+granted_by: ducthangho
+granted_on_instruction_nguyen_van: 'Đồng ý xử lý #568,chuyển lease đi.'
+recorded_by: codex-desktop
+recorder_is_dispatcher: false
+NGUON_CAP_VIEC: 'P1 lap lai o CA BON luot cross-review doc lap tren codex (be5c3f2,
+  15c487c, 7d0b012, 8de4e66), deu tra changes_requested. Executor TAI LAP duoc tren
+  bo cham THAT, tien trinh con THAT, ban sao tep THAT: ba dot bien MOT CHUOI (SystemExit
+  / loi tinh / os._exit) deu duoc cap 1/1 GIET trong khi KHONG ca nao chay - (giet,
+  hong) = (3, 0).'
+LY_DO_PHAI_LA_REVISION_MOI: PROTOCOL_DA_PHIEN.md:300 - mo rong pham vi hay doi closure
+  la revision moi, generation moi va cap lai lease. P1 nam NGOAI closure M13/M14 cua
+  r5. Executor da BA LAN bao va KHONG tu mo pham vi.
+DUONG_DA_SACH_DO_THE_NAO: 'r5 TU NHA bang bia mo hai chieu chan-doan-tin-dung-gia-r5-g2-bia-mo
+  (chieu mot 41def9f, chieu hai 67b33fb). LAN THU TU trong phien - no co ten tai issue
+  #599.'
+SU_CO_LUC_CAP_PHAI_KHAI: 'Ban DAU cua chinh tep nay duoc day len RONG 0 BYTE o commit
+  67b33fb: heredoc sinh no nam trong mot lenh bi mot tien trinh codex con sot nuot
+  mat stdin va chet giua chung, va executor commit ma KHONG do lai kich thuoc tep.
+  Hau qua: ai-dang-giu tra rc=12 KHONG_XAC_DINH tren TOAN KHO, tuc chan moi phien
+  khac. Da chua ngay o commit ke tiep. Bai hoc: mot tep lease moi phai duoc DO (kich
+  thuoc + phan tich YAML) TRUOC khi day, y het moi loi khai khac trong kho nay.'
+leased_at_utc: '2026-09-22T15:04:00Z'
+lease_expires_at_utc: '2026-09-23T14:37:00Z'
+role: executor
+provider: openai_codex
+executor: codex
+model: KHONG_KHAI
+effort: KHONG_KHAI
+assurance_target: human_audited
+assurance_target_vi_sao: Chot cua bo cham la thu DUY NHAT trong kho khong ai canh
+  ngoai chinh no. Sua no la sua CAI THUOC DO.
+assurance_target_HE_QUA_PHAI_KHAI: Packet nay KHONG LAND DUOC BANG MAY. Executor KHONG
+  duoc khai muc nao ho chu kho.
+assurance_target_fallback: advisory_review
+reviewer_provider: openai_codex
+reviewer_provider_vi_sao: Owner-authorized independent same-provider review at higher
+  model or effort; final human audit retained.
+review_class: sensitive
+effective_review_class: sensitive
+review_class_vi_sao: Cham vao chinh bo cham quyet dinh GIET / KHONG GIET / KHONG DO
+  DUOC.
+spec_ref: ops/specs/chan-doan-tin-dung-gia-r7.md
+spec_path: ops/specs/chan-doan-tin-dung-gia-r7.md
+prompt_path: ops/specs/chan-doan-tin-dung-gia-r7.md
+prompt_sha256_required: 78a8120b585381d4c310b7b2c910be37a84d403dc48e359ba7f6cf83cd052784
+spec_hash: 78a8120b585381d4c310b7b2c910be37a84d403dc48e359ba7f6cf83cd052784
+spec_hash_do_nhu_the_nao: SHA256 of UTF-8 LF r7 spec bytes.
+branch: codex/wp568-r7-g2
+branch_ownership: exclusive
+start_from_sha: c89d85fa8e2e30e0c4dffc43a6b65675353afc52
+start_from_sha_vi_sao: 'Head PR #600 (r5 vong 7). r6 xay TREN toan bo r1..r5, va A42
+  phai do delta trong DUNG bang dot bien ma r5 de lai.'
+reviewed_sha_required: c89d85fa8e2e30e0c4dffc43a6b65675353afc52
+reviewed_sha_required_note: Mo neo SAN luc cap. Moi luot cross-review PHAI ghi exact
+  reviewed_sha cua head THAT luc ay.
+write_set:
+- ops/nhanh_don_duoc_test.py
+write_set_MOT_DUONG: MOT tep. Trong tran ADR-0044:5 cho class sensitive ve SO TEP.
+TRAN_DONG_THEM: 1000
+TRAN_DONG_THEM_vi_sao: 'Chu kho cap mien tru cho #568 ("Nang tran len 10" = 1000 dong
+  them, chot lai bang mot cau hoi truc tiep). Van ban ADR-0044 VAN doc 300 cho class
+  sensitive - day la MIEN TRU CHO MOT GOI, khong phai nguong moi cua kho.'
+cam_tuyet_doi:
+- Bo hoac vo hieu hoa mot ca test de lam xanh.
+- Cap GIET khi thieu bang chung duong rang con DA CHAY - phai la KHONG DO DUOC, khong
+  duoc lam tron ve GIET lan ve hong.
+- Dung mot HANG SO nam trong tep lam bang chung "con da chay". Ke viet dot bien go
+  duoc no.
+- Chi kiem MOT chieu cua A37. Thieu A38 thi mot trien khai LUON tra KHONG DO DUOC
+  se xanh.
+- Chay cross-review ma khong chuyen huong stdin tu /dev/null.
+- Khai cross_approved khi luot codex tren head ung vien chua tra approve.
+- Tu cap lease, tu mo rong closure, tu noi TRAN_DONG_THEM.
+- Day mot tep lease hay spec ma chua DO kich thuoc va chua phan tich duoc YAML.
+khong_duoc_cham:
+- ops/nhanh_don_duoc.py
+- ops/lease_publish.py
+- ops/lease_publish_test.py
+- ops/bien_nhan_v2.py
+- ops/bien_nhan_v2_test.py
+- .claude/dev/packet_loop_test.py
+- .claude/dev/launcher_test.py
+- docs/PROTOCOL_DA_PHIEN.md
+- docs/adr/0044-nguong-kich-thuoc-packet-theo-do-luong.md
+- ops/specs/chan-doan-tin-dung-gia-r1.md
+- ops/specs/chan-doan-tin-dung-gia-r2.md
+- ops/specs/chan-doan-tin-dung-gia-r3.md
+- ops/specs/chan-doan-tin-dung-gia-r4.md
+- ops/specs/chan-doan-tin-dung-gia-r5.md
+- ops/specs/chan-doan-tin-dung-gia-r6.md
+- ops/specs/dau-phien-trung-lam-do-cong-r1.md
+- .github/workflows/ci.yml
+- .claude/dev/launcher.py
+- .claude/dev/packet_loop.py
+- scripts/tl.py
+- scripts/tl_selftest.py
+- RELEASE_MANIFEST.json
+khong_duoc_cham_vi_sao: ops/nhanh_don_duoc_test.py KHONG nam trong danh sach nay -
+  no LA write set.
+hinh_dang_ke_thua:
+  LOI-KHAI-RONG-HON-PHEP-DO: 9
+  TIN-HIEU-DO-CHINH-MA-TEST-GIA-MAO: 6
+  VA-DUNG-CHO-DUOC-CHI-ROI-BO-SOT-DUONG-THU-BA: 2
+  CHOT-CAM-THU-DAC-TA-KHONG-DOI: 2
+  BO-TUONG-DUONG-DO-CHINH-EXECUTOR-DUNG: 2
+  nguon: Chep tu r5-g1, cong nhung gi bon luot cross-review va chinh executor do them.
+  VI_SAO_LOI_KHAI_LEN_9: 'Executor khai "CI khong chay tep nay o bat ky job nao",
+    dua tren mot phep grep ten tep trong .github/workflows/. Lenh ay chi tim ten VIET
+    THANG trong YAML; job gate-registry kham pha tep qua REGISTRY va CO chay no day
+    du ca bang dot bien. Doc mot phep do HEP thanh mot ket luan RONG. Da dinh chinh
+    cong khai tren PR #600.'
+  VI_SAO_TIN_HIEU_GIA_MAO_LEN_6: Chinh P1 nay. Va lan truoc do la bo_qua doc nguoc
+    tu van ban than, do chinh ban va cua executor o luot 1 de ra.
+  HINH_DANG_MOI_BO_TUONG_DUONG_DO_CHINH_EXECUTOR_DUNG: Executor da HAI LAN dung mot
+    dot bien khong phan biet duoc bang bat ky dau vao nao. Ca hai da bo va ghi ly
+    do tai cho.
+  CO_HOI_TAI_PHAT_DA_BIET: A37 mot chieu. Neu chi kiem "phan chung gia mao phai do"
+    ma bo A38 ("dau vao binh thuong van phai duoc GIET"), thi mot trien khai LUON
+    tra KHONG DO DUOC se XANH - va loi khai "bo cham nay doi bang chung" lai rong
+    hon phep do, tuc LOI-KHAI-RONG-HON-PHEP-DO lan thu MUOI.
+execution_surface: codex_desktop
+transport: machine
+review_policy_note: Historical Claude-specific review instructions do not authorize
+  self-review. No CI until merge readiness.

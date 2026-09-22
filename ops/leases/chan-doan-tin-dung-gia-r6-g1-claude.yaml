@@ -154,3 +154,6 @@ hinh_dang_ke_thua:
     ("dau vao binh thuong van phai duoc GIET"), thi mot trien khai LUON tra KHONG DO DUOC se
     XANH - va loi khai "bo cham nay doi bang chung" lai rong hon phep do, tuc
     LOI-KHAI-RONG-HON-PHEP-DO lan thu MUOI.'
+
+# Explicit owner transfer instruction, Codex task 01a0c978-e49e-7de1-a05c-e99215f53b2e
+da_bi_thay_the: chan-doan-tin-dung-gia-r7-g2-codex

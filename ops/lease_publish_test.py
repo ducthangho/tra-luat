@@ -4390,13 +4390,13 @@ def _kho_do_thi(tmp: Path):
     cay = tmp / "kho"
     cay.mkdir()
     _g_a0(cay, "init", "-q", "-b", "master")
-    (cay / "README.md").write_text("nen\n", encoding="utf-8")
+    (cay / "README.md").write_bytes("nen\n".encode("utf-8"))
     _g_a0(cay, "add", "-A"); _g_a0(cay, "commit", "-qm", "c0")
-    (cay / "docs").mkdir(); (cay / "docs" / "a.md").write_text("a\n", encoding="utf-8")
+    (cay / "docs").mkdir(); (cay / "docs" / "a.md").write_bytes("a\n".encode("utf-8"))
     _g_a0(cay, "add", "-A"); _g_a0(cay, "commit", "-qm", "c1")
     (cay / "ops" / "leases").mkdir(parents=True)
-    (cay / "ops" / "leases" / "x.yaml").write_text("lease_id: x\n", encoding="utf-8")
-    (cay / "ops" / "lease_publish.py").write_text("# bộ kiểm giả tại S\n", encoding="utf-8")
+    (cay / "ops" / "leases" / "x.yaml").write_bytes("lease_id: x\n".encode("utf-8"))
+    (cay / "ops" / "lease_publish.py").write_bytes("# bộ kiểm giả tại S\n".encode("utf-8"))
     _g_a0(cay, "add", "-A"); _g_a0(cay, "commit", "-qm", "c2")
     shas = _g_a0(cay, "rev-list", "--reverse", "HEAD").split()
     return cay, shas
@@ -5738,9 +5738,14 @@ def t150_review2_F10_nguon_khong_utf8_la_12_khong_traceback():
         cay, g = _kho_thu(s)
         g(cay, "checkout", "-q", "-b", "ten-hong")
         d = cay / "ops" / "thu-hoi"; d.mkdir(parents=True)
-        with open(str(d).encode("utf-8") + b"/thu\xe9.yaml", "wb") as f:
-            f.write(b"x: 1\n")
-        g(cay, "add", "-A"); g(cay, "commit", "-qm", "ten non-utf8")
+        # Construct a raw Git path without requiring invalid UTF-8 filenames
+        # to be representable by the native Windows filesystem.
+        blob = subprocess.run(["git", "-C", str(cay), "hash-object", "-w", "--stdin"],
+                              input=b"x: 1\n", capture_output=True, check=True).stdout.strip()
+        subprocess.run(["git", "-C", str(cay), "update-index", "-z", "--index-info"],
+                       input=b"100644 " + blob + b"\tops/thu-hoi/thu\xe9.yaml\0",
+                       capture_output=True, check=True)
+        g(cay, "commit", "-qm", "ten non-utf8")
         g(cay, "push", "-q", "origin", "ten-hong")
         try:
             rc, o, e = _goi_main(mod, "ai-dang-giu", "ops/x.md", "--root", cay)
@@ -7041,6 +7046,41 @@ def _nhat_ky_ca(*phan) -> None:
     """
     print(*phan, flush=True)
 
+
+@ca
+def t174_GOI_GIT_giai_ma_dong_bo_va_giu_hop_dong_text():
+    """Real subprocess bytes: strict errors reach the caller, never a reader thread."""
+    import contextlib
+    import io
+    from unittest import mock
+    mod = _nap_cong()
+    real_run = subprocess.run
+    valid_out = "Tiếng Việt\r\ndòng hai\r".encode("utf-8")
+    valid_err = "cảnh báo\r\n".encode("utf-8")
+    for out_bytes, err_bytes, bad in ((valid_out, valid_err, False),
+                                      (b"\xff", b"", True),
+                                      (b"ok\n", b"\xff", True)):
+        script = ("import os,sys; "
+                  f"sys.stdout.buffer.write(bytes.fromhex('{out_bytes.hex()}')); "
+                  f"sys.stderr.buffer.write(bytes.fromhex('{err_bytes.hex()}')); "
+                  "sys.exit(7)")
+        def child(args, **kwargs):
+            chot(args == ["git", "probe"], "real subprocess adapter argv")
+            return real_run([sys.executable, "-c", script], **kwargs)
+        error = None
+        with contextlib.redirect_stderr(io.StringIO()) as captured:
+            with mock.patch.object(mod.subprocess, "run", side_effect=child):
+                try:
+                    result = mod.GOI_GIT("probe")
+                except UnicodeDecodeError as exc:
+                    error = exc
+        chot("Traceback" not in captured.getvalue(), "decoder leaked reader-thread traceback")
+        if bad:
+            chot(error is not None, "invalid UTF-8 must raise synchronously")
+        else:
+            chot(error is None and result.returncode == 7
+                 and result.stdout == "Tiếng Việt\ndòng hai\n"
+                 and result.stderr == "cảnh báo\n", "text/returncode contract changed")
 
 def main() -> int:
     qua, hong, bo_qua = 0, [], []

@@ -3280,6 +3280,20 @@ def r539_bang_chung_phai_den_tu_con_chay_that(d: Path):
             chot(f"KHONG DO DUOC: {name}" in text, "r539")
             chot(f"{name} | r515 | 1/1" not in text, "r539")
 
+    # Completion-destroying mutations cannot earn credit: their own proof is
+    # necessarily incomplete. Keep the exact mutation as a required negative
+    # protocol control, outside the table whose entries must all earn GIET.
+    fixture = Path(m.__file__)
+    fixture.write_text(fixture.read_text(encoding="utf-8").replace(entry, real + entry),
+                       encoding="utf-8", newline="\n")
+    m.DOT_BIEN_TU_KIEM = [("tk-drop-completion", ("r515",),
+                          "            completed." + "append(ten)", "            pass")]
+    with contextlib.redirect_stdout(io.StringIO()) as out:
+        missing = m.chay_dot_bien_tu_kiem()
+    chot(missing == (0, 0, 1), "r539")
+    chot("ca do THUC TE: r515" in out.getvalue(), "r539")
+    chot("KHONG DO DUOC: tk-drop-completion" in out.getvalue(), "r539")
+
 
 def r540_so_hang_va_bang_chung_phai_nhat_quan(d: Path):
     """A40 plus malformed channel data: every bad field stays unmeasurable."""
@@ -3410,7 +3424,6 @@ DOT_BIEN_TU_KIEM = [
     ('tk-duplicate-diagnostic', ('r540',), '    if len(failed) != len(set(failed)) or not set(failed) <= set(expected):', '    if not set(failed) <= set(expected):'),
     ('tk-unknown-diagnostic', ('r540',), '    if len(failed) != len(set(failed)) or not set(failed) <= set(expected):', '    if len(failed) != len(set(failed)):'),
     ('tk-always-unmeasurable', ('r516', 'r525', 'r530', 'r539', 'r540', 'r542'), '    return total - passed == len(failed)', '    return False'),
-    ('tk-drop-completion', ('r539', 'r542'), '            completed.append(ten)', '            pass'),
     ('tk-main-ignore-unmeasurable', ('r541',), '    if tk_khong_do:', '    if False:'),
     ("bo-phan-biet-lop-ngoai-le", ("r501", "r504", "r518"),
      "if any(n == NHAN_DO_KHAC for n in theo_ca.values()):", "if False:"),

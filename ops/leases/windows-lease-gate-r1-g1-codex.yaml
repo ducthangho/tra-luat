@@ -13,7 +13,10 @@ granted_on_instruction_nguyen_van: Tôi là chủ kho, nếu cần thu hồi lea
   cứ phương án nào khả thi để merge và land thì đề xuất và thực hiện cho tôi. Đọc
   kỹ skill
 leased_at_utc: '2026-09-22T17:51:03.593394+00:00'
-lease_expires_at_utc: '2026-09-23T14:37:00Z'
+# Owner-authorized closure after canonical gate35771091590 attempt2 passed.
+# Authority: https://github.com/ducthangho/tra-luat/issues/607#issuecomment-5781691130
+# Previous expiry: 2026-09-23T14:37:00Z; original grant preserved in Git history.
+lease_expires_at_utc: '2026-09-23T00:21:35Z'
 role: executor
 provider: openai_codex
 executor: codex

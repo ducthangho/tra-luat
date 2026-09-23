@@ -572,6 +572,19 @@ def chay_dot_bien():
     return dat, khong_giet, khong_do
 
 
+# #593 r1 / M3 — `stderr[-200:]` cat tu DAU. Huong cat la CO Y (nguyen nhan that
+# nam o CUOI stderr) va KHONG doi o day; nhung cat ma khong noi da bo bao nhieu
+# la cung lop voi `_goi_chan_doan` truoc #568: nguoi doc log khong biet minh
+# dang thieu gi. Nhan chi sinh KHI CO cat — `r544` do ca hai chieu.
+TRAN_DUOI_STDERR = 200
+
+
+def _khai_cat_dau_stderr(stderr: str) -> str:
+    """Nhan KHAI so ky tu DAU da bo khi `stderr` dai hon tran; RONG khi khong cat."""
+    bo = len(stderr) - TRAN_DUOI_STDERR
+    return f" …[CAT {bo} ky tu dau]" if bo > 0 else ""
+
+
 def chay_mot_mutant(ban_sao: Path, ten: str, dich):
     """M3 — `KHONG DO DUOC` thi chay lai DUNG MOT lan. Khong bao gio qua 2.
 
@@ -646,7 +659,9 @@ def chay_mot_mutant(ban_sao: Path, ten: str, dich):
         if trang_thai == KHONG_DO_DUOC:
             # F09 — giu chi tiet ngoai le, khong chi giu ten ca: chinh chi tiet ay
             # la du kien can de chan doan "khong do duoc" o lan thu hai.
-            ly_do = f"{ly_do} | rc_con={p.returncode} | stderr[-200:]={p.stderr[-200:]!r}"
+            ly_do = (f"{ly_do} | rc_con={p.returncode} | "
+                     f"stderr[-{TRAN_DUOI_STDERR}:]={p.stderr[-TRAN_DUOI_STDERR:]!r}"
+                     + _khai_cat_dau_stderr(p.stderr))
         if trang_thai != KHONG_DO_DUOC:
             return trang_thai, ly_do, lan_thu
     return trang_thai, ly_do, 2
@@ -2603,6 +2618,45 @@ def r527_tien_de_hai_dau_phien_phai_do_duoc_ba_trang_thai(d: Path):
         chot(a != b, "r527")
 
 
+def _chay_r508_tach_nguon_do(m, d: Path, so_luot: int) -> int:
+    """#593 r1 / M1+M2 — chay CHINH `r508` cua ban sao `m` `so_luot` lan, TACH BA NGUON DO.
+
+    Benh (TIEN-DE-HA-TANG-KHONG-DUOC-THANH-CHOT, do tren 18d42ca): vong (c2) cua
+    `r528` bat `BaseException` va dem MOI ngoai le vao `do`, nen 2000 lan
+    `OSError(28)` tiem vao `_kenh_tam` ra `chot cua ca r528 that bai` — mot chot
+    THUOC TINH trong khi khong do duoc thuoc tinh nao, va nguyen nhan "dia day"
+    MAT khoi thong bao. Doi chung duong, cung do ga, khong tiem: r528 DAT (2,0 s).
+
+    Ba nguon do, ba cach xu, bat HEP theo loai — KHONG `except Exception` o day:
+      · `TinHieuChotCa` cua ca long -> dem vao `do`: thuoc tinh SAI, ra DO_CHOT
+      · `OSError` va con chau (dia day, het fd, het quyen) -> KHONG DO DUOC,
+        mang LOAI + THONG DIEP + SO LAN, qua `TinHieuKhongDoDuoc`
+      · moi thu khac (NameError, TypeError...) -> THOAT RA nguyen ven: mot loi
+        lap trinh khong duoc bien thanh mot con so.
+    Tra so lan chot cua `r508` that bai. `r543` do ca bon duong tren CHINH ham nay.
+    """
+    do = 0
+    ha_tang: dict[str, list] = {}
+    for i in range(so_luot):
+        thu = d / f"r508-{i}"
+        try:
+            thu.mkdir(parents=True, exist_ok=True)
+            m.r508_ban_ghi_luot_TRUOC_chi_khac_dau_phien(thu)
+        except m.TinHieuChotCa:
+            do += 1
+        except OSError as loi_ha_tang:
+            ghi = ha_tang.setdefault(type(loi_ha_tang).__name__, [str(loi_ha_tang), 0])
+            ghi[1] += 1
+    if ha_tang:
+        chi_tiet = "; ".join(f"{loai}: {msg} ({n} lan)" for loai, (msg, n) in ha_tang.items())
+        # Gan roi `raise`: viet thang `raise TinHieuKhongDoDuoc(` o day se lam neo
+        # cua muc `dau-phien-can-tran-ma-lang-le-tra-cap-trung` het DUY NHAT ngoai bang.
+        khong_do = TinHieuKhongDoDuoc(
+            f"tien de ha tang cua r528 (c2) hong trong {so_luot} luot — {chi_tiet}")
+        raise khong_do
+    return do
+
+
 def r528_tien_de_khong_con_chap_duoi_chinh_dot_bien(d: Path):
     """#593 A9 — CHOT DUY NHAT chung minh benh DA HET, va no phai co doi chung.
 
@@ -2661,14 +2715,10 @@ def r528_tien_de_khong_con_chap_duoi_chinh_dot_bien(d: Path):
 
     m._hai_dau_phien_phan_biet = dem_goi
     N508 = 2000
-    do = 0
-    for i in range(N508):
-        thu = d / f"r508-{i}"
-        thu.mkdir(parents=True, exist_ok=True)
-        try:
-            m.r508_ban_ghi_luot_TRUOC_chi_khac_dau_phien(thu)
-        except BaseException:
-            do += 1
+    # #593 r1 — vong (c2) nam trong `_chay_r508_tach_nguon_do`: loi HA TANG ra
+    # KHONG DO DUOC mang nguyen nhan, khong con bi `except BaseException` dem
+    # vao `do` (do tren 18d42ca: 2000 x OSError(28) -> "chot cua ca r528 that bai").
+    do = _chay_r508_tach_nguon_do(m, d, N508)
     chot(dem["n"] == N508, "r528")   # (c1) ca THAT co di qua bo tien de
     chot(do == 0, "r528")            # (c2) va khong chap lan nao
 
@@ -3362,6 +3412,102 @@ def r542_kenh_hoan_tat_khong_duoc_xoa_chan_doan(d: Path):
     chot(text.count("TU KIEM XONG: ROOT-CAUSE-MUST-SURVIVE") == 2, "r542")
 
 
+def r543_tien_de_ha_tang_cua_r528_phai_ra_trang_thai_thu_ba(d: Path):
+    """#593 r1 / A1-A4 — vong (c2) cua `r528` phai tach BA nguon do; do tren CHINH ham no goi.
+
+    Tai lap tren 18d42ca (do ga: `_kenh_tam` nem `OSError(28)`): 2000 loi ha tang
+    bi `except BaseException` nuot thanh `chot cua ca r528 that bai`, 'dia day'
+    mat. Doi chung duong cung do ga: r528 DAT trong 2,0 s.
+
+    Bon chieu, moi chieu mot DAU VAO rieng — thieu chieu nao thi mot trien khai
+    "luon KHONG DO DUOC" (thieu A2) hay "moi thu deu la chot" (thieu A1/A4) van xanh:
+      A2  khong tiem gi              -> 0 lan do, khong ngoai le
+      A1  OSError(28) o `_kenh_tam`  -> KHONG DO DUOC mang LOAI + THONG DIEP + SO LAN
+          = N, KHONG phai DO_CHOT; hai loai XEN KE -> ke RIENG tung loai, moi loai N/2
+      A3  chot cua r508 that bai     -> dem = N, khong ngoai le
+      A4  NameError trong r508       -> THOAT RA nguyen ven, khong thanh con so
+    N nho: ca nay do PHAN LOAI chu khong do xac suat, va so lan khai phai BANG N.
+    """
+    m = _nap_ban_sao(d)
+    # Y HET r528: bo sinh 256 cua `entropy-giu-mot-byte`, de r508 di qua tien de that.
+    m.sinh_dau_phien = lambda: secrets.token_hex(16)[-2:] * 16
+    N = 8
+    goc = {"_kenh_tam": m._kenh_tam, "doc_kenh": m.doc_kenh}
+
+    def chay(ten, **thay):
+        """Goi ham THAT cua ban sao. Ba duong ra duoc ky vong tra ve co nhan; moi
+        duong ra KHAC la chot cua CHINH ca nay do — nep r517/r520, khong de mot
+        ngoai le la thoat ra thanh DO_KHAC roi bi xep la TIN DUNG GIA."""
+        for k, v in {**goc, **thay}.items():
+            setattr(m, k, v)
+        try:
+            return "tra", m._chay_r508_tach_nguon_do(m, d / ten, N)
+        except m.TinHieuKhongDoDuoc as e:
+            return "kdd", str(e)
+        except NameError as e:
+            return "lap-trinh", str(e)
+        except Exception as exc:                  # noqa: BLE001
+            raise TinHieuChotCa(f"chot cua ca r543 that bai: duong ra la {type(exc).__name__}: {exc}")
+
+    def nem(tao):
+        def hong(*a, **k):
+            raise tao()
+        return hong
+
+    # A2 — doi chung duong: khong tiem gi thi r508 THAT chay tron N lan.
+    chot(chay("sach") == ("tra", 0), "r543")
+    # A1 — dia day o tien de: KHONG DO DUOC mang loai + thong diep + so lan; KHONG DO_CHOT.
+    tt, ly = chay("day", _kenh_tam=nem(lambda: OSError(28, "No space left on device")))
+    chot(tt == "kdd", "r543")
+    chot(f"OSError: [Errno 28] No space left on device ({N} lan)" in ly, "r543")
+    chot(f"trong {N} luot" in ly, "r543")
+    # A1b — hai loai xen ke: moi loai duoc ke RIENG voi so lan cua no.
+    dem = {"i": 0}
+
+    def xen_ke(*a, **k):
+        dem["i"] += 1
+        raise (PermissionError(13, "Permission denied") if dem["i"] % 2
+               else FileNotFoundError(2, "No such file"))
+    tt, ly = chay("xen-ke", _kenh_tam=xen_ke)
+    chot(tt == "kdd", "r543")
+    chot(f"PermissionError: [Errno 13] Permission denied ({N // 2} lan)" in ly, "r543")
+    chot(f"FileNotFoundError: [Errno 2] No such file ({N // 2} lan)" in ly, "r543")
+    # A3 — chot cua ca long that bai: dem vao `do`, KHONG ngoai le.
+    chot(chay("chot", doc_kenh=lambda *a, **k: (m.GIET, "")) == ("tra", N), "r543")
+    # A4 — loi lap trinh: thoat ra nguyen ven, khong thanh con so.
+    tt, ly = chay("lap-trinh", _kenh_tam=nem(lambda: NameError("ten_khong_ton_tai")))
+    chot(tt == "lap-trinh" and "ten_khong_ton_tai" in ly, "r543")
+
+
+def r544_stderr_cat_dau_phai_khai_so_ky_tu_bi_bo(d: Path):
+    """#593 r1 / M3 + A5 — `stderr[-200:]` cat tu dau ma khong noi da bo bao nhieu.
+
+    Hai chieu tren HAM, roi mot lan tren DUONG THAT (`chay_mot_mutant` voi `run`
+    gia tra stderr dai): do ham ma khong do duong thi mot ban va quen goi ham van
+    xanh (L1 — do CHINH duong ra quyet dinh, khong do ban sao).
+      (1) stderr dai TRAN + 37 -> nhan ` …[CAT 37 ky tu dau]`
+      (2) stderr bang tran / rong -> KHONG nhan nao
+      (3) duong that: `ly_do` KHONG DO DUOC giu DUOI (huong cat khong doi) VA khai dau
+    """
+    m = _nap_ban_sao(d)
+    T = m.TRAN_DUOI_STDERR
+    dai = "d" * 37 + "c" * T
+    chot(m._khai_cat_dau_stderr(dai) == " …[CAT 37 ky tu dau]", "r544")   # (1)
+    chot(m._khai_cat_dau_stderr("c" * T) == "", "r544")                   # (2)
+    chot(m._khai_cat_dau_stderr("") == "", "r544")
+    # (3) — `run` gia tra stderr dai, `doc_kenh` gia tra KHONG DO DUOC (nep r522).
+    m.run = lambda args, cwd, check=True, env=None: subprocess.CompletedProcess(args, 1, "", dai)
+    m.doc_kenh = lambda *a, **k: (m.KHONG_DO_DUOC, "kenh khong ton tai")
+    bs = d / "bs"
+    bs.mkdir()
+    try:
+        tt, ly, _ = m.chay_mot_mutant(bs, "x", ("T1",))
+    except Exception as exc:                  # noqa: BLE001 — phan hang, nep r520
+        raise TinHieuChotCa(f"chay_mot_mutant nem {type(exc).__name__}: {exc}")
+    chot(tt == m.KHONG_DO_DUOC, "r544")
+    chot(f"stderr[-{T}:]={('c' * T)!r} …[CAT 37 ky tu dau]" in ly, "r544")
+
+
 TU_KIEM = [
     ("r542", r542_kenh_hoan_tat_khong_duoc_xoa_chan_doan, True),
     ("r539", r539_bang_chung_phai_den_tu_con_chay_that, True),
@@ -3405,6 +3551,8 @@ TU_KIEM = [
     ("r536", r536_con_khong_duoc_doat_so_do_cua_cha, True),
     ("r537", r537_chuan_hoa_than_khong_duoc_sua_noi_dung, True),
     ("r538", r538_bien_phai_cua_nhan_phai_co, True),
+    ("r543", r543_tien_de_ha_tang_cua_r528_phai_ra_trang_thai_thu_ba, True),
+    ("r544", r544_stderr_cat_dau_phai_khai_so_ky_tu_bi_bo, True),
 ]
 
 # ---- A6: MOI ca tu kiem phai co MOT dot bien rieng lam no DO --------------
@@ -3446,7 +3594,10 @@ DOT_BIEN_TU_KIEM = [
     # `sinh_dau_phien` — thu ma `r528` de len bang bo sinh cua rieng no. Hai muc
     # phan biet duoc bang dau vao, khong phai bo tuong duong.
     # Ca ba deu chet bang DO_CHOT — chot cua chinh chung.
-    ("bo-so-dau-phien", ("r508", "r509", "r528"),
+    # #593 r1 — `r543` cung chet (DO tu luot day du, khong chep tay): doi chung duong A2
+    # cua no chay `r508` THAT N lan, nen moi dot bien lam r508 do deu lam A2 do. Cung
+    # le voi `dau-phien-ha-tran-xuong-khong`.
+    ("bo-so-dau-phien", ("r508", "r509", "r528", "r543"),
      '    neo = {"dau_phien": dau_phien, "mutant": mutant, "lan_thu": lan_thu}',
      '    neo = {"mutant": mutant, "lan_thu": lan_thu}'),
     # r508 cung do: dau theo moc giay thi ph_that va ph_khac cua r508 TRUNG nhau
@@ -3858,7 +4009,7 @@ DOT_BIEN_TU_KIEM = [
     ("dau-phien-r508-khong-di-qua-bo-tien-de", ("r528",),
      "        ph_that, ph_khac = _hai_dau_phien_phan_biet()",
      "        ph_that, ph_khac = sinh_dau_phien(), sinh_dau_phien()"),
-    ("dau-phien-ha-tran-xuong-khong", ("r508", "r527", "r528"),
+    ("dau-phien-ha-tran-xuong-khong", ("r508", "r527", "r528", "r543"),
      "TRAN_RUT_DAU_PHIEN = 64", "TRAN_RUT_DAU_PHIEN = 0"),
     ("bo-chuan-hoa-ban-sao", ("r523",),
      "    ban_sao = Path(ban_sao).resolve()",
@@ -4027,6 +4178,31 @@ DOT_BIEN_TU_KIEM = [
      '                print(f"TU KIEM {ten}: DO_KHAC',
      '            except Exception as exc:\n'
      '                print(f"TU KIEM {ten}: DO_KHAC'),
+    # #593 r1 — TIEN-DE-HA-TANG-KHONG-DUOC-THANH-CHOT. Bay muc canh `_chay_r508_tach_nguon_do`
+    # (r543) va ba muc canh `_khai_cat_dau_stderr` + duong that (r544). Tung cap phan
+    # biet duoc bang DAU VAO (ghi o docstring r543/r544), khong cap nao la bo tuong duong.
+    # `dich` DO tu luot day du, khong chep tay.
+    ("r528-ha-tang-dem-vao-do", ("r543",),
+     "        except m.TinHieuChotCa:\n            do += 1\n        except OSError as loi_ha_tang:",
+     "        except (m.TinHieuChotCa, OSError):\n            do += 1\n        except _KhongBaoGioXayRa as loi_ha_tang:"),
+    ("r528-ha-tang-bat-rong", ("r543",),
+     "        except OSError as loi_ha_tang:", "        except Exception as loi_ha_tang:"),
+    ("r528-ha-tang-bo-dem-chot-long", ("r543",),
+     "        except m.TinHieuChotCa:\n            do += 1", "        except m.TinHieuChotCa:\n            pass"),
+    ("r528-ha-tang-khong-ra-trang-thai-thu-ba", ("r543",),
+     "    if ha_tang:\n        chi_tiet", "    if False:\n        chi_tiet"),
+    ("r528-ha-tang-mat-so-lan", ("r543",), "            ghi[1] += 1", "            ghi[1] = 1"),
+    ("r528-ha-tang-mat-thong-diep", ("r543",),
+     'f"{loai}: {msg} ({n} lan)"', 'f"{loai} ({n} lan)"'),
+    ("r528-ha-tang-gop-mot-loai", ("r543",),
+     "ha_tang.setdefault(type(loi_ha_tang).__name__, [str(loi_ha_tang), 0])",
+     'ha_tang.setdefault("OSError", [str(loi_ha_tang), 0])'),
+    ("stderr-cat-khong-khai", ("r544",),
+     '    return f" …[CAT {bo} ky tu dau]" if bo > 0 else ""', '    return ""'),
+    ("stderr-khai-ca-khi-khong-cat", ("r544",),
+     '    return f" …[CAT {bo} ky tu dau]" if bo > 0 else ""', '    return f" …[CAT {bo} ky tu dau]"'),
+    ("stderr-duong-that-bo-khai", ("r544",),
+     "                     + _khai_cat_dau_stderr(p.stderr))", '                     + "")'),
 ]
 
 
@@ -4041,8 +4217,9 @@ NHOM_BAT_BUOC = frozenset({"r501", "r502", "r503", "r504", "r505", "r506",
                            "r531", "r532", "r533", "r534", "r535",
                            "r536", "r537", "r538"})
 NHOM_BAT_BUOC = NHOM_BAT_BUOC | {"r539", "r540", "r541", "r542"}
+NHOM_BAT_BUOC = NHOM_BAT_BUOC | {"r543", "r544"}      # #593 r1
 
-SAN_NHOM = 42
+SAN_NHOM = 44
 
 
 # #568 r4 / B1 — `str.splitlines()` coi CHIN ky tu NGOAI `\n` la het dong, con

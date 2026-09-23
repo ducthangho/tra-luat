@@ -105,6 +105,18 @@ reviewer_vi_sao: 'Chu kho chi dinh: "Review codex gpt-6-astra, effort medium" �
   (fable / claude-fable-5-1, effort medium) theo dung nguyen tac "review bang phien ban hoac
   effort cao hon". Bon vong truoc chay tren ban codex mac dinh cua kho.'
 reviewer_independence: 'fresh session/context/checkout; khong fork context cua executor.'
+reviewer_model_muc_bang_chung: khai_co_audit
+reviewer_model_vi_sao_KHONG_PHAI_do_may: 'DO 2026-09-23T08:4xZ, va ket qua la KHONG DO DUOC —
+  khai thang thay vi de nguoi doc tuong da xac minh. Bo noi codex tren GitHub in DUNG hai truong
+  trong bang tom tat: `Commit` va `Review trigger`. KHONG in model, KHONG in effort. Cach kich
+  hoat duy nhat duoc tai lieu hoa la comment "@codex review" / "@codex security review"; viec
+  CHON model nam o chatgpt.com/codex/cloud/settings/general, tuc thiet lap CUA CHU KHO o cap to
+  chuc, khong phai thu phien nay goi duoc tu mot comment.
+  HE QUA: phien SE ghi yeu cau "gpt-6-astra, effort medium" vao than comment goi review, nhung
+  KHONG duoc phep khai rang luot review DA chay bang model ay. Muon len muc `do_may` thi chu kho
+  phai dat model o trang thiet lap tren, hoac cung cap mot nguon in ra model da phuc vu luot chay.
+  PROTOCOL §562 co san ba muc cho dung viec nay; day la muc giua, va no TU KHAI la yeu hon
+  `do_may` ngay tai cho dung.'
 cross_reviewer_requirement: 'CAM self_review va self_approve. Phien soan lease nay LA tac gia
   ban va; moi verdict phien dang la BAN GHI, khong phai mot phieu duyet.'
 

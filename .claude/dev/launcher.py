@@ -171,6 +171,8 @@ _PROVIDER_NGOAI_CLI = (
     # và Antigravity là hàng DUY NHẤT còn lệch.
     ("google_antigravity", "antigravity", "machine/local"),
     ("openai_chatgpt", "chatgpt_web", "human_mediated"),
+    # WP610: Desktop khai đúng bề mặt; không là CLI hoặc bằng chứng model/assurance.
+    ("openai_codex", "codex_desktop", "machine"),
     # Human Auditor — bộ ba chép từ bảng provider chuyển tiếp
     # (`ops/KE_HOACH_THI_CONG_DA_PROVIDER.md` §2, hàng "Human Auditor"). Cross-review PR #455
     # lượt 7 (`R7-02`) đo được: `human` từng bị bộ kiểm biên nhận chép tay vào tập "KHÔNG hợp

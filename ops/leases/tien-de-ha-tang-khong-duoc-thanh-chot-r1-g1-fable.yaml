@@ -1,0 +1,140 @@
+# LEASE - TIEN-DE-HA-TANG-KHONG-DUOC-THANH-CHOT revision 1 / generation 1
+# Goi #593. Executor FABLE. Ghi HO theo chi thi chu kho.
+#
+# DOC KY TRUOC KHI LAM: goi nay dong DUNG MOT LOP - tien de ha tang hong bi doi
+# thanh mot chot thuoc tinh. No KHONG hua quet het `except Exception` trong tep.
+
+schema_version: 2
+event: executor_lease_granted
+packet_issue: 593
+packet_id: TIEN-DE-HA-TANG-KHONG-DUOC-THANH-CHOT
+mission_issue: KHONG_CO
+revision: 1
+generation: 1
+lease_id: tien-de-ha-tang-khong-duoc-thanh-chot-r1-g1-fable
+thay_the_cho: KHONG_CO
+thay_the_cho_vi_sao: 'Duong trong. Do truoc khi cap: ai-dang-giu ops/nhanh_don_duoc_test.py
+  tra rc=0 NGUOI_GIU 0 - moi lease cua #568 (r5-g1, r6-g1, r7-g2) va cua #593 (r1-g1) deu
+  HET HAN. Khong ke vi ai, nen truong nay RONG chu khong tro bua vao mot lease da chet.'
+
+granted_by: ducthangho
+granted_on_instruction_nguyen_van: 'Chu kho, phien dieu phoi 2026-09-23, GO VAN XUOI:
+  "Soan dac ta di. Sau do xu ly r528, cap lease neu can. Cach lam: Khi thuc thi cac #, thuc hien
+  nhu sau: lap va, review bang codex phien ban hoac effort cao hon, co hint patch voi cac van de
+  phuc tap theo huong dan, phan theo lop loi, khong phan loi rieng le, dang verdict, cho toi khi
+  het P1, P2, P3. Khong chay CI, full CI cho toi khi du dieu kien merge. Khong can CI Windows do
+  loi da biet tu truoc. Xu ly tat ca PR khac theo nguyen tac toi vua dua ra.
+  Executor: fable 5.1, effort low. Review codex gpt-6-astra, effort low."'
+recorded_by: claude-session
+recorder_is_dispatcher: false
+
+NGUON_CAP_VIEC: 'Cross-review codex luot 4 tren 8de4e66 (#568 r5) dat ten lop nay va dua phan
+  chung. Executor TAI LAP tren master 18d42ca sau khi #606 da merge: 2000 loi ha tang bi nuot
+  thanh MOT chot thuoc tinh cua r528, nguyen nhan "dia day" mat khoi thong bao. Doi chung duong:
+  khong tiem gi thi r528 DAT trong 1,2 s va chot (c1) dem["n"] == 2000 DAT.'
+
+leased_at_utc: '2026-09-23T06:00:00Z'
+lease_expires_at_utc: '2026-09-24T06:00:00Z'
+
+role: executor
+provider: anthropic_claude
+executor: fable
+model: claude-fable-5-1
+model_vi_sao: 'Chu kho chi dinh "fable 5.1". Khong co Fable 7.1; dong Fable hien co la 5.1, va
+  executor da bao dieu do truoc khi cap.'
+effort: low
+effort_vi_sao: 'Chu kho chi dinh "effort low".'
+
+assurance_target: human_audited
+assurance_target_HE_QUA_PHAI_KHAI: 'Packet nay KHONG LAND DUOC BANG MAY. Executor KHONG duoc khai
+  muc nao ho chu kho, va KHONG duoc khai cross_approved.'
+assurance_target_fallback: advisory_review
+
+reviewer_provider: codex
+reviewer_model: gpt-6-astra
+reviewer_effort: low
+reviewer_vi_sao: 'Executor la ho Claude (Fable) nen reviewer PHAI khac ho. Chu kho chi dinh
+  "codex gpt-6-astra, effort low". BA luot cua #568 chay voi reasoning effort NONE, nen "low" la
+  MUC CAO HON da dung - dung y "phien ban hoac effort cao hon". Truyen bang
+  -c model_reasoning_effort=low, va PHAI doc lai banner de xac nhan no an, khong tin la da dat.
+  BAY DA SAP, giu lai: (1) chay NEN thi stdin con mo va codex exec treo den het gio (rc=124, 0 B)
+  - PHAI chuyen huong stdin tu /dev/null; (2) nha cung cap TU CHOI giua chung voi "flagged for
+  possible cybersecurity risk" khi bai soi dung khung TAN CONG - doi sang khung XAC MINH thi chay
+  binh thuong; doi CACH HOI, khong giam NOI DUNG hoi.'
+
+review_class: sensitive
+effective_review_class: sensitive
+review_class_vi_sao: 'Cham vao ca do DUY NHAT chung minh benh #593 da het (r528 / A9).'
+
+spec_ref: ops/specs/tien-de-ha-tang-khong-duoc-thanh-chot-r1.md
+spec_path: ops/specs/tien-de-ha-tang-khong-duoc-thanh-chot-r1.md
+prompt_path: ops/specs/tien-de-ha-tang-khong-duoc-thanh-chot-r1.md
+prompt_sha256_required: bc56d3eebae590370720cc0de7c520208233f2038f37fe37430de382a4a2b24d
+spec_hash: bc56d3eebae590370720cc0de7c520208233f2038f37fe37430de382a4a2b24d
+spec_hash_do_nhu_the_nao: 'sha256sum ops/specs/tien-de-ha-tang-khong-duoc-thanh-chot-r1.md tren
+  nhanh ops/cap-lease-593, 5517 B. Do lai TRUOC khi tin con so nay.'
+
+branch: claude/tien-de-ha-tang-r1
+branch_ownership: exclusive
+
+start_from_sha: 18d42cab74e80fc7635f754323fd13f520ccdcec
+start_from_sha_vi_sao: 'Head master sau khi #606 merge. Goi nay xay tren ban da co bang chung
+  hoan tat cua bo cham.'
+reviewed_sha_required: 18d42cab74e80fc7635f754323fd13f520ccdcec
+
+write_set:
+- ops/nhanh_don_duoc_test.py
+write_set_MOT_DUONG: 'MOT tep. Trong tran ADR-0044:5 cho class sensitive ve SO TEP.'
+
+TRAN_DONG_THEM: 300
+TRAN_DONG_THEM_vi_sao: 'Tran GOC cua ADR-0044:5 cho class sensitive. Goi nay HEP hon #568 nhieu -
+  mot lop, ba muc tieu. KHONG mang theo mien tru 1000 dong cua #568: mien tru ay cap cho MOT GOI,
+  khong phai mot nguong moi cua kho. Cham tran thi DUNG VA BAO, khong tu noi.'
+
+CI_PHAM_VI: 'Chu kho chi thi: khong chay lai CI de xem co xanh khong; chay TRON BO suite tai cho
+  moi vong. KHONG can CI Windows - loi Windows da biet tu truoc va da co #607/#608.'
+
+cam_tuyet_doi:
+- 'Bo hoac vo hieu hoa mot ca test de lam xanh.'
+- 'Dung except BaseException hay except Exception tran o vong (c2) cua r528.'
+- 'Dem mot loi HA TANG vao `do` - no phai ra trang thai THU BA mang nguyen nhan.'
+- 'Chi kiem MOT chieu cua A1. Thieu A2 thi mot trien khai LUON tra KHONG DO DUOC se xanh.'
+- 'Chay cross-review ma khong chuyen huong stdin tu /dev/null.'
+- 'Khai cross_approved khi luot codex tren head ung vien chua tra approve.'
+- 'Tu cap lease, tu mo rong closure, tu noi TRAN_DONG_THEM.'
+- 'Day mot tep lease hay spec ma chua DO kich thuoc va chua phan tich duoc YAML.'
+- 'Chay lai CI de xem no co xanh khong.'
+
+khong_duoc_cham:
+- ops/nhanh_don_duoc.py
+- ops/lease_publish.py
+- ops/lease_publish_test.py
+- ops/bien_nhan_v2.py
+- ops/bien_nhan_v2_test.py
+- .claude/dev/packet_loop_test.py
+- .claude/dev/launcher_test.py
+- .claude/dev/launcher.py
+- .claude/dev/packet_loop.py
+- docs/PROTOCOL_DA_PHIEN.md
+- docs/adr/0044-nguong-kich-thuoc-packet-theo-do-luong.md
+- ops/specs/tien-de-ha-tang-khong-duoc-thanh-chot-r1.md
+- ops/specs/dau-phien-trung-lam-do-cong-r1.md
+- .github/workflows/ci.yml
+- scripts/tl.py
+- scripts/tl_selftest.py
+- RELEASE_MANIFEST.json
+khong_duoc_cham_vi_sao: 'ops/nhanh_don_duoc_test.py KHONG nam trong danh sach nay - no LA write set.'
+
+hinh_dang_ke_thua:
+  LOI-KHAI-RONG-HON-PHEP-DO: 10
+  TIN-HIEU-DO-CHINH-MA-TEST-GIA-MAO: 6
+  VA-DUNG-CHO-DUOC-CHI-ROI-BO-SOT-DUONG-THU-BA: 2
+  CHOT-CAM-THU-DAC-TA-KHONG-DOI: 2
+  BO-TUONG-DUONG-DO-CHINH-EXECUTOR-DUNG: 2
+  VI_SAO_LOI_KHAI_LEN_10: 'Khi do lai r528 tren master, executor grep BaseException CHI trong 40
+    dong sau def r528, ma vong lap nam o dong thu ~65 - roi khai "khong thay nua". Mot phep do HEP
+    doc thanh mot ket luan RONG, lan nay o chinh buoc di tim benh. Da dinh chinh ngay.'
+  CO_HOI_TAI_PHAT_DA_BIET: 'A1 mot chieu. Neu chi kiem "tiem loi ha tang thi phai ra KHONG DO
+    DUOC" ma bo A2 ("khong tiem gi thi van DAT"), thi mot trien khai LUON tra KHONG DO DUOC se
+    XANH - va loi khai "da tach duoc hai nguon do" lai rong hon phep do, tuc
+    LOI-KHAI-RONG-HON-PHEP-DO lan thu MUOI MOT.'

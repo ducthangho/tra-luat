@@ -110,7 +110,7 @@ cross_reviewer_requirement: 'CAM self_review va self_approve. Phien soan lease n
 
 spec_path: ops/specs/wp570-bash-nen-mot-bo-giai-r10.md
 spec_ref: ops/cap-lease-570-g10
-spec_hash: DIEN_SAU_KHI_DAY
+spec_hash: c1e1bb34469e0a370ec33efcca7a37250f63a6a56d8d559d8600d111ba7826da
 spec_bytes: 52455
 prompt_path: ops/specs/wp570-bash-nen-mot-bo-giai-r10.md
 spec_hash_do_nhu_the_nao: 'Bam DOC NGUOC VE tu may chu sau khi day (`git cat-file blob

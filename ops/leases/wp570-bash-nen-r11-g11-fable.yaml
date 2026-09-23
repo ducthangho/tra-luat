@@ -126,10 +126,10 @@ cross_reviewer_requirement: 'CAM self_review va self_approve. Phien soan lease n
 
 spec_path: ops/specs/wp570-bash-nen-mot-bo-giai-r11.md
 spec_ref: ops/cap-lease-570-g11
-spec_hash: DIEN_SAU_KHI_DAY
+spec_hash: d0815fcc18bbb3081cfc476ee7cb425be195238b8775557839fdf3b452d02a09
 spec_bytes: 59995
 prompt_path: ops/specs/wp570-bash-nen-mot-bo-giai-r11.md
-prompt_sha256_required: DIEN_SAU_KHI_DAY
+prompt_sha256_required: d0815fcc18bbb3081cfc476ee7cb425be195238b8775557839fdf3b452d02a09
 spec_hash_do_nhu_the_nao: 'Bam DOC NGUOC VE tu may chu sau khi day (`git cat-file blob
   FETCH_HEAD:<path>`), khong phai bam cua tep tren dia phien. Spec di CUNG nhanh lease vi cong
   dang-lease doc tu REF, khong doc cay lam viec — bai hoc r6, khi spec nam nhanh rieng lam cong

@@ -212,6 +212,13 @@ dieu_kien_dung:
 ghi_chu_chieu_lai: 'TRUONG TAI LIEU, khong phai truong cong. Ghi de nguoi sau doc duoc VI SAO
   g10 ton tai ma khong phai lat lai bon vong review.'
 
+da_bi_thay_the: wp570-bash-nen-r12-g12-fable
+da_bi_thay_the_vi_sao: 'NUA THU HAI cua bia mo hai chieu, lan thay the THU TU trong chuoi. Nua
+  thu nhat (`thay_the_cho` trong g12) da day len ops/cap-lease-570-g12 truoc. Hai nua PHAI di
+  trong hai lan day rieng vi `_kiem_bia_mo` doc tu REF chu khong doc cay lam viec.
+  g11 con han toi 2026-09-24T12:00Z nhung tu day KHONG con la nguoi giu: r12 doi effort cua ca
+  hai vai (medium -> low) va them N32..N35, tuc doi tieu chi nghiem thu.'
+
 closure_status: 'Owner-directed grant, revision 11, generation 11. THAY THE g10 bang bia mo hai chieu (g10 CON_HAN, giu ca ba duong) — phep thay the THAT lan thu BA. Truoc do: EXECUTOR GIU NGUYEN: fable /
   claude-fable-5-1, nay khai them effort: medium. REVIEWER DOI: codex gpt-6-astra effort medium,
   cao hon bon vong truoc. Khong bia mo: g9 HET_HAN, NGUOI_GIU 0.'

@@ -863,4 +863,4 @@ bằng đường dẫn tuyệt đối vẫn không đi ngang qua đây. Rào duy
 mở đầu của chính mục lục này và thói quen đọc thư mục trước khi đọc tệp. Muốn chặt hơn
 thì phải có bộ đọc cưỡng chế — chưa làm, và đừng khai là đã làm.
 
-| `wp523-r14-review-1-codex-verdict.md` | #523 r14: approve kỹ thuật/advisory,0P0/P1/P2/P3;68 tình huống hữu hạn; M1/M7 ĐÃ VÁ THẬT. Actual surface codex_desktop chưa được receipt validator nhận; M11/canonical/human audit pending. | `15d1b103` | 13208 |
+| `wp523-r14-review-1-codex-verdict.md` | #523 r14: approve kỹ thuật/advisory,0P0/P1/P2/P3;68 tình huống hữu hạn; M1/M7 ĐÃ VÁ THẬT. Actual surface codex_desktop chưa được receipt validator nhận; M11/canonical/human audit pending. | `15d1b103` | 13103 |

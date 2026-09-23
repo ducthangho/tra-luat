@@ -310,10 +310,22 @@ def _liet_ke_py(goc: Path):
     hay của máy — đổi được danh sách".
 
     BA TRẠNG THÁI, khai thẳng trong báo cáo ở khoá `nguon_tep`:
-      `git`   — danh sách từ INDEX của kho;
-      `rglob` — cây KHÔNG phải kho git (bộ ca dựng cây giả), lùi về quét thẳng;
-      `rglob-git-hong` — có `.git` mà lệnh git hỏng. KHÔNG im lặng lùi: người đọc phải thấy
-                         mình đang đọc một danh sách RỘNG HƠN thứ git sẽ trả.
+      `git`      — danh sách từ INDEX của kho;
+      `rglob`    — cây KHÔNG phải kho git (bộ ca dựng cây giả), quét thẳng;
+      `git-hong: …` — có `.git` mà lệnh git hỏng (rc khác 0, hết giờ, không sinh được tiến
+                    trình). KHÔNG lùi, KHÔNG trả danh sách: `quet()` biến trạng thái này
+                    thành `KHONG_DO_DUOC`.
+
+    VÌ SAO KHÔNG LÙI VỀ `rglob` KHI GIT HỎNG (N26, #570 r10). Bản r9 lùi và ĐẶT TÊN cho việc
+    lùi (`rglob-git-hong`), với lý lẽ "người đọc phải thấy". Cross-review codex vòng 4 khai,
+    và executor ĐO LẠI thấy đúng, trên cây có `.git` GIẢ:
+        `_liet_ke_py` trả `rac_bi_ignore.py` kèm `rglob-git-hong`; `quet` ra `rc=2 DO`.
+    Tức ĐÚNG cái lớp mà r9 giết bằng kiến trúc — *phán quyết phụ thuộc trạng thái LOCAL của
+    máy* — sống lại qua CỬA SAU: git của người chạy hỏng thì tệp chưa theo dõi lại quyết
+    phán quyết. Một TRƯỜNG cho người đọc không phải một CỔNG; đó đúng là thứ `CLAUDE.md` gọi
+    là "lời dặn bằng miệng không phải hàng rào", lần này nằm trong chính mã của packet.
+    Không lấy được INDEX thì KHÔNG CÓ danh sách, nên KHÔNG CÓ phán quyết — fail-close, cùng
+    luật với tệp không phân tích được ở `quet()`. `None ≠ False`.
     Một tệp có trong INDEX mà không đọc được trên đĩa (đã xoá, sparse checkout) làm cổng
     KHÔNG_ĐO_ĐƯỢC ở `quet` — cây không khớp index thì không có gì để đo.
     """
@@ -325,9 +337,9 @@ def _liet_ke_py(goc: Path):
             if pc.returncode == 0:
                 ten = [x for x in pc.stdout.split("\0") if x]
                 return sorted({goc / x for x in ten}), "git"
-            return sorted(goc.rglob("*.py")), "rglob-git-hong"
-        except (OSError, subprocess.SubprocessError):
-            return sorted(goc.rglob("*.py")), "rglob-git-hong"
+            return [], f"git-hong: ls-files rc={pc.returncode} {pc.stderr.strip()[:200]!r}"
+        except (OSError, subprocess.SubprocessError) as e:
+            return [], f"git-hong: {type(e).__name__}: {e}"
     return sorted(goc.rglob("*.py")), "rglob"
 
 
@@ -506,6 +518,19 @@ def _rang_buoc_cua(pham_vi):
     VÌ SAO KHÔNG XUỐNG PHẠM VI CON — đó chính là F3: bản trước `ast.walk` cả cây, nên một
     `import` trong hàm A "có hiệu lực" ở hàm B, và một tham số tên `subprocess` ở B không che
     được gì. Python giải tên theo PHẠM VI TỪ VỰNG; bộ giải cũng phải thế, không hơn.
+
+    MỘT RÀNG BUỘC ĐƯỢC PHÂN LOẠI THEO CÁC TRƯỜNG CỦA NÚT, KHÔNG THEO MỖI CÁI TÊN (N27, r10).
+    Cross-review codex vòng 4 chỉ MỘT mặt; quét theo LỚP ra BA, hai chiều ngược nhau:
+      · `ImportFrom.level >= 1` — `from .subprocess import run` là module CÙNG GÓI. Bỏ qua
+        `level` ⇒ BÁO OAN một API nội bộ. Đo được: `[(2, 0)]`. (codex chỉ)
+      · `Import` tên CÓ CHẤM, không `as` — `import subprocess.x` ràng buộc tên `subprocess`
+        vào CHÍNH module stdlib ấy. Coi là `("khac",)` ⇒ BỎ SÓT. Đo được: `[]`. (codex KHÔNG
+        chỉ — tìm ra bằng phép quét theo lớp.)
+      · `from subprocess import *` — vẫn KHÔNG PHỦ, và đó là **nợ có tên**, không phải một
+        mặt mới: `*` đòi biết module xuất ra những gì, tức phải NẠP nó, chứ không phải đọc
+        cây cú pháp. Cùng hàng với `shell=True` và biến trung gian.
+    `import subprocess.x as y` KHÔNG ràng buộc `subprocess` (chỉ `y` ← module con) nên vẫn là
+    `("khac",)` — kiểm cả ở `t33`, để chiều "bắt oan" có răng.
     """
     import ast
     bang, toan_cuc, phi_cuc_bo = {}, set(), set()
@@ -528,15 +553,25 @@ def _rang_buoc_cua(pham_vi):
             continue                                   # KHÔNG xuống phạm vi con
         if isinstance(n, ast.Import):
             for al in n.names:
+                dau = al.name.split(".")[0]
                 if al.name in _MODULE_CHU:
                     them(al.asname or al.name, ("import", al.name, None))
+                elif al.asname is None and dau in _MODULE_CHU:
+                    # `import subprocess.x` RÀNG BUỘC tên `subprocess` vào CHÍNH module ấy —
+                    # luật Python, không phải suy diễn. Bản r9 gán `("khac",)` nên
+                    # `import subprocess.x` + `subprocess.run(["bash"])` LỌT (đo được: `[]`).
+                    them(dau, ("import", dau, None))
                 else:
-                    them(al.asname or al.name.split(".")[0], ("khac",))
+                    them(al.asname or dau, ("khac",))
         elif isinstance(n, ast.ImportFrom):
             for al in n.names:
                 if al.name == "*":
                     continue                           # KHÔNG PHỦ — khai trong docstring
-                if n.module in _MODULE_CHU:
+                # `level` LÀ MỘT PHẦN CỦA Ý NGHĨA, không phải siêu dữ liệu (N27, r10).
+                # `from .subprocess import run` trỏ vào module CÙNG GÓI, không phải stdlib;
+                # bản r9 bỏ qua `level` nên nó BÁO OAN một API nội bộ (đo được: `[(2, 0)]`).
+                # `from . import subprocess` đã đúng sẵn: `n.module is None`.
+                if n.level == 0 and n.module in _MODULE_CHU:
                     them(al.asname or al.name, ("import", n.module, al.name))
                 else:
                     them(al.asname or al.name, ("khac",))
@@ -743,6 +778,15 @@ def quet(goc: Path):
                                   "ly_do": f"không thấy {goc / 'ops'} — cây không phải gốc kho"}
     thu_muc = goc
     cac_tep, nguon_tep = _liet_ke_py(goc)
+    if nguon_tep.startswith("git-hong"):
+        # FAIL-CLOSE (N26). Cây LÀ kho git mà không lấy được INDEX ⇒ không có danh sách để
+        # quét. Lùi về `rglob` ở đây là mở lại đúng cái lớp r9 đã giết bằng kiến trúc.
+        return RC_KHONG_DO_DUOC, {"trang_thai": "KHONG_DO_DUOC", "nguon_tep": nguon_tep,
+                                  "da_quet": str(goc), "pham_vi": "toan-cay",
+                                  "ly_do": f"cây có `.git` mà không lấy được INDEX ({nguon_tep})."
+                                           " KHÔNG lùi về `rglob`: danh sách rộng hơn thì phán"
+                                           " quyết lại phụ thuộc trạng thái LOCAL của máy —"
+                                           " đúng lớp mà r9 giết bằng kiến trúc."}
     co_loi_goi = {}
     for tep in cac_tep:
         rel = tep.relative_to(goc).as_posix()

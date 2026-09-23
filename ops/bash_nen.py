@@ -294,6 +294,36 @@ _BIEN_GIT_CHON_KHO = (
 )
 
 
+_DUOI_PY = (".py", ".pyw")
+
+
+def _la_nguon_py(rel: str) -> bool:
+    """N35 (r12) — HẬU TỐ so KHÔNG phân biệt hoa/thường, và `.pyw` cũng là nguồn Python.
+
+    Đo được trên `1d63f80`: `git ls-files --cached -s -- '*.py'` trả RỖNG cho `VI_PHAM.PY` và
+    `w.pyw`, nên cả hai vô hình với cổng dù cả hai đều `shutil.which("bash")`. Pathspec `*.py`
+    là một phép so THEO MỘT CÁCH VIẾT — cùng lớp với mặt hoa/thường ở r7 và mặt byte ở r11.
+    Đây là thực thể THỨ BA của lớp ấy, nên nó được đưa ra MỘT HÀM thay vì vá tại chỗ.
+    """
+    return rel.casefold().endswith(_DUOI_PY)
+
+
+def _giai_ma_nguon(raw: bytes) -> str:
+    """N34 (r12) — giải mã theo ĐÚNG khai báo của chính tệp, không giả định UTF-8.
+
+    Python hợp lệ KHÔNG nhất thiết là UTF-8: PEP 263 cho phép `# coding: latin-1`, và một BOM
+    UTF-8 ở đầu tệp cũng hợp lệ. Bản r11 giải mã cứng `utf-8`, và đo được trên `1d63f80`:
+        `# coding: latin-1` + một ký tự Latin-1  ⇒ rc=3 KHONG_DO_DUOC (UnicodeDecodeError)
+        tệp có BOM                               ⇒ rc=3 (U+FEFF lọt vào `ast.parse`)
+    Tức một tệp Python HỢP LỆ làm cổng CHẶN VĨNH VIỄN cả kho. Fail-close đúng chỗ là khi
+    KHÔNG ĐO ĐƯỢC; ở đây nó đo được, chỉ là đọc sai cách.
+    """
+    import io, tokenize
+    ma, _ = tokenize.detect_encoding(io.BytesIO(raw).readline)
+    van = raw.decode(ma)
+    return van[1:] if van.startswith("\ufeff") else van
+
+
 def _moi_truong_git_sach():
     """(môi trường cho tiến trình git con, tên các biến đã GỠ).
 
@@ -307,12 +337,35 @@ def _moi_truong_git_sach():
     `GIT_CONFIG_COUNT=3` cùng ba cặp KEY/VALUE.
     """
     moi = dict(os.environ)
+    # N32 (r12) — REF THAY THẾ. `git replace <xấu> <sạch>` là một ref CỦA MÁY, và `cat-file`
+    # trả bytes thay thế một cách trong suốt. Đo được trên `1d63f80`: sau `git replace`,
+    # `ngoai_danh_sach` RỖNG; đặt `GIT_NO_REPLACE_OBJECTS=1` thì ra `['vi_pham.py']`.
+    # Đây là MẶT THỨ TÁM của lớp *phán quyết phụ thuộc trạng thái LOCAL của máy* — và nó là
+    # đúng món NỢ mà spec r11 đã KHAI TRƯỚC: *"danh sách biến git bị gỡ KHÔNG BAO GIỜ ĐỦ"*.
+    # Nợ ấy nay đến hạn; cơ chế không đổi, chỉ thêm một biến và một cờ.
     da_go = sorted(k for k in moi
                    if k in _BIEN_GIT_CHON_KHO
                    or k.startswith("GIT_CONFIG_KEY_") or k.startswith("GIT_CONFIG_VALUE_"))
     for k in da_go:
         moi.pop(k, None)
     return moi, da_go
+
+
+def _chay_git(goc: Path, *doi_so, **kw):
+    """MỘT chỗ duy nhất dựng mọi tiến trình `git` con của cổng.
+
+    HAI hàng rào cho ref thay thế nằm CÙNG MỘT CHỖ có lý do đo được: nếu tách ra hai nơi thì
+    KHÔNG đột biến nào đo được cái nào — bỏ một hàng rào thì hàng rào kia vẫn che, và một luật
+    không thể ĐỎ thì không phải luật. Gom lại đây thì một đột biến gỡ cả hai, và `t47` chốt (1)
+    ĐỎ được.
+      · `--no-replace-objects` (cờ) và `GIT_NO_REPLACE_OBJECTS=1` (biến) — ref thay thế là ref
+        CỦA MÁY; `cat-file` trả bytes thay thế một cách trong suốt (N32);
+      · môi trường đã gỡ mọi biến chọn kho / chọn index / tiêm cấu hình (N28).
+    """
+    env, _ = _moi_truong_git_sach()
+    env["GIT_NO_REPLACE_OBJECTS"] = "1"
+    return subprocess.run(["git", "--no-replace-objects", "-C", str(goc), *doi_so],
+                          env=env, **kw)
 
 
 def _doc_noi_dung(goc: Path, muc, nguon_tep):
@@ -340,18 +393,16 @@ def _doc_noi_dung(goc: Path, muc, nguon_tep):
     if nguon_tep != "git":
         ra = {}
         for rel, _, _ in muc:
-            ra[rel] = (goc / rel).read_text(encoding="utf-8")
+            ra[rel] = _giai_ma_nguon((goc / rel).read_bytes())
         return ra, []
     lien_ket = sorted(rel for rel, che_do, _ in muc if che_do == "120000")
     if lien_ket:
         return None, lien_ket
     if not muc:
         return {}, []
-    env, _ = _moi_truong_git_sach()
     yeu_cau = "".join(sha + "\n" for _, _, sha in muc).encode("ascii")
-    pc = subprocess.run(["git", "-C", str(goc), "cat-file", "--batch"],
-                        input=yeu_cau, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-                        timeout=180, env=env)
+    pc = _chay_git(goc, "cat-file", "--batch", input=yeu_cau,
+                   stdout=subprocess.PIPE, stderr=subprocess.PIPE, timeout=180)
     if pc.returncode != 0:
         raise OSError(f"cat-file --batch rc={pc.returncode}: {pc.stderr[:200]!r}")
     ra, dem, i = {}, 0, 0
@@ -364,7 +415,7 @@ def _doc_noi_dung(goc: Path, muc, nguon_tep):
         co = int(dau[2])
         than = kq[nl + 1:nl + 1 + co]
         i = nl + 1 + co + 1          # bỏ qua `\n` kết thúc mỗi bản ghi
-        ra[rel] = than.decode("utf-8")
+        ra[rel] = _giai_ma_nguon(than)
         dem += 1
     return ra, []
 
@@ -418,27 +469,43 @@ def _liet_ke_py(goc: Path):
     KHÔNG_ĐO_ĐƯỢC ở `quet` — cây không khớp index thì không có gì để đo.
     """
     if (goc / ".git").exists():
-        env, _ = _moi_truong_git_sach()
         try:
-            pc = subprocess.run(
-                ["git", "-C", str(goc), "ls-files", "--cached", "-s", "-z", "--", "*.py"],
-                capture_output=True, text=True, timeout=60, env=env)
+            pc = _chay_git(goc, "ls-files", "--cached", "-s", "-z",
+                           capture_output=True, text=True, timeout=60)
             if pc.returncode == 0:
-                muc = []
+                muc, chua_hoa_giai = [], set()
                 for dong in pc.stdout.split("\0"):
                     if not dong:
                         continue
                     dau, _, rel = dong.partition("\t")
                     truong = dau.split()
-                    if len(truong) < 2 or not rel:
+                    if len(truong) < 3 or not rel:
                         return [], f"git-hong: ls-files -s trả dòng lạ {dong[:120]!r}"
+                    # N35 — LỌC HẬU TỐ Ở ĐÂY, không bằng pathspec `*.py`: pathspec so theo MỘT
+                    # cách viết nên `VI_PHAM.PY` và `w.pyw` vô hình (đo được: ls-files trả rỗng).
+                    if not _la_nguon_py(rel):
+                        continue
+                    # N33 — STAGE LÀ MỘT PHẦN CỦA BẢN GHI. `ls-files -s` phát stage 1/2/3 cho
+                    # đường chưa hoà giải; bản r11 vứt trường ấy đi, nên ba bản ghi cùng `rel`
+                    # rơi vào cùng một khoá của `noi_dung` và blob có SHA LỚN NHẤT thắng. Đo
+                    # được: xung đột có stage 1/2 mang lời gọi trần, stage 3 sạch ⇒ cổng cho qua.
+                    if truong[2] != "0":
+                        chua_hoa_giai.add(rel)
+                        continue
                     muc.append((rel, truong[0], truong[1]))
+                if chua_hoa_giai:
+                    # FAIL-CLOSE. Một INDEX chưa hoà giải KHÔNG có blob nào để duyệt: chọn bừa
+                    # một stage là tự bịa ra một cây chưa từng tồn tại.
+                    return [], ("git-hong: INDEX chưa hoà giải ở "
+                                + ", ".join(sorted(chua_hoa_giai))
+                                + " — không có blob stage-0 nào để duyệt")
                 return sorted(set(muc)), "git"
             return [], f"git-hong: ls-files rc={pc.returncode} {pc.stderr.strip()[:200]!r}"
         except (OSError, subprocess.SubprocessError) as e:
             return [], f"git-hong: {type(e).__name__}: {e}"
-    return [(x.relative_to(goc).as_posix(), None, None)
-            for x in sorted(goc.rglob("*.py"))], "rglob"
+    return sorted((x.relative_to(goc).as_posix(), None, None)
+                  for x in goc.rglob("*")
+                  if x.is_file() and _la_nguon_py(x.name)), "rglob"
 
 
 def _so_cho_phep(muc):

@@ -731,9 +731,9 @@ DOT_BIEN = {
         '                    _r = _x.relative_to(goc).as_posix()\n'
         '                    if _r in _co:\n'
         '                        continue\n'
-        '                    _h = subprocess.run(["git", "-C", str(goc), "hash-object", "-w",\n'
-        '                                         str(_x)], capture_output=True, text=True,\n'
-        '                                        timeout=60, env=env).stdout.strip()\n'
+        '                    _h = _chay_git(goc, "hash-object", "-w", str(_x),\n'
+        '                                   capture_output=True, text=True,\n'
+        '                                   timeout=60).stdout.strip()\n'
         '                    if _h:\n'
         '                        muc.append((_r, "100644", _h))\n'
         '                return sorted(set(muc)), "git"  # đột biến: cộng cả tệp CHƯA add\n',
@@ -770,11 +770,10 @@ DOT_BIEN = {
     # ignore — nay viet bang `check-ignore` tren chinh danh sach INDEX.
     "bn_nghe_lai_luat_ignore": ("ops/bash_nen.py",
         '                return sorted(set(muc)), "git"\n',
-        '                _loai = subprocess.run(["git", "-C", str(goc), "check-ignore",\n'
-        '                                        "--no-index", "--stdin"],\n'
-        '                                       input="\\n".join(m[0] for m in muc),\n'
-        '                                       capture_output=True, text=True, timeout=60,\n'
-        '                                       env=env).stdout.split()\n'
+        '                _loai = _chay_git(goc, "check-ignore", "--no-index", "--stdin",\n'
+        '                                  input="\\n".join(m[0] for m in muc),\n'
+        '                                  capture_output=True, text=True,\n'
+        '                                  timeout=60).stdout.split()\n'
         '                return sorted({m for m in muc if m[0] not in _loai}), "git"  # đột biến: nghe lại ignore\n',
         "BASH_NEN", (), "t43_khong_luat_ignore_nao_doi_duoc_danh_sach_tep"),
     "bn_bo_executable_kw": ("ops/bash_nen.py",
@@ -828,6 +827,24 @@ DOT_BIEN = {
         '            return [(x.relative_to(goc).as_posix(), None, None)\n'
         '                    for x in sorted(goc.rglob("*.py"))], "rglob"  # đột biến: lùi im lặng\n',
         "BASH_NEN", (), "t44_khong_lay_duoc_INDEX_thi_KHONG_DO_DUOC_chu_khong_lui_ve_rglob"),
+    # r12 — BON dot bien cho bon mat cua "doc INDEX cho dung" (N32..N35), deu ve `t47`.
+    "bn_theo_ref_thay_the": ("ops/bash_nen.py",
+        '    env["GIT_NO_REPLACE_OBJECTS"] = "1"\n'
+        '    return subprocess.run(["git", "--no-replace-objects", "-C", str(goc), *doi_so],\n',
+        '    return subprocess.run(["git", "-C", str(goc), *doi_so],  # đột biến: nghe ref thay thế của MÁY\n',
+        "BASH_NEN", (), "t47_INDEX_phai_duoc_doc_TRUNG_THUC_va_nguon_py_nhan_du_moi_cach_viet"),
+    "bn_bo_qua_stage": ("ops/bash_nen.py",
+        '                    if truong[2] != "0":\n',
+        '                    if False:  # đột biến: nhận cả stage 1/2/3, SHA lớn nhất thắng\n',
+        "BASH_NEN", (), "t47_INDEX_phai_duoc_doc_TRUNG_THUC_va_nguon_py_nhan_du_moi_cach_viet"),
+    "bn_giai_ma_cung_utf8": ("ops/bash_nen.py",
+        "    ma, _ = tokenize.detect_encoding(io.BytesIO(raw).readline)\n",
+        '    ma = "utf-8"  # đột biến: giả định MỘT mã hoá, bỏ PEP 263 và BOM\n',
+        "BASH_NEN", (), "t47_INDEX_phai_duoc_doc_TRUNG_THUC_va_nguon_py_nhan_du_moi_cach_viet"),
+    "bn_duoi_theo_mot_cach_viet": ("ops/bash_nen.py",
+        "    return rel.casefold().endswith(_DUOI_PY)\n",
+        '    return rel.endswith(".py")  # đột biến: một cách viết, bỏ HOA và `.pyw`\n',
+        "BASH_NEN", (), "t47_INDEX_phai_duoc_doc_TRUNG_THUC_va_nguon_py_nhan_du_moi_cach_viet"),
     # r11 — N28: NOI DUNG cung tu INDEX, va moi truong git bi SCRUB. Hai mat, hai dot bien.
     "bn_doc_cay_lam_viec": ("ops/bash_nen.py",
         "    if nguon_tep != \"git\":\n",
@@ -2959,6 +2976,118 @@ def t43_khong_luat_ignore_nao_doi_duoc_danh_sach_tep():
         bang(danh_sach(dict(os.environ, XDG_CONFIG_HOME=str(tmp / "xdg"),
                             GIT_CONFIG_GLOBAL=str(rong))) == nen,
              "(6) `$XDG_CONFIG_HOME/git/ignore` — đường ignore MẶC ĐỊNH của git — đổi được danh sách")
+
+
+@ca
+def t47_INDEX_phai_duoc_doc_TRUNG_THUC_va_nguon_py_nhan_du_moi_cach_viet():
+    """THUỘC TÍNH: bốn mặt của "đọc INDEX cho đúng" — ref thay thế, stage, mã hoá, hậu tố.
+
+    SINH TỪ CROSS-REVIEW CODEX vòng 6 trên `1d63f80` — BỐN P2, tái hiện cả bốn:
+      (1) `git replace <xấu> <sạch>` là ref CỦA MÁY, `cat-file` trả bytes thay thế trong suốt.
+          Đo: sau `git replace`, `ngoai_danh_sach` RỖNG; đặt `GIT_NO_REPLACE_OBJECTS=1` ra
+          `['vi_pham.py']`. MẶT THỨ TÁM của lớp *phán quyết phụ thuộc trạng thái LOCAL của máy*
+          — và là đúng món NỢ spec r11 đã KHAI TRƯỚC: *"danh sách biến git gỡ KHÔNG BAO GIỜ ĐỦ"*.
+      (2) `ls-files -s` phát stage 1/2/3 cho đường chưa hoà giải; bản r11 vứt trường stage, nên
+          ba bản ghi cùng đường rơi vào cùng một khoá và blob SHA lớn nhất thắng. Đo: xung đột
+          có stage 1/2 mang lời gọi trần, stage 3 sạch ⇒ cổng CHO QUA.
+      (3) PEP 263: `# coding: latin-1` và BOM UTF-8 đều là Python HỢP LỆ. Bản r11 giải mã cứng
+          `utf-8` ⇒ cả hai ra `rc=3 KHONG_DO_DUOC`, tức một tệp hợp lệ CHẶN VĨNH VIỄN cả kho.
+      (4) pathspec `*.py` so theo MỘT cách viết ⇒ `VI_PHAM.PY` và `w.pyw` vô hình. Thực thể
+          THỨ BA của lớp ấy (sau hoa/thường ở r7 và byte ở r11), nên nó ra một HÀM riêng.
+
+    MỌI chốt đọc `co_loi_goi_tran`, KHÔNG đọc `ngoai_danh_sach` — và đó cũng là một phép đo:
+    `ngoai_danh_sach` là thứ có SAU bộ lọc miễn trừ, nên `bn_cong_cho_qua_moi_noi` (đích `t25`)
+    làm nó rỗng và giết luôn ca này ⇒ **bán kính 2/49**. Thuộc tính ca này trói là *"máy quét
+    ĐỌC ĐÚNG bytes nào"*, còn *"đọc ra rồi thì ĐỎ"* là của `t25`. `t35` đã chữa đúng cách này
+    ở r4; đây là lần thứ hai cùng một bài học trong packet.
+
+    MỌI tệp của ca này nằm TRONG `ops/`, và đó là một phép đo chứ không phải khẩu vị: bản đầu
+    đặt chúng ở GỐC cây, và `t35_thu_pham_vi_ve_ops` (đột biến thu phạm vi cổng về `ops/**`,
+    đích `t35`) xoá sạch chúng ⇒ **bán kính 2/49**. Ca này không trói thuộc tính PHẠM VI, nên
+    việc nó chết dưới đột biến ấy là tình cờ của GIÀN GIÁO. `t36` đã gặp và chữa đúng cách này.
+
+    Mỗi chốt kèm CHIỀU NGƯỢC ngay tại chỗ: (3) tệp BOM MANG vi phạm vẫn phải bị bắt; (4) `.txt`
+    mang lời gọi trần vẫn KHÔNG được quét.
+    """
+    def _kho(tmp, ten):
+        d = tmp / ten
+        (d / "ops").mkdir(parents=True)
+        for lenh in (["init", "-q"], ["config", "user.email", "t@t"], ["config", "user.name", "t"]):
+            subprocess.run(["git", "-C", str(d)] + lenh, capture_output=True, timeout=60)
+        return d
+
+    def _g(d, *a):
+        return subprocess.run(["git", "-C", str(d)] + list(a), capture_output=True,
+                              text=True, timeout=60)
+
+    BAN = 'import shutil\nb = shutil.which("bash")\n'
+    with tempfile.TemporaryDirectory() as tmp:
+        tmp = Path(tmp)
+        bq = _bash_nen_voi_chua_chuyen(tmp, {})
+
+        # (1) REF THAY THẾ của máy không được đổi bytes cổng đọc.
+        d = _kho(tmp, "ref")
+        (d / "ops" / "vi_pham.py").write_text(BAN, encoding="utf-8")
+        _g(d, "add", "-A")
+        xau = _g(d, "rev-parse", ":ops/vi_pham.py").stdout.strip()
+        (d / "ops" / "sach.py").write_text("X = 1\n", encoding="utf-8")
+        _g(d, "add", "-A")
+        rep = _g(d, "replace", xau, _g(d, "rev-parse", ":ops/sach.py").stdout.strip())
+        if rep.returncode != 0:
+            raise BoQuaMoiTruong(f"git replace không chạy được: {rep.stderr[:200]}")
+        _, bao = _quet(d, bq)
+        bang("ops/vi_pham.py" in (bao.get("co_loi_goi_tran") or {}),
+             f"(1) `git replace` của MÁY giấu được vi phạm: co_loi_goi_tran="
+             f"{sorted(bao.get('co_loi_goi_tran') or {})} — cổng đang đọc bytes thay thế chứ "
+             f"không đọc blob mà INDEX ghim")
+
+        # (2) INDEX chưa hoà giải KHÔNG có blob nào để duyệt ⇒ fail-close, nêu tên.
+        d = _kho(tmp, "stage")
+        (d / "ops" / "x.py").write_text(BAN, encoding="utf-8")
+        _g(d, "add", "-A"); _g(d, "commit", "-q", "-m", "a")
+        _g(d, "checkout", "-q", "-b", "nh")
+        (d / "ops" / "x.py").write_text(BAN + "# nh\n", encoding="utf-8")
+        _g(d, "add", "-A"); _g(d, "commit", "-q", "-m", "b")
+        _g(d, "checkout", "-q", "-")
+        (d / "ops" / "x.py").write_text("X = 1\n# c\n", encoding="utf-8")
+        _g(d, "add", "-A"); _g(d, "commit", "-q", "-m", "c")
+        _g(d, "merge", "nh")
+        stage = {l.split()[2] for l in _g(d, "ls-files", "-s").stdout.splitlines() if len(l.split()) > 2}
+        if stage == {"0"}:
+            raise BoQuaMoiTruong(f"không dựng được INDEX chưa hoà giải trên máy này: stage={stage}")
+        rc, bao = _quet(d, bq)
+        bang(rc == 3 and "chưa hoà giải" in str(bao.get("nguon_tep", "")) + str(bao.get("ly_do", "")),
+             f"(2) INDEX chưa hoà giải mà cổng vẫn ra phán quyết: rc={rc} "
+             f"{bao.get('trang_thai')} nguon_tep={str(bao.get('nguon_tep'))[:120]!r} — chọn bừa "
+             f"một stage là tự bịa ra một cây chưa từng tồn tại")
+
+        # (3) MÃ HOÁ theo khai báo của chính tệp, và chiều ngược: BOM mang vi phạm VẪN bị bắt.
+        d = _kho(tmp, "ma")
+        (d / "ops" / "latin.py").write_bytes("# coding: latin-1\ns = 'caf\xe9'\n".encode("latin-1"))
+        (d / "ops" / "bom.py").write_bytes(b"\xef\xbb\xbfX = 1\n")
+        _g(d, "add", "-A")
+        rc, bao = _quet(d, bq)
+        bang(rc == 0 and bao.get("trang_thai") == "DAT",
+             f"(3) Python HỢP LỆ (PEP 263 latin-1 / BOM) làm cổng CHẶN cả kho: rc={rc} "
+             f"{bao.get('trang_thai')} — {str(bao.get('ly_do'))[:180]}")
+        (d / "ops" / "bom_ban.py").write_bytes(b"\xef\xbb\xbf" + BAN.encode("utf-8"))
+        _g(d, "add", "-A")
+        _, bao = _quet(d, bq)
+        bang("ops/bom_ban.py" in (bao.get("co_loi_goi_tran") or {}),
+             f"(3) chiều ngược: tệp có BOM MANG lời gọi trần lại lọt: "
+             f"{sorted(bao.get('co_loi_goi_tran') or {})}")
+
+        # (4) HẬU TỐ nhận đủ mọi cách viết, và chiều ngược: `.txt` vẫn KHÔNG được quét.
+        d = _kho(tmp, "duoi")
+        (d / "ops" / "VI_PHAM.PY").write_text(BAN, encoding="utf-8")
+        (d / "ops" / "w.pyw").write_text(BAN, encoding="utf-8")
+        (d / "ops" / "khong_phai.txt").write_text(BAN, encoding="utf-8")
+        _g(d, "add", "-A")
+        _, bao = _quet(d, bq)
+        thay = sorted(bao.get("co_loi_goi_tran") or {})
+        bang(thay == ["ops/VI_PHAM.PY", "ops/w.pyw"],
+             f"(4) hậu tố so theo MỘT cách viết: thấy {thay}, mong ['ops/VI_PHAM.PY', 'ops/w.pyw'] — "
+             f"thiếu là lọt, thừa `.txt` là quét cả thứ không phải nguồn Python")
 
 
 @ca

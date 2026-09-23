@@ -1,0 +1,44 @@
+schema_version: 2
+event: executor_lease_granted
+packet_issue: 610
+packet_id: WP610-CODEX-DESKTOP-CONTRACT
+mission_issue: 499
+revision: 1
+generation: 1
+lease_id: wp610-codex-desktop-r1-g1
+granted_by: ducthangho
+granted_on_instruction: https://github.com/ducthangho/tra-luat/issues/523#issuecomment-5791146266
+granted_on_instruction_nguyen_van: 'Xử lý r14, #523 và tất cả PR khác theo nguyên
+  tắc tôi vừa đưa ra; Triển khai đi'
+recorded_by: codex-desktop
+recorder_is_dispatcher: false
+authority_caveat: Necessary bounded dependency610 discovered during authorized523
+  M11; agent projection, not human audit
+leased_at_utc: '2026-09-23T09:39:43Z'
+lease_expires_at_utc: '2026-09-23T11:07:05Z'
+role: executor
+executor: codex
+provider: openai_codex
+execution_surface: codex_desktop
+transport: machine
+review_class: sensitive
+effective_review_class: sensitive
+assurance_target: human_audited
+spec_path: ops/specs/wp610-codex-desktop-r1.md
+spec_ref: refs/heads/codex/wp610-authority
+spec_source_oid: d98b79a04fb865530abacaaf41c4fde8b3326bbe
+spec_hash: c18907feb12b2f00cf32d6bcbc66b44d2cd979da85bcced80132bdcdc69bf7c7
+prompt_path: ops/specs/wp610-codex-desktop-r1.md
+prompt_sha256_required: c18907feb12b2f00cf32d6bcbc66b44d2cd979da85bcced80132bdcdc69bf7c7
+branch: codex/wp610-g1
+start_from_sha: 18d42cab74e80fc7635f754323fd13f520ccdcec
+reviewed_sha_required: 18d42cab74e80fc7635f754323fd13f520ccdcec
+write_set:
+- .claude/dev/launcher.py
+- ops/bien_nhan_v2_test.py
+- ops/KE_HOACH_THI_CONG_DA_PROVIDER.md
+cam_tuyet_doi:
+- No process launch/credentials or validator implementation change
+- No edits to523 product or metadata
+- No self-review/approval/merge/deploy/LIVE
+- No fullCI before technical readiness

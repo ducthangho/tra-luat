@@ -450,7 +450,7 @@ HƯỚNG 2: ...
 ## BẢNG ĐO
 | khẳng định | PR khai | đo được | khớp? |
 
-### <slug>  [P1|P2|P3]  <tieu de mot dong>
+### <slug>  [P0|P1|P2|P3]  <tieu de mot dong>
 TỆP/DÒNG:
 VẤN ĐỀ:
 ĐÃ THỬ VÁ: có/không — <mo ta>

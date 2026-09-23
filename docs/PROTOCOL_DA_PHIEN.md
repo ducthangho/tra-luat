@@ -567,6 +567,21 @@ Mức review được ghi tường minh:
    trong cùng provider vẫn là same-provider, không thành cross-provider.
 4. `review_deferred`: chưa có reviewer; vẫn được vào draft land PR nhưng cần xác nhận riêng khi apply.
 
+**Ngưỡng severity theo Review Class (M1 của #523).** Đây là điều kiện nội dung
+cần kiểm cùng assurance, không phải quyền tự approve hoặc land:
+
+| Class | Điều kiện severity mặc định để xét approval |
+|---|---|
+| `routine` | Không còn P0/P1; P2/P3 còn lại phải có nợ có tên, owner và hướng xử lý được ghi trong verdict. |
+| `systemic` | Không còn P0/P1/P2; P3 còn lại phải có nợ có tên, owner và hướng xử lý được ghi trong verdict. |
+| `sensitive` | Không còn P0; cần approval tường minh đúng assurance, quyết định có căn cứ cho từng finding còn mở; thiếu quyết định thì chưa đủ. |
+| thiếu/không rõ | Xử lý như `sensitive`, không suy ra `routine`. |
+
+P0 chặn approval ở mọi class. Bảng không tự cho phép bỏ qua finding hoặc miễn
+review/gate/exact-SHA/human audit. Packet hoặc chỉ thị có ngưỡng chặt hơn thì áp
+ngưỡng đó; ví dụ yêu cầu0P1/P2/P3 vẫn chặn dù ngưỡng mặc định cho phép ghi nợ.
+Reviewer ghi ngưỡng đã áp và assurance riêng; “đủ severity” chưa phải “approved”.
+
 Reviewer có `contents: read` và chỉ có quyền ghi review/comment PR. `changes_requested` trả về executor, không cho
 reviewer sửa branch. Lỗi quota/rate-limit không tiêu thụ attempt nội dung; circuit breaker ngừng gọi provider tới
 thời điểm reset. Dispatcher, không phải Executor, quyết định fallback/reroute; cấm đổi provider để lách budget.
@@ -1006,6 +1021,24 @@ Tập lệnh đóng: `/mission start|pause|resume`, `/packet retry|cancel|rerout
 có audit.
 
 ## 12. Stop conditions và budget
+
+**Phân loại chi CI theo mục đích (M7 của #523).** Ghi loại trước khi chủ động
+phát sinh lượt chạy; tên event không quyết định loại:
+
+| Loại | Điều kiện và cách ghi chi |
+|---|---|
+| Gate tự động | Workflow phát sinh từ event hợp lệ trong công việc đã được cấp; ghi run ID/attempt, exact SHA và chi tự động riêng. Không coi “tự động” là quyền push/mở PR để lách lệnh chưa chạy CI. |
+| Phép đo được cấp | Có mục tiêu/phản chứng, scope và allowance hữu hạn công bố trước; ghi `used / reserved / limit`, rồi gắn kết quả với run ID/attempt và exact SHA. `workflow_dispatch` hợp lệ có thể thuộc loại này. |
+| Thăm dò chưa được cấp | Không có mục tiêu/allowance/authority thích hợp: không chạy; muốn chuyển thành phép đo thì phải có kế hoạch và quyền trước. |
+
+Một dispatch để đo được cấp và một dispatch thăm dò có cùng event vẫn khác loại.
+Thiếu mục đích/authority thì chưa đủ điều kiện chạy, không mặc định là gate tự động.
+Sổ chi tách cửa sổ hiện tại với lịch sử toàn packet, ghi rõ đơn vị allowance;
+không cộng run với attempt như cùng đơn vị. Lịch sử chưa đo đủ là `KHONG_DO_DUOC`,
+không phải0 và không dùng để suy phần ngân sách còn lại. Rerun cũng phải được tính
+theo đơn vị đã chốt. Ngân sách tự động và phép đo không tự vay lẫn nhau.
+Phân loại này không thay §10.2 về admission/provenance/gate hay chỉ thị thời điểm
+chạy: khi owner yêu cầu đợi tới đủ điều kiện merge, không chạy CI/fullCI giữa vòng vá.
 
 **Tín hiệu không hội tụ theo lớp.** Với chuyển tiếp từ lượt r sang r+1, đặt U là tập
 slug lớp còn mở ở cuối lượt r, F là tập con của U được reviewer lượt r+1 xác minh

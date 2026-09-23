@@ -281,6 +281,94 @@ _KHOA_WHICH = ("cmd",)
 _KHOA_SPAWN = ("args",)
 
 
+# BIEN MOI TRUONG CHON KHO / CHON INDEX / TIEM CAU HINH. Danh sach nay KHONG BAO GIO DU —
+# do la ly do no di KEM `_doc_noi_dung` doc tu BLOB: gap nhau o cho ca hai deu phai sai thi
+# phan quyet moi sai. Khai thang: mot bien git moi ma phien nay chua biet se KHONG bi go.
+_BIEN_GIT_CHON_KHO = (
+    "GIT_DIR", "GIT_INDEX_FILE", "GIT_WORK_TREE", "GIT_COMMON_DIR",
+    "GIT_OBJECT_DIRECTORY", "GIT_ALTERNATE_OBJECT_DIRECTORIES",
+    "GIT_CEILING_DIRECTORIES", "GIT_DISCOVERY_ACROSS_FILESYSTEM",
+    "GIT_NAMESPACE", "GIT_INDEX_VERSION",
+    "GIT_CONFIG", "GIT_CONFIG_GLOBAL", "GIT_CONFIG_SYSTEM", "GIT_CONFIG_NOSYSTEM",
+    "GIT_CONFIG_COUNT",
+)
+
+
+def _moi_truong_git_sach():
+    """(môi trường cho tiến trình git con, tên các biến đã GỠ).
+
+    SINH TỪ r11 (N28), cross-review codex vòng 5. `git -C <goc>` KHÔNG ghim được kho: nếu
+    `GIT_INDEX_FILE` có mặt thì `-C` vẫn đúng thư mục mà INDEX lại là tệp khác. Đo được trên
+    `6131cbd`: cùng một kho, index THẬT trả `['bad.py']`, đặt `GIT_INDEX_FILE` trỏ index khác
+    trả `[]` — và **cả hai lần đều khai `nguon_tep=git`**. Một cổng nói "tôi đọc INDEX" trong
+    khi đọc index của người khác là cổng tệ hơn không có cổng.
+    `GIT_CONFIG_COUNT`/`KEY_n`/`VALUE_n` cũng bị gỡ: chúng tiêm cấu hình tuỳ ý vào lượt chạy.
+    ĐO ĐƯỢC, không phải lý lẽ: môi trường của chính phiên soạn bản vá này ĐANG mang
+    `GIT_CONFIG_COUNT=3` cùng ba cặp KEY/VALUE.
+    """
+    moi = dict(os.environ)
+    da_go = sorted(k for k in moi
+                   if k in _BIEN_GIT_CHON_KHO
+                   or k.startswith("GIT_CONFIG_KEY_") or k.startswith("GIT_CONFIG_VALUE_"))
+    for k in da_go:
+        moi.pop(k, None)
+    return moi, da_go
+
+
+def _doc_noi_dung(goc: Path, muc, nguon_tep):
+    """({đường: thân}, [mục là SYMLINK]). NỘI DUNG LẤY TỪ ĐÂU là một phần của phán quyết.
+
+    N28 — SINH TỪ r11, cross-review codex vòng 5. r9/r10 lấy DANH SÁCH từ INDEX rồi đọc NỘI
+    DUNG bằng `read_text()` trên cây làm việc. Hai nguồn khác nhau, và khe giữa chúng đo được:
+    một mục `*.py` trong INDEX là SYMLINK thì `read_text()` đi theo ra NGOÀI kho. Đo trên
+    `6131cbd`: sửa tệp đích **bên ngoài kho** làm phán quyết đổi `['ops/lien_ket.py']` → `[]`
+    trong khi INDEX **không đổi một byte** — và `nguon_tep` vẫn khai `git`.
+    Đó là mặt thứ SÁU của lớp *phán quyết phụ thuộc trạng thái LOCAL của máy*. r9 giết được
+    "tệp NÀO", nhưng lớp còn phủ "BYTE nào" và "INDEX nào" (xem `_moi_truong_git_sach`).
+    Chủ kho quyết ở r11: **nội dung cũng lấy từ INDEX** — `git cat-file --batch` trên chính
+    các blob đã stage.
+
+    GIÁ, khai thẳng: tệp đã `git add` rồi sửa tiếp trên đĩa sẽ được quét ở DẠNG ĐÃ STAGE. Cổng
+    thôi phản ánh đĩa. Trong CI không khác gì (checkout sạch). Tại chỗ, nó có nghĩa "cổng xử
+    thứ anh đã stage" — đúng mạch với N23 ("danh sách là INDEX").
+    SYMLINK ⇒ **fail-close có tên**, không im lặng bỏ qua: blob của một mục mode `120000` là
+    CHUỖI ĐƯỜNG DẪN chứ không phải mã, nên đọc nó như Python là vô nghĩa. Đo trên kho hôm nay:
+    `git ls-files -s -- '*.py'` có **0** mục mode `120000` trên **264** mục, nên luật này KHÔNG
+    tốn gì ở hiện tại — nó là hàng rào cho ngày mai.
+    TỐC ĐỘ, đo chứ không đoán: `cat-file --batch` đọc trọn 264 blob trong **0,098 s**.
+    """
+    if nguon_tep != "git":
+        ra = {}
+        for rel, _, _ in muc:
+            ra[rel] = (goc / rel).read_text(encoding="utf-8")
+        return ra, []
+    lien_ket = sorted(rel for rel, che_do, _ in muc if che_do == "120000")
+    if lien_ket:
+        return None, lien_ket
+    if not muc:
+        return {}, []
+    env, _ = _moi_truong_git_sach()
+    yeu_cau = "".join(sha + "\n" for _, _, sha in muc).encode("ascii")
+    pc = subprocess.run(["git", "-C", str(goc), "cat-file", "--batch"],
+                        input=yeu_cau, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                        timeout=180, env=env)
+    if pc.returncode != 0:
+        raise OSError(f"cat-file --batch rc={pc.returncode}: {pc.stderr[:200]!r}")
+    ra, dem, i = {}, 0, 0
+    kq = pc.stdout
+    for rel, _, sha in muc:
+        nl = kq.index(b"\n", i)
+        dau = kq[i:nl].split()
+        if len(dau) != 3 or dau[0].decode() != sha:
+            raise OSError(f"cat-file trả không khớp ở {rel}: {kq[i:nl][:120]!r}")
+        co = int(dau[2])
+        than = kq[nl + 1:nl + 1 + co]
+        i = nl + 1 + co + 1          # bỏ qua `\n` kết thúc mỗi bản ghi
+        ra[rel] = than.decode("utf-8")
+        dem += 1
+    return ra, []
+
+
 def _liet_ke_py(goc: Path):
     """(danh sách `*.py` cần quét, nguồn đã dùng). BA nguồn, và nó KHAI ra dùng nguồn nào.
 
@@ -330,17 +418,27 @@ def _liet_ke_py(goc: Path):
     KHÔNG_ĐO_ĐƯỢC ở `quet` — cây không khớp index thì không có gì để đo.
     """
     if (goc / ".git").exists():
+        env, _ = _moi_truong_git_sach()
         try:
             pc = subprocess.run(
-                ["git", "-C", str(goc), "ls-files", "--cached", "-z", "--", "*.py"],
-                capture_output=True, text=True, timeout=60)
+                ["git", "-C", str(goc), "ls-files", "--cached", "-s", "-z", "--", "*.py"],
+                capture_output=True, text=True, timeout=60, env=env)
             if pc.returncode == 0:
-                ten = [x for x in pc.stdout.split("\0") if x]
-                return sorted({goc / x for x in ten}), "git"
+                muc = []
+                for dong in pc.stdout.split("\0"):
+                    if not dong:
+                        continue
+                    dau, _, rel = dong.partition("\t")
+                    truong = dau.split()
+                    if len(truong) < 2 or not rel:
+                        return [], f"git-hong: ls-files -s trả dòng lạ {dong[:120]!r}"
+                    muc.append((rel, truong[0], truong[1]))
+                return sorted(set(muc)), "git"
             return [], f"git-hong: ls-files rc={pc.returncode} {pc.stderr.strip()[:200]!r}"
         except (OSError, subprocess.SubprocessError) as e:
             return [], f"git-hong: {type(e).__name__}: {e}"
-    return sorted(goc.rglob("*.py")), "rglob"
+    return [(x.relative_to(goc).as_posix(), None, None)
+            for x in sorted(goc.rglob("*.py"))], "rglob"
 
 
 def _so_cho_phep(muc):
@@ -369,8 +467,21 @@ def _la_hang_bash(nut):
     `_HANG_BASH` da toan chu thuong nen chi can casefold ve MOT phia.
     """
     import ast as _ast
-    return (isinstance(nut, _ast.Constant) and isinstance(nut.value, str)
-            and nut.value.casefold() in _HANG_BASH)
+    if not isinstance(nut, _ast.Constant):
+        return False
+    v = nut.value
+    if isinstance(v, str):
+        return v.casefold() in _HANG_BASH
+    if isinstance(v, bytes):
+        # N30 (r11) — `shutil.which(b"bash")` và `subprocess.run([b"bash"])` CHẠY bash thật;
+        # bản r10 loại chúng chỉ vì không phải `str`, tức một đường vòng không cần phân tích
+        # luồng dữ liệu nào. Đo được trước vá: cả năm hình dạng byte đều ra `[]`.
+        # CHỈ ASCII: không giải mã bừa byte ngoài ASCII — một tên chương trình thật thì ASCII.
+        try:
+            return v.decode("ascii").casefold() in _HANG_BASH
+        except UnicodeDecodeError:
+            return False
+    return False
 
 
 def _doi_so_dau(nut, khoa):
@@ -506,6 +617,23 @@ _NUT_PHAM_VI = (ast.FunctionDef, ast.AsyncFunctionDef, ast.Lambda, ast.ClassDef,
                 ast.ListComp, ast.SetComp, ast.DictComp, ast.GeneratorExp)
 
 
+def _dich_walrus(nut):
+    """Tên bị `:=` ràng buộc bên trong `nut` (một comprehension) — PEP 572 nói chúng thuộc
+    phạm vi CHỨA comprehension. KHÔNG xuống hàm/lambda/lớp lồng bên trong: `:=` ở đó ràng buộc
+    trong chính phạm vi ấy, không trồi ra."""
+    import ast
+    ra = []
+    chong = list(ast.iter_child_nodes(nut))
+    while chong:
+        n = chong.pop()
+        if isinstance(n, (ast.FunctionDef, ast.AsyncFunctionDef, ast.Lambda, ast.ClassDef)):
+            continue
+        if isinstance(n, ast.NamedExpr) and isinstance(n.target, ast.Name):
+            ra.append(n.target.id)
+        chong.extend(ast.iter_child_nodes(n))
+    return ra
+
+
 def _rang_buoc_cua(pham_vi):
     """Bảng tên → tập ràng buộc TRỰC TIẾP trong MỘT phạm vi, KHÔNG xuống phạm vi con.
 
@@ -550,6 +678,14 @@ def _rang_buoc_cua(pham_vi):
         if isinstance(n, _NUT_PHAM_VI):
             if isinstance(n, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)):
                 them(n.name, ("khac",))
+            elif isinstance(n, (ast.ListComp, ast.SetComp, ast.DictComp, ast.GeneratorExp)):
+                # N29 (r11) — PEP 572: `:=` bên trong một comprehension ràng buộc ở phạm vi
+                # CHỨA comprehension, không ở trong nó. Bản r10 `continue` thẳng nên ràng buộc
+                # ấy biến mất; đo được: `import subprocess` rồi
+                # `[(subprocess := runner) for _ in [0]]` thì lời gọi SAU đó vẫn bị báo `[(3,0)]`
+                # — cổng CHẶN một phép che hợp lệ.
+                for x in _dich_walrus(n):
+                    them(x, ("khac",))
             continue                                   # KHÔNG xuống phạm vi con
         if isinstance(n, ast.Import):
             for al in n.names:
@@ -619,6 +755,62 @@ def _giai_ten(ten, chuoi):
     return None
 
 
+def _bang_pham_vi_ca_cay(cay):
+    """{id(nút phạm vi): (bảng, toàn_cục, phi_cục_bộ)} cho CẢ cây, SAU khi các ràng buộc khai
+    `global`/`nonlocal` đã được CHUYỂN về phạm vi SỞ HỮU chúng.
+
+    N29 — SINH TỪ r11, cross-review codex vòng 5. `_rang_buoc_cua` gom ràng buộc theo phạm vi
+    CÚ PHÁP, nhưng `global x` / `nonlocal x` nói rằng phép gán/`import` trong thân này thuộc về
+    một phạm vi KHÁC. Bản r10 bỏ qua điều ấy, và nó sai CẢ HAI HƯỚNG — đo được trên `6131cbd`:
+      LỌT   `subprocess = object()` ở module, rồi `def f(): global subprocess; import subprocess;
+             subprocess.run(["bash"])` ⇒ `[]` — một lời gọi bash THẬT không bị thấy;
+      OAN   `def f(): global subprocess; subprocess = gia()` rồi `subprocess.run(["bash"])` ở
+             module ⇒ `[(5, 0)]` — báo trên một cái tên đã bị che hợp lệ.
+      `nonlocal` cùng bệnh: `[(6, 4)]`.
+
+    Khai báo ĐỌC KHÔNG (`global x` mà không gán gì trong thân) KHÔNG chuyển gì — nếu chuyển thì
+    hoá ra vô hiệu hoá tên ấy vì cớ không đâu.
+    """
+    import ast
+    nut_cua, cha_cua, thu_tu = {}, {}, []
+
+    def ghi(nut, cha):
+        nut_cua[id(nut)] = nut
+        cha_cua[id(nut)] = cha
+        thu_tu.append(id(nut))
+        xuong(nut, id(nut))
+
+    def xuong(nut, chu):
+        for con in ast.iter_child_nodes(nut):
+            if isinstance(con, _NUT_PHAM_VI):
+                ghi(con, chu)
+            else:
+                xuong(con, chu)
+
+    ghi(cay, None)
+    bang = {i: list(_rang_buoc_cua(nut_cua[i])) for i in thu_tu}
+    goc = thu_tu[0]
+    _HAM = (ast.FunctionDef, ast.AsyncFunctionDef, ast.Lambda)
+    for i in thu_tu[1:]:
+        rieng, toan_cuc, phi_cuc_bo = bang[i]
+        for ten in toan_cuc:
+            rb = rieng.pop(ten, None)
+            if rb:
+                bang[goc][0].setdefault(ten, set()).update(rb)
+        for ten in phi_cuc_bo:
+            rb = rieng.pop(ten, None)
+            if not rb:
+                continue
+            j = cha_cua[i]
+            while j is not None and not (isinstance(nut_cua[j], _HAM) and ten in bang[j][0]):
+                j = cha_cua[j]
+            # Không tìm được chủ sở hữu thì ràng buộc ấy BIẾN MẤT — đúng: `nonlocal` không có
+            # phạm vi bao nào ràng buộc tên ấy là một lỗi cú pháp của chính mã được quét.
+            if j is not None:
+                bang[j][0].setdefault(ten, set()).update(rb)
+    return {i: tuple(bang[i]) for i in thu_tu}
+
+
 def _giai_callee_theo_pham_vi(cay):
     """[(nút `Call`, hàm tra tên)] cho MỌI lời gọi trong cây; hàm tra tên trả
     `(module, hàm|None)` hay None, theo đúng phạm vi từ vựng CHỨA lời gọi ấy.
@@ -630,9 +822,10 @@ def _giai_callee_theo_pham_vi(cay):
     """
     import ast
     ket = []
+    bang_cua = _bang_pham_vi_ca_cay(cay)
 
     def pham_vi(nut):
-        bang, toan_cuc, phi_cuc_bo = _rang_buoc_cua(nut)
+        bang, toan_cuc, phi_cuc_bo = bang_cua[id(nut)]
         return (isinstance(nut, ast.ClassDef), bang, toan_cuc, phi_cuc_bo)
 
     def duyet(nut, chuoi):
@@ -787,18 +980,37 @@ def quet(goc: Path):
                                            " KHÔNG lùi về `rglob`: danh sách rộng hơn thì phán"
                                            " quyết lại phụ thuộc trạng thái LOCAL của máy —"
                                            " đúng lớp mà r9 giết bằng kiến trúc."}
+    cac_tep = [m for m in cac_tep
+               if not any(m[0].startswith(x) for x in _BO_QUA_TOAN_CAY)]
+    _, bien_git_da_go = _moi_truong_git_sach()
+    try:
+        noi_dung, lien_ket = _doc_noi_dung(goc, cac_tep, nguon_tep)
+    except (OSError, UnicodeDecodeError) as e:
+        return RC_KHONG_DO_DUOC, {"trang_thai": "KHONG_DO_DUOC", "nguon_tep": nguon_tep,
+                                  "da_quet": str(goc), "pham_vi": "toan-cay",
+                                  "bien_git_da_go": bien_git_da_go,
+                                  "ly_do": f"không đọc được nội dung từ INDEX: {e}"}
+    if lien_ket:
+        # FAIL-CLOSE CÓ TÊN (N28). Blob của một mục mode `120000` là CHUỖI ĐƯỜNG DẪN, không
+        # phải mã. Đọc nó trên cây làm việc thì `read_text()` đi theo ra NGOÀI kho và phán
+        # quyết lại phụ thuộc byte ngoài kho — đúng lớp r11 giết bằng kiến trúc.
+        return RC_KHONG_DO_DUOC, {"trang_thai": "KHONG_DO_DUOC", "nguon_tep": nguon_tep,
+                                  "da_quet": str(goc), "pham_vi": "toan-cay",
+                                  "lien_ket_tuong_trung": lien_ket,
+                                  "bien_git_da_go": bien_git_da_go,
+                                  "ly_do": "mục `*.py` trong INDEX là SYMLINK: "
+                                           + ", ".join(lien_ket)
+                                           + ". Nội dung thật nằm NGOÀI thứ INDEX ghim, nên cổng "
+                                             "không đo được — `None ≠ False`."}
     co_loi_goi = {}
-    for tep in cac_tep:
-        rel = tep.relative_to(goc).as_posix()
-        if any(rel.startswith(x) for x in _BO_QUA_TOAN_CAY):
-            continue
+    for rel, than in sorted(noi_dung.items()):
         try:
-            than = tep.read_text(encoding="utf-8")
             dong = _loi_goi_tran(than)
-        except (OSError, UnicodeDecodeError, SyntaxError, ValueError) as e:
+        except (SyntaxError, ValueError) as e:
             # FAIL-CLOSE. Một tệp không phân tích được là một tệp KHÔNG ĐO ĐƯỢC, không
             # phải một tệp sạch — `None ≠ False`.
-            return RC_KHONG_DO_DUOC, {"trang_thai": "KHONG_DO_DUOC",
+            return RC_KHONG_DO_DUOC, {"trang_thai": "KHONG_DO_DUOC", "nguon_tep": nguon_tep,
+                                      "bien_git_da_go": bien_git_da_go,
                                       "ly_do": f"không đọc/phân tích được {rel}: {e}"}
         if dong:
             co_loi_goi[rel] = dong
@@ -834,7 +1046,9 @@ def quet(goc: Path):
     # thông điệp của nó là "xoá khỏi danh sách". Một mục số về 0 rơi vào CẢ `lech_so` lẫn đây;
     # báo cáo mang cả hai khoá, và đó là cố ý: hai luật, hai lý do, cùng một phán quyết.
     da_sach = [t for t in CHUA_CHUYEN if t not in co_loi_goi]
-    bao = {"da_quet": str(thu_muc), "pham_vi": "toan-cay", "nguon_tep": nguon_tep, "co_loi_goi_tran": co_loi_goi,
+    bao = {"da_quet": str(thu_muc), "pham_vi": "toan-cay", "nguon_tep": nguon_tep,
+           "nguon_noi_dung": "blob-index" if nguon_tep == "git" else "cay-lam-viec",
+           "bien_git_da_go": bien_git_da_go, "co_loi_goi_tran": co_loi_goi,
            "ngoai_danh_sach": moi, "muc_ratchet_da_sach": sorted(da_sach), "lech_so_loi_goi": lech_so,
            "cho_phep": sorted(CHO_PHEP), "anh_chup": sorted(ANH_CHUP_DONG_CUNG), "chua_chuyen": sorted(CHUA_CHUYEN),
            "so_cho_phep": {t: _so_cho_phep(m)[0] for t, m in sorted(_MIEN_TRU.items())}}

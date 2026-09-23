@@ -616,8 +616,12 @@ DOT_BIEN = {
         # bien cham HAI thuoc tinh. Dot bien qua rong thi ban kinh khong con doc duoc — va
         # loi ay la cua DOT BIEN, khong phai cua ca.
         "    cac_tep, nguon_tep = _liet_ke_py(goc)\n",
+        # NEO LAI LAN HAI O r11: tu r11 moi muc la `(rel, che_do, sha)` chu khong con la
+        # `Path`, nen ban cu goi `t.relative_to(goc)` tren mot tuple => gian giao hong =>
+        # TIN DUNG GIA. Bo cham lai theo hinh dang MOI. Day la lan thu HAI dot bien nay phai
+        # neo lai vi kieu du lieu doi — ghi ra vi no la CAI GIA co that cua viec doi kieu.
         '    cac_tep, nguon_tep = ([t for t in _liet_ke_py(goc)[0]\n'
-        '                           if t.relative_to(goc).as_posix().startswith("ops/")],\n'
+        '                           if t[0].startswith("ops/")],\n'
         '                          _liet_ke_py(goc)[1])  # đột biến: thu về `ops/**` như r3\n',
         "BASH_NEN", (), "t35_cong_phai_quet_TOAN_CAY_chu_khong_chi_ops"),
     "t23_bo_cat_CR_ten_cong_cu": ("ops/cai_cong_cu.sh",
@@ -715,13 +719,30 @@ DOT_BIEN = {
     # "hai ca troi cung mot thuoc tinh". Ban nay chi cat NGHIA cua INDEX: van di duong git, van
     # khai `nguon_tep = "git"`, nhung tra danh sach rglob — tuc NOI DOI ve nguon. `t44` khong
     # dong toi vi hai chot cua no o hai cay khac (git HONG va KHONG git).
+    # NEO LAI LAN HAI O r11. Ban r10 dat `if False:` len nhanh `.git` => QUA RONG (giet ca
+    # `t44`), da thu hep thanh "khai `git` ma tra rglob"; nhung r11 doi `muc` thanh bo ba
+    # `(rel, che_do, sha)` va `_doc_noi_dung` DOI sha that de `cat-file`, nen tra rglob khong
+    # con mach lac. Ban nay giu dung THUOC TINH t37 troi — "chua `git add` thi KHONG quet" —
+    # bang cach CONG THEM tep chua theo doi vao danh sach, kem sha that.
     "bn_quet_thang_bo_qua_INDEX": ("ops/bash_nen.py",
-        '                return sorted({goc / x for x in ten}), "git"\n',
-        '                return sorted(goc.rglob("*.py")), "git"  # đột biến: khai `git` mà trả rglob\n',
+        '                return sorted(set(muc)), "git"\n',
+        '                _co = {m[0] for m in muc}\n'
+        '                for _x in goc.rglob("*.py"):\n'
+        '                    _r = _x.relative_to(goc).as_posix()\n'
+        '                    if _r in _co:\n'
+        '                        continue\n'
+        '                    _h = subprocess.run(["git", "-C", str(goc), "hash-object", "-w",\n'
+        '                                         str(_x)], capture_output=True, text=True,\n'
+        '                                        timeout=60, env=env).stdout.strip()\n'
+        '                    if _h:\n'
+        '                        muc.append((_r, "100644", _h))\n'
+        '                return sorted(set(muc)), "git"  # đột biến: cộng cả tệp CHƯA add\n',
         "BASH_NEN", (), "t37_danh_sach_tep_la_INDEX_da_add_thi_quet_chua_add_thi_KHONG"),
     "bn_ten_phan_biet_hoa_thuong": ("ops/bash_nen.py",
-        "            and nut.value.casefold() in _HANG_BASH)\n",
-        "            and nut.value in _HANG_BASH)  # đột biến: so phân biệt hoa/thường\n",
+        # NEO LAI O r11: `_la_hang_bash` tach nhanh theo KIEU (str / bytes) nen dong cu
+        # khong con. Neo vao nhanh `str`.
+        "        return v.casefold() in _HANG_BASH\n",
+        "        return v in _HANG_BASH  # đột biến: so phân biệt hoa/thường\n",
         "BASH_NEN", (), "t33_do_phu_cua_cong_do_duoc_THEO_HINH_DANG"),
     "bn_khoa_cache_bo_cwd": ("ops/bash_nen.py",
         "                       os.getcwd()], default=str)\n",
@@ -745,13 +766,16 @@ DOT_BIEN = {
     # r8 — kien truc "danh sach = INDEX": dot bien NGHE LAI luat ignore (cua kho lan cua may qua
     # `--exclude-standard`) bang cach tru di tap tracked-ma-bi-ignore. `t43` chot (1) chet: tep
     # `add -f` khop `.gitignore` da commit bien mat. `t37` song: tep cua no khong bi ignore.
+    # NEO LAI O r11: dong `ten = [...]` khong con. Y DINH khong doi — bat cong NGHE LAI luat
+    # ignore — nay viet bang `check-ignore` tren chinh danh sach INDEX.
     "bn_nghe_lai_luat_ignore": ("ops/bash_nen.py",
-        '                ten = [x for x in pc.stdout.split("\\0") if x]\n',
-        '                ten = [x for x in pc.stdout.split("\\0") if x]\n'
-        '                _bi = set(subprocess.run(["git", "-C", str(goc), "ls-files", "--cached",\n'
-        '                                          "--ignored", "--exclude-standard", "-z", "--", "*.py"],\n'
-        '                                         capture_output=True, text=True, timeout=60).stdout.split("\\0"))\n'
-        '                ten = [x for x in ten if x not in _bi]  # đột biến: nghe lại luật ignore\n',
+        '                return sorted(set(muc)), "git"\n',
+        '                _loai = subprocess.run(["git", "-C", str(goc), "check-ignore",\n'
+        '                                        "--no-index", "--stdin"],\n'
+        '                                       input="\\n".join(m[0] for m in muc),\n'
+        '                                       capture_output=True, text=True, timeout=60,\n'
+        '                                       env=env).stdout.split()\n'
+        '                return sorted({m for m in muc if m[0] not in _loai}), "git"  # đột biến: nghe lại ignore\n',
         "BASH_NEN", (), "t43_khong_luat_ignore_nao_doi_duoc_danh_sach_tep"),
     "bn_bo_executable_kw": ("ops/bash_nen.py",
         # NEO LAI o r8: `executable` (ten hoac vi tri) nay di qua MOT nhanh.
@@ -799,8 +823,45 @@ DOT_BIEN = {
     # duong LUI ve `rglob` khi git hong; `t44` chot (1) phai DO.
     "bn_git_hong_lui_ve_rglob": ("ops/bash_nen.py",
         '            return [], f"git-hong: ls-files rc={pc.returncode} {pc.stderr.strip()[:200]!r}"\n',
-        '            return sorted(goc.rglob("*.py")), "rglob"  # đột biến: lùi im lặng\n',
+        # NEO LAI O r11: `_liet_ke_py` nay tra BAN GHI `(rel, che_do, sha)`, nen ban lui cu
+        # tra `Path` lam gian giao hong => TIN DUNG GIA. Ban nay lui dung hinh dang moi.
+        '            return [(x.relative_to(goc).as_posix(), None, None)\n'
+        '                    for x in sorted(goc.rglob("*.py"))], "rglob"  # đột biến: lùi im lặng\n',
         "BASH_NEN", (), "t44_khong_lay_duoc_INDEX_thi_KHONG_DO_DUOC_chu_khong_lui_ve_rglob"),
+    # r11 — N28: NOI DUNG cung tu INDEX, va moi truong git bi SCRUB. Hai mat, hai dot bien.
+    "bn_doc_cay_lam_viec": ("ops/bash_nen.py",
+        "    if nguon_tep != \"git\":\n",
+        "    if True:  # đột biến: đọc cây làm việc, symlink lại trỏ ra ngoài kho\n",
+        "BASH_NEN", (), "t46_noi_dung_lay_tu_INDEX_chu_khong_tu_cay_lam_viec"),
+    "bn_giu_bien_git_ke_thua": ("ops/bash_nen.py",
+        "    for k in da_go:\n        moi.pop(k, None)\n",
+        "    da_go = []  # đột biến: giữ nguyên GIT_INDEX_FILE/GIT_DIR kế thừa\n",
+        "BASH_NEN", (), "t46_noi_dung_lay_tu_INDEX_chu_khong_tu_cay_lam_viec"),
+    # r11 — N29: pham vi ton trong `global`/`nonlocal` va walrus trong comprehension.
+    "bn_bo_qua_global_nonlocal": ("ops/bash_nen.py",
+        "    for i in thu_tu[1:]:\n",
+        "    for i in []:  # đột biến: thôi chuyển ràng buộc `global`/`nonlocal` về chủ sở hữu\n",
+        "BASH_NEN", (), "t33_do_phu_cua_cong_do_duoc_THEO_HINH_DANG"),
+    "bn_bo_qua_walrus_comprehension": ("ops/bash_nen.py",
+        "                for x in _dich_walrus(n):\n",
+        "                for x in []:  # đột biến: walrus trong comprehension không trồi ra\n",
+        "BASH_NEN", (), "t33_do_phu_cua_cong_do_duoc_THEO_HINH_DANG"),
+    # r11 — N30: hang chuong trinh so theo MOI KIEU BIEU DIEN.
+    "bn_bo_hang_byte": ("ops/bash_nen.py",
+        "    if isinstance(v, bytes):\n",
+        "    if False:  # đột biến: b\"bash\" không phải hằng bash\n",
+        "BASH_NEN", (), "t33_do_phu_cua_cong_do_duoc_THEO_HINH_DANG"),
+    # r11 — N31: cong phai duoc NOI vao diem vao ma CI goi. Dot bien tren TEP TEST, qua cua
+    # `--tu-kiem-cong-that`, nen `bp` la TEP_TEST.
+    "t45_cong_khong_noi": (str(TEP_TEST.relative_to(GOC)),
+        "    rc, bao = _quet(goc, bo_quet)\n",
+        "    rc, bao = (0, {})  # đột biến: điểm vào KHÔNG chạy cổng trên cây thật\n",
+        "TEP_TEST", _KEM_TEP_TEST, "t45_bo_ca_phai_CHAY_cong_tren_cay_THAT_chu_khong_chi_cay_gia"),
+    "t45_cong_noi_ma_khong_neu_ten": (str(TEP_TEST.relative_to(GOC)),
+        '    return 1, [f"CỔNG TRÊN CÂY THẬT: {nhan} (rc={rc})",\n'
+        '               f"    {str(bao.get(\'ly_do\'))[:400]}"]\n',
+        '    return 1, [f"CỔNG TRÊN CÂY THẬT: {nhan}"]  # đột biến: giấu tên tệp vi phạm\n',
+        "TEP_TEST", _KEM_TEP_TEST, "t45_bo_ca_phai_CHAY_cong_tren_cay_THAT_chu_khong_chi_cay_gia"),
     "bn_khong_giai_callee": ("ops/bash_nen.py",
         "        loai = _loai_loi_goi(nut, tra_ten)\n",
         "        loai = _loai_theo_TEN_khong_giai_callee(nut)  # đột biến: nhận theo TÊN\n",
@@ -2099,6 +2160,17 @@ _HINH_DANG_PHU = {
     # Python). Ban r9 gan `("khac",)` cho no nen hinh dang nay do duoc `[]`. Codex vong 4
     # KHONG chi mat nay — no ra tu phep quet theo LOP tu mat codex co chi.
     "import_module_con": 'import subprocess.x\nsubprocess.run(["bash"])\n',
+    # r11 — N30, hang byte. `shutil.which(b"bash")` CHAY bash that; ban r10 loai chung chi vi
+    # khong phai `str`, tuc mot duong vong khong can phan tich luong du lieu nao.
+    "byte_which":      'import shutil\nshutil.which(b"bash")\n',
+    "byte_HOA":        'import shutil\nshutil.which(b"BASH.EXE")\n',
+    "byte_run_list":   'import subprocess\nsubprocess.run([b"bash"])\n',
+    "byte_executable": 'import subprocess\nsubprocess.run(["sh"], executable=b"bash")\n',
+    # r11 — N29, `global` chuyen rang buoc ve pham vi SO HUU. Ca CO LAP: module khong co rang
+    # buoc nao khac, nen `import` trong than ham la rang buoc DUY NHAT cua ten o module.
+    "global_import":   'def f():\n    global subprocess\n    import subprocess\n    subprocess.run(["bash"])\n',
+    # Chieu nguoc cua ban va walrus: mot comprehension THUONG khong che duoc gi.
+    "comprehension_thuong": 'import subprocess\n[x for x in [0]]\nsubprocess.run(["bash"])\n',
 }
 # `executable=` GHI DE, nen ca hai cung ten `bash` van la DUNG MOT ban ghi (F4, chieu dem).
 _HINH_DANG_MOT_BAN_GHI = 'import subprocess\nsubprocess.run(["bash"], executable="bash")\n'
@@ -2131,6 +2203,12 @@ _HINH_DANG_KHONG_PHU = {
     # `import subprocess.x as y` KHONG rang buoc `subprocess` — chi `y` ← module con. Day la
     # chieu nguoc cua `import_module_con`: mot ban va "cu co cham thi nhan" se bat oan o day.
     "import_con_co_as": 'import subprocess.x as y\ny.run(["bash"])\n',
+    # r11 — N30 chieu nguoc: byte NGOAI ASCII khong duoc giai ma bua.
+    "byte_ngoai_ascii": 'import shutil\nshutil.which(b"\\xff\\xfe")\n',
+    # r11 — N29 chieu BAT OAN. Ca ba deu la phep CHE hop le ma ban r10 van bao.
+    "global_gan_che":  'import subprocess\ndef f():\n    global subprocess\n    subprocess = gia()\nsubprocess.run(["bash"])\n',
+    "nonlocal_che":    'def o():\n    import subprocess\n    def i():\n        nonlocal subprocess\n        subprocess = gia()\n    subprocess.run(["bash"])\n',
+    "walrus_comprehension_che": 'import subprocess\n[(subprocess := runner) for _ in [0]]\nsubprocess.run(["bash"])\n',
 }
 
 
@@ -2884,6 +2962,130 @@ def t43_khong_luat_ignore_nao_doi_duoc_danh_sach_tep():
 
 
 @ca
+def t46_noi_dung_lay_tu_INDEX_chu_khong_tu_cay_lam_viec():
+    """THUỘC TÍNH: cả DANH SÁCH lẫn NỘI DUNG đều từ INDEX, và không biến git kế thừa nào đổi
+    được INDEX nào trả lời.
+
+    SINH TỪ CROSS-REVIEW CODEX vòng 5 trên `6131cbd` — HAI finding P2, và cả hai là **mặt thứ
+    sáu và bảy** của lớp *phán quyết phụ thuộc trạng thái LOCAL của máy*. r9 giết được "tệp
+    NÀO" bằng cách lấy danh sách từ INDEX; nhưng lớp còn phủ "BYTE nào" và "INDEX nào":
+      symlink       mục `*.py` trong INDEX là symlink ⇒ `read_text()` đi theo RA NGOÀI kho.
+                    Đo được: sửa tệp đích ngoài kho làm phán quyết đổi `['ops/lien_ket.py']`
+                    → `[]` trong khi INDEX **không đổi một byte**, và `nguon_tep` vẫn khai `git`.
+      GIT_INDEX_FILE  `git -C <goc>` đúng thư mục mà INDEX lại là tệp khác. Đo được: cùng một
+                    kho, index THẬT trả `['bad.py']`, đặt `GIT_INDEX_FILE` trả `[]` — cả hai
+                    lần đều khai `nguon_tep=git`.
+    Chủ kho quyết ở r11: **nội dung cũng lấy từ INDEX** (`cat-file --batch` trên blob đã stage)
+    và **gỡ mọi biến git chọn kho/chọn index/tiêm cấu hình** khỏi tiến trình con.
+
+    ĐÁNH ĐỔI CÓ CHỦ ĐỊNH, không phải tính chất tự nhiên: tệp đã `git add` rồi sửa tiếp trên đĩa
+    được quét ở DẠNG ĐÃ STAGE — chốt (3) trói đúng điều ấy, để ai đổi lại thiết kế phải đổi ca.
+    """
+    with tempfile.TemporaryDirectory() as tmp:
+        tmp = Path(tmp)
+        bq = _bash_nen_voi_chua_chuyen(tmp, {})
+        cay = tmp / "cay"
+        (cay / "ops").mkdir(parents=True)
+        for lenh in (["init", "-q"], ["config", "user.email", "t@t"], ["config", "user.name", "t"]):
+            subprocess.run(["git", "-C", str(cay)] + lenh, capture_output=True, timeout=60)
+        (cay / "ops" / "sach.py").write_text("X = 1\n", encoding="utf-8")
+        subprocess.run(["git", "-C", str(cay), "add", "-A"], capture_output=True, timeout=60)
+
+        # (3) NỘI DUNG là blob ĐÃ STAGE: sửa tiếp trên đĩa KHÔNG đổi phán quyết.
+        (cay / "ops" / "sach.py").write_text(
+            'import shutil\nb = shutil.which("bash")\n', encoding="utf-8")
+        rc, bao = _quet(cay, bq)
+        bang(not (bao.get("co_loi_goi_tran") or {}),
+             f"(3) sửa tệp trên ĐĨA sau khi `git add` lại đổi được phán quyết: "
+             f"{sorted(bao.get('co_loi_goi_tran') or {})} — nội dung đang đọc từ cây làm việc "
+             f"chứ không từ INDEX (nguon_noi_dung={bao.get('nguon_noi_dung')!r})")
+        subprocess.run(["git", "-C", str(cay), "checkout", "--", "ops/sach.py"],
+                       capture_output=True, timeout=60)
+
+        # (2) GIT_INDEX_FILE kế thừa KHÔNG đổi được danh sách.
+        (cay / "ban.py").write_text('import shutil\nb = shutil.which("bash")\n', encoding="utf-8")
+        subprocess.run(["git", "-C", str(cay), "add", "-A"], capture_output=True, timeout=60)
+        _, nen = _quet(cay, bq)
+        alt = tmp / "index_khac"
+        subprocess.run(["git", "-C", str(cay), "add", "ops/sach.py"], capture_output=True,
+                       timeout=60, env={**os.environ, "GIT_INDEX_FILE": str(alt)})
+        _, voi_alt = _quet(cay, bq, env={**os.environ, "GIT_INDEX_FILE": str(alt)})
+        bang(sorted(voi_alt.get("co_loi_goi_tran") or {}) == sorted(nen.get("co_loi_goi_tran") or {}),
+             f"(2) `GIT_INDEX_FILE` kế thừa đổi được danh sách: nền "
+             f"{sorted(nen.get('co_loi_goi_tran') or {})} → {sorted(voi_alt.get('co_loi_goi_tran') or {})}"
+             f" — `git -C` KHÔNG ghim được kho, phải gỡ biến khỏi tiến trình con")
+
+        # (1) Mục `*.py` là SYMLINK ⇒ KHÔNG ĐO ĐƯỢC, nêu tên. `None ≠ False`.
+        ngoai = tmp / "ngoai_kho.py"
+        ngoai.write_text('import shutil\nb = shutil.which("bash")\n', encoding="utf-8")
+        try:
+            (cay / "ops" / "lien_ket.py").symlink_to(ngoai)
+        except OSError as e:
+            raise BoQuaMoiTruong(f"không tạo được symlink trên máy này: {e}") from e
+        subprocess.run(["git", "-C", str(cay), "add", "-A"], capture_output=True, timeout=60)
+        rc, bao = _quet(cay, bq)
+        bang(bao.get("trang_thai") == "KHONG_DO_DUOC"
+             and any("lien_ket.py" in x for x in (bao.get("lien_ket_tuong_trung") or [])),
+             f"(1) mục `*.py` là SYMLINK mà cổng vẫn ra phán quyết: {bao.get('trang_thai')} "
+             f"lien_ket_tuong_trung={bao.get('lien_ket_tuong_trung')} — nội dung thật nằm NGOÀI "
+             f"thứ INDEX ghim, nên nó KHÔNG ĐO ĐƯỢC chứ không phải sạch")
+
+
+@ca
+def t45_bo_ca_phai_CHAY_cong_tren_cay_THAT_chu_khong_chi_cay_gia():
+    """THUỘC TÍNH: điểm vào mà CI gọi phải CHẠY cổng trên cây thật — sạch thì qua, bẩn thì hỏng.
+
+    SINH TỪ CROSS-REVIEW CODEX vòng 5 trên `6131cbd`, và đây là finding **P1** đầu tiên của
+    packet. `.github/workflows/ci.yml` gọi `python ops/cong_cu_test.py` ở BA chỗ và KHÔNG chỗ
+    nào gọi `ops/bash_nen.py quet`; còn `main()` chỉ chạy ca trên cây GIẢ cộng bán kính đột
+    biến. Đo lại trên một BẢN SAO kho, có bằng chứng dương:
+        `bash_nen.py quet --root .` ⇒ rc=2 DO, ngoai_danh_sach=['vi_pham_moi.py']
+        `cong_cu_test.py`           ⇒ rc=1 (nền), tên tệp vi phạm xuất hiện **0 lần**
+    Tức cái cổng cả packet sinh ra để dựng chưa từng được nối vào chỗ nó gác. Một cổng không
+    ai gọi thì không phải cổng.
+
+    HAI CHIỀU, và chiều SẠCH là chiều dễ quên: nếu thiếu nó thì một bản vá "lúc nào cũng hỏng"
+    vẫn xanh ở ca này. Đi qua CỬA TIẾN TRÌNH CON `--tu-kiem-cong-that` để đột biến trên đĩa
+    cắn được — lần thứ SÁU của cái bẫy "đột biến tệp không cắn nổi mã đã nạp trong tiến trình".
+    """
+    def _do(ban, bq):
+        p = subprocess.run([sys.executable, str(TEP_TEST), "--tu-kiem-cong-that", str(ban), str(bq)],
+                           cwd=GOC, capture_output=True, text=True, timeout=180)
+        dong = [l for l in p.stdout.splitlines() if l.startswith("KQ ")]
+        dung(dong, f"cửa tự kiểm hỏng: rc={p.returncode}\n{p.stdout[-600:]}\n{p.stderr[-600:]}")
+        return p.returncode, json.loads(dong[-1][3:])
+
+    with tempfile.TemporaryDirectory() as tmp:
+        tmp = Path(tmp)
+        bq = _bash_nen_voi_chua_chuyen(tmp, {})
+        cay = tmp / "cay"
+        (cay / "ops").mkdir(parents=True)
+        for lenh in (["init", "-q"], ["config", "user.email", "t@t"], ["config", "user.name", "t"]):
+            subprocess.run(["git", "-C", str(cay)] + lenh, capture_output=True, timeout=60)
+        (cay / "ops" / "sach.py").write_text("X = 1\n", encoding="utf-8")
+        subprocess.run(["git", "-C", str(cay), "add", "-A"], capture_output=True, timeout=60)
+        rc_sach, (loi_sach, _) = _do(cay, bq)
+        bang(rc_sach == 0 and loi_sach == 0,
+             f"(1) cây SẠCH mà điểm vào vẫn báo hỏng: rc={rc_sach} lỗi={loi_sach} — "
+             f"một cổng lúc nào cũng đỏ thì không ai bật nó")
+
+        (cay / "ops" / "ban.py").write_text(
+            'import shutil\nb = shutil.which("bash")\n', encoding="utf-8")
+        subprocess.run(["git", "-C", str(cay), "add", "-A"], capture_output=True, timeout=60)
+        rc_cong, bao_cong = _quet(cay, bq)          # phán quyết của CỔNG, gọi thẳng
+        rc_ban, (loi_ban, dong_ban) = _do(cay, bq)  # điểm vào mà CI gọi
+        bang((loi_ban != 0) == (rc_cong != 0) and (rc_ban != 0) == (loi_ban != 0),
+             f"(2) điểm vào KHÔNG phản ánh phán quyết của cổng: cổng rc={rc_cong} "
+             f"({bao_cong.get('trang_thai')}) mà điểm vào lỗi={loi_ban} mã={rc_ban} — "
+             f"CI gọi đúng điểm vào này, nên một bên nói ĐỎ mà bên kia nói qua là cổng KHÔNG "
+             f"được nối. (Đây KHÔNG phải ca gác tính ĐÚNG của cổng — đó là `t25`.)")
+        if rc_cong != 0:
+            bang(any("ban.py" in d for d in dong_ban),
+                 f"(3) điểm vào có báo hỏng nhưng KHÔNG nêu tên tệp vi phạm: {dong_ban} — "
+                 f"người đọc log CI phải biết sửa gì, không phải chỉ biết là có chuyện")
+
+
+@ca
 def t44_khong_lay_duoc_INDEX_thi_KHONG_DO_DUOC_chu_khong_lui_ve_rglob():
     """THUỘC TÍNH: cây LÀ kho git mà không lấy được INDEX ⇒ KHÔNG ĐO ĐƯỢC — không lùi, không
     phán quyết. Cây KHÔNG phải kho git thì vẫn quét thẳng được.
@@ -3019,6 +3221,46 @@ def t39_chi_CA_PHAN_QUYET_duoc_chot_tren_rc_va_trang_thai():
 
 
 
+def _cong_tren_cay_that(goc, bo_quet=None):
+    """(mã, dòng báo) — CHẠY chính cổng `bash_nen quet` trên cây THẬT.
+
+    N31 — SINH TỪ r11, cross-review codex vòng 5, và đây là finding **P1** đầu tiên của packet.
+    CI gọi `python ops/cong_cu_test.py` ở BA chỗ trong `.github/workflows/ci.yml` và KHÔNG chỗ
+    nào gọi `ops/bash_nen.py quet`. Còn `main()` thì chỉ chạy ca trên cây GIẢ cộng bán kính đột
+    biến. Tức cái cổng mà cả packet này sinh ra để dựng **chưa từng được nối vào chỗ nó gác**.
+
+    ĐO ĐƯỢC, bằng chứng dương, trên một BẢN SAO kho (không chạm tệp ngoài write set): thêm
+    `vi_pham_moi.py` có `shutil.which("bash")` rồi `git add`:
+        `python3 ops/bash_nen.py quet --root .` ⇒ rc=2 DO, ngoai_danh_sach=['vi_pham_moi.py']
+        `python3 ops/cong_cu_test.py`            ⇒ rc=1 (chỉ là nền t2_go_canary), và tên tệp
+                                                   vi phạm xuất hiện **0 lần** trong cả báo cáo.
+
+    BA TRẠNG THÁI, không phải hai: `DAT` ⇒ 0 · `DO` ⇒ lỗi · `KHONG_DO_DUOC` ⇒ CŨNG lỗi, kèm
+    nhãn riêng. Gộp hai cái sau làm một là xoá đúng phân biệt packet này tồn tại để giữ.
+    """
+    # `bo_quet` CHỈ cho ca đo dùng. Một cây GIẢ không thoả bảng miễn trừ THẬT (ảnh chụp khai
+    # 7 lời gọi, cây giả có 0 ⇒ lệch ⇒ ĐỎ OAN) — đúng cái bẫy `_bash_nen_voi_chua_chuyen` sinh
+    # ra để chặn, và đây là lần thứ TƯ nó cắn trong packet này. Đường THẬT (`main()`) không
+    # truyền gì, nên nó vẫn chạy đúng bộ quét thật trên cây thật.
+    rc, bao = _quet(goc, bo_quet)
+    if rc == 0:
+        return 0, [f"CỔNG TRÊN CÂY THẬT: ĐẠT · nguon_tep={bao.get('nguon_tep')} "
+                   f"· nguon_noi_dung={bao.get('nguon_noi_dung')}"]
+    nhan = "ĐỎ" if bao.get("trang_thai") == "DO" else "KHÔNG_ĐO_ĐƯỢC"
+    return 1, [f"CỔNG TRÊN CÂY THẬT: {nhan} (rc={rc})",
+               f"    {str(bao.get('ly_do'))[:400]}"]
+
+
+def _in_tu_kiem_cong_that():
+    """Cửa tiến trình con cho `t45`: chạy phép nối cổng trên MỘT gốc cho trước rồi in ra."""
+    i = sys.argv.index("--tu-kiem-cong-that")
+    goc = sys.argv[i + 1]
+    bq = sys.argv[i + 2] if len(sys.argv) > i + 2 else None
+    loi, dong = _cong_tren_cay_that(Path(goc), bq)
+    print("KQ " + json.dumps([loi, dong], ensure_ascii=False))
+    sys.exit(0 if loi == 0 else 9)
+
+
 def main() -> int:
     tien_kiem_bo_qua = [x for x in (_chay_tien_kiem(batch_behavior_test),
                                     _chay_tien_kiem(python_alias_behavior_test)) if x]
@@ -3045,6 +3287,13 @@ def main() -> int:
     print(f"\ncong_cu_test: {qua}/{len(CA) - len(bo_qua)} đạt; tổng={len(CA)}, "
           f"bỏ qua={len(bo_qua)}, tiền kiểm bỏ qua={len(tien_kiem_bo_qua)}")
 
+    # N31 — CỔNG PHẢI ĐƯỢC NỐI VÀO CHỖ NÓ GÁC. Chạy MỘT lần, trên cây THẬT, TRƯỚC bộ đột
+    # biến: đột biến dựng cây SAO và tráo `BASH_NEN`, nên chạy sau sẽ đo nhầm bản sao.
+    loi_cong, dong_cong = _cong_tren_cay_that(GOC)
+    print()
+    for d in dong_cong:
+        print(d)
+
     loi_db = _tu_kiem_phan_hang()
     loi_db += _tu_kiem_gian_giao()
     # MỘT ca đỏ ở NỀN không được làm hỏng phép đo bán kính của TOÀN BỘ bộ đột biến (r8, xem
@@ -3069,10 +3318,10 @@ def main() -> int:
             print(dong)
         loi_db += loi
     print(f"\nSỐ LIỆU: ca={len(CA)} · đột biến={len(DOT_BIEN)} · lỗi đột biến={loi_db}"
-          f" · tiền kiểm bỏ qua={len(tien_kiem_bo_qua)}")
+          f" · tiền kiểm bỏ qua={len(tien_kiem_bo_qua)} · cổng cây thật={'ĐẠT' if not loi_cong else 'HỎNG'}")
     # Tien kiem bi bo qua KEO ma thoat khac 0. `KHONG_DO_DUOC` khong duoc lang le thanh XANH —
     # `None != False`. No chi thoi giet CA SUITE, chu khong thoi la mot tin hieu.
-    return 1 if (hong or loi_db or tien_kiem_bo_qua) else 0
+    return 1 if (hong or loi_db or tien_kiem_bo_qua or loi_cong) else 0
 
 _KET_GIA_RONG = {
     "ca_dich_gia": ("giet_that", "chốt của chính nó"),
@@ -3180,4 +3429,6 @@ if __name__ == "__main__":
     if "--tu-kiem-luat-phan-quyet" in sys.argv[1:]:
         _in_tu_kiem_luat_phan_quyet()
         sys.exit(0)
+    if "--tu-kiem-cong-that" in sys.argv[1:]:
+        _in_tu_kiem_cong_that()
     sys.exit(main())

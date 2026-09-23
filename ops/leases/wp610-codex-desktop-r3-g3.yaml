@@ -1,0 +1,44 @@
+schema_version: 2
+event: executor_lease_granted
+packet_issue: 610
+packet_id: WP610-CODEX-DESKTOP-CONTRACT
+mission_issue: 499
+revision: 3
+generation: 3
+lease_id: wp610-codex-desktop-r3-g3
+granted_by: ducthangho
+granted_on_instruction: https://github.com/ducthangho/tra-luat/issues/610#issuecomment-5794979922
+granted_on_instruction_nguyen_van: Codex gpt-6-astra, medium effort vá và fable 5.1
+  medium effort cross review theo phân lớp lặp tiếp tới khi không còn P1, P2, P3
+recorded_by: codex-desktop
+recorder_is_dispatcher: false
+authority_caveat: Owner continuation projection; parent relinquishes writer; g2 superseded
+  for current writer, not revived; not dispatcher or human audit
+leased_at_utc: '2026-09-23T12:42:00Z'
+lease_expires_at_utc: '2026-09-23T14:12:00Z'
+role: executor
+executor: codex
+provider: openai_codex
+execution_surface: codex_desktop
+transport: machine
+review_class: sensitive
+effective_review_class: sensitive
+assurance_target: human_audited
+spec_path: ops/specs/wp610-codex-desktop-r3.md
+spec_ref: refs/heads/codex/wp610-authority
+spec_source_oid: 86e1af70cdeb0f1564dcbeffdb8ab487adb3f1a1
+spec_hash: f6b0b9a044034cf4755223378482e54e1151a85c601db708068327cd7d82e45c
+prompt_path: ops/specs/wp610-codex-desktop-r3.md
+prompt_sha256_required: f6b0b9a044034cf4755223378482e54e1151a85c601db708068327cd7d82e45c
+branch: codex/wp610-g1
+start_from_sha: 18d42cab74e80fc7635f754323fd13f520ccdcec
+reviewed_sha_required: 18d42cab74e80fc7635f754323fd13f520ccdcec
+write_set:
+- .claude/dev/launcher.py
+- ops/bien_nhan_v2_test.py
+- ops/KE_HOACH_THI_CONG_DA_PROVIDER.md
+cam_tuyet_doi:
+- No process launch/credentials or validator implementation change
+- No edits to523 product or metadata
+- No self-review/approval/merge/deploy/LIVE
+- No fullCI before technical readiness

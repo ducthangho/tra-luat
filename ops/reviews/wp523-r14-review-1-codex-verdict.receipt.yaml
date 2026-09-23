@@ -13,8 +13,8 @@ so_p1: 0
 so_p2: 0
 so_p3: 0
 verdict_path: ops/reviews/wp523-r14-review-1-codex-verdict.md
-verdict_sha256: 340cfaecc3f3cb0ba72c001d669f9c6b7dbf288687d01ceb997ea218f9c57b8a
-verdict_bytes: 13208
+verdict_sha256: d3078a606d9fa410042c9d02536e2d3b3a9bc52705651b0c76190c6da7bb8aec
+verdict_bytes: 13103
 evidence_url: https://github.com/ducthangho/tra-luat/blob/e83726dc8f42ba45151d57d1ffb3cc459510b976/ops/reviews/wp523-r14-review-1-codex-verdict.md
 model_reviewer_identity:
   provider: openai_codex
@@ -56,3 +56,11 @@ pending:
 - M11 evidence independent review and canonical integration
 - product CI outcome and exact-H human audit
 - land/bookkeeping
+format_reissue:
+  raw_original_sha256: 340cfaecc3f3cb0ba72c001d669f9c6b7dbf288687d01ceb997ea218f9c57b8a
+  raw_original_bytes: 13208
+  transform: 105 CRLF to LF only; Unicode identical; reviewer issued separate LF transport
+    copy; no new review round
+  raw_original_comment: https://github.com/ducthangho/tra-luat/issues/523#issuecomment-5792291427
+  initial_receipt_erratum: Initial receipt2462684 used raw CRLF hash against LF Git
+    blob; detected by validator, corrected here; old commit retained as failed history

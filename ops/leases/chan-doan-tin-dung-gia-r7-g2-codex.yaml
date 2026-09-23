@@ -30,7 +30,10 @@ SU_CO_LUC_CAP_PHAI_KHAI: 'Ban DAU cua chinh tep nay duoc day len RONG 0 BYTE o c
   khac. Da chua ngay o commit ke tiep. Bai hoc: mot tep lease moi phai duoc DO (kich
   thuoc + phan tich YAML) TRUOC khi day, y het moi loi khai khac trong kho nay.'
 leased_at_utc: '2026-09-22T15:04:00Z'
-lease_expires_at_utc: '2026-09-23T14:37:00Z'
+# Owner-authorized closure after canonical gate35819580758 passed.
+# Authority: https://github.com/ducthangho/tra-luat/issues/568#issuecomment-5789142140
+# Previous expiry: 2026-09-23T14:37:00Z; original grant retained in Git history.
+lease_expires_at_utc: '2026-09-23T05:22:56Z'
 role: executor
 provider: openai_codex
 executor: codex

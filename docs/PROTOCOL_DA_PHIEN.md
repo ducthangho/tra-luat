@@ -730,6 +730,26 @@ tiêu chí mới, không lấy danh sách Executor làm trần. Bảng đối ch
 phạm vi đã đo, kết quả dương/âm và phần chưa đo; tổng suite hay số dòng khớp không đóng lớp.
 Đổi Packet hoặc baseline không reset lịch sử, budget hay receipt đã giao (§3.2.1/§12).
 
+**Bảng lớp của mỗi lượt.** Mỗi finding có đúng một slug lớp nguyên nhân; mỗi lớp ghi
+các finding IDs/biểu hiện, mức nghiêm trọng cao nhất còn mở, nguồn lượt/SHA, cách vá
+chung và phép kiểm đóng lớp. Nếu cần vá riêng từng biểu hiện, ghi lý do cơ chế không
+cho một thay đổi chung; gợi ý reviewer vẫn theo §7/§8, không trở thành mệnh lệnh.
+Đếm số lớp và số biểu hiện riêng. Tách/gộp lớp cần bảng nối slug nguồn, lý do và phép
+đối chiếu trên cùng tập finding; không đổi khóa để xóa lần tái diễn hoặc làm đẹp tỷ lệ.
+
+Từ lượt sau, bảng đối chiếu vẫn phân từng finding trước theo bốn nhãn ở §8; lớp chỉ
+được ghi **ĐÃ VÁ THẬT** khi mọi biểu hiện thuộc phạm vi được kiểm độc lập đã đóng,
+không còn biểu hiện cùng cơ chế do bản vá sinh ra và không còn phần phải đo để đóng
+lớp. Thiếu quan sát, cắt acceptance hoặc chuyển biểu hiện ra ngoài scope không được
+tính là vá. Ghi phần `chua_do_duoc`/successor và authority riêng; giữ slug trong lịch
+sử. Phép đo target/non-target và đối chứng phải đủ để quyết kết luận; lỗi setup hay
+tổng suite xanh không thay bằng chứng cho đúng tính chất của từng lớp.
+
+Open P0 luôn chặn approval. Với P1/P2/P3, đối chiếu điều kiện severity của Packet,
+Review Class và assurance §8 riêng với bảng đối chiếu; hết finding hoặc tỷ lệ vá cao
+không tự tạo approval, không miễn exact-SHA audit/gate. Các nghĩa vụ bảng lớp/đọc nghĩa
+ở đây là kỷ luật review; scanner xanh không chứng minh chúng đã được máy cưỡng chế.
+
 Hồ sơ kế thừa #523 trong WP538 giữ N1–N8/M16 ở spec nguồn bất biến và bốn lớp **unresolved**:
 
 | Slug nguồn | Phần chưa được tuyên bố đóng bởi cập nhật tài liệu này |
@@ -986,6 +1006,21 @@ Tập lệnh đóng: `/mission start|pause|resume`, `/packet retry|cancel|rerout
 có audit.
 
 ## 12. Stop conditions và budget
+
+**Tín hiệu không hội tụ theo lớp.** Với chuyển tiếp từ lượt r sang r+1, đặt U là tập
+slug lớp còn mở ở cuối lượt r, F là tập con của U được reviewer lượt r+1 xác minh
+ĐÃ VÁ THẬT theo §8.3. Tỷ lệ = |F|/|U|; nhiều finding cùng lớp chỉ tính một lần.
+U rỗng thì tỷ lệ không xác định (`N/A`), không phải 0% hay 100%; không ghép hai tỷ lệ
+thấp qua một chuyển tiếp N/A. Hai chuyển tiếp liên tiếp có tỷ lệ <50% thì dừng vòng
+vá và đưa bằng chứng tới Review Rescue Checkpoint bên dưới. Ngưỡng này là heuristic
+kế thừa từ #523, không là chứng minh thống kê; không thay trần độc lập.
+
+Báo riêng các lớp mới tại r+1 (không nằm trong U), lớp tái mở và phần chưa đo; chúng
+không vào tử số F. Tỷ lệ cao chỉ nói về tập U, không chứng minh hội tụ khi lớp mới
+vẫn xuất hiện, không thay điều kiện dừng theo class/Packet hay bằng chứng approval.
+Một lớp xuất hiện ở ba lượt review khác nhau đòi xem lại cách làm tại checkpoint;
+ba biểu hiện của lớp trong cùng một lượt chỉ là một lần xuất hiện. Revision/scope
+cut không reset lịch sử đó, không tự cấp thêm review call hoặc attempt.
 
 Mặc định: 3 attempt/packet, 90 phút/run cho cả Executor và Reviewer, cùng failure fingerprint nội dung hai lần thì
 blocked, tối đa 20 packet,

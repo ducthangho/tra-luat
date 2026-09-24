@@ -1,0 +1,147 @@
+# Lease EXECUTOR — packet #578, phạm vi VÁ HỒ SƠ LAND theo cross-review, generation 4.
+#
+# NGUỒN SỰ THẬT LÀ TỆP NÀY. Comment trên "#578" chỉ là bản chiếu do
+# `.github/workflows/ops-publish-lease.yml` đăng khi tệp này được push lên nhánh `ops/**`.
+#
+# NHỚ ĐÓNG NHÁY mọi giá trị chứa `#`: không nháy thì `#` mở CHÚ THÍCH YAML và cắt cụt
+# giá trị IM LẶNG — đã đụng thật ở lease exec-4 của wp55.
+
+schema_version: 2
+event: executor_lease_granted
+packet_issue: 578
+packet_id: wp578
+generation: 4
+lease_id: wp578-land-g4-claude-20260924
+
+thay_the_cho: wp578-land-g3-claude-20260924
+bia_mo_ghi_chu: >-
+  Bia mộ HAI CHIỀU. Tệp lease g3 trên nhánh này mang `da_bi_thay_the` trỏ về lease này;
+  `_kiem_bia_mo` đòi đủ cả hai chiều, và cổng đọc từ REF nên phải commit trước rồi mới
+  chạy `lease_publish.py check`. Lease này KHÔNG chép `posted_comment_id` của g3.
+
+role: executor
+provider: claude
+executor: claude
+access: read-write
+review_class: sensitive
+effective_review_class: sensitive
+review_class_note: >-
+  `ops/land/` và `ops/leases/` KHÔNG có trong `_BANG_LOP` của `ops/lease_publish.py`,
+  nên cổng phân lớp fail-closed về `sensitive`. Lớp CỔNG TÍNH ĐƯỢC, không tự khai.
+
+write_set:
+  - ops/land/pr594-wp578-land-evidence.yaml
+  - ops/leases/wp578-land-g4-claude-20260924.yaml
+  - ops/leases/wp578-land-g3-claude-20260924.yaml
+write_set_note: >-
+  Ba tệp: hồ sơ land, chính lease này, và tệp g3 mang bia mộ. KHÔNG mã sản phẩm,
+  KHÔNG tệp của packet khác. Tệp thứ tư xuất hiện trong diff là finding.
+
+pham_vi_du_kien:
+  so_viec: 3
+  co_so: 'Verdict cross-review lượt 7 trên head f07fcf21 — 0 P1, 2 P2, 1 P3.'
+  viec:
+    - 'Lớp `pham-vi-tu-noi-rong-hon-du-lieu` (P2): hồ sơ tự đặt phạm vi tới head CHA của
+      head hiện tại, nhưng danh sách dừng ở `f405f2b` trong khi cha first-parent là
+      `662a032`. Ba biểu hiện cùng lớp: (a) thiếu entry cho `662a032`; (b) hai job
+      windows-latest của run 35637741169 được ghi lúc còn `in_progress`, kết cục thật
+      đã có; (c) dòng 840 ghi packet 568 còn mở, dòng 1536 ghi issue đã đóng 23-09.'
+    - 'Lớp `nguyen-nhan-vuot-phep-do` (P2): kết luận về việc nguyên nhân đỏ đã hoặc chưa
+      được chữa được suy từ phép so blob. So blob chỉ chứng minh blob đổi hay không đổi.
+      Thu câu kết luận về đúng phạm vi đã đo.'
+    - 'Lớp `neo-dong-loi-thoi` (P3): các neo theo SỐ DÒNG của protocol trỏ sang điều khoản
+      khác trong bản hiện tại. Câu trích vẫn đúng, địa chỉ thì không.'
+  nguyen_tac_va: >-
+    Vá theo LỚP, không theo lỗi lẻ. Ba biểu hiện của một lớp đóng bằng một bản vá đủ rộng,
+    không phải ba bản vá hẹp.
+
+KHONG_duoc_phep:
+  - 'Merge PR "#601" — ngoài land authority. Việc bấm nút thuộc chủ kho.'
+  - 'Sửa bất kỳ mã sản phẩm nào, kể cả sửa tạm rồi hoàn nguyên.'
+  - 'Chạy CI hay full CI bằng tay trước khi đủ điều kiện merge: `manual_ci_budget` là 0,
+    không `workflow_dispatch`, không re-run tay. Cổng chạy lại là HỆ QUẢ của push.'
+  - 'Chạy CI Windows — chủ kho khai lỗi đã biết từ trước, không đo lại trong lượt này.'
+  - 'Sửa một kết luận cũ của hồ sơ để làm nó đẹp hơn. Chỉ được ghi thêm phép đo và thu
+    hẹp lời khai về đúng phạm vi đo được.'
+  - 'Đụng "#568", "#570", "#562", "#552", "#574", "#579".'
+
+branch: claude/ho-so-land-578-20260921
+branch_ownership: exclusive
+target_branch_neu_land: master
+
+reviewed_sha_required: f07fcf211d7b95ed8967ef586278d277a68bd5eb
+reviewed_sha_note: >-
+  Head XUẤT PHÁT của generation này, đồng thời là head đã được review ở lượt 7.
+  Trường mang tên `reviewed_sha_*` vì validator dùng CHUNG cho lease executor lẫn reviewer.
+base_sha: ce25a427b87aca9a6352ce4679bb4e7dc56c8235
+start_from_sha: f07fcf211d7b95ed8967ef586278d277a68bd5eb
+
+granted_by: ducthangho
+granted_on_instruction: 'direct, in-session, 2026-09-24'
+recorded_by: claude-session
+recorder_is_dispatcher: false
+recorder_note: >-
+  Phiên agent GÕ HỘ. `granted_by` là chủ kho và chỉ chủ kho; phiên này không tự cấp cho
+  mình. Thứ thật sự neo danh tính là `GITHUB_ACTOR` ở cổng đăng, không phải chữ trong tệp.
+authority_basis: '§2 — start/pause/resume/reroute/override/authorize thuộc chủ kho'
+
+leased_at_utc: '2026-09-24T06:30:00Z'
+lease_expires_at_utc: '2026-09-25T06:30:00Z'
+run_minutes: 1440
+
+# --- Trần review: khối vượt trần theo ADR-0043 ---------------------------------------
+nang_tran:
+  truc: codex_review_calls_used
+  ai_nang: ducthangho
+  ai_nang_tham_quyen: '§2 — override/authorize thuộc chủ kho'
+  can_cu: 'Chỉ thị trực tiếp trong phiên 2026-09-24 cho phép nâng trần trục LỜI GỌI.'
+  can_cu_hien_vat: 'https://github.com/ducthangho/tra-luat/pull/601#issuecomment-5808616311'
+  can_cu_hinh_thuc: >-
+    Khối này được đăng công khai TRƯỚC lượt review thứ bảy, không ghi hậu kỳ. Khác tiền lệ
+    "#521", nơi khối `nang_tran_truc_loi_goi` chỉ có SAU khi tám lượt đã chạy.
+  tran_cu: 2
+  tran_moi: 12
+  ai_dat_con_so_12: >-
+    PHIÊN NÀY đặt, không phải con số chủ kho đọc ra. Chủ kho cho phép NÂNG; biên độ do phiên
+    chọn: 6 đã dùng cộng 6 lượt dự phòng cho vòng vá.
+  bo_dem_khong_reset: >-
+    `codex_review_calls_used` vẫn đếm tiếp TỪ 6. Nâng TRẦN khác reset BỘ ĐẾM. Lượt 7 đã
+    dùng, nên sau lượt ấy bộ đếm là 7.
+  cong_cuong_che: >-
+    KHÔNG CÓ. `ADR-0048` đã đo: bốn tên riêng của cơ chế này xuất hiện 0 lần trong
+    `ops/lease_publish.py` và 0 tệp `*.py` toàn kho. Đây là lời khai để kiểm bằng tay.
+
+review_rescue_checkpoint:
+  kich_hoat_boi: 'ADR-0037 — đã dùng hết hai lượt Codex mà chưa approve.'
+  tach_stable_slice: false
+  ly_do_khong_tach: >-
+    PR gồm ĐÚNG một tệp, là một văn bản hồ sơ liền mạch. Không có đường cắt nào thoả cả ba
+    điều kiện của ADR-0037 (hữu ích độc lập, có acceptance riêng, không phụ thuộc phần đang
+    có finding). Cắt một hồ sơ bằng chứng làm đôi thì nửa trước không tự chứng minh gì.
+  he_qua: 'Đi tiếp bằng vòng vá dưới trần mới đã khai, không tuyên Packet thất bại nội dung.'
+
+# --- Tiền điều kiện ĐÃ ĐO -------------------------------------------------------------
+preconditions_measured_at_utc: '2026-09-24T06:25:00Z'
+chong_lan_write_set:
+  do_bang: 'python ops/lease_publish.py ai-dang-giu <từng đường dẫn trong write_set>'
+  ket_qua: >-
+    rc=0 cho cả ba. Hồ sơ land và tệp g3: NGƯỜI_GIỮ 1 — đúng g3, chính lease đang được thay
+    bằng bia mộ hai chiều. Tệp g4: NGƯỜI_GIỮ 0. Không có bên thứ ba.
+  vi_sao_ghi_ra: >-
+    Packet này đã một lần vi phạm bất biến 2 của §1 (ba bên cùng giữ một đường dẫn). Lần này
+    đo TRƯỚC khi cấp, và chuyển quyền bằng bia mộ chứ không cấp chồng.
+master_sha_at_grant: ce25a427b87aca9a6352ce4679bb4e7dc56c8235
+packet_head_at_grant: f07fcf211d7b95ed8967ef586278d277a68bd5eb
+nhanh_so_voi_master: 'behind 5, ahead 17 lúc cấp'
+
+gate_bat_buoc:
+  - 'Diff của nhánh packet so với merge-base -> ĐÚNG 1 tệp (`ops/land/...`)'
+  - 'Đọc lại (readback) tệp sau mỗi lần ghi, đừng tin lệnh đã chạy đúng'
+  - 'Đếm dòng SAU khi sửa, ngay trước commit — không lấy số đếm từ bản nháp'
+  - 'YAML parse được sau mỗi lần sửa; số khoá top-level không giảm ngoài ý muốn'
+  - 'Đẩy ĐÚNG MỘT LẦN khi đã hội tụ, không đẩy giữa vòng vá'
+
+muc_tieu:
+  - 'Đóng ba lớp finding của lượt 7 bằng phép đo, không bằng lời hứa'
+  - 'Giữ mọi kết luận cũ; chỉ thêm phép đo và thu hẹp lời khai về đúng phạm vi đã đo'
+  - 'Chạy lại cross-review trên head mới cho tới khi hết P1, P2, P3'

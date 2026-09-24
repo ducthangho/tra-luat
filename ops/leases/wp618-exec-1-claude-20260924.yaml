@@ -1,0 +1,103 @@
+# Lease EXECUTOR — packet #618, THU-HOI-NEO-DINH-NGHIA-THEO-BASE-SHA, generation 1.
+#
+# NGUỒN SỰ THẬT LÀ TỆP NÀY. Comment trên "#618" chỉ là bản chiếu do
+# `.github/workflows/ops-publish-lease.yml` đăng khi tệp này được push lên nhánh `ops/**`.
+#
+# NHỚ ĐÓNG NHÁY mọi giá trị chứa `#`: không nháy thì `#` mở CHÚ THÍCH YAML và cắt cụt
+# giá trị IM LẶNG — đã đụng thật ở lease exec-4 của wp55.
+
+schema_version: 2
+event: executor_lease_granted
+packet_issue: 618
+packet_id: wp618
+generation: 1
+revision: 1
+lease_id: wp618-exec-1-claude-20260924
+
+spec: ops/specs/THU-HOI-NEO-DINH-NGHIA-THEO-BASE-SHA.md
+spec_hash: d713b0a423f88f837e1bbf892f727fe5aaa3142960b463e4015d92f68f727a37
+spec_hash_note: >-
+  sha256 cua CHINH tep spec, do bang `sha256sum` truoc khi soan tep nay. §3.2 doi `spec_hash`
+  trong schema toi thieu; do 28-08-2026 cho thay chi 2/74 lease toan kho co truong nay — packet
+  nay khong lap lai cho trong ay.
+
+role: executor
+provider: claude
+executor: claude
+access: read-write
+review_class: sensitive
+effective_review_class: sensitive
+review_class_note: >-
+  `.github/workflows/**` la CONG AN NINH. Ban va doi hanh vi cua chot neo dinh nghia, nen lop
+  la `sensitive` du cong phan lop co noi gi — day la lop TU KHAI CAO HON, khong phai ha xuong.
+
+write_set:
+  - .github/workflows/ops-thu-hoi-admission.yml
+  - ops/lease_publish_test.py
+  - ops/specs/THU-HOI-NEO-DINH-NGHIA-THEO-BASE-SHA.md
+  - ops/leases/wp618-exec-1-claude-20260924.yaml
+write_set_note: >-
+  Bon tep. KHONG cham `ops/lease_publish.py` (bo kiem) va KHONG cham `ci.yml`.
+  Tep thu nam trong diff la finding.
+
+pham_vi_du_kien:
+  so_viec: 3
+  viec:
+    - 'Doi moc checkout tu base.sha sang github.workflow_sha; chot neo thanh
+      `git rev-parse HEAD == $TL_WF_SHA`; them chot chong lui
+      `git merge-base --is-ancestor "$TL_S" HEAD`. Giu nguyen chot workflow_ref va
+      `--canonical-base "$TL_S"`.'
+    - 'Them ba ca do HANH VI theo A1/A2/A3 cua spec, kem dot bien A4 cho tung chot.'
+    - 'Khai thang o ca `t148` rang no chot theo HINH THUC nen khong bat duoc thay doi phep so
+      (A5) — KHONG sua ca ay thanh long hon.'
+
+KHONG_duoc_phep:
+  - 'Bat `SO_THU_HOI_KICH_HOAT` hay bien `thu-hoi` thanh required check — ngoai pham vi (spec §8).'
+  - 'Sua `ops/lease_publish.py`: bo kiem KHONG thuoc packet nay.'
+  - 'Sua `ci.yml`.'
+  - 'Noi long mot ca dang co de bang qua — ca long hon la ca khong ton tai.'
+  - 'Merge PR cua packet nay. Viec bam nut thuoc chu kho.'
+  - 'Chay CI hay full CI bang tay: `manual_ci_budget` la 0. Cong chay lai la HE QUA cua push.'
+  - 'Chay CI Windows.'
+  - 'Dung "#578", "#568", "#570", "#574", "#579" hay packet khac dang mo.'
+
+branch: claude/va-618-thu-hoi-neo-20260924
+branch_ownership: exclusive
+target_branch_neu_land: master
+
+base_sha: 515d16a1776dd6bb030790e207c98e3beefaabba
+start_from_sha: 515d16a1776dd6bb030790e207c98e3beefaabba
+reviewed_sha_required: 515d16a1776dd6bb030790e207c98e3beefaabba
+reviewed_sha_note: >-
+  Head XUAT PHAT. Truong mang ten `reviewed_sha_*` vi validator dung CHUNG cho lease executor
+  lan reviewer.
+
+granted_by: ducthangho
+granted_on_instruction: 'direct, in-session, 2026-09-24'
+recorded_by: claude-session
+recorder_is_dispatcher: false
+recorder_note: >-
+  Phien agent GO HO. `granted_by` la chu kho va chi chu kho. Thu that su neo danh tinh la
+  `GITHUB_ACTOR` o cong dang, khong phai chu trong tep nay.
+authority_basis: '§2 — start/pause/resume/reroute/override/authorize thuoc chu kho'
+
+leased_at_utc: '2026-09-24T17:45:00Z'
+lease_expires_at_utc: '2026-09-25T17:45:00Z'
+run_minutes: 1440
+
+preconditions_measured_at_utc: '2026-09-24T17:36:21Z'
+chong_lan_write_set:
+  do_bang: 'python ops/lease_publish.py ai-dang-giu .github/workflows/ops-thu-hoi-admission.yml'
+  ket_qua: 'rc=0 — NGUOI_GIU 0: khong co. Ba lease cua #503 cham duong nay deu HET_HAN.'
+master_sha_at_grant: 515d16a1776dd6bb030790e207c98e3beefaabba
+
+gate_bat_buoc:
+  - 'Diff cua nhanh so merge-base -> dung 4 tep trong write_set, khong hon'
+  - '`actionlint` chay duoc tren tep workflow sau khi sua; thieu cong cu thi in KHONG DO DUOC va DO'
+  - 'Moi ca moi phai co DOT BIEN lam no DO — ca khong co dot bien la ca chua duoc do'
+  - 'Doc lai (readback) tep sau moi lan ghi'
+
+muc_tieu:
+  - 'Go vế K1 (nhanh mac dinh phai dung yen) ma KHONG lam yeu B1/B2/B3'
+  - 'Ba ca do HANH VI thay cho mot ca do HINH THUC'
+  - 'Khai thang danh doi: bo kiem chay ban tai workflow_sha, khong phai tai S'

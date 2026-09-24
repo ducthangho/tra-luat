@@ -8265,6 +8265,88 @@ def t187_chan_doan_phai_ha_ve_CHUOI_THUAN_chu_khong_chi_isinstance():
         chot(loai == "TinHieuChotCa",
              f"{nhan}: cửa phải đỏ bằng `TinHieuChotCa`, nhận {loai}.")
 
+    # HAI NHÁNH THÔNG ĐIỆP CỦA BỘ CHẠY — cross-review codex lượt 4 (24-09,
+    # `diagnostic-normalization-wiring-unmeasured`, P2). Tách `_bao_loi_ca` khỏi `main` làm
+    # thông điệp ra khỏi THÂN `except`, tức ra khỏi tầm của `t189` (nó chỉ duyệt thân
+    # ExceptHandler) — và phần metaclass ở trên chỉ đo TÊN LỚP. Hai đột biến một dòng
+    # (`return str(ex)` ở nhánh `AssertionError`; `f"{_ten_lop(ex)}: {ex}"` ở nhánh còn lại)
+    # sống 183/183 trong khi bộ chạy vỡ trần. Nên đo THẲNG cả hai nhánh bằng chính họ `HO`,
+    # cộng hai lớp `__str__` hỏng, cộng ĐỐI CHỨNG chuỗi thường giữ nguyên nội dung, rồi đo
+    # CHỖ NỐI bằng một lượt `main()` thật.
+    class _StrNemBo(Exception):
+        def __str__(self):
+            raise ValueError("định dạng hỏng")
+
+    class _StrKhongChuoiBo(Exception):
+        def __str__(self):
+            return 12345          # noqa: RET504 — CỐ Ý trả thứ không phải chuỗi
+
+    class _AssertStrNem(AssertionError):
+        def __str__(self):
+            raise ValueError("định dạng hỏng")
+
+    def _bao(ex):
+        try:
+            return _bao_loi_ca(ex)
+        except BaseException as loi:  # noqa: BLE001 — đo "không nổ", phải bắt trọn
+            return _ChuoiNem(_ten_lop(loi))
+
+    class _ChuoiNem(str):
+        """Nhãn "`_bao_loi_ca` NÉM" — `str` con nên `type(r) is str` tự loại nó."""
+
+    nhanh = [(f"nhánh AssertionError / {nhan}", AssertionError(x), None) for nhan, x in HO]
+    nhanh += [("nhánh AssertionError / `__str__` NÉM", _AssertStrNem(), None)]
+    nhanh += [(f"nhánh Exception / {nhan}", RuntimeError(x), "RuntimeError") for nhan, x in HO]
+    nhanh += [("nhánh Exception / `__str__` NÉM", _StrNemBo(), "_StrNemBo"),
+              ("nhánh Exception / `__str__` trả thứ không phải chuỗi", _StrKhongChuoiBo(),
+               "_StrKhongChuoiBo")]
+    for nhan, ex, ten in nhanh:
+        r = _bao(ex)
+        chot(type(r) is str,
+             f"{nhan}: `_bao_loi_ca` phải trả `str` thuần, nhận "
+             f"{('NÉM `' + str.__str__(r) + '`') if isinstance(r, _ChuoiNem) else type(r).__name__}.")
+        chot(ten is None or r.startswith(f"{ten}: "),
+             f"{nhan}: nhánh không-assert phải nêu tên lớp `{ten}` ở đầu, nhận {r!r}.")
+    for ex, mong in ((AssertionError(NOI_DUNG), NOI_DUNG),
+                     (RuntimeError(NOI_DUNG), f"RuntimeError: {NOI_DUNG}")):
+        r = _bao(ex)
+        chot(r == mong, f"đối chứng xanh `_bao_loi_ca`: mong {mong!r}, nhận {r!r} — một cài "
+                        f"đặt trả hằng cho mọi đầu vào cũng qua các vế trên.")
+
+    # CHỖ NỐI: một lượt `main()` THẬT trên ba ca giả, mỗi ca ném qua một nhánh. `main` phải
+    # TRẢ `1`, in đủ ba dòng `ĐỎ` và dòng tổng kết `0/3` — không vỡ trần giữa chừng.
+    import contextlib, io
+    from unittest import mock
+
+    def _gia_assert_ho():
+        raise AssertionError(HO[3][1])
+
+    def _gia_exception_ho():
+        raise RuntimeError(HO[0][1])
+
+    def _gia_str_nem():
+        raise _StrNemBo()
+
+    ca_gia = [_gia_assert_ho, _gia_exception_ho, _gia_str_nem]
+    luu, ra = list(CA), io.StringIO()
+    try:
+        CA[:] = ca_gia
+        with mock.patch.object(sys, "argv", ["lease_publish_test.py"]), \
+                contextlib.redirect_stdout(ra):
+            try:
+                rc_main = main()
+            except BaseException as loi:  # noqa: BLE001 — đo "bộ chạy không vỡ", bắt trọn
+                rc_main = f"NÉM {_ten_lop(loi)}"
+    finally:
+        CA[:] = luu
+    chot(len(CA) == len(luu), "CA không được khôi phục sau lượt `main()` giả.")
+    dau_ra = ra.getvalue()
+    chot(rc_main == 1, f"`main()` trên ba ca đỏ phải trả 1, nhận {rc_main!r}.")
+    thieu = [f.__name__ for f in ca_gia if f"  ĐỎ  {f.__name__}: " not in dau_ra]
+    chot(not thieu, f"`main()` thiếu dòng ĐỎ cho {thieu!r}.")
+    chot("lease_publish: 0/3 đạt; đã chạy=3, bỏ qua=0" in dau_ra,
+         "`main()` không in dòng tổng kết `0/3` — bộ chạy vỡ trước khi báo.")
+
     # ĐỐI CHỨNG XANH: chuỗi thường phải đi qua NGUYÊN VẸN, không bị thay bằng dự phòng.
     thuong = _chuoi_thuan(NOI_DUNG, "<dự phòng>")
     chot(thuong == NOI_DUNG and type(thuong) is str,

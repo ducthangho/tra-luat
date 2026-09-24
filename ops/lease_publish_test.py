@@ -281,6 +281,23 @@ def _chuoi_thuan(x, du_phong: str) -> str:
     return r if type(r) is str else du_phong
 
 
+def _ten_lop(ex) -> str:
+    """Tên lớp của `ex`, đã hạ về `str` THUẦN — CỬA DUY NHẤT cho mọi đường chẩn đoán.
+
+    Cross-review codex lượt 2 (24-09, `diagnostic-normalization-wiring-unmeasured` còn mở):
+    bản vá lượt trước hạ tên lớp ở `_MaVang` và `_NgoaiLeLa` nhưng NHÁNH BÁO LỖI của chính
+    cửa `_goi_doi_tra_ve` vẫn đưa `type(loi).__name__` thô vào f-string của `chot`. Cho cả
+    họ 6 thành viên của `t187` đi vào nhánh ấy: 3/6 chết bằng `RuntimeError` TRẦN, 1/6 bằng
+    `KeyboardInterrupt` TRẦN — ca đỏ vì đường chẩn đoán, không vì thứ nó đo.
+
+    Đó là "vá đúng chỗ được chỉ rồi bỏ sót đường thứ ba". Nên lần này liệt kê bằng `ast`
+    MỌI chỗ định dạng một ngoại lệ vừa bắt, gom về MỘT cửa, và `t189` cấm viết thô trở lại.
+    `type(ex).__name__` không đi qua `__str__` của NGOẠI LỆ, nhưng có thể là một `str` CON —
+    một lớp đặt `__name__` như vậy là đủ để f-string nổ.
+    """
+    return _chuoi_thuan(getattr(type(ex), "__name__", "?"), "<tên lớp không đọc được>")
+
+
 class _MaVang:
     """`ma` của một ngoại lệ TRẦN: KHÔNG bằng bất kỳ mã thoát nào, và TỰ KHAI lớp khi in.
 
@@ -300,7 +317,7 @@ class _MaVang:
         # TÊN LỚP cũng phải hạ về chuỗi thuần: một metaclass đặt `__name__` thành `str`
         # con là đủ để dòng `chot` nổ ở đúng chỗ nó đang tố cáo. Hai trường, MỘT cửa hạ —
         # để không có trường nào "quên" như thông điệp đã từng quên.
-        self.kieu = _chuoi_thuan(getattr(type(ex), "__name__", "?"), "<tên lớp không đọc được>")
+        self.kieu = _ten_lop(ex)
         self.thong_diep = _thong_diep_an_toan(ex)
 
     def __eq__(self, _other):
@@ -436,11 +453,11 @@ def _goi_dem_lop_gh(gh: GhGia, ten: str, lease, ket_qua_mong_doi, so_goi_mong_do
     """
     ex, mod = _goi_lop_gh(gh, ten, lease, env_them=env_them, **k)
     thuc = DA_TRA_VE if ex is None else ex.ma
-    chot(thuc == ket_qua_mong_doi,
+    _chot_cua_dem("ket_qua", thuc == ket_qua_mong_doi,
          f"{nhan}: cổng `{ten}` phải kết thúc bằng {ket_qua_mong_doi}, được {thuc}. "
          f"Chốt SỐ LỜI GỌI phía sau chỉ có nghĩa khi cổng kết thúc ĐÚNG CÁCH — một phép dò "
          f"chết sớm cũng cho 0 lời gọi, và số đếm KHÔNG phân biệt được hai chuyện đó.")
-    chot(len(gh.calls) == so_goi_mong_doi,
+    _chot_cua_dem("dem", len(gh.calls) == so_goi_mong_doi,
          f"{nhan}: phải có đúng {so_goi_mong_doi} lời gọi GitHub, có {len(gh.calls)}.")
     return mod
 
@@ -466,7 +483,7 @@ def _goi_doi_tra_ve(ve: str, gh, ten: str, *args, kem_mod: bool = False, **k):
         ex, _mod = _goi_lop_gh(gh, ten, *args, **k)
     except BaseException as loi:  # noqa: BLE001 — ĐO "luôn trả về", nên phải bắt trọn
         chot(False,
-             f"{ve} helper NÉM `{type(loi).__name__}` thay vì TRẢ VỀ. Hợp đồng của "
+             f"{ve} helper NÉM `{_ten_lop(loi)}` thay vì TRẢ VỀ. Hợp đồng của "
              f"`_goi_lop_gh` là luôn trả về; ném nghĩa là mọi ca gọi nó sẽ đỏ bằng traceback "
              f"của runner chứ không bằng `chot` của chính ca.")
     return (ex, _mod) if kem_mod else ex
@@ -4603,6 +4620,27 @@ class TinHieuChotCa(AssertionError):
     """Tín hiệu của CHÍNH ca A0 — không `except` nào trong mã sản phẩm hay fixture dựng được nó."""
 
 
+class TinHieuCuaDem(TinHieuChotCa):
+    """Tín hiệu RIÊNG của cửa `_goi_dem_lop_gh`, mang NHÃN VẾ đã đỏ (`ket_qua` · `dem`).
+
+    Cross-review codex lượt 2 (24-09, `assertion-message-substitutes-signal-identity`, P2):
+    `t185` bắt `AssertionError` chung rồi tìm CHUỖI trong thông điệp để khai "vế nào đã đỏ".
+    Reviewer thay hai lời gọi cửa bằng `AssertionError` TRẦN chép lại đúng thông điệp ⇒ `t185`
+    vẫn QUA — ca tự nhận đã xác nhận hai chốt trong khi cả hai chốt CHƯA CHẠY. Danh tính của
+    tín hiệu phải là thứ mã khác KHÔNG giả được bằng cách chép chữ: một LỚP riêng và một nhãn
+    VẾ, không phải một chuỗi con.
+    """
+
+    def __init__(self, ve: str, msg: str):
+        super().__init__(msg)
+        self.ve = ve
+
+
+def _chot_cua_dem(ve: str, dk, msg):
+    if not dk:
+        raise TinHieuCuaDem(ve, msg)
+
+
 def chot(dk, msg):
     if not dk:
         raise TinHieuChotCa(msg)
@@ -7283,8 +7321,9 @@ def t173_N12_hang_fixture_dung_tren_CA_HAI_nen():
 
 # ── #579 — THỨ TỰ trong `kiem_github` là NỘI DUNG, không phải chi tiết cài đặt ──────────
 # Năm ca dưới đây phủ ma trận 2×2 (hạn × dấu) cộng một ca miền. `_lease_579` dựng đúng
-# một lease tối thiểu; `_do_kiem_github` trả `(mã thoát, số lời gọi GitHub)` — số lời gọi
-# là thứ phân biệt "tiền kiểm chặn" với "chuỗi cũ chặn", mà mã thoát KHÔNG phân biệt được.
+# một lease tối thiểu; `_do_kiem_github` trả MỘT mã thoát. Số lời gọi GitHub — thứ phân biệt
+# "tiền kiểm chặn" với "chuỗi cũ chặn" mà mã thoát không phân biệt được — CHỈ đọc qua cửa
+# `_do_kiem_github_dem`, nơi chốt CẢ vế kết quả (xem docstring `_do_kiem_github`).
 
 def _lease_579(**doi):
     mac_dinh = {"lease_id": "wp579-thu", "packet_issue": 55}
@@ -7993,8 +8032,9 @@ def t187_chan_doan_phai_ha_ve_CHUOI_THUAN_chu_khong_chi_isinstance():
     Cross-review lượt 6: **RAW 82 / 96 phép** trên hai họ `str` con hỏng định dạng.
 
     HỌ, chứ không một đại diện — bài học `m12/m13/m14` của #574: một nhãn có MỘT thành viên
-    thì nhãn ấy rộng hơn tập fixture. Bảy thành viên dưới đây hỏng ở BẢY chỗ khác nhau, và
-    mỗi cái phải cho ra một `str` THUẦN.
+    thì nhãn ấy rộng hơn tập fixture. SÁU thành viên dưới đây hỏng ở SÁU chỗ khác nhau, và
+    mỗi cái phải cho ra một `str` THUẦN. (Chuỗi thường ở cuối là ĐỐI CHỨNG, không phải thành
+    viên thứ bảy.)
 
     Vế cuối là ĐỐI CHỨNG XANH: chuỗi thường phải đi qua NGUYÊN VẸN. Thiếu nó thì một cài đặt
     trả hằng `"<x>"` cho mọi đầu vào cũng qua hết sáu vế trên.
@@ -8038,7 +8078,7 @@ def t187_chan_doan_phai_ha_ve_CHUOI_THUAN_chu_khong_chi_isinstance():
             _ = f"thông điệp: {r}"
         except BaseException as loi:  # noqa: BLE001
             chot(False, f"{nhan}: kết quả đã là `str` thuần mà f-string vẫn ném "
-                        f"`{type(loi).__name__}` — phép kiểm kiểu ở trên không đủ.")
+                        f"`{_ten_lop(loi)}` — phép kiểm kiểu ở trên không đủ.")
 
     # XUYÊN ĐƯỜNG TẠO — đo CHỖ DÙNG, không chỉ đo hàm hạ.
     #
@@ -8059,7 +8099,7 @@ def t187_chan_doan_phai_ha_ve_CHUOI_THUAN_chu_khong_chi_isinstance():
         try:
             r = f"{obj}"
         except BaseException as loi:  # noqa: BLE001 — đo "định dạng được", phải bắt trọn
-            return f"f-string NÉM `{type(loi).__name__}`"
+            return f"f-string NÉM `{_ten_lop(loi)}`"
         return None if type(r) is str else f"f-string ra `{type(r).__name__}`"
 
     lease_d = _lease_579()
@@ -8098,6 +8138,32 @@ def t187_chan_doan_phai_ha_ve_CHUOI_THUAN_chu_khong_chi_isinstance():
             hong = _dinh_dang_duoc(ra)
             chot(hong is None, f"{vi_tri}: kết quả của cửa không định dạng được — {hong}.")
 
+    # NHÁNH BÁO LỖI CỦA CỬA — đường THỨ BA, cross-review codex lượt 2 (24-09) bắt.
+    #
+    # Phần trên phủ hai wrapper; nhánh `except BaseException` của `_goi_doi_tra_ve` thì chưa.
+    # Nhánh ấy CÓ đường vào thật trên mã chưa đột biến: `_goi_lop_gh` chỉ bắt `Exception`,
+    # nên một ngoại lệ thuộc `BaseException` (mà không phải `Exception`) xuyên qua helper và
+    # rơi đúng vào nhánh báo lỗi. Cho nó mang tên lớp là chính `str` con của HỌ: cửa phải đỏ
+    # bằng `TinHieuChotCa` cả 6/6 — không được chết bằng `RuntimeError` hay
+    # `KeyboardInterrupt` TRẦN nổ ra từ chính f-string báo lỗi.
+    for nhan, x in HO:
+        _LopBase = type("_LopBase", (BaseException,), {})
+        _LopBase.__name__ = x
+
+        def _gh_nem_base(*_a, _L=_LopBase):
+            raise _L()
+        loai = "cửa TRẢ VỀ dù helper đã ném"
+        try:
+            _goi_doi_tra_ve(f"t187 {nhan} / nhánh báo lỗi", _gh_nem_base, "kiem_github",
+                            lease_d, env_them=ENV_GITHUB)
+        except TinHieuChotCa:
+            loai = "TinHieuChotCa"
+        except BaseException as loi:  # noqa: BLE001 — đo "đỏ ĐÚNG lớp", phải bắt trọn
+            loai = f"ngoại lệ TRẦN `{_ten_lop(loi)}`"
+        chot(loai == "TinHieuChotCa",
+             f"{nhan}: nhánh báo lỗi của cửa phải đỏ bằng `TinHieuChotCa`, nhận {loai}. "
+             f"Đường chẩn đoán làm vỡ phép đo là tín dụng giả ở tầng cửa.")
+
     # ĐỐI CHỨNG XANH: chuỗi thường phải đi qua NGUYÊN VẸN, không bị thay bằng dự phòng.
     thuong = _chuoi_thuan(NOI_DUNG, "<dự phòng>")
     chot(thuong == NOI_DUNG and type(thuong) is str,
@@ -8125,17 +8191,24 @@ def t185_cua_DEM_phai_chot_KET_QUA_truoc_khi_chot_SO_LOI_GOI():
     `DA_TRA_VE` là một nhãn RIÊNG chứ không phải `0`: `RC_OK` cũng bằng `0`, nên `ma == 0`
     không phân biệt "không ném" với "ném `Chan(RC_OK)`" — cùng bệnh đã đẻ ra `_MaVang`.
     """
-    class _ChotCa(AssertionError):
+    class _ChotCa(TinHieuChotCa):
         """Tín hiệu RIÊNG của ca này — mã ngoài KHÔNG giả được bằng một `AssertionError`."""
 
     def _thu(ten_cong, lease, ket_qua_mong_doi, so_goi_mong_doi):
-        """Chạy cửa; trả `None` nếu XANH, hoặc thông điệp nếu cửa chốt ĐỎ."""
+        """Chạy cửa; trả `None` nếu XANH, hoặc NHÃN VẾ (`ket_qua`/`dem`) nếu cửa chốt ĐỎ.
+
+        CHỈ nhận `TinHieuCuaDem` — tín hiệu do CHÍNH cửa phát. Mọi thứ khác thoát ra từ cửa
+        (kể cả một `AssertionError` mang đúng câu chữ) là cửa HỎNG, không phải cửa đỏ.
+        """
         gh = GhGia(comments={55: []})
         try:
             _goi_dem_lop_gh(gh, ten_cong, lease, ket_qua_mong_doi, so_goi_mong_doi,
                             "t185", env_them=ENV_GITHUB)
-        except AssertionError as loi:
-            return str(loi)
+        except TinHieuCuaDem as loi:
+            return loi.ve
+        except Exception as loi:  # noqa: BLE001 — cửa ném thứ KHÔNG phải tín hiệu của nó
+            raise _ChotCa(f"cửa ném `{_ten_lop(loi)}` thay vì `TinHieuCuaDem` — không phải "
+                          f"một chốt đã chạy, nên không được tính là chốt đỏ.") from None
         return None
 
     # Ba hành vi ĐO ĐƯỢC của cổng, dùng làm nguyên liệu cho ba vế (đo 21-09 trên head này):
@@ -8148,14 +8221,14 @@ def t185_cua_DEM_phai_chot_KET_QUA_truoc_khi_chot_SO_LOI_GOI():
     #     `_do_dau_da_dang` với lease HỢP LỆ: phép dò hỏi Issue đúng 1 lần rồi TRẢ VỀ.
     xanh = _thu("_do_dau_da_dang", HOP_LE, DA_TRA_VE, 1)
     if xanh is not None:
-        raise _ChotCa(f"(c) đối chứng XANH lại ĐỎ: {xanh}. Mọi vế sau mất nghĩa.")
+        raise _ChotCa(f"(c) đối chứng XANH lại ĐỎ ở vế {xanh!r}. Mọi vế sau mất nghĩa.")
 
     # (b) sai SỐ LỜI GỌI, kết quả vẫn đúng ⇒ phải đỏ ở vế ĐẾM.
     do_dem = _thu("_do_dau_da_dang", HOP_LE, DA_TRA_VE, 99)
     if do_dem is None:
         raise _ChotCa("(b) cửa KHÔNG đỏ khi số lời gọi sai — vế ĐẾM không có răng.")
-    if "lời gọi GitHub" not in do_dem:
-        raise _ChotCa(f"(b) đỏ nhưng KHÔNG phải ở vế đếm: {do_dem}")
+    if do_dem != "dem":
+        raise _ChotCa(f"(b) đỏ nhưng KHÔNG phải ở vế đếm: vế {do_dem!r}")
 
     # (a) kết quả sai, số lời gọi vẫn đúng ⇒ phải đỏ ở vế KẾT QUẢ.
     #     Lease TỰ CẤP làm `kiem_github` ném `Chan(rc=4)` sau ĐÚNG 1 lời gọi. Ca đòi
@@ -8165,8 +8238,8 @@ def t185_cua_DEM_phai_chot_KET_QUA_truoc_khi_chot_SO_LOI_GOI():
     if do_kq is None:
         raise _ChotCa("(a) cửa KHÔNG đỏ khi cổng kết thúc SAI CÁCH trong lúc số lời gọi "
                       "vẫn đúng. Đó CHÍNH LÀ hình dạng đã cho `R_probe` sống 177/177.")
-    if "kết thúc" not in do_kq:
-        raise _ChotCa(f"(a) đỏ nhưng KHÔNG phải ở vế kết quả: {do_kq}")
+    if do_kq != "ket_qua":
+        raise _ChotCa(f"(a) đỏ nhưng KHÔNG phải ở vế kết quả: vế {do_kq!r}")
 
 
 @ca
@@ -8343,6 +8416,92 @@ def t188_moi_ve_DOI_TRA_VE_cua_t184_phai_qua_CUA_chi_ve_d_duoc_goi_tran():
          f"thì nó không chứng minh được gì về mã thật.")
 
 
+@ca
+def t189_duong_chan_doan_KHONG_dinh_dang_THO_ngoai_le_vua_bat():
+    """A22 — chốt CẤU TRÚC: trong MIỀN chẩn đoán của packet, mọi ngoại lệ bắt RỘNG phải định
+    dạng qua `_ten_lop` / `_thong_diep_an_toan`, không được viết thô.
+
+    Cross-review codex lượt 2 (24-09): bản vá lượt 1 hạ tên lớp ở hai wrapper nhưng nhánh báo
+    lỗi của cửa `_goi_doi_tra_ve` vẫn viết `type(loi).__name__` thô. Liệt kê bằng `ast` trên
+    toàn tệp ra 24 chỗ định dạng một ngoại lệ vừa bắt; trong đó các chỗ THUỘC PACKET và bộ
+    chạy `main` đã gom về hai cửa. Ca này giữ cho chúng không mọc lại.
+
+    MIỀN là danh sách CHO PHÉP, nhỏ và biết trước: các helper chẩn đoán, các cửa, `main`, và
+    các ca đo chính thước đo (`t184`–`t189`). Ngoài miền là mã kế thừa từ master — sáu chỗ
+    (`t69`, `t90`, `t92`, `t125`-rig, `t139`, `_danh_gia_bieu_thuc_chuan_bi`) được KHAI là nợ,
+    không lặng lẽ sửa trong một packet `sensitive`.
+
+    "Bắt RỘNG" = không kiểu, `Exception`, `BaseException`, `AssertionError` (hoặc tuple chứa
+    chúng) — những nhánh có thể nhận một đối tượng TUỲ Ý. Bắt lớp cụ thể của sản phẩm
+    (`mod.Chan`, `OSError`, `TinHieuChotCa`…) thì tên và thông điệp do mã đã biết dựng.
+    Đo bằng `ast` kèm PHẢN CHỨNG trên mã giả để chốt không mù.
+    """
+    import ast as _ast
+    MIEN_TEN = {"_goi_doi_tra_ve", "_goi_dem_lop_gh", "_goi_lop_gh", "_thong_diep_an_toan",
+                "_chuoi_thuan", "_ten_lop", "_chot_cua_dem", "main",
+                "_MaVang", "_NgoaiLeLa", "TinHieuCuaDem"}
+    TIEN_TO = ("t184_", "t185_", "t186_", "t187_", "t188_", "t189_")
+    RONG = {"Exception", "BaseException", "AssertionError"}
+
+    def _rong(h):
+        if h.type is None:
+            return True
+        ds = h.type.elts if isinstance(h.type, _ast.Tuple) else [h.type]
+        return any(isinstance(x, _ast.Name) and x.id in RONG for x in ds)
+
+    def _vi_pham(cay):
+        mien = [n for n in cay.body if isinstance(n, (_ast.FunctionDef, _ast.ClassDef))
+                and (n.name in MIEN_TEN or n.name.startswith(TIEN_TO))]
+        pham = []
+        for goc in mien:
+            for h in _ast.walk(goc):
+                if not (isinstance(h, _ast.ExceptHandler) and h.name and _rong(h)):
+                    continue
+                v = h.name
+                for n in (x for st in h.body for x in _ast.walk(st)):
+                    if isinstance(n, _ast.FormattedValue) and isinstance(n.value, _ast.Name) \
+                            and n.value.id == v:
+                        pham.append((n.lineno, goc.name, "{%s}" % v))
+                    elif isinstance(n, _ast.Call) and isinstance(n.func, _ast.Name) \
+                            and n.func.id in ("str", "repr") and n.args \
+                            and isinstance(n.args[0], _ast.Name) and n.args[0].id == v:
+                        pham.append((n.lineno, goc.name, f"{n.func.id}({v})"))
+                    elif isinstance(n, _ast.Attribute) and n.attr == "__name__" \
+                            and isinstance(n.value, _ast.Call) \
+                            and isinstance(n.value.func, _ast.Name) and n.value.func.id == "type" \
+                            and n.value.args and isinstance(n.value.args[0], _ast.Name) \
+                            and n.value.args[0].id == v:
+                        pham.append((n.lineno, goc.name, f"type({v}).__name__"))
+        return len(mien), sorted(set(pham))
+
+    so_mien, pham = _vi_pham(_ast.parse(Path(__file__).read_text(encoding="utf-8")))
+    chot(so_mien >= 12,
+         f"miền đọc được phải có ít nhất 12 định nghĩa, đọc được {so_mien}. Miền hụt làm chốt "
+         f"dưới đây thành chốt KHÔNG THỂ ĐỎ.")
+    chot(not pham,
+         "đường chẩn đoán phải định dạng ngoại lệ vừa bắt qua `_ten_lop`/`_thong_diep_an_toan`. "
+         "Vi phạm: " + " · ".join(f"dòng {d} `{h}` {k}" for d, h, k in pham))
+
+    # PHẢN CHỨNG: ba dạng thô bị bắt; dạng đi qua cửa và nhánh bắt lớp CỤ THỂ được tha.
+    gia = _ast.parse(
+        "def main():\n"
+        "    try:\n"
+        "        f()\n"
+        "    except Exception as e:\n"
+        "        a = f'{type(e).__name__}'\n"
+        "        b = str(e)\n"
+        "        c = f'{e}'\n"
+        "        d = f'{_ten_lop(e)} {_thong_diep_an_toan(e)}'\n"
+        "    try:\n"
+        "        f()\n"
+        "    except OSError as o:\n"
+        "        z = f'{o}'\n")
+    _n, pham_gia = _vi_pham(gia)
+    chot([(d, k) for d, _h, k in pham_gia] == [(5, "type(e).__name__"), (6, "str(e)"), (7, "{e}")],
+         f"phản chứng: phải bắt ĐÚNG ba dạng thô ở dòng 5/6/7 và tha dòng 8 (qua cửa) cùng nhánh "
+         f"`OSError`, nhận {pham_gia!r}.")
+
+
 def main() -> int:
     qua, hong, bo_qua = 0, [], []
     # Selector không khớp ca nào ⇒ KHÔNG chạy gì và KHÔNG xanh (cross-review codex 11-09-2026, P2).
@@ -8375,9 +8534,10 @@ def main() -> int:
             else:
                 hong.append((fn.__name__, "bỏ qua không dẫn xuất được từ runs-on")); ket = "DO"
         except AssertionError as ex:
-            hong.append((fn.__name__, str(ex))); ket = "DO"
+            # Bộ chạy là đường chẩn đoán của MỌI ca — nó không được nổ khi báo lỗi.
+            hong.append((fn.__name__, _thong_diep_an_toan(ex))); ket = "DO"
         except Exception as ex:  # noqa: BLE001
-            hong.append((fn.__name__, f"{type(ex).__name__}: {ex}")); ket = "DO"
+            hong.append((fn.__name__, f"{_ten_lop(ex)}: {_thong_diep_an_toan(ex)}")); ket = "DO"
         _nhat_ky_ca("<<< ra", fn.__name__, f"{time.monotonic() - t0:.3f}s", ket)
         if ket == "DO":
             # In LÝ DO ngay tại chỗ (M4 lần 2, packet #504): danh sách `  ĐỎ  …` chỉ in ở cuối suite, nên khi job

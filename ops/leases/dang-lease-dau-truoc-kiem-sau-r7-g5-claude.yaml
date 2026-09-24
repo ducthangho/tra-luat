@@ -24,6 +24,17 @@ thay_the_cho: dang-lease-dau-truoc-kiem-sau-r6-g4-claude
 thay_the_vi_sao: 'g4 neo r6. r7 tu khai `thay_the_cho: revision 6` va r7 §10.1 doi lease phai neo
   DUNG revision hien hanh — mot lease neo r6 phai bi BAC khi r7 co hieu luc. Nen g5 ton tai de
   neo lai, khong phai de doi pham vi.'
+da_bi_thay_the: dang-lease-dau-truoc-kiem-sau-r8-g6-claude
+da_bi_thay_the_vi_sao: 'g5 neo dac ta r7. r8 da dong bang (88204 B, sha256
+  e6747568d19404e04c95c06cb799b98fc661557cab3b049c42258ef6b9236657) tren PR #592 nhanh
+  claude/spec-dang-lease-r2-20260921, va §10.1 doi lease phai neo DUNG revision hien hanh.
+  Nen g5 bi g6 thay the de NEO LAI, khong phai vi g5 sai pham vi hay het han — luc dat bia nay
+  g5 VAN CON HAN (het 2026-09-26T03:00:00Z, con ~27 gio).'
+da_bi_thay_the_dat_luc: '2026-09-24T23:5xZ'
+da_bi_thay_the_ve_thu_hai: 'Ve con lai cua dau hai chieu nam o
+  ops/leases/dang-lease-dau-truoc-kiem-sau-r8-g6-claude.yaml tren ref ops/cap-lease-579-g6,
+  dong `thay_the_cho: dang-lease-dau-truoc-kiem-sau-r7-g5-claude`.'
+
 BIA_MO_DA_DAT:
   LOI_KHAI_DAU_CUA_PHIEN_NAY_DA_BI_BAC: 'Ban dau phien nay ghi "g4 da het han nen KHONG can bia mo
     hai chieu", lay tu mot cau trong lease g3. CONG BAC NGAY: `check` tra rc=8 —

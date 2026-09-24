@@ -567,6 +567,21 @@ Mức review được ghi tường minh:
    trong cùng provider vẫn là same-provider, không thành cross-provider.
 4. `review_deferred`: chưa có reviewer; vẫn được vào draft land PR nhưng cần xác nhận riêng khi apply.
 
+**Ngưỡng severity theo Review Class (M1 của #523).** Đây là điều kiện nội dung
+cần kiểm cùng assurance, không phải quyền tự approve hoặc land:
+
+| Class | Điều kiện severity mặc định để xét approval |
+|---|---|
+| `routine` | Không còn P0/P1; P2/P3 còn lại phải có nợ có tên, owner và hướng xử lý được ghi trong verdict. |
+| `systemic` | Không còn P0/P1/P2; P3 còn lại phải có nợ có tên, owner và hướng xử lý được ghi trong verdict. |
+| `sensitive` | Không còn P0; cần approval tường minh đúng assurance, quyết định có căn cứ cho từng finding còn mở; thiếu quyết định thì chưa đủ. |
+| thiếu/không rõ | Xử lý như `sensitive`, không suy ra `routine`. |
+
+P0 chặn approval ở mọi class. Bảng không tự cho phép bỏ qua finding hoặc miễn
+review/gate/exact-SHA/human audit. Packet hoặc chỉ thị có ngưỡng chặt hơn thì áp
+ngưỡng đó; ví dụ yêu cầu0P1/P2/P3 vẫn chặn dù ngưỡng mặc định cho phép ghi nợ.
+Reviewer ghi ngưỡng đã áp và assurance riêng; “đủ severity” chưa phải “approved”.
+
 Reviewer có `contents: read` và chỉ có quyền ghi review/comment PR. `changes_requested` trả về executor, không cho
 reviewer sửa branch. Lỗi quota/rate-limit không tiêu thụ attempt nội dung; circuit breaker ngừng gọi provider tới
 thời điểm reset. Dispatcher, không phải Executor, quyết định fallback/reroute; cấm đổi provider để lách budget.
@@ -729,6 +744,26 @@ biểu hiện vẫn phải nối lớp cũ. Reviewer tự dựng thước kiểm
 tiêu chí mới, không lấy danh sách Executor làm trần. Bảng đối chiếu ghi nguồn lượt/SHA,
 phạm vi đã đo, kết quả dương/âm và phần chưa đo; tổng suite hay số dòng khớp không đóng lớp.
 Đổi Packet hoặc baseline không reset lịch sử, budget hay receipt đã giao (§3.2.1/§12).
+
+**Bảng lớp của mỗi lượt.** Mỗi finding có đúng một slug lớp nguyên nhân; mỗi lớp ghi
+các finding IDs/biểu hiện, mức nghiêm trọng cao nhất còn mở, nguồn lượt/SHA, cách vá
+chung và phép kiểm đóng lớp. Nếu cần vá riêng từng biểu hiện, ghi lý do cơ chế không
+cho một thay đổi chung; gợi ý reviewer vẫn theo §7/§8, không trở thành mệnh lệnh.
+Đếm số lớp và số biểu hiện riêng. Tách/gộp lớp cần bảng nối slug nguồn, lý do và phép
+đối chiếu trên cùng tập finding; không đổi khóa để xóa lần tái diễn hoặc làm đẹp tỷ lệ.
+
+Từ lượt sau, bảng đối chiếu vẫn phân từng finding trước theo bốn nhãn ở §8; lớp chỉ
+được ghi **ĐÃ VÁ THẬT** khi mọi biểu hiện thuộc phạm vi được kiểm độc lập đã đóng,
+không còn biểu hiện cùng cơ chế do bản vá sinh ra và không còn phần phải đo để đóng
+lớp. Thiếu quan sát, cắt acceptance hoặc chuyển biểu hiện ra ngoài scope không được
+tính là vá. Ghi phần `chua_do_duoc`/successor và authority riêng; giữ slug trong lịch
+sử. Phép đo target/non-target và đối chứng phải đủ để quyết kết luận; lỗi setup hay
+tổng suite xanh không thay bằng chứng cho đúng tính chất của từng lớp.
+
+Open P0 luôn chặn approval. Với P1/P2/P3, đối chiếu điều kiện severity của Packet,
+Review Class và assurance §8 riêng với bảng đối chiếu; hết finding hoặc tỷ lệ vá cao
+không tự tạo approval, không miễn exact-SHA audit/gate. Các nghĩa vụ bảng lớp/đọc nghĩa
+ở đây là kỷ luật review; scanner xanh không chứng minh chúng đã được máy cưỡng chế.
 
 Hồ sơ kế thừa #523 trong WP538 giữ N1–N8/M16 ở spec nguồn bất biến và bốn lớp **unresolved**:
 
@@ -986,6 +1021,39 @@ Tập lệnh đóng: `/mission start|pause|resume`, `/packet retry|cancel|rerout
 có audit.
 
 ## 12. Stop conditions và budget
+
+**Phân loại chi CI theo mục đích (M7 của #523).** Ghi loại trước khi chủ động
+phát sinh lượt chạy; tên event không quyết định loại:
+
+| Loại | Điều kiện và cách ghi chi |
+|---|---|
+| Gate tự động | Workflow phát sinh từ event hợp lệ trong công việc đã được cấp; ghi run ID/attempt, exact SHA và chi tự động riêng. Không coi “tự động” là quyền push/mở PR để lách lệnh chưa chạy CI. |
+| Phép đo được cấp | Có mục tiêu/phản chứng, scope và allowance hữu hạn công bố trước; ghi `used / reserved / limit`, rồi gắn kết quả với run ID/attempt và exact SHA. `workflow_dispatch` hợp lệ có thể thuộc loại này. |
+| Thăm dò chưa được cấp | Không có mục tiêu/allowance/authority thích hợp: không chạy; muốn chuyển thành phép đo thì phải có kế hoạch và quyền trước. |
+
+Một dispatch để đo được cấp và một dispatch thăm dò có cùng event vẫn khác loại.
+Thiếu mục đích/authority thì chưa đủ điều kiện chạy, không mặc định là gate tự động.
+Sổ chi tách cửa sổ hiện tại với lịch sử toàn packet, ghi rõ đơn vị allowance;
+không cộng run với attempt như cùng đơn vị. Lịch sử chưa đo đủ là `KHONG_DO_DUOC`,
+không phải0 và không dùng để suy phần ngân sách còn lại. Rerun cũng phải được tính
+theo đơn vị đã chốt. Ngân sách tự động và phép đo không tự vay lẫn nhau.
+Phân loại này không thay §10.2 về admission/provenance/gate hay chỉ thị thời điểm
+chạy: khi owner yêu cầu đợi tới đủ điều kiện merge, không chạy CI/fullCI giữa vòng vá.
+
+**Tín hiệu không hội tụ theo lớp.** Với chuyển tiếp từ lượt r sang r+1, đặt U là tập
+slug lớp còn mở ở cuối lượt r, F là tập con của U được reviewer lượt r+1 xác minh
+ĐÃ VÁ THẬT theo §8.3. Tỷ lệ = |F|/|U|; nhiều finding cùng lớp chỉ tính một lần.
+U rỗng thì tỷ lệ không xác định (`N/A`), không phải 0% hay 100%; không ghép hai tỷ lệ
+thấp qua một chuyển tiếp N/A. Hai chuyển tiếp liên tiếp có tỷ lệ <50% thì dừng vòng
+vá và đưa bằng chứng tới Review Rescue Checkpoint bên dưới. Ngưỡng này là heuristic
+kế thừa từ #523, không là chứng minh thống kê; không thay trần độc lập.
+
+Báo riêng các lớp mới tại r+1 (không nằm trong U), lớp tái mở và phần chưa đo; chúng
+không vào tử số F. Tỷ lệ cao chỉ nói về tập U, không chứng minh hội tụ khi lớp mới
+vẫn xuất hiện, không thay điều kiện dừng theo class/Packet hay bằng chứng approval.
+Một lớp xuất hiện ở ba lượt review khác nhau đòi xem lại cách làm tại checkpoint;
+ba biểu hiện của lớp trong cùng một lượt chỉ là một lần xuất hiện. Revision/scope
+cut không reset lịch sử đó, không tự cấp thêm review call hoặc attempt.
 
 Mặc định: 3 attempt/packet, 90 phút/run cho cả Executor và Reviewer, cùng failure fingerprint nội dung hai lần thì
 blocked, tối đa 20 packet,

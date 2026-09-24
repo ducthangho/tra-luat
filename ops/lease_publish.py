@@ -71,7 +71,12 @@ def GOI_GH(*doi_so):
 
 
 def GOI_GIT(*doi_so, cwd=None):
-    return subprocess.run(["git", *doi_so], cwd=cwd, capture_output=True, text=True)
+    # Decode synchronously: Windows reader-thread exceptions otherwise escape
+    # the consumer's UnicodeError handler and print an unrelated traceback.
+    p = subprocess.run(["git", *doi_so], cwd=cwd, capture_output=True)
+    p.stdout = p.stdout.decode("utf-8").replace("\r\n", "\n").replace("\r", "\n")
+    p.stderr = p.stderr.decode("utf-8").replace("\r\n", "\n").replace("\r", "\n")
+    return p
 
 
 # Cùng danh sách với `.claude/dev/packet_loop.py`. Hai chỗ cưỡng chế CÙNG một luật

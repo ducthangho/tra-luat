@@ -682,6 +682,7 @@ không — nên nó được nâng lên đây, và `t27` ĐỎ nếu bảng dư�
 | [`plat-x5-review-3-claude-verdict.md`](plat-x5-review-3-claude-verdict.md) | [`.receipt.yaml`](plat-x5-review-3-claude-verdict.receipt.yaml) | `plat-x5-review-3-claude-20260821` | **`approve`** | `117e0c42` | 6108 |
 | [`plat-m4-review-1-codex-verdict.md`](plat-m4-review-1-codex-verdict.md) | [`.receipt.yaml`](plat-m4-review-1-codex-verdict.receipt.yaml) | `plat-m4-review-1r2-codex-20260820` | `changes_requested` | `5813fc45` | 2345 |
 | [`plat-m4-review-2-codex-verdict.md`](plat-m4-review-2-codex-verdict.md) | [`.receipt.yaml`](plat-m4-review-2-codex-verdict.receipt.yaml) | `plat-m4-review-2-codex-20260821` | `blocked` | `7a2320fe` | 3428 |
+| [`wp523-r14-review-1-codex-verdict.md`](wp523-r14-review-1-codex-verdict.md) | [`.receipt.yaml`](wp523-r14-review-1-codex-verdict.receipt.yaml) | `quy-trinh-lap-review-r14-g14-codex` | **approve** (technical, `advisory_review`; 0 P0/P1/P2/P3, 68 tình huống hữu hạn; M1/M7 ĐÃ VÁ THẬT). Surface `codex_desktop` — validator nhận từ #612 (`ce25a42`); M11 tích hợp ở r15 (lease g16); human audit r14 `issues/523#issuecomment-5792844363` | `15d1b103` | 13103 |
 
 ### Tám hàng `don-nhanh-*` — chuỗi ĐẦU TIÊN của bảng này KHÔNG có hàng `approve` nào
 

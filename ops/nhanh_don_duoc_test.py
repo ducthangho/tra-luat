@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Phan chung bang kho bare that, kem bang dot bien tren ban sao tam."""
 from __future__ import annotations
+import ast
 import contextlib
 import importlib.util
 import io
@@ -13,6 +14,7 @@ import shutil
 import subprocess
 import sys
 import tempfile
+import warnings
 from pathlib import Path
 sys.dont_write_bytecode = True
 HERE = Path(__file__).resolve().parent
@@ -31,6 +33,18 @@ class TinHieuChotCa(AssertionError):
     pass
 
 
+class TinHieuKhongDoDuoc(Exception):
+    """#593 M2 — TIEN DE cua phep do khong dung duoc => KHONG DO DUOC.
+
+    KHONG phai DAT, va KHONG phai "chot that bai". Ba trang thai chu khong hai:
+    mot ca khong do duoc thi phai noi the, chu khong duoc lam tron len DAT (loi
+    #401) cung khong duoc gia lam mot chot sai. No KHONG ke thua `TinHieuChotCa`
+    nen `chay_tu_kiem` xep no vao DO_KHAC — do la lop DUNG: ca do vi mot le
+    KHONG PHAI chot cua no. Nho M2 cua r1 va M6 cua r2, cha in nguyen thong diep
+    nay ra chu khong chi ten ca.
+    """
+
+
 def chot(dieu_kien, ten_ca: str = "") -> None:
     if not dieu_kien:
         raise TinHieuChotCa(f"chot cua ca {ten_ca} that bai")
@@ -46,6 +60,39 @@ MUTANT_ENV = "NHANH_DON_DUOC_MUTANT"
 LAN_THU_ENV = "NHANH_DON_DUOC_LAN_THU"
 NHAN_DAT, NHAN_DO_CHOT, NHAN_DO_KHAC = "DAT", "DO_CHOT", "DO_KHAC"
 GIET, KHONG_GIET, KHONG_DO_DUOC = "GIET", "KHONG_GIET", "KHONG_DO_DUOC"
+
+
+# #593 — TRAN lan rut lai. Voi khong gian 256 (tuc duoi dot bien
+# `entropy-giu-mot-byte`) xac suat CA 64 lan deu trung la (1/256)^64, tuc 0 tren
+# moi thang do thuc te. Voi khong gian 1 (bo sinh HANG) thi no CAN, va do la
+# duong duy nhat toi `TinHieuKhongDoDuoc` — chan tren ton tai de khong bao gio
+# co vong lap khong chan.
+TRAN_RUT_DAU_PHIEN = 64
+
+
+def _hai_dau_phien_phan_biet() -> tuple[str, str]:
+    """#593 M1 — HAI dau phien KHAC NHAU, do duoc thay vi cau may.
+
+    Benh: `r508` mo dau bang `sinh_dau_phien(), sinh_dau_phien()` roi dung ngay.
+    Tinh phan biet ay la TIEN DE cua ca — ca do rang `doc_kenh` tra KHONG_DO_DUOC
+    khi ban ghi mang dau phien KHAC — chu KHONG phai thu ca ay do. Duoi dot bien
+    `entropy-giu-mot-byte` khong gian tut xuong 256, nen 1/256 luot hai lan rut
+    TRUNG nhau; ban ghi hoa ra KHOP dau phien dang hoi, va `r508` chet vi mot le
+    VO CAN. Dung hinh dang TIN DUNG GIA ma kho nay dat ten, lan nay NAM BEN
+    TRONG mot ca test. Do 200 000 cap, hai luot: 0,3840% va 0,3615%; ly thuyet
+    1/256 = 0,3906%. Hau qua: `gate-registry` — mot REQUIRED CHECK — do ~1/256
+    luot tren MOI head, MOI nhanh.
+
+    Chua bang cach bien tien de NGAM thanh tien de DO DUOC, ba trang thai.
+    """
+    dau = sinh_dau_phien()
+    for _ in range(TRAN_RUT_DAU_PHIEN):
+        khac = sinh_dau_phien()
+        if khac != dau:
+            return dau, khac
+    raise TinHieuKhongDoDuoc(
+        f"khong rut duoc HAI dau phien PHAN BIET sau {TRAN_RUT_DAU_PHIEN} lan — "
+        "khong gian sinh qua hep, tien de cua r508 khong dung duoc")
 
 
 def sinh_dau_phien() -> str:
@@ -232,11 +279,58 @@ def run(args: list[str], cwd: Path, check: bool = True, env: dict[str, str] | No
 def viet(path: Path, text: str) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(text, encoding="utf-8", newline="\n")
+def _dau_hieu_kho_bare(remote: Path, khi: str) -> None:
+    """Chot BA DAU HIEU CAU TRUC cua mot kho bare con ton tai.
+
+    KHONG CHUNG MINH `core.bare = true`. Do duoc (cross-review luot 4 tren
+    8de4e66): ham nay CHAP NHAN `.git` cua mot kho lam viec binh thuong, noi
+    `core.bare = false`. Doc `config` de biet chac doi mot phep do khac; con
+    hoi `git` thi phai PHONG TIEN TRINH, ma chinh viec ay da lam `gate-registry`
+    chuyen tu xanh sang do o 0c89a6e. Nen ten va thong diep cua chot nay duoc
+    THU HEP ve dung cai no do, thay vi noi long phep do de khop mot ten rong.
+
+    #568 — mot loi VO CAN khong ten la dung benh goi nay chua. `git push` bao
+    "does not appear to be a git repository" o mot buoc CACH XA cho tao kho, nen
+    thong diep ay khong noi duoc kho bien mat luc nao. Chot nay dat o hai moc va
+    mang theo DU KIEN: buoc nao, thu muc con gi, va git noi gi.
+    """
+    # KHONG phong tien trinh. Ban truoc cua chot nay goi `git rev-parse` HAI lan
+    # moi `kho_bare()`, tuc them hai tien trinh tren duong ma hang chuc ca va 112
+    # tien trinh con deu di qua. `gate-registry` CHUYEN TU XANH (7d0b012) SANG DO
+    # (0c89a6e) ngay o commit them chot ay, voi
+    #     VO CAN r506: OSError: [Errno 39] Directory not empty: '.../remote.git'
+    # Chua chung minh duoc co che, nhung mot phep DO khong duoc lam doi TAI cua
+    # thu no dang do — do la loi thiet ke cua chot, khong phai xui. Nay chot doc
+    # DAU HIEU tren dia: mot kho bare co `HEAD`, `objects/`, `refs/`.
+    # KHONG lay `remote` lam `cwd` (ban dau cua chot nay sap voi `FileNotFoundError`
+    # vo danh khi thu muc bien mat — dung lop benh no di chua).
+    try:
+        dau_hieu = {
+            "ton tai": remote.is_dir(),
+            "HEAD": (remote / "HEAD").is_file(),
+            "objects/": (remote / "objects").is_dir(),
+            "refs/": (remote / "refs").is_dir(),
+        }
+    except OSError as exc:
+        raise AssertionError(
+            f"dau hieu kho bare hong {khi}: {remote} | KHONG DOC DUOC: {type(exc).__name__}: {exc}")
+    if all(dau_hieu.values()):
+        return
+    try:
+        co = sorted(x.name for x in remote.iterdir())
+    except OSError as exc:
+        co = f"KHONG DOC DUOC THU MUC: {type(exc).__name__}: {exc}"
+    thieu = sorted(k for k, v in dau_hieu.items() if not v)
+    raise AssertionError(
+        f"dau hieu kho bare hong {khi}: {remote} | thieu={thieu} | thu muc con={co}")
+
+
 def kho_bare(*, mac_dinh: str = "main", a: bool = False, b: bool = False,
              c_mot: bool = False, c_hai: bool = False):
     td = tempfile.TemporaryDirectory()
     root, remote, work = Path(td.name), Path(td.name) / "remote.git", Path(td.name) / "work"
     run(["git", "init", "--bare", str(remote)], root)
+    _dau_hieu_kho_bare(remote, "ngay sau `git init --bare`")
     run(["git", "init", "-b", mac_dinh, str(work)], root)
     run(["git", "config", "user.name", "test"], work)
     run(["git", "config", "user.email", "test@example.invalid"], work)
@@ -275,6 +369,12 @@ def kho_bare(*, mac_dinh: str = "main", a: bool = False, b: bool = False,
             run(["git", "commit", "-m", f"commit rieng {i}"], work)
         run(["git", "switch", mac_dinh], work)
     run(["git", "remote", "add", "origin", str(remote)], work)
+    # Windows (log chu kho, 2026-09-21): `git push --all origin` tra rc=128 voi
+    # "does not appear to be a git repository" cho DUNG duong vua `init --bare`
+    # thanh cong o tren — mot lan trong ba luot, tren CA #590 lan #591. Khong tai
+    # lap duoc tren Linux. Chua biet nguyen nhan, nen o day KHONG doan: chi DO
+    # ngay truoc khi day, de luot Windows sau NEU TEN duoc buoc that su hong.
+    _dau_hieu_kho_bare(remote, "ngay truoc `git push --all origin`")
     run(["git", "push", "--all", "origin"], work)
     run(["git", "symbolic-ref", "HEAD", f"refs/heads/{mac_dinh}"], remote)
     run(["git", "fetch", "origin"], work)
@@ -638,7 +738,7 @@ def _chay_main_gia(d: Path, dat, kgiet, kdo, tu_kiem_do=(), tk_giet=None, tk_hon
     # `(0, 0)` khong kich duoc cong nao. Do duoc: `main-ignore-self-kills` SONG SOT
     # full voi dong in `dot bien giet 0/23`.
     tkg = len(m.DOT_BIEN_TU_KIEM) - tk_hong if tk_giet is None else tk_giet
-    m.chay_dot_bien_tu_kiem = lambda: (tkg, tk_hong)
+    m.chay_dot_bien_tu_kiem = lambda: (tkg, tk_hong, 0)
     # F03 — ba cach lam `thieu`/san khac nhau, moi cach CHI cham MOT ve:
     #   · `bo_khoi_tu_kiem` -> chi (NHOM - da_chay)
     #   · `bo_khoi_dich`    -> chi (NHOM - nhom_co_dot_bien)
@@ -1020,7 +1120,28 @@ def r508_ban_ghi_luot_TRUOC_chi_khac_dau_phien(d: Path):
     TRUOC thi chot so ten mutant da bac no roi, nen go chot dau phien KHONG doi mau
     gi va ca tro thanh xanh-vo-nghia.
     """
-    ph_that, ph_khac = sinh_dau_phien(), sinh_dau_phien()
+    # #593 M1 — TIEN DE, khong phai thu ca nay do. Xem `_hai_dau_phien_phan_biet`.
+    try:
+        ph_that, ph_khac = _hai_dau_phien_phan_biet()
+    except TinHieuKhongDoDuoc as e:
+        # DO DUOC o luot chay dau, va no la MOT KHUYET TAT CUA CHINH BAN VA NAY:
+        # hai dot bien CO SAN — `dau-phien-thanh-moc-giay` va (moi) ha tran xuong
+        # 0 — lam bo sinh SUY BIEN, `TinHieuKhongDoDuoc` thoat ra, va bo phan hang
+        # xep no vao DO_KHAC = "chet vi loi VO CAN" = TIN DUNG GIA. Tuc ban va
+        # chong chap lai SINH ra dung hinh dang ma packet nay di chua.
+        #
+        # Phan biet phai giu cho ro: tran CAN co HAI nghia khac han.
+        #   · Duoi mot bo sinh NGAU NHIEN NHUNG HEP (khong gian 256, tuc dot bien
+        #     `entropy-giu-mot-byte`) tran KHONG BAO GIO can — (1/256)^64.
+        #   · Tran chi can khi bo sinh SUY BIEN (hang, hoac moc giay). Do khong
+        #     phai "toi khong do duoc" ma la CHINH phat hien r508 phai bao: mot bo
+        #     sinh khong cho noi hai dau phan biet la mot bo sinh HONG.
+        # Nen o DAY no phai ra DO_CHOT — chot cua CHINH ca nay.
+        #
+        # Trang thai THU BA van ton tai va van do duoc: no song o HOP DONG cua
+        # `_hai_dau_phien_phan_biet`, va `r527` do thang no. Cai bi cam la de no
+        # THOAT RA khoi r508 thanh mot loi vo can.
+        raise TinHieuChotCa(f"chot cua ca r508 that bai: bo sinh SUY BIEN — {e}") from None
     k = _kenh_tam(_du_ca(ph_khac, {"T1": NHAN_DO_CHOT})
                   + [_ban_ghi(ph_khac, dong_luot=True, rc=1)], d)
     tt, _ = doc_kenh(k, ph_that, "m", 1, ("T1",))
@@ -1521,6 +1642,10 @@ def r516_bo_cham_tu_dot_bien_phan_hang_dung(d: Path):
         ten = Path(cwd).name
         goi.append(ten)
         out, rc = kich[ten]
+        ids = [c for c, _, _ in m.TU_KIEM]
+        failed = len(m._khoi_chan_doan(out, "DO_CHOT")) + len(m._khoi_chan_doan(out, "DO_KHAC"))
+        out += f"TU KIEM: {len(ids) - failed}/{len(ids)}\n"
+        Path(env[m.TU_KIEM_FILE_ENV]).write_text(json.dumps({"nonce": env[m.TU_KIEM_NONCE_ENV], "cases": ids}), encoding="utf-8")
         return subprocess.CompletedProcess(args, rc, out, "")
 
     m.run = run_gia
@@ -1543,12 +1668,12 @@ def r516_bo_cham_tu_dot_bien_phan_hang_dung(d: Path):
     NEO = ghep("    if not ", "duong.exists():")
     m.DOT_BIEN_TU_KIEM = [(ten, dich_cua[ten], NEO, "    pass") for ten in kich]
     with contextlib.redirect_stdout(io.StringIO()) as ra:
-        giet, hong = m.chay_dot_bien_tu_kiem()
+        giet, hong, khong_do = m.chay_dot_bien_tu_kiem()
     dong_in = ra.getvalue()
     chot(sorted(goi) == sorted(kich), "r516")       # MOI o deu THAT SU duoc chay
     so_giet = sum(1 for v in mong_doi.values() if v)
     chot((giet, hong) == (so_giet, len(kich) - so_giet), "r516")
-    chot((so_giet, len(kich)) == (2, 60), "r516")   # truc khong bi thu nho am tham
+    chot((so_giet, len(kich), khong_do) == (2, 60, 0), "r516")   # truc khong bi thu nho am tham
     # Va TUNG o phai ra dung nhan cua no, khong chi tong dung: mot bo cham cong
     # nham van co the ra dung cap so.
     for ten, la_giet in mong_doi.items():
@@ -2208,7 +2333,1040 @@ def r523_ban_sao_tuong_doi_khong_duoc_lam_lech_kenh(d: Path):
         chot(tuong_doi == tuyet_doi, "r523")
 
 
+
+def r524_chan_doan_cua_con_khong_duoc_mat_o_lop_phan_hang(d: Path):
+    r"""#568 — bo phan hang phai CHUYEN TIEP chan doan cua con, khong chi ten ca.
+
+    Benh do duoc: `gate-registry` DO tren head 57f85a1 cua PR #567 voi dung mot
+    dong `TIN DUNG GIA: ca chet vi loi VO CAN ['r506']`. Tu do KHONG cach nao
+    biet r506 nem AssertionError (git that bai — `run(check=True)` nem lop ay
+    TRAN), TypeError, OSError hay TimeoutExpired. Bon nguyen nhan can bon cach
+    xu KHAC NHAU, va con DA IN du thong tin ay; cha vut no di o lop cuoi.
+
+    Ca nay do THANG hai ham trich/goi, KHONG chay lai ca vong mutant (~2,4s moi
+    luot): san pham dang do la `_khoi_chan_doan` + `_goi_chan_doan`, va dau vao
+    la mot stdout DUNG DINH DANG do chinh `chay_tu_kiem` sinh ra.
+
+    BON chot doc lap — moi chot mot DUONG VAO rieng, de mot dot bien go tung
+    cai deu doi mau duoc (bai hoc "va dung cho duoc chi roi bo sot duong thu ba"):
+      (1) than NGOAI LE phai toi noi: ca KIEU lan THONG DIEP, khong chi ten ca;
+      (2) than NHIEU DONG phai toi noi — mot AssertionError cua `run()` mang ca
+          stdout lan stderr cua git, nen dong thu hai moi la cho co chan doan;
+      (3) khi phai CAT thi phai KHAI so ky tu da cat — nuot lang la dung benh
+          dang chua, chi nho hon;
+      (4) PHAN HANG khong doi: tap ten ca `_khoi_chan_doan` tra ve phai BANG
+          tap ma mau cu (`^TU KIEM (r\d+): DO_KHAC`) bat duoc, tren cung dau vao.
+    """
+    stdout = (
+        "TU KIEM r505: DAT\n"
+        "TU KIEM r506: DO_KHAC — AssertionError: rc=128: git init --bare\n"
+        "dong-thu-hai-MOC-A\n"
+        "dong-thu-ba\n"
+        "TU KIEM r507: DAT\n"
+        "TU KIEM r512: DO_CHOT — chot r512 hong\n"
+        "TU KIEM: 21/23\n"
+    )
+    khoi = _khoi_chan_doan(stdout, "DO_KHAC")
+    chot([ca for ca, _ in khoi] == ["r506"], "r524")
+    than = khoi[0][1]
+    # (1) kieu VA thong diep, khong chi ten ca
+    chot("AssertionError" in than and "rc=128" in than, "r524")
+    # (2) dong thu HAI phai toi noi — khong duoc dung o cuoi dong dau
+    chot("dong-thu-hai-MOC-A" in than, "r524")
+    # ...va khoi phai DUNG o ranh gioi, khong nuot dong `TU KIEM` ke tiep
+    chot("r507" not in than and "21/23" not in than, "r524")
+    # (3) cat thi phai KHAI so ky tu da cat
+    dai = "x" * (TRAN_CHAN_DOAN + 37)
+    goi = _goi_chan_doan(dai)
+    chot("CAT" in goi and "37" in goi, "r524")
+    chot(_goi_chan_doan("ngan") == "ngan", "r524")
+    # (4) PHAN HANG khong doi — so voi CHINH mau cu
+    cu = set(re.findall(r"^TU KIEM (r\d+): DO_KHAC", stdout, re.M))
+    chot({ca for ca, _ in khoi} == cu == {"r506"}, "r524")
+    # va nhanh DO_CHOT cung phai trich duoc, vi duong vao THU BA dung no
+    chot([ca for ca, _ in _khoi_chan_doan(stdout, "DO_CHOT")] == ["r512"], "r524")
+
+
+def r525_nhanh_thu_ba_phai_noi_vi_sao_ca_khi_con_chet_truoc_khi_in(d: Path):
+    """#568 r2/M6 — ca SUY BIEN cua nhanh THU BA: con chet TRUOC khi in duoc gi.
+
+    Benh: r1 dong ba nhanh in nhan o ca THUONG cua chung, roi bo sot ca SUY BIEN
+    cua nhanh thu ba. Khi con chet vi mot ngoai le KHONG bat duoc, CPython thoat
+    rc=1 va stdout RONG — khong nhan nao. Dinh tuyen: `do_khac` rong nen bo qua
+    nhanh mot; `rc != 1` SAI vi rc DUNG BANG 1 nen bo qua nhanh hai; `do_chot ==
+    dich` sai nen bo qua nhanh ba; roi vao `else`, in nhan tran roi lap `kh_chot`
+    RONG => stderr mang nguyen nhan BI VUT.
+
+    Ca nay goi CHINH `chay_dot_bien_tu_kiem`, chi thay `run` bang do gia kich ban
+    hoa (stdout, rc, STDERR) — tuc do DUONG PHAN HANG that. Do gia cua `r516` luon
+    tra stderr RONG, nen no di QUA duong nay ma khong thay gi; day la ly do lo song
+    sot qua ca mot bo test co 80 dot bien.
+
+    HAI o, va chung phai phan biet duoc bang DAU VAO — neu khong thi hai chot la
+    bo TUONG DUONG va ta chi dang do MOT thu:
+      (P2) suy bien: stdout RONG  => PHAI in stderr (mang chuoi moc)
+      (P1) thuong  : co DO_CHOT   => PHAI in CHOT, va KHONG duoc in stderr
+    """
+    m = _nap_ban_sao(d)
+    MOC = "MOC-STDERR-R525"
+    tb = ("Traceback (most recent call last):\n"
+          '  File "nhanh_don_duoc_test.py", line 1, in <module>\n'
+          f"ModuleNotFoundError: No module named '{MOC}'\n")
+    DICH = ("r515",)
+    # M9 (r3) — do gia CU luon tra `tb` NGAN (~130 ky tu) nen A8 xanh ma thuc te
+    # SAI: stderr THAT cua mot tien trinh con mang 425 ky tu canh bao dung TRUOC
+    # nguyen nhan, va `_goi_chan_doan` cat TU DAU. Kich thich HEP HON hien thuc
+    # la dung hinh dang TIN-HIEU-DO-CHINH-MA-TEST-GIA-MAO (lan thu 3, #568 r3).
+    # O thu ba dung stderr DUNG HINH DANG THAT: rac dai hon TRAN_CHAN_DOAN,
+    # nguyen nhan o CUOI.
+    RAC = (r"ban_sao.py:2213: SyntaxWarning: invalid escape sequence '\d'" "\n"
+           r'  """mot dong docstring dai, chep dung hinh dang that cua canh bao' "\n")
+    tb_dai = RAC * 4 + tb
+    kich = {
+        "suy-bien": ("", 1, tb),
+        "suy-bien-dai": ("", 1, tb_dai),
+        "thuong": ("TU KIEM r511: DO_CHOT — chot cua ca r511 that bai\n"
+                   "TU KIEM: 23/24\n", 1, tb),
+    }
+
+    def run_gia(args, cwd, check=True, env=None):
+        out, rc, err = kich[Path(cwd).name]
+        if Path(cwd).name == "thuong":
+            out = re.sub(r"^TU KIEM: [0-9]+/[0-9]+\n", "", out, flags=re.MULTILINE)
+            ids = [c for c, _, _ in m.TU_KIEM]
+            out += f"TU KIEM: {len(ids) - 1}/{len(ids)}\n"
+            Path(env[m.TU_KIEM_FILE_ENV]).write_text(json.dumps({"nonce": env[m.TU_KIEM_NONCE_ENV], "cases": ids}), encoding="utf-8")
+        return subprocess.CompletedProcess(args, rc, out, err)
+
+    m.run = run_gia
+
+    def ghep(*phan):
+        """Ghep neo LUC CHAY — viet nguyen van thi chinh than ca nay lam chuoi ay
+        xuat hien THEM mot lan ngoai bang, va phep doi neo duy nhat se bac het."""
+        return "".join(phan)
+
+    NEO = ghep("    if not ", "duong.exists():")
+    m.DOT_BIEN_TU_KIEM = [(ten, DICH, NEO, "    pass") for ten in kich]
+    with contextlib.redirect_stdout(io.StringIO()) as ra:
+        giet, hong, khong_do = m.chay_dot_bien_tu_kiem()
+    dong_in = ra.getvalue()
+
+    # Tach theo TUNG MUC: mot chuoi co mat "o dau do" khong chung minh no o DUNG
+    # muc can no — dung benh "loi khai rong hon phep do".
+    khoi = {}
+    hien = None
+    for dong in dong_in.splitlines():
+        if dong.startswith("DOT BIEN TU KIEM "):
+            # "DOT BIEN TU KIEM <ten>" — BON tu roi moi toi ten, nen chi so 4.
+            # Ban dau viet 3 va lay ra "KIEM": ca DO tren ma CHUA dot bien, roi
+            # keo ca bang xuong 2/82 vi moi mutant khac cung thay r525 trong
+            # `do_chot`. Mot ca do vi ly do VO CAN — dung benh ho hang.
+            hien = dong.split()[4]
+            khoi[hien] = []
+        elif hien:
+            khoi[hien].append(dong)
+    chot(set(khoi) == set(kich), "r525")          # ca hai o deu THAT SU chay
+    sb, th = "\n".join(khoi["suy-bien"]), "\n".join(khoi["thuong"])
+
+    # (P2) suy bien: nguyen nhan PHAI toi noi
+    chot(MOC in sb, "r525")
+    chot("ModuleNotFoundError" in sb, "r525")
+    # (P1) thuong: van in CHOT.
+    #
+    # #568 r5 / M14 — DONG `chot(MOC not in th, "r525")` DA BI BO. No cam mot the
+    # ma A8 cua r2 KHONG doi: A8 chi noi "rc=1, stdout rong, stderr mang chuoi
+    # moc => dong cha phai chua chuoi moc ay". Khong co ve cam.
+    # Te hon, no BAC TRUOC mot trien khai giu CA HAI chan doan, tuc KHOA CHET
+    # duong "con da bao mot chot roi CHET TIEP vi mot le khac" — duong ay co that
+    # (do duoc: (giet,hong)=(0,1), in "CHOT r511", KHONG in nguyen nhan tren
+    # stderr). Hinh dang loi MOI, dat ten trong dac ta r5:
+    # CHOT-CAM-THU-DAC-TA-KHONG-DOI. Nguy hon mot chot yeu, vi mot chot yeu chi
+    # khong bat duoc loi, con chot nay CHAN duong sua dung.
+    # Hanh vi hien tai nay do bang `r532` va khai bang hang so co ten.
+    chot("CHOT r511" in th, "r525")
+    # (P3) A15 cua r3 — LOI KHAI TRUNG THUC ve mot HAN CHE, KHONG phai mot ca
+    # xanh ve mot kha nang. Voi `TRAN_CHAN_DOAN` hien tai va huong cat TU DAU,
+    # nguyen nhan nam o CUOI stderr KHONG toi duoc dong cha. Doi huong cat (cat
+    # tu giua / uu tien duoi / loc canh bao) la MO RONG PHAM VI, NGOAI closure
+    # r3 — xem dac ta 596e1614, luu y gan vao A15.
+    sbd = "\n".join(khoi["suy-bien-dai"])
+    chot(MOC not in sbd, "r525")            # nguyen nhan BI CAT — khai thang
+    chot("…[CAT " in sbd, "r525")           # va cha PHAI noi la no da cat
+    chot("SyntaxWarning" in sbd, "r525")    # cai toi noi la phan DAU, tuc rac
+    # r7: hai crash thieu bang chung la KHONG DO DUOC; o thuong la hong.
+    chot((giet, hong, khong_do) == (0, 1, 2), "r525")
+
+
+def _dem_canh_bao_escape(ma: str, ten: str) -> int:
+    r"""Dem canh bao `invalid escape sequence` khi BIEN DICH `ma`.
+
+    Tach RIENG ra de `r526` do duoc HAI CHIEU bang CUNG mot phep do: ma that
+    phai ra 0, va mot mau BAN co chu phai ra >= 1. Mot phep do chi chay mot
+    chieu thi so 0 cua no khong phan biet duoc "sach" voi "khong do duoc gi".
+    """
+    with warnings.catch_warnings(record=True) as thu:
+        warnings.simplefilter("always")
+        compile(ma, ten, "exec")
+    return sum(1 for w in thu if "escape sequence" in str(w.message))
+
+
+def r526_ma_nguon_khong_duoc_sinh_canh_bao_escape_sequence(d: Path):
+    r"""#568 r3/M7+M8 — chinh tep nay phai bien dich SACH tren Python >= 3.12.
+
+    Benh do duoc tu goi chay Windows cua chu kho: hai docstring KHONG raw chua
+    `\d` (dong 2213 va 2723, do `18d6519` cua r1 dua vao) khien MOI tien trinh
+    con in 425 ky tu `SyntaxWarning` ra stderr TRUOC khi chay. `TRAN_CHAN_DOAN`
+    = 400 va `_goi_chan_doan` cat TU DAU, nen 100% ngan sach bi rac chiem va
+    nguyen nhan that bi cat sach. Hai nhanh doc `p.stderr` la nhanh `rc != 1`
+    (M2 cua r1) va nhanh P2 (M6 cua r2) — dung hai nhanh danh cho "con chet
+    truoc khi in duoc gi", tuc dung luc stderr la cho DUY NHAT con nguyen nhan.
+
+    So do do duoc: nen `dc85dd0a` = 0 canh bao, `18d6519` = 2, `45ea292` = 2;
+    `nen-*.err.txt` = 0 B con `ung-vien-*.err.txt` = 17 222 B moi luot.
+
+    Vo hinh tren Python 3.11 (DeprecationWarning, im lang mac dinh) va hien tu
+    3.12 (SyntaxWarning). CI ghim `python-version: "3.12"`, runner chay 3.12.14
+    — nen day KHONG phai mot lo ly thuyet.
+
+    A14 — phep do phai an DUNG tep dang chay. Doc mot BAN CHEP sach thi ca nay
+    se XANH trong khi tep that BAN, tuc hinh dang TIN-HIEU-DO-CHINH-MA-TEST-GIA
+    -MAO lan thu TU. Hai chot dau chan dung cho do, va co dot bien rieng.
+    """
+    import inspect as _ins
+    nguon = Path(__file__).resolve()
+    ma = nguon.read_text(encoding="utf-8")
+    # #568 r4 / M12 — CROSS-REVIEW CODEX, P2 tren 1486689, DA TAI HIEN: hai chot
+    # cu (`len > 50_000` va "ten ham co trong ma") chi xac thuc HINH DANG. Mot
+    # ban chep SACH dai hon 50 000 ky tu co chua ten ham ay thoa CA HAI, nen ca
+    # van DAT trong khi nguon dang chay BAN. Loi khai A14 rong hon phep do.
+    #
+    # KHONG the chung minh "van ban nay LA tep dang chay" tu chinh van ban. Thu
+    # chung minh duoc la: PHEP DOC chua bi thay. Nen doc bang HAI DUONG DOC LAP
+    # roi doi bang nhau TUNG BYTE — dot bien thay MOT duong van vo vi duong kia
+    # khong doi. Day la loi khai HEP HON va DUNG, thay cho loi khai rong cua A14.
+    #
+    # KHAI THANG cho no KHONG chung minh: neu ai do thay duong HAI bang chinh
+    # bieu thuc cua duong MOT, dang thuc thanh tam thuong va chot nay mu. Hai
+    # dot bien di kem chi dong duong "thay mot duong bang HANG SACH".
+    ma_2 = _ins.getsource(sys.modules[__name__])
+    chot(ma == ma_2, "r526")
+    chot(len(ma) > 50_000, "r526")
+    # A13 — ve can do.
+    chot(_dem_canh_bao_escape(ma, str(nguon)) == 0, "r526")
+    # ... va phep do PHAI CO RANG. Dung `chr` de mau ban khong tu no lam chinh
+    # tep nay ban tro lai — mot ca do "thanh cong" bang cach tai lap benh.
+    mau_ban = "x = " + chr(34) * 3 + chr(92) + "d" + chr(34) * 3 + chr(10)
+    chot(_dem_canh_bao_escape(mau_ban, "<mau-ban>") >= 1, "r526")
+
+
+def r527_tien_de_hai_dau_phien_phai_do_duoc_ba_trang_thai(d: Path):
+    """#593 M3/A1-A3 — `_hai_dau_phien_phan_biet` phai co BA trang thai phan
+    biet duoc BANG DAU VAO, va chan tren phai CO THAT.
+
+    Ba o, moi o mot bo sinh khac nhau — neu hai o khong phan biet duoc bang dau
+    vao thi chung la bo TUONG DUONG va ta chi dang do MOT thu:
+      (1) bo sinh HANG, khong gian 1  => KHONG DO DUOC, khong DAT, khong treo
+      (2) chan tren do duoc bang SO LAN GOI nguon = 1 + TRAN (chot bang HANG SO,
+          khong bang chinh `TRAN_RUT_DAU_PHIEN` — chot theo bien la tu noi mot
+          dang thuc, dot bien ha tran xuong 0 se van "dung")
+      (3) khong gian 256, gieo TAT DINH => luon ra hai dau KHAC, 1 000 luot
+    """
+    m = _nap_ban_sao(d)
+
+    # (1) + (2) — bo sinh HANG, va DEM so lan goi.
+    dem = {"n": 0}
+
+    def hang():
+        dem["n"] += 1
+        return "DAU-PHIEN-HANG"
+
+    m.sinh_dau_phien = hang
+    try:
+        m._hai_dau_phien_phan_biet()
+    except m.TinHieuKhongDoDuoc as e:
+        chot("PHAN BIET" in str(e), "r527")        # noi RO vi sao, khong nhan tran
+    except m.TinHieuChotCa:
+        chot(False, "r527")   # A3: KHONG duoc gia lam mot chot sai
+    else:
+        chot(False, "r527")   # A1: KHONG duoc lang le tra ve mot cap TRUNG
+    # A1 — chan tren CO THAT: 1 lan rut dau + dung TRAN lan rut lai, khong hon.
+    # 65 viet bang HANG SO co chu dich: xem docstring.
+    chot(dem["n"] == 65, "r527")
+
+    # (3) — khong gian 256, gieo tat dinh. Dung `random` chu khong `secrets`:
+    # phep do nay phai LAP LAI DUOC, khong duoc doi theo luot chay.
+    import random as _r
+    rng = _r.Random(20260921)
+    m.sinh_dau_phien = lambda: f"{rng.randrange(256):02x}" * 16
+    for _ in range(1000):
+        a, b = m._hai_dau_phien_phan_biet()
+        chot(a != b, "r527")
+
+
+def r528_tien_de_khong_con_chap_duoi_chinh_dot_bien(d: Path):
+    """#593 A9 — CHOT DUY NHAT chung minh benh DA HET, va no phai co doi chung.
+
+    Phai chay duoi CHINH bo sinh cua dot bien `entropy-giu-mot-byte`. Duoi ma
+    thuong khong gian la 2**128 nen "0 lan trung" dung mot cach VO NGHIA: mot
+    phep do khong phan biet duoc "da chua" voi "chua tung benh" la mot phep do
+    RONG. Do la vi sao ca nay do HAI VE bang CUNG mot bo sinh:
+      (a) HINH DANG CU (hai lan rut doc lap) PHAI con chap — neu khong thi phep
+          do nay mu, va moi con so cua ve (b) vo nghia
+      (b) HINH DANG MOI (qua `_hai_dau_phien_phan_biet`) phai 0 lan
+
+    N = 100 000 va ty le 1/256 => ve (a) ky vong ~390 lan. Xac suat no ra 0 la
+    (255/256)**100000, tuc e**-390 — khong phai mot rui ro ta dang chay.
+    """
+    m = _nap_ban_sao(d)
+    N = 100_000
+    # Y HET `thay` cua muc `entropy-giu-mot-byte` trong DOT_BIEN_TU_KIEM.
+    m.sinh_dau_phien = lambda: secrets.token_hex(16)[-2:] * 16
+
+    cu = sum(1 for _ in range(N) if m.sinh_dau_phien() == m.sinh_dau_phien())
+    chot(cu > 0, "r528")        # (a) phep do CO RANG
+
+    moi = 0
+    for _ in range(N):
+        try:
+            a, b = m._hai_dau_phien_phan_biet()
+        except m.TinHieuKhongDoDuoc:
+            # Khong gian 256 ma VAN can tran la mot that bai cua CHINH ca nay,
+            # nen no phai ra DO_CHOT. De `TinHieuKhongDoDuoc` thoat ra thi bo
+            # phan hang xep vao DO_KHAC = "chet vi loi VO CAN" = TIN DUNG GIA,
+            # va mutant thanh `hong` du `dich` ghi dung ten. Da do that.
+            chot(False, "r528")
+        if a == b:
+            moi += 1
+    chot(moi == 0, "r528")      # (b) hai so BANG NHAU: 0 tren 100 000
+
+    # (c) — CROSS-REVIEW CODEX, P2 tren 1486689, DA TAI HIEN: hai ve tren chi
+    # chung minh HAM da chua, KHONG chung minh CA THAT da chua. Noi lai benh goc
+    # vao chinh dong dau cua `r508` (`sinh_dau_phien(), sinh_dau_phien()`) ma giu
+    # ham nguyen ven thi CA HAI ve tren van DAT — do duoc, khong phai lo ngai.
+    # Do dung hinh dang TIN-HIEU-DO-CHINH-MA-TEST-GIA-MAO: chot mang ten A9 mà
+    # khong he cham vao thu A9 hua.
+    #
+    # Hai chot duoi day dong dung cho ay:
+    #   (c1) `r508` phai THAT SU di qua bo tien de — dem SO LAN GOI, tat dinh
+    #   (c2) va chay that N508 luot duoi bo sinh ay, khong chap lan nao
+    # N508 nho hon N vi moi luot `r508` dung he tep (~1,1 ms) chu khong chi rut
+    # so; chot (c2) KHONG can can duoi xac suat nao — duoi ma da chua no la 0
+    # voi xac suat 1 - (1/256)**64 moi luot.
+    that = m._hai_dau_phien_phan_biet
+    dem = {"n": 0}
+
+    def dem_goi():
+        dem["n"] += 1
+        return that()
+
+    m._hai_dau_phien_phan_biet = dem_goi
+    N508 = 2000
+    do = 0
+    for i in range(N508):
+        thu = d / f"r508-{i}"
+        thu.mkdir(parents=True, exist_ok=True)
+        try:
+            m.r508_ban_ghi_luot_TRUOC_chi_khac_dau_phien(thu)
+        except BaseException:
+            do += 1
+    chot(dem["n"] == N508, "r528")   # (c1) ca THAT co di qua bo tien de
+    chot(do == 0, "r528")            # (c2) va khong chap lan nao
+
+
+def r529_tach_dong_phai_bang_dung_bo_doc_cu(d: Path):
+    r"""#568 r4 / M10 — tap dong `_khoi_chan_doan` nhan phai BANG DUNG tap bo doc cu.
+
+    Benh (cross-review codex, P1 tren 1486689, da tai hien): ban truoc tach dong
+    bang `str.splitlines()`, von coi CHIN ky tu ngoai `
+` la het dong, trong khi
+    bo doc cu `re.findall(..., re.M)` thi KHONG — `$` voi re.M chi khop truoc `
+`
+    va o cuoi chuoi. Chenh lech ay cho MA SAN PHAM DOAT DUOC TEN CA:
+
+        stdout = "TU KIEM r501: DAT" + U+2028 + "TU KIEM r512: DO_CHOT" + LF
+        regex CU -> set()          splitlines -> {"r512"}
+
+    Voi rc=1 va dich=("r512",), cung mot dau vao chuyen tu `hong` sang GIET. Day
+    la mot duong CAP GIET GIA, dung lop loi ma `r511` ton tai de chan — va M3 cua
+    r1 tu khai "tap ten ca KHONG DOI so bo doc cu", loi khai ay SAI.
+
+    BA o, va o thu ba la DOI CHUNG DUONG — thieu no thi mot bo doc khong bao gio
+    nhan gi ca cung qua duoc o thu hai.
+    """
+    m = _nap_ban_sao(d)
+    # (1) Hang so phai DAN XUAT duoc tu chinh `splitlines` luc chay. Chep tay ma
+    #     thieu mot ky tu thi o (2) van xanh trong khi van ho dung ky tu do.
+    thua = {c for c in map(chr, range(0x110000))
+            if len(("a" + c + "b").splitlines()) > 1} - {chr(10)}
+    chot(set(m.KY_TU_TACH_DONG_LE) == thua, "r529")
+    # (2) Voi TUNG ky tu le, hai bo doc phai cho CUNG mot tap ten ca.
+    cu = re.compile(r"^TU KIEM (r\d+): DO_CHOT", re.M)
+    for c in m.KY_TU_TACH_DONG_LE:
+        s = ("TU KIEM r501: DAT" + c
+             + "TU KIEM r512: DO_CHOT - gia mao" + chr(10))
+        chot(set(cu.findall(s))
+             == {ca for ca, _ in m._khoi_chan_doan(s, "DO_CHOT")}, "r529")
+    # (3) DOI CHUNG DUONG: voi LF THAT, CA HAI bo doc phai thay r512.
+    s = ("TU KIEM r501: DAT" + chr(10)
+         + "TU KIEM r512: DO_CHOT - that" + chr(10))
+    chot(set(cu.findall(s)) == {"r512"}, "r529")
+    chot({ca for ca, _ in m._khoi_chan_doan(s, "DO_CHOT")} == {"r512"}, "r529")
+
+
+def r530_hai_nhanh_chuyen_tiep_con_lai_phai_co_dot_bien_canh(d: Path):
+    r"""#568 r4 / M11 — nhanh `DO_KHAC` va nhanh `rc != 1` phai THAT SU in chan doan.
+
+    Benh (cross-review codex, P2 tren 1486689, da tai hien): thay CA HAI dong
+    `print` chuyen tiep bang `pass` thi `r516 DAT`, `r524 DAT`, `r525 DAT`. Tuc
+    bo tron phan chuyen tiep o hai nhanh ay ma moi ca lien quan van xanh — dung
+    cai benh #568 cam ket khoa, va A1/A2 chua khoa duoc no o LOP CHA. `r524` chi
+    do hai helper; `r525` do nhanh CUOI; `r516` kiem phan hang nhung cho `stderr`
+    rong.
+
+    HAI o, phan biet duoc bang DAU VAO:
+      (P1) `vo-can` : stdout co DO_KHAC  => nhanh mot  => phai in "VO CAN <ca>: "
+      (P2) `rc-khac`: stdout RONG, rc=7  => nhanh hai  => phai in "stderr: "
+    """
+    m = _nap_ban_sao(d)
+    MOC_VC, MOC_SE = "MOC-VOCAN-R530", "MOC-STDERR-R530"
+    kich = {
+        "vo-can": ("TU KIEM r511: DO_KHAC - RuntimeError: " + MOC_VC + chr(10),
+                   1, ""),
+        "rc-khac": ("", 7, "Traceback ... OSError: " + MOC_SE + chr(10)),
+    }
+
+    def run_gia(args, cwd, check=True, env=None):
+        out, rc, err = kich[Path(cwd).name]
+        if Path(cwd).name == "vo-can":
+            out = re.sub(r"^TU KIEM: [0-9]+/[0-9]+\n", "", out, flags=re.MULTILINE)
+            ids = [c for c, _, _ in m.TU_KIEM]
+            out += f"TU KIEM: {len(ids) - 1}/{len(ids)}\n"
+            Path(env[m.TU_KIEM_FILE_ENV]).write_text(json.dumps({"nonce": env[m.TU_KIEM_NONCE_ENV], "cases": ids}), encoding="utf-8")
+        return subprocess.CompletedProcess(args, rc, out, err)
+
+    m.run = run_gia
+
+    def ghep(*phan):
+        """Ghep neo LUC CHAY: viet nguyen van thi chinh than ca nay lam chuoi ay
+        xuat hien THEM mot lan ngoai bang, va phep doi neo duy nhat se bac het."""
+        return "".join(phan)
+
+    NEO = ghep("    if not ", "duong.exists():")
+    m.DOT_BIEN_TU_KIEM = [(ten, ("r515",), NEO, "    pass") for ten in kich]
+    with contextlib.redirect_stdout(io.StringIO()) as ra:
+        giet, hong, khong_do = m.chay_dot_bien_tu_kiem()
+    dong_in = ra.getvalue()
+
+    khoi, hien = {}, None
+    for dong in dong_in.split(chr(10)):
+        if dong.startswith("DOT BIEN TU KIEM "):
+            hien = dong.split()[4]     # BON tu roi moi toi ten
+            khoi[hien] = []
+        elif hien:
+            khoi[hien].append(dong)
+    chot(set(khoi) == set(kich), "r530")
+    vc, rk = chr(10).join(khoi["vo-can"]), chr(10).join(khoi["rc-khac"])
+
+    # (P1) nhanh DO_KHAC phai CHUYEN TIEP, khong chi neu ten ca.
+    chot("VO CAN r511" in vc, "r530")
+    chot(MOC_VC in vc, "r530")
+    # (P2) nhanh rc != 1 phai in stderr, va KHONG duoc lan sang o kia.
+    chot("stderr: " in rk, "r530")
+    chot(MOC_SE in rk, "r530")
+    chot(MOC_SE not in vc, "r530")
+    # r7: DO_KHAC da hoan tat la hong; rc7 thieu bang chung la KHONG DO DUOC.
+    chot((giet, hong, khong_do) == (0, 1, 1), "r530")
+
+
+def r531_ranh_gioi_bo_dong_nao_thi_phai_khai(d: Path):
+    r"""#568 r5 / M13 — mat im lang la cam; ba trang thai phai phan biet duoc.
+
+    BON o. Ba o dau la BA TRANG THAI cua viec mat than, o thu tu tach trang thai
+    "cat theo tran" ra cho khoi lan:
+      (1) KHONG MAT      -> KHONG duoc co nhan nao
+      (2) than mang `LOI:` -> PHAI GIU (ranh gioi da hep lai)
+      (3) than lo mang tien to THAT -> khoi dong (chong gia mao) VA phai KHAI
+      (4) cat theo TRAN  -> nhan `CAT`, KHONG phai `BO QUA`
+
+    Chieu (1) la cho de khai rong nhat: mot trien khai LUON in nhan van thoa moi
+    chot cua chieu "co mat thi co nhan". Thieu o (1) thi loi khai "khai dung phan
+    bi bo" lai rong hon phep do.
+    """
+    m = _nap_ban_sao(d)
+    L = chr(10)
+
+    # (1) KHONG MAT
+    out1 = ("TU KIEM r506: DO_KHAC - RuntimeError: x" + L
+            + "TU KIEM r507: DAT" + L + "TU KIEM: 1/2" + L)
+    ra1 = m._khoi_chan_doan(out1, "DO_KHAC")
+    chot(ra1 == [("r506", "RuntimeError: x")], "r531")
+    chot(ra1[0][1].bo_qua == 0, "r531")
+    chot("CHA BO" not in m._goi_chan_doan(ra1[0][1]), "r531")
+
+    # (2) than mang `LOI:` — dung ca ma cross-review codex bao cao
+    out2 = ("TU KIEM r506: DO_KHAC - AssertionError: first" + L
+            + "LOI: root-cause" + L + "more-details" + L + "TU KIEM: 0/1" + L)
+    than2 = m._khoi_chan_doan(out2, "DO_KHAC")[0][1]
+    chot("root-cause" in than2, "r531")
+    chot("more-details" in than2, "r531")
+    chot(than2.bo_qua == 0, "r531")
+    chot("CHA BO" not in m._goi_chan_doan(than2), "r531")
+
+    # (3) than lo mang tien to THAT: van dong khoi, NHUNG phai khai
+    out3 = ("TU KIEM r506: DO_KHAC - RuntimeError: x" + L
+            + "TU KIEM r512: DAT" + L + "chi tiet mot" + L + "chi tiet hai" + L
+            + "TU KIEM: 1/2" + L)
+    than3 = m._khoi_chan_doan(out3, "DO_KHAC")[0][1]
+    chot(than3.bo_qua == 2, "r531")
+    chot("[CHA BO 2 dong]" in m._goi_chan_doan(than3), "r531")
+    chot("chi tiet mot" not in than3, "r531")   # VAN bi bo — nhung DA KHAI
+
+    # (4) cat theo TRAN la trang thai KHAC, phan biet duoc bang nhan
+    goi = m._goi_chan_doan("x" * (m.TRAN_CHAN_DOAN + 50))
+    chot("[CAT " in goi, "r531")
+    chot("CHA BO" not in goi, "r531")
+
+
+def r532_khai_dung_duong_da_bao_chot_roi_chet_tiep(d: Path):
+    r"""#568 r5 / M14 — LOI KHAI phai khop HANH VI, hai chieu.
+
+    `r525` cu chot `MOC not in th`, tuc CAM cha in `stderr` khi da co `DO_CHOT`.
+    A8 cua r2 KHONG doi the. Chot ay BAC TRUOC moi trien khai giu ca hai chan
+    doan — hinh dang CHOT-CAM-THU-DAC-TA-KHONG-DOI. Da bo.
+
+    Thay bang mot LOI KHAI co ten: `CHAN_DOAN_STDERR_KHI_DA_CO_CHOT`. Ca nay doi
+    hanh vi luc chay KHOP voi loi khai, HAI CHIEU:
+      doi HANH VI ma khong doi LOI KHAI => DO
+      doi LOI KHAI ma khong doi hanh vi => DO
+    Ai chua duong nay chi viec dat lai hang so; ca xanh tro lai. Do la khac biet
+    giua mot LOI KHAI va mot DIEU CAM.
+
+    r5 KHONG hua chua duong ay — chua no doi dinh dang dau ra ma r516/r524/r530
+    dang do. Xin revision rieng.
+    """
+    m = _nap_ban_sao(d)
+    MOC = "MOC-SAU-CHOT-R532"
+    kich = {"chot-roi-chet": ("TU KIEM r511: DO_CHOT - chot cua ca r511 that bai"
+                              + chr(10), 1, "SystemExit: " + MOC + chr(10))}
+
+    def run_gia(args, cwd, check=True, env=None):
+        out, rc, err = kich[Path(cwd).name]
+        return subprocess.CompletedProcess(args, rc, out, err)
+
+    m.run = run_gia
+
+    def ghep(*phan):
+        """Ghep neo LUC CHAY — xem ghi chu cung ten o r525."""
+        return "".join(phan)
+
+    NEO = ghep("    if not ", "duong.exists():")
+    m.DOT_BIEN_TU_KIEM = [(ten, ("r515",), NEO, "    pass") for ten in kich]
+    with contextlib.redirect_stdout(io.StringIO()) as ra:
+        giet, hong, khong_do = m.chay_dot_bien_tu_kiem()
+    dong_in = ra.getvalue()
+
+    chot("CHOT r511" in dong_in, "r532")        # chot CO duoc chuyen tiep
+    chot((giet, hong, khong_do) == (0, 0, 1), "r532")        # r7: CHOT roi chet, chua co bang chung hoan tat
+    # HAI CHIEU — day la ca chot cua ca nay.
+    chot((MOC in dong_in) == m.CHAN_DOAN_STDERR_KHI_DA_CO_CHOT, "r532")
+
+
+def r533_ranh_gioi_phai_dung_hinh_ban_ghi(d: Path):
+    r"""#568 r5 / cross-review P2 tren be5c3f2 — trung TIEN TO khong phai la ranh gioi.
+
+    `DOT BIEN ` la tien to TRAN. Mot dong THAN bat dau bang no dong khoi roi bien
+    mat MA KHONG duoc dem: chinh dong ranh gioi khong nam trong `bo_qua`. Nen
+    khong nhan `BO QUA`, khong nhan `CAT` — mat IM LANG, dung lop benh #568.
+
+    BON o:
+      (1) than `DOT BIEN root-cause` -> PHAI GIU (khong con la ranh gioi)
+      (2) than `DOT BIEN root-cause` + dong sau -> GIU CA HAI, KHONG nhan
+      (3) ban ghi THAT `DOT BIEN TU KIEM <ten> | ...` -> VAN dong khoi
+      (4) HAI CHIEU cua loi khai `DONG_RANH_GIOI_DUNG_HINH_KHONG_DUOC_DEM`
+
+    O (4) la cho khong do duoc: mot dong than trung DUNG HINH ban ghi that van
+    dong khoi va van khong duoc dem. Ta KHAI no chu khong lam tron — dem no se
+    sinh nhan tren dau vao BINH THUONG, tuc khai RONG hon phep do (A30 cam).
+    """
+    m = _nap_ban_sao(d)
+    L = chr(10)
+
+    # (1) trung tien to, KHONG phai ban ghi -> giu
+    out1 = ("TU KIEM r506: DO_KHAC - RuntimeError: first" + L
+            + "DOT BIEN root-cause" + L + "TU KIEM: 0/1" + L)
+    than1 = m._khoi_chan_doan(out1, "DO_KHAC")[0][1]
+    chot("root-cause" in than1, "r533")
+    chot(than1.bo_qua == 0, "r533")
+
+    # (2) va dong ke tiep cung phai con
+    out2 = ("TU KIEM r506: DO_KHAC - RuntimeError: first" + L
+            + "DOT BIEN root-cause" + L + "more-details" + L + "TU KIEM: 0/1" + L)
+    than2 = m._khoi_chan_doan(out2, "DO_KHAC")[0][1]
+    chot("root-cause" in than2 and "more-details" in than2, "r533")
+    chot(than2.bo_qua == 0, "r533")
+
+    # (3) ban ghi THAT van dong khoi — chot chong gia mao KHONG duoc noi long
+    out3 = ("TU KIEM r506: DO_KHAC - x" + L
+            + "DOT BIEN TU KIEM abc | r1 | 1/1" + L + "chi tiet" + L
+            + "TU KIEM: 0/1" + L)
+    than3 = m._khoi_chan_doan(out3, "DO_KHAC")[0][1]
+    chot("chi tiet" not in than3, "r533")
+    chot(than3.bo_qua == 1, "r533")
+    chot("[CHA BO 1 dong]" in m._goi_chan_doan(than3), "r533")
+
+    # (4) HAI CHIEU: dong ranh gioi DUNG HINH khong duoc dem — day la LOI KHAI.
+    # Dau vao co DUNG mot dong bi bo, va do la chinh dong ranh gioi.
+    out4 = ("TU KIEM r506: DO_KHAC - x" + L + "TU KIEM r512: DAT" + L
+            + "TU KIEM: 1/2" + L)
+    than4 = m._khoi_chan_doan(out4, "DO_KHAC")[0][1]
+    chot((than4.bo_qua == 0) == m.DONG_RANH_GIOI_DUNG_HINH_KHONG_DUOC_DEM, "r533")
+
+
+def r534_nhan_bo_dong_phai_song_qua_tran(d: Path):
+    r"""#568 r5 / cross-review P2 tren be5c3f2 — tran KHONG duoc nuot chinh loi khai.
+
+    `…[BO QUA n dong]` la sieu du lieu ve phep do. Ban truoc noi no vao cuoi
+    than roi `_goi_chan_doan` cat TU DAU, nen than dai lam nhan bi cat: cha in ra
+    so ky tu bi cat ma MAT HAN so dong bi bo. A29 khai mot thu khong den duoc
+    nguoi doc log.
+
+    BA o, phan biet duoc bang dau vao:
+      (1) than DAI + co dong bi bo -> PHAI co CA HAI so
+      (2) than NGAN + co dong bi bo -> co BO QUA, KHONG co CAT
+      (3) than DAI + KHONG dong bi bo -> co CAT, KHONG co BO QUA
+    """
+    m = _nap_ban_sao(d)
+    L = chr(10)
+    dai = "x" * (m.TRAN_CHAN_DOAN + 50)
+
+    # (1) ca hai so
+    out1 = ("TU KIEM r506: DO_KHAC - " + dai + L + "TU KIEM r512: DAT" + L
+            + "a" + L + "b" + L + "TU KIEM: 0/1" + L)
+    goi1 = m._goi_chan_doan(m._khoi_chan_doan(out1, "DO_KHAC")[0][1])
+    chot("[CHA BO 2 dong]" in goi1, "r534")
+    chot("[CAT " in goi1, "r534")
+
+    # (2) chi BO QUA
+    out2 = ("TU KIEM r506: DO_KHAC - ngan" + L + "TU KIEM r512: DAT" + L
+            + "a" + L + "b" + L + "TU KIEM: 0/1" + L)
+    goi2 = m._goi_chan_doan(m._khoi_chan_doan(out2, "DO_KHAC")[0][1])
+    chot("[CHA BO 2 dong]" in goi2, "r534")
+    chot("[CAT " not in goi2, "r534")
+
+    # (3) chi CAT
+    goi3 = m._goi_chan_doan(dai)
+    chot("[CAT " in goi3, "r534")
+    chot("CHA BO" not in goi3, "r534")
+
+
+def r535_moi_ho_tien_to_deu_phai_dung_hinh(d: Path):
+    r"""#568 r5 / cross-review luot 2 tren 15c487c — siet MOT ho la chua du.
+
+    Luot 1 chi siet `DOT BIEN `. Ba ho con lai (`TU KIEM r<n>: `, `MUTANT: `,
+    `CASE T<n>: `) VAN la tien to TRAN, nen van nuot chan doan IM LANG:
+
+        "TU KIEM r506: DO_KHAC - RuntimeError: first" + LF + "MUTANT: root-cause"
+          -> [('r506', 'RuntimeError: first')]   · khong nhan nao
+
+    Ca nay do CA BON ho bang mot bang, moi ho HAI ve — phan biet duoc bang dau vao:
+      · mot dong THAN chi TRUNG TIEN TO  -> PHAI GIU, khong nhan
+      · mot BAN GHI THAT cung ho         -> PHAI dong khoi va PHAI khai
+    Thieu ve thu hai thi mot `ranh` rong (`^(?!)`) cung qua duoc ve thu nhat.
+    """
+    m = _nap_ban_sao(d)
+    L = chr(10)
+    # (gia mao, ban ghi THAT) cho tung ho
+    ho = [
+        ("TU KIEM r512: root-cause",        "TU KIEM r512: DAT"),
+        ("MUTANT: root-cause",              "MUTANT: giet = 1 · khong giet = 0 · khong do duoc = 0 / tong 1"),
+        ("CASE T6: root-cause",             "CASE T6: DO — gia mao"),   # hinh cua `chay_ca`
+        ("DOT BIEN root-cause",             "DOT BIEN TU KIEM abc | r1 | 1/1"),
+    ]
+    for gia, that in ho:
+        # ve 1 — chi trung TIEN TO: phai GIU nguyen, khong sinh nhan
+        o1 = ("TU KIEM r506: DO_KHAC - dau" + L + gia + L + "TU KIEM: 0/1" + L)
+        t1 = m._khoi_chan_doan(o1, "DO_KHAC")[0][1]
+        chot(gia in t1, "r535")
+        chot(t1.bo_qua == 0, "r535")
+        # ve 2 — BAN GHI THAT: phai dong khoi, va phan sau phai duoc KHAI
+        o2 = ("TU KIEM r506: DO_KHAC - dau" + L + that + L + "chi tiet" + L
+              + "TU KIEM: 0/1" + L)
+        t2 = m._khoi_chan_doan(o2, "DO_KHAC")[0][1]
+        chot("chi tiet" not in t2, "r535")
+        chot(t2.bo_qua == 1, "r535")
+
+
+def r536_con_khong_duoc_doat_so_do_cua_cha(d: Path):
+    r"""#568 r5 / cross-review luot 2 tren 15c487c — dao ly 6, o lop sieu du lieu.
+
+    Ban va DAU TIEN cua P2-2 giu nhan `…[BO QUA n dong]` ngoai tran bang cach
+    DOC NGUOC con so ra tu van ban than. Khi ay mot chuoi do mã DANG BI THU phat
+    ra tro thanh bang chung phep do cua cha. Do duoc tren 15c487c:
+
+        than = "x"*450 + LF + "…[BO QUA 7 dong]"     # cha KHONG bo dong nao
+        -> "x"*400 + " …[CAT 50 ky tu] …[BO QUA 7 dong]"
+
+    Cha khai bo bay dong trong khi no bo KHONG dong nao. Ca nay chot HAI ve:
+      (1) con in nhan GIA          -> cha KHONG duoc nhan no lam so cua minh
+      (2) cha THAT SU bo n dong    -> cha PHAI khai dung n
+    Chi co ve (1) thi mot trien khai KHONG BAO GIO khai gi cung xanh.
+    """
+    m = _nap_ban_sao(d)
+    L = chr(10)
+    NHAN_GIA = "…[BO QUA 7 dong]"
+
+    # (1) con gia mao: cha khong bo dong nao, nen KHONG duoc khai so nao
+    o1 = ("TU KIEM r506: DO_KHAC - " + "x" * 450 + L + NHAN_GIA + L
+          + "TU KIEM: 0/1" + L)
+    t1 = m._khoi_chan_doan(o1, "DO_KHAC")[0][1]
+    chot(t1.bo_qua == 0, "r536")
+    goi1 = m._goi_chan_doan(t1)
+    chot("CHA BO" not in goi1, "r536")
+    chot("[CAT " in goi1, "r536")          # van phai khai phan bi CAT
+
+    # (1b) nhan gia o mot than NGAN: van khong duoc thanh so do cua cha
+    o1b = ("TU KIEM r506: DO_KHAC - dau" + L + NHAN_GIA + L + "TU KIEM: 0/1" + L)
+    t1b = m._khoi_chan_doan(o1b, "DO_KHAC")[0][1]
+    chot(t1b.bo_qua == 0, "r536")
+    chot("CHA BO" not in m._goi_chan_doan(t1b), "r536")
+    # van ban con PHAI con NGUYEN: cach lam ro khong duoc la SUA than con
+    chot(NHAN_GIA in m._goi_chan_doan(t1b), "r536")
+
+    # (2) chieu nguoc: cha THAT SU bo hai dong thi PHAI khai dung hai
+    o2 = ("TU KIEM r506: DO_KHAC - " + "x" * 450 + L + "TU KIEM r512: DAT" + L
+          + "a" + L + "b" + L + "TU KIEM: 0/1" + L)
+    t2 = m._khoi_chan_doan(o2, "DO_KHAC")[0][1]
+    chot(t2.bo_qua == 2, "r536")
+    goi2 = m._goi_chan_doan(t2)
+    chot("[CHA BO 2 dong]" in goi2, "r536")
+    chot("[CAT " in goi2, "r536")
+
+    # (3) `_goi_chan_doan` tren mot `str` THUONG (vd stderr) khong duoc sinh nhan
+    chot("CHA BO" not in m._goi_chan_doan("stderr binh thuong " + NHAN_GIA), "r536")
+
+
+def r537_chuan_hoa_than_khong_duoc_sua_noi_dung(d: Path):
+    r"""#568 r5 / cross-review luot 3 tren 7d0b012 — go dau phan cach, khong `lstrip`.
+
+    Ban truoc dung `lstrip(" —-")` — mot TAP KY TU, nen no an het dau cach va
+    dau gach o dau than KE CA khi chung la NOI DUNG. Do duoc truoc khi va:
+
+        "TU KIEM r1: DO_CHOT — -42"            -> than "42"       (mat dau AM)
+        "TU KIEM r1: DO_CHOT — --gio-cao-nhat" -> than "gio-cao-nhat"
+
+    Mot con so doi dau la SUA NOI DUNG chan doan. BON o:
+      (1) dau phan cach ` — ` bi go, than con NGUYEN (ke ca dau am)
+      (2) dau phan cach ` - ` (dang cac ca dung) cung duoc go, va CHI MOT
+      (3) than khong co dau phan cach thi KHONG bi cat xen
+      (4) HAI CHIEU cua `THAN_BO_DONG_TRANG_KHONG_DEM`
+      (5) HAI CHIEU cua `THAN_BO_KHOANG_TRANG_TUNG_DONG`, chuoi mong doi suy tu
+          loi khai — khong khoa cung hanh vi hien tai (luot 5)
+    """
+    m = _nap_ban_sao(d)
+    L = chr(10)
+
+    # (1) dau AM phai con
+    t1 = m._khoi_chan_doan("TU KIEM r1: DO_CHOT — -42" + L + "TU KIEM: 0/1", "DO_CHOT")[0][1]
+    chot(str(t1) == "-42", "r537")
+    t1b = m._khoi_chan_doan("TU KIEM r1: DO_CHOT — --gio-cao-nhat" + L + "TU KIEM: 0/1",
+                            "DO_CHOT")[0][1]
+    chot(str(t1b) == "--gio-cao-nhat", "r537")
+
+    # (2) dang ` - ` cung duoc go, va CHI MOT dau
+    t2 = m._khoi_chan_doan("TU KIEM r1: DO_KHAC - -7" + L + "TU KIEM: 0/1", "DO_KHAC")[0][1]
+    chot(str(t2) == "-7", "r537")
+
+    # (3) khong co dau phan cach thi khong duoc cat xen ky tu nao
+    t3 = m._khoi_chan_doan("TU KIEM r1: DO_KHAC:x" + L + "TU KIEM: 0/1", "DO_KHAC")[0][1]
+    chot(str(t3) == ":x", "r537")
+
+    # (4) HAI CHIEU, VE MOT: dong TRANG trong than bi loai va KHONG dem
+    t4 = m._khoi_chan_doan("TU KIEM r1: DO_KHAC - a" + L + "" + L + "b" + L + "TU KIEM: 0/1",
+                           "DO_KHAC")[0][1]
+    bi_bo = ("" not in str(t4).split(L)) and t4.bo_qua == 0
+    chot(bi_bo == m.THAN_BO_DONG_TRANG_KHONG_DEM, "r537")
+
+    # (5) HAI CHIEU, VE HAI: khoang trang TUNG DONG. Ban truoc gop ve nay vao
+    # cung mot hang voi ve (4), va no SAI — ma van xanh nho ve (4) dung. Do la
+    # ly do hai loi khai phai la hai hang, moi hang mot chot.
+    t5 = m._khoi_chan_doan("TU KIEM r1: DO_KHAC -  a  " + L + "  b  " + L + "TU KIEM: 0/1",
+                           "DO_KHAC")[0][1]
+    goi5 = m._goi_chan_doan(t5)
+    bo_tung_dong = "a | b" in goi5
+    chot(bo_tung_dong == m.THAN_BO_KHOANG_TRANG_TUNG_DONG, "r537")
+    # va khai CHINH XAC cai no LAM — chuoi mong doi SUY TU loi khai. Luot 5 do
+    # duoc: `goi5 == "a   |   b"` khoa cung hanh vi hien tai, nen mot trien khai
+    # doi CA hanh vi LAN loi khai (hop le theo A29-A36) van bi bac — dung hinh
+    # CHOT-CAM-THU-DAC-TA-KHONG-DOI ma M14 go o r525.
+    chot(goi5 == ("a | b" if m.THAN_BO_KHOANG_TRANG_TUNG_DONG else "a   |   b"), "r537")
+
+
+def r538_bien_phai_cua_nhan_phai_co(d: Path):
+    r"""#568 r5 / cross-review luot 3 tren 7d0b012 — `DO_CHOT` thieu bien PHAI.
+
+    `ranh` cu bat `TU KIEM r\d+: DO_CHOT` KHONG co bien phai, nen mot dong THAN
+    la `TU KIEM r512: DO_CHOT_fake-root` cung dong khoi va bien mat IM LANG. Do
+    duoc truoc khi va: than chi con 'first', `bo_qua == 0`.
+
+    Luot 6 (tren 273de20): nam duoi van la tien to, ho TU KIEM rong hon hinh
+    that, va loi khai "ranh rong bang dau" bi phan chung — nay khai thanh
+    `DAU_RONG_HON_RANH_THEO_HOP_DONG_TEN_CA` va do hai chieu o cuoi ca.
+
+    Luot 5 (tren 31127d7): NGU PHAP phai bang TAP HINH cua MOI diem phat that,
+    doi chieu tung `print` cot 0 — ba cho lech va bon ho chua ke, xem chu thich
+    tren dong `ranh`. Danh sach `that` duoi day la bang doi chieu ay.
+
+    Cung the voi ba ho kia: ban ghi THAT cua chung con dai hon hinh ma luot 2 da
+    siet (`MUTANT: giet = <so> `, `CASE T<n>: DO - `,
+    `DOT BIEN TU KIEM <ten>: NEO KHONG DUY NHAT `), nen mot dong than chi trung
+    phan DAU van lot qua. Ca nay do CA BON, moi ho mot ve GIA.
+    """
+    m = _nap_ban_sao(d)
+    L = chr(10)
+    gia = [
+        "TU KIEM r512: DO_CHOT_fake-root",
+        "MUTANT: giet = root-cause",
+        "CASE T6: DO root-cause",
+        "DOT BIEN TU KIEM abc: root-cause",
+        # luot 4 — TIEN TO DAI HON van khong phai BAN GHI. Co chu so sau
+        # `giet = ` chua thanh ban tong ket; co MOT dau `|` chua thanh dong
+        # ket qua; co `NEO KHONG DUY NHAT ` chua thanh ban ghi neo.
+        "MUTANT: giet = 1 root-cause",
+        "DOT BIEN TU KIEM abc | root-cause",
+        "DOT BIEN TU KIEM abc: NEO KHONG DUY NHAT root-cause",
+        # luot 5 — HAI dau `|` van chua thanh ban ghi; cach truoc dau hai cham
+        # la hinh khong ai phat; `DO - ` la hinh cua fixture, khong phai runner.
+        "DOT BIEN TU KIEM abc | r1 | root-cause",
+        "DOT BIEN TU KIEM : KHONG DO DUOC — phep cat bang hong",
+        "CASE T6: DO - gia mao",
+        "MUTANT abc | T1 | root-cause",
+        "TU KIEM co dot bien rieng: root-cause",
+        "LOI: root-cause",
+        "8/8x",
+        # luot 6 — nam duoi con la tien to, va ho TU KIEM rong hon hinh that
+        "DOT BIEN TU KIEM abc | r1 | TIN DUNG GIA: root-cause",
+        "DOT BIEN TU KIEM abc | r1 | 0 — ca do THUC TE: root-cause",
+        "MUTANT abc | T1 | KHONG DO DUOC (sau 2 lan): ",
+        "MUTANT abc | T1 | 0/1: ",
+        "LOI: nhom bat buoc THIEU (chua chay hoac chua co dot bien): root-cause",
+        "TU KIEM r512: DO_CHOT root-cause",
+        # luot 7 — bon nhom L/D/S/K (phan chung cua reviewer, moi dong mot mien)
+        "MUTANT abc | T1 | 0/1: root-cause",
+        "MUTANT abc | T1 | KHONG DO DUOC (sau 2 lan): root-cause",
+        "MUTANT abc | T1 | KHONG DO DUOC (sau 3 lan): kenh khong ton tai | rc_con=1 | stderr[-200:]=''",
+        "DOT BIEN TU KIEM abc | root-cause | 1/1",
+        "MUTANT abc | root-cause | 1/1",
+        "TU KIEM: ٠/١",
+        "MUTANT: giet = 01 · khong giet = 0 · khong do duoc = 0 / tong 1",
+        "DOT BIEN TU KIEM abc | r1 | TIN DUNG GIA: child rc=-0 != 1",
+        "DOT BIEN TU KIEM abc | r1 | TIN DUNG GIA: child rc=1 != 1",
+        "DOT BIEN TU KIEM abc | r1 | 1/2",
+        "DOT BIEN TU KIEM abc: NEO KHONG DUY NHAT (1)",
+        "MUTANT abc | T1 | 0/0: tap ca do chot [] != dich []",
+    ]
+    for dong in gia:
+        t = m._khoi_chan_doan(
+            "TU KIEM r506: DO_KHAC - first" + L + dong + L + "TU KIEM: 0/1" + L, "DO_KHAC")[0][1]
+        chot(dong in str(t), "r538")
+        chot(t.bo_qua == 0, "r538")
+    # chieu nguoc — BAN GHI THAT cua ca bon ho VAN phai dong khoi
+    # luot 5 — MOI diem phat cot 0 cua ma chay, moi hinh mot dong (so dong la
+    # cua 31127d7). Them mot `print` cot 0 ma khong them vao day la lech.
+    that = [
+        "TU KIEM r512: DAT",                                          # :4039
+        "TU KIEM r512: DO_CHOT — chot",                               # :4047
+        "TU KIEM: 38/38",                                             # :4051
+        "TU KIEM co dot bien rieng: 38/38 nhom bat buoc · dot bien giet 114/114",  # :4080
+        "MUTANT: giet = 1 · khong giet = 0 · khong do duoc = 0 / tong 1",           # :4083
+        "MUTANT abc | T1 | 1/1",                                      # :564
+        "MUTANT abc | T1 | KHONG DO DUOC (sau 2 lan): kenh khong ton tai | rc_con=1 | stderr[-200:]=''",  # :567
+        "MUTANT abc | T1 | KHONG DO DUOC (sau 1 lan): khong phong duoc tien trinh con: OSError: [Errno 24] x",
+        "MUTANT abc | T1 | 0/1: tap ca do chot ['T2'] != dich ['T1']",  # :570
+        "MUTANT in-ca-C | T1,T3 | 2/2",                                # ten muc co chu hoa
+        "DOT BIEN TU KIEM abc: NEO KHONG DUY NHAT (2)",
+        "DOT BIEN TU KIEM abc | r1 | TIN DUNG GIA: child rc=-15 != 1",
+        "CASE T6: DAT",                                               # :493
+        "CASE T6: DO — chot cua ca T6 that bai",                      # :498
+        "CASE T6: DO — RuntimeError: x",                              # :505
+        "DOT BIEN TU KIEM: KHONG DO DUOC — phep cat bang hong",       # :3961
+        "DOT BIEN TU KIEM abc: NEO KHONG DUY NHAT (0)",               # :3967
+        "DOT BIEN TU KIEM abc | r1 | TIN DUNG GIA: ca chet vi loi VO CAN ['r5']",  # :3992
+        "DOT BIEN TU KIEM abc | r1 | 1/1",                            # :4005
+        "DOT BIEN TU KIEM abc |  | 0/0",                              # dich rong
+        "DOT BIEN TU KIEM abc | r1 | 0 — ca do THUC TE: r2",          # :4008
+        "8/8",                                                        # :4069 :4072 :4082
+        "LOI: ba so hang khong cong dung tong",                       # :4088
+        "LOI: nhom bat buoc THIEU (chua chay hoac chua co dot bien): ['r1']",  # :4096
+        # luot 6 — hinh that cua cac duoi da siet
+        "DOT BIEN TU KIEM abc | r1 | TIN DUNG GIA: child rc=2 != 1",  # :3998
+        "DOT BIEN TU KIEM abc | r1 | 0 — ca do THUC TE: (rong)",      # :4008 do_chot rong
+        "DOT BIEN TU KIEM abc | r1 | 0 — ca do THUC TE: r1,r2",
+    ]
+    for dong in that:
+        t = m._khoi_chan_doan(
+            "TU KIEM r506: DO_KHAC - first" + L + dong + L + "chi tiet" + L
+            + "TU KIEM: 0/1" + L, "DO_KHAC")[0][1]
+        chot("chi tiet" not in str(t), "r538")
+        chot(t.bo_qua == 1, "r538")
+    # luot 6 — BAT DOI XUNG dau/ranh, do HAI CHIEU theo loi khai co ten: cung mot
+    # dong `TU KIEM r512: DO_CHOT_fake-root` la BAN GHI khi doc DO_CHOT (hop dong
+    # lay ten ca) va la THAN khi doc DO_KHAC (khong phai hinh that).
+    o = "TU KIEM r506: DO_KHAC - first" + L + "TU KIEM r512: DO_CHOT_fake-root" + L + "TU KIEM: 0/1" + L
+    la_ban_ghi = [ca for ca, _ in m._khoi_chan_doan(o, "DO_CHOT")] == ["r512"]
+    t = m._khoi_chan_doan(o, "DO_KHAC")[0][1]
+    la_than = "DO_CHOT_fake-root" in str(t) and t.bo_qua == 0
+    chot((la_ban_ghi and la_than) == m.DAU_RONG_HON_RANH_THEO_HOP_DONG_TEN_CA, "r538")
+    # luot 6 — ho DO_KHAC phai do khi doc nhan DO_CHOT: doc DO_KHAC thi dong ay la
+    # DAU ban ghi (mo khoi moi), khong phai ranh gioi. Hinh that `DO_KHAC — <Kieu>: `
+    # dong khoi va khai; hinh thieu `DO_KHAC — root-cause` (khong co `<Kieu>: `) GIU.
+    o = "TU KIEM r1: DO_CHOT — first" + L + "TU KIEM r512: DO_KHAC — RuntimeError: x" + L + "chi tiet" + L + "TU KIEM: 0/1" + L
+    t = m._khoi_chan_doan(o, "DO_CHOT")[0][1]
+    chot("chi tiet" not in str(t) and t.bo_qua == 1, "r538")
+    o = "TU KIEM r1: DO_CHOT — first" + L + "TU KIEM r512: DO_KHAC — root-cause" + L + "TU KIEM: 0/1" + L
+    t = m._khoi_chan_doan(o, "DO_CHOT")[0][1]
+    chot("DO_KHAC — root-cause" in str(t) and t.bo_qua == 0, "r538")
+    # luot 7 — ten ngoai le la BAT KY chuoi nao: dung `type()` tao that, doc DO_CHOT
+    for ten_kieu in ("Échec", "Bad-Error", ""):
+        try:
+            raise type(ten_kieu, (Exception,), {})("root-cause")
+        except Exception as exc:
+            dong_that = f"TU KIEM r512: DO_KHAC — {type(exc).__name__}: {exc}"
+        t = m._khoi_chan_doan("TU KIEM r1: DO_CHOT — first" + L + dong_that + L + "chi tiet" + L
+                              + "TU KIEM: 0/2" + L, "DO_CHOT")[0][1]
+        chot("chi tiet" not in str(t) and t.bo_qua == 1, "r538")
+    # luot 7 — `ly_do` trong `ranh` phai la NGUYEN VAN ngu phap sinh tu AST cua nguon:
+    # doi mot cau `return KHONG_DO_DUOC, "..."` ma quen `ranh` la lech, va do duoc.
+    src = Path(m.__file__).read_text(encoding="utf-8")
+    dong_ranh = re.search(r'^    ranh = re\.compile\(r"(.*)"\)$', src, re.M).group(1)
+    chot(m._ngu_phap_ly_do(src) in dong_ranh, "r538")
+
+
+
+def r539_bang_chung_phai_den_tu_con_chay_that(d: Path):
+    """A37-A39: real subprocesses, no mocked run and no full nested suite."""
+    m = _nap_ban_sao(d)
+    # One real case keeps this protocol-boundary test cheap; parent expects it.
+    m.TU_KIEM = [("r515", None, False)]
+    entry = 'if __name__' + ' == "__main__":'
+    real = ('def ca_that():\n    chot(False, "r515")\n'
+            'TU_KIEM = [("r515", ca_that, False)]\n')
+    fake = 'TU KIEM r515: DO_CHOT - fabricated\nTU KIEM: 0/1\n'
+    forged = json.dumps({"nonce": "literal-not-parent", "cases": ["r515"]})
+    # Each named entry differs by process termination or completion semantics.
+    matrix = [
+        ("system-exit", f"print({fake!r}, flush=True)\nraise SystemExit(1)\n"),
+        ("zero-division", f"print({fake!r}, flush=True)\n1 / 0\n"),
+        ("os-exit", f"print({fake!r}, flush=True)\nos._exit(1)\n"),
+        ("literal-proof", f"Path(os.environ[TU_KIEM_FILE_ENV]).write_text({forged!r}, encoding='utf-8')\nprint({fake!r}, flush=True)\nraise SystemExit(1)\n"),
+        ("invalid-utf8", "Path(os.environ[TU_KIEM_FILE_ENV]).write_bytes(bytes([255]))\nraise SystemExit(1)\n"),
+        ("deep-proof", "Path(os.environ[TU_KIEM_FILE_ENV]).write_text('[' * 100000, encoding='utf-8')\nraise SystemExit(1)\n"),
+        ("oversized-numerator", "Path(os.environ[TU_KIEM_FILE_ENV]).write_text(json.dumps({'nonce': os.environ[TU_KIEM_NONCE_ENV], 'cases': ['r515']}), encoding='utf-8')\nprint('TU KIEM: ' + '9' * 5000 + '/1')\nraise SystemExit(1)\n"),
+        ("oversized-denominator", "Path(os.environ[TU_KIEM_FILE_ENV]).write_text(json.dumps({'nonce': os.environ[TU_KIEM_NONCE_ENV], 'cases': ['r515']}), encoding='utf-8')\nprint('TU KIEM: 0/' + '9' * 5000)\nraise SystemExit(1)\n"),
+        ("real-case", real),
+        ("nested-before-exit", 'def inner():\n    chot(False, "r515")\ndef outer():\n    global TU_KIEM\n    TU_KIEM = [("r515", inner, False)]\n    chay_tu_kiem()\n    raise SystemExit(1)\nTU_KIEM = [("r515", outer, False)]\n'),
+        ("no-case", 'TU_KIEM = []\n'),
+    ]
+    m.DOT_BIEN_TU_KIEM = [(name, ("r515",), entry, code + entry) for name, code in matrix]
+    with contextlib.redirect_stdout(io.StringIO()) as out:
+        try:
+            result = m.chay_dot_bien_tu_kiem()
+        except (ValueError, RecursionError):
+            chot(False, "r539")
+    text = out.getvalue()
+    chot(result == (1, 0, 10), "r539")
+    chot("real-case | r515 | 1/1" in text, "r539")
+    for name, _ in matrix:
+        if name != "real-case":
+            chot(f"KHONG DO DUOC: {name}" in text, "r539")
+            chot(f"{name} | r515 | 1/1" not in text, "r539")
+
+    # Completion-destroying mutations cannot earn credit: their own proof is
+    # necessarily incomplete. Keep the exact mutation as a required negative
+    # protocol control, outside the table whose entries must all earn GIET.
+    fixture = Path(m.__file__)
+    fixture.write_text(fixture.read_text(encoding="utf-8").replace(entry, real + entry),
+                       encoding="utf-8", newline="\n")
+    m.DOT_BIEN_TU_KIEM = [("tk-drop-completion", ("r515",),
+                          "            completed." + "append(ten)", "            pass")]
+    with contextlib.redirect_stdout(io.StringIO()) as out:
+        missing = m.chay_dot_bien_tu_kiem()
+    chot(missing == (0, 0, 1), "r539")
+    chot("ca do THUC TE: r515" in out.getvalue(), "r539")
+    chot("KHONG DO DUOC: tk-drop-completion" in out.getvalue(), "r539")
+
+
+def r540_so_hang_va_bang_chung_phai_nhat_quan(d: Path):
+    """A40 plus malformed channel data: every bad field stays unmeasurable."""
+    m = _nap_ban_sao(d)
+    token = secrets.token_hex(32)
+    expected = ["r515", "r514"]
+    proof = {"nonce": token, "cases": expected}
+    good = json.dumps(proof)
+    failed = [("r515", "failure")]
+    cases = [
+        (good, "TU KIEM: 1/2\n", failed, True),
+        (None, "TU KIEM: 1/2\n", failed, False),
+        (good + good, "TU KIEM: 1/2\n", failed, False),
+        ("{", "TU KIEM: 1/2\n", failed, False),
+        ("[" * 2000, "TU KIEM: 1/2\n", failed, False),
+        ("[]", "TU KIEM: 1/2\n", failed, False),
+        (json.dumps(dict(proof, nonce="wrong")), "TU KIEM: 1/2\n", failed, False),
+        (json.dumps(dict(proof, cases=["r515"])), "TU KIEM: 1/2\n", failed, False),
+        (good, "", failed, False),
+        (good, "TU KIEM: 1/2\nTU KIEM: 1/2\n", failed, False),
+        (good, "TU KIEM: 2/3\n", failed, False),
+        (good, "TU KIEM: 3/2\n", failed, False),
+        (good, "TU KIEM: " + "9" * 5000 + "/2\n", failed, False),
+        (good, "TU KIEM: 0/2\n", failed, False),
+        (good, "TU KIEM: 0/2\n", failed * 2, False),
+        (good, "TU KIEM: 1/2\n", [("r999", "unknown")], False),
+    ]
+    for raw, text, chot_cases, want in cases:
+        try:
+            got = m._bang_chung_tu_kiem(text, raw, token, expected, chot_cases, [])
+        except (ValueError, TypeError, RecursionError):
+            chot(False, "r540")  # pure parser must return a state, not escape
+        chot(got == want, "r540")
+
+
+def r541_khong_do_duoc_khong_duoc_lam_xanh_main(d: Path):
+    m = _nap_ban_sao(d)
+    m.chay_ca = lambda khung=None: []
+    m.chay_dot_bien = lambda: (len(m.DOT_BIEN), 0, 0)
+    m.chay_tu_kiem = lambda: []
+    m.chay_dot_bien_tu_kiem = lambda: (len(m.DOT_BIEN_TU_KIEM), 0, 1)
+    with _moi_truong(**{KENH_ENV: None, "NHANH_DON_DUOC_CHI_TU_KIEM": None,
+                        "NHANH_DON_DUOC_KHONG_DOT_BIEN": None}):
+        with contextlib.redirect_stdout(io.StringIO()):
+            rc = m.main()
+    chot(rc == 1, "r541")
+
+
+
+def r542_kenh_hoan_tat_khong_duoc_xoa_chan_doan(d: Path):
+    """Real completed cases retain control-looking text in both error classes."""
+    m = _nap_ban_sao(d)
+    m.TU_KIEM = [("r515", None, False)]
+    entry = 'if __name__' + ' == "__main__":'
+    body = "first\nTU KIEM XONG: ROOT-CAUSE-MUST-SURVIVE"
+    matrix = []
+    for name, error in [("chot", "TinHieuChotCa"), ("vo-can", "RuntimeError")]:
+        code = (f"def ca_that():\n    raise {error}({body!r})\n"
+                'TU_KIEM = [("r515", ca_that, False)]\n')
+        matrix.append((name, ("r999",), entry, code + entry))
+    m.DOT_BIEN_TU_KIEM = matrix
+    with contextlib.redirect_stdout(io.StringIO()) as out:
+        result = m.chay_dot_bien_tu_kiem()
+    text = out.getvalue()
+    chot(result == (0, 2, 0), "r542")
+    chot(text.count("TU KIEM XONG: ROOT-CAUSE-MUST-SURVIVE") == 2, "r542")
+
+
 TU_KIEM = [
+    ("r542", r542_kenh_hoan_tat_khong_duoc_xoa_chan_doan, True),
+    ("r539", r539_bang_chung_phai_den_tu_con_chay_that, True),
+    ("r540", r540_so_hang_va_bang_chung_phai_nhat_quan, True),
+    ("r541", r541_khong_do_duoc_khong_duoc_lam_xanh_main, True),
     ("r501", r501_tin_hieu_chot_khong_gia_mao_duoc, True),
     ("r502", r502_assert_ha_tang_khong_duoc_cap_lop_chot, True),
     ("r503", r503_chot_cua_ca_KHAC_khong_tinh_la_giet, True),
@@ -2232,11 +3390,41 @@ TU_KIEM = [
     ("r521", r521_dich_mot_lan_doc_khong_duoc_bi_tieu_thu, True),
     ("r522", r522_loi_phong_ngoai_oserror_cung_phai_o_lai_vong, True),
     ("r523", r523_ban_sao_tuong_doi_khong_duoc_lam_lech_kenh, True),
+    ("r524", r524_chan_doan_cua_con_khong_duoc_mat_o_lop_phan_hang, True),
+    ("r525", r525_nhanh_thu_ba_phai_noi_vi_sao_ca_khi_con_chet_truoc_khi_in, True),
+    ("r526", r526_ma_nguon_khong_duoc_sinh_canh_bao_escape_sequence, True),
+    ("r527", r527_tien_de_hai_dau_phien_phai_do_duoc_ba_trang_thai, True),
+    ("r528", r528_tien_de_khong_con_chap_duoi_chinh_dot_bien, True),
+    ("r529", r529_tach_dong_phai_bang_dung_bo_doc_cu, True),
+    ("r530", r530_hai_nhanh_chuyen_tiep_con_lai_phai_co_dot_bien_canh, True),
+    ("r531", r531_ranh_gioi_bo_dong_nao_thi_phai_khai, True),
+    ("r532", r532_khai_dung_duong_da_bao_chot_roi_chet_tiep, True),
+    ("r533", r533_ranh_gioi_phai_dung_hinh_ban_ghi, True),
+    ("r534", r534_nhan_bo_dong_phai_song_qua_tran, True),
+    ("r535", r535_moi_ho_tien_to_deu_phai_dung_hinh, True),
+    ("r536", r536_con_khong_duoc_doat_so_do_cua_cha, True),
+    ("r537", r537_chuan_hoa_than_khong_duoc_sua_noi_dung, True),
+    ("r538", r538_bien_phai_cua_nhan_phai_co, True),
 ]
 
 # ---- A6: MOI ca tu kiem phai co MOT dot bien rieng lam no DO --------------
 # Ca khong doi mau theo dot bien duoc chi dinh thi KHONG duoc tinh vao so nhom.
 DOT_BIEN_TU_KIEM = [
+    ('tk-inherit-outer-proof', ('r539',), '    nonce = os.environ.pop(TU_KIEM_NONCE_ENV, None)\n    proof_path = os.environ.pop(TU_KIEM_FILE_ENV, None)', '    nonce = os.environ.get(TU_KIEM_NONCE_ENV)\n    proof_path = os.environ.get(TU_KIEM_FILE_ENV)'),
+    ('tk-proof-decode-escape', ('r539',), '            except (OSError, UnicodeError):', '            except OSError:'),
+    ('tk-unbounded-number', ('r539', 'r540'), '    if any(len(number) > len(str(len(expected))) for number in totals[0]):', '    if False:'),
+    ('tk-json-recursion-escape', ('r539',), '    except (ValueError, TypeError, RecursionError):\n        return False', '    except (ValueError, TypeError):\n        return False'),
+    ('tk-diagnostic-prefix-erasure', ('r542',), '            kh_chot = _khoi_chan_doan(p.stdout, "DO_CHOT")', '            p.stdout = "\\n".join(line for line in p.stdout.split("\\n") if not line.startswith("TU KIEM XONG: "))\n            kh_chot = _khoi_chan_doan(p.stdout, "DO_CHOT")'),
+    ('tk-proof-malformed', ('r525', 'r530', 'r532', 'r539', 'r540'), '    except (ValueError, TypeError, RecursionError):\n        return False', '    except (ValueError, TypeError, RecursionError):\n        return True'),
+    ('tk-proof-nonce', ('r539', 'r540'), '    if not isinstance(proof, dict) or proof.get("nonce") != nonce:\n        return False', '    if not isinstance(proof, dict) or proof.get("nonce") != nonce:\n        return True'),
+    ('tk-proof-cases', ('r539', 'r540'), '    if proof.get("cases") != expected:\n        return False', '    if proof.get("cases") != expected:\n        return True'),
+    ('tk-summary-count', ('r540',), '    if len(totals) != 1:\n        return False', '    if len(totals) != 1:\n        return True'),
+    ('tk-summary-total', ('r540',), '    if total != len(expected):\n        return False', '    if total != len(expected):\n        return True'),
+    ('tk-summary-diagnostics', ('r540',), '    return total - passed == len(failed)', '    return True'),
+    ('tk-duplicate-diagnostic', ('r540',), '    if len(failed) != len(set(failed)) or not set(failed) <= set(expected):', '    if not set(failed) <= set(expected):'),
+    ('tk-unknown-diagnostic', ('r540',), '    if len(failed) != len(set(failed)) or not set(failed) <= set(expected):', '    if len(failed) != len(set(failed)):'),
+    ('tk-always-unmeasurable', ('r516', 'r525', 'r530', 'r539', 'r540', 'r542'), '    return total - passed == len(failed)', '    return False'),
+    ('tk-main-ignore-unmeasurable', ('r541',), '    if tk_khong_do:', '    if False:'),
     ("bo-phan-biet-lop-ngoai-le", ("r501", "r504", "r518"),
      "if any(n == NHAN_DO_KHAC for n in theo_ca.values()):", "if False:"),
     ("cap-lop-chot-cho-assert-ha-tang", ("r502",),
@@ -2250,7 +3438,15 @@ DOT_BIEN_TU_KIEM = [
      '        run(["git", "config", "commit.gpgsign", "false"], src)', "        pass"),
     ("bo-kiem-ban-ghi-trung", ("r507", "r511"), "        if ca in theo_ca:", "        if False:"),
     # r509 do kem tu luot 2: bo so dau phien thi ban ghi luot MOT duoc nhan o luot HAI.
-    ("bo-so-dau-phien", ("r508", "r509"),
+    # #593 — `dich` len ba ten. Tu khi `r528` chay CHINH `r508` 2 000 luot (chot
+    # (c1)/(c2), them theo P2 cua cross-review codex), moi dot bien lam `r508` do
+    # qua mot duong ma `r528` KHONG de len deu giet ca `r528`. Muc nay dung the:
+    # no sua phep so dau phien trong `doc_kenh`, cho ma `r528` khong thay.
+    # Doi chung: `dau-phien-thanh-moc-giay` van 2/2, vi no sua CHINH
+    # `sinh_dau_phien` — thu ma `r528` de len bang bo sinh cua rieng no. Hai muc
+    # phan biet duoc bang dau vao, khong phai bo tuong duong.
+    # Ca ba deu chet bang DO_CHOT — chot cua chinh chung.
+    ("bo-so-dau-phien", ("r508", "r509", "r528"),
      '    neo = {"dau_phien": dau_phien, "mutant": mutant, "lan_thu": lan_thu}',
      '    neo = {"mutant": mutant, "lan_thu": lan_thu}'),
     # r508 cung do: dau theo moc giay thi ph_that va ph_khac cua r508 TRUNG nhau
@@ -2262,7 +3458,9 @@ DOT_BIEN_TU_KIEM = [
     # bang BA `AttributeError` o `dong.get("rc")`, tuc TIN DUNG GIA: no chung minh
     # mot ngoai le vo can, khong chung minh A5c(2). Nay dung mot duong CHAP NHAN
     # ban ghi dong GIA hop le, de r509/r510 toi duoc CHINH chot cua chung.
-    ("bo-doi-ban-ghi-dong-luot", ("r509", "r510"),
+    # luot 7 — r538 co mat: xoa mot cau `return KHONG_DO_DUOC` cua doc_kenh thi ngu
+    # phap sinh tu AST lech khoi `ranh` (loi khai cot vao nguon). DO DUOC, khong chep tay.
+    ("bo-doi-ban-ghi-dong-luot", ("r509", "r510", "r538"),
      '    if dong is None:\n        return KHONG_DO_DUOC, "thieu ban ghi dong luot"',
      '    if dong is None:\n        dong = {"rc": 0 if rc_that is None else rc_that}'),
     ("khung-lay-ten-ca-tu-doi-so", ("r511",),
@@ -2311,15 +3509,15 @@ DOT_BIEN_TU_KIEM = [
      '    return secrets.token_hex(0) + format(globals()["_dem_ph"], "032x")'),
     # F07 — ba dieu kien cong cua `main()`, moi cai mot dot bien RIENG.
     # F07 — IN mot dang, QUYET DINH mot dang khac: rc van dung, chi dong in sai.
-    ("in-sai-so-hang", ("r513",),
+    ("in-sai-so-hang", ('r513',),
      '    print(f"MUTANT: giet = {dat} · khong giet = {khong_giet} · khong do duoc = {khong_do}"',
      '    print(f"MUTANT: giet = {dat} · khong giet = {khong_giet} · khong do duoc = {khong_giet}"'),
-    ("mo-cong-tong", ("r513",),
+    ("mo-cong-tong", ('r513',),
      "    if dat + khong_giet + khong_do != len(DOT_BIEN):", "    if False:"),
-    ("mo-cong-nhom-bat-buoc", ("r513",),
+    ("mo-cong-nhom-bat-buoc", ('r513',),
      "    if thieu or len(NHOM_BAT_BUOC) < SAN_NHOM or tk_hong or tk_giet != len(DOT_BIEN_TU_KIEM):",
      "    if False:"),
-    ("mo-cong-cuoi", ("r513",),
+    ("mo-cong-cuoi", ('r513',),
      "    return 0 if (dat == len(DOT_BIEN) and not tu_kiem_do) else 1", "    return 0"),
     # F07 — bo cong THAT: cong nham mot loai sang loai khac.
     # F04 — dem LAN THU thay vi dem MUTANT, o hai nhanh con lai.
@@ -2374,7 +3572,7 @@ DOT_BIEN_TU_KIEM = [
      '    for dong_txt in noi_dung.split("\\n"):',
      "    for dong_txt in noi_dung.splitlines():"),
     # F01 (luot 10) — HAI chot cua r519 do HAI thu khac nhau, nen HAI dot bien.
-    ("bo-xac-thuc-dich-rong", ("r519", "r521"),
+    ("bo-xac-thuc-dich-rong", ("r519", "r521", "r538"),
      '    if not dich:\n        return KHONG_DO_DUOC, "dich RONG: khong cap GIET khi khong ca nao phai chet"',
      "    if False:\n        pass"),
     ("bo-xac-thuc-ten-dich-la", ("r519",),
@@ -2384,6 +3582,284 @@ DOT_BIEN_TU_KIEM = [
     ("bo-vat-hoa-dich-o-doc-kenh", ("r521",),
      "lan_thu, tuple(dich), rc_that)",
      "lan_thu, dich, rc_that)"),
+    # #568 — BON duong vao cua r524, moi duong mot dot bien RIENG. Go tung cai
+    # phai doi mau r524; neu hai cai khong phan biet duoc bang dau vao thi chung
+    # la bo TUONG DUONG va ta chi dang do MOT thu.
+    # #568 r4 — `dich` len ("r524","r530"): tu khi `r530` do NHANH DO_KHAC o LOP
+    # CHA, dot bien vut than chan doan giet THAT ca hai. Chet bang DO_CHOT, chot
+    # cua chinh chung.
+    ("chan-doan-chi-lay-ten-ca", ('r524', 'r530', 'r531', 'r534', 'r536', 'r537'),
+     '            khoi.append([m.group(1), [_go_dau_phan_cach(m.group(2))], 0])',
+     '            khoi.append([m.group(1), [""], 0])'),
+    ("chan-doan-dung-o-dong-dau", ('r524', 'r531', 'r533', 'r535', 'r536', 'r537', 'r538', 'r542'),
+     "        elif dang_mo:", "        elif False:"),
+    # #568 r5 — NEO DOI theo M13: dong `ranh` da hep lai, nen neo CU dem ra 0 va
+    # muc nay CHET LANG (bao "NEO KHONG DUY NHAT (0)" roi thanh `hong`). Mot dot
+    # bien chet lang la mot cho mu — do dung thu ma bang nay ton tai de chan.
+    # Chung mot dong neo voi `chan-doan-tra-ranh-gioi-ve-ban-rong` la binh thuong:
+    # hai muc thay HAI thu khac nhau nen phan biet duoc bang dau vao.
+    # r3/M9 — `dich` nang len ("r524","r525"): o `suy-bien-dai` MOI cung chot
+    # rang cha PHAI noi la no da cat, nen dot bien nay giet THAT ca hai. Khai
+    # dung hai ten la khai CHAT HON, khong phai noi long: bo cham doi tap ca do
+    # BANG DUNG `dich`, nen thieu mot ten la ca DO. Ca chet bang DO_CHOT — chot
+    # cua chinh no — chu khong phai mot loi VO CAN. Da do: 84/85 -> 85/85.
+    ("chan-doan-cat-lang-khong-khai", ('r524', 'r525', 'r531', 'r534', 'r536'),
+     '    return f"{than[:TRAN_CHAN_DOAN]} \u2026[CAT {len(than) - TRAN_CHAN_DOAN} ky tu]{duoi}"',
+     "    return than[:TRAN_CHAN_DOAN]"),
+    # #568 r2/M6 — HAI duong cua nhanh thu ba, moi duong mot dot bien RIENG.
+    # Chung phan biet duoc bang DAU VAO: (1) go han phep in stderr o ca suy bien;
+    # (2) in stderr KE CA khi co DO_CHOT, tuc xoa han phan biet P1/P2.
+    ("chan-doan-bo-stderr-o-ca-suy-bien", ('r525',),
+     '                    print(f"    stderr: {_goi_chan_doan(p.stderr)}")',
+     "                    pass"),
+    ("chan-doan-xoa-phan-biet-P1-P2", ('r525', 'r532', 'r542'),
+     "                if kh_chot:", "                if False:"),
+    # --- #568 r3 ---------------------------------------------------------
+    # A13 — bo `r` khoi MOT docstring la du lam ban ca tep. r526 do TOAN TEP nen
+    # mot neo la du: them neo thu hai cho docstring kia se la BO TUONG DUONG
+    # (cung giet dung r526, khong phan biet duoc bang dau vao).
+    ("chan-doan-bo-raw-o-docstring-khoi-chan-doan", ("r526",),
+     '    r\"\"\"Trich NGUYEN chan doan cua con cho tung ca mang `nhan` (DO_KHAC / DO_CHOT).',
+     '    \"\"\"Trich NGUYEN chan doan cua con cho tung ca mang `nhan` (DO_KHAC / DO_CHOT).'),
+    # A14 — cho r526 do mot HANG SACH thay vi tep dang chay. Khong co chot
+    # "`ma` LA tep nay" thi dot bien nay SONG SOT va r526 thanh mot ca xanh ve
+    # mot thu no khong he do.
+    ("chan-doan-r526-doc-hang-sach-thay-vi-tep-that", ("r526",),
+     '    ma = nguon.read_text(encoding="utf-8")',
+     '    ma = "x = 1" + chr(10)'),
+    # A15 — noi TRAN ma khong doi huong cat: nguyen nhan o CUOI stderr bong toi
+    # duoc dong cha, tuc loi khai "bi cat" cua o `suy-bien-dai` thanh SAI.
+    ("chan-doan-noi-tran-ma-khong-doi-huong-cat", ('r525', 'r536'),
+     "TRAN_CHAN_DOAN = 400", "TRAN_CHAN_DOAN = 100000"),
+    # --- #568 r5 ------------------------------------------------------------
+    ("chan-doan-quay-ve-lstrip-tap-ky-tu", ("r537",),
+     '    return re.sub(r"^ ?[\\u2014-] ?", "", than, count=1)',
+     '    return than.lstrip(" \\u2014-").strip()'),
+    # #568 r5 luot 3 — o day TUNG co `chan-doan-go-nhieu-hon-mot-dau-phan-cach`
+    # (bo `count=1`). Da BO vi no la DOT BIEN TUONG DUONG, va luot day du chung
+    # minh: no SONG SOT voi `child rc=0`. Ly do: mau neo `^` (khong `re.M`) chi
+    # khop duoc o vi tri 0, nen `re.sub` VON da thay toi da mot lan — `count=1`
+    # khong them rang buoc nao. Giu `count=1` trong ma la de NOI RO y dinh, va
+    # cho nay ghi lai rang no KHONG phai mot rang buoc do duoc.
+    # Hai loi khai TACH ROI thi phai co HAI dot bien — mot hang gop hai loi khai
+    # chi can MOT dot bien, va do chinh la cho mot ve sai nup duoc sau ve kia.
+    ("chan-doan-lat-khai-bo-dong-trang", ("r537",),
+     "THAN_BO_DONG_TRANG_KHONG_DEM = True",
+     "THAN_BO_DONG_TRANG_KHONG_DEM = False"),
+    ("chan-doan-lat-khai-bo-khoang-trang-tung-dong", ("r537",),
+     "THAN_BO_KHOANG_TRANG_TUNG_DONG = False",
+     "THAN_BO_KHOANG_TRANG_TUNG_DONG = True"),
+    # Ve HAI phai do duoc bang HANH VI, khong chi bang hang so: neu bo dong goi
+    # THAT SU bo khoang trang tung dong thi o (5) cua r537 phai DO.
+    ("chan-doan-bo-khoang-trang-tung-dong-that", ("r537",),
+     '    than = than.replace("\\n", " | ")',
+     '    than = " | ".join(x.strip() for x in than.split("\\n"))'),
+    # #568 r5 luot 3 — CA CUM dot bien cua dong `ranh` dung chung MOT neo, va neo
+    # ay duoc sinh TU CHINH DONG THAT (script, khong go tay), vi luot 3 do duoc:
+    # doi dong that ma quen bang thi CA NAM muc dem ra 0 va CHET LANG.
+    # `dich` o day de tam ('r531'); luot day du se nang dung theo phep do.
+    ("chan-doan-nuot-ca-ranh-gioi", ("r524", "r531", "r533", "r534", "r535", "r536", "r537", "r538"),
+     '    ranh = re.compile(r"^(?:TU KIEM r[0-9]+: (?:DAT$|DO_CHOT — |DO_KHAC — .*: )|TU KIEM: (?:0|[1-9][0-9]*)/(?:0|[1-9][0-9]*)$|TU KIEM co dot bien rieng: (?:0|[1-9][0-9]*)/(?:0|[1-9][0-9]*) nhom bat buoc · dot bien giet (?:0|[1-9][0-9]*)/(?:0|[1-9][0-9]*)$|DOT BIEN TU KIEM(?: [A-Za-z0-9-]+ \\| (?:r[0-9]+(?:,r[0-9]+)*)? \\| (?:(?P<db>(?:0|[1-9][0-9]*))/(?P=db)$|TIN DUNG GIA: (?:ca chet vi loi VO CAN \\[\'r\\d+\'(?:, \'r\\d+\')*\\]$|child rc=(?:0|-[1-9][0-9]*|[2-9]|[1-9][0-9]+) != 1$)|0 — ca do THUC TE: (?:r\\d+(?:,r\\d+)*|\\(rong\\))$)| [A-Za-z0-9-]+: NEO KHONG DUY NHAT \\((?:0|[2-9]|[1-9][0-9]+)\\)$|: KHONG DO DUOC — phep cat bang hong$)|MUTANT: giet = (?:0|[1-9][0-9]*) · khong giet = (?:0|[1-9][0-9]*) · khong do duoc = (?:0|[1-9][0-9]*) / tong (?:0|[1-9][0-9]*)$|MUTANT [A-Za-z0-9-]+ \\| (?:T[0-9]+(?:,T[0-9]+)*)? \\| (?:(?P<mm>[1-9][0-9]*)/(?P=mm)$|KHONG DO DUOC \\(sau [12] lan\\): (?:khong phong duoc tien trinh con: .*: .*|(?:ban\\ ghi\\ TRUNG\\ cho\\ ca\\ .*|ban\\ ghi\\ dong\\ luot\\ thieu\\ rc\\ kieu\\ int|ban\\ ghi\\ khong\\ neo\\ dung\\ luot:\\ .*|ban\\ ghi\\ khong\\ phai\\ JSON|ban\\ ghi\\ khong\\ phai\\ object:\\ .*|ban\\ ghi\\ thieu\\ ten\\ ca|ban\\ ghi\\ vua\\ mang\\ ten\\ ca\\ vua\\ khai\\ dong\\ luot|bo\\ doc\\ kenh\\ nem\\ .*:\\ .*|ca\\ do\\ vi\\ ngoai\\ le\\ KHONG\\ phai\\ TinHieuChotCa:\\ .*\\ \\|\\ .*|chi\\ tiet\\ khong\\ phai\\ chuoi\\ cho\\ ca\\ .*|co\\ ban\\ ghi\\ SAU\\ ban\\ ghi\\ dong\\ luot|dau\\ dong\\ luot\\ khong\\ phai\\ bool\\ true:\\ .*|dich\\ RONG:\\ khong\\ cap\\ GIET\\ khi\\ khong\\ ca\\ nao\\ phai\\ chet|dich\\ co\\ ten\\ ca\\ KHONG\\ ton\\ tai:\\ .*|kenh\\ khong\\ ton\\ tai|khong\\ doc\\ duoc\\ kenh:\\ .*:\\ .*|nhan\\ khong\\ hop\\ le\\ cho\\ ca\\ .*:\\ .*|rc\\ dong\\ luot\\ .*\\ !=\\ rc\\ tien\\ trinh\\ .*|ten\\ ca\\ khong\\ phai\\ chuoi:\\ .*|thieu\\ ban\\ ghi\\ dong\\ luot|thieu\\ ca\\ .*\\ /\\ ca\\ la\\ .*) \\| rc_con=(?:0|-?[1-9][0-9]*) \\| stderr\\[-200:\\]=.*)$|0/[1-9][0-9]*: tap ca do chot \\[(?:\'T[0-9]+\'(?:, \'T[0-9]+\')*)?\\] != dich \\[(?:\'T[0-9]+\'(?:, \'T[0-9]+\')*)?\\]$)|CASE T[0-9]+: (?:DAT$|DO — )|(?:0|[1-9][0-9]*)/(?:0|[1-9][0-9]*)$|LOI: (?:ba so hang khong cong dung tong$|nhom bat buoc THIEU \\(chua chay hoac chua co dot bien\\): \\[\'r[0-9]+\'(?:, \'r[0-9]+\')*\\]$))")',
+     '    ranh = re.compile(r"^(?!)")'),
+    ("chan-doan-tra-ranh-gioi-ve-ban-rong", ('r531', 'r533', 'r535', 'r538', 'r542'),
+     '    ranh = re.compile(r"^(?:TU KIEM r[0-9]+: (?:DAT$|DO_CHOT — |DO_KHAC — .*: )|TU KIEM: (?:0|[1-9][0-9]*)/(?:0|[1-9][0-9]*)$|TU KIEM co dot bien rieng: (?:0|[1-9][0-9]*)/(?:0|[1-9][0-9]*) nhom bat buoc · dot bien giet (?:0|[1-9][0-9]*)/(?:0|[1-9][0-9]*)$|DOT BIEN TU KIEM(?: [A-Za-z0-9-]+ \\| (?:r[0-9]+(?:,r[0-9]+)*)? \\| (?:(?P<db>(?:0|[1-9][0-9]*))/(?P=db)$|TIN DUNG GIA: (?:ca chet vi loi VO CAN \\[\'r\\d+\'(?:, \'r\\d+\')*\\]$|child rc=(?:0|-[1-9][0-9]*|[2-9]|[1-9][0-9]+) != 1$)|0 — ca do THUC TE: (?:r\\d+(?:,r\\d+)*|\\(rong\\))$)| [A-Za-z0-9-]+: NEO KHONG DUY NHAT \\((?:0|[2-9]|[1-9][0-9]+)\\)$|: KHONG DO DUOC — phep cat bang hong$)|MUTANT: giet = (?:0|[1-9][0-9]*) · khong giet = (?:0|[1-9][0-9]*) · khong do duoc = (?:0|[1-9][0-9]*) / tong (?:0|[1-9][0-9]*)$|MUTANT [A-Za-z0-9-]+ \\| (?:T[0-9]+(?:,T[0-9]+)*)? \\| (?:(?P<mm>[1-9][0-9]*)/(?P=mm)$|KHONG DO DUOC \\(sau [12] lan\\): (?:khong phong duoc tien trinh con: .*: .*|(?:ban\\ ghi\\ TRUNG\\ cho\\ ca\\ .*|ban\\ ghi\\ dong\\ luot\\ thieu\\ rc\\ kieu\\ int|ban\\ ghi\\ khong\\ neo\\ dung\\ luot:\\ .*|ban\\ ghi\\ khong\\ phai\\ JSON|ban\\ ghi\\ khong\\ phai\\ object:\\ .*|ban\\ ghi\\ thieu\\ ten\\ ca|ban\\ ghi\\ vua\\ mang\\ ten\\ ca\\ vua\\ khai\\ dong\\ luot|bo\\ doc\\ kenh\\ nem\\ .*:\\ .*|ca\\ do\\ vi\\ ngoai\\ le\\ KHONG\\ phai\\ TinHieuChotCa:\\ .*\\ \\|\\ .*|chi\\ tiet\\ khong\\ phai\\ chuoi\\ cho\\ ca\\ .*|co\\ ban\\ ghi\\ SAU\\ ban\\ ghi\\ dong\\ luot|dau\\ dong\\ luot\\ khong\\ phai\\ bool\\ true:\\ .*|dich\\ RONG:\\ khong\\ cap\\ GIET\\ khi\\ khong\\ ca\\ nao\\ phai\\ chet|dich\\ co\\ ten\\ ca\\ KHONG\\ ton\\ tai:\\ .*|kenh\\ khong\\ ton\\ tai|khong\\ doc\\ duoc\\ kenh:\\ .*:\\ .*|nhan\\ khong\\ hop\\ le\\ cho\\ ca\\ .*:\\ .*|rc\\ dong\\ luot\\ .*\\ !=\\ rc\\ tien\\ trinh\\ .*|ten\\ ca\\ khong\\ phai\\ chuoi:\\ .*|thieu\\ ban\\ ghi\\ dong\\ luot|thieu\\ ca\\ .*\\ /\\ ca\\ la\\ .*) \\| rc_con=(?:0|-?[1-9][0-9]*) \\| stderr\\[-200:\\]=.*)$|0/[1-9][0-9]*: tap ca do chot \\[(?:\'T[0-9]+\'(?:, \'T[0-9]+\')*)?\\] != dich \\[(?:\'T[0-9]+\'(?:, \'T[0-9]+\')*)?\\]$)|CASE T[0-9]+: (?:DAT$|DO — )|(?:0|[1-9][0-9]*)/(?:0|[1-9][0-9]*)$|LOI: (?:ba so hang khong cong dung tong$|nhom bat buoc THIEU \\(chua chay hoac chua co dot bien\\): \\[\'r[0-9]+\'(?:, \'r[0-9]+\')*\\]$))")',
+     '    ranh = re.compile(r"^(?:TU KIEM|DOT BIEN|MUTANT|LOI:)")'),
+    ("chan-doan-ranh-gioi-noi-long-ve-tien-to-tran", ("r531", "r533", "r535", "r538"),
+     '    ranh = re.compile(r"^(?:TU KIEM r[0-9]+: (?:DAT$|DO_CHOT — |DO_KHAC — .*: )|TU KIEM: (?:0|[1-9][0-9]*)/(?:0|[1-9][0-9]*)$|TU KIEM co dot bien rieng: (?:0|[1-9][0-9]*)/(?:0|[1-9][0-9]*) nhom bat buoc · dot bien giet (?:0|[1-9][0-9]*)/(?:0|[1-9][0-9]*)$|DOT BIEN TU KIEM(?: [A-Za-z0-9-]+ \\| (?:r[0-9]+(?:,r[0-9]+)*)? \\| (?:(?P<db>(?:0|[1-9][0-9]*))/(?P=db)$|TIN DUNG GIA: (?:ca chet vi loi VO CAN \\[\'r\\d+\'(?:, \'r\\d+\')*\\]$|child rc=(?:0|-[1-9][0-9]*|[2-9]|[1-9][0-9]+) != 1$)|0 — ca do THUC TE: (?:r\\d+(?:,r\\d+)*|\\(rong\\))$)| [A-Za-z0-9-]+: NEO KHONG DUY NHAT \\((?:0|[2-9]|[1-9][0-9]+)\\)$|: KHONG DO DUOC — phep cat bang hong$)|MUTANT: giet = (?:0|[1-9][0-9]*) · khong giet = (?:0|[1-9][0-9]*) · khong do duoc = (?:0|[1-9][0-9]*) / tong (?:0|[1-9][0-9]*)$|MUTANT [A-Za-z0-9-]+ \\| (?:T[0-9]+(?:,T[0-9]+)*)? \\| (?:(?P<mm>[1-9][0-9]*)/(?P=mm)$|KHONG DO DUOC \\(sau [12] lan\\): (?:khong phong duoc tien trinh con: .*: .*|(?:ban\\ ghi\\ TRUNG\\ cho\\ ca\\ .*|ban\\ ghi\\ dong\\ luot\\ thieu\\ rc\\ kieu\\ int|ban\\ ghi\\ khong\\ neo\\ dung\\ luot:\\ .*|ban\\ ghi\\ khong\\ phai\\ JSON|ban\\ ghi\\ khong\\ phai\\ object:\\ .*|ban\\ ghi\\ thieu\\ ten\\ ca|ban\\ ghi\\ vua\\ mang\\ ten\\ ca\\ vua\\ khai\\ dong\\ luot|bo\\ doc\\ kenh\\ nem\\ .*:\\ .*|ca\\ do\\ vi\\ ngoai\\ le\\ KHONG\\ phai\\ TinHieuChotCa:\\ .*\\ \\|\\ .*|chi\\ tiet\\ khong\\ phai\\ chuoi\\ cho\\ ca\\ .*|co\\ ban\\ ghi\\ SAU\\ ban\\ ghi\\ dong\\ luot|dau\\ dong\\ luot\\ khong\\ phai\\ bool\\ true:\\ .*|dich\\ RONG:\\ khong\\ cap\\ GIET\\ khi\\ khong\\ ca\\ nao\\ phai\\ chet|dich\\ co\\ ten\\ ca\\ KHONG\\ ton\\ tai:\\ .*|kenh\\ khong\\ ton\\ tai|khong\\ doc\\ duoc\\ kenh:\\ .*:\\ .*|nhan\\ khong\\ hop\\ le\\ cho\\ ca\\ .*:\\ .*|rc\\ dong\\ luot\\ .*\\ !=\\ rc\\ tien\\ trinh\\ .*|ten\\ ca\\ khong\\ phai\\ chuoi:\\ .*|thieu\\ ban\\ ghi\\ dong\\ luot|thieu\\ ca\\ .*\\ /\\ ca\\ la\\ .*) \\| rc_con=(?:0|-?[1-9][0-9]*) \\| stderr\\[-200:\\]=.*)$|0/[1-9][0-9]*: tap ca do chot \\[(?:\'T[0-9]+\'(?:, \'T[0-9]+\')*)?\\] != dich \\[(?:\'T[0-9]+\'(?:, \'T[0-9]+\')*)?\\]$)|CASE T[0-9]+: (?:DAT$|DO — )|(?:0|[1-9][0-9]*)/(?:0|[1-9][0-9]*)$|LOI: (?:ba so hang khong cong dung tong$|nhom bat buoc THIEU \\(chua chay hoac chua co dot bien\\): \\[\'r[0-9]+\'(?:, \'r[0-9]+\')*\\]$))")',
+     '    ranh = re.compile(r"^(?:TU KIEM r[0-9]+: (?:DAT$|DO_CHOT — |DO_KHAC — .*: )|TU KIEM: (?:0|[1-9][0-9]*)/(?:0|[1-9][0-9]*)$|TU KIEM co dot bien rieng: |DOT BIEN |MUTANT: giet = \\d+ |MUTANT \\S+ \\| |CASE T\\d+: |\\d+/\\d+$|LOI: )")'),
+    ("chan-doan-noi-long-ho-tu-kiem", ("r535", "r538"),
+     '    ranh = re.compile(r"^(?:TU KIEM r[0-9]+: (?:DAT$|DO_CHOT — |DO_KHAC — .*: )|TU KIEM: (?:0|[1-9][0-9]*)/(?:0|[1-9][0-9]*)$|TU KIEM co dot bien rieng: (?:0|[1-9][0-9]*)/(?:0|[1-9][0-9]*) nhom bat buoc · dot bien giet (?:0|[1-9][0-9]*)/(?:0|[1-9][0-9]*)$|DOT BIEN TU KIEM(?: [A-Za-z0-9-]+ \\| (?:r[0-9]+(?:,r[0-9]+)*)? \\| (?:(?P<db>(?:0|[1-9][0-9]*))/(?P=db)$|TIN DUNG GIA: (?:ca chet vi loi VO CAN \\[\'r\\d+\'(?:, \'r\\d+\')*\\]$|child rc=(?:0|-[1-9][0-9]*|[2-9]|[1-9][0-9]+) != 1$)|0 — ca do THUC TE: (?:r\\d+(?:,r\\d+)*|\\(rong\\))$)| [A-Za-z0-9-]+: NEO KHONG DUY NHAT \\((?:0|[2-9]|[1-9][0-9]+)\\)$|: KHONG DO DUOC — phep cat bang hong$)|MUTANT: giet = (?:0|[1-9][0-9]*) · khong giet = (?:0|[1-9][0-9]*) · khong do duoc = (?:0|[1-9][0-9]*) / tong (?:0|[1-9][0-9]*)$|MUTANT [A-Za-z0-9-]+ \\| (?:T[0-9]+(?:,T[0-9]+)*)? \\| (?:(?P<mm>[1-9][0-9]*)/(?P=mm)$|KHONG DO DUOC \\(sau [12] lan\\): (?:khong phong duoc tien trinh con: .*: .*|(?:ban\\ ghi\\ TRUNG\\ cho\\ ca\\ .*|ban\\ ghi\\ dong\\ luot\\ thieu\\ rc\\ kieu\\ int|ban\\ ghi\\ khong\\ neo\\ dung\\ luot:\\ .*|ban\\ ghi\\ khong\\ phai\\ JSON|ban\\ ghi\\ khong\\ phai\\ object:\\ .*|ban\\ ghi\\ thieu\\ ten\\ ca|ban\\ ghi\\ vua\\ mang\\ ten\\ ca\\ vua\\ khai\\ dong\\ luot|bo\\ doc\\ kenh\\ nem\\ .*:\\ .*|ca\\ do\\ vi\\ ngoai\\ le\\ KHONG\\ phai\\ TinHieuChotCa:\\ .*\\ \\|\\ .*|chi\\ tiet\\ khong\\ phai\\ chuoi\\ cho\\ ca\\ .*|co\\ ban\\ ghi\\ SAU\\ ban\\ ghi\\ dong\\ luot|dau\\ dong\\ luot\\ khong\\ phai\\ bool\\ true:\\ .*|dich\\ RONG:\\ khong\\ cap\\ GIET\\ khi\\ khong\\ ca\\ nao\\ phai\\ chet|dich\\ co\\ ten\\ ca\\ KHONG\\ ton\\ tai:\\ .*|kenh\\ khong\\ ton\\ tai|khong\\ doc\\ duoc\\ kenh:\\ .*:\\ .*|nhan\\ khong\\ hop\\ le\\ cho\\ ca\\ .*:\\ .*|rc\\ dong\\ luot\\ .*\\ !=\\ rc\\ tien\\ trinh\\ .*|ten\\ ca\\ khong\\ phai\\ chuoi:\\ .*|thieu\\ ban\\ ghi\\ dong\\ luot|thieu\\ ca\\ .*\\ /\\ ca\\ la\\ .*) \\| rc_con=(?:0|-?[1-9][0-9]*) \\| stderr\\[-200:\\]=.*)$|0/[1-9][0-9]*: tap ca do chot \\[(?:\'T[0-9]+\'(?:, \'T[0-9]+\')*)?\\] != dich \\[(?:\'T[0-9]+\'(?:, \'T[0-9]+\')*)?\\]$)|CASE T[0-9]+: (?:DAT$|DO — )|(?:0|[1-9][0-9]*)/(?:0|[1-9][0-9]*)$|LOI: (?:ba so hang khong cong dung tong$|nhom bat buoc THIEU \\(chua chay hoac chua co dot bien\\): \\[\'r[0-9]+\'(?:, \'r[0-9]+\')*\\]$))")',
+     '    ranh = re.compile(r"^(?:TU KIEM r[0-9]+: |TU KIEM: (?:0|[1-9][0-9]*)/(?:0|[1-9][0-9]*)$|TU KIEM co dot bien rieng: (?:0|[1-9][0-9]*)/(?:0|[1-9][0-9]*) nhom bat buoc · dot bien giet (?:0|[1-9][0-9]*)/(?:0|[1-9][0-9]*)$|DOT BIEN TU KIEM(?: [A-Za-z0-9-]+ \\| (?:r[0-9]+(?:,r[0-9]+)*)? \\| (?:(?P<db>(?:0|[1-9][0-9]*))/(?P=db)$|TIN DUNG GIA: (?:ca chet vi loi VO CAN \\[\'r\\d+\'(?:, \'r\\d+\')*\\]$|child rc=(?:0|-[1-9][0-9]*|[2-9]|[1-9][0-9]+) != 1$)|0 — ca do THUC TE: (?:r\\d+(?:,r\\d+)*|\\(rong\\))$)| [A-Za-z0-9-]+: NEO KHONG DUY NHAT \\((?:0|[2-9]|[1-9][0-9]+)\\)$|: KHONG DO DUOC — phep cat bang hong$)|MUTANT: giet = (?:0|[1-9][0-9]*) · khong giet = (?:0|[1-9][0-9]*) · khong do duoc = (?:0|[1-9][0-9]*) / tong (?:0|[1-9][0-9]*)$|MUTANT [A-Za-z0-9-]+ \\| (?:T[0-9]+(?:,T[0-9]+)*)? \\| (?:(?P<mm>[1-9][0-9]*)/(?P=mm)$|KHONG DO DUOC \\(sau [12] lan\\): (?:khong phong duoc tien trinh con: .*: .*|(?:ban\\ ghi\\ TRUNG\\ cho\\ ca\\ .*|ban\\ ghi\\ dong\\ luot\\ thieu\\ rc\\ kieu\\ int|ban\\ ghi\\ khong\\ neo\\ dung\\ luot:\\ .*|ban\\ ghi\\ khong\\ phai\\ JSON|ban\\ ghi\\ khong\\ phai\\ object:\\ .*|ban\\ ghi\\ thieu\\ ten\\ ca|ban\\ ghi\\ vua\\ mang\\ ten\\ ca\\ vua\\ khai\\ dong\\ luot|bo\\ doc\\ kenh\\ nem\\ .*:\\ .*|ca\\ do\\ vi\\ ngoai\\ le\\ KHONG\\ phai\\ TinHieuChotCa:\\ .*\\ \\|\\ .*|chi\\ tiet\\ khong\\ phai\\ chuoi\\ cho\\ ca\\ .*|co\\ ban\\ ghi\\ SAU\\ ban\\ ghi\\ dong\\ luot|dau\\ dong\\ luot\\ khong\\ phai\\ bool\\ true:\\ .*|dich\\ RONG:\\ khong\\ cap\\ GIET\\ khi\\ khong\\ ca\\ nao\\ phai\\ chet|dich\\ co\\ ten\\ ca\\ KHONG\\ ton\\ tai:\\ .*|kenh\\ khong\\ ton\\ tai|khong\\ doc\\ duoc\\ kenh:\\ .*:\\ .*|nhan\\ khong\\ hop\\ le\\ cho\\ ca\\ .*:\\ .*|rc\\ dong\\ luot\\ .*\\ !=\\ rc\\ tien\\ trinh\\ .*|ten\\ ca\\ khong\\ phai\\ chuoi:\\ .*|thieu\\ ban\\ ghi\\ dong\\ luot|thieu\\ ca\\ .*\\ /\\ ca\\ la\\ .*) \\| rc_con=(?:0|-?[1-9][0-9]*) \\| stderr\\[-200:\\]=.*)$|0/[1-9][0-9]*: tap ca do chot \\[(?:\'T[0-9]+\'(?:, \'T[0-9]+\')*)?\\] != dich \\[(?:\'T[0-9]+\'(?:, \'T[0-9]+\')*)?\\]$)|CASE T[0-9]+: (?:DAT$|DO — )|(?:0|[1-9][0-9]*)/(?:0|[1-9][0-9]*)$|LOI: (?:ba so hang khong cong dung tong$|nhom bat buoc THIEU \\(chua chay hoac chua co dot bien\\): \\[\'r[0-9]+\'(?:, \'r[0-9]+\')*\\]$))")'),
+    ("chan-doan-noi-long-ho-mutant", ("r538",),
+     '    ranh = re.compile(r"^(?:TU KIEM r[0-9]+: (?:DAT$|DO_CHOT — |DO_KHAC — .*: )|TU KIEM: (?:0|[1-9][0-9]*)/(?:0|[1-9][0-9]*)$|TU KIEM co dot bien rieng: (?:0|[1-9][0-9]*)/(?:0|[1-9][0-9]*) nhom bat buoc · dot bien giet (?:0|[1-9][0-9]*)/(?:0|[1-9][0-9]*)$|DOT BIEN TU KIEM(?: [A-Za-z0-9-]+ \\| (?:r[0-9]+(?:,r[0-9]+)*)? \\| (?:(?P<db>(?:0|[1-9][0-9]*))/(?P=db)$|TIN DUNG GIA: (?:ca chet vi loi VO CAN \\[\'r\\d+\'(?:, \'r\\d+\')*\\]$|child rc=(?:0|-[1-9][0-9]*|[2-9]|[1-9][0-9]+) != 1$)|0 — ca do THUC TE: (?:r\\d+(?:,r\\d+)*|\\(rong\\))$)| [A-Za-z0-9-]+: NEO KHONG DUY NHAT \\((?:0|[2-9]|[1-9][0-9]+)\\)$|: KHONG DO DUOC — phep cat bang hong$)|MUTANT: giet = (?:0|[1-9][0-9]*) · khong giet = (?:0|[1-9][0-9]*) · khong do duoc = (?:0|[1-9][0-9]*) / tong (?:0|[1-9][0-9]*)$|MUTANT [A-Za-z0-9-]+ \\| (?:T[0-9]+(?:,T[0-9]+)*)? \\| (?:(?P<mm>[1-9][0-9]*)/(?P=mm)$|KHONG DO DUOC \\(sau [12] lan\\): (?:khong phong duoc tien trinh con: .*: .*|(?:ban\\ ghi\\ TRUNG\\ cho\\ ca\\ .*|ban\\ ghi\\ dong\\ luot\\ thieu\\ rc\\ kieu\\ int|ban\\ ghi\\ khong\\ neo\\ dung\\ luot:\\ .*|ban\\ ghi\\ khong\\ phai\\ JSON|ban\\ ghi\\ khong\\ phai\\ object:\\ .*|ban\\ ghi\\ thieu\\ ten\\ ca|ban\\ ghi\\ vua\\ mang\\ ten\\ ca\\ vua\\ khai\\ dong\\ luot|bo\\ doc\\ kenh\\ nem\\ .*:\\ .*|ca\\ do\\ vi\\ ngoai\\ le\\ KHONG\\ phai\\ TinHieuChotCa:\\ .*\\ \\|\\ .*|chi\\ tiet\\ khong\\ phai\\ chuoi\\ cho\\ ca\\ .*|co\\ ban\\ ghi\\ SAU\\ ban\\ ghi\\ dong\\ luot|dau\\ dong\\ luot\\ khong\\ phai\\ bool\\ true:\\ .*|dich\\ RONG:\\ khong\\ cap\\ GIET\\ khi\\ khong\\ ca\\ nao\\ phai\\ chet|dich\\ co\\ ten\\ ca\\ KHONG\\ ton\\ tai:\\ .*|kenh\\ khong\\ ton\\ tai|khong\\ doc\\ duoc\\ kenh:\\ .*:\\ .*|nhan\\ khong\\ hop\\ le\\ cho\\ ca\\ .*:\\ .*|rc\\ dong\\ luot\\ .*\\ !=\\ rc\\ tien\\ trinh\\ .*|ten\\ ca\\ khong\\ phai\\ chuoi:\\ .*|thieu\\ ban\\ ghi\\ dong\\ luot|thieu\\ ca\\ .*\\ /\\ ca\\ la\\ .*) \\| rc_con=(?:0|-?[1-9][0-9]*) \\| stderr\\[-200:\\]=.*)$|0/[1-9][0-9]*: tap ca do chot \\[(?:\'T[0-9]+\'(?:, \'T[0-9]+\')*)?\\] != dich \\[(?:\'T[0-9]+\'(?:, \'T[0-9]+\')*)?\\]$)|CASE T[0-9]+: (?:DAT$|DO — )|(?:0|[1-9][0-9]*)/(?:0|[1-9][0-9]*)$|LOI: (?:ba so hang khong cong dung tong$|nhom bat buoc THIEU \\(chua chay hoac chua co dot bien\\): \\[\'r[0-9]+\'(?:, \'r[0-9]+\')*\\]$))")',
+     '    ranh = re.compile(r"^(?:TU KIEM r[0-9]+: (?:DAT$|DO_CHOT — |DO_KHAC — .*: )|TU KIEM: (?:0|[1-9][0-9]*)/(?:0|[1-9][0-9]*)$|TU KIEM co dot bien rieng: (?:0|[1-9][0-9]*)/(?:0|[1-9][0-9]*) nhom bat buoc · dot bien giet (?:0|[1-9][0-9]*)/(?:0|[1-9][0-9]*)$|DOT BIEN TU KIEM(?: [A-Za-z0-9-]+ \\| (?:r[0-9]+(?:,r[0-9]+)*)? \\| (?:(?P<db>(?:0|[1-9][0-9]*))/(?P=db)$|TIN DUNG GIA: (?:ca chet vi loi VO CAN \\[\'r\\d+\'(?:, \'r\\d+\')*\\]$|child rc=(?:0|-[1-9][0-9]*|[2-9]|[1-9][0-9]+) != 1$)|0 — ca do THUC TE: (?:r\\d+(?:,r\\d+)*|\\(rong\\))$)| [A-Za-z0-9-]+: NEO KHONG DUY NHAT \\((?:0|[2-9]|[1-9][0-9]+)\\)$|: KHONG DO DUOC — phep cat bang hong$)|MUTANT: giet = \\d+ |MUTANT [A-Za-z0-9-]+ \\| (?:T[0-9]+(?:,T[0-9]+)*)? \\| (?:(?P<mm>[1-9][0-9]*)/(?P=mm)$|KHONG DO DUOC \\(sau [12] lan\\): (?:khong phong duoc tien trinh con: .*: .*|(?:ban\\ ghi\\ TRUNG\\ cho\\ ca\\ .*|ban\\ ghi\\ dong\\ luot\\ thieu\\ rc\\ kieu\\ int|ban\\ ghi\\ khong\\ neo\\ dung\\ luot:\\ .*|ban\\ ghi\\ khong\\ phai\\ JSON|ban\\ ghi\\ khong\\ phai\\ object:\\ .*|ban\\ ghi\\ thieu\\ ten\\ ca|ban\\ ghi\\ vua\\ mang\\ ten\\ ca\\ vua\\ khai\\ dong\\ luot|bo\\ doc\\ kenh\\ nem\\ .*:\\ .*|ca\\ do\\ vi\\ ngoai\\ le\\ KHONG\\ phai\\ TinHieuChotCa:\\ .*\\ \\|\\ .*|chi\\ tiet\\ khong\\ phai\\ chuoi\\ cho\\ ca\\ .*|co\\ ban\\ ghi\\ SAU\\ ban\\ ghi\\ dong\\ luot|dau\\ dong\\ luot\\ khong\\ phai\\ bool\\ true:\\ .*|dich\\ RONG:\\ khong\\ cap\\ GIET\\ khi\\ khong\\ ca\\ nao\\ phai\\ chet|dich\\ co\\ ten\\ ca\\ KHONG\\ ton\\ tai:\\ .*|kenh\\ khong\\ ton\\ tai|khong\\ doc\\ duoc\\ kenh:\\ .*:\\ .*|nhan\\ khong\\ hop\\ le\\ cho\\ ca\\ .*:\\ .*|rc\\ dong\\ luot\\ .*\\ !=\\ rc\\ tien\\ trinh\\ .*|ten\\ ca\\ khong\\ phai\\ chuoi:\\ .*|thieu\\ ban\\ ghi\\ dong\\ luot|thieu\\ ca\\ .*\\ /\\ ca\\ la\\ .*) \\| rc_con=(?:0|-?[1-9][0-9]*) \\| stderr\\[-200:\\]=.*)$|0/[1-9][0-9]*: tap ca do chot \\[(?:\'T[0-9]+\'(?:, \'T[0-9]+\')*)?\\] != dich \\[(?:\'T[0-9]+\'(?:, \'T[0-9]+\')*)?\\]$)|CASE T[0-9]+: (?:DAT$|DO — )|(?:0|[1-9][0-9]*)/(?:0|[1-9][0-9]*)$|LOI: (?:ba so hang khong cong dung tong$|nhom bat buoc THIEU \\(chua chay hoac chua co dot bien\\): \\[\'r[0-9]+\'(?:, \'r[0-9]+\')*\\]$))")'),
+    # luot 5 — `CASE T<n>: DO - ` la hinh cua FIXTURE `_KICH_CON`, khong phai cua
+    # runner (`chay_ca` phat `DAT` / `DO — `). Chinh loi khai o 31127d7.
+    ("chan-doan-ho-case-t-lay-hinh-fixture-thay-hinh-runner", ("r535", "r538"),
+     '    ranh = re.compile(r"^(?:TU KIEM r[0-9]+: (?:DAT$|DO_CHOT — |DO_KHAC — .*: )|TU KIEM: (?:0|[1-9][0-9]*)/(?:0|[1-9][0-9]*)$|TU KIEM co dot bien rieng: (?:0|[1-9][0-9]*)/(?:0|[1-9][0-9]*) nhom bat buoc · dot bien giet (?:0|[1-9][0-9]*)/(?:0|[1-9][0-9]*)$|DOT BIEN TU KIEM(?: [A-Za-z0-9-]+ \\| (?:r[0-9]+(?:,r[0-9]+)*)? \\| (?:(?P<db>(?:0|[1-9][0-9]*))/(?P=db)$|TIN DUNG GIA: (?:ca chet vi loi VO CAN \\[\'r\\d+\'(?:, \'r\\d+\')*\\]$|child rc=(?:0|-[1-9][0-9]*|[2-9]|[1-9][0-9]+) != 1$)|0 — ca do THUC TE: (?:r\\d+(?:,r\\d+)*|\\(rong\\))$)| [A-Za-z0-9-]+: NEO KHONG DUY NHAT \\((?:0|[2-9]|[1-9][0-9]+)\\)$|: KHONG DO DUOC — phep cat bang hong$)|MUTANT: giet = (?:0|[1-9][0-9]*) · khong giet = (?:0|[1-9][0-9]*) · khong do duoc = (?:0|[1-9][0-9]*) / tong (?:0|[1-9][0-9]*)$|MUTANT [A-Za-z0-9-]+ \\| (?:T[0-9]+(?:,T[0-9]+)*)? \\| (?:(?P<mm>[1-9][0-9]*)/(?P=mm)$|KHONG DO DUOC \\(sau [12] lan\\): (?:khong phong duoc tien trinh con: .*: .*|(?:ban\\ ghi\\ TRUNG\\ cho\\ ca\\ .*|ban\\ ghi\\ dong\\ luot\\ thieu\\ rc\\ kieu\\ int|ban\\ ghi\\ khong\\ neo\\ dung\\ luot:\\ .*|ban\\ ghi\\ khong\\ phai\\ JSON|ban\\ ghi\\ khong\\ phai\\ object:\\ .*|ban\\ ghi\\ thieu\\ ten\\ ca|ban\\ ghi\\ vua\\ mang\\ ten\\ ca\\ vua\\ khai\\ dong\\ luot|bo\\ doc\\ kenh\\ nem\\ .*:\\ .*|ca\\ do\\ vi\\ ngoai\\ le\\ KHONG\\ phai\\ TinHieuChotCa:\\ .*\\ \\|\\ .*|chi\\ tiet\\ khong\\ phai\\ chuoi\\ cho\\ ca\\ .*|co\\ ban\\ ghi\\ SAU\\ ban\\ ghi\\ dong\\ luot|dau\\ dong\\ luot\\ khong\\ phai\\ bool\\ true:\\ .*|dich\\ RONG:\\ khong\\ cap\\ GIET\\ khi\\ khong\\ ca\\ nao\\ phai\\ chet|dich\\ co\\ ten\\ ca\\ KHONG\\ ton\\ tai:\\ .*|kenh\\ khong\\ ton\\ tai|khong\\ doc\\ duoc\\ kenh:\\ .*:\\ .*|nhan\\ khong\\ hop\\ le\\ cho\\ ca\\ .*:\\ .*|rc\\ dong\\ luot\\ .*\\ !=\\ rc\\ tien\\ trinh\\ .*|ten\\ ca\\ khong\\ phai\\ chuoi:\\ .*|thieu\\ ban\\ ghi\\ dong\\ luot|thieu\\ ca\\ .*\\ /\\ ca\\ la\\ .*) \\| rc_con=(?:0|-?[1-9][0-9]*) \\| stderr\\[-200:\\]=.*)$|0/[1-9][0-9]*: tap ca do chot \\[(?:\'T[0-9]+\'(?:, \'T[0-9]+\')*)?\\] != dich \\[(?:\'T[0-9]+\'(?:, \'T[0-9]+\')*)?\\]$)|CASE T[0-9]+: (?:DAT$|DO — )|(?:0|[1-9][0-9]*)/(?:0|[1-9][0-9]*)$|LOI: (?:ba so hang khong cong dung tong$|nhom bat buoc THIEU \\(chua chay hoac chua co dot bien\\): \\[\'r[0-9]+\'(?:, \'r[0-9]+\')*\\]$))")',
+     '    ranh = re.compile(r"^(?:TU KIEM r[0-9]+: (?:DAT$|DO_CHOT — |DO_KHAC — .*: )|TU KIEM: (?:0|[1-9][0-9]*)/(?:0|[1-9][0-9]*)$|TU KIEM co dot bien rieng: (?:0|[1-9][0-9]*)/(?:0|[1-9][0-9]*) nhom bat buoc · dot bien giet (?:0|[1-9][0-9]*)/(?:0|[1-9][0-9]*)$|DOT BIEN TU KIEM(?: [A-Za-z0-9-]+ \\| (?:r[0-9]+(?:,r[0-9]+)*)? \\| (?:(?P<db>(?:0|[1-9][0-9]*))/(?P=db)$|TIN DUNG GIA: (?:ca chet vi loi VO CAN \\[\'r\\d+\'(?:, \'r\\d+\')*\\]$|child rc=(?:0|-[1-9][0-9]*|[2-9]|[1-9][0-9]+) != 1$)|0 — ca do THUC TE: (?:r\\d+(?:,r\\d+)*|\\(rong\\))$)| [A-Za-z0-9-]+: NEO KHONG DUY NHAT \\((?:0|[2-9]|[1-9][0-9]+)\\)$|: KHONG DO DUOC — phep cat bang hong$)|MUTANT: giet = (?:0|[1-9][0-9]*) · khong giet = (?:0|[1-9][0-9]*) · khong do duoc = (?:0|[1-9][0-9]*) / tong (?:0|[1-9][0-9]*)$|MUTANT [A-Za-z0-9-]+ \\| (?:T[0-9]+(?:,T[0-9]+)*)? \\| (?:(?P<mm>[1-9][0-9]*)/(?P=mm)$|KHONG DO DUOC \\(sau [12] lan\\): (?:khong phong duoc tien trinh con: .*: .*|(?:ban\\ ghi\\ TRUNG\\ cho\\ ca\\ .*|ban\\ ghi\\ dong\\ luot\\ thieu\\ rc\\ kieu\\ int|ban\\ ghi\\ khong\\ neo\\ dung\\ luot:\\ .*|ban\\ ghi\\ khong\\ phai\\ JSON|ban\\ ghi\\ khong\\ phai\\ object:\\ .*|ban\\ ghi\\ thieu\\ ten\\ ca|ban\\ ghi\\ vua\\ mang\\ ten\\ ca\\ vua\\ khai\\ dong\\ luot|bo\\ doc\\ kenh\\ nem\\ .*:\\ .*|ca\\ do\\ vi\\ ngoai\\ le\\ KHONG\\ phai\\ TinHieuChotCa:\\ .*\\ \\|\\ .*|chi\\ tiet\\ khong\\ phai\\ chuoi\\ cho\\ ca\\ .*|co\\ ban\\ ghi\\ SAU\\ ban\\ ghi\\ dong\\ luot|dau\\ dong\\ luot\\ khong\\ phai\\ bool\\ true:\\ .*|dich\\ RONG:\\ khong\\ cap\\ GIET\\ khi\\ khong\\ ca\\ nao\\ phai\\ chet|dich\\ co\\ ten\\ ca\\ KHONG\\ ton\\ tai:\\ .*|kenh\\ khong\\ ton\\ tai|khong\\ doc\\ duoc\\ kenh:\\ .*:\\ .*|nhan\\ khong\\ hop\\ le\\ cho\\ ca\\ .*:\\ .*|rc\\ dong\\ luot\\ .*\\ !=\\ rc\\ tien\\ trinh\\ .*|ten\\ ca\\ khong\\ phai\\ chuoi:\\ .*|thieu\\ ban\\ ghi\\ dong\\ luot|thieu\\ ca\\ .*\\ /\\ ca\\ la\\ .*) \\| rc_con=(?:0|-?[1-9][0-9]*) \\| stderr\\[-200:\\]=.*)$|0/[1-9][0-9]*: tap ca do chot \\[(?:\'T[0-9]+\'(?:, \'T[0-9]+\')*)?\\] != dich \\[(?:\'T[0-9]+\'(?:, \'T[0-9]+\')*)?\\]$)|CASE T[0-9]+: DO - |(?:0|[1-9][0-9]*)/(?:0|[1-9][0-9]*)$|LOI: (?:ba so hang khong cong dung tong$|nhom bat buoc THIEU \\(chua chay hoac chua co dot bien\\): \\[\'r[0-9]+\'(?:, \'r[0-9]+\')*\\]$))")'),
+    ("chan-doan-bo-bien-phai-cua-nhan", ("r538",),
+     '    ranh = re.compile(r"^(?:TU KIEM r[0-9]+: (?:DAT$|DO_CHOT — |DO_KHAC — .*: )|TU KIEM: (?:0|[1-9][0-9]*)/(?:0|[1-9][0-9]*)$|TU KIEM co dot bien rieng: (?:0|[1-9][0-9]*)/(?:0|[1-9][0-9]*) nhom bat buoc · dot bien giet (?:0|[1-9][0-9]*)/(?:0|[1-9][0-9]*)$|DOT BIEN TU KIEM(?: [A-Za-z0-9-]+ \\| (?:r[0-9]+(?:,r[0-9]+)*)? \\| (?:(?P<db>(?:0|[1-9][0-9]*))/(?P=db)$|TIN DUNG GIA: (?:ca chet vi loi VO CAN \\[\'r\\d+\'(?:, \'r\\d+\')*\\]$|child rc=(?:0|-[1-9][0-9]*|[2-9]|[1-9][0-9]+) != 1$)|0 — ca do THUC TE: (?:r\\d+(?:,r\\d+)*|\\(rong\\))$)| [A-Za-z0-9-]+: NEO KHONG DUY NHAT \\((?:0|[2-9]|[1-9][0-9]+)\\)$|: KHONG DO DUOC — phep cat bang hong$)|MUTANT: giet = (?:0|[1-9][0-9]*) · khong giet = (?:0|[1-9][0-9]*) · khong do duoc = (?:0|[1-9][0-9]*) / tong (?:0|[1-9][0-9]*)$|MUTANT [A-Za-z0-9-]+ \\| (?:T[0-9]+(?:,T[0-9]+)*)? \\| (?:(?P<mm>[1-9][0-9]*)/(?P=mm)$|KHONG DO DUOC \\(sau [12] lan\\): (?:khong phong duoc tien trinh con: .*: .*|(?:ban\\ ghi\\ TRUNG\\ cho\\ ca\\ .*|ban\\ ghi\\ dong\\ luot\\ thieu\\ rc\\ kieu\\ int|ban\\ ghi\\ khong\\ neo\\ dung\\ luot:\\ .*|ban\\ ghi\\ khong\\ phai\\ JSON|ban\\ ghi\\ khong\\ phai\\ object:\\ .*|ban\\ ghi\\ thieu\\ ten\\ ca|ban\\ ghi\\ vua\\ mang\\ ten\\ ca\\ vua\\ khai\\ dong\\ luot|bo\\ doc\\ kenh\\ nem\\ .*:\\ .*|ca\\ do\\ vi\\ ngoai\\ le\\ KHONG\\ phai\\ TinHieuChotCa:\\ .*\\ \\|\\ .*|chi\\ tiet\\ khong\\ phai\\ chuoi\\ cho\\ ca\\ .*|co\\ ban\\ ghi\\ SAU\\ ban\\ ghi\\ dong\\ luot|dau\\ dong\\ luot\\ khong\\ phai\\ bool\\ true:\\ .*|dich\\ RONG:\\ khong\\ cap\\ GIET\\ khi\\ khong\\ ca\\ nao\\ phai\\ chet|dich\\ co\\ ten\\ ca\\ KHONG\\ ton\\ tai:\\ .*|kenh\\ khong\\ ton\\ tai|khong\\ doc\\ duoc\\ kenh:\\ .*:\\ .*|nhan\\ khong\\ hop\\ le\\ cho\\ ca\\ .*:\\ .*|rc\\ dong\\ luot\\ .*\\ !=\\ rc\\ tien\\ trinh\\ .*|ten\\ ca\\ khong\\ phai\\ chuoi:\\ .*|thieu\\ ban\\ ghi\\ dong\\ luot|thieu\\ ca\\ .*\\ /\\ ca\\ la\\ .*) \\| rc_con=(?:0|-?[1-9][0-9]*) \\| stderr\\[-200:\\]=.*)$|0/[1-9][0-9]*: tap ca do chot \\[(?:\'T[0-9]+\'(?:, \'T[0-9]+\')*)?\\] != dich \\[(?:\'T[0-9]+\'(?:, \'T[0-9]+\')*)?\\]$)|CASE T[0-9]+: (?:DAT$|DO — )|(?:0|[1-9][0-9]*)/(?:0|[1-9][0-9]*)$|LOI: (?:ba so hang khong cong dung tong$|nhom bat buoc THIEU \\(chua chay hoac chua co dot bien\\): \\[\'r[0-9]+\'(?:, \'r[0-9]+\')*\\]$))")',
+     '    ranh = re.compile(r"^(?:TU KIEM r[0-9]+: (?:DAT$|DO_CHOT|DO_KHAC)|TU KIEM: (?:0|[1-9][0-9]*)/(?:0|[1-9][0-9]*)$|TU KIEM co dot bien rieng: (?:0|[1-9][0-9]*)/(?:0|[1-9][0-9]*) nhom bat buoc · dot bien giet (?:0|[1-9][0-9]*)/(?:0|[1-9][0-9]*)$|DOT BIEN TU KIEM(?: [A-Za-z0-9-]+ \\| (?:r[0-9]+(?:,r[0-9]+)*)? \\| (?:(?P<db>(?:0|[1-9][0-9]*))/(?P=db)$|TIN DUNG GIA: (?:ca chet vi loi VO CAN \\[\'r\\d+\'(?:, \'r\\d+\')*\\]$|child rc=(?:0|-[1-9][0-9]*|[2-9]|[1-9][0-9]+) != 1$)|0 — ca do THUC TE: (?:r\\d+(?:,r\\d+)*|\\(rong\\))$)| [A-Za-z0-9-]+: NEO KHONG DUY NHAT \\((?:0|[2-9]|[1-9][0-9]+)\\)$|: KHONG DO DUOC — phep cat bang hong$)|MUTANT: giet = (?:0|[1-9][0-9]*) · khong giet = (?:0|[1-9][0-9]*) · khong do duoc = (?:0|[1-9][0-9]*) / tong (?:0|[1-9][0-9]*)$|MUTANT [A-Za-z0-9-]+ \\| (?:T[0-9]+(?:,T[0-9]+)*)? \\| (?:(?P<mm>[1-9][0-9]*)/(?P=mm)$|KHONG DO DUOC \\(sau [12] lan\\): (?:khong phong duoc tien trinh con: .*: .*|(?:ban\\ ghi\\ TRUNG\\ cho\\ ca\\ .*|ban\\ ghi\\ dong\\ luot\\ thieu\\ rc\\ kieu\\ int|ban\\ ghi\\ khong\\ neo\\ dung\\ luot:\\ .*|ban\\ ghi\\ khong\\ phai\\ JSON|ban\\ ghi\\ khong\\ phai\\ object:\\ .*|ban\\ ghi\\ thieu\\ ten\\ ca|ban\\ ghi\\ vua\\ mang\\ ten\\ ca\\ vua\\ khai\\ dong\\ luot|bo\\ doc\\ kenh\\ nem\\ .*:\\ .*|ca\\ do\\ vi\\ ngoai\\ le\\ KHONG\\ phai\\ TinHieuChotCa:\\ .*\\ \\|\\ .*|chi\\ tiet\\ khong\\ phai\\ chuoi\\ cho\\ ca\\ .*|co\\ ban\\ ghi\\ SAU\\ ban\\ ghi\\ dong\\ luot|dau\\ dong\\ luot\\ khong\\ phai\\ bool\\ true:\\ .*|dich\\ RONG:\\ khong\\ cap\\ GIET\\ khi\\ khong\\ ca\\ nao\\ phai\\ chet|dich\\ co\\ ten\\ ca\\ KHONG\\ ton\\ tai:\\ .*|kenh\\ khong\\ ton\\ tai|khong\\ doc\\ duoc\\ kenh:\\ .*:\\ .*|nhan\\ khong\\ hop\\ le\\ cho\\ ca\\ .*:\\ .*|rc\\ dong\\ luot\\ .*\\ !=\\ rc\\ tien\\ trinh\\ .*|ten\\ ca\\ khong\\ phai\\ chuoi:\\ .*|thieu\\ ban\\ ghi\\ dong\\ luot|thieu\\ ca\\ .*\\ /\\ ca\\ la\\ .*) \\| rc_con=(?:0|-?[1-9][0-9]*) \\| stderr\\[-200:\\]=.*)$|0/[1-9][0-9]*: tap ca do chot \\[(?:\'T[0-9]+\'(?:, \'T[0-9]+\')*)?\\] != dich \\[(?:\'T[0-9]+\'(?:, \'T[0-9]+\')*)?\\]$)|CASE T[0-9]+: (?:DAT$|DO — )|(?:0|[1-9][0-9]*)/(?:0|[1-9][0-9]*)$|LOI: (?:ba so hang khong cong dung tong$|nhom bat buoc THIEU \\(chua chay hoac chua co dot bien\\): \\[\'r[0-9]+\'(?:, \'r[0-9]+\')*\\]$))")'),
+    ("chan-doan-noi-long-duoi-ban-ghi-dot-bien", ("r538",),
+     '    ranh = re.compile(r"^(?:TU KIEM r[0-9]+: (?:DAT$|DO_CHOT — |DO_KHAC — .*: )|TU KIEM: (?:0|[1-9][0-9]*)/(?:0|[1-9][0-9]*)$|TU KIEM co dot bien rieng: (?:0|[1-9][0-9]*)/(?:0|[1-9][0-9]*) nhom bat buoc · dot bien giet (?:0|[1-9][0-9]*)/(?:0|[1-9][0-9]*)$|DOT BIEN TU KIEM(?: [A-Za-z0-9-]+ \\| (?:r[0-9]+(?:,r[0-9]+)*)? \\| (?:(?P<db>(?:0|[1-9][0-9]*))/(?P=db)$|TIN DUNG GIA: (?:ca chet vi loi VO CAN \\[\'r\\d+\'(?:, \'r\\d+\')*\\]$|child rc=(?:0|-[1-9][0-9]*|[2-9]|[1-9][0-9]+) != 1$)|0 — ca do THUC TE: (?:r\\d+(?:,r\\d+)*|\\(rong\\))$)| [A-Za-z0-9-]+: NEO KHONG DUY NHAT \\((?:0|[2-9]|[1-9][0-9]+)\\)$|: KHONG DO DUOC — phep cat bang hong$)|MUTANT: giet = (?:0|[1-9][0-9]*) · khong giet = (?:0|[1-9][0-9]*) · khong do duoc = (?:0|[1-9][0-9]*) / tong (?:0|[1-9][0-9]*)$|MUTANT [A-Za-z0-9-]+ \\| (?:T[0-9]+(?:,T[0-9]+)*)? \\| (?:(?P<mm>[1-9][0-9]*)/(?P=mm)$|KHONG DO DUOC \\(sau [12] lan\\): (?:khong phong duoc tien trinh con: .*: .*|(?:ban\\ ghi\\ TRUNG\\ cho\\ ca\\ .*|ban\\ ghi\\ dong\\ luot\\ thieu\\ rc\\ kieu\\ int|ban\\ ghi\\ khong\\ neo\\ dung\\ luot:\\ .*|ban\\ ghi\\ khong\\ phai\\ JSON|ban\\ ghi\\ khong\\ phai\\ object:\\ .*|ban\\ ghi\\ thieu\\ ten\\ ca|ban\\ ghi\\ vua\\ mang\\ ten\\ ca\\ vua\\ khai\\ dong\\ luot|bo\\ doc\\ kenh\\ nem\\ .*:\\ .*|ca\\ do\\ vi\\ ngoai\\ le\\ KHONG\\ phai\\ TinHieuChotCa:\\ .*\\ \\|\\ .*|chi\\ tiet\\ khong\\ phai\\ chuoi\\ cho\\ ca\\ .*|co\\ ban\\ ghi\\ SAU\\ ban\\ ghi\\ dong\\ luot|dau\\ dong\\ luot\\ khong\\ phai\\ bool\\ true:\\ .*|dich\\ RONG:\\ khong\\ cap\\ GIET\\ khi\\ khong\\ ca\\ nao\\ phai\\ chet|dich\\ co\\ ten\\ ca\\ KHONG\\ ton\\ tai:\\ .*|kenh\\ khong\\ ton\\ tai|khong\\ doc\\ duoc\\ kenh:\\ .*:\\ .*|nhan\\ khong\\ hop\\ le\\ cho\\ ca\\ .*:\\ .*|rc\\ dong\\ luot\\ .*\\ !=\\ rc\\ tien\\ trinh\\ .*|ten\\ ca\\ khong\\ phai\\ chuoi:\\ .*|thieu\\ ban\\ ghi\\ dong\\ luot|thieu\\ ca\\ .*\\ /\\ ca\\ la\\ .*) \\| rc_con=(?:0|-?[1-9][0-9]*) \\| stderr\\[-200:\\]=.*)$|0/[1-9][0-9]*: tap ca do chot \\[(?:\'T[0-9]+\'(?:, \'T[0-9]+\')*)?\\] != dich \\[(?:\'T[0-9]+\'(?:, \'T[0-9]+\')*)?\\]$)|CASE T[0-9]+: (?:DAT$|DO — )|(?:0|[1-9][0-9]*)/(?:0|[1-9][0-9]*)$|LOI: (?:ba so hang khong cong dung tong$|nhom bat buoc THIEU \\(chua chay hoac chua co dot bien\\): \\[\'r[0-9]+\'(?:, \'r[0-9]+\')*\\]$))")',
+     '    ranh = re.compile(r"^(?:TU KIEM r[0-9]+: (?:DAT$|DO_CHOT — |DO_KHAC — .*: )|TU KIEM: (?:0|[1-9][0-9]*)/(?:0|[1-9][0-9]*)$|TU KIEM co dot bien rieng: (?:0|[1-9][0-9]*)/(?:0|[1-9][0-9]*) nhom bat buoc · dot bien giet (?:0|[1-9][0-9]*)/(?:0|[1-9][0-9]*)$|DOT BIEN TU KIEM(?: [A-Za-z0-9-]+ \\| (?:r[0-9]+(?:,r[0-9]+)*)? \\| | [A-Za-z0-9-]+: NEO KHONG DUY NHAT \\((?:0|[2-9]|[1-9][0-9]+)\\)$|: KHONG DO DUOC — phep cat bang hong$)|MUTANT: giet = (?:0|[1-9][0-9]*) · khong giet = (?:0|[1-9][0-9]*) · khong do duoc = (?:0|[1-9][0-9]*) / tong (?:0|[1-9][0-9]*)$|MUTANT [A-Za-z0-9-]+ \\| (?:T[0-9]+(?:,T[0-9]+)*)? \\| (?:(?P<mm>[1-9][0-9]*)/(?P=mm)$|KHONG DO DUOC \\(sau [12] lan\\): (?:khong phong duoc tien trinh con: .*: .*|(?:ban\\ ghi\\ TRUNG\\ cho\\ ca\\ .*|ban\\ ghi\\ dong\\ luot\\ thieu\\ rc\\ kieu\\ int|ban\\ ghi\\ khong\\ neo\\ dung\\ luot:\\ .*|ban\\ ghi\\ khong\\ phai\\ JSON|ban\\ ghi\\ khong\\ phai\\ object:\\ .*|ban\\ ghi\\ thieu\\ ten\\ ca|ban\\ ghi\\ vua\\ mang\\ ten\\ ca\\ vua\\ khai\\ dong\\ luot|bo\\ doc\\ kenh\\ nem\\ .*:\\ .*|ca\\ do\\ vi\\ ngoai\\ le\\ KHONG\\ phai\\ TinHieuChotCa:\\ .*\\ \\|\\ .*|chi\\ tiet\\ khong\\ phai\\ chuoi\\ cho\\ ca\\ .*|co\\ ban\\ ghi\\ SAU\\ ban\\ ghi\\ dong\\ luot|dau\\ dong\\ luot\\ khong\\ phai\\ bool\\ true:\\ .*|dich\\ RONG:\\ khong\\ cap\\ GIET\\ khi\\ khong\\ ca\\ nao\\ phai\\ chet|dich\\ co\\ ten\\ ca\\ KHONG\\ ton\\ tai:\\ .*|kenh\\ khong\\ ton\\ tai|khong\\ doc\\ duoc\\ kenh:\\ .*:\\ .*|nhan\\ khong\\ hop\\ le\\ cho\\ ca\\ .*:\\ .*|rc\\ dong\\ luot\\ .*\\ !=\\ rc\\ tien\\ trinh\\ .*|ten\\ ca\\ khong\\ phai\\ chuoi:\\ .*|thieu\\ ban\\ ghi\\ dong\\ luot|thieu\\ ca\\ .*\\ /\\ ca\\ la\\ .*) \\| rc_con=(?:0|-?[1-9][0-9]*) \\| stderr\\[-200:\\]=.*)$|0/[1-9][0-9]*: tap ca do chot \\[(?:\'T[0-9]+\'(?:, \'T[0-9]+\')*)?\\] != dich \\[(?:\'T[0-9]+\'(?:, \'T[0-9]+\')*)?\\]$)|CASE T[0-9]+: (?:DAT$|DO — )|(?:0|[1-9][0-9]*)/(?:0|[1-9][0-9]*)$|LOI: (?:ba so hang khong cong dung tong$|nhom bat buoc THIEU \\(chua chay hoac chua co dot bien\\): \\[\'r[0-9]+\'(?:, \'r[0-9]+\')*\\]$))")'),
+    # luot 5 (cross-review tren 31127d7) — bon cho lech giua NGU PHAP va DIEM PHAT
+    # THAT, moi cho mot dot bien. Ca r538 giu bang doi chieu tung diem phat.
+    ("chan-doan-doi-khoang-trang-truoc-tong-ket-dot-bien", ("r538",),
+     '    ranh = re.compile(r"^(?:TU KIEM r[0-9]+: (?:DAT$|DO_CHOT — |DO_KHAC — .*: )|TU KIEM: (?:0|[1-9][0-9]*)/(?:0|[1-9][0-9]*)$|TU KIEM co dot bien rieng: (?:0|[1-9][0-9]*)/(?:0|[1-9][0-9]*) nhom bat buoc · dot bien giet (?:0|[1-9][0-9]*)/(?:0|[1-9][0-9]*)$|DOT BIEN TU KIEM(?: [A-Za-z0-9-]+ \\| (?:r[0-9]+(?:,r[0-9]+)*)? \\| (?:(?P<db>(?:0|[1-9][0-9]*))/(?P=db)$|TIN DUNG GIA: (?:ca chet vi loi VO CAN \\[\'r\\d+\'(?:, \'r\\d+\')*\\]$|child rc=(?:0|-[1-9][0-9]*|[2-9]|[1-9][0-9]+) != 1$)|0 — ca do THUC TE: (?:r\\d+(?:,r\\d+)*|\\(rong\\))$)| [A-Za-z0-9-]+: NEO KHONG DUY NHAT \\((?:0|[2-9]|[1-9][0-9]+)\\)$|: KHONG DO DUOC — phep cat bang hong$)|MUTANT: giet = (?:0|[1-9][0-9]*) · khong giet = (?:0|[1-9][0-9]*) · khong do duoc = (?:0|[1-9][0-9]*) / tong (?:0|[1-9][0-9]*)$|MUTANT [A-Za-z0-9-]+ \\| (?:T[0-9]+(?:,T[0-9]+)*)? \\| (?:(?P<mm>[1-9][0-9]*)/(?P=mm)$|KHONG DO DUOC \\(sau [12] lan\\): (?:khong phong duoc tien trinh con: .*: .*|(?:ban\\ ghi\\ TRUNG\\ cho\\ ca\\ .*|ban\\ ghi\\ dong\\ luot\\ thieu\\ rc\\ kieu\\ int|ban\\ ghi\\ khong\\ neo\\ dung\\ luot:\\ .*|ban\\ ghi\\ khong\\ phai\\ JSON|ban\\ ghi\\ khong\\ phai\\ object:\\ .*|ban\\ ghi\\ thieu\\ ten\\ ca|ban\\ ghi\\ vua\\ mang\\ ten\\ ca\\ vua\\ khai\\ dong\\ luot|bo\\ doc\\ kenh\\ nem\\ .*:\\ .*|ca\\ do\\ vi\\ ngoai\\ le\\ KHONG\\ phai\\ TinHieuChotCa:\\ .*\\ \\|\\ .*|chi\\ tiet\\ khong\\ phai\\ chuoi\\ cho\\ ca\\ .*|co\\ ban\\ ghi\\ SAU\\ ban\\ ghi\\ dong\\ luot|dau\\ dong\\ luot\\ khong\\ phai\\ bool\\ true:\\ .*|dich\\ RONG:\\ khong\\ cap\\ GIET\\ khi\\ khong\\ ca\\ nao\\ phai\\ chet|dich\\ co\\ ten\\ ca\\ KHONG\\ ton\\ tai:\\ .*|kenh\\ khong\\ ton\\ tai|khong\\ doc\\ duoc\\ kenh:\\ .*:\\ .*|nhan\\ khong\\ hop\\ le\\ cho\\ ca\\ .*:\\ .*|rc\\ dong\\ luot\\ .*\\ !=\\ rc\\ tien\\ trinh\\ .*|ten\\ ca\\ khong\\ phai\\ chuoi:\\ .*|thieu\\ ban\\ ghi\\ dong\\ luot|thieu\\ ca\\ .*\\ /\\ ca\\ la\\ .*) \\| rc_con=(?:0|-?[1-9][0-9]*) \\| stderr\\[-200:\\]=.*)$|0/[1-9][0-9]*: tap ca do chot \\[(?:\'T[0-9]+\'(?:, \'T[0-9]+\')*)?\\] != dich \\[(?:\'T[0-9]+\'(?:, \'T[0-9]+\')*)?\\]$)|CASE T[0-9]+: (?:DAT$|DO — )|(?:0|[1-9][0-9]*)/(?:0|[1-9][0-9]*)$|LOI: (?:ba so hang khong cong dung tong$|nhom bat buoc THIEU \\(chua chay hoac chua co dot bien\\): \\[\'r[0-9]+\'(?:, \'r[0-9]+\')*\\]$))")',
+     '    ranh = re.compile(r"^(?:TU KIEM r[0-9]+: (?:DAT$|DO_CHOT — |DO_KHAC — .*: )|TU KIEM: (?:0|[1-9][0-9]*)/(?:0|[1-9][0-9]*)$|TU KIEM co dot bien rieng: (?:0|[1-9][0-9]*)/(?:0|[1-9][0-9]*) nhom bat buoc · dot bien giet (?:0|[1-9][0-9]*)/(?:0|[1-9][0-9]*)$|DOT BIEN TU KIEM(?: [A-Za-z0-9-]+ \\| (?:r[0-9]+(?:,r[0-9]+)*)? \\| (?:(?P<db>(?:0|[1-9][0-9]*))/(?P=db)$|TIN DUNG GIA: (?:ca chet vi loi VO CAN \\[\'r\\d+\'(?:, \'r\\d+\')*\\]$|child rc=(?:0|-[1-9][0-9]*|[2-9]|[1-9][0-9]+) != 1$)|0 — ca do THUC TE: (?:r\\d+(?:,r\\d+)*|\\(rong\\))$)| [A-Za-z0-9-]+: NEO KHONG DUY NHAT \\((?:0|[2-9]|[1-9][0-9]+)\\)$| : KHONG DO DUOC — phep cat bang hong$)|MUTANT: giet = (?:0|[1-9][0-9]*) · khong giet = (?:0|[1-9][0-9]*) · khong do duoc = (?:0|[1-9][0-9]*) / tong (?:0|[1-9][0-9]*)$|MUTANT [A-Za-z0-9-]+ \\| (?:T[0-9]+(?:,T[0-9]+)*)? \\| (?:(?P<mm>[1-9][0-9]*)/(?P=mm)$|KHONG DO DUOC \\(sau [12] lan\\): (?:khong phong duoc tien trinh con: .*: .*|(?:ban\\ ghi\\ TRUNG\\ cho\\ ca\\ .*|ban\\ ghi\\ dong\\ luot\\ thieu\\ rc\\ kieu\\ int|ban\\ ghi\\ khong\\ neo\\ dung\\ luot:\\ .*|ban\\ ghi\\ khong\\ phai\\ JSON|ban\\ ghi\\ khong\\ phai\\ object:\\ .*|ban\\ ghi\\ thieu\\ ten\\ ca|ban\\ ghi\\ vua\\ mang\\ ten\\ ca\\ vua\\ khai\\ dong\\ luot|bo\\ doc\\ kenh\\ nem\\ .*:\\ .*|ca\\ do\\ vi\\ ngoai\\ le\\ KHONG\\ phai\\ TinHieuChotCa:\\ .*\\ \\|\\ .*|chi\\ tiet\\ khong\\ phai\\ chuoi\\ cho\\ ca\\ .*|co\\ ban\\ ghi\\ SAU\\ ban\\ ghi\\ dong\\ luot|dau\\ dong\\ luot\\ khong\\ phai\\ bool\\ true:\\ .*|dich\\ RONG:\\ khong\\ cap\\ GIET\\ khi\\ khong\\ ca\\ nao\\ phai\\ chet|dich\\ co\\ ten\\ ca\\ KHONG\\ ton\\ tai:\\ .*|kenh\\ khong\\ ton\\ tai|khong\\ doc\\ duoc\\ kenh:\\ .*:\\ .*|nhan\\ khong\\ hop\\ le\\ cho\\ ca\\ .*:\\ .*|rc\\ dong\\ luot\\ .*\\ !=\\ rc\\ tien\\ trinh\\ .*|ten\\ ca\\ khong\\ phai\\ chuoi:\\ .*|thieu\\ ban\\ ghi\\ dong\\ luot|thieu\\ ca\\ .*\\ /\\ ca\\ la\\ .*) \\| rc_con=(?:0|-?[1-9][0-9]*) \\| stderr\\[-200:\\]=.*)$|0/[1-9][0-9]*: tap ca do chot \\[(?:\'T[0-9]+\'(?:, \'T[0-9]+\')*)?\\] != dich \\[(?:\'T[0-9]+\'(?:, \'T[0-9]+\')*)?\\]$)|CASE T[0-9]+: (?:DAT$|DO — )|(?:0|[1-9][0-9]*)/(?:0|[1-9][0-9]*)$|LOI: (?:ba so hang khong cong dung tong$|nhom bat buoc THIEU \\(chua chay hoac chua co dot bien\\): \\[\'r[0-9]+\'(?:, \'r[0-9]+\')*\\]$))")'),
+    ("chan-doan-quen-ho-mutant-tung-muc", ("r538",),
+     '    ranh = re.compile(r"^(?:TU KIEM r[0-9]+: (?:DAT$|DO_CHOT — |DO_KHAC — .*: )|TU KIEM: (?:0|[1-9][0-9]*)/(?:0|[1-9][0-9]*)$|TU KIEM co dot bien rieng: (?:0|[1-9][0-9]*)/(?:0|[1-9][0-9]*) nhom bat buoc · dot bien giet (?:0|[1-9][0-9]*)/(?:0|[1-9][0-9]*)$|DOT BIEN TU KIEM(?: [A-Za-z0-9-]+ \\| (?:r[0-9]+(?:,r[0-9]+)*)? \\| (?:(?P<db>(?:0|[1-9][0-9]*))/(?P=db)$|TIN DUNG GIA: (?:ca chet vi loi VO CAN \\[\'r\\d+\'(?:, \'r\\d+\')*\\]$|child rc=(?:0|-[1-9][0-9]*|[2-9]|[1-9][0-9]+) != 1$)|0 — ca do THUC TE: (?:r\\d+(?:,r\\d+)*|\\(rong\\))$)| [A-Za-z0-9-]+: NEO KHONG DUY NHAT \\((?:0|[2-9]|[1-9][0-9]+)\\)$|: KHONG DO DUOC — phep cat bang hong$)|MUTANT: giet = (?:0|[1-9][0-9]*) · khong giet = (?:0|[1-9][0-9]*) · khong do duoc = (?:0|[1-9][0-9]*) / tong (?:0|[1-9][0-9]*)$|MUTANT [A-Za-z0-9-]+ \\| (?:T[0-9]+(?:,T[0-9]+)*)? \\| (?:(?P<mm>[1-9][0-9]*)/(?P=mm)$|KHONG DO DUOC \\(sau [12] lan\\): (?:khong phong duoc tien trinh con: .*: .*|(?:ban\\ ghi\\ TRUNG\\ cho\\ ca\\ .*|ban\\ ghi\\ dong\\ luot\\ thieu\\ rc\\ kieu\\ int|ban\\ ghi\\ khong\\ neo\\ dung\\ luot:\\ .*|ban\\ ghi\\ khong\\ phai\\ JSON|ban\\ ghi\\ khong\\ phai\\ object:\\ .*|ban\\ ghi\\ thieu\\ ten\\ ca|ban\\ ghi\\ vua\\ mang\\ ten\\ ca\\ vua\\ khai\\ dong\\ luot|bo\\ doc\\ kenh\\ nem\\ .*:\\ .*|ca\\ do\\ vi\\ ngoai\\ le\\ KHONG\\ phai\\ TinHieuChotCa:\\ .*\\ \\|\\ .*|chi\\ tiet\\ khong\\ phai\\ chuoi\\ cho\\ ca\\ .*|co\\ ban\\ ghi\\ SAU\\ ban\\ ghi\\ dong\\ luot|dau\\ dong\\ luot\\ khong\\ phai\\ bool\\ true:\\ .*|dich\\ RONG:\\ khong\\ cap\\ GIET\\ khi\\ khong\\ ca\\ nao\\ phai\\ chet|dich\\ co\\ ten\\ ca\\ KHONG\\ ton\\ tai:\\ .*|kenh\\ khong\\ ton\\ tai|khong\\ doc\\ duoc\\ kenh:\\ .*:\\ .*|nhan\\ khong\\ hop\\ le\\ cho\\ ca\\ .*:\\ .*|rc\\ dong\\ luot\\ .*\\ !=\\ rc\\ tien\\ trinh\\ .*|ten\\ ca\\ khong\\ phai\\ chuoi:\\ .*|thieu\\ ban\\ ghi\\ dong\\ luot|thieu\\ ca\\ .*\\ /\\ ca\\ la\\ .*) \\| rc_con=(?:0|-?[1-9][0-9]*) \\| stderr\\[-200:\\]=.*)$|0/[1-9][0-9]*: tap ca do chot \\[(?:\'T[0-9]+\'(?:, \'T[0-9]+\')*)?\\] != dich \\[(?:\'T[0-9]+\'(?:, \'T[0-9]+\')*)?\\]$)|CASE T[0-9]+: (?:DAT$|DO — )|(?:0|[1-9][0-9]*)/(?:0|[1-9][0-9]*)$|LOI: (?:ba so hang khong cong dung tong$|nhom bat buoc THIEU \\(chua chay hoac chua co dot bien\\): \\[\'r[0-9]+\'(?:, \'r[0-9]+\')*\\]$))")',
+     '    ranh = re.compile(r"^(?:TU KIEM r[0-9]+: (?:DAT$|DO_CHOT — |DO_KHAC — .*: )|TU KIEM: (?:0|[1-9][0-9]*)/(?:0|[1-9][0-9]*)$|TU KIEM co dot bien rieng: (?:0|[1-9][0-9]*)/(?:0|[1-9][0-9]*) nhom bat buoc · dot bien giet (?:0|[1-9][0-9]*)/(?:0|[1-9][0-9]*)$|DOT BIEN TU KIEM(?: [A-Za-z0-9-]+ \\| (?:r[0-9]+(?:,r[0-9]+)*)? \\| (?:(?P<db>(?:0|[1-9][0-9]*))/(?P=db)$|TIN DUNG GIA: (?:ca chet vi loi VO CAN \\[\'r\\d+\'(?:, \'r\\d+\')*\\]$|child rc=(?:0|-[1-9][0-9]*|[2-9]|[1-9][0-9]+) != 1$)|0 — ca do THUC TE: (?:r\\d+(?:,r\\d+)*|\\(rong\\))$)| [A-Za-z0-9-]+: NEO KHONG DUY NHAT \\((?:0|[2-9]|[1-9][0-9]+)\\)$|: KHONG DO DUOC — phep cat bang hong$)|MUTANT: giet = (?:0|[1-9][0-9]*) · khong giet = (?:0|[1-9][0-9]*) · khong do duoc = (?:0|[1-9][0-9]*) / tong (?:0|[1-9][0-9]*)$|CASE T[0-9]+: (?:DAT$|DO — )|(?:0|[1-9][0-9]*)/(?:0|[1-9][0-9]*)$|LOI: (?:ba so hang khong cong dung tong$|nhom bat buoc THIEU \\(chua chay hoac chua co dot bien\\): \\[\'r[0-9]+\'(?:, \'r[0-9]+\')*\\]$))")'),
+    ("chan-doan-quen-dong-tong-ket-nhom", ("r538",),
+     '    ranh = re.compile(r"^(?:TU KIEM r[0-9]+: (?:DAT$|DO_CHOT — |DO_KHAC — .*: )|TU KIEM: (?:0|[1-9][0-9]*)/(?:0|[1-9][0-9]*)$|TU KIEM co dot bien rieng: (?:0|[1-9][0-9]*)/(?:0|[1-9][0-9]*) nhom bat buoc · dot bien giet (?:0|[1-9][0-9]*)/(?:0|[1-9][0-9]*)$|DOT BIEN TU KIEM(?: [A-Za-z0-9-]+ \\| (?:r[0-9]+(?:,r[0-9]+)*)? \\| (?:(?P<db>(?:0|[1-9][0-9]*))/(?P=db)$|TIN DUNG GIA: (?:ca chet vi loi VO CAN \\[\'r\\d+\'(?:, \'r\\d+\')*\\]$|child rc=(?:0|-[1-9][0-9]*|[2-9]|[1-9][0-9]+) != 1$)|0 — ca do THUC TE: (?:r\\d+(?:,r\\d+)*|\\(rong\\))$)| [A-Za-z0-9-]+: NEO KHONG DUY NHAT \\((?:0|[2-9]|[1-9][0-9]+)\\)$|: KHONG DO DUOC — phep cat bang hong$)|MUTANT: giet = (?:0|[1-9][0-9]*) · khong giet = (?:0|[1-9][0-9]*) · khong do duoc = (?:0|[1-9][0-9]*) / tong (?:0|[1-9][0-9]*)$|MUTANT [A-Za-z0-9-]+ \\| (?:T[0-9]+(?:,T[0-9]+)*)? \\| (?:(?P<mm>[1-9][0-9]*)/(?P=mm)$|KHONG DO DUOC \\(sau [12] lan\\): (?:khong phong duoc tien trinh con: .*: .*|(?:ban\\ ghi\\ TRUNG\\ cho\\ ca\\ .*|ban\\ ghi\\ dong\\ luot\\ thieu\\ rc\\ kieu\\ int|ban\\ ghi\\ khong\\ neo\\ dung\\ luot:\\ .*|ban\\ ghi\\ khong\\ phai\\ JSON|ban\\ ghi\\ khong\\ phai\\ object:\\ .*|ban\\ ghi\\ thieu\\ ten\\ ca|ban\\ ghi\\ vua\\ mang\\ ten\\ ca\\ vua\\ khai\\ dong\\ luot|bo\\ doc\\ kenh\\ nem\\ .*:\\ .*|ca\\ do\\ vi\\ ngoai\\ le\\ KHONG\\ phai\\ TinHieuChotCa:\\ .*\\ \\|\\ .*|chi\\ tiet\\ khong\\ phai\\ chuoi\\ cho\\ ca\\ .*|co\\ ban\\ ghi\\ SAU\\ ban\\ ghi\\ dong\\ luot|dau\\ dong\\ luot\\ khong\\ phai\\ bool\\ true:\\ .*|dich\\ RONG:\\ khong\\ cap\\ GIET\\ khi\\ khong\\ ca\\ nao\\ phai\\ chet|dich\\ co\\ ten\\ ca\\ KHONG\\ ton\\ tai:\\ .*|kenh\\ khong\\ ton\\ tai|khong\\ doc\\ duoc\\ kenh:\\ .*:\\ .*|nhan\\ khong\\ hop\\ le\\ cho\\ ca\\ .*:\\ .*|rc\\ dong\\ luot\\ .*\\ !=\\ rc\\ tien\\ trinh\\ .*|ten\\ ca\\ khong\\ phai\\ chuoi:\\ .*|thieu\\ ban\\ ghi\\ dong\\ luot|thieu\\ ca\\ .*\\ /\\ ca\\ la\\ .*) \\| rc_con=(?:0|-?[1-9][0-9]*) \\| stderr\\[-200:\\]=.*)$|0/[1-9][0-9]*: tap ca do chot \\[(?:\'T[0-9]+\'(?:, \'T[0-9]+\')*)?\\] != dich \\[(?:\'T[0-9]+\'(?:, \'T[0-9]+\')*)?\\]$)|CASE T[0-9]+: (?:DAT$|DO — )|(?:0|[1-9][0-9]*)/(?:0|[1-9][0-9]*)$|LOI: (?:ba so hang khong cong dung tong$|nhom bat buoc THIEU \\(chua chay hoac chua co dot bien\\): \\[\'r[0-9]+\'(?:, \'r[0-9]+\')*\\]$))")',
+     '    ranh = re.compile(r"^(?:TU KIEM r[0-9]+: (?:DAT$|DO_CHOT — |DO_KHAC — .*: )|TU KIEM: (?:0|[1-9][0-9]*)/(?:0|[1-9][0-9]*)$|DOT BIEN TU KIEM(?: [A-Za-z0-9-]+ \\| (?:r[0-9]+(?:,r[0-9]+)*)? \\| (?:(?P<db>(?:0|[1-9][0-9]*))/(?P=db)$|TIN DUNG GIA: (?:ca chet vi loi VO CAN \\[\'r\\d+\'(?:, \'r\\d+\')*\\]$|child rc=(?:0|-[1-9][0-9]*|[2-9]|[1-9][0-9]+) != 1$)|0 — ca do THUC TE: (?:r\\d+(?:,r\\d+)*|\\(rong\\))$)| [A-Za-z0-9-]+: NEO KHONG DUY NHAT \\((?:0|[2-9]|[1-9][0-9]+)\\)$|: KHONG DO DUOC — phep cat bang hong$)|MUTANT: giet = (?:0|[1-9][0-9]*) · khong giet = (?:0|[1-9][0-9]*) · khong do duoc = (?:0|[1-9][0-9]*) / tong (?:0|[1-9][0-9]*)$|MUTANT [A-Za-z0-9-]+ \\| (?:T[0-9]+(?:,T[0-9]+)*)? \\| (?:(?P<mm>[1-9][0-9]*)/(?P=mm)$|KHONG DO DUOC \\(sau [12] lan\\): (?:khong phong duoc tien trinh con: .*: .*|(?:ban\\ ghi\\ TRUNG\\ cho\\ ca\\ .*|ban\\ ghi\\ dong\\ luot\\ thieu\\ rc\\ kieu\\ int|ban\\ ghi\\ khong\\ neo\\ dung\\ luot:\\ .*|ban\\ ghi\\ khong\\ phai\\ JSON|ban\\ ghi\\ khong\\ phai\\ object:\\ .*|ban\\ ghi\\ thieu\\ ten\\ ca|ban\\ ghi\\ vua\\ mang\\ ten\\ ca\\ vua\\ khai\\ dong\\ luot|bo\\ doc\\ kenh\\ nem\\ .*:\\ .*|ca\\ do\\ vi\\ ngoai\\ le\\ KHONG\\ phai\\ TinHieuChotCa:\\ .*\\ \\|\\ .*|chi\\ tiet\\ khong\\ phai\\ chuoi\\ cho\\ ca\\ .*|co\\ ban\\ ghi\\ SAU\\ ban\\ ghi\\ dong\\ luot|dau\\ dong\\ luot\\ khong\\ phai\\ bool\\ true:\\ .*|dich\\ RONG:\\ khong\\ cap\\ GIET\\ khi\\ khong\\ ca\\ nao\\ phai\\ chet|dich\\ co\\ ten\\ ca\\ KHONG\\ ton\\ tai:\\ .*|kenh\\ khong\\ ton\\ tai|khong\\ doc\\ duoc\\ kenh:\\ .*:\\ .*|nhan\\ khong\\ hop\\ le\\ cho\\ ca\\ .*:\\ .*|rc\\ dong\\ luot\\ .*\\ !=\\ rc\\ tien\\ trinh\\ .*|ten\\ ca\\ khong\\ phai\\ chuoi:\\ .*|thieu\\ ban\\ ghi\\ dong\\ luot|thieu\\ ca\\ .*\\ /\\ ca\\ la\\ .*) \\| rc_con=(?:0|-?[1-9][0-9]*) \\| stderr\\[-200:\\]=.*)$|0/[1-9][0-9]*: tap ca do chot \\[(?:\'T[0-9]+\'(?:, \'T[0-9]+\')*)?\\] != dich \\[(?:\'T[0-9]+\'(?:, \'T[0-9]+\')*)?\\]$)|CASE T[0-9]+: (?:DAT$|DO — )|(?:0|[1-9][0-9]*)/(?:0|[1-9][0-9]*)$|LOI: (?:ba so hang khong cong dung tong$|nhom bat buoc THIEU \\(chua chay hoac chua co dot bien\\): \\[\'r[0-9]+\'(?:, \'r[0-9]+\')*\\]$))")'),
+    ("chan-doan-quen-dong-ti-so-va-loi", ("r538",),
+     '    ranh = re.compile(r"^(?:TU KIEM r[0-9]+: (?:DAT$|DO_CHOT — |DO_KHAC — .*: )|TU KIEM: (?:0|[1-9][0-9]*)/(?:0|[1-9][0-9]*)$|TU KIEM co dot bien rieng: (?:0|[1-9][0-9]*)/(?:0|[1-9][0-9]*) nhom bat buoc · dot bien giet (?:0|[1-9][0-9]*)/(?:0|[1-9][0-9]*)$|DOT BIEN TU KIEM(?: [A-Za-z0-9-]+ \\| (?:r[0-9]+(?:,r[0-9]+)*)? \\| (?:(?P<db>(?:0|[1-9][0-9]*))/(?P=db)$|TIN DUNG GIA: (?:ca chet vi loi VO CAN \\[\'r\\d+\'(?:, \'r\\d+\')*\\]$|child rc=(?:0|-[1-9][0-9]*|[2-9]|[1-9][0-9]+) != 1$)|0 — ca do THUC TE: (?:r\\d+(?:,r\\d+)*|\\(rong\\))$)| [A-Za-z0-9-]+: NEO KHONG DUY NHAT \\((?:0|[2-9]|[1-9][0-9]+)\\)$|: KHONG DO DUOC — phep cat bang hong$)|MUTANT: giet = (?:0|[1-9][0-9]*) · khong giet = (?:0|[1-9][0-9]*) · khong do duoc = (?:0|[1-9][0-9]*) / tong (?:0|[1-9][0-9]*)$|MUTANT [A-Za-z0-9-]+ \\| (?:T[0-9]+(?:,T[0-9]+)*)? \\| (?:(?P<mm>[1-9][0-9]*)/(?P=mm)$|KHONG DO DUOC \\(sau [12] lan\\): (?:khong phong duoc tien trinh con: .*: .*|(?:ban\\ ghi\\ TRUNG\\ cho\\ ca\\ .*|ban\\ ghi\\ dong\\ luot\\ thieu\\ rc\\ kieu\\ int|ban\\ ghi\\ khong\\ neo\\ dung\\ luot:\\ .*|ban\\ ghi\\ khong\\ phai\\ JSON|ban\\ ghi\\ khong\\ phai\\ object:\\ .*|ban\\ ghi\\ thieu\\ ten\\ ca|ban\\ ghi\\ vua\\ mang\\ ten\\ ca\\ vua\\ khai\\ dong\\ luot|bo\\ doc\\ kenh\\ nem\\ .*:\\ .*|ca\\ do\\ vi\\ ngoai\\ le\\ KHONG\\ phai\\ TinHieuChotCa:\\ .*\\ \\|\\ .*|chi\\ tiet\\ khong\\ phai\\ chuoi\\ cho\\ ca\\ .*|co\\ ban\\ ghi\\ SAU\\ ban\\ ghi\\ dong\\ luot|dau\\ dong\\ luot\\ khong\\ phai\\ bool\\ true:\\ .*|dich\\ RONG:\\ khong\\ cap\\ GIET\\ khi\\ khong\\ ca\\ nao\\ phai\\ chet|dich\\ co\\ ten\\ ca\\ KHONG\\ ton\\ tai:\\ .*|kenh\\ khong\\ ton\\ tai|khong\\ doc\\ duoc\\ kenh:\\ .*:\\ .*|nhan\\ khong\\ hop\\ le\\ cho\\ ca\\ .*:\\ .*|rc\\ dong\\ luot\\ .*\\ !=\\ rc\\ tien\\ trinh\\ .*|ten\\ ca\\ khong\\ phai\\ chuoi:\\ .*|thieu\\ ban\\ ghi\\ dong\\ luot|thieu\\ ca\\ .*\\ /\\ ca\\ la\\ .*) \\| rc_con=(?:0|-?[1-9][0-9]*) \\| stderr\\[-200:\\]=.*)$|0/[1-9][0-9]*: tap ca do chot \\[(?:\'T[0-9]+\'(?:, \'T[0-9]+\')*)?\\] != dich \\[(?:\'T[0-9]+\'(?:, \'T[0-9]+\')*)?\\]$)|CASE T[0-9]+: (?:DAT$|DO — )|(?:0|[1-9][0-9]*)/(?:0|[1-9][0-9]*)$|LOI: (?:ba so hang khong cong dung tong$|nhom bat buoc THIEU \\(chua chay hoac chua co dot bien\\): \\[\'r[0-9]+\'(?:, \'r[0-9]+\')*\\]$))")',
+     '    ranh = re.compile(r"^(?:TU KIEM r[0-9]+: (?:DAT$|DO_CHOT — |DO_KHAC — .*: )|TU KIEM: (?:0|[1-9][0-9]*)/(?:0|[1-9][0-9]*)$|TU KIEM co dot bien rieng: (?:0|[1-9][0-9]*)/(?:0|[1-9][0-9]*) nhom bat buoc · dot bien giet (?:0|[1-9][0-9]*)/(?:0|[1-9][0-9]*)$|DOT BIEN TU KIEM(?: [A-Za-z0-9-]+ \\| (?:r[0-9]+(?:,r[0-9]+)*)? \\| (?:(?P<db>(?:0|[1-9][0-9]*))/(?P=db)$|TIN DUNG GIA: (?:ca chet vi loi VO CAN \\[\'r\\d+\'(?:, \'r\\d+\')*\\]$|child rc=(?:0|-[1-9][0-9]*|[2-9]|[1-9][0-9]+) != 1$)|0 — ca do THUC TE: (?:r\\d+(?:,r\\d+)*|\\(rong\\))$)| [A-Za-z0-9-]+: NEO KHONG DUY NHAT \\((?:0|[2-9]|[1-9][0-9]+)\\)$|: KHONG DO DUOC — phep cat bang hong$)|MUTANT: giet = (?:0|[1-9][0-9]*) · khong giet = (?:0|[1-9][0-9]*) · khong do duoc = (?:0|[1-9][0-9]*) / tong (?:0|[1-9][0-9]*)$|MUTANT [A-Za-z0-9-]+ \\| (?:T[0-9]+(?:,T[0-9]+)*)? \\| (?:(?P<mm>[1-9][0-9]*)/(?P=mm)$|KHONG DO DUOC \\(sau [12] lan\\): (?:khong phong duoc tien trinh con: .*: .*|(?:ban\\ ghi\\ TRUNG\\ cho\\ ca\\ .*|ban\\ ghi\\ dong\\ luot\\ thieu\\ rc\\ kieu\\ int|ban\\ ghi\\ khong\\ neo\\ dung\\ luot:\\ .*|ban\\ ghi\\ khong\\ phai\\ JSON|ban\\ ghi\\ khong\\ phai\\ object:\\ .*|ban\\ ghi\\ thieu\\ ten\\ ca|ban\\ ghi\\ vua\\ mang\\ ten\\ ca\\ vua\\ khai\\ dong\\ luot|bo\\ doc\\ kenh\\ nem\\ .*:\\ .*|ca\\ do\\ vi\\ ngoai\\ le\\ KHONG\\ phai\\ TinHieuChotCa:\\ .*\\ \\|\\ .*|chi\\ tiet\\ khong\\ phai\\ chuoi\\ cho\\ ca\\ .*|co\\ ban\\ ghi\\ SAU\\ ban\\ ghi\\ dong\\ luot|dau\\ dong\\ luot\\ khong\\ phai\\ bool\\ true:\\ .*|dich\\ RONG:\\ khong\\ cap\\ GIET\\ khi\\ khong\\ ca\\ nao\\ phai\\ chet|dich\\ co\\ ten\\ ca\\ KHONG\\ ton\\ tai:\\ .*|kenh\\ khong\\ ton\\ tai|khong\\ doc\\ duoc\\ kenh:\\ .*:\\ .*|nhan\\ khong\\ hop\\ le\\ cho\\ ca\\ .*:\\ .*|rc\\ dong\\ luot\\ .*\\ !=\\ rc\\ tien\\ trinh\\ .*|ten\\ ca\\ khong\\ phai\\ chuoi:\\ .*|thieu\\ ban\\ ghi\\ dong\\ luot|thieu\\ ca\\ .*\\ /\\ ca\\ la\\ .*) \\| rc_con=(?:0|-?[1-9][0-9]*) \\| stderr\\[-200:\\]=.*)$|0/[1-9][0-9]*: tap ca do chot \\[(?:\'T[0-9]+\'(?:, \'T[0-9]+\')*)?\\] != dich \\[(?:\'T[0-9]+\'(?:, \'T[0-9]+\')*)?\\]$)|CASE T[0-9]+: (?:DAT$|DO — ))")'),
+    # luot 6 (cross-review tren 273de20) — NAM duoi van la TIEN TO du luot 5 khai
+    # "du hinh": `TIN DUNG GIA: `, `0 — ca do THUC TE: `, hai duoi MUTANT that bai,
+    # `LOI: ... THIEU ...: `. Diem phat that LUON co phan sau (hai cau co dinh /
+    # danh sach ca hoac `(rong)` / `ly_do` khong rong / repr danh sach). Va ho TU
+    # KIEM: `DO_CHOT(?: |$)` rong hon hinh that `DO_CHOT — ` / `DO_KHAC — <Kieu>: `.
+    ("chan-doan-noi-long-duoi-tin-dung-gia", ("r538",),
+     '    ranh = re.compile(r"^(?:TU KIEM r[0-9]+: (?:DAT$|DO_CHOT — |DO_KHAC — .*: )|TU KIEM: (?:0|[1-9][0-9]*)/(?:0|[1-9][0-9]*)$|TU KIEM co dot bien rieng: (?:0|[1-9][0-9]*)/(?:0|[1-9][0-9]*) nhom bat buoc · dot bien giet (?:0|[1-9][0-9]*)/(?:0|[1-9][0-9]*)$|DOT BIEN TU KIEM(?: [A-Za-z0-9-]+ \\| (?:r[0-9]+(?:,r[0-9]+)*)? \\| (?:(?P<db>(?:0|[1-9][0-9]*))/(?P=db)$|TIN DUNG GIA: (?:ca chet vi loi VO CAN \\[\'r\\d+\'(?:, \'r\\d+\')*\\]$|child rc=(?:0|-[1-9][0-9]*|[2-9]|[1-9][0-9]+) != 1$)|0 — ca do THUC TE: (?:r\\d+(?:,r\\d+)*|\\(rong\\))$)| [A-Za-z0-9-]+: NEO KHONG DUY NHAT \\((?:0|[2-9]|[1-9][0-9]+)\\)$|: KHONG DO DUOC — phep cat bang hong$)|MUTANT: giet = (?:0|[1-9][0-9]*) · khong giet = (?:0|[1-9][0-9]*) · khong do duoc = (?:0|[1-9][0-9]*) / tong (?:0|[1-9][0-9]*)$|MUTANT [A-Za-z0-9-]+ \\| (?:T[0-9]+(?:,T[0-9]+)*)? \\| (?:(?P<mm>[1-9][0-9]*)/(?P=mm)$|KHONG DO DUOC \\(sau [12] lan\\): (?:khong phong duoc tien trinh con: .*: .*|(?:ban\\ ghi\\ TRUNG\\ cho\\ ca\\ .*|ban\\ ghi\\ dong\\ luot\\ thieu\\ rc\\ kieu\\ int|ban\\ ghi\\ khong\\ neo\\ dung\\ luot:\\ .*|ban\\ ghi\\ khong\\ phai\\ JSON|ban\\ ghi\\ khong\\ phai\\ object:\\ .*|ban\\ ghi\\ thieu\\ ten\\ ca|ban\\ ghi\\ vua\\ mang\\ ten\\ ca\\ vua\\ khai\\ dong\\ luot|bo\\ doc\\ kenh\\ nem\\ .*:\\ .*|ca\\ do\\ vi\\ ngoai\\ le\\ KHONG\\ phai\\ TinHieuChotCa:\\ .*\\ \\|\\ .*|chi\\ tiet\\ khong\\ phai\\ chuoi\\ cho\\ ca\\ .*|co\\ ban\\ ghi\\ SAU\\ ban\\ ghi\\ dong\\ luot|dau\\ dong\\ luot\\ khong\\ phai\\ bool\\ true:\\ .*|dich\\ RONG:\\ khong\\ cap\\ GIET\\ khi\\ khong\\ ca\\ nao\\ phai\\ chet|dich\\ co\\ ten\\ ca\\ KHONG\\ ton\\ tai:\\ .*|kenh\\ khong\\ ton\\ tai|khong\\ doc\\ duoc\\ kenh:\\ .*:\\ .*|nhan\\ khong\\ hop\\ le\\ cho\\ ca\\ .*:\\ .*|rc\\ dong\\ luot\\ .*\\ !=\\ rc\\ tien\\ trinh\\ .*|ten\\ ca\\ khong\\ phai\\ chuoi:\\ .*|thieu\\ ban\\ ghi\\ dong\\ luot|thieu\\ ca\\ .*\\ /\\ ca\\ la\\ .*) \\| rc_con=(?:0|-?[1-9][0-9]*) \\| stderr\\[-200:\\]=.*)$|0/[1-9][0-9]*: tap ca do chot \\[(?:\'T[0-9]+\'(?:, \'T[0-9]+\')*)?\\] != dich \\[(?:\'T[0-9]+\'(?:, \'T[0-9]+\')*)?\\]$)|CASE T[0-9]+: (?:DAT$|DO — )|(?:0|[1-9][0-9]*)/(?:0|[1-9][0-9]*)$|LOI: (?:ba so hang khong cong dung tong$|nhom bat buoc THIEU \\(chua chay hoac chua co dot bien\\): \\[\'r[0-9]+\'(?:, \'r[0-9]+\')*\\]$))")',
+     '    ranh = re.compile(r"^(?:TU KIEM r[0-9]+: (?:DAT$|DO_CHOT — |DO_KHAC — .*: )|TU KIEM: (?:0|[1-9][0-9]*)/(?:0|[1-9][0-9]*)$|TU KIEM co dot bien rieng: (?:0|[1-9][0-9]*)/(?:0|[1-9][0-9]*) nhom bat buoc · dot bien giet (?:0|[1-9][0-9]*)/(?:0|[1-9][0-9]*)$|DOT BIEN TU KIEM(?: [A-Za-z0-9-]+ \\| (?:r[0-9]+(?:,r[0-9]+)*)? \\| (?:(?P<db>(?:0|[1-9][0-9]*))/(?P=db)$|TIN DUNG GIA: |0 — ca do THUC TE: (?:r\\d+(?:,r\\d+)*|\\(rong\\))$)| [A-Za-z0-9-]+: NEO KHONG DUY NHAT \\((?:0|[2-9]|[1-9][0-9]+)\\)$|: KHONG DO DUOC — phep cat bang hong$)|MUTANT: giet = (?:0|[1-9][0-9]*) · khong giet = (?:0|[1-9][0-9]*) · khong do duoc = (?:0|[1-9][0-9]*) / tong (?:0|[1-9][0-9]*)$|MUTANT [A-Za-z0-9-]+ \\| (?:T[0-9]+(?:,T[0-9]+)*)? \\| (?:(?P<mm>[1-9][0-9]*)/(?P=mm)$|KHONG DO DUOC \\(sau [12] lan\\): (?:khong phong duoc tien trinh con: .*: .*|(?:ban\\ ghi\\ TRUNG\\ cho\\ ca\\ .*|ban\\ ghi\\ dong\\ luot\\ thieu\\ rc\\ kieu\\ int|ban\\ ghi\\ khong\\ neo\\ dung\\ luot:\\ .*|ban\\ ghi\\ khong\\ phai\\ JSON|ban\\ ghi\\ khong\\ phai\\ object:\\ .*|ban\\ ghi\\ thieu\\ ten\\ ca|ban\\ ghi\\ vua\\ mang\\ ten\\ ca\\ vua\\ khai\\ dong\\ luot|bo\\ doc\\ kenh\\ nem\\ .*:\\ .*|ca\\ do\\ vi\\ ngoai\\ le\\ KHONG\\ phai\\ TinHieuChotCa:\\ .*\\ \\|\\ .*|chi\\ tiet\\ khong\\ phai\\ chuoi\\ cho\\ ca\\ .*|co\\ ban\\ ghi\\ SAU\\ ban\\ ghi\\ dong\\ luot|dau\\ dong\\ luot\\ khong\\ phai\\ bool\\ true:\\ .*|dich\\ RONG:\\ khong\\ cap\\ GIET\\ khi\\ khong\\ ca\\ nao\\ phai\\ chet|dich\\ co\\ ten\\ ca\\ KHONG\\ ton\\ tai:\\ .*|kenh\\ khong\\ ton\\ tai|khong\\ doc\\ duoc\\ kenh:\\ .*:\\ .*|nhan\\ khong\\ hop\\ le\\ cho\\ ca\\ .*:\\ .*|rc\\ dong\\ luot\\ .*\\ !=\\ rc\\ tien\\ trinh\\ .*|ten\\ ca\\ khong\\ phai\\ chuoi:\\ .*|thieu\\ ban\\ ghi\\ dong\\ luot|thieu\\ ca\\ .*\\ /\\ ca\\ la\\ .*) \\| rc_con=(?:0|-?[1-9][0-9]*) \\| stderr\\[-200:\\]=.*)$|0/[1-9][0-9]*: tap ca do chot \\[(?:\'T[0-9]+\'(?:, \'T[0-9]+\')*)?\\] != dich \\[(?:\'T[0-9]+\'(?:, \'T[0-9]+\')*)?\\]$)|CASE T[0-9]+: (?:DAT$|DO — )|(?:0|[1-9][0-9]*)/(?:0|[1-9][0-9]*)$|LOI: (?:ba so hang khong cong dung tong$|nhom bat buoc THIEU \\(chua chay hoac chua co dot bien\\): \\[\'r[0-9]+\'(?:, \'r[0-9]+\')*\\]$))")'),
+    ("chan-doan-noi-long-duoi-ca-do-thuc-te", ("r538",),
+     '    ranh = re.compile(r"^(?:TU KIEM r[0-9]+: (?:DAT$|DO_CHOT — |DO_KHAC — .*: )|TU KIEM: (?:0|[1-9][0-9]*)/(?:0|[1-9][0-9]*)$|TU KIEM co dot bien rieng: (?:0|[1-9][0-9]*)/(?:0|[1-9][0-9]*) nhom bat buoc · dot bien giet (?:0|[1-9][0-9]*)/(?:0|[1-9][0-9]*)$|DOT BIEN TU KIEM(?: [A-Za-z0-9-]+ \\| (?:r[0-9]+(?:,r[0-9]+)*)? \\| (?:(?P<db>(?:0|[1-9][0-9]*))/(?P=db)$|TIN DUNG GIA: (?:ca chet vi loi VO CAN \\[\'r\\d+\'(?:, \'r\\d+\')*\\]$|child rc=(?:0|-[1-9][0-9]*|[2-9]|[1-9][0-9]+) != 1$)|0 — ca do THUC TE: (?:r\\d+(?:,r\\d+)*|\\(rong\\))$)| [A-Za-z0-9-]+: NEO KHONG DUY NHAT \\((?:0|[2-9]|[1-9][0-9]+)\\)$|: KHONG DO DUOC — phep cat bang hong$)|MUTANT: giet = (?:0|[1-9][0-9]*) · khong giet = (?:0|[1-9][0-9]*) · khong do duoc = (?:0|[1-9][0-9]*) / tong (?:0|[1-9][0-9]*)$|MUTANT [A-Za-z0-9-]+ \\| (?:T[0-9]+(?:,T[0-9]+)*)? \\| (?:(?P<mm>[1-9][0-9]*)/(?P=mm)$|KHONG DO DUOC \\(sau [12] lan\\): (?:khong phong duoc tien trinh con: .*: .*|(?:ban\\ ghi\\ TRUNG\\ cho\\ ca\\ .*|ban\\ ghi\\ dong\\ luot\\ thieu\\ rc\\ kieu\\ int|ban\\ ghi\\ khong\\ neo\\ dung\\ luot:\\ .*|ban\\ ghi\\ khong\\ phai\\ JSON|ban\\ ghi\\ khong\\ phai\\ object:\\ .*|ban\\ ghi\\ thieu\\ ten\\ ca|ban\\ ghi\\ vua\\ mang\\ ten\\ ca\\ vua\\ khai\\ dong\\ luot|bo\\ doc\\ kenh\\ nem\\ .*:\\ .*|ca\\ do\\ vi\\ ngoai\\ le\\ KHONG\\ phai\\ TinHieuChotCa:\\ .*\\ \\|\\ .*|chi\\ tiet\\ khong\\ phai\\ chuoi\\ cho\\ ca\\ .*|co\\ ban\\ ghi\\ SAU\\ ban\\ ghi\\ dong\\ luot|dau\\ dong\\ luot\\ khong\\ phai\\ bool\\ true:\\ .*|dich\\ RONG:\\ khong\\ cap\\ GIET\\ khi\\ khong\\ ca\\ nao\\ phai\\ chet|dich\\ co\\ ten\\ ca\\ KHONG\\ ton\\ tai:\\ .*|kenh\\ khong\\ ton\\ tai|khong\\ doc\\ duoc\\ kenh:\\ .*:\\ .*|nhan\\ khong\\ hop\\ le\\ cho\\ ca\\ .*:\\ .*|rc\\ dong\\ luot\\ .*\\ !=\\ rc\\ tien\\ trinh\\ .*|ten\\ ca\\ khong\\ phai\\ chuoi:\\ .*|thieu\\ ban\\ ghi\\ dong\\ luot|thieu\\ ca\\ .*\\ /\\ ca\\ la\\ .*) \\| rc_con=(?:0|-?[1-9][0-9]*) \\| stderr\\[-200:\\]=.*)$|0/[1-9][0-9]*: tap ca do chot \\[(?:\'T[0-9]+\'(?:, \'T[0-9]+\')*)?\\] != dich \\[(?:\'T[0-9]+\'(?:, \'T[0-9]+\')*)?\\]$)|CASE T[0-9]+: (?:DAT$|DO — )|(?:0|[1-9][0-9]*)/(?:0|[1-9][0-9]*)$|LOI: (?:ba so hang khong cong dung tong$|nhom bat buoc THIEU \\(chua chay hoac chua co dot bien\\): \\[\'r[0-9]+\'(?:, \'r[0-9]+\')*\\]$))")',
+     '    ranh = re.compile(r"^(?:TU KIEM r[0-9]+: (?:DAT$|DO_CHOT — |DO_KHAC — .*: )|TU KIEM: (?:0|[1-9][0-9]*)/(?:0|[1-9][0-9]*)$|TU KIEM co dot bien rieng: (?:0|[1-9][0-9]*)/(?:0|[1-9][0-9]*) nhom bat buoc · dot bien giet (?:0|[1-9][0-9]*)/(?:0|[1-9][0-9]*)$|DOT BIEN TU KIEM(?: [A-Za-z0-9-]+ \\| (?:r[0-9]+(?:,r[0-9]+)*)? \\| (?:(?P<db>(?:0|[1-9][0-9]*))/(?P=db)$|TIN DUNG GIA: (?:ca chet vi loi VO CAN \\[\'r\\d+\'(?:, \'r\\d+\')*\\]$|child rc=(?:0|-[1-9][0-9]*|[2-9]|[1-9][0-9]+) != 1$)|0 — ca do THUC TE: )| [A-Za-z0-9-]+: NEO KHONG DUY NHAT \\((?:0|[2-9]|[1-9][0-9]+)\\)$|: KHONG DO DUOC — phep cat bang hong$)|MUTANT: giet = (?:0|[1-9][0-9]*) · khong giet = (?:0|[1-9][0-9]*) · khong do duoc = (?:0|[1-9][0-9]*) / tong (?:0|[1-9][0-9]*)$|MUTANT [A-Za-z0-9-]+ \\| (?:T[0-9]+(?:,T[0-9]+)*)? \\| (?:(?P<mm>[1-9][0-9]*)/(?P=mm)$|KHONG DO DUOC \\(sau [12] lan\\): (?:khong phong duoc tien trinh con: .*: .*|(?:ban\\ ghi\\ TRUNG\\ cho\\ ca\\ .*|ban\\ ghi\\ dong\\ luot\\ thieu\\ rc\\ kieu\\ int|ban\\ ghi\\ khong\\ neo\\ dung\\ luot:\\ .*|ban\\ ghi\\ khong\\ phai\\ JSON|ban\\ ghi\\ khong\\ phai\\ object:\\ .*|ban\\ ghi\\ thieu\\ ten\\ ca|ban\\ ghi\\ vua\\ mang\\ ten\\ ca\\ vua\\ khai\\ dong\\ luot|bo\\ doc\\ kenh\\ nem\\ .*:\\ .*|ca\\ do\\ vi\\ ngoai\\ le\\ KHONG\\ phai\\ TinHieuChotCa:\\ .*\\ \\|\\ .*|chi\\ tiet\\ khong\\ phai\\ chuoi\\ cho\\ ca\\ .*|co\\ ban\\ ghi\\ SAU\\ ban\\ ghi\\ dong\\ luot|dau\\ dong\\ luot\\ khong\\ phai\\ bool\\ true:\\ .*|dich\\ RONG:\\ khong\\ cap\\ GIET\\ khi\\ khong\\ ca\\ nao\\ phai\\ chet|dich\\ co\\ ten\\ ca\\ KHONG\\ ton\\ tai:\\ .*|kenh\\ khong\\ ton\\ tai|khong\\ doc\\ duoc\\ kenh:\\ .*:\\ .*|nhan\\ khong\\ hop\\ le\\ cho\\ ca\\ .*:\\ .*|rc\\ dong\\ luot\\ .*\\ !=\\ rc\\ tien\\ trinh\\ .*|ten\\ ca\\ khong\\ phai\\ chuoi:\\ .*|thieu\\ ban\\ ghi\\ dong\\ luot|thieu\\ ca\\ .*\\ /\\ ca\\ la\\ .*) \\| rc_con=(?:0|-?[1-9][0-9]*) \\| stderr\\[-200:\\]=.*)$|0/[1-9][0-9]*: tap ca do chot \\[(?:\'T[0-9]+\'(?:, \'T[0-9]+\')*)?\\] != dich \\[(?:\'T[0-9]+\'(?:, \'T[0-9]+\')*)?\\]$)|CASE T[0-9]+: (?:DAT$|DO — )|(?:0|[1-9][0-9]*)/(?:0|[1-9][0-9]*)$|LOI: (?:ba so hang khong cong dung tong$|nhom bat buoc THIEU \\(chua chay hoac chua co dot bien\\): \\[\'r[0-9]+\'(?:, \'r[0-9]+\')*\\]$))")'),
+    ("chan-doan-noi-long-duoi-mutant-that-bai", ("r538",),
+     '    ranh = re.compile(r"^(?:TU KIEM r[0-9]+: (?:DAT$|DO_CHOT — |DO_KHAC — .*: )|TU KIEM: (?:0|[1-9][0-9]*)/(?:0|[1-9][0-9]*)$|TU KIEM co dot bien rieng: (?:0|[1-9][0-9]*)/(?:0|[1-9][0-9]*) nhom bat buoc · dot bien giet (?:0|[1-9][0-9]*)/(?:0|[1-9][0-9]*)$|DOT BIEN TU KIEM(?: [A-Za-z0-9-]+ \\| (?:r[0-9]+(?:,r[0-9]+)*)? \\| (?:(?P<db>(?:0|[1-9][0-9]*))/(?P=db)$|TIN DUNG GIA: (?:ca chet vi loi VO CAN \\[\'r\\d+\'(?:, \'r\\d+\')*\\]$|child rc=(?:0|-[1-9][0-9]*|[2-9]|[1-9][0-9]+) != 1$)|0 — ca do THUC TE: (?:r\\d+(?:,r\\d+)*|\\(rong\\))$)| [A-Za-z0-9-]+: NEO KHONG DUY NHAT \\((?:0|[2-9]|[1-9][0-9]+)\\)$|: KHONG DO DUOC — phep cat bang hong$)|MUTANT: giet = (?:0|[1-9][0-9]*) · khong giet = (?:0|[1-9][0-9]*) · khong do duoc = (?:0|[1-9][0-9]*) / tong (?:0|[1-9][0-9]*)$|MUTANT [A-Za-z0-9-]+ \\| (?:T[0-9]+(?:,T[0-9]+)*)? \\| (?:(?P<mm>[1-9][0-9]*)/(?P=mm)$|KHONG DO DUOC \\(sau [12] lan\\): (?:khong phong duoc tien trinh con: .*: .*|(?:ban\\ ghi\\ TRUNG\\ cho\\ ca\\ .*|ban\\ ghi\\ dong\\ luot\\ thieu\\ rc\\ kieu\\ int|ban\\ ghi\\ khong\\ neo\\ dung\\ luot:\\ .*|ban\\ ghi\\ khong\\ phai\\ JSON|ban\\ ghi\\ khong\\ phai\\ object:\\ .*|ban\\ ghi\\ thieu\\ ten\\ ca|ban\\ ghi\\ vua\\ mang\\ ten\\ ca\\ vua\\ khai\\ dong\\ luot|bo\\ doc\\ kenh\\ nem\\ .*:\\ .*|ca\\ do\\ vi\\ ngoai\\ le\\ KHONG\\ phai\\ TinHieuChotCa:\\ .*\\ \\|\\ .*|chi\\ tiet\\ khong\\ phai\\ chuoi\\ cho\\ ca\\ .*|co\\ ban\\ ghi\\ SAU\\ ban\\ ghi\\ dong\\ luot|dau\\ dong\\ luot\\ khong\\ phai\\ bool\\ true:\\ .*|dich\\ RONG:\\ khong\\ cap\\ GIET\\ khi\\ khong\\ ca\\ nao\\ phai\\ chet|dich\\ co\\ ten\\ ca\\ KHONG\\ ton\\ tai:\\ .*|kenh\\ khong\\ ton\\ tai|khong\\ doc\\ duoc\\ kenh:\\ .*:\\ .*|nhan\\ khong\\ hop\\ le\\ cho\\ ca\\ .*:\\ .*|rc\\ dong\\ luot\\ .*\\ !=\\ rc\\ tien\\ trinh\\ .*|ten\\ ca\\ khong\\ phai\\ chuoi:\\ .*|thieu\\ ban\\ ghi\\ dong\\ luot|thieu\\ ca\\ .*\\ /\\ ca\\ la\\ .*) \\| rc_con=(?:0|-?[1-9][0-9]*) \\| stderr\\[-200:\\]=.*)$|0/[1-9][0-9]*: tap ca do chot \\[(?:\'T[0-9]+\'(?:, \'T[0-9]+\')*)?\\] != dich \\[(?:\'T[0-9]+\'(?:, \'T[0-9]+\')*)?\\]$)|CASE T[0-9]+: (?:DAT$|DO — )|(?:0|[1-9][0-9]*)/(?:0|[1-9][0-9]*)$|LOI: (?:ba so hang khong cong dung tong$|nhom bat buoc THIEU \\(chua chay hoac chua co dot bien\\): \\[\'r[0-9]+\'(?:, \'r[0-9]+\')*\\]$))")',
+     '    ranh = re.compile(r"^(?:TU KIEM r[0-9]+: (?:DAT$|DO_CHOT — |DO_KHAC — .*: )|TU KIEM: (?:0|[1-9][0-9]*)/(?:0|[1-9][0-9]*)$|TU KIEM co dot bien rieng: (?:0|[1-9][0-9]*)/(?:0|[1-9][0-9]*) nhom bat buoc · dot bien giet (?:0|[1-9][0-9]*)/(?:0|[1-9][0-9]*)$|DOT BIEN TU KIEM(?: [A-Za-z0-9-]+ \\| (?:r[0-9]+(?:,r[0-9]+)*)? \\| (?:(?P<db>(?:0|[1-9][0-9]*))/(?P=db)$|TIN DUNG GIA: (?:ca chet vi loi VO CAN \\[\'r\\d+\'(?:, \'r\\d+\')*\\]$|child rc=(?:0|-[1-9][0-9]*|[2-9]|[1-9][0-9]+) != 1$)|0 — ca do THUC TE: (?:r\\d+(?:,r\\d+)*|\\(rong\\))$)| [A-Za-z0-9-]+: NEO KHONG DUY NHAT \\((?:0|[2-9]|[1-9][0-9]+)\\)$|: KHONG DO DUOC — phep cat bang hong$)|MUTANT: giet = (?:0|[1-9][0-9]*) · khong giet = (?:0|[1-9][0-9]*) · khong do duoc = (?:0|[1-9][0-9]*) / tong (?:0|[1-9][0-9]*)$|MUTANT [A-Za-z0-9-]+ \\| (?:T[0-9]+(?:,T[0-9]+)*)? \\| (?:(?P<mm>[1-9][0-9]*)/(?P=mm)$|KHONG DO DUOC \\(sau \\d+ lan\\): |0/\\d+: )|CASE T[0-9]+: (?:DAT$|DO — )|(?:0|[1-9][0-9]*)/(?:0|[1-9][0-9]*)$|LOI: (?:ba so hang khong cong dung tong$|nhom bat buoc THIEU \\(chua chay hoac chua co dot bien\\): \\[\'r[0-9]+\'(?:, \'r[0-9]+\')*\\]$))")'),
+    ("chan-doan-noi-long-duoi-loi-thieu-nhom", ("r538",),
+     '    ranh = re.compile(r"^(?:TU KIEM r[0-9]+: (?:DAT$|DO_CHOT — |DO_KHAC — .*: )|TU KIEM: (?:0|[1-9][0-9]*)/(?:0|[1-9][0-9]*)$|TU KIEM co dot bien rieng: (?:0|[1-9][0-9]*)/(?:0|[1-9][0-9]*) nhom bat buoc · dot bien giet (?:0|[1-9][0-9]*)/(?:0|[1-9][0-9]*)$|DOT BIEN TU KIEM(?: [A-Za-z0-9-]+ \\| (?:r[0-9]+(?:,r[0-9]+)*)? \\| (?:(?P<db>(?:0|[1-9][0-9]*))/(?P=db)$|TIN DUNG GIA: (?:ca chet vi loi VO CAN \\[\'r\\d+\'(?:, \'r\\d+\')*\\]$|child rc=(?:0|-[1-9][0-9]*|[2-9]|[1-9][0-9]+) != 1$)|0 — ca do THUC TE: (?:r\\d+(?:,r\\d+)*|\\(rong\\))$)| [A-Za-z0-9-]+: NEO KHONG DUY NHAT \\((?:0|[2-9]|[1-9][0-9]+)\\)$|: KHONG DO DUOC — phep cat bang hong$)|MUTANT: giet = (?:0|[1-9][0-9]*) · khong giet = (?:0|[1-9][0-9]*) · khong do duoc = (?:0|[1-9][0-9]*) / tong (?:0|[1-9][0-9]*)$|MUTANT [A-Za-z0-9-]+ \\| (?:T[0-9]+(?:,T[0-9]+)*)? \\| (?:(?P<mm>[1-9][0-9]*)/(?P=mm)$|KHONG DO DUOC \\(sau [12] lan\\): (?:khong phong duoc tien trinh con: .*: .*|(?:ban\\ ghi\\ TRUNG\\ cho\\ ca\\ .*|ban\\ ghi\\ dong\\ luot\\ thieu\\ rc\\ kieu\\ int|ban\\ ghi\\ khong\\ neo\\ dung\\ luot:\\ .*|ban\\ ghi\\ khong\\ phai\\ JSON|ban\\ ghi\\ khong\\ phai\\ object:\\ .*|ban\\ ghi\\ thieu\\ ten\\ ca|ban\\ ghi\\ vua\\ mang\\ ten\\ ca\\ vua\\ khai\\ dong\\ luot|bo\\ doc\\ kenh\\ nem\\ .*:\\ .*|ca\\ do\\ vi\\ ngoai\\ le\\ KHONG\\ phai\\ TinHieuChotCa:\\ .*\\ \\|\\ .*|chi\\ tiet\\ khong\\ phai\\ chuoi\\ cho\\ ca\\ .*|co\\ ban\\ ghi\\ SAU\\ ban\\ ghi\\ dong\\ luot|dau\\ dong\\ luot\\ khong\\ phai\\ bool\\ true:\\ .*|dich\\ RONG:\\ khong\\ cap\\ GIET\\ khi\\ khong\\ ca\\ nao\\ phai\\ chet|dich\\ co\\ ten\\ ca\\ KHONG\\ ton\\ tai:\\ .*|kenh\\ khong\\ ton\\ tai|khong\\ doc\\ duoc\\ kenh:\\ .*:\\ .*|nhan\\ khong\\ hop\\ le\\ cho\\ ca\\ .*:\\ .*|rc\\ dong\\ luot\\ .*\\ !=\\ rc\\ tien\\ trinh\\ .*|ten\\ ca\\ khong\\ phai\\ chuoi:\\ .*|thieu\\ ban\\ ghi\\ dong\\ luot|thieu\\ ca\\ .*\\ /\\ ca\\ la\\ .*) \\| rc_con=(?:0|-?[1-9][0-9]*) \\| stderr\\[-200:\\]=.*)$|0/[1-9][0-9]*: tap ca do chot \\[(?:\'T[0-9]+\'(?:, \'T[0-9]+\')*)?\\] != dich \\[(?:\'T[0-9]+\'(?:, \'T[0-9]+\')*)?\\]$)|CASE T[0-9]+: (?:DAT$|DO — )|(?:0|[1-9][0-9]*)/(?:0|[1-9][0-9]*)$|LOI: (?:ba so hang khong cong dung tong$|nhom bat buoc THIEU \\(chua chay hoac chua co dot bien\\): \\[\'r[0-9]+\'(?:, \'r[0-9]+\')*\\]$))")',
+     '    ranh = re.compile(r"^(?:TU KIEM r[0-9]+: (?:DAT$|DO_CHOT — |DO_KHAC — .*: )|TU KIEM: (?:0|[1-9][0-9]*)/(?:0|[1-9][0-9]*)$|TU KIEM co dot bien rieng: (?:0|[1-9][0-9]*)/(?:0|[1-9][0-9]*) nhom bat buoc · dot bien giet (?:0|[1-9][0-9]*)/(?:0|[1-9][0-9]*)$|DOT BIEN TU KIEM(?: [A-Za-z0-9-]+ \\| (?:r[0-9]+(?:,r[0-9]+)*)? \\| (?:(?P<db>(?:0|[1-9][0-9]*))/(?P=db)$|TIN DUNG GIA: (?:ca chet vi loi VO CAN \\[\'r\\d+\'(?:, \'r\\d+\')*\\]$|child rc=(?:0|-[1-9][0-9]*|[2-9]|[1-9][0-9]+) != 1$)|0 — ca do THUC TE: (?:r\\d+(?:,r\\d+)*|\\(rong\\))$)| [A-Za-z0-9-]+: NEO KHONG DUY NHAT \\((?:0|[2-9]|[1-9][0-9]+)\\)$|: KHONG DO DUOC — phep cat bang hong$)|MUTANT: giet = (?:0|[1-9][0-9]*) · khong giet = (?:0|[1-9][0-9]*) · khong do duoc = (?:0|[1-9][0-9]*) / tong (?:0|[1-9][0-9]*)$|MUTANT [A-Za-z0-9-]+ \\| (?:T[0-9]+(?:,T[0-9]+)*)? \\| (?:(?P<mm>[1-9][0-9]*)/(?P=mm)$|KHONG DO DUOC \\(sau [12] lan\\): (?:khong phong duoc tien trinh con: .*: .*|(?:ban\\ ghi\\ TRUNG\\ cho\\ ca\\ .*|ban\\ ghi\\ dong\\ luot\\ thieu\\ rc\\ kieu\\ int|ban\\ ghi\\ khong\\ neo\\ dung\\ luot:\\ .*|ban\\ ghi\\ khong\\ phai\\ JSON|ban\\ ghi\\ khong\\ phai\\ object:\\ .*|ban\\ ghi\\ thieu\\ ten\\ ca|ban\\ ghi\\ vua\\ mang\\ ten\\ ca\\ vua\\ khai\\ dong\\ luot|bo\\ doc\\ kenh\\ nem\\ .*:\\ .*|ca\\ do\\ vi\\ ngoai\\ le\\ KHONG\\ phai\\ TinHieuChotCa:\\ .*\\ \\|\\ .*|chi\\ tiet\\ khong\\ phai\\ chuoi\\ cho\\ ca\\ .*|co\\ ban\\ ghi\\ SAU\\ ban\\ ghi\\ dong\\ luot|dau\\ dong\\ luot\\ khong\\ phai\\ bool\\ true:\\ .*|dich\\ RONG:\\ khong\\ cap\\ GIET\\ khi\\ khong\\ ca\\ nao\\ phai\\ chet|dich\\ co\\ ten\\ ca\\ KHONG\\ ton\\ tai:\\ .*|kenh\\ khong\\ ton\\ tai|khong\\ doc\\ duoc\\ kenh:\\ .*:\\ .*|nhan\\ khong\\ hop\\ le\\ cho\\ ca\\ .*:\\ .*|rc\\ dong\\ luot\\ .*\\ !=\\ rc\\ tien\\ trinh\\ .*|ten\\ ca\\ khong\\ phai\\ chuoi:\\ .*|thieu\\ ban\\ ghi\\ dong\\ luot|thieu\\ ca\\ .*\\ /\\ ca\\ la\\ .*) \\| rc_con=(?:0|-?[1-9][0-9]*) \\| stderr\\[-200:\\]=.*)$|0/[1-9][0-9]*: tap ca do chot \\[(?:\'T[0-9]+\'(?:, \'T[0-9]+\')*)?\\] != dich \\[(?:\'T[0-9]+\'(?:, \'T[0-9]+\')*)?\\]$)|CASE T[0-9]+: (?:DAT$|DO — )|(?:0|[1-9][0-9]*)/(?:0|[1-9][0-9]*)$|LOI: (?:ba so hang khong cong dung tong$|nhom bat buoc THIEU \\(chua chay hoac chua co dot bien\\): ))")'),
+    ("chan-doan-bo-dau-phan-cach-cua-nhan", ("r538",),
+     '    ranh = re.compile(r"^(?:TU KIEM r[0-9]+: (?:DAT$|DO_CHOT — |DO_KHAC — .*: )|TU KIEM: (?:0|[1-9][0-9]*)/(?:0|[1-9][0-9]*)$|TU KIEM co dot bien rieng: (?:0|[1-9][0-9]*)/(?:0|[1-9][0-9]*) nhom bat buoc · dot bien giet (?:0|[1-9][0-9]*)/(?:0|[1-9][0-9]*)$|DOT BIEN TU KIEM(?: [A-Za-z0-9-]+ \\| (?:r[0-9]+(?:,r[0-9]+)*)? \\| (?:(?P<db>(?:0|[1-9][0-9]*))/(?P=db)$|TIN DUNG GIA: (?:ca chet vi loi VO CAN \\[\'r\\d+\'(?:, \'r\\d+\')*\\]$|child rc=(?:0|-[1-9][0-9]*|[2-9]|[1-9][0-9]+) != 1$)|0 — ca do THUC TE: (?:r\\d+(?:,r\\d+)*|\\(rong\\))$)| [A-Za-z0-9-]+: NEO KHONG DUY NHAT \\((?:0|[2-9]|[1-9][0-9]+)\\)$|: KHONG DO DUOC — phep cat bang hong$)|MUTANT: giet = (?:0|[1-9][0-9]*) · khong giet = (?:0|[1-9][0-9]*) · khong do duoc = (?:0|[1-9][0-9]*) / tong (?:0|[1-9][0-9]*)$|MUTANT [A-Za-z0-9-]+ \\| (?:T[0-9]+(?:,T[0-9]+)*)? \\| (?:(?P<mm>[1-9][0-9]*)/(?P=mm)$|KHONG DO DUOC \\(sau [12] lan\\): (?:khong phong duoc tien trinh con: .*: .*|(?:ban\\ ghi\\ TRUNG\\ cho\\ ca\\ .*|ban\\ ghi\\ dong\\ luot\\ thieu\\ rc\\ kieu\\ int|ban\\ ghi\\ khong\\ neo\\ dung\\ luot:\\ .*|ban\\ ghi\\ khong\\ phai\\ JSON|ban\\ ghi\\ khong\\ phai\\ object:\\ .*|ban\\ ghi\\ thieu\\ ten\\ ca|ban\\ ghi\\ vua\\ mang\\ ten\\ ca\\ vua\\ khai\\ dong\\ luot|bo\\ doc\\ kenh\\ nem\\ .*:\\ .*|ca\\ do\\ vi\\ ngoai\\ le\\ KHONG\\ phai\\ TinHieuChotCa:\\ .*\\ \\|\\ .*|chi\\ tiet\\ khong\\ phai\\ chuoi\\ cho\\ ca\\ .*|co\\ ban\\ ghi\\ SAU\\ ban\\ ghi\\ dong\\ luot|dau\\ dong\\ luot\\ khong\\ phai\\ bool\\ true:\\ .*|dich\\ RONG:\\ khong\\ cap\\ GIET\\ khi\\ khong\\ ca\\ nao\\ phai\\ chet|dich\\ co\\ ten\\ ca\\ KHONG\\ ton\\ tai:\\ .*|kenh\\ khong\\ ton\\ tai|khong\\ doc\\ duoc\\ kenh:\\ .*:\\ .*|nhan\\ khong\\ hop\\ le\\ cho\\ ca\\ .*:\\ .*|rc\\ dong\\ luot\\ .*\\ !=\\ rc\\ tien\\ trinh\\ .*|ten\\ ca\\ khong\\ phai\\ chuoi:\\ .*|thieu\\ ban\\ ghi\\ dong\\ luot|thieu\\ ca\\ .*\\ /\\ ca\\ la\\ .*) \\| rc_con=(?:0|-?[1-9][0-9]*) \\| stderr\\[-200:\\]=.*)$|0/[1-9][0-9]*: tap ca do chot \\[(?:\'T[0-9]+\'(?:, \'T[0-9]+\')*)?\\] != dich \\[(?:\'T[0-9]+\'(?:, \'T[0-9]+\')*)?\\]$)|CASE T[0-9]+: (?:DAT$|DO — )|(?:0|[1-9][0-9]*)/(?:0|[1-9][0-9]*)$|LOI: (?:ba so hang khong cong dung tong$|nhom bat buoc THIEU \\(chua chay hoac chua co dot bien\\): \\[\'r[0-9]+\'(?:, \'r[0-9]+\')*\\]$))")',
+     '    ranh = re.compile(r"^(?:TU KIEM r[0-9]+: (?:DAT$|DO_CHOT(?: |$)|DO_KHAC(?: |$))|TU KIEM: (?:0|[1-9][0-9]*)/(?:0|[1-9][0-9]*)$|TU KIEM co dot bien rieng: (?:0|[1-9][0-9]*)/(?:0|[1-9][0-9]*) nhom bat buoc · dot bien giet (?:0|[1-9][0-9]*)/(?:0|[1-9][0-9]*)$|DOT BIEN TU KIEM(?: [A-Za-z0-9-]+ \\| (?:r[0-9]+(?:,r[0-9]+)*)? \\| (?:(?P<db>(?:0|[1-9][0-9]*))/(?P=db)$|TIN DUNG GIA: (?:ca chet vi loi VO CAN \\[\'r\\d+\'(?:, \'r\\d+\')*\\]$|child rc=(?:0|-[1-9][0-9]*|[2-9]|[1-9][0-9]+) != 1$)|0 — ca do THUC TE: (?:r\\d+(?:,r\\d+)*|\\(rong\\))$)| [A-Za-z0-9-]+: NEO KHONG DUY NHAT \\((?:0|[2-9]|[1-9][0-9]+)\\)$|: KHONG DO DUOC — phep cat bang hong$)|MUTANT: giet = (?:0|[1-9][0-9]*) · khong giet = (?:0|[1-9][0-9]*) · khong do duoc = (?:0|[1-9][0-9]*) / tong (?:0|[1-9][0-9]*)$|MUTANT [A-Za-z0-9-]+ \\| (?:T[0-9]+(?:,T[0-9]+)*)? \\| (?:(?P<mm>[1-9][0-9]*)/(?P=mm)$|KHONG DO DUOC \\(sau [12] lan\\): (?:khong phong duoc tien trinh con: .*: .*|(?:ban\\ ghi\\ TRUNG\\ cho\\ ca\\ .*|ban\\ ghi\\ dong\\ luot\\ thieu\\ rc\\ kieu\\ int|ban\\ ghi\\ khong\\ neo\\ dung\\ luot:\\ .*|ban\\ ghi\\ khong\\ phai\\ JSON|ban\\ ghi\\ khong\\ phai\\ object:\\ .*|ban\\ ghi\\ thieu\\ ten\\ ca|ban\\ ghi\\ vua\\ mang\\ ten\\ ca\\ vua\\ khai\\ dong\\ luot|bo\\ doc\\ kenh\\ nem\\ .*:\\ .*|ca\\ do\\ vi\\ ngoai\\ le\\ KHONG\\ phai\\ TinHieuChotCa:\\ .*\\ \\|\\ .*|chi\\ tiet\\ khong\\ phai\\ chuoi\\ cho\\ ca\\ .*|co\\ ban\\ ghi\\ SAU\\ ban\\ ghi\\ dong\\ luot|dau\\ dong\\ luot\\ khong\\ phai\\ bool\\ true:\\ .*|dich\\ RONG:\\ khong\\ cap\\ GIET\\ khi\\ khong\\ ca\\ nao\\ phai\\ chet|dich\\ co\\ ten\\ ca\\ KHONG\\ ton\\ tai:\\ .*|kenh\\ khong\\ ton\\ tai|khong\\ doc\\ duoc\\ kenh:\\ .*:\\ .*|nhan\\ khong\\ hop\\ le\\ cho\\ ca\\ .*:\\ .*|rc\\ dong\\ luot\\ .*\\ !=\\ rc\\ tien\\ trinh\\ .*|ten\\ ca\\ khong\\ phai\\ chuoi:\\ .*|thieu\\ ban\\ ghi\\ dong\\ luot|thieu\\ ca\\ .*\\ /\\ ca\\ la\\ .*) \\| rc_con=(?:0|-?[1-9][0-9]*) \\| stderr\\[-200:\\]=.*)$|0/[1-9][0-9]*: tap ca do chot \\[(?:\'T[0-9]+\'(?:, \'T[0-9]+\')*)?\\] != dich \\[(?:\'T[0-9]+\'(?:, \'T[0-9]+\')*)?\\]$)|CASE T[0-9]+: (?:DAT$|DO — )|(?:0|[1-9][0-9]*)/(?:0|[1-9][0-9]*)$|LOI: (?:ba so hang khong cong dung tong$|nhom bat buoc THIEU \\(chua chay hoac chua co dot bien\\): \\[\'r[0-9]+\'(?:, \'r[0-9]+\')*\\]$))")'),
+    # luot 7 (cross-review tren e7f15cb) — bon nhom lech giua ngu phap va MIEN GIA
+    # TRI ma ma bao dam: L `ly_do` (chi kiem khong rong), D cot dich (`[^|]*`),
+    # S so (`\d` nhan chu so Unicode, so dem `01`, `-0`, va `rc=1` o nhanh `!= 1`),
+    # K ten ngoai le (`[A-Za-z_]\w*` bac `Échec`, `Bad-Error`, ten rong). Moi nhom
+    # mot dot bien; ti so `n/n` doi HAI SO BANG NHAU bang tham chieu nguoc.
+    ("chan-doan-ly-do-chi-kiem-khong-rong", ("r538",),
+     '    ranh = re.compile(r"^(?:TU KIEM r[0-9]+: (?:DAT$|DO_CHOT — |DO_KHAC — .*: )|TU KIEM: (?:0|[1-9][0-9]*)/(?:0|[1-9][0-9]*)$|TU KIEM co dot bien rieng: (?:0|[1-9][0-9]*)/(?:0|[1-9][0-9]*) nhom bat buoc · dot bien giet (?:0|[1-9][0-9]*)/(?:0|[1-9][0-9]*)$|DOT BIEN TU KIEM(?: [A-Za-z0-9-]+ \\| (?:r[0-9]+(?:,r[0-9]+)*)? \\| (?:(?P<db>(?:0|[1-9][0-9]*))/(?P=db)$|TIN DUNG GIA: (?:ca chet vi loi VO CAN \\[\'r\\d+\'(?:, \'r\\d+\')*\\]$|child rc=(?:0|-[1-9][0-9]*|[2-9]|[1-9][0-9]+) != 1$)|0 — ca do THUC TE: (?:r\\d+(?:,r\\d+)*|\\(rong\\))$)| [A-Za-z0-9-]+: NEO KHONG DUY NHAT \\((?:0|[2-9]|[1-9][0-9]+)\\)$|: KHONG DO DUOC — phep cat bang hong$)|MUTANT: giet = (?:0|[1-9][0-9]*) · khong giet = (?:0|[1-9][0-9]*) · khong do duoc = (?:0|[1-9][0-9]*) / tong (?:0|[1-9][0-9]*)$|MUTANT [A-Za-z0-9-]+ \\| (?:T[0-9]+(?:,T[0-9]+)*)? \\| (?:(?P<mm>[1-9][0-9]*)/(?P=mm)$|KHONG DO DUOC \\(sau [12] lan\\): (?:khong phong duoc tien trinh con: .*: .*|(?:ban\\ ghi\\ TRUNG\\ cho\\ ca\\ .*|ban\\ ghi\\ dong\\ luot\\ thieu\\ rc\\ kieu\\ int|ban\\ ghi\\ khong\\ neo\\ dung\\ luot:\\ .*|ban\\ ghi\\ khong\\ phai\\ JSON|ban\\ ghi\\ khong\\ phai\\ object:\\ .*|ban\\ ghi\\ thieu\\ ten\\ ca|ban\\ ghi\\ vua\\ mang\\ ten\\ ca\\ vua\\ khai\\ dong\\ luot|bo\\ doc\\ kenh\\ nem\\ .*:\\ .*|ca\\ do\\ vi\\ ngoai\\ le\\ KHONG\\ phai\\ TinHieuChotCa:\\ .*\\ \\|\\ .*|chi\\ tiet\\ khong\\ phai\\ chuoi\\ cho\\ ca\\ .*|co\\ ban\\ ghi\\ SAU\\ ban\\ ghi\\ dong\\ luot|dau\\ dong\\ luot\\ khong\\ phai\\ bool\\ true:\\ .*|dich\\ RONG:\\ khong\\ cap\\ GIET\\ khi\\ khong\\ ca\\ nao\\ phai\\ chet|dich\\ co\\ ten\\ ca\\ KHONG\\ ton\\ tai:\\ .*|kenh\\ khong\\ ton\\ tai|khong\\ doc\\ duoc\\ kenh:\\ .*:\\ .*|nhan\\ khong\\ hop\\ le\\ cho\\ ca\\ .*:\\ .*|rc\\ dong\\ luot\\ .*\\ !=\\ rc\\ tien\\ trinh\\ .*|ten\\ ca\\ khong\\ phai\\ chuoi:\\ .*|thieu\\ ban\\ ghi\\ dong\\ luot|thieu\\ ca\\ .*\\ /\\ ca\\ la\\ .*) \\| rc_con=(?:0|-?[1-9][0-9]*) \\| stderr\\[-200:\\]=.*)$|0/[1-9][0-9]*: tap ca do chot \\[(?:\'T[0-9]+\'(?:, \'T[0-9]+\')*)?\\] != dich \\[(?:\'T[0-9]+\'(?:, \'T[0-9]+\')*)?\\]$)|CASE T[0-9]+: (?:DAT$|DO — )|(?:0|[1-9][0-9]*)/(?:0|[1-9][0-9]*)$|LOI: (?:ba so hang khong cong dung tong$|nhom bat buoc THIEU \\(chua chay hoac chua co dot bien\\): \\[\'r[0-9]+\'(?:, \'r[0-9]+\')*\\]$))")',
+     '    ranh = re.compile(r"^(?:TU KIEM r[0-9]+: (?:DAT$|DO_CHOT — |DO_KHAC — .*: )|TU KIEM: (?:0|[1-9][0-9]*)/(?:0|[1-9][0-9]*)$|TU KIEM co dot bien rieng: (?:0|[1-9][0-9]*)/(?:0|[1-9][0-9]*) nhom bat buoc · dot bien giet (?:0|[1-9][0-9]*)/(?:0|[1-9][0-9]*)$|DOT BIEN TU KIEM(?: [A-Za-z0-9-]+ \\| (?:r[0-9]+(?:,r[0-9]+)*)? \\| (?:(?P<db>(?:0|[1-9][0-9]*))/(?P=db)$|TIN DUNG GIA: (?:ca chet vi loi VO CAN \\[\'r\\d+\'(?:, \'r\\d+\')*\\]$|child rc=(?:0|-[1-9][0-9]*|[2-9]|[1-9][0-9]+) != 1$)|0 — ca do THUC TE: (?:r\\d+(?:,r\\d+)*|\\(rong\\))$)| [A-Za-z0-9-]+: NEO KHONG DUY NHAT \\((?:0|[2-9]|[1-9][0-9]+)\\)$|: KHONG DO DUOC — phep cat bang hong$)|MUTANT: giet = (?:0|[1-9][0-9]*) · khong giet = (?:0|[1-9][0-9]*) · khong do duoc = (?:0|[1-9][0-9]*) / tong (?:0|[1-9][0-9]*)$|MUTANT [A-Za-z0-9-]+ \\| (?:T[0-9]+(?:,T[0-9]+)*)? \\| (?:(?P<mm>[1-9][0-9]*)/(?P=mm)$|KHONG DO DUOC \\(sau [12] lan\\): .+$|0/[1-9][0-9]*: .+$)|CASE T[0-9]+: (?:DAT$|DO — )|(?:0|[1-9][0-9]*)/(?:0|[1-9][0-9]*)$|LOI: (?:ba so hang khong cong dung tong$|nhom bat buoc THIEU \\(chua chay hoac chua co dot bien\\): \\[\'r[0-9]+\'(?:, \'r[0-9]+\')*\\]$))")'),
+    ("chan-doan-cot-dich-nhan-moi-thu", ("r538",),
+     '    ranh = re.compile(r"^(?:TU KIEM r[0-9]+: (?:DAT$|DO_CHOT — |DO_KHAC — .*: )|TU KIEM: (?:0|[1-9][0-9]*)/(?:0|[1-9][0-9]*)$|TU KIEM co dot bien rieng: (?:0|[1-9][0-9]*)/(?:0|[1-9][0-9]*) nhom bat buoc · dot bien giet (?:0|[1-9][0-9]*)/(?:0|[1-9][0-9]*)$|DOT BIEN TU KIEM(?: [A-Za-z0-9-]+ \\| (?:r[0-9]+(?:,r[0-9]+)*)? \\| (?:(?P<db>(?:0|[1-9][0-9]*))/(?P=db)$|TIN DUNG GIA: (?:ca chet vi loi VO CAN \\[\'r\\d+\'(?:, \'r\\d+\')*\\]$|child rc=(?:0|-[1-9][0-9]*|[2-9]|[1-9][0-9]+) != 1$)|0 — ca do THUC TE: (?:r\\d+(?:,r\\d+)*|\\(rong\\))$)| [A-Za-z0-9-]+: NEO KHONG DUY NHAT \\((?:0|[2-9]|[1-9][0-9]+)\\)$|: KHONG DO DUOC — phep cat bang hong$)|MUTANT: giet = (?:0|[1-9][0-9]*) · khong giet = (?:0|[1-9][0-9]*) · khong do duoc = (?:0|[1-9][0-9]*) / tong (?:0|[1-9][0-9]*)$|MUTANT [A-Za-z0-9-]+ \\| (?:T[0-9]+(?:,T[0-9]+)*)? \\| (?:(?P<mm>[1-9][0-9]*)/(?P=mm)$|KHONG DO DUOC \\(sau [12] lan\\): (?:khong phong duoc tien trinh con: .*: .*|(?:ban\\ ghi\\ TRUNG\\ cho\\ ca\\ .*|ban\\ ghi\\ dong\\ luot\\ thieu\\ rc\\ kieu\\ int|ban\\ ghi\\ khong\\ neo\\ dung\\ luot:\\ .*|ban\\ ghi\\ khong\\ phai\\ JSON|ban\\ ghi\\ khong\\ phai\\ object:\\ .*|ban\\ ghi\\ thieu\\ ten\\ ca|ban\\ ghi\\ vua\\ mang\\ ten\\ ca\\ vua\\ khai\\ dong\\ luot|bo\\ doc\\ kenh\\ nem\\ .*:\\ .*|ca\\ do\\ vi\\ ngoai\\ le\\ KHONG\\ phai\\ TinHieuChotCa:\\ .*\\ \\|\\ .*|chi\\ tiet\\ khong\\ phai\\ chuoi\\ cho\\ ca\\ .*|co\\ ban\\ ghi\\ SAU\\ ban\\ ghi\\ dong\\ luot|dau\\ dong\\ luot\\ khong\\ phai\\ bool\\ true:\\ .*|dich\\ RONG:\\ khong\\ cap\\ GIET\\ khi\\ khong\\ ca\\ nao\\ phai\\ chet|dich\\ co\\ ten\\ ca\\ KHONG\\ ton\\ tai:\\ .*|kenh\\ khong\\ ton\\ tai|khong\\ doc\\ duoc\\ kenh:\\ .*:\\ .*|nhan\\ khong\\ hop\\ le\\ cho\\ ca\\ .*:\\ .*|rc\\ dong\\ luot\\ .*\\ !=\\ rc\\ tien\\ trinh\\ .*|ten\\ ca\\ khong\\ phai\\ chuoi:\\ .*|thieu\\ ban\\ ghi\\ dong\\ luot|thieu\\ ca\\ .*\\ /\\ ca\\ la\\ .*) \\| rc_con=(?:0|-?[1-9][0-9]*) \\| stderr\\[-200:\\]=.*)$|0/[1-9][0-9]*: tap ca do chot \\[(?:\'T[0-9]+\'(?:, \'T[0-9]+\')*)?\\] != dich \\[(?:\'T[0-9]+\'(?:, \'T[0-9]+\')*)?\\]$)|CASE T[0-9]+: (?:DAT$|DO — )|(?:0|[1-9][0-9]*)/(?:0|[1-9][0-9]*)$|LOI: (?:ba so hang khong cong dung tong$|nhom bat buoc THIEU \\(chua chay hoac chua co dot bien\\): \\[\'r[0-9]+\'(?:, \'r[0-9]+\')*\\]$))")',
+     '    ranh = re.compile(r"^(?:TU KIEM r[0-9]+: (?:DAT$|DO_CHOT — |DO_KHAC — .*: )|TU KIEM: (?:0|[1-9][0-9]*)/(?:0|[1-9][0-9]*)$|TU KIEM co dot bien rieng: (?:0|[1-9][0-9]*)/(?:0|[1-9][0-9]*) nhom bat buoc · dot bien giet (?:0|[1-9][0-9]*)/(?:0|[1-9][0-9]*)$|DOT BIEN TU KIEM(?: [A-Za-z0-9-]+ \\| [^|]* \\| (?:(?P<db>(?:0|[1-9][0-9]*))/(?P=db)$|TIN DUNG GIA: (?:ca chet vi loi VO CAN \\[\'r\\d+\'(?:, \'r\\d+\')*\\]$|child rc=(?:0|-[1-9][0-9]*|[2-9]|[1-9][0-9]+) != 1$)|0 — ca do THUC TE: (?:r\\d+(?:,r\\d+)*|\\(rong\\))$)| [A-Za-z0-9-]+: NEO KHONG DUY NHAT \\((?:0|[2-9]|[1-9][0-9]+)\\)$|: KHONG DO DUOC — phep cat bang hong$)|MUTANT: giet = (?:0|[1-9][0-9]*) · khong giet = (?:0|[1-9][0-9]*) · khong do duoc = (?:0|[1-9][0-9]*) / tong (?:0|[1-9][0-9]*)$|MUTANT [A-Za-z0-9-]+ \\| [^|]* \\| (?:(?P<mm>[1-9][0-9]*)/(?P=mm)$|KHONG DO DUOC \\(sau [12] lan\\): (?:khong phong duoc tien trinh con: .*: .*|(?:ban\\ ghi\\ TRUNG\\ cho\\ ca\\ .*|ban\\ ghi\\ dong\\ luot\\ thieu\\ rc\\ kieu\\ int|ban\\ ghi\\ khong\\ neo\\ dung\\ luot:\\ .*|ban\\ ghi\\ khong\\ phai\\ JSON|ban\\ ghi\\ khong\\ phai\\ object:\\ .*|ban\\ ghi\\ thieu\\ ten\\ ca|ban\\ ghi\\ vua\\ mang\\ ten\\ ca\\ vua\\ khai\\ dong\\ luot|bo\\ doc\\ kenh\\ nem\\ .*:\\ .*|ca\\ do\\ vi\\ ngoai\\ le\\ KHONG\\ phai\\ TinHieuChotCa:\\ .*\\ \\|\\ .*|chi\\ tiet\\ khong\\ phai\\ chuoi\\ cho\\ ca\\ .*|co\\ ban\\ ghi\\ SAU\\ ban\\ ghi\\ dong\\ luot|dau\\ dong\\ luot\\ khong\\ phai\\ bool\\ true:\\ .*|dich\\ RONG:\\ khong\\ cap\\ GIET\\ khi\\ khong\\ ca\\ nao\\ phai\\ chet|dich\\ co\\ ten\\ ca\\ KHONG\\ ton\\ tai:\\ .*|kenh\\ khong\\ ton\\ tai|khong\\ doc\\ duoc\\ kenh:\\ .*:\\ .*|nhan\\ khong\\ hop\\ le\\ cho\\ ca\\ .*:\\ .*|rc\\ dong\\ luot\\ .*\\ !=\\ rc\\ tien\\ trinh\\ .*|ten\\ ca\\ khong\\ phai\\ chuoi:\\ .*|thieu\\ ban\\ ghi\\ dong\\ luot|thieu\\ ca\\ .*\\ /\\ ca\\ la\\ .*) \\| rc_con=(?:0|-?[1-9][0-9]*) \\| stderr\\[-200:\\]=.*)$|0/[1-9][0-9]*: tap ca do chot \\[(?:\'T[0-9]+\'(?:, \'T[0-9]+\')*)?\\] != dich \\[(?:\'T[0-9]+\'(?:, \'T[0-9]+\')*)?\\]$)|CASE T[0-9]+: (?:DAT$|DO — )|(?:0|[1-9][0-9]*)/(?:0|[1-9][0-9]*)$|LOI: (?:ba so hang khong cong dung tong$|nhom bat buoc THIEU \\(chua chay hoac chua co dot bien\\): \\[\'r[0-9]+\'(?:, \'r[0-9]+\')*\\]$))")'),
+    ("chan-doan-so-nhan-chu-so-unicode-va-dem", ("r538",),
+     '    ranh = re.compile(r"^(?:TU KIEM r[0-9]+: (?:DAT$|DO_CHOT — |DO_KHAC — .*: )|TU KIEM: (?:0|[1-9][0-9]*)/(?:0|[1-9][0-9]*)$|TU KIEM co dot bien rieng: (?:0|[1-9][0-9]*)/(?:0|[1-9][0-9]*) nhom bat buoc · dot bien giet (?:0|[1-9][0-9]*)/(?:0|[1-9][0-9]*)$|DOT BIEN TU KIEM(?: [A-Za-z0-9-]+ \\| (?:r[0-9]+(?:,r[0-9]+)*)? \\| (?:(?P<db>(?:0|[1-9][0-9]*))/(?P=db)$|TIN DUNG GIA: (?:ca chet vi loi VO CAN \\[\'r\\d+\'(?:, \'r\\d+\')*\\]$|child rc=(?:0|-[1-9][0-9]*|[2-9]|[1-9][0-9]+) != 1$)|0 — ca do THUC TE: (?:r\\d+(?:,r\\d+)*|\\(rong\\))$)| [A-Za-z0-9-]+: NEO KHONG DUY NHAT \\((?:0|[2-9]|[1-9][0-9]+)\\)$|: KHONG DO DUOC — phep cat bang hong$)|MUTANT: giet = (?:0|[1-9][0-9]*) · khong giet = (?:0|[1-9][0-9]*) · khong do duoc = (?:0|[1-9][0-9]*) / tong (?:0|[1-9][0-9]*)$|MUTANT [A-Za-z0-9-]+ \\| (?:T[0-9]+(?:,T[0-9]+)*)? \\| (?:(?P<mm>[1-9][0-9]*)/(?P=mm)$|KHONG DO DUOC \\(sau [12] lan\\): (?:khong phong duoc tien trinh con: .*: .*|(?:ban\\ ghi\\ TRUNG\\ cho\\ ca\\ .*|ban\\ ghi\\ dong\\ luot\\ thieu\\ rc\\ kieu\\ int|ban\\ ghi\\ khong\\ neo\\ dung\\ luot:\\ .*|ban\\ ghi\\ khong\\ phai\\ JSON|ban\\ ghi\\ khong\\ phai\\ object:\\ .*|ban\\ ghi\\ thieu\\ ten\\ ca|ban\\ ghi\\ vua\\ mang\\ ten\\ ca\\ vua\\ khai\\ dong\\ luot|bo\\ doc\\ kenh\\ nem\\ .*:\\ .*|ca\\ do\\ vi\\ ngoai\\ le\\ KHONG\\ phai\\ TinHieuChotCa:\\ .*\\ \\|\\ .*|chi\\ tiet\\ khong\\ phai\\ chuoi\\ cho\\ ca\\ .*|co\\ ban\\ ghi\\ SAU\\ ban\\ ghi\\ dong\\ luot|dau\\ dong\\ luot\\ khong\\ phai\\ bool\\ true:\\ .*|dich\\ RONG:\\ khong\\ cap\\ GIET\\ khi\\ khong\\ ca\\ nao\\ phai\\ chet|dich\\ co\\ ten\\ ca\\ KHONG\\ ton\\ tai:\\ .*|kenh\\ khong\\ ton\\ tai|khong\\ doc\\ duoc\\ kenh:\\ .*:\\ .*|nhan\\ khong\\ hop\\ le\\ cho\\ ca\\ .*:\\ .*|rc\\ dong\\ luot\\ .*\\ !=\\ rc\\ tien\\ trinh\\ .*|ten\\ ca\\ khong\\ phai\\ chuoi:\\ .*|thieu\\ ban\\ ghi\\ dong\\ luot|thieu\\ ca\\ .*\\ /\\ ca\\ la\\ .*) \\| rc_con=(?:0|-?[1-9][0-9]*) \\| stderr\\[-200:\\]=.*)$|0/[1-9][0-9]*: tap ca do chot \\[(?:\'T[0-9]+\'(?:, \'T[0-9]+\')*)?\\] != dich \\[(?:\'T[0-9]+\'(?:, \'T[0-9]+\')*)?\\]$)|CASE T[0-9]+: (?:DAT$|DO — )|(?:0|[1-9][0-9]*)/(?:0|[1-9][0-9]*)$|LOI: (?:ba so hang khong cong dung tong$|nhom bat buoc THIEU \\(chua chay hoac chua co dot bien\\): \\[\'r[0-9]+\'(?:, \'r[0-9]+\')*\\]$))")',
+     '    ranh = re.compile(r"^(?:TU KIEM r[0-9]+: (?:DAT$|DO_CHOT — |DO_KHAC — .*: )|TU KIEM: \\d+/\\d+$|TU KIEM co dot bien rieng: \\d+/\\d+ nhom bat buoc · dot bien giet \\d+/\\d+$|DOT BIEN TU KIEM(?: [A-Za-z0-9-]+ \\| (?:r[0-9]+(?:,r[0-9]+)*)? \\| (?:(?P<db>\\d+)/(?P=db)$|TIN DUNG GIA: (?:ca chet vi loi VO CAN \\[\'r\\d+\'(?:, \'r\\d+\')*\\]$|child rc=(?:0|-[1-9][0-9]*|[2-9]|[1-9][0-9]+) != 1$)|0 — ca do THUC TE: (?:r\\d+(?:,r\\d+)*|\\(rong\\))$)| [A-Za-z0-9-]+: NEO KHONG DUY NHAT \\((?:0|[2-9]|[1-9][0-9]+)\\)$|: KHONG DO DUOC — phep cat bang hong$)|MUTANT: giet = \\d+ · khong giet = \\d+ · khong do duoc = \\d+ / tong \\d+$|MUTANT [A-Za-z0-9-]+ \\| (?:T[0-9]+(?:,T[0-9]+)*)? \\| (?:(?P<mm>[1-9][0-9]*)/(?P=mm)$|KHONG DO DUOC \\(sau [12] lan\\): (?:khong phong duoc tien trinh con: .*: .*|(?:ban\\ ghi\\ TRUNG\\ cho\\ ca\\ .*|ban\\ ghi\\ dong\\ luot\\ thieu\\ rc\\ kieu\\ int|ban\\ ghi\\ khong\\ neo\\ dung\\ luot:\\ .*|ban\\ ghi\\ khong\\ phai\\ JSON|ban\\ ghi\\ khong\\ phai\\ object:\\ .*|ban\\ ghi\\ thieu\\ ten\\ ca|ban\\ ghi\\ vua\\ mang\\ ten\\ ca\\ vua\\ khai\\ dong\\ luot|bo\\ doc\\ kenh\\ nem\\ .*:\\ .*|ca\\ do\\ vi\\ ngoai\\ le\\ KHONG\\ phai\\ TinHieuChotCa:\\ .*\\ \\|\\ .*|chi\\ tiet\\ khong\\ phai\\ chuoi\\ cho\\ ca\\ .*|co\\ ban\\ ghi\\ SAU\\ ban\\ ghi\\ dong\\ luot|dau\\ dong\\ luot\\ khong\\ phai\\ bool\\ true:\\ .*|dich\\ RONG:\\ khong\\ cap\\ GIET\\ khi\\ khong\\ ca\\ nao\\ phai\\ chet|dich\\ co\\ ten\\ ca\\ KHONG\\ ton\\ tai:\\ .*|kenh\\ khong\\ ton\\ tai|khong\\ doc\\ duoc\\ kenh:\\ .*:\\ .*|nhan\\ khong\\ hop\\ le\\ cho\\ ca\\ .*:\\ .*|rc\\ dong\\ luot\\ .*\\ !=\\ rc\\ tien\\ trinh\\ .*|ten\\ ca\\ khong\\ phai\\ chuoi:\\ .*|thieu\\ ban\\ ghi\\ dong\\ luot|thieu\\ ca\\ .*\\ /\\ ca\\ la\\ .*) \\| rc_con=(?:0|-?[1-9][0-9]*) \\| stderr\\[-200:\\]=.*)$|0/[1-9][0-9]*: tap ca do chot \\[(?:\'T[0-9]+\'(?:, \'T[0-9]+\')*)?\\] != dich \\[(?:\'T[0-9]+\'(?:, \'T[0-9]+\')*)?\\]$)|CASE T[0-9]+: (?:DAT$|DO — )|\\d+/\\d+$|LOI: (?:ba so hang khong cong dung tong$|nhom bat buoc THIEU \\(chua chay hoac chua co dot bien\\): \\[\'r[0-9]+\'(?:, \'r[0-9]+\')*\\]$))")'),
+    ("chan-doan-rc-con-nhan-1-va-am-0", ("r538",),
+     '    ranh = re.compile(r"^(?:TU KIEM r[0-9]+: (?:DAT$|DO_CHOT — |DO_KHAC — .*: )|TU KIEM: (?:0|[1-9][0-9]*)/(?:0|[1-9][0-9]*)$|TU KIEM co dot bien rieng: (?:0|[1-9][0-9]*)/(?:0|[1-9][0-9]*) nhom bat buoc · dot bien giet (?:0|[1-9][0-9]*)/(?:0|[1-9][0-9]*)$|DOT BIEN TU KIEM(?: [A-Za-z0-9-]+ \\| (?:r[0-9]+(?:,r[0-9]+)*)? \\| (?:(?P<db>(?:0|[1-9][0-9]*))/(?P=db)$|TIN DUNG GIA: (?:ca chet vi loi VO CAN \\[\'r\\d+\'(?:, \'r\\d+\')*\\]$|child rc=(?:0|-[1-9][0-9]*|[2-9]|[1-9][0-9]+) != 1$)|0 — ca do THUC TE: (?:r\\d+(?:,r\\d+)*|\\(rong\\))$)| [A-Za-z0-9-]+: NEO KHONG DUY NHAT \\((?:0|[2-9]|[1-9][0-9]+)\\)$|: KHONG DO DUOC — phep cat bang hong$)|MUTANT: giet = (?:0|[1-9][0-9]*) · khong giet = (?:0|[1-9][0-9]*) · khong do duoc = (?:0|[1-9][0-9]*) / tong (?:0|[1-9][0-9]*)$|MUTANT [A-Za-z0-9-]+ \\| (?:T[0-9]+(?:,T[0-9]+)*)? \\| (?:(?P<mm>[1-9][0-9]*)/(?P=mm)$|KHONG DO DUOC \\(sau [12] lan\\): (?:khong phong duoc tien trinh con: .*: .*|(?:ban\\ ghi\\ TRUNG\\ cho\\ ca\\ .*|ban\\ ghi\\ dong\\ luot\\ thieu\\ rc\\ kieu\\ int|ban\\ ghi\\ khong\\ neo\\ dung\\ luot:\\ .*|ban\\ ghi\\ khong\\ phai\\ JSON|ban\\ ghi\\ khong\\ phai\\ object:\\ .*|ban\\ ghi\\ thieu\\ ten\\ ca|ban\\ ghi\\ vua\\ mang\\ ten\\ ca\\ vua\\ khai\\ dong\\ luot|bo\\ doc\\ kenh\\ nem\\ .*:\\ .*|ca\\ do\\ vi\\ ngoai\\ le\\ KHONG\\ phai\\ TinHieuChotCa:\\ .*\\ \\|\\ .*|chi\\ tiet\\ khong\\ phai\\ chuoi\\ cho\\ ca\\ .*|co\\ ban\\ ghi\\ SAU\\ ban\\ ghi\\ dong\\ luot|dau\\ dong\\ luot\\ khong\\ phai\\ bool\\ true:\\ .*|dich\\ RONG:\\ khong\\ cap\\ GIET\\ khi\\ khong\\ ca\\ nao\\ phai\\ chet|dich\\ co\\ ten\\ ca\\ KHONG\\ ton\\ tai:\\ .*|kenh\\ khong\\ ton\\ tai|khong\\ doc\\ duoc\\ kenh:\\ .*:\\ .*|nhan\\ khong\\ hop\\ le\\ cho\\ ca\\ .*:\\ .*|rc\\ dong\\ luot\\ .*\\ !=\\ rc\\ tien\\ trinh\\ .*|ten\\ ca\\ khong\\ phai\\ chuoi:\\ .*|thieu\\ ban\\ ghi\\ dong\\ luot|thieu\\ ca\\ .*\\ /\\ ca\\ la\\ .*) \\| rc_con=(?:0|-?[1-9][0-9]*) \\| stderr\\[-200:\\]=.*)$|0/[1-9][0-9]*: tap ca do chot \\[(?:\'T[0-9]+\'(?:, \'T[0-9]+\')*)?\\] != dich \\[(?:\'T[0-9]+\'(?:, \'T[0-9]+\')*)?\\]$)|CASE T[0-9]+: (?:DAT$|DO — )|(?:0|[1-9][0-9]*)/(?:0|[1-9][0-9]*)$|LOI: (?:ba so hang khong cong dung tong$|nhom bat buoc THIEU \\(chua chay hoac chua co dot bien\\): \\[\'r[0-9]+\'(?:, \'r[0-9]+\')*\\]$))")',
+     '    ranh = re.compile(r"^(?:TU KIEM r[0-9]+: (?:DAT$|DO_CHOT — |DO_KHAC — .*: )|TU KIEM: (?:0|[1-9][0-9]*)/(?:0|[1-9][0-9]*)$|TU KIEM co dot bien rieng: (?:0|[1-9][0-9]*)/(?:0|[1-9][0-9]*) nhom bat buoc · dot bien giet (?:0|[1-9][0-9]*)/(?:0|[1-9][0-9]*)$|DOT BIEN TU KIEM(?: [A-Za-z0-9-]+ \\| (?:r[0-9]+(?:,r[0-9]+)*)? \\| (?:(?P<db>(?:0|[1-9][0-9]*))/(?P=db)$|TIN DUNG GIA: (?:ca chet vi loi VO CAN \\[\'r\\d+\'(?:, \'r\\d+\')*\\]$|child rc=-?\\d+ != 1$)|0 — ca do THUC TE: (?:r\\d+(?:,r\\d+)*|\\(rong\\))$)| [A-Za-z0-9-]+: NEO KHONG DUY NHAT \\((?:0|[2-9]|[1-9][0-9]+)\\)$|: KHONG DO DUOC — phep cat bang hong$)|MUTANT: giet = (?:0|[1-9][0-9]*) · khong giet = (?:0|[1-9][0-9]*) · khong do duoc = (?:0|[1-9][0-9]*) / tong (?:0|[1-9][0-9]*)$|MUTANT [A-Za-z0-9-]+ \\| (?:T[0-9]+(?:,T[0-9]+)*)? \\| (?:(?P<mm>[1-9][0-9]*)/(?P=mm)$|KHONG DO DUOC \\(sau [12] lan\\): (?:khong phong duoc tien trinh con: .*: .*|(?:ban\\ ghi\\ TRUNG\\ cho\\ ca\\ .*|ban\\ ghi\\ dong\\ luot\\ thieu\\ rc\\ kieu\\ int|ban\\ ghi\\ khong\\ neo\\ dung\\ luot:\\ .*|ban\\ ghi\\ khong\\ phai\\ JSON|ban\\ ghi\\ khong\\ phai\\ object:\\ .*|ban\\ ghi\\ thieu\\ ten\\ ca|ban\\ ghi\\ vua\\ mang\\ ten\\ ca\\ vua\\ khai\\ dong\\ luot|bo\\ doc\\ kenh\\ nem\\ .*:\\ .*|ca\\ do\\ vi\\ ngoai\\ le\\ KHONG\\ phai\\ TinHieuChotCa:\\ .*\\ \\|\\ .*|chi\\ tiet\\ khong\\ phai\\ chuoi\\ cho\\ ca\\ .*|co\\ ban\\ ghi\\ SAU\\ ban\\ ghi\\ dong\\ luot|dau\\ dong\\ luot\\ khong\\ phai\\ bool\\ true:\\ .*|dich\\ RONG:\\ khong\\ cap\\ GIET\\ khi\\ khong\\ ca\\ nao\\ phai\\ chet|dich\\ co\\ ten\\ ca\\ KHONG\\ ton\\ tai:\\ .*|kenh\\ khong\\ ton\\ tai|khong\\ doc\\ duoc\\ kenh:\\ .*:\\ .*|nhan\\ khong\\ hop\\ le\\ cho\\ ca\\ .*:\\ .*|rc\\ dong\\ luot\\ .*\\ !=\\ rc\\ tien\\ trinh\\ .*|ten\\ ca\\ khong\\ phai\\ chuoi:\\ .*|thieu\\ ban\\ ghi\\ dong\\ luot|thieu\\ ca\\ .*\\ /\\ ca\\ la\\ .*) \\| rc_con=(?:0|-?[1-9][0-9]*) \\| stderr\\[-200:\\]=.*)$|0/[1-9][0-9]*: tap ca do chot \\[(?:\'T[0-9]+\'(?:, \'T[0-9]+\')*)?\\] != dich \\[(?:\'T[0-9]+\'(?:, \'T[0-9]+\')*)?\\]$)|CASE T[0-9]+: (?:DAT$|DO — )|(?:0|[1-9][0-9]*)/(?:0|[1-9][0-9]*)$|LOI: (?:ba so hang khong cong dung tong$|nhom bat buoc THIEU \\(chua chay hoac chua co dot bien\\): \\[\'r[0-9]+\'(?:, \'r[0-9]+\')*\\]$))")'),
+    ("chan-doan-ti-so-hai-so-khong-can-bang", ("r538",),
+     '    ranh = re.compile(r"^(?:TU KIEM r[0-9]+: (?:DAT$|DO_CHOT — |DO_KHAC — .*: )|TU KIEM: (?:0|[1-9][0-9]*)/(?:0|[1-9][0-9]*)$|TU KIEM co dot bien rieng: (?:0|[1-9][0-9]*)/(?:0|[1-9][0-9]*) nhom bat buoc · dot bien giet (?:0|[1-9][0-9]*)/(?:0|[1-9][0-9]*)$|DOT BIEN TU KIEM(?: [A-Za-z0-9-]+ \\| (?:r[0-9]+(?:,r[0-9]+)*)? \\| (?:(?P<db>(?:0|[1-9][0-9]*))/(?P=db)$|TIN DUNG GIA: (?:ca chet vi loi VO CAN \\[\'r\\d+\'(?:, \'r\\d+\')*\\]$|child rc=(?:0|-[1-9][0-9]*|[2-9]|[1-9][0-9]+) != 1$)|0 — ca do THUC TE: (?:r\\d+(?:,r\\d+)*|\\(rong\\))$)| [A-Za-z0-9-]+: NEO KHONG DUY NHAT \\((?:0|[2-9]|[1-9][0-9]+)\\)$|: KHONG DO DUOC — phep cat bang hong$)|MUTANT: giet = (?:0|[1-9][0-9]*) · khong giet = (?:0|[1-9][0-9]*) · khong do duoc = (?:0|[1-9][0-9]*) / tong (?:0|[1-9][0-9]*)$|MUTANT [A-Za-z0-9-]+ \\| (?:T[0-9]+(?:,T[0-9]+)*)? \\| (?:(?P<mm>[1-9][0-9]*)/(?P=mm)$|KHONG DO DUOC \\(sau [12] lan\\): (?:khong phong duoc tien trinh con: .*: .*|(?:ban\\ ghi\\ TRUNG\\ cho\\ ca\\ .*|ban\\ ghi\\ dong\\ luot\\ thieu\\ rc\\ kieu\\ int|ban\\ ghi\\ khong\\ neo\\ dung\\ luot:\\ .*|ban\\ ghi\\ khong\\ phai\\ JSON|ban\\ ghi\\ khong\\ phai\\ object:\\ .*|ban\\ ghi\\ thieu\\ ten\\ ca|ban\\ ghi\\ vua\\ mang\\ ten\\ ca\\ vua\\ khai\\ dong\\ luot|bo\\ doc\\ kenh\\ nem\\ .*:\\ .*|ca\\ do\\ vi\\ ngoai\\ le\\ KHONG\\ phai\\ TinHieuChotCa:\\ .*\\ \\|\\ .*|chi\\ tiet\\ khong\\ phai\\ chuoi\\ cho\\ ca\\ .*|co\\ ban\\ ghi\\ SAU\\ ban\\ ghi\\ dong\\ luot|dau\\ dong\\ luot\\ khong\\ phai\\ bool\\ true:\\ .*|dich\\ RONG:\\ khong\\ cap\\ GIET\\ khi\\ khong\\ ca\\ nao\\ phai\\ chet|dich\\ co\\ ten\\ ca\\ KHONG\\ ton\\ tai:\\ .*|kenh\\ khong\\ ton\\ tai|khong\\ doc\\ duoc\\ kenh:\\ .*:\\ .*|nhan\\ khong\\ hop\\ le\\ cho\\ ca\\ .*:\\ .*|rc\\ dong\\ luot\\ .*\\ !=\\ rc\\ tien\\ trinh\\ .*|ten\\ ca\\ khong\\ phai\\ chuoi:\\ .*|thieu\\ ban\\ ghi\\ dong\\ luot|thieu\\ ca\\ .*\\ /\\ ca\\ la\\ .*) \\| rc_con=(?:0|-?[1-9][0-9]*) \\| stderr\\[-200:\\]=.*)$|0/[1-9][0-9]*: tap ca do chot \\[(?:\'T[0-9]+\'(?:, \'T[0-9]+\')*)?\\] != dich \\[(?:\'T[0-9]+\'(?:, \'T[0-9]+\')*)?\\]$)|CASE T[0-9]+: (?:DAT$|DO — )|(?:0|[1-9][0-9]*)/(?:0|[1-9][0-9]*)$|LOI: (?:ba so hang khong cong dung tong$|nhom bat buoc THIEU \\(chua chay hoac chua co dot bien\\): \\[\'r[0-9]+\'(?:, \'r[0-9]+\')*\\]$))")',
+     '    ranh = re.compile(r"^(?:TU KIEM r[0-9]+: (?:DAT$|DO_CHOT — |DO_KHAC — .*: )|TU KIEM: (?:0|[1-9][0-9]*)/(?:0|[1-9][0-9]*)$|TU KIEM co dot bien rieng: (?:0|[1-9][0-9]*)/(?:0|[1-9][0-9]*) nhom bat buoc · dot bien giet (?:0|[1-9][0-9]*)/(?:0|[1-9][0-9]*)$|DOT BIEN TU KIEM(?: [A-Za-z0-9-]+ \\| (?:r[0-9]+(?:,r[0-9]+)*)? \\| (?:(?:0|[1-9][0-9]*)/(?:0|[1-9][0-9]*)$|TIN DUNG GIA: (?:ca chet vi loi VO CAN \\[\'r\\d+\'(?:, \'r\\d+\')*\\]$|child rc=(?:0|-[1-9][0-9]*|[2-9]|[1-9][0-9]+) != 1$)|0 — ca do THUC TE: (?:r\\d+(?:,r\\d+)*|\\(rong\\))$)| [A-Za-z0-9-]+: NEO KHONG DUY NHAT \\((?:0|[2-9]|[1-9][0-9]+)\\)$|: KHONG DO DUOC — phep cat bang hong$)|MUTANT: giet = (?:0|[1-9][0-9]*) · khong giet = (?:0|[1-9][0-9]*) · khong do duoc = (?:0|[1-9][0-9]*) / tong (?:0|[1-9][0-9]*)$|MUTANT [A-Za-z0-9-]+ \\| (?:T[0-9]+(?:,T[0-9]+)*)? \\| (?:[1-9][0-9]*/[1-9][0-9]*$|KHONG DO DUOC \\(sau [12] lan\\): (?:khong phong duoc tien trinh con: .*: .*|(?:ban\\ ghi\\ TRUNG\\ cho\\ ca\\ .*|ban\\ ghi\\ dong\\ luot\\ thieu\\ rc\\ kieu\\ int|ban\\ ghi\\ khong\\ neo\\ dung\\ luot:\\ .*|ban\\ ghi\\ khong\\ phai\\ JSON|ban\\ ghi\\ khong\\ phai\\ object:\\ .*|ban\\ ghi\\ thieu\\ ten\\ ca|ban\\ ghi\\ vua\\ mang\\ ten\\ ca\\ vua\\ khai\\ dong\\ luot|bo\\ doc\\ kenh\\ nem\\ .*:\\ .*|ca\\ do\\ vi\\ ngoai\\ le\\ KHONG\\ phai\\ TinHieuChotCa:\\ .*\\ \\|\\ .*|chi\\ tiet\\ khong\\ phai\\ chuoi\\ cho\\ ca\\ .*|co\\ ban\\ ghi\\ SAU\\ ban\\ ghi\\ dong\\ luot|dau\\ dong\\ luot\\ khong\\ phai\\ bool\\ true:\\ .*|dich\\ RONG:\\ khong\\ cap\\ GIET\\ khi\\ khong\\ ca\\ nao\\ phai\\ chet|dich\\ co\\ ten\\ ca\\ KHONG\\ ton\\ tai:\\ .*|kenh\\ khong\\ ton\\ tai|khong\\ doc\\ duoc\\ kenh:\\ .*:\\ .*|nhan\\ khong\\ hop\\ le\\ cho\\ ca\\ .*:\\ .*|rc\\ dong\\ luot\\ .*\\ !=\\ rc\\ tien\\ trinh\\ .*|ten\\ ca\\ khong\\ phai\\ chuoi:\\ .*|thieu\\ ban\\ ghi\\ dong\\ luot|thieu\\ ca\\ .*\\ /\\ ca\\ la\\ .*) \\| rc_con=(?:0|-?[1-9][0-9]*) \\| stderr\\[-200:\\]=.*)$|0/[1-9][0-9]*: tap ca do chot \\[(?:\'T[0-9]+\'(?:, \'T[0-9]+\')*)?\\] != dich \\[(?:\'T[0-9]+\'(?:, \'T[0-9]+\')*)?\\]$)|CASE T[0-9]+: (?:DAT$|DO — )|(?:0|[1-9][0-9]*)/(?:0|[1-9][0-9]*)$|LOI: (?:ba so hang khong cong dung tong$|nhom bat buoc THIEU \\(chua chay hoac chua co dot bien\\): \\[\'r[0-9]+\'(?:, \'r[0-9]+\')*\\]$))")'),
+    ("chan-doan-ten-ngoai-le-chi-ascii", ("r538",),
+     '    ranh = re.compile(r"^(?:TU KIEM r[0-9]+: (?:DAT$|DO_CHOT — |DO_KHAC — .*: )|TU KIEM: (?:0|[1-9][0-9]*)/(?:0|[1-9][0-9]*)$|TU KIEM co dot bien rieng: (?:0|[1-9][0-9]*)/(?:0|[1-9][0-9]*) nhom bat buoc · dot bien giet (?:0|[1-9][0-9]*)/(?:0|[1-9][0-9]*)$|DOT BIEN TU KIEM(?: [A-Za-z0-9-]+ \\| (?:r[0-9]+(?:,r[0-9]+)*)? \\| (?:(?P<db>(?:0|[1-9][0-9]*))/(?P=db)$|TIN DUNG GIA: (?:ca chet vi loi VO CAN \\[\'r\\d+\'(?:, \'r\\d+\')*\\]$|child rc=(?:0|-[1-9][0-9]*|[2-9]|[1-9][0-9]+) != 1$)|0 — ca do THUC TE: (?:r\\d+(?:,r\\d+)*|\\(rong\\))$)| [A-Za-z0-9-]+: NEO KHONG DUY NHAT \\((?:0|[2-9]|[1-9][0-9]+)\\)$|: KHONG DO DUOC — phep cat bang hong$)|MUTANT: giet = (?:0|[1-9][0-9]*) · khong giet = (?:0|[1-9][0-9]*) · khong do duoc = (?:0|[1-9][0-9]*) / tong (?:0|[1-9][0-9]*)$|MUTANT [A-Za-z0-9-]+ \\| (?:T[0-9]+(?:,T[0-9]+)*)? \\| (?:(?P<mm>[1-9][0-9]*)/(?P=mm)$|KHONG DO DUOC \\(sau [12] lan\\): (?:khong phong duoc tien trinh con: .*: .*|(?:ban\\ ghi\\ TRUNG\\ cho\\ ca\\ .*|ban\\ ghi\\ dong\\ luot\\ thieu\\ rc\\ kieu\\ int|ban\\ ghi\\ khong\\ neo\\ dung\\ luot:\\ .*|ban\\ ghi\\ khong\\ phai\\ JSON|ban\\ ghi\\ khong\\ phai\\ object:\\ .*|ban\\ ghi\\ thieu\\ ten\\ ca|ban\\ ghi\\ vua\\ mang\\ ten\\ ca\\ vua\\ khai\\ dong\\ luot|bo\\ doc\\ kenh\\ nem\\ .*:\\ .*|ca\\ do\\ vi\\ ngoai\\ le\\ KHONG\\ phai\\ TinHieuChotCa:\\ .*\\ \\|\\ .*|chi\\ tiet\\ khong\\ phai\\ chuoi\\ cho\\ ca\\ .*|co\\ ban\\ ghi\\ SAU\\ ban\\ ghi\\ dong\\ luot|dau\\ dong\\ luot\\ khong\\ phai\\ bool\\ true:\\ .*|dich\\ RONG:\\ khong\\ cap\\ GIET\\ khi\\ khong\\ ca\\ nao\\ phai\\ chet|dich\\ co\\ ten\\ ca\\ KHONG\\ ton\\ tai:\\ .*|kenh\\ khong\\ ton\\ tai|khong\\ doc\\ duoc\\ kenh:\\ .*:\\ .*|nhan\\ khong\\ hop\\ le\\ cho\\ ca\\ .*:\\ .*|rc\\ dong\\ luot\\ .*\\ !=\\ rc\\ tien\\ trinh\\ .*|ten\\ ca\\ khong\\ phai\\ chuoi:\\ .*|thieu\\ ban\\ ghi\\ dong\\ luot|thieu\\ ca\\ .*\\ /\\ ca\\ la\\ .*) \\| rc_con=(?:0|-?[1-9][0-9]*) \\| stderr\\[-200:\\]=.*)$|0/[1-9][0-9]*: tap ca do chot \\[(?:\'T[0-9]+\'(?:, \'T[0-9]+\')*)?\\] != dich \\[(?:\'T[0-9]+\'(?:, \'T[0-9]+\')*)?\\]$)|CASE T[0-9]+: (?:DAT$|DO — )|(?:0|[1-9][0-9]*)/(?:0|[1-9][0-9]*)$|LOI: (?:ba so hang khong cong dung tong$|nhom bat buoc THIEU \\(chua chay hoac chua co dot bien\\): \\[\'r[0-9]+\'(?:, \'r[0-9]+\')*\\]$))")',
+     '    ranh = re.compile(r"^(?:TU KIEM r[0-9]+: (?:DAT$|DO_CHOT — |DO_KHAC — [A-Za-z_]\\w*: )|TU KIEM: (?:0|[1-9][0-9]*)/(?:0|[1-9][0-9]*)$|TU KIEM co dot bien rieng: (?:0|[1-9][0-9]*)/(?:0|[1-9][0-9]*) nhom bat buoc · dot bien giet (?:0|[1-9][0-9]*)/(?:0|[1-9][0-9]*)$|DOT BIEN TU KIEM(?: [A-Za-z0-9-]+ \\| (?:r[0-9]+(?:,r[0-9]+)*)? \\| (?:(?P<db>(?:0|[1-9][0-9]*))/(?P=db)$|TIN DUNG GIA: (?:ca chet vi loi VO CAN \\[\'r\\d+\'(?:, \'r\\d+\')*\\]$|child rc=(?:0|-[1-9][0-9]*|[2-9]|[1-9][0-9]+) != 1$)|0 — ca do THUC TE: (?:r\\d+(?:,r\\d+)*|\\(rong\\))$)| [A-Za-z0-9-]+: NEO KHONG DUY NHAT \\((?:0|[2-9]|[1-9][0-9]+)\\)$|: KHONG DO DUOC — phep cat bang hong$)|MUTANT: giet = (?:0|[1-9][0-9]*) · khong giet = (?:0|[1-9][0-9]*) · khong do duoc = (?:0|[1-9][0-9]*) / tong (?:0|[1-9][0-9]*)$|MUTANT [A-Za-z0-9-]+ \\| (?:T[0-9]+(?:,T[0-9]+)*)? \\| (?:(?P<mm>[1-9][0-9]*)/(?P=mm)$|KHONG DO DUOC \\(sau [12] lan\\): (?:khong phong duoc tien trinh con: .*: .*|(?:ban\\ ghi\\ TRUNG\\ cho\\ ca\\ .*|ban\\ ghi\\ dong\\ luot\\ thieu\\ rc\\ kieu\\ int|ban\\ ghi\\ khong\\ neo\\ dung\\ luot:\\ .*|ban\\ ghi\\ khong\\ phai\\ JSON|ban\\ ghi\\ khong\\ phai\\ object:\\ .*|ban\\ ghi\\ thieu\\ ten\\ ca|ban\\ ghi\\ vua\\ mang\\ ten\\ ca\\ vua\\ khai\\ dong\\ luot|bo\\ doc\\ kenh\\ nem\\ .*:\\ .*|ca\\ do\\ vi\\ ngoai\\ le\\ KHONG\\ phai\\ TinHieuChotCa:\\ .*\\ \\|\\ .*|chi\\ tiet\\ khong\\ phai\\ chuoi\\ cho\\ ca\\ .*|co\\ ban\\ ghi\\ SAU\\ ban\\ ghi\\ dong\\ luot|dau\\ dong\\ luot\\ khong\\ phai\\ bool\\ true:\\ .*|dich\\ RONG:\\ khong\\ cap\\ GIET\\ khi\\ khong\\ ca\\ nao\\ phai\\ chet|dich\\ co\\ ten\\ ca\\ KHONG\\ ton\\ tai:\\ .*|kenh\\ khong\\ ton\\ tai|khong\\ doc\\ duoc\\ kenh:\\ .*:\\ .*|nhan\\ khong\\ hop\\ le\\ cho\\ ca\\ .*:\\ .*|rc\\ dong\\ luot\\ .*\\ !=\\ rc\\ tien\\ trinh\\ .*|ten\\ ca\\ khong\\ phai\\ chuoi:\\ .*|thieu\\ ban\\ ghi\\ dong\\ luot|thieu\\ ca\\ .*\\ /\\ ca\\ la\\ .*) \\| rc_con=(?:0|-?[1-9][0-9]*) \\| stderr\\[-200:\\]=.*)$|0/[1-9][0-9]*: tap ca do chot \\[(?:\'T[0-9]+\'(?:, \'T[0-9]+\')*)?\\] != dich \\[(?:\'T[0-9]+\'(?:, \'T[0-9]+\')*)?\\]$)|CASE T[0-9]+: (?:DAT$|DO — )|(?:0|[1-9][0-9]*)/(?:0|[1-9][0-9]*)$|LOI: (?:ba so hang khong cong dung tong$|nhom bat buoc THIEU \\(chua chay hoac chua co dot bien\\): \\[\'r[0-9]+\'(?:, \'r[0-9]+\')*\\]$))")'),
+    # luot 6 — lat LOI KHAI bat doi xung dau/ranh ma khong doi hanh vi: r538 do hai chieu.
+    ("chan-doan-lat-loi-khai-dau-rong-hon-ranh", ("r538",),
+     "DAU_RONG_HON_RANH_THEO_HOP_DONG_TEN_CA = True",
+     "DAU_RONG_HON_RANH_THEO_HOP_DONG_TEN_CA = False"),
+    # #568 r5 (cross-review P2 tren be5c3f2) — HOI QUY ve dung ban truoc khi va:
+    # `DOT BIEN ` la tien to TRAN. Dot bien nay tai lap CHINH phep do cua reviewer,
+    # nen no la neo GIU cho ban va khoi bi go lai ma khong ai thay.
+    # Lat LOI KHAI ma khong doi hanh vi — chieu thu hai cua o (4) r533.
+    ("chan-doan-lat-khai-dong-ranh-gioi-khong-dem", ("r533",),
+     "DONG_RANH_GIOI_DUNG_HINH_KHONG_DUOC_DEM = True",
+     "DONG_RANH_GIOI_DUNG_HINH_KHONG_DUOC_DEM = False"),
+    # Doi HANH VI ma khong doi loi khai: dem ca dong ranh gioi. Dau vao BINH
+    # THUONG cung sinh nhan, nen o (4) cua r533 va o (1) cua r531 deu DO.
+    ("chan-doan-dem-ca-dong-ranh-gioi", ("r531", "r533", "r534", "r535", "r536", "r537", "r538"),
+     "            dang_mo = False\n", "            dang_mo = False\n            bo_qua += 1\n"),
+    # Bo phep giu nhan BO QUA ngoai tran: than dai lam nhan bi cat, mat so dong.
+    ("chan-doan-de-tran-nuot-nhan-bo-qua", ("r531", "r533", "r534", "r536"),
+     '    duoi = f" \u2026[CHA BO {so_bo} dong]" if so_bo else ""',
+     '    duoi = ""'),
+    # Bo han phep tach nhan: y het tren nhung o mot cho khac, phan biet duoc bang
+    # dau vao o (2) cua r534 (than NGAN + co dong bi bo).
+    # #568 r5 luot 2 — o day TUNG co muc `chan-doan-bo-sieu-du-lieu-so-dong-bo`
+    # (`_so_dong_bo` tra 0). Da BO: `_so_dong_bo` chi co MOT cho goi, nen no va
+    # `chan-doan-de-tran-nuot-nhan-bo-qua` (`duoi = ""`) cho dung mot hanh vi tren
+    # MOI dau vao — do duoc, ca hai cung tap ca do va cung dau ra. Do la BO TUONG
+    # DUONG: giu ca hai la tu bao minh do hai thu trong khi chi do MOT.
+    # #568 r5 luot 2 — DUNG duong gia mao ma cross-review do duoc: doc so dong bo
+    # NGUOC ra tu VAN BAN than. Con in dung chuoi la cha khai so khong phai cua no.
+    ("chan-doan-doc-so-dong-bo-tu-van-ban", ("r531", "r533", "r534", "r536"),
+     '    return getattr(than, "bo_qua", 0)',
+     '    return int((re.search(r"\\[BO QUA (\\d+) dong\\]", str(than)) or ["", "0"])[1])'),
+    # Vut SIEU DU LIEU luc dong goi: `bo_qua` luon 0, nen khong bao gio khai.
+    ("chan-doan-vut-so-dong-bo-luc-dong-goi", ("r531", "r533", "r534", "r535", "r536", "r538"),
+     "        o.bo_qua = bo_qua", "        o.bo_qua = 0"),
+    # Noi long TUNG ho tien to — moi ho mot muc, phan biet duoc bang dau vao.
+    # #568 r5 — luot day du (99 dot bien) bao rc=1 voi SAU muc lech `dich`:
+    # chan-doan-chi-lay-ten-ca, chan-doan-dung-o-dong-dau,
+    # chan-doan-nuot-ca-ranh-gioi, chan-doan-cat-lang-khong-khai,
+    # chan-doan-xoa-phan-biet-P1-P2, tu-dot-bien-nhan-moi-tap-ca.
+    # Nguyen nhan: r531/r532 la ca MOI cua r5, va chung do THAT cac dot bien cu
+    # ay; `dich` cu do do HEP hon phep do. Bo cham doi `do_chot == set(dich)`
+    # BANG DUNG, nen khai thieu mot ten la HONG — dung nhu thiet ke.
+    # Bai hoc ghi lai de khong lap: TU KIEM 32/32 KHONG thay duoc luot day du.
+    # `dich` o sau muc tren duoc nang len TU PHEP DO, khong tu suy doan.
+    # M13/A29 — tra ranh gioi ve ban RONG. O (2) cua r531 mat lai than.
+    # M13/A29 — bo phep DEM: mat lai im lang o o (3).
+    ("chan-doan-bo-dem-phan-bi-bo", ("r531", "r533", "r534", "r535", "r536", "r538"),
+     "        elif dong.strip():", "        elif False:"),
+    # M13/A30 — KHAI ca khi KHONG mat: dong rong cuoi chuoi cung duoc dem, nen
+    # dau vao BINH THUONG sinh nhan. Day la dot bien canh chieu (1) — chieu ma
+    # mot ca chi kiem "co mat thi co nhan" se BO SOT.
+    ("chan-doan-khai-bo-qua-ca-khi-khong-mat", ("r531", "r533", "r534", "r535", "r536", "r538"),
+     "        elif dong.strip():", "        else:"),
+    # M14/A32 — lat LOI KHAI ma khong doi hanh vi.
+    ("chan-doan-lat-loi-khai-stderr-sau-chot", ('r532',),
+     "CHAN_DOAN_STDERR_KHI_DA_CO_CHOT = False",
+     "CHAN_DOAN_STDERR_KHI_DA_CO_CHOT = True"),
+    # M14/A32 — chieu NGUOC: doi HANH VI ma khong doi loi khai. Day moi la chieu
+    # ma mot ca mot-chieu bo sot, va cung la chieu chung minh hang so KHONG phai
+    # mot dieu cam: ai chua duong nay ma nho dat lai hang so thi ca xanh.
+    ("chan-doan-in-them-stderr-khi-da-co-chot", ('r532',),
+     '                        print(f"    CHOT {ca}: {_goi_chan_doan(than)}")',
+     '                        print(f"    CHOT {ca}: {_goi_chan_doan(than)}")\n'
+     '                        print(f"    stderr: {_goi_chan_doan(p.stderr)}")'),
+    # --- #568 r4 ------------------------------------------------------------
+    # M10/A20 — tra phep tach dong ve `splitlines()`, tuc mo lai duong CAP GIET
+    # GIA ma cross-review codex tim ra.
+    ("chan-doan-tach-dong-lai-nuot-dau-tach-unicode", ("r529",),
+     "    for dong in stdout.split(chr(10)):",
+     "    for dong in stdout.splitlines():"),
+    # M10/A20 — bo MOT ky tu khoi danh sach. Khong co chot (1) cua r529 — von DAN
+    # XUAT lai danh sach tu chinh `splitlines` luc chay — thi dot bien nay SONG
+    # SOT: o (2) chi lap tren danh sach, nen danh sach ngan di thi no kiem it di
+    # ma van xanh. Do dung hinh dang LOI-KHAI-RONG-HON-PHEP-DO.
+    ("chan-doan-bo-mot-ky-tu-khoi-danh-sach-tach-dong", ("r529",),
+     'KY_TU_TACH_DONG_LE = "\\r\\v\\f\\x1c\\x1d\\x1e\\x85\\u2028\\u2029"',
+     'KY_TU_TACH_DONG_LE = "\\r\\v\\f\\x1c\\x1d\\x1e\\x85\\u2028"'),
+    # M11/A22 — bo chuyen tiep o nhanh DO_KHAC.
+    ("chan-doan-bo-chuyen-tiep-o-nhanh-do-khac", ('r530', 'r542'),
+     '                    print(f"    VO CAN {ca}: {_goi_chan_doan(than)}")',
+     "                    pass"),
+    # M11/A23 — bo chuyen tiep o nhanh `rc != 1`. NEO PHAI HAI DONG: dong `print`
+    # 16 dau cach la CHUOI CON cua dong 20 dau cach o nhanh P2, nen neo mot dong
+    # dem ra HAI lan ngoai bang va phep doi neo duy nhat bac het. Da do.
+    ("chan-doan-bo-chuyen-tiep-o-nhanh-rc-khac-1", ('r530',),
+     '                # rong va stderr la cho DUY NHAT con chan doan.\n'
+     '                print(f"    stderr: {_goi_chan_doan(p.stderr)}")',
+     "                pass"),
+    # M12/A24 — thay DUONG HAI bang mot hang sach. Duong MOT da co dot bien rieng
+    # (`chan-doan-r526-doc-hang-sach-thay-vi-tep-that`); hai duong, hai dot bien.
+    ("chan-doan-r526-doc-duong-hai-bang-hang-sach", ("r526",),
+     "    ma_2 = _ins.getsource(sys.modules[__name__])",
+     '    ma_2 = "x = 1" + chr(10)'),
+    # --- #593 --------------------------------------------------------------
+    # A1 — can tran ma LANG LE tra ve mot cap TRUNG thay vi khai KHONG DO DUOC.
+    # Chi giet r527: duoi bo sinh THAT (khong gian 256) duong `raise` gan nhu
+    # khong bao gio toi, nen r528 mu voi dot bien nay — do la ly do no la mot
+    # dot bien RIENG chu khong gop.
+    ("dau-phien-can-tran-ma-lang-le-tra-cap-trung", ("r527",),
+     "    raise TinHieuKhongDoDuoc(", "    return dau, dau\n    raise TinHieuKhongDoDuoc("),
+    # A9 — bo PHEP SO, tuc bo vong rut lai. Day la dot bien tai lap DUNG benh
+    # goc: `_hai_dau_phien_phan_biet` tro lai thanh hai lan rut doc lap.
+    ("dau-phien-bo-vong-rut-lai", ("r527", "r528"),
+     "        if khac != dau:", "        if True:"),
+    # A1 — ha tran xuong 0: chan tren khong con "tren" nua. r527 bat bang SO LAN
+    # GOI (chot theo HANG SO 65, khong theo bien), r528 bat vi khong gian 256 ma
+    # van can tran.
+    # `dich` co r508: ha tran xuong 0 lam moi bo sinh thanh "suy bien" duoi mat
+    # `_hai_dau_phien_phan_biet`, nen r508 cung chet — bang CHOT cua chinh no, sau
+    # khi da sua duong thoat DO_KHAC. Khai du BA ten la khai CHAT HON.
+    # CROSS-REVIEW CODEX P2 — dot bien noi lai BENH GOC o dong goi cua `r508`,
+    # giu ham nguyen ven. Truoc khi co chot (c1) cua r528, dot bien nay SONG SOT
+    # tron ven: ca hai ve do cua A9 chi cham vao HAM. Khoi try/except o lai nen
+    # cu phap van dung; nhanh `except` chi khong bao gio chay nua.
+    ("dau-phien-r508-khong-di-qua-bo-tien-de", ("r528",),
+     "        ph_that, ph_khac = _hai_dau_phien_phan_biet()",
+     "        ph_that, ph_khac = sinh_dau_phien(), sinh_dau_phien()"),
+    ("dau-phien-ha-tran-xuong-khong", ("r508", "r527", "r528"),
+     "TRAN_RUT_DAU_PHIEN = 64", "TRAN_RUT_DAU_PHIEN = 0"),
     ("bo-chuan-hoa-ban-sao", ("r523",),
      "    ban_sao = Path(ban_sao).resolve()",
      "    pass"),
@@ -2499,44 +3975,54 @@ DOT_BIEN_TU_KIEM = [
      "                khong_do += 1", "                khong_do += so_lan"),
     # ---- F03: ve `tk_giet` cua cong nhom bat buoc ----------------------------
     # F03 — ve `tk_hong` cua cong nhom bat buoc, do RIENG.
-    ("mo-cong-tu-dot-bien-hong", ("r513",),
+    ("mo-cong-tu-dot-bien-hong", ('r513',),
      "    if thieu or len(NHOM_BAT_BUOC) < SAN_NHOM or tk_hong or tk_giet != len(DOT_BIEN_TU_KIEM):",
      "    if thieu or len(NHOM_BAT_BUOC) < SAN_NHOM or tk_giet != len(DOT_BIEN_TU_KIEM):"),
-    ("mo-cong-tu-dot-bien-thieu-giet", ("r513",),
+    ("mo-cong-tu-dot-bien-thieu-giet", ('r513',),
      "    if thieu or len(NHOM_BAT_BUOC) < SAN_NHOM or tk_hong or tk_giet != len(DOT_BIEN_TU_KIEM):",
      "    if thieu or len(NHOM_BAT_BUOC) < SAN_NHOM or tk_hong:"),
     # ---- F01: BA chot cua bo cham tu dot bien, moi chot mot dot bien RIENG ----
-    ("tu-dot-bien-bo-loc-loi-vo-can", ("r516",),
+    # #568 r4 — `dich` len ("r516","r530"): `if do_khac:` -> `if False:` lam
+    # nhanh DO_KHAC KHONG BAO GIO chay, nen dong chuyen tiep cua no bien mat va
+    # `r530` do. Khai du hai ten la khai CHAT HON.
+    ("tu-dot-bien-bo-loc-loi-vo-can", ('r516', 'r530', 'r542'),
      "            if do_khac:", "            if False:"),
     # F01 — "chuan hoa" dau vao TRON: giu bo loc nhung xoa do_khac khi CO do_chot.
-    ("tu-dot-bien-chuan-hoa-hon-hop", ("r516",),
-     '            do_khac = set(re.findall(r"^TU KIEM (r\\d+): DO_KHAC", p.stdout, re.M))',
-     '            do_khac = set(re.findall(r"^TU KIEM (r\\d+): DO_KHAC", p.stdout, re.M))\n'
+    # #568 — NEO DOI theo ban va (khoi trich chan doan thay cho mot re.findall).
+    # Y NGHIA cua dot bien GIU NGUYEN: chuan hoa lan lon de giau DO_KHAC khi co
+    # DO_CHOT, tuc mot duong cap TIN DUNG GIA. r516 van la ca dich.
+    ("tu-dot-bien-chuan-hoa-hon-hop", ('r516',),
+     "            do_khac = {ca for ca, _ in kh_khac}",
+     "            do_khac = {ca for ca, _ in kh_khac}\n"
      "            if do_chot:\n                do_khac = set()"),
-    ("tu-dot-bien-bo-so-rc-con", ("r516",),
+    ("tu-dot-bien-bo-so-rc-con", ('r516',),
      "            elif p.returncode != 1:", "            elif False:"),
-    ("tu-dot-bien-nhan-moi-tap-ca", ("r516",),
-     "            elif do_chot == set(dich):", "            elif True:"),
+    # r2/M6 — r525 cung lai CHINH `chay_dot_bien_tu_kiem`, nen hai dot bien vao
+    # vi tu cap GIET giet CA no. Ghi du `dich` la ghi SU THAT da do, va no lam
+    # dot bien CHAT HON: runner doi `do_chot == set(dich)` BANG NHAU, nen muc nay
+    # gio phai giet ca hai ca moi duoc cong.
+    ("tu-dot-bien-nhan-moi-tap-ca", ('r516', 'r525', 'r532', 'r539', 'r542'),
+     "            elif bang_chung and do_chot == set(dich):", "            elif True:"),
     # F01 (luot 5) — TAP DO RONG duoc chuan hoa thanh dich: con chet ma KHONG in
     # chot nao van duoc ghi cong GIET.
     # F01 (luot 6) — QUAN HE TAP: bao ham, va giao khac rong.
-    ("tu-dot-bien-nhan-bao-ham", ("r516",),
-     "            elif do_chot == set(dich):", "            elif set(dich) <= do_chot:"),
-    ("tu-dot-bien-nhan-giao-khac-rong", ("r516",),
-     "            elif do_chot == set(dich):", "            elif do_chot & set(dich):"),
-    ("tu-dot-bien-nhan-tap-rong-lam-dich", ("r516",),
-     "            elif do_chot == set(dich):",
+    ("tu-dot-bien-nhan-bao-ham", ('r516', 'r539'),
+     "            elif bang_chung and do_chot == set(dich):", "            elif set(dich) <= do_chot:"),
+    ("tu-dot-bien-nhan-giao-khac-rong", ('r516', 'r539'),
+     "            elif bang_chung and do_chot == set(dich):", "            elif do_chot & set(dich):"),
+    ("tu-dot-bien-nhan-tap-rong-lam-dich", ('r516', 'r525', 'r539'),
+     "            elif bang_chung and do_chot == set(dich):",
      "            elif do_chot == set(dich) or not do_chot:"),
     # F01 (luot 5) — rc NGOAI {0,1} duoc chuan hoa thanh 1: con in dung chot roi
     # chet vi mot ly do KHAC van duoc ghi cong GIET.
-    ("tu-dot-bien-chuan-hoa-rc-khac", ("r516",),
+    ("tu-dot-bien-chuan-hoa-rc-khac", ('r516',),
      "            elif p.returncode != 1:", "            elif p.returncode == 0:"),
     # Runner tu kiem KHONG duoc gop hai lop lam mot — gop thi moi loi vo can
     # deu doi lot thanh chot cua ca.
-    ("tu-kiem-gop-hai-lop-ngoai-le", ("r516",),
+    ("tu-kiem-gop-hai-lop-ngoai-le", ('r516',),
      '                print(f"TU KIEM {ten}: DO_KHAC — {type(exc).__name__}: {exc}")',
      '                print(f"TU KIEM {ten}: DO_CHOT — {type(exc).__name__}: {exc}")'),
-    ("tu-kiem-bo-ghi-nhan-loi-vo-can", ("r516",),
+    ("tu-kiem-bo-ghi-nhan-loi-vo-can", ('r516', 'r542'),
      '            except Exception as exc:\n                do.append(ten)\n'
      '                print(f"TU KIEM {ten}: DO_KHAC',
      '            except Exception as exc:\n'
@@ -2550,13 +4036,324 @@ DOT_BIEN_TU_KIEM = [
 NHOM_BAT_BUOC = frozenset({"r501", "r502", "r503", "r504", "r505", "r506",
                            "r507", "r508", "r509", "r510", "r511", "r512",
                            "r513", "r514", "r515", "r516", "r517", "r518",
-                           "r519", "r520", "r521", "r522", "r523"})
-SAN_NHOM = 23
+                           "r519", "r520", "r521", "r522", "r523", "r524",
+                           "r525", "r526", "r527", "r528", "r529", "r530",
+                           "r531", "r532", "r533", "r534", "r535",
+                           "r536", "r537", "r538"})
+NHOM_BAT_BUOC = NHOM_BAT_BUOC | {"r539", "r540", "r541", "r542"}
+
+SAN_NHOM = 42
+
+
+# #568 r4 / B1 — `str.splitlines()` coi CHIN ky tu NGOAI `\n` la het dong, con
+# bo doc cu (`re.findall(..., re.M)`) thi KHONG: `$` voi re.M chi khop truoc `\n`
+# va o cuoi chuoi. Chenh lech ay cho MA SAN PHAM DOAT DUOC TEN CA — mot chuoi
+# chua tung la dong ket qua thanh bang chung chot, tuc cap GIET GIA.
+#
+# Do duoc: stdout = "TU KIEM r501: DAT" + U+2028 + "TU KIEM r512: DO_CHOT" + LF
+#          regex CU -> set()      parser dung splitlines -> {"r512"}
+#
+# Hang so nay KHONG duoc chep tay. `r529` DAN XUAT lai no tu chinh `splitlines`
+# luc chay roi doi BANG NHAU — chep tay ma thieu mot ky tu thi chot van xanh
+# trong khi van ho dung ky tu do.
+KY_TU_TACH_DONG_LE = "\r\v\f\x1c\x1d\x1e\x85\u2028\u2029"
+
+# #568 r5 / M14 — LOI KHAI, khong phai mot doi hoi.
+#
+# Khi con IN mot nhan `DO_CHOT` roi CHET TIEP vi mot le khac, le ay nam tren
+# `stderr` va HIEN GIO bi vut: cha chi in dong `CHOT <ca>`. Hang so nay khai
+# dung the, va `r532` doi hanh vi luc chay KHOP voi no.
+#
+# Vi sao la mot HANG SO chu khong phai mot chot cam: chot cam (`MOC not in th`
+# cua `r525` cu) BAC TRUOC moi trien khai giu ca hai chan doan. Hang so thi
+# khong: ai chua duong nay chi viec dat lai `True`, va `r532` xanh tro lai.
+# Doi HANH VI ma khong doi LOI KHAI => `r532` DO. Doi LOI KHAI ma khong doi
+# hanh vi => cung DO. Hai chieu, khong mot chieu.
+#
+# r5 KHONG hua chua duong ay: chua no doi dinh dang dau ra ma r516/r524/r530
+# dang do, tuc mo rong pham vi. Xin revision rieng.
+CHAN_DOAN_STDERR_KHI_DA_CO_CHOT = False
+
+# #568 r5 / cross-review P2 tren be5c3f2 — phan CON LAI sau khi da siet `ranh`:
+# mot dong THAN trung DUNG HINH mot ban ghi that (vd `TU KIEM r512: DAT`) VAN
+# dong khoi — do la chot chong gia mao, giu nguyen — va chinh dong ay KHONG
+# duoc dem vao `BO QUA`. Khong the phan biet no voi mot ban ghi that bang van
+# ban, nen day la trang thai KHONG DO DUOC; ta KHAI no thay vi lam tron.
+# Dem no se sinh nhan tren dau vao BINH THUONG (moi khoi deu ket o mot ban ghi),
+# tuc lai khai RONG hon phep do — dung benh ma A30 cam.
+DONG_RANH_GIOI_DUNG_HINH_KHONG_DUOC_DEM = True
+
+# #568 r5 / cross-review luot 4 tren 8de4e66 — TACH hai ve. Ban truoc gop chung
+# vao MOT hang `CHUAN_HOA_THAN_BO_DONG_TRANG_VA_KHOANG_TRANG`, va ve thu hai SAI:
+# ma KHONG bo khoang trang tung dong. Do duoc: than ' a  ' + LF + '  b  ' ra
+# 'a   |   b' — khoang trang BEN TRONG con nguyen. Mot hang gop hai loi khai thi
+# mot ve sai van xanh nho ve kia dung; va `r537` cu chi do ve dong trang, nen bo
+# rieng `.strip()` cua bo dong goi van DAT. Hai loi khai, hai chot, tung ve mot.
+THAN_BO_DONG_TRANG_KHONG_DEM = True
+# Chi bo o HAI DAU cua CA THAN (`_goi_chan_doan`), KHONG bo tung dong.
+THAN_BO_KHOANG_TRANG_TUNG_DONG = False
+
+# #568 r5 / cross-review luot 6 tren 273de20 — BAT DOI XUNG co ten. `dau` (mo
+# khoi) nhan MOI hau to sau nhan: do la HOP DONG LAY TEN CA (A33 — phan hang
+# khong doi so voi mau cu `^TU KIEM (r\d+): DO_KHAC`). `ranh` (dong khoi) chi
+# nhan HINH THAT `DO_CHOT — ` / `DO_KHAC — <Kieu>: `. He qua do duoc:
+#   `TU KIEM r512: DO_CHOT_fake-root`  doc DO_CHOT -> BAN GHI (ten r512 duoc lay)
+#                                     doc DO_KHAC -> THAN (giu, khong dem)
+# Luot 5 khai sai rang `ranh` "rong bang dau"; khong the siet `dau` (doi phan
+# hang) va khong noi `ranh` theo `dau` (tai nuot `_fake-root`), nen KHAI va DO.
+DAU_RONG_HON_RANH_THEO_HOP_DONG_TEN_CA = True
+
+TRAN_CHAN_DOAN = 400
+
+
+class ThanChanDoan(str):
+    """Than chan doan, MANG THEO so dong cha da bo — sieu du lieu, khong van ban.
+
+    #568 r5 / cross-review P2 tren 15c487c. Ban truoc noi `…[BO QUA n dong]` vao
+    CUOI than roi `_goi_chan_doan` doc NGUOC con so ay ra bang regex. Con chi can
+    in dung chuoi ay la cha khai mot con so KHONG PHAI CUA MINH. Do duoc:
+
+        than = "x"*450 + LF + "…[BO QUA 7 dong]"      # con in ra, cha KHONG bo gi
+        -> goi = "x"*400 + " …[CAT 50 ky tu] …[BO QUA 7 dong]"
+
+    Cha khong bo dong nao ma khai bo bay dong. Do la dao ly 6 cua kho nay: mot
+    chuoi do ma DANG BI THU phat ra khong duoc tro thanh bang chung cua phep do.
+    So dong bo di theo DOI TUONG, khong di theo van ban, nen con khong gia mao duoc.
+    """
+
+    bo_qua: int = 0
+
+    def __new__(cls, s: str, bo_qua: int = 0):
+        o = super().__new__(cls, s)
+        o.bo_qua = bo_qua
+        return o
+
+
+def _go_dau_phan_cach(than: str) -> str:
+    """Go DUNG MOT dau phan cach giua nhan va than. KHONG dung `lstrip`.
+
+    #568 r5 / cross-review luot 3 tren 7d0b012. Ban truoc dung
+    `lstrip(" \u2014-")`, tuc mot TAP KY TU — no an het moi dau cach va moi dau
+    gach o DAU THAN, ke ca khi chung la NOI DUNG. Do duoc:
+
+        "TU KIEM r1: DO_CHOT \u2014 -42"            -> than "42"
+        "TU KIEM r1: DO_CHOT \u2014 --gio-cao-nhat" -> than "gio-cao-nhat"
+
+    Mot dau AM bien mat la SUA NOI DUNG chan doan, khong phai chuan hoa dinh
+    dang — nguoi doc log nhan mot con so KHAC voi con so con bao.
+    """
+    return re.sub(r"^ ?[\u2014-] ?", "", than, count=1)
+
+
+def _so_dong_bo(than) -> int:
+    """SO DONG cha da bo. Doc tu SIEU DU LIEU, KHONG BAO GIO tu van ban than."""
+    return getattr(than, "bo_qua", 0)
+
+
+def _ngu_phap_ly_do(src: str) -> str:
+    """Sinh NGU PHAP cua `ly_do` KHONG DO DUOC tu CHINH cac `return` cua bo doc kenh.
+
+    #568 r5 / cross-review luot 7 tren e7f15cb — `.+` chi kiem "khong rong", bo
+    cau truc ma ma bao dam: moi `ly_do` KHONG DO DUOC la MOT trong cac cau co
+    tien to co dinh o `doc_kenh`/`_doc_kenh_xac_thuc`, noi them ` | rc_con=<int>
+    | stderr[-200:]=<repr>` (chay_mot_mutant), hoac `khong phong duoc tien trinh
+    con: <Kieu>: <exc>`. Doc bang AST de loi khai trong `ranh` KHONG the lech
+    khoi nguon: r538 chot rang chuoi nay nam NGUYEN VAN trong dong `ranh`.
+    """
+    cau = []
+    for fn in ast.walk(ast.parse(src)):
+        if isinstance(fn, ast.FunctionDef) and fn.name in ("doc_kenh", "_doc_kenh_xac_thuc"):
+            for n in ast.walk(fn):
+                if (isinstance(n, ast.Return) and isinstance(n.value, ast.Tuple)
+                        and getattr(n.value.elts[0], "id", "") == "KHONG_DO_DUOC"):
+                    a = n.value.elts[1]
+                    ph = a.values if isinstance(a, ast.JoinedStr) else [a]
+                    cau.append("".join(re.escape(v.value) if isinstance(v, ast.Constant) else ".*"
+                                       for v in ph))
+    return ("(?:khong phong duoc tien trinh con: .*: .*|(?:" + "|".join(sorted(set(cau)))
+            + r") \| rc_con=(?:0|-?[1-9][0-9]*) \| stderr\[-200:\]=.*)$")
+
+
+def _khoi_chan_doan(stdout: str, nhan: str) -> list[tuple[str, str]]:
+    r"""Trich NGUYEN chan doan cua con cho tung ca mang `nhan` (DO_KHAC / DO_CHOT).
+
+    #568 — ban truoc bat `^TU KIEM (r\d+): DO_KHAC` tuc CHI TEN CA roi vut phan
+    con lai, trong khi con IN DU `DO_KHAC — <Kieu>: <thong diep>`. Cha giu
+    `p.stdout` trong tay ma in ra mot dong khong mang kieu ngoai le lan thong
+    diep, nen tu log CI khong cach nao biet ca ay nem AssertionError (git that
+    bai — `run(check=True)` nem lop ay TRAN), TypeError, OSError hay
+    TimeoutExpired. Bon nguyen nhan can bon cach xu KHAC NHAU.
+
+    Than ngoai le CO THE NHIEU DONG: mot AssertionError cua `run()` mang ca
+    stdout lan stderr cua git. Nen khoi keo dai toi dong `TU KIEM ` / `DOT BIEN `
+    ke tiep, chu KHONG dung o cuoi dong dau — dung o dong dau la tai lap dung
+    cai loi dang chua, chi khac do sau.
+
+    Mau neo giu Y HET ban truoc (`DO_KHAC` khong bat buoc co ` — `) de phep
+    PHAN HANG khong doi: tap ten ca tra ve phai bang tap cu tren moi dau vao.
+    """
+    dau = re.compile(rf"^TU KIEM (r\d+): {nhan}(.*)$")
+    # KHONG co dau cach sau "TU KIEM": dong TONG KET cua con la `TU KIEM: 21/23`
+    # — dau hai cham, khong phai cach. Ban dau cua ham nay doi dau cach nen dong
+    # ay KHONG duoc coi la ranh gioi va bi nuot vao than chan doan. Ca r524 bat
+    # duoc ngay luot chay dau.
+    # #568 r5 / M13 — ranh gioi CU dong khoi o BAT KY dong nao mang mot trong bon
+    # tien to, ke ca khi do la NOI DUNG HOP LE cua ngoai le. Phan bi bo KHONG bao
+    # gio toi `_goi_chan_doan`, nen khong co nhan `CAT` va khong co so ky tu mat.
+    # Do duoc (cross-review codex, P2 tren eb4a9ab):
+    #     "TU KIEM r506: DO_KHAC - AssertionError: first" + LF
+    #     "LOI: root-cause" + LF + "more-details" + LF + "TU KIEM: 0/1" + LF
+    #   -> [('r506', 'AssertionError: first')] · 'root-cause' co: False
+    #   -> sau _goi_chan_doan: khong co nhan CAT
+    # Mat hai dong than MA KHONG mot dau hieu nao noi la da mat — dung lop benh
+    # #568 ton tai de chua, o mot tang khac. Xay ra KE CA khi thong diep ngan hon
+    # tran 400, nen KHONG phai truong hop cat da khai cua `_goi_chan_doan`.
+    #
+    # Chua bang HAI nuoc, can ca hai:
+    #  (a) HEP ranh gioi lai con dung nhung dong THAT SU la dau mot ban ghi cua
+    #      bo do. `LOI:` roi khoi tap ay: trong bo do no chi xuat hien o cuoi
+    #      `main`, con mot dong THAN bat dau bang `LOI:` la chuyen binh thuong.
+    #  (b) Con lai thi DEM va KHAI. Mot dong than lo bat dau bang tien to THAT
+    #      (vd `TU KIEM r512: DAT`) VAN dong khoi — do la chot chong gia mao,
+    #      giu nguyen — nhung tu do den ban ghi ke tiep, moi dong KHONG phai dau
+    #      ban ghi deu duoc dem va khai bang `[BO QUA n dong]`.
+    # #568 r5 / cross-review P2 tren be5c3f2 — `DOT BIEN ` la tien to TRAN,
+    # khong phai hinh mot ban ghi. Mot dong THAN "DOT BIEN root-cause" dong khoi
+    # roi bien mat, KHONG duoc dem (no la chinh dong ranh gioi), nen khong co
+    # nhan nao — dung lop mat IM LANG goi nay ton tai de chua. Do duoc:
+    #   "TU KIEM r506: DO_KHAC - RuntimeError: first" + LF + "DOT BIEN root-cause"
+    #   -> [('r506', 'RuntimeError: first')]   · khong nhan BO QUA, khong nhan CAT
+    # Ban ghi THAT cua bo do luon la `DOT BIEN TU KIEM <ten> | `, `... <ten>: `
+    # hoac `DOT BIEN TU KIEM: `. Siet ve DUNG ba hinh ay thi dong than tren roi
+    # khoi tap ranh gioi va duoc GIU nguyen — khong mat, nen khong can nhan.
+    # #568 r5 / cross-review luot 5 tren 31127d7 — NGU PHAP phai la TAP HINH cua
+    # MOI ban ghi cot 0 ma bo do THAT phat (`print` trong ma chay, khong phai
+    # fixture), doi chieu TUNG diem phat. Do duoc ba cho lech giua loi khai
+    # va ma phat:
+    #   · `DOT BIEN TU KIEM abc | r1 | root-cause` la RANH — duoi sau dau `|`
+    #     thu hai khong bi rang buoc, tuc van la TIEN TO (lan thu 10 cua
+    #     hinh dang "loi khai rong hon phep do" trong goi nay);
+    #   · `DOT BIEN TU KIEM: KHONG DO DUOC — ...` THAT (khong co cach truoc dau
+    #     hai cham) la THAN, con ban CO cach — thu khong ai phat — la RANH;
+    #   · `CASE T<n>: DO - ` la hinh cua FIXTURE `_KICH_CON`, khong phai cua
+    #     runner: `chay_ca` phat `CASE T<n>: DAT` va `CASE T<n>: DO — `.
+    # Va bon ho bo do phat ma ngu phap chua ke: `MUTANT <ten> | <dich> | ...`
+    # tung muc (ba hinh), `TU KIEM co dot bien rieng: ...`, dong ti so
+    # `<n>/<n>`, va hai dong `LOI: ...` cuoi `main` (r5 da bo TIEN TO `LOI:` vi
+    # qua rong; nay ke lai bang DU HINH, cung nguyen tac voi `MUTANT:`).
+    # Dong con (`    VO CAN`, `    CHOT`, `    stderr:`) thut dau, khong phai
+    # dau ban ghi.
+    # Luot 6 (tren 273de20) — luot 5 van con NAM duoi la tien to (`TIN DUNG
+    # GIA: `, `0 — ca do THUC TE: `, hai duoi MUTANT that bai, `LOI: ...
+    # THIEU ...: `) va ho TU KIEM `DO_CHOT(?: |$)` rong hon hinh that. Nay moi
+    # hau to co dinh deu DU, truong co cau truc dung cau truc (danh sach ca,
+    # repr danh sach, `ly_do` khong rong). Loi khai "`ranh` rong bang `dau`"
+    # cua luot 5 SAI va bi phan chung: xem `DAU_RONG_HON_RANH_THEO_HOP_DONG_TEN_CA`.
+    # Luot 7 (tren e7f15cb) — tung TRUONG theo MIEN GIA TRI ma ma bao dam, khong
+    # phai theo lop ky tu rong nhat: so nguyen in tu int la ASCII khong dem
+    # (`0|[1-9][0-9]*`), rc o nhanh `!= 1` khong the la 1 hay `-0`, so lan neo
+    # `!= 1`, `sau <n> lan` chi 1|2, ti so `n/n` la HAI SO BANG NHAU (tham chieu
+    # nguoc), cot dich la danh sach ten ca (`r<n>` bang tu kiem, `T<n>` bang CA),
+    # `ly_do` la mot trong cac cau cua `doc_kenh` (sinh tu AST — `_ngu_phap_ly_do`,
+    # r538 doi chieu nguyen van) hoac `tap ca do chot [...] != dich [...]`, ten
+    # ngoai le la BAT KY chuoi nao (`type("Échec", ...)` hop le) nen `.*: `. Ten ca
+    # lay tu `dau` (hop dong `r\d+`) giu `\d`; ten tu bang la `[0-9]`.
+    ranh = re.compile(r"^(?:TU KIEM r[0-9]+: (?:DAT$|DO_CHOT — |DO_KHAC — .*: )|TU KIEM: (?:0|[1-9][0-9]*)/(?:0|[1-9][0-9]*)$|TU KIEM co dot bien rieng: (?:0|[1-9][0-9]*)/(?:0|[1-9][0-9]*) nhom bat buoc · dot bien giet (?:0|[1-9][0-9]*)/(?:0|[1-9][0-9]*)$|DOT BIEN TU KIEM(?: [A-Za-z0-9-]+ \| (?:r[0-9]+(?:,r[0-9]+)*)? \| (?:(?P<db>(?:0|[1-9][0-9]*))/(?P=db)$|TIN DUNG GIA: (?:ca chet vi loi VO CAN \['r\d+'(?:, 'r\d+')*\]$|child rc=(?:0|-[1-9][0-9]*|[2-9]|[1-9][0-9]+) != 1$)|0 — ca do THUC TE: (?:r\d+(?:,r\d+)*|\(rong\))$)| [A-Za-z0-9-]+: NEO KHONG DUY NHAT \((?:0|[2-9]|[1-9][0-9]+)\)$|: KHONG DO DUOC — phep cat bang hong$)|MUTANT: giet = (?:0|[1-9][0-9]*) · khong giet = (?:0|[1-9][0-9]*) · khong do duoc = (?:0|[1-9][0-9]*) / tong (?:0|[1-9][0-9]*)$|MUTANT [A-Za-z0-9-]+ \| (?:T[0-9]+(?:,T[0-9]+)*)? \| (?:(?P<mm>[1-9][0-9]*)/(?P=mm)$|KHONG DO DUOC \(sau [12] lan\): (?:khong phong duoc tien trinh con: .*: .*|(?:ban\ ghi\ TRUNG\ cho\ ca\ .*|ban\ ghi\ dong\ luot\ thieu\ rc\ kieu\ int|ban\ ghi\ khong\ neo\ dung\ luot:\ .*|ban\ ghi\ khong\ phai\ JSON|ban\ ghi\ khong\ phai\ object:\ .*|ban\ ghi\ thieu\ ten\ ca|ban\ ghi\ vua\ mang\ ten\ ca\ vua\ khai\ dong\ luot|bo\ doc\ kenh\ nem\ .*:\ .*|ca\ do\ vi\ ngoai\ le\ KHONG\ phai\ TinHieuChotCa:\ .*\ \|\ .*|chi\ tiet\ khong\ phai\ chuoi\ cho\ ca\ .*|co\ ban\ ghi\ SAU\ ban\ ghi\ dong\ luot|dau\ dong\ luot\ khong\ phai\ bool\ true:\ .*|dich\ RONG:\ khong\ cap\ GIET\ khi\ khong\ ca\ nao\ phai\ chet|dich\ co\ ten\ ca\ KHONG\ ton\ tai:\ .*|kenh\ khong\ ton\ tai|khong\ doc\ duoc\ kenh:\ .*:\ .*|nhan\ khong\ hop\ le\ cho\ ca\ .*:\ .*|rc\ dong\ luot\ .*\ !=\ rc\ tien\ trinh\ .*|ten\ ca\ khong\ phai\ chuoi:\ .*|thieu\ ban\ ghi\ dong\ luot|thieu\ ca\ .*\ /\ ca\ la\ .*) \| rc_con=(?:0|-?[1-9][0-9]*) \| stderr\[-200:\]=.*)$|0/[1-9][0-9]*: tap ca do chot \[(?:'T[0-9]+'(?:, 'T[0-9]+')*)?\] != dich \[(?:'T[0-9]+'(?:, 'T[0-9]+')*)?\]$)|CASE T[0-9]+: (?:DAT$|DO — )|(?:0|[1-9][0-9]*)/(?:0|[1-9][0-9]*)$|LOI: (?:ba so hang khong cong dung tong$|nhom bat buoc THIEU \(chua chay hoac chua co dot bien\): \['r[0-9]+'(?:, 'r[0-9]+')*\]$))")
+    khoi: list[list] = []
+    # `dang_mo` la CO TRANG THAI, khong phai `khoi` khac rong: gap ranh gioi thi
+    # khoi phai DONG HAN. Ban dau chi BO QUA dong ranh gioi roi nhat tiep, nen
+    # moi thu sau mot ca DAT lai chay nguoc vao khoi truoc no.
+    dang_mo = False
+    # M13(b) — so dong BI BO sau khi mot khoi dong lai, tinh den ban ghi ke tiep.
+    # CHI dem dong KHONG phai dau ban ghi: mot ban ghi ke tiep la ket thuc binh
+    # thuong, khong phai mat mat. Nho the, dau vao BINH THUONG khong sinh nhan
+    # nao — do la chieu ma A30 doi, va la cho de khai rong nhat.
+    bo_qua = 0
+    for dong in stdout.split(chr(10)):
+        m = dau.match(dong)
+        if m:
+            if khoi and bo_qua:
+                khoi[-1][2] = bo_qua
+            bo_qua = 0
+            khoi.append([m.group(1), [_go_dau_phan_cach(m.group(2))], 0])
+            dang_mo = True
+        elif ranh.match(dong):
+            dang_mo = False
+        elif dang_mo:
+            khoi[-1][1].append(dong)
+        elif dong.strip():
+            bo_qua += 1
+    if khoi and bo_qua:
+        khoi[-1][2] = bo_qua
+    return [(ca, ThanChanDoan("\n".join(x for x in than if x.strip()), n))
+            for ca, than, n in khoi]
+
+
+def _goi_chan_doan(than: str) -> str:
+    """Goi mot than chan doan, va KHAI TUONG MINH khi phai cat.
+
+    Nuot lang phan du la dung benh #568 o quy mo nho hon, nen cat thi phai noi
+    da cat BAO NHIEU ky tu — nguoi doc log biet minh dang thieu bao nhieu.
+    """
+    so_bo = _so_dong_bo(than)
+    than = (str(than) or "").strip() or "(rong)"
+    than = than.replace("\n", " | ")
+    # #568 r5 / cross-review P2 tren be5c3f2 — `…[BO QUA n dong]` la SIEU DU LIEU
+    # ve phep do, khong phai noi dung chan doan. Ban truoc noi no vao CUOI than
+    # roi cat TU DAU, nen than dai lam tran nuot mat chinh no: cha chi con so ky
+    # tu bi cat, mat han so DONG bi bo — tuc A29 khai ma khong den duoc nguoi doc.
+    # Giu nhan NGOAI ngan sach tran. Huong cat GIU NGUYEN (ngoai pham vi r5).
+    #
+    # Luot 2 (tren 15c487c) — ban va DAU TIEN cua P2 nay doc con so NGUOC ra tu
+    # van ban than bang regex, nen con chi can in dung chuoi la cha khai mot con
+    # so khong phai cua minh. Nay so ay den tu `ThanChanDoan.bo_qua` — SIEU DU
+    # LIEU do CHINH cha dat — con van ban than khong con quyen gi voi no.
+    # Ten RIENG cho nhan cua CHA. Ca r536 o (1b) do duoc: neu cha dung chung
+    # chuoi `…[BO QUA n dong]` voi than con, thi mot than con mang dung chuoi ay
+    # se doc y het mot loi khai cua cha — nguoi doc log khong phan biet duoc.
+    # Doi ten la cach duy nhat khong phai SUA than con de lam ro chuyen ay.
+    duoi = f" …[CHA BO {so_bo} dong]" if so_bo else ""
+    if len(than) <= TRAN_CHAN_DOAN:
+        return than + duoi
+    return f"{than[:TRAN_CHAN_DOAN]} …[CAT {len(than) - TRAN_CHAN_DOAN} ky tu]{duoi}"
+
+
+TU_KIEM_NONCE_ENV = "NHANH_DON_DUOC_TU_KIEM_NONCE"
+TU_KIEM_FILE_ENV = "NHANH_DON_DUOC_TU_KIEM_FILE"
+
+
+def _bang_chung_tu_kiem(stdout, proof_text, nonce, expected, kh_chot, kh_khac):
+    """M15/M16 completion on a separate channel; stdout remains diagnostic data.
+
+    Guards literal prewritten output, not an arbitrary child reading the nonce
+    and implementing this protocol without running tests.
+    """
+    try:
+        proof = json.loads(proof_text)
+    except (ValueError, TypeError, RecursionError):
+        return False
+    if not isinstance(proof, dict) or proof.get("nonce") != nonce:
+        return False
+    if proof.get("cases") != expected:
+        return False
+    totals = re.findall(r"^TU KIEM: ([0-9]+)/([0-9]+)\r?$", stdout, re.MULTILINE)
+    if len(totals) != 1:
+        return False
+    # Bound conversion by the parent's known count, including Python's int limit.
+    if any(len(number) > len(str(len(expected))) for number in totals[0]):
+        return False
+    passed, total = map(int, totals[0])
+    if total != len(expected):
+        return False
+    failed = [case for case, _ in kh_chot + kh_khac]
+    if len(failed) != len(set(failed)) or not set(failed) <= set(expected):
+        return False
+    return total - passed == len(failed)
 
 
 def chay_dot_bien_tu_kiem():
     """Chay tung dot bien tren BAN SAO cua CHINH tep nay, doi DUNG ca dich do."""
-    giet = hong = 0
+    giet = hong = khong_do_tk = 0
     goc = Path(__file__).read_text(encoding="utf-8")
     # Moi mau neo xuat hien HAI lan: mot o ma that, mot o CHINH bang duoi day.
     # Chi ap len phan TRUOC bang — cung lop loi ma r506 da dinh (dem chuoi thi tu
@@ -2582,7 +4379,7 @@ def chay_dot_bien_tu_kiem():
     # va chot ay bao dong gia ngay lan chay dau.
     if not bang.startswith("DOT_BIEN_TU_KIEM = [\n") or not bang.endswith("\n]\n"):
         print("DOT BIEN TU KIEM: KHONG DO DUOC — phep cat bang hong")
-        return 0, len(DOT_BIEN_TU_KIEM)
+        return 0, 0, len(DOT_BIEN_TU_KIEM)
     with tempfile.TemporaryDirectory() as td:
         for ten, dich, neo, thay in DOT_BIEN_TU_KIEM:
             ngoai_bang = dau.count(neo) + duoi.count(neo)
@@ -2598,33 +4395,79 @@ def chay_dot_bien_tu_kiem():
             shutil.copy2(TOOL, d / TOOL.name)
             env = dict(os.environ, NHANH_DON_DUOC_CHI_TU_KIEM="1", PYTHONDONTWRITEBYTECODE="1")
             env.pop(KENH_ENV, None)
+            nonce = secrets.token_hex(32)
+            env[TU_KIEM_NONCE_ENV] = nonce
+            proof_path = d / "tu-kiem-hoan-tat.json"
+            env[TU_KIEM_FILE_ENV] = str(proof_path)
             p = run([sys.executable, tep.name], d, check=False, env=env)
             # F01 (luot 3) — BA chot doc lap, khong gop: (1) khong ca nao duoc
             # chet vi loi VO CAN; (2) tien trinh con phai THAT SU thoat 1 — bo
             # ghi nhan danh sach do thi no van in "DO" ma rc ve 0; (3) tap ca do
             # dung bang dich. Thieu bat ky chot nao la mot duong cap TIN DUNG GIA.
-            do_chot = set(re.findall(r"^TU KIEM (r\d+): DO_CHOT", p.stdout, re.M))
-            do_khac = set(re.findall(r"^TU KIEM (r\d+): DO_KHAC", p.stdout, re.M))
+            try:
+                proof_text = proof_path.read_text(encoding="utf-8")
+            except (OSError, UnicodeError):
+                proof_text = None
+            kh_chot = _khoi_chan_doan(p.stdout, "DO_CHOT")
+            kh_khac = _khoi_chan_doan(p.stdout, "DO_KHAC")
+            bang_chung = _bang_chung_tu_kiem(
+                p.stdout, proof_text, nonce, [c for c, _, _ in TU_KIEM], kh_chot, kh_khac)
+            do_chot = {ca for ca, _ in kh_chot}
+            do_khac = {ca for ca, _ in kh_khac}
+            # r7 preserves diagnostic routing; missing completion evidence
+            # changes the final state to KHONG DO DUOC after forwarding.
             if do_khac:
                 hong += 1
                 print(f"DOT BIEN TU KIEM {ten} | {','.join(dich)} | TIN DUNG GIA: "
                       f"ca chet vi loi VO CAN {sorted(do_khac)}")
+                for ca, than in kh_khac:
+                    print(f"    VO CAN {ca}: {_goi_chan_doan(than)}")
             elif p.returncode != 1:
                 hong += 1
                 print(f"DOT BIEN TU KIEM {ten} | {','.join(dich)} | TIN DUNG GIA: "
                       f"child rc={p.returncode} != 1")
-            elif do_chot == set(dich):
+                # Nhanh nay thuong la con chet TRUOC khi in duoc gi, nen stdout
+                # rong va stderr la cho DUY NHAT con chan doan.
+                print(f"    stderr: {_goi_chan_doan(p.stderr)}")
+            elif bang_chung and do_chot == set(dich):
                 giet += 1
                 print(f"DOT BIEN TU KIEM {ten} | {','.join(dich)} | {len(dich)}/{len(dich)}")
             else:
                 hong += 1
                 print(f"DOT BIEN TU KIEM {ten} | {','.join(dich)} | 0 — ca do THUC TE: "
                       f"{','.join(sorted(do_chot)) or '(rong)'}")
-    return giet, hong
+                # Duong vao THU BA co DUNG HAI duong, va r1 chi dong duong dau.
+                # Liet ke het TRUOC khi va: `kh_chot` khac rong (P1) hoac RONG
+                # (P2) — vet can, vi mot tap chi co hai kha nang ay.
+                if kh_chot:
+                    # P1 — ca THUONG: biet ca NAO do van chua noi vi SAO no do,
+                    # ma day dung la nhanh "dot bien giet nham ca khac" — can nhat.
+                    for ca, than in kh_chot:
+                        print(f"    CHOT {ca}: {_goi_chan_doan(than)}")
+                else:
+                    # P2 — r2/M6. CA SUY BIEN cua CHINH nhanh nay, r1 de ho.
+                    # `main` duoi CHI_TU_KIEM tra `1 if chay_tu_kiem() else 0`, va
+                    # `chay_tu_kiem` in DO_CHOT hoac DO_KHAC cho MOI ca hong. Nen
+                    # rc=1 ma KHONG nhan nao <=> con chet NGOAI ham ay (loi muc
+                    # module: SyntaxError / NameError / ImportError) — luc do
+                    # stdout RONG con stderr mang nguyen nhan.
+                    # Bo qua day la tai lap DUNG benh (B) ma packet nay sinh ra de
+                    # chua, chi nho hon: mot nhan tran khong noi nguyen nhan.
+                    print(f"    stderr: {_goi_chan_doan(p.stderr)}")
+            if not bang_chung:
+                # Preserve existing diagnostic routing, but never collapse an
+                # incomplete/contradictory measurement into an ordinary failure.
+                hong -= 1
+                khong_do_tk += 1
+                print(f"    KHONG DO DUOC: {ten} — thieu hoac mau thuan bang chung hoan tat")
+    return giet, hong, khong_do_tk
 
 
 def chay_tu_kiem():
     do = []
+    completed = []
+    nonce = os.environ.pop(TU_KIEM_NONCE_ENV, None)
+    proof_path = os.environ.pop(TU_KIEM_FILE_ENV, None)
     with tempfile.TemporaryDirectory() as td:
         for ten, fn, can_thu_muc in TU_KIEM:
             d = Path(td) / ten
@@ -2643,7 +4486,10 @@ def chay_tu_kiem():
             except Exception as exc:
                 do.append(ten)
                 print(f"TU KIEM {ten}: DO_KHAC — {type(exc).__name__}: {exc}")
+            completed.append(ten)
     print(f"TU KIEM: {len(TU_KIEM) - len(do)}/{len(TU_KIEM)}")
+    if nonce and proof_path:
+        Path(proof_path).write_text(json.dumps({"nonce": nonce, "cases": completed}), encoding="utf-8")
     return do
 
 
@@ -2668,7 +4514,10 @@ def main() -> int:
         return 0
     dat, khong_giet, khong_do = chay_dot_bien()
     tu_kiem_do = chay_tu_kiem()
-    tk_giet, tk_hong = chay_dot_bien_tu_kiem()
+    tk_giet, tk_hong, tk_khong_do = chay_dot_bien_tu_kiem()
+    print(f"TU DOT BIEN KHONG DO DUOC: {tk_khong_do}")
+    if tk_khong_do:
+        return 1
     nhom_co_dot_bien = {c for _, dich, _, _ in DOT_BIEN_TU_KIEM for c in dich}
     da_chay = {t for t, _, _ in TU_KIEM}
     thieu = (NHOM_BAT_BUOC - nhom_co_dot_bien) | (NHOM_BAT_BUOC - da_chay)

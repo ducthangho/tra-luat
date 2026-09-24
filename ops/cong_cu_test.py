@@ -4,6 +4,7 @@
 CHÍNH lệnh qua subprocess (không import) — doctrine `lease_publish_test.py`."""
 from __future__ import annotations
 
+import datetime as _dt
 import json, os, runpy, shutil, subprocess, sys, tempfile
 from pathlib import Path
 
@@ -770,10 +771,14 @@ DOT_BIEN = {
     # ignore — nay viet bang `check-ignore` tren chinh danh sach INDEX.
     "bn_nghe_lai_luat_ignore": ("ops/bash_nen.py",
         '                return sorted(set(muc)), "git"\n',
+        # NEO LAI O r15: ban r13 truyen duong dan dang TEXT vao tien trinh con, va tu N36
+        # duong co the mang BYTE THO (surrogate) nen CHINH DOT BIEN vo => stdout rong =>
+        # no giet OAN `t49`. Loi cua DOT BIEN, khong cua ca. Nay truyen BYTES.
         '                _loai = _chay_git(goc, "check-ignore", "--no-index", "--stdin",\n'
-        '                                  input="\\n".join(m[0] for m in muc),\n'
-        '                                  capture_output=True, text=True,\n'
-        '                                  timeout=60).stdout.split()\n'
+        '                                  input="\\n".join(m[0] for m in muc)\n'
+        '                                        .encode("utf-8", "surrogateescape"),\n'
+        '                                  capture_output=True, timeout=60\n'
+        '                                  ).stdout.decode("utf-8", "surrogateescape").split()\n'
         '                return sorted({m for m in muc if m[0] not in _loai}), "git"  # đột biến: nghe lại ignore\n',
         "BASH_NEN", (), "t43_khong_luat_ignore_nao_doi_duoc_danh_sach_tep"),
     "bn_bo_executable_kw": ("ops/bash_nen.py",
@@ -829,6 +834,31 @@ DOT_BIEN = {
         '            return [(x.relative_to(goc).as_posix(), None, None)\n'
         '                    for x in sorted(goc.rglob("*.py"))], "rglob"  # đột biến: lùi im lặng\n',
         "BASH_NEN", (), "t44_khong_lay_duoc_INDEX_thi_KHONG_DO_DUOC_chu_khong_lui_ve_rglob"),
+    # r15 — SAU dot bien cho N39..N44, mot cho moi luat.
+    "bn_global_doi_cho_thay_vi_chep": ("ops/bash_nen.py",
+        "            rb = rieng.get(ten)\n            if rb:\n",
+        "            rb = rieng.pop(ten, None)  # đột biến: DỜI thay vì CHÉP\n            if rb:\n",
+        "BASH_NEN", (), "t33_do_phu_cua_cong_do_duoc_THEO_HINH_DANG"),
+    "bn_bo_walrus_luc_dinh_nghia": ("ops/bash_nen.py",
+        "                for x in _truong_luc_dinh_nghia(n):\n",
+        "                for x in []:  # đột biến: walrus lúc định nghĩa không trồi ra\n",
+        "BASH_NEN", (), "t33_do_phu_cua_cong_do_duoc_THEO_HINH_DANG"),
+    "bn_bo_type_params": ("ops/bash_nen.py",
+        '            ngoai = [*getattr(con, "type_params", ()), *con.decorator_list, *a.defaults,\n',
+        '            ngoai = [*con.decorator_list, *a.defaults,  # đột biến: bỏ PEP 695\n',
+        "BASH_NEN", (), "t50_PEP695_type_params_phai_duoc_tham_va_phai_CHE_duoc"),
+    "bn_giai_ma_hong_thanh_traceback": ("ops/bash_nen.py",
+        "    except (OSError, UnicodeDecodeError, SyntaxError, LookupError, ValueError) as e:\n",
+        "    except (OSError, UnicodeDecodeError) as e:  # đột biến: lỗi giải mã thành traceback\n",
+        "BASH_NEN", (), "t47_INDEX_phai_duoc_doc_TRUNG_THUC_va_nguon_py_nhan_du_moi_cach_viet"),
+    "bn_duong_xau_ra_JSON_tho": ("ops/bash_nen.py",
+        "            co_loi_goi[_duong_bao_cao(rel)] = dong\n",
+        "            co_loi_goi[rel] = dong  # đột biến: phát byte thô ra JSON\n",
+        "BASH_NEN", (), "t49_duong_XAU_ra_JSON_HOP_LE_va_NGAY_GO_phai_duoc_DOC"),
+    "bn_ngay_go_chi_la_chu": ("ops/bash_nen.py",
+        "    qua_han = sorted(CHUA_CHUYEN) if (CHUA_CHUYEN and hom_nay > _dt.date.fromisoformat(_NGAY_GO)) else []\n",
+        "    qua_han = []  # đột biến: NGÀY GỠ lại thành chữ trang trí\n",
+        "BASH_NEN", (), "t49_duong_XAU_ra_JSON_HOP_LE_va_NGAY_GO_phai_duoc_DOC"),
     # r13 — ba dot bien cho N36/N37/N38.
     # THU HEP sau mot phep do: ban dau dot bien them `text=True` vao lenh git, va the la
     # `pc.stdout` thanh `str` con cho tach van `.split(b"\\0")` => TypeError => GIAN GIAO SAP,
@@ -2225,6 +2255,11 @@ _HINH_DANG_PHU = {
     # Ban r12 giai ca hai o pham vi TRONG, nen chinh tham so che ten module thi lot.
     "mac_dinh_che_ten_module": 'import shutil\ndef f(shutil=shutil.which("bash")):\n    pass\n',
     "ham_LONG_trong_ham":      'def run():\n    def f():\n        import shutil as sh\n        return sh.which("bash")\n',
+    # r15 — N39: pham vi KHAI `global` ma TU no `import` thi trong than la MODULE that.
+    "global_roi_import": 'subprocess = object()\ndef f():\n    global subprocess\n    import subprocess\n    subprocess.run(["bash"])\n',
+    "global_doc_khong":  'import subprocess\ndef f():\n    global subprocess\n    subprocess.run(["bash"])\n',
+    # r15 — N40 chieu BAT: `:=` trong THAN la cua than, khong che duoc gi o ngoai.
+    "walrus_trong_than": 'import subprocess\ndef f():\n    y = (subprocess := runner)\nsubprocess.run(["bash"])\n',
 }
 # `executable=` GHI DE, nen ca hai cung ten `bash` van la DUNG MOT ban ghi (F4, chieu dem).
 _HINH_DANG_MOT_BAN_GHI = 'import subprocess\nsubprocess.run(["bash"], executable="bash")\n'
@@ -2263,6 +2298,10 @@ _HINH_DANG_KHONG_PHU = {
     "global_gan_che":  'import subprocess\ndef f():\n    global subprocess\n    subprocess = gia()\nsubprocess.run(["bash"])\n',
     "nonlocal_che":    'def o():\n    import subprocess\n    def i():\n        nonlocal subprocess\n        subprocess = gia()\n    subprocess.run(["bash"])\n',
     "walrus_comprehension_che": 'import subprocess\n[(subprocess := runner) for _ in [0]]\nsubprocess.run(["bash"])\n',
+    # r15 — N40 chieu BAT OAN: `:=` trong TRUONG LUC DINH NGHIA che ten o pham vi CHUA.
+    "walrus_mac_dinh_che": 'import subprocess\ndef f(x=(subprocess := runner)):\n    pass\nsubprocess.run(["bash"])\n',
+    # r15 — N39 chieu BAT OAN: `global x; x = gia()` la mot phep che hop le.
+    "global_roi_gan_che": 'import subprocess\ndef f():\n    global subprocess\n    subprocess = gia()\nsubprocess.run(["bash"])\n',
 }
 
 
@@ -3048,6 +3087,164 @@ def t43_khong_luat_ignore_nao_doi_duoc_danh_sach_tep():
 
 
 @ca
+def t50_PEP695_type_params_phai_duoc_tham_va_phai_CHE_duoc():
+    """THUỘC TÍNH: tham số kiểu PEP 695 phải được THĂM (không sập) và phải CHE được tên ngoài.
+
+    SINH TỪ CROSS-REVIEW CODEX vòng 8 trên `f6189e3`. Đo trên **Python 3.12.3 THẬT**:
+        `def f[T: shutil.which("bash")](): pass`        ⇒ **KeyError** — CLI thoát 1
+        `class C[T: subprocess.run(["bash"])]: pass`    ⇒ **KeyError**
+        `def f[subprocess](): subprocess.run(["bash"])` ⇒ `[(3, 4)]` — **BẮT OAN**, vì
+                                                           `subprocess` ở đó là TypeVar
+    Lời gọi ở `bound` được `ast.walk` tìm thấy (nên nó vào `ung_vien`) mà bộ duyệt phạm vi
+    KHÔNG thăm (nên không có mục trong bảng tra) ⇒ `KeyError`. Đó là **sập**, không phải bỏ sót.
+
+    CA NÀY CÓ MỘT NỀN RIÊNG, và nó tự khai: máy soạn bản vá chạy **Python 3.11**, nơi cú pháp
+    PEP 695 còn chưa parse nổi — `SyntaxError`, chưa tới `KeyError`. Nên ca đi tìm một trình
+    thông dịch **>= 3.12** và chạy phép đo QUA TIẾN TRÌNH CON của nó. Không tìm thấy thì
+    `BoQuaMoiTruong` kèm chẩn đoán ĐO ĐƯỢC — `KHÔNG ĐO ĐƯỢC` không được lặng lẽ thành xanh,
+    và bộ chấm sẽ ghi đột biến đích là KHÔNG_ĐO_ĐƯỢC chứ không phải "giết đúng".
+    CI ghim `python-version: "3.12"` ở cả ba chỗ gọi bộ ca này, nên trên CI nó CHẠY.
+    """
+    ung = [x for x in (shutil.which("python3.12"), shutil.which("python3.13"),
+                       "/usr/bin/python3.12", "/usr/bin/python3.13") if x and Path(x).exists()]
+    if sys.version_info >= (3, 12):
+        ung.insert(0, sys.executable)
+    py = next((x for x in ung if subprocess.run(
+        [x, "-c", "import sys;raise SystemExit(0 if sys.version_info>=(3,12) else 1)"],
+        capture_output=True, timeout=60).returncode == 0), None)
+    if py is None:
+        raise BoQuaMoiTruong(
+            f"không có trình thông dịch >= 3.12 trên máy này (đang chạy "
+            f"{'.'.join(map(str, sys.version_info[:3]))}); cú pháp PEP 695 chưa parse được nên "
+            f"KHÔNG ĐO ĐƯỢC. CI ghim 3.12 nên ở đó ca này chạy.")
+
+    ma = (
+        "import json, runpy, sys\n"
+        "m = runpy.run_path(sys.argv[1])\n"
+        "ra = {}\n"
+        "for ten, than in json.loads(sys.argv[2]).items():\n"
+        "    try:\n"
+        "        ra[ten] = ['ok', m['_loi_goi_tran'](than)]\n"
+        "    except Exception as ex:\n"
+        "        ra[ten] = [type(ex).__name__, str(ex)[:120]]\n"
+        "print('KQ ' + json.dumps(ra))\n")
+    hd = {
+        "bound":   'import shutil\ndef f[T: shutil.which("bash")]():\n    pass\n',
+        "co_so":   'import subprocess\nclass C[T: subprocess.run(["bash"])]:\n    pass\n',
+        "che_ten": 'import subprocess\ndef f[subprocess]():\n    subprocess.run(["bash"])\n',
+        # CHỨNG (control) cho chốt (3): phép CHE bằng THAM SỐ THƯỜNG, không dính PEP 695.
+        # Nếu chính nó cũng hỏng thì cơ chế giải tên CHUNG đã hỏng — thứ `t33` trói — và ca
+        # này KHÔNG ĐO ĐƯỢC chứ không phải ĐỎ.
+        "chung_che_thuong": 'import subprocess\ndef f(subprocess):\n    subprocess.run(["bash"])\n',
+        "chung_bat_thuong": 'import subprocess\nsubprocess.run(["bash"])\n',
+    }
+    pc = subprocess.run([py, "-c", ma, str(BASH_NEN), json.dumps(hd)],
+                        capture_output=True, text=True, timeout=180)
+    dong = [l for l in pc.stdout.splitlines() if l.startswith("KQ ")]
+    dung(dong, f"giàn giáo hỏng trên {py}: rc={pc.returncode}\n{pc.stdout[-500:]}\n{pc.stderr[-500:]}")
+    kq = json.loads(dong[-1][3:])
+
+    bang(all(v[0] == "ok" for v in kq.values()),
+         f"(1) tham số kiểu PEP 695 làm bộ giải SẬP: "
+         f"{ {k: v for k, v in kq.items() if v[0] != 'ok'} } — lời gọi ở `bound` được `ast.walk` "
+         f"thấy mà bộ duyệt không thăm thì bảng tra thiếu mục, và đó là `KeyError`, không phải "
+         f"một phép đo")
+    bang(kq["bound"][1] and kq["co_so"][1],
+         f"(2) lời gọi `bash` trong `bound` của tham số kiểu bị BỎ SÓT: "
+         f"bound={kq['bound'][1]} co_so={kq['co_so'][1]}")
+    # N25 — CHỐT TIỀN ĐỀ TRƯỚC KẾT LUẬN. Chốt (3) chỉ đọc được khi cơ chế giải tên CHUNG còn
+    # chạy: tham số thường phải che được, và lời gọi trần thường phải bắt được. Thiếu tiền đề
+    # ấy thì việc `che_ten` ra `[]` không nói gì về PEP 695 — nó nói về `t33`.
+    # Đo được: `bn_ten_bi_che_khong_chan` và `bn_khong_giai_callee` (đích `t33`) giết ca này
+    # ⇒ bán kính 2/52, vì bản đầu kết luận thẳng mà không hỏi tiền đề.
+    if kq["chung_che_thuong"][1] or not kq["chung_bat_thuong"][1]:
+        raise BoQuaMoiTruong(
+            f"KHÔNG ĐO ĐƯỢC: cơ chế giải tên CHUNG đã hỏng trên nền này — tham số thường "
+            f"che={kq['chung_che_thuong'][1]} (mong []), lời gọi trần thường "
+            f"bắt={kq['chung_bat_thuong'][1]} (mong khác rỗng). Thuộc tính PEP 695 không đọc "
+            f"được khi nền của nó đã đổ; đó là chuyện của `t33`.")
+    bang(not kq["che_ten"][1],
+         f"(3) tên tham số kiểu KHÔNG che được tên ngoài: {kq['che_ten'][1]} — "
+         f"`def f[subprocess]()` thì `subprocess` trong thân là TypeVar, không phải module")
+
+
+@ca
+def t49_duong_XAU_ra_JSON_HOP_LE_va_NGAY_GO_phai_duoc_DOC():
+    """THUỘC TÍNH: biên giới BÁO CÁO ra JSON hợp lệ, và NGÀY GỠ là một hạn ĐỌC ĐƯỢC.
+
+    SINH TỪ CROSS-REVIEW CODEX vòng 8 trên `f6189e3`, ba trong sáu P2:
+      (2) đường mang byte không giải mã được đi thẳng ra `json.dumps(ensure_ascii=False)` ⇒
+          stdout phát lại byte thô và **một bộ đọc JSON UTF-8 nghiêm từ chối**. Đây đúng món
+          **verdict r13 đã tự khai là CHƯA ĐO** — nợ đến hạn.
+      (3) `_NGAY_GO` chỉ được nội suy vào chuỗi LÝ DO, **không mã nào so sánh nó**: đo được
+          trên `f6189e3` — chỉ xuất hiện ở `Assign` và `FormattedValue`, không một `Compare`
+          nào, không `import datetime`. Sau 2026-12-31 mọi mục ratchet pass VÔ HẠN. Lại đúng
+          họ **N6-LOI-KHAI-RONG-HON-PHEP-DO**, lần thứ BA trong packet.
+    Mặt (1) — cookie mã hoá lạ ⇒ `rc=3` chứ không traceback — nằm ở `t47` chứ không ở đây, và
+    đó là một phép đo: fixture ấy chỉ nổ KHI `detect_encoding` được dùng, mà cơ chế ấy là của
+    `t47`. Đặt ở đây thì `bn_giai_ma_cung_utf8` (đích `t47`) giết luôn ca này ⇒ bán kính 2/52.
+    Mặt (4) — PEP 695 — nằm ở `t50`, vì nó cần một nền Python >= 3.12 riêng.
+
+    Mỗi chốt kèm CHIỀU NGƯỢC: (3) ĐÚNG ngày gỡ vẫn phải qua; (2) đường Unicode thường vẫn
+    phải đọc được nguyên vẹn.
+    """
+    def _g(d, *a):
+        return subprocess.run(["git", "-C", str(d)] + list(a), capture_output=True,
+                              text=True, timeout=60)
+
+    def _kho(tmp, ten):
+        d = tmp / ten
+        (d / "ops").mkdir(parents=True)
+        for l in (["init", "-q"], ["config", "user.email", "t@t"], ["config", "user.name", "t"]):
+            subprocess.run(["git", "-C", str(d)] + l, capture_output=True, timeout=60)
+        return d
+
+    BAN = 'import shutil\nb = shutil.which("bash")\n'
+    with tempfile.TemporaryDirectory() as tmp:
+        tmp = Path(tmp)
+        bq = _bash_nen_voi_chua_chuyen(tmp, {})
+
+        # (2) đường mang byte xấu ⇒ JSON vẫn đọc được bằng UTF-8 nghiêm. Chiều ngược: đường
+        #     Unicode thường vẫn nguyên vẹn.
+        d = _kho(tmp, "duong")
+        try:
+            (d / "ops" / b"xau_\xff.py".decode("utf-8", "surrogateescape")).write_text(
+                BAN, encoding="utf-8")
+        except OSError as e:
+            raise BoQuaMoiTruong(f"nền này không đặt được tên tệp có byte thô: {e}") from e
+        (d / "ops" / "bình_thường.py").write_text(BAN, encoding="utf-8")
+        _g(d, "add", "-A")
+        pc = subprocess.run([sys.executable, str(bq), "quet", "--root", str(d), "--json"],
+                            capture_output=True, timeout=180)
+        try:
+            bao = json.loads(pc.stdout.decode("utf-8"))
+            doc_duoc, ly = True, ""
+        except Exception as e:                                        # noqa: BLE001
+            bao, doc_duoc, ly = {}, False, f"{type(e).__name__}: {e}"
+        bang(doc_duoc, f"(2) đường mang byte thô làm JSON KHÔNG đọc được: {ly} — giữ byte cho "
+                       f"việc đối chiếu INDEX là đúng, nhưng biên giới BÁO CÁO phải an toàn")
+        bang("ops/bình_thường.py" in (bao.get("co_loi_goi_tran") or {}),
+             f"(2) chiều ngược: đường Unicode THƯỜNG bị bóp méo: "
+             f"{sorted(bao.get('co_loi_goi_tran') or {})}")
+
+        # (3) NGÀY GỠ là một HẠN đọc được, không phải chữ trong lý do.
+        d = _kho(tmp, "ngay")
+        (d / "ops" / "no_cu.py").write_text(BAN, encoding="utf-8")
+        _g(d, "add", "-A")
+        bq2 = _bash_nen_voi_chua_chuyen(tmp, {"ops/no_cu.py": (1, "nợ giả")},
+                                        ten="bash_nen_ngay_go.py")
+        m = runpy.run_path(str(bq2))
+        han = _dt.date.fromisoformat(m["_NGAY_GO"])
+        rc_dung, _ = m["quet"](d, hom_nay=han)
+        rc_qua, bao_qua = m["quet"](d, hom_nay=han + _dt.timedelta(days=1))
+        bang(rc_dung == 0,
+             f"(3) ĐÚNG ngày gỡ mà cổng đã đỏ: rc={rc_dung} — hạn là hạn, không phải hạn trừ một")
+        bang(rc_qua != 0 and "ops/no_cu.py" in (bao_qua.get("ratchet_qua_han") or []),
+             f"(3) QUA ngày gỡ một ngày mà ratchet vẫn pass: rc={rc_qua} "
+             f"qua_han={bao_qua.get('ratchet_qua_han')} — ngày gỡ đang là chữ trang trí")
+
+
+@ca
 def t48_khung_INDEX_giu_BYTES_va_anh_chup_ghim_BLOB():
     """THUỘC TÍNH: khung `ls-files -z` tách trên BYTES, và ảnh chụp đông cứng ghim BLOB.
 
@@ -3220,6 +3417,20 @@ def t47_INDEX_phai_duoc_doc_TRUNG_THUC_va_nguon_py_nhan_du_moi_cach_viet():
         bang("ops/bom_ban.py" in (bao.get("co_loi_goi_tran") or {}),
              f"(3) chiều ngược: tệp có BOM MANG lời gọi trần lại lọt: "
              f"{sorted(bao.get('co_loi_goi_tran') or {})}")
+
+        # (3c) COOKIE LẠ ⇒ `rc=3` kèm JSON, KHÔNG traceback (N42, r15). Chốt này ở ĐÂY chứ
+        # không ở `t49`: fixture chỉ nổ KHI `detect_encoding` được dùng, mà cơ chế ấy là của
+        # ca này. Đặt ở `t49` thì `bn_giai_ma_cung_utf8` (đích là ca này) giết luôn `t49` —
+        # đo được: bán kính 2/52.
+        d = _kho(tmp, "cookie")
+        (d / "ops" / "xau.py").write_bytes(b"# coding: khong-ton-tai\nX = 1\n")
+        _g(d, "add", "-A")
+        pc = subprocess.run([sys.executable, str(bq), "quet", "--root", str(d), "--json"],
+                            capture_output=True, timeout=180)
+        bang(pc.returncode == 3 and pc.stdout[:1] == b"{" and b"Traceback" not in pc.stderr,
+             f"(3c) cookie mã hoá lạ làm CLI vỡ: rc={pc.returncode} "
+             f"stdout_dau={pc.stdout[:40]!r} traceback={b'Traceback' in pc.stderr} — tài liệu "
+             f"khai BA trạng thái thì trạng thái thứ ba phải ĐỌC ĐƯỢC, không phải một vết đổ")
 
         # (4) HẬU TỐ nhận đủ mọi cách viết, và chiều ngược: `.txt` vẫn KHÔNG được quét.
         d = _kho(tmp, "duoi")

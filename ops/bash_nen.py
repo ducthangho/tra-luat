@@ -59,6 +59,7 @@ Mã thoát của CLI:
 from __future__ import annotations
 
 import argparse
+import datetime as _dt
 import ast
 import json
 import os
@@ -366,6 +367,25 @@ def _chay_git(goc: Path, *doi_so, **kw):
     env["GIT_NO_REPLACE_OBJECTS"] = "1"
     return subprocess.run(["git", "--no-replace-objects", "-C", str(goc), *doi_so],
                           env=env, **kw)
+
+
+def _duong_bao_cao(rel: str) -> str:
+    """Đường dẫn AN TOÀN cho báo cáo. Giữ nguyên đường Unicode thường; đường mang byte không
+    giải mã được thì đổi surrogate thành `\\xNN` đọc được.
+
+    N43 (r15) — N36 giữ byte thô bằng `surrogateescape`, và đó là ĐÚNG cho việc đối chiếu với
+    INDEX. Nhưng chuỗi ấy đi thẳng ra `json.dumps(..., ensure_ascii=False)` thì stdout phát lại
+    byte thô và **một bộ đọc JSON UTF-8 nghiêm từ chối**. Đo được trên `f6189e3`: đường
+    `ops/xau_\xff.py` ⇒ rc=2 kèm đầu ra `UnicodeDecodeError`.
+    Chính verdict r13 đã KHAI món nợ này — *"báo cáo một đường như vậy ra JSON trên nền khác
+    thì CHƯA ĐO"*. Nay đo được, nên trả.
+    Đường dẫn NỘI BỘ vẫn nguyên vẹn; chỉ biên giới BÁO CÁO mới đổi.
+    """
+    try:
+        rel.encode("utf-8")
+        return rel
+    except UnicodeEncodeError:
+        return rel.encode("utf-8", "surrogateescape").decode("utf-8", "backslashreplace")
 
 
 def _doc_noi_dung(goc: Path, muc, nguon_tep):
@@ -703,6 +723,39 @@ _NUT_PHAM_VI = (ast.FunctionDef, ast.AsyncFunctionDef, ast.Lambda, ast.ClassDef,
                 ast.ListComp, ast.SetComp, ast.DictComp, ast.GeneratorExp)
 
 
+def _truong_luc_dinh_nghia(con):
+    """Các nút được TÍNH ở phạm vi CHỨA khi định nghĩa `con` — decorator, giá trị mặc định,
+    chú thích, cơ sở lớp, và **tham số kiểu PEP 695** (N41). Không gồm THÂN."""
+    import ast
+    ra = list(getattr(con, "type_params", ()) or ())
+    ra += list(getattr(con, "decorator_list", ()) or ())
+    a = getattr(con, "args", None)
+    if a is not None:
+        ra += [*a.defaults, *[x for x in a.kw_defaults if x is not None]]
+        ra += [x.annotation for x in (*a.posonlyargs, *a.args, *a.kwonlyargs, a.vararg, a.kwarg)
+               if x is not None and x.annotation is not None]
+    if getattr(con, "returns", None) is not None:
+        ra.append(con.returns)
+    ra += list(getattr(con, "bases", ()) or ())
+    ra += [k.value for k in (getattr(con, "keywords", ()) or ())]
+    return ra
+
+
+def _dich_walrus_trong(nut):
+    """Tên bị `:=` ràng buộc bên trong `nut`, không xuống hàm/lambda/lớp lồng."""
+    import ast
+    ra, chong = [], [nut]
+    while chong:
+        n = chong.pop()
+        if n is not nut and isinstance(n, (ast.FunctionDef, ast.AsyncFunctionDef,
+                                           ast.Lambda, ast.ClassDef)):
+            continue
+        if isinstance(n, ast.NamedExpr) and isinstance(n.target, ast.Name):
+            ra.append(n.target.id)
+        chong.extend(ast.iter_child_nodes(n))
+    return ra
+
+
 def _dich_walrus(nut):
     """Tên bị `:=` ràng buộc bên trong `nut` (một comprehension) — PEP 572 nói chúng thuộc
     phạm vi CHỨA comprehension. KHÔNG xuống hàm/lambda/lớp lồng bên trong: `:=` ở đó ràng buộc
@@ -762,8 +815,19 @@ def _rang_buoc_cua(pham_vi):
     while chong:
         n = chong.pop()
         if isinstance(n, _NUT_PHAM_VI):
-            if isinstance(n, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)):
-                them(n.name, ("khac",))
+            if isinstance(n, (ast.FunctionDef, ast.AsyncFunctionDef, ast.Lambda,
+                              ast.ClassDef)):
+                if not isinstance(n, ast.Lambda):
+                    them(n.name, ("khac",))
+                # N40 (r15) — `:=` trong TRƯỜNG LÚC ĐỊNH NGHĨA (mặc định, decorator, chú
+                # thích, cơ sở lớp) ràng buộc ở phạm vi CHỨA, vì chính các trường ấy được
+                # TÍNH ở phạm vi chứa (N37). Bản r13 bỏ qua cả nút nên mất ràng buộc ấy.
+                # Đo được: `import subprocess`, `def f(x=(subprocess := runner)): pass`,
+                # rồi `subprocess.run(["bash"])` ⇒ `[(4, 0)]` — BẮT OAN một phép che hợp lệ.
+                # CHỈ trường lúc định nghĩa, KHÔNG xuống thân: `:=` trong thân là của thân.
+                for x in _truong_luc_dinh_nghia(n):
+                    for y in _dich_walrus_trong(x):
+                        them(y, ("khac",))
             elif isinstance(n, (ast.ListComp, ast.SetComp, ast.DictComp, ast.GeneratorExp)):
                 # N29 (r11) — PEP 572: `:=` bên trong một comprehension ràng buộc ở phạm vi
                 # CHỨA comprehension, không ở trong nó. Bản r10 `continue` thẳng nên ràng buộc
@@ -801,6 +865,12 @@ def _rang_buoc_cua(pham_vi):
             them(n.id, ("khac",))
         elif isinstance(n, ast.ExceptHandler):
             them(n.name, ("khac",))
+        elif type(n).__name__ in ("TypeVar", "ParamSpec", "TypeVarTuple"):
+            # N41 — tên tham số kiểu CHE tên ngoài trong thân: `def f[subprocess]()` thì
+            # `subprocess` trong thân là TypeVar, không phải module.
+            them(getattr(n, "name", None), ("khac",))
+        elif type(n).__name__ == "TypeAlias":
+            them(getattr(getattr(n, "name", None), "id", None), ("khac",))
         elif isinstance(n, ast.Global):
             toan_cuc.update(n.names)
         elif isinstance(n, ast.Nonlocal):
@@ -833,8 +903,17 @@ def _giai_ten(ten, chuoi):
         if la_lop and i != n - 1:
             continue
         if ten in toan_cuc:
+            # N39 (r15) — phạm vi KHAI `global x` mà TỰ NÓ ràng buộc `x` thì dùng ràng buộc
+            # ẤY: bên trong hàm vừa `import subprocess`, cái tên là module, không mơ hồ.
+            # Không có ràng buộc riêng (khai ĐỌC KHÔNG) thì mới về bảng module.
+            # Đối xứng cả hai chiều: `global x; x = gia()` cho `("khac",)` ⇒ None ⇒ KHÔNG báo,
+            # đúng, vì tên ấy đã bị che.
+            if ten in bang:
+                return _tra_import(bang[ten])
             return _tra_import(chuoi[0][1].get(ten, ()))
         if ten in phi_cuc_bo:
+            if ten in bang:
+                return _tra_import(bang[ten])
             continue
         if ten in bang:
             return _tra_import(bang[ten])
@@ -879,12 +958,22 @@ def _bang_pham_vi_ca_cay(cay):
     _HAM = (ast.FunctionDef, ast.AsyncFunctionDef, ast.Lambda)
     for i in thu_tu[1:]:
         rieng, toan_cuc, phi_cuc_bo = bang[i]
+        # N39 (r15) — CHÉP, KHÔNG DỜI. Bản r13 `pop` ràng buộc khỏi phạm vi khai `global`,
+        # nên bên TRONG chính hàm vừa `import`, cái tên ấy mất ràng buộc và bộ giải trả None.
+        # Cross-review codex vòng 8 nêu lại đúng ca này, và họ ĐÚNG — phiên trước tôi lập luận
+        # ngược lại rằng "tên bị ràng buộc hai lần nên mơ hồ là đúng", và lập luận ấy SAI:
+        # sự mơ hồ nằm ở phạm vi MODULE, không nằm trong thân hàm đã tự `import`.
+        # Đo được trên `f6189e3`: `subprocess = object()` ở module, rồi
+        # `def f(): global subprocess; import subprocess; subprocess.run(["bash"])` ⇒ `[]`.
+        # Chép thì: bảng của `f` giữ `("import", …)` ⇒ trong `f` BẮT; bảng module có cả
+        # `("khac",)` lẫn `("import", …)` ⇒ ngoài module vẫn mơ hồ ⇒ KHÔNG bắt oan. Cả hai
+        # chiều mà r11 đã vá vẫn giữ nguyên.
         for ten in toan_cuc:
-            rb = rieng.pop(ten, None)
+            rb = rieng.get(ten)
             if rb:
                 bang[goc][0].setdefault(ten, set()).update(rb)
         for ten in phi_cuc_bo:
-            rb = rieng.pop(ten, None)
+            rb = rieng.get(ten)
             if not rb:
                 continue
             j = cha_cua[i]
@@ -922,7 +1011,14 @@ def _giai_callee_theo_pham_vi(cay):
         """(nút tính ở phạm vi NGOÀI, nút tính ở phạm vi TRONG) của một nút phạm vi."""
         if isinstance(con, (ast.FunctionDef, ast.AsyncFunctionDef)):
             a = con.args
-            ngoai = [*con.decorator_list, *a.defaults,
+            # N41 (r15) — PEP 695. Bản r13 KHÔNG duyệt `type_params`, nên một lời gọi ở
+            # `bound` được `ast.walk` tìm thấy mà `tham` không thăm ⇒ `tra_theo_nut[id]`
+            # ném **KeyError** và CLI thoát 1. Đo trên Python 3.12.3 THẬT (CI ghim 3.12):
+            #   `def f[T: shutil.which("bash")](): pass`      ⇒ KeyError
+            #   `class C[T: subprocess.run(["bash"])]: pass`  ⇒ KeyError
+            #   `def f[subprocess](): subprocess.run(["bash"])` ⇒ [(3,4)] — BẮT OAN
+            # `getattr` để mã vẫn chạy trên 3.11 (máy soạn bản vá) — ở đó nó là no-op.
+            ngoai = [*getattr(con, "type_params", ()), *con.decorator_list, *a.defaults,
                      *[x for x in a.kw_defaults if x is not None],
                      *[x.annotation for x in (*a.posonlyargs, *a.args, *a.kwonlyargs,
                                               a.vararg, a.kwarg)
@@ -934,8 +1030,8 @@ def _giai_callee_theo_pham_vi(cay):
             a = con.args
             return ([*a.defaults, *[x for x in a.kw_defaults if x is not None]], [con.body])
         if isinstance(con, ast.ClassDef):
-            return ([*con.decorator_list, *con.bases, *[k.value for k in con.keywords]],
-                    list(con.body))
+            return ([*getattr(con, "type_params", ()), *con.decorator_list, *con.bases,
+                     *[k.value for k in con.keywords]], list(con.body))
         if isinstance(con, (ast.ListComp, ast.SetComp, ast.DictComp, ast.GeneratorExp)):
             gen = con.generators
             if not gen:
@@ -1041,6 +1137,13 @@ ANH_CHUP_DONG_CUNG = {
 # ai vá xong cũng quên xoá tên mình, và cổng dần hết ý nghĩa mà vẫn xanh.
 # NGAY GO la BAT BUOC cho moi muc (#570 r4, N17). Mot danh sach khong co ngay go la mot
 # nghia trang — dung thu N5 sinh ra de chan, chi cham hon.
+# N44 (r15) — NGÀY GỠ PHẢI ĐƯỢC ĐỌC. Trước r15 hằng này chỉ được nội suy vào chuỗi LÝ DO và
+# KHÔNG mã nào so sánh nó: đo được trên `f6189e3` — `_NGAY_GO` chỉ xuất hiện ở `Assign` và
+# `FormattedValue`, không một `Compare` nào, không `import datetime`. Tức sau 2026-12-31 mọi
+# mục ratchet vẫn pass VÔ HẠN. Lại đúng họ **N6-LOI-KHAI-RONG-HON-PHEP-DO** — lần thứ BA trong
+# packet, sau `ANH_CHUP_DONG_CUNG` (r13) và chính bảng này.
+# Ngày so theo **UTC** để phán quyết không đổi theo múi giờ người chạy; `quet(hom_nay=...)`
+# cho ca đo tiêm ngày, nên luật này ĐỎ được mà không phải chờ tới cuối năm.
 _NGAY_GO = "2026-12-31"
 CHUA_CHUYEN = {
     ".claude/dev/launcher_test.py": (7,
@@ -1087,7 +1190,7 @@ CHUA_CHUYEN = {
 _BO_QUA_TOAN_CAY = (".git/",)
 
 
-def quet(goc: Path):
+def quet(goc: Path, hom_nay=None):
     """Quét TOÀN CÂY kho. Trả (rc, báo_cáo). Ba trạng thái, không phải hai.
 
     PHẠM VI MỞ Ở r4 (#570, N17), và lý do là một phép đo chứ không phải một ý hay.
@@ -1122,7 +1225,13 @@ def quet(goc: Path):
     _, bien_git_da_go = _moi_truong_git_sach()
     try:
         noi_dung, lien_ket = _doc_noi_dung(goc, cac_tep, nguon_tep)
-    except (OSError, UnicodeDecodeError) as e:
+    # N42 (r15) — `tokenize.detect_encoding` ném `SyntaxError` khi cookie mã hoá lạ, và
+    # `LookupError` khi tên mã hoá không tồn tại. Bản r13 không bắt hai loại ấy, nên CLI
+    # THOÁT 1 KÈM TRACEBACK thay vì trả `rc=3 KHONG_DO_DUOC` như tài liệu khai. Đo được trên
+    # `f6189e3`: tệp `# coding: khong-ton-tai` ⇒ rc=1, stdout KHÔNG phải JSON, stderr có
+    # traceback. BẮT HẸP — chỉ quanh `_doc_noi_dung` — để một lỗi hiện thực khác không bị
+    # biến thành "phép đo thất bại".
+    except (OSError, UnicodeDecodeError, SyntaxError, LookupError, ValueError) as e:
         return RC_KHONG_DO_DUOC, {"trang_thai": "KHONG_DO_DUOC", "nguon_tep": nguon_tep,
                                   "da_quet": str(goc), "pham_vi": "toan-cay",
                                   "bien_git_da_go": bien_git_da_go,
@@ -1150,7 +1259,7 @@ def quet(goc: Path):
                                       "bien_git_da_go": bien_git_da_go,
                                       "ly_do": f"không đọc/phân tích được {rel}: {e}"}
         if dong:
-            co_loi_goi[rel] = dong
+            co_loi_goi[_duong_bao_cao(rel)] = dong
 
     # MỘT LUẬT ĐẾM CHO MỌI BẢNG MIỄN TRỪ (r7 vòng 2). Ba bảng, ba ý nghĩa khác nhau —
     # `CHO_PHEP` vĩnh viễn, `CHUA_CHUYEN` có ngày gỡ, `ANH_CHUP_DONG_CUNG` bất biến — nhưng
@@ -1200,13 +1309,19 @@ def quet(goc: Path):
             thay_oid = oid_that.get(t)
             if thay_oid != ghim:
                 lech_oid[t] = {"ghim": ghim, "do_duoc": thay_oid}
+    # N44 — mục ratchet QUÁ NGÀY GỠ là ĐỎ. `hom_nay` chỉ để ca đo tiêm ngày; đường thật đọc
+    # đồng hồ UTC, không đọc giờ địa phương.
+    if hom_nay is None:
+        hom_nay = _dt.datetime.now(_dt.timezone.utc).date()
+    qua_han = sorted(CHUA_CHUYEN) if (CHUA_CHUYEN and hom_nay > _dt.date.fromisoformat(_NGAY_GO)) else []
     da_sach = [t for t in CHUA_CHUYEN if t not in co_loi_goi]
     bao = {"da_quet": str(thu_muc), "pham_vi": "toan-cay", "nguon_tep": nguon_tep,
            "nguon_noi_dung": "blob-index" if nguon_tep == "git" else "cay-lam-viec",
            "bien_git_da_go": bien_git_da_go, "co_loi_goi_tran": co_loi_goi,
            "ngoai_danh_sach": moi, "muc_ratchet_da_sach": sorted(da_sach), "lech_so_loi_goi": lech_so,
            "cho_phep": sorted(CHO_PHEP), "anh_chup": sorted(ANH_CHUP_DONG_CUNG), "chua_chuyen": sorted(CHUA_CHUYEN),
-           "lech_oid_dong_cung": lech_oid,
+           "lech_oid_dong_cung": lech_oid, "ngay_go": _NGAY_GO,
+           "ratchet_qua_han": qua_han,
            "so_cho_phep": {t: _so_cho_phep(m)[0] for t, m in sorted(_MIEN_TRU.items())}}
     if khong_khai_so:
         # FAIL-CLOSE. Một mục miễn trừ không khai hạn ngạch số là một mục KHÔNG ĐO ĐƯỢC,
@@ -1223,6 +1338,13 @@ def quet(goc: Path):
             + "; ".join(f"{t}:{d}" for t, d in sorted(moi.items()))
             + ". Dùng `ops/bash_nen.py::tim_bash()` — nó QUYẾT BẰNG NĂNG LỰC, và "
               "`shutil.which(\"bash\")` trên Windows trả bộ phóng WSL (Issue #570).")
+        return RC_DO, bao
+    if qua_han:
+        bao["trang_thai"] = "DO"
+        bao["ly_do"] = (
+            f"mục ratchet QUÁ NGÀY GỠ {_NGAY_GO} (hôm nay {hom_nay}): " + ", ".join(qua_han)
+            + ". Ngày gỡ là một HẠN, không phải một chữ trong lý do — hoặc chuyển các tệp ấy "
+              "sang `tim_bash()`, hoặc gia hạn tường minh kèm phép đo nói vì sao.")
         return RC_DO, bao
     if lech_oid:
         bao["trang_thai"] = "DO"

@@ -1,0 +1,105 @@
+# Lease EXECUTOR — packet #578, phạm vi LAND/BOOKKEEPING, generation 3.
+#
+# NGUỒN SỰ THẬT LÀ TỆP NÀY. Comment trên "#578" chỉ là bản chiếu do
+# `.github/workflows/ops-publish-lease.yml` đăng khi tệp này được push lên nhánh `ops/**`.
+#
+# NHỚ ĐÓNG NHÁY mọi giá trị chứa `#`: không nháy thì `#` mở CHÚ THÍCH YAML và cắt cụt
+# giá trị IM LẶNG — đã đụng thật ở lease exec-4 của wp55.
+
+schema_version: 2
+event: executor_lease_granted
+packet_issue: 578
+packet_id: wp578
+generation: 3
+lease_id: wp578-land-g3-claude-20260924
+
+role: executor
+provider: claude
+executor: claude
+access: read-write
+review_class: sensitive
+effective_review_class: sensitive
+review_class_note: >-
+  `ops/land/` và `ops/leases/` KHÔNG có trong `_BANG_LOP` của `ops/lease_publish.py`,
+  nên cổng phân lớp fail-closed về `sensitive`. Đây là lớp CỔNG TÍNH ĐƯỢC, không phải
+  lớp tự khai — đã đo bằng `_tinh_lop_tu_write_set` trước khi soạn tệp này.
+
+write_set:
+  - ops/land/pr594-wp578-land-evidence.yaml
+  - ops/leases/wp578-land-g3-claude-20260924.yaml
+write_set_note: >-
+  HẸP CÓ CHỦ ĐÍCH. Đúng hai tệp: hồ sơ land, và chính lease này. KHÔNG mã sản phẩm,
+  KHÔNG tệp của packet khác. Tệp thứ ba xuất hiện trong diff là finding.
+
+pham_vi_du_kien:
+  so_viec: 2
+  viec:
+    - 'Commit 1 — CẬP NHẬT TRẠNG THÁI vào hồ sơ land: khai CI của head `f405f2b` (hai cổng
+      đỏ), và ghi những gì đã đổi từ 21-09: master chạy tiếp, "#568" đóng, "#600" merge,
+      0/93 lease còn sống.'
+    - 'Commit 2 — HỢP NHẤT `origin/master` vào nhánh, không xung đột (đã đo `git merge-tree`
+      rc=0), để cổng chạy lại trên head mới do PUSH.'
+  thu_tu_bat_buoc: >-
+    Commit 1 TRƯỚC commit 2. Lý do là luật của chính hồ sơ: mục `dien_bien_do_duoc` chỉ
+    khai CI các head TỪ `9387078` ĐẾN head CHA của head hiện tại, nên CI của `f405f2b`
+    chỉ khai được khi `f405f2b` đã thành cha. Đảo thứ tự thì khoảng trống ấy không đóng
+    được nữa. Chủ kho ra đúng thứ tự này: "cập nhật trạng thái trước".
+
+KHONG_duoc_phep:
+  - 'Merge PR "#601" — vẫn nằm ngoài land authority, y như bản chiếu 5761642860.'
+  - 'Sửa bất kỳ mã sản phẩm nào, kể cả sửa tạm rồi hoàn nguyên.'
+  - 'Chạy lại CI bằng tay hay `workflow_dispatch` — `manual_ci_budget` vẫn là 0. Cổng chạy
+    lại là HỆ QUẢ của push, không phải lời gọi tay.'
+  - 'Gọi thêm review codex. Trần trục LỜI GỌI của §12 là 2, đã dùng 6; lease này KHÔNG
+    reset bộ đếm nào (§12 d.1021).'
+  - 'Đụng "#568", "#570", "#562", "#552", "#574", "#579".'
+
+branch: claude/ho-so-land-578-20260921
+branch_ownership: exclusive
+target_branch_neu_land: master
+
+reviewed_sha_required: f405f2b491f509cc57b466a05243a5e57bba500c
+reviewed_sha_note: >-
+  Head XUẤT PHÁT, không phải head đưa ra review — cùng quy ước với lease executor của wp55.
+  Trường mang tên `reviewed_sha_*` vì validator dùng CHUNG cho lease executor lẫn reviewer.
+base_sha: d553efa51bbd659779d20edd71519e7f2d2e2765
+start_from_sha: f405f2b491f509cc57b466a05243a5e57bba500c
+
+granted_by: ducthangho
+granted_on_instruction: 'direct, in-session, 2026-09-24 ("Cấp lease đi, hợp nhất master vào nhánh. Lưu ý, cập nhật trạng thái trước")'
+recorded_by: claude-session
+recorder_is_dispatcher: false
+recorder_note: >-
+  Phiên agent GÕ HỘ. `granted_by` là chủ kho và chỉ chủ kho; phiên này không tự cấp cho
+  mình. Tiền lệ cùng đường: `31c323e` lease "#543" (ghi hộ). Thứ thật sự neo danh tính là
+  `GITHUB_ACTOR` ở cổng đăng, không phải chữ trong tệp này.
+authority_basis: '§2 — start/pause/resume/reroute/override/authorize thuộc chủ kho'
+
+leased_at_utc: '2026-09-24T02:00:00Z'
+lease_expires_at_utc: '2026-09-25T02:00:00Z'
+run_minutes: 1440
+
+# --- Tiền điều kiện ĐÃ ĐO, không phải khai suông -------------------------------------
+preconditions_measured_at_utc: '2026-09-24T01:58:00Z'
+chong_lan_write_set:
+  do_bang: 'python ops/lease_publish.py ai-dang-giu ops/land/pr594-wp578-land-evidence.yaml'
+  ket_qua: 'rc=0 — NGƯỜI_GIỮ 0: không có'
+  vi_sao_ghi_ra: >-
+    Packet này ĐÃ vi phạm bất biến 2 của §1 một lần (VI_PHAM_2_CHONG_LAN_WRITE_SET, ba bên
+    cùng giữ `ops/lease_publish_test.py`). Lần này đo TRƯỚC khi cấp, và đo ra 0. Toàn kho
+    hiện có 0/93 lease còn sống.
+lease_song_khac_luc_cap: 'KHÔNG CÓ — quét 93 lease, 0 cái còn hạn lúc 2026-09-24T01:55Z.'
+master_sha_at_grant: d553efa51bbd659779d20edd71519e7f2d2e2765
+packet_head_at_grant: f405f2b491f509cc57b466a05243a5e57bba500c
+merge_kho_da_do: 'git merge-tree --write-tree origin/master <head> -> rc=0, KHÔNG xung đột'
+
+gate_bat_buoc:
+  - 'Diff của nhánh so với merge-base -> ĐÚNG 1 tệp (`ops/land/...`), không mã sản phẩm'
+  - 'Hợp nhất KHÔNG được đổi một byte nào của tệp hồ sơ land'
+  - 'Đọc lại (readback) tệp sau mỗi lần ghi, đừng tin lệnh đã chạy đúng'
+  - 'Đếm dòng SAU khi sửa, ngay trước commit — không lấy số đếm từ bản nháp'
+
+muc_tieu:
+  - 'Khai CI của `f405f2b` vào hồ sơ trước khi head đổi — đóng đúng khoảng trống đã báo trước'
+  - 'Ghi trạng thái đo được ngày 24-09 vào hồ sơ, không sửa kết luận cũ'
+  - 'Hợp nhất master để cổng chạy lại trên head mới'

@@ -61,18 +61,22 @@ model_reviewer_identity:
   neo_boi_launcher: false
 github_submitter_identity:
   actor: chatgpt-codex-connector[bot]
-  role: GitHub App đã VẬN CHUYỂN comment verdict (PROTOCOL §8 dòng 456-460 — actor vận chuyển);
+  role: >-
+    GitHub App đã VẬN CHUYỂN comment verdict (PROTOCOL §8 dòng 456-460 — actor vận chuyển);
     khớp comment_delivery.author
   recorder_actor: ducthangho
-  recorder_role: executor session claude ghi biên nhận này qua GitHub REST API bằng token chủ kho —
+  recorder_role: >-
+    executor session claude ghi biên nhận này qua GitHub REST API bằng token chủ kho —
     KHÔNG phải actor vận chuyển verdict, KHÔNG phải bằng chứng model hay phê duyệt
   model_identity_not_inferred_from_actor: true
 anchor:
   loai: canonical_ancestry
-  cuong_do: candidate ancestry only; canonical inclusion pending — commit verdict 358765f7 (evidence_url)
+  cuong_do: >-
+    candidate ancestry only; canonical inclusion pending — commit verdict 358765f7 (evidence_url)
     chỉ ở tổ tiên PR #623, vào master khi PR land bằng merge commit; riêng reviewed_sha 92adc711 ĐÃ
     canonical qua merge commit c10487410cc502e96e9dd43639f2ddb6af104922 (PR #613)
-  gioi_han: Validator đo tổ tiên trên checkout hiện hành, không chứng minh canonical inclusion của
+  gioi_han: >-
+    Validator đo tổ tiên trên checkout hiện hành, không chứng minh canonical inclusion của
     commit evidence_url; kiểm sau land bằng `git merge-base --is-ancestor 358765f7bdf7af5ca9d1b5960744572124e910ab
     origin/master`. Không chứng minh nội dung review đã đọc gì — connector không xuất bằng chứng đọc.
 comment_delivery:

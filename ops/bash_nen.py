@@ -61,6 +61,7 @@ from __future__ import annotations
 import argparse
 import datetime as _dt
 import ast
+import hashlib
 import json
 import os
 import re
@@ -188,19 +189,30 @@ def ung_vien(path=None, system_root=None, program_files=None, git=None):
 
     duoi_sr = []
     for d in path.split(os.pathsep):
-        if not d:
-            continue
+        # N62 (r18) — THÀNH PHẦN RỖNG LÀ THƯ MỤC HIỆN TẠI, và `PATH=""` là MỘT thành phần rỗng.
+        # Bản r17 viết ngược lại — *"một `PATH=""` tường minh nghĩa là đừng tìm ở đâu cả"* — và
+        # gán nó cho HỆ ĐIỀU HÀNH mà KHÔNG ĐO. Vòng 12 đo, phiên đo lại, cả ba cùng một chiều:
+        #   `os.get_exec_path({"PATH": ""})`           ⇒ `['']`
+        #   `PATH= bash -c 'echo OK'` ở thư mục có bash   ⇒ rc=0 `OK`
+        #   `subprocess.run(["bash"], env={"PATH": ""})` ⇒ rc=0 `OK`
+        # Đó là LỜI KHAI RỘNG HƠN PHÉP ĐO — đúng họ N6 — và lần này do chính phiên viết ra.
+        # CHUỖI ỨNG VIÊN phải là `./bash`, KHÔNG phải `bash`: `Path(".") / "bash"` chuẩn hoá
+        # mất dấu `.` và cho ra một TÊN TRẦN, tức phép thử năng lực sẽ đi tìm theo PATH thay vì
+        # thử đúng tệp ở thư mục hiện tại.
+        # CHƯA ĐO trên Windows: `CreateProcess` có luật tìm thư mục hiện tại riêng.
+        d = d or os.curdir
         for ten in ("bash.exe", "bash"):
-            u = Path(d) / ten
+            u = Path(os.path.join(d, ten))
             try:
                 if not u.is_file():
                     continue
             except OSError:
                 continue
+            chuoi_u = os.path.join(d, ten)   # giữ `./` — xem N62 ở trên
             if _duoi_system_root(u, sr_norm):
-                duoi_sr.append(str(u))
+                duoi_sr.append(chuoi_u)
             else:
-                them(u)
+                them(chuoi_u)
     if os.name == "nt":
         g = shutil.which("git", path=path) if git is None else git
         if g:
@@ -275,9 +287,19 @@ def tim_bash(dung_cache=True, tat_ca=False, **ep):
     # `which` doc `PATHEXT` de biet duoi nao la thuc thi duoc.
     # KHAI THANG: ve (2) chua do duoc tren nen nay (Linux bo qua `PATHEXT`); no vao khoa vi
     # LY LE doc duoc tu ma, khong phai vi mot phep do. `None != False`.
-    _ENV_ANH_HUONG = ("CONG_CU_BASH", "PATH", "PATHEXT", "SystemRoot", "ProgramFiles")
-    moi_truong = {k: os.environ.get(k) for k in _ENV_ANH_HUONG}
-    khoa = json.dumps([sorted(ep.items()), bool(tat_ca), sorted(moi_truong.items()),
+    # N61 (r18) — KHOÁ THEO TOÀN BỘ MÔI TRƯỜNG, không theo một DANH SÁCH biến. Bản r4..r17
+    # liệt kê năm biến mà `ung_vien()` đọc — nhưng thứ quyết phán quyết là PHÉP THỬ NĂNG LỰC,
+    # và phép thử ấy chạy `bash`, mà `bash` đọc môi trường của chính nó. Đo được ở vòng 12:
+    # cache `/bin/bash` xong, đặt `BASH_ENV` trỏ vào một tệp `exit 7` ⇒ cache vẫn trả
+    # `/bin/bash`, còn đo lại trả `None` (`phép argv: rc=7`). `BASH_ENV`, `ENV`, `SHELLOPTS`,
+    # `BASHOPTS`, `POSIXLY_CORRECT`… danh sách ấy KHÔNG BAO GIỜ ĐỦ — đúng bài học `CLAUDE.md`
+    # về danh sách CẤM. Nên khoá băm TẤT CẢ: mọi thay đổi môi trường làm cache hết hiệu lực.
+    # GIÁ: một biến chẳng liên quan đổi cũng làm đo lại. Trong một tiến trình, môi trường
+    # hiếm khi đổi, nên giá ấy gần như bằng không. Chỉ lưu BĂM, không lưu giá trị — môi
+    # trường có thể mang bí mật.
+    van_tay_moi_truong = hashlib.sha256(
+        json.dumps(sorted(os.environ.items())).encode("ascii")).hexdigest()
+    khoa = json.dumps([sorted(ep.items()), bool(tat_ca), van_tay_moi_truong,
                        os.getcwd()], default=str)
     # N51 (r16) — KHOA DU MA TRA LOI VAN CU. Khoa gom moi DAU VAO, nhung ket qua khong
     # sinh ra tu dau vao — no sinh ra tu phep thu NANG LUC tren mot TEP. Thay chinh tep ay
@@ -345,6 +367,36 @@ _KHOA_SPAWN = ("args",)
 # CHU KY KHAC `Popen`: doi so DAU la `cmd` — mot CHUOI LENH SHELL — va KHONG co `executable`.
 # Nen chung di rieng mot loai, khong muon luat vi tri thu ba cua `Popen`.
 _TEN_SHELL_RA = ("getoutput", "getstatusoutput")
+# N59 (r18) — CÁC API KHÁC PHÓNG `bash` THEO TÊN. Từ r8 docstring của `_loi_goi_tran` khai
+# `os.system` / `os.execvp` / `asyncio.create_subprocess_exec` là NỢ CÓ TÊN; verdict r16 và
+# r17 xin reviewer ĐO cái nào chạy thật để nâng lên luật. Vòng 12 đo ba cái; phiên đo thêm
+# sáu. Cả CHÍN đều CHẠY BASH THẬT trên nền này (tiến trình con cô lập, in ra `OK`).
+# MỖI MỤC MANG BA THUỘC TÍNH, và cả ba đều là PHÉP ĐO chứ không phải suy luận theo "loại":
+#   · vị trí đối số mang tên chương trình, và tên từ khoá của nó (đọc `inspect.signature`);
+#   · KIỂU được nhận. Gộp theo loại là SAI: `os.system(Path("bash"))` CHẠY, còn `os.popen`
+#     và `create_subprocess_shell` ném `TypeError`/`ValueError` với path-like; `os.popen` còn
+#     từ chối cả `bytes`. Bắt lời gọi mà runtime từ chối là BÁO ĐỘNG GIẢ — đúng lỗi F3 vòng 11.
+# KHÔNG CÓ biến thể không-`p` (`execv`, `posix_spawn`, `spawnv`): chúng KHÔNG tìm theo PATH
+# — đo được `execv("bash", …)` ném `FileNotFoundError` — nên `"bash"` ở đó là `./bash`, không
+# phải khuyết tật packet này chặn.
+_S, _B, _P = "str", "bytes", "path"
+_API_THEO_TEN = {
+    ("os", "execvp"): (0, "file", (_S, _B, _P)),
+    ("os", "execvpe"): (0, "file", (_S, _B, _P)),
+    ("os", "execlp"): (0, "file", (_S, _B, _P)),
+    ("os", "execlpe"): (0, "file", (_S, _B, _P)),
+    ("os", "posix_spawnp"): (0, "path", (_S, _B, _P)),
+    ("os", "spawnlp"): (1, "file", (_S, _B, _P)),
+    ("os", "spawnlpe"): (1, "file", (_S, _B, _P)),
+    ("os", "spawnvp"): (1, "file", (_S, _B, _P)),
+    ("os", "spawnvpe"): (1, "file", (_S, _B, _P)),
+    ("os", "system"): (0, "command", (_S, _B, _P)),
+    ("os", "popen"): (0, "cmd", (_S,)),
+    ("asyncio", "create_subprocess_exec"): (0, "program", (_S, _B, _P)),
+    ("asyncio", "create_subprocess_shell"): (0, "cmd", (_S, _B)),
+}
+# Vỏ bọc GIỮ HẰNG mà bộ tính hằng gấp được khi callee giải về đúng module (N58).
+_BOC_OS = ("fspath", "fsencode", "fsdecode")
 _KHOA_SHELL_RA = ("cmd",)
 _LOAI_THEO_TEN = {**{t: "which" for t in _TEN_WHICH},
                   **{t: "spawn" for t in _TEN_SPAWN},
@@ -637,10 +689,17 @@ def _so_cho_phep(muc):
     chuỗi với 9 lời gọi ⇒ `rc=0 DAT`. Cùng lớp với F1 (hạn ngạch 0 bị bỏ qua): miễn trừ khai
     theo TƯ CÁCH THÀNH VIÊN thay vì theo HẠN NGẠCH. `t40` đọc bảng THẬT để chặn ngay lúc khai.
     """
-    if isinstance(muc, (tuple, list)) and len(muc) == 3:
-        return int(muc[0]), str(muc[2])        # (số, OID, lý do) — mục ĐÔNG CỨNG (N38)
-    if isinstance(muc, (tuple, list)) and len(muc) == 2:
-        return int(muc[0]), str(muc[1])
+    if isinstance(muc, (tuple, list)) and len(muc) in (2, 3):
+        # N63 (r18) — KHÔNG ÉP KIỂU, HỎI KIỂU. Bản trước gọi `int(muc[0])` vô điều kiện, nên
+        # một hạn ngạch gõ nhầm ném `ValueError` TRƯỚC khi `quet()` kịp vào nhánh fail-close
+        # đã khai — đo được: `("not-a-number", "lý do")` ⇒ CLI thoát 1 kèm traceback thay vì
+        # báo cáo ba trạng thái. `bool` bị loại tường minh vì `True` LÀ một `int` (bằng 1)
+        # trong Python; số âm bị loại vì một hạn ngạch âm không có nghĩa. Trả `None` ⇒ mục ấy
+        # rơi đúng vào `khong_khai_so` ⇒ KHONG_DO_DUOC. `None ≠ False`.
+        so = muc[0]
+        if not isinstance(so, int) or isinstance(so, bool) or so < 0:
+            return None, str(muc[-1])
+        return so, str(muc[-1])            # (số, lý do) hay (số, OID, lý do) — N38
     return None, str(muc)
 
 
@@ -703,6 +762,10 @@ def _gia_tri_hang(nut, tra_ten=None, sau=0):
     # mà phần tử phải GẤP thì `_la_vec_bash` đã mở theo CÚ PHÁP trước khi tới đây. Bản đầu
     # của r17 có nhánh ấy và đột biến `bn_khong_rut_gon_bao_chua` SỐNG SÓT — dấu hiệu đo
     # được của mã không đường nào đi tới. Gỡ, thay vì giữ một nhánh không ai kiểm được.
+    if isinstance(nut, ast.Call):
+        boc = _gap_vo_boc(nut, tra_ten, sau)
+        if boc is not _KHONG_BIET:
+            return boc
     if isinstance(nut, ast.Call) and tra_ten is not None:
         if not _la_dung_duong(nut.func, tra_ten) or nut.keywords:
             return _KHONG_BIET
@@ -717,6 +780,60 @@ def _gia_tri_hang(nut, tra_ten=None, sau=0):
             return str(PurePosixPath(*phan))
         except (ValueError, TypeError):
             return _KHONG_BIET
+    return _KHONG_BIET
+
+
+def _gap_vo_boc(nut, tra_ten, sau):
+    """Gấp một VỎ BỌC GIỮ HẰNG quanh một giá trị hằng, hay `_KHONG_BIET` (N58, r18).
+
+    Vòng 12 đo được bốn cách viết CHẠY BASH THẬT mà N52 trả `[]`: `"bash".encode()`,
+    `str(Path("bash"))`, `os.fspath(Path("bash"))`, `bytes("bash", "ascii")`. Cùng một tên,
+    thêm một lớp gọi hàm THUẦN quanh nó.
+    TẬP ĐƯỢC GẤP, và vì sao dừng ở đó:
+      · `.encode()` / `.decode()` trên một hằng — KHÔNG che được (không ai gán lại được
+        phương thức của `str`/`bytes`), nên không cần giải tên;
+      · `str(…)` / `bytes(…)` — là TÊN DỰNG SẴN, nên CHE ĐƯỢC. Chỉ gấp khi tên ấy KHÔNG có
+        ràng buộc nào trong chuỗi phạm vi; có thì coi như hàm người dùng, không gấp;
+      · `os.fspath` / `os.fsencode` / `os.fsdecode` — chỉ khi callee GIẢI được về `os` thật.
+    Hàm THẬT được gọi trên giá trị ĐÃ GẤP, không mô phỏng: `str(b"bash")` ra `"b'bash'"` như
+    Python làm, và vì thế KHÔNG bị nhận nhầm là tên `bash`.
+    NÓI THẲNG: đây vẫn là một TẬP TOÁN TỬ liệt kê — nhỏ hơn tập hình dạng r16 nhiều, nhưng
+    KHÔNG đóng. Thứ đóng được cửa là phân tích luồng dữ liệu, và nó vẫn là nợ có tên.
+    """
+    f = nut.func
+    try:
+        if (isinstance(f, ast.Attribute) and f.attr in ("encode", "decode")
+                and not nut.keywords and len(nut.args) <= 2):
+            goc = _gia_tri_hang(f.value, tra_ten, sau + 1)
+            doi = [_gia_tri_hang(a, tra_ten, sau + 1) for a in nut.args]
+            if (isinstance(goc, str if f.attr == "encode" else bytes)
+                    and all(isinstance(x, str) for x in doi)):
+                return getattr(goc, f.attr)(*doi)
+            return _KHONG_BIET
+        if (isinstance(f, ast.Name) and f.id in ("str", "bytes") and not nut.keywords
+                and 1 <= len(nut.args) <= 3 and tra_ten is not None
+                and not tra_ten(f.id, hoi_rang_buoc=True)):
+            doi = [_gia_tri_hang(a, tra_ten, sau + 1) for a in nut.args]
+            if all(isinstance(x, (str, bytes)) for x in doi):
+                return (str if f.id == "str" else bytes)(*doi)
+            return _KHONG_BIET
+        if tra_ten is not None and len(nut.args) == 1 and not nut.keywords:
+            ten = None
+            if isinstance(f, ast.Attribute) and isinstance(f.value, ast.Name):
+                muc = tra_ten(f.value.id)
+                if muc and muc[0] == "os" and muc[1] is None and f.attr in _BOC_OS:
+                    ten = f.attr
+            elif isinstance(f, ast.Name):
+                muc = tra_ten(f.id)
+                if muc and muc[0] == "os" and muc[1] in _BOC_OS:
+                    ten = muc[1]
+            if ten is not None:
+                v = _gia_tri_hang(nut.args[0], tra_ten, sau + 1)
+                if isinstance(v, (str, bytes)):
+                    return getattr(os, ten)(v)
+                return _KHONG_BIET
+    except (TypeError, ValueError, UnicodeError, LookupError):
+        return _KHONG_BIET
     return _KHONG_BIET
 
 
@@ -752,12 +869,17 @@ def _ten_trong_vec(v):
     """
     if isinstance(v, (list, tuple)):
         v = v[0] if v else None
+    elif isinstance(v, dict):
+        # N58 (r18) — Python duyệt `dict` theo KHOÁ, và thứ tự khoá là XÁC ĐỊNH (thứ tự
+        # chèn). Đo được: `subprocess.run({"bash": None, "-c": None, "echo OK": None})` in ra
+        # `OK`. Khác `set`: ở đó thứ tự KHÔNG xác định nên chỉ tập MỘT phần tử mới tính.
+        v = next(iter(v)) if v else None
     elif isinstance(v, (set, frozenset)):
         v = next(iter(v)) if len(v) == 1 else None
     return _ten_tu_gia_tri(v)
 
 
-def _la_ten_bash(nut, tra_ten, cho_duong=True):
+def _la_ten_bash(nut, tra_ten, cho_duong=True, nhan=None):
     """Nút này có đặt ra TÊN chương trình `bash` không.
 
     `cho_duong=False` cho hai helper chạy qua shell: `Popen(..., shell=True)` **TỪ CHỐI** đối
@@ -768,8 +890,20 @@ def _la_ten_bash(nut, tra_ten, cho_duong=True):
     """
     if nut is None:
         return False
-    v = _gia_tri_hang(nut, tra_ten if cho_duong else None)
+    # `nhan` (N59, r18): KIỂU mà API này thật sự nhận, đo riêng từng API. `cho_duong=False`
+    # là cách viết cũ của "không nhận path-like", giữ cho hai helper shell của r16/r17.
+    if nhan is None:
+        nhan = (_S, _B, _P) if cho_duong else (_S, _B)
+    if _P not in nhan and isinstance(nut, ast.Call) and tra_ten is not None \
+            and _la_dung_duong(nut.func, tra_ten):
+        return False
+    # GIẢI TÊN ở mọi nhánh, kể cả nhánh không nhận path-like: `os.popen(os.fspath(Path(
+    # "bash")))` đưa vào một `str` và CHẠY bash. Thứ bị loại là một ĐỐI TƯỢNG path ở ngọn,
+    # không phải mọi phép gấp có `pathlib` bên trong — chốt ngay trên làm đúng việc ấy.
+    v = _gia_tri_hang(nut, tra_ten)
     if v is _KHONG_BIET:
+        return False
+    if isinstance(v, bytes) and _B not in nhan:
         return False
     ten = _ten_tu_gia_tri(v)
     return ten is not None and ten.casefold() in _HANG_BASH
@@ -792,11 +926,26 @@ def _la_vec_bash(nut, tra_ten):
     if isinstance(nut, ast.Set):
         # Tập NHIỀU phần tử: thứ tự duyệt không xác định ⇒ không biết cái nào là chương trình.
         return len(nut.elts) == 1 and _la_ten_bash(nut.elts[0], tra_ten)
+    if isinstance(nut, ast.Dict):
+        # Khoá đầu TIÊN. Khoá `None` là một `**x` trải ra — không biết nó mang gì, không đoán.
+        return bool(nut.keys) and nut.keys[0] is not None \
+            and _la_ten_bash(nut.keys[0], tra_ten)
     v = _gia_tri_hang(nut, tra_ten)          # `run("bash")` — chuỗi trần cũng phóng theo TÊN
     if v is _KHONG_BIET:
         return False
     ten = _ten_trong_vec(v)
     return ten is not None and ten.casefold() in _HANG_BASH
+
+
+def _doi_so_thu(nut, vt, khoa):
+    """Đối số ở VỊ TRÍ `vt`, hay đối số từ khoá `khoa`. Có `*` trải trước vị trí ấy thì
+    không đoán — trả None (không bắt), đúng kỷ luật `_doi_so_executable`."""
+    if len(nut.args) > vt and not any(isinstance(a, ast.Starred) for a in nut.args[:vt + 1]):
+        return nut.args[vt]
+    for k in nut.keywords:
+        if k.arg == khoa:
+            return k.value
+    return None
 
 
 def _doi_so_dau(nut, khoa):
@@ -847,7 +996,8 @@ def _co_the_thanh_bash(nut, sau=0):
         return isinstance(v, str) and v.casefold() in _HANG_BASH
     if isinstance(nut, ast.BinOp) and isinstance(nut.op, ast.Add):
         return True                    # phép nối hằng: để luật thật quyết
-    if isinstance(nut, (ast.List, ast.Tuple, ast.Set, ast.Call)):
+    if isinstance(nut, (ast.List, ast.Tuple, ast.Set, ast.Dict, ast.Call, ast.Attribute)):
+        # `Dict` cho argv kiểu từ điển, `Attribute` cho `"bash".encode()` (N58, r18).
         return any(_co_the_thanh_bash(x, sau + 1) for x in ast.iter_child_nodes(nut))
     return False
 
@@ -886,6 +1036,14 @@ def _loi_goi_tran(than: str):
         `Path("", "bash")`, `Path(".", "bash")`, `PurePath("bash.exe")`, tập hợp MỘT
         phần tử `{"bash"}`, và phép nối hằng `"ba" + "sh"`. Cả ba chỗ — `which`,
         `argv[0]`, `executable=` — dùng chung phép rút gọn ấy;
+      · CHÍN API phóng theo TÊN ngoài `subprocess`/`shutil` (N59, r18): `os.execvp`/
+        `execvpe`/`execlp`/`execlpe`, `os.posix_spawnp`, `os.spawnlp`/`spawnlpe`/`spawnvp`/
+        `spawnvpe` (tên ở vị trí THỨ HAI, sau chế độ), `os.system`, `os.popen`,
+        `asyncio.create_subprocess_exec`/`_shell`. Từ r8 chúng là NỢ CÓ TÊN; cả chín đo được
+        là CHẠY BASH THẬT. KIỂU được nhận đo RIÊNG từng API (bảng `_API_THEO_TEN`);
+      · `dict` làm argv — KHOÁ ĐẦU TIÊN, vì thứ tự khoá xác định — và VỎ BỌC GIỮ HẰNG:
+        `"bash".encode()`, `str(…)`/`bytes(…)` khi tên dựng sẵn không bị che, `os.fspath`/
+        `fsencode`/`fsdecode` khi callee giải về `os` thật (N58, r18);
       · nhưng HAI HELPER SHELL thì KHÔNG nhận path-like: `Popen(..., shell=True)` **từ
         chối** đối số đường dẫn (đo được: `TypeError`), nên `getoutput(Path("bash"))`
         là một BÁO ĐỘNG GIẢ và không được bắt;
@@ -911,7 +1069,9 @@ def _loi_goi_tran(than: str):
       · chuỗi lệnh NHIỀU TỪ (`run("bash -c ...", shell=True)`, `getoutput("bash -c x")`) —
         chỉ chuỗi trần đúng một tên `bash` được phủ; tách một dòng lệnh shell là bài toán
         KHÁC (trích dẫn, thoát ký tự), và ở đây không đo được cái nào nên không viết bừa;
-      · `os.system` / `os.execvp` / `os.spawn*` / `asyncio.create_subprocess_exec`;
+      · biến thể KHÔNG `p` — `os.execv`, `os.posix_spawn`, `os.spawnv*` — vì chúng KHÔNG tìm
+        theo PATH (đo được: `execv("bash", …)` ném `FileNotFoundError`), nên `"bash"` ở đó là
+        `./bash`, không phải khuyết tật packet này chặn;
       · tên `bash` đi qua BIẾN TRUNG GIAN, nối chuỗi, danh sách dựng nơi khác, hay một
         `executable=` KHÔNG phải hằng;
       · `from shutil import *`, tên đến qua `globals()`/`getattr`.
@@ -941,6 +1101,10 @@ def _loi_goi_tran(than: str):
         if loai == "which":
             dau = _doi_so_dau(nut, _KHOA_WHICH)
             dinh = _la_ten_bash(dau, tra_ten)
+        elif loai.startswith("api:"):
+            mod, _, ham = loai[4:].partition(".")
+            vt, kw, nhan = _API_THEO_TEN[(mod, ham)]
+            dinh = _la_ten_bash(_doi_so_thu(nut, vt, kw), tra_ten, nhan=nhan)
         elif loai == "shell_ra":
             # `getoutput(cmd)` / `getstatusoutput(cmd)`: MOT doi so, chay qua shell, KHONG
             # co `executable`. Ap luat vi tri thu ba cua `Popen` vao day la doc sai chu ky.
@@ -969,7 +1133,11 @@ _MODULE_CHU = {"subprocess": _TEN_SPAWN + _TEN_SHELL_RA, "shutil": _TEN_WHICH,
                # `pathlib` CO MAT de GIAI TEN `Path`, khong phai de phan loai loi goi:
                # `_LOAI_THEO_TEN.get()` tra None cho chung nen `Path(...)` khong bao gio
                # bi tinh la mot lan phong tien trinh.
-               "pathlib": _TEN_DUONG_PATHLIB}
+               "pathlib": _TEN_DUONG_PATHLIB,
+               # N58/N59 (r18) — `os`/`asyncio` CÓ MẶT vì hai lý do khác nhau: các API ở
+               # `_API_THEO_TEN` là lời PHÓNG; `_BOC_OS` chỉ là VỎ BỌC để bộ tính hằng gấp.
+               "os": tuple(t for (m, t) in _API_THEO_TEN if m == "os") + _BOC_OS,
+               "asyncio": tuple(t for (m, t) in _API_THEO_TEN if m == "asyncio")}
 
 
 # Các nút MỞ PHẠM VI TỪ VỰNG mới (luật Python 3): hàm, lambda, lớp, và bốn loại comprehension.
@@ -1137,7 +1305,16 @@ def _rang_buoc_cua(pham_vi):
                     # neo vào thời điểm ấy. Đo được: `def subprocess(x=subprocess.run(
                     # ["bash"]))` — bản r16 coi tên đã ràng buộc từ dòng `def` nên LỌT.
                     than_dau = n.body[0] if getattr(n, "body", None) else n
-                    vi_tri[0] = (than_dau.lineno, than_dau.col_offset)
+                    if isinstance(n, ast.ClassDef):
+                        # N60 (r18) — THÂN LỚP CHẠY NGAY LÚC ĐỊNH NGHĨA, thân hàm thì không.
+                        # Nên tên LỚP chỉ có hiệu lực sau khi CẢ thân đã chạy xong và
+                        # decorator đã áp. Bản r17 neo cả hai vào dòng đầu thân — đúng cho
+                        # hàm, SAI cho lớp. Đo được: `import subprocess` ·
+                        # `class subprocess: x = 1; subprocess.run(["bash"])` — lời gọi trong
+                        # thân lớp CHẠY BASH THẬT (in ra `OK`) mà r17 trả `[]`.
+                        vi_tri[0] = _ket_nut(n)
+                    else:
+                        vi_tri[0] = (than_dau.lineno, than_dau.col_offset)
                     them(n.name, ("khac",))
                     vi_tri[0] = ht
                 # N40 (r15) — `:=` trong TRƯỜNG LÚC ĐỊNH NGHĨA (mặc định, decorator, chú
@@ -1238,6 +1415,23 @@ def _tra_import(cac_rang_buoc, truoc=None):
         if rb[0] == "import":
             return rb[1], rb[2]
     return None
+
+
+def _co_rang_buoc(ten, chuoi):
+    """Tên này có ràng buộc NÀO trong chuỗi phạm vi nhìn thấy được không (N58, r18).
+
+    KHÔNG xét vị trí, có chủ đích: câu hỏi là "có an toàn để coi đây là tên dựng sẵn không",
+    và một ràng buộc ở BẤT KỲ đâu trong chuỗi là đủ để trả lời "không". Sai chiều ấy chỉ làm
+    ta bỏ gấp một vỏ bọc — tức LỌT về phía đã khai là nợ, không bao giờ BẮT OAN.
+    """
+    n = len(chuoi)
+    for i in range(n - 1, -1, -1):
+        la_lop, bang, toan_cuc, phi_cuc_bo = chuoi[i]
+        if la_lop and i != n - 1:
+            continue
+        if ten in bang or ten in toan_cuc or ten in phi_cuc_bo:
+            return True
+    return False
 
 
 def _giai_ten(ten, chuoi, vi_tri=None):
@@ -1433,8 +1627,12 @@ def _giai_callee_theo_pham_vi(cay):
                 tham(x, chuoi_trong)
             return
         if isinstance(con, ast.Call):
-            ket.append((con, lambda ten, c=chuoi,
-                        v=(con.lineno, con.col_offset): _giai_ten(ten, c, v)))
+            # `hoi_rang_buoc=True` (N58, r18): hỏi "tên này có ràng buộc nào trong chuỗi phạm
+            # vi không" — để biết `str`/`bytes` còn là tên DỰNG SẴN hay đã bị che. `_giai_ten`
+            # trả None cho CẢ "không ràng buộc" lẫn "bị che", nên không trả lời được câu ấy.
+            ket.append((con, lambda ten, hoi_rang_buoc=False, c=chuoi,
+                        v=(con.lineno, con.col_offset):
+                        _co_rang_buoc(ten, c) if hoi_rang_buoc else _giai_ten(ten, c, v)))
         for x in ast.iter_child_nodes(con):
             tham(x, chuoi)
 
@@ -1471,12 +1669,22 @@ def _loai_loi_goi(nut, tra_ten):
             return None
         mod, _ = muc
         if nut.func.attr in _MODULE_CHU[mod]:
-            return _LOAI_THEO_TEN.get(nut.func.attr)
+            return _loai_theo_cap(mod, nut.func.attr)
         return None
     if isinstance(nut.func, ast.Name):
         muc = tra_ten(nut.func.id)
         if muc and muc[1] is not None and muc[1] in _MODULE_CHU[muc[0]]:
-            return _LOAI_THEO_TEN.get(muc[1])
+            return _loai_theo_cap(muc[0], muc[1])
+    return None
+
+
+def _loai_theo_cap(mod, ham):
+    """Loại lời gọi cho CẶP (module, hàm). Tra theo CẶP chứ không theo tên trần: `run` của
+    `subprocess` và một `run` giả định của module khác không được lẫn nhau."""
+    if (mod, ham) in _API_THEO_TEN:
+        return f"api:{mod}.{ham}"
+    if mod in ("subprocess", "shutil"):
+        return _LOAI_THEO_TEN.get(ham)
     return None
 
 # CHỈ tệp này được phép chứa lời gọi trần — nó LÀ bộ giải. NHƯNG CÓ HẠN NGẠCH, không phải

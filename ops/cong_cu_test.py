@@ -882,6 +882,67 @@ DOT_BIEN = {
         "    qua_han = sorted(CHUA_CHUYEN) if (CHUA_CHUYEN and hom_nay > _dt.date.fromisoformat(_NGAY_GO)) else []\n",
         "    qua_han = []  # đột biến: NGÀY GỠ lại thành chữ trang trí\n",
         "BASH_NEN", (), "t49_duong_XAU_ra_JSON_HOP_LE_va_NGAY_GO_phai_duoc_DOC"),
+    # ── r18 — DOT BIEN cho N58..N64 (cross-review codex vong 12) ─────────────────
+    # N58: bo tinh hang thoi gap VO BOC GIU HANG => `"bash".encode()`, `str(Path(...))` lot.
+    "bn_khong_gap_vo_boc": ("ops/bash_nen.py",
+        "        boc = _gap_vo_boc(nut, tra_ten, sau)\n",
+        "        boc = _KHONG_BIET  # đột biến: không gấp vỏ bọc giữ hằng\n",
+        "BASH_NEN", (), "t33_do_phu_cua_cong_do_duoc_THEO_HINH_DANG"),
+    # N58 chieu NGUOC: `str` bi CHE ma van gap nhu ten dung san => BAT OAN.
+    "bn_str_bi_che_van_gap": ("ops/bash_nen.py",
+        "                and not tra_ten(f.id, hoi_rang_buoc=True)):\n",
+        "                and True):  # đột biến: không hỏi `str`/`bytes` có bị che không\n",
+        "BASH_NEN", (), "t33_do_phu_cua_cong_do_duoc_THEO_HINH_DANG"),
+    # N58: `dict` thoi la argv.
+    "bn_dict_khong_la_argv": ("ops/bash_nen.py",
+        "        return bool(nut.keys) and nut.keys[0] is not None \\\n",
+        "        return False and nut.keys[0] is not None \\\n",
+        "BASH_NEN", (), "t33_do_phu_cua_cong_do_duoc_THEO_HINH_DANG"),
+    # N59: bang API ngoai subprocess/shutil bi bo qua.
+    "bn_bo_bang_api": ("ops/bash_nen.py",
+        "    if (mod, ham) in _API_THEO_TEN:\n",
+        "    if False:  # đột biến: bỏ các API phóng theo TÊN ngoài subprocess/shutil\n",
+        "BASH_NEN", (), "t33_do_phu_cua_cong_do_duoc_THEO_HINH_DANG"),
+    # N59: bo KIEU DUOC NHAN cua tung API => `os.popen(Path(...))` bi BAT OAN.
+    "bn_api_bo_kieu_nhan": ("ops/bash_nen.py",
+        "            dinh = _la_ten_bash(_doi_so_thu(nut, vt, kw), tra_ten, nhan=nhan)\n",
+        "            dinh = _la_ten_bash(_doi_so_thu(nut, vt, kw), tra_ten)  # đột biến: bỏ kiểu được nhận\n",
+        "BASH_NEN", (), "t33_do_phu_cua_cong_do_duoc_THEO_HINH_DANG"),
+    # N59: vi tri doi so luon la 0 => `spawnlp(mode, "bash")` lot va `spawnlp("bash", …)` bi bat.
+    "bn_api_vi_tri_luon_dau": ("ops/bash_nen.py",
+        "            dinh = _la_ten_bash(_doi_so_thu(nut, vt, kw), tra_ten, nhan=nhan)\n",
+        "            dinh = _la_ten_bash(_doi_so_thu(nut, 0, kw), tra_ten, nhan=nhan)  # đột biến: vị trí luôn là 0\n",
+        "BASH_NEN", (), "t33_do_phu_cua_cong_do_duoc_THEO_HINH_DANG"),
+    # N60: ten LOP neo vao DAU than nhu ten ham.
+    "bn_lop_neo_dau_than": ("ops/bash_nen.py",
+        "                        vi_tri[0] = _ket_nut(n)\n",
+        "                        vi_tri[0] = (than_dau.lineno, than_dau.col_offset)  # đột biến: lớp như hàm\n",
+        "BASH_NEN", (), "t33_do_phu_cua_cong_do_duoc_THEO_HINH_DANG"),
+    # N61: khoa cache thoi theo moi truong. N56 KHONG cuu duoc vi ung vien giu nguyen.
+    "bn_khoa_bo_moi_truong": ("ops/bash_nen.py",
+        '        json.dumps(sorted(os.environ.items())).encode("ascii")).hexdigest()\n',
+        '        b"").hexdigest()  # đột biến: khoá không theo môi trường\n',
+        "BASH_NEN", (), "t51_cache_phai_HET_HIEU_LUC_khi_chinh_TEP_ung_vien_doi"),
+    # N62: thanh phan PATH RONG lai bi bo qua.
+    "bn_path_rong_bo_qua": ("ops/bash_nen.py",
+        "        d = d or os.curdir\n",
+        "        if not d:\n            continue  # đột biến: thành phần rỗng bị bỏ qua\n",
+        "BASH_NEN", (), "t51_cache_phai_HET_HIEU_LUC_khi_chinh_TEP_ung_vien_doi"),
+    # N62: chuoi ung vien mat `./` => thanh TEN TRAN, phep thu di tim theo PATH.
+    "bn_path_rong_mat_cham": ("ops/bash_nen.py",
+        "            chuoi_u = os.path.join(d, ten)   # giữ `./` — xem N62 ở trên\n",
+        "            chuoi_u = str(Path(d) / ten)  # đột biến: chuẩn hoá mất `./`\n",
+        "BASH_NEN", (), "t51_cache_phai_HET_HIEU_LUC_khi_chinh_TEP_ung_vien_doi"),
+    # N63: han ngach bi EP KIEU thay vi hoi kieu.
+    "bn_quota_ep_kieu": ("ops/bash_nen.py",
+        "        if not isinstance(so, int) or isinstance(so, bool) or so < 0:\n",
+        "        so = int(so)  # đột biến: ép kiểu thay vì hỏi kiểu\n        if False:\n",
+        "BASH_NEN", (), "t40_moi_MIEN_TRU_deu_mang_HAN_NGACH_va_dem_theo_LOI_GOI"),
+    # N64: quay ve "MOT nguon muon nhat" — rang buoc co dieu kien xoa xuat xu con song.
+    "ct_xuat_xu_mot_nguon": ("ops/cong_cu_test.py",
+        "            if dk_ <= bao_chot:          # CHẮC CHẮN chạy trước phép chốt ⇒ che thứ cũ hơn\n",
+        "            if True:  # đột biến: một nguồn muộn nhất, bỏ qua điều kiện\n",
+        "TEP_TEST", _KEM_TEP_TEST, "t39_chi_CA_PHAN_QUYET_duoc_chot_tren_rc_va_trang_thai"),
     # ── r17 — DOT BIEN cho N52..N57 (cross-review codex vong 11) ─────────────────
     # N52: bo tinh hang thoi rut gon HANG DUNG SAN (list/tuple/set/chuoi) => moi hinh dang
     # bao chua deu lot, ke ca `["bash"]`.
@@ -941,13 +1002,13 @@ DOT_BIEN = {
         "BASH_NEN", (), "t51_cache_phai_HET_HIEU_LUC_khi_chinh_TEP_ung_vien_doi"),
     # N55: ratchet thoi doc XUAT XU cua bao cao => truong co che bi bat oan.
     "ct_khong_theo_xuat_xu_bao": ("ops/cong_cu_test.py",
-        '                if ng == "bao" and khoa in _TRUONG_TONG_HOP:\n',
+        '                if "bao" in ng and khoa in _TRUONG_TONG_HOP:\n',
         '                if khoa in _TRUONG_TONG_HOP:  # đột biến: không hỏi xuất xứ của báo cáo\n',
         "TEP_TEST", _KEM_TEP_TEST, "t39_chi_CA_PHAN_QUYET_duoc_chot_tren_rc_va_trang_thai"),
     # N55: rang buoc MUON NHAT khong con thang => bi danh bi ghi de van bi tinh.
     "ct_xuat_xu_khong_theo_vi_tri": ("ops/cong_cu_test.py",
-        "        cac = [x for x in rang_buoc.get(ten, ()) if x[0] < vt]\n",
-        "        cac = list(rang_buoc.get(ten, ()))  # đột biến: xuất xứ không theo vị trí\n",
+        "        cac = [x for x in bang_.get(ten, ()) if x[0] < vt]\n",
+        "        cac = list(bang_.get(ten, ()))  # đột biến: xuất xứ không theo vị trí\n",
         "TEP_TEST", _KEM_TEP_TEST, "t39_chi_CA_PHAN_QUYET_duoc_chot_tren_rc_va_trang_thai"),
     # ── r16 — DOT BIEN cho N45..N51 (cross-review codex vong 10) ─────────────────
     # N45, chieu LOT: hai helper chay qua shell roi khoi tap duoc che.
@@ -1011,8 +1072,8 @@ DOT_BIEN = {
         "TEP_TEST", _KEM_TEP_TEST, "t39_chi_CA_PHAN_QUYET_duoc_chot_tren_rc_va_trang_thai"),
     # N49: ratchet quay ve khop DUNG chu `rc`, nen doi ten bien la thoat.
     "ct_chi_ten_rc": ("ops/cong_cu_test.py",
-        "                    ghi(d.id, vt, ng)\n",
-        "                    ghi(d.id, vt, \"khac\")  # đột biến: không đi theo xuất xứ của `_quet`\n",
+        "                    ghi(d.id, vt, ng, dk)\n",
+        "                    ghi(d.id, vt, \"khac\", dk)  # đột biến: không đi theo xuất xứ của `_quet`\n",
         "TEP_TEST", _KEM_TEP_TEST, "t39_chi_CA_PHAN_QUYET_duoc_chot_tren_rc_va_trang_thai"),
     # N50: ly do mien tru tro lai thanh mot loi khai khong ai doc.
     "ct_ly_do_khong_doc": ("ops/cong_cu_test.py",
@@ -1098,7 +1159,7 @@ DOT_BIEN = {
     # (a) THU HEP ve luat cu (chi chieu DO, chi phep so bang) => dung ba lan lap `t45`/`t47`/
     #     `t48` chui qua duoc. Mau `rc_bang_0`, `ne_rc`, `ne_tt`, `ngoai_ds` phai DOI.
     "t39_thu_hep_ve_chieu_DO": (str(TEP_TEST.relative_to(GOC)),
-        '            if isinstance(n, _ast.Name) and nguon_tai(n.id, vt) == "ma":\n'
+        '            if isinstance(n, _ast.Name) and "ma" in nguon_tap(n.id, vt, dieu_kien):\n'
         '                return True\n',
         '            if isinstance(n, _ast.Name) and n.id == "rc":\n'
         '                return True  # đột biến: về luật cũ, khớp đúng CHỮ `rc`\n',
@@ -2453,6 +2514,30 @@ _HINH_DANG_PHU = {
     "gan_tu_chinh_RHS":        'import subprocess\nsubprocess = subprocess.run(["bash"])\n',
     "mac_dinh_cung_dong":      'import subprocess\ndef subprocess(x=subprocess.run(["bash"])):\n    pass\n',
     "lop_re_import":           'subprocess = object()\nclass C:\n    import subprocess\n    subprocess.run(["bash"])\n',
+    # r18 — N58: `dict` lam argv (KHOA DAU TIEN la chuong trinh; thu tu khoa XAC DINH) va
+    # VO BOC GIU HANG. Ca nam dang duoi deu CHAY BASH THAT tren nen nay (in ra `OK`).
+    "dict_lam_argv":           'import subprocess\nsubprocess.run({"bash": None})\n',
+    "boc_encode":              'import subprocess\nsubprocess.run(["bash".encode(), "-c", "x"])\n',
+    "boc_str_path":            'import subprocess\nfrom pathlib import Path\nsubprocess.run([str(Path("bash"))])\n',
+    "boc_os_fspath":           'import subprocess, os\nfrom pathlib import Path\nsubprocess.run([os.fspath(Path("bash"))])\n',
+    "boc_bytes":               'import subprocess\nsubprocess.run([bytes("bash", "ascii")])\n',
+    # r18 — N59: API KHAC phong bash THEO TEN. Tu r8 day la NO CO TEN; vong 12 do ba, phien
+    # do them sau — ca CHIN deu CHAY THAT.
+    "os_execvp":               'import os\nos.execvp("bash", ["bash"])\n',
+    "os_execlp":               'import os\nos.execlp("bash", "bash")\n',
+    "os_posix_spawnp":         'import os\nos.posix_spawnp("bash", ["bash"], {})\n',
+    "os_spawnlp_mode_dau":     'import os\nos.spawnlp(os.P_WAIT, "bash", "bash")\n',
+    "os_spawnvp":              'import os\nos.spawnvp(os.P_WAIT, "bash", ["bash"])\n',
+    "os_system":               'import os\nos.system("bash")\n',
+    "os_system_path":          'import os\nfrom pathlib import Path\nos.system(Path("bash"))\n',
+    "os_popen":                'import os\nos.popen("bash")\n',
+    "asyncio_exec":            'import asyncio\nasyncio.create_subprocess_exec("bash")\n',
+    "asyncio_exec_tu_khoa":    'import asyncio\nasyncio.create_subprocess_exec(program="bash")\n',
+    "asyncio_shell":           'import asyncio\nasyncio.create_subprocess_shell("bash")\n',
+    "from_os_import":          'from os import execvp\nexecvp("bash", ["bash"])\n',
+    "popen_qua_fspath":        'import os\nfrom pathlib import Path\nos.popen(os.fspath(Path("bash")))\n',
+    # r18 — N60: THAN LOP chay ngay luc dinh nghia, nen ten LOP chi rang buoc SAU ca than.
+    "lop_cung_ten_goi_trong_than": 'import subprocess\nclass subprocess:\n    x = 1\n    subprocess.run(["bash"])\n',
     # r16 — N47, PEP 695: `type X[T] = ...` co pham vi chu thich RIENG (chay qua `t50`).
     "global_doc_khong":  'import subprocess\ndef f():\n    global subprocess\n    subprocess.run(["bash"])\n',
     # r15 — N40 chieu BAT: `:=` trong THAN la cua than, khong che duoc gi o ngoai.
@@ -2530,6 +2615,24 @@ _HINH_DANG_KHONG_PHU = {
     "shell_ra_path_like_2": 'import subprocess\nfrom pathlib import Path\nsubprocess.getstatusoutput(Path("bash"))\n',
     # r17 — N53 chieu NGUOC: hai rang buoc HOAN TAT cung mot cho ⇒ van mo ho.
     "gan_day_chuyen_che":   'import subprocess\nsubprocess = other = runner\nsubprocess.run(["bash"])\n',
+    # r18 — N58 chieu NGUOC. `**x` o dau `dict` — khong biet no mang gi; `str` bi che thi la
+    # ham nguoi dung; `str(b"bash")` ra `"b'bash'"` nhu Python lam, khong phai ten `bash`.
+    "dict_trai_dau":        'import subprocess\nsubprocess.run({**x, "bash": 1})\n',
+    "boc_str_bi_che":       'import subprocess\nfrom pathlib import Path\ndef str(x):\n    return x\nsubprocess.run([str(Path("bash"))])\n',
+    "boc_str_cua_bytes":    'import subprocess\nsubprocess.run([str(b"bash")])\n',
+    # r18 — N59 chieu NGUOC. KIEU DUOC NHAN la cua TUNG API, do rieng: `os.popen` tu choi ca
+    # path-like lan bytes; `create_subprocess_shell` tu choi path-like. Bat chung la bat OAN.
+    "os_popen_path":        'import os\nfrom pathlib import Path\nos.popen(Path("bash"))\n',
+    "os_popen_bytes":       'import os\nos.popen(b"bash")\n',
+    "asyncio_shell_path":   'import asyncio\nfrom pathlib import Path\nasyncio.create_subprocess_shell(Path("bash"))\n',
+    # bien the KHONG `p` KHONG tim theo PATH — `execv("bash")` do duoc nem FileNotFoundError.
+    "os_execv_khong_p":     'import os\nos.execv("bash", ["bash"])\n',
+    "os_posix_spawn_khong_p": 'import os\nos.posix_spawn("bash", ["bash"], {})\n',
+    # `spawnlp` mang CHE DO o vi tri 0; `"bash"` o do khong phai ten chuong trinh.
+    "os_spawnlp_bash_o_mode": 'import os\nos.spawnlp("bash", "sh", "sh")\n',
+    "os_bi_che":            'import os\nos = runner\nos.system("bash")\n',
+    # r18 — N60 chieu NGUOC: goi SAU lop cung ten thi ten da la LOP.
+    "lop_cung_ten_goi_sau": 'import subprocess\nclass subprocess:\n    x = 1\nsubprocess.run(["bash"])\n',
 }
 
 
@@ -3122,15 +3225,65 @@ def _chot_DO_cua_cong_trong(than: str):
         return (getattr(n, "end_lineno", None) or n.lineno,
                 getattr(n, "end_col_offset", None) or n.col_offset)
 
-    rang_buoc = {}                      # ten -> [(vi_tri_hoan_tat, nguon)]
+    # ── N64 (r18) — TẬP NGUỒN CÒN TỚI ĐƯỢC, không phải MỘT nguồn muộn nhất ──────
+    # N55 chọn ràng buộc có vị trí LỚN NHẤT trước phép chốt. Đúng khi mọi phép gán đều chạy,
+    # SAI khi phép gán nằm trong một nhánh CÓ THỂ không chạy. Đo được ở vòng 12:
+    #   `rc, bao = _quet(…)` · `if False: rc = other()` · `bang(rc == 2, …)`   ⇒ []
+    #   cùng thế với phép gán trong một vòng lặp RỖNG                           ⇒ []
+    # Ở cả hai, phép chốt THẬT SỰ đọc mã thoát của `_quet`, và ratchet để nó lọt.
+    # Nay mỗi ràng buộc mang TẬP NÚT ĐIỀU KHIỂN bao quanh nó. Tại một phép chốt, đi lùi từ
+    # ràng buộc gần nhất: ràng buộc CÓ ĐIỀU KIỆN thì GỘP nguồn của nó vào tập; gặp ràng buộc
+    # CHẮC CHẮN chạy trước phép chốt — mọi nút điều khiển của nó cũng bao phép chốt — thì nó
+    # che mọi thứ cũ hơn, dừng. Biến lặp của `for` là ràng buộc CÓ ĐIỀU KIỆN (iterable có
+    # thể rỗng). Phép tính này THẬN TRỌNG về phía BẮT: một ràng buộc có thể không chạy thì
+    # không được xoá xuất xứ còn sống.
+    # KHAI THẲNG chỗ chưa phủ: ràng buộc MANG QUA VÒNG LẶP (gán SAU phép chốt trong cùng thân
+    # vòng lặp, có hiệu lực từ vòng thứ hai) — vị trí từ vựng không nói được. Nợ có tên.
+    rang_buoc = {}                      # ten -> [(vi_tri_hoan_tat, nguon, nut_dieu_khien)]
+    cha = {}
+    for _p in _ast.walk(cay):
+        for _c in _ast.iter_child_nodes(_p):
+            cha[id(_c)] = _p
+    _DIEU_KHIEN = tuple(x for x in (_ast.If, _ast.For, _ast.AsyncFor, _ast.While, _ast.Try,
+                                    getattr(_ast, "TryStar", None), getattr(_ast, "Match", None))
+                        if x is not None)
 
-    def ghi(ten, vt, nguon):
+    def dieu_khien_bao(nut):
+        ra_ = set()
+        x = cha.get(id(nut))
+        while x is not None:
+            if isinstance(x, _DIEU_KHIEN):
+                ra_.add(id(x))
+            x = cha.get(id(x))
+        return frozenset(ra_)
+
+    def ghi(ten, vt, nguon, dk=frozenset()):
         if ten:
-            rang_buoc.setdefault(ten, []).append((vt, nguon))
+            rang_buoc.setdefault(ten, []).append((vt, nguon, dk))
 
-    def nguon_tai(ten, vt):
-        cac = [x for x in rang_buoc.get(ten, ()) if x[0] < vt]
-        return max(cac)[1] if cac else None
+    def tap_toi_duoc(bang_, ten, vt, noi_chot):
+        """Tập NGUỒN của `ten` còn tới được phép chốt tại `noi_chot`."""
+        cac = [x for x in bang_.get(ten, ()) if x[0] < vt]
+        bao_chot = dieu_khien_bao(noi_chot)
+        ra_ = set()
+        for _vt, ng_, dk_ in sorted(cac, key=lambda x: x[0], reverse=True):
+            ra_.add(ng_)
+            if dk_ <= bao_chot:          # CHẮC CHẮN chạy trước phép chốt ⇒ che thứ cũ hơn
+                break
+        return ra_
+
+    def nguon_tap(ten, vt, noi_chot):
+        # KHÔNG lọc lại ở đây: `tap_toi_duoc` đã lọc theo vị trí. Bản đầu lọc CẢ HAI chỗ, và
+        # đột biến `ct_xuat_xu_khong_theo_vi_tri` gỡ một chỗ mà SỐNG SÓT — mã thừa làm một
+        # phép đo mất răng. Một phép lọc, một chỗ, một đột biến.
+        return tap_toi_duoc(rang_buoc, ten, vt, noi_chot)
+
+    def uu_tien(tap):
+        """Một nhãn cho BÍ DANH: thận trọng về phía bắt — có `ma` thì là `ma`."""
+        for k in ("ma", "bo_doi", "bao"):
+            if k in tap:
+                return k
+        return "khac"
 
     doi = True
     while doi:                          # tới bất động điểm: bí danh nhiều tầng
@@ -3150,6 +3303,9 @@ def _chot_DO_cua_cong_trong(than: str):
             vt = _ket(gia) if gia is not None else _ket(nut)
             if gia is None:
                 continue
+            dk = dieu_khien_bao(nut)
+            if isinstance(nut, (_ast.For, _ast.AsyncFor)):
+                dk = dk | {id(nut)}              # biến lặp: iterable có thể RỖNG
 
             def nguon_cua(g):
                 """Nguồn mà một biểu thức đặt ra, theo bảng ràng buộc của VÒNG TRƯỚC."""
@@ -3159,12 +3315,10 @@ def _chot_DO_cua_cong_trong(than: str):
                         and isinstance(g.slice, _ast.Constant)):
                     return {0: "ma", 1: "bao"}.get(g.slice.value, "khac")
                 if isinstance(g, _ast.Name):
-                    cac = [x for x in truoc.get(g.id, ()) if x[0] < _ket(g)]
-                    return max(cac)[1] if cac else "khac"
+                    return uu_tien(tap_toi_duoc(truoc, g.id, _ket(g), g))
                 if (isinstance(g, _ast.Subscript) and isinstance(g.value, _ast.Name)
                         and isinstance(g.slice, _ast.Constant)):
-                    cac = [x for x in truoc.get(g.value.id, ()) if x[0] < _ket(g)]
-                    if cac and max(cac)[1] == "bo_doi":
+                    if "bo_doi" in tap_toi_duoc(truoc, g.value.id, _ket(g), g):
                         return {0: "ma", 1: "bao"}.get(g.slice.value, "khac")
                 return "khac"
 
@@ -3175,10 +3329,14 @@ def _chot_DO_cua_cong_trong(than: str):
                     for k, ph in enumerate(d.elts):
                         if isinstance(ph, _ast.Name):
                             ghi(ph.id, vt,
-                                {0: "ma", 1: "bao"}.get(k, "khac") if ng == "bo_doi" else "khac")
+                                {0: "ma", 1: "bao"}.get(k, "khac") if ng == "bo_doi" else "khac",
+                                dk)
                 elif isinstance(d, _ast.Name):
-                    ghi(d.id, vt, ng)
-        if {k: sorted(v) for k, v in rang_buoc.items()} != {k: sorted(v) for k, v in truoc.items()}:
+                    ghi(d.id, vt, ng, dk)
+
+        def _chuan(b):
+            return {k: sorted(((x[0], x[1], tuple(sorted(x[2]))) for x in v)) for k, v in b.items()}
+        if _chuan(rang_buoc) != _chuan(truoc):
             doi = True
 
     def cham_phan_quyet(dieu_kien):
@@ -3186,21 +3344,21 @@ def _chot_DO_cua_cong_trong(than: str):
         if any(la_quet(n) for n in _ast.walk(dieu_kien)):
             return True                  # `bang(_quet(…)[0] == 2, …)` — không đi qua tên nào
         for n in _ast.walk(dieu_kien):
-            if isinstance(n, _ast.Name) and nguon_tai(n.id, vt) == "ma":
+            if isinstance(n, _ast.Name) and "ma" in nguon_tap(n.id, vt, dieu_kien):
                 return True
             if not (isinstance(n, _ast.Subscript) and isinstance(n.slice, _ast.Constant)):
                 continue
             khoa = n.slice.value
             g = n.value
             if isinstance(g, _ast.Name):
-                ng = nguon_tai(g.id, vt)
-                if ng == "bao" and khoa in _TRUONG_TONG_HOP:
+                ng = nguon_tap(g.id, vt, dieu_kien)
+                if "bao" in ng and khoa in _TRUONG_TONG_HOP:
                     return True
-                if ng == "bo_doi" and khoa == 0:
+                if "bo_doi" in ng and khoa == 0:
                     return True
             elif (isinstance(g, _ast.Subscript) and isinstance(g.value, _ast.Name)
                   and isinstance(g.slice, _ast.Constant) and g.slice.value == 1
-                  and nguon_tai(g.value.id, vt) == "bo_doi"
+                  and "bo_doi" in nguon_tap(g.value.id, vt, dieu_kien)
                   and khoa in _TRUONG_TONG_HOP):
                 return True
         return False
@@ -3263,6 +3421,16 @@ _MAU_TOAN_TU = {
     # chon dung "khac" cho mau `bi_danh_ghi_de`, nen ca hai mau ra cung ket qua.
     "chot_truoc_khi_ghi_de":
         "def f():\n    rc, bao = _quet(a, b)\n    bang(rc == 2, 'x')\n    rc = khac()\n",
+    # r18 — N64: TAP NGUON CON TOI DUOC. Phep ghi de nam trong nhanh CO THE KHONG CHAY thi
+    # khong duoc xoa xuat xu con song. Khong co mau nay thi mot ban va quay ve "muon nhat
+    # thang" se SONG SOT.
+    "ghi_de_co_dieu_kien":
+        "def f():\n    rc, bao = _quet(a, b)\n    if x:\n        rc = other()\n    bang(rc == 2, 'x')\n",
+    "ghi_de_trong_vong_lap":
+        "def f():\n    rc, bao = _quet(a, b)\n    for _ in xs:\n        rc = other()\n    bang(rc == 2, 'x')\n",
+    # KHONG duoc bat: phep ghi de nam CUNG nhanh voi phep chot ⇒ chac chan chay truoc no.
+    "ghi_de_cung_nhanh":
+        "def f():\n    rc, bao = _quet(a, b)\n    if x:\n        rc = other()\n        bang(rc == 2, 'x')\n",
     # KHONG duoc bat: ten `rc` GIEO SAN, khong tu `_quet`.
     "rc_gieo_san":     "def f():\n    rc = other()\n    ma, bao = _quet(a, b)\n    bang(rc == 0, 'x')\n",
     # KHONG duoc bat: mot chuoi TRUNG TEN truong, tren mot doi tuong chang lien quan.
@@ -3301,6 +3469,8 @@ _MAU_MONG = {"eq_rc": True, "eq_tt": True, "ne_rc": True, "ne_tt": True,
              "lay_phan_tu_0": True, "goi_long": True,
              "xuat_xu_bo_doi": True, "xuat_xu_bao_doi": True,
              "chot_truoc_khi_ghi_de": True,
+             "ghi_de_co_dieu_kien": True, "ghi_de_trong_vong_lap": True,
+             "ghi_de_cung_nhanh": False,
              "truong_co_che": False, "lech_oid": False,
              "rc_gieo_san": False, "chuoi_trung_ten": False, "bi_danh_ghi_de": False,
              "bo_doi_truong_co_che": False,
@@ -3430,6 +3600,40 @@ def t40_moi_MIEN_TRU_deu_mang_HAN_NGACH_va_dem_theo_LOI_GOI():
         bang("ops/reviews/moi/helper.py" in (bao.get("co_loi_goi_tran") or {}),
              f"tệp review MỚI phải ĐƯỢC QUÉT TỚI, không được tha theo tiền tố: đã thấy "
              f"{sorted((bao.get('co_loi_goi_tran') or {}))}")
+
+        # N63 (r18) — HẠN NGẠCH HỎNG phải FAIL-CLOSE, không NÉM. Bản trước gọi `int(muc[0])` vô
+        # điều kiện, nên `("not-a-number", "lý do")` ném `ValueError` TRƯỚC khi `quet()` kịp vào
+        # nhánh KHONG_DO_DUOC đã khai — đo được ở vòng 12: CLI thoát 1 kèm traceback. Đo CƠ CHẾ
+        # (hàm đọc hạn ngạch trả `None`; `quet` không ném), KHÔNG chốt `rc`/`trang_thai` — N22.
+        # `True` bị loại tường minh: trong Python nó LÀ `int` và bằng 1, nên một hạn ngạch
+        # gõ nhầm thành `True` sẽ lặng lẽ thành "được phép một lần".
+        hong = {"chuoi_so": ("not-a-number", "lý do"), "bool": (True, "lý do"),
+                "am": (-1, "lý do"), "so_thuc": (1.5, "lý do"), "none": (None, "lý do")}
+        # BỌC lời gọi: một phép đọc NÉM chính là khuyết tật đang đo, nên nó phải đi tới CHỐT
+        # của ca này chứ không được thoát ra như một ngoại lệ thô. Đo được lý do: bản đầu gọi
+        # thẳng, và đột biến `bn_quota_ep_kieu` bị bộ phân hạng gắn TÍN DỤNG GIẢ — ca chết vì
+        # `ValueError` TRƯỚC khi tới `bang(...)`, tức không phải bị chốt của nó giết.
+        def _doc(v):
+            try:
+                return bn["_so_cho_phep"](v)[0]
+            except Exception as e:                                    # noqa: BLE001
+                return f"NÉM {type(e).__name__}"
+        doc_sai = {k: _doc(v) for k, v in hong.items()}
+        bang(all(v is None for v in doc_sai.values()),
+             f"hạn ngạch HỎNG phải đọc ra `None` (⇒ KHONG_DO_DUOC), đọc được {doc_sai}")
+        bang(bn["_so_cho_phep"]((3, "lý do"))[0] == 3
+             and bn["_so_cho_phep"]((0, "oid", "lý do"))[0] == 0,
+             "chiều ngược: hạn ngạch HỢP LỆ (kể cả 0, kể cả mục ba phần tử) phải đọc đúng")
+        bq_hong = _bash_nen_voi_chua_chuyen(tmp, {"ops/gia_t40.py": ("not-a-number", "lý do")},
+                                            ten="bash_nen_quota_hong.py")
+        try:
+            runpy.run_path(str(bq_hong))["quet"](cay)
+            nem = None
+        except Exception as e:                                        # noqa: BLE001
+            nem = f"{type(e).__name__}: {e}"
+        bang(nem is None,
+             f"một hạn ngạch gõ nhầm làm `quet()` NÉM thay vì báo cáo: {nem} — cổng mất tiếng "
+             f"nói, CI chỉ thấy traceback và không biết mục nào hỏng")
 
 
 @ca
@@ -3635,7 +3839,7 @@ def t51_cache_phai_HET_HIEU_LUC_khi_chinh_TEP_ung_vien_doi():
 
         TOT = '#!/bin/sh\nexec /bin/bash "$@"\n'
         XAU = "#!/bin/sh\nexit 7\n"
-        cu_env = {k: os.environ.get(k) for k in ("CONG_CU_BASH", "PATH")}
+        cu_env = {k: os.environ.get(k) for k in ("CONG_CU_BASH", "PATH", "BASH_ENV")}
         # `finally` phải khôi phục CẢ HAI kể cả khi chúng vốn VẮNG — chốt (5) gỡ `PATH`.
         try:
             os.environ["CONG_CU_BASH"] = str(w)
@@ -3711,21 +3915,63 @@ def t51_cache_phai_HET_HIEU_LUC_khi_chinh_TEP_ung_vien_doi():
                  f"Ứng viên MỚI không làm ứng viên CŨ nào đổi, nên vân tay từng tệp vẫn "
                  f"khớp — phải ĐẾM LẠI tập ứng viên, không chỉ soát những cái đã thử.")
 
-            # (5) N57 (r17) — `PATH` VẮNG ≠ `PATH` RỖNG, và luật ấy là của HỆ ĐIỀU HÀNH.
-            #     `os.get_exec_path()`/`execvp` dùng `os.defpath` khi biến VẮNG; một `PATH=""`
-            #     tường minh nghĩa là "đừng tìm ở đâu cả". Bản trước gộp hai ca vào `""` nên
-            #     trên máy không đặt `PATH` thì `ung_vien()` trả `[]` và cổng báo
-            #     KHONG_DO_DUOC — trong khi `subprocess.run(["bash"])` trên CHÍNH máy ấy vẫn
-            #     tìm thấy `/bin/bash`. `None ≠ ""`, cùng họ với `None ≠ False`.
+            # (5) N57 (r17) + N62 (r18) — `PATH` VẮNG ≠ `PATH` RỖNG, và RỖNG là THƯ MỤC HIỆN TẠI.
+            #     SỬA LẠI Ở r18, và bản cũ của chính chốt này là thứ phải sửa. r17 khẳng định
+            #     *"một `PATH=""` tường minh nghĩa là đừng tìm ở đâu cả"*, gán nó cho HỆ ĐIỀU
+            #     HÀNH, rồi KHOÁ nó bằng `bang(... and not rong)` — mà KHÔNG ĐO. Vòng 12 đo:
+            #     `os.get_exec_path({"PATH": ""})` ⇒ `['']`, và `subprocess.run(["bash"],
+            #     env={"PATH": ""})` ở thư mục có `bash` ⇒ `rc=0`. Một chốt khoá cứng một ngữ
+            #     nghĩa SAI thì tệ hơn không có chốt: nó làm bản vá ĐÚNG thành ĐỎ.
+            #     Nay đo cả ba mặt, và mặt RỖNG đo bằng một thư mục hiện tại THẬT SỰ có `bash`.
             os.environ.pop("CONG_CU_BASH", None)
             os.environ.pop("PATH", None)
             vang = m["ung_vien"]()
-            rong = m["ung_vien"](path="")
-            bang(bool(vang) and not rong,
-                 f"(5) `PATH` VẮNG cho {len(vang)} ứng viên và `PATH=\"\"` cho {len(rong)} — "
-                 f"mong VẮNG khác rỗng (lùi về `os.defpath` = {os.defpath!r}) và RỖNG tường "
-                 f"minh thì rỗng. Gộp hai ca lại là để cổng báo KHÔNG ĐO ĐƯỢC trên một máy "
-                 f"chạy `bash` được.")
+            cho_bash = tmp / "cwd_co_bash"
+            cho_bash.mkdir()
+            (cho_bash / "bash").symlink_to(w)
+            cu_cwd = os.getcwd()
+            try:
+                os.chdir(cho_bash)
+                rong = m["ung_vien"](path="")
+            finally:
+                os.chdir(cu_cwd)
+            bang(bool(vang),
+                 f"(5a) `PATH` VẮNG cho {len(vang)} ứng viên — mong lùi về `os.defpath` = "
+                 f"{os.defpath!r} như `os.get_exec_path()` làm. Gộp VẮNG vào RỖNG là để cổng "
+                 f"báo KHÔNG ĐO ĐƯỢC trên một máy chạy `bash` được.")
+            bang(rong == [os.path.join(os.curdir, "bash")],
+                 f"(5b) `PATH=\"\"` ở thư mục CÓ `bash` cho {rong!r} — mong "
+                 f"{[os.path.join(os.curdir, 'bash')]!r}. Thành phần RỖNG là thư mục HIỆN TẠI "
+                 f"(`os.get_exec_path({{'PATH': ''}})` ⇒ `['']`). Và chuỗi phải giữ `./`: "
+                 f"`Path('.') / 'bash'` chuẩn hoá thành TÊN TRẦN `bash`, tức phép thử năng lực "
+                 f"sẽ đi tìm theo PATH thay vì thử đúng tệp ấy.")
+
+            # (6) N61 (r18) — khoá cache theo TOÀN BỘ môi trường. `bash` đọc môi trường của
+            #     CHÍNH NÓ; đo được ở vòng 12: cache `/bin/bash` xong, đặt `BASH_ENV` trỏ vào
+            #     một tệp `exit 7` ⇒ cache vẫn trả đường cũ, còn đo lại trả `None`.
+            #     Ứng viên giữ NGUYÊN, nên N56 (đếm lại ứng viên) KHÔNG cứu được ca này — đó
+            #     là lý do chốt này tách được N61 khỏi N56.
+            m["_CACHE"].clear()
+            os.environ["CONG_CU_BASH"] = str(w)
+            rong_dir = tmp / "rong2"
+            rong_dir.mkdir()
+            os.environ["PATH"] = str(rong_dir)
+            viet(TOT)
+            if tim()[0] != str(w):
+                raise BoQuaMoiTruong("không dựng lại được ứng viên giả cho chốt (6)")
+            env_xau = tmp / "bash_env_xau.sh"
+            env_xau.write_text("exit 7\n", encoding="utf-8")
+            os.environ["BASH_ENV"] = str(env_xau)
+            try:
+                env_cache = tim()[0]
+                env_moi = tim(dung_cache=False)[0]
+            finally:
+                os.environ.pop("BASH_ENV", None)
+            bang(env_cache == env_moi,
+                 f"(6) `BASH_ENV` đổi mà cache trả {env_cache!r} còn đo lại trả {env_moi!r}. "
+                 f"Phán quyết sinh ra từ phép thử NĂNG LỰC, mà `bash` đọc môi trường của chính "
+                 f"nó — danh sách biến 'có ảnh hưởng' không bao giờ đủ, nên khoá phải băm TOÀN "
+                 f"BỘ môi trường.")
 
             bang(dau > 0 and sau == dau,
                  f"(3) CHIỀU NGƯỢC — cache đã CHẾT: lần đầu {dau} phép thử năng lực, sau 20 "

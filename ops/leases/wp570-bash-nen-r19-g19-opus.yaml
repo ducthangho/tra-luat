@@ -256,6 +256,13 @@ dieu_kien_dung:
 ghi_chu_chieu_lai: 'TRUONG TAI LIEU, khong phai truong cong. Ghi de nguoi sau doc duoc VI SAO
   g10 ton tai ma khong phai lat lai bon vong review.'
 
+da_bi_thay_the: wp570-bash-nen-r20-g20-opus
+da_bi_thay_the_vi_sao: 'NUA THU NHAT cua bia mo hai chieu, lan thay the THU MUOI HAI. Di TRUOC vi cong
+  `check` doc tu REF va CHAN [8] khi lease cu chua mang dong nay. Da dem MOI ref mang tep lease g19
+  sau khi chot hai nguon ref (ls-remote / for-each-ref khop, comm -23 RONG tren 368 nhanh): DUNG MOT
+  ref. g19 con han toi 2026-09-25T19:00Z nhung tu day KHONG con la nguoi giu: g20 them BON luat
+  (N72..N75) tu cross-review vong 14 va ba lo cung lop tu tim.'
+
 closure_status: 'Owner-directed grant, revision 19, generation 19. BAY luat moi N65..N71 tu
   cross-review vong 13 (8 P2, KHONG P1). REVIEWER nang len `high`, executor effort `high`. Doctrine
   r8 ve pham vi ham DOI NGUOC (N67). THAY THE g18 bang bia mo hai chieu, lan thu MUOI MOT.

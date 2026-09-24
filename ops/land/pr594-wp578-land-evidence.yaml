@@ -1024,7 +1024,23 @@ con_mo:
        chuan-bi success 106521954110 (21:21:30Z), gate-packet-loop success 106521999373 (21:30:14Z),
        gate success 106521999383 (21:34:59Z), gate-registry success 106521999380 (21:47:56Z)
        => 4/4 XANH; thu-hoi success 106521944161 (run 35656673813), mo skipped 106521961800
-       (run 35656669266). Voi entry nay, danh sach DAT DUNG pham vi luat neu: tu 9387078 den head CHA.'
+       (run 35656669266).'
+    - 'head f405f2b (21:56Z) — HEAD CHA cua ban va nay, run 35660016335, doc 2026-09-24T01:58Z:
+       chuan-bi success 106532773249 (21:56:39Z), gate 106532796424 FAILURE (22:02:21Z),
+       gate-packet-loop success 106532796437 (22:06:23Z), gate-registry 106532796386 FAILURE (22:21:06Z),
+       thu-hoi success 106532751488 (21:56:49Z, run 35660009737), mo skipped 106532749399 (run 35660008941)
+       => 3 xanh / 2 DO. Day la head DUY NHAT cua PR #601 mang HAI cong do cung luc.
+       NGUYEN NHAN da truy, da dang comment, va KHONG cai nao thuoc packet #578:
+       (a) `gate` do o bien_nhan_v2_test: 63/63 ca dat nhung 73/74 dot bien — m55_bo_RIENG_chot_thieu_bang_
+       bi_danh_be_mat KHONG RANG. Lan thu HAI tren nhanh nay (lan truoc: head 85f974b). Tu ops/bien_nhan_v2*,
+       thuoc packet #551. Comment 5768151154. Phep do delta hai ve tai cho, ca hai ve dung trong MOT lenh:
+       74/74 va TONG: DAT ca hai => delta 0. Tinh ca head nay: 12 success / 2 failure tren 14 luot gate.
+       (b) `gate-registry` do o CI_DANG_KY ops/nhanh_don_duoc_test.py rc=1, dot bien giet 75/76. Tu packet
+       #568. Comment 5768404207. Delta hai ve tai cho: 76/76 ca hai, MUTANT giet 10/10. Day la lan DAU TIEN
+       gate-registry do tren nhanh nay.
+       KHONG re-run tay (manual_ci_budget 0). KHONG va hai nguyen nhan nay: ca hai nam ngoai write set va
+       ngoai land authority.
+       Voi entry nay, danh sach DAT DUNG pham vi luat neu: tu 9387078 den head CHA.'
     hai_ket_luan_do_duoc_PHAM_VI_GHI_TRONG_TUNG_MUC:
       m55_khong_dai: 'Bon luot lien tiep cung bo bien_nhan_v2 tren b94182b / a479699 / 85f974b / e6eabed: dat / dat / DO /
         dat = 3 dat, 1 do; cong phep do tai cho hai ve (cua phien chinh) delta 0. Ten giu nguyen LECH_CHUA_RO_NGUYEN_NHAN:
@@ -1485,3 +1501,69 @@ chuoi_ho_so_dung_o_dau: 'Tep nay ghi nhan merge (TRANG_THAI: merged), 4 check-ru
   (nguon ben truoc thao tac: chua co hien vat), mot tranh chap danh tinh generation input (danh dau ngay tai truong
   canonical) va mot mission_id lech schema. No KHONG tu sinh mat xich tiep theo. Moi viec o `con_mo` doi chi
   thi chu kho.'
+
+# ══════════════════════ CAP NHAT TRANG THAI — 2026-09-24 ══════════════════════
+CAP_NHAT_TRANG_THAI_20260924:
+  vi_sao_co_muc_nay: 'Chu kho cap lease wp578-land-g3-claude-20260924 va ra lenh: "Cap lease di, hop nhat
+    master vao nhanh. Luu y, cap nhat trang thai truoc". Muc nay ghi trang thai DO DUOC luc
+    2026-09-24T01:55-02:00Z, TRUOC khi head doi. No KHONG sua mot ket luan nao cua cac ban truoc: moi so
+    lieu cu giu nguyen va van dung voi moc thoi gian cua chung. Thu tu nay do chinh luat cua tep nay bat —
+    xem PHAM_VI_THEO_LUAT_khong_theo_danh_sach: CI cua f405f2b chi khai duoc khi f405f2b da thanh head CHA.'
+  do_luc: '2026-09-24T01:55Z .. 02:00Z, sau `git fetch origin --prune`.'
+  hai_ngay_khong_ai_cham_PR: 'PR #601 va issue #578 deu khong doi tu 2026-09-21T22:29:20Z va
+    2026-09-21T13:58:21Z. Khong co chi thi moi cua chu kho tren ca hai noi trong khoang ay.'
+
+  master_da_chay_tiep: 'master 714f36e -> d553efa, +35 commit, nhanh nay tut sau 35 va di truoc 15.
+    Bon cong tren d553efa XANH TRON: chuan-bi 107137815630, gate 107137852348, gate-packet-loop
+    107137852364, gate-registry 107137852296 (xong 2026-09-23T10:15:26Z .. 10:43:13Z). Rieng `gate` xanh
+    5/5 luot gan nhat tren master (18d42ca, 6ed7f02, 177876f, 803c248, 403a576).'
+
+  hai_nguyen_nhan_do_da_TACH_DOI_SO_PHAN:
+    gate_registry_nguyen_nhan_DA_DUOC_CHUA_O_THUONG_NGUON: 'Blob ops/nhanh_don_duoc_test.py doi
+      df4e6da9dc9179dc2c3243c21bf1a208c42533c3 -> cef56c4877a71b33b9409f81546fb9c0668c5a8c tren master
+      (commit 9fbc2a9, packet #568). Tuc thu lam gate-registry do tren f405f2b da duoc chua o NOI KHAC,
+      khong phai o day va khong phai boi phien nay.'
+    gate_nguyen_nhan_KHONG_DOI: 'Blob ops/bien_nhan_v2.py (62ce28be6116) va ops/bien_nhan_v2_test.py
+      (b0f69c4af6a0) GIONG HET nhau giua f405f2b va master. Nguyen nhan m55 chua duoc chua o dau ca.
+      Ten giu nguyen LECH_CHUA_RO_NGUYEN_NHAN — `gate` xanh 5/5 tren master KHONG co nghia la da biet
+      nguyen nhan, no chi co nghia la hinh dang do khong tai xuat hien trong 35 commit vua roi.'
+    de_xuat_packet_rieng_NAY_YEU_DI: 'Ban 21-09 de nghi mo mot packet rieng cho lech mutation-suite, vi
+      hinh dang ay trai tren HAI bo doc lap (#551 va #568). Qua 35 commit tiep theo no KHONG tai xuat
+      hien lan nao. Bang chung cho packet ay nay YEU HON luc de nghi, khong manh hon. Ghi ra day de lan
+      sau khong ai doc ban cu roi tuong da co co so.'
+
+  packet_khac_do_duoc:
+    p568: 'Issue DONG luc 2026-09-23T06:02:19Z.'
+    p600: 'PR #600 MERGE luc 2026-09-23T04:44:45Z. KHONG phai viec cua phien nay.'
+    p601: 'Van MO, mergeable True nhung mergeable_state `blocked`, head van f405f2b.'
+    p578: 'Issue van MO.'
+
+  lease_toan_kho: '0 / 93 lease con han luc 2026-09-24T01:55Z (quet `lease_expires_at_utc` tren
+    ops/leases/*.yaml, doc duoc han o ca 93 tep). Khong ai giu gi.'
+
+  he_qua_cho_VI_PHAM_2_CHONG_LAN_WRITE_SET: 'Rui ro DANG SONG da TU HET: ba ben cung giu
+    ops/lease_publish_test.py deu qua han (muon nhat 2026-09-22T06:00:00Z). `ai-dang-giu` tren
+    ops/land/pr594-wp578-land-evidence.yaml luc 2026-09-24T01:5xZ tra rc=0, NGUOI_GIU 0.
+    KHONG TUYEN la "da chua": no HET HAN, khong ai chua no ca. Phan con lai cua vi pham ay la PHAN XU,
+    va phan xu van thuoc chu kho. Cung li do, lease g3 duoc cap ma KHONG tai pham bat bien 2 cua §1 —
+    da do TRUOC khi cap, khong khai suong.'
+
+  review_khong_doi: '6 review codex tren PR #601, 0 APPROVED. `cross_approved` van KHONG CO. Tran truc
+    LOI GOI cua §12 van la 2 va da dung 6; lease g3 KHONG reset bo dem nao (§12 d.1021) va cam goi them.'
+
+  ban_va_nay_lam_GI_va_KHONG_lam_GI:
+    lam: 'Khai CI cua head f405f2b vao dien_bien_do_duoc (3 xanh / 2 do) — dong dung khoang trong da bao
+      truoc khi de nghi hop nhat; va ghi khoi nay.'
+    khong_lam: 'KHONG sua mot ket luan cu nao. KHONG va hai nguyen nhan do — ca hai ngoai write set va
+      ngoai land authority. KHONG re-run cong nao (manual_ci_budget 0). KHONG merge PR #601.'
+    ngay_sau_ban_va_nay: 'Hop nhat origin/master (d553efa) vao nhanh. Da do kho truoc: `git merge-tree
+      --write-tree` rc=0, KHONG xung dot — tep ho so nay khong ton tai tren master nen khong the dung do.
+      Cong se chay lai tren head moi DO PUSH, khong phai do loi goi tay.'
+    ky_vong_KHONG_phai_loi_hua: 'Ky vong gate-registry xanh vi nguyen nhan da duoc chua o thuong nguon;
+      `gate` thi khong ai biet, va so do duy nhat dang ke la 12 xanh / 2 do tren 14 luot o nhanh nay cong
+      5/5 tren master. Day la SO DO, khong phai xac suat va khong phai cam ket. Head moi do hay xanh,
+      ban sau khai nguyen van ket qua.'
+
+  KHONG_XAC_LAP_THEM_GI: 'Khoi nay KHONG lam LANDED tien them mot buoc nao. LANDED van CHUA,
+    LANDED_KHONG_XAC_LAP van 19 dong, CON_THIEU_DE_GOI_LANDED van 9 muc. Viec duy nhat tu dong trong hai
+    ngay qua la RUI RO cua VI_PHAM_2 het han — va het han khong phai la chua.'

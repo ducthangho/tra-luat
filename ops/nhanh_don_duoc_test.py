@@ -842,8 +842,13 @@ def r501_tin_hieu_chot_khong_gia_mao_duoc(d: Path):
         if globals().get("_CA_HIEN_TAI") == "T7":
             return that_run(["git", "rev-parse", "--verify", "khong-ton-tai-xxx"],
                             cwd, check=True)
-        return that_run(args, cwd, check=check, env=env)
+        try:
+            return that_run(args, cwd, check=check, env=env)
+        except OSError as loi:        # #593 vong 3 — T2 phai SACH; hong ha tang la tien de
+            ha_tang.append(loi)
+            raise
 
+    ha_tang: list = []
     goc_ca = list(CA)
     try:
         globals()["run"] = run_gia
@@ -856,6 +861,10 @@ def r501_tin_hieu_chot_khong_gia_mao_duoc(d: Path):
         globals()["run"] = that_run
         globals()["CA"] = goc_ca
         globals().pop("_CA_HIEN_TAI", None)
+    if ha_tang:                      # gan roi raise: giu neo `raise TinHieuKhongDoDuoc(` duy nhat
+        khong_do = TinHieuKhongDoDuoc(f"tien de ha tang cua r501 (T2) hong: "
+                                      f"{type(ha_tang[0]).__name__}: {ha_tang[0]} ({len(ha_tang)} lan)")
+        raise khong_do
     chot(do == ["T7"], "r501")
     chot(tt == KHONG_DO_DUOC and "T7" in ly_do, "r501")
 
@@ -1159,8 +1168,12 @@ def r508_ban_ghi_luot_TRUOC_chi_khac_dau_phien(d: Path):
         raise TinHieuChotCa(f"chot cua ca r508 that bai: bo sinh SUY BIEN — {e}") from None
     k = _kenh_tam(_du_ca(ph_khac, {"T1": NHAN_DO_CHOT})
                   + [_ban_ghi(ph_khac, dong_luot=True, rc=1)], d)
-    tt, _ = doc_kenh(k, ph_that, "m", 1, ("T1",))
-    chot(tt == KHONG_DO_DUOC, "r508")
+    # #593 r1 vong 3 — `doc_kenh` doi LOI DOC thanh KHONG DO DUOC, dung gia tri ca
+    # nay cho: 2000 loi doc tung ra r528 DAT (lam tron LEN). Doc thu TRUOC de `OSError`
+    # thoat ra thanh tien de hong, va chot DUNG ly do bac chu khong nhan moi KDD.
+    k.read_text(encoding="utf-8")
+    tt, ly = doc_kenh(k, ph_that, "m", 1, ("T1",))
+    chot(tt == KHONG_DO_DUOC and ly.startswith("ban ghi khong neo dung luot"), "r508")
 
 
 def r509_dau_phien_phai_sinh_moi_moi_luot(d: Path):
@@ -3434,15 +3447,20 @@ def r543_tien_de_ha_tang_cua_r528_phai_ra_trang_thai_thu_ba(d: Path):
     N = 8
     goc = {"_kenh_tam": m._kenh_tam, "doc_kenh": m.doc_kenh}
 
-    def chay(ten, **thay):
+    def chay(ten, cho_kdd=False, **thay):
         """Goi ham THAT cua ban sao. Ba duong ra duoc ky vong tra ve co nhan; moi
         duong ra KHAC la chot cua CHINH ca nay do — nep r517/r520, khong de mot
-        ngoai le la thoat ra thanh DO_KHAC roi bi xep la TIN DUNG GIA."""
+        ngoai le la thoat ra thanh DO_KHAC roi bi xep la TIN DUNG GIA.
+        Vong 3: KDD o duong KHONG tiem loi (`cho_kdd=False`) la tien de CUA CHINH
+        r543 hong — chuyen tiep thanh KHONG DO DUOC, khong thanh chot."""
         for k, v in {**goc, **thay}.items():
             setattr(m, k, v)
         try:
             return "tra", m._chay_r508_tach_nguon_do(m, d / ten, N)
         except m.TinHieuKhongDoDuoc as e:
+            if not cho_kdd:
+                khong_do = TinHieuKhongDoDuoc(f"tien de ha tang cua r543 ({ten}) hong: {e}")
+                raise khong_do from None
             return "kdd", str(e)
         except NameError as e:
             return "lap-trinh", str(e)
@@ -3457,7 +3475,7 @@ def r543_tien_de_ha_tang_cua_r528_phai_ra_trang_thai_thu_ba(d: Path):
     # A2 — doi chung duong: khong tiem gi thi r508 THAT chay tron N lan.
     chot(chay("sach") == ("tra", 0), "r543")
     # A1 — dia day o tien de: KHONG DO DUOC mang loai + thong diep + so lan; KHONG DO_CHOT.
-    tt, ly = chay("day", _kenh_tam=nem(lambda: OSError(28, "No space left on device")))
+    tt, ly = chay("day", True, _kenh_tam=nem(lambda: OSError(28, "No space left on device")))
     chot(tt == "kdd", "r543")
     chot(f"OSError: [Errno 28] No space left on device ({N} lan)" in ly, "r543")
     chot(f"trong {N} luot" in ly, "r543")
@@ -3468,15 +3486,65 @@ def r543_tien_de_ha_tang_cua_r528_phai_ra_trang_thai_thu_ba(d: Path):
         dem["i"] += 1
         raise (PermissionError(13, "Permission denied") if dem["i"] % 2
                else FileNotFoundError(2, "No such file"))
-    tt, ly = chay("xen-ke", _kenh_tam=xen_ke)
+    tt, ly = chay("xen-ke", True, _kenh_tam=xen_ke)
     chot(tt == "kdd", "r543")
     chot(f"PermissionError: [Errno 13] Permission denied ({N // 2} lan)" in ly, "r543")
     chot(f"FileNotFoundError: [Errno 2] No such file ({N // 2} lan)" in ly, "r543")
     # A3 — chot cua ca long that bai: dem vao `do`, KHONG ngoai le.
     chot(chay("chot", doc_kenh=lambda *a, **k: (m.GIET, "")) == ("tra", N), "r543")
     # A4 — loi lap trinh: thoat ra nguyen ven, khong thanh con so.
-    tt, ly = chay("lap-trinh", _kenh_tam=nem(lambda: NameError("ten_khong_ton_tai")))
+    # `True`: o DAY KDD la loi lap trinh bi NUOT — chot SAI, khong phai tien de hong.
+    tt, ly = chay("lap-trinh", True, _kenh_tam=nem(lambda: NameError("ten_khong_ton_tai")))
     chot(tt == "lap-trinh" and "ten_khong_ton_tai" in ly, "r543")
+    # ---- vong 3: DIEM PHAT SINH x LOAI x DUONG QUAN SAT (cross-review v2, F1+F2) ----
+    # B1 — `mkdir` hong (PermissionError that tu `Path.mkdir`), khong chi `_kenh_tam`.
+    goc_mkdir = Path.mkdir
+
+    def mkdir_hong(self, *a, **k):
+        if self.parent == d / "mkdir":
+            raise PermissionError(13, "mkdir hong")
+        return goc_mkdir(self, *a, **k)
+    Path.mkdir = mkdir_hong
+    try:
+        tt, ly = chay("mkdir", True)
+    finally:
+        Path.mkdir = goc_mkdir
+    chot(tt == "kdd" and f"PermissionError: [Errno 13] mkdir hong ({N} lan)" in ly, "r543")
+    # B2 — con chau OSError NGOAI ba loai da thu: ca HO, khong phai danh sach.
+    tt, ly = chay("con-chau", True, _kenh_tam=nem(lambda: BlockingIOError(11, "tam het")))
+    chot(tt == "kdd" and f"BlockingIOError: [Errno 11] tam het ({N} lan)" in ly, "r543")
+
+    # B3 — loi DOC THAT: kenh la thu muc. Truoc vong 3 `doc_kenh` doi no thanh KDD va r508 DAT.
+    def kenh_thu_muc(_ban_ghi, thu):
+        (thu / "k.jsonl").mkdir()
+        return thu / "k.jsonl"
+    tt, ly = chay("thu-muc", True, _kenh_tam=kenh_thu_muc)
+    chot(tt == "kdd" and "IsADirectoryError" in ly and f"({N} lan)" in ly, "r543")
+    # B4 — loi doc AN trong `doc_kenh` (ly do khac `khong neo dung luot`): KHONG lam tron len DAT.
+    chot(chay("doc-an", doc_kenh=lambda *a, **k: (m.KHONG_DO_DUOC, "khong doc duoc kenh: X"))
+         == ("tra", N), "r543")
+    # B5 — KDD o duong khong tiem thi chuyen tiep thanh KHONG DO DUOC, khong thanh chot.
+    try:
+        chay("kdd-ngoai-y", _kenh_tam=nem(lambda: OSError(28, "day")))
+        chot(False, "r543")
+    except TinHieuKhongDoDuoc:
+        pass
+    # B6 — ca ngoai KHAC cung lop: T2 cua r501 hong ha tang -> KHONG DO DUOC, khong chot r501.
+    goc_run = m.run
+
+    def run_hong(args, cwd, check=True, env=None):
+        if getattr(m, "_CA_HIEN_TAI", None) == "T2":
+            raise OSError(28, "T2 het cho")
+        return goc_run(args, cwd, check=check, env=env)
+    m.run = run_hong
+    try:
+        m.r501_tin_hieu_chot_khong_gia_mao_duoc(d)
+        ly = "DAT"
+    except (m.TinHieuKhongDoDuoc, m.TinHieuChotCa) as e:
+        ly = f"{type(e).__name__}: {e}"
+    finally:
+        m.run = goc_run
+    chot(ly.startswith("TinHieuKhongDoDuoc") and "OSError: [Errno 28] T2 het cho (" in ly, "r543")
 
 
 def r544_stderr_cat_dau_phai_khai_so_ky_tu_bi_bo(d: Path):
@@ -3495,17 +3563,19 @@ def r544_stderr_cat_dau_phai_khai_so_ky_tu_bi_bo(d: Path):
     chot(m._khai_cat_dau_stderr(dai) == " …[CAT 37 ky tu dau]", "r544")   # (1)
     chot(m._khai_cat_dau_stderr("c" * T) == "", "r544")                   # (2)
     chot(m._khai_cat_dau_stderr("") == "", "r544")
-    # (3) — `run` gia tra stderr dai, `doc_kenh` gia tra KHONG DO DUOC (nep r522).
-    m.run = lambda args, cwd, check=True, env=None: subprocess.CompletedProcess(args, 1, "", dai)
+    # (3) — `run` gia tra stderr, `doc_kenh` gia tra KHONG DO DUOC (nep r522). Vong 3
+    # (cross-review v2 F2): HAI chieu tren DUONG THAT — 0/T-1/T/T+37, khong chi dai.
     m.doc_kenh = lambda *a, **k: (m.KHONG_DO_DUOC, "kenh khong ton tai")
-    bs = d / "bs"
-    bs.mkdir()
-    try:
-        tt, ly, _ = m.chay_mot_mutant(bs, "x", ("T1",))
-    except Exception as exc:                  # noqa: BLE001 — phan hang, nep r520
-        raise TinHieuChotCa(f"chay_mot_mutant nem {type(exc).__name__}: {exc}")
-    chot(tt == m.KHONG_DO_DUOC, "r544")
-    chot(f"stderr[-{T}:]={('c' * T)!r} …[CAT 37 ky tu dau]" in ly, "r544")
+    for se in ("", "c" * (T - 1), "c" * T, dai):
+        m.run = lambda args, cwd, check=True, env=None, se=se: subprocess.CompletedProcess(args, 1, "", se)
+        (bs := d / f"bs{len(se)}").mkdir()
+        try:
+            tt, ly, _ = m.chay_mot_mutant(bs, "x", ("T1",))
+        except Exception as exc:                  # noqa: BLE001 — phan hang, nep r520
+            raise TinHieuChotCa(f"chay_mot_mutant nem {type(exc).__name__}: {exc}")
+        bo = len(se) - T
+        chot(tt == m.KHONG_DO_DUOC and ("…[CAT" in ly) == (bo > 0), "r544")
+        chot(f"stderr[-{T}:]={se[-T:]!r}" + (f" …[CAT {bo} ky tu dau]" if bo > 0 else "") in ly, "r544")
 
 
 TU_KIEM = [
@@ -4203,6 +4273,18 @@ DOT_BIEN_TU_KIEM = [
      '    return f" …[CAT {bo} ky tu dau]" if bo > 0 else ""', '    return f" …[CAT {bo} ky tu dau]"'),
     ("stderr-duong-that-bo-khai", ("r544",),
      "                     + _khai_cat_dau_stderr(p.stderr))", '                     + "")'),
+    # Vong 3 (cross-review v2): moi duong moi mot muc; dau vao phan biet ghi o B1-B6 cua r543.
+    ("r508-bo-doc-thu-kenh", ("r543",), '    k.read_text(encoding="utf-8")\n    tt, ly', "    tt, ly"),
+    ("r508-nhan-moi-kdd", ("r543",), " and ly.startswith(\"ban ghi khong neo dung luot\")", ""),
+    ("r501-ha-tang-thanh-chot", ("r543",), "            ha_tang.append(loi)\n", ""),
+    ("r543-kdd-ngoai-y-thanh-ket-qua", ("r543",), "            if not cho_kdd:", "            if False:"),
+    ("r528-ha-tang-mkdir-ngoai-try", ("r543",), "        try:\n            thu.mkdir(parents=True, exist_ok=True)",
+     "        thu.mkdir(parents=True, exist_ok=True)\n        try:"),
+    ("r528-ha-tang-chi-ba-loai-da-thu", ("r543",), "        except OSError as loi_ha_tang:",
+     "        except (PermissionError, FileNotFoundError, OSError) as loi_ha_tang:\n"
+     "            if type(loi_ha_tang) not in (OSError, PermissionError, FileNotFoundError):\n                raise"),
+    ("stderr-duong-that-khai-ca-khi-ngan", ("r544",), "                     + _khai_cat_dau_stderr(p.stderr))",
+     '                     + (_khai_cat_dau_stderr(p.stderr) or " …[CAT 0 ky tu dau]"))'),
 ]
 
 

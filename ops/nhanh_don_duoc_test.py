@@ -3813,6 +3813,7 @@ def r547_mien_tru_phai_co_rang_ma_khong_nuot_loi_khac(d: Path):
     finally:                                   # HAI lop, nhu moi fixture: dang ky roi don
         _bo_cua([_tiem(la), tiem])
     m, vang, bat, doc = _nap_ban_sao(d), [], [], Path.read_text
+    proof, run_goc = set(), m.run          # (4) CHI thu loi o DUNG duong proof m.run giao (vong 7)
     entry = 'if __name__' + ' == "__main__":'
     m.DOT_BIEN_TU_KIEM = [("khong-phat-proof", ("r547",), entry, "raise SystemExit(1)\n" + entry)]
 
@@ -3820,13 +3821,21 @@ def r547_mien_tru_phai_co_rang_ma_khong_nuot_loi_khac(d: Path):
         try:
             return doc(self, *a, **k)
         except FileNotFoundError as e:
-            vang.append(e)
+            if self in proof:
+                vang.append(e)
             raise
-    Path.read_text = doc_ghi
+
+    def run_ghi(args, cwd, check=True, env=None):
+        proof.add(Path((env or {}).get(TU_KIEM_FILE_ENV, "")))
+        return run_goc(args, cwd, check=check, env=env)
+    Path.read_text, m.run = doc_ghi, run_ghi
     try:
         with contextlib.redirect_stdout(io.StringIO()):
             m.chay_dot_bien_tu_kiem()
-        ok.append(bool(vang) and not any(e is x for e in so.loi for x in vang))          # (4)
+        with contextlib.suppress(FileNotFoundError):
+            (d / "khac-r547.json").read_text()   # tep KHAC cung loai/ma: KHONG duoc thu
+        ok.append(bool(vang) and all(Path(e.filename) in proof for e in vang)
+                  and not any(e is x for e in so.loi for x in vang))                    # (4)
         with _vang_co_chu_y(m) as bat:
             m.run(["true"], d, check=False, env={TU_KIEM_FILE_ENV: str(d / "p.json")})
             for ten in ("p.json", "khac.json"):      # dung duong proof VA mot tep khac: chi cai dau
@@ -3838,7 +3847,7 @@ def r547_mien_tru_phai_co_rang_ma_khong_nuot_loi_khac(d: Path):
             ok.append(bool(bat) and any(bat[0] is t for t in so.tiem))
         ok.append(not any(e is x for e in so.loi for x in bat))                          # (5)
     finally:
-        Path.read_text = doc
+        Path.read_text, m.run = doc, run_goc
         _bo_cua([_tiem(e) for e in vang + bat])
     chot(all(ok), "r547")
 
@@ -4589,7 +4598,8 @@ DOT_BIEN_TU_KIEM = [
     ("loc-luc-doc-theo-thong-diep", ("r547",), " if _la_ha_tang_that(e)]   # loc",
      " if not any(str(e) == str(t) for t in _SO_HA_TANG.tiem)]   # loc"),
     ("r545-nuot-theo-loai", ("r545",), "if not any(loi is x for x in cua_ca):", "if not any(type(loi) is type(x) for x in cua_ca):"),
-    ("vang-moi-tep", ("r547",), "            if self in proof:", "            if True:"),
+    ("vang-moi-tep", ("r547",), "            if self in proof:\n                cua.append(", "            if True:\n                cua.append("),
+    ("r547-thu-moi-tep", ("r547",), "            if self in proof:\n                vang.append(e)", "            if True:\n                vang.append(e)"),
     ("loc-dang-ky-theo-thong-diep", ("r547",), "not any(exc is t for t in _SO_HA_TANG.tiem)", "not any(str(exc) == str(t) for t in _SO_HA_TANG.tiem)"),
     ("bo-loc-dang-ky", ("r545", "r547"), " and not any(exc is t for t in _SO_HA_TANG.tiem)", ""),
 ]

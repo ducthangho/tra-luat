@@ -257,6 +257,14 @@ dieu_kien_dung:
 ghi_chu_chieu_lai: 'TRUONG TAI LIEU, khong phai truong cong. Ghi de nguoi sau doc duoc VI SAO
   g10 ton tai ma khong phai lat lai bon vong review.'
 
+da_bi_thay_the: wp570-bash-nen-r18-g18-opus
+da_bi_thay_the_vi_sao: 'NUA THU NHAT cua bia mo hai chieu, lan thay the THU MUOI trong chuoi. Di
+  TRUOC vi cong `check` doc tu REF va CHAN [8] khi lease cu chua mang dong nay. Da dem MOI ref
+  mang tep lease g17: chot hai nguon ref (ls-remote 353 / for-each-ref 353, comm -23 RONG) =>
+  DUNG MOT ref `refs/remotes/origin/ops/cap-lease-570-g17`. g17 con han toi 2026-09-25T07:00Z
+  nhung tu day KHONG con la nguoi giu: g18 DOI EXECUTOR theo chi thi chu kho va them BAY luat
+  nghiem thu (N58..N64) tu cross-review vong 12.'
+
 closure_status: 'Owner-directed grant, revision 17, generation 17. BAY luat moi N52..N57 tu
   cross-review vong 11 (8 P2, KHONG P1). DIEU KIEN DUNG da no o lop A (lan thu NAM) va phien
   DA DUNG DE HOI thay vi tu chon; chu kho chon phuong an BO TINH HANG sau khi doc phep do ba

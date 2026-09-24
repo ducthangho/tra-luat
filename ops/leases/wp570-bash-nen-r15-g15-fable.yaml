@@ -228,6 +228,16 @@ dieu_kien_dung:
 ghi_chu_chieu_lai: 'TRUONG TAI LIEU, khong phai truong cong. Ghi de nguoi sau doc duoc VI SAO
   g10 ton tai ma khong phai lat lai bon vong review.'
 
+da_bi_thay_the: wp570-bash-nen-r16-g16-fable
+da_bi_thay_the_vi_sao: 'NUA THU NHAT cua bia mo hai chieu, lan thay the THU TAM trong chuoi.
+  Nua nay di TRUOC vi cong `lease_publish.py check` doc tu REF va CHAN [8] khi lease cu chua
+  mang dong nay: do duoc 2026-09-24T05:4xZ, rc=8 doc TRUC TIEP. Nua thu hai (`thay_the_cho`
+  trong g16) day len ops/cap-lease-570-g16 SAU, trong mot lan day RIENG.
+  Da dem MOI ref mang tep lease g15, khong doan: chot hai nguon ref (ls-remote 347 /
+  for-each-ref 347, khop) => DUNG MOT ref `refs/remotes/origin/ops/cap-lease-570-g15`.
+  g15 con han toi 2026-09-25T04:00Z nhung tu day KHONG con la nguoi giu: r16 them BAY luat
+  nghiem thu moi (N45..N51) tu cross-review vong 10 cong ba P2 cua luot `1091c8a`.'
+
 closure_status: 'Owner-directed grant, revision 15, generation 15. SAU luat moi N39..N44 tu cross-review vong 8. Effort GIU `low` ca hai vai. Truoc do: THAY THE g10 bang bia mo hai chieu (g10 CON_HAN, giu ca ba duong) — phep thay the THAT lan thu BA. Truoc do: EXECUTOR GIU NGUYEN: fable /
   claude-fable-5-1, nay khai them effort: medium. REVIEWER DOI: codex gpt-6-astra effort medium,
   cao hon bon vong truoc. Khong bia mo: g9 HET_HAN, NGUOI_GIU 0.'

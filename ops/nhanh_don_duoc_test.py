@@ -86,9 +86,10 @@ def _chuoi_that(exc) -> list:
 def _ghi_ha_tang(exc, truoc=None) -> None:
     """Ghi CA CHUOI (vong 4 F1). Diem nuot (`truoc=None`): MOI lan bat la mot lan ghi, ke ca
     CUNG doi tuong `raise` lai (vong 5 F1). Chi khi hop chuoi vao CUA SO ca (`truoc`) moi khu trung."""
-    for e in _chuoi_that(exc):
-        if truoc is None or not any(e is x for x in _SO_HA_TANG.loi[truoc:]):
+    for e in _chuoi_that(exc):     # vong 8: SU KIEN = doi tuong + traceback; `raise` lai doi traceback
+        if truoc is None or not any(e is x for x in _SO_HA_TANG.loi[truoc:]) or getattr(e, "_ndd_tb", 0) is not e.__traceback__:
             _SO_HA_TANG.loi.append(e)
+            e._ndd_tb = e.__traceback__
 
 
 def _bo_cua(ds) -> None:
@@ -3702,13 +3703,13 @@ def r545_so_ha_tang_moi_diem_nuot_ghi_va_runner_doi_nhan(d: Path):
                 raise moi("chuoi")
             except OSError:
                 m.chot(False, "x")
-        tiem, lap, boc = m._tiem(moi("tiem")), moi("lap"), moi("boc")
+        tiem, lap, boc, tai = m._tiem(moi("tiem")), moi("lap"), moi("boc"), moi("tai-phat")
 
-        def ghi_roi_boc():                    # ghi o diem nuot ROI boc vao chot: dem MOT lan
-            m._ghi_ha_tang(boc)
+        def ghi_roi_boc():                    # ghi ROI boc vao chot trong CUNG handler: MOT su kien
             try:
                 raise boc
-            except OSError:
+            except OSError as e:
+                m._ghi_ha_tang(e)
                 m.chot(False, "x")
         m.TU_KIEM = [("nuot-dat", lambda: [m._ghi_ha_tang(moi("nuot")) for _ in "ab"], False),
                      ("sach", lambda: None, False),
@@ -3717,7 +3718,8 @@ def r545_so_ha_tang_moi_diem_nuot_ghi_va_runner_doi_nhan(d: Path):
                      ("chot-that", lambda: m.chot(False, "x"), False),
                      ("da-dang-ky", lambda: (m._ghi_ha_tang(tiem), m.chot(False, "x")), False),
                      ("lap-1", lambda: m._ghi_ha_tang(lap), False), ("lap-2", lambda: m._ghi_ha_tang(lap), False),
-                     ("ghi-roi-boc", ghi_roi_boc, False)]
+                     ("ghi-roi-boc", ghi_roi_boc, False),     # tai-phat: nuot ROI raise lai = HAI su kien
+                     ("tai-phat", lambda: (m._ghi_ha_tang(tai), (_ for _ in ()).throw(tai)), False)]
         buf = io.StringIO()
         with contextlib.redirect_stdout(buf):
             m.chay_tu_kiem()
@@ -3727,7 +3729,8 @@ def r545_so_ha_tang_moi_diem_nuot_ghi_va_runner_doi_nhan(d: Path):
         chot(f"{kdd}chuoi (1 lan)" in nhan["chuoi"], "r545")
         chot(nhan["sach"].endswith(": DAT"), "r545")
         chot(": DO_CHOT" in nhan["chot-that"] and ": DO_CHOT" in nhan["da-dang-ky"], "r545")
-        chot(all(f"{kdd}lap (1 lan)" in nhan[c] for c in ("lap-1", "lap-2")), "r545")      # vong 5 F1
+        chot(all(f"{kdd}lap (1 lan)" in nhan[c] for c in ("lap-1", "lap-2"))                # vong 5 F1
+             and f"{kdd}tai-phat (2 lan)" in nhan["tai-phat"], "r545")                          # vong 8
         chot(f"{kdd}boc (1 lan)" in nhan["ghi-roi-boc"], "r545")
     finally:                 # xoa DUNG loi cua ca nay: xoa theo vi tri se nuot ca loi THAT (lam tron LEN)
         for e in cua_ca:                  # lop mot: dang ky SAU khi do; lop hai: don theo danh tinh
@@ -4579,14 +4582,15 @@ DOT_BIEN_TU_KIEM = [
     # #593 r2 vong 4 (cross-review F1+F2): moi quyen ghi/don/mien tru mot muc; dich do tu luot day du.
     ("ghi-so-bo-duyet-chuoi", ("r545",), "    for e in _chuoi_that(exc):", "    for e in [exc][:_la_ha_tang_that(exc)]:"),
     ("ghi-so-kho-bare-liet-ke", ("r545",), "        _ghi_ha_tang(exc)                    # r2 vong 4: loi bi doi", "        pass  #"),
-    ("runner-bo-doi-nhan-loi-khac", ("r546",), "                    _ha_tang_cua_ca(truoc, goc)   # loi khac", "                    pass  #"),
+    ("runner-bo-doi-nhan-loi-khac", ("r545", "r546"), "                    _ha_tang_cua_ca(truoc, goc)   # loi khac", "                    pass  #"),
     ("r545-nuot-moi-oserror", ("r545",), "                    if not any(loi is x for x in cua_ca):\n                        raise", "                    pass"),
     ("r545-don-het-so", ("r545",), "   # don r545", "; so.loi.clear()"),
     ("r546-don-het-so", ("r546",), "   # don r546", "; so.loi.clear()"),
     # vong 5 (F1 khu trung, F2 hai lop): dich do tu luot day du.
-    ("khu-trung-toan-so", ("r545",), "        if truoc is None or not any(e is x for x in _SO_HA_TANG.loi[truoc:]):",
-     "        if not any(e is x for x in _SO_HA_TANG.loi):"),
-    ("khu-trung-bo-cua-so", ("r545",), "        if truoc is None or not any(e is x for x in _SO_HA_TANG.loi[truoc:]):", "        if True:"),
+    ("khu-trung-toan-so", ("r545",), "if truoc is None or not any(e is x for x in _SO_HA_TANG.loi[truoc:])",
+     "if not any(e is x for x in _SO_HA_TANG.loi)"),
+    ("khu-trung-theo-doi-tuong", ("r545",), ' or getattr(e, "_ndd_tb", 0) is not e.__traceback__:', ":"),
+    ("khu-trung-bo-cua-so", ("r545",), "if truoc is None or not any(e is x for x in _SO_HA_TANG.loi[truoc:]) or", "if True or"),
     ("runner-bo-loc-luc-doc", ("r547",), " if _la_ha_tang_that(e)]   # loc", " if True]   # loc"),
     ("bo-cua-khong-lam-gi", ("r547",), "if not any(e is x for x in ds)]", "if True]"),
     ("bo-cua-xoa-het", ("r545", "r546", "r547"), "if not any(e is x for x in ds)]", "if False]"),

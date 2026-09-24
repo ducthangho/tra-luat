@@ -1,0 +1,269 @@
+# LEASE — WP570-BASH-NEN-MOT-BO-GIAI revision 17 / generation 17
+#
+# VI SAO CO g17 — TAM finding P2, KHONG CO P1, tu cross-review vong 11 tren `fe6034a`.
+# Ca tam DA TAI HIEN truoc khi cham mot dong va nao. Bay luat moi (N52..N57) => PROTOCOL §3.2
+# doi revision + generation moi.
+#
+# DIEU KIEN DUNG DA NO, VA PHIEN DA DUNG DE HOI — day la diem dang ghi nhat cua g17.
+# `dieu_kien_dung` ghi: "Mot hinh dang loi lap lan thu BA => DUNG, hoi 'co nen lam viec nay
+# khong', khong hoi 'va the nao'." Lop A — nhan dien ten `bash` theo HINH DANG CU PHAP cua doi
+# so — nay la lan thu NAM:
+#     r7 casefold · r11 byte · r12 duoi .pyw · r16 pathlib+shell · r17 Path nhieu thanh phan,
+#     tap mot phan tu, VA mot bao dong gia do chinh r16 de ra.
+# Phien KHONG tu chon. Phien DO ba phuong an roi dua cho chu kho:
+#     (a) noi bang liet ke    — re, nhung phep do noi thang rang lan thu SAU se toi
+#     (b) BO TINH HANG        — do tren 20 hinh dang: liet ke r16 sai 5/20, bo tinh hang 1/20
+#     (c) dao thanh danh sach CHO PHEP — dung doctrine CLAUDE.md, nhung do duoc no bat
+#         276/586 loi goi tren cay that => ratchet 276 muc, TRAI THANG N13
+# CHU KHO CHON (b). => N52.
+#
+# TAM FINDING, SAU LOP:
+#   A  be mat nhan dien ten (F2 Path nhieu thanh phan, F6 tap mot phan tu, F3 BAO DONG GIA)
+#      => N52   `Path("", "bash")` CHAY THAT (in ra `OK`); `run({"bash"})` thoat rc=0;
+#               `getoutput(Path("bash"))` nem TypeError => r16 bat OAN no
+#   B  mo hinh pham vi (F4)   => N53  rang buoc HOAN TAT MUON NHAT thang
+#   C  ranh gioi bao cao (F7) => N54  phep hien thi phai DON ANH; khoa giu NGUYEN VEN
+#   D  ratchet phan quyet (F5)=> N55  XUAT XU co vi tri, khong phai trung ten
+#   F  cache (F1)             => N56  van tay phu CA TAP ung vien
+#   G  moi (F8)               => N57  `PATH` VANG khac `PATH` RONG
+#
+# HAI TRONG TAM LA BAO DONG GIA DO CHINH r16 DE RA (F3, F5), va BON la cho r16 va hut trong
+# DUNG ham no vua mo rong (F1, F2, F4, F6). Ghi thang ra day: mot ban va noi rong bang liet ke
+# thi vua bo sot vua bat oan, va ca hai chieu deu do duoc.
+#
+# CONG TREN CAY THAT BAT MOT LOI CUA CHINH BAN VA NAY, khong phai bo ca: ban dau cua N52 rut
+# gon CA vector nen `run(["bash", "-c", kich])` — phan tu sau la BIEN — khong rut gon duoc va
+# LOT; `.claude/dev/launcher_test.py` khai 7 ma do duoc 6. Sua: mo bao chua theo CU PHAP truoc.
+# Doi chieu toan cay r16 <-> r17: THEM 0 · MAT 0 tren 264 tep.
+
+trang_thai_ban_ghi: 'DA CAP 2026-09-24. Day len ops/cap-lease-570-g17 theo chi thi chu kho.'
+
+schema_version: 2
+event: executor_lease_granted
+packet_issue: 570
+packet_id: WP570-BASH-NEN-MOT-BO-GIAI
+mission_issue: KHONG_CO
+revision: 17
+generation: 17
+lease_id: wp570-bash-nen-r17-g17-fable
+granted_by: ducthangho
+
+thay_the_cho: wp570-bash-nen-r16-g16-fable
+thay_the_cho_vi_sao: 'Dau HAI CHIEU cho g16, LAN THU CHIN trong chuoi. g16 CON_HAN va DANG giu
+  ca ba duong (do `ai-dang-giu`, rc doc TRUC TIEP). Hai nua di trong HAI LAN DAY RIENG vi
+  `_kiem_bia_mo` doc tu REF: (1) g16 mang `da_bi_thay_the` day truoc; (2) g17 khai
+  `thay_the_cho` day sau — thu tu nay do duoc, vi cong `check` CHAN [8] khi lam nguoc.
+  Dem MOI ref mang tep lease g16, khong doan.
+  (Ghi chu lich su) Dau HAI CHIEU cho g15, LAN THU TAM trong chuoi. g15 CON_HAN va DANG giu
+  ca ba duong (do `ai-dang-giu`, rc=11 doc TRUC TIEP, NGUOI_GIU 1 tren ca hai duong .py). Hai
+  nua di trong HAI LAN DAY RIENG vi `_kiem_bia_mo` doc tu REF chu khong doc cay lam viec:
+  (1) g16 khai `thay_the_cho`; (2) g15 mang `da_bi_thay_the: wp570-bash-nen-r16-g16-fable`.
+  Dem MOI ref mang tep lease g15, khong doan.
+  (Ghi chu lich su) Dau HAI CHIEU cho g14, LAN THU BAY trong chuoi. g14 CON_HAN va DANG giu
+  ca ba duong. Hai nua di trong HAI LAN DAY RIENG vi `_kiem_bia_mo` doc tu REF.
+  (Ghi chu lich su) Dau HAI CHIEU cho g13, LAN THU SAU trong chuoi. g13 CON_HAN va DANG giu
+  ca ba duong. Hai nua di trong HAI LAN DAY RIENG vi `_kiem_bia_mo` doc tu REF.
+  (Ghi chu lich su) Dau HAI CHIEU cho g12, LAN THU NAM trong chuoi (g7->g8, g8->g9,
+  g10->g11, g11->g12, g12->g13). g12 CON_HAN va DANG giu ca ba duong. Hai nua di trong HAI LAN
+  DAY RIENG vi `_kiem_bia_mo` doc tu REF. Dem MOI ref mang tep lease g12, khong doan.
+  (Ghi chu lich su) Dau HAI CHIEU cho g11, LAN THU TU trong chuoi (sau g7->g8, g8->g9,
+  g10->g11). g11 CON_HAN va DANG giu ca ba duong. DO 2026-09-23T14:2xZ, rc doc TRUC TIEP, sau
+  khi chot hai nguon ref. Dem MOI ref mang tep lease g11, khong doan. Hai nua di trong HAI LAN
+  DAY RIENG vi `_kiem_bia_mo` doc tu REF.
+  (Ghi chu lich su, giu lai de doi chieu) Dau HAI CHIEU. KHAC g10 (g9 da HET_HAN, khong con nguoi giu de thay the):
+  g10 CON_HAN va DANG giu ca ba duong, nen day la mot phep THAY THE THAT — lan thu BA trong
+  chuoi nay, sau g7->g8 va g8->g9.
+  DO 2026-09-23, rc doc TRUC TIEP, SAU khi chot hai nguon ref: ls-remote 339 / for-each-ref 339,
+  comm -23 RONG => quet KHONG mu. Dem MOI ref mang tep lease g10, khong doan:
+    refs/remotes/origin/ops/cap-lease-570-g10   — DUNG MOT ref
+  Hai nua cua bia mo di trong HAI LAN DAY RIENG, vi `_kiem_bia_mo` doc tu REF chu khong doc cay
+  lam viec: (1) g11 khai `thay_the_cho`; (2) g10 mang `da_bi_thay_the: wp570-bash-nen-r11-g11-fable`.'
+
+GIA_CUA_VIEC_LO_HAN_G9_GIU_LAI_DE_DOI_CHIEU: 'KHAI THANG. g9 het han luc 2026-09-22T06:25Z trong khi ban va r10 DA
+  viet xong trong cay lam viec nhung CHUA land. Phien KHONG tu gia han, KHONG day — dung luat —
+  va cai gia la 26 gio dung yen. Han cua g10 duoc dat theo phep do ay chu khong theo thoi quen:
+  24 gio thay vi 8-12 gio, vi pham vi lan nay gom ca vong lap review nhieu vong lan cac PR khac
+  chu kho giao.'
+
+granted_on_instruction: https://github.com/ducthangho/tra-luat/issues/570
+granted_on_instruction_nguyen_van: 'Chu kho, phien 2026-09-23, chon trong bon phuong an da
+  trinh cho lop "phan quyet phu thuoc trang thai LOCAL cua may" (mat thu 6 va 7): "Doc BLOB tu
+  INDEX + scrub GIT_*". Phuong an ay duoc trinh nguyen van kem CAI GIA: "`git cat-file --batch`
+  lay noi dung tu blob da stage thay vi `read_text()` tren dia, cong go moi bien GIT_* khoi tien
+  trinh con. Giet CA HAI mat bang kien truc va hoan tat dung y dinh N23 (danh sach la INDEX ->
+  noi dung cung tu INDEX). GIA, khai thang: tep da `add` roi sua tiep tren dia se duoc quet o
+  DANG DA STAGE — cong thoi phan anh dia. Trong CI khong khac gi. Doi tieu chi => can r11/g11."
+  Chi thi khung cua cung phien: "lap va, review bang codex phien ban hoac effort cao hon, co hint
+  patch voi cac van de phuc tap, phan theo lop loi, khong phan loi rieng le, dang verdict, cho
+  toi khi het P1, P2, P3. Khong chay CI, full CI cho toi khi du dieu kien merge. Khong can CI
+  Windows do loi da biet tu truoc."'
+granted_on_instruction_ghi_chu: 'Chi thi TRONG PHIEN, khong phai comment GitHub co san. Neo vao
+  issue #570 cho pham vi thay vi neo bua vao mot issuecomment khong chua cau ay — kho da tra gia
+  cho kieu cho trong ay o lease g2 cua #541.
+  Chi thi NAY cung ap dung cho MOI PR khac chu kho giao; lease nay chi phu #570/PR #581.'
+recorded_by: claude-session
+recorder_is_dispatcher: false
+
+leased_at_utc: '2026-09-24T07:00:00Z'
+lease_expires_at_utc: '2026-09-25T07:00:00Z'
+han_de_xuat_vi_sao: 'HAI MUOI BON gio. Dai hon moi the he truoc (g6 8h, g9 12h) va ly do la mot
+  phep do: g9 het han voi ban va da viet xong ma chua land, mat 26 gio. Pham vi g10 gom NHIEU
+  VONG review (dieu kien thoat la "khong con P1/P2/P3", khong phai mot vong), va moi vong doi
+  mot luot codex ben ngoai ma phien khong dieu khien duoc nhip. Han NAY van la han: het thi DUNG
+  va xin the he moi, khong tu gia han.'
+
+role: executor
+provider: anthropic
+executor: fable
+model: claude-fable-5-1
+effort: low
+effort_vi_sao: 'HA tu `medium` (r10-r11) xuong `low` theo chi thi chu kho 2026-09-23. Day la
+  thu doi tieu chi — spec r11 §7.0 neu dich danh `medium` cho ca executor lan reviewer — nen no
+  la ly do THU NHAT khien g12 ton tai, khong phai mot sua nho. g8/g9 de `KHONG_KHAI`; g10/g11
+  khai `medium`.'
+execution_surface: claude-code-remote
+transport: cloud
+environment: cloud
+operating_system: Linux
+environment_vi_sao: 'Phien chay tren container Linux. Day la GIOI HAN THAT: khuyet tat goc cua
+  #570 chi SINH RA tren Windows, nen moi ket luan Windows trong packet nay den tu bo do chay TAY
+  tren may chu kho, khong tu phien nay. Chu kho chi thi: KHONG CAN CI Windows, loi da biet.'
+
+risk: sensitive
+review_class: sensitive
+effective_review_class: sensitive
+assurance_target: human_audited
+assurance_target_vi_sao: '§8 cho sensitive: Codex cross_approved HOAC human_audited. Phien nay LA
+  tac gia ban va nen KHONG duoc tu review/duyet/merge. Codex la reviewer CHEO cua vong lap; chu
+  kho van la nguoi nghiem thu va merge. Giu human_audited de khong ai doc "codex im" thanh "da
+  duyet".'
+
+reviewer_provider: openai
+reviewer_model: gpt-6-astra
+reviewer_effort: low
+reviewer_vi_sao: 'Chu kho chi dinh: "Review codex gpt-6-astra, effort low" — CAO HON executor
+  (fable / claude-fable-5-1, effort medium) theo dung nguyen tac "review bang phien ban hoac
+  effort cao hon". Bon vong truoc chay tren ban codex mac dinh cua kho.'
+reviewer_independence: 'fresh session/context/checkout; khong fork context cua executor.'
+reviewer_model_muc_bang_chung: khai_co_audit
+reviewer_model_vi_sao_KHONG_PHAI_do_may: 'DO 2026-09-23T08:4xZ, va ket qua la KHONG DO DUOC —
+  khai thang thay vi de nguoi doc tuong da xac minh. Bo noi codex tren GitHub in DUNG hai truong
+  trong bang tom tat: `Commit` va `Review trigger`. KHONG in model, KHONG in effort. Cach kich
+  hoat duy nhat duoc tai lieu hoa la comment "@codex review" / "@codex security review"; viec
+  CHON model nam o chatgpt.com/codex/cloud/settings/general, tuc thiet lap CUA CHU KHO o cap to
+  chuc, khong phai thu phien nay goi duoc tu mot comment.
+  HE QUA: phien SE ghi yeu cau "gpt-6-astra, effort medium" vao than comment goi review, nhung
+  KHONG duoc phep khai rang luot review DA chay bang model ay. Muon len muc `do_may` thi chu kho
+  phai dat model o trang thiet lap tren, hoac cung cap mot nguon in ra model da phuc vu luot chay.
+  PROTOCOL §562 co san ba muc cho dung viec nay; day la muc giua, va no TU KHAI la yeu hon
+  `do_may` ngay tai cho dung.'
+cross_reviewer_requirement: 'CAM self_review va self_approve. Phien soan lease nay LA tac gia
+  ban va; moi verdict phien dang la BAN GHI, khong phai mot phieu duyet.'
+
+spec_path: ops/specs/wp570-bash-nen-mot-bo-giai-r17.md
+spec_ref: ops/cap-lease-570-g17
+spec_hash: d86d27c7dbcc751fc251259ff0d8ab4f4828a2f6132cff3d796cf91034999b9b
+spec_bytes: 98770
+prompt_path: ops/specs/wp570-bash-nen-mot-bo-giai-r17.md
+prompt_sha256_required: d86d27c7dbcc751fc251259ff0d8ab4f4828a2f6132cff3d796cf91034999b9b
+spec_hash_do_nhu_the_nao: 'Bam DOC NGUOC VE tu may chu sau khi day (`git cat-file blob
+  FETCH_HEAD:<path>`), khong phai bam cua tep tren dia phien. Spec di CUNG nhanh lease vi cong
+  dang-lease doc tu REF, khong doc cay lam viec — bai hoc r6, khi spec nam nhanh rieng lam cong
+  DO trong khi `check` cuc bo rc=0.'
+
+branch: claude/va-570-bash-nen-20260919
+branch_vi_sao: 'Nhanh DA TON TAI va dang mang PR #581, head e290f99.'
+branch_ownership: exclusive
+target_branch_neu_land: master
+
+base_sha: 714f36e
+base_sha_vi_sao: 'merge-base cua nhanh voi origin/master. DO LAI luc cap g17: 714f36e6aad8,
+  KHONG DOI. (Ghi chu cu) DO LAI 2026-09-24T05:4xZ luc cap g16: `git merge-base origin/claude/va-570-bash-nen-20260919 origin/master` => 714f36e6aad8,
+  KHONG DOI du origin/master da chay toi `ce25a42`. Khong rebase.
+  (Ghi chu cu) DO 2026-09-23T08:1xZ: origin/master DA
+  di them 31 commit (toi 18d42ca) nhung `git diff 714f36e..origin/master -- <ba duong write set>`
+  RONG — master KHONG cham tep nao cua write set. GitHub bao mergeable_state: clean. Nen KHONG
+  rebase bat buoc; neu rebase thi do lai base_sha.'
+start_from_sha: fe6034a568f02134adb61b4164cbbc6052242aa4
+start_from_sha_vi_sao: 'Head hien tai cua PR #581 (`fe6034a`, r16 — DA day len nhanh PR,
+  CHUA merge vao master). Bo do Windows cho cay nay CHUA CO: lan do Windows cuoi la `1d63f80`,
+  nen r11..r17 deu KHONG co phep do Windows nao.
+  (Ghi chu cu) Head hien tai cua PR #581 (`8180970`, r15 — DA day len nhanh PR,
+  CHUA merge vao master). Bo do Windows cho cay nay CHUA CO: lan do Windows cuoi la `1d63f80`,
+  nen r11..r15 deu KHONG co phep do Windows nao. (Ghi chu cu) Head hien tai cua PR #581. Bo do Windows cho cay nay
+  CHUA dung: `570-do-16` ghim 6131cbd nen KHONG doc duoc cay nay. Se dung `570-do-17` ghim head
+  sau khi r12 land. Toan bo phan Windows cua r11 va r12 hien la CHUA DO.'
+immutable_acceptance_baseline: dc85dd0a34188238aa6537ce843ff3688e488fd3
+reviewed_sha_required: fe6034a568f02134adb61b4164cbbc6052242aa4
+reviewed_sha_required_note: 'Neo DUOI luc cap, tro vao head hien tai. Verdict cuoi PHAI neo dung
+  head cuoi cua nhanh; neo nay khong thay the phep do ay.'
+
+write_set:
+- ops/bash_nen.py
+- ops/cong_cu.py
+- ops/cong_cu_test.py
+
+write_set_vi_sao_BA_duong: 'Giu nguyen ba duong cua r6..r9. `ops/lease_publish_test.py` KHONG
+  vao write set: r10 khong co viec gi o duong ay, va khai mot duong minh khong dung la tao mot
+  chong lan tren giay khong can thiet.'
+
+write_set_da_quet_toan_kho: 'DO 2026-09-23T08:1xZ, doc rc TRUC TIEP. Xem KHONG_CO_BIA_MO_VI_SAO
+  cho so lieu day du, ke ca lan quet MU dau tien va cach chua.'
+
+write_set_CONG_VIEC_TRUOC_LEASE_r11: 'CO, va khai thang. Ban va r11 (N28+N29+N30+N31, hai ca
+  moi t45/t46, bay dot bien) duoc viet DUOI g10 — cung write set, lease con han — truoc khi g11
+  duoc cap. Viec soan ma duoi g10 la hop le; thu KHONG hop le la LAND ma theo tieu chi r11 duoi
+  mot lease cap theo tieu chi r10, va phien khong lam the: r11/g11 duoc cap TRUOC khi day.
+  Day dung hinh dang phien da DUNG LAI o r10 thay vi land duoi g9.'
+write_set_CONG_VIEC_TRUOC_LEASE: 'CO, va khai thang. Ban va r10 (N26 + N27 + ca `t44` + ba dot
+  bien) DA duoc viet trong cay lam viec khi g9 con han, va van con do CHUA COMMIT khi g9 het han.
+  Tu luc g9 het han (2026-09-22T06:25Z) den luc lease nay cap, phien KHONG cham them mot byte nao
+  cua ba duong ay, KHONG commit, KHONG day — chi doc, chi do, va chi sua BO DO Windows von nam
+  NGOAI kho. Ban va ay se duoc land DUOI g10.'
+
+run_minutes: 240
+heartbeat_required_minutes: 30
+attempts_limit: class-based owner-directed loop; no reset of prior history
+review_calls_limit: toi khi khong con finding P1/P2/P3
+manual_ci_budget: 0
+manual_ci_budget_vi_sao: 'Chu kho: "Khong chay CI, full CI cho toi khi du dieu kien merge. Khong
+  can CI Windows do loi da biet tu truoc." Cong chay theo `on: pull_request` la co che cua kho,
+  khong phai phien goi.'
+
+prohibited_actions:
+- self_review
+- self_approve
+- merge
+- land
+- deploy
+- ruleset_mutation
+- admin_bypass
+- tiet_lo_secret
+- workflow_dispatch
+- tu_gia_han_lease
+- resolve_review_thread
+
+dieu_kien_dung:
+- 'Mot hinh dang loi lap lan thu BA => DUNG, hoi "co nen lam viec nay khong", khong hoi "va the
+  nao". Da dung DUNG LUC mot lan o r9 (lop phan quyet phu thuoc trang thai LOCAL cua may).'
+- 'Can cham bat ky duong nao ngoai write set => DUNG, xin revision.'
+- 'Lease het han ma chua toi nguong thoat => DUNG, xin the he moi. KHONG tu gia han. Da xay ra
+  hai lan (g6, g9); lan thu hai ton 26 gio.'
+- 'Ban kinh dot bien > 1 => DOC ly do in ra roi moi ket luan. Hai kha nang khac nhau: (a) hai ca
+  troi cung mot thuoc tinh; (b) dot bien QUA RONG, nam tren duong chung cua gian giao. Chua phan
+  biet duoc thi KHONG duoc doan.'
+- 'Verdict thieu bang dem THEO MUC DO => chua phai mot vong hoan chinh.'
+
+ghi_chu_chieu_lai: 'TRUONG TAI LIEU, khong phai truong cong. Ghi de nguoi sau doc duoc VI SAO
+  g10 ton tai ma khong phai lat lai bon vong review.'
+
+closure_status: 'Owner-directed grant, revision 17, generation 17. BAY luat moi N52..N57 tu
+  cross-review vong 11 (8 P2, KHONG P1). DIEU KIEN DUNG da no o lop A (lan thu NAM) va phien
+  DA DUNG DE HOI thay vi tu chon; chu kho chon phuong an BO TINH HANG sau khi doc phep do ba
+  phuong an. THAY THE g16 bang bia mo hai chieu, lan thu CHIN trong chuoi.
+  (Ghi chu lich su) Owner-directed grant, revision 16, generation 16. BAY luat moi N45..N51 tu
+  cross-review vong 10 (7 P2) cong ba P2 cua luot `1091c8a` chua tung duoc xu. KHONG CO P1.
+  Effort GIU `low` ca hai vai. THAY THE g15 bang bia mo hai chieu, lan thu TAM trong chuoi.
+  (Ghi chu lich su) Owner-directed grant, revision 15, generation 15. SAU luat moi N39..N44 tu cross-review vong 8. Effort GIU `low` ca hai vai. Truoc do: THAY THE g10 bang bia mo hai chieu (g10 CON_HAN, giu ca ba duong) — phep thay the THAT lan thu BA. Truoc do: EXECUTOR GIU NGUYEN: fable /
+  claude-fable-5-1, nay khai them effort: medium. REVIEWER DOI: codex gpt-6-astra effort medium,
+  cao hon bon vong truoc. Khong bia mo: g9 HET_HAN, NGUOI_GIU 0.'

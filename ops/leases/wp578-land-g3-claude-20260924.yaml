@@ -103,3 +103,10 @@ muc_tieu:
   - 'Khai CI của `f405f2b` vào hồ sơ trước khi head đổi — đóng đúng khoảng trống đã báo trước'
   - 'Ghi trạng thái đo được ngày 24-09 vào hồ sơ, không sửa kết luận cũ'
   - 'Hợp nhất master để cổng chạy lại trên head mới'
+
+# --- BIA MỘ (thêm 2026-09-24 khi cấp generation 4) -----------------------------------
+# Lease này đã được thay thế. `_kiem_bia_mo` của `ops/lease_publish.py` đòi bia mộ HAI
+# CHIỀU: dòng dưới đây trỏ tới lease mới, và lease mới mang `thay_the_cho` trỏ ngược lại.
+# Thiếu một chiều thì cổng từ chối. Phạm vi việc của generation 3 đã xong (hồ sơ được cập
+# nhật trạng thái, master đã hợp nhất vào nhánh); phần còn lại chuyển sang generation 4.
+da_bi_thay_the: wp578-land-g4-claude-20260924

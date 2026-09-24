@@ -1,0 +1,107 @@
+schema_version: 2
+receipt_id: wp461-review-1-codex
+kind: review_delivery_receipt
+role: reviewer
+packet_id: wp461
+packet_slug: WP461-BE-MAT-THU-HAI-CUA-CODEX
+packet_issue: 461
+mission_issue: 470
+revision: 3
+generation_reviewed: 3
+luot: 1
+lease_ung_vien: wp461-be-mat-thu-hai-cua-codex-exec-1g3-claude-20260924
+lease_ghi_bien_nhan: wp461-be-mat-thu-hai-cua-codex-exec-1g4-claude-20260924
+lease_reviewer: KHONG_CO — reviewer là GitHub App `chatgpt-codex-connector[bot]`, không có lease reviewer;
+  lượt gọi là issue comment `@codex review` của executor (pull/617#issuecomment-5818827449)
+reviewed_sha: 5e2851881e810b39ebee6884371e5b3e229a01d7
+reviewed_tree: 84a7ec65be31cb3818dcaa5e98f8bc6d0d7a6e95
+reviewed_sha_nghia: >-
+  Exact head của PR #617 lúc gọi review — đúng `reviewed_sha_required` của lease g4. 3 tệp sản phẩm
+  (.claude/dev/launcher.py, ops/KE_HOACH_THI_CONG_DA_PROVIDER.md, ops/bien_nhan_v2_test.py), +79/−4.
+  Comment reviewer tự khai `Reviewed commit: 5e2851881e`.
+verdict: approve
+assurance: advisory_review
+assurance_ghi_chu: >-
+  Connector không xuất session/model ⇒ theo hợp đồng `bien_nhan_v2` không nâng được
+  `cross_approved`/`same_provider_approved`. Packet r3 nhắm `cross_approved` (spec r3, lease g3); lượt
+  connector sạch trên exact head là bằng chứng review chéo về NGƯỜI GỌI nhưng không chứng minh được model
+  ⇒ biên nhận này chỉ khai `advisory_review`, không tự cấp mức cao hơn. Chủ kho land #617 bằng merge
+  commit 6980e5bf (17:54:50Z) — quyết định land là hiện vật riêng §13.
+so_p0: 0
+so_p1: 0
+so_p2: 0
+so_p3: 0
+findings_ids: []
+doi_chieu_luot_truoc:
+- luot: wp461 r2 cross-review lượt 1–4 (PR #471, 2026-09-07)
+  phan: các lớp r2 (uy-quyen-khong-co-neo-ben ×2, lease-thieu-truong-dieu-phoi, bo-loc-va-cham-thieu-ref)
+    thuộc HỒ SƠ lease/spec r2, không phải mã; r3 kế thừa ở spec §7 và neo lease g3 vào comment đóng băng
+    5817701016. Lượt này (mã r3) không mở lớp nào.
+- luot: codex trên PR #616 (hồ sơ lease g3 + spec r3, review 5308350641)
+  phan: 2 P1 + 1 P2 về SPEC/HỒ SƠ (M4 CHANGELOG-manifest xác nhận; tổ tiên d644f197 bác; số Q2 109 xác nhận)
+    — không thuộc lượt review mã này; đã trả lời từng thread; hai khuyết tật spec r3 ghi ở #461.
+luot_2_ngoai_bien_nhan: >-
+  Codex lượt 2/2 trên #617 tự bắn khi bỏ draft (17:54:41Z), 9 giây trước khi chủ kho merge (17:54:50Z);
+  bảng tóm tắt 5819108895 kẹt 'Running', không có review object, không có kết quả ⇒ KHÔNG ĐO ĐƯỢC, không
+  có biên nhận riêng.
+verdict_path: ops/reviews/wp461-review-1-codex-verdict.md
+verdict_sha256: 7e9784677b4ee038ee7fa7f72754b7c33695d1cc9db91f80543bff4be17a2df6
+verdict_bytes: 598
+evidence_url: https://github.com/ducthangho/tra-luat/blob/c83febe8c0d6dfff9f9f90958cb5860cd375c79f/ops/reviews/wp461-review-1-codex-verdict.md
+model_reviewer_identity:
+  provider: openai_codex
+  surface: codex_service
+  transport: machine
+  surface_nghia: GitHub App `chatgpt-codex-connector[bot]` review trên PR — bề mặt `codex_service` theo
+    hợp đồng dữ liệu mà CHÍNH lượt review này chấm (#617 land ở master 6980e5bf, Mission #470 Q1)
+  model_yeu_cau: KHONG_DO_DUOC
+  effort_yeu_cau: KHONG_DO_DUOC
+  model_da_chay: KHONG_DO_DUOC
+  effort_da_chay: KHONG_DO_DUOC
+  KHONG_do_duoc: GitHub App không xuất session_run_id, model hay effort trong comment/review; không
+    có telemetry độc lập; tính độc lập của phiên reviewer không chứng minh được từ trong kho
+  subagent_cung_phien: false
+  neo_boi_launcher: false
+github_submitter_identity:
+  actor: ducthangho
+  role: agent recorder using GitHub REST API (executor session claude); comment reviewer do
+    chatgpt-codex-connector[bot] tự đăng
+  model_identity_not_inferred_from_actor: true
+anchor:
+  loai: canonical_ancestry
+  cuong_do: canonical — 5e285188 là tổ tiên của master qua merge commit 6980e5bf04e4e5b8b75e5817578f1aba13f2f5ab (PR #617, land 2026-09-24T17:54:50Z)
+  gioi_han: Neo chứng minh candidate đã vào master bằng merge commit (không squash); không chứng minh
+    nội dung review đã đọc gì — connector không xuất bằng chứng đọc.
+comment_delivery:
+  url: https://github.com/ducthangho/tra-luat/pull/617#issuecomment-5819108011
+  author: chatgpt-codex-connector[bot]
+  created_at: '2026-09-24T17:40:42Z'
+  readback_byte_equal: true
+  readback_ghi_chu: Đọc lại qua REST 2026-09-24T18:5xZ, 609 B, sha256 2276547e… khớp con số chủ kho ghi ở chỉ thị 5820263820.
+format_reissue:
+  raw_original_sha256: 2276547ec77b74618c5e548ce3efeb3661fd90e59e847d187a3691f4c632cb8d
+  raw_original_bytes: 609
+  transform: bỏ khoảng trắng cuối 1 dòng (dòng trắng trước `</details>`) và chuẩn một LF cuối tệp;
+    Unicode/nội dung giữ nguyên; không lượt review mới
+  raw_original_comment: https://github.com/ducthangho/tra-luat/pull/617#issuecomment-5819108011
+budget:
+  codex_review_calls_used_on_pr617: 2
+  codex_review_calls_cap: 2
+  calls:
+  - id: pull/617#issuecomment-5818827449
+    reviewed: 5e2851881e810b39ebee6884371e5b3e229a01d7
+    ket_qua: pull/617#issuecomment-5819108011 — 0 finding (biên nhận này)
+  - id: auto (Draft marked ready, 17:54:41Z)
+    reviewed: 5e2851881e810b39ebee6884371e5b3e229a01d7
+    ket_qua: không có — PR merge 9 giây sau, bảng tóm tắt kẹt Running; KHÔNG ĐO ĐƯỢC
+  reviewer_dispatched_ci: 0
+  product_ci_tren_reviewed_sha: gate/gate-registry/gate-packet-loop/thu-hoi/chuan-bi success (launcher skipped)
+  historical_total_spend: KHONG_DO_DUOC
+land:
+  merge_commit: 6980e5bf04e4e5b8b75e5817578f1aba13f2f5ab
+  bookkeeping: issues/461#issuecomment-5819397645
+  bien_nhan_viet_sau_land: true
+pending:
+- nợ bookkeeping CHANGELOG r376 + RELEASE_MANIFEST (khuyết tật spec r3 M4)
+- khuyết tật spec r3 Q2 (đếm 109 receipt codex_cli, không 14) — ghi ở pull/616 thread 4096922503
+- write set biên nhận này ngoài spec r3 §4 (A12) — hợp thức bằng chỉ thị 5820263820, không bằng revision

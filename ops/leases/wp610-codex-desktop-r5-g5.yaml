@@ -1,0 +1,43 @@
+schema_version: 2
+event: executor_lease_granted
+packet_issue: 610
+packet_id: WP610-CODEX-DESKTOP-CONTRACT
+mission_issue: 499
+revision: 5
+generation: 5
+lease_id: wp610-codex-desktop-r5-g5
+granted_by: ducthangho
+granted_on_instruction: https://github.com/ducthangho/tra-luat/issues/610#issuecomment-5806482943
+granted_on_instruction_nguyen_van: 'Tôi cho phép cấp lease, gen cho phiên này thực hiện'
+recorded_by: codex-desktop
+recorder_is_dispatcher: false
+authority_caveat: Owner directly authorized new generation after g4 expiry; old subagent stopped;
+  recorder is not dispatcher, approver or human auditor
+leased_at_utc: '2026-09-24T02:40:18Z'
+lease_expires_at_utc: '2026-09-24T04:10:18Z'
+role: executor
+executor: codex
+provider: openai_codex
+execution_surface: codex_desktop
+transport: machine
+review_class: sensitive
+effective_review_class: sensitive
+assurance_target: human_audited
+spec_path: ops/specs/wp610-codex-desktop-r5.md
+spec_ref: refs/heads/codex/wp610-authority
+spec_source_oid: ecc763f7aa42ab1e97958bcb8db3f3a7537d0127
+spec_hash: de86b50426529ca862ebb7b45820886f6d57a93fc49334371d760318efd659d9
+prompt_path: ops/specs/wp610-codex-desktop-r5.md
+prompt_sha256_required: de86b50426529ca862ebb7b45820886f6d57a93fc49334371d760318efd659d9
+branch: codex/wp610-g1
+start_from_sha: 18d42cab74e80fc7635f754323fd13f520ccdcec
+reviewed_sha_required: 18d42cab74e80fc7635f754323fd13f520ccdcec
+write_set:
+- .claude/dev/launcher.py
+- ops/bien_nhan_v2_test.py
+- ops/KE_HOACH_THI_CONG_DA_PROVIDER.md
+cam_tuyet_doi:
+- No process launch/credentials or validator implementation change
+- No edits to523 product or metadata
+- No self-review/approval/merge/deploy/LIVE
+- No fullCI before technical readiness

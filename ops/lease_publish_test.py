@@ -403,19 +403,22 @@ class _NgoaiLeLa:
     Bắt `Exception` chứ KHÔNG bắt `BaseException`: `KeyboardInterrupt` và `SystemExit` phải
     đi thẳng ra, một bộ test nuốt chúng là một bộ test không dừng được.
     """
-    __slots__ = ("ngoai_le", "kieu", "ma")
+    # KHÔNG giữ ngoại lệ gốc. Cross-review lượt 8 (24-09): trường `ngoai_le` cũ không ai đọc,
+    # nhưng nó biến wrapper thành một đường đưa đối tượng THÔ ra khỏi biên chẩn đoán —
+    # `_NgoaiLeLa(ex).ngoai_le.__class__` trong `main` qua mọi chốt cấu trúc và làm bộ chạy vỡ.
+    # Wrapper chỉ giữ BẢN CHỤP đã hạ về `str` thuần; không còn gì thô để đọc lại.
+    __slots__ = ("kieu", "ma")
 
     def __init__(self, ex):
         # `kieu` LẤY TỪ `_MaVang`, KHÔNG đọc `type(ex).__name__` lần nữa. Cross-review codex
         # 24-09 (`diagnostic-normalization-wiring-unmeasured`) đo: bản cũ giữ tên lớp THÔ ở
         # đây, nên với `__name__` là `str` con thì `_MaVang` in được 6/6 mà lớp này chỉ 2/6 —
         # `__str__` bên dưới nổ đúng ở f-string. Hai lớp, MỘT cửa hạ tên lớp.
-        self.ngoai_le, self.ma = ex, _MaVang(ex)
+        self.ma = _MaVang(ex)
         self.kieu = self.ma.kieu
 
     def __str__(self):
-        # Dùng BẢN CHỤP an toàn, KHÔNG định dạng lại `self.ngoai_le` — định dạng lần hai là
-        # đường thứ hai để `__str__` hỏng làm vỡ ca. Xem `_thong_diep_an_toan`.
+        # Chỉ dùng BẢN CHỤP an toàn — ngoại lệ gốc không còn được giữ. Xem `_thong_diep_an_toan`.
         return f"<ngoại lệ TRẦN {self.kieu}: {self.ma.thong_diep}>"
 
     __repr__ = __str__
@@ -8323,6 +8326,19 @@ def t187_chan_doan_phai_ha_ve_CHUOI_THUAN_chu_khong_chi_isinstance():
              f"`_bien_chan_doan` {nhan}: mong {mong!r} (kiểu `str` thuần), nhận {r!r} "
              f"kiểu {type(r).__name__}.")
 
+    # WRAPPER CHỈ GIỮ BẢN CHỤP — lượt 8: `_NgoaiLeLa` từng giữ nguyên ngoại lệ gốc, và đó là
+    # đường đưa đối tượng thô ra khỏi biên. Đo bằng runtime, không bằng tên trường: mọi slot
+    # của hai wrapper phải là `str` THUẦN (hoặc `_MaVang` mà mọi slot của nó cũng vậy), và
+    # không slot nào là chính ngoại lệ.
+    _ex_goc = RuntimeError(NOI_DUNG)
+    _w = _NgoaiLeLa(_ex_goc)
+
+    def _slot(o):
+        return [(sl, getattr(o, sl, None)) for sl in type(o).__slots__]
+    tho = [(sl, type(v).__name__) for o in (_w, _w.ma) for sl, v in _slot(o)
+           if v is _ex_goc or not (type(v) is str or (o is _w and sl == "ma" and type(v) is _MaVang))]
+    chot(not tho, f"wrapper phải chỉ giữ bản chụp `str` thuần, còn giữ {tho!r}.")
+
     # `__class__` NÉM — cửa thứ ba (cross-review lượt 9) và thứ tư (executor rà ra). `isinstance`
     # đọc `x.__class__` khi kiểu thật không khớp, và `__class__` là một property NÉM được. Hai
     # họ: `__str__` TRẢ một đối tượng có `__class__` ném (cửa 3, ở `_thong_diep_an_toan`), và
@@ -8459,6 +8475,42 @@ def t187_chan_doan_phai_ha_ve_CHUOI_THUAN_chu_khong_chi_isinstance():
         "_gia_assert_thuong": NOI_DUNG,
         "_gia_exception_thuong": f"RuntimeError: {NOI_DUNG}",
     }
+
+    # TOÀN BỘ các họ fixture của ca này đi qua CHÍNH `main` — cross-review lượt 8 (24-09): đột
+    # biến đọc ngược đối tượng thô trong `main` sống 183/183 vì lượt `main()` chỉ có năm ca,
+    # không có họ metaclass hay `__class__` ném. Chốt cấu trúc `t189` chỉ phủ các hình dạng
+    # ĐÃ BIẾT; phép đo HÀNH VI này mới là bảo đảm cho bộ chạy. Kỳ vọng viết tay, suy từ cách
+    # `BaseException.__str__` gọi `str()` trên đối số: lớp con `str` chỉ hỏng `__format__`,
+    # `__repr__` hay `__getattribute__` vẫn cho nội dung (slot `tp_str` thừa kế từ `str`); hỏng
+    # `__str__` (kể cả ném tín hiệu dừng) cho `<__str__ hỏng>`.
+    HONG_STR = {"str con hỏng `__str__`", "str con hỏng CẢ BA", "str con ném TÍN HIỆU DỪNG"}
+
+    def _ca(ten, loi):
+        def _f():
+            raise loi
+        _f.__name__ = ten
+        return _f
+
+    them = []
+    for i, (nhan, x) in enumerate(HO):
+        noi = "<__str__ hỏng>" if nhan in HONG_STR else NOI_DUNG
+        them += [(_ca(f"_gia_ho{i}_assert", AssertionError(x)), noi),
+                 (_ca(f"_gia_ho{i}_exception", RuntimeError(x)), f"RuntimeError: {noi}")]
+    for i, tin_hieu in enumerate((RuntimeError, KeyboardInterrupt, None)):
+        _LoiTenMain = _meta_hong(tin_hieu)("_LoiTenMain", (Exception,), {})
+        them.append((_ca(f"_gia_meta{i}", _LoiTenMain("m")), "<tên lớp không đọc được>: m"))
+    for i, tin_hieu in enumerate((RuntimeError, KeyboardInterrupt)):
+        _ExTraLopNem, _ExLopNem, _AssertLopNem = _ho_lop_nem(tin_hieu)
+        them += [(_ca(f"_gia_lop{i}_tra", _ExTraLopNem()),
+                  "_ExTraLopNem: <__str__ trả thứ không phải chuỗi>"),
+                 (_ca(f"_gia_lop{i}_exception", _ExLopNem(NOI_DUNG)), f"_ExLopNem: {NOI_DUNG}"),
+                 (_ca(f"_gia_lop{i}_assert", _AssertLopNem(NOI_DUNG)), NOI_DUNG)]
+    them += [(_ca("_gia_assert_str_nem", _AssertStrNem()), "<__str__ hỏng>"),
+             (_ca("_gia_str_khong_chuoi", _StrKhongChuoiBo()),
+              "_StrKhongChuoiBo: <__str__ trả thứ không phải chuỗi>")]
+    for f, mong in them:
+        ca_gia.append(f)
+        MONG_DONG[f.__name__] = mong
     luu, ra = list(CA), io.StringIO()
     try:
         CA[:] = ca_gia
@@ -8472,7 +8524,7 @@ def t187_chan_doan_phai_ha_ve_CHUOI_THUAN_chu_khong_chi_isinstance():
         CA[:] = luu
     chot(len(CA) == len(luu), "CA không được khôi phục sau lượt `main()` giả.")
     dau_ra = ra.getvalue()
-    chot(rc_main == 1, f"`main()` trên năm ca đỏ phải trả 1, nhận {rc_main!r}.")
+    chot(rc_main == 1, f"`main()` trên {len(ca_gia)} ca đỏ phải trả 1, nhận {rc_main!r}.")
     # So THEO TỪNG TÊN CA, trên đúng các dòng `  ĐỎ  ` — không tìm chuỗi ở bất kỳ đâu trong
     # log, vì dòng `!!! do` cũng chứa lý do và sẽ che một dòng `ĐỎ` sai.
     dong_do = {}
@@ -8481,11 +8533,13 @@ def t187_chan_doan_phai_ha_ve_CHUOI_THUAN_chu_khong_chi_isinstance():
             ten, _, ly = dong[len("  ĐỎ  "):].partition(": ")
             dong_do.setdefault(ten, []).append(ly)
     chot(sorted(dong_do) == sorted(MONG_DONG),
-         f"`main()` phải in đúng một nhóm dòng ĐỎ cho năm ca giả, nhận tên {sorted(dong_do)!r}.")
+         f"`main()` phải in đúng một nhóm dòng ĐỎ cho mỗi ca giả, nhận tên {sorted(dong_do)!r}.")
     sai = {ten: dong_do.get(ten) for ten, mong in MONG_DONG.items() if dong_do.get(ten) != [mong]}
     chot(not sai, f"`main()` in SAI nội dung dòng ĐỎ: {sai!r}; mong {MONG_DONG!r}.")
-    chot("lease_publish: 0/5 đạt; đã chạy=5, bỏ qua=0" in dau_ra,
-         "`main()` không in dòng tổng kết `0/5` — bộ chạy vỡ trước khi báo.")
+    n_gia = len(ca_gia)
+    chot(n_gia == 28 and f"lease_publish: 0/{n_gia} đạt; đã chạy={n_gia}, bỏ qua=0" in dau_ra,
+         f"`main()` không in dòng tổng kết `0/{n_gia}` (mong 28 = 5 + HO 6×2 + metaclass 3 "
+         f"+ `__class__` 3×2 + 2) — bộ chạy vỡ trước khi báo.")
 
     # ĐỐI CHỨNG XANH: chuỗi thường phải đi qua NGUYÊN VẸN, không bị thay bằng dự phòng.
     thuong = _chuoi_thuan(NOI_DUNG, "<dự phòng>")
@@ -8808,8 +8862,10 @@ def t189_duong_chan_doan_KHONG_dinh_dang_THO_ngoai_le_vua_bat():
                 "_MaVang", "_NgoaiLeLa", "TinHieuCuaDem", "_bien_chan_doan"}
     TIEN_TO = ("t184_", "t185_", "t186_", "t187_", "t188_", "t189_")
     RONG = {"Exception", "BaseException", "AssertionError"}
-    CUA = {"_ten_lop", "_thong_diep_an_toan", "_bao_loi_ca", "_chuoi_thuan", "_MaVang",
-           "_NgoaiLeLa"}
+    # Cửa = hàm/lớp nhận NGUYÊN ngoại lệ và chỉ giữ/trả BẢN CHỤP `str` thuần. `_chuoi_thuan`
+    # KHÔNG thuộc tập này: nó đòi hai đối số và nhận một giá trị đã là chuỗi, không nhận ngoại
+    # lệ (lượt 8: `_chuoi_thuan(ex)` một đối số từng lọt chốt tên).
+    CUA = {"_ten_lop", "_thong_diep_an_toan", "_bao_loi_ca", "_MaVang", "_NgoaiLeLa"}
     CHAN_DOAN = ("_chuoi_thuan", "_thong_diep_an_toan", "_ten_lop", "_bao_loi_ca")
 
     def _rong(h):
@@ -8838,6 +8894,14 @@ def t189_duong_chan_doan_KHONG_dinh_dang_THO_ngoai_le_vua_bat():
                         p = cha.get(n)
                         hop_le = (isinstance(p, _ast.Call) and isinstance(p.func, _ast.Name)
                                   and p.func.id in CUA and p.args == [n] and not p.keywords)
+                        # Kết quả của cửa không được bị ĐỌC TIẾP (thuộc tính, chỉ số, gọi):
+                        # lượt 8 bắt `_NgoaiLeLa(ex).ngoai_le.__class__` — cửa hợp lệ, nhưng
+                        # thứ ra khỏi cửa bị lôi ngược về đối tượng thô.
+                        ong = cha.get(p)
+                        if hop_le and ((isinstance(ong, (_ast.Attribute, _ast.Subscript))
+                                        and ong.value is p)
+                                       or (isinstance(ong, _ast.Call) and ong.func is p)):
+                            hop_le = False
                         if not hop_le:
                             pham.append((n.lineno, goc.name,
                                          _ast.unparse(p) if p is not None else h.name))
@@ -8868,6 +8932,27 @@ def t189_duong_chan_doan_KHONG_dinh_dang_THO_ngoai_le_vua_bat():
                     and len(thuc[0].value.args) == 2 and not thuc[0].value.keywords)
             if not dung:
                 pham.append((ten, "thân không phải đúng một `return _bien_chan_doan(...)`"))
+                continue
+            # TÍNH SỚM (lượt 8): Python tính default, decorator, annotation và CẢ đối số dự phòng
+            # TRƯỚC khi gọi biên — tức NGOÀI `try`. Nên: dự phòng phải là HẰNG `str` hoặc chính
+            # tham số dự phòng của hàm; mọi hàm lồng/lambda không có tham số, default, decorator,
+            # annotation.
+            du = thuc[0].value.args[1]
+            ten_tham_so = [a.arg for a in fn.args.args]
+            if not ((isinstance(du, _ast.Constant) and isinstance(du.value, str))
+                    or (isinstance(du, _ast.Name) and ten_tham_so and du.id == ten_tham_so[-1]
+                        and du.id == "du_phong")):
+                pham.append((ten, "dự phòng không phải hằng `str`"))
+                continue
+            for n in _ast.walk(fn):
+                if n is fn or not isinstance(n, (_ast.Lambda, _ast.FunctionDef)):
+                    continue
+                a = n.args
+                co_tham_so = (a.args or a.posonlyargs or a.kwonlyargs or a.vararg or a.kwarg
+                              or a.defaults or a.kw_defaults)
+                if co_tham_so or getattr(n, "decorator_list", None) or getattr(n, "returns", None):
+                    pham.append((ten, "hàm lồng/lambda có tham số, default, decorator hay annotation"))
+                    break
         return pham
 
     def _vi_pham_C(cay):
@@ -8919,14 +9004,18 @@ def t189_duong_chan_doan_KHONG_dinh_dang_THO_ngoai_le_vua_bat():
         "        d = isinstance(e, AssertionError)\n"
         "        g = e.args\n"
         "        h = f'{_ten_lop(e)} {_thong_diep_an_toan(e)} {_bao_loi_ca(e)}'\n"
+        "        k = _NgoaiLeLa(e).ngoai_le\n"
+        "        m = _chuoi_thuan(e)\n"
+        "        return _NgoaiLeLa(e), 1\n"
         "    try:\n"
         "        f()\n"
         "    except OSError as o:\n"
         "        z = f'{o}'\n")
     _n, pham_gia = _vi_pham_A(gia_A)
-    chot([d for d, _h, _k in pham_gia] == [5, 6, 7, 8, 9],
-         f"phản chứng (A): phải bắt ĐÚNG năm cách chạm ở dòng 5–9 và tha dòng 10 (qua cửa) cùng "
-         f"nhánh `OSError`, nhận {pham_gia!r}.")
+    chot([d for d, _h, _k in pham_gia] == [5, 6, 7, 8, 9, 11, 12],
+         f"phản chứng (A): phải bắt ĐÚNG bảy cách chạm ở dòng 5–9, 11, 12 (gồm đọc ngược kết quả "
+         f"của cửa và `_chuoi_thuan` sai chữ ký) và tha dòng 10, 13 (qua cửa) cùng nhánh "
+         f"`OSError`, nhận {pham_gia!r}.")
 
     # PHẢN CHỨNG (B)/(C): bản TRƯỚC biên (lượt 6) của hai hàm phải bị bắt; bản đúng thì tha.
     gia_BC = _ast.parse(
@@ -8953,6 +9042,23 @@ def t189_duong_chan_doan_KHONG_dinh_dang_THO_ngoai_le_vua_bat():
         "    return r\n")
     chot([t for t, _k in _vi_pham_B(gia_BC)] == ["_thong_diep_an_toan", "_bao_loi_ca"],
          f"phản chứng (B): phải bắt đúng hai hàm chưa qua biên, nhận {_vi_pham_B(gia_BC)!r}.")
+    # PHẢN CHỨNG (B) — TÍNH SỚM: ba dạng lượt 8 đo được là lọt bản trước; dạng đúng thì tha.
+    gia_SOM = _ast.parse(
+        "def _chuoi_thuan(x, du_phong):\n"
+        "    return _bien_chan_doan(lambda: str.__str__(x), str(x))\n"
+        "def _thong_diep_an_toan(ex):\n"
+        "    def _l(t=ex.__str__()):\n"
+        "        return t\n"
+        "    return _bien_chan_doan(_l, 'd')\n"
+        "def _ten_lop(ex):\n"
+        "    return _bien_chan_doan(lambda ten=getattr(type(ex), '__name__', '?'): ten, 'd')\n"
+        "def _bao_loi_ca(ex):\n"
+        "    def _l():\n"
+        "        return 'x'\n"
+        "    return _bien_chan_doan(_l, 'd')\n")
+    chot([t for t, _k in _vi_pham_B(gia_SOM)] == ["_chuoi_thuan", "_thong_diep_an_toan", "_ten_lop"],
+         f"phản chứng (B) tính sớm: phải bắt đúng ba hàm tính trước biên và tha `_bao_loi_ca`, "
+         f"nhận {_vi_pham_B(gia_SOM)!r}.")
     chot(_vi_pham_C(gia_BC) == ["thân không phải đúng một `try`"],
          f"phản chứng (C): biên không có `try` phải bị bắt, nhận {_vi_pham_C(gia_BC)!r}.")
 

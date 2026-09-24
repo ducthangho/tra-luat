@@ -1,0 +1,106 @@
+schema_version: 2
+receipt_id: wp523-r15-review-1-codex
+kind: review_delivery_receipt
+role: reviewer
+packet_id: wp523
+packet_slug: QUY-TRINH-LAP-REVIEW-VA-DIEU-KIEN-DUNG
+packet_issue: 523
+revision: 15
+generation_reviewed: 16
+luot: 1
+lease_ung_vien: quy-trinh-lap-review-r15-g16-claude
+lease_ghi_bien_nhan: quy-trinh-lap-review-r15-g17-claude
+lease_reviewer: KHONG_CO — reviewer là GitHub App `chatgpt-codex-connector[bot]`, không có lease
+  reviewer; lượt gọi là issue comment `@codex review` của executor (pull/613#issuecomment-5811858888)
+reviewed_sha: 92adc7112155a6711ec2c86d59ce60293b342314
+reviewed_tree: e5535d73f8df4ee2ec78bfafc0da66f9d70cde0e
+reviewed_sha_nghia: >-
+  Exact head của PR #613 lúc gọi review — đúng `reviewed_sha_required` của lease g17. KHÔNG phải
+  head sau (61a39096, chỉ thêm merge master: `git diff 92adc711 61a39096 -- ops/reviews/` rỗng),
+  KHÔNG phải commit tổng hợp nào. Comment reviewer tự khai `Reviewed commit: 92adc71121`.
+verdict: approve
+assurance: advisory_review
+assurance_ghi_chu: >-
+  Connector không xuất session/model ⇒ theo hợp đồng `bien_nhan_v2` không nâng được
+  `cross_approved`/`same_provider_approved`; `human_audited` là mức của NGƯỜI (audit A7 của chủ kho:
+  pull/613#issuecomment-5813656260 trên 92adc711 và pull/613#issuecomment-5814227641 trên 61a39096,
+  cả hai còn placeholder dòng `tự đo`). Biên nhận này KHÔNG tự cấp mức nào cao hơn.
+so_p0: 0
+so_p1: 0
+so_p2: 0
+so_p3: 0
+findings_ids: []
+doi_chieu_luot_truoc:
+- luot: wp523-r14-review-1-codex
+  reviewed_sha: 15d1b103e8d4dec60f96049eb5ad9b16d436d63f
+  findings_ids_luot_truoc: []
+  phan: r14 lượt 1 để lại 0 finding ⇒ không có slug nào để đối chiếu; r15 chỉ tích hợp hồ sơ r14
+    (M-M11) nên không mở lớp mới.
+luot_2_ngoai_bien_nhan: >-
+  Codex lượt 2/2 trên #613 (review 5304344210, 2026-09-24T12:2xZ) chấm commit TỔNG HỢP 76275ebc
+  không có trên server, 1 P1 lớp "gate trên reviewed commit tổng hợp"; đã trả lời ở thread
+  4093538781 với phép đo trên head thật. Không có biên nhận riêng vì đích review không neo được
+  vào OID nào trong kho (KHÔNG ĐO ĐƯỢC), và trần §12 đã 2/2.
+verdict_path: ops/reviews/wp523-r15-review-1-codex-verdict.md
+verdict_sha256: 1e88685f0050a15ce3ead1ac8b220560083cbeee39aff65731abcb5093db44a0
+verdict_bytes: 582
+evidence_url: https://github.com/ducthangho/tra-luat/blob/358765f7bdf7af5ca9d1b5960744572124e910ab/ops/reviews/wp523-r15-review-1-codex-verdict.md
+model_reviewer_identity:
+  provider: openai_codex
+  surface: codex_service
+  transport: machine
+  surface_nghia: GitHub App `chatgpt-codex-connector[bot]` review trên PR — bề mặt `codex_service`
+    theo hợp đồng dữ liệu land ở #617 (master 6980e5bf, wp461 r3 / Mission #470 Q1)
+  model_yeu_cau: KHONG_DO_DUOC
+  effort_yeu_cau: KHONG_DO_DUOC
+  model_da_chay: KHONG_DO_DUOC
+  effort_da_chay: KHONG_DO_DUOC
+  KHONG_do_duoc: GitHub App không xuất session_run_id, model hay effort trong comment/review; không
+    có telemetry độc lập; tính độc lập của phiên reviewer không chứng minh được từ trong kho
+  subagent_cung_phien: false
+  neo_boi_launcher: false
+github_submitter_identity:
+  actor: ducthangho
+  role: agent recorder using GitHub REST API (executor session claude); comment reviewer do
+    chatgpt-codex-connector[bot] tự đăng
+  model_identity_not_inferred_from_actor: true
+anchor:
+  loai: canonical_ancestry
+  cuong_do: canonical — 92adc711 là tổ tiên của master qua merge commit c10487410cc502e96e9dd43639f2ddb6af104922 (PR #613, land 2026-09-24T13:4xZ)
+  gioi_han: Neo chứng minh candidate đã vào master bằng merge commit (S17, không squash); không chứng minh
+    nội dung review đã đọc gì — connector không xuất bằng chứng đọc.
+comment_delivery:
+  url: https://github.com/ducthangho/tra-luat/pull/613#issuecomment-5812074543
+  author: chatgpt-codex-connector[bot]
+  created_at: '2026-09-24T10:06:46Z'
+  readback_byte_equal: true
+  readback_ghi_chu: Đọc lại qua REST 2026-09-24T18:40Z, 593 B, bằng byte với bản lưu lúc 10:09Z.
+format_reissue:
+  raw_original_sha256: 568588b08a2a44b22c5b1f5ab2e189105f22eb56188ec9e015f68cb3c0d4c354
+  raw_original_bytes: 593
+  transform: bỏ khoảng trắng cuối 1 dòng (dòng trắng trước `</details>`) và chuẩn một LF cuối tệp;
+    Unicode/nội dung giữ nguyên; không lượt review mới
+  raw_original_comment: https://github.com/ducthangho/tra-luat/pull/613#issuecomment-5812074543
+budget:
+  codex_review_calls_used_on_pr613: 2
+  codex_review_calls_cap: 2
+  calls:
+  - id: pull/613#issuecomment-5811858888
+    reviewed: 92adc7112155a6711ec2c86d59ce60293b342314
+    ket_qua: pull/613#issuecomment-5812074543 — 0 finding (biên nhận này)
+  - id: auto (Draft marked ready)
+    reviewed: 76275ebc (commit tổng hợp, không có trên server)
+    ket_qua: review 5304344210 — 1 P1 lớp tổng hợp, KHÔNG ĐO ĐƯỢC trên chính nó
+  reviewer_dispatched_ci: 0
+  product_ci_tren_reviewed_sha: gate/gate-packet-loop/thu-hoi/chuan-bi success; gate-registry ĐỎ
+    vô can (nhanh_don_duoc_test rig tạm 'Directory not empty', pull/613#issuecomment-5812420143);
+    head kế 61a39096 6/6 success
+  historical_total_spend: KHONG_DO_DUOC
+land:
+  merge_commit: c10487410cc502e96e9dd43639f2ddb6af104922
+  bookkeeping: issues/523#issuecomment-5815274276
+  bien_nhan_viet_sau_land: true
+pending:
+- nợ `receipt-r14-thieu-role-reviewer` vẫn mở (S5 cấm sửa receipt r14)
+- human audit A7 còn placeholder dòng `tự đo` ở hai comment audit
+- nợ bookkeeping CHANGELOG r376 + RELEASE_MANIFEST (wp461 r3)

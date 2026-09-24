@@ -148,9 +148,9 @@ _TRANSPORT_CONTRACTS = (
     ("openai_api", ("llm",), "llm_cli", "machine"),
 )
 
-# Provider KHÔNG đi qua một CLI của launcher, nên `_TRANSPORT_CONTRACTS` không bao giờ
-# chứa chúng — nhưng chúng vẫn là provider hợp lệ của kho, và bộ kiểm biên nhận
-# (`ops/bien_nhan_v2.py`) cần một nguồn CÓ CẤU TRÚC để đọc.
+# Bề mặt KHÔNG đi qua một CLI của launcher nằm ngoài `_TRANSPORT_CONTRACTS`.
+# Một provider có thể có cả hàng CLI và ngoài CLI với hai bề mặt khác nhau (Codex).
+# Bộ kiểm biên nhận (`ops/bien_nhan_v2.py`) cần nguồn CÓ CẤU TRÚC cho các bề mặt này.
 #
 # VÌ SAO Ở ĐÂY, và vì sao là BẢNG chứ không phải văn xuôi: cross-review PR #455 đo được
 # hai lần liên tiếp rằng một danh sách CHO PHÉP rút từ VĂN BẢN TỰ DO thì nới được bằng

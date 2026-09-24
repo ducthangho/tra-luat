@@ -133,3 +133,7 @@ hinh_dang_ke_thua:
     AssertionError (_dau_hieu_kho_bare qua chay_ca) va duong runner long; dac ta r2 §2 xep
     _dau_hieu_kho_bare CO DAY DO (sai khi chay long); commit khai "khong co dot bien sach" cho hai
     duong ma reviewer dung duoc phep giet sach.'
+da_bi_thay_the: tien-de-ha-tang-khong-duoc-thanh-chot-r2-g3-claude
+da_bi_thay_the_vi_sao: 'CUNG packet, CUNG revision, generation MOI chi de NOI TRAN 520 -> 620. Chu kho
+  chon (a) o issues/593#issuecomment-5812745049. g2 dung o head 81151ef (516/520) sau cross-review
+  vong 5 changes_requested P2=2.'

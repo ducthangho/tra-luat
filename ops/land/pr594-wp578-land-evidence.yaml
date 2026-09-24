@@ -837,7 +837,10 @@ AI_GHI_LANDED_VE_SAU: 'Ai hoan tat not bookkeeping thi ghi chuyen trang `landed`
 
 LANDED_KHONG_XAC_LAP:
 - 'KHONG tuyen CASE T6 cua #568 da chua. gate-registry xanh luot nay la so lieu thu N tren mot ca
-  truoc nay 6 xanh / 1 do / 2 huy voi tep KHONG doi. #568 van mo.'
+  truoc nay 6 xanh / 1 do / 2 huy voi tep KHONG doi. #568 con MO tinh den 2026-09-21; issue #568 da DONG
+  luc 2026-09-23T06:02:19Z (xem CAP_NHAT_TRANG_THAI_20260924.packet_khac_do_duoc.p568). Viec issue dong
+  KHONG lam CASE T6 thanh da chua: cau tren van dung nguyen. Moc thoi gian duoc them sau cross-review
+  luot 7 — mot cau trang thai khong mang moc thoi gian se troi ma khong ai thay.'
 - 'KHONG tuyen dot bien cua M2 da bi giet tren Windows that. No chi bi giet duoi NGU NGHIA
   WINDOWS GIA LAP.'
 - 'KHONG tuyen `cross_approved`. Codex submit 0 review tren candidate.'
@@ -952,7 +955,17 @@ con_mo:
     total_count 14 (4 cua 96331398646 + 7 cua 96487934829 + 3 `don`). Ai bam KHONG DO DUOC tu object (PAT chu kho);
     phien nay KHONG bam (manual_ci_budget 0). Day la run KHAC run/attempt/event voi cong hau merge (§10.2.2 d.860:
     "run ID, attempt, event ... của đúng run"): KHONG dua vao post_merge_checks, KHONG dung nang N4 (cho_yeu_con_lai muc
-    1) hay moc Workflow definition. KET QUA CUOI CHUA DOC — khong khai.'
+    1) hay moc Workflow definition. KET QUA CUOI, DOC 2026-09-24T06:4xZ (bo sung sau cross-review luot 7):
+    run 35637741169 conclusion FAILURE. Bay job: chuan-bi success 106459232271, gate (ubuntu-latest) success
+    106459257761, gate-registry (ubuntu-latest) success 106459257762, gate-packet-loop (ubuntu-latest) success
+    106459257781, gate-packet-loop (windows-latest) success 106459257773, gate (windows-latest) FAILURE
+    106459257597 (18:59:45Z, buoc do: "lease-publish selftest (do lai setup sau G5)"), gate-registry
+    (windows-latest) CANCELLED 106459257619 (19:20:59Z).
+    KET LUAN KHONG DOI: run nay van KHONG duoc dua vao post_merge_checks va van KHONG nang N4 — no khac
+    run/attempt/event voi cong hau merge. Thu duy nhat doi la: truoc day muc nay dung o `in_progress`, nay
+    co ket cuc. Ghi ra vi mot lenh do dung o trang thai dang chay se loi thoi ma khong ai biet.
+    KHONG tuyen nguyen nhan cua cong windows do: chua truy, va chu kho khai la loi da biet tu truoc —
+    lời khai ay thuoc chu kho, khong phai phep do cua phien nay.'
   no_ngoai_packet_routine_586_mang_token: 'Lop F, KHONG sua o day: Routine trig_01YSJXisJCB2wY8oZWd1Rdtc ("DUNG goi codex tren
     #586 — vuot tran §12", tao 2026-09-21T18:25:40Z, do list_triggers ~19:05Z) mang nguyen van token kich hoat codex HAI lan
     trong prompt. Thuoc phien #586, khong thuoc packet nay; ghi de chu kho biet. Fable vong 7 phat hien.'
@@ -1041,6 +1054,15 @@ con_mo:
        KHONG re-run tay (manual_ci_budget 0). KHONG va hai nguyen nhan nay: ca hai nam ngoai write set va
        ngoai land authority.
        Voi entry nay, danh sach DAT DUNG pham vi luat neu: tu 9387078 den head CHA.'
+    - 'head 662a032 (2026-09-24T02:0xZ) — HEAD CHA first-parent cua head hien tai f07fcf21,
+       doc 2026-09-24T06:5xZ: GET commits/662a0326/check-runs -> total_count 0. KHONG co check-run nao.
+       KHONG PHAI passed, KHONG PHAI failed: la not_run. Nguyen nhan CAU TAO, khong phai su co —
+       commit nay chi la commit GIUA trong mot cu day hai commit, va CI cua kho chay tren HEAD cua
+       cu day chu khong tren tung commit. Moi commit khong bao gio la head cua mot cu day thi vinh
+       vien 0 check-run.
+       HE QUA CHO LUAT: luat doi entry cho head CHA, va head cha o day la mot commit theo CAU TAO
+       khong the co CI. Nen entry dung la entry nay — khai not_run kem ly do — chu khong phai mot
+       khoang trong. Cross-review luot 7 (P2, lop pham-vi-tu-noi-rong-hon-du-lieu) bat dung cho nay.'
     hai_ket_luan_do_duoc_PHAM_VI_GHI_TRONG_TUNG_MUC:
       m55_khong_dai: 'Bon luot lien tiep cung bo bien_nhan_v2 tren b94182b / a479699 / 85f974b / e6eabed: dat / dat / DO /
         dat = 3 dat, 1 do; cong phep do tai cho hai ve (cua phien chinh) delta 0. Ten giu nguyen LECH_CHUA_RO_NGUYEN_NHAN:
@@ -1082,6 +1104,77 @@ con_mo:
       MOI CON SO O DAY la CI cua PR #601 (PR mang ho so), KHONG phai cong hau merge cua packet #578
       (714f36e6 / run 35581617584), va KHONG phai bang chung cho `landed` cua #578. Cong DO o 85f974b
       KHONG doi muc bao dam nao — khong len, khong xuong.'
+
+NEO_PROTOCOL_TINH_THEO_BLOB:
+  vi_sao_co_muc_nay: >-
+    Cross-review luot 7 (P3, lop neo-dong-loi-thoi) bat rang cac neo kieu `d.<so>` trong tep nay tro
+    sang dieu khoan KHAC khi doc tren ban protocol moi. Do dung, va nguyen nhan KHONG phai neo sai luc
+    viet: protocol duoc chen noi dung nen moi so dong dich xuong.
+  do_duoc:
+    blob_protocol_moi_neo_d_tinh_theo: 17069f962ed1021460358b7f79776d278051ea38
+    so_dong_cua_blob_ay: 1424
+    co_mat_tai: 'a1bbdc10, 714f36e6, f405f2b — tuc ban protocol duong thoi khi tep nay duoc soan'
+    blob_tren_master_hien_tai: 0dedc3d922dc86a78c71194b084b4bba7afda517
+    so_dong_ban_moi: 1492
+    vi_du_do_duoc: >-
+      Cau "Hai lượt Codex review trên cùng PR..." nam o dong 1011 cua blob 17069f96 va dong 1079 cua
+      blob 0dedc3d9. Neo `d.1011-1013` trong muc VI_PHAM_3 vi the DUNG voi blob 17069f96 va LECH voi
+      ban hien tai. Cung co che cho `d.859-863` (bang §10.2.2) va `d.1021`.
+  luat_doc: >-
+    MOI neo dang `d.<so>` trong tep nay tinh theo blob 17069f96. Muon kiem mot neo thi doc
+    `git show 17069f96 | sed -n '<so>p'`, dung doc tren master. Cau TRICH NGUYEN VAN trong tung muc
+    van la thu co tham quyen; so dong chi la dia chi, va dia chi thi troi.
+  vi_sao_KHONG_sua_tung_so: >-
+    Tep nay co hang chuc neo `d.<so>`. Sua tung so sang ban moi se dung cho toi lan protocol duoc chen
+    noi dung tiep theo, roi lech lai ca loat — dung hinh dang ma muc PHAM_VI_THEO_LUAT_khong_theo_danh_sach
+    da tra gia. Neo theo BLOB dong duoc ca lop vi blob khong doi.
+  gioi_han_cua_ban_va_nay: >-
+    KHONG tuyen rang moi neo `d.<so>` trong tep da duoc kiem lai tung cai. DA KIEM ba neo ma cross-review
+    luot 7 chi ra (d.1011-1013, d.1015-1018, d.859-863) va chung khop blob 17069f96. Cac neo con lai:
+    CHUA KIEM TUNG CAI.
+
+DINH_CHINH_SAU_REVIEW_VONG_14:
+  nguon: 'Cross-review luot 7, reviewer codex gpt-6-sol effort medium, chay CUC BO qua CLI (khong qua
+    connector tren PR), tren head f07fcf21. Ket qua: request_changes — 0 P1, 2 P2, 1 P3.'
+  vi_sao_co_luot_7: >-
+    Tran truc LOI GOI cua §12 la 2 va PR nay da dung 6. Chu kho cho phep nang tran; khoi `nang_tran`
+    theo schema ADR-0043 duoc khai CONG KHAI TRUOC khi phong luot 7, tai comment 5808616311 tren #601,
+    va lap lai trong lease wp578-land-g4-claude-20260924. Bo dem KHONG reset: sau luot 7 no la 7.
+    Review Rescue Checkpoint cua ADR-0037 da vao, ket luan KHONG tach Stable Slice (PR dung mot tep,
+    van ban lien mach, khong co duong cat thoa ba dieu kien).
+  P2_A_pham_vi_tu_noi_rong_hon_du_lieu:
+    trang_thai: 'CHAP NHAN — da va, ba bieu hien cung mot lop, dong bang MOT ban va.'
+    bieu_hien_a: 'Thieu entry cho head CHA first-parent 662a032. Da them, khai not_run kem ly do CAU TAO
+      (total_count 0: commit giua trong mot cu day hai commit, CI chay tren head cua cu day).'
+    bieu_hien_b: 'Muc workflow_dispatch_tren_merge_commit_SAU_head dung o `in_progress` va tu khai
+      "KET QUA CUOI CHUA DOC". Da doc va da bo sung: run 35637741169 conclusion FAILURE, gate
+      (windows-latest) FAILURE, gate-registry (windows-latest) CANCELLED. Ket luan cu KHONG doi.'
+    bieu_hien_c: 'LANDED_KHONG_XAC_LAP ghi "#568 van mo" trong khi CAP_NHAT_TRANG_THAI_20260924 ghi issue
+      da dong 23-09. Da them moc thoi gian cho cau cu; ket luan ve CASE T6 KHONG doi.'
+    KHONG_TUYEN_LA_BAN_VA_CUOI: >-
+      Ban vong 12 tung tuyen "TUYEN LA BAN VA CUOI" va tuyen ay sai ngay sau do, vi moi ban va lai sinh
+      mot head moi chua co CI. Ban nay KHONG lap lai loi tuyen ay. Muc `dien_bien_do_duoc` la SO MO theo
+      cau tao: no day du duy nhat khi NGUNG VA. Do la dieu §12 va CLAUDE.md doi khi mot hinh dang lap
+      lan thu ba — ghi ra day thay vi hua lan nua.
+  P2_B_nguyen_nhan_vuot_phep_do:
+    trang_thai: 'CHAP NHAN — da thu hep CA HAI VE.'
+    chi_tiet: >-
+      Hai cau trong hai_nguyen_nhan_do_da_TACH_DOI_SO_PHAN suy nhan qua tu phep so blob, theo hai chieu
+      nguoc nhau: mot ve ket luan "da duoc chua o thuong nguon", ve kia ket luan "chua duoc chua o dau ca".
+      Ca hai deu rong hon phep do — so blob chi noi blob doi hay khong doi. Da thay bang loi khai hep:
+      cai DO DUOC la trang thai blob; muon noi ve nguyen nhan thi can phan chung va phep do sau thay doi.
+  P3_C_neo_dong_loi_thoi:
+    trang_thai: 'CHAP NHAN — da dong bang NEO THEO BLOB thay vi sua tung so.'
+    chi_tiet: >-
+      Ba neo cross-review chi ra (d.1011-1013, d.1015-1018, d.859-863) KHONG sai luc viet: chung khop blob
+      protocol 17069f96 (1424 dong) duong thoi. Chung troi vi protocol duoc chen noi dung (blob hien tai
+      0dedc3d9, 1492 dong). Xem khoa NEO_PROTOCOL_TINH_THEO_BLOB. Khoa ay tu khai gioi han: chi ba neo
+      duoc kiem, cac neo con lai CHUA KIEM TUNG CAI.
+  phien_nay_TU_BAO_CAO_mot_loi_do_cua_chinh_no: >-
+    Khi do `ai-dang-giu` va `lease_publish.py check`, phien nay ban dau doc ma thoat bang `| tail; echo $?`,
+    tuc lay rc cua `tail` chu khong phai cua python — dung bay PIPESTATUS ma CLAUDE.md da ghi. Cac so rc
+    bao trong luot ay SAI; ket luan ve AI DANG GIU thi khong doi vi no doc tu dong van ban, khong tu rc.
+    Da do lai bang `${PIPESTATUS[0]}`: ai-dang-giu tra rc=11 khi co nguoi giu, check tra rc=0.
 
 DINH_CHINH_SAU_REVIEW_VONG_13:
   nguon: 'Vong 12 cua vong lap, tren head 4128fe9. KHONG co luot codex (da cham stop condition §12).
@@ -1521,10 +1614,21 @@ CAP_NHAT_TRANG_THAI_20260924:
   hai_nguyen_nhan_do_da_TACH_DOI_SO_PHAN:
     gate_registry_nguyen_nhan_DA_DUOC_CHUA_O_THUONG_NGUON: 'Blob ops/nhanh_don_duoc_test.py doi
       df4e6da9dc9179dc2c3243c21bf1a208c42533c3 -> cef56c4877a71b33b9409f81546fb9c0668c5a8c tren master
-      (commit 9fbc2a9, packet #568). Tuc thu lam gate-registry do tren f405f2b da duoc chua o NOI KHAC,
-      khong phai o day va khong phai boi phien nay.'
+      (commit 9fbc2a9, packet #568).
+      PHAM VI CUA PHEP DO NAY — thu hep sau cross-review luot 7 (P2, lop nguyen-nhan-vuot-phep-do):
+      phep so blob chi chung minh BLOB DA DOI. No KHONG chung minh nguyen nhan lam gate-registry do da
+      duoc chua. Ban truoc viet "tuc thu lam gate-registry do da duoc chua o NOI KHAC" — do la suy nhan
+      qua tu mot phep do chi noi ve noi dung tep. Muon khang dinh da chua thi can: phan chung tai hien
+      loi cu, phep do sau thay doi tren dung SHA, va bang chung noi loi ay voi dung thay doi ay.
+      Khong cai nao duoc chay o day. Cai DO DUOC va chi cai do: blob doi, va packet #568 co mot commit
+      cham dung tep ay.'
     gate_nguyen_nhan_KHONG_DOI: 'Blob ops/bien_nhan_v2.py (62ce28be6116) va ops/bien_nhan_v2_test.py
-      (b0f69c4af6a0) GIONG HET nhau giua f405f2b va master. Nguyen nhan m55 chua duoc chua o dau ca.
+      (b0f69c4af6a0) GIONG HET nhau giua f405f2b va master. Hai blob ay KHONG DOI — do la toan bo
+      dieu phep do nay noi duoc. Ban truoc viet "Nguyen nhan m55 chua duoc chua o dau ca"; cau ay rong
+      hon phep do theo chieu NGUOC lai voi cau tren, va cung mot lop loi (cross-review luot 7, P2).
+      Hai tep khong doi khong loai tru viec nguyen nhan nam o tep khac, o moi truong, hay o tuong tac —
+      nhat la khi chinh muc nay goi nguyen nhan la LECH_CHUA_RO_NGUYEN_NHAN. Cau dung: chua ai truy ra
+      nguyen nhan, va hai tep trong tam nghi van thi khong doi.
       Ten giu nguyen LECH_CHUA_RO_NGUYEN_NHAN — `gate` xanh 5/5 tren master KHONG co nghia la da biet
       nguyen nhan, no chi co nghia la hinh dang do khong tai xuat hien trong 35 commit vua roi.'
     de_xuat_packet_rieng_NAY_YEU_DI: 'Ban 21-09 de nghi mo mot packet rieng cho lech mutation-suite, vi
@@ -1549,7 +1653,10 @@ CAP_NHAT_TRANG_THAI_20260924:
     da do TRUOC khi cap, khong khai suong.'
 
   review_khong_doi: '6 review codex tren PR #601, 0 APPROVED. `cross_approved` van KHONG CO. Tran truc
-    LOI GOI cua §12 van la 2 va da dung 6; lease g3 KHONG reset bo dem nao (§12 d.1021) va cam goi them.'
+    LOI GOI cua §12 van la 2 va da dung 6; lease g3 KHONG reset bo dem nao (§12 d.1021) va cam goi them.
+    CAP NHAT 2026-09-24 sau khi chu kho cho phep nang tran: tran truc LOI GOI nang 2 -> 12 (khoi nang_tran
+    tai comment 5808616311 va trong lease g4), luot 7 da chay, bo dem nay la 7. Cau tren dung voi trang
+    thai luc 01:55Z va duoc giu nguyen; dong nay la phan tiep theo, khong phai sua cau cu.'
 
   ban_va_nay_lam_GI_va_KHONG_lam_GI:
     lam: 'Khai CI cua head f405f2b vao dien_bien_do_duoc (3 xanh / 2 do) — dong dung khoang trong da bao

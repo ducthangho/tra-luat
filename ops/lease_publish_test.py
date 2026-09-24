@@ -5110,7 +5110,8 @@ def t136_A2_adapter_nguon_ghim_danh_tinh_profile_duyet_va_khong_doc_config_kho()
 @ca
 def t137_M9_workflow_admission_hop_dong_tinh_va_actionlint_shellcheck():
     """M9 (R5/S5): `ops-thu-hoi-admission.yml` — chỉ `pull_request_target` đúng 5 types, base master, KHÔNG
-    dispatch/paths; quyền chỉ đọc hai mức; checkout NEO base.sha, không checkout head; PyYAML ghim; bộ kiểm gọi
+    dispatch/paths; quyền chỉ đọc hai mức; checkout NEO C = workflow_sha (#618; trước đó base.sha), không checkout
+    head; PyYAML ghim; bộ kiểm gọi
     `kiem-thu-hoi-github` với S/H/nhánh qua ENV (không `${{ }}` trong thân `run`); artifact receipt
     `thu-hoi-receipt-<H>-<attempt>` `if-no-files-found: error`; actionlint + shellcheck rc=0, THIẾU công cụ ⇒ ĐỎ."""
     import shutil
@@ -5160,7 +5161,7 @@ def t137_M9_workflow_admission_hop_dong_tinh_va_actionlint_shellcheck():
     chot(env.get("TL_S") == "${{ github.event.pull_request.base.sha }}" and env.get("TL_H") == "${{ github.event.pull_request.head.sha }}"
          and env.get("TL_NHANH") == "${{ github.event.pull_request.base.ref }}", f"env S/H/nhánh: {env}")
     chot('git rev-parse HEAD' in kiem and 'refs/pull/$TL_PR/head' in kiem and 'https://github.com/$TL_KHO' in kiem
-         and '"$TL_KHO" = "ducthangho/tra-luat"' in kiem, "phải đo S == HEAD, fetch H từ endpoint canonical tường minh")
+         and '"$TL_KHO" = "ducthangho/tra-luat"' in kiem, "phải đo HEAD == workflow_sha (cây C, #618), fetch H từ endpoint canonical tường minh")
     up = [b for b in steps if str(b.get("uses", "")).startswith("actions/upload-artifact@")]
     chot(len(up) == 1, "đúng một bước upload-artifact")
     uw = up[0]["with"]
@@ -5678,7 +5679,9 @@ def t148_review_F07_M9_definition_receipt_va_commit_pin():
     d = yaml.safe_load(van)
     steps = d["jobs"]["thu-hoi"]["steps"]
     env = {k: v for step in steps for k, v in (step.get("env") or {}).items()}
-    # M9 đòi identity riêng của definition; checkout S không chứng minh workflow đã chạy tại S.
+    # M9 đòi identity riêng của definition; checkout S không chứng minh workflow đã chạy tại S. (Lý lẽ F07
+    # viết thời mốc checkout là S; từ #618 mốc là C = workflow_sha và cùng lý lẽ áp cho C: checkout đúng C
+    # vẫn không tự chứng minh tệp workflow được lấy từ C — nên vẫn đo workflow_sha/workflow_ref riêng.)
     chot("${{ github.workflow_sha }}" in env.values() and "${{ github.workflow_ref }}" in env.values(),
          "M9 phải nhận actual workflow_sha/workflow_ref độc lập với base.sha và checkout")
     scripts = "\n".join(step.get("run", "") for step in steps)
@@ -5835,7 +5838,7 @@ def t152_C2a_M9_fetch_H_mang_xac_thuc_qua_header_khong_token_trong_URL():
     steps = yaml.safe_load(WORKFLOW_THU_HOI.read_text(encoding="utf-8"))["jobs"]["thu-hoi"]["steps"]
     checkout = [b for b in steps if str(b.get("uses", "")).startswith("actions/checkout@")]
     chot(len(checkout) == 1 and (checkout[0].get("with") or {}).get("persist-credentials") is False,
-         "(iv) checkout S phải giữ `persist-credentials: false`")
+         "(iv) checkout C (= workflow_sha, #618) phải giữ `persist-credentials: false`")
     lenh_fetch, lenh_config = [], []
     for b in steps:
         than = b.get("run")
@@ -5854,7 +5857,7 @@ def t152_C2a_M9_fetch_H_mang_xac_thuc_qua_header_khong_token_trong_URL():
     url = re.findall(r"https://[^\s\"']+", f)
     chot(url and all("@" not in u and "TL_TOKEN" not in u for u in url),
          f"(ii) URL fetch mang credential: {url}")
-    chot(not lenh_config, f"(iii) không được `git config` ghi extraheader vào cây S: {lenh_config}")
+    chot(not lenh_config, f"(iii) không được `git config` ghi extraheader vào cây checkout C: {lenh_config}")
     dau = [j for j in range(i) if ds[j].startswith("WF_BLOB=")]
     cuoi = [j for j in range(i + 1, len(ds)) if ds[j].startswith("NHAN=")]
     chot(len(dau) == len(cuoi) == 1, "(i) không tìm được ranh giới đoạn auth/fetch")
@@ -5902,7 +5905,7 @@ def t155_618_neo_dinh_nghia_theo_workflow_sha_khong_theo_base_sha():
     """packet #618: chốt neo định nghĩa phải đo HÀNH VI, không đo hình thức.
 
     Bản trước đòi `workflow_sha == base.sha`. Với `pull_request_target`, GitHub nạp định nghĩa từ HEAD
-    nhánh base lúc chạy, nên hai giá trị bằng nhau CHỈ KHI nhánh mặc định chưa tiến kể từ base của PR —
+    nhánh MẶC ĐỊNH lúc chạy (kể cả PR nhắm base khác; lane này chỉ nhận base master), nên hai giá trị bằng nhau CHỈ KHI nhánh mặc định chưa tiến kể từ base của PR —
     tức cổng ĐỎ trên mọi PR không rebase liên tục. Đo thật trên PR #601: head `fa263ef2` ăn exit 12
     (run 35981638892) trong khi bộ kiểm canonical chạy lại tại chỗ cho rc=0.
 

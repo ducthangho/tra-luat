@@ -7,18 +7,24 @@ name: thu-hoi
 # LAND-DOC-RECEIPT-THU-HOI). Nghiệm thu + bật là slice A1, quyết định của chủ kho.
 #
 # VÌ SAO `pull_request_target` mà KHÔNG chạy code ứng viên: cổng phải chạy MÃ CANONICAL — bộ kiểm
-# lấy từ base.sha (S) — trên đúng head ứng viên (H) đã được fetch vào object-store; cây của H chỉ
+# lấy từ cây C = `workflow_sha` (packet #618; trước đó là base.sha) — trên đúng head ứng viên (H)
+# đã được fetch vào object-store; cây của H chỉ
 # được ĐỌC qua object-store, không checkout, không hook, không action nào của cây ứng viên chạy.
 # `ops-publish-lease.yml` từng ăn P1 vì bộ kiểm nằm cùng nhánh với thứ nó kiểm (PR #104).
 # `pull_request_target` là cách duy nhất có token đọc + định nghĩa workflow từ base; token ở đây
 # CHỈ ĐỌC (`contents: read`, `pull-requests: read`) — job này không ghi Issue/PR/kho.
 #
-# Ba mỏ neo ĐO, không tin lời khai của event:
-#   S — `git rev-parse HEAD` sau checkout phải bằng `base.sha` của event (ancestry S→H tự đi đồ thị);
-#       và ĐỊNH NGHĨA workflow đang chạy (`github.workflow_sha`/`workflow_ref`) cũng phải neo đúng S —
-#       checkout đúng S không chứng minh tệp workflow đã được lấy từ S (finding F07 cross-review A0).
+# BỐN mỏ neo ĐO, không tin lời khai của event (packet #618 tách S khỏi C — trước đó hai mốc là một):
+#   C — cây chạy = CHÍNH commit định nghĩa: `git rev-parse HEAD` phải bằng `github.workflow_sha`, và
+#       `workflow_ref` phải trỏ `refs/heads/<nhánh mặc định>` (finding F07 cross-review A0: checkout đúng
+#       một commit không tự chứng minh tệp workflow được lấy từ commit ấy — nên đo cả hai).
+#   S — `base.sha` của event: mốc SO SỔ revocation (`--canonical-base`), KHÔNG còn là mốc checkout.
+#       Chống lùi: S phải là tổ tiên của C. Bộ kiểm còn đòi S là tổ tiên của H — đó là thiết kế
+#       fail-close giữ nguyên theo quyết định chủ kho cho #618 (đường (a)), không phải dương tính giả.
 #   H — fetch `refs/pull/<n>/head` từ endpoint canonical tường minh; OID nhận được phải bằng `head.sha`.
-#   T — tree(H) do bộ kiểm tự lấy từ bytes đã băm; receipt ghi cả ba.
+#   T — tree(H) do bộ kiểm tự lấy từ bytes đã băm.
+# Vì sao gỡ `workflow_sha == base.sha`: với `pull_request_target`, GitHub nạp định nghĩa từ HEAD nhánh
+# base lúc chạy, nên hai giá trị chỉ bằng nhau khi nhánh mặc định chưa tiến — chốt ấy chặn việc ĐÚNG.
 # KHÔNG `workflow_dispatch` (hợp đồng R5/S5: consumer từ chối mọi event khác kể cả cùng tên).
 # Không lọc `paths:` — mọi PR vào nhánh mặc định đều qua admission (A11: docs/bot/rc9/standalone).
 
@@ -116,7 +122,8 @@ jobs:
           unset AUTH_B64
           NHAN="$(git rev-parse refs/thu-hoi/ung-vien)"
           [ "$NHAN" = "$TL_H" ] || { echo "fetch refs/pull/$TL_PR/head cho $NHAN != head.sha $TL_H" >&2; exit 12; }
-          # Bộ kiểm CANONICAL (tệp của cây S vừa checkout) đọc H qua object-store, không checkout cây ứng viên.
+          # Bộ kiểm CANONICAL (tệp của cây C = workflow_sha vừa checkout) đọc H qua object-store, không checkout
+          # cây ứng viên. S chỉ đi vào qua `--canonical-base`: mốc so sổ, không phải mã đang chạy.
           mkdir -p "$RUNNER_TEMP/thu-hoi-receipt"
           # F12 (review lượt 2): dưới `set -e`, `X=$?` sau lệnh fail là dòng chết — lấy rc THẬT vào biến rồi mới thoát fail-close.
           CHECKER_RC=0
@@ -146,6 +153,14 @@ jobs:
           d["run_id"] = int(run_id); d["run_attempt"] = int(attempt)
           d["check_run_id"] = check_run_id; d["job_id"] = khop[0].get("id"); d["checker_rc"] = int(checker_rc)
           d["workflow_definition_commit"] = wf_sha; d["workflow_ref"] = wf_ref; d["checkout_commit"] = wf_sha
+          # #618 F2: `oid_bo_kiem_tai_S` (do bộ kiểm tự ghi) là dữ liệu NỀN về S, KHÔNG phải identity của mã
+          # đã chạy — từ #618 mã chạy ở C = workflow_sha, có thể khác S. Consumer phải dùng cặp dưới đây để
+          # biết mã nào đã chạy; đọc `oid_bo_kiem_tai_S` làm identity là đọc sai. Hợp đồng consumer M9 trong
+          # spec THU-HOI-LEASE-VA-CAP-LAI còn giả định C == S: nợ có tên, ghi trên Issue #618.
+          d["bo_kiem_da_chay_commit"] = wf_sha
+          d["oid_bo_kiem_da_chay"] = subprocess.run(
+              ["git", "rev-parse", wf_sha + ":ops/lease_publish.py"],
+              capture_output=True, check=True, text=True).stdout.strip()
           d["workflow_definition_blob"] = wf_blob; d["workflow_definition_sha256"] = hashlib.sha256(than).hexdigest()
           json.dump(d, open(tep, "w", encoding="utf-8"), ensure_ascii=False, sort_keys=True, indent=1)
           print("receipt:", d["ket_luan"], "S", d["S"][:12], "H", d["H"][:12], "T", d["T"][:12],

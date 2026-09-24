@@ -265,3 +265,11 @@ WINDOWS:
   chi_thi: '"windows de sau" — HOAN, khong phai THA.'
   he_qua: 'r5 §7 muc 1, 2, 8 van KHONG DO DUOC va van giu cong DO. Dieu kien dung §9 khong the dat
     chi bang cross-review Linux; packet chua xong cho toi khi co luot Windows that.'
+
+# ───────────────────────── BIA MỘ — vế THỨ NHẤT của dấu HAI CHIỀU ─────────────────────────
+# Thêm 2026-09-24 khi cấp g6. g5 CÒN HIỆU LỰC nên bia mộ hai chiều là BẮT BUỘC. REVISION mới
+# (r5 -> r6): protocol §3.2 — đổi acceptance làm lease cũ mất hiệu lực.
+da_bi_thay_the: r378-symlink-doi-dac-quyen-r6-g6-claude
+da_bi_thay_the_luc: '2026-09-24T19:1xZ'
+da_bi_thay_the_vi_sao: 'r6 (issues/574#issuecomment-5820612652) sửa nhãn phiên bản của ma trận 68 ô
+  (F1d, cross-review codex lượt 2). spec_hash r6 = 5699ad217d0ec9f9eb83b59cd0600c90f8b0d6aa3e6285722a8205563ddb9b5d.'

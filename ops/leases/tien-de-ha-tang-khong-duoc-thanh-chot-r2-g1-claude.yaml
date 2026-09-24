@@ -1,0 +1,134 @@
+# LEASE - TIEN-DE-HA-TANG-KHONG-DUOC-THANH-CHOT revision 2 / generation 1
+# Goi #593. Executor claude-opus-5-5. Ghi HO theo chi thi chu kho.
+#
+# DOC KY TRUOC KHI LAM: r2 dong CA LOP tai CHO QUYET DINH NHAN (runner), khong va tung
+# ca. Danh sach the hien DO bang ma tran toan tep nam o dac ta §2.
+
+schema_version: 2
+event: executor_lease_granted
+packet_issue: 593
+packet_id: TIEN-DE-HA-TANG-KHONG-DUOC-THANH-CHOT
+mission_issue: KHONG_CO
+revision: 2
+generation: 1
+lease_id: tien-de-ha-tang-khong-duoc-thanh-chot-r2-g1-claude
+thay_the_cho: tien-de-ha-tang-khong-duoc-thanh-chot-r1-g1-fable
+thay_the_cho_vi_sao: 'Dau HAI CHIEU, CUNG packet_id. Ban r1-g1 da mang dong `da_bi_thay_the`
+  tro sang lease nay truoc khi lease nay di qua `check`. Revision MOI theo chi thi chu kho,
+  khong phai thu hoi xuyen packet - khong phai khe AG-T0-01B.'
+
+granted_by: ducthangho
+granted_on_instruction: https://github.com/ducthangho/tra-luat/issues/593#issuecomment-5807914747
+granted_on_instruction_nguyen_van: 'Chu kho, phien Claude Code 2026-09-24, GO VAN XUOI: "(a) mo
+  revision 2, soan dac ta di, phai dua het cac van de vao de xu ly trong revision nay. Noi tran
+  len 450. Sau do thuc thi theo dung quy tac vong lap toi dua ra". Kem theo, khi bo phan loai
+  quyen chan lan ghi dau, chu kho chon "Cho phep toi ghi lease".'
+recorded_by: claude-session
+recorder_is_dispatcher: false
+
+NGUON_CAP_VIEC: 'Cross-review codex vong 2 (3c0147a) va vong 3 (3eb5bd9), ca hai changes_requested
+  P2=2; executor tai lap tung the hien, roi TU QUET ca tep: 26 ca (dem theo TEN ca) doi loi ha tang
+  thanh DO_CHOT hoac lam tron len DAT. Ban chieu: issues/593#issuecomment-5806860890.'
+
+leased_at_utc: '2026-09-24T04:45:00Z'
+lease_expires_at_utc: '2026-09-25T04:45:00Z'
+
+role: executor
+provider: anthropic_claude
+executor: claude
+model: claude-opus-5-5
+model_vi_sao: 'Model DANG phuc vu phien thi cong, do bang get_session (session_context.model va
+  last_served_model). r1-g1 khai claude-fable-5-1 nhung phien ke nhiem chay claude-opus-5-5; chu
+  kho da duyet va yeu cau ghi ro su lech. Lease nay khai DUNG model thuc.'
+effort: medium
+effort_vi_sao: 'session_context.effort_level do bang get_session.'
+
+assurance_target: human_audited
+assurance_target_HE_QUA_PHAI_KHAI: 'Packet nay KHONG LAND DUOC BANG MAY. Executor KHONG duoc khai
+  muc nao ho chu kho, va KHONG duoc khai cross_approved.'
+assurance_target_fallback: advisory_review
+
+reviewer_provider: codex
+reviewer_model: gpt-6-astra
+reviewer_effort: low
+reviewer_vi_sao: 'Chu kho chi dinh "codex gpt-6-astra, effort low" (giu tu r1). Executor ho Claude,
+  reviewer ho khac. PHAI doc lai banner de xac nhan model va effort. Chay voi stdin tu /dev/null,
+  khung XAC MINH khong phai khung TAN CONG.'
+
+review_class: sensitive
+effective_review_class: sensitive
+review_class_vi_sao: 'Cham bo phan hang cua bo cham tu kiem (chay_tu_kiem) va moi diem nuot loi.'
+
+spec_ref: ops/specs/tien-de-ha-tang-khong-duoc-thanh-chot-r2.md
+spec_path: ops/specs/tien-de-ha-tang-khong-duoc-thanh-chot-r2.md
+prompt_path: ops/specs/tien-de-ha-tang-khong-duoc-thanh-chot-r2.md
+prompt_sha256_required: ca05fac0da86c8b8a5c10ab58d947dfeb851bec8af621a4f99a45ec56ad08454
+spec_hash: ca05fac0da86c8b8a5c10ab58d947dfeb851bec8af621a4f99a45ec56ad08454
+spec_hash_do_nhu_the_nao: 'sha256sum ops/specs/tien-de-ha-tang-khong-duoc-thanh-chot-r2.md tren
+  nhanh ops/cap-lease-593, 9209 B. Do lai TRUOC khi tin con so nay.'
+
+branch: claude/tien-de-ha-tang-r1
+branch_ownership: exclusive
+branch_vi_sao: 'Giu nhanh cua r1: r2 xay TIEP tren head r1, va nhanh chua co PR.'
+
+start_from_sha: 3eb5bd909ef1d64f503e95af09227a43f6498830
+start_from_sha_vi_sao: 'Head r1 luc dung. r2 thay the mot phan va hep cua r1 (dac ta §3 M4).'
+reviewed_sha_required: 3eb5bd909ef1d64f503e95af09227a43f6498830
+reviewed_sha_required_note: 'Mo neo SAN luc cap. Ho so audit va cross-review PHAI neo head ung
+  vien THAT.'
+
+write_set:
+- ops/nhanh_don_duoc_test.py
+write_set_MOT_DUONG: 'MOT tep.'
+
+TRAN_DONG_THEM: 450
+TRAN_DONG_THEM_vi_sao: 'Chu kho chi thi "Noi tran len 450". Do bang git diff --numstat 18d42ca --
+  ops/nhanh_don_duoc_test.py (CA goi). Vuot tran goc 300 cua ADR-0044:5 cho class sensitive la
+  NGOAI LE CUA CHU KHO cho goi nay, khong phai nguong moi cua kho. Cham tran thi DUNG VA BAO.'
+
+CI_PHAM_VI: 'Chu kho chi thi: khong chay lai CI de xem co xanh khong; chay TRON BO suite tai cho
+  moi vong. KHONG can CI Windows (loi Windows da biet, #607/#608).'
+
+cam_tuyet_doi:
+- 'Bo hoac vo hieu hoa mot ca test de lam xanh.'
+- 'Va tung ca thay cho dong tai runner - dac ta §3.'
+- 'Dem mot loi HA TANG vao DO_CHOT, hoac de no lam tron len DAT.'
+- 'Phan loai loi TIEM CO CHU Y theo ten kich ban hay cua so thoi gian thay vi theo DOI TUONG.'
+- 'Chay cross-review ma khong chuyen huong stdin tu /dev/null.'
+- 'Khai cross_approved.'
+- 'Tu cap lease moi, tu mo rong closure, tu noi TRAN_DONG_THEM.'
+- 'Chay lai CI de xem no co xanh khong.'
+
+khong_duoc_cham:
+- ops/nhanh_don_duoc.py
+- ops/lease_publish.py
+- ops/lease_publish_test.py
+- ops/bien_nhan_v2.py
+- ops/bien_nhan_v2_test.py
+- .claude/dev/packet_loop_test.py
+- .claude/dev/launcher_test.py
+- .claude/dev/launcher.py
+- .claude/dev/packet_loop.py
+- docs/PROTOCOL_DA_PHIEN.md
+- docs/adr/0044-nguong-kich-thuoc-packet-theo-do-luong.md
+- ops/specs/tien-de-ha-tang-khong-duoc-thanh-chot-r1.md
+- ops/specs/tien-de-ha-tang-khong-duoc-thanh-chot-r2.md
+- ops/specs/dau-phien-trung-lam-do-cong-r1.md
+- .github/workflows/ci.yml
+- scripts/tl.py
+- scripts/tl_selftest.py
+- RELEASE_MANIFEST.json
+khong_duoc_cham_vi_sao: 'ops/nhanh_don_duoc_test.py KHONG nam trong danh sach nay - no LA write set.'
+
+hinh_dang_ke_thua:
+  LOI-KHAI-RONG-HON-PHEP-DO: 10
+  TIN-HIEU-DO-CHINH-MA-TEST-GIA-MAO: 6
+  VA-DUNG-CHO-DUOC-CHI-ROI-BO-SOT-DUONG-THU-BA: 3
+  CHOT-CAM-THU-DAC-TA-KHONG-DOI: 2
+  BO-TUONG-DUONG-DO-CHINH-EXECUTOR-DUNG: 2
+  VI_SAO_VA_DUNG_LEN_3: 'Vong 3 cua r1 va DUNG danh sach the hien vong 2 chi ra; vong 3 review tim
+    them the hien, va ma tran toan tep cua executor tim them nua (r512 r520 r523 ...). Chu kho da
+    duoc hoi "co nen lam viec nay khong" va tra loi bang chi thi mo r2.'
+  CO_HOI_TAI_PHAT_DA_BIET: 'Neu runner doi nhan ca khi loi tiem CO CHU Y (khong dang ky) thi mot ca
+    sach bi ra KHONG DO DUOC - mot trien khai "moi thu la KDD" se xanh B1/B2 ma lam MU ca bo. Doi
+    chung duong B3 (luot SACH N/N) la cai chan.'

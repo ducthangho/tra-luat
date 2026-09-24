@@ -5141,8 +5141,11 @@ def t137_M9_workflow_admission_hop_dong_tinh_va_actionlint_shellcheck():
     checkout = [b for b in steps if str(b.get("uses", "")).startswith("actions/checkout@")]
     chot(len(checkout) == 1, f"đúng một checkout: {len(checkout)}")
     w = checkout[0]["with"]
-    chot(w.get("ref") == "${{ github.event.pull_request.base.sha }}" and w.get("persist-credentials") is False
-         and w.get("fetch-depth") == 0, f"checkout phải neo base.sha, không giữ credential, đủ lịch sử: {w}")
+    # #618: mốc checkout đổi từ `base.sha` sang `workflow_sha` — cây phải là CHÍNH commit định nghĩa.
+    # So khớp vẫn CHÍNH XÁC một giá trị (không nới thành "chứa" hay "một trong"): nới ở đây là mở cửa cho
+    # một ref khác lọt vào. Lý do đổi và phản chứng hành vi: t155_618.
+    chot(w.get("ref") == "${{ github.workflow_sha }}" and w.get("persist-credentials") is False
+         and w.get("fetch-depth") == 0, f"checkout phải neo workflow_sha, không giữ credential, đủ lịch sử: {w}")
     chot("head.sha }}" not in yaml.safe_dump(w) and all("head.ref" not in str(b.get("with", "")) for b in steps),
          "không bước nào checkout head PR")
     chot(re.search(r"pip\s+install\b[^\n]*\bPyYAML==6\.0\.3\b", van), "PyYAML phải ghim exact 6.0.3 (t31)")

@@ -8207,15 +8207,38 @@ def t187_chan_doan_phai_ha_ve_CHUOI_THUAN_chu_khong_chi_isinstance():
             class _LoiThongDiep(Exception):
                 def __str__(self, _x=x):
                     return _x
-            bang += [(nhan_ho, "tên lớp", _LopTen("m"), f"{NOI_DUNG}: m"),
-                     (nhan_ho, "thông điệp", _LoiThongDiep(), f"_LoiThongDiep: {NOI_DUNG}")]
+            bang += [(nhan_ho, "tên lớp", _LopTen("m"), NOI_DUNG, "m"),
+                     (nhan_ho, "thông điệp", _LoiThongDiep(), "_LoiThongDiep", NOI_DUNG)]
         return bang
 
-    for nhan, truong, ex_goc, mong_bao in _bang_ho_truong():
-        r_bao = _bao_loi_ca(ex_goc)
-        chot(type(r_bao) is str and r_bao == mong_bao,
-             f"{nhan} / {truong}: `_bao_loi_ca` mong {mong_bao!r}, nhận {r_bao!r}.")
+    # Mọi giá trị đang ĐO đi vào thông điệp `chot` qua `_in`: chưa chắc là `str` thuần thì chỉ
+    # in nhãn, không định dạng — định dạng chính thứ đang đo là đường vỡ trần trước chốt.
+    def _in(v):
+        return v if type(v) is str else "<không phải str thuần>"
+
+    # Lời gọi helper đang đo đi qua cửa BẮT TRỌN từ phía người gọi — lượt 10: một lời gọi trần
+    # ở đây làm đột biến tính dự phòng sớm đổ `RuntimeError` trước chốt (tín dụng giả cho ca).
+    def _bao_an_toan(ex):
+        try:
+            return _bao_loi_ca(ex)
+        except BaseException as loi:  # noqa: BLE001 — đo "không nổ", phải bắt trọn
+            return f"<NÉM {_ten_lop(loi)}>"
+
+    def _str_an_toan(o):
+        try:
+            return str(o)
+        except BaseException as loi:  # noqa: BLE001 — cùng lý do với `_bao_an_toan`
+            return f"<NÉM {_ten_lop(loi)}>"
+
+    # Kỳ vọng NỘI DUNG cho MỌI consumer, không chỉ `_bao_loi_ca` — cross-review lượt 10: vòng
+    # này từng chỉ chốt KIỂU và "định dạng được", nên đột biến làm `_MaVang.kieu` (hay bản sao
+    # ở `_NgoaiLeLa`) mất tên HO về dự phòng vẫn qua 183/183. Kỳ vọng viết tay trong bảng.
+    for nhan, truong, ex_goc, mong_kieu, mong_td in _bang_ho_truong():
         vi_tri = f"{nhan} / {truong}"
+        mong_bao = f"{mong_kieu}: {mong_td}"
+        r_bao = _bao_an_toan(ex_goc)
+        chot(type(r_bao) is str and r_bao == mong_bao,
+             f"{vi_tri}: `_bao_loi_ca` mong {mong_bao!r}, nhận {_in(r_bao)!r}.")
         mv = _MaVang(ex_goc)
         chot(type(mv.kieu) is str and type(mv.thong_diep) is str,
              f"{vi_tri}: `_MaVang` phải giữ CẢ HAI trường là `str` THUẦN, nhận "
@@ -8240,6 +8263,17 @@ def t187_chan_doan_phai_ha_ve_CHUOI_THUAN_chu_khong_chi_isinstance():
              f"{ra.__class__.__name__}.")
         hong = _dinh_dang_duoc(ra)
         chot(hong is None, f"{vi_tri}: kết quả của cửa không định dạng được — {hong}.")
+        mong_nl = f"<ngoại lệ TRẦN {mong_kieu}: {mong_td}>"
+        for noi_dung, thuc, mong in (("`_MaVang.kieu`", mv.kieu, mong_kieu),
+                                     ("`_MaVang.thong_diep`", mv.thong_diep, mong_td),
+                                     ("`_NgoaiLeLa.kieu`", nl.kieu, mong_kieu),
+                                     ("`str(_NgoaiLeLa)`", _str_an_toan(nl), mong_nl),
+                                     ("helper `.kieu`", ra.kieu, mong_kieu),
+                                     ("helper `.ma.kieu`", ra.ma.kieu, mong_kieu),
+                                     ("helper `.ma.thong_diep`", ra.ma.thong_diep, mong_td),
+                                     ("`str(helper)`", _str_an_toan(ra), mong_nl)):
+            chot(type(thuc) is str and thuc == mong,
+                 f"{vi_tri}: {noi_dung} mong {mong!r}, nhận {_in(thuc)!r}.")
 
     # NHÁNH BÁO LỖI CỦA CỬA — đường THỨ BA, cross-review codex lượt 2 (24-09) bắt.
     #
@@ -8531,9 +8565,9 @@ def t187_chan_doan_phai_ha_ve_CHUOI_THUAN_chu_khong_chi_isinstance():
                   "_ExTraLopNem: <__str__ trả thứ không phải chuỗi>"),
                  (_ca(f"_gia_lop{i}_exception", _ExLopNem(NOI_DUNG)), f"_ExLopNem: {NOI_DUNG}"),
                  (_ca(f"_gia_lop{i}_assert", _AssertLopNem(NOI_DUNG)), NOI_DUNG)]
-    for i, (_nh, truong, ex_goc, mong_bao) in enumerate(_bang_ho_truong()):
+    for i, (_nh, truong, ex_goc, mong_kieu, mong_td) in enumerate(_bang_ho_truong()):
         them.append((_ca(f"_gia_bang{i}_{'ten' if truong == 'tên lớp' else 'td'}", ex_goc),
-                     mong_bao))
+                     f"{mong_kieu}: {mong_td}"))
     them += [(_ca("_gia_assert_str_nem", _AssertStrNem()), "<__str__ hỏng>"),
              (_ca("_gia_str_khong_chuoi", _StrKhongChuoiBo()),
               "_StrKhongChuoiBo: <__str__ trả thứ không phải chuỗi>")]

@@ -8183,40 +8183,55 @@ def t187_chan_doan_phai_ha_ve_CHUOI_THUAN_chu_khong_chi_isinstance():
         return None if type(r) is str else f"f-string ra `{type(r).__name__}`"
 
     lease_d = _lease_579()
-    for nhan, x in HO:
-        _LopTen = type("_LopTen", (Exception,), {})
-        _LopTen.__name__ = x
+    # BẢNG DÙNG CHUNG HO × {tên lớp, thông điệp} — cùng một bảng đi qua wrapper/helper (vòng
+    # dưới), `_bao_loi_ca` trực tiếp, và lượt `main()` thật ở cuối ca. Cross-review lượt 9
+    # (24-09): lượt `main()` từng chỉ có HO ở THÔNG ĐIỆP, không có HO ở TÊN LỚP, nên đột biến
+    # quên bước hạ tên (biên loại `str` con ⇒ mọi tên HO thành dự phòng) qua cả `t187` lẫn
+    # `t189`. Một bảng, nhiều phía: thêm họ ở một phía thì phía kia tự có.
+    # Kỳ vọng viết TAY: `str.__str__` trên `str` con gọi hàm của LỚP `str`, không gọi bản ghi
+    # đè, nên mọi tên HO hạ về đúng nội dung.
+    def _bang_ho_truong():
+        bang = []
+        for nhan_ho, x in HO:
+            _LopTen = type("_LopTen", (Exception,), {})
+            _LopTen.__name__ = x
 
-        class _LoiThongDiep(Exception):
-            def __str__(self, _x=x):
-                return _x
+            class _LoiThongDiep(Exception):
+                def __str__(self, _x=x):
+                    return _x
+            bang += [(nhan_ho, "tên lớp", _LopTen("m"), f"{NOI_DUNG}: m"),
+                     (nhan_ho, "thông điệp", _LoiThongDiep(), f"_LoiThongDiep: {NOI_DUNG}")]
+        return bang
 
-        for truong, ex_goc in (("tên lớp", _LopTen("m")), ("thông điệp", _LoiThongDiep())):
-            vi_tri = f"{nhan} / {truong}"
-            mv = _MaVang(ex_goc)
-            chot(type(mv.kieu) is str and type(mv.thong_diep) is str,
-                 f"{vi_tri}: `_MaVang` phải giữ CẢ HAI trường là `str` THUẦN, nhận "
-                 f"kieu={type(mv.kieu).__name__} thong_diep={type(mv.thong_diep).__name__}. "
-                 f"Hàm hạ có răng mà chỗ nối không gọi nó là lỗ thật, không phải lỗ phép đo.")
-            hong = _dinh_dang_duoc(mv)
-            chot(hong is None, f"{vi_tri}: `_MaVang` không định dạng được — {hong}.")
-            nl = _NgoaiLeLa(ex_goc)
-            chot(type(nl.kieu) is str,
-                 f"{vi_tri}: `_NgoaiLeLa.kieu` phải là `str` THUẦN, nhận "
-                 f"{type(nl.kieu).__name__}. Lớp này có bản sao tên lớp RIÊNG và in nó ra.")
-            hong = _dinh_dang_duoc(nl)
-            chot(hong is None, f"{vi_tri}: `_NgoaiLeLa` không định dạng được — {hong}.")
+    for nhan, truong, ex_goc, mong_bao in _bang_ho_truong():
+        r_bao = _bao_loi_ca(ex_goc)
+        chot(type(r_bao) is str and r_bao == mong_bao,
+             f"{nhan} / {truong}: `_bao_loi_ca` mong {mong_bao!r}, nhận {r_bao!r}.")
+        vi_tri = f"{nhan} / {truong}"
+        mv = _MaVang(ex_goc)
+        chot(type(mv.kieu) is str and type(mv.thong_diep) is str,
+             f"{vi_tri}: `_MaVang` phải giữ CẢ HAI trường là `str` THUẦN, nhận "
+             f"kieu={type(mv.kieu).__name__} thong_diep={type(mv.thong_diep).__name__}. "
+             f"Hàm hạ có răng mà chỗ nối không gọi nó là lỗ thật, không phải lỗ phép đo.")
+        hong = _dinh_dang_duoc(mv)
+        chot(hong is None, f"{vi_tri}: `_MaVang` không định dạng được — {hong}.")
+        nl = _NgoaiLeLa(ex_goc)
+        chot(type(nl.kieu) is str,
+             f"{vi_tri}: `_NgoaiLeLa.kieu` phải là `str` THUẦN, nhận "
+             f"{type(nl.kieu).__name__}. Lớp này có bản sao tên lớp RIÊNG và in nó ra.")
+        hong = _dinh_dang_duoc(nl)
+        chot(hong is None, f"{vi_tri}: `_NgoaiLeLa` không định dạng được — {hong}.")
 
-            def _gh_nem(*_a, _e=ex_goc):
-                raise _e
-            ra = _goi_doi_tra_ve(f"t187 {vi_tri}", _gh_nem, "kiem_github", lease_d,
-                                 env_them=ENV_GITHUB)
-            chot(ra.__class__.__name__ == "_NgoaiLeLa" and type(ra.kieu) is str
-                 and type(ra.ma.kieu) is str and type(ra.ma.thong_diep) is str,
-                 f"{vi_tri}: qua CỬA THẬT mọi trường chẩn đoán phải là `str` THUẦN, nhận "
-                 f"{ra.__class__.__name__}.")
-            hong = _dinh_dang_duoc(ra)
-            chot(hong is None, f"{vi_tri}: kết quả của cửa không định dạng được — {hong}.")
+        def _gh_nem(*_a, _e=ex_goc):
+            raise _e
+        ra = _goi_doi_tra_ve(f"t187 {vi_tri}", _gh_nem, "kiem_github", lease_d,
+                             env_them=ENV_GITHUB)
+        chot(ra.__class__.__name__ == "_NgoaiLeLa" and type(ra.kieu) is str
+             and type(ra.ma.kieu) is str and type(ra.ma.thong_diep) is str,
+             f"{vi_tri}: qua CỬA THẬT mọi trường chẩn đoán phải là `str` THUẦN, nhận "
+             f"{ra.__class__.__name__}.")
+        hong = _dinh_dang_duoc(ra)
+        chot(hong is None, f"{vi_tri}: kết quả của cửa không định dạng được — {hong}.")
 
     # NHÁNH BÁO LỖI CỦA CỬA — đường THỨ BA, cross-review codex lượt 2 (24-09) bắt.
     #
@@ -8505,6 +8520,9 @@ def t187_chan_doan_phai_ha_ve_CHUOI_THUAN_chu_khong_chi_isinstance():
                   "_ExTraLopNem: <__str__ trả thứ không phải chuỗi>"),
                  (_ca(f"_gia_lop{i}_exception", _ExLopNem(NOI_DUNG)), f"_ExLopNem: {NOI_DUNG}"),
                  (_ca(f"_gia_lop{i}_assert", _AssertLopNem(NOI_DUNG)), NOI_DUNG)]
+    for i, (_nh, truong, ex_goc, mong_bao) in enumerate(_bang_ho_truong()):
+        them.append((_ca(f"_gia_bang{i}_{'ten' if truong == 'tên lớp' else 'td'}", ex_goc),
+                     mong_bao))
     them += [(_ca("_gia_assert_str_nem", _AssertStrNem()), "<__str__ hỏng>"),
              (_ca("_gia_str_khong_chuoi", _StrKhongChuoiBo()),
               "_StrKhongChuoiBo: <__str__ trả thứ không phải chuỗi>")]
@@ -8537,9 +8555,9 @@ def t187_chan_doan_phai_ha_ve_CHUOI_THUAN_chu_khong_chi_isinstance():
     sai = {ten: dong_do.get(ten) for ten, mong in MONG_DONG.items() if dong_do.get(ten) != [mong]}
     chot(not sai, f"`main()` in SAI nội dung dòng ĐỎ: {sai!r}; mong {MONG_DONG!r}.")
     n_gia = len(ca_gia)
-    chot(n_gia == 28 and f"lease_publish: 0/{n_gia} đạt; đã chạy={n_gia}, bỏ qua=0" in dau_ra,
-         f"`main()` không in dòng tổng kết `0/{n_gia}` (mong 28 = 5 + HO 6×2 + metaclass 3 "
-         f"+ `__class__` 3×2 + 2) — bộ chạy vỡ trước khi báo.")
+    chot(n_gia == 40 and f"lease_publish: 0/{n_gia} đạt; đã chạy={n_gia}, bỏ qua=0" in dau_ra,
+         f"`main()` không in dòng tổng kết `0/{n_gia}` (mong 40 = 5 + HO 6×2 + metaclass 3 "
+         f"+ `__class__` 3×2 + bảng HO×trường 6×2 + 2) — bộ chạy vỡ trước khi báo.")
 
     # ĐỐI CHỨNG XANH: chuỗi thường phải đi qua NGUYÊN VẸN, không bị thay bằng dự phòng.
     thuong = _chuoi_thuan(NOI_DUNG, "<dự phòng>")

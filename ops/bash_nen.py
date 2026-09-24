@@ -756,6 +756,52 @@ def _oid_dong_cung(muc):
 
 _KHONG_BIET = object()          # "không rút gọn được" — KHÁC với "rút gọn ra None"
 
+
+# ── N74 (r20) — PHÉP THẬT TRONG BỘ GẤP HẰNG: MỘT CỬA, HAI LOẠI HỎNG ────────────────────────
+# Vòng 14 đo được `"%c" % 999999999999999999999999999` làm `quet --json` THOÁT 1 kèm traceback
+# (`OverflowError` không nằm trong bộ `except` của nhánh `%`) — một tệp phân tích được làm sập
+# CẢ cổng toàn cây, thay vì ra `KHONG_DO_DUOC` đã khai. Hỏi theo LỚP, không theo ca: MỖI phép
+# thật mà bộ gấp gọi (`%`, cắt lát, `join`, `encode`/`decode`, `str`/`bytes`, `os.fs*`,
+# `PurePosixPath`) đều có thể ném một ngoại lệ mà bộ `except` liệt kê chưa nghĩ tới. Hai loại:
+#   · phép ném vì GIÁ TRỊ (`OverflowError`, `IndexError`, `LookupError`…) — trên hằng của kiểu
+#     dựng sẵn, chương trình THẬT cũng ném đúng thế lúc tính đối số, nên lời gọi không bao giờ
+#     chạy ⇒ `_KHONG_BIET` là ĐÚNG, không phải thận trọng;
+#   · phép KHUẾCH ĐẠI tài nguyên — `"%0999999999d" % 1` dựng một chuỗi 1 GB từ 17 byte mã
+#     nguồn. Chương trình thật có thể chạy được, bộ quét thì không nên thử ⇒ `_VuotNganSach`,
+#     và `quet` biến nó thành `KHONG_DO_DUOC` (fail-close), KHÔNG thành `_KHONG_BIET` (fail-open).
+# `%` là phép DUY NHẤT trong tập gấp có hệ số khuếch đại: `+`/`join`/cắt lát đều bị chặn trên
+# bởi độ dài hằng trong mã nguồn; `*` không được gấp.
+class _VuotNganSach(Exception):
+    """Gấp hằng vượt ngân sách tài nguyên — KHÔNG ĐO ĐƯỢC, không phải "không phải bash"."""
+
+
+_NGAN_SACH_DINH_DANG = 4096
+_MAU_DINH_DANG = re.compile(r"%(?:\([^)]*\))?[#0 +-]*(\*|\d+)?(?:\.(\*|\d+))?[hlL]?.", re.S)
+
+
+def _chay_phep(ham, *doi):
+    """Gọi MỘT phép thật trên giá trị đã gấp. Ném vì giá trị ⇒ `_KHONG_BIET`; hết bộ nhớ ⇒
+    `_VuotNganSach`. Mọi phép thật của bộ gấp đi qua ĐÚNG cửa này."""
+    try:
+        return ham(*doi)
+    except MemoryError as e:
+        raise _VuotNganSach(f"gấp hằng hết bộ nhớ: {type(e).__name__}") from None
+    except Exception:
+        return _KHONG_BIET
+
+
+def _kiem_ngan_sach_dinh_dang(mau, doi):
+    """Ném `_VuotNganSach` khi `mau % doi` có thể dựng chuỗi lớn hơn ngân sách."""
+    van = mau.decode("latin-1") if isinstance(mau, bytes) else mau
+    for m in _MAU_DINH_DANG.finditer(van):
+        for so in m.groups():
+            if so is not None and so != "*" and int(so) > _NGAN_SACH_DINH_DANG:
+                raise _VuotNganSach(f"độ rộng/độ chính xác {so} > {_NGAN_SACH_DINH_DANG}")
+    if "*" in van:
+        cac = doi if isinstance(doi, tuple) else (doi,)
+        if any(type(x) is int and abs(x) > _NGAN_SACH_DINH_DANG for x in cac):
+            raise _VuotNganSach(f"`*` nhận số > {_NGAN_SACH_DINH_DANG}")
+
 _TEN_DUNG_DUONG = {"Path", "PurePath", "PosixPath", "WindowsPath",
                    "PurePosixPath", "PureWindowsPath"}
 
@@ -791,10 +837,9 @@ def _gia_tri_hang(nut, tra_ten=None, sau=0):
     if isinstance(nut, ast.BinOp) and isinstance(nut.op, ast.Add):
         t = _gia_tri_hang(nut.left, tra_ten, sau + 1)
         ph = _gia_tri_hang(nut.right, tra_ten, sau + 1)
-        if isinstance(t, str) and isinstance(ph, str):
-            return t + ph
-        if isinstance(t, bytes) and isinstance(ph, bytes):
-            return t + ph
+        if (isinstance(t, str) and isinstance(ph, str)) or \
+                (isinstance(t, bytes) and isinstance(ph, bytes)):
+            return _chay_phep(lambda: t + ph)
         return _KHONG_BIET
     # N65 (r19) — BỐN TOÁN TỬ GIỮ HẰNG NỮA. Vòng 13 đo được `f"bash"`, `"%s" % "bash"`,
     # `"".join(["ba", "sh"])`, `"hsab"[::-1]` — cả bốn CHẠY BASH THẬT (in ra `OK`) mà r18 trả
@@ -812,27 +857,22 @@ def _gia_tri_hang(nut, tra_ten=None, sau=0):
         ph = _gia_tri_hang(nut.right, tra_ten, sau + 1)
         if isinstance(t, (str, bytes)) and ph is not _KHONG_BIET \
                 and isinstance(ph, (str, bytes, int, float, tuple)):
-            try:
-                return t % ph
-            except (TypeError, ValueError, KeyError):
-                return _KHONG_BIET
+            _kiem_ngan_sach_dinh_dang(t, ph)
+            return _chay_phep(lambda: t % ph)
         return _KHONG_BIET
     if isinstance(nut, ast.Subscript):
         goc = _gia_tri_hang(nut.value, tra_ten, sau + 1)
         chi = nut.slice
         if isinstance(goc, (str, bytes)):
-            try:
-                if isinstance(chi, ast.Slice):
-                    phan = [None if x is None else _gia_tri_hang(x, tra_ten, sau + 1)
-                            for x in (chi.lower, chi.upper, chi.step)]
-                    if all(x is None or type(x) is int for x in phan):
-                        return goc[slice(*phan)]
-                    return _KHONG_BIET
-                k = _gia_tri_hang(chi, tra_ten, sau + 1)
-                if type(k) is int:
-                    return goc[k]
-            except (IndexError, ValueError):
+            if isinstance(chi, ast.Slice):
+                phan = [None if x is None else _gia_tri_hang(x, tra_ten, sau + 1)
+                        for x in (chi.lower, chi.upper, chi.step)]
+                if all(x is None or type(x) is int for x in phan):
+                    return _chay_phep(lambda: goc[slice(*phan)])
                 return _KHONG_BIET
+            k = _gia_tri_hang(chi, tra_ten, sau + 1)
+            if type(k) is int:
+                return _chay_phep(lambda: goc[k])
         return _KHONG_BIET
     # KHÔNG có nhánh cho bao chứa: `ast.literal_eval` đã phủ bao chứa HẰNG, còn bao chứa
     # mà phần tử phải GẤP thì `_la_vec_bash` đã mở theo CÚ PHÁP trước khi tới đây. Bản đầu
@@ -848,14 +888,11 @@ def _gia_tri_hang(nut, tra_ten=None, sau=0):
         phan = [_gia_tri_hang(a, tra_ten, sau + 1) for a in nut.args]
         if not phan or not all(isinstance(x, str) for x in phan):
             return _KHONG_BIET
-        try:
-            # DÙNG `PurePosixPath` CHO MỌI HÀM DỰNG, có chủ đích: ta chỉ CHẤP NHẬN kết quả
-            # khi nó đúng bằng `bash`/`bash.exe`, mà cả hai đều không chứa dấu phân cách —
-            # nên khác biệt POSIX/Windows không đổi được phán quyết, còn dùng một lớp cố
-            # định thì phép đo không phụ thuộc nền đang chạy.
-            return str(PurePosixPath(*phan))
-        except (ValueError, TypeError):
-            return _KHONG_BIET
+        # DÙNG `PurePosixPath` CHO MỌI HÀM DỰNG, có chủ đích: ta chỉ CHẤP NHẬN kết quả
+        # khi nó đúng bằng `bash`/`bash.exe`, mà cả hai đều không chứa dấu phân cách —
+        # nên khác biệt POSIX/Windows không đổi được phán quyết, còn dùng một lớp cố
+        # định thì phép đo không phụ thuộc nền đang chạy.
+        return _chay_phep(lambda: str(PurePosixPath(*phan)))
     return _KHONG_BIET
 
 
@@ -877,51 +914,49 @@ def _gap_vo_boc(nut, tra_ten, sau):
     KHÔNG đóng. Thứ đóng được cửa là phân tích luồng dữ liệu, và nó vẫn là nợ có tên.
     """
     f = nut.func
-    try:
-        if (isinstance(f, ast.Attribute) and f.attr == "join" and not nut.keywords
-                and len(nut.args) == 1):
-            # N65 (r19) — `"".join([...])` trên một HẰNG phân cách. Không che được.
-            sep = _gia_tri_hang(f.value, tra_ten, sau + 1)
-            if isinstance(nut.args[0], (ast.List, ast.Tuple)):
-                phan = [_gia_tri_hang(a, tra_ten, sau + 1) for a in nut.args[0].elts]
-            else:
-                phan = _gia_tri_hang(nut.args[0], tra_ten, sau + 1)
-            if isinstance(sep, (str, bytes)) and isinstance(phan, (list, tuple)) \
-                    and all(type(x) is type(sep) for x in phan):
-                return sep.join(phan)
-            return _KHONG_BIET
-        if (isinstance(f, ast.Attribute) and f.attr in ("encode", "decode")
-                and not nut.keywords and len(nut.args) <= 2):
-            goc = _gia_tri_hang(f.value, tra_ten, sau + 1)
-            doi = [_gia_tri_hang(a, tra_ten, sau + 1) for a in nut.args]
-            if (isinstance(goc, str if f.attr == "encode" else bytes)
-                    and all(isinstance(x, str) for x in doi)):
-                return getattr(goc, f.attr)(*doi)
-            return _KHONG_BIET
-        if (isinstance(f, ast.Name) and f.id in ("str", "bytes") and not nut.keywords
-                and 1 <= len(nut.args) <= 3 and tra_ten is not None
-                and not tra_ten(f.id, hoi_rang_buoc=True)):
-            doi = [_gia_tri_hang(a, tra_ten, sau + 1) for a in nut.args]
-            if all(isinstance(x, (str, bytes)) for x in doi):
-                return (str if f.id == "str" else bytes)(*doi)
-            return _KHONG_BIET
-        if tra_ten is not None and len(nut.args) == 1 and not nut.keywords:
-            ten = None
-            if isinstance(f, ast.Attribute) and isinstance(f.value, ast.Name):
-                muc = tra_ten(f.value.id)
-                if muc and muc[0] == "os" and muc[1] is None and f.attr in _BOC_OS:
-                    ten = f.attr
-            elif isinstance(f, ast.Name):
-                muc = tra_ten(f.id)
-                if muc and muc[0] == "os" and muc[1] in _BOC_OS:
-                    ten = muc[1]
-            if ten is not None:
-                v = _gia_tri_hang(nut.args[0], tra_ten, sau + 1)
-                if isinstance(v, (str, bytes)):
-                    return getattr(os, ten)(v)
-                return _KHONG_BIET
-    except (TypeError, ValueError, UnicodeError, LookupError):
+    # N74 (r20): mọi phép thật đi qua `_chay_phep`; không còn `try` bao cả khối.
+    if (isinstance(f, ast.Attribute) and f.attr == "join" and not nut.keywords
+            and len(nut.args) == 1):
+        # N65 (r19) — `"".join([...])` trên một HẰNG phân cách. Không che được.
+        sep = _gia_tri_hang(f.value, tra_ten, sau + 1)
+        if isinstance(nut.args[0], (ast.List, ast.Tuple)):
+            phan = [_gia_tri_hang(a, tra_ten, sau + 1) for a in nut.args[0].elts]
+        else:
+            phan = _gia_tri_hang(nut.args[0], tra_ten, sau + 1)
+        if isinstance(sep, (str, bytes)) and isinstance(phan, (list, tuple)) \
+                and all(type(x) is type(sep) for x in phan):
+            return _chay_phep(sep.join, phan)
         return _KHONG_BIET
+    if (isinstance(f, ast.Attribute) and f.attr in ("encode", "decode")
+            and not nut.keywords and len(nut.args) <= 2):
+        goc = _gia_tri_hang(f.value, tra_ten, sau + 1)
+        doi = [_gia_tri_hang(a, tra_ten, sau + 1) for a in nut.args]
+        if (isinstance(goc, str if f.attr == "encode" else bytes)
+                and all(isinstance(x, str) for x in doi)):
+            return _chay_phep(getattr(goc, f.attr), *doi)
+        return _KHONG_BIET
+    if (isinstance(f, ast.Name) and f.id in ("str", "bytes") and not nut.keywords
+            and 1 <= len(nut.args) <= 3 and tra_ten is not None
+            and not tra_ten(f.id, hoi_rang_buoc=True)):
+        doi = [_gia_tri_hang(a, tra_ten, sau + 1) for a in nut.args]
+        if all(isinstance(x, (str, bytes)) for x in doi):
+            return _chay_phep(str if f.id == "str" else bytes, *doi)
+        return _KHONG_BIET
+    if tra_ten is not None and len(nut.args) == 1 and not nut.keywords:
+        ten = None
+        if isinstance(f, ast.Attribute) and isinstance(f.value, ast.Name):
+            muc = tra_ten(f.value.id)
+            if muc and muc[0] == "os" and muc[1] is None and f.attr in _BOC_OS:
+                ten = f.attr
+        elif isinstance(f, ast.Name):
+            muc = tra_ten(f.id)
+            if muc and muc[0] == "os" and muc[1] in _BOC_OS:
+                ten = muc[1]
+        if ten is not None:
+            v = _gia_tri_hang(nut.args[0], tra_ten, sau + 1)
+            if isinstance(v, (str, bytes)):
+                return _chay_phep(getattr(os, ten), v)
+            return _KHONG_BIET
     return _KHONG_BIET
 
 
@@ -1145,9 +1180,14 @@ def _loi_goi_tran(than: str):
       · bộ tính hằng gấp thêm f-string KHÔNG biểu thức, `%` trên hằng, `"sep".join([...])`, cắt
         lát và chỉ số trên hằng (N65, r19); và `pty.spawn(argv)` — kể cả chuỗi trần — là lời
         phóng kiểu argv (N66, r19);
-      · CHÚ THÍCH không được tính thì KHÔNG bị quét (N68, r19): có `from __future__ import
-        annotations`, hoặc chú thích biến CỤC BỘ trong hàm (không bao giờ tính, PEP 526). Giá
-        trị mặc định, decorator, cơ sở lớp thì vẫn quét — chúng chạy lúc định nghĩa;
+      · CHÚ THÍCH được LƯU thì bị quét, dù có `from __future__ import annotations` hay không
+        (N73, r20 — đổi lại một phần N68): chú thích hoãn vẫn nằm trong `__annotations__` và
+        `typing.get_type_hints` TÍNH LẠI được (đo được: in ra `OK`). Chỉ chú thích biến CỤC BỘ
+        trong hàm là không bao giờ tính (không được lưu, PEP 526) nên KHÔNG quét. Giá trị mặc
+        định, decorator, cơ sở lớp vẫn quét — chúng chạy lúc định nghĩa;
+      · phép thật của bộ gấp hằng NÉM vì giá trị (`"%c" % <số quá lớn>`) ⇒ chương trình thật
+        cũng ném lúc tính đối số ⇒ KHÔNG bắt; phép KHUẾCH ĐẠI vượt ngân sách (`"%05000d" % 1`)
+        ⇒ `_VuotNganSach`, và `quet` ra `KHONG_DO_DUOC` — fail-close, không đoán (N74, r20);
       · nhưng HAI HELPER SHELL thì KHÔNG nhận path-like: `Popen(..., shell=True)` **từ
         chối** đối số đường dẫn (đo được: `TypeError`), nên `getoutput(Path("bash"))`
         là một BÁO ĐỘNG GIẢ và không được bắt;
@@ -1159,6 +1199,12 @@ def _loi_goi_tran(than: str):
         chứa lời gọi CŨNG theo thứ tự thực thi (N67, r19 — đổi ngược doctrine r8), chỉ khác
         một điều: chưa có lần ghi cục bộ nào hoàn tất thì đó là `UnboundLocalError`, KHÔNG
         đọc sang phạm vi ngoài;
+      · RÀNG BUỘC TỚI ĐƯỢC LỜI GỌI theo NHÁNH (N72, r20): hai `except`, hai `case`, `if`/`else`
+        LOẠI TRỪ nhau — `import` ở nhánh này không tới lời gọi ở nhánh kia; thân vòng lặp có
+        CẠNH QUAY LUI — `import` đứng sau lời gọi trong cùng thân vòng vẫn tới từ vòng hai;
+        `finally` luôn chạy. Và một phạm vi chỉ theo thứ tự với lời gọi khi mọi phạm vi ở
+        giữa CHẠY NGAY (thân lớp, list/set/dict comprehension): lời gọi trong THÂN HÀM thấy
+        `import` của module dù `import` viết ở dưới;
       · `type X[T] = …` (PEP 695) có phạm vi chú thích RIÊNG (N47, r16): `T` của nó không rò
         ra phạm vi chứa;
       · callee giải theo PHẠM VI TỪ VỰNG (r8, F3 codex vòng 3): `import subprocess` ở module
@@ -1184,9 +1230,10 @@ def _loi_goi_tran(than: str):
     Các nhóm ấy cần phân tích luồng dữ liệu, không phải khớp cây cú pháp. Chúng là **nợ có
     tên**, không phải chỗ đã kín. Ai mở rộng thì thêm hình dạng vào `t33` TRƯỚC.
     Mọi phạm vi đều giải theo THỨ TỰ THỰC THI (N46/N53/N67) — xem `_giai_ten`. Ở HÀM, tên
-    cục bộ chưa có lần ghi nào hoàn tất là `UnboundLocalError`, không rơi ra ngoài. Hai chỗ
-    vẫn lệch đã khai ở đó: nhánh `if` không chạy (rơi về phía thận trọng), và `global` ghi từ
-    một hàm định nghĩa sau nhưng gọi trước. Hàm BAO NGOÀI một hàm lồng không lọc theo vị trí.
+    cục bộ không lần ghi nào TỚI được là `UnboundLocalError`, không rơi ra ngoài. Ba chỗ vẫn
+    lệch đã khai ở đó (N72): hai giá trị KHÁC NHAU cùng có thể tới lời gọi ⇒ mơ hồ ⇒ không
+    báo; `global` ghi từ một hàm gọi lúc nào không rõ; `break`/`continue`/`return` không đổi
+    đường nhánh. Hàm BAO NGOÀI một hàm lồng không lọc theo vị trí.
     """
     cay = ast.parse(than)
     # LỌC TRƯỚC THEO HẰNG, GIẢI CALLEE SAU. Bộ giải phạm vi dựng bảng ràng buộc cho MỌI phạm
@@ -1320,6 +1367,136 @@ def _ket_nut(nut):
             getattr(nut, "end_col_offset", None) or getattr(nut, "col_offset", 0))
 
 
+# ── N72 (r20) — RÀNG BUỘC NÀO TỚI ĐƯỢC LỜI GỌI: theo NHÁNH ĐIỀU KHIỂN, không chỉ theo VỊ TRÍ ──
+# N46/N53/N67 trả lời câu ấy bằng MỘT phép so: ràng buộc hoàn tất MUỘN NHẤT trước lời gọi là
+# giá trị đang có. Đúng cho mã THẲNG, sai theo ba hướng mà vòng 14 và phép quét theo lớp đo
+# được, tất cả trên Python 3.12.3 THẬT:
+#   · NHÁNH LOẠI TRỪ NHAU — `except A: import subprocess` · `except B: subprocess.run([…])`
+#     (hay hai `case` của `match`, hay `if`/`else`) ⇒ nhánh sau chạy thì nhánh trước KHÔNG
+#     chạy ⇒ `UnboundLocalError`/`NameError`, mà bộ quét BÁO. (codex vòng 14)
+#   · CẠNH QUAY LUI — `for i in range(2): if i: subprocess.run([…])` · `import subprocess`
+#     ⇒ vòng thứ hai chạy bash THẬT, mà bộ quét trả `[]`. (tìm bằng phép quét theo lớp)
+#   · (M1) lời gọi trong THÂN HÀM thì vị trí của nó không nói gì về lúc nó chạy so với phạm
+#     vi MODULE: `def f(): subprocess.run([…])` · `import subprocess` · `f()` chạy bash THẬT
+#     mà bộ quét trả `[]` — N46 lọc phạm vi module theo vị trí BẤT KỂ lời gọi nằm ở đâu.
+# Mô hình: mỗi ràng buộc và mỗi lời gọi mang ĐƯỜNG NHÁNH từ gốc phạm vi — dãy `(id(nút),
+# nhánh)` của mọi nút điều khiển bao quanh. Từ hai đường ấy suy ra ba điều, không cần đồ thị
+# luồng: LOẠI TRỪ (tách ở cùng một nút, hai nhánh không cùng chạy), QUAY LUI (cùng nằm trong
+# thân một vòng lặp), và THỐNG TRỊ (đường của ràng buộc là TIỀN TỐ đường của lời gọi ⇒ mọi
+# lối tới lời gọi đều đi qua nó).
+# NÓI THẲNG chỗ vẫn là xấp xỉ: `break`/`continue`/`return` giữa hai câu lệnh, và trình quản
+# lý `with` nuốt ngoại lệ, không làm đổi đường — nên một ràng buộc trong thân `with` KHÔNG
+# thống trị mã sau `with` (thận trọng), nhưng một phép nhảy sớm thì không được mô hình hoá.
+
+
+def _ban_do_nhanh(cha):
+    """{id(nút con): nhánh} cho các con của `cha` nằm trong một nhánh CÓ ĐIỀU KIỆN.
+
+    Con KHÔNG có mặt ⇒ chạy mỗi khi `cha` chạy (điều kiện của `if`, `iter` của `for`,
+    `subject` của `match`, `items` của `with`, và `finalbody` — `finally` luôn chạy).
+    """
+    ra = {}
+
+    def dat(cac, nhanh):
+        for x in cac:
+            ra[id(x)] = nhanh
+
+    ten = type(cha).__name__
+    if isinstance(cha, ast.If):
+        dat(cha.body, "than")
+        dat(cha.orelse, "khac")
+    elif isinstance(cha, ast.IfExp):
+        dat([cha.body], "than")
+        dat([cha.orelse], "khac")
+    elif isinstance(cha, (ast.For, ast.AsyncFor)):
+        dat([cha.target, *cha.body], "lap")
+        dat(cha.orelse, "het")
+    elif isinstance(cha, ast.While):
+        # Điều kiện của `while` được tính LẠI sau mỗi vòng ⇒ nó thuộc vòng lặp như thân.
+        dat([cha.test, *cha.body], "lap")
+        dat(cha.orelse, "het")
+    elif ten in ("Try", "TryStar"):
+        dat(cha.body, "thu")
+        for i, h in enumerate(cha.handlers):
+            ra[id(h)] = ("bat", i)
+        dat(cha.orelse, "khong_loi")
+    elif ten == "Match":
+        for i, c in enumerate(cha.cases):
+            ra[id(c)] = ("ca", i)
+    elif isinstance(cha, (ast.With, ast.AsyncWith)):
+        dat(cha.body, "voi")
+    elif isinstance(cha, ast.BoolOp):
+        for i, v in enumerate(cha.values[1:], 1):
+            ra[id(v)] = ("va_hoac", i)
+    return ra
+
+
+def _di_xuong(duong, cha, ban_do, con):
+    """Đường nhánh của `con`, khi `duong` là đường của `cha`."""
+    nhanh = ban_do.get(id(con))
+    return duong if nhanh is None else duong + ((id(cha), nhanh),)
+
+
+def _loai_tru(a, b):
+    """Hai nhánh KHÁC NHAU của CÙNG một nút có thể KHÔNG BAO GIỜ cùng chạy trong một lượt?"""
+    if {a, b} == {"than", "khac"}:
+        return True
+    ba, bb = isinstance(a, tuple), isinstance(b, tuple)
+    if ba and bb and a[0] == b[0] and a[0] in ("bat", "ca") and a != b:
+        return True       # hai `except` / hai `case`: chọn đúng một
+    return (ba and a[0] == "bat" and b == "khong_loi") or \
+        (bb and b[0] == "bat" and a == "khong_loi")
+
+
+def _gia_tri_toi(cac_rang_buoc, truoc, duong):
+    """(tập ràng buộc CÓ THỂ là giá trị tại lời gọi, có_thể_CHƯA_gán) — N72, r20.
+
+    `truoc is None` ⇒ phạm vi KHÔNG theo thứ tự với lời gọi (một hàm bao ngoài, hay module
+    khi lời gọi nằm trong thân hàm): mọi ràng buộc đều có thể là giá trị, không cái nào che
+    cái nào.
+    Một ràng buộc TỚI được lời gọi khi: (tiến) nó hoàn tất trước lời gọi và không tách khỏi
+    lời gọi ở một cặp nhánh LOẠI TRỪ; hoặc (lùi) cả hai cùng nằm trong thân một vòng lặp. Nó
+    bị CHE khi một ràng buộc khác THỐNG TRỊ lời gọi và nằm giữa (lối tiến), hay nằm trong
+    vòng lặp trong cùng chung của cả hai (lối lùi).
+    """
+    if truoc is None:
+        return {x[0] for x in cac_rang_buoc}, False
+
+    def chung(d):
+        k = 0
+        while k < len(d) and k < len(duong) and d[k] == duong[k]:
+            k += 1
+        return k
+
+    thong_tri = [x for x in cac_rang_buoc if x[1] < truoc and chung(x[2]) == len(x[2])]
+    song = set()
+    for rb, vt, d in cac_rang_buoc:
+        k = chung(d)
+        tach = k < len(d) and k < len(duong) and d[k][0] == duong[k][0] \
+            and _loai_tru(d[k][1], duong[k][1])
+        if vt < truoc and not tach and not any(vt < y[1] for y in thong_tri):
+            song.add(rb)
+            continue
+        vong = [j for j in range(k) if d[j][1] == "lap"]
+        if vong and not any(len(y[2]) > vong[-1] for y in thong_tri):
+            song.add(rb)
+    return song, not thong_tri
+
+
+def _mot_import(tap):
+    """(module, hàm|None) khi MỌI giá trị có thể là CÙNG một `import` theo dõi; None nếu khác.
+
+    "Mơ hồ ⇒ không báo" GIỮ NGUYÊN (N53): hai giá trị khác nhau có thể tới lời gọi thì không
+    đoán. Đổi một điều: hai ràng buộc ở hai chỗ mà CÙNG giá trị (`import subprocess` trong
+    cả hai nhánh) nay là một giá trị, không phải mơ hồ.
+    """
+    if len(tap) == 1:
+        (rb,) = tap
+        if rb[0] == "import":
+            return rb[1], rb[2]
+    return None
+
+
 def _vi_tri_hoan_tat(n, mac_dinh):
     """Vị trí mà một ràng buộc sinh trong câu lệnh `n` THỰC SỰ có hiệu lực (N53, r17).
 
@@ -1384,14 +1561,16 @@ def _rang_buoc_cua(pham_vi):
     """
     import ast
     bang, toan_cuc, phi_cuc_bo = {}, set(), set()
-    # N46 (r16) — MOI rang buoc mang VI TRI `(dong, cot)` cua nut sinh ra no. Phep giai o
-    # pham vi HAM khong dung toi no (luat ten cuc bo cua Python la LUC BIEN DICH, khong theo
-    # dong chay), nhung MODULE va THAN LOP thi CO: xem `_giai_ten`.
+    # N46 (r16) — MOI rang buoc mang VI TRI `(dong, cot)` cua nut sinh ra no. Moi pham vi
+    # CHAY THEO THU TU voi loi goi deu dung toi no (N67 da go ngoai le "ham thi khong"):
+    # xem `_giai_ten` va `_gia_tri_toi`.
     vi_tri = [(0, 0)]
+    # N72 (r20) — và ĐƯỜNG NHÁNH từ gốc phạm vi tới nó (xem `_gia_tri_toi`).
+    duong_ht = [()]
 
     def them(ten, rb):   # noqa: D401
         if ten:
-            bang.setdefault(ten, set()).add((rb, vi_tri[0]))
+            bang.setdefault(ten, set()).add((rb, vi_tri[0], duong_ht[0]))
 
     if isinstance(pham_vi, (ast.FunctionDef, ast.AsyncFunctionDef, ast.Lambda)):
         a = pham_vi.args
@@ -1403,11 +1582,13 @@ def _rang_buoc_cua(pham_vi):
         chong = [*getattr(pham_vi, "type_params", ()), pham_vi.value]
     else:
         chong = list(ast.iter_child_nodes(pham_vi))
-    chong = [(x, (0, 0)) for x in chong]
+    ban_do_goc = _ban_do_nhanh(pham_vi)
+    chong = [(x, (0, 0), _di_xuong((), pham_vi, ban_do_goc, x)) for x in chong]
     while chong:
-        n, ht = chong.pop()
+        n, ht, d = chong.pop()
         ht = _vi_tri_hoan_tat(n, ht)
         vi_tri[0] = ht
+        duong_ht[0] = d
         if isinstance(n, _NUT_PHAM_VI):
             if isinstance(n, (ast.FunctionDef, ast.AsyncFunctionDef, ast.Lambda,
                               ast.ClassDef)):
@@ -1490,43 +1671,14 @@ def _rang_buoc_cua(pham_vi):
             them(getattr(n, "name", None), ("khac",))
         elif type(n).__name__ == "MatchMapping":
             them(getattr(n, "rest", None), ("khac",))
-        chong.extend((c, ht) for c in ast.iter_child_nodes(n))
+        ban_do = _ban_do_nhanh(n)
+        chong.extend((c, ht, _di_xuong(d, n, ban_do, c)) for c in ast.iter_child_nodes(n))
     return bang, toan_cuc, phi_cuc_bo
 
 
-def _loc_truoc(cac_rang_buoc, truoc):
-    """Ràng buộc HOÀN TẤT MUỘN NHẤT mà vẫn trước `truoc`; `truoc is None` ⇒ lấy tất.
-
-    N53 (r17) — "muộn nhất thắng", KHÔNG phải "đúng một cái". Bản r16 lọc theo vị trí rồi vẫn
-    đòi tập còn lại có ĐÚNG MỘT phần tử, nên `subprocess = object()` · `import subprocess` ·
-    `subprocess.run(["bash"])` cho hai ràng buộc cùng nằm trước lời gọi ⇒ mơ hồ ⇒ **LỌT**, dù
-    lúc gọi thì `import` đã ghi đè phép gán. Ở module và thân lớp, không gian tên là thứ bị
-    SỬA TUẦN TỰ: cái ghi sau cùng là cái đang có hiệu lực.
-    Vẫn mơ hồ khi HAI ràng buộc hoàn tất ở CÙNG một vị trí (ví dụ `a = b = …`) — khi ấy tập
-    trả về có nhiều hơn một phần tử và `_tra_import` từ chối, đúng phía thận trọng.
-    """
-    if truoc is None:
-        return set(cac_rang_buoc)
-    truoc_do = [x for x in cac_rang_buoc if x[1] < truoc]
-    if not truoc_do:
-        return set()
-    dinh = max(x[1] for x in truoc_do)
-    return {x for x in truoc_do if x[1] == dinh}
-
-
-def _tra_import(cac_rang_buoc, truoc=None):
-    """(module, hàm|None) khi tên bị ràng buộc ĐÚNG MỘT LẦN và là `import` theo dõi; None khi
-    bị che, mơ hồ, hay trỏ vào thứ khác.
-
-    `truoc` — vị trí `(dòng, cột)` của lời gọi. Chỉ phạm vi chạy theo THỨ TỰ CÂU LỆNH mới
-    truyền nó vào (N46); `None` giữ nguyên ngữ nghĩa cũ "ràng buộc là thuộc tính của CẢ
-    phạm vi", đúng luật tên cục bộ lúc biên dịch của hàm."""
-    cac = _loc_truoc(cac_rang_buoc, truoc)
-    if len(cac) == 1:
-        ((rb, _vt),) = cac
-        if rb[0] == "import":
-            return rb[1], rb[2]
-    return None
+# `_loc_truoc` / `_tra_import` ĐÃ GỠ Ở r20 — N72 thay "muộn nhất thắng" bằng `_gia_tri_toi` +
+# `_mot_import`. Để lại chúng là để lại MÃ CHẾT, và đột biến neo vào mã chết thì SỐNG SÓT mà
+# không đo gì (bài học r17 với `_la_hang_bash`).
 
 
 def _co_rang_buoc(ten, chuoi):
@@ -1546,7 +1698,7 @@ def _co_rang_buoc(ten, chuoi):
     return False
 
 
-def _giai_ten(ten, chuoi, vi_tri=None):
+def _giai_ten(ten, chuoi, vi_tri=None, ds=None):
     """Giải `ten` theo chuỗi phạm vi `chuoi` (ngoài → trong), luật Python: phạm vi gần nhất
     có ràng buộc thắng; thân LỚP không nhìn thấy được từ hàm lồng trong nó; `global` nhảy về
     module; `nonlocal` bỏ qua phạm vi hiện tại.
@@ -1563,52 +1715,72 @@ def _giai_ten(ten, chuoi, vi_tri=None):
     LỌC RỖNG KHÔNG PHẢI "KHÔNG TÌM THẤY": trong thân lớp, mọi ràng buộc nằm SAU lời gọi ⇒
     lúc ấy tên còn thuộc phạm vi BAO, nên phải đi tiếp ra ngoài chứ không trả None.
 
-    KHAI THẲNG chỗ vẫn lệch: một phép gán nằm trước lời gọi nhưng nằm trong nhánh `if` KHÔNG
-    chạy, hay một lời gọi trong vòng lặp mà vòng sau đã bị che — vị trí không nói được. Cả
-    hai đều rơi về phía THẬN TRỌNG (coi là mơ hồ ⇒ không báo), trừ một chỗ: `global` ghi từ
-    một hàm định nghĩa SAU lời gọi mà lại được gọi TRƯỚC. Đó là lối vào duy nhất còn báo oan
-    được, và nó cần phân tích luồng gọi — **nợ có tên**, không phải chỗ đã kín.
+    N72 (r20) — "THEO THỨ TỰ" LÀ QUAN HỆ GIỮA PHẠM VI VÀ LỜI GỌI, không phải thuộc tính của
+    phạm vi. `ds[i] = (đường nhánh của lời gọi trong phạm vi i, phạm vi i CHẠY NGAY lúc định
+    nghĩa)`. Phạm vi `i` theo thứ tự với lời gọi khi MỌI phạm vi nằm giữa đều chạy ngay (thân
+    lớp, list/set/dict comprehension) — N46 lọc module theo vị trí BẤT KỂ lời gọi nằm trong
+    thân hàm, nên `def f(): subprocess.run([…])` · `import subprocess` LỌT (M1). Trong phạm vi
+    theo thứ tự, `_gia_tri_toi` quyết giá trị nào tới được lời gọi theo NHÁNH, không chỉ theo
+    vị trí: nhánh loại trừ không tới, cạnh quay lui của vòng lặp tới.
+
+    KHAI THẲNG chỗ vẫn là nợ: (a) hai giá trị KHÁC NHAU cùng có thể tới lời gọi (`if x: import
+    subprocess` · `else: subprocess = None`) ⇒ mơ hồ ⇒ KHÔNG báo, dù một nhánh chạy bash thật —
+    doctrine "mơ hồ ⇒ không báo" giữ nguyên, không đổi ở vòng này; (b) `global` ghi từ một hàm
+    được gọi lúc nào thì cú pháp không nói được — ràng buộc ấy vẫn được xếp theo vị trí của nó
+    trong thân hàm; (c) `break`/`continue`/`return` không đổi đường nhánh.
     """
     n = len(chuoi)
+    if ds is None:
+        ds = [((), False)] * n
     for i in range(n - 1, -1, -1):
         la_lop, bang, toan_cuc, phi_cuc_bo = chuoi[i]
         if la_lop and i != n - 1:
             continue
-        # Module là `chuoi[0]`; thân lớp mang cờ `la_lop`. Cả hai chạy theo thứ tự câu lệnh.
-        # N67 (r19) — VÀ PHẠM VI HÀM TRỰC TIẾP CHỨA LỜI GỌI CŨNG VẬY. ĐỔI NGƯỢC doctrine r8/N46,
-        # và phải nói thẳng: r8 viết *"trong hàm, phép gán làm tên thành cục bộ ngay từ lúc biên
-        # dịch, nên `import` rồi gán lại ở dòng dưới là mơ hồ THẬT"*. SAI. "Là cục bộ" chỉ quyết
-        # một điều: đọc TRƯỚC lần ghi đầu tiên thì `UnboundLocalError`. Nó KHÔNG quyết giá trị
-        # nào đang có lúc gọi — và giá trị ấy đi theo thứ tự thực thi, y như ở module. Đo được
-        # trên Python 3.12.3 THẬT (CI ghim 3.12): `def f(): import subprocess;
-        # subprocess.run(["bash", …]); subprocess = object()` IN RA `OK`, mà r18 trả `[]`.
-        # CHỈ phạm vi TRỰC TIẾP chứa lời gọi (`i == n - 1`): một hàm BAO NGOÀI chạy lúc nào so
-        # với hàm lồng thì vị trí cú pháp không nói được, nên ở đó vẫn không lọc.
-        la_ham = i == n - 1 and i != 0 and not la_lop
-        truoc = vi_tri if (vi_tri is not None and (la_lop or i == 0 or la_ham)) else None
+        # N67 (r19) giữ nguyên ý: phạm vi HÀM trực tiếp chứa lời gọi cũng chạy theo thứ tự —
+        # "là cục bộ" chỉ quyết `UnboundLocalError` trước lần ghi đầu, không quyết giá trị.
+        # N72 (r20) mở rộng đúng một bậc: một phạm vi theo thứ tự khi mọi phạm vi GIỮA nó và
+        # lời gọi đều CHẠY NGAY; module không còn được lọc vô điều kiện.
+        theo_thu_tu = vi_tri is not None and all(ds[j][1] for j in range(i + 1, n))
+        truoc = vi_tri if theo_thu_tu else None
+        duong = ds[i][0]
+        la_ham = i != 0 and not la_lop
         if ten in toan_cuc:
             # N39 (r15) — phạm vi KHAI `global x` mà TỰ NÓ ràng buộc `x` thì dùng ràng buộc
             # ẤY: bên trong hàm vừa `import subprocess`, cái tên là module, không mơ hồ.
-            # Không có ràng buộc riêng (khai ĐỌC KHÔNG) thì mới về bảng module.
+            # Không có ràng buộc riêng tới được (khai ĐỌC KHÔNG) thì mới về bảng module.
             # Đối xứng cả hai chiều: `global x; x = gia()` cho `("khac",)` ⇒ None ⇒ KHÔNG báo,
             # đúng, vì tên ấy đã bị che.
-            if ten in bang and _loc_truoc(bang[ten], truoc):
-                return _tra_import(bang[ten], truoc)
+            if ten in bang:
+                song, _ = _gia_tri_toi(bang[ten], truoc, duong)
+                if song:
+                    return _mot_import(song)
             # Bảng module KHÔNG lọc theo vị trí: lời gọi nằm trong một hàm, và hàm ấy chạy
             # lúc nào thì vị trí cú pháp không nói được. Không lọc = phía thận trọng.
-            return _tra_import(chuoi[0][1].get(ten, ()))
+            return _mot_import(_gia_tri_toi(chuoi[0][1].get(ten, ()), None, ())[0])
         if ten in phi_cuc_bo:
-            if ten in bang and _loc_truoc(bang[ten], truoc):
-                return _tra_import(bang[ten], truoc)
+            if ten in bang:
+                song, _ = _gia_tri_toi(bang[ten], truoc, duong)
+                if song:
+                    return _mot_import(song)
             continue
         if ten in bang:
-            if _loc_truoc(bang[ten], truoc):
-                return _tra_import(bang[ten], truoc)
-            if la_ham:
-                # Tên là CỤC BỘ mà chưa có lần ghi nào hoàn tất trước lời gọi ⇒ Python ném
-                # `UnboundLocalError`, KHÔNG đọc sang phạm vi ngoài. Khác hẳn module/thân lớp.
-                return None
-            continue                       # mọi ràng buộc còn ở PHÍA SAU ⇒ đi ra phạm vi bao
+            song, co_the_chua_gan = _gia_tri_toi(bang[ten], truoc, duong)
+            if not song:
+                if la_ham:
+                    # Tên là CỤC BỘ mà không lần ghi nào TỚI được lời gọi ⇒ Python ném
+                    # `UnboundLocalError`, KHÔNG đọc sang phạm vi ngoài. Khác hẳn module/lớp.
+                    return None
+                continue                   # thân lớp/module: chưa gán ⇒ đi ra phạm vi bao
+            if la_lop and co_the_chua_gan and _co_rang_buoc(ten, chuoi[:i]):
+                # Thân lớp mà có lối tới lời gọi KHÔNG qua lần gán nào ⇒ lối ấy đọc phạm vi
+                # BAO. Chỉ báo khi CẢ HAI lối cùng ra một `import`. Phạm vi bao KHÔNG ràng buộc
+                # tên ấy thì lối kia là `NameError` — sập, không phải một giá trị khác — nên
+                # đối xứng với `UnboundLocalError` của hàm: báo theo lối còn lại. Đo được:
+                # `class C: if os.sep: import subprocess` · `subprocess.run([…])` chạy bash
+                # THẬT, mà bản đầu của N72 (so với kết quả giải ngoài là None) trả `[]`.
+                rieng = _mot_import(song)
+                return rieng if rieng == _giai_ten(ten, chuoi[:i], vi_tri, ds[:i]) else None
+            return _mot_import(song)
     return None
 
 
@@ -1699,19 +1871,22 @@ def _giai_callee_theo_pham_vi(cay):
         bang, toan_cuc, phi_cuc_bo = bang_cua[id(nut)]
         return (isinstance(nut, ast.ClassDef), bang, toan_cuc, phi_cuc_bo)
 
-    # N68 (r19) — CHÚ THÍCH KHÔNG PHẢI LÚC NÀO CŨNG CHẠY. Đo trên Python 3.12.3 THẬT:
-    #   · có `from __future__ import annotations` ⇒ chú thích tham số / trả về / biến được
-    #     LƯU dạng chuỗi, không tính — `def f(x: subprocess.run(["bash"…]))` KHÔNG in gì;
-    #   · chú thích biến CỤC BỘ trong hàm (`x: … = 1` trong thân) KHÔNG BAO GIỜ được tính, kể
-    #     cả không có `__future__` (PEP 526; đo được: không in gì) — rộng hơn đề xuất vòng 13
-    #     một bậc, và phép đo là lý do;
-    #   · chú thích biến ở MODULE / THÂN LỚP mà không có `__future__` thì CÓ chạy (in ra).
-    # Bản r18 quét mọi chú thích như lời gọi thật ⇒ BÁO OAN. Decorator, giá trị mặc định, cơ
-    # sở lớp vẫn quét: chúng chạy lúc định nghĩa bất kể `__future__`.
-    # CHƯA ĐO: Python 3.14 hoãn chú thích MẶC ĐỊNH (PEP 649); CI ghim 3.12 nên ở đây không đo.
-    hoan_chu_thich = any(
-        isinstance(n, ast.ImportFrom) and n.module == "__future__"
-        and any(al.name == "annotations" for al in n.names) for n in cay.body)
+    # N68 (r19) → N73 (r20) — CHÚ THÍCH: câu hỏi đúng là "có được LƯU không", không phải
+    # "có được tính LÚC ĐỊNH NGHĨA không". N68 bỏ qua mọi chú thích khi có
+    # `from __future__ import annotations`, vì lúc định nghĩa chúng không chạy. Nhưng chúng
+    # được LƯU dạng chuỗi trong `__annotations__`, và bất kỳ ai cũng TÍNH LẠI được. Đo được ở
+    # vòng 14 trên Python 3.12.3 THẬT: `class C: x: subprocess.run(["bash", …])` rồi
+    # `typing.get_type_hints(C)` IN RA `OK`, mà r19 trả `[]`. Cùng thế với tham số hàm và
+    # `eval(f.__annotations__["a"])`. Nên quy tắc đúng CÙNG LOẠI với thân hàm — thân hàm cũng
+    # chỉ chạy khi có người gọi, và ta vẫn quét nó: MÃ CÓ THỂ CHẠY thì quét.
+    #   · chú thích tham số / trả về / biến ở MODULE hoặc THÂN LỚP — được lưu ⇒ QUÉT, dù có
+    #     `__future__` hay không (r18 đúng ở đây; r19 sai);
+    #   · chú thích biến CỤC BỘ trong hàm — KHÔNG được lưu ở đâu cả (PEP 526), không công cụ
+    #     nào tính lại được ⇒ KHÔNG chạy. Phần này của N68 giữ nguyên, đo lại: không in gì.
+    # Hệ quả, nói thẳng: phát hiện F5 vòng 13 ("chú thích hoãn bị báo oan") nay lại được
+    # BÁO. Đó không phải báo oan — đó là mã được lưu để chạy. NỢ CÓ TÊN: chú thích hoãn được
+    # tính trong GLOBALS của module, không theo phạm vi từ vựng, nên tên chỉ ràng buộc trong
+    # hàm bao vẫn được giải theo phạm vi từ vựng ở đây.
 
     def _ngoai_va_trong(con):
         """(nút tính ở phạm vi NGOÀI, nút tính ở phạm vi TRONG) của một nút phạm vi."""
@@ -1728,9 +1903,8 @@ def _giai_callee_theo_pham_vi(cay):
                      *[x for x in a.kw_defaults if x is not None],
                      *[x.annotation for x in (*a.posonlyargs, *a.args, *a.kwonlyargs,
                                               a.vararg, a.kwarg)
-                       if x is not None and x.annotation is not None
-                       and not hoan_chu_thich]]
-            if con.returns is not None and not hoan_chu_thich:
+                       if x is not None and x.annotation is not None]]
+            if con.returns is not None:
                 ngoai.append(con.returns)
             return ngoai, list(con.body)
         if isinstance(con, ast.Lambda):
@@ -1762,49 +1936,49 @@ def _giai_callee_theo_pham_vi(cay):
             if isinstance(n, ast.Call):
                 ket.append((n, None))
 
-    def tham(con, chuoi):
+    def tham(con, chuoi, ds):
         """Thăm MỘT nút. Nút phạm vi được xử lý TẠI ĐÂY chứ không phải ở vòng lặp của nút cha.
 
         Bản đầu của N37 truyền nút phạm vi vào hàm duyệt như GỐC, nên chính nó không còn được
         nhận ra là phạm vi và một hàm lồng trong hàm mất đúng một tầng. Đo được ngay trên kho:
         `scripts/tl_selftest.py` khai 1 lời gọi trần mà đo được 0 — cổng ra ĐỎ và chỉ thẳng tệp.
         Ca tối giản: `def run(): def f(): import shutil as sh; sh.which("bash")` ⇒ `[]`.
+
+        `ds` (N72, r20) — `[(đường nhánh trong phạm vi i, phạm vi i CHẠY NGAY)]`, song song với
+        `chuoi`; `_giai_ten` dùng nó để biết ràng buộc nào tới được lời gọi.
         """
-        if hoan_chu_thich and isinstance(con, (ast.FunctionDef, ast.AsyncFunctionDef)):
-            a = con.args
-            for x in (*a.posonlyargs, *a.args, *a.kwonlyargs, a.vararg, a.kwarg):
-                if x is not None and x.annotation is not None:
-                    khong_chay(x.annotation)
-            if con.returns is not None:
-                khong_chay(con.returns)
-        if isinstance(con, ast.AnnAssign) and (hoan_chu_thich
-                                               or (len(chuoi) > 1 and not chuoi[-1][0])):
-            # Chú thích biến: bị hoãn (có `__future__`), hoặc nằm trong HÀM (không bao giờ tính).
+        if isinstance(con, ast.AnnAssign) and len(chuoi) > 1 and not chuoi[-1][0]:
+            # N73 (r20): chú thích biến CỤC BỘ trong hàm — không bao giờ tính, không được lưu.
             khong_chay(con.annotation)
             for x in (con.target, con.value):
                 if x is not None:
-                    tham(x, chuoi)
+                    tham(x, chuoi, ds)
             return
         if isinstance(con, _NUT_PHAM_VI):
             ngoai, trong = _ngoai_va_trong(con)
             chuoi_trong = chuoi + [pham_vi(con)]
+            # Thân lớp và list/set/dict comprehension CHẠY NGAY tại chỗ định nghĩa; thân hàm,
+            # lambda, generator và alias kiểu thì chạy LÚC KHÁC.
+            ds_trong = ds + [((), isinstance(con, (ast.ClassDef, ast.ListComp, ast.SetComp,
+                                                    ast.DictComp)))]
             for x in ngoai:
-                tham(x, chuoi)
+                tham(x, chuoi, ds)
             for x in trong:
-                tham(x, chuoi_trong)
+                tham(x, chuoi_trong, ds_trong)
             return
         if isinstance(con, ast.Call):
             # `hoi_rang_buoc=True` (N58, r18): hỏi "tên này có ràng buộc nào trong chuỗi phạm
             # vi không" — để biết `str`/`bytes` còn là tên DỰNG SẴN hay đã bị che. `_giai_ten`
             # trả None cho CẢ "không ràng buộc" lẫn "bị che", nên không trả lời được câu ấy.
             ket.append((con, lambda ten, hoi_rang_buoc=False, c=chuoi,
-                        v=(con.lineno, con.col_offset):
-                        _co_rang_buoc(ten, c) if hoi_rang_buoc else _giai_ten(ten, c, v)))
+                        v=(con.lineno, con.col_offset), d=ds:
+                        _co_rang_buoc(ten, c) if hoi_rang_buoc else _giai_ten(ten, c, v, d)))
+        ban_do = _ban_do_nhanh(con)
         for x in ast.iter_child_nodes(con):
-            tham(x, chuoi)
+            tham(x, chuoi, ds[:-1] + [(_di_xuong(ds[-1][0], con, ban_do, x), ds[-1][1])])
 
     for _con in ast.iter_child_nodes(cay):
-        tham(_con, [pham_vi(cay)])
+        tham(_con, [pham_vi(cay)], [((), False)])
     return ket
 
 
@@ -2008,9 +2182,15 @@ def quet(goc: Path, hom_nay=None):
     for rel, than in sorted(noi_dung.items()):
         try:
             dong = _loi_goi_tran(than)
-        except (SyntaxError, ValueError) as e:
+        except Exception as e:             # noqa: BLE001 — có chủ đích, xem N74
             # FAIL-CLOSE. Một tệp không phân tích được là một tệp KHÔNG ĐO ĐƯỢC, không
             # phải một tệp sạch — `None ≠ False`.
+            # N74 (r20) — BẮT MỌI `Exception`, không liệt kê. Bộ `(SyntaxError, ValueError)` cũ
+            # để `OverflowError` của bộ gấp hằng đi thẳng ra ngoài: `quet --json` THOÁT 1 kèm
+            # traceback (vòng 14), tức một tệp làm sập cả cổng. Liệt kê kiểu ngoại lệ là đúng
+            # cái danh sách CẤM mà `CLAUDE.md` nói không bao giờ đủ; hỏi "phép đo có hoàn tất
+            # không" thì chỉ có hai đáp án. Lỗi của chính bộ quét (ví dụ `KeyError` của N41)
+            # cũng rơi vào đây — ĐỎ và NÓI TÊN, không im lặng.
             # N48 (r16) — `_duong_bao_cao` PHAI phu CA loi ra LOI. Ban r15 chi lam sach
             # duong o `co_loi_goi`, con nhanh nay nhet `rel` THO vao `ly_do`; do duoc: mot
             # muc `ops/bad_\xff.py` cu phap hong lam `quet --json` nha byte 0xff, va mot
@@ -2019,7 +2199,8 @@ def quet(goc: Path, hom_nay=None):
             return RC_KHONG_DO_DUOC, {"trang_thai": "KHONG_DO_DUOC", "nguon_tep": nguon_tep,
                                       "bien_git_da_go": bien_git_da_go,
                                       "ly_do": "không đọc/phân tích được "
-                                               f"{_duong_bao_cao(rel)}: {e}"}
+                                               f"{_duong_bao_cao(rel)}: "
+                                               f"{type(e).__name__}: {e}"}
         if dong:
             # N54 (r17) — KHOÁ GIỮ NGUYÊN VẸN. `_duong_bao_cao` là phép HIỂN THỊ; dùng nó
             # làm khoá thì hai đường khác nhau có thể đè nhau (đo được ở vòng 11).

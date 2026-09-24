@@ -7421,8 +7421,11 @@ def t175_het_han_ma_KHONG_co_dau_thi_van_la_het_han():
 
     CẶP `t174`/`t175` PHẢI ĐỎ NGƯỢC CHIỀU NHAU — mỗi đột biến đích làm ĐÚNG MỘT trong hai ca
     đỏ, và hai đột biến cho hai ca KHÁC NHAU. Đo (cross-review codex lượt 3): đưa phép dò xuống
-    sau `kiem()` ⇒ chỉ `t174` đỏ; cho phép dò ném `RC_DA_DANG` vô điều kiện ⇒ chỉ `t175` đỏ. Hai
-    tập ca đỏ khác nhau là bằng chứng cặp này PHÂN BIỆT được hai lỗi. Dấu hiệu bộ TƯƠNG ĐƯƠNG
+    sau `kiem()` ⇒ TRONG CẶP chỉ `t174` đỏ; cho phép dò ném `RC_DA_DANG` vô điều kiện ⇒ TRONG CẶP
+    chỉ `t175` đỏ. Hai tập ca đỏ khác nhau là bằng chứng cặp này PHÂN BIỆT được hai lỗi.
+    Phạm vi của câu trên là CẶP, không phải cả miền. Tập đỏ đầy đủ trên `t174`–`t184`, đo bằng
+    công cụ công thức (bản sao, phân hạng bằng `TinHieuChotCa`, 24-09): dò sau `kiem()` ⇒
+    `{t174, t182}`; ném 9 vô điều kiện ⇒ `{t175, t177, t178, t179, t180, t181, t183, t184}`. Dấu hiệu bộ TƯƠNG ĐƯƠNG
     là điều ngược lại: mọi đột biến đều làm CẢ HAI cùng đỏ (hoặc cùng xanh). (Bản trước viết
     ngược nghĩa câu này.)
 
@@ -7677,7 +7680,10 @@ def t180_hai_loi_cung_luc_thi_tien_kiem_KHONG_duoc_cuop_quyen_phan():
     sót đường thứ ba".
 
     ĐỘT BIẾN LÀM CA NÀY ĐỎ: đưa `_tien_kiem_mien_dang` trở ra NGOÀI `try` ⇒ `rc` 4 → 8.
-    Đã chạy: nó giết ĐÚNG ca này, `t174`–`t179` đều QUA.
+    Đã chạy (công cụ công thức, bản sao, 24-09): tập đỏ trên `t174`–`t184` là `{t178, t180}`, cả
+    hai đỏ bằng `TinHieuChotCa` của chính ca. `t178` đỏ ĐÚNG lý do: vế `lease_id=None` của nó gọi
+    thẳng `_do_dau_da_dang` và đòi TRẢ VỀ, mà tiền kiểm ngoài `try` ném `Chan(8)`. Bản trước khai
+    "giết ĐÚNG ca này, `t174`–`t179` đều QUA" — hẹp hơn phép đo; cross-review codex lượt 6 bắt.
 
     CÔNG THỨC THỨ HAI CỦA BẢN TRƯỚC LÀ SAI, và đây là lý do nó bị gỡ: bản trước ghi "bỏ
     `return` ở nhánh `Chan` để tiền kiểm ném lại". Python KHÔNG tự ném lại một ngoại lệ đã

@@ -39,6 +39,11 @@ Codex Desktop không được khai thành CLI. Bề mặt Desktop không chứng
 đã phục vụ hoặc tính độc lập của session; khai giới hạn đo được và giữ mức advisory
 khi chưa đủ evidence theo protocol.
 
+Tên lịch sử “Codex service” chưa có tên máy trong hợp đồng dữ liệu; nợ này được
+để riêng tại [#461](https://github.com/ducthangho/tra-luat/issues/461), theo mục
+`no_khai_ra` của [biên nhận review #460 lượt 9](reviews/pr460-bien-nhan-v2-review-9-gpt6astra-verdict.receipt.yaml).
+Hàng Desktop không ánh xạ lại tên đó, không sửa biên nhận lịch sử và không đóng nợ #461.
+
 ## 3. Vai trò ChatGPT Pro Web
 
 ChatGPT Pro Web được dùng theo hai chế độ.

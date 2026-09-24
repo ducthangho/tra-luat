@@ -2075,7 +2075,7 @@ def c44_bo_ba_provider_phai_KHOP_nguon_ke_hoach_va_hang_LECH_phai_doi_hanh_vi():
                               + _doc_bang_launcher("_PROVIDER_NGOAI_CLI")) if r}
     for prov, be_mat, van_chuyen in BO_BA_PROVIDER_DONG_BANG:
         r = hang.get((prov, be_mat))
-        bang(r is not None, f"`{prov}` KHÔNG có hàng nào trong bảng của launcher.py")
+        bang(r is not None, f"`{prov}`/`{be_mat}` KHÔNG có hàng nào trong bảng của launcher.py")
         bang(r[-2:] == [be_mat, van_chuyen],
              f"hàng `{prov}` LỆCH oracle §2: launcher={r[-2:]} oracle={[be_mat, van_chuyen]}")
     # (b) oracle ⊆ bảng §2 của kế hoạch, đọc Ô CUỐI chứ không dò substring (`machine` là tiền tố
@@ -2092,20 +2092,10 @@ def c44_bo_ba_provider_phai_KHOP_nguon_ke_hoach_va_hang_LECH_phai_doi_hanh_vi():
         # `R9-F05`: đối chiếu CẢ cột surface, không chỉ transport. Bản trước chỉ so ô cuối, nên
         # lời khai "Antigravity là hàng DUY NHẤT lệch §2" rộng hơn phép đo — reviewer lượt 9 đổi
         # riêng ô surface trong bản sao kế hoạch và `c44` VẪN QUA.
-        # Ô surface có HAI dạng trong §2: một token trong dấu nháy ngược, hoặc prose nhiều giá trị
-        # (hàng Codex: "`codex_cli` hoặc Codex service"). Khai thẳng ngoại lệ ấy thay vì lờ đi:
-        # dạng nhiều giá trị chỉ đòi surface của oracle CÓ MẶT như một token, và *"Codex service"*
-        # chưa có tên máy trong hợp đồng dữ liệu — đó là nợ CHÍNH SÁCH, không vá trong PR này.
-        token = _RE.findall(r"`([^`]+)`", o[-2])
-        if len(token) == 1 and " hoặc " not in o[-2]:
-            bang(token[0] == be_mat_s2,
-                 f"`{prov}`: §2 khai bề mặt {token[0]!r}, oracle chép tay {be_mat_s2!r}")
-        else:
-            bang(be_mat_s2 in token,
-                 f"`{prov}`: ô bề mặt §2 nhiều giá trị {o[-2]!r} mà KHÔNG chứa {be_mat_s2!r}")
-            bang(prov == "openai_codex",
-                 f"`{prov}`: ô bề mặt nhiều giá trị — mới chỉ khai ngoại lệ cho `openai_codex`, "
-                 f"thêm hàng dạng này phải quyết cách biểu diễn trong hợp đồng dữ liệu trước")
+        # Mỗi hàng §2 có đúng một surface máy; nợ tên Codex service ở #461
+        # không được dùng làm ngoại lệ cho bảng contract hiện hành.
+        bang(o[-2] == f"`{be_mat_s2}`",
+             f"`{prov}`: §2 khai bề mặt {o[-2]!r}, đòi đúng một token `{be_mat_s2}`")
     # (c) witness đối xứng — hàng ấy phải ĐỔI HÀNH VI, không chỉ đổi chuỗi
     d = v2_du()
     d["model_reviewer_identity"].update(provider="google_antigravity", surface="antigravity",
@@ -2376,6 +2366,20 @@ def c64_desktop_advisory_va_cli_giu_hop_dong():
 @ca
 def c65_desktop_khong_muon_quyen_hoac_bien_thanh_cli():
     """Thêm surface không mở provider/transport/assurance khác."""
+    # Oracle đọc AST riêng: Desktop không phải lệnh CLI và chỉ có một hàng đúng.
+    cli = _doc_bang_launcher("_TRANSPORT_CONTRACTS")
+    ngoai_cli = _doc_bang_launcher("_PROVIDER_NGOAI_CLI")
+    bang(not any(r[-2] == "codex_desktop" for r in cli if r),
+         "Desktop bị khai thành CLI trong `_TRANSPORT_CONTRACTS`")
+    desktop = [r for r in ngoai_cli if r and r[:2] == ["openai_codex", "codex_desktop"]]
+    bang(desktop == [["openai_codex", "codex_desktop", "machine"]],
+         f"Desktop ngoài CLI phải có ĐÚNG 1 hàng với transport machine: {desktop}")
+    # Giữ đủ evidence phiên để đo riêng phân vùng NGƯỜI/MÔ HÌNH.
+    d = v2_du(); d["assurance"] = "human_audited"
+    d["model_reviewer_identity"].update(surface="codex_desktop", transport="machine", phien_doc_lap=True)
+    loi = bnv2._thieu(d)
+    bang(any("mức của NGƯỜI audit" in x for x in loi),
+         f"Desktop có session phải bị chặn human_audited bởi phân vùng người/mô hình: {loi}")
     for field, value, reason in (("provider", "anthropic_claude", "surface"),
                                   ("transport", "human", "transport"),
                                   ("surface", "codex_desktop_fake", "surface")):

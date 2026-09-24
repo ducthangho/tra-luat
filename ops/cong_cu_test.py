@@ -902,9 +902,23 @@ DOT_BIEN = {
         "        loai = _loai_loi_goi(nut, tra_ten)\n",
         "        loai = _loai_theo_TEN_khong_giai_callee(nut)  # đột biến: nhận theo TÊN\n",
         "BASH_NEN", (), "t33_do_phu_cua_cong_do_duoc_THEO_HINH_DANG"),
-    "t39_bo_phep_so_bang": (str(TEP_TEST.relative_to(GOC)),
-        "            if not all(isinstance(o, _ast.Eq) for o in con.ops):\n                continue\n",
-        "            pass  # đột biến: thôi đòi phép so BẰNG, ca âm `!=` bị bắt oan\n",
+    # r14 — THAY dot bien `t39_bo_phep_so_bang`: dong no neo (`isinstance(o, _ast.Eq)`) khong
+    # con, vi luat nay khong doi phep so BANG nua. Hai dot bien duoi troi HAI CHIEU cua luat
+    # MOI, va chieu thu hai moi la chieu de quen.
+    # (a) THU HEP ve luat cu (chi chieu DO, chi phep so bang) => dung ba lan lap `t45`/`t47`/
+    #     `t48` chui qua duoc. Mau `rc_bang_0`, `ne_rc`, `ne_tt`, `ngoai_ds` phai DOI.
+    "t39_thu_hep_ve_chieu_DO": (str(TEP_TEST.relative_to(GOC)),
+        '        if "rc" in ten or (chuoi | thuoc) & set(_TRUONG_TONG_HOP):\n',
+        '        if ("rc" in ten and 2 in {n.value for n in _ast.walk(dieu_kien)\n'
+        '                                 if isinstance(n, _ast.Constant)}):  # đột biến: về luật cũ\n',
+        "TEP_TEST", _KEM_TEP_TEST, "t39_chi_CA_PHAN_QUYET_duoc_chot_tren_rc_va_trang_thai"),
+    # (b) NOI QUA: gom ca TRUONG CO CHE vao => `truong_co_che`/`lech_oid` bi bat OAN, va moi ca
+    #     doc `co_loi_goi_tran` phai chui vao `CA_PHAN_QUYET`. Mot luat bat oan la luat se bi
+    #     tat, va khi ay ca ba lan lap kia quay lai — day la chieu r7 da so, nen phai co ca giu.
+    "t39_noi_qua_sang_truong_co_che": (str(TEP_TEST.relative_to(GOC)),
+        '_TRUONG_TONG_HOP = ("trang_thai", "ngoai_danh_sach", "ly_do")\n',
+        '_TRUONG_TONG_HOP = ("trang_thai", "ngoai_danh_sach", "ly_do",\n'
+        '                    "co_loi_goi_tran", "lech_oid_dong_cung")  # đột biến: nới quá\n',
         "TEP_TEST", _KEM_TEP_TEST, "t39_chi_CA_PHAN_QUYET_duoc_chot_tren_rc_va_trang_thai"),
     # HAI DOT BIEN CHO CHINH LUAT N22 — mot luat khong the DO thi khong phai luat.
     # Chung dot bien TEP TEST, nen `bp` la `TEP_TEST` chu khong phai `BASH_NEN`.
@@ -2026,7 +2040,7 @@ def t27_cong_khong_bao_dong_gia_tren_CHU_THICH():
             '# và shutil.which("bash") trong một chú thích\n'
             'GHI_CHU = \'shutil.which("bash")\'\n', encoding="utf-8")
         rc, bao = _quet(cay, bq)
-        bang(rc == 0 and bao["trang_thai"] == "DAT",
+        bang(not (bao.get("co_loi_goi_tran") or {}),
              f"tệp chỉ NHẮC TỚI trong chú thích/chuỗi mà cổng ĐỎ: rc={rc} "
              f"{bao.get('ly_do')} — báo động giả")
 
@@ -2454,7 +2468,7 @@ def t35_cong_phai_quet_TOAN_CAY_chu_khong_chi_ops():
         # sẽ làm chiều ngược của ratchet báo "mục đã sạch" và nền ĐỎ oan.
         bq = _bash_nen_voi_chua_chuyen(tmp, {})
         rc, bao = _quet(cay, bq)
-        bang(rc == 0, f"NỀN phải SẠCH mà rc={rc}: {bao.get('ly_do')}")
+        bang(not (bao.get("co_loi_goi_tran") or {}), f"NỀN phải SẠCH mà rc={rc}: {bao.get('ly_do')}")
         bang(bao.get("pham_vi") == "toan-cay",
              f"báo cáo không khai phạm vi toàn cây: {bao.get('pham_vi')!r}")
 
@@ -2589,7 +2603,7 @@ def t37_danh_sach_tep_la_INDEX_da_add_thi_quet_chua_add_thi_KHONG():
         bq = _bash_nen_voi_chua_chuyen(tmp, {})
 
         rc, bao = _quet(cay, bq)
-        bang(rc == 0 and bao["trang_thai"] == "DAT",
+        bang(not (bao.get("co_loi_goi_tran") or {}),
              f"(1) NỀN phải SẠCH mà rc={rc}: {bao.get('ly_do')}")
         bang(bao.get("nguon_tep") == "git",
              f"(1) cây LÀ kho git mà cổng không khai dùng git: {bao.get('nguon_tep')!r}")
@@ -2599,7 +2613,7 @@ def t37_danh_sach_tep_la_INDEX_da_add_thi_quet_chua_add_thi_KHONG():
         (ban / "x.py").write_text('import shutil\nb = shutil.which("bash")\n', encoding="utf-8")
         (ban / "hong.py").write_text("def (\n", encoding="utf-8")
         rc, bao = _quet(cay, bq)
-        bang(rc == 0 and bao["trang_thai"] == "DAT",
+        bang(not (bao.get("co_loi_goi_tran") or {}),
              f"(2) tệp rác `node_modules/**` (chưa theo dõi) vẫn làm cổng rc={rc} "
              f"{bao.get('trang_thai')}: {str(bao.get('ly_do'))[:150]} — phán quyết đang phụ "
              f"thuộc MÁY AI CHẠY chứ không phụ thuộc INDEX của kho")
@@ -2749,30 +2763,61 @@ CA_PHAN_QUYET = {
         "chiều ngược của ratchet: mục đã SẠCH mà còn trong danh sách ⇒ rc=2.",
     "t36_ratchet_dem_SO_LAN_chu_khong_tha_ca_tep":
         "phán quyết MỚI ở r7: số lời gọi LỆCH với số khai ⇒ rc=2. Không ca nào khác trói nó.",
+    # r14 — HAI ca được khai TƯỜNG MINH sau khi nới luật. Cả hai trói PHÁN QUYẾT thật sự:
+    # fail-close LÀ thuộc tính của chúng, không phải một chốt mượn tạm.
+    "t44_khong_lay_duoc_INDEX_thi_KHONG_DO_DUOC_chu_khong_lui_ve_rglob":
+        "cây có `.git` mà không lấy được INDEX ⇒ rc=3 KHONG_DO_DUOC. Phán quyết CHÍNH LÀ "
+        "thuộc tính ca này trói: không có danh sách thì không có phán quyết.",
+    "t47_INDEX_phai_duoc_doc_TRUNG_THUC_va_nguon_py_nhan_du_moi_cach_viet":
+        "INDEX chưa hoà giải ⇒ rc=3. Chọn bừa một stage là tự bịa ra một cây chưa từng tồn "
+        "tại, nên fail-close là thuộc tính, không phải hệ quả.",
 }
-# `t27` KHÔNG có tên ở đây, và chiều ngược của `t39` là thứ chỉ ra điều đó. Nó là ca ÂM —
-# khẳng định cổng KHÔNG đỏ — nên nó không có chốt ĐỎ nào để được phép. Danh sách này là
-# "ai được khẳng định ĐỎ", không phải "ai động tới phán quyết".
+# DANH SÁCH NÀY LÀ MỘT KIỂM KÊ, KHÔNG PHẢI MỘT LỆNH CẤM — đọc lại ở r14 cho đúng. Trước r14
+# nó khai mình là "ai được khẳng định ĐỎ", và đúng câu ấy là chỗ ba lần lặp chui qua: `t45`
+# (r11) chốt "điểm vào phải hỏng", `t47` (r12) đọc `ngoai_danh_sach`, `t48` (r13) chốt
+# `rc == 0` — không cái nào "khẳng định ĐỎ" nên không cái nào bị hỏi.
+# Nay nó là: "ai được trói PHÁN QUYẾT của cổng — chiều nào cũng vậy". Bốn ca khác đã viết lại
+# theo TRƯỜNG CƠ CHẾ thay vì vào đây; `t27` là một trong số đó (nó chốt `co_loi_goi_tran` rỗng,
+# đúng thuộc tính nó trói: chú thích KHÔNG sinh ra lời gọi nào).
 
 _TT_DO = "DO"
 
 
+# TRƯỜNG TỔNG HỢP: giá trị của chúng là hàm của MỌI luật trong cổng. Một ca chốt lên đây là
+# trói lại phán quyết, không trói cơ chế của chính nó. Đối lập là TRƯỜNG CƠ CHẾ —
+# `co_loi_goi_tran`, `lech_so_loi_goi`, `lech_oid_dong_cung`, `nguon_tep`, `nguon_noi_dung`,
+# `bien_git_da_go`, `lien_ket_tuong_trung`, `muc_ratchet_da_sach`, `so_cho_phep` — mỗi trường
+# một luật, nên chốt lên chúng thì bán kính đột biến còn đọc được.
+_TRUONG_TONG_HOP = ("trang_thai", "ngoai_danh_sach", "ly_do")
+
+
 def _chot_DO_cua_cong_trong(than: str):
-    """Số dòng các chốt khẳng định **cổng ĐỎ** trong thân một ca. Đo bằng `ast`, không đo chuỗi.
+    """Số dòng các chốt trói PHÁN QUYẾT của cổng trong thân một ca. Đo bằng `ast`, không đo chuỗi.
 
-    HAI LẦN THU HẸP, cả hai đều từ một phép đo chứ không phải từ khẩu vị:
+    NỚI RỘNG Ở r14 — chỉ thị chủ kho, sau khi cùng một hình dạng lỗi lặp BA revision liên tiếp:
+        r11 `t45` chốt "cây bẩn ⇒ điểm vào hỏng"   — trói lại thuộc tính `t25`
+        r12 `t47` chốt trên `ngoai_danh_sach`      — trường có SAU bộ lọc miễn trừ
+        r13 `t48` chốt `rc == 0`                   — phán quyết, phụ thuộc MỌI luật khác
+    Cả ba **lọt qua** luật cũ, vì luật cũ chỉ phủ `rc == 2` và `trang_thai == "DO"`. Lặp lần
+    thứ ba thì chữa bằng CƠ CHẾ: nay phủ **mọi** phép chạm tới `rc` hoặc tới một TRƯỜNG TỔNG
+    HỢP (`trang_thai`, `ngoai_danh_sach`, `ly_do`) — mọi toán tử, mọi giá trị.
 
-    (a) CHỈ ca có gọi `_quet(...)`. Bản đầu quét mọi ca và tóm luôn `t2`, `t4`, `t7`, `t9`,
-        `t12`–`t15`… — những ca phán quyết của `ops/cong_cu.py kiem-tra`, chẳng liên quan gì
-        tới cổng `bash_nen`. Một luật bắt oan là luật sẽ bị tắt, và khi ấy cả sáu lần lặp kia
-        quay lại. `_quet` là ranh giới ĐO ĐƯỢC: gọi nó tức là đang chạy cổng.
+    VÌ SAO LẦN NÀY NỚI ĐƯỢC mà r7 thì không. r7 ghi: *"chiều XANH là NỀN của gần như mọi ca —
+    cấm nó thì không ca nào viết được."* Câu ấy chưa từng được ĐO. r14 đo: trong **13** ca có
+    gọi `_quet`, nới rộng bắt thêm **SÁU** — không phải gần hết. Sáu ca ấy đã đi đúng hai
+    đường: bốn viết lại theo TRƯỜNG CƠ CHẾ (`co_loi_goi_tran`, `lien_ket_tuong_trung`…), hai
+    khai tường minh vào `CA_PHAN_QUYET` vì fail-close **là** thuộc tính của chúng.
 
-    (b) CHỈ chiều ĐỎ (`rc == 2`, `trang_thai == "DO"`). Chiều XANH (`rc == 0 … "DAT"`) là NỀN
-        của gần như mọi ca — cấm nó thì không ca nào viết được. Và cả sáu lần lặp đều là
-        khẳng định ĐỎ, không lần nào là khẳng định xanh.
+    Danh sách này là một KIỂM KÊ, không phải một lệnh cấm: ca nào thật sự trói phán quyết thì
+    khai ra kèm lý do. Trước r14 nó là danh sách ba mục **bỏ sót sáu**.
 
-    Docstring NHẮC TỚI `rc == 2` để giải thích KHÔNG bị tính: chỉ đếm biểu thức so sánh thật
-    nằm trong đối số điều kiện của `bang(...)`/`dung(...)`. Đúng bài học `t27`.
+    GIỮ NGUYÊN thu hẹp (a) của r7: CHỈ ca có gọi `_quet(...)`. Bản đầu quét mọi ca và tóm luôn
+    `t2`, `t4`, `t7`… — những ca phán quyết của `ops/cong_cu.py kiem-tra`, chẳng liên quan tới
+    cổng `bash_nen`. Một luật bắt oan là luật sẽ bị tắt.
+
+    Docstring NHẮC TỚI `rc` và `trang_thai` để giải thích, mà KHÔNG bị tính: chỉ đọc đối số
+    ĐIỀU KIỆN của `bang(...)`/`dung(...)`, không đọc thông điệp, không đọc chú thích. Đúng bài
+    học `t27`.
     """
     import ast as _ast
     cay = _ast.parse(than)
@@ -2785,22 +2830,14 @@ def _chot_DO_cua_cong_trong(than: str):
         if not (isinstance(nut, _ast.Call) and isinstance(nut.func, _ast.Name)
                 and nut.func.id in ("bang", "dung") and nut.args):
             continue
-        for con in _ast.walk(nut.args[0]):
-            if not isinstance(con, _ast.Compare):
-                continue
-            # PHẢI LÀ PHÉP SO BẰNG. Bản đầu chỉ hỏi "có `rc` và có `2` không", nên
-            # `bang(rc != 2, …)` — một ca ÂM hoàn toàn hợp lệ — bị xếp là "khẳng định cổng
-            # ĐỎ" và bị ép vào `CA_PHAN_QUYET`. Cross-review codex trên `1253e3a` chỉ ra,
-            # executor đo lại: cả `==` lẫn `!=` đều ra dòng [3]. Một luật bắt oan là luật
-            # sẽ bị tắt, và khi ấy cả sáu lần lặp nó sinh ra để chặn sẽ quay lại.
-            if not all(isinstance(o, _ast.Eq) for o in con.ops):
-                continue
-            ten = {n.id for n in _ast.walk(con) if isinstance(n, _ast.Name)}
-            hang = {n.value for n in _ast.walk(con) if isinstance(n, _ast.Constant)}
-            if ("rc" in ten and 2 in hang) or (_TT_DO in hang and "trang_thai" in _nhan(con)):
-                ra.append(con.lineno)
-                break
-    return sorted(set(ra))
+        dieu_kien = nut.args[0]
+        ten = {n.id for n in _ast.walk(dieu_kien) if isinstance(n, _ast.Name)}
+        chuoi = {n.value for n in _ast.walk(dieu_kien)
+                 if isinstance(n, _ast.Constant) and isinstance(n.value, str)}
+        thuoc = {n.attr for n in _ast.walk(dieu_kien) if isinstance(n, _ast.Attribute)}
+        if "rc" in ten or (chuoi | thuoc) & set(_TRUONG_TONG_HOP):
+            ra.append(dieu_kien.lineno)
+    return ra
 
 
 def _nhan(nut) -> str:
@@ -2814,16 +2851,25 @@ def _nhan(nut) -> str:
 
 
 _MAU_TOAN_TU = {
-    # PHAI bat: khang dinh cong DO
+    # PHAI bat: moi phep cham toi `rc` hoac mot TRUONG TONG HOP — MOI toan tu, MOI gia tri.
+    # Truoc r14 chi hai mau `eq_*` la True, va DUNG CHO DO la cho ba lan lap chui qua:
+    # `t45` (r11) chot "diem vao phai hong", `t47` (r12) doc `ngoai_danh_sach`, `t48` (r13)
+    # chot `rc == 0`. Khong cai nao "khang dinh DO" nen khong cai nao bi hoi.
     "eq_rc":   "def f():\n    rc, bao = _quet(a, b)\n    bang(rc == 2, 'x')\n",
     "eq_tt":   'def f():\n    rc, bao = _quet(a, b)\n    bang(bao["trang_thai"] == "DO", "x")\n',
-    # KHONG duoc bat: ca AM hoan toan hop le
     "ne_rc":   "def f():\n    rc, bao = _quet(a, b)\n    bang(rc != 2, 'x')\n",
     "ne_tt":   'def f():\n    rc, bao = _quet(a, b)\n    bang(bao["trang_thai"] != "DO", "x")\n',
+    "rc_bang_0": "def f():\n    rc, bao = _quet(a, b)\n    bang(rc == 0, 'x')\n",
+    "ngoai_ds":  'def f():\n    rc, bao = _quet(a, b)\n    bang(not bao["ngoai_danh_sach"], "x")\n',
+    # KHONG duoc bat: TRUONG CO CHE — moi truong mot luat, nen ban kinh dot bien con doc duoc.
+    "truong_co_che": 'def f():\n    rc, bao = _quet(a, b)\n    bang(not bao["co_loi_goi_tran"], "x")\n',
+    "lech_oid":      'def f():\n    rc, bao = _quet(a, b)\n    bang(not bao["lech_oid_dong_cung"], "x")\n',
     # KHONG duoc bat: khong dung toi cong
     "khong_quet": "def f():\n    bang(rc == 2, 'x')\n",
 }
-_MAU_MONG = {"eq_rc": True, "eq_tt": True, "ne_rc": False, "ne_tt": False, "khong_quet": False}
+_MAU_MONG = {"eq_rc": True, "eq_tt": True, "ne_rc": True, "ne_tt": True,
+             "rc_bang_0": True, "ngoai_ds": True,
+             "truong_co_che": False, "lech_oid": False, "khong_quet": False}
 
 
 def _in_tu_kiem_luat_phan_quyet():
@@ -3165,7 +3211,7 @@ def t47_INDEX_phai_duoc_doc_TRUNG_THUC_va_nguon_py_nhan_du_moi_cach_viet():
         (d / "ops" / "bom.py").write_bytes(b"\xef\xbb\xbfX = 1\n")
         _g(d, "add", "-A")
         rc, bao = _quet(d, bq)
-        bang(rc == 0 and bao.get("trang_thai") == "DAT",
+        bang(not (bao.get("co_loi_goi_tran") or {}),
              f"(3) Python HỢP LỆ (PEP 263 latin-1 / BOM) làm cổng CHẶN cả kho: rc={rc} "
              f"{bao.get('trang_thai')} — {str(bao.get('ly_do'))[:180]}")
         (d / "ops" / "bom_ban.py").write_bytes(b"\xef\xbb\xbf" + BAN.encode("utf-8"))
@@ -3251,8 +3297,7 @@ def t46_noi_dung_lay_tu_INDEX_chu_khong_tu_cay_lam_viec():
             raise BoQuaMoiTruong(f"không tạo được symlink trên máy này: {e}") from e
         subprocess.run(["git", "-C", str(cay), "add", "-A"], capture_output=True, timeout=60)
         rc, bao = _quet(cay, bq)
-        bang(bao.get("trang_thai") == "KHONG_DO_DUOC"
-             and any("lien_ket.py" in x for x in (bao.get("lien_ket_tuong_trung") or [])),
+        bang(any("lien_ket.py" in x for x in (bao.get("lien_ket_tuong_trung") or [])),
              f"(1) mục `*.py` là SYMLINK mà cổng vẫn ra phán quyết: {bao.get('trang_thai')} "
              f"lien_ket_tuong_trung={bao.get('lien_ket_tuong_trung')} — nội dung thật nằm NGOÀI "
              f"thứ INDEX ghim, nên nó KHÔNG ĐO ĐƯỢC chứ không phải sạch")

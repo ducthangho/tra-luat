@@ -248,6 +248,15 @@ dieu_kien_dung:
 ghi_chu_chieu_lai: 'TRUONG TAI LIEU, khong phai truong cong. Ghi de nguoi sau doc duoc VI SAO
   g10 ton tai ma khong phai lat lai bon vong review.'
 
+da_bi_thay_the: wp570-bash-nen-r17-g17-fable
+da_bi_thay_the_vi_sao: 'NUA THU NHAT cua bia mo hai chieu, lan thay the THU CHIN trong chuoi.
+  Nua nay di TRUOC vi cong `lease_publish.py check` doc tu REF va CHAN [8] khi lease cu chua
+  mang dong nay — do duoc o luot g15->g16, rc=8 doc TRUC TIEP.
+  Da dem MOI ref mang tep lease g16, khong doan: chot hai nguon ref (ls-remote 352 /
+  for-each-ref 352, comm -23 RONG) => DUNG MOT ref `refs/remotes/origin/ops/cap-lease-570-g16`.
+  g16 con han toi 2026-09-25T05:00Z nhung tu day KHONG con la nguoi giu: r17 them BAY luat
+  nghiem thu moi (N52..N57) tu cross-review vong 11 (8 P2, KHONG P1).'
+
 closure_status: 'Owner-directed grant, revision 16, generation 16. BAY luat moi N45..N51 tu
   cross-review vong 10 (7 P2) cong ba P2 cua luot `1091c8a` chua tung duoc xu. KHONG CO P1.
   Effort GIU `low` ca hai vai. THAY THE g15 bang bia mo hai chieu, lan thu TAM trong chuoi.

@@ -245,13 +245,43 @@ def _thong_diep_an_toan(ex) -> str:
     chỉ sống ở `_MaVang.kieu` / `_NgoaiLeLa.kieu`, lấy từ `type(ex).__name__` — thứ không đi
     qua `__str__`.
     """
+    def _lam():
+        try:
+            td = ex.__str__()
+        except BaseException:  # noqa: BLE001 — giữ nhãn riêng cho "`__str__` ném"
+            return "<__str__ hỏng>"
+        # `issubclass(type(td), …)`, KHÔNG `isinstance(td, …)`: `isinstance` tra `td.__class__`
+        # khi kiểu thật không khớp, và `__class__` là một property NÉM được — đó là cửa thứ ba
+        # (cross-review lượt 9). `type()` không đi qua callback nào.
+        if not issubclass(type(td), str):
+            return "<__str__ trả thứ không phải chuỗi>"
+        return str.__str__(td)
+    return _bien_chan_doan(_lam, "<không hạ được về chuỗi thuần>")
+
+
+def _bien_chan_doan(lam, du_phong: str) -> str:
+    """BIÊN CHẨN ĐOÁN DUY NHẤT — mọi phép đọc/hạ một giá trị dẫn xuất từ ngoại lệ chạy TRONG đây.
+
+    Vì sao một BIÊN chứ không vá từng cửa: cùng một lớp bệnh đã hở ở BA cửa khác nhau —
+    metaclass chặn `__name__` (`getattr` chỉ nuốt `AttributeError`), nhánh thông điệp của bộ
+    chạy ra ngoài tầm `t189`, và `isinstance` đọc `__class__` ngoài `try` (cross-review lượt 9)
+    — cộng cửa thứ tư executor tìm ra khi rà: `isinstance(ex, AssertionError)` ở `_bao_loi_ca`.
+    Mọi callback Python gọi ngầm (`__class__` `__str__` `__name__` `__eq__` `__repr__`
+    `__format__` …) đều là một cửa; liệt kê chúng là DANH SÁCH CẤM, thứ kho này đã đo là thua từ
+    trong thiết kế. Nên đảo lại: `lam()` chạy TRỌN trong MỘT `try` bắt `BaseException`, kết quả
+    chỉ ra khỏi biên khi `type(r) is str` (không đi qua `__class__`) và đã sao về `str` thuần
+    bằng `str.__str__` — mọi thứ khác thành `du_phong`, một hằng do mã đã biết viết.
+
+    `t189` chốt bất biến ở dạng DANH SÁCH CHO PHÉP: bốn hàm chẩn đoán chỉ có MỘT câu thực là
+    `return _bien_chan_doan(...)`, và biến của mọi nhánh bắt rộng trong miền chỉ được xuất hiện
+    làm ĐỐI SỐ DUY NHẤT của một cửa chẩn đoán. Phạm vi: API của harness test; không có chứng cứ
+    một lease YAML hay CLI chạm được các callback này.
+    """
     try:
-        td = ex.__str__()
-    except BaseException:  # noqa: BLE001 — đường chẩn đoán KHÔNG được làm vỡ phép đo
-        return "<__str__ hỏng>"
-    if not isinstance(td, str):
-        return "<__str__ trả thứ không phải chuỗi>"
-    return _chuoi_thuan(td, "<không hạ được về chuỗi thuần>")
+        r = lam()
+        return str.__str__(r) if type(r) is str else du_phong
+    except BaseException:  # noqa: BLE001 — biên chẩn đoán: KHÔNG gì được thoát ra
+        return du_phong
 
 
 def _chuoi_thuan(x, du_phong: str) -> str:
@@ -271,14 +301,10 @@ def _chuoi_thuan(x, du_phong: str) -> str:
     đều NÉM — chúng đi qua đúng cái callback đang muốn tránh. Dùng `str.__str__` vì nó tra
     trên LỚP `str` dựng sẵn, không tra trên instance, nên không có đường nào che.
 
-    Vẫn bọc `try`: một lớp con có thể cài `__getattribute__` quái gở. Và chốt lại bằng
-    `type(...) is str` — "không ném" chưa phải "đã thuần".
+    Phép hạ chạy TRONG `_bien_chan_doan`: một lớp con có thể cài `__getattribute__` quái gở,
+    và biên chỉ cho ra `str` có `type(...) is str` — "không ném" chưa phải "đã thuần".
     """
-    try:
-        r = str.__str__(x)
-    except BaseException:  # noqa: BLE001 — cùng lý do: chẩn đoán không được làm vỡ phép đo
-        return du_phong
-    return r if type(r) is str else du_phong
+    return _bien_chan_doan(lambda: str.__str__(x), du_phong)
 
 
 def _ten_lop(ex) -> str:
@@ -298,16 +324,10 @@ def _ten_lop(ex) -> str:
     `t187` đo cả ba họ. Phạm vi: API của harness test; KHÔNG có chứng cứ một lease YAML hay
     CLI chạm được metaclass Python.
     """
-    # BỌC CẢ PHÉP ĐỌC, không chỉ phép hạ. Cross-review codex lượt 3 (24-09): bản trước tính
-    # `getattr(type(ex), "__name__", "?")` TRƯỚC khi vào `try` của `_chuoi_thuan` — một metaclass
-    # làm hỏng việc đọc `__name__` là đủ để CHÍNH cửa hạ tên lớp ném `RuntimeError`, và lỗi lan
-    # ra `_MaVang`, `_NgoaiLeLa`, helper, cửa, `main`. Giá trị mặc định của `getattr` chỉ đỡ
-    # `AttributeError`, không đỡ gì khác. Dự phòng là chuỗi thuần KHÔNG đọc thêm gì từ `ex`.
-    try:
-        ten = getattr(type(ex), "__name__", "?")
-    except BaseException:  # noqa: BLE001 — đường chẩn đoán không được làm vỡ phép đo
-        return "<tên lớp không đọc được>"
-    return _chuoi_thuan(ten, "<tên lớp không đọc được>")
+    # Lượt 3 bắt `getattr` đọc tên NGOÀI `try`; bản vá khi ấy là một `try` riêng cho cửa này.
+    # Nay cả phép đọc lẫn phép hạ nằm trong BIÊN chung — xem `_bien_chan_doan`.
+    return _bien_chan_doan(lambda: str.__str__(getattr(type(ex), "__name__", "?")),
+                           "<tên lớp không đọc được>")
 
 
 def _bao_loi_ca(ex) -> str:
@@ -317,9 +337,13 @@ def _bao_loi_ca(ex) -> str:
     thêm tên lớp. Cả hai vế đi qua hai cửa an toàn: bộ chạy là đường chẩn đoán của MỌI ca, nó
     không được nổ đúng lúc đang báo một ca đỏ.
     """
-    if isinstance(ex, AssertionError):
-        return _thong_diep_an_toan(ex)
-    return f"{_ten_lop(ex)}: {_thong_diep_an_toan(ex)}"
+    # `issubclass(type(ex), …)` khớp đúng cách `except AssertionError` của `main` phân nhánh
+    # (theo KIỂU thật), và không đọc `ex.__class__` — cửa thứ tư, xem `_bien_chan_doan`.
+    def _lam():
+        if issubclass(type(ex), AssertionError):
+            return _thong_diep_an_toan(ex)
+        return f"{_ten_lop(ex)}: {_thong_diep_an_toan(ex)}"
+    return _bien_chan_doan(_lam, "<chẩn đoán bộ chạy hỏng>")
 
 
 class _MaVang:
@@ -8271,6 +8295,87 @@ def t187_chan_doan_phai_ha_ve_CHUOI_THUAN_chu_khong_chi_isinstance():
         chot(loai == "TinHieuChotCa",
              f"{nhan}: cửa phải đỏ bằng `TinHieuChotCa`, nhận {loai}.")
 
+    # HỢP ĐỒNG CỦA CHÍNH BIÊN, đo thẳng — không qua bốn hàm chẩn đoán. Cả bốn hàm hiện đã tự
+    # hạ về `str` thuần trước khi trả, nên đột biến cho biên trả NGUYÊN `r` sống nếu chỉ đo qua
+    # chúng (đo 24-09, `BIEN_khong_ha`). Hợp đồng là của biên: CHỈ `str` THUẦN ra khỏi nó.
+    class _StrCon(str):
+        pass
+
+    class _ObjLopNemBien:
+        @property
+        def __class__(self):
+            raise RuntimeError("đọc __class__ hỏng")
+
+    def _nem_dung():
+        raise KeyboardInterrupt("tín hiệu dừng trong biên")
+
+    for nhan, lam, mong in (
+            ("trả `str` thuần", lambda: NOI_DUNG, NOI_DUNG),
+            ("trả `str` CON", lambda: _StrCon(NOI_DUNG), "<dp>"),
+            ("trả thứ không phải chuỗi", lambda: 12345, "<dp>"),
+            ("trả đối tượng có `__class__` ném", _ObjLopNemBien, "<dp>"),
+            ("ném tín hiệu dừng", _nem_dung, "<dp>")):
+        try:
+            r = _bien_chan_doan(lam, "<dp>")
+        except BaseException as loi:  # noqa: BLE001 — đo "biên không để gì thoát", bắt trọn
+            r = f"<NÉM {_ten_lop(loi)}>"
+        chot(type(r) is str and r == mong,
+             f"`_bien_chan_doan` {nhan}: mong {mong!r} (kiểu `str` thuần), nhận {r!r} "
+             f"kiểu {type(r).__name__}.")
+
+    # `__class__` NÉM — cửa thứ ba (cross-review lượt 9) và thứ tư (executor rà ra). `isinstance`
+    # đọc `x.__class__` khi kiểu thật không khớp, và `__class__` là một property NÉM được. Hai
+    # họ: `__str__` TRẢ một đối tượng có `__class__` ném (cửa 3, ở `_thong_diep_an_toan`), và
+    # CHÍNH ngoại lệ có `__class__` ném (cửa 4, ở nhánh phân loại của `_bao_loi_ca`) — mỗi họ
+    # hai thành viên (ném ngoại lệ thường, ném TÍN HIỆU DỪNG). Kỳ vọng viết TAY, CHÍNH XÁC:
+    # một cài đặt trả hằng dự phòng cho mọi thứ cũng không qua được.
+    def _ho_lop_nem(tin_hieu):
+        class _ObjLopNem:
+            @property
+            def __class__(self):
+                raise tin_hieu("đọc __class__ hỏng")
+
+        class _ExTraLopNem(Exception):
+            def __str__(self):
+                return _ObjLopNem()
+
+        class _ExLopNem(Exception):
+            @property
+            def __class__(self):
+                raise tin_hieu("đọc __class__ hỏng")
+
+        class _AssertLopNem(AssertionError):
+            @property
+            def __class__(self):
+                raise tin_hieu("đọc __class__ hỏng")
+        return _ExTraLopNem, _ExLopNem, _AssertLopNem
+
+    for nhan_ho, tin_hieu in (("`__class__` NÉM ngoại lệ thường", RuntimeError),
+                              ("`__class__` NÉM tín hiệu dừng", KeyboardInterrupt)):
+        _ExTraLopNem, _ExLopNem, _AssertLopNem = _ho_lop_nem(tin_hieu)
+        o_do = (
+            ("cửa 3 · `_thong_diep_an_toan`", lambda: _thong_diep_an_toan(_ExTraLopNem()),
+             "<__str__ trả thứ không phải chuỗi>"),
+            ("cửa 3 · `_bao_loi_ca`", lambda: _bao_loi_ca(_ExTraLopNem()),
+             "_ExTraLopNem: <__str__ trả thứ không phải chuỗi>"),
+            ("cửa 3 · `_MaVang`", lambda: str(_MaVang(_ExTraLopNem())),
+             "KHÔNG-CÓ-MÃ (ngoại lệ TRẦN _ExTraLopNem: <__str__ trả thứ không phải chuỗi>)"),
+            ("cửa 4 · `_bao_loi_ca` nhánh Exception", lambda: _bao_loi_ca(_ExLopNem(NOI_DUNG)),
+             f"_ExLopNem: {NOI_DUNG}"),
+            ("cửa 4 · `_bao_loi_ca` nhánh AssertionError",
+             lambda: _bao_loi_ca(_AssertLopNem(NOI_DUNG)), NOI_DUNG),
+            ("cửa 4 · `_ten_lop`", lambda: _ten_lop(_ExLopNem()), "_ExLopNem"),
+            ("cửa 4 · `_NgoaiLeLa`", lambda: str(_NgoaiLeLa(_ExLopNem(NOI_DUNG))),
+             f"<ngoại lệ TRẦN _ExLopNem: {NOI_DUNG}>"),
+        )
+        for noi, lam, mong in o_do:
+            try:
+                r = lam()
+            except BaseException as loi:  # noqa: BLE001 — đo "không nổ", phải bắt trọn
+                r = f"<NÉM {_ten_lop(loi)}>"
+            chot(type(r) is str and r == mong,
+                 f"{nhan_ho} / {noi}: mong {mong!r}, nhận {r!r}.")
+
     # HAI NHÁNH THÔNG ĐIỆP CỦA BỘ CHẠY — cross-review codex lượt 4 (24-09,
     # `diagnostic-normalization-wiring-unmeasured`, P2). Tách `_bao_loi_ca` khỏi `main` làm
     # thông điệp ra khỏi THÂN `except`, tức ra khỏi tầm của `t189` (nó chỉ duyệt thân
@@ -8676,30 +8781,36 @@ def t188_moi_ve_DOI_TRA_VE_cua_t184_phai_qua_CUA_chi_ve_d_duoc_goi_tran():
 
 @ca
 def t189_duong_chan_doan_KHONG_dinh_dang_THO_ngoai_le_vua_bat():
-    """A22 — chốt CẤU TRÚC: trong MIỀN chẩn đoán của packet, mọi ngoại lệ bắt RỘNG phải định
-    dạng qua `_ten_lop` / `_thong_diep_an_toan`, không được viết thô.
+    """A22 — chốt CẤU TRÚC, dạng DANH SÁCH CHO PHÉP: trong MIỀN chẩn đoán của packet, mọi giá
+    trị dẫn xuất từ một ngoại lệ bắt RỘNG chỉ được chạm tới BÊN TRONG biên `_bien_chan_doan`.
 
-    Cross-review codex lượt 2 (24-09): bản vá lượt 1 hạ tên lớp ở hai wrapper nhưng nhánh báo
-    lỗi của cửa `_goi_doi_tra_ve` vẫn viết `type(loi).__name__` thô. Liệt kê bằng `ast` trên
-    toàn tệp ra 24 chỗ định dạng một ngoại lệ vừa bắt; trong đó các chỗ THUỘC PACKET và bộ
-    chạy `main` đã gom về hai cửa. Ca này giữ cho chúng không mọc lại.
+    Lịch sử: bản đầu (cross-review lượt 2) cấm ba dạng thô — `{e}`, `str(e)`/`repr(e)`,
+    `type(e).__name__`. Đó là DANH SÁCH CẤM, và nó thua đúng như kho đã đo ở PR #104: tách
+    thông điệp ra một helper (lượt 4) và `isinstance` đọc `__class__` (lượt 9) đều lọt qua mà
+    không vi phạm dạng nào. Nay đảo lại, ba bất biến, miền cho phép nhỏ và biết trước:
 
-    MIỀN là danh sách CHO PHÉP, nhỏ và biết trước: các helper chẩn đoán, các cửa, `main`, và
-    các ca đo chính thước đo (`t184`–`t189`). Ngoài miền là mã kế thừa từ master — sáu chỗ
-    (`t69`, `t90`, `t92`, `t125`-rig, `t139`, `_danh_gia_bieu_thuc_chuan_bi`) được KHAI là nợ,
-    không lặng lẽ sửa trong một packet `sensitive`.
+      (A) biến của một nhánh bắt RỘNG trong miền chỉ được xuất hiện làm ĐỐI SỐ DUY NHẤT của
+          một CỬA chẩn đoán (`CUA`). Không thuộc tính, không định dạng, không so sánh.
+      (B) bốn hàm chẩn đoán có đúng MỘT câu thực: `return _bien_chan_doan(<hàm>, <dự phòng>)`
+          (được phép định nghĩa hàm lồng trước đó — chúng chạy TRONG biên).
+      (C) `_bien_chan_doan` là đúng MỘT `try` bắt `BaseException`, nhánh bắt chỉ `return
+          du_phong`, không `else`/`finally`.
 
+    MIỀN: các helper chẩn đoán, các cửa, `main`, và các ca đo chính thước đo (`t184`–`t189`).
+    Ngoài miền là mã kế thừa từ master — sáu chỗ (`t69`, `t90`, `t92`, `t125`-rig, `t139`,
+    `_danh_gia_bieu_thuc_chuan_bi`) được KHAI là nợ, không lặng lẽ sửa trong packet `sensitive`.
     "Bắt RỘNG" = không kiểu, `Exception`, `BaseException`, `AssertionError` (hoặc tuple chứa
-    chúng) — những nhánh có thể nhận một đối tượng TUỲ Ý. Bắt lớp cụ thể của sản phẩm
-    (`mod.Chan`, `OSError`, `TinHieuChotCa`…) thì tên và thông điệp do mã đã biết dựng.
-    Đo bằng `ast` kèm PHẢN CHỨNG trên mã giả để chốt không mù.
+    chúng). Mỗi bất biến có PHẢN CHỨNG trên mã giả để chốt không mù.
     """
     import ast as _ast
     MIEN_TEN = {"_goi_doi_tra_ve", "_goi_dem_lop_gh", "_goi_lop_gh", "_thong_diep_an_toan",
                 "_chuoi_thuan", "_ten_lop", "_bao_loi_ca", "_chot_cua_dem", "main",
-                "_MaVang", "_NgoaiLeLa", "TinHieuCuaDem"}
+                "_MaVang", "_NgoaiLeLa", "TinHieuCuaDem", "_bien_chan_doan"}
     TIEN_TO = ("t184_", "t185_", "t186_", "t187_", "t188_", "t189_")
     RONG = {"Exception", "BaseException", "AssertionError"}
+    CUA = {"_ten_lop", "_thong_diep_an_toan", "_bao_loi_ca", "_chuoi_thuan", "_MaVang",
+           "_NgoaiLeLa"}
+    CHAN_DOAN = ("_chuoi_thuan", "_thong_diep_an_toan", "_ten_lop", "_bao_loi_ca")
 
     def _rong(h):
         if h.type is None:
@@ -8707,7 +8818,7 @@ def t189_duong_chan_doan_KHONG_dinh_dang_THO_ngoai_le_vua_bat():
         ds = h.type.elts if isinstance(h.type, _ast.Tuple) else [h.type]
         return any(isinstance(x, _ast.Name) and x.id in RONG for x in ds)
 
-    def _vi_pham(cay):
+    def _vi_pham_A(cay):
         mien = [n for n in cay.body if isinstance(n, (_ast.FunctionDef, _ast.ClassDef))
                 and (n.name in MIEN_TEN or n.name.startswith(TIEN_TO))]
         pham = []
@@ -8715,33 +8826,89 @@ def t189_duong_chan_doan_KHONG_dinh_dang_THO_ngoai_le_vua_bat():
             for h in _ast.walk(goc):
                 if not (isinstance(h, _ast.ExceptHandler) and h.name and _rong(h)):
                     continue
-                v = h.name
-                for n in (x for st in h.body for x in _ast.walk(st)):
-                    if isinstance(n, _ast.FormattedValue) and isinstance(n.value, _ast.Name) \
-                            and n.value.id == v:
-                        pham.append((n.lineno, goc.name, "{%s}" % v))
-                    elif isinstance(n, _ast.Call) and isinstance(n.func, _ast.Name) \
-                            and n.func.id in ("str", "repr") and n.args \
-                            and isinstance(n.args[0], _ast.Name) and n.args[0].id == v:
-                        pham.append((n.lineno, goc.name, f"{n.func.id}({v})"))
-                    elif isinstance(n, _ast.Attribute) and n.attr == "__name__" \
-                            and isinstance(n.value, _ast.Call) \
-                            and isinstance(n.value.func, _ast.Name) and n.value.func.id == "type" \
-                            and n.value.args and isinstance(n.value.args[0], _ast.Name) \
-                            and n.value.args[0].id == v:
-                        pham.append((n.lineno, goc.name, f"type({v}).__name__"))
+                cha = {}
+                for st in h.body:
+                    for n in _ast.walk(st):
+                        for c in _ast.iter_child_nodes(n):
+                            cha[c] = n
+                for st in h.body:
+                    for n in _ast.walk(st):
+                        if not (isinstance(n, _ast.Name) and n.id == h.name):
+                            continue
+                        p = cha.get(n)
+                        hop_le = (isinstance(p, _ast.Call) and isinstance(p.func, _ast.Name)
+                                  and p.func.id in CUA and p.args == [n] and not p.keywords)
+                        if not hop_le:
+                            pham.append((n.lineno, goc.name,
+                                         _ast.unparse(p) if p is not None else h.name))
         return len(mien), sorted(set(pham))
 
-    so_mien, pham = _vi_pham(_ast.parse(Path(__file__).read_text(encoding="utf-8")))
-    chot(so_mien >= 12,
-         f"miền đọc được phải có ít nhất 12 định nghĩa, đọc được {so_mien}. Miền hụt làm chốt "
-         f"dưới đây thành chốt KHÔNG THỂ ĐỎ.")
-    chot(not pham,
-         "đường chẩn đoán phải định dạng ngoại lệ vừa bắt qua `_ten_lop`/`_thong_diep_an_toan`. "
-         "Vi phạm: " + " · ".join(f"dòng {d} `{h}` {k}" for d, h, k in pham))
+    def _than(fn):
+        b = fn.body
+        if b and isinstance(b[0], _ast.Expr) and isinstance(getattr(b[0], "value", None),
+                                                            _ast.Constant) \
+                and isinstance(b[0].value.value, str):
+            b = b[1:]
+        return b
 
-    # PHẢN CHỨNG: ba dạng thô bị bắt; dạng đi qua cửa và nhánh bắt lớp CỤ THỂ được tha.
-    gia = _ast.parse(
+    def _vi_pham_B(cay):
+        ds = {n.name: n for n in cay.body if isinstance(n, _ast.FunctionDef)}
+        pham = []
+        for ten in CHAN_DOAN:
+            fn = ds.get(ten)
+            if fn is None:
+                pham.append((ten, "không tìm thấy"))
+                continue
+            b = _than(fn)
+            thuc = [x for x in b if not isinstance(x, _ast.FunctionDef)]
+            dung = (len(thuc) == 1 and b[-1] is thuc[0] and isinstance(thuc[0], _ast.Return)
+                    and isinstance(thuc[0].value, _ast.Call)
+                    and isinstance(thuc[0].value.func, _ast.Name)
+                    and thuc[0].value.func.id == "_bien_chan_doan"
+                    and len(thuc[0].value.args) == 2 and not thuc[0].value.keywords)
+            if not dung:
+                pham.append((ten, "thân không phải đúng một `return _bien_chan_doan(...)`"))
+        return pham
+
+    def _vi_pham_C(cay):
+        fn = next((n for n in cay.body if isinstance(n, _ast.FunctionDef)
+                   and n.name == "_bien_chan_doan"), None)
+        if fn is None:
+            return ["không tìm thấy `_bien_chan_doan`"]
+        b = _than(fn)
+        if not (len(b) == 1 and isinstance(b[0], _ast.Try)):
+            return ["thân không phải đúng một `try`"]
+        t = b[0]
+        loi = []
+        if t.orelse or t.finalbody:
+            loi.append("có `else`/`finally`")
+        if not (len(t.handlers) == 1 and isinstance(t.handlers[0].type, _ast.Name)
+                and t.handlers[0].type.id == "BaseException"):
+            loi.append("nhánh bắt không phải đúng một `except BaseException`")
+        elif not (len(t.handlers[0].body) == 1 and isinstance(t.handlers[0].body[0], _ast.Return)
+                  and isinstance(t.handlers[0].body[0].value, _ast.Name)
+                  and t.handlers[0].body[0].value.id == fn.args.args[-1].arg):
+            loi.append("nhánh bắt không chỉ `return <dự phòng>`")
+        if not (t.body and isinstance(t.body[-1], _ast.Return)):
+            loi.append("thân `try` không kết thúc bằng `return`")
+        return loi
+
+    cay = _ast.parse(Path(__file__).read_text(encoding="utf-8"))
+    so_mien, pham_A = _vi_pham_A(cay)
+    chot(so_mien >= 13,
+         f"miền đọc được phải có ít nhất 13 định nghĩa, đọc được {so_mien}. Miền hụt làm chốt "
+         f"dưới đây thành chốt KHÔNG THỂ ĐỎ.")
+    chot(not pham_A,
+         "(A) biến của nhánh bắt rộng chỉ được làm ĐỐI SỐ DUY NHẤT của một cửa chẩn đoán. "
+         "Vi phạm: " + " · ".join(f"dòng {d} `{h}` {k}" for d, h, k in pham_A))
+    pham_B = _vi_pham_B(cay)
+    chot(not pham_B, f"(B) hàm chẩn đoán phải chỉ đi qua biên: {pham_B!r}")
+    pham_C = _vi_pham_C(cay)
+    chot(not pham_C, f"(C) `_bien_chan_doan` sai hình dạng: {pham_C!r}")
+
+    # PHẢN CHỨNG (A): mọi cách chạm biến ngoài cửa đều bị bắt — gồm hai cửa mà danh sách cấm
+    # cũ để lọt (`isinstance`, thuộc tính) — còn đi qua cửa và nhánh bắt lớp CỤ THỂ thì tha.
+    gia_A = _ast.parse(
         "def main():\n"
         "    try:\n"
         "        f()\n"
@@ -8749,15 +8916,45 @@ def t189_duong_chan_doan_KHONG_dinh_dang_THO_ngoai_le_vua_bat():
         "        a = f'{type(e).__name__}'\n"
         "        b = str(e)\n"
         "        c = f'{e}'\n"
-        "        d = f'{_ten_lop(e)} {_thong_diep_an_toan(e)}'\n"
+        "        d = isinstance(e, AssertionError)\n"
+        "        g = e.args\n"
+        "        h = f'{_ten_lop(e)} {_thong_diep_an_toan(e)} {_bao_loi_ca(e)}'\n"
         "    try:\n"
         "        f()\n"
         "    except OSError as o:\n"
         "        z = f'{o}'\n")
-    _n, pham_gia = _vi_pham(gia)
-    chot([(d, k) for d, _h, k in pham_gia] == [(5, "type(e).__name__"), (6, "str(e)"), (7, "{e}")],
-         f"phản chứng: phải bắt ĐÚNG ba dạng thô ở dòng 5/6/7 và tha dòng 8 (qua cửa) cùng nhánh "
-         f"`OSError`, nhận {pham_gia!r}.")
+    _n, pham_gia = _vi_pham_A(gia_A)
+    chot([d for d, _h, _k in pham_gia] == [5, 6, 7, 8, 9],
+         f"phản chứng (A): phải bắt ĐÚNG năm cách chạm ở dòng 5–9 và tha dòng 10 (qua cửa) cùng "
+         f"nhánh `OSError`, nhận {pham_gia!r}.")
+
+    # PHẢN CHỨNG (B)/(C): bản TRƯỚC biên (lượt 6) của hai hàm phải bị bắt; bản đúng thì tha.
+    gia_BC = _ast.parse(
+        "def _chuoi_thuan(x, du_phong):\n"
+        "    return _bien_chan_doan(lambda: str.__str__(x), du_phong)\n"
+        "def _thong_diep_an_toan(ex):\n"
+        "    try:\n"
+        "        td = ex.__str__()\n"
+        "    except BaseException:\n"
+        "        return 'h'\n"
+        "    if not isinstance(td, str):\n"
+        "        return 'k'\n"
+        "    return _chuoi_thuan(td, 'd')\n"
+        "def _ten_lop(ex):\n"
+        "    def _l():\n"
+        "        return 1\n"
+        "    return _bien_chan_doan(_l, 'd')\n"
+        "def _bao_loi_ca(ex):\n"
+        "    if isinstance(ex, AssertionError):\n"
+        "        return _thong_diep_an_toan(ex)\n"
+        "    return _bien_chan_doan(lambda: 1, 'd')\n"
+        "def _bien_chan_doan(lam, du_phong):\n"
+        "    r = lam()\n"
+        "    return r\n")
+    chot([t for t, _k in _vi_pham_B(gia_BC)] == ["_thong_diep_an_toan", "_bao_loi_ca"],
+         f"phản chứng (B): phải bắt đúng hai hàm chưa qua biên, nhận {_vi_pham_B(gia_BC)!r}.")
+    chot(_vi_pham_C(gia_BC) == ["thân không phải đúng một `try`"],
+         f"phản chứng (C): biên không có `try` phải bị bắt, nhận {_vi_pham_C(gia_BC)!r}.")
 
 
 def main() -> int:

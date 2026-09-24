@@ -340,7 +340,12 @@ class _NgoaiLeLa:
     __slots__ = ("ngoai_le", "kieu", "ma")
 
     def __init__(self, ex):
-        self.ngoai_le, self.kieu, self.ma = ex, type(ex).__name__, _MaVang(ex)
+        # `kieu` LẤY TỪ `_MaVang`, KHÔNG đọc `type(ex).__name__` lần nữa. Cross-review codex
+        # 24-09 (`diagnostic-normalization-wiring-unmeasured`) đo: bản cũ giữ tên lớp THÔ ở
+        # đây, nên với `__name__` là `str` con thì `_MaVang` in được 6/6 mà lớp này chỉ 2/6 —
+        # `__str__` bên dưới nổ đúng ở f-string. Hai lớp, MỘT cửa hạ tên lớp.
+        self.ngoai_le, self.ma = ex, _MaVang(ex)
+        self.kieu = self.ma.kieu
 
     def __str__(self):
         # Dùng BẢN CHỤP an toàn, KHÔNG định dạng lại `self.ngoai_le` — định dạng lần hai là
@@ -440,7 +445,7 @@ def _goi_dem_lop_gh(gh: GhGia, ten: str, lease, ket_qua_mong_doi, so_goi_mong_do
     return mod
 
 
-def _goi_doi_tra_ve(ve: str, gh, ten: str, *args, **k):
+def _goi_doi_tra_ve(ve: str, gh, ten: str, *args, kem_mod: bool = False, **k):
     """Gọi `_goi_lop_gh` và ĐÒI nó TRẢ VỀ. Helper NÉM ⇒ ca đỏ bằng `chot` của CHÍNH nó.
 
     Mệnh đề đang đo là *"helper LUÔN trả về"*. Viết lời gọi trần thì đúng lúc mệnh đề ấy SAI,
@@ -450,6 +455,12 @@ def _goi_doi_tra_ve(ve: str, gh, ten: str, *args, **k):
 
     Cửa này là cách duy nhất trong tệp để đo một vế "phải trả về" — một vế, một cửa, nên
     không còn vế nào có thể quên bọc.
+
+    `kem_mod=True` trả thêm module đang chạy. Có vì một lý do ĐO ĐƯỢC: cross-review codex
+    24-09 (`return-contract-unwrapped-arms`) bắt vế (a) và (c) của `t184` vẫn gọi TRẦN —
+    vế (a) cần module để chốt DANH TÍNH LỚP `Chan` (danh tính ấy theo từng lần nạp), mà
+    bản cũ của cửa vứt module đi, nên vế ấy không qua cửa được. Lời khai "cách duy nhất"
+    ngay trên khi ấy SAI; `t188` nay khoá nó bằng `ast`.
     """
     try:
         ex, _mod = _goi_lop_gh(gh, ten, *args, **k)
@@ -458,7 +469,7 @@ def _goi_doi_tra_ve(ve: str, gh, ten: str, *args, **k):
              f"{ve} helper NÉM `{type(loi).__name__}` thay vì TRẢ VỀ. Hợp đồng của "
              f"`_goi_lop_gh` là luôn trả về; ném nghĩa là mọi ca gọi nó sẽ đỏ bằng traceback "
              f"của runner chứ không bằng `chot` của chính ca.")
-    return ex
+    return (ex, _mod) if kem_mod else ex
 
 
 def _do_kiem_github_dem(lease, co_dau: bool, ket_qua_mong_doi, so_goi_mong_doi, nhan: str,
@@ -7808,8 +7819,8 @@ def t184_chinh_HELPER_phai_doi_ngoai_le_TRAN_thanh_ca_DO_chu_khong_vo_tran():
     #
     # Nên vế (a) ép cổng tự ném: lease TỰ CẤP ⇒ `kiem()` ném `Chan(RC_TU_CAP)` của chính nó.
     lease_tu_cap = _lease_579(granted_by="codex")
-    ex, mod_a = _goi_lop_gh(GhGia(comments={55: []}), "kiem_github", lease_tu_cap,
-                            env_them=ENV_GITHUB)
+    ex, mod_a = _goi_doi_tra_ve("(a)", GhGia(comments={55: []}), "kiem_github",
+                                lease_tu_cap, env_them=ENV_GITHUB, kem_mod=True)
     # ĐÒI DANH TÍNH LỚP, không chỉ đòi "một đối tượng có `.ma` đúng". Cross-review lượt 5 bắt
     # (`helper-contract-assertions-omit-code-domain-and-identity`): bản trước chỉ chốt
     # `.ma == 4`, nên hai đột biến đều LỌT — `P_identity` đổi danh tính `Chan`, và `P_type`
@@ -7900,7 +7911,7 @@ def t184_chinh_HELPER_phai_doi_ngoai_le_TRAN_thanh_ca_DO_chu_khong_vo_tran():
          f"vẫn ĐỎ, nhưng người đọc mất đúng thứ cần để biết đã hỏng ở đâu.")
 
     # (c) HỢP ĐỒNG CŨ: không ném gì -> `None`.
-    ex, _m = _goi_lop_gh(GhGia(comments={55: []}), "_kiem_comment_da_co", "o/r", lease)
+    ex = _goi_doi_tra_ve("(c)", GhGia(comments={55: []}), "_kiem_comment_da_co", "o/r", lease)
     chot(ex is None,
          f"(c) không ném gì thì phải trả `None`, nhận {ex!r}. Trả một đối tượng ở đây làm mọi "
          f"ca dùng `ex is None` đỏ sai.")
@@ -7944,13 +7955,10 @@ def t184_chinh_HELPER_phai_doi_ngoai_le_TRAN_thanh_ca_DO_chu_khong_vo_tran():
         # Đúng LỚP lỗi mà vế này sinh ra để đo, chỉ cao hơn một tầng — và nó cho thấy: muốn
         # đo "X không thoát ra", phải BẮT, không thể đọc `ex` sau lời gọi. Mệnh đề thật của
         # vế (e) là "helper LUÔN TRẢ VỀ", và mệnh đề ấy chỉ kiểm được từ phía người gọi.
-        try:
-            ex, _m = _goi_lop_gh(_gh_hong, "kiem_github", lease, env_them=ENV_GITHUB)
-        except BaseException as loi:   # noqa: BLE001 — ĐO "luôn trả về", nên phải bắt trọn
-            ex = None
-            chot(False,
-                 f"(e) {nhan}: helper NÉM `{type(loi).__name__}` thay vì TRẢ VỀ. Đường chẩn "
-                 f"đoán làm vỡ phép đo là hỏng cả lớp ca gọi helper, không riêng ca này.")
+        #
+        # Bắt ấy nay nằm TRONG CỬA `_goi_doi_tra_ve` — vế này từng tự viết `try` riêng, tức một
+        # cửa thứ hai song song với cửa chung, và lời khai "một vế, một cửa" khi ấy sai.
+        ex = _goi_doi_tra_ve(f"(e) {nhan}", _gh_hong, "kiem_github", lease, env_them=ENV_GITHUB)
         chot(ex is not None and ex.__class__.__name__ == "_NgoaiLeLa",
              f"(e) {nhan}: helper phải TRẢ VỀ được, nhận {ex!r}. Ngoại lệ trần thoát ra ở đây "
              f"làm vỡ mọi ca dùng helper, không riêng ca này.")
@@ -8031,6 +8039,64 @@ def t187_chan_doan_phai_ha_ve_CHUOI_THUAN_chu_khong_chi_isinstance():
         except BaseException as loi:  # noqa: BLE001
             chot(False, f"{nhan}: kết quả đã là `str` thuần mà f-string vẫn ném "
                         f"`{type(loi).__name__}` — phép kiểm kiểu ở trên không đủ.")
+
+    # XUYÊN ĐƯỜNG TẠO — đo CHỖ DÙNG, không chỉ đo hàm hạ.
+    #
+    # Cross-review codex 24-09 (`diagnostic-normalization-wiring-unmeasured`, P2): phần trên
+    # chỉ gọi `_chuoi_thuan` TRỰC TIẾP, nên hai đột biến độc lập — gỡ lời gọi hạ TÊN LỚP trong
+    # `_MaVang.__init__`, hoặc cho `_thong_diep_an_toan` trả nguyên THÔNG ĐIỆP — đều qua 14/14.
+    # Hàm hạ có răng; CHỖ NỐI vào hàm hạ thì không ai đo. Và phép đo của reviewer lộ luôn một
+    # lỗ thật: `_NgoaiLeLa.kieu` giữ tên lớp THÔ, `_MaVang` in được 6/6 mà nó chỉ 2/6.
+    #
+    # Nên mỗi thành viên HỌ đi vào CẢ HAI trường qua ĐƯỜNG THẬT:
+    #   tên lớp    — một lớp ngoại lệ có `__name__` là CHÍNH `str` con ấy
+    #   thông điệp — một ngoại lệ mà `__str__` trả CHÍNH `str` con ấy
+    # rồi qua BA chỗ dùng: `_MaVang` · `_NgoaiLeLa` · cửa `_goi_doi_tra_ve` (đường của mọi ca).
+    #
+    # KHÔNG đưa giá trị thô vào f-string của `chot` — làm vậy là đỏ vì ĐƯỜNG CHẨN ĐOÁN, tức
+    # tín dụng giả đúng loại ca này sinh ra để chặn. Chỉ nêu `type(...).__name__`.
+    def _dinh_dang_duoc(obj):
+        try:
+            r = f"{obj}"
+        except BaseException as loi:  # noqa: BLE001 — đo "định dạng được", phải bắt trọn
+            return f"f-string NÉM `{type(loi).__name__}`"
+        return None if type(r) is str else f"f-string ra `{type(r).__name__}`"
+
+    lease_d = _lease_579()
+    for nhan, x in HO:
+        _LopTen = type("_LopTen", (Exception,), {})
+        _LopTen.__name__ = x
+
+        class _LoiThongDiep(Exception):
+            def __str__(self, _x=x):
+                return _x
+
+        for truong, ex_goc in (("tên lớp", _LopTen("m")), ("thông điệp", _LoiThongDiep())):
+            vi_tri = f"{nhan} / {truong}"
+            mv = _MaVang(ex_goc)
+            chot(type(mv.kieu) is str and type(mv.thong_diep) is str,
+                 f"{vi_tri}: `_MaVang` phải giữ CẢ HAI trường là `str` THUẦN, nhận "
+                 f"kieu={type(mv.kieu).__name__} thong_diep={type(mv.thong_diep).__name__}. "
+                 f"Hàm hạ có răng mà chỗ nối không gọi nó là lỗ thật, không phải lỗ phép đo.")
+            hong = _dinh_dang_duoc(mv)
+            chot(hong is None, f"{vi_tri}: `_MaVang` không định dạng được — {hong}.")
+            nl = _NgoaiLeLa(ex_goc)
+            chot(type(nl.kieu) is str,
+                 f"{vi_tri}: `_NgoaiLeLa.kieu` phải là `str` THUẦN, nhận "
+                 f"{type(nl.kieu).__name__}. Lớp này có bản sao tên lớp RIÊNG và in nó ra.")
+            hong = _dinh_dang_duoc(nl)
+            chot(hong is None, f"{vi_tri}: `_NgoaiLeLa` không định dạng được — {hong}.")
+
+            def _gh_nem(*_a, _e=ex_goc):
+                raise _e
+            ra = _goi_doi_tra_ve(f"t187 {vi_tri}", _gh_nem, "kiem_github", lease_d,
+                                 env_them=ENV_GITHUB)
+            chot(ra.__class__.__name__ == "_NgoaiLeLa" and type(ra.kieu) is str
+                 and type(ra.ma.kieu) is str and type(ra.ma.thong_diep) is str,
+                 f"{vi_tri}: qua CỬA THẬT mọi trường chẩn đoán phải là `str` THUẦN, nhận "
+                 f"{ra.__class__.__name__}.")
+            hong = _dinh_dang_duoc(ra)
+            chot(hong is None, f"{vi_tri}: kết quả của cửa không định dạng được — {hong}.")
 
     # ĐỐI CHỨNG XANH: chuỗi thường phải đi qua NGUYÊN VẸN, không bị thay bằng dự phòng.
     thuong = _chuoi_thuan(NOI_DUNG, "<dự phòng>")
@@ -8203,6 +8269,79 @@ def t174_GOI_GIT_giai_ma_dong_bo_va_giu_hop_dong_text():
             chot(error is None and result.returncode == 7
                  and result.stdout == "Tiếng Việt\ndòng hai\n"
                  and result.stderr == "cảnh báo\n", "text/returncode contract changed")
+
+@ca
+def t188_moi_ve_DOI_TRA_VE_cua_t184_phai_qua_CUA_chi_ve_d_duoc_goi_tran():
+    """A19(e) — chốt CẤU TRÚC cho cửa `_goi_doi_tra_ve`, cùng nếp với `t186`.
+
+    Cross-review codex 24-09 (`return-contract-unwrapped-arms`, P2): lượt 6 đòi MỌI vế "phải
+    trả về" của `t184` đo từ phía người gọi, bản vá dựng cửa `_goi_doi_tra_ve` và docstring
+    của cửa khai *"cách duy nhất trong tệp"* — trong khi vế (a) và (c) vẫn gọi `_goi_lop_gh`
+    TRẦN, và vế (e) tự viết một `try` riêng song song với cửa. Đột biến nhánh trả `Chan`
+    thành `raise` làm `t184` chết bằng `Chan` trần TRƯỚC `chot`: ca đỏ đúng mà không đo gì.
+
+    Không có ca này thì bản vá chỉ sống tới lần ai đó thêm một vế mới gọi trần. Danh sách CHO
+    PHÉP có đúng MỘT phần tử và biết trước: vế (d), nơi `KeyboardInterrupt` PHẢI xuyên qua
+    helper — vế ấy đo điều NGƯỢC LẠI với "trả về", nên nó không được qua cửa.
+
+    Đo bằng `ast`, không bằng `grep`, vì câu hỏi là CẤU TRÚC: lời gọi nằm trong THÂN một `try`
+    có nhánh bắt `KeyboardInterrupt` hay không. Kèm PHẢN CHỨNG trên mã giả để chốt không mù.
+    """
+    import ast as _ast
+
+    def _vi_pham(cay):
+        ham = [n for n in cay.body
+               if isinstance(n, _ast.FunctionDef) and n.name.startswith("t184_")]
+        if len(ham) != 1:
+            return None, [f"tìm thấy {len(ham)} hàm `t184_*`, cần đúng 1"], 0
+        cha = {}
+        for n in _ast.walk(ham[0]):
+            for c in _ast.iter_child_nodes(n):
+                cha[c] = n
+
+        def _trong_than_try_ctrl_c(nut):
+            while nut in cha:
+                tren = cha[nut]
+                if (isinstance(tren, _ast.Try) and nut in tren.body and any(
+                        isinstance(h.type, _ast.Name) and h.type.id == "KeyboardInterrupt"
+                        for h in tren.handlers)):
+                    return True
+                nut = tren
+            return False
+
+        def _goi(ten):
+            return [c for c in _ast.walk(ham[0]) if isinstance(c, _ast.Call)
+                    and isinstance(c.func, _ast.Name) and c.func.id == ten]
+
+        tran = _goi("_goi_lop_gh")
+        pham = [f"dòng {c.lineno}" for c in tran if not _trong_than_try_ctrl_c(c)]
+        if len(tran) - len(pham) != 1:
+            pham.append(f"cần ĐÚNG MỘT lời gọi trần hợp lệ (vế d), thấy {len(tran) - len(pham)}")
+        return tran, pham, len(_goi("_goi_doi_tra_ve"))
+
+    _tran, pham, so_cua = _vi_pham(_ast.parse(Path(__file__).read_text(encoding="utf-8")))
+    chot(not pham,
+         "mọi vế ĐÒI TRẢ VỀ của `t184` phải qua cửa `_goi_doi_tra_ve`; chỉ vế (d) được gọi "
+         "`_goi_lop_gh` trần, và phải nằm trong thân `try … except KeyboardInterrupt`. Vi phạm: "
+         + " · ".join(pham))
+    chot(so_cua >= 5,
+         f"`t184` phải có ít nhất 5 lời gọi qua cửa — vế (a) (a2) (b) (c) (e) — thấy {so_cua}. "
+         f"Ít hơn nghĩa là một vế đã bị GỠ chứ không phải được bọc.")
+
+    # PHẢN CHỨNG: chốt phải BẮT được một lời gọi trần ngoài `try`, và THA đúng hình dạng (d).
+    gia = _ast.parse(
+        "def t184_gia():\n"
+        "    ex, m = _goi_lop_gh(1, 'x')\n"
+        "    try:\n"
+        "        _goi_lop_gh(2, 'y')\n"
+        "    except KeyboardInterrupt:\n"
+        "        pass\n")
+    _t, pham_gia, _c = _vi_pham(gia)
+    chot(pham_gia == ["dòng 2"],
+         f"phản chứng: chốt phải bắt ĐÚNG lời gọi trần ở dòng 2 và tha lời gọi trong "
+         f"`try … except KeyboardInterrupt`, nhận {pham_gia!r}. Chốt không bắt được mã giả "
+         f"thì nó không chứng minh được gì về mã thật.")
+
 
 def main() -> int:
     qua, hong, bo_qua = 0, [], []

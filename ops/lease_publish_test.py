@@ -7571,9 +7571,11 @@ def t178_tien_kiem_mien_chan_TRUOC_khi_cham_mang():
     cho phép **CHẠM MẠNG**.
 
     NĂM vế dưới đây khoá trục ấy (đếm ở vòng lặp: `None`, danh sách, `bool`, ánh xạ, số thực).
-    Chúng KHÔNG thay bốn vế trên: bốn vế kia đo trục `packet_issue`, năm vế này đo trục
-    `lease_id`, và `L` chỉ chết ở trục thứ hai. (Bản trước khai "ba vế" — số hạng trôi khỏi
-    mã; cross-review lượt 11 song song bắt.)
+    Chúng KHÔNG thay bốn vế trên. Bốn vế kia đo ở CỔNG TỔNG (`kiem_github`, có dấu): MỘT vế
+    thiếu `lease_id`, BA vế `packet_issue` (thiếu, sai kiểu `str`, là `bool`). Năm vế này đo
+    ở PHÉP DÒ (`_do_dau_da_dang`) với `lease_id` sai KIỂU — và `L` chỉ chết ở đây. (Bản trước
+    khai "ba vế"; bản sau khai "bốn vế kia đo trục `packet_issue`" — hai lần lời khai lệch
+    thành viên thật. Cross-review lượt 11 song song và lượt 11 của vòng này bắt.)
     """
     thieu_id = _lease_579()
     del thieu_id["lease_id"]
@@ -7595,9 +7597,9 @@ def t178_tien_kiem_mien_chan_TRUOC_khi_cham_mang():
     #
     #   nháp 1  chốt `ma == RC_NOI_DUNG`, `co_dau=True`  -> nền ĐỎ: `lease_id=True` cho rc=9.
     #           Đúng hành vi: đồ giả dựng dấu `**Lease `<lease_id>`**`, nên với `True` dấu
-    #           thành ``**Lease `True`**`` và CỬA CUỐI tìm thấy nó. Bốn vế `packet_issue` ở
-    #           trên không dính vì `kiem()` tự từ chối kiểu sai của `packet_issue` trước đó;
-    #           `lease_id` không có chốt tương ứng trong `kiem()`.
+    #           thành ``**Lease `True`**`` và CỬA CUỐI tìm thấy nó. Bốn vế ở trên (một thiếu
+    #           `lease_id`, ba `packet_issue`) không dính vì `kiem()` tự từ chối chúng trước đó;
+    #           `lease_id` sai KIỂU thì không có chốt tương ứng trong `kiem()`.
     #   nháp 2  chốt `goi == 0` trên `kiem_github`, `co_dau=False` -> nền vẫn ĐỎ: `lease_id`
     #           hợp lệ về mặt `kiem()` nên CHUỖI CŨ chạy tiếp và tự nó gọi 2 lần. Số lời gọi
     #           của CỔNG TỔNG trộn lời gọi của phép dò với lời gọi của `kiem()`.
@@ -8264,6 +8266,24 @@ def t187_chan_doan_phai_ha_ve_CHUOI_THUAN_chu_khong_chi_isinstance():
         hong = _dinh_dang_duoc(ra)
         chot(hong is None, f"{vi_tri}: kết quả của cửa không định dạng được — {hong}.")
         mong_nl = f"<ngoại lệ TRẦN {mong_kieu}: {mong_td}>"
+        mong_mv = f"KHÔNG-CÓ-MÃ (ngoại lệ TRẦN {mong_kieu}: {mong_td})"
+        # MỌI đường định dạng của MỌI đối tượng chẩn đoán, không riêng `str` — lượt 11 của vòng
+        # này: bảng chỉ chốt `str()`, nên đột biến làm `repr(_NgoaiLeLa)` mất thông điệp sống
+        # 183/183, trong khi các chốt thật in `{ex!r}`. Liệt kê theo ĐƯỜNG (`str`, `repr`,
+        # f-string, `format`) × ĐỐI TƯỢNG (`_MaVang`, `_NgoaiLeLa`, kết quả helper, `.ma` của
+        # nó), mỗi ô một kỳ vọng viết tay — không vá riêng `repr`.
+        for ten_dt, dt, mong in (("`_MaVang`", mv, mong_mv), ("`_NgoaiLeLa`", nl, mong_nl),
+                                 ("kết quả helper", ra, mong_nl),
+                                 ("`.ma` của kết quả helper", ra.ma, mong_mv)):
+            for ten_duong, lam in (("str", str), ("repr", repr),
+                                   ("f-string", lambda o: f"{o}"),
+                                   ("format", lambda o: format(o, ""))):
+                try:
+                    thuc = lam(dt)
+                except BaseException as loi:  # noqa: BLE001 — đo "không nổ", phải bắt trọn
+                    thuc = f"<NÉM {_ten_lop(loi)}>"
+                chot(type(thuc) is str and thuc == mong,
+                     f"{vi_tri}: {ten_duong}({ten_dt}) mong {mong!r}, nhận {_in(thuc)!r}.")
         for noi_dung, thuc, mong in (("`_MaVang.kieu`", mv.kieu, mong_kieu),
                                      ("`_MaVang.thong_diep`", mv.thong_diep, mong_td),
                                      ("`_NgoaiLeLa.kieu`", nl.kieu, mong_kieu),

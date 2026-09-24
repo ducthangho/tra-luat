@@ -255,3 +255,8 @@ dieu_kien_dung:
      đi qua bề mặt nào — `codex` không phát `modelUsage`. Đó là QUYẾT ĐỊNH và đã được quyết.'
   - 'Sửa `ops/reviews/README.md` — ngoài write set. Nếu có lý do chính đáng thì BẮT BUỘC chạy lại
      `ops/lease_publish_test.py` (`t26`/`t27` đọc chính tệp ấy — `R9-F01`, trả giá ở `fa3f282`).'
+
+# BIA MO — g2 da bi thay the boi g3 (2026-09-24). Het han 2026-09-08T09:52:00Z, khong co ma land.
+da_bi_thay_the: wp461-be-mat-thu-hai-cua-codex-exec-1g3-claude-20260924
+da_bi_thay_the_luc: '2026-09-24T17:05:59Z'
+da_bi_thay_the_boi_ai: 'ducthangho — comment dong bang r3 issues/461#issuecomment-5817701016; phien claude ghi ho'

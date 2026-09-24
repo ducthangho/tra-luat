@@ -1,0 +1,206 @@
+# LEASE — DANG-LEASE-DAU-TRUOC-KIEM-SAU revision 8 / generation 6
+#
+# DOI SO VOI g5: neo sang dac ta r8. Khong doi pham vi, khong doi executor, khong doi
+# assurance_target. g6 ton tai VI r8 da dong bang va r7 §10.1 doi lease phai neo DUNG revision
+# hien hanh — mot lease neo r7 phai bi BAC khi r8 co hieu luc.
+#
+# DOC XUNG_DOT_WRITE_SET_DO_DUOC TRUOC MOI THU KHAC. Lease nay duoc cap TRONG khi mot cua so
+# HAI WRITER tren `ops/lease_publish_test.py` DA DUOC DO va CHUA duoc giai. Cap g6 KHONG tao ra
+# no va KHONG lam no te hon, nhung cung KHONG giai duoc no.
+
+trang_thai_ban_ghi: 'DA CAP. Day len ops/cap-lease-579-g6.'
+
+schema_version: 2
+event: executor_lease_granted
+packet_issue: 579
+packet_id: DANG-LEASE-DAU-TRUOC-KIEM-SAU
+mission_issue: KHONG_CO
+revision: 8
+generation: 6
+lease_id: dang-lease-dau-truoc-kiem-sau-r8-g6-claude
+
+thay_the_cho: dang-lease-dau-truoc-kiem-sau-r7-g5-claude
+thay_the_vi_sao: 'g5 neo r7. r8 tu khai `thay_the_cho: revision 7,
+  452b0886572154d096184f734d1287f051cbf1c44e63e27e0d5d2b02ad215401` va §10.1 doi lease neo DUNG
+  revision hien hanh. Nen g6 ton tai de NEO LAI, khong phai de doi pham vi.'
+BIA_MO_DA_DAT:
+  da_lam: 'Them `da_bi_thay_the: dang-lease-dau-truoc-kiem-sau-r8-g6-claude` vao
+    ops/leases/dang-lease-dau-truoc-kiem-sau-r7-g5-claude.yaml tren ref ops/cap-lease-579-g5 —
+    ve THU NHAT cua dau hai chieu — TRUOC khi chay `check` cho g6.'
+  vi_sao_phai_lam: 'Cong `_kiem_bia_mo` doc tu REFS va doi dau HAI CHIEU. Da do o generation
+    truoc: `check` tra rc=8 ("lease cu chua mang dong da_bi_thay_the") truoc khi dat bia, rc=0
+    sau khi dat. Cong KHONG phan biet lease cu con han hay het han — g5 lan nay VAN CON HAN
+    (het 2026-09-26T03:00:00Z, con ~27h luc cap), nen doi hoi ay cang ro rang.'
+
+granted_by: ducthangho
+granted_on_instruction_nguyen_van: 'Chu kho, phien 24-09-2026, nguyen van: "#589 bo draft, da cross
+  review chua. Dong y r8 + lease moi de xu ly F4".'
+granted_on_instruction_ghi_chu: 'Chi thi KHONG co dieu kien. Da lam ca hai viec: bo draft cho #589
+  (do lai: draft=false) va cap lease nay. F4 duoc xu ly BANG CHINH r8 — xem F4_DUOC_XU_LY_THE_NAO.'
+recorded_by: claude-session
+recorder_is_dispatcher: false
+
+XUNG_DOT_LOI_ICH:
+  co: true
+  noi_dung: 'Phien ghi lease nay CHINH LA reviewer da dang cross-review luot 3 va luot 4 cho PR
+    #589, da dat hang luot 7, va da dang ban chieu cho luot 7 / 9 / 10. Ghi lease la hanh vi
+    DIEU PHOI, khong phai review — nhung neu phien nay ve sau GHI vao write_set nay thi moi
+    verdict tren deu tro thanh self_review.'
+  he_qua: 'Phien nay KHONG duoc dong vai reviewer cho ban va nao sinh ra duoi lease g6, va KHONG
+    duoc ghi vao ba duong cua write_set. Can ca hai thi phai co phien khac.'
+  giu_qua_g5: true
+
+XUNG_DOT_WRITE_SET_DO_DUOC:
+  co: true
+  do_luc: '2026-09-24T23:5xZ'
+  duong_bi_chong_lap: ops/lease_publish_test.py
+  nguoi_giu_thu_hai: wp618-exec-1-claude-20260924
+  nguoi_giu_thu_hai_o: 'refs/heads/ops/cap-lease-618:ops/leases/wp618-exec-1-claude-20260924.yaml'
+  nguoi_giu_thu_hai_han: '2026-09-25T17:45:00Z'
+  nguoi_giu_thu_hai_branch_ownership: exclusive
+  phep_do:
+    - 'python3 ops/lease_publish.py ai-dang-giu ops/lease_publish_test.py — rc doc TRUC TIEP = 11,
+      dong tong ket "NGUOI_GIU 2: dang-lease-dau-truoc-kiem-sau-r7-g5-claude,
+      wp618-exec-1-claude-20260924".'
+    - 'Khong dung o LOI KHAI write_set: da do DIFF THAT cua ca hai PR.
+      #589 (claude/va-dang-lease-20260920) cham ops/lease_publish_test.py +2107/-5.
+      #620 (claude/va-618-thu-hoi-neo-20260924) cham CUNG tep +170/-24.
+      `comm -12` tren hai danh sach ten tep ra DUNG MOT dong: ops/lease_publish_test.py.'
+    - 'Issue #618 trang thai `open`, PR #620 `open` — nen day KHONG phai "chua het han nhung da
+      land". Packet kia dang chay THAT.'
+  vi_sao_van_cap: 'g6 la ban KE TUC cua g5 tren CUNG packet, CUNG ba duong. No khong THEM mot
+    writer nao: cua so hai writer da mo san giua g5 va wp618, va se giong y het voi g6. Chan g6
+    khong dong duoc cua so ay — chi lam #579 mat lease trong khi #618 van giu.'
+  vi_sao_VAN_PHAI_KHAI: 'Doctrine cua kho: quet du nhanh ops/** TRUOC khi cap bat ky lease nao, va
+    "chua het han KHONG phai con hieu luc". Lan truoc kho tra gia bang mot lease chong lap DA KY vi
+    dac ta khai "khong lease nao dang giu" sau khi chi quet master. Day la phep do ay, ghi ra day
+    thay vi de trong.'
+  AI_GIAI_DUOC: 'CHU KHO. Hai duong: (a) thu hep write_set cua mot trong hai packet de khong con
+    giao nhau; (b) xep thu tu hai packet — mot land truoc, mot neo lai base sau. Phien nay KHONG
+    duoc lam ca hai: #618 ngoai tham quyen, va #579 thi phien nay bi XUNG_DOT_LOI_ICH chan ghi.'
+  RUI_RO_CU_THE: 'Ca hai nhanh se xung dot khi merge, va ben merge sau phai hoa bang tay tren mot
+    tep 520 KB. Nang hon: neu mot ben vo tinh ghi de vung cua ben kia thi mot CA TEST co the mat
+    dang ky ma suite van xanh — dung hinh dang "merge-drops-test-registration" ma chinh packet nay
+    da tra gia mot lan (commit e26fb2b, mat @ca cua t174_GOI_GIT).'
+
+F4_DUOC_XU_LY_THE_NAO:
+  finding: spec-review-verdict-history-contradicts-itself
+  hang: P3
+  bao_o: 'Cross-review luot 7 (codex gpt-6-astra medium), giu mo qua luot 9/10/13.'
+  noi_dung: 'r7 §0.7 va §10.6 dung luot 5-6 lam vi du DA `approve` kem P3, trong khi bang lich su
+    cua CHINH r7 ghi luot 5 `changes_requested` (§12.4) va luot 6 `blocked` (§12.5).'
+  vi_sao_KHONG_va_bang_commit: 'r7 da DONG BANG bang spec_sha256. Sua tep la doi bam, tuc vo hieu
+    lease theo protocol §3.2. Duong dung la mot REVISION.'
+  da_xu_ly: 'r8 sua dung hai doan ay, va sua DUNG CACH: khong lang le doi cau ma ghi ro ban truoc
+    khai gi, doi chieu bang lich su, va khang dinh "chua luot nao cua packet ra approve". Kem tham
+    chieu §0.8.'
+  phep_do_xac_nhan: 'Dem cau chua "luot 5"/"luot 6" + "approve" trong ca hai ban: r7 co hai cau
+    KHANG DINH luot 5-6 la approve; r8 khong con cau nao nhu vay, hai cau tuong ung nay MO TA rang
+    ban truoc khai sai. Diff r7->r8 = 59 dong, chi cham §0.2-0.5, §0.7-0.8, §10-§12 (van ban va
+    bang lich su) — KHONG cham dieu khoan ky thuat nao.'
+  CON_LAI: 'Sau g6, F4 KHONG con la no cua executor: no da duoc sua trong r8. Thu con lai la #592
+    (mang r8) phai land. Cho tới khi #592 land, r8 chi song tren nhanh do va tren nhanh lease nay.'
+
+leased_at_utc: '2026-09-25T00:00:00Z'
+lease_expires_at_utc: '2026-09-27T00:00:00Z'
+han_vi_sao: '48 gio, giu nguyen cach tinh cua g5. CAU HOI CON TREO tu g5 va CHUA duoc tra loi:
+  chu kho co that su muon 48 gio hay khong — con so ay ban dau lay tu yeu cau cua phien executor,
+  khong phai tu mot quyet dinh tuong minh. Ghi lai o day thay vi im lang de nhan no con treo.'
+
+role: executor
+provider: anthropic
+executor: claude
+model: KHONG_KHAI
+effort: KHONG_KHAI
+execution_surface: claude-code
+transport: cloud
+environment: cloud
+operating_system: linux
+
+spec_path: ops/specs/dang-lease-dau-truoc-kiem-sau-r8.md
+spec_da_land: false
+spec_land_o: 'CHUA LAND — PR #592, nhanh claude/spec-dang-lease-r2-20260921, head d6a33b71.'
+spec_chep_vao_nhanh_lease: 'Commit cap lease nay mang MOT BAN SAO cua r8 tai
+  ops/specs/dang-lease-dau-truoc-kiem-sau-r8.md, vi cong `check` doi `prompt_path` TON TAI trong
+  cay cua ref dang xet. Ban sao da do byte-exact voi ban tren nhanh #592: 88204 B,
+  sha256 e6747568d19404e04c95c06cb799b98fc661557cab3b049c42258ef6b9236657.'
+spec_ref: ops/specs/dang-lease-dau-truoc-kiem-sau-r8.md
+prompt_path: ops/specs/dang-lease-dau-truoc-kiem-sau-r8.md
+prompt_sha256_required: e6747568d19404e04c95c06cb799b98fc661557cab3b049c42258ef6b9236657
+prompt_sha256_required_vi_sao: 'Cong `check` doi bam khi co `prompt_path` — do duoc:
+  thieu dong nay thi rc=6 ("tro vao mot tep khong neo bam thi tep doi luc nao cung khong
+  ai biet"). Bang `spec_hash` vi cung tro mot tep.'
+spec_hash: e6747568d19404e04c95c06cb799b98fc661557cab3b049c42258ef6b9236657
+
+start_from_sha: 541fa6ca9ba78d2669261b528572dbc05b53ea87
+start_from_sha_vi_sao: 'HEAD cua origin/master luc cap (23:5xZ 24-09). Day CUNG la base ma #589
+  dang neo — do bang `git merge-base`, nen executor khong phai hoa master them lan nao chi de
+  nhan g6.'
+
+reviewed_sha_required: b11c1e289b5e42c276cb30e4be108be14d265ca3
+reviewed_sha_required_note: 'Head THAT cua nhanh lam viec luc cap, va CUNG la sha ma cross-review
+  luot 13 da neo (verdict `blocked`, P2 1 / P3 1, dang 2026-09-24T23:44:54Z). Nen g6 khong lui
+  lai diem nao da duoc review.'
+
+branch: claude/va-dang-lease-20260920
+branch_ownership: exclusive
+
+write_set:
+  - ops/lease_publish.py
+  - ops/lease_publish_test.py
+  - CLAUDE.md
+write_set_vi_sao: 'BA duong — KHONG doi so voi g3/g4/g5. r8 §2 giu nguyen bang do cua r7 chung minh
+  write_set khong doi qua r3..r8.'
+write_set_do_luc_cap:
+  ops/lease_publish.py: 'NGUOI_GIU 1 (chinh g5, bi g6 thay the). rc=11.'
+  ops/lease_publish_test.py: 'NGUOI_GIU 2 — g5 (bi thay the) VA wp618-exec-1-claude-20260924
+    (KHONG bi thay the, con han). Xem XUNG_DOT_WRITE_SET_DO_DUOC. rc=11.'
+  CLAUDE.md: 'NGUOI_GIU 1 (chinh g5, bi g6 thay the). rc=11.'
+
+prohibited_actions:
+  - self_review
+  - self_approve
+  - merge
+  - land
+  - deploy
+  - ruleset_mutation
+  - admin_bypass
+  - tiet_lo_secret
+  - sua_github_workflows
+  - day_len_ops_ngoai_viec_cap_lease
+  - chay_ci_windows
+  - gan_nhan_windows
+  - cham_t131_t132
+  - cham_RELEASE_MANIFEST_json
+
+manual_ci_budget: KHONG_GIOI_HAN_CO_DIEU_KIEN
+manual_ci_budget_vi_sao: 'Giu nguyen cach doc cua g5, neo vao r8 §10.5: "Khong CI" = dung chan
+  cong, KHONG phai cam do.'
+
+attempts_limit: 10
+same_failure_limit: 10
+gioi_han_vi_sao: 'Giu nguyen cua g5 — chi thi "noi len 10" va "lap toi khi co cross approval".'
+
+risk: sensitive
+review_class: sensitive
+effective_review_class: sensitive
+review_class_vi_sao: 'Cham ops/lease_publish.py, tuc CONG DOC LEASE (protocol §8). Nhac lai gioi
+  han da do va da mo Issue #603: `_tinh_lop_tu_write_set` hien CHI tra ve duoc `sensitive` —
+  bang `_BANG_LOP` co 7 muc deu `sensitive` va mac dinh cung `sensitive`, nen `routine`/`systemic`
+  KHONG voi toi duoc. Nhan `sensitive` o day dung, nhung no dung vi cong khong the tra thu khac.'
+
+assurance_target: human_audited
+assurance_target_vi_sao: 'Quyet dinh chu kho (Q4 cua r1, giu qua r2-r8). KHONG doi o generation nay.'
+assurance_target_HE_QUA_PHAI_KHAI: 'Packet nay KHONG LAND DUOC BANG MAY.'
+
+TRANG_THAI_REVIEW_LUC_CAP:
+  luot_gan_nhat: 13
+  reviewer: 'codex gpt-6-astra, effort medium, qua launcher.py run, ma_thoat=0, 851s'
+  neo: b11c1e289b5e42c276cb30e4be108be14d265ca3
+  verdict: blocked
+  so_finding: 'P1 0 / P2 1 / P3 1'
+  P2_con_mo: 'runner-diagnostic-content-not-checked — oracle dau ra TUC THOI `!!! do` chua duoc
+    chot. Reviewer do them tren BAN SAO MASTER: 167/167 qua, tuc day la LO ORACLE KE THUA, KHONG
+    phai hoi quy moi cua packet.'
+  P3_con_mo: 'spec-review-verdict-history-contradicts-itself — chinh F4, nay da sua trong r8.'
+  DIEU_KIEN_DUNG: 'Khong con P1, P2, P3. Sau r8, con lai dung mot P2 (lo oracle ke thua).'

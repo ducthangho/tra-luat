@@ -40,7 +40,7 @@ packet_id: QUY-TRINH-LAP-REVIEW-VA-DIEU-KIEN-DUNG
 packet_slug: QUY-TRINH-LAP-REVIEW-VA-DIEU-KIEN-DUNG
 packet_id_ben: wp523
 packet_id_ghi_chu: >-
-  Spec r15 khai packet_id = wp523 (ID ben §3.2) va packet_slug rieng. Truong  o day giu
+  Spec r15 khai packet_id = wp523 (ID ben §3.2) va packet_slug rieng. Truong packet_id o day giu
   slug de KHONG doi khoa so voi gen 10-15 (bo dem/lease cu deu khai slug); ID ben ghi o
   . Bien nhan cua r15 phai khai CA HAI khoa (spec r15, write set 5).
 revision: 15

@@ -5906,14 +5906,17 @@ def t155_618_neo_dinh_nghia_theo_workflow_sha_khong_theo_base_sha():
     tức cổng ĐỎ trên mọi PR không rebase liên tục. Đo thật trên PR #601: head `fa263ef2` ăn exit 12
     (run 35981638892) trong khi bộ kiểm canonical chạy lại tại chỗ cho rc=0.
 
-    Ba ca đo hành vi, chạy CHÍNH đoạn shell của workflow bằng bash thật với `git` được stub:
-      A1  workflow_sha != S, cây == workflow_sha, S là tổ tiên  -> QUA   (ca tái hiện sự cố #601)
-      A2  workflow_ref không trỏ refs/heads/<nhánh mặc định>    -> ĐỎ 12 (bất biến B1)
-      A3  S KHÔNG phải tổ tiên của workflow_sha                 -> ĐỎ 12 (chống lùi)
+    Chạy CHÍNH đoạn shell của workflow bằng bash thật trên một đồ thị Git THẬT (A là cha của B) — KHÔNG
+    stub git, để chính Git quyết quan hệ tổ tiên (F1, cross-review #620 lượt 1):
+      A1   S=A, WF=B, cây=B                    -> QUA   (ca tái hiện sự cố #601)
+      A2   workflow_ref không trỏ refs/heads/*  -> ĐỎ 12 (bất biến B1)
+      A3   WF=A là tổ tiên THẬT của S=B         -> ĐỎ 12 (chống lùi)
+      A3b  cây=A nhưng workflow_sha=B           -> ĐỎ 12
+      A3c  S không có trong object store (128)  -> ĐỎ 12
 
-    ĐỘT BIẾN (A4) — mỗi chốt một đột biến riêng, chạy trên BẢN SAO văn bản, không đụng tệp thật:
-      gỡ chốt `--is-ancestor`  => A3 phải thôi ĐỎ  (nếu không, A3 đang đo thứ khác)
-      gỡ chốt `workflow_ref`   => A2 phải thôi ĐỎ
+    ĐỘT BIẾN (A4) trên BẢN SAO văn bản: gỡ chốt ancestry, hỏi `HEAD HEAD`, đảo toán hạng, gỡ chốt ref.
+    BINDING (F4, lượt 2): fixture tự cấp env nên KHÔNG chứng minh đường nối context -> shell; vì vậy chốt
+    riêng từng cặp tên -> biểu thức trên env của chính bước được trích, kèm đột biến đổi tên / đổi nguồn.
     """
     import yaml
     steps = yaml.safe_load(WORKFLOW_THU_HOI.read_text(encoding="utf-8"))["jobs"]["thu-hoi"]["steps"]
@@ -5924,13 +5927,28 @@ def t155_618_neo_dinh_nghia_theo_workflow_sha_khong_theo_base_sha():
     chot("github.workflow_sha" in ref and "base.sha" not in ref,
          f"mốc checkout phải là workflow_sha, không phải base.sha: {ref!r}")
 
-    than = None
+    than, buoc = None, None
     for b in steps:
         t = b.get("run")
         if isinstance(t, str) and "TL_WF_SHA" in t and "merge-base" in t:
-            than = t
+            than, buoc = t, b
             break
     chot(than is not None, "không tìm được bước mang chốt neo định nghĩa")
+
+    # F4 — binding context -> shell, đo trên env CỦA CHÍNH BƯỚC được trích, từng cặp chính xác.
+    CAN_BINDING = {"TL_WF_SHA": "${{github.workflow_sha}}", "TL_WF_REF": "${{github.workflow_ref}}",
+                   "TL_S": "${{github.event.pull_request.base.sha}}"}
+    def binding_dung(e):
+        return all(re.sub(r"\s+", "", str(e.get(k, ""))) == v for k, v in CAN_BINDING.items())
+    env_buoc = dict(buoc.get("env") or {})
+    chot(binding_dung(env_buoc), f"env của bước neo phải map đúng từng cặp {sorted(CAN_BINDING)}: {env_buoc}")
+    for ten_db, e2 in (
+        ("đổi tên khoá TL_WF_SHA", {**{k: v for k, v in env_buoc.items() if k != "TL_WF_SHA"},
+                                    "TL_UNUSED_WF_SHA": env_buoc.get("TL_WF_SHA")}),
+        ("đổi nguồn TL_WF_SHA sang base.sha", {**env_buoc, "TL_WF_SHA": "${{ github.event.pull_request.base.sha }}"}),
+        ("đổi nguồn TL_WF_REF sang head.ref", {**env_buoc, "TL_WF_REF": "${{ github.head_ref }}"}),
+    ):
+        chot(not binding_dung(e2), f"đột biến binding [{ten_db}] phải bị chốt binding bác")
     chot("\nAUTH_B64=" in than, "không tìm được ranh giới trước đoạn auth/fetch")
     doan_goc = than[:than.index("\nAUTH_B64=")]
 

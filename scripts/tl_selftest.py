@@ -25323,8 +25323,8 @@ def run() -> int:
             lượt 4  m11      canh theo lớp, nhưng so bằng TÊN lớp
             lượt 5  m12/m13/m14 + MẤT PHỦ m3
             (sau)   phiên điều phối TỰ ĐO khi soạn r3: `m10` và `m14` cho TẬP ô đỏ BẰNG NHAU
-                    (27 toạ độ, hai chiều rỗng) ⇒ một BỘ TƯƠNG ĐƯƠNG mà ma trận r2/r3-bản-đầu
-                    không phân biệt nổi. Không reviewer nào nêu; nó lộ ra vì `A11` đòi so TẬP
+                    (27 toạ độ, hai chiều rỗng) ⇒ một BỘ TƯƠNG ĐƯƠNG mà ma trận SÁU dạng của
+                    bản đầu theo HỌ (`576774b`) không phân biệt nổi. Không reviewer nào nêu; nó lộ ra vì `A11` đòi so TẬP
                     chứ không so SỐ ĐẾM — và hai cái đó cùng cho `27` nên phép đếm im lặng.
 
         Lượt 5 là lượt đắt nhất, và nó bắt hai thứ KHÁC NHAU:

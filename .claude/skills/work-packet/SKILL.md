@@ -128,6 +128,20 @@ git -C "$CANON" show -s --format=%B "$H" > "$SCRATCH/candidate-message.txt"
 đích bằng `git --version`, `"$PY" --version`, import các module command dùng, `jq --version`,
 `actionlint -version` và phiên bản shell. Tập cần probe lấy từ command thật (§10.2.1).
 
+### Ba chỗ làm cổng ĐỎ vì NƠI CHẠY, không vì mã — đo 21→24-09-2026
+
+Cả ba đều cho một cổng đỏ trông y hệt lỗi thật. Đo trước khi đi săn:
+
+| triệu chứng | nguyên nhân | phép đo |
+|---|---|---|
+| `doc-claims-check --strict` `rc=2`, cờ `SHA_NOT_A_COMMIT` trên các tiền tố 8 ký tự | `core.abbrev` của git tự nới theo số object của kho; `ci.yml` ghim **7** | cùng một cây: abbrev 8 → `rc=2`; `git config core.abbrev 7` → `rc=0`, `flags 0` |
+| `packet_loop_test.py` đỏ SÁU ca, `rc=14`, `ly_do_dung: workspace la git worktree` | đang chạy trong một `git worktree` LIÊN KẾT | `git rev-parse --git-dir` khác `--git-common-dir` ⇒ đang ở worktree; dựng clone độc lập rồi đo lại |
+| `ops/cong_cu.py kiem-tra` `rc=2` và `cong_cu_test.py` `rc=1` | thiếu một công cụ trong bản kê (đo được: `jsonschema` `trang_thai: DO`) | đọc `trang_thai` TỪNG mục trong JSON, đừng dừng ở `trang_thai_tong` |
+
+Hai nếp git mà `ci.yml` đặt trước checkout và bộ chạy cục bộ phải đặt lại: `core.autocrlf=false`
++ `core.eol=lf` (RELEASE_MANIFEST băm theo LF), và `core.abbrev=7` ở trên. Thiếu chúng thì cổng
+nói thật — chỉ là nói về cây của bạn, không về bản vá.
+
 ## Cú pháp máy trạng thái
 
 Chọn đường điều phối theo protocol §3/§4 và authority của Packet; bảng lệnh này mô tả runtime

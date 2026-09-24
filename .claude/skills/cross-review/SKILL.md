@@ -535,6 +535,42 @@ Cách giữ danh tính finding qua các lượt xem protocol §8/§12/§13.
 gh api repos/ducthangho/tra-luat/actions/jobs/<id>/logs
 ```
 
+**`gh` có thể KHÔNG có trên nền đang chạy.** Đo 21→24-09-2026: container của một phiên review
+không có `gh`, và hệ quả không dừng ở lệnh này — `ops/lease_publish.py kiem-github` trả
+`rc=8: KHÔNG ĐO ĐƯỢC loại số hiệu: không gọi được gh api`. `rc=8` ấy **không phải một phán
+quyết**, nó là một khoảng trống công cụ; đọc nó thành "cổng chặn" là khai rộng hơn phép đo.
+Đường vòng chỉ cần token và HTTP; endpoint logs trả 302 nên phải theo redirect:
+
+```bash
+curl -sS -L -H "Authorization: Bearer $GITHUB_PAT" \
+  "https://api.github.com/repos/ducthangho/tra-luat/actions/jobs/<id>/logs" -o "$SCRATCH/job.log"
+```
+
+**MÀU KHÔNG PHẢI NGUYÊN NHÂN.** `conclusion=failure` chỉ nói lượt chạy kết thúc khác 0. Nó không
+nói cổng hỏng, và nó không nói hai lượt đỏ trên cùng một nhánh là cùng một bệnh. Phân loại TỪNG
+lượt đỏ bằng log của chính nó **trước khi đếm**.
+
+Đã trả giá đúng chỗ này: một lượt rà 40 lần chạy `ops-publish-lease.yml` đọc 10 lượt đỏ thành
+"cổng chập chờn 25%". Mở log từng lượt thì **8/10 là cổng từ chối ĐÚNG** (`CHAN [8]` thiếu bia
+mộ, hoặc lease đã hết hạn) và chỉ **2/10** là lệch thật — khoảng 5%. Chuỗi "đỏ rồi xanh trên
+cùng nhánh" cũng bị đọc nhầm: nội dung giữa hai lượt KHÁC nhau (người ta thêm bia mộ rồi đẩy
+lại), nên nó chứng minh cổng hoạt động chứ không chứng minh gì về tính tất định.
+
+## `ai-dang-giu` — `rc=12` là lệnh TỪ CHỐI TRẢ LỜI, không phải câu trả lời
+
+Lệnh quét `refs/heads/*`. Một nhánh **cục bộ** tụt sau bản trên máy chủ làm nó trả
+`rc=12 NHÁNH_CỤC_BỘ_TỤT_SAU` — nó đang nói "tôi không đo được", không nói "không ai giữ". Đo
+24-09-2026: cùng một đường cho `rc=12`, rồi `rc=11 NGƯỜI_GIỮ 1` ngay sau khi cập nhật ref.
+
+Thông điệp lỗi **nêu đích danh nhánh nào tụt**. Cập nhật đúng nhánh ấy, đừng ép toàn bộ
+`refs/heads/*` — làm thế có thể xoá công việc cục bộ của nhánh khác:
+
+```bash
+git -C "$SOURCE" fetch --prune origin '+refs/heads/*:refs/remotes/origin/*'
+git -C "$SOURCE" branch -f <nhanh-lenh-vua-neu-ten> "refs/remotes/origin/<nhanh-ay>"
+"$PY" "$SOURCE/ops/lease_publish.py" ai-dang-giu <duong>; echo "rc=$?"
+```
+
 ## Provenance CI
 
 Theo protocol §10.2.2, `$RUN_NODE_ID` lấy từ raw REST response của đúng run. Query dưới

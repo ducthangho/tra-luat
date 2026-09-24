@@ -8313,8 +8313,14 @@ def t187_chan_doan_phai_ha_ve_CHUOI_THUAN_chu_khong_chi_isinstance():
         chot(r == mong, f"đối chứng xanh `_bao_loi_ca`: mong {mong!r}, nhận {r!r} — một cài "
                         f"đặt trả hằng cho mọi đầu vào cũng qua các vế trên.")
 
-    # CHỖ NỐI: một lượt `main()` THẬT trên ba ca giả, mỗi ca ném qua một nhánh. `main` phải
-    # TRẢ `1`, in đủ ba dòng `ĐỎ` và dòng tổng kết `0/3` — không vỡ trần giữa chừng.
+    # CHỖ NỐI: một lượt `main()` THẬT trên năm ca giả, ném qua CẢ HAI nhánh. `main` phải TRẢ
+    # `1`, in dòng tổng kết `0/5` — không vỡ trần giữa chừng — VÀ mỗi dòng `ĐỎ` phải mang ĐÚNG
+    # nội dung. Cross-review codex lượt 5 (24-09, `runner-diagnostic-content-not-checked`, P2):
+    # bản trước chỉ chốt TIỀN TỐ dòng, nên cho `main` ghi một HẰNG thay cho `_bao_loi_ca(ex)` ở
+    # một trong hai nhánh vẫn sống 183/183 — helper có răng, chỗ dùng helper thì không.
+    # Kỳ vọng viết TAY, KHÔNG sinh bằng `_bao_loi_ca` (thứ đang bị đo không được làm oracle của
+    # chính nó). Hai câu dự phòng của `_thong_diep_an_toan` được ghim nguyên văn: đổi chúng có
+    # chủ ý thì phải sửa cả ở đây.
     import contextlib, io
     from unittest import mock
 
@@ -8327,7 +8333,21 @@ def t187_chan_doan_phai_ha_ve_CHUOI_THUAN_chu_khong_chi_isinstance():
     def _gia_str_nem():
         raise _StrNemBo()
 
-    ca_gia = [_gia_assert_ho, _gia_exception_ho, _gia_str_nem]
+    def _gia_assert_thuong():
+        raise AssertionError(NOI_DUNG)
+
+    def _gia_exception_thuong():
+        raise RuntimeError(NOI_DUNG)
+
+    ca_gia = [_gia_assert_ho, _gia_exception_ho, _gia_str_nem, _gia_assert_thuong,
+              _gia_exception_thuong]
+    MONG_DONG = {
+        "_gia_assert_ho": "<__str__ hỏng>",
+        "_gia_exception_ho": "RuntimeError: <__str__ hỏng>",
+        "_gia_str_nem": "_StrNemBo: <__str__ hỏng>",
+        "_gia_assert_thuong": NOI_DUNG,
+        "_gia_exception_thuong": f"RuntimeError: {NOI_DUNG}",
+    }
     luu, ra = list(CA), io.StringIO()
     try:
         CA[:] = ca_gia
@@ -8341,11 +8361,20 @@ def t187_chan_doan_phai_ha_ve_CHUOI_THUAN_chu_khong_chi_isinstance():
         CA[:] = luu
     chot(len(CA) == len(luu), "CA không được khôi phục sau lượt `main()` giả.")
     dau_ra = ra.getvalue()
-    chot(rc_main == 1, f"`main()` trên ba ca đỏ phải trả 1, nhận {rc_main!r}.")
-    thieu = [f.__name__ for f in ca_gia if f"  ĐỎ  {f.__name__}: " not in dau_ra]
-    chot(not thieu, f"`main()` thiếu dòng ĐỎ cho {thieu!r}.")
-    chot("lease_publish: 0/3 đạt; đã chạy=3, bỏ qua=0" in dau_ra,
-         "`main()` không in dòng tổng kết `0/3` — bộ chạy vỡ trước khi báo.")
+    chot(rc_main == 1, f"`main()` trên năm ca đỏ phải trả 1, nhận {rc_main!r}.")
+    # So THEO TỪNG TÊN CA, trên đúng các dòng `  ĐỎ  ` — không tìm chuỗi ở bất kỳ đâu trong
+    # log, vì dòng `!!! do` cũng chứa lý do và sẽ che một dòng `ĐỎ` sai.
+    dong_do = {}
+    for dong in dau_ra.splitlines():
+        if dong.startswith("  ĐỎ  "):
+            ten, _, ly = dong[len("  ĐỎ  "):].partition(": ")
+            dong_do.setdefault(ten, []).append(ly)
+    chot(sorted(dong_do) == sorted(MONG_DONG),
+         f"`main()` phải in đúng một nhóm dòng ĐỎ cho năm ca giả, nhận tên {sorted(dong_do)!r}.")
+    sai = {ten: dong_do.get(ten) for ten, mong in MONG_DONG.items() if dong_do.get(ten) != [mong]}
+    chot(not sai, f"`main()` in SAI nội dung dòng ĐỎ: {sai!r}; mong {MONG_DONG!r}.")
+    chot("lease_publish: 0/5 đạt; đã chạy=5, bỏ qua=0" in dau_ra,
+         "`main()` không in dòng tổng kết `0/5` — bộ chạy vỡ trước khi báo.")
 
     # ĐỐI CHỨNG XANH: chuỗi thường phải đi qua NGUYÊN VẸN, không bị thay bằng dự phòng.
     thuong = _chuoi_thuan(NOI_DUNG, "<dự phòng>")

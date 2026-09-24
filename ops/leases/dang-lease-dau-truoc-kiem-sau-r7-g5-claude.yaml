@@ -225,3 +225,41 @@ dem_hinh_dang_loi:
   ghi_chu: 'Chep nguyen bo dem cua g4, KHONG reset — doi generation khong reset bo dem. Bon hinh
     dang dau DA CHAM hoac VUOT nguong ba. He qua bat buoc van nguyen: moi cau ban vá them vao
     docstring hay CLAUDE.md PHAI neu phep do dung sau no, hoac noi thang KHONG DO DUOC.'
+
+# ─────────────────────────────────────────────────────────────────────────────
+# LUOT DAY LAI THU 2 — them 2026-09-24, theo chi thi chu kho "day lai g5 cho
+# workflow chay luot nua". KHONG doi mot truong ngu nghia nao: revision, generation,
+# spec_hash, reviewed_sha_required, write_set, han, assurance_target deu NGUYEN.
+# Khoi nay thuan tuy la BANG CHUNG, va no ton tai vi bo loc duong dan cua
+# ops-publish-lease.yml chi kich hoat tren `ops/leases/**` — mot commit RONG se
+# KHONG lam workflow chay.
+DAY_LAI_LAN_2:
+  vi_sao: 'Luot dau (run 35949471676, head dcfd34a) => completed/FAILURE, nen lease nay
+    DA DAY nhung CHUA DANG: khong co comment cua github-actions[bot] tren #579, trong khi
+    g1/g2/g3/g4 deu co (5752246020, 5755872542, 5755989232, 5763534966).'
+  luot_dau_do_o_dau: 't125_AB_toan_suite_KHONG_doi_verdict_theo_ambient_actor =>
+    LECH_CHUA_RO_NGUYEN_NHAN. khong-actor=(rc=1, 166/167), co-actor=(rc=0, 167/167).
+    Ca lech DO = t139_A12_catalog_mutant_A0_giet_dung_ly_do_va_ghi_SONG_kem_seam.'
+  KHONG_phai_loi_noi_dung_lease: 'Hai ly do do duoc. (a) ops-publish-lease.yml NEO BO KIEM
+    VAO NHANH MAC DINH ("Bo kiem ay NEO VAO NHANH MAC DINH, khong lay tu head duoc day"),
+    nen suite chay la cua master, khong phai cua g5. (b) g5 chi them HAI tep — chinh tep
+    lease nay va mot ban chep dac ta r7 — khong cham ops/lease_publish*.py.
+    Do: `git log d553efa..origin/master -- ops/lease_publish_test.py ops/lease_publish.py`
+    => RONG, tuc suite KHONG doi giua luc do va bay gio.'
+  da_thu_tai_hien_TAI_CHO: 'NAM luot, KHONG luot nao do:
+      clone g5 (dcfd34a)     lan 1 => rc=0, 167/167 dat, da chay=167, bo qua=0
+      clone g5 (dcfd34a)     lan 2 => rc=0, 167/167 dat, da chay=167, bo qua=0
+      clone master (ce25a42) lan 1 => rc=0, 167/167 dat, da chay=167, bo qua=0
+      clone master (ce25a42) lan 2 => rc=0, 167/167 dat, da chay=167, bo qua=0
+      clone master + GITHUB_ACTOR=ducthangho GITHUB_REPOSITORY=... CI=true
+                             => rc=0, 167/167 dat; t139 QUA trong 14.370s
+    Hai CLONE DOC LAP (khong worktree — .git dang TEP nem MA_WORKTREE), rc doc TRUC TIEP,
+    va doi BANG CHUNG DUONG N/N hai so BANG NHAU chu khong nhan rc=0 tran.'
+  KET_LUAN_DUNG_MUC: 'Khong tai hien duoc o day. t139 la ca NANG (14.4s) chay dot bien, nen
+    gia thuyet TAI/THU TU la HOP LY — nhung do la GIA THUYET, khong phai phep do. Chinh ca
+    t125 tu khai "CHUA loai tru ro GITHUB_ACTOR, anh huong thu tu ca hoac tai; khong ket
+    luan nguyen nhan tu rieng hai ket qua". Nen cau dung la: NGUYEN NHAN CHUA BIET, va luot
+    day lai nay la mot phep thu, khong phai mot ban vá.'
+  neu_luot_nay_LAI_DO: 'Thi hai lan lien tiep tren CI va khong lan nao tai hien duoc tai
+    cho => KHONG con doc duoc la chap chon. Luc do DUNG, bao chu kho, va dieu tra t125/t139
+    nhu mot lo hong that cua bo do — dung day lan thu ba.'

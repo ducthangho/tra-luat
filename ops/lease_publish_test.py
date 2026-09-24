@@ -8169,6 +8169,7 @@ def t186_KHONG_ca_nao_duoc_chot_SO_LOI_GOI_ngoai_CUA():
          f"bộ dò của chính ca này KHÔNG thấy hình dạng bị cấm khi bơm vào (thấy {len(thay)}). "
          f"Một phép kiểm không thể ĐỎ thì không phải bằng chứng.")
 
+@ca
 def t174_GOI_GIT_giai_ma_dong_bo_va_giu_hop_dong_text():
     """Real subprocess bytes: strict errors reach the caller, never a reader thread."""
     import contextlib

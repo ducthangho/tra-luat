@@ -173,6 +173,10 @@ _PROVIDER_NGOAI_CLI = (
     ("openai_chatgpt", "chatgpt_web", "human_mediated"),
     # WP610: Desktop khai đúng bề mặt; không là CLI hoặc bằng chứng model/assurance.
     ("openai_codex", "codex_desktop", "machine"),
+    # wp461 r3: Codex chạy như DỊCH VỤ — GitHub App `chatgpt-codex-connector[bot]` (review trên
+    # PR) và Codex cloud nói chung. Không CLI, không Desktop; không chứng minh model/effort hay
+    # tính độc lập của phiên. Tên máy chốt ở Mission #470 (Q1); định nghĩa ở spec r3 §2.
+    ("openai_codex", "codex_service", "machine"),
     # Human Auditor — bộ ba chép từ bảng provider chuyển tiếp
     # (`ops/KE_HOACH_THI_CONG_DA_PROVIDER.md` §2, hàng "Human Auditor"). Cross-review PR #455
     # lượt 7 (`R7-02`) đo được: `human` từng bị bộ kiểm biên nhận chép tay vào tập "KHÔNG hợp

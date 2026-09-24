@@ -1102,9 +1102,14 @@ con_mo:
         "NGUYEN NHAN DO DUOC" va goi mot quan sat la "bang chung cho nguyen nhan" — ca hai deu rong hon
         phep do; cross-review luot 9 bat, va day la duong vao THU TU cua lop nay.
         XANH TRON BON CONG: trong bon head b94182b..e6eabed thi a479699 la duy nhat; tinh ca b246aac thi co HAI
-        (a479699 18:38:03Z, b246aac 20:00:46Z). b246aac xanh tron vi khong co cu day nao sau no trong cua so
-        27 phut — QUAN SAT nay NHAT QUAN voi gia thuyet tren, khong phai "bang chung cho nguyen nhan"
-        (ha nhan sau cross-review luot 9).'
+        (a479699 18:38:03Z, b246aac 20:00:46Z).
+        HAI QUAN SAT RIENG ve b246aac, ghi tach — ban vong 16 van de chung noi bang chu "vi" va
+        cross-review luot 10 bat dung do:
+        (i) b246aac xanh tron (gate-registry success 20:00:46Z);
+        (ii) trong 27 phut sau cu day sinh ra b246aac, nhat ky duoc khai KHONG co cu day ke tiep.
+        Hai quan sat ay NHAT QUAN voi gia thuyet "nhip day giet cong dang chay". Chung KHONG xac lap
+        rang (i) xay ra VI (ii): dieu do doi cancellation reason cua dung run/attempt, va khong phep do
+        nao o day doc no.'
     chot_tai_sha: 'f07fcf211d7b95ed8967ef586278d277a68bd5eb — doc 2026-09-24T09:07:22Z. So
       `dien_bien_do_duoc` khai CI cua cac head #601 tu 9387078 DEN VA BAO GOM SHA nay. Head sinh sau moc
       nay khong co entry theo luat moi (xem PHAM_VI_THEO_LUAT_khong_theo_danh_sach, muc SUA LUAT O VONG 15).'
@@ -1194,10 +1199,17 @@ NEO_PROTOCOL_TINH_THEO_BLOB:
         (25 dong) — phu neo `ADR-0034 d.18-19`'
       'docs/adr/0048-tran-vong-review-len-muoi.md': '1d2cf6d6dd05e5da33fd4231a9955fe9ca5341eb (134 dong) —
         phu neo `ADR-0048 d.96-102`'
+      'docs/adr/0037-review-rescue-va-tach-stable-slice.md': '43486b5e826e9e338bc5ec176bf306582b30339c
+        (15 dong) — phu neo `ADR-0037 d.5-6`'
+      'docs/adr/0043-tran-vong-review-canon-la-hai.md': '0395f36a44cddaa4f222e76cf6b7d08cecb22c67
+        (28 dong) — phu neo `ADR-0043 d.5-6`'
     cach_kiem: 'git show <blob> | sed -n "<so>p" — doc tren blob, khong doc tren HEAD cua master.'
     gioi_han: >-
-      DA KIEM: ba tep tren, va cac doan duoc dan khop tai blob ghi o day (cross-review luot 9 cung doc
-      va xac nhan chung khop tai HEAD). CHUA KIEM TUNG CAI: cac neo khac trong tep neu co. Bang nay khai
+      DA KIEM: NAM tep tren, va cac doan duoc dan khop tai blob ghi o day (cross-review luot 9 va 10 cung
+      doc va xac nhan; luot 10 do duoc 926/25/134 dong cho ba tep dau). Hai tep ADR-0037 va ADR-0043 duoc
+      them o vong 17 sau khi luot 10 chi ra rang neo cua chung con nam ngoai ca hai luat.
+      CHUA KIEM TUNG CAI va KHAI THANG: neo tro vao cac tep LEASE va cac tep WORKFLOW. Bang nay KHONG
+      tuyen phu het moi neo trong ho so. Bang nay khai
       BLOB chu khong khai commit, vi blob la thu khong doi khi tep duoc sua o commit sau.
 
   vi_sao_KHONG_sua_tung_so: >-
@@ -1208,6 +1220,36 @@ NEO_PROTOCOL_TINH_THEO_BLOB:
     KHONG tuyen rang moi neo `d.<so>` trong tep da duoc kiem lai tung cai. DA KIEM ba neo ma cross-review
     luot 7 chi ra (d.1011-1013, d.1015-1018, d.859-863) va chung khop blob 17069f96. Cac neo con lai:
     CHUA KIEM TUNG CAI.
+
+DINH_CHINH_SAU_REVIEW_VONG_17:
+  nguon: 'Cross-review luot 10, codex gpt-6-sol effort medium, chay cuc bo tren commit CHUA DAY
+    ff1c6ada. Ket qua: request_changes — 0 P1, 1 P2, 0 P3.'
+  trang_thai_ba_lop_theo_reviewer:
+    pham_vi_tu_noi_rong_hon_du_lieu: 'DONG MOT PHAN theo luot 10 — hai entry neo SHA, luat A chot tai
+      f07fcf21, luat B gan nhan lich su, cau 35 commit da thu ve 5 luot gate. Phan "mot phan" la vi
+      reviewer khong xac minh doc lap duoc con so 15 luot 13/2 (no khong goi GitHub API), khong phai vi
+      con loi. Cac cum "head hien tai" con lai nam trong TRICH luat cu, khong ap cho luat A.'
+    neo_dong_loi_thoi: 'DONG doi voi cac blob da khai. Luot 10 do duoc 926/25/134 dong va xac nhan bon
+      doan duoc dan dung chu de.'
+    nguyen_nhan_vuot_phep_do: 'CHUA DONG o luot 10 — mot cau con sot. Da sua o vong nay.'
+  P2_cau_nhan_qua_con_sot:
+    noi: '`gate_registry_bi_huy_LIET_KE_khong_dem_tran` — cau "b246aac xanh tron VI khong co cu day nao
+      sau no trong cua so 27 phut".'
+    vi_sao_sot: >-
+      Vong 16 ha HAI cau cua muc nay ("NGUYEN NHAN DO DUOC" va "dung la bang chung cho nguyen nhan")
+      nhung bo sot cau thu ba nam ngay duoi chung. Do la duong vao THU NAM cua cung mot lop.
+    da_sua: 'Tach thanh hai quan sat rieng: (i) b246aac xanh tron; (ii) trong 27 phut sau cu day ay,
+      nhat ky duoc khai khong co cu day ke tiep. Hai quan sat NHAT QUAN voi gia thuyet, khong xac lap
+      quan he nhan qua giua chung.'
+    DIEU_DANG_GHI_NHAT: >-
+      Khoi vong 16 KHAI rang no da ha cau nay. Loi khai ay rong hon ban sua that. Tuc lop
+      `nguyen-nhan-vuot-phep-do` tai dien ngay ben trong LOI KHAI rang no da duoc sua — mot loi khai ve
+      BAN VA cung co the rong hon ban va, y het loi khai ve phep do. Da ghi dinh chinh ngay trong khoi
+      vong 16 thay vi chi ghi o day, de nguoi doc khoi ay khong doc phai loi khai cu.
+  mo_rong_bang_blob: >-
+    Luot 10 chi ra neo `ADR-0037 d.5-6` va `ADR-0043 d.5-6` con nam ngoai ca hai luat neo. Da them vao
+    bang: ADR-0037 -> 43486b5e (15 dong), ADR-0043 -> 0395f36a (28 dong), va da kiem hai doan duoc dan.
+    Bang nay KHONG tuyen phu het moi neo: neo tro vao cac tep lease va workflow van chua duoc khai.
 
 DINH_CHINH_SAU_REVIEW_VONG_16:
   nguon: 'Cross-review luot 9, codex gpt-6-sol effort medium, chay cuc bo tren commit CHUA DAY
@@ -1240,6 +1282,13 @@ DINH_CHINH_SAU_REVIEW_VONG_16:
       doc `cancellation reason` cua tung run. Cung ha cau "dung la bang chung cho nguyen nhan tren".
     ghi_cong_cho_reviewer: 'Phep do `concurrency`/`cancel-in-progress` la cua reviewer luot 9, khong phai
       cua phien nay. No lam gia thuyet MANH HON dong thoi cho thay vi sao no van chi la gia thuyet.'
+    DINH_CHINH_CUA_CHINH_KHOI_NAY_o_vong_17: >-
+      Khoi vong 16 khai da ha cau nhan qua cua muc nay. Loi khai ay RONG HON ban sua that: vong 16 ha hai
+      cau ("NGUYEN NHAN DO DUOC" va "dung la bang chung cho nguyen nhan") nhung BO SOT cau
+      "b246aac xanh tron VI khong co cu day nao sau no trong cua so 27 phut" nam ngay duoi. Cross-review
+      luot 10 bat. Da tach cau ay thanh hai quan sat rieng o vong 17.
+      Dang ghi lai vi day la lop `nguyen-nhan-vuot-phep-do` tai dien ngay trong loi khai rang no da duoc
+      sua — tuc mot loi khai ve BAN VA cung co the rong hon ban va, y het loi khai ve phep do.
   P2_C_neo_dong_no_DA_TRA:
     vong_15_tu_khai_no: 'Vong 15 gioi han luat ve neo protocol va khai thang rang neo CLAUDE.md/ADR
       "CHUA duoc khai, do la no con lai". Reviewer luot 9 xac nhan thua nhan no la trung thuc nhung lop

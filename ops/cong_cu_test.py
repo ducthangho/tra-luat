@@ -821,12 +821,31 @@ DOT_BIEN = {
     # r10 — N26: cua sau cua lop "phan quyet phu thuoc trang thai LOCAL cua may". Phuc hoi
     # duong LUI ve `rglob` khi git hong; `t44` chot (1) phai DO.
     "bn_git_hong_lui_ve_rglob": ("ops/bash_nen.py",
-        '            return [], f"git-hong: ls-files rc={pc.returncode} {pc.stderr.strip()[:200]!r}"\n',
+        # NEO LAI LAN HAI O r13: N36 viet lai dong nay de giai ma `stderr` tu BYTES.
+        '            return [], ("git-hong: ls-files rc=%d %r"\n'
+        '                        % (pc.returncode, pc.stderr.decode("utf-8", "replace").strip()[:200]))\n',
         # NEO LAI O r11: `_liet_ke_py` nay tra BAN GHI `(rel, che_do, sha)`, nen ban lui cu
         # tra `Path` lam gian giao hong => TIN DUNG GIA. Ban nay lui dung hinh dang moi.
         '            return [(x.relative_to(goc).as_posix(), None, None)\n'
         '                    for x in sorted(goc.rglob("*.py"))], "rglob"  # đột biến: lùi im lặng\n',
         "BASH_NEN", (), "t44_khong_lay_duoc_INDEX_thi_KHONG_DO_DUOC_chu_khong_lui_ve_rglob"),
+    # r13 — ba dot bien cho N36/N37/N38.
+    # THU HEP sau mot phep do: ban dau dot bien them `text=True` vao lenh git, va the la
+    # `pc.stdout` thanh `str` con cho tach van `.split(b"\\0")` => TypeError => GIAN GIAO SAP,
+    # giet 8 ca. Do la dot bien QUA RONG, khong phai phep do thuoc tinh. Ban nay mo phong DUNG
+    # va CHI phep dich dong pho quat, tren DUONG DAN, giu nguyen moi kieu du lieu.
+    "bn_khung_dich_dong": ("ops/bash_nen.py",
+        '                    rel = rel_b.decode("utf-8", "surrogateescape")\n',
+        '                    rel = rel_b.decode("utf-8", "surrogateescape").replace("\\r", "\\n")  # đột biến: dịch dòng phổ quát\n',
+        "BASH_NEN", (), "t48_khung_INDEX_giu_BYTES_va_anh_chup_ghim_BLOB"),
+    "bn_anh_chup_chi_dem_so": ("ops/bash_nen.py",
+        "            if thay_oid != ghim:\n",
+        "            if False:  # đột biến: ảnh chụp chỉ đếm số, không ghim blob\n",
+        "BASH_NEN", (), "t48_khung_INDEX_giu_BYTES_va_anh_chup_ghim_BLOB"),
+    "bn_dinh_nghia_giai_o_pham_vi_trong": ("ops/bash_nen.py",
+        "            for x in ngoai:\n                tham(x, chuoi)\n",
+        "            for x in ngoai:\n                tham(x, chuoi_trong)  # đột biến: biểu thức lúc định nghĩa giải ở phạm vi TRONG\n",
+        "BASH_NEN", (), "t33_do_phu_cua_cong_do_duoc_THEO_HINH_DANG"),
     # r12 — BON dot bien cho bon mat cua "doc INDEX cho dung" (N32..N35), deu ve `t47`.
     "bn_theo_ref_thay_the": ("ops/bash_nen.py",
         '    env["GIT_NO_REPLACE_OBJECTS"] = "1"\n'
@@ -2188,6 +2207,10 @@ _HINH_DANG_PHU = {
     "global_import":   'def f():\n    global subprocess\n    import subprocess\n    subprocess.run(["bash"])\n',
     # Chieu nguoc cua ban va walrus: mot comprehension THUONG khong che duoc gi.
     "comprehension_thuong": 'import subprocess\n[x for x in [0]]\nsubprocess.run(["bash"])\n',
+    # r13 — N37: bieu thuc LUC DINH NGHIA tinh o pham vi NGOAI, chi THAN moi o pham vi moi.
+    # Ban r12 giai ca hai o pham vi TRONG, nen chinh tham so che ten module thi lot.
+    "mac_dinh_che_ten_module": 'import shutil\ndef f(shutil=shutil.which("bash")):\n    pass\n',
+    "ham_LONG_trong_ham":      'def run():\n    def f():\n        import shutil as sh\n        return sh.which("bash")\n',
 }
 # `executable=` GHI DE, nen ca hai cung ten `bash` van la DUNG MOT ban ghi (F4, chieu dem).
 _HINH_DANG_MOT_BAN_GHI = 'import subprocess\nsubprocess.run(["bash"], executable="bash")\n'
@@ -2976,6 +2999,81 @@ def t43_khong_luat_ignore_nao_doi_duoc_danh_sach_tep():
         bang(danh_sach(dict(os.environ, XDG_CONFIG_HOME=str(tmp / "xdg"),
                             GIT_CONFIG_GLOBAL=str(rong))) == nen,
              "(6) `$XDG_CONFIG_HOME/git/ignore` — đường ignore MẶC ĐỊNH của git — đổi được danh sách")
+
+
+@ca
+def t48_khung_INDEX_giu_BYTES_va_anh_chup_ghim_BLOB():
+    """THUỘC TÍNH: khung `ls-files -z` tách trên BYTES, và ảnh chụp đông cứng ghim BLOB.
+
+    SINH TỪ CROSS-REVIEW CODEX vòng 7 trên `cf6e6cb` — hai P2, tái hiện cả hai:
+      (1) `text=True` dịch dòng phổ quát TRƯỚC khi tách khung `\0`/`\t`, nên `ops/va\r.py` và
+          `ops/va\n.py` — HAI đường khác nhau trong INDEX — gộp thành MỘT `rel`, và
+          `_doc_noi_dung` ghi đè im lặng. Đo: tệp `\r` mang lời gọi trần, tệp `\n` sạch với OID
+          cao hơn ⇒ `rc=0 DAT`, `co_loi_goi_tran` **RỖNG**. Vi phạm tàng hình.
+      (2) `ANH_CHUP_DONG_CUNG` KHAI "không được sửa một byte" mà chỉ ĐO số lời gọi. Đo: đổi HẾT
+          bảy `shutil.which("bash")` sang `subprocess.run(["bash"])`, giữ nguyên số 7 ⇒ vẫn
+          `rc=0 DAT`, `lech_so` RỖNG. Đây đúng hình dạng kho đã đặt tên ở packet
+          **N6-LOI-KHAI-RONG-HON-PHEP-DO**: lời khai rộng hơn phép đo.
+
+    CHIỀU NGƯỢC nằm ngay trong chốt (2): ảnh chụp NGUYÊN BẢN phải cho `lech_oid` RỖNG, kẻo một
+    bản vá "lúc nào cũng lệch" vẫn xanh ở đây.
+    """
+    def _g(d, *a):
+        return subprocess.run(["git", "-C", str(d)] + list(a), capture_output=True,
+                              text=True, timeout=60)
+
+    BAN = 'import shutil\nb = shutil.which("bash")\n'
+    with tempfile.TemporaryDirectory() as tmp:
+        tmp = Path(tmp)
+
+        # (1) KHUNG tách trên BYTES — hai đường chỉ khác ký tự điều khiển.
+        cay = tmp / "khung"
+        (cay / "ops").mkdir(parents=True)
+        for lenh in (["init", "-q"], ["config", "user.email", "t@t"], ["config", "user.name", "t"]):
+            subprocess.run(["git", "-C", str(cay)] + lenh, capture_output=True, timeout=60)
+        try:
+            (cay / "ops" / "va\r.py").write_bytes(BAN.encode("utf-8"))
+            (cay / "ops" / "va\n.py").write_bytes(b"X = 1\n" * 40)
+        except OSError as e:
+            raise BoQuaMoiTruong(f"nền này không đặt được tên tệp có ký tự điều khiển: {e}") from e
+        _g(cay, "add", "-A")
+        bq = _bash_nen_voi_chua_chuyen(tmp, {})
+        _, bao = _quet(cay, bq)
+        thay = sorted(bao.get("co_loi_goi_tran") or {})
+        bang(thay == ["ops/va\r.py"],
+             f"(1) hai đường KHÁC NHAU trong INDEX bị gộp làm một: thấy {thay!r}, mong "
+             f"['ops/va\\r.py'] — dịch dòng phổ quát đang chạy TRƯỚC khi tách khung, nên một "
+             f"blob ghi đè blob kia và vi phạm thành tàng hình")
+
+        # (2) ẢNH CHỤP ghim BLOB: đổi hình dạng mà giữ nguyên SỐ vẫn phải ĐỎ.
+        cay2 = tmp / "anhchup"
+        (cay2 / "ops").mkdir(parents=True)
+        for lenh in (["init", "-q"], ["config", "user.email", "t@t"], ["config", "user.name", "t"]):
+            subprocess.run(["git", "-C", str(cay2)] + lenh, capture_output=True, timeout=60)
+        (cay2 / "ops" / "anh.py").write_text(
+            "import shutil, subprocess\n" + 'b = shutil.which("bash")\n' * 7, encoding="utf-8")
+        _g(cay2, "add", "-A")
+        oid = _g(cay2, "rev-parse", ":ops/anh.py").stdout.strip()
+        bq2 = _bash_nen_voi_chua_chuyen(
+            tmp, {}, ten="bash_nen_anh_chup.py",
+            anh_chup={"ops/anh.py": (7, oid, "ảnh chụp đông cứng")})
+        # CHỐT TRÊN CƠ CHẾ (`lech_oid_dong_cung`), KHÔNG trên `rc`. Bản đầu chốt `rc == 0` và
+        # thế là trói lại phán quyết — thứ phụ thuộc MỌI luật khác của cổng, trong đó có thuộc
+        # tính `t40` trói. Đây là lần thứ BA liên tiếp (r11 `t45`, r12 `t47`, r13 `t48`) cùng
+        # một hình dạng: chốt trên KẾT QUẢ thay vì CƠ CHẾ. `t39`/N22 chỉ phủ `rc == 2` và
+        # `trang_thai == "DO"`, nên `rc == 0` lọt qua nó — NỢ CÓ TÊN, đã trình chủ kho.
+        _, bao = _quet(cay2, bq2)
+        bang(not (bao.get("lech_oid_dong_cung") or {}),
+             f"(2) ảnh chụp NGUYÊN BẢN mà cổng đã báo lệch OID: "
+             f"{bao.get('lech_oid_dong_cung')} — một cổng lúc nào cũng đỏ thì không ai bật nó")
+        (cay2 / "ops" / "anh.py").write_text(
+            "import shutil, subprocess\n" + 'subprocess.run(["bash"])\n' * 7, encoding="utf-8")
+        _g(cay2, "add", "-A")
+        _, bao = _quet(cay2, bq2)
+        bang(bool(bao.get("lech_oid_dong_cung") or {}),
+             f"(2) đổi HẾT bảy lời gọi sang hình dạng khác mà GIỮ số 7: "
+             f"lech_oid={bao.get('lech_oid_dong_cung')} — mục khai "
+             f"'không được sửa một byte' mà chỉ đo SỐ là lời khai rộng hơn phép đo")
 
 
 @ca

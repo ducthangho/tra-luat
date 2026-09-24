@@ -470,17 +470,26 @@ def _liet_ke_py(goc: Path):
     """
     if (goc / ".git").exists():
         try:
+            # N36 (r13) — KHÔNG `text=True`. Dịch dòng phổ quát chạy TRƯỚC khi tách khung
+            # `\0`/`\t`, nên `ops/va\r.py` và `ops/va\n.py` — HAI đường khác nhau trong INDEX —
+            # gộp thành MỘT `rel`, và `_doc_noi_dung` ghi đè im lặng. Đo được trên `cf6e6cb`:
+            # tệp `\r` mang lời gọi trần, tệp `\n` sạch với OID cao hơn ⇒ `rc=0 DAT`,
+            # `co_loi_goi_tran` RỖNG. Tách khung trên BYTES rồi mới giải mã, và giải mã bằng
+            # `surrogateescape` để không mất byte nào.
             pc = _chay_git(goc, "ls-files", "--cached", "-s", "-z",
-                           capture_output=True, text=True, timeout=60)
+                           capture_output=True, timeout=60)
             if pc.returncode == 0:
                 muc, chua_hoa_giai = [], set()
-                for dong in pc.stdout.split("\0"):
-                    if not dong:
+                for tho in pc.stdout.split(b"\0"):
+                    if not tho:
                         continue
-                    dau, _, rel = dong.partition("\t")
-                    truong = dau.split()
+                    dau_b, tab, rel_b = tho.partition(b"\t")
+                    if not tab:
+                        return [], f"git-hong: ls-files -s trả dòng lạ {tho[:120]!r}"
+                    truong = dau_b.decode("ascii", "replace").split()
+                    rel = rel_b.decode("utf-8", "surrogateescape")
                     if len(truong) < 3 or not rel:
-                        return [], f"git-hong: ls-files -s trả dòng lạ {dong[:120]!r}"
+                        return [], f"git-hong: ls-files -s trả dòng lạ {tho[:120]!r}"
                     # N35 — LỌC HẬU TỐ Ở ĐÂY, không bằng pathspec `*.py`: pathspec so theo MỘT
                     # cách viết nên `VI_PHAM.PY` và `w.pyw` vô hình (đo được: ls-files trả rỗng).
                     if not _la_nguon_py(rel):
@@ -500,7 +509,8 @@ def _liet_ke_py(goc: Path):
                                 + ", ".join(sorted(chua_hoa_giai))
                                 + " — không có blob stage-0 nào để duyệt")
                 return sorted(set(muc)), "git"
-            return [], f"git-hong: ls-files rc={pc.returncode} {pc.stderr.strip()[:200]!r}"
+            return [], ("git-hong: ls-files rc=%d %r"
+                        % (pc.returncode, pc.stderr.decode("utf-8", "replace").strip()[:200]))
         except (OSError, subprocess.SubprocessError) as e:
             return [], f"git-hong: {type(e).__name__}: {e}"
     return sorted((x.relative_to(goc).as_posix(), None, None)
@@ -517,9 +527,18 @@ def _so_cho_phep(muc):
     chuỗi với 9 lời gọi ⇒ `rc=0 DAT`. Cùng lớp với F1 (hạn ngạch 0 bị bỏ qua): miễn trừ khai
     theo TƯ CÁCH THÀNH VIÊN thay vì theo HẠN NGẠCH. `t40` đọc bảng THẬT để chặn ngay lúc khai.
     """
+    if isinstance(muc, (tuple, list)) and len(muc) == 3:
+        return int(muc[0]), str(muc[2])        # (số, OID, lý do) — mục ĐÔNG CỨNG (N38)
     if isinstance(muc, (tuple, list)) and len(muc) == 2:
         return int(muc[0]), str(muc[1])
     return None, str(muc)
+
+
+def _oid_dong_cung(muc):
+    """OID blob mà mục miễn trừ GHIM, hay None khi mục không ghim gì (N38)."""
+    if isinstance(muc, (tuple, list)) and len(muc) == 3:
+        return str(muc[1])
+    return None
 
 
 def _la_hang_bash(nut):
@@ -882,10 +901,14 @@ def _giai_callee_theo_pham_vi(cay):
     """[(nút `Call`, hàm tra tên)] cho MỌI lời gọi trong cây; hàm tra tên trả
     `(module, hàm|None)` hay None, theo đúng phạm vi từ vựng CHỨA lời gọi ấy.
 
-    Bỏ qua có chủ đích, khai thẳng: decorator/giá trị mặc định của một `def` lồng và `iter`
-    đầu tiên của comprehension thật ra thuộc phạm vi NGOÀI; ở đây chúng được giải trong phạm
-    vi TRONG. Lệch chỉ lộ khi tham số của chính hàm ấy trùng tên `subprocess`/`shutil` và
-    decorator lại gọi `bash` — chưa có phép đo nào cần nó.
+    N37 (r13) — MÓN NỢ ẤY ĐÃ ĐẾN HẠN. Bản r12 khai thẳng chỗ bỏ qua: *"decorator / giá trị mặc
+    định của một `def` lồng và `iter` đầu tiên của comprehension thật ra thuộc phạm vi NGOÀI…
+    chưa có phép đo nào cần nó."* Cross-review codex vòng 7 đưa ra đúng phép đo ấy:
+        `def f(shutil=shutil.which("bash"))` ⇒ `[]` — LỌT, dù định nghĩa `f` CÓ gọi bash.
+    Python tính decorator, giá trị mặc định, chú thích, cơ sở lớp và `iter` ĐẦU TIÊN của
+    comprehension ở phạm vi CHỨA, chỉ THÂN mới ở phạm vi mới. Nay duyệt đúng thế.
+    Bốn hình dạng kia (`x=…`, `@…`, `x: …`, `class C(…)`) vốn ĐÃ bắt được vì tên không bị che;
+    lệch chỉ lộ khi chính tham số che tên module — đúng ca codex dựng.
     """
     import ast
     ket = []
@@ -895,16 +918,55 @@ def _giai_callee_theo_pham_vi(cay):
         bang, toan_cuc, phi_cuc_bo = bang_cua[id(nut)]
         return (isinstance(nut, ast.ClassDef), bang, toan_cuc, phi_cuc_bo)
 
-    def duyet(nut, chuoi):
-        for con in ast.iter_child_nodes(nut):
-            if isinstance(con, _NUT_PHAM_VI):
-                duyet(con, chuoi + [pham_vi(con)])
-                continue
-            if isinstance(con, ast.Call):
-                ket.append((con, lambda ten, c=chuoi: _giai_ten(ten, c)))
-            duyet(con, chuoi)
+    def _ngoai_va_trong(con):
+        """(nút tính ở phạm vi NGOÀI, nút tính ở phạm vi TRONG) của một nút phạm vi."""
+        if isinstance(con, (ast.FunctionDef, ast.AsyncFunctionDef)):
+            a = con.args
+            ngoai = [*con.decorator_list, *a.defaults,
+                     *[x for x in a.kw_defaults if x is not None],
+                     *[x.annotation for x in (*a.posonlyargs, *a.args, *a.kwonlyargs,
+                                              a.vararg, a.kwarg)
+                       if x is not None and x.annotation is not None]]
+            if con.returns is not None:
+                ngoai.append(con.returns)
+            return ngoai, list(con.body)
+        if isinstance(con, ast.Lambda):
+            a = con.args
+            return ([*a.defaults, *[x for x in a.kw_defaults if x is not None]], [con.body])
+        if isinstance(con, ast.ClassDef):
+            return ([*con.decorator_list, *con.bases, *[k.value for k in con.keywords]],
+                    list(con.body))
+        if isinstance(con, (ast.ListComp, ast.SetComp, ast.DictComp, ast.GeneratorExp)):
+            gen = con.generators
+            if not gen:
+                return [], list(ast.iter_child_nodes(con))
+            trong = [x for x in ast.iter_child_nodes(con) if x is not gen[0]]
+            return [gen[0].iter], trong + [gen[0].target, *gen[0].ifs]
+        return [], list(ast.iter_child_nodes(con))
 
-    duyet(cay, [pham_vi(cay)])
+    def tham(con, chuoi):
+        """Thăm MỘT nút. Nút phạm vi được xử lý TẠI ĐÂY chứ không phải ở vòng lặp của nút cha.
+
+        Bản đầu của N37 truyền nút phạm vi vào hàm duyệt như GỐC, nên chính nó không còn được
+        nhận ra là phạm vi và một hàm lồng trong hàm mất đúng một tầng. Đo được ngay trên kho:
+        `scripts/tl_selftest.py` khai 1 lời gọi trần mà đo được 0 — cổng ra ĐỎ và chỉ thẳng tệp.
+        Ca tối giản: `def run(): def f(): import shutil as sh; sh.which("bash")` ⇒ `[]`.
+        """
+        if isinstance(con, _NUT_PHAM_VI):
+            ngoai, trong = _ngoai_va_trong(con)
+            chuoi_trong = chuoi + [pham_vi(con)]
+            for x in ngoai:
+                tham(x, chuoi)
+            for x in trong:
+                tham(x, chuoi_trong)
+            return
+        if isinstance(con, ast.Call):
+            ket.append((con, lambda ten, c=chuoi: _giai_ten(ten, c)))
+        for x in ast.iter_child_nodes(con):
+            tham(x, chuoi)
+
+    for _con in ast.iter_child_nodes(cay):
+        tham(_con, [pham_vi(cay)])
     return ket
 
 
@@ -956,11 +1018,19 @@ CHO_PHEP = {
 # ẢNH CHỤP ĐÔNG CỨNG. `ops/reviews/**` từng được bỏ qua bằng TIỀN TỐ, tức miễn trừ vô hạn:
 # ba tệp bẩn thêm vào đó cho `rc=0 DAT` và `co_loi_goi_tran` RỖNG (đo được). Nay là KIỂM KÊ
 # TƯỜNG MINH — đúng hai tệp, đúng số lời gọi; một tệp review MỚI mang lời gọi trần sẽ ĐỎ.
+# N38 (r13) — ĐÔNG CỨNG PHẢI GHIM BLOB, KHÔNG CHỈ ĐẾM SỐ. Bảng này KHAI "không được sửa một
+# byte" mà chỉ ĐO số lời gọi. Lời khai RỘNG HƠN PHÉP ĐO — đúng hình dạng kho đã đặt tên ở
+# packet N6-LOI-KHAI-RONG-HON-PHEP-DO. Đo được trên `cf6e6cb`: đổi HẾT bảy `shutil.which("bash")`
+# thành `subprocess.run(["bash"])`, giữ nguyên số 7, cổng vẫn `rc=0 DAT`, `lech_so` RỖNG.
+# Nay mỗi mục mang `(số_lần, OID_blob, lý_do)`: OID lệch ⇒ ĐỎ, dù số có khớp. Làm mới ảnh chụp
+# hợp lệ thì phải cập nhật OID tường minh — đó là cái giá, và là cái giá ĐÚNG.
 ANH_CHUP_DONG_CUNG = {
     "ops/reviews/goi-va-lease-hoi-toan-kho-1/lease_publish_test.py":
-        (7, "ảnh chụp verdict đông cứng — `t26` băm lại mỗi lượt, KHÔNG được sửa một byte"),
+        (7, "1d7f5f41e27558473fded1876aa920c6433da2de",
+         "ảnh chụp verdict đông cứng — `t26` băm lại mỗi lượt, KHÔNG được sửa một byte"),
     "ops/reviews/goi-va-lease-hoi-toan-kho-2/lease_publish_test.py":
-        (7, "ảnh chụp verdict đông cứng — như trên"),
+        (7, "d74def6953f72325bcf03f108fd8ee695785ab29",
+         "ảnh chụp verdict đông cứng — như trên"),
 }
 
 # RATCHET. Mỗi mục là một tệp CHƯA chuyển sang `tim_bash`, kèm lý do đo được. Cổng ĐỎ theo
@@ -1112,12 +1182,31 @@ def quet(goc: Path):
     # `da_sach` là chiều ngược RIÊNG của `CHUA_CHUYEN` — ratchet có NGÀY GỠ, phải ngắn đi, nên
     # thông điệp của nó là "xoá khỏi danh sách". Một mục số về 0 rơi vào CẢ `lech_so` lẫn đây;
     # báo cáo mang cả hai khoá, và đó là cố ý: hai luật, hai lý do, cùng một phán quyết.
+    # N38 — OID lệch là ĐỎ, dù số có khớp. Một mục khai "đông cứng từng byte" mà chỉ đo SỐ là
+    # lời khai rộng hơn phép đo.
+    lech_oid = {}
+    if nguon_tep == "git":
+        # DUYỆT BẢNG ẢNH CHỤP CỦA CHÍNH NÓ, không duyệt bảng GỘP — và đó là một phép đo, không
+        # phải khẩu vị. Bản đầu duyệt `_MIEN_TRU`, nên `bn_cho_phep_vo_han` (đột biến thu bảng
+        # gộp còn mỗi `CHUA_CHUYEN`, đích `t40`) làm mục ảnh chụp biến mất khỏi vòng lặp và giết
+        # luôn `t48` ⇒ bán kính 2/50. "Ảnh chụp ghim blob" là thuộc tính của BẢNG ẢNH CHỤP;
+        # "mọi miễn trừ đều mang hạn ngạch" là thuộc tính `t40` trói. Hai thứ khác nhau thì
+        # không được đi chung một vòng lặp.
+        oid_that = {rel: sha for rel, _, sha in cac_tep}
+        for t, m in ANH_CHUP_DONG_CUNG.items():
+            ghim = _oid_dong_cung(m)
+            if ghim is None:
+                continue
+            thay_oid = oid_that.get(t)
+            if thay_oid != ghim:
+                lech_oid[t] = {"ghim": ghim, "do_duoc": thay_oid}
     da_sach = [t for t in CHUA_CHUYEN if t not in co_loi_goi]
     bao = {"da_quet": str(thu_muc), "pham_vi": "toan-cay", "nguon_tep": nguon_tep,
            "nguon_noi_dung": "blob-index" if nguon_tep == "git" else "cay-lam-viec",
            "bien_git_da_go": bien_git_da_go, "co_loi_goi_tran": co_loi_goi,
            "ngoai_danh_sach": moi, "muc_ratchet_da_sach": sorted(da_sach), "lech_so_loi_goi": lech_so,
            "cho_phep": sorted(CHO_PHEP), "anh_chup": sorted(ANH_CHUP_DONG_CUNG), "chua_chuyen": sorted(CHUA_CHUYEN),
+           "lech_oid_dong_cung": lech_oid,
            "so_cho_phep": {t: _so_cho_phep(m)[0] for t, m in sorted(_MIEN_TRU.items())}}
     if khong_khai_so:
         # FAIL-CLOSE. Một mục miễn trừ không khai hạn ngạch số là một mục KHÔNG ĐO ĐƯỢC,
@@ -1134,6 +1223,16 @@ def quet(goc: Path):
             + "; ".join(f"{t}:{d}" for t, d in sorted(moi.items()))
             + ". Dùng `ops/bash_nen.py::tim_bash()` — nó QUYẾT BẰNG NĂNG LỰC, và "
               "`shutil.which(\"bash\")` trên Windows trả bộ phóng WSL (Issue #570).")
+        return RC_DO, bao
+    if lech_oid:
+        bao["trang_thai"] = "DO"
+        bao["ly_do"] = (
+            "ảnh chụp ĐÔNG CỨNG đã đổi BLOB: "
+            + "; ".join(f"{t} ghim {v['ghim'][:12]} mà đo được {str(v['do_duoc'])[:12]}"
+                        for t, v in sorted(lech_oid.items()))
+            + ". Mục khai 'không được sửa một byte' thì phải ĐO bằng blob, không bằng số lần — "
+              "đổi hết 7 lời gọi sang một hình dạng khác mà giữ số 7 thì phép đếm không thấy gì. "
+              "Làm mới ảnh chụp hợp lệ ⇒ cập nhật OID tường minh.")
         return RC_DO, bao
     if lech_so:
         bao["trang_thai"] = "DO"

@@ -434,6 +434,11 @@ reviewed_sha: <sha>
 ## ĐỐI CHIẾU LƯỢT TRƯỚC
 - <slug>: <kết quả kiểm lại và bằng chứng>
 
+## BẢNG LỚP
+| slug lớp | finding IDs/biểu hiện | hạng còn mở | nguồn lượt/SHA | phương án chung hoặc lý do vá riêng | phép kiểm/giới hạn |
+|---|---|---|---|---|---|
+| <slug> | <IDs> | <hạng> | <nguồn> | <phương án/lý do> | <command, kết quả, chưa đo> |
+
 ## BẢNG SĂN
 HƯỚNG 1: <ten>
   giả thuyết : <neu ... thi ... sai>
@@ -445,7 +450,7 @@ HƯỚNG 2: ...
 ## BẢNG ĐO
 | khẳng định | PR khai | đo được | khớp? |
 
-### <slug>  [P1|P2|P3]  <tieu de mot dong>
+### <slug>  [P0|P1|P2|P3]  <tieu de mot dong>
 TỆP/DÒNG:
 VẤN ĐỀ:
 ĐÃ THỬ VÁ: có/không — <mo ta>
@@ -454,6 +459,8 @@ VẤN ĐỀ:
 ```
 
 Cú pháp bảng Markdown trên có thể trình bày cả số khớp và số lệch.
+Bảng lớp và quy tắc phân hạng theo protocol §8.3; tín hiệu hội tụ/checkpoint theo
+§12; hợp đồng gợi ý cách vá và patch-as-hint theo §7/§8.
 
 **HINT.patch — kết quả thuật lại của #518 (12-09-2026).** Commit merge
 `a8b0cf443ca8475e859ad8ae5e150fce135818d2` ghi bảy lượt review, sáu lượt có finding;

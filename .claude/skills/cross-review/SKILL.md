@@ -566,6 +566,7 @@ Thông điệp lỗi **nêu đích danh nhánh nào tụt**. Cập nhật đúng
 `refs/heads/*` — làm thế có thể xoá công việc cục bộ của nhánh khác:
 
 ```bash
+PY="$(command -v python3 || command -v python || command -v py)"
 git -C "$SOURCE" fetch --prune origin '+refs/heads/*:refs/remotes/origin/*'
 git -C "$SOURCE" branch -f <nhanh-lenh-vua-neu-ten> "refs/remotes/origin/<nhanh-ay>"
 "$PY" "$SOURCE/ops/lease_publish.py" ai-dang-giu <duong>; echo "rc=$?"

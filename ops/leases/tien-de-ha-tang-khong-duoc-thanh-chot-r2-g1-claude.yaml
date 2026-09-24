@@ -132,3 +132,7 @@ hinh_dang_ke_thua:
   CO_HOI_TAI_PHAT_DA_BIET: 'Neu runner doi nhan ca khi loi tiem CO CHU Y (khong dang ky) thi mot ca
     sach bi ra KHONG DO DUOC - mot trien khai "moi thu la KDD" se xanh B1/B2 ma lam MU ca bo. Doi
     chung duong B3 (luot SACH N/N) la cai chan.'
+da_bi_thay_the: tien-de-ha-tang-khong-duoc-thanh-chot-r2-g2-claude
+da_bi_thay_the_vi_sao: 'CUNG packet, CUNG revision, generation MOI chi de NOI TRAN. Chu kho chi thi
+  2026-09-24 (ban chieu issues/593#issuecomment-5810763990): "Noi tran len 520, va tiep theo vong
+  lap". g1 dung o head 8434be1 (437/450) sau cross-review vong 4 changes_requested P2=2.'

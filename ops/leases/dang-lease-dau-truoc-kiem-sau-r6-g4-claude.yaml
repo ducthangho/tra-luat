@@ -22,6 +22,11 @@ generation: 4
 lease_id: dang-lease-dau-truoc-kiem-sau-r6-g4-claude
 
 thay_the_cho: dang-lease-dau-truoc-kiem-sau-r2-g3-claude
+da_bi_thay_the: dang-lease-dau-truoc-kiem-sau-r7-g5-claude
+da_bi_thay_the_vi_sao: 'VE THU NHAT cua dau hai chieu. g5 neo dac ta r7, ma r7 tu khai
+  `thay_the_cho: revision 6` va §10.1 doi lease phai neo DUNG revision hien hanh. Dong nay dat
+  luc 2026-09-24T02:5xZ, SAU khi g4 da het han (2026-09-22T06:00:00Z) — cong `check` doi no bat ke
+  con han hay khong: da do rc=8 truoc khi dat.'
 thay_the_vi_sao: 'g3 neo spec_hash cua r2. Tu do den nay dac ta da qua r3, r4, r5, r6 — moi ban
   deu la he qua cua mot luot cross-review BAT duoc khuyet tat cua ban truoc. Reviewer luot 3 do va
   ghi thang: "Lease g3 giao kem van la revision 2 / generation 3 / hash r2; khong dung artifact do

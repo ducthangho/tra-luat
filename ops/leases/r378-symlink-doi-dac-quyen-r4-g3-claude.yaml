@@ -250,3 +250,15 @@ KHONG_DUOC_KHAI:
   ban sao RIG da noi _TRAN_CHAN_DOAN_110.'
 - 'Ket luan hai dot bien la BO TUONG DUONG bang cach so SO DEM. Phai so TAP.'
 - 'Khai rang lease nay phu ca #579. No CHI phu #574 — xem PHAM_VI_LEASE_NAY_HEP_HON_CHI_THI.'
+
+# ───────────────────────── BIA MỘ — vế THỨ NHẤT của dấu HAI CHIỀU ─────────────────────────
+# Thêm 2026-09-24 khi cấp g4. KHÁC hoàn toàn ca của g3-với-g2: lúc ấy lease tiền nhiệm ĐÃ HẾT
+# HẠN TỰ NHIÊN nên `thay_the_cho` để RỖNG và KHÔNG viết bia mộ. Lần này lease này (g3) vẫn CÒN
+# HIỆU LỰC — `ai-dang-giu` đếm nó là NGƯỜI GIỮ — nên bia mộ HAI CHIỀU là BẮT BUỘC, và cổng
+# `check` trả rc=8 nếu thiếu (tiền lệ đo được ở g5 của #579).
+da_bi_thay_the: r378-symlink-doi-dac-quyen-r4-g4-claude
+da_bi_thay_the_luc: '2026-09-24T14:5xZ'
+da_bi_thay_the_vi_sao: 'g4 nâng hạn 24h -> 48h theo chỉ thị chủ kho ("Đồng ý" với đề nghị nâng
+  hạn), và neo lại `reviewed_sha_required` sang head SAU merge base (ce9de50 -> 34cb21f) — đúng
+  thứ bảng chỉ thị gốc đòi mà lúc cấp g3 chưa đo được. revision KHÔNG đổi (vẫn r4), write_set
+  KHÔNG đổi, assurance_target KHÔNG đổi.'

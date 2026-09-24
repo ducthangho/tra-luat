@@ -1016,7 +1016,12 @@ def kiem_github(lease: dict, tep=None, goc=None) -> tuple:
     một lease đã đăng đúng.
 
     Giá thứ hai, nhỏ hơn và cũng phải khai: đường KHÔNG-CÓ-DẤU gọi `_kiem_comment_da_co` HAI
-    lần (một lần dò, một lần trong chuỗi cũ). Đổi một lời gọi API lấy việc giữ M3 đúng từng
+    lần KHI chuỗi cũ đi tới cửa cuối (một lần dò, một lần ở cửa cuối); MỘT lần khi `kiem()`
+    hay chốt loại số hiệu chặn trước. Đếm lời gọi thật (24-09, bộ ca #579): lease sạch ⇒ 2,
+    endpoint `comments` hỏng mãi ⇒ 2; hết hạn ⇒ 1 (`rc=8`), tự cấp ⇒ 1 (`rc=4`), neo prompt
+    không kiểm được ⇒ 1 (`rc=6`), thiếu trường ⇒ 1 (`rc=8`), số hiệu là PR ⇒ 1 (`rc=8`, số
+    của cross-review lượt 7). Bản trước khai "HAI lần" cho mọi đường không-dấu — rộng hơn
+    phép đo (cross-review lượt 11 song song). Đổi một lời gọi API lấy việc giữ M3 đúng từng
     mã thoát. KHÔNG ĐO: chi phí ấy chưa được đo trên một issue nhiều trang comment.
     """
     _do_dau_da_dang(lease)

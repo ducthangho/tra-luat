@@ -7389,7 +7389,8 @@ def _do_kiem_github(lease, co_dau: bool, **k):
     CỐ Ý KHÔNG TRẢ SỐ LỜI GỌI — và đó là bản vá kiến trúc của lượt 6, không phải một lần
     dọn dẹp. Bản trước trả `(ma, so_loi_goi)`, nên một ca chỉ việc lấy vế thứ hai rồi chốt
     trên nó mà quên vế thứ nhất; đúng như thế đã xảy ra ở vế `lease_id` của `t178` và làm
-    đột biến `R_probe` SỐNG 177/177. Nay muốn chốt số lời gọi thì **bắt buộc** đi qua
+    đột biến `R_probe` SỐNG 177/177 (lượt 6, suite khi ấy 177 ca). Nay muốn chốt số lời gọi
+    thì **bắt buộc** đi qua
     `_do_kiem_github_dem`, mà cửa ấy chốt CẢ HAI vế. Lỗ chết theo hình dạng hàm, không
     theo một chốt thêm ở đúng chỗ reviewer chỉ.
     """
@@ -7452,8 +7453,8 @@ def t175_het_han_ma_KHONG_co_dau_thi_van_la_het_han():
     chỉ `t175` đỏ. Hai tập ca đỏ khác nhau là bằng chứng cặp này PHÂN BIỆT được hai lỗi.
     Phạm vi của câu trên là CẶP, không phải cả miền. Tập đỏ đầy đủ trên `t174`–`t184`, đo bằng
     công cụ công thức (bản sao, phân hạng bằng `TinHieuChotCa`, 24-09): dò sau `kiem()` ⇒
-    `{t174, t182}`; ném 9 vô điều kiện ⇒ `{t175, t177, t178, t179, t180, t181, t183, t184}`. Dấu hiệu bộ TƯƠNG ĐƯƠNG
-    là điều ngược lại: mọi đột biến đều làm CẢ HAI cùng đỏ (hoặc cùng xanh). (Bản trước viết
+    `{t174, t182}`; ném 9 vô điều kiện ⇒ `{t175, t177, t178, t179, t180, t181, t183, t184}`.
+    Dấu hiệu bộ TƯƠNG ĐƯƠNG là điều ngược lại: mọi đột biến đều làm CẢ HAI cùng đỏ (hoặc cùng xanh). (Bản trước viết
     ngược nghĩa câu này.)
 
     ĐỘT BIẾN LÀM CA NÀY ĐỎ: cho `_do_dau_da_dang` ném `Chan(RC_DA_DANG)` không cần dấu.
@@ -7569,8 +7570,10 @@ def t178_tien_kiem_mien_chan_TRUOC_khi_cham_mang():
     docstring của `_tien_kiem_mien_dang` tự khai làm lý do tồn tại: một lease hỏng miền được
     cho phép **CHẠM MẠNG**.
 
-    Ba vế dưới đây khoá trục ấy. Chúng KHÔNG thay bốn vế trên: bốn vế kia đo trục
-    `packet_issue`, ba vế này đo trục `lease_id`, và `L` chỉ chết ở trục thứ hai.
+    NĂM vế dưới đây khoá trục ấy (đếm ở vòng lặp: `None`, danh sách, `bool`, ánh xạ, số thực).
+    Chúng KHÔNG thay bốn vế trên: bốn vế kia đo trục `packet_issue`, năm vế này đo trục
+    `lease_id`, và `L` chỉ chết ở trục thứ hai. (Bản trước khai "ba vế" — số hạng trôi khỏi
+    mã; cross-review lượt 11 song song bắt.)
     """
     thieu_id = _lease_579()
     del thieu_id["lease_id"]
@@ -7583,7 +7586,8 @@ def t178_tien_kiem_mien_chan_TRUOC_khi_cham_mang():
                         ("`packet_issue` là `bool`", _lease_579(packet_issue=True))):
         _do_kiem_github_dem(lease, True, RC_NOI_DUNG, 0, nhan)
 
-    # TRỤC `lease_id` SAI KIỂU — ba hình dạng, mỗi hình dạng một lý do khác nhau để lọt.
+    # TRỤC `lease_id` SAI KIỂU — năm hình dạng (vòng lặp ngay dưới), mỗi hình dạng một lý do
+    # khác nhau để lọt.
     # Xem docstring: đây là thứ duy nhất giết được đột biến `L`, và nó giết bằng SỐ LỜI GỌI
     # chứ không bằng mã thoát (mã thoát là 8 ở cả hai bên — đã đo).
     # ĐO THẲNG `_do_dau_da_dang`, KHÔNG đo `kiem_github` — và hai bản nháp trước đã sai đúng
@@ -7613,7 +7617,8 @@ def t178_tien_kiem_mien_chan_TRUOC_khi_cham_mang():
         gh = GhGia(comments={55: []})
         # `DA_TRA_VE`, KHÔNG phải một mã: phép DÒ là phép DÒ — nó nuốt mọi thứ và TRẢ VỀ.
         # Vế kết quả này chính là thứ lượt 6 bắt được là THIẾU: bỏ nó ra thì `R_probe`
-        # (ném ngay đầu phép dò, đúng năm đầu vào này) SỐNG 177/177.
+        # (ném ngay đầu phép dò, đúng năm đầu vào này) SỐNG 177/177 — đo ở lượt 6, khi suite
+        # còn 177 ca.
         _goi_dem_lop_gh(gh, "_do_dau_da_dang", _lease_579(lease_id=lid),
                         DA_TRA_VE, 0,
                         f"{nhan}: tiền kiểm phải chặn PHÉP DÒ trước khi nó chạm mạng — và "
@@ -7822,7 +7827,9 @@ def t183_do_dau_HONG_roi_PHUC_HOI_thi_cua_cuoi_van_phai_bo_qua():
         `t183` — hỏng rồi LÀNH  => `rc=9`, phải bỏ qua
 
     `len(gh.calls) == 3` một mình KHÔNG thấy `K`: cả bản đúng lẫn `K` đều gọi đủ ba lần. Thứ
-    phân biệt là MÃ THOÁT, nên ca này chốt mã — ngược với `t181` nơi số lời gọi mới là răng.
+    phân biệt là MÃ THOÁT, nên ca này chốt mã. `t181` thì có răng ở CẢ HAI trục — đột biến `I`
+    đổi `rc=8` → `rc=0` VÀ 3 → 2 lời gọi (docstring `t181`); bản trước viết "ngược với `t181`
+    nơi số lời gọi mới là răng", hẹp hơn phép đo.
 
     ĐỘT BIẾN LÀM CA NÀY ĐỎ: nuốt `Chan(RC_DA_DANG)` đến từ `_kiem_comment_da_co` ở cuối
     `kiem_github` (giữ nguyên mọi `Chan` khác).
@@ -8171,7 +8178,8 @@ def t187_chan_doan_phai_ha_ve_CHUOI_THUAN_chu_khong_chi_isinstance():
     # Nên mỗi thành viên HỌ đi vào CẢ HAI trường qua ĐƯỜNG THẬT:
     #   tên lớp    — một lớp ngoại lệ có `__name__` là CHÍNH `str` con ấy
     #   thông điệp — một ngoại lệ mà `__str__` trả CHÍNH `str` con ấy
-    # rồi qua BA chỗ dùng: `_MaVang` · `_NgoaiLeLa` · cửa `_goi_doi_tra_ve` (đường của mọi ca).
+    # rồi qua BỐN chỗ dùng: `_bao_loi_ca` (kỳ vọng viết tay) · `_MaVang` · `_NgoaiLeLa` · cửa
+    # `_goi_doi_tra_ve` (đường của mọi ca).
     #
     # KHÔNG đưa giá trị thô vào f-string của `chot` — làm vậy là đỏ vì ĐƯỜNG CHẨN ĐOÁN, tức
     # tín dụng giả đúng loại ca này sinh ra để chặn. Chỉ nêu `type(...).__name__`.
@@ -8261,9 +8269,10 @@ def t187_chan_doan_phai_ha_ve_CHUOI_THUAN_chu_khong_chi_isinstance():
 
     # ĐỌC TÊN LỚP HỎNG Ở METACLASS — cross-review codex lượt 3 (24-09). Các vế trên cho tên lớp
     # là một `str` CON; ở đây chính việc ĐỌC `__name__` hỏng. Ba thành viên: ném ngoại lệ thường,
-    # ném TÍN HIỆU DỪNG (lượt 3), và TRẢ `None` (cross-review lượt 7 đòi thêm). Đo qua NĂM chỗ dùng: cửa hạ tên · hai wrapper · helper THẬT (phải
-    # TRẢ `_NgoaiLeLa`) · cửa trả về (BaseException xuyên helper phải đỏ bằng `TinHieuChotCa`) ·
-    # thông điệp bộ chạy.
+    # ném TÍN HIỆU DỪNG (lượt 3), và TRẢ `None` (cross-review lượt 7 đòi thêm). Đo qua SÁU chỗ
+    # dùng: cửa hạ tên · hai wrapper · thông điệp bộ chạy (bốn chỗ trong vòng `noi, lam`) ·
+    # helper THẬT (phải TRẢ `_NgoaiLeLa`) · cửa trả về (BaseException xuyên helper phải đỏ bằng
+    # `TinHieuChotCa`).
     def _meta_hong(tin_hieu):
         class _MetaHong(type):
             def __getattribute__(cls, ten):
@@ -8455,9 +8464,11 @@ def t187_chan_doan_phai_ha_ve_CHUOI_THUAN_chu_khong_chi_isinstance():
         chot(r == mong, f"đối chứng xanh `_bao_loi_ca`: mong {mong!r}, nhận {r!r} — một cài "
                         f"đặt trả hằng cho mọi đầu vào cũng qua các vế trên.")
 
-    # CHỖ NỐI: một lượt `main()` THẬT trên năm ca giả, ném qua CẢ HAI nhánh. `main` phải TRẢ
-    # `1`, in dòng tổng kết `0/5` — không vỡ trần giữa chừng — VÀ mỗi dòng `ĐỎ` phải mang ĐÚNG
-    # nội dung. Cross-review codex lượt 5 (24-09, `runner-diagnostic-content-not-checked`, P2):
+    # CHỖ NỐI: một lượt `main()` THẬT trên các ca giả dựng dưới đây (năm ca gốc cộng mọi họ
+    # fixture — số ca là `len(ca_gia)`, chốt ở cuối), ném qua CẢ HAI nhánh. `main` phải TRẢ `1`,
+    # in dòng tổng kết `0/<số ca>` — không vỡ trần giữa chừng — VÀ mỗi dòng `ĐỎ` phải mang ĐÚNG
+    # nội dung. (Bản trước khai "năm ca giả", "`0/5`" — đúng lúc viết, trôi khi thêm họ; lượt
+    # 11 song song bắt.) Cross-review codex lượt 5 (24-09, `runner-diagnostic-content-not-checked`, P2):
     # bản trước chỉ chốt TIỀN TỐ dòng, nên cho `main` ghi một HẰNG thay cho `_bao_loi_ca(ex)` ở
     # một trong hai nhánh vẫn sống 183/183 — helper có răng, chỗ dùng helper thì không.
     # Kỳ vọng viết TAY, KHÔNG sinh bằng `_bao_loi_ca` (thứ đang bị đo không được làm oracle của
@@ -8491,9 +8502,9 @@ def t187_chan_doan_phai_ha_ve_CHUOI_THUAN_chu_khong_chi_isinstance():
         "_gia_exception_thuong": f"RuntimeError: {NOI_DUNG}",
     }
 
-    # TOÀN BỘ các họ fixture của ca này đi qua CHÍNH `main` — cross-review lượt 8 (24-09): đột
-    # biến đọc ngược đối tượng thô trong `main` sống 183/183 vì lượt `main()` chỉ có năm ca,
-    # không có họ metaclass hay `__class__` ném. Chốt cấu trúc `t189` chỉ phủ các hình dạng
+    # TOÀN BỘ các họ fixture của ca này đi qua CHÍNH `main`. Ghi chú LỊCH SỬ — cross-review
+    # lượt 8 (24-09, trên `c824528`): đột biến đọc ngược đối tượng thô trong `main` sống
+    # 183/183 vì lượt `main()` KHI ẤY chỉ có năm ca, chưa có họ metaclass hay `__class__` ném. Chốt cấu trúc `t189` chỉ phủ các hình dạng
     # ĐÃ BIẾT; phép đo HÀNH VI này mới là bảo đảm cho bộ chạy. Kỳ vọng viết tay, suy từ cách
     # `BaseException.__str__` gọi `str()` trên đối số: lớp con `str` chỉ hỏng `__format__`,
     # `__repr__` hay `__getattribute__` vẫn cho nội dung (slot `tp_str` thừa kế từ `str`); hỏng

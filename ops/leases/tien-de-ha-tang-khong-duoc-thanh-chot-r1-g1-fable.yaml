@@ -138,3 +138,11 @@ hinh_dang_ke_thua:
     DUOC" ma bo A2 ("khong tiem gi thi van DAT"), thi mot trien khai LUON tra KHONG DO DUOC se
     XANH - va loi khai "da tach duoc hai nguon do" lai rong hon phep do, tuc
     LOI-KHAI-RONG-HON-PHEP-DO lan thu MUOI MOT.'
+da_bi_thay_the: tien-de-ha-tang-khong-duoc-thanh-chot-r2-g1-claude
+da_bi_thay_the_vi_sao: 'CUNG packet, revision MOI. Chu kho chi thi 2026-09-24 sau khi executor
+  bao DUNG o issues/593#issuecomment-5806860890 (cham tran 274/300 va hinh dang
+  VA-DUNG-CHO-DUOC-CHI-ROI-BO-SOT-DUONG-THU-BA len 3): "(a) mo revision 2, soan dac ta di, phai
+  dua het cac van de vao de xu ly trong revision nay. Noi tran len 450. Sau do thuc thi theo
+  dung quy tac vong lap toi dua ra". Revision 1 dung o head 3eb5bd9 tren claude/tien-de-ha-tang-r1;
+  r2 xay TIEP tren head ay, cung nhanh, cung write set. KHONG phai khe AG-T0-01B: cung packet_id,
+  thu hoi co chu y theo chi thi chu kho.'

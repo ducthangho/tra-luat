@@ -1007,8 +1007,13 @@ def kiem_github(lease: dict, tep=None, goc=None) -> tuple:
     GIÁ PHẢI TRẢ, khai thẳng chứ không làm nhẹ (M4): với lease ĐÃ ĐĂNG, đường này trả `rc=9`
     mà **KHÔNG** chạy `kiem()` nữa — nghĩa là các chốt tự cấp (`rc=4`), neo prompt (`rc=6`)
     và băm không còn soi lease ấy trên đường này. Một tệp lease đã đăng rồi bị SỬA về sau sẽ
-    KHÔNG bị bắt ở đây. Đánh đổi có chủ đích: bản chiếu đã công bố mới là thứ người khác đọc,
-    và không ai được lợi khi một lượt CI đỏ vì một lease đã đăng đúng.
+    KHÔNG bị bắt ở đây. Đường ấy CŨNG bỏ `_kiem_loai_so_hieu` — chốt nằm NGOÀI `kiem()`, nên
+    câu trên chưa phủ nó (cross-review lượt 7): `packet_issue` trỏ vào một Pull Request mà đã
+    có dấu bot thì trả `rc=9` thay vì `rc=8` (`RC_NOI_DUNG`). Reviewer lượt 7 đếm lời gọi thật: có dấu
+    ⇒ `kiem` 0 lần, lời gọi loại số hiệu 0 lần, bất kể số hiệu là issue hay PR. Không tạo được
+    comment nào: `rc=9` là "đã đăng, bỏ qua", không phải "đạt". Đánh đổi có chủ đích: bản
+    chiếu đã công bố mới là thứ người khác đọc, và không ai được lợi khi một lượt CI đỏ vì
+    một lease đã đăng đúng.
 
     Giá thứ hai, nhỏ hơn và cũng phải khai: đường KHÔNG-CÓ-DẤU gọi `_kiem_comment_da_co` HAI
     lần (một lần dò, một lần trong chuỗi cũ). Đổi một lời gọi API lấy việc giữ M3 đúng từng

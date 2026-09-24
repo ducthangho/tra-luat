@@ -293,7 +293,10 @@ def _ten_lop(ex) -> str:
     Đó là "vá đúng chỗ được chỉ rồi bỏ sót đường thứ ba". Nên lần này liệt kê bằng `ast`
     MỌI chỗ định dạng một ngoại lệ vừa bắt, gom về MỘT cửa, và `t189` cấm viết thô trở lại.
     `type(ex).__name__` không đi qua `__str__` của NGOẠI LỆ, nhưng có thể là một `str` CON —
-    một lớp đặt `__name__` như vậy là đủ để f-string nổ.
+    một lớp đặt `__name__` như vậy là đủ để f-string nổ — và việc ĐỌC nó đi qua
+    `__getattribute__` của METACLASS, vốn được ném bất cứ gì hoặc trả `None` (lượt 3 · lượt 7).
+    `t187` đo cả ba họ. Phạm vi: API của harness test; KHÔNG có chứng cứ một lease YAML hay
+    CLI chạm được metaclass Python.
     """
     # BỌC CẢ PHÉP ĐỌC, không chỉ phép hạ. Cross-review codex lượt 3 (24-09): bản trước tính
     # `getattr(type(ex), "__name__", "?")` TRƯỚC khi vào `try` của `_chuoi_thuan` — một metaclass
@@ -333,8 +336,9 @@ class _MaVang:
     __slots__ = ("kieu", "thong_diep")
 
     def __init__(self, ex):
-        # `type(ex).__name__` KHÔNG đi qua `__str__`, nên tên lớp luôn đọc được kể cả khi
-        # định dạng hỏng. Thông điệp đi qua `_thong_diep_an_toan` — xem hàm ấy.
+        # `type(ex).__name__` KHÔNG đi qua `__str__` của ngoại lệ, nhưng VẪN đi qua metaclass —
+        # nên tên lớp cũng đi qua một cửa an toàn (`_ten_lop`), không đọc thẳng. Thông điệp đi
+        # qua `_thong_diep_an_toan` — xem hàm ấy.
         # TÊN LỚP cũng phải hạ về chuỗi thuần: một metaclass đặt `__name__` thành `str`
         # con là đủ để dòng `chot` nổ ở đúng chỗ nó đang tố cáo. Hai trường, MỘT cửa hạ —
         # để không có trường nào "quên" như thông điệp đã từng quên.
@@ -7452,10 +7456,14 @@ def t177_con_han_KHONG_dau_thi_MOI_CHOT_cua_kiem_van_phai_chay():
     Đây là chốt đắt nhất của packet: dò dấu TRƯỚC nghĩa là với lease ĐÃ ĐĂNG, các chốt của
     `kiem()` (tự cấp, neo prompt, trường bắt buộc) KHÔNG còn soi nó trên đường này — giá đã
     khai trong docstring `kiem_github`. Cái giá ấy chỉ chấp nhận được nếu đường KHÔNG-CÓ-DẤU
-    vẫn chạy đủ chốt. Ca này đo đúng điều đó, bằng BA ca tiêm cho BA mã thoát KHÁC NHAU.
+    vẫn chạy đủ chốt. Ca này đo đúng điều đó, bằng BỐN hình dạng: lease sạch (`RC_OK`) và BA
+    ca tiêm cho BA mã thoát KHÁC NHAU (`RC_TU_CAP`, `RC_NEO`, `RC_NOI_DUNG`).
 
-    ĐỘT BIẾN LÀM CA NÀY ĐỎ: cho tiền kiểm nuốt cả bốn hình dạng (ví dụ trả `Chan(RC_DA_DANG)`
-    ngay khi chưa dò được dấu) ⇒ cả ba mã đều thành 9.
+    ĐỘT BIẾN LÀM CA NÀY ĐỎ: cho phép dò ném `Chan(RC_DA_DANG)` cả khi đã dò XONG mà KHÔNG thấy
+    dấu (thêm một `raise` ngay sau `_kiem_comment_da_co` trong `try` của `_do_dau_da_dang`) ⇒
+    cả bốn mã đều thành 9. ĐÃ CHẠY: giết `t177`. Bản trước viết "cho tiền kiểm NUỐT cả bốn
+    hình dạng" — đọc theo nghĩa đổi hai nhánh `except` thành ném 9 thì công thức ấy SỐNG ở
+    `t177` (đường không-dấu không đi qua nhánh `except` nào); soát lại khi vá lượt 7.
     """
     ma = _do_kiem_github(_lease_579(), co_dau=False)
     chot(ma == RC_OK, f"lease sạch, còn hạn, chưa đăng mà bị chặn: rc={ma}")
@@ -7864,7 +7872,13 @@ def t184_chinh_HELPER_phai_doi_ngoai_le_TRAN_thanh_ca_DO_chu_khong_vo_tran():
 
     ĐỘT BIẾN LÀM CA NÀY ĐỎ, từng vế một:
         (a) `except mod.Chan` -> gộp vào nhánh `_NgoaiLeLa`
-        (b) trả `None` thay cho `_NgoaiLeLa`  |  hoặc bỏ `__eq__`  |  hoặc `__str__` bỏ `self.kieu`
+        (b) trả `None` thay cho `_NgoaiLeLa`  |  hoặc cho `_MaVang.__eq__` trả `True`
+            |  hoặc `__str__` của `_MaVang` HAY của `_NgoaiLeLa` bỏ `self.kieu`
+        ĐÃ CHẠY từng dòng trên (bản sao, phân hạng bằng `TinHieuChotCa`): mọi công thức giết
+        `t184`. Hai công thức của bản trước là SAI, cross-review lượt 7 bắt một, executor đo
+        ra cái thứ hai khi soát lại cả loạt: "bỏ `__eq__`" TƯƠNG ĐƯƠNG (mặc định so danh tính,
+        vẫn `False` với mọi mã) ⇒ 183/183; "`__str__` bỏ `self.kieu`" chỉ giết khi đột biến
+        `_MaVang` — ở `_NgoaiLeLa` nó SỐNG vì vế (b) chưa chốt `str(ex)`. Nay chốt cả hai.
         (c) trả `_NgoaiLeLa(None)` khi không ném gì
         (d) `except Exception` -> `except BaseException`
     """
@@ -7976,6 +7990,11 @@ def t184_chinh_HELPER_phai_doi_ngoai_le_TRAN_thanh_ca_DO_chu_khong_vo_tran():
     chot("RuntimeError" in str(ma),
          f"(b) `str(ma)` phải NÊU TÊN LỚP đã thoát, nhận {str(ma)!r}. Không nêu thì ca gọi "
          f"vẫn ĐỎ, nhưng người đọc mất đúng thứ cần để biết đã hỏng ở đâu.")
+    # Cùng đòi hỏi cho CHÍNH `_NgoaiLeLa`: các ca in `{ex!r}` chứ không chỉ `{ma}`. Thiếu dòng
+    # này thì đột biến bỏ `self.kieu` khỏi `_NgoaiLeLa.__str__` SỐNG (đo khi soát công thức,
+    # cross-review lượt 7).
+    chot("RuntimeError" in str(ex) and "RuntimeError" in repr(ex),
+         f"(b) `str`/`repr` của `_NgoaiLeLa` phải NÊU TÊN LỚP đã thoát, nhận {str(ex)!r}.")
 
     # (c) HỢP ĐỒNG CŨ: không ném gì -> `None`.
     ex = _goi_doi_tra_ve("(c)", GhGia(comments={55: []}), "_kiem_comment_da_co", "o/r", lease)
@@ -8193,20 +8212,23 @@ def t187_chan_doan_phai_ha_ve_CHUOI_THUAN_chu_khong_chi_isinstance():
              f"Đường chẩn đoán làm vỡ phép đo là tín dụng giả ở tầng cửa.")
 
     # ĐỌC TÊN LỚP HỎNG Ở METACLASS — cross-review codex lượt 3 (24-09). Các vế trên cho tên lớp
-    # là một `str` CON; ở đây chính việc ĐỌC `__name__` ném. Hai thành viên: ném ngoại lệ thường
-    # và ném TÍN HIỆU DỪNG. Đo qua NĂM chỗ dùng: cửa hạ tên · hai wrapper · helper THẬT (phải
+    # là một `str` CON; ở đây chính việc ĐỌC `__name__` hỏng. Ba thành viên: ném ngoại lệ thường,
+    # ném TÍN HIỆU DỪNG (lượt 3), và TRẢ `None` (cross-review lượt 7 đòi thêm). Đo qua NĂM chỗ dùng: cửa hạ tên · hai wrapper · helper THẬT (phải
     # TRẢ `_NgoaiLeLa`) · cửa trả về (BaseException xuyên helper phải đỏ bằng `TinHieuChotCa`) ·
     # thông điệp bộ chạy.
     def _meta_hong(tin_hieu):
         class _MetaHong(type):
             def __getattribute__(cls, ten):
                 if ten == "__name__":
+                    if tin_hieu is None:
+                        return None
                     raise tin_hieu("đọc tên lớp hỏng")
                 return type.__getattribute__(cls, ten)
         return _MetaHong
 
     for nhan, tin_hieu in (("metaclass đọc tên NÉM ngoại lệ thường", RuntimeError),
-                           ("metaclass đọc tên NÉM tín hiệu dừng", KeyboardInterrupt)):
+                           ("metaclass đọc tên NÉM tín hiệu dừng", KeyboardInterrupt),
+                           ("metaclass đọc tên TRẢ `None`", None)):
         _M = _meta_hong(tin_hieu)
         _LoiTen = _M("_LoiTen", (Exception,), {})
         _LoiTenBase = _M("_LoiTenBase", (BaseException,), {})

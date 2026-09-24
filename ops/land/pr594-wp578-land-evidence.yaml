@@ -79,9 +79,13 @@ trang_thai_ban_ghi: 'DA CAP 2026-09-21T13:55:15Z (SAU merge — xem uy_quyen.aut
   duong DA DO DUOC tu log job va artifact (xem danh_tinh_CI_10_2_2). Uy quyen ben la PHE CHUAN HAU KIEM (xem
   authorization_url_BAN_CHAT). Vong lap cross-review DA DUNG tai b94182b + ban va nay vi cham stop condition §12
   (SAU loi goi codex tren tran HAI — xem VI_PHAM_3_VUOT_TRAN_TRUC_LOI_GOI), KHONG phai vi da approve; CHUA co
-  cross_approved. Ban ghi nay DA DUOC SUA muoi ba lan sau review tren PR #601 — xem DINH_CHINH_SAU_REVIEW, _VONG_2,
-  _VONG_3, _VONG_4, _VONG_5, _VONG_6, _VONG_7, _VONG_8, _VONG_9, _VONG_10, _VONG_11, _VONG_12, _VONG_13 (bay vong cuoi KHONG co codex: chi ra soat Fable; _VONG_8 va 5 finding
-  cua vong 7 va doi luat cam token sang luat DUNG).'
+  cross_approved. Ban ghi nay DA DUOC SUA nhieu lan sau review tren PR #601. SO LAN KHONG GHI BANG SO O DAY:
+  dem bang cach liet ke cac khoa `DINH_CHINH_SAU_REVIEW*` cua chinh tep nay
+  (`python -c "import yaml;d=yaml.safe_load(open(TEP));print(len([k for k in d if k.startswith(chr(68)+chr(73)+chr(78)+chr(72)+chr(95)+chr(67)+chr(72))]))"`).
+  VI SAO KHONG DEM BANG SO: ban truoc ghi "muoi ba lan" va liet ke toi _VONG_13; vong 14 duoc them ma con
+  so o day khong doi, nen no LECH ngay trong cung mot ban va — cross-review luot 8 (P3) bat. Doi DEM sang
+  LIET KE TU DU LIEU la cung cach da dung cho gate_registry_bi_huy_LIET_KE_khong_dem_tran, va no dong ca lop
+  thay vi sua mot con so roi cho no troi tiep o vong sau.'
 
 # ══════════════════════ VI PHAM VAI TRO — DOC TRUOC ══════════════════════
 VI_PHAM_VAI_TRO:
@@ -1055,14 +1059,19 @@ con_mo:
        ngoai land authority.
        Voi entry nay, danh sach DAT DUNG pham vi luat neu: tu 9387078 den head CHA.'
     - 'head 662a032 (2026-09-24T02:0xZ) — HEAD CHA first-parent cua head hien tai f07fcf21,
-       doc 2026-09-24T06:5xZ: GET commits/662a0326/check-runs -> total_count 0. KHONG co check-run nao.
-       KHONG PHAI passed, KHONG PHAI failed: la not_run. Nguyen nhan CAU TAO, khong phai su co —
-       commit nay chi la commit GIUA trong mot cu day hai commit, va CI cua kho chay tren HEAD cua
-       cu day chu khong tren tung commit. Moi commit khong bao gio la head cua mot cu day thi vinh
-       vien 0 check-run.
-       HE QUA CHO LUAT: luat doi entry cho head CHA, va head cha o day la mot commit theo CAU TAO
-       khong the co CI. Nen entry dung la entry nay — khai not_run kem ly do — chu khong phai mot
-       khoang trong. Cross-review luot 7 (P2, lop pham-vi-tu-noi-rong-hon-du-lieu) bat dung cho nay.'
+       DO LUC 2026-09-24T09:07:22Z: GET commits/662a0326/check-runs -> total_count 0, KHONG check-run nao.
+       KHONG PHAI passed, KHONG PHAI failed: la not_run TAI MOC DO TREN.
+       PHAM VI CUA CAU NAY — thu hep sau cross-review luot 8: "0 tai moc do", KHONG phai "vinh vien 0".
+       Ban truoc viet "vinh vien 0 check-run"; do la loi khai ve TUONG LAI, ma check-run la trang thai
+       ben ngoai Git — mot dispatch bat ky sau nay deu tao duoc. Gia thuyet giai thich (commit giua
+       trong mot cu day, CI chay tren head cua cu day) la GIA THUYET HOP LY, khong phai phep do: phien
+       nay khong chay phan chung nao cho no.'
+    - 'head f07fcf21 (2026-09-24T02:0xZ) — head da duoc review o luot 7 va la first-parent cua head
+       mang ban va nay, DO LUC 2026-09-24T09:07:22Z: total_count 6. Run 35945633018: chuan-bi success
+       107462804731 (02:03:49Z), gate-packet-loop success 107462825098 (02:12:44Z), gate success
+       107462825065 (02:15:59Z), gate-registry success 107462825173 (02:43:16Z) => 4/4 XANH.
+       Ngoai run ay: thu-hoi success 107462800472 (run 35945631627), mo skipped 107462796264
+       (run 35945629996).'
     hai_ket_luan_do_duoc_PHAM_VI_GHI_TRONG_TUNG_MUC:
       m55_khong_dai: 'Bon luot lien tiep cung bo bien_nhan_v2 tren b94182b / a479699 / 85f974b / e6eabed: dat / dat / DO /
         dat = 3 dat, 1 do; cong phep do tai cho hai ve (cua phien chinh) delta 0. Ten giu nguyen LECH_CHUA_RO_NGUYEN_NHAN:
@@ -1077,6 +1086,9 @@ con_mo:
         XANH TRON BON CONG: trong bon head b94182b..e6eabed thi a479699 la duy nhat; tinh ca b246aac thi co HAI
         (a479699 18:38:03Z, b246aac 20:00:46Z). b246aac xanh tron vi khong co cu day nao sau no trong cua so
         27 phut — dung la bang chung cho nguyen nhan tren.'
+    chot_tai_sha: 'f07fcf211d7b95ed8967ef586278d277a68bd5eb — doc 2026-09-24T09:07:22Z. So
+      `dien_bien_do_duoc` khai CI cua cac head #601 tu 9387078 DEN VA BAO GOM SHA nay. Head sinh sau moc
+      nay khong co entry theo luat moi (xem PHAM_VI_THEO_LUAT_khong_theo_danh_sach, muc SUA LUAT O VONG 15).'
     da_lam_gi_trong_luc_do: 'DUNG day. Moi cu day luc ay chi sinh them mot luot toan skipped,
       lam nhieu ho so ma khong them mot phep do nao. KHONG re-run tay: manual_ci_budget 0.'
     PHAM_VI_THEO_LUAT_khong_theo_danh_sach: 'LUAT, de muc nay khong the loi thoi lan nua:
@@ -1098,6 +1110,18 @@ con_mo:
       head (b246aac, e20edde, 06724b1) NGOAI dien_bien_do_duoc, tuc vi pham luat ngay luc dat luat.
       Ban vong 12 nay tra ca ba vao danh sach, va TUYEN LA BAN VA CUOI: CI cua chinh no va cua 4128fe9
       theo CAU TAO khong bao gio duoc khai o day.
+      SUA LUAT O VONG 15 — vi luat tren TU NO sinh ra mot vong lap khong ket thuc. Luat doi mot entry cho
+      head CHA; moi ban va sinh mot head moi, nen head cha doi theo va so lai thieu dung mot entry. Vong 7
+      bat thieu 662a032; vong 14 them 662a032; vong 8 bat thieu f07fcf21 — cung mot lop, lan thu BA, va
+      moi lan deu do chinh ban va truoc sinh ra. CLAUDE.md va §12 deu noi: hinh dang lap lan thu ba thi
+      cau hoi dung la "co nen tiep tuc cach nay khong", khong phai "va the nao".
+      LUAT MOI, thay luat cu: so nay CHOT TAI MOT EXACT SHA duoc neu ro o khoa `chot_tai_sha` ngay duoi.
+      Entry duoc doi toi va CHI toi SHA do. Moi head sinh ra SAU moc chot — ke ca head mang chinh ban va
+      nay — KHONG co entry, va do la DUNG theo cau tao chu khong phai thieu sot. Ai doc so nay phai doc
+      `chot_tai_sha` truoc; khong co no thi so khong tu noi duoc pham vi cua minh.
+      SO NAY KHONG PHAI TIEU CHI HOAN TAT. No la nhat ky chan doan cua mot su co CI da dong. Khong muc
+      nao trong CON_THIEU_DE_GOI_LANDED phu thuoc vao no. Noi thang ra vi ba vong review vua qua deu xu ly
+      no nhu mot cong phai xanh, trong khi no khong phai.
       XANH TRON BON CONG, cap nhat: a479699 (18:38:03Z), b246aac (20:00:46Z), e20edde (20:38:51Z),
       06724b1 (21:14:31Z) — BON head, tat ca deu la head KHONG bi cu day ke tiep chen vao trong cua so
       ~27 phut cua gate-registry.
@@ -1121,9 +1145,16 @@ NEO_PROTOCOL_TINH_THEO_BLOB:
       blob 0dedc3d9. Neo `d.1011-1013` trong muc VI_PHAM_3 vi the DUNG voi blob 17069f96 va LECH voi
       ban hien tai. Cung co che cho `d.859-863` (bang §10.2.2) va `d.1021`.
   luat_doc: >-
-    MOI neo dang `d.<so>` trong tep nay tinh theo blob 17069f96. Muon kiem mot neo thi doc
+    Neo dang `d.<so>` DI KEM MOT THAM CHIEU PROTOCOL (vi du `§12 d.1011-1013`, `§10.2.2 d.859-863`,
+    hoac `PROTOCOL ... d.<so>`) tinh theo blob 17069f96. Muon kiem mot neo thi doc
     `git show 17069f96 | sed -n '<so>p'`, dung doc tren master. Cau TRICH NGUYEN VAN trong tung muc
     van la thu co tham quyen; so dong chi la dia chi, va dia chi thi troi.
+    LUAT NAY KHONG AP CHO NEO CUA TEP KHAC. Ban dau cua muc nay viet "MOI neo `d.<so>` trong tep nay",
+    va cau ay SAI: tep con neo `CLAUDE.md d.85-97`, `CLAUDE.md d.757-758` va cac neo ADR. Doc
+    `CLAUDE.md d.85-97` theo blob protocol se ra mot doan khong lien quan. Cross-review luot 8 (P2)
+    bat dung cho nay, va do la loi do CHINH CACH DONG LOP cua ban va vong 14 tao ra: mot luat qua rong
+    dong duoc lop cu va mo mot lop moi. Neo cua `CLAUDE.md` va cua ADR: theo blob RIENG cua tung tep
+    tai commit duoc nhac, hoac theo doan trich — CHUA duoc khai o day, va do la no con lai.
   vi_sao_KHONG_sua_tung_so: >-
     Tep nay co hang chuc neo `d.<so>`. Sua tung so sang ban moi se dung cho toi lan protocol duoc chen
     noi dung tiep theo, roi lech lai ca loat — dung hinh dang ma muc PHAM_VI_THEO_LUAT_khong_theo_danh_sach
@@ -1132,6 +1163,48 @@ NEO_PROTOCOL_TINH_THEO_BLOB:
     KHONG tuyen rang moi neo `d.<so>` trong tep da duoc kiem lai tung cai. DA KIEM ba neo ma cross-review
     luot 7 chi ra (d.1011-1013, d.1015-1018, d.859-863) va chung khop blob 17069f96. Cac neo con lai:
     CHUA KIEM TUNG CAI.
+
+DINH_CHINH_SAU_REVIEW_VONG_15:
+  nguon: 'Cross-review luot 8, codex gpt-6-sol effort medium, chay cuc bo tren commit CHUA DAY
+    754e34ae. Ket qua: request_changes — 0 P1, 3 P2, 1 P3.'
+  dieu_dang_ghi_nhat: >-
+    BA trong bon finding cua luot 8 la loi do CHINH BAN VA VONG 14 tao ra, khong phai loi cu con sot.
+    Vong 14 vá đúng chỗ luot 7 chi, roi mo mot duong vao moi o ca ba lop. Day dung hinh dang
+    "vá đúng chỗ được chỉ rồi bỏ sót đường thứ ba" ma CLAUDE.md da ghi, va no xay ra ngay trong ban va
+    viet boi mot phien da doc dong chu ay.
+  P2_A_pham_vi:
+    duong_vao_thu_ba: 'Entry duoc them cho 662a032 — first-parent cua head CU f07fcf21 — trong khi
+      first-parent cua head MANG BAN VA la chinh f07fcf21. Va xong thi so van thieu dung mot entry.'
+    loi_khai_vuot_phep_do: 'Ban vong 14 viet "vinh vien 0 check-run" cho 662a032. Check-run la trang thai
+      NGOAI Git; mot dispatch sau nay tao duoc. Da thu ve "0 TAI MOC DO 2026-09-24T09:07:22Z", va ha
+      giai thich cau tao xuong dung ten cua no: GIA THUYET, khong phai phep do.'
+    cach_dong_LOP_that_su: >-
+      Khong them entry nua. Da SUA LUAT: so chot tai mot exact SHA (`chot_tai_sha` = f07fcf21) va khai
+      thang rang head sinh sau moc chot KHONG co entry theo cau tao. Luat cu doi entry cho head cha, ma
+      head cha doi theo moi ban va — do la vong lap khong ket thuc, va no da chay ba vong (7, 14, 8).
+      Kem mot cau chua tung duoc noi ro: so nay KHONG phai tieu chi hoan tat, khong muc nao cua
+      CON_THIEU_DE_GOI_LANDED phu thuoc vao no.
+    da_them: 'Entry cho f07fcf21, do luc 09:07:22Z: total_count 6, run 35945633018 cho 4/4 xanh.'
+  P2_B_nguyen_nhan:
+    duong_vao_thu_ba: '`ky_vong_KHONG_phai_loi_hua` viet "Ky vong gate-registry xanh VI nguyen nhan da
+      duoc chua o thuong nguon" — lay dung menh de nhan qua ma hai cau kia vua thu hep lam TIEN DE.
+      Vong 14 thu hep hai ve duoc chi va bo sot ve thu ba trong cung mot tep.'
+    da_sua: 'Cau ky vong nay dua tren cac luot da quan sat, KHONG dua tren nguyen nhan nao. Giu nguyen
+      so do 12 xanh / 2 do tren 14 luot va 5/5 tren master.'
+  P2_C_neo_dong:
+    duong_vao_thu_ba: 'Luat vong 14 viet "MOI neo d.<so> trong tep nay tinh theo blob protocol". Tep con
+      neo `CLAUDE.md d.85-97`, `CLAUDE.md d.757-758` va neo ADR; doc chung theo blob protocol se ra doan
+      khong lien quan. Mot luat qua rong dong duoc lop cu va mo mot lop moi.'
+    da_sua: 'Luat gioi han cho neo DI KEM tham chieu protocol (§ hoac chu PROTOCOL). Neo cua CLAUDE.md va
+      ADR: CHUA duoc khai, va do la no con lai — ghi ra thay vi de luat nuot chung.'
+  P3_D_dem_lan_dinh_chinh:
+    da_sua: 'Bo DEM BANG SO o trang_thai_ban_ghi, doi sang LIET KE TU DU LIEU bang mot lenh chay duoc tren
+      chinh tep. Cung cach da dung cho gate_registry_bi_huy_LIET_KE_khong_dem_tran. Con so 13 cu lech ngay
+      trong ban va them vong 14; mot con so thu cong se troi tiep o moi vong sau.'
+  ghi_chu_ve_prompt_luot_8: >-
+    Reviewer luot 8 bao mau VERDICT trong prompt ghi `reviewed_sha: f07fcf21` (head luot 7) trong khi doi
+    tuong that la 754e34ae. Dung: do la loi cua phien dieu phoi khi soan prompt, khong phai loi ho so.
+    Reviewer van ghi dung SHA that trong verdict cua no.
 
 DINH_CHINH_SAU_REVIEW_VONG_14:
   nguon: 'Cross-review luot 7, reviewer codex gpt-6-sol effort medium, chay CUC BO qua CLI (khong qua
@@ -1666,7 +1739,12 @@ CAP_NHAT_TRANG_THAI_20260924:
     ngay_sau_ban_va_nay: 'Hop nhat origin/master (d553efa) vao nhanh. Da do kho truoc: `git merge-tree
       --write-tree` rc=0, KHONG xung dot — tep ho so nay khong ton tai tren master nen khong the dung do.
       Cong se chay lai tren head moi DO PUSH, khong phai do loi goi tay.'
-    ky_vong_KHONG_phai_loi_hua: 'Ky vong gate-registry xanh vi nguyen nhan da duoc chua o thuong nguon;
+    ky_vong_KHONG_phai_loi_hua: 'CAU NAY DA DUOC SUA sau cross-review luot 8 (P2, lop
+      nguyen-nhan-vuot-phep-do): ban truoc viet "Ky vong gate-registry xanh VI nguyen nhan da duoc chua
+      o thuong nguon" — lay dung menh de nhan qua ma hai cau khac trong tep vua thu hep lam TIEN DE.
+      Do la duong vao THU BA cua cung mot lop, va no do chinh ban va vong 14 de lot. Cau dung:
+      ky vong gate-registry xanh DUA TREN cac luot da quan sat, KHONG dua tren mot nguyen nhan nao —
+      chua ai truy ra nguyen nhan, va blob `ops/nhanh_don_duoc_test.py` co doi la dieu duy nhat do duoc;
       `gate` thi khong ai biet, va so do duy nhat dang ke la 12 xanh / 2 do tren 14 luot o nhanh nay cong
       5/5 tren master. Day la SO DO, khong phai xac suat va khong phai cam ket. Head moi do hay xanh,
       ban sau khai nguyen van ket qua.'

@@ -5850,6 +5850,9 @@ def t152_C2a_M9_fetch_H_mang_xac_thuc_qua_header_khong_token_trong_URL():
       if [ "${1-}" = rev-parse ] && [ "$#" -eq 2 ]; then
         case "$2" in HEAD|"$TL_WF_SHA:.github/workflows/ops-thu-hoi-admission.yml") printf '%s\n' "$TL_S"; return;; esac
       fi
+      # #618: chốt chống lùi mới gọi `merge-base --is-ancestor S HEAD`. Ca này đo auth/fetch, không đo
+      # chốt neo (chốt ấy do t155_618 đo, kèm đột biến) — nên stub trả "là tổ tiên" để đi tới fetch.
+      if [ "${1-}" = merge-base ] && [ "${2-}" = --is-ancestor ]; then return 0; fi
       local -a cfg=()
       while [ "${1-}" = -c ]; do cfg+=("$1" "$2"); shift 2; done
       [ "$#" -eq 4 ] && [ "$1" = fetch ] && [ "$2" = --no-tags ] || return 91
@@ -5877,6 +5880,102 @@ def t152_C2a_M9_fetch_H_mang_xac_thuc_qua_header_khong_token_trong_URL():
              "(i) Git không nhận header hiệu lực dẫn từ TL_TOKEN trên URL fetch")
         chot(dong == ["::add-mask::" + b64, "AUTHORIZATION: basic " + b64] and not p.stderr,
              "(v) phải đăng ký mask đúng base64 trước fetch, không có output thừa (kể cả stderr)")
+
+
+@ca
+def t155_618_neo_dinh_nghia_theo_workflow_sha_khong_theo_base_sha():
+    """packet #618: chốt neo định nghĩa phải đo HÀNH VI, không đo hình thức.
+
+    Bản trước đòi `workflow_sha == base.sha`. Với `pull_request_target`, GitHub nạp định nghĩa từ HEAD
+    nhánh base lúc chạy, nên hai giá trị bằng nhau CHỈ KHI nhánh mặc định chưa tiến kể từ base của PR —
+    tức cổng ĐỎ trên mọi PR không rebase liên tục. Đo thật trên PR #601: head `fa263ef2` ăn exit 12
+    (run 35981638892) trong khi bộ kiểm canonical chạy lại tại chỗ cho rc=0.
+
+    Ba ca đo hành vi, chạy CHÍNH đoạn shell của workflow bằng bash thật với `git` được stub:
+      A1  workflow_sha != S, cây == workflow_sha, S là tổ tiên  -> QUA   (ca tái hiện sự cố #601)
+      A2  workflow_ref không trỏ refs/heads/<nhánh mặc định>    -> ĐỎ 12 (bất biến B1)
+      A3  S KHÔNG phải tổ tiên của workflow_sha                 -> ĐỎ 12 (chống lùi)
+
+    ĐỘT BIẾN (A4) — mỗi chốt một đột biến riêng, chạy trên BẢN SAO văn bản, không đụng tệp thật:
+      gỡ chốt `--is-ancestor`  => A3 phải thôi ĐỎ  (nếu không, A3 đang đo thứ khác)
+      gỡ chốt `workflow_ref`   => A2 phải thôi ĐỎ
+    """
+    import yaml
+    steps = yaml.safe_load(WORKFLOW_THU_HOI.read_text(encoding="utf-8"))["jobs"]["thu-hoi"]["steps"]
+
+    checkout = [b for b in steps if str(b.get("uses", "")).startswith("actions/checkout@")]
+    chot(len(checkout) == 1, f"đúng một checkout, thấy {len(checkout)}")
+    ref = str((checkout[0].get("with") or {}).get("ref", ""))
+    chot("github.workflow_sha" in ref and "base.sha" not in ref,
+         f"mốc checkout phải là workflow_sha, không phải base.sha: {ref!r}")
+
+    than = None
+    for b in steps:
+        t = b.get("run")
+        if isinstance(t, str) and "TL_WF_SHA" in t and "merge-base" in t:
+            than = t
+            break
+    chot(than is not None, "không tìm được bước mang chốt neo định nghĩa")
+    chot("\nAUTH_B64=" in than, "không tìm được ranh giới trước đoạn auth/fetch")
+    doan_goc = than[:than.index("\nAUTH_B64=")]
+
+    S40, WF40, H40 = "a" * 40, "c" * 40, "b" * 40
+    REF_DUNG = "ducthangho/tra-luat/.github/workflows/ops-thu-hoi-admission.yml" + chr(64) + "refs/heads/master"
+    REF_SAI = "ducthangho/tra-luat/.github/workflows/ops-thu-hoi-admission.yml" + chr(64) + "refs/pull/999/merge"
+
+    def chay(doan, *, wf_ref, to_tien_rc, head_tra=None):
+        """Chạy đoạn shell với `git` stub. `to_tien_rc` là rc của `merge-base --is-ancestor`."""
+        stub = (
+            "set -euo pipefail\n"
+            "git() {\n"
+            '  if [ "${1-}" = rev-parse ] && [ "$#" -eq 2 ]; then\n'
+            '    case "$2" in\n'
+            '      HEAD) echo "$TL_FAKE_HEAD"; return 0;;\n'
+            '      *) echo deadbeef; return 0;;\n'
+            "    esac\n"
+            "  fi\n"
+            '  if [ "${1-}" = merge-base ] && [ "${2-}" = --is-ancestor ]; then return "$TL_FAKE_ANC"; fi\n'
+            "  return 90\n"
+            "}\n"
+        )
+        env = dict(PATH=os.environ["PATH"], TL_S=S40, TL_H=H40, TL_PR="601", TL_NHANH="master",
+                   TL_KHO="ducthangho/tra-luat", TL_WF_SHA=WF40, TL_WF_REF=wf_ref,
+                   TL_FAKE_HEAD=(head_tra or WF40), TL_FAKE_ANC=str(to_tien_rc))
+        with San() as s:
+            return subprocess.run([_bash_posix(), "--noprofile", "--norc", "-c", stub + doan],
+                                  cwd=s, env=env, capture_output=True, text=True, timeout=20)
+
+    # --- A1: chính ca đã ĐỎ thật trên PR #601 ---
+    chot(WF40 != S40, "fixture phải dựng workflow_sha KHÁC base.sha, nếu không ca này vô nghĩa")
+    p = chay(doan_goc, wf_ref=REF_DUNG, to_tien_rc=0)
+    chot(p.returncode == 0,
+         f"A1: workflow_sha != S mà cây == workflow_sha và S là tổ tiên thì phải QUA; rc={p.returncode} {p.stderr!r}")
+
+    # --- A2: workflow_ref không trỏ nhánh mặc định ---
+    p = chay(doan_goc, wf_ref=REF_SAI, to_tien_rc=0)
+    chot(p.returncode == 12, f"A2: workflow_ref lạ phải ĐỎ 12; rc={p.returncode} {p.stderr!r}")
+
+    # --- A3: định nghĩa lùi về trước base ---
+    p = chay(doan_goc, wf_ref=REF_DUNG, to_tien_rc=1)
+    chot(p.returncode == 12, f"A3: S không phải tổ tiên thì phải ĐỎ 12; rc={p.returncode} {p.stderr!r}")
+
+    # --- A3b: cây không phải commit định nghĩa ---
+    p = chay(doan_goc, wf_ref=REF_DUNG, to_tien_rc=0, head_tra="f" * 40)
+    chot(p.returncode == 12, f"A3b: HEAD != workflow_sha phải ĐỎ 12; rc={p.returncode} {p.stderr!r}")
+
+    # --- A4: đột biến từng chốt trên BẢN SAO, mỗi chốt một đột biến riêng ---
+    dong = doan_goc.split("\n")
+    bo_anc = "\n".join(d for d in dong if "--is-ancestor" not in d and "không phải tổ tiên" not in d)
+    chot(bo_anc != doan_goc, "đột biến gỡ chốt --is-ancestor không đổi gì — chốt ấy không có trong đoạn")
+    p = chay(bo_anc, wf_ref=REF_DUNG, to_tien_rc=1)
+    chot(p.returncode == 0,
+         f"A4: gỡ chốt --is-ancestor mà A3 vẫn ĐỎ ⇒ A3 đang đo thứ khác; rc={p.returncode} {p.stderr!r}")
+
+    bo_ref = "\n".join(d for d in dong if "TL_WF_REF" not in d and "workflow_ref lạ" not in d)
+    chot(bo_ref != doan_goc, "đột biến gỡ chốt workflow_ref không đổi gì")
+    p = chay(bo_ref, wf_ref=REF_SAI, to_tien_rc=0)
+    chot(p.returncode == 0,
+         f"A4: gỡ chốt workflow_ref mà A2 vẫn ĐỎ ⇒ A2 đang đo thứ khác; rc={p.returncode} {p.stderr!r}")
 
 
 @ca

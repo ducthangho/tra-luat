@@ -8295,6 +8295,20 @@ def t187_chan_doan_phai_ha_ve_CHUOI_THUAN_chu_khong_chi_isinstance():
             chot(type(thuc) is str and thuc == mong,
                  f"{vi_tri}: {noi_dung} mong {mong!r}, nhận {_in(thuc)!r}.")
 
+    # NỘI DUNG thông điệp của cửa, không chỉ LỚP tín hiệu — cross-review lượt 12 (24-09): hai
+    # đoạn dưới chỉ nhận đúng lớp `TinHieuChotCa` rồi bỏ thông điệp, nên đột biến xoá tên lớp
+    # hay nhãn vế khỏi thông báo của `_goi_doi_tra_ve` sống 183/183. `TinHieuChotCa` là tín
+    # hiệu CỦA TA (không phải ngoại lệ tuỳ ý), nhưng vẫn chỉ đọc `args[0]` khi nó là `str` thuần.
+    def _thong_diep_tin_hieu(tin):
+        a = tin.args
+        return a[0] if len(a) == 1 and type(a[0]) is str else None
+
+    def _chot_thong_diep_cua(nhan, td_cua, ve_cua, mong_ten):
+        mong = f"{ve_cua} helper NÉM `{mong_ten}` thay vì TRẢ VỀ."
+        chot(td_cua is not None and td_cua.startswith(mong),
+             f"{nhan}: thông điệp của cửa phải mở đầu bằng {mong!r} (nhãn vế + tên lớp đã hạ), "
+             f"nhận {td_cua if td_cua is not None else '<không phải str thuần>'!r}.")
+
     # NHÁNH BÁO LỖI CỦA CỬA — đường THỨ BA, cross-review codex lượt 2 (24-09) bắt.
     #
     # Phần trên phủ hai wrapper; nhánh `except BaseException` của `_goi_doi_tra_ve` thì chưa.
@@ -8309,17 +8323,18 @@ def t187_chan_doan_phai_ha_ve_CHUOI_THUAN_chu_khong_chi_isinstance():
 
         def _gh_nem_base(*_a, _L=_LopBase):
             raise _L()
-        loai = "cửa TRẢ VỀ dù helper đã ném"
+        loai, td_cua = "cửa TRẢ VỀ dù helper đã ném", None
+        ve_cua = f"t187 {nhan} / nhánh báo lỗi"
         try:
-            _goi_doi_tra_ve(f"t187 {nhan} / nhánh báo lỗi", _gh_nem_base, "kiem_github",
-                            lease_d, env_them=ENV_GITHUB)
-        except TinHieuChotCa:
-            loai = "TinHieuChotCa"
+            _goi_doi_tra_ve(ve_cua, _gh_nem_base, "kiem_github", lease_d, env_them=ENV_GITHUB)
+        except TinHieuChotCa as tin:
+            loai, td_cua = "TinHieuChotCa", _thong_diep_tin_hieu(tin)
         except BaseException as loi:  # noqa: BLE001 — đo "đỏ ĐÚNG lớp", phải bắt trọn
             loai = f"ngoại lệ TRẦN `{_ten_lop(loi)}`"
         chot(loai == "TinHieuChotCa",
              f"{nhan}: nhánh báo lỗi của cửa phải đỏ bằng `TinHieuChotCa`, nhận {loai}. "
              f"Đường chẩn đoán làm vỡ phép đo là tín dụng giả ở tầng cửa.")
+        _chot_thong_diep_cua(nhan, td_cua, ve_cua, NOI_DUNG)
 
     # ĐỌC TÊN LỚP HỎNG Ở METACLASS — cross-review codex lượt 3 (24-09). Các vế trên cho tên lớp
     # là một `str` CON; ở đây chính việc ĐỌC `__name__` hỏng. Ba thành viên: ném ngoại lệ thường,
@@ -8365,16 +8380,18 @@ def t187_chan_doan_phai_ha_ve_CHUOI_THUAN_chu_khong_chi_isinstance():
 
         def _gh_ten_hong_base(*_a, _L=_LoiTenBase):
             raise _L()
-        loai = "cửa TRẢ VỀ dù helper đã ném"
+        loai, td_cua = "cửa TRẢ VỀ dù helper đã ném", None
+        ve_cua = f"t187 {nhan} / cửa"
         try:
-            _goi_doi_tra_ve(f"t187 {nhan} / cửa", _gh_ten_hong_base, "kiem_github", lease_d,
+            _goi_doi_tra_ve(ve_cua, _gh_ten_hong_base, "kiem_github", lease_d,
                             env_them=ENV_GITHUB)
-        except TinHieuChotCa:
-            loai = "TinHieuChotCa"
+        except TinHieuChotCa as tin:
+            loai, td_cua = "TinHieuChotCa", _thong_diep_tin_hieu(tin)
         except BaseException as loi:  # noqa: BLE001 — đo "đỏ ĐÚNG lớp", phải bắt trọn
             loai = f"ngoại lệ TRẦN `{_ten_lop(loi)}`"
         chot(loai == "TinHieuChotCa",
              f"{nhan}: cửa phải đỏ bằng `TinHieuChotCa`, nhận {loai}.")
+        _chot_thong_diep_cua(nhan, td_cua, ve_cua, "<tên lớp không đọc được>")
 
     # HỢP ĐỒNG CỦA CHÍNH BIÊN, đo thẳng — không qua bốn hàm chẩn đoán. Cả bốn hàm hiện đã tự
     # hạ về `str` thuần trước khi trả, nên đột biến cho biên trả NGUYÊN `r` sống nếu chỉ đo qua
@@ -8726,6 +8743,20 @@ def t185_cua_DEM_phai_chot_KET_QUA_truoc_khi_chot_SO_LOI_GOI():
                 _cau_chu_that("kiem_github", TU_CAP, DA_TRA_VE, 1)))
     if set(CAU) != {"dem", "ket_qua"}:
         raise _ChotCa(f"(d) phải thu được câu chữ của CẢ HAI vế, thu được vế {sorted(CAU)!r}.")
+    # NỘI DUNG của hai thông điệp, không chỉ NHÃN — cross-review lượt 12: cửa đếm là một trong
+    # ba nơi sinh thông điệp chẩn đoán của miền, và nó mới được chốt nhãn. Kỳ vọng viết tay
+    # từ ba hành vi đã đo ở đầu ca: phép dò + lease hợp lệ gọi 1 lần; `kiem_github` + lease tự
+    # cấp ném `Chan(4)`.
+    MONG_CAU = {
+        "dem": "t185: phải có đúng 99 lời gọi GitHub, có 1.",
+        "ket_qua": "t185: cổng `kiem_github` phải kết thúc bằng ĐÃ-TRẢ-VỀ (cổng không ném), "
+                   "được 4. ",
+    }
+    for ve, mong in MONG_CAU.items():
+        cau = CAU[ve]
+        if not (type(cau) is str and (cau == mong if ve == "dem" else cau.startswith(mong))):
+            raise _ChotCa(f"(d) thông điệp vế {ve!r} mong {mong!r}, nhận "
+                          f"{cau if type(cau) is str else '<không phải str thuần>'!r}.")
     for ve, cau in CAU.items():
         try:
             _thu("_do_dau_da_dang", HOP_LE, DA_TRA_VE, 1, cua=_cua_nem(AssertionError(cau)))

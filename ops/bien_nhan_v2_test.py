@@ -96,6 +96,7 @@ BO_BA_PROVIDER_DONG_BANG = (
     ("anthropic_claude", "claude_code", "machine/local"),
     ("openai_codex", "codex_cli", "machine"),
     ("openai_codex", "codex_desktop", "machine"),
+    ("openai_codex", "codex_service", "machine"),
     ("human", "manual_audit", "human"),
 )
 KE_HOACH_PROVIDER = "ops/KE_HOACH_THI_CONG_DA_PROVIDER.md"
@@ -2414,6 +2415,70 @@ def c66_desktop_xoa_hang_doi_hanh_vi_cli_van_qua():
                 loi = mod._thieu(d)
                 if removed and surface == "codex_desktop":
                     bang(len(loi) == 1 and "surface" in loi[0], f"bỏ hàng không chặn đúng surface: {loi}")
+                else:
+                    bang(loi == [], f"đối chứng {surface} removed={removed}: {loi}")
+
+
+@ca
+def c67_service_khai_that_duoc_nhan_khai_sai_bi_tu_choi_dung_cot():
+    """wp461 r3 (Mission #470 Q1): bề mặt thứ ba của Codex là `codex_service` — dịch vụ / GitHub App
+    `chatgpt-codex-connector[bot]`. Ba điều phải đúng CÙNG LÚC: (1) khai THẬT được nhận với danh
+    sách lỗi RỖNG (`R9-F04`: không phải "không có chữ surface"); (2) mọi tên khác cho cùng bề mặt
+    bị từ chối ĐÚNG MỘT lỗi, ĐÚNG cột surface — kể cả tên mà lượt r15 của wp523 đã thử
+    (`codex_github_connector`); (3) hợp đồng của `openai_codex` đúng ba bề mặt, không hơn."""
+    d = v2_du(); d["assurance"] = "advisory_review"
+    d["model_reviewer_identity"].update(surface="codex_service", transport="machine")
+    bang(bnv2._thieu(d) == [], f"codex_service khai THẬT bị từ chối: {bnv2._thieu(d)}")
+    for sai in ("codex_api", "codex_github_connector", "Codex service", "codex_service_fake"):
+        d = v2_du(); d["assurance"] = "advisory_review"
+        d["model_reviewer_identity"].update(surface=sai, transport="machine")
+        loi = bnv2._thieu(d)
+        bang(len(loi) == 1 and "surface" in loi[0] and "openai_codex" in loi[0],
+             f"surface={sai!r}: đòi ĐÚNG 1 lỗi ở cột surface, đo được {loi}")
+    bang(bnv2.PROVIDER_HOP_DONG["openai_codex"]["be_mat"] == frozenset({"codex_cli", "codex_desktop", "codex_service"}),
+         f"hợp đồng openai_codex lệch: {sorted(bnv2.PROVIDER_HOP_DONG['openai_codex']['be_mat'])}")
+    # service KHÔNG phải CLI: không được có mặt trong `_TRANSPORT_CONTRACTS` (S5 của spec r3).
+    cli = _doc_bang_launcher("_TRANSPORT_CONTRACTS")
+    bang(not any(r[-2] == "codex_service" for r in cli if r),
+         "codex_service bị khai thành CLI trong `_TRANSPORT_CONTRACTS`")
+    ngoai_cli = _doc_bang_launcher("_PROVIDER_NGOAI_CLI")
+    service = [r for r in ngoai_cli if r and r[:2] == ["openai_codex", "codex_service"]]
+    bang(service == [["openai_codex", "codex_service", "machine"]],
+         f"service ngoài CLI phải có ĐÚNG 1 hàng với transport machine: {service}")
+    # Tên hợp đồng KHÔNG mua được assurance: không session ⇒ không nâng mức mô hình; phân vùng
+    # người/mô hình vẫn chặn `human_audited` — y hệt Desktop (`c65`).
+    d = v2_du(); d["assurance"] = "human_audited"
+    d["model_reviewer_identity"].update(surface="codex_service", transport="machine", phien_doc_lap=True)
+    bang(any("mức của NGƯỜI audit" in x for x in bnv2._thieu(d)),
+         "codex_service có session không được chặn human_audited bởi phân vùng người/mô hình")
+    for assurance in ("same_provider_approved", "cross_approved"):
+        d = v2_du(); d["assurance"] = assurance
+        d["model_reviewer_identity"].update(surface="codex_service", transport="machine")
+        d["model_reviewer_identity"].pop("session_run_id")
+        d["model_reviewer_identity"]["KHONG_do_duoc"] = "GitHub App không xuất session/model"
+        loi = bnv2._thieu(d)
+        bang(any(assurance in x for x in loi), f"codex_service không evidence được nâng {assurance}: {loi}")
+
+
+@ca
+def c68_service_xoa_hang_doi_hanh_vi_cli_desktop_van_qua():
+    """Đột biến trên cây gương: bỏ ĐÚNG hàng `codex_service`; CLI và Desktop là đối chứng cùng lúc.
+    Đây là phép đo A6 của spec r3: rút hàng phải làm ca dương ĐỎ với thông báo nêu đúng cột."""
+    row = '    ("openai_codex", "codex_service", "machine"),'
+    for removed in (False, True):
+        with tempfile.TemporaryDirectory() as t:
+            kw = {"sua_launcher": _thay_1(row, "")} if removed else {}
+            cong = _cay_guong(Path(t), kho_rieng=False, **kw)
+            sp = importlib.util.spec_from_file_location("wp461_mirror", cong)
+            mod = importlib.util.module_from_spec(sp); sp.loader.exec_module(mod)
+            dung(mod.PROVIDER_NGUON_HONG is None, f"rig không đọc được nguồn: {mod.PROVIDER_NGUON_HONG}")
+            for surface in ("codex_cli", "codex_desktop", "codex_service"):
+                d = v2_du(); d["assurance"] = "advisory_review"
+                d["model_reviewer_identity"].update(surface=surface, transport="machine")
+                loi = mod._thieu(d)
+                if removed and surface == "codex_service":
+                    bang(len(loi) == 1 and "surface" in loi[0] and "codex_service" in loi[0],
+                         f"bỏ hàng không chặn đúng surface: {loi}")
                 else:
                     bang(loi == [], f"đối chứng {surface} removed={removed}: {loi}")
 

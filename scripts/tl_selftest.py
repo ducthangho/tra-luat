@@ -25323,7 +25323,7 @@ def run() -> int:
             lượt 4  m11      canh theo lớp, nhưng so bằng TÊN lớp
             lượt 5  m12/m13/m14 + MẤT PHỦ m3
             (sau)   phiên điều phối TỰ ĐO khi soạn r3: `m10` và `m14` cho TẬP ô đỏ BẰNG NHAU
-                    (23 toạ độ, hai chiều rỗng) ⇒ một BỘ TƯƠNG ĐƯƠNG mà ma trận r2/r3-bản-đầu
+                    (27 toạ độ, hai chiều rỗng) ⇒ một BỘ TƯƠNG ĐƯƠNG mà ma trận r2/r3-bản-đầu
                     không phân biệt nổi. Không reviewer nào nêu; nó lộ ra vì `A11` đòi so TẬP
                     chứ không so SỐ ĐẾM — và hai cái đó cùng cho `27` nên phép đếm im lặng.
 
@@ -25424,7 +25424,7 @@ def run() -> int:
                   ("thong_diep_khac", ("MOT_THONG_DIEP_KHAC",)),
                   ("hai_doi_so", ("a", "b")),
                   # PHÂN GIẢI `m10` KHỎI `m14`. Đo 21-09: với 6 dạng trên, hai đột biến ấy cho
-                  # TẬP ô đỏ BẰNG NHAU (23 toạ độ, hai chiều rỗng) ⇒ ma trận không phân biệt
+                  # TẬP ô đỏ BẰNG NHAU (27 toạ độ, hai chiều rỗng) ⇒ ma trận không phân biệt
                   # nổi "so bằng CHUỖI" với "so bằng `args`". Dạng này tách chúng: `str()` của
                   # một ngoại lệ HAI đối số là `('...', 'x')` — CHỨA mốc, nên `m10` cấp `killed`
                   # — trong khi `args` KHÁC tuple một phần tử, nên `m14` cấp tín dụng giả.

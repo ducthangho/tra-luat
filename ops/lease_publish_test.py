@@ -8855,6 +8855,12 @@ def t189_duong_chan_doan_KHONG_dinh_dang_THO_ngoai_le_vua_bat():
     `_danh_gia_bieu_thuc_chuan_bi`) được KHAI là nợ, không lặng lẽ sửa trong packet `sensitive`.
     "Bắt RỘNG" = không kiểu, `Exception`, `BaseException`, `AssertionError` (hoặc tuple chứa
     chúng). Mỗi bất biến có PHẢN CHỨNG trên mã giả để chốt không mù.
+
+    GIỚI HẠN, khai thẳng: đây là chốt CẤU TRÚC trên một tập hình dạng đã biết, không phải
+    chứng minh. Python đủ động để một phép đọc thô đi đường mà `ast` không lần theo (qua
+    `globals()`, `getattr` với tên dựng lúc chạy, một hàm ngoài miền…). Lượt 8 đã lách được bản
+    trước theo ba cách. Bảo đảm HÀNH VI cho bộ chạy nằm ở `t187`: một lượt `main()` thật qua
+    MỌI họ fixture, đòi đúng một dòng `ĐỎ` với nội dung viết tay cho từng ca.
     """
     import ast as _ast
     MIEN_TEN = {"_goi_doi_tra_ve", "_goi_dem_lop_gh", "_goi_lop_gh", "_thong_diep_an_toan",

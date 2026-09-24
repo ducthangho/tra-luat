@@ -66,6 +66,16 @@ va_cham_da_khai: >-
   phien. Hai thay doi la HAI HANG muc luc khac nhau, khong cham cung dong. Cach xu: nhanh g4 xuat phat tu
   master (KHONG tu nhanh g17); khi mot trong hai PR land, PR con lai merge origin/master (merge commit)
   truoc khi land. Khai o day thay vi che; chu kho quyet thu tu land.
+vi_pham_da_khai_readme: >-
+  Cross-review luot 1 tren #624 (thread 4097579866, P1) DUNG: hai lease con hieu luc co write set giao
+  nhau (README.md) vi pham bat bien doc quyen §1.2 — 'serialize merge' chi xu xung dot git, khong xu
+  viec hai nhanh cung ghi mot tep. Da do lai sau khi dong bo ref: `ai-dang-giu ops/reviews/README.md`
+  => NGUOI_GIU 1 = g17 (rc=11). Su that: hang muc luc wp461 trong README DA duoc ghi o #625 (commit
+  78d9b74f, 19:03Z) khi g17 con hieu luc — ghi nhan la VI PHAM DA XAY RA, khong xoa lich su (khong
+  rebase/force-push). Bien phap: (a) KHONG ghi them README tren #625 truoc khi g17 het han
+  2026-09-24T19:47:22Z hoac bi thu hoi; (b) neu can generation ke tiep (g5) thi write set KHONG duoc
+  giao voi lease nao con hieu luc — do `ai-dang-giu` truoc khi ghi; (c) neu #623 land truoc, #625 merge
+  origin/master bang merge commit. Chu kho co the thu hoi g4 neu muon xu nghiem hon.
 
 branch: claude/wp461-g4-receipt
 branch_ownership: exclusive
@@ -73,12 +83,18 @@ target_branch_neu_land: master
 base_sha: 541fa6ca9ba78d2669261b528572dbc05b53ea87
 start_from_sha: 541fa6ca9ba78d2669261b528572dbc05b53ea87
 continuation_base: 541fa6ca9ba78d2669261b528572dbc05b53ea87
-reviewed_sha_required: 5e2851881e810b39ebee6884371e5b3e229a01d7
+reviewed_sha_required: 541fa6ca9ba78d2669261b528572dbc05b53ea87
 reviewed_sha_required_nghia: >-
+  Bootstrap (nhu g3): base cua nhanh bookkeeping. Verdict cua lan review PR bookkeeping (#625) PHAI neo
+  exact head THAT cua PR ay (40 hex) — khong chep lai con so nay, khong neo commit tong hop. Truong nay
+  KHONG phai muc tieu cua bien nhan; xem bien_nhan_reviewed_sha_bat_buoc (va cross-review luot 1 tren #624,
+  thread 4097579876: hai nghia bi gop mot truong => tach).
+bien_nhan_reviewed_sha_bat_buoc: 5e2851881e810b39ebee6884371e5b3e229a01d7
+bien_nhan_reviewed_sha_bat_buoc_nghia: >-
   Head THAT cua PR #617 ma codex luot 1 da cham sach (pull/617#issuecomment-5819108011, 'Reviewed commit:
-  5e2851881e', 0 finding, 0 review object). Bien nhan PHAI neo DUNG OID nay lam reviewed_sha — KHONG neo
-  merge commit 6980e5bf, KHONG neo commit tong hop nao. Luot 2 tu ban luc 17:54:41 tren PR da merge (9 giay
-  sau) — KHONG co ket qua, khong co bien nhan.
+  5e2851881e', 0 finding, 0 review object). Bien nhan wp461-review-1-codex PHAI neo DUNG OID nay lam
+  reviewed_sha — KHONG neo merge commit 6980e5bf, KHONG neo commit tong hop nao. Luot 2 tu ban luc
+  17:54:41 tren PR da merge (9 giay sau) — KHONG co ket qua, khong co bien nhan.
 
 granted_by: ducthangho
 granted_on_instruction: https://github.com/ducthangho/tra-luat/issues/461#issuecomment-5820263820
@@ -108,7 +124,11 @@ heartbeat_at: '2026-09-24T18:58:03Z'
 lease_until: '2026-09-24T20:28:03Z'
 run_minutes: 90
 heartbeat_required_minutes: 30
-attempts_used: 0
+attempts_used: 1
+attempts_used_ghi_chu: >-
+  Cong don theo PACKET (§12), khong reset theo generation: g3 da chay MOT run executor (PR #617, land
+  6980e5bf) => 1/3 da dung truoc khi cap g4 (cross-review luot 1 tren #624, thread 4097579887). g1/g2/r2
+  khong co run nao land.
 attempts_limit: 3
 
 reviewer_provider: openai_codex
@@ -125,6 +145,7 @@ dieu_kien_dung:
   - 'S7 — goi codex bat ky hinh thuc nao, ke ca bo draft PR de connector tu ban. DUNG (viec bo draft la cua chu kho).'
   - 'S8 — va cham README voi g17 bien thanh XUNG DOT merge that => merge origin/master bang merge commit, khong rebase; khong sua hang cua g17.'
   - 'S9 — HET HAN lease_expires_at_utc => ngung ghi, handoff §7 tren #461, xin generation moi.'
+  - 'S10 — ghi README.md khi lease g17 (wp523) con hieu luc (truoc 2026-09-24T19:47:22Z) => DUNG; lan ghi 19:03Z da khai la vi pham.'
 
 cam_tuyet_doi:
   - Khong sua noi dung spec r3; khong sua hien vat da giao; khong alias; khong mien tru moi

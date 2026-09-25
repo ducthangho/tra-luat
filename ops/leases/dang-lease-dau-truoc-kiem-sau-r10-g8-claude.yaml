@@ -163,4 +163,4 @@ da_bi_thay_the_vi_sao: 'r11 (issues/579#issuecomment-5827148911, chủ kho chọ
   vào t191 — liệt kê chốt của kiem() bằng máy. spec_hash r11 =
   3cc2011efb25abb19f1c2588355ba24d6d5f00a5ea9bea99e5450b1ae0c9d443. Thay để NEO LAI, không phải vì g8 sai.'
 da_bi_thay_the_ve_thu_hai: 'Ve con lai nam o ops/leases/dang-lease-dau-truoc-kiem-sau-r11-g9-claude.yaml tren
-  ref ops/cap-lease-579-g9, dong .'
+  ref ops/cap-lease-579-g9, dong `thay_the_cho: dang-lease-dau-truoc-kiem-sau-r10-g8-claude`.'

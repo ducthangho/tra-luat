@@ -92,7 +92,7 @@ anchor:
     canonical qua merge commit 6980e5bf04e4e5b8b75e5817578f1aba13f2f5ab (PR #617)
   gioi_han: >-
     Validator đo tổ tiên trên checkout hiện hành, không chứng minh canonical inclusion của
-    commit evidence_url; kiểm sau land bằng `git merge-base --is-ancestor ef72264cb268643a89df3e15cf6cb840da92307bc0d6dfff9f9f90958cb5860cd375c79f
+    commit evidence_url; kiểm sau land bằng `git merge-base --is-ancestor ef72264cb268643a89df3e15cf6cb840da92307b
     origin/master`. Không chứng minh nội dung review đã đọc gì — connector không xuất bằng chứng đọc.
 comment_delivery:
   url: https://github.com/ducthangho/tra-luat/pull/617#issuecomment-5819108011
@@ -102,13 +102,127 @@ comment_delivery:
   readback_bang_chung:
     phuong_thuc: GET https://api.github.com/repos/ducthangho/tra-luat/issues/comments/5819108011 (REST, token chu kho)
     http_status: 200
-    doc_luc_utc: '2026-09-24T18:52:2xZ'
+    doc_luc_utc: '2026-09-24T18:52:00Z'
+    doc_luc_utc_ghi_chu: giay KHONG duoc luu (chi biet toi phut 2026-09-24T18:52Z); khai thang, khong bia (thread 4100016580)
     body_sha256_nguon: 2276547ec77b74618c5e548ce3efeb3661fd90e59e847d187a3691f4c632cb8d
     body_sha256_doc_nguoc: 2276547ec77b74618c5e548ce3efeb3661fd90e59e847d187a3691f4c632cb8d
     body_bytes: 609
     so_sanh: bytes UTF-8 cua body sau khi giai ma JSON == bytes tep verdict (khong hash chuoi JSON escape)
-    raw_json_luu: KHONG — phan hoi JSON tho khong duoc luu thanh hien vat trong kho (khai thang, thread 4099876842);
-      chi hash body + status + thoi diem duoc ghi o day
+    raw_json_luu: >-
+      Lan 1 (18:52Z) KHONG luu raw JSON — khai thang. Lan 2 (readback_lan_2 duoi day) LUU NGUYEN raw JSON phan hoi
+      (sort_keys, indent 1, khong sua noi dung) ke ca rc tien trinh, theo PROTOCOL §8 dong 456-462 (thread 4099876842).
+  readback_lan_2:
+    doc_luc_utc: '2026-09-25T01:16:13Z'
+    lenh: "REST GET /repos/ducthangho/tra-luat/issues/comments/5819108011 (gh.call, token chu kho, KHONG in token)"
+    http_status: 200
+    rc_tien_trinh: 0
+    body_sha256_doc_nguoc: 2276547ec77b74618c5e548ce3efeb3661fd90e59e847d187a3691f4c632cb8d
+    body_bytes: 609
+    so_voi_tep_verdict: BANG NHAU tung byte (Python bytes ==)
+    raw_json_phan_hoi: |
+      {
+       "author_association": "NONE",
+       "body": "Codex Review: Didn't find any major issues. Can't wait for the next one!\n\n**Reviewed commit:** `5e2851881e`\n\n<details> <summary>ℹ️ About Codex in GitHub</summary>\n<br/>\n\n[Your team has set up Codex to review pull requests in this repo](https://chatgpt.com/codex/cloud/settings/general). Reviews are triggered when you\n- Open a pull request for review\n- Mark a draft as ready\n- Comment \"@codex review\".\n\nIf Codex has suggestions, it will comment; otherwise it will react with 👍.\n\n\n\n\nCodex can also answer questions or update the PR. Try commenting \"@codex address that feedback\".\n            \n</details>",
+       "created_at": "2026-09-24T17:40:42Z",
+       "html_url": "https://github.com/ducthangho/tra-luat/pull/617#issuecomment-5819108011",
+       "id": 5819108011,
+       "issue_url": "https://api.github.com/repos/ducthangho/tra-luat/issues/617",
+       "minimized": null,
+       "node_id": "IC_kwDOTNeRjc8AAAABWtiKqw",
+       "performed_via_github_app": {
+        "created_at": "2025-02-14T01:37:05Z",
+        "description": "Bring ChatGPT and Codex to your GitHub repositories.",
+        "events": [
+         "check_run",
+         "check_suite",
+         "commit_comment",
+         "issues",
+         "issue_comment",
+         "pull_request",
+         "pull_request_review",
+         "pull_request_review_comment",
+         "pull_request_review_thread",
+         "repository",
+         "status",
+         "sub_issues"
+        ],
+        "external_url": "https://www.chatgpt.com",
+        "html_url": "https://github.com/apps/chatgpt-codex-connector",
+        "id": 1144995,
+        "name": "ChatGPT Codex Connector",
+        "node_id": "A_kwHOAOQ6Gs4AEXij",
+        "owner": {
+         "avatar_url": "https://avatars.githubusercontent.com/u/14957082?v=4",
+         "events_url": "https://api.github.com/users/openai/events{/privacy}",
+         "followers_url": "https://api.github.com/users/openai/followers",
+         "following_url": "https://api.github.com/users/openai/following{/other_user}",
+         "gists_url": "https://api.github.com/users/openai/gists{/gist_id}",
+         "gravatar_id": "",
+         "html_url": "https://github.com/openai",
+         "id": 14957082,
+         "login": "openai",
+         "node_id": "MDEyOk9yZ2FuaXphdGlvbjE0OTU3MDgy",
+         "organizations_url": "https://api.github.com/users/openai/orgs",
+         "received_events_url": "https://api.github.com/users/openai/received_events",
+         "repos_url": "https://api.github.com/users/openai/repos",
+         "site_admin": false,
+         "starred_url": "https://api.github.com/users/openai/starred{/owner}{/repo}",
+         "subscriptions_url": "https://api.github.com/users/openai/subscriptions",
+         "type": "Organization",
+         "url": "https://api.github.com/users/openai",
+         "user_view_type": "public"
+        },
+        "permissions": {
+         "actions": "write",
+         "checks": "read",
+         "contents": "write",
+         "emails": "read",
+         "issues": "write",
+         "metadata": "read",
+         "pull_requests": "write",
+         "statuses": "read",
+         "workflows": "write"
+        },
+        "slug": "chatgpt-codex-connector",
+        "updated_at": "2026-09-23T18:52:59Z"
+       },
+       "pin": null,
+       "reactions": {
+        "+1": 0,
+        "-1": 0,
+        "confused": 0,
+        "eyes": 0,
+        "heart": 0,
+        "hooray": 0,
+        "laugh": 0,
+        "rocket": 0,
+        "total_count": 0,
+        "url": "https://api.github.com/repos/ducthangho/tra-luat/issues/comments/5819108011/reactions"
+       },
+       "updated_at": "2026-09-24T17:40:42Z",
+       "url": "https://api.github.com/repos/ducthangho/tra-luat/issues/comments/5819108011",
+       "user": {
+        "avatar_url": "https://avatars.githubusercontent.com/in/1144995?v=4",
+        "events_url": "https://api.github.com/users/chatgpt-codex-connector%5Bbot%5D/events{/privacy}",
+        "followers_url": "https://api.github.com/users/chatgpt-codex-connector%5Bbot%5D/followers",
+        "following_url": "https://api.github.com/users/chatgpt-codex-connector%5Bbot%5D/following{/other_user}",
+        "gists_url": "https://api.github.com/users/chatgpt-codex-connector%5Bbot%5D/gists{/gist_id}",
+        "gravatar_id": "",
+        "html_url": "https://github.com/apps/chatgpt-codex-connector",
+        "id": 199175422,
+        "login": "chatgpt-codex-connector[bot]",
+        "node_id": "BOT_kgDOC98s_g",
+        "organizations_url": "https://api.github.com/users/chatgpt-codex-connector%5Bbot%5D/orgs",
+        "received_events_url": "https://api.github.com/users/chatgpt-codex-connector%5Bbot%5D/received_events",
+        "repos_url": "https://api.github.com/users/chatgpt-codex-connector%5Bbot%5D/repos",
+        "site_admin": false,
+        "starred_url": "https://api.github.com/users/chatgpt-codex-connector%5Bbot%5D/starred{/owner}{/repo}",
+        "subscriptions_url": "https://api.github.com/users/chatgpt-codex-connector%5Bbot%5D/subscriptions",
+        "type": "Bot",
+        "url": "https://api.github.com/users/chatgpt-codex-connector%5Bbot%5D",
+        "user_view_type": "public"
+       }
+      }
 format_reissue:
   khong_bien_doi: true
   ghi_chu: >-
@@ -136,3 +250,14 @@ pending:
 - nợ bookkeeping CHANGELOG r376 + RELEASE_MANIFEST (khuyết tật spec r3 M4)
 - khuyết tật spec r3 Q2 (đếm 109 receipt codex_cli, không 14) — ghi ở pull/616 thread 4096922503
 - write set biên nhận này ngoài spec r3 §4 (A12) — hợp thức bằng chỉ thị 5820263820, không bằng revision
+lich_su_ban_ung_vien:
+  ghi_chu: >-
+    Receipt nay CHUA duoc giao (chua o master: `git ls-tree origin/master ops/reviews/wp461-*` rong) — moi ban la
+    ban UNG VIEN trong PR #625; sua truoc khi land khong phai 'sua receipt da giao' (r4 S3 / §8 dong 461-462).
+    Lich su cac ban ung vien ghi o day de noi nguon; ban hien hanh la dong cuoi (truoc commit nay).
+  cac_ban:
+  - {commit: 78d9b74fc059d93bdb7ecb172427d5a78647c0b6, luc: '2026-09-24T19:01:28+00:00', receipt_sha256: 77e751e3cf60e6b1c499e133213988e603eb00da76a43efab7702721fea48fed}
+  - {commit: ea7711a61239e6845f73ffd92d7c20de97c0a667, luc: '2026-09-24T19:31:19+00:00', receipt_sha256: 73600a343a0bb94ede4284fe7973a027942fd78e85b97c6cdc5dfbf3f05df500}
+  - {commit: 020de5e0148808486e0530f6810e4286816969a6, luc: '2026-09-25T00:08:20+00:00', receipt_sha256: e61bd3d6a192308bc3c5f8b74ea35b7ac904b9713b67ac35a773dbc5c5048d66}
+  - {commit: 518bbe04adca684a9f5bc89c8483a47abc20d4e3, luc: '2026-09-25T00:37:55+00:00', receipt_sha256: 5f5a78d71ae7fa530c247951b757384671eb9b6938c50a873145790b2665b80f}
+  - {commit: c2b16900b2209090e0a785574da02b60e7912a9c, luc: '2026-09-25T00:52:40+00:00', receipt_sha256: 37571adef958657fae39cfb05aee3664af17af93cadc4f388fecbec13b8536a8}

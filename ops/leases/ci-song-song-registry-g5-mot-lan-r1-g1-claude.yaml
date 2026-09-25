@@ -6,7 +6,8 @@ event: executor_lease_granted
 
 packet_issue: 637
 granted_by: ducthangho
-granted_on_instruction: https://github.com/ducthangho/tra-luat/issues/637#issuecomment-5829047823
+granted_on_instruction: https://github.com/ducthangho/tra-luat/issues/637#issuecomment-5829167916
+granted_on_instruction_truoc: https://github.com/ducthangho/tra-luat/issues/637#issuecomment-5829047823
 granted_on_instruction_nguyen_van: >-
   'Dong y voi CI spec, tao phien moi opus 5.5 medium, tao PR, cap lease xu ly noi dung nay'
   (chu kho, phien Claude Code session_01EfoFDAAquT8HRqXft6QDeQ, 2026-09-25).
@@ -17,10 +18,11 @@ recorded_by: claude-session
 recorder_is_dispatcher: false
 
 leased_at_utc: '2026-09-25T08:04:30Z'
-lease_expires_at_utc: '2026-09-26T08:04:30Z'
+lease_expires_at_utc: '2026-09-25T09:34:30Z'
 han_ghi_chu: >-
-  24 gio. A6/A8 doi benchmark 3 luot x N in 1,2,4 tren 8 bo that tai cho (N=1 ~33 phut moi luot theo nen muc 1
-  spec) — 90 phut khong du. Het han => handoff §7, KHONG tu gia han.
+  90 phut theo comment dong bang cua chu kho issues/637#issuecomment-5829167916 (08:13:24Z): 'hạn 90 phút'. Ban
+  dau ghi 24 gio (08:04:30Z, truoc comment ay) — RONG HON quyen duoc cap nen thu ve 90 phut, KHONG tu mo rong.
+  Benchmark A6/A8 co the can lau hon 90 phut: het han => handoff §7, generation moi can chu kho cap.
 
 packet_id: CI-SONG-SONG-REGISTRY-G5-MOT-LAN
 packet_slug: CI-SONG-SONG-REGISTRY-G5-MOT-LAN

@@ -653,7 +653,7 @@ jobs:
       # ops/reviews/** là hiện vật review bất biến, không phải mã sống để CI chạy.
       - name: test registry (phạm vi + các bộ chưa được nối)
         env:
-          CI_DANG_KY_WORKERS: "4"
+          CI_DANG_KY_WORKERS: "1"
         run: python .claude/dev/ci_dang_ky_test.py --chay
 
   gate-packet-loop:

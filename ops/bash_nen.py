@@ -843,17 +843,27 @@ def _gia_tri_hang(nut, tra_ten=None, sau=0):
     phân tích luồng dữ liệu.
     """
     if sau > 8:
-        return _KHONG_BIET
+        # N88 (r24, vòng 18) — HẾT độ sâu mà biểu thức vẫn có thể là hằng ⇒ NÉM (fail-close), không
+        # coi là "không phải bash". Đo được: chín lớp `"" + …` gấp ra `bash` và CHẠY BASH THẬT mà r23
+        # trả `[]`. (Chuỗi `+` nay được làm PHẲNG ở dưới nên không còn tốn độ sâu theo số vế.)
+        raise _VuotNganSach(f"biểu thức hằng lồng quá 8 tầng (dòng {getattr(nut, 'lineno', '?')})")
     try:
         return ast.literal_eval(nut)
     except (ValueError, TypeError, SyntaxError, MemoryError, RecursionError):
         pass
     if isinstance(nut, ast.BinOp) and isinstance(nut.op, ast.Add):
-        t = _gia_tri_hang(nut.left, tra_ten, sau + 1)
-        ph = _gia_tri_hang(nut.right, tra_ten, sau + 1)
-        if (isinstance(t, str) and isinstance(ph, str)) or \
-                (isinstance(t, bytes) and isinstance(ph, bytes)):
-            return _chay_phep(lambda: t + ph)
+        # N88 — LÀM PHẲNG chuỗi `a + b + c + …` (lồng sang trái một tầng mỗi vế) bằng vòng lặp: số vế
+        # không được tiêu độ sâu, chỉ lồng THẬT mới tiêu.
+        ve, x = [], nut
+        while isinstance(x, ast.BinOp) and isinstance(x.op, ast.Add):
+            ve.append(x.right)
+            x = x.left
+        ve.append(x)
+        gia = [_gia_tri_hang(v, tra_ten, sau + 1) for v in reversed(ve)]
+        if all(isinstance(g, str) for g in gia) or all(isinstance(g, bytes) for g in gia):
+            if sum(len(g) for g in gia) > _NGAN_SACH_DINH_DANG:
+                raise _VuotNganSach(f"phép nối dựng {sum(len(g) for g in gia)} ký tự")
+            return _chay_phep(type(gia[0])().join, gia)
         return _KHONG_BIET
     # N65 (r19) — BỐN TOÁN TỬ GIỮ HẰNG NỮA. Vòng 13 đo được `f"bash"`, `"%s" % "bash"`,
     # `"".join(["ba", "sh"])`, `"hsab"[::-1]` — cả bốn CHẠY BASH THẬT (in ra `OK`) mà r18 trả
@@ -1070,6 +1080,16 @@ def _phan_tu_dau(nut):
                 viec.extend(((x.right, True), (x.left, True)))
             elif isinstance(x, (ast.List, ast.Tuple)):
                 viec.extend((e, False) for e in reversed(x.elts))
+            elif isinstance(x, ast.Dict):
+                # N89 (r24, vòng 18) — `[*{"bash": None}, …]`: duyệt `dict` theo KHOÁ, thứ tự XÁC
+                # ĐỊNH. Khoá `None` là `**x` trải ra — không biết nó mang gì.
+                if x.keys and x.keys[0] is None:
+                    return "khong_biet", None
+                viec.extend((k, False) for k in reversed(x.keys))
+            elif isinstance(x, ast.Set):
+                if len(x.elts) != 1:
+                    return "khong_biet", None      # thứ tự duyệt `set` nhiều phần tử: không xác định
+                viec.append((x.elts[0], False))
             else:
                 return "khong_biet", None          # dãy là biến / lời gọi / chuỗi: không đoán
         elif isinstance(x, ast.Starred):
@@ -1162,8 +1182,10 @@ def _co_the_thanh_bash(nut, sau=0):
     ghép `"ba" + "sh"` thành tên ấy. Bộ lọc hẹp hơn luật thật là một lỗi LỌT IM LẶNG: luật
     thật sẽ không bao giờ được hỏi.
     """
-    if sau > 8 or nut is None:
+    if nut is None:
         return False
+    if sau > 8:
+        return True                    # N88: hết độ sâu ⇒ để luật thật quyết (và nó NÉM)
     if isinstance(nut, ast.Constant):
         v = nut.value
         if isinstance(v, bytes):
@@ -1284,8 +1306,14 @@ def _loi_goi_tran(than: str, sau=0):
         KHÔNG phân tích được, hay lồng quá 3 tầng ⇒ NÉM (fail-close);
       · N85 (r23): argv NỐI (`["bash", "-c"] + them`) hay TRẢI (`[*("bash", "-c"), x]`) mà phần
         tử ĐẦU là hằng của một list/tuple viết ngay tại lời gọi; N86: `"%(k)s" % {"k": "bash"}`;
-      · N84 (r23): biểu thức lồng sâu tới giới hạn biên dịch của chính Python (~10.000 tầng) —
-        bộ duyệt dùng ngăn xếp tường minh, không đệ quy;
+      · N84 (r23): biểu thức lồng sâu tới trần `ast.parse` của chính trình thông dịch (~9991 tầng
+        trên 3.12, ~2984 trên 3.11) — bộ duyệt dùng ngăn xếp tường minh, không đệ quy;
+      · N88 (r24): chuỗi `+` DÀI được làm phẳng; gấp hằng HẾT độ sâu (lồng THẬT quá 8 tầng) ⇒ NÉM
+        `_VuotNganSach` (fail-close), không coi là "không phải bash";
+      · N89 (r24): argv TRẢI một `dict` literal (khoá đầu) hay một `set` MỘT phần tử;
+      · N90 (r24): tên module nạp động đến bằng từ khoá `name=`; callee `exec`/`eval`/`__import__`/
+        `import_module` được TÍNH RA (`builtins.__dict__["exec"]`, `getattr(builtins, "exec")`…) — mọi
+        callee `Subscript`/`Call` có NHẮC tới tên ấy đều "có thể" là nó;
       · `type X[T] = …` (PEP 695) có phạm vi chú thích RIÊNG (N47, r16): `T` của nó không rò
         ra phạm vi chứa;
       · callee giải theo PHẠM VI TỪ VỰNG (r8, F3 codex vòng 3): `import subprocess` ở module
@@ -1413,6 +1441,35 @@ _HAM_NAP_DONG = {("importlib", "import_module"): "import_module",
                  ("builtins", "eval"): "eval"}
 
 
+def _tu_trong_callee_tinh(f, tu):
+    """Tên trong `tu` mà một callee TÍNH RA (`Subscript`/`Call`) có nhắc tới, hay None (N90, r24).
+
+    Vòng 18 đo được `builtins.__dict__["exec"](<tải hằng>)` CHẠY BASH THẬT mà r23 trả `[]`: callee
+    không phải một tên hay thuộc tính nên không luật nào hỏi nó. Liệt kê từng cách viết
+    (`__dict__[…]`, `vars(builtins)[…]`, `getattr(builtins, "…")`, `__builtins__[…]`…) là danh sách
+    CẤM, và nó không bao giờ đủ. Nên hỏi theo kiểu N76 — "CÓ THỂ": callee được TÍNH RA mà trong cây
+    của nó có nhắc tới một trong các tên ấy (hằng chuỗi, tên, hay thuộc tính) ⇒ coi như chính hàm ấy.
+    `page.eval(…)` (thuộc tính trên một TÊN) KHÔNG thuộc luật này — xem `_ten_exec_cua`.
+    """
+    if not isinstance(f, (ast.Subscript, ast.Call)):
+        return None
+    for x in ast.walk(f):
+        t = (x.value if isinstance(x, ast.Constant) and isinstance(x.value, str)
+             else x.id if isinstance(x, ast.Name)
+             else x.attr if isinstance(x, ast.Attribute) else None)
+        if t in tu:
+            return t
+    return None
+
+
+def _ten_module_hang(goi):
+    """Nút tên module của một lời NẠP ĐỘNG: đối số vị trí 0, hoặc từ khoá `name=` (N90, r24).
+    `importlib.import_module(name="subprocess")` đúng chữ ký công khai và CHẠY BASH THẬT (đo được)."""
+    if goi.args and not isinstance(goi.args[0], ast.Starred):
+        return goi.args[0]
+    return next((k.value for k in goi.keywords if k.arg == "name"), None)
+
+
 def _module_dong(goi, tra_ten=None):
     """Tên module (trong `_MODULE_CHU`) mà một lời gọi NẠP ĐỘNG với tên HẰNG trả về, hay None.
 
@@ -1429,10 +1486,13 @@ def _module_dong(goi, tra_ten=None):
     đúng tinh thần N76. Bảng ràng buộc hỏi CẢ HAI chế độ (xem N83 ở `_bang_pham_vi_ca_cay`).
     KHÔNG PHỦ (nợ có tên): tên module không phải hằng; `import_module` tương đối (`".x"`).
     """
-    if not isinstance(goi, ast.Call) or not goi.args or isinstance(goi.args[0], ast.Starred):
+    if not isinstance(goi, ast.Call) or _ten_module_hang(goi) is None:
         return None
     f, loai = goi.func, None
-    if isinstance(f, ast.Name):
+    tinh = _tu_trong_callee_tinh(f, ("__import__", "import_module", "eval"))
+    if tinh is not None:
+        loai = tinh                        # N90: callee TÍNH RA — "có thể" (N76)
+    elif isinstance(f, ast.Name):
         if f.id in ("__import__", "eval") and (tra_ten is None
                                                or not tra_ten(f.id, hoi_rang_buoc=True)):
             loai = f.id
@@ -1463,7 +1523,7 @@ def _module_dong(goi, tra_ten=None):
             muc = tra_ten(than.id)
             return muc[0] if muc and muc[1] is None else None
         return None
-    ten = _gia_tri_hang(goi.args[0])
+    ten = _gia_tri_hang(_ten_module_hang(goi))
     if not isinstance(ten, str):
         return None
     if loai == "__import__":
@@ -1623,7 +1683,8 @@ def _tai_exec(cay):
         f = n.func
         if not ((isinstance(f, ast.Name) and f.id in thang)
                 or (isinstance(f, ast.Attribute) and f.attr in ("exec", "eval")
-                    and isinstance(f.value, ast.Name) and f.value.id in goc)):
+                    and isinstance(f.value, ast.Name) and f.value.id in goc)
+                or _tu_trong_callee_tinh(f, ("exec", "eval")) is not None):   # N90
             continue
         van = _tai_hang(n)
         if van is None:

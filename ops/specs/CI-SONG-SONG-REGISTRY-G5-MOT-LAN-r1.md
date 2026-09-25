@@ -13,7 +13,8 @@ nguon_cap_viec: >-
 tham_dinh_nhap: >-
   Codex gpt-6-astra (codex CLI, chỉ-đọc) thẩm định bản nháp tại c4e95ee6cf3b87655fc96d2d931f912febfa7cd8:
   lượt 1 "dong_y_neu_sua" (8 P2 + 1 P3); tại 783d522f7c21995e8b56e909976a1a354a0e3aee lượt 2 "dong_y_neu_sua"
-  (4 P2 + 1 P3), không còn bất đồng về phương án tổng thể. Bản này sửa cả hai lượt (mục 11).
+  (4 P2 + 1 P3); tại e7ac2394f6e36262158aa73affd165586e542685 lượt 3 "dong_y_neu_sua" (2 P3). Không còn bất đồng về
+  phương án tổng thể. Bản này sửa cả ba lượt (mục 11).
 ghi_chu_hinh_dang: >-
   Chưa cổng nào đọc tệp này. Nó là DỮ LIỆU cho lease và cho reviewer, không phải giao diện.
 ---
@@ -62,7 +63,7 @@ Nguồn: workflow `gate`, run **36090209528** attempt **1**, event `pull_request
   `.claude/hooks/subagent_ghi_detect_test.py` 205 giây (03:49:35Z) · `.claude/dev/mcp_gh_test.py` 29 giây (03:46:39Z) ·
   4 bộ còn lại ≤ 2 giây (03:46:10Z–03:46:12Z).
 
-**Nghĩa vụ L5:** executor đo lại cả bảng trước mỗi bước công bố (lease, PR, land) và ghi mốc đầy đủ.
+**Nghĩa vụ L5:** đo lại cả bảng trước mỗi bước công bố (**đóng băng / đăng băm**, lease, PR, land) và ghi mốc đầy đủ. Mốc nào không khôi phục được thì ghi `KHONG_DO_DUOC`, không điền phỏng đoán.
 
 Hệ quả:
 - **Cache công cụ gần như vô ích** (≈ 0,2 phút mỗi job) ⇒ bỏ khỏi packet (mục 3).
@@ -143,7 +144,7 @@ Ràng buộc đã đo, executor không được phá:
 | A5 | M3 mặc định: không đặt biến ⇒ log nghiệp vụ giống master `4c53c76d` trên cùng bộ giả | so log nghiệp vụ lệch ⇒ ĐỎ |
 | A6 | **đối chiếu trên 8 bộ thật** (tại chỗ, Ubuntu): N=1 và N chọn cho cùng phán quyết và cùng tập dòng `CI_DANG_KY`, lặp **3 lần** mỗi N | một lần lệch ⇒ DỪNG (S2) |
 | A7 | M4 + M6: selftest G5 chỉ ở `gate`; probe vô điều kiện ở cả ba job, trước bước nặng đầu tiên; T6 và kiểm "lời gọi CI" của registry vẫn đạt | đột biến workflow trong bộ nhớ: bỏ probe ở một job · thêm `if:` cho probe · dời probe sau bước nặng · nhân đôi selftest ⇒ mỗi đột biến làm chốt M6 ĐỎ. Codex đã đo: nếu thiếu M6 thì bỏ cả hai probe vẫn qua T6, registry 21/21 và Ruff 3/3 |
-| A8 | M5 + Q4: benchmark tại chỗ N ∈ {1, 2, 4} trên 8 bộ thật, **dùng lại 3 lượt của A6**, ghi thời lượng và `so_lop_*` từng lượt. Luật chọn là một hàm thuần trong W1 (`chon_so_worker`): lấy **trung vị** 3 lượt cho mỗi N; chỉ N ∈ {2, 4} có trung vị **nhỏ hơn** trung vị N=1 mới là ứng viên; chọn ứng viên có trung vị nhỏ nhất, hai ứng viên chênh ≤ 10 % thì chọn N nhỏ hơn; **không có ứng viên ⇒ DỪNG (S2) trước push**. Sau đó **một** push xác nhận: bước registry trên CI **< 33,1 phút** (nền mục 1) và JSON M1 in `so_lop_*` của runner | fixture trung vị `{1: 100, 2: 101, 4: 102}` giây ⇒ hàm trả "không có ứng viên" (đột biến cho phép chọn N=1 ⇒ ĐỎ); N chọn không nhanh hơn nền trên CI ⇒ KHÔNG ĐẠT, DỪNG (S2) |
+| A8 | M5 + Q4: benchmark tại chỗ N ∈ {1, 2, 4} trên 8 bộ thật, **dùng lại 3 lượt của A6**, ghi thời lượng và `so_lop_*` từng lượt. Luật chọn là một hàm thuần trong W1 (`chon_so_worker`): lấy **trung vị** 3 lượt cho mỗi N; chỉ N ∈ {2, 4} có trung vị **nhỏ hơn** trung vị N=1 mới là ứng viên; trong tập ứng viên đặt `t_min` = trung vị nhỏ nhất, rồi chọn **N nhỏ nhất** có trung vị **≤ 1,10 × `t_min`**; **không có ứng viên ⇒ DỪNG (S2) trước push**. Sau đó **một** push xác nhận: bước registry trên CI **< 33,1 phút** (nền mục 1) và JSON M1 in `so_lop_*` của runner | fixture trung vị `{1: 100, 2: 101, 4: 102}` giây ⇒ "không có ứng viên" (đột biến cho phép chọn N=1 ⇒ ĐỎ); fixture đúng biên `{1: 200, 2: 110, 4: 100}` ⇒ N=2 (110 ≤ 1,10 × 100); fixture vượt biên `{1: 200, 2: 110,5, 4: 100}` ⇒ N=4; đột biến đổi mẫu số sang trung vị của N lớn hơn ⇒ ĐỎ; N chọn không nhanh hơn nền trên CI ⇒ KHÔNG ĐẠT, DỪNG (S2) |
 | A9 | tổng phút runner của lượt xác nhận **< 63,7 phút** (nền mục 1) | không nhỏ hơn ⇒ KHÔNG ĐẠT |
 | A10 | cổng hiện hành trên head cuối, mỗi cổng có lệnh + **dấu hiệu dương**: `lease_publish_test` in `N/N đạt` · `bien_nhan_v2` in `TỔNG: ĐẠT` và `0 vi phạm` · `ci_phamvi --kiem-bam` rc=0 và in kết luận dương · `actionlint .github/workflows/ci.yml` rc=0 và **không** in chẩn đoán nào (Codex đo trên `783d522f`: rc=0, đầu ra rỗng); kiểm toàn bộ workflow là phép đo riêng, so với nền cùng phạm vi (nền: 1 thông tin SC1003 ở `ops-don-ref.yml:117`) · `release-verify --strict --json` có `ok=true` và `expected_file_count == checked_file_count` · ba job CI của lượt xác nhận có dòng `TỔNG: ĐẠT` trong log | cổng thiếu, đỏ, `skipped` hoặc không có dấu hiệu dương ⇒ KHÔNG ĐẠT. Dấu hiệu dương chỉ được ghi vào bằng chứng sau khi xác nhận lệnh thực sự chạy và đạt |
 | A11 | kích thước: báo `git diff --numstat` so base; ≤ 300 dòng thêm | vượt ⇒ dừng trước review (S5) |
@@ -169,10 +170,10 @@ PR qua API và đối chiếu bảng. Chủ kho duyệt trần khi đóng băng.
 - `ops/specs/MUTANT-KHONG-CHAY-TREN-WINDOWS.md:85` từng cân nhắc và bỏ "song song hoá `chay_moi()`". Executor đọc lại lý
   do và trả lời trong PR trước khi làm M3.
 
-## 9. Va chạm (đo 2026-09-25T04:3xZ; đo lại trước khi ghi)
+## 9. Va chạm (đo 2026-09-25T05:02:33Z trên 43 PR đang mở; đo lại trước khi ghi)
 
-- PR đang mở chạm write set: **#447** (`ci_dang_ky_test.py`, cập nhật lần cuối 2026-09-14).
-- PR #581 chạm `ops/cong_cu_test.py` — **ngoài** write set (mục 3).
+- PR đang mở chạm write set: **#447** (`ci_dang_ky_test.py`, cập nhật lần cuối 2026-09-14T18:51:22Z).
+- PR #581 (cập nhật lần cuối 2026-09-25T04:38:14Z) chạm `ops/cong_cu_test.py` — **ngoài** write set (mục 3).
 - Không lease sống nào giữ W1/W2 theo quét các PR đang mở. Phiên thi công chạy `lease_publish.py ai-dang-giu` trước khi ghi.
 
 ## 10. Điều kiện dừng
@@ -216,3 +217,5 @@ Lượt 2 trên `783d522f` (4 P2 + 1 P3) và chỗ đã sửa:
 | 4 | P2 | lượt gate kế tiếp vượt trần chưa có chốt | mục 7, S4 |
 | 5 | P3 | actionlint lệch phạm vi và dấu hiệu dương | A10 |
 | — | — | mốc đo còn `x` | mục 1 (mốc từ thời gian sửa đổi tệp, probe đo lại) |
+
+Lượt 3 trên `e7ac2394` (2 P3; không còn P1/P2): mẫu số của luật chọn N ⇒ A8 (`t_min`, ≤ 1,10 × `t_min`, fixture đúng biên và vượt biên); mốc chỉ biết tới phút ở mục 9 và bước "đóng băng" trong L5 ⇒ mục 9 đo lại 2026-09-25T05:02:33Z, mục 1 bổ sung.

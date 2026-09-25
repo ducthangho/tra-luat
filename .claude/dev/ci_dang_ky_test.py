@@ -686,7 +686,7 @@ def dem_la_do(chap_nhan, o_trong_ci):
 
 
 # CI-SONG-SONG-REGISTRY-G5-MOT-LAN r1 (#637): M1–M3, M6, M7. Hằng số trong W1 theo spec M3.
-GIAY_TOI_DA_MOT_BO, GIAY_CHO_CAY_DUNG, BIEN_WORKERS, BIEN_MOC = 1800, 10, "CI_DANG_KY_WORKERS", "CI_DANG_KY_MOC"
+GIAY_TOI_DA_MOT_BO, GIAY_CHO_CAY_DUNG, BIEN_WORKERS, BIEN_MOC = 3600, 10, "CI_DANG_KY_WORKERS", "CI_DANG_KY_MOC"
 
 
 def _gio_utc(): return datetime.datetime.now(datetime.timezone.utc)

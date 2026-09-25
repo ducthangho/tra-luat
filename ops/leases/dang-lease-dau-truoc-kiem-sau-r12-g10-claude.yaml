@@ -74,8 +74,9 @@ operating_system: linux
 spec_path: ops/specs/dang-lease-dau-truoc-kiem-sau-r12.md
 spec_da_land: false
 spec_land_o: 'CHUA LAND — PR #592, nhanh claude/spec-dang-lease-r2-20260921, head 9526980.'
-spec_chep_vao_nhanh_lease: 'Commit cap lease nay mang MOT BAN SAO cua r11 lay bang
-  `git show dca5a71:<duong>`, KHONG sua mot byte — cong `check` doi prompt_path TON TAI trong cay.'
+spec_chep_vao_nhanh_lease: 'Commit cap lease nay (4b38f7e) mang MOT BAN SAO cua r12 lay bang
+  `git show 9526980:<duong>`, KHONG sua mot byte — cong `check` doi prompt_path TON TAI trong cay.
+  (SUA 25-09, cross-review #579 luot 19 P4: ban cap ghi nham "r11" / dca5a71 — chep tu g9.)'
 spec_ref: ops/specs/dang-lease-dau-truoc-kiem-sau-r12.md
 prompt_path: ops/specs/dang-lease-dau-truoc-kiem-sau-r12.md
 prompt_sha256_required: 3f90daab16aaa59a91fbf6cb773250b7ad0b0894a1552261e6bcd1e92589b2b2

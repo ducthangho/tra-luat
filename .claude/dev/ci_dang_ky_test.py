@@ -728,6 +728,8 @@ def _chay_co_lap(argv, cwd=ROOT, goc_tam=None, gioi_han=GIAY_TOI_DA_MOT_BO):
                              stdin=subprocess.DEVNULL, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
                              start_new_session=posix)
         ban_in, _ = p.communicate(timeout=gioi_han)
+        if posix and _pid_song(None, p.pid):  # cha thoát mà con cháu còn chạy ngoài vòng quản lý (review lượt 4)
+            raise ChildProcessError("con cháu còn sống sau khi bộ thoát")
     except Exception as e:  # MỌI lỗi sau khởi chạy đi CHUNG đường dừng: giết cả nhóm, chờ ≤ 10 s, rồi mới dọn
         loi = (f"hết giờ {gioi_han} giây" if isinstance(e, subprocess.TimeoutExpired)
                else f"khởi chạy/chờ thất bại: {type(e).__name__}: {e}")
@@ -780,39 +782,39 @@ def chay_moi(moi=MOI, cach_ly=CACH_LY, chay_mot=_chay_that,
             rc, ban_in, loi = -1, "", f"ngoại lệ worker {type(e).__name__}: {e}"
         return rc, ban_in, loi, bd, dong_ho()
 
-    muc = []
-    with concurrent.futures.ThreadPoolExecutor(max_workers=so_worker) as ex:
-        tuong_lai = [ex.submit(_mot, path) for path, _ in ds]
-        for (path, mau), tl in zip(ds, tuong_lai):
-            rc, ban_in, loi, bd, kt = tl.result()
-            muc.append({"duong_dan": path, "rc": rc, "giay": round((kt - bd).total_seconds(), 3),
-                        "bat_dau_utc": _iso(bd), "ket_thuc_utc": _iso(kt)})
-            print(ban_in, end="")
-            if loi is not None:
-                print(f"CI_DANG_KY {path}: ĐỎ — LỖI HẠ TẦNG: {loi}, rc={rc}")
-                do += 1
-                continue
-            ok = rc == 0 and any(bang_chung_xanh(ban_in, m)
-                                 for m in mau_theo_nen(path, mau, la_windows))
-            if path in cach_ly:
-                no = cach_ly[path]
-                chap_nhan = cach_ly_chap_nhan(ok, no["moi_truong"], hien_tai)
-                nen = hien_tai or "không xác định"
-                if chap_nhan is None and o_trong_ci:
-                    print(f"CI_DANG_KY {path}: ĐỎ — KHÔNG ĐO ĐƯỢC trong CI, môi trường={nen}, "
-                          f"cách ly neo {no['moi_truong']}")
-                elif chap_nhan is None:
-                    print(f"CI_DANG_KY {path}: KHÔNG ĐO ĐƯỢC (ngoài CI) — môi trường={nen}")
-                elif hien_tai != no["moi_truong"]:
-                    print(f"CI_DANG_KY {path}: {'ĐẠT' if ok else 'ĐỎ'} — KHÔNG CÁCH LY trên {nen}, rc={rc}")
-                elif not chap_nhan:
-                    print(f"CI_DANG_KY {path}: ĐỎ — đã xanh, hãy gỡ khỏi cách ly")
-                else:
-                    print(f"CI_DANG_KY {path}: CÁCH LY rc={rc} nợ={no['slug']}")
-                do += dem_la_do(chap_nhan, o_trong_ci)
+    ex, muc = concurrent.futures.ThreadPoolExecutor(max_workers=so_worker), []
+    tuong_lai = [ex.submit(_mot, path) for path, _ in ds]
+    for (path, mau), tl in zip(ds, tuong_lai):
+        rc, ban_in, loi, bd, kt = tl.result()
+        muc.append({"duong_dan": path, "rc": rc, "giay": round((kt - bd).total_seconds(), 3),
+                    "bat_dau_utc": _iso(bd), "ket_thuc_utc": _iso(kt)})
+        print(ban_in, end="")
+        if loi is not None:
+            print(f"CI_DANG_KY {path}: ĐỎ — LỖI HẠ TẦNG: {loi}, rc={rc}")
+            do += 1
+            continue
+        ok = rc == 0 and any(bang_chung_xanh(ban_in, m)
+                             for m in mau_theo_nen(path, mau, la_windows))
+        if path in cach_ly:
+            no = cach_ly[path]
+            chap_nhan = cach_ly_chap_nhan(ok, no["moi_truong"], hien_tai)
+            nen = hien_tai or "không xác định"
+            if chap_nhan is None and o_trong_ci:
+                print(f"CI_DANG_KY {path}: ĐỎ — KHÔNG ĐO ĐƯỢC trong CI, môi trường={nen}, "
+                      f"cách ly neo {no['moi_truong']}")
+            elif chap_nhan is None:
+                print(f"CI_DANG_KY {path}: KHÔNG ĐO ĐƯỢC (ngoài CI) — môi trường={nen}")
+            elif hien_tai != no["moi_truong"]:
+                print(f"CI_DANG_KY {path}: {'ĐẠT' if ok else 'ĐỎ'} — KHÔNG CÁCH LY trên {nen}, rc={rc}")
+            elif not chap_nhan:
+                print(f"CI_DANG_KY {path}: ĐỎ — đã xanh, hãy gỡ khỏi cách ly")
             else:
-                print(f"CI_DANG_KY {path}: {'ĐẠT' if ok else 'ĐỎ'} rc={rc}")
-                do += not ok
+                print(f"CI_DANG_KY {path}: CÁCH LY rc={rc} nợ={no['slug']}")
+            do += dem_la_do(chap_nhan, o_trong_ci)
+        else:
+            print(f"CI_DANG_KY {path}: {'ĐẠT' if ok else 'ĐỎ'} rc={rc}")
+            do += not ok
+    ex.shutdown()
     if bao_cao is not None:
         bao_cao.update(N=so_worker, so_lop_logic=os.cpu_count(), bo=muc, so_lop_dung_duoc=len(os.sched_getaffinity(0))
                        if hasattr(os, "sched_getaffinity") else None)
@@ -848,8 +850,9 @@ def chon_so_worker(trung_vi_theo_N):
 G5_SELFTEST, G5_PROBE, JOB_G5 = "python ops/cong_cu_test.py", "python ops/cong_cu.py kiem-tra --json", ("gate", "gate-registry", "gate-packet-loop")
 G5_THIET_LAP = frozenset({"git config --global core.autocrlf false", "git config --global core.eol lf", "git config --global core.abbrev 7",
                           "python -m pip install --quiet PyYAML==6.0.3 jsonschema==4.26.0", "bash ops/cai_actionlint.sh",
-                          "bash ops/cai_cong_cu.sh shellcheck", "bash ops/cai_cong_cu.sh rg"})
-def _dong_lenh(b): return [x.strip() for x in str(b.get("run", "")).splitlines() if x.strip() and not x.lstrip().startswith("#")]
+                          "bash ops/cai_cong_cu.sh shellcheck", "bash ops/cai_cong_cu.sh rg",
+                          "actions/checkout@v4", "actions/setup-python@v5"})
+def _dong_lenh(b): return [b.get("uses")] * ("uses" in b) + [x.strip() for x in str(b.get("run", "")).splitlines() if x.strip() and not x.lstrip().startswith("#")]
 
 
 def loi_g5_workflow(data):
@@ -864,8 +867,8 @@ def loi_g5_workflow(data):
             loi += [f"{j}: phải có đúng một bước G5 (chỉ ở {JOB_G5}), thấy {len(cham)}"] if cham or j in JOB_G5 else []
         elif _dong_lenh(buoc[cham[0]]) != [G5_PROBE] + [G5_SELFTEST] * (j == "gate"):
             loi.append(f"{j}: bước G5 sai hình dạng: {_dong_lenh(buoc[cham[0]])}")
-        elif "if" in buoc[cham[0]] or "if" in v:
-            loi.append(f"{j}: bước G5 có điều kiện")
+        elif {"if", "continue-on-error"} & (set(buoc[cham[0]]) | set(v)):
+            loi.append(f"{j}: bước G5 có điều kiện hoặc được phép bỏ qua lỗi")
         elif any(not set(_dong_lenh(b)) <= G5_THIET_LAP for b in buoc[:cham[0]]):
             loi.append(f"{j}: có lệnh ngoài danh sách thiết lập đứng trước probe G5")
     return loi
@@ -1481,6 +1484,9 @@ def phan_chung():
             _them("p637-A3c-chau-da-chet", _chau > 0 and not _pid_song(_chau))
             _them("p637-A3c-dung-trong-han", time.monotonic() - _t < 2 + GIAY_CHO_CAY_DUNG + 3)
             _them("p637-A3c-da-don", not any(pathlib.Path(_g).iterdir()))
+            _rc, _bi, _loi = _chay_co_lap([sys.executable, "-c", "import subprocess as s,sys;print(s.Popen([sys.executable,'-c','import time;"
+                                           "time.sleep(60)'],stdout=s.DEVNULL,stderr=s.DEVNULL).pid)"], goc_tam=_g, gioi_han=30)
+            _them("p637-A3c-con-chau-song-sau-khi-bo-thoat-la-do", "còn sống" in (_loi or "") and not _pid_song(int(_bi.split()[0])))
             _rc, _bi, _loi = _chay_co_lap([sys.executable, "-c", "import time;time.sleep(60)"], goc_tam=_g, gioi_han="x")
             _them("p637-A3c-loi-khac-het-gio-van-giet-va-cho", _rc == -signal.SIGKILL and "TypeError" in (_loi or "")
                   and not any(pathlib.Path(_g).iterdir()))
@@ -1505,6 +1511,9 @@ def phan_chung():
     _them("p637-A7-selftest-trong-echo", _hong_wf("gate", lambda b, i: b[i].update(run=b[i]["run"].replace(G5_SELFTEST, f"echo '{G5_SELFTEST}'"))))
     _them("p637-A7-probe-trong-heredoc", _hong_wf("gate-registry", lambda b, i: b[i].update(run=f"cat <<'EOF'\n{G5_PROBE}\nEOF\n")))
     _them("p637-A7-nang-doi-ten-cai-truoc-probe", _hong_wf("gate-registry", lambda b, i: b.insert(i, {"name": "cài registry", "run": "python .claude/dev/ci_dang_ky_test.py --chay"})))
+    _them("p637-A7-uses-truoc-probe", _hong_wf("gate-registry", lambda b, i: b.insert(i, {"uses": "docker://python:3.12", "with": {"args": "scripts/tl.py --selftest"}})))
+    _them("p637-A7-probe-continue-on-error", _hong_wf("gate-registry", lambda b, i: b[i].update({"continue-on-error": True})))
+    _them("p637-A7-job-continue-on-error", bool(loi_g5_workflow({"jobs": {**_wf0["jobs"], "gate": {**_wf0["jobs"]["gate"], "continue-on-error": True}}})))
     _them("p637-A7-nhan-doi-selftest-trong-gate", _hong_wf("gate", lambda b, i: b.insert(i + 1, {"run": G5_SELFTEST})))
     _them("p637-A8-khong-ung-vien", chon_so_worker({1: 100, 2: 101, 4: 102}) is None)
     _them("p637-A8-dung-bien", chon_so_worker({1: 200, 2: 110, 4: 100}) == 2)

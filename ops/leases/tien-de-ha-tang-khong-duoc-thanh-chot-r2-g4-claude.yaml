@@ -1,0 +1,148 @@
+# LEASE - TIEN-DE-HA-TANG-KHONG-DUOC-THANH-CHOT revision 2 / generation 4
+# Goi #593. Executor claude-opus-5-5. Ghi HO theo chi thi chu kho. g4: THEM ci.yml vao write set
+# CHI de nang timeout-minutes cua job gate-registry 60 -> 90. Tep test KHONG doi.
+#
+# DOC KY TRUOC KHI LAM: r2 dong CA LOP tai CHO QUYET DINH NHAN (runner), khong va tung
+# ca. Danh sach the hien DO bang ma tran toan tep nam o dac ta §2.
+
+schema_version: 2
+event: executor_lease_granted
+packet_issue: 593
+packet_id: TIEN-DE-HA-TANG-KHONG-DUOC-THANH-CHOT
+mission_issue: KHONG_CO
+revision: 2
+generation: 4
+lease_id: tien-de-ha-tang-khong-duoc-thanh-chot-r2-g4-claude
+thay_the_cho: tien-de-ha-tang-khong-duoc-thanh-chot-r2-g3-claude
+thay_the_cho_vi_sao: 'Dau HAI CHIEU, CUNG packet_id, CUNG revision. Ban r2-g3 da mang dong
+  `da_bi_thay_the` tro sang lease nay truoc khi lease nay di qua `check`. Generation MOI chi de THEM
+  .github/workflows/ci.yml vao write set theo chi thi chu kho - khong phai khe AG-T0-01B.'
+granted_by: ducthangho
+granted_on_instruction: https://github.com/ducthangho/tra-luat/issues/593#issuecomment-5825322033
+granted_on_instruction_nguyen_van: 'Chu kho, phien Claude Code 2026-09-25 ~01:46Z, chon "Nang timeout
+  (Recommended)" cho su co gate-registry bi cat o tran 60 phut tren PR #629
+  (pull/629#issuecomment-5825306837). Ban chieu: issues/593#issuecomment-5825322033 (do executor dang
+  HO - nguon chat, do ben thap hon comment chu kho tu viet). Truoc do chu kho da noi "cap lease va xu
+  ly luon theo vong lap va".'
+recorded_by: claude-session
+recorder_is_dispatcher: false
+
+NGUON_CAP_VIEC: 'CI gate-registry (job 107895998908, head 5082a00) cancelled o tran timeout-minutes 60.
+  ops/nhanh_don_duoc_test.py chay day du 49 phut (nen 18d42ca: 20 phut); buoc test registry chay tuan
+  tu, nen master 32,5 phut. Loi DO chinh goi nay gay ra, khong phai flake.'
+leased_at_utc: '2026-09-25T01:55:00Z'
+lease_expires_at_utc: '2026-09-26T01:55:00Z'
+role: executor
+provider: anthropic_claude
+executor: claude
+model: claude-opus-5-5
+model_vi_sao: 'Model DANG phuc vu phien thi cong, do bang get_session (session_context.model va
+  last_served_model). r1-g1 khai claude-fable-5-1 nhung phien ke nhiem chay claude-opus-5-5; chu
+  kho da duyet va yeu cau ghi ro su lech. Lease nay khai DUNG model thuc.'
+effort: medium
+effort_vi_sao: 'session_context.effort_level do bang get_session.'
+
+assurance_target: human_audited
+assurance_target_HE_QUA_PHAI_KHAI: 'Packet nay KHONG LAND DUOC BANG MAY. Executor KHONG duoc khai
+  muc nao ho chu kho, va KHONG duoc khai cross_approved.'
+assurance_target_fallback: advisory_review
+
+reviewer_provider: codex
+reviewer_model: gpt-6-astra
+reviewer_effort: low
+reviewer_vi_sao: 'Chu kho chi dinh "codex gpt-6-astra, effort low" (giu tu r1). Executor ho Claude,
+  reviewer ho khac. PHAI doc lai banner de xac nhan model va effort. Chay voi stdin tu /dev/null,
+  khung XAC MINH khong phai khung TAN CONG.'
+
+review_class: sensitive
+effective_review_class: sensitive
+review_class_vi_sao: 'Cham bo phan hang cua bo cham tu kiem (chay_tu_kiem) va moi diem nuot loi.'
+
+spec_ref: ops/specs/tien-de-ha-tang-khong-duoc-thanh-chot-r2.md
+spec_path: ops/specs/tien-de-ha-tang-khong-duoc-thanh-chot-r2.md
+prompt_path: ops/specs/tien-de-ha-tang-khong-duoc-thanh-chot-r2.md
+prompt_sha256_required: ca05fac0da86c8b8a5c10ab58d947dfeb851bec8af621a4f99a45ec56ad08454
+spec_hash: ca05fac0da86c8b8a5c10ab58d947dfeb851bec8af621a4f99a45ec56ad08454
+spec_hash_do_nhu_the_nao: 'sha256sum ops/specs/tien-de-ha-tang-khong-duoc-thanh-chot-r2.md tren
+  nhanh ops/cap-lease-593, 9209 B. Do lai TRUOC khi tin con so nay.'
+
+branch: claude/tien-de-ha-tang-r1
+branch_ownership: exclusive
+branch_vi_sao: 'Giu nhanh cua r1: r2 xay TIEP tren head r1, va nhanh chua co PR.'
+
+start_from_sha: 5082a00c64c62e7a713781c1d7c14426174e46e1
+start_from_sha_vi_sao: 'Head PR #629 luc g3 dung: merge origin/master 601a0f18 vao 35b68ab (reviewed_sha cua
+  human audit pull/629#issuecomment-5824716121, ung vien sua o 5824729671).'
+reviewed_sha_required: 35b68ab870a8ef0e07d3723edaccce0f7c77a9d8
+reviewed_sha_required_note: 'Mo neo SAN luc cap. Ho so audit va cross-review PHAI neo head ung
+  vien THAT.'
+
+write_set:
+- ops/nhanh_don_duoc_test.py
+- .github/workflows/ci.yml
+write_set_HAI_DUONG: 'HAI tep. ops/nhanh_don_duoc_test.py GIU NGUYEN byte (blob 7f576b55...) - no nam
+  trong write set chi de lease KHONG thu hep vung da cap. .github/workflows/ci.yml CHI duoc doi DUNG
+  gia tri timeout-minutes cua job gate-registry (60 -> 90) va dong chu thich ngay tren no; moi dong
+  khac cua ci.yml la ngoai pham vi.'
+TRAN_CI_YML: 'Toi da 6 dong them / 6 dong xoa trong .github/workflows/ci.yml, do bang git diff --numstat
+  5082a00 -- .github/workflows/ci.yml. Cham tran thi DUNG VA BAO.'
+
+TRAN_DONG_THEM: 620
+TRAN_DONG_THEM_vi_sao: 'Chu kho chon (a) "noi tran (de xuat 620)" (truoc do 520 o r2-g2, 450 o r2-g1,
+  300 o r1). Do bang git diff --numstat 18d42ca -- ops/nhanh_don_duoc_test.py (CA goi). O "tran 450"
+  trong bang dau dac ta r2 duoc chi thi nay THAY THE; dac ta khong doi. Vuot ADR-0044:5 la NGOAI LE
+  CUA CHU KHO cho goi nay, khong phai nguong moi. Cham tran thi DUNG VA BAO.'
+CI_PHAM_VI: 'Chu kho chi thi: khong chay lai CI de xem co xanh khong; chay TRON BO suite tai cho
+  moi vong. KHONG can CI Windows (loi Windows da biet, #607/#608).'
+
+cam_tuyet_doi:
+- 'Bo hoac vo hieu hoa mot ca test de lam xanh.'
+- 'Va tung ca thay cho dong tai runner - dac ta §3.'
+- 'Dem mot loi HA TANG vao DO_CHOT, hoac de no lam tron len DAT.'
+- 'Phan loai loi TIEM CO CHU Y theo ten kich ban hay cua so thoi gian thay vi theo DOI TUONG.'
+- 'Chay cross-review ma khong chuyen huong stdin tu /dev/null.'
+- 'Khai cross_approved.'
+- 'Tu cap lease moi, tu mo rong closure, tu noi TRAN_DONG_THEM.'
+- 'Chay lai CI de xem no co xanh khong.'
+- 'Doi bat ky gia tri nao cua ci.yml ngoai timeout-minutes cua gate-registry (vd timeout cua gate, gate-packet-loop).'
+
+khong_duoc_cham:
+- ops/nhanh_don_duoc.py
+- ops/lease_publish.py
+- ops/lease_publish_test.py
+- ops/bien_nhan_v2.py
+- ops/bien_nhan_v2_test.py
+- .claude/dev/packet_loop_test.py
+- .claude/dev/launcher_test.py
+- .claude/dev/launcher.py
+- .claude/dev/packet_loop.py
+- docs/PROTOCOL_DA_PHIEN.md
+- docs/adr/0044-nguong-kich-thuoc-packet-theo-do-luong.md
+- ops/specs/tien-de-ha-tang-khong-duoc-thanh-chot-r1.md
+- ops/specs/tien-de-ha-tang-khong-duoc-thanh-chot-r2.md
+- ops/specs/dau-phien-trung-lam-do-cong-r1.md
+- scripts/tl.py
+- scripts/tl_selftest.py
+- RELEASE_MANIFEST.json
+khong_duoc_cham_vi_sao: 'ops/nhanh_don_duoc_test.py va .github/workflows/ci.yml KHONG nam trong danh sach
+  nay - chung LA write set (ci.yml bi go khoi day o g4, theo chi thi chu kho).'
+
+hinh_dang_ke_thua:
+  LOI-KHAI-RONG-HON-PHEP-DO: 12
+  TIN-HIEU-DO-CHINH-MA-TEST-GIA-MAO: 6
+  VA-DUNG-CHO-DUOC-CHI-ROI-BO-SOT-DUONG-THU-BA: 4
+  CHOT-CAM-THU-DAC-TA-KHONG-DOI: 2
+  BO-TUONG-DUONG-DO-CHINH-EXECUTOR-DUNG: 3
+  VI_SAO_VA_DUNG_LEN_3: 'Vong 3 cua r1 va DUNG danh sach the hien vong 2 chi ra; vong 3 review tim
+    them the hien, va ma tran toan tep cua executor tim them nua (r512 r520 r523 ...). Chu kho da
+    duoc hoi "co nen lam viec nay khong" va tra loi bang chi thi mo r2.'
+  CO_HOI_TAI_PHAT_DA_BIET: 'Neu runner doi nhan ca khi loi tiem CO CHU Y (khong dang ky) thi mot ca
+    sach bi ra KHONG DO DUOC - mot trien khai "moi thu la KDD" se xanh B1/B2 ma lam MU ca bo. Doi
+    chung duong B3 (luot SACH N/N) la cai chan.'
+  VI_SAO_LEN_4_VA_12: 'Vong 4 (r2 luot 1): phep quet cua chinh r2 bo sot duong OSError bi boc trong
+    AssertionError (_dau_hieu_kho_bare qua chay_ca) va duong runner long; dac ta r2 §2 xep
+    _dau_hieu_kho_bare CO DAY DO (sai khi chay long); commit khai "khong co dot bien sach" cho hai
+    duong ma reviewer dung duoc phep giet sach.'
+  VI_SAO_TUONG_DUONG_LEN_3: 'Vong 5: moi doi chung "loi cua minh / loi ngoai" dung HAI THONG DIEP
+    KHAC NHAU, nen doi phep so danh tinh thanh so thong diep van xanh (10/10 dot bien song). Kem:
+    vong 5 tu de ra hoi quy khu trung (F1) - hinh dang "va mot lo mo lo khac".'

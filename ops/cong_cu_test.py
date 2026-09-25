@@ -3073,12 +3073,21 @@ def t33_do_phu_cua_cong_do_duoc_THEO_HINH_DANG():
     kq_td = _do('import subprocess\nsubprocess.run(["%4096s%4096s" % ("", "")])\n')
     bang(isinstance(kq_td, str) and "_VuotNganSach" in kq_td,
          f"(1d) `\"%4096s%4096s\"` phải NÉM `_VuotNganSach` (ngân sách cộng dồn), đo được {kq_td!r}")
-    # (1f) N84 (r23, F5 vòng 17) — biểu thức lồng SÂU hợp lệ (Python 3.12 biên dịch tới ~10.000
-    # tầng) phải QUÉT ĐƯỢC, không ném `RecursionError`. 3000 tầng: gấp ba giới hạn đệ quy mặc định.
-    kq_sau = _do("import subprocess\nx = " + "+".join(["1"] * 3000)
-                 + '\nsubprocess.run(["bash"])\n')
+    # (1f) N84 (r23, F5 vòng 17) — biểu thức lồng SÂU hợp lệ phải QUÉT ĐƯỢC, không ném
+    # `RecursionError`. 2000 tầng: gấp đôi giới hạn đệ quy mặc định, và DƯỚI trần của chính
+    # `ast.parse` trên MỌI bản đã đo — đo được ~2984 trên 3.11, ~9991 trên 3.12. Bản đầu dùng 3000
+    # và đỏ ở NỀN trên 3.11 vì `ast.parse` ném trước khi cổng kịp duyệt; tiền đề dưới đây tách hai
+    # nguyên nhân ấy ra, để chốt không bao giờ đổ cho cổng một giới hạn của trình thông dịch.
+    than_sau = "import subprocess\nx = " + "+".join(["1"] * 2000) + '\nsubprocess.run(["bash"])\n'
+    try:
+        import ast as _ast_tien_de
+        _ast_tien_de.parse(than_sau)
+    except RecursionError:
+        bang(False, "(1f) TIỀN ĐỀ: chính `ast.parse` của trình thông dịch này không dựng nổi cây "
+                    "2000 tầng — đây là giới hạn của Python, không phải của cổng; hạ độ sâu của chốt")
+    kq_sau = _do(than_sau)
     bang(kq_sau == [(3, 0)],
-         f"(1f) biểu thức 3000 tầng phải quét ĐƯỢC và bắt đúng lời gọi, đo được {kq_sau!r}")
+         f"(1f) biểu thức 2000 tầng phải quét ĐƯỢC và bắt đúng lời gọi, đo được {kq_sau!r}")
     # (1g) N83 (r23, F6 vòng 17) — tải `exec` HẰNG không phân tích được ⇒ NÉM (fail-close), không
     # lặng lẽ bỏ qua: cùng sự kiện ở tệp ngoài cho `KHONG_DO_DUOC`.
     kq_hong = _do('exec("import subprocess\\nsubprocess.run([")\n')

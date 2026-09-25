@@ -33,26 +33,30 @@ so_p2: 0
 so_p3: 0
 findings_ids: []
 doi_chieu_luot_truoc:
-- luot: wp461 r2 cross-review lượt 1–4 (PR #471, 2026-09-07)
+- luot: >-
+    wp461 r2 cross-review lượt 1–4 (PR #471, 2026-09-07)
   phan: các lớp r2 (uy-quyen-khong-co-neo-ben ×2, lease-thieu-truong-dieu-phoi, bo-loc-va-cham-thieu-ref)
     thuộc HỒ SƠ lease/spec r2, không phải mã; r3 kế thừa ở spec §7 và neo lease g3 vào comment đóng băng
     5817701016. Lượt này (mã r3) không mở lớp nào.
-- luot: codex trên PR #616 (hồ sơ lease g3 + spec r3, review 5308350641)
-  phan: 2 P1 + 1 P2 về SPEC/HỒ SƠ (M4 CHANGELOG-manifest xác nhận; tổ tiên d644f197 bác; số Q2 109 xác nhận)
+- luot: >-
+    codex trên PR #616 (hồ sơ lease g3 + spec r3, review 5308350641)
+  phan: >-
+    2 P1 + 1 P2 về SPEC/HỒ SƠ (M4 CHANGELOG-manifest xác nhận; tổ tiên d644f197 bác; số Q2 109 xác nhận)
     — không thuộc lượt review mã này; đã trả lời từng thread; hai khuyết tật spec r3 ghi ở #461.
 luot_2_ngoai_bien_nhan: >-
   Codex lượt 2/2 trên #617 tự bắn khi bỏ draft (17:54:41Z), 9 giây trước khi chủ kho merge (17:54:50Z);
   bảng tóm tắt 5819108895 kẹt 'Running', không có review object, không có kết quả ⇒ KHÔNG ĐO ĐƯỢC, không
   có biên nhận riêng.
 verdict_path: ops/reviews/wp461-review-1-codex-verdict.md
-verdict_sha256: 7e9784677b4ee038ee7fa7f72754b7c33695d1cc9db91f80543bff4be17a2df6
-verdict_bytes: 598
-evidence_url: https://github.com/ducthangho/tra-luat/blob/c83febe8c0d6dfff9f9f90958cb5860cd375c79f/ops/reviews/wp461-review-1-codex-verdict.md
+verdict_sha256: 2276547ec77b74618c5e548ce3efeb3661fd90e59e847d187a3691f4c632cb8d
+verdict_bytes: 609
+evidence_url: https://github.com/ducthangho/tra-luat/blob/ef72264cb268643a89df3e15cf6cb840da92307b/ops/reviews/wp461-review-1-codex-verdict.md
 model_reviewer_identity:
   provider: openai_codex
   surface: codex_service
   transport: machine
-  surface_nghia: GitHub App `chatgpt-codex-connector[bot]` review trên PR — bề mặt `codex_service` theo
+  surface_nghia: >-
+    GitHub App `chatgpt-codex-connector[bot]` review trên PR — bề mặt `codex_service` theo
     hợp đồng dữ liệu mà CHÍNH lượt review này chấm (#617 land ở master 6980e5bf, Mission #470 Q1)
   model_yeu_cau: KHONG_DO_DUOC
   effort_yeu_cau: KHONG_DO_DUOC
@@ -89,11 +93,11 @@ comment_delivery:
   readback_byte_equal: true
   readback_ghi_chu: Đọc lại qua REST 2026-09-24T18:5xZ, 609 B, sha256 2276547e… khớp con số chủ kho ghi ở chỉ thị 5820263820.
 format_reissue:
-  raw_original_sha256: 2276547ec77b74618c5e548ce3efeb3661fd90e59e847d187a3691f4c632cb8d
-  raw_original_bytes: 609
-  transform: bỏ khoảng trắng cuối 1 dòng (dòng trắng trước `</details>`) và chuẩn một LF cuối tệp;
-    Unicode/nội dung giữ nguyên; không lượt review mới
-  raw_original_comment: https://github.com/ducthangho/tra-luat/pull/617#issuecomment-5819108011
+  khong_bien_doi: true
+  ghi_chu: >-
+    Tep verdict la NGUYEN BYTE body UTF-8 cua comment (readback qua REST), ke ca dong trang co khoang trang
+    truoc </details> va ket thuc goc — §8 dong 456-462 (khong bo newline, khong chuan hoa). Ban truoc
+    (LF, bo khoang trang cuoi) da bi thay the theo cross-review thread 4099651082; verdict_sha256 = hash raw.
 budget:
   codex_review_calls_used_on_pr617: 2
   codex_review_calls_cap: 2

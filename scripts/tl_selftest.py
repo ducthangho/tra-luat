@@ -25371,7 +25371,8 @@ def run() -> int:
 
         PHẠM VI, KHAI CHO ĐÚNG — và r2 đã khai quá rộng đúng chỗ này: ma trận bảo đảm cho
         MIỀN ĐÃ LIỆT KÊ dưới đây (11 lớp × 7 dạng đối số × 3 trạng thái oracle, 79 ô), KHÔNG cho
-        "mọi cài đặt sai có thể viết bằng Python". Một `m17` theo một chiều chưa ai nêu vẫn
+        mọi cài đặt sai có thể viết bằng Python (cách nói của đặc tả r3 §8.4 — KHÔNG phải lời
+        của r2; lời r2 là câu dòng 67 trích ở trên). Một `m17` theo một chiều chưa ai nêu vẫn
         có thể tồn tại; `A11` đòi bằng chứng cho các chiều ĐÃ BIẾT, không đòi bằng chứng phủ
         định về những chiều chưa biết.
         """

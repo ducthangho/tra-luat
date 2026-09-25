@@ -10,11 +10,12 @@ generation_reviewed: 16
 luot: 1
 lease_ung_vien: quy-trinh-lap-review-r15-g16-claude
 lease_ghi_bien_nhan_ban_dau: quy-trinh-lap-review-r15-g17-claude
-lease_ghi_bien_nhan: quy-trinh-lap-review-r15-g18-claude
+lease_ghi_bien_nhan: quy-trinh-lap-review-r15-g19-claude
 lease_ghi_bien_nhan_ghi_chu: >-
   Ban dau (verdict LF/bo khoang trang, receipt v1 cua PR) ghi duoi quy-trinh-lap-review-r15-g17-claude; ban HIEN HANH (verdict nguyen byte,
   cac truong sua theo cross-review) ghi duoi quy-trinh-lap-review-r15-g18-claude — cross-review thread 4099876847. Ca hai generation deu neo
-  chi thi chu kho; lich su commit giu nguyen.
+  chi thi chu kho; lich su commit giu nguyen. g19 (quy-trinh-lap-review-r15-g19-claude, neo uy quyen chung
+  issues/523#issuecomment-5825373202) chi them readback_lan_3 va sinh lai lich_su_ban_ung_vien tu git log.
 lease_reviewer: KHONG_CO — reviewer là GitHub App `chatgpt-codex-connector[bot]`, không có lease
   reviewer; lượt gọi là issue comment `@codex review` của executor (pull/613#issuecomment-5811858888)
 reviewed_sha: 92adc7112155a6711ec2c86d59ce60293b342314
@@ -214,6 +215,95 @@ comment_delivery:
         "user_view_type": "public"
        }
       }
+  readback_lan_3:
+    doc_luc_utc: '2026-09-25T02:47:05Z'
+    lenh: "urllib GET https://api.github.com/repos/ducthangho/tra-luat/issues/comments/5812074543 (Accept application/vnd.github+json; token chu kho, KHONG in)"
+    http_status: 200
+    rc_tien_trinh: 0
+    phan_hoi_tho_bytes: 4181
+    phan_hoi_tho_sha256: becb6f9b35dc6392b60e69b515cb8475f48627a5e57e950e3a59c49645681f34
+    phan_hoi_tho_base64: |
+      eyJ1cmwiOiJodHRwczovL2FwaS5naXRodWIuY29tL3JlcG9zL2R1Y3RoYW5naG8vdHJhLWx1YXQv
+      aXNzdWVzL2NvbW1lbnRzLzU4MTIwNzQ1NDMiLCJodG1sX3VybCI6Imh0dHBzOi8vZ2l0aHViLmNv
+      bS9kdWN0aGFuZ2hvL3RyYS1sdWF0L3B1bGwvNjEzI2lzc3VlY29tbWVudC01ODEyMDc0NTQzIiwi
+      aXNzdWVfdXJsIjoiaHR0cHM6Ly9hcGkuZ2l0aHViLmNvbS9yZXBvcy9kdWN0aGFuZ2hvL3RyYS1s
+      dWF0L2lzc3Vlcy82MTMiLCJpZCI6NTgxMjA3NDU0Mywibm9kZV9pZCI6IklDX2t3RE9UTmVSamM4
+      QUFBQUJXbTA0THciLCJ1c2VyIjp7ImxvZ2luIjoiY2hhdGdwdC1jb2RleC1jb25uZWN0b3JbYm90
+      XSIsImlkIjoxOTkxNzU0MjIsIm5vZGVfaWQiOiJCT1Rfa2dET0M5OHNfZyIsImF2YXRhcl91cmwi
+      OiJodHRwczovL2F2YXRhcnMuZ2l0aHVidXNlcmNvbnRlbnQuY29tL2luLzExNDQ5OTU/dj00Iiwi
+      Z3JhdmF0YXJfaWQiOiIiLCJ1cmwiOiJodHRwczovL2FwaS5naXRodWIuY29tL3VzZXJzL2NoYXRn
+      cHQtY29kZXgtY29ubmVjdG9yJTVCYm90JTVEIiwiaHRtbF91cmwiOiJodHRwczovL2dpdGh1Yi5j
+      b20vYXBwcy9jaGF0Z3B0LWNvZGV4LWNvbm5lY3RvciIsImZvbGxvd2Vyc191cmwiOiJodHRwczov
+      L2FwaS5naXRodWIuY29tL3VzZXJzL2NoYXRncHQtY29kZXgtY29ubmVjdG9yJTVCYm90JTVEL2Zv
+      bGxvd2VycyIsImZvbGxvd2luZ191cmwiOiJodHRwczovL2FwaS5naXRodWIuY29tL3VzZXJzL2No
+      YXRncHQtY29kZXgtY29ubmVjdG9yJTVCYm90JTVEL2ZvbGxvd2luZ3svb3RoZXJfdXNlcn0iLCJn
+      aXN0c191cmwiOiJodHRwczovL2FwaS5naXRodWIuY29tL3VzZXJzL2NoYXRncHQtY29kZXgtY29u
+      bmVjdG9yJTVCYm90JTVEL2dpc3Rzey9naXN0X2lkfSIsInN0YXJyZWRfdXJsIjoiaHR0cHM6Ly9h
+      cGkuZ2l0aHViLmNvbS91c2Vycy9jaGF0Z3B0LWNvZGV4LWNvbm5lY3RvciU1QmJvdCU1RC9zdGFy
+      cmVkey9vd25lcn17L3JlcG99Iiwic3Vic2NyaXB0aW9uc191cmwiOiJodHRwczovL2FwaS5naXRo
+      dWIuY29tL3VzZXJzL2NoYXRncHQtY29kZXgtY29ubmVjdG9yJTVCYm90JTVEL3N1YnNjcmlwdGlv
+      bnMiLCJvcmdhbml6YXRpb25zX3VybCI6Imh0dHBzOi8vYXBpLmdpdGh1Yi5jb20vdXNlcnMvY2hh
+      dGdwdC1jb2RleC1jb25uZWN0b3IlNUJib3QlNUQvb3JncyIsInJlcG9zX3VybCI6Imh0dHBzOi8v
+      YXBpLmdpdGh1Yi5jb20vdXNlcnMvY2hhdGdwdC1jb2RleC1jb25uZWN0b3IlNUJib3QlNUQvcmVw
+      b3MiLCJldmVudHNfdXJsIjoiaHR0cHM6Ly9hcGkuZ2l0aHViLmNvbS91c2Vycy9jaGF0Z3B0LWNv
+      ZGV4LWNvbm5lY3RvciU1QmJvdCU1RC9ldmVudHN7L3ByaXZhY3l9IiwicmVjZWl2ZWRfZXZlbnRz
+      X3VybCI6Imh0dHBzOi8vYXBpLmdpdGh1Yi5jb20vdXNlcnMvY2hhdGdwdC1jb2RleC1jb25uZWN0
+      b3IlNUJib3QlNUQvcmVjZWl2ZWRfZXZlbnRzIiwidHlwZSI6IkJvdCIsInVzZXJfdmlld190eXBl
+      IjoicHVibGljIiwic2l0ZV9hZG1pbiI6ZmFsc2V9LCJjcmVhdGVkX2F0IjoiMjAyNi0wOS0yNFQx
+      MDowNjo0NloiLCJ1cGRhdGVkX2F0IjoiMjAyNi0wOS0yNFQxMDowNjo0NloiLCJhdXRob3JfYXNz
+      b2NpYXRpb24iOiJOT05FIiwiYm9keSI6IkNvZGV4IFJldmlldzogRGlkbid0IGZpbmQgYW55IG1h
+      am9yIGlzc3Vlcy4gQ2hlZidzIGtpc3MuXG5cbioqUmV2aWV3ZWQgY29tbWl0OioqIGA5MmFkYzcx
+      MTIxYFxuXG48ZGV0YWlscz4gPHN1bW1hcnk+4oS577iPIEFib3V0IENvZGV4IGluIEdpdEh1Yjwv
+      c3VtbWFyeT5cbjxici8+XG5cbltZb3VyIHRlYW0gaGFzIHNldCB1cCBDb2RleCB0byByZXZpZXcg
+      cHVsbCByZXF1ZXN0cyBpbiB0aGlzIHJlcG9dKGh0dHBzOi8vY2hhdGdwdC5jb20vY29kZXgvY2xv
+      dWQvc2V0dGluZ3MvZ2VuZXJhbCkuIFJldmlld3MgYXJlIHRyaWdnZXJlZCB3aGVuIHlvdVxuLSBP
+      cGVuIGEgcHVsbCByZXF1ZXN0IGZvciByZXZpZXdcbi0gTWFyayBhIGRyYWZ0IGFzIHJlYWR5XG4t
+      IENvbW1lbnQgXCJAY29kZXggcmV2aWV3XCIuXG5cbklmIENvZGV4IGhhcyBzdWdnZXN0aW9ucywg
+      aXQgd2lsbCBjb21tZW50OyBvdGhlcndpc2UgaXQgd2lsbCByZWFjdCB3aXRoIPCfkY0uXG5cblxu
+      XG5cbkNvZGV4IGNhbiBhbHNvIGFuc3dlciBxdWVzdGlvbnMgb3IgdXBkYXRlIHRoZSBQUi4gVHJ5
+      IGNvbW1lbnRpbmcgXCJAY29kZXggYWRkcmVzcyB0aGF0IGZlZWRiYWNrXCIuXG4gICAgICAgICAg
+      ICBcbjwvZGV0YWlscz4iLCJyZWFjdGlvbnMiOnsidXJsIjoiaHR0cHM6Ly9hcGkuZ2l0aHViLmNv
+      bS9yZXBvcy9kdWN0aGFuZ2hvL3RyYS1sdWF0L2lzc3Vlcy9jb21tZW50cy81ODEyMDc0NTQzL3Jl
+      YWN0aW9ucyIsInRvdGFsX2NvdW50IjowLCIrMSI6MCwiLTEiOjAsImxhdWdoIjowLCJob29yYXki
+      OjAsImNvbmZ1c2VkIjowLCJoZWFydCI6MCwicm9ja2V0IjowLCJleWVzIjowfSwicGVyZm9ybWVk
+      X3ZpYV9naXRodWJfYXBwIjp7ImlkIjoxMTQ0OTk1LCJzbHVnIjoiY2hhdGdwdC1jb2RleC1jb25u
+      ZWN0b3IiLCJub2RlX2lkIjoiQV9rd0hPQU9RNkdzNEFFWGlqIiwib3duZXIiOnsibG9naW4iOiJv
+      cGVuYWkiLCJpZCI6MTQ5NTcwODIsIm5vZGVfaWQiOiJNREV5T2s5eVoyRnVhWHBoZEdsdmJqRTBP
+      VFUzTURneSIsImF2YXRhcl91cmwiOiJodHRwczovL2F2YXRhcnMuZ2l0aHVidXNlcmNvbnRlbnQu
+      Y29tL3UvMTQ5NTcwODI/dj00IiwiZ3JhdmF0YXJfaWQiOiIiLCJ1cmwiOiJodHRwczovL2FwaS5n
+      aXRodWIuY29tL3VzZXJzL29wZW5haSIsImh0bWxfdXJsIjoiaHR0cHM6Ly9naXRodWIuY29tL29w
+      ZW5haSIsImZvbGxvd2Vyc191cmwiOiJodHRwczovL2FwaS5naXRodWIuY29tL3VzZXJzL29wZW5h
+      aS9mb2xsb3dlcnMiLCJmb2xsb3dpbmdfdXJsIjoiaHR0cHM6Ly9hcGkuZ2l0aHViLmNvbS91c2Vy
+      cy9vcGVuYWkvZm9sbG93aW5ney9vdGhlcl91c2VyfSIsImdpc3RzX3VybCI6Imh0dHBzOi8vYXBp
+      LmdpdGh1Yi5jb20vdXNlcnMvb3BlbmFpL2dpc3Rzey9naXN0X2lkfSIsInN0YXJyZWRfdXJsIjoi
+      aHR0cHM6Ly9hcGkuZ2l0aHViLmNvbS91c2Vycy9vcGVuYWkvc3RhcnJlZHsvb3duZXJ9ey9yZXBv
+      fSIsInN1YnNjcmlwdGlvbnNfdXJsIjoiaHR0cHM6Ly9hcGkuZ2l0aHViLmNvbS91c2Vycy9vcGVu
+      YWkvc3Vic2NyaXB0aW9ucyIsIm9yZ2FuaXphdGlvbnNfdXJsIjoiaHR0cHM6Ly9hcGkuZ2l0aHVi
+      LmNvbS91c2Vycy9vcGVuYWkvb3JncyIsInJlcG9zX3VybCI6Imh0dHBzOi8vYXBpLmdpdGh1Yi5j
+      b20vdXNlcnMvb3BlbmFpL3JlcG9zIiwiZXZlbnRzX3VybCI6Imh0dHBzOi8vYXBpLmdpdGh1Yi5j
+      b20vdXNlcnMvb3BlbmFpL2V2ZW50c3svcHJpdmFjeX0iLCJyZWNlaXZlZF9ldmVudHNfdXJsIjoi
+      aHR0cHM6Ly9hcGkuZ2l0aHViLmNvbS91c2Vycy9vcGVuYWkvcmVjZWl2ZWRfZXZlbnRzIiwidHlw
+      ZSI6Ik9yZ2FuaXphdGlvbiIsInVzZXJfdmlld190eXBlIjoicHVibGljIiwic2l0ZV9hZG1pbiI6
+      ZmFsc2V9LCJuYW1lIjoiQ2hhdEdQVCBDb2RleCBDb25uZWN0b3IiLCJkZXNjcmlwdGlvbiI6IkJy
+      aW5nIENoYXRHUFQgYW5kIENvZGV4IHRvIHlvdXIgR2l0SHViIHJlcG9zaXRvcmllcy4iLCJleHRl
+      cm5hbF91cmwiOiJodHRwczovL3d3dy5jaGF0Z3B0LmNvbSIsImh0bWxfdXJsIjoiaHR0cHM6Ly9n
+      aXRodWIuY29tL2FwcHMvY2hhdGdwdC1jb2RleC1jb25uZWN0b3IiLCJjcmVhdGVkX2F0IjoiMjAy
+      NS0wMi0xNFQwMTozNzowNVoiLCJ1cGRhdGVkX2F0IjoiMjAyNi0wOS0yM1QxODo1Mjo1OVoiLCJw
+      ZXJtaXNzaW9ucyI6eyJhY3Rpb25zIjoid3JpdGUiLCJjaGVja3MiOiJyZWFkIiwiY29udGVudHMi
+      OiJ3cml0ZSIsImVtYWlscyI6InJlYWQiLCJpc3N1ZXMiOiJ3cml0ZSIsIm1ldGFkYXRhIjoicmVh
+      ZCIsInB1bGxfcmVxdWVzdHMiOiJ3cml0ZSIsInN0YXR1c2VzIjoicmVhZCIsIndvcmtmbG93cyI6
+      IndyaXRlIn0sImV2ZW50cyI6WyJjaGVja19ydW4iLCJjaGVja19zdWl0ZSIsImNvbW1pdF9jb21t
+      ZW50IiwiaXNzdWVzIiwiaXNzdWVfY29tbWVudCIsInB1bGxfcmVxdWVzdCIsInB1bGxfcmVxdWVz
+      dF9yZXZpZXciLCJwdWxsX3JlcXVlc3RfcmV2aWV3X2NvbW1lbnQiLCJwdWxsX3JlcXVlc3RfcmV2
+      aWV3X3RocmVhZCIsInJlcG9zaXRvcnkiLCJzdGF0dXMiLCJzdWJfaXNzdWVzIl19LCJtaW5pbWl6
+      ZWQiOm51bGwsInBpbiI6bnVsbH0=
+    body_sha256_tu_phan_hoi_tho: 568588b08a2a44b22c5b1f5ab2e189105f22eb56188ec9e015f68cb3c0d4c354
+    so_voi_tep_verdict: BANG NHAU tung byte (json.loads(phan_hoi_tho)['body'].encode('utf-8') == bytes tep verdict)
+    ghi_chu: >-
+      Day la BYTE VAN CHUYEN cua phan hoi HTTP, chup bang resp.read() TRUOC json.loads (thread
+      PRRT_kwDOTNeRjc6l1EcK, review 5312180071). readback_lan_2 la ban tai tuan tu hoa (sort_keys/indent) nen
+      KHONG phai raw — giu lai lam lich su, khong xoa. Giai ma: base64 -d, khong chuan hoa xuong dong. Cung
+      hinh dang receipt wp461 (#625, 45de8954). Ghi duoi lease quy-trinh-lap-review-r15-g19-claude.
 format_reissue:
   khong_bien_doi: true
   ghi_chu: >-
@@ -254,3 +344,5 @@ lich_su_ban_ung_vien:
   - {commit: 265528bf5281b72e2b3783787fb7aba7fb8942a1, luc: '2026-09-24T19:24:23+00:00', receipt_sha256: 0325576baabdafca1b285efebaaeb0ba3b058dcb1df0fb9c6242b1157c84be02}
   - {commit: 1dbaf8897d08ebbc91e27f90d6c3a156569eb6f5, luc: '2026-09-25T00:04:49+00:00', receipt_sha256: 835b6c2b956e8708b39b4e69009258e841bb55f0867b3795e11b12c085c9da53}
   - {commit: d68492e17a3c26edf135bfabf46e3dd4f3d6e8b5, luc: '2026-09-25T00:41:12+00:00', receipt_sha256: 2cb825dd8f123d5f853d8b59f8d3661fae0baded8a9506683cb23887d75788c9}
+  - {commit: f9cd880d38d43460a5e3bd1ec82b1ca6b5d5bcce, luc: '2026-09-25T01:14:29+00:00', receipt_sha256: 65e427f53f38187f608d99007c27c5a12aaa2924cded14540e919500c809b539}
+  - {commit: 5d8b2b01102165dfd19c032a26d552b7d1ecfef5, luc: '2026-09-25T01:22:38+00:00', receipt_sha256: ce8bb82a4b6fb49104675db29ed4e64aa685830fe23ec76cf78d1f3c26828193}

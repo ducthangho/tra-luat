@@ -68,11 +68,22 @@ reviewed_sha_required: 45de8954878519d0886942e45c149790aadea710
 reviewed_sha_required_nghia: >-
   Head ung vien dung luc ghi (head PR #625). Moi push moi tren agent/wp461-g7-claude lam review cu het hieu luc; verdict
   phai neo exact head THAT cua PR g7 (40 hex).
+reviewed_sha_required_ghi_chu: >-
+  Gia tri tren la CAN DUOI (continuation base, head PR #625 luc ghi), KHONG phai head phai review. Dich review =
+  exact head cua PR g7 tai luc review (vd 9b35593150d834308d13765bb33cc6fd753ed6c6, roi cac head sau).
 bien_nhan_reviewed_sha_bat_buoc: 5e2851881e810b39ebee6884371e5b3e229a01d7
 
 granted_by: ducthangho
 granted_on_instruction: https://github.com/ducthangho/tra-luat/issues/461#issuecomment-5825489539
 uy_quyen_chung: https://github.com/ducthangho/tra-luat/issues/461#issuecomment-5825376799
+uy_quyen_chung_hieu_luc: >-
+  5825376799 tu khai hieu luc toi khi PR #625 land; quyet dinh 5825489539 bien #625 thanh lich su (dong khi PR g7
+  land). Doc hieu luc = toi khi PR g7 (#633) land hoac chu kho thu hoi; khong coi la vo han. Spec r5 (dong bang)
+  dan ca hai comment, khong sua spec — ghi chu nay la cach doc.
+reviewer_fallback: >-
+  Codex het han muc (02:13Z 25-09). Chi thi chu kho (chat, neo issues/461#issuecomment-5825807476): reviewer =
+  phien Claude moi doc lap, read-only, model claude-fable-5-1; assurance same_provider_approved, KHONG thanh
+  cross_approved; human audit chu kho van la cong bat buoc (assurance_target human_audited).
 granted_on_instruction_da_doc_nguoc: >-
   Doc lai qua API 2026-09-25T02:08:31Z: 5825489539 (OWNER, 2026-09-25T02:05:39Z) va 5825376799 (OWNER, 2026-09-25T01:52:07Z), issue 461.
   Noi dung do phien nay soan, chu kho dan.
@@ -90,6 +101,20 @@ attempts_used: 1
 attempts_limit: 6
 attempts_ghi_chu: >-
   Theo quyet dinh 5825489539: g3 (run san pham) = 1; g4, g5, g6 VOID khoi tran; attempts_limit bookkeeping = 6.
+nang_tran_attempts:
+  tran_cu: 3
+  tran_moi: 6
+  ai_nang: ducthangho
+  can_cu: https://github.com/ducthangho/tra-luat/issues/461#issuecomment-5825489539
+  khi_nao: '2026-09-25T02:05:39Z'
+  tran_cu_nguon: 'PROTOCOL §3.1 max_attempts_per_packet: 3'
+nang_tran:
+  tran_cu: 2
+  tran_moi: 6
+  ai_nang: ducthangho
+  can_cu: https://github.com/ducthangho/tra-luat/issues/461#issuecomment-5825376799
+  khi_nao: '2026-09-25T01:52:07Z'
+  tran_cu_nguon: 'PROTOCOL §12 + ADR-0043 (tran canon 2 luot/PR)'
 tran_codex: >-
   Uy quyen chung 5825376799: toi da 6 luot moi lan nang; luot App tu ban khi bo draft cung dem; dem ghi trong
   receipt/PR, khong dua vao ten nhanh.

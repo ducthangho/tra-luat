@@ -1330,6 +1330,11 @@ def _loi_goi_tran(than: str, sau=0):
         `exec(bien)`, hay `compile(…)` rồi `exec` đối tượng mã (N81 chỉ phủ dạng HẰNG); nạp động
         gán vào đích BỘ (`a, b = __import__(…), 1`) hay qua `:=` TRONG comprehension; `.eval`/
         `.exec` trên một đối tượng không phải `builtins` (`page.eval("…")`);
+      · LỚP ĐÃ KHÉP (r28, quyết định chủ kho): tham số chương trình cấp TRÙNG theo cách N96/N96b chưa
+        nhận (từ khoá tường minh cộng `**{…}`…) ⇒ BÁO THỪA có tên, chỉ trên mã Python vốn từ chối chạy;
+        và chuỗi trong `Literal[…]`/`Annotated[…, …]` (DỮ LIỆU, `get_type_hints` không tính) vẫn được N99
+        quét ⇒ BÁO THỪA CÓ CHỦ ĐÍCH kiểu N76 — phân biệt vị trí tham chiếu tới đòi giải tên `typing`.
+        Cả hai ghim ở `_HINH_DANG_BAO_THAN_TRONG`;
       · argv mà phần tử ĐẦU đến từ BIẾN — `[*xs, "bash"]`, `sys.argv[1:] + ["bash"]` — dù `xs`
         rỗng thì bash chạy thật: đó là luồng dữ liệu, không phải cây cú pháp;
       · LỚP ĐÃ KHÉP (r25, quyết định chủ kho sau khi điều kiện dừng chạm lần BA ở codex vòng 19): mọi
@@ -2238,8 +2243,12 @@ def _giai_callee_theo_pham_vi(cay):
                 chong.extend((x, chuoi, hop, luu, vt, sau_chuoi)
                              for x in (con.target, con.value) if x is not None)
                 continue
-            if luu and isinstance(con, ast.Constant) and isinstance(con.value, str) \
-                    and len(con.value) <= _TRAN_EXEC:
+            if luu and isinstance(con, ast.Constant) and isinstance(con.value, str):
+                if len(con.value) > _TRAN_EXEC:
+                    # N99b (r28, codex vòng 22; chủ kho: fail-close) — chuỗi chú thích QUÁ TRẦN bị bản
+                    # r27 bỏ qua IM LẶNG trong khi `get_type_hints` vẫn tính và phóng bash. Quá trần
+                    # thì NÉM, đúng như tải `exec`.
+                    raise _VuotNganSach(f"chú thích chuỗi dài {len(con.value)} > {_TRAN_EXEC}")
                 try:
                     than_chuoi = ast.parse(con.value, mode="eval").body
                 except (SyntaxError, ValueError):

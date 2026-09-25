@@ -10,12 +10,17 @@ generation_reviewed: 16
 luot: 1
 lease_ung_vien: quy-trinh-lap-review-r15-g16-claude
 lease_ghi_bien_nhan_ban_dau: quy-trinh-lap-review-r15-g17-claude
-lease_ghi_bien_nhan: quy-trinh-lap-review-r15-g19-claude
+lease_ghi_bien_nhan: quy-trinh-lap-review-r15-g20-claude
 lease_ghi_bien_nhan_ghi_chu: >-
   Ban dau (verdict LF/bo khoang trang, receipt v1 cua PR) ghi duoi quy-trinh-lap-review-r15-g17-claude; ban HIEN HANH (verdict nguyen byte,
-  cac truong sua theo cross-review) ghi duoi quy-trinh-lap-review-r15-g18-claude — cross-review thread 4099876847. Ca hai generation deu neo
-  chi thi chu kho; lich su commit giu nguyen. g19 (quy-trinh-lap-review-r15-g19-claude, neo uy quyen chung
-  issues/523#issuecomment-5825373202) chi them readback_lan_3 va sinh lai lich_su_ban_ung_vien tu git log.
+  cac truong sua theo cross-review) ghi duoi quy-trinh-lap-review-r15-g18-claude — theo cung lop thread 4099876847 (tren PR 625 /
+  wp461, ap cho receipt nay; thread cua chinh PR 623 la 4100014483). Ca hai generation deu neo chi thi chu kho;
+  lich su commit giu nguyen. Ba ban ung vien dau (b78c2a01, 97776519, 265528bf) viet trong cua so g17 boi mot
+  phien KHONG giu lease (su co hai writer: issues/523#issuecomment-5824973258); chu kho chap nhan PR 623 va cac
+  generation ke tiep bang issues/523#issuecomment-5820535544. g19 (quy-trinh-lap-review-r15-g19-claude, neo uy quyen chung
+  issues/523#issuecomment-5825373202) chi them readback_lan_3 va sinh lai lich_su_ban_ung_vien tu git log. g20
+  (quy-trinh-lap-review-r15-g20-claude, thay the g19, gom README) sua theo cross-review luot 7
+  (pull/623#issuecomment-5826210424, reviewer claude-fable-5-1 xhigh cung provider).
 lease_reviewer: KHONG_CO — reviewer là GitHub App `chatgpt-codex-connector[bot]`, không có lease
   reviewer; lượt gọi là issue comment `@codex review` của executor (pull/613#issuecomment-5811858888)
 reviewed_sha: 92adc7112155a6711ec2c86d59ce60293b342314
@@ -43,10 +48,12 @@ doi_chieu_luot_truoc:
   phan: r14 lượt 1 để lại 0 finding ⇒ không có slug nào để đối chiếu; r15 chỉ tích hợp hồ sơ r14
     (M-M11) nên không mở lớp mới.
 luot_2_ngoai_bien_nhan: >-
-  Codex lượt 2/2 trên #613 (review 5304344210, 2026-09-24T12:2xZ) chấm commit TỔNG HỢP 76275ebc
-  không có trên server, 1 P1 lớp "gate trên reviewed commit tổng hợp"; đã trả lời ở thread
-  4093538781 với phép đo trên head thật. Không có biên nhận riêng vì đích review không neo được
-  vào OID nào trong kho (KHÔNG ĐO ĐƯỢC), và trần §12 đã 2/2.
+  Codex lượt 2/2 trên PR 613: review 5304344210, submitted_at 2026-09-24T12:23:53Z. Hai mỏ neo, ghi cả hai:
+  (a) đối tượng review do GitHub ghi commit_id = 92adc7112155a6711ec2c86d59ce60293b342314 (= reviewed_sha
+  của biên nhận này), body tự khai 'Reviewed commit: 92adc71121'; (b) finding P1 duy nhất (thread 4093538781)
+  đo trên object tổng hợp 76275ebc của reviewer, không có trên server — KHÔNG ĐO ĐƯỢC trên chính nó; đã trả lời
+  ở thread ấy bằng phép đo trên head thật. Không lập biên nhận riêng vì finding đo trên object không tra được
+  (quyết định chủ kho, audit pull/613#issuecomment-5814227641), và trần §12 đã 2/2.
 verdict_path: ops/reviews/wp523-r15-review-1-codex-verdict.md
 verdict_sha256: 568588b08a2a44b22c5b1f5ab2e189105f22eb56188ec9e015f68cb3c0d4c354
 verdict_bytes: 593
@@ -310,6 +317,9 @@ format_reissue:
     Tep verdict la NGUYEN BYTE body UTF-8 cua comment (readback qua REST), ke ca dong trang co khoang trang
     truoc </details> va ket thuc goc — §8 dong 456-462 (khong bo newline, khong chuan hoa). Ban truoc
     (LF, bo khoang trang cuoi) da bi thay the theo cross-review thread 4099651082; verdict_sha256 = hash raw.
+    Vi vay A5 'git diff --check <base> <head> --' tra rc=2 tren PR nay (trailing whitespace verdict.md dong 19):
+    CO Y theo §8 (giu nguyen byte da giao), khong phai hoi quy; CI khong chay diff --check. Spec ke tiep nen loai
+    ops/reviews/*-verdict.md khoi A5.
 budget:
   codex_review_calls_used_on_pr613: 2
   codex_review_calls_cap: 2
@@ -318,12 +328,20 @@ budget:
     reviewed: 92adc7112155a6711ec2c86d59ce60293b342314
     ket_qua: pull/613#issuecomment-5812074543 — 0 finding (biên nhận này)
   - id: auto (Draft marked ready)
-    reviewed: 76275ebc (commit tổng hợp, không có trên server)
-    ket_qua: review 5304344210 — 1 P1 lớp tổng hợp, KHÔNG ĐO ĐƯỢC trên chính nó
+    reviewed: 92adc7112155a6711ec2c86d59ce60293b342314
+    reviewed_nguon: GitHub review 5304344210 commit_id; body 'Reviewed commit 92adc71121'; submitted_at 2026-09-24T12:23:53Z
+    bang_chung_finding_do_tren: >-
+      76275ebc — object tổng hợp của reviewer, không có trên server (git cat-file: not a valid object);
+      KHÔNG ĐO ĐƯỢC trên chính nó
+    ket_qua: review 5304344210 — 1 P1 (thread 4093538781)
   reviewer_dispatched_ci: 0
-  product_ci_tren_reviewed_sha: gate/gate-packet-loop/thu-hoi/chuan-bi success; gate-registry ĐỎ
-    vô can (nhanh_don_duoc_test rig tạm 'Directory not empty', pull/613#issuecomment-5812420143);
-    head kế 61a39096 6/6 success
+  product_ci_tren_reviewed_sha: >-
+    92adc711 — 7 check-run: chuan-bi, gate, gate-packet-loop, thu-hoi (107581788956) success; gate-registry
+    failure vô can (nhanh_don_duoc_test rig tạm 'Directory not empty', pull/613#issuecomment-5812420143);
+    thu-hoi failure (check-run 107628547502, hậu merge, workflow thu hồi lease, không phải product CI); mo skipped.
+    Head kế 61a39096 — 8 check-run: 6 success (chuan-bi, gate, gate-packet-loop, gate-registry, thu-hoi x2),
+    mo skipped, thu-hoi failure (check-run 107659460897, hậu merge). Đo qua REST commits/SHA/check-runs
+    2026-09-25T03:3xZ theo cross-review lượt 7.
   historical_total_spend: KHONG_DO_DUOC
 land:
   merge_commit: c10487410cc502e96e9dd43639f2ddb6af104922
@@ -346,3 +364,4 @@ lich_su_ban_ung_vien:
   - {commit: d68492e17a3c26edf135bfabf46e3dd4f3d6e8b5, luc: '2026-09-25T00:41:12+00:00', receipt_sha256: 2cb825dd8f123d5f853d8b59f8d3661fae0baded8a9506683cb23887d75788c9}
   - {commit: f9cd880d38d43460a5e3bd1ec82b1ca6b5d5bcce, luc: '2026-09-25T01:14:29+00:00', receipt_sha256: 65e427f53f38187f608d99007c27c5a12aaa2924cded14540e919500c809b539}
   - {commit: 5d8b2b01102165dfd19c032a26d552b7d1ecfef5, luc: '2026-09-25T01:22:38+00:00', receipt_sha256: ce8bb82a4b6fb49104675db29ed4e64aa685830fe23ec76cf78d1f3c26828193}
+  - {commit: f2401165053854973b310fc249bda0b4aec2bb2e, luc: '2026-09-25T02:47:45+00:00', receipt_sha256: bcb0af99230a787fc7b554857a42b45e49300d2efef33b3fb108a6554ad12178}

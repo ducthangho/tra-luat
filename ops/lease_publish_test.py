@@ -8811,6 +8811,20 @@ def t187_chan_doan_phai_ha_ve_CHUOI_THUAN_chu_khong_chi_isinstance():
          f"`main()` phải in đúng một nhóm dòng ĐỎ cho mỗi ca giả, nhận tên {sorted(dong_do)!r}.")
     sai = {ten: dong_do.get(ten) for ten, mong in MONG_DONG.items() if dong_do.get(ten) != [mong]}
     chot(not sai, f"`main()` in SAI nội dung dòng ĐỎ: {sai!r}; mong {MONG_DONG!r}.")
+    # ĐẦU RA TỨC THỜI `!!! do <tên> <lý do>` — cross-review lượt 13 (24-09): chỉ dòng `ĐỎ` cuối
+    # suite được chốt, nên đột biến làm dòng tức thời mất lý do hay mất tên sống 183/183. Dòng
+    # ấy là thứ DUY NHẤT còn lại khi job bị huỷ giữa chừng (M4 lần 2, packet #504). Lỗ này KẾ
+    # THỪA từ master (reviewer đo trên bản sao master: 167/167 với cùng đột biến), không do
+    # packet gây ra — vá ở đây vì bộ chạy nằm trong miền của packet.
+    tuc_thoi = {}
+    for dong in dau_ra.splitlines():
+        if dong.startswith("!!! do "):
+            ten, _, ly = dong[len("!!! do "):].partition(" ")
+            tuc_thoi.setdefault(ten, []).append(ly)
+    sai_tt = {ten: tuc_thoi.get(ten) for ten, mong in MONG_DONG.items()
+              if tuc_thoi.get(ten) != [mong.replace("\n", " ")[:700]]}
+    chot(not sai_tt and sorted(tuc_thoi) == sorted(MONG_DONG),
+         f"`main()` in SAI dòng tức thời `!!! do`: {sai_tt!r}; tên có dòng: {sorted(tuc_thoi)!r}.")
     n_gia = len(ca_gia)
     chot(n_gia == 40 and f"lease_publish: 0/{n_gia} đạt; đã chạy={n_gia}, bỏ qua=0" in dau_ra,
          f"`main()` không in dòng tổng kết `0/{n_gia}` (mong 40 = 5 + HO 6×2 + metaclass 3 "

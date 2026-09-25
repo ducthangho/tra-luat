@@ -1504,6 +1504,7 @@ def phan_chung():
     _them("p637-A7-hai-selftest-mot-run", _hong_wf("gate", lambda b, i: b[i].update(run=b[i]["run"] + "\n" + G5_SELFTEST)))
     _them("p637-A7-nang-truoc-probe-cung-run", _hong_wf("gate-registry", lambda b, i: b[i].update(
         run="python .claude/dev/ci_dang_ky_test.py --chay\n" + b[i]["run"])))
+    _them("p637-A7-comment-truoc-probe-khong-la-nang", not _hong_wf("gate-registry", lambda b, i: b[i].update(run="# x\n" + b[i]["run"])))
     _them("p637-A7-nhan-doi-selftest-trong-gate", _hong_wf("gate", lambda b, i: b.insert(i + 1, {"run": G5_SELFTEST})))
     _them("p637-A8-khong-ung-vien", chon_so_worker({1: 100, 2: 101, 4: 102}) is None)
     _them("p637-A8-dung-bien", chon_so_worker({1: 200, 2: 110, 4: 100}) == 2)

@@ -9077,9 +9077,11 @@ def _mien_mot_chot(nguon: str, dong: int, cot: int, nhat_ky: Path, trong_suot: b
 
     Bản trước thay lời gọi bằng `""` khi `bo_qua_han`, nên phá cả đường SẠCH (`assert … is None`,
     `len(None)`) hoặc đổi luồng (`if … is not None: return`) — và `t191` nhận cái đỏ ấy làm "đã phủ".
-    Nay chốt vẫn CHẠY thật: `raise` thành `_t191_mien(bo_qua_han, lambda: _t191_nem(<ngoại lệ>))`, lời
-    gọi thành `_t191_mien(bo_qua_han, lambda: <lời gọi>)`. `_t191_mien` trả ĐÚNG giá trị thật khi chốt
-    không ném, và CHỈ khi `bo_qua_han` mà chốt ném `Chan` mới nuốt (trả `None`) và GHI vào `nhat_ky`.
+    Nay chốt vẫn CHẠY thật: lời gọi `f(a, k=b)` thành `_t191_mien(bo_qua_han, f, a, k=b)`, `raise E` thành
+    `_t191_nem(bo_qua_han, E)`. Hàm và đối số được TÍNH NGOÀI vùng nuốt, đúng thứ tự cũ, một lần (lượt 19, F1:
+    bản `lambda: f(g())` nuốt cả `Chan` của đối số `g()` rồi ghi phủ cho `f`). `_t191_mien` trả ĐÚNG giá trị
+    thật khi chốt không ném, và CHỈ khi `bo_qua_han` mà CHÍNH lời gọi đích ném `Chan` mới nuốt (trả `None`) và
+    GHI vào `nhat_ky`.
     `trong_suot=True`: ghi rồi ném lại — bản đối chứng phải cho `t190` QUA, nếu không thì chính phép
     bọc đã đổi hành vi và phán quyết là KHÔNG ĐO ĐƯỢC. Chốt có `raise … from …` ⇒ không dựng ⇒ ném."""
     import ast
@@ -9087,10 +9089,6 @@ def _mien_mot_chot(nguon: str, dong: int, cot: int, nhat_ky: Path, trong_suot: b
     def _goi(ten, *doi):
         return ast.Call(func=ast.Name(id=ten, ctx=ast.Load()), args=list(doi), keywords=[])
 
-    def _boc(bieu_thuc):
-        return _goi("_t191_mien", ast.Name(id="bo_qua_han", ctx=ast.Load()),
-                    ast.Lambda(args=ast.arguments(posonlyargs=[], args=[], kwonlyargs=[], kw_defaults=[],
-                                                  defaults=[]), body=bieu_thuc))
 
     class _Mien(ast.NodeTransformer):
         def __init__(self):
@@ -9112,14 +9110,16 @@ def _mien_mot_chot(nguon: str, dong: int, cot: int, nhat_ky: Path, trong_suot: b
                 if node.cause is not None:
                     raise TinHieuChotCa(f"({dong}, {cot}): `raise … from` — KHÔNG dựng được phép miễn trung thành")
                 self.da_doi += 1
-                return ast.Expr(value=_boc(_goi("_t191_nem", node.exc)))
+                return ast.Expr(value=_goi("_t191_nem", ast.Name(id="bo_qua_han", ctx=ast.Load()), node.exc))
             return self.generic_visit(node)
 
         def visit_Call(self, node):
             self.generic_visit(node)
             if self._dich(node):
                 self.da_doi += 1
-                return _boc(node)
+                return ast.Call(func=ast.Name(id="_t191_mien", ctx=ast.Load()),
+                                args=[ast.Name(id="bo_qua_han", ctx=ast.Load()), node.func, *node.args],
+                                keywords=node.keywords)
             return node
 
     t = _Mien()
@@ -9129,18 +9129,26 @@ def _mien_mot_chot(nguon: str, dong: int, cot: int, nhat_ky: Path, trong_suot: b
     return ast.unparse(cay) + f"""
 
 
-def _t191_nem(e):
-    raise e
+def _t191_ghi():
+    with open({str(nhat_ky)!r}, "a", encoding="utf-8") as tep:
+        tep.write("mien\\n")
 
 
-def _t191_mien(bo_qua_han, goi):
+def _t191_nem(bo_qua_han, e, /):
+    if not bo_qua_han or not isinstance(e, Chan):
+        raise e
+    _t191_ghi()
+    if {trong_suot!r}:
+        raise e
+
+
+def _t191_mien(bo_qua_han, ham, /, *doi, **doi_ten):
     if not bo_qua_han:
-        return goi()
+        return ham(*doi, **doi_ten)
     try:
-        return goi()
+        return ham(*doi, **doi_ten)
     except Chan:
-        with open({str(nhat_ky)!r}, "a", encoding="utf-8") as f:
-            f.write("mien\\n")
+        _t191_ghi()
         if {trong_suot!r}:
             raise
         return None
@@ -9212,7 +9220,7 @@ _CHOT_GIA_T191 = {  # tên: đoạn chèn vào kiem(). Lượt 17: sót AnnAssig
     "LEN": "    len([1] if _kiem_gia_t191(lease) is None else None)\n",
     "IF_RETURN": "    if _kiem_gia_t191(lease) is not None:\n        return lease, ''\n",
 }
-_STUB_T191 = ('\n\ndef _kiem_gia_t191(lease):\n    if lease.get("chot_gia_t191"):\n'
+_STUB_T191 = ('\n\ndef _kiem_gia_t191(lease, han=None):\n    if lease.get("chot_gia_t191"):\n'
               '        raise Chan(RC_NOI_DUNG, "chot gia t191")\n    return None\n')
 
 # Hợp đồng PHÂN LOẠI của bộ liệt kê (lượt 18, F2): (tên, đoạn chèn, +ds, +miễn, +đếm thô). Mỗi nhánh
@@ -9228,6 +9236,14 @@ _PHAN_LOAI_T191 = (
     ("async-def-long", "    async def _gia_long():\n        return _kiem_gia_t191(lease)\n", 0, 0, 1),
     ("lambda-long", "    _gia_long = lambda: _kiem_gia_t191(lease)\n", 0, 0, 1),
     ("class-long", "    class _GiaLong:\n        x = _kiem_gia_t191(lease)\n", 0, 0, 1),
+    # lượt 19, F2: `… if … else …` và `while` — thân / else / điều kiện, có và không nhắc `bo_qua_han`
+    ("ifexp-else-mien", "    gia_x = None if bo_qua_han else _kiem_gia_t191(lease)\n", 0, 1, 1),
+    ("ifexp-else-thuong", "    gia_x = None if lease else _kiem_gia_t191(lease)\n", 1, 0, 1),
+    ("ifexp-dieu-kien", "    gia_x = 1 if _kiem_gia_t191(lease) else bo_qua_han\n", 1, 0, 1),
+    ("while-than-mien", "    while not bo_qua_han:\n        _kiem_gia_t191(lease)\n        break\n", 0, 1, 1),
+    ("while-than-thuong", "    while lease:\n        _kiem_gia_t191(lease)\n        break\n", 1, 0, 1),
+    ("while-else-mien", "    while not bo_qua_han:\n        break\n    else:\n        _kiem_gia_t191(lease)\n", 0, 1, 1),
+    ("while-dieu-kien", "    while _kiem_gia_t191(lease):\n        break\n", 1, 0, 1),
 )
 
 
@@ -9249,8 +9265,7 @@ def t191_MOI_chot_cua_kiem_deu_duoc_t190_phu_o_nhanh_DA_DANG():
         nào chạm ⇒ liệt kê +1 và phán quyết phải là `KHONG_CHAM`, không được là `PHU`.
 
     Phạm vi CÒN HỞ (khai cả ở r12): chốt ngoài `kiem()`; chốt bên trong từng hàm `_kiem_*`; lời gọi qua
-    bí danh/thuộc tính; ngoại lệ không phải `Chan`; biểu thức gán `:=` NẰM TRONG đối số của chốt (lambda
-    bọc đổi phạm vi của nó).
+    bí danh/thuộc tính; ngoại lệ không phải `Chan`.
     """
     import ast
     import tempfile
@@ -9296,6 +9311,20 @@ def t191_MOI_chot_cua_kiem_deu_duoc_t190_phu_o_nhanh_DA_DANG():
             kq = _phan_quyet_phu(g, *moi[0], td, f"am{j}")
             chot(kq == "KHONG_CHAM", f"CA ÂM {loai}: phán {kq}, mong KHONG_CHAM — không fixture nào chạm chốt "
                                      f"giả, nên mọi phán quyết khác nghĩa là phép đo không phân biệt.")
+    # Lượt 19, F1: CHỈ lời gọi đích được nuốt. `f(g())`: `g` = `_doc_han` CÓ fixture (hạn hỏng dạng), `f` KHÔNG ⇒
+    # `f` phải KHONG_CHAM (bản cũ: PHU). `g` phải CHAM_KHONG_BAT: fixture chạm nó, nhưng `_doc_han` gốc phía sau
+    # vẫn chặn, nên t190 không phân biệt được — đúng nhãn, không được tính phủ. Dạng vị trí và dạng từ khoá.
+    with tempfile.TemporaryDirectory() as t:
+        td = Path(t)
+        for j, doan in enumerate(('    gia_t191 = _kiem_gia_t191(lease, _doc_han(lease["lease_expires_at_utc"]))\n',
+                                  '    gia_t191 = _kiem_gia_t191(lease, han=_doc_han(lease["lease_expires_at_utc"]))\n')):
+            g = _gia(doan)
+            ds_g, _ = _liet_ke_chot_kiem(g)
+            moi = {ten: (d, c) for (ten, d, c) in ds_g if "gia_t191 =" in g.split("\n")[d - 1]}
+            chot(set(moi) == {"_kiem_gia_t191", "_doc_han"}, f"ĐỐI SỐ LỒNG {j}: liệt kê {moi}")
+            kq = {ten: _phan_quyet_phu(g, *dc, td, f"ds{j}{ten}") for ten, dc in moi.items()}
+            chot(kq == {"_kiem_gia_t191": "KHONG_CHAM", "_doc_han": "CHAM_KHONG_BAT"},
+                 f"ĐỐI SỐ LỒNG {j}: {kq} — Chan của đối số không được ghi phủ cho hàm ngoài")
     print(f"t191: {len(ds)} chốt của kiem() đều PHU ở nhánh đã-có-dấu; miễn sẵn: {mien}; "
           f"phân loại {len(_PHAN_LOAI_T191)} dòng; ca âm {len(_CHOT_GIA_T191)} dạng")
 

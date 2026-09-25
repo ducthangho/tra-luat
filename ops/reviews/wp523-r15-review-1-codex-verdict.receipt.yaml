@@ -9,7 +9,12 @@ revision: 15
 generation_reviewed: 16
 luot: 1
 lease_ung_vien: quy-trinh-lap-review-r15-g16-claude
-lease_ghi_bien_nhan: quy-trinh-lap-review-r15-g17-claude
+lease_ghi_bien_nhan_ban_dau: quy-trinh-lap-review-r15-g17-claude
+lease_ghi_bien_nhan: quy-trinh-lap-review-r15-g18-claude
+lease_ghi_bien_nhan_ghi_chu: >-
+  Ban dau (verdict LF/bo khoang trang, receipt v1 cua PR) ghi duoi quy-trinh-lap-review-r15-g17-claude; ban HIEN HANH (verdict nguyen byte,
+  cac truong sua theo cross-review) ghi duoi quy-trinh-lap-review-r15-g18-claude — cross-review thread 4099876847. Ca hai generation deu neo
+  chi thi chu kho; lich su commit giu nguyen.
 lease_reviewer: KHONG_CO — reviewer là GitHub App `chatgpt-codex-connector[bot]`, không có lease
   reviewer; lượt gọi là issue comment `@codex review` của executor (pull/613#issuecomment-5811858888)
 reviewed_sha: 92adc7112155a6711ec2c86d59ce60293b342314
@@ -73,19 +78,28 @@ github_submitter_identity:
 anchor:
   loai: canonical_ancestry
   cuong_do: >-
-    candidate ancestry only; canonical inclusion pending — commit verdict 358765f7 (evidence_url)
+    candidate ancestry only; canonical inclusion pending — commit verdict b2134a40243e5cb3ea6d64eaf49a4c9f26794cbc (evidence_url)
     chỉ ở tổ tiên PR #623, vào master khi PR land bằng merge commit; riêng reviewed_sha 92adc711 ĐÃ
     canonical qua merge commit c10487410cc502e96e9dd43639f2ddb6af104922 (PR #613)
   gioi_han: >-
     Validator đo tổ tiên trên checkout hiện hành, không chứng minh canonical inclusion của
-    commit evidence_url; kiểm sau land bằng `git merge-base --is-ancestor 358765f7bdf7af5ca9d1b5960744572124e910ab
+    commit evidence_url; kiểm sau land bằng `git merge-base --is-ancestor b2134a40243e5cb3ea6d64eaf49a4c9f26794cbcbdf7af5ca9d1b5960744572124e910ab
     origin/master`. Không chứng minh nội dung review đã đọc gì — connector không xuất bằng chứng đọc.
 comment_delivery:
   url: https://github.com/ducthangho/tra-luat/pull/613#issuecomment-5812074543
   author: chatgpt-codex-connector[bot]
   created_at: '2026-09-24T10:06:46Z'
   readback_byte_equal: true
-  readback_ghi_chu: Đọc lại qua REST 2026-09-24T18:40Z, 593 B, bằng byte với bản lưu lúc 10:09Z.
+  readback_bang_chung:
+    phuong_thuc: GET https://api.github.com/repos/ducthangho/tra-luat/issues/comments/5812074543 (REST, token chu kho)
+    http_status: 200
+    doc_luc_utc: '2026-09-24T18:40:1xZ'
+    body_sha256_nguon: 568588b08a2a44b22c5b1f5ab2e189105f22eb56188ec9e015f68cb3c0d4c354
+    body_sha256_doc_nguoc: 568588b08a2a44b22c5b1f5ab2e189105f22eb56188ec9e015f68cb3c0d4c354
+    body_bytes: 593
+    so_sanh: bytes UTF-8 cua body sau khi giai ma JSON == bytes tep verdict (khong hash chuoi JSON escape)
+    raw_json_luu: KHONG — phan hoi JSON tho khong duoc luu thanh hien vat trong kho (khai thang, thread 4099876842);
+      chi hash body + status + thoi diem duoc ghi o day
 format_reissue:
   khong_bien_doi: true
   ghi_chu: >-

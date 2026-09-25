@@ -1,4 +1,4 @@
-# ĐẶC TẢ — `LAND-DOC-RECEIPT-THU-HOI-C1a1a` — **revision 3**
+# ĐẶC TẢ — `LAND-DOC-RECEIPT-THU-HOI-C1a1a` — **revision 4**
 
 | trường | giá trị |
 |---|---|
@@ -6,7 +6,7 @@
 | `packet_issue` | **CHƯA ĐĂNG**. Đặc tả không cấp việc (soan-spec §5); phải có Issue và lease còn hiệu lực mới được giao |
 | `nguon_cap_viec` | `#499` §C1 · nghĩa vụ S≠C từ `#618`, chuyển sang tại `#499` comment `5819877014` · hợp đồng M9 của spec cha `ops/specs/THU-HOI-LEASE-VA-CAP-LAI.md` d.439–477 · quyết định chủ kho ở §0 |
 | `review_class` | **`sensitive`**. Đây là bộ kiểm mà `land-packets` sẽ dựa vào để chấp nhận land (protocol §8 d.680: *review/land authority*) |
-| `revision` | **3**. Revision 1 (`11a97f47`, sha256 `970fb4c3…`) và revision 2 (`90675fa3`, sha256 `1f998e02…`) là commit cục bộ, chưa đóng băng, chưa công bố. Revision 3 áp **phương pháp mới** sau Review Rescue Checkpoint (§0 vòng 4, §5.0) |
+| `revision` | **4**. Revision 1–3 (`11a97f47` · `90675fa3` · `ee02122b`; sha256 `970fb4c3…` · `1f998e02…` · `c614d350…`) là commit cục bộ, chưa đóng băng, chưa công bố. Revision 4 chuyển **độ phủ** sang hợp đồng triển khai (A0) sau checkpoint lần 2 (§0 vòng 5) |
 | `thay_the_cho` | không có. Bản nháp `LAND-DOC-RECEIPT-THU-HOI-C1a1` (commit cục bộ `21e92702`, sha256 `664bdc0d…`) **chưa từng đóng băng, chưa công bố, chưa lease nào neo**. Bản nháp ấy bị thay vì review lượt 1 đo được nó vượt trần ADR-0044 (§0 vòng 3) |
 
 **GIỚI HẠN LỜI KHAI:** mọi khẳng định trong tệp này chỉ chứng minh được tới đúng phép đo ghi kèm.
@@ -29,6 +29,7 @@ trả lời trong phiên 25-09-2026; phiên agent ghi lại đúng lựa chọn 
 | 3 | C1a1 ước 450–570 dòng > trần 300 | **"Tách: không-git / đồ thị git"** | tệp này = **C1a1a** (không git). **C1a1b** = luật trên đồ thị git |
 | 4 | Checkpoint §12: hết trần 2 lượt codex, và lớp `dot-bien-tuong-duong-hoac-thieu` đã xuất hiện ở 3 lượt review | **"Đổi phương pháp + nâng trần 2→4"** | §5.0 (checklist nguồn chuẩn → nhóm trường phụ thuộc) · khối `nang_tran` ở §9 |
 | 4 | Prototype sau vá chạm đúng 300 dòng | **"Ngoại lệ có phạm vi ≤330"** | A14 |
+| 5 | Checkpoint lần 2: lớp `dot-bien-tuong-duong-hoac-thieu` xuất hiện **lần thứ 4** (codex lượt 3, chín biểu hiện) | **"Chuyển độ phủ sang triển khai"** | A0 (bảng phủ mệnh đề là sản phẩm bắt buộc của executor, codex kiểm trên mã thật) · §5.0 thành hợp đồng phủ · thêm 9 guard đã đo vào A6/A7/A8 · lượt codex 4/4 chỉ hỏi hợp đồng ấy có đóng được lớp ở tầng đặc tả không |
 
 Hai chỉ thị reviewer, như chủ kho gõ trong phiên 25-09-2026 (không có bản trên GitHub), theo thứ tự thời gian:
 *"Do codex đã hết quota, thay cross review bằng same provider reviewer với effort hoặc mô hình ở mức cao hơn"*,
@@ -119,38 +120,40 @@ M1–M6 thuộc `.claude/dev/doc_receipt_thu_hoi.py`. M7 thuộc `…_test.py`. 
 | **M4** | **K3 — danh tính kho.** Lấy từ **tham số**, không từ receipt: `repository == kho`; `kho_canonical == "github.com/" + kho`; `nhanh_mac_dinh == nhanh`; `workflow_ref == kho + "/.github/workflows/ops-thu-hoi-admission.yml@refs/heads/" + nhanh` | review lượt 1, lớp `tieu-chi-mau-thuan-luat-hoac-producer` |
 | **M5** | **K4 — stale.** `S == base_hien_hanh` và `H == head_hien_hanh`. Lệch một trong hai ⇒ đỏ ("receipt stale, chạy lại"). Hợp đồng với caller ghi ở §8 | nghĩa vụ #618 mục 3 |
 | **M6** | **K5 — kết luận bộ kiểm.** `checker_rc == 0` (đã là `int` không `bool` nhờ K2); `ket_luan` thuộc tập đóng `{"TAP_THU_HOI_RONG"}`; `che_do == "chua_kich_hoat"`. Giá trị lạ ⇒ đỏ; mở rộng tập phải qua revision. Khi A1b đổi `che_do`, bộ kiểm này **phải** đỏ tới khi có revision, và đó là chủ ý | producer §1 |
-| **M7** | `.claude/dev/doc_receipt_thu_hoi_test.py`: dựng **fixture dương** từ bảng §1 (38 khoá, giá trị của receipt mẫu, viết thẳng trong test, không đọc artifact), rồi mỗi ca âm là **một biến đổi logic** của fixture ấy. Ca cả nhóm theo checklist §5.0 (A8: nhóm kho ba trường, nhóm nhánh hai trường) và ca phối hợp A11 (K3 + K4) phải liệt kê các trường chúng đổi. Đột biến chạy trên **bản sao tạm** của module (không sửa tệp thật), nạp bằng `importlib` với `sys.dont_write_bytecode = True`. Suite in dòng tổng `doc_receipt_thu_hoi tests: N/N ca QUA · M/M dot bien GIET` | L3 |
+| **M7** | `.claude/dev/doc_receipt_thu_hoi_test.py`: dựng **fixture dương** từ bảng §1 (38 khoá, giá trị của receipt mẫu, viết thẳng trong test, không đọc artifact), rồi mỗi ca âm là **một biến đổi logic** của fixture ấy. Ca cả nhóm theo hợp đồng §5.0 (A8: nhóm kho ba trường, nhóm nhánh hai trường) và ca phối hợp A11 (K3 + K4) phải liệt kê các trường chúng đổi. Đột biến chạy trên **bản sao tạm** của module (không sửa tệp thật), nạp bằng `importlib` với `sys.dont_write_bytecode = True`. Suite in dòng tổng `doc_receipt_thu_hoi tests: N/N ca QUA · M/M dot bien GIET` | L3 |
 | **M8** | Đăng ký `.claude/dev/doc_receipt_thu_hoi_test.py` vào `MOI` của `ci_dang_ky_test.py`. Regex **tự buộc** từng cặp bằng nhau và lớn hơn 0 bằng backreference: `r'^doc_receipt_thu_hoi tests: ([1-9]\d*)/(\1) ca QUA · ([1-9]\d*)/(\3) dot bien GIET$'`. **Không** dựa vào `bang_chung_xanh` để so: hàm ấy (`ci_dang_ky_test.py` d.605–609) chỉ so khi regex có **đúng hai** nhóm, nên với bốn nhóm nó trả `True` mà không so gì (cross-review lượt 1 đo). Không sửa `bang_chung_xanh` dùng chung | `ci_dang_ky_test.py` |
 
 ## 5. `nghiem_thu` — mỗi tiêu chí nêu phép đo làm nó ĐỎ (L3)
 
-### 5.0 Phương pháp chọn phản chứng — checklist nguồn chuẩn (từ revision 3)
+### 5.0 Hợp đồng phủ mệnh đề (revision 4; thay checklist nguồn chuẩn của revision 3)
 
-Ba lượt review liền (same-provider lượt 1, codex lượt 1, codex lượt 2) cùng tìm ra lớp
-`dot-bien-tuong-duong-hoac-thieu`, lần nào cũng ở một chỗ mới: vá đúng ca được chỉ rồi sót ca song song. Theo
-§12, revision 3 đổi **cách chọn** phản chứng thay vì thêm một ca nữa.
+Lớp `dot-bien-tuong-duong-hoac-thieu` đã xuất hiện ở **bốn** lượt review (same-provider lượt 1, codex lượt 1, 2, 3).
+Revision 3 đổi sang checklist theo nguồn chuẩn; codex lượt 3 vẫn tìm ra chín mệnh đề nằm ngoài checklist (hằng ghép
+trong `workflow_ref` và `kho_canonical`, từng vế của quan hệ ba trường C, việc áp predicate kiểu vào từng trường).
+Kết luận của checkpoint lần 2: **một danh sách ca viết sẵn trong đặc tả không đóng được lớp này**, vì danh sách nào
+cũng là thứ người viết đã nghĩ tới. Độ phủ phải được **chứng minh trên mã thật**, bằng một bảng mà reviewer đối chiếu
+ngược với văn bản luật.
 
-**Luật:** mỗi luật so receipt với một **nguồn chuẩn** (tham số caller hoặc hằng trong mã). Với mỗi nguồn chuẩn,
-liệt kê **mọi** trường receipt phụ thuộc nó. Nguồn nào có từ hai trường phụ thuộc trở lên thì phải có đủ ba thứ:
-(i) một ca âm **đơn trường** cho từng trường; (ii) một ca âm **cả nhóm**, đổi mọi trường trong nhóm sang cùng một
-giá trị khác một cách nhất quán, giữ nguyên tham số và mọi trường khác; (iii) một đột biến "lấy nguồn chuẩn từ
-receipt" mà **chỉ** ca cả nhóm giết được. Nguồn chỉ có một trường thì ca đơn trường đã là ca cả nhóm.
+**Hợp đồng.** Mỗi luật M1–M6 được tách thành các **mệnh đề** nguyên tử, gồm đủ năm loại:
+(a) tiền điều kiện parse (M2 a–d);
+(b) ràng buộc một trường với một tham số hoặc hằng, **tách mọi thành phần của chuỗi ghép**, gồm cả phần hằng: tiền tố
+`github.com/` của `kho_canonical`; đường `.github/workflows/ops-thu-hoi-admission.yml`, loại ref `@refs/heads/`, phần
+kho và phần nhánh của `workflow_ref`;
+(c) miền kiểu **và việc áp miền ấy vào từng trường**: mỗi trường trong 38 khoá là một mệnh đề riêng;
+(d) **từng vế** của mỗi quan hệ giữa các trường (ba trường C bằng nhau là ba vế);
+(e) tổng hợp kết quả và CLI (M1).
+Mỗi mệnh đề phải trỏ tới **một ca phân biệt** (receipt làm sai riêng mệnh đề ấy, mọi luật khác vẫn `qua`) và **một
+đột biến** làm sai riêng mệnh đề ấy mà chỉ ca của nó giết được, **hoặc** một giải thích **đã đo** vì sao đột biến ấy
+tương đương. Ngoại lệ duy nhất là loại (c): với mỗi trường, ca âm riêng của trường ấy tự nó là bằng chứng (bỏ áp
+predicate cho trường đó thì đúng ca ấy đỏ), nên không đòi 38 đột biến; chỉ đòi một đột biến cho **mỗi predicate**.
 
-| nguồn chuẩn | trường receipt phụ thuộc | ca đơn trường | ca cả nhóm | đột biến "lấy từ receipt" |
-|---|---|---|---|---|
-| tham số `kho` | `repository` · `kho_canonical` · phần kho của `workflow_ref` | 3 (A8) | đổi cả ba sang `other/repo` (A8) | `kho = receipt["repository"]` |
-| tham số `nhanh` | `nhanh_mac_dinh` · phần nhánh của `workflow_ref` | 2 (A8) | đổi cả hai sang nhánh khác (A8) | `nhanh = receipt["nhanh_mac_dinh"]` |
-| tham số `base_hien_hanh` | `S` | 1 (A9) | = ca đơn | `base = receipt["S"]` |
-| tham số `head_hien_hanh` | `H` | 1 (A9) | = ca đơn | `head = receipt["H"]` |
-| hằng `schema_version == 1` | `schema_version` | `2`, `True` (A5) | = ca đơn | — (hằng, không có nguồn trong receipt) |
-| hằng `event` | `event` | chuỗi lạ (A5b) | = ca đơn | — |
-| hằng `che_do`, tập `ket_luan`, `checker_rc == 0` | ba trường cùng tên | mỗi trường một ca (A10) | — (ba hằng độc lập, không chung nguồn) | — |
-| hằng tập 38 khoá | tập khoá | thiếu từng khoá, thừa một khoá (A4) | — | — |
+**Nhóm theo nguồn của revision 3 vẫn giữ**, như một phần của loại (b): tham số nào có từ hai trường phụ thuộc trở lên
+(`kho`: ba trường; `nhanh`: hai trường) thì ngoài ca đơn trường còn có **ca cả nhóm**, và đột biến "lấy tham số từ
+receipt" chỉ ca cả nhóm giết được.
 
-**Ngoài checklist, khai rõ:** ba trường C (`checkout_commit`, `bo_kiem_da_chay_commit`,
-`workflow_definition_commit`) **không** có nguồn chuẩn trong C1a1a. K2 chỉ đòi ba trường bằng nhau (A7), nên một
-receipt đổi cả ba sang cùng một commit khác **vẫn qua C1a1a**. Chuyện đó là đúng thiết kế: C chỉ đo được bằng git
-(C1a1b, N1/N7). Không được đọc `ok` của C1a1a như bằng chứng về C.
+**Ngoài phạm vi C1a1a, khai rõ:** receipt đổi **cả ba** trường C sang **cùng** một commit khác vẫn qua C1a1a. Đó là
+ca **dương** của giới hạn lát này (C chỉ đo được bằng git, C1a1b N1/N7), không phải khoảng trống. Nhưng ba trường C
+**bất đồng** phải bị bác, theo từng vế (A7).
 
 Mọi ca âm trong bảng giữ fixture dương cho mọi luật **khác** luật đang thử, để lỗi ở luật khác không che ca
 đích (cross-review lượt 2 cảnh báo).
@@ -166,16 +169,17 @@ assertion của nó** (lớp ngoại lệ riêng, kèm tên ca), không vì lỗ
 | **A3** | Byte `0x80` giữa thân ⇒ K1 `do`, không ném ngoại lệ trần | Đột biến bỏ `try` quanh giải mã ⇒ ca ĐỎ vì kiểu ngoại lệ sai |
 | **A4** | Thiếu **từng** khoá trong 38 (lặp đủ 38) ⇒ K1 `do`; thừa một khoá ⇒ K1 `do` | Đột biến đổi phép so tập khít thành `issubset` ⇒ ca "thừa khoá" ĐỎ. Đột biến đổi thành `issuperset` ⇒ ca "thiếu khoá" ĐỎ. Hai đột biến, hai ca đích khác nhau |
 | **A5** | `schema_version = True` ⇒ K1 `do` (vì `True == 1` trong Python); `schema_version = 2` ⇒ K1 `do` | Đột biến dùng `== 1` không kiểm kiểu ⇒ ca `True` ĐỎ. Đột biến bỏ phép so giá trị ⇒ ca `2` ĐỎ |
-| **A5b** | `event = "thu_hoi_admission_receipt_v2"` ⇒ K1 `do` | Đột biến bỏ phép so `event` ⇒ ca ĐỎ. (Revision 2 có luật M2(g) mà **không** có ca nào; checklist §5.0 bắt được) |
-| **A6** | Mỗi nhóm kiểu của M3 có ít nhất một ca âm: hex 39 ký tự, hex HOA, `int` là `bool`, `job_id = null`, `thoi_diem_utc` thiếu `Z`, `descriptor_q13_ghim` là hex 63 | Mỗi ca có **một** đột biến nới đúng phép kiểm của nhóm ấy ⇒ đúng ca ấy ĐỎ |
-| **A7** | Ba trường C lệch nhau (`bo_kiem_da_chay_commit` khác hai trường kia) ⇒ K2 `do` | Đột biến bỏ phép so bằng nhau ⇒ ca ĐỎ |
-| **A8** | K3 theo §5.0: **năm ca đơn trường** (`repository`, `kho_canonical`, phần kho của `workflow_ref`, `nhanh_mac_dinh`, phần nhánh của `workflow_ref`), **ca cả nhóm kho** (đổi `repository`, `kho_canonical`, phần kho của `workflow_ref` sang `other/repo`), **ca cả nhóm nhánh** (đổi `nhanh_mac_dinh` và phần nhánh của `workflow_ref` sang nhánh khác). Mọi ca giữ nguyên tham số caller, S, H và các trường khác | Đột biến `kho = receipt["repository"]` ⇒ **ca cả nhóm kho** ĐỎ (năm ca đơn trường không giết được nó: cross-review lượt 2 đo được 85/85 · 30/30 vẫn xanh với đột biến này trên revision 2). Đột biến `nhanh = receipt["nhanh_mac_dinh"]` ⇒ **ca cả nhóm nhánh** ĐỎ. Đột biến bỏ phép so `workflow_ref` ⇒ ca đơn trường `workflow_ref` ĐỎ |
+| **A5b** | `event = "thu_hoi_admission_receipt_v2"` ⇒ K1 `do` | Đột biến bỏ phép so `event` ⇒ ca ĐỎ. (Revision 2 có luật M2(g) mà **không** có ca nào; checklist của revision 3 bắt được) |
+| **A6** | **Mỗi trường** trong 38 khoá có ít nhất một ca âm **riêng** với giá trị sai miền của nhóm nó (bảng trường → nhóm viết **trong test**, độc lập với hằng của module): hex 39 ký tự, hex HOA, `int` là `bool`, `job_id = null`, `thoi_diem_utc` thiếu `Z`, `descriptor_q13_ghim` hex 63, `dict` thay bằng `list` và ngược lại, v.v. Trường mà K1 đã chặn trước (`schema_version`, `event`) ghi rõ là K1 chặn, không tính làm bằng chứng K2 | Mỗi **predicate** có một đột biến nới nó ⇒ các ca của predicate ấy ĐỎ. Bỏ áp predicate cho một trường bất kỳ ⇒ ca riêng của trường ấy ĐỎ (codex lượt 3 đo: bỏ áp cho `tree_S`, `run_id`, `ngan_sach`, `thu_hoi_moi` đều sống trên suite revision 3) |
+| **A7** | Ba ca, mỗi ca lệch **đúng một** trường C (`checkout_commit`, rồi `bo_kiem_da_chay_commit`, rồi `workflow_definition_commit`) sang một hex40 hợp lệ khác ⇒ K2 `do`. Ca dương: cả ba cùng đổi sang một commit khác ⇒ K2 `qua` (giới hạn §5.0) | Ba đột biến, mỗi đột biến bỏ **một vế** của quan hệ ⇒ đúng ca của vế ấy ĐỎ (codex lượt 3 đo: bỏ vế đầu hoặc vế cuối đều sống trên suite revision 3) |
+| **A8** | K3 theo §5.0: **năm ca đơn trường** (`repository`, `kho_canonical`, phần kho của `workflow_ref`, `nhanh_mac_dinh`, phần nhánh của `workflow_ref`), **ca cả nhóm kho** (đổi `repository`, `kho_canonical`, phần kho của `workflow_ref` sang `other/repo`), **ca cả nhóm nhánh** (đổi `nhanh_mac_dinh` và phần nhánh của `workflow_ref` sang nhánh khác), và **ba ca thành phần hằng**: `kho_canonical` đổi tiền tố host (`evil.example/ducthangho/tra-luat`); `workflow_ref` đổi đường workflow (`…/untrusted.yml@…`); `workflow_ref` đổi loại ref (`@refs/tags/`). Mọi ca giữ nguyên tham số caller, S, H và các trường khác | Đột biến `kho = receipt["repository"]` ⇒ **ca cả nhóm kho** ĐỎ (năm ca đơn trường không giết được nó: cross-review lượt 2 đo được 85/85 · 30/30 vẫn xanh với đột biến này trên revision 2). Đột biến `nhanh = receipt["nhanh_mac_dinh"]` ⇒ **ca cả nhóm nhánh** ĐỎ. Đột biến bỏ phép so `workflow_ref` ⇒ ca đơn trường `workflow_ref` ĐỎ. Ba đột biến nới từng thành phần hằng (chỉ giữ hậu tố `/<kho>` cho host; bỏ ràng buộc đường; cho phép `@refs/tags/`) ⇒ đúng ca thành phần ấy ĐỎ (codex lượt 3 đo: cả ba sống trên suite revision 3, và receipt tương ứng cho `ok=true`) |
 | **A9** | K4 theo §5.0: `base_hien_hanh ≠ S` ⇒ `do`; `head_hien_hanh ≠ H` ⇒ `do` | Đột biến bỏ từng vế ⇒ đúng ca của vế ấy ĐỎ. Đột biến `base = receipt["S"]` ⇒ ca `base` ĐỎ; `head = receipt["H"]` ⇒ ca `head` ĐỎ |
 | **A10** | K5: `checker_rc = 1` ⇒ `do`; `ket_luan` lạ ⇒ `do`; `che_do = "da_kich_hoat"` ⇒ `do` | Đột biến bỏ từng vế ⇒ đúng ca ĐỎ |
 | **A11** | Mọi luật được ghi trạng thái: ca đỏ đồng thời K3 và K4 ⇒ `luat` có **cả hai** `do` | Đột biến "dừng ở luật đỏ đầu tiên" ⇒ ca ĐỎ |
 | **A12** | CLI: rc 0 / 12 / 2 đúng như M1; tệp không tồn tại ⇒ 2; `--base` 39 ký tự ⇒ 2 | Đọc `rc` trực tiếp từ `subprocess.run`, không qua pipe |
 | **A13** | Suite in **N/N và M/M, mỗi cặp hai số bằng nhau**; `ci_dang_ky_test.py --chay` nhận tệp mới, rc 0. Trong suite, gọi `chay_moi` (hoặc `bang_chung_xanh`) với **đúng regex đăng ký** và runner giả rc 0: dòng dương được nhận; lệch riêng cặp ca, lệch riêng cặp đột biến, cả hai lệch, và `0/0` đều bị bác | Xoá dòng đăng ký ⇒ `ci_dang_ky_test.py` ĐỎ. Đột biến thay `(\1)` hoặc `(\3)` bằng `(\d+)` ⇒ đúng ca lệch của cặp ấy ĐỎ |
 | **A14** | `git diff --numstat origin/master..<head>` chạm **đúng ba** đường của write set, và **tổng dòng thêm ≤ 330** theo **ngoại lệ có phạm vi** của ADR-0044 (chủ kho, §0 vòng 4: ≤ 3 tệp, ≤ 330 dòng thêm, chỉ cho C1a1a; trần gốc lớp `sensitive` là 300) | Vượt 330 ⇒ executor **DỪNG** và hỏi chủ kho. PR phải ghi số numstat thật và gọi đúng tên là *ngoại lệ*, không viết "ADR-0044 ĐẠT" |
+| **A0** | Executor nộp **bảng phủ mệnh đề** theo hợp đồng §5.0, là tệp docstring đầu `.claude/dev/doc_receipt_thu_hoi_test.py` hoặc bảng dữ liệu trong test (không thêm đường thứ tư vào write set). Bảng lập **từ văn bản luật M1–M6 của đặc tả**, không sinh từ danh sách ca đã có. Mỗi dòng: mệnh đề · tên ca · tên đột biến (hoặc giải thích tương đương đã đo) | Cross-review của PR thi công đối chiếu ngược: mỗi câu trong M1–M6 phải có dòng trong bảng; mỗi dòng phải có ca và đột biến chạy thật. Mệnh đề thiếu dòng, hoặc đột biến mà suite không giết, là **finding chặn merge**. Suite phải in số mệnh đề đã phủ, dạng `P/P menh de` hai số bằng nhau |
 | **A15** | `python3 .claude/dev/packet_loop.py doctrine-scan --root .` rc 0; `adr-song` rc 0 | rc đọc trực tiếp |
 
 **Không tiêu chí nào được đóng bằng `rc=0` trơn.** Mỗi tiêu chí đòi bằng chứng dương: hai số bằng nhau,
@@ -210,7 +214,11 @@ C1b đo và nối đủ. Không nơi nào được quảng bá `ok` của C1a1a 
 
 ## 7. `chua_do_duoc`
 
-1. **Số dòng thêm.** Cross-review codex lượt 2 (04:40–04:48Z) đo prototype theo revision 2: **+297**; thêm ca cả nhóm
+1. **Số dòng thêm.** Cross-review codex lượt 3 (04:55Z–05:02Z) đo prototype theo revision 3: **+307**; thêm chín guard
+   của finding lượt 3: **+325** (module 89, test 235, đăng ký 1). Revision 4 còn đòi ca riêng cho **từng** trường (A6)
+   và bảng phủ (A0). Viết bằng bảng dữ liệu thì ước thêm ~10–25 dòng, tức **có thể vượt 330**. Chốt A14 giữ nguyên:
+   vượt thì dừng và hỏi chủ kho, **không** được cắt ca để vừa trần.
+   Trước đó, cross-review codex lượt 2 (04:40–04:48Z) đo prototype theo revision 2: **+297**; thêm ca cả nhóm
    kho và đột biến của nó: **+300** (module 89, test 210, đăng ký 1). Revision 3 còn thêm ca `schema_version = 2`,
    A5b và hai đột biến `base/head` lấy từ receipt, nên dự kiến vượt 300 vài dòng: đó là lý do chủ kho cấp
    ngoại lệ ≤ 330 (A14). Trước đó, cross-review codex lượt 1 viết prototype và đo bằng `git diff --no-index --numstat`
@@ -267,6 +275,11 @@ không kiểm được nguồn của hai tham số ấy — nó chỉ kiểm rec
     tran_moi: 4
     da_dung_truoc_khi_nang: 2   # run 0ef2c936 (lượt 1), a0fb6806 (lượt 2)
   ```
+
+  Đã dùng 3/4 (lượt 3: run `2452e13b`). Lượt 4 là lượt **cuối** cho đặc tả này. Nếu lượt 4 còn P1/P2/P3, không vá tiếp
+  theo finding: quay lại chủ kho.
+- Cross-review của **PR thi công** là một trục khác (lời gọi riêng của PR ấy), và có nhiệm vụ bắt buộc: kiểm bảng phủ A0
+  trên mã thật.
 - Lượt review same-provider trên bản nháp C1a1 (trước khi codex hoạt động lại) được giữ làm **lịch sử**, không
   tính là approval. Protocol §8 d.652: `same_provider_approved` không thay được `cross_approved` cho lớp
   `sensitive`.
@@ -281,3 +294,4 @@ không kiểm được nguồn của hai tham số ấy — nó chỉ kiểm rec
 | 1 (same-provider) | Claude cùng provider, model cao hơn | bản nháp C1a1 `21e92702` | request_changes | 0 | 6 | 2 | dẫn tới tách C1a1a/C1a1b (§0 vòng 3) |
 | 1 (codex) | `gpt-6-astra` effort `high`, run `0ef2c936`, 04:21:43–04:36:05Z | revision 1 `11a97f47` | request_changes | 0 | 2 | 1 | `dot-bien-tuong-duong-hoac-thieu` (đường parse, đột biến BOM) · `loi-khai-rong-hon-phep-do` (regex bốn nhóm không được so) · `mau-thuan-noi-tai-va-so-thieu-don-vi-thoi-diem` (giờ giữ chỗ, ca phối hợp A8). Revision 2 vá cả ba ở M1, M2, M7, M8, A2, A8, A13, §1, §6, §7, §9 |
 | 2 (codex) | `gpt-6-astra` effort `high`, run `a0fb6806`, 04:38:04–04:49:04Z | revision 2 `90675fa3` | request_changes | 0 | 1 | 0 | Hai lớp của lượt 1 đã vá thật. Còn `dot-bien-tuong-duong-hoac-thieu`: thiếu ca cả nhóm **kho** (đột biến `kho = receipt["repository"]` sống, nhận receipt kho khác với `ok=true`). Lớp này đã ở 3 lượt ⇒ Review Rescue Checkpoint. Revision 3 đổi phương pháp (§5.0) và rà toàn đặc tả theo checklist; bắt thêm A5b (`event` không có ca) và hai đột biến `base/head` lấy từ receipt |
+| 3 (codex) | `gpt-6-astra` effort `high`, run `2452e13b`, 04:52:51–05:02:33Z | revision 3 `ee02122b` | request_changes | 0 | 1 | 0 | Biểu hiện r1/r2 đã vá thật; các ca cả nhóm kho/nhánh và base/head có răng. Còn `dot-bien-tuong-duong-hoac-thieu`, **lần thứ 4**, chín biểu hiện: ba thành phần hằng của K3, hai vế C, bốn trường chưa được áp predicate kiểu. Chủ kho qua checkpoint lần 2 và chọn chuyển độ phủ sang triển khai: revision 4 thêm A0 và chín guard, §5.0 thành hợp đồng phủ mệnh đề |

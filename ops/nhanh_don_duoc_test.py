@@ -22,6 +22,22 @@ sys.dont_write_bytecode = True
 HERE = Path(__file__).resolve().parent
 TOOL = HERE / "nhanh_don_duoc.py"
 
+# #593 r3 M1 — TAT bao tri git NEN o moi tien trinh git con, NOI THEM vao GIT_CONFIG_* (moi truong co the
+# da mang credential git qua chinh co che nay — ghi de la mat no). gate-registry do master 4c53c76 (job
+# 107949420933): `td.cleanup()` cua `kho_bare` gap ENOTEMPTY tren `remote.git`. Gia thuyet — KHONG DO DUOC
+# tai cho (git 2.43 o day, 2.55 tren CI): `maintenance`/`gc --auto` tach nen sau push/fetch van ghi vao do.
+GIT_TAT_BAO_TRI = (("gc.auto", "0"), ("gc.autoDetach", "false"), ("maintenance.auto", "false"),
+                   ("maintenance.autoDetach", "false"), ("receive.autogc", "false"))
+def _tat_bao_tri_git(env) -> None:
+    n = int(env.get("GIT_CONFIG_COUNT") or 0)
+    co = {(env.get(f"GIT_CONFIG_KEY_{i}"), env.get(f"GIT_CONFIG_VALUE_{i}")) for i in range(n)}
+    for k, v in GIT_TAT_BAO_TRI:
+        if (k, v) not in co:
+            env[f"GIT_CONFIG_KEY_{n}"], env[f"GIT_CONFIG_VALUE_{n}"] = k, v
+            n += 1
+    env["GIT_CONFIG_COUNT"] = str(n)
+_tat_bao_tri_git(os.environ)
+
 # ---- M1: tin hieu "chot cua CHINH ca nay hong" -------------------------------
 # Ma HA TANG (`run`, `nap_tool`, `chay_dot_bien`) nem `AssertionError` TRAN va
 # KHONG bao gio nem lop nay. Nho vay bo cham phan biet duoc "dich chet dung chot"
@@ -3854,6 +3870,28 @@ def r547_mien_tru_phai_co_rang_ma_khong_nuot_loi_khac(d: Path):
         Path.read_text, m.run = doc, run_goc
         _bo_cua([_tiem(e) for e in vang + bat])
     chot(all(ok), "r547")
+def r548_git_con_phai_tat_bao_tri_nen(d: Path):
+    """#593 r3 M2 — NAP module (tien trinh con, moi truong SACH khoa ta) phai noi DU khoa; bien co san giu
+    nguyen; nap lai khong them trung; va git con qua `run()` thay dung gia tri. Bang khoa ghi CUNG o day,
+    doc lap voi `GIT_TAT_BAO_TRI` — suy tu no thi bo mot khoa khoi bang van xanh (F08)."""
+    can = {"gc.auto": "0", "gc.autoDetach": "false", "maintenance.auto": "false",
+           "maintenance.autoDetach": "false", "receive.autogc": "false"}
+    env = {k: v for k, v in os.environ.items() if not k.startswith("GIT_CONFIG_")}
+    env.update(GIT_CONFIG_COUNT="1", GIT_CONFIG_KEY_0="r548.canh", GIT_CONFIG_VALUE_0="giu")
+    ma = ("import importlib.util as u, json, os, sys\n"
+          "s = u.spec_from_file_location('m548', sys.argv[1]); m = u.module_from_spec(s); s.loader.exec_module(m)\n"
+          "m._tat_bao_tri_git(os.environ)\n"
+          "print(json.dumps({k: v for k, v in os.environ.items() if k.startswith('GIT_CONFIG_')}))\n")
+    p = run([sys.executable, "-c", ma, str(Path(__file__).resolve())], d, check=False, env=env)
+    if p.returncode:
+        raise AssertionError(f"r548 nap module rc={p.returncode}: {p.stderr[-300:]}")
+    g = json.loads(p.stdout.strip().splitlines()[-1])
+    cap = [(g.get(f"GIT_CONFIG_KEY_{i}"), g.get(f"GIT_CONFIG_VALUE_{i}")) for i in range(int(g["GIT_CONFIG_COUNT"]))]
+    ok = [cap[0] == ("r548.canh", "giu"), len(cap) == 1 + len(can), set(cap[1:]) == set(can.items())]
+    run(["git", "init", "-q", str(d / "k")], d)
+    for k, v in can.items():
+        ok.append(run(["git", "config", "--get", k], d / "k", check=False).stdout.strip() == v)
+    chot(all(ok), "r548")
 
 TU_KIEM = [
     ("r542", r542_kenh_hoan_tat_khong_duoc_xoa_chan_doan, True),
@@ -3903,6 +3941,7 @@ TU_KIEM = [
     ("r545", r545_so_ha_tang_moi_diem_nuot_ghi_va_runner_doi_nhan, True),
     ("r546", r546_ma_tran_doc_hong_qua_runner_that, True),
     ("r547", r547_mien_tru_phai_co_rang_ma_khong_nuot_loi_khac, True),
+    ("r548", r548_git_con_phai_tat_bao_tri_nen, True),
 ]
 
 # ---- A6: MOI ca tu kiem phai co MOT dot bien rieng lam no DO --------------
@@ -4606,6 +4645,11 @@ DOT_BIEN_TU_KIEM = [
     ("r547-thu-moi-tep", ("r547",), "            if self in proof:\n                vang.append(e)", "            if True:\n                vang.append(e)"),
     ("loc-dang-ky-theo-thong-diep", ("r547",), "not any(exc is t for t in _SO_HA_TANG.tiem)", "not any(str(exc) == str(t) for t in _SO_HA_TANG.tiem)"),
     ("bo-loc-dang-ky", ("r545", "r547"), " and not any(exc is t for t in _SO_HA_TANG.tiem)", ""),
+    ("git-bao-tri-bo-nap", ("r548",), "\n_tat_bao_tri_git(os.environ)\n", "\n"),
+    ("git-bao-tri-ghi-de", ("r548",), 'n = int(env.get("GIT_CONFIG_COUNT") or 0)', "n = 0"),
+    ("git-bao-tri-noi-trung", ("r548",), "        if (k, v) not in co:\n            env", "        if True:\n            env"),
+    ("git-bao-tri-thieu-khoa", ("r548",), ',\n                   ("maintenance.autoDetach", "false"), ("receive.autogc", "false"))',
+     ',\n                   ("maintenance.autoDetach", "false"))'),
 ]
 
 
@@ -4622,8 +4666,9 @@ NHOM_BAT_BUOC = frozenset({"r501", "r502", "r503", "r504", "r505", "r506",
 NHOM_BAT_BUOC = NHOM_BAT_BUOC | {"r539", "r540", "r541", "r542"}
 NHOM_BAT_BUOC = NHOM_BAT_BUOC | {"r543", "r544"}      # #593 r1
 NHOM_BAT_BUOC = NHOM_BAT_BUOC | {"r545", "r546", "r547"}      # #593 r2
+NHOM_BAT_BUOC = NHOM_BAT_BUOC | {"r548"}      # #593 r3
 
-SAN_NHOM = 47
+SAN_NHOM = 48
 
 
 # #568 r4 / B1 — `str.splitlines()` coi CHIN ky tu NGOAI `\n` la het dong, con

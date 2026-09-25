@@ -25341,8 +25341,9 @@ def run() -> int:
             (giới hạn lớp con theo module) lọt ở `LỚP=con`, `m14` (phân hạng theo `args`)
             lọt ở thông điệp rỗng.
 
-        Tức lời khai của r2 — con trỏ ⟦r2:67 #a64cff8f⟧ (ops/specs/r378-symlink-doi-dac-quyen-r2.md,
-        băm nội dung dòng; kiểm bằng con_tro.py của đặc tả r10) — RỘNG HƠN phép đo. Không chép
+        Tức lời khai của r2 — con trỏ ⟦r2:67 #a64cff8f|dù nó sai theo chiều nào⟧
+        (ops/specs/r378-symlink-doi-dac-quyen-r2.md; băm nội dung dòng, và mảnh neo phải nằm
+        trong dòng ấy; kiểm bằng con_tro.py của đặc tả r11) — RỘNG HƠN phép đo. Không chép
         lại lời r2 vào đây: hai bản trước chép, một bản diễn ý trong ngoặc (cross-review #574
         lượt 4 bắt), và đặc tả r10 bỏ hẳn lời trích viết tay. Ma trận có trục, nhưng **mỗi trục chỉ có một điểm**, nên nó
         vẫn là 14 ĐIỂM được sắp thành bảng. Đúng cái bẫy nó sinh ra để thoát.
@@ -25372,8 +25373,9 @@ def run() -> int:
 
         PHẠM VI, KHAI CHO ĐÚNG — và r2 đã khai quá rộng đúng chỗ này: ma trận bảo đảm cho
         MIỀN ĐÃ LIỆT KÊ dưới đây (11 lớp × 7 dạng đối số × 3 trạng thái oracle, 79 ô), KHÔNG cho
-        mọi cài đặt sai có thể viết bằng Python (cách nói của đặc tả r3, con trỏ ⟦r3:323-324 #e70e42b5⟧ —
-        bản trước ghi §8.4, sai, nguồn thật là §8.3; KHÔNG phải lời của r2). Một `m17` theo một chiều chưa ai nêu vẫn
+        mọi cài đặt sai có thể viết bằng Python (cách nói của đặc tả r3, con trỏ
+        ⟦r3:323-324 #e70e42b5|mọi cài đặt sai có thể viết bằng Python⟧ — bản trước ghi §8.4,
+        sai, nguồn thật là §8.3; KHÔNG phải lời của r2). Một `m17` theo một chiều chưa ai nêu vẫn
         có thể tồn tại; `A11` đòi bằng chứng cho các chiều ĐÃ BIẾT, không đòi bằng chứng phủ
         định về những chiều chưa biết.
         """

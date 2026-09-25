@@ -13,8 +13,8 @@ nguon_cap_viec: >-
 tham_dinh_nhap: >-
   Codex gpt-6-astra (codex CLI, chỉ-đọc) thẩm định bản nháp tại c4e95ee6cf3b87655fc96d2d931f912febfa7cd8:
   lượt 1 "dong_y_neu_sua" (8 P2 + 1 P3); tại 783d522f7c21995e8b56e909976a1a354a0e3aee lượt 2 "dong_y_neu_sua"
-  (4 P2 + 1 P3); tại e7ac2394f6e36262158aa73affd165586e542685 lượt 3 "dong_y_neu_sua" (2 P3). Không còn bất đồng về
-  phương án tổng thể. Bản này sửa cả ba lượt (mục 11).
+  (4 P2 + 1 P3); tại e7ac2394f6e36262158aa73affd165586e542685 lượt 3 "dong_y_neu_sua" (2 P3); tại b7957aae1804a0a86af67b80ca39a225b35b896a lượt 4
+  "dong_y_neu_sua" (1 P3). Không còn bất đồng về phương án tổng thể. Bản này sửa cả bốn lượt (mục 11).
 ghi_chu_hinh_dang: >-
   Chưa cổng nào đọc tệp này. Nó là DỮ LIỆU cho lease và cho reviewer, không phải giao diện.
 ---
@@ -144,7 +144,7 @@ Ràng buộc đã đo, executor không được phá:
 | A5 | M3 mặc định: không đặt biến ⇒ log nghiệp vụ giống master `4c53c76d` trên cùng bộ giả | so log nghiệp vụ lệch ⇒ ĐỎ |
 | A6 | **đối chiếu trên 8 bộ thật** (tại chỗ, Ubuntu): N=1 và N chọn cho cùng phán quyết và cùng tập dòng `CI_DANG_KY`, lặp **3 lần** mỗi N | một lần lệch ⇒ DỪNG (S2) |
 | A7 | M4 + M6: selftest G5 chỉ ở `gate`; probe vô điều kiện ở cả ba job, trước bước nặng đầu tiên; T6 và kiểm "lời gọi CI" của registry vẫn đạt | đột biến workflow trong bộ nhớ: bỏ probe ở một job · thêm `if:` cho probe · dời probe sau bước nặng · nhân đôi selftest ⇒ mỗi đột biến làm chốt M6 ĐỎ. Codex đã đo: nếu thiếu M6 thì bỏ cả hai probe vẫn qua T6, registry 21/21 và Ruff 3/3 |
-| A8 | M5 + Q4: benchmark tại chỗ N ∈ {1, 2, 4} trên 8 bộ thật, **dùng lại 3 lượt của A6**, ghi thời lượng và `so_lop_*` từng lượt. Luật chọn là một hàm thuần trong W1 (`chon_so_worker`): lấy **trung vị** 3 lượt cho mỗi N; chỉ N ∈ {2, 4} có trung vị **nhỏ hơn** trung vị N=1 mới là ứng viên; trong tập ứng viên đặt `t_min` = trung vị nhỏ nhất, rồi chọn **N nhỏ nhất** có trung vị **≤ 1,10 × `t_min`**; **không có ứng viên ⇒ DỪNG (S2) trước push**. Sau đó **một** push xác nhận: bước registry trên CI **< 33,1 phút** (nền mục 1) và JSON M1 in `so_lop_*` của runner | fixture trung vị `{1: 100, 2: 101, 4: 102}` giây ⇒ "không có ứng viên" (đột biến cho phép chọn N=1 ⇒ ĐỎ); fixture đúng biên `{1: 200, 2: 110, 4: 100}` ⇒ N=2 (110 ≤ 1,10 × 100); fixture vượt biên `{1: 200, 2: 110,5, 4: 100}` ⇒ N=4; đột biến đổi mẫu số sang trung vị của N lớn hơn ⇒ ĐỎ; N chọn không nhanh hơn nền trên CI ⇒ KHÔNG ĐẠT, DỪNG (S2) |
+| A8 | M5 + Q4: benchmark tại chỗ N ∈ {1, 2, 4} trên 8 bộ thật, **dùng lại 3 lượt của A6**, ghi thời lượng và `so_lop_*` từng lượt. Luật chọn là một hàm thuần trong W1 (`chon_so_worker`): lấy **trung vị** 3 lượt cho mỗi N; chỉ N ∈ {2, 4} có trung vị **nhỏ hơn** trung vị N=1 mới là ứng viên; trong tập ứng viên đặt `t_min` = trung vị nhỏ nhất, rồi chọn **N nhỏ nhất** có trung vị **≤ 1,10 × `t_min`**; **không có ứng viên ⇒ DỪNG (S2) trước push**. Sau đó **một** push xác nhận: bước registry trên CI **< 33,1 phút** (nền mục 1) và JSON M1 in `so_lop_*` của runner | fixture trung vị `{1: 100, 2: 101, 4: 102}` giây ⇒ "không có ứng viên" (đột biến cho phép chọn N=1 ⇒ ĐỎ); fixture đúng biên `{1: 200, 2: 110, 4: 100}` ⇒ N=2 (110 ≤ 1,10 × 100); fixture vượt biên `{1: 200, 2: 110,5, 4: 100}` ⇒ N=4; đột biến dùng `(t_max − t_min) / t_max ≤ 0,10` thay cho `(t_max − t_min) / t_min ≤ 0,10` (với `t_max` là trung vị lớn nhất trong tập ứng viên) phải làm fixture vượt biên ĐỎ (bản đúng chọn N=4, đột biến chọn N=2); N chọn không nhanh hơn nền trên CI ⇒ KHÔNG ĐẠT, DỪNG (S2) |
 | A9 | tổng phút runner của lượt xác nhận **< 63,7 phút** (nền mục 1) | không nhỏ hơn ⇒ KHÔNG ĐẠT |
 | A10 | cổng hiện hành trên head cuối, mỗi cổng có lệnh + **dấu hiệu dương**: `lease_publish_test` in `N/N đạt` · `bien_nhan_v2` in `TỔNG: ĐẠT` và `0 vi phạm` · `ci_phamvi --kiem-bam` rc=0 và in kết luận dương · `actionlint .github/workflows/ci.yml` rc=0 và **không** in chẩn đoán nào (Codex đo trên `783d522f`: rc=0, đầu ra rỗng); kiểm toàn bộ workflow là phép đo riêng, so với nền cùng phạm vi (nền: 1 thông tin SC1003 ở `ops-don-ref.yml:117`) · `release-verify --strict --json` có `ok=true` và `expected_file_count == checked_file_count` · ba job CI của lượt xác nhận có dòng `TỔNG: ĐẠT` trong log | cổng thiếu, đỏ, `skipped` hoặc không có dấu hiệu dương ⇒ KHÔNG ĐẠT. Dấu hiệu dương chỉ được ghi vào bằng chứng sau khi xác nhận lệnh thực sự chạy và đạt |
 | A11 | kích thước: báo `git diff --numstat` so base; ≤ 300 dòng thêm | vượt ⇒ dừng trước review (S5) |
@@ -217,5 +217,7 @@ Lượt 2 trên `783d522f` (4 P2 + 1 P3) và chỗ đã sửa:
 | 4 | P2 | lượt gate kế tiếp vượt trần chưa có chốt | mục 7, S4 |
 | 5 | P3 | actionlint lệch phạm vi và dấu hiệu dương | A10 |
 | — | — | mốc đo còn `x` | mục 1 (mốc từ thời gian sửa đổi tệp, probe đo lại) |
+
+Lượt 4 trên `b7957aae` (1 P3): câu mô tả đột biến ở A8 ghi sai đại lượng ⇒ thay bằng câu Codex đề xuất (đã kiểm trong bộ nhớ).
 
 Lượt 3 trên `e7ac2394` (2 P3; không còn P1/P2): mẫu số của luật chọn N ⇒ A8 (`t_min`, ≤ 1,10 × `t_min`, fixture đúng biên và vượt biên); mốc chỉ biết tới phút ở mục 9 và bước "đóng băng" trong L5 ⇒ mục 9 đo lại 2026-09-25T05:02:33Z, mục 1 bổ sung.

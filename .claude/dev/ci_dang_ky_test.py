@@ -846,29 +846,28 @@ def chon_so_worker(trung_vi_theo_N):
 
 
 G5_SELFTEST, G5_PROBE, JOB_G5 = "python ops/cong_cu_test.py", "python ops/cong_cu.py kiem-tra --json", ("gate", "gate-registry", "gate-packet-loop")
+G5_THIET_LAP = frozenset({"git config --global core.autocrlf false", "git config --global core.eol lf", "git config --global core.abbrev 7",
+                          "python -m pip install --quiet PyYAML==6.0.3 jsonschema==4.26.0", "bash ops/cai_actionlint.sh",
+                          "bash ops/cai_cong_cu.sh shellcheck", "bash ops/cai_cong_cu.sh rg"})
+def _dong_lenh(b): return [x.strip() for x in str(b.get("run", "")).splitlines() if x.strip() and not x.lstrip().startswith("#")]
 
 
 def loi_g5_workflow(data):
-    """M6: selftest G5 ở đúng MỘT job (`gate`); probe vô điều kiện ở cả ba job, trước lệnh nặng đầu.
-    Theo DÒNG LỆNH (bỏ comment) và DANH SÁCH CHO PHÉP: dòng chạm `ops/cong_cu` phải BẰNG ĐÚNG một trong hai lệnh."""
-    jobs, loi, co_self = (data or {}).get("jobs") or {}, [], []
+    """M6 theo HÌNH DẠNG BƯỚC + danh sách CHO PHÉP (review tại chỗ lượt 1–3: nhận diện theo văn bản lọt ba lần): mỗi job G5
+    đúng MỘT bước chạm `ops/cong_cu`, lệnh BẰNG ĐÚNG [probe](+selftest ở gate), vô điều kiện; trước nó chỉ lệnh thiết lập."""
+    jobs = (data or {}).get("jobs") or {}
+    loi = [f"thiếu job {j}" for j in JOB_G5 if j not in jobs]
     for j, v in jobs.items():
-        dong = [(b, x.strip()) for b in ((v or {}).get("steps") or []) for x in str(b.get("run", "")).splitlines()
-                if x.strip() and not x.lstrip().startswith("#")]
-        co_self += [j] * sum(x == G5_SELFTEST for _, x in dong)
-        loi += [f"{j}: dòng G5 ngoài danh sách cho phép: {x!r}" for _, x in dong if "ops/cong_cu" in x and x not in (G5_SELFTEST, G5_PROBE)]
-        probe = [i for i, (_, x) in enumerate(dong) if x == G5_PROBE]
-        nang = [i for i, (b, _) in enumerate(dong) if i not in probe
-                and not str(b.get("name", "")).startswith(("cài ", "Force LF"))]
-        if j not in JOB_G5: pass
-        elif len(probe) != 1:
-            loi.append(f"{j}: probe G5 phải có đúng một dòng lệnh, thấy {len(probe)}")
-        elif "if" in dong[probe[0]][0] or "if" in v:
-            loi.append(f"{j}: probe G5 có điều kiện")
-        elif nang and nang[0] < probe[0]:
-            loi.append(f"{j}: probe G5 đứng sau lệnh nặng '{dong[nang[0]][1]}'")
-    if sorted(co_self) != ["gate"] or set(JOB_G5) - set(jobs):
-        loi.append(f"selftest G5 phải có đúng một lời gọi, ở job gate; thấy {sorted(co_self)}")
+        buoc = (v or {}).get("steps") or []
+        cham = [i for i, b in enumerate(buoc) if "ops/cong_cu" in str(b.get("run", ""))]
+        if j not in JOB_G5 or len(cham) != 1:
+            loi += [f"{j}: phải có đúng một bước G5 (chỉ ở {JOB_G5}), thấy {len(cham)}"] if cham or j in JOB_G5 else []
+        elif _dong_lenh(buoc[cham[0]]) != [G5_PROBE] + [G5_SELFTEST] * (j == "gate"):
+            loi.append(f"{j}: bước G5 sai hình dạng: {_dong_lenh(buoc[cham[0]])}")
+        elif "if" in buoc[cham[0]] or "if" in v:
+            loi.append(f"{j}: bước G5 có điều kiện")
+        elif any(not set(_dong_lenh(b)) <= G5_THIET_LAP for b in buoc[:cham[0]]):
+            loi.append(f"{j}: có lệnh ngoài danh sách thiết lập đứng trước probe G5")
     return loi
 
 
@@ -1502,8 +1501,10 @@ def phan_chung():
     _them("p637-A7-nang-truoc-probe-cung-run", _hong_wf("gate-registry", lambda b, i: b[i].update(
         run="python .claude/dev/ci_dang_ky_test.py --chay\n" + b[i]["run"])))
     _them("p637-A7-comment-truoc-probe-khong-la-nang", not _hong_wf("gate-registry", lambda b, i: b[i].update(run="# x\n" + b[i]["run"])))
-    _them("p637-A7-probe-doi-doi-so", _hong_wf("gate-registry", lambda b, i: b[i].update(run=G5_PROBE.replace("--json", "--help"))))
+    _them("p637-A7-thieu-job", bool(loi_g5_workflow({"jobs": {k: v for k, v in _wf0["jobs"].items() if k != "gate-packet-loop"}})))
     _them("p637-A7-selftest-trong-echo", _hong_wf("gate", lambda b, i: b[i].update(run=b[i]["run"].replace(G5_SELFTEST, f"echo '{G5_SELFTEST}'"))))
+    _them("p637-A7-probe-trong-heredoc", _hong_wf("gate-registry", lambda b, i: b[i].update(run=f"cat <<'EOF'\n{G5_PROBE}\nEOF\n")))
+    _them("p637-A7-nang-doi-ten-cai-truoc-probe", _hong_wf("gate-registry", lambda b, i: b.insert(i, {"name": "cài registry", "run": "python .claude/dev/ci_dang_ky_test.py --chay"})))
     _them("p637-A7-nhan-doi-selftest-trong-gate", _hong_wf("gate", lambda b, i: b.insert(i + 1, {"run": G5_SELFTEST})))
     _them("p637-A8-khong-ung-vien", chon_so_worker({1: 100, 2: 101, 4: 102}) is None)
     _them("p637-A8-dung-bien", chon_so_worker({1: 200, 2: 110, 4: 100}) == 2)

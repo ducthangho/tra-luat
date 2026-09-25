@@ -905,16 +905,6 @@ DOT_BIEN = {
         "                (len(chuoi) > 1 and not chuoi[-1][0])\n",
         "                False  # đột biến: chú thích cục bộ vẫn quét\n",
         "BASH_NEN", (), "t33_do_phu_cua_cong_do_duoc_THEO_HINH_DANG"),
-    # N69 -> N75 (NEO LAI O r20): `with` nuot ngoai le khong con la NHANH co dieu kien.
-    "ct_with_nuot_khong_dieu_khien": ("ops/cong_cu_test.py",
-        '        if la_with_nuot(x):\n            return "voi"',
-        '        if False:  # đột biến: bỏ `with` nuốt ngoại lệ\n            return "voi"',
-        "TEP_TEST", _KEM_TEP_TEST, "t39_chi_CA_PHAN_QUYET_duoc_chot_tren_rc_va_trang_thai"),
-    # N69: xuat xu gom moi pham vi vao MOT bang.
-    "ct_xuat_xu_gop_pham_vi": ("ops/cong_cu_test.py",
-        "            if isinstance(x, _PV):\n",
-        "            if False:  # đột biến: gộp mọi phạm vi vào một bảng\n",
-        "TEP_TEST", _KEM_TEP_TEST, "t39_chi_CA_PHAN_QUYET_duoc_chot_tren_rc_va_trang_thai"),
     # N70: ghi de TEN TRAN khong phan giai qua PATH.
     "bn_ghi_de_ten_tran_khong_giai": ("ops/bash_nen.py",
         "        if os.sep in ghi_de or (os.altsep and os.altsep in ghi_de):\n",
@@ -981,12 +971,71 @@ DOT_BIEN = {
         "        if not isinstance(so, int) or isinstance(so, bool) or so < 0:\n",
         "        so = int(so)  # đột biến: ép kiểu thay vì hỏi kiểu\n        if False:\n",
         "BASH_NEN", (), "t40_moi_MIEN_TRU_deu_mang_HAN_NGACH_va_dem_theo_LOI_GOI"),
-    # N64 -> N75 (NEO LAI O r20): rang buoc trong NHANH cung duoc coi la THONG TRI phep chot
-    # — rang buoc co dieu kien xoa xuat xu con song.
-    "ct_xuat_xu_mot_nguon": ("ops/cong_cu_test.py",
-        "        thong_tri = [x for x in cac if x[0] < vt and chung(x[2]) == len(x[2])]\n",
-        "        thong_tri = [x for x in cac if x[0] < vt]  # đột biến: mọi ràng buộc trước đều chắc chắn chạy\n",
+    # ── r22 — DOT BIEN cho N78b/c, N80..N82 (cross-review codex vong 16, sau khi DOI KIEN TRUC bo chot) ──
+    # RUT O r22, kem ly do DO DUOC: 11 dot bien mo phong NHANH/PHAM VI/VI TRI cua bo chot (ct_with_nuot_khong_dieu_khien, ct_xuat_xu_gop_pham_vi, ct_xuat_xu_mot_nguon, ct_comprehension_khong_pham_vi,
+    # ct_except_sao_loai_tru, ct_assert_warns_nuot, ct_finally_la_nhanh, ct_lop_nhin_thay_tu_ham,
+    # ct_khong_loai_tru, ct_khong_quay_lui, ct_xuat_xu_khong_theo_vi_tri) — ma dich cua chung (N64/N69/N75/N79)
+    # DA GO theo N80. Dot bien tren ma khong con ton tai thi khong neo duoc.
+    # N80: walrus thoi la mot dang rang buoc ghi nguon.
+    "ct_bo_walrus_rang_buoc": ("ops/cong_cu_test.py",
+        "        if isinstance(nut, (_ast.AnnAssign, _ast.AugAssign, _ast.NamedExpr)):\n",
+        "        if isinstance(nut, (_ast.AnnAssign, _ast.AugAssign)):  # đột biến: `:=` không ghi nguồn\n",
         "TEP_TEST", _KEM_TEP_TEST, "t39_chi_CA_PHAN_QUYET_duoc_chot_tren_rc_va_trang_thai"),
+    # N80: dich comprehension thoi ghi nguon tu iterable.
+    "ct_bo_comprehension_rang_buoc": ("ops/cong_cu_test.py",
+        "        if isinstance(nut, (_ast.For, _ast.AsyncFor, _ast.comprehension)):\n",
+        "        if isinstance(nut, (_ast.For, _ast.AsyncFor)):  # đột biến: đích comprehension không ghi nguồn\n",
+        "TEP_TEST", _KEM_TEP_TEST, "t39_chi_CA_PHAN_QUYET_duoc_chot_tren_rc_va_trang_thai"),
+    # N80: lap tren danh sach HANG thoi lay nguon tung phan tu.
+    "ct_lap_bo_phan_tu_hang": ("ops/cong_cu_test.py",
+        "            if isinstance(g, (_ast.List, _ast.Tuple, _ast.Set)):\n",
+        "            if False:  # đột biến: lặp trên danh sách hằng không lấy nguồn từng phần tử\n",
+        "TEP_TEST", _KEM_TEP_TEST, "t39_chi_CA_PHAN_QUYET_duoc_chot_tren_rc_va_trang_thai"),
+    # N81: bo nhan NAP DONG (`__import__(…)`, `importlib.import_module(…)`) thoi duoc giai.
+    "bn_bo_nap_dong_nhan": ("ops/bash_nen.py",
+        "        mod = _module_dong(nut.func.value, tra_ten)          # N81 — bộ nhận NẠP ĐỘNG\n",
+        "        mod = None  # đột biến: bộ nhận nạp động không được giải\n",
+        "BASH_NEN", (), "t33_do_phu_cua_cong_do_duoc_THEO_HINH_DANG"),
+    # N81: `__import__` bi CHE van duoc coi la ham dung san.
+    "bn_nap_dong_khong_hoi_che": ("ops/bash_nen.py",
+        '        if f.id == "__import__" and (tra_ten is None\n',
+        '        if f.id == "__import__" and (True  # đột biến: không hỏi `__import__` có bị che không\n',
+        "BASH_NEN", (), "t33_do_phu_cua_cong_do_duoc_THEO_HINH_DANG"),
+    # N81: `m = __import__("subprocess")` thoi rang buoc `m` vao module.
+    "bn_nap_dong_gan_ten_bo": ("ops/bash_nen.py",
+        '            them(dich.id, ("import", _module_dong(n.value), None))\n',
+        '            them(dich.id, ("khac",))  # đột biến: `m = __import__(…)` không ràng buộc module\n',
+        "BASH_NEN", (), "t33_do_phu_cua_cong_do_duoc_THEO_HINH_DANG"),
+    # N81: rang buoc do `exec("import …")` hang sinh ra thoi vao bang module.
+    "bn_exec_khong_rang_buoc": ("ops/bash_nen.py",
+        "            for ten, rb in _bang_pham_vi_ca_cay(tai, sau + 1)[id(tai)][0].items():\n",
+        "            for ten, rb in {}.items():  # đột biến: ràng buộc của `exec` hằng không vào bảng module\n",
+        "BASH_NEN", (), "t33_do_phu_cua_cong_do_duoc_THEO_HINH_DANG"),
+    # N81: loi goi bash NAM TRONG tai `exec` hang thoi duoc quet.
+    "bn_exec_khong_quet_tai": ("ops/bash_nen.py",
+        "            if _loi_goi_tran(dau + goi.args[0].value, sau + 1):\n",
+        "            if False:  # đột biến: không quét lời gọi trong tải `exec`\n",
+        "BASH_NEN", (), "t33_do_phu_cua_cong_do_duoc_THEO_HINH_DANG"),
+    # N82: chu so huu `nonlocal` dung o ham GIUA cung khai `nonlocal`.
+    "bn_nonlocal_dung_o_giua": ("ops/bash_nen.py",
+        "                                         and ten not in bang[j][2]):\n",
+        "                                         ):  # đột biến: dừng ở hàm giữa cũng khai `nonlocal`\n",
+        "BASH_NEN", (), "t33_do_phu_cua_cong_do_duoc_THEO_HINH_DANG"),
+    # N82: `global str` CHI DOC lai che ten dung san `str`.
+    "bn_global_doc_khong_van_che": ("ops/bash_nen.py",
+        "            return ten in chuoi[0][1]\n",
+        "            return True  # đột biến: `global` chỉ đọc vẫn che tên dựng sẵn\n",
+        "BASH_NEN", (), "t33_do_phu_cua_cong_do_duoc_THEO_HINH_DANG"),
+    # N78b: do rong co qua nhieu chu so lai di thang vao `int()` (ValueError).
+    "bn_so_dai_khong_chan": ("ops/bash_nen.py",
+        "                if len(so) > len(str(_NGAN_SACH_DINH_DANG)):\n",
+        "                if False:  # đột biến: không chặn số quá dài trước `int()`\n",
+        "BASH_NEN", (), "t33_do_phu_cua_cong_do_duoc_THEO_HINH_DANG"),
+    # N78c: `join` tai dung dau phan cach khong tinh ngan sach truoc khi dung.
+    "bn_join_khong_ngan_sach": ("ops/bash_nen.py",
+        "            if dai > _NGAN_SACH_DINH_DANG:\n",
+        "            if False:  # đột biến: `join` không tính ngân sách trước khi dựng\n",
+        "BASH_NEN", (), "t33_do_phu_cua_cong_do_duoc_THEO_HINH_DANG"),
     # ── r21 — DOT BIEN cho N76..N79 (cross-review codex vong 15, sau khi DOI KIEN TRUC) ──
     # RUT O r21, kem ly do DO DUOC: 13 dot bien mo phong THU TU/NHANH (bn_lop_neo_dau_than, bn_nhanh_khong_loai_tru, bn_khong_quay_lui, bn_finally_la_nhanh,
     # bn_lop_khong_chay_ngay, bn_lop_chua_gan_khong_gop, bn_lop_chua_gan_khong_hoi_ngoai, bn_nhanh_cung_thong_tri, bn_khong_muon_nhat_thang,
@@ -1023,16 +1072,6 @@ DOT_BIEN = {
         "                tong += int(so)\n",
         "                tong = max(tong, int(so))  # đột biến: ngân sách tính TỪNG Ô, không cộng dồn\n",
         "BASH_NEN", (), "t33_do_phu_cua_cong_do_duoc_THEO_HINH_DANG"),
-    # N79 (G8 vong 15): comprehension thoi la pham vi rieng trong bo chot.
-    "ct_comprehension_khong_pham_vi": ("ops/cong_cu_test.py",
-        "           _ast.ListComp, _ast.SetComp, _ast.DictComp, _ast.GeneratorExp)\n",
-        "           )  # đột biến: comprehension không phải phạm vi riêng\n",
-        "TEP_TEST", _KEM_TEP_TEST, "t39_chi_CA_PHAN_QUYET_duoc_chot_tren_rc_va_trang_thai"),
-    # N79 (G3 vong 15): hai `except*` lai bi coi la loai tru nhau trong bo chot.
-    "ct_except_sao_loai_tru": ("ops/cong_cu_test.py",
-        '                    return ("bat" if type(x).__name__ == "Try" else "bat_sao", i_)\n',
-        '                    return ("bat", i_)  # đột biến: `except*` cũng loại trừ nhau\n',
-        "TEP_TEST", _KEM_TEP_TEST, "t39_chi_CA_PHAN_QUYET_duoc_chot_tren_rc_va_trang_thai"),
     # ── r20 — DOT BIEN cho N72..N75 (cross-review codex vong 14) ─────────────────
     # N74: `_chay_phep` quay ve LIET KE kieu ngoai le ⇒ `OverflowError` di thang ra ngoai.
     "bn_chay_phep_liet_ke": ("ops/bash_nen.py",
@@ -1049,31 +1088,6 @@ DOT_BIEN = {
         "        except Exception as e:             # noqa: BLE001 — có chủ đích, xem N74\n",
         "        except (SyntaxError, ValueError) as e:  # đột biến: liệt kê kiểu ngoại lệ\n",
         "BASH_NEN", (), "t44_khong_lay_duoc_INDEX_thi_KHONG_DO_DUOC_chu_khong_lui_ve_rglob"),
-    # N75: `assertWarns` lai bi coi la nuot ngoai le ⇒ ghi de chac chan chay thanh co dieu kien.
-    "ct_assert_warns_nuot": ("ops/cong_cu_test.py",
-        '    _BO_NUOT = {"suppress", "raises", "assertRaises", "assertRaisesRegex"}\n',
-        '    _BO_NUOT = {"suppress", "raises", "assertRaises", "assertRaisesRegex", "assertWarns"}  # đột biến\n',
-        "TEP_TEST", _KEM_TEP_TEST, "t39_chi_CA_PHAN_QUYET_duoc_chot_tren_rc_va_trang_thai"),
-    # N75: `finally` thanh nhanh CO DIEU KIEN trong ratchet.
-    "ct_finally_la_nhanh": ("ops/cong_cu_test.py",
-        '            return "khong_loi" if any(c is con_ for c in x.orelse) else None\n',
-        '            return "khong_loi" if any(c is con_ for c in x.orelse) else "cuoi"  # đột biến\n',
-        "TEP_TEST", _KEM_TEP_TEST, "t39_chi_CA_PHAN_QUYET_duoc_chot_tren_rc_va_trang_thai"),
-    # N75: than lop lai nhin thay duoc tu ham long ⇒ thuoc tinh lop che `rc` cua `_quet` (LOT).
-    "ct_lop_nhin_thay_tu_ham": ("ops/cong_cu_test.py",
-        "            if vi_ and pv in la_lop_:\n",
-        "            if False:  # đột biến: thân lớp nhìn thấy được từ hàm lồng\n",
-        "TEP_TEST", _KEM_TEP_TEST, "t39_chi_CA_PHAN_QUYET_duoc_chot_tren_rc_va_trang_thai"),
-    # N75: khong nhanh nao LOAI TRU trong ratchet ⇒ `_quet` o `if` toi phep chot o `else` (BAT OAN).
-    "ct_khong_loai_tru": ("ops/cong_cu_test.py",
-        "    def loai_tru(a_, b_):\n",
-        "    def loai_tru(a_, b_):\n        return False  # đột biến: không nhánh nào loại trừ\n",
-        "TEP_TEST", _KEM_TEP_TEST, "t39_chi_CA_PHAN_QUYET_duoc_chot_tren_rc_va_trang_thai"),
-    # N75: bo CANH QUAY LUI trong ratchet ⇒ `_quet` sau phep chot trong cung vong khong toi (LOT).
-    "ct_khong_quay_lui": ("ops/cong_cu_test.py",
-        '            vong_ = [j_ for j_ in range(k_) if dk_[j_][1] == "lap"]\n',
-        "            vong_ = []  # đột biến: bỏ cạnh quay lui\n",
-        "TEP_TEST", _KEM_TEP_TEST, "t39_chi_CA_PHAN_QUYET_duoc_chot_tren_rc_va_trang_thai"),
     # ── r17 — DOT BIEN cho N52..N57 (cross-review codex vong 11) ─────────────────
     # N52: bo tinh hang thoi rut gon HANG DUNG SAN (list/tuple/set/chuoi) => moi hinh dang
     # bao chua deu lot, ke ca `["bash"]`.
@@ -1125,12 +1139,6 @@ DOT_BIEN = {
         '                if "bao" in ng and khoa in _TRUONG_TONG_HOP:\n',
         '                if khoa in _TRUONG_TONG_HOP:  # đột biến: không hỏi xuất xứ của báo cáo\n',
         "TEP_TEST", _KEM_TEP_TEST, "t39_chi_CA_PHAN_QUYET_duoc_chot_tren_rc_va_trang_thai"),
-    # N55 -> N75 (NEO LAI O r20): bo loc VI TRI o loi tien ⇒ `_quet` dung SAU phep chot van
-    # toi duoc (`quet_sau_chot`).
-    "ct_xuat_xu_khong_theo_vi_tri": ("ops/cong_cu_test.py",
-        "            if vt_ < vt and not tach and not any(vt_ < y[0] for y in thong_tri):\n",
-        "            if not tach and not any(vt_ < y[0] for y in thong_tri):  # đột biến: xuất xứ không theo vị trí\n",
-        "TEP_TEST", _KEM_TEP_TEST, "t39_chi_CA_PHAN_QUYET_duoc_chot_tren_rc_va_trang_thai"),
     # ── r16 — DOT BIEN cho N45..N51 (cross-review codex vong 10) ─────────────────
     # N45, chieu LOT: hai helper chay qua shell roi khoi tap duoc che.
     "bn_bo_shell_ra": ("ops/bash_nen.py",
@@ -1179,10 +1187,10 @@ DOT_BIEN = {
         "        elif isinstance(nut, _ast.Assert):\n",
         "        elif False:  # đột biến: `assert` trần không còn là một phép chốt\n",
         "TEP_TEST", _KEM_TEP_TEST, "t39_chi_CA_PHAN_QUYET_duoc_chot_tren_rc_va_trang_thai"),
-    # N49: ratchet quay ve khop DUNG chu `rc`, nen doi ten bien la thoat.
+    # N49: ratchet quay ve khop DUNG chu `rc`, nen doi ten bien la thoat. (NEO LAI O r22 vao N80.)
     "ct_chi_ten_rc": ("ops/cong_cu_test.py",
-        "                    ghi(d.id, vt, ng, dk, noi=nut)\n",
-        "                    ghi(d.id, vt, \"khac\", dk, noi=nut)  # đột biến: không đi theo xuất xứ của `_quet`\n",
+        "                        ghi(d.id, x)\n",
+        '                        ghi(d.id, "khac")  # đột biến: không đi theo xuất xứ của `_quet`\n',
         "TEP_TEST", _KEM_TEP_TEST, "t39_chi_CA_PHAN_QUYET_duoc_chot_tren_rc_va_trang_thai"),
     # N50: ly do mien tru tro lai thanh mot loi khai khong ai doc.
     "ct_ly_do_khong_doc": ("ops/cong_cu_test.py",
@@ -2683,6 +2691,16 @@ _HINH_DANG_PHU = {
     # pham vi CHUA. Ca hai CHAY BASH THAT tren 3.12 ma r20 tra `[]`.
     "except_sao_cung_chay": 'def f():\n    try:\n        pass\n    except* ValueError:\n        import subprocess\n    except* TypeError:\n        subprocess.run(["bash"])\n',
     "walrus_trong_comprehension": 'import subprocess\n[(subprocess.run(["bash"]), (subprocess := object())) for _ in [0]]\n',
+    # r22 — N81, vong 16 H3/H4: NAP DONG voi ten HANG. Ca sau deu CHAY BASH THAT (do tren 3.12).
+    "nap_dong_import":         '__import__("subprocess").run(["bash"])\n',
+    "nap_dong_builtins":       '__builtins__.__import__("subprocess").run(["bash"])\n',
+    "nap_dong_importlib":      'import importlib\nimportlib.import_module("subprocess").run(["bash"])\n',
+    "nap_dong_gan_ten":        'm = __import__("subprocess")\nm.run(["bash"])\n',
+    "exec_import_roi_goi":     'exec("import subprocess")\nsubprocess.run(["bash"])\n',
+    "exec_tai_co_loi_goi":     'exec("import subprocess\\nsubprocess.run([\'bash\'])")\n',
+    # r22 — N82, vong 16 H1/H2: `nonlocal` di toi DUNG chu so huu; `global str` CHI DOC khong che.
+    "nonlocal_ba_tang":        'def o():\n    x = 1\n    def m():\n        nonlocal x\n        x = object()\n        def i():\n            nonlocal x\n            import subprocess as x\n            x.run(["bash"])\n',
+    "global_str_chi_doc":      'import subprocess\ndef f():\n    global str\n    subprocess.run([str("bash")])\n',
     # r20 — N74: `%` voi do rong NHO van gap duoc.
     "hang_phan_tram_do_rong": 'import subprocess\nsubprocess.run(["%4s" % "bash"])\n',
     # r19 — N66: `pty.spawn` kieu ARGV; chuoi tran CUNG chay (do duoc rc 0).
@@ -2790,6 +2808,11 @@ _HINH_DANG_KHONG_PHU = {
     # van quyet: ham `o` co rang buoc rieng ⇒ ten cuc bo ⇒ khong doc `import` o module.
     "walrus_mac_dinh_cuc_bo_ham": 'import subprocess\ndef o():\n    def f(x=(subprocess := runner)):\n        pass\n    subprocess.run(["bash"])\n',
     "walrus_comprehension_cuc_bo_ham": 'import subprocess\ndef o():\n    [(subprocess := runner) for _ in [0]]\n    subprocess.run(["bash"])\n',
+    # r22 — N81/N82 chieu NGUOC.
+    "nap_dong_bi_che":         'def __import__(x):\n    return x\n__import__("subprocess").run(["bash"])\n',
+    "nap_dong_ten_bien":       '__import__(ten).run(["bash"])\n',
+    "exec_vo_hai":             'exec("x = 1")\nsubprocess.run(["bash"])\n',
+    "global_str_bi_gan_module": 'import subprocess\nstr = f\ndef f():\n    global str\n    subprocess.run([str("bash")])\n',
     "chu_thich_dich_khong_don_future": 'from __future__ import annotations\nimport subprocess\nholder.x: subprocess.run(["bash"]) = None\n',
 }
 
@@ -2906,6 +2929,15 @@ def t33_do_phu_cua_cong_do_duoc_THEO_HINH_DANG():
     kq_ns = _do('import subprocess\nsubprocess.run(["%05000d" % 1])\n')
     bang(isinstance(kq_ns, str) and "_VuotNganSach" in kq_ns,
          f"(1c) `\"%05000d\" % 1` phải NÉM `_VuotNganSach` (fail-close), đo được {kq_ns!r}")
+    # (1e) N78b/N78c (r22, H5/H6 vòng 16) — số độ rộng QUÁ DÀI (vượt giới hạn chuyển chuỗi của
+    # `int`) và `join` TÁI DÙNG dấu phân cách đều phải NÉM `_VuotNganSach` TRƯỚC khi dựng.
+    for nhan, than_ns in (("số 5000 chữ số", 'import subprocess\nsubprocess.run(["%' + "9" * 5000
+                                             + 's" % "x"])\n'),
+                          ("join khuếch đại", 'import subprocess\nsubprocess.run([("' + "a" * 100
+                                              + '").join([' + ",".join(['""'] * 100) + '])])\n')):
+        kq_e = _do(than_ns)
+        bang(isinstance(kq_e, str) and "_VuotNganSach" in kq_e,
+             f"(1e) {nhan} phải NÉM `_VuotNganSach` trước khi dựng, đo được {kq_e!r}")
     # (1d) N78 (r21, G5 vòng 15) — ngân sách là TỔNG: hai ô 4096 mỗi ô đều hợp lệ riêng lẻ.
     kq_td = _do('import subprocess\nsubprocess.run(["%4096s%4096s" % ("", "")])\n')
     bang(isinstance(kq_td, str) and "_VuotNganSach" in kq_td,
@@ -3460,260 +3492,80 @@ def _chot_DO_cua_cong_trong(than: str):
         return (getattr(n, "end_lineno", None) or n.lineno,
                 getattr(n, "end_col_offset", None) or n.col_offset)
 
-    # ── N64 (r18) — TẬP NGUỒN CÒN TỚI ĐƯỢC, không phải MỘT nguồn muộn nhất ──────
-    # N55 chọn ràng buộc có vị trí LỚN NHẤT trước phép chốt. Đúng khi mọi phép gán đều chạy,
-    # SAI khi phép gán nằm trong một nhánh CÓ THỂ không chạy. Đo được ở vòng 12:
-    #   `rc, bao = _quet(…)` · `if False: rc = other()` · `bang(rc == 2, …)`   ⇒ []
-    #   cùng thế với phép gán trong một vòng lặp RỖNG                           ⇒ []
-    # Ở cả hai, phép chốt THẬT SỰ đọc mã thoát của `_quet`, và ratchet để nó lọt.
-    # Nay mỗi ràng buộc mang TẬP NÚT ĐIỀU KHIỂN bao quanh nó. Tại một phép chốt, đi lùi từ
-    # ràng buộc gần nhất: ràng buộc CÓ ĐIỀU KIỆN thì GỘP nguồn của nó vào tập; gặp ràng buộc
-    # CHẮC CHẮN chạy trước phép chốt — mọi nút điều khiển của nó cũng bao phép chốt — thì nó
-    # che mọi thứ cũ hơn, dừng. Biến lặp của `for` là ràng buộc CÓ ĐIỀU KIỆN (iterable có
-    # thể rỗng). Phép tính này THẬN TRỌNG về phía BẮT: một ràng buộc có thể không chạy thì
-    # không được xoá xuất xứ còn sống.
-    # KHAI THẲNG chỗ chưa phủ: ràng buộc MANG QUA VÒNG LẶP (gán SAU phép chốt trong cùng thân
-    # vòng lặp, có hiệu lực từ vòng thứ hai) — vị trí từ vựng không nói được. Nợ có tên.
-    rang_buoc = {}                      # ten -> [(vi_tri_hoan_tat, nguon, nut_dieu_khien)]
-    cha = {}
-    for _p in _ast.walk(cay):
-        for _c in _ast.iter_child_nodes(_p):
-            cha[id(_c)] = _p
-    # N69 (r19), mặt (a) — `with` mà trình quản lý NUỐT NGOẠI LỆ cũng là một nút điều khiển:
-    # một ngoại lệ bị nuốt làm mọi câu lệnh còn lại trong thân KHÔNG chạy. Đo được ở vòng 13:
-    # `rc, bao = _quet(…)` · `with suppress(Exception): raise Exception(); rc = other()` ·
-    # `bang(rc == 2, …)` ⇒ `[]`, dù phép chốt THẬT SỰ đọc mã thoát của `_quet`.
-    # CHỈ các trình quản lý nuốt ngoại lệ ĐÃ BIẾT. Đánh dấu MỌI `with` là có điều kiện thì mọi
-    # phép ghi đè trong `with open(...)` đều thành "có thể không chạy" và ratchet đẩy những ca
-    # vô can vào bản kiểm kê — codex cảnh báo đúng điều ấy. NỢ CÓ TÊN: trình quản lý do người
-    # dùng viết có `__exit__` trả `True` thì không nhận ra được bằng cú pháp.
-    # N75 (r20) — CHỈ trình quản lý NUỐT NGOẠI LỆ. `assertWarns`/`assertWarnsRegex` BẮT CẢNH
-    # BÁO, không nuốt ngoại lệ: một ngoại lệ trong thân vẫn bay ra, nên mọi lối tới câu lệnh
-    # SAU `with` đều đã chạy trọn thân. Đo được ở vòng 14: `with self.assertWarns(W):
-    # warnings.warn(…); rc = other()` rồi `bang(rc == 0, …)` ⇒ `[6]`, mong `[]`.
-    _BO_NUOT = {"suppress", "raises", "assertRaises", "assertRaisesRegex"}
+    # ── N80 (r22) — XUẤT XỨ THEO TÊN, KHÔNG THEO PHẠM VI / VỊ TRÍ / NHÁNH ─────────────
+    # Năm revision liền (r18 N64 → r19 N69 → r20 N75 → r21 N79 → vòng 16) vá CÙNG MỘT lớp: "nguồn
+    # nào TỚI ĐƯỢC phép chốt". Mỗi vòng mô phỏng thêm một mảnh ngữ nghĩa — nhánh có điều kiện,
+    # `with` nuốt ngoại lệ, phạm vi từ vựng, cạnh quay lui, comprehension — và vòng sau tìm ra mảnh
+    # kế tiếp: iterable ĐẦU của comprehension tính ở phạm vi bao, biểu thức lúc định nghĩa (mặc
+    # định, decorator, cơ sở lớp) cũng thế, tham số lambda/async, và năm dạng ràng buộc chưa ghi
+    # (walrus, `with … as`, `except … as`, `case`, `+=`). ĐIỀU KIỆN DỪNG của lease chạm ở lần thứ
+    # NĂM; chủ kho chọn ĐỔI KIẾN TRÚC sau khi đọc phép đo, cùng hướng N76 đã làm cho bộ giải tên:
+    #   hợp mọi ràng buộc cùng tên, giữ luật nhãn trường ⇒ trên CÂY THẬT bắt đúng 6 ca như cũ,
+    #   THÊM 0 · MẤT 0; 9 mẫu CHE TÊN trong `_MAU_TOAN_TU` chuyển thành BỊ BẮT — bắt thừa có chủ
+    #   đích, và bắt thừa ở đây chỉ đẩy một ca vào BẢN KIỂM KÊ, không làm cổng lọt.
+    # Luật: NGUỒN của một tên là HỢP nguồn của MỌI ràng buộc cùng tên trong cả tệp ca, mọi dạng
+    # ràng buộc có giá trị (gán, gán có chú thích, `+=`, `:=`, `for`/comprehension — kể cả phần
+    # tử của danh sách hằng, `with … as`). Không hỏi phạm vi, vị trí hay nhánh.
+    rang_buoc = {}                      # ten -> {nguon}
 
-    def la_with_nuot(x):
-        if not isinstance(x, (_ast.With, _ast.AsyncWith)):
-            return False
-        for it in x.items:
-            e = it.context_expr
-            f = e.func if isinstance(e, _ast.Call) else None
-            ten_ = f.id if isinstance(f, _ast.Name) else (
-                f.attr if isinstance(f, _ast.Attribute) else None)
-            if ten_ in _BO_NUOT:
-                return True
-        return False
-
-    # N75 (r20) — NHÁNH, không phải NÚT. N64 coi MỌI con của một nút điều khiển là có điều
-    # kiện, nên phép gán trong `finally` — luôn chạy — thành "có thể không chạy". Đo được ở
-    # vòng 14: `try: pass` · `finally: rc = other()` · `bang(rc == 0, …)` ⇒ `[7]`, mong `[]`.
-    # Nay mỗi ràng buộc mang ĐƯỜNG NHÁNH `((id(nút), nhánh), …)` từ gốc, cùng mô hình với
-    # `_ban_do_nhanh` của `bash_nen` (N72): `finally`, điều kiện `if`, `iter` của `for` KHÔNG
-    # là nhánh; thân vòng lặp là nhánh `lap`; hai `except`/hai `case`/`if`–`else` LOẠI TRỪ.
-    def nhanh_cua(x, con_):
-        if isinstance(x, (_ast.If, _ast.IfExp)):
-            if con_ is x.test:
-                return None
-            if isinstance(x, _ast.IfExp):
-                return "than" if con_ is x.body else "khac"
-            return "than" if any(c is con_ for c in x.body) else "khac"
-        if isinstance(x, (_ast.For, _ast.AsyncFor, _ast.While)):
-            if any(c is con_ for c in x.orelse):
-                return "het"
-            return None if con_ is getattr(x, "iter", None) else "lap"
-        if type(x).__name__ in ("Try", "TryStar"):
-            if any(c is con_ for c in x.body):
-                return "thu"
-            for i_, h_ in enumerate(x.handlers):
-                if h_ is con_:
-                    # N79 (r21, G3 vòng 15) — các `except*` CÓ THỂ CÙNG CHẠY khi một
-                    # `ExceptionGroup` chứa nhiều nhóm con khớp, nên chúng KHÔNG loại trừ nhau.
-                    return ("bat" if type(x).__name__ == "Try" else "bat_sao", i_)
-            return "khong_loi" if any(c is con_ for c in x.orelse) else None
-        if type(x).__name__ == "Match":
-            for i_, c_ in enumerate(x.cases):
-                if c_ is con_:
-                    return ("ca", i_)
-            return None
-        if la_with_nuot(x):
-            return "voi" if any(c is con_ for c in x.body) else None
-        if isinstance(x, _ast.BoolOp) and con_ is not x.values[0]:
-            return ("va_hoac", 1)
-        return None
-
-    def dieu_khien_bao(nut):
-        ra_ = []
-        con_, x = nut, cha.get(id(nut))
-        while x is not None:
-            nh_ = nhanh_cua(x, con_)
-            if nh_ is not None:
-                ra_.append((id(x), nh_))
-            con_, x = x, cha.get(id(x))
-        return tuple(reversed(ra_))
-
-    def loai_tru(a_, b_):
-        if {a_, b_} == {"than", "khac"}:
-            return True
-        ta_, tb_ = isinstance(a_, tuple), isinstance(b_, tuple)
-        if ta_ and tb_ and a_[0] == b_[0] and a_[0] in ("bat", "ca") and a_ != b_:
-            return True
-        return (ta_ and a_[0] == "bat" and b_ == "khong_loi") or \
-            (tb_ and b_[0] == "bat" and a_ == "khong_loi")
-
-    # N69 (r19), mặt (b) — XUẤT XỨ TÁCH THEO PHẠM VI TỪ VỰNG. Bản r18 gom MỌI phạm vi lồng vào
-    # MỘT bảng, nên một biến cục bộ trong một hàm phụ chẳng ai gọi xoá được xuất xứ THẬT của ca
-    # bao ngoài. Đo được: `rc, bao = _quet(…)` · `def helper(): rc = other()` ·
-    # `bang(rc == 2, …)` ⇒ `[]`. Tra theo đúng luật closure của Python: phạm vi có ràng buộc
-    # RIÊNG của tên thì dùng nó; không có thì đọc sang phạm vi BAO.
-    # QUYẾT ĐỊNH, khai thẳng: một phép chốt nằm trong hàm phụ lồng mà đọc xuất xứ `_quet` của
-    # phạm vi bao VẪN được tính. Ratchet là bản KIỂM KÊ phép chốt, không phải phân tích luồng
-    # gọi; không biết hàm phụ có được gọi hay không thì nghiêng về phía kiểm kê.
-    # N79 (r21, G8 vòng 15) — COMPREHENSION là một phạm vi từ vựng riêng (Python 3), và đích lặp
-    # của nó là ràng buộc CỤC BỘ của phạm vi ấy. Bản r20 bỏ sót cả bốn loại, nên
-    # `rc, bao = _quet(…)` · `[bang(rc == 2, "x") for rc in [0]]` bị đẩy vào bản kiểm kê dù
-    # phép chốt đọc số nguyên của chính comprehension (đo được: `[3]`, mong `[]`).
-    _PV = (_ast.FunctionDef, _ast.AsyncFunctionDef, _ast.Lambda, _ast.ClassDef,
-           _ast.ListComp, _ast.SetComp, _ast.DictComp, _ast.GeneratorExp)
-
-    def chuoi_pham_vi(nut):
-        ra_ = []
-        x = cha.get(id(nut))
-        while x is not None:
-            if isinstance(x, _PV):
-                ra_.append(id(x))
-            x = cha.get(id(x))
-        ra_.append(id(cay))
-        return ra_
-
-    # N75 (r20) — THÂN LỚP KHÔNG NHÌN THẤY ĐƯỢC từ hàm lồng trong nó (luật closure của
-    # Python, cùng luật `bash_nen._giai_ten` đã dùng). Bản r19 tra cả `ClassDef` giữa đường, nên
-    # một thuộc tính lớp tên `rc` che mất `rc` của `_quet` mà phương thức THẬT SỰ đọc. Đo được
-    # ở vòng 14: `rc, bao = _quet(…)` · `class K: rc = 1; def m(self): bang(rc == 0, …)` ⇒ `[]`.
-    la_lop_ = {id(x) for x in _ast.walk(cay) if isinstance(x, _ast.ClassDef)}
-
-    def khoa_cua(bang_, ten, nut):
-        """Khoá `(phạm vi, tên)` mà `ten` tại `nut` phân giải tới, hay None."""
-        for vi_, pv in enumerate(chuoi_pham_vi(nut)):
-            if vi_ and pv in la_lop_:
-                continue
-            if (pv, ten) in bang_:
-                return (pv, ten)
-        return None
-
-    def ghi(ten, vt, nguon, dk=(), noi=None):
+    def ghi(ten, nguon):
         if ten:
-            pv = chuoi_pham_vi(noi)[0] if noi is not None else id(cay)
-            rang_buoc.setdefault((pv, ten), []).append((vt, nguon, dk))
+            rang_buoc.setdefault(ten, set()).add(nguon)
 
-    def tap_toi_duoc(bang_, ten, vt, noi_chot):
-        """Tập NGUỒN của `ten` còn tới được phép chốt tại `noi_chot` (N75, r20).
+    def nguon_tap(ten, *_):
+        """Tập NGUỒN của `ten` — hợp mọi ràng buộc cùng tên (N80). Tham số thừa giữ chữ ký cũ."""
+        return rang_buoc.get(ten, set())
 
-        Tới được: (tiến) hoàn tất trước phép chốt và không tách khỏi nó ở một cặp nhánh LOẠI
-        TRỪ; hoặc (lùi) cả hai cùng nằm trong thân một vòng lặp — ràng buộc sau phép chốt
-        trong cùng thân vòng có hiệu lực từ vòng thứ hai. Đo được ở vòng 14 (phép quét theo
-        lớp, codex không chỉ): `rc = 0` · `for …: bang(rc == 0, …)` · `rc, bao = _quet(…)` ⇒
-        `[]` — món nợ r18 đã khai, nay đóng. Bị CHE khi một ràng buộc THỐNG TRỊ phép chốt
-        (đường của nó là tiền tố đường phép chốt) và nằm giữa (lối tiến) hay nằm trong vòng
-        lặp trong cùng chung (lối lùi).
-        """
-        khoa_ = khoa_cua(bang_, ten, noi_chot)
-        cac = bang_.get(khoa_, ())
-        duong_ = dieu_khien_bao(noi_chot)
+    def cac_dich_va_gia(nut):
+        """[(đích, biểu thức giá trị, là_vòng_lặp)] cho MỌI dạng ràng buộc CÓ giá trị."""
+        if isinstance(nut, _ast.Assign):
+            return [(d, nut.value, False) for d in nut.targets]
+        if isinstance(nut, (_ast.AnnAssign, _ast.AugAssign, _ast.NamedExpr)):
+            return [(nut.target, nut.value, False)] if nut.value is not None else []
+        if isinstance(nut, (_ast.For, _ast.AsyncFor, _ast.comprehension)):
+            return [(nut.target, nut.iter, True)]
+        if isinstance(nut, (_ast.With, _ast.AsyncWith)):
+            return [(it.optional_vars, it.context_expr, False) for it in nut.items
+                    if it.optional_vars is not None]
+        return []
 
-        def chung(d_):
-            k_ = 0
-            while k_ < len(d_) and k_ < len(duong_) and d_[k_] == duong_[k_]:
-                k_ += 1
-            return k_
+    def nguon_cua(g, lap=False):
+        """Tập nguồn mà một biểu thức đặt ra; `lap` ⇒ nguồn của MỖI PHẦN TỬ khi lặp trên nó."""
+        if lap:
+            if isinstance(g, (_ast.List, _ast.Tuple, _ast.Set)):
+                ra_ = set()
+                for e in g.elts:
+                    ra_ |= nguon_cua(e)
+                return ra_ or {"khac"}
+            # lặp trên một BỘ ĐÔI `_quet(…)` ⇒ lần lượt nhận mã rồi báo cáo
+            return {"ma", "bao"} if "bo_doi" in nguon_cua(g) else {"khac"}
+        if isinstance(g, _ast.NamedExpr):
+            return nguon_cua(g.value)
+        if la_quet(g):
+            return {"bo_doi"}
+        if isinstance(g, _ast.Subscript) and isinstance(g.slice, _ast.Constant):
+            if la_quet(g.value) or (isinstance(g.value, _ast.Name)
+                                    and "bo_doi" in nguon_tap(g.value.id)):
+                return {{0: "ma", 1: "bao"}.get(g.slice.value, "khac")}
+        if isinstance(g, _ast.Name):
+            return set(nguon_tap(g.id)) or {"khac"}
+        return {"khac"}
 
-        thong_tri = [x for x in cac if x[0] < vt and chung(x[2]) == len(x[2])]
-        ra_ = set()
-        for vt_, ng_, dk_ in cac:
-            k_ = chung(dk_)
-            tach = k_ < len(dk_) and k_ < len(duong_) and dk_[k_][0] == duong_[k_][0] \
-                and loai_tru(dk_[k_][1], duong_[k_][1])
-            if vt_ < vt and not tach and not any(vt_ < y[0] for y in thong_tri):
-                ra_.add(ng_)
-                continue
-            vong_ = [j_ for j_ in range(k_) if dk_[j_][1] == "lap"]
-            if vong_ and not any(len(y[2]) > vong_[-1] for y in thong_tri):
-                ra_.add(ng_)
-        return ra_
-
-    def nguon_tap(ten, vt, noi_chot):
-        # KHÔNG lọc lại ở đây: `tap_toi_duoc` đã lọc theo vị trí. Bản đầu lọc CẢ HAI chỗ, và
-        # đột biến `ct_xuat_xu_khong_theo_vi_tri` gỡ một chỗ mà SỐNG SÓT — mã thừa làm một
-        # phép đo mất răng. Một phép lọc, một chỗ, một đột biến.
-        return tap_toi_duoc(rang_buoc, ten, vt, noi_chot)
-
-    def uu_tien(tap):
-        """Một nhãn cho BÍ DANH: thận trọng về phía bắt — có `ma` thì là `ma`."""
-        for k in ("ma", "bo_doi", "bao"):
-            if k in tap:
-                return k
-        return "khac"
-
-    doi = True
-    while doi:                          # tới bất động điểm: bí danh nhiều tầng
-        doi = False
-        truoc = {k: list(v) for k, v in rang_buoc.items()}
-        rang_buoc.clear()
+    kich = -1
+    while kich != sum(len(v) for v in rang_buoc.values()):     # bất động điểm: bí danh nhiều tầng
+        kich = sum(len(v) for v in rang_buoc.values())
         for nut in _ast.walk(cay):
-            if isinstance(nut, _ast.FunctionDef):
-                for a in (*nut.args.posonlyargs, *nut.args.args, *nut.args.kwonlyargs,
-                          nut.args.vararg, nut.args.kwarg):
-                    if a is not None:
-                        ghi(a.arg, (0, 0), "khac", noi=nut.body[0] if nut.body else nut)
-            if isinstance(nut, _ast.comprehension):
-                # N79: đích lặp ràng buộc TRƯỚC khi phần tử được tính ở mỗi vòng ⇒ vị trí (0, 0),
-                # và nó thuộc phạm vi comprehension (nút cha của đích đi qua nút comprehension).
-                for d_ in _ast.walk(nut.target):
-                    if isinstance(d_, _ast.Name):
-                        ghi(d_.id, (0, 0), "khac", noi=d_)
-                continue
-            if not isinstance(nut, (_ast.Assign, _ast.AnnAssign, _ast.For, _ast.AsyncFor)):
-                continue
-            gia = getattr(nut, "value", None) or getattr(nut, "iter", None)
-            dich = nut.targets if isinstance(nut, _ast.Assign) else [nut.target]
-            vt = _ket(gia) if gia is not None else _ket(nut)
-            if gia is None:
-                continue
-            dk = dieu_khien_bao(nut)
-            if isinstance(nut, (_ast.For, _ast.AsyncFor)):
-                dk = dk + ((id(nut), "lap"),)    # biến lặp: iterable có thể RỖNG
-
-            def nguon_cua(g):
-                """Nguồn mà một biểu thức đặt ra, theo bảng ràng buộc của VÒNG TRƯỚC."""
-                if la_quet(g):
-                    return "bo_doi"
-                if (isinstance(g, _ast.Subscript) and la_quet(g.value)
-                        and isinstance(g.slice, _ast.Constant)):
-                    return {0: "ma", 1: "bao"}.get(g.slice.value, "khac")
-                if isinstance(g, _ast.Name):
-                    return uu_tien(tap_toi_duoc(truoc, g.id, _ket(g), g))
-                if (isinstance(g, _ast.Subscript) and isinstance(g.value, _ast.Name)
-                        and isinstance(g.slice, _ast.Constant)):
-                    if "bo_doi" in tap_toi_duoc(truoc, g.value.id, _ket(g), g):
-                        return {0: "ma", 1: "bao"}.get(g.slice.value, "khac")
-                return "khac"
-
-            ng = nguon_cua(gia)
-            for d in dich:
+            for d, gia, lap in cac_dich_va_gia(nut):
+                ng = nguon_cua(gia, lap)
                 if isinstance(d, (_ast.Tuple, _ast.List)):
                     # `ma, bao = _quet(…)` — CHỈ phần tử 0 là phán quyết.
                     for k, ph in enumerate(d.elts):
                         if isinstance(ph, _ast.Name):
-                            ghi(ph.id, vt,
-                                {0: "ma", 1: "bao"}.get(k, "khac") if ng == "bo_doi" else "khac",
-                                dk, noi=nut)
+                            ghi(ph.id, {0: "ma", 1: "bao"}.get(k, "khac")
+                                if "bo_doi" in ng else "khac")
                 elif isinstance(d, _ast.Name):
-                    ghi(d.id, vt, ng, dk, noi=nut)
-
-        def _chuan(b):
-            return {k: sorted(((x[0], x[1], tuple(sorted(x[2]))) for x in v)) for k, v in b.items()}
-        if _chuan(rang_buoc) != _chuan(truoc):
-            doi = True
+                    for x in ng:
+                        ghi(d.id, x)
 
     def cham_phan_quyet(dieu_kien):
         vt = _ket(dieu_kien)
@@ -3838,6 +3690,18 @@ _MAU_TOAN_TU = {
     # PHAI bat: comprehension KHONG rang buoc `rc` ⇒ doc `rc` cua `_quet` o pham vi bao.
     "comprehension_doc_bao":
         "def f():\n    rc, bao = _quet(a, b)\n    [bang(rc == 2, 'x') for _ in [0]]\n",
+    # r22 — N80: MOI dang rang buoc co gia tri ghi nguon; pham vi/vi tri/nhanh khong con hoi.
+    "walrus_tu_quet":
+        "def f():\n    (rc := _quet(a, b)[0])\n    bang(rc == 2, 'x')\n",
+    "comprehension_dich_tu_quet":
+        "def f():\n    [bang(rc == 2, 'x') for rc, bao in [_quet(a, b)]]\n",
+    "iterable_dau_o_pham_vi_bao":
+        "def f():\n    rc, bao = _quet(a, b)\n    [0 for rc in [bang(rc == 2, 'x')]]\n",
+    "mac_dinh_o_pham_vi_bao":
+        "def f():\n    rc, bao = _quet(a, b)\n    def g(rc=bang(rc == 2, 'x')):\n        pass\n",
+    # BAT THUA CO CHU DICH (N80): tham so lambda CHE `rc` — nay van bi bat, chi day ca vao kiem ke.
+    "lambda_tham_so_che":
+        "def f():\n    rc, bao = _quet(a, b)\n    (lambda rc: bang(rc == 2, 'x'))(0)\n",
     # PHAI bat: hai `except*` CO THE cung chay ⇒ `_quet` o nhanh truoc toi phep chot nhanh sau.
     "except_sao_cung_chay":
         "def f():\n    try:\n        pass\n    except* ValueError:\n        rc, bao = _quet(a, b)\n"
@@ -3883,6 +3747,10 @@ _MAU_LY_DO_MONG = {"rong": True, "khoang_trang": True, "khong_phai_chuoi": True,
                    "con_so": True, "danh_sach": True,
                    "that": False, "co_le_trang": False}
 
+# r22 — N80: CHIN mau duoi day doi tu False sang True CO CHU DICH — chung la meo CHE TEN (gan de,
+# `finally`, nhanh loai tru, `_quet` sau phep chot, comprehension/ham phu co `rc` rieng…) ma
+# r18..r21 da mo phong nhanh/pham vi/vi tri de khong bat. Chu kho chon DOI KIEN TRUC: bat thua o day
+# chi day mot ca vao BAN KIEM KE, khong lam cong lot. Tren cay that: THEM 0 (do duoc).
 _MAU_MONG = {"eq_rc": True, "eq_tt": True, "ne_rc": True, "ne_tt": True,
              "rc_bang_0": True, "ngoai_ds": True,
              "assert_tran": True, "assert_tt": True, "bi_danh": True,
@@ -3890,16 +3758,19 @@ _MAU_MONG = {"eq_rc": True, "eq_tt": True, "ne_rc": True, "ne_tt": True,
              "xuat_xu_bo_doi": True, "xuat_xu_bao_doi": True,
              "chot_truoc_khi_ghi_de": True,
              "ghi_de_co_dieu_kien": True, "ghi_de_trong_vong_lap": True,
-             "ghi_de_cung_nhanh": False,
+             "ghi_de_cung_nhanh": True,
              "with_nuot_truoc_ghi_de": True, "helper_long_che": True,
-             "with_thuong_ghi_de": False, "helper_rc_rieng": False,
+             "with_thuong_ghi_de": True, "helper_rc_rieng": True,
              "lop_long_phuong_thuc": True, "quay_lui_vong_lap": True,
-             "assert_warns_ghi_de": False, "finally_ghi_de": False,
-             "nhanh_loai_tru": False, "quet_sau_chot": False,
-             "comprehension_rc_rieng": False, "comprehension_doc_bao": True,
+             "assert_warns_ghi_de": True, "finally_ghi_de": True,
+             "nhanh_loai_tru": True, "quet_sau_chot": True,
+             "comprehension_rc_rieng": True, "comprehension_doc_bao": True,
              "except_sao_cung_chay": True,
+             "walrus_tu_quet": True, "comprehension_dich_tu_quet": True,
+             "iterable_dau_o_pham_vi_bao": True, "mac_dinh_o_pham_vi_bao": True,
+             "lambda_tham_so_che": True,
              "truong_co_che": False, "lech_oid": False,
-             "rc_gieo_san": False, "chuoi_trung_ten": False, "bi_danh_ghi_de": False,
+             "rc_gieo_san": False, "chuoi_trung_ten": False, "bi_danh_ghi_de": True,
              "bo_doi_truong_co_che": False,
              "assert_thong_diep": False, "khong_quet": False}
 
@@ -5015,7 +4886,7 @@ def t44_khong_lay_duoc_INDEX_thi_KHONG_DO_DUOC_chu_khong_lui_ve_rglob():
         # `_loi_goi_tran` của một bản sao — để chốt đo CỬA `quet`, không đo bộ gấp hằng. Bản
         # đầu dùng một phép khuếch đại vượt ngân sách làm mồi, và đột biến `bn_bo_ngan_sach`
         # giết THÊM ca này (bán kính 2/53): hai chốt đo chồng lên nhau.
-        neo = "def _loi_goi_tran(than: str):\n"
+        neo = "def _loi_goi_tran(than: str, sau=0):\n"
         than3 = bq.read_text(encoding="utf-8")
         dung(than3.count(neo) == 1, f"mỏ neo tiêm `{neo.strip()}` phải có đúng một lần")
         bq3 = tmp / "bash_nen_tiem_nem.py"

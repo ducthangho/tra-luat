@@ -15,8 +15,9 @@ lease_id: wp461-be-mat-thu-hai-cua-codex-exec-1g9-claude-20260925
 generation_truoc: wp461-be-mat-thu-hai-cua-codex-exec-1g8-claude-20260925
 generation_truoc_ghi_chu: >-
   KHONG dung thay_the_cho: g8 da het han 2026-09-25T06:09:00Z truoc khi ghi g9 (khong thay mot lease song).
-  Tep g8 CHUA giao (chi o nhanh ops/cap-lease-461-g8 9d90f9b097d2e4f4d7bc792a53cb6495960fa5a0) => nhanh g9 mang tep g8 theo nguyen byte
-  de land cung mot merge commit. PR #636 (nhanh agent/wp461-g8-claude) chuyen STALE theo §4: mergeable_state dirty sau khi
+  Tep lease g8 CHUA giao (chi o nhanh ops/cap-lease-461-g8 9d90f9b097d2e4f4d7bc792a53cb6495960fa5a0) => NHANH LEASE
+  ops/cap-lease-461-g9 (tach khoi nhanh ung vien agent/wp461-g9-claude) mang tep lease g8 theo nguyen byte cung tep nay,
+  de hai tep lease land bang mot PR lease; ung vien chi co 3 duong wp461. PR #636 (nhanh agent/wp461-g8-claude) chuyen STALE theo §4: mergeable_state dirty sau khi
   #623 land (b7973df84b359322b214c45cb8e59d4f1e7b098f). Head 77f272d435b0c23369b2348efa821c760d653036 la continuation base.
 role: executor
 provider: anthropic_claude
@@ -121,3 +122,7 @@ chua_do_duoc:
   - 'Danh tinh nguoi ky: #566.'
   - 'Serving model/effort/session cua reviewer qua App: KHONG DO DUOC.'
   - 'Cau anchor.cuong_do trong receipt con ghi "PR cua g8": khong sua de giu blob da audit; PR g9 mang nguyen chuoi commit g8.'
+  - >-
+    Thu tu: mot merge commit THU tai cho dafffc92f578c439f1a6ac0ca55234998487a0f3 (15:44:29Z) tao TRUOC khi ghi lease nay,
+    KHONG push; da bo, ung vien lam lai duoi lease: d4473e088c0a2f9864d98adba672eb8c599fa1f8 (15:58:13Z, cung tree
+    2053539869b4223065368be8a100c76487b39220). Review tai cho Codex luot 1 (tren dafffc9) nêu diem nay (P2).

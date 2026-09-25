@@ -599,13 +599,17 @@ jobs:
     # ma trận/`timeout-minutes`/tiền tố 9 bước với `gate`, KHÔNG thêm mặt điều kiện nào; phút TÍNH
     # TIỀN tăng vì trả tiền thiết lập ba lần. Consumer `loi_ruff_ci` đọc MỌI job, không chỉ `gate`.
     # Bước `test registry` (41,0 % tổng bước Windows) sống ở đây.
+    # #593 r2-g4 (đo 25-09-2026, ubuntu): trần 60 cắt job 107895998908 — `test registry` chạy TUẦN TỰ;
+    # bước ấy 32,65 phút trên master (run 36076793429) → 52,15 phút với #593 (job 107910512895) ⇒ 60 → 90.
+    # 90 cỡ theo UBUNTU: windows-latest đã chạm trần 60 từ run 35637741169 (trước #593) — 90 KHÔNG đủ Windows.
+    # Timeout KHÁC `gate`/`gate-packet-loop` (vẫn 60) có chủ đích; tiền tố 9 bước và ma trận vẫn chung.
     needs: chuan-bi
     strategy:
       fail-fast: false
       matrix:
         os: ${{ fromJson(needs.chuan-bi.outputs.os) }}
     runs-on: ${{ matrix.os }}
-    timeout-minutes: 60
+    timeout-minutes: 90
     env:
       PYTHONIOENCODING: utf-8
       PYTHONUTF8: "1"

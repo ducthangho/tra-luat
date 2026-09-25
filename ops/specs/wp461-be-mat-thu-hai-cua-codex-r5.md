@@ -18,28 +18,29 @@ ly_do_revision: >-
 sinh_ra_tu: r4 (eda1dd12...) + quyet dinh chu kho 5825489539 + uy quyen chung 5825376799.
 ---
 
-# `wp461` — ban **r5** (bookkeeping, sua r4 theo cross-review va quyet dinh chu kho)
+# `wp461` — bản **r5** (bookkeeping; sửa r4 theo cross-review và quyết định chủ kho)
 
-## 0. Thay doi cua r5 so voi r4 (uu tien hon noi dung r4 ben duoi khi mau thuan)
+## 0. Thay đổi của r5 so với r4 (ưu tiên hơn nội dung r4 bên dưới khi mâu thuẫn)
 
-| truong | r5 |
+| trường | r5 |
 |---|---|
-|  /  | **5** / **7** (g3 san pham; g4, g5, g6 bookkeeping — lich su) |
-|  (packet, sensitive) | **** — chu kho audit exact head cuoi truoc khi land; ket qua luot review App ghi rieng  |
-|  | **** (base cua nhanh bien nhan, truoc moi thay doi bookkeeping) |
-|  | **** (head PR #625 luc soan r5, 40 hex) |
-| master luc soan |  |
-| executor |  ·  ·  ·  · effort medium |
-| reviewer |  qua GitHub App (yeu cau gpt-6-sol, effort medium; model/effort/session KHONG_DO_DUOC) |
-| attempts | g3 = 1; g4/g5/g6 VOID theo 5825489539;  bookkeeping **6**;  **1/6** |
-| nhanh / PR | nhanh rieng **** (tu ) + PR moi; PR #624/#625/#627/#628/#630 la LICH SU, dong khi PR g7 land |
-| dieu kien dong | PR cua g7 land bang merge commit sau human audit chu kho tren exact head; A7/A9 do tren master |
-| tran codex | uy quyen chung 5825376799 (toi da 6 luot moi lan nang); luot App tu ban khi bo draft cung dem |
-| moi OID | du 40 hex, assert do dai khi ghi |
-| lich su ban ung vien trong receipt | lenh kiem:  + sha256 tung , loai ban hien tai |
+| `revision` / `generation` | **5** / **7** (g3 sản phẩm; g4, g5, g6 bookkeeping — lịch sử) |
+| `assurance_target` (packet, sensitive) | **`human_audited`** — chủ kho audit exact head cuối trước khi land; kết quả lượt review App ghi riêng `ket_qua_review_app: advisory_review` |
+| `immutable_acceptance_baseline` | **`541fa6ca9ba78d2669261b528572dbc05b53ea87`** (base của nhánh biên nhận, trước mọi thay đổi bookkeeping) |
+| `continuation_base` | **`45de8954878519d0886942e45c149790aadea710`** (head PR #625 lúc soạn r5) |
+| master lúc soạn | `601a0f18c83057fa079d204122660f5697fc6389` |
+| executor | `provider: anthropic_claude` · `execution_surface: claude_code` · `transport: machine/local` · `model: claude-opus-5-5` · effort medium |
+| reviewer | `openai_codex` qua GitHub App (yêu cầu gpt-6-sol, effort medium; model/effort/session `KHONG_DO_DUOC`) |
+| attempts | g3 = 1; g4/g5/g6 VOID theo `5825489539`; `attempts_limit` bookkeeping **6**; `attempts_used` **1/6** |
+| nhánh / PR | nhánh riêng **`agent/wp461-g7-claude`** (từ `45de8954878519d0886942e45c149790aadea710`) + PR mới; PR #624/#625/#627/#628/#630 là LỊCH SỬ, đóng khi PR g7 land |
+| điều kiện đóng | PR của g7 land bằng merge commit sau human audit chủ kho trên exact head; A7/A9 đo trên master |
+| trần codex | uỷ quyền chung `5825376799` (tối đa 6 lượt mỗi lần nâng); lượt App tự bắn khi bỏ draft cũng đếm |
+| mọi OID | đủ 40 hex, assert độ dài khi ghi |
+| lịch sử bản ứng viên trong receipt | lệnh kiểm: `git log --reverse --format=%H 541fa6ca9ba78d2669261b528572dbc05b53ea87..HEAD^ -- ops/reviews/wp461-review-1-codex-verdict.receipt.yaml` + sha256 từng `commit:path`, loại bản hiện tại |
 
+## Nội dung r4 được giữ (tham chiếu, đã bị §0 ghi đè ở các trường trên)
 
-## Noi dung r4 duoc giu (tham chieu)
+# `wp461` — bề mặt thứ hai của Codex: **hồ sơ biên nhận** (bản **r4**, bookkeeping)
 
 > **BẢN NHÁP — CHƯA ĐÓNG BĂNG.** Soạn bởi phiên executor Claude Code sau finding P1 `4099812192` (cross-review
 > #624) theo chỉ thị chủ kho `2026-09-25T00:2xZ` *"tiếp tục lặp vá, cross-review theo phân lớp…"*. Tệp này

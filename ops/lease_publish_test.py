@@ -8858,8 +8858,11 @@ def t190_DA_DANG_ma_tep_bi_SUA_van_phai_qua_kiem_tru_chot_han():
     `rc=4` — workflow coi là bỏ qua thành công, và `ai-dang-giu` tính tệp đã sửa là người giữ.
     Trên master `kiem()` chạy trước nên không có lỗ này: HỒI QUY của chính packet.
 
-    Năm vế, mỗi vế một đột biến riêng làm nó đỏ (bản đầu ghi "Ba vế"; (iv) thêm ở lượt 14, (v) ở
-    lượt 15):
+    Các vế dưới đây là FIXTURE; danh sách chốt cần phủ KHÔNG còn viết tay ở đây. Ba lượt liền
+    (14 → (iv), 15 → (v), 16 → (vi)) một danh sách tay tưởng đủ rồi lại thiếu, nên từ lượt 16
+    `t191` LIỆT KÊ BẰNG MÁY mọi chốt của `kiem()` và đòi ca này phủ từng cái — một chốt mới mà
+    không có vế ở đây thì `t191` ĐỎ. Bản đầu docstring này ghi "Ba vế", rồi "Năm vế"; con số ấy
+    đã trôi hai lần, nên thôi ghi:
       (i)   đã đăng, tệp SẠCH                      -> vẫn `rc=9` (idempotent)
             đột biến: nhánh đã-có-dấu ném một mã KHÁC thay vì ném lại `rc=9`.
       (ii)  đã đăng, tệp bị sửa: tự cấp / neo prompt không kiểm được / thiếu trường / hạn hỏng
@@ -8879,6 +8882,10 @@ def t190_DA_DANG_ma_tep_bi_SUA_van_phai_qua_kiem_tru_chot_han():
             đột biến: `if tep is not None and not bo_qua_han:` (skip_file_gates), hoặc nhánh
             đã-có-dấu gọi `kiem(lease, bo_qua_han=True)` bỏ `tep, goc` (drop_path) — cả hai sống
             185/185 trước vế này.
+      (vi)  neo prompt CÓ `tep` (đúng / lệch băm / tệp không tồn tại), `lease_id` sai ký tự,
+            `packet_issue = 0` — cả chưa đăng lẫn đã đăng (lượt 16, F1/F2: C1, C2, C3 sống 185/185);
+            (vi-b) nhánh đã-có-dấu phải nêu CÙNG lý do với nhánh chưa đăng cho lease tự cấp bằng tên
+            provider — chốt provider bị chốt allowlist che về mã thoát, `t191` bắt.
     """
     L = _lease_579
     thieu = L()
@@ -8947,6 +8954,211 @@ def t190_DA_DANG_ma_tep_bi_SUA_van_phai_qua_kiem_tru_chot_han():
                 chot(ma == mong, f"{nhan}, {'ĐÃ' if co_dau else 'chưa'} đăng: mong rc={mong}, "
                                  f"nhận rc={ma}. Nhánh đã-có-dấu phải chạy cả chốt cần tệp.")
 
+
+    # (vi) Chốt cần `tep` ở ĐÚNG nhánh sản xuất — cross-review lượt 16 (25-09, F1/F2): đột biến
+    # `neo = "" if bo_qua_han else _kiem_neo_prompt(...)` (C1) sống 185/185, vì vế (ii) đo neo prompt
+    # KHÔNG kèm `tep` còn vế (v) có `tep` mà không có neo; trong khi `ops-publish-lease.yml` LUÔN gọi
+    # `kiem-github "$tep"`. Cùng lượt: miễn regex `lease_id` (C2) và miễn `packet_issue > 0` (C3) khi
+    # `bo_qua_han` cũng sống. Vá vế này thôi thì lần thứ tư đến y hệt — nên `t191` LIỆT KÊ BẰNG MÁY
+    # mọi chốt của `kiem()` và đòi `t190` phủ từng cái; vế này là phần fixture cho ba chốt còn trống.
+    with San() as s:
+        (s / ".git").mkdir()
+        duong, sha = dat_prompt(s, b"prompt that cho t190 ve (vi)\n")
+        git = _GitKhoGia({"a"}, {"a"}, [])
+        for i, (nhan, lease, mong_chua, mong_da) in enumerate((
+                ("neo prompt ĐÚNG băm (đối chứng xanh)",
+                 L(prompt_path=duong, prompt_sha256_required=sha), None, RC_DA_DANG),
+                ("neo prompt LỆCH băm", L(prompt_path=duong, prompt_sha256_required="0" * 64),
+                 RC_NEO, RC_NEO),
+                ("neo prompt trỏ tệp KHÔNG tồn tại",
+                 L(prompt_path="ops/prompts/khong-co.md", prompt_sha256_required=sha), RC_NEO, RC_NEO),
+                ("lease_id sai ký tự", L(lease_id="wp579 thu!"), RC_NOI_DUNG, RC_NOI_DUNG),
+                ("packet_issue = 0", L(packet_issue=0), RC_NOI_DUNG, RC_NOI_DUNG))):
+            p = viet(s, lease, ten=f"vi-{i}.yaml")
+            for co_dau, mong in ((False, mong_chua), (True, mong_da)):
+                if mong is None:
+                    continue          # chưa đăng + sạch: đi tiếp tới lớp GitHub, ngoài vế này
+                gh, _ = _dung_gh_579(lease, co_dau)
+                ex, _mod = _goi_lop_gh(gh, "kiem_github", lease, p, s, env_them=ENV_GITHUB,
+                                       truoc_khi_chay=lambda m, g=git: setattr(m, "GOI_GIT", g))
+                ma = 0 if ex is None else ex.ma
+                chot(ma == mong, f"(vi) {nhan}, {'ĐÃ' if co_dau else 'chưa'} đăng, CÓ tep: mong rc={mong}, "
+                                 f"nhận rc={ma}.")
+
+    # (vi-b) CHẨN ĐOÁN, không chỉ mã thoát — `t191` bắt (25-09): chốt "granted_by là tên provider" bị
+    # chốt allowlist ngay sau nó CHE (cùng `rc=4`, hai tập không giao nhau), nên miễn nó khi `bo_qua_han`
+    # vẫn ra `rc=4` và mọi vế đo mã thoát đều QUA. Thứ phân biệt được là LÝ DO: nhánh đã-có-dấu phải nói
+    # đúng điều nhánh chưa đăng nói.
+    tu_cap = L(granted_by="codex")
+    ly_do = {}
+    for co_dau in (False, True):
+        gh, _ = _dung_gh_579(tu_cap, co_dau)
+        ex, _mod = _goi_lop_gh(gh, "kiem_github", tu_cap, env_them=ENV_GITHUB)
+        ly_do[co_dau] = "" if ex is None else _chuoi_thuan(getattr(ex, "thong_diep", ""), "<không đọc được>")
+    chot(ly_do[False] and ly_do[False] == ly_do[True],
+         f"(vi-b) tự cấp bằng tên provider: nhánh đã-có-dấu phải nêu CÙNG lý do với nhánh chưa đăng. "
+         f"chưa đăng: {ly_do[False][:90]!r} · đã đăng: {ly_do[True][:90]!r}")
+
+
+def _liet_ke_chot_kiem(nguon: str):
+    """Liệt kê BẰNG MÁY mọi chốt TRỰC TIẾP trong thân `kiem()` — thứ `t191` đòi `t190` phủ.
+
+    Chốt = (a) câu lệnh `raise Chan(...)`; (b) lời gọi một hàm tên bắt đầu `_kiem_` hoặc `_doc_` đứng
+    thành câu lệnh riêng hoặc làm vế phải của một phép gán. Chốt nằm dưới một `if` mà điều kiện có
+    nhắc `bo_qua_han` là miễn trừ ĐÃ ĐƯỢC PHÉP (chốt hạn) — trả riêng, không đòi phủ.
+
+    KHÔNG thấy (khai, đừng đọc rộng hơn): chốt ngoài `kiem()` (ví dụ `_kiem_loai_so_hieu` trong
+    `kiem_github`); lời gọi chốt lồng trong một biểu thức (điều kiện `if`, đối số của hàm khác); chốt
+    bên trong các hàm `_kiem_*` (mỗi hàm được tính MỘT chốt — miễn cả hàm); ngoại lệ không phải `Chan`.
+    """
+    import ast
+    goc = ast.parse(nguon)
+    fn = next(f for f in goc.body if isinstance(f, ast.FunctionDef) and f.name == "kiem")
+    ds, mien = [], []
+
+    def goi_chot(c):
+        return (isinstance(c, ast.Call) and isinstance(c.func, ast.Name)
+                and c.func.id.startswith(("_kiem_", "_doc_")))
+
+    def duyet(stmts, da_mien):
+        for st in stmts:
+            if (isinstance(st, ast.Raise) and isinstance(st.exc, ast.Call)
+                    and isinstance(st.exc.func, ast.Name) and st.exc.func.id == "Chan"):
+                (mien if da_mien else ds).append(("raise Chan", st.lineno))
+            elif isinstance(st, (ast.Expr, ast.Assign)) and goi_chot(st.value):
+                (mien if da_mien else ds).append((st.value.func.id, st.lineno))
+            if isinstance(st, ast.If):
+                m = da_mien or any(isinstance(n, ast.Name) and n.id == "bo_qua_han"
+                                   for n in ast.walk(st.test))
+                duyet(st.body, m)
+                duyet(st.orelse, m)
+            else:
+                for ten in ("body", "orelse", "finalbody"):
+                    duyet(getattr(st, ten, []) or [], da_mien)
+                for h in getattr(st, "handlers", []) or []:
+                    duyet(h.body, da_mien)
+    duyet(fn.body, False)
+    return ds, mien
+
+
+def _mien_mot_chot(nguon: str, dong: int) -> str:
+    """Đột biến: chốt ở dòng `dong` của `kiem()` được MIỄN khi `bo_qua_han` — đúng hình dạng hồi quy
+    mà `t190` sinh ra để chặn. Trả mã nguồn cả module (qua `ast.unparse`)."""
+    import ast
+
+    class _Mien(ast.NodeTransformer):
+        def __init__(self):
+            self.trong_kiem = False
+            self.da_doi = 0
+
+        def visit_FunctionDef(self, node):
+            if node.name != "kiem":
+                return node
+            self.trong_kiem = True
+            self.generic_visit(node)
+            self.trong_kiem = False
+            return node
+
+        def _boc(self, node):
+            self.da_doi += 1
+            return ast.If(test=ast.UnaryOp(op=ast.Not(), operand=ast.Name(id="bo_qua_han", ctx=ast.Load())),
+                          body=[node], orelse=[])
+
+        def visit_Raise(self, node):
+            return self._boc(node) if self.trong_kiem and node.lineno == dong else node
+
+        def visit_Expr(self, node):
+            return self._boc(node) if self.trong_kiem and node.lineno == dong else node
+
+        def visit_Assign(self, node):
+            if self.trong_kiem and node.lineno == dong:
+                self.da_doi += 1
+                node.value = ast.IfExp(test=ast.Name(id="bo_qua_han", ctx=ast.Load()),
+                                       body=ast.Constant(value=""), orelse=node.value)
+            return node
+
+    cay = ast.parse(nguon)
+    t = _Mien()
+    cay = ast.fix_missing_locations(t.visit(cay))
+    if t.da_doi != 1:
+        raise TinHieuChotCa(f"đột biến dòng {dong} đổi {t.da_doi} nút, không phải đúng 1")
+    return ast.unparse(cay)
+
+
+def _chay_t190_tren(nguon: str, thu_muc: Path, ten: str) -> str:
+    """Chạy `t190` với module cổng dựng từ `nguon`; trả `CHOT` / `QUA` / `TRAN:<lớp>`."""
+    import importlib.util
+    p = thu_muc / f"{ten}.py"
+    p.write_text(nguon, encoding="utf-8")
+
+    def _nap():
+        spec = importlib.util.spec_from_file_location(f"lp_t191_{ten}", p)
+        m = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(m)
+        return m
+    cu, cu_bc = globals()["_nap_cong"], sys.dont_write_bytecode
+    globals()["_nap_cong"], sys.dont_write_bytecode = _nap, True
+    try:
+        t190_DA_DANG_ma_tep_bi_SUA_van_phai_qua_kiem_tru_chot_han()
+        return "QUA"
+    except TinHieuChotCa:
+        return "CHOT"
+    except Exception as ex:  # noqa: BLE001 — không phải tín hiệu của t190 thì KHÔNG tính là phủ
+        return "TRAN:" + _ten_lop(ex)
+    finally:
+        globals()["_nap_cong"], sys.dont_write_bytecode = cu, cu_bc
+
+
+@ca
+def t191_MOI_chot_cua_kiem_deu_duoc_t190_phu_o_nhanh_DA_DANG():
+    """A23 KHÔNG còn liệt kê tay — đặc tả r11 trỏ vào ca này.
+
+    Ba lượt liền (14, 15, 16) `t190` phải thêm một vế sau khi tưởng đủ, vì danh sách chốt cần phủ
+    được viết TAY. Ca này lấy danh sách bằng `_liet_ke_chot_kiem` (AST thân `kiem()`), rồi với MỖI
+    chốt dựng đột biến "miễn chốt ấy khi `bo_qua_han`" và đòi `t190` ĐỎ bằng `TinHieuChotCa`. Thêm
+    một chốt vào `kiem()` mà không thêm vế cho `t190` ⇒ ca này ĐỎ, nêu tên và dòng của chốt.
+
+    Ba chốt tự kiểm, không có chúng thì ca này không phải bằng chứng:
+      - ĐỐI CHỨNG XANH: nguồn đi qua `ast.unparse` KHÔNG đột biến phải cho `t190` QUA — nếu không,
+        mọi "CHOT" dưới đây có thể chỉ là hậu quả của việc dựng lại nguồn.
+      - CA ÂM: chèn vào `kiem()` một chốt giả mà không fixture nào chạm ⇒ phép liệt kê phải thấy
+        thêm ĐÚNG MỘT chốt, và đột biến miễn nó phải cho `t190` QUA (tức "không được phủ").
+      - Phép liệt kê phải thấy ĐÚNG MỘT chốt được miễn sẵn (chốt hạn) — thấy 0 nghĩa là nó không
+        còn nhận ra miễn trừ; thấy 2 nghĩa là có một miễn trừ mới chưa ai duyệt.
+
+    Phạm vi CÒN HỞ, khai ở `_liet_ke_chot_kiem` và ở đặc tả r11: chốt ngoài `kiem()` (F4 lượt 16,
+    `_kiem_loai_so_hieu`), lời gọi chốt lồng trong biểu thức, chốt bên trong từng hàm `_kiem_*`.
+    """
+    import tempfile
+    nguon = SCRIPT.read_text(encoding="utf-8")
+    ds, mien = _liet_ke_chot_kiem(nguon)
+    chot(len(mien) == 1, f"phải thấy đúng MỘT chốt đã được miễn (chốt hạn), thấy {mien}")
+    chot(len(ds) >= 1, "không liệt kê được chốt nào trong kiem() — phép liệt kê hỏng")
+    with tempfile.TemporaryDirectory() as t:
+        td = Path(t)
+        import ast
+        chot(_chay_t190_tren(ast.unparse(ast.parse(nguon)), td, "doi_chung") == "QUA",
+             "ĐỐI CHỨNG: t190 phải QUA trên nguồn dựng lại không đột biến")
+        khong_phu = []
+        for i, (ten, dong) in enumerate(ds):
+            kq = _chay_t190_tren(_mien_mot_chot(nguon, dong), td, f"m{i}")
+            if kq != "CHOT":
+                khong_phu.append(f"{ten} (dòng {dong}): {kq}")
+        chot(not khong_phu, f"chốt của kiem() KHÔNG được t190 phủ ở nhánh đã-có-dấu: {khong_phu}")
+        # CA ÂM — chốt giả chèn trước dòng đọc `reviewed_sha_required`.
+        moc = '    sha = str(lease["reviewed_sha_required"]).strip()\n'
+        chot(nguon.count(moc) == 1, "không tìm thấy mốc chèn chốt giả trong kiem()")
+        gia = nguon.replace(moc, '    if lease.get("chot_gia_t191"):\n'
+                                 '        raise Chan(RC_NOI_DUNG, "chot gia t191")\n' + moc)
+        ds_gia, _ = _liet_ke_chot_kiem(gia)
+        chot(len(ds_gia) == len(ds) + 1, f"CA ÂM: chèn một chốt mà phép liệt kê thấy {len(ds_gia)} "
+                                         f"thay vì {len(ds) + 1}")
+        moi = [d for (_, d) in ds_gia if gia.split("\n")[d - 1].strip().startswith("raise Chan(RC_NOI_DUNG, \"chot gia")]
+        chot(len(moi) == 1, f"CA ÂM: không định vị được chốt giả: {moi}")
+        kq = _chay_t190_tren(_mien_mot_chot(gia, moi[0]), td, "am")
+        chot(kq == "QUA", f"CA ÂM: miễn chốt giả mà t190 ra {kq} — t190 không thể phủ một chốt không "
+                          f"fixture nào chạm, nên phải QUA; ra khác nghĩa là phép đo không phân biệt.")
+    print(f"t191: {len(ds)} chốt của kiem() đều được t190 phủ ở nhánh đã-có-dấu; miễn sẵn: {mien}")
 
 @ca
 def t185_cua_DEM_phai_chot_KET_QUA_truoc_khi_chot_SO_LOI_GOI():

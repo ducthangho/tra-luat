@@ -9000,88 +9000,118 @@ def t190_DA_DANG_ma_tep_bi_SUA_van_phai_qua_kiem_tru_chot_han():
          f"chưa đăng: {ly_do[False][:90]!r} · đã đăng: {ly_do[True][:90]!r}")
 
 
+_PHAM_VI_LONG = ("FunctionDef", "AsyncFunctionDef", "Lambda", "ClassDef")
+
+
+def _la_chot(n) -> bool:
+    """Một nút là CHỐT khi nó là `raise Chan(...)` hoặc một lời gọi hàm tên `_kiem_*`/`_doc_*` — ở BẤT KỲ đâu."""
+    import ast
+    if isinstance(n, ast.Raise):
+        return (isinstance(n.exc, ast.Call) and isinstance(n.exc.func, ast.Name) and n.exc.func.id == "Chan")
+    return (isinstance(n, ast.Call) and isinstance(n.func, ast.Name)
+            and n.func.id.startswith(("_kiem_", "_doc_")))
+
+
 def _liet_ke_chot_kiem(nguon: str):
-    """Liệt kê BẰNG MÁY mọi chốt TRỰC TIẾP trong thân `kiem()` — thứ `t191` đòi `t190` phủ.
+    """Liệt kê BẰNG MÁY mọi chốt trong thân `kiem()` — thứ `t191` đòi `t190` phủ.
 
-    Chốt = (a) câu lệnh `raise Chan(...)`; (b) lời gọi một hàm tên bắt đầu `_kiem_` hoặc `_doc_` đứng
-    thành câu lệnh riêng hoặc làm vế phải của một phép gán. Chốt nằm dưới một `if` mà điều kiện có
-    nhắc `bo_qua_han` là miễn trừ ĐÃ ĐƯỢC PHÉP (chốt hạn) — trả riêng, không đòi phủ.
+    Duyệt TỔNG QUÁT mọi nút con, KHÔNG liệt kê tay loại câu lệnh (cross-review lượt 17, F1: bản trước
+    chỉ nhìn `Expr`/`Assign` và bốn trường thân khối nên sót `AnnAssign` và thân `match … case`). Dừng ở
+    ranh giới phạm vi lồng (`def`, `lambda`, `class` bên trong). Chốt nằm dưới một điều kiện nhắc
+    `bo_qua_han` (`if`/`while`/biểu thức `… if … else …`/vế trước của `and`·`or`/`case … if`) là
+    miễn trừ ĐÃ ĐƯỢC PHÉP (chốt hạn) — trả riêng. Mỗi chốt định danh bằng `(loại, tên, dòng, cột)`.
 
-    KHÔNG thấy (khai, đừng đọc rộng hơn): chốt ngoài `kiem()` (ví dụ `_kiem_loai_so_hieu` trong
-    `kiem_github`); lời gọi chốt lồng trong một biểu thức (điều kiện `if`, đối số của hàm khác); chốt
-    bên trong các hàm `_kiem_*` (mỗi hàm được tính MỘT chốt — miễn cả hàm); ngoại lệ không phải `Chan`.
+    KHÔNG thấy (khai): chốt ngoài `kiem()` (ví dụ `_kiem_loai_so_hieu` trong `kiem_github`); chốt BÊN
+    TRONG từng hàm `_kiem_*` (mỗi lời gọi là MỘT chốt); ngoại lệ không phải `Chan`; lời gọi qua tên khác
+    (bí danh, thuộc tính).
     """
     import ast
-    goc = ast.parse(nguon)
-    fn = next(f for f in goc.body if isinstance(f, ast.FunctionDef) and f.name == "kiem")
+    fn = next(f for f in ast.parse(nguon).body if isinstance(f, ast.FunctionDef) and f.name == "kiem")
+
+    def nhac(x):
+        return x is not None and any(isinstance(n, ast.Name) and n.id == "bo_qua_han" for n in ast.walk(x))
+
     ds, mien = [], []
 
-    def goi_chot(c):
-        return (isinstance(c, ast.Call) and isinstance(c.func, ast.Name)
-                and c.func.id.startswith(("_kiem_", "_doc_")))
-
-    def duyet(stmts, da_mien):
-        for st in stmts:
-            if (isinstance(st, ast.Raise) and isinstance(st.exc, ast.Call)
-                    and isinstance(st.exc.func, ast.Name) and st.exc.func.id == "Chan"):
-                (mien if da_mien else ds).append(("raise Chan", st.lineno))
-            elif isinstance(st, (ast.Expr, ast.Assign)) and goi_chot(st.value):
-                (mien if da_mien else ds).append((st.value.func.id, st.lineno))
-            if isinstance(st, ast.If):
-                m = da_mien or any(isinstance(n, ast.Name) and n.id == "bo_qua_han"
-                                   for n in ast.walk(st.test))
-                duyet(st.body, m)
-                duyet(st.orelse, m)
-            else:
-                for ten in ("body", "orelse", "finalbody"):
-                    duyet(getattr(st, ten, []) or [], da_mien)
-                for h in getattr(st, "handlers", []) or []:
-                    duyet(h.body, da_mien)
-    duyet(fn.body, False)
+    def di(n, da_mien):
+        if type(n).__name__ in _PHAM_VI_LONG:
+            return
+        if _la_chot(n):
+            ten = "raise Chan" if isinstance(n, ast.Raise) else n.func.id
+            (mien if da_mien else ds).append((ten, n.lineno, n.col_offset))
+        if isinstance(n, (ast.If, ast.While, ast.IfExp)):
+            di(n.test, da_mien)
+            for con in ([n.body] if isinstance(n, ast.IfExp) else n.body) + ([n.orelse] if isinstance(n, ast.IfExp) else n.orelse):
+                di(con, da_mien or nhac(n.test))
+            return
+        if isinstance(n, ast.BoolOp):
+            truoc = False
+            for v in n.values:
+                di(v, da_mien or truoc)
+                truoc = truoc or nhac(v)
+            return
+        if isinstance(n, ast.match_case):
+            di(n.pattern, da_mien)
+            if n.guard is not None:
+                di(n.guard, da_mien)
+            for con in n.body:
+                di(con, da_mien or nhac(n.guard))
+            return
+        for con in ast.iter_child_nodes(n):
+            di(con, da_mien)
+    for st in fn.body:
+        di(st, False)
     return ds, mien
 
 
-def _mien_mot_chot(nguon: str, dong: int) -> str:
-    """Đột biến: chốt ở dòng `dong` của `kiem()` được MIỄN khi `bo_qua_han` — đúng hình dạng hồi quy
-    mà `t190` sinh ra để chặn. Trả mã nguồn cả module (qua `ast.unparse`)."""
+def _dem_chot_tho(nguon: str) -> int:
+    """Phép đếm ĐỘC LẬP cho `t191`: `ast.walk` thô trên TOÀN `kiem()` (kể cả phạm vi lồng). Lệch với bộ liệt
+    kê nghĩa là bộ liệt kê bỏ sót một loại nút, hoặc `kiem()` có phạm vi lồng chứa chốt — cả hai phải ĐỎ."""
+    import ast
+    fn = next(f for f in ast.parse(nguon).body if isinstance(f, ast.FunctionDef) and f.name == "kiem")
+    return sum(1 for n in ast.walk(fn) if _la_chot(n))
+
+
+def _mien_mot_chot(nguon: str, dong: int, cot: int) -> str:
+    """Đột biến: chốt ở `(dòng, cột)` của `kiem()` được MIỄN khi `bo_qua_han` — đúng hình dạng hồi quy mà
+    `t190` sinh ra để chặn. CÙNG hợp đồng duyệt với `_liet_ke_chot_kiem`: `raise` bọc `if not bo_qua_han:`,
+    lời gọi thay bằng `("" if bo_qua_han else <lời gọi>)` — dùng được ở MỌI vị trí biểu thức."""
     import ast
 
     class _Mien(ast.NodeTransformer):
         def __init__(self):
-            self.trong_kiem = False
-            self.da_doi = 0
+            self.trong_kiem, self.da_doi = False, 0
+
+        def _dich(self, node):
+            return self.trong_kiem and node.lineno == dong and node.col_offset == cot
 
         def visit_FunctionDef(self, node):
-            if node.name != "kiem":
+            if node.name != "kiem" or self.trong_kiem:
                 return node
             self.trong_kiem = True
             self.generic_visit(node)
             self.trong_kiem = False
             return node
 
-        def _boc(self, node):
-            self.da_doi += 1
-            return ast.If(test=ast.UnaryOp(op=ast.Not(), operand=ast.Name(id="bo_qua_han", ctx=ast.Load())),
-                          body=[node], orelse=[])
-
         def visit_Raise(self, node):
-            return self._boc(node) if self.trong_kiem and node.lineno == dong else node
-
-        def visit_Expr(self, node):
-            return self._boc(node) if self.trong_kiem and node.lineno == dong else node
-
-        def visit_Assign(self, node):
-            if self.trong_kiem and node.lineno == dong:
+            if self._dich(node):
                 self.da_doi += 1
-                node.value = ast.IfExp(test=ast.Name(id="bo_qua_han", ctx=ast.Load()),
-                                       body=ast.Constant(value=""), orelse=node.value)
+                return ast.If(test=ast.UnaryOp(op=ast.Not(), operand=ast.Name(id="bo_qua_han", ctx=ast.Load())),
+                              body=[node], orelse=[])
+            return self.generic_visit(node)
+
+        def visit_Call(self, node):
+            self.generic_visit(node)
+            if self._dich(node):
+                self.da_doi += 1
+                return ast.IfExp(test=ast.Name(id="bo_qua_han", ctx=ast.Load()), body=ast.Constant(value=""),
+                                 orelse=node)
             return node
 
-    cay = ast.parse(nguon)
     t = _Mien()
-    cay = ast.fix_missing_locations(t.visit(cay))
+    cay = ast.fix_missing_locations(t.visit(ast.parse(nguon)))
     if t.da_doi != 1:
-        raise TinHieuChotCa(f"đột biến dòng {dong} đổi {t.da_doi} nút, không phải đúng 1")
+        raise TinHieuChotCa(f"đột biến ({dong}, {cot}) đổi {t.da_doi} nút, không phải đúng 1")
     return ast.unparse(cay)
 
 
@@ -9109,56 +9139,74 @@ def _chay_t190_tren(nguon: str, thu_muc: Path, ten: str) -> str:
         globals()["_nap_cong"], sys.dont_write_bytecode = cu, cu_bc
 
 
+_CHOT_GIA_T191 = {  # tên: đoạn chèn vào kiem() — mỗi loại nút một dạng; bản trước sót AnnAssign và match
+    "if-raise": '    if lease.get("chot_gia_t191"):\n        raise Chan(RC_NOI_DUNG, "chot gia t191")\n',
+    "AnnAssign": "    gia_t191: object = _kiem_gia_t191(lease)\n",
+    "match": ('    match lease.get("chot_gia_t191"):\n        case True:\n'
+              '            raise Chan(RC_NOI_DUNG, "chot gia t191")\n'),
+    "walrus": "    if (gia_t191 := _kiem_gia_t191(lease)) is not None:\n        pass\n",
+    "for": "    for _gia in (1,):\n        _kiem_gia_t191(lease)\n",
+    "AugAssign": "    gia_n = 0\n    gia_n += len(str(_kiem_gia_t191(lease)))\n",
+    "doi-so-long": "    str(_kiem_gia_t191(lease))\n",
+}
+
+
 @ca
 def t191_MOI_chot_cua_kiem_deu_duoc_t190_phu_o_nhanh_DA_DANG():
     """A23 KHÔNG còn liệt kê tay — đặc tả r11 trỏ vào ca này.
 
     Ba lượt liền (14, 15, 16) `t190` phải thêm một vế sau khi tưởng đủ, vì danh sách chốt cần phủ
-    được viết TAY. Ca này lấy danh sách bằng `_liet_ke_chot_kiem` (AST thân `kiem()`), rồi với MỖI
-    chốt dựng đột biến "miễn chốt ấy khi `bo_qua_han`" và đòi `t190` ĐỎ bằng `TinHieuChotCa`. Thêm
-    một chốt vào `kiem()` mà không thêm vế cho `t190` ⇒ ca này ĐỎ, nêu tên và dòng của chốt.
+    được viết TAY. Ca này lấy danh sách bằng `_liet_ke_chot_kiem` (duyệt AST tổng quát thân `kiem()`),
+    rồi với MỖI chốt dựng đột biến "miễn chốt ấy khi `bo_qua_han`" và đòi `t190` ĐỎ bằng `TinHieuChotCa`.
+    Thêm một chốt vào `kiem()` mà không thêm vế cho `t190` ⇒ ca này ĐỎ, nêu tên, dòng, cột.
 
-    Ba chốt tự kiểm, không có chúng thì ca này không phải bằng chứng:
-      - ĐỐI CHỨNG XANH: nguồn đi qua `ast.unparse` KHÔNG đột biến phải cho `t190` QUA — nếu không,
-        mọi "CHOT" dưới đây có thể chỉ là hậu quả của việc dựng lại nguồn.
-      - CA ÂM: chèn vào `kiem()` một chốt giả mà không fixture nào chạm ⇒ phép liệt kê phải thấy
-        thêm ĐÚNG MỘT chốt, và đột biến miễn nó phải cho `t190` QUA (tức "không được phủ").
-      - Phép liệt kê phải thấy ĐÚNG MỘT chốt được miễn sẵn (chốt hạn) — thấy 0 nghĩa là nó không
-        còn nhận ra miễn trừ; thấy 2 nghĩa là có một miễn trừ mới chưa ai duyệt.
+    Cross-review lượt 17 (F1): bộ liệt kê bản đầu tự nó là một DANH SÁCH TAY các loại câu lệnh, nên
+    chốt trong `AnnAssign` hay thân `match … case` lọt 186/186. Nay duyệt mọi nút, và có thêm PHÉP ĐẾM ĐỘC
+    LẬP (`_dem_chot_tho`, `ast.walk` thô) phải bằng tổng chốt liệt kê được.
 
-    Phạm vi CÒN HỞ, khai ở `_liet_ke_chot_kiem` và ở đặc tả r11: chốt ngoài `kiem()` (F4 lượt 16,
-    `_kiem_loai_so_hieu`), lời gọi chốt lồng trong biểu thức, chốt bên trong từng hàm `_kiem_*`.
+    Tự kiểm, không có chúng thì ca này không phải bằng chứng:
+      - ĐỐI CHỨNG XANH: nguồn đi qua `ast.unparse` KHÔNG đột biến phải cho `t190` QUA.
+      - Đúng MỘT chốt được miễn sẵn (chốt hạn).
+      - Hai phía đếm bằng nhau.
+      - CA ÂM, mỗi loại nút trong `_CHOT_GIA_T191` một lần: chèn chốt giả mà không fixture nào chạm ⇒
+        bộ liệt kê thấy thêm ĐÚNG MỘT chốt (vẫn khớp phép đếm thô), và miễn nó ⇒ `t190` QUA.
+
+    Phạm vi CÒN HỞ, khai ở `_liet_ke_chot_kiem` và ở đặc tả r11: chốt ngoài `kiem()` (F4 lượt 16),
+    chốt bên trong từng hàm `_kiem_*`, lời gọi qua bí danh.
     """
+    import ast
     import tempfile
     nguon = SCRIPT.read_text(encoding="utf-8")
     ds, mien = _liet_ke_chot_kiem(nguon)
     chot(len(mien) == 1, f"phải thấy đúng MỘT chốt đã được miễn (chốt hạn), thấy {mien}")
     chot(len(ds) >= 1, "không liệt kê được chốt nào trong kiem() — phép liệt kê hỏng")
+    chot(len(ds) + len(mien) == _dem_chot_tho(nguon),
+         f"bộ liệt kê thấy {len(ds) + len(mien)} chốt, phép đếm thô thấy {_dem_chot_tho(nguon)} — sót loại nút")
     with tempfile.TemporaryDirectory() as t:
         td = Path(t)
-        import ast
         chot(_chay_t190_tren(ast.unparse(ast.parse(nguon)), td, "doi_chung") == "QUA",
              "ĐỐI CHỨNG: t190 phải QUA trên nguồn dựng lại không đột biến")
         khong_phu = []
-        for i, (ten, dong) in enumerate(ds):
-            kq = _chay_t190_tren(_mien_mot_chot(nguon, dong), td, f"m{i}")
+        for i, (ten, dong, cot) in enumerate(ds):
+            kq = _chay_t190_tren(_mien_mot_chot(nguon, dong, cot), td, f"m{i}")
             if kq != "CHOT":
-                khong_phu.append(f"{ten} (dòng {dong}): {kq}")
+                khong_phu.append(f"{ten} (dòng {dong}, cột {cot}): {kq}")
         chot(not khong_phu, f"chốt của kiem() KHÔNG được t190 phủ ở nhánh đã-có-dấu: {khong_phu}")
-        # CA ÂM — chốt giả chèn trước dòng đọc `reviewed_sha_required`.
         moc = '    sha = str(lease["reviewed_sha_required"]).strip()\n'
         chot(nguon.count(moc) == 1, "không tìm thấy mốc chèn chốt giả trong kiem()")
-        gia = nguon.replace(moc, '    if lease.get("chot_gia_t191"):\n'
-                                 '        raise Chan(RC_NOI_DUNG, "chot gia t191")\n' + moc)
-        ds_gia, _ = _liet_ke_chot_kiem(gia)
-        chot(len(ds_gia) == len(ds) + 1, f"CA ÂM: chèn một chốt mà phép liệt kê thấy {len(ds_gia)} "
-                                         f"thay vì {len(ds) + 1}")
-        moi = [d for (_, d) in ds_gia if gia.split("\n")[d - 1].strip().startswith("raise Chan(RC_NOI_DUNG, \"chot gia")]
-        chot(len(moi) == 1, f"CA ÂM: không định vị được chốt giả: {moi}")
-        kq = _chay_t190_tren(_mien_mot_chot(gia, moi[0]), td, "am")
-        chot(kq == "QUA", f"CA ÂM: miễn chốt giả mà t190 ra {kq} — t190 không thể phủ một chốt không "
-                          f"fixture nào chạm, nên phải QUA; ra khác nghĩa là phép đo không phân biệt.")
-    print(f"t191: {len(ds)} chốt của kiem() đều được t190 phủ ở nhánh đã-có-dấu; miễn sẵn: {mien}")
+        stub = "\n\ndef _kiem_gia_t191(lease):\n    return None\n"
+        for j, (loai, doan) in enumerate(_CHOT_GIA_T191.items()):
+            gia = nguon.replace(moc, doan + moc) + stub
+            ds_gia, mien_gia = _liet_ke_chot_kiem(gia)
+            chot(len(ds_gia) == len(ds) + 1 and len(ds_gia) + len(mien_gia) == _dem_chot_tho(gia),
+                 f"CA ÂM {loai}: liệt kê thấy {len(ds_gia)} (mong {len(ds) + 1}), đếm thô {_dem_chot_tho(gia)}")
+            moi = [(d, c) for (_, d, c) in ds_gia if "t191" in gia.split("\n")[d - 1]]
+            chot(len(moi) == 1, f"CA ÂM {loai}: không định vị được đúng một chốt giả: {moi}")
+            kq = _chay_t190_tren(_mien_mot_chot(gia, *moi[0]), td, f"am{j}")
+            chot(kq == "QUA", f"CA ÂM {loai}: miễn chốt giả mà t190 ra {kq} — không fixture nào chạm chốt ấy, "
+                              f"nên phải QUA; ra khác nghĩa là phép đo không phân biệt.")
+    print(f"t191: {len(ds)} chốt của kiem() đều được t190 phủ ở nhánh đã-có-dấu; miễn sẵn: {mien}; "
+          f"ca âm {len(_CHOT_GIA_T191)} loại nút")
 
 @ca
 def t185_cua_DEM_phai_chot_KET_QUA_truoc_khi_chot_SO_LOI_GOI():

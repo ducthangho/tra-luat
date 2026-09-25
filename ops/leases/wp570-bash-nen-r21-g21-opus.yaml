@@ -262,6 +262,13 @@ dieu_kien_dung:
 ghi_chu_chieu_lai: 'TRUONG TAI LIEU, khong phai truong cong. Ghi de nguoi sau doc duoc VI SAO
   g10 ton tai ma khong phai lat lai bon vong review.'
 
+da_bi_thay_the: wp570-bash-nen-r22-g22-opus
+da_bi_thay_the_vi_sao: 'NUA THU NHAT cua bia mo hai chieu, lan thay the THU MUOI BON. Di TRUOC vi cong
+  `check` doc tu REF va CHAN [8] khi lease cu chua mang dong nay. Da dem MOI ref mang tep lease g21
+  sau khi chot hai nguon ref (ls-remote / for-each-ref khop, comm -23 RONG tren 382 nhanh): DUNG MOT
+  ref. g21 con han toi 2026-09-26T01:20Z nhung tu day KHONG con la nguoi giu: dieu kien dung cham o
+  lop D (lan lap thu nam), chu kho chon DOI KIEN TRUC D (N80), g22 mang revision ay.'
+
 closure_status: 'Owner-directed grant, revision 21, generation 21. DIEU KIEN DUNG cham o lop B (lan
   lap thu sau); chu kho chon DOI KIEN TRUC sau khi doc phep do (N76). Them N77..N79. THAY THE g20
   bang bia mo hai chieu, lan thu MUOI BA.

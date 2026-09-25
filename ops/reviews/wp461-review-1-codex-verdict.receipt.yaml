@@ -11,11 +11,14 @@ generation_reviewed: 3
 luot: 1
 lease_ung_vien: wp461-be-mat-thu-hai-cua-codex-exec-1g3-claude-20260924
 lease_ghi_bien_nhan_ban_dau: wp461-be-mat-thu-hai-cua-codex-exec-1g4-claude-20260924
-lease_ghi_bien_nhan: wp461-be-mat-thu-hai-cua-codex-exec-1g5-claude-20260924
+lease_ghi_bien_nhan_sua: wp461-be-mat-thu-hai-cua-codex-exec-1g5-claude-20260924
+lease_ghi_bien_nhan: wp461-be-mat-thu-hai-cua-codex-exec-1g6-claude-20260925
+spec_bookkeeping: r4 (sha256 eda1dd127d9595bcd19219b8113451939558ed7b39fffd3e5b317816a1dfb056, dong bang issues/461#issuecomment-5824676204)
 lease_ghi_bien_nhan_ghi_chu: >-
-  Ban dau (verdict LF/bo khoang trang, receipt v1 cua PR) ghi duoi wp461-be-mat-thu-hai-cua-codex-exec-1g4-claude-20260924; ban HIEN HANH (verdict nguyen byte,
-  cac truong sua theo cross-review) ghi duoi wp461-be-mat-thu-hai-cua-codex-exec-1g5-claude-20260924 — cross-review thread 4099876847. Ca hai generation deu neo
-  chi thi chu kho; lich su commit giu nguyen.
+  g4 (r3 + chi thi 5820263820): ban dau — verdict LF 598 B, receipt lan dau. g5 (r3 + uy quyen 5820541861): sua
+  verdict thanh nguyen byte 609 B, folded YAML, anchor/readback/attribution. g6 (spec r4 DA DONG BANG, write set
+  3 duong nam tron trong spec): hang README + truong nay. Ca ba neo chi thi chu kho; lich su commit giu nguyen
+  (thread 4099876847).
 lease_reviewer: KHONG_CO — reviewer là GitHub App `chatgpt-codex-connector[bot]`, không có lease reviewer;
   lượt gọi là issue comment `@codex review` của executor (pull/617#issuecomment-5818827449)
 reviewed_sha: 5e2851881e810b39ebee6884371e5b3e229a01d7

@@ -749,8 +749,21 @@ def _kiem_ngan_sach_dinh_dang(mau, doi):
                     raise _VuotNganSach(f"độ rộng/độ chính xác có {len(so)} chữ số")
                 tong += int(so)
     if "*" in van:
-        cac = doi if isinstance(doi, tuple) else (doi,)
-        tong += sum(abs(x) for x in cac if type(x) is int)
+        # N103 (r29, codex vòng 23) — CHỈ toán hạng được `*` tiêu thụ (độ rộng/độ chính xác động) mới là
+        # khuếch đại. Bản r28 cộng MỌI số nguyên hễ mẫu có `*` ở đâu đó, nên `"%s*" % 100000` (dấu `*` là
+        # chữ thường) và `"%*s" % (1, 100000)` (100000 là GIÁ TRỊ) ném `_VuotNganSach` oan ⇒ cả cây ra
+        # KHONG_DO_DUOC. Đi theo từng đặc tả, tiêu thụ toán hạng đúng thứ tự; `%%` không tiêu thụ gì.
+        cac = list(doi) if isinstance(doi, tuple) else [doi]
+        i = 0
+        for m in _MAU_DINH_DANG.finditer(van):
+            if m.group(0) == "%%":
+                continue
+            for so in m.groups():
+                if so == "*":
+                    if i < len(cac) and type(cac[i]) is int:
+                        tong += abs(cac[i])
+                    i += 1
+            i += 1
     if tong > _NGAN_SACH_DINH_DANG:
         raise _VuotNganSach(f"tổng độ rộng/độ chính xác {tong} > {_NGAN_SACH_DINH_DANG}")
 
@@ -788,8 +801,12 @@ def _gia_tri_hang(nut, tra_ten=None, sau=0):
         raise _VuotNganSach(f"biểu thức hằng lồng quá 8 tầng (dòng {getattr(nut, 'lineno', '?')})")
     try:
         return ast.literal_eval(nut)
-    except (ValueError, TypeError, SyntaxError, MemoryError, RecursionError):
+    except (ValueError, TypeError, SyntaxError):
         pass
+    except (MemoryError, RecursionError) as e:
+        # N102 — hết tài nguyên khi gấp một literal KHÔNG phải "không phải hằng": bản r28 nuốt nó và
+        # rơi xuống "không biết" — im lặng. Nay NÉM, như mọi trần khác của bộ gấp.
+        raise _VuotNganSach(f"`literal_eval` hết tài nguyên: {type(e).__name__}") from e
     if isinstance(nut, ast.BinOp) and isinstance(nut.op, ast.Add):
         # N88 — LÀM PHẲNG chuỗi `a + b + c + …` (lồng sang trái một tầng mỗi vế) bằng vòng lặp: số vế
         # không được tiêu độ sâu, chỉ lồng THẬT mới tiêu.
@@ -1304,6 +1321,10 @@ def _loi_goi_tran(than: str, sau=0):
         `__future__`) là tham chiếu tới mà `get_type_hints` TÍNH: phân tích được như biểu thức thì quét
         (luật HỢP của N98), báo tại vị trí chuỗi; N96b: tham số trùng qua `**{…}` literal cũng là
         `TypeError`; N97b: tải `eval` bỏ khoảng trắng đầu như chính `eval`;
+      · N102 (r29, soát MỌI trần theo quyết định chủ kho): tải `exec`/`eval` hằng QUÁ TRẦN ⇒ NÉM, không
+        coi là "không có"; chuỗi NẠP ĐỘNG nhiều tầng giải tới BẤT ĐỘNG ĐIỂM, không theo trần số vòng;
+        `literal_eval` hết tài nguyên ⇒ NÉM; N103: `%` với `*` chỉ tính ngân sách cho số THẬT là độ
+        rộng/độ chính xác; N104: mỗi NÚT lời gọi là một bản ghi, kể cả hai lời gọi cùng vị trí chuỗi;
       · `type X[T] = …` (PEP 695) có phạm vi chú thích RIÊNG (N47, r16): `T` của nó không rò
         ra phạm vi chứa;
       · callee giải theo PHẠM VI TỪ VỰNG (r8, F3 codex vòng 3): `import subprocess` ở module
@@ -1334,7 +1355,9 @@ def _loi_goi_tran(than: str, sau=0):
         nhận (từ khoá tường minh cộng `**{…}`…) ⇒ BÁO THỪA có tên, chỉ trên mã Python vốn từ chối chạy;
         và chuỗi trong `Literal[…]`/`Annotated[…, …]` (DỮ LIỆU, `get_type_hints` không tính) vẫn được N99
         quét ⇒ BÁO THỪA CÓ CHỦ ĐÍCH kiểu N76 — phân biệt vị trí tham chiếu tới đòi giải tên `typing`.
-        Cả hai ghim ở `_HINH_DANG_BAO_THAN_TRONG`;
+        Cả hai ghim ở `_HINH_DANG_BAO_THAN_TRONG`. Mở rộng r29: `posix_spawnp` cấp bằng TỪ KHOÁ (Python
+        từ chối — cùng họ "Python từ chối lời gọi"); chú thích của hàm generic mà tham số kiểu CHE tên
+        module (PEP 695, 3.12) ⇒ BÁO THỪA CÓ CHỦ ĐÍCH (ghim ở `_HINH_DANG_BAO_THAN_TRONG` khi >= 3.12);
       · argv mà phần tử ĐẦU đến từ BIẾN — `[*xs, "bash"]`, `sys.argv[1:] + ["bash"]` — dù `xs`
         rỗng thì bash chạy thật: đó là luồng dữ liệu, không phải cây cú pháp;
       · LỚP ĐÃ KHÉP (r25, quyết định chủ kho sau khi điều kiện dừng chạm lần BA ở codex vòng 19): mọi
@@ -1426,10 +1449,14 @@ def _loi_goi_tran(than: str, sau=0):
                 # `argv[0]` trang trí. Một lời gọi là MỘT bản ghi dù cả hai cùng tên `bash`.
                 dinh = _la_ten_bash(exe, tra_ten)
         if dinh:
-            ban_ghi.append(vi_tri_cua.get(id(nut)) or (nut.lineno, nut.col_offset))
+            ban_ghi.append((id(nut), vi_tri_cua.get(id(nut)) or (nut.lineno, nut.col_offset)))
     # MỘT BẢN GHI CHO MỖI `ast.Call`, không phải cho mỗi DÒNG. Tập dòng cũ gộp hai lời gọi
     # trên cùng một dòng thành một — đo được: `(which("bash"), which("bash"))` ra `[2]`.
-    return sorted(set(ban_ghi) | set(ghi_exec))
+    # MỘT BẢN GHI CHO MỖI `ast.Call` — khử trùng theo DANH TÍNH nút, không theo toạ độ (N104, r29, codex
+    # vòng 23): hai lời gọi trong CÙNG một chú thích chuỗi cùng mang toạ độ của chuỗi, và khử theo toạ độ
+    # gộp chúng làm một ⇒ hạn ngạch đếm thiếu. Toạ độ lặp lại được GIỮ trong kết quả.
+    theo_nut = dict(ban_ghi)
+    return sorted(list(theo_nut.values()) + sorted(set(ghi_exec)))
 
 
 # Nhận diện theo TÊN mà không giải được CALLEE thì sai CẢ HAI HƯỚNG — đo được cả hai:
@@ -1650,8 +1677,13 @@ def _tai_hang(goi):
     if not goi.args or isinstance(goi.args[0], ast.Starred):
         return None
     v = _gia_tri_hang(goi.args[0])
-    if not isinstance(v, (str, bytes)) or len(v) > _TRAN_EXEC:
+    if not isinstance(v, (str, bytes)):
         return None
+    if len(v) > _TRAN_EXEC:
+        # N102 (r29, codex vòng 23; chủ kho: soát MỌI trần) — tải hằng QUÁ TRẦN bị bản r28 coi như
+        # "không có tải" (trả None) trong khi chương trình thật vẫn chạy nó và phóng bash. Quá trần ⇒
+        # NÉM, như chú thích chuỗi (N99b) và `exec` lồng.
+        raise _VuotNganSach(f"tải `exec`/`eval` hằng dài {len(v)} > {_TRAN_EXEC}")
     if isinstance(v, bytes):
         from importlib.util import decode_source
         try:
@@ -2059,7 +2091,12 @@ def _bang_pham_vi_ca_cay(cay, sau=0):
         nut, (b, tc, pcb) = nut_cua[i], bang[i]
         chuoi_cua[i] = chuoi_cua.get(cha_cua[i], []) + [
             (isinstance(nut, ast.ClassDef), b, tc, pcb, type(nut).__name__ == "TypeAlias")]
-    for _vong in range(len(thu_tu) + 1):
+    # N102 — lặp TỚI bất động điểm, không theo một trần số vòng: bản r28 dừng sau `len(thu_tu)+1` vòng,
+    # nên chuỗi `a = __import__("importlib")` → `b = a.import_module("importlib")` → `c =
+    # b.import_module("subprocess")` ở MỘT phạm vi (2 vòng) để `c` chưa giải — đo được `[]`, chạy thật
+    # thì phóng bash. Kết thúc được bảo đảm: mỗi vòng thêm ít nhất một bộ `("import", …)` vào một tập
+    # hữu hạn (số mục "dong" × số module theo dõi).
+    while True:
         moi = []
         for i in thu_tu:
             for ten, tap in bang[i][0].items():

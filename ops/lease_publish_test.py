@@ -7688,11 +7688,16 @@ def t178_tien_kiem_mien_chan_TRUOC_khi_cham_mang():
     `KeyError` chết ngay đó rồi `kiem()` dựng lại `rc=8`. Chúng đo CÁI NUỐT, không đo hàm ấy.
 
     Thứ hàm ấy thật sự đóng là ca thứ BA: `packet_issue: "55"` (chuỗi) vẫn dựng được URL
-    `issues/55/comments` hợp lệ, nên phép dò thấy dấu và trả `rc=9` — một lease SAI KIỂU
-    được cấp đường "đã đăng, bỏ qua" và NÉ SẠCH mọi chốt của `kiem()`.
+    `issues/55/comments` hợp lệ, nên phép dò CHẠM MẠNG và thấy dấu. TRƯỚC bản vá P1 #589
+    (`8d04b78`) điều đó nghĩa là `rc=9` — một lease SAI KIỂU được cấp đường "đã đăng, bỏ
+    qua" và né sạch mọi chốt của `kiem()`. SAU bản vá, nhánh đã-có-dấu chạy `kiem()` trên tệp
+    hiện tại, nên mã thoát là `rc=8` ở cả hai bên và `kiem()` luôn chạy (đo lại 25-09 trên
+    `0093149`, bốn fixture của ca này: gỡ tiền kiểm chỉ đổi số lời gọi GitHub 0 -> 1 ở hai vế
+    sai kiểu; hai vế thiếu trường giữ 0). Đoạn này sửa ở cross-review lượt 15 (F3): bản trước
+    chỉ sửa bảng trên mà để nguyên câu kết luận cũ như hành vi hiện hành.
 
     Nên ca này đo thêm SỐ LỜI GỌI GitHub, thứ mà mã thoát không phân biệt được: tiền kiểm
-    chặn trước khi chạm mạng ⇒ **0** lời gọi. Đó là răng riêng của ca thứ ba.
+    chặn trước khi chạm mạng ⇒ **0** lời gọi. Sau bản vá P1 đó là răng DUY NHẤT của ca thứ ba.
 
     CA `bool` NAY DA DO — và nó là ca DUY NHẤT giữ răng cho chốt `isinstance(so, bool)`.
     Cross-review codex lượt 1 dựng đột biến G (gỡ đúng điều kiện `bool` ấy, giữ nguyên mọi
@@ -8853,7 +8858,8 @@ def t190_DA_DANG_ma_tep_bi_SUA_van_phai_qua_kiem_tru_chot_han():
     `rc=4` — workflow coi là bỏ qua thành công, và `ai-dang-giu` tính tệp đã sửa là người giữ.
     Trên master `kiem()` chạy trước nên không có lỗ này: HỒI QUY của chính packet.
 
-    Ba vế, mỗi vế một đột biến riêng làm nó đỏ:
+    Năm vế, mỗi vế một đột biến riêng làm nó đỏ (bản đầu ghi "Ba vế"; (iv) thêm ở lượt 14, (v) ở
+    lượt 15):
       (i)   đã đăng, tệp SẠCH                      -> vẫn `rc=9` (idempotent)
             đột biến: nhánh đã-có-dấu ném một mã KHÁC thay vì ném lại `rc=9`.
       (ii)  đã đăng, tệp bị sửa: tự cấp / neo prompt không kiểm được / thiếu trường / hạn hỏng
@@ -8866,6 +8872,13 @@ def t190_DA_DANG_ma_tep_bi_SUA_van_phai_qua_kiem_tru_chot_han():
       (iv)  CẢ HỌ chốt khác của `kiem()` — lớp review, danh sách người cấp, dạng SHA,
             `GITHUB_ACTOR` — cùng mã ở cả chưa đăng lẫn đã đăng (lượt 14)
             đột biến: miễn thêm bất kỳ một chốt nào khi `bo_qua_han` (ví dụ `_kiem_lop_review`).
+      (v)   các chốt CẦN ĐƯỜNG DẪN TỆP — con trỏ treo (fixture `t99`), bia mộ thiếu vế cũ
+            (fixture `t100`) — cùng `rc=8` ở cả chưa đăng lẫn đã đăng; bia mộ ĐÚNG đã đăng ⇒ `rc=9`
+            (lượt 15, F1). Mọi lời gọi ở (i)–(iv) không truyền `tep/goc`, nên chúng không bao giờ đi
+            qua nhánh `if tep is not None` của `kiem()`.
+            đột biến: `if tep is not None and not bo_qua_han:` (skip_file_gates), hoặc nhánh
+            đã-có-dấu gọi `kiem(lease, bo_qua_han=True)` bỏ `tep, goc` (drop_path) — cả hai sống
+            185/185 trước vế này.
     """
     L = _lease_579
     thieu = L()
@@ -8905,6 +8918,34 @@ def t190_DA_DANG_ma_tep_bi_SUA_van_phai_qua_kiem_tru_chot_han():
         ma = 0 if ex is None else ex.ma
         chot(ma == RC_TU_CAP, f"GITHUB_ACTOR không có thẩm quyền, {'ĐÃ' if co_dau else 'chưa'} "
                               f"đăng: mong rc={RC_TU_CAP}, nhận rc={ma}.")
+
+    # (v) Chốt cần ĐƯỜNG DẪN TỆP — cross-review lượt 15 (25-09, F1): hai đột biến làm nhánh
+    # đã-có-dấu bỏ `_kiem_con_tro_treo`/`_kiem_bia_mo` sống 185/185, vì `t99`/`t100` chỉ gọi
+    # `kiem()` thường. Dùng LẠI đúng fixture của hai ca ấy, gọi qua `kiem_github(lease, tep, goc)`.
+    truong, khoa = "vung_duoc_phep_cham", "tham_chieu_truong_lease"
+    with San() as s:
+        (s / ".git").mkdir()
+        tu_t99 = lease_mau(lease_id="KIEM-treo", **{khoa: [truong]})
+        p_treo = viet(s, tu_t99, ten="treo.yaml")
+        tu_t100 = lease_mau(lease_id="MOI", thay_the_cho="CU")
+        p_moi = viet(s, tu_t100, ten="moi.yaml")
+        for nhan, lease, p, cu_marker, mong_chua, mong_da in (
+                ("con trỏ treo (fixture t99)", tu_t99, p_treo, None, RC_NOI_DUNG, RC_NOI_DUNG),
+                ("bia mộ thiếu vế cũ (fixture t100)", tu_t100, p_moi, None, RC_NOI_DUNG,
+                 RC_NOI_DUNG),
+                ("bia mộ ĐÚNG (fixture t100, đối chứng)", tu_t100, p_moi, "MOI", None, RC_DA_DANG)):
+            git = _GitKhoGia({"a"}, {"a"}, [
+                ("refs/remotes/origin/a", "ops/leases/cu.yaml",
+                 _lease_quet("CU", da_bi_thay_the=cu_marker))])
+            for co_dau, mong in ((False, mong_chua), (True, mong_da)):
+                if mong is None:
+                    continue          # chưa đăng + sạch: đi tiếp tới lớp GitHub, ngoài vế này
+                gh, _ = _dung_gh_579(lease, co_dau)
+                ex, _mod = _goi_lop_gh(gh, "kiem_github", lease, p, s, env_them=ENV_GITHUB,
+                                       truoc_khi_chay=lambda m, g=git: setattr(m, "GOI_GIT", g))
+                ma = 0 if ex is None else ex.ma
+                chot(ma == mong, f"{nhan}, {'ĐÃ' if co_dau else 'chưa'} đăng: mong rc={mong}, "
+                                 f"nhận rc={ma}. Nhánh đã-có-dấu phải chạy cả chốt cần tệp.")
 
 
 @ca

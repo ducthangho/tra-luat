@@ -1024,7 +1024,9 @@ def kiem_github(lease: dict, tep=None, goc=None) -> tuple:
     đi là thật, và chưa có chốt nào so tệp với bản chiếu. Đường ấy CŨNG bỏ `_kiem_loai_so_hieu` — chốt nằm NGOÀI `kiem()`, nên
     câu trên chưa phủ nó (cross-review lượt 7): `packet_issue` trỏ vào một Pull Request mà đã
     có dấu bot thì trả `rc=9` thay vì `rc=8` (`RC_NOI_DUNG`). Reviewer lượt 7 đếm lời gọi thật: có dấu
-    ⇒ `kiem` 0 lần, lời gọi loại số hiệu 0 lần, bất kể số hiệu là issue hay PR. Không tạo được
+    ⇒ `kiem` 0 lần, lời gọi loại số hiệu 0 lần, bất kể số hiệu là issue hay PR — số ấy là TRƯỚC
+    bản vá P1. Đo lại 25-09 trên lease sạch của bộ #579 (lượt 15): có dấu ⇒ `kiem` 1 lần (kèm
+    `bo_qua_han`), loại số hiệu 0 lần; không dấu ⇒ 1 và 1. Nửa về `_kiem_loai_so_hieu` VẪN đúng. Không tạo được
     comment nào: `rc=9` là "đã đăng, bỏ qua", không phải "đạt". Đánh đổi có chủ đích: bản
     chiếu đã công bố mới là thứ người khác đọc, và không ai được lợi khi một lượt CI đỏ vì
     một lease đã đăng đúng.

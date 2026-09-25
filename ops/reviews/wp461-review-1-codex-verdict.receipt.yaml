@@ -223,6 +223,94 @@ comment_delivery:
         "user_view_type": "public"
        }
       }
+  readback_lan_3:
+    doc_luc_utc: '2026-09-25T01:24:41Z'
+    lenh: "urllib GET https://api.github.com/repos/ducthangho/tra-luat/issues/comments/5819108011 (Accept application/vnd.github+json; token chu kho, KHONG in)"
+    http_status: 200
+    rc_tien_trinh: 0
+    phan_hoi_tho_bytes: 4197
+    phan_hoi_tho_sha256: 92ae465f09441f564cd87d5427fb6a474dfdb8a2ddb664db33e594930bdc9138
+    phan_hoi_tho_base64: |
+      eyJ1cmwiOiJodHRwczovL2FwaS5naXRodWIuY29tL3JlcG9zL2R1Y3RoYW5naG8vdHJhLWx1YXQv
+      aXNzdWVzL2NvbW1lbnRzLzU4MTkxMDgwMTEiLCJodG1sX3VybCI6Imh0dHBzOi8vZ2l0aHViLmNv
+      bS9kdWN0aGFuZ2hvL3RyYS1sdWF0L3B1bGwvNjE3I2lzc3VlY29tbWVudC01ODE5MTA4MDExIiwi
+      aXNzdWVfdXJsIjoiaHR0cHM6Ly9hcGkuZ2l0aHViLmNvbS9yZXBvcy9kdWN0aGFuZ2hvL3RyYS1s
+      dWF0L2lzc3Vlcy82MTciLCJpZCI6NTgxOTEwODAxMSwibm9kZV9pZCI6IklDX2t3RE9UTmVSamM4
+      QUFBQUJXdGlLcXciLCJ1c2VyIjp7ImxvZ2luIjoiY2hhdGdwdC1jb2RleC1jb25uZWN0b3JbYm90
+      XSIsImlkIjoxOTkxNzU0MjIsIm5vZGVfaWQiOiJCT1Rfa2dET0M5OHNfZyIsImF2YXRhcl91cmwi
+      OiJodHRwczovL2F2YXRhcnMuZ2l0aHVidXNlcmNvbnRlbnQuY29tL2luLzExNDQ5OTU/dj00Iiwi
+      Z3JhdmF0YXJfaWQiOiIiLCJ1cmwiOiJodHRwczovL2FwaS5naXRodWIuY29tL3VzZXJzL2NoYXRn
+      cHQtY29kZXgtY29ubmVjdG9yJTVCYm90JTVEIiwiaHRtbF91cmwiOiJodHRwczovL2dpdGh1Yi5j
+      b20vYXBwcy9jaGF0Z3B0LWNvZGV4LWNvbm5lY3RvciIsImZvbGxvd2Vyc191cmwiOiJodHRwczov
+      L2FwaS5naXRodWIuY29tL3VzZXJzL2NoYXRncHQtY29kZXgtY29ubmVjdG9yJTVCYm90JTVEL2Zv
+      bGxvd2VycyIsImZvbGxvd2luZ191cmwiOiJodHRwczovL2FwaS5naXRodWIuY29tL3VzZXJzL2No
+      YXRncHQtY29kZXgtY29ubmVjdG9yJTVCYm90JTVEL2ZvbGxvd2luZ3svb3RoZXJfdXNlcn0iLCJn
+      aXN0c191cmwiOiJodHRwczovL2FwaS5naXRodWIuY29tL3VzZXJzL2NoYXRncHQtY29kZXgtY29u
+      bmVjdG9yJTVCYm90JTVEL2dpc3Rzey9naXN0X2lkfSIsInN0YXJyZWRfdXJsIjoiaHR0cHM6Ly9h
+      cGkuZ2l0aHViLmNvbS91c2Vycy9jaGF0Z3B0LWNvZGV4LWNvbm5lY3RvciU1QmJvdCU1RC9zdGFy
+      cmVkey9vd25lcn17L3JlcG99Iiwic3Vic2NyaXB0aW9uc191cmwiOiJodHRwczovL2FwaS5naXRo
+      dWIuY29tL3VzZXJzL2NoYXRncHQtY29kZXgtY29ubmVjdG9yJTVCYm90JTVEL3N1YnNjcmlwdGlv
+      bnMiLCJvcmdhbml6YXRpb25zX3VybCI6Imh0dHBzOi8vYXBpLmdpdGh1Yi5jb20vdXNlcnMvY2hh
+      dGdwdC1jb2RleC1jb25uZWN0b3IlNUJib3QlNUQvb3JncyIsInJlcG9zX3VybCI6Imh0dHBzOi8v
+      YXBpLmdpdGh1Yi5jb20vdXNlcnMvY2hhdGdwdC1jb2RleC1jb25uZWN0b3IlNUJib3QlNUQvcmVw
+      b3MiLCJldmVudHNfdXJsIjoiaHR0cHM6Ly9hcGkuZ2l0aHViLmNvbS91c2Vycy9jaGF0Z3B0LWNv
+      ZGV4LWNvbm5lY3RvciU1QmJvdCU1RC9ldmVudHN7L3ByaXZhY3l9IiwicmVjZWl2ZWRfZXZlbnRz
+      X3VybCI6Imh0dHBzOi8vYXBpLmdpdGh1Yi5jb20vdXNlcnMvY2hhdGdwdC1jb2RleC1jb25uZWN0
+      b3IlNUJib3QlNUQvcmVjZWl2ZWRfZXZlbnRzIiwidHlwZSI6IkJvdCIsInVzZXJfdmlld190eXBl
+      IjoicHVibGljIiwic2l0ZV9hZG1pbiI6ZmFsc2V9LCJjcmVhdGVkX2F0IjoiMjAyNi0wOS0yNFQx
+      Nzo0MDo0MloiLCJ1cGRhdGVkX2F0IjoiMjAyNi0wOS0yNFQxNzo0MDo0MloiLCJhdXRob3JfYXNz
+      b2NpYXRpb24iOiJOT05FIiwiYm9keSI6IkNvZGV4IFJldmlldzogRGlkbid0IGZpbmQgYW55IG1h
+      am9yIGlzc3Vlcy4gQ2FuJ3Qgd2FpdCBmb3IgdGhlIG5leHQgb25lIVxuXG4qKlJldmlld2VkIGNv
+      bW1pdDoqKiBgNWUyODUxODgxZWBcblxuPGRldGFpbHM+IDxzdW1tYXJ5PuKEue+4jyBBYm91dCBD
+      b2RleCBpbiBHaXRIdWI8L3N1bW1hcnk+XG48YnIvPlxuXG5bWW91ciB0ZWFtIGhhcyBzZXQgdXAg
+      Q29kZXggdG8gcmV2aWV3IHB1bGwgcmVxdWVzdHMgaW4gdGhpcyByZXBvXShodHRwczovL2NoYXRn
+      cHQuY29tL2NvZGV4L2Nsb3VkL3NldHRpbmdzL2dlbmVyYWwpLiBSZXZpZXdzIGFyZSB0cmlnZ2Vy
+      ZWQgd2hlbiB5b3Vcbi0gT3BlbiBhIHB1bGwgcmVxdWVzdCBmb3IgcmV2aWV3XG4tIE1hcmsgYSBk
+      cmFmdCBhcyByZWFkeVxuLSBDb21tZW50IFwiQGNvZGV4IHJldmlld1wiLlxuXG5JZiBDb2RleCBo
+      YXMgc3VnZ2VzdGlvbnMsIGl0IHdpbGwgY29tbWVudDsgb3RoZXJ3aXNlIGl0IHdpbGwgcmVhY3Qg
+      d2l0aCDwn5GNLlxuXG5cblxuXG5Db2RleCBjYW4gYWxzbyBhbnN3ZXIgcXVlc3Rpb25zIG9yIHVw
+      ZGF0ZSB0aGUgUFIuIFRyeSBjb21tZW50aW5nIFwiQGNvZGV4IGFkZHJlc3MgdGhhdCBmZWVkYmFj
+      a1wiLlxuICAgICAgICAgICAgXG48L2RldGFpbHM+IiwicmVhY3Rpb25zIjp7InVybCI6Imh0dHBz
+      Oi8vYXBpLmdpdGh1Yi5jb20vcmVwb3MvZHVjdGhhbmdoby90cmEtbHVhdC9pc3N1ZXMvY29tbWVu
+      dHMvNTgxOTEwODAxMS9yZWFjdGlvbnMiLCJ0b3RhbF9jb3VudCI6MCwiKzEiOjAsIi0xIjowLCJs
+      YXVnaCI6MCwiaG9vcmF5IjowLCJjb25mdXNlZCI6MCwiaGVhcnQiOjAsInJvY2tldCI6MCwiZXll
+      cyI6MH0sInBlcmZvcm1lZF92aWFfZ2l0aHViX2FwcCI6eyJpZCI6MTE0NDk5NSwic2x1ZyI6ImNo
+      YXRncHQtY29kZXgtY29ubmVjdG9yIiwibm9kZV9pZCI6IkFfa3dIT0FPUTZHczRBRVhpaiIsIm93
+      bmVyIjp7ImxvZ2luIjoib3BlbmFpIiwiaWQiOjE0OTU3MDgyLCJub2RlX2lkIjoiTURFeU9rOXla
+      MkZ1YVhwaGRHbHZiakUwT1RVM01EZ3kiLCJhdmF0YXJfdXJsIjoiaHR0cHM6Ly9hdmF0YXJzLmdp
+      dGh1YnVzZXJjb250ZW50LmNvbS91LzE0OTU3MDgyP3Y9NCIsImdyYXZhdGFyX2lkIjoiIiwidXJs
+      IjoiaHR0cHM6Ly9hcGkuZ2l0aHViLmNvbS91c2Vycy9vcGVuYWkiLCJodG1sX3VybCI6Imh0dHBz
+      Oi8vZ2l0aHViLmNvbS9vcGVuYWkiLCJmb2xsb3dlcnNfdXJsIjoiaHR0cHM6Ly9hcGkuZ2l0aHVi
+      LmNvbS91c2Vycy9vcGVuYWkvZm9sbG93ZXJzIiwiZm9sbG93aW5nX3VybCI6Imh0dHBzOi8vYXBp
+      LmdpdGh1Yi5jb20vdXNlcnMvb3BlbmFpL2ZvbGxvd2luZ3svb3RoZXJfdXNlcn0iLCJnaXN0c191
+      cmwiOiJodHRwczovL2FwaS5naXRodWIuY29tL3VzZXJzL29wZW5haS9naXN0c3svZ2lzdF9pZH0i
+      LCJzdGFycmVkX3VybCI6Imh0dHBzOi8vYXBpLmdpdGh1Yi5jb20vdXNlcnMvb3BlbmFpL3N0YXJy
+      ZWR7L293bmVyfXsvcmVwb30iLCJzdWJzY3JpcHRpb25zX3VybCI6Imh0dHBzOi8vYXBpLmdpdGh1
+      Yi5jb20vdXNlcnMvb3BlbmFpL3N1YnNjcmlwdGlvbnMiLCJvcmdhbml6YXRpb25zX3VybCI6Imh0
+      dHBzOi8vYXBpLmdpdGh1Yi5jb20vdXNlcnMvb3BlbmFpL29yZ3MiLCJyZXBvc191cmwiOiJodHRw
+      czovL2FwaS5naXRodWIuY29tL3VzZXJzL29wZW5haS9yZXBvcyIsImV2ZW50c191cmwiOiJodHRw
+      czovL2FwaS5naXRodWIuY29tL3VzZXJzL29wZW5haS9ldmVudHN7L3ByaXZhY3l9IiwicmVjZWl2
+      ZWRfZXZlbnRzX3VybCI6Imh0dHBzOi8vYXBpLmdpdGh1Yi5jb20vdXNlcnMvb3BlbmFpL3JlY2Vp
+      dmVkX2V2ZW50cyIsInR5cGUiOiJPcmdhbml6YXRpb24iLCJ1c2VyX3ZpZXdfdHlwZSI6InB1Ymxp
+      YyIsInNpdGVfYWRtaW4iOmZhbHNlfSwibmFtZSI6IkNoYXRHUFQgQ29kZXggQ29ubmVjdG9yIiwi
+      ZGVzY3JpcHRpb24iOiJCcmluZyBDaGF0R1BUIGFuZCBDb2RleCB0byB5b3VyIEdpdEh1YiByZXBv
+      c2l0b3JpZXMuIiwiZXh0ZXJuYWxfdXJsIjoiaHR0cHM6Ly93d3cuY2hhdGdwdC5jb20iLCJodG1s
+      X3VybCI6Imh0dHBzOi8vZ2l0aHViLmNvbS9hcHBzL2NoYXRncHQtY29kZXgtY29ubmVjdG9yIiwi
+      Y3JlYXRlZF9hdCI6IjIwMjUtMDItMTRUMDE6Mzc6MDVaIiwidXBkYXRlZF9hdCI6IjIwMjYtMDkt
+      MjNUMTg6NTI6NTlaIiwicGVybWlzc2lvbnMiOnsiYWN0aW9ucyI6IndyaXRlIiwiY2hlY2tzIjoi
+      cmVhZCIsImNvbnRlbnRzIjoid3JpdGUiLCJlbWFpbHMiOiJyZWFkIiwiaXNzdWVzIjoid3JpdGUi
+      LCJtZXRhZGF0YSI6InJlYWQiLCJwdWxsX3JlcXVlc3RzIjoid3JpdGUiLCJzdGF0dXNlcyI6InJl
+      YWQiLCJ3b3JrZmxvd3MiOiJ3cml0ZSJ9LCJldmVudHMiOlsiY2hlY2tfcnVuIiwiY2hlY2tfc3Vp
+      dGUiLCJjb21taXRfY29tbWVudCIsImlzc3VlcyIsImlzc3VlX2NvbW1lbnQiLCJwdWxsX3JlcXVl
+      c3QiLCJwdWxsX3JlcXVlc3RfcmV2aWV3IiwicHVsbF9yZXF1ZXN0X3Jldmlld19jb21tZW50Iiwi
+      cHVsbF9yZXF1ZXN0X3Jldmlld190aHJlYWQiLCJyZXBvc2l0b3J5Iiwic3RhdHVzIiwic3ViX2lz
+      c3VlcyJdfSwibWluaW1pemVkIjpudWxsLCJwaW4iOm51bGx9
+    body_sha256_tu_phan_hoi_tho: 2276547ec77b74618c5e548ce3efeb3661fd90e59e847d187a3691f4c632cb8d
+    so_voi_tep_verdict: BANG NHAU tung byte (json.loads(phan_hoi_tho)['body'].encode('utf-8') == bytes tep verdict)
+    ghi_chu: >-
+      Day la BYTE VAN CHUYEN cua phan hoi HTTP truoc khi json.loads (thread 4100110242 tren #623 — cung lop);
+      readback_lan_2 la ban tai tuan tu hoa (sort_keys) nen KHONG phai raw, giu lai lam lich su. Giai ma:
+      base64 -d, khong chuan hoa xuong dong.
 format_reissue:
   khong_bien_doi: true
   ghi_chu: >-

@@ -1,0 +1,156 @@
+# LAND AUTHORITY + LAND EVIDENCE — PR #639, packet #593 (TIEN-DE-HA-TANG-KHONG-DUOC-THANH-CHOT) revision 3.
+#
+# Schema chuan: docs/PROTOCOL_DA_PHIEN.md §13.1 khoi "Land evidence tach approval khoi thao tac".
+# Hai ve trong mot tep nhu ops/land/pr629-593-land-evidence.yaml: `uy_quyen` (cai duoc cap phep) va
+# `merge` / `hau_merge` (cai da thuc su xay ra, do duoc).
+#
+# TEP NAY NAM TREN NHANH ops/cap-lease-593, KHONG merge vao master (uy quyen cam "merge PR khac").
+# Ban chieu cua no la bien nhan dang tren #593. Thu dinh danh tep la BAM commit, khong phai ten nhanh.
+
+schema_version: 1
+mission_id: KHONG_CO
+mission_id_ghi_chu: 'Packet #593 khong thuoc mission nao (mission_issue: KHONG_CO trong lease).'
+packet_issue: 593
+packet_id: TIEN-DE-HA-TANG-KHONG-DUOC-THANH-CHOT
+generation: 2
+generation_ghi_chu: 'Lan land THU HAI cua goi (land attempt). Lan mot: PR #629 revision 2, merge 0e2fe84.'
+provider: claude
+role: land_operator
+session_id: session_01WoiA9fVU6vC8fiWZuVyhhS
+land_operator: 'claude-session session_01WoiA9fVU6vC8fiWZuVyhhS (model claude-opus-5-5). Cung la executor.
+  Chu kho cho phep ro trong uy quyen: "Land Operator: phien executor noi tren, chi thi hanh; khong doi dieu
+  kien, khong tinh la phe duyet doc lap".'
+input_packet_generations:
+- packet_issue: 593
+  lease_id: tien-de-ha-tang-khong-duoc-thanh-chot-r3-g1-claude
+  revision: 3
+  generation: 1
+  ghi_chu: 'Mo r3 theo chi thi chu kho ("Mo r3, tat bao tri git (Recommended)") sau khi gate-registry do tren
+    master 4c53c76 (r546 chet OSError Errno 39 tren remote.git). Tran 80 dong them, write set mot tep
+    ops/nhanh_don_duoc_test.py, dac ta r3 sha256 177f003d3ace04b8d100e6a38fc9a81a11899e7c135a9a2d6eeb56c839c37541.'
+
+# ---------------------------------------------------------------- UY QUYEN (cai duoc cap phep)
+assurance_target: human_audited
+authorized_head_sha: cbfd82c9f50883854a2a39b32181b86bbbd64286
+reviewed_sha: cbfd82c9f50883854a2a39b32181b86bbbd64286
+approver: ducthangho
+authorization_url: https://github.com/ducthangho/tra-luat/pull/639#issuecomment-5834204913
+uy_quyen:
+  chuoi_nguon_ben:
+  - url: https://github.com/ducthangho/tra-luat/pull/639#issuecomment-5834129950
+    ai_viet: ducthangho (tu viet)
+    noi_dung: 'Audit + uy quyen neo 88afd8d. VO HIEU: head PR la cbfd82c, va 88afd8d la dung ban da do
+      gate-registry (run 36120618513, 197/199, hai lan Errno 39). Land Operator tu choi thi hanh
+      (pull/639#issuecomment-5834144787).'
+  - url: https://github.com/ducthangho/tra-luat/pull/639#issuecomment-5834130241
+    ai_viet: ducthangho (tu viet)
+    noi_dung: 'Ban trung lap cua comment tren (dang hai lan). VO HIEU cung ly do.'
+  - url: https://github.com/ducthangho/tra-luat/pull/639#issuecomment-5834204913
+    ai_viet: ducthangho (tu viet)
+    noi_dung: 'Audit human_audited APPROVE + uy quyen land §13.1 neo DUNG cbfd82c (tree bc464b4, nen 4c53c76);
+      thay the hai comment tren; chap nhan LECH DAC TA (ghi 5 khoa vao remote.git/config ngoai §2 M1). Dich
+      master, merge commit, han 2026-09-27T23:59:00Z. NGUON UY QUYEN DUNG CHO MERGE.'
+    lich_su_sua: 'Dang luc 14:37:10Z bi CAT (chi co phan "Toi da tu doc"); sua 14:44:57Z thay TOAN than bang
+      Verdict + Uy quyen (mat phan dau); sua lan hai 14:46:41Z ghep day du. Chi ban 14:46:41Z duoc dung.
+      Executor da bao ca hai lan thieu va KHONG merge tren ban thieu.'
+  dich: master
+  merge_method: merge
+  han: '2026-09-27T23:59:00Z'
+  ghi_uy_quyen: 'packet_loop.py ghi-uy-quyen --action merge --nguoi-cap ducthangho --bang-chung
+    pull/639#issuecomment-5834204913 --head-sha cbfd82c9f50883854a2a39b32181b86bbbd64286 -> rc=0 ("day la
+    LOI KHAI, khong phai bang chung").'
+  guard_merge: 'packet_loop.py guard --action merge -> rc=7. Theo thiet ke, khai thang trong uy quyen.'
+
+# ---------------------------------------------------------------- REVIEW
+review:
+  reviewer: 'codex gpt-6-astra, reasoning effort low (banner doc lai tung luot); provider openai — cross-provider.'
+  vong:
+  - {vong: 1, head: 816cb68, ket_luan: 'changes_requested P1=0 P2=2 P3=0 (gia tri hieu luc thay vi co mat;
+      r548 tu bu).'}
+  - {vong: 2, head: f43f728, ket_luan: 'changes_requested P1=0 P2=1 P3=1 (GIT_CONFIG_PARAMETERS de len; ro
+      mkdtemp).'}
+  - {vong: 3, head: 88afd8d, ket_luan: 'approve P1=0 P2=0 P3=0',
+     ban_chieu: 'https://github.com/ducthangho/tra-luat/issues/593#issuecomment-5830417071'}
+  - {vong: 4, head: cbfd82c, ket_luan: 'approve P1=0 P2=0 P3=0',
+     ban_chieu: 'https://github.com/ducthangho/tra-luat/issues/593#issuecomment-5831451751',
+     bam_verdict: '8b9dc23a98215160c91e0ff77d48ef80ea7540e1d56f74142ea00eedad536ee9 (sha256 tep trong scratchpad
+       phien; ban chieu tren #593 la ban ben)'}
+  vi_sao_co_vong_4: 'gate-registry tren 88afd8d (git 2.55) VAN do: M1 qua GIT_CONFIG_* khong toi receive-pack
+    (transport duong dan cuc bo xoa GIT_CONFIG_COUNT/PARAMETERS). Va 47d04af ghi thang config kho bare; cbfd82c
+    = 47d04af + merge master b7973df. Vong 4 review dung phan ay.'
+  cross_approved: 'KHONG khai. Muc dat cua goi la human_audited.'
+
+# ---------------------------------------------------------------- TRUOC MERGE
+pre_merge_checks:
+- 'Luot day du tai cho Python 3.12 tren cbfd82c (worktree co lap): rc=0 · TU KIEM 48/48 · dot bien giet 200/200 ·
+  MUTANT 10/10 · stderr 0 B.'
+- 'CI tren dung cbfd82c: run 36127902921 attempt 2 (chay lai MOT lan: attempt 1 chet ~2s runner_id=0 do su co
+  Actions toan kho 10:39Z->~14:19Z) — chuan-bi · gate · gate-packet-loop · gate-registry (14:32:44Z->15:42:16Z,
+  git 2.55.0) deu success; thu-hoi run 36127900444 attempt 2 success.'
+- 'Log gate-registry job 108114491888: "TU KIEM: 48/48" · "dot bien giet 200/200" · "TU DOT BIEN KHONG DO DUOC: 0" ·
+  "MUTANT: giet = 10 · khong giet = 0 · khong do duoc = 0 / tong 10" · "CI_DANG_KY ops/nhanh_don_duoc_test.py:
+  DAT rc=0". Lan DAU ban va r546 xanh tren git 2.55.'
+- 'mergeable_state: clean; 0 review thread. PR dang draft -> executor chuyen ready ngay truoc merge.'
+- 'Doc lai head + hang rao ref (git ls-remote origin, CHI hai ref): refs/heads/claude/tien-de-ha-tang-r3 =
+  cbfd82c; refs/heads/master = b7973df; master la to tien cua head. KHONG do toan bo ref lan nay (khac #629).'
+
+# ---------------------------------------------------------------- MERGE (da xay ra)
+merge_commit: 77c36a5029d34612192cd7b1d1eed9d44e245f74
+merge:
+  cong_cu: 'MCP merge_pull_request merge_method=merge expectedHeadSha=cbfd82c9f50883854a2a39b32181b86bbbd64286'
+  parents: [b7973df84b359322b214c45cb8e59d4f1e7b098f, cbfd82c9f50883854a2a39b32181b86bbbd64286]
+  tree: bc464b43f91203a2194ad48280c88fa1bd363f94
+  tree_ghi_chu: 'Trung tree cua cbfd82c — merge khong doi noi dung ung vien.'
+  thoi_diem: '2026-09-25T15:43:28Z'
+  diff_so_master_cu: 'git diff --stat b7973df 77c36a5: ops/nhanh_don_duoc_test.py +77/-1 (mot tep).'
+
+# ---------------------------------------------------------------- HAU MERGE
+post_merge_checks:
+- run: 36156097695
+  head_sha: 77c36a5029d34612192cd7b1d1eed9d44e245f74
+  conclusion: success
+  jobs: 'chuan-bi success · gate (ubuntu) success 15:43:41->15:59:12 · gate-packet-loop (ubuntu) success
+    15:43:42->15:52:28 · gate-registry (ubuntu) success 15:43:42->16:55:04 = 71,4 phut, git 2.55.0.'
+  log_gate_registry: 'job 108140936849: "TU DOT BIEN KHONG DO DUOC: 0" · "TU KIEM co dot bien rieng: 48/48 nhom bat
+    buoc · dot bien giet 200/200" · "MUTANT: giet = 10 · khong giet = 0 · khong do duoc = 0 / tong 10" ·
+    "CI_DANG_KY ops/nhanh_don_duoc_test.py: DAT rc=0" · "TONG: DAT". Luot xanh THU HAI lien tiep tren git 2.55
+    (sau luot PR tren cbfd82c) — van chua chung minh loi chap chon da het.'
+  canh_bao_bien_do: 'gate-registry 71,4 phut (tran 90). Luot master #629: 67,0 phut. Bien con ~18,6 phut.'
+  windows: 'Luot master KHONG co job Windows (chuan-bi.outputs.os chi ubuntu o luot push).'
+
+# ---------------------------------------------------------------- BOOKKEEPING
+bookkeeping:
+- muc: 'Ghi merge commit / parents / tree'
+  trang_thai: XONG
+  bang_chung: 'khoi `merge` tren.'
+- muc: 'Doc cong hau merge'
+  trang_thai: XONG
+  bang_chung: 'run 36156097695 success (ca 4 job).'
+- muc: 'Thu hoi lease r3-g1'
+  trang_thai: 'DE HET HAN — 2026-09-26T08:45:00Z'
+  vi_sao: 'Uy quyen cho phep "de lease r3-g1 het han". Duong thu hoi SOM duy nhat la da_bi_thay_the, doi mot lease
+    MOI tro nguoc — cap lease moi chi de thu hoi la tao them mot quyen ghi. Toi han, `ai-dang-giu` VAN bao r3-g1
+    giu ops/nhanh_don_duoc_test.py du goi da land (no AG-T0-01B-thu-hoi-lease-chua-co-duong).'
+- muc: 'Ho so land (tep nay)'
+  trang_thai: XONG
+  bang_chung: 'nhanh ops/cap-lease-593, KHONG merge.'
+- muc: 'Bien nhan len #593 roi dong #593 completed'
+  trang_thai: 'lam ngay sau commit tep nay'
+
+# ---------------------------------------------------------------- NO VA GIOI HAN CON MO
+no_con_mo:
+- ten: 'co che ENOTEMPTY la GIA THUYET'
+  noi_dung: 'Bao tri git chay nen trong remote.git chua duoc do truc tiep; mot luot gate-registry xanh khong chung
+    minh loi chap chon da het. Chu kho yeu cau theo doi cac luot master sau land.'
+- ten: 'lech dac ta r3 §2 M1'
+  noi_dung: 'Ghi config kho bare la co che THEM; chu kho chap nhan trong 5834204913. Dac ta r3 khong sua.'
+- ten: 'tk-json-recursion-escape phu thuoc phien ban Python'
+  noi_dung: 'Python 3.11 giet r539+r540 (197/198), 3.12 chi r539; delta so nen 0. Moi truong dev 3.11 se do gia.'
+- ten: AG-T0-01B-thu-hoi-lease-chua-co-duong
+  noi_dung: 'xem bookkeeping "Thu hoi lease r3-g1".'
+- ten: 'than PR #639 cu'
+  noi_dung: 'Bang trong than PR van ghi +46/-1 (commit dau); so dung la +77/-1. Khong sua sau merge.'
+
+trang_thai_goi: 'landed — ket qua da vao master o 77c36a5 (tree = ung vien cbfd82c duoc duyet), hau-merge gate
+  xanh (run 36156097695), bookkeeping xong tru lease de het han co khai. Packet complete theo §10.2 khi bien nhan
+  #593 duoc dang va #593 dong.'

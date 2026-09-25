@@ -237,3 +237,13 @@ VIEC_CON_LAI_TRONG_WRITE_SET: 'KHONG CO. Docstring trich r2 da sua o 677ef37 (ma
 write_set_do_luc_cap:
   do_luc: '2026-09-25T01:xxZ'
   ket_qua: 'Do lai sau khi commit g8 — ghi trong thong diep commit va bao cao.'
+
+# ───────────────────────── BIA MỘ — vế THỨ NHẤT của dấu HAI CHIỀU ─────────────────────────
+# Thêm 2026-09-25 khi cấp g9. g8 CÒN HIỆU LỰC (hạn 2026-09-26T06:00:00Z) nên bia mộ hai chiều là
+# BẮT BUỘC. REVISION mới (r8 -> r9): protocol §3.2.
+da_bi_thay_the: r378-symlink-doi-dac-quyen-r9-g9-claude
+da_bi_thay_the_luc: '2026-09-25T02:0xZ'
+da_bi_thay_the_vi_sao: 'r9 (issues/574#issuecomment-5825229926, chủ kho: "Mở r9 + g9, quét theo ngữ cảnh")
+  sửa lời trích gán sai cho r2 ở bảng §0.2 dòng 99 và đổi phép quét sang THEO NGỮ CẢNH (Phụ lục C); head
+  mới 19f2141 bỏ dấu trích một cụm của r3 trong docstring. spec_hash r9 =
+  7caffe2ef6f117b3115b05439698ea9000e3028227410e94c94c81458b24cbe4.'

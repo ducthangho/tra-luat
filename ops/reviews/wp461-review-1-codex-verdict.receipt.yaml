@@ -340,12 +340,15 @@ pending:
 - write set biên nhận này ngoài spec r3 §4 (A12) — hợp thức bằng chỉ thị 5820263820, không bằng revision
 lich_su_ban_ung_vien:
   ghi_chu: >-
-    Receipt nay CHUA duoc giao (chua o master: `git ls-tree origin/master ops/reviews/wp461-*` rong) — moi ban la
-    ban UNG VIEN trong PR #625; sua truoc khi land khong phai 'sua receipt da giao' (r4 S3 / §8 dong 461-462).
-    Lich su cac ban ung vien ghi o day de noi nguon; ban hien hanh la dong cuoi (truoc commit nay).
+    Receipt nay CHUA duoc giao (chua o master) — moi ban la ban UNG VIEN trong PR #625; sua truoc khi land khong phai
+    'sua receipt da giao' (r4 S3 / §8 dong 461-462). Danh sach duoi day SINH TU `git log -- <receipt>` ngay truoc khi
+    commit, cu -> moi, gom ca ban CHA TRUC TIEP cua commit nay (thread 4100221350); kiem lai bang
+    `git log --format=%H -- ops/reviews/wp461-review-1-codex-verdict.receipt.yaml` + sha256 tung blob.
   cac_ban:
   - {commit: 78d9b74fc059d93bdb7ecb172427d5a78647c0b6, luc: '2026-09-24T19:01:28+00:00', receipt_sha256: 77e751e3cf60e6b1c499e133213988e603eb00da76a43efab7702721fea48fed}
   - {commit: ea7711a61239e6845f73ffd92d7c20de97c0a667, luc: '2026-09-24T19:31:19+00:00', receipt_sha256: 73600a343a0bb94ede4284fe7973a027942fd78e85b97c6cdc5dfbf3f05df500}
   - {commit: 020de5e0148808486e0530f6810e4286816969a6, luc: '2026-09-25T00:08:20+00:00', receipt_sha256: e61bd3d6a192308bc3c5f8b74ea35b7ac904b9713b67ac35a773dbc5c5048d66}
   - {commit: 518bbe04adca684a9f5bc89c8483a47abc20d4e3, luc: '2026-09-25T00:37:55+00:00', receipt_sha256: 5f5a78d71ae7fa530c247951b757384671eb9b6938c50a873145790b2665b80f}
   - {commit: c2b16900b2209090e0a785574da02b60e7912a9c, luc: '2026-09-25T00:52:40+00:00', receipt_sha256: 37571adef958657fae39cfb05aee3664af17af93cadc4f388fecbec13b8536a8}
+  - {commit: 7885c230b303a82da383f3a288eff2b7b8c30a6e, luc: '2026-09-25T01:19:21+00:00', receipt_sha256: b63dec976d1145e5509dd2da0b688e2ce41d0f34c359711d55ea9aa1bab59073}
+  - {commit: ab691999a3566c32552cfd5649b442c0053e1e43, luc: '2026-09-25T01:27:56+00:00', receipt_sha256: 3da9a32d4cabf4bad677d2af5d66a967856910d1e5bc4d2b604f1a0dbddde842}

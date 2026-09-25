@@ -38,7 +38,10 @@ PHAM_VI_LEASE_NAY:
   da_cap: 'Lease nay CHI #574. #579 co lease RIENG (dang-lease-dau-truoc-kiem-sau-r10-g8-claude),
     write set KHONG chong lan.'
 
-leased_at_utc: '2026-09-25T03:15:00Z'
+leased_at_utc: '2026-09-25T03:03:24Z'
+leased_at_utc_nguon: 'SUA 25-09 (#574 r12/g12, cross-review luot 7 L1). = committer date cua 87c89c4, commit TAO tep nay.
+  Ban dau ghi 2026-09-25T03:15:00Z — DOAN, MUON HON chinh commit tao tep. Chi thi cap (issues/574#issuecomment-5825973245)
+  created_at 2026-09-25T03:02:18Z; workflow dang lease chay 2026-09-25T03:04:15Z.'
 lease_expires_at_utc: '2026-09-26T06:00:00Z'
 han_vi_sao: 'GIU NGUYEN han cua g4..g7: 2026-09-26T06:00:00Z. Cua so 48h la cua so chu kho da duyet
   (issues/574#issuecomment-5816412671). Doi revision KHONG phai ly do de phien nay tu noi han.'
@@ -207,7 +210,7 @@ WINDOWS:
 reviewed_sha_required_note: 'd52a79a = head HIEN HANH cua claude/va-r378-symlink-20260920 luc cap g10:
   19f2141 + docstring thay loi r2/r3 bang con tro (sua §8.4 -> §8.3) + manifest tai sinh. selftest 1715/1715,
   release-verify strict 180/180, golden rc=0; con_tro.py kiem --ham: 2 DUNG, 0 VI_PHAM, rc=0.'
-start_from_sha_vi_sao: 'HEAD cua origin/master luc cap g10 (2026-09-25T03:xxZ) = 601a0f1 (land #618).'
+start_from_sha_vi_sao: 'HEAD cua origin/master luc cap g10 (commit 87c89c4, 2026-09-25T03:03:24Z) = 601a0f1 (land #618).'
 spec_hash_do_nhu_the_nao: 'Do TU BLOB: `git show 0f4dc19:ops/specs/r378-symlink-doi-dac-quyen-r10.md | sha256sum`.
   1134 dong. Ban chep vao nhanh lease nay khop tung byte.'
 spec_land_o: 'CHUA LAND — PR #604, nhanh claude/spec-r378-20260920, head 0f4dc19.'
@@ -235,14 +238,18 @@ VIEC_CON_LAI_TRONG_WRITE_SET: 'KHONG CO. Docstring da doi sang con tro o d52a79a
   Buoc tiep: cross-review luot 6 (chay lai TRON) tren d52a79a theo thuoc r10 — reviewer do phien dieu phoi dung.'
 
 write_set_do_luc_cap:
-  do_luc: '2026-09-25T03:xxZ'
+  do_luc: '2026-09-25T03:03:24Z'
+  do_luc_nguon: 'SUA 25-09 (L1). CAN TREN: committer date cua 87c89c4. Phep do chay TRUOC commit; phut do that khong
+    co hien vat ben. Ban dau ghi mot chuoi co xx thay phut — khong parse duoc.'
   ket_qua: 'Do lai sau khi commit g10 — ghi trong thong diep commit va bao cao.'
 
 # ───────────────────────── BIA MỘ — vế THỨ NHẤT của dấu HAI CHIỀU ─────────────────────────
 # Thêm 2026-09-25 khi cấp g11. g10 CÒN HIỆU LỰC (hạn 2026-09-26T06:00:00Z) nên bia mộ hai chiều là
 # BẮT BUỘC. REVISION mới (r10 -> r11): protocol §3.2.
 da_bi_thay_the: r378-symlink-doi-dac-quyen-r11-g11-claude
-da_bi_thay_the_luc: '2026-09-25T06:xxZ'
+da_bi_thay_the_luc: '2026-09-25T08:19:11Z'
+da_bi_thay_the_luc_nguon: 'SUA 25-09 (L1). = committer date cua c859f0b, commit DAT bia mo nay; workflow chay luc
+  2026-09-25T08:19:15Z. Ban dau ghi mot chuoi co xx thay phut — khong parse duoc, va sai gio (06 thay vi 08).'
 da_bi_thay_the_vi_sao: 'r11 (issues/574#issuecomment-5829237930, chủ kho: "Đồng ý") — con trỏ mang mảnh neo do máy
   kiểm, tự kiểm đếm chính xác 15 ca; head mới 76f199e. spec_hash r11 =
   a3ebdab14accfbaeced6bde516938cc01dcd98b19780b7aadd0655a2975d5b7f.'

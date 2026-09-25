@@ -870,7 +870,8 @@ def _gia_tri_hang(nut, tra_ten=None, sau=0):
         t = _gia_tri_hang(nut.left, tra_ten, sau + 1)
         ph = _gia_tri_hang(nut.right, tra_ten, sau + 1)
         if isinstance(t, (str, bytes)) and ph is not _KHONG_BIET \
-                and isinstance(ph, (str, bytes, int, float, tuple)):
+                and isinstance(ph, (str, bytes, int, float, tuple, dict)):
+            # `dict` (N86, r23, F7 vòng 17): `"%(k)s" % {"k": "bash"}` là dạng CHUẨN của `%`.
             _kiem_ngan_sach_dinh_dang(t, ph)
             return _chay_phep(lambda: t % ph)
         return _KHONG_BIET
@@ -1052,6 +1053,32 @@ def _la_ten_bash(nut, tra_ten, cho_duong=True, nhan=None):
     return ten is not None and ten.casefold() in _HANG_BASH
 
 
+def _phan_tu_dau(nut):
+    """("co", nút phần tử ĐẦU) | ("rong", None) | ("khong_biet", None) của một argv viết theo
+    CÚ PHÁP: list/tuple literal, `*` trải một list/tuple literal, và `+` nối hai vế như thế.
+
+    Không đệ quy Python (N84): đi xuống VẾ TRÁI của chuỗi `+` bằng vòng lặp, vì `[…] + a + b + …`
+    lồng sang trái đúng một tầng cho mỗi vế.
+    """
+    # Ngăn xếp `(nút, là_dãy)`: `là_dãy` ⇒ nút là MỘT DÃY (vế của `+`, đích của `*`); ngược lại
+    # nút là MỘT PHẦN TỬ — và `"ba" + "sh"` ở vị trí phần tử là phần tử, không phải phép nối dãy.
+    viec = [(nut, True)]
+    while viec:
+        x, la_day = viec.pop()
+        if la_day:
+            if isinstance(x, ast.BinOp) and isinstance(x.op, ast.Add):
+                viec.extend(((x.right, True), (x.left, True)))
+            elif isinstance(x, (ast.List, ast.Tuple)):
+                viec.extend((e, False) for e in reversed(x.elts))
+            else:
+                return "khong_biet", None          # dãy là biến / lời gọi / chuỗi: không đoán
+        elif isinstance(x, ast.Starred):
+            viec.append((x.value, True))
+        else:
+            return "co", x
+    return "rong", None
+
+
 def _la_vec_bash(nut, tra_ten):
     """`argv` này có đặt ra TÊN chương trình `bash` ở vị trí đầu không.
 
@@ -1064,8 +1091,16 @@ def _la_vec_bash(nut, tra_ten):
     """
     if nut is None:
         return False
-    if isinstance(nut, (ast.List, ast.Tuple)):
-        return bool(nut.elts) and _la_ten_bash(nut.elts[0], tra_ten)
+    if isinstance(nut, (ast.List, ast.Tuple, ast.BinOp)):
+        # N85 (r23, F3 vòng 17) — argv NỐI (`["bash", "-c"] + them`) hay TRẢI (`[*("bash",
+        # "-c"), x]`) có phần tử ĐẦU là hằng của một bao chứa viết NGAY tại lời gọi. Đo được: cả
+        # bốn dạng CHẠY BASH THẬT mà r22 trả `[]`. Đi theo CÚ PHÁP tới phần tử đầu; không biết
+        # được (bao chứa đầu là biến, `*x` không phải literal) thì KHÔNG đoán.
+        loai, dau = _phan_tu_dau(nut)
+        if loai == "co":
+            return _la_ten_bash(dau, tra_ten)
+        if not isinstance(nut, ast.BinOp) or loai == "rong":
+            return False                   # BinOp không mở được: có thể là nối CHUỖI, gấp dưới
     if isinstance(nut, ast.Set):
         # Tập NHIỀU phần tử: thứ tự duyệt không xác định ⇒ không biết cái nào là chương trình.
         return len(nut.elts) == 1 and _la_ten_bash(nut.elts[0], tra_ten)
@@ -1149,8 +1184,10 @@ def _co_the_thanh_bash(nut, sau=0):
         # hằng `bash` không" thì bộ lọc loại nó TRƯỚC khi luật thật được hỏi. Đo được ở bản
         # đầu của r19: đúng hình dạng này lọt trong khi ba toán tử kia bị bắt.
         return True
-    if isinstance(nut, (ast.List, ast.Tuple, ast.Set, ast.Dict, ast.Call, ast.Attribute)):
-        # `Dict` cho argv kiểu từ điển, `Attribute` cho `"bash".encode()` (N58, r18).
+    if isinstance(nut, (ast.List, ast.Tuple, ast.Set, ast.Dict, ast.Call, ast.Attribute,
+                        ast.Starred)):
+        # `Dict` cho argv kiểu từ điển, `Attribute` cho `"bash".encode()` (N58, r18), `Starred`
+        # cho argv TRẢI `[*("bash", "-c"), x]` (N85, r23).
         return any(_co_the_thanh_bash(x, sau + 1) for x in ast.iter_child_nodes(nut))
     return False
 
@@ -1161,6 +1198,18 @@ def _mang_hang_bash(nut):
     chỉ tốn công giải callee thừa; sai chiều hẹp mới là lọt."""
     return any(_co_the_thanh_bash(a)
                for a in (*nut.args, *(kw.value for kw in nut.keywords)))
+
+
+def _mo_dau_tu_bang(bang_cua):
+    """Mã MỞ ĐẦU tái dựng mọi ràng buộc `import` theo dõi của một tệp — cho tải `exec` (N83)."""
+    dong = set()
+    for bang, _toan_cuc, _phi_cuc_bo in bang_cua.values():
+        for ten, tap in bang.items():
+            for rb in tap:
+                if rb[0] == "import":
+                    dong.add(f"import {rb[1]} as {ten}\n" if rb[2] is None
+                             else f"from {rb[1]} import {rb[2]} as {ten}\n")
+    return "".join(sorted(dong))
 
 
 def _loi_goi_tran(than: str, sau=0):
@@ -1225,6 +1274,18 @@ def _loi_goi_tran(than: str, sau=0):
         `eval("…")` với chuỗi HẰNG — `import` trong chuỗi vào bảng module, lời gọi bash trong
         chuỗi được báo tại vị trí `exec`. `nonlocal` đi tới đúng chủ sở hữu qua các hàm giữa cũng
         khai `nonlocal`; `global str` chỉ đọc không che tên dựng sẵn (N82);
+      · N83 (r23): nạp động qua BÍ DANH (`from importlib import import_module as im`, `import
+        importlib as il`, `from builtins import __import__ as imp`), `importlib.__import__`, MỌI
+        đích của phép gán (`a = b = …`) và phép gán có chú thích, hai tầng (`il = __import__(
+        "importlib")` rồi `il.import_module(…)`), GIÁ TRỊ của `eval` hằng (`eval("__import__(
+        'subprocess')")`); tải `exec`/`eval` được GẤP HẰNG (`bytes`, `+`, f-string không biểu
+        thức), callee `builtins.exec`/`from builtins import exec`, và tên trong tải giải theo
+        MỌI ràng buộc `import` của CẢ TỆP (hàm chứa `exec`, nạp động, `exec` trước). Tải hằng
+        KHÔNG phân tích được, hay lồng quá 3 tầng ⇒ NÉM (fail-close);
+      · N85 (r23): argv NỐI (`["bash", "-c"] + them`) hay TRẢI (`[*("bash", "-c"), x]`) mà phần
+        tử ĐẦU là hằng của một list/tuple viết ngay tại lời gọi; N86: `"%(k)s" % {"k": "bash"}`;
+      · N84 (r23): biểu thức lồng sâu tới giới hạn biên dịch của chính Python (~10.000 tầng) —
+        bộ duyệt dùng ngăn xếp tường minh, không đệ quy;
       · `type X[T] = …` (PEP 695) có phạm vi chú thích RIÊNG (N47, r16): `T` của nó không rò
         ra phạm vi chứa;
       · callee giải theo PHẠM VI TỪ VỰNG (r8, F3 codex vòng 3): `import subprocess` ở module
@@ -1248,7 +1309,11 @@ def _loi_goi_tran(than: str, sau=0):
         `executable=` KHÔNG phải hằng;
       · `from shutil import *`, tên đến qua `globals()`/`getattr`;
       · NẠP ĐỘNG với đối số KHÔNG phải hằng: `__import__(ten)`, `importlib.import_module(ten)`,
-        `exec(bien)`, hay `compile(…)` rồi `exec` đối tượng mã (N81 chỉ phủ dạng HẰNG).
+        `exec(bien)`, hay `compile(…)` rồi `exec` đối tượng mã (N81 chỉ phủ dạng HẰNG); nạp động
+        gán vào đích BỘ (`a, b = __import__(…), 1`) hay qua `:=` TRONG comprehension; `.eval`/
+        `.exec` trên một đối tượng không phải `builtins` (`page.eval("…")`);
+      · argv mà phần tử ĐẦU đến từ BIẾN — `[*xs, "bash"]`, `sys.argv[1:] + ["bash"]` — dù `xs`
+        rỗng thì bash chạy thật: đó là luồng dữ liệu, không phải cây cú pháp.
     Các nhóm ấy cần phân tích luồng dữ liệu, không phải khớp cây cú pháp. Chúng là **nợ có
     tên**, không phải chỗ đã kín. Ai mở rộng thì thêm hình dạng vào `t33` TRƯỚC.
     Tên được giải KHÔNG theo thứ tự thực thi (N76, r21) — xem `_giai_ten`. Nợ có tên còn lại ở
@@ -1261,14 +1326,21 @@ def _loi_goi_tran(than: str, sau=0):
     # vi của tệp, và đo được trên kho thật nó chiếm 8,5/10,4s của `quet` (12.912 phạm vi) trong
     # khi chỉ 6 tệp có hằng `bash`. Một lời gọi không mang hằng `bash` ở đối số nào thì không
     # cần biết callee là ai — nên chỉ tệp CÓ ứng viên mới trả tiền cho bộ giải.
-    # N81 (r22) — lời gọi bash NẰM TRONG tải `exec("…")` hằng được báo TẠI VỊ TRÍ `exec`. Tải
-    # được quét cùng các `import` mức module của tệp chứa nó (nó chạy trong globals ấy).
+    # N81 (r22) — lời gọi bash NẰM TRONG tải `exec("…")` hằng được báo TẠI VỊ TRÍ `exec`.
+    # N83 (r23, F2 vòng 17) — phần MỞ ĐẦU của tải sinh từ BẢNG RÀNG BUỘC của cả tệp, không từ
+    # các nút `import` cú pháp ở mức module. Bản r22 bỏ ba thứ, cả ba CHẠY BASH THẬT mà cổng trả
+    # `[]`: `import` trong HÀM chứa `exec` (tải đọc `locals()`), ràng buộc NẠP ĐỘNG
+    # (`m = __import__(…)`), và ràng buộc do một `exec` TRƯỚC sinh ra. Bảng đã có đủ cả ba; lấy
+    # HỢP mọi phạm vi — không hỏi `exec` nằm ở đâu, đúng tinh thần N76.
+    # Quá `_SAU_EXEC` tầng lồng mà còn tải hằng ⇒ NÉM (fail-close), không lặng lẽ thôi quét.
     ghi_exec = []
-    if sau < _SAU_EXEC:
-        dau = "".join(ast.unparse(n) + "\n" for n in cay.body
-                      if isinstance(n, (ast.Import, ast.ImportFrom)))
-        for goi, _tai in _tai_exec(cay):
-            if _loi_goi_tran(dau + goi.args[0].value, sau + 1):
+    cac_tai = _tai_exec(cay)
+    if cac_tai and sau >= _SAU_EXEC:
+        raise _VuotNganSach(f"`exec`/`eval` hằng lồng quá {_SAU_EXEC} tầng")
+    if cac_tai:
+        dau = _mo_dau_tu_bang(_bang_pham_vi_ca_cay(cay, sau))
+        for goi, van in cac_tai:
+            if _loi_goi_tran(dau + van, sau + 1):
                 ghi_exec.append((goi.lineno, goi.col_offset))
     ung_vien = [n for n in ast.walk(cay) if isinstance(n, ast.Call) and _mang_hang_bash(n)]
     if not ung_vien:
@@ -1329,7 +1401,16 @@ _MODULE_CHU = {"subprocess": _TEN_SPAWN + _TEN_SHELL_RA, "shutil": _TEN_WHICH,
                "pty": tuple(t for (m, t) in _API_ARGV if m == "pty"),
                # N81 (r22) — `importlib`/`builtins` CÓ MẶT để GIẢI TÊN hàm NẠP ĐỘNG, không phải
                # để phân loại lời gọi: `_loai_theo_cap` trả None cho cả hai.
-               "importlib": ("import_module",), "builtins": ("__import__",)}
+               "importlib": ("import_module", "__import__"),
+               "builtins": ("__import__", "exec", "eval")}
+
+# N83 (r23, F1 vòng 17) — (module, tên) → loại hàm NẠP ĐỘNG. Một bảng cho CẢ HAI chế độ của
+# `_module_dong` (cú pháp và qua bộ giải tên), nên bí danh (`from importlib import import_module
+# as im`) và thành viên cùng họ (`importlib.__import__`, `builtins.eval`) đi cùng một đường.
+_HAM_NAP_DONG = {("importlib", "import_module"): "import_module",
+                 ("importlib", "__import__"): "__import__",
+                 ("builtins", "__import__"): "__import__",
+                 ("builtins", "eval"): "eval"}
 
 
 def _module_dong(goi, tra_ten=None):
@@ -1338,40 +1419,53 @@ def _module_dong(goi, tra_ten=None):
     N81 (r22, H3 vòng 16) — `__import__("subprocess").run(["bash", …])` CHẠY BASH THẬT (đo được)
     mà bộ quét trả `[]`: bộ nhận của lời gọi không phải một `Name` nên không ai hỏi nó là gì.
     Phủ: `__import__(…)`, `__builtins__.__import__(…)`, `builtins.__import__(…)`,
-    `importlib.import_module(…)` — với tên module là HẰNG chuỗi. `__import__("a.b")` KHÔNG có
+    `importlib.import_module(…)`, `importlib.__import__(…)` — và mọi BÍ DANH của chúng khi
+    `tra_ten` có mặt (`from importlib import import_module as im`, N83) — với tên module là HẰNG
+    (gấp qua `_gia_tri_hang`: `"sub" + "process"` cũng là hằng). `__import__("a.b")` KHÔNG có
     `fromlist` trả module ĐỈNH `a`, có `fromlist` khác rỗng thì trả `a.b` — đúng luật Python.
-    `tra_ten is None` ⇒ hỏi theo CÚ PHÁP, không kiểm che tên (dùng khi dựng bảng ràng buộc,
-    lúc chưa có bộ giải): lệch về phía "có thể là module", đúng tinh thần N76.
+    N83 (r23, B8 vòng 17) — `eval("<tải hằng>")` trả GIÁ TRỊ của tải: tải là một lời nạp động
+    hằng (`eval("__import__('subprocess')")`) hay tên một module đã `import` ⇒ module ấy.
+    `tra_ten is None` ⇒ hỏi theo CÚ PHÁP, không kiểm che tên — lệch về phía "có thể là module",
+    đúng tinh thần N76. Bảng ràng buộc hỏi CẢ HAI chế độ (xem N83 ở `_bang_pham_vi_ca_cay`).
     KHÔNG PHỦ (nợ có tên): tên module không phải hằng; `import_module` tương đối (`".x"`).
     """
-    if not isinstance(goi, ast.Call) or not goi.args:
+    if not isinstance(goi, ast.Call) or not goi.args or isinstance(goi.args[0], ast.Starred):
         return None
     f, loai = goi.func, None
     if isinstance(f, ast.Name):
-        if f.id == "__import__" and (tra_ten is None
-                                     or not tra_ten("__import__", hoi_rang_buoc=True)):
-            loai = "__import__"
+        if f.id in ("__import__", "eval") and (tra_ten is None
+                                               or not tra_ten(f.id, hoi_rang_buoc=True)):
+            loai = f.id
         elif tra_ten is not None:
-            muc = tra_ten(f.id)
-            loai = {("importlib", "import_module"): "import_module",
-                    ("builtins", "__import__"): "__import__"}.get(muc)
+            loai = _HAM_NAP_DONG.get(tra_ten(f.id))
     elif isinstance(f, ast.Attribute) and isinstance(f.value, ast.Name):
         goc = f.value.id
-        if goc == "__builtins__" and f.attr == "__import__" and (
+        if goc == "__builtins__" and f.attr in ("__import__", "eval") and (
                 tra_ten is None or not tra_ten(goc, hoi_rang_buoc=True)):
-            loai = "__import__"
+            loai = f.attr
         else:
             muc = tra_ten(goc) if tra_ten is not None else (goc, None)
-            if muc == ("importlib", None) and f.attr == "import_module":
-                loai = "import_module"
-            elif muc == ("builtins", None) and f.attr == "__import__":
-                loai = "__import__"
+            if muc and muc[1] is None:
+                loai = _HAM_NAP_DONG.get((muc[0], f.attr))
     if loai is None:
         return None
-    a0 = goi.args[0]
-    if not (isinstance(a0, ast.Constant) and isinstance(a0.value, str)):
+    if loai == "eval":
+        van = _tai_hang(goi)
+        if van is None:
+            return None
+        try:
+            than = ast.parse(van, mode="eval").body
+        except (SyntaxError, ValueError):
+            return None                    # tải hỏng thì `eval` ném — không trả module nào
+        if isinstance(than, ast.Call):
+            return _module_dong(than, None)
+        if isinstance(than, ast.Name) and tra_ten is not None:
+            muc = tra_ten(than.id)
+            return muc[0] if muc and muc[1] is None else None
         return None
-    ten = a0.value
+    ten = _gia_tri_hang(goi.args[0])
+    if not isinstance(ten, str):
+        return None
     if loai == "__import__":
         tu_ds = goi.args[3] if len(goi.args) >= 4 else next(
             (k.value for k in goi.keywords if k.arg == "fromlist"), None)
@@ -1466,26 +1560,80 @@ _SAU_EXEC = 3              # N81 — độ sâu tối đa của `exec` lồng `e
 _TRAN_EXEC = 100_000       # N81 — độ dài tối đa của một chuỗi `exec` được phân tích
 
 
+def _tai_hang(goi):
+    """Tải HẰNG (đã giải mã thành `str`) của một lời gọi `exec`/`eval`, hay None.
+
+    N83 (r23, F2 vòng 17) — "hằng" theo ĐÚNG định nghĩa của packet (N52/N65): đối số được GẤP
+    qua `_gia_tri_hang`, nên `b"…"`, `"…" + "…"`, f-string không biểu thức đều là tải hằng. Đo
+    được: cả ba CHẠY BASH THẬT mà r22 (chỉ nhận `ast.Constant` kiểu `str`) trả `[]`. `bytes` được
+    giải mã như trình thông dịch làm (`decode_source`: cookie mã hoá, dòng mới phổ quát).
+    """
+    if not goi.args or isinstance(goi.args[0], ast.Starred):
+        return None
+    v = _gia_tri_hang(goi.args[0])
+    if not isinstance(v, (str, bytes)) or len(v) > _TRAN_EXEC:
+        return None
+    if isinstance(v, bytes):
+        from importlib.util import decode_source
+        try:
+            v = decode_source(v)
+        except (SyntaxError, UnicodeDecodeError, LookupError) as e:
+            raise SyntaxError(f"tải `exec`/`eval` dòng {goi.lineno}: giải mã hỏng: {e}") from e
+    return v
+
+
+def _ten_exec_cua(cay):
+    """(tên gọi THẲNG → 'exec'|'eval', tên GỐC của thuộc tính) CÓ THỂ là `exec`/`eval` dựng sẵn.
+
+    N83 (r23, E1 vòng 17) — `builtins.exec("…")` CHẠY BASH THẬT mà r22 (chỉ nhận chữ `exec`
+    trần) trả `[]`. Theo CÚ PHÁP, HỢP mọi `import builtins` / `from builtins import exec` ở
+    BẤT KỲ đâu trong tệp — không hỏi phạm vi, đúng tinh thần N76. Thuộc tính `.exec`/`.eval`
+    trên một đối tượng KHÁC (`page.eval("…")`) KHÔNG tính: đó không phải trình thông dịch Python.
+    """
+    thang, goc = {"exec": "exec", "eval": "eval"}, {"__builtins__"}
+    for n in ast.walk(cay):
+        if isinstance(n, ast.Import):
+            goc.update(al.asname or "builtins" for al in n.names if al.name == "builtins")
+        elif isinstance(n, ast.ImportFrom) and n.level == 0 and n.module == "builtins":
+            thang.update((al.asname or al.name, al.name) for al in n.names
+                         if al.name in ("exec", "eval"))
+    return thang, goc
+
+
 def _tai_exec(cay):
-    """[(nút gọi, cây của tải)] cho mọi `exec(…)`/`eval(…)` mà đối số đầu là CHUỖI HẰNG.
+    """[(nút gọi, tải đã giải mã)] cho mọi `exec(…)`/`eval(…)` mà đối số đầu là tải HẰNG.
 
     N81 (r22, H4 vòng 16) — `exec("import subprocess")` rồi `subprocess.run(["bash", …])` CHẠY
     BASH THẬT (đo được) mà bộ quét trả `[]`: chỉ nút `Import` CÚ PHÁP mới thành ràng buộc. Chuỗi
     hằng thì ĐỌC được mà không chạy gì, nên phân tích nó như một tệp con. Theo CÚ PHÁP, không
-    kiểm che tên `exec` — "có thể chạy" là đủ (N76). Tải không phân tích được thì chương trình
-    thật cũng ném lúc `exec` ⇒ không có gì chạy ⇒ bỏ qua. KHÔNG PHỦ (nợ có tên): tải không phải
-    hằng; `compile(…)` rồi `exec` đối tượng mã.
+    kiểm che tên `exec` — "có thể chạy" là đủ (N76). Callee và tải: xem `_ten_exec_cua`,
+    `_tai_hang` (N83).
+    N83 (r23, F6 vòng 17) — tải hằng KHÔNG phân tích được thì NÉM, không bỏ qua. Bản r22 nuốt
+    lỗi với lý lẽ "chương trình thật cũng ném lúc `exec`" — chỉ đúng khi bộ phân tích của cổng
+    TRÙNG bộ phân tích lúc chạy (cùng phiên bản, cùng cờ `-W`). Đo được: với `-W error` một
+    escape `\\d` trong tải làm cổng trả `[]`, còn cùng lời gọi ở TỆP NGOÀI thì `quet` ra
+    `KHONG_DO_DUOC`. Hai đường cho cùng một sự kiện phải cho cùng một phán quyết: fail-close.
+    KHÔNG PHỦ (nợ có tên): tải không phải hằng; `compile(…)` rồi `exec` đối tượng mã.
     """
+    thang, goc = _ten_exec_cua(cay)
     ra = []
     for n in ast.walk(cay):
-        if (isinstance(n, ast.Call) and isinstance(n.func, ast.Name)
-                and n.func.id in ("exec", "eval") and n.args
-                and isinstance(n.args[0], ast.Constant) and isinstance(n.args[0].value, str)
-                and len(n.args[0].value) <= _TRAN_EXEC):
-            try:
-                ra.append((n, ast.parse(n.args[0].value)))
-            except (SyntaxError, ValueError):
-                pass
+        if not isinstance(n, ast.Call):
+            continue
+        f = n.func
+        if not ((isinstance(f, ast.Name) and f.id in thang)
+                or (isinstance(f, ast.Attribute) and f.attr in ("exec", "eval")
+                    and isinstance(f.value, ast.Name) and f.value.id in goc)):
+            continue
+        van = _tai_hang(n)
+        if van is None:
+            continue
+        try:
+            ast.parse(van)
+        except (SyntaxError, ValueError) as e:
+            raise SyntaxError(f"tải `exec`/`eval` hằng ở dòng {n.lineno} không phân tích "
+                              f"được: {e}") from e
+        ra.append((n, van))
     return ra
 
 
@@ -1613,14 +1761,18 @@ def _rang_buoc_cua(pham_vi):
                     them(al.asname or al.name, ("khac",))
         elif isinstance(n, ast.Name) and isinstance(n.ctx, (ast.Store, ast.Del)):
             them(n.id, ("khac",))
-        elif (isinstance(n, (ast.Assign, ast.NamedExpr)) and _module_dong(n.value)
-              and isinstance(n.targets[-1] if isinstance(n, ast.Assign) else n.target,
-                             ast.Name)):
-            # N81 — `m = __import__("subprocess")` RÀNG BUỘC `m` vào module ấy. Theo cú pháp,
-            # không kiểm che tên `__import__`: "có thể là module" là đủ (N76). Đích vẫn được
-            # duyệt tiếp như mọi phép gán, nên nó mang thêm `("khac",)` — vô hại dưới N76.
-            dich = n.targets[-1] if isinstance(n, ast.Assign) else n.target
-            them(dich.id, ("import", _module_dong(n.value), None))
+        elif isinstance(n, (ast.Assign, ast.AnnAssign, ast.NamedExpr)) \
+                and isinstance(n.value, ast.Call):
+            # N81 (r22) → N83 (r23, F1 vòng 17) — `m = <lời gọi>` CÓ THỂ là một lời NẠP ĐỘNG. Ghi
+            # CHỜ GIẢI `("dong", lời gọi, phạm vi)` cho MỌI đích tên — `a = b = __import__(…)`
+            # ràng buộc CẢ HAI (r22 chỉ ghi đích cuối), `m: object = …` cũng là một phép gán
+            # (r22 bỏ `AnnAssign`). Việc giải để SAU khi mọi bảng đã dựng (`_bang_pham_vi_ca_cay`),
+            # vì callee có thể là một BÍ DANH (`from importlib import import_module as im`) mà chỉ
+            # bộ giải tên mới biết. `_mot_import` bỏ qua mục "dong" nên mục chưa giải là vô hại.
+            for dich in (n.targets if isinstance(n, ast.Assign) else [n.target]):
+                # đích `:=` trong comprehension thuộc phạm vi CHỨA (N76, G6) — `bo_qua` ở trên
+                if isinstance(dich, ast.Name) and id(dich) not in bo_qua:
+                    them(dich.id, ("dong", n.value, id(pham_vi)))
         elif isinstance(n, ast.ExceptHandler):
             them(n.name, ("khac",))
         elif type(n).__name__ in ("TypeVar", "ParamSpec", "TypeVarTuple"):
@@ -1739,27 +1891,27 @@ def _bang_pham_vi_ca_cay(cay, sau=0):
     import ast
     nut_cua, cha_cua, thu_tu = {}, {}, []
 
-    def ghi(nut, cha):
-        nut_cua[id(nut)] = nut
-        cha_cua[id(nut)] = cha
-        thu_tu.append(id(nut))
-        xuong(nut, id(nut))
-
-    def xuong(nut, chu):
-        for con in ast.iter_child_nodes(nut):
-            if isinstance(con, _NUT_PHAM_VI):
-                ghi(con, chu)
-            else:
-                xuong(con, chu)
-
-    ghi(cay, None)
+    # N84 (r23, F5 vòng 17) — NGĂN XẾP TƯỜNG MINH, không đệ quy Python: một biểu thức lồng ~1000
+    # tầng (hợp lệ, Python 3.12 biên dịch được tới ~10.000) làm bản đệ quy ném `RecursionError`
+    # và cổng ra `KHONG_DO_DUOC` cho cả kho. Thứ tự duyệt giữ nguyên (tiền thứ tự).
+    chong = [(cay, None, True)]
+    while chong:
+        nut, chu, la_pham_vi = chong.pop()
+        if la_pham_vi:
+            nut_cua[id(nut)] = nut
+            cha_cua[id(nut)] = chu
+            thu_tu.append(id(nut))
+            chu = id(nut)
+        chong.extend((con, chu, isinstance(con, _NUT_PHAM_VI))
+                     for con in reversed(list(ast.iter_child_nodes(nut))))
     bang = {i: list(_rang_buoc_cua(nut_cua[i])) for i in thu_tu}
     goc = thu_tu[0]
     # N81 (r22) — ràng buộc do `exec("…")` HẰNG sinh ra đi vào bảng MODULE (tải của `exec` ở
     # mức module ghi vào globals; trong hàm thì chỉ `exec(…, globals())` mới tới được tên đọc
     # sau đó — gộp vào module là phía "có thể", đúng N76). Đệ quy có giới hạn cho `exec` lồng.
     if sau < _SAU_EXEC:
-        for _goi, tai in _tai_exec(cay):
+        for _goi, van in _tai_exec(cay):
+            tai = ast.parse(van)
             for ten, rb in _bang_pham_vi_ca_cay(tai, sau + 1)[id(tai)][0].items():
                 bang[goc][0].setdefault(ten, set()).update(rb)
     _HAM = (ast.FunctionDef, ast.AsyncFunctionDef, ast.Lambda)
@@ -1795,6 +1947,34 @@ def _bang_pham_vi_ca_cay(cay, sau=0):
             # phạm vi bao nào ràng buộc tên ấy là một lỗi cú pháp của chính mã được quét.
             if j is not None:
                 bang[j][0].setdefault(ten, set()).update(rb)
+    # N83 (r23, F1 vòng 17) — GIẢI các ràng buộc NẠP ĐỘNG chờ giải, SAU khi mọi bảng đã dựng và
+    # mọi `global`/`nonlocal` đã chuyển. Mỗi mục "dong" được giải bằng chuỗi phạm vi của CHÍNH
+    # phạm vi đã ghi nó, ở CẢ HAI chế độ của `_module_dong`: CÚ PHÁP (`__import__` bị che vẫn
+    # "có thể" — N76) và QUA BỘ GIẢI TÊN (bí danh). Lặp tới bất động điểm: `il = __import__(
+    # "importlib")` rồi `m = il.import_module("subprocess")` cần hai vòng. Mục đến từ tải `exec`
+    # (phạm vi lạ) đã được giải trong lần dựng bảng của chính tải ấy.
+    chuoi_cua = {}
+    for i in thu_tu:                                   # tiền thứ tự: cha luôn trước con
+        nut, (b, tc, pcb) = nut_cua[i], bang[i]
+        chuoi_cua[i] = chuoi_cua.get(cha_cua[i], []) + [
+            (isinstance(nut, ast.ClassDef), b, tc, pcb, type(nut).__name__ == "TypeAlias")]
+    for _vong in range(len(thu_tu) + 1):
+        moi = []
+        for i in thu_tu:
+            for ten, tap in bang[i][0].items():
+                for rb in tap:
+                    if rb[0] != "dong" or rb[2] not in chuoi_cua:
+                        continue
+                    c = chuoi_cua[rb[2]]
+                    mod = _module_dong(rb[1]) or _module_dong(
+                        rb[1], lambda t, hoi_rang_buoc=False, c=c:
+                        _co_rang_buoc(t, c) if hoi_rang_buoc else _giai_ten(t, c))
+                    if mod and ("import", mod, None) not in tap:
+                        moi.append((tap, ("import", mod, None)))
+        if not moi:
+            break
+        for tap, rb in moi:
+            tap.add(rb)
     return {i: tuple(bang[i]) for i in thu_tu}
 
 
@@ -1894,40 +2074,41 @@ def _giai_callee_theo_pham_vi(cay):
             if isinstance(n, ast.Call):
                 ket.append((n, None))
 
-    def tham(con, chuoi):
-        """Thăm MỘT nút. Nút phạm vi được xử lý TẠI ĐÂY chứ không phải ở vòng lặp của nút cha.
+    def tham(goc_tham, chuoi_goc):
+        """Thăm MỘT nút và mọi nút con. Nút phạm vi được xử lý TẠI ĐÂY chứ không phải ở vòng lặp
+        của nút cha.
 
         Bản đầu của N37 truyền nút phạm vi vào hàm duyệt như GỐC, nên chính nó không còn được
         nhận ra là phạm vi và một hàm lồng trong hàm mất đúng một tầng. Đo được ngay trên kho:
         `scripts/tl_selftest.py` khai 1 lời gọi trần mà đo được 0 — cổng ra ĐỎ và chỉ thẳng tệp.
         Ca tối giản: `def run(): def f(): import shutil as sh; sh.which("bash")` ⇒ `[]`.
+        N84 (r23, F5 vòng 17) — NGĂN XẾP TƯỜNG MINH thay đệ quy: biểu thức lồng ~1000 tầng làm
+        bản đệ quy ném `RecursionError` (đo được: n=996), trong khi Python 3.12 chạy tệp ấy.
         """
-        if isinstance(con, ast.AnnAssign) and (
-                (len(chuoi) > 1 and not chuoi[-1][0])
-                or (hoan_chu_thich and not con.simple)):
-            # N73 (r20): chú thích biến CỤC BỘ trong hàm — không bao giờ tính, không được lưu.
-            # N77 (r21): đích không đơn khi có `__future__` — không tính, không lưu.
-            khong_chay(con.annotation)
-            for x in (con.target, con.value):
-                if x is not None:
-                    tham(x, chuoi)
-            return
-        if isinstance(con, _NUT_PHAM_VI):
-            ngoai, trong = _ngoai_va_trong(con)
-            chuoi_trong = chuoi + [pham_vi(con)]
-            for x in ngoai:
-                tham(x, chuoi)
-            for x in trong:
-                tham(x, chuoi_trong)
-            return
-        if isinstance(con, ast.Call):
-            # `hoi_rang_buoc=True` (N58, r18): hỏi "tên này có ràng buộc nào trong chuỗi phạm
-            # vi không" — để biết `str`/`bytes` còn là tên DỰNG SẴN hay đã bị che. `_giai_ten`
-            # trả None cho CẢ "không ràng buộc" lẫn "bị che", nên không trả lời được câu ấy.
-            ket.append((con, lambda ten, hoi_rang_buoc=False, c=chuoi:
-                        _co_rang_buoc(ten, c) if hoi_rang_buoc else _giai_ten(ten, c)))
-        for x in ast.iter_child_nodes(con):
-            tham(x, chuoi)
+        chong = [(goc_tham, chuoi_goc)]
+        while chong:
+            con, chuoi = chong.pop()
+            if isinstance(con, ast.AnnAssign) and (
+                    (len(chuoi) > 1 and not chuoi[-1][0])
+                    or (hoan_chu_thich and not con.simple)):
+                # N73 (r20): chú thích biến CỤC BỘ trong hàm — không bao giờ tính, không được lưu.
+                # N77 (r21): đích không đơn khi có `__future__` — không tính, không lưu.
+                khong_chay(con.annotation)
+                chong.extend((x, chuoi) for x in (con.target, con.value) if x is not None)
+                continue
+            if isinstance(con, _NUT_PHAM_VI):
+                ngoai, trong = _ngoai_va_trong(con)
+                chuoi_trong = chuoi + [pham_vi(con)]
+                chong.extend((x, chuoi) for x in ngoai)
+                chong.extend((x, chuoi_trong) for x in trong)
+                continue
+            if isinstance(con, ast.Call):
+                # `hoi_rang_buoc=True` (N58, r18): hỏi "tên này có ràng buộc nào trong chuỗi phạm
+                # vi không" — để biết `str`/`bytes` còn là tên DỰNG SẴN hay đã bị che. `_giai_ten`
+                # trả None cho CẢ "không ràng buộc" lẫn "bị che", nên không trả lời được câu ấy.
+                ket.append((con, lambda ten, hoi_rang_buoc=False, c=chuoi:
+                            _co_rang_buoc(ten, c) if hoi_rang_buoc else _giai_ten(ten, c)))
+            chong.extend((x, chuoi) for x in ast.iter_child_nodes(con))
 
     for _con in ast.iter_child_nodes(cay):
         tham(_con, [pham_vi(cay)])

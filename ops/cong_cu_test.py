@@ -971,6 +971,99 @@ DOT_BIEN = {
         "        if not isinstance(so, int) or isinstance(so, bool) or so < 0:\n",
         "        so = int(so)  # đột biến: ép kiểu thay vì hỏi kiểu\n        if False:\n",
         "BASH_NEN", (), "t40_moi_MIEN_TRU_deu_mang_HAN_NGACH_va_dem_theo_LOI_GOI"),
+    # ── r23 — DOT BIEN cho N83..N87 (cross-review cung nha cung cap, vong 17) ──
+    # N83: rang buoc NAP DONG cho giai thoi duoc giai ⇒ moi dang gan `m = …(…)` lot.
+    "bn_nap_dong_khong_giai": ("ops/bash_nen.py",
+        '                    if mod and ("import", mod, None) not in tap:\n',
+        '                    if False:  # đột biến: ràng buộc nạp động chờ giải không được giải\n',
+        "BASH_NEN", (), "t33_do_phu_cua_cong_do_duoc_THEO_HINH_DANG"),
+    # N83: chi giai theo CU PHAP ⇒ bi danh (`import_module as im`) lot.
+    "bn_nap_dong_chi_cu_phap": ("ops/bash_nen.py",
+        '                    mod = _module_dong(rb[1]) or _module_dong(\n',
+        '                    mod = _module_dong(rb[1]) or (lambda *_a: None)(  # đột biến: chỉ cú pháp\n',
+        "BASH_NEN", (), "t33_do_phu_cua_cong_do_duoc_THEO_HINH_DANG"),
+    # N83: chi DICH CUOI cua phep gan day chuyen duoc rang buoc (hanh vi r22).
+    "bn_gan_chi_dich_cuoi": ("ops/bash_nen.py",
+        '            for dich in (n.targets if isinstance(n, ast.Assign) else [n.target]):\n',
+        '            for dich in (n.targets[-1:] if isinstance(n, ast.Assign) else [n.target]):  # đột biến\n',
+        "BASH_NEN", (), "t33_do_phu_cua_cong_do_duoc_THEO_HINH_DANG"),
+    # N83: phep gan CO CHU THICH khong con la mot rang buoc nap dong (hanh vi r22).
+    "bn_gan_bo_chu_thich": ("ops/bash_nen.py",
+        '        elif isinstance(n, (ast.Assign, ast.AnnAssign, ast.NamedExpr)) \\\n',
+        '        elif isinstance(n, (ast.Assign, ast.NamedExpr)) \\\n',
+        "BASH_NEN", (), "t33_do_phu_cua_cong_do_duoc_THEO_HINH_DANG"),
+    # N83: gia tri cua `eval` hang thoi duoc hoi.
+    "bn_eval_khong_tra_module": ("ops/bash_nen.py",
+        '        if isinstance(than, ast.Call):\n            return _module_dong(than, None)\n',
+        '        if isinstance(than, ast.Call):\n            return None  # đột biến: `eval` hằng không trả module\n',
+        "BASH_NEN", (), "t33_do_phu_cua_cong_do_duoc_THEO_HINH_DANG"),
+    # N83: `importlib.__import__` roi khoi bang nap dong.
+    "bn_bo_importlib_import": ("ops/bash_nen.py",
+        '                 ("importlib", "__import__"): "__import__",\n',
+        '',
+        "BASH_NEN", (), "t33_do_phu_cua_cong_do_duoc_THEO_HINH_DANG"),
+    # N83: `import builtins` khong con cho `builtins.exec` la exec.
+    "bn_exec_bo_builtins": ("ops/bash_nen.py",
+        '            goc.update(al.asname or "builtins" for al in n.names if al.name == "builtins")\n',
+        '            pass  # đột biến: `builtins.exec` không được nhận\n',
+        "BASH_NEN", (), "t33_do_phu_cua_cong_do_duoc_THEO_HINH_DANG"),
+    # N83: tai `exec` KHONG gap hang — chi nhan `ast.Constant` (hanh vi r22).
+    "bn_tai_khong_gap": ("ops/bash_nen.py",
+        '    v = _gia_tri_hang(goi.args[0])\n',
+        '    v = getattr(goi.args[0], "value", None)  # đột biến: tải không được gấp hằng\n',
+        "BASH_NEN", (), "t33_do_phu_cua_cong_do_duoc_THEO_HINH_DANG"),
+    # N83: tai `bytes` bi bo.
+    "bn_tai_bo_bytes": ("ops/bash_nen.py",
+        '    if isinstance(v, bytes):\n        from importlib.util import decode_source\n',
+        '    if isinstance(v, bytes):\n        return None  # đột biến: tải `bytes` bị bỏ\n',
+        "BASH_NEN", (), "t33_do_phu_cua_cong_do_duoc_THEO_HINH_DANG"),
+    # N83: mo dau cua tai chi lay `import` CU PHAP muc module (hanh vi r22).
+    "bn_mo_dau_cu_phap": ("ops/bash_nen.py",
+        '        dau = _mo_dau_tu_bang(_bang_pham_vi_ca_cay(cay, sau))\n',
+        '        dau = "".join(ast.unparse(x) + "\\n" for x in cay.body\n'
+        '                      if isinstance(x, (ast.Import, ast.ImportFrom)))  # đột biến\n',
+        "BASH_NEN", (), "t33_do_phu_cua_cong_do_duoc_THEO_HINH_DANG"),
+    # N83 (F6): tai hang hong bi NUOT (hanh vi r22, fail-open).
+    "bn_tai_hong_nuot": ("ops/bash_nen.py",
+        '            raise SyntaxError(f"tải `exec`/`eval` hằng ở dòng {n.lineno} không phân tích "\n',
+        '            continue  # đột biến: nuốt tải hỏng\n'
+        '            raise SyntaxError(f"tải `exec`/`eval` hằng ở dòng {n.lineno} không phân tích "\n',
+        "BASH_NEN", (), "t33_do_phu_cua_cong_do_duoc_THEO_HINH_DANG"),
+    # N83: `exec` long qua tran thoi fail-close.
+    "bn_exec_long_im": ("ops/bash_nen.py",
+        '    if cac_tai and sau >= _SAU_EXEC:\n',
+        '    if False:  # đột biến: lồng quá trần không ném\n',
+        "BASH_NEN", (), "t33_do_phu_cua_cong_do_duoc_THEO_HINH_DANG"),
+    # N84 (F5): bo duyet quay ve DE QUY Python.
+    "bn_tham_de_quy": ("ops/bash_nen.py",
+        '            chong.extend((x, chuoi) for x in ast.iter_child_nodes(con))\n',
+        '            [tham(x, chuoi) for x in ast.iter_child_nodes(con)]  # đột biến: đệ quy\n',
+        "BASH_NEN", (), "t33_do_phu_cua_cong_do_duoc_THEO_HINH_DANG"),
+    # N85 (F3): argv NOI khong con duoc mo.
+    "bn_argv_khong_mo_noi": ("ops/bash_nen.py",
+        '            if isinstance(x, ast.BinOp) and isinstance(x.op, ast.Add):\n',
+        '            if False:  # đột biến: argv nối không được mở\n',
+        "BASH_NEN", (), "t33_do_phu_cua_cong_do_duoc_THEO_HINH_DANG"),
+    # N85 (F3): argv TRAI khong con duoc mo.
+    "bn_argv_khong_mo_trai": ("ops/bash_nen.py",
+        '        elif isinstance(x, ast.Starred):\n            viec.append((x.value, True))\n',
+        '        elif isinstance(x, ast.Starred):\n            return "khong_biet", None  # đột biến\n',
+        "BASH_NEN", (), "t33_do_phu_cua_cong_do_duoc_THEO_HINH_DANG"),
+    # N86 (F7): `%` voi ve phai `dict` thoi duoc gap.
+    "bn_phan_tram_bo_dict": ("ops/bash_nen.py",
+        '                and isinstance(ph, (str, bytes, int, float, tuple, dict)):\n',
+        '                and isinstance(ph, (str, bytes, int, float, tuple)):  # đột biến\n',
+        "BASH_NEN", (), "t33_do_phu_cua_cong_do_duoc_THEO_HINH_DANG"),
+    # N87 (F4): bo chot thoi nhan `.get(<truong tong hop>)`.
+    "ct_bo_get_truong": ("ops/cong_cu_test.py",
+        '        elif (isinstance(n, _ast.Call) and isinstance(n.func, _ast.Attribute)\n',
+        '        elif False and (isinstance(n, _ast.Call) and isinstance(n.func, _ast.Attribute)\n',
+        "TEP_TEST", _KEM_TEP_TEST, "t39_chi_CA_PHAN_QUYET_duoc_chot_tren_rc_va_trang_thai"),
+    # N87 (F4): bi danh TRUONG TONG HOP thoi mang nguon `tt`.
+    "ct_bo_bi_danh_truong": ("ops/cong_cu_test.py",
+        '            return {"tt"}                  # N87: tên mang GIÁ TRỊ một trường tổng hợp\n',
+        '            return {"khac"}  # đột biến: bí danh trường tổng hợp không mang nguồn\n',
+        "TEP_TEST", _KEM_TEP_TEST, "t39_chi_CA_PHAN_QUYET_duoc_chot_tren_rc_va_trang_thai"),
     # ── r22 — DOT BIEN cho N78b/c, N80..N82 (cross-review codex vong 16, sau khi DOI KIEN TRUC bo chot) ──
     # RUT O r22, kem ly do DO DUOC: 11 dot bien mo phong NHANH/PHAM VI/VI TRI cua bo chot (ct_with_nuot_khong_dieu_khien, ct_xuat_xu_gop_pham_vi, ct_xuat_xu_mot_nguon, ct_comprehension_khong_pham_vi,
     # ct_except_sao_loai_tru, ct_assert_warns_nuot, ct_finally_la_nhanh, ct_lop_nhin_thay_tu_ham,
@@ -998,13 +1091,13 @@ DOT_BIEN = {
         "BASH_NEN", (), "t33_do_phu_cua_cong_do_duoc_THEO_HINH_DANG"),
     # N81: `__import__` bi CHE van duoc coi la ham dung san.
     "bn_nap_dong_khong_hoi_che": ("ops/bash_nen.py",
-        '        if f.id == "__import__" and (tra_ten is None\n',
-        '        if f.id == "__import__" and (True  # đột biến: không hỏi `__import__` có bị che không\n',
+        '        if f.id in ("__import__", "eval") and (tra_ten is None\n',
+        '        if f.id in ("__import__", "eval") and (True  # đột biến: không hỏi `__import__` có bị che không\n',
         "BASH_NEN", (), "t33_do_phu_cua_cong_do_duoc_THEO_HINH_DANG"),
     # N81: `m = __import__("subprocess")` thoi rang buoc `m` vao module.
     "bn_nap_dong_gan_ten_bo": ("ops/bash_nen.py",
-        '            them(dich.id, ("import", _module_dong(n.value), None))\n',
-        '            them(dich.id, ("khac",))  # đột biến: `m = __import__(…)` không ràng buộc module\n',
+        '                    them(dich.id, ("dong", n.value, id(pham_vi)))\n',
+        '                    them(dich.id, ("khac",))  # đột biến: `m = __import__(…)` không ràng buộc module\n',
         "BASH_NEN", (), "t33_do_phu_cua_cong_do_duoc_THEO_HINH_DANG"),
     # N81: rang buoc do `exec("import …")` hang sinh ra thoi vao bang module.
     "bn_exec_khong_rang_buoc": ("ops/bash_nen.py",
@@ -1013,7 +1106,7 @@ DOT_BIEN = {
         "BASH_NEN", (), "t33_do_phu_cua_cong_do_duoc_THEO_HINH_DANG"),
     # N81: loi goi bash NAM TRONG tai `exec` hang thoi duoc quet.
     "bn_exec_khong_quet_tai": ("ops/bash_nen.py",
-        "            if _loi_goi_tran(dau + goi.args[0].value, sau + 1):\n",
+        "            if _loi_goi_tran(dau + van, sau + 1):\n",
         "            if False:  # đột biến: không quét lời gọi trong tải `exec`\n",
         "BASH_NEN", (), "t33_do_phu_cua_cong_do_duoc_THEO_HINH_DANG"),
     # N82: chu so huu `nonlocal` dung o ham GIUA cung khai `nonlocal`.
@@ -1136,8 +1229,8 @@ DOT_BIEN = {
         "BASH_NEN", (), "t51_cache_phai_HET_HIEU_LUC_khi_chinh_TEP_ung_vien_doi"),
     # N55: ratchet thoi doc XUAT XU cua bao cao => truong co che bi bat oan.
     "ct_khong_theo_xuat_xu_bao": ("ops/cong_cu_test.py",
-        '                if "bao" in ng and khoa in _TRUONG_TONG_HOP:\n',
-        '                if khoa in _TRUONG_TONG_HOP:  # đột biến: không hỏi xuất xứ của báo cáo\n',
+        '            if "bao" in ng and khoa in _TRUONG_TONG_HOP:\n',
+        '            if khoa in _TRUONG_TONG_HOP:  # đột biến: không hỏi xuất xứ của báo cáo\n',
         "TEP_TEST", _KEM_TEP_TEST, "t39_chi_CA_PHAN_QUYET_duoc_chot_tren_rc_va_trang_thai"),
     # ── r16 — DOT BIEN cho N45..N51 (cross-review codex vong 10) ─────────────────
     # N45, chieu LOT: hai helper chay qua shell roi khoi tap duoc che.
@@ -1212,8 +1305,8 @@ DOT_BIEN = {
         "BASH_NEN", (), "t48_khung_INDEX_giu_BYTES_va_anh_chup_ghim_BLOB"),
     # N37: bieu thuc luc dinh nghia (mac dinh, decorator…) giai o pham vi TRONG. (NEO LAI O r21.)
     "bn_dinh_nghia_giai_o_pham_vi_trong": ("ops/bash_nen.py",
-        "            for x in ngoai:\n                tham(x, chuoi)\n",
-        "            for x in ngoai:\n                tham(x, chuoi_trong)  # đột biến: biểu thức lúc định nghĩa giải ở phạm vi TRONG\n",
+        "                chong.extend((x, chuoi) for x in ngoai)\n",
+        "                chong.extend((x, chuoi_trong) for x in ngoai)  # đột biến: biểu thức lúc định nghĩa giải ở phạm vi TRONG\n",
         "BASH_NEN", (), "t33_do_phu_cua_cong_do_duoc_THEO_HINH_DANG"),
     # r12 — BON dot bien cho bon mat cua "doc INDEX cho dung" (N32..N35), deu ve `t47`.
     "bn_theo_ref_thay_the": ("ops/bash_nen.py",
@@ -1277,7 +1370,7 @@ DOT_BIEN = {
     # (a) THU HEP ve luat cu (chi chieu DO, chi phep so bang) => dung ba lan lap `t45`/`t47`/
     #     `t48` chui qua duoc. Mau `rc_bang_0`, `ne_rc`, `ne_tt`, `ngoai_ds` phai DOI.
     "t39_thu_hep_ve_chieu_DO": (str(TEP_TEST.relative_to(GOC)),
-        '            if isinstance(n, _ast.Name) and "ma" in nguon_tap(n.id, vt, dieu_kien):\n'
+        '            if isinstance(n, _ast.Name) and nguon_tap(n.id, vt, dieu_kien) & {"ma", "tt"}:\n'
         '                return True\n',
         '            if isinstance(n, _ast.Name) and n.id == "rc":\n'
         '                return True  # đột biến: về luật cũ, khớp đúng CHỮ `rc`\n',
@@ -2698,6 +2791,34 @@ _HINH_DANG_PHU = {
     "nap_dong_gan_ten":        'm = __import__("subprocess")\nm.run(["bash"])\n',
     "exec_import_roi_goi":     'exec("import subprocess")\nsubprocess.run(["bash"])\n',
     "exec_tai_co_loi_goi":     'exec("import subprocess\\nsubprocess.run([\'bash\'])")\n',
+    # r23 — N83 (F1/F2 vong 17): nap dong qua BI DANH, moi dich gan, `AnnAssign`, `importlib.__import__`,
+    # `builtins.exec`, gia tri cua `eval` hang; tai `exec` GAP hang (`bytes`, `+`, f-string) va
+    # doc rang buoc cua CA TEP (ham chua `exec`, nap dong, `exec` truoc). Ca hai muoi dang deu CHAY
+    # BASH THAT tren 3.12 ma r22 tra `[]`.
+    "nap_dong_from_import_module": 'from importlib import import_module\nm = import_module("subprocess")\nm.run(["bash"])\n',
+    "nap_dong_bi_danh_import_module": 'from importlib import import_module as im\nm = im("subprocess")\nm.run(["bash"])\n',
+    "nap_dong_importlib_bi_danh": 'import importlib as il\nm = il.import_module("subprocess")\nm.run(["bash"])\n',
+    "nap_dong_builtins_bi_danh": 'from builtins import __import__ as imp\nm = imp("subprocess")\nm.run(["bash"])\n',
+    "nap_dong_gan_day_chuyen": 'a = b = __import__("subprocess")\na.run(["bash"])\n',
+    "nap_dong_gan_chu_thich": 'm: object = __import__("subprocess")\nm.run(["bash"])\n',
+    "nap_dong_importlib_import": 'import importlib\nimportlib.__import__("subprocess").run(["bash"])\n',
+    "nap_dong_hai_tang": 'il = __import__("importlib")\nm = il.import_module("subprocess")\nm.run(["bash"])\n',
+    "builtins_exec":        'import builtins\nbuiltins.exec("import subprocess\\nsubprocess.run([\'bash\'])")\n',
+    "eval_tra_module":      'eval("__import__(\'subprocess\')").run(["bash"])\n',
+    "exec_tai_bytes":       'exec(b"import subprocess\\nsubprocess.run([\'bash\'])")\n',
+    "exec_tai_noi":         'exec("import subprocess\\n" + "subprocess.run([\'bash\'])")\n',
+    "exec_tai_f_string":    'exec(f"import subprocess\\nsubprocess.run([\'bash\'])")\n',
+    "exec_trong_ham_doc_cuc_bo": 'def f():\n    import subprocess\n    exec("subprocess.run([\'bash\'])")\n',
+    "exec_doc_nap_dong":    'm = __import__("subprocess")\nexec("m.run([\'bash\'])")\n',
+    "exec_doc_exec_truoc":  'exec("import subprocess")\nexec("subprocess.run([\'bash\'])")\n',
+    # r23 — N85 (F3 vong 17): argv NOI / TRAI, phan tu DAU la hang cua bao chua viet tai loi goi.
+    "argv_noi_list":        'import subprocess, sys\nsubprocess.run(["bash", "-c"] + sys.argv[1:] + ["x"])\n',
+    "argv_noi_list_don":    'import subprocess\nsubprocess.run(["bash"] + ["-c", "x"])\n',
+    "argv_trai_tuple":      'import subprocess\nsubprocess.run([*("bash", "-c"), "x"])\n',
+    "argv_noi_tuple":       'import subprocess\nsubprocess.run(("bash",) + ("-c", "x"))\n',
+    "argv_noi_rong_truoc":  'import subprocess\nsubprocess.run([] + ["bash"])\n',
+    # r23 — N86 (F7 vong 17): `%` voi ve phai `dict`.
+    "hang_phan_tram_dict":  'import subprocess\nsubprocess.run(["%(a)s" % {"a": "bash"}])\n',
     # r22 — N82, vong 16 H1/H2: `nonlocal` di toi DUNG chu so huu; `global str` CHI DOC khong che.
     "nonlocal_ba_tang":        'def o():\n    x = 1\n    def m():\n        nonlocal x\n        x = object()\n        def i():\n            nonlocal x\n            import subprocess as x\n            x.run(["bash"])\n',
     "global_str_chi_doc":      'import subprocess\ndef f():\n    global str\n    subprocess.run([str("bash")])\n',
@@ -2814,6 +2935,16 @@ _HINH_DANG_KHONG_PHU = {
     "exec_vo_hai":             'exec("x = 1")\nsubprocess.run(["bash"])\n',
     "global_str_bi_gan_module": 'import subprocess\nstr = f\ndef f():\n    global str\n    subprocess.run([str("bash")])\n',
     "chu_thich_dich_khong_don_future": 'from __future__ import annotations\nimport subprocess\nholder.x: subprocess.run(["bash"]) = None\n',
+    # r23 — N83/N85/N86 chieu NGUOC. Hai dang `argv_*_bien_dau` la NO LUONG DU LIEU, KHONG phai an
+    # toan: `xs`/`sys.argv[1:]` rong thi bash CHAY THAT (do duoc) — phan tu dau la mot BIEN.
+    "import_module_thu_vien_khac": 'from mylib import import_module\nm = import_module("subprocess")\nm.run(["bash"])\n',
+    "gan_goi_ham_thuong":   'm = f("subprocess")\nm.run(["bash"])\n',
+    "eval_doi_tuong_khac":  'import subprocess as s\npage.eval("s.run([\'bash\'])")\n',
+    "eval_tra_khong_phai_module": 'eval("1").run(["bash"])\n',
+    "argv_noi_dau_khac":    'import subprocess\nsubprocess.run(["x"] + ["bash"])\n',
+    "argv_trai_bien_dau":   'import subprocess\nsubprocess.run([*xs, "bash"])\n',
+    "argv_noi_bien_dau":    'import subprocess, sys\nsubprocess.run(sys.argv[1:] + ["bash"])\n',
+    "hang_phan_tram_dict_khac": 'import subprocess\nsubprocess.run(["%(a)s" % {"a": "sh"}])\n',
 }
 
 # r21 — N76: BAO DONG GIA CO CHU DICH. Moi hinh dang duoi day la mot meo CHE TEN (gan de, nhanh
@@ -2942,6 +3073,24 @@ def t33_do_phu_cua_cong_do_duoc_THEO_HINH_DANG():
     kq_td = _do('import subprocess\nsubprocess.run(["%4096s%4096s" % ("", "")])\n')
     bang(isinstance(kq_td, str) and "_VuotNganSach" in kq_td,
          f"(1d) `\"%4096s%4096s\"` phải NÉM `_VuotNganSach` (ngân sách cộng dồn), đo được {kq_td!r}")
+    # (1f) N84 (r23, F5 vòng 17) — biểu thức lồng SÂU hợp lệ (Python 3.12 biên dịch tới ~10.000
+    # tầng) phải QUÉT ĐƯỢC, không ném `RecursionError`. 3000 tầng: gấp ba giới hạn đệ quy mặc định.
+    kq_sau = _do("import subprocess\nx = " + "+".join(["1"] * 3000)
+                 + '\nsubprocess.run(["bash"])\n')
+    bang(kq_sau == [(3, 0)],
+         f"(1f) biểu thức 3000 tầng phải quét ĐƯỢC và bắt đúng lời gọi, đo được {kq_sau!r}")
+    # (1g) N83 (r23, F6 vòng 17) — tải `exec` HẰNG không phân tích được ⇒ NÉM (fail-close), không
+    # lặng lẽ bỏ qua: cùng sự kiện ở tệp ngoài cho `KHONG_DO_DUOC`.
+    kq_hong = _do('exec("import subprocess\\nsubprocess.run([")\n')
+    bang(isinstance(kq_hong, str) and "SyntaxError" in kq_hong,
+         f"(1g) tải `exec` hằng hỏng phải NÉM `SyntaxError`, đo được {kq_hong!r}")
+    # (1h) `exec` hằng lồng QUÁ `_SAU_EXEC` tầng ⇒ NÉM `_VuotNganSach`, không thôi quét trong im lặng.
+    tai4 = "import subprocess\nsubprocess.run(['bash'])"
+    for _ in range(4):
+        tai4 = "exec(" + repr(tai4) + ")"
+    kq_long = _do(tai4 + "\n")
+    bang(isinstance(kq_long, str) and "_VuotNganSach" in kq_long,
+         f"(1h) `exec` lồng 4 tầng phải NÉM `_VuotNganSach`, đo được {kq_long!r}")
     tai_lieu = (_loi_goi_tran.__doc__ or "")
     tom_tat = tai_lieu.strip().splitlines()[0].lower() if tai_lieu.strip() else ""
     # ĐO DÒNG TÓM TẮT, KHÔNG ĐO CẢ THÂN. Bản đầu của chốt này cấm chuỗi "mọi lời gọi" trên
@@ -3529,6 +3678,32 @@ def _chot_DO_cua_cong_trong(than: str):
                     if it.optional_vars is not None]
         return []
 
+    def doc_truong_tong_hop(n):
+        """`n` có phải một phép ĐỌC TRƯỜNG TỔNG HỢP từ báo cáo của `_quet` không (N87, r23).
+
+        F4 vòng 17 — hai cách đọc cùng một trường mà luật cũ không thấy, đo được trên BẢN SAO tệp
+        ca (một ca mới ngoài `CA_PHAN_QUYET`): `bao.get("trang_thai")` và bí danh trường `tt =
+        bao["trang_thai"]` ⇒ kiểm kê RỖNG. `.get` là cùng một phép đọc viết cách khác, và idiom
+        ấy ĐANG có trong tệp này. Nay: chỉ số hằng HAY `.get(<hằng>)`, trên tên nguồn `bao` hay
+        trên `<bộ đôi>[1]`; và nguồn `tt` cho tên mang GIÁ TRỊ của một trường như thế.
+        """
+        if isinstance(n, _ast.Subscript) and isinstance(n.slice, _ast.Constant):
+            khoa, g = n.slice.value, n.value
+        elif (isinstance(n, _ast.Call) and isinstance(n.func, _ast.Attribute)
+              and n.func.attr == "get" and n.args and isinstance(n.args[0], _ast.Constant)):
+            khoa, g = n.args[0].value, n.func.value
+        else:
+            return False
+        if isinstance(g, _ast.Name):
+            ng = nguon_tap(g.id)
+            if "bao" in ng and khoa in _TRUONG_TONG_HOP:
+                return True
+            return False
+        return (isinstance(g, _ast.Subscript) and isinstance(g.slice, _ast.Constant)
+                and g.slice.value == 1 and khoa in _TRUONG_TONG_HOP
+                and (la_quet(g.value) or (isinstance(g.value, _ast.Name)
+                                          and "bo_doi" in nguon_tap(g.value.id))))
+
     def nguon_cua(g, lap=False):
         """Tập nguồn mà một biểu thức đặt ra; `lap` ⇒ nguồn của MỖI PHẦN TỬ khi lặp trên nó."""
         if lap:
@@ -3543,6 +3718,8 @@ def _chot_DO_cua_cong_trong(than: str):
             return nguon_cua(g.value)
         if la_quet(g):
             return {"bo_doi"}
+        if doc_truong_tong_hop(g):
+            return {"tt"}                  # N87: tên mang GIÁ TRỊ một trường tổng hợp
         if isinstance(g, _ast.Subscript) and isinstance(g.slice, _ast.Constant):
             if la_quet(g.value) or (isinstance(g.value, _ast.Name)
                                     and "bo_doi" in nguon_tap(g.value.id)):
@@ -3572,22 +3749,14 @@ def _chot_DO_cua_cong_trong(than: str):
         if any(la_quet(n) for n in _ast.walk(dieu_kien)):
             return True                  # `bang(_quet(…)[0] == 2, …)` — không đi qua tên nào
         for n in _ast.walk(dieu_kien):
-            if isinstance(n, _ast.Name) and "ma" in nguon_tap(n.id, vt, dieu_kien):
+            # N87 (r23): `tt` — bí danh của một trường tổng hợp — là chạm phán quyết như `ma`.
+            if isinstance(n, _ast.Name) and nguon_tap(n.id, vt, dieu_kien) & {"ma", "tt"}:
                 return True
-            if not (isinstance(n, _ast.Subscript) and isinstance(n.slice, _ast.Constant)):
-                continue
-            khoa = n.slice.value
-            g = n.value
-            if isinstance(g, _ast.Name):
-                ng = nguon_tap(g.id, vt, dieu_kien)
-                if "bao" in ng and khoa in _TRUONG_TONG_HOP:
-                    return True
-                if "bo_doi" in ng and khoa == 0:
-                    return True
-            elif (isinstance(g, _ast.Subscript) and isinstance(g.value, _ast.Name)
-                  and isinstance(g.slice, _ast.Constant) and g.slice.value == 1
-                  and "bo_doi" in nguon_tap(g.value.id, vt, dieu_kien)
-                  and khoa in _TRUONG_TONG_HOP):
+            if doc_truong_tong_hop(n):
+                return True
+            if (isinstance(n, _ast.Subscript) and isinstance(n.slice, _ast.Constant)
+                    and n.slice.value == 0 and isinstance(n.value, _ast.Name)
+                    and "bo_doi" in nguon_tap(n.value.id, vt, dieu_kien)):
                 return True
         return False
 
@@ -3730,6 +3899,15 @@ _MAU_TOAN_TU = {
         "    assert bao['co_loi_goi_tran'], 'rc va trang_thai chi duoc nhac o day'\n",
     # KHONG duoc bat: khong dung toi cong
     "khong_quet": "def f():\n    bang(rc == 2, 'x')\n",
+    # r23 — N87 (F4 vong 17): `.get(<truong tong hop>)` va BI DANH TRUONG la cung mot phep doc.
+    "get_truong_tong_hop": "def f():\n    rc, bao = _quet(a, b)\n    bang(bao.get('trang_thai') == 'DO', 'x')\n",
+    "bi_danh_truong":      "def f():\n    rc, bao = _quet(a, b)\n    tt = bao['trang_thai']\n    bang(tt == 'DO', 'x')\n",
+    "get_qua_bo_doi":      "def f():\n    kq = _quet(a, b)\n    bang(not kq[1].get('ngoai_danh_sach'), 'x')\n",
+    "bi_danh_truong_get":  "def f():\n    rc, bao = _quet(a, b)\n    ld = bao.get('ly_do')\n    bang(ld, 'x')\n",
+    # KHONG duoc bat (chieu nguoc N87): `.get` cua TRUONG CO CHE, va bi danh cua no.
+    "get_truong_co_che":   "def f():\n    rc, bao = _quet(a, b)\n    bang(not bao.get('co_loi_goi_tran'), 'x')\n",
+    "bi_danh_truong_co_che": "def f():\n    rc, bao = _quet(a, b)\n    c = bao['co_loi_goi_tran']\n    bang(not c, 'x')\n",
+    "get_tren_doi_tuong_khac": "def f():\n    rc, bao = _quet(a, b)\n    bang(config.get('trang_thai') == 'ok', 'x')\n",
 }
 def _ly_do_khong_doc_duoc(v) -> bool:
     """Lý do miễn trừ KHÔNG đọc được: không phải chuỗi, hay chỉ có khoảng trắng (N50, r16)."""
@@ -3772,7 +3950,11 @@ _MAU_MONG = {"eq_rc": True, "eq_tt": True, "ne_rc": True, "ne_tt": True,
              "truong_co_che": False, "lech_oid": False,
              "rc_gieo_san": False, "chuoi_trung_ten": False, "bi_danh_ghi_de": True,
              "bo_doi_truong_co_che": False,
-             "assert_thong_diep": False, "khong_quet": False}
+             "assert_thong_diep": False, "khong_quet": False,
+             "get_truong_tong_hop": True, "bi_danh_truong": True, "get_qua_bo_doi": True,
+             "bi_danh_truong_get": True,
+             "get_truong_co_che": False, "bi_danh_truong_co_che": False,
+             "get_tren_doi_tuong_khac": False}
 
 
 def _in_tu_kiem_luat_phan_quyet():

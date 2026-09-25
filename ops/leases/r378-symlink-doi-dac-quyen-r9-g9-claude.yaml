@@ -239,3 +239,12 @@ VIEC_CON_LAI_TRONG_WRITE_SET: 'KHONG CO. Docstring da sua o 19f2141 (manifest ta
 write_set_do_luc_cap:
   do_luc: '2026-09-25T02:xxZ'
   ket_qua: 'Do lai sau khi commit g9 — ghi trong thong diep commit va bao cao.'
+
+# ───────────────────────── BIA MỘ — vế THỨ NHẤT của dấu HAI CHIỀU ─────────────────────────
+# Thêm 2026-09-25 khi cấp g10. g9 CÒN HIỆU LỰC (hạn 2026-09-26T06:00:00Z) nên bia mộ hai chiều là
+# BẮT BUỘC. REVISION mới (r9 -> r10): protocol §3.2.
+da_bi_thay_the: r378-symlink-doi-dac-quyen-r10-g10-claude
+da_bi_thay_the_luc: '2026-09-25T03:xxZ'
+da_bi_thay_the_vi_sao: 'r10 (issues/574#issuecomment-5825973245, chủ kho chọn "Đổi kiến trúc") thay mọi lời trích viết
+  tay của revision khác bằng con trỏ do máy sinh + cổng kiểm; head mới d52a79a. spec_hash r10 =
+  f4ce0b97ea24993b356d38a105f979004909783d53ef04212afd2a6c4765bb1b.'

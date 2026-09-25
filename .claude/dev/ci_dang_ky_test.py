@@ -1411,16 +1411,17 @@ def phan_chung():
                              ("8", "8", 8, "posix"), ("vang", None, 1, "posix"), ("windows-luon-1", "4", 1, "nt")):
         _them("p637-A4-N-" + _t, doc_so_worker({} if _e is None else {BIEN_WORKERS: _e}, _nen) == _n)
     for _v in ("0", "-1", "9", "abc", " 2", "2.0"):
+        _n = 0
         with contextlib.suppress(ValueError):
-            doc_so_worker({BIEN_WORKERS: _v}, "posix"); _v = None
-        _them(f"p637-A4-N-sai-{_v!r}", _v is not None)
+            _n = doc_so_worker({BIEN_WORKERS: _v}, "posix"); _n = None
+        _them(f"p637-A4-N-sai-{_v!r}", _n is not None)
     _M = {f"{c}_test.py": r"^(\d+)/(\d+)$" for c in "abcde"}
     _NO = {"e_test.py": {"slug": "gia", "ly_do": "gia", "moi_truong": MOI_TRUONG_CI, "log": "gia"}}
 
     def _gia(path):
         time.sleep({"a": .3, "b": .2, "c": .1}.get(path[0], 0))
         if path[0] == "d": raise RuntimeError("worker hỏng")
-        return {"b": (1, "0/1\n"), "e": (-9, "treo\n", "hết giờ 1800 giây")}.get(path[0], (0, "1/1\n"))
+        return {"b": (1, "1/1\n"), "e": (-9, "treo\n", "hết giờ 1800 giây")}.get(path[0], (0, "1/1\n"))
 
     def _log(moi, chay_mot=_gia, **kw):
         out, bc = io.StringIO(), {}
@@ -1428,7 +1429,7 @@ def phan_chung():
             d = chay_moi(moi=moi, cach_ly=_NO, chay_mot=chay_mot, doc_moi_truong=lambda: MOI_TRUONG_CI,
                          doc_trong_ci=lambda: True, doc_nen_windows=lambda: False, bao_cao=bc, **kw)
         return d, out.getvalue(), bc
-    _L3 = "1/1\nCI_DANG_KY a_test.py: ĐẠT rc=0\n0/1\nCI_DANG_KY b_test.py: ĐỎ rc=1\n1/1\nCI_DANG_KY c_test.py: ĐẠT rc=0\n"
+    _L3 = "1/1\nCI_DANG_KY a_test.py: ĐẠT rc=0\n1/1\nCI_DANG_KY b_test.py: ĐỎ rc=1\n1/1\nCI_DANG_KY c_test.py: ĐẠT rc=0\n"
     _L5 = _L3 + ("CI_DANG_KY d_test.py: ĐỎ — LỖI HẠ TẦNG: ngoại lệ worker RuntimeError: worker hỏng, rc=-1\n"
                  "treo\nCI_DANG_KY e_test.py: ĐỎ — LỖI HẠ TẦNG: hết giờ 1800 giây, rc=-9\n")
     _them("p637-A5-mac-dinh-giong-master", _log({k: _M[k] for k in "a_test.py b_test.py c_test.py".split()})[:2] == (1, _L3))
@@ -1497,6 +1498,7 @@ def phan_chung():
     _them("p637-A7-probe-co-if", _hong_wf("gate-packet-loop", lambda b, i: b[i].update({"if": "always()"})))
     _them("p637-A7-probe-sau-buoc-nang", _hong_wf("gate-registry", lambda b, i: b.append(b.pop(i))))
     _them("p637-A7-nhan-doi-selftest", _hong_wf("gate-packet-loop", lambda b, i: b.insert(i, {"run": G5_SELFTEST})))
+    _them("p637-A7-nhan-doi-selftest-trong-gate", _hong_wf("gate", lambda b, i: b.insert(i + 1, {"run": G5_SELFTEST})))
     _them("p637-A8-khong-ung-vien", chon_so_worker({1: 100, 2: 101, 4: 102}) is None)
     _them("p637-A8-dung-bien", chon_so_worker({1: 200, 2: 110, 4: 100}) == 2)
     _them("p637-A8-vuot-bien", chon_so_worker({1: 200, 2: 110.5, 4: 100}) == 4)

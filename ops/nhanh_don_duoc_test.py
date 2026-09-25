@@ -84,11 +84,12 @@ def _chuoi_that(exc) -> list:
 
 
 def _ghi_ha_tang(exc, truoc=None) -> None:
-    """Ghi CA CHUOI. SO LAN = so lan DIEM NUOT goi ham nay (`truoc=None`, ke ca cung doi tuong) + so
-    doi tuong tren chuoi CHUA co trong cua so ca (`truoc`: khu trung theo DOI TUONG).
-    NO CO TEN `SO-LAN-THEO-DOI-TUONG-KHONG-THEO-SU-KIEN` (#593 vong 8-9, chu kho chon (b)): cung doi
-    tuong da ghi roi phat sinh LAI (lan I/O moi) trong cung ca thi dem THIEU. Nhan khong doi; sua
-    dung doi MA SU KIEN tai bien I/O — traceback KHONG dung duoc (vong 9 do: dem doi/thieu)."""
+    """Ghi CA CHUOI. SO LAN = moi lan DIEM NUOT goi (`truoc=None`) cong MOI doi tuong ha tang tren
+    chuoi, ke ca to tien da ghi; hop runner (`truoc`) chi them doi tuong CHUA co trong cua so ca.
+    NO CO TEN `SO-LAN-THEO-DOI-TUONG-KHONG-THEO-SU-KIEN` (#593 vong 8-10, chu kho chon (b), mo rong):
+    dem THIEU khi cung doi tuong phat sinh LAI trong cung ca; dem THUA khi nhieu loi moi chung mot
+    to tien (3 su kien -> 4 muc). NHAN khong doi. Sua dung doi MA SU KIEN tai bien I/O —
+    traceback KHONG dung duoc (vong 9 do: dem doi/thieu)."""
     for e in _chuoi_that(exc):
         if truoc is None or not any(e is x for x in _SO_HA_TANG.loi[truoc:]):
             _SO_HA_TANG.loi.append(e)

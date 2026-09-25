@@ -126,3 +126,7 @@ chua_do_duoc:
   - 'Serving model/effort/session cua reviewer: KHONG DO DUOC qua App.'
   - 'Sau khi va, head moi KHONG co luot codex nao (tran 2/2 da dung); chi executor tu do. Luot them can chu kho khai nang_tran.'
   - 'git diff --check se bao trailing whitespace tren tep verdict raw: khong co cong CI nao chay diff --check; khai la NGOAI LE co chu dich, khong sua byte.'
+
+da_bi_thay_the: wp461-be-mat-thu-hai-cua-codex-exec-1g6-claude-20260925
+da_bi_thay_the_luc: '2026-09-25T00:46:23Z'
+da_bi_thay_the_boi_ai: 'ducthangho — comment dong bang r4 issues/461#issuecomment-5824676204 (OWNER, 2026-09-25T00:38:53Z); phien claude ghi ho. Ly do: hop dong packet chuyen tu r3 (khong phu ops/reviews) sang r4; g5 con hieu luc toi 01:27:45Z nen dat bia mo hai chieu thay vi cho het han.'

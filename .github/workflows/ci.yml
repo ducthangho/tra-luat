@@ -642,11 +642,10 @@ jobs:
       - name: cài rg cho G5 (cài xong đo lại)
         shell: bash
         run: bash ops/cai_cong_cu.sh rg
-      - name: G5 kiem ban ke cong cu + T1..T8 (packet #290)
+      # #637: selftest T1..T8 chỉ chạy ở job `gate`; job này chỉ probe (chốt M6 ở ci_dang_ky_test.py).
+      - name: G5 probe ban ke cong cu (packet #290)
         shell: bash
-        run: |
-          python ops/cong_cu.py kiem-tra --json
-          python ops/cong_cu_test.py
+        run: python ops/cong_cu.py kiem-tra --json
       - name: cài Ruff 0.15.15 và in probe dương
         run: |
           python -m pip install --quiet ruff==0.15.15
@@ -654,6 +653,8 @@ jobs:
       # Sổ ở ci_dang_ky_test.py được đối chiếu với phép tìm tệp trên cây. Các tệp dưới
       # ops/reviews/** là hiện vật review bất biến, không phải mã sống để CI chạy.
       - name: test registry (phạm vi + các bộ chưa được nối)
+        env:
+          CI_DANG_KY_WORKERS: "4"
         run: python .claude/dev/ci_dang_ky_test.py --chay
 
   gate-packet-loop:
@@ -701,11 +702,10 @@ jobs:
       - name: cài rg cho G5 (cài xong đo lại)
         shell: bash
         run: bash ops/cai_cong_cu.sh rg
-      - name: G5 kiem ban ke cong cu + T1..T8 (packet #290)
+      # #637: selftest T1..T8 chỉ chạy ở job `gate`; job này chỉ probe (chốt M6 ở ci_dang_ky_test.py).
+      - name: G5 probe ban ke cong cu (packet #290)
         shell: bash
-        run: |
-          python ops/cong_cu.py kiem-tra --json
-          python ops/cong_cu_test.py
+        run: python ops/cong_cu.py kiem-tra --json
       - name: cài Ruff 0.15.15 và in probe dương
         run: |
           python -m pip install --quiet ruff==0.15.15

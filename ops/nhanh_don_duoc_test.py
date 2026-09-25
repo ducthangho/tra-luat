@@ -40,6 +40,11 @@ def _tat_bao_tri_git(env) -> None:
             env[f"GIT_CONFIG_KEY_{n}"], env[f"GIT_CONFIG_VALUE_{n}"] = k, v
             n += 1
     env["GIT_CONFIG_COUNT"] = str(n)
+    # r3 vong 2 P2: `GIT_CONFIG_PARAMETERS` (tu `git -c`) THANG cac muc dem so; co thi noi duoi cua ta vao CUOI.
+    duoi = " ".join(f"'{k}'='{v}'" for k, v in GIT_TAT_BAO_TRI)
+    tham = env.get("GIT_CONFIG_PARAMETERS") or ""
+    if tham and not tham.endswith(duoi):
+        env["GIT_CONFIG_PARAMETERS"] = f"{tham} {duoi}"
 _tat_bao_tri_git(os.environ)
 
 # ---- M1: tin hieu "chot cua CHINH ca nay hong" -------------------------------
@@ -3880,27 +3885,30 @@ def r548_git_con_phai_tat_bao_tri_nen(d: Path):
     `m.run()` TRONG tien trinh ay thay dung. Sau do goi lan hai phai khong doi gi. Bang khoa ghi CUNG (F08)."""
     can = {"gc.auto": "0", "gc.autoDetach": "false", "maintenance.auto": "false",
            "maintenance.autoDetach": "false", "receive.autogc": "false"}
-    env = {k: v for k, v in os.environ.items() if not k.startswith("GIT_CONFIG_")}
+    goc = {k: v for k, v in os.environ.items() if not k.startswith("GIT_CONFIG_")}
     dau = [("r548.canh", "giu"), ("gc.auto", "0"), ("GC.auto", "1")]
-    env.update(GIT_CONFIG_COUNT=str(len(dau)), **{f"GIT_CONFIG_{t}_{i}": x for i, kv in enumerate(dau)
-                                                   for t, x in zip(("KEY", "VALUE"), kv)})
-    ma = ("import importlib.util as u, json, os, sys, tempfile\n"
+    tham = "'gc.auto'='1' 'maintenance.auto'='true'"
+    ma = ("import importlib.util as u, json, os, sys\n"
           "from pathlib import Path\n"
           "s = u.spec_from_file_location('m548', sys.argv[1]); m = u.module_from_spec(s); s.loader.exec_module(m)\n"
           "chup = lambda: {k: v for k, v in os.environ.items() if k.startswith('GIT_CONFIG_')}\n"
-          "sau_nap = chup(); k = Path(tempfile.mkdtemp()); m.run(['git', 'init', '-q', str(k)], k)\n"
-          "gia = {x: m.run(['git', 'config', '--get', x], k, check=False).stdout.strip() for x in sys.argv[2:]}\n"
+          "sau_nap = chup(); k = Path(sys.argv[2]); m.run(['git', 'init', '-q', str(k)], k.parent)\n"
+          "gia = {x: m.run(['git', 'config', '--get', x], k, check=False).stdout.strip() for x in sys.argv[3:]}\n"
           "m._tat_bao_tri_git(os.environ)\n"
           "print(json.dumps([sau_nap, gia, chup()]))\n")
-    p = run([sys.executable, "-c", ma, str(Path(__file__).resolve()), *can], d, check=False, env=env)
-    if p.returncode:
-        raise AssertionError(f"r548 nap module rc={p.returncode}: {p.stderr[-300:]}")
-    sau_nap, gia, lan_hai = json.loads(p.stdout.strip().splitlines()[-1])
-    cap = [(sau_nap.get(f"GIT_CONFIG_KEY_{i}"), sau_nap.get(f"GIT_CONFIG_VALUE_{i}"))
-           for i in range(int(sau_nap["GIT_CONFIG_COUNT"]))]
-    cuoi = {k.lower(): v for k, v in cap}
-    ok = [cap[:len(dau)] == dau, all(cuoi.get(k.lower()) == v for k, v in can.items()),
-          gia == can, lan_hai == sau_nap]
+    ok = []
+    for i, them in enumerate(({}, {"GIT_CONFIG_PARAMETERS": tham})):
+        env = dict(goc, GIT_CONFIG_COUNT=str(len(dau)), **them, **{f"GIT_CONFIG_{t}_{j}": x for j, kv in
+                                                                  enumerate(dau) for t, x in zip(("KEY", "VALUE"), kv)})
+        p = run([sys.executable, "-c", ma, str(Path(__file__).resolve()), str(d / f"k{i}"), *can], d, check=False, env=env)
+        if p.returncode:
+            raise AssertionError(f"r548 nap module rc={p.returncode}: {p.stderr[-300:]}")
+        sau_nap, gia, lan_hai = json.loads(p.stdout.strip().splitlines()[-1])
+        cap = [(sau_nap.get(f"GIT_CONFIG_KEY_{j}"), sau_nap.get(f"GIT_CONFIG_VALUE_{j}"))
+               for j in range(int(sau_nap["GIT_CONFIG_COUNT"]))]
+        cuoi = {k.lower(): v for k, v in cap}
+        ok += [cap[:len(dau)] == dau, all(cuoi.get(k.lower()) == v for k, v in can.items()),
+               gia == can, lan_hai == sau_nap, sau_nap.get("GIT_CONFIG_PARAMETERS", "").startswith(them.get("GIT_CONFIG_PARAMETERS", ""))]
     chot(all(ok), "r548")
 
 TU_KIEM = [
@@ -4658,6 +4666,7 @@ DOT_BIEN_TU_KIEM = [
     ("git-bao-tri-bo-nap", ("r548",), "\n_tat_bao_tri_git(os.environ)\n", "\n"),
     ("git-bao-tri-ghi-de", ("r548",), 'n = int(env.get("GIT_CONFIG_COUNT") or 0)', "n = 0"),
     ("git-bao-tri-noi-trung", ("r548",), "        if cuoi.get(k.lower()) != v:\n            env", "        if True:\n            env"),
+    ("git-bao-tri-bo-tham-so", ("r548",), '        env["GIT_CONFIG_PARAMETERS"] = f"{tham} {duoi}"', "        pass"),
     ("git-bao-tri-gia-tri-dau", ("r548",), 'cuoi[(env.get(f"GIT_CONFIG_KEY_{i}") or "").lower()] = env.get(f"GIT_CONFIG_VALUE_{i}")',
      'cuoi.setdefault((env.get(f"GIT_CONFIG_KEY_{i}") or "").lower(), env.get(f"GIT_CONFIG_VALUE_{i}"))'),
     ("git-bao-tri-thieu-khoa", ("r548",), ',\n                   ("maintenance.autoDetach", "false"), ("receive.autogc", "false"))',

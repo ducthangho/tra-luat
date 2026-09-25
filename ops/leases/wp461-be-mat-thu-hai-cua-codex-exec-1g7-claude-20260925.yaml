@@ -81,7 +81,7 @@ uy_quyen_chung_hieu_luc: >-
   land). Doc hieu luc = toi khi PR g7 (#633) land hoac chu kho thu hoi; khong coi la vo han. Spec r5 (dong bang)
   dan ca hai comment, khong sua spec — ghi chu nay la cach doc.
 reviewer_fallback: >-
-  Codex het han muc (do: comment bot 5825560016 luc 2026-09-25T02:13:48Z tren #633; chi thi chu kho dang luc 02:3xZ). Chi thi chu kho (chat, neo issues/461#issuecomment-5825807476): reviewer =
+  Codex het han muc (do: comment bot 5825560016 luc 2026-09-25T02:13:48Z tren #633; chi thi chu kho qua chat luc 02:3xZ, comment neo dang luc 02:42:45Z). Chi thi chu kho (chat, neo issues/461#issuecomment-5825807476): reviewer =
   phien Claude moi doc lap, read-only, model claude-fable-5-1; assurance same_provider_approved, KHONG thanh
   cross_approved; human audit chu kho van la cong bat buoc (assurance_target human_audited).
 granted_on_instruction_da_doc_nguoc: >-
@@ -92,17 +92,30 @@ recorded_by: claude-session
 recorder_is_dispatcher: false
 
 leased_at_utc: '2026-09-25T02:08:31Z'
-lease_sua_lan_cuoi: '2026-09-25T03:04:05Z'
+reviewer_fallback_da_doc_nguoc: >-
+  id 5825807476, issue 461, user ducthangho (OWNER), created_at 2026-09-25T02:42:45Z; do PHIEN EXECUTOR dang duoi tai
+  khoan chu kho theo chi thi chat 02:3xZ (than comment tu khai). Theo §2 tham quyen khong chuyen qua output agent:
+  CHO chu kho xac nhan tuong minh khi human audit.
+lease_sua_lan_cuoi: '2026-09-25T03:15:46Z'
 lease_sua_ghi_chu: >-
   Sua sau review cung provider luot 1 (394fb6e9, 02:55:35Z) va luot 2 (commit ke tiep): chi them chu thich,
   khoi nang_tran, reviewer_fallback. KHONG doi truong mang quyen (leased_at, han, write_set, hash, spec, branch).
-  Cac neo sinh sau 02:08:31Z (5825807476) duoc them trong cac lan sua nay, khong phai luc cap.
+  Cac neo sinh sau 02:08:31Z (5825807476) duoc them trong cac lan sua nay, khong phai luc cap. Ban chieu tren #461
+  (github-actions issuecomment-5825553028, 02:13:05Z) = ban f65040741af8997882c66ba70a079569cde42bea, CHUA cap nhat
+  (job dang bo qua lease da dang); ban dung = blob tai head nhanh ops/cap-lease-461-g7; executor dang comment tro
+  blob moi tren #461.
 lease_expires_at_utc: '2026-09-25T03:38:31Z'
-heartbeat_at: '2026-09-25T03:04:05Z'
+heartbeat_at: '2026-09-25T03:15:46Z'
+do_chua_trong_write_set: >-
+  Nhanh agent/wp461-g7-claude da MERGE master 601a0f18c83057fa079d204122660f5697fc6389 (commit
+  0fc5d4d682e69b2fc88fb64c6b244e8396b14279, 02:11:09Z). S1 (chua trong ba duong) do bang
+  git diff --name-only 601a0f18c83057fa079d204122660f5697fc6389...HEAD (merge-base voi master = master_luc_ghi), KHONG
+  bang diff tu immutable_acceptance_baseline 541fa6ca (cho them .github/workflows/ops-thu-hoi-admission.yml va
+  ops/lease_publish_test.py den tu #620 qua merge). Baseline 541fa6ca chi dung cho lich su theo duong (lenh §0 spec).
 heartbeat_lich_su: >-
   02:08:31Z (cap); khong heartbeat tu 02:08:31Z toi 2026-09-25T03:04:05Z — khoang trong > 30 phut (§4) do cho review: codex 02:13Z
   het han muc, reviewer cung provider luot 1 (02:42Z-02:51Z) va luot 2 (02:57Z-03:04Z). Commit trong khoang ay:
-  9b35593150d834308d13765bb33cc6fd753ed6c6 (02:13:19Z), 2dbc3c6705dfe41bc4cd663dde32d3280f520d0b (02:52:20Z),
+  0fc5d4d682e69b2fc88fb64c6b244e8396b14279 (02:11:09Z, merge master 601a0f18 vao nhanh), 9b35593150d834308d13765bb33cc6fd753ed6c6 (02:13:19Z), 2dbc3c6705dfe41bc4cd663dde32d3280f520d0b (02:52:20Z),
   394fb6e9ae0e6147c194273fbfd6c97aae55e436 (02:55:35Z), 5d5b18e6a68d5a5aef2da42aaacfa844b0f9200c (03:03:21Z) —
   ghi sau khi heartbeat qua han (reviewer luot 2 P3-1); khong co review_sla. Tu nay heartbeat moi <= 30 phut.
 lease_until: '2026-09-25T03:38:31Z'
@@ -129,7 +142,9 @@ nang_tran:
     claude-session ghi theo uy quyen 5825376799 (chu kho uy quyen executor nang tran luot codex, toi da 6 moi lan
     nang); khong co comment chu kho rieng nang tran cho #632/#633.
   luot_da_dung_tren_pr_632_633: '0 review codex (goi 02:13Z tren ca hai PR, bot tra het han muc; khong review nao)'
-  tran_cu_nguon: 'PROTOCOL §12 + ADR-0043 (tran canon 2 luot/PR)'
+  tran_cu_nguon: 'PROTOCOL §8/§12 — tran LOI GOI codex 2/PR (codex_review_calls_used)'
+  truc: loi_goi
+  truc_vong_ghi_chu: 'Truc VONG theo ADR-0048 = 10 cho spec dong bang tu 2026-09-12; khong doi, khong nang o day.'
 tran_codex: >-
   Uy quyen chung 5825376799: toi da 6 luot moi lan nang; luot App tu ban khi bo draft cung dem; dem ghi trong
   receipt/PR, khong dua vao ten nhanh.

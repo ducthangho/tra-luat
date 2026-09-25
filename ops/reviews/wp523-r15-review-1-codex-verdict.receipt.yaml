@@ -93,7 +93,8 @@ comment_delivery:
   readback_bang_chung:
     phuong_thuc: GET https://api.github.com/repos/ducthangho/tra-luat/issues/comments/5812074543 (REST, token chu kho)
     http_status: 200
-    doc_luc_utc: '2026-09-24T18:40:1xZ'
+    doc_luc_utc: '2026-09-24T18:40:00Z'
+    doc_luc_utc_ghi_chu: giay KHONG duoc luu (chi biet toi phut 2026-09-24T18:40Z); khai thang, khong bia (thread 4100016580)
     body_sha256_nguon: 568588b08a2a44b22c5b1f5ab2e189105f22eb56188ec9e015f68cb3c0d4c354
     body_sha256_doc_nguoc: 568588b08a2a44b22c5b1f5ab2e189105f22eb56188ec9e015f68cb3c0d4c354
     body_bytes: 593

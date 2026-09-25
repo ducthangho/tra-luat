@@ -354,8 +354,11 @@ class _MaVang:
     và người đọc mất đúng thứ cần biết — ngoại lệ nào đã thoát ra. Lớp này giữ cả hai:
     so sánh luôn SAI với mọi mã thoát, mà in ra thì nêu tên lớp và thông điệp.
 
-    `__eq__` luôn `False` là CÓ CHỦ ĐÍCH và đã kiểm: trong tệp này không ca nào chốt bằng
-    `ma != X`, nên không có đường nào biến nó thành một ca xanh giả. `t184` khoá cả hai vế.
+    `__eq__` luôn `False` là CÓ CHỦ ĐÍCH và đã kiểm. Ca chốt bằng `ma != X` — nơi `_MaVang` cho
+    `!=` ĐÚNG với mọi mã — có đúng HAI chỗ, cả hai cố ý (đo bằng `ast`, cross-review lượt 14 chỉ):
+    `t184` vế (b) (`ma != m`, tự kiểm chính sentinel) và vế lease HỢP LỆ của `t179`
+    (`ma != RC_DA_DANG`: lỗi thô từ chuỗi cũ được phép, chỉ `rc=9` bị cấm). Bản trước khai "không
+    ca nào" — sai từ khi `t179` thêm vế ấy. `t184` khoá cả hai toán tử.
     """
     __slots__ = ("kieu", "thong_diep")
 
@@ -7648,7 +7651,8 @@ def t177_con_han_KHONG_dau_thi_MOI_CHOT_cua_kiem_van_phai_chay():
 
     ĐỘT BIẾN LÀM CA NÀY ĐỎ: cho phép dò ném `Chan(RC_DA_DANG)` cả khi đã dò XONG mà KHÔNG thấy
     dấu (thêm một `raise` ngay sau `_kiem_comment_da_co` trong `try` của `_do_dau_da_dang`) ⇒
-    cả bốn mã đều thành 9. ĐÃ CHẠY: giết `t177`. Bản trước viết "cho tiền kiểm NUỐT cả bốn
+    lease sạch thành 9 (đo lại 25-09 sau bản vá P1: ba mã tiêm vẫn 4/6/8, vì nhánh đã-có-dấu
+    nay chạy `kiem()`; bản 24-09 cả bốn thành 9). ĐÃ CHẠY: giết `t177`. Bản trước viết "cho tiền kiểm NUỐT cả bốn
     hình dạng" — đọc theo nghĩa đổi hai nhánh `except` thành ném 9 thì công thức ấy SỐNG ở
     `t177` (đường không-dấu không đi qua nhánh `except` nào); soát lại khi vá lượt 7.
     """
@@ -7676,7 +7680,9 @@ def t178_tien_kiem_mien_chan_TRUOC_khi_cham_mang():
 
         thiếu `lease_id`        -> rc=8  KHÔNG đổi   (bộ tương đương)
         thiếu `packet_issue`    -> rc=8  KHÔNG đổi   (bộ tương đương)
-        `packet_issue` SAI KIỂU -> rc=9  ĐỔI, và đổi NGUY HIỂM
+        `packet_issue` SAI KIỂU -> rc=9  ĐỔI, và đổi NGUY HIỂM   (TRƯỚC bản vá P1 #589;
+                                           đo lại 25-09: rc=8 ở cả hai bên, chỉ số lời gọi
+                                           GitHub đổi 0 -> 1 — thứ vế `bool`/sai kiểu chốt)
 
     Hai ca đầu không đổi vì `_do_dau_da_dang` vốn NUỐT mọi ngoại lệ không phải `RC_DA_DANG`:
     `KeyError` chết ngay đó rồi `kiem()` dựng lại `rc=8`. Chúng đo CÁI NUỐT, không đo hàm ấy.
@@ -7807,7 +7813,9 @@ def t179_do_dau_KHONG_DO_DUOC_thi_nhuong_lai_cho_chuoi_cu():
     một mình `rc` không phân biệt nổi:
 
         nhường lại cho chuỗi cũ (đúng)              -> rc=4   `kiem()` đã chạy
-        nuốt thành "đã đăng"                        -> rc=9   `kiem()` bị bỏ qua
+        nuốt thành "đã đăng"                        -> rc=9   `kiem()` bị bỏ qua  (TRƯỚC bản vá
+                                                    P1 #589; nay nhánh đã-có-dấu chạy `kiem()` nên
+                                                    lease tự cấp cho rc=4 — xem vế lease HỢP LỆ)
         ném thẳng lỗi KHÔNG ĐO ĐƯỢC của phép dò     -> rc=8   `kiem()` bị bỏ qua
 
     ĐỘT BIẾN LÀM CA NÀY ĐỎ: cho nhánh nuốt ném `Chan(RC_DA_DANG)`; hoặc bỏ điều kiện
@@ -8855,6 +8863,9 @@ def t190_DA_DANG_ma_tep_bi_SUA_van_phai_qua_kiem_tru_chot_han():
             -> `rc=4` (miễn trừ CHỈ là chốt hạn)
             đột biến: gọi `kiem()` KHÔNG kèm `bo_qua_han` (hết hạn -> 8), hoặc cho `bo_qua_han`
             thoát sớm khỏi `kiem()` (hết hạn + tự cấp -> 9).
+      (iv)  CẢ HỌ chốt khác của `kiem()` — lớp review, danh sách người cấp, dạng SHA,
+            `GITHUB_ACTOR` — cùng mã ở cả chưa đăng lẫn đã đăng (lượt 14)
+            đột biến: miễn thêm bất kỳ một chốt nào khi `bo_qua_han` (ví dụ `_kiem_lop_review`).
     """
     L = _lease_579
     thieu = L()
@@ -8872,6 +8883,28 @@ def t190_DA_DANG_ma_tep_bi_SUA_van_phai_qua_kiem_tru_chot_han():
         ma = _do_kiem_github(lease, co_dau=True)
         chot(ma == mong, f"{nhan}: mong rc={mong}, nhận rc={ma}. Dấu 'đã đăng' chỉ nói TÊN lease "
                          f"đã đăng, không nói tệp HIỆN TẠI là tệp đã đăng.")
+
+    # CẢ HỌ chốt của `kiem()`, không chỉ bốn chốt trên — cross-review lượt 14 (25-09, F1): đột
+    # biến miễn thêm chốt `review_class` ở nhánh đã-có-dấu sống 185/185, vì `t190` không có
+    # fixture lease nhạy cảm. Mỗi vế dưới đây đòi CÙNG một mã ở cả hai trạng thái chưa đăng / đã
+    # đăng — nhánh đã-có-dấu phải phán như master, chỉ trừ chốt hạn.
+    lop_sai = _lease_v2(write_set=[".claude/dev/launcher.py"], review_class="systemic",
+                        effective_review_class="systemic", lease_id="wp579-thu", packet_issue=55)
+    for nhan, lease, mong in (
+            ("review_class hạ lớp (fixture t74)", lop_sai, RC_LOP),
+            ("người cấp ngoài danh sách cho phép", L(granted_by="nguoi-la"), RC_TU_CAP),
+            ("reviewed_sha_required sai dạng", L(reviewed_sha_required="abc123"), RC_NOI_DUNG)):
+        for co_dau in (False, True):
+            ma = _do_kiem_github(lease, co_dau=co_dau)
+            chot(ma == mong, f"{nhan}, {'ĐÃ' if co_dau else 'chưa'} đăng: mong rc={mong}, nhận "
+                             f"rc={ma}.")
+    for co_dau in (False, True):
+        gh, _ = _dung_gh_579(L(), co_dau)
+        ex, _mod = _goi_lop_gh(gh, "kiem_github", L(),
+                               env_them={**ENV_GITHUB, "GITHUB_ACTOR": "nguoi-la"})
+        ma = 0 if ex is None else ex.ma
+        chot(ma == RC_TU_CAP, f"GITHUB_ACTOR không có thẩm quyền, {'ĐÃ' if co_dau else 'chưa'} "
+                              f"đăng: mong rc={RC_TU_CAP}, nhận rc={ma}.")
 
 
 @ca

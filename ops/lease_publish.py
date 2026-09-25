@@ -906,7 +906,7 @@ def _tien_kiem_mien_dang(lease) -> None:
 
         đột biến bỏ tiền kiểm  ·  thiếu `lease_id`      -> rc=8  (KHÔNG đổi)
         đột biến bỏ tiền kiểm  ·  thiếu `packet_issue`  -> rc=8  (KHÔNG đổi)
-        đột biến bỏ tiền kiểm  ·  `packet_issue` SAI KIỂU -> rc=9  (ĐỔI, và đổi NGUY HIỂM)
+        đột biến bỏ tiền kiểm  ·  `packet_issue` SAI KIỂU -> rc=9  (ĐỔI, và đổi NGUY HIỂM) — TRƯỚC bản vá P1
 
     Lý do hai ca đầu không đổi: `_do_dau_da_dang` vốn NUỐT mọi ngoại lệ không phải
     `RC_DA_DANG`, nên `KeyError` chết ngay tại đó rồi `kiem()` dựng lại `rc=8` như cũ.
@@ -915,7 +915,11 @@ def _tien_kiem_mien_dang(lease) -> None:
     Thứ hàm này thật sự đóng là ca THỨ BA: `packet_issue: "579"` (chuỗi) vẫn dựng được URL
     `issues/579/comments` hợp lệ, nên dò thấy dấu và trả `rc=9` — tức một lease SAI KIỂU
     được cấp đường "đã đăng, bỏ qua" và **né sạch mọi chốt của `kiem()`**. Đó là một lỗ
-    thật, và nó là lý do duy nhất đã đo được để hàm này tồn tại.
+    thật, và nó là lý do duy nhất đã đo được để hàm này tồn tại — CHO TỚI bản vá P1 (#589).
+    ĐO LẠI 25-09 sau bản vá P1 (nhánh đã-có-dấu nay chạy `kiem()`): gỡ tiền kiểm thì
+    `packet_issue` sai kiểu (chuỗi, `bool`) cho `rc=8` ở CẢ bản đúng lẫn bản gỡ, `kiem()` chạy
+    1 lần ở cả hai — mã thoát KHÔNG còn đổi. Răng CÒN LẠI của hàm là số lời gọi GitHub của
+    phép dò: 0 (bản đúng) so 1 (bản gỡ). `t178` chốt đúng đại lượng ấy.
 
     `bool` bị loại tường minh vì `isinstance(True, int)` là `True` trong Python: một
     `packet_issue: true` lọt phép kiểm kiểu ngây thơ rồi thành `issues/True` trên URL.

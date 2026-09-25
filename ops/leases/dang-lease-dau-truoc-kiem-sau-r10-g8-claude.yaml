@@ -153,3 +153,14 @@ TRANG_THAI_REVIEW_LUC_CAP:
   REVIEWER_KHA_DUNG: 'KHONG — codex het han muc toi 2026-09-28 05:10 (do: stderr luot B574-6, 25-09
     01:5xZ). Han lease nay 2026-09-27T00:00Z den TRUOC. Da hoi chu kho: issues/579#issuecomment-5825742655.'
   DIEU_KIEN_DUNG: 'Khong con P1, P2, P3 o mot luot. Chua dat — luot 16 se do.'
+
+# ───────────────────────── BIA MỘ — vế THỨ NHẤT của dấu HAI CHIỀU ─────────────────────────
+# Thêm 2026-09-25 khi cấp g9. g8 CÒN HIỆU LỰC (hạn 2026-09-27T00:00:00Z) nên bia mộ hai chiều là
+# BẮT BUỘC. REVISION mới (r10 -> r11): protocol §3.2.
+da_bi_thay_the: dang-lease-dau-truoc-kiem-sau-r11-g9-claude
+da_bi_thay_the_dat_luc: '2026-09-25T05:xxZ'
+da_bi_thay_the_vi_sao: 'r11 (issues/579#issuecomment-5827148911, chủ kho chọn "r11 + đổi kiến trúc (đề xuất)"): A23 trỏ
+  vào t191 — liệt kê chốt của kiem() bằng máy. spec_hash r11 =
+  3cc2011efb25abb19f1c2588355ba24d6d5f00a5ea9bea99e5450b1ae0c9d443. Thay để NEO LAI, không phải vì g8 sai.'
+da_bi_thay_the_ve_thu_hai: 'Ve con lai nam o ops/leases/dang-lease-dau-truoc-kiem-sau-r11-g9-claude.yaml tren
+  ref ops/cap-lease-579-g9, dong .'

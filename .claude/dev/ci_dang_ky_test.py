@@ -686,8 +686,7 @@ def dem_la_do(chap_nhan, o_trong_ci):
 
 
 # CI-SONG-SONG-REGISTRY-G5-MOT-LAN r1 (#637): M1–M3, M6, M7. Hằng số trong W1 theo spec M3.
-GIAY_TOI_DA_MOT_BO, GIAY_CHO_CAY_DUNG, BIEN_WORKERS = 1800, 10, "CI_DANG_KY_WORKERS"
-_RE_ISO_UTC = re.compile(r"^\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d(\.\d+)?Z$")
+GIAY_TOI_DA_MOT_BO, GIAY_CHO_CAY_DUNG, BIEN_WORKERS, _RE_ISO_UTC = 1800, 10, "CI_DANG_KY_WORKERS", re.compile(r"^\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d(\.\d+)?Z$")
 
 
 def _gio_utc(): return datetime.datetime.now(datetime.timezone.utc)
@@ -815,8 +814,8 @@ def chay_moi(moi=MOI, cach_ly=CACH_LY, chay_mot=_chay_that,
                 print(f"CI_DANG_KY {path}: {'ĐẠT' if ok else 'ĐỎ'} rc={rc}")
                 do += not ok
     if bao_cao is not None:
-        aff = getattr(os, "sched_getaffinity", None)
-        bao_cao.update(N=so_worker, so_lop_logic=os.cpu_count(), so_lop_dung_duoc=len(aff(0)) if aff else None, bo=muc)
+        bao_cao.update(N=so_worker, so_lop_logic=os.cpu_count(), bo=muc, so_lop_dung_duoc=len(os.sched_getaffinity(0))
+                       if hasattr(os, "sched_getaffinity") else None)
     return do
 
 
@@ -846,22 +845,23 @@ def chon_so_worker(trung_vi_theo_N):
     return min((n for n, t in ung.items() if t * 100 <= 110 * t_min), default=None)
 
 
-G5_SELFTEST, G5_PROBE, JOB_G5 = "python ops/cong_cu_test.py", "ops/cong_cu.py kiem-tra", ("gate", "gate-registry", "gate-packet-loop")
+G5_SELFTEST, G5_PROBE, JOB_G5 = "python ops/cong_cu_test.py", "python ops/cong_cu.py kiem-tra --json", ("gate", "gate-registry", "gate-packet-loop")
 
 
 def loi_g5_workflow(data):
-    """M6: selftest G5 ở đúng MỘT job (`gate`); probe vô điều kiện ở cả ba job, trước bước nặng đầu."""
-    # Theo DÒNG LỆNH thực thi (bỏ comment), không theo substring của cả bước (review tại chỗ lượt 1).
+    """M6: selftest G5 ở đúng MỘT job (`gate`); probe vô điều kiện ở cả ba job, trước lệnh nặng đầu.
+    Theo DÒNG LỆNH (bỏ comment) và DANH SÁCH CHO PHÉP: dòng chạm `ops/cong_cu` phải BẰNG ĐÚNG một trong hai lệnh."""
     jobs, loi, co_self = (data or {}).get("jobs") or {}, [], []
     for j, v in jobs.items():
         dong = [(b, x.strip()) for b in ((v or {}).get("steps") or []) for x in str(b.get("run", "")).splitlines()
                 if x.strip() and not x.lstrip().startswith("#")]
-        co_self += [j] * sum(x.split("#")[0].count(G5_SELFTEST) for _, x in dong)
-        if j not in JOB_G5: continue
-        probe = [i for i, (_, x) in enumerate(dong) if x.startswith("python " + G5_PROBE)]
+        co_self += [j] * sum(x == G5_SELFTEST for _, x in dong)
+        loi += [f"{j}: dòng G5 ngoài danh sách cho phép: {x!r}" for _, x in dong if "ops/cong_cu" in x and x not in (G5_SELFTEST, G5_PROBE)]
+        probe = [i for i, (_, x) in enumerate(dong) if x == G5_PROBE]
         nang = [i for i, (b, _) in enumerate(dong) if i not in probe
                 and not str(b.get("name", "")).startswith(("cài ", "Force LF"))]
-        if len(probe) != 1:
+        if j not in JOB_G5: pass
+        elif len(probe) != 1:
             loi.append(f"{j}: probe G5 phải có đúng một dòng lệnh, thấy {len(probe)}")
         elif "if" in dong[probe[0]][0] or "if" in v:
             loi.append(f"{j}: probe G5 có điều kiện")
@@ -1449,7 +1449,6 @@ def phan_chung():
         _j = json.loads(json.dumps(_bc)); _f(_j["bo"])
         _them("p637-A1-" + _t, bool(loi_json_thoi_gian(_j, _M)))
     _cv, _st = threading.Condition(), {"act": 0, "max": 0, "goi": []}
-
     def _tran(path):
         with _cv:
             _st["act"] += 1; _st["max"] = max(_st["max"], _st["act"]); _st["goi"].append(path)
@@ -1461,9 +1460,8 @@ def phan_chung():
     _them("p637-A3b-tran-N-va-chong-lap", _st["max"] == 2 and sorted(_st["goi"]) == sorted(_M4))
     with tempfile.TemporaryDirectory() as _g, tempfile.TemporaryDirectory() as _hen:
         _env0, _SCR = dict(os.environ), (
-            "import os,pathlib,sys,time,tempfile;t=pathlib.Path(tempfile.gettempdir());h=pathlib.Path(sys.argv[2])\n"
-            "(t/'x.txt').write_text(sys.argv[1]);(h/sys.argv[1]).touch()\n"
-            "while len(list(h.iterdir()))<2: time.sleep(.05)\n"
+            "import os,pathlib,sys,time,tempfile;t=pathlib.Path(tempfile.gettempdir());h=pathlib.Path(sys.argv[2]);(t/'x.txt')"
+            ".write_text(sys.argv[1]);(h/sys.argv[1]).touch()\nwhile len(list(h.iterdir()))<2: time.sleep(.05)\n"
             "print(sys.argv[1],(t/'x.txt').read_text(),os.environ['TMPDIR'])")
         _o = _log({"A": "^A A ", "B": "^B B "}, so_worker=2, chay_mot=lambda p: _chay_co_lap(
             [sys.executable, "-c", _SCR, p, _hen], goc_tam=_g, gioi_han=60))[1]
@@ -1490,7 +1488,6 @@ def phan_chung():
         _them("p637-A3c-ngoai-cay-khong-bi-dung", _ngoai.poll() is None)
         _ngoai.kill(); _ngoai.wait()
     _wf0 = yaml.safe_load(CI_WORKFLOW.read_text(encoding="utf-8"))
-
     def _hong_wf(j, f):
         w = json.loads(json.dumps(_wf0)); b = w["jobs"][j]["steps"]
         f(b, next(i for i, x in enumerate(b) if G5_PROBE in str(x.get("run", ""))))
@@ -1505,6 +1502,8 @@ def phan_chung():
     _them("p637-A7-nang-truoc-probe-cung-run", _hong_wf("gate-registry", lambda b, i: b[i].update(
         run="python .claude/dev/ci_dang_ky_test.py --chay\n" + b[i]["run"])))
     _them("p637-A7-comment-truoc-probe-khong-la-nang", not _hong_wf("gate-registry", lambda b, i: b[i].update(run="# x\n" + b[i]["run"])))
+    _them("p637-A7-probe-doi-doi-so", _hong_wf("gate-registry", lambda b, i: b[i].update(run=G5_PROBE.replace("--json", "--help"))))
+    _them("p637-A7-selftest-trong-echo", _hong_wf("gate", lambda b, i: b[i].update(run=b[i]["run"].replace(G5_SELFTEST, f"echo '{G5_SELFTEST}'"))))
     _them("p637-A7-nhan-doi-selftest-trong-gate", _hong_wf("gate", lambda b, i: b.insert(i + 1, {"run": G5_SELFTEST})))
     _them("p637-A8-khong-ung-vien", chon_so_worker({1: 100, 2: 101, 4: 102}) is None)
     _them("p637-A8-dung-bien", chon_so_worker({1: 200, 2: 110, 4: 100}) == 2)

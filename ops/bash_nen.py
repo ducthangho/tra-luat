@@ -61,7 +61,6 @@ from __future__ import annotations
 import argparse
 import datetime as _dt
 import ast
-import hashlib
 import json
 import os
 import re
@@ -254,35 +253,6 @@ def ung_vien(path=None, system_root=None, program_files=None, git=None):
     return [u for u in ds if Path(u).is_file()]
 
 
-_CACHE = {}
-
-
-def _van_tay_tep(duong):
-    """Dấu nhận dạng MỘT tệp ứng viên, hay None khi không `stat` được (N51, r16).
-
-    Gồm cả `st_ino`/`st_dev` lẫn `st_mtime_ns`/`st_size`/`st_mode`: thay tệp bằng `rename`
-    đổi inode, ghi đè tại chỗ đổi mtime+size, đổi quyền đổi mode. Không cái nào MỘT MÌNH đủ.
-    Tệp biến mất ⇒ None, và None ≠ bất cứ vân tay nào ⇒ đo lại. Đúng `None ≠ False`.
-    """
-    try:
-        st = os.stat(duong)
-    except OSError:
-        return None
-    return (st.st_mtime_ns, st.st_size, st.st_ino, st.st_dev, st.st_mode)
-
-
-def _van_tay_ung_vien(chan_doan):
-    """Vân tay của MỌI ứng viên đã thử trong một lượt đo.
-
-    GIÁ PHẢI TRẢ, khai thẳng: mỗi lần trúng cache nay tốn thêm một `os.stat` cho mỗi ứng
-    viên — rẻ hơn nhiều bậc so với phép thử năng lực (mỗi phép là một tiến trình con), nên
-    đổi được. CÒN LẠI MỘT KHE không đóng được: tệp vẫn có thể bị thay GIỮA lúc so vân tay
-    và lúc thật sự chạy. Đó là đua ở mức hệ điều hành, không phải ở cache; ghi ra đây thay
-    vì để người sau tưởng đã kín.
-    """
-    return tuple((c["duong"], _van_tay_tep(c["duong"])) for c in chan_doan)
-
-
 def tim_bash(dung_cache=True, tat_ca=False, **ep):
     """Đường dẫn `bash` ĐÃ CHỨNG MINH làm được việc, hoặc None. Trả (đường, chẩn_đoán).
 
@@ -295,59 +265,15 @@ def tim_bash(dung_cache=True, tat_ca=False, **ep):
     với đường dừng-sớm thì Git Bash đạt trước nên System32 chưa từng được chạm — tức tiêu
     chí ấy đòi một thứ CLI không sinh ra được. Đây là chỗ sinh ra nó.
     """
-    # (xem `_van_tay_ung_vien` cho N51 — van tay TEP, ben canh khoa DAU VAO)
-    # KHOA CACHE PHAI GOM MOI TRUONG (#570 r4, N19). `ung_vien()` doc `CONG_CU_BASH`,
-    # `PATH`, `SystemRoot`, `ProgramFiles` tu `os.environ` khi tham so la None — nen mot
-    # khoa chi gom `ep` se tra ket qua KHONG khop moi truong hien tai, IM LANG.
-    # ĐO ĐƯỢC (cross-review 05ec2eb5, executor do lai): goi `tim_bash()`; dat `CONG_CU_BASH`
-    # sang mot bash THAT o duong khac; goi lai => van tra duong CU. Khoa cu: `[[], false]`.
-    # Nut ghi de ma module TU KHAI la co, bi chinh cache nuot.
-    # r7: khoa CON THIEU HAI dau vao NGAM, va ca hai da duoc DO (cross-review codex tren
-    # 55f9bce). (1) THU MUC LAM VIEC — mot muc TUONG DOI trong `CONG_CU_BASH`/`PATH` giai
-    # theo cwd, nen doi cwd la doi ung vien; do duoc tren Linux: dat `CONG_CU_BASH=bash`,
-    # `PATH=.`, goi o `a/` roi goi o `b/` => tra CUNG mot ket qua, tuc cache nuot.
-    # (2) `PATHEXT` — `ung_vien()` goi `shutil.which("git", path=path)`, ma tren Windows
-    # `which` doc `PATHEXT` de biet duoi nao la thuc thi duoc.
-    # KHAI THANG: ve (2) chua do duoc tren nen nay (Linux bo qua `PATHEXT`); no vao khoa vi
-    # LY LE doc duoc tu ma, khong phai vi mot phep do. `None != False`.
-    # N61 (r18) — KHOÁ THEO TOÀN BỘ MÔI TRƯỜNG, không theo một DANH SÁCH biến. Bản r4..r17
-    # liệt kê năm biến mà `ung_vien()` đọc — nhưng thứ quyết phán quyết là PHÉP THỬ NĂNG LỰC,
-    # và phép thử ấy chạy `bash`, mà `bash` đọc môi trường của chính nó. Đo được ở vòng 12:
-    # cache `/bin/bash` xong, đặt `BASH_ENV` trỏ vào một tệp `exit 7` ⇒ cache vẫn trả
-    # `/bin/bash`, còn đo lại trả `None` (`phép argv: rc=7`). `BASH_ENV`, `ENV`, `SHELLOPTS`,
-    # `BASHOPTS`, `POSIXLY_CORRECT`… danh sách ấy KHÔNG BAO GIỜ ĐỦ — đúng bài học `CLAUDE.md`
-    # về danh sách CẤM. Nên khoá băm TẤT CẢ: mọi thay đổi môi trường làm cache hết hiệu lực.
-    # GIÁ: một biến chẳng liên quan đổi cũng làm đo lại. Trong một tiến trình, môi trường
-    # hiếm khi đổi, nên giá ấy gần như bằng không. Chỉ lưu BĂM, không lưu giá trị — môi
-    # trường có thể mang bí mật.
-    van_tay_moi_truong = hashlib.sha256(
-        json.dumps(sorted(os.environ.items())).encode("ascii")).hexdigest()
-    khoa = json.dumps([sorted(ep.items()), bool(tat_ca), van_tay_moi_truong,
-                       os.getcwd()], default=str)
-    # N51 (r16) — KHOA DU MA TRA LOI VAN CU. Khoa gom moi DAU VAO, nhung ket qua khong
-    # sinh ra tu dau vao — no sinh ra tu phep thu NANG LUC tren mot TEP. Thay chinh tep ay
-    # tai cho (mot trinh cai ghi de thu `CONG_CU_BASH` tro toi) thi khoa khong doi mot bit,
-    # va cache tra lai phan quyet cu. Do duoc tren `8180970`, CA HAI CHIEU:
-    #   tot -> xau: `tim_bash()` tra `/tmp/f1cache/bash` trong khi `dung_cache=False` tra
-    #                `None` (`chan_doan`: "phép argv: rc=7");
-    #   xau -> tot: `tim_bash()` tra `None` trong khi khong cache tra dung duong ay.
-    # Chieu THU HAI moi la chieu dau doc: cong bao "KHONG CO bash" tren mot may DA CO.
-    # VAN TAY phai phu MOI ung vien da thu, khong chi ke thang — vi khi ket qua la `None`
-    # thi khong co ke thang nao, ma `chan_doan` chinh la thu phai het hieu luc.
-    # N56 (r17) — VÂN TAY PHẢI PHỦ CẢ TẬP ỨNG VIÊN, không chỉ những ứng viên ĐÃ THỬ.
-    # N51 chụp vân tay của `chan_doan`, mà `chan_doan` chỉ chứa thứ đã có mặt lúc đo. Một
-    # `bash` MỚI xuất hiện trong một thư mục `PATH` KHÔNG đổi thì không ứng viên cũ nào đổi,
-    # nên vân tay khớp và cache trả lại câu trả lời cũ. Đo được ở vòng 11, chiều độc nhất:
-    # thư mục rỗng ⇒ cache `(None, [])`; thêm một symlink `bash`; cache vẫn trả `None` trong
-    # khi `dung_cache=False` tìm thấy và chấp nhận nó — cổng báo KHÔNG CÓ `bash` trên máy ĐÃ
-    # CÓ. Chữa: ĐẾM LẠI ứng viên ở mỗi lần trúng cache. Phép đếm chỉ `stat`, không phóng tiến
-    # trình nào, nên vẫn rẻ hơn phép thử năng lực nhiều bậc — cache vẫn là cache (`t51` chốt
-    # chiều ấy).
-    if dung_cache and khoa in _CACHE:
-        kq_cu, ds_cu, van_tay_cu = _CACHE[khoa]
-        ds_moi = ung_vien(**ep)
-        if ds_moi == ds_cu and van_tay_cu == _van_tay_ung_vien(kq_cu[1]):
-            return kq_cu
+    # N94 (r25→r26, quyết định chủ kho) — KHÔNG CÒN CACHE. Sáu revision liền vá CÙNG MỘT hình dạng
+    # "cache trả phán quyết CŨ": khoá thiếu môi trường (N19, r4) → thiếu cwd/`PATHEXT` (r7) → tệp
+    # ứng viên đổi tại chỗ (N51, r16) → ứng viên MỚI xuất hiện (N56, r17) → `BASH_ENV` đổi (N61,
+    # r18) → NỘI DUNG tệp mà `BASH_ENV` trỏ tới đổi (codex vòng 20). Phán quyết sinh ra từ một
+    # phép thử NĂNG LỰC, mà `bash` đọc thứ ta không liệt kê hết được — mỗi vân tay mới chỉ là một
+    # mục nữa trong danh sách CẤM. Đo trước khi chọn: trúng cache 3,0 ms, đo lại 5,7 ms ⇒ cache chỉ
+    # tiết kiệm ~2,7 ms mỗi lần gọi. Chủ kho chọn "Gỡ cache": mọi lần gọi đều ĐO LẠI, và cả lớp chết
+    # theo KIẾN TRÚC. `dung_cache` còn trong chữ ký để người gọi cũ không gãy; nó không còn tác dụng.
+    del dung_cache
     chan_doan = []
     ket = None
     for u in ung_vien(**ep):
@@ -357,10 +283,7 @@ def tim_bash(dung_cache=True, tat_ca=False, **ep):
             ket = u
             if not tat_ca:
                 break
-    kq = (ket, chan_doan)
-    if dung_cache:
-        _CACHE[khoa] = (kq, ung_vien(**ep), _van_tay_ung_vien(chan_doan))
-    return kq
+    return ket, chan_doan
 
 
 # ───────────────────────────── CỔNG chặn bản sao ─────────────────────────────
@@ -581,14 +504,17 @@ def _doc_noi_dung(goc: Path, muc, nguon_tep):
     tốn gì ở hiện tại — nó là hàng rào cho ngày mai.
     TỐC ĐỘ, đo chứ không đoán: `cat-file --batch` đọc trọn 264 blob trong **0,098 s**.
     """
+    # N95 (r26, codex vòng 20) — SYMLINK ⇒ fail-close ở CẢ HAI đường, không riêng đường git. Cây
+    # KHÔNG phải kho (`rglob`) từng đọc thẳng qua liên kết: đổi tệp ĐÍCH ngoài cây làm phán quyết
+    # của `linked.py` (không đổi một byte) đổi theo. `_liet_ke_py` nay gắn `120000` cho mục ấy.
+    lien_ket = sorted(rel for rel, che_do, _ in muc if che_do == "120000")
+    if lien_ket:
+        return None, lien_ket
     if nguon_tep != "git":
         ra = {}
         for rel, _, _ in muc:
             ra[rel] = _giai_ma_nguon((goc / rel).read_bytes())
         return ra, []
-    lien_ket = sorted(rel for rel, che_do, _ in muc if che_do == "120000")
-    if lien_ket:
-        return None, lien_ket
     if not muc:
         return {}, []
     yeu_cau = "".join(sha + "\n" for _, _, sha in muc).encode("ascii")
@@ -704,7 +630,16 @@ def _liet_ke_py(goc: Path):
                         % (pc.returncode, pc.stderr.decode("utf-8", "replace").strip()[:200]))
         except (OSError, subprocess.SubprocessError) as e:
             return [], f"git-hong: {type(e).__name__}: {e}"
-    return sorted((x.relative_to(goc).as_posix(), None, None)
+    # N95 — mục mà đường đi tới nó có một SYMLINK bất kỳ (chính tệp hay một thư mục cha trong cây)
+    # mang chế độ `120000`, cùng hình dạng với đường git, để `_doc_noi_dung` fail-close.
+    goc_that = os.path.realpath(goc)
+
+    def _che_do(x):
+        tuong_doi = x.relative_to(goc)
+        la_lien_ket = os.path.realpath(x) != os.path.join(goc_that, *tuong_doi.parts)
+        return "120000" if la_lien_ket else None
+
+    return sorted((x.relative_to(goc).as_posix(), _che_do(x), None)
                   for x in goc.rglob("*")
                   if x.is_file() and _la_nguon_py(x.name)), "rglob"
 
@@ -953,18 +888,28 @@ def _gap_vo_boc(nut, tra_ten, sau):
             and len(nut.args) == 1):
         # N65 (r19) — `"".join([...])` trên một HẰNG phân cách. Không che được.
         sep = _gia_tri_hang(f.value, tra_ten, sau + 1)
+        if not isinstance(sep, (str, bytes)):
+            return _KHONG_BIET
         if isinstance(nut.args[0], (ast.List, ast.Tuple)):
-            phan = [_gia_tri_hang(a, tra_ten, sau + 1) for a in nut.args[0].elts]
-        else:
-            phan = _gia_tri_hang(nut.args[0], tra_ten, sau + 1)
-        if isinstance(sep, (str, bytes)) and isinstance(phan, (list, tuple)) \
-                and all(type(x) is type(sep) for x in phan):
+            # N93b (r26, codex vòng 20) — ngân sách tính TRONG LÚC gấp từng phần tử, như phép nối
+            # (N93): bản r25 gấp MỌI phần tử rồi mới cộng, 1000 phần tử `("%4096s" % "")` dựng
+            # ~4 MB trước khi ném. Đây là toán tử gấp CUỐI CÙNG có ngân sách tính sau — đã soát
+            # cả bộ gấp: `%` (tính trước từ mẫu), `+` (N93), `join` (đây); các phép còn lại không
+            # khuếch đại (cắt lát, chỉ số, `encode`/`decode`, vỏ `str`/`bytes`/`os.fs*`).
+            phan, tong = [], 0
+            for a in nut.args[0].elts:
+                x = _gia_tri_hang(a, tra_ten, sau + 1)
+                if type(x) is not type(sep):
+                    return _KHONG_BIET
+                tong += len(x) + (len(sep) if phan else 0)
+                if tong > _NGAN_SACH_DINH_DANG:
+                    raise _VuotNganSach(f"`join` vượt {_NGAN_SACH_DINH_DANG} ký tự")
+                phan.append(x)
             # N78c (r22, H6 vòng 16) — `join` TÁI DÙNG dấu phân cách giữa MỖI cặp phần tử nên
-            # KHUẾCH ĐẠI: 1000 ký tự × 1000 phần tử rỗng dựng 999.000 ký tự từ ~4 KB mã. Tính độ
-            # dài bằng số học TRƯỚC khi dựng.
-            dai = sum(len(x) for x in phan) + len(sep) * max(len(phan) - 1, 0)
-            if dai > _NGAN_SACH_DINH_DANG:
-                raise _VuotNganSach(f"`join` dựng {dai} ký tự > {_NGAN_SACH_DINH_DANG}")
+            # KHUẾCH ĐẠI; từ N93b phép cộng dồn ở trên đã chặn nó TRƯỚC khi dựng. Nhánh cũ "gấp đối
+            # số không phải literal rồi mới cộng" đã gỡ ở r26: không nút nào ngoài list/tuple literal
+            # gấp ra được một list/tuple (đột biến `bn_join_khong_ngan_sach` sống sót — dấu hiệu
+            # đo được của mã không đường nào đi tới).
             return _chay_phep(sep.join, phan)
         return _KHONG_BIET
     if (isinstance(f, ast.Attribute) and f.attr in ("encode", "decode")
@@ -1155,6 +1100,21 @@ def _doi_so_thu(nut, vt, khoa):
     return None
 
 
+def _trung_doi_so(nut, vt, khoa):
+    """Tham số ở VỊ TRÍ `vt` có được cấp HAI lần — vừa bằng vị trí vừa bằng từ khoá — không (N96).
+
+    Codex vòng 20 đo được: `shutil.which("bash", cmd="sh")`, `subprocess.run(["bash"],
+    args=["sh"])`, `asyncio.create_subprocess_exec("bash", program="sh")` — cả ba NÉM `TypeError`
+    TRƯỚC khi phóng gì, mà cổng BÁO chúng. Một lời gọi Python từ chối thì không chạy gì: báo nó là
+    BÁO ĐỘNG GIẢ. Có `*` trải trước vị trí ấy thì không biết vị trí nào được cấp ⇒ không kết luận.
+    """
+    if isinstance(khoa, str):
+        khoa = (khoa,)
+    if len(nut.args) <= vt or any(isinstance(a, ast.Starred) for a in nut.args[:vt + 1]):
+        return False
+    return any(k.arg in khoa for k in nut.keywords)
+
+
 def _doi_so_dau(nut, khoa):
     """Doi so DAU TIEN cua mot lenh goi, du no den bang VI TRI hay bang TEN."""
     if nut.args:
@@ -1323,6 +1283,10 @@ def _loi_goi_tran(than: str, sau=0):
       · N90 (r24): tên module nạp động đến bằng từ khoá `name=`; callee `exec`/`eval`/`__import__`/
         `import_module` được TÍNH RA (`builtins.__dict__["exec"]`, `getattr(builtins, "exec")`…) — mọi
         callee `Subscript`/`Call` có NHẮC tới tên ấy đều "có thể" là nó;
+      · N96 (r26): tham số chương trình cấp HAI lần (vị trí + từ khoá) ⇒ Python ném `TypeError`
+        TRƯỚC khi phóng ⇒ KHÔNG báo; N97: tải `eval` có CÂU LỆNH thì `eval` không chạy được ⇒ KHÔNG
+        báo; N98: chú thích LƯU dưới `from __future__ import annotations` giải theo HỢP phạm vi từ
+        vựng và globals của module (`get_type_hints` tính nó trong globals);
       · `type X[T] = …` (PEP 695) có phạm vi chú thích RIÊNG (N47, r16): `T` của nó không rò
         ra phạm vi chứa;
       · callee giải theo PHẠM VI TỪ VỰNG (r8, F3 codex vòng 3): `import subprocess` ở module
@@ -1396,6 +1360,20 @@ def _loi_goi_tran(than: str, sau=0):
             continue                       # N68: nằm trong một chú thích KHÔNG được tính
         loai = _loai_loi_goi(nut, tra_ten)
         if loai is None:
+            continue
+        # N96 (r26) — tham số chương trình cấp HAI lần ⇒ `TypeError` lúc gọi ⇒ không phóng gì.
+        if loai == "which":
+            trung = _trung_doi_so(nut, 0, _KHOA_WHICH)
+        elif loai.startswith("argv:"):
+            trung = _trung_doi_so(nut, *_API_ARGV[tuple(loai[5:].split(".", 1))])
+        elif loai.startswith("api:"):
+            trung = _trung_doi_so(nut, *_API_THEO_TEN[tuple(loai[4:].split(".", 1))][:2])
+        elif loai == "shell_ra":
+            trung = _trung_doi_so(nut, 0, _KHOA_SHELL_RA)
+        else:
+            trung = (_trung_doi_so(nut, 0, _KHOA_SPAWN)
+                     or _trung_doi_so(nut, 2, ("executable",)))
+        if trung:
             continue
         if loai == "which":
             dau = _doi_so_dau(nut, _KHOA_WHICH)
@@ -1676,7 +1654,8 @@ def _ten_exec_cua(cay):
 
 
 def _tai_exec(cay):
-    """[(nút gọi, tải đã giải mã)] cho mọi `exec(…)`/`eval(…)` mà đối số đầu là tải HẰNG.
+    """[(nút gọi, tải đã giải mã)] cho mọi `exec(…)`/`eval(…)` mà đối số đầu là tải HẰNG hợp lệ
+    theo ĐÚNG chế độ của hàm (N97).
 
     N81 (r22, H4 vòng 16) — `exec("import subprocess")` rồi `subprocess.run(["bash", …])` CHẠY
     BASH THẬT (đo được) mà bộ quét trả `[]`: chỉ nút `Import` CÚ PHÁP mới thành ràng buộc. Chuỗi
@@ -1696,17 +1675,32 @@ def _tai_exec(cay):
         if not isinstance(n, ast.Call):
             continue
         f = n.func
-        if not ((isinstance(f, ast.Name) and f.id in thang)
-                or (isinstance(f, ast.Attribute) and f.attr in ("exec", "eval")
-                    and isinstance(f.value, ast.Name) and f.value.id in goc)
-                or _tu_trong_callee_tinh(f, ("exec", "eval")) is not None):   # N90
+        if isinstance(f, ast.Name) and f.id in thang:
+            kieu = thang[f.id]
+        elif (isinstance(f, ast.Attribute) and f.attr in ("exec", "eval")
+              and isinstance(f.value, ast.Name) and f.value.id in goc):
+            kieu = f.attr
+        else:
+            kieu = _tu_trong_callee_tinh(f, ("exec", "eval"))            # N90
+        if kieu is None:
             continue
         van = _tai_hang(n)
         if van is None:
             continue
         try:
-            ast.parse(van)
+            ast.parse(van, mode=kieu)
         except (SyntaxError, ValueError) as e:
+            # N97 (r26, codex vòng 20) — `eval` chỉ nhận MỘT BIỂU THỨC: tải có CÂU LỆNH (`import …`)
+            # thì `eval` ném `SyntaxError` trước khi chạy gì — ở MỌI phiên bản, vì câu lệnh không
+            # bao giờ là biểu thức. Bản r25 phân tích mọi tải ở chế độ `exec` rồi BÁO lời gọi bash
+            # bên trong: báo động giả. Nên: hợp lệ như `exec` mà không như `eval` ⇒ không chạy gì ⇒
+            # bỏ qua. Hỏng ở CẢ HAI chế độ ⇒ vẫn NÉM như F6 (bộ phân tích có thể lệch phiên bản).
+            if kieu == "eval":
+                try:
+                    ast.parse(van)
+                    continue
+                except (SyntaxError, ValueError):
+                    pass
             raise SyntaxError(f"tải `exec`/`eval` hằng ở dòng {n.lineno} không phân tích "
                               f"được: {e}") from e
         ra.append((n, van))
@@ -2161,30 +2155,56 @@ def _giai_callee_theo_pham_vi(cay):
         N84 (r23, F5 vòng 17) — NGĂN XẾP TƯỜNG MINH thay đệ quy: biểu thức lồng ~1000 tầng làm
         bản đệ quy ném `RecursionError` (đo được: n=996), trong khi Python 3.12 chạy tệp ấy.
         """
-        chong = [(goc_tham, chuoi_goc)]
+        # N98 (r26, quyết định chủ kho) — chú thích được LƯU dưới `from __future__ import annotations`
+        # được TÍNH LẠI trong GLOBALS của module (`typing.get_type_hints`), không theo phạm vi từ vựng.
+        # Codex vòng 20 đo được: `import subprocess` ở module, hàm bao che `subprocess = object()`,
+        # chú thích của hàm lồng gọi `subprocess.run([…bash…])` ⇒ `get_type_hints` phóng bash mà
+        # cổng trả `[]`. Lớp chú thích lặp lần thứ tư (N68 → N73 → N77); chủ kho chọn "giải HỢP hai
+        # phạm vi": nút mang cờ `hop` được giải theo CẢ chuỗi từ vựng LẪN riêng phạm vi module, có
+        # `import` ở bên nào ⇒ báo (tinh thần N76 "có thể").
+        chong = [(goc_tham, chuoi_goc, False)]
         while chong:
-            con, chuoi = chong.pop()
+            con, chuoi, hop = chong.pop()
             if isinstance(con, ast.AnnAssign) and (
                     (len(chuoi) > 1 and not chuoi[-1][0])
                     or (hoan_chu_thich and not con.simple)):
                 # N73 (r20): chú thích biến CỤC BỘ trong hàm — không bao giờ tính, không được lưu.
                 # N77 (r21): đích không đơn khi có `__future__` — không tính, không lưu.
                 khong_chay(con.annotation)
-                chong.extend((x, chuoi) for x in (con.target, con.value) if x is not None)
+                chong.extend((x, chuoi, hop) for x in (con.target, con.value) if x is not None)
+                continue
+            if isinstance(con, ast.AnnAssign) and hoan_chu_thich:
+                # N98: chú thích biến ĐƯỢC LƯU (module / thân lớp) dưới `__future__`.
+                chong.append((con.annotation, chuoi, True))
+                chong.extend((x, chuoi, hop) for x in (con.target, con.value) if x is not None)
                 continue
             if isinstance(con, _NUT_PHAM_VI):
                 ngoai, trong = _ngoai_va_trong(con)
                 chuoi_trong = chuoi + [pham_vi(con)]
-                chong.extend((x, chuoi) for x in ngoai)
-                chong.extend((x, chuoi_trong) for x in trong)
+                luu = set()
+                if hoan_chu_thich and isinstance(con, (ast.FunctionDef, ast.AsyncFunctionDef)):
+                    a_ = con.args
+                    luu = {id(x.annotation) for x in (*a_.posonlyargs, *a_.args, *a_.kwonlyargs,
+                                                      a_.vararg, a_.kwarg)
+                           if x is not None and x.annotation is not None}
+                    if con.returns is not None:
+                        luu.add(id(con.returns))
+                chong.extend((x, chuoi, hop or id(x) in luu) for x in ngoai)
+                chong.extend((x, chuoi_trong, hop) for x in trong)
                 continue
             if isinstance(con, ast.Call):
                 # `hoi_rang_buoc=True` (N58, r18): hỏi "tên này có ràng buộc nào trong chuỗi phạm
                 # vi không" — để biết `str`/`bytes` còn là tên DỰNG SẴN hay đã bị che. `_giai_ten`
                 # trả None cho CẢ "không ràng buộc" lẫn "bị che", nên không trả lời được câu ấy.
-                ket.append((con, lambda ten, hoi_rang_buoc=False, c=chuoi:
-                            _co_rang_buoc(ten, c) if hoi_rang_buoc else _giai_ten(ten, c)))
-            chong.extend((x, chuoi) for x in ast.iter_child_nodes(con))
+                if hop:
+                    ket.append((con, lambda ten, hoi_rang_buoc=False, c=chuoi:
+                                (_co_rang_buoc(ten, c) and _co_rang_buoc(ten, c[:1]))
+                                if hoi_rang_buoc else
+                                (_giai_ten(ten, c) or _giai_ten(ten, c[:1]))))
+                else:
+                    ket.append((con, lambda ten, hoi_rang_buoc=False, c=chuoi:
+                                _co_rang_buoc(ten, c) if hoi_rang_buoc else _giai_ten(ten, c)))
+            chong.extend((x, chuoi, hop) for x in ast.iter_child_nodes(con))
 
     for _con in ast.iter_child_nodes(cay):
         tham(_con, [pham_vi(cay)])

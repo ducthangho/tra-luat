@@ -81,7 +81,7 @@ uy_quyen_chung_hieu_luc: >-
   land). Doc hieu luc = toi khi PR g7 (#633) land hoac chu kho thu hoi; khong coi la vo han. Spec r5 (dong bang)
   dan ca hai comment, khong sua spec — ghi chu nay la cach doc.
 reviewer_fallback: >-
-  Codex het han muc (02:13Z 25-09). Chi thi chu kho (chat, neo issues/461#issuecomment-5825807476): reviewer =
+  Codex het han muc (do: comment bot 5825560016 luc 2026-09-25T02:13:48Z tren #633; chi thi chu kho dang luc 02:3xZ). Chi thi chu kho (chat, neo issues/461#issuecomment-5825807476): reviewer =
   phien Claude moi doc lap, read-only, model claude-fable-5-1; assurance same_provider_approved, KHONG thanh
   cross_approved; human audit chu kho van la cong bat buoc (assurance_target human_audited).
 granted_on_instruction_da_doc_nguoc: >-
@@ -92,6 +92,11 @@ recorded_by: claude-session
 recorder_is_dispatcher: false
 
 leased_at_utc: '2026-09-25T02:08:31Z'
+lease_sua_lan_cuoi: '2026-09-25T03:03:21Z'
+lease_sua_ghi_chu: >-
+  Sua sau review cung provider luot 1 (394fb6e9, 02:55:35Z) va luot 2 (commit ke tiep): chi them chu thich,
+  khoi nang_tran, reviewer_fallback. KHONG doi truong mang quyen (leased_at, han, write_set, hash, spec, branch).
+  Cac neo sinh sau 02:08:31Z (5825807476) duoc them trong cac lan sua nay, khong phai luc cap.
 lease_expires_at_utc: '2026-09-25T03:38:31Z'
 heartbeat_at: '2026-09-25T02:08:31Z'
 lease_until: '2026-09-25T03:38:31Z'
@@ -114,6 +119,10 @@ nang_tran:
   ai_nang: ducthangho
   can_cu: https://github.com/ducthangho/tra-luat/issues/461#issuecomment-5825376799
   khi_nao: '2026-09-25T01:52:07Z'
+  ghi_ho: >-
+    claude-session ghi theo uy quyen 5825376799 (chu kho uy quyen executor nang tran luot codex, toi da 6 moi lan
+    nang); khong co comment chu kho rieng nang tran cho #632/#633.
+  luot_da_dung_tren_pr_632_633: '0 review codex (goi 02:13Z tren ca hai PR, bot tra het han muc; khong review nao)'
   tran_cu_nguon: 'PROTOCOL §12 + ADR-0043 (tran canon 2 luot/PR)'
 tran_codex: >-
   Uy quyen chung 5825376799: toi da 6 luot moi lan nang; luot App tu ban khi bo draft cung dem; dem ghi trong

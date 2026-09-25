@@ -1,16 +1,23 @@
 #!/usr/bin/env python3
 """Sổ test sống: kiểm phạm vi, lời gọi CI, rc và bằng chứng dương."""
 import argparse
+import concurrent.futures
 import contextlib
+import datetime
 import io
 import json
 import os
 import pathlib
 import re
 import shlex
+import shutil
+import signal
+import statistics
 import subprocess
 import sys
 import tempfile
+import threading
+import time
 
 import yaml
 
@@ -678,31 +685,117 @@ def dem_la_do(chap_nhan, o_trong_ci):
     return not chap_nhan
 
 
-def _chay_that(path):
-    p = subprocess.run([sys.executable, path], cwd=ROOT, text=True, encoding="utf-8",
-                       errors="backslashreplace", stdout=subprocess.PIPE,
-                       stderr=subprocess.STDOUT)
-    return p.returncode, p.stdout
+# CI-SONG-SONG-REGISTRY-G5-MOT-LAN r1 (#637): M1–M3, M6, M7. Hằng số trong W1 theo spec M3.
+GIAY_TOI_DA_MOT_BO, GIAY_CHO_CAY_DUNG, BIEN_WORKERS, BIEN_MOC = 3600, 10, "CI_DANG_KY_WORKERS", "CI_DANG_KY_MOC"
+
+
+def _gio_utc(): return datetime.datetime.now(datetime.timezone.utc)
+def _iso(dt): return dt.astimezone(datetime.timezone.utc).isoformat(timespec="milliseconds").replace("+00:00", "Z")
+
+
+def doc_so_worker(env=os.environ, la_windows=None):
+    """M3 miền N: vắng/rỗng ⇒ 1; đúng một chữ số 1–8 ⇒ N; khác ⇒ ValueError. Windows ⇒ 1 (Q6)."""
+    raw = env.get(BIEN_WORKERS) or "1"
+    if not re.fullmatch(r"[1-8]", raw):
+        raise ValueError(f"{BIEN_WORKERS}={raw!r} ngoài miền 1–8")
+    return 1 if nen_la_windows(la_windows) else int(raw)
+
+
+def _pid_song(pid, pgid=None, moc=None):
+    """PID KHÔNG-zombie (zombie = đã chết) mang `pid`, thuộc nhóm `pgid`, hoặc mang dấu `moc` trong environ: con cháu
+    đã `setsid` thoát nhóm vẫn thừa kế dấu (PR #640 P2); dấu ngẫu nhiên nên không giết nhầm PID tái dùng."""
+    proc, dau = pathlib.Path("/proc"), f"{BIEN_MOC}={moc}".encode()
+    if not proc.is_dir():  # POSIX không /proc: không lọc được zombie ⇒ nghiêng về "còn sống" (ĐỎ)
+        return [0] * (not subprocess.call(["kill", "-0", f"-{pgid}" if pid is None else str(pid)], stderr=subprocess.DEVNULL))
+    ra = []
+    for d in ([proc / str(pid)] if pgid is None else proc.glob("[0-9]*")):
+        with contextlib.suppress(OSError, IndexError, ValueError):
+            f = (d / "stat").read_text().rsplit(")", 1)[1].split()
+            if f[0] != "Z" and (pgid is None or int(f[2]) == pgid or (moc and dau in (d / "environ").read_bytes())):
+                ra.append(int(d.name))
+    return ra
+
+
+def _chay_co_lap(argv, cwd=ROOT, goc_tam=None, gioi_han=GIAY_TOI_DA_MOT_BO):
+    """M2+M3: một bộ, một subprocess, BẢN SAO env có TMPDIR/TEMP/TMP riêng; không đụng
+    `os.environ`/cwd của cha. Trả `(rc, ban_in, loi_ha_tang)`; `loi_ha_tang` khác None ⇒ ĐỎ."""
+    tam, posix, moc = pathlib.Path(tempfile.mkdtemp(prefix="bo-", dir=goc_tam)), os.name != "nt", os.urandom(8).hex()
+    env = dict(os.environ, TMPDIR=str(tam), TEMP=str(tam), TMP=str(tam), **{BIEN_MOC: moc})
+    rc, ban_in, loi, p = -1, "", None, None
+    try:
+        p = subprocess.Popen(argv, cwd=cwd, env=env, text=True, encoding="utf-8", errors="backslashreplace",
+                             stdin=subprocess.DEVNULL, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
+                             start_new_session=posix)
+        ban_in, _ = p.communicate(timeout=gioi_han)
+        if posix and _pid_song(None, p.pid, moc):  # cha thoát mà con cháu còn chạy ngoài vòng quản lý (review lượt 4)
+            raise ChildProcessError("con cháu còn sống sau khi bộ thoát")
+    except Exception as e:  # MỌI lỗi sau khởi chạy đi CHUNG đường dừng: giết cả nhóm, chờ ≤ 10 s, rồi mới dọn
+        loi = (f"hết giờ {gioi_han} giây" if isinstance(e, subprocess.TimeoutExpired)
+               else f"khởi chạy/chờ thất bại: {type(e).__name__}: {e}")
+        if p is not None:
+            han = time.monotonic() + GIAY_CHO_CAY_DUNG
+            with contextlib.suppress(OSError):  # Windows: taskkill /T là nỗ lực, KHÔNG xác nhận được (Q6)
+                os.killpg(p.pid, signal.SIGKILL) if posix else subprocess.call(
+                    ["taskkill", "/T", "/F", "/PID", str(p.pid)], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+            for q in (_pid_song(None, p.pid, moc) if posix else []):
+                with contextlib.suppress(OSError): os.kill(q, signal.SIGKILL)
+            with contextlib.suppress(Exception):
+                p.kill(); ban_in = p.communicate(timeout=GIAY_CHO_CAY_DUNG)[0] or ban_in
+            while posix and _pid_song(None, p.pid, moc) and time.monotonic() < han:
+                time.sleep(0.05)
+            if p.returncode is None or not posix or _pid_song(None, p.pid, moc):
+                loi += "; KHÔNG xác nhận được cả cây tiến trình đã dừng"
+    rc = p.returncode if p is not None and isinstance(p.returncode, int) else rc
+    with contextlib.suppress(OSError):
+        shutil.rmtree(tam)
+    if tam.exists():
+        loi = (loi + "; " if loi else "") + f"dọn thư mục tạm thất bại: {tam} còn"
+    return rc, ban_in or "", loi
+
+
+def _chay_that(path, goc_tam=None):
+    return _chay_co_lap([sys.executable, path], goc_tam=goc_tam)
 
 
 def chay_moi(moi=MOI, cach_ly=CACH_LY, chay_mot=_chay_that,
              doc_moi_truong=moi_truong_hien_tai, doc_trong_ci=trong_ci,
-             doc_nen_windows=nen_la_windows):
+             doc_nen_windows=nen_la_windows, so_worker=1, dong_ho=_gio_utc, bao_cao=None):
     """Năm tham số sau là ĐƯỜNG NỐI ĐỂ ĐO, không phải cấu hình: phản chứng phải gọi
     được chính hàm này với bộ chạy giả, nếu không tầng tiêu thụ lại không ai canh.
 
     `doc_nen_windows` là seam thứ năm, thêm cho packet #456: nếu nền chỉ đọc được
     qua `os.name` thật thì phản chứng A3 phải có máy Windows mới chạy được, tức là
-    không ai canh — đúng thứ bốn seam kia sinh ra để tránh."""
+    không ai canh — đúng thứ bốn seam kia sinh ra để tránh.
+
+    #637: `so_worker` = trần bộ ĐANG chạy; `dong_ho` = seam M1; `bao_cao` nhận JSON (không in ở
+    đây ⇒ log nghiệp vụ giữ nguyên master, A5). Log theo thứ tự `MOI`; lỗi hạ tầng không qua `CACH_LY`."""
     do = 0
     hien_tai = doc_moi_truong()
     o_trong_ci = doc_trong_ci()
     la_windows = doc_nen_windows()
-    for path, mau in moi.items():
-        rc, ban_in = chay_mot(path)
+    ds = list(moi.items())
+
+    def _mot(path):
+        bd = dong_ho()
+        try:
+            rc, ban_in, loi = (tuple(chay_mot(path)) + (None,))[:3]
+        except Exception as e:
+            rc, ban_in, loi = -1, "", f"ngoại lệ worker {type(e).__name__}: {e}"
+        return rc, ban_in, loi, bd, dong_ho()
+
+    ex, muc = concurrent.futures.ThreadPoolExecutor(max_workers=so_worker), []
+    tuong_lai = [ex.submit(_mot, path) for path, _ in ds]
+    for (path, mau), tl in zip(ds, tuong_lai):
+        rc, ban_in, loi, bd, kt = tl.result()
+        muc.append({"duong_dan": path, "rc": rc, "giay": round((kt - bd).total_seconds(), 3),
+                    "bat_dau_utc": _iso(bd), "ket_thuc_utc": _iso(kt)})
+        print(ban_in, end="")
+        if loi is not None:
+            print(f"CI_DANG_KY {path}: ĐỎ — LỖI HẠ TẦNG: {loi}, rc={rc}")
+            do += 1
+            continue
         ok = rc == 0 and any(bang_chung_xanh(ban_in, m)
                              for m in mau_theo_nen(path, mau, la_windows))
-        print(ban_in, end="")
         if path in cach_ly:
             no = cach_ly[path]
             chap_nhan = cach_ly_chap_nhan(ok, no["moi_truong"], hien_tai)
@@ -722,7 +815,66 @@ def chay_moi(moi=MOI, cach_ly=CACH_LY, chay_mot=_chay_that,
         else:
             print(f"CI_DANG_KY {path}: {'ĐẠT' if ok else 'ĐỎ'} rc={rc}")
             do += not ok
+    ex.shutdown()
+    if bao_cao is not None:
+        bao_cao.update(N=so_worker, so_lop_logic=os.cpu_count(), bo=muc, so_lop_dung_duoc=len(os.sched_getaffinity(0))
+                       if hasattr(os, "sched_getaffinity") else None)
     return do
+
+
+def loi_json_thoi_gian(js, moi=MOI):
+    """A1: đúng một mục cho mỗi khoá `moi` (đếm lúc chạy), rc nguyên, giay ≥ 0, mốc ISO UTC, kt ≥ bd."""
+    bo = js.get("bo") if isinstance(js, dict) else None
+    if not isinstance(bo, list) or type(js.get("N")) is not int or not {"so_lop_logic", "so_lop_dung_duoc"} <= set(js):
+        return ["thiếu bo/N/so_lop_*"]
+    loi = [] if sorted(m.get("duong_dan") for m in bo) == sorted(moi) else ["mục không khớp một-một với MOI"]
+    for m in bo:
+        mo = [m.get(k) for k in ("bat_dau_utc", "ket_thuc_utc")]
+        if type(m.get("rc")) is not int or type(m.get("giay")) not in (int, float) or m["giay"] < 0:
+            loi.append(f"rc/giay sai: {m.get('duong_dan')}")
+        with contextlib.suppress(TypeError, ValueError):  # PARSE rồi so thời điểm, không so chuỗi (PR #640 P2)
+            mo = [datetime.datetime.fromisoformat(x[:-1] + "+00:00") for x in mo if x.endswith("Z")]
+        if len(mo) != 2 or not all(isinstance(x, datetime.datetime) for x in mo) or mo[1] < mo[0]:
+            loi.append(f"mốc không phải ISO UTC hoặc đảo: {m.get('duong_dan')}")
+    return loi
+
+
+def chon_so_worker(trung_vi_theo_N):
+    """M7/A8, hàm thuần: nhận trung vị (hoặc danh sách lượt ⇒ lấy trung vị) cho N ∈ {1,2,4}.
+    Ứng viên = N ∈ {2,4} nhanh hơn hẳn N=1; t_min = trung vị nhỏ nhất của ứng viên; chọn N nhỏ
+    nhất có trung vị ≤ 1,10 × t_min. Không ứng viên ⇒ None (DỪNG S2)."""
+    tv = {n: statistics.median(t) if isinstance(t, (list, tuple)) else t
+          for n, t in trung_vi_theo_N.items()}
+    ung = {n: t for n, t in tv.items() if n in (2, 4) and t < tv[1]}
+    t_min = min(ung.values(), default=None)
+    return min((n for n, t in ung.items() if t * 100 <= 110 * t_min), default=None)
+
+
+G5_SELFTEST, G5_PROBE, JOB_G5 = "python ops/cong_cu_test.py", "python ops/cong_cu.py kiem-tra --json", ("gate", "gate-registry", "gate-packet-loop")
+G5_THIET_LAP = frozenset({"git config --global core.autocrlf false", "git config --global core.eol lf", "git config --global core.abbrev 7",
+                          "python -m pip install --quiet PyYAML==6.0.3 jsonschema==4.26.0", "bash ops/cai_actionlint.sh",
+                          "bash ops/cai_cong_cu.sh shellcheck", "bash ops/cai_cong_cu.sh rg",
+                          "actions/checkout@v4", "actions/setup-python@v5"})
+def _dong_lenh(b): return [b.get("uses")] * ("uses" in b) + [x.strip() for x in str(b.get("run", "")).splitlines() if x.strip() and not x.lstrip().startswith("#")]
+
+
+def loi_g5_workflow(data):
+    """M6 theo HÌNH DẠNG BƯỚC + danh sách CHO PHÉP (review tại chỗ lượt 1–3: nhận diện theo văn bản lọt ba lần): mỗi job G5
+    đúng MỘT bước chạm `ops/cong_cu`, lệnh BẰNG ĐÚNG [probe](+selftest ở gate), vô điều kiện; trước nó chỉ lệnh thiết lập."""
+    jobs = (data or {}).get("jobs") or {}
+    loi = [f"thiếu job {j}" for j in JOB_G5 if j not in jobs]
+    for j, v in jobs.items():
+        buoc = (v or {}).get("steps") or []
+        cham = [i for i, b in enumerate(buoc) if re.search(r"(?<![A-Za-z0-9_])cong_cu", str(b.get("run", "")))]
+        if j not in JOB_G5 or len(cham) != 1:
+            loi += [f"{j}: phải có đúng một bước G5 (chỉ ở {JOB_G5}), thấy {len(cham)}"] if cham or j in JOB_G5 else []
+        elif _dong_lenh(buoc[cham[0]]) != [G5_PROBE] + [G5_SELFTEST] * (j == "gate"):
+            loi.append(f"{j}: bước G5 sai hình dạng: {_dong_lenh(buoc[cham[0]])}")
+        elif {"if", "continue-on-error"} & (set(buoc[cham[0]]) | set(v)):
+            loi.append(f"{j}: bước G5 có điều kiện hoặc được phép bỏ qua lỗi")
+        elif any(not set(_dong_lenh(b)) <= G5_THIET_LAP for b in buoc[:cham[0]]):
+            loi.append(f"{j}: có lệnh ngoài danh sách thiết lập đứng trước probe G5")
+    return loi
 
 
 def phan_chung():
@@ -1260,6 +1412,123 @@ def phan_chung():
     for _ten, _jobs, _env, _mong in _FX:
         _loi = len(loi_ruff_ci(_wf(_jobs, _env))[0])
         _them("ruff-ci-" + _ten, (_loi == 0) if _mong == 0 else (_loi >= 1))
+    # ── #637: A1–A5, A7, A8 đi qua CHÍNH `chay_moi`/`_chay_co_lap`; đột biến mã đo ngoài cây (PR). ──
+    for _t, _e, _n, _nen in (("rong", "", 1, "posix"), ("1", "1", 1, "posix"), ("4", "4", 4, "posix"),
+                             ("8", "8", 8, "posix"), ("vang", None, 1, "posix"), ("windows-luon-1", "4", 1, "nt")):
+        _them("p637-A4-N-" + _t, doc_so_worker({} if _e is None else {BIEN_WORKERS: _e}, _nen) == _n)
+    for _v in ("0", "-1", "9", "abc", " 2", "2.0"):
+        _n = 0
+        with contextlib.suppress(ValueError):
+            _n = doc_so_worker({BIEN_WORKERS: _v}, "posix"); _n = None
+        _them(f"p637-A4-N-sai-{_v!r}", _n is not None)
+    _M = {f"{c}_test.py": r"^(\d+)/(\d+)$" for c in "abcde"}
+    _NO = {"e_test.py": {"slug": "gia", "ly_do": "gia", "moi_truong": MOI_TRUONG_CI, "log": "gia"}}
+
+    def _gia(path):
+        time.sleep({"a": .3, "b": .2, "c": .1}.get(path[0], 0))
+        if path[0] == "d": raise RuntimeError("worker hỏng")
+        return {"b": (1, "1/1\n"), "e": (-9, "treo\n", "hết giờ 1800 giây")}.get(path[0], (0, "1/1\n"))
+
+    def _log(moi, chay_mot=_gia, **kw):
+        out, bc = io.StringIO(), {}
+        with contextlib.redirect_stdout(out):
+            d = chay_moi(moi=moi, cach_ly=_NO, chay_mot=chay_mot, doc_moi_truong=lambda: MOI_TRUONG_CI,
+                         doc_trong_ci=lambda: True, doc_nen_windows=lambda: False, bao_cao=bc, **kw)
+        return d, out.getvalue(), bc
+    _L3 = "1/1\nCI_DANG_KY a_test.py: ĐẠT rc=0\n1/1\nCI_DANG_KY b_test.py: ĐỎ rc=1\n1/1\nCI_DANG_KY c_test.py: ĐẠT rc=0\n"
+    _L5 = _L3 + ("CI_DANG_KY d_test.py: ĐỎ — LỖI HẠ TẦNG: ngoại lệ worker RuntimeError: worker hỏng, rc=-1\n"
+                 "treo\nCI_DANG_KY e_test.py: ĐỎ — LỖI HẠ TẦNG: hết giờ 1800 giây, rc=-9\n")
+    _them("p637-A5-mac-dinh-giong-master", _log({k: _M[k] for k in "a_test.py b_test.py c_test.py".split()})[:2] == (1, _L3))
+    _them("p637-A3-N1-thu-tu-MOI-va-ha-tang-khong-qua-cach-ly", _log(_M, so_worker=1)[:2] == (3, _L5))
+    _them("p637-A3-N4-cung-log-cung-phan-quyet", _log(_M, so_worker=4)[:2] == (3, _L5))
+    _t0, _nhip = datetime.datetime(2026, 9, 25, 8, tzinfo=datetime.timezone.utc), iter(range(99))
+    _bc = _log(_M, dong_ho=lambda: _t0 + datetime.timedelta(seconds=1.5 * next(_nhip)))[2]
+    _them("p637-A1-clock-gia-khop-chinh-xac", _bc["bo"][1] == {
+        "duong_dan": "b_test.py", "rc": 1, "giay": 1.5,
+        "bat_dau_utc": "2026-09-25T08:00:03.000Z", "ket_thuc_utc": "2026-09-25T08:00:04.500Z"})
+    _them("p637-A1-json-hop-le", not loi_json_thoi_gian(_bc, _M) and _bc["N"] == 1)
+    for _t, _f in (("bo-mot-muc", lambda b: b.pop()), ("rc-sai-kieu", lambda b: b[0].update(rc="0")),
+                   ("giay-am", lambda b: b[0].update(giay=-1)), ("moc-khong-utc", lambda b: b[0].update(
+                       bat_dau_utc="2026-09-25T08:00:00")), ("moc-dao", lambda b: b[0].update(
+                       bat_dau_utc=b[0]["ket_thuc_utc"], ket_thuc_utc=b[0]["bat_dau_utc"])),
+                   ("moc-lich-khong-ton-tai", lambda b: b[0].update(bat_dau_utc="2026-99-99T99:99:99.000Z"))):
+        _j = json.loads(json.dumps(_bc)); _f(_j["bo"])
+        _them("p637-A1-" + _t, bool(loi_json_thoi_gian(_j, _M)))
+    _j["bo"] = [{**m, "bat_dau_utc": "2026-09-25T08:00:00Z", "ket_thuc_utc": "2026-09-25T08:00:00.100Z"} for m in _bc["bo"]]
+    _them("p637-A1-do-chinh-xac-khac-van-dung", not loi_json_thoi_gian(_j, _M))
+    _cv, _st = threading.Condition(), {"act": 0, "max": 0, "goi": []}
+    def _tran(path):
+        with _cv:
+            _st["act"] += 1; _st["max"] = max(_st["max"], _st["act"]); _st["goi"].append(path)
+            _cv.notify_all(); _cv.wait_for(lambda: _st["act"] >= 2, 2); _cv.wait_for(lambda: _st["act"] > 2, .3)
+            _st["act"] -= 1
+        return 0, "1/1\n"
+    _M4 = {k: _M[k] for k in "a_test.py b_test.py c_test.py d_test.py".split()}
+    _log(_M4, chay_mot=_tran, so_worker=2)
+    _them("p637-A3b-tran-N-va-chong-lap", _st["max"] == 2 and sorted(_st["goi"]) == sorted(_M4))
+    with tempfile.TemporaryDirectory() as _g, tempfile.TemporaryDirectory() as _hen:
+        _env0, _SCR = dict(os.environ), (
+            "import os,pathlib,sys,time,tempfile;t=pathlib.Path(tempfile.gettempdir());h=pathlib.Path(sys.argv[2]);(t/'x.txt')"
+            ".write_text(sys.argv[1]);(h/sys.argv[1]).touch()\nwhile len(list(h.iterdir()))<2: time.sleep(.05)\n"
+            "print(sys.argv[1],(t/'x.txt').read_text(),os.environ['TMPDIR'])")
+        _o = _log({"A": "^A A ", "B": "^B B "}, so_worker=2, chay_mot=lambda p: _chay_co_lap(
+            [sys.executable, "-c", _SCR, p, _hen], goc_tam=_g, gioi_han=60))[1]
+        _td = re.findall(r"^[AB] [AB] (.+)$", _o, re.M)
+        _them("p637-A2-khong-dung-nhau", "CI_DANG_KY A: ĐẠT" in _o and "CI_DANG_KY B: ĐẠT" in _o)
+        _them("p637-A2-tmpdir-rieng", len(set(_td)) == 2 and all(pathlib.Path(x).parent == pathlib.Path(_g) for x in _td))
+        _them("p637-A2-da-don", not any(pathlib.Path(_g).iterdir()))
+        _them("p637-A2-environ-cha-khong-doi", dict(os.environ) == _env0)
+    if os.name != "nt":  # A3c KHÔNG ĐO TRÊN WINDOWS (Q6): killpg//proc là đường POSIX
+        _ngoai = subprocess.Popen([sys.executable, "-c", "import time;time.sleep(60)"])
+        with tempfile.TemporaryDirectory() as _g:
+            _t = time.monotonic()
+            _rc, _bi, _loi = _chay_co_lap([sys.executable, "-c", "import subprocess,sys,time;c=subprocess.Popen("
+                                           "[sys.executable,'-c','import time;time.sleep(120)']);print(c.pid,flush=True);"
+                                           "time.sleep(120)"], goc_tam=_g, gioi_han=2)
+            _chau = int(_bi.split()[0]) if _bi.split() else -1
+            _them("p637-A3c-het-gio-la-loi-ha-tang", _loi is not None and "hết giờ 2" in _loi)
+            _them("p637-A3c-chau-da-chet", _chau > 0 and not _pid_song(_chau))
+            _them("p637-A3c-dung-trong-han", time.monotonic() - _t < 2 + GIAY_CHO_CAY_DUNG + 3)
+            _them("p637-A3c-da-don", not any(pathlib.Path(_g).iterdir()))
+            _rc, _bi, _loi = _chay_co_lap([sys.executable, "-c", "import subprocess as s,sys;print(s.Popen([sys.executable,'-c','import time;"
+                                           "time.sleep(60)'],stdout=s.DEVNULL,stderr=s.DEVNULL).pid)"], goc_tam=_g, gioi_han=30)
+            _them("p637-A3c-con-chau-song-sau-khi-bo-thoat-la-do", "còn sống" in (_loi or "") and not _pid_song(int(_bi.split()[0])))
+            _rc, _bi, _loi = _chay_co_lap([sys.executable, "-c", "import subprocess as s,sys;print(s.Popen([sys.executable,'-c','import time;time.sleep(60)'],start_new_session=True,stdout=s.DEVNULL,stderr=s.DEVNULL).pid)"], goc_tam=_g, gioi_han=30)
+            _them("p637-A3c-chau-setsid-thoat-nhom-van-bi-bat", "còn sống" in (_loi or "") and not _pid_song(int(_bi.split()[0])))
+            _rc, _bi, _loi = _chay_co_lap([sys.executable, "-c", "import time;time.sleep(60)"], goc_tam=_g, gioi_han="x")
+            _them("p637-A3c-loi-khac-het-gio-van-giet-va-cho", _rc == -signal.SIGKILL and "TypeError" in (_loi or "")
+                  and not any(pathlib.Path(_g).iterdir()))
+        _them("p637-A3c-ngoai-cay-khong-bi-dung", _ngoai.poll() is None)
+        _ngoai.kill(); _ngoai.wait()
+    _wf0 = yaml.safe_load(CI_WORKFLOW.read_text(encoding="utf-8"))
+    def _hong_wf(j, f):
+        w = json.loads(json.dumps(_wf0)); b = w["jobs"][j]["steps"]
+        f(b, next(i for i, x in enumerate(b) if G5_PROBE in str(x.get("run", ""))))
+        return bool(loi_g5_workflow(w))
+    _them("p637-A7-workflow-that-dat", not loi_g5_workflow(_wf0))
+    _them("p637-A7-bo-probe", _hong_wf("gate-registry", lambda b, i: b.pop(i)))
+    _them("p637-A7-probe-co-if", _hong_wf("gate-packet-loop", lambda b, i: b[i].update({"if": "always()"})))
+    _them("p637-A7-probe-sau-buoc-nang", _hong_wf("gate-registry", lambda b, i: b.append(b.pop(i))))
+    _them("p637-A7-nhan-doi-selftest", _hong_wf("gate-packet-loop", lambda b, i: b.insert(i, {"run": G5_SELFTEST})))
+    _them("p637-A7-probe-bi-comment", _hong_wf("gate-registry", lambda b, i: b[i].update(run="# " + b[i]["run"])))
+    _them("p637-A7-hai-selftest-mot-run", _hong_wf("gate", lambda b, i: b[i].update(run=b[i]["run"] + "\n" + G5_SELFTEST)))
+    _them("p637-A7-nang-truoc-probe-cung-run", _hong_wf("gate-registry", lambda b, i: b[i].update(
+        run="python .claude/dev/ci_dang_ky_test.py --chay\n" + b[i]["run"])))
+    _them("p637-A7-comment-truoc-probe-khong-la-nang", not _hong_wf("gate-registry", lambda b, i: b[i].update(run="# x\n" + b[i]["run"])))
+    for _i, _r in enumerate(("python -m ops.cong_cu_test", "python ops//cong_cu_test.py", "cd ops && python cong_cu_test.py")):
+        _them(f"p637-A7-goi-tuong-duong-{_i}", _hong_wf("gate-registry", lambda b, i: b.insert(i + 1, {"run": _r})))
+    _them("p637-A7-thieu-job", bool(loi_g5_workflow({"jobs": {k: v for k, v in _wf0["jobs"].items() if k != "gate-packet-loop"}})))
+    _them("p637-A7-selftest-trong-echo", _hong_wf("gate", lambda b, i: b[i].update(run=b[i]["run"].replace(G5_SELFTEST, f"echo '{G5_SELFTEST}'"))))
+    _them("p637-A7-probe-trong-heredoc", _hong_wf("gate-registry", lambda b, i: b[i].update(run=f"cat <<'EOF'\n{G5_PROBE}\nEOF\n")))
+    _them("p637-A7-nang-doi-ten-cai-truoc-probe", _hong_wf("gate-registry", lambda b, i: b.insert(i, {"name": "cài registry", "run": "python .claude/dev/ci_dang_ky_test.py --chay"})))
+    _them("p637-A7-uses-truoc-probe", _hong_wf("gate-registry", lambda b, i: b.insert(i, {"uses": "docker://python:3.12", "with": {"args": "scripts/tl.py --selftest"}})))
+    _them("p637-A7-probe-continue-on-error", _hong_wf("gate-registry", lambda b, i: b[i].update({"continue-on-error": True})))
+    _them("p637-A7-job-continue-on-error", bool(loi_g5_workflow({"jobs": {**_wf0["jobs"], "gate": {**_wf0["jobs"]["gate"], "continue-on-error": True}}})))
+    _them("p637-A7-nhan-doi-selftest-trong-gate", _hong_wf("gate", lambda b, i: b.insert(i + 1, {"run": G5_SELFTEST})))
+    _them("p637-A8-khong-ung-vien", chon_so_worker({1: 100, 2: 101, 4: 102}) is None)
+    _them("p637-A8-dung-bien", chon_so_worker({1: 200, 2: 110, 4: 100}) == 2)
+    _them("p637-A8-vuot-bien", chon_so_worker({1: 200, 2: 110.5, 4: 100}) == 4)
+    _them("p637-A8-trung-vi-khong-phai-trung-binh", chon_so_worker({1: [300, 100, 200], 2: [90, 500, 80], 4: [95, 95, 1]}) == 2)
     # Bang ten KHONG con ton tai: 47 ten cu tung nam o day, cach cho sinh ket qua hang tram dong —
     # chinh nguon lech F02 to cao. Nay ten VA ket qua o CUNG mot `_them`, khong con `zip` de cat im.
     for ten, ok in KQ:
@@ -1273,6 +1542,12 @@ def main():
     ap.add_argument("--chay", action="store_true")
     ap.add_argument("--mutant", choices=("windows_311_launcher_workflow",))
     ns = ap.parse_args()
+    if ns.chay:  # A4: N sai ⇒ ĐỎ TRƯỚC khi chạy bộ nào
+        try:
+            so_worker = doc_so_worker()
+        except ValueError as e:
+            print("ĐỎ:", e); print("TỔNG: ĐỎ")
+            return 2
     if ns.mutant:
         killed = giet_windows_311_launcher_workflow(LAUNCHER_WORKFLOW.read_text(encoding="utf-8"))
         print(f"MUTANT {ns.mutant}: {'GIẾT' if killed else 'SỐNG'}")
@@ -1282,13 +1557,20 @@ def main():
     ruff_loi, ruff_chot = loi_ruff_ci()
     loi += launcher_loi
     loi += ruff_loi
+    loi += ["G5 (M6): " + x for x in loi_g5_workflow(yaml.safe_load(CI_WORKFLOW.read_text(encoding="utf-8")))]
     for x in loi: print("ĐỎ:", x)
     print(f"ĐĂNG KÝ: {tren_cay}/{trong_so}")
     print(f"TRẠNG THÁI: chan={trong_so - len(CACH_LY)} cach_ly={len(CACH_LY)}")
     print(f"LAUNCHER WINDOWS: {launcher_chot - len(launcher_loi)}/{launcher_chot} hợp đồng")
     print(f"RUFF CI: {ruff_chot - len(ruff_loi)}/{ruff_chot} hợp đồng")
     ok = not loi and tren_cay == trong_so and phan_chung()
-    if ns.chay: ok = chay_moi() == 0 and ok
+    if ns.chay:
+        bc = {}
+        ok = chay_moi(so_worker=so_worker, bao_cao=bc) == 0 and ok
+        print("CI_DANG_KY_THOI_GIAN " + json.dumps(bc, ensure_ascii=False))
+        loi_js = loi_json_thoi_gian(bc)
+        for x in loi_js: print("ĐỎ: JSON thời gian:", x)
+        ok = ok and not loi_js
     print("TỔNG:", "ĐẠT" if ok else "ĐỎ")
     return 0 if ok else 1
 

@@ -18,8 +18,10 @@ spec_bookkeeping: r5 (sha256 4d02e418457cac58404475353ec682cfa4379781ca26ab49135
 lease_ghi_bien_nhan_ghi_chu: >-
   g4 (r3 + chi thi 5820263820): ban dau — verdict LF 598 B, receipt lan dau. g5 (r3 + uy quyen 5820541861): sua
   verdict thanh nguyen byte 609 B, folded YAML, anchor/readback/attribution. g6 (spec r4 DA DONG BANG, write set
-  3 duong nam tron trong spec): hang README + truong nay. Ca ba neo chi thi chu kho; lich su commit giu nguyen
-  (thread 4099876847).
+  3 duong nam tron trong spec): hang README + truong nay. g7 (spec r5, quyet dinh chu kho 5825489539, uy quyen
+  5825376799): assurance_target_packet human_audited, tach ket_qua_review_app, lich_su_ban_ung_vien sinh bang lenh
+  git log --reverse; sua P3 cua reviewer cung provider (ghi chu g7 + pending A12). Ca bon neo chi thi chu kho; lich
+  su commit giu nguyen (thread 4099876847).
 lease_reviewer: KHONG_CO — reviewer là GitHub App `chatgpt-codex-connector[bot]`, không có lease reviewer;
   lượt gọi là issue comment `@codex review` của executor (pull/617#issuecomment-5818827449)
 reviewed_sha: 5e2851881e810b39ebee6884371e5b3e229a01d7
@@ -340,7 +342,10 @@ land:
 pending:
 - nợ bookkeeping CHANGELOG r376 + RELEASE_MANIFEST (khuyết tật spec r3 M4)
 - khuyết tật spec r3 Q2 (đếm 109 receipt codex_cli, không 14) — ghi ở pull/616 thread 4096922503
-- write set biên nhận này ngoài spec r3 §4 (A12) — hợp thức bằng chỉ thị 5820263820, không bằng revision
+no_da_dong:
+- >-
+  write set bien nhan nay ngoai spec r3 §4 (A12): da dong bang revision — spec r4/r5 §3 chua dung 3 duong write set
+  (write_set_hash 021c0f52...); truoc do hop thuc bang chi thi 5820263820.
 lich_su_ban_ung_vien:
   ghi_chu: >-
     Receipt CHUA duoc giao (chua o master). Danh sach = cac ban UNG VIEN truoc commit nay, cu -> moi, sinh tu
@@ -355,3 +360,4 @@ lich_su_ban_ung_vien:
   - {commit: 7885c230b303a82da383f3a288eff2b7b8c30a6e, luc: '2026-09-25T01:19:21+00:00', receipt_sha256: b63dec976d1145e5509dd2da0b688e2ce41d0f34c359711d55ea9aa1bab59073}
   - {commit: ab691999a3566c32552cfd5649b442c0053e1e43, luc: '2026-09-25T01:27:56+00:00', receipt_sha256: 3da9a32d4cabf4bad677d2af5d66a967856910d1e5bc4d2b604f1a0dbddde842}
   - {commit: 45de8954878519d0886942e45c149790aadea710, luc: '2026-09-25T01:45:36+00:00', receipt_sha256: f0a97f57c5159cf5c00f620a90de9e57e849791f07693a589b06cd471f2bc45d}
+  - {commit: 9b35593150d834308d13765bb33cc6fd753ed6c6, luc: '2026-09-25T02:13:19+00:00', receipt_sha256: 75504ae0f7b0ff2f2f86179b3fd9d6d4deb4a9d6a77feb2a6fa1ce5f858d5a2c}

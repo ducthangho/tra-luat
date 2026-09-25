@@ -630,18 +630,22 @@ def _liet_ke_py(goc: Path):
                         % (pc.returncode, pc.stderr.decode("utf-8", "replace").strip()[:200]))
         except (OSError, subprocess.SubprocessError) as e:
             return [], f"git-hong: {type(e).__name__}: {e}"
-    # N95 — mục mà đường đi tới nó có một SYMLINK bất kỳ (chính tệp hay một thư mục cha trong cây)
-    # mang chế độ `120000`, cùng hình dạng với đường git, để `_doc_noi_dung` fail-close.
-    goc_that = os.path.realpath(goc)
-
-    def _che_do(x):
-        tuong_doi = x.relative_to(goc)
-        la_lien_ket = os.path.realpath(x) != os.path.join(goc_that, *tuong_doi.parts)
-        return "120000" if la_lien_ket else None
-
-    return sorted((x.relative_to(goc).as_posix(), _che_do(x), None)
-                  for x in goc.rglob("*")
-                  if x.is_file() and _la_nguon_py(x.name)), "rglob"
+    # N100 (r27, quyết định chủ kho — lớp SYMLINK lần thứ ba) — MỌI symlink tên nguồn Python, kể cả
+    # TREO (`is_file()` đi theo liên kết nên bản r26 bỏ mất `broken.py`), và MỌI symlink trỏ tới THƯ
+    # MỤC (đo được: `rglob` của 3.11 lẫn 3.12 KHÔNG đi vào thư mục symlink, nên các tệp `.py` bên dưới
+    # bị bỏ qua IM LẶNG) đều mang `120000` ⇒ fail-close. Một mục chỉ cần LÀ symlink là đủ, không hỏi
+    # đích có tồn tại không.
+    ra = []
+    for x in goc.rglob("*"):
+        if x.is_symlink():
+            if _la_nguon_py(x.name) or x.is_dir():
+                ra.append((x.relative_to(goc).as_posix(), "120000", None))
+        elif x.is_file() and _la_nguon_py(x.name):
+            # Thư mục CHA không thể là symlink: `rglob` không đi vào thư mục symlink (đo được), và
+            # chính thư mục symlink đã mang `120000` ở trên. Phép dò cha của N95 đã gỡ ở r27 — mã
+            # không đường nào đi tới (đột biến neo vào nó sống sót mà không đo gì).
+            ra.append((x.relative_to(goc).as_posix(), None, None))
+    return sorted(ra), "rglob"
 
 
 def _so_cho_phep(muc):
@@ -1112,7 +1116,16 @@ def _trung_doi_so(nut, vt, khoa):
         khoa = (khoa,)
     if len(nut.args) <= vt or any(isinstance(a, ast.Starred) for a in nut.args[:vt + 1]):
         return False
-    return any(k.arg in khoa for k in nut.keywords)
+    # N96b (r27, codex vòng 21) — từ khoá đến qua `**{…}` là một dict LITERAL thì khoá của nó biết
+    # được: `run(["bash"], **{"args": ["sh"]})` cũng ném `TypeError`. `**x` không phải literal thì
+    # không biết — không kết luận.
+    for k in nut.keywords:
+        if k.arg in khoa:
+            return True
+        if k.arg is None and isinstance(k.value, ast.Dict) and any(
+                isinstance(kk, ast.Constant) and kk.value in khoa for kk in k.value.keys):
+            return True
+    return False
 
 
 def _doi_so_dau(nut, khoa):
@@ -1287,6 +1300,10 @@ def _loi_goi_tran(than: str, sau=0):
         TRƯỚC khi phóng ⇒ KHÔNG báo; N97: tải `eval` có CÂU LỆNH thì `eval` không chạy được ⇒ KHÔNG
         báo; N98: chú thích LƯU dưới `from __future__ import annotations` giải theo HỢP phạm vi từ
         vựng và globals của module (`get_type_hints` tính nó trong globals);
+      · N99 (r27): CHUỖI trong chú thích ĐƯỢC LƯU (tham số, trả về, biến module/thân lớp — có hay không
+        `__future__`) là tham chiếu tới mà `get_type_hints` TÍNH: phân tích được như biểu thức thì quét
+        (luật HỢP của N98), báo tại vị trí chuỗi; N96b: tham số trùng qua `**{…}` literal cũng là
+        `TypeError`; N97b: tải `eval` bỏ khoảng trắng đầu như chính `eval`;
       · `type X[T] = …` (PEP 695) có phạm vi chú thích RIÊNG (N47, r16): `T` của nó không rò
         ra phạm vi chứa;
       · callee giải theo PHẠM VI TỪ VỰNG (r8, F3 codex vòng 3): `import subprocess` ở module
@@ -1350,9 +1367,13 @@ def _loi_goi_tran(than: str, sau=0):
             if _loi_goi_tran(dau + van, sau + 1):
                 ghi_exec.append((goi.lineno, goi.col_offset))
     ung_vien = [n for n in ast.walk(cay) if isinstance(n, ast.Call) and _mang_hang_bash(n)]
-    if not ung_vien:
+    if not ung_vien and not _co_chuoi_trong_chu_thich(cay):
         return sorted(set(ghi_exec))
-    tra_theo_nut = {id(n): tra for n, tra in _giai_callee_theo_pham_vi(cay)}
+    cap = _giai_callee_theo_pham_vi(cay)
+    tra_theo_nut = {id(n): tra for n, tra, _ in cap}
+    # N99 — lời gọi nằm TRONG một chú thích chuỗi không thuộc cây của tệp; báo tại vị trí chuỗi.
+    vi_tri_cua = {id(n): vt for n, _, vt in cap if vt is not None}
+    ung_vien += [n for n, _, vt in cap if vt is not None and _mang_hang_bash(n)]
     ban_ghi = []
     for nut in ung_vien:
         tra_ten = tra_theo_nut[id(nut)]
@@ -1400,7 +1421,7 @@ def _loi_goi_tran(than: str, sau=0):
                 # `argv[0]` trang trí. Một lời gọi là MỘT bản ghi dù cả hai cùng tên `bash`.
                 dinh = _la_ten_bash(exe, tra_ten)
         if dinh:
-            ban_ghi.append((nut.lineno, nut.col_offset))
+            ban_ghi.append(vi_tri_cua.get(id(nut)) or (nut.lineno, nut.col_offset))
     # MỘT BẢN GHI CHO MỖI `ast.Call`, không phải cho mỗi DÒNG. Tập dòng cũ gộp hai lời gọi
     # trên cùng một dòng thành một — đo được: `(which("bash"), which("bash"))` ra `[2]`.
     return sorted(set(ban_ghi) | set(ghi_exec))
@@ -1507,7 +1528,7 @@ def _module_dong(goi, tra_ten=None):
         if van is None:
             return None
         try:
-            than = ast.parse(van, mode="eval").body
+            than = ast.parse(van.lstrip(" \t"), mode="eval").body       # N97b: như `eval`
         except (SyntaxError, ValueError):
             return None                    # tải hỏng thì `eval` ném — không trả module nào
         if isinstance(than, ast.Call):
@@ -1687,6 +1708,11 @@ def _tai_exec(cay):
         van = _tai_hang(n)
         if van is None:
             continue
+        if kieu == "eval":
+            # N97b (r27, codex vòng 21) — `eval` dạng chuỗi BỎ khoảng trắng và tab ĐẦU trước khi phân
+            # tích (`builtin_eval`); `ast.parse(…, mode="eval")` thì không, nên `eval("  __import__(…)
+            # …")` chạy bash thật mà cổng ném `unexpected indent`. Chuẩn hoá y như `eval`.
+            van = van.lstrip(" \t")
         try:
             ast.parse(van, mode=kieu)
         except (SyntaxError, ValueError) as e:
@@ -2048,8 +2074,33 @@ def _bang_pham_vi_ca_cay(cay, sau=0):
     return {i: tuple(bang[i]) for i in thu_tu}
 
 
+def _co_chuoi_trong_chu_thich(cay):
+    """Tệp có chuỗi hằng mang dấu `(` nằm trong một CHÚ THÍCH không — bộ lọc RẺ cho N99 (r27).
+
+    Một tham chiếu tới thông thường (`"Path"`, `"list[int]"`) không có lời gọi nào; chuỗi có `(`
+    mới có thể là một lời gọi mà `get_type_hints` sẽ chạy. Cố ý RỘNG hơn luật thật (tính cả chú
+    thích cục bộ không được lưu): sai chiều rộng chỉ tốn một lượt giải tên thừa.
+    """
+    for n in ast.walk(cay):
+        cac = []
+        if isinstance(n, (ast.FunctionDef, ast.AsyncFunctionDef)):
+            a = n.args
+            cac = [x.annotation for x in (*a.posonlyargs, *a.args, *a.kwonlyargs, a.vararg, a.kwarg)
+                   if x is not None and x.annotation is not None]
+            if n.returns is not None:
+                cac.append(n.returns)
+        elif isinstance(n, ast.AnnAssign):
+            cac = [n.annotation]
+        for ct in cac:
+            if any(isinstance(x, ast.Constant) and isinstance(x.value, str) and "(" in x.value
+                   for x in ast.walk(ct)):
+                return True
+    return False
+
+
 def _giai_callee_theo_pham_vi(cay):
-    """[(nút `Call`, hàm tra tên)] cho MỌI lời gọi trong cây; hàm tra tên trả
+    """[(nút `Call`, hàm tra tên, vị trí báo | None)] cho MỌI lời gọi trong cây — và, từ N99, cho
+    lời gọi trong CHÚ THÍCH CHUỖI được lưu (vị trí báo là vị trí chuỗi); hàm tra tên trả
     `(module, hàm|None)` hay None, theo đúng phạm vi từ vựng CHỨA lời gọi ấy.
 
     N37 (r13) — MÓN NỢ ẤY ĐÃ ĐẾN HẠN. Bản r12 khai thẳng chỗ bỏ qua: *"decorator / giá trị mặc
@@ -2142,7 +2193,7 @@ def _giai_callee_theo_pham_vi(cay):
         """
         for n in ast.walk(nut):
             if isinstance(n, ast.Call):
-                ket.append((n, None))
+                ket.append((n, None, None))
 
     def tham(goc_tham, chuoi_goc):
         """Thăm MỘT nút và mọi nút con. Nút phạm vi được xử lý TẠI ĐÂY chứ không phải ở vòng lặp
@@ -2162,35 +2213,57 @@ def _giai_callee_theo_pham_vi(cay):
         # cổng trả `[]`. Lớp chú thích lặp lần thứ tư (N68 → N73 → N77); chủ kho chọn "giải HỢP hai
         # phạm vi": nút mang cờ `hop` được giải theo CẢ chuỗi từ vựng LẪN riêng phạm vi module, có
         # `import` ở bên nào ⇒ báo (tinh thần N76 "có thể").
-        chong = [(goc_tham, chuoi_goc, False)]
+        # N99 (r27, quyết định chủ kho — lớp chú thích lần thứ năm) — cờ `luu`: nút nằm trong một chú
+        # thích ĐƯỢC LƯU (tham số, trả về, biến module/thân lớp — dù có `__future__` hay không). Một
+        # CHUỖI HẰNG ở đó là tham chiếu tới mà `get_type_hints` sẽ TÍNH trong globals: đo được, `def
+        # f(x: "subprocess.run([…bash…])")` phóng bash thật mà r26 trả `[]`. Chuỗi phân tích được như
+        # một biểu thức thì được quét — với cờ `hop` (N98) — và lời gọi bash trong nó báo TẠI VỊ TRÍ
+        # chuỗi; không phân tích được thì bỏ qua (chú thích chữ tự do là hợp lệ, `get_type_hints` ném).
+        chong = [(goc_tham, chuoi_goc, False, False, None, 0)]
         while chong:
-            con, chuoi, hop = chong.pop()
+            con, chuoi, hop, luu, vt, sau_chuoi = chong.pop()
             if isinstance(con, ast.AnnAssign) and (
                     (len(chuoi) > 1 and not chuoi[-1][0])
                     or (hoan_chu_thich and not con.simple)):
                 # N73 (r20): chú thích biến CỤC BỘ trong hàm — không bao giờ tính, không được lưu.
                 # N77 (r21): đích không đơn khi có `__future__` — không tính, không lưu.
                 khong_chay(con.annotation)
-                chong.extend((x, chuoi, hop) for x in (con.target, con.value) if x is not None)
+                chong.extend((x, chuoi, hop, luu, vt, sau_chuoi)
+                             for x in (con.target, con.value) if x is not None)
                 continue
-            if isinstance(con, ast.AnnAssign) and hoan_chu_thich:
-                # N98: chú thích biến ĐƯỢC LƯU (module / thân lớp) dưới `__future__`.
-                chong.append((con.annotation, chuoi, True))
-                chong.extend((x, chuoi, hop) for x in (con.target, con.value) if x is not None)
+            if isinstance(con, ast.AnnAssign):
+                # N98/N99: chú thích biến ĐƯỢC LƯU (module / thân lớp).
+                chong.append((con.annotation, chuoi, hop or hoan_chu_thich, con.simple, vt,
+                              sau_chuoi))
+                chong.extend((x, chuoi, hop, luu, vt, sau_chuoi)
+                             for x in (con.target, con.value) if x is not None)
+                continue
+            if luu and isinstance(con, ast.Constant) and isinstance(con.value, str) \
+                    and len(con.value) <= _TRAN_EXEC:
+                try:
+                    than_chuoi = ast.parse(con.value, mode="eval").body
+                except (SyntaxError, ValueError):
+                    than_chuoi = None
+                if than_chuoi is not None:
+                    if sau_chuoi >= _SAU_EXEC:
+                        raise _VuotNganSach(f"chú thích chuỗi lồng quá {_SAU_EXEC} tầng")
+                    chong.append((than_chuoi, chuoi, True, True,
+                                  vt or (con.lineno, con.col_offset), sau_chuoi + 1))
                 continue
             if isinstance(con, _NUT_PHAM_VI):
                 ngoai, trong = _ngoai_va_trong(con)
                 chuoi_trong = chuoi + [pham_vi(con)]
-                luu = set()
-                if hoan_chu_thich and isinstance(con, (ast.FunctionDef, ast.AsyncFunctionDef)):
+                luu_ct = set()
+                if isinstance(con, (ast.FunctionDef, ast.AsyncFunctionDef)):
                     a_ = con.args
-                    luu = {id(x.annotation) for x in (*a_.posonlyargs, *a_.args, *a_.kwonlyargs,
-                                                      a_.vararg, a_.kwarg)
-                           if x is not None and x.annotation is not None}
+                    luu_ct = {id(x.annotation) for x in (*a_.posonlyargs, *a_.args,
+                                                         *a_.kwonlyargs, a_.vararg, a_.kwarg)
+                              if x is not None and x.annotation is not None}
                     if con.returns is not None:
-                        luu.add(id(con.returns))
-                chong.extend((x, chuoi, hop or id(x) in luu) for x in ngoai)
-                chong.extend((x, chuoi_trong, hop) for x in trong)
+                        luu_ct.add(id(con.returns))
+                chong.extend((x, chuoi, hop or (hoan_chu_thich and id(x) in luu_ct),
+                              luu or id(x) in luu_ct, vt, sau_chuoi) for x in ngoai)
+                chong.extend((x, chuoi_trong, hop, luu, vt, sau_chuoi) for x in trong)
                 continue
             if isinstance(con, ast.Call):
                 # `hoi_rang_buoc=True` (N58, r18): hỏi "tên này có ràng buộc nào trong chuỗi phạm
@@ -2200,11 +2273,11 @@ def _giai_callee_theo_pham_vi(cay):
                     ket.append((con, lambda ten, hoi_rang_buoc=False, c=chuoi:
                                 (_co_rang_buoc(ten, c) and _co_rang_buoc(ten, c[:1]))
                                 if hoi_rang_buoc else
-                                (_giai_ten(ten, c) or _giai_ten(ten, c[:1]))))
+                                (_giai_ten(ten, c) or _giai_ten(ten, c[:1])), vt))
                 else:
                     ket.append((con, lambda ten, hoi_rang_buoc=False, c=chuoi:
-                                _co_rang_buoc(ten, c) if hoi_rang_buoc else _giai_ten(ten, c)))
-            chong.extend((x, chuoi, hop) for x in ast.iter_child_nodes(con))
+                                _co_rang_buoc(ten, c) if hoi_rang_buoc else _giai_ten(ten, c), vt))
+            chong.extend((x, chuoi, hop, luu, vt, sau_chuoi) for x in ast.iter_child_nodes(con))
 
     for _con in ast.iter_child_nodes(cay):
         tham(_con, [pham_vi(cay)])

@@ -471,7 +471,7 @@ no_da_dong:
 lich_su_ban_ung_vien:
   ghi_chu: >-
     Receipt CHUA duoc giao (chua o master). Danh sach = cac ban UNG VIEN truoc commit nay, cu -> moi, sinh tu
-    `git log --reverse --format=%H 541fa6ca9ba78d2669261b528572dbc05b53ea87..155bbaa47e6936a81e16537e44e8a9b0c8e8fa60 -- ops/reviews/wp461-review-1-codex-verdict.receipt.yaml` (DIEM CUOI GHIM = ban ung vien lien truoc ban nay; ban sua sau PHAI chu dong doi diem cuoi, khong dung HEAD^; Codex 4101132071) + sha256 cua
+    `git log --reverse --format=%H 541fa6ca9ba78d2669261b528572dbc05b53ea87..c026693d3b0cec663e09f02a5cd195e92d26bb60 -- ops/reviews/wp461-review-1-codex-verdict.receipt.yaml` (DIEM CUOI GHIM = ban ung vien lien truoc ban nay; ban sua sau PHAI chu dong doi diem cuoi, khong dung HEAD^; Codex 4101132071) + sha256 cua
     `git show <commit>:ops/reviews/wp461-review-1-codex-verdict.receipt.yaml`; ban hien tai khong co mat (tu tham chieu). Thread 4100299339.
   cac_ban:
   - {commit: 78d9b74fc059d93bdb7ecb172427d5a78647c0b6, luc: '2026-09-24T19:01:28+00:00', receipt_sha256: 77e751e3cf60e6b1c499e133213988e603eb00da76a43efab7702721fea48fed}
@@ -486,3 +486,5 @@ lich_su_ban_ung_vien:
   - {commit: 2dbc3c6705dfe41bc4cd663dde32d3280f520d0b, luc: '2026-09-25T02:52:20+00:00', receipt_sha256: 73cf7a24ba73eddbdefaf4362f6c4fd4e6adc8e4b8221454610ac95a121ac5ee}
   - {commit: 25fa89befd393ad09785bd6b0dd8143657d46fd3, luc: '2026-09-25T03:04:31+00:00', receipt_sha256: 3757046fd0aff1190f50191f271020838c7bbc429bed1b0b45debbaf49e53e1d}
   - {commit: 155bbaa47e6936a81e16537e44e8a9b0c8e8fa60, luc: '2026-09-25T03:14:27+00:00', receipt_sha256: 1bb963b94eb19416f0365e5cd3c56137b2f01190b76d8a3aee570e90d855eac7}
+  - {commit: 0b10ad35298614ed4ef700f2c82af639029e88a1, luc: '2026-09-25T04:42:41+00:00', receipt_sha256: 85bd9e3fd0b9c623630a9486bfff47a557a70d00ac46c9bc3e7939ce24e421e8}
+  - {commit: c026693d3b0cec663e09f02a5cd195e92d26bb60, luc: '2026-09-25T04:46:18+00:00', receipt_sha256: ddd7ec7f6203a0680784f8b3c042bbe757a58c22c8fd516c447eb5a0397474c1}

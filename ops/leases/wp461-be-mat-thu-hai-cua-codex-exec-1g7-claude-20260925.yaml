@@ -1,0 +1,116 @@
+# LEASE — WP461 revision 5 / generation 7 — ho so bien nhan (bookkeeping), nhanh rieng theo generation
+# GHI HO theo quyet dinh chu kho issues/461#issuecomment-5825489539 (OWNER, 2026-09-25T02:05:39Z) + uy quyen chung
+# issues/461#issuecomment-5825376799. Phien claude KHONG tu cap: moi truong chep tu hai comment ay hoac do duoc.
+
+schema_version: 2
+event: executor_lease_granted
+
+packet_issue: 461
+packet_id: wp461
+packet_ten: WP461-BE-MAT-THU-HAI-CUA-CODEX
+mission_issue: 470
+revision: 5
+generation: 7
+lease_id: wp461-be-mat-thu-hai-cua-codex-exec-1g7-claude-20260925
+thay_the_cho:
+  - wp461-be-mat-thu-hai-cua-codex-exec-1g6-claude-20260925
+thay_the_cho_ghi_chu: >-
+  g6 (spec r4, het han 2026-09-25T02:16:23Z) con hieu luc luc ghi g7 => bia mo hai chieu trong tep g6 (cung commit).
+  g4/g5 het han, lich su. Quyet dinh chu kho 5825489539 dong PR #624/#625/#627/#628/#630 khi PR g7 land.
+role: executor
+provider: anthropic_claude
+execution_surface: claude_code
+transport: machine/local
+executor: claude
+model: claude-opus-5-5
+effort: medium
+reviewer_provider: openai_codex
+reviewer_model_yeu_cau: gpt-6-sol
+reviewer_effort_yeu_cau: medium
+reviewer_ghi_chu: qua GitHub App khong chon/khong do duoc model/effort/session => KHONG_DO_DUOC.
+environment: cloud
+access: read-write
+risk: sensitive
+review_class: sensitive
+effective_review_class: sensitive
+assurance_target: human_audited
+assurance_ghi_chu: >-
+  Chu kho audit exact head cuoi truoc khi land (quyet dinh 5825489539). Ket qua luot review App ghi rieng
+  (ket_qua_review_app: advisory_review); receipt lich su giu advisory_review trung thuc.
+
+spec_path: ops/specs/wp461-be-mat-thu-hai-cua-codex-r5.md
+spec_ref: refs/heads/ops/cap-lease-461-g7
+spec_source_oid: 61f5d3612474289174e929dc9c3d7d99141ce2a4
+spec_sha256: 4d02e418457cac58404475353ec682cfa4379781ca26ab491354df7c2ddcaa49
+spec_hash: 4d02e418457cac58404475353ec682cfa4379781ca26ab491354df7c2ddcaa49
+spec_hash_formula: SHA256 of UTF-8 LF Git blob bytes at spec_source_oid:spec_path
+spec_ban: r5
+spec_hash_ban_truoc: eda1dd127d9595bcd19219b8113451939558ed7b39fffd3e5b317816a1dfb056
+prompt_path: ops/specs/wp461-be-mat-thu-hai-cua-codex-r5.md
+prompt_sha256_required: 4d02e418457cac58404475353ec682cfa4379781ca26ab491354df7c2ddcaa49
+
+write_set:
+  - ops/reviews/README.md
+  - ops/reviews/wp461-review-1-codex-verdict.md
+  - ops/reviews/wp461-review-1-codex-verdict.receipt.yaml
+write_set_hash: 021c0f52957836d5c7ea66de4bb3b1a5a48d3b25fcaff95c69b88eec61faaed8
+write_set_hash_cach_tinh: sha256 cac duong dan da sap xep, noi LF, LF cuoi, utf-8 (nhu g2..g6); bang write set spec r4/r5 §3.
+
+branch: agent/wp461-g7-claude
+branch_ownership: exclusive
+target_branch_neu_land: master
+immutable_acceptance_baseline: 541fa6ca9ba78d2669261b528572dbc05b53ea87
+base_sha: 541fa6ca9ba78d2669261b528572dbc05b53ea87
+start_from_sha: 45de8954878519d0886942e45c149790aadea710
+continuation_base: 45de8954878519d0886942e45c149790aadea710
+master_luc_ghi: 601a0f18c83057fa079d204122660f5697fc6389
+reviewed_sha_required: 45de8954878519d0886942e45c149790aadea710
+reviewed_sha_required_nghia: >-
+  Head ung vien dung luc ghi (head PR #625). Moi push moi tren agent/wp461-g7-claude lam review cu het hieu luc; verdict
+  phai neo exact head THAT cua PR g7 (40 hex).
+bien_nhan_reviewed_sha_bat_buoc: 5e2851881e810b39ebee6884371e5b3e229a01d7
+
+granted_by: ducthangho
+granted_on_instruction: https://github.com/ducthangho/tra-luat/issues/461#issuecomment-5825489539
+uy_quyen_chung: https://github.com/ducthangho/tra-luat/issues/461#issuecomment-5825376799
+granted_on_instruction_da_doc_nguoc: >-
+  Doc lai qua API 2026-09-25T02:08:31Z: 5825489539 (OWNER, 2026-09-25T02:05:39Z) va 5825376799 (OWNER, 2026-09-25T01:52:07Z), issue 461.
+  Noi dung do phien nay soan, chu kho dan.
+authority_basis: '§2 + §12 Review Rescue Checkpoint (quyet dinh chu kho)'
+recorded_by: claude-session
+recorder_is_dispatcher: false
+
+leased_at_utc: '2026-09-25T02:08:31Z'
+lease_expires_at_utc: '2026-09-25T03:38:31Z'
+heartbeat_at: '2026-09-25T02:08:31Z'
+lease_until: '2026-09-25T03:38:31Z'
+run_minutes: 90
+heartbeat_required_minutes: 30
+attempts_used: 1
+attempts_limit: 6
+attempts_ghi_chu: >-
+  Theo quyet dinh 5825489539: g3 (run san pham) = 1; g4, g5, g6 VOID khoi tran; attempts_limit bookkeeping = 6.
+tran_codex: >-
+  Uy quyen chung 5825376799: toi da 6 luot moi lan nang; luot App tu ban khi bo draft cung dem; dem ghi trong
+  receipt/PR, khong dua vao ten nhanh.
+
+dieu_kien_dung:
+  - 'S1 — cham duong ngoai BA duong. DUNG.'
+  - 'S2 — tep san pham trong diff. DUNG.'
+  - 'S3 — sua spec r4/r5, verdict/receipt/lease DA GIAO (tren master). DUNG.'
+  - 'S4 — bien_nhan_v2 / lease_publish_test / bien-nhan do (rc truc tiep) => khong push.'
+  - 'S5 — surface codex_service; S20 ca do tren ban sao roi.'
+  - 'S6 — scalar YAML co " #" phai folded/quoted; moi OID du 40 hex; assert sau parse.'
+  - 'S7 — write set khong giao lease song (do ai-dang-giu truoc khi ghi).'
+  - 'S8 — commit tong hop reviewer tu dung => KHONG DO DUOC.'
+  - 'S9 — HET HAN => ngung ghi, handoff §7, generation moi neo 5825489539/5825376799.'
+
+cam_tuyet_doi:
+  - Khong sua hien vat da giao; khong alias; khong mien tru moi
+  - Khong tu review / approve / merge / land; land chi merge commit
+  - Khong CI tay, khong Windows, khong LIVE/deploy
+
+chua_do_duoc:
+  - 'Danh tinh nguoi ky: #566.'
+  - 'Serving model/effort/session cua reviewer qua App: KHONG DO DUOC.'
+  - 'git diff --check bao trailing whitespace tren tep verdict raw — chinh sach hep r4/r5 §4; .gitattributes de xuat, ngoai write set.'

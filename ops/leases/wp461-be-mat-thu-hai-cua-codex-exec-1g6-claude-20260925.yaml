@@ -142,3 +142,7 @@ chua_do_duoc:
   - 'Danh tinh nguoi ky: #566.'
   - 'Serving model/effort/session cua reviewer qua App: KHONG DO DUOC.'
   - 'git diff --check bao trailing whitespace tren tep verdict raw — r4 §4 khai day KHONG la cong cua packet (chinh sach hep cho tep verdict raw); khong cong CI nao chay diff --check. Co che .gitattributes (whitespace=-trailing-space cho *-codex-verdict.md) DA DO CHAY DUOC (rc 2 -> 0, hash khong doi) nhung ngoai write set r4 => de xuat cho chu kho, khong tu them.'
+
+da_bi_thay_the: wp461-be-mat-thu-hai-cua-codex-exec-1g7-claude-20260925
+da_bi_thay_the_luc: '2026-09-25T02:08:31Z'
+da_bi_thay_the_boi_ai: 'ducthangho — quyet dinh issues/461#issuecomment-5825489539; phien claude ghi ho (g6 con hieu luc toi 02:16:23Z)'

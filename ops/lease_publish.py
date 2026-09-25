@@ -789,7 +789,7 @@ def _kiem_neo_prompt(lease: dict, tep: Path, goc) -> str:
     return thuc
 
 
-def kiem(lease: dict, tep=None, goc=None) -> tuple:
+def kiem(lease: dict, tep=None, goc=None, bo_qua_han: bool = False) -> tuple:
     """Kiểm thuần và trả `(lease, băm prompt)`; ném `Chan` nếu không hợp lệ.
 
     Trả kèm cái băm chứ không trả mỗi lease, để dòng "prompt … khớp băm" mà `check`
@@ -888,7 +888,10 @@ def kiem(lease: dict, tep=None, goc=None) -> tuple:
         neo = _kiem_neo_prompt(lease, Path(tep), goc)
 
     han = _doc_han(lease["lease_expires_at_utc"])
-    if han <= datetime.now(timezone.utc):
+    # `bo_qua_han` bỏ ĐÚNG MỘT chốt — chốt HẠN, và chỉ nó (vẫn ĐỌC hạn để hạn hỏng dạng còn
+    # bị chặn). Người gọi DUY NHẤT: nhánh đã-có-dấu của `kiem_github`, nơi một lease đã đăng
+    # rồi mới hết hạn phải được `rc=9` (idempotent, `t174`) chứ không `rc=8`.
+    if not bo_qua_han and han <= datetime.now(timezone.utc):
         raise Chan(RC_NOI_DUNG,
                    f"lease đã hết hạn lúc {han.isoformat()} — đăng một lease chết thì "
                    f"người nhận tưởng có quyền mà không có")
@@ -1004,10 +1007,17 @@ def kiem_github(lease: dict, tep=None, goc=None) -> tuple:
     dạng ấy. Hai lượt `35519177197` (#568) và `35519243379` (#566) đỏ vì đúng chuyện này,
     cả hai đỏ SAU KHI lease mới đã đăng xong.
 
-    GIÁ PHẢI TRẢ, khai thẳng chứ không làm nhẹ (M4): với lease ĐÃ ĐĂNG, đường này trả `rc=9`
-    mà **KHÔNG** chạy `kiem()` nữa — nghĩa là các chốt tự cấp (`rc=4`), neo prompt (`rc=6`)
-    và băm không còn soi lease ấy trên đường này. Một tệp lease đã đăng rồi bị SỬA về sau sẽ
-    KHÔNG bị bắt ở đây. Đường ấy CŨNG bỏ `_kiem_loai_so_hieu` — chốt nằm NGOÀI `kiem()`, nên
+    GIÁ PHẢI TRẢ, khai thẳng chứ không làm nhẹ (M4) — và bản trước khai SAI hậu quả: với lease
+    ĐÃ ĐĂNG, đường này từng trả `rc=9` mà KHÔNG chạy `kiem()`, và câu cũ ở đây nói "một tệp
+    lease đã đăng rồi bị SỬA về sau sẽ KHÔNG bị bắt" như một đánh đổi chấp nhận được. Connector
+    codex (#589, 24-09) nối nó với `ai-dang-giu` và chỉ ra hậu quả thật: tệp đã sửa được tính là
+    người giữ mà chưa qua cổng thẩm quyền — P1. Nay nhánh đã-có-dấu chạy `kiem()` trên tệp HIỆN
+    TẠI, trừ đúng chốt hạn; tự cấp (`rc=4`), neo prompt (`rc=6`), trường thiếu/sai dạng
+    (`rc=8`) đều bị chặn TRƯỚC `rc=9`. `t190` đo từng vế.
+    GIÁ CÒN LẠI, KHÔNG ĐÓNG ở đây: một người CÓ thẩm quyền sửa một lease đã đăng (gia hạn,
+    nới `write_set`) thì tệp qua `kiem()` và vẫn `rc=9` — bản CHIẾU đã đăng không phản ánh nội
+    dung mới. Đó là thao tác của người có quyền, không phải lỗ thẩm quyền; nhưng bản chiếu cũ
+    đi là thật, và chưa có chốt nào so tệp với bản chiếu. Đường ấy CŨNG bỏ `_kiem_loai_so_hieu` — chốt nằm NGOÀI `kiem()`, nên
     câu trên chưa phủ nó (cross-review lượt 7): `packet_issue` trỏ vào một Pull Request mà đã
     có dấu bot thì trả `rc=9` thay vì `rc=8` (`RC_NOI_DUNG`). Reviewer lượt 7 đếm lời gọi thật: có dấu
     ⇒ `kiem` 0 lần, lời gọi loại số hiệu 0 lần, bất kể số hiệu là issue hay PR. Không tạo được
@@ -1024,7 +1034,21 @@ def kiem_github(lease: dict, tep=None, goc=None) -> tuple:
     phép đo (cross-review lượt 11 song song). Đổi một lời gọi API lấy việc giữ M3 đúng từng
     mã thoát. KHÔNG ĐO: chi phí ấy chưa được đo trên một issue nhiều trang comment.
     """
-    _do_dau_da_dang(lease)
+    try:
+        _do_dau_da_dang(lease)
+    except Chan as c:
+        if c.ma != RC_DA_DANG:
+            raise
+        # ĐÃ CÓ DẤU — nhưng dấu chỉ nói "lease MANG TÊN NÀY đã đăng", KHÔNG nói "tệp HIỆN TẠI
+        # là tệp đã đăng". Cross-review connector codex trên #589 (24-09, P1, đo lại): bản
+        # trước tôn trọng dấu NGAY, nên một lease đã đăng bị SỬA thành tự cấp (`rc=4`) hay
+        # neo prompt không kiểm được (`rc=6`) vẫn ra `rc=9` — workflow coi là bỏ qua thành
+        # công, và `ai-dang-giu` tính tệp đã sửa là người giữ. Trên master `kiem()` chạy
+        # trước nên không có lỗ này: đây là HỒI QUY của chính packet.
+        # Nên: tệp HIỆN TẠI phải qua MỌI chốt của `kiem()` TRỪ chốt hạn — miễn trừ HẸP đúng
+        # một điều kiện, vì hết hạn sau khi đăng là lý do packet này tồn tại (`t174`).
+        kiem(lease, tep, goc, bo_qua_han=True)
+        raise
     lease, neo = kiem(lease, tep, goc)
     repo = _repo_github()
     _kiem_loai_so_hieu(repo, lease["packet_issue"])

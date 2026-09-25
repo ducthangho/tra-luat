@@ -7453,7 +7453,9 @@ def t175_het_han_ma_KHONG_co_dau_thi_van_la_het_han():
     chỉ `t175` đỏ. Hai tập ca đỏ khác nhau là bằng chứng cặp này PHÂN BIỆT được hai lỗi.
     Phạm vi của câu trên là CẶP, không phải cả miền. Tập đỏ đầy đủ trên `t174`–`t184`, đo bằng
     công cụ công thức (bản sao, phân hạng bằng `TinHieuChotCa`, 24-09): dò sau `kiem()` ⇒
-    `{t174, t182}`; ném 9 vô điều kiện ⇒ `{t175, t177, t178, t179, t180, t181, t183, t184}`.
+    `{t174, t182}`; ném 9 vô điều kiện ⇒ `{t175, t177, t178, t179, t181, t183, t184}` (đo lại
+    25-09 sau bản vá P1 #589: `t180` rơi khỏi tập — bản 24-09 có nó; nguyên nhân CHƯA phân tích,
+    chỉ số đo là chắc).
     Dấu hiệu bộ TƯƠNG ĐƯƠNG là điều ngược lại: mọi đột biến đều làm CẢ HAI cùng đỏ (hoặc cùng xanh). (Bản trước viết
     ngược nghĩa câu này.)
 
@@ -7484,10 +7486,10 @@ def t176_con_han_ma_DA_co_dau_van_bo_qua_nhu_cu():
 def t177_con_han_KHONG_dau_thi_MOI_CHOT_cua_kiem_van_phai_chay():
     """A4 — đường KHÔNG-CÓ-DẤU không được đổi một mã thoát nào.
 
-    Đây là chốt đắt nhất của packet: dò dấu TRƯỚC nghĩa là với lease ĐÃ ĐĂNG, các chốt của
-    `kiem()` (tự cấp, neo prompt, trường bắt buộc) KHÔNG còn soi nó trên đường này — giá đã
-    khai trong docstring `kiem_github`. Cái giá ấy chỉ chấp nhận được nếu đường KHÔNG-CÓ-DẤU
-    vẫn chạy đủ chốt. Ca này đo đúng điều đó, bằng BỐN hình dạng: lease sạch (`RC_OK`) và BA
+    Đây là chốt đắt nhất của packet: dò dấu TRƯỚC thì đường KHÔNG-CÓ-DẤU phải chạy đủ chốt
+    của `kiem()` như master. (Bản trước khai thêm: "với lease ĐÃ ĐĂNG, các chốt của `kiem()`
+    KHÔNG còn soi nó trên đường này" — đúng với mã khi ấy, và chính là lỗ P1 connector codex
+    bắt trên #589; nay đường ĐÃ-CÓ-DẤU cũng chạy `kiem()` trừ chốt hạn, `t190` đo.) Ca này đo đúng điều đó, bằng BỐN hình dạng: lease sạch (`RC_OK`) và BA
     ca tiêm cho BA mã thoát KHÁC NHAU (`RC_TU_CAP`, `RC_NEO`, `RC_NOI_DUNG`).
 
     ĐỘT BIẾN LÀM CA NÀY ĐỎ: cho phép dò ném `Chan(RC_DA_DANG)` cả khi đã dò XONG mà KHÔNG thấy
@@ -7691,6 +7693,25 @@ def t179_do_dau_KHONG_DO_DUOC_thi_nhuong_lai_cho_chuoi_cu():
          f"ngoại lệ lạ từ phép dò cũng phải nhường cho `kiem()` (rc={RC_TU_CAP}), được rc={ma}. "
          f"Nhánh nuốt của `_do_dau_da_dang` tồn tại đúng để chuyện này KHÔNG thành một phán "
          f"quyết; bỏ nó đi thì một lỗi lạ sẽ thoát ra khỏi cổng dưới dạng vỡ trần.")
+
+    # VẾ LEASE HỢP LỆ — thêm sau bản vá P1 (#589, 24-09). Nhánh đã-có-dấu nay chạy `kiem()`
+    # trên tệp hiện tại, nên với lease TỰ CẤP ở trên, một `rc=9` GIẢ từ phép dò bị `kiem()`
+    # chặn thành `rc=4` — ĐÚNG BẰNG kỳ vọng, và đột biến "nhánh nuốt ném rc=9" SỐNG ở ca này
+    # (đo bằng công cụ công thức ngay sau bản vá). Với lease HỢP LỆ thì `kiem()` cho qua, nên
+    # `rc=9` giả lộ ra: phép dò KHÔNG đo được thì chuỗi cũ phải tự phán, không được thành "đã
+    # đăng rồi".
+    hop_le = _lease_579()
+    ex, _mod = _goi_lop_gh(GhGia(comments={55: []}, loi_comment={55}), "kiem_github", hop_le,
+                           env_them=ENV_GITHUB)
+    ma = 0 if ex is None else ex.ma
+    chot(ma == RC_NOI_DUNG,
+         f"lease HỢP LỆ + dò dấu hỏng 'tử tế': cửa cuối của chuỗi cũ phải chặn rc={RC_NOI_DUNG}, "
+         f"được rc={ma}. rc={RC_DA_DANG} nghĩa là sự cố mạng thành 'đã đăng rồi'.")
+    ex, _mod = _goi_lop_gh(gh_no_tung, "kiem_github", hop_le, env_them=ENV_GITHUB)
+    ma = 0 if ex is None else ex.ma
+    chot(ma != RC_DA_DANG,
+         f"lease HỢP LỆ + ngoại lệ lạ từ phép dò: KHÔNG được thành rc={RC_DA_DANG} ('đã đăng "
+         f"rồi'), được {ma}. Chuỗi cũ tự đụng lại ngoại lệ ấy là đúng hành vi M3.")
 
 
 @ca
@@ -8646,6 +8667,43 @@ def t187_chan_doan_phai_ha_ve_CHUOI_THUAN_chu_khong_chi_isinstance():
     chot(thuong == NOI_DUNG and type(thuong) is str,
          f"đối chứng: chuỗi thường phải giữ nguyên, nhận {thuong!r}. Một cài đặt trả hằng "
          f"cho MỌI đầu vào cũng qua hết các vế trên — vế này là thứ duy nhất bác nó.")
+
+
+@ca
+def t190_DA_DANG_ma_tep_bi_SUA_van_phai_qua_kiem_tru_chot_han():
+    """A23 (P1 connector codex trên #589, 24-09) — dấu "đã đăng" KHÔNG miễn cho tệp HIỆN TẠI.
+
+    Bản trước tôn trọng dấu NGAY: một lease đã đăng rồi bị SỬA thành tự cấp ra `rc=9` thay vì
+    `rc=4` — workflow coi là bỏ qua thành công, và `ai-dang-giu` tính tệp đã sửa là người giữ.
+    Trên master `kiem()` chạy trước nên không có lỗ này: HỒI QUY của chính packet.
+
+    Ba vế, mỗi vế một đột biến riêng làm nó đỏ:
+      (i)   đã đăng, tệp SẠCH                      -> vẫn `rc=9` (idempotent)
+            đột biến: nhánh đã-có-dấu ném một mã KHÁC thay vì ném lại `rc=9`.
+      (ii)  đã đăng, tệp bị sửa: tự cấp / neo prompt không kiểm được / thiếu trường / hạn hỏng
+            dạng -> đúng mã của `kiem()` (4 / 6 / 8 / 8), KHÔNG phải 9
+            đột biến: gỡ lời gọi `kiem(..., bo_qua_han=True)` ở nhánh đã-có-dấu.
+      (iii) đã đăng, HẾT HẠN                       -> `rc=9` (hành vi `t174`); hết hạn + tự cấp
+            -> `rc=4` (miễn trừ CHỈ là chốt hạn)
+            đột biến: gọi `kiem()` KHÔNG kèm `bo_qua_han` (hết hạn -> 8), hoặc cho `bo_qua_han`
+            thoát sớm khỏi `kiem()` (hết hạn + tự cấp -> 9).
+    """
+    L = _lease_579
+    thieu = L()
+    del thieu["granted_by"]
+    het = khi_truoc(3)
+    for nhan, lease, mong in (
+            ("(i) đã đăng, sạch", L(), RC_DA_DANG),
+            ("(ii) đã đăng, tự cấp", L(granted_by="codex"), RC_TU_CAP),
+            ("(ii) đã đăng, neo prompt không kiểm được", L(prompt_path="ops/prompts/p.md"), RC_NEO),
+            ("(ii) đã đăng, thiếu trường", thieu, RC_NOI_DUNG),
+            ("(ii) đã đăng, hạn hỏng dạng", L(lease_expires_at_utc="không phải ngày"), RC_NOI_DUNG),
+            ("(iii) đã đăng, hết hạn", L(lease_expires_at_utc=het), RC_DA_DANG),
+            ("(iii) đã đăng, hết hạn + tự cấp", L(lease_expires_at_utc=het, granted_by="codex"),
+             RC_TU_CAP)):
+        ma = _do_kiem_github(lease, co_dau=True)
+        chot(ma == mong, f"{nhan}: mong rc={mong}, nhận rc={ma}. Dấu 'đã đăng' chỉ nói TÊN lease "
+                         f"đã đăng, không nói tệp HIỆN TẠI là tệp đã đăng.")
 
 
 @ca

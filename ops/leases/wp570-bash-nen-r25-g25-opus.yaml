@@ -297,6 +297,13 @@ dieu_kien_dung:
 ghi_chu_chieu_lai: 'TRUONG TAI LIEU, khong phai truong cong. Ghi de nguoi sau doc duoc VI SAO
   g10 ton tai ma khong phai lat lai bon vong review.'
 
+da_bi_thay_the: wp570-bash-nen-r26-g26-opus
+da_bi_thay_the_vi_sao: 'NUA THU NHAT cua bia mo hai chieu, lan thay the THU MUOI TAM. Di TRUOC vi cong
+  `check` doc tu REF va CHAN [8] khi lease cu chua mang dong nay. Da dem MOI ref mang tep lease g25
+  sau khi chot hai nguon ref (ls-remote / for-each-ref khop, comm -23 RONG tren 398 nhanh): DUNG MOT
+  ref. g25 con han nhung tu day KHONG con la nguoi giu: codex vong 20 cham dieu kien dung o cache va
+  chu thich; chu kho chon go cache (N94) va giai HOP chu thich hoan (N98); g26 mang revision 26.'
+
 closure_status: 'Owner-directed grant, revision 25, generation 25. DIEU KIEN DUNG cham lan BA (codex vong
   19); chu kho chon KHEP hai lop cua cong (nap dong/exec che giau, argv trai — no co ten) va DAO bo chot
   sang danh sach CHO PHEP (N92). Them N93. THAY THE g24 bang bia mo hai chieu, lan thu MUOI BAY.

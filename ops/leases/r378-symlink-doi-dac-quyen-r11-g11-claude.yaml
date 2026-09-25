@@ -36,7 +36,10 @@ PHAM_VI_LEASE_NAY:
   da_cap: 'Lease nay CHI #574. #579 co lease RIENG (dang-lease-dau-truoc-kiem-sau-r11-g9-claude),
     write set KHONG chong lan.'
 
-leased_at_utc: '2026-09-25T06:30:00Z'
+leased_at_utc: '2026-09-25T08:20:08Z'
+leased_at_utc_nguon: 'SUA 25-09 (r12/g12, cross-review #574 luot 7 L1). = committer date cua 5387831, commit TAO tep nay.
+  Ban dau ghi 2026-09-25T06:30:00Z — DOAN, va SOM HON ca chi thi cap (issues/574#issuecomment-5829237930, created_at
+  2026-09-25T08:19:08Z). Workflow dang lease chay luc 2026-09-25T08:21:09Z; bot dang 2026-09-25T08:23:59Z.'
 lease_expires_at_utc: '2026-09-26T06:00:00Z'
 han_vi_sao: 'GIU NGUYEN han cua g4..g7: 2026-09-26T06:00:00Z. Cua so 48h la cua so chu kho da duyet
   (issues/574#issuecomment-5816412671). Doi revision KHONG phai ly do de phien nay tu noi han.'
@@ -234,5 +237,18 @@ VIEC_CON_LAI_TRONG_WRITE_SET: 'KHONG CO. Docstring da dung con tro co manh neo o
   Buoc tiep: cross-review luot 7 (codex, phien dieu phoi) tren 76f199e theo thuoc r11.'
 
 write_set_do_luc_cap:
-  do_luc: '2026-09-25T06:xxZ'
+  do_luc: '2026-09-25T08:20:08Z'
+  do_luc_nguon: 'SUA 25-09 (L1). CAN TREN: committer date cua 5387831. Phep do chay TRUOC commit; phut do that khong
+    co hien vat ben, nen KHONG ghi mot phut doan. Ban dau ghi mot chuoi co xx thay phut — khong parse duoc.'
   ket_qua: 'Do lai sau khi commit g11 — ghi trong thong diep commit va bao cao.'
+
+# ───────────────────────── BIA MỘ — vế THỨ NHẤT của dấu HAI CHIỀU ─────────────────────────
+# Thêm 2026-09-25 khi cấp g12. g11 CÒN HIỆU LỰC (hạn 2026-09-26T06:00:00Z) nên bia mộ hai chiều là
+# BẮT BUỘC. REVISION mới (r11 -> r12): protocol §3.2.
+da_bi_thay_the: r378-symlink-doi-dac-quyen-r12-g12-claude
+da_bi_thay_the_luc: '2026-09-25T12:19:06Z'
+da_bi_thay_the_luc_nguon: 'date -u luc commit bia mo nay; commit dung CHINH gia tri ay lam committer date (GIT_COMMITTER_DATE)
+  — doc lai bang `git log -1 --format=%cI` tren commit sua tep nay.'
+da_bi_thay_the_vi_sao: 'r12 (issues/574#issuecomment-5831890944, chủ kho: "Mở r12 + g12 (đề xuất)") — tự kiểm con trỏ
+  theo trục đầu vào 34 ca, sửa con trỏ r7:210-211, rút lời khai tương đương; head không đổi 76f199e. spec_hash r12 =
+  f1e17b3c87689bea9cbb571fedd656ce91770263a1e90f527973fc5ba68303dd.'

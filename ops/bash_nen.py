@@ -859,10 +859,19 @@ def _gia_tri_hang(nut, tra_ten=None, sau=0):
             ve.append(x.right)
             x = x.left
         ve.append(x)
-        gia = [_gia_tri_hang(v, tra_ten, sau + 1) for v in reversed(ve)]
+        # N93 (r25, codex vòng 19) — ngân sách tính TRONG LÚC gấp từng vế, không phải sau khi đã dựng
+        # đủ: bản r24 gấp MỌI vế rồi mới cộng, nên 1000 vế `("%4096s" % "")` dựng ~5,8 MB trước khi
+        # ném. Nay vượt ngân sách là dừng — các vế sau KHÔNG được gấp; vế đầu không phải hằng cũng dừng.
+        gia, tong = [], 0
+        for v in reversed(ve):
+            g = _gia_tri_hang(v, tra_ten, sau + 1)
+            if not isinstance(g, (str, bytes)):
+                return _KHONG_BIET
+            tong += len(g)
+            if tong > _NGAN_SACH_DINH_DANG:
+                raise _VuotNganSach(f"phép nối vượt {_NGAN_SACH_DINH_DANG} ký tự")
+            gia.append(g)
         if all(isinstance(g, str) for g in gia) or all(isinstance(g, bytes) for g in gia):
-            if sum(len(g) for g in gia) > _NGAN_SACH_DINH_DANG:
-                raise _VuotNganSach(f"phép nối dựng {sum(len(g) for g in gia)} ký tự")
             return _chay_phep(type(gia[0])().join, gia)
         return _KHONG_BIET
     # N65 (r19) — BỐN TOÁN TỬ GIỮ HẰNG NỮA. Vòng 13 đo được `f"bash"`, `"%s" % "bash"`,
@@ -1341,7 +1350,13 @@ def _loi_goi_tran(than: str, sau=0):
         gán vào đích BỘ (`a, b = __import__(…), 1`) hay qua `:=` TRONG comprehension; `.eval`/
         `.exec` trên một đối tượng không phải `builtins` (`page.eval("…")`);
       · argv mà phần tử ĐẦU đến từ BIẾN — `[*xs, "bash"]`, `sys.argv[1:] + ["bash"]` — dù `xs`
-        rỗng thì bash chạy thật: đó là luồng dữ liệu, không phải cây cú pháp.
+        rỗng thì bash chạy thật: đó là luồng dữ liệu, không phải cây cú pháp;
+      · LỚP ĐÃ KHÉP (r25, quyết định chủ kho sau khi điều kiện dừng chạm lần BA ở codex vòng 19): mọi
+        cách viết CỐ Ý che giấu còn lại của NẠP ĐỘNG/`exec` và của argv TRẢI — callee tính ra bằng
+        biểu thức điều kiện hay tên GẤP (`(builtins.exec if c else f)(…)`, `getattr(builtins,
+        "ex" + "ec")`), đối số nạp động TRẢI (`import_module(*["…"])`, `**{"name": …}`), argv trải
+        `{**{}, "bash": …}`. Packet #570 chặn lời gọi bash TRẦN do vô tình, không chống che giấu có
+        chủ đích; hai lớp này được khai là nợ, reviewer không báo thêm cách viết của chúng.
     Các nhóm ấy cần phân tích luồng dữ liệu, không phải khớp cây cú pháp. Chúng là **nợ có
     tên**, không phải chỗ đã kín. Ai mở rộng thì thêm hình dạng vào `t33` TRƯỚC.
     Tên được giải KHÔNG theo thứ tự thực thi (N76, r21) — xem `_giai_ten`. Nợ có tên còn lại ở

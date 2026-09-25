@@ -1,0 +1,135 @@
+# LEASE — QUY-TRINH-LAP-REVIEW-VA-DIEU-KIEN-DUNG revision 15 / generation 20 — README + receipt A6 (PR #623), reviewer doi sang Claude cung provider
+# GHI HO theo UY QUYEN CHUNG do CHU KHO tu viet: issues/523#issuecomment-5825373202 (OWNER, 2026-09-25T01:51:43Z).
+# Khac g17: neo nay KHONG do phien executor tu dang. Pham vi chep tu comment ay; han theo §12.
+
+schema_version: 2
+event: executor_lease_granted
+
+packet_issue: 523
+mission_issue: 499
+granted_by: ducthangho
+granted_on_instruction: https://github.com/ducthangho/tra-luat/issues/523#issuecomment-5825373202
+granted_on_instruction_nguyen_van: >-
+  'UY QUYEN CHUNG — wp523 r15 (PR #623/#626 va ke tiep), co hieu luc toi khi #623 land - executor claude duoc:
+  ghi ho generation ke tiep (g19+), cap revision moi (r16+) khi write set/acceptance can doi, nang tran luot
+  codex (toi da 6 luot moi lan nang, ghi nang_tran vao lease), mo PR moi cho spec/lease — tat ca neo vao comment
+  nay, han moi generation 90 phut §12 - executor: claude-opus-5-5, effort medium · reviewer: openai_codex, yeu cau
+  gpt-6-sol effort medium; qua GitHub App => model/effort khai KHONG_DO_DUOC - vong lap va theo lop toi khi het
+  P1/P2/P3; khong CI tay, khong Windows; land chi merge commit; lease song khong duoc giao write set'
+granted_on_instruction_da_doc_nguoc: >-
+  Doc lai qua REST 2026-09-25T02:45:16Z truoc khi ghi: id=5825373202, user.login=ducthangho, author_association=OWNER,
+  created_at=2026-09-25T01:51:43Z, issue 523. Chi thi truc tiep trong phien cua chu kho cung ngay:
+  'Xu ly ca #623, #631. Chay vong lap toi het P1, P2, P3 neu chua chay'.
+authority_caveat: >-
+  author_association=OWNER khong tach chu kho khoi phien agent dung token chu kho (#566). Nhung comment neo nay
+  KHONG do phien nay dang — manh hon neo cua g17 (tu dang).
+recorded_by: claude-session
+recorder_is_dispatcher: false
+
+leased_at_utc: '2026-09-25T03:39:31Z'
+lease_expires_at_utc: '2026-09-25T05:09:31Z'
+han_khong_co_trong_chi_thi: >-
+  Uy quyen neu 'han moi generation 90 phut §12' — han = 90 phut ke tu luc ghi. Het han thi handoff §7; KHONG tu
+  gia han.
+
+packet_id: QUY-TRINH-LAP-REVIEW-VA-DIEU-KIEN-DUNG
+packet_slug: QUY-TRINH-LAP-REVIEW-VA-DIEU-KIEN-DUNG
+packet_id_ben: wp523
+revision: 15
+generation: 20
+lease_id: quy-trinh-lap-review-r15-g20-claude
+thay_the_cho: quy-trinh-lap-review-r15-g19-claude
+holder_lich_su: >-
+  g19 (quy-trinh-lap-review-r15-g19-claude, PR #634) CON HAN toi 04:15:16Z nhung giu receipt; g20 THAY THE g19 (thay_the_cho
+  o day + da_bi_thay_the trong tep g19, hai chieu) de gom README vao cung mot lease, khong mo cua so hai writer.
+  Cung phien thi hanh voi g19.
+phien_thi_hanh: >-
+  Cung phien thi hanh g19 (session_01EfoFDAAquT8HRqXft6QDeQ). Tuyen bo so huu nhanh #623: pull/623#issuecomment-5825833591.
+role: executor
+provider: anthropic_claude
+executor: claude
+model: claude-opus-5-5
+effort: medium
+reviewer_provider: anthropic_claude
+reviewer_model_yeu_cau: claude-fable-5-1
+reviewer_effort_yeu_cau: xhigh
+reviewer_doi_tu: openai_codex (gpt-6-sol, medium) — codex het quota
+reviewer_doi_neo: https://github.com/ducthangho/tra-luat/issues/523#issuecomment-5826219229
+reviewer_ghi_chu: >-
+  Chu kho chi thi trong phien: 'Do codex da het quota, thay cross review bang same provider reviewer voi effort hoac
+  mo hinh o muc cao hon'. Neo 5826219229 do phien executor dang (tai khoan chu kho) — yeu hon comment chu kho tu viet.
+  Phien headless MOI, clone rieng, read-only; model do bang modelUsage (do_may). review_class sensitive => approve chi
+  dat same_provider_approved, KHONG thay cross_approved/human_audited (§8); land van can chu kho audit.
+environment: cloud
+risk: sensitive
+review_class: sensitive
+assurance_target: advisory_review
+effective_review_class: sensitive
+access: read-write
+
+spec_path: ops/specs/QUY-TRINH-LAP-REVIEW-VA-DIEU-KIEN-DUNG-r15.md
+spec_ref: refs/heads/master
+spec_source_oid: 1940be5f972af7636c4136e26b265711344f4442
+spec_sha256: f333152f5f44cdb65a354d4eb9fc44fe69a718a5d9b61e47926309105da93f53
+spec_hash: f333152f5f44cdb65a354d4eb9fc44fe69a718a5d9b61e47926309105da93f53
+spec_hash_formula: SHA256 of UTF-8 LF Git blob bytes at spec_source_oid:spec_path
+prompt_path: ops/specs/QUY-TRINH-LAP-REVIEW-VA-DIEU-KIEN-DUNG-r15.md
+prompt_sha256_required: f333152f5f44cdb65a354d4eb9fc44fe69a718a5d9b61e47926309105da93f53
+
+branch: claude/wp523-r15-g17-a6
+branch_ghi_chu: >-
+  Tiep tuc nhanh cua PR #623 — khong mo PR moi. Commit moi ghi ro lease g20.
+branch_ownership: exclusive
+start_from_sha: f2401165053854973b310fc249bda0b4aec2bb2e
+immutable_acceptance_baseline: 395bc7b1be6c275d8de697f8d8541bb36a290c9e
+continuation_base: 601a0f18c83057fa079d204122660f5697fc6389
+reviewed_sha_required: f2401165053854973b310fc249bda0b4aec2bb2e
+reviewed_sha_required_nghia: >-
+  Moi verdict cua PR #623 neo exact head THAT cua PR. Dich cua BIEN NHAN o truong duoi.
+bien_nhan_reviewed_sha_bat_buoc: 92adc7112155a6711ec2c86d59ce60293b342314
+bien_nhan_reviewed_sha_bat_buoc_nghia: >-
+  Head THAT ma codex luot 1 cua #613 da cham sach (pull/613#issuecomment-5812074543). Giu nguyen.
+
+write_set:
+  - ops/reviews/README.md
+  - ops/reviews/wp523-r15-review-1-codex-verdict.receipt.yaml
+write_set_hash: adfaebe8c0337ee454914bde3168357a5691d8c3d90885951f5487fa6bba55b2
+write_set_hash_cach_tinh: >-
+  sha256 cua cac duong dan DA SAP XEP, noi bang LF, co LF cuoi, utf-8 — cung cong thuc g18.
+write_set_ghi_chu: >-
+  HAI duong. README tu do sau khi lease wp461 g7 het han 03:38:31Z. Verdict khong can doi.
+write_set_da_do_truoc_khi_cap: >-
+  Do 2026-09-25T03:38:36Z trong clone sach (fetch '+refs/heads/*'), cong ref hai nguon comm -23 = 0, is-shallow=false.
+  ai-dang-giu README => NGUOI_GIU 0 (wp461 g4/g6/g7 HET_HAN). ai-dang-giu receipt => NGUOI_GIU 1 = g19 (chinh phien nay,
+  thay the o day).
+nang_tran:
+  tran_cu: '6 luot tren PR #623 theo issues/523#issuecomment-5824616821 — da dung 6/6'
+  tran_moi: 'them toi da 6 luot (luot 7-12) tren PR #623 — ghi tu g19, giu nguyen'
+  neo: https://github.com/ducthangho/tra-luat/issues/523#issuecomment-5825373202
+  da_dung: 'luot 7 (claude-fable-5-1 xhigh) pull/623#issuecomment-5826210424 tren f2401165 — changes_requested'
+  ghi_truoc_khi_vuot: true
+muc_tieu: >-
+  Va finding luot 7 (pull/623#issuecomment-5826210424): P2 budget-luot-2-khai-khac-metadata-github; P2 readme-cot-byte-582
+  (thread l0hPO); P2 readme-chuoi-lease-g17-g18-g19 (thread l01rw); P3 trich-thread-pr-625-lam-nguon; P3
+  lich-su-thieu-su-co-hai-writer; P3 a5-diff-check-rc2-do-verdict-tho. Roi luot 8 tren exact head moi.
+dieu_kien_dung:
+  - 'S1 — cham duong dan ngoai HAI duong da khai. DUNG.'
+  - 'S2 — xuat hien TEP SAN PHAM trong diff. DUNG.'
+  - 'S3 — sua spec, verdict/receipt/lease DA GIAO (tren master). DUNG.'
+  - 'S4 — bien_nhan_v2 DO hoac bien-nhan --packet wp523 DO (rc doc TRUC TIEP) => KHONG push.'
+  - 'S5 — surface giu codex_service.'
+  - 'S6 — moi scalar YAML co " #" phai folded/quoted; parse lai va so tung gia tri; moi OID du 40 hex.'
+  - 'S7 — write set KHONG giao lease song (do ai-dang-giu truoc khi ghi).'
+  - 'S8 — commit tong hop reviewer tu dung => KHONG DO DUOC, khong chan.'
+  - 'S9 — HET HAN => ngung ghi, handoff §7, generation moi neo 5825373202.'
+
+cam_tuyet_doi:
+  - Khong sua spec; khong sua hien vat da giao; khong alias; khong mien tru moi
+  - Khong tu review / approve / merge / land; land chi bang merge commit
+  - Khong CI tay, khong Windows, khong LIVE/deploy
+  - Khong force-push; chi fast-forward nhanh PR #623
+
+chua_do_duoc:
+  - 'Danh tinh nguoi ky: #566.'
+  - 'Luot 1-6 (codex App): model/effort KHONG DO DUOC. Tu luot 7: do_may qua modelUsage.'
+  - 'Codex het quota: loi khai cua chu kho trong phien, khong tu do lai.'

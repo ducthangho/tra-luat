@@ -42,14 +42,15 @@ luot_2_ngoai_bien_nhan: >-
   4093538781 với phép đo trên head thật. Không có biên nhận riêng vì đích review không neo được
   vào OID nào trong kho (KHÔNG ĐO ĐƯỢC), và trần §12 đã 2/2.
 verdict_path: ops/reviews/wp523-r15-review-1-codex-verdict.md
-verdict_sha256: 1e88685f0050a15ce3ead1ac8b220560083cbeee39aff65731abcb5093db44a0
-verdict_bytes: 582
-evidence_url: https://github.com/ducthangho/tra-luat/blob/358765f7bdf7af5ca9d1b5960744572124e910ab/ops/reviews/wp523-r15-review-1-codex-verdict.md
+verdict_sha256: 568588b08a2a44b22c5b1f5ab2e189105f22eb56188ec9e015f68cb3c0d4c354
+verdict_bytes: 593
+evidence_url: https://github.com/ducthangho/tra-luat/blob/b2134a40243e5cb3ea6d64eaf49a4c9f26794cbc/ops/reviews/wp523-r15-review-1-codex-verdict.md
 model_reviewer_identity:
   provider: openai_codex
   surface: codex_service
   transport: machine
-  surface_nghia: GitHub App `chatgpt-codex-connector[bot]` review trên PR — bề mặt `codex_service`
+  surface_nghia: >-
+    GitHub App `chatgpt-codex-connector[bot]` review trên PR — bề mặt `codex_service`
     theo hợp đồng dữ liệu land ở #617 (master 6980e5bf, wp461 r3 / Mission #470 Q1)
   model_yeu_cau: KHONG_DO_DUOC
   effort_yeu_cau: KHONG_DO_DUOC
@@ -86,11 +87,11 @@ comment_delivery:
   readback_byte_equal: true
   readback_ghi_chu: Đọc lại qua REST 2026-09-24T18:40Z, 593 B, bằng byte với bản lưu lúc 10:09Z.
 format_reissue:
-  raw_original_sha256: 568588b08a2a44b22c5b1f5ab2e189105f22eb56188ec9e015f68cb3c0d4c354
-  raw_original_bytes: 593
-  transform: bỏ khoảng trắng cuối 1 dòng (dòng trắng trước `</details>`) và chuẩn một LF cuối tệp;
-    Unicode/nội dung giữ nguyên; không lượt review mới
-  raw_original_comment: https://github.com/ducthangho/tra-luat/pull/613#issuecomment-5812074543
+  khong_bien_doi: true
+  ghi_chu: >-
+    Tep verdict la NGUYEN BYTE body UTF-8 cua comment (readback qua REST), ke ca dong trang co khoang trang
+    truoc </details> va ket thuc goc — §8 dong 456-462 (khong bo newline, khong chuan hoa). Ban truoc
+    (LF, bo khoang trang cuoi) da bi thay the theo cross-review thread 4099651082; verdict_sha256 = hash raw.
 budget:
   codex_review_calls_used_on_pr613: 2
   codex_review_calls_cap: 2

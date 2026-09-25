@@ -139,8 +139,15 @@ Phiên dev trên máy này ≠ phiên Cowork LIVE (bootstrap từ zip Package �
   tức có **hai** lớp chồng nhau, và lớp JSON ấy KHÔNG phải thứ gây ra `&#39;`.
   Chốt: `diff` bản-đã-đến qua MCP **chỉ dùng để tìm lệch VỀ KÝ TỰ THẬT** (kiểu `co` + `\u0308` + `dex`);
   chênh lệch thực thể HTML ở đó là **tạo tác của công cụ đọc**, đừng ghi thành phát hiện. Muốn khẳng
-  định byte trên GitHub thì phải có client thứ hai — container này KHÔNG có (REST tới `repos/…` bị
-  proxy chặn 403), nên câu ấy đứng ở trạng thái thứ ba: **KHÔNG ĐO ĐƯỢC**, và nói thẳng như vậy.
+  định byte trên GitHub thì phải có client thứ hai. Lúc viết (22-08) container KHÔNG có, nên câu ấy
+  đứng ở trạng thái thứ ba: **KHÔNG ĐO ĐƯỢC**. **NAY CÓ** — đo `2026-09-25`: REST tới `repos/…`
+  trả **200 kèm `X-GitHub-*`** (xem mục REST ở §Gọi agent đa nền), nên phép đo ấy làm được.
+  Đã chạy thử trên `issuecomment-5811128755` (bản chiếu lease, dày dấu nháy): REST trả **44 dấu `'`
+  thật · 8 dấu `>` thật · 3 dấu `<` thật · 0 thực thể HTML**. **Nói cho ĐÚNG phạm vi:** cùng lúc ấy
+  đọc CHÍNH comment đó qua MCP cũng ra ký tự thật ⇒ hiện tượng 22-08 **KHÔNG TÁI LẬP**. Nên thứ vừa
+  đóng là **NĂNG LỰC ĐO**, KHÔNG phải ca cũ: comment của lượt 22-08 không còn để thử lại, ca ấy ở
+  nguyên **KHÔNG ĐO ĐƯỢC**. Đừng đọc thành "đã bắt được MCP bóp méo" — chưa ai đo được điều đó.
+  Chốt (a) *đăng xong đọc ngược rồi diff* GIỮ NGUYÊN, nay mạnh hơn vì đã có client thứ hai thật.
   Bài học gốc không đổi, chỉ chật hơn: **phải biết mình đang đứng ở LỚP NÀO** — kể cả khi cái lớp
   đang lừa mình chính là cái chốt vừa dựng ra để chống bị lừa.
 - **HỎI CHỖ TIỆN TAY thay vì hỏi CHỖ KẾT LUẬN ĐƯỢC GHI — ba lần trong MỘT phiên (14-08-2026).**
@@ -600,6 +607,19 @@ không tra được.
   người đọc đi sai hướng — cùng họ `codex login status` NÓI DỐI. `launcher.py doctor` nay
   **ĐO** hai đường REST đó (`rest-chung`/`rest-kho`) thay vì nối thêm câu "có thể bị chặn";
   câu ấy là ĐOÁN, và nó từng được nối vào MỌI kết quả, vô điều kiện.
+  · **HAI DÒNG 403 Ở TRÊN ĐÃ TRÔI — đo lại `2026-09-25T01:1xZ`, cùng container remote: tất cả
+  **200 CÓ `X-GitHub-*`**, kể cả `/repos/<kho>` và `/repos/<kho>/pulls/N`.** Chạy hai vế **có
+  token / không token: kết quả Y HỆT** (đúng phép đối chứng hai chiều của lượt 17-08). Nền đã đổi,
+  KHÔNG phải lượt cũ đo sai. **Máy đã đúng sẵn, chỉ VĂN BẢN cũ**: `doctor` in `rest-kho=OK` từ
+  trước khi mục này được sửa — đó chính là lý do §17-08 bắt `doctor` ĐO thay vì nối câu phỏng đoán.
+  · **KHÔNG ĐO ĐƯỢC, khai thẳng:** vế **không token** vẫn 200 trên kho RIÊNG ⇒ có tầng nào đó cấp
+  danh tính hộ. Không biết là tầng nào, **không đoán**. Hệ quả thực hành: `200` ở đây KHÔNG chứng
+  minh token của bạn còn sống — đừng dùng đường này làm phép thử credential.
+  · **Bài học gốc KHÔNG đổi, và đừng đọc mục này thành "REST nay dùng thoải mái".** Bốn đường vẫn
+  hỏng ĐỘC LẬP; `gh auth status` hỏi `/user` nên nó vẫn xanh được trong khi việc thật hỏng; và
+  **vẫn phải thử ít nhất hai client trước khi gọi bất cứ thứ gì là chính sách**. Thứ hết hạn là
+  TRẠNG THÁI, không phải cách đọc. Mục này ghi ĐIỀU KIỆN ĐO (ngày · container · hai vế token) đúng
+  vì lượt 17-08 không ghi, nên nó trôi hơn một tháng mà không ai thấy.
   · **`api.githubcopilot.com` (điểm cuối MCP github) GỌI ĐƯỢC TỪ TRONG CONTAINER** — và câu
   này thay cho một câu SAI tôi vừa viết chính ở đây vài giờ trước ("bị chặn ngay ở tầng
   CONNECT"). Nguồn của cái sai: probe bằng `curl` nhận `CONNECT tunnel failed, response 403`

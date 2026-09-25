@@ -349,94 +349,111 @@ budget:
       pull_request kiem ref merge TONG HOP cua GitHub (checkout in 'HEAD is now at 87ba49e'), KHONG phai chinh
       reviewed_sha; OID day du va tree cua ref ay KHONG DO DUOC (object khong con tren server). Luot
       pull_request_target (thu-hoi) chay workflow tu base va checkout base 515d16a1776dd6bb030790e207c98e3beefaabba.
-      Codex 4101132069.
+      workflow_blob_oid_tai_run_head_sha chi la blob cua workflow_path tai run_head_sha (hoac base voi
+      pull_request_target); KHONG chung minh chinh blob ay da chay trong run (commit dinh nghia workflow cua run =
+      ref merge tong hop, not_measured). conclusion_api la loi khai cua API, tach khoi xac_minh_bang_chung.
+      Codex 4101132069 + review tai cho tren 0b10ad35298614ed4ef700f2c82af639029e88a1.
     cac_check:
     - check: 'thu-hoi'
-      ket_qua: passed
+      conclusion_api: success
+      xac_minh_bang_chung: not_measured (chi co conclusion API; job khong in dong ket; KHONG tinh la bang chung dat)
+      lenh_va_rc: not_measured (API khong tra lenh/rc tung buoc)
       check_run_id: 107761345603
       run_id: 36037564902
       run_attempt: 1
       event: pull_request_target
       workflow_path: .github/workflows/ops-thu-hoi-admission.yml
-      workflow_blob_oid: b6be81ea533e0c05506314d479c296ca21c65b3c
+      workflow_blob_oid_tai_run_head_sha: b6be81ea533e0c05506314d479c296ca21c65b3c
       run_head_sha: 5e2851881e810b39ebee6884371e5b3e229a01d7
       log_bytes: 75651
       log_sha256: fd8c728f0b3aa56602a4abfd7ef127002e3b0eec20d84f8e65a6704433e6cd85
       checkout_trong_log: '515d16a1'
       dau_hieu_duong: KHONG_CO (job khong in dong TONG; chi dua vao conclusion)
     - check: 'gate (ubuntu-latest)'
-      ket_qua: passed
+      conclusion_api: success
+      xac_minh_bang_chung: co_dau_hieu_duong (dong ket trong log job khop marker; rc tung lenh not_measured)
+      lenh_va_rc: not_measured (API khong tra lenh/rc tung buoc)
       check_run_id: 107748454529
       run_id: 36033686489
       run_attempt: 1
       event: pull_request
       workflow_path: .github/workflows/ci.yml
-      workflow_blob_oid: 2ca2f9d88e21ae00477f627434fa4b852cc512f3
+      workflow_blob_oid_tai_run_head_sha: 2ca2f9d88e21ae00477f627434fa4b852cc512f3
       run_head_sha: 5e2851881e810b39ebee6884371e5b3e229a01d7
       log_bytes: 793346
       log_sha256: 0d6ea90957f9fbe16a5f897837b881e7a3c75023a4fb10923e0ea01a743e8f2d
       checkout_trong_log: '87ba49e'
       dau_hieu_duong: "TỔNG: ĐẠT"
     - check: 'gate-packet-loop (ubuntu-latest)'
-      ket_qua: passed
+      conclusion_api: success
+      xac_minh_bang_chung: co_dau_hieu_duong (dong ket trong log job khop marker; rc tung lenh not_measured)
+      lenh_va_rc: not_measured (API khong tra lenh/rc tung buoc)
       check_run_id: 107748454392
       run_id: 36033686489
       run_attempt: 1
       event: pull_request
       workflow_path: .github/workflows/ci.yml
-      workflow_blob_oid: 2ca2f9d88e21ae00477f627434fa4b852cc512f3
+      workflow_blob_oid_tai_run_head_sha: 2ca2f9d88e21ae00477f627434fa4b852cc512f3
       run_head_sha: 5e2851881e810b39ebee6884371e5b3e229a01d7
       log_bytes: 115803
       log_sha256: 668b8ea63cf2bd6269c61e29aa87f2300afcda9ab801c3aba7d19bf2ba3e163f
       checkout_trong_log: '87ba49e'
       dau_hieu_duong: "TỔNG: ĐẠT"
     - check: 'gate-registry (ubuntu-latest)'
-      ket_qua: passed
+      conclusion_api: success
+      xac_minh_bang_chung: co_dau_hieu_duong (dong ket trong log job khop marker; rc tung lenh not_measured)
+      lenh_va_rc: not_measured (API khong tra lenh/rc tung buoc)
       check_run_id: 107748454351
       run_id: 36033686489
       run_attempt: 1
       event: pull_request
       workflow_path: .github/workflows/ci.yml
-      workflow_blob_oid: 2ca2f9d88e21ae00477f627434fa4b852cc512f3
+      workflow_blob_oid_tai_run_head_sha: 2ca2f9d88e21ae00477f627434fa4b852cc512f3
       run_head_sha: 5e2851881e810b39ebee6884371e5b3e229a01d7
       log_bytes: 211412
       log_sha256: 893e4c1ac655c4e021fc2df63a00bbcc89a1789453fcdb1b8ae7591038899920
       checkout_trong_log: '87ba49e'
       dau_hieu_duong: "TỔNG: ĐẠT"
     - check: 'chuan-bi'
-      ket_qua: passed
+      conclusion_api: success
+      xac_minh_bang_chung: not_measured (chi co conclusion API; job khong in dong ket; KHONG tinh la bang chung dat)
+      lenh_va_rc: not_measured (API khong tra lenh/rc tung buoc)
       check_run_id: 107748414485
       run_id: 36033686489
       run_attempt: 1
       event: pull_request
       workflow_path: .github/workflows/ci.yml
-      workflow_blob_oid: 2ca2f9d88e21ae00477f627434fa4b852cc512f3
+      workflow_blob_oid_tai_run_head_sha: 2ca2f9d88e21ae00477f627434fa4b852cc512f3
       run_head_sha: 5e2851881e810b39ebee6884371e5b3e229a01d7
       log_bytes: 2884
       log_sha256: 264d103ce7ec8119a52344c70f724bd9e3a4839fd990b1c2cf347a2245ea725e
       checkout_trong_log: KHONG_CO_DONG_CHECKOUT
       dau_hieu_duong: KHONG_CO (job khong in dong TONG; chi dua vao conclusion)
     - check: 'thu-hoi'
-      ket_qua: passed
+      conclusion_api: success
+      xac_minh_bang_chung: not_measured (chi co conclusion API; job khong in dong ket; KHONG tinh la bang chung dat)
+      lenh_va_rc: not_measured (API khong tra lenh/rc tung buoc)
       check_run_id: 107748413392
       run_id: 36033687080
       run_attempt: 1
       event: pull_request_target
       workflow_path: .github/workflows/ops-thu-hoi-admission.yml
-      workflow_blob_oid: b6be81ea533e0c05506314d479c296ca21c65b3c
+      workflow_blob_oid_tai_run_head_sha: b6be81ea533e0c05506314d479c296ca21c65b3c
       run_head_sha: 5e2851881e810b39ebee6884371e5b3e229a01d7
       log_bytes: 75303
       log_sha256: 4e3b3004c81fb8b86e81c482a45e723479f8d52b7562ec68f53ccee0b39023f2
       checkout_trong_log: '515d16a1'
       dau_hieu_duong: KHONG_CO (job khong in dong TONG; chi dua vao conclusion)
     - check: 'launcher'
-      ket_qua: skipped
+      conclusion_api: skipped
+      xac_minh_bang_chung: skipped (khong chay; khong co bang chung duong, khong tinh la dat)
+      lenh_va_rc: not_measured (API khong tra lenh/rc tung buoc)
       check_run_id: 107748412930
       run_id: 36033686405
       run_attempt: 1
       event: pull_request
       workflow_path: .github/workflows/launcher-windows.yml
-      workflow_blob_oid: 24b55164eca4fef5c76aae13cb691e4bb103d05e
+      workflow_blob_oid_tai_run_head_sha: 24b55164eca4fef5c76aae13cb691e4bb103d05e
       run_head_sha: 5e2851881e810b39ebee6884371e5b3e229a01d7
       log: KHONG_DO_DUOC (log khong con tren server, HTTP 404)
   historical_total_spend: KHONG_DO_DUOC

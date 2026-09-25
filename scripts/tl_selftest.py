@@ -25341,8 +25341,9 @@ def run() -> int:
             (giới hạn lớp con theo module) lọt ở `LỚP=con`, `m14` (phân hạng theo `args`)
             lọt ở thông điệp rỗng.
 
-        Tức lời khai của r2 — *"một cài đặt sai theo bất kỳ chiều nào phải làm ít nhất một ô
-        đỏ"* — RỘNG HƠN phép đo. Ma trận có trục, nhưng **mỗi trục chỉ có một điểm**, nên nó
+        Tức lời khai của r2 (đặc tả r2 dòng 67, nguyên văn) — *"nên một cài đặt sai phải làm ít
+        nhất một Ô đỏ dù nó sai theo chiều nào."* — RỘNG HƠN phép đo. (Bản trước chép lại câu này
+        bằng một câu DIỄN Ý đặt trong ngoặc như nguyên văn; cross-review #574 lượt 4 bắt.) Ma trận có trục, nhưng **mỗi trục chỉ có một điểm**, nên nó
         vẫn là 14 ĐIỂM được sắp thành bảng. Đúng cái bẫy nó sinh ra để thoát.
 
         NÊN BẢN NÀY ĐỔI BA THỨ:

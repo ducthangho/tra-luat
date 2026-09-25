@@ -153,3 +153,15 @@ TRANG_THAI_REVIEW_LUC_CAP:
   P1_connector: 'P1 cua connector codex GitHub (review 5311667334) — lease da dang bi sua ra rc=9 —
     va o 8d04b78, luot 14 xac nhan DONG.'
   DIEU_KIEN_DUNG: 'Khong con P1, P2, P3 o mot luot. Chua dat — luot 15 se do.'
+
+# ───────────────────────── BIA MỘ — vế THỨ NHẤT của dấu HAI CHIỀU ─────────────────────────
+# Thêm 2026-09-25 khi cấp g8. g7 CÒN HIỆU LỰC (hạn 2026-09-27T00:00:00Z) nên bia mộ hai chiều là
+# BẮT BUỘC. REVISION mới (r9 -> r10): protocol §3.2.
+da_bi_thay_the: dang-lease-dau-truoc-kiem-sau-r10-g8-claude
+da_bi_thay_the_dat_luc: '2026-09-25T02:5xZ'
+da_bi_thay_the_vi_sao: 'r10 (issues/579#issuecomment-5825808861, chủ kho: "Mở r10 + g8") đóng F2 lượt 15:
+  §5.0 bảng nghiệm thu duy nhất có thẩm quyền, tập đỏ đo lại toàn suite tại af6b54c. spec_hash r10 =
+  34149e294303b60a298ac2a3317044ea26d80b7df1d2121abb896c10859b3c36. Thay để NEO LAI, không phải vì g7 sai
+  phạm vi hay hết hạn.'
+da_bi_thay_the_ve_thu_hai: 'Ve con lai nam o ops/leases/dang-lease-dau-truoc-kiem-sau-r10-g8-claude.yaml tren
+  ref ops/cap-lease-579-g8, dong `thay_the_cho: dang-lease-dau-truoc-kiem-sau-r9-g7-claude`.'

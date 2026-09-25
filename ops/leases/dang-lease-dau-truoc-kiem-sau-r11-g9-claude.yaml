@@ -55,7 +55,9 @@ LUOT16_DUOC_XU_LY_THE_NAO:
   F4: 'chot loai so hieu ngoai kiem() (P4): da khai tu luot 7; r11 §0.11 khai la lo con ho cua phep liet ke.'
   MOI: 't191 bat chot provider bi chot allowlist che ve ma thoat — ve (vi-b) so ly do.'
 
-leased_at_utc: '2026-09-25T05:20:00Z'
+leased_at_utc: '2026-09-25T05:11:39Z'
+leased_at_utc_nguon: 'SUA 25-09 (theo L1 cua #574 luot 7 — cung lop ho so lease). = committer date cua c408c5d, commit TAO
+  tep nay. Ban dau ghi 2026-09-25T05:20:00Z — DOAN, MUON HON chinh commit tao tep.'
 lease_expires_at_utc: '2026-09-27T00:00:00Z'
 han_vi_sao: '48 gio, giu nguyen cach tinh cua g5. CAU HOI CON TREO tu g5 va CHUA duoc tra loi:
   chu kho co that su muon 48 gio hay khong — con so ay ban dau lay tu yeu cau cua phien executor,
@@ -103,7 +105,9 @@ write_set:
 write_set_vi_sao: 'BA duong — KHONG doi so voi g3/g4/g5. r8 §2 giu nguyen bang do cua r7 chung minh
   write_set khong doi qua r3..r8.'
 write_set_do_luc_cap:
-  do_luc: '2026-09-25T05:2xZ'
+  do_luc: '2026-09-25T05:11:39Z'
+  do_luc_nguon: 'SUA 25-09. CAN TREN: committer date cua c408c5d. Phep do chay TRUOC commit; phut do that khong co hien
+    vat ben. Ban dau ghi mot chuoi co x thay phut — khong parse duoc.'
   ket_qua: 'Do lai sau khi commit g9 — ghi trong thong diep commit va bao cao.'
 
 prohibited_actions:
@@ -151,3 +155,12 @@ TRANG_THAI_REVIEW_LUC_CAP:
   da_xu_ly: 'F1/F2 o 4e82a06 (ma); F3/F4 bang r11.'
   REVIEWER_KHA_DUNG: 'CO — codex song lai (chu kho 25-09); probe gpt-6-astra PROBE_OK rc=0.'
   DIEU_KIEN_DUNG: 'Khong con P1, P2, P3 o mot luot. Chua dat — luot 17 se do.'
+
+# ───────────────────────── BIA MỘ — vế THỨ NHẤT của dấu HAI CHIỀU ─────────────────────────
+# Thêm 2026-09-25 khi cấp g10. g9 CÒN HIỆU LỰC (hạn 2026-09-27T00:00:00Z) nên bia mộ hai chiều là
+# BẮT BUỘC. REVISION mới (r11 -> r12): protocol §3.2.
+da_bi_thay_the: dang-lease-dau-truoc-kiem-sau-r12-g10-claude
+da_bi_thay_the_luc: '2026-09-25T14:05:29Z'
+da_bi_thay_the_luc_nguon: 'date -u luc commit bia mo nay; commit dung CHINH gia tri ay lam committer date (GIT_COMMITTER_DATE).'
+da_bi_thay_the_vi_sao: 'r12 (issues/579#issuecomment-5831890719, chủ kho: "Mở r12 + g10 (đề xuất)") — t191 phán PHỦ bằng
+  phép miễn trung thành; hợp đồng phân loại; §0.12 khai miền duyệt. spec_hash r12 = 3f90daab16aaa59a91fbf6cb773250b7ad0b0894a1552261e6bcd1e92589b2b2.'

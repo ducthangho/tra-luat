@@ -27,7 +27,8 @@ lease_reviewer: KHONG_CO — reviewer là GitHub App `chatgpt-codex-connector[bo
 reviewed_sha: 5e2851881e810b39ebee6884371e5b3e229a01d7
 reviewed_tree: 84a7ec65be31cb3818dcaa5e98f8bc6d0d7a6e95
 reviewed_sha_nghia: >-
-  Exact head của PR #617 lúc gọi review — đúng `reviewed_sha_required` của lease g4. 3 tệp sản phẩm
+  Exact head của PR #617 lúc gọi review — đúng `bien_nhan_reviewed_sha_bat_buoc` của lease g4
+  (d9c8ccac31e0b28555cafd135b805ee125ace3b2) và g7. 3 tệp sản phẩm
   (.claude/dev/launcher.py, ops/KE_HOACH_THI_CONG_DA_PROVIDER.md, ops/bien_nhan_v2_test.py), +79/−4.
   Comment reviewer tự khai `Reviewed commit: 5e2851881e`.
 verdict: approve
@@ -82,7 +83,7 @@ model_reviewer_identity:
 github_submitter_identity:
   actor: chatgpt-codex-connector[bot]
   role: >-
-    GitHub App đã VẬN CHUYỂN comment verdict (PROTOCOL §8 dòng 456-460 — actor vận chuyển);
+    GitHub App đã VẬN CHUYỂN comment verdict (PROTOCOL §7 dòng 456-460 — actor vận chuyển);
     khớp comment_delivery.author
   recorder_actor: ducthangho
   recorder_role: >-
@@ -115,7 +116,7 @@ comment_delivery:
     so_sanh: bytes UTF-8 cua body sau khi giai ma JSON == bytes tep verdict (khong hash chuoi JSON escape)
     raw_json_luu: >-
       Lan 1 (18:52Z) KHONG luu raw JSON — khai thang. Lan 2 (readback_lan_2 duoi day) LUU NGUYEN raw JSON phan hoi
-      (sort_keys, indent 1, khong sua noi dung) ke ca rc tien trinh, theo PROTOCOL §8 dong 456-462 (thread 4099876842).
+      (sort_keys, indent 1, khong sua noi dung) ke ca rc tien trinh, theo PROTOCOL §7 dong 456-462 (thread 4099876842).
   readback_lan_2:
     doc_luc_utc: '2026-09-25T01:16:13Z'
     lenh: "REST GET /repos/ducthangho/tra-luat/issues/comments/5819108011 (gh.call, token chu kho, KHONG in token)"
@@ -320,7 +321,7 @@ format_reissue:
   khong_bien_doi: true
   ghi_chu: >-
     Tep verdict la NGUYEN BYTE body UTF-8 cua comment (readback qua REST), ke ca dong trang co khoang trang
-    truoc </details> va ket thuc goc — §8 dong 456-462 (khong bo newline, khong chuan hoa). Ban truoc
+    truoc </details> va ket thuc goc — §7 dong 456-462 (khong bo newline, khong chuan hoa). Ban truoc
     (LF, bo khoang trang cuoi) da bi thay the theo cross-review thread 4099651082; verdict_sha256 = hash raw.
 budget:
   codex_review_calls_used_on_pr617: 2
@@ -362,3 +363,4 @@ lich_su_ban_ung_vien:
   - {commit: 45de8954878519d0886942e45c149790aadea710, luc: '2026-09-25T01:45:36+00:00', receipt_sha256: f0a97f57c5159cf5c00f620a90de9e57e849791f07693a589b06cd471f2bc45d}
   - {commit: 9b35593150d834308d13765bb33cc6fd753ed6c6, luc: '2026-09-25T02:13:19+00:00', receipt_sha256: 75504ae0f7b0ff2f2f86179b3fd9d6d4deb4a9d6a77feb2a6fa1ce5f858d5a2c}
   - {commit: 2dbc3c6705dfe41bc4cd663dde32d3280f520d0b, luc: '2026-09-25T02:52:20+00:00', receipt_sha256: 73cf7a24ba73eddbdefaf4362f6c4fd4e6adc8e4b8221454610ac95a121ac5ee}
+  - {commit: 25fa89befd393ad09785bd6b0dd8143657d46fd3, luc: '2026-09-25T03:04:31+00:00', receipt_sha256: 3757046fd0aff1190f50191f271020838c7bbc429bed1b0b45debbaf49e53e1d}

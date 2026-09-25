@@ -102,7 +102,7 @@ comment_delivery:
     phuong_thuc: GET https://api.github.com/repos/ducthangho/tra-luat/issues/comments/5812074543 (REST, token chu kho)
     http_status: 200
     doc_luc_utc: '2026-09-24T18:40:00Z'
-    doc_luc_utc_ghi_chu: giay KHONG duoc luu (chi biet toi phut 2026-09-24T18:40Z); khai thang, khong bia (thread 4100016580)
+    doc_luc_utc_ghi_chu: giay KHONG duoc luu (chi biet toi phut 2026-09-24T18:40Z); khai thang, khong bia (thread 4100016580 tren PR 625 / wp461, cung lop, ap cho receipt nay)
     body_sha256_nguon: 568588b08a2a44b22c5b1f5ab2e189105f22eb56188ec9e015f68cb3c0d4c354
     body_sha256_doc_nguoc: 568588b08a2a44b22c5b1f5ab2e189105f22eb56188ec9e015f68cb3c0d4c354
     body_bytes: 593
@@ -338,10 +338,12 @@ budget:
   product_ci_tren_reviewed_sha: >-
     92adc711 — 7 check-run: chuan-bi, gate, gate-packet-loop, thu-hoi (107581788956) success; gate-registry
     failure vô can (nhanh_don_duoc_test rig tạm 'Directory not empty', pull/613#issuecomment-5812420143);
-    thu-hoi failure (check-run 107628547502, hậu merge, workflow thu hồi lease, không phải product CI); mo skipped.
+    thu-hoi failure (check-run 107628547502, run 35998333826 tạo 2026-09-24T12:19:31Z, pull_request_target kích bởi
+    ready_for_review 12:19:29Z — TRƯỚC merge 13:38:29Z; workflow thu hồi lease, không phải product CI); mo skipped.
     Head kế 61a39096 — 8 check-run: 6 success (chuan-bi, gate, gate-packet-loop, gate-registry, thu-hoi x2),
-    mo skipped, thu-hoi failure (check-run 107659460897, hậu merge). Đo qua REST commits/SHA/check-runs
-    2026-09-25T03:3xZ theo cross-review lượt 7.
+    mo skipped, thu-hoi failure (check-run 107659460897, run 36007526100 tạo 2026-09-24T13:42:37Z — hậu merge). Đo qua REST commits/SHA/check-runs
+    trong khoảng 2026-09-25T03:32:03Z..2026-09-25T03:38:36Z (giây không lưu; sau comment issues/523 5826219229,
+    trước phép đo ai-dang-giu của g20) theo cross-review lượt 7; thời điểm run đo lại lượt 8.
   historical_total_spend: KHONG_DO_DUOC
 land:
   merge_commit: c10487410cc502e96e9dd43639f2ddb6af104922
@@ -365,3 +367,4 @@ lich_su_ban_ung_vien:
   - {commit: f9cd880d38d43460a5e3bd1ec82b1ca6b5d5bcce, luc: '2026-09-25T01:14:29+00:00', receipt_sha256: 65e427f53f38187f608d99007c27c5a12aaa2924cded14540e919500c809b539}
   - {commit: 5d8b2b01102165dfd19c032a26d552b7d1ecfef5, luc: '2026-09-25T01:22:38+00:00', receipt_sha256: ce8bb82a4b6fb49104675db29ed4e64aa685830fe23ec76cf78d1f3c26828193}
   - {commit: f2401165053854973b310fc249bda0b4aec2bb2e, luc: '2026-09-25T02:47:45+00:00', receipt_sha256: bcb0af99230a787fc7b554857a42b45e49300d2efef33b3fb108a6554ad12178}
+  - {commit: f088fa28a99931e21ee137aaf2c685e6e30ef6de, luc: '2026-09-25T04:19:33+00:00', receipt_sha256: 6fe676c055defd1627eb498e1b3fcdf1371e5dd664e2844865b02399369db61e}

@@ -46,6 +46,11 @@ def _tat_bao_tri_git(env) -> None:
     if tham and not tham.endswith(duoi):
         env["GIT_CONFIG_PARAMETERS"] = f"{tham} {duoi}"
 _tat_bao_tri_git(os.environ)
+def _tat_bao_tri_kho_bare(remote: Path) -> None:
+    # r3 CI 88afd8d van ENOTEMPTY: transport cuc bo GO GIT_CONFIG_COUNT/PARAMETERS khoi receive-pack (do: hook
+    # pre-receive khong thay gc.auto). Nen ghi THANG vao config kho dich — ghi tep, KHONG phong tien trinh.
+    with (remote / "config").open("a", encoding="utf-8", newline="\n") as f:
+        f.write("".join(f"[{k.split('.')[0]}]\n\t{k.split('.')[1]} = {v}\n" for k, v in GIT_TAT_BAO_TRI))
 
 # ---- M1: tin hieu "chot cua CHINH ca nay hong" -------------------------------
 # Ma HA TANG (`run`, `nap_tool`, `chay_dot_bien`) nem `AssertionError` TRAN va
@@ -451,6 +456,7 @@ def kho_bare(*, mac_dinh: str = "main", a: bool = False, b: bool = False,
     td = tempfile.TemporaryDirectory()
     root, remote, work = Path(td.name), Path(td.name) / "remote.git", Path(td.name) / "work"
     run(["git", "init", "--bare", str(remote)], root)
+    _tat_bao_tri_kho_bare(remote)
     _dau_hieu_kho_bare(remote, "ngay sau `git init --bare`")
     run(["git", "init", "-b", mac_dinh, str(work)], root)
     run(["git", "config", "user.name", "test"], work)
@@ -3909,6 +3915,9 @@ def r548_git_con_phai_tat_bao_tri_nen(d: Path):
         cuoi = {k.lower(): v for k, v in cap}
         ok += [cap[:len(dau)] == dau, all(cuoi.get(k.lower()) == v for k, v in can.items()),
                gia == can, lan_hai == sau_nap, sau_nap.get("GIT_CONFIG_PARAMETERS", "").startswith(them.get("GIT_CONFIG_PARAMETERS", ""))]
+    td, remote, _ = kho_bare()      # kho DICH doc tu tep config cua no, moi truong KHONG co GIT_CONFIG_*
+    with td:
+        ok += [run(["git", "config", "--get", k], remote, env=goc, check=False).stdout.strip() == v for k, v in can.items()]
     chot(all(ok), "r548")
 
 TU_KIEM = [
@@ -4667,6 +4676,7 @@ DOT_BIEN_TU_KIEM = [
     ("git-bao-tri-ghi-de", ("r548",), 'n = int(env.get("GIT_CONFIG_COUNT") or 0)', "n = 0"),
     ("git-bao-tri-noi-trung", ("r548",), "        if cuoi.get(k.lower()) != v:\n            env", "        if True:\n            env"),
     ("git-bao-tri-bo-tham-so", ("r548",), '        env["GIT_CONFIG_PARAMETERS"] = f"{tham} {duoi}"', "        pass"),
+    ("git-bao-tri-bo-kho-bare", ("r548",), "    _tat_bao_tri_kho_bare(remote)\n", ""),
     ("git-bao-tri-gia-tri-dau", ("r548",), 'cuoi[(env.get(f"GIT_CONFIG_KEY_{i}") or "").lower()] = env.get(f"GIT_CONFIG_VALUE_{i}")',
      'cuoi.setdefault((env.get(f"GIT_CONFIG_KEY_{i}") or "").lower(), env.get(f"GIT_CONFIG_VALUE_{i}"))'),
     ("git-bao-tri-thieu-khoa", ("r548",), ',\n                   ("maintenance.autoDetach", "false"), ("receive.autogc", "false"))',

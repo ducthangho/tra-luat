@@ -23,6 +23,18 @@ thay_the_cho: dang-lease-dau-truoc-kiem-sau-r7-g5-claude
 thay_the_vi_sao: 'g5 neo r7. r8 tu khai `thay_the_cho: revision 7,
   452b0886572154d096184f734d1287f051cbf1c44e63e27e0d5d2b02ad215401` va §10.1 doi lease neo DUNG
   revision hien hanh. Nen g6 ton tai de NEO LAI, khong phai de doi pham vi.'
+da_bi_thay_the: dang-lease-dau-truoc-kiem-sau-r9-g7-claude
+da_bi_thay_the_vi_sao: 'g6 neo dac ta r8. r9 da dong bang (sha256
+  6b5fbfdf7813793be8a4852f985a71e9f112c24c6c1e7828c14ffdcbc6d8c72c) tren PR #592 nhanh
+  claude/spec-dang-lease-r2-20260921 head e0cf55a, theo chi thi chu kho "Mo r9 + g7"
+  (issues/579#issuecomment-5824824680), va §10.1 doi lease neo DUNG revision hien hanh. g6 bi g7
+  thay the de NEO LAI, khong phai vi g6 sai pham vi hay het han — luc dat bia nay g6 VAN CON HAN
+  (het 2026-09-27T00:00:00Z).'
+da_bi_thay_the_dat_luc: '2026-09-25T01:4xZ'
+da_bi_thay_the_ve_thu_hai: 'Ve con lai cua dau hai chieu nam o
+  ops/leases/dang-lease-dau-truoc-kiem-sau-r9-g7-claude.yaml tren ref ops/cap-lease-579-g7,
+  dong `thay_the_cho: dang-lease-dau-truoc-kiem-sau-r8-g6-claude`.'
+
 BIA_MO_DA_DAT:
   da_lam: 'Them `da_bi_thay_the: dang-lease-dau-truoc-kiem-sau-r8-g6-claude` vao
     ops/leases/dang-lease-dau-truoc-kiem-sau-r7-g5-claude.yaml tren ref ops/cap-lease-579-g5 —

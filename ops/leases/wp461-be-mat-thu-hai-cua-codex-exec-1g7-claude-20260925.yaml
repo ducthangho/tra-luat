@@ -96,16 +96,21 @@ reviewer_fallback_da_doc_nguoc: >-
   id 5825807476, issue 461, user ducthangho (OWNER), created_at 2026-09-25T02:42:45Z; do PHIEN EXECUTOR dang duoi tai
   khoan chu kho theo chi thi chat 02:3xZ (than comment tu khai). Theo §2 tham quyen khong chuyen qua output agent:
   CHO chu kho xac nhan tuong minh khi human audit.
-lease_sua_lan_cuoi: '2026-09-25T03:15:46Z'
+lease_sua_lan_cuoi: '2026-09-25T03:24:02Z'
 lease_sua_ghi_chu: >-
-  Sua sau review cung provider luot 1 (394fb6e9, 02:55:35Z) va luot 2 (commit ke tiep): chi them chu thich,
-  khoi nang_tran, reviewer_fallback. KHONG doi truong mang quyen (leased_at, han, write_set, hash, spec, branch).
+  Sua sau khi cap, theo review cung provider: luot 1 394fb6e9ae0e6147c194273fbfd6c97aae55e436 (02:55:35Z) ·
+  luot 2 5d5b18e6a68d5a5aef2da42aaacfa844b0f9200c (03:03:21Z) va d97f9aa9a9d84025b4ce213b42783f3e169fcca8 (03:04:05Z) ·
+  luot 3 cf204134f5f2f5049b31f0d9b038498b6bafe7e6 (03:15:46Z) · luot 4 commit nay (2026-09-25T03:24:02Z, chi sua chinh ghi chu nay +
+  heartbeat). Khoa them: reviewed_sha_required_ghi_chu, uy_quyen_chung_hieu_luc, reviewer_fallback (+_da_doc_nguoc),
+  nang_tran/nang_tran_attempts (+ghi_ho, truc, truc_vong_ghi_chu), lease_sua_*, heartbeat_lich_su,
+  do_chua_trong_write_set; heartbeat_at cap nhat. KHONG doi truong mang quyen (leased_at, han, write_set, hash,
+  spec, branch, baseline, continuation, attempts, executor, assurance_target).
   Cac neo sinh sau 02:08:31Z (5825807476) duoc them trong cac lan sua nay, khong phai luc cap. Ban chieu tren #461
   (github-actions issuecomment-5825553028, 02:13:05Z) = ban f65040741af8997882c66ba70a079569cde42bea, CHUA cap nhat
   (job dang bo qua lease da dang); ban dung = blob tai head nhanh ops/cap-lease-461-g7; executor dang comment tro
   blob moi tren #461.
 lease_expires_at_utc: '2026-09-25T03:38:31Z'
-heartbeat_at: '2026-09-25T03:15:46Z'
+heartbeat_at: '2026-09-25T03:24:02Z'
 do_chua_trong_write_set: >-
   Nhanh agent/wp461-g7-claude da MERGE master 601a0f18c83057fa079d204122660f5697fc6389 (commit
   0fc5d4d682e69b2fc88fb64c6b244e8396b14279, 02:11:09Z). S1 (chua trong ba duong) do bang

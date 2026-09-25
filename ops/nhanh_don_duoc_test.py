@@ -29,10 +29,14 @@ TOOL = HERE / "nhanh_don_duoc.py"
 GIT_TAT_BAO_TRI = (("gc.auto", "0"), ("gc.autoDetach", "false"), ("maintenance.auto", "false"),
                    ("maintenance.autoDetach", "false"), ("receive.autogc", "false"))
 def _tat_bao_tri_git(env) -> None:
+    # r3 vong 1 P2: git dung muc CUOI cua moi khoa (ten khoa khong phan biet hoa/thuong) — co cap tat
+    # o truoc ma cap bat o sau thi van BAT. Nen xet GIA TRI HIEU LUC, khong xet su co mat cua cap.
     n = int(env.get("GIT_CONFIG_COUNT") or 0)
-    co = {(env.get(f"GIT_CONFIG_KEY_{i}"), env.get(f"GIT_CONFIG_VALUE_{i}")) for i in range(n)}
+    cuoi = {}
+    for i in range(n):
+        cuoi[(env.get(f"GIT_CONFIG_KEY_{i}") or "").lower()] = env.get(f"GIT_CONFIG_VALUE_{i}")
     for k, v in GIT_TAT_BAO_TRI:
-        if (k, v) not in co:
+        if cuoi.get(k.lower()) != v:
             env[f"GIT_CONFIG_KEY_{n}"], env[f"GIT_CONFIG_VALUE_{n}"] = k, v
             n += 1
     env["GIT_CONFIG_COUNT"] = str(n)
@@ -3871,26 +3875,32 @@ def r547_mien_tru_phai_co_rang_ma_khong_nuot_loi_khac(d: Path):
         _bo_cua([_tiem(e) for e in vang + bat])
     chot(all(ok), "r547")
 def r548_git_con_phai_tat_bao_tri_nen(d: Path):
-    """#593 r3 M2 — NAP module (tien trinh con, moi truong SACH khoa ta) phai noi DU khoa; bien co san giu
-    nguyen; nap lai khong them trung; va git con qua `run()` thay dung gia tri. Bang khoa ghi CUNG o day,
-    doc lap voi `GIT_TAT_BAO_TRI` — suy tu no thi bo mot khoa khoi bang van xanh (F08)."""
+    """#593 r3 M2 — trong tien trinh con moi truong SACH khoa ta (co canh + xung dot `gc.auto` 0-roi-1), CHI
+    NAP module roi chup ngay: canh giu nguyen, gia tri HIEU LUC (muc cuoi) cua moi khoa dung, va git con qua
+    `m.run()` TRONG tien trinh ay thay dung. Sau do goi lan hai phai khong doi gi. Bang khoa ghi CUNG (F08)."""
     can = {"gc.auto": "0", "gc.autoDetach": "false", "maintenance.auto": "false",
            "maintenance.autoDetach": "false", "receive.autogc": "false"}
     env = {k: v for k, v in os.environ.items() if not k.startswith("GIT_CONFIG_")}
-    env.update(GIT_CONFIG_COUNT="1", GIT_CONFIG_KEY_0="r548.canh", GIT_CONFIG_VALUE_0="giu")
-    ma = ("import importlib.util as u, json, os, sys\n"
+    dau = [("r548.canh", "giu"), ("gc.auto", "0"), ("GC.auto", "1")]
+    env.update(GIT_CONFIG_COUNT=str(len(dau)), **{f"GIT_CONFIG_{t}_{i}": x for i, kv in enumerate(dau)
+                                                   for t, x in zip(("KEY", "VALUE"), kv)})
+    ma = ("import importlib.util as u, json, os, sys, tempfile\n"
+          "from pathlib import Path\n"
           "s = u.spec_from_file_location('m548', sys.argv[1]); m = u.module_from_spec(s); s.loader.exec_module(m)\n"
+          "chup = lambda: {k: v for k, v in os.environ.items() if k.startswith('GIT_CONFIG_')}\n"
+          "sau_nap = chup(); k = Path(tempfile.mkdtemp()); m.run(['git', 'init', '-q', str(k)], k)\n"
+          "gia = {x: m.run(['git', 'config', '--get', x], k, check=False).stdout.strip() for x in sys.argv[2:]}\n"
           "m._tat_bao_tri_git(os.environ)\n"
-          "print(json.dumps({k: v for k, v in os.environ.items() if k.startswith('GIT_CONFIG_')}))\n")
-    p = run([sys.executable, "-c", ma, str(Path(__file__).resolve())], d, check=False, env=env)
+          "print(json.dumps([sau_nap, gia, chup()]))\n")
+    p = run([sys.executable, "-c", ma, str(Path(__file__).resolve()), *can], d, check=False, env=env)
     if p.returncode:
         raise AssertionError(f"r548 nap module rc={p.returncode}: {p.stderr[-300:]}")
-    g = json.loads(p.stdout.strip().splitlines()[-1])
-    cap = [(g.get(f"GIT_CONFIG_KEY_{i}"), g.get(f"GIT_CONFIG_VALUE_{i}")) for i in range(int(g["GIT_CONFIG_COUNT"]))]
-    ok = [cap[0] == ("r548.canh", "giu"), len(cap) == 1 + len(can), set(cap[1:]) == set(can.items())]
-    run(["git", "init", "-q", str(d / "k")], d)
-    for k, v in can.items():
-        ok.append(run(["git", "config", "--get", k], d / "k", check=False).stdout.strip() == v)
+    sau_nap, gia, lan_hai = json.loads(p.stdout.strip().splitlines()[-1])
+    cap = [(sau_nap.get(f"GIT_CONFIG_KEY_{i}"), sau_nap.get(f"GIT_CONFIG_VALUE_{i}"))
+           for i in range(int(sau_nap["GIT_CONFIG_COUNT"]))]
+    cuoi = {k.lower(): v for k, v in cap}
+    ok = [cap[:len(dau)] == dau, all(cuoi.get(k.lower()) == v for k, v in can.items()),
+          gia == can, lan_hai == sau_nap]
     chot(all(ok), "r548")
 
 TU_KIEM = [
@@ -4647,7 +4657,9 @@ DOT_BIEN_TU_KIEM = [
     ("bo-loc-dang-ky", ("r545", "r547"), " and not any(exc is t for t in _SO_HA_TANG.tiem)", ""),
     ("git-bao-tri-bo-nap", ("r548",), "\n_tat_bao_tri_git(os.environ)\n", "\n"),
     ("git-bao-tri-ghi-de", ("r548",), 'n = int(env.get("GIT_CONFIG_COUNT") or 0)', "n = 0"),
-    ("git-bao-tri-noi-trung", ("r548",), "        if (k, v) not in co:\n            env", "        if True:\n            env"),
+    ("git-bao-tri-noi-trung", ("r548",), "        if cuoi.get(k.lower()) != v:\n            env", "        if True:\n            env"),
+    ("git-bao-tri-gia-tri-dau", ("r548",), 'cuoi[(env.get(f"GIT_CONFIG_KEY_{i}") or "").lower()] = env.get(f"GIT_CONFIG_VALUE_{i}")',
+     'cuoi.setdefault((env.get(f"GIT_CONFIG_KEY_{i}") or "").lower(), env.get(f"GIT_CONFIG_VALUE_{i}"))'),
     ("git-bao-tri-thieu-khoa", ("r548",), ',\n                   ("maintenance.autoDetach", "false"), ("receive.autogc", "false"))',
      ',\n                   ("maintenance.autoDetach", "false"))'),
 ]

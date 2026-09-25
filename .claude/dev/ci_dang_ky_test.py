@@ -686,9 +686,7 @@ def dem_la_do(chap_nhan, o_trong_ci):
 
 
 # CI-SONG-SONG-REGISTRY-G5-MOT-LAN r1 (#637): M1–M3, M6, M7. Hằng số trong W1 theo spec M3.
-GIAY_TOI_DA_MOT_BO = 1800
-GIAY_CHO_CAY_DUNG = 10
-BIEN_WORKERS = "CI_DANG_KY_WORKERS"
+GIAY_TOI_DA_MOT_BO, GIAY_CHO_CAY_DUNG, BIEN_WORKERS = 1800, 10, "CI_DANG_KY_WORKERS"
 _RE_ISO_UTC = re.compile(r"^\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d(\.\d+)?Z$")
 
 
@@ -731,20 +729,21 @@ def _chay_co_lap(argv, cwd=ROOT, goc_tam=None, gioi_han=GIAY_TOI_DA_MOT_BO):
                              stdin=subprocess.DEVNULL, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
                              start_new_session=posix)
         ban_in, _ = p.communicate(timeout=gioi_han)
-    except subprocess.TimeoutExpired:  # giết CẢ NHÓM của riêng bộ này, chờ ≤ 10 s, rồi mới dọn
-        loi, han = f"hết giờ {gioi_han} giây", time.monotonic() + GIAY_CHO_CAY_DUNG
-        with contextlib.suppress(ProcessLookupError):
-            os.killpg(p.pid, signal.SIGKILL) if posix else p.kill()
-        with contextlib.suppress(subprocess.TimeoutExpired):
-            ban_in, _ = p.communicate(timeout=GIAY_CHO_CAY_DUNG)
-        while posix and _pid_song(None, p.pid) and time.monotonic() < han:
-            time.sleep(0.05)
-        if p.returncode is None or (posix and _pid_song(None, p.pid)):
-            loi += "; KHÔNG xác nhận được cây tiến trình đã dừng"
-    except Exception as e:  # khởi chạy/chờ hỏng ⇒ lỗi hạ tầng, vẫn đi tiếp tới bước dọn
-        loi = f"khởi chạy/chờ thất bại: {type(e).__name__}: {e}"
-    if p is not None and isinstance(p.returncode, int):
-        rc = p.returncode
+    except Exception as e:  # MỌI lỗi sau khởi chạy đi CHUNG đường dừng: giết cả nhóm, chờ ≤ 10 s, rồi mới dọn
+        loi = (f"hết giờ {gioi_han} giây" if isinstance(e, subprocess.TimeoutExpired)
+               else f"khởi chạy/chờ thất bại: {type(e).__name__}: {e}")
+        if p is not None:
+            han = time.monotonic() + GIAY_CHO_CAY_DUNG
+            with contextlib.suppress(OSError):  # Windows: taskkill /T là nỗ lực, KHÔNG xác nhận được (Q6)
+                os.killpg(p.pid, signal.SIGKILL) if posix else subprocess.call(
+                    ["taskkill", "/T", "/F", "/PID", str(p.pid)], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+            with contextlib.suppress(Exception):
+                p.kill(); ban_in = p.communicate(timeout=GIAY_CHO_CAY_DUNG)[0] or ban_in
+            while posix and _pid_song(None, p.pid) and time.monotonic() < han:
+                time.sleep(0.05)
+            if p.returncode is None or not posix or _pid_song(None, p.pid):
+                loi += "; KHÔNG xác nhận được cả cây tiến trình đã dừng"
+    rc = p.returncode if p is not None and isinstance(p.returncode, int) else rc
     with contextlib.suppress(OSError):
         shutil.rmtree(tam)
     if tam.exists():
@@ -852,22 +851,24 @@ G5_SELFTEST, G5_PROBE, JOB_G5 = "python ops/cong_cu_test.py", "ops/cong_cu.py ki
 
 def loi_g5_workflow(data):
     """M6: selftest G5 ở đúng MỘT job (`gate`); probe vô điều kiện ở cả ba job, trước bước nặng đầu."""
-    jobs, loi = (data or {}).get("jobs") or {}, []
-    co_self = sorted(j for j, v in jobs.items() for b in ((v or {}).get("steps") or [])
-                     if G5_SELFTEST in str(b.get("run", "")))
-    if co_self != ["gate"]:
-        loi.append(f"selftest G5 phải ở đúng một bước của job gate, thấy {co_self}")
-    for j in JOB_G5:
-        buoc = ((jobs.get(j) or {}).get("steps")) or []
-        probe = [i for i, b in enumerate(buoc) if G5_PROBE in str(b.get("run", ""))]
-        nang = [i for i, b in enumerate(buoc) if "run" in b and i not in probe
+    # Theo DÒNG LỆNH thực thi (bỏ comment), không theo substring của cả bước (review tại chỗ lượt 1).
+    jobs, loi, co_self = (data or {}).get("jobs") or {}, [], []
+    for j, v in jobs.items():
+        dong = [(b, x.strip()) for b in ((v or {}).get("steps") or []) for x in str(b.get("run", "")).splitlines()
+                if x.strip() and not x.lstrip().startswith("#")]
+        co_self += [j] * sum(x.split("#")[0].count(G5_SELFTEST) for _, x in dong)
+        if j not in JOB_G5: continue
+        probe = [i for i, (_, x) in enumerate(dong) if x.startswith("python " + G5_PROBE)]
+        nang = [i for i, (b, _) in enumerate(dong) if i not in probe
                 and not str(b.get("name", "")).startswith(("cài ", "Force LF"))]
         if len(probe) != 1:
-            loi.append(f"{j}: probe G5 phải có đúng một lần, thấy {len(probe)}")
-        elif "if" in buoc[probe[0]] or "if" in (jobs.get(j) or {}):
+            loi.append(f"{j}: probe G5 phải có đúng một dòng lệnh, thấy {len(probe)}")
+        elif "if" in dong[probe[0]][0] or "if" in v:
             loi.append(f"{j}: probe G5 có điều kiện")
         elif nang and nang[0] < probe[0]:
-            loi.append(f"{j}: probe G5 đứng sau bước nặng '{buoc[nang[0]].get('name')}'")
+            loi.append(f"{j}: probe G5 đứng sau lệnh nặng '{dong[nang[0]][1]}'")
+    if sorted(co_self) != ["gate"] or set(JOB_G5) - set(jobs):
+        loi.append(f"selftest G5 phải có đúng một lời gọi, ở job gate; thấy {sorted(co_self)}")
     return loi
 
 
@@ -1471,9 +1472,7 @@ def phan_chung():
         _them("p637-A2-tmpdir-rieng", len(set(_td)) == 2 and all(pathlib.Path(x).parent == pathlib.Path(_g) for x in _td))
         _them("p637-A2-da-don", not any(pathlib.Path(_g).iterdir()))
         _them("p637-A2-environ-cha-khong-doi", dict(os.environ) == _env0)
-    if os.name == "nt":
-        print("p637-A3c: KHÔNG ĐO TRÊN WINDOWS (Q6) — killpg/`/proc` là đường POSIX")
-    else:
+    if os.name != "nt":  # A3c KHÔNG ĐO TRÊN WINDOWS (Q6): killpg//proc là đường POSIX
         _ngoai = subprocess.Popen([sys.executable, "-c", "import time;time.sleep(60)"])
         with tempfile.TemporaryDirectory() as _g:
             _t = time.monotonic()
@@ -1485,6 +1484,9 @@ def phan_chung():
             _them("p637-A3c-chau-da-chet", _chau > 0 and not _pid_song(_chau))
             _them("p637-A3c-dung-trong-han", time.monotonic() - _t < 2 + GIAY_CHO_CAY_DUNG + 3)
             _them("p637-A3c-da-don", not any(pathlib.Path(_g).iterdir()))
+            _rc, _bi, _loi = _chay_co_lap([sys.executable, "-c", "import time;time.sleep(60)"], goc_tam=_g, gioi_han="x")
+            _them("p637-A3c-loi-khac-het-gio-van-giet-va-cho", _rc == -signal.SIGKILL and "TypeError" in (_loi or "")
+                  and not any(pathlib.Path(_g).iterdir()))
         _them("p637-A3c-ngoai-cay-khong-bi-dung", _ngoai.poll() is None)
         _ngoai.kill(); _ngoai.wait()
     _wf0 = yaml.safe_load(CI_WORKFLOW.read_text(encoding="utf-8"))
@@ -1498,6 +1500,10 @@ def phan_chung():
     _them("p637-A7-probe-co-if", _hong_wf("gate-packet-loop", lambda b, i: b[i].update({"if": "always()"})))
     _them("p637-A7-probe-sau-buoc-nang", _hong_wf("gate-registry", lambda b, i: b.append(b.pop(i))))
     _them("p637-A7-nhan-doi-selftest", _hong_wf("gate-packet-loop", lambda b, i: b.insert(i, {"run": G5_SELFTEST})))
+    _them("p637-A7-probe-bi-comment", _hong_wf("gate-registry", lambda b, i: b[i].update(run="# " + b[i]["run"])))
+    _them("p637-A7-hai-selftest-mot-run", _hong_wf("gate", lambda b, i: b[i].update(run=b[i]["run"] + "\n" + G5_SELFTEST)))
+    _them("p637-A7-nang-truoc-probe-cung-run", _hong_wf("gate-registry", lambda b, i: b[i].update(
+        run="python .claude/dev/ci_dang_ky_test.py --chay\n" + b[i]["run"])))
     _them("p637-A7-nhan-doi-selftest-trong-gate", _hong_wf("gate", lambda b, i: b.insert(i + 1, {"run": G5_SELFTEST})))
     _them("p637-A8-khong-ung-vien", chon_so_worker({1: 100, 2: 101, 4: 102}) is None)
     _them("p637-A8-dung-bien", chon_so_worker({1: 200, 2: 110, 4: 100}) == 2)

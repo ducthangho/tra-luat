@@ -642,8 +642,7 @@ jobs:
       - name: cài rg cho G5 (cài xong đo lại)
         shell: bash
         run: bash ops/cai_cong_cu.sh rg
-      # #637: selftest T1..T8 chỉ chạy ở job `gate`; job này chỉ probe (chốt M6 ở ci_dang_ky_test.py).
-      - name: G5 probe ban ke cong cu (packet #290)
+      - name: G5 probe ban ke cong cu (#290; selftest T1..T8 chi o job gate, chot M6 #637)
         shell: bash
         run: python ops/cong_cu.py kiem-tra --json
       - name: cài Ruff 0.15.15 và in probe dương
@@ -702,8 +701,7 @@ jobs:
       - name: cài rg cho G5 (cài xong đo lại)
         shell: bash
         run: bash ops/cai_cong_cu.sh rg
-      # #637: selftest T1..T8 chỉ chạy ở job `gate`; job này chỉ probe (chốt M6 ở ci_dang_ky_test.py).
-      - name: G5 probe ban ke cong cu (packet #290)
+      - name: G5 probe ban ke cong cu (#290; selftest T1..T8 chi o job gate, chot M6 #637)
         shell: bash
         run: python ops/cong_cu.py kiem-tra --json
       - name: cài Ruff 0.15.15 và in probe dương

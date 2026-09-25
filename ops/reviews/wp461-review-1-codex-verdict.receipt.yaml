@@ -14,7 +14,7 @@ lease_ghi_bien_nhan_ban_dau: wp461-be-mat-thu-hai-cua-codex-exec-1g4-claude-2026
 lease_ghi_bien_nhan_sua: wp461-be-mat-thu-hai-cua-codex-exec-1g5-claude-20260924
 lease_ghi_bien_nhan_g6: wp461-be-mat-thu-hai-cua-codex-exec-1g6-claude-20260925
 lease_ghi_bien_nhan: wp461-be-mat-thu-hai-cua-codex-exec-1g7-claude-20260925
-spec_bookkeeping: r5 (sha256 4d02e418457cac58404475353ec682cfa4379781ca26ab491354df7c2ddcaa49, quyet dinh chu kho issues/461#issuecomment-5825489539; thay r4 eda1dd12...)
+spec_bookkeeping: r5 (sha256 4d02e418457cac58404475353ec682cfa4379781ca26ab491354df7c2ddcaa49, quyet dinh chu kho issues/461#issuecomment-5825489539; thay r4 sha256 eda1dd127d9595bcd19219b8113451939558ed7b39fffd3e5b317816a1dfb056)
 lease_ghi_bien_nhan_ghi_chu: >-
   g4 (r3 + chi thi 5820263820): ban dau — verdict LF 598 B, receipt lan dau. g5 (r3 + uy quyen 5820541861): sua
   verdict thanh nguyen byte 609 B, folded YAML, anchor/readback/attribution. g6 (spec r4 DA DONG BANG, write set
@@ -39,7 +39,7 @@ assurance_ghi_chu: >-
   `cross_approved`/`same_provider_approved`. Packet r3 nhắm `cross_approved` (spec r3, lease g3); lượt
   connector sạch trên exact head là bằng chứng review chéo về NGƯỜI GỌI nhưng không chứng minh được model
   ⇒ biên nhận này chỉ khai `advisory_review`, không tự cấp mức cao hơn. Chủ kho land #617 bằng merge
-  commit 6980e5bf (17:54:50Z) — quyết định land là hiện vật riêng §13.
+  commit 6980e5bf04e4e5b8b75e5817578f1aba13f2f5ab (17:54:50Z = merged_at API pull 617; committer date 17:54:49Z) — quyết định land là hiện vật riêng §13.
 so_p0: 0
 so_p1: 0
 so_p2: 0
@@ -54,7 +54,7 @@ doi_chieu_luot_truoc:
 - luot: >-
     codex trên PR #616 (hồ sơ lease g3 + spec r3, review 5308350641)
   phan: >-
-    2 P1 + 1 P2 về SPEC/HỒ SƠ (M4 CHANGELOG-manifest xác nhận; tổ tiên d644f197 bác; số Q2 109 xác nhận)
+    2 P1 + 1 P2 về SPEC/HỒ SƠ (M4 CHANGELOG-manifest xác nhận; tổ tiên d644f197ab357ade9ed70cc4c3902bac37360b8c bác; số Q2 109 xác nhận)
     — không thuộc lượt review mã này; đã trả lời từng thread; hai khuyết tật spec r3 ghi ở #461.
 luot_2_ngoai_bien_nhan: >-
   Codex lượt 2/2 trên #617 tự bắn khi bỏ draft (17:54:41Z), 9 giây trước khi chủ kho merge (17:54:50Z);
@@ -70,7 +70,7 @@ model_reviewer_identity:
   transport: machine
   surface_nghia: >-
     GitHub App `chatgpt-codex-connector[bot]` review trên PR — bề mặt `codex_service` theo
-    hợp đồng dữ liệu mà CHÍNH lượt review này chấm (#617 land ở master 6980e5bf, Mission #470 Q1)
+    hợp đồng dữ liệu mà CHÍNH lượt review này chấm (#617 land ở master 6980e5bf04e4e5b8b75e5817578f1aba13f2f5ab, Mission #470 Q1)
   model_yeu_cau: KHONG_DO_DUOC
   effort_yeu_cau: KHONG_DO_DUOC
   model_da_chay: KHONG_DO_DUOC
@@ -93,7 +93,7 @@ anchor:
   loai: canonical_ancestry
   cuong_do: >-
     candidate ancestry only; canonical inclusion pending — commit verdict ef72264cb268643a89df3e15cf6cb840da92307b (evidence_url)
-    chỉ ở tổ tiên PR #625, vào master khi PR land bằng merge commit; riêng reviewed_sha 5e285188 ĐÃ
+    chỉ ở tổ tiên PR #625, vào master khi PR land bằng merge commit; riêng reviewed_sha 5e2851881e810b39ebee6884371e5b3e229a01d7 ĐÃ
     canonical qua merge commit 6980e5bf04e4e5b8b75e5817578f1aba13f2f5ab (PR #617)
   gioi_han: >-
     Validator đo tổ tiên trên checkout hiện hành, không chứng minh canonical inclusion của
@@ -345,7 +345,7 @@ pending:
 no_da_dong:
 - >-
   write set bien nhan nay ngoai spec r3 §4 (A12): da dong bang revision — spec r4/r5 §3 chua dung 3 duong write set
-  (write_set_hash 021c0f52...); truoc do hop thuc bang chi thi 5820263820.
+  (write_set_hash 021c0f52957836d5c7ea66de4bb3b1a5a48d3b25fcaff95c69b88eec61faaed8); truoc do hop thuc bang chi thi 5820263820.
 lich_su_ban_ung_vien:
   ghi_chu: >-
     Receipt CHUA duoc giao (chua o master). Danh sach = cac ban UNG VIEN truoc commit nay, cu -> moi, sinh tu
@@ -361,3 +361,4 @@ lich_su_ban_ung_vien:
   - {commit: ab691999a3566c32552cfd5649b442c0053e1e43, luc: '2026-09-25T01:27:56+00:00', receipt_sha256: 3da9a32d4cabf4bad677d2af5d66a967856910d1e5bc4d2b604f1a0dbddde842}
   - {commit: 45de8954878519d0886942e45c149790aadea710, luc: '2026-09-25T01:45:36+00:00', receipt_sha256: f0a97f57c5159cf5c00f620a90de9e57e849791f07693a589b06cd471f2bc45d}
   - {commit: 9b35593150d834308d13765bb33cc6fd753ed6c6, luc: '2026-09-25T02:13:19+00:00', receipt_sha256: 75504ae0f7b0ff2f2f86179b3fd9d6d4deb4a9d6a77feb2a6fa1ce5f858d5a2c}
+  - {commit: 2dbc3c6705dfe41bc4cd663dde32d3280f520d0b, luc: '2026-09-25T02:52:20+00:00', receipt_sha256: 73cf7a24ba73eddbdefaf4362f6c4fd4e6adc8e4b8221454610ac95a121ac5ee}

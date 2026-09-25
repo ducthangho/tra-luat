@@ -240,3 +240,13 @@ write_set_do_luc_cap:
   ket_qua: 'TRUOC khi commit g12: rc=12 KHONG_XAC_DINH — dung mot ly do: bia mo mot chieu g11 -> g12 (g12 chua ton tai).
     Nguoi giu con han khac: chi g10 (CON_HAN · DA_BI_THAY_THE). Moi lease khac cham hai duong da HET_HAN. Do lai SAU
     commit g12 — ghi trong comment bao cao.'
+
+# ───────────────────────── BIA MỘ — vế THỨ NHẤT của dấu HAI CHIỀU ─────────────────────────
+# Thêm 2026-09-25 khi cấp g13. g12 CÒN HIỆU LỰC (hạn 2026-09-26T06:00:00Z) nên bia mộ hai chiều là
+# BẮT BUỘC. REVISION mới (r12 -> r13): protocol §3.2.
+da_bi_thay_the: r378-symlink-doi-dac-quyen-r13-g13-claude
+da_bi_thay_the_luc: '2026-09-25T14:19:15Z'
+da_bi_thay_the_luc_nguon: 'date -u luc commit bia mo nay; commit dung CHINH gia tri ay lam committer date (GIT_COMMITTER_DATE).'
+da_bi_thay_the_vi_sao: 'r13 (issues/574#issuecomment-5833730614, chủ kho: "Mở r13 + g13 (đề xuất)") — tự kiểm con trỏ theo miền
+  hữu hạn + CLI thật (60 ca); head không đổi 76f199e. spec_hash r13 =
+  3c812540bd58b19099906df8e6fb00e22ec21728c1c880087ada4406af33b318.'

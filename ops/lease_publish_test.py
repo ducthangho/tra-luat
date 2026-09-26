@@ -9357,12 +9357,12 @@ _KIEU_T191 = (("truc", str), ("ke-co", _B), ("ke-khong", _L))
 # r16 (lượt 25): VỊ TRÍ sinh bằng máy. Mỗi mẫu gốc một câu; MỌI hằng số nguyên trong nó lần lượt thành chốt `len(str(@))`, nên
 # mỗi (nút cha, trường con, toán tử) có trong mẫu gốc đều có dòng, bọc `ke-co` ⇒ (0,1,1) và `ke-khong` ⇒ (1,0,1) (luật viết tay).
 _GOC_T191 = (*(f"_a = 1 {o} 1" for o in "+ - * / // % ** << >> | ^ & == != < <= > >=".split()), "_a = 0 < 1 < 1",
-             "_a = 1 in (1,)", "_a = 1 not in (1,)", "_a = [1] is None", "_a = [1] is not None", "_a = -1", "_a = +1", "_a = ~1",
+             "_a = 1 in (1,)", "_a = 1 not in (1,)", "_a = ([1] * 9)[1] is ([1] * 9)[1]", "_a = ([1] * 9)[1] is not ([1] * 9)[1]", "_a = -1", "_a = +1", "_a = ~1",
              "_a = not 1", "for _i in (1,):\n    pass", "_a = [1, 1, 1, 1, 1][0:1:1]", "_a = {1: 1}", "_a = dict(k=1)",
-             "_a = f'{1:>{1}}'", "_d = {}\n_d[1] = 1", *(f"_n = 1\n_n {o}= 1" for o in "+ - * / // % ** << >> | ^ &".split()), "_a = [*(1,)]", "_a = {1}", "(_y := 1)", "assert 1",
+             "_a = f'{1:>{1}}'", "_d = {}\n_d[1] = 1", *(f"_l = [1] * 9\n_l[1] {o}= 1" for o in "+ - * / // % ** << >> | ^ &".split()), "_a = [*(1,)]", "_a = {1}", "(_y := 1)", "assert 1",
              "_a = {1: 1 for _i in (1,) if 1}", "try:\n    _a = 1\nexcept ValueError:\n    pass\nelse:\n    _a = 1\nfinally:\n    _a = 1",
              "_l = [1, 1]\ndel _l[0:1]", "try:\n    raise ValueError(1)\nexcept ValueError:\n    pass", "with memoryview(b'x') as _m:\n    _a = 1",
-             "_l = [0] * 9\n_l[1] += 1", "_d = {}\n_d[1]: int = 1", "_d = {}\nfor _d[1] in (1,):\n    pass", "_a = [str] * 5\n_a[0](1)",
+             "_d = {}\n_d[1]: int = 1", "_d = {}\nfor _d[1] in (1,):\n    pass", "_a = [str] * 5\n_a[0](1)",
              "_d = {}\nwith memoryview(b'x') as _d[1]:\n    pass", "_d = {}\n_a = [1 for _d[1] in (1,)]", "_a = list(1 for _i in (1,))",
              "_a = {1 for _i in (1,)}", "match 1:\n    case _:\n        pass", "try:\n    assert 0, 1\nexcept AssertionError:\n    pass",
              "try:\n    raise ValueError\nexcept (ValueError,) * 1:\n    pass", "try:\n    raise ValueError from ValueError(1)\nexcept ValueError:\n    pass",

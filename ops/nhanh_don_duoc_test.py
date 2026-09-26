@@ -22,6 +22,36 @@ sys.dont_write_bytecode = True
 HERE = Path(__file__).resolve().parent
 TOOL = HERE / "nhanh_don_duoc.py"
 
+# #593 r3 M1 — TAT bao tri git NEN o moi tien trinh git con, NOI THEM vao GIT_CONFIG_* (moi truong co the
+# da mang credential git qua chinh co che nay — ghi de la mat no). gate-registry do master 4c53c76 (job
+# 107949420933): `td.cleanup()` cua `kho_bare` gap ENOTEMPTY tren `remote.git`. Gia thuyet — KHONG DO DUOC
+# tai cho (git 2.43 o day, 2.55 tren CI): `maintenance`/`gc --auto` tach nen sau push/fetch van ghi vao do.
+GIT_TAT_BAO_TRI = (("gc.auto", "0"), ("gc.autoDetach", "false"), ("maintenance.auto", "false"),
+                   ("maintenance.autoDetach", "false"), ("receive.autogc", "false"))
+def _tat_bao_tri_git(env) -> None:
+    # r3 vong 1 P2: git dung muc CUOI cua moi khoa (ten khoa khong phan biet hoa/thuong) — co cap tat
+    # o truoc ma cap bat o sau thi van BAT. Nen xet GIA TRI HIEU LUC, khong xet su co mat cua cap.
+    n = int(env.get("GIT_CONFIG_COUNT") or 0)
+    cuoi = {}
+    for i in range(n):
+        cuoi[(env.get(f"GIT_CONFIG_KEY_{i}") or "").lower()] = env.get(f"GIT_CONFIG_VALUE_{i}")
+    for k, v in GIT_TAT_BAO_TRI:
+        if cuoi.get(k.lower()) != v:
+            env[f"GIT_CONFIG_KEY_{n}"], env[f"GIT_CONFIG_VALUE_{n}"] = k, v
+            n += 1
+    env["GIT_CONFIG_COUNT"] = str(n)
+    # r3 vong 2 P2: `GIT_CONFIG_PARAMETERS` (tu `git -c`) THANG cac muc dem so; co thi noi duoi cua ta vao CUOI.
+    duoi = " ".join(f"'{k}'='{v}'" for k, v in GIT_TAT_BAO_TRI)
+    tham = env.get("GIT_CONFIG_PARAMETERS") or ""
+    if tham and not tham.endswith(duoi):
+        env["GIT_CONFIG_PARAMETERS"] = f"{tham} {duoi}"
+_tat_bao_tri_git(os.environ)
+def _tat_bao_tri_kho_bare(remote: Path) -> None:
+    # r3 CI 88afd8d van ENOTEMPTY: transport cuc bo GO GIT_CONFIG_COUNT/PARAMETERS khoi receive-pack (do: hook
+    # pre-receive khong thay gc.auto). Nen ghi THANG vao config kho dich — ghi tep, KHONG phong tien trinh.
+    with (remote / "config").open("a", encoding="utf-8", newline="\n") as f:
+        f.write("".join(f"[{k.split('.')[0]}]\n\t{k.split('.')[1]} = {v}\n" for k, v in GIT_TAT_BAO_TRI))
+
 # ---- M1: tin hieu "chot cua CHINH ca nay hong" -------------------------------
 # Ma HA TANG (`run`, `nap_tool`, `chay_dot_bien`) nem `AssertionError` TRAN va
 # KHONG bao gio nem lop nay. Nho vay bo cham phan biet duoc "dich chet dung chot"
@@ -426,6 +456,7 @@ def kho_bare(*, mac_dinh: str = "main", a: bool = False, b: bool = False,
     td = tempfile.TemporaryDirectory()
     root, remote, work = Path(td.name), Path(td.name) / "remote.git", Path(td.name) / "work"
     run(["git", "init", "--bare", str(remote)], root)
+    _tat_bao_tri_kho_bare(remote)
     _dau_hieu_kho_bare(remote, "ngay sau `git init --bare`")
     run(["git", "init", "-b", mac_dinh, str(work)], root)
     run(["git", "config", "user.name", "test"], work)
@@ -3854,6 +3885,40 @@ def r547_mien_tru_phai_co_rang_ma_khong_nuot_loi_khac(d: Path):
         Path.read_text, m.run = doc, run_goc
         _bo_cua([_tiem(e) for e in vang + bat])
     chot(all(ok), "r547")
+def r548_git_con_phai_tat_bao_tri_nen(d: Path):
+    """#593 r3 M2 — trong tien trinh con moi truong SACH khoa ta (co canh + xung dot `gc.auto` 0-roi-1), CHI
+    NAP module roi chup ngay: canh giu nguyen, gia tri HIEU LUC (muc cuoi) cua moi khoa dung, va git con qua
+    `m.run()` TRONG tien trinh ay thay dung. Sau do goi lan hai phai khong doi gi. Bang khoa ghi CUNG (F08)."""
+    can = {"gc.auto": "0", "gc.autoDetach": "false", "maintenance.auto": "false",
+           "maintenance.autoDetach": "false", "receive.autogc": "false"}
+    goc = {k: v for k, v in os.environ.items() if not k.startswith("GIT_CONFIG_")}
+    dau = [("r548.canh", "giu"), ("gc.auto", "0"), ("GC.auto", "1")]
+    tham = "'gc.auto'='1' 'maintenance.auto'='true'"
+    ma = ("import importlib.util as u, json, os, sys\n"
+          "from pathlib import Path\n"
+          "s = u.spec_from_file_location('m548', sys.argv[1]); m = u.module_from_spec(s); s.loader.exec_module(m)\n"
+          "chup = lambda: {k: v for k, v in os.environ.items() if k.startswith('GIT_CONFIG_')}\n"
+          "sau_nap = chup(); k = Path(sys.argv[2]); m.run(['git', 'init', '-q', str(k)], k.parent)\n"
+          "gia = {x: m.run(['git', 'config', '--get', x], k, check=False).stdout.strip() for x in sys.argv[3:]}\n"
+          "m._tat_bao_tri_git(os.environ)\n"
+          "print(json.dumps([sau_nap, gia, chup()]))\n")
+    ok = []
+    for i, them in enumerate(({}, {"GIT_CONFIG_PARAMETERS": tham})):
+        env = dict(goc, GIT_CONFIG_COUNT=str(len(dau)), **them, **{f"GIT_CONFIG_{t}_{j}": x for j, kv in
+                                                                  enumerate(dau) for t, x in zip(("KEY", "VALUE"), kv)})
+        p = run([sys.executable, "-c", ma, str(Path(__file__).resolve()), str(d / f"k{i}"), *can], d, check=False, env=env)
+        if p.returncode:
+            raise AssertionError(f"r548 nap module rc={p.returncode}: {p.stderr[-300:]}")
+        sau_nap, gia, lan_hai = json.loads(p.stdout.strip().splitlines()[-1])
+        cap = [(sau_nap.get(f"GIT_CONFIG_KEY_{j}"), sau_nap.get(f"GIT_CONFIG_VALUE_{j}"))
+               for j in range(int(sau_nap["GIT_CONFIG_COUNT"]))]
+        cuoi = {k.lower(): v for k, v in cap}
+        ok += [cap[:len(dau)] == dau, all(cuoi.get(k.lower()) == v for k, v in can.items()),
+               gia == can, lan_hai == sau_nap, sau_nap.get("GIT_CONFIG_PARAMETERS", "").startswith(them.get("GIT_CONFIG_PARAMETERS", ""))]
+    td, remote, _ = kho_bare()      # kho DICH doc tu tep config cua no, moi truong KHONG co GIT_CONFIG_*
+    with td:
+        ok += [run(["git", "config", "--get", k], remote, env=goc, check=False).stdout.strip() == v for k, v in can.items()]
+    chot(all(ok), "r548")
 
 TU_KIEM = [
     ("r542", r542_kenh_hoan_tat_khong_duoc_xoa_chan_doan, True),
@@ -3903,6 +3968,7 @@ TU_KIEM = [
     ("r545", r545_so_ha_tang_moi_diem_nuot_ghi_va_runner_doi_nhan, True),
     ("r546", r546_ma_tran_doc_hong_qua_runner_that, True),
     ("r547", r547_mien_tru_phai_co_rang_ma_khong_nuot_loi_khac, True),
+    ("r548", r548_git_con_phai_tat_bao_tri_nen, True),
 ]
 
 # ---- A6: MOI ca tu kiem phai co MOT dot bien rieng lam no DO --------------
@@ -4606,6 +4672,15 @@ DOT_BIEN_TU_KIEM = [
     ("r547-thu-moi-tep", ("r547",), "            if self in proof:\n                vang.append(e)", "            if True:\n                vang.append(e)"),
     ("loc-dang-ky-theo-thong-diep", ("r547",), "not any(exc is t for t in _SO_HA_TANG.tiem)", "not any(str(exc) == str(t) for t in _SO_HA_TANG.tiem)"),
     ("bo-loc-dang-ky", ("r545", "r547"), " and not any(exc is t for t in _SO_HA_TANG.tiem)", ""),
+    ("git-bao-tri-bo-nap", ("r548",), "\n_tat_bao_tri_git(os.environ)\n", "\n"),
+    ("git-bao-tri-ghi-de", ("r548",), 'n = int(env.get("GIT_CONFIG_COUNT") or 0)', "n = 0"),
+    ("git-bao-tri-noi-trung", ("r548",), "        if cuoi.get(k.lower()) != v:\n            env", "        if True:\n            env"),
+    ("git-bao-tri-bo-tham-so", ("r548",), '        env["GIT_CONFIG_PARAMETERS"] = f"{tham} {duoi}"', "        pass"),
+    ("git-bao-tri-bo-kho-bare", ("r548",), "    _tat_bao_tri_kho_bare(remote)\n", ""),
+    ("git-bao-tri-gia-tri-dau", ("r548",), 'cuoi[(env.get(f"GIT_CONFIG_KEY_{i}") or "").lower()] = env.get(f"GIT_CONFIG_VALUE_{i}")',
+     'cuoi.setdefault((env.get(f"GIT_CONFIG_KEY_{i}") or "").lower(), env.get(f"GIT_CONFIG_VALUE_{i}"))'),
+    ("git-bao-tri-thieu-khoa", ("r548",), ',\n                   ("maintenance.autoDetach", "false"), ("receive.autogc", "false"))',
+     ',\n                   ("maintenance.autoDetach", "false"))'),
 ]
 
 
@@ -4622,8 +4697,9 @@ NHOM_BAT_BUOC = frozenset({"r501", "r502", "r503", "r504", "r505", "r506",
 NHOM_BAT_BUOC = NHOM_BAT_BUOC | {"r539", "r540", "r541", "r542"}
 NHOM_BAT_BUOC = NHOM_BAT_BUOC | {"r543", "r544"}      # #593 r1
 NHOM_BAT_BUOC = NHOM_BAT_BUOC | {"r545", "r546", "r547"}      # #593 r2
+NHOM_BAT_BUOC = NHOM_BAT_BUOC | {"r548"}      # #593 r3
 
-SAN_NHOM = 47
+SAN_NHOM = 48
 
 
 # #568 r4 / B1 — `str.splitlines()` coi CHIN ky tu NGOAI `\n` la het dong, con

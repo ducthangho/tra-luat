@@ -1,0 +1,148 @@
+# LEASE — WP461-BE-MAT-THU-HAI-CUA-CODEX revision 4 / generation 6 — HO SO BIEN NHAN (bookkeeping) tu spec r4 DA DONG BANG
+# GHI HO theo comment DONG BANG r4 cua chu kho (issues/461#issuecomment-5824676204, OWNER, 2026-09-25T00:38:53Z)
+# va chi thi trong phien "Dong bang r4, ghi lease g6 di" / "Da dang". Phien claude KHONG tu cap: moi truong o day
+# chep tu comment ay hoac do duoc; han KHONG co trong chi thi (placeholder) => 90 phut §12.
+
+schema_version: 2
+event: executor_lease_granted
+
+packet_issue: 461
+packet_id: wp461
+packet_ten: WP461-BE-MAT-THU-HAI-CUA-CODEX
+mission_issue: 470
+revision: 4
+generation: 6
+lease_id: wp461-be-mat-thu-hai-cua-codex-exec-1g6-claude-20260925
+thay_the_cho:
+  - wp461-be-mat-thu-hai-cua-codex-exec-1g5-claude-20260924
+thay_the_cho_ghi_chu: >-
+  g5 (tu r3 + chi thi 5820541861, het han 01:27:45Z) con hieu luc luc ghi g6 => bia mo HAI CHIEU (da_bi_thay_the
+  trong tep g5) de KHONG co hai lease song giao write set (bai hoc P1 thread 4097579866). g4 het han 20:28:03Z,
+  g3 het han 18:35:59Z — la lich su, khong bia mo. Lich su commit cua PR #625 giu nguyen.
+role: executor
+provider: claude
+executor: claude
+model: fable-5.1
+effort: xhigh
+reviewer_provider: openai_codex
+reviewer_model_yeu_cau: gpt-6-astra
+reviewer_effort_yeu_cau: medium
+reviewer_ghi_chu: >-
+  Qua GitHub App connector khong chon duoc model/effort va khong co telemetry => bien nhan khai KHONG_DO_DUOC.
+environment: cloud
+assurance_target: advisory_review
+access: read-write
+risk: sensitive
+review_class: sensitive
+effective_review_class: sensitive
+
+spec_path: ops/specs/wp461-be-mat-thu-hai-cua-codex-r4.md
+spec_ref: refs/heads/claude/spec-wp461-r4-20260925
+spec_source_oid: a9c3907b582508e11ccbed024981bbad3a1bd16d
+spec_sha256: eda1dd127d9595bcd19219b8113451939558ed7b39fffd3e5b317816a1dfb056
+spec_hash: eda1dd127d9595bcd19219b8113451939558ed7b39fffd3e5b317816a1dfb056
+spec_hash_formula: SHA256 of UTF-8 LF Git blob bytes at spec_source_oid:spec_path
+spec_hash_do_tu_dau: >-
+  `git show a9c3907b582508e11ccbed024981bbad3a1bd16d:ops/specs/wp461-be-mat-thu-hai-cua-codex-r4.md | sha256sum`
+  => eda1dd12... (10697 B, blob 856d8141182e6cdf079d400d44213e6980b672c4). Do lai ngay truoc khi ghi; trung voi
+  con so chu kho ghi trong comment dong bang. Spec r4 duoc merge --no-ff vao nhanh lease nay (nhu g3) de
+  lease_publish.py check doc duoc prompt_path; PR #628 (spec) van mo.
+spec_ban: r4
+spec_hash_ban_truoc: 7a44e0e0cb7651b980144244e828821d93af0200f7d6083b112ad3b022b2f715
+prompt_path: ops/specs/wp461-be-mat-thu-hai-cua-codex-r4.md
+prompt_sha256_required: eda1dd127d9595bcd19219b8113451939558ed7b39fffd3e5b317816a1dfb056
+
+write_set:
+  - ops/reviews/README.md
+  - ops/reviews/wp461-review-1-codex-verdict.md
+  - ops/reviews/wp461-review-1-codex-verdict.receipt.yaml
+write_set_hash: 021c0f52957836d5c7ea66de4bb3b1a5a48d3b25fcaff95c69b88eec61faaed8
+write_set_hash_cach_tinh: >-
+  sha256 cua cac duong dan DA SAP XEP, noi bang LF, co LF cuoi, utf-8 — cung cong thuc g2..g5. BANG write set §3
+  cua spec r4 (bam 021c0f52...) — lan dau write set lease NAM TRON trong spec da bam (tra P1 thread 4099812192).
+write_set_da_do_truoc_khi_cap: >-
+  Do 2026-09-25T00:46:23Z tren origin/master 601a0f18 sau khi dong bo moi nhanh cuc bo: ai-dang-giu README => NGUOI_GIU 0;
+  verdict/receipt => NGUOI_GIU 1 = g5 (chinh lease bi thay the o day, bia mo hai chieu cung commit). Lease g18
+  cua wp523 (con hieu luc toi 01:27:45Z) KHONG co README trong write set => khong giao.
+
+branch: claude/wp461-g4-receipt
+branch_ghi_chu: >-
+  Tiep tuc nhanh cua PR #625 (ten mang 'g4') — khong mo PR moi de khong reset bo dem codex; commit ghi ro lease g6.
+branch_ownership: exclusive
+target_branch_neu_land: master
+base_sha: 601a0f18
+start_from_sha: 518bbe04adca684a9f5bc89c8483a47abc20d4e3
+continuation_base: 601a0f18
+reviewed_sha_required: 541fa6ca9ba78d2669261b528572dbc05b53ea87
+reviewed_sha_required_nghia: >-
+  Bootstrap base cua nhanh PR #625 (tach nghia nhu g4/g5): verdict cua PR bookkeeping phai neo exact head THAT.
+bien_nhan_reviewed_sha_bat_buoc: 5e2851881e810b39ebee6884371e5b3e229a01d7
+
+granted_by: ducthangho
+granted_on_instruction: https://github.com/ducthangho/tra-luat/issues/461#issuecomment-5824676204
+granted_on_instruction_nguyen_van: >-
+  'DONG BANG wp461 r4 — ho so bien nhan luot review 1 (bookkeeping). Reviewed commit:
+  a9c3907b582508e11ccbed024981bbad3a1bd16d. blob 856d8141... · sha256 eda1dd12... · 10697 B · thay_the_ban r3
+  (7a44e0e0...). write set 3 duong ops/reviews/README.md · wp461-review-1-codex-verdict.md ·
+  wp461-review-1-codex-verdict.receipt.yaml. executor claude · reviewer openai_codex (gpt-6-astra, effort >= medium;
+  App => KHONG_DO_DUOC) · assurance bien nhan advisory_review. Cap lease generation 6 cho executor claude tu r4, han:
+  <gio UTC hoac de trong => 90 phut §12>. Nhanh: claude/wp461-g4-receipt (PR #625).'
+granted_on_instruction_da_doc_nguoc: >-
+  Doc lai qua API 2026-09-25T00:46:23Z: id=5824676204, user.login=ducthangho, author_association=OWNER,
+  created_at=2026-09-25T00:38:53Z, issue 461. Hash/blob/commit khop 3/3 voi origin/claude/spec-wp461-r4-20260925.
+  Noi dung do phien nay soan, chu kho dan ('Da dang').
+nang_tran_codex: https://github.com/ducthangho/tra-luat/issues/461#issuecomment-5824625817
+nang_tran_codex_ghi_chu: >-
+  tran_cu 2 luot/PR => tran_moi toi khi head hien hanh het P1/P2/P3, toi da 6 luot/PR (#624, #625); luot App tu ban
+  cung dem. #625 da dung: 2 executor + 1 App = 3.
+han_khong_co_trong_chi_thi: >-
+  Comment ghi 'han: <gio UTC hoac de trong => 90 phut §12>' — chu kho de trong => 90 phut ke tu luc ghi.
+  Het han thi handoff §7; KHONG tu gia han.
+authority_basis: '§2 — start/pause/resume/reroute/override/authorize thuoc chu kho'
+recorded_by: claude-session
+recorder_is_dispatcher: false
+
+leased_at_utc: '2026-09-25T00:46:23Z'
+lease_expires_at_utc: '2026-09-25T02:16:23Z'
+heartbeat_at: '2026-09-25T00:46:23Z'
+lease_until: '2026-09-25T02:16:23Z'
+run_minutes: 90
+heartbeat_required_minutes: 30
+attempts_used: 1
+attempts_used_ghi_chu: >-
+  Cong don theo packet: g3 mot run san pham (PR #617). g4/g5/g6 la bookkeeping. KHONG reset khi doi revision (r4 §1).
+attempts_limit: 3
+
+muc_tieu: >-
+  Theo spec r4 §2 (M1 verdict nguyen byte, M2 receipt v2, M3 hang README) va va cac finding con mo cua luot App
+  #625 (review 5311890412): README cot byte 609 + ghi lease ban dau/sua (thread 4099876831, 4099876847);
+  P1 diff --check (4099876837): chinh sach hep nam trong r4 §4 (tep verdict raw KHONG qua diff --check); P1 to tien
+  (4099876821) do tren squash tong hop — bac. Roi goi luot codex ke tiep theo nang_tran.
+
+dieu_kien_dung:
+  - 'S1 — cham duong ngoai BA duong r4 §3. DUNG, revision.'
+  - 'S2 — tep san pham trong diff. DUNG.'
+  - 'S3 — sua spec r4/r3, verdict/receipt/lease DA GIAO. DUNG.'
+  - 'S4 — A1/A5 do => khong push (rc doc truc tiep).'
+  - 'S5 — surface phai la codex_service; S20 ca do chay tren ban sao roi truoc khi push.'
+  - 'S6 — moi scalar YAML co " #" phai folded/quoted; assert sau parse (r4 A4).'
+  - 'S7 — codex: theo nang_tran 5824625817 (toi da 6 luot/PR); luot App tu ban cung dem; khong mo PR moi.'
+  - 'S8 — write set KHONG giao voi lease con hieu luc (g5 da bia mo; g18 khong co README).'
+  - 'S9 — commit tong hop reviewer tu dung => KHONG DO DUOC, chi cham exact head.'
+  - 'S10 — HET HAN => ngung ghi, handoff §7, xin generation moi neo chi thi ben.'
+
+cam_tuyet_doi:
+  - Khong sua spec; khong sua hien vat da giao; khong alias; khong mien tru moi
+  - Khong tu review / approve / merge / land; land chi bang merge commit (evidence_url neo commit verdict)
+  - Khong CI tay, khong Windows, khong LIVE/deploy
+  - Dung khi het han, danh tinh stale, ngoai scope, hoac thieu bang chung
+
+chua_do_duoc:
+  - 'Han lease: chu kho de trong => §12.'
+  - 'Danh tinh nguoi ky: #566.'
+  - 'Serving model/effort/session cua reviewer qua App: KHONG DO DUOC.'
+  - 'git diff --check bao trailing whitespace tren tep verdict raw — r4 §4 khai day KHONG la cong cua packet (chinh sach hep cho tep verdict raw); khong cong CI nao chay diff --check. Co che .gitattributes (whitespace=-trailing-space cho *-codex-verdict.md) DA DO CHAY DUOC (rc 2 -> 0, hash khong doi) nhung ngoai write set r4 => de xuat cho chu kho, khong tu them.'
+
+da_bi_thay_the: wp461-be-mat-thu-hai-cua-codex-exec-1g7-claude-20260925
+da_bi_thay_the_luc: '2026-09-25T02:08:31Z'
+da_bi_thay_the_boi_ai: 'ducthangho — quyet dinh issues/461#issuecomment-5825489539; phien claude ghi ho (g6 con hieu luc toi 02:16:23Z)'

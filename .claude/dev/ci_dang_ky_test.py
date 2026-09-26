@@ -693,6 +693,55 @@ def _gio_utc(): return datetime.datetime.now(datetime.timezone.utc)
 def _iso(dt): return dt.astimezone(datetime.timezone.utc).isoformat(timespec="milliseconds").replace("+00:00", "Z")
 
 
+# CI-REGISTRY-DOT-BIEN-THEO-DIFF r1 (#643): M1 kế hoạch theo diff (fail-closed), M2 bằng chứng chế độ, M4 chốt env.
+# LỆCH protocol :839-840 CÓ DUYỆT (spec §2): chỉ VÒNG ĐỘT BIẾN của bộ trong `NHE` bị bỏ; T1..T8 và mọi bộ khác chạy mọi
+# lượt. Cờ nhẹ là cờ SẴN CÓ của bộ (`ops/nhanh_don_duoc_test.py:5184`), không sửa bộ nào.
+NHE = {"ops/nhanh_don_duoc_test.py": {"NHANH_DON_DUOC_KHONG_DOT_BIEN": "1"}}
+MAU_DAY_DU = {"ops/nhanh_don_duoc_test.py": r"^MUTANT: giet = (\d+) · khong giet = 0 · khong do duoc = 0 / tong (\d+)$"}
+VUNG_CHUNG = (".github/workflows/ci.yml", ".claude/dev/ci_dang_ky_test.py", "requirements.txt")
+DAY_DU, CHE_DO_NHE, BIEN_SU_KIEN, BIEN_GOC, BIEN_DAU = "day_du", "nhe", "CI_DANG_KY_SU_KIEN", "CI_DANG_KY_GOC", "CI_DANG_KY_DAU"
+ENV_REGISTRY = {BIEN_WORKERS: "2", BIEN_SU_KIEN: "${{ github.event_name }}",
+                BIEN_GOC: "${{ github.event.pull_request.base.sha || github.event.before }}",
+                BIEN_DAU: "${{ github.event.pull_request.head.sha || github.sha }}"}
+
+
+def doc_diff(env=os.environ, chay=subprocess.run):
+    """M1: tập đường dẫn đổi, hoặc None = KHÔNG ĐO ĐƯỢC (⇒ đủ). Ba trạng thái: tập · rỗng · None. `--no-renames` để
+    đổi tên KHỎI vùng cũng tính là chạm vùng; SHA phải 40 hex thường, khác toàn-0 (push tạo nhánh) ⇒ không nhét cờ."""
+    su_kien, goc, dau = (env.get(k) or "" for k in (BIEN_SU_KIEN, BIEN_GOC, BIEN_DAU))
+    if su_kien not in ("push", "pull_request") or not all(re.fullmatch(r"[0-9a-f]{40}", x) and x.strip("0") for x in (goc, dau)):
+        return None
+    try:
+        r = chay(["git", "diff", "--name-only", "--no-renames", "-z", f"{goc}...{dau}"], cwd=ROOT, capture_output=True)
+    except Exception:
+        return None
+    return None if r.returncode else {x for x in r.stdout.decode("utf-8", "surrogateescape").split("\0") if x}
+
+
+def ke_hoach(doi, nhe=NHE):
+    """M1: bộ → (chế độ, lý do). Chỉ bộ có trong `nhe` mới có thể nhẹ, và chỉ khi diff đo được mà không chạm vùng."""
+    kh = {}
+    for p in nhe:
+        cham = None if doi is None else sorted(doi & {p, p[:-len("_test.py")] + ".py", *VUNG_CHUNG})
+        kh[p] = ((DAY_DU, "không đo được diff hoặc sự kiện không phải push/pull_request") if cham is None
+                 else (DAY_DU, "diff chạm " + ", ".join(cham)) if cham else (CHE_DO_NHE, "diff không chạm vùng đột biến"))
+    return kh
+
+
+def env_theo_che_do(path, che_do):
+    """M2: nhẹ ⇒ ĐẶT cờ; đủ ⇒ GỠ cờ dù cha có — cờ rò từ cha không được lặng lẽ biến đủ thành nhẹ."""
+    return {k: (v if che_do == CHE_DO_NHE else None) for k, v in NHE.get(path, {}).items()}
+
+
+def loi_env_registry(data):
+    """M4: đúng MỘT bước registry, `env:` BẰNG ĐÚNG `ENV_REGISTRY` (thừa, thiếu, lệch chữ ⇒ ĐỎ)."""
+    buoc = [b for v in ((data or {}).get("jobs") or {}).values() for b in (v or {}).get("steps") or []
+            if "python .claude/dev/ci_dang_ky_test.py --chay" in _dong_lenh(b)]
+    if len(buoc) != 1:
+        return [f"phải có đúng một bước registry, thấy {len(buoc)}"]
+    return [] if buoc[0].get("env") == ENV_REGISTRY else [f"env bước registry lệch: {buoc[0].get('env')}"]
+
+
 def doc_so_worker(env=os.environ, la_windows=None):
     """M3 miền N: vắng/rỗng ⇒ 1; đúng một chữ số 1–8 ⇒ N; khác ⇒ ValueError. Windows ⇒ 1 (Q6)."""
     raw = env.get(BIEN_WORKERS) or "1"
@@ -716,11 +765,13 @@ def _pid_song(pid, pgid=None, moc=None):
     return ra
 
 
-def _chay_co_lap(argv, cwd=ROOT, goc_tam=None, gioi_han=GIAY_TOI_DA_MOT_BO):
+def _chay_co_lap(argv, cwd=ROOT, goc_tam=None, gioi_han=GIAY_TOI_DA_MOT_BO, env_doi=None):
     """M2+M3: một bộ, một subprocess, BẢN SAO env có TMPDIR/TEMP/TMP riêng; không đụng
-    `os.environ`/cwd của cha. Trả `(rc, ban_in, loi_ha_tang)`; `loi_ha_tang` khác None ⇒ ĐỎ."""
+    `os.environ`/cwd của cha. Trả `(rc, ban_in, loi_ha_tang)`; `loi_ha_tang` khác None ⇒ ĐỎ.
+    #643: `env_doi` đặt khoá (giá trị chuỗi) hoặc GỠ khoá (None) trên bản sao ấy."""
     tam, posix, moc = pathlib.Path(tempfile.mkdtemp(prefix="bo-", dir=goc_tam)), os.name != "nt", os.urandom(8).hex()
     env = dict(os.environ, TMPDIR=str(tam), TEMP=str(tam), TMP=str(tam), **{BIEN_MOC: moc})
+    env = {k: v for k, v in {**env, **(env_doi or {})}.items() if v is not None}
     rc, ban_in, loi, p = -1, "", None, None
     try:
         p = subprocess.Popen(argv, cwd=cwd, env=env, text=True, encoding="utf-8", errors="backslashreplace",
@@ -753,13 +804,13 @@ def _chay_co_lap(argv, cwd=ROOT, goc_tam=None, gioi_han=GIAY_TOI_DA_MOT_BO):
     return rc, ban_in or "", loi
 
 
-def _chay_that(path, goc_tam=None):
-    return _chay_co_lap([sys.executable, path], goc_tam=goc_tam)
+def _chay_that(path, goc_tam=None, che_do=DAY_DU):
+    return _chay_co_lap([sys.executable, path], goc_tam=goc_tam, env_doi=env_theo_che_do(path, che_do))
 
 
 def chay_moi(moi=MOI, cach_ly=CACH_LY, chay_mot=_chay_that,
              doc_moi_truong=moi_truong_hien_tai, doc_trong_ci=trong_ci,
-             doc_nen_windows=nen_la_windows, so_worker=1, dong_ho=_gio_utc, bao_cao=None):
+             doc_nen_windows=nen_la_windows, so_worker=1, dong_ho=_gio_utc, bao_cao=None, kh=None):
     """Năm tham số sau là ĐƯỜNG NỐI ĐỂ ĐO, không phải cấu hình: phản chứng phải gọi
     được chính hàm này với bộ chạy giả, nếu không tầng tiêu thụ lại không ai canh.
 
@@ -768,7 +819,8 @@ def chay_moi(moi=MOI, cach_ly=CACH_LY, chay_mot=_chay_that,
     không ai canh — đúng thứ bốn seam kia sinh ra để tránh.
 
     #637: `so_worker` = trần bộ ĐANG chạy; `dong_ho` = seam M1; `bao_cao` nhận JSON (không in ở
-    đây ⇒ log nghiệp vụ giữ nguyên master, A5). Log theo thứ tự `MOI`; lỗi hạ tầng không qua `CACH_LY`."""
+    đây ⇒ log nghiệp vụ giữ nguyên master, A5). Log theo thứ tự `MOI`; lỗi hạ tầng không qua `CACH_LY`.
+    #643: `kh` = kế hoạch `ke_hoach()`; bộ vắng mặt ⇒ ĐỦ. Chế độ đủ của bộ trong `MAU_DAY_DU` đòi thêm dòng dương."""
     do = 0
     hien_tai = doc_moi_truong()
     o_trong_ci = doc_trong_ci()
@@ -787,8 +839,9 @@ def chay_moi(moi=MOI, cach_ly=CACH_LY, chay_mot=_chay_that,
     tuong_lai = [ex.submit(_mot, path) for path, _ in ds]
     for (path, mau), tl in zip(ds, tuong_lai):
         rc, ban_in, loi, bd, kt = tl.result()
+        che_do = (kh or {}).get(path, (DAY_DU,))[0]
         muc.append({"duong_dan": path, "rc": rc, "giay": round((kt - bd).total_seconds(), 3),
-                    "bat_dau_utc": _iso(bd), "ket_thuc_utc": _iso(kt)})
+                    "bat_dau_utc": _iso(bd), "ket_thuc_utc": _iso(kt), "che_do": che_do})
         print(ban_in, end="")
         if loi is not None:
             print(f"CI_DANG_KY {path}: ĐỎ — LỖI HẠ TẦNG: {loi}, rc={rc}")
@@ -796,6 +849,9 @@ def chay_moi(moi=MOI, cach_ly=CACH_LY, chay_mot=_chay_that,
             continue
         ok = rc == 0 and any(bang_chung_xanh(ban_in, m)
                              for m in mau_theo_nen(path, mau, la_windows))
+        if ok and che_do == DAY_DU and path in MAU_DAY_DU and not bang_chung_xanh(ban_in, MAU_DAY_DU[path]):
+            print(f"CI_DANG_KY {path}: chế độ đủ mà THIẾU dòng MUTANT dương")
+            ok = False
         if path in cach_ly:
             no = cach_ly[path]
             chap_nhan = cach_ly_chap_nhan(ok, no["moi_truong"], hien_tai)
@@ -817,7 +873,8 @@ def chay_moi(moi=MOI, cach_ly=CACH_LY, chay_mot=_chay_that,
             do += not ok
     ex.shutdown()
     if bao_cao is not None:
-        bao_cao.update(N=so_worker, so_lop_logic=os.cpu_count(), bo=muc, so_lop_dung_duoc=len(os.sched_getaffinity(0))
+        bao_cao.update(ke_hoach={p: {"che_do": c, "ly_do": ly} for p, (c, ly) in (kh or {}).items()},
+                       N=so_worker, so_lop_logic=os.cpu_count(), bo=muc, so_lop_dung_duoc=len(os.sched_getaffinity(0))
                        if hasattr(os, "sched_getaffinity") else None)
     return do
 
@@ -1445,7 +1502,7 @@ def phan_chung():
     _bc = _log(_M, dong_ho=lambda: _t0 + datetime.timedelta(seconds=1.5 * next(_nhip)))[2]
     _them("p637-A1-clock-gia-khop-chinh-xac", _bc["bo"][1] == {
         "duong_dan": "b_test.py", "rc": 1, "giay": 1.5,
-        "bat_dau_utc": "2026-09-25T08:00:03.000Z", "ket_thuc_utc": "2026-09-25T08:00:04.500Z"})
+        "bat_dau_utc": "2026-09-25T08:00:03.000Z", "ket_thuc_utc": "2026-09-25T08:00:04.500Z", "che_do": DAY_DU})
     _them("p637-A1-json-hop-le", not loi_json_thoi_gian(_bc, _M) and _bc["N"] == 1)
     for _t, _f in (("bo-mot-muc", lambda b: b.pop()), ("rc-sai-kieu", lambda b: b[0].update(rc="0")),
                    ("giay-am", lambda b: b[0].update(giay=-1)), ("moc-khong-utc", lambda b: b[0].update(
@@ -1529,6 +1586,68 @@ def phan_chung():
     _them("p637-A8-dung-bien", chon_so_worker({1: 200, 2: 110, 4: 100}) == 2)
     _them("p637-A8-vuot-bien", chon_so_worker({1: 200, 2: 110.5, 4: 100}) == 4)
     _them("p637-A8-trung-vi-khong-phai-trung-binh", chon_so_worker({1: [300, 100, 200], 2: [90, 500, 80], 4: [95, 95, 1]}) == 2)
+    # ── #643: A1–A4. doc_diff qua `chay` giả; env qua tiến trình con THẬT; bằng chứng qua CHÍNH `chay_moi`. ──
+    class _R:
+        def __init__(s, rc, out): s.returncode, s.stdout = rc, out
+    _A, _B, _P, _K = "a" * 40, "b" * 40, "ops/nhanh_don_duoc_test.py", "NHANH_DON_DUOC_KHONG_DOT_BIEN"
+
+    def _dd(e, rc=0, out=b"x\0y\0", ghi=None):
+        return doc_diff({BIEN_SU_KIEN: "push", BIEN_GOC: _A, BIEN_DAU: _B, **e},
+                        lambda argv, **kw: (ghi.append(argv) if ghi is not None else None) or _R(rc, out))
+    _them("p643-A1-push-doc-duoc", _dd({}) == {"x", "y"})
+    _them("p643-A1-pull-request-doc-duoc", _dd({BIEN_SU_KIEN: "pull_request"}) == {"x", "y"})
+    _them("p643-A1-diff-rong-la-tap-rong", _dd({}, out=b"") == set())
+    for _t, _e in (("schedule", {BIEN_SU_KIEN: "schedule"}), ("dispatch", {BIEN_SU_KIEN: "workflow_dispatch"}),
+                   ("su-kien-vang", {BIEN_SU_KIEN: ""}), ("goc-toan-0", {BIEN_GOC: "0" * 40}), ("goc-vang", {BIEN_GOC: ""}),
+                   ("dau-39", {BIEN_DAU: "b" * 39}), ("dau-hoa", {BIEN_DAU: "B" * 40}), ("goc-la-co", {BIEN_GOC: "--output=/x"})):
+        _them("p643-A1-khong-do-duoc-" + _t, _dd(_e) is None)
+    _them("p643-A1-git-rc-khac-0", _dd({}, rc=128) is None)
+    _them("p643-A1-git-nem", doc_diff({BIEN_SU_KIEN: "push", BIEN_GOC: _A, BIEN_DAU: _B},
+                                      lambda *a, **k: (_ for _ in ()).throw(OSError("không có git"))) is None)
+    _g = []
+    _dd({}, ghi=_g)
+    _them("p643-A1-argv-git", _g == [["git", "diff", "--name-only", "--no-renames", "-z", f"{_A}...{_B}"]])
+    for _t, _doi, _cd in (("khong-do-duoc", None, DAY_DU), ("rong", set(), CHE_DO_NHE),
+                          ("ngoai-vung", {"docs/x.md", _P + "c", "ops/nhanh_don_duoc.pyi"}, CHE_DO_NHE),
+                          ("cham-bo", {_P}, DAY_DU), ("cham-dich", {"docs/x.md", "ops/nhanh_don_duoc.py"}, DAY_DU),
+                          *((f"cham-chung-{_i}", {_v}, DAY_DU) for _i, _v in enumerate(VUNG_CHUNG))):
+        _them("p643-A1-ke-hoach-" + _t, ke_hoach(_doi)[_P][0] == _cd)
+    _them("p643-A1-chi-bo-trong-NHE", set(ke_hoach(set())) == set(NHE) <= set(MOI) and set(MAU_DAY_DU) == set(NHE))
+    _py, _cu = [sys.executable, "-c", f"import os; print(repr(os.environ.get({_K!r})))"], os.environ.get(_K)
+    os.environ[_K] = "cha"
+    try:
+        _du, _nh = (_chay_co_lap(_py, env_doi=env_theo_che_do(_P, c))[1].strip() for c in (DAY_DU, CHE_DO_NHE))
+    finally:
+        os.environ.pop(_K) if _cu is None else os.environ.__setitem__(_K, _cu)
+    _them("p643-A2-du-go-co-ro-tu-cha", _du == "None")
+    _them("p643-A2-nhe-dat-co", _nh == "'1'")
+    _them("p643-A2-bo-khong-trong-NHE-khong-doi-env", env_theo_che_do("a_test.py", CHE_DO_NHE) == {})
+    _MUT = "MUTANT: giet = 10 · khong giet = 0 · khong do duoc = 0 / tong 10\n"
+
+    def _kq(out, cd=None):
+        with contextlib.redirect_stdout(io.StringIO()):
+            return chay_moi(moi={_P: MOI[_P]}, cach_ly={}, chay_mot=lambda p: (0, out), doc_moi_truong=lambda: MOI_TRUONG_CI,
+                            doc_trong_ci=lambda: True, doc_nen_windows=lambda: False, kh=cd and {_P: (cd, "giả")})
+    _them("p643-A3-du-chi-co-8-8-la-do", _kq("8/8\n", DAY_DU) == 1)
+    _them("p643-A3-mac-dinh-la-du", _kq("8/8\n") == 1)
+    _them("p643-A3-du-co-mutant-dat", _kq("8/8\n" + _MUT, DAY_DU) == 0)
+    _them("p643-A3-nhe-8-8-dat", _kq("8/8\n", CHE_DO_NHE) == 0)
+    _them("p643-A3-du-mutant-song-la-do", _kq("8/8\n" + _MUT.replace("khong giet = 0", "khong giet = 1"), DAY_DU) == 1)
+    _them("p643-A3-du-mutant-0-la-do", _kq("8/8\n" + _MUT.replace("10", "0"), DAY_DU) == 1)
+    _them("p643-A3-du-mutant-lech-tong-la-do", _kq("8/8\n" + _MUT.replace("tong 10", "tong 11"), DAY_DU) == 1)
+
+    def _hong_env(f):
+        w = json.loads(json.dumps(_wf0))
+        f(next(b for b in w["jobs"]["gate-registry"]["steps"] if "ci_dang_ky_test.py --chay" in str(b.get("run", ""))), w)
+        return bool(loi_env_registry(w))
+    _them("p643-A4-workflow-that-dat", not loi_env_registry(_wf0))
+    for _k in ENV_REGISTRY:
+        _them(f"p643-A4-thieu-{_k}", _hong_env(lambda b, w: b["env"].pop(_k)))
+        _them(f"p643-A4-lech-{_k}", _hong_env(lambda b, w: b["env"].update({_k: b["env"][_k] + " "})))
+    _them("p643-A4-thua-khoa", _hong_env(lambda b, w: b["env"].update(X="1")))
+    _them("p643-A4-N-1", _hong_env(lambda b, w: b["env"].update({BIEN_WORKERS: "1"})))
+    _them("p643-A4-bo-env", _hong_env(lambda b, w: b.pop("env")))
+    _them("p643-A4-hai-buoc-registry", _hong_env(lambda b, w: w["jobs"]["gate"]["steps"].append(dict(b))))
     # Bang ten KHONG con ton tai: 47 ten cu tung nam o day, cach cho sinh ket qua hang tram dong —
     # chinh nguon lech F02 to cao. Nay ten VA ket qua o CUNG mot `_them`, khong con `zip` de cat im.
     for ten, ok in KQ:
@@ -1557,7 +1676,8 @@ def main():
     ruff_loi, ruff_chot = loi_ruff_ci()
     loi += launcher_loi
     loi += ruff_loi
-    loi += ["G5 (M6): " + x for x in loi_g5_workflow(yaml.safe_load(CI_WORKFLOW.read_text(encoding="utf-8")))]
+    wf = yaml.safe_load(CI_WORKFLOW.read_text(encoding="utf-8"))
+    loi += ["G5 (M6): " + x for x in loi_g5_workflow(wf)] + ["ENV registry (#643 M4): " + x for x in loi_env_registry(wf)]
     for x in loi: print("ĐỎ:", x)
     print(f"ĐĂNG KÝ: {tren_cay}/{trong_so}")
     print(f"TRẠNG THÁI: chan={trong_so - len(CACH_LY)} cach_ly={len(CACH_LY)}")
@@ -1565,8 +1685,10 @@ def main():
     print(f"RUFF CI: {ruff_chot - len(ruff_loi)}/{ruff_chot} hợp đồng")
     ok = not loi and tren_cay == trong_so and phan_chung()
     if ns.chay:
-        bc = {}
-        ok = chay_moi(so_worker=so_worker, bao_cao=bc) == 0 and ok
+        bc, kh = {}, ke_hoach(doc_diff())
+        for p, (cd, ly) in kh.items(): print(f"CI_DANG_KY_KE_HOACH {p}: {cd} — {ly}")
+        ok = chay_moi(so_worker=so_worker, bao_cao=bc, kh=kh,
+                      chay_mot=lambda p: _chay_that(p, che_do=kh.get(p, (DAY_DU,))[0])) == 0 and ok
         print("CI_DANG_KY_THOI_GIAN " + json.dumps(bc, ensure_ascii=False))
         loi_js = loi_json_thoi_gian(bc)
         for x in loi_js: print("ĐỎ: JSON thời gian:", x)

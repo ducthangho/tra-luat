@@ -19,8 +19,10 @@ recorded_by: claude-session
 recorder_is_dispatcher: false
 
 leased_at_utc: '2026-09-26T15:19:00Z'
-lease_expires_at_utc: '2026-09-27T15:19:00Z'
-han_ghi_chu: '24 gio theo comment dong bang issues/651#issuecomment-5847409058.'
+lease_expires_at_utc: '2026-09-26T23:25:00Z'
+han_ghi_chu: >-
+  Goc 24 gio (2026-09-27T15:19:00Z) theo comment dong bang issues/651#issuecomment-5847409058. RUT NGAN ve
+  2026-09-26T23:25:00Z — xem thu_hoi_bang_rut_han.
 
 packet_id: CI-REGISTRY-THU-HEP-VUNG
 packet_slug: CI-REGISTRY-THU-HEP-VUNG
@@ -115,5 +117,20 @@ lech_nguong_duoc_duyet: >-
   AskUserQuestion, chon "Nang tran, dung actionlint"): cot chot M4 bi Codex CLI bat 4 luot lien cung mot hinh dang
   (o tu do trong workflow tuan), va vá goc — actionlint THAT tren tep W3 tho, fail-close khi vang cong cu — can them
   dong khi packet da o dung tran 300. Do sau va: 320 dong them tren 3 tep (luc hoi uoc 312–315).
-lease_sua_lan_cuoi: '2026-09-26'
-lease_sua_ghi_chu: 'Chi them lech_nguong_duoc_duyet; khong doi write set, han, spec.'
+lease_sua_lan_cuoi: '2026-09-26T23:25:00Z'
+lease_sua_ghi_chu: >-
+  Lan 1: them lech_nguong_duoc_duyet (khong doi write set, han, spec). Lan 2: rut ngan lease_expires_at_utc
+  (thu_hoi_bang_rut_han); khong doi write set, spec.
+thu_hoi_bang_rut_han:
+  han_goc_utc: '2026-09-27T15:19:00Z'
+  han_moi_utc: '2026-09-26T23:25:00Z'
+  chi_thi: >-
+    Chu kho trong phien Claude Code 2026-09-26 (sau land #653): "Thu hoi lease g1"; chon cach "Chay 1 [rut ngan
+    han] roi kich hoat so thu hoi theo 3".
+  ly_do: 'Packet #651 da LAND (PR #653 merge 68b552d0f08200ba860ea788517558a4172df384; Issue #651 dong).'
+  vi_sao_khong_dung_so: >-
+    So ops/thu-hoi/ CHUA kich hoat (SO_THU_HOI_KICH_HOAT = False trong ops/lease_publish.py); so khong rong khi co
+    False => rc=12 o moi consumer. Rut han chi dung co che DA CAI (phan loai lease theo han), khong them duong ghi moi.
+  gioi_han: >-
+    Duong moi, chua co tien le va chua co cong nao doc truong nay. Hieu luc chi toi dau khi MOI ref mang tep lease
+    nay deu mang ban rut han: da cap nhat master (PR) va nhanh claude/ci-registry-thu-hep-vung-49xikc (cung PR).

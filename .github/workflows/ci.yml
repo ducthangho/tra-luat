@@ -651,9 +651,14 @@ jobs:
           ruff --version
       # Sổ ở ci_dang_ky_test.py được đối chiếu với phép tìm tệp trên cây. Các tệp dưới
       # ops/reviews/** là hiện vật review bất biến, không phải mã sống để CI chạy.
+      # #643 (CI-REGISTRY-DOT-BIEN-THEO-DIFF): N=2; ba biến sự kiện/diff cho kế hoạch chế độ (vòng đột biến
+      # `nhanh_don_duoc` chỉ chạy khi diff chạm vùng của nó). Qua `env:`, KHÔNG nội suy vào `run`; chốt M4 so từng chữ.
       - name: test registry (phạm vi + các bộ chưa được nối)
         env:
-          CI_DANG_KY_WORKERS: "1"
+          CI_DANG_KY_WORKERS: "2"
+          CI_DANG_KY_SU_KIEN: ${{ github.event_name }}
+          CI_DANG_KY_GOC: ${{ github.event.pull_request.base.sha || github.event.before }}
+          CI_DANG_KY_DAU: ${{ github.event.pull_request.head.sha || github.sha }}
         run: python .claude/dev/ci_dang_ky_test.py --chay
 
   gate-packet-loop:

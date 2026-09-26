@@ -79,7 +79,7 @@ Hai lần đo trước đó trả `rc=12` vì phía đo, không phải vì có n
 mới, một lần nhánh spec cục bộ phân kỳ sau khi master tiến 14 commit. Fetch lại và rebase xong thì đo ra `rc=0`.
 
 **Vì sao cần `ci_dang_ky_test.py`:** tệp test mới dưới `.claude/dev/` phải có mặt trong sổ `MOI`
-(`ci_dang_ky_test.py` d.29) thì CI mới chạy và đối chiếu N/N; xoá dòng đăng ký thì `kiem()` báo test sống
+(`ci_dang_ky_test.py` d.29 tại `0e2fe847`; d.**36** tại `b7396160`, xem §11) thì CI mới chạy và đối chiếu N/N; xoá dòng đăng ký thì `kiem()` báo test sống
 chưa đăng ký (review lượt 1 đo).
 
 **Mật độ tham chiếu cho trần dòng:** ca `t155_618` của #620 (đồ thị git thật, 5 ca + 4 đột biến) dài **132**
@@ -121,7 +121,7 @@ M1–M6 thuộc `.claude/dev/doc_receipt_thu_hoi.py`. M7 thuộc `…_test.py`. 
 | **M5** | **K4 — stale.** `S == base_hien_hanh` và `H == head_hien_hanh`. Lệch một trong hai ⇒ đỏ ("receipt stale, chạy lại"). Hợp đồng với caller ghi ở §8 | nghĩa vụ #618 mục 3 |
 | **M6** | **K5 — kết luận bộ kiểm.** `checker_rc == 0` (đã là `int` không `bool` nhờ K2); `ket_luan` thuộc tập đóng `{"TAP_THU_HOI_RONG"}`; `che_do == "chua_kich_hoat"`. Giá trị lạ ⇒ đỏ; mở rộng tập phải qua revision. Khi A1b đổi `che_do`, bộ kiểm này **phải** đỏ tới khi có revision, và đó là chủ ý | producer §1 |
 | **M7** | `.claude/dev/doc_receipt_thu_hoi_test.py`: dựng **fixture dương** từ bảng §1 (38 khoá, giá trị của receipt mẫu, viết thẳng trong test, không đọc artifact), rồi mỗi ca âm là **một biến đổi logic** của fixture ấy. Ca cả nhóm theo hợp đồng §5.0 (A8: nhóm kho ba trường, nhóm nhánh hai trường) và ca phối hợp A11 (K3 + K4) phải liệt kê các trường chúng đổi. Đột biến chạy trên **bản sao tạm** của module (không sửa tệp thật), nạp bằng `importlib` với `sys.dont_write_bytecode = True`. Suite in dòng tổng `doc_receipt_thu_hoi tests: N/N ca QUA · M/M dot bien GIET` | L3 |
-| **M8** | Đăng ký `.claude/dev/doc_receipt_thu_hoi_test.py` vào `MOI` của `ci_dang_ky_test.py`. Regex **tự buộc** từng cặp bằng nhau và lớn hơn 0 bằng backreference: `r'^doc_receipt_thu_hoi tests: ([1-9]\d*)/(\1) ca QUA · ([1-9]\d*)/(\3) dot bien GIET$'`. **Không** dựa vào `bang_chung_xanh` để so: hàm ấy (`ci_dang_ky_test.py` d.605–609) chỉ so khi regex có **đúng hai** nhóm, nên với bốn nhóm nó trả `True` mà không so gì (cross-review lượt 1 đo). Không sửa `bang_chung_xanh` dùng chung | `ci_dang_ky_test.py` |
+| **M8** | Đăng ký `.claude/dev/doc_receipt_thu_hoi_test.py` vào `MOI` của `ci_dang_ky_test.py`. Regex **tự buộc** từng cặp bằng nhau và lớn hơn 0 bằng backreference: `r'^doc_receipt_thu_hoi tests: ([1-9]\d*)/(\1) ca QUA · ([1-9]\d*)/(\3) dot bien GIET$'`. **Không** dựa vào `bang_chung_xanh` để so: hàm ấy (`ci_dang_ky_test.py` d.605–609 tại `0e2fe847`; d.**612–616** tại `b7396160`, thân hàm không đổi) chỉ so khi regex có **đúng hai** nhóm, nên với bốn nhóm nó trả `True` mà không so gì (cross-review lượt 1 đo). Không sửa `bang_chung_xanh` dùng chung | `ci_dang_ky_test.py` |
 
 ## 5. `nghiem_thu` — mỗi tiêu chí nêu phép đo làm nó ĐỎ (L3)
 
@@ -286,6 +286,25 @@ không kiểm được nguồn của hai tham số ấy — nó chỉ kiểm rec
 - Nếu codex không cho được approval trên exact head, merge cần **human audit của chủ kho**, và PR phải khai thẳng
   là không có `cross_approved`.
 - Không CI, không full CI cho tới khi đủ điều kiện merge. Không CI Windows.
+
+## 11. Đo lại khi hợp nhất master — `origin/master` `b7396160`, **07:43Z 26-09-2026**
+
+Nhánh đặc tả hợp nhất 84 commit mới của master (merge `dcb5267a`, không xung đột). §1 giữ nguyên làm lịch sử;
+bảng dưới là số hiện hành. Các lời khai trong §1–§9 không bị viết lại, chỉ hai trích dẫn dòng được ghi kèm vị trí mới.
+
+| đại lượng | tại `0e2fe847` (§1) | tại `b7396160` | hệ quả |
+|---|---|---|---|
+| producer `ops/lease_publish.py` + workflow `thu-hoi` | — | `git diff --stat 0e2fe847 b7396160 --` hai tệp: **rỗng** | bảng 38 khoá và kiểu ở §1 còn đúng |
+| `ci_dang_ky_test.py` | — | **+293/−11** (packet #637, song song hoá registry) | vị trí `MOI` và `bang_chung_xanh` trôi (dưới) |
+| dòng `MOI = {` | d.29 | d.**36** | chỉ trích dẫn |
+| `bang_chung_xanh` | d.605–609 | d.**612–616**, thân **không đổi** (vẫn `len(m.groups()) != 2`) | M8 và regex backreference còn nguyên giá trị |
+| `chay_moi` gọi `bang_chung_xanh` | trực tiếp | qua `mau_theo_nen(path, mau, la_windows)` với `any(...)` | cross-review PR thi công phải đo lại regex M8 trên `chay_moi` mới |
+| `ai-dang-giu .claude/dev/doc_receipt_thu_hoi.py` | rc 0 · 0 | rc 0 · **0** | — |
+| `ai-dang-giu .claude/dev/doc_receipt_thu_hoi_test.py` | rc 0 · 0 | rc 0 · **0** | — |
+| `ai-dang-giu .claude/dev/ci_dang_ky_test.py` | rc 0 · 0 | rc **11** · **1**: `ci-registry-dot-bien-theo-diff-r1-g1-claude` (packet **#643**, hết `2026-09-27T01:20:00Z`) | **chặn cấp lease C1a1a** tới khi đường ấy về 0 |
+
+**Lease C1a1a chỉ được cấp sau khi đo lại `ai-dang-giu` cả ba đường ra `NGƯỜI_GIỮ 0`**, không suy từ giờ hết hạn
+(nợ `AG-T0-01B`: lease không tự chết khi packet đã land).
 
 ## 10. Lịch sử review
 

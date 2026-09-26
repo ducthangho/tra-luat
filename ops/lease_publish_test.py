@@ -9369,7 +9369,17 @@ _GOC_T191 = (*(f"_a = 1 {o} 1" for o in "+ - * / // % ** << >> | ^ & == != < <= 
              "try:\n    _a = 1\nexcept* ValueError:\n    pass\nelse:\n    _a = 1\nfinally:\n    _a = 1",
              # r18 (lượt 27): BoolOp LỒNG BoolOp dưới miễn kế thừa (phản chứng NESTED_CHILD)
              "_a = 0 or 1", "_a = 1 and 1", "_a = 0 or (1 and 1)", "_a = 1 and (0 or 1)", "_a = (0 or 1) and 1",
-             "_a = (1 and 0) or 1", "_a = 0 or (0 or 1)", "_a = 1 and (1 and 1)", "_a = 0 or (1 and (0 or 1))")
+             "_a = (1 and 0) or 1", "_a = 0 or (0 or 1)", "_a = 1 and (1 and 1)", "_a = 0 or (1 and (0 or 1))",
+             # r21 (lượt 30, F1): VỊ TRÍ PHẦN TỬ của CHỐT nhận miễn kế thừa — mỗi trường danh sách ≥ 3 phần tử. Tiền tố của
+             # chuỗi so sánh/BoolOp giữ nguyên nên vị trí thay luôn được thực thi (witness đòi).
+             *(f"_a = {e}" for e in ("max(0, 1, 2)", "max(0, *(1,), 2)", "dict(a=1, b=2, c=3)", "1 < 2 < 3 < 5", "1 != 2 != 3 != 5",
+                                     "1 in (1, 2) in ((1, 2),) in [((1, 2),)]", "([5] * 9)[0] is ([5] * 9)[1] is ([5] * 9)[2] is ([5] * 9)[3]",
+                                     "(1, 2, 3)", "[1, 2, 3]", "{1, 2, 3}", "{1: 2, 3: 4, 5: 6}", "{1: 2, **{3: 4}, 5: 6}", "0 or 0 or 1",
+                                     "1 and 1 and 1", "f'{1}{2}{3}'", "[1 for _i in 'x' if 1 if 2 if 3]",
+                                     "1 <= 2 <= 3 <= 5", "5 > 3 > 2 > 1", "5 >= 3 >= 2 >= 1", "1 == 1 == 1 == 1",
+                                     "1 not in (2,) not in ((3,),) not in [5]", "[1][0:1] is not [2][0:1] is not [3][0:1] is not [5][0:1]",
+                                     *(k.replace("E", "1 for _i in 'x' if 2 for _j in 'y' if 3 for _k in 'z' if 5")
+                                       for k in ("[E]", "{E}", "{6: E}", "list((E))")))))
 
 
 def _vi_tri_t191(goc: str):
@@ -9454,6 +9464,15 @@ def _vt_co_t191(goc: str, x: str):
         cay = ast.parse(goc, mode="eval"); cs = [v for v in ast.walk(cay) if isinstance(v, ast.Constant) and type(v.value) is int]
         c = cs[i].value; cs[i].value = "§"
         yield "(" + ast.unparse(cay).replace("'§'", f"((_co := ({x})) and {c} or {c})") + ", _co)[1]"
+# r21 (lượt 30, F2): cờ CHỈ xuất hiện ở ĐÍCH walrus (đọc lại giá trị đầu vào qua `locals()`), và `await` là GỐC điều kiện
+# bên trong async-genexp LỒNG được chạy ngay — cả hai phụ thuộc cờ (witness), `nhac` phải nhận.
+_DICH_WALRUS_T191 = "(bo_qua_han := locals()['bo_qua_han'])"
+_AWAIT_T191 = "(await __import__('asyncio').sleep(0, result={x}))"
+_PHAN_LOAI_T191 += tuple(
+    (f"dac.dich-walrus.{ng}", m.replace("F", _DICH_WALRUS_T191 if x == "bo_qua_han" else "not " + _DICH_WALRUS_T191), 0, 1, 1)
+    for ng, (x, m) in _NGU_CANH_NHAC_T191.items()) + tuple(
+    (f"dac.agen.{k}", "list((" + d.replace("A", _AWAIT_T191.replace("{x}", x)) + " for _i in 'x').__anext__().__await__())", 0, 1, 1)
+    for k, x, d in (("or", "bo_qua_han", "A or @"), ("and", "not bo_qua_han", "A and @"), ("ifexp", "bo_qua_han", "(@ if A else None)")))
 _PHAN_LOAI_T191 += tuple(
     (f"vtco.{ng}.{i}-{j}", m.replace("F", d), 0, 1, 1)
     for ng, (x, m) in _NGU_CANH_NHAC_T191.items() for i, g in enumerate(_VT_CO_T191) for j, d in enumerate(_vt_co_t191(g, x)))

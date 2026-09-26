@@ -9366,7 +9366,10 @@ _GOC_T191 = (*(f"_a = 1 {o} 1" for o in "+ - * / // % ** << >> | ^ & == != < <= 
              "_d = {}\nwith memoryview(b'x') as _d[1]:\n    pass", "_d = {}\n_a = [1 for _d[1] in (1,)]", "_a = list(1 for _i in (1,))",
              "_a = {1 for _i in (1,)}", "match 1:\n    case _:\n        pass", "try:\n    assert 0, 1\nexcept AssertionError:\n    pass",
              "try:\n    raise ValueError\nexcept (ValueError,) * 1:\n    pass", "try:\n    raise ValueError from ValueError(1)\nexcept ValueError:\n    pass",
-             "try:\n    _a = 1\nexcept* ValueError:\n    pass\nelse:\n    _a = 1\nfinally:\n    _a = 1")
+             "try:\n    _a = 1\nexcept* ValueError:\n    pass\nelse:\n    _a = 1\nfinally:\n    _a = 1",
+             # r18 (lượt 27): BoolOp LỒNG BoolOp dưới miễn kế thừa (phản chứng NESTED_CHILD)
+             "_a = 0 or 1", "_a = 1 and 1", "_a = 0 or (1 and 1)", "_a = 1 and (0 or 1)", "_a = (0 or 1) and 1",
+             "_a = (1 and 0) or 1", "_a = 0 or (0 or 1)", "_a = 1 and (1 and 1)", "_a = 0 or (1 and (0 or 1))")
 
 
 def _vi_tri_t191(goc: str):
@@ -9384,6 +9387,37 @@ _PHAN_LOAI_T191 += tuple(
     (f"{n}.{k}.{v}.khong", boc(d), *((0, 1) if k == "ke-co" else (1, 0)), 1) for (n, v), d in _GEN_T191.items() for k, boc in _KIEU_T191) + tuple(
     (f"goc.{k}.{i}-{j}", boc(d), *((0, 1) if k == "ke-co" else (1, 0)), 1)
     for i, g in enumerate(_GOC_T191) for j, d in enumerate(_vi_tri_t191(g)) for k, boc in _KIEU_T191[1:])
+# r18 (lượt 27, phản chứng NHAC_CALL/NHAC_EQ): DẠNG của biểu thức nhắc cờ. Mỗi dạng có một lớp nút GỐC khác nhau (mọi phép so sánh,
+# mọi phép toán hai ngôi trừ `@`, một ngôi, lời gọi, thuộc tính, chỉ số, BoolOp, IfExp, walrus, comprehension, literal có sao,
+# f-chuỗi) và đúng khi và chỉ khi `{x}` đúng; `{x}` = `bo_qua_han` (hoặc `not bo_qua_han` cho `and`). Mỗi dạng × MỌI ngữ cảnh
+# `nhac` được gọi ⇒ miễn (0, 1, 1), luật viết tay; witness chạy được xác nhận dạng thật sự phụ thuộc cờ.
+_NHAC_T191 = ("{x}", "bool({x})", "({x}).real", "(({x}),)[0]", "not not ({x})", "+({x})", "-({x})", "~~({x})",
+              *(f"({{x}}) {o}" for o in ("== True", "!= False", "is True", "is not False", "in (True,)", "not in (False,)",
+                                          "> False", ">= True", "+ 0", "- 0", "* 1", "/ 1", "// 1", "% 2", "** 1", "<< 0", ">> 0",
+                                          "| False", "& True", "^ False")),
+              "False < ({x})", "True <= ({x})", "(({x}) and True)", "(({x}) or False)", "(True if ({x}) else False)",
+              "(_z := ({x}))", "[1 for _i in (1,) if ({x})]", "{1 for _i in (1,) if ({x})}", "{1: 1 for _i in (1,) if ({x})}",
+              "[*((1,) if ({x}) else ())]", "(*((1,) if ({x}) else ()),)", "{*((1,) if ({x}) else ())}",
+              "{**({1: 1} if ({x}) else {})}", "f\"{'1' if ({x}) else ''}\"", "any(({x}) for _i in (1,))", "(lambda: ({x}))()",
+              "[1][:({x})]")
+_NGU_CANH_NHAC_T191 = {"or": ("bo_qua_han", "F or @"), "and": ("not bo_qua_han", "F and @"), "if": ("bo_qua_han", "if F:\n    @"),
+                       "while": ("bo_qua_han", "while F:\n    @\n    break"), "ifexp": ("bo_qua_han", "(@ if F else None)"),
+                       "case": ("bo_qua_han", "match 1:\n    case _ if F:\n        @")}
+# BoolOp lồng dưới miễn kế thừa từ VẾ TRƯỚC của BoolOp ngoài (miễn kế thừa từ `if` do mẫu gốc BoolOp ở `_GOC_T191` phủ),
+# và cờ nằm trong BoolOp lồng ở vế trước/sau; bộ ba viết tay.
+_LONG_T191 = {"or-and-sau": ("bo_qua_han or (lease and @)", 0, 1), "or-and-dau": ("bo_qua_han or (@ and lease)", 0, 1),
+              "or-or": ("bo_qua_han or (not lease or @)", 0, 1), "and-or": ("not bo_qua_han and (not lease or @)", 0, 1),
+              "and-and": ("not bo_qua_han and (lease and @)", 0, 1), "and-or-dau": ("not bo_qua_han and (@ or not lease)", 0, 1),
+              "ba-tang": ("bo_qua_han or (lease and (not lease or @))", 0, 1),
+              "co-trong-truoc-or": ("(lease and bo_qua_han) or @", 0, 1),
+              "co-trong-truoc-and": ("(not lease or not bo_qua_han) and @", 0, 1),
+              "co-trong-cung": ("not lease or (bo_qua_han or @)", 0, 1),
+              "co-trong-sau": ("@ or (lease and bo_qua_han)", 1, 0), "co-sau-trong": ("not lease or (@ and bo_qua_han)", 1, 0),
+              "khong": ("lease and (not lease or @)", 1, 0)}
+_PHAN_LOAI_T191 += tuple(
+    (f"nhac.{ng}.{i}", m.replace("F", d.replace("{x}", x)), 0, 1, 1)
+    for ng, (x, m) in _NGU_CANH_NHAC_T191.items() for i, d in enumerate(_NHAC_T191)) + tuple(
+    (f"long.{k}", d, a, b, 1) for k, (d, a, b) in _LONG_T191.items())
 
 
 def _chay_doan_t191(doan: str, bo_qua_han: bool) -> bool:
@@ -9435,8 +9469,9 @@ def t191_MOI_chot_cua_kiem_deu_duoc_t190_phu_o_nhanh_DA_DANG():
     can = {f"{n}.{k}.{v}.{c}" for n, truc in _TRUC_T191.items() for v, cs in truc.items()
            for k, cc in (("truc", cs), ("ke-co", cs), ("ke-khong", ("khong",))) for c in cc}
     chot(len(set(khoa)) == len(khoa), "MA TRẬN: khoá trùng")
-    chot({x for x in khoa if not x.startswith(("dac.", "goc."))} == can,
-         f"MA TRẬN lệch tích trục: thiếu {sorted(can - set(khoa))}, thừa {sorted(set(khoa) - can - {x for x in khoa if x.startswith(('dac.', 'goc.'))})}")
+    rieng = ("dac.", "goc.", "nhac.", "long.")
+    chot({x for x in khoa if not x.startswith(rieng)} == can,
+         f"MA TRẬN lệch tích trục: thiếu {sorted(can - set(khoa))}, thừa {sorted(set(khoa) - can - {x for x in khoa if x.startswith(rieng)})}")
     for loai, doan, them_ds, them_mien, them_tho in _PHAN_LOAI_T191:
         if them_ds + them_mien:  # witness chạy được: ds ⇒ gọi ở CẢ HAI giá trị cờ; miễn ⇒ gọi hay không PHỤ THUỘC cờ
             chay = (_chay_doan_t191(doan, False), _chay_doan_t191(doan, True))

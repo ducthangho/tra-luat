@@ -810,6 +810,16 @@ WF_DOT_BIEN_DU = ROOT / ".github/workflows/ci-dot-bien-du.yml"
 CRON_DOT_BIEN_DU, TEN_WF_DU, JOB_DU = "17 19 * * 6", "đột biến đủ (hằng tuần)", "dot-bien-du"
 
 
+def loi_actionlint(tep, tim=shutil.which, chay=subprocess.run):
+    """#651 M4 (Codex lượt 5): dict sau `safe_load` mù YAML thô (`on:`/`true:` cùng thành True, khoá trùng bị nuốt) ⇒ W3
+    qua `actionlint` THẬT trên tệp thô. Vắng công cụ (tên giả ⇒ FileNotFoundError) / lỗi chạy ⇒ KHÔNG ĐO ĐƯỢC ⇒ ĐỎ."""
+    try:
+        r = chay([tim("actionlint") or "actionlint-VANG", "-no-color", str(tep)], capture_output=True, text=True, timeout=120)
+    except (OSError, subprocess.SubprocessError) as e:
+        return [f"KHÔNG ĐO ĐƯỢC: actionlint {type(e).__name__} — fail-close"]
+    return [] if r.returncode == 0 else [f"actionlint rc={r.returncode}: " + " | ".join((r.stdout + r.stderr).splitlines()[:3])]
+
+
 def loi_workflow_dot_bien_du(data, ci):
     """#651 M4: lượt ĐỦ hằng tuần. Danh sách CHO PHÉP ở mọi tầng; bước so BẰNG ĐÚNG `gate-registry` của `ci.yml` (trích từ
     CHÍNH hai tệp, không chép) trừ `env` bước registry = chỉ `CI_DANG_KY_WORKERS` ⇒ vắng biến diff ⇒ `ke_hoach` ĐỦ."""
@@ -1861,6 +1871,16 @@ def phan_chung():
         _them("p651-M4-" + _t + "-do", _hong_du(_f))
     _them("p651-M4-rong-do", bool(loi_workflow_dot_bien_du(None, _wf0)))
     _them("p651-M4-ci-yml-doi-thi-do", bool(loi_workflow_dot_bien_du(_wd0, {"jobs": {}})))
+    with tempfile.TemporaryDirectory() as _d:  # Codex lượt 5: YAML THÔ mà `safe_load` làm mất dấu ⇒ dict XANH, actionlint ĐỎ
+        _tho, _w = WF_DOT_BIEN_DU.read_text(encoding="utf-8"), pathlib.Path(_d, "w.yml")
+        for _t, _a, _b in (("goc", "", ""), ("on-thanh-true", "\non:\n", "\ntrue:\n"), ("khoa-True-rac", "\npermissions:", '\n"True": rac\npermissions:'),
+                           ("cron-trung", '    - cron: "17', '    - cron: "0 0 1 1 *"\n      cron: "17'),
+                           ("timeout-trung", "    timeout-minutes: 90\n", "    timeout-minutes: 5\n    timeout-minutes: 90\n")):
+            _w.write_text(_v := _tho.replace(_a, _b, 1) if _a else _tho, encoding="utf-8")
+            _them(f"p651-M4-yaml-tho-{_t}", not loi_actionlint(_w) if not _a else (
+                _v != _tho and not loi_workflow_dot_bien_du(yaml.safe_load(_v), _wf0) and bool(loi_actionlint(_w))))
+    _them("p651-M4-actionlint-vang-hoac-nem-do", all(loi_actionlint(WF_DOT_BIEN_DU, **_k) for _k in (
+        {"tim": lambda _: None}, {"chay": lambda *a, **k: (_ for _ in ()).throw(OSError("x"))})))
     for _t, _doi, _cd in (("cham-hook", {".claude/hooks/pretooluse_guard.py"}, DAY_DU), ("cham-bo", {_PTG}, DAY_DU),
                           ("cham-chung", {"requirements.txt"}, DAY_DU), ("tai-lieu", {"docs/x.md"}, CHE_DO_NHE),
                           ("hook-khac", {".claude/hooks/subagent_ghi_detect.py"}, CHE_DO_NHE),
@@ -1942,7 +1962,7 @@ def main():
         loi_du = loi_workflow_dot_bien_du(yaml.safe_load(WF_DOT_BIEN_DU.read_text(encoding="utf-8")), wf)
     except (OSError, yaml.YAMLError) as e:
         loi_du = [f"không đọc được {WF_DOT_BIEN_DU.name}: {type(e).__name__}"]
-    loi += ["ĐỘT BIẾN ĐỦ (#651 M4): " + x for x in loi_du]
+    loi += ["ĐỘT BIẾN ĐỦ (#651 M4): " + x for x in loi_du + loi_actionlint(WF_DOT_BIEN_DU)]
     for x in loi: print("ĐỎ:", x)
     print(f"ĐĂNG KÝ: {tren_cay}/{trong_so}")
     print(f"TRẠNG THÁI: chan={trong_so - len(CACH_LY)} cach_ly={len(CACH_LY)}")

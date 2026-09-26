@@ -109,3 +109,11 @@ cam_tuyet_doi:
 chua_do_duoc:
   - 'Danh tinh nguoi ky: #566.'
   - 'Effort thuc te cua phien executor.'
+
+lech_nguong_duoc_duyet: >-
+  S5 (spec §4, ADR-0044: <= 300 dong them) NANG len ~320 theo quyet dinh chu kho trong phien 2026-09-26 (hoi
+  AskUserQuestion, chon "Nang tran, dung actionlint"): cot chot M4 bi Codex CLI bat 4 luot lien cung mot hinh dang
+  (o tu do trong workflow tuan), va vá goc — actionlint THAT tren tep W3 tho, fail-close khi vang cong cu — can them
+  dong khi packet da o dung tran 300. Do sau va: 320 dong them tren 3 tep (luc hoi uoc 312–315).
+lease_sua_lan_cuoi: '2026-09-26'
+lease_sua_ghi_chu: 'Chi them lech_nguong_duoc_duyet; khong doi write set, han, spec.'

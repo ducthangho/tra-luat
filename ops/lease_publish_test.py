@@ -9241,12 +9241,16 @@ _STUB_T191 = ('\n\ndef _kiem_gia_t191(lease, han=None):\n    if lease.get("chot_
 # Hợp đồng PHÂN LOẠI của bộ liệt kê (lượt 18, F2): (tên, đoạn chèn, +ds, +miễn, +đếm thô). Mỗi nhánh
 # ngữ nghĩa một CẶP có/không nhắc `bo_qua_han`; phạm vi lồng: bộ liệt kê KHÔNG thấy, đếm thô CÓ thấy.
 _PHAN_LOAI_T191 = (
-    ("case-guard-mien", "    match 1:\n        case 1 if not bo_qua_han:\n            _kiem_gia_t191(lease)\n", 0, 1, 1),
+    # lượt 22: case LỒNG — guard ngoài nhắc bo_qua_han, guard trong KHÔNG; miễn phải được THỪA KẾ vào thân case trong
+    ("case-guard-mien", "    match 1:\n        case 1 if not bo_qua_han:\n            match 2:\n                case 2 if lease:\n"
+                        "                    _kiem_gia_t191(lease)\n", 0, 1, 1),
     ("case-guard-thuong", "    match 1:\n        case 1 if lease:\n            _kiem_gia_t191(lease)\n", 1, 0, 1),
-    # lượt 21: BA vế — vế giữa KHÔNG nhắc bo_qua_han, chốt sau nó; miễn phải được NHỚ qua vế giữa
-    ("or-mien", "    bo_qua_han or lease or _kiem_gia_t191(lease)\n", 0, 1, 1),
-    ("and-mien", "    (not bo_qua_han) and lease and _kiem_gia_t191(lease)\n", 0, 1, 1),
-    ("or-truoc-khong-mien", "    _kiem_gia_t191(lease) or bo_qua_han\n", 1, 0, 1),
+    # lượt 21–22: cờ KHÔNG ở vế đầu, bọc `not not`; vế giữa `not` không nhắc cờ; chốt nằm trong IfExp của vế cuối —
+    # miễn phải được NHỚ qua mọi vế sau và THỪA KẾ vào IfExp. `and-mien`: cờ trong phép so sánh, chốt trong BoolOp LỒNG.
+    ("or-mien", "    lease.get('skip') or (not not bo_qua_han) or (not lease) or (_kiem_gia_t191(lease) if lease else None)\n", 0, 1, 1),
+    ("and-mien", "    (bo_qua_han is False) and lease and (lease or _kiem_gia_t191(lease))\n", 0, 1, 1),
+    # đối chứng vị trí: cờ nằm TRONG chính đối số của chốt và ở vế SAU — không miễn
+    ("or-truoc-khong-mien", "    lease.get('skip') or _kiem_gia_t191(lease, han=bo_qua_han) or bo_qua_han\n", 1, 0, 1),
     ("or-thuong", "    lease or _kiem_gia_t191(lease)\n", 1, 0, 1),
     ("def-long", "    def _gia_long():\n        return _kiem_gia_t191(lease)\n", 0, 0, 1),
     ("async-def-long", "    async def _gia_long():\n        return _kiem_gia_t191(lease)\n", 0, 0, 1),

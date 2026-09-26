@@ -1,16 +1,10 @@
 name: đột biến đủ (hằng tuần)
 
-# #651 (CI-REGISTRY-THU-HEP-VUNG r1) M4. Lượt `gate-registry` của `ci.yml` bỏ vòng đột biến của bộ trong `NHE`
-# khi diff không chạm vùng (#643/#647/#651), và #651 thu hẹp vùng: `ci_dang_ky_test.py` cùng `.github/**` (trừ
-# `ci.yml`) không còn ép đủ. Workflow này bù phần nới ấy: chạy CÙNG lệnh registry mà KHÔNG truyền biến diff, nên
-# `doc_diff` trả "không đo được" và `ke_hoach` fail-closed về ĐỦ cho mọi bộ.
-#
-# Chốt ở `.claude/dev/ci_dang_ky_test.py` (`loi_workflow_dot_bien_du`), trích TỪ CHÍNH hai tệp YAML: `on` đúng
-# `schedule` + `workflow_dispatch`; `permissions` chỉ đọc; cron ghim; không khoá cấp workflow khác; một job; env job,
-# `timeout-minutes` và MỌI bước bằng `gate-registry` của `ci.yml`, trừ `env` bước registry = chỉ `CI_DANG_KY_WORKERS`.
-# Sửa `gate-registry` mà quên tệp này ⇒ registry ĐỎ ngay trên PR — không có bản sao thứ hai để trôi.
-#
-# Chỉ ubuntu: lượt đủ này đo VÒNG ĐỘT BIẾN; Windows vốn bỏ đột biến của `pretooluse_guard_test`.
+# #651 (CI-REGISTRY-THU-HEP-VUNG r1) M4 — bù phần chốt nới của #651 (`ci_dang_ky_test.py`, `.github/**` trừ `ci.yml` không còn
+# ép đủ). Cùng lệnh registry, KHÔNG biến diff ⇒ `doc_diff` "không đo được" ⇒ `ke_hoach` fail-closed về ĐỦ cho mọi bộ.
+# Chốt `loi_workflow_dot_bien_du` (`.claude/dev/ci_dang_ky_test.py`): mọi giá trị hoặc GHIM, hoặc BẰNG `gate-registry` của
+# `ci.yml` (trích từ chính hai tệp) trừ `env` bước registry. Sửa `gate-registry` mà quên tệp này ⇒ registry ĐỎ trên PR.
+# Chỉ ubuntu: Windows vốn bỏ đột biến của `pretooluse_guard_test`.
 
 on:
   schedule:

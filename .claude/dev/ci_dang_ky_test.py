@@ -716,9 +716,9 @@ MAU_NHE = {_PTG: _DONG_NHE_HOOK, _SGD: _DONG_NHE_HOOK}
 # #651 M2: `ci_dang_ky_test.py` ra khỏi vùng (bộ chọn tự canh bằng `phan_chung` mọi lượt); `.github/**` → riêng `ci.yml`.
 # Phần chốt nới ra được bù bằng lượt ĐỦ hằng tuần `ci-dot-bien-du.yml` (chốt `loi_workflow_dot_bien_du`).
 VUNG_CHUNG = (".github/workflows/ci.yml", "requirements.txt")
-# Tệp/tiền tố NGOÀI cặp bộ/đích mà vòng đột biến của bộ đọc. `_PTG`: mỗi mutant chạy lại `t15`/`t33` ⇒ `--kiem-bang` ⇒
-# `scripts/tl.py tool-inventory` + `--help`. Đo bằng audit hook `open` (d4a84ef): 32 tệp, TẤT CẢ dưới `scripts/` ⇒ khoá
-# cả lớp bằng tiền tố, không liệt kê từng tệp (Codex CLI lượt 2 → `tl_core/`, lượt 3 → `tl_gws.py`: vá theo danh sách thua).
+# Tệp/tiền tố NGOÀI cặp bộ/đích. `_PTG`: mutant chạy lại `t15`/`t33` ⇒ `--kiem-bang` ⇒ `tl.py tool-inventory` + `--help`;
+# audit hook `open` (d4a84ef): 32 tệp, TẤT CẢ dưới `scripts/` ⇒ tiền tố cả lớp. Đó là kiểm kê `--kiem-bang`, KHÔNG phải
+# toàn vòng: `t11` chạy `ruff check .` (~264 tệp, Codex lượt 4) — NGOÀI VÙNG CÓ CHỦ ĐÍCH; ca nền chạy mọi lượt, lượt tuần bù.
 VUNG_THEM = {_SGD: (".claude/settings.json",)}
 TIEN_TO_THEM = {_PTG: ("scripts/",)}
 # Review connector PR #645 (P2): fallback :833-836 phải giữ cho workflow/security/runner (`.github/**`) và cấu hình
@@ -806,14 +806,15 @@ def loi_env_registry(data):
 
 
 WF_DOT_BIEN_DU = ROOT / ".github/workflows/ci-dot-bien-du.yml"
-CRON_DOT_BIEN_DU = "17 19 * * 6"  # GHIM: "chuỗi cron bất kỳ" để lọt lịch năm (review Codex CLI lượt 2, P2)
+# GHIM (Codex CLI): cron bất kỳ lọt lịch năm (lượt 2); `name`/job id tự do lọt biểu thức hỏng (lượt 4).
+CRON_DOT_BIEN_DU, TEN_WF_DU, JOB_DU = "17 19 * * 6", "đột biến đủ (hằng tuần)", "dot-bien-du"
 
 
 def loi_workflow_dot_bien_du(data, ci):
     """#651 M4: lượt ĐỦ hằng tuần. Danh sách CHO PHÉP ở mọi tầng; bước so BẰNG ĐÚNG `gate-registry` của `ci.yml` (trích từ
     CHÍNH hai tệp, không chép) trừ `env` bước registry = chỉ `CI_DANG_KY_WORKERS` ⇒ vắng biến diff ⇒ `ke_hoach` ĐỦ."""
     d, loi = data or {}, []
-    if set(map(str, d)) - {"name", "on", "True", "permissions", "jobs"}:  # `concurrency` biểu thức hỏng ⇒ không chạy (lượt 3)
+    if set(map(str, d)) - {"name", "on", "True", "permissions", "jobs"} or d.get("name") != TEN_WF_DU:
         loi.append(f"khoá cấp workflow ngoài danh sách cho phép: {sorted(map(str, d))}")
     on = d.get("on", d.get(True))  # PyYAML đọc khoá trần `on` thành True
     lich = on.get("schedule") if isinstance(on, dict) else None
@@ -824,9 +825,9 @@ def loi_workflow_dot_bien_du(data, ci):
     if d.get("permissions") != {"contents": "read"}:
         loi.append(f"permissions phải đúng contents: read: {d.get('permissions')!r}")
     jobs, goc = d.get("jobs") or {}, (((ci or {}).get("jobs") or {}).get("gate-registry") or {})
-    if len(jobs) != 1 or not isinstance(next(iter(jobs.values())), dict):
-        return loi + [f"phải đúng một job, thấy {len(jobs)}"]
-    job = next(iter(jobs.values()))
+    if set(jobs) != {JOB_DU} or not isinstance(jobs[JOB_DU], dict):
+        return loi + [f"phải đúng một job `{JOB_DU}`, thấy {sorted(map(str, jobs))}"]
+    job = jobs[JOB_DU]
     if set(job) != {"runs-on", "timeout-minutes", "env", "steps"} or job["runs-on"] != "ubuntu-latest":
         loi.append(f"job: khoá {sorted(job)} / runs-on {job.get('runs-on')!r} ngoài danh sách cho phép")
     loi += [f"job: {k} lệch gate-registry" for k in ("timeout-minutes", "env") if job.get(k) != goc.get(k)]
@@ -1836,10 +1837,8 @@ def phan_chung():
     _them("p651-M4-ban-json-van-dat", not _hong_du(lambda w, j: None))  # khoá `on` dạng chuỗi cũng nhận
 
     def _buoc_reg(j): return next(b for b in j["steps"] if "ci_dang_ky_test.py --chay" in str(b.get("run", "")))
-    for _t, _f in (("them-push", lambda w, j: w["on"].update(push=None)),
-                   ("them-pull-request", lambda w, j: w["on"].update(pull_request=None)),
-                   ("bo-schedule", lambda w, j: w["on"].pop("schedule")),
-                   ("schedule-rong", lambda w, j: w["on"].update(schedule=[])),
+    for _t, _f in (("them-push", lambda w, j: w["on"].update(push=None)), ("them-pull-request", lambda w, j: w["on"].update(pull_request=None)),
+                   ("bo-schedule", lambda w, j: w["on"].pop("schedule")), ("schedule-rong", lambda w, j: w["on"].update(schedule=[])),
                    ("schedule-hang-nam", lambda w, j: w["on"].update(schedule=[{"cron": "17 19 1 1 *"}])),
                    ("schedule-them-cron", lambda w, j: w["on"]["schedule"].append({"cron": "0 0 1 1 *"})),
                    ("bo-dispatch", lambda w, j: w["on"].pop("workflow_dispatch")),
@@ -1852,13 +1851,13 @@ def phan_chung():
                    ("troi-ghim-pip", lambda w, j: j["steps"][3].update(run=j["steps"][3]["run"].replace("6.0.3", "6.0.2"))),
                    ("them-buoc", lambda w, j: j["steps"].insert(0, {"run": "true"})),
                    ("buoc-continue-on-error", lambda w, j: _buoc_reg(j).update({"continue-on-error": True})),
-                   ("job-if", lambda w, j: j.update({"if": "false"})),
-                   ("job-windows", lambda w, j: j.update({"runs-on": "windows-latest"})),
+                   ("job-if", lambda w, j: j.update({"if": "false"})), ("job-windows", lambda w, j: j.update({"runs-on": "windows-latest"})),
                    ("timeout-lech", lambda w, j: j.update({"timeout-minutes": 5})),
-                   ("permissions-ghi", lambda w, j: w.update(permissions={"contents": "write"})),
-                   ("hai-job", lambda w, j: w["jobs"].update(khac=j)),
+                   ("permissions-ghi", lambda w, j: w.update(permissions={"contents": "write"})), ("hai-job", lambda w, j: w["jobs"].update(khac=j)),
                    ("khoa-la", lambda w, j: w.update({"run-name": "x"})),
-                   ("concurrency", lambda w, j: w.update(concurrency={"group": "${{ fromJSON(github.event_name) }}"}))):
+                   ("concurrency", lambda w, j: w.update(concurrency={"group": "${{ fromJSON(github.event_name) }}"})),
+                   ("name-bieu-thuc", lambda w, j: w.update(name="${{ broken() }}")),
+                   ("job-id-la", lambda w, j: w.update(jobs={"1invalid": w["jobs"].pop(JOB_DU)}))):
         _them("p651-M4-" + _t + "-do", _hong_du(_f))
     _them("p651-M4-rong-do", bool(loi_workflow_dot_bien_du(None, _wf0)))
     _them("p651-M4-ci-yml-doi-thi-do", bool(loi_workflow_dot_bien_du(_wd0, {"jobs": {}})))

@@ -1132,10 +1132,7 @@ def t26i_record_boundary_regression(h):
     return not xau, "loi: " + "; ".join(xau) if xau else f"matrix passed ({so_ca} cases)"
 
 
-# ── CHE DO NHE (#651): CI bo MOI vong dot bien khi diff KHONG cham vung ─────────────────
-# Do run 36246637438: bo nay 291,81 s tren gate-registry, 42 ca nen chi 7,6 s tai cho.
-# `ci_dang_ky_test.py` dat co duoi day khi diff khong cham hook/bo nay/`.claude/settings.json`/
-# vung chung, va GO co khi cham — nen dot bien van do dung luot can do. Ca NEN chay du moi luot.
+# ── CHE DO NHE (#651): bo MOI vong dot bien, ca NEN chay du (run 36246637438: 291,81 s; ca nen 7,6 s) ──
 CO_NHE = "SUBAGENT_GHI_DETECT_KHONG_DOT_BIEN"
 
 
@@ -1145,8 +1142,7 @@ def che_do_chay(env=None):
 
 
 def dong_nhe(so_ca_dat, so_ca, so_dot_bien):
-    """Dong bang chung che do nhe. KHONG mang chu `bi giet` — o day khong giet cai nao, nen
-    dong nay PHAI truot mau che do du (`MAU_DAY_DU`) cua so dang ky."""
+    """Dong bang chung nhe. KHONG mang chu `bi giet` ⇒ PHAI truot `MAU_DAY_DU` cua so dang ky."""
     return (f"TONG: CA {so_ca_dat}/{so_ca} dat · "
             f"DOT BIEN {so_dot_bien} muc CHE DO NHE — do khi diff cham vung")
 
@@ -1154,6 +1150,15 @@ def dong_nhe(so_ca_dat, so_ca, so_dot_bien):
 def dat_nhe(so_ca, do, so_dot_bien):
     """Tieu chi DAT cua che do nhe van doi SO DUONG hai ve (#319): bang dot bien rong la DO."""
     return so_ca > 0 and do == 0 and so_dot_bien > 0
+
+
+def ket_thuc_nhe(so_ca, do, so_dot_bien):
+    """Duoi nhanh nhe: dong bang chung, TONG, roi cong bo gioi han. Tra ma thoat."""
+    dat = dat_nhe(so_ca, do, so_dot_bien)
+    print(dong_nhe(so_ca - do, so_ca, so_dot_bien))
+    print("TONG:", "DAT" if dat else "DO")
+    _in_gioi_han()  # #651 Codex luot 3-4: nhe KHONG duoc cat khoi nay
+    return 0 if dat else 1
 
 
 def t27_che_do_nhe_chi_khi_co_DUNG_1(h):
@@ -1167,6 +1172,13 @@ def t28_dong_nhe_KHONG_gia_dang_dong_du_va_bang_rong_thi_DO(h):
     ok = ("bi giet" not in d and "CHE DO NHE" in d and dat_nhe(42, 0, 25)
           and not dat_nhe(42, 0, 0) and not dat_nhe(42, 1, 25) and not dat_nhe(0, 0, 25))
     return ok, "che do nhe: dong bang chung rieng, bang dot bien rong -> DO"
+
+
+def t29_nhanh_nhe_VAN_cong_bo_gioi_han(h):
+    with contextlib.redirect_stdout(__import__("io").StringIO()) as b:
+        rc = ket_thuc_nhe(2, 0, 1)
+    ok = rc == 0 and "TONG: DAT" in (o := b.getvalue()) and "A10 :" in o and "NO  :" in o and o.index("TONG: DAT") < o.index("A10 :")
+    return ok, "nhanh nhe: rc=0, A10/NO in SAU `TONG`"
 
 
 CA = [t1_khong_ghi_thi_clean, t2_ghi_tep_theo_doi_thi_changed,
@@ -1204,7 +1216,7 @@ CA = [t1_khong_ghi_thi_clean, t2_ghi_tep_theo_doi_thi_changed,
       t26i_record_boundary_regression,
       # --- #651: che do nhe ---
       t27_che_do_nhe_chi_khi_co_DUNG_1,
-      t28_dong_nhe_KHONG_gia_dang_dong_du_va_bang_rong_thi_DO]
+      t28_dong_nhe_KHONG_gia_dang_dong_du_va_bang_rong_thi_DO, t29_nhanh_nhe_VAN_cong_bo_gioi_han]
 
 # --- DOT BIEN: moi cai go DUNG MOT tinh chat, va phai lam it nhat mot ca DO ---
 DOT_BIEN = [
@@ -1343,6 +1355,8 @@ DOT_BIEN_NHAM_TEST = [
      '            f"DOT BIEN {so_dot_bien} muc CHE DO NHE — do khi diff cham vung")\n',
      '            f"DOT BIEN {so_dot_bien}/{so_dot_bien} bi giet")\n',
      "t28_dong_nhe_KHONG_gia_dang_dong_du_va_bang_rong_thi_DO"),
+    ("mt7_nhe_cat_cong_bo_gioi_han", "    _in_gioi_han()  # #651 Codex luot 3-4: nhe KHONG duoc cat khoi nay\n",
+     "    pass\n", "t29_nhanh_nhe_VAN_cong_bo_gioi_han"),
 ]
 
 
@@ -1462,14 +1476,8 @@ def chay():
             print(f"  DO   {f.__name__:52} {msg}")
         else:
             print(f"  ok   {f.__name__:52} {msg}")
-    # CHE DO NHE (#651): cat DUNG ba vong dot bien, khong cat gi khac — ca NEN o tren DA chay du, khoi
-    # cong bo gioi han `_in_gioi_han` van in.
-    if che_do_chay() == "nhe":
-        dat = dat_nhe(len(CA), do, len(DOT_BIEN))
-        print(dong_nhe(len(CA) - do, len(CA), len(DOT_BIEN)))
-        print("TONG:", "DAT" if dat else "DO")
-        _in_gioi_han()
-        return 0 if dat else 1
+    if che_do_chay() == "nhe":  # #651: cat DUNG ba vong dot bien; ca NEN o tren DA chay du
+        return ket_thuc_nhe(len(CA), do, len(DOT_BIEN))
     goc = HOOK.read_text(encoding="utf-8")
     song = []
     # ── DOT BIEN CHI CO NGHIA KHI NEN XANH ───────────────────────────────────────────────

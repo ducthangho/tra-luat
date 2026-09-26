@@ -716,7 +716,10 @@ MAU_NHE = {_PTG: _DONG_NHE_HOOK, _SGD: _DONG_NHE_HOOK}
 # #651 M2: `ci_dang_ky_test.py` ra khỏi vùng (bộ chọn tự canh bằng `phan_chung` mọi lượt); `.github/**` → riêng `ci.yml`.
 # Phần chốt nới ra được bù bằng lượt ĐỦ hằng tuần `ci-dot-bien-du.yml` (chốt `loi_workflow_dot_bien_du`).
 VUNG_CHUNG = (".github/workflows/ci.yml", "requirements.txt")
-VUNG_THEM = {_SGD: (".claude/settings.json",)}  # tệp NGOÀI cặp bộ/đích mà vòng đột biến của bộ đọc
+# Tệp/tiền tố NGOÀI cặp bộ/đích mà vòng đột biến của bộ đọc. `_PTG`: mỗi mutant chạy lại ca nền, và `t15`/`t33` gọi
+# `--kiem-bang` ⇒ `scripts/tl.py tool-inventory` + `--help` (review Codex CLI lượt 2 trên 1b885af, P2 kế thừa #647).
+VUNG_THEM = {_SGD: (".claude/settings.json",), _PTG: ("scripts/tl.py",)}
+TIEN_TO_THEM = {_PTG: ("scripts/tl_core/",)}
 # Review connector PR #645 (P2): fallback :833-836 phải giữ cho workflow/security/runner (`.github/**`) và cấu hình
 # TOÀN CỤC ở gốc kho (`pyproject.toml`, `sitecustomize.py`, manifest…) — không chỉ 5 đường của `VUNG_CHUNG`.
 # Codex CLI lượt 1 trên feeee4ed: script thiết lập runner của `gate-registry` nằm NGOÀI `.github/` (`cai_actionlint.sh`
@@ -762,7 +765,7 @@ def ke_hoach(doi, nhe=NHE):
     kh = {}
     for p in nhe:
         vung = {p, p[:-len("_test.py")] + ".py", *VUNG_CHUNG, *VUNG_THEM.get(p, ())}
-        cham = None if doi is None else sorted(x for x in doi if _cham_vung(x, vung))
+        cham = None if doi is None else sorted(x for x in doi if _cham_vung(x, vung) or x.startswith(TIEN_TO_THEM.get(p, ())))
         kh[p] = ((DAY_DU, "không đo được diff hoặc sự kiện không phải push/pull_request") if cham is None
                  else (DAY_DU, "diff chạm " + ", ".join(cham)) if cham else (CHE_DO_NHE, "diff không chạm vùng đột biến"))
     return kh
@@ -802,6 +805,7 @@ def loi_env_registry(data):
 
 
 WF_DOT_BIEN_DU = ROOT / ".github/workflows/ci-dot-bien-du.yml"
+CRON_DOT_BIEN_DU = "17 19 * * 6"  # GHIM: "chuỗi cron bất kỳ" để lọt lịch năm (review Codex CLI lượt 2, P2)
 
 
 def loi_workflow_dot_bien_du(data, ci):
@@ -814,9 +818,8 @@ def loi_workflow_dot_bien_du(data, ci):
     lich = on.get("schedule") if isinstance(on, dict) else None
     if not isinstance(on, dict) or set(on) != {"schedule", "workflow_dispatch"} or on["workflow_dispatch"] is not None:
         loi.append(f"`on` phải đúng schedule + workflow_dispatch trần: {on!r}")
-    elif not (isinstance(lich, list) and lich and all(isinstance(x, dict) and set(x) == {"cron"} and isinstance(x["cron"], str)
-                                                     for x in lich)):
-        loi.append(f"schedule phải là danh sách cron khác rỗng: {lich!r}")
+    elif lich != [{"cron": CRON_DOT_BIEN_DU}]:
+        loi.append(f"schedule phải đúng [{{cron: {CRON_DOT_BIEN_DU!r}}}] (hằng tuần): {lich!r}")
     if d.get("permissions") != {"contents": "read"}:
         loi.append(f"permissions phải đúng contents: read: {d.get('permissions')!r}")
     jobs, goc = d.get("jobs") or {}, (((ci or {}).get("jobs") or {}).get("gate-registry") or {})
@@ -1811,7 +1814,13 @@ def phan_chung():
                           ("bo-chon-nhe", {".claude/dev/ci_dang_ky_test.py"}, CHE_DO_NHE),
                           ("hook-khac", {".claude/hooks/pretooluse_guard.py"}, CHE_DO_NHE), ("tai-lieu", {"docs/x.md"}, CHE_DO_NHE)):
         _them("p651-M3-ke-hoach-" + _t, ke_hoach(_doi).get(_SGD, ("vắng",))[0] == _cd)
-    _them("p651-M3-settings-chi-vung-bo-subagent", ke_hoach({".claude/settings.json"})[_PTG][0] == CHE_DO_NHE)
+    _them("p651-M3-settings-chi-vung-bo-subagent", ke_hoach({".claude/settings.json"}).get(_PTG, ("vắng",))[0] == CHE_DO_NHE)
+    for _t, _doi, _cd in (("tl-py", {"scripts/tl.py"}, DAY_DU), ("registry", {"scripts/tl_core/command_registry.py"}, DAY_DU),
+                          ("tl-core-khac", {"scripts/tl_core/x/y.py"}, DAY_DU), ("scripts-khac-nhe", {"scripts/khac.py"}, CHE_DO_NHE),
+                          ("tien-to-gia-nhe", {"scripts/tl_core_x.py", "scripts/tl.pyc"}, CHE_DO_NHE)):
+        _them("p651-P2-ptg-kiem-bang-" + _t, ke_hoach(_doi).get(_PTG, ("vắng",))[0] == _cd)
+    _them("p651-P2-tl-core-chi-vung-ptg", ke_hoach({"scripts/tl_core/command_registry.py"}).get(_SGD, ("vắng",))[0] == CHE_DO_NHE
+          and ke_hoach({"scripts/tl.py"}).get(_P, ("vắng",))[0] == CHE_DO_NHE)
     _them("p651-M3-env", env_theo_che_do(_SGD, CHE_DO_NHE) == {"SUBAGENT_GHI_DETECT_KHONG_DOT_BIEN": "1"}
           and env_theo_che_do(_SGD, DAY_DU) == {"SUBAGENT_GHI_DETECT_KHONG_DOT_BIEN": None})
     _them("p651-M3-mau-nhe-va-day-du-cho-bo-subagent", _SGD in MAU_NHE and _SGD in MAU_DAY_DU and _SGD in MOI)
@@ -1830,6 +1839,8 @@ def phan_chung():
                    ("them-pull-request", lambda w, j: w["on"].update(pull_request=None)),
                    ("bo-schedule", lambda w, j: w["on"].pop("schedule")),
                    ("schedule-rong", lambda w, j: w["on"].update(schedule=[])),
+                   ("schedule-hang-nam", lambda w, j: w["on"].update(schedule=[{"cron": "17 19 1 1 *"}])),
+                   ("schedule-them-cron", lambda w, j: w["on"]["schedule"].append({"cron": "0 0 1 1 *"})),
                    ("bo-dispatch", lambda w, j: w["on"].pop("workflow_dispatch")),
                    ("env-workflow-co-nhe", lambda w, j: w.update(env={"NHANH_DON_DUOC_KHONG_DOT_BIEN": "1"})),
                    ("defaults-workflow", lambda w, j: w.update(defaults={"run": {"shell": "bash"}})),

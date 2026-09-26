@@ -1428,6 +1428,28 @@ def _chay_dot_bien_nham_test():
     return song
 
 
+def _in_gioi_han():
+    """Cong bo gioi han cua bo — in o CA HAI che do (#651: nhe tung cat mat khoi nay).
+    Review Codex CLI luot 2 tren 1b885af, P3."""
+    # ── A10 — RANH GIOI CUA CHINH BO TEST NAY, khai o day chu khong giau trong PR ──
+    print("A10 : hieu luc cua `SubagentStop` exit 2 tren nen — KHONG DO DUOC trong bo nay.")
+    print("      Bo nay do DETECTOR bang payload tong hop; no KHONG chung minh hook that su")
+    print("      duoc nen goi, cung khong chung minh ma thoat 2 co tac dung. Muon do phai")
+    print("      phong mot subagent THAT. D1 (CHI TO CAO) chon chinh vi phep do ay chua co.")
+    # ── NO CO TEN, khai o DAY chu khong giau trong PR ────────────────────────────────────
+    # Cross-review luot 2 (PR #342) doi bon tieu chi; luot 3 dong duoc HAI, con HAI khong
+    # dong duoc bang mot ca test va noi thang vi sao, thay vi de trong.
+    print("NO  : `snapshot-ngoai-cay-KHONG-co-bien-toan-ven` — anh chup nam NGOAI cay nhung")
+    print("      subagent VAN ghi de duoc no. `agent_id` nay da nam TRONG anh chup (t23),")
+    print("      nhung do la chot chong DOI TEN, khong phai bien toan ven: ke sua duoc tep")
+    print("      thi sua duoc ca truong ay. Bien toan ven that doi mot KHOA ma subagent")
+    print("      khong doc duoc, va D1 khong co thu ay. Khong va bang bam dai hon.")
+    print("NO  : `A3/A8/A11-chua-co-ca-dong` — `install`, `tl nlm-reconcile`, ghi NGOAI kho,")
+    print("      mo phong mang: bo nay dung payload TONG HOP nen khong dieu khien duoc mot")
+    print("      agent THAT lam nhung viec ay. Ba dang GHI cua A4 (xoa · doi ten · staged)")
+    print("      DA co ca rieng tu luot 3 — xem t4b/t4c/t4d.")
+
+
 def chay():
     do_san = set()          # ca DA DO o NEN — doc chu thich duoi truoc khi sua
     do = 0
@@ -1439,11 +1461,13 @@ def chay():
             print(f"  DO   {f.__name__:52} {msg}")
         else:
             print(f"  ok   {f.__name__:52} {msg}")
-    # CHE DO NHE (#651): cat DUNG ba vong dot bien, khong cat gi khac — ca NEN o tren DA chay du.
+    # CHE DO NHE (#651): cat DUNG ba vong dot bien, khong cat gi khac — ca NEN o tren DA chay du, khoi
+    # cong bo gioi han `_in_gioi_han` van in.
     if che_do_chay() == "nhe":
         dat = dat_nhe(len(CA), do, len(DOT_BIEN))
         print(dong_nhe(len(CA) - do, len(CA), len(DOT_BIEN)))
         print("TONG:", "DAT" if dat else "DO")
+        _in_gioi_han()
         return 0 if dat else 1
     goc = HOOK.read_text(encoding="utf-8")
     song = []
@@ -1500,23 +1524,7 @@ def chay():
               f"DOT BIEN {tap_giet}/{len(DOT_BIEN)} bi giet")
     dat = (len(CA) > 0 and do == 0 and len(DOT_BIEN) > 0 and not song)
     print("TONG:", "DAT" if dat else "DO")
-    # ── A10 — RANH GIOI CUA CHINH BO TEST NAY, khai o day chu khong giau trong PR ──
-    print("A10 : hieu luc cua `SubagentStop` exit 2 tren nen — KHONG DO DUOC trong bo nay.")
-    print("      Bo nay do DETECTOR bang payload tong hop; no KHONG chung minh hook that su")
-    print("      duoc nen goi, cung khong chung minh ma thoat 2 co tac dung. Muon do phai")
-    print("      phong mot subagent THAT. D1 (CHI TO CAO) chon chinh vi phep do ay chua co.")
-    # ── NO CO TEN, khai o DAY chu khong giau trong PR ────────────────────────────────────
-    # Cross-review luot 2 (PR #342) doi bon tieu chi; luot 3 dong duoc HAI, con HAI khong
-    # dong duoc bang mot ca test va noi thang vi sao, thay vi de trong.
-    print("NO  : `snapshot-ngoai-cay-KHONG-co-bien-toan-ven` — anh chup nam NGOAI cay nhung")
-    print("      subagent VAN ghi de duoc no. `agent_id` nay da nam TRONG anh chup (t23),")
-    print("      nhung do la chot chong DOI TEN, khong phai bien toan ven: ke sua duoc tep")
-    print("      thi sua duoc ca truong ay. Bien toan ven that doi mot KHOA ma subagent")
-    print("      khong doc duoc, va D1 khong co thu ay. Khong va bang bam dai hon.")
-    print("NO  : `A3/A8/A11-chua-co-ca-dong` — `install`, `tl nlm-reconcile`, ghi NGOAI kho,")
-    print("      mo phong mang: bo nay dung payload TONG HOP nen khong dieu khien duoc mot")
-    print("      agent THAT lam nhung viec ay. Ba dang GHI cua A4 (xoa · doi ten · staged)")
-    print("      DA co ca rieng tu luot 3 — xem t4b/t4c/t4d.")
+    _in_gioi_han()
     return 0 if dat else 1
 
 

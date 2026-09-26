@@ -143,3 +143,12 @@ TRANG_THAI_REVIEW_LUC_CAP:
   so_finding: 'P1 0 / P2 1 / P3 2'
   da_xu_ly: 'F1/F2 bang ma (2ec5e0a); F3 bang r13.'
   DIEU_KIEN_DUNG: 'Khong con P1, P2, P3 o mot luot. Chua dat — luot 21 se do.'
+
+# ───────────────────────── BIA MỘ — vế THỨ NHẤT của dấu HAI CHIỀU ─────────────────────────
+# Thêm 2026-09-26 khi cấp g12. g11 CÒN HIỆU LỰC (hạn 2026-09-27T00:00:00Z) nên bia mộ hai chiều là
+# BẮT BUỘC. REVISION mới (r13 -> r14): protocol §3.2.
+da_bi_thay_the: dang-lease-dau-truoc-kiem-sau-r14-g12-claude
+da_bi_thay_the_luc: '2026-09-26T06:57:10Z'
+da_bi_thay_the_luc_nguon: 'date -u luc commit bia mo nay; commit dung CHINH gia tri ay lam committer date (GIT_COMMITTER_DATE).'
+da_bi_thay_the_vi_sao: 'r14 (issues/579#issuecomment-5843748145, chủ kho: "r14 + g12: ma trận ca (đề xuất)") — hợp đồng phân loại
+  t191 thành ma trận trục; head 874020c. spec_hash r14 = 9771e601af2152d53135a57afb700f2f95cfdcc512416f88e9f176be99b0e36f.'

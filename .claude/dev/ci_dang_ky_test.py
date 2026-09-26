@@ -704,7 +704,15 @@ MAU_DAY_DU = {"ops/nhanh_don_duoc_test.py": r"^MUTANT: giet = (\d+) · khong gie
 VUNG_CHUNG = (".github/workflows/ci.yml", ".claude/dev/ci_dang_ky_test.py", "requirements.txt")
 # Review connector PR #645 (P2): fallback :833-836 phải giữ cho workflow/security/runner (`.github/**`) và cấu hình
 # TOÀN CỤC ở gốc kho (`pyproject.toml`, `sitecustomize.py`, manifest…) — không chỉ 5 đường của `VUNG_CHUNG`.
-TIEN_TO_CHUNG = (".github/",)
+# Codex CLI lượt 1 trên feeee4ed: script thiết lập runner của `gate-registry` nằm NGOÀI `.github/` (`cai_actionlint.sh`
+# ghi GITHUB_PATH ⇒ đổi cách tìm git/tar); `cai_cong_cu.sh` đọc `ops/cong_cu.yaml`. Chốt `loi_vung_thiet_lap` dẫn
+# xuất từ ci.yml để một bước cài MỚI mà quên vùng thì ĐỎ. Tài liệu gốc: danh sách CHO PHÉP, tệp gốc lạ vẫn ⇒ ĐỦ.
+TIEN_TO_CHUNG = (".github/", "ops/cai_", "ops/cong_cu")
+GOC_TAI_LIEU = frozenset({"AGENTS.md", "CHANGELOG.md", "CLAUDE.md", "CONTEXT.md", "INSTALL.md", "README.md", "SKILL.md"})
+
+
+def _cham_vung(x, vung):
+    return x in vung or x.startswith(TIEN_TO_CHUNG) or ("/" not in x and x not in GOC_TAI_LIEU)
 DAY_DU, CHE_DO_NHE, BIEN_SU_KIEN, BIEN_GOC, BIEN_DAU = "day_du", "nhe", "CI_DANG_KY_SU_KIEN", "CI_DANG_KY_GOC", "CI_DANG_KY_DAU"
 ENV_REGISTRY = {BIEN_WORKERS: "2", BIEN_SU_KIEN: "${{ github.event_name }}",
                 BIEN_GOC: "${{ github.event.pull_request.base.sha || github.event.before }}",
@@ -732,7 +740,7 @@ def ke_hoach(doi, nhe=NHE):
     kh = {}
     for p in nhe:
         vung = {p, p[:-len("_test.py")] + ".py", *VUNG_CHUNG}
-        cham = None if doi is None else sorted(x for x in doi if x in vung or x.startswith(TIEN_TO_CHUNG) or "/" not in x)
+        cham = None if doi is None else sorted(x for x in doi if _cham_vung(x, vung))
         kh[p] = ((DAY_DU, "không đo được diff hoặc sự kiện không phải push/pull_request") if cham is None
                  else (DAY_DU, "diff chạm " + ", ".join(cham)) if cham else (CHE_DO_NHE, "diff không chạm vùng đột biến"))
     return kh
@@ -741,6 +749,14 @@ def ke_hoach(doi, nhe=NHE):
 def env_theo_che_do(path, che_do):
     """M2: nhẹ ⇒ ĐẶT cờ; đủ ⇒ GỠ cờ dù cha có — cờ rò từ cha không được lặng lẽ biến đủ thành nhẹ."""
     return {k: (v if che_do == CHE_DO_NHE else None) for k, v in NHE.get(path, {}).items()}
+
+
+def loi_vung_thiet_lap(data, goc=ROOT):
+    """Mọi đường dẫn TỆP CÓ THẬT được nhắc trong `run` của job `gate-registry` phải nằm trong vùng ⇒ ĐỦ."""
+    buoc = ((((data or {}).get("jobs") or {}).get("gate-registry") or {}).get("steps") or [])
+    tu = {t for b in buoc for t in re.findall(r"[\w./-]+", str(b.get("run", ""))) if "/" in t and (goc / t).is_file()}
+    return [f"gate-registry dùng {t} mà vùng đột biến không phủ" for t in sorted(tu) if not _cham_vung(t, set(VUNG_CHUNG))] + \
+        ([] if tu else ["không dẫn xuất được tệp nào từ gate-registry"])
 
 
 def loi_env_registry(data):
@@ -1642,7 +1658,11 @@ def phan_chung():
                           ("workflow-khac", {"docs/x.md", ".github/workflows/khac.yml"}, DAY_DU),
                           ("github-checks", {".github/checks/x.py"}, DAY_DU),
                           ("goc-pyproject", {"pyproject.toml"}, DAY_DU), ("goc-sitecustomize", {"sitecustomize.py"}, DAY_DU),
-                          ("tai-lieu-va-ma-khac-van-nhe", {"docs/x.md", "ops/khac.py", "scripts/tl.py", "CLAUDE.md/x"}, CHE_DO_NHE)):
+                          ("tai-lieu-va-ma-khac-van-nhe", {"docs/x.md", "ops/khac.py", "scripts/tl.py", "CLAUDE.md/x"}, CHE_DO_NHE),
+                          ("tai-lieu-goc-van-nhe", {"README.md", "CLAUDE.md", "CHANGELOG.md"}, CHE_DO_NHE),
+                          ("goc-md-la", {"POLICY.md"}, DAY_DU), ("goc-manifest", {"RELEASE_MANIFEST.json"}, DAY_DU),
+                          *((f"thiet-lap-{_i}", {_v}, DAY_DU) for _i, _v in enumerate(
+                              ("ops/cai_actionlint.sh", "ops/cai_cong_cu.sh", "ops/cong_cu.py", "ops/cong_cu.yaml")))):
         _them("p643-A1-ke-hoach-" + _t, ke_hoach(_doi)[_P][0] == _cd)
     _them("p643-A1-chi-bo-trong-NHE", set(ke_hoach(set())) == set(NHE) <= set(MOI) and set(MAU_DAY_DU) == set(NHE))
     _py, _cu = [sys.executable, "-c", f"import os; print(repr(os.environ.get({_K!r})))"], os.environ.get(_K)
@@ -1673,6 +1693,11 @@ def phan_chung():
         f(next(b for b in w["jobs"]["gate-registry"]["steps"] if "ci_dang_ky_test.py --chay" in str(b.get("run", ""))), w)
         return bool(loi_env_registry(w))
     _them("p643-A4-workflow-that-dat", not loi_env_registry(_wf0))
+    _them("p643-vung-thiet-lap-that-dat", not loi_vung_thiet_lap(_wf0))
+    _wf_moi = json.loads(json.dumps(_wf0))
+    _wf_moi["jobs"]["gate-registry"]["steps"].insert(0, {"run": "bash scripts/tl_boot.py"})
+    _them("p643-vung-thiet-lap-buoc-moi-ngoai-vung-la-do", bool(loi_vung_thiet_lap(_wf_moi)))
+    _them("p643-vung-thiet-lap-khong-dan-xuat-duoc-la-do", bool(loi_vung_thiet_lap({"jobs": {}})))
     _them("p643-tran-bo-nho-hon-timeout-job", GIAY_TOI_DA_MOT_BO == 4500
           and GIAY_TOI_DA_MOT_BO < 60 * _wf0["jobs"]["gate-registry"]["timeout-minutes"])
     for _k in ENV_REGISTRY:
@@ -1711,7 +1736,8 @@ def main():
     loi += launcher_loi
     loi += ruff_loi
     wf = yaml.safe_load(CI_WORKFLOW.read_text(encoding="utf-8"))
-    loi += ["G5 (M6): " + x for x in loi_g5_workflow(wf)] + ["ENV registry (#643 M4): " + x for x in loi_env_registry(wf)]
+    loi += ["G5 (M6): " + x for x in loi_g5_workflow(wf)] + ["ENV registry (#643 M4): " + x for x in loi_env_registry(wf)] \
+        + ["VÙNG thiết lập (#643): " + x for x in loi_vung_thiet_lap(wf)]
     for x in loi: print("ĐỎ:", x)
     print(f"ĐĂNG KÝ: {tren_cay}/{trong_so}")
     print(f"TRẠNG THÁI: chan={trong_so - len(CACH_LY)} cach_ly={len(CACH_LY)}")

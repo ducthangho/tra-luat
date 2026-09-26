@@ -4,6 +4,7 @@ import argparse
 import concurrent.futures
 import contextlib
 import datetime
+import hashlib
 import io
 import json
 import os
@@ -714,6 +715,7 @@ LENH_REGISTRY = frozenset({"git config --global core.autocrlf false", "git confi
                            "bash ops/cai_cong_cu.sh shellcheck", "bash ops/cai_cong_cu.sh rg",
                            "python ops/cong_cu.py kiem-tra --json", "python -m pip install --quiet ruff==0.15.15",
                            "ruff --version", "python .claude/dev/ci_dang_ky_test.py --chay"})
+BAM_GATE_REGISTRY = "b42a413f852e0852f0e59ef8acaf6757a771c2e55e296714426a73e7e308ebc9"
 GOC_TAI_LIEU = frozenset({"AGENTS.md", "CHANGELOG.md", "CLAUDE.md", "CONTEXT.md", "INSTALL.md", "README.md", "SKILL.md"})
 
 
@@ -757,11 +759,21 @@ def env_theo_che_do(path, che_do):
     return {k: (v if che_do == CHE_DO_NHE else None) for k, v in NHE.get(path, {}).items()}
 
 
+def bam_gate_registry(data):
+    """Băm TOÀN BỘ định nghĩa job `gate-registry` + `env`/`defaults` cấp workflow (JSON sắp khoá)."""
+    d = data or {}
+    goi = {"job": (d.get("jobs") or {}).get("gate-registry"), "env": d.get("env"), "defaults": d.get("defaults")}
+    return hashlib.sha256(json.dumps(goi, sort_keys=True, ensure_ascii=False).encode("utf-8")).hexdigest()
+
+
 def loi_vung_thiet_lap(data):
-    """Bước của `gate-registry` theo danh sách CHO PHÉP, từng chữ (Codex CLI lượt 2: dẫn xuất bằng regex lọt khi đổi
-    cách gọi — quote, `cd`, `working-directory`). Thêm bước ⇒ phải thêm vào `LENH_REGISTRY` VÀ vùng, không thì ĐỎ."""
+    """Bước của `gate-registry` theo danh sách CHO PHÉP từng chữ, VÀ cả job đóng băng bằng băm. Ba lượt Codex CLI liên
+    tiếp vá một lối lại lọt lối khác (regex → `cd`/`working-directory` → `env.BASH_ENV`): liệt kê lối vào là thua từ
+    thiết kế, nên mọi đổi của job (env, shell, defaults…) ⇒ ĐỎ cho tới khi ai đó cập nhật `BAM_GATE_REGISTRY` + vùng."""
     buoc = ((((data or {}).get("jobs") or {}).get("gate-registry") or {}).get("steps") or [])
-    loi = [f"gate-registry: bước có working-directory: {b.get('name')}" for b in buoc if "working-directory" in b]
+    loi = [] if bam_gate_registry(data) == BAM_GATE_REGISTRY else [
+        f"gate-registry đổi (băm {bam_gate_registry(data)}): rà vùng đột biến rồi cập nhật BAM_GATE_REGISTRY"]
+    loi += [f"gate-registry: bước có working-directory: {b.get('name')}" for b in buoc if "working-directory" in b]
     loi += [f"gate-registry: lệnh ngoài danh sách cho phép: {x!r}" for b in buoc for x in _dong_lenh(b) if x not in LENH_REGISTRY]
     return loi + ([] if buoc else ["không thấy bước nào của gate-registry"])
 
@@ -1710,6 +1722,14 @@ def phan_chung():
     _them("p643-vung-thiet-lap-khong-co-buoc-do", bool(loi_vung_thiet_lap({"jobs": {}})))
     _them("p643-vung-thiet-lap-lenh-hop-le-doi-thu-muc-do", _hong_reg(lambda b: b.insert(0, {
         "run": "python ops/cong_cu.py kiem-tra --json", "working-directory": "scripts"})))
+    _them("p643-vung-thiet-lap-bash-env-buoc-do", _hong_reg(lambda b: b[4].setdefault("env", {}).update(BASH_ENV="x.sh")))
+    for _k, _v in (("env", {"BASH_ENV": "x.sh"}), ("defaults", {"run": {"shell": "bash"}})):
+        _w = json.loads(json.dumps(_wf0)); _w[_k] = _v
+        _them(f"p643-vung-thiet-lap-{_k}-cap-workflow-do", bool(loi_vung_thiet_lap(_w)))
+    _w = json.loads(json.dumps(_wf0)); _w["jobs"]["gate-registry"].setdefault("defaults", {"run": {"working-directory": "scripts"}})
+    _them("p643-vung-thiet-lap-defaults-cap-job-do", bool(loi_vung_thiet_lap(_w)))
+    _w = json.loads(json.dumps(_wf0)); _w["jobs"]["gate"]["steps"].append({"run": "true"})
+    _them("p643-vung-thiet-lap-job-khac-doi-van-dat", not loi_vung_thiet_lap(_w))
     _them("p643-lenh-registry-deu-trong-vung", all(_cham_vung(t, set(VUNG_CHUNG)) for x in LENH_REGISTRY
                                                    for t in x.split() if "/" in t and "@" not in t))
     _them("p643-tran-bo-nho-hon-timeout-job", GIAY_TOI_DA_MOT_BO == 4500

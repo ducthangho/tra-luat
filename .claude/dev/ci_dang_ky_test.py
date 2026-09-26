@@ -702,6 +702,9 @@ def _iso(dt): return dt.astimezone(datetime.timezone.utc).isoformat(timespec="mi
 NHE = {"ops/nhanh_don_duoc_test.py": {"NHANH_DON_DUOC_KHONG_DOT_BIEN": "1"}}
 MAU_DAY_DU = {"ops/nhanh_don_duoc_test.py": r"^MUTANT: giet = (\d+) · khong giet = 0 · khong do duoc = 0 / tong (\d+)$"}
 VUNG_CHUNG = (".github/workflows/ci.yml", ".claude/dev/ci_dang_ky_test.py", "requirements.txt")
+# Review connector PR #645 (P2): fallback :833-836 phải giữ cho workflow/security/runner (`.github/**`) và cấu hình
+# TOÀN CỤC ở gốc kho (`pyproject.toml`, `sitecustomize.py`, manifest…) — không chỉ 5 đường của `VUNG_CHUNG`.
+TIEN_TO_CHUNG = (".github/",)
 DAY_DU, CHE_DO_NHE, BIEN_SU_KIEN, BIEN_GOC, BIEN_DAU = "day_du", "nhe", "CI_DANG_KY_SU_KIEN", "CI_DANG_KY_GOC", "CI_DANG_KY_DAU"
 ENV_REGISTRY = {BIEN_WORKERS: "2", BIEN_SU_KIEN: "${{ github.event_name }}",
                 BIEN_GOC: "${{ github.event.pull_request.base.sha || github.event.before }}",
@@ -728,7 +731,8 @@ def ke_hoach(doi, nhe=NHE):
     """M1: bộ → (chế độ, lý do). Chỉ bộ có trong `nhe` mới có thể nhẹ, và chỉ khi diff đo được mà không chạm vùng."""
     kh = {}
     for p in nhe:
-        cham = None if doi is None else sorted(doi & {p, p[:-len("_test.py")] + ".py", *VUNG_CHUNG})
+        vung = {p, p[:-len("_test.py")] + ".py", *VUNG_CHUNG}
+        cham = None if doi is None else sorted(x for x in doi if x in vung or x.startswith(TIEN_TO_CHUNG) or "/" not in x)
         kh[p] = ((DAY_DU, "không đo được diff hoặc sự kiện không phải push/pull_request") if cham is None
                  else (DAY_DU, "diff chạm " + ", ".join(cham)) if cham else (CHE_DO_NHE, "diff không chạm vùng đột biến"))
     return kh
@@ -1634,7 +1638,11 @@ def phan_chung():
     for _t, _doi, _cd in (("khong-do-duoc", None, DAY_DU), ("rong", set(), CHE_DO_NHE),
                           ("ngoai-vung", {"docs/x.md", _P + "c", "ops/nhanh_don_duoc.pyi"}, CHE_DO_NHE),
                           ("cham-bo", {_P}, DAY_DU), ("cham-dich", {"docs/x.md", "ops/nhanh_don_duoc.py"}, DAY_DU),
-                          *((f"cham-chung-{_i}", {_v}, DAY_DU) for _i, _v in enumerate(VUNG_CHUNG))):
+                          *((f"cham-chung-{_i}", {_v}, DAY_DU) for _i, _v in enumerate(VUNG_CHUNG)),
+                          ("workflow-khac", {"docs/x.md", ".github/workflows/khac.yml"}, DAY_DU),
+                          ("github-checks", {".github/checks/x.py"}, DAY_DU),
+                          ("goc-pyproject", {"pyproject.toml"}, DAY_DU), ("goc-sitecustomize", {"sitecustomize.py"}, DAY_DU),
+                          ("tai-lieu-va-ma-khac-van-nhe", {"docs/x.md", "ops/khac.py", "scripts/tl.py", "CLAUDE.md/x"}, CHE_DO_NHE)):
         _them("p643-A1-ke-hoach-" + _t, ke_hoach(_doi)[_P][0] == _cd)
     _them("p643-A1-chi-bo-trong-NHE", set(ke_hoach(set())) == set(NHE) <= set(MOI) and set(MAU_DAY_DU) == set(NHE))
     _py, _cu = [sys.executable, "-c", f"import os; print(repr(os.environ.get({_K!r})))"], os.environ.get(_K)

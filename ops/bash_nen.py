@@ -630,16 +630,18 @@ def _liet_ke_py(goc: Path):
                         % (pc.returncode, pc.stderr.decode("utf-8", "replace").strip()[:200]))
         except (OSError, subprocess.SubprocessError) as e:
             return [], f"git-hong: {type(e).__name__}: {e}"
-    # N100 (r27, quyết định chủ kho — lớp SYMLINK lần thứ ba) — MỌI symlink tên nguồn Python, kể cả
-    # TREO (`is_file()` đi theo liên kết nên bản r26 bỏ mất `broken.py`), và MỌI symlink trỏ tới THƯ
-    # MỤC (đo được: `rglob` của 3.11 lẫn 3.12 KHÔNG đi vào thư mục symlink, nên các tệp `.py` bên dưới
-    # bị bỏ qua IM LẶNG) đều mang `120000` ⇒ fail-close. Một mục chỉ cần LÀ symlink là đủ, không hỏi
-    # đích có tồn tại không.
+    # N100 (r27, quyết định chủ kho — lớp SYMLINK lần thứ ba) — symlink tên nguồn Python (kể cả TREO)
+    # và symlink tới THƯ MỤC (đo được: `rglob` của 3.11 lẫn 3.12 KHÔNG đi vào thư mục symlink) mang
+    # `120000` ⇒ fail-close.
+    # N106 (r30, quyết định chủ kho — lớp SYMLINK lần thứ BỐN, codex vòng 24): N100 còn hỏi `is_dir()`,
+    # mà `is_dir()` ĐI THEO liên kết — đo được: symlink `vendor` treo bị bỏ, rồi CHÍNH liên kết ấy thành
+    # `120000` chỉ vì đích NGOÀI gốc vừa được tạo. Cùng các byte trong cây, hai phán quyết. Nay MỌI
+    # symlink — tệp hay thư mục, treo hay không, tên gì — đều `120000`; chỉ `is_symlink()` (lstat) được
+    # hỏi, không một câu nào về ĐÍCH.
     ra = []
     for x in goc.rglob("*"):
         if x.is_symlink():
-            if _la_nguon_py(x.name) or x.is_dir():
-                ra.append((x.relative_to(goc).as_posix(), "120000", None))
+            ra.append((x.relative_to(goc).as_posix(), "120000", None))
         elif x.is_file() and _la_nguon_py(x.name):
             # Thư mục CHA không thể là symlink: `rglob` không đi vào thư mục symlink (đo được), và
             # chính thư mục symlink đã mang `120000` ở trên. Phép dò cha của N95 đã gỡ ở r27 — mã
@@ -734,36 +736,42 @@ def _kiem_ngan_sach_dinh_dang(mau, doi):
 
     N78 (r21, G5 vòng 15) — ngân sách là TỔNG, không phải từng ô. Bản r20 chặn từng độ rộng
     riêng lẻ, nên `"%4096s%4096s" % ("", "")` gấp ra 8192 ký tự — và lặp đặc tả ấy là dựng được
-    hàng trăm MB từ một tệp nhỏ. Nay CỘNG mọi độ rộng/độ chính xác (và mọi số nguyên đối số khi
-    có `*`) rồi mới so: một chặn trên THẬN TRỌNG của phần khuếch đại.
+    hàng trăm MB từ một tệp nhỏ. Nay CỘNG mọi độ rộng/độ chính xác khuếch đại (N103, N107) rồi mới
+    so: một chặn trên THẬN TRỌNG của phần khuếch đại.
     """
     van = mau.decode("latin-1") if isinstance(mau, bytes) else mau
+    # N103 (r29, codex vòng 23) — CHỈ toán hạng được `*` tiêu thụ (độ rộng/độ chính xác động) mới là
+    # khuếch đại; đi theo từng đặc tả, tiêu thụ toán hạng đúng thứ tự; `%%` không tiêu thụ gì.
+    # N107 (r30, codex vòng 24) — ĐỘ CHÍNH XÁC của chuyển đổi CHUỖI (`s`, `r`, `a`) và của `c` là TRẦN
+    # (cắt), không phải khuếch đại: `"%.*s" % (5000, "bash")` ra đúng `bash` mà bản r29 NÉM ⇒ cả cây
+    # KHONG_DO_DUOC oan. Độ chính xác của chuyển đổi SỐ (`%.5000f`) vẫn khuếch đại và vẫn được tính.
+    cac = list(doi) if isinstance(doi, tuple) else [doi]
     tong = 0
-    for m in _MAU_DINH_DANG.finditer(van):
-        for so in m.groups():
-            if so is not None and so != "*":
-                # N78b (r22, H5 vòng 16) — so ĐỘ DÀI chuỗi chữ số TRƯỚC khi chuyển: số có hơn
-                # ~4300 chữ số làm `int()` ném `ValueError` (giới hạn chuyển chuỗi của Python).
-                so = so.lstrip("0") or "0"
-                if len(so) > len(str(_NGAN_SACH_DINH_DANG)):
-                    raise _VuotNganSach(f"độ rộng/độ chính xác có {len(so)} chữ số")
-                tong += int(so)
-    if "*" in van:
-        # N103 (r29, codex vòng 23) — CHỈ toán hạng được `*` tiêu thụ (độ rộng/độ chính xác động) mới là
-        # khuếch đại. Bản r28 cộng MỌI số nguyên hễ mẫu có `*` ở đâu đó, nên `"%s*" % 100000` (dấu `*` là
-        # chữ thường) và `"%*s" % (1, 100000)` (100000 là GIÁ TRỊ) ném `_VuotNganSach` oan ⇒ cả cây ra
-        # KHONG_DO_DUOC. Đi theo từng đặc tả, tiêu thụ toán hạng đúng thứ tự; `%%` không tiêu thụ gì.
-        cac = list(doi) if isinstance(doi, tuple) else [doi]
-        i = 0
-        for m in _MAU_DINH_DANG.finditer(van):
-            if m.group(0) == "%%":
-                continue
-            for so in m.groups():
-                if so == "*":
-                    if i < len(cac) and type(cac[i]) is int:
-                        tong += abs(cac[i])
-                    i += 1
+    i = 0
+
+    def _so(dac_ta):
+        nonlocal i
+        if dac_ta is None:
+            return 0
+        if dac_ta == "*":
+            v = cac[i] if i < len(cac) and type(cac[i]) is int else 0
             i += 1
+            return abs(v)
+        # N78b (r22, H5 vòng 16) — so ĐỘ DÀI chuỗi chữ số TRƯỚC khi chuyển: số có hơn ~4300 chữ số
+        # làm `int()` ném `ValueError` (giới hạn chuyển chuỗi của Python).
+        dac_ta = dac_ta.lstrip("0") or "0"
+        if len(dac_ta) > len(str(_NGAN_SACH_DINH_DANG)):
+            raise _VuotNganSach(f"độ rộng/độ chính xác có {len(dac_ta)} chữ số")
+        return int(dac_ta)
+
+    for m in _MAU_DINH_DANG.finditer(van):
+        if m.group(0) == "%%":
+            continue
+        rong = _so(m.group(1))
+        chinh_xac = _so(m.group(2))
+        i += 1                                      # chính giá trị được định dạng
+        chu = m.group(0)[-1] in "srac"
+        tong += rong + (0 if chu else chinh_xac)
     if tong > _NGAN_SACH_DINH_DANG:
         raise _VuotNganSach(f"tổng độ rộng/độ chính xác {tong} > {_NGAN_SACH_DINH_DANG}")
 
@@ -1325,6 +1333,9 @@ def _loi_goi_tran(than: str, sau=0):
         coi là "không có"; chuỗi NẠP ĐỘNG nhiều tầng giải tới BẤT ĐỘNG ĐIỂM, không theo trần số vòng;
         `literal_eval` hết tài nguyên ⇒ NÉM; N103: `%` với `*` chỉ tính ngân sách cho số THẬT là độ
         rộng/độ chính xác; N104: mỗi NÚT lời gọi là một bản ghi, kể cả hai lời gọi cùng vị trí chuỗi;
+      · N107 (r30): độ chính xác của `%s`/`%r`/`%a`/`%c` là TRẦN, không khuếch đại (`"%.*s" % (5000,
+        "bash")` ra `bash` và bị bắt); N108: mỗi lời gọi TRONG một tải `exec`/`eval` hằng là một bản
+        ghi; N109: chuỗi bí danh nạp động giải TUYẾN TÍNH (hàng đợi theo phụ thuộc);
       · `type X[T] = …` (PEP 695) có phạm vi chú thích RIÊNG (N47, r16): `T` của nó không rò
         ra phạm vi chứa;
       · callee giải theo PHẠM VI TỪ VỰNG (r8, F3 codex vòng 3): `import subprocess` ở module
@@ -1366,6 +1377,10 @@ def _loi_goi_tran(than: str, sau=0):
         "ex" + "ec")`), đối số nạp động TRẢI (`import_module(*["…"])`, `**{"name": …}`), argv trải
         `{**{}, "bash": …}`. Packet #570 chặn lời gọi bash TRẦN do vô tình, không chống che giấu có
         chủ đích; hai lớp này được khai là nợ, reviewer không báo thêm cách viết của chúng.
+      · LỚP ĐÃ KHÉP (r30, quyết định chủ kho — chú thích lần CHÍN, codex vòng 24): chuỗi chú thích được
+        TÍNH RA (`"subprocess" + ".run(…)"`, `%`, `join`, f-string) — `get_type_hints` chạy nó mà cổng
+        chỉ phân tích chuỗi HẰNG trực tiếp. Cách viết cố ý che giấu, cùng lý do lớp r25; ghim ở
+        `_HINH_DANG_KHONG_PHU` (`khep_chu_thich_tinh_*`).
     Các nhóm ấy cần phân tích luồng dữ liệu, không phải khớp cây cú pháp. Chúng là **nợ có
     tên**, không phải chỗ đã kín. Ai mở rộng thì thêm hình dạng vào `t33` TRƯỚC.
     Tên được giải KHÔNG theo thứ tự thực thi (N76, r21) — xem `_giai_ten`. Nợ có tên còn lại ở
@@ -1391,12 +1406,17 @@ def _loi_goi_tran(than: str, sau=0):
         raise _VuotNganSach(f"`exec`/`eval` hằng lồng quá {_SAU_EXEC} tầng")
     if cac_tai:
         dau = _mo_dau_tu_bang(_bang_pham_vi_ca_cay(cay, sau))
+        # N108 (r30, codex vòng 24) — mang SỐ lời gọi của tải ra ngoài, không chỉ "có/không": bản r29
+        # gộp hai lời gọi trong MỘT tải `exec` thành một bản ghi ⇒ hạn ngạch đếm thiếu. Mỗi NÚT `exec`
+        # được đếm một lần (khoá theo nút, không theo toạ độ), mỗi lời gọi trong tải là một bản ghi.
+        so_tai = {}
         for goi, van in cac_tai:
-            if _loi_goi_tran(dau + van, sau + 1):
-                ghi_exec.append((goi.lineno, goi.col_offset))
+            so_tai[id(goi)] = ((goi.lineno, goi.col_offset), len(_loi_goi_tran(dau + van, sau + 1)))
+        for vt, so in so_tai.values():
+            ghi_exec.extend([vt] * so)
     ung_vien = [n for n in ast.walk(cay) if isinstance(n, ast.Call) and _mang_hang_bash(n)]
     if not ung_vien and not _co_chuoi_trong_chu_thich(cay):
-        return sorted(set(ghi_exec))
+        return sorted(ghi_exec)
     cap = _giai_callee_theo_pham_vi(cay)
     tra_theo_nut = {id(n): tra for n, tra, _ in cap}
     # N99 — lời gọi nằm TRONG một chú thích chuỗi không thuộc cây của tệp; báo tại vị trí chuỗi.
@@ -1456,7 +1476,7 @@ def _loi_goi_tran(than: str, sau=0):
     # vòng 23): hai lời gọi trong CÙNG một chú thích chuỗi cùng mang toạ độ của chuỗi, và khử theo toạ độ
     # gộp chúng làm một ⇒ hạn ngạch đếm thiếu. Toạ độ lặp lại được GIỮ trong kết quả.
     theo_nut = dict(ban_ghi)
-    return sorted(list(theo_nut.values()) + sorted(set(ghi_exec)))
+    return sorted(list(theo_nut.values()) + ghi_exec)
 
 
 # Nhận diện theo TÊN mà không giải được CALLEE thì sai CẢ HAI HƯỚNG — đo được cả hai:
@@ -1663,6 +1683,8 @@ def _dich_walrus(nut):
 
 
 _SAU_EXEC = 3              # N81 — độ sâu tối đa của `exec` lồng `exec`
+# N109 — số lần giải một mục NẠP ĐỘNG; `t33` đọc nó để chốt độ phức tạp TUYẾN TÍNH.
+_DEM_GIAI_DONG = 0
 _TRAN_EXEC = 100_000       # N81 — độ dài tối đa của một chuỗi `exec` được phân tích
 
 
@@ -2094,25 +2116,42 @@ def _bang_pham_vi_ca_cay(cay, sau=0):
     # N102 — lặp TỚI bất động điểm, không theo một trần số vòng: bản r28 dừng sau `len(thu_tu)+1` vòng,
     # nên chuỗi `a = __import__("importlib")` → `b = a.import_module("importlib")` → `c =
     # b.import_module("subprocess")` ở MỘT phạm vi (2 vòng) để `c` chưa giải — đo được `[]`, chạy thật
-    # thì phóng bash. Kết thúc được bảo đảm: mỗi vòng thêm ít nhất một bộ `("import", …)` vào một tập
-    # hữu hạn (số mục "dong" × số module theo dõi).
-    while True:
-        moi = []
-        for i in thu_tu:
-            for ten, tap in bang[i][0].items():
-                for rb in tap:
-                    if rb[0] != "dong" or rb[2] not in chuoi_cua:
-                        continue
-                    c = chuoi_cua[rb[2]]
-                    mod = _module_dong(rb[1]) or _module_dong(
-                        rb[1], lambda t, hoi_rang_buoc=False, c=c:
-                        _co_rang_buoc(t, c) if hoi_rang_buoc else _giai_ten(t, c))
-                    if mod and ("import", mod, None) not in tap:
-                        moi.append((tap, ("import", mod, None)))
-        if not moi:
-            break
-        for tap, rb in moi:
-            tap.add(rb)
+    # thì phóng bash.
+    # N109 (r30, codex vòng 24) — HÀNG ĐỢI THEO PHỤ THUỘC, không quét lại cả bảng: bản r29 quét lại
+    # MỌI mục "dong" sau mỗi vòng có thêm một bí danh, nên chuỗi n bí danh tốn bậc HAI (đo được: 800
+    # tầng, 31 KB, 2,8 s). Nay một mục chỉ được giải lại khi một TÊN nó nhắc tới vừa có thêm ràng buộc
+    # "import" — ở BẤT KỲ phạm vi nào (khoá theo tên, không theo phạm vi, nên đường đi qua ranh giới
+    # phạm vi không bị sót). Kết thúc được bảo đảm: một mục chỉ vào lại hàng đợi khi một tập hữu hạn
+    # (bộ `("import", …)` của một tên) lớn lên.
+    global _DEM_GIAI_DONG
+    cac_muc = []
+    theo_ten = {}
+    for i in thu_tu:
+        for ten, tap in bang[i][0].items():
+            for rb in tap:
+                if rb[0] != "dong" or rb[2] not in chuoi_cua:
+                    continue
+                k = len(cac_muc)
+                cac_muc.append((ten, tap, rb, chuoi_cua[rb[2]]))
+                for n in ast.walk(rb[1]):
+                    if isinstance(n, ast.Name):
+                        theo_ten.setdefault(n.id, []).append(k)
+    hang = list(range(len(cac_muc)))
+    trong_hang = set(hang)
+    while hang:
+        k = hang.pop()
+        trong_hang.discard(k)
+        _DEM_GIAI_DONG += 1
+        ten, tap, rb, c = cac_muc[k]
+        mod = _module_dong(rb[1]) or _module_dong(
+            rb[1], lambda t, hoi_rang_buoc=False, c=c:
+            _co_rang_buoc(t, c) if hoi_rang_buoc else _giai_ten(t, c))
+        if mod and ("import", mod, None) not in tap:
+            tap.add(("import", mod, None))
+            for k2 in theo_ten.get(ten, ()):
+                if k2 not in trong_hang:
+                    trong_hang.add(k2)
+                    hang.append(k2)
     return {i: tuple(bang[i]) for i in thu_tu}
 
 

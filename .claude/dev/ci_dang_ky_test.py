@@ -686,7 +686,9 @@ def dem_la_do(chap_nhan, o_trong_ci):
 
 
 # CI-SONG-SONG-REGISTRY-G5-MOT-LAN r1 (#637): M1–M3, M6, M7. Hằng số trong W1 theo spec M3.
-GIAY_TOI_DA_MOT_BO, GIAY_CHO_CAY_DUNG, BIEN_WORKERS, BIEN_MOC = 3600, 10, "CI_DANG_KY_WORKERS", "CI_DANG_KY_MOC"
+# #643 (chủ kho chọn "b", PR #644): 3600 → 4500. Đo run 36208617323, N=2 chế độ đủ: `nhanh_don_duoc_test` 3306,45 s = 92 %
+# trần cũ. 4500 + thiết lập vẫn dưới `timeout-minutes: 90` của job (ca `p643-tran-bo-duoi-timeout-job`).
+GIAY_TOI_DA_MOT_BO, GIAY_CHO_CAY_DUNG, BIEN_WORKERS, BIEN_MOC = 4500, 10, "CI_DANG_KY_WORKERS", "CI_DANG_KY_MOC"
 
 
 def _gio_utc(): return datetime.datetime.now(datetime.timezone.utc)
@@ -1662,6 +1664,8 @@ def phan_chung():
         f(next(b for b in w["jobs"]["gate-registry"]["steps"] if "ci_dang_ky_test.py --chay" in str(b.get("run", ""))), w)
         return bool(loi_env_registry(w))
     _them("p643-A4-workflow-that-dat", not loi_env_registry(_wf0))
+    _them("p643-tran-bo-duoi-timeout-job", GIAY_TOI_DA_MOT_BO == 4500
+          and GIAY_TOI_DA_MOT_BO + 600 <= 60 * _wf0["jobs"]["gate-registry"]["timeout-minutes"])
     for _k in ENV_REGISTRY:
         _them(f"p643-A4-thieu-{_k}", _hong_env(lambda b, w: b["env"].pop(_k)))
         _them(f"p643-A4-lech-{_k}", _hong_env(lambda b, w: b["env"].update({_k: b["env"][_k] + " "})))

@@ -981,8 +981,8 @@ DOT_BIEN = {
         "BASH_NEN", (), "t33_do_phu_cua_cong_do_duoc_THEO_HINH_DANG"),
     # r30 — N107: do chinh xac cua chuyen doi CHUOI la tran, khong khuech dai.
     "bn_chinh_xac_chuoi_van_tinh": ("ops/bash_nen.py",
-        "        tong += rong + (0 if chu else chinh_xac)\n",
-        "        tong += rong + chinh_xac  # đột biến: độ chính xác của `%s` vẫn tính là khuếch đại\n",
+        "            tong += rong\n",
+        "            tong += rong + chinh_xac  # đột biến: độ chính xác của `%s` vẫn tính là khuếch đại\n",
         "BASH_NEN", (), "t33_do_phu_cua_cong_do_duoc_THEO_HINH_DANG"),
     # r30 — N108: so loi goi trong tai `exec` duoc mang ra ngoai.
     "bn_tai_exec_co_khong": ("ops/bash_nen.py",
@@ -991,8 +991,21 @@ DOT_BIEN = {
         "BASH_NEN", (), "t33_do_phu_cua_cong_do_duoc_THEO_HINH_DANG"),
     # r30 — N109: giai lai THEO PHU THUOC, khong quet lai ca bang.
     "bn_giai_dong_quet_lai": ("ops/bash_nen.py",
-        "            for k2 in theo_ten.get(ten, ()):\n",
+        "            for k2 in (*theo_ten.get((ten, b_id), ()), *theo_ten.get((None, b_id), ())):\n",
         "            for k2 in range(len(cac_muc)):  # đột biến: quét lại MỌI mục (bậc hai)\n",
+        "BASH_NEN", (), "t33_do_phu_cua_cong_do_duoc_THEO_HINH_DANG"),
+    # r31 — N110..N112 (codex vong 25).
+    "bn_kieu_b_thieu": ("ops/bash_nen.py",
+        '_KIEU_TRAN = frozenset("srabc")\n',
+        '_KIEU_TRAN = frozenset("srac")  # đột biến: quên `%b` của bytes\n',
+        "BASH_NEN", (), "t33_do_phu_cua_cong_do_duoc_THEO_HINH_DANG"),
+    "bn_phu_thuoc_moi_bang": ("ops/bash_nen.py",
+        "                    for pv in c:\n",
+        "                    for pv in [x for ch in chuoi_cua.values() for x in ch]:  # đột biến: khoá theo tên trần\n",
+        "BASH_NEN", (), "t33_do_phu_cua_cong_do_duoc_THEO_HINH_DANG"),
+    "bn_eval_khong_phu_thuoc": ("ops/bash_nen.py",
+        "            ra.update(x.id for x in ast.walk(tai) if isinstance(x, ast.Name))\n",
+        "            pass  # đột biến: tên trong tải `eval` không là phụ thuộc\n",
         "BASH_NEN", (), "t33_do_phu_cua_cong_do_duoc_THEO_HINH_DANG"),
     "bn_ban_ghi_theo_toa_do": ("ops/bash_nen.py",
         "    theo_nut = dict(ban_ghi)\n",
@@ -1329,8 +1342,8 @@ DOT_BIEN = {
         "BASH_NEN", (), "t33_do_phu_cua_cong_do_duoc_THEO_HINH_DANG"),
     # N78 (G5 vong 15): ngan sach khuech dai tinh tung o thay vi cong don.
     "bn_ngan_sach_tung_o": ("ops/bash_nen.py",
-        "        tong += rong + (0 if chu else chinh_xac)\n",
-        "        tong = max(tong, rong + (0 if chu else chinh_xac))  # đột biến: ngân sách tính TỪNG Ô, không cộng dồn\n",
+        "            tong += rong\n",
+        "            tong = max(tong, rong)  # đột biến: ngân sách tính TỪNG Ô, không cộng dồn\n",
         "BASH_NEN", (), "t33_do_phu_cua_cong_do_duoc_THEO_HINH_DANG"),
     # ── r20 — DOT BIEN cho N72..N75 (cross-review codex vong 14) ─────────────────
     # N74: `_chay_phep` quay ve LIET KE kieu ngoai le ⇒ `OverflowError` di thang ra ngoai.
@@ -2993,6 +3006,12 @@ _HINH_DANG_PHU = {
     "phan_tram_chinh_xac_sao_chu":  'import subprocess\nsubprocess.run(["%.*s" % (5000, "bash")])\n',
     "phan_tram_rong_chinh_xac_sao": 'import subprocess\nsubprocess.run(["%*.*s" % (1, 5000, "bash")])\n',
     "phan_tram_chinh_xac_tinh_chu": 'import subprocess\nsubprocess.run(["%.5000s" % "bash"])\n',
+    # r31 — N110: `%b` cua bytes, do chinh xac la TRAN; ca ba ra dung `b"bash"` va CHAY BASH THAT.
+    "phan_tram_b_chinh_xac_sao":  'import subprocess\nsubprocess.run([b"%.*b" % (5000, b"bash")])\n',
+    "phan_tram_b_rong_chinh_xac": 'import subprocess\nsubprocess.run([b"%*.*b" % (1, 5000, b"bash")])\n',
+    "phan_tram_b_chinh_xac_tinh": 'import subprocess\nsubprocess.run([b"%.5000b" % b"bash"])\n',
+    # r31 — N112: phu thuoc nam TRONG tai `eval("b")` hang; vong lap hai luot chay bash that (codex vong 25).
+    "nap_dong_eval_vong_lap": 'import importlib as il\nfor i in range(2):\n    if i:\n        a = eval("b")\n        a.run(["bash"])\n    b = il.import_module("subprocess")\n',
     "nap_dong_ba_tang":     'a = __import__("importlib")\nb = a.import_module("importlib")\nc = b.import_module("subprocess")\nc.run(["bash"])\n',
     # r23 — N86 (F7 vong 17): `%` voi ve phai `dict`.
     "hang_phan_tram_dict":  'import subprocess\nsubprocess.run(["%(a)s" % {"a": "bash"}])\n',
@@ -3430,6 +3449,48 @@ def t33_do_phu_cua_cong_do_duoc_THEO_HINH_DANG():
                                '    m.run(["bash"])\n')
     bang(isinstance(kq_pv, list) and [d for d, _c in kq_pv] == [4],
          "(1m) N109: nạp ở module, giải trong hàm (qua ranh giới phạm vi) phải vẫn bắt")
+    # N111 (r31, codex vòng 25) — n hàm ĐỘC LẬP, mỗi hàm một chuỗi nạp động hai tầng cùng tên `x`: giải
+    # một `x` không được xếp lại mục của các hàm khác. Đếm số lần giải, phải TUYẾN TÍNH theo số mục.
+    n_ham = 400
+    nhieu_ham = "".join(f'def f{i}():\n    x = __import__("importlib")\n    y = x.import_module("subprocess")\n'
+                        for i in range(n_ham))
+    # Kèm MỘT lời gọi bash thật: không có hằng `bash` thì cổng thoát trước khi dựng bảng phạm vi.
+    nhieu_ham += 'import subprocess\nsubprocess.run(["bash"])\n'
+    d1 = _g_bn["_DEM_GIAI_DONG"]
+    _do(nhieu_ham)
+    so_giai_ham = _g_bn["_DEM_GIAI_DONG"] - d1
+    bang(so_giai_ham <= 3 * 2 * n_ham,
+         f"(1m) N111: {n_ham} hàm độc lập (mỗi hàm 2 mục nạp động) phải giải ≤ {6 * n_ham} lần, đo được "
+         f"{so_giai_ham}")
+    # (1n) N110 (r31, chủ kho: đóng theo BẢNG) — bảng kiểu chuyển đổi của cổng được đo bằng CHÍNH `%` của
+    # Python: mọi chữ cái mà `%` của `str` hay `bytes` nhận phải có trong bảng; kiểu TRẦN thì độ chính xác
+    # 5000 KHÔNG dựng chuỗi dài; kiểu KHUẾCH ĐẠI thì có cách viết (có/không `#`) dựng ≥ 5000 ký tự.
+    tran, kd = _g_bn["_KIEU_TRAN"], _g_bn["_KIEU_KHUECH_DAI"]
+    for ch in "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ":
+        nhan = []
+        for loai, mau_ch, gia in (("str", "%" + ch, None), ("bytes", ("%" + ch).encode(), None)):
+            for thu in (1, 1.0, "x", b"x"):
+                try:
+                    mau_ch % thu
+                except (ValueError, TypeError):
+                    continue
+                nhan.append((loai, thu))
+                break
+        if not nhan:
+            continue
+        bang(ch in tran or ch in kd, f"(1n) N110: `%{ch}` được Python nhận ({nhan}) mà KHÔNG có trong bảng")
+        dai = 0
+        for loai, thu in nhan:
+            for co in ("", "#"):
+                mau_ch = "%" + co + ".5000" + ch
+                try:
+                    dai = max(dai, len((mau_ch.encode() if loai == "bytes" else mau_ch) % thu))
+                except (ValueError, TypeError):
+                    pass
+        if ch in tran:
+            bang(dai < 100, f"(1n) N110: `%{ch}` khai là TRẦN mà độ chính xác 5000 dựng {dai} ký tự")
+        elif ch in kd:
+            bang(dai >= 5000, f"(1n) N110: `%{ch}` khai là KHUẾCH ĐẠI mà độ chính xác 5000 chỉ dựng {dai}")
     kq_sao = _do('import subprocess\nsubprocess.run(["%*s" % (5000, "x")])\n')
     bang(isinstance(kq_sao, str) and "_VuotNganSach" in kq_sao,
          f"(1m) `%*s` với độ rộng 5000 vẫn phải NÉM (N103 chỉ bỏ số KHÔNG phải độ rộng), đo được "

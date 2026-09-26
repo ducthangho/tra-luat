@@ -717,6 +717,13 @@ class _VuotNganSach(Exception):
 
 
 _NGAN_SACH_DINH_DANG = 4096
+# N110 (r31, quyết định chủ kho — ngân sách `%` lần BA: I2 `%*` → J6 `%.*s` → K2 `b"%.*b"`) — BẢNG ĐẦY ĐỦ
+# mọi kiểu chuyển đổi mà `%` của `str` hay `bytes` nhận, thay cho phân loại từng chữ. TRẦN: độ chính xác
+# CẮT giá trị (chuỗi/bytes, `c`) — chỉ độ rộng khuếch đại. KHUẾCH ĐẠI: độ chính xác của số (kể cả `%#g`)
+# dựng thêm chữ số. Kiểu NGOÀI bảng ⇒ NÉM (fail-close). `t33` (1n) đo BẢNG NÀY bằng chính `%` của Python:
+# mọi chữ cái mà `%` nhận phải nằm trong bảng, và mỗi kiểu phải đúng nhóm của nó.
+_KIEU_TRAN = frozenset("srabc")
+_KIEU_KHUECH_DAI = frozenset("diouxXeEfFgG")
 _MAU_DINH_DANG = re.compile(r"%(?:\([^)]*\))?[#0 +-]*(\*|\d+)?(?:\.(\*|\d+))?[hlL]?.", re.S)
 
 
@@ -742,9 +749,9 @@ def _kiem_ngan_sach_dinh_dang(mau, doi):
     van = mau.decode("latin-1") if isinstance(mau, bytes) else mau
     # N103 (r29, codex vòng 23) — CHỈ toán hạng được `*` tiêu thụ (độ rộng/độ chính xác động) mới là
     # khuếch đại; đi theo từng đặc tả, tiêu thụ toán hạng đúng thứ tự; `%%` không tiêu thụ gì.
-    # N107 (r30, codex vòng 24) — ĐỘ CHÍNH XÁC của chuyển đổi CHUỖI (`s`, `r`, `a`) và của `c` là TRẦN
-    # (cắt), không phải khuếch đại: `"%.*s" % (5000, "bash")` ra đúng `bash` mà bản r29 NÉM ⇒ cả cây
-    # KHONG_DO_DUOC oan. Độ chính xác của chuyển đổi SỐ (`%.5000f`) vẫn khuếch đại và vẫn được tính.
+    # N107 (r30, codex vòng 24) — ĐỘ CHÍNH XÁC của chuyển đổi CHUỖI là TRẦN (cắt), không phải khuếch đại:
+    # `"%.*s" % (5000, "bash")` ra đúng `bash` mà bản r29 NÉM ⇒ cả cây KHONG_DO_DUOC oan. N110 (r31): phân
+    # loại theo BẢNG `_KIEU_TRAN`/`_KIEU_KHUECH_DAI` (bản r30 quên `%b` của bytes — codex vòng 25).
     cac = list(doi) if isinstance(doi, tuple) else [doi]
     tong = 0
     i = 0
@@ -770,8 +777,13 @@ def _kiem_ngan_sach_dinh_dang(mau, doi):
         rong = _so(m.group(1))
         chinh_xac = _so(m.group(2))
         i += 1                                      # chính giá trị được định dạng
-        chu = m.group(0)[-1] in "srac"
-        tong += rong + (0 if chu else chinh_xac)
+        kieu = m.group(0)[-1]
+        if kieu in _KIEU_TRAN:
+            tong += rong
+        elif kieu in _KIEU_KHUECH_DAI:
+            tong += rong + chinh_xac
+        else:
+            raise _VuotNganSach(f"kiểu chuyển đổi `%{kieu}` không có trong bảng ngân sách")
     if tong > _NGAN_SACH_DINH_DANG:
         raise _VuotNganSach(f"tổng độ rộng/độ chính xác {tong} > {_NGAN_SACH_DINH_DANG}")
 
@@ -1336,6 +1348,9 @@ def _loi_goi_tran(than: str, sau=0):
       · N107 (r30): độ chính xác của `%s`/`%r`/`%a`/`%c` là TRẦN, không khuếch đại (`"%.*s" % (5000,
         "bash")` ra `bash` và bị bắt); N108: mỗi lời gọi TRONG một tải `exec`/`eval` hằng là một bản
         ghi; N109: chuỗi bí danh nạp động giải TUYẾN TÍNH (hàng đợi theo phụ thuộc);
+      · N110 (r31): ngân sách `%` theo BẢNG đầy đủ kiểu chuyển đổi của `str` và `bytes` (`%b` là trần;
+        kiểu ngoài bảng ⇒ NÉM); N111: hàng đợi N109 khoá theo (tên, bảng phạm vi); N112: tên TRONG tải
+        `eval("…")` hằng là phụ thuộc của mục nạp động;
       · `type X[T] = …` (PEP 695) có phạm vi chú thích RIÊNG (N47, r16): `T` của nó không rò
         ra phạm vi chứa;
       · callee giải theo PHẠM VI TỪ VỰNG (r8, F3 codex vòng 3): `import subprocess` ở module
@@ -2123,6 +2138,13 @@ def _bang_pham_vi_ca_cay(cay, sau=0):
     # "import" — ở BẤT KỲ phạm vi nào (khoá theo tên, không theo phạm vi, nên đường đi qua ranh giới
     # phạm vi không bị sót). Kết thúc được bảo đảm: một mục chỉ vào lại hàng đợi khi một tập hữu hạn
     # (bộ `("import", …)` của một tên) lớn lên.
+    # N111 (r31, codex vòng 25) — phụ thuộc khoá theo (TÊN, BẢNG PHẠM VI), không theo tên trần: bản r30
+    # giải `x` ở một hàm là xếp lại MỌI mục nhắc tới một `x` KHÁC ở mọi hàm khác ⇒ 800 hàm độc lập tốn
+    # 321 200 lần giải. Một mục chỉ THẤY các bảng trên chuỗi phạm vi của chính nó (`c`), nên chỉ đăng ký
+    # ở đó. N112 (r31, codex vòng 25) — tên nằm TRONG tải `eval("…")` hằng cũng là phụ thuộc: bản r30
+    # không thấy `b` trong `a = eval("b")` nên giải `b` về sau không xếp lại `a` ⇒ lọt, chạy bash thật.
+    # Tải được đọc qua trần sẵn có (`_tai_hang`); tải không phân tích được ⇒ mục phụ thuộc MỌI tên trên
+    # chuỗi của nó (khoá `None`).
     global _DEM_GIAI_DONG
     cac_muc = []
     theo_ten = {}
@@ -2132,10 +2154,13 @@ def _bang_pham_vi_ca_cay(cay, sau=0):
                 if rb[0] != "dong" or rb[2] not in chuoi_cua:
                     continue
                 k = len(cac_muc)
-                cac_muc.append((ten, tap, rb, chuoi_cua[rb[2]]))
-                for n in ast.walk(rb[1]):
-                    if isinstance(n, ast.Name):
-                        theo_ten.setdefault(n.id, []).append(k)
+                c = chuoi_cua[rb[2]]
+                cac_muc.append((ten, tap, rb, c))
+                for ten_pt in _ten_phu_thuoc(rb[1]):
+                    for pv in c:
+                        theo_ten.setdefault((ten_pt, id(pv[1])), []).append(k)
+    # Bảng phạm vi (dict tên → tập) của mỗi `tap` — để biết một thay đổi xảy ra ở bảng nào.
+    bang_cua_tap = {id(tap): id(bang[i][0]) for i in thu_tu for tap in bang[i][0].values()}
     hang = list(range(len(cac_muc)))
     trong_hang = set(hang)
     while hang:
@@ -2148,11 +2173,41 @@ def _bang_pham_vi_ca_cay(cay, sau=0):
             _co_rang_buoc(t, c) if hoi_rang_buoc else _giai_ten(t, c))
         if mod and ("import", mod, None) not in tap:
             tap.add(("import", mod, None))
-            for k2 in theo_ten.get(ten, ()):
+            b_id = bang_cua_tap[id(tap)]
+            for k2 in (*theo_ten.get((ten, b_id), ()), *theo_ten.get((None, b_id), ())):
                 if k2 not in trong_hang:
                     trong_hang.add(k2)
                     hang.append(k2)
     return {i: tuple(bang[i]) for i in thu_tu}
+
+
+def _ten_phu_thuoc(bieu):
+    """Tên mà việc giải một mục NẠP ĐỘNG `bieu` phụ thuộc — kể cả tên trong tải `eval`/`exec` (N112).
+
+    Theo CÚ PHÁP, như N76: mọi lời gọi tên `eval`/`exec` (trần hay thuộc tính) đều "có thể" là hàm dựng
+    sẵn. Tải đọc qua `_tai_hang` (cùng trần, cùng gấp hằng); tải KHÔNG phải hằng hay không phân tích được
+    ⇒ thêm `None`: mục ấy phụ thuộc MỌI tên trên chuỗi phạm vi của nó.
+    """
+    ra = set()
+    for n in ast.walk(bieu):
+        if isinstance(n, ast.Name):
+            ra.add(n.id)
+        if not isinstance(n, ast.Call):
+            continue
+        f = n.func
+        ten_f = f.id if isinstance(f, ast.Name) else (f.attr if isinstance(f, ast.Attribute) else None)
+        if ten_f not in ("eval", "exec"):
+            continue
+        van = _tai_hang(n)
+        try:
+            tai = ast.parse(van.lstrip(), mode="eval") if van is not None else None
+        except SyntaxError:
+            tai = None
+        if tai is None:
+            ra.add(None)
+        else:
+            ra.update(x.id for x in ast.walk(tai) if isinstance(x, ast.Name))
+    return ra
 
 
 def _co_chuoi_trong_chu_thich(cay):

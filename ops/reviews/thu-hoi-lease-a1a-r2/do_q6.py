@@ -6,9 +6,10 @@ Chỉ đọc cây của MOC — không đọc ref nào khác, không đọc HEAD
 Miền lease = mọi blob dưới ops/leases có đuôi .yaml/.yml (đúng miền của _quet_lease_toan_kho);
 mọi thứ khác (vd .yaml.nhap) đếm vào `ngoai_mien`, không đọc.
 Mỗi tệp trong miền PHẢI: nằm trực tiếp dưới ops/leases · YAML parse được · là mapping ·
-lease_id là chuỗi khác rỗng · lease_id == tên tệp bỏ đuôi · thay_the_cho đúng kiểu
-(_danh_sach_thay_the_cho khác None) · da_bi_thay_the vắng hoặc là chuỗi khác rỗng ·
-lease_id không trùng. Vi phạm bất kỳ ⇒ rc=3 (KHÔNG ĐO ĐƯỢC), không ép kiểu, không bỏ qua.
+lease_id là chuỗi khớp LEASE_ID (ASCII chữ/số/`.`/`_`/`-`) · lease_id == tên tệp bỏ đuôi · thay_the_cho đúng kiểu
+(_danh_sach_thay_the_cho khác None), mỗi phần tử khớp LEASE_ID, không lặp · da_bi_thay_the vắng
+khoá hoặc là chuỗi khớp LEASE_ID (có khoá mang null là sai) · lease_expires_at_utc đọc được bằng
+_doc_han của cổng (ISO8601 có múi giờ) · lease_id không trùng. Vi phạm bất kỳ ⇒ rc=3 (KHÔNG ĐO ĐƯỢC), không ép kiểu, không bỏ qua.
 
 Dùng:  python3 -B do_q6.py <kho> <MOC> <CLOCK_UTC>      in JSON, rc 0 | 3
        python3 -B do_q6.py --tu-kiem [<kho>]            dựng kho giả, kiểm các phản chứng, rc 0 | 1
@@ -62,19 +63,37 @@ def dan_xuat(goc: Path, moc: str, clock: str, lp) -> dict:
             vi_pham.append((duong, f"khong-phai-mapping: {type(d).__name__}"))
             continue
         lid = d.get("lease_id")
-        if not isinstance(lid, str) or not lid.strip():
-            vi_pham.append((duong, "lease_id-sai-kieu-hoac-rong"))
+        if not isinstance(lid, str) or not lp.LEASE_ID.fullmatch(lid):
+            vi_pham.append((duong, "lease_id-sai-kieu-hoac-mien"))
             continue
         if lid != re.sub(r"\.ya?ml$", "", ten):
             vi_pham.append((duong, f"lease_id-khac-ten-tep: {lid!r}"))
             continue
-        if lp._danh_sach_thay_the_cho(d.get("thay_the_cho")) is None:
+        tt = lp._danh_sach_thay_the_cho(d.get("thay_the_cho"))
+        if tt is None:
             vi_pham.append((duong, "thay_the_cho-sai-kieu"))
             continue
+        # Mỗi chốt dưới đây phải là chốt DUY NHẤT cho ca của nó: gỡ chốt kiểu ở trên thì các chốt
+        # sau vẫn không được chết TypeError (tín dụng giả), nên đọc `tt or []`, `isinstance(t, str)`.
+        if any(not lp.LEASE_ID.fullmatch(x) for x in tt or []):
+            vi_pham.append((duong, "thay_the_cho-ngoai-mien-LEASE_ID"))
+            continue
+        if len(tt or []) != len(set(tt or [])):
+            vi_pham.append((duong, "thay_the_cho-lap-phan-tu"))
+            continue
         t = d.get("da_bi_thay_the")
-        if t is not None and (not isinstance(t, str) or not t.strip()):
+        if "da_bi_thay_the" in d and (not isinstance(t, str) or not t.strip()):
             vi_pham.append((duong, "da_bi_thay_the-sai-kieu"))
             continue
+        if isinstance(t, str) and not lp.LEASE_ID.fullmatch(t):
+            vi_pham.append((duong, "da_bi_thay_the-ngoai-mien-LEASE_ID"))
+            continue
+        try:
+            han = lp._doc_han(d.get("lease_expires_at_utc"))
+        except lp.Chan as e:
+            vi_pham.append((duong, f"lease_expires_at_utc-hong: {e.thong_diep[:80]}"))
+            continue
+        d = {**d, "_han_utc": han}
         if lid in L:
             vi_pham.append((duong, f"trung-lease_id-voi {L[lid][2]}"))
             continue
@@ -97,8 +116,7 @@ def dan_xuat(goc: Path, moc: str, clock: str, lp) -> dict:
 
     def trang_thai(moi):
         d = L[moi][0]
-        het = datetime.fromisoformat(str(d.get("lease_expires_at_utc")).replace("Z", "+00:00"))
-        if het <= now:
+        if d["_han_utc"] <= now:
             return "HET_HAN"
         t = d.get("da_bi_thay_the")
         if not t:
@@ -158,12 +176,24 @@ def tu_kiem(goc: Path) -> int:
         "id-sai-kieu": ({**sach, "bad.yaml": "lease_id: 7\n"}, 3, [["x", "y"]]),
         "yaml-hong": ({**sach, "bad.yaml": "lease_id: [\n"}, 3, [["x", "y"]]),
         "trung-id": ({**sach, "y.yml": _lease("y", SONG, thay="x")}, 3, [["x", "y"]]),
-        "thay-sai-kieu": ({**sach, "z.yaml": "lease_id: z\nthay_the_cho: 5\n"}, 3, [["x", "y"]]),
+        "thay-sai-kieu": ({**sach, "z.yaml": _lease("z", SONG) + "thay_the_cho: 5\n"}, 3, [["x", "y"]]),
         "mot-chieu-moi": ({**sach, "y.yaml": _lease("y", SONG, thay="x", bi="w")}, 3, []),
         "da-bi-thay-tiep": ({"x.yaml": _lease("x", CHET, bi="y"), "y.yaml": _lease("y", SONG, thay="x", bi="z"),
                              "z.yaml": _lease("z", SONG, thay="y")}, 0, [["y", "z"]]),
         "het-han": ({"x.yaml": _lease("x", CHET, bi="y"), "y.yaml": _lease("y", CHET, thay="x")}, 0, []),
         "nhap-ngoai-mien": ({**sach, "q.yaml.nhap": "- khong doc\n"}, 0, [["x", "y"]]),
+        "id-ngoai-mien-don": ({**sach, "a+b.yaml": _lease("a+b", SONG)}, 3, [["x", "y"]]),
+        "id-ngoai-mien-cu": ({"x+y.yaml": _lease("x+y", CHET, bi="y"), "y.yaml": _lease("y", SONG, thay="x+y")}, 3, []),
+        "id-ngoai-mien-moi": ({"x.yaml": _lease("x", CHET, bi="x+y"), "x+y.yaml": _lease("x+y", SONG, thay="x")}, 3, []),
+        "bia-null-moi": ({**sach, "y.yaml": sach["y.yaml"] + "da_bi_thay_the: null\n"}, 3, []),
+        "bia-null-ngoai-cap": ({**sach, "z.yaml": _lease("z", SONG) + "da_bi_thay_the: null\n"}, 3, [["x", "y"]]),
+        "bia-khoa-khong-gia-tri": ({**sach, "y.yaml": sach["y.yaml"] + "da_bi_thay_the:\n"}, 3, []),
+        "thay-phan-tu-ngoai-mien": ({**sach, "z.yaml": _lease("z", SONG) + "thay_the_cho: [\"a+b\"]\n"}, 3, [["x", "y"]]),
+        "thay-phan-tu-lap": ({"x.yaml": _lease("x", CHET, bi="y"),
+                              "y.yaml": _lease("y", SONG) + "thay_the_cho: [x, x]\n"}, 3, []),
+        "bia-gia-tri-ngoai-mien": ({**sach, "z.yaml": _lease("z", SONG) + "da_bi_thay_the: \"a+b\"\n"}, 3, [["x", "y"]]),
+        "han-sai-dinh-dang": ({**sach, "y.yaml": "lease_id: y\nlease_expires_at_utc: 'mai'\nthay_the_cho: x\n"}, 3, []),
+        "han-thieu-mui-gio": ({**sach, "y.yaml": "lease_id: y\nlease_expires_at_utc: '2099-01-01T00:00:00'\nthay_the_cho: x\n"}, 3, []),
     }
     hong = 0
     with tempfile.TemporaryDirectory() as t:

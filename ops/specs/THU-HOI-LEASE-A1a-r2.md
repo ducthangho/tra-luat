@@ -1,14 +1,14 @@
-# ĐẶC TẢ — `THU-HOI-LEASE-A1a` — **revision 2**, bản nháp 3 (chưa đóng băng)
+# ĐẶC TẢ — `THU-HOI-LEASE-A1a` — **revision 2**, bản nháp 4 (chưa đóng băng)
 
 | trường | giá trị |
 |---|---|
 | `packet_id` | `THU-HOI-LEASE-A1a` (nửa **mã** của slice A1; nửa **cấu hình** là `THU-HOI-LEASE-A1b`) |
-| `revision` | 2 — **bản nháp 3**. Bản nháp 1: commit `f8a37c04`, sha256 `a5aacafa…`, codex lượt 1 `changes_requested` 2 P1 + 5 P2. Bản nháp 2: commit `981b9ea1`, sha256 `1bfdc7bb…`, codex lượt 2 `changes_requested` 1 P1 + 3 P2 (F8–F11; đóng F1, F3–F7, F2 một phần). Verdict ở `ops/reviews/thu-hoi-lease-a1a-r2/luot{1,2}-VERDICT.md`. Revision chỉ tăng khi đóng băng; bản nháp định danh bằng băm. |
+| `revision` | 2 — **bản nháp 4**. Bản nháp 1: commit `f8a37c04`, sha256 `a5aacafa…`, codex lượt 1 `changes_requested` 2 P1 + 5 P2. Bản nháp 2: commit `981b9ea1`, sha256 `1bfdc7bb…`, codex lượt 2 `changes_requested` 1 P1 + 3 P2 (F8–F11; đóng F1, F3–F7, F2 một phần). Bản nháp 3: commit `79b8ec7b`, sha256 `fb67bebd…`, codex lượt 3 `changes_requested` 1 P1 (F12, tồn dư F11; đóng F8–F10). Verdict ở `ops/reviews/thu-hoi-lease-a1a-r2/luot{1,2,3}-VERDICT.md`. Revision chỉ tăng khi đóng băng; bản nháp định danh bằng băm. |
 | `thay_the_cho` | revision 1 `ops/specs/THU-HOI-LEASE-A1a.md`, sha256 `64f92d4026fda7bdeb4326be660614eea2d25f6e30db9a20ff0c1c6aa4f5f37c` (211 dòng, 21 775 B; land qua PR #577, commit `9db7145`). Tệp r1 **giữ nguyên** trong kho để băm của nó vẫn tra được; r2 là tệp riêng. |
 | `packet_issue` | **#564** (`[THU-HOI-LEASE-A1] Packet Issue`). Issue **không** cấp việc; chỉ Issue + lease còn hiệu lực mới giao được (protocol §3.2, §4). |
 | `nguon_cap_viec` | Spec cha **r9** `ops/specs/THU-HOI-LEASE-VA-CAP-LAI.md` §`write_set` dòng A1 · #499 §A (A1–A3), §B (B1–B5) · quyết định chủ kho vòng 2 tại #499 comment [`5825988768`](https://github.com/ducthangho/tra-luat/issues/499#issuecomment-5825988768) · số đo nợ `AG-T0-01B` dạng 2 tại #564 comment [`5847471844`](https://github.com/ducthangho/tra-luat/issues/564#issuecomment-5847471844) |
 | `review_class` | **`sensitive`**: `ops/lease_publish.py` là cổng đọc lease (protocol §8). |
-| `reviewer` | codex `gpt-6-astra`, effort `high` (chỉ thị chủ kho 26-09). Trần `codex_review_calls` của đặc tả này **4** (chủ kho nâng 2 → 4 trong phiên 26-09, khai trên #564 `5847670544` trước lượt 1). Đã dùng **2/4**. |
+| `reviewer` | codex `gpt-6-astra`, effort `high` (chỉ thị chủ kho 26-09). Trần `codex_review_calls` của đặc tả này **4** (chủ kho nâng 2 → 4 trong phiên 26-09, khai trên #564 `5847670544` trước lượt 1). Đã dùng **3/4**. |
 | `dong_bang` | bằng **human audit của chủ kho** sau khi lượt codex cuối sạch, rồi merge bằng merge commit. Tới lúc đó tệp này **chưa** đóng băng và **không** lease nào được neo vào nó. |
 
 **Định danh tệp này là BĂM, không phải tên nhánh.** Tìm ở `master` trước; chưa thấy thì fetch nhánh
@@ -279,12 +279,12 @@ là lần 8, và nó phải nhắm vào chỗ **còn** trao thẩm quyền cho m
 
 2. **`BIA_MO_LICH_SU` theo Q6 + (b) — dẫn xuất từ cây mốc, clock ghim.** Script
    `ops/reviews/thu-hoi-lease-a1a-r2/do_q6.py` (hiện vật review, **không** thuộc write set), dùng
-   `yaml.safe_load` và `_danh_sach_thay_the_cho` của chính cổng, **không** regex, **không** đọc ref nào ngoài cây mốc:
+   `yaml.safe_load` và `_danh_sach_thay_the_cho` của chính cổng, **không** dùng regex để parse YAML, **không** đọc ref nào ngoài cây mốc:
 
    ```
    D     = kiểm kê mọi blob dưới ops/leases trong CÂY của MOC; không đuôi .yaml/.yml (vd .yaml.nhap) ⇒ `ngoai_mien`, không đọc
    L     = blob .yaml/.yml trong D (không kiểm mode — khớp bộ quét của cổng), parse bằng yaml.safe_load; YAML hỏng/không mapping, thiếu ID,
-           ID không phải chuỗi khác rỗng, tệp nằm trong thư mục con, tên tệp không bằng <lease_id>.yaml (hoặc .yml), trùng ID, `thay_the_cho` sai kiểu, `da_bi_thay_the` không phải chuỗi khác rỗng ⇒ rc=3
+           ID không phải chuỗi khớp ^[A-Za-z0-9._-]+$ (LEASE_ID của cổng), tệp nằm trong thư mục con, tên tệp không bằng <lease_id>.yaml (hoặc .yml), trùng ID, `thay_the_cho` sai kiểu / có phần tử ngoài `LEASE_ID` / có phần tử lặp, `da_bi_thay_the` có khoá nhưng không phải chuỗi khớp `LEASE_ID` (kể cả null), `lease_expires_at_utc` không đọc được bằng `_doc_han` của cổng (ISO8601 có múi giờ) ⇒ rc=3
            Không ép ID qua str() và không biến schema thay_the_cho sai kiểu thành danh sách rỗng
    cặp   = (cũ, mới, blob cũ, blob mới): kiểm ID/tên của CẢ HAI đầu trước lọc (b);
            `mới` khai thay_the_cho ∋ cũ VÀ `cũ` (cùng cây) khai da_bi_thay_the == mới
@@ -293,32 +293,61 @@ là lần 8, và nó phải nhắm vào chỗ **còn** trao thẩm quyền cho m
    C     = giờ commit của MOC (ghim, không phải giờ chạy)
    ```
 
-   **Script đã sửa theo thuật toán trên** (F11 lượt 2): `do_q6.py` sha256 `f20c0a1a45db2f604cac81ec221ab1bcc873041870f8465060a3d8dbea026d46`.
+   **Script đã sửa theo thuật toán trên** (F11 lượt 2, F12 lượt 3, và rà **toàn bộ** trường mà thuật toán đọc — xem dưới): `do_q6.py` sha256 `040bfd0df9273f810a7fd0f1b4a29b135addde847f621e795c50806f1fd4df9f`.
    Miền lease = mọi blob `.yaml`/`.yml` dưới `ops/leases` (đúng miền của `_quet_lease_toan_kho`); mọi tệp khác
    (vd `.yaml.nhap`) vào `ngoai_mien`, không đọc. Mỗi tệp trong miền phải: nằm trực tiếp dưới `ops/leases` ·
-   parse được · là mapping · `lease_id` là chuỗi khác rỗng · `lease_id` == tên tệp bỏ đuôi · `thay_the_cho` đúng
-   kiểu · `da_bi_thay_the` vắng hoặc chuỗi khác rỗng · không trùng ID. Vi phạm ⇒ `rc=3`, không ép kiểu, không bỏ qua.
+   parse được · là mapping · `lease_id` là chuỗi khớp `^[A-Za-z0-9._-]+$` (`LEASE_ID` của cổng) · `lease_id` == tên tệp bỏ đuôi · `thay_the_cho` đúng
+   kiểu, mỗi phần tử khớp `LEASE_ID`, không lặp · `da_bi_thay_the` vắng khoá hoặc là chuỗi khớp `LEASE_ID` (có khoá mang `null` cũng sai) ·
+   `lease_expires_at_utc` đọc được bằng `_doc_han` của cổng · không trùng ID. Đó là **mọi** trường thuật toán đọc (`lease_id`,
+   `thay_the_cho`, `da_bi_thay_the`, `lease_expires_at_utc`); bản nháp 3 chỉ phủ phần reviewer đã chỉ, và lượt 3 tìm ra đúng
+   phần còn lại của `lease_id`/`da_bi_thay_the` — bản nháp 4 tự liệt kê hết trường trước khi vá. Vi phạm ⇒ `rc=3`, không ép kiểu, không bỏ qua.
    In `path`/`blob` của **cả hai** đầu mỗi cặp.
 
-   **Tự kiểm** `python3 -B do_q6.py --tu-kiem` (kho giả, clock = giờ mốc): **13/13 đạt** — sạch ⇒ rc0 giữ `(x,y)`;
-   đổi riêng tên một đầu · không phải mapping · thiếu ID · ID sai kiểu · YAML hỏng · trùng ID · `thay_the_cho` sai
-   kiểu · bia mộ một chiều ở đầu mới ⇒ mỗi ca rc3; đầu mới bị thay tiếp ⇒ chỉ giữ cặp sau; hết hạn ⇒ `()`; tệp nháp
-   ngoài miền ⇒ không ảnh hưởng; cây sau thêm cặp ⇒ kết quả cây mốc không đổi. **Đột biến** (bản sao tạm, mỗi cái
-   gỡ đúng một chốt): bỏ kiểm tên · bỏ kiểm mapping · bỏ kiểm trùng · bỏ kiểm kiểu `thay_the_cho` · bỏ `rc=3` cho
-   `KHONG_XAC_DINH` · đọc `HEAD` thay cây mốc · bỏ lọc hạn ⇒ **7/7 đỏ, mỗi cái đúng một ca đích, không ca nào chết
-   vì ngoại lệ vô can** (bản đầu, mutant kiểu `thay_the_cho` chết `TypeError` — tín dụng giả — nên vòng lặp cặp nay
-   dùng `or []` để chốt kiểu là chốt duy nhất).
+   **Tự kiểm** `python3 -B do_q6.py --tu-kiem` (kho giả, clock = giờ mốc): **24/24 đạt** (bản in
+   `ops/reviews/thu-hoi-lease-a1a-r2/tu-kiem-q6-2026-09-26.log`). Ca: sạch ⇒ rc0 giữ `(x,y)`; mỗi ca sau ⇒ rc3 — đổi
+   riêng tên một đầu · không phải mapping · thiếu ID · ID sai kiểu · YAML hỏng · trùng ID · `thay_the_cho` sai kiểu ·
+   bia mộ một chiều ở đầu mới · ID ngoài miền (đứng riêng · ở đầu cũ · ở đầu mới) · bia mộ `null` (đầu mới · tệp ngoài
+   cặp) · khoá bia mộ không giá trị · phần tử `thay_the_cho` ngoài miền · phần tử `thay_the_cho` lặp · giá trị bia mộ
+   ngoài miền · hạn sai định dạng · hạn thiếu múi giờ; đầu mới bị thay tiếp ⇒ chỉ giữ cặp sau; hết hạn ⇒ `()`; tệp nháp
+   ngoài miền ⇒ không ảnh hưởng; cây sau thêm cặp ⇒ kết quả cây mốc không đổi. Mỗi fixture chỉ vi phạm **đúng một**
+   chốt (hai ca đầu tiên của lượt 3 thiếu trường hạn nên bị chốt hạn che — đã thêm hạn hợp lệ).
+
+   **Ma trận đột biến** `python3 -B mut_q6.py <tmp> <kho> do_q6.py` (hiện vật review; bản in
+   `mut-q6-2026-09-26.log`): **tập ca đích KHAI TRƯỚC** trong script, đòi tập ca `HONG` thực đo **bằng đúng** tập
+   khai, Traceback ⇒ `LECH`. Kết quả **14/14 khớp** + đối chứng gốc sạch:
+
+   | gỡ chốt | ca đích (khai trước = thực đo) |
+   |---|---|
+   | kiểm tên | `sai-ten` |
+   | kiểm mapping (bỏ qua tệp sai) | `khong-phai-mapping` |
+   | kiểm trùng ID | `trung-id` |
+   | kiểm kiểu `thay_the_cho` | `thay-sai-kieu` |
+   | `rc=3` cho `KHONG_XAC_DINH` | `mot-chieu-moi` |
+   | đọc cây mốc (đổi sang `HEAD`) | `cay-sau-khong-doi-cay-moc` |
+   | lọc hạn | `het-han` |
+   | miền `lease_id` | `id-ngoai-mien-don` |
+   | `null` coi như vắng | `bia-null-moi`, `bia-null-ngoai-cap`, `bia-khoa-khong-gia-tri` |
+   | miền phần tử `thay_the_cho` | `thay-phan-tu-ngoai-mien` |
+   | lặp phần tử `thay_the_cho` | `thay-phan-tu-lap` |
+   | miền giá trị bia mộ | `bia-gia-tri-ngoai-mien` |
+   | hạn hỏng coi như hết hạn | `han-sai-dinh-dang`, `han-thieu-mui-gio` |
+   | cả ba chốt miền cùng lúc | 5 ca miền, gồm `id-ngoai-mien-cu`/`-moi` (hai ca cặp được **hai** chốt che — miền ID và miền tham chiếu ở đầu kia — nên chỉ đột biến ghép giết được; khai như vậy, không gọi là ca thừa) |
+
+   Hai lần đo đầu của ma trận này **LỆCH**, và lệch là thứ đáng ghi: (a) ba mutant chết vì `TypeError`/Traceback
+   (tín dụng giả — chốt sau đọc giá trị mà chốt trước đã được giả định loại) ⇒ các chốt sau nay đọc `tt or []` và
+   `isinstance(t, str)`; (b) hai mutant sống vì fixture thiếu trường hạn nên chốt hạn che ⇒ thêm hạn hợp lệ.
 
    Chạy trên kho thật `python3 -B do_q6.py <kho> 072181157a27804e69deb35bb792a88c70ac31e3 2026-09-10T04:55:37Z`
-   (bản ghi `ops/reviews/thu-hoi-lease-a1a-r2/q6-do-2026-09-26.json`, sha256 `1fc99cd9…`, `rc=0`, chạy trong khoảng
-   23:20–23:22:44Z 26-09): miền lease **89** tệp, **89** hợp lệ, **0** vi phạm (kể cả ID/tên của cả hai đầu mọi cặp);
+   (bản ghi `ops/reviews/thu-hoi-lease-a1a-r2/q6-do-2026-09-26.json`, sha256 `1fc99cd9…`, `rc=0`; tạo lúc 23:20–23:22:44Z 26-09
+   bằng script bản nháp 3, và script bản nháp 4 chạy lại trước 23:45:23Z cho bản in **byte-equal** — `cmp` rc0): miền lease
+   **89** tệp, **89** hợp lệ, **0** vi phạm theo **mọi** chốt trên (kể cả miền `LEASE_ID`, `null`, hạn, của cả hai đầu mọi cặp);
    **3** tệp `.yaml.nhap` ngoài miền (bản nháp 2 đếm gộp thành "92 lease" — sai đơn vị, F11 lượt 2);
    **11** cặp hai chiều, digest biểu diễn sắp xếp `8f372ccd2ceab70901868a58d3380acbd89dce25c7127d4d514bc959270fef48`
    (**không đổi** so bản nháp 2); **3** cặp một chiều (không tính); **0** `KHONG_XAC_DINH`; cả 11 lease `mới` hết
    hạn, muộn nhất `2026-09-08T10:17:12Z`. Giờ commit của mốc là `2026-09-10T04:55:37Z` (`11:55:37+07:00`) ⇒ tại C,
    (b) giữ **0** cặp ⇒ `BIA_MO_LICH_SU = ()`. `trang_thai` kiểm hạn **trước** bia mộ, nên mọi C ≥
    `2026-09-08T10:17:12Z` cho cùng kết quả — clock không phải một nguồn trôi. Executor chạy lại đúng lệnh trên
-   **và** `--tu-kiem` lúc thi công, dán cả hai bản in vào thân PR; lệch digest, lệch số cặp, hoặc tự kiểm dưới 13/13
+   **và** `--tu-kiem` **và** `mut_q6.py` lúc thi công, dán cả ba bản in vào thân PR; lệch digest, lệch số cặp, tự kiểm dưới 24/24, hoặc ma trận đột biến có dòng `LECH`
    ⇒ **DỪNG**, không ghim. Script là hiện vật review (nhánh đặc tả), **không** mở write set A1a.
 
    Hệ quả đã khai, không phải lỗ: cặp thay thế sinh **sau** mốc không vào hằng (r9 Q6 *"Feature tomb không

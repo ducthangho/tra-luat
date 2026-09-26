@@ -9238,36 +9238,125 @@ _CHOT_GIA_T191 = {  # tên: đoạn chèn vào kiem(). Lượt 17: sót AnnAssig
 _STUB_T191 = ('\n\ndef _kiem_gia_t191(lease, han=None):\n    if lease.get("chot_gia_t191"):\n'
               '        raise Chan(RC_NOI_DUNG, "chot gia t191")\n    return None\n')
 
-# Hợp đồng PHÂN LOẠI của bộ liệt kê (lượt 18, F2): (tên, đoạn chèn, +ds, +miễn, +đếm thô). Mỗi nhánh
-# ngữ nghĩa một CẶP có/không nhắc `bo_qua_han`; phạm vi lồng: bộ liệt kê KHÔNG thấy, đếm thô CÓ thấy.
+# Hợp đồng PHÂN LOẠI của bộ liệt kê — MA TRẬN (r14, lượt 23: thôi nhồi điều kiện vào một snippet để giữ 19 dòng).
+# Dòng: (khoá, đoạn, +ds, +miễn, +đếm thô); bộ ba VIẾT TAY. Khoá 4 phần = `nút.kiểu.vị trí.cờ`: kiểu `truc` (điều kiện của
+# chính nút) · `ke-co` (bọc trong `if not bo_qua_han:`) · `ke-khong` (bọc trong `if lease:`); cờ `co`/`khong` = điều kiện của
+# nút có nhắc `bo_qua_han`; với `bool`, cờ là vế nhắc cờ nằm `truoc`/`sau` vế chốt, `trong` chính vế chốt, hay `khong` có.
+# `@` = `_kiem_gia_t191(lease)`. Khoá `dac.*`: một ý riêng ngoài tích trục. Tích trục đủ hay không: `_TRUC_T191`.
+def _thut(s: str, le: str = "    ") -> str:
+    return "".join(le + dong + "\n" for dong in s.split("\n"))
+
+
+_B, _L = (lambda s: "if not bo_qua_han:\n" + _thut(s)), (lambda s: "if lease:\n" + _thut(s))
+_TRUC_T191 = {n: {v: ("co", "khong") for v in ("than", "else", "dk")} for n in ("if", "while", "ifexp")}
+_TRUC_T191["case"] = {"than": ("co", "khong"), "guard": ("co", "khong")}
+_TRUC_T191["bool"] = {"dau": ("sau", "trong", "khong"), "giua": ("truoc", "sau", "trong", "khong"),
+                      "cuoi": ("truoc", "trong", "khong")}
 _PHAN_LOAI_T191 = (
-    # lượt 22: case LỒNG — guard ngoài nhắc bo_qua_han, guard trong KHÔNG; miễn phải được THỪA KẾ vào thân case trong
-    ("case-guard-mien", "    match 1:\n        case 1 if not bo_qua_han:\n            match 2:\n                case 2 if lease:\n"
-                        "                    _kiem_gia_t191(lease)\n", 0, 1, 1),
-    ("case-guard-thuong", "    match 1:\n        case 1 if lease:\n            _kiem_gia_t191(lease)\n", 1, 0, 1),
-    # lượt 21–22: cờ KHÔNG ở vế đầu, bọc `not not`; vế giữa `not` không nhắc cờ; chốt nằm trong IfExp của vế cuối —
-    # miễn phải được NHỚ qua mọi vế sau và THỪA KẾ vào IfExp. `and-mien`: cờ trong phép so sánh, chốt trong BoolOp LỒNG.
-    ("or-mien", "    lease.get('skip') or (not not bo_qua_han) or (not lease) or (_kiem_gia_t191(lease) if lease else None)\n", 0, 1, 1),
-    ("and-mien", "    (bo_qua_han is False) and lease and (lease or _kiem_gia_t191(lease))\n", 0, 1, 1),
-    # đối chứng vị trí: cờ nằm TRONG chính đối số của chốt và ở vế SAU — không miễn
-    ("or-truoc-khong-mien", "    lease.get('skip') or _kiem_gia_t191(lease, han=bo_qua_han) or bo_qua_han\n", 1, 0, 1),
-    ("or-thuong", "    lease or _kiem_gia_t191(lease)\n", 1, 0, 1),
-    ("def-long", "    def _gia_long():\n        return _kiem_gia_t191(lease)\n", 0, 0, 1),
-    ("async-def-long", "    async def _gia_long():\n        return _kiem_gia_t191(lease)\n", 0, 0, 1),
-    ("lambda-long", "    _gia_long = lambda: _kiem_gia_t191(lease)\n", 0, 0, 1),
-    ("class-long", "    class _GiaLong:\n        x = _kiem_gia_t191(lease)\n", 0, 0, 1),
-    # lượt 20, F2: chốt NẰM TRONG guard của `case` — thường, và dưới `or` có nhắc `bo_qua_han`
-    ("guard-chua-chot", "    match 1:\n        case 1 if _kiem_gia_t191(lease):\n            pass\n", 1, 0, 1),
-    ("guard-chua-chot-mien", "    match 1:\n        case 1 if bo_qua_han or _kiem_gia_t191(lease):\n            pass\n", 0, 1, 1),
-    # lượt 19, F2: `… if … else …` và `while` — thân / else / điều kiện, có và không nhắc `bo_qua_han`
-    ("ifexp-else-mien", "    gia_x = None if bo_qua_han else _kiem_gia_t191(lease)\n", 0, 1, 1),
-    ("ifexp-else-thuong", "    gia_x = None if lease else _kiem_gia_t191(lease)\n", 1, 0, 1),
-    ("ifexp-dieu-kien", "    gia_x = 1 if _kiem_gia_t191(lease) else bo_qua_han\n", 1, 0, 1),
-    ("while-than-mien", "    while not bo_qua_han:\n        _kiem_gia_t191(lease)\n        break\n", 0, 1, 1),
-    ("while-than-thuong", "    while lease:\n        _kiem_gia_t191(lease)\n        break\n", 1, 0, 1),
-    ("while-else-mien", "    while not bo_qua_han:\n        break\n    else:\n        _kiem_gia_t191(lease)\n", 0, 1, 1),
-    ("while-dieu-kien", "    while _kiem_gia_t191(lease):\n        break\n", 1, 0, 1),
+    ("if.truc.than.co", "if not bo_qua_han:\n    @", 0, 1, 1),
+    ("if.truc.than.khong", "if lease:\n    @", 1, 0, 1),
+    ("if.truc.else.co", "if bo_qua_han:\n    pass\nelse:\n    @", 0, 1, 1),
+    ("if.truc.else.khong", "if not lease:\n    pass\nelse:\n    @", 1, 0, 1),
+    ("if.truc.dk.co", "if @ or bo_qua_han:\n    pass", 1, 0, 1),
+    ("if.truc.dk.khong", "if @:\n    pass", 1, 0, 1),
+    ("if.ke-co.than.co", _B("if bo_qua_han is not None:\n    @"), 0, 1, 1),
+    ("if.ke-co.than.khong", _B("if lease:\n    @"), 0, 1, 1),
+    ("if.ke-co.else.co", _B("if bo_qua_han:\n    pass\nelse:\n    @"), 0, 1, 1),
+    ("if.ke-co.else.khong", _B("if not lease:\n    pass\nelse:\n    @"), 0, 1, 1),
+    ("if.ke-co.dk.co", _B("if @ or bo_qua_han:\n    pass"), 0, 1, 1),
+    ("if.ke-co.dk.khong", _B("if @:\n    pass"), 0, 1, 1),
+    ("if.ke-khong.than.khong", _L("if lease:\n    @"), 1, 0, 1),
+    ("if.ke-khong.else.khong", _L("if not lease:\n    pass\nelse:\n    @"), 1, 0, 1),
+    ("if.ke-khong.dk.khong", _L("if @:\n    pass"), 1, 0, 1),
+    ("while.truc.than.co", "while not bo_qua_han:\n    @\n    break", 0, 1, 1),
+    ("while.truc.than.khong", "while lease:\n    @\n    break", 1, 0, 1),
+    ("while.truc.else.co", "while bo_qua_han:\n    break\nelse:\n    @", 0, 1, 1),
+    ("while.truc.else.khong", "while not lease:\n    pass\nelse:\n    @", 1, 0, 1),
+    ("while.truc.dk.co", "while @ or bo_qua_han:\n    break", 1, 0, 1),
+    ("while.truc.dk.khong", "while @:\n    break", 1, 0, 1),
+    ("while.ke-co.than.co", _B("while bo_qua_han is not None:\n    @\n    break"), 0, 1, 1),
+    ("while.ke-co.than.khong", _B("while lease:\n    @\n    break"), 0, 1, 1),
+    ("while.ke-co.else.co", _B("while bo_qua_han:\n    break\nelse:\n    @"), 0, 1, 1),
+    ("while.ke-co.else.khong", _B("while not lease:\n    pass\nelse:\n    @"), 0, 1, 1),
+    ("while.ke-co.dk.co", _B("while @ or bo_qua_han:\n    break"), 0, 1, 1),
+    ("while.ke-co.dk.khong", _B("while @:\n    break"), 0, 1, 1),
+    ("while.ke-khong.than.khong", _L("while lease:\n    @\n    break"), 1, 0, 1),
+    ("while.ke-khong.else.khong", _L("while not lease:\n    pass\nelse:\n    @"), 1, 0, 1),
+    ("while.ke-khong.dk.khong", _L("while @:\n    break"), 1, 0, 1),
+    ("ifexp.truc.than.co", "@ if not bo_qua_han else None", 0, 1, 1),
+    ("ifexp.truc.than.khong", "@ if lease else None", 1, 0, 1),
+    ("ifexp.truc.else.co", "None if bo_qua_han else @", 0, 1, 1),
+    ("ifexp.truc.else.khong", "None if not lease else @", 1, 0, 1),
+    ("ifexp.truc.dk.co", "1 if @ or bo_qua_han else 0", 1, 0, 1),
+    ("ifexp.truc.dk.khong", "1 if @ else 0", 1, 0, 1),
+    ("ifexp.ke-co.than.co", _B("@ if bo_qua_han is not None else None"), 0, 1, 1),
+    ("ifexp.ke-co.than.khong", _B("@ if lease else None"), 0, 1, 1),
+    ("ifexp.ke-co.else.co", _B("None if bo_qua_han else @"), 0, 1, 1),
+    ("ifexp.ke-co.else.khong", _B("None if not lease else @"), 0, 1, 1),
+    ("ifexp.ke-co.dk.co", _B("1 if @ or bo_qua_han else 0"), 0, 1, 1),
+    ("ifexp.ke-co.dk.khong", _B("1 if @ else 0"), 0, 1, 1),
+    ("ifexp.ke-khong.than.khong", _L("@ if lease else None"), 1, 0, 1),
+    ("ifexp.ke-khong.else.khong", _L("None if not lease else @"), 1, 0, 1),
+    ("ifexp.ke-khong.dk.khong", _L("1 if @ else 0"), 1, 0, 1),
+    ("case.truc.than.co", "match 1:\n    case 1 if not bo_qua_han:\n        @", 0, 1, 1),
+    ("case.truc.than.khong", "match 1:\n    case 1 if lease:\n        @", 1, 0, 1),
+    ("case.truc.guard.co", "match 1:\n    case 1 if @ or bo_qua_han:\n        pass", 1, 0, 1),
+    ("case.truc.guard.khong", "match 1:\n    case 1 if @:\n        pass", 1, 0, 1),
+    ("case.ke-co.than.co", _B("match 1:\n    case 1 if bo_qua_han is not None:\n        @"), 0, 1, 1),
+    ("case.ke-co.than.khong", _B("match 1:\n    case 1 if lease:\n        @"), 0, 1, 1),
+    ("case.ke-co.guard.co", _B("match 1:\n    case 1 if @ or bo_qua_han:\n        pass"), 0, 1, 1),
+    ("case.ke-co.guard.khong", _B("match 1:\n    case 1 if @:\n        pass"), 0, 1, 1),
+    ("case.ke-khong.than.khong", _L("match 1:\n    case 1 if lease:\n        @"), 1, 0, 1),
+    ("case.ke-khong.guard.khong", _L("match 1:\n    case 1 if @:\n        pass"), 1, 0, 1),
+    ("bool.truc.dau.sau", "@ or bo_qua_han", 1, 0, 1),
+    ("bool.truc.dau.trong", "_kiem_gia_t191(lease, han=bo_qua_han) or not lease", 1, 0, 1),
+    ("bool.truc.dau.khong", "@ or not lease", 1, 0, 1),
+    ("bool.truc.giua.truoc", "bo_qua_han or @ or not lease", 0, 1, 1),
+    ("bool.truc.giua.sau", "not lease or @ or bo_qua_han", 1, 0, 1),
+    ("bool.truc.giua.trong", "not lease or _kiem_gia_t191(lease, han=bo_qua_han) or not lease", 1, 0, 1),
+    ("bool.truc.giua.khong", "not lease or @ or not lease", 1, 0, 1),
+    # cờ ở vế GIỮA (không phải vế đầu, không liền trước), sau nó một vế `not` — miễn phải được NHỚ qua mọi vế sau
+    ("bool.truc.cuoi.truoc", "not lease or bo_qua_han or not lease or @", 0, 1, 1),
+    ("bool.truc.cuoi.trong", "not lease or _kiem_gia_t191(lease, han=bo_qua_han)", 1, 0, 1),
+    ("bool.truc.cuoi.khong", "not lease or @", 1, 0, 1),
+    ("bool.ke-co.dau.sau", _B("@ or bo_qua_han"), 0, 1, 1),
+    ("bool.ke-co.dau.trong", _B("_kiem_gia_t191(lease, han=bo_qua_han) or not lease"), 0, 1, 1),
+    ("bool.ke-co.dau.khong", _B("@ or not lease"), 0, 1, 1),
+    ("bool.ke-co.giua.truoc", _B("bo_qua_han or @ or not lease"), 0, 1, 1),
+    ("bool.ke-co.giua.sau", _B("not lease or @ or bo_qua_han"), 0, 1, 1),
+    ("bool.ke-co.giua.trong", _B("not lease or _kiem_gia_t191(lease, han=bo_qua_han) or not lease"), 0, 1, 1),
+    ("bool.ke-co.giua.khong", _B("not lease or @ or not lease"), 0, 1, 1),
+    ("bool.ke-co.cuoi.truoc", _B("not lease or bo_qua_han or not lease or @"), 0, 1, 1),
+    ("bool.ke-co.cuoi.trong", _B("not lease or _kiem_gia_t191(lease, han=bo_qua_han)"), 0, 1, 1),
+    ("bool.ke-co.cuoi.khong", _B("not lease or @"), 0, 1, 1),
+    ("bool.ke-khong.dau.khong", _L("@ or not lease"), 1, 0, 1),
+    ("bool.ke-khong.giua.khong", _L("not lease or @ or not lease"), 1, 0, 1),
+    ("bool.ke-khong.cuoi.khong", _L("not lease or @"), 1, 0, 1),
+    ("dac.and-truoc", "not bo_qua_han and @", 0, 1, 1),
+    ("dac.and-khong", "lease and @", 1, 0, 1),
+    ("dac.co-trong-so-sanh", "if bo_qua_han is False:\n    @", 0, 1, 1),
+    ("dac.co-not-not", "not not bo_qua_han or @", 0, 1, 1),
+    ("dac.co-trong-bool-dk", "if lease and not bo_qua_han:\n    @", 0, 1, 1),
+    ("dac.guard-bool-truoc", "match 1:\n    case 1 if bo_qua_han or @:\n        pass", 0, 1, 1),
+    ("dac.ke-tu-while", "while not bo_qua_han:\n    if lease:\n        @\n    break", 0, 1, 1),
+    ("dac.ke-tu-else", "if bo_qua_han:\n    pass\nelse:\n    if lease:\n        @", 0, 1, 1),
+    ("dac.ke-tu-case", "match 1:\n    case 1 if not bo_qua_han:\n        match 2:\n            case 2 if lease:\n                @", 0, 1, 1),
+    ("dac.ke-tu-ifexp", "(not lease or @) if not bo_qua_han else None", 0, 1, 1),
+    ("dac.ke-tu-bool", "bo_qua_han or (@ if lease else None)", 0, 1, 1),
+    ("dac.def-long", "def _gia_long():\n    return @", 0, 0, 1),
+    ("dac.async-def-long", "async def _gia_long():\n    return @", 0, 0, 1),
+    ("dac.lambda-long", "_gia_long = lambda: @", 0, 0, 1),
+    ("dac.class-long", "class _GiaLong:\n    x = @", 0, 0, 1),
+    ("dac.def-long-trong-mien", _B("def _gia_long():\n    return @"), 0, 0, 1),
 )
+
+
+def _chay_doan_t191(doan: str, bo_qua_han: bool) -> bool:
+    """Witness CHẠY ĐƯỢC, độc lập với bộ liệt kê: chạy đoạn với `lease` truthy, trả chốt giả có ĐƯỢC GỌI không."""
+    goi, ns = [], {}
+    exec("def _f(lease, bo_qua_han, _kiem_gia_t191):\n" + _thut(doan.replace("@", "_kiem_gia_t191(lease)")), ns)
+    ns["_f"]({"a": 1}, bo_qua_han, lambda *a, **k: goi.append(1))
+    return bool(goi)
 
 
 @ca
@@ -9282,8 +9371,9 @@ def t191_MOI_chot_cua_kiem_deu_duoc_t190_phu_o_nhanh_DA_DANG():
     Tự kiểm, không có chúng thì ca này không phải bằng chứng:
       - ĐỐI CHỨNG XANH: nguồn đi qua `ast.unparse` KHÔNG đột biến phải cho `t190` QUA.
       - Đúng MỘT chốt được miễn sẵn (chốt hạn); bộ liệt kê và phép đếm thô bằng nhau.
-      - HỢP ĐỒNG PHÂN LOẠI `_PHAN_LOAI_T191` (lượt 18, F2): guard của `case`, `and`/`or` theo VỊ TRÍ, phạm
-        vi lồng — mỗi dòng đòi đúng +ds/+miễn/+đếm thô và chốt mới nằm đúng dòng chèn.
+      - HỢP ĐỒNG PHÂN LOẠI `_PHAN_LOAI_T191` (r14: MA TRẬN nút × trực tiếp/kế thừa × vị trí × cờ, tích trục đo
+        bằng `_TRUC_T191`): mỗi dòng đòi đúng +ds/+miễn/+đếm thô viết tay, chốt mới nằm đúng dòng chèn, và bộ ba
+        không trái witness CHẠY ĐƯỢC (`_chay_doan_t191`) — oracle không đi qua bộ liệt kê.
       - CA ÂM `_CHOT_GIA_T191`: chốt giả THỰC THI ĐƯỢC (ném `Chan` khi `chot_gia_t191`) mà không fixture
         nào chạm ⇒ liệt kê +1 và phán quyết phải là `KHONG_CHAM`, không được là `PHU`.
 
@@ -9306,8 +9396,18 @@ def t191_MOI_chot_cua_kiem_deu_duoc_t190_phu_o_nhanh_DA_DANG():
 
     def _dong_gia(g, cac):
         return [(d, c) for (_, d, c) in cac if "gia_t191" in g.split("\n")[d - 1].replace(" t191", "_t191")]
+    khoa = [dong[0] for dong in _PHAN_LOAI_T191]
+    can = {f"{n}.{k}.{v}.{c}" for n, truc in _TRUC_T191.items() for v, cs in truc.items()
+           for k, cc in (("truc", cs), ("ke-co", cs), ("ke-khong", ("khong",))) for c in cc}
+    chot(len(set(khoa)) == len(khoa), "MA TRẬN: khoá trùng")
+    chot({x for x in khoa if not x.startswith("dac.")} == can,
+         f"MA TRẬN lệch tích trục: thiếu {sorted(can - set(khoa))}, thừa {sorted(set(khoa) - can - {x for x in khoa if x.startswith('dac.')})}")
     for loai, doan, them_ds, them_mien, them_tho in _PHAN_LOAI_T191:
-        g = _gia(doan)
+        if them_ds + them_mien:  # witness chạy được: ds ⇒ gọi ở CẢ HAI giá trị cờ; miễn ⇒ gọi hay không PHỤ THUỘC cờ
+            chay = (_chay_doan_t191(doan, False), _chay_doan_t191(doan, True))
+            chot(chay == (True, True) if them_ds else chay[0] != chay[1],
+                 f"PHÂN LOẠI {loai}: bộ ba viết tay trái witness chạy được (gọi khi cờ False/True = {chay})")
+        g = _gia(_thut(doan.replace("@", "_kiem_gia_t191(lease)")))
         ds_g, mien_g = _liet_ke_chot_kiem(g)
         so = (len(ds_g) - len(ds), len(mien_g) - len(mien), _dem_chot_tho(g) - len(ds) - len(mien))
         chot(so == (them_ds, them_mien, them_tho),

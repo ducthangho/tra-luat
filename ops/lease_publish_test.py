@@ -9400,7 +9400,15 @@ _NHAC_T191 = ("{x}", "bool({x})", "({x}).real", "(({x}),)[0]", "not not ({x})", 
               "[*((1,) if ({x}) else ())]", "(*((1,) if ({x}) else ()),)", "{*((1,) if ({x}) else ())}",
               "{**({1: 1} if ({x}) else {})}", "f\"{'1' if ({x}) else ''}\"", "any(({x}) for _i in (1,))", "(lambda: ({x}))()",
               "[1][:({x})]", "[1 for _i in ((1,) if ({x}) else ())]", "any(True for _i in ((1,) if ({x}) else ()))",
-              "{1: 1 for _i in ((1,) if ({x}) else ())}", "{1 for _i in ((1,) if ({x}) else ())}")
+              "{1: 1 for _i in ((1,) if ({x}) else ())}", "{1 for _i in ((1,) if ({x}) else ())}",
+              # r20 (lượt 29, F2): cờ ĐỌC trong ĐÍCH gán của comprehension (chỉ số `Subscript`, `Load`) và trong
+              # `yield`/`yield from`/`await` của generator/async-genexp LỒNG được tiêu thụ ngay — hàm ngoài vẫn đồng bộ.
+              *(f"((_box := [False, False]), {k}, _box[1])[2]" for k in (
+                  "[True for _box[{x}] in [True]]", "{True for _box[{x}] in [True]}", "{1: True for _box[{x}] in [True]}",
+                  "list(True for _box[{x}] in [True])", "[True for (_i, _box[{x}]) in [(1, True)]]")),
+              "next((lambda: (yield ({x})))())", "next((lambda: (yield from (({x}),)))())",
+              "(list((await ((_co := ({x})), type('A', (), {'__await__': lambda s: iter(())})())[1] for _i in 'x')"
+              ".__anext__().__await__()), _co)[1]")
 _NGU_CANH_NHAC_T191 = {"or": ("bo_qua_han", "F or @"), "and": ("not bo_qua_han", "F and @"), "if": ("bo_qua_han", "if F:\n    @"),
                        "while": ("bo_qua_han", "while F:\n    @\n    break"), "ifexp": ("bo_qua_han", "(@ if F else None)"),
                        "case": ("bo_qua_han", "match 1:\n    case _ if F:\n        @")}
@@ -9426,7 +9434,17 @@ _VT_CO_T191 = (*(f"5 {o} 3" for o in "+ - * / // % ** << | ^ & == != < <= > >=".
                "0 or 5", "5 and 3", "0 or (5 and (0 or 3))", "abs(5)", "dict(k=5)['k']", "max(*(5, 3))", "dict(**{'k': 5})['k']",
                "{5: 3}[5]", "(5, 3)[1]", "[5, 3, 1][0:2:1]", "(5).real", "5 if 3 else abs", "abs if 0 else 5", "{5}", "[5]",
                "[*(5,)]", "f'{5:>{3}}'", "[5 for _i in 'x' if 3]", "{5: 3 for _i in 'x' if 1}", "{5 for _i in 'x' if 1}",
-               "list((5 for _i in 'x' if 1))", "(_q := 5)", "(lambda a=5: a)()", "(lambda *, a=5: a)()")
+               "list((5 for _i in 'x' if 1))", "(_q := 5)", "(lambda a=5: a)()", "(lambda *, a=5: a)()",
+               # r20 (lượt 29, F1): VỊ TRÍ PHẦN TỬ trong trường danh sách — mỗi trường ≥ 3 phần tử; so sánh chuỗi đều ĐÚNG
+               # nên không vị trí nào bị ngắn mạch (witness đòi mọi vị trí được thực thi).
+               "max(5, 3, 1)", "max(5, *(3,), 1)", "dict(a=5, b=3, c=1)['b']", "1 < 2 < 3 < 4", "1 <= 1 <= 2 <= 2", "4 > 3 > 2 > 1",
+               "4 >= 4 >= 3 >= 3", "3 == 3 == 3 == 3", "1 != 2 != 3 != 4", "1 in (1, 2) in ((1, 2),) in [((1, 2),)]",
+               "1 not in (2,) not in ((3,),) not in [4]", "([5] * 9)[1] is ([5] * 9)[2] is ([5] * 9)[3] is ([5] * 9)[4]",
+               "[5][0:1] is not [3][0:1] is not [1][0:1] is not [2][0:1]", "(5, 3, 1)", "[5, 3, 1]", "{5, 3, 1}", "{5: 3, 1: 2, 4: 6}",
+               "{5: 3, **{1: 2}, 4: 6}", "0 or 0 or 5", "5 and 3 and 1", "f'{5}{3}{1}'", "{(5, 3, 1): 2}[5, 3, 1]",
+               "[5 for _i in 'x' if 3 if 1 if 2]", *(k.replace("E", "5 for _i in 'x' if 3 for _j in 'y' if 1 for _k in 'z' if 2")
+                                                    for k in ("[E]", "{E}", "{6: E}", "list((E))")),
+               "(lambda a=5, b=3, c=1: a)()", "(lambda *, a=5, b=3, c=1: a)()")
 
 
 def _vt_co_t191(goc: str, x: str):

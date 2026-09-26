@@ -5,7 +5,7 @@ CHÍNH lệnh qua subprocess (không import) — doctrine `lease_publish_test.py
 from __future__ import annotations
 
 import datetime as _dt
-import json, os, runpy, shutil, subprocess, sys, tempfile
+import json, os, runpy, shutil, subprocess, sys, tempfile, time
 from pathlib import Path
 
 import yaml
@@ -956,11 +956,10 @@ DOT_BIEN = {
         "        d = d or os.curdir\n",
         "        if not d:\n            continue  # đột biến: thành phần rỗng bị bỏ qua\n",
         "BASH_NEN", (), "t51_cache_phai_HET_HIEU_LUC_khi_chinh_TEP_ung_vien_doi"),
-    # N62: chuoi ung vien mat `./` => thanh TEN TRAN, phep thu di tim theo PATH.
-    "bn_path_rong_mat_cham": ("ops/bash_nen.py",
-        "            chuoi_u = os.path.join(d, ten)   # giữ `./` — xem N62 ở trên\n",
-        "            chuoi_u = str(Path(d) / ten)  # đột biến: chuẩn hoá mất `./`\n",
-        "BASH_NEN", (), "t51_cache_phai_HET_HIEU_LUC_khi_chinh_TEP_ung_vien_doi"),
+    # RUT O r32: bn_path_rong_mat_cham (N62: `Path('.') / 'bash'` rut thanh TEN TRAN) — N113 tuyet doi
+    # hoa MOI ung vien ngay khi liet ke, va `abspath("bash") == abspath("./bash")`, nen dot bien ay
+    # khong con doi duoc hanh vi nao (luot day du r32 do duoc: song sot). Ca lop "ten tran" nay chet
+    # theo KIEN TRUC; chot (5b)/(9) cua `t51` canh N113.
     # N63: han ngach bi EP KIEU thay vi hoi kieu.
     "bn_quota_ep_kieu": ("ops/bash_nen.py",
         "        if not isinstance(so, int) or isinstance(so, bool) or so < 0:\n",
@@ -991,7 +990,7 @@ DOT_BIEN = {
         "BASH_NEN", (), "t33_do_phu_cua_cong_do_duoc_THEO_HINH_DANG"),
     # r30 — N109: giai lai THEO PHU THUOC, khong quet lai ca bang.
     "bn_giai_dong_quet_lai": ("ops/bash_nen.py",
-        "            for k2 in (*theo_ten.get((ten, b_id), ()), *theo_ten.get((None, b_id), ())):\n",
+        "            for k2 in theo_ten.get((ten, b_id), ()):\n",
         "            for k2 in range(len(cac_muc)):  # đột biến: quét lại MỌI mục (bậc hai)\n",
         "BASH_NEN", (), "t33_do_phu_cua_cong_do_duoc_THEO_HINH_DANG"),
     # r31 — N110..N112 (codex vong 25).
@@ -1006,6 +1005,31 @@ DOT_BIEN = {
     "bn_eval_khong_phu_thuoc": ("ops/bash_nen.py",
         "            ra.update(x.id for x in ast.walk(tai) if isinstance(x, ast.Name))\n",
         "            pass  # đột biến: tên trong tải `eval` không là phụ thuộc\n",
+        "BASH_NEN", (), "t33_do_phu_cua_cong_do_duoc_THEO_HINH_DANG"),
+    # r32 — N113/N114 (codex vong 26).
+    "bn_tra_duong_goc": ("ops/bash_nen.py",
+        "        ds.append(tuyet_doi)\n",
+        "        ds.append(str(u))  # đột biến: trả chuỗi gốc (tương đối) thay đường đã thử\n",
+        "BASH_NEN", (), "t51_cache_phai_HET_HIEU_LUC_khi_chinh_TEP_ung_vien_doi"),
+    "bn_khong_han_tong": ("ops/bash_nen.py",
+        "        dat, ly_do = _do_nang_luc([u], het_han=het_han)\n",
+        "        dat, ly_do = _do_nang_luc([u])  # đột biến: không hạn tổng\n",
+        "BASH_NEN", (), "t51_cache_phai_HET_HIEU_LUC_khi_chinh_TEP_ung_vien_doi"),
+    "bn_han_tong_theo_ung_vien": ("ops/bash_nen.py",
+        "        return han if het_han is None else min(han, het_han - time.monotonic())\n",
+        "        return han  # đột biến: hạn tổng chỉ xét giữa các ỨNG VIÊN, không giữa các PHÉP\n",
+        "BASH_NEN", (), "t51_cache_phai_HET_HIEU_LUC_khi_chinh_TEP_ung_vien_doi"),
+    "bn_eval_moi_thuoc_tinh": ("ops/bash_nen.py",
+        "        if not dung_san:\n            continue\n        try:\n            van = _tai_hang(n)\n",
+        "        if False:  # đột biến: đọc tải của MỌI `.eval`\n            continue\n        try:\n            van = _tai_hang(n)\n",
+        "BASH_NEN", (), "t33_do_phu_cua_cong_do_duoc_THEO_HINH_DANG"),
+    "bn_phu_thuoc_dai_dien": ("ops/bash_nen.py",
+        "            for k2 in theo_ten.get((ten, b_id), ()):\n",
+        "            for k2 in (*theo_ten.get((ten, b_id), ()), *[j for j, mm in enumerate(cac_muc) if 'eval' in ast.dump(mm[2][1])]):  # đột biến: khoá đại diện\n",
+        "BASH_NEN", (), "t33_do_phu_cua_cong_do_duoc_THEO_HINH_DANG"),
+    "bn_chinh_xac_am_tinh": ("ops/bash_nen.py",
+        "            return max(v, 0) if la_chinh_xac else abs(v)\n",
+        "            return abs(v)  # đột biến: độ chính xác `*` âm tính như dương\n",
         "BASH_NEN", (), "t33_do_phu_cua_cong_do_duoc_THEO_HINH_DANG"),
     "bn_ban_ghi_theo_toa_do": ("ops/bash_nen.py",
         "    theo_nut = dict(ban_ghi)\n",
@@ -3462,6 +3486,25 @@ def t33_do_phu_cua_cong_do_duoc_THEO_HINH_DANG():
     bang(so_giai_ham <= 3 * 2 * n_ham,
          f"(1m) N111: {n_ham} hàm độc lập (mỗi hàm 2 mục nạp động) phải giải ≤ {6 * n_ham} lần, đo được "
          f"{so_giai_ham}")
+    # N115 (r32, codex vòng 26) — tải KHÔNG phải hằng (`page.eval(x)`) không có phụ thuộc: n mục như thế
+    # ĐỨNG TRƯỚC một chuỗi n bí danh không được bị xếp lại theo mỗi bí danh (r31: 800 + 800 ⇒ 642 401).
+    n_dd = 400
+    dai_dien = ("".join(f"p{i} = page.eval(x)\n" for i in range(n_dd)) + 'a0 = __import__("importlib")\n'
+                + "".join(f'a{i} = a{i - 1}.import_module("importlib")\n' for i in range(1, n_dd))
+                + f'c = a{n_dd - 1}.import_module("subprocess")\nc.run(["bash"])\n')
+    d2 = _g_bn["_DEM_GIAI_DONG"]
+    kq_dd = _do(dai_dien)
+    so_giai_dd = _g_bn["_DEM_GIAI_DONG"] - d2
+    bang(isinstance(kq_dd, list) and len(kq_dd) == 1 and so_giai_dd <= 3 * 2 * n_dd,
+         f"(1m) N115: {n_dd} `page.eval(x)` + chuỗi {n_dd} bí danh phải bắt đúng và giải ≤ {6 * n_dd} lần, "
+         f"đo được {kq_dd!r} sau {so_giai_dd} lần giải")
+    # N115 — `.eval` trên một đối tượng KHÁC không phải `eval` dựng sẵn: tải dài của nó không được chạm
+    # trần `exec` (r31 NÉM cả tệp), và lời gọi bash sau đó phải vẫn bị bắt. (Chốt riêng thay vì một mục
+    # `_HINH_DANG_PHU` để các bảng hình dạng giữ dạng LITERAL thuần.)
+    kq_pe = _do('result = page.eval(' + repr("x" * 100_001) + ')\nimport subprocess\nsubprocess.run(["bash"])\n')
+    bang(isinstance(kq_pe, list) and [d for d, _c in kq_pe] == [3],
+         f"(1m) N115: `page.eval(<100 001 ký tự>)` rồi `subprocess.run(['bash'])` phải ra dòng 3, đo được "
+         f"{str(kq_pe)[:200]!r}")
     # (1n) N110 (r31, chủ kho: đóng theo BẢNG) — bảng kiểu chuyển đổi của cổng được đo bằng CHÍNH `%` của
     # Python: mọi chữ cái mà `%` của `str` hay `bytes` nhận phải có trong bảng; kiểu TRẦN thì độ chính xác
     # 5000 KHÔNG dựng chuỗi dài; kiểu KHUẾCH ĐẠI thì có cách viết (có/không `#`) dựng ≥ 5000 ký tự.
@@ -3491,6 +3534,53 @@ def t33_do_phu_cua_cong_do_duoc_THEO_HINH_DANG():
             bang(dai < 100, f"(1n) N110: `%{ch}` khai là TRẦN mà độ chính xác 5000 dựng {dai} ký tự")
         elif ch in kd:
             bang(dai >= 5000, f"(1n) N110: `%{ch}` khai là KHUẾCH ĐẠI mà độ chính xác 5000 chỉ dựng {dai}")
+    # (1o) N116 (r32, chủ kho: "đóng bằng phép đo SAI PHÂN") — ngân sách `%` của cổng so với độ dài THẬT
+    # mà `%` của Python dựng, trên một LƯỚI: cờ × độ rộng (tĩnh/`*`, kể cả ÂM) × độ chính xác (tĩnh/`*`,
+    # kể cả ÂM) × mọi kiểu trong bảng × str/bytes. Hai chiều: thật > ngân sách sản phẩm ⇒ cổng PHẢI NÉM
+    # (không lọt); thật ≤ 64 ký tự ⇒ cổng KHÔNG được NÉM (không báo oan cả cây). "Thật" là độ dài LỚN NHẤT
+    # trên một TẬP giá trị của kiểu ấy: `%.5000g` ra 3 ký tự với 1.5 mà hơn 5000 với 1/3 — cổng không
+    # biết giá trị sẽ là gì trong mọi trường hợp, nên chỉ bị đòi chặt khi KHÔNG giá trị nào khuếch đại.
+    kiem_ns = _g_bn["_kiem_ngan_sach_dinh_dang"]
+    vuot = _g_bn["_VuotNganSach"]
+    tran_ns = _g_bn["_NGAN_SACH_DINH_DANG"]
+    gia_tri = {"s": ("x",), "r": ("x",), "a": ("x",), "c": (65,), "b": (b"x",)}
+    gia_so = {"e": (1.5, 1 / 3, 1e300, -1e-300), "i": (7, -7, 10 ** 30)}
+    lech = []
+    so_o = 0
+    for kieu in sorted(_g_bn["_KIEU_TRAN"] | _g_bn["_KIEU_KHUECH_DAI"]):
+        for la_bytes in (False, True):
+            for co in ("", "#", "-", "0"):
+                for rong in ("", "5", "5000", "*"):
+                    for cx in ("", ".5", ".5000", ".*"):
+                        for r_dong in ((-5000, -5, 0, 5, 5000) if rong == "*" else (None,)):
+                            for c_dong in ((-5000, -5, 0, 5, 5000) if cx == ".*" else (None,)):
+                                mau_o = "%" + co + rong + cx + kieu
+                                if la_bytes:
+                                    mau_o = mau_o.encode()
+                                cac_gt = gia_tri.get(kieu) or gia_so["e" if kieu in "eEfFgG" else "i"]
+                                that = -1
+                                for gt in cac_gt:
+                                    if la_bytes and isinstance(gt, str):
+                                        gt = gt.encode()
+                                    doi_o = tuple(x for x in (r_dong, c_dong) if x is not None) + (gt,)
+                                    doi_o = doi_o if len(doi_o) > 1 else doi_o[0]
+                                    try:
+                                        that = max(that, len(mau_o % doi_o))
+                                    except (ValueError, TypeError, OverflowError):
+                                        continue
+                                    try:
+                                        kiem_ns(mau_o, doi_o)
+                                        nem = False
+                                    except vuot:
+                                        nem = True
+                                if that < 0:
+                                    continue
+                                so_o += 1
+                                if (that > tran_ns and not nem) or (that <= 64 and nem):
+                                    lech.append((mau_o, doi_o, that, nem))
+    bang(so_o > 1000 and not lech,
+         f"(1o) N116: {len(lech)} ô lệch trên {so_o} ô của lưới sai phân (mẫu, đối, dài thật, cổng ném): "
+         f"{lech[:6]}")
     kq_sao = _do('import subprocess\nsubprocess.run(["%*s" % (5000, "x")])\n')
     bang(isinstance(kq_sao, str) and "_VuotNganSach" in kq_sao,
          f"(1m) `%*s` với độ rộng 5000 vẫn phải NÉM (N103 chỉ bỏ số KHÔNG phải độ rộng), đo được "
@@ -4209,7 +4299,8 @@ def _chot_DO_cua_cong_trong(than: str):
                 # `**x` không phải literal thì không biết — không đoán.
                 # LỚP ĐÃ KHÉP (r30, chủ kho — lần BA của hình dạng "`dk`/xuất xứ tới bằng cách viết
                 # mới"): `**` LỒNG (`**{**{"dk": …}}`) và đích lồng trong VÒNG LẶP là nợ có tên, ghim ở
-                # `_MAU_TOAN_TU` (`khep_*`, mong False). Bộ chốt chỉ nhận cú pháp TRỰC TIẾP.
+                # `_MAU_TOAN_TU` (`khep_*`, mong False). Bộ chốt chỉ nhận cú pháp TRỰC TIẾP. r32: mở rộng
+                # cho mọi DẠNG RÀNG BUỘC mới — `match`/`case` (codex vòng 26), walrus, `with … as`….
                 dieu_kien = next((v for k in nut.keywords
                                   if k.arg is None and isinstance(k.value, _ast.Dict)
                                   for kk, v in zip(k.value.keys, k.value.values)
@@ -4382,6 +4473,10 @@ _MAU_TOAN_TU = {
     # LONG trong VONG LAP. No co ten: bo chot KHONG bat (mong False). Ai phu duoc thi dao sang True.
     "khep_dk_sao_sao_long": "def f():\n    rc, bao = _quet(a, b)\n    bang(**{**{'dk': bao['trang_thai'] == 'DO'}, 'msg': 'x'})\n",
     "khep_vong_lap_dich_long": "def f():\n    for ((rc, bao),) in [(_quet(a, b),)]:\n        bang(rc == 2, 'x')\n",
+    # r32 — LOP DA KHEP mo rong (chu kho, codex vong 26): xuat xu qua `match` — mot dang RANG BUOC moi
+    # cua cung lop r30. Bo chot KHONG bat (mong False); reviewer khong bao them dang rang buoc moi nao.
+    "khep_match_anh_xa": "def f():\n    rc, bao = _quet(a, b)\n    match bao:\n        case {'trang_thai': tt}:\n            bang(tt == 'DO', 'x')\n",
+    "khep_match_bo": "def f():\n    match _quet(a, b):\n        case (rc, bao):\n            dung(rc == 2, 'x')\n",
     "get_tren_doi_tuong_khac": "def f():\n    rc, bao = _quet(a, b)\n    bang(config.get('trang_thai') == 'ok', 'x')\n",
 }
 def _ly_do_khong_doc_duoc(v) -> bool:
@@ -4431,6 +4526,7 @@ _MAU_MONG = {"eq_rc": True, "eq_tt": True, "ne_rc": True, "ne_tt": True,
              "get_truong_co_che": False, "bi_danh_truong_co_che": False,
              "get_tren_doi_tuong_khac": False,
              "khep_dk_sao_sao_long": False, "khep_vong_lap_dich_long": False,
+             "khep_match_anh_xa": False, "khep_match_bo": False,
              "getitem_truong": True, "itemgetter_truong": True, "bi_danh_getattr_get": True,
              "ten_truong_gap": True, "itemgetter_ten_gap": True,
              "get_co_che_mac_dinh": False, "len_truong_co_che": False,
@@ -4929,12 +5025,32 @@ def t51_cache_phai_HET_HIEU_LUC_khi_chinh_TEP_ung_vien_doi():
                  f"(5a) `PATH` VẮNG cho {len(vang)} ứng viên — mong lùi về `os.defpath` = "
                  f"{os.defpath!r} như `os.get_exec_path()` làm. Gộp VẮNG vào RỖNG là để cổng "
                  f"báo KHÔNG ĐO ĐƯỢC trên một máy chạy `bash` được.")
-            bang(rong == [os.path.join(os.curdir, "bash")],
+            bang(rong == [os.path.abspath(cho_bash / "bash")],
                  f"(5b) `PATH=\"\"` ở thư mục CÓ `bash` cho {rong!r} — mong "
-                 f"{[os.path.join(os.curdir, 'bash')]!r}. Thành phần RỖNG là thư mục HIỆN TẠI "
-                 f"(`os.get_exec_path({{'PATH': ''}})` ⇒ `['']`). Và chuỗi phải giữ `./`: "
-                 f"`Path('.') / 'bash'` chuẩn hoá thành TÊN TRẦN `bash`, tức phép thử năng lực "
-                 f"sẽ đi tìm theo PATH thay vì thử đúng tệp ấy.")
+                 f"{[os.path.abspath(cho_bash / 'bash')]!r}. Thành phần RỖNG là thư mục HIỆN TẠI "
+                 f"(`os.get_exec_path({{'PATH': ''}})` ⇒ `['']`). Chuỗi KHÔNG được thành TÊN TRẦN "
+                 f"`bash` (phép thử sẽ đi tìm theo PATH), và từ N113 (r32) nó là đường TUYỆT ĐỐI "
+                 f"tính theo cwd LÚC ĐO — `./bash` trả ra ngoài sẽ trỏ tệp khác khi người gọi đổi cwd.")
+
+            # (9) N113 (r32, codex vòng 26 — P1) — đường TRẢ VỀ phải là đúng tệp ĐÃ THỬ, bất kể cwd
+            #     của người gọi về sau. Đo được trên r31: `tim_bash(path="")` ở thư mục A (có
+            #     `bash` tốt) trả `./bash`; chạy nó với `cwd` = B (có một `bash` khác) in
+            #     `WRONG_CANDIDATE`.
+            b9 = tmp / "cwd_khac"
+            b9.mkdir()
+            (b9 / "bash").write_text("#!/bin/sh\necho WRONG_CANDIDATE\n", encoding="utf-8")
+            (b9 / "bash").chmod(0o755)
+            viet(TOT)
+            try:
+                os.chdir(cho_bash)
+                duong9 = tim(path="")[0]
+            finally:
+                os.chdir(cu_cwd)
+            ra9 = (subprocess.run([duong9, "-c", "echo DUNG"], cwd=b9, capture_output=True,
+                                  text=True, timeout=60).stdout.strip() if duong9 else None)
+            bang(duong9 is not None and os.path.isabs(duong9) and ra9 == "DUNG",
+                 f"(9) N113: `tim_bash(path='')` phải trả đường TUYỆT ĐỐI của tệp đã thử, và chạy nó "
+                 f"từ một cwd KHÁC vẫn là tệp ấy: trả {duong9!r}, chạy ra {ra9!r}")
 
             # (6) N61 (r18) — khoá cache theo TOÀN BỘ môi trường. `bash` đọc môi trường của
             #     CHÍNH NÓ; đo được ở vòng 12: cache `/bin/bash` xong, đặt `BASH_ENV` trỏ vào
@@ -4978,6 +5094,37 @@ def t51_cache_phai_HET_HIEU_LUC_khi_chinh_TEP_ung_vien_doi():
                  f"(8) nội dung tệp `BASH_ENV` đổi sang `exit 7`: trước {truoc!r}, sau {sau_doi!r} "
                  f"— mong `{w}` rồi `None`. Phán quyết cũ sống qua một thay đổi mà `bash` đọc.")
 
+            # (10) N114 (r32, codex vòng 26) — HẠN TỔNG. Bốn ứng viên TREO ngay ở phép đầu; hạn riêng 2s,
+            #     hạn tổng 2,5s. Có hạn tổng (tính cho TỪNG PHÉP) thì dừng quanh 2,5s và trả None kèm chẩn
+            #     đoán "hết hạn TỔNG"; hạn chỉ tính giữa ỨNG VIÊN thì ~4s; không có thì ~8s. Treo ở phép
+            #     ĐẦU chứ không ở phép mở đường dẫn: chốt này không được phụ thuộc phép thứ hai (đo được ở
+            #     lượt đầy đủ r32: `bn_bo_kiem_mo_tep` giết thêm nó khi ứng viên treo ở phép hai).
+            if not Path("/bin/sleep").exists():
+                raise BoQuaMoiTruong("nền này không có `/bin/sleep` để dựng ứng viên TREO — KHÔNG ĐO ĐƯỢC")
+            g = tim.__globals__
+            cu_han = (g["_HAN_GIAY"], g["_HAN_TONG_GIAY"])
+            treo = []
+            for i10 in range(4):
+                d10 = tmp / f"treo{i10}"
+                d10.mkdir()
+                (d10 / "bash").write_text("#!/bin/sh\nexec /bin/sleep 10\n", encoding="utf-8")
+                (d10 / "bash").chmod(0o755)
+                treo.append(str(d10))
+            os.environ.pop("CONG_CU_BASH", None)
+            g["_HAN_GIAY"], g["_HAN_TONG_GIAY"] = 2, 2.5
+            try:
+                t10 = time.monotonic()
+                kq10, cd10 = tim(path=os.pathsep.join(treo), tat_ca=True)
+                lau10 = time.monotonic() - t10
+            finally:
+                g["_HAN_GIAY"], g["_HAN_TONG_GIAY"] = cu_han
+            # CHỈ đo hạn TỔNG: thời gian và chẩn đoán. KHÔNG khẳng định `kq10 is None` — "quá hạn là bị từ
+            # chối" là thuộc tính của `t28` (đo được ở lượt đầy đủ r32: `bn_bo_han_treo` giết thêm chốt
+            # này khi nó còn khẳng định cả kết quả). `tat_ca=True` để mọi ứng viên đều đi qua hạn tổng.
+            bang(lau10 < 3.3 and any("hết hạn TỔNG" in c["ly_do"] for c in cd10),
+                 f"(10) N114: bốn ứng viên treo, hạn riêng 2s, hạn tổng 2,5s: trả {kq10!r} sau "
+                 f"{lau10:.2f}s, chẩn đoán {[c['ly_do'][:40] for c in cd10]}")
+
             # (7) N70 (r19) — ghi đè bằng TÊN TRẦN phải phân giải qua PATH, và phép thử CÙNG vân
             #     tay phải canh CÙNG một tệp. Đo được ở vòng 13: `./bash` giữ chỗ ở thư mục hiện
             #     tại, PATH trỏ bash thật, `CONG_CU_BASH=bash` — thay bash trong PATH bằng bản
@@ -4985,7 +5132,10 @@ def t51_cache_phai_HET_HIEU_LUC_khi_chinh_TEP_ung_vien_doi():
             khu = tmp / "ten_tran"
             (khu / "p").mkdir(parents=True)
             giu_cho = khu / "bash"
-            giu_cho.write_text("#!/bin/sh\nexit 0\n", encoding="utf-8")
+            # N113 (r32) — tệp giữ chỗ là một `bash` CHẠY ĐƯỢC: từ khi mọi ứng viên được tuyệt đối hoá,
+            # một ghi đè tên trần KHÔNG phân giải qua PATH thành `<cwd>/bash`, và chỉ khi tệp ấy ĐẠT phép
+            # thử thì sai lầm ấy mới lộ ra ở đường trả về (7a).
+            giu_cho.write_text(TOT, encoding="utf-8")
             giu_cho.chmod(0o755)
             that_su = khu / "p" / "bash"
             that_su.write_text(TOT, encoding="utf-8")

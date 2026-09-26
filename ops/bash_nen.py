@@ -67,6 +67,7 @@ import re
 import shutil
 import subprocess
 import sys
+import time
 import tempfile
 from pathlib import Path, PurePosixPath
 
@@ -81,6 +82,7 @@ _DAU_CHAY = "BN_DA_CHAY_TU_TEP"
 _SCRIPT_ARGV = 'printf "BN0=%s\\nBNSO=%s\\nBN1=%s\\n" "$0" "$#" "${1-}"'
 
 _HAN_GIAY = 30
+_HAN_TONG_GIAY = 120      # N114 — hạn TỔNG cho mọi phép thử năng lực của một lần `tim_bash`
 
 
 def _chay(argv, han=_HAN_GIAY):
@@ -95,7 +97,7 @@ def _chay(argv, han=_HAN_GIAY):
         return -999, f"không spawn được: {type(e).__name__}: {e}"
 
 
-def _do_nang_luc(argv_ung_vien, thu_muc_tam=None, han=None):
+def _do_nang_luc(argv_ung_vien, thu_muc_tam=None, han=None, het_han=None):
     """Ứng viên có LÀM ĐƯỢC VIỆC không — hai phép chạy thật. Trả (đạt, lý_do).
 
     `argv_ung_vien` là một DANH SÁCH chứ không phải một đường dẫn: bộ test cần bơm được
@@ -114,8 +116,14 @@ def _do_nang_luc(argv_ung_vien, thu_muc_tam=None, han=None):
     # nó, nên nó phải có ca canh — trước r2 nó đúng do MAY, không do thiết kế.
     han = _HAN_GIAY if han is None else han
 
+    def _han_phep():
+        # N114 — mỗi PHÉP chạy (không chỉ mỗi ứng viên) lấy min(hạn riêng, phần còn lại của hạn tổng).
+        return han if het_han is None else min(han, het_han - time.monotonic())
+
     # (1) TRUNG THỰC ARGV.
-    rc, ra = _chay(argv_ung_vien + ["-c", _SCRIPT_ARGV, _NHAN_ARGV, *_DOI_SO], han=han)
+    if _han_phep() <= 0:
+        return False, "không thử: hết hạn TỔNG"
+    rc, ra = _chay(argv_ung_vien + ["-c", _SCRIPT_ARGV, _NHAN_ARGV, *_DOI_SO], han=_han_phep())
     if rc != 0:
         # `rc == -998` là QUÁ HẠN, tức ứng viên TREO. Nó phải rơi vào nhánh TỪ CHỐI này,
         # không được coi là "không kết luận được rồi cho qua".
@@ -140,7 +148,9 @@ def _do_nang_luc(argv_ung_vien, thu_muc_tam=None, han=None):
             os.chmod(tep, 0o755)
         except OSError:
             pass
-        rc, ra = _chay(argv_ung_vien + [str(tep)], han=han)
+        if _han_phep() <= 0:
+            return False, "phép mở đường dẫn bản địa: không thử — hết hạn TỔNG"
+        rc, ra = _chay(argv_ung_vien + [str(tep)], han=_han_phep())
         if rc != 0 or _DAU_CHAY not in ra:
             return False, (f"phép mở đường dẫn bản địa: rc={rc} — không chạy được "
                            f"{str(tep)!r}: {ra.strip()[:200]}")
@@ -165,14 +175,20 @@ def ung_vien(path=None, system_root=None, program_files=None, git=None):
     def them(u):
         if not u:
             return
+        # N113 (r32, codex vòng 26 — P1) — trả và THỬ đúng đường TUYỆT ĐỐI, chính là khoá khử trùng.
+        # Bản r31 khử trùng bằng đường tuyệt đối mà lại lưu và TRẢ chuỗi gốc: một thành phần `PATH`
+        # rỗng/tương đối cho `./bash`, và người gọi chạy nó với một `cwd` KHÁC là chạy một tệp CHƯA
+        # TỪNG được đo (đo được: in `WRONG_CANDIDATE`). Tuyệt đối hoá ngay tại đây — theo cwd của
+        # CHÍNH lúc đo — thì phán quyết và đường trả về gắn vào cùng một tệp.
         try:
-            k = os.path.normcase(os.path.abspath(str(u)))
+            tuyet_doi = os.path.abspath(str(u))
+            k = os.path.normcase(tuyet_doi)
         except OSError:
-            k = str(u)
+            tuyet_doi = k = str(u)
         if k in thay:
             return
         thay.add(k)
-        ds.append(str(u))
+        ds.append(tuyet_doi)
 
     ghi_de = env.get("CONG_CU_BASH")
     # N57 (r17) — `PATH` VẮNG khác `PATH` RỖNG, và luật ấy là của HỆ ĐIỀU HÀNH chứ không
@@ -276,8 +292,19 @@ def tim_bash(dung_cache=True, tat_ca=False, **ep):
     del dung_cache
     chan_doan = []
     ket = None
+    # N114 (r32, codex vòng 26) — HẠN TỔNG cho mọi phép thử. Mỗi ứng viên có hạn riêng `_HAN_GIAY`,
+    # nhưng bản r31 không có hạn TỔNG: 100 ứng viên treo giữ người gọi ~50 phút (đo được: 4 ứng viên
+    # treo với hạn riêng 1s ⇒ 4,0s). Nay mỗi phép thử lấy min(hạn riêng, phần còn lại); hết hạn tổng
+    # thì các ứng viên còn lại KHÔNG được thử, ghi vào chẩn đoán, và kết quả rơi về None — đường
+    # fail-close sẵn có (KHÔNG ĐO ĐƯỢC ⇒ người gọi ĐỎ).
+    het_han = time.monotonic() + _HAN_TONG_GIAY
     for u in ung_vien(**ep):
-        dat, ly_do = _do_nang_luc([u])
+        con = het_han - time.monotonic()
+        if con <= 0:
+            chan_doan.append({"duong": u, "dat": False,
+                              "ly_do": f"không thử: hết hạn TỔNG {_HAN_TONG_GIAY}s cho mọi phép thử"})
+            continue
+        dat, ly_do = _do_nang_luc([u], het_han=het_han)
         chan_doan.append({"duong": u, "dat": dat, "ly_do": ly_do})
         if dat and ket is None:
             ket = u
@@ -756,14 +783,18 @@ def _kiem_ngan_sach_dinh_dang(mau, doi):
     tong = 0
     i = 0
 
-    def _so(dac_ta):
+    def _so(dac_ta, la_chinh_xac=False):
         nonlocal i
         if dac_ta is None:
             return 0
         if dac_ta == "*":
             v = cac[i] if i < len(cac) and type(cac[i]) is int else 0
             i += 1
-            return abs(v)
+            # N116 (r32, chủ kho — ngân sách `%` lần BỐN, codex vòng 26): ĐỘ RỘNG `*` âm là căn trái với
+            # |x|; ĐỘ CHÍNH XÁC `*` âm là BỎ QUA (như không viết). Bản r31 lấy `abs()` cho cả hai, nên
+            # `"%.*f" % (-5000, 1.0)` ra `'1'` mà cổng NÉM. Chốt `t33` (1o) đo mô hình này SAI PHÂN với
+            # chính `%` của Python trên một lưới cờ × độ rộng × độ chính xác × kiểu × str/bytes.
+            return max(v, 0) if la_chinh_xac else abs(v)
         # N78b (r22, H5 vòng 16) — so ĐỘ DÀI chuỗi chữ số TRƯỚC khi chuyển: số có hơn ~4300 chữ số
         # làm `int()` ném `ValueError` (giới hạn chuyển chuỗi của Python).
         dac_ta = dac_ta.lstrip("0") or "0"
@@ -775,7 +806,7 @@ def _kiem_ngan_sach_dinh_dang(mau, doi):
         if m.group(0) == "%%":
             continue
         rong = _so(m.group(1))
-        chinh_xac = _so(m.group(2))
+        chinh_xac = _so(m.group(2), la_chinh_xac=True)
         i += 1                                      # chính giá trị được định dạng
         kieu = m.group(0)[-1]
         if kieu in _KIEU_TRAN:
@@ -1351,6 +1382,9 @@ def _loi_goi_tran(than: str, sau=0):
       · N110 (r31): ngân sách `%` theo BẢNG đầy đủ kiểu chuyển đổi của `str` và `bytes` (`%b` là trần;
         kiểu ngoài bảng ⇒ NÉM); N111: hàng đợi N109 khoá theo (tên, bảng phạm vi); N112: tên TRONG tải
         `eval("…")` hằng là phụ thuộc của mục nạp động;
+      · N115 (r32): chỉ tải của `eval`/`exec` DỰNG SẴN là phụ thuộc; tải không hằng thì không phụ thuộc
+        gì (không có khoá đại diện); N116: độ chính xác `*` ÂM là bỏ qua, độ rộng `*` âm lấy |x| — đo
+        SAI PHÂN với `%` của Python (`t33` (1o));
       · `type X[T] = …` (PEP 695) có phạm vi chú thích RIÊNG (N47, r16): `T` của nó không rò
         ra phạm vi chứa;
       · callee giải theo PHẠM VI TỪ VỰNG (r8, F3 codex vòng 3): `import subprocess` ở module
@@ -2143,8 +2177,7 @@ def _bang_pham_vi_ca_cay(cay, sau=0):
     # 321 200 lần giải. Một mục chỉ THẤY các bảng trên chuỗi phạm vi của chính nó (`c`), nên chỉ đăng ký
     # ở đó. N112 (r31, codex vòng 25) — tên nằm TRONG tải `eval("…")` hằng cũng là phụ thuộc: bản r30
     # không thấy `b` trong `a = eval("b")` nên giải `b` về sau không xếp lại `a` ⇒ lọt, chạy bash thật.
-    # Tải được đọc qua trần sẵn có (`_tai_hang`); tải không phân tích được ⇒ mục phụ thuộc MỌI tên trên
-    # chuỗi của nó (khoá `None`).
+    # Tải được đọc qua `_tai_hang`; tải không phải hằng/không phân tích được thì không có phụ thuộc (N115).
     global _DEM_GIAI_DONG
     cac_muc = []
     theo_ten = {}
@@ -2174,7 +2207,7 @@ def _bang_pham_vi_ca_cay(cay, sau=0):
         if mod and ("import", mod, None) not in tap:
             tap.add(("import", mod, None))
             b_id = bang_cua_tap[id(tap)]
-            for k2 in (*theo_ten.get((ten, b_id), ()), *theo_ten.get((None, b_id), ())):
+            for k2 in theo_ten.get((ten, b_id), ()):
                 if k2 not in trong_hang:
                     trong_hang.add(k2)
                     hang.append(k2)
@@ -2184,9 +2217,14 @@ def _bang_pham_vi_ca_cay(cay, sau=0):
 def _ten_phu_thuoc(bieu):
     """Tên mà việc giải một mục NẠP ĐỘNG `bieu` phụ thuộc — kể cả tên trong tải `eval`/`exec` (N112).
 
-    Theo CÚ PHÁP, như N76: mọi lời gọi tên `eval`/`exec` (trần hay thuộc tính) đều "có thể" là hàm dựng
-    sẵn. Tải đọc qua `_tai_hang` (cùng trần, cùng gấp hằng); tải KHÔNG phải hằng hay không phân tích được
-    ⇒ thêm `None`: mục ấy phụ thuộc MỌI tên trên chuỗi phạm vi của nó.
+    N115 (r32, codex vòng 26; chủ kho: "vá gọn N112") — hai sửa:
+      · CHỈ `eval`/`exec` DỰNG SẴN (tên trần, hay thuộc tính trên `builtins`/`__builtins__` — cùng luật
+        `_ten_exec_cua`). Bản r31 đọc tải của MỌI `.eval(…)`, nên `page.eval(<chuỗi 100 001>)` ném trần
+        của `exec` và cả tệp thành KHONG_DO_DUOC — đo được. Tải của `eval` DỰNG SẴN quá trần vẫn NÉM ở
+        đây, đúng như `_tai_exec` ném cho chính lời gọi ấy (N102) — không có trần nào bị nuốt.
+      · KHÔNG còn khoá ĐẠI DIỆN. Tải không phải hằng hay không phân tích được thì `_module_dong` KHÔNG
+        BAO GIỜ giải được mục ấy, nên nó không cần xếp lại khi tên nào đổi. Bản r31 cho nó phụ thuộc
+        MỌI tên ⇒ mỗi bí danh mới xếp lại tất cả ⇒ bậc hai (đo được: 800 mục, 642 401 lần giải).
     """
     ra = set()
     for n in ast.walk(bieu):
@@ -2195,17 +2233,17 @@ def _ten_phu_thuoc(bieu):
         if not isinstance(n, ast.Call):
             continue
         f = n.func
-        ten_f = f.id if isinstance(f, ast.Name) else (f.attr if isinstance(f, ast.Attribute) else None)
-        if ten_f not in ("eval", "exec"):
+        dung_san = ((isinstance(f, ast.Name) and f.id in ("eval", "exec"))
+                    or (isinstance(f, ast.Attribute) and f.attr in ("eval", "exec")
+                        and isinstance(f.value, ast.Name) and f.value.id in ("builtins", "__builtins__")))
+        if not dung_san:
             continue
-        van = _tai_hang(n)
         try:
+            van = _tai_hang(n)
             tai = ast.parse(van.lstrip(), mode="eval") if van is not None else None
-        except SyntaxError:
-            tai = None
-        if tai is None:
-            ra.add(None)
-        else:
+        except (SyntaxError, ValueError):
+            tai = None                          # không phân tích được ⇒ `eval` ném lúc chạy ⇒ không giải
+        if tai is not None:
             ra.update(x.id for x in ast.walk(tai) if isinstance(x, ast.Name))
     return ra
 

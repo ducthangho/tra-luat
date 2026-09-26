@@ -1,7 +1,8 @@
 """Phan chung cho packet #329 pha 2 — may phat hien ghi cua subagent read-only.
 
 Chay: python3 .claude/hooks/subagent_ghi_detect_test.py
-Thoat 0 khi VA CHI KHI moi ca DAT va moi dot bien BI GIET.
+Thoat 0 khi VA CHI KHI moi ca DAT va moi dot bien BI GIET — che do DU. Che do NHE (#651,
+`SUBAGENT_GHI_DETECT_KHONG_DOT_BIEN=1`): 0 khi moi ca DAT, KHONG chay dot bien nao.
 
 Doc truoc khi sua: bo test nay do DETECTOR, khong do hook runtime cua nen. Ranh gioi ay
 duoc ghi thang o `A10` cuoi tep — dung doc "N/N dat" thanh "chot da co hieu

@@ -6,7 +6,7 @@ name: đột biến đủ (hằng tuần)
 # `doc_diff` trả "không đo được" và `ke_hoach` fail-closed về ĐỦ cho mọi bộ.
 #
 # Chốt ở `.claude/dev/ci_dang_ky_test.py` (`loi_workflow_dot_bien_du`), trích TỪ CHÍNH hai tệp YAML: `on` đúng
-# `schedule` + `workflow_dispatch`; `permissions` chỉ đọc; không `env`/`defaults` cấp workflow; một job; env job,
+# `schedule` + `workflow_dispatch`; `permissions` chỉ đọc; cron ghim; không khoá cấp workflow khác; một job; env job,
 # `timeout-minutes` và MỌI bước bằng `gate-registry` của `ci.yml`, trừ `env` bước registry = chỉ `CI_DANG_KY_WORKERS`.
 # Sửa `gate-registry` mà quên tệp này ⇒ registry ĐỎ ngay trên PR — không có bản sao thứ hai để trôi.
 #
@@ -19,10 +19,6 @@ on:
 
 permissions:
   contents: read
-
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: false
 
 jobs:
   dot-bien-du:

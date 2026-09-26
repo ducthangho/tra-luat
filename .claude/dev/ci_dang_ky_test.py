@@ -716,10 +716,11 @@ MAU_NHE = {_PTG: _DONG_NHE_HOOK, _SGD: _DONG_NHE_HOOK}
 # #651 M2: `ci_dang_ky_test.py` ra khỏi vùng (bộ chọn tự canh bằng `phan_chung` mọi lượt); `.github/**` → riêng `ci.yml`.
 # Phần chốt nới ra được bù bằng lượt ĐỦ hằng tuần `ci-dot-bien-du.yml` (chốt `loi_workflow_dot_bien_du`).
 VUNG_CHUNG = (".github/workflows/ci.yml", "requirements.txt")
-# Tệp/tiền tố NGOÀI cặp bộ/đích mà vòng đột biến của bộ đọc. `_PTG`: mỗi mutant chạy lại ca nền, và `t15`/`t33` gọi
-# `--kiem-bang` ⇒ `scripts/tl.py tool-inventory` + `--help` (review Codex CLI lượt 2 trên 1b885af, P2 kế thừa #647).
-VUNG_THEM = {_SGD: (".claude/settings.json",), _PTG: ("scripts/tl.py",)}
-TIEN_TO_THEM = {_PTG: ("scripts/tl_core/",)}
+# Tệp/tiền tố NGOÀI cặp bộ/đích mà vòng đột biến của bộ đọc. `_PTG`: mỗi mutant chạy lại `t15`/`t33` ⇒ `--kiem-bang` ⇒
+# `scripts/tl.py tool-inventory` + `--help`. Đo bằng audit hook `open` (d4a84ef): 32 tệp, TẤT CẢ dưới `scripts/` ⇒ khoá
+# cả lớp bằng tiền tố, không liệt kê từng tệp (Codex CLI lượt 2 → `tl_core/`, lượt 3 → `tl_gws.py`: vá theo danh sách thua).
+VUNG_THEM = {_SGD: (".claude/settings.json",)}
+TIEN_TO_THEM = {_PTG: ("scripts/",)}
 # Review connector PR #645 (P2): fallback :833-836 phải giữ cho workflow/security/runner (`.github/**`) và cấu hình
 # TOÀN CỤC ở gốc kho (`pyproject.toml`, `sitecustomize.py`, manifest…) — không chỉ 5 đường của `VUNG_CHUNG`.
 # Codex CLI lượt 1 trên feeee4ed: script thiết lập runner của `gate-registry` nằm NGOÀI `.github/` (`cai_actionlint.sh`
@@ -812,7 +813,7 @@ def loi_workflow_dot_bien_du(data, ci):
     """#651 M4: lượt ĐỦ hằng tuần. Danh sách CHO PHÉP ở mọi tầng; bước so BẰNG ĐÚNG `gate-registry` của `ci.yml` (trích từ
     CHÍNH hai tệp, không chép) trừ `env` bước registry = chỉ `CI_DANG_KY_WORKERS` ⇒ vắng biến diff ⇒ `ke_hoach` ĐỦ."""
     d, loi = data or {}, []
-    if set(map(str, d)) - {"name", "on", "True", "permissions", "concurrency", "jobs"} or "env" in d or "defaults" in d:
+    if set(map(str, d)) - {"name", "on", "True", "permissions", "jobs"}:  # `concurrency` biểu thức hỏng ⇒ không chạy (lượt 3)
         loi.append(f"khoá cấp workflow ngoài danh sách cho phép: {sorted(map(str, d))}")
     on = d.get("on", d.get(True))  # PyYAML đọc khoá trần `on` thành True
     lich = on.get("schedule") if isinstance(on, dict) else None
@@ -1816,8 +1817,8 @@ def phan_chung():
         _them("p651-M3-ke-hoach-" + _t, ke_hoach(_doi).get(_SGD, ("vắng",))[0] == _cd)
     _them("p651-M3-settings-chi-vung-bo-subagent", ke_hoach({".claude/settings.json"}).get(_PTG, ("vắng",))[0] == CHE_DO_NHE)
     for _t, _doi, _cd in (("tl-py", {"scripts/tl.py"}, DAY_DU), ("registry", {"scripts/tl_core/command_registry.py"}, DAY_DU),
-                          ("tl-core-khac", {"scripts/tl_core/x/y.py"}, DAY_DU), ("scripts-khac-nhe", {"scripts/khac.py"}, CHE_DO_NHE),
-                          ("tien-to-gia-nhe", {"scripts/tl_core_x.py", "scripts/tl.pyc"}, CHE_DO_NHE)):
+                          ("tl-gws", {"scripts/tl_gws.py"}, DAY_DU), ("tl-core-khac", {"scripts/tl_core/x/y.py"}, DAY_DU),
+                          ("tien-to-gia-nhe", {"scripts_x/tl.py", "docs/scripts/tl.py"}, CHE_DO_NHE)):
         _them("p651-P2-ptg-kiem-bang-" + _t, ke_hoach(_doi).get(_PTG, ("vắng",))[0] == _cd)
     _them("p651-P2-tl-core-chi-vung-ptg", ke_hoach({"scripts/tl_core/command_registry.py"}).get(_SGD, ("vắng",))[0] == CHE_DO_NHE
           and ke_hoach({"scripts/tl.py"}).get(_P, ("vắng",))[0] == CHE_DO_NHE)
@@ -1856,7 +1857,8 @@ def phan_chung():
                    ("timeout-lech", lambda w, j: j.update({"timeout-minutes": 5})),
                    ("permissions-ghi", lambda w, j: w.update(permissions={"contents": "write"})),
                    ("hai-job", lambda w, j: w["jobs"].update(khac=j)),
-                   ("khoa-la", lambda w, j: w.update({"run-name": "x"}))):
+                   ("khoa-la", lambda w, j: w.update({"run-name": "x"})),
+                   ("concurrency", lambda w, j: w.update(concurrency={"group": "${{ fromJSON(github.event_name) }}"}))):
         _them("p651-M4-" + _t + "-do", _hong_du(_f))
     _them("p651-M4-rong-do", bool(loi_workflow_dot_bien_du(None, _wf0)))
     _them("p651-M4-ci-yml-doi-thi-do", bool(loi_workflow_dot_bien_du(_wd0, {"jobs": {}})))

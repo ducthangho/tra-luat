@@ -1,0 +1,114 @@
+{
+ "moc": "072181157a27804e69deb35bb792a88c70ac31e3",
+ "clock": "2026-09-10T04:55:37Z",
+ "lease_trong_cay": 92,
+ "yaml_hong_hoac_trung": [],
+ "cap_hai_chieu": 11,
+ "mot_chieu": [
+  [
+   "cong-ngoai-write-set-exec-1r5-codex-20260828",
+   "ci-cai-jsonschema-exec-1-claude-20260829"
+  ],
+  [
+   "tach-danh-tinh-github-exec-1r6-codex-20260828",
+   "cong-duyet-theo-tham-quyen-exec-1-claude-20260829"
+  ],
+  [
+   "thu-hoi-lease-exec-1-codex-20260828",
+   "bo-ghi-nguoc-exec-1-claude-20260829"
+  ]
+ ],
+ "digest_cap_hai_chieu_sha256": "8f372ccd2ceab70901868a58d3380acbd89dce25c7127d4d514bc959270fef48",
+ "hang": [
+  [
+   "ci-cai-jsonschema-exec-1-claude-20260829",
+   "ci-cai-jsonschema-exec-1r2-claude-20260829",
+   "8cceb3e856030d1f3d15bb1c976e9c6974687790",
+   "ab9cd7a2bd1ae7c258e3e0337c99c7b8b7ee199e",
+   "2026-08-29T14:05:00Z",
+   "HET_HAN"
+  ],
+  [
+   "ci-cai-jsonschema-exec-1r2-claude-20260829",
+   "ci-cai-jsonschema-exec-1r3-claude-20260829",
+   "ab9cd7a2bd1ae7c258e3e0337c99c7b8b7ee199e",
+   "005c6288924f5d4a6e3e61e250ded4cf3fe673b8",
+   "2026-08-29T14:05:00Z",
+   "HET_HAN"
+  ],
+  [
+   "gate-tach-job-cat-chi-phi-exec-1-claude-20260906",
+   "gate-tach-job-cat-chi-phi-exec-1r2-claude-20260906",
+   "de30af933a090b91cbd7eff73f517f68a17cdd59",
+   "3bb7c461cd9ca994c4b3ccd3445e1e96ef2ce345",
+   "2026-09-08T07:50:35Z",
+   "HET_HAN"
+  ],
+  [
+   "gate-tach-job-cat-chi-phi-exec-1r2-claude-20260906",
+   "gate-tach-job-cat-chi-phi-exec-1r3-claude-20260906",
+   "3bb7c461cd9ca994c4b3ccd3445e1e96ef2ce345",
+   "cad296dd4b573793d960a34f45deba8dedff5567",
+   "2026-09-08T09:44:51Z",
+   "HET_HAN"
+  ],
+  [
+   "gate-tach-job-cat-chi-phi-exec-1r3-claude-20260906",
+   "gate-tach-job-cat-chi-phi-exec-1r4-claude-20260906",
+   "cad296dd4b573793d960a34f45deba8dedff5567",
+   "5b0e2cff7f1a6a07974c653dfe454d34e7cb9a52",
+   "2026-09-08T10:17:12Z",
+   "HET_HAN"
+  ],
+  [
+   "khong-do-duoc-phai-do-exec-1-claude-20260829",
+   "khong-do-duoc-phai-do-exec-1r2-claude-20260829",
+   "3ff71a9e60f528a22495789a99b5868b0f712b2f",
+   "98e777ca12608fa44af4245a34840ded1f252a87",
+   "2026-08-30T02:46:00Z",
+   "HET_HAN"
+  ],
+  [
+   "lease-hoi-toan-kho-exec-1-claude-20260823",
+   "lease-hoi-toan-kho-exec-1r2-codex-20260823",
+   "b955f957df3e31964b6a71983ee39c516c49099e",
+   "a8d898e1004eb5a52c789b0217912528b2fefeb9",
+   "2026-08-24T05:35:00Z",
+   "HET_HAN"
+  ],
+  [
+   "lease-hoi-toan-kho-exec-1r2-codex-20260823",
+   "lease-hoi-toan-kho-exec-1r3-codex-20260823",
+   "a8d898e1004eb5a52c789b0217912528b2fefeb9",
+   "27bb601296b7800f7435d61ddb52d905adccd3a9",
+   "2026-08-24T07:50:00Z",
+   "HET_HAN"
+  ],
+  [
+   "lease-hoi-toan-kho-exec-1r3-codex-20260823",
+   "lease-hoi-toan-kho-exec-1r4-codex-20260823",
+   "27bb601296b7800f7435d61ddb52d905adccd3a9",
+   "fb473fe2572c9809a96e55bd479cbcd37a98eb71",
+   "2026-08-24T08:25:00Z",
+   "HET_HAN"
+  ],
+  [
+   "mutant-khong-chay-tren-windows-exec-1-claude-20260906",
+   "gate-tach-job-cat-chi-phi-exec-1-claude-20260906",
+   "1f9504281c3415f7194e124eb7b2702c34c8efd1",
+   "de30af933a090b91cbd7eff73f517f68a17cdd59",
+   "2026-09-08T03:37:33Z",
+   "HET_HAN"
+  ],
+  [
+   "wp461-be-mat-thu-hai-cua-codex-exec-1-claude-20260907",
+   "wp461-be-mat-thu-hai-cua-codex-exec-1r2-claude-20260907",
+   "7485511cd930123598a71ece1c2162f46324a588",
+   "26f07b4fe49964034c710864f350402fe5bf55c3",
+   "2026-09-08T05:27:42Z",
+   "HET_HAN"
+  ]
+ ],
+ "KHONG_XAC_DINH": 0,
+ "BIA_MO_LICH_SU_theo_b": []
+}

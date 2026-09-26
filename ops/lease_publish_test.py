@@ -9354,11 +9354,36 @@ _GEN_T191 = {  # nút generic, không điều kiện riêng ⇒ ô cờ duy nh�
     ("comp", "iter"): "[_i for _i in (@,)]", ("with", "item"): "with memoryview(@ or b'x'):\n    pass",
     ("try-sao", "than"): "try:\n    raise ValueError\nexcept* ValueError:\n    @"}
 _KIEU_T191 = (("truc", str), ("ke-co", _B), ("ke-khong", _L))
+# r16 (lượt 25): VỊ TRÍ sinh bằng máy. Mỗi mẫu gốc một câu; MỌI hằng số nguyên trong nó lần lượt thành chốt `len(str(@))`, nên
+# mỗi (nút cha, trường con, toán tử) có trong mẫu gốc đều có dòng, bọc `ke-co` ⇒ (0,1,1) và `ke-khong` ⇒ (1,0,1) (luật viết tay).
+_GOC_T191 = (*(f"_a = 1 {o} 1" for o in "+ - * / // % ** << >> | ^ & == != < <= > >=".split()), "_a = 0 < 1 < 1",
+             "_a = 1 in (1,)", "_a = 1 not in (1,)", "_a = [1] is None", "_a = [1] is not None", "_a = -1", "_a = +1", "_a = ~1",
+             "_a = not 1", "for _i in (1,):\n    pass", "_a = [1, 1, 1, 1, 1][0:1:1]", "_a = {1: 1}", "_a = dict(k=1)",
+             "_a = f'{1:>{1}}'", "_d = {}\n_d[1] = 1", *(f"_n = 1\n_n {o}= 1" for o in "+ - * / // % ** << >> | ^ &".split()), "_a = [*(1,)]", "_a = {1}", "(_y := 1)", "assert 1",
+             "_a = {1: 1 for _i in (1,) if 1}", "try:\n    _a = 1\nexcept ValueError:\n    pass\nelse:\n    _a = 1\nfinally:\n    _a = 1",
+             "_l = [1, 1]\ndel _l[0:1]", "try:\n    raise ValueError(1)\nexcept ValueError:\n    pass", "with memoryview(b'x') as _m:\n    _a = 1",
+             "_l = [0] * 9\n_l[1] += 1", "_d = {}\n_d[1]: int = 1", "_d = {}\nfor _d[1] in (1,):\n    pass", "_a = [str] * 5\n_a[0](1)",
+             "_d = {}\nwith memoryview(b'x') as _d[1]:\n    pass", "_d = {}\n_a = [1 for _d[1] in (1,)]", "_a = list(1 for _i in (1,))",
+             "_a = {1 for _i in (1,)}", "match 1:\n    case _:\n        pass", "try:\n    assert 0, 1\nexcept AssertionError:\n    pass",
+             "try:\n    raise ValueError\nexcept (ValueError,) * 1:\n    pass", "try:\n    raise ValueError from ValueError(1)\nexcept ValueError:\n    pass",
+             "try:\n    _a = 1\nexcept* ValueError:\n    pass\nelse:\n    _a = 1\nfinally:\n    _a = 1")
+
+
+def _vi_tri_t191(goc: str):
+    """Mỗi hằng số nguyên của `goc` (theo thứ tự `ast.walk`) thành chốt — trả các đoạn, mỗi đoạn đúng một chốt."""
+    import ast
+    n = sum(isinstance(x, ast.Constant) and type(x.value) is int for x in ast.walk(ast.parse(goc)))
+    for i in range(n):
+        cay = ast.parse(goc); cs = [x for x in ast.walk(cay) if isinstance(x, ast.Constant) and type(x.value) is int]
+        cs[i].value = "@"
+        yield ast.unparse(cay).replace("'@'", "len(str(@))")
 _PHAN_LOAI_T191 += tuple(
     (f"{op}.{k}.{v}.{c}", boc(m.format(op=op, c=cc, f=ff)), *((0, 1) if k == "ke-co" else (a, b)), 1)
     for op, (cc, ff) in (("or", ("bo_qua_han", "not lease")), ("and", ("not bo_qua_han", "lease")))
     for (v, c), (m, a, b) in _BOOL_T191.items() for k, boc in _KIEU_T191 if k != "ke-khong" or c == "khong") + tuple(
-    (f"{n}.{k}.{v}.khong", boc(d), *((0, 1) if k == "ke-co" else (1, 0)), 1) for (n, v), d in _GEN_T191.items() for k, boc in _KIEU_T191)
+    (f"{n}.{k}.{v}.khong", boc(d), *((0, 1) if k == "ke-co" else (1, 0)), 1) for (n, v), d in _GEN_T191.items() for k, boc in _KIEU_T191) + tuple(
+    (f"goc.{k}.{i}-{j}", boc(d), *((0, 1) if k == "ke-co" else (1, 0)), 1)
+    for i, g in enumerate(_GOC_T191) for j, d in enumerate(_vi_tri_t191(g)) for k, boc in _KIEU_T191[1:])
 
 
 def _chay_doan_t191(doan: str, bo_qua_han: bool) -> bool:
@@ -9410,8 +9435,8 @@ def t191_MOI_chot_cua_kiem_deu_duoc_t190_phu_o_nhanh_DA_DANG():
     can = {f"{n}.{k}.{v}.{c}" for n, truc in _TRUC_T191.items() for v, cs in truc.items()
            for k, cc in (("truc", cs), ("ke-co", cs), ("ke-khong", ("khong",))) for c in cc}
     chot(len(set(khoa)) == len(khoa), "MA TRẬN: khoá trùng")
-    chot({x for x in khoa if not x.startswith("dac.")} == can,
-         f"MA TRẬN lệch tích trục: thiếu {sorted(can - set(khoa))}, thừa {sorted(set(khoa) - can - {x for x in khoa if x.startswith('dac.')})}")
+    chot({x for x in khoa if not x.startswith(("dac.", "goc."))} == can,
+         f"MA TRẬN lệch tích trục: thiếu {sorted(can - set(khoa))}, thừa {sorted(set(khoa) - can - {x for x in khoa if x.startswith(('dac.', 'goc.'))})}")
     for loai, doan, them_ds, them_mien, them_tho in _PHAN_LOAI_T191:
         if them_ds + them_mien:  # witness chạy được: ds ⇒ gọi ở CẢ HAI giá trị cờ; miễn ⇒ gọi hay không PHỤ THUỘC cờ
             chay = (_chay_doan_t191(doan, False), _chay_doan_t191(doan, True))

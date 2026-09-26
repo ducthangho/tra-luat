@@ -126,3 +126,4 @@ lease_sua_ghi_chu: >-
   SAU commit 09:28:31Z chua no) va cap nhat bo dem ci_budget theo lich su chay that. Luot 3 (review connector #645 tren ff5e457):
   moi luot CI ghi run ID + attempt + SHA day du (protocol :1030-1039), neo luot 3 vao run 36233604256; lan chay lai
   job ghi la attempt 2 cua run 36212359766, khong tinh them luot.
+da_bi_thay_the: ci-registry-pretooluse-che-do-nhe-r1-g1-claude

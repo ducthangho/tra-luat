@@ -44,7 +44,8 @@ MOI = {
     # Lo #319 (`0/0 bi giet` lot vi `bang_chung_xanh` chi soi hai nhom CA) CO THAT va
     # co SAN tu base, nhung bit no o day la doi hanh vi Linux — ngoai pham vi packet
     # #456. Chot tuong duong duoc dat o duong WINDOWS (`MOI_WINDOWS`), la noi dot bien
-    # bat buoc cua A2 thuc su bieu hien. Lo phia Linux de lai cho packet ke.
+    # bat buoc cua A2 thuc su bieu hien. Lo phia Linux: #647 dong o tang che do du
+    # (`MAU_DAY_DU`), mau nay van giu nguyen.
     ".claude/hooks/pretooluse_guard_test.py": r"(?s)TONG: CA (\d+)/(\d+) dat · DOT BIEN \d+/\d+ bi giet.*TONG: DAT",
     ".claude/hooks/subagent_ghi_detect_test.py": r"(?s)TONG: CA (\d+)/(\d+) dat · DOT BIEN \d+/\d+ bi giet.*TONG: DAT",
     "ops/nhanh_don_duoc_test.py": r"^(\d+)/(\d+)$",
@@ -700,8 +701,14 @@ def _iso(dt): return dt.astimezone(datetime.timezone.utc).isoformat(timespec="mi
 # CI-REGISTRY-DOT-BIEN-THEO-DIFF r1 (#643): M1 kế hoạch theo diff (fail-closed), M2 bằng chứng chế độ, M4 chốt env.
 # LỆCH protocol :839-840 CÓ DUYỆT (spec §2): chỉ VÒNG ĐỘT BIẾN của bộ trong `NHE` bị bỏ; T1..T8 và mọi bộ khác chạy mọi
 # lượt. Cờ nhẹ là cờ SẴN CÓ của bộ (`ops/nhanh_don_duoc_test.py:5184`), không sửa bộ nào.
-NHE = {"ops/nhanh_don_duoc_test.py": {"NHANH_DON_DUOC_KHONG_DOT_BIEN": "1"}}
-MAU_DAY_DU = {"ops/nhanh_don_duoc_test.py": r"^MUTANT: giet = (\d+) · khong giet = 0 · khong do duoc = 0 / tong (\d+)$"}
+# #647 (CI-REGISTRY-PRETOOLUSE-CHE-DO-NHE r1): mở rộng lệch ấy sang `pretooluse_guard_test` — cờ mới của bộ, cùng luật vùng.
+_PTG = ".claude/hooks/pretooluse_guard_test.py"
+NHE = {"ops/nhanh_don_duoc_test.py": {"NHANH_DON_DUOC_KHONG_DOT_BIEN": "1"},
+       _PTG: {"PRETOOLUSE_GUARD_KHONG_DOT_BIEN": "1"}}
+MAU_DAY_DU = {"ops/nhanh_don_duoc_test.py": r"^MUTANT: giet = (\d+) · khong giet = 0 · khong do duoc = 0 / tong (\d+)$",
+              _PTG: r"^TONG: CA \d+/\d+ dat · DOT BIEN (\d+)/(\d+) bi giet$"}
+# Mẫu RIÊNG của chế độ nhẹ, chỉ được cộng thêm khi kế hoạch là nhẹ. Bộ vắng mặt ⇒ mẫu `MOI` tự nó đã chấp nhận dòng nhẹ.
+MAU_NHE = {_PTG: r"(?s)TONG: CA (\d+)/(\d+) dat · DOT BIEN [1-9]\d* muc CHE DO NHE — do khi diff cham vung.*TONG: DAT"}
 VUNG_CHUNG = (".github/workflows/ci.yml", ".claude/dev/ci_dang_ky_test.py", "requirements.txt")
 # Review connector PR #645 (P2): fallback :833-836 phải giữ cho workflow/security/runner (`.github/**`) và cấu hình
 # TOÀN CỤC ở gốc kho (`pyproject.toml`, `sitecustomize.py`, manifest…) — không chỉ 5 đường của `VUNG_CHUNG`.
@@ -893,8 +900,11 @@ def chay_moi(moi=MOI, cach_ly=CACH_LY, chay_mot=_chay_that,
             do += 1
             continue
         ok = rc == 0 and any(bang_chung_xanh(ban_in, m)
-                             for m in mau_theo_nen(path, mau, la_windows))
-        if ok and che_do == DAY_DU and path in MAU_DAY_DU and not bang_chung_xanh(ban_in, MAU_DAY_DU[path]):
+                             for m in mau_theo_nen(path, mau, la_windows)
+                             + ([MAU_NHE[path]] if che_do == CHE_DO_NHE and path in MAU_NHE else []))
+        # #647: Windows không chạy đột biến của bộ có trong `MOI_WINDOWS` ⇒ không đòi dòng đủ ở đó.
+        if (ok and che_do == DAY_DU and path in MAU_DAY_DU and not (la_windows and path in MOI_WINDOWS)
+                and not bang_chung_xanh(ban_in, MAU_DAY_DU[path])):
             print(f"CI_DANG_KY {path}: chế độ đủ mà THIẾU dòng MUTANT dương")
             ok = False
         if path in cach_ly:
@@ -1138,8 +1148,9 @@ def phan_chung():
     _them("p456-dong-linux-tren-windows-DAT", _dem_nen(_LNX456, True) == 0)
     _them("p456-dong-linux-tren-linux-khong-doi", _dem_nen(_LNX456, False) == 0)
     _them("p456-dot-bien-0-tren-0-DO-tren-windows", _dem_nen(_RONG456, True) == 1)
-    # M4: duong Linux phai giong BASE tung dau vao, ke ca dau vao xau.
-    _them("p456-linux-nhan-0-tren-0-Y-HET-base", _dem_nen(_RONG456, False) == 0)
+    # M4 cua #456 giu o tang MAU (`MOI` y het base, hai ca duoi). Lo #319 phia Linux nay DONG o tang CHE DO:
+    # #647 M2 bat che do du doi `MAU_DAY_DU` (x/x, x>0) — `0/0` KHONG con duoc nhan tren Linux.
+    _them("p456-linux-0-tren-0-nay-DO-boi-647", _dem_nen(_RONG456, False) == 1)
     _them("p456-mau-linux-KHONG-DOI-so-voi-base", MOI[_P456] == _MAU_BASE456)
     _them("p456-linux-A-B-tung-dau-vao-khop-base",
           all(bang_chung_xanh(x, MOI[_P456]) is bang_chung_xanh(x, _MAU_BASE456)
@@ -1706,6 +1717,36 @@ def phan_chung():
     _them("p643-A3-du-mutant-song-la-do", _kq("8/8\n" + _MUT.replace("khong giet = 0", "khong giet = 1"), DAY_DU) == 1)
     _them("p643-A3-du-mutant-0-la-do", _kq("8/8\n" + _MUT.replace("10", "0"), DAY_DU) == 1)
     _them("p643-A3-du-mutant-lech-tong-la-do", _kq("8/8\n" + _MUT.replace("tong 10", "tong 11"), DAY_DU) == 1)
+    # ── #647: A2 qua CHÍNH `chay_moi` (dòng in giống bộ thật), A3 qua `ke_hoach`, env qua `env_theo_che_do`. ──
+    _NH = "TONG: CA 41/41 dat · DOT BIEN 34 muc CHE DO NHE — do khi diff cham vung\nTONG: DAT\n"
+    _DU = "TONG: CA 41/41 dat · DOT BIEN 34/34 bi giet\nTONG: DAT\n"
+    _WI = "TONG: CA 41/41 dat · DOT BIEN 34 muc KHONG DO TREN WINDOWS — do tren ubuntu-latest\nTONG: DAT\n"
+
+    def _kp(out, cd=None, win=False, path=_PTG):
+        with contextlib.redirect_stdout(io.StringIO()):
+            return chay_moi(moi={path: MOI[path]}, cach_ly={}, chay_mot=lambda p: (0, out), doc_moi_truong=lambda: MOI_TRUONG_CI,
+                            doc_trong_ci=lambda: True, doc_nen_windows=lambda: win, kh=cd and {path: (cd, "giả")})
+    for _t, _kqp in (("nhe-dong-nhe-dat", _kp(_NH, CHE_DO_NHE) == 0), ("nhe-dong-du-dat", _kp(_DU, CHE_DO_NHE) == 0),
+                     ("du-chi-dong-nhe-do", _kp(_NH, DAY_DU) == 1), ("mac-dinh-dong-nhe-do", _kp(_NH) == 1),
+                     ("du-dong-du-dat", _kp(_DU, DAY_DU) == 0), ("du-0-0-do", _kp(_DU.replace("34/34", "0/0"), DAY_DU) == 1),
+                     ("du-song-do", _kp(_DU.replace("34/34", "33/34"), DAY_DU) == 1),
+                     ("nhe-bang-rong-do", _kp(_NH.replace("34 muc", "0 muc"), CHE_DO_NHE) == 1),
+                     ("nhe-thieu-ca-do", _kp(_NH.replace("41/41", "38/41"), CHE_DO_NHE) == 1),
+                     ("nhe-dong-windows-tren-linux-do", _kp(_WI, CHE_DO_NHE) == 1),
+                     ("windows-du-dong-windows-dat", _kp(_WI, DAY_DU, True) == 0),
+                     ("windows-du-dong-du-dat", _kp(_DU, DAY_DU, True) == 0),
+                     ("windows-du-dong-nhe-do", _kp(_NH, DAY_DU, True) == 1),  # miễn MAU_DAY_DU ⇒ chỉ MAU_NHE canh
+                     ("mau-nhe-khong-rao-sang-bo-khac", _kp(_NH, CHE_DO_NHE, path=_P) == 1)):
+        _them("p647-A2-" + _t, _kqp)
+    for _t, _doi, _cd in (("cham-hook", {".claude/hooks/pretooluse_guard.py"}, DAY_DU), ("cham-bo", {_PTG}, DAY_DU),
+                          ("cham-chung", {"requirements.txt"}, DAY_DU), ("tai-lieu", {"docs/x.md"}, CHE_DO_NHE),
+                          ("hook-khac", {".claude/hooks/subagent_ghi_detect.py"}, CHE_DO_NHE),
+                          ("dich-bo-kia", {"ops/nhanh_don_duoc.py"}, CHE_DO_NHE)):
+        _them("p647-A3-ke-hoach-" + _t, ke_hoach(_doi).get(_PTG, ("vắng",))[0] == _cd)  # .get: mất khoá ⇒ ĐỎ, không ném
+    _them("p647-A3-hai-bo-doc-lap", ke_hoach({".claude/hooks/pretooluse_guard.py"})[_P][0] == CHE_DO_NHE)
+    _them("p647-M2-env", env_theo_che_do(_PTG, CHE_DO_NHE) == {"PRETOOLUSE_GUARD_KHONG_DOT_BIEN": "1"}
+          and env_theo_che_do(_PTG, DAY_DU) == {"PRETOOLUSE_GUARD_KHONG_DOT_BIEN": None})
+    _them("p647-M2-mau-nhe-chi-cho-bo-trong-NHE", set(MAU_NHE) <= set(NHE))
 
     def _hong_env(f):
         w = json.loads(json.dumps(_wf0))

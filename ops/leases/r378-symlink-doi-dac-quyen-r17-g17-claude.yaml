@@ -241,3 +241,12 @@ write_set_do_luc_cap:
   do_luc: '2026-09-26T04:55:59Z'
   do_luc_nguon: 'date -u in ra NGAY TRUOC lan chay `ai-dang-giu` cho hai duong write set (sau vong dong bo nhanh).'
   ket_qua: 'TRUOC khi commit g17: rc=12 KHONG_XAC_DINH — dung mot ly do: bia mo mot chieu g16 -> g17 (g17 chua ton tai). Do lai SAU commit g17 — ghi trong comment bao cao.'
+
+# ───────────────────────── BIA MỘ — vế THỨ NHẤT của dấu HAI CHIỀU ─────────────────────────
+# Thêm 2026-09-26 khi cấp g18. g17 CÒN HIỆU LỰC (hạn 2026-09-27T06:00:00Z) nên bia mộ hai chiều là
+# BẮT BUỘC. REVISION mới (r17 -> r18): protocol §3.2.
+da_bi_thay_the: r378-symlink-doi-dac-quyen-r18-g18-claude
+da_bi_thay_the_luc: '2026-09-26T06:40:10Z'
+da_bi_thay_the_luc_nguon: 'date -u luc commit bia mo nay; commit dung CHINH gia tri ay lam committer date (GIT_COMMITTER_DATE).'
+da_bi_thay_the_vi_sao: 'r18 (issues/574#issuecomment-5843748247, chủ kho: "r18 + g18: bảng khoảng nối (đề xuất)") — bảng lớp khoảng
+  nối câu–nhãn; head không đổi 76f199e. spec_hash r18 = a67aa369b77bbfa589b98c160c05f8187571a7c1a52a48bb75e2c3fdeaab237d.'

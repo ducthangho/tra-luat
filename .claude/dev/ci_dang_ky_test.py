@@ -705,14 +705,17 @@ ENV_REGISTRY = {BIEN_WORKERS: "2", BIEN_SU_KIEN: "${{ github.event_name }}",
                 BIEN_DAU: "${{ github.event.pull_request.head.sha || github.sha }}"}
 
 
-def doc_diff(env=os.environ, chay=subprocess.run):
+def doc_diff(env=os.environ, chay=subprocess.run, kho=ROOT):
     """M1: tập đường dẫn đổi, hoặc None = KHÔNG ĐO ĐƯỢC (⇒ đủ). Ba trạng thái: tập · rỗng · None. `--no-renames` để
-    đổi tên KHỎI vùng cũng tính là chạm vùng; SHA phải 40 hex thường, khác toàn-0 (push tạo nhánh) ⇒ không nhét cờ."""
+    đổi tên KHỎI vùng cũng tính là chạm vùng; SHA phải 40 hex thường, khác toàn-0 (push tạo nhánh) ⇒ không nhét cờ.
+    Push: GOC phải là TỔ TIÊN của DAU — force-push lùi/phân kỳ thì ba chấm bỏ sót phía GOC (review Codex P1) ⇒ đủ."""
     su_kien, goc, dau = (env.get(k) or "" for k in (BIEN_SU_KIEN, BIEN_GOC, BIEN_DAU))
     if su_kien not in ("push", "pull_request") or not all(re.fullmatch(r"[0-9a-f]{40}", x) and x.strip("0") for x in (goc, dau)):
         return None
     try:
-        r = chay(["git", "diff", "--name-only", "--no-renames", "-z", f"{goc}...{dau}"], cwd=ROOT, capture_output=True)
+        if su_kien == "push" and chay(["git", "merge-base", "--is-ancestor", goc, dau], cwd=kho, capture_output=True).returncode:
+            return None
+        r = chay(["git", "diff", "--name-only", "--no-renames", "-z", f"{goc}...{dau}"], cwd=kho, capture_output=True)
     except Exception:
         return None
     return None if r.returncode else {x for x in r.stdout.decode("utf-8", "surrogateescape").split("\0") if x}
@@ -1601,12 +1604,30 @@ def phan_chung():
                    ("su-kien-vang", {BIEN_SU_KIEN: ""}), ("goc-toan-0", {BIEN_GOC: "0" * 40}), ("goc-vang", {BIEN_GOC: ""}),
                    ("dau-39", {BIEN_DAU: "b" * 39}), ("dau-hoa", {BIEN_DAU: "B" * 40}), ("goc-la-co", {BIEN_GOC: "--output=/x"})):
         _them("p643-A1-khong-do-duoc-" + _t, _dd(_e) is None)
-    _them("p643-A1-git-rc-khac-0", _dd({}, rc=128) is None)
+    _them("p643-A1-git-rc-khac-0", _dd({BIEN_SU_KIEN: "pull_request"}, rc=128) is None)
+    _them("p643-A1-push-khong-phai-to-tien", doc_diff({BIEN_SU_KIEN: "push", BIEN_GOC: _A, BIEN_DAU: _B},
+                                                        lambda argv, **kw: _R(int("merge-base" in argv), b"x\0")) is None)
     _them("p643-A1-git-nem", doc_diff({BIEN_SU_KIEN: "push", BIEN_GOC: _A, BIEN_DAU: _B},
                                       lambda *a, **k: (_ for _ in ()).throw(OSError("không có git"))) is None)
-    _g = []
+    _g, _h = [], []
     _dd({}, ghi=_g)
-    _them("p643-A1-argv-git", _g == [["git", "diff", "--name-only", "--no-renames", "-z", f"{_A}...{_B}"]])
+    _dd({BIEN_SU_KIEN: "pull_request"}, ghi=_h)
+    _dif = ["git", "diff", "--name-only", "--no-renames", "-z", f"{_A}...{_B}"]
+    _them("p643-A1-argv-git-push", _g == [["git", "merge-base", "--is-ancestor", _A, _B], _dif])
+    _them("p643-A1-argv-git-pr", _h == [_dif])
+    with tempfile.TemporaryDirectory() as _k:  # git THẬT: tiến, lùi (force-push), phân kỳ
+        _gk = lambda *a: subprocess.run(["git", "-C", _k, "-c", "user.name=t", "-c", "user.email=t@t", *a],
+                                        capture_output=True, text=True, check=True).stdout.strip()
+        _gk("init", "-q"); _t = pathlib.Path(_k, "ops"); _t.mkdir()
+        _c = []
+        for _i, _f in enumerate(("ops/nhanh_don_duoc.py", "ops/nhanh_don_duoc.py", "docs.md")):
+            if _i == 2: _gk("checkout", "-q", _c[0])
+            pathlib.Path(_k, _f).write_text(str(_i)); _gk("add", "-A"); _gk("commit", "-qm", str(_i)); _c.append(_gk("rev-parse", "HEAD"))
+        _dt = lambda g, d, sk="push": doc_diff({BIEN_SU_KIEN: sk, BIEN_GOC: g, BIEN_DAU: d}, kho=_k)
+        _them("p643-A1-git-that-tien", _dt(_c[0], _c[1]) == {"ops/nhanh_don_duoc.py"})
+        _them("p643-A1-git-that-force-push-lui", _dt(_c[1], _c[0]) is None)
+        _them("p643-A1-git-that-force-push-phan-ky", _dt(_c[1], _c[2]) is None)
+        _them("p643-A1-git-that-pr-ba-cham", _dt(_c[1], _c[2], "pull_request") == {"docs.md"})
     for _t, _doi, _cd in (("khong-do-duoc", None, DAY_DU), ("rong", set(), CHE_DO_NHE),
                           ("ngoai-vung", {"docs/x.md", _P + "c", "ops/nhanh_don_duoc.pyi"}, CHE_DO_NHE),
                           ("cham-bo", {_P}, DAY_DU), ("cham-dich", {"docs/x.md", "ops/nhanh_don_duoc.py"}, DAY_DU),

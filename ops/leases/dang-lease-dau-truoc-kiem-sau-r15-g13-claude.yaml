@@ -1,0 +1,146 @@
+# LEASE — DANG-LEASE-DAU-TRUOC-KIEM-SAU revision 15 / generation 13
+#
+# DOI SO VOI g12: neo sang dac ta r15 (ma tran t191 them truc And/Or va nut generic; quet dot bien theo tung lop nut AST;
+# A7-A10/A23 do lai tai 107779a); reviewed_sha sang head hien hanh 107779a. HAN = han g12, KHONG noi. Khong doi pham vi, write_set, executor,
+# assurance_target.
+#
+# Reviewer: codex (luot review chay o phien dieu phoi).
+trang_thai_ban_ghi: 'DA CAP. Day len ops/cap-lease-579-g13.'
+
+schema_version: 2
+event: executor_lease_granted
+packet_issue: 579
+packet_id: DANG-LEASE-DAU-TRUOC-KIEM-SAU
+mission_issue: KHONG_CO
+revision: 15
+generation: 13
+lease_id: dang-lease-dau-truoc-kiem-sau-r15-g13-claude
+
+thay_the_cho: dang-lease-dau-truoc-kiem-sau-r14-g12-claude
+thay_the_vi_sao: 'g12 neo r14. r15 tu khai `thay_the_cho: revision 14,
+  9771e601af2152d53135a57afb700f2f95cfdcc512416f88e9f176be99b0e36f` va §10.1 doi lease neo DUNG revision hien hanh.'
+BIA_MO_DA_DAT:
+  da_lam: 'Them `da_bi_thay_the: dang-lease-dau-truoc-kiem-sau-r15-g13-claude` vao
+    ops/leases/dang-lease-dau-truoc-kiem-sau-r14-g12-claude.yaml tren ref ops/cap-lease-579-g12 (commit 772c645) — ve THU
+    NHAT cua dau hai chieu — TRUOC khi chay `check` cho g13.'
+  vi_sao_phai_lam: 'g12 CON HAN (toi 2026-09-27T00:00:00Z). Doi revision lam g12 mat hieu luc (protocol §3.2).'
+
+granted_by: ducthangho
+granted_on_instruction_nguyen_van: 'Chu kho, 26-09-2026, sau cross-review luot 24 (verdict pull/589 5844277514):
+  "r15 + g13: them truc And/Or + node generic". Chuyen qua phien dieu phoi. Chu kho khong neu han moi => g13 giu han g12;
+  tran 3000 dong: vuot thi DUNG va bao, khong tu noi.'
+granted_on_instruction_ghi_chu: 'Mo neo BEN: issues/579#issuecomment-5844317236 (ban chieu do PHIEN
+  AGENT dieu phoi dang HO, created_at 2026-09-26T07:37:54Z; author_association OWNER khong phan biet nguoi voi phien chay
+  bang token cua nguoi — no #566).'
+recorded_by: claude-session
+recorder_is_dispatcher: false
+
+XUNG_DOT_LOI_ICH:
+  co: false
+  noi_dung: 'Lease nay do phien EXECUTOR cua #579 ghi ho (phien ghi g6 la phien dieu phoi khac, tung
+    lam reviewer — ghi o g6). Phien executor KHONG review; cross-review van do codex, doc lap.'
+
+XUNG_DOT_WRITE_SET:
+  trang_thai: 'Do bang ai-dang-giu sau vong dong bo nhanh — xem write_set_do_luc_cap.'
+
+LUOT21_24_DUOC_XU_LY_THE_NAO:
+  luot21: 'F2-L21 BOOL_FORGET (P3) — va DUOI g11 (bb4094f).'
+  luot22: 'F2-L22 tam bien the a-h (P3) — va DUOI g11 bang lam giau bon snippet (5628b30).'
+  luot23: 'F2-L23 IF_INHERITED, WHILE_INHERITED, MATCH_DIRECT (hoi quy) — chu kho mo r14 + g12: ma tran truc (874020c).'
+  luot24: 'F2-L24 AND_INHERITED, FOR_INHERITED — chu kho mo r15 + g13: truc And/Or + nut generic (107779a).'
+
+leased_at_utc: '2026-09-26T08:54:02Z'
+leased_at_utc_nguon: 'date -u luc commit tao tep nay; commit dung CHINH gia tri ay lam committer date (GIT_COMMITTER_DATE).'
+lease_expires_at_utc: '2026-09-27T00:00:00Z'
+han_vi_sao: 'GIU han g12 theo quyet dinh chu kho (issues/579#issuecomment-5844317236: "g13 giu han
+  2026-09-27T00:00:00Z — khong noi"). KHONG phai phien executor tu dat. Cau hoi con treo tu g5 (48 gio) khong doi.'
+
+role: executor
+provider: anthropic
+executor: claude
+model: KHONG_KHAI
+effort: KHONG_KHAI
+execution_surface: claude-code
+transport: cloud
+environment: cloud
+operating_system: linux
+
+spec_path: ops/specs/dang-lease-dau-truoc-kiem-sau-r15.md
+spec_da_land: false
+spec_land_o: 'CHUA LAND — PR #592, nhanh claude/spec-dang-lease-r2-20260921, head 99e24de.'
+spec_chep_vao_nhanh_lease: 'Commit cap lease nay mang MOT BAN SAO cua r15 lay bang
+  `git show 99e24de:<duong>`, KHONG sua mot byte — cong `check` doi prompt_path TON TAI trong cay.'
+spec_ref: ops/specs/dang-lease-dau-truoc-kiem-sau-r15.md
+prompt_path: ops/specs/dang-lease-dau-truoc-kiem-sau-r15.md
+prompt_sha256_required: 4c1094fdfd9958fea58d0a69f47a22d2b1ad0808a9958902f5913bcf6f7e1905
+prompt_sha256_required_vi_sao: 'Cong `check` doi bam khi co `prompt_path` — do duoc:
+  thieu dong nay thi rc=6 ("tro vao mot tep khong neo bam thi tep doi luc nao cung khong
+  ai biet"). Bang `spec_hash` vi cung tro mot tep.'
+spec_hash: 4c1094fdfd9958fea58d0a69f47a22d2b1ad0808a9958902f5913bcf6f7e1905
+
+start_from_sha: b739616058a8b5f1344710b8b215535f964577a1
+start_from_sha_vi_sao: 'MERGE-BASE cua nhanh #589 (107779a) voi master = b739616 (#638) — nhanh da hoa master
+  (bb4094f); master khong di chuyen tu do va khong cham write set.'
+
+reviewed_sha_required: 107779a7c0e94c0151140a8c44e3deab71264aa4
+reviewed_sha_required_note: 'Head THAT cua nhanh #589 luc cap g13: 107779a — truc And/Or + nut generic tren 874020c.
+  Suite 186/186 rc=0; +2966/3000 dong. Cross-review luot 25 (codex, phien dieu phoi) theo r15.'
+
+branch: claude/va-dang-lease-20260920
+branch_ownership: exclusive
+
+write_set:
+  - ops/lease_publish.py
+  - ops/lease_publish_test.py
+  - CLAUDE.md
+write_set_vi_sao: 'BA duong — KHONG doi so voi g3/g4/g5. r8 §2 giu nguyen bang do cua r7 chung minh
+  write_set khong doi qua r3..r8.'
+write_set_do_luc_cap:
+  do_luc: '2026-09-26T08:52:50Z'
+  do_luc_nguon: 'date -u in ra NGAY TRUOC lan chay `ai-dang-giu` cho ba duong write set (sau vong dong bo nhanh).'
+  ket_qua: 'TRUOC khi commit g13: rc=12 KHONG_XAC_DINH ca ba duong — dung mot ly do: bia mo mot chieu g12 -> g13 (g13 chua ton tai). Do lai SAU commit g13 — ghi trong comment bao cao.'
+
+prohibited_actions:
+  - self_review
+  - self_approve
+  - merge
+  - land
+  - deploy
+  - ruleset_mutation
+  - admin_bypass
+  - tiet_lo_secret
+  - sua_github_workflows
+  - day_len_ops_ngoai_viec_cap_lease
+  - chay_ci_windows
+  - gan_nhan_windows
+  - cham_t131_t132
+  - cham_RELEASE_MANIFEST_json
+
+manual_ci_budget: KHONG_GIOI_HAN_CO_DIEU_KIEN
+manual_ci_budget_vi_sao: 'Giu nguyen cach doc cua g5, neo vao r8 §10.5: "Khong CI" = dung chan
+  cong, KHONG phai cam do.'
+
+attempts_limit: 10
+same_failure_limit: 10
+gioi_han_vi_sao: 'Giu nguyen cua g5 — chi thi "noi len 10" va "lap toi khi co cross approval".'
+
+risk: sensitive
+review_class: sensitive
+effective_review_class: sensitive
+review_class_vi_sao: 'Cham ops/lease_publish.py, tuc CONG DOC LEASE (protocol §8). Nhac lai gioi
+  han da do va da mo Issue #603: `_tinh_lop_tu_write_set` hien CHI tra ve duoc `sensitive` —
+  bang `_BANG_LOP` co 7 muc deu `sensitive` va mac dinh cung `sensitive`, nen `routine`/`systemic`
+  KHONG voi toi duoc. Nhan `sensitive` o day dung, nhung no dung vi cong khong the tra thu khac.'
+
+assurance_target: human_audited
+assurance_target_vi_sao: 'Quyet dinh chu kho (Q4 cua r1, giu qua r2-r8). KHONG doi o generation nay.'
+assurance_target_HE_QUA_PHAI_KHAI: 'Packet nay KHONG LAND DUOC BANG MAY.'
+
+TRANG_THAI_REVIEW_LUC_CAP:
+  luot_gan_nhat: 24
+  reviewer: 'codex gpt-6-astra medium (phien dieu phoi)'
+  neo: 874020c5cb48ba7d78e7e5151f2b7b65e914cf65
+  verdict: changes_requested
+  so_finding: 'P1 0 / P2 0 / P3 1'
+  da_xu_ly: 'F2-L24 bang truc And/Or + nut generic (107779a) + r15 §0.15.'
+  DIEU_KIEN_DUNG: 'Khong con P1, P2, P3 o mot luot. Chua dat — luot 25 se do.'

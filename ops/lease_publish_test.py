@@ -9243,8 +9243,9 @@ _STUB_T191 = ('\n\ndef _kiem_gia_t191(lease, han=None):\n    if lease.get("chot_
 _PHAN_LOAI_T191 = (
     ("case-guard-mien", "    match 1:\n        case 1 if not bo_qua_han:\n            _kiem_gia_t191(lease)\n", 0, 1, 1),
     ("case-guard-thuong", "    match 1:\n        case 1 if lease:\n            _kiem_gia_t191(lease)\n", 1, 0, 1),
-    ("or-mien", "    bo_qua_han or _kiem_gia_t191(lease)\n", 0, 1, 1),
-    ("and-mien", "    (not bo_qua_han) and _kiem_gia_t191(lease)\n", 0, 1, 1),
+    # lượt 21: BA vế — vế giữa KHÔNG nhắc bo_qua_han, chốt sau nó; miễn phải được NHỚ qua vế giữa
+    ("or-mien", "    bo_qua_han or lease or _kiem_gia_t191(lease)\n", 0, 1, 1),
+    ("and-mien", "    (not bo_qua_han) and lease and _kiem_gia_t191(lease)\n", 0, 1, 1),
     ("or-truoc-khong-mien", "    _kiem_gia_t191(lease) or bo_qua_han\n", 1, 0, 1),
     ("or-thuong", "    lease or _kiem_gia_t191(lease)\n", 1, 0, 1),
     ("def-long", "    def _gia_long():\n        return _kiem_gia_t191(lease)\n", 0, 0, 1),

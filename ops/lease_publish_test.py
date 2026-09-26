@@ -9399,7 +9399,8 @@ _NHAC_T191 = ("{x}", "bool({x})", "({x}).real", "(({x}),)[0]", "not not ({x})", 
               "(_z := ({x}))", "[1 for _i in (1,) if ({x})]", "{1 for _i in (1,) if ({x})}", "{1: 1 for _i in (1,) if ({x})}",
               "[*((1,) if ({x}) else ())]", "(*((1,) if ({x}) else ()),)", "{*((1,) if ({x}) else ())}",
               "{**({1: 1} if ({x}) else {})}", "f\"{'1' if ({x}) else ''}\"", "any(({x}) for _i in (1,))", "(lambda: ({x}))()",
-              "[1][:({x})]")
+              "[1][:({x})]", "[1 for _i in ((1,) if ({x}) else ())]", "any(True for _i in ((1,) if ({x}) else ()))",
+              "{1: 1 for _i in ((1,) if ({x}) else ())}", "{1 for _i in ((1,) if ({x}) else ())}")
 _NGU_CANH_NHAC_T191 = {"or": ("bo_qua_han", "F or @"), "and": ("not bo_qua_han", "F and @"), "if": ("bo_qua_han", "if F:\n    @"),
                        "while": ("bo_qua_han", "while F:\n    @\n    break"), "ifexp": ("bo_qua_han", "(@ if F else None)"),
                        "case": ("bo_qua_han", "match 1:\n    case _ if F:\n        @")}
@@ -9414,6 +9415,30 @@ _LONG_T191 = {"or-and-sau": ("bo_qua_han or (lease and @)", 0, 1), "or-and-dau":
               "co-trong-cung": ("not lease or (bo_qua_han or @)", 0, 1),
               "co-trong-sau": ("@ or (lease and bo_qua_han)", 1, 0), "co-sau-trong": ("not lease or (@ and bo_qua_han)", 1, 0),
               "khong": ("lease and (not lease or @)", 1, 0)}
+_NGU_CANH_NHAC_T191.update({"or-long": ("bo_qua_han", "F or (lease and (not lease or @))"),
+                            "if-long": ("bo_qua_han", "if F:\n    if lease:\n        lease and @")})
+# r19 (lượt 28): VỊ TRÍ của CỜ bên trong biểu thức nhắc (nút × toán tử × trường con), sinh bằng máy. Mỗi hằng số nguyên của
+# mẫu gốc lần lượt thành `((_co := {x}) and c or c)` — giá trị giữ nguyên `c` (không đổi nghĩa phép toán, không chia 0), cờ nằm
+# ĐÚNG ở trường con ấy; cả dạng là `(mẫu, _co)[1]` nên đúng khi và chỉ khi `{x}` đúng. Mọi vị trí phải được thực thi (witness).
+# Miền lặp comprehension không cho walrus ⇒ các dạng viết tay cuối `_NHAC_T191`.
+_VT_CO_T191 = (*(f"5 {o} 3" for o in "+ - * / // % ** << | ^ & == != < <= > >=".split()), "50 >> 3", "5 in (3,)",
+               "5 not in (3,)", "([5] * 9)[5] is ([5] * 9)[3]", "([5] * 9)[5] is not ([5] * 9)[3]", "-5", "+5", "~5", "not 5",
+               "0 or 5", "5 and 3", "0 or (5 and (0 or 3))", "abs(5)", "dict(k=5)['k']", "max(*(5, 3))", "dict(**{'k': 5})['k']",
+               "{5: 3}[5]", "(5, 3)[1]", "[5, 3, 1][0:2:1]", "(5).real", "5 if 3 else abs", "abs if 0 else 5", "{5}", "[5]",
+               "[*(5,)]", "f'{5:>{3}}'", "[5 for _i in 'x' if 3]", "{5: 3 for _i in 'x' if 1}", "{5 for _i in 'x' if 1}",
+               "list((5 for _i in 'x' if 1))", "(_q := 5)", "(lambda a=5: a)()", "(lambda *, a=5: a)()")
+
+
+def _vt_co_t191(goc: str, x: str):
+    import ast
+    n = sum(isinstance(v, ast.Constant) and type(v.value) is int for v in ast.walk(ast.parse(goc, mode="eval")))
+    for i in range(n):
+        cay = ast.parse(goc, mode="eval"); cs = [v for v in ast.walk(cay) if isinstance(v, ast.Constant) and type(v.value) is int]
+        c = cs[i].value; cs[i].value = "§"
+        yield "(" + ast.unparse(cay).replace("'§'", f"((_co := ({x})) and {c} or {c})") + ", _co)[1]"
+_PHAN_LOAI_T191 += tuple(
+    (f"vtco.{ng}.{i}-{j}", m.replace("F", d), 0, 1, 1)
+    for ng, (x, m) in _NGU_CANH_NHAC_T191.items() for i, g in enumerate(_VT_CO_T191) for j, d in enumerate(_vt_co_t191(g, x)))
 _PHAN_LOAI_T191 += tuple(
     (f"nhac.{ng}.{i}", m.replace("F", d.replace("{x}", x)), 0, 1, 1)
     for ng, (x, m) in _NGU_CANH_NHAC_T191.items() for i, d in enumerate(_NHAC_T191)) + tuple(
@@ -9469,7 +9494,7 @@ def t191_MOI_chot_cua_kiem_deu_duoc_t190_phu_o_nhanh_DA_DANG():
     can = {f"{n}.{k}.{v}.{c}" for n, truc in _TRUC_T191.items() for v, cs in truc.items()
            for k, cc in (("truc", cs), ("ke-co", cs), ("ke-khong", ("khong",))) for c in cc}
     chot(len(set(khoa)) == len(khoa), "MA TRẬN: khoá trùng")
-    rieng = ("dac.", "goc.", "nhac.", "long.")
+    rieng = ("dac.", "goc.", "nhac.", "long.", "vtco.")
     chot({x for x in khoa if not x.startswith(rieng)} == can,
          f"MA TRẬN lệch tích trục: thiếu {sorted(can - set(khoa))}, thừa {sorted(set(khoa) - can - {x for x in khoa if x.startswith(rieng)})}")
     for loai, doan, them_ds, them_mien, them_tho in _PHAN_LOAI_T191:

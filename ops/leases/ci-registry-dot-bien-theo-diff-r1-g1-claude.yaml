@@ -76,6 +76,17 @@ lech_protocol_duoc_duyet: >-
   docs/PROTOCOL_DA_PHIEN.md:839-840 (selector chi activate sau shadow 2-4 tuan) — chu kho chon 'Duyệt lệch, bật ngay'.
   Pham vi hep o spec §2: chi vong dot bien cua ops/nhanh_don_duoc_test.py; T1..T8 va moi bo khac van chay moi luot.
 
+lech_spec_duoc_duyet:
+  - muc: 'ngoai M1-M4 (hang so GIAY_TOI_DA_MOT_BO cua #637 M3)'
+    spec: 'khong nhac; gia tri ke thua 3600 giay'
+    thanh: '4500 giay'
+    neo: https://github.com/ducthangho/tra-luat/issues/643#issuecomment-5842443112
+    commit: d82c62af19ed1d990c43483c12dfd9230e9dc413
+    ly_do: >-
+      Do A5 run 36208617323 (N=2, che do du): ops/nhanh_don_duoc_test.py 3306,45 s = 92 % tran 3600 s
+      (PR #644 comment 5842399645). Chu kho chon phuong an 'b' (nang tran) trong phien executor.
+    khong_phai: 'KHONG gia han lease, KHONG cap them ngan sach CI (ci_budget giu nguyen 2 luot).'
+
 ci_budget:
   gate_tu_dong: '0 / 1 / 2 luot pull_request tren head cuoi (spec §7)'
   phep_do_duoc_cap: '0 / 0 / 0'
@@ -99,3 +110,9 @@ cam_tuyet_doi:
 chua_do_duoc:
   - 'Danh tinh nguoi ky: #566.'
   - 'Effort thuc te cua phien executor.'
+lease_sua_lan_cuoi: '2026-09-26T09:40:00Z'
+lease_sua_ghi_chu: >-
+  Sua sau khi cap va sau khi dang (comment 5841895375), theo review Codex tai cho PR #645 luot 1 tren e1cfd35d
+  (1 P3): them lech_spec_duoc_duyet cho tran 3600 -> 4500. KHONG doi truong mang quyen (leased_at, han,
+  write_set, hash, spec, branch, baseline, continuation). Ban chieu da dang la ban truoc sua; tep nay la nguon
+  co tham quyen.

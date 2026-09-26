@@ -88,10 +88,14 @@ lech_spec_duoc_duyet:
     khong_phai: 'KHONG gia han lease, KHONG cap them ngan sach CI (ci_budget giu nguyen 2 luot).'
 
 ci_budget:
-  gate_tu_dong: '0 / 1 / 2 luot pull_request tren head cuoi (spec §7)'
+  gate_tu_dong: '3 / 0 / 2 luot pull_request (spec §7) — VUOT tran, xem ci_budget_da_dung'
   phep_do_duoc_cap: '0 / 0 / 0'
   tham_do_chua_cap: cam
   het: 'DUNG truoc moi push/chay lai ke tiep, cho quyet dinh cua chu kho'
+ci_budget_da_dung:
+  - 'run 36208617323 tren 4ca5d8cc (PR #644, A5): 1/2'
+  - 'run 36212359766 tren cb79de8a (tran 4500, chu kho chon b): 2/2; job gate chay lai 1 lan (108364040831) theo chi thi chu kho "Lam 1, 3"'
+  - 'lan push 3d07a8af (va review connector #645 + Codex CLI 4 luot): 3/2 — theo chi thi chu kho "Cac PR chua cross review thi chay lap" (2026-09-26), coi la nang tran cho vong lap review'
 
 dieu_kien_dung:
   - 'S1 — cham duong ngoai W1/W2. DUNG.'
@@ -110,9 +114,10 @@ cam_tuyet_doi:
 chua_do_duoc:
   - 'Danh tinh nguoi ky: #566.'
   - 'Effort thuc te cua phien executor.'
-lease_sua_lan_cuoi: '2026-09-26T09:40:00Z'
+lease_sua_lan_cuoi: '2026-09-26T09:43:41Z'
 lease_sua_ghi_chu: >-
   Sua sau khi cap va sau khi dang (comment 5841895375), theo review Codex tai cho PR #645 luot 1 tren e1cfd35d
   (1 P3): them lech_spec_duoc_duyet cho tran 3600 -> 4500. KHONG doi truong mang quyen (leased_at, han,
   write_set, hash, spec, branch, baseline, continuation). Ban chieu da dang la ban truoc sua; tep nay la nguon
-  co tham quyen.
+  co tham quyen. Luot 2 (review connector #645 tren 9726adb): sua moc lease_sua_lan_cuoi (ban truoc ghi 09:40:00Z,
+  SAU commit 09:28:31Z chua no) va cap nhat bo dem ci_budget theo lich su chay that.

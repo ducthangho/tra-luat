@@ -154,3 +154,12 @@ TRANG_THAI_REVIEW_LUC_CAP:
   so_finding: 'P1 0 / P2 0 / P3 1 / P4 0'
   da_xu_ly: 'F2-L28 bang truc vi tri cua co trong bieu thuc nhac (a6095fd) + r19 §0.19.'
   DIEU_KIEN_DUNG: 'Khong con P1, P2, P3 o mot luot. Chua dat — luot 29 se do.'
+
+# ───────────────────────── BIA MỘ — vế THỨ NHẤT của dấu HAI CHIỀU ─────────────────────────
+# Thêm 2026-09-26 khi cấp g18. g17 CÒN HIỆU LỰC (hạn 2026-09-27T00:00:00Z) nên bia mộ hai chiều là
+# BẮT BUỘC. REVISION mới (r19 -> r20): protocol §3.2.
+da_bi_thay_the: dang-lease-dau-truoc-kiem-sau-r20-g18-claude
+da_bi_thay_the_luc: '2026-09-26T20:57:06Z'
+da_bi_thay_the_luc_nguon: 'date -u luc commit bia mo nay; commit dung CHINH gia tri ay lam committer date (GIT_COMMITTER_DATE).'
+da_bi_thay_the_vi_sao: 'r20 — va F1-L29, F2-L29 (cross-review luot 29, pull/589 5849206704): vi tri phan tu, co doc trong dich
+  gan va yield/await long; head moi 4fde570. spec_hash r20 = a234b8e9992a90b1b67322261d6eaba25332016bbd6e7fb6ab47877afa8fd57f.'

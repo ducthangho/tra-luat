@@ -158,3 +158,11 @@ TRANG_THAI_REVIEW_LUC_CAP:
   so_finding: 'P1 0 / P2 0 / P3 2 / P4 0'
   da_xu_ly: 'F1-L30, F2-L30 bang vi tri phan tu cua chot + dich walrus/await trong async-genexp (23e1697) + r21 §0.21 (rut lai hai ly do mien cua r20).'
   DIEU_KIEN_DUNG: 'Khong con P1, P2, P3 o mot luot. Chua dat — luot 31 se do.'
+
+# ───────────────────────── BIA MỘ — vế THỨ NHẤT của dấu HAI CHIỀU ─────────────────────────
+# Thêm 2026-09-26 khi cấp g20. g19 CÒN HIỆU LỰC (hạn 2026-09-27T00:00:00Z) nên bia mộ hai chiều là BẮT BUỘC.
+da_bi_thay_the: dang-lease-dau-truoc-kiem-sau-r21-g20-claude
+da_bi_thay_the_luc: '2026-09-26T23:31:00Z'
+da_bi_thay_the_luc_nguon: 'date -u luc commit bia mo nay; commit dung CHINH gia tri ay lam committer date (GIT_COMMITTER_DATE).'
+da_bi_thay_the_vi_sao: 'g20 — lease cau noi CUNG revision 21, CUNG head 23e1697; chu kho GIA HAN (issues/579#issuecomment-5850874948),
+  han moi 2026-09-29T00:00:00Z (mac dinh do phien reviewer dat, chu kho khong neu moc).'

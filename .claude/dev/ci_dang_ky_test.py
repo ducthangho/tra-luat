@@ -708,6 +708,12 @@ VUNG_CHUNG = (".github/workflows/ci.yml", ".claude/dev/ci_dang_ky_test.py", "req
 # ghi GITHUB_PATH ⇒ đổi cách tìm git/tar); `cai_cong_cu.sh` đọc `ops/cong_cu.yaml`. Chốt `loi_vung_thiet_lap` dẫn
 # xuất từ ci.yml để một bước cài MỚI mà quên vùng thì ĐỎ. Tài liệu gốc: danh sách CHO PHÉP, tệp gốc lạ vẫn ⇒ ĐỦ.
 TIEN_TO_CHUNG = (".github/", "ops/cai_", "ops/cong_cu")
+LENH_REGISTRY = frozenset({"git config --global core.autocrlf false", "git config --global core.eol lf",
+                           "git config --global core.abbrev 7", "actions/checkout@v4", "actions/setup-python@v5",
+                           "python -m pip install --quiet PyYAML==6.0.3 jsonschema==4.26.0", "bash ops/cai_actionlint.sh",
+                           "bash ops/cai_cong_cu.sh shellcheck", "bash ops/cai_cong_cu.sh rg",
+                           "python ops/cong_cu.py kiem-tra --json", "python -m pip install --quiet ruff==0.15.15",
+                           "ruff --version", "python .claude/dev/ci_dang_ky_test.py --chay"})
 GOC_TAI_LIEU = frozenset({"AGENTS.md", "CHANGELOG.md", "CLAUDE.md", "CONTEXT.md", "INSTALL.md", "README.md", "SKILL.md"})
 
 
@@ -751,12 +757,13 @@ def env_theo_che_do(path, che_do):
     return {k: (v if che_do == CHE_DO_NHE else None) for k, v in NHE.get(path, {}).items()}
 
 
-def loi_vung_thiet_lap(data, goc=ROOT):
-    """Mọi đường dẫn TỆP CÓ THẬT được nhắc trong `run` của job `gate-registry` phải nằm trong vùng ⇒ ĐỦ."""
+def loi_vung_thiet_lap(data):
+    """Bước của `gate-registry` theo danh sách CHO PHÉP, từng chữ (Codex CLI lượt 2: dẫn xuất bằng regex lọt khi đổi
+    cách gọi — quote, `cd`, `working-directory`). Thêm bước ⇒ phải thêm vào `LENH_REGISTRY` VÀ vùng, không thì ĐỎ."""
     buoc = ((((data or {}).get("jobs") or {}).get("gate-registry") or {}).get("steps") or [])
-    tu = {t for b in buoc for t in re.findall(r"[\w./-]+", str(b.get("run", ""))) if "/" in t and (goc / t).is_file()}
-    return [f"gate-registry dùng {t} mà vùng đột biến không phủ" for t in sorted(tu) if not _cham_vung(t, set(VUNG_CHUNG))] + \
-        ([] if tu else ["không dẫn xuất được tệp nào từ gate-registry"])
+    loi = [f"gate-registry: bước có working-directory: {b.get('name')}" for b in buoc if "working-directory" in b]
+    loi += [f"gate-registry: lệnh ngoài danh sách cho phép: {x!r}" for b in buoc for x in _dong_lenh(b) if x not in LENH_REGISTRY]
+    return loi + ([] if buoc else ["không thấy bước nào của gate-registry"])
 
 
 def loi_env_registry(data):
@@ -1694,10 +1701,17 @@ def phan_chung():
         return bool(loi_env_registry(w))
     _them("p643-A4-workflow-that-dat", not loi_env_registry(_wf0))
     _them("p643-vung-thiet-lap-that-dat", not loi_vung_thiet_lap(_wf0))
-    _wf_moi = json.loads(json.dumps(_wf0))
-    _wf_moi["jobs"]["gate-registry"]["steps"].insert(0, {"run": "bash scripts/tl_boot.py"})
-    _them("p643-vung-thiet-lap-buoc-moi-ngoai-vung-la-do", bool(loi_vung_thiet_lap(_wf_moi)))
-    _them("p643-vung-thiet-lap-khong-dan-xuat-duoc-la-do", bool(loi_vung_thiet_lap({"jobs": {}})))
+    def _hong_reg(f):
+        w = json.loads(json.dumps(_wf0)); f(w["jobs"]["gate-registry"]["steps"]); return bool(loi_vung_thiet_lap(w))
+    for _i, _b in enumerate(({"run": "python scripts/tl_boot.py"}, {"run": "python scripts/'tl_boot.py'"},
+                             {"run": "cd scripts\npython tl_boot.py"}, {"run": "python tl_boot.py", "working-directory": "scripts"},
+                             {"run": "bash ./ops/cai_actionlint.sh"}, {"uses": "actions/cache@v4"})):
+        _them(f"p643-vung-thiet-lap-buoc-la-{_i}-do", _hong_reg(lambda b: b.insert(0, dict(_b))))
+    _them("p643-vung-thiet-lap-khong-co-buoc-do", bool(loi_vung_thiet_lap({"jobs": {}})))
+    _them("p643-vung-thiet-lap-lenh-hop-le-doi-thu-muc-do", _hong_reg(lambda b: b.insert(0, {
+        "run": "python ops/cong_cu.py kiem-tra --json", "working-directory": "scripts"})))
+    _them("p643-lenh-registry-deu-trong-vung", all(_cham_vung(t, set(VUNG_CHUNG)) for x in LENH_REGISTRY
+                                                   for t in x.split() if "/" in t and "@" not in t))
     _them("p643-tran-bo-nho-hon-timeout-job", GIAY_TOI_DA_MOT_BO == 4500
           and GIAY_TOI_DA_MOT_BO < 60 * _wf0["jobs"]["gate-registry"]["timeout-minutes"])
     for _k in ENV_REGISTRY:

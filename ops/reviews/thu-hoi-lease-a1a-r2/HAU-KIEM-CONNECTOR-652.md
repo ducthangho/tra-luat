@@ -116,8 +116,10 @@ Kết quả lượt 8 ghi ở `luot8-VERDICT.md`: `changes_requested`, **2 P1 ·
   từng lượt ở trên. Bản vá **không** dùng `luot8-HINT.patch` (viết lại bằng tay, từ chính hồ sơ E7/E11).
 - **F18** (P1, `q6-thieu-kiem-id-ten`): đặc tả đóng băng vẫn **bắt** executor chạy `do_q6.py` 31 ca và `mut_q6.py`,
   tức đúng bộ đo đã biết lỗi C5/C6; tên hai bản `_hk` không có trong đặc tả; tiêu chí "có dòng `LECH` thì dừng"
-  (dòng 371) cũng va với đối chứng âm `DUNG LECH chet-im-lang-rc2`. **CHƯA SỬA — cần revision 3**, là quyết định
-  của chủ kho. PR này không sửa đặc tả.
+  (dòng 371) cũng va với đối chứng âm `DUNG LECH chet-im-lang-rc2`. Chủ kho duyệt **revision 3 tối thiểu**
+  (#564 [`5852159297`](https://github.com/ducthangho/tra-luat/issues/564#issuecomment-5852159297), vòng 5): `ops/specs/THU-HOI-LEASE-A1a-r3.md`
+  chỉ đổi chỉ dẫn bộ đo thi công sang `do_q6_hk.py`/`mut_q6_hk.py` ghim băm, kèm tiêu chí dương đọc từ bản in. r2
+  và hai script gốc giữ nguyên byte. Chờ lượt 9.
 - Hai mutant lượt 8 ghi là **sống** (gỡ riêng nhánh DEL; decode `strict`): nhánh DEL nay có ca `ten-DEL-sau-duoi` và
   mutant `bo-rieng-DEL`; byte không-UTF-8 nay có **chốt riêng** (`ten-tep-khong-phai-utf8`), ca `ten-byte-sau-duoi`,
   mutant `bo-chot-utf8`. Mutant `strict` **không** đưa vào ma trận: nó chết bằng `UnicodeDecodeError`, tức giết

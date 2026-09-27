@@ -21,3 +21,5 @@ VERDICT: changes_requested — **0 P1 / 2 P2 / 2 P3** (+ 1 nit)
 Không đo được lại (đã tự khai ở §8.6/T2): 441 = 441 lúc 03:08Z; 100/89 run; annotation Ubuntu 26.
 
 Xử lý: vá cả 4 + nit ở bản nháp 9.
+
+**Đính chính (lượt 6b/6c, 27-09):** câu "mọi mốc T1/§1/§2 … không muộn hơn commit chứa nó" ở trên **sai** — `git log -S'02:45Z'` cho thấy "đo 02:45Z" vào ở `52831cc` (02:33:31Z). Câu "đã tự khai ở §8.6/T2" cho 441 = 441 cũng **sai** lúc đó: §8.6 chưa liệt kê nó (thêm ở bản nháp 11).

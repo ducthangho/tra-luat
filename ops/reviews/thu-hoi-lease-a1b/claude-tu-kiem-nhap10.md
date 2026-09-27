@@ -1,6 +1,7 @@
 # Tự kiểm phía executor — spec `THU-HOI-LEASE-A1b` bản nháp 10 (trước push)
 
-- đối tượng: commit cục bộ `a4010f4` (chưa push)
+- đối tượng: commit cục bộ `a4010f4` (chưa push, không nhánh nào chứa — chỉ còn trong reflog của phiên), cha `fc26d8d`;
+  sha256 đặc tả tại đó `9e6df411721033c20c36b6e98924b0980446fa891acf01f3b4596e4bd8b39d74`
 - vai: bước tự kiểm của executor (subagent Claude general-purpose, read-only, effort **mặc định** — định nghĩa
   agent `xhigh` chưa nạp được giữa phiên); KHÔNG là review, KHÔNG là assurance
 - ghi chú hình dạng: tóm lược do phiên điều phối ghi lại, không phải raw output bất biến.

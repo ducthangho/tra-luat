@@ -10,7 +10,7 @@ VERDICT: changes_requested — **0 P1 / 2 P2 / 3 P3**
 
 Đo lại khớp (qua git/sha256sum): sha256 r9/r3/r2/`do_q6_hk.py`/`mut_q6_hk.py`/`q6-do-2026-09-26.json`; băm bản nháp
 1–6; 76/77 first-parent; hằng :934–948 và test :5154 trên `67802bf`/`f5bef3a`; workflow :47/:160; numstat A0;
-ADR-0044:5; protocol :669/:1079–1089; `git grep` T2 rc=1; A3 chép đúng bảng tiêu chí dương r3 :399–404; giờ
+ADR-0044:5; protocol :669/:1079–1089; `git grep` T2 rc=1; A3 chép đúng bảng tiêu chí dương r3 (reviewer dẫn :399–404; đúng là `:401–405` — đính chính ở lượt 6b); giờ
 commit mốc `2026-09-10T04:55:37Z`.
 
 1. [P2] M5(c) còn miễn trừ "trừ khi Q6 cho phép" trong khi M5(d) cấm vô điều kiện trên fixture; (a) không khai

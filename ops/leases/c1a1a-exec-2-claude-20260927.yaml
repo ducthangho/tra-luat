@@ -1,0 +1,136 @@
+# Lease EXECUTOR — packet #650, LAND-DOC-RECEIPT-THU-HOI-C1a1a, generation 2.
+#
+# NGUỒN SỰ THẬT LÀ TỆP NÀY. Comment trên "#650" chỉ là bản chiếu do
+# `.github/workflows/ops-publish-lease.yml` đăng khi tệp này được push lên nhánh `ops/**`.
+#
+# NHỚ ĐÓNG NHÁY mọi giá trị chứa `#`.
+
+schema_version: 2
+event: executor_lease_granted
+packet_issue: 650
+packet_id: LAND-DOC-RECEIPT-THU-HOI-C1a1a
+generation: 2
+revision: 5
+lease_id: c1a1a-exec-2-claude-20260927
+thay_the_cho: c1a1a-exec-1-claude-20260927
+thay_the_ghi_chu: >-
+  g1 (phien session_01LZYaDZiMtLCMAzXKibMz5f) da THU HOI bang rut han ve 2026-09-27T10:43:00Z (commit 4e29cbc9,
+  '#650' comment 5855139112) vi chu kho chon executor la session_017KWSXEY9ifmPKmJREKfdSJ. g1 da HET_HAN nen KHONG
+  them da_bi_thay_the vao tep g1 (sua tep lease het han lam cong dang lease tra rc=8). g1 khong day dong ma nao.
+
+spec: ops/specs/LAND-DOC-RECEIPT-THU-HOI-C1a1a.md
+spec_source_commit: 0fc9766f39b585df3021ec43427c3866ae8271a2
+spec_hash: 978058983e8eddefebfba267dbff2ef5cee95daf9b2d4847121d43b8cff89d77
+spec_hash_note: >-
+  sha256 cua CHINH tep spec tai spec_source_commit (blob 8224ba54176f6bbfba528ed2e3fb6555852ba336).
+  Dong bang bang human audit '#499' comment 5845868954; readback '#499' comment 5847194470. Do lai 15:24Z
+  27-09 tai origin/claude/spec-c1a1-doc-receipt-20260925 04f2b5fe: khop.
+
+role: executor
+provider: anthropic_claude
+executor: claude
+surface: claude_code
+model: claude-opus-5-5
+effort_ghi_chu: 'Tu khai; KHONG DO DUOC tu ngoai.'
+environment: cloud
+access: read-write
+risk: sensitive
+review_class: sensitive
+effective_review_class: sensitive
+review_class_note: >-
+  Bo kiem ma land-packets se dua vao de chap nhan receipt thu-hoi (protocol §8 d.680: review/land authority).
+assurance_target: human_audited
+reviewer_provider: openai_codex
+reviewer_surface: codex_cli
+reviewer_model_yeu_cau: gpt-6-astra
+reviewer_ghi_chu: >-
+  Chu kho: Claude la executor, Codex la reviewer, KHONG chay reviewer Claude. Codex CLI tai cho,
+  model_reasoning_effort=xhigh (header log phai co dong 'reasoning effort: xhigh'), toi da 2 luot cho PR nay
+  (protocol §8); cham tran ma con finding => Review Rescue Checkpoint, hoi chu kho. human_audited la cong land.
+  Verdict chep nguyen van vao ops/reviews/land-doc-receipt-thu-hoi-c1a1a/.
+
+write_set:
+  - .claude/dev/doc_receipt_thu_hoi.py
+  - .claude/dev/doc_receipt_thu_hoi_test.py
+  - .claude/dev/ci_dang_ky_test.py
+write_set_hash: c6ade46c37aaab2ac1fe6ee0f535bd866d838d542115d2a03cfd6ac6e8bfa02d
+write_set_hash_cach_tinh: 'sha256 cua cac duong dan DA SAP XEP, noi bang LF, co LF cuoi, utf-8.'
+write_set_note: >-
+  Ba tep san pham, dung spec §2. Nhanh lam viec la nhanh spec, nen PR thi cong con mang theo
+  `ops/specs/LAND-DOC-RECEIPT-THU-HOI-C1a1a.md` (quyet dinh chu kho, phuong an b, '#650' comment 5847220567): tep
+  ay CHI DUOC MANG THEO, sha256 phai giu nguyen 978058983e8e... tai head; sua no la finding. Verdict review o
+  ops/reviews/land-doc-receipt-thu-hoi-c1a1a/ la hien vat cua vai reviewer, chep vao nhanh bang commit rieng, KHONG
+  tinh vao tran dong. Tran dong ADR-0044 (ngoai le co pham vi <=400 dong them, spec A14) tinh tren BA tep san pham.
+
+KHONG_duoc_phep:
+  - 'Goi git, mang, hay tien trinh con trong module (C1a1b, C1a2, C1b).'
+  - 'Sua ops/lease_publish.py, workflow thu-hoi, hay spec da dong bang.'
+  - 'Cat ca hay gop ID de vua tran dong: vuot 400 thi DUNG va hoi chu kho.'
+  - 'Sua bang_chung_xanh dung chung trong ci_dang_ky_test.py.'
+  - 'Merge PR cua packet nay. Viec bam nut thuoc chu kho; land chi bang merge commit.'
+  - 'Chay CI, full CI bang tay, hay CI Windows (chu kho: khong chay toi khi merge). Khong mo PR truoc khi vong review sach.'
+  - 'Force-push.'
+  - 'Nhan nghia vu Q17 (a)/(b) cua A1b: thuoc C1b (quyet dinh chu kho, #650 comment 5855191310).'
+
+branch: claude/spec-c1a1-doc-receipt-20260925
+branch_ownership: exclusive
+target_branch_neu_land: master
+
+base_sha: 5618f61c6ac2fa14aab52b0f5ce3d065aee8e022
+start_from_sha: 04f2b5fea60bbdd2fdd8e8eae9fa00871c92fc77
+immutable_acceptance_baseline: 5618f61c6ac2fa14aab52b0f5ce3d065aee8e022
+reviewed_sha_required: 04f2b5fea60bbdd2fdd8e8eae9fa00871c92fc77
+reviewed_sha_required_nghia: 'Chua co head ung vien; moi verdict neo exact head THAT cua nhanh thi cong.'
+
+granted_by: ducthangho
+granted_on_instruction: 'https://github.com/ducthangho/tra-luat/issues/650#issuecomment-5847220567'
+granted_on_instruction_nguyen_van: >-
+  '(b), cap lease khi duong trong' (chu kho, 26-09-2026); chon executor: "Phien 017KWSXE thi cong" va
+  "Giao phien kia" (chu kho, phien session_01LZYaDZ..., 27-09-2026; '#650' comment 5855139112, 5855359420).
+authority_caveat: >-
+  Comment neo do phien agent dang bang tai khoan chu kho, chep loi chu kho trong phien — yeu hon comment chu kho
+  tu viet (#566). author_association=OWNER khong tach chu kho khoi phien agent dung token chu kho.
+recorded_by: claude-session
+recorder_is_dispatcher: false
+recorder_note: >-
+  Phien agent GO HO. granted_by la chu kho va chi chu kho.
+authority_basis: '§2 — start/pause/resume/reroute/override/authorize thuoc chu kho'
+
+leased_at_utc: '2026-09-27T15:26:00Z'
+lease_expires_at_utc: '2026-09-28T15:26:00Z'
+run_minutes: 1440
+
+preconditions_measured_at_utc: '2026-09-27T15:23:17Z'
+chong_lan_write_set:
+  do_bang: >-
+    fetch --prune '+refs/heads/*'; so TAP TEN ls-remote --heads (473) voi for-each-ref refs/remotes/origin (473):
+    comm -23 = 0, comm -13 = 0. ai-dang-giu tren ban sao scratch co 473 refs/heads (master 5618f61c), rc doc truc tiep.
+  ket_qua: >-
+    doc_receipt_thu_hoi.py rc=0 NGUOI_GIU 0; doc_receipt_thu_hoi_test.py rc=0 NGUOI_GIU 0;
+    ci_dang_ky_test.py rc=0 NGUOI_GIU 0 (hai ban sao cu #647/#651 da het han 13:31Z/15:19Z; g1 het han 10:43Z).
+master_sha_at_grant: 5618f61c6ac2fa14aab52b0f5ce3d065aee8e022
+master_doi_tu_lan_do_truoc: >-
+  27b74eb..5618f61c chi doi .github/workflows/ci.yml (#662 tach job gate-ops); ops/lease_publish.py, workflow
+  thu-hoi va ci_dang_ky_test.py KHONG doi (MOI d.37, bang_chung_xanh d.614 than khong doi).
+
+ci_budget:
+  gate_tu_dong: '0 truoc khi vong review sach; 1 luot pull_request khi mo PR luc san sang merge'
+  phep_do_duoc_cap: '0 / 0 / 0'
+  het: 'DUNG truoc moi push/chay lai ke tiep, cho quyet dinh cua chu kho'
+
+dieu_kien_dung:
+  - 'S1 — cham duong ngoai write set (tru tep spec mang theo va verdict review). DUNG.'
+  - 'S2 — Codex luot 2/2 van con P1/P2/P3 => Review Rescue Checkpoint, hoi chu kho; KHONG tu noi tran.'
+  - 'S3 — > 400 dong them tren ba tep san pham. DUNG truoc review.'
+  - 'S4 — het han lease => ngung ghi, handoff §7.'
+
+gate_bat_buoc:
+  - 'Diff so merge-base: dung ba tep san pham + tep spec mang theo (sha256 khong doi) + verdict review.'
+  - 'Bang nghia vu A0 day du, unresolved = 0; reviewer doi chieu nguoc tu M1-M6.'
+  - 'Moi ca moi phai co dot bien lam no DO dung assertion dich, hoac equivalent_verified co do.'
+  - 'ruff F delta so master = 0; doctrine-scan va adr-song rc 0 (A15); ci_dang_ky_test.py --chay nhan tep moi.'
+  - 'Doc lai (readback) tep sau moi lan ghi.'
+
+chua_do_duoc:
+  - 'Danh tinh nguoi ky: #566.'
+  - 'Effort thuc te cua phien executor.'

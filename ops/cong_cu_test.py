@@ -1036,6 +1036,15 @@ DOT_BIEN = {
         "        if _kieu_exec_cua(n, ten_exec) is None:          # N117 — CÙNG luật với bộ quét `_tai_exec`\n",
         "        if not (isinstance(n.func, ast.Name) and n.func.id in ('eval', 'exec')):  # đột biến: luật viết tay riêng\n",
         "BASH_NEN", (), "t33_do_phu_cua_cong_do_duoc_THEO_HINH_DANG"),
+    # r34 — N118: khoa anh xa dem ngoac CAN BANG.
+    "bn_khoa_dung_o_ngoac_dau": ("ops/bash_nen.py",
+        '                if van[i] == "(":\n                    muc += 1\n',
+        '                if False:  # đột biến: khoá dừng ở `)` ĐẦU (hành vi regex r33)\n                    muc += 1\n',
+        "BASH_NEN", (), "t33_do_phu_cua_cong_do_duoc_THEO_HINH_DANG"),
+    "bn_khoa_khong_khep_nem": ("ops/bash_nen.py",
+        "                return                          # \"incomplete format key\" — Python ném trước khi dựng\n",
+        "                raise _VuotNganSach('khoá không khép')  # đột biến: NÉM oan trên mẫu Python từ chối\n",
+        "BASH_NEN", (), "t33_do_phu_cua_cong_do_duoc_THEO_HINH_DANG"),
     "bn_ban_ghi_theo_toa_do": ("ops/bash_nen.py",
         "    theo_nut = dict(ban_ghi)\n",
         "    theo_nut = {p: p for _, p in ban_ghi}  # đột biến: khử trùng theo toạ độ\n",
@@ -3044,6 +3053,9 @@ _HINH_DANG_PHU = {
     # r33 — N117: phu thuoc trong tai `eval` qua BI DANH dung san (codex vong 27; chay bash that).
     "nap_dong_eval_bi_danh_goc":  'import builtins as bi, importlib as il\nfor i in range(2):\n    if i:\n        a = bi.eval("b")\n        a.run(["bash"])\n    b = il.import_module("subprocess")\n',
     "nap_dong_eval_bi_danh_thang": 'from builtins import eval as ev\nimport importlib as il\nfor i in range(2):\n    if i:\n        a = ev("b")\n        a.run(["bash"])\n    b = il.import_module("subprocess")\n',
+    # r34 — N118: khoa anh xa co ngoac LONG (codex vong 28); ra dung `bash` va CHAY BASH THAT.
+    "phan_tram_khoa_ngoac_long":   'import subprocess\nsubprocess.run(["%((a))s" % {"(a)": "bash"}])\n',
+    "phan_tram_khoa_ngoac_giua":   'import subprocess\nsubprocess.run(["%(a(b)c)s" % {"a(b)c": "bash"}])\n',
     "nap_dong_ba_tang":     'a = __import__("importlib")\nb = a.import_module("importlib")\nc = b.import_module("subprocess")\nc.run(["bash"])\n',
     # r23 — N86 (F7 vong 17): `%` voi ve phai `dict`.
     "hang_phan_tram_dict":  'import subprocess\nsubprocess.run(["%(a)s" % {"a": "bash"}])\n',
@@ -3588,9 +3600,48 @@ def t33_do_phu_cua_cong_do_duoc_THEO_HINH_DANG():
                                 so_o += 1
                                 if (that > tran_ns and not nem) or (that <= 64 and nem):
                                     lech.append((mau_o, doi_o, that, nem))
-    bang(so_o > 1000 and not lech,
-         f"(1o) N116: {len(lech)} ô lệch trên {so_o} ô của lưới sai phân (mẫu, đối, dài thật, cổng ném): "
-         f"{lech[:6]}")
+    # N118 (r34, codex vòng 28) — lưới mở sang KHOÁ ÁNH XẠ: khoá thường, rỗng, lồng ngoặc (`(a)`, `a(b)c`,
+    # `((x))`), kèm cờ × độ rộng/độ chính xác TĨNH (Python cấm `*` cùng khoá ánh xạ) × mọi kiểu × str/bytes.
+    # Và chiều khoá HỎNG: không khép ngoặc ⇒ Python ném `ValueError` trước khi dựng gì ⇒ cổng không được NÉM.
+    so_khoa = 0
+    for khoa in ("a", "", "(a)", "a(b)c", "((x))"):
+        for kieu in sorted(_g_bn["_KIEU_TRAN"] | _g_bn["_KIEU_KHUECH_DAI"]):
+            for la_bytes in (False, True):
+                for co in ("", "#", "-"):
+                    for rong in ("", "5", "5000"):
+                        for cx in ("", ".5", ".5000"):
+                            mau_o = "%(" + khoa + ")" + co + rong + cx + kieu
+                            k_o = khoa
+                            if la_bytes:
+                                mau_o, k_o = mau_o.encode(), khoa.encode()
+                            cac_gt = gia_tri.get(kieu) or gia_so["e" if kieu in "eEfFgG" else "i"]
+                            that, nem = -1, False
+                            for gt in cac_gt:
+                                if la_bytes and isinstance(gt, str):
+                                    gt = gt.encode()
+                                try:
+                                    that = max(that, len(mau_o % {k_o: gt}))
+                                except (ValueError, TypeError, OverflowError):
+                                    continue
+                                try:
+                                    kiem_ns(mau_o, {k_o: gt})
+                                    nem = False
+                                except vuot:
+                                    nem = True
+                            if that < 0:
+                                continue
+                            so_o += 1
+                            so_khoa += 1
+                            if (that > tran_ns and not nem) or (that <= 64 and nem):
+                                lech.append((mau_o, khoa, that, nem))
+    for hong in ("%((a)s", "%(a", "%(a(b)s"):
+        try:
+            kiem_ns(hong, {"a": "x"})
+        except vuot:
+            lech.append((hong, "khoá hỏng", "Python ném ValueError", True))
+    bang(so_o > 1000 and so_khoa > 500 and not lech,
+         f"(1o) N116/N118: {len(lech)} ô lệch trên {so_o} ô của lưới sai phân ({so_khoa} ô khoá ánh xạ) "
+         f"(mẫu, đối/khoá, dài thật, cổng ném): {lech[:6]}")
     kq_sao = _do('import subprocess\nsubprocess.run(["%*s" % (5000, "x")])\n')
     bang(isinstance(kq_sao, str) and "_VuotNganSach" in kq_sao,
          f"(1m) `%*s` với độ rộng 5000 vẫn phải NÉM (N103 chỉ bỏ số KHÔNG phải độ rộng), đo được "

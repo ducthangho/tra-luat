@@ -751,7 +751,64 @@ _NGAN_SACH_DINH_DANG = 4096
 # mọi chữ cái mà `%` nhận phải nằm trong bảng, và mỗi kiểu phải đúng nhóm của nó.
 _KIEU_TRAN = frozenset("srabc")
 _KIEU_KHUECH_DAI = frozenset("diouxXeEfFgG")
-_MAU_DINH_DANG = re.compile(r"%(?:\([^)]*\))?[#0 +-]*(\*|\d+)?(?:\.(\*|\d+))?[hlL]?.", re.S)
+def _tach_dinh_dang(van):
+    """Mỗi đặc tả `%` của `van` là một bộ (độ_rộng, độ_chính_xác, kiểu) — theo ĐÚNG luật tách của CPython.
+
+    N118 (r34, chủ kho — ngân sách `%` lần NĂM, codex vòng 28): bản r33 tách bằng regex `%(?:\([^)]*\))?…`,
+    dừng khoá ánh xạ ở `)` ĐẦU TIÊN, nên `"%((a))s" % {"(a)": "bash"}` (ra `'bash'`, phóng bash thật) bị
+    đọc thành kiểu `)` ngoài bảng ⇒ NÉM ⇒ cả cây KHONG_DO_DUOC. Nay chép thứ tự tách của
+    `unicode_format_arg_parse`: khoá `(…)` đếm ngoặc CÂN BẰNG · cờ `-+ #0` · độ rộng `*`|chữ số · `.`
+    rồi độ chính xác `*`|chữ số (có thể rỗng) · một `h`/`l`/`L` · ký tự kiểu. Chỉ `%%` ĐỨNG LIỀN là chữ `%`
+    (đo được: `"%5%" % ()` ném `TypeError` — nó tiêu thụ đối số). Khoá không khép hay thiếu ký tự kiểu thì
+    Python ném `ValueError` TRƯỚC khi dựng gì ⇒ dừng tách, không có gì để tính. `t33` (1o) đo bộ tách này
+    SAI PHÂN với `%` của Python, kể cả khoá ánh xạ lồng ngoặc.
+    """
+    i, n = 0, len(van)
+    while True:
+        i = van.find("%", i)
+        if i < 0 or i + 1 >= n:
+            return
+        i += 1
+        if van[i] == "%":
+            i += 1
+            continue
+        if van[i] == "(":
+            muc = 1
+            i += 1
+            while i < n and muc:
+                if van[i] == "(":
+                    muc += 1
+                elif van[i] == ")":
+                    muc -= 1
+                i += 1
+            if muc:
+                return                          # "incomplete format key" — Python ném trước khi dựng
+        while i < n and van[i] in "-+ #0":
+            i += 1
+        rong = None
+        if i < n and van[i] == "*":
+            rong, i = "*", i + 1
+        else:
+            j = i
+            while i < n and van[i].isdigit():
+                i += 1
+            rong = van[j:i] or None
+        cx = None
+        if i < n and van[i] == ".":
+            i += 1
+            if i < n and van[i] == "*":
+                cx, i = "*", i + 1
+            else:
+                j = i
+                while i < n and van[i].isdigit():
+                    i += 1
+                cx = van[j:i] or "0"
+        if i < n and van[i] in "hlL":
+            i += 1
+        if i >= n:
+            return                              # "incomplete format"
+        yield rong, cx, van[i]
+        i += 1
 
 
 def _chay_phep(ham, *doi):
@@ -802,13 +859,10 @@ def _kiem_ngan_sach_dinh_dang(mau, doi):
             raise _VuotNganSach(f"độ rộng/độ chính xác có {len(dac_ta)} chữ số")
         return int(dac_ta)
 
-    for m in _MAU_DINH_DANG.finditer(van):
-        if m.group(0) == "%%":
-            continue
-        rong = _so(m.group(1))
-        chinh_xac = _so(m.group(2), la_chinh_xac=True)
+    for dac_rong, dac_cx, kieu in _tach_dinh_dang(van):
+        rong = _so(dac_rong)
+        chinh_xac = _so(dac_cx, la_chinh_xac=True)
         i += 1                                      # chính giá trị được định dạng
-        kieu = m.group(0)[-1]
         if kieu in _KIEU_TRAN:
             tong += rong
         elif kieu in _KIEU_KHUECH_DAI:
@@ -1387,6 +1441,8 @@ def _loi_goi_tran(than: str, sau=0):
         SAI PHÂN với `%` của Python (`t33` (1o));
       · N117 (r33): bộ đọc phụ thuộc của hàng đợi nạp động nhận `eval`/`exec` dựng sẵn bằng CÙNG luật với
         bộ quét (`_kieu_exec_cua`) — bí danh `bi.eval`, `from builtins import eval as ev` cũng được tính;
+      · N118 (r34): đặc tả `%` tách theo ĐÚNG luật CPython (`_tach_dinh_dang`) — khoá ánh xạ đếm ngoặc
+        CÂN BẰNG (`"%((a))s" % {"(a)": "bash"}`), đo sai phân cùng lưới (1o);
       · `type X[T] = …` (PEP 695) có phạm vi chú thích RIÊNG (N47, r16): `T` của nó không rò
         ra phạm vi chứa;
       · callee giải theo PHẠM VI TỪ VỰNG (r8, F3 codex vòng 3): `import subprocess` ở module

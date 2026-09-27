@@ -141,3 +141,15 @@ Kết quả lượt 8 ghi ở `luot8-VERDICT.md`: `changes_requested`, **2 P1 ·
   *"không có script tạo r3 trong packet"*; nay có. `luot9-HINT.patch` (chỉ nhắm EVIDENCE) **không** áp, vì cách đính chính
   trên giữ được hồ sơ.
 
+## Lượt 10/10 — lượt cuối
+
+**`approve`, 0 P1 · 0 P2 · 0 P3**, `HINT.patch` rỗng (`run.json` `9fbc066d`, 477 giây, `ma_thoat 0`; `openai_codex` ·
+`codex_cli` · `machine`; header `gpt-6-astra` / `high`). `reviewed_sha` `8eb076b6d5ff41feafa723829d126e2c34c8ba3b`,
+`reviewed_spec_sha256` `ac7e0129b281b517c69e9a2512a05b47d55ad99f0ac964462c061ea511f70bc1`. F19 **ĐÓNG** (reviewer tự
+đếm 8 lời gọi `rep()` bằng AST và trace, chạy `tao_r3.py` trên bản sao r2 ra r3 giống từng byte). C3/C4 giữ
+**ĐÓNG-MỘT-PHẦN** vì giới hạn xác minh lịch sử ngoài sandbox, không phải finding.
+
+Chuỗi hậu kiểm: lượt 8 `2 P1` → lượt 9 `1 P2` → lượt 10 `0`. Trần 10/10 đã dùng hết. Bước kế: human audit của chủ kho neo
+**revision 3**, rồi merge PR #658 bằng merge commit. Commit mang verdict lượt 10 chỉ thêm hiện vật lượt 10 và mục này
+(cùng tiền lệ đã được chấp nhận ở audit #652 `5851587276`).
+

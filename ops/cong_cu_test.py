@@ -6454,7 +6454,12 @@ def _in_ban_kinh_con():
         if ten == _TEN_GIA_PHAN_DONG:
             bg = _ban_ghi_gia(ten, do_o_nen)
             bg[3][bg[2]][1] = "giả\u2028giữa\u2029cuối\u0085hết"
-            print("BKCON " + json.dumps(bg, ensure_ascii=False), flush=True)
+            # Y1 (r46, codex vòng 40): ghi BYTE UTF-8 thẳng vào `buffer`, KHÔNG qua `print`. Qua `print` thì mã hoá
+            # stdout của con (Windows cục bộ, `PYTHONIOENCODING=ascii`) ném trước khi phép thử kịp đo cách TÁCH —
+            # tức chính phép thử lại mang về phụ thuộc mã hoá mà đường thật đã gỡ.
+            sys.stdout.flush()
+            sys.stdout.buffer.write(("BKCON " + json.dumps(bg, ensure_ascii=False) + "\n").encode("utf-8"))
+            sys.stdout.buffer.flush()
             continue
         if kieu == "f":
             continue

@@ -6335,7 +6335,10 @@ def _nhan_ket_qua_con(n, rc, ra, do_o_nen):
     if rc != 0:
         return None, f"mã thoát {rc}"
     kq = {}
-    for dong in ra.splitlines():
+    # X3 (r45, codex vòng 39): tách CHỈ theo `\n` mà con thực sự viết. `splitlines()` còn cắt ở U+2028, U+2029,
+    # U+0085, `\x0b`… nên một lý do HỢP LỆ chứa các ký tự ấy từng xé đôi bản ghi — chỉ ở đường song song.
+    for dong in ra.split("\n"):
+        dong = dong.rstrip("\r")
         if not dong.startswith("BKCON "):
             continue
         try:
@@ -6386,7 +6389,7 @@ def _cac_ca_da_chay(do_o_nen):
 
 
 # Tên GIẢ chỉ cửa tiến trình con nhận ra — dùng cho tự kiểm, không bao giờ nằm trong `DOT_BIEN`.
-_TIEN_TO_GIA = "__gia_"
+_TIEN_TO_GIA = "__gia_"   # tiền tố DÀNH RIÊNG: tự kiểm đòi 0 tên `DOT_BIEN` mang nó (X2)
 _TEN_GIA_NHANH = "__gia_nhanh_n126__"
 # N129: mỗi con giả vi phạm ĐÚNG MỘT chốt và lọt qua MỌI chốt còn lại — không thế thì gỡ chốt của nó vẫn bị chốt
 # khác bắt, và chốt ấy không có răng riêng (đo được ở r43). (f) không in gì.
@@ -6403,6 +6406,17 @@ _GIA_BAT_THUONG = {
     "__gia_thong_diep_n129__": "e5",
     "__gia_thieu_n129__": "f",
 }
+# X3: bản ghi HỢP LỆ mà lý do chứa U+2028, U+2029, U+0085 — in NGUYÊN VĂN (không thoát), phải được NHẬN.
+_TEN_GIA_PHAN_DONG = "__gia_phan_dong_n129__"
+# X2 (r45, codex vòng 39): tập tên giả ĐÓNG, liệt kê ĐỦ. Bản r44 nhận diện tên giả bằng TIỀN TỐ, nên một đột biến
+# THẬT tên `__gia_…` sẽ được dựng bản ghi đạt mà không hề đo. Nay chỉ tên trong tập này — và KHÔNG có trong
+# `DOT_BIEN` — mới đi nhánh giả; tên thật luôn qua `_do_mot`.
+_TEN_GIA_TAT_CA = frozenset({_TEN_GIA_NHANH, _TEN_GIA_NHANH + "b", _TEN_GIA_PHAN_DONG, *_GIA_BAT_THUONG,
+                             *(t + "_la" for t in _GIA_BAT_THUONG)})
+
+
+def _la_ten_gia(ten):
+    return ten not in DOT_BIEN and ten in _TEN_GIA_TAT_CA
 
 
 def _dich_mong(ten, do_o_nen):
@@ -6412,7 +6426,7 @@ def _dich_mong(ten, do_o_nen):
     """
     if ten in DOT_BIEN:
         return DOT_BIEN[ten][5]
-    if ten.startswith(_TIEN_TO_GIA):
+    if _la_ten_gia(ten):
         return sorted(_cac_ca_da_chay(do_o_nen))[0]
     return None
 
@@ -6429,11 +6443,18 @@ def _in_ban_kinh_con():
     i = sys.argv.index("--ban-kinh-con")
     do_o_nen = json.loads(sys.argv[i + 1])
     ma_thoat = 0
-    in_ = lambda bg: print("BKCON " + json.dumps(bg, ensure_ascii=False), flush=True)
+    # ASCII thuần: stdout của con đổ vào tệp, mà trên Windows mã hoá mặc định của nó KHÔNG phải UTF-8 — chữ Việt
+    # trong lý do sẽ làm `print` ném. Thoát hết thì đường vận chuyển không phụ thuộc mã hoá của nền.
+    in_ = lambda bg: print("BKCON " + json.dumps(bg, ensure_ascii=True), flush=True)
     for ten in sys.argv[i + 2:]:
         kieu = _GIA_BAT_THUONG.get(ten)
-        if not ten.startswith(_TIEN_TO_GIA):
+        if not _la_ten_gia(ten):
             in_(_do_mot(ten, do_o_nen))
+            continue
+        if ten == _TEN_GIA_PHAN_DONG:
+            bg = _ban_ghi_gia(ten, do_o_nen)
+            bg[3][bg[2]][1] = "giả\u2028giữa\u2029cuối\u0085hết"
+            print("BKCON " + json.dumps(bg, ensure_ascii=False), flush=True)
             continue
         if kieu == "f":
             continue
@@ -6471,13 +6492,16 @@ def _in_ban_kinh_con():
 def _tu_kiem_song_song(do_o_nen):
     """Số lỗi của phép tự kiểm N126 — chạy TRƯỚC bảng bán kính.
 
-    Bốn chốt:
+    Sáu chốt:
       (1) ba đột biến thật đo SONG SONG (2 tiến trình) phải cho ĐÚNG dòng báo, số lỗi và THỨ TỰ như TUẦN TỰ — hai
           đường dùng CÙNG `_do_mot` + `_ket_luan_ban_ghi`, nên chốt này đo cả đường vận chuyển bản ghi;
       (2) một tên KHÔNG có trong `DOT_BIEN` phải thành dòng `ĐỎ` + 1 lỗi, không biến mất khỏi bảng;
       (3) N128 S1: số tiến trình `10**9` với hai tên giả phải xong ngay và phóng ĐÚNG hai tiến trình;
       (4) N129: mỗi con giả bất thường phải thành dòng `ĐỎ` mang ĐÚNG lý do từ chối + 1 lỗi, trong khi con BÌNH
-          THƯỜNG chạy cùng lượt vẫn `ok` đúng thứ tự — chốt hai chiều, để bản vá "từ chối tất cả" cũng HỎNG.
+          THƯỜNG chạy cùng lượt vẫn `ok` đúng thứ tự — chốt hai chiều, để bản vá "từ chối tất cả" cũng HỎNG;
+      (5) X3: bản ghi hợp lệ có U+2028/U+2029/U+0085 NGUYÊN VĂN trong lý do phải được NHẬN;
+      (6) X2: 0 tên `DOT_BIEN` mang tiền tố dành riêng, và một tên `__gia_…` KHÔNG thuộc tập giả phải được ĐO
+          thật (`_do_mot` ⇒ không có trong `DOT_BIEN` ⇒ con chết ⇒ `ĐỎ`), không được dựng bản ghi đạt.
     """
     # BA đột biến cho HAI tiến trình ⇒ một nhóm có hai tên (`[a, c]`, `[b]`): bản ráp theo thứ tự NHÓM
     # thay vì thứ tự GỐC sẽ lệch ở đây. Hai tên cho hai tiến trình thì không phân biệt được hai cách ráp.
@@ -6511,6 +6535,18 @@ def _tu_kiem_song_song(do_o_nen):
                 or not ket[1][0][0].startswith(f"  ĐỎ  {gia}: tiến trình con KHÔNG trả kết quả hợp lệ")):
             print(f"  ĐỎ  tự kiểm song song (4{kieu}): con bất thường không thành dòng ĐỎ: {ket!r}"[:600])
             loi += 1
+    ket = _ban_kinh_moi_dot_bien([_TEN_GIA_NHANH, _TEN_GIA_PHAN_DONG], do_o_nen, 2)
+    mong = _ket_luan_ban_ghi(_ban_ghi_gia(_TEN_GIA_PHAN_DONG, do_o_nen), do_o_nen)
+    if len(ket) != 2 or ket[0] != ok_gia or ket[1] != mong or mong[1] != 0:
+        print(f"  ĐỎ  tự kiểm song song (5): bản ghi có ký tự phân dòng Unicode bị từ chối: {ket!r}"[:600])
+        loi += 1
+    trung = sorted(t for t in DOT_BIEN if t.startswith(_TIEN_TO_GIA))
+    tuong_lai = _TIEN_TO_GIA + "tuong_lai_that_n129__"
+    ket = _ban_kinh_moi_dot_bien([_TEN_GIA_NHANH, tuong_lai], do_o_nen, 2)
+    if trung or len(ket) != 2 or ket[1][1] != 1 or not ket[1][0][0].startswith(f"  ĐỎ  {tuong_lai}:"):
+        print(f"  ĐỎ  tự kiểm song song (6): tên dành riêng trong DOT_BIEN {trung!r}, hay tên `__gia_` lạ "
+              f"được dựng bản ghi đạt: {ket!r}"[:600])
+        loi += 1
     print(f"TỰ KIỂM SONG SONG (N126): {'ĐẠT' if not loi else 'HỎNG'}")
     return loi
 

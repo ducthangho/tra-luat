@@ -366,6 +366,13 @@ dieu_kien_dung:
 ghi_chu_chieu_lai: 'TRUONG TAI LIEU, khong phai truong cong. Ghi de nguoi sau doc duoc VI SAO
   g10 ton tai ma khong phai lat lai bon vong review.'
 
+da_bi_thay_the: wp570-bash-nen-r42-g42-opus
+da_bi_thay_the_vi_sao: 'NUA THU NHAT cua bia mo hai chieu, lan thay the THU BA MUOI BON. Di TRUOC vi
+  cong `check` doc tu REF va CHAN [8] khi lease cu chua mang dong nay. Da dem MOI ref mang tep lease g41
+  sau khi chot hai nguon ref (ls-remote / for-each-ref khop, comm -23 RONG tren 466 nhanh): DUNG MOT
+  ref. g41 con han nhung tu day KHONG con la nguoi giu: codex vong 36 ra P2 1 (U1, ket qua cua con thoat
+  khac 0 van duoc nhan); lop moi N129; g42 mang r42.'
+
 closure_status: 'Owner-directed grant, revision 41, generation 41. DIEU KIEN DUNG cham lan ba o lop han
   thoi gian cua vong song song; chu kho KHEP LOP va go may han gio/giet cay. THAY THE g40 bang bia mo hai
   chieu, lan thu BA MUOI BA.

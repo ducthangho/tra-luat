@@ -1,15 +1,15 @@
-# ĐẶC TẢ — `THU-HOI-LEASE-A1a` — **revision 2**, bản nháp 5 (chờ đóng băng bằng human audit)
+# ĐẶC TẢ — `THU-HOI-LEASE-A1a` — **revision 2**, bản nháp 5 (chưa đóng băng)
 
 | trường | giá trị |
 |---|---|
 | `packet_id` | `THU-HOI-LEASE-A1a` (nửa **mã** của slice A1; nửa **cấu hình** là `THU-HOI-LEASE-A1b`) |
-| `revision` | 2 — **bản nháp 5**. Bản nháp 1: commit `f8a37c04`, sha256 `a5aacafa…`, codex lượt 1 `changes_requested` 2 P1 + 5 P2. Bản nháp 2: commit `981b9ea1`, sha256 `1bfdc7bb…`, codex lượt 2 `changes_requested` 1 P1 + 3 P2 (F8–F11; đóng F1, F3–F7, F2 một phần). Bản nháp 3: commit `79b8ec7b`, sha256 `fb67bebd…`, codex lượt 3 `changes_requested` 1 P1 (F12, tồn dư F11; đóng F8–F10). Bản nháp 4: commit `33e19c41`, sha256 `b8856466…`, codex lượt 4 (**cuối**) `changes_requested` 1 P1 + 1 P3 (F13 hạn tràn miền UTC ⇒ rc1 thay rc3, **không** fail-open; F14 lời khai cô lập fixture quá rộng; đóng F12). Bản nháp 5 áp `luot4-HINT.patch` và đóng ba khoảng trống phủ reviewer lượt 4 chỉ ra (§8 mục 2); **không** có lượt codex thứ 5 — quyết định chủ kho (§0 vòng 4). Verdict ở `ops/reviews/thu-hoi-lease-a1a-r2/luot{1,2,3,4}-VERDICT.md`. Revision chỉ tăng khi đóng băng; bản nháp định danh bằng băm. |
+| `revision` | 2 — **bản nháp 5**. Bản nháp 1: commit `f8a37c04`, sha256 `a5aacafa…`, codex lượt 1 `changes_requested` 2 P1 + 5 P2. Bản nháp 2: commit `981b9ea1`, sha256 `1bfdc7bb…`, codex lượt 2 `changes_requested` 1 P1 + 3 P2 (F8–F11; đóng F1, F3–F7, F2 một phần). Bản nháp 3: commit `79b8ec7b`, sha256 `fb67bebd…`, codex lượt 3 `changes_requested` 1 P1 (F12, tồn dư F11; đóng F8–F10). Bản nháp 4: commit `33e19c41`, sha256 `b8856466…`, codex lượt 4 (**cuối**) `changes_requested` 1 P1 + 1 P3 (F13 hạn tràn miền UTC ⇒ rc1 thay rc3, **không** fail-open; F14 lời khai cô lập fixture quá rộng; đóng F12). Bản nháp 5 áp `luot4-HINT.patch` và đóng ba khoảng trống phủ reviewer lượt 4 chỉ ra (§8 mục 2); chủ kho nâng trần lên 10 và cho lặp tới sạch (§0 vòng 4). Verdict ở `ops/reviews/thu-hoi-lease-a1a-r2/luot{1,2,3,4}-VERDICT.md`. Revision chỉ tăng khi đóng băng; bản nháp định danh bằng băm. |
 | `thay_the_cho` | revision 1 `ops/specs/THU-HOI-LEASE-A1a.md`, sha256 `64f92d4026fda7bdeb4326be660614eea2d25f6e30db9a20ff0c1c6aa4f5f37c` (211 dòng, 21 775 B; land qua PR #577, commit `9db7145`). Tệp r1 **giữ nguyên** trong kho để băm của nó vẫn tra được; r2 là tệp riêng. |
 | `packet_issue` | **#564** (`[THU-HOI-LEASE-A1] Packet Issue`). Issue **không** cấp việc; chỉ Issue + lease còn hiệu lực mới giao được (protocol §3.2, §4). |
 | `nguon_cap_viec` | Spec cha **r9** `ops/specs/THU-HOI-LEASE-VA-CAP-LAI.md` §`write_set` dòng A1 · #499 §A (A1–A3), §B (B1–B5) · quyết định chủ kho vòng 2 tại #499 comment [`5825988768`](https://github.com/ducthangho/tra-luat/issues/499#issuecomment-5825988768) · số đo nợ `AG-T0-01B` dạng 2 tại #564 comment [`5847471844`](https://github.com/ducthangho/tra-luat/issues/564#issuecomment-5847471844) |
 | `review_class` | **`sensitive`**: `ops/lease_publish.py` là cổng đọc lease (protocol §8). |
-| `reviewer` | codex `gpt-6-astra`, effort `high` (chỉ thị chủ kho 26-09). Trần `codex_review_calls` của đặc tả này **4** (chủ kho nâng 2 → 4 trong phiên 26-09, khai trên #564 `5847670544` trước lượt 1). Đã dùng **4/4** (hết trần). |
-| `dong_bang` | bằng **human audit của chủ kho** trên bản nháp 5 (vòng 4, §0: lượt codex cuối còn 1 P1 + 1 P3, đã vá theo HINT đã kiểm của reviewer; không gọi lượt 5), rồi merge bằng merge commit. Tới lúc đó tệp này **chưa** đóng băng và **không** lease nào được neo vào nó. |
+| `reviewer` | codex `gpt-6-astra`, effort `high` (chỉ thị chủ kho 26-09). Trần `codex_review_calls` của đặc tả này **4** (chủ kho nâng 2 → 4 trong phiên 26-09, khai trên #564 `5847670544` trước lượt 1). Trần nâng lần 2 lên **10** (#564 `5851241285`); đã dùng **4/10**. |
+| `dong_bang` | lặp codex tới `approve` (0 P1/P2/P3) hoặc chạm trần 10, rồi **human audit của chủ kho**, rồi merge bằng merge commit (§0 vòng 4). Tới lúc đó tệp này **chưa** đóng băng và **không** lease nào được neo vào nó. |
 
 **Định danh tệp này là BĂM, không phải tên nhánh.** Tìm ở `master` trước; chưa thấy thì fetch nhánh
 `claude/spec-a1a-r2-20260926`. Tên nhánh sẽ trôi hoặc bị xoá, băm thì không.
@@ -52,7 +52,7 @@ Hệ quả: M-A và M-C của r1 **ra khỏi** `ngoai_pham_vi`, thành **M12** v
 | câu | nguyên văn lựa chọn | hệ quả |
 |---|---|---|
 | Trần ADR-0044 (§8 mục 1) | **"Cho ngoại lệ, nâng trần A1a"** — mỏ neo #564 [`5851070255`](https://github.com/ducthangho/tra-luat/issues/564#issuecomment-5851070255) | ≤ **3** tệp, ≤ **663** dòng thêm (cận trên ước §8 mục 1), chỉ cho A1a; B1–B5 **ở lại** A1a |
-| Đóng đặc tả sau khi hết trần codex 4/4 với 1 P1 + 1 P3 (lớp `q6-thieu-kiem-id-ten` lần thứ 3 ⇒ Review Rescue Checkpoint) | **"Fix, then human audit (Recommended)"** | Áp `luot4-HINT.patch` (đã được reviewer kiểm 26/26 · 15/15 · byte-equal), đóng ba khoảng trống phủ, rồi **đóng băng bằng human audit**; không gọi codex lượt 5 (tiền lệ C1a1a r5) |
+| Đóng đặc tả sau khi hết trần codex 4/4 với 1 P1 + 1 P3 (lớp `q6-thieu-kiem-id-ten` lần thứ 3 ⇒ Review Rescue Checkpoint) | lần đầu **"Fix, then human audit (Recommended)"**; sau đó **thay** bằng **"Cho phép nâng trần, fix xong chạy lặp tới hết P1, P2, P3"** — mỏ neo #564 [`5851241285`](https://github.com/ducthangho/tra-luat/issues/564#issuecomment-5851241285) | Áp `luot4-HINT.patch`, đóng ba khoảng trống phủ, rồi **lặp codex** (trần 10) tới `approve`; human audit sau cùng |
 
 F1 là lần thứ 7 của hình dạng đã đếm ở §7. Đáp ứng của bản nháp 2 **không** phải một chốt nữa cho M14 mà là **rút thẩm quyền** của nó: dự báo đọc cache thì không có gì để lừa, vì nó không quyết định gì.
 

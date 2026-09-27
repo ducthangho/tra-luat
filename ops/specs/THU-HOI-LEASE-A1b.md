@@ -1,4 +1,4 @@
-# ĐẶC TẢ — `THU-HOI-LEASE-A1b` — **revision 1, bản nháp 2 (CHƯA đóng băng)**
+# ĐẶC TẢ — `THU-HOI-LEASE-A1b` — **revision 1, bản nháp 3 (CHƯA đóng băng)**
 
 | trường | giá trị |
 |---|---|
@@ -8,7 +8,7 @@
 | `review_class` | **`sensitive`**: `ops/lease_publish.py` là cổng đọc lease (protocol §8). |
 | `reviewer` | codex `gpt-6-astra`, effort `high`; trần `codex_review_calls` **10** cho đặc tả này (tiền lệ A1a r2); connector (`advisory_review`); cổng land **`human_audited`** (Q7). |
 | `dong_bang` | **CHƯA.** Chỉ đóng băng khi đủ T1–T6 (§1) **và** đo lại mọi số ở §2 (L5). Tới lúc đó tệp này là DỮ LIỆU, không cấp việc. |
-| `lich_su_ban_nhap` | Bản nháp 1: commit `65a612a`, sha256 `cb9ec4736551e9713d26e8f6b2384f203a37dea3f1d5eb6d8ab923de9337a39a`, codex lượt 1 `changes_requested` **2 P1 + 3 P2** (F1–F5, `ops/reviews/thu-hoi-lease-a1b/luot1-VERDICT.md`). Bản nháp 2 đóng F1–F5 bằng quyết định Q13–Q16 và sửa lời khai. |
+| `lich_su_ban_nhap` | Bản nháp 1: commit `65a612a`, sha256 `cb9ec4736551e9713d26e8f6b2384f203a37dea3f1d5eb6d8ab923de9337a39a`, codex lượt 1 `changes_requested` **2 P1 + 3 P2** (F1–F5, `ops/reviews/thu-hoi-lease-a1b/luot1-VERDICT.md`). Bản nháp 2: commit `673256e`, sha256 `0a1f7213c8f78456c4fdac24c0a0bcc4713e17da15a0204e286f9c2147dbb510`, codex lượt 2 `changes_requested` **1 P1 + 1 P2** (F6–F7, `luot2-VERDICT.md`). Lượt 2 xác nhận **F3 đã vá thật**; F1, F4, F5 **chuyển** sang packet tiền đề (§8.3: chuyển sang successor KHÔNG tính là đã vá — chỉ đóng khi successor land và đo được); F2 vá một phần ⇒ F6. Bản nháp 3 vá F6 (A5/A6/T6 đòi chuyển đổi DƯƠNG và seam WIRING) và F7 (oracle holder + eligibility theo Q6). |
 
 ## 0. Quyết định của chủ kho (27-09-2026)
 
@@ -35,7 +35,7 @@
 |---|---|---|
 | Q13 | F1 (P1): bước đo profile phải có trên canonical **trước** khi đo được digest | **packet tiền đề riêng `THU-HOI-LEASE-A1-DO-PROFILE`**: thêm bước đo vào workflow `thu-hoi` (chạy MÃ CANONICAL tại `workflow_sha`), ghim runner, cờ vẫn `False`. Đo ≥ 2 run canonical sau khi land. M6 cũ **rời** A1b |
 | Q14 | F2 (P1): bật cờ chưa nối luật mới vào verdict production — `lenh_check`/`lenh_ai_dang_giu`/`lenh_kiem_thu_hoi_github` không gọi discovery (codex đo AST) | **packet tiền đề riêng `THU-HOI-LEASE-A1-WIRING`**: nối sổ + discovery vào verdict production **sau cờ** (cờ `False` ⇒ hành vi y hệt), land với cờ `False`. A1b chỉ **bật** + nghiệm thu |
-| Q15 | F2 (P1): M5 "mọi rc bằng nhau" trái r9 Q6 | **phân loại delta theo Q6** trên cùng map ref + cùng clock: chỉ cho `0→8` (bảo thủ) ở cặp thay thế sinh sau mốc; delta khác ⇒ ĐỎ |
+| Q15 | F2 (P1): M5 "mọi rc bằng nhau" trái r9 Q6 | **phân loại delta theo Q6** trên cùng map ref + cùng clock — đủ HAI trục của Q6 (r9 `:381–388`): **eligibility** (rc) chỉ cho `0→8` bảo thủ ở cặp thay thế sinh sau mốc; **holder** so TẬP theo ID/path kèm nguyên nhân, không suy từ rc (codex lượt 2 F7). Delta khác ⇒ ĐỎ |
 | Q16 | F4 (P2): nợ "C == S" trong hợp đồng consumer | **packet consumer đóng**: chốt hợp đồng C/S/H/T và có ca C≠S. A1b neo exact SHA + entry point consumer, test import consumer thật |
 
 ## 1. Tiền đề — thiếu một ⇒ KHÔNG đóng băng, KHÔNG cấp lease
@@ -47,7 +47,7 @@
 | T3 | **facts Q10 (a)–(i)** trên #656 | **CHƯA** | comment ID ghim vào bản đóng băng |
 | T4 | **ruleset** đủ Q3 | **CHƯA** — required checks `gate (ubuntu-latest)`, `gate-packet-loop (ubuntu-latest)`, **không** `thu-hoi`; `allowed_merge_methods = [merge, squash, rebase]`; `bypass_actors = []`; strict **chưa đọc được** (`branches/master/protection` ⇒ 403) | `GET rules/branches/master`, `GET rulesets/20856202` |
 | T5 | **`THU-HOI-LEASE-A1-DO-PROFILE` đã land** và có **≥ 2** receipt của run canonical cách **≥ 24 h** cho **cùng** digest schema v2 (Q13) | **CHƯA** — workflow tại `67802bf` có 2 bước `run`, không gọi `hoso_adapter_do` (codex lượt 1) | receipt: run ID, attempt, `workflow_sha`, digest, `image_os`/`image_version` |
-| T6 | **`THU-HOI-LEASE-A1-WIRING` đã land** với cờ `False` (Q14) | **CHƯA** — chưa có spec | entry point production gọi discovery khi cờ `True` (fixture tiêm cờ) |
+| T6 | **`THU-HOI-LEASE-A1-WIRING` đã land** với cờ `False` (Q14), có: exact commit SHA · danh sách **đường production** cần nghiệm thu (`check`, `ai-dang-giu`, admission `kiem-thu-hoi-github`) · **seam tiêm** map ref, clock, nguồn discovery nội bộ · kết quả discovery **quyết định** verdict (không chỉ được gọi) | **CHƯA** — chưa có spec | SHA + entry point + chữ ký seam ghim vào bản đóng băng; ca "gọi discovery rồi bỏ kết quả" của chính packet WIRING phải ĐỎ |
 
 ## 2. Số đo (L5 — đo lại trước MỖI bước công bố)
 
@@ -90,7 +90,7 @@ Hiện vật review/biên nhận đo ở `ops/reviews/thu-hoi-lease-a1b/**`, nh�
 | **M2** | Ca **wiring thật** qua **consumer thật** (import, không chép validator): join check-run → suite → run → attempt → artifact; từng mắt xích sai ⇒ consumer từ chối; có ca C≠S | `ops/lease_publish_test.py` |
 | **M3** | Ca khoá `BIA_MO_LICH_SU` = giá trị dẫn xuất Q9 | `ops/lease_publish_test.py` |
 | **M4** | `PROFILE_ADAPTER_DA_DUYET = frozenset({<digest v2 chủ kho duyệt>})` — lấy từ receipt T5, không từ máy executor | `ops/lease_publish.py` |
-| **M5** | Ca **phân loại delta** (Q15): cùng map ref + clock, cờ `False` → `True`; chỉ `0→8` ở cặp sau mốc được phép; mọi delta mở quyền (`8→0`, `11→0`, `12→0`) ⇒ ĐỎ | `ops/lease_publish_test.py` |
+| **M5** | Ca **phân loại delta** (Q15), cùng map ref + clock, cờ `False` → `True`, qua **verdict thật** của WIRING (không chép validator): (a) **fixture dương bắt buộc** — cặp thay thế sau mốc, sổ rỗng — phải cho **đúng** `0→8`; tập delta rỗng ⇒ ĐỎ; (b) eligibility: ngoài (a), mọi delta mở quyền (`8→0`, `11→0`, `12→0`) ⇒ ĐỎ; (c) holder: so **tập holder theo ID/path** kèm nguyên nhân trước/sau — mất một holder khi còn holder khác (rc vẫn `11`) ⇒ ĐỎ trừ khi nguyên nhân được Q6 cho phép | `ops/lease_publish_test.py` |
 | **M6** | Ca **production qua discovery**: cờ `True` + mỏ neo đúng ⇒ discovery chạy; mỏ neo sai/rỗng ⇒ `12` | `ops/lease_publish_test.py` |
 
 ## 6. `nghiem_thu` — mỗi tiêu chí nêu phép đo làm nó ĐỎ (L3)
@@ -101,8 +101,8 @@ Hiện vật review/biên nhận đo ở `ops/reviews/thu-hoi-lease-a1b/**`, nh�
 | A2 | M2: consumer thật chấp nhận fixture đủ; từ chối từng mắt xích sai; canary PR thật S≠H **và** C≠S cho join đủ qua API | đột biến gỡ một mắt xích mà ca xanh; canary thiếu mắt xích |
 | A3 | M3: script dẫn xuất A1a chạy lại trên ứng viên, clock = lúc bật, ra **đúng** hằng | lệch digest/số cặp ⇒ DỪNG |
 | A4 | M4: digest mỏ neo = digest trong ≥ 2 receipt T5; chủ kho trích nguyên digest trong audit | receipt khác nhau ⇒ DỪNG; mỏ neo ≠ receipt |
-| A5 | M5: delta cờ `False`→`True` chỉ gồm `0→8` ở cặp sau mốc; biên nhận đếm delta **theo loại** trên kho thật | đột biến cho một nhánh mở quyền khi cờ `True` mà ca xanh |
-| A6 | M6: discovery chạy khi mỏ neo đúng; mỏ neo sai/rỗng ⇒ `12` trên đường production | đột biến bỏ phép so mỏ neo mà ca xanh (có đường production từ T6) |
+| A5 | M5 (a)(b)(c); biên nhận đếm delta **theo loại và theo trục** (eligibility / holder) trên kho thật | đột biến "gọi discovery rồi bỏ kết quả" (fixture dương ra delta rỗng) mà ca xanh; đột biến mở quyền một nhánh mà ca xanh; đột biến bỏ một holder trong tập ≥ 2 holder mà ca xanh |
+| A6 | M6: trên từng đường production của T6, mỏ neo đúng ⇒ kết quả discovery **đổi verdict** như fixture dương M5(a); mỏ neo sai/rỗng ⇒ `12` | đột biến bỏ phép so mỏ neo mà ca xanh; đột biến gọi discovery rồi bỏ kết quả mà ca xanh |
 | A7 | T4 đo bởi executor (API ruleset) trước cấp lease **và** trước merge | thiếu `thu-hoi`/strict/merge-only/không bypass ⇒ DỪNG |
 | A8 | ADR-0044 ≤ 300 dòng thêm | vượt mà chưa có ngoại lệ chủ kho |
 
@@ -122,6 +122,7 @@ Chép từ A1a r2 §7 (`9bc0fe28…`), cộng #651 và lượt 1 của đặc t�
 | "quyết định đổi bộ lọc bị đọc thành quyền đổi nguồn" | 1 | A1a r2 lượt 1 F2 |
 | "ô tự do trong workflow" | 4 | #651 lượt 2–5 — áp cho `THU-HOI-LEASE-A1-DO-PROFILE` |
 | **"đặc tả hứa thứ tiền đề chưa có producer/đường nối"** (mới) | **2** | A1b lượt 1 F1 (bước đo profile), F2 (wiring production) |
+| **"tiêu chí thoả được bởi tập rỗng"** (mới) | **2** | A1b lượt 2 F6 (delta rỗng qua A5), F7 (delta rc rỗng che mất holder) — cùng gốc: tiêu chí chỉ cấm cái XẤU mà không đòi cái TỐT phải xảy ra |
 
 ## 8. `chua_do_duoc`
 

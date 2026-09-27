@@ -57,7 +57,9 @@ branch: claude/ci-gate-tach-gate-ops-r1-g1
 branch_ownership: exclusive
 branch_ghi_chu: >-
   Spec + lease o nhanh ops/cap-lease-ci-gate-tach-gate-ops (de ops-publish-lease.yml dang ban chieu); ma o nhanh
-  claude/ci-gate-tach-gate-ops-r1-g1 re tu commit lease tren nhanh ops (nhanh ops la to tien cua nhanh ma).
+  claude/ci-gate-tach-gate-ops-r1-g1 dat THANG tren start_from_sha (khong mang commit spec/lease) de diff PR chi
+  con W1 — sua theo Codex CLI luot 1 (P2 nguong-300-bo-sot-spec-lease: 5c79fa2..3fa7773 = +438 vi tinh ca spec 132
+  + lease 101). Spec/lease vao master bang PR bookkeeping rieng sau land (tien le #659).
 start_from_sha: 5c79fa2c94b328ae3bbbef52a4cfa820fc40bc4a
 immutable_acceptance_baseline: 5c79fa2c94b328ae3bbbef52a4cfa820fc40bc4a
 continuation_base: 5c79fa2c94b328ae3bbbef52a4cfa820fc40bc4a
@@ -99,3 +101,7 @@ cam_tuyet_doi:
 chua_do_duoc:
   - 'Danh tinh nguoi ky: #566.'
   - 'Effort thuc te cua phien executor.'
+lease_sua_lan_cuoi: '2026-09-27T10:40:00Z'
+lease_sua_ghi_chu: >-
+  Lan 1: chi sua branch_ghi_chu (nhanh ma dat thang tren master thay vi re tu commit lease). Khong doi write set,
+  han, spec, branch.

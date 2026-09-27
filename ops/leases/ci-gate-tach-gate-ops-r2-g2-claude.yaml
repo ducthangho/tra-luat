@@ -19,7 +19,9 @@ recorded_by: claude-session
 recorder_is_dispatcher: false
 
 leased_at_utc: '2026-09-27T11:05:00Z'
-lease_expires_at_utc: '2026-09-28T11:05:00Z'
+lease_expires_at_utc: '2026-09-27T13:30:00Z'
+han_ghi_chu: >-
+  Goc 24 gio (2026-09-28T11:05:00Z). RUT NGAN ve 2026-09-27T13:30:00Z — xem thu_hoi_bang_rut_han.
 
 packet_id: CI-GATE-TACH-GATE-OPS
 packet_slug: CI-GATE-TACH-GATE-OPS
@@ -109,3 +111,20 @@ cam_tuyet_doi:
 chua_do_duoc:
   - 'Danh tinh nguoi ky: #566.'
   - 'Effort thuc te cua phien executor.'
+lease_sua_lan_cuoi: '2026-09-27T13:30:00Z'
+lease_sua_ghi_chu: >-
+  Lan 1: rut ngan lease_expires_at_utc (thu_hoi_bang_rut_han). Khong doi write set, spec, branch.
+thu_hoi_bang_rut_han:
+  han_goc_utc: '2026-09-28T11:05:00Z'
+  han_moi_utc: '2026-09-27T13:30:00Z'
+  chi_thi: >-
+    Chu kho trong phien Claude Code 2026-09-27 (sau land #662): "Land va bookeeping di. Thu hoi r2 g2."
+  ly_do: 'Packet #660 da LAND (PR #662 merge 518faca7c79b55f068bef8996d28cedad3d242aa, 2026-09-27T13:20Z).'
+  vi_sao_khong_dung_so: >-
+    Theo tien le #651: so ops/thu-hoi/ chua kich hoat (SO_THU_HOI_KICH_HOAT = False); rut han chi dung co che DA CAI
+    (phan loai lease theo han).
+  gioi_han: >-
+    Ref mang lease nay: nhanh ops/cap-lease-ci-gate-tach-gate-ops (ban rut han) va master sau PR bookkeeping. Nhanh
+    ma claude/ci-gate-tach-gate-ops-r1-g1 KHONG mang tep lease. Nghiem thu: ai-dang-giu .github/workflows/ci.yml
+    khong con ci-gate-tach-gate-ops-r2-g2-claude trong NGUOI_GIU khi quet du ref.
+

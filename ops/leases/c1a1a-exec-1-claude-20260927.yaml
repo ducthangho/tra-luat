@@ -1,0 +1,102 @@
+# Lease EXECUTOR — packet #650, LAND-DOC-RECEIPT-THU-HOI-C1a1a, generation 1.
+#
+# NGUỒN SỰ THẬT LÀ TỆP NÀY. Comment trên "#650" chỉ là bản chiếu do
+# `.github/workflows/ops-publish-lease.yml` đăng khi tệp này được push lên nhánh `ops/**`.
+#
+# NHỚ ĐÓNG NHÁY mọi giá trị chứa `#`.
+
+schema_version: 2
+event: executor_lease_granted
+packet_issue: 650
+packet_id: LAND-DOC-RECEIPT-THU-HOI-C1a1a
+generation: 1
+revision: 5
+lease_id: c1a1a-exec-1-claude-20260927
+
+spec: ops/specs/LAND-DOC-RECEIPT-THU-HOI-C1a1a.md
+spec_source_commit: 0fc9766f39b585df3021ec43427c3866ae8271a2
+spec_hash: 978058983e8eddefebfba267dbff2ef5cee95daf9b2d4847121d43b8cff89d77
+spec_hash_note: >-
+  sha256 cua CHINH tep spec tai spec_source_commit (blob 8224ba54176f6bbfba528ed2e3fb6555852ba336).
+  Dong bang bang human audit '#499' comment 5845868954; readback '#499' comment 5847194470.
+
+role: executor
+provider: claude
+executor: claude
+access: read-write
+review_class: sensitive
+effective_review_class: sensitive
+review_class_note: >-
+  Bo kiem ma land-packets se dua vao de chap nhan receipt thu-hoi (protocol §8 d.680: review/land authority).
+
+write_set:
+  - .claude/dev/doc_receipt_thu_hoi.py
+  - .claude/dev/doc_receipt_thu_hoi_test.py
+  - .claude/dev/ci_dang_ky_test.py
+write_set_note: >-
+  Ba tep san pham, dung spec §2. Nhanh lam viec la nhanh spec, nen PR thi cong con mang theo
+  `ops/specs/LAND-DOC-RECEIPT-THU-HOI-C1a1a.md` (quyet dinh chu kho, phuong an b): tep ay CHI DUOC
+  MANG THEO, sha256 phai giu nguyen 978058983e8e... tai head; sua no la finding. Tran dong ADR-0044
+  (ngoai le co pham vi <=400 dong them, spec A14) tinh tren BA tep san pham.
+
+pham_vi_du_kien:
+  so_viec: 3
+  viec:
+    - 'Module thuan va CLI kiem-json theo M1-M6 (K1-K5), khong goi git, khong mang.'
+    - 'Suite theo M7 va A1-A15, kem bang nghia vu A0 theo §5.0 (disposition witness_killed /
+      equivalent_verified / unresolved; unresolved phai bang 0).'
+    - 'Dang ky suite vao MOI cua ci_dang_ky_test.py voi regex backreference theo M8; do lai regex
+      tren chay_moi hien hanh (spec §11).'
+
+KHONG_duoc_phep:
+  - 'Goi git, mang, hay tien trinh con trong module (C1a1b, C1a2, C1b).'
+  - 'Sua ops/lease_publish.py, workflow thu-hoi, hay spec da dong bang.'
+  - 'Cat ca hay gop ID de vua tran dong: vuot 400 thi DUNG va hoi chu kho.'
+  - 'Sua bang_chung_xanh dung chung trong ci_dang_ky_test.py.'
+  - 'Merge PR cua packet nay. Viec bam nut thuoc chu kho.'
+  - 'Chay CI hay full CI bang tay: manual_ci_budget la 0.'
+  - 'Chay CI Windows.'
+
+branch: claude/spec-c1a1-doc-receipt-20260925
+branch_ownership: exclusive
+target_branch_neu_land: master
+
+base_sha: 27b74eb6ef6ba9d81f988caf9059bd99461748fc
+start_from_sha: 04f2b5fea60bbdd2fdd8e8eae9fa00871c92fc77
+reviewed_sha_required: 04f2b5fea60bbdd2fdd8e8eae9fa00871c92fc77
+
+granted_by: ducthangho
+granted_on_instruction: 'direct, in-session, 2026-09-27: "Cap lease va thi cong di" (thay dieu kien "khi duong trong" ngay 26-09)'
+recorded_by: claude-session
+recorder_is_dispatcher: false
+recorder_note: >-
+  Phien agent GO HO. granted_by la chu kho va chi chu kho.
+authority_basis: '§2 — start/pause/resume/reroute/override/authorize thuoc chu kho'
+
+leased_at_utc: '2026-09-27T10:35:00Z'
+lease_expires_at_utc: '2026-09-28T10:35:00Z'
+run_minutes: 1440
+
+preconditions_measured_at_utc: '2026-09-27T10:35:00Z'
+chong_lan_write_set:
+  do_bang: 'python ops/lease_publish.py ai-dang-giu <tung duong>, rc doc truc tiep'
+  ket_qua: >-
+    doc_receipt_thu_hoi.py rc=0 NGUOI_GIU 0; doc_receipt_thu_hoi_test.py rc=0 NGUOI_GIU 0;
+    ci_dang_ky_test.py rc=11 NGUOI_GIU 2 — CA HAI la ban sao cu cua packet DA LAND tren nhanh phien khac:
+    ci-registry-pretooluse-che-do-nhe-r1-g1-claude ('#647' closed completed; ban tren master da_bi_thay_the;
+    con dem vi nhanh claude/spec-a1a-r2-20260926; het 2026-09-27T13:31Z) va
+    ci-registry-thu-hep-vung-r1-g1-claude ('#651' da land; da rut han ve 2026-09-26T23:25Z o '#654'/'#655';
+    con dem vi blob cu tren ops/cap-lease-570-g33; het 2026-09-27T15:19Z).
+chong_lan_ghi_de_chu_kho:
+  ly_do: >-
+    Chu kho chi thi cap ngay du ci_dang_ky_test.py con hai nguoi giu tren. Ca hai thuoc packet da land nen khong
+    con ai ghi vao duong ay; day la no AG-T0-01B (ban sao lease tren nhanh khac khong nhan bia mo/rut han), ghi o
+    '#564' comment 5847471844. Phien nay KHONG sua lease cua packet khac.
+  rui_ro_da_khai: 'Neu mot phien khac con dung that mot trong hai lease cu tren nhanh cua no, se co hai writer tren ci_dang_ky_test.py toi 15:19Z.'
+master_sha_at_grant: 27b74eb6ef6ba9d81f988caf9059bd99461748fc
+
+gate_bat_buoc:
+  - 'Diff so merge-base: dung ba tep san pham + tep spec mang theo (sha256 khong doi), khong hon.'
+  - 'Bang nghia vu A0 day du, unresolved = 0; reviewer doi chieu nguoc tu M1-M6.'
+  - 'Moi ca moi phai co dot bien lam no DO dung assertion dich, hoac equivalent_verified co do.'
+  - 'Doc lai (readback) tep sau moi lan ghi.'

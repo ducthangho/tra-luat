@@ -6252,63 +6252,39 @@ def _so_tien_trinh_ban_kinh():
     return min(so, _TRAN_TIEN_TRINH)
 
 
-_HAN_LO_BAN_KINH = 40 * 60
-_SO_LAN_PHONG = [0]     # đếm số tiến trình con đã phóng — chỉ tự kiểm (4) đọc
+_SO_LAN_PHONG = [0]     # đếm số tiến trình con đã phóng — chỉ tự kiểm (3) đọc
 
 
-def _han_lo_ban_kinh():
-    """Hạn (giây) cho CẢ PHA đột biến. `CONG_CU_TEST_HAN_LO_GIAY` ghi đè; không đọc được ⇒ mặc định.
+def _ban_kinh_moi_dot_bien(cac_ten, do_o_nen, so_tien_trinh):
+    """[(dòng báo, số lỗi)] theo ĐÚNG thứ tự `cac_ten`: tuần tự trong tiến trình này, hay chia cho tiến trình con.
 
-    40 phút, ĐO chứ không đoán. Run 36310980284 (r39, `a97b124`) trên `ubuntu-latest`: runner có HAI lõi nên
-    chạy 2 tiến trình, và hạn 30 phút cắt đúng 35/212 đột biến (177 xong) — tức cả bảng cần ~36 phút ở đó (máy 4
-    lõi của phiên: ~23 phút). Ngân sách job 60 phút: ~2 phút cài đặt + ~3 phút 53 ca và tự kiểm + 40 phút pha đột
-    biến + ~6 phút bước sau ≈ 51 phút, dư ~10%. Hết hạn thì bảng vẫn in đủ dòng `ĐỎ` trước trần job (đo được ở
-    chính run ấy: job kết thúc ĐỎ ở phút ~33, KHÔNG bị huỷ). Runner Windows CHƯA đo.
-    """
-    tho = os.environ.get("CONG_CU_TEST_HAN_LO_GIAY")
-    if tho is not None and tho.strip().isdigit() and int(tho) >= 1:
-        return float(int(tho))
-    return float(_HAN_LO_BAN_KINH)
+    FAIL-CLOSE: đột biến nào tiến trình con KHÔNG trả kết quả (chết, in lạ) thì thành một dòng `ĐỎ` kèm lý do và
+    tính MỘT lỗi — không bao giờ biến mất khỏi bảng.
 
-
-def _ban_kinh_moi_dot_bien(cac_ten, do_o_nen, so_tien_trinh, het_han=None):
-    """[(dòng báo, số lỗi)] theo ĐÚNG thứ tự `cac_ten`, đo trong `so_tien_trinh` tiến trình con CÓ QUẢN LÝ.
-
-    `het_han` là mốc `time.monotonic()` TUYỆT ĐỐI của cả pha đột biến; `None` ⇒ neo mới `_han_lo_ban_kinh()`.
-
-    FAIL-CLOSE: đột biến nào tiến trình con KHÔNG trả kết quả (chết, hết hạn, in lạ) thì thành một dòng `ĐỎ`
-    kèm lý do và tính MỘT lỗi — không bao giờ biến mất khỏi bảng. Dọn cây không xác nhận được ⇒ thêm MỘT lỗi.
-
-    N127 (r39, codex vòng 33): một hạn cho cả lô, neo lúc phóng; mỗi lần chờ chỉ nhận phần còn lại; hết hạn
-    ⇒ giết CẢ CÂY.
-    N128 (r40, codex vòng 34): hạn ấy nay là của CẢ PHA — tự kiểm và lô thật dùng CHUNG một mốc (S3); MỌI đường
-    đi qua tiến trình con có quản lý, kể cả `so_tien_trinh == 1` hay một đột biến (S2: bản r39 `return` sớm vào
-    đường trong-tiến-trình, không hạn nào); số tiến trình kẹp theo số đột biến (S1).
+    LỚP ĐÃ KHÉP (chủ kho, 2026-09-27, r41): TIẾN TRÌNH CON TREO. Ba vòng codex liên tiếp (33 · 34 · 35) tìm ra khe
+    mới trong chính bộ máy hạn giờ/giết cây dựng để in dòng `ĐỎ` trước trần job (N127, N128). Chủ kho khép lớp và
+    GỠ bộ máy ấy: một con treo thì job `gate` bị GitHub HUỶ ở trần 60 phút, mà huỷ KHÔNG phải success, nên land
+    vẫn bị chặn — fail-close do CI. Cái mất đi chỉ là dòng `ĐỎ` chẩn đoán; không có đường nào để một con treo cho
+    ra XANH. Đây là nợ có tên, không phải lỗ chưa biết.
     """
     if not cac_ten:
         return []
-    het_han = time.monotonic() + _han_lo_ban_kinh() if het_han is None else het_han
     so = max(1, min(int(so_tien_trinh), len(cac_ten), _TRAN_TIEN_TRINH))
+    if so == 1:
+        return [_ban_kinh_mot(t, do_o_nen) for t in cac_ten]
     nhom = [cac_ten[i::so] for i in range(so)]
     cac_con = []
     for n in nhom:
         tep_ra = tempfile.TemporaryFile()
-        kw = {"start_new_session": True} if os.name == "posix" else {
-            "creationflags": getattr(subprocess, "CREATE_NEW_PROCESS_GROUP", 0)}
         p = subprocess.Popen([sys.executable, str(TEP_TEST), "--ban-kinh-con",
                               json.dumps(sorted(do_o_nen)), *n],
                              stdout=tep_ra, stderr=subprocess.STDOUT, stdin=subprocess.DEVNULL,
-                             cwd=str(GOC), **kw)
+                             cwd=str(GOC))
         _SO_LAN_PHONG[0] += 1
         cac_con.append((n, p, tep_ra))
-    kq, ghi_chu, don_hong = {}, {}, []
+    kq, ghi_chu = {}, {}
     for n, p, tep_ra in cac_con:
-        try:
-            rc = p.wait(timeout=max(0.0, het_han - time.monotonic()))
-        except subprocess.TimeoutExpired:
-            if not _giet_cay_tien_trinh(p):
-                don_hong.append(n[0])
-            rc = "hết hạn pha đột biến"
+        rc = p.wait()
         tep_ra.seek(0)
         ra = tep_ra.read().decode("utf-8", "replace")
         tep_ra.close()
@@ -6322,71 +6298,12 @@ def _ban_kinh_moi_dot_bien(cac_ten, do_o_nen, so_tien_trinh, het_han=None):
                     kq[ten] = (list(cac_dong), int(loi))
         for ten in n:
             ghi_chu[ten] = f"rc={rc}, đuôi đầu ra: {ra[-300:]!r}"
-    ket = [kq.get(t) or ([f"  ĐỎ  {t}: tiến trình con KHÔNG trả kết quả ({ghi_chu.get(t)})"], 1)
-           for t in cac_ten]
-    for t in don_hong:
-        i = cac_ten.index(t)
-        dong, loi = ket[i]
-        ket[i] = (dong + [f"  ĐỎ  {t}: dọn cây tiến trình con KHÔNG xác nhận được"], loi + 1)
-    return ket
+    return [kq.get(t) or ([f"  ĐỎ  {t}: tiến trình con KHÔNG trả kết quả ({ghi_chu.get(t)})"], 1)
+            for t in cac_ten]
 
 
-def _pid_con_song(pid):
-    """True/False: tiến trình `pid` còn chạy không (zombie tính là ĐÃ CHẾT); None khi nền không cho đo.
-
-    Linux đọc `/proc`; POSIX khác hỏi `ps`; Windows hỏi `tasklist`. Chỉ dùng cho tự kiểm (3)/(5).
-    """
-    try:
-        if Path(f"/proc/{pid}/stat").exists():
-            return Path(f"/proc/{pid}/stat").read_text().rsplit(")", 1)[1].split()[0] != "Z"
-        if os.name == "posix":
-            r = subprocess.run(["ps", "-o", "stat=", "-p", str(pid)], capture_output=True, text=True, timeout=30)
-            trang = r.stdout.strip()
-            return bool(trang) and not trang.startswith("Z")
-        r = subprocess.run(["tasklist", "/FI", f"PID eq {pid}", "/NH", "/FO", "CSV"],
-                           capture_output=True, text=True, timeout=30)
-        return f'"{pid}"' in r.stdout
-    except (OSError, subprocess.SubprocessError, IndexError):
-        return None if os.name != "posix" else False
-
-
-def _giet_cay_tien_trinh(p):
-    """Giết tiến trình con CÙNG hậu duệ (mỗi con chạy trong nhóm tiến trình riêng), thu hồi, và trả True chỉ
-    khi việc dọn XÁC NHẬN được.
-
-    POSIX: `killpg` cả nhóm — lỗi khác `ProcessLookupError` ⇒ không xác nhận. Windows: `taskkill /T /F`, và
-    N128 (r40, codex vòng 34 — S4) ĐỌC mã thoát của nó: khác 0 ⇒ không xác nhận (CLAUDE.md: taskkill có thể
-    trả `Access denied` ngay trên tiến trình do chính mình sinh). `kill()` + `wait()` luôn chạy sau cùng để
-    thu hồi chính tiến trình con.
-    """
-    xac_nhan = True
-    try:
-        if os.name == "posix":
-            import signal
-            try:
-                os.killpg(p.pid, signal.SIGKILL)
-            except ProcessLookupError:
-                pass
-        else:
-            r = subprocess.run(["taskkill", "/T", "/F", "/PID", str(p.pid)],
-                               capture_output=True, timeout=60)
-            xac_nhan = r.returncode == 0
-    except (OSError, subprocess.SubprocessError):
-        xac_nhan = False
-    try:
-        p.kill()
-    except OSError:
-        pass
-    try:
-        p.wait(timeout=60)
-    except subprocess.TimeoutExpired:
-        xac_nhan = False
-    return xac_nhan
-
-
-# Hai tên GIẢ chỉ cửa tiến trình con nhận ra — dùng cho tự kiểm, không bao giờ nằm trong `DOT_BIEN`.
-_TEN_GIA_NHANH = "__gia_nhanh_n127__"
-_TEN_GIA_TREO = "__gia_treo_n127__"
+# Tên GIẢ chỉ cửa tiến trình con nhận ra — dùng cho tự kiểm, không bao giờ nằm trong `DOT_BIEN`.
+_TEN_GIA_NHANH = "__gia_nhanh_n126__"
 
 
 def _in_ban_kinh_con():
@@ -6397,86 +6314,40 @@ def _in_ban_kinh_con():
         if ten == _TEN_GIA_NHANH:
             print("BKCON " + json.dumps([ten, [f"  ok  {ten}"], 0], ensure_ascii=False), flush=True)
             continue
-        if ten == _TEN_GIA_TREO:
-            # Treo CÙNG một tiến trình cháu, ghi pid cháu ra tệp mà tự kiểm chỉ định: cây phải chết trọn.
-            chau = subprocess.Popen([sys.executable, "-c", "import time; time.sleep(3600)"])
-            tep_chau = os.environ.get("N127_TEP_CHAU")
-            if tep_chau:
-                Path(tep_chau).write_text(str(chau.pid), encoding="utf-8")
-            time.sleep(3600)
         cac_dong, loi = _ban_kinh_mot(ten, do_o_nen)
         print("BKCON " + json.dumps([ten, cac_dong, loi], ensure_ascii=False), flush=True)
     sys.exit(0)
 
 
-def _do_treo(so_tien_trinh, han, het_han_pha):
-    """(kết quả, giây, cháu còn sống) của một lô `[NHANH, TREO]` với hạn `min(han, phần còn lại của pha)`."""
-    with tempfile.TemporaryDirectory() as tmp:
-        tep_chau = Path(tmp) / "chau.pid"
-        cu = os.environ.get("N127_TEP_CHAU")
-        os.environ["N127_TEP_CHAU"] = str(tep_chau)
-        t0 = time.monotonic()
-        try:
-            ket = _ban_kinh_moi_dot_bien([_TEN_GIA_NHANH, _TEN_GIA_TREO], [], so_tien_trinh,
-                                         het_han=min(t0 + han, het_han_pha))
-        finally:
-            if cu is None:
-                os.environ.pop("N127_TEP_CHAU", None)
-            else:
-                os.environ["N127_TEP_CHAU"] = cu
-        giay = time.monotonic() - t0
-        chau_song = None
-        for _ in range(50):
-            if not tep_chau.is_file():
-                break
-            chau_song = _pid_con_song(int(tep_chau.read_text(encoding="utf-8")))
-            if chau_song is not True:
-                break
-            time.sleep(0.1)
-    return ket, giay, chau_song
+def _tu_kiem_song_song(do_o_nen):
+    """Số lỗi của phép tự kiểm N126 — chạy TRƯỚC bảng bán kính.
 
-
-def _tu_kiem_song_song(do_o_nen, het_han_pha):
-    """Số lỗi của phép tự kiểm N126–N128 — chạy TRƯỚC bảng bán kính, trong CÙNG hạn pha với bảng.
-
-    Năm chốt:
-      (1) ba đột biến thật đo trong 2 tiến trình phải cho ĐÚNG dòng báo, số lỗi và THỨ TỰ như trong 1 tiến trình;
+    Ba chốt:
+      (1) ba đột biến thật đo SONG SONG (2 tiến trình) phải cho ĐÚNG dòng báo, số lỗi và THỨ TỰ như TUẦN TỰ;
       (2) một tên KHÔNG có trong `DOT_BIEN` phải thành dòng `ĐỎ` + 1 lỗi, không biến mất khỏi bảng;
-      (3) 2 tiến trình: con TREO (kèm cháu) bị cắt ở hạn, thành `ĐỎ`; con kia giữ kết quả; cháu chết;
-      (4) N128 S1: số tiến trình `10**9` với hai tên giả phải xong ngay và phóng ĐÚNG hai tiến trình;
-      (5) N128 S2: MỘT tiến trình, `[NHANH, TREO]` — NHANH giữ kết quả, TREO bị cắt ở hạn, cháu chết.
+      (3) N128 S1: số tiến trình `10**9` với hai tên giả phải xong ngay và phóng ĐÚNG hai tiến trình.
     """
     # BA đột biến cho HAI tiến trình ⇒ một nhóm có hai tên (`[a, c]`, `[b]`): bản ráp theo thứ tự NHÓM
     # thay vì thứ tự GỐC sẽ lệch ở đây. Hai tên cho hai tiến trình thì không phân biệt được hai cách ráp.
     mau = [t for t in ("t1_rc_gop", "bn_khong_tran_tep", "bn_khong_git_bo_kiem_oid") if t in DOT_BIEN]
     loi = 0
-    mot = _ban_kinh_moi_dot_bien(mau, do_o_nen, 1, het_han=het_han_pha)
-    hai = _ban_kinh_moi_dot_bien(mau, do_o_nen, 2, het_han=het_han_pha)
-    if len(mau) != 3 or mot != hai or any(l for _, l in mot):
-        print(f"  ĐỎ  tự kiểm song song (1): 1 tiến trình {mot!r} ≠ 2 tiến trình {hai!r}")
+    tuan_tu = _ban_kinh_moi_dot_bien(mau, do_o_nen, 1)
+    song_song = _ban_kinh_moi_dot_bien(mau, do_o_nen, 2)
+    if len(mau) != 3 or tuan_tu != song_song or any(l for _, l in tuan_tu):
+        print(f"  ĐỎ  tự kiểm song song (1): tuần tự {tuan_tu!r} ≠ song song {song_song!r}")
         loi += 1
     ma = "__khong_ton_tai_n126__"
-    ket = _ban_kinh_moi_dot_bien([_TEN_GIA_NHANH, ma], do_o_nen, 2, het_han=het_han_pha)
+    ket = _ban_kinh_moi_dot_bien([_TEN_GIA_NHANH, ma], do_o_nen, 2)
     if len(ket) != 2 or ket[1][1] != 1 or not ket[1][0][0].startswith(f"  ĐỎ  {ma}:"):
         print(f"  ĐỎ  tự kiểm song song (2): tên lạ không thành dòng ĐỎ: {ket!r}")
         loi += 1
-    han = 10.0
-    for so_chot, so_tt in ((3, 2), (5, 1)):
-        ket, giay, chau = _do_treo(so_tt, han, het_han_pha)
-        dung = (len(ket) == 2 and ket[0] == ([f"  ok  {_TEN_GIA_NHANH}"], 0) and ket[1][1] >= 1
-                and ket[1][0][0].startswith(f"  ĐỎ  {_TEN_GIA_TREO}:") and "hết hạn" in ket[1][0][0]
-                and giay < han + 10 and chau is False)
-        if not dung:
-            print(f"  ĐỎ  tự kiểm song song ({so_chot}): {so_tt} tiến trình — con treo phải thành ĐỎ ở hạn và cả "
-                  f"cây phải chết: {giay:.1f}s, cháu còn sống={chau}, kết quả={ket!r}")
-            loi += 1
     truoc, t0 = _SO_LAN_PHONG[0], time.monotonic()
-    ket = _ban_kinh_moi_dot_bien([_TEN_GIA_NHANH, _TEN_GIA_NHANH + "b"], do_o_nen, 10 ** 9, het_han=het_han_pha)
-    phong, giay4 = _SO_LAN_PHONG[0] - truoc, time.monotonic() - t0
-    if phong != 2 or giay4 > 60 or ket[0] != ([f"  ok  {_TEN_GIA_NHANH}"], 0):
-        print(f"  ĐỎ  tự kiểm song song (4): 10**9 tiến trình phải kẹp về 2: phóng {phong}, {giay4:.1f}s")
+    ket = _ban_kinh_moi_dot_bien([_TEN_GIA_NHANH, _TEN_GIA_NHANH + "b"], do_o_nen, 10 ** 9)
+    phong, giay = _SO_LAN_PHONG[0] - truoc, time.monotonic() - t0
+    if phong != 2 or giay > 60 or ket[0] != ([f"  ok  {_TEN_GIA_NHANH}"], 0):
+        print(f"  ĐỎ  tự kiểm song song (3): 10**9 tiến trình phải kẹp về 2: phóng {phong}, {giay:.1f}s")
         loi += 1
-    print(f"TỰ KIỂM SONG SONG (N126–N128): {'ĐẠT' if not loi else 'HỎNG'}")
+    print(f"TỰ KIỂM SONG SONG (N126): {'ĐẠT' if not loi else 'HỎNG'}")
     return loi
 
 
@@ -6533,14 +6404,11 @@ def main() -> int:
         print(d)
     loi_db += loi_nen
     so_tien_trinh = _so_tien_trinh_ban_kinh()
-    # N128 (r40, codex vòng 34 — S3): MỘT mốc hạn cho CẢ PHA đột biến, neo TRƯỚC tự kiểm; tự kiểm và lô thật
-    # đều chỉ nhận phần còn lại của nó, nên cả pha không thể vượt `_han_lo_ban_kinh()`.
-    het_han_pha = time.monotonic() + _han_lo_ban_kinh()
-    loi_db += _tu_kiem_song_song(do_o_nen, het_han_pha)
+    loi_db += _tu_kiem_song_song(do_o_nen)
     print(f"\nBÁN KÍNH ĐỘT BIẾN ({len(DOT_BIEN)} đột biến, mỗi ca đúng một"
           + (f"; LOẠI {len(do_o_nen)} ca đỏ ở nền" if do_o_nen else "")
           + f"; {so_tien_trinh} tiến trình):")
-    for cac_dong, loi in _ban_kinh_moi_dot_bien(list(DOT_BIEN), do_o_nen, so_tien_trinh, het_han=het_han_pha):
+    for cac_dong, loi in _ban_kinh_moi_dot_bien(list(DOT_BIEN), do_o_nen, so_tien_trinh):
         for dong in cac_dong:
             print(dong)
         loi_db += loi

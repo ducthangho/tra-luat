@@ -3931,8 +3931,8 @@ def r548_git_con_phai_tat_bao_tri_nen(d: Path):
 def _manh_gia(d: Path):
     """Ban sao voi BON ham thu thap thay bang do gia DAT TRON; `goi` ghi bang da nhan."""
     m, goi = _nap_ban_sao(d), {}
-    m.chay_ca = lambda khung=None: []
-    m.chay_tu_kiem = lambda: []
+    m.chay_ca = lambda khung=None: goi.update(ca=True) or []        # Codex #661 luot 2: ghi DAU GOI
+    m.chay_tu_kiem = lambda: goi.update(tu_kiem=True) or []
     m.chay_dot_bien = lambda muc=None: goi.update(db=muc, env=MANH_ENV in os.environ or MANH_RA_ENV in os.environ) \
         or (len(muc or m.DOT_BIEN), 0, 0)
     m.chay_dot_bien_tu_kiem = lambda muc=None: goi.update(dbtk=muc) or (len(muc or m.DOT_BIEN_TU_KIEM), 0, 0)
@@ -3974,7 +3974,7 @@ def r551_manh_chi_chay_phan_hoach_va_chi_ghi_khi_dat_tron(d: Path):
     ra = d / "ra" / "m.json"
     rc, out = _main_manh(m, "1/4", ra)
     db, dbtk = m.phan_hoach(m.DOT_BIEN, 1, 4), m.phan_hoach(m.DOT_BIEN_TU_KIEM, 1, 4)
-    chot(rc == 0 and goi == {"db": db, "dbtk": dbtk, "env": False}, "r551")
+    chot(rc == 0 and goi == {"ca": True, "tu_kiem": True, "db": db, "dbtk": dbtk, "env": False}, "r551")
     x = json.loads(ra.read_text(encoding="utf-8"))
     chot(x == {"phien_ban": 1, "manh": 1, "so_manh": 4, "giet": [y[0] for y in db],
                "tk_giet": [y[0] for y in dbtk], "sha256_tool": hashlib.sha256(TOOL.read_bytes()).hexdigest(),
@@ -4841,6 +4841,8 @@ DOT_BIEN_TU_KIEM = [
     ("manh-bo-doi-ra", ("r549",), "            if not ra:\n", "            if False:\n"),
     ("phan-hoach-lech-du", ("r550", "r552"), "if i % n == k]", "if i % n <= k]"),
     ("phan-hoach-bo-kiem-trung", ("r550",), "    if len(set(ten)) != len(ten):\n", "    if False:\n"),
+    ("manh-chay-truoc-xac-thuc", ("r549", "r550"), "        gia_tri, ra = os.environ.pop(", "        chay_ca(None)\n        gia_tri, ra = os.environ.pop("),
+    ("manh-bo-tu-kiem", ("r551",), "    tu_kiem_do = chay_tu_kiem()\n    tk_giet, tk_hong, tk_khong_do = chay_dot_bien_tu_kiem(dbtk)", "    tu_kiem_do = []\n    tk_giet, tk_hong, tk_khong_do = chay_dot_bien_tu_kiem(dbtk)"),
     ("manh-bo-pop-env", ("r551",), "os.environ.pop(MANH_ENV, None), os.environ.pop(MANH_RA_ENV, None)", "os.environ.get(MANH_ENV), os.environ.get(MANH_RA_ENV)"),
     ("manh-vong-tron-bang", ("r551", "r552"), "= chay_dot_bien(db)", "= chay_dot_bien()"),
     ("manh-tu-kiem-tron-bang", ("r551", "r552"), "= chay_dot_bien_tu_kiem(dbtk)", "= chay_dot_bien_tu_kiem()"),
@@ -5381,8 +5383,7 @@ def phan_hoach(bang, k: int, n: int) -> list:
     return [x for i, x in enumerate(bang) if i % n == k]
 
 
-def _bam(tep) -> str:
-    return hashlib.sha256(Path(tep).read_bytes()).hexdigest()
+_bam = lambda tep: hashlib.sha256(Path(tep).read_bytes()).hexdigest()   # noqa: E731
 
 
 def chay_manh(k: int, n: int, db, dbtk, ra) -> int:

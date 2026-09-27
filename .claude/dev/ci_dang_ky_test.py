@@ -1922,7 +1922,7 @@ def phan_chung():
                    ("gop-lenh-khac", lambda w, j: _j(w, JOB_GOP)["steps"][-1].update(run="true")),
                    ("matrix-bool", lambda w, j: _j(w, JOB_MANH)["strategy"]["matrix"].update(manh=[False, True, 2, 3])),
                    ("matrix-float", lambda w, j: _j(w, JOB_MANH)["strategy"]["matrix"].update(manh=[0.0, 1, 2, 3])),
-                   ("manh-python-float", lambda w, j: _j(w, JOB_MANH)["steps"][1]["with"].update({"python-version": 3.12})),
+                   ("manh-timeout-float", lambda w, j: _j(w, JOB_MANH).update({"timeout-minutes": 30.0})),
                    ("du-fetch-depth-false", lambda w, j: j["steps"][1]["with"].update({"fetch-depth": False})),
                    ("du-timeout-float", lambda w, j: j.update({"timeout-minutes": 90.0})),
                    ("env-reg-thieu-manh", lambda w, j: _buoc_reg(j)["env"].pop(BIEN_MANH)),
@@ -1933,8 +1933,7 @@ def phan_chung():
     _them("p661-M4-doc-bien", [doc_bien_manh(e) for e in ({}, {BIEN_MANH: ""}, {BIEN_MANH: BO_MANH})] == [None, None, BO_MANH])
     for _v in (BO_MANH + " ", "ops/nhanh_don_duoc.py", _PTG):
         _n = 0
-        with contextlib.suppress(ValueError):
-            _n = doc_bien_manh({BIEN_MANH: _v}); _n = None
+        with contextlib.suppress(ValueError): _n = doc_bien_manh({BIEN_MANH: _v}); _n = None
         _them(f"p661-M4-gia-tri-la-do-{_v!r}", _n is not None)
     _r = subprocess.run([sys.executable, str(pathlib.Path(__file__).resolve()), "--chay"], capture_output=True, text=True,
                         env=dict(os.environ, **{BIEN_MANH: "ops/x.py", BIEN_WORKERS: "2"}), timeout=120)

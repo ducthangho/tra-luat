@@ -133,3 +133,12 @@ gate_bat_buoc:
 chua_do_duoc:
   - 'Danh tinh nguoi ky: #566.'
   - 'Effort thuc te cua phien executor.'
+
+lech_protocol_duoc_duyet: >-
+  CHONG write set tren .claude/dev/ci_dang_ky_test.py voi lease ci-dot-bien-chia-manh-r2-g1-claude ('#661', cap
+  15:22Z, TRUOC lease nay) do dua do/cap (TOCTOU: phien nay do 15:23:17Z truoc khi nhanh lease #661 len may chu).
+  Chu kho duyet trong phien 2026-09-27: "Cho chong co khai". Dieu kien: C1a1a chi giu DUNG 1 dong dang ky trong MOI
+  (da day o 96a9322), KHONG sua them tep ay; packet nao land SAU thi merge master va giai xung dot mot dong.
+  Ghi su co: '#650' comment 5857248919.
+lease_sua_lan_cuoi: '2026-09-27T15:40:00Z'
+lease_sua_ghi_chu: 'Lan 1: them lech_protocol_duoc_duyet. Khong doi write set, han, spec.'

@@ -26,6 +26,7 @@ DAT  han-tran-UTC-duoi: rc=3 (mong 3) giu=[] vi_pham=[('ops/leases/y.yaml', 'lea
 DAT  han-bang-dung-C: rc=0 (mong 0) giu=[] vi_pham=[]
 DAT  thu-muc-con: rc=3 (mong 3) giu=[['x', 'y']] vi_pham=[('ops/leases/sub/z.yaml', 'thu-muc-con')]
 DAT  han-vang: rc=3 (mong 3) giu=[['x', 'y']] vi_pham=[('ops/leases/z.yaml', 'lease_expires_at_utc-hong: lease_expires_at_utc rỗng')]
-DAT  han-bien-hop-le: rc=0 (mong 0) giu=[['x', 'y']] vi_pham=[]
+DAT  han-bien-tren-hop-le: rc=0 (mong 0) giu=[['x', 'y']] vi_pham=[]
+DAT  han-bien-duoi-hop-le: rc=0 (mong 0) giu=[] vi_pham=[]
 DAT  cay-sau-khong-doi-cay-moc: giu=[['x', 'y']]
-TU_KIEM: 30/30 dat
+TU_KIEM: 31/31 dat

@@ -204,16 +204,21 @@ def tu_kiem(goc: Path) -> int:
         "thu-muc-con": ({**sach, "sub/z.yaml": _lease("z", SONG)}, 3, [["x", "y"]]),
         "han-vang": ({**sach, "z.yaml": "lease_id: z\n"}, 3, [["x", "y"]]),
         # Đối chứng DƯƠNG sát miền ngày (reviewer lượt 5): hạn hợp lệ năm 1 / năm 9999 KHÔNG được từ chối.
-        "han-bien-hop-le": ({**sach, "z.yaml": _lease("z", "9999-12-31T23:59:59Z"),
-                             "w.yaml": _lease("w", "0001-01-01T00:00:00Z")}, 0, [["x", "y"]]),
+        # Hạn biên đặt ở ĐẦU MỚI của cặp (reviewer lượt 6: đặt ngoài cặp thì mutant "bỏ qua im lặng tệp biên"
+        # sống), và đòi thêm số lease hợp lệ (phần tử thứ 4) để bắt cả việc bỏ qua ở biên dưới.
+        "han-bien-tren-hop-le": ({"x.yaml": _lease("x", CHET, bi="y"),
+                                  "y.yaml": _lease("y", "9999-12-31T23:59:59Z", thay="x")}, 0, [["x", "y"]], 2),
+        "han-bien-duoi-hop-le": ({"x.yaml": _lease("x", CHET, bi="y"),
+                                  "y.yaml": _lease("y", "0001-01-01T00:00:00Z", thay="x")}, 0, [], 2),
     }
     hong = 0
     with tempfile.TemporaryDirectory() as t:
-        for ten, (tep, rc_mong, giu_mong) in ca.items():
+        for ten, (tep, rc_mong, giu_mong, *hop_le_mong) in ca.items():
             k, moc = _kho_gia(Path(t), tep)
             kq = dan_xuat(k, moc, CLOCK, lp)
             giu = [x[:2] for x in kq["BIA_MO_LICH_SU_theo_b"]]
-            ok = kq["ma_thoat"] == rc_mong and (rc_mong == 3 or giu == giu_mong)
+            ok = (kq["ma_thoat"] == rc_mong and (rc_mong == 3 or giu == giu_mong)
+                  and (not hop_le_mong or kq["lease_hop_le"] == hop_le_mong[0]))
             hong += not ok
             print(f"{'DAT ' if ok else 'HONG'} {ten}: rc={kq['ma_thoat']} (mong {rc_mong}) giu={giu} vi_pham={kq['vi_pham']}")
         # Cây sau thêm cặp mới: cây mốc không đổi kết quả (r9 Q6 "không lấy HEAD").

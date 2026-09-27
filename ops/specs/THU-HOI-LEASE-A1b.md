@@ -1,114 +1,133 @@
-# ĐẶC TẢ — `THU-HOI-LEASE-A1b` — **revision 1, bản nháp 1 (CHƯA đóng băng)**
+# ĐẶC TẢ — `THU-HOI-LEASE-A1b` — **revision 1, bản nháp 2 (CHƯA đóng băng)**
 
 | trường | giá trị |
 |---|---|
-| `packet_id` | `THU-HOI-LEASE-A1b` — nửa **cấu hình** của slice A1 (nửa **mã** là `THU-HOI-LEASE-A1a`) |
+| `packet_id` | `THU-HOI-LEASE-A1b` — **bật cờ** của slice A1 (mã: `THU-HOI-LEASE-A1a`; đo profile: `THU-HOI-LEASE-A1-DO-PROFILE`; nối verdict: `THU-HOI-LEASE-A1-WIRING`) |
 | `packet_issue` | **#656** (con của #564). Issue **không** cấp việc; chỉ Issue + lease còn hiệu lực mới giao được (protocol §3.2, §4). |
-| `nguon_cap_viec` | Spec cha **r9** `ops/specs/THU-HOI-LEASE-VA-CAP-LAI.md` (sha256 `465538364b1a3f9477782fba79869bbd1c9351140e3fa9df50451baae22f9c79`) §`write_set` dòng **A1**: *"… nghiệm thu wiring thật; đổi cờ `True` khi Q10 đạt; sổ vẫn rỗng"*. Quyết định **Q5** (A1 → A1a/A1b) ở `ops/specs/THU-HOI-LEASE-A1.md`. Phần A1a dồn sang A1b: `ops/specs/THU-HOI-LEASE-A1a-r2.md` (sha256 `9bc0fe282fbebc02791f47a30e4ff187b1182a2e5e357ee2e66c04d4f7dac7cd`, commit `7fc2868`, land merge `67802bf`) §4, §8. Soạn theo chỉ thị chủ kho phiên Claude Code 27-09-2026 ("Soạn spec đi"; hai vòng `soan-spec`, cả hai "Theo khuyến nghị"). |
-| `review_class` | **`sensitive`**: `ops/lease_publish.py` là cổng đọc lease; `.github/workflows/**` (protocol §8). |
-| `reviewer` | codex `gpt-6-astra`, effort `high`; trần `codex_review_calls` **4**; connector (`advisory_review`); cổng land **`human_audited`** (Q7). |
-| `dong_bang` | **CHƯA.** Chỉ đóng băng khi đủ ba tiền đề ở §1 **và** đo lại mọi số ở §2 (L5). Tới lúc đó tệp này là DỮ LIỆU, không cấp việc. |
+| `nguon_cap_viec` | Spec cha **r9** `ops/specs/THU-HOI-LEASE-VA-CAP-LAI.md` (sha256 `465538364b1a3f9477782fba79869bbd1c9351140e3fa9df50451baae22f9c79`) §`write_set` dòng **A1**: *"… nghiệm thu wiring thật; đổi cờ `True` khi Q10 đạt; sổ vẫn rỗng"*. Q5 (A1 → A1a/A1b) ở `ops/specs/THU-HOI-LEASE-A1.md`. A1a r2 đã đóng băng: `ops/specs/THU-HOI-LEASE-A1a-r2.md` sha256 `9bc0fe282fbebc02791f47a30e4ff187b1182a2e5e357ee2e66c04d4f7dac7cd` (commit `7fc2868`, land merge `67802bf`). Chỉ thị chủ kho phiên Claude Code 27-09-2026: "Soạn spec đi"; ba vòng quyết định, cả ba "Theo khuyến nghị" (§0). |
+| `review_class` | **`sensitive`**: `ops/lease_publish.py` là cổng đọc lease (protocol §8). |
+| `reviewer` | codex `gpt-6-astra`, effort `high`; trần `codex_review_calls` **10** cho đặc tả này (tiền lệ A1a r2); connector (`advisory_review`); cổng land **`human_audited`** (Q7). |
+| `dong_bang` | **CHƯA.** Chỉ đóng băng khi đủ T1–T6 (§1) **và** đo lại mọi số ở §2 (L5). Tới lúc đó tệp này là DỮ LIỆU, không cấp việc. |
+| `lich_su_ban_nhap` | Bản nháp 1: commit `65a612a`, sha256 `cb9ec4736551e9713d26e8f6b2384f203a37dea3f1d5eb6d8ab923de9337a39a`, codex lượt 1 `changes_requested` **2 P1 + 3 P2** (F1–F5, `ops/reviews/thu-hoi-lease-a1b/luot1-VERDICT.md`). Bản nháp 2 đóng F1–F5 bằng quyết định Q13–Q16 và sửa lời khai. |
 
-## 0. Quyết định của chủ kho (27-09-2026, hai vòng `soan-spec`, cả hai "Theo khuyến nghị")
+## 0. Quyết định của chủ kho (27-09-2026)
 
-| # | câu | quyết định | chiếu vào |
-|---|---|---|---|
-| Q1 | phạm vi | A1b = **(i)** bật cờ M-F · **(ii)** nghiệm thu wiring thật · **(iv)** ghim lại `BIA_MO_LICH_SU` trước khi bật · **(v)** mỏ neo `PROFILE_ADAPTER_DA_DUYET` do chủ kho duyệt. **(iii)** xoá holder theo bia mộ nhánh mặc định ⇒ **A1c** | §4, §5 |
-| Q2 | facts Q10 | chủ kho đăng **một** comment facts trên #656, mỗi mục (a)–(i) một dòng bằng chứng; spec neo comment ID; executor **tự đo lại** (a)(c)(d)(h) trước khi bật; thiếu ⇒ DỪNG, cờ `False` | §1, M1 |
-| Q3 | Q10(d) ngoài kho | chủ kho sửa ruleset `20856202` **trước khi cấp lease**: thêm required check `thu-hoi`, strict up-to-date, `allowed_merge_methods = [merge]`, giữ `bypass_actors = []` | §1, A6 |
-| Q4 | thời điểm | bản nháp bây giờ; **đóng băng sau khi A1a land** | `dong_bang` |
-| Q5 | Issue | Issue mới **#656**, con của #564 | `packet_issue` |
-| Q6 | rollback | A1b land với **sổ rỗng**; rollback = PR revert cờ về `False`, **chỉ hợp lệ khi sổ còn rỗng** (sau slice C thì không) | M5, A5 |
-| Q7 | review/trần | như A1a; ADR-0044 **≤ 300** dòng thêm; vượt ⇒ hỏi, không tự nới | §3 |
-| Q8 | wiring thật | fixture có đột biến **và** một canary PR thật S≠H; hiện vật ở `ops/reviews/thu-hoi-lease-a1b/` (ngoài write set mã, tiền lệ A1a) | M2, A2 |
-| Q9 | `BIA_MO_LICH_SU` | mốc giữ **A0** (`0721811`); chạy lại đúng script dẫn xuất của A1a trên ứng viên, clock = lúc bật; phải **trùng** hằng đã ghim; lệch ⇒ DỪNG | M3, A3 |
-| Q10 | profile | ghim `runs-on: ubuntu-24.04`; digest đo bởi **bước workflow trên runner thật**, in vào receipt; executor ĐỀ XUẤT, chủ kho DUYỆT bằng cách trích digest trong audit; trôi ⇒ runbook (đo lại → PR dữ liệu → duyệt), không tự cập nhật; đo ≥ 2 run cách ≥ 24 h trước đóng băng, khác nhau ⇒ DỪNG | M4, A4 |
-| Q11 | consumer | `LAND-DOC-RECEIPT-THU-HOI` (#499 C1) là **packet tiền đề riêng**, không vào A1b; A1b đóng băng khi nó đã land | §1 |
-| Q12 | write set | 3 tệp (§3); đọc ruleset là **phép đo của executor** ghi vào biên nhận, **không** là unit test (test không gọi mạng) | §3, A6 |
+**Vòng 1–2** (`soan-spec`, "Theo khuyến nghị"):
+
+| # | câu | quyết định |
+|---|---|---|
+| Q1 | phạm vi | A1b = **(i)** bật cờ · **(ii)** nghiệm thu wiring thật · **(iv)** ghim lại `BIA_MO_LICH_SU` trước khi bật · **(v)** mỏ neo `PROFILE_ADAPTER_DA_DUYET` do chủ kho duyệt. **(iii)** xoá holder theo bia mộ nhánh mặc định ⇒ **A1c** |
+| Q2 | facts Q10 | chủ kho đăng **một** comment facts trên #656, mỗi mục (a)–(i) một dòng bằng chứng; spec neo comment ID; executor **tự đo lại** (a)(c)(d)(h) trước khi bật; thiếu ⇒ DỪNG |
+| Q3 | Q10(d) ngoài kho | chủ kho sửa ruleset `20856202` trước cấp lease: required check `thu-hoi`, strict up-to-date, `allowed_merge_methods = [merge]`, `bypass_actors = []` |
+| Q4 | thời điểm | bản nháp bây giờ; đóng băng khi đủ tiền đề §1 |
+| Q5 | Issue | #656, con của #564 |
+| Q6 | rollback | A1b land với **sổ rỗng**; rollback = PR revert cờ về `False`, **chỉ hợp lệ khi sổ còn rỗng** |
+| Q7 | review/trần | codex + connector + `human_audited`; ADR-0044 **≤ 300** dòng thêm; vượt ⇒ hỏi |
+| Q8 | wiring thật | fixture có đột biến **và** canary PR thật; hiện vật ở `ops/reviews/thu-hoi-lease-a1b/` |
+| Q9 | `BIA_MO_LICH_SU` | mốc giữ **A0** (`0721811`); chạy lại script dẫn xuất của A1a trên ứng viên, clock = lúc bật; phải **trùng** hằng; lệch ⇒ DỪNG |
+| Q10 | profile | digest đo trên **runner thật bởi mã CANONICAL**; executor ĐỀ XUẤT, chủ kho DUYỆT bằng cách trích digest trong audit; trôi ⇒ runbook (đo lại → PR dữ liệu → duyệt); đo ≥ 2 run cách ≥ 24 h, khác nhau ⇒ DỪNG |
+| Q11 | consumer | `LAND-DOC-RECEIPT-THU-HOI` (#499 C1) là packet tiền đề riêng |
+| Q12 | ruleset | đọc ruleset là **phép đo của executor** ghi vào biên nhận, không là unit test |
+
+**Vòng 3** (sau codex lượt 1, "Theo khuyến nghị"):
+
+| # | finding | quyết định |
+|---|---|---|
+| Q13 | F1 (P1): bước đo profile phải có trên canonical **trước** khi đo được digest | **packet tiền đề riêng `THU-HOI-LEASE-A1-DO-PROFILE`**: thêm bước đo vào workflow `thu-hoi` (chạy MÃ CANONICAL tại `workflow_sha`), ghim runner, cờ vẫn `False`. Đo ≥ 2 run canonical sau khi land. M6 cũ **rời** A1b |
+| Q14 | F2 (P1): bật cờ chưa nối luật mới vào verdict production — `lenh_check`/`lenh_ai_dang_giu`/`lenh_kiem_thu_hoi_github` không gọi discovery (codex đo AST) | **packet tiền đề riêng `THU-HOI-LEASE-A1-WIRING`**: nối sổ + discovery vào verdict production **sau cờ** (cờ `False` ⇒ hành vi y hệt), land với cờ `False`. A1b chỉ **bật** + nghiệm thu |
+| Q15 | F2 (P1): M5 "mọi rc bằng nhau" trái r9 Q6 | **phân loại delta theo Q6** trên cùng map ref + cùng clock: chỉ cho `0→8` (bảo thủ) ở cặp thay thế sinh sau mốc; delta khác ⇒ ĐỎ |
+| Q16 | F4 (P2): nợ "C == S" trong hợp đồng consumer | **packet consumer đóng**: chốt hợp đồng C/S/H/T và có ca C≠S. A1b neo exact SHA + entry point consumer, test import consumer thật |
 
 ## 1. Tiền đề — thiếu một ⇒ KHÔNG đóng băng, KHÔNG cấp lease
 
-| # | tiền đề | trạng thái lúc soạn (đo 01:30–02:00Z 27-09) | cách đo lại |
+| # | tiền đề | trạng thái lúc soạn (đo 01:30–02:40Z 27-09) | cách đo lại |
 |---|---|---|---|
-| T1 | **A1a đã land** (write set trùng hoàn toàn với A1b, §3) | spec A1a r2 **đóng băng** (merge `67802bf`); mã A1a **chưa** có lease — #579 g20 giữ `ops/lease_publish.py`, `ops/lease_publish_test.py` tới **2026-09-29T00:00:00Z** | `git log --first-parent origin/master` có merge A1a; `ai-dang-giu` 3 đường ⇒ `NGƯỜI_GIỮ 0` (quét đủ ref) |
-| T2 | **consumer `LAND-DOC-RECEIPT-THU-HOI` đã land** (Q10 c) | **CHƯA** — không có trong `.claude/`; chỉ `ops/specs/M9-FETCH-AUTH.md:61` nhắc là "packet riêng" | tệp consumer có trên `origin/master` và gọi được |
-| T3 | **facts Q10 (a)–(i)** đã được chủ kho đăng trên #656 | **CHƯA** | comment ID ghim vào `nguon_cap_viec` bản đóng băng |
-| T4 | **ruleset** đủ Q3 (trước cấp lease) | **CHƯA** — required checks chỉ `gate (ubuntu-latest)`, `gate-packet-loop (ubuntu-latest)`; **không** `thu-hoi`; `allowed_merge_methods = [merge, squash, rebase]`; `bypass_actors = []`; strict up-to-date **chưa đọc được** (`branches/master/protection` ⇒ 403) | `GET rules/branches/master`, `GET rulesets/20856202` |
+| T1 | **mã A1a đã land** | spec A1a r2 đóng băng (merge `67802bf`); mã **chưa**. #579 g20 giữ `ops/lease_publish.py`, `ops/lease_publish_test.py` tới **2026-09-29T00:00:00Z** (đo bởi agent khảo sát ~23:30Z 26-09) | merge A1a trên `--first-parent origin/master`; `ai-dang-giu` 2 đường ⇒ `NGƯỜI_GIỮ 0` (quét đủ ref) |
+| T2 | **consumer `LAND-DOC-RECEIPT-THU-HOI` đã land**, có: exact commit SHA · entry point production gọi được · hợp đồng C/S/H/T đã chốt · ca C≠S (Q16) | **CHƯA** — `git grep -E 'check_suite\|check_run_url\|thu-hoi-receipt' 67802bf -- .claude` ⇒ rc=1 (codex lượt 1) | SHA + entry point ghim vào bản đóng băng |
+| T3 | **facts Q10 (a)–(i)** trên #656 | **CHƯA** | comment ID ghim vào bản đóng băng |
+| T4 | **ruleset** đủ Q3 | **CHƯA** — required checks `gate (ubuntu-latest)`, `gate-packet-loop (ubuntu-latest)`, **không** `thu-hoi`; `allowed_merge_methods = [merge, squash, rebase]`; `bypass_actors = []`; strict **chưa đọc được** (`branches/master/protection` ⇒ 403) | `GET rules/branches/master`, `GET rulesets/20856202` |
+| T5 | **`THU-HOI-LEASE-A1-DO-PROFILE` đã land** và có **≥ 2** receipt của run canonical cách **≥ 24 h** cho **cùng** digest schema v2 (Q13) | **CHƯA** — workflow tại `67802bf` có 2 bước `run`, không gọi `hoso_adapter_do` (codex lượt 1) | receipt: run ID, attempt, `workflow_sha`, digest, `image_os`/`image_version` |
+| T6 | **`THU-HOI-LEASE-A1-WIRING` đã land** với cờ `False` (Q14) | **CHƯA** — chưa có spec | entry point production gọi discovery khi cờ `True` (fixture tiêm cờ) |
 
 ## 2. Số đo (L5 — đo lại trước MỖI bước công bố)
 
 - `origin/master` lúc soạn: **`67802bf`** (01:49Z 27-09).
-- Hằng A0 trên master (`ops/lease_publish.py`, đo trên `fa8a062`): `SO_THU_HOI_KICH_HOAT = False` (:934) · `PROFILE_ADAPTER_DA_DUYET = frozenset()` (:942) · `BIA_MO_LICH_SU = ()` (:944) · `DESCRIPTOR_Q13_SHA256 = None` (:948). A1a r2 sẽ thêm `MOC_BIA_MO_LICH_SU` và ghim `DESCRIPTOR_Q13_SHA256` — số dòng CHÍNH XÁC phải đo lại sau khi A1a land.
-- `ops/thu-hoi/` **không tồn tại** trên master (sổ rỗng).
-- Digest profile = `sha256(JSON sort_keys)` của `hoso_adapter_do()` (`ops/lease_publish.py:1258`), trong đó có **`git_sha256` của binary git trên runner**. Workflow `thu-hoi` đang `runs-on: ubuntu-latest` (`ops-thu-hoi-admission.yml:47`). Annotation GitHub trên run CI 27-09: *"ubuntu-latest label will migrate to Ubuntu 26 beginning October 19, 2026"*.
-- Workflow `thu-hoi`: **100** run gần nhất, **89** `success` (01:50Z 27-09) — ở A0 discovery `KHONG_CHAY`, nên **chưa từng có** phép đo digest trên runner thật.
-- Cỡ tham chiếu: A0 = **2 387** dòng thêm / 3 tệp (numstat merge `0721811`). A1b ước **150–250** dòng thêm — ƯỚC, chưa đo.
+- Hằng A0 (`ops/lease_publish.py` @ `67802bf`): `SO_THU_HOI_KICH_HOAT = False` (:934) · `PROFILE_ADAPTER_DA_DUYET = frozenset()` (:942) · `BIA_MO_LICH_SU = ()` (:944) · `DESCRIPTOR_Q13_SHA256 = None` (:948). Số dòng **đổi** sau A1a/A1-WIRING — đo lại.
+- `ops/thu-hoi/` **không tồn tại** @ `67802bf` (sổ rỗng).
+- **Schema profile là v2 sau A1a** (A1a r2 M1/M2, `ops/specs/THU-HOI-LEASE-A1a-r2.md:145–146`, A2 `:222`): digest băm **tầng BẮT BUỘC** (`git_path`, `git_version`, `credential_helper`, `tls_thu_vien`, `http_sslCAInfo`/`http_sslCAPath`/`proxy`/`endpoint`, `image_os`/`image_version`); `git_sha256` ở tầng **AUDIT-ONLY**, ngoài digest. Trôi digest vì thế theo **`image_version`/`git_version`** của runner, không theo băm nhị phân. Tại `67802bf` mã vẫn là schema A0 (v1).
+- Workflow `thu-hoi`: `runs-on: ubuntu-latest` (`ops-thu-hoi-admission.yml:47`); checkout `ref: ${{ github.workflow_sha }}`; `bo_kiem_da_chay_commit = wf_sha` (:160). Annotation GitHub 27-09: `ubuntu-latest` → Ubuntu 26 từ **2026-10-19**. **100** run gần nhất, **89** `success` (01:50Z 27-09; chưa đo độc lập lần hai).
+- Q6 (chạy lại bởi codex lượt 1 @ `67802bf`): **89** lease hợp lệ, **11** cặp hai chiều, digest `8f372ccd…`, **0** cặp giữ lại.
+- Cỡ tham chiếu: A0 = **2 387** dòng thêm / 3 tệp (`141 + 919 + 1327`, numstat `0721811^1..0721811`).
 
 ## 3. `write_set`
 
 ```
 ops/lease_publish.py
 ops/lease_publish_test.py
-.github/workflows/ops-thu-hoi-admission.yml
 ```
 
-Đúng ba đường, không ký tự đại diện, **trùng hoàn toàn** write set A1a ⇒ tuần tự sau A1a. Hiện vật review
-và biên nhận đo (canary, profile, ruleset) ở `ops/reviews/thu-hoi-lease-a1b/**` — nhánh riêng, tiền lệ A1a/#551.
+Hai đường (bản nháp 1 có ba — workflow rời sang `THU-HOI-LEASE-A1-DO-PROFILE`, Q13). Trùng write set A1a
+và A1-WIRING ⇒ tuần tự sau cả hai. Test **được đọc/import** consumer ngoài write set (Q16) — không vi phạm L2.
+Hiện vật review/biên nhận đo ở `ops/reviews/thu-hoi-lease-a1b/**`, nhánh riêng (tiền lệ A1a/#551).
 
 ## 4. `ngoai_pham_vi`
 
 | thứ | lý do |
 |---|---|
-| **(iii)** xoá holder theo bia mộ nhánh mặc định bằng OID máy chủ (nợ `AG-T0-01B` dạng 2, #564) | Q1 ⇒ **A1c**. Mã nhạy cảm, cỡ lớn; làm sau khi sổ chạy. |
-| Bản ghi thu hồi đầu tiên (`ops/thu-hoi/wp461-…yaml`) | slice **C** (r9), sau Q8/Q10/Q11 của r9. A1b land với sổ **rỗng**. |
-| Consumer `LAND-DOC-RECEIPT-THU-HOI` | Q11: packet tiền đề riêng (#499 C1), đường `.claude/…` ngoài write set. |
-| Sửa ruleset / branch protection | Q3: cấu hình ngoài kho, việc của chủ kho. A1b chỉ **đo**. |
-| Cơ chế tự cập nhật digest profile | Q10: executor không tự duyệt (ADR-0047 lớp 2). |
-| Bỏ `git_sha256` khỏi profile | Q10: chỉ xét nếu hai lần đo cách 24 h khác nhau — quyết định chủ kho, ngoài A1b. |
+| **(iii)** xoá holder theo bia mộ nhánh mặc định (nợ `AG-T0-01B` dạng 2) | Q1 ⇒ **A1c** |
+| Bước đo profile, ghim runner, sửa `ops-thu-hoi-admission.yml` và ca "đúng hai bước run" (`ops/lease_publish_test.py:5154`) | Q13 ⇒ `THU-HOI-LEASE-A1-DO-PROFILE`; phải giữ chốt nhận diện từng bước, không chỉ nới `len(than)` (codex lượt 1 F5) |
+| Nối sổ + discovery vào verdict production | Q14 ⇒ `THU-HOI-LEASE-A1-WIRING` |
+| Hợp đồng C/S/H/T và ca C≠S của consumer | Q16 ⇒ packet consumer |
+| Bản ghi thu hồi đầu tiên | slice **C** (r9); A1b land với sổ rỗng |
+| Sửa ruleset | Q3: việc chủ kho; A1b chỉ đo |
+| Tự cập nhật digest | Q10: executor không tự duyệt (ADR-0047 lớp 2) |
 
 ## 5. `muc_tieu` — mỗi dòng chiếu vào MỘT đường dẫn (L2)
 
 | # | mục tiêu | đường |
 |---|---|---|
-| **M1** | `SO_THU_HOI_KICH_HOAT = True` — **chỉ** sau khi T1–T4 đạt và executor đo lại (a)(c)(d)(h) của Q10 | `ops/lease_publish.py` |
-| **M2** | Ca **wiring thật** dạng fixture: join check-run → suite → run → attempt → artifact `thu-hoi-receipt-<H>-<attempt>`; mỗi mắt xích thiếu/sai SHA/sai attempt/artifact vắng ⇒ consumer từ chối; có đột biến gỡ từng mắt xích | `ops/lease_publish_test.py` |
-| **M3** | Ca khoá `BIA_MO_LICH_SU`: hằng bằng đúng giá trị dẫn xuất (Q9) — đổi hằng mà không đổi bằng chứng ⇒ đỏ | `ops/lease_publish_test.py` |
-| **M4** | `PROFILE_ADAPTER_DA_DUYET = frozenset({<digest chủ kho duyệt>})` — giá trị lấy từ receipt runner thật, KHÔNG từ máy executor | `ops/lease_publish.py` |
-| **M5** | Ca **tương đương hành vi** (Q6): cờ `True` + sổ rỗng ⇒ `check` và `ai-dang-giu` cho **cùng rc và cùng tập `NGƯỜI_GIỮ`** như cờ `False`, trên một bộ lease fixture phủ mọi nhãn hiện có | `ops/lease_publish_test.py` |
-| **M6** | Ghim `runs-on: ubuntu-24.04` + bước **đo profile** in `hoso_adapter_do()` (JSON) và digest vào receipt, không bí mật | `.github/workflows/ops-thu-hoi-admission.yml` |
+| **M1** | `SO_THU_HOI_KICH_HOAT = True` — chỉ sau T1–T6 và executor đo lại Q10 (a)(c)(d)(h) | `ops/lease_publish.py` |
+| **M2** | Ca **wiring thật** qua **consumer thật** (import, không chép validator): join check-run → suite → run → attempt → artifact; từng mắt xích sai ⇒ consumer từ chối; có ca C≠S | `ops/lease_publish_test.py` |
+| **M3** | Ca khoá `BIA_MO_LICH_SU` = giá trị dẫn xuất Q9 | `ops/lease_publish_test.py` |
+| **M4** | `PROFILE_ADAPTER_DA_DUYET = frozenset({<digest v2 chủ kho duyệt>})` — lấy từ receipt T5, không từ máy executor | `ops/lease_publish.py` |
+| **M5** | Ca **phân loại delta** (Q15): cùng map ref + clock, cờ `False` → `True`; chỉ `0→8` ở cặp sau mốc được phép; mọi delta mở quyền (`8→0`, `11→0`, `12→0`) ⇒ ĐỎ | `ops/lease_publish_test.py` |
+| **M6** | Ca **production qua discovery**: cờ `True` + mỏ neo đúng ⇒ discovery chạy; mỏ neo sai/rỗng ⇒ `12` | `ops/lease_publish_test.py` |
 
 ## 6. `nghiem_thu` — mỗi tiêu chí nêu phép đo làm nó ĐỎ (L3)
 
 | # | tiêu chí | ĐỎ khi |
 |---|---|---|
-| A1 | M1: cờ `True` trên ứng viên; biên nhận đo lại (a)(c)(d)(h) có trong thân PR | biên nhận thiếu một mục, hoặc một mục đo ra khác facts #656 |
-| A2 | M2: fixture join qua; **canary PR thật** S≠H cho join đủ 5 mắt xích qua API, hiện vật ở `ops/reviews/thu-hoi-lease-a1b/` | đột biến gỡ bất kỳ mắt xích nào mà ca vẫn xanh; canary thiếu mắt xích |
-| A3 | M3: script dẫn xuất A1a chạy lại trên ứng viên, clock = lúc bật, cho **đúng** hằng đã ghim | lệch digest/số cặp ⇒ DỪNG (không ghim đè) |
-| A4 | M4: digest trong mỏ neo = digest in bởi bước M6 trên **≥ 2** run runner thật cách **≥ 24 h**; chủ kho trích nguyên digest trong audit | hai lần đo khác nhau ⇒ DỪNG; digest không khớp receipt; mỏ neo rỗng mà đường production đi tiếp (đột biến) |
-| A5 | M5: cờ `True`/sổ rỗng ≡ cờ `False` trên rc + `NGƯỜI_GIỮ` | đột biến đổi một nhánh phân loại khi cờ `True` mà ca vẫn xanh |
-| A6 | T4 đo bởi executor (API ruleset) ngay trước cấp lease **và** trước merge: `thu-hoi` required, strict, merge-only, không bypass | thiếu một điều kiện ⇒ DỪNG (không phải unit test — Q12) |
-| A7 | `actionlint` (có `shellcheck`) rc=0 trên `ops-thu-hoi-admission.yml`; ADR-0044 ≤ 300 dòng thêm | rc≠0; vượt trần mà chưa có ngoại lệ chủ kho |
+| A1 | M1: cờ `True`; biên nhận đo lại (a)(c)(d)(h) trong thân PR | thiếu một mục, hoặc lệch facts #656 |
+| A2 | M2: consumer thật chấp nhận fixture đủ; từ chối từng mắt xích sai; canary PR thật S≠H **và** C≠S cho join đủ qua API | đột biến gỡ một mắt xích mà ca xanh; canary thiếu mắt xích |
+| A3 | M3: script dẫn xuất A1a chạy lại trên ứng viên, clock = lúc bật, ra **đúng** hằng | lệch digest/số cặp ⇒ DỪNG |
+| A4 | M4: digest mỏ neo = digest trong ≥ 2 receipt T5; chủ kho trích nguyên digest trong audit | receipt khác nhau ⇒ DỪNG; mỏ neo ≠ receipt |
+| A5 | M5: delta cờ `False`→`True` chỉ gồm `0→8` ở cặp sau mốc; biên nhận đếm delta **theo loại** trên kho thật | đột biến cho một nhánh mở quyền khi cờ `True` mà ca xanh |
+| A6 | M6: discovery chạy khi mỏ neo đúng; mỏ neo sai/rỗng ⇒ `12` trên đường production | đột biến bỏ phép so mỏ neo mà ca xanh (có đường production từ T6) |
+| A7 | T4 đo bởi executor (API ruleset) trước cấp lease **và** trước merge | thiếu `thu-hoi`/strict/merge-only/không bypass ⇒ DỪNG |
+| A8 | ADR-0044 ≤ 300 dòng thêm | vượt mà chưa có ngoại lệ chủ kho |
 
 ## 7. `hinh_dang_ke_thua` (L4)
 
-Chép từ A1a r2 §7 (đóng băng `9bc0fe28…`), cộng một hình dạng từ #651:
+Chép từ A1a r2 §7 (`9bc0fe28…`), cộng #651 và lượt 1 của đặc tả này:
 
 | hình dạng | số lần | nguồn |
 |---|---|---|
-| **"nguồn được tin mà chưa xác minh"** | **7** | r9 lượt 1–6 · A1a r2 lượt 1 F1. Checkpoint §12 đã chạy (A1a vòng 3). **Lần 8** phải nhắm vào chỗ A1b **trao thẩm quyền** — ở đây là M4 (digest profile) và M1 (facts Q10): cả hai phải lấy từ nguồn đo, không từ lời khai. |
-| "thu hồi là dữ liệu ghi vào bản sao" | 3 | r9 §1 (2) · #564 dạng 2. **Thêm chứng cứ 27-09:** thu hồi lease #651 g1 bằng rút hạn (PR #654/#655) không tới được hai nhánh của phiên khác — đúng hình dạng này. |
+| **"nguồn được tin mà chưa xác minh"** | **7** | r9 lượt 1–6 · A1a r2 lượt 1 F1. **Lần 8** phải nhắm chỗ A1b **trao thẩm quyền**: M4 (digest) và M1 (facts Q10). |
+| "thu hồi là dữ liệu ghi vào bản sao" | 3 | r9 §1 (2) · #564 dạng 2. Chứng cứ thêm 27-09: rút hạn lease #651 g1 (PR #654/#655) không tới được hai nhánh phiên khác. |
 | "lời khai hội tụ rộng hơn phép đo" | 3 | r9 g2, lượt 1 |
 | "hai cổng bất đồng" | 1 | r9, #473 |
-| "cổng CÓ MẶT khác cổng ĐO ĐƯỢC" | 1 | #499 C2a |
+| "cổng CÓ MẶT khác cổng ĐO ĐƯỢC" | **2** | #499 C2a · **A1b lượt 1 F2**: cờ có mặt nhưng không đường production nào đọc nó để gọi discovery |
 | "gate xanh lane PR, master đo lần đầu" | 1 | #499 C3 |
-| "khử trùng giữ một đại diện, rồi hỏi đại diện câu hỏi về cả nhóm" | 1 | A1a M14 §5.1 |
+| "khử trùng giữ một đại diện…" | 1 | A1a M14 §5.1 |
 | "quyết định đổi bộ lọc bị đọc thành quyền đổi nguồn" | 1 | A1a r2 lượt 1 F2 |
-| **"ô tự do trong workflow"** (mới với chuỗi này) | **4** | #651 (Codex CLI lượt 2–5): cron không ghim · `concurrency` · `name`/job id · YAML thô qua `safe_load`. **Áp trực tiếp M6**: mọi giá trị mới của workflow phải ghim hoặc dẫn xuất, và qua `actionlint` thật. |
+| "ô tự do trong workflow" | 4 | #651 lượt 2–5 — áp cho `THU-HOI-LEASE-A1-DO-PROFILE` |
+| **"đặc tả hứa thứ tiền đề chưa có producer/đường nối"** (mới) | **2** | A1b lượt 1 F1 (bước đo profile), F2 (wiring production) |
 
 ## 8. `chua_do_duoc`
 
-1. **Tần suất trôi `git_sha256` trong Ubuntu 24.04** — chưa có phép đo nào (A0 `KHONG_CHAY`). A4 đòi hai lần đo cách 24 h; nếu trôi hằng tuần thì runbook Q10 sẽ chạy thường xuyên và mọi admission 12 giữa hai lần duyệt — **fail-closed**, không mở quyền, nhưng chặn land. Quyết định bỏ `git_sha256` thuộc chủ kho.
-2. **Strict up-to-date của ruleset** — `branches/master/protection` trả **403** cho token phiên; `rules/branches/master` chưa cho thấy trường ấy. A6 phải tìm được nguồn đọc được, không thì A6 là `KHÔNG ĐO ĐƯỢC` ⇒ DỪNG.
-3. **Số dòng thêm** — ƯỚC 150–250, chưa đo; phụ thuộc cỡ fixture M2/M5 sau khi A1a land.
-4. **Vị trí dòng của các hằng sau A1a** — mọi số dòng ở §2 là của A0 (`fa8a062`); phải đo lại trên master sau A1a.
-5. **Hành vi của `ai-dang-giu` khi cờ `True` và sổ rỗng trên TOÀN KHO** — M5 đo trên fixture; trên kho thật chỉ đo được lúc thi công (biên nhận so trước/sau).
+1. **Tần suất trôi digest v2** — theo `image_version`/`git_version`; chưa đo (A0 `KHONG_CHAY`). T5 đòi 2 lần cách 24 h. Trôi ⇒ admission `12` tới khi chủ kho duyệt digest mới — fail-closed, chặn land.
+2. **Strict up-to-date của ruleset** — `branches/master/protection` 403; phải tìm nguồn đọc được, không thì A7 là `KHÔNG ĐO ĐƯỢC` ⇒ DỪNG.
+3. **Số dòng thêm** — chưa ước lại sau khi rút M6 cũ và thêm M5/M6 mới; phụ thuộc giao diện A1-WIRING.
+4. **Vị trí dòng hằng** sau A1a/A1-WIRING — §2 là số @ `67802bf`.
+5. **Delta trên toàn kho thật** — M5 đo trên fixture; kho thật chỉ đo lúc thi công (A5 biên nhận).
+6. **Các số chưa đo độc lập lần hai** (codex lượt 1): 100/89 run `thu-hoi`, annotation Ubuntu 26, hạn #579 g20, ruleset.

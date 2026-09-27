@@ -483,8 +483,9 @@ def _chay_git(goc: Path, *doi_so, **kw):
     """
     env, _ = _moi_truong_git_sach()
     env["GIT_NO_REPLACE_OBJECTS"] = "1"
-    return subprocess.run(["git", "--no-replace-objects", "-C", str(goc), *doi_so],
-                          env=env, **kw)
+    chay = subprocess.Popen if kw.pop("mo_luong", False) else subprocess.run   # N125 — đọc THEO LUỒNG
+    return chay(["git", "--no-replace-objects", "-C", str(goc), *doi_so],
+                env=env, **kw)
 
 
 def _duong_bao_cao(rel: str) -> str:
@@ -523,8 +524,61 @@ _TRAN_TEP_NGUON = 8 * 1024 * 1024     # N124 — byte tối đa của MỘT tệ
 _TRAN_TONG_NGUON = 64 * 1024 * 1024   # N124 — tổng byte tối đa của mọi tệp nguồn (kho hôm nay: 10,5 MB / 264 tệp)
 
 
+_TRAN_SO_TEP_NGUON = 20_000   # N125 — số MỤC nguồn tối đa (kho hôm nay: 264 mục `*.py` trong INDEX)
+_TRAN_MUC_DUYET = 200_000     # N125 — số mục thư mục tối đa được DUYỆT ở cây không-git (cây làm việc hôm nay: 2 289)
+
+
 class _VuotTranDoc(ValueError):
-    """Tệp nguồn hay tổng nguồn vượt trần ĐỌC (N124) — `quet` biến nó thành KHONG_DO_DUOC."""
+    """Tệp nguồn, tổng nguồn hay SỐ MỤC vượt trần ĐỌC (N124, N125) — `quet` biến nó thành KHONG_DO_DUOC."""
+
+
+def _ban_ghi_index(goc: Path):
+    """`CompletedProcess` của `git ls-files --cached -s -z` mà `stdout` là DANH SÁCH bản ghi đã tách, CHỈ giữ bản
+    ghi nguồn Python (hay bản ghi lạ không tách được, để `_liet_ke_py` từ chối). Đọc THEO LUỒNG (N125).
+
+    N125 (r37, codex vòng 31): N124 chặn BYTE mà không chặn SỐ MỤC. Tệp rỗng không cộng byte nào, nên một INDEX
+    rất nhiều `.py` rỗng vẫn qua trần 64 MB trong khi danh sách, `co_kt`, hai đầu ra `cat-file` (mỗi bản ghi một
+    dòng đầu) cùng chuỗi và AST của từng tệp phình theo số mục. Đo được: 100 000 tệp rỗng ⇒ đỉnh bộ nhớ tăng
+    ~90 MB ở nhánh git, ~25 MB ở nhánh không-git — tuyến tính, không trần. Nay đếm mục TRONG LÚC đọc và NÉM
+    `_VuotTranDoc` ngay khi quá `_TRAN_SO_TEP_NGUON`; bản ghi không phải nguồn Python không được giữ lại nên
+    phần còn lại của INDEX chỉ tốn thời gian (hạn 60 s), không tốn bộ nhớ.
+    """
+    import tempfile
+    import threading
+    with tempfile.TemporaryFile() as tep_loi:
+        p = _chay_git(goc, "ls-files", "--cached", "-s", "-z", mo_luong=True,
+                      stdout=subprocess.PIPE, stderr=tep_loi)
+        het_gio = threading.Event()
+        dong_ho = threading.Timer(60, lambda: (het_gio.set(), p.kill()))
+        dong_ho.start()
+        giu, du = [], b""
+        try:
+            while True:
+                khoi = p.stdout.read(1 << 16)
+                if not khoi:
+                    break
+                *cac_ban_ghi, du = (du + khoi).split(b"\0")
+                for tho in cac_ban_ghi:
+                    _, tab, rel_b = tho.partition(b"\t")
+                    if tab and not _la_nguon_py(rel_b.decode("utf-8", "surrogateescape")):
+                        continue
+                    giu.append(tho)
+                    if len(giu) > _TRAN_SO_TEP_NGUON:
+                        raise _VuotTranDoc(f"INDEX có hơn {_TRAN_SO_TEP_NGUON} mục nguồn Python")
+                if len(du) > (1 << 20):
+                    raise _VuotTranDoc("một bản ghi INDEX dài hơn 1 MiB")
+            rc = p.wait()
+        finally:
+            dong_ho.cancel()
+            if p.poll() is None:
+                p.kill()
+                p.wait()
+            p.stdout.close()
+        if het_gio.is_set():
+            raise subprocess.TimeoutExpired(["git", "ls-files"], 60)
+        tep_loi.seek(0)
+        return subprocess.CompletedProcess(["git", "ls-files"], rc, giu + ([du] if du else []),
+                                           tep_loi.read(4096))
 
 
 def _oid_blob_tu_dia(p):
@@ -683,11 +737,10 @@ def _liet_ke_py(goc: Path):
             # tệp `\r` mang lời gọi trần, tệp `\n` sạch với OID cao hơn ⇒ `rc=0 DAT`,
             # `co_loi_goi_tran` RỖNG. Tách khung trên BYTES rồi mới giải mã, và giải mã bằng
             # `surrogateescape` để không mất byte nào.
-            pc = _chay_git(goc, "ls-files", "--cached", "-s", "-z",
-                           capture_output=True, timeout=60)
+            pc = _ban_ghi_index(goc)   # N125 — theo luồng, có trần SỐ MỤC
             if pc.returncode == 0:
                 muc, chua_hoa_giai = [], set()
-                for tho in pc.stdout.split(b"\0"):
+                for tho in pc.stdout:
                     if not tho:
                         continue
                     dau_b, tab, rel_b = tho.partition(b"\t")
@@ -718,7 +771,7 @@ def _liet_ke_py(goc: Path):
                 return sorted(set(muc)), "git"
             return [], ("git-hong: ls-files rc=%d %r"
                         % (pc.returncode, pc.stderr.decode("utf-8", "replace").strip()[:200]))
-        except (OSError, subprocess.SubprocessError) as e:
+        except (OSError, subprocess.SubprocessError, _VuotTranDoc) as e:
             return [], f"git-hong: {type(e).__name__}: {e}"
     # N100 (r27, quyết định chủ kho — lớp SYMLINK lần thứ ba) — symlink tên nguồn Python (kể cả TREO)
     # và symlink tới THƯ MỤC (đo được: `rglob` của 3.11 lẫn 3.12 KHÔNG đi vào thư mục symlink) mang
@@ -733,14 +786,33 @@ def _liet_ke_py(goc: Path):
     # ⇒ `_liet_ke_py` trả `([], "rglob")` và `quet` ra ĐẠT. Nay duyệt bằng `os.walk(onerror=…)` (KHÔNG theo
     # symlink): MỌI lỗi đọc thư mục ⇒ `rglob-hong: …` kèm tên thư mục ⇒ `quet` ra KHONG_DO_DUOC. Một danh
     # sách THIẾU không bao giờ được coi là một danh sách SẠCH.
-    ra, loi = [], []
-    for thu_muc, cac_tm, cac_tep in os.walk(goc, onerror=loi.append, followlinks=False):
-        for ten in (*cac_tm, *cac_tep):
-            p = Path(thu_muc) / ten
-            if p.is_symlink():
-                ra.append((p.relative_to(goc).as_posix(), "120000", None))
-            elif ten in cac_tep and p.is_file() and _la_nguon_py(ten):
-                ra.append((p.relative_to(goc).as_posix(), None, None))
+    # N125 (r37, codex vòng 31): `os.walk` dựng TRỌN danh sách tên của mỗi thư mục trước khi trả, nên một thư
+    # mục triệu mục làm phình bộ nhớ trước khi ta kịp đếm. Nay duyệt bằng `os.scandir` (lười, KHÔNG theo
+    # symlink), đếm MỌI mục đã duyệt (`_TRAN_MUC_DUYET`) và mọi mục nguồn giữ lại (`_TRAN_SO_TEP_NGUON`); vượt
+    # trần ⇒ `rglob-hong: … vượt trần` ⇒ KHONG_DO_DUOC. Lỗi đọc thư mục vẫn đi vào `loi` như N121.
+    ra, loi, cho, da_duyet = [], [], [str(goc)], 0
+    try:
+        while cho:
+            thu_muc = cho.pop()
+            try:
+                with os.scandir(thu_muc) as cac_muc:
+                    for mt in cac_muc:
+                        da_duyet += 1
+                        if da_duyet > _TRAN_MUC_DUYET:
+                            raise _VuotTranDoc(f"cây có hơn {_TRAN_MUC_DUYET} mục để duyệt")
+                        ten, p = mt.name, Path(mt.path)
+                        if p.is_symlink():
+                            ra.append((p.relative_to(goc).as_posix(), "120000", None))
+                        elif mt.is_dir(follow_symlinks=False):
+                            cho.append(mt.path)
+                        elif p.is_file() and _la_nguon_py(ten):
+                            ra.append((p.relative_to(goc).as_posix(), None, None))
+                        if len(ra) > _TRAN_SO_TEP_NGUON:
+                            raise _VuotTranDoc(f"cây có hơn {_TRAN_SO_TEP_NGUON} mục nguồn Python")
+            except OSError as e:
+                loi.append(e)
+    except _VuotTranDoc as e:
+        return [], f"rglob-hong: vượt trần: {e}"
     if loi:
         return [], "rglob-hong: " + "; ".join(
             f"{getattr(e, 'filename', '?')}: {type(e).__name__}: {getattr(e, 'strerror', e)}" for e in loi[:5])
@@ -1542,6 +1614,8 @@ def _loi_goi_tran(than: str, sau=0):
         `Popen`; N120: `%g`/`%G` không `#` chỉ tính độ chính xác tới trần chữ số thật của `double`;
       · N122 (r36): `tim_bash` đòi tính năng BASH (`pipefail`, mảng, `BASH_VERSINFO` ≥ 3) — sh/dash bị từ chối;
         N123: cây không-git kiểm OID đông cứng từ byte thật; N124: trần đọc nguồn (8 MB/tệp, 64 MB tổng);
+      · N125 (r37): trần SỐ MỤC nguồn (20 000) đo TRONG LÚC liệt kê — INDEX đọc theo luồng, cây không-git
+        duyệt bằng `os.scandir` lười có trần số mục duyệt (200 000); vượt trần ⇒ KHONG_DO_DUOC;
       · `type X[T] = …` (PEP 695) có phạm vi chú thích RIÊNG (N47, r16): `T` của nó không rò
         ra phạm vi chứa;
       · callee giải theo PHẠM VI TỪ VỰNG (r8, F3 codex vòng 3): `import subprocess` ở module

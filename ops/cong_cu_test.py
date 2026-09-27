@@ -1088,6 +1088,27 @@ DOT_BIEN = {
         "        _kiem_tran_doc([(rel, (goc / rel).stat().st_size) for rel, _, _ in muc])\n",
         "        pass  # đột biến: nhánh không-git đọc không trần\n",
         "BASH_NEN", (), "t46_noi_dung_lay_tu_INDEX_chu_khong_tu_cay_lam_viec"),
+    # r37 — N125: tran SO MUC nguon, do TRONG LUC liet ke, o ca hai nhanh.
+    "bn_git_khong_tran_so_muc": ("ops/bash_nen.py",
+        "                    if len(giu) > _TRAN_SO_TEP_NGUON:\n",
+        "                    if False:  # đột biến: nhánh git không trần số mục\n",
+        "BASH_NEN", (), "t46_noi_dung_lay_tu_INDEX_chu_khong_tu_cay_lam_viec"),
+    "bn_git_giu_moi_ban_ghi": ("ops/bash_nen.py",
+        "                    if tab and not _la_nguon_py(rel_b.decode(\"utf-8\", \"surrogateescape\")):\n",
+        "                    if False:  # đột biến: giữ MỌI bản ghi INDEX (kể cả không phải nguồn)\n",
+        "BASH_NEN", (), "t46_noi_dung_lay_tu_INDEX_chu_khong_tu_cay_lam_viec"),
+    "bn_khong_git_khong_tran_so_muc": ("ops/bash_nen.py",
+        "                        if len(ra) > _TRAN_SO_TEP_NGUON:\n",
+        "                        if False:  # đột biến: nhánh không-git không trần số mục\n",
+        "BASH_NEN", (), "t46_noi_dung_lay_tu_INDEX_chu_khong_tu_cay_lam_viec"),
+    "bn_khong_git_khong_tran_duyet": ("ops/bash_nen.py",
+        "                        if da_duyet > _TRAN_MUC_DUYET:\n",
+        "                        if False:  # đột biến: không trần số mục DUYỆT\n",
+        "BASH_NEN", (), "t46_noi_dung_lay_tu_INDEX_chu_khong_tu_cay_lam_viec"),
+    "bn_vuot_tran_nuot_thanh_danh_sach": ("ops/bash_nen.py",
+        '        return [], f"rglob-hong: vượt trần: {e}"\n',
+        '        return sorted(ra), "rglob"  # đột biến: vượt trần mà trả danh sách CỤT như danh sách đủ\n',
+        "BASH_NEN", (), "t46_noi_dung_lay_tu_INDEX_chu_khong_tu_cay_lam_viec"),
     "bn_ban_ghi_theo_toa_do": ("ops/bash_nen.py",
         "    theo_nut = dict(ban_ghi)\n",
         "    theo_nut = {p: p for _, p in ban_ghi}  # đột biến: khử trùng theo toạ độ\n",
@@ -1555,9 +1576,12 @@ DOT_BIEN = {
         "BASH_NEN", (), "t33_do_phu_cua_cong_do_duoc_THEO_HINH_DANG"),
     # r12 — BON dot bien cho bon mat cua "doc INDEX cho dung" (N32..N35), deu ve `t47`.
     "bn_theo_ref_thay_the": ("ops/bash_nen.py",
+        # NEO LAI O r37: N125 cho `_chay_git` chon `Popen`/`run` qua `mo_luong`.
         '    env["GIT_NO_REPLACE_OBJECTS"] = "1"\n'
-        '    return subprocess.run(["git", "--no-replace-objects", "-C", str(goc), *doi_so],\n',
-        '    return subprocess.run(["git", "-C", str(goc), *doi_so],  # đột biến: nghe ref thay thế của MÁY\n',
+        '    chay = subprocess.Popen if kw.pop("mo_luong", False) else subprocess.run   # N125 — đọc THEO LUỒNG\n'
+        '    return chay(["git", "--no-replace-objects", "-C", str(goc), *doi_so],\n',
+        '    chay = subprocess.Popen if kw.pop("mo_luong", False) else subprocess.run\n'
+        '    return chay(["git", "-C", str(goc), *doi_so],  # đột biến: nghe ref thay thế của MÁY\n',
         "BASH_NEN", (), "t47_INDEX_phai_duoc_doc_TRUNG_THUC_va_nguon_py_nhan_du_moi_cach_viet"),
     "bn_bo_qua_stage": ("ops/bash_nen.py",
         '                    if truong[2] != "0":\n',
@@ -5804,13 +5828,11 @@ def t46_noi_dung_lay_tu_INDEX_chu_khong_tu_cay_lam_viec():
             def __getattr__(self, ten):
                 return getattr(os_that, ten)
 
-            def walk(self, top, onerror=None, followlinks=False):
-                for bo in os_that.walk(top, onerror=onerror, followlinks=followlinks):
-                    if Path(bo[0]).name == "an":
-                        if onerror:
-                            onerror(PermissionError(13, "Permission denied", str(bo[0])))
-                        continue
-                    yield bo
+            # N125 (r37): bộ duyệt nay là `os.scandir` lười thay `os.walk`, nên lỗi được tiêm vào đúng chỗ ấy.
+            def scandir(self, duong):
+                if Path(duong).name == "an":
+                    raise PermissionError(13, "Permission denied", str(duong))
+                return os_that.scandir(duong)
         g7["os"] = _OsLoiDoc()
         try:
             ds7, nguon7 = m7["_liet_ke_py"](k7)
@@ -5878,6 +5900,40 @@ def t46_noi_dung_lay_tu_INDEX_chu_khong_tu_cay_lam_viec():
         mong9 = {(n, t, d): ("doc" if d == 0 else "nem") for n in ("khong-git", "git")
                  for t in ("tep", "tong") for d in (0, -1)}
         bang(ket9 == mong9, f"(9) N124: trần đọc ở hai nhánh, hai phía biên: đo {ket9}, mong {mong9}")
+
+        # (10) N125 (r37, codex vòng 31) — trần SỐ MỤC, đo TRONG LÚC liệt kê, ở cả hai nhánh và hai phía biên.
+        #      Mỗi cây có BA mục `.py` cộng một mục KHÔNG phải nguồn: mục ấy KHÔNG được tính vào trần nguồn (nhánh
+        #      git không giữ nó lại). Trần = 3 ⇒ liệt kê đủ ba; trần = 2 ⇒ fail-close có tên. Nhánh không-git còn
+        #      đo trần số mục DUYỆT: đúng bằng số mục của cây ⇒ liệt kê; bớt một ⇒ fail-close.
+        k10 = tmp / "kho_git_so_muc"
+        k10b = tmp / "khong_kho_so_muc"
+        for goc10 in (k10, k10b):
+            (goc10 / "ops").mkdir(parents=True)
+            for i10 in range(3):
+                (goc10 / "ops" / f"m{i10}.py").write_bytes(b"")
+            (goc10 / "ops" / "ghi_chu.txt").write_bytes(b"")
+        for lenh10 in (["init", "-q"], ["add", "ops"]):
+            subprocess.run(["git", "-C", str(k10), *lenh10], capture_output=True, check=True, timeout=60)
+        so_muc10 = sum(1 for _ in k10b.rglob("*"))
+        cu10 = (g9["_TRAN_SO_TEP_NGUON"], g9["_TRAN_MUC_DUYET"])
+        ket10 = {}
+        try:
+            for nhan10, goc10, ten_tran10, dung_bang in (("git", k10, "_TRAN_SO_TEP_NGUON", 3),
+                                                         ("khong-git", k10b, "_TRAN_SO_TEP_NGUON", 3),
+                                                         ("khong-git", k10b, "_TRAN_MUC_DUYET", so_muc10)):
+                for lech10 in (0, -1):
+                    g9["_TRAN_SO_TEP_NGUON"], g9["_TRAN_MUC_DUYET"] = cu10
+                    g9[ten_tran10] = dung_bang + lech10
+                    ds10, nguon10 = g9["_liet_ke_py"](goc10)
+                    ket10[(nhan10, ten_tran10, lech10)] = (
+                        "du" if len(ds10) == 3 and nguon10 in ("git", "rglob")
+                        else "vuot-tran" if ("vượt trần" in nguon10 or "_VuotTranDoc" in nguon10) and not ds10
+                        else f"khac: {nguon10[:60]} {len(ds10)}")
+        finally:
+            g9["_TRAN_SO_TEP_NGUON"], g9["_TRAN_MUC_DUYET"] = cu10
+        mong10 = {k: ("du" if k[2] == 0 else "vuot-tran") for k in ket10}
+        bang(len(ket10) == 6 and ket10 == mong10,
+             f"(10) N125: trần số mục ở hai nhánh, hai phía biên: đo {ket10}")
 
         if hasattr(os, "geteuid") and os.geteuid() != 0:
             (k7 / "an").chmod(0)

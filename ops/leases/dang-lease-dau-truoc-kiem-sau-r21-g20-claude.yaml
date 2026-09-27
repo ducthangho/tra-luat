@@ -163,3 +163,11 @@ TRANG_THAI_REVIEW_LUC_CAP:
   so_finding: 'P1 0 / P2 0 / P3 2 / P4 0'
   da_xu_ly: 'CHUA — F1-L31, F2-L31 se dong bang ma tran sinh tu ast (r22 + g21), theo chi thi chu kho doi cach lam.'
   DIEU_KIEN_DUNG: 'Khong con P1, P2, P3 o mot luot. Chua dat — luot 32 se do tren head cua r22.'
+
+# ───────────────────────── BIA MỘ — vế THỨ NHẤT của dấu HAI CHIỀU ─────────────────────────
+# Thêm 2026-09-27 khi cấp g21. g20 CÒN HIỆU LỰC (hạn 2026-09-29T00:00:00Z) nên bia mộ hai chiều là BẮT BUỘC.
+da_bi_thay_the: dang-lease-dau-truoc-kiem-sau-r22-g21-claude
+da_bi_thay_the_luc: '2026-09-27T07:15:25Z'
+da_bi_thay_the_luc_nguon: 'date -u luc commit bia mo nay; commit dung CHINH gia tri ay lam committer date (GIT_COMMITTER_DATE).'
+da_bi_thay_the_vi_sao: 'g21 neo dac ta r22 (507bfc4, sha256 957470487ff051a2a5fff36ad4e6bf838f680119d09e3491f018873f04c2fb05) va head
+  #589 359d30d — ma tran t191 sinh tu ast theo chu kho (issues/579#issuecomment-5850874948); han GIU 2026-09-29T00:00:00Z.'

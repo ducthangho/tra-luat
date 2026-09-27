@@ -90,6 +90,9 @@ def dan_xuat(goc: Path, moc: str, clock: str, lp) -> dict:
             continue
         try:
             han = lp._doc_han(d.get("lease_expires_at_utc"))
+        except OverflowError:
+            vi_pham.append((duong, "lease_expires_at_utc-hong: vuot-mien-UTC"))
+            continue
         except lp.Chan as e:
             vi_pham.append((duong, f"lease_expires_at_utc-hong: {e.thong_diep[:80]}"))
             continue
@@ -155,7 +158,7 @@ def _kho_gia(tmp: Path, tep: dict) -> tuple[Path, str]:
     k = Path(tempfile.mkdtemp(dir=tmp))
     subprocess.run(["git", "init", "-q", str(k)], check=True)
     for ten, nd in tep.items():
-        (k / "ops/leases").mkdir(parents=True, exist_ok=True)
+        (k / "ops/leases" / ten).parent.mkdir(parents=True, exist_ok=True)
         (k / "ops/leases" / ten).write_text(nd, encoding="utf-8")
     subprocess.run(["git", "-C", str(k), "add", "-A"], check=True)
     subprocess.run(["git", "-C", str(k), "-c", "user.email=q6@local", "-c", "user.name=q6",
@@ -194,6 +197,12 @@ def tu_kiem(goc: Path) -> int:
         "bia-gia-tri-ngoai-mien": ({**sach, "z.yaml": _lease("z", SONG) + "da_bi_thay_the: \"a+b\"\n"}, 3, [["x", "y"]]),
         "han-sai-dinh-dang": ({**sach, "y.yaml": "lease_id: y\nlease_expires_at_utc: 'mai'\nthay_the_cho: x\n"}, 3, []),
         "han-thieu-mui-gio": ({**sach, "y.yaml": "lease_id: y\nlease_expires_at_utc: '2099-01-01T00:00:00'\nthay_the_cho: x\n"}, 3, []),
+        "han-tran-UTC-tren": ({**sach, "y.yaml": _lease("y", "9999-12-31T23:59:59-01:00", thay="x")}, 3, []),
+        "han-tran-UTC-duoi": ({**sach, "y.yaml": _lease("y", "0001-01-01T00:00:00+01:00", thay="x")}, 3, []),
+        # Ba khoảng trống phủ reviewer lượt 4 chỉ ra (đột biến tự soạn SỐNG trên 24 ca cũ):
+        "han-bang-dung-C": ({"x.yaml": _lease("x", CHET, bi="y"), "y.yaml": _lease("y", CLOCK, thay="x")}, 0, []),
+        "thu-muc-con": ({**sach, "sub/z.yaml": _lease("z", SONG)}, 3, [["x", "y"]]),
+        "han-vang": ({**sach, "z.yaml": "lease_id: z\n"}, 3, [["x", "y"]]),
     }
     hong = 0
     with tempfile.TemporaryDirectory() as t:

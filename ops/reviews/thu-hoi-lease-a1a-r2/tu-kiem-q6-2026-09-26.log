@@ -21,5 +21,10 @@ DAT  thay-phan-tu-lap: rc=3 (mong 3) giu=[] vi_pham=[('ops/leases/y.yaml', 'thay
 DAT  bia-gia-tri-ngoai-mien: rc=3 (mong 3) giu=[['x', 'y']] vi_pham=[('ops/leases/z.yaml', 'da_bi_thay_the-ngoai-mien-LEASE_ID')]
 DAT  han-sai-dinh-dang: rc=3 (mong 3) giu=[] vi_pham=[('ops/leases/y.yaml', "lease_expires_at_utc-hong: lease_expires_at_utc không đọc được: 'mai' (cần ISO8601, ví dụ 2026-08-14T07:00:")]
 DAT  han-thieu-mui-gio: rc=3 (mong 3) giu=[] vi_pham=[('ops/leases/y.yaml', "lease_expires_at_utc-hong: lease_expires_at_utc phải kèm múi giờ (thêm 'Z'): '2099-01-01T00:00:00'")]
+DAT  han-tran-UTC-tren: rc=3 (mong 3) giu=[] vi_pham=[('ops/leases/y.yaml', 'lease_expires_at_utc-hong: vuot-mien-UTC')]
+DAT  han-tran-UTC-duoi: rc=3 (mong 3) giu=[] vi_pham=[('ops/leases/y.yaml', 'lease_expires_at_utc-hong: vuot-mien-UTC')]
+DAT  han-bang-dung-C: rc=0 (mong 0) giu=[] vi_pham=[]
+DAT  thu-muc-con: rc=3 (mong 3) giu=[['x', 'y']] vi_pham=[('ops/leases/sub/z.yaml', 'thu-muc-con')]
+DAT  han-vang: rc=3 (mong 3) giu=[['x', 'y']] vi_pham=[('ops/leases/z.yaml', 'lease_expires_at_utc-hong: lease_expires_at_utc rỗng')]
 DAT  cay-sau-khong-doi-cay-moc: giu=[['x', 'y']]
-TU_KIEM: 24/24 dat
+TU_KIEM: 29/29 dat

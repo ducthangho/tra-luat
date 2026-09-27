@@ -1385,6 +1385,8 @@ def _loi_goi_tran(than: str, sau=0):
       · N115 (r32): chỉ tải của `eval`/`exec` DỰNG SẴN là phụ thuộc; tải không hằng thì không phụ thuộc
         gì (không có khoá đại diện); N116: độ chính xác `*` ÂM là bỏ qua, độ rộng `*` âm lấy |x| — đo
         SAI PHÂN với `%` của Python (`t33` (1o));
+      · N117 (r33): bộ đọc phụ thuộc của hàng đợi nạp động nhận `eval`/`exec` dựng sẵn bằng CÙNG luật với
+        bộ quét (`_kieu_exec_cua`) — bí danh `bi.eval`, `from builtins import eval as ev` cũng được tính;
       · `type X[T] = …` (PEP 695) có phạm vi chú thích RIÊNG (N47, r16): `T` của nó không rò
         ra phạm vi chứa;
       · callee giải theo PHẠM VI TỪ VỰNG (r8, F3 codex vòng 3): `import subprocess` ở module
@@ -1782,6 +1784,25 @@ def _ten_exec_cua(cay):
     return thang, goc
 
 
+def _kieu_exec_cua(n, ten_exec):
+    """'exec'|'eval' khi lời gọi `n` CÓ THỂ là `exec`/`eval` dựng sẵn, hay None — MỘT luật duy nhất.
+
+    N117 (r33, chủ kho: "một nguồn sự thật", codex vòng 27) — `_tai_exec` (bộ QUÉT) và `_ten_phu_thuoc`
+    (bộ đọc PHỤ THUỘC của hàng đợi nạp động) từng có hai luật riêng, và luật viết tay của bộ đọc phụ
+    thuộc (N115) bỏ sót bí danh `import builtins as bi; bi.eval(…)` và `from builtins import eval as ev`
+    mà bộ quét nhận — đo được: chạy thật phóng bash, cổng trả `[]`. Nay cả hai gọi hàm này.
+    `ten_exec` là `_ten_exec_cua(cay)` của CẢ TỆP.
+    """
+    thang, goc = ten_exec
+    f = n.func
+    if isinstance(f, ast.Name) and f.id in thang:
+        return thang[f.id]
+    if (isinstance(f, ast.Attribute) and f.attr in ("exec", "eval")
+            and isinstance(f.value, ast.Name) and f.value.id in goc):
+        return f.attr
+    return _tu_trong_callee_tinh(f, ("exec", "eval"))                     # N90
+
+
 def _tai_exec(cay):
     """[(nút gọi, tải đã giải mã)] cho mọi `exec(…)`/`eval(…)` mà đối số đầu là tải HẰNG hợp lệ
     theo ĐÚNG chế độ của hàm (N97).
@@ -1798,19 +1819,12 @@ def _tai_exec(cay):
     `KHONG_DO_DUOC`. Hai đường cho cùng một sự kiện phải cho cùng một phán quyết: fail-close.
     KHÔNG PHỦ (nợ có tên): tải không phải hằng; `compile(…)` rồi `exec` đối tượng mã.
     """
-    thang, goc = _ten_exec_cua(cay)
+    ten_exec = _ten_exec_cua(cay)
     ra = []
     for n in ast.walk(cay):
         if not isinstance(n, ast.Call):
             continue
-        f = n.func
-        if isinstance(f, ast.Name) and f.id in thang:
-            kieu = thang[f.id]
-        elif (isinstance(f, ast.Attribute) and f.attr in ("exec", "eval")
-              and isinstance(f.value, ast.Name) and f.value.id in goc):
-            kieu = f.attr
-        else:
-            kieu = _tu_trong_callee_tinh(f, ("exec", "eval"))            # N90
+        kieu = _kieu_exec_cua(n, ten_exec)
         if kieu is None:
             continue
         van = _tai_hang(n)
@@ -2179,6 +2193,7 @@ def _bang_pham_vi_ca_cay(cay, sau=0):
     # không thấy `b` trong `a = eval("b")` nên giải `b` về sau không xếp lại `a` ⇒ lọt, chạy bash thật.
     # Tải được đọc qua `_tai_hang`; tải không phải hằng/không phân tích được thì không có phụ thuộc (N115).
     global _DEM_GIAI_DONG
+    ten_exec = _ten_exec_cua(cay)
     cac_muc = []
     theo_ten = {}
     for i in thu_tu:
@@ -2189,7 +2204,7 @@ def _bang_pham_vi_ca_cay(cay, sau=0):
                 k = len(cac_muc)
                 c = chuoi_cua[rb[2]]
                 cac_muc.append((ten, tap, rb, c))
-                for ten_pt in _ten_phu_thuoc(rb[1]):
+                for ten_pt in _ten_phu_thuoc(rb[1], ten_exec):
                     for pv in c:
                         theo_ten.setdefault((ten_pt, id(pv[1])), []).append(k)
     # Bảng phạm vi (dict tên → tập) của mỗi `tap` — để biết một thay đổi xảy ra ở bảng nào.
@@ -2214,7 +2229,7 @@ def _bang_pham_vi_ca_cay(cay, sau=0):
     return {i: tuple(bang[i]) for i in thu_tu}
 
 
-def _ten_phu_thuoc(bieu):
+def _ten_phu_thuoc(bieu, ten_exec):
     """Tên mà việc giải một mục NẠP ĐỘNG `bieu` phụ thuộc — kể cả tên trong tải `eval`/`exec` (N112).
 
     N115 (r32, codex vòng 26; chủ kho: "vá gọn N112") — hai sửa:
@@ -2232,11 +2247,7 @@ def _ten_phu_thuoc(bieu):
             ra.add(n.id)
         if not isinstance(n, ast.Call):
             continue
-        f = n.func
-        dung_san = ((isinstance(f, ast.Name) and f.id in ("eval", "exec"))
-                    or (isinstance(f, ast.Attribute) and f.attr in ("eval", "exec")
-                        and isinstance(f.value, ast.Name) and f.value.id in ("builtins", "__builtins__")))
-        if not dung_san:
+        if _kieu_exec_cua(n, ten_exec) is None:          # N117 — CÙNG luật với bộ quét `_tai_exec`
             continue
         try:
             van = _tai_hang(n)

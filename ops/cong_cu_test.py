@@ -1020,8 +1020,8 @@ DOT_BIEN = {
         "        return han  # đột biến: hạn tổng chỉ xét giữa các ỨNG VIÊN, không giữa các PHÉP\n",
         "BASH_NEN", (), "t51_cache_phai_HET_HIEU_LUC_khi_chinh_TEP_ung_vien_doi"),
     "bn_eval_moi_thuoc_tinh": ("ops/bash_nen.py",
-        "        if not dung_san:\n            continue\n        try:\n            van = _tai_hang(n)\n",
-        "        if False:  # đột biến: đọc tải của MỌI `.eval`\n            continue\n        try:\n            van = _tai_hang(n)\n",
+        "        if _kieu_exec_cua(n, ten_exec) is None:          # N117 — CÙNG luật với bộ quét `_tai_exec`\n",
+        "        if False:  # đột biến: đọc tải của MỌI `.eval`\n",
         "BASH_NEN", (), "t33_do_phu_cua_cong_do_duoc_THEO_HINH_DANG"),
     "bn_phu_thuoc_dai_dien": ("ops/bash_nen.py",
         "            for k2 in theo_ten.get((ten, b_id), ()):\n",
@@ -1030,6 +1030,11 @@ DOT_BIEN = {
     "bn_chinh_xac_am_tinh": ("ops/bash_nen.py",
         "            return max(v, 0) if la_chinh_xac else abs(v)\n",
         "            return abs(v)  # đột biến: độ chính xác `*` âm tính như dương\n",
+        "BASH_NEN", (), "t33_do_phu_cua_cong_do_duoc_THEO_HINH_DANG"),
+    # r33 — N117: bo doc phu thuoc dung CUNG luat voi bo quet.
+    "bn_phu_thuoc_luat_rieng": ("ops/bash_nen.py",
+        "        if _kieu_exec_cua(n, ten_exec) is None:          # N117 — CÙNG luật với bộ quét `_tai_exec`\n",
+        "        if not (isinstance(n.func, ast.Name) and n.func.id in ('eval', 'exec')):  # đột biến: luật viết tay riêng\n",
         "BASH_NEN", (), "t33_do_phu_cua_cong_do_duoc_THEO_HINH_DANG"),
     "bn_ban_ghi_theo_toa_do": ("ops/bash_nen.py",
         "    theo_nut = dict(ban_ghi)\n",
@@ -1177,8 +1182,8 @@ DOT_BIEN = {
         "BASH_NEN", (), "t33_do_phu_cua_cong_do_duoc_THEO_HINH_DANG"),
     # N90: `_tai_exec` thoi hoi callee TINH RA (nap dong van hoi).
     "bn_tai_exec_bo_callee_tinh": ("ops/bash_nen.py",
-        '            kieu = _tu_trong_callee_tinh(f, ("exec", "eval"))            # N90\n',
-        '            kieu = None  # đột biến: `exec` qua callee tính ra không được quét\n',
+        '    return _tu_trong_callee_tinh(f, ("exec", "eval"))                     # N90\n',
+        '    return None  # đột biến: `exec` qua callee tính ra không được quét\n',
         "BASH_NEN", (), "t33_do_phu_cua_cong_do_duoc_THEO_HINH_DANG"),
     # ── r23 — DOT BIEN cho N83..N87 (cross-review cung nha cung cap, vong 17) ──
     # N83: rang buoc NAP DONG cho giai thoi duoc giai ⇒ moi dang gan `m = …(…)` lot.
@@ -3036,6 +3041,9 @@ _HINH_DANG_PHU = {
     "phan_tram_b_chinh_xac_tinh": 'import subprocess\nsubprocess.run([b"%.5000b" % b"bash"])\n',
     # r31 — N112: phu thuoc nam TRONG tai `eval("b")` hang; vong lap hai luot chay bash that (codex vong 25).
     "nap_dong_eval_vong_lap": 'import importlib as il\nfor i in range(2):\n    if i:\n        a = eval("b")\n        a.run(["bash"])\n    b = il.import_module("subprocess")\n',
+    # r33 — N117: phu thuoc trong tai `eval` qua BI DANH dung san (codex vong 27; chay bash that).
+    "nap_dong_eval_bi_danh_goc":  'import builtins as bi, importlib as il\nfor i in range(2):\n    if i:\n        a = bi.eval("b")\n        a.run(["bash"])\n    b = il.import_module("subprocess")\n',
+    "nap_dong_eval_bi_danh_thang": 'from builtins import eval as ev\nimport importlib as il\nfor i in range(2):\n    if i:\n        a = ev("b")\n        a.run(["bash"])\n    b = il.import_module("subprocess")\n',
     "nap_dong_ba_tang":     'a = __import__("importlib")\nb = a.import_module("importlib")\nc = b.import_module("subprocess")\nc.run(["bash"])\n',
     # r23 — N86 (F7 vong 17): `%` voi ve phai `dict`.
     "hang_phan_tram_dict":  'import subprocess\nsubprocess.run(["%(a)s" % {"a": "bash"}])\n',
@@ -3191,6 +3199,8 @@ _HINH_DANG_KHONG_PHU = {
     "khep_chu_thich_tinh_phan_tram": 'import subprocess\ndef f(x: "%s.run([\'bash\'])" % "subprocess"):\n    pass\n',
     "khep_chu_thich_tinh_join":  'import subprocess\ndef f(x: "".join(["subprocess.run(", "[\'bash\']", ")"])):\n    pass\n',
     "khep_chu_thich_tinh_fstring": 'import subprocess\ndef f(x: f"{\'subprocess\'}.run([\\"bash\\"])"):\n    pass\n',
+    # r33 — N117 chieu NGUOC: `.eval` tren doi tuong KHAC khong phai `eval` dung san — khong phu thuoc.
+    "eval_thuoc_tinh_khong_phu_thuoc": 'import importlib as il\nfor i in range(2):\n    if i:\n        a = page.eval("b")\n        a.run(["bash"])\n    b = il.import_module("subprocess")\n',
     "khep_callee_dieu_kien": 'import builtins\n(builtins.exec if True else print)("import subprocess\\nsubprocess.run([\'bash\'])")\n',
     "khep_callee_ten_gap":  'import builtins\ngetattr(builtins, "ex" + "ec")("import subprocess\\nsubprocess.run([\'bash\'])")\n',
     "khep_nap_dong_trai":   'import importlib\nimportlib.import_module(*["subprocess"]).run(["bash"])\n',

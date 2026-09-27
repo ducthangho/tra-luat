@@ -1045,6 +1045,23 @@ DOT_BIEN = {
         "                return                          # \"incomplete format key\" — Python ném trước khi dựng\n",
         "                raise _VuotNganSach('khoá không khép')  # đột biến: NÉM oan trên mẫu Python từ chối\n",
         "BASH_NEN", (), "t33_do_phu_cua_cong_do_duoc_THEO_HINH_DANG"),
+    # r35 — N119/N120/N121 (codex vong 29).
+    "bn_g_khong_thang_van_tinh": ("ops/bash_nen.py",
+        '        elif kieu in "gG" and "#" not in co:\n',
+        '        elif False:  # đột biến: `%g` không `#` vẫn tính trọn độ chính xác\n',
+        "BASH_NEN", (), "t33_do_phu_cua_cong_do_duoc_THEO_HINH_DANG"),
+    "bn_asyncio_bo_executable": ("ops/bash_nen.py",
+        '            exe_as = _doi_so_executable_asyncio(nut) if mod == "asyncio" else None\n',
+        '            exe_as = None  # đột biến: `executable=` của asyncio bị bỏ qua\n',
+        "BASH_NEN", (), "t33_do_phu_cua_cong_do_duoc_THEO_HINH_DANG"),
+    "bn_rglob_nuot_loi_doc": ("ops/bash_nen.py",
+        "    if loi:\n        return [], \"rglob-hong: \"",
+        "    if False:  # đột biến: lỗi đọc thư mục bị nuốt\n        return [], \"rglob-hong: \"",
+        "BASH_NEN", (), "t46_noi_dung_lay_tu_INDEX_chu_khong_tu_cay_lam_viec"),
+    "bn_quet_bo_rglob_hong": ("ops/bash_nen.py",
+        '    if nguon_tep.startswith("rglob-hong"):\n',
+        '    if False:  # đột biến: `quet` quét tiếp danh sách THIẾU\n',
+        "BASH_NEN", (), "t46_noi_dung_lay_tu_INDEX_chu_khong_tu_cay_lam_viec"),
     "bn_ban_ghi_theo_toa_do": ("ops/bash_nen.py",
         "    theo_nut = dict(ban_ghi)\n",
         "    theo_nut = {p: p for _, p in ban_ghi}  # đột biến: khử trùng theo toạ độ\n",
@@ -1072,17 +1089,17 @@ DOT_BIEN = {
     # RUT O r27: bn_rglob_bo_lien_ket — phep do CHA la symlink (`_che_do`) thanh ma chet vi `rglob` khong
     # di vao thu muc symlink (do duoc tren 3.11 va 3.12); da go. Hai dot bien duoi canh luat moi.
     "bn_rglob_bo_symlink_tep": ("ops/bash_nen.py",
-        "        if x.is_symlink():\n",
-        "        if x.is_symlink() and x.is_dir():  # đột biến: symlink tên `*.py` (kể cả treo) không được đánh dấu\n",
+        "            if p.is_symlink():\n",
+        "            if p.is_symlink() and p.is_dir():  # đột biến: symlink tên `*.py` (kể cả treo) không được đánh dấu\n",
         "BASH_NEN", (), "t46_noi_dung_lay_tu_INDEX_chu_khong_tu_cay_lam_viec"),
     "bn_rglob_bo_symlink_thu_muc": ("ops/bash_nen.py",
-        "        if x.is_symlink():\n",
-        "        if x.is_symlink() and _la_nguon_py(x.name):  # đột biến: thư mục symlink bị bỏ qua im lặng\n",
+        "            if p.is_symlink():\n",
+        "            if p.is_symlink() and _la_nguon_py(ten):  # đột biến: thư mục symlink bị bỏ qua im lặng\n",
         "BASH_NEN", (), "t46_noi_dung_lay_tu_INDEX_chu_khong_tu_cay_lam_viec"),
     # r30 — N106: phan loai symlink KHONG hoi dich.
     "bn_rglob_hoi_dich": ("ops/bash_nen.py",
-        "        if x.is_symlink():\n",
-        "        if x.is_symlink() and (_la_nguon_py(x.name) or x.is_dir()):  # đột biến: luật N100, hỏi ĐÍCH\n",
+        "            if p.is_symlink():\n",
+        "            if p.is_symlink() and (_la_nguon_py(ten) or p.is_dir()):  # đột biến: luật N100, hỏi ĐÍCH\n",
         "BASH_NEN", (), "t46_noi_dung_lay_tu_INDEX_chu_khong_tu_cay_lam_viec"),
     # N99: chuoi trong chu thich duoc luu thoi duoc phan tich.
     "bn_chu_thich_chuoi_bo": ("ops/bash_nen.py",
@@ -3056,6 +3073,9 @@ _HINH_DANG_PHU = {
     # r34 — N118: khoa anh xa co ngoac LONG (codex vong 28); ra dung `bash` va CHAY BASH THAT.
     "phan_tram_khoa_ngoac_long":   'import subprocess\nsubprocess.run(["%((a))s" % {"(a)": "bash"}])\n',
     "phan_tram_khoa_ngoac_giua":   'import subprocess\nsubprocess.run(["%(a(b)c)s" % {"a(b)c": "bash"}])\n',
+    # r35 — N119: `executable=` cua asyncio GHI DE chuong trinh (codex vong 29; chay bash that).
+    "asyncio_exec_executable":  'import asyncio\nasyncio.create_subprocess_exec("x", "-c", "true", executable="bash")\n',
+    "asyncio_shell_executable": 'import asyncio\nasyncio.create_subprocess_shell("true", executable="bash")\n',
     "nap_dong_ba_tang":     'a = __import__("importlib")\nb = a.import_module("importlib")\nc = b.import_module("subprocess")\nc.run(["bash"])\n',
     # r23 — N86 (F7 vong 17): `%` voi ve phai `dict`.
     "hang_phan_tram_dict":  'import subprocess\nsubprocess.run(["%(a)s" % {"a": "bash"}])\n',
@@ -3213,6 +3233,8 @@ _HINH_DANG_KHONG_PHU = {
     "khep_chu_thich_tinh_fstring": 'import subprocess\ndef f(x: f"{\'subprocess\'}.run([\\"bash\\"])"):\n    pass\n',
     # r33 — N117 chieu NGUOC: `.eval` tren doi tuong KHAC khong phai `eval` dung san — khong phu thuoc.
     "eval_thuoc_tinh_khong_phu_thuoc": 'import importlib as il\nfor i in range(2):\n    if i:\n        a = page.eval("b")\n        a.run(["bash"])\n    b = il.import_module("subprocess")\n',
+    # r35 — N119 chieu NGUOC: `executable=` khac bash thi `argv[0] == "bash"` chi la trang tri.
+    "asyncio_exec_executable_khac": 'import asyncio\nasyncio.create_subprocess_exec("bash", "x", executable="/bin/echo")\n',
     "khep_callee_dieu_kien": 'import builtins\n(builtins.exec if True else print)("import subprocess\\nsubprocess.run([\'bash\'])")\n',
     "khep_callee_ten_gap":  'import builtins\ngetattr(builtins, "ex" + "ec")("import subprocess\\nsubprocess.run([\'bash\'])")\n',
     "khep_nap_dong_trai":   'import importlib\nimportlib.import_module(*["subprocess"]).run(["bash"])\n',
@@ -3276,6 +3298,10 @@ _HINH_DANG_BAO_THAN_TRONG = {
     # r29 — LOP DA KHEP mo rong (chu kho, codex vong 23): moi loi goi Python TU CHOI vi sai quy uoc
     # truyen doi so — `posix_spawnp` chi nhan VI TRI.
     "khep_posix_spawnp_tu_khoa": 'import os\nos.posix_spawnp(path="bash", argv=["bash"], env={})\n',
+    # r35 — LOP DA KHEP mo rong (chu kho, codex vong 29): `__import__(…, level≠0)` la nhap TUONG DOI —
+    # ngoai package Python nem `ImportError`, trong package no nap module CUNG TEN cua package. Bao thua co ten.
+    "khep_import_tuong_doi_vi_tri": '__import__("subprocess", globals(), locals(), (), 1).run(["bash"])\n',
+    "khep_import_tuong_doi_tu_khoa": '__import__("subprocess", level=1).run(["bash"])\n',
     "khep_annotated_du_lieu": 'import subprocess\nfrom typing import Annotated\ndef f(x: Annotated[int, "subprocess.run([\'bash\'])"]):\n    pass\n',
 }
 if sys.version_info >= (3, 12):
@@ -3559,14 +3585,22 @@ def t33_do_phu_cua_cong_do_duoc_THEO_HINH_DANG():
     # (1o) N116 (r32, chủ kho: "đóng bằng phép đo SAI PHÂN") — ngân sách `%` của cổng so với độ dài THẬT
     # mà `%` của Python dựng, trên một LƯỚI: cờ × độ rộng (tĩnh/`*`, kể cả ÂM) × độ chính xác (tĩnh/`*`,
     # kể cả ÂM) × mọi kiểu trong bảng × str/bytes. Hai chiều: thật > ngân sách sản phẩm ⇒ cổng PHẢI NÉM
-    # (không lọt); thật ≤ 64 ký tự ⇒ cổng KHÔNG được NÉM (không báo oan cả cây). "Thật" là độ dài LỚN NHẤT
+    # (không lọt); thật ≤ `_CHAT` ký tự ⇒ cổng KHÔNG được NÉM (không báo oan cả cây). "Thật" là độ dài LỚN NHẤT
     # trên một TẬP giá trị của kiểu ấy: `%.5000g` ra 3 ký tự với 1.5 mà hơn 5000 với 1/3 — cổng không
     # biết giá trị sẽ là gì trong mọi trường hợp, nên chỉ bị đòi chặt khi KHÔNG giá trị nào khuếch đại.
+    # N120 (r35, chủ kho: "siết phép đo") — ngưỡng CHẶT nâng 64 → 1000: bản r32–r34 chỉ đòi "thật ≤ 64 ⇒ không
+    # NÉM", nên `%.5000g` (thật ≤ ~760 với mọi `double`) lọt qua phép đo dù cổng NÉM oan — codex vòng 29 bắt.
+    # Ở ngưỡng 1000, mọi báo thừa cùng hình dạng lộ ra trong MỘT lượt đo thay vì từng vòng review.
+    _CHAT = 1000
     kiem_ns = _g_bn["_kiem_ngan_sach_dinh_dang"]
+    dai_g = max(len(("%" + c + ".5000" + k) % v) for c in ("", "+", " ") for k in "gG"
+                for v in (5e-324, -5e-324, 2.2250738585072014e-308, 1e-300, 1 / 3, 1e300, 1.7976931348623157e308))
+    bang(dai_g <= _g_bn["_TRAN_CHU_SO_G"],
+         f"(1o) N120: `%.5000g` không `#` dựng tới {dai_g} ký tự > trần {_g_bn['_TRAN_CHU_SO_G']} của cổng")
     vuot = _g_bn["_VuotNganSach"]
     tran_ns = _g_bn["_NGAN_SACH_DINH_DANG"]
     gia_tri = {"s": ("x",), "r": ("x",), "a": ("x",), "c": (65,), "b": (b"x",)}
-    gia_so = {"e": (1.5, 1 / 3, 1e300, -1e-300), "i": (7, -7, 10 ** 30)}
+    gia_so = {"e": (1.5, 1 / 3, 1e300, -1e-300, 5e-324, 2.2250738585072014e-308), "i": (7, -7, 10 ** 30)}
     lech = []
     so_o = 0
     for kieu in sorted(_g_bn["_KIEU_TRAN"] | _g_bn["_KIEU_KHUECH_DAI"]):
@@ -3598,7 +3632,7 @@ def t33_do_phu_cua_cong_do_duoc_THEO_HINH_DANG():
                                 if that < 0:
                                     continue
                                 so_o += 1
-                                if (that > tran_ns and not nem) or (that <= 64 and nem):
+                                if (that > tran_ns and not nem) or (that <= _CHAT and nem):
                                     lech.append((mau_o, doi_o, that, nem))
     # N118 (r34, codex vòng 28) — lưới mở sang KHOÁ ÁNH XẠ: khoá thường, rỗng, lồng ngoặc (`(a)`, `a(b)c`,
     # `((x))`), kèm cờ × độ rộng/độ chính xác TĨNH (Python cấm `*` cùng khoá ánh xạ) × mọi kiểu × str/bytes.
@@ -3632,7 +3666,7 @@ def t33_do_phu_cua_cong_do_duoc_THEO_HINH_DANG():
                                 continue
                             so_o += 1
                             so_khoa += 1
-                            if (that > tran_ns and not nem) or (that <= 64 and nem):
+                            if (that > tran_ns and not nem) or (that <= _CHAT and nem):
                                 lech.append((mau_o, khoa, that, nem))
     for hong in ("%((a)s", "%(a", "%(a(b)s"):
         try:
@@ -5703,6 +5737,52 @@ def t46_noi_dung_lay_tu_INDEX_chu_khong_tu_cay_lam_viec():
             ket6[lan] = bao6.get("lien_ket_tuong_trung")
         bang(all(bool(v) for v in ket6.values()),
              f"(6) symlink `vendor` treo phải fail-close BẤT KỂ đích ngoài gốc có tồn tại hay không: {ket6}")
+
+        # (7) N121 (r35, codex vòng 29) — thư mục KHÔNG đọc được ở cây không-git phải fail-close, không bị
+        #     bỏ qua im lặng như `rglob`. Root bỏ qua `chmod 000`, nên chốt TIÊM lỗi đọc thư mục vào chính
+        #     bản cổng đang đo (`bq`) — không phụ thuộc người chạy; và khi KHÔNG phải root thì đo thêm bằng
+        #     `chmod 000` thật qua tiến trình con.
+        k7 = tmp / "khong_kho_an"
+        (k7 / "ops").mkdir(parents=True)
+        (k7 / "an").mkdir()
+        (k7 / "an" / "bad.py").write_text('import shutil\nshutil.which("bash")\n', encoding="utf-8")
+        m7 = runpy.run_path(str(bq))
+        g7 = m7["_liet_ke_py"].__globals__
+        os_that = g7["os"]
+
+        class _OsLoiDoc:
+            def __getattr__(self, ten):
+                return getattr(os_that, ten)
+
+            def walk(self, top, onerror=None, followlinks=False):
+                for bo in os_that.walk(top, onerror=onerror, followlinks=followlinks):
+                    if Path(bo[0]).name == "an":
+                        if onerror:
+                            onerror(PermissionError(13, "Permission denied", str(bo[0])))
+                        continue
+                    yield bo
+        g7["os"] = _OsLoiDoc()
+        try:
+            ds7, nguon7 = m7["_liet_ke_py"](k7)
+            rc7, bao7 = m7["quet"](k7)
+        finally:
+            g7["os"] = os_that
+        bang(nguon7.startswith("rglob-hong") and not ds7,
+             f"(7) N121: thư mục không đọc được ở cây không-git phải cho `rglob-hong`, đo được "
+             f"{nguon7!r} với {len(ds7)} tệp")
+        # Đọc TRƯỜNG CƠ CHẾ, không đọc phán quyết (`t39`): nhánh fail-close KHÔNG quét gì nên báo cáo không có
+        # `co_loi_goi_tran`; một bản quét tiếp danh sách THIẾU sẽ trả `co_loi_goi_tran = []`.
+        bang(nguon7.startswith("rglob-hong") and bao7.get("co_loi_goi_tran") is None,
+             f"(7) N121: `quet` không được QUÉT TIẾP một danh sách THIẾU: co_loi_goi_tran="
+             f"{bao7.get('co_loi_goi_tran')!r}, nguon_tep={str(bao7.get('nguon_tep'))[:80]!r}")
+        if hasattr(os, "geteuid") and os.geteuid() != 0:
+            (k7 / "an").chmod(0)
+            try:
+                _, bao7b = _quet(k7, bq)
+            finally:
+                (k7 / "an").chmod(0o755)
+            bang(str(bao7b.get("nguon_tep")).startswith("rglob-hong") and bao7b.get("co_loi_goi_tran") is None,
+                 f"(7) N121: `chmod 000` THẬT phải fail-close: nguon_tep={str(bao7b.get('nguon_tep'))[:80]!r}")
 
 
 @ca

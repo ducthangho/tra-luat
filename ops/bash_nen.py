@@ -665,15 +665,22 @@ def _liet_ke_py(goc: Path):
     # `120000` chỉ vì đích NGOÀI gốc vừa được tạo. Cùng các byte trong cây, hai phán quyết. Nay MỌI
     # symlink — tệp hay thư mục, treo hay không, tên gì — đều `120000`; chỉ `is_symlink()` (lstat) được
     # hỏi, không một câu nào về ĐÍCH.
-    ra = []
-    for x in goc.rglob("*"):
-        if x.is_symlink():
-            ra.append((x.relative_to(goc).as_posix(), "120000", None))
-        elif x.is_file() and _la_nguon_py(x.name):
-            # Thư mục CHA không thể là symlink: `rglob` không đi vào thư mục symlink (đo được), và
-            # chính thư mục symlink đã mang `120000` ở trên. Phép dò cha của N95 đã gỡ ở r27 — mã
-            # không đường nào đi tới (đột biến neo vào nó sống sót mà không đo gì).
-            ra.append((x.relative_to(goc).as_posix(), None, None))
+    # N121 (r35, chủ kho — cây không-git đọc sót lần NĂM, codex vòng 29): `Path.rglob` BỎ QUA IM LẶNG thư
+    # mục không đọc được — đo được: người dùng thường, thư mục `000` chứa `bad.py` gọi `shutil.which("bash")`
+    # ⇒ `_liet_ke_py` trả `([], "rglob")` và `quet` ra ĐẠT. Nay duyệt bằng `os.walk(onerror=…)` (KHÔNG theo
+    # symlink): MỌI lỗi đọc thư mục ⇒ `rglob-hong: …` kèm tên thư mục ⇒ `quet` ra KHONG_DO_DUOC. Một danh
+    # sách THIẾU không bao giờ được coi là một danh sách SẠCH.
+    ra, loi = [], []
+    for thu_muc, cac_tm, cac_tep in os.walk(goc, onerror=loi.append, followlinks=False):
+        for ten in (*cac_tm, *cac_tep):
+            p = Path(thu_muc) / ten
+            if p.is_symlink():
+                ra.append((p.relative_to(goc).as_posix(), "120000", None))
+            elif ten in cac_tep and p.is_file() and _la_nguon_py(ten):
+                ra.append((p.relative_to(goc).as_posix(), None, None))
+    if loi:
+        return [], "rglob-hong: " + "; ".join(
+            f"{getattr(e, 'filename', '?')}: {type(e).__name__}: {getattr(e, 'strerror', e)}" for e in loi[:5])
     return sorted(ra), "rglob"
 
 
@@ -751,8 +758,9 @@ _NGAN_SACH_DINH_DANG = 4096
 # mọi chữ cái mà `%` nhận phải nằm trong bảng, và mỗi kiểu phải đúng nhóm của nó.
 _KIEU_TRAN = frozenset("srabc")
 _KIEU_KHUECH_DAI = frozenset("diouxXeEfFgG")
+_TRAN_CHU_SO_G = 800      # N120 — trần độ dài `%.Ng` (không `#`) của mọi `double`; `t33` (1o) đo
 def _tach_dinh_dang(van):
-    """Mỗi đặc tả `%` của `van` là một bộ (độ_rộng, độ_chính_xác, kiểu) — theo ĐÚNG luật tách của CPython.
+    """Mỗi đặc tả `%` của `van` là một bộ (cờ, độ_rộng, độ_chính_xác, kiểu) — theo ĐÚNG luật tách của CPython.
 
     N118 (r34, chủ kho — ngân sách `%` lần NĂM, codex vòng 28): bản r33 tách bằng regex `%(?:\([^)]*\))?…`,
     dừng khoá ánh xạ ở `)` ĐẦU TIÊN, nên `"%((a))s" % {"(a)": "bash"}` (ra `'bash'`, phóng bash thật) bị
@@ -783,8 +791,10 @@ def _tach_dinh_dang(van):
                 i += 1
             if muc:
                 return                          # "incomplete format key" — Python ném trước khi dựng
+        j = i
         while i < n and van[i] in "-+ #0":
             i += 1
+        co = van[j:i]
         rong = None
         if i < n and van[i] == "*":
             rong, i = "*", i + 1
@@ -807,7 +817,7 @@ def _tach_dinh_dang(van):
             i += 1
         if i >= n:
             return                              # "incomplete format"
-        yield rong, cx, van[i]
+        yield co, rong, cx, van[i]
         i += 1
 
 
@@ -859,12 +869,18 @@ def _kiem_ngan_sach_dinh_dang(mau, doi):
             raise _VuotNganSach(f"độ rộng/độ chính xác có {len(dac_ta)} chữ số")
         return int(dac_ta)
 
-    for dac_rong, dac_cx, kieu in _tach_dinh_dang(van):
+    for co, dac_rong, dac_cx, kieu in _tach_dinh_dang(van):
         rong = _so(dac_rong)
         chinh_xac = _so(dac_cx, la_chinh_xac=True)
         i += 1                                      # chính giá trị được định dạng
         if kieu in _KIEU_TRAN:
             tong += rong
+        elif kieu in "gG" and "#" not in co:
+            # N120 (r35, chủ kho — ngân sách `%` lần SÁU, codex vòng 29): `%g`/`%G` KHÔNG có `#` bỏ số 0
+            # đuôi, nên độ chính xác chỉ là TRẦN của số chữ số THẬT của một `double` — tối đa ~770 (khai
+            # triển thập phân chính xác của số dưới chuẩn). Đo được: `"%.5000g" % 1.0` ra `'1'` mà bản r34
+            # cộng 5000 ⇒ NÉM. `%#g` giữ số 0 đuôi nên vẫn khuếch đại đủ. `t33` (1o) đo trần này.
+            tong += rong + min(chinh_xac, _TRAN_CHU_SO_G)
         elif kieu in _KIEU_KHUECH_DAI:
             tong += rong + chinh_xac
         else:
@@ -1278,6 +1294,22 @@ def _doi_so_executable(nut):
     return exe
 
 
+def _doi_so_executable_asyncio(nut):
+    """Nút `executable=` của `asyncio.create_subprocess_*`, hay None (N119).
+
+    Ở asyncio, `executable` CHỈ đến bằng TỪ KHOÁ (qua `**kwds`) — không có vị trí thứ ba như `Popen`.
+    `executable=None` tường minh là vắng.
+    """
+    import ast
+    exe = None
+    for kw in nut.keywords:
+        if kw.arg == "executable":
+            exe = kw.value
+    if isinstance(exe, ast.Constant) and exe.value is None:
+        return None
+    return exe
+
+
 def _co_the_thanh_bash(nut, sau=0):
     """Cây con này CÓ THỂ rút gọn ra tên `bash` không — phép thử RẺ, cố ý RỘNG (N52, r17).
 
@@ -1443,6 +1475,8 @@ def _loi_goi_tran(than: str, sau=0):
         bộ quét (`_kieu_exec_cua`) — bí danh `bi.eval`, `from builtins import eval as ev` cũng được tính;
       · N118 (r34): đặc tả `%` tách theo ĐÚNG luật CPython (`_tach_dinh_dang`) — khoá ánh xạ đếm ngoặc
         CÂN BẰNG (`"%((a))s" % {"(a)": "bash"}`), đo sai phân cùng lưới (1o);
+      · N119 (r35): `executable=` của `asyncio.create_subprocess_exec/_shell` GHI ĐÈ chương trình, như
+        `Popen`; N120: `%g`/`%G` không `#` chỉ tính độ chính xác tới trần chữ số thật của `double`;
       · `type X[T] = …` (PEP 695) có phạm vi chú thích RIÊNG (N47, r16): `T` của nó không rò
         ra phạm vi chứa;
       · callee giải theo PHẠM VI TỪ VỰNG (r8, F3 codex vòng 3): `import subprocess` ở module
@@ -1473,7 +1507,8 @@ def _loi_goi_tran(than: str, sau=0):
         nhận (từ khoá tường minh cộng `**{…}`…) ⇒ BÁO THỪA có tên, chỉ trên mã Python vốn từ chối chạy;
         và chuỗi trong `Literal[…]`/`Annotated[…, …]` (DỮ LIỆU, `get_type_hints` không tính) vẫn được N99
         quét ⇒ BÁO THỪA CÓ CHỦ ĐÍCH kiểu N76 — phân biệt vị trí tham chiếu tới đòi giải tên `typing`.
-        Cả hai ghim ở `_HINH_DANG_BAO_THAN_TRONG`. Mở rộng r29: `posix_spawnp` cấp bằng TỪ KHOÁ (Python
+        Cả hai ghim ở `_HINH_DANG_BAO_THAN_TRONG`. Mở rộng r35: `__import__(…, level≠0)` — nhập TƯƠNG ĐỐI,
+        Python ném `ImportError` ngoài package hay nạp module cùng tên của package. Mở rộng r29: `posix_spawnp` cấp bằng TỪ KHOÁ (Python
         từ chối — cùng họ "Python từ chối lời gọi"); chú thích của hàm generic mà tham số kiểu CHE tên
         module (PEP 695, 3.12) ⇒ BÁO THỪA CÓ CHỦ ĐÍCH (ghim ở `_HINH_DANG_BAO_THAN_TRONG` khi >= 3.12);
       · argv mà phần tử ĐẦU đến từ BIẾN — `[*xs, "bash"]`, `sys.argv[1:] + ["bash"]` — dù `xs`
@@ -1561,7 +1596,16 @@ def _loi_goi_tran(than: str, sau=0):
         elif loai.startswith("api:"):
             mod, _, ham = loai[4:].partition(".")
             vt, kw, nhan = _API_THEO_TEN[(mod, ham)]
-            dinh = _la_ten_bash(_doi_so_thu(nut, vt, kw), tra_ten, nhan=nhan)
+            exe_as = _doi_so_executable_asyncio(nut) if mod == "asyncio" else None
+            if exe_as is not None:
+                # N119 (r35, codex vòng 29) — `asyncio.create_subprocess_exec/_shell` chuyển `**kwds`
+                # xuống vòng lặp sự kiện, nơi `executable=` GHI ĐÈ chương trình thật sự chạy, y như
+                # `Popen`. Đo được: `create_subprocess_exec("x", executable="bash")` và
+                # `create_subprocess_shell("printf OK", executable="bash")` phóng bash mà r34 trả `[]`;
+                # `create_subprocess_exec("bash", executable="/bin/echo")` chỉ chạy `echo` mà r34 bắt.
+                dinh = _la_ten_bash(exe_as, tra_ten)
+            else:
+                dinh = _la_ten_bash(_doi_so_thu(nut, vt, kw), tra_ten, nhan=nhan)
         elif loai == "shell_ra":
             # `getoutput(cmd)` / `getstatusoutput(cmd)`: MOT doi so, chay qua shell, KHONG
             # co `executable`. Ap luat vi tri thu ba cua `Popen` vao day la doc sai chu ky.
@@ -2693,6 +2737,12 @@ def quet(goc: Path, hom_nay=None):
                                   "ly_do": f"không thấy {goc / 'ops'} — cây không phải gốc kho"}
     thu_muc = goc
     cac_tep, nguon_tep = _liet_ke_py(goc)
+    if nguon_tep.startswith("rglob-hong"):
+        # N121 — cây KHÔNG phải kho git mà có thư mục không đọc được: danh sách THIẾU ⇒ fail-close.
+        return RC_KHONG_DO_DUOC, {"trang_thai": "KHONG_DO_DUOC", "nguon_tep": nguon_tep,
+                                  "da_quet": str(goc), "pham_vi": "toan-cay",
+                                  "ly_do": f"cây không-git có thư mục không đọc được ({nguon_tep}) — "
+                                           "danh sách tệp THIẾU không phải danh sách SẠCH."}
     if nguon_tep.startswith("git-hong"):
         # FAIL-CLOSE (N26). Cây LÀ kho git mà không lấy được INDEX ⇒ không có danh sách để
         # quét. Lùi về `rglob` ở đây là mở lại đúng cái lớp r9 đã giết bằng kiến trúc.

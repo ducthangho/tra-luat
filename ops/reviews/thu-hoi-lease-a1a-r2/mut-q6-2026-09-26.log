@@ -16,5 +16,7 @@ KHOP han-tran-coi-nhu-het-han: rc=1 do=['han-tran-UTC-duoi', 'han-tran-UTC-tren'
 KHOP han-bang-coi-nhu-con-han: rc=1 do=['han-bang-dung-C'] khai=['han-bang-dung-C']
 KHOP nhan-thu-muc-con: rc=1 do=['thu-muc-con'] khai=['thu-muc-con']
 KHOP han-vang-mac-dinh-nam-2000: rc=1 do=['han-vang'] khai=['han-vang']
+KHOP tu-choi-nam-bien: rc=1 do=['han-bien-hop-le'] khai=['han-bien-hop-le']
+KHOP bo-rieng-chot-thu-muc-con: rc=0 do=[] khai=[]
 KHOP bo-mien-ca-ba-cho: rc=1 do=['bia-gia-tri-ngoai-mien', 'id-ngoai-mien-cu', 'id-ngoai-mien-don', 'id-ngoai-mien-moi', 'thay-phan-tu-ngoai-mien'] khai=['bia-gia-tri-ngoai-mien', 'id-ngoai-mien-cu', 'id-ngoai-mien-don', 'id-ngoai-mien-moi', 'thay-phan-tu-ngoai-mien']
 TAT_CA_KHOP

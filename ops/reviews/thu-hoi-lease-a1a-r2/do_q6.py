@@ -203,6 +203,9 @@ def tu_kiem(goc: Path) -> int:
         "han-bang-dung-C": ({"x.yaml": _lease("x", CHET, bi="y"), "y.yaml": _lease("y", CLOCK, thay="x")}, 0, []),
         "thu-muc-con": ({**sach, "sub/z.yaml": _lease("z", SONG)}, 3, [["x", "y"]]),
         "han-vang": ({**sach, "z.yaml": "lease_id: z\n"}, 3, [["x", "y"]]),
+        # Đối chứng DƯƠNG sát miền ngày (reviewer lượt 5): hạn hợp lệ năm 1 / năm 9999 KHÔNG được từ chối.
+        "han-bien-hop-le": ({**sach, "z.yaml": _lease("z", "9999-12-31T23:59:59Z"),
+                             "w.yaml": _lease("w", "0001-01-01T00:00:00Z")}, 0, [["x", "y"]]),
     }
     hong = 0
     with tempfile.TemporaryDirectory() as t:

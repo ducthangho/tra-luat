@@ -22,6 +22,10 @@ mut={
  "han-bang-coi-nhu-con-han":([('        if d["_han_utc"] <= now:\n','        if d["_han_utc"] < now:\n')],{"han-bang-dung-C"}),
  "nhan-thu-muc-con":([('        if "/" in ten:\n','        if False:\n'),('        if lid != re.sub(r"\\.ya?ml$", "", ten):\n','        if lid != re.sub(r"\\.ya?ml$", "", ten.rsplit("/", 1)[-1]):\n')],{"thu-muc-con"}),
  "han-vang-mac-dinh-nam-2000":([('lp._doc_han(d.get("lease_expires_at_utc"))','lp._doc_han(d.get("lease_expires_at_utc") or "2000-01-01T00:00:00Z")')],{"han-vang"}),
+ "tu-choi-nam-bien":([('            han = lp._doc_han(d.get("lease_expires_at_utc"))\n','            han = lp._doc_han(d.get("lease_expires_at_utc"))\n            if han.year in (1, 9999):\n                raise OverflowError\n')],{"han-bien-hop-le"}),
+ # Chot thu muc con bi chot ten CHE (ten "sub/z" != lease_id "z"; LEASE_ID cam "/") => go rieng no khong doi ca nao.
+ # Khai tap dich RONG co chu dich: day la bang chung hai chot che nhau, khong phai ca thua.
+ "bo-rieng-chot-thu-muc-con":([('        if "/" in ten:\n','        if False:\n')],set()),
  "bo-mien-ca-ba-cho":([('not lp.LEASE_ID.fullmatch(lid)','False'),('any(not lp.LEASE_ID.fullmatch(x) for x in tt or [])','False'),('if isinstance(t, str) and not lp.LEASE_ID.fullmatch(t):','if False:')],
     {"id-ngoai-mien-don","id-ngoai-mien-cu","id-ngoai-mien-moi","thay-phan-tu-ngoai-mien","bia-gia-tri-ngoai-mien"}),
 }

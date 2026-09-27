@@ -255,3 +255,12 @@ write_set_do_luc_cap:
   do_luc: '2026-09-27T18:03:17Z'
   do_luc_nguon: 'date -u in ra NGAY TRUOC lan chay `ai-dang-giu` cho hai duong write set (sau vong dong bo nhanh).'
   ket_qua: 'TRUOC khi commit g30: rc=12 KHONG_XAC_DINH ca hai duong — dung mot ly do: bia mo mot chieu g29 -> g30 (g30 chua ton tai). Do lai SAU commit g30 — ghi trong comment bao cao.'
+
+# ───────────────────────── BIA MỘ — vế THỨ NHẤT của dấu HAI CHIỀU ─────────────────────────
+# Thêm 2026-09-27 khi cấp g31. g30 CÒN HIỆU LỰC (hạn 2026-09-28T06:00:00Z) nên bia mộ hai chiều là
+# BẮT BUỘC. REVISION mới (r30 -> r31): protocol §3.2.
+da_bi_thay_the: r378-symlink-doi-dac-quyen-r31-g31-claude
+da_bi_thay_the_luc: '2026-09-27T20:32:28Z'
+da_bi_thay_the_luc_nguon: 'date -u luc commit bia mo nay; commit dung CHINH gia tri ay lam committer date (GIT_COMMITTER_DATE).'
+da_bi_thay_the_vi_sao: 'r31 (issues/574#issuecomment-5859082664: phiên điều phối tự mở r31 sau lượt 26 — còn P2, hội tụ, không P1, không đổi parser) — phép phủ
+  đọc tệp / selector THẬT, CLI và ca trực tiếp đếm tại biên thực thi trong tu_kiem (v22); head không đổi 76f199e. spec_hash r31 = f40d9c3aadde14fe8a1834b28476151340448ff45d61d7c5136cf2c2c3eb4b15.'

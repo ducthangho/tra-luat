@@ -162,3 +162,11 @@ TRANG_THAI_REVIEW_LUC_CAP:
   so_finding: 'P1 0 / P2 0 / P3 2 / P4 0'
   da_xu_ly: 'F1-L31, F2-L31 bang ma tran sinh tu ast (359d30d) + r22 §0.22 (rut lai ly do mien GOC_Lambda/GOC_GeneratorExp).'
   DIEU_KIEN_DUNG: 'Khong con P1, P2, P3 o mot luot. Chua dat — luot 32 se do.'
+
+# ───────────────────────── BIA MỘ — vế THỨ NHẤT của dấu HAI CHIỀU ─────────────────────────
+# Thêm 2026-09-27 khi cấp g22. g21 CÒN HIỆU LỰC (hạn 2026-09-29T00:00:00Z) nên bia mộ hai chiều là BẮT BUỘC.
+da_bi_thay_the: dang-lease-dau-truoc-kiem-sau-r23-g22-claude
+da_bi_thay_the_luc: '2026-09-27T08:39:54Z'
+da_bi_thay_the_luc_nguon: 'date -u luc commit bia mo nay; commit dung CHINH gia tri ay lam committer date (GIT_COMMITTER_DATE).'
+da_bi_thay_the_vi_sao: 'g21 neo head 359d30d co CI gate DO tren Python 3.12 (t191, 185/186) — executor tu bat. g22 neo dac ta r23 (03ae4d1,
+  sha256 57740f910ac9e118d12dc498a810520d91368e83065f43aecdf7ed8c124d7935) va head bc89d2d (CI gate xanh 186/186); han GIU 2026-09-29T00:00:00Z.'

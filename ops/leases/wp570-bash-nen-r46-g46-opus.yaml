@@ -132,7 +132,22 @@ recorded_by: claude-session
 recorder_is_dispatcher: false
 
 leased_at_utc: '2026-09-27T16:40:00Z'
-lease_expires_at_utc: '2026-09-28T16:40:00Z'
+lease_expires_at_utc: '2026-09-27T17:43:00Z'
+thu_hoi_bang_rut_han:
+  han_goc_utc: '2026-09-28T16:40:00Z'
+  han_moi_utc: '2026-09-27T17:43:00Z'
+  chi_thi: >-
+    Chu kho trong phien Claude Code 2026-09-27 (sau khi tu merge #581): "Land va bookeeping". Chu kho chon "Rut
+    han" thay cho bia mo `da_bi_thay_the` ghi trong uy quyen land 5857839292, vi khong co lease ke tiep nen bia mo
+    se la MOT CHIEU va lam ai-dang-giu nem KHONG_XAC_DINH tren write set.
+  ly_do: 'Packet #570 da LAND (PR #581 merge 2c1a4a88f4ff9caf17841eddf8f279126c6f6962, 2026-09-27T17:37:43Z; parents
+    10e859d + b7064f9, tree d263123 dung bang merge-tree tinh truoc).'
+  vi_sao_khong_dung_so: >-
+    Theo tien le #651/#660: so ops/thu-hoi/ chua kich hoat; rut han chi dung co che DA CAI (phan loai lease theo
+    han).
+  gioi_han: >-
+    Ref mang lease nay: DUNG MOT nhanh ops/cap-lease-570-g46 (da dem sau khi chot hai nguon ref). Nghiem thu:
+    ai-dang-giu ops/bash_nen.py va ops/cong_cu_test.py khong con wp570-bash-nen-r46-g46-opus trong NGUOI_GIU.
 han_de_xuat_vi_sao: 'HAI MUOI BON gio. Dai hon moi the he truoc (g6 8h, g9 12h) va ly do la mot
   phep do: g9 het han voi ban va da viet xong ma chua land, mat 26 gio. Pham vi g10 gom NHIEU
   VONG review (dieu kien thoat la "khong con P1/P2/P3", khong phai mot vong), va moi vong doi

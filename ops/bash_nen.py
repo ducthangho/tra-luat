@@ -79,7 +79,14 @@ _NHAN_ARGV = "bn-argv-probe"
 _DOI_SO = ("bn-A1", "bn-A2", "bn-A3")
 _DAU_CHAY = "BN_DA_CHAY_TU_TEP"
 
-_SCRIPT_ARGV = 'printf "BN0=%s\\nBNSO=%s\\nBN1=%s\\n" "$0" "$#" "${1-}"'
+# N122 (r36, codex vòng 30) — cùng lượt argv, đo luôn TÍNH NĂNG BASH mà người dùng (`ops/cai_cong_cu.sh`) cần:
+# `set -o pipefail`, mảng, `BASH_VERSINFO` ≥ 3. Hai phép cũ chỉ dùng cú pháp POSIX nên NHẬN cả `/bin/sh` lẫn
+# dash (đo được: `(True, 'đạt cả hai phép')`), trong khi `cai_cong_cu.sh` thoát 2 ngay ở `pipefail`. Bọc trong
+# `eval` trong subshell để một shell không-Bash lỗi CÚ PHÁP ở mảng mà vẫn in được phần argv ở trên; `; :` cuối để
+# mã thoát của script không mang lỗi ấy (đo được: thiếu nó thì dash bị từ chối với lý do SAI "phép argv: rc=2").
+_SCRIPT_ARGV = ('printf "BN0=%s\\nBNSO=%s\\nBN1=%s\\n" "$0" "$#" "${1-}"; '
+                '(eval \'set -o pipefail && a=(x y) && [ "${a[1]}" = y ] && [ "${BASH_VERSINFO[0]:-0}" -ge 3 ]\') '
+                '2>/dev/null && printf "BNBASH=1\\n"; :')
 
 _HAN_GIAY = 30
 _HAN_TONG_GIAY = 120      # N114 — hạn TỔNG cho mọi phép thử năng lực của một lần `tim_bash`
@@ -128,7 +135,7 @@ def _do_nang_luc(argv_ung_vien, thu_muc_tam=None, han=None, het_han=None):
         # `rc == -998` là QUÁ HẠN, tức ứng viên TREO. Nó phải rơi vào nhánh TỪ CHỐI này,
         # không được coi là "không kết luận được rồi cho qua".
         return False, f"phép argv: rc={rc} — {ra.strip()[:200]}"
-    doc = dict(re.findall(r"^(BN0|BNSO|BN1)=(.*)$", ra, re.M))
+    doc = dict(re.findall(r"^(BN0|BNSO|BN1|BNBASH)=(.*)$", ra, re.M))
     if doc.get("BN0") != _NHAN_ARGV:
         return False, (f"phép argv: `$0` là {doc.get('BN0')!r}, mong {_NHAN_ARGV!r} — "
                        f"đối số vị trí KHÔNG tới nơi (chữ ký của bộ phóng WSL)")
@@ -137,6 +144,9 @@ def _do_nang_luc(argv_ung_vien, thu_muc_tam=None, han=None, het_han=None):
                        f"đối số vị trí bị nuốt")
     if doc.get("BN1") != _DOI_SO[0]:
         return False, f"phép argv: `$1` là {doc.get('BN1')!r}, mong {_DOI_SO[0]!r}"
+    if doc.get("BNBASH") != "1":
+        return False, ("phép tính năng Bash: không có `set -o pipefail`/mảng/`BASH_VERSINFO` ≥ 3 — "
+                       "đây là shell POSIX (sh/dash…), không phải Bash mà `cai_cong_cu.sh` cần (N122)")
 
     # (2) MỞ ĐƯỢC ĐƯỜNG DẪN BẢN ĐỊA — truyền `str(Path)` y như bộ test vẫn truyền.
     tam = tempfile.mkdtemp(prefix="bash-nen-", dir=thu_muc_tam)
@@ -509,6 +519,43 @@ def _duong_bao_cao(rel: str) -> str:
         return rel.encode("utf-8", "surrogateescape").decode("utf-8", "backslashreplace")
 
 
+_TRAN_TEP_NGUON = 8 * 1024 * 1024     # N124 — byte tối đa của MỘT tệp nguồn được đọc (kho hôm nay: lớn nhất 2,16 MB)
+_TRAN_TONG_NGUON = 64 * 1024 * 1024   # N124 — tổng byte tối đa của mọi tệp nguồn (kho hôm nay: 10,5 MB / 264 tệp)
+
+
+class _VuotTranDoc(ValueError):
+    """Tệp nguồn hay tổng nguồn vượt trần ĐỌC (N124) — `quet` biến nó thành KHONG_DO_DUOC."""
+
+
+def _oid_blob_tu_dia(p):
+    """OID blob git (`sha1("blob <n>\\0" + byte)`) của tệp THƯỜNG `p`, hay None khi vắng/symlink/không đọc được
+    (N123). None luôn LỆCH với một OID ghim ⇒ fail-close."""
+    import hashlib
+    try:
+        if p.is_symlink() or not p.is_file():
+            return None
+        du_lieu = p.read_bytes()
+    except OSError:
+        return None
+    return hashlib.sha1(b"blob %d\0" % len(du_lieu) + du_lieu).hexdigest()
+
+
+def _kiem_tran_doc(co_kt):
+    """NÉM `_VuotTranDoc` khi một tệp hay tổng vượt trần — đo TRƯỚC khi đọc byte nào (N124).
+
+    N124 (r36, codex vòng 30): bản r35 đọc trọn `cat-file --batch` (hay `read_bytes()` ở cây không-git) vào
+    bộ nhớ mà không có trần nào — một `.py` gần giới hạn máy chủ, hay nhiều tệp vừa, giữ cả lô byte cộng chuỗi
+    đã giải mã cộng AST, có thể làm CI chết vì hết bộ nhớ thay vì trả KHONG_DO_DUOC. Hạn giờ không chặn byte.
+    """
+    tong = 0
+    for rel, co in co_kt:
+        if co > _TRAN_TEP_NGUON:
+            raise _VuotTranDoc(f"tệp nguồn {rel} dài {co} byte > trần {_TRAN_TEP_NGUON}")
+        tong += co
+    if tong > _TRAN_TONG_NGUON:
+        raise _VuotTranDoc(f"tổng nguồn {tong} byte > trần {_TRAN_TONG_NGUON}")
+
+
 def _doc_noi_dung(goc: Path, muc, nguon_tep):
     """({đường: thân}, [mục là SYMLINK]). NỘI DUNG LẤY TỪ ĐÂU là một phần của phán quyết.
 
@@ -538,6 +585,7 @@ def _doc_noi_dung(goc: Path, muc, nguon_tep):
     if lien_ket:
         return None, lien_ket
     if nguon_tep != "git":
+        _kiem_tran_doc([(rel, (goc / rel).stat().st_size) for rel, _, _ in muc])
         ra = {}
         for rel, _, _ in muc:
             ra[rel] = _giai_ma_nguon((goc / rel).read_bytes())
@@ -545,6 +593,21 @@ def _doc_noi_dung(goc: Path, muc, nguon_tep):
     if not muc:
         return {}, []
     yeu_cau = "".join(sha + "\n" for _, _, sha in muc).encode("ascii")
+    # N124 (r36, codex vòng 30) — đo KÍCH THƯỚC blob (`--batch-check`, đầu ra nhỏ) TRƯỚC khi đọc nội dung.
+    pk = _chay_git(goc, "cat-file", "--batch-check", input=yeu_cau,
+                   stdout=subprocess.PIPE, stderr=subprocess.PIPE, timeout=180)
+    if pk.returncode != 0:
+        raise OSError(f"cat-file --batch-check rc={pk.returncode}: {pk.stderr[:200]!r}")
+    dong_kt = pk.stdout.decode("ascii", "replace").splitlines()
+    if len(dong_kt) != len(muc):
+        raise OSError(f"cat-file --batch-check trả {len(dong_kt)} dòng cho {len(muc)} blob")
+    co_kt = []
+    for (rel, _, sha), dong in zip(muc, dong_kt):
+        truong = dong.split()
+        if len(truong) != 3 or truong[0] != sha or not truong[2].isdigit():
+            raise OSError(f"cat-file --batch-check trả không khớp ở {rel}: {dong[:120]!r}")
+        co_kt.append((rel, int(truong[2])))
+    _kiem_tran_doc(co_kt)
     pc = _chay_git(goc, "cat-file", "--batch", input=yeu_cau,
                    stdout=subprocess.PIPE, stderr=subprocess.PIPE, timeout=180)
     if pc.returncode != 0:
@@ -1477,6 +1540,8 @@ def _loi_goi_tran(than: str, sau=0):
         CÂN BẰNG (`"%((a))s" % {"(a)": "bash"}`), đo sai phân cùng lưới (1o);
       · N119 (r35): `executable=` của `asyncio.create_subprocess_exec/_shell` GHI ĐÈ chương trình, như
         `Popen`; N120: `%g`/`%G` không `#` chỉ tính độ chính xác tới trần chữ số thật của `double`;
+      · N122 (r36): `tim_bash` đòi tính năng BASH (`pipefail`, mảng, `BASH_VERSINFO` ≥ 3) — sh/dash bị từ chối;
+        N123: cây không-git kiểm OID đông cứng từ byte thật; N124: trần đọc nguồn (8 MB/tệp, 64 MB tổng);
       · `type X[T] = …` (PEP 695) có phạm vi chú thích RIÊNG (N47, r16): `T` của nó không rò
         ra phạm vi chứa;
       · callee giải theo PHẠM VI TỪ VỰNG (r8, F3 codex vòng 3): `import subprocess` ở module
@@ -1513,6 +1578,9 @@ def _loi_goi_tran(than: str, sau=0):
         module (PEP 695, 3.12) ⇒ BÁO THỪA CÓ CHỦ ĐÍCH (ghim ở `_HINH_DANG_BAO_THAN_TRONG` khi >= 3.12);
       · argv mà phần tử ĐẦU đến từ BIẾN — `[*xs, "bash"]`, `sys.argv[1:] + ["bash"]` — dù `xs`
         rỗng thì bash chạy thật: đó là luồng dữ liệu, không phải cây cú pháp;
+      · LỚP ĐÃ KHÉP (r36, chủ kho, codex vòng 30): (a) MỌI đối số cấp qua `**` TRẢI — kể cả `executable`
+        (`run([…], **{"executable": "bash"})`, asyncio) — cùng họ r25; (b) ngân sách `%` BÁO THỪA fail-close
+        khi độ rộng và độ chính xác của một chuyển đổi chồng nhau (`%3000.3000f`) — mô hình là CẬN TRÊN an toàn;
       · LỚP ĐÃ KHÉP (r25, quyết định chủ kho sau khi điều kiện dừng chạm lần BA ở codex vòng 19): mọi
         cách viết CỐ Ý che giấu còn lại của NẠP ĐỘNG/`exec` và của argv TRẢI — callee tính ra bằng
         biểu thức điều kiện hay tên GẤP (`(builtins.exec if c else f)(…)`, `getattr(builtins,
@@ -2855,6 +2923,18 @@ def quet(goc: Path, hom_nay=None):
             if ghim is None:
                 continue                   # đã vào `khong_khai_so` ở trên
             thay_oid = oid_that.get(t)
+            if thay_oid != ghim:
+                lech_oid[t] = {"ghim": ghim, "do_duoc": thay_oid}
+    else:
+        # N123 (r36, codex vòng 30) — cây KHÔNG-git cũng phải kiểm byte đông cứng. Bản r35 bỏ HẲN phép kiểm ở
+        # nhánh này mà vẫn cho ĐẠT: đo được, cây giải nén không `.git`, đổi bảy `shutil.which("bash")` của một
+        # tệp đông cứng thành bảy lời phóng bash khác ⇒ vẫn ĐẠT, `lech_oid_dong_cung` rỗng. Một phép kiểm BẮT
+        # BUỘC bị bỏ qua không được báo là ĐẠT: tính OID blob git từ CHÍNH byte trên đĩa rồi so như nhánh git.
+        for t, m in ANH_CHUP_DONG_CUNG.items():
+            ghim = _oid_dong_cung(m)
+            if ghim is None:
+                continue
+            thay_oid = _oid_blob_tu_dia(goc / t)
             if thay_oid != ghim:
                 lech_oid[t] = {"ghim": ghim, "do_duoc": thay_oid}
     if hom_nay is None:

@@ -1062,6 +1062,32 @@ DOT_BIEN = {
         '    if nguon_tep.startswith("rglob-hong"):\n',
         '    if False:  # đột biến: `quet` quét tiếp danh sách THIẾU\n',
         "BASH_NEN", (), "t46_noi_dung_lay_tu_INDEX_chu_khong_tu_cay_lam_viec"),
+    # r36 — N122: phep tinh nang Bash.
+    "bn_bo_phep_tinh_nang_bash": ("ops/bash_nen.py",
+        '    if doc.get("BNBASH") != "1":\n',
+        '    if False:  # đột biến: nhận cả shell POSIX\n',
+        "BASH_NEN", (), "t23_bash_nen_tu_choi_bash_nuot_argv"),
+    # r36 — N123/N124.
+    "bn_khong_git_bo_kiem_oid": ("ops/bash_nen.py",
+        "            thay_oid = _oid_blob_tu_dia(goc / t)\n",
+        "            thay_oid = ghim  # đột biến: cây không-git coi như khớp\n",
+        "BASH_NEN", (), "t46_noi_dung_lay_tu_INDEX_chu_khong_tu_cay_lam_viec"),
+    "bn_khong_tran_tep": ("ops/bash_nen.py",
+        "        if co > _TRAN_TEP_NGUON:\n",
+        "        if False:  # đột biến: không trần mỗi tệp\n",
+        "BASH_NEN", (), "t46_noi_dung_lay_tu_INDEX_chu_khong_tu_cay_lam_viec"),
+    "bn_khong_tran_tong": ("ops/bash_nen.py",
+        "    if tong > _TRAN_TONG_NGUON:\n",
+        "    if False:  # đột biến: không trần tổng\n",
+        "BASH_NEN", (), "t46_noi_dung_lay_tu_INDEX_chu_khong_tu_cay_lam_viec"),
+    "bn_git_khong_kiem_tran": ("ops/bash_nen.py",
+        "    _kiem_tran_doc(co_kt)\n",
+        "    pass  # đột biến: nhánh git đọc không trần\n",
+        "BASH_NEN", (), "t46_noi_dung_lay_tu_INDEX_chu_khong_tu_cay_lam_viec"),
+    "bn_khong_git_khong_kiem_tran": ("ops/bash_nen.py",
+        "        _kiem_tran_doc([(rel, (goc / rel).stat().st_size) for rel, _, _ in muc])\n",
+        "        pass  # đột biến: nhánh không-git đọc không trần\n",
+        "BASH_NEN", (), "t46_noi_dung_lay_tu_INDEX_chu_khong_tu_cay_lam_viec"),
     "bn_ban_ghi_theo_toa_do": ("ops/bash_nen.py",
         "    theo_nut = dict(ban_ghi)\n",
         "    theo_nut = {p: p for _, p in ban_ghi}  # đột biến: khử trùng theo toạ độ\n",
@@ -2340,6 +2366,7 @@ if a and a[0] == "-c":
     nhan, con = a[2], a[3:]
     print("BN0=%s" % nhan); print("BNSO=%s" % len(con))
     print("BN1=%s" % (con[0] if con else ""))
+    print("BNBASH=1")
     raise SystemExit(0)
 try:
     t = open(a[0], encoding="utf-8").read()
@@ -2396,6 +2423,9 @@ _BASH_NEN_GIA_KHONG_MO_TEP = _BASH_NEN_GIA_DUNG.replace(
 # het han 60s, roi `TemporaryDirectory` chet tiep bang `WinError 32`, va ca suite nay chet
 # trong `batch_behavior_test()` TRUOC vong lap ca. Han cua `_do_nang_luc` la thu DUY NHAT
 # chan mat ay, va truoc r2 no dung do MAY — khong ca nao canh.
+# N122 (r36, codex vòng 30) — một shell POSIX (sh/dash) TRUYỀN ĐÚNG argv và MỞ ĐƯỢC tệp, chỉ thiếu tính năng Bash.
+_BASH_NEN_GIA_POSIX = _BASH_NEN_GIA_DUNG.replace('    print("BNBASH=1")\n', '')
+
 _BASH_NEN_GIA_TREO = '''import time
 time.sleep(600)
 '''
@@ -2448,6 +2478,16 @@ def t23_bash_nen_tu_choi_bash_nuot_argv():
                  f"từ chối ĐÚNG ({ten}) nhưng LÝ DO không nêu phép argv: "
                  f"{ly_do_xau!r} — mã thoát đúng mà lý do sai thì người gọi khẳng "
                  f"định nhầm chuyện")
+        # N122 (r36) — shell POSIX truyền đúng argv, mở được tệp, chỉ THIẾU tính năng Bash: phải bị từ chối,
+        # và lý do phải nêu đúng phép. Kèm `/bin/dash` THẬT khi máy có.
+        dat_p, ly_do_p = _goi_do_nang_luc(_BASH_NEN_GIA_POSIX, tmp)
+        bang(not dat_p and "Bash" in (ly_do_p or ""),
+             f"shell POSIX (thiếu pipefail/mảng) mà được NHẬN, hay lý do sai: {dat_p!r} {ly_do_p!r}")
+        if Path("/bin/dash").exists():
+            m23 = runpy.run_path(str(BASH_NEN))
+            dat_d, ly_do_d = m23["_do_nang_luc"](["/bin/dash"])
+            bang(not dat_d and "Bash" in (ly_do_d or ""),
+                 f"`/bin/dash` THẬT mà được NHẬN làm bash, hay bị từ chối với lý do sai: {ly_do_d!r}")
 
 
 @ca
@@ -3235,6 +3275,10 @@ _HINH_DANG_KHONG_PHU = {
     "eval_thuoc_tinh_khong_phu_thuoc": 'import importlib as il\nfor i in range(2):\n    if i:\n        a = page.eval("b")\n        a.run(["bash"])\n    b = il.import_module("subprocess")\n',
     # r35 — N119 chieu NGUOC: `executable=` khac bash thi `argv[0] == "bash"` chi la trang tri.
     "asyncio_exec_executable_khac": 'import asyncio\nasyncio.create_subprocess_exec("bash", "x", executable="/bin/echo")\n',
+    # r36 — LOP DA KHEP mo rong (chu kho, codex vong 30): moi doi so cap qua `**` TRAI — ke ca `executable`
+    # (asyncio lan Popen). Chay bash that; cong KHONG phu. Ai phu duoc thi chuyen sang PHU.
+    "khep_executable_trai_asyncio": 'import asyncio\nasyncio.create_subprocess_exec("x", "-c", "true", **{"executable": "bash"})\n',
+    "khep_executable_trai_popen":   'import subprocess\nsubprocess.run(["x", "-c", "true"], **{"executable": "bash"})\n',
     "khep_callee_dieu_kien": 'import builtins\n(builtins.exec if True else print)("import subprocess\\nsubprocess.run([\'bash\'])")\n',
     "khep_callee_ten_gap":  'import builtins\ngetattr(builtins, "ex" + "ec")("import subprocess\\nsubprocess.run([\'bash\'])")\n',
     "khep_nap_dong_trai":   'import importlib\nimportlib.import_module(*["subprocess"]).run(["bash"])\n',
@@ -3676,6 +3720,12 @@ def t33_do_phu_cua_cong_do_duoc_THEO_HINH_DANG():
     bang(so_o > 1000 and so_khoa > 500 and not lech,
          f"(1o) N116/N118: {len(lech)} ô lệch trên {so_o} ô của lưới sai phân ({so_khoa} ô khoá ánh xạ) "
          f"(mẫu, đối/khoá, dài thật, cổng ném): {lech[:6]}")
+    # LỚP ĐÃ KHÉP (r36, chủ kho — ngân sách `%` lần BẢY, codex vòng 30): độ rộng + độ chính xác của MỘT chuyển
+    # đổi CHỒNG nhau mà cổng CỘNG — `"%3000.3000f" % 1.0` dài 3002 mà cổng NÉM. Báo thừa FAIL-CLOSE có tên
+    # (KHONG_DO_DUOC, không lọt); ghim để ai làm cận sát hơn phải chủ động đổi dòng này.
+    kq_chong = _do('import subprocess\nsubprocess.run(["%3000.3000f" % 1.0])\n')
+    bang(isinstance(kq_chong, str) and "_VuotNganSach" in kq_chong,
+         f"(1m) LỚP ĐÃ KHÉP r36: `%3000.3000f` là báo thừa fail-close CÓ TÊN (cổng NÉM), đo được {kq_chong!r}")
     kq_sao = _do('import subprocess\nsubprocess.run(["%*s" % (5000, "x")])\n')
     bang(isinstance(kq_sao, str) and "_VuotNganSach" in kq_sao,
          f"(1m) `%*s` với độ rộng 5000 vẫn phải NÉM (N103 chỉ bỏ số KHÔNG phải độ rộng), đo được "
@@ -5710,12 +5760,12 @@ def t46_noi_dung_lay_tu_INDEX_chu_khong_tu_cay_lam_viec():
 
         # (5) N100 (r27, codex vòng 21) — symlink TREO tên `*.py`, và THƯ MỤC symlink (mà `rglob`
         #     không đi vào — đo được), cũng phải fail-close ở cây không-git.
-        for ten5, dung in (("treo", lambda d: (d / "treo.py").symlink_to(d / "khong_co.py")),
+        for ten5, dung5 in (("treo", lambda d: (d / "treo.py").symlink_to(d / "khong_co.py")),
                            ("thu_muc", lambda d: (d / "tm").symlink_to(ngoai.parent,
                                                                       target_is_directory=True))):
             k5 = tmp / f"khong_kho_{ten5}"
             (k5 / "ops").mkdir(parents=True)       # cổng đòi `ops/` ở gốc, nếu không nó từ chối cây
-            dung(k5 / "ops")
+            dung5(k5 / "ops")
             _, bao5 = _quet(k5, bq)
             bang(bool(bao5.get("lien_ket_tuong_trung")),
                  f"(5) cây không-git có symlink {ten5} mà cổng không fail-close: "
@@ -5775,6 +5825,60 @@ def t46_noi_dung_lay_tu_INDEX_chu_khong_tu_cay_lam_viec():
         bang(nguon7.startswith("rglob-hong") and bao7.get("co_loi_goi_tran") is None,
              f"(7) N121: `quet` không được QUÉT TIẾP một danh sách THIẾU: co_loi_goi_tran="
              f"{bao7.get('co_loi_goi_tran')!r}, nguon_tep={str(bao7.get('nguon_tep'))[:80]!r}")
+        # (8) N123 (r36, codex vòng 30) — cây KHÔNG-git vẫn phải kiểm BYTE đông cứng: bản r35 bỏ hẳn phép kiểm
+        #     OID ở nhánh này. Dựng một ảnh chụp đông cứng ghim đúng OID, quét cây giải nén (không `.git`):
+        #     byte nguyên ⇒ không lệch; đổi byte (vẫn đúng một lời gọi) ⇒ PHẢI lệch.
+        import hashlib as _hl
+        k8 = tmp / "khong_kho_dong_cung"
+        (k8 / "ops").mkdir(parents=True)
+        than8 = b'import shutil\nshutil.which("bash")\n'
+        (k8 / "ops" / "dong.py").write_bytes(than8)
+        oid8 = _hl.sha1(b"blob %d\0" % len(than8) + than8).hexdigest()
+        bq8 = _bash_nen_voi_chua_chuyen(tmp, {}, ten="bash_nen_dong_cung_t46.py",
+                                        anh_chup={"ops/dong.py": (1, oid8, "ảnh chụp đông cứng giả của t46 (8)")})
+        _, bao8a = _quet(k8, bq8)
+        (k8 / "ops" / "dong.py").write_bytes(than8 + b"# doi byte\n")
+        _, bao8b = _quet(k8, bq8)
+        bang(not bao8a.get("lech_oid_dong_cung") and bool(bao8b.get("lech_oid_dong_cung")),
+             f"(8) N123: cây không-git phải so OID đông cứng từ byte thật: byte nguyên ⇒ "
+             f"{bao8a.get('lech_oid_dong_cung')!r}, byte đổi ⇒ {bao8b.get('lech_oid_dong_cung')!r}")
+
+        # (9) N124 (r36, codex vòng 30) — TRẦN ĐỌC nguồn, đo TRƯỚC khi đọc, ở CẢ HAI nhánh và HAI phía biên:
+        #     đúng bằng trần ⇒ đọc; vượt một byte ⇒ `_VuotTranDoc`. Trần được hạ tạm trong CHÍNH bản cổng đang đo.
+        m9 = runpy.run_path(str(bq))
+        g9 = m9["_doc_noi_dung"].__globals__
+        vuot9 = g9["_VuotTranDoc"]
+        cu9 = (g9["_TRAN_TEP_NGUON"], g9["_TRAN_TONG_NGUON"])
+        muc_kg = [("ops/dong.py", None, None)]
+        # Nhánh git đo trên một kho git NHỎ dựng tại chỗ, không trên `GOC`: bộ đột biến chạy ca này trên bản
+        # sao cây KHÔNG đầy đủ (không `.git`) — đo được ở lượt đầy đủ r36, bản đầu dựa vào INDEX của `GOC` nên
+        # `muc_git` rỗng và ca chết `IndexError` (tín dụng giả dưới hai đột biến vô can).
+        k9 = tmp / "kho_git_tran"
+        (k9 / "ops").mkdir(parents=True)
+        (k9 / "ops" / "dong.py").write_bytes(than8)
+        for lenh9 in (["init", "-q"], ["add", "ops/dong.py"]):
+            subprocess.run(["git", "-C", str(k9), *lenh9], capture_output=True, check=True, timeout=60)
+        muc_git, nguon_git9 = m9["_liet_ke_py"](k9)
+        dung(nguon_git9 == "git" and len(muc_git) == 1,
+             f"(9) GIÀN GIÁO: kho git nhỏ phải cho đúng một mục từ INDEX, đo được {nguon_git9!r} {muc_git!r}")
+        ket9 = {}
+        try:
+            for nhan, goc9, muc9, nguon9 in (("khong-git", k8, muc_kg, "rglob"), ("git", k9, muc_git, "git")):
+                co9 = len(than8) if nguon9 == "git" else (goc9 / muc9[0][0]).stat().st_size
+                for ten_tran, gia_tri in (("tep", co9), ("tep", co9 - 1), ("tong", co9), ("tong", co9 - 1)):
+                    g9["_TRAN_TEP_NGUON"], g9["_TRAN_TONG_NGUON"] = cu9
+                    g9["_TRAN_TEP_NGUON" if ten_tran == "tep" else "_TRAN_TONG_NGUON"] = gia_tri
+                    try:
+                        g9["_doc_noi_dung"](goc9, muc9, nguon9)
+                        ket9[(nhan, ten_tran, gia_tri - co9)] = "doc"
+                    except vuot9:
+                        ket9[(nhan, ten_tran, gia_tri - co9)] = "nem"
+        finally:
+            g9["_TRAN_TEP_NGUON"], g9["_TRAN_TONG_NGUON"] = cu9
+        mong9 = {(n, t, d): ("doc" if d == 0 else "nem") for n in ("khong-git", "git")
+                 for t in ("tep", "tong") for d in (0, -1)}
+        bang(ket9 == mong9, f"(9) N124: trần đọc ở hai nhánh, hai phía biên: đo {ket9}, mong {mong9}")
+
         if hasattr(os, "geteuid") and os.geteuid() != 0:
             (k7 / "an").chmod(0)
             try:

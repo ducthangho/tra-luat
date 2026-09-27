@@ -5059,7 +5059,7 @@ def t131_S8_tam_tran_bound_tru_1_bound_bound_cong_1_va_deadline():
         kho = mod.KhoObject(cay, bay_gio=lambda: 100.0, deadline=100.0)
         try:
             rc, td = _ma_chan(mod, kho.commit, c3)
-            chot(rc == 12 and "hết deadline reader tại memo" in td and "kill" not in td and kho.memo == {},  # F3-L35: ĐÚNG cửa đầu, không đua
+            chot(rc == 12 and "deadline" in td and "kill" not in td and kho.memo == {},
                  f"chạm deadline phải 12 ở lớp TRƯỚC spawn (không phải lớp join-timeout/kill): {rc} {td}")
         finally:
             kho.dong()
@@ -9511,6 +9511,8 @@ def _sinh_dong_t191():
                 mong = ((0, 0, 1) if loai == "chot" and pv else (1, 0, 1) if loai == "chot" and ch == (True, True)
                         else (0, 1, 1) if ch == (True, False) or (loai == "co" and ch == (False, True)) else None)
                 if mong is None: hong.setdefault(khoa, set()).add(f"witness {ch}"); continue
+                # F1-L36: nội dung phải CHỨNG MINH ô của nhãn (vd cờ ở `[…][1:2:1]` dựng lại thành `Slice.lower` — ô `Subscript.slice` mất)
+                if khoa not in _khoa_noi_dung_t191(d): hong.setdefault(khoa, set()).add("dung-lai-khac-o"); continue
                 dong.append((f"sinh.{loai}.{kieu}{'.pham-vi' if pv else ''}.{'.'.join(o)}.{so}-{i}", d, *mong)); co_dong.add(khoa)
     _sinh_goc_t191(dong, co_dong, hong)
     return tuple(dong), co_dong, hong
@@ -9588,6 +9590,98 @@ def _khoa_dong_t191(k):
     r, pv = p[2:], False
     while r[0] in ("khong-chay", "pham-vi"): pv, r = pv or r[0] == "pham-vi", r[1:]
     return (p[0], r[0], r[1], r[2], p[1], pv)
+_MAU_DEM_T191 = {}
+def _MAU_T191(m):
+    """(đường tới `F`, kiểu các câu lệnh, câu lệnh của `_TIEN_T191`, chuỗi dựng lại) của mẫu ngữ cảnh `m` — tính MỘT lần."""
+    import ast
+    if m in _MAU_DEM_T191: return _MAU_DEM_T191[m]
+    mm, duong = ast.parse(m.replace("@", "_kiem_gia_t191(lease)")), []
+    def tim(n, dg):
+        if isinstance(n, ast.Name) and n.id == "F": duong.append(dg)
+        for f, v in ast.iter_fields(n):
+            for k, x in (enumerate(v) if isinstance(v, list) else [(None, v)]):
+                if isinstance(x, ast.AST): tim(x, dg + [(f, k)])
+    tim(mm, [])
+    _MAU_DEM_T191[m] = ((duong[0] if len(duong) == 1 else None), [type(x) for x in mm.body],
+                        [ast.unparse(x) for x in ast.parse(_TIEN_T191).body], ast.unparse(mm))
+    return _MAU_DEM_T191[m]
+def _khoa_noi_dung_t191(d):
+    """F1-L36: tập khoá mà NỘI DUNG dòng chứng minh, đọc từ cấu trúc AST — không từ nhãn. CHỐT: đúng một `_kiem_gia_t191(lease)`
+    đặt theo `_chot_t191`, ô = (cha, trường, vị trí) của chỗ đặt, bộ bọc = `if` bao ngoài, phạm vi lồng = tổ tiên. CỜ/GỐC: phần sau
+    `_TIEN_T191` phải KHỚP TRỌN mẫu ngữ cảnh; CỜ lấy ô từ `_box.append(X) or …` (X đúng của ngữ cảnh), GỐC lấy lớp của nút ở chỗ `F`
+    (cờ trần, hoặc chứa đúng một `1 // (not bo_qua_han)`). Chỗ đặt đọc được nhiều cách (phần tử khối và con đại diện; đích `_h[…]`
+    và chỉ số của nó) ⇒ trả MỌI cách đọc; nhãn phải nằm trong tập này."""
+    import ast
+    md = ast.parse(d); cha = {c: n for n in ast.walk(md) for c in ast.iter_child_nodes(n)}
+    la = lambda n, s: isinstance(n, ast.AST) and ast.unparse(n) == s
+    def pv_cua(s):
+        while s in cha:
+            s = cha[s]
+            if type(s).__name__ in _PHAM_VI_LONG: return True
+        return False
+    def o_cua(s):  # (lớp[toán tử], trường, vị trí, phạm vi lồng) của chỗ đặt s; phần tử khối qua con đại diện được nâng lên
+        p, r = cha.get(s), set()
+        if p is not None and p is than[0]: return {("Module", "body", vt, False) for vt in ("dau", "giua", "cuoi") for k, x in enumerate(than[1])
+                                                    if x is s and vt == ("dau" if k == 0 else "cuoi" if k == len(than[1]) - 1 else "giua")}
+        for f, v in ast.iter_fields(p) if p is not None else ():
+            for k, x in enumerate(v if isinstance(v, list) else [v]):
+                if x is s:
+                    r.add((_ten_o_t191(p), f, "don" if not isinstance(v, list) else "dau" if k == 0 else "cuoi" if k == len(v) - 1
+                           else "giua", pv_cua(s)))
+                    if _DAI_DIEN_T191.get(type(p).__name__) == f: r |= o_cua(p)
+        return r
+    tien = _MAU_T191("")[2]
+    def mau(m):  # nút ở chỗ `F` nếu phần sau `_TIEN_T191` khớp trọn mẫu `m` (`@` = chốt), không thì None
+        dg, kieu, _t, chuoi = _MAU_T191(m)
+        if dg is None or len(md.body) != 3 + len(kieu) or [type(x) for x in md.body[3:]] != kieu or [ast.unparse(x) for x in md.body[:3]] != tien:
+            return None
+        n, cuoi = ast.Module(md.body[3:], []), None
+        for f, k in dg:
+            cuoi, n = n, getattr(n, f, None)
+            if k is not None: n = n[k] if isinstance(n, list) and k < len(n) else None
+        if not isinstance(n, ast.expr): return None
+        f, k = dg[-1]; dat = (lambda v: setattr(cuoi, f, v)) if k is None else (lambda v: getattr(cuoi, f).__setitem__(k, v))
+        dat(ast.Name("F", ast.Load()))  # thay TẠM chỗ `F` rồi trả lại — không chép cây
+        try: ok = ast.unparse(ast.Module(md.body[3:], [])) == chuoi
+        except ValueError: ok = False  # chỗ `F` rơi vào nơi không dựng lại được (vd trong f-string) ⇒ không khớp
+        finally: dat(n)
+        return n if ok else None
+    ten = lambda n, t: isinstance(n, ast.Name) and n.id == t
+    goi = [n for n in ast.walk(md) if isinstance(n, ast.Call) and ten(n.func, "_kiem_gia_t191") and la(n, "_kiem_gia_t191(lease)")]
+    hop = [n for n in ast.walk(md) if isinstance(n, ast.Call) and isinstance(n.func, ast.Attribute) and la(n.func, "_box.append")]
+    dau = [n for n in ast.walk(md) if isinstance(n, ast.BoolOp) and isinstance(n.op, ast.And) and la(n.values[0], "1 // (not bo_qua_han)")]
+    r = set()
+    b, boc, than = md.body, "truc", (md, md.body[3:])  # thân mẫu = phần sau `_TIEN_T191`, cha của nó đọc là `Module`
+    if len(b) == 1 and isinstance(b[0], ast.If) and not b[0].orelse and ast.unparse(b[0].test) in ("not bo_qua_han", "lease"):
+        b, boc, than = b[0].body, ("ke-co" if ast.unparse(b[0].test) == "not bo_qua_han" else "ke-khong"), (b[0], b[0].body[3:])
+    if (len(goi) == 1 and not hop and not dau and [ast.unparse(x) for x in b[:3]] == tien
+            and not any(isinstance(n, ast.Name) and n.id == "bo_qua_han" for x in b for n in ast.walk(x))):
+        g, p = goi[0], cha.get(goi[0]); cho = []
+        if isinstance(p, ast.Expr): cho.append(p)
+        elif isinstance(p, ast.Tuple) and len(p.elts) == 2 and p.elts[0] is g and isinstance(cha.get(p), ast.Subscript) \
+                and cha[p].value is p and la(cha[p].slice, "1"):
+            cho.append(cha[p]); ngoai = cha.get(cha[p])
+            if (la(p.elts[1], "0") and isinstance(ngoai, ast.Subscript) and ngoai.slice is cha[p] and la(ngoai.value, "_h")
+                    and isinstance(ngoai.ctx, (ast.Store, ast.Del))): cho.append(ngoai)
+        r |= {("chot",) + o[:3] + (boc, o[3]) for s in cho for o in o_cua(s)}
+    for ng, (x, m) in _NGU_CANH_NHAC_T191.items() if len(hop) == 1 else ():
+        F = mau(m)
+        if (F is None or len(hop) != 1 or dau or not isinstance(F, ast.Subscript) or not la(F.slice, "1")
+                or not isinstance(F.value, ast.Tuple) or len(F.value.elts) != 2 or not la(F.value.elts[1], "_box[-1]")): continue
+        s, h = cha.get(hop[0]), hop[0]
+        if not (len(h.args) == 1 and not h.keywords and la(h.args[0], ast.unparse(ast.parse(x, mode="eval").body)) and isinstance(s, ast.BoolOp)
+                and isinstance(s.op, ast.Or) and len(s.values) == 2 and s.values[0] is h): continue
+        cho = [s] + ([cha[s]] if isinstance(cha.get(s), ast.Subscript) and cha[s].slice is s and la(cha[s].value, "_h")
+                     and isinstance(cha[s].ctx, (ast.Store, ast.Del)) else [])
+        r |= {("co", "Assign", "value", "don", ng, pv_cua(s)) for s in cho if cha.get(s) is F.value and F.value.elts[0] is s}
+        r |= {("co",) + o[:3] + (ng, o[3]) for s in cho if cha.get(s) is not F.value for o in o_cua(s)}
+    for ng in _GOC_NGU_CANH_T191 if not hop and len(goi) <= 2 else ():
+        for m in (_GOC_NGU_CANH_T191[ng][0], _GOC_TEN_T191[ng]):
+            F = mau(m)
+            if F is None or hop: continue
+            if isinstance(F, ast.Name) and F.id == "bo_qua_han" and not dau: r.add(("goc", "Name", ng))
+            elif len(dau) == 1 and dau[0] is not F and dau[0] in set(ast.walk(F)): r.add(("goc", _ten_o_t191(F), ng))
+    return r
 def _khoa_ky_vong_t191():
     """Vũ trụ KHOÁ PHỦ tính ĐỘC LẬP với sổ sách của bộ sinh: ô của kho × bộ bọc; ô cờ (vế phải phép gán) × ngữ cảnh; lớp `expr`[toán tử]
     của siêu dữ liệu `ast` × ngữ cảnh gốc. Mọi khoá phải có dòng được kiểm, hoặc nằm trong bảng miễn đã trải."""
@@ -9697,8 +9791,11 @@ def t191_MOI_chot_cua_kiem_deu_duoc_t190_phu_o_nhanh_DA_DANG():
     chot(kiem_nguon.startswith("def kiem(") and kiem_nguon.count(moc) == 1 and [x[0] for x in sum(_liet_ke_chot_kiem(kiem_nguon), [])]
          == [x[0] for x in ds + mien] and _dem_chot_tho(kiem_nguon) == len(ds) + len(mien), "đoạn nguồn kiem() lệch cả tệp")
     sinh, co_dong, hong = _sinh_dong_t191()
-    chot({_khoa_dong_t191(k) for k, *_ in sinh} == co_dong, "MA TRẬN SINH: khoá phủ phải dẫn từ CHÍNH các dòng được kiểm — lệch "
-         f"{sorted(co_dong ^ {_khoa_dong_t191(k) for k, *_ in sinh})[:5]}")
+    nd = [(k, _khoa_dong_t191(k), _khoa_noi_dung_t191(d)) for k, d, *_ in sinh]  # F1-L36: ô THỰC CÓ đọc từ AST của nội dung dòng
+    chot(all(kn in s for _k, kn, s in nd), "MA TRẬN SINH: nội dung dòng không chứng minh ô của nhãn — "
+         f"{[(k, sorted(s)[:2]) for k, kn, s in nd if kn not in s][:3]}")
+    chot({kn for _k, kn, _s in nd} == co_dong, "MA TRẬN SINH: khoá phủ phải dẫn từ CHÍNH các dòng được kiểm — lệch "
+         f"{sorted(co_dong ^ {kn for _k, kn, _s in nd})[:5]}")
     chua = {o: v for o, v in hong.items() if o not in co_dong}
     kv = _khoa_ky_vong_t191(); md = _mien_day_du_t191(kv)
     chot(all(any(_khop_mien_t191(e, k) for k in kv) for e in _MIEN_SINH_T191), "MA TRẬN SINH: mục miễn không khớp khoá vũ trụ nào (miễn chết)")

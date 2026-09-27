@@ -165,3 +165,11 @@ TRANG_THAI_REVIEW_LUC_CAP:
   so_finding: 'P1 0 / P2 0 / P3 1 / P4 0 (F1-L32, pull/589 5854247436)'
   da_xu_ly: 'F1-L31, F2-L31 bang ma tran sinh tu ast (359d30d, r22); F1-L32 + gate CI 3.12 (bc89d2d, r23); toi uu CI t191 (d9b0454, r24).'
   DIEU_KIEN_DUNG: 'Khong con P1, P2, P3 o mot luot. Chua dat — luot 33 se do.'
+
+# ───────────────────────── BIA MỘ — vế THỨ NHẤT của dấu HAI CHIỀU ─────────────────────────
+# Thêm 2026-09-27 khi cấp g24. g23 CÒN HIỆU LỰC (hạn 2026-09-29T00:00:00Z) nên bia mộ hai chiều là BẮT BUỘC.
+da_bi_thay_the: dang-lease-dau-truoc-kiem-sau-r25-g24-claude
+da_bi_thay_the_luc: '2026-09-27T11:41:28Z'
+da_bi_thay_the_luc_nguon: 'date -u luc commit bia mo nay; commit dung CHINH gia tri ay lam committer date (GIT_COMMITTER_DATE).'
+da_bi_thay_the_vi_sao: 'g24 neo dac ta r25 (ec8bf6a, sha256 ac34241757508410fc0acbdc11b310cc41a6a6c2b468673294994aeeb6b6a9fa) va head 4171474
+  — va F1-L33, F2-L33 cua luot 33 (pull/589 5854732156); han GIU 2026-09-29T00:00:00Z.'

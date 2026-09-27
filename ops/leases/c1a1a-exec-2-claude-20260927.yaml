@@ -12,11 +12,10 @@ packet_id: LAND-DOC-RECEIPT-THU-HOI-C1a1a
 generation: 2
 revision: 5
 lease_id: c1a1a-exec-2-claude-20260927
-thay_the_cho: c1a1a-exec-1-claude-20260927
-thay_the_ghi_chu: >-
+g1_ghi_chu: >-
   g1 (phien session_01LZYaDZiMtLCMAzXKibMz5f) da THU HOI bang rut han ve 2026-09-27T10:43:00Z (commit 4e29cbc9,
-  '#650' comment 5855139112) vi chu kho chon executor la session_017KWSXEY9ifmPKmJREKfdSJ. g1 da HET_HAN nen KHONG
-  them da_bi_thay_the vao tep g1 (sua tep lease het han lam cong dang lease tra rc=8). g1 khong day dong ma nao.
+  '#650' comment 5855139112) vi chu kho chon executor la session_017KWSXEY9ifmPKmJREKfdSJ. g1 da HET_HAN nen lease nay
+  KHONG khai thay_the_cho (cong doi bia mo hai chieu, ma sua tep lease het han thi cong tra rc=8). g1 khong day dong ma nao.
 
 spec: ops/specs/LAND-DOC-RECEIPT-THU-HOI-C1a1a.md
 spec_source_commit: 0fc9766f39b585df3021ec43427c3866ae8271a2

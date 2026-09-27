@@ -124,3 +124,20 @@ Kết quả lượt 8 ghi ở `luot8-VERDICT.md`: `changes_requested`, **2 P1 ·
   mutant `bo-rieng-DEL`; byte không-UTF-8 nay có **chốt riêng** (`ten-tep-khong-phai-utf8`), ca `ten-byte-sau-duoi`,
   mutant `bo-chot-utf8`. Mutant `strict` **không** đưa vào ma trận: nó chết bằng `UnicodeDecodeError`, tức giết
   bằng lỗi vô can — đúng loại tín dụng giả mà bộ phân hạng từ chối.
+
+## Lượt 9/10 — revision 3
+
+`changes_requested`, **0 P1 · 1 P2 · 0 P3** (`run.json` `ef7602b8`, 623 giây, `ma_thoat 0`; `openai_codex` · `codex_cli` ·
+`machine`; header `gpt-6-astra` / `high`). F17 và F18 **ĐÓNG**; C5, C6 **ĐÓNG** trong bộ đo thi công r3; C3, C4 giữ
+**ĐÓNG-MỘT-PHẦN** (giới hạn xác minh lịch sử, không phải lỗi mới). Reviewer thử từng tiêu chí dương của r3 và cả 14 phép
+đổi bản in, băm, `rc` đều làm đúng tiêu chí ấy đỏ; khai thêm một hàng `mong="LECH"` bị chặn bởi tiêu chí "duy nhất đối chứng
+âm" lẫn băm.
+
+- **F19** (P2, `so-do-khong-khop`): `luot9-EVIDENCE.md` khai *"thay đúng 7 đoạn"* rồi liệt kê **8** mục. Danh sách đúng,
+  con số sai. **Đính chính ở đây, không sửa `luot9-EVIDENCE.md`**: tệp ấy là đầu vào reviewer lượt 9 đã đọc, giữ nguyên
+  byte để lời khai và finding cùng tra được. Con số nay **đo được**: script tạo r3 được trích nguyên văn từ transcript
+  phiên soạn thành `tao_r3.py` (sha256 `ce56a45aa939e4cdfceef55a820ca8adc4e04f33c74e555c7bfd02e077a5d15b`), có đúng **8**
+  lời gọi `rep()`, và chạy trên bản sao r2 cho ra r3 **giống từng byte** (`cmp` rc0, r3 sha256 `ac7e0129…`). Lượt 9 ghi
+  *"không có script tạo r3 trong packet"*; nay có. `luot9-HINT.patch` (chỉ nhắm EVIDENCE) **không** áp, vì cách đính chính
+  trên giữ được hồ sơ.
+

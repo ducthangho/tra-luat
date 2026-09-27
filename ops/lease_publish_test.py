@@ -9579,6 +9579,28 @@ _MIEN_SINH_T191 = {
     **{("goc", k): "witness (False, False)" for k in ("Yield", "YieldFrom")}, ("goc", "Constant"): "khong-o",
     # F1-L33: `lambda`, `(… for …)`, `{…}` LUÔN ĐÚNG ⇒ trong `F or @` chốt KHÔNG BAO GIỜ chạy (mã chết, ở mọi giá trị cờ)
     **{("goc", k, "or"): "witness (False, False)" for k in ("Lambda", "GeneratorExp", "Set")}}
+def _khoa_dong_t191(k):
+    """Khoá phủ ĐỌC TỪ KHOÁ DÒNG `sinh.*` (không tin tập khoá do bộ sinh tự khai) — F1-L34: bỏ một dòng thì khoá của nó phải mất."""
+    p = k.split(".")[1:]
+    if p[0] == "goc": return ("goc", p[2], p[1])
+    r = p[2:][1:] if p[2] == "khong-chay" else p[2:]
+    return (p[0], r[0], r[1], r[2], p[1])
+def _khoa_ky_vong_t191():
+    """Vũ trụ KHOÁ PHỦ tính ĐỘC LẬP với sổ sách của bộ sinh: ô của kho × bộ bọc; ô cờ (vế phải phép gán) × ngữ cảnh; lớp `expr`[toán tử]
+    của siêu dữ liệu `ast` × ngữ cảnh gốc. Mọi khoá phải có dòng được kiểm, hoặc nằm trong bảng miễn đã trải."""
+    import ast
+    kv = set()
+    for g in _KHO_T191 + tuple(_kho_toan_tu_t191()):
+        cay = ast.parse(g); bt = {id(x) for x in ast.walk(cay.body[-1].value)} if isinstance(cay.body[-1], ast.Assign) else set()
+        for n, f, vt, _k, c in _o_sinh_t191(cay):
+            kv |= {("chot", _ten_o_t191(n), f, vt, w) for w in ("truc", "ke-co", "ke-khong")}
+            if id(c) in bt and not isinstance(c, ast.stmt): kv |= {("co", _ten_o_t191(n), f, vt, ng) for ng in _NGU_CANH_NHAC_T191}
+    tt = {ast.BinOp: ast.operator, ast.UnaryOp: ast.unaryop, ast.Compare: ast.cmpop, ast.BoolOp: ast.boolop}
+    for c in vars(ast).values():
+        if isinstance(c, type) and issubclass(c, ast.expr) and c is not ast.expr and type(c) is type:
+            kv |= {("goc", k, ng) for k in ([f"{c.__name__}[{o.__name__}]" for o in tt[c].__subclasses__()] if c in tt else [c.__name__])
+                   for ng in _GOC_NGU_CANH_T191}
+    return kv
 def _mien_day_du_t191():
     """F1-L33: bảng miễn TRẢI ĐỦ CHIỀU. Mục thiếu chiều cuối (bộ bọc của chốt / ngữ cảnh của cờ / ngữ cảnh của gốc) áp cho MỌI giá trị
     của chiều ấy; mục đủ chiều chỉ áp cho đúng ô ấy."""
@@ -9670,8 +9692,12 @@ def t191_MOI_chot_cua_kiem_deu_duoc_t190_phu_o_nhanh_DA_DANG():
     chot(kiem_nguon.startswith("def kiem(") and kiem_nguon.count(moc) == 1 and [x[0] for x in sum(_liet_ke_chot_kiem(kiem_nguon), [])]
          == [x[0] for x in ds + mien] and _dem_chot_tho(kiem_nguon) == len(ds) + len(mien), "đoạn nguồn kiem() lệch cả tệp")
     sinh, co_dong, hong = _sinh_dong_t191()
+    chot({_khoa_dong_t191(k) for k, *_ in sinh} == co_dong, "MA TRẬN SINH: khoá phủ phải dẫn từ CHÍNH các dòng được kiểm — lệch "
+         f"{sorted(co_dong ^ {_khoa_dong_t191(k) for k, *_ in sinh})[:5]}")
     chua = {o: v for o, v in hong.items() if o not in co_dong}
-    md = _mien_day_du_t191()
+    kv, md = _khoa_ky_vong_t191(), _mien_day_du_t191()
+    chot(kv == co_dong | set(md) and not co_dong & set(md), f"MA TRẬN SINH: vũ trụ khoá ≠ khoá có dòng ∪ miễn — thiếu "
+         f"{sorted(kv - co_dong - set(md))[:5]}, thừa {sorted((co_dong | set(md)) - kv)[:5]}, vừa có dòng vừa miễn {sorted(co_dong & set(md))[:5]}")
     chot(set(chua) == set(md) and all(v == set(md[o].split("|")) for o, v in chua.items()),
          f"MA TRẬN SINH: ô không dòng phải ĐÚNG bảng miễn, và mọi lần xuất hiện hỏng đúng lý do đã khai — lệch "
          f"{sorted((o, sorted(v)) for o, v in chua.items() if v != set(md.get(o, '').split('|')))} · thừa {sorted(set(md) - set(chua))}")

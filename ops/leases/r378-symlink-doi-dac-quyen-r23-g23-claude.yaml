@@ -251,3 +251,12 @@ write_set_do_luc_cap:
   do_luc: '2026-09-27T03:42:56Z'
   do_luc_nguon: 'date -u in ra NGAY TRUOC lan chay `ai-dang-giu` cho hai duong write set (sau vong dong bo nhanh).'
   ket_qua: 'TRUOC khi commit g23: rc=12 KHONG_XAC_DINH ca hai duong — dung mot ly do: bia mo mot chieu g22 -> g23 (g23 chua ton tai). Do lai SAU commit g23 — ghi trong comment bao cao.'
+
+# ───────────────────────── BIA MỘ — vế THỨ NHẤT của dấu HAI CHIỀU ─────────────────────────
+# Thêm 2026-09-27 khi cấp g24. g23 CÒN HIỆU LỰC (hạn 2026-09-28T06:00:00Z) nên bia mộ hai chiều là
+# BẮT BUỘC. REVISION mới (r23 -> r24): protocol §3.2.
+da_bi_thay_the: r378-symlink-doi-dac-quyen-r24-g24-claude
+da_bi_thay_the_luc: '2026-09-27T04:45:34Z'
+da_bi_thay_the_luc_nguon: 'date -u luc commit bia mo nay; commit dung CHINH gia tri ay lam committer date (GIT_COMMITTER_DATE).'
+da_bi_thay_the_vi_sao: 'r24 (issues/574#issuecomment-5852577740, phiên điều phối mở theo chỉ thị lặp 5852205510 của chủ kho) — thứ tự chuyển
+  tiếp td cũ/mới, sự kiện trong rào, EOF rào chưa đóng trong tu_kiem (v15); head không đổi 76f199e. spec_hash r24 = 65cc019d0ec7f1fac049f0cc5dda42c976d80b6c0b41979d8b61f2861aefc621.'

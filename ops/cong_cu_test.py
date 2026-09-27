@@ -6222,6 +6222,112 @@ def _cong_tren_cay_that(goc, bo_quet=None):
                f"    {str(bao.get('ly_do'))[:400]}"]
 
 
+def _ban_kinh_mot(ten_db, do_o_nen):
+    """(dòng báo, số lỗi) của MỘT đột biến — cùng một hàm cho đường tuần tự lẫn tiến trình con."""
+    try:
+        ket, ca_dich = _do_ban_kinh(ten_db, bo_qua_ca=do_o_nen)
+    except AssertionError as ex:
+        return [f"  ĐỎ  {ten_db}: {ex}"], 1
+    return _ket_luan_ban_kinh(ten_db, ca_dich, ket, len(CA), do_o_nen)
+
+
+def _so_tien_trinh_ban_kinh():
+    """Số tiến trình đo bán kính. `CONG_CU_TEST_TIEN_TRINH` ghi đè; mặc định số lõi, trần 4.
+
+    N126 (r38): job `gate` có trần 60 phút mà vòng bán kính TUẦN TỰ (53 ca × 212 đột biến) đã vượt nó —
+    run 36286651867 (r34) và 36299153762 (r36) đều bị HUỶ ở phút 60,2. Mỗi đột biến vốn chạy cô lập (cây
+    tạm riêng theo tên, `globals()` tráo rồi trả), nên tách thành tiến trình con là an toàn; KHÔNG dùng luồng
+    vì phép tráo `globals()` là của cả tiến trình. Giá trị không đọc được ⇒ 1 (tuần tự), không đoán.
+    """
+    tho = os.environ.get("CONG_CU_TEST_TIEN_TRINH")
+    if tho is not None:
+        return int(tho) if tho.strip().isdigit() and int(tho) >= 1 else 1
+    return max(1, min(4, os.cpu_count() or 1))
+
+
+def _ban_kinh_moi_dot_bien(cac_ten, do_o_nen, so_tien_trinh):
+    """[(dòng báo, số lỗi)] theo ĐÚNG thứ tự `cac_ten`, tuần tự hay chia cho `so_tien_trinh` tiến trình con.
+
+    FAIL-CLOSE: đột biến nào tiến trình con KHÔNG trả kết quả (chết, hết giờ, in lạ) thì thành một dòng
+    `ĐỎ` kèm lý do và tính MỘT lỗi — không bao giờ biến mất khỏi bảng. Một bảng thiếu dòng không phải một
+    bảng sạch.
+    """
+    if so_tien_trinh <= 1 or len(cac_ten) <= 1:
+        return [_ban_kinh_mot(t, do_o_nen) for t in cac_ten]
+    nhom = [cac_ten[i::so_tien_trinh] for i in range(so_tien_trinh)]
+    nhom = [n for n in nhom if n]
+    cac_con = []
+    for n in nhom:
+        tep_ra = tempfile.TemporaryFile()
+        p = subprocess.Popen([sys.executable, str(TEP_TEST), "--ban-kinh-con",
+                              json.dumps(sorted(do_o_nen)), *n],
+                             stdout=tep_ra, stderr=subprocess.STDOUT, stdin=subprocess.DEVNULL,
+                             cwd=str(GOC))
+        cac_con.append((n, p, tep_ra))
+    kq, ghi_chu = {}, {}
+    for n, p, tep_ra in cac_con:
+        try:
+            rc = p.wait(timeout=_HAN_TIEN_TRINH_BAN_KINH)
+        except subprocess.TimeoutExpired:
+            p.kill()
+            p.wait()
+            rc = "hết giờ"
+        tep_ra.seek(0)
+        ra = tep_ra.read().decode("utf-8", "replace")
+        tep_ra.close()
+        for dong in ra.splitlines():
+            if dong.startswith("BKCON "):
+                try:
+                    ten, cac_dong, loi = json.loads(dong[6:])
+                except (ValueError, TypeError):
+                    continue
+                if ten in n and ten not in kq:
+                    kq[ten] = (list(cac_dong), int(loi))
+        for ten in n:
+            ghi_chu[ten] = f"rc={rc}, đuôi đầu ra: {ra[-300:]!r}"
+    return [kq.get(t) or ([f"  ĐỎ  {t}: tiến trình con KHÔNG trả kết quả ({ghi_chu.get(t)})"], 1)
+            for t in cac_ten]
+
+
+_HAN_TIEN_TRINH_BAN_KINH = 3 * 3600
+
+
+def _in_ban_kinh_con():
+    """Cửa tiến trình con của N126: đo bán kính các đột biến được giao, in mỗi kết quả một dòng `BKCON`."""
+    i = sys.argv.index("--ban-kinh-con")
+    do_o_nen = json.loads(sys.argv[i + 1])
+    for ten in sys.argv[i + 2:]:
+        cac_dong, loi = _ban_kinh_mot(ten, do_o_nen)
+        print("BKCON " + json.dumps([ten, cac_dong, loi], ensure_ascii=False), flush=True)
+    sys.exit(0)
+
+
+def _tu_kiem_song_song(do_o_nen):
+    """Số lỗi của phép tự kiểm N126 — chạy TRƯỚC bảng bán kính, chỉ khi đo song song.
+
+    Hai chốt, hai chiều:
+      (1) ba đột biến thật đo SONG SONG (2 tiến trình) phải cho ĐÚNG dòng báo, số lỗi và THỨ TỰ như đo TUẦN TỰ;
+      (2) một tên đột biến KHÔNG có trong `DOT_BIEN` giao cho tiến trình con phải thành dòng `ĐỎ` + 1 lỗi,
+          không được biến mất khỏi bảng.
+    """
+    # BA đột biến cho HAI tiến trình ⇒ một nhóm có hai tên (`[a, c]`, `[b]`): bản ráp theo thứ tự NHÓM
+    # thay vì thứ tự GỐC sẽ lệch ở đây. Hai tên cho hai tiến trình thì không phân biệt được hai cách ráp.
+    mau = [t for t in ("t1_rc_gop", "bn_khong_tran_tep", "bn_khong_git_bo_kiem_oid") if t in DOT_BIEN]
+    loi = 0
+    tuan_tu = _ban_kinh_moi_dot_bien(mau, do_o_nen, 1)
+    song_song = _ban_kinh_moi_dot_bien(mau, do_o_nen, 2)
+    if len(mau) != 3 or tuan_tu != song_song:
+        print(f"  ĐỎ  tự kiểm song song (1): tuần tự {tuan_tu!r} ≠ song song {song_song!r}")
+        loi += 1
+    ma = "__khong_ton_tai_n126__"
+    ket = _ban_kinh_moi_dot_bien([mau[0] if mau else "t1_rc_gop", ma], do_o_nen, 2)
+    if len(ket) != 2 or ket[1][1] != 1 or not ket[1][0][0].startswith(f"  ĐỎ  {ma}:"):
+        print(f"  ĐỎ  tự kiểm song song (2): tên lạ không thành dòng ĐỎ: {ket!r}")
+        loi += 1
+    print(f"TỰ KIỂM SONG SONG (N126): {'ĐẠT' if not loi else 'HỎNG'}")
+    return loi
+
+
 def _in_tu_kiem_cong_that():
     """Cửa tiến trình con cho `t45`: chạy phép nối cổng trên MỘT gốc cho trước rồi in ra."""
     i = sys.argv.index("--tu-kiem-cong-that")
@@ -6274,17 +6380,12 @@ def main() -> int:
     for d in dong_nen:
         print(d)
     loi_db += loi_nen
+    so_tien_trinh = _so_tien_trinh_ban_kinh()
+    loi_db += _tu_kiem_song_song(do_o_nen) if so_tien_trinh > 1 else 0
     print(f"\nBÁN KÍNH ĐỘT BIẾN ({len(DOT_BIEN)} đột biến, mỗi ca đúng một"
-          + (f"; LOẠI {len(do_o_nen)} ca đỏ ở nền" if do_o_nen else "") + "):")
-    for ten_db, cfg in DOT_BIEN.items():
-        ca_dich = cfg[-1]
-        try:
-            ket, _ = _do_ban_kinh(ten_db, bo_qua_ca=do_o_nen)
-        except AssertionError as ex:
-            print(f"  ĐỎ  {ten_db}: {ex}")
-            loi_db += 1
-            continue
-        cac_dong, loi = _ket_luan_ban_kinh(ten_db, ca_dich, ket, len(CA), do_o_nen)
+          + (f"; LOẠI {len(do_o_nen)} ca đỏ ở nền" if do_o_nen else "")
+          + f"; {so_tien_trinh} tiến trình):")
+    for cac_dong, loi in _ban_kinh_moi_dot_bien(list(DOT_BIEN), do_o_nen, so_tien_trinh):
         for dong in cac_dong:
             print(dong)
         loi_db += loi
@@ -6402,4 +6503,6 @@ if __name__ == "__main__":
         sys.exit(0)
     if "--tu-kiem-cong-that" in sys.argv[1:]:
         _in_tu_kiem_cong_that()
+    if "--ban-kinh-con" in sys.argv[1:]:
+        _in_ban_kinh_con()
     sys.exit(main())

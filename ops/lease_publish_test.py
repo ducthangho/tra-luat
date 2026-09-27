@@ -5685,8 +5685,9 @@ def t139_A12_catalog_mutant_A0_giet_dung_ly_do_va_ghi_SONG_kem_seam():
          t129_Q45_reader_object_store_bam_lai_va_canh_tu_bytes, "GIET", "KhoObject.doc"),
         ("S8-bo-tran-parent", "                if sau + 1 > gioi_han:\n", "                if False:\n",
          t131_S8_tam_tran_bound_tru_1_bound_bound_cong_1_va_deadline, "GIET", "KhoObject.to_tien"),
+        # F3-L36: ca đích là `t192` (đếm spawn, tất định) — `t131` suy "trước spawn" từ thông điệp nên tuỳ lịch, và lease cấm chạm nó
         ("S8-bo-deadline", "        if con <= 0:\n", "        if False:\n",
-         t131_S8_tam_tran_bound_tru_1_bound_bound_cong_1_va_deadline, "GIET", "KhoObject._con_thoi_gian"),
+         t192_S8_het_deadline_la_12_va_KHONG_spawn_cat_file_dem_bang_Popen, "GIET", "KhoObject._con_thoi_gian"),
         ("S8-bo-tran-tree-edges", "            if buoc > self.ngan_sach[\"max_tree_or_alias_edges\"]:\n", "            if False:\n",
          t131_S8_tam_tran_bound_tru_1_bound_bound_cong_1_va_deadline, "GIET", "KhoObject.tim"),
         ("shallow-bo-chot", "        if self._git_nguon(goc_kho, \"rev-parse\", \"--is-shallow-repository\").strip() == \"true\":\n",
@@ -9878,6 +9879,31 @@ def t191_MOI_chot_cua_kiem_deu_duoc_t190_phu_o_nhanh_DA_DANG():
     print(f"t191: {len(ds)} chốt của kiem() đều PHU ở nhánh đã-có-dấu; miễn sẵn: {mien}; "
           f"phân loại {len(hang)} dòng ({len(sinh)} sinh, {len(co_dong)} ô, miễn {len(_MIEN_SINH_T191)}); "
           f"ca âm {len(_CHOT_GIA_T191)} dạng")
+
+@ca
+def t192_S8_het_deadline_la_12_va_KHONG_spawn_cat_file_dem_bang_Popen():
+    """F3-L35/F3-L36: deadline đã hết ⇒ `KhoObject.doc` ném 12 mà KHÔNG spawn `cat-file` lần nào — ĐẾM `Popen`, không suy từ lời.
+
+    `t131` suy "trước spawn" từ THÔNG ĐIỆP và `memo`. Dưới `S8-bo-deadline` (bỏ `if con <= 0`), `doc` vẫn spawn; nếu đọc xong mà
+    child chưa thoát thì lỗi "chờ cat-file … kết thúc" cũng mang chữ `deadline`, không `kill`, `memo` rỗng ⇒ `t131` QUA tuỳ lịch
+    (cross-review lượt 36 dựng được). Ở đây clock TIÊM, và spawn đếm ở chính `subprocess.Popen` ⇒ tất định. Lease cấm chạm
+    `t131`/`t132`, nên phép đo nằm ở ca riêng và catalog `t139` trỏ `S8-bo-deadline` về đây. Chốt KẾT QUẢ trước, ĐẾM sau (nếp
+    `_goi_dem_lop_gh`). ĐỐI CHỨNG: trước deadline đúng MỘT spawn — bộ đếm THẤY được spawn, nên "0" là số đo, không phải bộ đếm câm."""
+    from unittest import mock
+    mod = _nap_cong()
+    popen_that = subprocess.Popen
+    with San() as s:
+        cay, (_c0, _c1, c2) = _kho_do_thi(s)
+        for deadline, mong_rc, mong_spawn in ((100.0, 12, 0), (99.0, 12, 0), (100.5, 0, 1)):
+            spawn = []
+            kho = mod.KhoObject(cay, bay_gio=lambda: 100.0, deadline=deadline)
+            try:
+                with mock.patch.object(mod.subprocess, "Popen", side_effect=lambda *a, **k: spawn.append(a) or popen_that(*a, **k)):
+                    rc, td = _ma_chan(mod, kho.commit, c2)
+            finally:
+                kho.dong()
+            chot(rc == mong_rc, f"clock 100, deadline {deadline}: phải rc={mong_rc}, được {rc}: {td}")
+            chot(len(spawn) == mong_spawn, f"clock 100, deadline {deadline}: phải {mong_spawn} lần spawn cat-file, có {len(spawn)}")
 
 @ca
 def t185_cua_DEM_phai_chot_KET_QUA_truoc_khi_chot_SO_LOI_GOI():

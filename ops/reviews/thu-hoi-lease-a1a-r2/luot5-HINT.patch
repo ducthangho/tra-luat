@@ -1,0 +1,14 @@
+NHÃN: chưa chạy trên cây thật — executor tự áp, tự đo, tự chịu trách nhiệm commit
+(docs/PROTOCOL_DA_PHIEN.md §13 patch-as-hint, ràng buộc 1. Nhãn thêm sau khi merge PR #652 theo hậu kiểm connector; sha256 bản reviewer sinh ra: 816f293e6ce767e4debdf233b81fad1651db2d0ec760ce14fd42c987a643d6de)
+
+--- SPEC.md
++++ SPEC.md
+@@ -374,7 +374,7 @@
+    - #579 **đã land** (PR #589 merged);
+    - `ai-dang-giu` đo lại **ra `NGƯỜI_GIỮ 0`** trên cả ba đường write set, `rc` đọc trực tiếp, sau khi so
+      tập tên ref hai nguồn như §1;
+-   - chủ kho đã chọn (a) hoặc (b) ở mục 1;
++   - áp dụng ngoại lệ ADR-0044 đã được chủ kho chốt tại §0 vòng 4 và mục 1 (≤ 3 tệp, ≤ 663 dòng thêm, chỉ cho A1a);
+    - đặc tả này đã đóng băng bằng human audit.
+ 
+    Chú ý tự tham chiếu: nợ `AG-T0-01B` dạng 2 (mà M14 chỉ **dự báo**, không chữa) có thể làm `ai-dang-giu`

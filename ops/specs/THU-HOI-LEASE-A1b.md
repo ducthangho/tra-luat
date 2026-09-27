@@ -1,4 +1,4 @@
-# ĐẶC TẢ — `THU-HOI-LEASE-A1b` — **revision 1, bản nháp 4 (CHƯA đóng băng)**
+# ĐẶC TẢ — `THU-HOI-LEASE-A1b` — **revision 1, bản nháp 5 (CHƯA đóng băng)**
 
 | trường | giá trị |
 |---|---|
@@ -6,9 +6,9 @@
 | `packet_issue` | **#656** (con của #564). Issue **không** cấp việc; chỉ Issue + lease còn hiệu lực mới giao được (protocol §3.2, §4). |
 | `nguon_cap_viec` | Spec cha **r9** `ops/specs/THU-HOI-LEASE-VA-CAP-LAI.md` (sha256 `465538364b1a3f9477782fba79869bbd1c9351140e3fa9df50451baae22f9c79`) §`write_set` dòng **A1**: *"… nghiệm thu wiring thật; đổi cờ `True` khi Q10 đạt; sổ vẫn rỗng"*. Q5 (A1 → A1a/A1b) ở `ops/specs/THU-HOI-LEASE-A1.md`. A1a r2 đã đóng băng: `ops/specs/THU-HOI-LEASE-A1a-r2.md` sha256 `9bc0fe282fbebc02791f47a30e4ff187b1182a2e5e357ee2e66c04d4f7dac7cd` (commit `7fc2868`, land merge `67802bf`). Chỉ thị chủ kho phiên Claude Code 27-09-2026: "Soạn spec đi"; ba vòng quyết định, cả ba "Theo khuyến nghị" (§0). |
 | `review_class` | **`sensitive`**: `ops/lease_publish.py` là cổng đọc lease (protocol §8). |
-| `reviewer` | codex `gpt-6-astra`, effort `high`; trần `codex_review_calls` **10** cho đặc tả này (tiền lệ A1a r2); connector (`advisory_review`); cổng land **`human_audited`** (Q7). |
+| `reviewer` | codex `gpt-6-astra`, effort `high`; trần `codex_review_calls` **2** theo protocol §8 (`docs/PROTOCOL_DA_PHIEN.md:669`) — một đặc tả KHÔNG nới được trần ấy. Bản nháp 1–4 tự ghi trần 10 (chép tiền lệ A1a r2) và đã dùng **4** lượt ⇒ **vượt trần từ lượt 3**; connector bắt (P1 `r4113875422`). **Review Rescue Checkpoint** (§12 `:1079–1089`) ghi ở #657 `issuecomment-5852188204`: chủ kho quyết **không gọi thêm lượt Codex nào** cho #657; bản nháp 5 vá lời khai theo connector; assurance cho lần land bản nháp làm DỮ LIỆU là **`human_audited`** trên đúng head sau vá. Connector (`advisory_review`); cổng land thi công **`human_audited`** (Q7). |
 | `dong_bang` | **CHƯA.** Chỉ đóng băng khi đủ T1–T6 (§1) **và** đo lại mọi số ở §2 (L5). Tới lúc đó tệp này là DỮ LIỆU, không cấp việc. |
-| `lich_su_ban_nhap` | Bản nháp 1: commit `65a612a`, sha256 `cb9ec4736551e9713d26e8f6b2384f203a37dea3f1d5eb6d8ab923de9337a39a`, codex lượt 1 `changes_requested` **2 P1 + 3 P2** (F1–F5, `ops/reviews/thu-hoi-lease-a1b/luot1-VERDICT.md`). Bản nháp 2: commit `673256e`, sha256 `0a1f7213c8f78456c4fdac24c0a0bcc4713e17da15a0204e286f9c2147dbb510`, codex lượt 2 `changes_requested` **1 P1 + 1 P2** (F6–F7, `luot2-VERDICT.md`). Lượt 2 xác nhận **F3 đã vá thật**; F1, F4, F5 **chuyển** sang packet tiền đề (§8.3: chuyển sang successor KHÔNG tính là đã vá — chỉ đóng khi successor land và đo được); F2 vá một phần ⇒ F6. Bản nháp 3: commit `1503ca8`, sha256 `b7baed1cc9076bb760963013b4accf7215c4e0a7955f3ce90ef483c85ad958b9`, codex lượt 3 `changes_requested` **0 P1 + 1 P2** (F8, `luot3-VERDICT.md`); lượt 3 xác nhận **F6, F7 đã vá thật trong đặc tả** (phản chứng lượt 2 nay bị từ chối). Bản nháp 4 vá F8 (ma trận oracle riêng từng đường production) và cập nhật T4 (strict nay ĐO ĐƯỢC): commit `52831cc`, sha256 `d135c6215680355de932ca5ec8db15bc856f6994a0ec4bea57d14838bf3519ec`, codex lượt 4 **`approve` — 0 P1 / 0 P2 / 0 P3** (`luot4-VERDICT.md`); F8 đã vá thật trong đặc tả. Approve là cho **bản nháp đặc tả**, không xác nhận tiền đề T1–T6. Dùng **4/10** lượt. Commit ghi dòng này chỉ thêm lịch sử — nội dung kỹ thuật = bản nháp 4. |
+| `lich_su_ban_nhap` | Bản nháp 1: commit `65a612a`, sha256 `cb9ec4736551e9713d26e8f6b2384f203a37dea3f1d5eb6d8ab923de9337a39a`, codex lượt 1 `changes_requested` **2 P1 + 3 P2** (F1–F5, `ops/reviews/thu-hoi-lease-a1b/luot1-VERDICT.md`). Bản nháp 2: commit `673256e`, sha256 `0a1f7213c8f78456c4fdac24c0a0bcc4713e17da15a0204e286f9c2147dbb510`, codex lượt 2 `changes_requested` **1 P1 + 1 P2** (F6–F7, `luot2-VERDICT.md`). Lượt 2 xác nhận **F3 đã vá thật**; F1, F4, F5 **chuyển** sang packet tiền đề (§8.3: chuyển sang successor KHÔNG tính là đã vá — chỉ đóng khi successor land và đo được); F2 vá một phần ⇒ F6. Bản nháp 3: commit `1503ca8`, sha256 `b7baed1cc9076bb760963013b4accf7215c4e0a7955f3ce90ef483c85ad958b9`, codex lượt 3 `changes_requested` **0 P1 + 1 P2** (F8, `luot3-VERDICT.md`); lượt 3 xác nhận **F6, F7 đã vá thật trong đặc tả** (phản chứng lượt 2 nay bị từ chối). Bản nháp 4 vá F8 (ma trận oracle riêng từng đường production) và cập nhật T4 (strict nay ĐO ĐƯỢC): commit `52831cc`, sha256 `d135c6215680355de932ca5ec8db15bc856f6994a0ec4bea57d14838bf3519ec`, codex lượt 4 **`approve` — 0 P1 / 0 P2 / 0 P3** (`luot4-VERDICT.md`); F8 đã vá thật trong đặc tả. Approve là cho **bản nháp đặc tả**, không xác nhận tiền đề T1–T6. Đã dùng **4** lượt, vượt trần 2 (xem `reviewer`). Commit `59916b0` chỉ thêm dòng lịch sử (sha256 `34f9837f…`) — nên approve lượt 4 **neo `52831cc`, KHÔNG neo head nào sau đó**, và KHÔNG là verdict exact-SHA cho bất kỳ head nào của #657 (connector P2 `r4113875424`). Bản nháp 5 (commit ghi dòng này) vá **6** finding connector review `5328618160` chỉ bằng sửa lời khai/điều kiện: trần 2 + checkpoint (`r4113875422`) · approve cũ (`r4113875424`) · facts Q10 neo byte (`r4113875431`, T3/Q2) · vai đo ruleset (`r4113875427`, T4/A7) · bootstrap consumer bị bỏ lỡ (`r4113875442`, T2) · hiện vật nằm trong write set (`r4113875429`, §3/Q8/A2). Không có verdict Codex nào cho bản nháp 5; thay bằng `human_audited`. |
 
 ## 0. Quyết định của chủ kho (27-09-2026)
 
@@ -17,17 +17,17 @@
 | # | câu | quyết định |
 |---|---|---|
 | Q1 | phạm vi | A1b = **(i)** bật cờ · **(ii)** nghiệm thu wiring thật · **(iv)** ghim lại `BIA_MO_LICH_SU` trước khi bật · **(v)** mỏ neo `PROFILE_ADAPTER_DA_DUYET` do chủ kho duyệt. **(iii)** xoá holder theo bia mộ nhánh mặc định ⇒ **A1c** |
-| Q2 | facts Q10 | chủ kho đăng **một** comment facts trên #656, mỗi mục (a)–(i) một dòng bằng chứng; spec neo comment ID; executor **tự đo lại** (a)(c)(d)(h) trước khi bật; thiếu ⇒ DỪNG |
+| Q2 | facts Q10 | chủ kho đăng **một** comment facts trên #656, mỗi mục (a)–(i) một dòng bằng chứng; bản đóng băng neo **comment ID + sha256 UTF-8 của thân + biên nhận đọc ngược** (ai đọc, lúc nào, qua đường nào); comment là BẢN CHIẾU, thân sửa sau đóng băng ⇒ băm lệch ⇒ **DỪNG**, cần revision mới (connector `r4113875431`); executor **tự đo lại** (a)(c)(d)(h) trước khi bật; thiếu ⇒ DỪNG |
 | Q3 | Q10(d) ngoài kho | chủ kho sửa ruleset `20856202` trước cấp lease: required check `thu-hoi`, strict up-to-date, `allowed_merge_methods = [merge]`, `bypass_actors = []` |
 | Q4 | thời điểm | bản nháp bây giờ; đóng băng khi đủ tiền đề §1 |
 | Q5 | Issue | #656, con của #564 |
 | Q6 | rollback | A1b land với **sổ rỗng**; rollback = PR revert cờ về `False`, **chỉ hợp lệ khi sổ còn rỗng** |
 | Q7 | review/trần | codex + connector + `human_audited`; ADR-0044 **≤ 300** dòng thêm; vượt ⇒ hỏi |
-| Q8 | wiring thật | fixture có đột biến **và** canary PR thật; hiện vật ở `ops/reviews/thu-hoi-lease-a1b/` |
+| Q8 | wiring thật | fixture có đột biến **và** canary PR thật; hiện vật ghi vào **một tệp trong write set**: `ops/reviews/thu-hoi-lease-a1b/bien-nhan-thi-cong.md` (connector `r4113875429`) |
 | Q9 | `BIA_MO_LICH_SU` | mốc giữ **A0** (`0721811`); chạy lại script dẫn xuất của A1a trên ứng viên, clock = lúc bật; phải **trùng** hằng; lệch ⇒ DỪNG |
 | Q10 | profile | digest đo trên **runner thật bởi mã CANONICAL**; executor ĐỀ XUẤT, chủ kho DUYỆT bằng cách trích digest trong audit; trôi ⇒ runbook (đo lại → PR dữ liệu → duyệt); đo ≥ 2 run cách ≥ 24 h, khác nhau ⇒ DỪNG |
 | Q11 | consumer | `LAND-DOC-RECEIPT-THU-HOI` (#499 C1) là packet tiền đề riêng |
-| Q12 | ruleset | đọc ruleset là **phép đo của executor** ghi vào biên nhận, không là unit test |
+| Q12 | ruleset | đọc ruleset là **phép đo** ghi vào biên nhận, không là unit test. Trước cấp lease: **chủ kho/điều phối** (vai đóng băng + cấp lease) đo; sau khi nhận lease và trước merge: **executor** đo lại (connector `r4113875427`) |
 
 **Vòng 3** (sau codex lượt 1, "Theo khuyến nghị"):
 
@@ -43,9 +43,9 @@
 | # | tiền đề | trạng thái lúc soạn (đo 01:30–02:40Z 27-09) | cách đo lại |
 |---|---|---|---|
 | T1 | **mã A1a đã land** | spec A1a r2 đóng băng (merge `67802bf`); mã **chưa**. #579 g20 giữ `ops/lease_publish.py`, `ops/lease_publish_test.py` tới **2026-09-29T00:00:00Z** (đo bởi agent khảo sát ~23:30Z 26-09) | merge A1a trên `--first-parent origin/master`; `ai-dang-giu` 2 đường ⇒ `NGƯỜI_GIỮ 0` (quét đủ ref) |
-| T2 | **consumer `LAND-DOC-RECEIPT-THU-HOI` đã land**, có: exact commit SHA · entry point production gọi được · hợp đồng C/S/H/T đã chốt · ca C≠S (Q16) | **CHƯA** — `git grep -E 'check_suite\|check_run_url\|thu-hoi-receipt' 67802bf -- .claude` ⇒ rc=1 (codex lượt 1) | SHA + entry point ghim vào bản đóng băng |
-| T3 | **facts Q10 (a)–(i)** trên #656 | **CHƯA** | comment ID ghim vào bản đóng băng |
-| T4 | **ruleset** đủ Q3 | **CHƯA** — `GET rulesets/20856202` (đo 02:45Z 27-09, codex lượt 3 và đo lại trong phiên): required checks `gate (ubuntu-latest)`, `gate-packet-loop (ubuntu-latest)`, **không** `thu-hoi`; **`strict_required_status_checks_policy = false`**; `allowed_merge_methods = [merge, squash, rebase]`; `bypass_actors = []` | `GET rulesets/20856202` (đọc được; `branches/master/protection` vẫn 403 nhưng không cần) |
+| T2 | **consumer `LAND-DOC-RECEIPT-THU-HOI` đã land**, có: exact commit SHA · entry point production gọi được · hợp đồng C/S/H/T đã chốt · ca C≠S (Q16) | **CHƯA** — `git grep -E 'check_suite\|check_run_url\|thu-hoi-receipt' 67802bf -- .claude` ⇒ rc=1 (codex lượt 1). **Bootstrap đã bị BỎ LỠ**, không chỉ "còn chờ" (connector `r4113875442`): r9 đòi consumer land TRƯỚC A0 và đóng cập nhật canonical tới receipt đầu tiên đã xác minh; A0 `0721811` đã land mà consumer thì chưa. Đo 03:08Z 27-09: `ls-remote` **441** ref máy chủ = **441** cục bộ (thiếu **0**, so tập tên); `git log --all -- ops/thu-hoi/` ⇒ **0** commit trên mọi ref; `origin/master` `67802bf`, **76** commit first-parent sau A0. Sổ RỖNG hôm nay KHÔNG chứng minh chưa từng có thu hồi thêm-rồi-xoá — phép quét trên mới là bằng chứng, và nó phải được audit | SHA + entry point ghim vào bản đóng băng, **CỘNG** (a) biên nhận quét lịch sử `ops/thu-hoi/` từ A0 `0721811` trên **mọi** ref (so tập tên `ls-remote` ↔ cục bộ trước khi quét; không fetch được ⇒ ĐỎ), do một vai KHÁC người đo audit lại; (b) **một** receipt canonical của consumer đã xác minh (run ID, attempt, `head_sha`, C/S/H/T). Thiếu (a) hoặc (b) ⇒ KHÔNG đóng băng — consumer land muộn tự nó KHÔNG đủ T2 |
+| T3 | **facts Q10 (a)–(i)** trên #656 | **CHƯA** | comment ID **+ sha256 UTF-8 thân + biên nhận đọc ngược** ghim vào bản đóng băng (Q2); thân đổi ⇒ revision mới |
+| T4 | **ruleset** đủ Q3 | **CHƯA** — `GET rulesets/20856202` (đo 02:45Z 27-09, codex lượt 3 và đo lại trong phiên): required checks `gate (ubuntu-latest)`, `gate-packet-loop (ubuntu-latest)`, **không** `thu-hoi`; **`strict_required_status_checks_policy = false`**; `allowed_merge_methods = [merge, squash, rebase]`; `bypass_actors = []` | `GET rulesets/20856202` (đọc được; `branches/master/protection` vẫn 403 nhưng không cần). Trước cấp lease: **chủ kho/điều phối** đo; executor đo lại sau khi nhận lease và trước merge (Q12, A7) |
 | T5 | **`THU-HOI-LEASE-A1-DO-PROFILE` đã land** và có **≥ 2** receipt của run canonical cách **≥ 24 h** cho **cùng** digest schema v2 (Q13) | **CHƯA** — workflow tại `67802bf` có 2 bước `run`, không gọi `hoso_adapter_do` (codex lượt 1) | receipt: run ID, attempt, `workflow_sha`, digest, `image_os`/`image_version` |
 | T6 | **`THU-HOI-LEASE-A1-WIRING` đã land** với cờ `False` (Q14), có: exact commit SHA · danh sách **đường production** cần nghiệm thu (`check`, `ai-dang-giu`, admission `kiem-thu-hoi-github`) **kèm HỢP ĐỒNG verdict riêng từng đường** (ma trận A6) · **seam tiêm** map ref, clock, nguồn discovery nội bộ · kết quả discovery **quyết định** verdict (không chỉ được gọi). Validator ứng viên M4 của admission **độc lập với cờ** (r9 Q3) — WIRING không được đổi semantics ấy | **CHƯA** — chưa có spec | SHA + entry point + chữ ký seam ghim vào bản đóng băng; ca "gọi discovery rồi bỏ kết quả" của chính packet WIRING phải ĐỎ |
 
@@ -64,11 +64,14 @@
 ```
 ops/lease_publish.py
 ops/lease_publish_test.py
+ops/reviews/thu-hoi-lease-a1b/bien-nhan-thi-cong.md
 ```
 
-Hai đường (bản nháp 1 có ba — workflow rời sang `THU-HOI-LEASE-A1-DO-PROFILE`, Q13). Trùng write set A1a
+Ba đường (bản nháp 1–4 có hai — workflow rời sang `THU-HOI-LEASE-A1-DO-PROFILE`, Q13). Trùng write set A1a
 và A1-WIRING ⇒ tuần tự sau cả hai. Test **được đọc/import** consumer ngoài write set (Q16) — không vi phạm L2.
-Hiện vật review/biên nhận đo ở `ops/reviews/thu-hoi-lease-a1b/**`, nhánh riêng (tiền lệ A1a/#551).
+Đường thứ ba là **một tệp cố định** (không phải `**`): biên nhận thi công — facts đo lại (A1), canary (A2),
+dẫn xuất (A3), digest (A4), delta (A5), ruleset (A7). Bản nháp 4 viết "hiện vật ở nhánh riêng" mà không vai nào
+được cấp quyền ghi đường ấy (connector `r4113875429`). Verdict review vẫn thuộc vai reviewer, ngoài write set executor.
 
 ## 4. `ngoai_pham_vi`
 
@@ -98,12 +101,12 @@ Hiện vật review/biên nhận đo ở `ops/reviews/thu-hoi-lease-a1b/**`, nh�
 | # | tiêu chí | ĐỎ khi |
 |---|---|---|
 | A1 | M1: cờ `True`; biên nhận đo lại (a)(c)(d)(h) trong thân PR | thiếu một mục, hoặc lệch facts #656 |
-| A2 | M2: consumer thật chấp nhận fixture đủ; từ chối từng mắt xích sai; canary PR thật S≠H **và** C≠S cho join đủ qua API | đột biến gỡ một mắt xích mà ca xanh; canary thiếu mắt xích |
+| A2 | M2: consumer thật chấp nhận fixture đủ; từ chối từng mắt xích sai; canary PR thật S≠H **và** C≠S cho join đủ qua API — ghi vào `bien-nhan-thi-cong.md` | đột biến gỡ một mắt xích mà ca xanh; canary thiếu mắt xích |
 | A3 | M3: script dẫn xuất A1a chạy lại trên ứng viên, clock = lúc bật, ra **đúng** hằng | lệch digest/số cặp ⇒ DỪNG |
 | A4 | M4: digest mỏ neo = digest trong ≥ 2 receipt T5; chủ kho trích nguyên digest trong audit | receipt khác nhau ⇒ DỪNG; mỏ neo ≠ receipt |
 | A5 | M5 (a)(b)(c); biên nhận đếm delta **theo loại và theo trục** (eligibility / holder) trên kho thật | đột biến "gọi discovery rồi bỏ kết quả" (fixture dương ra delta rỗng) mà ca xanh; đột biến mở quyền một nhánh mà ca xanh; đột biến bỏ một holder trong tập ≥ 2 holder mà ca xanh |
 | A6 | M6 — **ma trận oracle riêng từng đường** (codex lượt 3 F8), mỗi đường mỏ neo sai/rỗng ⇒ `12`: **`check`** (eligibility) — fixture dương M5(a) ra `0→8`; **`ai-dang-giu`** (holder) — **tập holder theo ID/path** trước/sau theo M5(c), rc đi kèm tập, không suy tập từ rc; **admission `kiem-thu-hoi-github`** (namespace sổ) — sổ rỗng/hợp lệ ⇒ **giữ** kết quả nền (validator M4 độc lập cờ), và dữ liệu discovery **không khớp** (OID/nhánh mặc định lệch) ⇒ từ chối. Không đường nào được đổi semantics để "đạt" oracle của đường khác | trên **mỗi** đường: đột biến bỏ phép so mỏ neo mà ca xanh; đột biến gọi discovery rồi bỏ kết quả mà ca xanh; đột biến làm admission trả `8` cho fixture eligibility (mở rộng semantics) mà ca xanh |
-| A7 | T4 đo bởi executor (API ruleset) trước cấp lease **và** trước merge | thiếu `thu-hoi`/strict/merge-only/không bypass ⇒ DỪNG |
+| A7 | T4 (API ruleset) đo bởi **chủ kho/điều phối** trước cấp lease, rồi **executor** đo lại sau khi nhận lease **và** trước merge; cả hai lần ghi vào `bien-nhan-thi-cong.md` | lần nào thiếu `thu-hoi`/strict/merge-only/không bypass ⇒ DỪNG |
 | A8 | ADR-0044 ≤ 300 dòng thêm | vượt mà chưa có ngoại lệ chủ kho |
 
 ## 7. `hinh_dang_ke_thua` (L4)
@@ -116,6 +119,8 @@ Chép từ A1a r2 §7 (`9bc0fe28…`), cộng #651 và lượt 1 của đặc t�
 | "thu hồi là dữ liệu ghi vào bản sao" | 3 | r9 §1 (2) · #564 dạng 2. Chứng cứ thêm 27-09: rút hạn lease #651 g1 (PR #654/#655) không tới được hai nhánh phiên khác. |
 | "lời khai hội tụ rộng hơn phép đo" | 3 | r9 g2, lượt 1 |
 | "hai cổng bất đồng" | 1 | r9, #473 |
+| **"đặc tả tự nới luật của protocol"** (mới) | **1** | bản nháp 1–4: trần Codex 10 chép tiền lệ thay vì trần 2 của §8 (connector `r4113875422`) |
+| **"bản chiếu có thể sửa được dùng làm thẩm quyền"** (mới) | **1** | bản nháp 4 T3: neo comment ID trần (connector `r4113875431`) |
 | "cổng CÓ MẶT khác cổng ĐO ĐƯỢC" | **2** | #499 C2a · **A1b lượt 1 F2**: cờ có mặt nhưng không đường production nào đọc nó để gọi discovery |
 | "gate xanh lane PR, master đo lần đầu" | 1 | #499 C3 |
 | "khử trùng giữ một đại diện…" | 1 | A1a M14 §5.1 |

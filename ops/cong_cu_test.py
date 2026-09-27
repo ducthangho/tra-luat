@@ -6282,50 +6282,107 @@ def _ban_kinh_moi_dot_bien(cac_ten, do_o_nen, so_tien_trinh):
                              cwd=str(GOC))
         _SO_LAN_PHONG[0] += 1
         cac_con.append((n, p, tep_ra))
-    kq, ghi_chu = {}, {}
+    kq = {}
     for n, p, tep_ra in cac_con:
         rc = p.wait()
         tep_ra.seek(0)
         ra = tep_ra.read().decode("utf-8", "replace")
         tep_ra.close()
-        for dong in ra.splitlines():
-            if dong.startswith("BKCON "):
-                try:
-                    ten, cac_dong, loi = json.loads(dong[6:])
-                except (ValueError, TypeError):
-                    continue
-                if ten in n and ten not in kq:
-                    kq[ten] = (list(cac_dong), int(loi))
-        for ten in n:
-            ghi_chu[ten] = f"rc={rc}, đuôi đầu ra: {ra[-300:]!r}"
-    return [kq.get(t) or ([f"  ĐỎ  {t}: tiến trình con KHÔNG trả kết quả ({ghi_chu.get(t)})"], 1)
-            for t in cac_ten]
+        nhan, ly_do = _nhan_ket_qua_con(n, rc, ra)
+        if nhan is None:
+            for ten in n:
+                kq[ten] = ([f"  ĐỎ  {ten}: tiến trình con KHÔNG trả kết quả hợp lệ ({ly_do}; rc={rc}, "
+                            f"đuôi đầu ra: {ra[-300:]!r})"], 1)
+        else:
+            kq.update(nhan)
+    return [kq[t] for t in cac_ten]
+
+
+def _nhan_ket_qua_con(n, rc, ra):
+    """(kết quả theo tên, None) khi đầu ra của MỘT tiến trình con hợp lệ TRỌN VẸN; (None, lý do) nếu không.
+
+    N129 (r42, codex vòng 36 — U1): con in đủ dòng `BKCON` rồi thoát 7 từng được nhận là thành công, vì `rc` chỉ
+    dùng trong ghi chú. Liệt kê MỌI đường nhận nhầm, không chỉ đường được chỉ; mỗi đường làm CẢ NHÓM thành `ĐỎ`:
+      (a) mã thoát khác 0;  (b) dòng `BKCON` không phân tích được;  (c) tên không thuộc nhóm của con;
+      (d) một tên xuất hiện hai lần;  (e) kiểu sai — dòng báo không phải danh sách chuỗi, số lỗi không phải số
+      nguyên KHÔNG ÂM (số âm hay `True` sẽ TRỪ bớt tổng lỗi);  (f) thiếu kết quả của tên nào đó trong nhóm.
+    """
+    if rc != 0:
+        return None, f"mã thoát {rc}"
+    kq = {}
+    for dong in ra.splitlines():
+        if not dong.startswith("BKCON "):
+            continue
+        try:
+            ten, cac_dong, loi = json.loads(dong[6:])
+        except (ValueError, TypeError):
+            return None, f"dòng BKCON hỏng: {dong[:120]!r}"
+        if ten not in n:
+            return None, f"tên ngoài nhóm: {ten!r}"
+        if ten in kq:
+            return None, f"tên lặp: {ten!r}"
+        if (not isinstance(cac_dong, list) or not all(isinstance(x, str) for x in cac_dong)
+                or type(loi) is not int or loi < 0):
+            return None, f"kiểu sai cho {ten!r}"
+        kq[ten] = (cac_dong, loi)
+    thieu = [t for t in n if t not in kq]
+    if thieu:
+        return None, f"thiếu kết quả: {thieu!r}"
+    return kq, None
 
 
 # Tên GIẢ chỉ cửa tiến trình con nhận ra — dùng cho tự kiểm, không bao giờ nằm trong `DOT_BIEN`.
 _TEN_GIA_NHANH = "__gia_nhanh_n126__"
+# N129: mỗi con giả làm ĐÚNG một điều bất thường — (a) … (f) của `_nhan_ket_qua_con`; (f) không in gì.
+_GIA_BAT_THUONG = {
+    "__gia_thoat7_n129__": "a",
+    "__gia_hong_n129__": "b",
+    "__gia_ngoai_n129__": "c",
+    "__gia_lap_n129__": "d",
+    "__gia_am_n129__": "e",
+    "__gia_thieu_n129__": "f",
+}
 
 
 def _in_ban_kinh_con():
     """Cửa tiến trình con của N126: đo bán kính các đột biến được giao, in mỗi kết quả một dòng `BKCON`."""
     i = sys.argv.index("--ban-kinh-con")
     do_o_nen = json.loads(sys.argv[i + 1])
+    ma_thoat = 0
     for ten in sys.argv[i + 2:]:
-        if ten == _TEN_GIA_NHANH:
-            print("BKCON " + json.dumps([ten, [f"  ok  {ten}"], 0], ensure_ascii=False), flush=True)
+        kieu = _GIA_BAT_THUONG.get(ten)
+        if kieu == "f":
+            continue
+        if ten == _TEN_GIA_NHANH or kieu:
+            dong = "BKCON " + json.dumps([ten, [f"  ok  {ten}"], 0], ensure_ascii=False)
+            # (b) và (c) in KÈM một dòng hợp lệ cho chính tên mình: không thế thì chốt (f) "thiếu kết quả"
+            # cũng bắt được, và gỡ chốt (b)/(c) sẽ không làm tự kiểm HỎNG — hai chốt không có răng riêng.
+            if kieu == "b":
+                print(dong[:-1], flush=True)
+            elif kieu == "c":
+                print("BKCON " + json.dumps([ten + "_la", [f"  ok  {ten}"], 0], ensure_ascii=False), flush=True)
+            elif kieu == "e":
+                dong = "BKCON " + json.dumps([ten, [f"  ok  {ten}"], -1], ensure_ascii=False)
+            print(dong, flush=True)
+            if kieu == "d":
+                print(dong, flush=True)
+            if kieu == "a":
+                ma_thoat = 7
             continue
         cac_dong, loi = _ban_kinh_mot(ten, do_o_nen)
         print("BKCON " + json.dumps([ten, cac_dong, loi], ensure_ascii=False), flush=True)
-    sys.exit(0)
+    sys.exit(ma_thoat)
 
 
 def _tu_kiem_song_song(do_o_nen):
     """Số lỗi của phép tự kiểm N126 — chạy TRƯỚC bảng bán kính.
 
-    Ba chốt:
+    Bốn chốt:
       (1) ba đột biến thật đo SONG SONG (2 tiến trình) phải cho ĐÚNG dòng báo, số lỗi và THỨ TỰ như TUẦN TỰ;
       (2) một tên KHÔNG có trong `DOT_BIEN` phải thành dòng `ĐỎ` + 1 lỗi, không biến mất khỏi bảng;
-      (3) N128 S1: số tiến trình `10**9` với hai tên giả phải xong ngay và phóng ĐÚNG hai tiến trình.
+      (3) N128 S1: số tiến trình `10**9` với hai tên giả phải xong ngay và phóng ĐÚNG hai tiến trình;
+      (4) N129: mỗi con giả bất thường (a)…(f) phải thành `ĐỎ` + 1 lỗi, trong khi con BÌNH THƯỜNG chạy cùng lượt
+          vẫn được nhận `ok` đúng thứ tự — chốt hai chiều, để bản vá "từ chối tất cả" cũng HỎNG.
     """
     # BA đột biến cho HAI tiến trình ⇒ một nhóm có hai tên (`[a, c]`, `[b]`): bản ráp theo thứ tự NHÓM
     # thay vì thứ tự GỐC sẽ lệch ở đây. Hai tên cho hai tiến trình thì không phân biệt được hai cách ráp.
@@ -6347,6 +6404,12 @@ def _tu_kiem_song_song(do_o_nen):
     if phong != 2 or giay > 60 or ket[0] != ([f"  ok  {_TEN_GIA_NHANH}"], 0):
         print(f"  ĐỎ  tự kiểm song song (3): 10**9 tiến trình phải kẹp về 2: phóng {phong}, {giay:.1f}s")
         loi += 1
+    for gia, kieu in _GIA_BAT_THUONG.items():
+        ket = _ban_kinh_moi_dot_bien([_TEN_GIA_NHANH, gia], do_o_nen, 2)
+        if (len(ket) != 2 or ket[0] != ([f"  ok  {_TEN_GIA_NHANH}"], 0) or ket[1][1] != 1
+                or not ket[1][0][0].startswith(f"  ĐỎ  {gia}:")):
+            print(f"  ĐỎ  tự kiểm song song (4{kieu}): con bất thường không thành dòng ĐỎ: {ket!r}")
+            loi += 1
     print(f"TỰ KIỂM SONG SONG (N126): {'ĐẠT' if not loi else 'HỎNG'}")
     return loi
 

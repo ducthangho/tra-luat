@@ -1,0 +1,12 @@
+NHÃN: chưa chạy trên cây thật — executor tự áp, tự đo, tự chịu trách nhiệm commit
+--- EVIDENCE.md
++++ EVIDENCE.md
+@@ -8,7 +8,7 @@
+   `bo-chot-utf8`; mở rộng tập đích `doc-ls-tree-khong-z` (4 ca tên) và `bo-chot-ky-tu-dieu-khien` (xuống dòng + DEL) vì
+   hai lần đo đầu LỆCH theo chiều hành vi đúng/tập khai hẹp. Mutant decode `strict` KHÔNG đưa vào: nó chết bằng
+   `UnicodeDecodeError`, tức giết bằng lỗi vô can.
+-- r3: tạo bằng script chép r2 rồi thay đúng 7 đoạn (tiêu đề · hàng `revision` · `thay_the_cho` · `reviewer` · `dong_bang` ·
++- r3: tạo bằng script chép r2 rồi sửa các phần sau (tiêu đề · hàng `revision` · `thay_the_cho` · `reviewer` · `dong_bang` ·
+   câu "Tìm ở master…fetch nhánh" · §0 thêm vòng 5 · §8 mục 2 thay câu chỉ dẫn chạy bằng khối "Bộ đo THI CÔNG").
+   r2 sha256 vẫn `9bc0fe28…`; r3 sha256 `ac7e0129…`, 436 dòng.
+ - Tiêu chí dương của r3 đo trên log thật: dòng cuối `TU_KIEM: 35/35 dat`, 0 `HONG`; dòng cuối `TAT_CA_KHOP`, 27 `DUNG `,

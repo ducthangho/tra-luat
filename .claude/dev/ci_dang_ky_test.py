@@ -761,14 +761,30 @@ def doc_diff(env=os.environ, chay=subprocess.run, kho=ROOT):
     return None if r.returncode else {x for x in r.stdout.decode("utf-8", "surrogateescape").split("\0") if x}
 
 
-def ke_hoach(doi, nhe=NHE):
-    """M1: bộ → (chế độ, lý do). Chỉ bộ có trong `nhe` mới có thể nhẹ, và chỉ khi diff đo được mà không chạm vùng."""
+# #661 M4: CHỈ lượt tuần đặt biến này (ci.yml CẤM qua `loi_env_registry`); đột biến ĐỦ do job mảnh + gom (M5).
+BIEN_MANH, BO_MANH, JOB_MANH, JOB_GOP, SO_MANH = ("CI_DANG_KY_DOT_BIEN_MANH", "ops/nhanh_don_duoc_test.py",
+                                                  "dot-bien-manh", "dot-bien-gop", 4)
+
+
+def doc_bien_manh(env=os.environ):
+    """M4: vắng/rỗng ⇒ None; ĐÚNG `BO_MANH` ⇒ nó; khác ⇒ ValueError (registry ĐỎ trước khi chạy bộ nào)."""
+    raw = env.get(BIEN_MANH) or None
+    if raw not in (None, BO_MANH):
+        raise ValueError(f"{BIEN_MANH}={raw!r} ngoài miền {{vắng, {BO_MANH!r}}}")
+    return raw
+
+
+def ke_hoach(doi, nhe=NHE, manh=None):
+    """M1: bộ → (chế độ, lý do). Chỉ bộ có trong `nhe` mới có thể nhẹ, và chỉ khi diff đo được mà không chạm vùng.
+    #661 M4: `manh` (từ `doc_bien_manh`) ⇒ bộ ấy nhẹ bất kể diff; hai bộ kia không đổi."""
     kh = {}
     for p in nhe:
         vung = {p, p[:-len("_test.py")] + ".py", *VUNG_CHUNG, *VUNG_THEM.get(p, ())}
         cham = None if doi is None else sorted(x for x in doi if _cham_vung(x, vung) or x.startswith(TIEN_TO_THEM.get(p, ())))
         kh[p] = ((DAY_DU, "không đo được diff hoặc sự kiện không phải push/pull_request") if cham is None
                  else (DAY_DU, "diff chạm " + ", ".join(cham)) if cham else (CHE_DO_NHE, "diff không chạm vùng đột biến"))
+    if manh:
+        kh[manh] = (CHE_DO_NHE, "vòng đột biến do job mảnh + gom (ci-dot-bien-du.yml)")
     return kh
 
 
@@ -835,19 +851,45 @@ def loi_workflow_dot_bien_du(data, ci):
     if d.get("permissions") != {"contents": "read"}:
         loi.append(f"permissions phải đúng contents: read: {d.get('permissions')!r}")
     jobs, goc = d.get("jobs") or {}, (((ci or {}).get("jobs") or {}).get("gate-registry") or {})
-    if set(jobs) != {JOB_DU} or not isinstance(jobs[JOB_DU], dict):
-        return loi + [f"phải đúng một job `{JOB_DU}`, thấy {sorted(map(str, jobs))}"]
+    if set(jobs) != {JOB_DU, JOB_MANH, JOB_GOP} or not isinstance(jobs[JOB_DU], dict):
+        return loi + [f"phải đúng ba job {JOB_DU}/{JOB_MANH}/{JOB_GOP}, thấy {sorted(map(str, jobs))}"]
     job = jobs[JOB_DU]
     if set(job) != {"runs-on", "timeout-minutes", "env", "steps"} or job["runs-on"] != "ubuntu-latest":
         loi.append(f"job: khoá {sorted(job)} / runs-on {job.get('runs-on')!r} ngoài danh sách cho phép")
-    loi += [f"job: {k} lệch gate-registry" for k in ("timeout-minutes", "env") if job.get(k) != goc.get(k)]
+    loi += [f"job: {k} lệch gate-registry" for k in ("timeout-minutes", "env") if not _bang_kieu(job.get(k), goc.get(k))]
     ky_vong = json.loads(json.dumps(goc.get("steps") or []))
     reg = [b for b in ky_vong if "python .claude/dev/ci_dang_ky_test.py --chay" in _dong_lenh(b)]
     if len(reg) != 1:
         return loi + [f"gate-registry của ci.yml có {len(reg)} bước registry, cần đúng một"]
-    reg[0]["env"] = {BIEN_WORKERS: "2"}
-    return loi + ([] if job.get("steps") == ky_vong else ["bước lệch gate-registry của ci.yml (env registry chỉ được "
-                                                          f"{{{BIEN_WORKERS}: '2'}})"])
+    reg[0]["env"] = {BIEN_WORKERS: "2", BIEN_MANH: BO_MANH}
+    loi += [] if _bang_kieu(job.get("steps"), ky_vong) else [f"bước lệch gate-registry của ci.yml (env registry chỉ được {reg[0]['env']})"]
+    return loi + [f"job {j} lệch hình GHIM (#661 M5)" for j, v in zip((JOB_MANH, JOB_GOP), _job_manh_gop(goc)) if not _bang_kieu(jobs[j], v)]
+
+
+def _bang_kieu(a, b):
+    """`==` có xét KIỂU ở mọi tầng: `False == 0`, `90.0 == 90` làm matrix/số sai kiểu lọt (Codex #661 lượt 1 F01)."""
+    if type(a) is not type(b):
+        return False
+    if isinstance(a, dict):
+        return a.keys() == b.keys() and all(_bang_kieu(a[k], b[k]) for k in a)
+    return len(a) == len(b) and all(map(_bang_kieu, a, b)) if isinstance(a, list) else a == b
+
+
+def _job_manh_gop(goc):
+    """#661 M5: hai job GHIM trọn; bước python + `env` TRÍCH từ `gate-registry`; matrix và N cùng từ `SO_MANH`."""
+    dau = [{"uses": "actions/checkout@v4"}] + json.loads(json.dumps((goc.get("steps") or [])[2:3]))
+    env, m = goc.get("env"), "${{ matrix.manh }}"
+    manh = {"runs-on": "ubuntu-latest", "timeout-minutes": 30, "env": env,
+            "strategy": {"fail-fast": False, "matrix": {"manh": list(range(SO_MANH))}},
+            "steps": dau + [{"name": "đột biến một mảnh", "run": "python ops/nhanh_don_duoc_test.py",
+                             "env": {"NHANH_DON_DUOC_MANH": f"{m}/{SO_MANH}", "NHANH_DON_DUOC_MANH_RA": f"manh/manh-{m}.json"}},
+                            {"uses": "actions/upload-artifact@v4", "with": {
+                                "name": f"dot-bien-manh-{m}", "path": f"manh/manh-{m}.json", "if-no-files-found": "error"}}]}
+    gop = {"needs": JOB_MANH, "runs-on": "ubuntu-latest", "timeout-minutes": 10,
+           "steps": dau + [{"uses": "actions/download-artifact@v4",
+                            "with": {"pattern": "dot-bien-manh-*", "path": "manh", "merge-multiple": True}},
+                           {"name": "gom mảnh", "run": "python ops/nhanh_don_duoc_test.py --gop manh"}]}
+    return manh, gop
 
 
 def doc_so_worker(env=os.environ, la_windows=None):
@@ -1869,6 +1911,33 @@ def phan_chung():
                    ("name-bieu-thuc", lambda w, j: w.update(name="${{ broken() }}")),
                    ("job-id-la", lambda w, j: w.update(jobs={"1invalid": w["jobs"].pop(JOB_DU)}))):
         _them("p651-M4-" + _t + "-do", _hong_du(_f))
+
+    def _j(w, ten): return w["jobs"][ten]
+    for _t, _f in (("thieu-gop", lambda w, j: w["jobs"].pop(JOB_GOP)), ("gop-khong-needs", lambda w, j: _j(w, JOB_GOP).pop("needs")),
+                   ("matrix-3", lambda w, j: _j(w, JOB_MANH)["strategy"]["matrix"].update(manh=[0, 1, 2])),
+                   ("manh-sai-N", lambda w, j: _j(w, JOB_MANH)["steps"][2]["env"].update(NHANH_DON_DUOC_MANH="${{ matrix.manh }}/3")),
+                   ("manh-if", lambda w, j: _j(w, JOB_MANH).update({"if": "false"})),
+                   ("manh-continue-on-error", lambda w, j: _j(w, JOB_MANH).update({"continue-on-error": True})),
+                   ("gop-if", lambda w, j: _j(w, JOB_GOP).update({"if": "always()"})),
+                   ("gop-lenh-khac", lambda w, j: _j(w, JOB_GOP)["steps"][-1].update(run="true")),
+                   ("matrix-bool", lambda w, j: _j(w, JOB_MANH)["strategy"]["matrix"].update(manh=[False, True, 2, 3])),
+                   ("matrix-float", lambda w, j: _j(w, JOB_MANH)["strategy"]["matrix"].update(manh=[0.0, 1, 2, 3])),
+                   ("manh-timeout-float", lambda w, j: _j(w, JOB_MANH).update({"timeout-minutes": 30.0})),
+                   ("du-fetch-depth-false", lambda w, j: j["steps"][1]["with"].update({"fetch-depth": False})),
+                   ("du-timeout-float", lambda w, j: j.update({"timeout-minutes": 90.0})),
+                   ("env-reg-thieu-manh", lambda w, j: _buoc_reg(j)["env"].pop(BIEN_MANH)),
+                   ("env-reg-thua", lambda w, j: _buoc_reg(j)["env"].update(X="1"))):
+        _them("p661-M5-" + _t + "-do", _hong_du(_f))
+    _them("p661-M4-ke-hoach", all(ke_hoach(_d, manh=BO_MANH)[_P] == (CHE_DO_NHE, "vòng đột biến do job mảnh + gom (ci-dot-bien-du.yml)")
+                                  and ke_hoach(_d, manh=BO_MANH)[_PTG] == ke_hoach(_d)[_PTG] for _d in (None, set(), {_P})))
+    _them("p661-M4-doc-bien", [doc_bien_manh(e) for e in ({}, {BIEN_MANH: ""}, {BIEN_MANH: BO_MANH})] == [None, None, BO_MANH])
+    for _v in (BO_MANH + " ", "ops/nhanh_don_duoc.py", _PTG):
+        _n = 0
+        with contextlib.suppress(ValueError): _n = doc_bien_manh({BIEN_MANH: _v}); _n = None
+        _them(f"p661-M4-gia-tri-la-do-{_v!r}", _n is not None)
+    _r = subprocess.run([sys.executable, str(pathlib.Path(__file__).resolve()), "--chay"], capture_output=True, text=True,
+                        env=dict(os.environ, **{BIEN_MANH: "ops/x.py", BIEN_WORKERS: "2"}), timeout=120)
+    _them("p661-M4-main-do-truoc-khi-chay", _r.returncode == 2 and "TỔNG: ĐỎ" in _r.stdout and "CI_DANG_KY_KE_HOACH" not in _r.stdout)
     _them("p651-M4-rong-do", bool(loi_workflow_dot_bien_du(None, _wf0)))
     _them("p651-M4-ci-yml-doi-thi-do", bool(loi_workflow_dot_bien_du(_wd0, {"jobs": {}})))
     with tempfile.TemporaryDirectory() as _d:  # Codex lượt 5: YAML THÔ mà `safe_load` làm mất dấu ⇒ dict XANH, actionlint ĐỎ
@@ -1924,6 +1993,7 @@ def phan_chung():
         _them(f"p643-A4-thieu-{_k}", _hong_env(lambda b, w: b["env"].pop(_k)))
         _them(f"p643-A4-lech-{_k}", _hong_env(lambda b, w: b["env"].update({_k: b["env"][_k] + " "})))
     _them("p643-A4-thua-khoa", _hong_env(lambda b, w: b["env"].update(X="1")))
+    _them("p661-M4-ci-yml-co-bien-manh-do", _hong_env(lambda b, w: b["env"].update({BIEN_MANH: BO_MANH})))
     _them("p643-A4-N-1", _hong_env(lambda b, w: b["env"].update({BIEN_WORKERS: "1"})))
     _them("p643-A4-bo-env", _hong_env(lambda b, w: b.pop("env")))
     _them("p643-A4-hai-buoc-registry", _hong_env(lambda b, w: w["jobs"]["gate"]["steps"].append(dict(b))))
@@ -1942,7 +2012,7 @@ def main():
     ns = ap.parse_args()
     if ns.chay:  # A4: N sai ⇒ ĐỎ TRƯỚC khi chạy bộ nào
         try:
-            so_worker = doc_so_worker()
+            so_worker, manh = doc_so_worker(), doc_bien_manh()
         except ValueError as e:
             print("ĐỎ:", e); print("TỔNG: ĐỎ")
             return 2
@@ -1970,7 +2040,7 @@ def main():
     print(f"RUFF CI: {ruff_chot - len(ruff_loi)}/{ruff_chot} hợp đồng")
     ok = not loi and tren_cay == trong_so and phan_chung()
     if ns.chay:
-        bc, kh = {}, ke_hoach(doc_diff())
+        bc, kh = {}, ke_hoach(doc_diff(), manh=manh)
         for p, (cd, ly) in kh.items(): print(f"CI_DANG_KY_KE_HOACH {p}: {cd} — {ly}")
         ok = chay_moi(so_worker=so_worker, bao_cao=bc, kh=kh,
                       chay_mot=lambda p: _chay_that(p, che_do=kh.get(p, (DAY_DU,))[0])) == 0 and ok

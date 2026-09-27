@@ -9683,6 +9683,19 @@ def _khoa_noi_dung_t191(d):
             if isinstance(F, ast.Name) and F.id == "bo_qua_han" and not dau: r.add(("goc", "Name", ng))
             elif len(dau) == 1 and dau[0] is not F and dau[0] in set(ast.walk(F)): r.add(("goc", _ten_o_t191(F), ng))
     return r
+def _mong_witness_t191(k, d):
+    """F1-L38: bộ ba (+ds, +miễn, +thô) mà WITNESS chạy trên CHÍNH nội dung cuối của dòng `sinh.*` đòi — không nhận bộ ba của bộ
+    sinh. Luật riêng giữ nguyên: chốt dưới phạm vi lồng ⇒ (0, 0, 1) bất kể witness; ô không chạy ⇒ witness PHẢI (False, False)."""
+    p, kh = k.split("."), _khoa_dong_t191(k)
+    ch = (_chay_sinh_t191(d, False), _chay_sinh_t191(d, True))
+    if p[1] == "goc":
+        if kh[1] == "Name": return (0, 1, 1) if ch in ((True, False), (False, True)) else None
+        return (0, _GOC_NGU_CANH_T191[kh[2]][1], _GOC_NGU_CANH_T191[kh[2]][1]) if ch == (True, False) else None
+    if p[1] == "co": return (0, 1, 1) if ch in ((True, False), (False, True)) else None
+    if kh[5]: return (0, 0, 1)
+    if "khong-chay" in p:
+        return None if ch != (False, False) or kh[1:3] not in _KHONG_CHAY_T191 else (0, 1, 1) if kh[4] == "ke-co" else (1, 0, 1)
+    return {(True, True): (1, 0, 1), (True, False): (0, 1, 1)}.get(ch)
 def _khoa_ky_vong_t191():
     """Vũ trụ KHOÁ PHỦ tính ĐỘC LẬP với sổ sách của bộ sinh: ô của kho × bộ bọc; ô cờ (vế phải phép gán) × ngữ cảnh; lớp `expr`[toán tử]
     của siêu dữ liệu `ast` × ngữ cảnh gốc. Mọi khoá phải có dòng được kiểm, hoặc nằm trong bảng miễn đã trải."""
@@ -9806,6 +9819,8 @@ def t191_MOI_chot_cua_kiem_deu_duoc_t190_phu_o_nhanh_DA_DANG():
          f"MA TRẬN SINH: ô không dòng phải ĐÚNG bảng miễn, và mọi lần xuất hiện hỏng đúng lý do đã khai — lệch "
          f"{sorted((o, sorted(v)) for o, v in chua.items() if v != set(md.get(o, '').split('|')))} · thừa {sorted(set(md) - set(chua))}")
     chot(_vu_tru_t191() == ([], [], [], []), f"MA TRẬN SINH: vũ trụ `ast` chưa phủ (lớp, trường, vị trí, toán tử): {_vu_tru_t191()}")
+    sai_w = [(k, tuple(r), m) for k, d, *r in sinh for m in [_mong_witness_t191(k, d)] if tuple(r) != m]
+    chot(not sai_w, f"MA TRẬN SINH: bộ ba trái witness chạy trên CHÍNH nội dung dòng (nhãn, bộ ba, witness đòi) — {sai_w[:3]}")
     hang = _PHAN_LOAI_T191 + sinh
     khoa = [dong[0] for dong in hang]
     can = {f"{n}.{k}.{v}.{c}" for n, truc in _TRUC_T191.items() for v, cs in truc.items()
@@ -9815,7 +9830,7 @@ def t191_MOI_chot_cua_kiem_deu_duoc_t190_phu_o_nhanh_DA_DANG():
     chot({x for x in khoa if not x.startswith(rieng)} == can,
          f"MA TRẬN lệch tích trục: thiếu {sorted(can - set(khoa))}, thừa {sorted(set(khoa) - can - {x for x in khoa if x.startswith(rieng)})}")
     for loai, doan, them_ds, them_mien, them_tho in hang:
-        if them_ds + them_mien and not loai.startswith("sinh."):  # dòng `sinh.*`: bộ ba ĐÃ lấy từ witness khi sinh  # witness chạy được: ds ⇒ gọi ở CẢ HAI giá trị cờ; miễn ⇒ gọi hay không PHỤ THUỘC cờ
+        if them_ds + them_mien and not loai.startswith("sinh."):  # dòng `sinh.*`: witness kiểm lại ở `_mong_witness_t191` (F1-L38)  # witness chạy được: ds ⇒ gọi ở CẢ HAI giá trị cờ; miễn ⇒ gọi hay không PHỤ THUỘC cờ
             chay = (_chay_doan_t191(doan, False), _chay_doan_t191(doan, True))
             chot(chay == (True, True) if them_ds else chay[0] != chay[1],
                  f"PHÂN LOẠI {loai}: bộ ba viết tay trái witness chạy được (gọi khi cờ False/True = {chay})")

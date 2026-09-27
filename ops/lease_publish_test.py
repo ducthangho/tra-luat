@@ -9370,6 +9370,10 @@ _PHAN_LOAI_T191 += tuple((f"long.{k}", d, a, b, 1) for k, (d, a, b) in _LONG_T19
 # kiện `(E', _box[-1])[1]` của mọi ngữ cảnh `nhac`. KỲ VỌNG = WITNESS THỰC THI (chốt có được gọi khi cờ False/True); ô dưới phạm vi
 # lồng: (0, 0, 1) và chốt đếm thô của t191 bắt. Ô không dựng nổi witness hợp lệ PHẢI nằm trong `_MIEN_SINH_T191` và máy kiểm MỌI lần
 # xuất hiện của nó đều thất bại đúng lý do; trường không thấy mang biểu thức/câu lệnh phải được phép thử BIÊN DỊCH bác.
+def _phan_tich_duoc_t191(g):  # mẫu theo phiên bản: `type` (3.12), mặc định của tham số kiểu (3.13) — chỉ vào kho nếu Python đang chạy nhận
+    import ast
+    try: return bool(ast.parse(g))
+    except SyntaxError: return False
 _KHO_T191 = (
     "_a = 0 or 0 or 1", "_a = 1 and 1 and 1", "_a = (_q := 1)", "_a = 1 if 1 else 2", "_a = 1 if 0 else 2", "_a = {1: 2, 3: 4, 5: 6}",
     "_a = {1: 2, **{3: 4}, 5: 6}", "_a = {1, 2, 3}", "_a = [1 for _i in 'x' if 1 if 1 if 1 for _j in 'y' if 1 for _k in 'z']",
@@ -9397,7 +9401,11 @@ _KHO_T191 = (
     "@(lambda f: f)\n@(lambda f: f)\n@(lambda f: f)\nasync def _k() -> int:\n    async for _i in _k():\n        pass\n        pass\n        pass\n"
     "    async with _k() as _w, _k() as _v, _k():\n        pass\n        pass\n        pass\n    pass\n_k().close()",
     # quét miền lượt 27 (NESTED_SAU_TANG_1): BoolOp lồng HAI tầng dưới miễn kế thừa
-    "_a = 0 or (1 and (0 or 1))", "_a = 1 and (0 or (1 and 1))")
+    "_a = 0 or (1 and (0 or 1))", "_a = 1 and (0 or (1 and 1))",
+    # kiểu trường từ siêu dữ liệu `ast` (docstring): `else` của `async for`, `else`/`finally` của `try … except*`
+    "async def _k2():\n    async for _i in _k2():\n        pass\n    else:\n        pass\n        pass\n        pass\n_k2().close()",
+    "try:\n    pass\nexcept* ValueError:\n    pass\nelse:\n    pass\n    pass\n    pass\nfinally:\n    pass\n    pass\n    pass") + tuple(
+    g for g in ("type _Ta[_T: int, *_Ts, **_P] = list[_T]", "type _Tb[_U = int, *_Us = (), **_Q = []] = int") if _phan_tich_duoc_t191(g))
 _CHUOI_SS_T191 = {"Eq": "1 == 1 == 1 == 1", "NotEq": "1 != 2 != 3 != 5", "Lt": "1 < 2 < 3 < 5", "LtE": "1 <= 1 <= 2 <= 2",
                   "Gt": "5 > 3 > 2 > 1", "GtE": "5 >= 5 >= 3 >= 3", "In": "1 in (1, 2) in ((1, 2),) in [((1, 2),)]",
                   "NotIn": "1 not in (2,) not in ((3,),) not in [5]", "Is": "_h is _h is _h is _h", "IsNot": "_h is not _box is not _h is not _box"}
@@ -9495,7 +9503,8 @@ _GOC_NGU_CANH_T191 = {"if": ("if F:\n    @\nelse:\n    @", 2), "ifexp": ("(@ if 
                       "case": ("match 1:\n    case _ if F:\n        @", 1)}
 # Ô KHÔNG BAO GIỜ CHẠY mà cú pháp vẫn cho chốt (chú thích biến cục bộ; `yield` ngay trong `kiem()` biến nó thành generator): witness
 # không dựng được, nên đòi FAIL-CLOSE — bộ liệt kê vẫn phải đếm chốt ấy như chốt chạy được (t190 phải phủ ⇒ t191 đỏ, không lọt).
-_KHONG_CHAY_T191 = {("AnnAssign", "annotation"), ("Yield", "value"), ("YieldFrom", "value")}
+_KHONG_CHAY_T191 = {("AnnAssign", "annotation"), ("Yield", "value"), ("YieldFrom", "value"), ("TypeAlias", "value"), ("TypeVar", "bound"),
+                    *((k, "default_value") for k in ("TypeVar", "ParamSpec", "TypeVarTuple"))}  # 3.12+: vế phải `type` và cận/mặc định tính LƯỜI
 def _sinh_goc_t191(dong, co_dong, hong):
     """F2-L31: LỚP GỐC của điều kiện nhắc cờ. Mọi nút biểu thức của kho làm GỐC; một ô con thành `(1 // (not bo_qua_han) and c)`
     — NÉM khi DỰNG gốc lúc cờ True (witness nuốt), giữ giá trị lúc False; ô đầu tiên cho witness (gọi, không gọi) là dòng của
@@ -9544,32 +9553,31 @@ _MIEN_SINH_T191 = {
     **{(l, "NamedExpr", "target", "don"): "SyntaxError" for l in ("chot", "co")},  # cờ ở đích walrus: dòng `dac.dich-walrus`
     **{("chot", "MatchMapping", "keys", v): "SyntaxError" for v in ("dau", "giua", "cuoi")},
     ("chot", "MatchClass", "cls", "don"): "SyntaxError", ("chot", "MatchValue", "value", "don"): "SyntaxError",
+    **({("chot", "TypeAlias", "name", "don"): "SyntaxError"} if sys.version_info >= (3, 12) else {}),  # tên `type` chỉ nhận định danh
     # GỐC điều kiện (F2-L31): `await` ngoài async và `*`/`:` đứng một mình là lỗi cú pháp; `yield` biến `kiem()` thành generator
     # (không chạy); `Constant` không có con để đặt cờ (không nhắc được cờ); `{…}` dựng lại thành Set.
     **{("goc", k): "SyntaxError" for k in ("Await", "Slice", "Starred")}, ("goc", "FormattedValue"): "SyntaxError|dung-lai-khac-lop",
     **{("goc", k): "witness (False, False)" for k in ("Yield", "YieldFrom")}, ("goc", "Constant"): "khong-o"}
 def _vu_tru_t191():
-    """Phủ VŨ TRỤ đo bằng máy: (lớp cụ thể vắng kho, (lớp, trường) biên dịch được mà kho không có con, trường danh sách thiếu vị trí,
-    toán tử vắng). Phép thử biên dịch: thay trường bằng một `Name` rồi `compile` — bác được thì trường không mang biểu thức."""
+    """Phủ VŨ TRỤ đo bằng máy: (lớp cụ thể vắng kho, (lớp, trường) KHAI kiểu biểu thức/câu lệnh/phần tử khối mà kho không có con,
+    trường danh sách thiếu vị trí, toán tử vắng). Kiểu trường đọc từ SIÊU DỮ LIỆU `ast` — chữ ký trong docstring của lớp, vd
+    `FunctionDef(identifier name, arguments args, stmt* body, …)` — nên đúng theo phiên bản Python đang chạy (3.12: `TypeAlias`)."""
     import ast
-    goc = (ast.stmt, ast.expr, ast.excepthandler, ast.pattern)
+    import re
+    goc = (ast.stmt, ast.expr, ast.excepthandler, ast.pattern) + ((ast.type_param,) if hasattr(ast, "type_param") else ())
     lop = [c for c in vars(ast).values() if isinstance(c, type) and issubclass(c, goc) and c not in goc and c._fields
-           and type(c) is type]  # `type(c) is type`: bỏ bí danh cũ Num/Str/… + [ast.comprehension, ast.arguments, ast.keyword, ast.withitem, ast.match_case, ast.arg, ast.alias]
+           and type(c) is type] + [ast.comprehension, ast.arguments, ast.keyword, ast.withitem, ast.match_case, ast.arg, ast.alias]
+    kieu = lambda c: {t: k for k, t in re.findall(r"(\w+)[*?]? (\w+)", (c.__doc__ or "").split("(", 1)[-1])}
+    mang = {"expr", "stmt", "keyword", "comprehension", "withitem", "excepthandler", "match_case"}
     kho = _KHO_T191 + tuple(_kho_toan_tu_t191())
     mau, thay, ten = {}, {}, set()
     for g in kho:
         for n, f, vt, _k, _c in _o_sinh_t191(ast.parse(g)):
             thay.setdefault((type(n), f), set()).add(vt); ten.add(_ten_o_t191(n))
         for n in ast.walk(ast.parse(g)): mau.setdefault(type(n), g)
-    vang, bd = [c.__name__ for c in lop if c not in mau], []
-    for c in lop:
-        for f in (c._fields if c in mau else ()):
-            if (c, f) in thay: continue
-            cay = ast.parse(mau[c]); n = next(x for x in ast.walk(cay) if type(x) is c); cu = getattr(n, f)
-            if isinstance(cu, (list, ast.AST)) or cu is None:
-                setattr(n, f, [ast.Name("_x", ast.Load())] if isinstance(cu, list) else ast.Name("_x", ast.Load()))
-                try: compile(ast.fix_missing_locations(cay), "t191", "exec"); bd.append(f"{c.__name__}.{f}")
-                except (SyntaxError, ValueError, TypeError): pass
+    vang = [c.__name__ for c in lop if c not in mau]
+    bd = [f"{c.__name__}.{f}" for c in lop if c in mau for f, k in kieu(c).items() if k in mang and (c, f) not in thay]
+    assert all(set(kieu(c)) == set(c._fields) for c in lop), "chữ ký docstring lệch `_fields`"
     vt = [f"{c.__name__}.{f}" for (c, f), v in thay.items() if c is not ast.Module and v != {"don"} and v != {"dau", "giua", "cuoi"}]
     op = [f"{n}[{o.__name__}]" for n, b in (("BinOp", ast.operator), ("AugAssign", ast.operator), ("UnaryOp", ast.unaryop),
           ("Compare", ast.cmpop), ("BoolOp", ast.boolop)) for o in b.__subclasses__() if f"{n}[{o.__name__}]" not in ten]

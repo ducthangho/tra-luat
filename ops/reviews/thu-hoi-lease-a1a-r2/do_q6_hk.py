@@ -55,6 +55,12 @@ def dan_xuat(goc: Path, moc: str, clock: str, lp) -> dict:
         if any(ord(c) < 0x20 or ord(c) == 0x7F for c in duong):
             vi_pham.append((duong, "ten-tep-co-ky-tu-dieu-khien"))
             continue
+        # Byte không phải UTF-8 về đây dưới dạng surrogate (surrogateescape); không chốt thì
+        # một byte lạ SAU đuôi `.yaml` làm tệp lọt ra ngoai_mien im lặng (lượt 8, mutant sống).
+        if any(0xDC80 <= ord(c) <= 0xDCFF for c in duong):
+            vi_pham.append((duong.encode("utf-8", "surrogateescape").decode("utf-8", "backslashreplace"),
+                            "ten-tep-khong-phai-utf8"))
+            continue
         if loai != "blob" or not duong.endswith((".yaml", ".yml")):
             ngoai_mien.append(duong)
             continue
@@ -221,6 +227,10 @@ def tu_kiem(goc: Path) -> int:
         # Hậu kiểm connector #652 (P2): tên có tab/xuống dòng không được lọt ra ngoai_mien im lặng.
         "ten-co-tab": ({**sach, "bad\tname.yaml": _lease("bad", SONG)}, 3, [["x", "y"]]),
         "ten-xuong-dong-sau-duoi": ({**sach, "z.yaml\n": _lease("z", SONG)}, 3, [["x", "y"]]),
+        # Lượt 8: nhánh DEL và nhánh byte không-UTF-8 mỗi nhánh một ca riêng (ký tự đặt SAU đuôi
+        # để chốt so tên không che được).
+        "ten-DEL-sau-duoi": ({**sach, "z.yaml\x7f": _lease("z", SONG)}, 3, [["x", "y"]]),
+        "ten-byte-sau-duoi": ({**sach, "z.yaml\udcff": _lease("z", SONG)}, 3, [["x", "y"]]),
     }
     hong = 0
     with tempfile.TemporaryDirectory() as t:

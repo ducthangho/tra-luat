@@ -20,7 +20,9 @@ DUNG KHOP tu-choi-nam-bien: rc=1 do=['han-bien-duoi-hop-le', 'han-bien-tren-hop-
 DUNG KHOP bo-qua-im-lang-tep-han-bien: rc=1 do=['han-bien-duoi-hop-le', 'han-bien-tren-hop-le'] khai=['han-bien-duoi-hop-le', 'han-bien-tren-hop-le']
 DUNG KHOP bo-rieng-chot-thu-muc-con: rc=0 do=[] khai=[]
 DUNG KHOP bo-mien-ca-ba-cho: rc=1 do=['bia-gia-tri-ngoai-mien', 'id-ngoai-mien-cu', 'id-ngoai-mien-don', 'id-ngoai-mien-moi', 'thay-phan-tu-ngoai-mien'] khai=['bia-gia-tri-ngoai-mien', 'id-ngoai-mien-cu', 'id-ngoai-mien-don', 'id-ngoai-mien-moi', 'thay-phan-tu-ngoai-mien']
-DUNG KHOP doc-ls-tree-khong-z: rc=1 do=['ten-co-tab', 'ten-xuong-dong-sau-duoi'] khai=['ten-co-tab', 'ten-xuong-dong-sau-duoi']
-DUNG KHOP bo-chot-ky-tu-dieu-khien: rc=1 do=['ten-xuong-dong-sau-duoi'] khai=['ten-xuong-dong-sau-duoi']
+DUNG KHOP doc-ls-tree-khong-z: rc=1 do=['ten-DEL-sau-duoi', 'ten-byte-sau-duoi', 'ten-co-tab', 'ten-xuong-dong-sau-duoi'] khai=['ten-DEL-sau-duoi', 'ten-byte-sau-duoi', 'ten-co-tab', 'ten-xuong-dong-sau-duoi']
+DUNG KHOP bo-chot-ky-tu-dieu-khien: rc=1 do=['ten-DEL-sau-duoi', 'ten-xuong-dong-sau-duoi'] khai=['ten-DEL-sau-duoi', 'ten-xuong-dong-sau-duoi']
+DUNG KHOP bo-rieng-DEL: rc=1 do=['ten-DEL-sau-duoi'] khai=['ten-DEL-sau-duoi']
+DUNG KHOP bo-chot-utf8: rc=1 do=['ten-byte-sau-duoi'] khai=['ten-byte-sau-duoi']
 DUNG LECH chet-im-lang-rc2: rc=2 do=[] khai=[] mong=LECH
 TAT_CA_KHOP

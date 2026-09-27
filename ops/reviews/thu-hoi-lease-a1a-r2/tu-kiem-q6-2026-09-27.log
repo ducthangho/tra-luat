@@ -30,5 +30,7 @@ DAT  han-bien-tren-hop-le: rc=0 (mong 0) giu=[['x', 'y']] vi_pham=[]
 DAT  han-bien-duoi-hop-le: rc=0 (mong 0) giu=[] vi_pham=[]
 DAT  ten-co-tab: rc=3 (mong 3) giu=[['x', 'y']] vi_pham=[('ops/leases/bad\tname.yaml', 'ten-tep-co-ky-tu-dieu-khien')]
 DAT  ten-xuong-dong-sau-duoi: rc=3 (mong 3) giu=[['x', 'y']] vi_pham=[('ops/leases/z.yaml\n', 'ten-tep-co-ky-tu-dieu-khien')]
+DAT  ten-DEL-sau-duoi: rc=3 (mong 3) giu=[['x', 'y']] vi_pham=[('ops/leases/z.yaml\x7f', 'ten-tep-co-ky-tu-dieu-khien')]
+DAT  ten-byte-sau-duoi: rc=3 (mong 3) giu=[['x', 'y']] vi_pham=[('ops/leases/z.yaml\\xff', 'ten-tep-khong-phai-utf8')]
 DAT  cay-sau-khong-doi-cay-moc: giu=[['x', 'y']]
-TU_KIEM: 33/33 dat
+TU_KIEM: 35/35 dat

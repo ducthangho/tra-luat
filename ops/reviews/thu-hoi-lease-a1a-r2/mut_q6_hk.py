@@ -47,9 +47,12 @@ for rc,hong,err,dich,mong in [(0,set(),"",set(),True),(1,{"a"},"",{"a"},True),
         (1,set(),"",set(),False),(1,{"a"},"Traceback (most recent call last)",{"a"},False)]:
     assert phan_hang(rc,hong,err,dich)==mong,(rc,hong,err,dich,mong)
 KHONG_Z=('git("ls-tree", "-r", "-z", moc, "--", "ops/leases").split("\\0")','git("ls-tree", "-r", moc, "--", "ops/leases").splitlines()')
-mut["doc-ls-tree-khong-z"]=([KHONG_Z],{"ten-co-tab","ten-xuong-dong-sau-duoi"})
-# Chot ky tu dieu khien: ten co tab van bi chot ten che (lease_id "bad" != "bad\tname"), nen go rieng no chi lo ca xuong-dong-sau-duoi.
-mut["bo-chot-ky-tu-dieu-khien"]=([('        if any(ord(c) < 0x20 or ord(c) == 0x7F for c in duong):\n','        if False:\n')],{"ten-xuong-dong-sau-duoi"})
+# Khong -z thi git trich dan MOI ten co byte dieu khien/khong-UTF-8 => ca bon ca ten deu lot ra ngoai_mien.
+mut["doc-ls-tree-khong-z"]=([KHONG_Z],{"ten-co-tab","ten-xuong-dong-sau-duoi","ten-DEL-sau-duoi","ten-byte-sau-duoi"})
+# Chot ky tu dieu khien: ten co tab van bi chot ten che (lease_id "bad" != "bad\tname"), nen go no chi lo hai ca ky tu dieu khien dat SAU duoi (xuong dong, DEL).
+mut["bo-chot-ky-tu-dieu-khien"]=([('        if any(ord(c) < 0x20 or ord(c) == 0x7F for c in duong):\n','        if False:\n')],{"ten-xuong-dong-sau-duoi","ten-DEL-sau-duoi"})
+mut["bo-rieng-DEL"]=([(' or ord(c) == 0x7F for c in duong','  for c in duong')],{"ten-DEL-sau-duoi"})
+mut["bo-chot-utf8"]=([('        if any(0xDC80 <= ord(c) <= 0xDCFF for c in duong):\n','        if False:\n')],{"ten-byte-sau-duoi"})
 # Doi chung cho chot rc: chet som bang rc 2, khong Traceback, khong dong HONG nao. Phai ra LECH.
 mut["chet-im-lang-rc2"]=([('    lp = _nap_lp(goc)\n','    lp = _nap_lp(goc)\n    sys.exit(2)\n')],set(),"LECH")
 ok_all=True

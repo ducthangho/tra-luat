@@ -23,8 +23,8 @@ review, nên phải chờ nó xong rồi mới merge.
 | C2 | P1 | `luot7-VERDICT.md` | `reviewed_sha 7fc28680` ≠ head `d71f77ec` (connector gọi là `f1dec864`) | **ĐÃ CHẤP NHẬN** trong human audit (#652 `5851587276`: *"neo_commit chi them hien vat review luot 7"*). Lượt 8 neo đúng head chứa nó (mục L8) | `d71f77ec^{tree}` = `45e611fa…`, `7fc28680^{tree}` = `15c0240b…`, khớp mô tả của connector. `f1dec864` **không** có trong kho (`git cat-file -t` lỗi); nhiều khả năng là commit merge tổng hợp của connector. Blob đặc tả bằng nhau ở cả hai commit |
 | C3 | P1 | `luot7-VERDICT.md` | verdict không khai `execution_surface` / `transport` | **BỔ SUNG** ở bảng S dưới, lấy từ `run.json` của launcher. **Không** sửa verdict: đó là hiện vật của reviewer | bảng S |
 | C4 | P1 | `luot7-PROMPT.md` | `origin` của checkout reviewer là bare mirror cục bộ | **ĐÚNG, và rộng hơn connector nói**: cả **bảy** lượt đều vậy. Chữa bằng lượt 8 với `origin` thật (mục L8) | bảng S, cột `origin cay-kho` |
-| C5 | P2 | `do_q6.py` | không dùng `ls-tree -z` ⇒ tên có tab/xuống dòng lọt ra `ngoai_mien` im lặng | **SỬA** trong `do_q6_hk.py` (xem "Vì sao tệp mới") | tự kiểm **33/33** (thêm `ten-co-tab`, `ten-xuong-dong-sau-duoi`); kết quả thật trên cây mốc **không đổi** |
-| C6 | P2 | `mut_q6.py` | bỏ qua mã thoát ⇒ mutant chết không `Traceback` được tính KHOP | **SỬA** trong `mut_q6_hk.py` | ma trận **25/25 DUNG**; phản chứng: gỡ chốt rc ⇒ `chet-im-lang-rc2` thành `SAI KHOP` ⇒ `CO_LECH` |
+| C5 | P2 | `do_q6.py` | không dùng `ls-tree -z` ⇒ tên có tab/xuống dòng lọt ra `ngoai_mien` im lặng | **SỬA** trong `do_q6_hk.py` (xem "Vì sao tệp mới") | tự kiểm **35/35** (thêm `ten-co-tab`, `ten-xuong-dong-sau-duoi`; lượt 8 thêm `ten-DEL-sau-duoi`, `ten-byte-sau-duoi`); kết quả thật trên cây mốc **không đổi** |
+| C6 | P2 | `mut_q6.py` | bỏ qua mã thoát ⇒ mutant chết không `Traceback` được tính KHOP | **SỬA** trong `mut_q6_hk.py` | ma trận **27/27 DUNG**; phản chứng: gỡ chốt rc ⇒ `chet-im-lang-rc2` thành `SAI KHOP` ⇒ `CO_LECH` |
 
 ## Vì sao tệp mới, không sửa tại chỗ
 
@@ -36,9 +36,9 @@ HINT thì khác: protocol §13 đòi nhãn nằm **trên** patch, nên phải s�
 `luot5-VERDICT.md` và `luot6-VERDICT.md`) vẫn tái lập được: bỏ **3 dòng đầu** (`tail -n +4`) là ra đúng
 byte reviewer sinh ra, và dòng nhãn ghi sẵn băm ấy.
 
-Băm bản vá: `do_q6_hk.py` sha256 `7f9fe4572ba56ce20191877c9626e9004cc7589fd98a991489d6675c6afb7beb` ·
-`mut_q6_hk.py` sha256 `81274590080a173255ac3ed8accce74bdfa638bb065d0d5abb634253859de9d9`. Log:
-`tu-kiem-q6-2026-09-27.log` (33/33) · `mut-q6-2026-09-27.log` (25/25, `TAT_CA_KHOP`). Phản chứng chốt rc
+Băm bản vá: `do_q6_hk.py` sha256 `0ec537e48b34631eee1e6161be2419bb7ba861a5a446b89afd4937672a974967` ·
+`mut_q6_hk.py` sha256 `c4f04f03cf781089ae51faf1e8e63f1d7773bf301d2d61de0919f85a8428bb94`. Log:
+`tu-kiem-q6-2026-09-27.log` (35/35) · `mut-q6-2026-09-27.log` (27/27, `TAT_CA_KHOP`). Phản chứng chốt rc
 chạy trên bản trước khi đổi tên (khác đúng dòng docstring đầu): gỡ dòng `if rc!=(1 if dich else 0)` cùng
 bảy assert tự kiểm ⇒ `SAI  KHOP chet-im-lang-rc2` ⇒ `CO_LECH`.
 
@@ -82,10 +82,23 @@ Mọi lượt: `provider openai_codex` · `execution_surface codex_cli` · `tran
 | 6 | `66f348ca` | 27-09 00:38:38 | 381 | 0 | `635e9a23` | bare mirror cục bộ |
 | 7 | `afa0ef1f` | 27-09 00:49:29 | 495 | 0 | `7fc28680` | bare mirror cục bộ |
 
-Bare mirror dựng bằng `clone --bare --no-local` từ kho làm việc, rồi nạp `refs/remotes/origin/*`. Trước mỗi
-lượt, tập tên nhánh của mirror được so với `git ls-remote --heads origin` (máy chủ thật) và phải lệch **0**,
-không thì dừng. Vậy **tập ref** đã được đối chiếu với máy chủ, nhưng **danh tính remote** trong checkout
-reviewer thì không: `remote get-url origin` trả một đường dẫn cục bộ. Đó đúng là điều C4 nói.
+Bare mirror dựng bằng `clone --bare --no-local` từ kho làm việc, rồi nạp `refs/remotes/origin/*`. Đối chiếu
+**tập tên nhánh** với `git ls-remote --heads origin` (máy chủ thật) **không** đồng đều giữa các lượt. Bản đầu của
+đoạn này viết "trước mỗi lượt … lệch 0, không thì dừng": câu ấy suy từ script dựng **hiện hành**, không từ hồ sơ
+từng lượt, và lượt 8 (F17, P1) bác đúng bằng hồ sơ lượt 1. Theo từng lượt:
+
+| lượt | đối chiếu tập tên với máy chủ | nguồn |
+|---|---|---|
+| 1 | **lệch 1**: mirror 430, máy chủ 429 lúc 15:57Z; thừa `claude/wp523-r15-g17-a6-BAN-TRUNG-LAP-khong-land` (đã xoá trên máy chủ). Lượt vẫn chạy lúc 15:59Z | `luot1-EVIDENCE.md` E7 |
+| 2 | 435/435, `comm -3` rỗng lúc 22:54:33Z, sau khi gỡ nhánh thừa trên | `luot2-EVIDENCE.md` E11 |
+| 3 | 435/435, `comm -3` rỗng lúc 23:23:57Z | `luot3-EVIDENCE.md` dòng 23 |
+| 4 | 437/437, `comm -3` rỗng lúc 23:47:11Z | `luot4-EVIDENCE.md` dòng 16 |
+| 5–7 | **KHÔNG ĐO ĐƯỢC độc lập.** EVIDENCE ba lượt này không ghi phép so. Workspace còn `.mirror-info` (438 head lúc 00:25:51Z · 00:38:37Z · 00:49:28Z); script dựng hiện hành chỉ ghi tệp ấy **sau** chốt lệch = 0, nhưng phiên bản script lúc chạy không được lưu | `.mirror-info` trong workspace, ngoài kho |
+
+Ở **mọi** lượt 1–7, phép so chỉ là so **tên**; OID là OID của cache kho làm việc, không phải readback máy chủ.
+Còn **danh tính remote** trong checkout reviewer thì không được đối chiếu ở lượt nào: `remote get-url origin`
+trả một đường dẫn cục bộ. Đó đúng là điều C4 nói. Lượt 8 là lượt đầu tiên so cả tên **và** OID, và đặt
+`origin` về endpoint thật.
 
 ## L8 — lượt codex 8/10
 
@@ -96,4 +109,16 @@ Trần 10 (#564 `5851241285`); đã dùng 7. Lượt 8 khác bảy lượt trư�
    phiên điều phối chạy ngay trước đó (ghi trong EVIDENCE lượt 8).
 2. Verdict phải khai `execution_surface` và `transport`, và neo `reviewed_sha` vào head của PR tiếp nối.
 
-Kết quả lượt 8 ghi ở `luot8-VERDICT.md`.
+Kết quả lượt 8 ghi ở `luot8-VERDICT.md`: `changes_requested`, **2 P1 · 0 P2 · 0 P3**, 672 giây, `ma_thoat 0`
+(`run.json`: `openai_codex` · `codex_cli` · `machine`; header `stderr.log`: `gpt-6-astra`, effort `high`).
+
+- **F17** (P1, `so-do-khong-khop`): bảng S cũ khai "trước mỗi lượt lệch 0" — hồ sơ lượt 1 bác. **SỬA**: bảng theo
+  từng lượt ở trên. Bản vá **không** dùng `luot8-HINT.patch` (viết lại bằng tay, từ chính hồ sơ E7/E11).
+- **F18** (P1, `q6-thieu-kiem-id-ten`): đặc tả đóng băng vẫn **bắt** executor chạy `do_q6.py` 31 ca và `mut_q6.py`,
+  tức đúng bộ đo đã biết lỗi C5/C6; tên hai bản `_hk` không có trong đặc tả; tiêu chí "có dòng `LECH` thì dừng"
+  (dòng 371) cũng va với đối chứng âm `DUNG LECH chet-im-lang-rc2`. **CHƯA SỬA — cần revision 3**, là quyết định
+  của chủ kho. PR này không sửa đặc tả.
+- Hai mutant lượt 8 ghi là **sống** (gỡ riêng nhánh DEL; decode `strict`): nhánh DEL nay có ca `ten-DEL-sau-duoi` và
+  mutant `bo-rieng-DEL`; byte không-UTF-8 nay có **chốt riêng** (`ten-tep-khong-phai-utf8`), ca `ten-byte-sau-duoi`,
+  mutant `bo-chot-utf8`. Mutant `strict` **không** đưa vào ma trận: nó chết bằng `UnicodeDecodeError`, tức giết
+  bằng lỗi vô can — đúng loại tín dụng giả mà bộ phân hạng từ chối.

@@ -1,0 +1,315 @@
+CASE T1: DAT
+CASE T2: DAT
+CASE T3: DAT
+CASE T4: DAT
+CASE T5: DAT
+CASE T6: DAT
+CASE T7: DAT
+CASE T8: DAT
+MUTANT dao-chieu-to-tien | T1 | 1/1
+MUTANT bo-kiem-commit-rieng | T2 | 1/1
+MUTANT noi-B-thanh-mot-commit | T3 | 1/1
+MUTANT loi-thanh-khong-commit-rieng | T4 | 1/1
+MUTANT in-ca-C | T3,T5,T8 | 3/3
+MUTANT bo-loai-mac-dinh | T6 | 1/1
+MUTANT xoa-khai-gioi-han | T7 | 1/1
+MUTANT bo-chan-fetch-loi | T8 | 1/1
+MUTANT go-nhanh-kho-nong | T5 | 1/1
+MUTANT dao-khop-base-remote | T1,T3,T6 | 3/3
+TU KIEM r542: DAT
+TU KIEM r539: DAT
+TU KIEM r540: DAT
+TU KIEM r541: DAT
+TU KIEM r501: DAT
+TU KIEM r502: DAT
+TU KIEM r503: DAT
+TU KIEM r504: DAT
+TU KIEM r505: DAT
+TU KIEM r506: DAT
+TU KIEM r507: DAT
+TU KIEM r508: DAT
+TU KIEM r509: DAT
+TU KIEM r510: DAT
+TU KIEM r511: DAT
+TU KIEM r512: DAT
+TU KIEM r513: DAT
+TU KIEM r514: DAT
+TU KIEM r515: DAT
+TU KIEM r516: DAT
+TU KIEM r517: DAT
+TU KIEM r518: DAT
+TU KIEM r519: DAT
+TU KIEM r520: DAT
+TU KIEM r521: DAT
+TU KIEM r522: DAT
+TU KIEM r523: DAT
+TU KIEM r524: DAT
+TU KIEM r525: DAT
+TU KIEM r526: DAT
+TU KIEM r527: DAT
+TU KIEM r528: DAT
+TU KIEM r529: DAT
+TU KIEM r530: DAT
+TU KIEM r531: DAT
+TU KIEM r532: DAT
+TU KIEM r533: DAT
+TU KIEM r534: DAT
+TU KIEM r535: DAT
+TU KIEM r536: DAT
+TU KIEM r537: DAT
+TU KIEM r538: DAT
+TU KIEM r543: DAT
+TU KIEM r544: DAT
+TU KIEM r545: DAT
+TU KIEM r546: DAT
+TU KIEM r547: DAT
+TU KIEM r548: DAT
+TU KIEM r549: DAT
+TU KIEM r550: DAT
+TU KIEM r551: DAT
+TU KIEM r552: DAT
+TU KIEM: 52/52
+DOT BIEN TU KIEM tk-inherit-outer-proof | r539 | 1/1
+DOT BIEN TU KIEM tk-proof-decode-escape | r539 | 1/1
+DOT BIEN TU KIEM tk-unbounded-number | r539,r540 | 2/2
+DOT BIEN TU KIEM tk-json-recursion-escape | r539 | 1/1
+DOT BIEN TU KIEM tk-diagnostic-prefix-erasure | r542 | 1/1
+DOT BIEN TU KIEM tk-proof-malformed | r525,r530,r532,r539,r540 | 5/5
+DOT BIEN TU KIEM tk-proof-nonce | r539,r540 | 2/2
+DOT BIEN TU KIEM tk-proof-cases | r539,r540 | 2/2
+DOT BIEN TU KIEM tk-summary-count | r540 | 1/1
+DOT BIEN TU KIEM tk-summary-total | r540 | 1/1
+DOT BIEN TU KIEM tk-summary-diagnostics | r540 | 1/1
+DOT BIEN TU KIEM tk-duplicate-diagnostic | r540 | 1/1
+DOT BIEN TU KIEM tk-unknown-diagnostic | r540 | 1/1
+DOT BIEN TU KIEM tk-always-unmeasurable | r516,r525,r530,r539,r540,r542 | 6/6
+DOT BIEN TU KIEM tk-main-ignore-unmeasurable | r541 | 1/1
+DOT BIEN TU KIEM bo-phan-biet-lop-ngoai-le | r501,r504,r518 | 3/3
+DOT BIEN TU KIEM cap-lop-chot-cho-assert-ha-tang | r502 | 1/1
+DOT BIEN TU KIEM bo-so-tap-ca-do-voi-dich | r503,r504,r505,r512,r515,r521 | 6/6
+DOT BIEN TU KIEM bo-tran-chay-lai | r505,r509,r517,r520,r521,r522 | 6/6
+DOT BIEN TU KIEM go-tat-ky-o-kho-mutant | r506 | 1/1
+DOT BIEN TU KIEM bo-kiem-ban-ghi-trung | r507,r511 | 2/2
+DOT BIEN TU KIEM bo-so-dau-phien | r508,r509,r528,r543 | 4/4
+DOT BIEN TU KIEM dau-phien-thanh-moc-giay | r508,r509 | 2/2
+DOT BIEN TU KIEM bo-doi-ban-ghi-dong-luot | r509,r510,r538 | 3/3
+DOT BIEN TU KIEM khung-lay-ten-ca-tu-doi-so | r511 | 1/1
+DOT BIEN TU KIEM cham-doc-stdout-vo-dieu-kien | r512 | 1/1
+DOT BIEN TU KIEM cham-thu-hoi-giet-vi-stdout | r512 | 1/1
+DOT BIEN TU KIEM cham-doc-stdout-khi-rc-mot | r505,r512,r520,r521,r522,r523 | 6/6
+DOT BIEN TU KIEM runner-bat-assertion-tran | r501 | 1/1
+DOT BIEN TU KIEM src-tat-ky-khong-chay | r506 | 1/1
+DOT BIEN TU KIEM zero-entropy-bo-dem | r509 | 1/1
+DOT BIEN TU KIEM in-sai-so-hang | r513 | 1/1
+DOT BIEN TU KIEM mo-cong-tong | r513 | 1/1
+DOT BIEN TU KIEM mo-cong-nhom-bat-buoc | r513 | 1/1
+DOT BIEN TU KIEM mo-cong-cuoi | r513 | 1/1
+DOT BIEN TU KIEM cong-bu-theo-lan-thu | r514 | 1/1
+DOT BIEN TU KIEM cong-giet-theo-so-lan | r514 | 1/1
+DOT BIEN TU KIEM cong-khong-giet-theo-so-lan | r514 | 1/1
+DOT BIEN TU KIEM doi-cheo-khong-giet-va-khong-do | r514 | 1/1
+DOT BIEN TU KIEM gop-khong-do-vao-khong-giet | r514 | 1/1
+DOT BIEN TU KIEM bo-so-mutant | r515 | 1/1
+DOT BIEN TU KIEM bo-so-lan-thu | r515 | 1/1
+DOT BIEN TU KIEM ban-sau-ghi-de-ban-dong-luot | r517 | 1/1
+DOT BIEN TU KIEM bo-tach-ca-voi-dong-luot | r517 | 1/1
+DOT BIEN TU KIEM ep-kieu-dau-dong-luot | r517 | 1/1
+DOT BIEN TU KIEM bo-xac-thuc-nhan | r517 | 1/1
+DOT BIEN TU KIEM bo-xac-thuc-kieu-ten-ca | r517 | 1/1
+DOT BIEN TU KIEM bo-xac-thuc-object | r517 | 1/1
+DOT BIEN TU KIEM nhan-rc-bool | r517 | 1/1
+DOT BIEN TU KIEM doc-tach-dong-bang-splitlines | r518 | 1/1
+DOT BIEN TU KIEM bo-xac-thuc-dich-rong | r519,r521,r538 | 3/3
+DOT BIEN TU KIEM bo-xac-thuc-ten-dich-la | r519 | 1/1
+DOT BIEN TU KIEM bo-vat-hoa-dich-o-doc-kenh | r521 | 1/1
+DOT BIEN TU KIEM chan-doan-chi-lay-ten-ca | r524,r530,r531,r534,r536,r537 | 6/6
+DOT BIEN TU KIEM chan-doan-dung-o-dong-dau | r524,r531,r533,r535,r536,r537,r538,r542 | 8/8
+DOT BIEN TU KIEM chan-doan-cat-lang-khong-khai | r524,r525,r531,r534,r536 | 5/5
+DOT BIEN TU KIEM chan-doan-bo-stderr-o-ca-suy-bien | r525 | 1/1
+DOT BIEN TU KIEM chan-doan-xoa-phan-biet-P1-P2 | r525,r532,r542 | 3/3
+DOT BIEN TU KIEM chan-doan-bo-raw-o-docstring-khoi-chan-doan | r526 | 1/1
+DOT BIEN TU KIEM chan-doan-r526-doc-hang-sach-thay-vi-tep-that | r526 | 1/1
+DOT BIEN TU KIEM chan-doan-noi-tran-ma-khong-doi-huong-cat | r525,r536 | 2/2
+DOT BIEN TU KIEM chan-doan-quay-ve-lstrip-tap-ky-tu | r537 | 1/1
+DOT BIEN TU KIEM chan-doan-lat-khai-bo-dong-trang | r537 | 1/1
+DOT BIEN TU KIEM chan-doan-lat-khai-bo-khoang-trang-tung-dong | r537 | 1/1
+DOT BIEN TU KIEM chan-doan-bo-khoang-trang-tung-dong-that | r537 | 1/1
+DOT BIEN TU KIEM chan-doan-nuot-ca-ranh-gioi | r524,r531,r533,r534,r535,r536,r537,r538 | 8/8
+DOT BIEN TU KIEM chan-doan-tra-ranh-gioi-ve-ban-rong | r531,r533,r535,r538,r542 | 5/5
+DOT BIEN TU KIEM chan-doan-ranh-gioi-noi-long-ve-tien-to-tran | r531,r533,r535,r538 | 4/4
+DOT BIEN TU KIEM chan-doan-noi-long-ho-tu-kiem | r535,r538 | 2/2
+DOT BIEN TU KIEM chan-doan-noi-long-ho-mutant | r538 | 1/1
+DOT BIEN TU KIEM chan-doan-ho-case-t-lay-hinh-fixture-thay-hinh-runner | r535,r538 | 2/2
+DOT BIEN TU KIEM chan-doan-bo-bien-phai-cua-nhan | r538 | 1/1
+DOT BIEN TU KIEM chan-doan-noi-long-duoi-ban-ghi-dot-bien | r538 | 1/1
+DOT BIEN TU KIEM chan-doan-doi-khoang-trang-truoc-tong-ket-dot-bien | r538 | 1/1
+DOT BIEN TU KIEM chan-doan-quen-ho-mutant-tung-muc | r538 | 1/1
+DOT BIEN TU KIEM chan-doan-quen-dong-tong-ket-nhom | r538 | 1/1
+DOT BIEN TU KIEM chan-doan-quen-dong-ti-so-va-loi | r538 | 1/1
+DOT BIEN TU KIEM chan-doan-noi-long-duoi-tin-dung-gia | r538 | 1/1
+DOT BIEN TU KIEM chan-doan-noi-long-duoi-ca-do-thuc-te | r538 | 1/1
+DOT BIEN TU KIEM chan-doan-noi-long-duoi-mutant-that-bai | r538 | 1/1
+DOT BIEN TU KIEM chan-doan-noi-long-duoi-loi-thieu-nhom | r538 | 1/1
+DOT BIEN TU KIEM chan-doan-bo-dau-phan-cach-cua-nhan | r538 | 1/1
+DOT BIEN TU KIEM chan-doan-ly-do-chi-kiem-khong-rong | r538 | 1/1
+DOT BIEN TU KIEM chan-doan-cot-dich-nhan-moi-thu | r538 | 1/1
+DOT BIEN TU KIEM chan-doan-so-nhan-chu-so-unicode-va-dem | r538 | 1/1
+DOT BIEN TU KIEM chan-doan-rc-con-nhan-1-va-am-0 | r538 | 1/1
+DOT BIEN TU KIEM chan-doan-ti-so-hai-so-khong-can-bang | r538 | 1/1
+DOT BIEN TU KIEM chan-doan-ten-ngoai-le-chi-ascii | r538 | 1/1
+DOT BIEN TU KIEM chan-doan-lat-loi-khai-dau-rong-hon-ranh | r538 | 1/1
+DOT BIEN TU KIEM chan-doan-lat-khai-dong-ranh-gioi-khong-dem | r533 | 1/1
+DOT BIEN TU KIEM chan-doan-dem-ca-dong-ranh-gioi | r531,r533,r534,r535,r536,r537,r538 | 7/7
+DOT BIEN TU KIEM chan-doan-de-tran-nuot-nhan-bo-qua | r531,r533,r534,r536 | 4/4
+DOT BIEN TU KIEM chan-doan-doc-so-dong-bo-tu-van-ban | r531,r533,r534,r536 | 4/4
+DOT BIEN TU KIEM chan-doan-vut-so-dong-bo-luc-dong-goi | r531,r533,r534,r535,r536,r538 | 6/6
+DOT BIEN TU KIEM chan-doan-bo-dem-phan-bi-bo | r531,r533,r534,r535,r536,r538 | 6/6
+DOT BIEN TU KIEM chan-doan-khai-bo-qua-ca-khi-khong-mat | r531,r533,r534,r535,r536,r538 | 6/6
+DOT BIEN TU KIEM chan-doan-lat-loi-khai-stderr-sau-chot | r532 | 1/1
+DOT BIEN TU KIEM chan-doan-in-them-stderr-khi-da-co-chot | r532 | 1/1
+DOT BIEN TU KIEM chan-doan-tach-dong-lai-nuot-dau-tach-unicode | r529 | 1/1
+DOT BIEN TU KIEM chan-doan-bo-mot-ky-tu-khoi-danh-sach-tach-dong | r529 | 1/1
+DOT BIEN TU KIEM chan-doan-bo-chuyen-tiep-o-nhanh-do-khac | r530,r542 | 2/2
+DOT BIEN TU KIEM chan-doan-bo-chuyen-tiep-o-nhanh-rc-khac-1 | r530 | 1/1
+DOT BIEN TU KIEM chan-doan-r526-doc-duong-hai-bang-hang-sach | r526 | 1/1
+DOT BIEN TU KIEM dau-phien-can-tran-ma-lang-le-tra-cap-trung | r527 | 1/1
+DOT BIEN TU KIEM dau-phien-bo-vong-rut-lai | r527,r528 | 2/2
+DOT BIEN TU KIEM dau-phien-r508-khong-di-qua-bo-tien-de | r528 | 1/1
+DOT BIEN TU KIEM dau-phien-ha-tran-xuong-khong | r508,r527,r528,r543 | 4/4
+DOT BIEN TU KIEM bo-chuan-hoa-ban-sao | r523 | 1/1
+DOT BIEN TU KIEM bo-vat-hoa-dich-o-chay-dot-bien | r521 | 1/1
+DOT BIEN TU KIEM bo-vat-hoa-dich-o-chay-mot-mutant | r521 | 1/1
+DOT BIEN TU KIEM hep-lai-loi-phong-chi-oserror | r522 | 1/1
+DOT BIEN TU KIEM dem-dich-ke-ca-trung | r519 | 1/1
+DOT BIEN TU KIEM bo-xoa-co-chi-tu-kiem | r519 | 1/1
+DOT BIEN TU KIEM bo-tu-choi-dot-bien-noop | r519 | 1/1
+DOT BIEN TU KIEM bo-bat-loi-phong-con | r520,r522,r545 | 3/3
+DOT BIEN TU KIEM bo-vo-fail-close | r517,r545 | 2/2
+DOT BIEN TU KIEM bo-so-rc-tien-trinh | r515 | 1/1
+DOT BIEN TU KIEM bo-so-rc-khi-child-khong | r515 | 1/1
+DOT BIEN TU KIEM run-nem-tin-hieu-chot | r501 | 1/1
+DOT BIEN TU KIEM nap-boc-lop-dong-ten | r502 | 1/1
+DOT BIEN TU KIEM archive-boc-lop-dong-ten | r502 | 1/1
+DOT BIEN TU KIEM nap-boc-lop-chot | r502 | 1/1
+DOT BIEN TU KIEM archive-boc-lop-chot | r502 | 1/1
+DOT BIEN TU KIEM dung-chi-khi-giet | r505,r509 | 2/2
+DOT BIEN TU KIEM chuan-hoa-lan-hai-thanh-giet | r505 | 1/1
+DOT BIEN TU KIEM dung-chi-khi-khong-giet | r505,r520,r522,r523 | 4/4
+DOT BIEN TU KIEM entropy-giu-mot-byte | r509 | 1/1
+DOT BIEN TU KIEM entropy-nen-bang-modulo | r509 | 1/1
+DOT BIEN TU KIEM entropy-chi-giu-bit-cao | r509 | 1/1
+DOT BIEN TU KIEM entropy-sap-xep-byte | r509 | 1/1
+DOT BIEN TU KIEM entropy-bo-bit-cao-byte-giua | r509 | 1/1
+DOT BIEN TU KIEM cache-dau-phien-theo-dinh-danh | r509 | 1/1
+DOT BIEN TU KIEM cong-theo-so-lan | r514 | 1/1
+DOT BIEN TU KIEM mo-cong-tu-dot-bien-hong | r513 | 1/1
+DOT BIEN TU KIEM mo-cong-tu-dot-bien-thieu-giet | r513 | 1/1
+DOT BIEN TU KIEM tu-dot-bien-bo-loc-loi-vo-can | r516,r530,r542 | 3/3
+DOT BIEN TU KIEM tu-dot-bien-chuan-hoa-hon-hop | r516 | 1/1
+DOT BIEN TU KIEM tu-dot-bien-bo-so-rc-con | r516 | 1/1
+DOT BIEN TU KIEM tu-dot-bien-nhan-moi-tap-ca | r516,r525,r532,r539,r542 | 5/5
+DOT BIEN TU KIEM tu-dot-bien-nhan-bao-ham | r516,r539 | 2/2
+DOT BIEN TU KIEM tu-dot-bien-nhan-giao-khac-rong | r516,r539 | 2/2
+DOT BIEN TU KIEM tu-dot-bien-nhan-tap-rong-lam-dich | r516,r525,r539 | 3/3
+DOT BIEN TU KIEM tu-dot-bien-chuan-hoa-rc-khac | r516 | 1/1
+DOT BIEN TU KIEM tu-kiem-gop-hai-lop-ngoai-le | r516,r545 | 2/2
+DOT BIEN TU KIEM tu-kiem-bo-ghi-nhan-loi-vo-can | r516,r542 | 2/2
+DOT BIEN TU KIEM r528-ha-tang-dem-vao-do | r543,r545 | 2/2
+DOT BIEN TU KIEM r528-ha-tang-bat-rong | r543 | 1/1
+DOT BIEN TU KIEM r528-ha-tang-bo-dem-chot-long | r543 | 1/1
+DOT BIEN TU KIEM r528-ha-tang-khong-ra-trang-thai-thu-ba | r543 | 1/1
+DOT BIEN TU KIEM r528-ha-tang-mat-so-lan | r543 | 1/1
+DOT BIEN TU KIEM r528-ha-tang-mat-thong-diep | r543 | 1/1
+DOT BIEN TU KIEM r528-ha-tang-gop-mot-loai | r543 | 1/1
+DOT BIEN TU KIEM stderr-cat-khong-khai | r544 | 1/1
+DOT BIEN TU KIEM stderr-khai-ca-khi-khong-cat | r544 | 1/1
+DOT BIEN TU KIEM stderr-duong-that-bo-khai | r544 | 1/1
+DOT BIEN TU KIEM r508-nhan-moi-kdd | r543 | 1/1
+DOT BIEN TU KIEM r528-ha-tang-mkdir-ngoai-try | r543 | 1/1
+DOT BIEN TU KIEM r528-ha-tang-chi-ba-loai-da-thu | r543,r545 | 2/2
+DOT BIEN TU KIEM stderr-duong-that-khai-ca-khi-ngan | r544 | 1/1
+DOT BIEN TU KIEM ghi-so-doc-kenh | r545 | 1/1
+DOT BIEN TU KIEM ghi-so-doc-kenh-xac-thuc | r545,r546 | 2/2
+DOT BIEN TU KIEM ghi-so-chay-ca | r545 | 1/1
+DOT BIEN TU KIEM ghi-so-phong-mutant | r545 | 1/1
+DOT BIEN TU KIEM ghi-so-helper-r528 | r545 | 1/1
+DOT BIEN TU KIEM ghi-so-bang-chung | r546 | 1/1
+DOT BIEN TU KIEM runner-bo-doi-nhan-dat | r545,r546 | 2/2
+DOT BIEN TU KIEM runner-bo-doi-nhan-chot | r545,r546 | 2/2
+DOT BIEN TU KIEM runner-bo-duyet-chuoi | r545 | 1/1
+DOT BIEN TU KIEM runner-khong-theo-vi-tri | r545,r546,r547 | 3/3
+DOT BIEN TU KIEM tom-tat-mat-so-lan | r545 | 1/1
+DOT BIEN TU KIEM tom-tat-mat-thong-diep | r545,r547 | 2/2
+DOT BIEN TU KIEM ghi-so-bo-duyet-chuoi | r545 | 1/1
+DOT BIEN TU KIEM ghi-so-kho-bare-liet-ke | r545 | 1/1
+DOT BIEN TU KIEM runner-bo-doi-nhan-loi-khac | r546 | 1/1
+DOT BIEN TU KIEM r545-nuot-moi-oserror | r545 | 1/1
+DOT BIEN TU KIEM r545-don-het-so | r545 | 1/1
+DOT BIEN TU KIEM r546-don-het-so | r546 | 1/1
+DOT BIEN TU KIEM khu-trung-toan-so | r545 | 1/1
+DOT BIEN TU KIEM khu-trung-bo-cua-so | r545 | 1/1
+DOT BIEN TU KIEM runner-bo-loc-luc-doc | r547 | 1/1
+DOT BIEN TU KIEM bo-cua-khong-lam-gi | r547 | 1/1
+DOT BIEN TU KIEM bo-cua-xoa-het | r545,r546,r547 | 3/3
+DOT BIEN TU KIEM bo-cua-theo-thong-diep | r545,r546,r547 | 3/3
+DOT BIEN TU KIEM vang-khong-bat | r547 | 1/1
+DOT BIEN TU KIEM vang-khong-dang-ky | r547 | 1/1
+DOT BIEN TU KIEM vang-khong-don | r547 | 1/1
+DOT BIEN TU KIEM bo-mien-tru-vang-tep | r547 | 1/1
+DOT BIEN TU KIEM loc-luc-doc-theo-thong-diep | r547 | 1/1
+DOT BIEN TU KIEM r545-nuot-theo-loai | r545 | 1/1
+DOT BIEN TU KIEM vang-moi-tep | r547 | 1/1
+DOT BIEN TU KIEM r547-thu-moi-tep | r547 | 1/1
+DOT BIEN TU KIEM loc-dang-ky-theo-thong-diep | r547 | 1/1
+DOT BIEN TU KIEM bo-loc-dang-ky | r545,r547 | 2/2
+DOT BIEN TU KIEM git-bao-tri-bo-nap | r548 | 1/1
+DOT BIEN TU KIEM git-bao-tri-ghi-de | r548 | 1/1
+DOT BIEN TU KIEM git-bao-tri-noi-trung | r548 | 1/1
+DOT BIEN TU KIEM git-bao-tri-bo-tham-so | r548 | 1/1
+DOT BIEN TU KIEM git-bao-tri-bo-kho-bare | r548 | 1/1
+DOT BIEN TU KIEM git-bao-tri-gia-tri-dau | r548 | 1/1
+DOT BIEN TU KIEM git-bao-tri-thieu-khoa | r548 | 1/1
+DOT BIEN TU KIEM manh-regex-long | r549 | 1/1
+DOT BIEN TU KIEM manh-fullmatch-thanh-match | r549 | 1/1
+DOT BIEN TU KIEM manh-bo-k-nho-hon-n | r549 | 1/1
+DOT BIEN TU KIEM manh-bo-doi-ra | r549 | 1/1
+DOT BIEN TU KIEM phan-hoach-lech-du | r550,r552 | 2/2
+DOT BIEN TU KIEM phan-hoach-bo-kiem-trung | r550 | 1/1
+DOT BIEN TU KIEM manh-chay-truoc-xac-thuc | r549,r550 | 2/2
+DOT BIEN TU KIEM manh-bo-tu-kiem | r551 | 1/1
+DOT BIEN TU KIEM manh-bo-pop-env | r551 | 1/1
+DOT BIEN TU KIEM manh-vong-tron-bang | r551,r552 | 2/2
+DOT BIEN TU KIEM manh-tu-kiem-tron-bang | r551,r552 | 2/2
+DOT BIEN TU KIEM manh-bo-chay-ca | r551 | 1/1
+DOT BIEN TU KIEM manh-bo-tu-kiem-do | r551 | 1/1
+DOT BIEN TU KIEM manh-bo-so-hang-khong-do | r551 | 1/1
+DOT BIEN TU KIEM manh-in-dong-day-du | r551 | 1/1
+DOT BIEN TU KIEM manh-bam-sai-tep | r551,r552 | 2/2
+DOT BIEN TU KIEM dot-bien-bo-tham-so-muc | r551 | 1/1
+DOT BIEN TU KIEM tu-dot-bien-bo-tham-so-muc | r551 | 1/1
+DOT BIEN TU KIEM gop-bo-qua-json-hong | r552 | 1/1
+DOT BIEN TU KIEM gop-bo-kiem-khoa | r552 | 1/1
+DOT BIEN TU KIEM gop-bo-kiem-phien-ban | r552 | 1/1
+DOT BIEN TU KIEM gop-bo-kiem-so-manh | r552 | 1/1
+DOT BIEN TU KIEM gop-bo-kiem-khoang-n | r552 | 1/1
+DOT BIEN TU KIEM gop-bo-kieu-int-manh | r552 | 1/1
+DOT BIEN TU KIEM gop-bo-kieu-int-so-manh | r552 | 1/1
+DOT BIEN TU KIEM gop-bo-kieu-int-phien-ban | r552 | 1/1
+DOT BIEN TU KIEM gop-bo-kieu-mang | r552 | 1/1
+DOT BIEN TU KIEM gop-bo-kiem-tap-manh | r552 | 1/1
+DOT BIEN TU KIEM gop-bo-kiem-bam | r552 | 1/1
+DOT BIEN TU KIEM gop-bo-bam-tool | r552 | 1/1
+DOT BIEN TU KIEM gop-bo-kiem-thanh-vien | r552 | 1/1
+DOT BIEN TU KIEM gop-bo-kiem-hop | r552 | 1/1
+DOT BIEN TU KIEM gop-bo-kiem-lap | r552 | 1/1
+DOT BIEN TU KIEM gop-chi-mot-bang | r552 | 1/1
+DOT BIEN TU KIEM gop-bo-kiem-nhom | r552 | 1/1
+DOT BIEN TU KIEM gop-bo-kiem-san | r552 | 1/1
+DOT BIEN TU KIEM gop-rc-0-khi-loi | r552 | 1/1
+DOT BIEN TU KIEM ghi-so-gop | r546 | 1/1
+DOT BIEN TU KIEM gop-cli-bo-qua | r552 | 1/1
+TU DOT BIEN KHONG DO DUOC: 0
+TU KIEM co dot bien rieng: 52/52 nhom bat buoc · dot bien giet 239/239
+8/8
+MUTANT: giet = 10 · khong giet = 0 · khong do duoc = 0 / tong 10
+rc=0 giay=5485

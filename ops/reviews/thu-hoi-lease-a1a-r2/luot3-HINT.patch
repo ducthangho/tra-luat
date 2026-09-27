@@ -1,3 +1,6 @@
+NHÃN: chưa chạy trên cây thật — executor tự áp, tự đo, tự chịu trách nhiệm commit
+(docs/PROTOCOL_DA_PHIEN.md §13 patch-as-hint, ràng buộc 1. Nhãn thêm sau khi merge PR #652 theo hậu kiểm connector; sha256 bản reviewer sinh ra: 133e91d4d4d0d7368b46bfe6c812266b68e5e3777ac46f8f03a079cbf1f784fe)
+
 --- SPEC.md
 +++ SPEC.md
 @@ -279,12 +279,12 @@

@@ -138,5 +138,7 @@ thu_hoi_bang_rut_han:
     claude/ci-registry-thu-hep-vung-49xikc mang ban rut han, nhung ops/cap-lease-574-g21 (1212d11) va
     ops/cap-lease-579-g20 (8168297) — nhanh cua phien khac, re tu master SAU 68b552d, TRUOC eb32b50 — con blob cu
     3e447df (han 2026-09-27T15:19:00Z). ai-dang-giu tren du ref (review hau kiem, 00:33-00:36Z 27-09) van ra #651
-    CON_HAN/NGUOI_GIU, rc=11. Phien nay khong duoc day len nhanh ay; hai ban cu tu mat hieu luc luc 15:19Z hoac khi
-    nhanh ay hop nhat master. Nghiem thu: #651 vang khoi NGUOI_GIU khi quet du ref.
+    CON_HAN/NGUOI_GIU, rc=11. Phien nay khong duoc day len nhanh ay. Hai ban cu het hieu luc luc 2026-09-27T15:19:00Z
+    (do: _phan_loai_lease 15:18:59Z con han, 15:19:00Z het han), hoac som hon CHI KHI chinh ref nhanh ay duoc cap nhat
+    sang ban rut han (chua do). Merge nhanh ay VAO master ma giu ref nguon thi #651 VAN con (do: rc=11). Nghiem thu:
+    #651 vang khoi NGUOI_GIU khi quet du ref.

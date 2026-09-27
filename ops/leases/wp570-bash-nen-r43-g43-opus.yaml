@@ -373,6 +373,13 @@ dieu_kien_dung:
 ghi_chu_chieu_lai: 'TRUONG TAI LIEU, khong phai truong cong. Ghi de nguoi sau doc duoc VI SAO
   g10 ton tai ma khong phai lat lai bon vong review.'
 
+da_bi_thay_the: wp570-bash-nen-r44-g44-opus
+da_bi_thay_the_vi_sao: 'NUA THU NHAT cua bia mo hai chieu, lan thay the THU BA MUOI SAU. Di TRUOC vi
+  cong `check` doc tu REF va CHAN [8] khi lease cu chua mang dong nay. Da dem MOI ref mang tep lease g43
+  sau khi chot hai nguon ref (ls-remote / for-each-ref khop, comm -23 RONG tren 471 nhanh): DUNG MOT
+  ref. g43 con han nhung tu day KHONG con la nguoi giu: codex vong 38 ra P2 1 (W1); lop N129 cham lan ba,
+  chu kho chon doi thiet ke; g44 mang r44.'
+
 closure_status: 'Owner-directed grant, revision 43, generation 43. Codex vong 37: P2 1 (V1, bao cao rong
   van duoc nhan), lop N129 gap lan HAI. THAY THE g42 bang bia mo hai chieu, lan thu BA MUOI LAM.
   (Ghi chu lich su) Owner-directed grant, revision 42, generation 42. Codex vong 36: P2 1 (U1, ket qua cua

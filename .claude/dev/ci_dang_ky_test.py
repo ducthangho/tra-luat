@@ -761,8 +761,7 @@ def doc_diff(env=os.environ, chay=subprocess.run, kho=ROOT):
     return None if r.returncode else {x for x in r.stdout.decode("utf-8", "surrogateescape").split("\0") if x}
 
 
-# #661 (CI-DOT-BIEN-CHIA-MANH r2) M4: CHỈ lượt tuần đặt biến này (`loi_env_registry` CẤM nó trong ci.yml) — vòng đột
-# biến ĐỦ của bộ ấy do 4 job mảnh + job gom cùng workflow đảm nhận (M5 chốt hình dạng).
+# #661 M4: CHỈ lượt tuần đặt biến này (ci.yml CẤM qua `loi_env_registry`); đột biến ĐỦ do job mảnh + gom (M5).
 BIEN_MANH, BO_MANH, JOB_MANH, JOB_GOP, SO_MANH = ("CI_DANG_KY_DOT_BIEN_MANH", "ops/nhanh_don_duoc_test.py",
                                                   "dot-bien-manh", "dot-bien-gop", 4)
 
@@ -857,26 +856,36 @@ def loi_workflow_dot_bien_du(data, ci):
     job = jobs[JOB_DU]
     if set(job) != {"runs-on", "timeout-minutes", "env", "steps"} or job["runs-on"] != "ubuntu-latest":
         loi.append(f"job: khoá {sorted(job)} / runs-on {job.get('runs-on')!r} ngoài danh sách cho phép")
-    loi += [f"job: {k} lệch gate-registry" for k in ("timeout-minutes", "env") if job.get(k) != goc.get(k)]
+    loi += [f"job: {k} lệch gate-registry" for k in ("timeout-minutes", "env") if not _bang_kieu(job.get(k), goc.get(k))]
     ky_vong = json.loads(json.dumps(goc.get("steps") or []))
     reg = [b for b in ky_vong if "python .claude/dev/ci_dang_ky_test.py --chay" in _dong_lenh(b)]
     if len(reg) != 1:
         return loi + [f"gate-registry của ci.yml có {len(reg)} bước registry, cần đúng một"]
     reg[0]["env"] = {BIEN_WORKERS: "2", BIEN_MANH: BO_MANH}
-    loi += [] if job.get("steps") == ky_vong else [f"bước lệch gate-registry của ci.yml (env registry chỉ được {reg[0]['env']})"]
-    return loi + [f"job {j} lệch hình GHIM (#661 M5)" for j, v in zip((JOB_MANH, JOB_GOP), _job_manh_gop(goc)) if jobs[j] != v]
+    loi += [] if _bang_kieu(job.get("steps"), ky_vong) else [f"bước lệch gate-registry của ci.yml (env registry chỉ được {reg[0]['env']})"]
+    return loi + [f"job {j} lệch hình GHIM (#661 M5)" for j, v in zip((JOB_MANH, JOB_GOP), _job_manh_gop(goc)) if not _bang_kieu(jobs[j], v)]
+
+
+def _bang_kieu(a, b):
+    """`==` có xét KIỂU ở mọi tầng: `False == 0`, `90.0 == 90` làm matrix/số sai kiểu lọt (Codex #661 lượt 1 F01)."""
+    if type(a) is not type(b):
+        return False
+    if isinstance(a, dict):
+        return a.keys() == b.keys() and all(_bang_kieu(a[k], b[k]) for k in a)
+    return len(a) == len(b) and all(map(_bang_kieu, a, b)) if isinstance(a, list) else a == b
 
 
 def _job_manh_gop(goc):
-    """#661 M5: hai job GHIM trọn; tiền tố 3 bước + `env` TRÍCH từ `gate-registry`; matrix và N cùng từ `SO_MANH`."""
-    dau, env, m = json.loads(json.dumps((goc.get("steps") or [])[:3])), goc.get("env"), "${{ matrix.manh }}"
+    """#661 M5: hai job GHIM trọn; bước python + `env` TRÍCH từ `gate-registry`; matrix và N cùng từ `SO_MANH`."""
+    dau = [{"uses": "actions/checkout@v4"}] + json.loads(json.dumps((goc.get("steps") or [])[2:3]))
+    env, m = goc.get("env"), "${{ matrix.manh }}"
     manh = {"runs-on": "ubuntu-latest", "timeout-minutes": 30, "env": env,
             "strategy": {"fail-fast": False, "matrix": {"manh": list(range(SO_MANH))}},
             "steps": dau + [{"name": "đột biến một mảnh", "run": "python ops/nhanh_don_duoc_test.py",
                              "env": {"NHANH_DON_DUOC_MANH": f"{m}/{SO_MANH}", "NHANH_DON_DUOC_MANH_RA": f"manh/manh-{m}.json"}},
                             {"uses": "actions/upload-artifact@v4", "with": {
                                 "name": f"dot-bien-manh-{m}", "path": f"manh/manh-{m}.json", "if-no-files-found": "error"}}]}
-    gop = {"needs": JOB_MANH, "runs-on": "ubuntu-latest", "timeout-minutes": 10, "env": env,
+    gop = {"needs": JOB_MANH, "runs-on": "ubuntu-latest", "timeout-minutes": 10,
            "steps": dau + [{"uses": "actions/download-artifact@v4",
                             "with": {"pattern": "dot-bien-manh-*", "path": "manh", "merge-multiple": True}},
                            {"name": "gom mảnh", "run": "python ops/nhanh_don_duoc_test.py --gop manh"}]}
@@ -1906,11 +1915,16 @@ def phan_chung():
     def _j(w, ten): return w["jobs"][ten]
     for _t, _f in (("thieu-gop", lambda w, j: w["jobs"].pop(JOB_GOP)), ("gop-khong-needs", lambda w, j: _j(w, JOB_GOP).pop("needs")),
                    ("matrix-3", lambda w, j: _j(w, JOB_MANH)["strategy"]["matrix"].update(manh=[0, 1, 2])),
-                   ("manh-sai-N", lambda w, j: _j(w, JOB_MANH)["steps"][3]["env"].update(NHANH_DON_DUOC_MANH="${{ matrix.manh }}/3")),
+                   ("manh-sai-N", lambda w, j: _j(w, JOB_MANH)["steps"][2]["env"].update(NHANH_DON_DUOC_MANH="${{ matrix.manh }}/3")),
                    ("manh-if", lambda w, j: _j(w, JOB_MANH).update({"if": "false"})),
                    ("manh-continue-on-error", lambda w, j: _j(w, JOB_MANH).update({"continue-on-error": True})),
                    ("gop-if", lambda w, j: _j(w, JOB_GOP).update({"if": "always()"})),
                    ("gop-lenh-khac", lambda w, j: _j(w, JOB_GOP)["steps"][-1].update(run="true")),
+                   ("matrix-bool", lambda w, j: _j(w, JOB_MANH)["strategy"]["matrix"].update(manh=[False, True, 2, 3])),
+                   ("matrix-float", lambda w, j: _j(w, JOB_MANH)["strategy"]["matrix"].update(manh=[0.0, 1, 2, 3])),
+                   ("manh-python-float", lambda w, j: _j(w, JOB_MANH)["steps"][1]["with"].update({"python-version": 3.12})),
+                   ("du-fetch-depth-false", lambda w, j: j["steps"][1]["with"].update({"fetch-depth": False})),
+                   ("du-timeout-float", lambda w, j: j.update({"timeout-minutes": 90.0})),
                    ("env-reg-thieu-manh", lambda w, j: _buoc_reg(j)["env"].pop(BIEN_MANH)),
                    ("env-reg-thua", lambda w, j: _buoc_reg(j)["env"].update(X="1"))):
         _them("p661-M5-" + _t + "-do", _hong_du(_f))

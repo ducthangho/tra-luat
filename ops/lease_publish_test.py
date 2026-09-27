@@ -9369,7 +9369,7 @@ _PHAN_LOAI_T191 += tuple((f"long.{k}", d, a, b, 1) for k, (d, a, b) in _LONG_T19
 # câu lệnh → `@`), bọc trực tiếp | `if not bo_qua_han:` | `if lease:`. Dòng CỜ: con ở ô thành `(_box.append(X) or E)` trong điều
 # kiện `(E', _box[-1])[1]` của mọi ngữ cảnh `nhac`. KỲ VỌNG = WITNESS THỰC THI (chốt có được gọi khi cờ False/True); ô dưới phạm vi
 # lồng: (0, 0, 1) và chốt đếm thô của t191 bắt. Ô không dựng nổi witness hợp lệ PHẢI nằm trong `_MIEN_SINH_T191` và máy kiểm MỌI lần
-# xuất hiện của nó đều thất bại đúng lý do; trường không thấy mang biểu thức/câu lệnh phải được phép thử BIÊN DỊCH bác.
+# xuất hiện của nó đều thất bại đúng lý do; tập (lớp[toán tử], trường) kỳ vọng dẫn từ SIÊU DỮ LIỆU `ast` (`_vu_tru_t191`), không từ kho.
 def _phan_tich_duoc_t191(g):  # mẫu theo phiên bản: `type` (3.12), mặc định của tham số kiểu (3.13) — chỉ vào kho nếu Python đang chạy nhận
     import ast
     try: return bool(ast.parse(g))
@@ -9419,6 +9419,21 @@ def _kho_toan_tu_t191():
         yield ast.unparse(ast.AugAssign(ast.parse("_h[1]", mode="eval").body, o(), mm(o) or ast.Constant(3)))
     for o in con(ast.unaryop): yield ast.unparse(ast.Assign([ast.Name("_a", ast.Store())], ast.UnaryOp(o(), ast.Constant(1)), lineno=1))
     for o in con(ast.cmpop): yield "_a = " + _CHUOI_SS_T191[o.__name__]
+    # F1-L33: gốc × NGỮ CẢNH — `F or @` chỉ gọi chốt khi gốc SAI, `and`/`case` khi gốc ĐÚNG. Mỗi toán tử có thêm một mẫu mang giá trị
+    # chân lý NGƯỢC với mẫu mặc định, tìm bằng máy trên toán hạng nhỏ; các lớp khác có thêm một mẫu SAI (rỗng/0/'').
+    def dung(e):
+        try: return bool(eval(e, {}))
+        except (ArithmeticError, ValueError): return None
+    ts = (0, 1, 3, 5, 50, -1)
+    for o in con(ast.operator) + con(ast.unaryop):
+        mac = ast.unparse(ast.BinOp(ast.Constant(5), o(), ast.Constant(3)) if issubclass(o, ast.operator) else ast.UnaryOp(o(), ast.Constant(1)))
+        if o is ast.MatMult: yield "_a = type('_Z', (), {'__matmul__': lambda s, o: 0})() @ 0"; continue
+        yield "_a = " + next(e for a in ts for b in ts for e in [ast.unparse(ast.BinOp(ast.Constant(a), o(), ast.Constant(b))
+              if issubclass(o, ast.operator) else ast.UnaryOp(o(), ast.Constant(a)))] if dung(e) is (not dung(mac)))
+    yield from ("_a = " + e for e in ("1 == 2", "1 != 1", "2 < 1", "2 <= 1", "1 > 2", "1 >= 2", "3 in (1,)", "1 not in (1,)", "_h is _box",
+                                      "_h is not _h", "0 or 0 or 0", "1 and 1 and 0", "(0).real", "0 if 1 else 1", "(_q := 0)", "[*()]",
+                                      "(*(),)", "{**{}}", "[_i for _i in ()]", "{_i for _i in ()}", "{_i: _i for _i in ()}", "f\"{''}\"",
+                                      "bool(0)", "[0][0]"))
 _TIEN_T191 = "_h = [0] * 99\n_box = [None]\n_m = type('_M', (), {'__matmul__': lambda s, o: s, '__rmatmul__': lambda s, o: s})()\n"
 def _ten_o_t191(n):
     import ast
@@ -9489,18 +9504,21 @@ def _sinh_dong_t191():
                         d = _TIEN_T191 + _NGU_CANH_NHAC_T191[kieu][1].replace("@", "_kiem_gia_t191(lease)").replace("F", f"({e}, _box[-1])[1]")
                     ch = (_chay_sinh_t191(d, False), _chay_sinh_t191(d, True))
                 except (SyntaxError, ValueError) as l_:
-                    hong.setdefault((loai,) + o, set()).add(type(l_).__name__); continue
+                    hong.setdefault((loai,) + o + (kieu,), set()).add(type(l_).__name__); continue
+                khoa = (loai,) + o + (kieu,)  # F1-L33: khoá giữ ĐỦ chiều — bộ bọc của chốt / ngữ cảnh của cờ
                 if loai == "chot" and not pv and o[:2] in _KHONG_CHAY_T191 and ch == (False, False):  # fail-close: vẫn phải liệt kê
                     ch, kieu = ((True, False) if kieu == "ke-co" else (True, True)), kieu + ".khong-chay"
                 mong = ((0, 0, 1) if loai == "chot" and pv else (1, 0, 1) if loai == "chot" and ch == (True, True)
                         else (0, 1, 1) if ch == (True, False) or (loai == "co" and ch == (False, True)) else None)
-                if mong is None: hong.setdefault((loai,) + o, set()).add(f"witness {ch}"); continue
-                dong.append((f"sinh.{loai}.{kieu}.{'.'.join(o)}.{so}-{i}", d, *mong)); co_dong.add((loai,) + o)
+                if mong is None: hong.setdefault(khoa, set()).add(f"witness {ch}"); continue
+                dong.append((f"sinh.{loai}.{kieu}.{'.'.join(o)}.{so}-{i}", d, *mong)); co_dong.add(khoa)
     _sinh_goc_t191(dong, co_dong, hong)
     return tuple(dong), co_dong, hong
 _GOC_NGU_CANH_T191 = {"if": ("if F:\n    @\nelse:\n    @", 2), "ifexp": ("(@ if F else @)", 2), "or": ("F or @", 1),
                       "while": ("while F:\n    @\n    break\nelse:\n    @", 2), "and": ("F and @", 1),
                       "case": ("match 1:\n    case _ if F:\n        @", 1)}
+_GOC_TEN_T191 = {"if": "if F:\n    @", "ifexp": "(@ if F else None)", "while": "while F:\n    @\n    break", "or": "F or @", "and": "F and @",
+                 "case": "match 1:\n    case _ if F:\n        @"}
 # Ô KHÔNG BAO GIỜ CHẠY mà cú pháp vẫn cho chốt (chú thích biến cục bộ; `yield` ngay trong `kiem()` biến nó thành generator): witness
 # không dựng được, nên đòi FAIL-CLOSE — bộ liệt kê vẫn phải đếm chốt ấy như chốt chạy được (t190 phải phủ ⇒ t191 đỏ, không lọt).
 _KHONG_CHAY_T191 = {("AnnAssign", "annotation"), ("Yield", "value"), ("YieldFrom", "value"), ("TypeAlias", "value"), ("TypeVar", "bound"),
@@ -9514,21 +9532,22 @@ def _sinh_goc_t191(dong, co_dong, hong):
     for c in vars(ast).values():
         if isinstance(c, type) and issubclass(c, ast.expr) and c is not ast.expr and type(c) is type:
             for k in ([f"{c.__name__}[{o.__name__}]" for o in tt[c].__subclasses__()] if c in tt else [c.__name__]):
-                hong.setdefault(("goc", k), set())
-    for ng, (mau, sl) in _GOC_NGU_CANH_T191.items():  # gốc `Name` = CHÍNH cờ: witness phụ thuộc cờ theo một trong hai chiều
+                for ng in _GOC_NGU_CANH_T191: hong.setdefault(("goc", k, ng), set())
+    ghi = lambda k, ly_do: [hong[("goc", k, ng)].add(ly_do) for ng in _GOC_NGU_CANH_T191]
+    for ng, mau in _GOC_TEN_T191.items():  # gốc `Name` = CHÍNH cờ, một chốt: witness phụ thuộc cờ theo một trong hai chiều
         d = _TIEN_T191 + mau.replace("@", "_kiem_gia_t191(lease)").replace("F", "bo_qua_han")
         ch = (_chay_sinh_t191(d, False), _chay_sinh_t191(d, True))
-        if ch in ((True, False), (False, True)): dong.append((f"sinh.goc.{ng}.Name.co", d, 0, sl, sl)); co_dong.add(("goc", "Name"))
-        else: hong[("goc", "Name")].add(f"witness {ch}")
+        if ch in ((True, False), (False, True)): dong.append((f"sinh.goc.{ng}.Name.co", d, 0, 1, 1)); co_dong.add(("goc", "Name", ng))
+        else: hong[("goc", "Name", ng)].add(f"witness {ch}")
     xong = set()
     for so, goc in enumerate(_KHO_T191 + tuple(_kho_toan_tu_t191())):
         for i, n in enumerate(x for x in ast.walk(ast.parse(goc)) if isinstance(x, ast.expr)):
             k = _ten_o_t191(n)
             try: e0 = ast.unparse(n); r = ast.parse(e0, mode="eval").body
-            except (SyntaxError, ValueError) as l_: hong[("goc", k)].add(type(l_).__name__); continue
-            if _ten_o_t191(r) != k: hong[("goc", k)].add("dung-lai-khac-lop"); continue  # vd FormattedValue `{3}` ⇒ Set
+            except (SyntaxError, ValueError) as l_: ghi(k, type(l_).__name__); continue
+            if _ten_o_t191(r) != k: ghi(k, "dung-lai-khac-lop"); continue  # vd FormattedValue `{3}` ⇒ Set
             o = [q for q in _o_sinh_t191(r) if isinstance(q[4], ast.expr)]
-            if not o: hong[("goc", k)].add("khong-o")
+            if not o: ghi(k, "khong-o")
             for j in range(len(o)):
                 cay = ast.parse(e0, mode="eval"); cn, f, _v, kk, c = [q for q in _o_sinh_t191(cay.body) if isinstance(q[4], ast.expr)][j]
                 moi = ast.BoolOp(ast.And(), [ast.parse("1 // (not bo_qua_han)", mode="eval").body, c])
@@ -9536,14 +9555,14 @@ def _sinh_goc_t191(dong, co_dong, hong):
                 if kk is None: setattr(cn, f, moi)
                 else: getattr(cn, f)[kk] = moi
                 try: e = ast.unparse(ast.fix_missing_locations(cay))
-                except ValueError as l_: hong[("goc", k)].add(type(l_).__name__); continue
+                except ValueError as l_: ghi(k, type(l_).__name__); continue
                 for ng, (mau, sl) in _GOC_NGU_CANH_T191.items():
                     if (k, ng) in xong: continue
                     d = _TIEN_T191 + mau.replace("@", "_kiem_gia_t191(lease)").replace("F", f"({e})")
                     try: ch = (_chay_sinh_t191(d, False), _chay_sinh_t191(d, True))
-                    except (SyntaxError, ValueError) as l_: hong[("goc", k)].add(type(l_).__name__); continue
-                    if ch != (True, False): hong[("goc", k)].add(f"witness {ch}"); continue
-                    dong.append((f"sinh.goc.{ng}.{k}.{so}-{i}-{j}", d, 0, sl, sl)); co_dong.add(("goc", k)); xong.add((k, ng))
+                    except (SyntaxError, ValueError) as l_: hong[("goc", k, ng)].add(type(l_).__name__); continue
+                    if ch != (True, False): hong[("goc", k, ng)].add(f"witness {ch}"); continue
+                    dong.append((f"sinh.goc.{ng}.{k}.{so}-{i}-{j}", d, 0, sl, sl)); co_dong.add(("goc", k, ng)); xong.add((k, ng))
 # Ô KHÔNG dựng nổi witness hợp lệ: lý do là THỨ MÁY ĐO (lớp ngoại lệ khi dựng, hoặc witness không bao giờ gọi), không phải văn
 # xuôi; t191 đòi MỌI lần xuất hiện của ô đều hỏng đúng lý do này, và tập ô không dòng = đúng bảng này. Đường tới con cháu vẫn có
 # dòng (vd `JoinedStr.values` → `FormattedValue.value`), nên bỏ duyệt ở ô ấy vẫn chết.
@@ -9557,7 +9576,16 @@ _MIEN_SINH_T191 = {
     # GỐC điều kiện (F2-L31): `await` ngoài async và `*`/`:` đứng một mình là lỗi cú pháp; `yield` biến `kiem()` thành generator
     # (không chạy); `Constant` không có con để đặt cờ (không nhắc được cờ); `{…}` dựng lại thành Set.
     **{("goc", k): "SyntaxError" for k in ("Await", "Slice", "Starred")}, ("goc", "FormattedValue"): "SyntaxError|dung-lai-khac-lop",
-    **{("goc", k): "witness (False, False)" for k in ("Yield", "YieldFrom")}, ("goc", "Constant"): "khong-o"}
+    **{("goc", k): "witness (False, False)" for k in ("Yield", "YieldFrom")}, ("goc", "Constant"): "khong-o",
+    # F1-L33: `lambda`, `(… for …)`, `{…}` LUÔN ĐÚNG ⇒ trong `F or @` chốt KHÔNG BAO GIỜ chạy (mã chết, ở mọi giá trị cờ)
+    **{("goc", k, "or"): "witness (False, False)" for k in ("Lambda", "GeneratorExp", "Set")}}
+def _mien_day_du_t191():
+    """F1-L33: bảng miễn TRẢI ĐỦ CHIỀU. Mục thiếu chiều cuối (bộ bọc của chốt / ngữ cảnh của cờ / ngữ cảnh của gốc) áp cho MỌI giá trị
+    của chiều ấy; mục đủ chiều chỉ áp cho đúng ô ấy."""
+    chieu = {"chot": ("truc", "ke-co", "ke-khong"), "co": tuple(_NGU_CANH_NHAC_T191), "goc": tuple(_GOC_NGU_CANH_T191)}
+    du = {"chot": 5, "co": 5, "goc": 3}
+    return {(k + (c,) if len(k) < du[k[0]] else k): v for k, v in _MIEN_SINH_T191.items()
+            for c in (chieu[k[0]] if len(k) < du[k[0]] else (None,))}
 def _vu_tru_t191():
     """Phủ VŨ TRỤ đo bằng máy: (lớp cụ thể vắng kho, (lớp, trường) KHAI kiểu biểu thức/câu lệnh/phần tử khối mà kho không có con,
     trường danh sách thiếu vị trí, toán tử vắng). Kiểu trường đọc từ SIÊU DỮ LIỆU `ast` — chữ ký trong docstring của lớp, vd
@@ -9570,15 +9598,17 @@ def _vu_tru_t191():
     kieu = lambda c: {t: k for k, t in re.findall(r"(\w+)[*?]? (\w+)", (c.__doc__ or "").split("(", 1)[-1])}
     mang = {"expr", "stmt", "keyword", "comprehension", "withitem", "excepthandler", "match_case"}
     kho = _KHO_T191 + tuple(_kho_toan_tu_t191())
+    tt = {ast.BinOp: ast.operator, ast.AugAssign: ast.operator, ast.UnaryOp: ast.unaryop, ast.Compare: ast.cmpop, ast.BoolOp: ast.boolop}
+    ten_c = lambda c: [f"{c.__name__}[{o.__name__}]" for o in tt[c].__subclasses__()] if c in tt else [c.__name__]
     mau, thay, ten = {}, {}, set()
-    for g in kho:
+    for g in kho:  # F1-L33: khoá (lớp[toán tử], trường) — không gộp các toán tử của cùng một lớp
         for n, f, vt, _k, _c in _o_sinh_t191(ast.parse(g)):
-            thay.setdefault((type(n), f), set()).add(vt); ten.add(_ten_o_t191(n))
+            thay.setdefault((_ten_o_t191(n), f), set()).add(vt); ten.add(_ten_o_t191(n))
         for n in ast.walk(ast.parse(g)): mau.setdefault(type(n), g)
     vang = [c.__name__ for c in lop if c not in mau]
-    bd = [f"{c.__name__}.{f}" for c in lop if c in mau for f, k in kieu(c).items() if k in mang and (c, f) not in thay]
+    bd = [f"{t}.{f}" for c in lop if c in mau for t in ten_c(c) for f, k in kieu(c).items() if k in mang and (t, f) not in thay]
     assert all(set(kieu(c)) == set(c._fields) for c in lop), "chữ ký docstring lệch `_fields`"
-    vt = [f"{c.__name__}.{f}" for (c, f), v in thay.items() if c is not ast.Module and v != {"don"} and v != {"dau", "giua", "cuoi"}]
+    vt = [f"{c}.{f}" for (c, f), v in thay.items() if c != "Module" and v != {"don"} and v != {"dau", "giua", "cuoi"}]
     op = [f"{n}[{o.__name__}]" for n, b in (("BinOp", ast.operator), ("AugAssign", ast.operator), ("UnaryOp", ast.unaryop),
           ("Compare", ast.cmpop), ("BoolOp", ast.boolop)) for o in b.__subclasses__() if f"{n}[{o.__name__}]" not in ten]
     return vang, bd, vt, op
@@ -9610,7 +9640,8 @@ def t191_MOI_chot_cua_kiem_deu_duoc_t190_phu_o_nhanh_DA_DANG():
         không trái witness CHẠY ĐƯỢC (`_chay_doan_t191`) — oracle không đi qua bộ liệt kê.
       - r22, MA TRẬN SINH `_sinh_dong_t191`: mọi (lớp[toán tử], trường, vị trí) của kho mẫu × CHỐT/CỜ, bộ ba lấy từ
         witness THỰC THI (`_chay_sinh_t191`); ô không dòng phải đúng `_MIEN_SINH_T191` và hỏng đúng lý do ở MỌI lần
-        xuất hiện; `_vu_tru_t191` đòi kho phủ mọi lớp cụ thể, mọi trường biên dịch được, mọi vị trí, mọi toán tử.
+        xuất hiện; `_vu_tru_t191` đòi kho phủ mọi lớp cụ thể, mọi (lớp[toán tử], trường) KHAI kiểu biểu thức/câu lệnh trong siêu dữ liệu
+        `ast`, mọi vị trí; khoá phủ giữ đủ chiều (bộ bọc chốt, ngữ cảnh cờ, ngữ cảnh gốc).
       - CA ÂM `_CHOT_GIA_T191`: chốt giả THỰC THI ĐƯỢC (ném `Chan` khi `chot_gia_t191`) mà không fixture
         nào chạm ⇒ liệt kê +1 và phán quyết phải là `KHONG_CHAM`, không được là `PHU`.
 
@@ -9640,10 +9671,10 @@ def t191_MOI_chot_cua_kiem_deu_duoc_t190_phu_o_nhanh_DA_DANG():
          == [x[0] for x in ds + mien] and _dem_chot_tho(kiem_nguon) == len(ds) + len(mien), "đoạn nguồn kiem() lệch cả tệp")
     sinh, co_dong, hong = _sinh_dong_t191()
     chua = {o: v for o, v in hong.items() if o not in co_dong}
-    chot(set(chua) == set(_MIEN_SINH_T191) and all(v == set(_MIEN_SINH_T191[o].split("|")) for o, v in chua.items()),
+    md = _mien_day_du_t191()
+    chot(set(chua) == set(md) and all(v == set(md[o].split("|")) for o, v in chua.items()),
          f"MA TRẬN SINH: ô không dòng phải ĐÚNG bảng miễn, và mọi lần xuất hiện hỏng đúng lý do đã khai — lệch "
-         f"{sorted((o, sorted(v)) for o, v in chua.items() if v != set(_MIEN_SINH_T191.get(o, '').split('|')))} · thừa "
-         f"{sorted(set(_MIEN_SINH_T191) - set(chua))}")
+         f"{sorted((o, sorted(v)) for o, v in chua.items() if v != set(md.get(o, '').split('|')))} · thừa {sorted(set(md) - set(chua))}")
     chot(_vu_tru_t191() == ([], [], [], []), f"MA TRẬN SINH: vũ trụ `ast` chưa phủ (lớp, trường, vị trí, toán tử): {_vu_tru_t191()}")
     hang = _PHAN_LOAI_T191 + sinh
     khoa = [dong[0] for dong in hang]

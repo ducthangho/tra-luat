@@ -105,3 +105,7 @@ lease_sua_lan_cuoi: '2026-09-27T10:40:00Z'
 lease_sua_ghi_chu: >-
   Lan 1: chi sua branch_ghi_chu (nhanh ma dat thang tren master thay vi re tu commit lease). Khong doi write set,
   han, spec, branch.
+da_bi_thay_the: ci-gate-tach-gate-ops-r2-g2-claude
+da_bi_thay_the_vi_sao: >-
+  Review Rescue Checkpoint sau Codex CLI luot 2/2 tren 6f2b0f9 (blocked, P2 spec-hua-windows-sau-land-sai-ma-tran):
+  chu kho chon 'Revision r2 + 1 luot Codex' (2026-09-27). Spec r2 thay r1; lease r2 g2 thay lease nay (bia mo hai chieu).

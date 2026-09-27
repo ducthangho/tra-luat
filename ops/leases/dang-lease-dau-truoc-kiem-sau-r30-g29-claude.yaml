@@ -79,7 +79,25 @@ LUOT21_31_VA_PHAN_CHUNG_DUOC_XU_LY_THE_NAO:
 
 leased_at_utc: '2026-09-27T14:52:15Z'
 leased_at_utc_nguon: 'date -u luc commit tao tep nay; commit dung CHINH gia tri ay lam committer date (GIT_COMMITTER_DATE).'
-lease_expires_at_utc: '2026-09-29T00:00:00Z'
+lease_expires_at_utc: '2026-09-27T16:22:00Z'
+han_ghi_chu: >-
+  Goc 2026-09-29T00:00:00Z. RUT NGAN ve 2026-09-27T16:22:00Z — xem thu_hoi_bang_rut_han.
+lease_sua_lan_cuoi: '2026-09-27T16:07:59Z'
+lease_sua_ghi_chu: >-
+  Lan 1: rut ngan lease_expires_at_utc (thu_hoi_bang_rut_han). Khong doi write set, spec, branch.
+thu_hoi_bang_rut_han:
+  han_goc_utc: '2026-09-29T00:00:00Z'
+  han_moi_utc: '2026-09-27T16:22:00Z'
+  chi_thi: >-
+    Chu kho trong phien Claude Code 2026-09-27 (sau khi merge #589): "Toi da dang audit, merge. Hay land va bookeeping".
+  ly_do: 'Packet #579 da LAND (PR #589 merge ddc41ec5ada5a818e3cc85eca5c29a29781c594a, 2026-09-27T16:05:38Z, head 50dac77).'
+  vi_sao_khong_dung_so: >-
+    Theo tien le #651/#660: so ops/thu-hoi/ chua kich hoat (SO_THU_HOI_KICH_HOAT = False); rut han chi dung co che DA CAI
+    (phan loai lease theo han). Han moi dat ~15 phut SAU commit de lan dang bang git khong gap lease da het han.
+  gioi_han: >-
+    Ref mang lease nay: nhanh ops/cap-lease-579-g29 (ban rut han) va master sau PR bookkeeping. Nhanh ma
+    claude/va-dang-lease-20260920 KHONG mang tep lease. Nghiem thu: sau 2026-09-27T16:22:00Z, ai-dang-giu cho ba duong write set
+    khong con dang-lease-dau-truoc-kiem-sau-r30-g29-claude trong NGUOI_GIU khi quet du ref.
 han_vi_sao: 'GIU han g28 = g27 = g26 = g25 = g24 = g23 = g22 = g21 = g20 = 2026-09-29T00:00:00Z (gia han theo chu kho, ban chieu issues/579#issuecomment-5850874948; moc MAC
   DINH do PHIEN REVIEWER dat). KHONG noi them — phien executor khong tu dat hay tu noi.'
 

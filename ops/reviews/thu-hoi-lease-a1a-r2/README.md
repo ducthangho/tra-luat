@@ -8,7 +8,13 @@ reviewer. Đính chính ghi ở `HAU-KIEM-CONNECTOR-652.md` hoặc ở §0 của
 
 **Đặc tả có hiệu lực: revision 3**, `ops/specs/THU-HOI-LEASE-A1a-r3.md`, sha256
 `ac7e0129b281b517c69e9a2512a05b47d55ad99f0ac964462c061ea511f70bc1`, blob `401804bacea92ae5305bb5c3a36cc3821f973227`.
-Lease A1a neo băm này. r2 (`9bc0fe28…`) giữ nguyên byte làm hồ sơ.
+r2 (`9bc0fe28…`) giữ nguyên byte làm hồ sơ.
+
+**Tệp này KHÔNG cấp việc và KHÔNG nói lease nào đang tồn tại.** Lúc viết (27-09-2026) **chưa có** lease A1a nào trong
+`ops/leases`. Lease A1a **tương lai** phải neo `spec_hash` bằng đúng băm r3 ở trên, và chỉ được cấp khi #579 đã land
+**và** `ai-dang-giu` đo lại ra `NGƯỜI_GIỮ 0` trên cả ba đường write set (r3 §8 mục 3). Thứ giao việc là Packet Issue
+#564 **cộng** lease còn hiệu lực (protocol §3.2, §4). Muốn biết lease nào đang giữ gì thì hỏi `ai-dang-giu`, đừng hỏi
+mục lục này: nó là hồ sơ lịch sử và cố ý không chép trạng thái lease.
 
 ## Các lượt
 

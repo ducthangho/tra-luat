@@ -92,3 +92,5 @@ Không tìm thấy số Git tĩnh sai trong §1/§2. **100/89 run, annotation Ub
 M1–M6 đều chiếu đúng một đường về mặt bảng. M2 có thể nằm hoàn toàn trong tệp test nhờ import consumer; M5/M6 cũng khả thi theo cách đó **sau khi hợp đồng WIRING được khóa**, chưa thể chứng nhận từ T6 hiện tại. Executor đo rồi đề xuất digest, producer canonical và chủ kho duyệt độc lập không phải “tự khai” bị ADR-0047 cấm.
 
 VERDICT: REQUEST_CHANGES
+
+<!-- Đính chính 27-09 (bản nháp 14): header log runtime của lượt này ghi `reasoning effort: none`; nhãn effort `high` ở dòng đầu là SAI. -->

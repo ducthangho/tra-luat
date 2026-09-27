@@ -73,3 +73,5 @@ Các phép đo khác:
 **Giới hạn:** 100/89 run và annotation Ubuntu chưa đo độc lập; truy vấn lịch sử workflow bị connector từ chối. Full suite/CI/canary: **not_run**. `git diff --check` **failed, rc=2** tại hai dòng Markdown hard-break trong verdict lượt 2 được chép nguyên văn. Không sửa repository; HEAD/tree giữ nguyên, trạng thái quan sát có `.codex/` ignored. Phép đo dùng shell/Python cục bộ, transport `machine`; model/effort không được chứng thực độc lập.
 
 VERDICT: REQUEST_CHANGES
+
+<!-- Đính chính 27-09 (bản nháp 14): header log runtime của lượt này ghi `reasoning effort: none`; nhãn effort `high` ở dòng đầu là SAI. -->

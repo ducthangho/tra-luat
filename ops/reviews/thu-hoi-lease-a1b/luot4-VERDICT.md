@@ -58,3 +58,5 @@ Các phép đo khác:
 **Giới hạn:** 100/89 run và annotation Ubuntu chưa đo độc lập; endpoint lịch sử workflow bị connector từ chối. Full suite/CI/canary: **not_run**. Lần gọi fixture đầu **failed, rc=2** vì thiếu `--nhanh-mac-dinh`; lần sửa lệnh đạt như trên. Model/effort không được chứng thực độc lập. Không sửa repository; HEAD/tree giữ nguyên, chỉ thấy `.codex/` ignored. Approval này dành cho **bản nháp đặc tả**, không xác nhận đủ tiền đề kích hoạt.
 
 VERDICT: APPROVE
+
+<!-- Đính chính 27-09 (bản nháp 14): header log runtime của lượt này ghi `reasoning effort: none`; nhãn effort `high` ở dòng đầu là SAI. -->

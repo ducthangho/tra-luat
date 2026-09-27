@@ -137,3 +137,5 @@ Các phép đo L5 **đã khớp** tại base: hai SHA-256 r9/A1a r2; các dòng 
 Các số **100 run/89 success**, annotation migration, lease #579 g20, ruleset và comment authority: **not_measured độc lập qua GitHub**, không coi là passed. A3 có phản chứng khả thi; A1/A6 là phép đo vận hành; A7 đo được lint nhưng chưa bao phủ M6. Không chạy full suite hay CI cho diff chỉ đặc tả này.
 
 VERDICT: REQUEST_CHANGES
+
+<!-- Đính chính 27-09 (bản nháp 14): header log runtime của lượt này ghi `reasoning effort: none`; nhãn effort `high` ở dòng đầu là SAI. -->

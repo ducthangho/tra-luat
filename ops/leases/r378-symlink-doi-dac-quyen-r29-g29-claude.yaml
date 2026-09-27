@@ -253,3 +253,12 @@ write_set_do_luc_cap:
   do_luc: '2026-09-27T15:15:09Z'
   do_luc_nguon: 'date -u in ra NGAY TRUOC lan chay `ai-dang-giu` cho hai duong write set (sau vong dong bo nhanh).'
   ket_qua: 'TRUOC khi commit g29: rc=12 KHONG_XAC_DINH ca hai duong — dung mot ly do: bia mo mot chieu g28 -> g29 (g29 chua ton tai). Do lai SAU commit g29 — ghi trong comment bao cao.'
+
+# ───────────────────────── BIA MỘ — vế THỨ NHẤT của dấu HAI CHIỀU ─────────────────────────
+# Thêm 2026-09-27 khi cấp g30. g29 CÒN HIỆU LỰC (hạn 2026-09-28T06:00:00Z) nên bia mộ hai chiều là
+# BẮT BUỘC. REVISION mới (r29 -> r30): protocol §3.2.
+da_bi_thay_the: r378-symlink-doi-dac-quyen-r30-g30-claude
+da_bi_thay_the_luc: '2026-09-27T18:02:36Z'
+da_bi_thay_the_luc_nguon: 'date -u luc commit bia mo nay; commit dung CHINH gia tri ay lam committer date (GIT_COMMITTER_DATE).'
+da_bi_thay_the_vi_sao: 'r30 (issues/574#issuecomment-5857870690: chủ kho "r30 vá 9 + hạ F2 xuống P4 (đề xuất)" sau lượt 25) — bảng tên / vai trò nút cha /
+  độ dài nguyên trạng / NFC-NFD, máy kiểm bản đồ chặt hơn trong tu_kiem (v21); head không đổi 76f199e. spec_hash r30 = b0e97f92b43e86661982213e8c8279a13c67bf3e7e08431a9a6272d5c8f04815.'

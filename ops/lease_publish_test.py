@@ -9633,6 +9633,11 @@ def t191_MOI_chot_cua_kiem_deu_duoc_t190_phu_o_nhanh_DA_DANG():
 
     def _dong_gia(g, cac):
         return [(d, c) for (_, d, c) in cac if "gia_t191" in g.split("\n")[d - 1].replace(" t191", "_t191")]
+    # Ma trận chỉ đổi THÂN kiem(), và bộ liệt kê lẫn phép đếm thô chỉ đọc kiem() ⇒ phân tích RIÊNG đoạn nguồn của kiem() thay vì cả
+    # tệp cho mỗi dòng (CI: t191 chạy ba lần — suite chính và hai vế A/B của t125). Đòi đoạn ấy cho ĐÚNG danh sách chốt như cả tệp.
+    kiem_nguon = ast.get_source_segment(nguon, next(f for f in ast.parse(nguon).body if getattr(f, "name", "") == "kiem"))
+    chot(kiem_nguon.startswith("def kiem(") and kiem_nguon.count(moc) == 1 and [x[0] for x in sum(_liet_ke_chot_kiem(kiem_nguon), [])]
+         == [x[0] for x in ds + mien] and _dem_chot_tho(kiem_nguon) == len(ds) + len(mien), "đoạn nguồn kiem() lệch cả tệp")
     sinh, co_dong, hong = _sinh_dong_t191()
     chua = {o: v for o, v in hong.items() if o not in co_dong}
     chot(set(chua) == set(_MIEN_SINH_T191) and all(v == set(_MIEN_SINH_T191[o].split("|")) for o, v in chua.items()),
@@ -9653,7 +9658,7 @@ def t191_MOI_chot_cua_kiem_deu_duoc_t190_phu_o_nhanh_DA_DANG():
             chay = (_chay_doan_t191(doan, False), _chay_doan_t191(doan, True))
             chot(chay == (True, True) if them_ds else chay[0] != chay[1],
                  f"PHÂN LOẠI {loai}: bộ ba viết tay trái witness chạy được (gọi khi cờ False/True = {chay})")
-        g = _gia(_thut(doan if loai.startswith("sinh.") else doan.replace("@", "_kiem_gia_t191(lease)")))
+        g = kiem_nguon.replace(moc, _thut(doan if loai.startswith("sinh.") else doan.replace("@", "_kiem_gia_t191(lease)")) + moc)
         ds_g, mien_g = _liet_ke_chot_kiem(g)
         so = (len(ds_g) - len(ds), len(mien_g) - len(mien), _dem_chot_tho(g) - len(ds) - len(mien))
         chot(so == (them_ds, them_mien, them_tho),

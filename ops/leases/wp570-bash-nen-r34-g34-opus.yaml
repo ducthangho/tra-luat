@@ -331,6 +331,13 @@ dieu_kien_dung:
 ghi_chu_chieu_lai: 'TRUONG TAI LIEU, khong phai truong cong. Ghi de nguoi sau doc duoc VI SAO
   g10 ton tai ma khong phai lat lai bon vong review.'
 
+da_bi_thay_the: wp570-bash-nen-r35-g35-opus
+da_bi_thay_the_vi_sao: 'NUA THU NHAT cua bia mo hai chieu, lan thay the THU HAI MUOI BAY. Di TRUOC vi
+  cong `check` doc tu REF va CHAN [8] khi lease cu chua mang dong nay. Da dem MOI ref mang tep lease g34
+  sau khi chot hai nguon ref (ls-remote / for-each-ref khop, comm -23 RONG tren 442 nhanh): DUNG MOT
+  ref. g34 con han nhung tu day KHONG con la nguoi giu: codex vong 29 ra P2 4, dieu kien dung cham o hai
+  lop; chu kho chon N120, N121, gop `__import__` tuong doi vao lop da khep; g35 mang r35.'
+
 closure_status: 'Owner-directed grant, revision 34, generation 34. DIEU KIEN DUNG cham o ngan sach `%`
   (lan nam); chu kho chon BO TACH DUNG CPYTHON + SAI PHAN (N118). THAY THE g33 bang bia mo hai chieu, lan
   thu HAI MUOI SAU.

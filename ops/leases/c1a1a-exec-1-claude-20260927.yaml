@@ -74,7 +74,7 @@ recorder_note: >-
 authority_basis: '§2 — start/pause/resume/reroute/override/authorize thuoc chu kho'
 
 leased_at_utc: '2026-09-27T10:35:00Z'
-lease_expires_at_utc: '2026-09-28T10:35:00Z'
+lease_expires_at_utc: '2026-09-27T10:43:00Z'
 run_minutes: 1440
 
 preconditions_measured_at_utc: '2026-09-27T10:35:00Z'
@@ -100,3 +100,15 @@ gate_bat_buoc:
   - 'Bang nghia vu A0 day du, unresolved = 0; reviewer doi chieu nguoc tu M1-M6.'
   - 'Moi ca moi phai co dot bien lam no DO dung assertion dich, hoac equivalent_verified co do.'
   - 'Doc lai (readback) tep sau moi lan ghi.'
+thu_hoi_bang_rut_han:
+  han_goc_utc: '2026-09-28T10:35:00Z'
+  han_moi_utc: '2026-09-27T10:43:00Z'
+  chi_thi: >-
+    Chu kho trong phien session_01LZYaDZiMtLCMAzXKibMz5f 2026-09-27, tra loi cau hoi chon executor:
+    "Phien 017KWSXE thi cong".
+  ly_do: >-
+    Hai phien cung duoc giao executor C1a1a. Chu kho chon session_017KWSXEY9ifmPKmJREKfdSJ. Phien nay CHUA day
+    dong ma nao vao write set (nhanh claude/spec-c1a1-doc-receipt-20260925 van o 04f2b5fe; ban nhap cuc bo da xoa).
+  tien_le: 'Rut han theo PR #654/#655 (lease #651 g1).'
+  pham_vi: >-
+    Ban sao duy nhat cua lease nay nam tren nhanh ops/cap-lease-650; khong co ban sao tren nhanh khac tai luc rut han.

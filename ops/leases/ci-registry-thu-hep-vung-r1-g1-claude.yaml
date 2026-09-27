@@ -120,7 +120,8 @@ lech_nguong_duoc_duyet: >-
 lease_sua_lan_cuoi: '2026-09-26T23:25:00Z'
 lease_sua_ghi_chu: >-
   Lan 1: them lech_nguong_duoc_duyet (khong doi write set, han, spec). Lan 2: rut ngan lease_expires_at_utc
-  (thu_hoi_bang_rut_han); khong doi write set, spec.
+  (thu_hoi_bang_rut_han); khong doi write set, spec. Lan 3 (2026-09-27, PR sau #654): chi sua LOI KHAI trong
+  thu_hoi_bang_rut_han theo review hau kiem Codex CLI tren eb32b50 (P2 xuyen ref, P3 pham vi rc=12); khong doi han.
 thu_hoi_bang_rut_han:
   han_goc_utc: '2026-09-27T15:19:00Z'
   han_moi_utc: '2026-09-26T23:25:00Z'
@@ -129,8 +130,15 @@ thu_hoi_bang_rut_han:
     han] roi kich hoat so thu hoi theo 3".
   ly_do: 'Packet #651 da LAND (PR #653 merge 68b552d0f08200ba860ea788517558a4172df384; Issue #651 dong).'
   vi_sao_khong_dung_so: >-
-    So ops/thu-hoi/ CHUA kich hoat (SO_THU_HOI_KICH_HOAT = False trong ops/lease_publish.py); so khong rong khi co
-    False => rc=12 o moi consumer. Rut han chi dung co che DA CAI (phan loai lease theo han), khong them duong ghi moi.
+    So ops/thu-hoi/ CHUA kich hoat (SO_THU_HOI_KICH_HOAT = False trong ops/lease_publish.py). So khong rong khi co
+    False => `check --du-bao` rc=12 (do, review hau kiem 27-09); `check` thuong KHONG kiem so (do: rc=0 voi so co ban
+    ghi); duong khac chua do. Rut han chi dung co che DA CAI (phan loai lease theo han).
   gioi_han: >-
-    Duong moi, chua co tien le va chua co cong nao doc truong nay. Hieu luc chi toi dau khi MOI ref mang tep lease
-    nay deu mang ban rut han: da cap nhat master (PR) va nhanh claude/ci-registry-thu-hep-vung-49xikc (cung PR).
+    Duong moi, chua co tien le va chua co cong nao doc truong nay. Thu hoi CHUA hoan tat xuyen ref: master va nhanh
+    claude/ci-registry-thu-hep-vung-49xikc mang ban rut han, nhung ops/cap-lease-574-g21 (1212d11) va
+    ops/cap-lease-579-g20 (8168297) — nhanh cua phien khac, re tu master SAU 68b552d, TRUOC eb32b50 — con blob cu
+    3e447df (han 2026-09-27T15:19:00Z). ai-dang-giu tren du ref (review hau kiem, 00:33-00:36Z 27-09) van ra #651
+    CON_HAN/NGUOI_GIU, rc=11. Phien nay khong duoc day len nhanh ay. Hai ban cu het hieu luc luc 2026-09-27T15:19:00Z
+    (do: _phan_loai_lease 15:18:59Z con han, 15:19:00Z het han), hoac som hon CHI KHI chinh ref nhanh ay duoc cap nhat
+    sang ban rut han (chua do). Merge nhanh ay VAO master ma giu ref nguon thi #651 VAN con (do: rc=11). Nghiem thu:
+    #651 vang khoi NGUOI_GIU khi quet du ref.

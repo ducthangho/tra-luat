@@ -1,4 +1,4 @@
-<!-- Verdict codex lượt 1 (gpt-6-astra high, codex_cli tại chỗ) trên ops/specs/THU-HOI-LEASE-A1b.md bản nháp 1 @ 65a612a, base 67802bf. Chép nguyên văn từ tệp -o của codex exec. -->
+<!-- Verdict codex lượt 1 (gpt-6-astra high, codex_cli tại chỗ) trên ops/specs/THU-HOI-LEASE-A1b.md bản nháp 1 @ 65a612a, base 67802bf. Chép nguyên văn từ tệp -o của codex exec; chỉ bỏ khoảng trắng cuối dòng (hard-break Markdown) theo tiền lệ ops/reviews/thu-hoi-lease-a1a-r2/. -->
 Review ở mức `advisory_review`, trên:
 
 ```text

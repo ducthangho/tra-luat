@@ -1,4 +1,4 @@
-<!-- Verdict codex lượt 2 (gpt-6-astra high, codex_cli tại chỗ) trên bản nháp 2 @ 673256e, base 67802bf. Chép nguyên văn. -->
+<!-- Verdict codex lượt 2 (gpt-6-astra high, codex_cli tại chỗ) trên ops/specs/THU-HOI-LEASE-A1b.md bản nháp 2 @ 673256e, base 67802bf. Chép nguyên văn từ tệp -o của codex exec; chỉ bỏ khoảng trắng cuối dòng (hard-break Markdown) theo tiền lệ ops/reviews/thu-hoi-lease-a1a-r2/. -->
 Review `advisory_review`, không sửa tệp:
 
 ```text
@@ -10,7 +10,7 @@ spec_sha256: 0a1f7213c8f78456c4fdac24c0a0bcc4713e17da15a0204e286f9c2147dbb510
 
 Phép đo chạy bằng shell/Python cục bộ, transport `machine`; không có bằng chứng runtime độc lập để chứng nhận model/effort hoặc connector như spec khai.
 
-**1. P1 — F2 chưa đóng: A5 vẫn xanh khi luật mới không có tác dụng.**  
+**1. P1 — F2 chưa đóng: A5 vẫn xanh khi luật mới không có tác dụng.**
 `ops/specs/THU-HOI-LEASE-A1b.md:50`, `:93–105`. Lớp: `bat-co-chua-noi-verdict-production`.
 
 “Delta chỉ gồm `0→8`” không bắt buộc **có** chuyển đổi `0→8` trên fixture cần chuyển đổi. Tập delta rỗng vẫn đạt. T6/M6 thêm điều kiện gọi discovery nhưng chưa đòi kết quả discovery được dùng để quyết verdict.
@@ -36,7 +36,7 @@ illustrative_T6_call_and_discard anchor False calls 1 rc 12
 
 **Khóa và rủi ro:** chạy qua verdict thật, không chép validator vào test. Nếu cần sửa seam hoặc hành vi WIRING, trả về packet WIRING; không âm thầm đưa phần đó vào M5/M6 của A1b.
 
-**2. P2 — M5/A5 gọi là phân loại delta Q6 nhưng bỏ mất delta holder.**  
+**2. P2 — M5/A5 gọi là phân loại delta Q6 nhưng bỏ mất delta holder.**
 `ops/specs/THU-HOI-LEASE-A1b.md:38`, `:93`, `:104`. Lớp: `loi-khai-delta-rong-hon-phep-do`.
 
 Q6 của r9 yêu cầu đo **holder và eligibility, từng ID/path cùng nguyên nhân**. Bản nháp chỉ quy định chuyển mã thoát. Mất một holder vẫn có thể giữ nguyên `rc=11` vì holder khác còn tồn tại; phép đo A5 không phát hiện việc thu hẹp quyền giữ.

@@ -9,12 +9,9 @@ không ném được lớp này), fixture dương vẫn xanh, và ngoại lệ t
 khi dòng khai `TD:` kèm lập luận và CẢ bộ ca vẫn xanh trên đột biến; còn lại `unresolved` (chặn merge).
 """
 import ast
-import builtins
 import importlib.util
 import json
-import os
 import pathlib
-import socket
 import subprocess
 import sys
 import tempfile
@@ -78,8 +75,12 @@ def ca(m, ten, dau_vao, do=(), **tham):
     try:
         kq = m.kiem_json(raw, **{"kho": KHO, "nhanh": "master", "base_hien_hanh": S, "head_hien_hanh": H, **tham})
     except Exception as e:  # M1: không được ném với MỌI bytes. Ghi LOẠI + SỐ DÒNG ném trong module (luot2 F15)
-        so = [f.lineno for f in traceback.extract_tb(e.__traceback__) if f.filename == m.__file__]
-        raise TinHieuChotCa(f"{ten}: NEM:{type(e).__name__}@{so[-1] if so else '?'}") from None
+        so, gd, tb = [f.lineno for f in traceback.extract_tb(e.__traceback__) if f.filename == m.__file__], "?", e.__traceback__
+        while tb is not None:  # GIAI ĐOẠN = số luật đã ghi trong frame kiem_json lúc ném (luot3 F25: đúng dòng mà sai giai đoạn)
+            if tb.tb_frame.f_code.co_filename == m.__file__ and type(tb.tb_frame.f_locals.get("luat")) is dict:
+                gd = len(tb.tb_frame.f_locals["luat"])
+            tb = tb.tb_next
+        raise TinHieuChotCa(f"{ten}: NEM:{type(e).__name__}@{so[-1] if so else '?'}#{gd}") from None
     kiem_kq(ten, kq, do)
 
 
@@ -124,6 +125,7 @@ CA = [("duong_fixture", lambda d: d, ()), ("duong_c_khac_s", doi(**dict.fromkeys
       ("k5_ket_luan_so", doi(ket_luan=1), ("K5",)), ("hex40_ngoai_af", doi(T="g" * 40), ("K2",)),
       ("hex64_ngoai_af", doi(workflow_definition_sha256="g" * 64), ("K2",)), ("hex64_63", doi(workflow_definition_sha256="a" * 63), ("K2",)),
       ("hex64_65", doi(workflow_definition_sha256="a" * 65), ("K2",)), ("hex_la_so", doi(T=int("1" * 40)), ("K2",)),
+      ("hex64_la_so", doi(workflow_definition_sha256=int("1" * 64)), ("K2",)), ("descriptor_la_so", doi(descriptor_q13_ghim=int("1" * 64)), ("K2",)),
       ("int_float", doi(run_id=1.5), ("K2",)), ("gio_unicode_so", doi(thoi_diem_utc="\u0662026-09-25T01:25:14Z"), ()),
       ("duong_kho_khac", doi(repository="other/repo", kho_canonical="github.com/other/repo", workflow_ref=WFK), (), {"kho": "other/repo"}),
       ("duong_nhanh_khac", doi(nhanh_mac_dinh="main", workflow_ref=WFN), (), {"nhanh": "main"}), ("a11_k3_k4", doi(repository="other/repo"), ("K3", "K4"), {"base_hien_hanh": X40})]
@@ -195,6 +197,23 @@ def ca_thu_tu(ten, m):
             raise TinHieuChotCa(f"{ten}: thu tu {ev} != {muon}")
 
 
+_CON_TINH = r"""
+import importlib.util, json, sys
+sp = importlib.util.spec_from_file_location("m_tinh", sys.argv[1])
+m = importlib.util.module_from_spec(sp)
+sp.loader.exec_module(m)
+dang, ev = [False], []
+sys.addaudithook(lambda e, a: ev.append(e) if dang[0] and e.split(".")[0] in ("open", "os", "subprocess", "socket", "shutil", "urllib", "http", "ctypes") else None)
+anh = lambda: ({k: repr(v) for k, v in vars(sys).items() if k != "modules"}, sorted(sys.modules), {k: repr(v) for k, v in vars(m).items() if k != "__builtins__"})
+tham, raws = dict(kho=sys.argv[2], nhanh="master", base_hien_hanh=sys.argv[3], head_hien_hanh=sys.argv[4]), [open(p, "rb").read() for p in sys.argv[5:]]
+truoc = anh()
+dang[0] = True
+kq = [m.kiem_json(r, **tham) for r in raws + raws]
+dang[0] = False
+print(json.dumps({"ev": ev, "trang_thai": anh() == truoc, "tat_dinh": kq[:len(raws)] == kq[len(raws):]}))
+"""
+
+
 def ca_tinh(ten, m):
     """M1: module thuần (import chỉ trong tập cho phép) và docstring khai đúng giới hạn (không quyền land/provenance)."""
     cay = ast.parse(pathlib.Path(m.__file__).read_text(encoding="utf-8"))
@@ -203,20 +222,18 @@ def ca_tinh(ten, m):
     doc = ast.get_docstring(cay) or ""
     if ten_import - {"argparse", "json", "re", "sys"} or "KHÔNG phải quyền land" not in doc or "KHÔNG chứng minh provenance" not in doc:
         raise TinHieuChotCa(f"{ten}: import {sorted(ten_import)} hoac docstring thieu loi khai gioi han")
-    goi, goc = [], [(subprocess, "Popen"), (socket, "socket"), (builtins, "open"), (os, "system"), (os, "popen")]
-    cu = [getattr(o, a) for o, a in goc]
-    anh = ({k: id(v) for k, v in vars(sys).items()}, set(sys.modules), {k: id(v) for k, v in vars(m).items()})  # cả GIÁ TRỊ, không chỉ tên
-    try:  # M1 hàm thuần: không tiến trình con, mạng, tệp, trạng thái toàn cục; cùng đầu vào ⇒ cùng kết quả (luot2 F20)
-        for o, a in goc:
-            setattr(o, a, lambda *x, _a=a, **k: (goi.append(_a), (_ for _ in ()).throw(RuntimeError(_a)))[1])
-        kq = [m.kiem_json(r, kho=KHO, nhanh="master", base_hien_hanh=S, head_hien_hanh=H) for r in (ma(FIX), ma(FIX), b"{")]
-    except Exception as e:
-        kq = [repr(e)]
-    finally:
-        for (o, a), f in zip(goc, cu):
-            setattr(o, a, f)
-    if goi or len(kq) != 3 or kq[0] != kq[1] or anh != ({k: id(v) for k, v in vars(sys).items()}, set(sys.modules), {k: id(v) for k, v in vars(m).items()}):
-        raise TinHieuChotCa(f"{ten}: kiem_json co tac dung phu: goi={goi} kq={kq[:1]}")
+    with tempfile.TemporaryDirectory() as t:  # M1 hàm thuần, đo trong TIẾN TRÌNH CON cô lập bằng audit hook (luot3 F29)
+        vao = [pathlib.Path(t) / f"r{i}.json" for i in range(2)]
+        for p, raw in zip(vao, (ma(FIX), b"{")):
+            p.write_bytes(raw)
+        r = subprocess.run([sys.executable, "-B", "-c", _CON_TINH, m.__file__, KHO, S, H, *map(str, vao)],
+                           capture_output=True, text=True, timeout=60)
+    try:
+        kq = json.loads(r.stdout.splitlines()[-1])
+    except (IndexError, ValueError):
+        kq = {"loi": r.stderr[-300:]}
+    if kq != {"ev": [], "trang_thai": True, "tat_dinh": True}:
+        raise TinHieuChotCa(f"{ten}: kiem_json co tac dung phu: {kq}")
 
 
 MAU = r'^doc_receipt_thu_hoi tests: ([1-9]\d*)/(\1) ca QUA · ([1-9]\d*)/(\3) dot bien GIET$'
@@ -248,6 +265,7 @@ def chay_ca(m, path, chi=None, bo=()):
 # (ID, mệnh đề, tên đột biến, chuỗi cũ, chuỗi mới, ca đích | "TD: lập luận", ngoại lệ trần (loại, DÒNG ném nguyên văn),
 #  [ca gác A1 — mặc định "duong_fixture"; None = A1 KHÔNG ÁP DỤNG được, khai rõ | với TD: các ca loại khỏi phép đo])
 _Q, _K4, _IN, _DAU = 'if r[k] != v])', '    ghi("K4"', '    print(json.dumps(kq, ', '    luat, ly_do = {}, []'
+_CX = 'r["checkout_commit"] == ' + repr(X40)
 _TRA = '    return {"ok": all(v == "qua" for v in luat.values()), "luat": luat, "ly_do": ly_do}'
 _BAT = ('except UnicodeDecodeError:\n            loi.append("khong phai UTF-8 strict")\n        except json.JSONDecodeError:\n'
         '            loi.append("khong phai JSON")\n        except (ValueError, RecursionError):')
@@ -283,15 +301,15 @@ DB = [
     ("M2b'", "UnicodeDecodeError ⇒ đỏ (chốt riêng)", "bo_try_decode", 'except UnicodeDecodeError:', 'except ZeroDivisionError:',
      "TD: except (ValueError, RecursionError) bắt trùm UnicodeDecodeError ⇒ vẫn K1 đỏ", None),
     ("M2b3", "UnicodeDecodeError ⇒ đỏ (cả nhóm chốt)", "bo_try_decode_nhom", _BAT, _BAT.replace("except UnicodeDecodeError:", "except ZeroDivisionError:")
-     .replace("except (ValueError, RecursionError):", "except RecursionError:"), "byte_0x80", ("UnicodeDecodeError", 'chuoi = raw.decode("utf-8", "strict")')),
+     .replace("except (ValueError, RecursionError):", "except RecursionError:"), "byte_0x80", ("UnicodeDecodeError", 'chuoi = raw.decode("utf-8", "strict")', 0)),
     ("M2c", "json.loads nhận str", "loads_bytes", 'json.loads(chuoi)', 'json.loads(raw)', "utf16-le", None),
     ("M2c'", "JSONDecodeError ⇒ đỏ (chốt riêng)", "bo_try_json", 'except json.JSONDecodeError:', 'except ZeroDivisionError:',
      "TD: except (ValueError, RecursionError) bắt trùm JSONDecodeError ⇒ vẫn K1 đỏ", None),
     ("M2c3", "JSONDecodeError ⇒ đỏ (cả nhóm chốt)", "bo_try_json_nhom", _BAT, _BAT.replace("except json.JSONDecodeError:", "except ZeroDivisionError:")
-     .replace("except (ValueError, RecursionError):", "except RecursionError:"), "khong_phai_json", ("JSONDecodeError", "r = json.loads(chuoi)")),
-    ("M2d", "gốc phải object", "bo_kiem_dict", 'type(r) is not dict:', 'False:', "goc_list_38_khoa", ("TypeError", 'elif not (type(r["schema_version"]) is int and r["schema_version"] == 1):')),
+     .replace("except (ValueError, RecursionError):", "except RecursionError:"), "khong_phai_json", ("JSONDecodeError", "r = json.loads(chuoi)", 0)),
+    ("M2d", "gốc phải object", "bo_kiem_dict", 'type(r) is not dict:', 'False:', "goc_list_38_khoa", ("TypeError", 'elif not (type(r["schema_version"]) is int and r["schema_version"] == 1):', 0)),
     ("M2e", "tập khoá khít: thừa ⇒ đỏ", "khoa_superset", 'if set(r) != KHOA:', 'if not KHOA <= set(r):', "thua_khoa", None),
-    ("M2e'", "tập khoá khít: thiếu ⇒ đỏ", "khoa_subset", 'if set(r) != KHOA:', 'if not set(r) <= KHOA:', "thieu_tree_S", ("KeyError", 'loi = [f"{k} sai kieu" for k in sorted(KIEU) if not KIEU[k](r[k])]')),
+    ("M2e'", "tập khoá khít: thiếu ⇒ đỏ", "khoa_subset", 'if set(r) != KHOA:', 'if not set(r) <= KHOA:', "thieu_tree_S", ("KeyError", 'loi = [f"{k} sai kieu" for k in sorted(KIEU) if not KIEU[k](r[k])]', 1)),
     ("M2f", "schema_version int không bool", "schema_bo_kieu", 'type(r["schema_version"]) is int and ', '', "schema_true", None),
     ("M2f'", "schema_version == 1", "schema_bo_gia_tri", 'r["schema_version"] == 1)', 'True)', "schema_2", None),
     ("M2g", "event hằng", "bo_event", 'r["event"] != EVENT', 'False', "event_v2", None),
@@ -339,25 +357,28 @@ DB = [
     ("M6b", "ket_luan thuộc tập đóng", "bo_ket_luan", 'r["ket_luan"] in KET_LUAN', 'True', "k5_ket_luan", None),
     ("M6c", "che_do hằng", "bo_che_do", 'r["che_do"] == CHE_DO', 'True', "k5_che_do", None),
     ("M6d", "ket_luan sai kiểu JSON ⇒ K5 do, không ném (F1)", "ket_luan_bam", 'KET_LUAN = ("TAP_THU_HOI_RONG",)',
-     'KET_LUAN = frozenset({"TAP_THU_HOI_RONG"})', "k5_ket_luan_list", ("TypeError", 'ghi("K5", [f"{k} la" for k, dat in (("checker_rc", r["checker_rc"] == 0), ("ket_luan", r["ket_luan"] in KET_LUAN),')),
-    # --- danh mục hình dạng kết quả (M1): mỗi trường × {kiểu, giá trị}, nhánh đỏ gác bằng fixture, nhánh xanh A1 KHÔNG ÁP DỤNG
+     'KET_LUAN = frozenset({"TAP_THU_HOI_RONG"})', "k5_ket_luan_list", ("TypeError", 'ghi("K5", [f"{k} la" for k, dat in (("checker_rc", r["checker_rc"] == 0), ("ket_luan", r["ket_luan"] in KET_LUAN),', 4)),
+    # --- danh mục hình dạng kết quả (M1): {ok, luat, ly_do, tập khoá} × {nhánh K1 đỏ, K2–K5 đỏ, xanh}; nhánh xanh chỉ kích
+    # hoạt trên duong_c_khac_s để fixture THẬT vẫn gác A1 (luot3 F26: không miễn A1)
     ("M1o", "ok là bool — nhánh đỏ", "ok_do_int", _TRA, _TRA.replace('"ok": all(v == "qua" for v in luat.values())', '"ok": all(v == "qua" for v in luat.values()) or 0'), "k5_rc", None),
-    ("M1o2", "ok là bool — nhánh xanh", "ok_xanh_int", _TRA, _TRA.replace('"ok": all(v == "qua" for v in luat.values())', '"ok": all(v == "qua" for v in luat.values()) and 1'), "duong_fixture", None, None),
+    ("M1o2", "ok là bool — nhánh xanh", "ok_xanh_int", _TRA, _TRA.replace('"ok": all(v == "qua" for v in luat.values())', '"ok": (1 if ' + _CX + ' else all(v == "qua" for v in luat.values()))'), "duong_c_khac_s", None),
     ("M1u", "luat là dict — nhánh đỏ K2–K5", "luat_do_list", _TRA, _TRA.replace('"luat": luat,', '"luat": luat if "do" not in luat.values() else list(luat.items()),'), "k5_rc", None),
-    ("M1u2", "luat là dict — nhánh xanh", "luat_xanh_list", _TRA, _TRA.replace('"luat": luat,', '"luat": list(luat.items()),'), "duong_fixture", None, None),
+    ("M1u2", "luat là dict — nhánh xanh", "luat_xanh_list", _TRA, _TRA.replace('"luat": luat,', '"luat": list(luat.items()) if ' + _CX + ' else luat,'), "duong_c_khac_s", None),
+    ("M1o3", "ok là bool — nhánh K1 đỏ (F27)", "ok_k1_int", _TRA1, _TRA1.replace('"ok": False', '"ok": 0'), "bom", None),
+    ("M1x3", "đúng 3 khoá — nhánh K1 đỏ (F27)", "khoa_thua_k1", _TRA1, _TRA1.replace('"ly_do": ly_do}', '"ly_do": ly_do, "x": 1}'), "bom", None),
     ("M1v", "luat là dict — nhánh K1 đỏ", "luat_k1_list", _TRA1, _TRA1.replace('"luat": luat', '"luat": list(luat.items())'), "bom", None),
     ("M1w", "ly_do là list — nhánh K1 đỏ", "ly_do_k1_tuple", _TRA1, _TRA1.replace('"ly_do": ly_do', '"ly_do": tuple(ly_do)'), "bom", None),
     ("M1w2", "ly_do là list — nhánh đỏ K2–K5", "ly_do_do_tuple", _TRA, _TRA.replace('"ly_do": ly_do}', '"ly_do": ly_do if not ly_do else tuple(ly_do)}'), "k5_rc", None),
-    ("M1w3", "ly_do là list — nhánh xanh", "ly_do_xanh_tuple", _TRA, _TRA.replace('"ly_do": ly_do}', '"ly_do": tuple(ly_do)}'), "duong_fixture", None, None),
+    ("M1w3", "ly_do là list — nhánh xanh", "ly_do_xanh_tuple", _TRA, _TRA.replace('"ly_do": ly_do}', '"ly_do": tuple(ly_do) if ' + _CX + ' else ly_do}'), "duong_c_khac_s", None),
     ("M1x", "đúng 3 khoá — nhánh đỏ", "khoa_thua_do", _TRA, _TRA.replace('"ly_do": ly_do}', '"ly_do": ly_do, **({"x": 1} if ly_do else {})}'), "k5_rc", None),
-    ("M1x2", "đúng 3 khoá — nhánh xanh", "khoa_thua_xanh", _TRA, _TRA.replace('"ly_do": ly_do}', '"ly_do": ly_do, "x": 1}'), "duong_fixture", None, None),
+    ("M1x2", "đúng 3 khoá — nhánh xanh", "khoa_thua_xanh", _TRA, _TRA.replace('"ly_do": ly_do}', '"ly_do": ly_do, **({"x": 1} if ' + _CX + ' else {})}'), "duong_c_khac_s", None),
     ("M1q2", "K1 đỏ ⇒ lý do ĐÚNG 'K1 do' (F22)", "k1_ly_do_sai_nghia", '            ghi(k, ["K1 do"])', '            ghi(k, ["K1 qua"])', "bom", None),
     ("M1y", "CLI giữ kiểu bool của ok (F17)", "cli_ok_int", _IN, '    kq["ok"] = int(kq["ok"])\n' + _IN, "cli", None),
     ("M2i", "parser nhận CHÍNH str đã decode (F21)", "strip_sau_decode", 'chuoi = raw.decode("utf-8", "strict")', 'chuoi = raw.decode("utf-8", "strict").strip()', "thu_tu_k1", None),
     ("M2j", "số nguyên quá dài ⇒ K1 đỏ, không ném (F23)", "bo_bat_value", 'except (ValueError, RecursionError):', 'except ZeroDivisionError:',
-     "so_dai_vuot", ("ValueError", "r = json.loads(chuoi)")),
+     "so_dai_vuot", ("ValueError", "r = json.loads(chuoi)", 0)),
     ("M2k", "lồng quá sâu ⇒ K1 đỏ, không ném", "bo_bat_recursion", 'except (ValueError, RecursionError):', 'except ValueError:',
-     "long_sau", ("RecursionError", "r = json.loads(chuoi)")),
+     "long_sau", ("RecursionError", "r = json.loads(chuoi)", 0)),
     ("M3v2", "int không nhận chuỗi", "int_nhan_str", 'lambda v: type(v) is int for k', 'lambda v: type(v) in (int, str) for k', "int_chuoi", None),
     ("M1p", "ly_do là list[str] (F10)", "ly_do_so", '        ly_do.extend(f"{k}: {x}" for x in loi)',
      '        ly_do.extend(f"{k}: {x}" for x in loi)\n        ly_do[:] = [0 for _ in ly_do]', "k5_rc", None),
@@ -373,6 +394,13 @@ DB = [
     ("M1s3", "không đổi trạng thái sys (F20)", "trang_thai_sys", _DAU, _DAU + '\n    sys._dem_c1a1a = getattr(sys, "_dem_c1a1a", 0) + 1', "tinh", None),
     ("M1s4", "không mở tệp (F20)", "mo_tep", _DAU, _DAU + '\n    open(__file__, "rb").close()', "tinh", None),
     ("M1s5", "không đổi biến toàn cục module (F20)", "bien_toan_cuc", _DAU, _DAU + '\n    globals()["_goi_cuoi"] = raw', "tinh", None),
+    ("M3u2", "hex64 phải là str (F28)", "hex64_ep_str", 'def _khop(mau):\n', 'def _khop(mau):\n    if mau == "[0-9a-f]{64}":\n'
+     '        return lambda v: re.fullmatch(mau, str(v)) is not None\n', "hex64_la_so", None),
+    ("M1s6", "không sửa sys.path (F29)", "sys_path", _DAU, _DAU + '\n    sys.path.append("c1a1a-probe")', "tinh", None),
+    ("M1s7", "không sửa list toàn cục tại chỗ (F29)", "list_toan_cuc", ("_VANG = object()", _DAU),
+     ("_NHAT_KY = []\n_VANG = object()", _DAU + "\n    _NHAT_KY.append(len(raw))"), "tinh", None),
+    ("M1s8", "không mở tệp qua io.open (F29)", "io_open", _DAU, _DAU + '\n    __import__("io").open(__import__("os").devnull, "w").close()', "tinh", None),
+    ("M1s9", "không posix_spawn (F29)", "posix_spawn", _DAU, _DAU + '\n    __import__("os").posix_spawn(sys.executable, [sys.executable, "-c", "pass"], {})', "tinh", None),
     ("M8a", "regex đăng ký buộc cặp ca", "mau_bo_1", r'(\1)', r'(\d+)', "dang_ky", None),
     ("M8b", "regex đăng ký buộc cặp đột biến", "mau_bo_3", r'(\3)', r'(\d+)', "dang_ky", None),
 ]
@@ -400,6 +428,9 @@ def _nap(path, ten):
         sys.dont_write_bytecode = truoc
 
 
+DUONG = {c[0] for c in CA if not c[2]}
+
+
 def chay_dot_bien(nguon, dong):
     _id, _md, ten, cu, moi, dich, nem, *phu = dong
     if dich == "dang_ky":  # đột biến M8 đặt lên regex đăng ký, không lên module
@@ -410,9 +441,11 @@ def chay_dot_bien(nguon, dong):
             return "unresolved", "song"
         except TinHieuChotCa as e:
             return ("witness_killed", "giet") if str(e).startswith("dang_ky: mau dang ky") else ("unresolved", f"tin dung gia: {e}")
-    if nguon.count(cu) != 1:
-        return "unresolved", f"chuoi cu xuat hien {nguon.count(cu)} lan"
-    ban = nguon.replace(cu, moi)
+    ban = nguon
+    for c, n in (zip(cu, moi) if type(cu) is tuple else [(cu, moi)]):  # tuple = đột biến nhiều chỗ, mỗi neo phải duy nhất
+        if ban.count(c) != 1:
+            return "unresolved", f"chuoi cu xuat hien {ban.count(c)} lan"
+        ban = ban.replace(c, n)
     gac = phu[0] if phu else "duong_fixture"
     with tempfile.TemporaryDirectory() as t:
         p = pathlib.Path(t) / f"dot_bien_{ten}.py"  # tên riêng từng đột biến, bản sao tạm
@@ -422,10 +455,9 @@ def chay_dot_bien(nguon, dong):
             if dich.startswith("TD:"):
                 chay_ca(m, p, bo=gac if phu else ())
                 return "equivalent_verified", "ca bo ca van xanh"
-            if gac == dich:
-                return "unresolved", "ca gac A1 trung ca dich"
-            if gac is not None:
-                chay_ca(m, p, {gac})  # A1: đột biến làm ca gác dương đỏ là quá tay (luot2 F16: không miễn theo tên ca đích)
+            if gac not in DUONG or gac == dich:  # ca gác phải CÓ THẬT, DƯƠNG, khác đích (luot3 F26)
+                return "unresolved", f"ca gac A1 khong hop le: {gac}"
+            chay_ca(m, p, {gac})  # A1: đột biến làm ca gác dương đỏ là quá tay (luot2 F16: không miễn theo tên ca đích)
             chay_ca(m, p, {dich})
             return "unresolved", "song"
         except TinHieuChotCa as e:
@@ -433,9 +465,11 @@ def chay_dot_bien(nguon, dong):
             if "NEM:" not in s:
                 ok = s.startswith(dich + ":")
             else:  # ngoại lệ trần: đúng LOẠI và ném tại ĐÚNG dòng neo, dòng ấy phải DUY NHẤT trong bản đột biến (luot2 F15)
-                loai, dong_neo = nem or ("", None)
+                if type(nem) is not tuple or len(nem) != 3:  # hàng khai sai dạng ⇒ không cấp tín dụng, không crash
+                    return "unresolved", f"nem sai dang: {nem!r}"
+                loai, dong_neo, gd = nem  # + GIAI ĐOẠN: số luật đã ghi khi dòng neo chạy (luot3 F25)
                 so = [i for i, dong_ma in enumerate(ban.splitlines(), 1) if dong_ma.strip() == dong_neo]
-                ok = len(so) == 1 and s == f"{dich}: NEM:{loai}@{so[0]}"
+                ok = len(so) == 1 and s == f"{dich}: NEM:{loai}@{so[0]}#{gd}"
             return ("witness_killed", "giet") if ok else ("unresolved", f"tin dung gia/qua tay: {s[:100]}")
         except Exception as e:
             return "unresolved", f"tin dung gia: {type(e).__name__}"
@@ -457,8 +491,7 @@ def main():
     for h in hong_ca + hong_db:
         print("HONG", h)
     n_ca, n_db = len(CA) + 4, len(bang) - dem["equivalent_verified"]
-    print("nghia vu: " + " · ".join(f"{k} {v}" for k, v in dem.items())
-          + f" · a1_khong_ap_dung {sum(1 for d in bang if len(d) > 7 and d[7] is None and not d[5].startswith('TD:'))}")
+    print("nghia vu: " + " · ".join(f"{k} {v}" for k, v in dem.items()))
     print(f"doc_receipt_thu_hoi tests: {n_ca - len(hong_ca)}/{n_ca} ca QUA · {dem['witness_killed']}/{n_db} dot bien GIET")
     return 1 if hong_ca or hong_db else 0
 

@@ -200,9 +200,9 @@ lech_protocol_khai:
     mo_ta: >-
       Spec r5 (sha256 978058983e8e...) dong bang A14 = ngoai le <= 400 dong them tren 3 tep san pham. Chu kho nang
       <= 500 roi <= 650 trong lease (lech_nguong_duoc_duyet) va xac nhan lai trong human audit, NHUNG KHONG tao spec
-      revision moi. PROTOCOL §3.2 d.148: doi acceptance tao revision moi va lam lease cu mat hieu luc. Ung vien land
-      them +650 dong => A14 cua spec r5 KHONG dat; land dua tren quyet dinh lech co duyet cua chu kho, khong dua tren
-      su phu hop voi r5.
+      revision moi. PROTOCOL §3.2 d.148: doi acceptance tao revision moi va lam lease cu mat hieu luc. Ung vien da merge
+      (bf63bb1) them +650 dong => A14 cua spec r5 KHONG dat; thao tac merge f8a7829 dua tren quyet dinh lech co duyet
+      cua chu kho, khong dua tren su phu hop voi r5.
     trang_thai: 'LECH DA XAY RA, khai thang; khong tuyen bo A14 dat theo r5.'
     xu_ly: >-
       Chu kho chon (phien dieu phoi 2026-09-28) ghi erratum canh spec dong bang:
@@ -221,6 +221,6 @@ nang_tran:
       - https://github.com/ducthangho/tra-luat/issues/650#issuecomment-5862692098
     ghi_chu: >-
       Truc VONG canon (ADR-0048) = 10; 8 luot nam duoi tran vong. Truc LOI_GOI (2) bi vuot co chu kho nang tung buoc
-      (lease review_budget_ghi_chu, review_budget_ghi_chu_2), nhung khoi nang_tran nay CHI duoc ghi sau land, tai
-      day (Codex #667 P2) — ghi muon, khai thang. Luot 3-8 la lich su review ADVISORY; assurance land DUY NHAT la
+      (lease review_budget_ghi_chu, review_budget_ghi_chu_2), nhung khoi nang_tran nay CHI duoc ghi sau khi PR #666
+      da merge tai f8a7829 (packet van `merged`, CHUA `landed` — xem trang_thai_packet), tai day (Codex #667 P2) — ghi muon, khai thang. Luot 3-8 la lich su review ADVISORY; assurance land DUY NHAT la
       human_audited cua chu kho, khong phai luot 8.

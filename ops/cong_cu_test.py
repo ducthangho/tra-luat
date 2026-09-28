@@ -1685,6 +1685,22 @@ DOT_BIEN = {
         "                    if 'which(\"bash\")' in l]  # đột biến: đo CHUỖI, không đo cấu trúc\n",
         "BASH_NEN", (), "t27_cong_khong_bao_dong_gia_tren_CHU_THICH"),
     # #668 CI-G5-CONG-CU-CHIA-MANH: mỗi chốt gom/ghi/chế độ một đột biến riêng; ca đích đòi THẺ riêng của chốt.
+    'f6_main_mat_gia_tri': ("ops/cong_cu_test.py",
+        '            ket.update(nhan or {})\n',
+        '            ket.update({t: None for t in (nhan or {})})  # đột biến: đủ tên, mất giá trị\n',
+        "TEP_TEST", _KEM_TEP_TEST, 't54_main_chon_DUNG_vong_ban_kinh_theo_che_do'),
+    'f6_main_mat_van_tay': ("ops/cong_cu_test.py",
+        '        dong, loi = _ket_thuc_manh(k, n, ra, ten, ket, ly_con, _van_tay())\n',
+        '        dong, loi = _ket_thuc_manh(k, n, ra, ten, ket, ly_con, {})  # đột biến: mất vân tay\n',
+        "TEP_TEST", _KEM_TEP_TEST, 't54_main_chon_DUNG_vong_ban_kinh_theo_che_do'),
+    'f6_main_bo_tien_kiem': ("ops/cong_cu_test.py",
+        '        if hong or tien_kiem_bo_qua:\n',
+        '        if hong:  # đột biến: tiền kiểm bỏ qua vẫn đo\n',
+        "TEP_TEST", _KEM_TEP_TEST, 't54_main_chon_DUNG_vong_ban_kinh_theo_che_do'),
+    'f6_main_manh_mot_tien_trinh': ("ops/cong_cu_test.py",
+        '        for nhom, rc, ra_con in _phong_con(ten, (), _so_tien_trinh_ban_kinh()) if ten else ():\n',
+        '        for nhom, rc, ra_con in _phong_con(ten, (), 1) if ten else ():  # đột biến: bỏ số tiến trình\n',
+        "TEP_TEST", _KEM_TEP_TEST, 't54_main_chon_DUNG_vong_ban_kinh_theo_che_do'),
     'f5_main_bo_nhan': ("ops/cong_cu_test.py",
         '            ket.update(nhan or {})\n',
         '            pass  # đột biến: bỏ nhận bản ghi\n',
@@ -6411,12 +6427,16 @@ def t54_main_chon_DUNG_vong_ban_kinh_theo_che_do():
     kq = _doc_kq_tu_kiem("--tu-kiem-main")
     du, p = kq["mong_du"], kq["mong_manh"]
     dung(du and p, f"giàn giáo không dựng được kỳ vọng: {str(kq)[:300]}")
-    goi_ghi = lambda ket, ly_none: [[3, 8, "x", p, ket, ly_none]]
-    mong = {"du": [0, du, [], []], "gate": [0, [], [], []],
-            "manh": [0, [], p, goi_ghi(sorted(p), True)],          # nhận ĐỦ bản ghi của cả hai nhóm, gọi bộ ghi đúng một lần
-            "con_hong": [1, [], p, goi_ghi(None, False)],          # nhóm con hỏng ⇒ bộ ghi nhận `None` + lý do, rc=1
-            "ghi_do": [1, [], p, goi_ghi(sorted(p), True)],        # bộ ghi báo lỗi ⇒ `main` phải TRUYỀN lên rc=1
-            "nen_do": [1, [], [], goi_ghi(None, False)]}           # nền đỏ ⇒ không phóng con nào, bộ ghi xoá tệp cũ, rc=1
+    so = kq["mong_so"]
+    # Mỗi lời gọi bộ ghi: [k, n, ra, tên, tập tên ket, GIÁ TRỊ ket khớp đúng thứ con phát, lý do đúng dạng, VÂN TAY đúng].
+    dat = [[3, 8, "x", p, sorted(p), True, True, True]]
+    khong = [[3, 8, "x", p, None, None, True, True]]
+    mong = {"du": [0, du, [], [], [[], so], None], "gate": [0, [], [], [], None, None],
+            "manh": [0, [], p, dat, None, [[], so]],        # nhận ĐỦ bản ghi (tên + giá trị) của hai nhóm, gọi ghi đúng một lần
+            "con_hong": [1, [], p, khong, None, [[], so]],  # nhóm con hỏng ⇒ bộ ghi nhận `None` + lý do, rc=1
+            "ghi_do": [1, [], p, dat, None, [[], so]],      # bộ ghi báo lỗi ⇒ `main` phải TRUYỀN lên rc=1
+            "nen_do": [1, [], [], khong, None, None],       # nền đỏ ⇒ không phóng con nào, bộ ghi xoá tệp cũ, rc=1
+            "tien_kiem": [1, [], [], khong, None, None]}    # F6: tiền kiểm KHÔNG ĐO ĐƯỢC cũng là nền không xanh
     sai = {t: str(kq.get(t))[:200] for t, m in mong.items() if kq.get(t) != m}
     bang(not sai, f"`main` nối SAI vòng bán kính theo chế độ/kịch bản (thấy): {sai} — mong du={len(du)} tên, "
                   f"manh 3/8={len(p)} tên, xem docstring `_in_tu_kiem_main`")
@@ -7080,6 +7100,7 @@ def _in_tu_kiem_main():
     tiến trình này (`list(DOT_BIEN)`, `_phan_manh`): ca đo DÂY NỐI, tính đúng của phân hoạch là việc của `t52`.
     """
     import contextlib
+    import hashlib
     import io
     g, goi = globals(), {}
     ten_ca = [fn.__name__ for fn in CA]
@@ -7094,28 +7115,42 @@ def _in_tu_kiem_main():
             cac.append(f)
         CA[:] = cac
 
+    bam = lambda x: hashlib.sha256(json.dumps(x, sort_keys=True).encode()).hexdigest()
+    vt_gia = {"sha256_test": "a" * 64, "head": "b" * 40}
+
     def phong(ten, do_o_nen, so):
         goi.setdefault("phong", []).extend(ten)
+        goi["phong_tham_so"] = [list(do_o_nen), so]
         nhom = [ten[0::2], ten[1::2]]
+        goi["phat"] = bam({t: _ban_ghi_du_gia(t) for t in ten})   # đúng thứ con giả phát ra, đo cả GIÁ TRỊ
         return [(n, 1 if (goi["kb"] == "con_hong" and i == 1) else 0,
                  "" if (goi["kb"] == "con_hong" and i == 1) else
                  "".join("BKCON " + json.dumps(_ban_ghi_du_gia(t)) + "\n" for t in n)) for i, n in enumerate(nhom)]
 
     def ghi(k, n, ra, ten, ket, ly, vt):
-        goi.setdefault("ghi", []).append([k, n, ra, list(ten), None if ket is None else sorted(ket), ly is None])
+        # F6 (Codex lượt 3): ghi lại MỌI thứ `main` trao cho bộ ghi — tên thôi là để lọt "đủ tên, mất giá trị/vân tay".
+        goi.setdefault("ghi", []).append([k, n, ra, list(ten), None if ket is None else sorted(ket),
+                                          None if ket is None else bam(ket) == goi.get("phat"),
+                                          isinstance(ly, str) and bool(ly) if ket is None else ly is None,
+                                          vt == vt_gia])
         return [], (1 if ket is None or goi["kb"] == "ghi_do" else 0)
 
-    g["_chay_tien_kiem"] = lambda fn: None
+    def du(ten, do_o_nen, so):
+        goi.setdefault("du", []).extend(ten)
+        goi["du_tham_so"] = [list(do_o_nen), so]
+        return []
+
+    g["_chay_tien_kiem"] = lambda fn: ("tk_gia", "bỏ qua có chủ đích") if goi["kb"] == "tien_kiem" else None
     g["_cong_tren_cay_that"] = lambda goc, bo_quet=None: (0, [])
     g["_tu_kiem_phan_hang"] = g["_tu_kiem_gian_giao"] = lambda: 0
     g["_tu_kiem_song_song"] = lambda do_o_nen: 0
-    g["_ban_kinh_moi_dot_bien"] = lambda ten, do_o_nen, so: goi.setdefault("du", []).extend(ten) or []
-    g["_phong_con"], g["_ket_thuc_manh"] = phong, ghi
-    g["_van_tay"] = lambda: {"sha256_test": "a" * 64, "head": "b" * 40}
-    kq = {"mong_du": list(DOT_BIEN), "mong_manh": _phan_manh(3, 8)}
+    g["_ban_kinh_moi_dot_bien"], g["_phong_con"], g["_ket_thuc_manh"] = du, phong, ghi
+    g["_van_tay"] = lambda: dict(vt_gia)
+    kq = {"mong_du": list(DOT_BIEN), "mong_manh": _phan_manh(3, 8), "mong_so": _so_tien_trinh_ban_kinh()}
     manh = {_BIEN_MANH: "3/8", _BIEN_MANH_RA: "x"}
     for kb, env, do in (("du", {}, None), ("gate", {_BIEN_BAN_KINH: "manh"}, None), ("manh", manh, None),
-                        ("con_hong", manh, None), ("ghi_do", manh, None), ("nen_do", manh, ten_ca[-1])):
+                        ("con_hong", manh, None), ("ghi_do", manh, None), ("nen_do", manh, ten_ca[-1]),
+                        ("tien_kiem", manh, None)):
         goi.clear()
         goi["kb"] = kb
         dung_ca(do)
@@ -7124,7 +7159,8 @@ def _in_tu_kiem_main():
         os.environ.update(env)
         with contextlib.redirect_stdout(io.StringIO()):
             rc = main()
-        kq[kb] = [rc, goi.get("du", []), goi.get("phong", []), goi.get("ghi", [])]
+        kq[kb] = [rc, goi.get("du", []), goi.get("phong", []), goi.get("ghi", []),
+                  goi.get("du_tham_so"), goi.get("phong_tham_so")]
     print("KQ " + json.dumps(kq, ensure_ascii=True))
 
 
@@ -7198,7 +7234,7 @@ def main() -> int:
         k, n, ra = tham_so
         ten = _phan_manh(k, n)
         if hong or tien_kiem_bo_qua:
-            _ket_thuc_manh(k, n, ra, ten, None, "nền đỏ hoặc tiền kiểm bị bỏ qua — không đo", {})
+            _ket_thuc_manh(k, n, ra, ten, None, "nền đỏ hoặc tiền kiểm bị bỏ qua — không đo", _van_tay())
             print(f"  ĐỎ  mảnh {k}/{n} [M-nen]: nền KHÔNG xanh — không đo bán kính, không ghi tệp")
             return 1
         print(f"\nBÁN KÍNH ĐỘT BIẾN — MẢNH {k}/{n} ({len(ten)}/{len(DOT_BIEN)} đột biến; "

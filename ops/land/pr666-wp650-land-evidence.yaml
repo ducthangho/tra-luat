@@ -38,6 +38,18 @@ authorization_url_la_gi: >-
   kem muc "Uy quyen land": merge commit, CHI tren bf63bb1. Dang 06:17:39Z; chu kho SUA tai cho luc ~06:35Z de danh
   dau [x] du 5 muc tu kiem (ban dau ca 5 de trong — land operator KHONG merge cho toi khi da danh dau). Comment id
   khong doi qua lan sua.
+authorization_thu_tu_thoi_gian:
+  nguon: 'Codex connector #667 luot 2 P1 (4119661444): chung minh ban uy quyen da sua CO TRUOC merge'
+  comment_created_at: '2026-09-28T06:17:39Z'
+  comment_updated_at: '2026-09-28T06:35:21Z'
+  merged_at: '2026-09-28T06:35:57Z'
+  ket_luan: >-
+    updated_at (lan sua CUOI CUNG, doc lai qua MCP github issue_read get_comments luc 2026-09-28T07:40Z) = 06:35:21Z,
+    SOM hon merged_at 36s => khong co lan sua nao SAU merge. Su kien webhook issue_comment.edited voi 5 muc [x] den
+    phien nay luc 06:35:22Z; land operator doc lai comment va kiem head/CI roi moi goi merge (06:35:57Z).
+  gioi_han: >-
+    GitHub API khong tra lich su tung lan sua qua MCP; khong co bam than comment doc TRUOC merge (than doc qua MCP bi
+    chuan hoa thuc the HTML — CLAUDE.md, nen bam ay khong dung lam bang chung byte). Do chinh xac thoi gian: giay.
 land_operator: claude-session (tai khoan GitHub cua chu kho qua MCP github)
 merge_method: merge
 merge_commit: f8a7829cc44f296c25faf1a6439b603ba840f70b
@@ -52,6 +64,9 @@ pre_merge_checks:
   - 'Head PR = bf63bb1 (git fetch + rev-parse) ngay truoc merge; base origin/master = ceb1a3f khong doi.'
   - check: 'CI tren bf63bb1 (neo run/job, Codex #667 P1)'
     workflow_run: https://github.com/ducthangho/tra-luat/actions/runs/36379712476
+    checkout: {sha: bf63bb1ec485bccf8eec34cc5604f949d70fc7d6, parents: cb9ecc8606a7d4b237a5b20702c04f096af2d0e6, tree: 235f6605809b4f813adf5fdc467aae3944093629}
+    workflow_definition: {path: .github/workflows/ci.yml, tai_commit: bf63bb1, blob: 6ba1255b5ae5635e1ffc9495b11462b3f5c2fd14, sha256: 69100292ffee7b13b71053006df98239ffe1c86328d2c3af8e089b46dc243d16}
+    runner: ubuntu-latest (labels cua tung job, doc qua list_workflow_jobs)
     workflow: .github/workflows/ci.yml (gate), event pull_request, run_attempt 1, head_sha bf63bb1
     jobs_success: {chuan-bi: 108792748557, gate-registry: 108792765482, gate-packet-loop: 108792765529, gate-ops: 108792765497, gate: 108792765498}
     thu_hoi_success: [https://github.com/ducthangho/tra-luat/actions/runs/36379710851, https://github.com/ducthangho/tra-luat/actions/runs/36379744361]
@@ -68,16 +83,42 @@ post_merge_checks:
   - check: 'CI master tren merge commit f8a7829 (Codex #667 P1: merge khong tu dong nghia landed)'
     workflow_run: https://github.com/ducthangho/tra-luat/actions/runs/36387278453
     workflow: .github/workflows/ci.yml (gate), event push, branch master, run_attempt 1, head_sha f8a7829
+    checkout: {sha: f8a7829cc44f296c25faf1a6439b603ba840f70b, parents: [ceb1a3f36912dd4f03fe1741c443cd09e82a44ee, bf63bb1ec485bccf8eec34cc5604f949d70fc7d6], tree: 235f6605809b4f813adf5fdc467aae3944093629}
+    workflow_definition: {path: .github/workflows/ci.yml, tai_commit: f8a7829, blob: 6ba1255b5ae5635e1ffc9495b11462b3f5c2fd14, sha256: 69100292ffee7b13b71053006df98239ffe1c86328d2c3af8e089b46dc243d16}
+    runner: ubuntu-latest
     conclusion: success
     jobs_success: {chuan-bi: 108815209536, gate-ops: 108815233211, gate-registry: 108815233275, gate-packet-loop: 108815233290, gate: 108815233339}
     doc_lai_luc: '2026-09-28T07:31Z qua MCP github actions_get / list_workflow_jobs'
+  - check: 'Windows TU DONG tren master f8a7829 (Codex #667 luot 2 P1 4119661431)'
+    workflow_run: https://github.com/ducthangho/tra-luat/actions/runs/36387278424
+    workflow: .github/workflows/launcher-windows.yml ("launcher (Windows that)"), event push, branch master, run_attempt 1, head_sha f8a7829
+    workflow_definition: {path: .github/workflows/launcher-windows.yml, tai_commit: f8a7829, blob: 24b55164eca4fef5c76aae13cb691e4bb103d05e, sha256: fd382397fe05b6d98ee9957cee19a732dbe4855c88d090a49462ec7c6cc6233f}
+    conclusion: success
+    jobs_success: {launcher-windows-latest: 108815209421, launcher-ubuntu-latest: 108815209553}
+    skipped_KHONG_tinh_la_pass: 'job ubuntu-latest bo 4 buoc Probe chi-Windows (#11-#14) theo dieu kien workflow; job windows-latest chay du ca 4.'
+    doc_lai_luc: '2026-09-28T07:43Z qua MCP github list_workflow_runs / list_workflow_jobs'
 post_merge_ghi_chu: >-
-  Run nay chi co job ubuntu-latest; khong co lan chay Windows nao tren f8a7829 (chi thi chu kho: khong chay CI tay,
-  khong Windows) — Windows la not_run, khong tinh la pass. Trang thai `landed` cua packet dua tren: merge commit
-  f8a7829 dung authorized_head_sha + CI master xanh o tren + human audit; KHONG dua tren review model.
+  DINH CHINH: ban 876ad29 cua tep nay ghi "Windows not_run" — SAI. launcher-windows.yml tu chay khi push master cham
+  .claude/dev/** (khong phai lan chay tay); run 36387278424 o tren da chay va XANH. Trang thai `landed` cua packet dua
+  tren: merge commit f8a7829 dung authorized_head_sha + hai workflow master xanh o tren + human audit; KHONG dua tren
+  review model.
+khong_do_duoc:
+  - 'Artifact gate-evidence cua tung run va marker duong trong log gate (Codex #667 luot 2 P1 4119661425): chua doc lai.'
+  - 'Danh sach required context cua ruleset/branch protection cho master (Codex #667 luot 2 P2 4119661439): chua doc
+    duoc; ket luan launcher/mo "khong required" chi suy tu mergeable_state => KHONG DO DUOC, khong phai da chung minh.'
+  - 'Validator tu dong cho ho so land (cac finding doi "validation case"): kho chua co validator cho ops/land/*.yaml —
+    viec ay la packet rieng, khong lam trong PR bookkeeping.'
 bookkeeping:
   - 'Thu hoi lease c1a1a-exec-2-claude-20260927 bang rut han ve 2026-09-28T06:55Z tren ops/cap-lease-650 (4fe61ac); ops-publish-lease run 36387390312 success.'
   - 'Dua tep lease (ban da thu hoi) + tep ho so nay vao master qua PR bookkeeping.'
+  - check: 'Lease thoi giu write set sau 06:55Z (Codex #667 luot 2 P1 4119661450; dieu kien nghiem thu trong chinh lease)'
+    do_luc: '2026-09-28T07:42:28Z'
+    ref_inventory: 'git ls-remote --heads origin (489) so TAP TEN voi for-each-ref refs/remotes/origin (489): comm -23 = 0, comm -13 = 0'
+    lenh: 'ops/lease_publish.py ai-dang-giu <tep> trong ban sao scratch co 489 refs/heads (moi ref origin) + origin that'
+    ket_qua:
+      .claude/dev/doc_receipt_thu_hoi.py: 'rc=0, NGUOI_GIU 0; c1a1a-exec-2 = HET_HAN'
+      .claude/dev/doc_receipt_thu_hoi_test.py: 'rc=0, NGUOI_GIU 0; c1a1a-exec-2 = HET_HAN'
+      .claude/dev/ci_dang_ky_test.py: 'rc=11, NGUOI_GIU 1 = ci-g5-cong-cu-chia-manh-r1-g1-claude (lease cua packet KHAC); c1a1a-exec-2 KHONG con trong NGUOI_GIU'
 khong_co_cross_approved: >-
   Review Codex la advisory_review; cong land cua packet sensitive nay la human_audited cua chu kho tren exact head.
 lech_protocol_khai:

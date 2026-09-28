@@ -90,8 +90,8 @@ def ca(m, ten, dau_vao, do=(), **tham):
     kiem_kq(ten, kq, do)
     if "K4" in do and "K1" not in do:  # nghĩa lý do K4: ĐÚNG trường lệch, ĐÚNG "stale, chay lai" (luot3 F30 K4-THONG-BAO-STALE)
         r, t = json.loads(raw), {"S": S, "H": H, **{k: tham[v] for k, v in (("S", "base_hien_hanh"), ("H", "head_hien_hanh")) if v in tham}}
-        k4 = [re.fullmatch(r"K4\s*:\s*([SH])\s*:?\s*(?:receipt )?stale, ch(?:ay|ạy) l(?:ai|ại)", x) for x in kq["ly_do"] if re.match(r"K4\b", x)]
-        if not all(k4) or sorted(x[1] for x in k4) != sorted(k for k in ("S", "H") if r[k] != t[k]):  # luot5 F35, luot6 F39/F40
+        k4 = [re.fullmatch(r"K4\s*:\s*([SH])\s*:?\s*(?:receipt )?stale, ch(?:ay|ạy) l(?:ai|ại)", x.lstrip()) for x in kq["ly_do"] if re.match(r"\s*K4\b", x)]
+        if not all(k4) or sorted(x[1] for x in k4) != sorted(k for k in ("S", "H") if r[k] != t[k]):  # luot5 F35, luot6 F39/F40, luot7 F41
             raise TinHieuChotCa(f"{ten}: ly do K4 sai nghia: {kq['ly_do']}")
 
 
@@ -383,7 +383,7 @@ DB = [
     ("M5c", "base lấy từ THAM SỐ", "base_tu_receipt", _K4, '    base_hien_hanh = r["S"]\n' + _K4, "k4_base", None),
     ("M5e", "lý do K4 nói stale (F30)", "k4_noi_fresh", 'stale, chay lai', 'fresh, khong can chay lai', "k4_base", None),
     ("M5f", "lý do K4 nêu ĐÚNG trường (F30)", "k4_sai_truong", '[f"{k} stale', '[f"S stale', "k4_head", None),
-    ("M5g", "MỌI lý do nhãn K4 được kiểm (F40)", "k4_mau_thuan", _K4, '    ly_do += ["K4:S fresh"] * (r["S"] != base_hien_hanh)\n' + _K4, "k4_base", None),
+    ("M5g", "MỌI lý do nhãn K4 được kiểm, kể cả thụt đầu (F40/F41)", "k4_mau_thuan", _K4, '    ly_do += ["\\tK4:S fresh"] * (r["S"] != base_hien_hanh)\n' + _K4, "k4_base", None),
     ("M5d", "head lấy từ THAM SỐ", "head_tu_receipt", _K4, '    head_hien_hanh = r["H"]\n' + _K4, "k4_head", None),
     ("M6a", "checker_rc == 0", "bo_rc", 'r["checker_rc"] == 0)', 'True)', "k5_rc", None),
     ("M6b", "ket_luan thuộc tập đóng", "bo_ket_luan", 'r["ket_luan"] in KET_LUAN', 'True', "k5_ket_luan", None),

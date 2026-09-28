@@ -258,3 +258,12 @@ write_set_do_luc_cap:
   do_luc: '2026-09-28T02:27:20Z'
   do_luc_nguon: 'date -u in ra NGAY TRUOC lan chay `ai-dang-giu` cho hai duong write set (sau vong dong bo nhanh).'
   ket_qua: 'TRUOC khi commit g33: ai-dang-giu hai duong rc=12, dung MOT ly do: bia mo mot chieu g32 -> g33 (ve thu nhat 9e78ca5 da day, ve thu hai la chinh tep nay); tap ref may chu/cuc bo thieu 0. Do lai SAU commit g33 — ghi trong comment bao cao.'
+
+# ───────────────────────── BIA MỘ — vế THỨ NHẤT của dấu HAI CHIỀU ─────────────────────────
+# Thêm 2026-09-28 khi cấp g34. g33 CÒN HIỆU LỰC (hạn 2026-09-28T06:00:00Z) nên bia mộ hai chiều là
+# BẮT BUỘC. REVISION mới (r33 -> r34): protocol §3.2.
+da_bi_thay_the: r378-symlink-doi-dac-quyen-r34-g34-claude
+da_bi_thay_the_luc: '2026-09-28T03:52:24Z'
+da_bi_thay_the_luc_nguon: 'date -u luc commit bia mo nay; commit dung CHINH gia tri ay lam committer date (GIT_COMMITTER_DATE).'
+da_bi_thay_the_vi_sao: 'r34 (chỉ thị chủ kho trong phiên executor "R32 chạy cross review và vá tới hết P1, P2, P3" + "Chạy cross review vòng mới luôn đi"; lượt 29 còn P2, 4 biểu hiện cùng lớp, không P1, không đổi parser) —
+  phép phủ đọc byte thật đã truyền cho kiem, CLI ghi argv thật, câu hiệu lực cho ca âm Python trong tu_kiem (v25); head không đổi 76f199e.'

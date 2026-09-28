@@ -1065,7 +1065,22 @@ def chon_so_worker(trung_vi_theo_N):
     return min((n for n, t in ung.items() if t * 100 <= 110 * t_min), default=None)
 
 
-G5_SELFTEST, G5_PROBE, JOB_G5 = "python ops/cong_cu_test.py", "python ops/cong_cu.py kiem-tra --json", ("gate", "gate-registry", "gate-packet-loop")
+G5_SELFTEST, G5_PROBE = "python ops/cong_cu_test.py", "python ops/cong_cu.py kiem-tra --json"
+# #668: bán kính đột biến của `cong_cu_test` chia `SO_MANH_G5` job mảnh + một job gom. Mọi giá trị dưới đây GHIM, so
+# BẰNG ĐÚNG (danh sách CHO PHÉP): `N` của env mảnh, matrix, tên/mẫu artifact và `if` của gom không được trôi lệch nhau.
+JOB_G5_MANH, JOB_G5_GOP, SO_MANH_G5 = "gate-cong-cu", "gate-cong-cu-gop", 8
+JOB_G5 = ("gate", "gate-registry", "gate-packet-loop", JOB_G5_MANH, JOB_G5_GOP)
+G5_GOP = "python ops/cong_cu_test.py --gop manh"
+G5_LENH = {"gate": [G5_PROBE, G5_SELFTEST], JOB_G5_MANH: [G5_PROBE, G5_SELFTEST], JOB_G5_GOP: [G5_GOP]}
+G5_ENV = {"gate": {"CONG_CU_TEST_BAN_KINH": "manh"},
+          JOB_G5_MANH: {"CONG_CU_TEST_MANH": f"${{{{ matrix.manh }}}}/{SO_MANH_G5}",
+                        "CONG_CU_TEST_MANH_RA": "manh/manh-${{ matrix.manh }}.txt"}}
+G5_TAI_LEN = {"uses": "actions/upload-artifact@v4", "with": {
+    "name": "gate-cong-cu-manh-${{ matrix.os }}-${{ matrix.manh }}", "path": "manh/manh-${{ matrix.manh }}.txt",
+    "if-no-files-found": "error"}}
+G5_TAI_VE = {"uses": "actions/download-artifact@v4", "with": {
+    "pattern": "gate-cong-cu-manh-${{ matrix.os }}-*", "path": "manh", "merge-multiple": True}}
+G5_GOP_IF, G5_GOP_NEEDS = "${{ !cancelled() }}", ["chuan-bi", JOB_G5_MANH]
 G5_THIET_LAP = frozenset({"git config --global core.autocrlf false", "git config --global core.eol lf", "git config --global core.abbrev 7",
                           "python -m pip install --quiet PyYAML==6.0.3 jsonschema==4.26.0", "bash ops/cai_actionlint.sh",
                           "bash ops/cai_cong_cu.sh shellcheck", "bash ops/cai_cong_cu.sh rg",
@@ -1073,9 +1088,26 @@ G5_THIET_LAP = frozenset({"git config --global core.autocrlf false", "git config
 def _dong_lenh(b): return [b.get("uses")] * ("uses" in b) + [x.strip() for x in str(b.get("run", "")).splitlines() if x.strip() and not x.lstrip().startswith("#")]
 
 
+def _loi_g5_manh_gop(j, v, buoc, i):
+    """#668: phần RIÊNG của hai job mảnh/gom — matrix, `needs`, `if`, và bước artifact, mọi thứ so BẰNG ĐÚNG."""
+    ma = ((v.get("strategy") or {}).get("matrix") or {})
+    if j == JOB_G5_MANH:
+        loi = [] if ma.get("manh") == list(range(SO_MANH_G5)) and set(ma) == {"os", "manh"} else [
+            f"{j}: matrix phải đúng os + manh {list(range(SO_MANH_G5))}, thấy {ma}"]
+        loi += [] if v.get("needs") == "chuan-bi" and "if" not in v else [f"{j}: needs/if lệch: {v.get('needs')!r}/{v.get('if')!r}"]
+        return loi + ([] if buoc[i + 1:] == [G5_TAI_LEN] else [f"{j}: sau bước G5 phải đúng MỘT bước tải lên {G5_TAI_LEN}"])
+    loi = [] if set(ma) == {"os"} else [f"{j}: matrix chỉ được có os, thấy {ma}"]
+    loi += [] if v.get("needs") == G5_GOP_NEEDS and v.get("if") == G5_GOP_IF else [
+        f"{j}: needs/if phải đúng {G5_GOP_NEEDS}/{G5_GOP_IF!r}, thấy {v.get('needs')!r}/{v.get('if')!r}"]
+    loi += [] if i + 1 == len(buoc) else [f"{j}: bước gom phải là bước CUỐI"]
+    return loi + ([] if [b for b in buoc[:i] if "download-artifact" in str(b.get("uses", ""))] == [G5_TAI_VE] else
+                  [f"{j}: trước bước gom phải có đúng MỘT bước tải về {G5_TAI_VE}"])
+
+
 def loi_g5_workflow(data):
     """M6 theo HÌNH DẠNG BƯỚC + danh sách CHO PHÉP (review tại chỗ lượt 1–3: nhận diện theo văn bản lọt ba lần): mỗi job G5
-    đúng MỘT bước chạm `ops/cong_cu`, lệnh BẰNG ĐÚNG [probe](+selftest ở gate), vô điều kiện; trước nó chỉ lệnh thiết lập."""
+    đúng MỘT bước chạm `ops/cong_cu`, lệnh BẰNG ĐÚNG `G5_LENH` (mặc định [probe]), `env` BẰNG ĐÚNG `G5_ENV` (mặc định
+    vắng), vô điều kiện; trước nó chỉ lệnh thiết lập (gom: thêm đúng bước tải về). #668: job mảnh/gom qua `_loi_g5_manh_gop`."""
     jobs = (data or {}).get("jobs") or {}
     loi = [f"thiếu job {j}" for j in JOB_G5 if j not in jobs]
     for j, v in jobs.items():
@@ -1083,12 +1115,17 @@ def loi_g5_workflow(data):
         cham = [i for i, b in enumerate(buoc) if re.search(r"(?<![A-Za-z0-9_])cong_cu", str(b.get("run", "")))]
         if j not in JOB_G5 or len(cham) != 1:
             loi += [f"{j}: phải có đúng một bước G5 (chỉ ở {JOB_G5}), thấy {len(cham)}"] if cham or j in JOB_G5 else []
-        elif _dong_lenh(buoc[cham[0]]) != [G5_PROBE] + [G5_SELFTEST] * (j == "gate"):
+        elif _dong_lenh(buoc[cham[0]]) != G5_LENH.get(j, [G5_PROBE]):
             loi.append(f"{j}: bước G5 sai hình dạng: {_dong_lenh(buoc[cham[0]])}")
-        elif {"if", "continue-on-error"} & (set(buoc[cham[0]]) | set(v)):
+        elif buoc[cham[0]].get("env") != G5_ENV.get(j):
+            loi.append(f"{j}: env bước G5 phải BẰNG ĐÚNG {G5_ENV.get(j)}, thấy {buoc[cham[0]].get('env')}")
+        elif {"if", "continue-on-error"} & (set(buoc[cham[0]]) | (set(v) - {"if"} if j == JOB_G5_GOP else set(v))):
             loi.append(f"{j}: bước G5 có điều kiện hoặc được phép bỏ qua lỗi")
-        elif any(not set(_dong_lenh(b)) <= G5_THIET_LAP for b in buoc[:cham[0]]):
+        elif any(not set(_dong_lenh(b)) <= (G5_THIET_LAP | {G5_TAI_VE["uses"]} if j == JOB_G5_GOP else G5_THIET_LAP)
+                 for b in buoc[:cham[0]]):
             loi.append(f"{j}: có lệnh ngoài danh sách thiết lập đứng trước probe G5")
+        elif j in (JOB_G5_MANH, JOB_G5_GOP):
+            loi += _loi_g5_manh_gop(j, v, buoc, cham[0])
     return loi
 
 
@@ -1741,6 +1778,43 @@ def phan_chung():
     _them("p637-A7-probe-continue-on-error", _hong_wf("gate-registry", lambda b, i: b[i].update({"continue-on-error": True})))
     _them("p637-A7-job-continue-on-error", bool(loi_g5_workflow({"jobs": {**_wf0["jobs"], "gate": {**_wf0["jobs"]["gate"], "continue-on-error": True}}})))
     _them("p637-A7-nhan-doi-selftest-trong-gate", _hong_wf("gate", lambda b, i: b.insert(i + 1, {"run": G5_SELFTEST})))
+    # ── #668 A6: job mảnh/gom — mỗi hình dạng lệch một ca, sửa trên BẢN SAO của ci.yml thật. ──
+    def _hong_job(j, f):
+        w = json.loads(json.dumps(_wf0)); v = w["jobs"][j]; b = v["steps"]
+        f(v, b, next(i for i, x in enumerate(b) if re.search(r"(?<![A-Za-z0-9_])cong_cu", str(x.get("run", "")))))
+        return bool(loi_g5_workflow(w))
+    _M, _G = JOB_G5_MANH, JOB_G5_GOP
+    def _moi_mau(i, b, **kv): b[i] = {**b[i], **kv}
+    for _t, _j, _f in (
+            ("gate-thieu-env-ban-kinh", "gate", lambda v, b, i: b[i].pop("env")),
+            ("gate-env-ban-kinh-la", "gate", lambda v, b, i: _moi_mau(i, b, env={"CONG_CU_TEST_BAN_KINH": "du"})),
+            ("gate-env-thua-bien", "gate", lambda v, b, i: b[i]["env"].update({"CONG_CU_TEST_MANH": "0/8"})),
+            ("registry-co-env-ban-kinh", "gate-registry", lambda v, b, i: _moi_mau(i, b, env={"CONG_CU_TEST_BAN_KINH": "manh"})),
+            ("manh-sai-n", _M, lambda v, b, i: b[i]["env"].update({"CONG_CU_TEST_MANH": "${{ matrix.manh }}/7"})),
+            ("manh-thieu-ra", _M, lambda v, b, i: b[i]["env"].pop("CONG_CU_TEST_MANH_RA")),
+            ("manh-thieu-selftest", _M, lambda v, b, i: _moi_mau(i, b, run=G5_PROBE)),
+            ("manh-matrix-thieu", _M, lambda v, b, i: v["strategy"]["matrix"].update({"manh": list(range(SO_MANH_G5 - 1))})),
+            ("manh-matrix-thua", _M, lambda v, b, i: v["strategy"]["matrix"].update({"manh": list(range(SO_MANH_G5 + 1))})),
+            ("manh-matrix-khoa-la", _M, lambda v, b, i: v["strategy"]["matrix"].update({"include": [{"manh": 9}]})),
+            ("manh-job-if", _M, lambda v, b, i: v.update({"if": "${{ !cancelled() }}"})),
+            ("manh-buoc-continue", _M, lambda v, b, i: _moi_mau(i, b, **{"continue-on-error": True})),
+            ("manh-bo-tai-len", _M, lambda v, b, i: b.pop(i + 1)),
+            ("manh-tai-len-khong-loi", _M, lambda v, b, i: b[i + 1]["with"].update({"if-no-files-found": "warn"})),
+            ("manh-them-buoc-sau", _M, lambda v, b, i: b.append({"run": "true"})),
+            ("gop-khong-needs-manh", _G, lambda v, b, i: v.update({"needs": "chuan-bi"})),
+            ("gop-khong-if", _G, lambda v, b, i: v.pop("if")),
+            ("gop-if-always", _G, lambda v, b, i: v.update({"if": "${{ always() }}"})),
+            ("gop-lenh-khac", _G, lambda v, b, i: _moi_mau(i, b, run="python ops/cong_cu_test.py --gop khac")),
+            ("gop-co-env", _G, lambda v, b, i: _moi_mau(i, b, env={"CONG_CU_TEST_BAN_KINH": "manh"})),
+            ("gop-bo-tai-ve", _G, lambda v, b, i: b.pop(next(k for k, x in enumerate(b) if "download" in str(x.get("uses"))))),
+            ("gop-tai-ve-mau-khac", _G, lambda v, b, i: b[i - 1]["with"].update({"pattern": "gate-cong-cu-manh-*"})),
+            ("gop-hai-tai-ve", _G, lambda v, b, i: b.insert(i, dict(b[i - 1]))),
+            ("gop-buoc-sau-gom", _G, lambda v, b, i: b.append({"run": "true"})),
+            ("gop-matrix-them-manh", _G, lambda v, b, i: v["strategy"]["matrix"].update({"manh": [0]})),
+    ):
+        _them(f"p668-A6-{_t}", _hong_job(_j, _f))
+    for _j in (_M, _G):
+        _them(f"p668-A6-thieu-job-{_j}", bool(loi_g5_workflow({"jobs": {k: v for k, v in _wf0["jobs"].items() if k != _j}})))
     _them("p637-A8-khong-ung-vien", chon_so_worker({1: 100, 2: 101, 4: 102}) is None)
     _them("p637-A8-dung-bien", chon_so_worker({1: 200, 2: 110, 4: 100}) == 2)
     _them("p637-A8-vuot-bien", chon_so_worker({1: 200, 2: 110.5, 4: 100}) == 4)

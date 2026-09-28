@@ -1684,6 +1684,127 @@ DOT_BIEN = {
         "            dong = [i for i, l in enumerate(than.splitlines(), 1)\n"
         "                    if 'which(\"bash\")' in l]  # đột biến: đo CHUỖI, không đo cấu trúc\n",
         "BASH_NEN", (), "t27_cong_khong_bao_dong_gia_tren_CHU_THICH"),
+    # #668 CI-G5-CONG-CU-CHIA-MANH: mỗi chốt gom/ghi/chế độ một đột biến riêng; ca đích đòi THẺ riêng của chốt.
+    'g668_gom_bo_thu_muc': ("ops/cong_cu_test.py",
+        '    if muc is None:\n',
+        '    if False:  # đột biến: thư mục vắng lọt\n',
+        "TEP_TEST", _KEM_TEP_TEST, 't52_gom_manh_phai_DO_khi_thieu_trung_lech_va_moi_chot_co_THE_RIENG'),
+    'g668_gom_bo_rong': ("ops/cong_cu_test.py",
+        '    if not muc:\n        return [f"  ĐỎ  gom [G-rong]',
+        '    if False:\n        return [f"  ĐỎ  gom [G-rong]',
+        "TEP_TEST", _KEM_TEP_TEST, 't52_gom_manh_phai_DO_khi_thieu_trung_lech_va_moi_chot_co_THE_RIENG'),
+    'g668_gom_bo_head': ("ops/cong_cu_test.py",
+        '    if van_tay.get("head") is None:\n        return ["  ĐỎ  gom [G-head]',
+        '    if False:\n        return ["  ĐỎ  gom [G-head]',
+        "TEP_TEST", _KEM_TEP_TEST, 't52_gom_manh_phai_DO_khi_thieu_trung_lech_va_moi_chot_co_THE_RIENG'),
+    'g668_gom_bo_tep_thuong': ("ops/cong_cu_test.py",
+        '        if p.is_symlink() or not p.is_file():\n',
+        '        if False:  # đột biến: nhận mục không phải tệp thường\n',
+        "TEP_TEST", _KEM_TEP_TEST, 't52_gom_manh_phai_DO_khi_thieu_trung_lech_va_moi_chot_co_THE_RIENG'),
+    'g668_gom_nhan_khoa_thua': ("ops/cong_cu_test.py",
+        '            if not isinstance(dau, dict) or set(dau) != _KHOA_DAU_MANH:\n',
+        '            if not isinstance(dau, dict) or not _KHOA_DAU_MANH <= set(dau):  # đột biến: nhận khoá thừa\n',
+        "TEP_TEST", _KEM_TEP_TEST, 't52_gom_manh_phai_DO_khi_thieu_trung_lech_va_moi_chot_co_THE_RIENG'),
+    'g668_gom_bo_kieu_int': ("ops/cong_cu_test.py",
+        '            if any(type(dau[x]) is not int for x in ("phien_ban", "manh", "so_manh")):\n',
+        '            if False:  # đột biến: bool lọt thành số\n',
+        "TEP_TEST", _KEM_TEP_TEST, 't52_gom_manh_phai_DO_khi_thieu_trung_lech_va_moi_chot_co_THE_RIENG'),
+    'g668_gom_bo_phien_ban': ("ops/cong_cu_test.py",
+        '        if dau["phien_ban"] != _PHIEN_BAN_MANH:\n',
+        '        if False:  # đột biến: phiên bản lạ lọt\n',
+        "TEP_TEST", _KEM_TEP_TEST, 't52_gom_manh_phai_DO_khi_thieu_trung_lech_va_moi_chot_co_THE_RIENG'),
+    'g668_gom_bo_sha': ("ops/cong_cu_test.py",
+        '        if dau["sha256_test"] != van_tay["sha256_test"] or dau["head"] != van_tay["head"]:\n',
+        '        if dau["head"] != van_tay["head"]:  # đột biến: bỏ so sha256_test\n',
+        "TEP_TEST", _KEM_TEP_TEST, 't52_gom_manh_phai_DO_khi_thieu_trung_lech_va_moi_chot_co_THE_RIENG'),
+    'g668_gom_bo_head_manh': ("ops/cong_cu_test.py",
+        '        if dau["sha256_test"] != van_tay["sha256_test"] or dau["head"] != van_tay["head"]:\n',
+        '        if dau["sha256_test"] != van_tay["sha256_test"]:  # đột biến: bỏ so head\n',
+        "TEP_TEST", _KEM_TEP_TEST, 't52_gom_manh_phai_DO_khi_thieu_trung_lech_va_moi_chot_co_THE_RIENG'),
+    'g668_gom_bo_dong_la': ("ops/cong_cu_test.py",
+        '        if la:\n',
+        '        if False:  # đột biến: dòng ngoài hợp đồng lọt\n',
+        "TEP_TEST", _KEM_TEP_TEST, 't52_gom_manh_phai_DO_khi_thieu_trung_lech_va_moi_chot_co_THE_RIENG'),
+    'g668_gom_bo_so_manh': ("ops/cong_cu_test.py",
+        '    if len(cac_n) != 1:\n',
+        '    if False:  # đột biến: số mảnh khác nhau lọt\n',
+        "TEP_TEST", _KEM_TEP_TEST, 't52_gom_manh_phai_DO_khi_thieu_trung_lech_va_moi_chot_co_THE_RIENG'),
+    'g668_gom_bo_n': ("ops/cong_cu_test.py",
+        '    if not 2 <= n <= _TRAN_MANH:\n',
+        '    if False:  # đột biến: N ngoài phạm vi lọt\n',
+        "TEP_TEST", _KEM_TEP_TEST, 't52_gom_manh_phai_DO_khi_thieu_trung_lech_va_moi_chot_co_THE_RIENG'),
+    'g668_gom_bo_tap': ("ops/cong_cu_test.py",
+        '    if sorted(than_cac) != list(range(n)):\n',
+        '    if False:  # đột biến: tập mảnh lệch lọt\n',
+        "TEP_TEST", _KEM_TEP_TEST, 't52_gom_manh_phai_DO_khi_thieu_trung_lech_va_moi_chot_co_THE_RIENG'),
+    'g668_gom_bo_phan_hoach': ("ops/cong_cu_test.py",
+        '    if sum(map(len, phan)) != len(DOT_BIEN) or set().union(*phan) != set(DOT_BIEN):\n',
+        '    if False:  # đột biến: phân hoạch chồng lấn lọt\n',
+        "TEP_TEST", _KEM_TEP_TEST, 't52_gom_manh_phai_DO_khi_thieu_trung_lech_va_moi_chot_co_THE_RIENG'),
+    'g668_gom_bo_dem': ("ops/cong_cu_test.py",
+        '        if len(cua_k) != 1:\n',
+        '        if not cua_k:  # đột biến: mảnh trùng lọt, lấy tệp đầu\n',
+        "TEP_TEST", _KEM_TEP_TEST, 't52_gom_manh_phai_DO_khi_thieu_trung_lech_va_moi_chot_co_THE_RIENG'),
+    'g668_gom_tin_ten_cua_manh': ("ops/cong_cu_test.py",
+        '        nhan, ly_do = _nhan_ket_qua_con(phan[k], 0, than, ())\n',
+        '        nhan, ly_do = _nhan_ket_qua_con([json.loads(x[6:])[1] for x in than.split("\\n") if x], 0, than, ())  # đột biến: tin tên do mảnh tự khai\n',
+        "TEP_TEST", _KEM_TEP_TEST, 't52_gom_manh_phai_DO_khi_thieu_trung_lech_va_moi_chot_co_THE_RIENG'),
+    'g668_phan_manh_chong': ("ops/cong_cu_test.py",
+        '    return [t for i, t in enumerate(DOT_BIEN if ten is None else ten) if i % n == k]\n',
+        '    return [t for i, t in enumerate(DOT_BIEN if ten is None else ten) if i % n <= k]  # đột biến\n',
+        "TEP_TEST", _KEM_TEP_TEST, 't52_gom_manh_phai_DO_khi_thieu_trung_lech_va_moi_chot_co_THE_RIENG'),
+    'g668_ghi_bo_xoa_cu': ("ops/cong_cu_test.py",
+        '    if tep.exists() or tep.is_symlink():\n        tep.unlink()\n',
+        '    if False:  # đột biến: để lại tệp mảnh cũ\n        tep.unlink()\n',
+        "TEP_TEST", _KEM_TEP_TEST, 't52_gom_manh_phai_DO_khi_thieu_trung_lech_va_moi_chot_co_THE_RIENG'),
+    'g668_ghi_bo_con': ("ops/cong_cu_test.py",
+        '    if ket is None:\n        return [f"  ĐỎ  mảnh {k}/{n} [M-con]',
+        '    if False:\n        return [f"  ĐỎ  mảnh {k}/{n} [M-con]',
+        "TEP_TEST", _KEM_TEP_TEST, 't52_gom_manh_phai_DO_khi_thieu_trung_lech_va_moi_chot_co_THE_RIENG'),
+    'g668_ghi_bo_head': ("ops/cong_cu_test.py",
+        '    if van_tay.get("head") is None:\n        return [f"  ĐỎ  mảnh {k}/{n} [M-head]',
+        '    if False:\n        return [f"  ĐỎ  mảnh {k}/{n} [M-head]',
+        "TEP_TEST", _KEM_TEP_TEST, 't52_gom_manh_phai_DO_khi_thieu_trung_lech_va_moi_chot_co_THE_RIENG'),
+    'g668_ghi_bo_loi': ("ops/cong_cu_test.py",
+        '    if loi:\n        return dong + [f"  ĐỎ  mảnh {k}/{n} [M-loi]',
+        '    if False:\n        return dong + [f"  ĐỎ  mảnh {k}/{n} [M-loi]',
+        "TEP_TEST", _KEM_TEP_TEST, 't52_gom_manh_phai_DO_khi_thieu_trung_lech_va_moi_chot_co_THE_RIENG'),
+    'g668_che_do_bo_ra_le': ("ops/cong_cu_test.py",
+        '        if ra is not None:\n            raise ValueError(f"[C-ra-le]',
+        '        if False:\n            raise ValueError(f"[C-ra-le]',
+        "TEP_TEST", _KEM_TEP_TEST, 't53_che_do_doc_FAIL_CLOSED_moi_cau_hinh_la_co_THE_RIENG'),
+    'g668_che_do_rong_la_vang': ("ops/cong_cu_test.py",
+        '        if bk != "manh":\n',
+        '        if bk not in ("manh", ""):  # đột biến: rỗng coi như đúng\n',
+        "TEP_TEST", _KEM_TEP_TEST, 't53_che_do_doc_FAIL_CLOSED_moi_cau_hinh_la_co_THE_RIENG'),
+    'g668_che_do_bo_ca_hai': ("ops/cong_cu_test.py",
+        '    if bk is not None:\n        raise ValueError(f"[C-ca-hai]',
+        '    if False:\n        raise ValueError(f"[C-ca-hai]',
+        "TEP_TEST", _KEM_TEP_TEST, 't53_che_do_doc_FAIL_CLOSED_moi_cau_hinh_la_co_THE_RIENG'),
+    'g668_che_do_match_khong_full': ("ops/cong_cu_test.py",
+        '    m = re.fullmatch(r"(0|[1-9][0-9]?)/([1-9][0-9]?)", mh)\n',
+        '    m = re.match(r"(0|[1-9][0-9]?)/([1-9][0-9]?)", mh)  # đột biến: bỏ neo cuối\n',
+        "TEP_TEST", _KEM_TEP_TEST, 't53_che_do_doc_FAIL_CLOSED_moi_cau_hinh_la_co_THE_RIENG'),
+    'g668_che_do_chu_so_unicode': ("ops/cong_cu_test.py",
+        '    m = re.fullmatch(r"(0|[1-9][0-9]?)/([1-9][0-9]?)", mh)\n',
+        '    m = re.fullmatch(r"(0|[1-9]\\d?|\\d)/([1-9][0-9]?)", mh)  # đột biến: \\d nhận chữ số Unicode\n',
+        "TEP_TEST", _KEM_TEP_TEST, 't53_che_do_doc_FAIL_CLOSED_moi_cau_hinh_la_co_THE_RIENG'),
+    'g668_che_do_nhan_n_1': ("ops/cong_cu_test.py",
+        '    if not (2 <= n <= _TRAN_MANH and k < n):\n',
+        '    if not (1 <= n <= _TRAN_MANH and k < n):  # đột biến\n',
+        "TEP_TEST", _KEM_TEP_TEST, 't53_che_do_doc_FAIL_CLOSED_moi_cau_hinh_la_co_THE_RIENG'),
+    'g668_che_do_nhan_k_bang_n': ("ops/cong_cu_test.py",
+        '    if not (2 <= n <= _TRAN_MANH and k < n):\n',
+        '    if not (2 <= n <= _TRAN_MANH and k <= n):  # đột biến\n',
+        "TEP_TEST", _KEM_TEP_TEST, 't53_che_do_doc_FAIL_CLOSED_moi_cau_hinh_la_co_THE_RIENG'),
+    'g668_che_do_bo_tran_tren': ("ops/cong_cu_test.py",
+        '    if not (2 <= n <= _TRAN_MANH and k < n):\n',
+        '    if not (2 <= n and k < n):  # đột biến: bỏ trần trên\n',
+        "TEP_TEST", _KEM_TEP_TEST, 't53_che_do_doc_FAIL_CLOSED_moi_cau_hinh_la_co_THE_RIENG'),
+    'g668_che_do_ra_rong_lot': ("ops/cong_cu_test.py",
+        '    if not ra:\n',
+        '    if ra is None:  # đột biến: tệp ra rỗng lọt\n',
+        "TEP_TEST", _KEM_TEP_TEST, 't53_che_do_doc_FAIL_CLOSED_moi_cau_hinh_la_co_THE_RIENG'),
 }
 
 def _la_dong_ho_nhay(ex) -> bool:
@@ -6192,6 +6313,61 @@ def t39_chi_CA_PHAN_QUYET_duoc_chot_tren_rc_va_trang_thai():
 
 
 
+def _doc_kq_tu_kiem(cua):
+    """`KQ` của một cửa tự kiểm `--tu-kiem-…` chạy qua `TEP_TEST` (để đột biến trên đĩa cắn được)."""
+    p = subprocess.run([sys.executable, str(TEP_TEST), cua], cwd=GOC, capture_output=True, text=True, timeout=300)
+    dong = [l for l in p.stdout.splitlines() if l.startswith("KQ ")]
+    dung(p.returncode == 0 and dong, f"cửa {cua} hỏng: rc={p.returncode}\n{p.stdout[-600:]}\n{p.stderr[-600:]}")
+    return json.loads(dong[-1][3:])
+
+
+@ca
+def t52_gom_manh_phai_DO_khi_thieu_trung_lech_va_moi_chot_co_THE_RIENG():
+    """#668 M3/M4: job gom ĐỎ khi bộ mảnh sai — mỗi cách sai bị ĐÚNG chốt của nó bắt (thẻ `[G-…]`).
+
+    Bộ mảnh dựng bằng CHÍNH `_ket_thuc_manh` (phía ghi) rồi làm hỏng từng cách, nên ca đo cả hợp đồng hai phía.
+    Đòi THẺ chứ không chỉ đòi ĐỎ: gỡ một chốt thì kịch bản của nó hoặc lọt, hoặc bị chốt KHÁC bắt với thẻ khác — cả
+    hai đều ĐỎ ở đây. Đối chứng hai chiều: bộ ĐÚNG phải XANH (N=3 và N=1-bị-từ-chối), để "từ chối tất cả" cũng HỎNG.
+    Phía ghi: mảnh không đạt KHÔNG để lại tệp, kể cả tệp cũ cùng tên — job gom không được thấy mảnh cũ.
+    """
+    kq = _doc_kq_tu_kiem("--tu-kiem-gom")
+    loi, dau, cuoi = kq["dung"]
+    bang(loi == 0 and dau == "GOM MẢNH 3/3" and "lỗi đột biến=0" in cuoi,
+         f"bộ mảnh ĐÚNG phải gom XANH: {kq['dung']}")
+    mong = {"thieu": "G-tap", "thua": "G-dem", "trung": "G-tap", "chuyen": "G-ban-ghi", "xoa": "G-ban-ghi",
+            "sha": "G-van-tay", "head": "G-van-tay", "so_manh": "G-so-manh", "phien_ban": "G-phien-ban",
+            "kieu_bool": "G-dau", "khoa_thua": "G-dau", "dau_hong": "G-dau", "dong_la": "G-dong-la",
+            "ban_ghi": "G-ban-ghi", "tep_la": "G-tep", "rong": "G-rong", "khong_co": "G-thu-muc",
+            "head_gom_none": "G-head", "n_1": "G-n", "phan_chong": "G-phan-hoach"}
+    sai = {t: kq.get(t) for t, the in mong.items()
+           if not (kq.get(t) and kq[t][0] >= 1 and f"[{the}]" in kq[t][1])}
+    bang(not sai, f"kịch bản hỏng KHÔNG bị đúng chốt bắt (mong thẻ {mong}): {sai}")
+    ghi = {t: kq.get(t) for t, the in (("ghi_loi", "M-loi"), ("ghi_con", "M-con"), ("ghi_head", "M-head"))
+           if not (kq.get(t) and kq[t][0] >= 1 and f"[{the}]" in kq[t][1] and kq[t][2] == "khong-tep")}
+    bang(not ghi, f"mảnh KHÔNG đạt phải ĐỎ đúng thẻ và KHÔNG để lại tệp: {ghi}")
+
+
+@ca
+def t53_che_do_doc_FAIL_CLOSED_moi_cau_hinh_la_co_THE_RIENG():
+    """#668 M1/M2: `_doc_che_do` nhận ĐÚNG ba chế độ; mọi cấu hình lạ ⇒ lỗi mang ĐÚNG thẻ `[C-…]`.
+
+    Chuỗi rỗng KHÔNG phải "vắng": `gate` rơi nhầm về `du` thì chỉ chậm, còn một biến mảnh hỏng rơi về `gate` thì không
+    ai đo bán kính. `\\u0661` (chữ số Ả Rập) và `\\n` cuối là hai lối `\\d`/`$` từng lọt ở kho này. Phân hoạch
+    `i % N == k` do `t52` gác (kịch bản `dung` + `phan_chong`): đặt thêm chốt ở đây là cho một đột biến bán kính 2.
+    """
+    kq = _doc_kq_tu_kiem("--tu-kiem-che-do")
+    mong = {"vang": ["du", None], "gate": ["gate", None], "manh": ["manh", [7, 8, "x"]],
+            "manh_16": ["manh", [15, 16, "x"]],
+            "gate_rong": ["loi", "[C-ban-kinh]"], "gate_la": ["loi", "[C-ban-kinh]"],
+            "k_bang_n": ["loi", "[C-pham-vi]"], "n_1": ["loi", "[C-pham-vi]"], "n_17": ["loi", "[C-pham-vi]"],
+            "chu": ["loi", "[C-hinh-dang]"], "so_0_dau": ["loi", "[C-hinh-dang]"], "cach": ["loi", "[C-hinh-dang]"],
+            "xuong_dong": ["loi", "[C-hinh-dang]"], "so_la": ["loi", "[C-hinh-dang]"],
+            "thieu_ra": ["loi", "[C-thieu-ra]"], "ra_rong": ["loi", "[C-thieu-ra]"],
+            "ca_hai": ["loi", "[C-ca-hai]"], "ra_le": ["loi", "[C-ra-le]"]}
+    sai = {t: [kq.get(t), m] for t, m in mong.items() if kq.get(t) != m}
+    bang(not sai, f"`_doc_che_do` đọc sai (thấy, mong): {sai}")
+
+
 def _cong_tren_cay_that(goc, bo_quet=None):
     """(mã, dòng báo) — CHẠY chính cổng `bash_nen quet` trên cây THẬT.
 
@@ -6295,22 +6471,8 @@ def _ban_kinh_moi_dot_bien(cac_ten, do_o_nen, so_tien_trinh):
     so = max(1, min(int(so_tien_trinh), len(cac_ten), _TRAN_TIEN_TRINH))
     if so == 1:
         return [_ban_kinh_mot(t, do_o_nen) for t in cac_ten]
-    nhom = [cac_ten[i::so] for i in range(so)]
-    cac_con = []
-    for n in nhom:
-        tep_ra = tempfile.TemporaryFile()
-        p = subprocess.Popen([sys.executable, str(TEP_TEST), "--ban-kinh-con",
-                              json.dumps(sorted(do_o_nen)), *n],
-                             stdout=tep_ra, stderr=subprocess.STDOUT, stdin=subprocess.DEVNULL,
-                             cwd=str(GOC))
-        _SO_LAN_PHONG[0] += 1
-        cac_con.append((n, p, tep_ra))
     kq = {}
-    for n, p, tep_ra in cac_con:
-        rc = p.wait()
-        tep_ra.seek(0)
-        ra = tep_ra.read().decode("utf-8", "replace")
-        tep_ra.close()
+    for n, rc, ra in _phong_con(cac_ten, do_o_nen, so):
         nhan, ly_do = _nhan_ket_qua_con(n, rc, ra, do_o_nen)
         if nhan is None:
             for ten in n:
@@ -6320,6 +6482,30 @@ def _ban_kinh_moi_dot_bien(cac_ten, do_o_nen, so_tien_trinh):
             for ten, ban_ghi in nhan.items():
                 kq[ten] = _ket_luan_ban_ghi(ban_ghi, do_o_nen)
     return [kq[t] for t in cac_ten]
+
+
+def _phong_con(cac_ten, do_o_nen, so):
+    """[(nhóm, mã thoát, đầu ra)] — chia `cac_ten` cho `so` tiến trình con `--ban-kinh-con`, đợi hết. KHÔNG kết luận gì.
+
+    #668: tách khỏi `_ban_kinh_moi_dot_bien` để chế độ MẢNH dùng ĐÚNG đường phóng + bộ nhận của đường song song.
+    """
+    so = max(1, min(int(so), len(cac_ten), _TRAN_TIEN_TRINH))
+    cac_con = []
+    for n in [cac_ten[i::so] for i in range(so)]:
+        tep_ra = tempfile.TemporaryFile()
+        p = subprocess.Popen([sys.executable, str(TEP_TEST), "--ban-kinh-con",
+                              json.dumps(sorted(do_o_nen)), *n],
+                             stdout=tep_ra, stderr=subprocess.STDOUT, stdin=subprocess.DEVNULL,
+                             cwd=str(GOC))
+        _SO_LAN_PHONG[0] += 1
+        cac_con.append((n, p, tep_ra))
+    kq = []
+    for n, p, tep_ra in cac_con:
+        rc = p.wait()
+        tep_ra.seek(0)
+        kq.append((n, rc, tep_ra.read().decode("utf-8", "replace")))
+        tep_ra.close()
+    return kq
 
 
 _TRANG_THAI_CA = ("qua", "bo_qua", "giet_that", "tin_dung_gia")   # đúng bộ `_chay_1_ca` trả
@@ -6556,6 +6742,302 @@ def _tu_kiem_song_song(do_o_nen):
     return loi
 
 
+# ----------------------------------------------------- #668 CI-G5-CONG-CU-CHIA-MANH: gate · mảnh · gom
+# Đo 28-09-2026: vòng bán kính là ~93 % bước G5 (~43/46 phút) vì mỗi đột biến chạy lại TRỌN `CA`, và runner chỉ có
+# 2 lõi. Nhanh lên được chỉ bằng nhiều RUNNER. Ba chế độ, đọc từ biến môi trường bằng MỘT hàm thuần:
+#   · vắng mọi biến ⇒ `du`   — hành vi cũ, đo trọn bán kính tại chỗ;
+#   · `CONG_CU_TEST_BAN_KINH=manh` ⇒ `gate` — không đo bán kính ở đây, job `gate-cong-cu`+`gate-cong-cu-gop` đo;
+#   · `CONG_CU_TEST_MANH=k/N` + `CONG_CU_TEST_MANH_RA=<tệp>` ⇒ `manh` — đo đột biến `i % N == k`, ghi bản ghi `BKCON`.
+# Tệp mảnh chứa ĐÚNG các dòng `BKCON` mà tiến trình con vẫn in (hợp đồng N129: con gửi DỮ LIỆU, cha kết luận), nên
+# `--gop` kiểm lại bằng CÙNG `_nhan_ket_qua_con` + `_ket_luan_ban_ghi` — không có đường phân hạng thứ hai.
+_BIEN_BAN_KINH, _BIEN_MANH, _BIEN_MANH_RA = "CONG_CU_TEST_BAN_KINH", "CONG_CU_TEST_MANH", "CONG_CU_TEST_MANH_RA"
+_TRAN_MANH = 16
+_PHIEN_BAN_MANH = 1
+_KHOA_DAU_MANH = frozenset({"phien_ban", "manh", "so_manh", "sha256_test", "head"})
+
+
+def _doc_che_do(env):
+    """(chế độ, tham số) từ `env`; cấu hình sai ⇒ `ValueError` mang THẺ `[C-…]`. Hàm THUẦN, không đọc `os.environ`.
+
+    Fail-closed: giá trị lạ — kể cả chuỗi RỖNG — là lỗi, không phải "coi như vắng". Một biến đặt nhầm mà lặng lẽ rơi
+    về `du` thì job mảnh chạy TRỌN bán kính (chậm nhưng xanh), còn rơi về `gate` thì không ai đo bán kính cả.
+    """
+    import re
+    bk, mh, ra = env.get(_BIEN_BAN_KINH), env.get(_BIEN_MANH), env.get(_BIEN_MANH_RA)
+    if mh is None:
+        if ra is not None:
+            raise ValueError(f"[C-ra-le] {_BIEN_MANH_RA} đặt mà vắng {_BIEN_MANH}")
+        if bk is None:
+            return "du", None
+        if bk != "manh":
+            raise ValueError(f"[C-ban-kinh] {_BIEN_BAN_KINH}={bk!r}: chỉ nhận đúng 'manh'")
+        return "gate", None
+    if bk is not None:
+        raise ValueError(f"[C-ca-hai] {_BIEN_MANH} và {_BIEN_BAN_KINH} không được cùng đặt")
+    m = re.fullmatch(r"(0|[1-9][0-9]?)/([1-9][0-9]?)", mh)
+    if not m:
+        raise ValueError(f"[C-hinh-dang] {_BIEN_MANH}={mh!r}: phải đúng dạng k/N, số thập phân không số 0 dẫn đầu")
+    k, n = int(m.group(1)), int(m.group(2))
+    if not (2 <= n <= _TRAN_MANH and k < n):
+        raise ValueError(f"[C-pham-vi] {_BIEN_MANH}={mh!r}: cần 2 ≤ N ≤ {_TRAN_MANH} và 0 ≤ k < N")
+    if not ra:
+        raise ValueError(f"[C-thieu-ra] {_BIEN_MANH} đặt mà thiếu {_BIEN_MANH_RA}")
+    return "manh", (k, n, ra)
+
+
+def _phan_manh(k, n, ten=None):
+    """Tên đột biến của mảnh k/N theo THỨ TỰ `DOT_BIEN`: chỉ số `i % n == k`."""
+    return [t for i, t in enumerate(DOT_BIEN if ten is None else ten) if i % n == k]
+
+
+def _van_tay():
+    """{sha256_test, head} của tiến trình ĐANG CHẠY. `head` không đọc được ⇒ `None` (người gọi fail-close)."""
+    import hashlib
+    import re
+    try:
+        p = subprocess.run(["git", "-C", str(GOC), "rev-parse", "HEAD"], capture_output=True, text=True, timeout=60)
+        head = p.stdout.strip() if p.returncode == 0 else ""
+    except (OSError, subprocess.SubprocessError):
+        head = ""
+    return {"sha256_test": hashlib.sha256(Path(TEP_TEST).read_bytes()).hexdigest(),
+            "head": head if re.fullmatch(r"[0-9a-f]{40}|[0-9a-f]{64}", head) else None}
+
+
+def _ket_thuc_manh(k, n, ra, cac_ten, ket, ly_con, van_tay):
+    """(dòng in, số lỗi). Ghi tệp mảnh CHỈ khi mảnh ĐẠT trọn; không đạt thì KHÔNG để lại tệp nào ở `ra`.
+
+    `ket`: {tên: bản ghi} đã qua `_nhan_ket_qua_con`, hoặc `None` kèm `ly_con`. Tách khỏi `main()` để ca tự kiểm gọi
+    được bằng bản ghi dựng sẵn — chạy trọn `CA` trong một ca là nhân thời gian mỗi đột biến lên gấp đôi.
+    """
+    tep = Path(ra)
+    if tep.exists() or tep.is_symlink():
+        tep.unlink()
+    if ket is None:
+        return [f"  ĐỎ  mảnh {k}/{n} [M-con]: tiến trình con KHÔNG trả kết quả hợp lệ ({ly_con})"], 1
+    if van_tay.get("head") is None:
+        return [f"  ĐỎ  mảnh {k}/{n} [M-head]: không đọc được HEAD — KHÔNG ĐO ĐƯỢC, không ghi tệp"], 1
+    dong, loi = [], 0
+    for ten in cac_ten:
+        bg = (ket or {}).get(ten)
+        d, l = _ket_luan_ban_ghi(bg, ()) if bg else ([f"  ĐỎ  {ten}: thiếu bản ghi"], 1)
+        dong += d
+        loi += l
+    if loi:
+        return dong + [f"  ĐỎ  mảnh {k}/{n} [M-loi]: {loi} lỗi đột biến — không ghi tệp"], loi
+    dau = {"phien_ban": _PHIEN_BAN_MANH, "manh": k, "so_manh": n, **van_tay}
+    tep.parent.mkdir(parents=True, exist_ok=True)
+    tep.write_bytes(("MANH " + json.dumps(dau, ensure_ascii=True, sort_keys=True) + "\n" + "".join(
+        "BKCON " + json.dumps(ket[t], ensure_ascii=True) + "\n" for t in cac_ten)).encode("utf-8"))
+    return dong + [f"MẢNH {k}/{n}: {len(cac_ten)}/{len(cac_ten)} đột biến bán kính 1 · ghi {tep}"], 0
+
+
+def _gom_manh(thu_muc, van_tay):
+    """(dòng in, số lỗi) — GOM mọi tệp mảnh trong `thu_muc`. KHÔNG tin phán quyết nào của mảnh.
+
+    Mỗi đường hỏng mang MỘT thẻ `[G-…]` riêng, để đột biến gỡ một chốt thì kịch bản của chốt ấy đổi thẻ (bị chốt
+    khác bắt) hoặc lọt — cả hai đều làm ca tự kiểm ĐỎ. Chốt không có thẻ riêng là chốt không đo được răng.
+    """
+    goc = Path(thu_muc)
+    muc = sorted(goc.iterdir()) if goc.is_dir() else None
+    if muc is None:
+        return [f"  ĐỎ  gom [G-thu-muc]: không có thư mục {goc}"], 1
+    if not muc:
+        return [f"  ĐỎ  gom [G-rong]: {goc} không có mảnh nào"], 1
+    if van_tay.get("head") is None:
+        return ["  ĐỎ  gom [G-head]: không đọc được HEAD của chính tiến trình gom — KHÔNG ĐO ĐƯỢC"], 1
+    dau_cac, than_cac = {}, {}
+    for p in muc:
+        if p.is_symlink() or not p.is_file():
+            return [f"  ĐỎ  gom [G-tep]: {p.name} không phải tệp thường"], 1
+        try:
+            dong0, _, than = p.read_bytes().decode("utf-8").partition("\n")
+            if not dong0.startswith("MANH "):
+                raise ValueError("thiếu dòng MANH đầu tệp")
+            dau = json.loads(dong0[5:])
+            if not isinstance(dau, dict) or set(dau) != _KHOA_DAU_MANH:
+                raise ValueError(f"khoá {sorted(dau) if isinstance(dau, dict) else type(dau).__name__}")
+            if any(type(dau[x]) is not int for x in ("phien_ban", "manh", "so_manh")):
+                raise ValueError("phien_ban/manh/so_manh phải là số nguyên")
+        except (OSError, UnicodeDecodeError, ValueError) as ex:
+            return [f"  ĐỎ  gom [G-dau]: đầu tệp {p.name} hỏng: {ex}"], 1
+        if dau["phien_ban"] != _PHIEN_BAN_MANH:
+            return [f"  ĐỎ  gom [G-phien-ban]: {p.name} phien_ban={dau['phien_ban']}"], 1
+        if dau["sha256_test"] != van_tay["sha256_test"] or dau["head"] != van_tay["head"]:
+            return [f"  ĐỎ  gom [G-van-tay]: {p.name} đo trên mã KHÁC tiến trình gom "
+                    f"({dau['head']}/{str(dau['sha256_test'])[:12]} ≠ {van_tay['head']}/{van_tay['sha256_test'][:12]})"], 1
+        la = [d for d in than.split("\n") if d and not d.startswith("BKCON ")]
+        if la:
+            return [f"  ĐỎ  gom [G-dong-la]: {p.name} có dòng ngoài hợp đồng: {la[0][:80]!r}"], 1
+        dau_cac[p.name] = dau
+        than_cac.setdefault(dau["manh"], []).append((p.name, than))
+    cac_n = sorted({d["so_manh"] for d in dau_cac.values()})
+    if len(cac_n) != 1:
+        return [f"  ĐỎ  gom [G-so-manh]: các mảnh khai số mảnh khác nhau {cac_n}"], 1
+    n = cac_n[0]
+    if not 2 <= n <= _TRAN_MANH:
+        return [f"  ĐỎ  gom [G-n]: số mảnh {n} ngoài 2..{_TRAN_MANH}"], 1
+    if sorted(than_cac) != list(range(n)):
+        return [f"  ĐỎ  gom [G-tap]: tập mảnh {sorted(than_cac)} ≠ 0..{n - 1}"], 1
+    phan = [_phan_manh(k, n) for k in range(n)]
+    if sum(map(len, phan)) != len(DOT_BIEN) or set().union(*phan) != set(DOT_BIEN):
+        return [f"  ĐỎ  gom [G-phan-hoach]: phân hoạch {n} mảnh không phủ ĐÚNG {len(DOT_BIEN)} đột biến, rời nhau"], 1
+    ket = {}
+    for k in range(n):
+        cua_k = than_cac.get(k, [])
+        if len(cua_k) != 1:
+            return [f"  ĐỎ  gom [G-dem]: mảnh {k} có {len(cua_k)} tệp: {[t for t, _ in cua_k]}"], 1
+        ten_tep, than = cua_k[0]
+        nhan, ly_do = _nhan_ket_qua_con(phan[k], 0, than, ())
+        if nhan is None:
+            return [f"  ĐỎ  gom [G-ban-ghi]: mảnh {k} ({ten_tep}): {ly_do}"], 1
+        ket.update(nhan)
+    # Dự phòng, KHÔNG có đột biến riêng: với `G-tap` + `G-dem` + `G-ban-ghi` + `G-phan-hoach` đứng trước, không đầu vào đơn nào
+    # tới được đây mà thiếu tên. Nó chỉ đổi `KeyError` ở vòng dưới thành một dòng ĐỎ đọc được khi chốt trên bị gỡ.
+    if set(ket) != set(DOT_BIEN):
+        return [f"  ĐỎ  gom [G-tong]: {len(ket)} bản ghi cho {len(DOT_BIEN)} đột biến"], 1
+    dong, loi = [f"GOM MẢNH {n}/{n}", f"BÁN KÍNH ĐỘT BIẾN ({len(DOT_BIEN)} đột biến, mỗi ca đúng một; {n} mảnh):"], 0
+    for ten in DOT_BIEN:
+        d, l = _ket_luan_ban_ghi(ket[ten], ())
+        dong += d
+        loi += l
+    return dong + [f"SỐ LIỆU GOM: ca={len(CA)} · đột biến={len(DOT_BIEN)} · lỗi đột biến={loi}"], loi
+
+
+def _main_gop():
+    """Điểm vào `--gop <thư mục>` của job `gate-cong-cu-gop`."""
+    i = sys.argv.index("--gop")
+    if len(sys.argv) != i + 2:
+        print(f"  ĐỎ  gom [G-doi-so]: cần đúng một thư mục sau --gop, thấy {sys.argv[i + 1:]!r}")
+        return 2
+    dong, loi = _gom_manh(sys.argv[i + 1], _van_tay())
+    for d in dong:
+        print(d)
+    return 1 if loi else 0
+
+
+def _ban_ghi_du_gia(ten):
+    """Bản ghi `ok` hợp lệ cho một tên THẬT của `DOT_BIEN`: đích `giet_that`, mọi ca khác `qua` — chỉ cho tự kiểm."""
+    dich = DOT_BIEN[ten][5]
+    return ["do", ten, dich, {t: ["giet_that" if t == dich else "qua", "giả" if t == dich else None]
+                              for t in _cac_ca_da_chay(())}]
+
+
+def _in_tu_kiem_gom():
+    """Cửa tiến trình con cho `t52`: dựng bộ mảnh bằng CHÍNH `_ket_thuc_manh`, làm hỏng từng cách, gom, in `KQ`."""
+    n = 3
+    # Vân tay CỐ ĐỊNH, không `_van_tay()`: dưới đột biến `GOC` là cây tạm, không phải kho git, nên HEAD đọc được
+    # hay không là chuyện của RIG — mọi kịch bản sẽ ĐỎ vì `G-head` và ca "giết" mọi đột biến sai lý do.
+    vt = {"sha256_test": "a" * 64, "head": "b" * 40}
+    kq = {}
+    with tempfile.TemporaryDirectory(prefix="gom668_") as d:
+        d = Path(d)
+
+        def dung_bo(ten, sua=None):
+            thu = d / ten
+            thu.mkdir()
+            for k in range(n):
+                cac = _phan_manh(k, n)
+                _ket_thuc_manh(k, n, str(thu / f"manh-{k}.txt"), cac, {t: _ban_ghi_du_gia(t) for t in cac}, None, vt)
+            if sua:
+                sua(thu)
+            dong, loi = _gom_manh(thu, vt)
+            kq[ten] = [loi, dong[0], dong[-1]]
+
+        def sua_dong(k, f):
+            def _s(thu):
+                p = thu / f"manh-{k}.txt"
+                p.write_text(f(p.read_text(encoding="utf-8")), encoding="utf-8", newline="\n")
+            return _s
+
+        def sua_dau(k, **doi):
+            def _f(chu):
+                dong0, _, than = chu.partition("\n")
+                dau = json.loads(dong0[5:])
+                dau.update(doi)
+                return "MANH " + json.dumps(dau) + "\n" + than
+            return sua_dong(k, _f)
+
+        def chuyen(thu):   # dòng BKCON đầu của mảnh 0 chuyển sang mảnh 1
+            a, b = thu / "manh-0.txt", thu / "manh-1.txt"
+            la = a.read_text(encoding="utf-8").split("\n")
+            b.write_text(b.read_text(encoding="utf-8") + la.pop(1) + "\n", encoding="utf-8", newline="\n")
+            a.write_text("\n".join(la), encoding="utf-8", newline="\n")
+
+        dung_bo("dung")
+        dung_bo("thieu", lambda t: (t / "manh-2.txt").unlink())
+        dung_bo("thua", lambda t: shutil.copy(t / "manh-0.txt", t / "manh-0b.txt"))
+        dung_bo("trung", lambda t: shutil.copy(t / "manh-0.txt", t / "manh-2.txt"))
+        dung_bo("chuyen", chuyen)
+        dung_bo("xoa", sua_dong(1, lambda c: "\n".join(c.split("\n")[:1] + c.split("\n")[2:])))
+        dung_bo("sha", sua_dau(0, sha256_test="0" * 64))
+        dung_bo("head", sua_dau(2, head="0" * 40))
+        dung_bo("so_manh", sua_dau(1, so_manh=4))
+        dung_bo("phien_ban", sua_dau(1, phien_ban=2))
+        dung_bo("kieu_bool", sua_dau(0, manh=False))
+        dung_bo("khoa_thua", sua_dau(0, them=1))
+        dung_bo("dau_hong", sua_dong(0, lambda c: "MANH {" + c.partition("\n")[1] + c.partition("\n")[2]))
+        dung_bo("dong_la", sua_dong(0, lambda c: c + "rac\n"))
+        dung_bo("ban_ghi", sua_dong(2, lambda c: c.replace('["giet_that", "gi', '["xanh", "gi', 1)))
+        dung_bo("tep_la", lambda t: (t / "thu_muc_con").mkdir())
+        mot = d / "n_1"
+        mot.mkdir()
+        _ket_thuc_manh(0, 1, str(mot / "manh-0.txt"), list(DOT_BIEN), {t: _ban_ghi_du_gia(t) for t in DOT_BIEN},
+                       None, vt)
+        dong, loi = _gom_manh(mot, vt)
+        kq["n_1"] = [loi, dong[0], dong[-1]]
+        # Phân hoạch CHỒNG LẤN (mảnh k lấy mọi i % n <= k): mỗi mảnh tự nhất quán, hợp các mảnh vẫn đủ tên — chỉ
+        # phép đếm tổng của `G-phan-hoach` bắt được. Tráo `_phan_manh` ở CẢ HAI phía, như một đột biến vào nó.
+        g, goc_pm = globals(), _phan_manh
+        g["_phan_manh"] = lambda k, n, ten=None: [t for i, t in enumerate(DOT_BIEN if ten is None else ten)
+                                                   if i % n <= k]
+        try:
+            dung_bo("phan_chong")
+        finally:
+            g["_phan_manh"] = goc_pm
+        rong = d / "rong"
+        rong.mkdir()
+        kq["rong"] = [_gom_manh(rong, vt)[1], _gom_manh(rong, vt)[0][0], ""]
+        kq["khong_co"] = [_gom_manh(d / "khong_co", vt)[1], _gom_manh(d / "khong_co", vt)[0][0], ""]
+        kq["head_gom_none"] = [_gom_manh(d / "dung", {**vt, "head": None})[1],
+                               _gom_manh(d / "dung", {**vt, "head": None})[0][0], ""]
+        # Phía GHI: mảnh không đạt KHÔNG được để lại tệp — kể cả tệp cũ cùng tên.
+        ghi = d / "ghi"
+        ghi.mkdir()
+        cac = _phan_manh(0, n)
+        hong = {t: _ban_ghi_du_gia(t) for t in cac}
+        hong[cac[0]] = ["loi", cac[0], "giả hỏng"]
+        for ten, ket, ly, v in (("ghi_loi", hong, None, vt), ("ghi_con", None, "giả", vt),
+                                ("ghi_head", {t: _ban_ghi_du_gia(t) for t in cac}, None, {**vt, "head": None})):
+            p = ghi / f"{ten}.txt"
+            p.write_text("cũ\n", encoding="utf-8")
+            dong, loi = _ket_thuc_manh(0, n, str(p), cac, ket, ly, v)
+            kq[ten] = [loi, dong[-1], "con-tep" if p.exists() else "khong-tep"]
+    print("KQ " + json.dumps(kq, ensure_ascii=True))
+
+
+def _in_tu_kiem_che_do():
+    """Cửa tiến trình con cho `t53`: `_doc_che_do` trên bảng môi trường cố định, in `KQ`."""
+    bang_env = {
+        "vang": {}, "gate": {_BIEN_BAN_KINH: "manh"}, "gate_rong": {_BIEN_BAN_KINH: ""},
+        "gate_la": {_BIEN_BAN_KINH: "MANH"}, "manh": {_BIEN_MANH: "7/8", _BIEN_MANH_RA: "x"},
+        "manh_16": {_BIEN_MANH: "15/16", _BIEN_MANH_RA: "x"}, "k_bang_n": {_BIEN_MANH: "8/8", _BIEN_MANH_RA: "x"},
+        "n_1": {_BIEN_MANH: "0/1", _BIEN_MANH_RA: "x"}, "n_17": {_BIEN_MANH: "0/17", _BIEN_MANH_RA: "x"},
+        "chu": {_BIEN_MANH: "a/8", _BIEN_MANH_RA: "x"}, "so_0_dau": {_BIEN_MANH: "01/8", _BIEN_MANH_RA: "x"},
+        "cach": {_BIEN_MANH: " 0/8", _BIEN_MANH_RA: "x"}, "xuong_dong": {_BIEN_MANH: "0/8\n", _BIEN_MANH_RA: "x"},
+        "so_la": {_BIEN_MANH: "١/8", _BIEN_MANH_RA: "x"}, "thieu_ra": {_BIEN_MANH: "0/8"},
+        "ra_rong": {_BIEN_MANH: "0/8", _BIEN_MANH_RA: ""}, "ca_hai": {_BIEN_MANH: "0/8", _BIEN_MANH_RA: "x",
+                                                                       _BIEN_BAN_KINH: "manh"},
+        "ra_le": {_BIEN_MANH_RA: "x"},
+    }
+    kq = {}
+    for ten, env in bang_env.items():
+        try:
+            kq[ten] = list(_doc_che_do(env))
+        except ValueError as ex:
+            kq[ten] = ["loi", str(ex).split("]")[0] + "]"]
+    print("KQ " + json.dumps(kq, ensure_ascii=True))
+
+
 def _in_tu_kiem_cong_that():
     """Cửa tiến trình con cho `t45`: chạy phép nối cổng trên MỘT gốc cho trước rồi in ra."""
     i = sys.argv.index("--tu-kiem-cong-that")
@@ -6567,6 +7049,12 @@ def _in_tu_kiem_cong_that():
 
 
 def main() -> int:
+    try:
+        che_do, tham_so = _doc_che_do(os.environ)
+    except ValueError as ex:
+        # TRƯỚC mọi ca: cấu hình sai thì không có kết quả nào đáng tin để in (#668).
+        print(f"  ĐỎ  cấu hình chế độ: {ex}")
+        return 2
     tien_kiem_bo_qua = [x for x in (_chay_tien_kiem(batch_behavior_test),
                                     _chay_tien_kiem(python_alias_behavior_test)) if x]
     # TACH KHOI `bo_qua` cua CA: `bo_qua` la MAU SO (`len(CA) - len(bo_qua)`), ma tien kiem
@@ -6592,6 +7080,28 @@ def main() -> int:
     print(f"\ncong_cu_test: {qua}/{len(CA) - len(bo_qua)} đạt; tổng={len(CA)}, "
           f"bỏ qua={len(bo_qua)}, tiền kiểm bỏ qua={len(tien_kiem_bo_qua)}")
 
+    if che_do == "manh":
+        # Mảnh CHỈ đo bán kính của phần mình. Cổng cây thật + các tự kiểm chạy ở job `gate` (chế độ `gate`), một lần.
+        k, n, ra = tham_so
+        ten = _phan_manh(k, n)
+        if hong or tien_kiem_bo_qua:
+            _ket_thuc_manh(k, n, ra, ten, None, "nền đỏ hoặc tiền kiểm bị bỏ qua — không đo", {})
+            print(f"  ĐỎ  mảnh {k}/{n} [M-nen]: nền KHÔNG xanh — không đo bán kính, không ghi tệp")
+            return 1
+        print(f"\nBÁN KÍNH ĐỘT BIẾN — MẢNH {k}/{n} ({len(ten)}/{len(DOT_BIEN)} đột biến; "
+              f"{_so_tien_trinh_ban_kinh()} tiến trình):")
+        ket, ly_con = {}, None
+        for nhom, rc, ra_con in _phong_con(ten, (), _so_tien_trinh_ban_kinh()) if ten else ():
+            nhan, ly = _nhan_ket_qua_con(nhom, rc, ra_con, ())
+            if nhan is None:
+                ket, ly_con = None, f"{ly}; rc={rc}, đuôi đầu ra: {ra_con[-300:]!r}"
+                break
+            ket.update(nhan)
+        dong, loi = _ket_thuc_manh(k, n, ra, ten, ket, ly_con, _van_tay())
+        for d in dong:
+            print(d)
+        return 1 if loi else 0
+
     # N31 — CỔNG PHẢI ĐƯỢC NỐI VÀO CHỖ NÓ GÁC. Chạy MỘT lần, trên cây THẬT, TRƯỚC bộ đột
     # biến: đột biến dựng cây SAO và tráo `BASH_NEN`, nên chạy sau sẽ đo nhầm bản sao.
     loi_cong, dong_cong = _cong_tren_cay_that(GOC)
@@ -6610,14 +7120,19 @@ def main() -> int:
     loi_db += loi_nen
     so_tien_trinh = _so_tien_trinh_ban_kinh()
     loi_db += _tu_kiem_song_song(do_o_nen)
-    print(f"\nBÁN KÍNH ĐỘT BIẾN ({len(DOT_BIEN)} đột biến, mỗi ca đúng một"
-          + (f"; LOẠI {len(do_o_nen)} ca đỏ ở nền" if do_o_nen else "")
-          + f"; {so_tien_trinh} tiến trình):")
-    for cac_dong, loi in _ban_kinh_moi_dot_bien(list(DOT_BIEN), do_o_nen, so_tien_trinh):
-        for dong in cac_dong:
-            print(dong)
-        loi_db += loi
-    print(f"\nSỐ LIỆU: ca={len(CA)} · đột biến={len(DOT_BIEN)} · lỗi đột biến={loi_db}"
+    if che_do == "gate":
+        print(f"\nBÁN KÍNH ĐỘT BIẾN ({len(DOT_BIEN)} đột biến): GIAO cho job `gate-cong-cu` (mảnh) + "
+              f"`gate-cong-cu-gop` (gom) — KHÔNG đo trong tiến trình này ({_BIEN_BAN_KINH}=manh)")
+    else:
+        print(f"\nBÁN KÍNH ĐỘT BIẾN ({len(DOT_BIEN)} đột biến, mỗi ca đúng một"
+              + (f"; LOẠI {len(do_o_nen)} ca đỏ ở nền" if do_o_nen else "")
+              + f"; {so_tien_trinh} tiến trình):")
+        for cac_dong, loi in _ban_kinh_moi_dot_bien(list(DOT_BIEN), do_o_nen, so_tien_trinh):
+            for dong in cac_dong:
+                print(dong)
+            loi_db += loi
+    print(f"\nSỐ LIỆU: ca={len(CA)} · đột biến={len(DOT_BIEN)}"
+          + (" (giao mảnh)" if che_do == "gate" else "") + f" · lỗi đột biến={loi_db}"
           f" · tiền kiểm bỏ qua={len(tien_kiem_bo_qua)} · cổng cây thật={'ĐẠT' if not loi_cong else 'HỎNG'}")
     # Tien kiem bi bo qua KEO ma thoat khac 0. `KHONG_DO_DUOC` khong duoc lang le thanh XANH —
     # `None != False`. No chi thoi giet CA SUITE, chu khong thoi la mot tin hieu.
@@ -6733,4 +7248,12 @@ if __name__ == "__main__":
         _in_tu_kiem_cong_that()
     if "--ban-kinh-con" in sys.argv[1:]:
         _in_ban_kinh_con()
+    if "--tu-kiem-gom" in sys.argv[1:]:
+        _in_tu_kiem_gom()
+        sys.exit(0)
+    if "--tu-kiem-che-do" in sys.argv[1:]:
+        _in_tu_kiem_che_do()
+        sys.exit(0)
+    if "--gop" in sys.argv[1:]:
+        sys.exit(_main_gop())
     sys.exit(main())

@@ -7360,7 +7360,9 @@ def _in_tu_kiem_gom():
         # đo, nên dựng một kho git TẠM từ CHÍNH tệp đang chạy (kể cả khi nó là bản đột biến) và lấy vân tay tại đó.
         kho = d / "kho"
         (kho / "ops").mkdir(parents=True)
-        for ten in ("cong_cu_test.py", "lease_publish_test.py", "bash_nen.py", "cong_cu.py"):
+        # CHỈ đúng thứ `--gop` import (F22, Codex lượt 7, P1): cây của đột biến `TEP_TEST` cũ chỉ mang hai tệp kèm này;
+        # đòi thêm `cong_cu.py` làm `t52` chết VÔ CAN (tín dụng giả) dưới 5 đột biến cũ ⇒ cổng bán kính hồi quy.
+        for ten in ("cong_cu_test.py", "lease_publish_test.py", "bash_nen.py"):
             shutil.copy2(Path(TEP_TEST).parent / ten, kho / "ops" / ten)
         git = lambda *a: subprocess.run(["git", "-C", str(kho), "-c", "user.email=t@t", "-c", "user.name=t", "-c",
                                          "commit.gpgsign=false", *a], capture_output=True, text=True, timeout=60)

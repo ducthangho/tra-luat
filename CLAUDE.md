@@ -480,6 +480,33 @@ Phiên dev trên máy này ≠ phiên Cowork LIVE (bootstrap từ zip Package �
   này: cổng đọc từ **REF** nên phải **commit trước rồi mới `check`** (thiếu ⇒ `rc=8`), và
   lease mới **không được chép `posted_comment_id`** của bản cũ.
 
+- **…VÀ BIA MỘ HAI CHIỀU CHỈ DÙNG CHO LEASE CÒN SỐNG — viết nó vào một lease ĐÃ CHẾT là mua
+  một lượt ĐỎ, không phải dọn dẹp.** Đo 20-09-2026, hai lượt `ops — đăng lease bằng git` ĐỎ:
+  [`35519177197`](https://github.com/ducthangho/tra-luat/actions/runs/35519177197) (#568) và
+  [`35519243379`](https://github.com/ducthangho/tra-luat/actions/runs/35519243379) (#566).
+  Cả hai đỏ **SAU KHI** lease mới đã đăng xong — tức việc chính đã thành, chỉ cái đuôi gãy.
+  Cơ chế, đo được chứ không suy: `_kiem_bia_mo` đòi lease CŨ mang `da_bi_thay_the`, nên phải
+  SỬA tệp lease cũ; mà bước `tìm lease vừa đổi` chọn theo **tệp đã đổi trong `before..sha`**.
+  Sửa một lease đã hết hạn = đưa một tệp CHẾT vào tập quét = `rc=8` = cả lượt `exit 1`.
+  Phân biệt cho đúng, vì hai việc trông giống nhau: lease cũ **CÒN HẠN** thì bia mộ là thứ
+  DUY NHẤT thu hồi được nó (gạch đầu dòng trên) — cứ viết. Lease cũ **ĐÃ HẾT HẠN** thì
+  write-set exclusion đã nhả rồi, `_phan_loai_lease` không còn tính nó là người giữ, nên bia
+  mộ không mua thêm gì mà chỉ thêm một tệp vào tập quét. Khai `thay_the_cho: []` kèm một câu
+  nói rõ vì sao KHÔNG khai bia mộ.
+  Cái đắt nằm ở chỗ khác, và nó là lý do mục này đáng ghi: `rc=8` (hết hạn) **che mất** `rc=9`
+  (đã đăng). `kiem_github` gọi `kiem()` ở dòng đầu, mà `kiem()` ném `rc=8` cho lease hết hạn
+  TRƯỚC khi chốt `rc=9` kịp chạy — nên một lease **đã đăng rồi mới hết hạn** không bao giờ
+  tới được nhánh `rc=9` mà workflow **đã có sẵn và viết đúng**. Cổng không nói dối; nhánh
+  đúng chỉ **không bao giờ được gọi**. Cùng họ *"cổng VẮNG MẶT trông giống cổng xanh"*.
+  Chỗ đắt nhất: chính tài liệu của kho khai NGƯỢC. Docstring `t32` trong
+  `ops/lease_publish_test.py` viết rằng chốt `posted_comment_id` *"đúng cho lease ĐÃ đăng
+  (rc=9)"* — **vế ấy SAI**, và 20-09 là lần đầu nó bị ĐO. Fixture của `t32` phủ đúng một nửa
+  (*hết hạn, KHÔNG dấu*); nửa bù (*hết hạn, ĐÃ có dấu*) chưa ai viết. Đây là bản vá #195
+  **ĐÚNG mà HẸP** — đúng hình dạng `VÁ ĐÚNG CHỖ ĐƯỢC CHỈ RỒI BỎ SÓT ĐƯỜNG THỨ BA` ngay dưới.
+  **MÁY KHÔNG CANH mục này.** Không cổng nào hỏi *"lease anh sắp viết bia mộ vào còn sống
+  không"*; `_kiem_bia_mo` chỉ đòi hai chiều, nó không đọc hạn. Đây thuần là kỷ luật viết,
+  nói thẳng ra kẻo người đọc tưởng đã có cơ chế.
+
 - **VÁ ĐÚNG CHỖ ĐƯỢC CHỈ RỒI BỎ SÓT ĐƯỜNG THỨ BA — hai lượt liền, và lần nào bản vá cũng TỰ TÁI
   TẠO lỗ nó vừa lấp.** Đo 12-09-2026, packet #513 lượt 10→13. Chuỗi:
   · lượt 10 vá `F01` — `if do_chot == set(dich)` cấp `GIET` khi CẢ HAI vế rỗng, tức cấp tín dụng cho

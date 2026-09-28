@@ -4,6 +4,7 @@ from __future__ import annotations
 import ast
 import builtins
 import contextlib
+import hashlib
 import importlib.util
 import io
 import json
@@ -635,7 +636,7 @@ def chay_ca(khung: "KhungPhat | None" = None):
             if khung is not None:
                 khung.phat(NHAN_DO_KHAC, f"{type(exc).__name__}: {exc}")
     return do
-def chay_dot_bien():
+def chay_dot_bien(muc=None):
     dat = khong_giet = khong_do = 0
     with tempfile.TemporaryDirectory() as d:
         root, src = Path(d), Path(d) / "source"
@@ -650,7 +651,7 @@ def chay_dot_bien():
         shutil.copy2(Path(__file__), src / Path(__file__).name)
         run(["git", "add", "--", TOOL.name, Path(__file__).name], src)
         run(["git", "commit", "-qm", "source"], src)
-        for ten, dich, neo, thay in DOT_BIEN:
+        for ten, dich, neo, thay in (DOT_BIEN if muc is None else muc):
             # F07 (luot 12) — cho THU BA cua cung benh F04, va la cho ban va
             # luot 11 BO SOT. `chay_mot_mutant` co `dich = tuple(dich)` nhung do
             # chi gan lai ten CUC BO cua no; iterator cua NGUOI GOI van bi tieu
@@ -3564,8 +3565,15 @@ def r543_tien_de_ha_tang_cua_r528_phai_ra_trang_thai_thu_ba(d: Path):
     N nho: ca nay do PHAN LOAI chu khong do xac suat, va so lan khai phai BANG N.
     """
     m = _nap_ban_sao(d)
-    # Y HET r528: bo sinh 256 cua `entropy-giu-mot-byte`, de r508 di qua tien de that.
-    m.sinh_dau_phien = lambda: secrets.token_hex(16)[-2:] * 16
+    # #661 M7: khong gian 256 nhu r528 nhung KHONG lap LIEN TIEP (lap => chet LAY 10/300 duoi `dau-phien-bo-vong-rut-lai`).
+    truoc = {"v": None}
+
+    def hep():
+        while (v := secrets.token_hex(1) * 16) == truoc["v"]:
+            pass
+        truoc["v"] = v
+        return v
+    m.sinh_dau_phien = hep
     N = 8
     goc = {"_kenh_tam": m._kenh_tam, "doc_kenh": m.doc_kenh}
 
@@ -3920,6 +3928,147 @@ def r548_git_con_phai_tat_bao_tri_nen(d: Path):
         ok += [run(["git", "config", "--get", k], remote, env=goc, check=False).stdout.strip() == v for k, v in can.items()]
     chot(all(ok), "r548")
 
+def _manh_gia(d: Path):
+    """Ban sao voi BON ham thu thap thay bang do gia DAT TRON; `goi` ghi bang da nhan."""
+    m, goi = _nap_ban_sao(d), {}
+    m.chay_ca = lambda khung=None: goi.update(ca=True) or []        # Codex #661 luot 2: ghi DAU GOI
+    m.chay_tu_kiem = lambda: goi.update(tu_kiem=True) or []
+    m.chay_dot_bien = lambda muc=None: goi.update(db=muc, env=MANH_ENV in os.environ or MANH_RA_ENV in os.environ) \
+        or (len(muc or m.DOT_BIEN), 0, 0)
+    m.chay_dot_bien_tu_kiem = lambda muc=None: goi.update(dbtk=muc) or (len(muc or m.DOT_BIEN_TU_KIEM), 0, 0)
+    return m, goi
+
+
+def _main_manh(m, gia_tri, ra):
+    with _moi_truong(**{MANH_ENV: gia_tri, MANH_RA_ENV: ra and str(ra)}):
+        out = io.StringIO()
+        with contextlib.redirect_stdout(out):
+            return m.main(), out.getvalue()
+
+
+def r549_manh_sai_hinh_thi_khong_chay_gi(d: Path):
+    """#661 A3 — `k/N` sai hinh, hoac vang `..._RA`, => rc 2 va KHONG chay mot ham nao."""
+    m, goi = _manh_gia(d)
+    m.chay_manh = lambda k, n, db, dbtk, ra: goi.update(db=(k, n)) or 0
+    for gia_tri, ra in [(s, d / "x.json") for s in ("4/4", "0/1", "a/4", "0/9", " 0/4", "0/4\n", "00/4", "0/4x", "1/10")] \
+            + [("0/4", None), ("0/4", ""), (None, d / "x.json")]:     # sai hinh; vang/rong RA; vang MANH
+        chot(_main_manh(m, gia_tri, ra)[0] == 2 and not goi, "r549")
+    for dung in ("3/4", "0/2", "7/8"):
+        chot(_main_manh(m, dung, d / "x.json")[0] == 0 and goi.pop("db", None) == tuple(map(int, dung.split("/"))), "r549")
+
+
+def r550_phan_hoach_phu_dung_bang_va_roi_nhau(d: Path):
+    """#661 A3 — N manh phu DUNG bang, doi mot roi nhau; ten trung => rc 2, khong chay gi."""
+    m, goi = _manh_gia(d)
+    for bang in (m.DOT_BIEN, m.DOT_BIEN_TU_KIEM):
+        for n in (2, 4, 8):
+            ten = [x[0] for k in range(n) for x in m.phan_hoach(bang, k, n)]
+            chot(sorted(ten) == sorted(x[0] for x in bang) and len(ten) == len(bang), "r550")
+    m.DOT_BIEN_TU_KIEM = list(m.DOT_BIEN_TU_KIEM) + [m.DOT_BIEN_TU_KIEM[5]]
+    chot(_main_manh(m, "1/4", d / "x.json")[0] == 2 and not goi, "r550")
+
+
+def r551_manh_chi_chay_phan_hoach_va_chi_ghi_khi_dat_tron(d: Path):
+    """#661 M1 — phan hoach DUNG toi hai vong, bien manh KHONG ro, KHONG in MAU_DAY_DU, ghi CHI khi DAT TRON."""
+    m, goi = _manh_gia(d)
+    ra = d / "ra" / "m.json"
+    rc, out = _main_manh(m, "1/4", ra)
+    db, dbtk = m.phan_hoach(m.DOT_BIEN, 1, 4), m.phan_hoach(m.DOT_BIEN_TU_KIEM, 1, 4)
+    chot(rc == 0 and goi == {"ca": True, "tu_kiem": True, "db": db, "dbtk": dbtk, "env": False}, "r551")
+    x = json.loads(ra.read_text(encoding="utf-8"))
+    chot(x == {"phien_ban": 1, "manh": 1, "so_manh": 4, "giet": [y[0] for y in db],
+               "tk_giet": [y[0] for y in dbtk], "sha256_tool": hashlib.sha256(TOOL.read_bytes()).hexdigest(),
+               "sha256_test": hashlib.sha256(Path(__file__).read_bytes()).hexdigest()}, "r551")
+    chot(f"MANH 1/4: MUTANT giet = {len(db)} / {len(db)} · TU DOT BIEN giet = {len(dbtk)} / {len(dbtk)}" in out
+         and not re.search(r"^MUTANT: giet", out, re.M), "r551")
+    hong = {"ca": ("chay_ca", lambda khung=None: ["T1"]), "tu-kiem": ("chay_tu_kiem", lambda: ["r501"])}
+    for i in range(6):   # dung MOT so hang cua sau lech
+        hong[f"so-{i}"] = ("chay_dot_bien" if i < 3 else "chay_dot_bien_tu_kiem",
+                           lambda muc=None, i=i: tuple(len(muc or "") - (j == i % 3) if j == 0 else int(j == i % 3) for j in range(3)))
+    for ten, (ham, gia) in hong.items():
+        ra.unlink(missing_ok=True)
+        m2, _ = _manh_gia(d / ten)
+        setattr(m2, ham, gia)
+        chot(_main_manh(m2, "1/4", ra)[0] == 1 and not ra.exists(), "r551")
+    # `muc` THAT SU la thu vong lap: do gia NEM o muc DAU kem ten, KHONG cham duong bang chung (A1: cham => giet lay).
+    m3, dung = _nap_ban_sao(d / "vong"), type("Dung", (Exception,), {})
+    nem = lambda ten: (_ for _ in ()).throw(dung(ten))   # noqa: E731
+    m3.chay_mot_mutant = lambda ban_sao, ten, dich: nem(ten)
+    for ham, muc in ((m3.chay_dot_bien, m3.DOT_BIEN[2:3]), (m3.chay_dot_bien_tu_kiem, m3.DOT_BIEN_TU_KIEM[4:5])):
+        try:
+            ham(muc)
+        except dung as e:
+            chot(e.args[0] == muc[0][0], "r551")
+        else:
+            chot(False, "r551")
+        m3.run = lambda args, cwd, *a, **k: nem(Path(cwd).name)
+
+
+def r552_gop_chi_dat_khi_phu_dung_hai_bang(d: Path):
+    """#661 A1/A2 — GOP bon manh THAT (ghi boi `chay_manh`) => DAT; moi lech => rc 1."""
+    m, _ = _manh_gia(d)
+    goc = d / "goc"
+    for k in range(4):
+        chot(_main_manh(m, f"{k}/4", goc / f"manh-{k}.json")[0] == 0, "r552")
+
+    def gop(ten, sua=lambda t: None):
+        t = d / ten
+        shutil.copytree(goc, t)
+        sua(t)
+        out = io.StringIO()
+        with contextlib.redirect_stdout(out):
+            return m.gop(t), out.getvalue()
+
+    def sua(k, f):
+        def s(t):
+            x = json.loads((t / f"manh-{k}.json").read_text(encoding="utf-8"))
+            f(x)
+            (t / f"manh-{k}.json").write_text(json.dumps(x), encoding="utf-8")
+        return s
+    rc, out = gop("dat")
+    n, tk = len(m.DOT_BIEN), len(m.DOT_BIEN_TU_KIEM)
+    chot(rc == 0 and out == f"GOP MANH 4/4\nMUTANT: giet = {n} · khong giet = 0 · khong do duoc = 0 / tong {n}\n"
+         f"TU DOT BIEN: giet = {tk} / {tk}\n", "r552")
+    chuyen = m.DOT_BIEN_TU_KIEM[0][0]
+    kich = {
+        "thieu-tep": lambda t: (t / "manh-3.json").unlink(),
+        "thua-manh-rong": lambda t: (t / "manh-9.json").write_text(json.dumps(dict(
+            json.loads((t / "manh-1.json").read_text(encoding="utf-8")), giet=[], tk_giet=[])), encoding="utf-8"),
+        "manh-bool": sua(1, lambda x: x.update(manh=True)),
+        "chuyen-ten": lambda t: (sua(0, lambda x: x["tk_giet"].remove(chuyen))(t),
+                                 sua(1, lambda x: x["tk_giet"].append(chuyen))(t)),
+        "xoa-ten-giet": sua(2, lambda x: x["giet"].pop()),
+        "xoa-ten-tk": sua(2, lambda x: x["tk_giet"].pop()),
+        "lap-ten": sua(0, lambda x: x["tk_giet"].append(chuyen)),
+        "sha-test": sua(2, lambda x: x.update(sha256_test="0" * 64)),
+        "sha-tool": sua(2, lambda x: x.update(sha256_tool="0" * 64)),
+        "so-manh": sua(1, lambda x: x.update(so_manh=5)),
+        "json-hong": lambda t: (t / "rac.json").write_text("{", encoding="utf-8"),
+        "khoa-thua": sua(0, lambda x: x.update(them=1)),
+        "phien-ban": sua(3, lambda x: x.update(phien_ban=2)),
+        "phien-ban-bool": sua(0, lambda x: x.update(phien_ban=True)),
+        "so-manh-float-tep-sau": sua(2, lambda x: x.update(so_manh=4.0)),
+        "object-thay-mang": lambda t: [sua(k, lambda x: x.update({c: dict.fromkeys(x[c], False) for c in ("giet", "tk_giet")}))(t)
+                                       for k in range(4)],
+        "mot-manh": lambda t: [(t / f"manh-{k}.json").unlink() for k in (1, 2, 3)] and sua(0, lambda x: x.update(
+            so_manh=1, giet=[y[0] for y in m.DOT_BIEN], tk_giet=[y[0] for y in m.DOT_BIEN_TU_KIEM]))(t),
+    }
+    for ten, f in kich.items():
+        rc, out = gop(ten, f)
+        chot(rc == 1 and "GOP: LOI" in out and "GOP MANH" not in out, "r552")
+    nhom = m.NHOM_BAT_BUOC
+    m.NHOM_BAT_BUOC = nhom | {"r999"}
+    chot(gop("nhom")[0] == 1, "r552")
+    m.NHOM_BAT_BUOC = nhom - {"r549"}             # khong `thieu`, chi duoi san
+    chot(gop("san")[0] == 1, "r552")
+    m.NHOM_BAT_BUOC = nhom
+    # Duong CLI THAT; `KHONG_DOT_BIEN` de neu `--gop` bi bo qua thi con chi chay T1..T8.
+    env = {k: v for k, v in os.environ.items() if not k.startswith("NHANH_DON_DUOC_")}
+    p = run([sys.executable, m.__file__, "--gop", str(d / "dat")], d, check=False,
+            env=dict(env, NHANH_DON_DUOC_KHONG_DOT_BIEN="1"))
+    chot(p.returncode == 0 and p.stdout.startswith("GOP MANH 4/4\n"), "r552")
+
+
 TU_KIEM = [
     ("r542", r542_kenh_hoan_tat_khong_duoc_xoa_chan_doan, True),
     ("r539", r539_bang_chung_phai_den_tu_con_chay_that, True),
@@ -3969,6 +4118,10 @@ TU_KIEM = [
     ("r546", r546_ma_tran_doc_hong_qua_runner_that, True),
     ("r547", r547_mien_tru_phai_co_rang_ma_khong_nuot_loi_khac, True),
     ("r548", r548_git_con_phai_tat_bao_tri_nen, True),
+    ("r549", r549_manh_sai_hinh_thi_khong_chay_gi, True),
+    ("r550", r550_phan_hoach_phu_dung_bang_va_roi_nhau, True),
+    ("r551", r551_manh_chi_chay_phan_hoach_va_chi_ghi_khi_dat_tron, True),
+    ("r552", r552_gop_chi_dat_khi_phu_dung_hai_bang, True),
 ]
 
 # ---- A6: MOI ca tu kiem phai co MOT dot bien rieng lam no DO --------------
@@ -4681,6 +4834,47 @@ DOT_BIEN_TU_KIEM = [
      'cuoi.setdefault((env.get(f"GIT_CONFIG_KEY_{i}") or "").lower(), env.get(f"GIT_CONFIG_VALUE_{i}"))'),
     ("git-bao-tri-thieu-khoa", ("r548",), ',\n                   ("maintenance.autoDetach", "false"), ("receive.autogc", "false"))',
      ',\n                   ("maintenance.autoDetach", "false"))'),
+    # #661 M3 — moi chot cua che do MANH/GOP: go chot ay => ca cua no DO.
+    ("manh-regex-long", ("r549",), 're.fullmatch(r"[0-9]/[2-8]", gia_tri', 're.fullmatch(r"[0-9]+/[0-9]+", gia_tri'),
+    ("manh-fullmatch-thanh-match", ("r549",), 'not re.fullmatch(r"[0-9]/[2-8]"', 'not re.match(r"[0-9]/[2-8]"'),
+    ("manh-bo-k-nho-hon-n", ("r549",), "    if k >= n:\n", "    if False:\n"),
+    ("manh-bo-doi-ra", ("r549",), "            if not ra:\n", "            if False:\n"),
+    ("phan-hoach-lech-du", ("r550", "r552"), "if i % n == k]", "if i % n <= k]"),
+    ("phan-hoach-bo-kiem-trung", ("r550",), "    if len(set(ten)) != len(ten):\n", "    if False:\n"),
+    ("manh-chay-truoc-xac-thuc", ("r549", "r550"), "        gia_tri, ra = os.environ.pop(", "        chay_ca(None)\n        gia_tri, ra = os.environ.pop("),
+    ("manh-bo-tu-kiem", ("r551",), "    tu_kiem_do = chay_tu_kiem()\n    tk_giet, tk_hong, tk_khong_do = chay_dot_bien_tu_kiem(dbtk)", "    tu_kiem_do = []\n    tk_giet, tk_hong, tk_khong_do = chay_dot_bien_tu_kiem(dbtk)"),
+    ("manh-bo-pop-env", ("r551",), "os.environ.pop(MANH_ENV, None), os.environ.pop(MANH_RA_ENV, None)", "os.environ.get(MANH_ENV), os.environ.get(MANH_RA_ENV)"),
+    ("manh-vong-tron-bang", ("r551", "r552"), "= chay_dot_bien(db)", "= chay_dot_bien()"),
+    ("manh-tu-kiem-tron-bang", ("r551", "r552"), "= chay_dot_bien_tu_kiem(dbtk)", "= chay_dot_bien_tu_kiem()"),
+    ("manh-bo-chay-ca", ("r551",), "    if chay_ca(None):\n", "    if False:\n"),
+    ("manh-bo-tu-kiem-do", ("r551",), "    if tu_kiem_do or (dat, khong_giet", "    if (dat, khong_giet"),
+    ("manh-bo-so-hang-khong-do", ("r551",), "khong_do, tk_giet, tk_hong, tk_khong_do) != (len(db), 0, 0, len(dbtk), 0, 0)", "tk_giet, tk_hong) != (len(db), 0, len(dbtk), 0)"),
+    ("manh-in-dong-day-du", ("r551",), '    print(f"MANH {k}/{n}: MUTANT giet = ',
+     '    print(f"MUTANT: giet = {dat} · khong giet = 0 · khong do duoc = 0 / tong {dat}")\n    print(f"MANH {k}/{n}: MUTANT giet = '),
+    ("manh-bam-sai-tep", ("r551", "r552"), '"sha256_test": _bam(__file__)', '"sha256_test": _bam(TOOL)'),
+    ("dot-bien-bo-tham-so-muc", ("r551",), "in (DOT_BIEN if muc is None else muc):", "in DOT_BIEN:"),
+    ("tu-dot-bien-bo-tham-so-muc", ("r551",), "in (DOT_BIEN_TU_KIEM if muc is None else muc):", "in DOT_BIEN_TU_KIEM:"),
+    ("gop-bo-qua-json-hong", ("r552",), '            return [f"{tep.name}: JSON hong ({e})"], None', "            continue"),
+    ("gop-bo-kiem-khoa", ("r552",), " or set(x) != _KHOA_MANH for x in doc)", " for x in doc)"),
+    ("gop-bo-kiem-phien-ban", ("r552",), '    if any(x["phien_ban"] != PHIEN_BAN_MANH for x in doc):', "    if False:"),
+    ("gop-bo-kiem-so-manh", ("r552",), ' or any(x["so_manh"] != n for x in doc):', ":"),
+    ("gop-bo-kiem-khoang-n", ("r552",), "    if not 2 <= n <= 8 or any(", "    if any("),
+    ("gop-bo-kieu-int-manh", ("r552",), 'for k in ("phien_ban", "so_manh", "manh")):', 'for k in ("phien_ban", "so_manh")):'),
+    ("gop-bo-kieu-int-so-manh", ("r552",), 'for k in ("phien_ban", "so_manh", "manh")):', 'for k in ("phien_ban", "manh")):'),
+    ("gop-bo-kieu-int-phien-ban", ("r552",), 'for k in ("phien_ban", "so_manh", "manh")):', 'for k in ("so_manh", "manh")):'),
+    ("gop-bo-kieu-mang", ("r552",), '    if any(type(x[k]) is not list for x in doc for k in ("giet", "tk_giet")):', "    if False:"),
+    ("gop-bo-kiem-tap-manh", ("r552",), '    if sorted(x["manh"] for x in doc) != list(range(n)):', "    if False:"),
+    ("gop-bo-kiem-bam", ("r552",), '    if any([x["sha256_test"], x["sha256_tool"]] != bam for x in doc):', "    if False:"),
+    ("gop-bo-bam-tool", ("r552",), '[x["sha256_test"], x["sha256_tool"]] != bam', '[x["sha256_test"], bam[1]] != bam'),
+    ("gop-bo-kiem-thanh-vien", ("r552",), "            if any(ten not in thuoc for ten in x[khoa]):", "            if False:"),
+    ("gop-bo-kiem-hop", ("r552",), "        if set(hop) != {y[0] for y in bang}:", "        if False:"),
+    ("gop-bo-kiem-lap", ("r552",), "        if len(hop) != len(set(hop)):", "        if False:"),
+    ("gop-chi-mot-bang", ("r552",), 'in (("giet", DOT_BIEN), ("tk_giet", DOT_BIEN_TU_KIEM)):', 'in (("tk_giet", DOT_BIEN_TU_KIEM),):'),
+    ("gop-bo-kiem-nhom", ("r552",), "    thieu = (NHOM_BAT_BUOC - nhom) | (NHOM_BAT_BUOC - {t for t, _, _ in TU_KIEM})", "    thieu = set()"),
+    ("gop-bo-kiem-san", ("r552",), "    if thieu or len(NHOM_BAT_BUOC) < SAN_NHOM:\n", "    if thieu:\n"),
+    ("gop-rc-0-khi-loi", ("r552",), "    if loi:\n        return 1\n    g, tk", "    if False:\n        return 1\n    g, tk"),
+    ("ghi-so-gop", ("r546",), "            _ghi_ha_tang(e)                       # r2 M1 diem nuot: _loi_gop\n", ""),
+    ("gop-cli-bo-qua", ("r552",), '    if sys.argv[1:2] == ["--gop"]:', "    if False:"),
 ]
 
 
@@ -4698,8 +4892,9 @@ NHOM_BAT_BUOC = NHOM_BAT_BUOC | {"r539", "r540", "r541", "r542"}
 NHOM_BAT_BUOC = NHOM_BAT_BUOC | {"r543", "r544"}      # #593 r1
 NHOM_BAT_BUOC = NHOM_BAT_BUOC | {"r545", "r546", "r547"}      # #593 r2
 NHOM_BAT_BUOC = NHOM_BAT_BUOC | {"r548"}      # #593 r3
+NHOM_BAT_BUOC = NHOM_BAT_BUOC | {"r549", "r550", "r551", "r552"}      # #661
 
-SAN_NHOM = 48
+SAN_NHOM = 52
 
 
 # #568 r4 / B1 — `str.splitlines()` coi CHIN ky tu NGOAI `\n` la het dong, con
@@ -5008,7 +5203,7 @@ def _bang_chung_tu_kiem(stdout, proof_text, nonce, expected, kh_chot, kh_khac):
     return total - passed == len(failed)
 
 
-def chay_dot_bien_tu_kiem():
+def chay_dot_bien_tu_kiem(muc=None):
     """Chay tung dot bien tren BAN SAO cua CHINH tep nay, doi DUNG ca dich do."""
     giet = hong = khong_do_tk = 0
     goc = Path(__file__).read_text(encoding="utf-8")
@@ -5038,7 +5233,7 @@ def chay_dot_bien_tu_kiem():
         print("DOT BIEN TU KIEM: KHONG DO DUOC — phep cat bang hong")
         return 0, 0, len(DOT_BIEN_TU_KIEM)
     with tempfile.TemporaryDirectory() as td:
-        for ten, dich, neo, thay in DOT_BIEN_TU_KIEM:
+        for ten, dich, neo, thay in (DOT_BIEN_TU_KIEM if muc is None else muc):
             ngoai_bang = dau.count(neo) + duoi.count(neo)
             if ngoai_bang != 1:
                 print(f"DOT BIEN TU KIEM {ten}: NEO KHONG DUY NHAT ({ngoai_bang})")
@@ -5165,7 +5360,127 @@ def chay_tu_kiem():
     return do
 
 
+# ---- #661 CI-DOT-BIEN-CHIA-MANH: MANH (M1) chi tinh GIET qua bo phan hang SAN CO; GOP (M2) --
+MANH_ENV, MANH_RA_ENV, PHIEN_BAN_MANH = "NHANH_DON_DUOC_MANH", "NHANH_DON_DUOC_MANH_RA", 1
+_KHOA_MANH = {"phien_ban", "manh", "so_manh", "sha256_test", "sha256_tool", "giet", "tk_giet"}
+
+
+def doc_manh(gia_tri) -> tuple[int, int]:
+    """M1 — `k/N` khop DUNG `^[0-9]/[2-8]$` (fullmatch: khong LF cuoi) va k < N."""
+    if not re.fullmatch(r"[0-9]/[2-8]", gia_tri or ""):
+        raise ValueError(f"{MANH_ENV}={gia_tri!r} sai hinh k/N")
+    k, n = map(int, gia_tri.split("/"))
+    if k >= n:
+        raise ValueError(f"{MANH_ENV}={gia_tri!r}: can k < N")
+    return k, n
+
+
+def phan_hoach(bang, k: int, n: int) -> list:
+    """M1 — muc thu i vao manh `i % n`. Ten TRUNG thi phan hoach theo ten vo nghia."""
+    ten = [x[0] for x in bang]
+    if len(set(ten)) != len(ten):
+        raise ValueError("ten mutant TRUNG trong bang")
+    return [x for i, x in enumerate(bang) if i % n == k]
+
+
+_bam = lambda tep: hashlib.sha256(Path(tep).read_bytes()).hexdigest()   # noqa: E731
+
+
+def chay_manh(k: int, n: int, db, dbtk, ra) -> int:
+    """M1 — T1..T8 + tron TU_KIEM + CHI hai phan hoach; ghi `ra` KHI DAT TRON (nen `giet` = tap da giet); KHONG in dong MAU_DAY_DU."""
+    ra = Path(ra).resolve()               # MOT lan, truoc moi con (cwd khong doi)
+    if chay_ca(None):
+        print(f"MANH {k}/{n}: T1..T8 DO — khong ghi bang chung")
+        return 1
+    dat, khong_giet, khong_do = chay_dot_bien(db)
+    tu_kiem_do = chay_tu_kiem()
+    tk_giet, tk_hong, tk_khong_do = chay_dot_bien_tu_kiem(dbtk)
+    print(f"MANH {k}/{n}: MUTANT giet = {dat} / {len(db)} · TU DOT BIEN giet = {tk_giet} / {len(dbtk)}")
+    if tu_kiem_do or (dat, khong_giet, khong_do, tk_giet, tk_hong, tk_khong_do) != (len(db), 0, 0, len(dbtk), 0, 0):
+        print(f"MANH {k}/{n}: DO — khong ghi bang chung")
+        return 1
+    ra.parent.mkdir(parents=True, exist_ok=True)
+    ra.write_text(json.dumps({"phien_ban": PHIEN_BAN_MANH, "manh": k, "so_manh": n,
+                              "sha256_test": _bam(__file__), "sha256_tool": _bam(TOOL),
+                              "giet": [x[0] for x in db], "tk_giet": [x[0] for x in dbtk]}), encoding="utf-8")
+    return 0
+
+
+def _loi_gop(thu_muc: Path):
+    """M2 — `(loi, N)`; moi chot MOT dieu kien (`r552`). Thanh vien + hop = tron bang + khong lap => manh BANG phan hoach."""
+    doc = []
+    for tep in sorted(Path(thu_muc).glob("*.json")):
+        try:
+            doc.append(json.loads(tep.read_text(encoding="utf-8")))
+        except OSError as e:
+            _ghi_ha_tang(e)                       # r2 M1 diem nuot: _loi_gop
+            return [f"{tep.name}: {type(e).__name__}: {e}"], None
+        except ValueError as e:
+            return [f"{tep.name}: JSON hong ({e})"], None
+    if not doc:
+        return ["khong co tep manh nao"], None
+    if any(not isinstance(x, dict) or set(x) != _KHOA_MANH for x in doc):
+        return ["tep manh sai khoa"], None
+    # Codex #661 luot 1 F02 — KIEU TRUOC gia tri, MOI tep: `True == 1`, `4.0 == 4`, `{ten: ..}` duyet nhu mang.
+    if any(type(x[k]) is not int for x in doc for k in ("phien_ban", "so_manh", "manh")):
+        return ["phien_ban/so_manh/manh phai la int"], None
+    if any(type(x[k]) is not list for x in doc for k in ("giet", "tk_giet")):
+        return ["giet/tk_giet phai la mang"], None
+    if any(x["phien_ban"] != PHIEN_BAN_MANH for x in doc):
+        return ["phien_ban lech"], None
+    n = doc[0]["so_manh"]
+    if not 2 <= n <= 8 or any(x["so_manh"] != n for x in doc):
+        return [f"so_manh lech: {[x['so_manh'] for x in doc]}"], None
+    if sorted(x["manh"] for x in doc) != list(range(n)):
+        return [f"can dung {n} manh 0..{n - 1}, thay {[x['manh'] for x in doc]}"], None
+    bam = [_bam(__file__), _bam(TOOL)]
+    if any([x["sha256_test"], x["sha256_tool"]] != bam for x in doc):
+        return ["sha256 lech tep DANG CHAY"], None
+    loi = []
+    for khoa, bang in (("giet", DOT_BIEN), ("tk_giet", DOT_BIEN_TU_KIEM)):
+        for x in doc:
+            thuoc = {y[0] for y in phan_hoach(bang, x["manh"], n)}
+            if any(ten not in thuoc for ten in x[khoa]):
+                loi.append(f"manh {x['manh']}: {khoa} co ten NGOAI phan hoach")
+        hop = [ten for x in doc for ten in x[khoa]]
+        if set(hop) != {y[0] for y in bang}:
+            loi.append(f"{khoa}: hop cac manh != tron bang")
+        if len(hop) != len(set(hop)):
+            loi.append(f"{khoa}: ten LAP")
+    nhom = {c for _, dich, _, _ in DOT_BIEN_TU_KIEM for c in dich}
+    thieu = (NHOM_BAT_BUOC - nhom) | (NHOM_BAT_BUOC - {t for t, _, _ in TU_KIEM})
+    if thieu or len(NHOM_BAT_BUOC) < SAN_NHOM:
+        loi.append(f"nhom bat buoc thieu {sorted(thieu)} hoac duoi san {SAN_NHOM}")
+    return loi, n
+
+
+def gop(thu_muc) -> int:
+    """M2 — `--gop <thu muc>`: DAT in ba dong duong (dong MUTANT khop `MAU_DAY_DU`)."""
+    loi, n = _loi_gop(thu_muc)
+    for x in loi:
+        print(f"GOP: LOI — {x}")
+    if loi:
+        return 1
+    g, tk = len(DOT_BIEN), len(DOT_BIEN_TU_KIEM)
+    print(f"GOP MANH {n}/{n}")
+    print(f"MUTANT: giet = {g} · khong giet = 0 · khong do duoc = 0 / tong {g}")
+    print(f"TU DOT BIEN: giet = {tk} / {tk}")
+    return 0
+
+
 def main() -> int:
+    # #661 M1 — POP truoc moi thu (con chep `os.environ` => khong thua ke bien manh); sai hinh => rc 2, KHONG chay gi.
+    if MANH_ENV in os.environ or MANH_RA_ENV in os.environ:
+        gia_tri, ra = os.environ.pop(MANH_ENV, None), os.environ.pop(MANH_RA_ENV, None)
+        try:
+            k, n = doc_manh(gia_tri)
+            if not ra:
+                raise ValueError(f"thieu {MANH_RA_ENV}")
+            db, dbtk = phan_hoach(DOT_BIEN, k, n), phan_hoach(DOT_BIEN_TU_KIEM, k, n)
+        except ValueError as e:
+            print(f"MANH: LOI — {e}")
+            return 2
+        return chay_manh(k, n, db, dbtk, ra)
     if os.environ.get("NHANH_DON_DUOC_CHI_TU_KIEM"):
         return 1 if chay_tu_kiem() else 0
     duong = os.environ.get(KENH_ENV)
@@ -5213,4 +5528,6 @@ def main() -> int:
         return 1
     return 0 if (dat == len(DOT_BIEN) and not tu_kiem_do) else 1
 if __name__ == "__main__":
+    if sys.argv[1:2] == ["--gop"]:          # #661 M2: dung MOT doi so
+        raise SystemExit(gop(sys.argv[2]) if len(sys.argv) == 3 else 2)
     raise SystemExit(main())

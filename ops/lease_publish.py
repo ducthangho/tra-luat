@@ -789,7 +789,7 @@ def _kiem_neo_prompt(lease: dict, tep: Path, goc) -> str:
     return thuc
 
 
-def kiem(lease: dict, tep=None, goc=None) -> tuple:
+def kiem(lease: dict, tep=None, goc=None, bo_qua_han: bool = False) -> tuple:
     """Kiểm thuần và trả `(lease, băm prompt)`; ném `Chan` nếu không hợp lệ.
 
     Trả kèm cái băm chứ không trả mỗi lease, để dòng "prompt … khớp băm" mà `check`
@@ -888,14 +888,173 @@ def kiem(lease: dict, tep=None, goc=None) -> tuple:
         neo = _kiem_neo_prompt(lease, Path(tep), goc)
 
     han = _doc_han(lease["lease_expires_at_utc"])
-    if han <= datetime.now(timezone.utc):
+    # `bo_qua_han` bỏ ĐÚNG MỘT chốt — chốt HẠN, và chỉ nó (vẫn ĐỌC hạn để hạn hỏng dạng còn
+    # bị chặn). Người gọi DUY NHẤT: nhánh đã-có-dấu của `kiem_github`, nơi một lease đã đăng
+    # rồi mới hết hạn phải được `rc=9` (idempotent, `t174`) chứ không `rc=8`.
+    if not bo_qua_han and han <= datetime.now(timezone.utc):
         raise Chan(RC_NOI_DUNG,
                    f"lease đã hết hạn lúc {han.isoformat()} — đăng một lease chết thì "
                    f"người nhận tưởng có quyền mà không có")
     return lease, neo
 
 
+def _tien_kiem_mien_dang(lease) -> None:
+    """Tiền kiểm miền cho `kiem_github` (M2) — và PHẠM VI THẬT của nó, đã ĐO.
+
+    Lời khai đầu tiên viết ở đây là *"thiếu trường sẽ thành `KeyError` TRẦN thoát ra khỏi
+    cổng"*. **Phép đo BÁC câu ấy**, và nó bị bác bởi chính đột biến gỡ hàm này ra:
+
+        đột biến bỏ tiền kiểm  ·  thiếu `lease_id`      -> rc=8  (KHÔNG đổi)
+        đột biến bỏ tiền kiểm  ·  thiếu `packet_issue`  -> rc=8  (KHÔNG đổi)
+        đột biến bỏ tiền kiểm  ·  `packet_issue` SAI KIỂU -> rc=9  (ĐỔI, và đổi NGUY HIỂM) — TRƯỚC bản vá P1
+
+    Lý do hai ca đầu không đổi: `_do_dau_da_dang` vốn NUỐT mọi ngoại lệ không phải
+    `RC_DA_DANG`, nên `KeyError` chết ngay tại đó rồi `kiem()` dựng lại `rc=8` như cũ.
+    Tức hai ca ấy là **BỘ TƯƠNG ĐƯƠNG** — chúng không đo hàm này, chúng đo cái nuốt.
+
+    Thứ hàm này thật sự đóng là ca THỨ BA: `packet_issue: "579"` (chuỗi) vẫn dựng được URL
+    `issues/579/comments` hợp lệ, nên dò thấy dấu và trả `rc=9` — tức một lease SAI KIỂU
+    được cấp đường "đã đăng, bỏ qua" và **né sạch mọi chốt của `kiem()`**. Đó là một lỗ
+    thật, và nó là lý do duy nhất đã đo được để hàm này tồn tại — CHO TỚI bản vá P1 (#589).
+    ĐO LẠI 25-09 sau bản vá P1 (nhánh đã-có-dấu nay chạy `kiem()`): gỡ tiền kiểm thì
+    `packet_issue` sai kiểu (chuỗi, `bool`) cho `rc=8` ở CẢ bản đúng lẫn bản gỡ, `kiem()` chạy
+    1 lần ở cả hai — mã thoát KHÔNG còn đổi. Răng CÒN LẠI của hàm là số lời gọi GitHub của
+    phép dò: 0 (bản đúng) so 1 (bản gỡ). `t178` chốt đúng đại lượng ấy.
+
+    `bool` bị loại tường minh vì `isinstance(True, int)` là `True` trong Python: một
+    `packet_issue: true` lọt phép kiểm kiểu ngây thơ rồi thành `issues/True` trên URL.
+    CA `bool` NAY ĐÃ ĐO — `t178` giữ nó bằng SỐ LỜI GỌI GitHub (`0`), không bằng mã thoát
+    (mã thoát là `8` ở cả bản đúng lẫn bản gỡ chốt). Câu "KHÔNG ĐO" ở đây là lời khai của
+    bản trước, đã hết hiệu lực từ `M11`; cross-review lượt 2 bắt nó còn sót
+    (`post-fix-boolean-evidence-claims-drift`). Giới hạn CÒN đúng: mới đo qua adapter giả,
+    chưa đo trên một endpoint HTTP thật.
+
+    HÀM NÀY KHÔNG PHÁN, NÓ CHỈ LÀM PHÉP DÒ CÂM. `Chan` nó ném được `_do_dau_da_dang` bắt
+    lại và nuốt; hệ quả là dữ liệu thiếu miền làm phép dò NHƯỜNG quyền phán cho chuỗi
+    `kiem()` cũ, đúng thứ tự cũ, đúng mã thoát cũ (M3).
+
+    BẢN TRƯỚC ĐẶT HÀM NÀY NGOÀI `try` VÀ ĐÓ LÀ MỘT HỒI QUY THẬT, do cross-review codex
+    lượt 1 bắt (`unposted-error-precedence-changes`). Khi ấy `Chan(8)` ở đây thoát ra khỏi
+    cả `kiem_github`, cướp quyền phán của `kiem()`. Phản chứng chạy được: một lease CHƯA
+    ĐĂNG vừa tự cấp (`kiem()` trả `rc=4`) vừa có `packet_issue` sai kiểu —
+
+        nền `origin/master`   -> rc=4   (`kiem()` bắt authority trước)
+        bản cũ của packet này -> rc=8   (tiền kiểm bắn trước, ĐỔI thứ tự lỗi)
+        bản này               -> rc=4   (nhường lại, khớp nền)
+
+    Docstring cũ khai "không đổi mã thoát (M3)" và câu ấy ĐÚNG khi lease chỉ mắc MỘT lỗi,
+    SAI khi mắc hai. `t177` chỉ dựng từng lỗi riêng nên không bắt được. `t180` khoá ca hai
+    lỗi đồng thời.
+    """
+    if not isinstance(lease.get("lease_id"), (str, int)) or isinstance(lease.get("lease_id"), bool):
+        raise Chan(RC_NOI_DUNG, "tiền kiểm: thiếu `lease_id` hoặc sai kiểu")
+    so = lease.get("packet_issue")
+    if isinstance(so, bool) or not isinstance(so, int):
+        raise Chan(RC_NOI_DUNG, "tiền kiểm: thiếu `packet_issue` hoặc sai kiểu (đòi số nguyên)")
+
+
+def _do_dau_da_dang(lease: dict) -> None:
+    """M1 — dò dấu "đã đăng" TRƯỚC, không chạm `kiem()`.
+
+    CÓ dấu ⇒ ném `Chan(RC_DA_DANG)` ngay. KHÔNG có dấu, hoặc KHÔNG ĐO ĐƯỢC vì bất cứ lý do
+    nào khác, ⇒ trả về lặng lẽ để `kiem_github` chạy TRỌN chuỗi cũ — chính chuỗi ấy sẽ dựng
+    lại đúng lỗi đó, đúng thứ tự, đúng mã thoát của `origin/master` (M3).
+
+    Vì sao nuốt mọi ngoại lệ KHÁC ở đây mà không phải là fail-open: hàm này KHÔNG phải một
+    cổng, nó là một phép DÒ. Nó chỉ có quyền nói "đã đăng rồi, bỏ qua"; nó không có quyền
+    nói "đạt". Mọi phán quyết từ chối vẫn do chuỗi cũ đưa ra, nguyên vẹn.
+
+    `_tien_kiem_mien_dang` nằm TRONG `try` là có chủ đích, và bản trước để nó ngoài — xem
+    docstring hàm ấy. Nuốt `Chan` của tiền kiểm KHÔNG làm mất răng của nó: răng của tiền
+    kiểm là chặn phép dò CHẠM MẠNG rồi trả `rc=9` cho một lease hỏng miền, và răng ấy đo
+    bằng SỐ LỜI GỌI GitHub (`t178`), không đo bằng mã thoát.
+    """
+    # CHỐT HÌNH DẠNG đứng NGOÀI `try` — có chủ đích, và khác hẳn chốt MIỀN bên dưới.
+    #
+    # Cross-review lượt 2 bắt (`unposted-error-precedence-changes`, lần thứ hai cùng slug):
+    # bản vá lượt 1 đưa CẢ `_tien_kiem_mien_dang` vào trong `try`, nên `Chan` nó ném cho một
+    # `lease` KHÔNG PHẢI ánh xạ cũng bị nuốt — rồi `kiem()` gọi `.get()` trên thứ không có
+    # phương thức ấy và một `AttributeError` TRẦN thoát ra khỏi cổng. Đo được năm hình dạng:
+    # `None` · `[]` · `True` · `55` · `"55"`.
+    #
+    # KHAI CHO ĐÚNG, ĐỪNG PHÓNG ĐẠI: nền `origin/master` CŨNG vỡ y hệt ở đây, nên đây KHÔNG
+    # phải hồi quy mới — nó là việc đánh mất một chốt mà chính lượt 1 vừa thêm vào. Và phạm vi
+    # đã đo được là API `kiem_github`; đường CLI có `_doc_yaml` giữ chốt ánh xạ và đo ra `rc=8`.
+    #
+    # Vì sao HAI chốt chứ không một:
+    #   HÌNH DẠNG (không phải dict) -> không ai phán được gì về nó, kể cả `kiem()`. Fail-close
+    #                                  NGAY, ngoài `try`.
+    #   MIỀN (dict thiếu/sai trường) -> `kiem()` phán được, và phán ĐÚNG THỨ TỰ hơn. Nhường
+    #                                  lại: nuốt trong `try`.
+    # Gộp hai thứ ấy làm một là lý do lượt 1 sai theo chiều này và lượt 0 sai theo chiều kia.
+    if not isinstance(lease, dict):
+        raise Chan(RC_NOI_DUNG, "tiền kiểm: lease không phải ánh xạ")
+    try:
+        _tien_kiem_mien_dang(lease)
+        _kiem_comment_da_co(_repo_github(), lease)
+    except Chan as c:
+        if c.ma == RC_DA_DANG:
+            raise
+        return
+    except Exception:  # noqa: BLE001 — xem docstring: dò, không phán
+        return
+
+
 def kiem_github(lease: dict, tep=None, goc=None) -> tuple:
+    """Kiểm một lease TRƯỚC khi đăng, gồm hai lớp GitHub mà `kiem()` không chạm.
+
+    THỨ TỰ LÀ NỘI DUNG, không phải chi tiết cài đặt. Bản trước gọi `kiem()` NGAY DÒNG ĐẦU,
+    mà `kiem()` ném `rc=8` khi lease hết hạn (`:885`) — nằm TRƯỚC chốt `rc=9` của
+    `_kiem_comment_da_co`. Hệ quả đo được 20-09-2026: một lease **đã đăng rồi mới hết hạn**
+    không bao giờ tới được đường `rc=9`; nó chết ở `rc=8`, và bước `đăng` của
+    `ops-publish-lease.yml` — vốn CÓ SẴN nhánh `rc=9` đúng — không bao giờ được gọi cho hình
+    dạng ấy. Hai lượt `35519177197` (#568) và `35519243379` (#566) đỏ vì đúng chuyện này,
+    cả hai đỏ SAU KHI lease mới đã đăng xong.
+
+    GIÁ PHẢI TRẢ, khai thẳng chứ không làm nhẹ (M4) — và bản trước khai SAI hậu quả: với lease
+    ĐÃ ĐĂNG, đường này từng trả `rc=9` mà KHÔNG chạy `kiem()`, và câu cũ ở đây nói "một tệp
+    lease đã đăng rồi bị SỬA về sau sẽ KHÔNG bị bắt" như một đánh đổi chấp nhận được. Connector
+    codex (#589, 24-09) nối nó với `ai-dang-giu` và chỉ ra hậu quả thật: tệp đã sửa được tính là
+    người giữ mà chưa qua cổng thẩm quyền — P1. Nay nhánh đã-có-dấu chạy `kiem()` trên tệp HIỆN
+    TẠI, trừ đúng chốt hạn; tự cấp (`rc=4`), neo prompt (`rc=6`), trường thiếu/sai dạng
+    (`rc=8`) đều bị chặn TRƯỚC `rc=9`. `t190` đo từng vế.
+    GIÁ CÒN LẠI, KHÔNG ĐÓNG ở đây: một người CÓ thẩm quyền sửa một lease đã đăng (gia hạn,
+    nới `write_set`) thì tệp qua `kiem()` và vẫn `rc=9` — bản CHIẾU đã đăng không phản ánh nội
+    dung mới. Đó là thao tác của người có quyền, không phải lỗ thẩm quyền; nhưng bản chiếu cũ
+    đi là thật, và chưa có chốt nào so tệp với bản chiếu. Đường ấy CŨNG bỏ `_kiem_loai_so_hieu` — chốt nằm NGOÀI `kiem()`, nên
+    câu trên chưa phủ nó (cross-review lượt 7): `packet_issue` trỏ vào một Pull Request mà đã
+    có dấu bot thì trả `rc=9` thay vì `rc=8` (`RC_NOI_DUNG`). Reviewer lượt 7 đếm lời gọi thật: có dấu
+    ⇒ `kiem` 0 lần, lời gọi loại số hiệu 0 lần, bất kể số hiệu là issue hay PR — số ấy là TRƯỚC
+    bản vá P1. Đo lại 25-09 trên lease sạch của bộ #579 (lượt 15): có dấu ⇒ `kiem` 1 lần (kèm
+    `bo_qua_han`), loại số hiệu 0 lần; không dấu ⇒ 1 và 1. Nửa về `_kiem_loai_so_hieu` VẪN đúng. Không tạo được
+    comment nào: `rc=9` là "đã đăng, bỏ qua", không phải "đạt". Đánh đổi có chủ đích: bản
+    chiếu đã công bố mới là thứ người khác đọc, và không ai được lợi khi một lượt CI đỏ vì
+    một lease đã đăng đúng.
+
+    Giá thứ hai, nhỏ hơn và cũng phải khai: đường KHÔNG-CÓ-DẤU gọi `_kiem_comment_da_co` HAI
+    lần KHI chuỗi cũ đi tới cửa cuối (một lần dò, một lần ở cửa cuối); MỘT lần khi `kiem()`
+    hay chốt loại số hiệu chặn trước. Đếm lời gọi thật (24-09, bộ ca #579): lease sạch ⇒ 2,
+    endpoint `comments` hỏng mãi ⇒ 2; hết hạn ⇒ 1 (`rc=8`), tự cấp ⇒ 1 (`rc=4`), neo prompt
+    không kiểm được ⇒ 1 (`rc=6`), thiếu trường ⇒ 1 (`rc=8`), số hiệu là PR ⇒ 1 (`rc=8`, số
+    của cross-review lượt 7). Bản trước khai "HAI lần" cho mọi đường không-dấu — rộng hơn
+    phép đo (cross-review lượt 11 song song). Đổi một lời gọi API lấy việc giữ M3 đúng từng
+    mã thoát. KHÔNG ĐO: chi phí ấy chưa được đo trên một issue nhiều trang comment.
+    """
+    try:
+        _do_dau_da_dang(lease)
+    except Chan as c:
+        if c.ma != RC_DA_DANG:
+            raise
+        # ĐÃ CÓ DẤU — nhưng dấu chỉ nói "lease MANG TÊN NÀY đã đăng", KHÔNG nói "tệp HIỆN TẠI
+        # là tệp đã đăng". Cross-review connector codex trên #589 (24-09, P1, đo lại): bản
+        # trước tôn trọng dấu NGAY, nên một lease đã đăng bị SỬA thành tự cấp (`rc=4`) hay
+        # neo prompt không kiểm được (`rc=6`) vẫn ra `rc=9` — workflow coi là bỏ qua thành
+        # công, và `ai-dang-giu` tính tệp đã sửa là người giữ. Trên master `kiem()` chạy
+        # trước nên không có lỗ này: đây là HỒI QUY của chính packet.
+        # Nên: tệp HIỆN TẠI phải qua MỌI chốt của `kiem()` TRỪ chốt hạn — miễn trừ HẸP đúng
+        # một điều kiện, vì hết hạn sau khi đăng là lý do packet này tồn tại (`t174`).
+        kiem(lease, tep, goc, bo_qua_han=True)
+        raise
     lease, neo = kiem(lease, tep, goc)
     repo = _repo_github()
     _kiem_loai_so_hieu(repo, lease["packet_issue"])

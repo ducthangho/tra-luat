@@ -32,11 +32,12 @@ trang_thai_packet:
     PROTOCOL §10 (thuat ngu trang thai): `landed` = da vao canonical o exact SHA duoc duyet, HAU-MERGE GATE XANH va
     BOOKKEEPING PACKET XONG. (1) merge dung authorized_head_sha bf63bb1 tai f8a7829 — CO. (2) hau-merge gate: required
     contexts cua master do duoc (gate, gate-packet-loop, gate-ops ubuntu-latest) va ca ba success tren run 36387278453;
-    bon moc §10.2.2 do cho ca ba run can cu — xem ops/land/pr666-wp650-provenance.yaml (Workflow definition bang NGUON
-    THAY THE vi GraphQL 403; gioi han khai o do). (3) bookkeeping: PR #667 merge 3fee59e; ban sua nay la muc cuoi.
+    bon moc §10.2.2 cho ca ba run can cu — xem ops/land/pr666-wp650-provenance.yaml: Run, Checkout, Gate output do
+    duoc; Workflow definition do duoc BYTES bang NGUON THAY THE (GraphQL 403), con commit nguon CHINH XAC not_measured —
+    chu kho chap nhan nguon thay the voi gioi han ay. Moc nay dong theo quyet dinh chu kho, khong phai do du. (3) bookkeeping: PR #667 merge 3fee59e; ban sua nay la muc cuoi.
     Truoc ban sua nay, tep ghi `landed: false` (dung o thoi diem ay); trang thai doi CHI khi ban sua nay merge.
   dieu_kien_da_dong:
-    - 'Bon moc §10.2.2 cho run 36379712476, 36387278453, 36387278424 — ops/land/pr666-wp650-provenance.yaml bon_moc.'
+    - 'Bon moc §10.2.2 cho run 36379712476, 36387278453, 36387278424 — ops/land/pr666-wp650-provenance.yaml bon_moc (commit nguon chinh xac cua workflow: not_measured, dong bang quyet dinh chu kho chap nhan nguon thay the).'
     - 'Required contexts cua master — ops/land/pr666-wp650-provenance.yaml required_contexts.'
     - 'PR bookkeeping #667 merge tai 3fee59e.'
 role: land_operator
@@ -153,8 +154,8 @@ provenance_ghi_chu: >-
   chi la doi chieu tham khao, KHONG phai bang chung provenance. CAP NHAT 16:28Z: bon moc da do tu log/artifact/REST cua
   dung run/job — ops/land/pr666-wp650-provenance.yaml bon_moc (Workflow definition bang nguon thay the, co gioi han).
 khong_do_duoc:
-  - 'DA DONG 16:28Z (xem ops/land/pr666-wp650-provenance.yaml): moc Checkout, Workflow definition, Gate output cho ca
-    ba run; artifact gate-evidence 10956094584 + marker duong; required contexts cua master. Con lai khong do duoc:
+  - 'DA DONG 16:28Z (xem ops/land/pr666-wp650-provenance.yaml): moc Checkout, Gate output, va BYTES Workflow definition cho ca
+    ba run (commit nguon chinh xac van not_measured); artifact gate-evidence 10956094584 + marker duong; required contexts cua master. Con lai khong do duoc:
     WorkflowRun.file (GraphQL 403) va lich su ruleset tai thoi diem merge (REST 403) — liet ke o tep ay.'
   - 'Validator tu dong cho ho so land (cac finding doi "validation case"): kho chua co validator cho ops/land/*.yaml —
     no co ten LAND-EVIDENCE-VALIDATOR, Issue #669 (con cua #499, chu kho quyet mo 2026-09-28); khong lam trong PR bookkeeping.'

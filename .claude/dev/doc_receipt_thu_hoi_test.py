@@ -51,6 +51,10 @@ class TinHieuChotCa(AssertionError):
     """Chỉ khung ca sinh; mã triển khai không ném được lớp này."""
 
 
+class LoiDo(RuntimeError):
+    """Phép đo tự hỏng: làm suite ĐỎ, không bao giờ được tính là giết đột biến."""
+
+
 def doi(**kv):
     return lambda d: {**d, **kv}
 
@@ -231,7 +235,9 @@ def ca_tinh(ten, m):
     try:
         kq = json.loads(r.stdout.splitlines()[-1])
     except (IndexError, ValueError):
-        kq = {"loi": r.stderr[-300:]}
+        kq = None
+    if r.returncode != 0 or type(kq) is not dict or set(kq) != {"ev", "trang_thai", "tat_dinh"}:
+        raise LoiDo(f"{ten}: probe tinh thuan hong rc={r.returncode}: {r.stderr[-200:]}")  # KHÔNG phải bằng chứng tác dụng phụ (luot4 F32)
     if kq != {"ev": [], "trang_thai": True, "tat_dinh": True}:
         raise TinHieuChotCa(f"{ten}: kiem_json co tac dung phu: {kq}")
 
@@ -441,8 +447,11 @@ def chay_dot_bien(nguon, dong):
             return "unresolved", "song"
         except TinHieuChotCa as e:
             return ("witness_killed", "giet") if str(e).startswith("dang_ky: mau dang ky") else ("unresolved", f"tin dung gia: {e}")
+    cap = list(zip(cu, moi)) if type(cu) is tuple and type(moi) is tuple and len(cu) == len(moi) else [(cu, moi)]
+    if not cap or any(type(c) is not str or type(n) is not str for c, n in cap):  # 3/2, 2/3, 0/0, sai kiểu (luot4 F31)
+        return "unresolved", "dot bien khai sai dang"
     ban = nguon
-    for c, n in (zip(cu, moi) if type(cu) is tuple else [(cu, moi)]):  # tuple = đột biến nhiều chỗ, mỗi neo phải duy nhất
+    for c, n in cap:  # tuple = đột biến nhiều chỗ, mỗi neo phải duy nhất
         if ban.count(c) != 1:
             return "unresolved", f"chuoi cu xuat hien {ban.count(c)} lan"
         ban = ban.replace(c, n)
@@ -480,7 +489,7 @@ def main():
     for c in CA + [("cli",), ("dang_ky",), ("thu_tu_k1",), ("tinh",)]:
         try:
             chay_ca(m, MODUN, {c[0]})
-        except TinHieuChotCa as e:
+        except (TinHieuChotCa, LoiDo) as e:
             hong_ca.append(str(e))
     nguon, dem, bang = MODUN.read_text(encoding="utf-8"), dict.fromkeys(("witness_killed", "equivalent_verified", "unresolved"), 0), DB + _theo_truong()
     for dong in bang:

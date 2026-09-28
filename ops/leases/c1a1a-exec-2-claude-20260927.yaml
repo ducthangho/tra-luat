@@ -120,7 +120,7 @@ ci_budget:
 dieu_kien_dung:
   - 'S1 — cham duong ngoai write set (tru tep spec mang theo va verdict review). DUNG.'
   - 'S2 — Codex luot 2/2 van con P1/P2/P3 => Review Rescue Checkpoint, hoi chu kho; KHONG tu noi tran.'
-  - 'S3 — > 500 dong them tren ba tep san pham (lech_nguong_duoc_duyet). DUNG truoc review.'
+  - 'S3 — > 650 dong them tren ba tep san pham (lech_nguong_duoc_duyet). DUNG truoc review.'
   - 'S4 — het han lease => ngung ghi, handoff §7.'
 
 gate_bat_buoc:
@@ -145,7 +145,18 @@ lech_nguong_duoc_duyet: >-
   trong phien 2026-09-28 (AskUserQuestion, chon "Nang ngoai le len <=500"). Ly do: va du 14 finding Codex luot 1
   (13 P1 / 1 P2, lop dot-bien-tuong-duong-hoac-thieu) khong cat ca, khong gop ID => +479 (module 111, test 367,
   dang ky 1). PR phai goi dung ten la NGOAI LE, khong viet 'dat tran'.
-lease_sua_lan_cuoi: '2026-09-28T00:40:00Z'
+  NANG LAN 2 len <= 650 tai Review Rescue Checkpoint 2026-09-28 (chu kho chon "Dong danh muc + 1 luot",
+  '#650' comment tiep sau 5861429584).
+review_budget_ghi_chu: >-
+  Tran Codex cho PR thi cong C1a1a NANG 2 -> 3 (chu kho, checkpoint 2026-09-28, "Dong danh muc + 1 luot"). Luot 3
+  chi audit DANH MUC dot bien co he thong + bang chung; dot bien moi NGOAI danh muc thanh no co ten, khong chan
+  merge, tru loi runtime that. Luot 3 khong approve => checkpoint, hoi chu kho; KHONG luot 4.
+lech_spec_duoc_duyet:
+  - 'A1 (F16): nhom null/bool (M3w/M3x/M3y/M1o) dung fixture DOI CHUNG rieng cho chot A1 — chu kho "Fixture doi chung rieng".'
+  - 'A2 (F24): M2a tach hai ID hai cap (verdict = equivalent_verified; thu tu = witness_killed) — chu kho "Hai ID, hai cap".'
+  - 'M3 (F23): ValueError cua parser (so nguyen qua dai) => K1 do fail-close — chu kho "K1 do fail-close".'
+lease_sua_lan_cuoi: '2026-09-28T01:10:00Z'
 lease_sua_ghi_chu: >-
   Lan 1 (2026-09-27T15:40Z): them lech_protocol_duoc_duyet. Lan 2 (2026-09-28T00:40Z): them lech_nguong_duoc_duyet.
+  Lan 3 (2026-09-28T01:10Z): checkpoint — tran dong <=650, tran Codex 2->3, ba lech spec co duyet.
   Khong doi write set, han, spec.

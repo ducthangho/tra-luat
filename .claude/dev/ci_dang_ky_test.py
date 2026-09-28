@@ -1086,6 +1086,33 @@ G5_THIET_LAP = frozenset({"git config --global core.autocrlf false", "git config
                           "bash ops/cai_cong_cu.sh shellcheck", "bash ops/cai_cong_cu.sh rg",
                           "actions/checkout@v4", "actions/setup-python@v5"})
 def _dong_lenh(b): return [b.get("uses")] * ("uses" in b) + [x.strip() for x in str(b.get("run", "")).splitlines() if x.strip() and not x.lstrip().startswith("#")]
+# #668 F1 (Codex lượt 1, P1): lệnh đúng chưa phải lệnh CHẠY. `shell: bash -n {0}` chỉ kiểm cú pháp ⇒ `--gop` rc=0 mà không
+# gom gì; `defaults.run.shell`, `working-directory`, env kế thừa, `with.ref` của checkout là những lối khác cùng hình dạng.
+# Nên NGỮ NGHĨA THỰC THI của job G5 cũng theo danh sách CHO PHÉP: khoá job/bước, shell, env, `with`, `runs-on`, matrix os.
+G5_JOB_ENV = {"PYTHONIOENCODING": "utf-8", "PYTHONUTF8": "1", "PYTHONDONTWRITEBYTECODE": "1"}
+G5_KHOA_JOB = frozenset({"needs", "strategy", "runs-on", "timeout-minutes", "env", "steps"})
+G5_KHOA_BUOC = frozenset({"name", "run", "shell", "env", "uses", "with"})
+G5_WITH = {"actions/checkout@v4": ({}, {"fetch-depth": 0}), "actions/setup-python@v5": ({"python-version": "3.12"},)}
+G5_OS = "${{ fromJson(needs.chuan-bi.outputs.os) }}"
+
+
+def _loi_thuc_thi_g5(j, v, buoc):
+    """Lỗi ngữ nghĩa thực thi của job G5 `j` trên các bước `buoc` (từ đầu tới HẾT bước G5; job mới: mọi bước)."""
+    loi = [f"{j}: khoá job ngoài danh sách cho phép: {sorted(set(v) - G5_KHOA_JOB - ({'if'} if j == JOB_G5_GOP else set()))}"] \
+        if set(v) - G5_KHOA_JOB - ({"if"} if j == JOB_G5_GOP else set()) else []
+    st = v.get("strategy") or {}
+    if v.get("env") != G5_JOB_ENV or v.get("runs-on") != "${{ matrix.os }}" or set(st) != {"fail-fast", "matrix"} \
+            or st.get("fail-fast") is not False or (st.get("matrix") or {}).get("os") != G5_OS:
+        loi.append(f"{j}: env/runs-on/strategy cấp job lệch hình dạng ghim")
+    for b in buoc:
+        ten = b.get("name") or b.get("uses")
+        if set(b) - G5_KHOA_BUOC or b.get("shell", "bash") != "bash":
+            loi.append(f"{j}: bước {ten!r} có khoá/shell ngoài danh sách cho phép: {sorted(set(b) - G5_KHOA_BUOC)} shell={b.get('shell')!r}")
+        elif "uses" in b and b.get("with", {}) not in G5_WITH.get(b["uses"], (b.get("with", {}),)):
+            loi.append(f"{j}: bước {ten!r} có `with` lệch ghim: {b.get('with')}")
+        elif "env" in b and not re.search(r"(?<![A-Za-z0-9_])cong_cu", str(b.get("run", ""))) and set(b["env"]) != {"AL_VER"}:
+            loi.append(f"{j}: bước thiết lập {ten!r} có env ngoài AL_VER: {sorted(b['env'])}")
+    return loi
 
 
 def _loi_g5_manh_gop(j, v, buoc, i):
@@ -1110,6 +1137,7 @@ def loi_g5_workflow(data):
     vắng), vô điều kiện; trước nó chỉ lệnh thiết lập (gom: thêm đúng bước tải về). #668: job mảnh/gom qua `_loi_g5_manh_gop`."""
     jobs = (data or {}).get("jobs") or {}
     loi = [f"thiếu job {j}" for j in JOB_G5 if j not in jobs]
+    loi += [f"workflow có khoá `{k}` cấp workflow — kế thừa vào mọi job G5" for k in ("defaults", "env") if k in (data or {})]
     for j, v in jobs.items():
         buoc = (v or {}).get("steps") or []
         cham = [i for i, b in enumerate(buoc) if re.search(r"(?<![A-Za-z0-9_])cong_cu", str(b.get("run", "")))]
@@ -1124,8 +1152,10 @@ def loi_g5_workflow(data):
         elif any(not set(_dong_lenh(b)) <= (G5_THIET_LAP | {G5_TAI_VE["uses"]} if j == JOB_G5_GOP else G5_THIET_LAP)
                  for b in buoc[:cham[0]]):
             loi.append(f"{j}: có lệnh ngoài danh sách thiết lập đứng trước probe G5")
-        elif j in (JOB_G5_MANH, JOB_G5_GOP):
-            loi += _loi_g5_manh_gop(j, v, buoc, cham[0])
+        else:
+            moi = j in (JOB_G5_MANH, JOB_G5_GOP)
+            loi += _loi_thuc_thi_g5(j, v, buoc if moi else buoc[:cham[0] + 1])
+            loi += _loi_g5_manh_gop(j, v, buoc, cham[0]) if moi else []
     return loi
 
 
@@ -1815,6 +1845,31 @@ def phan_chung():
         _them(f"p668-A6-{_t}", _hong_job(_j, _f))
     for _j in (_M, _G):
         _them(f"p668-A6-thieu-job-{_j}", bool(loi_g5_workflow({"jobs": {k: v for k, v in _wf0["jobs"].items() if k != _j}})))
+    # #668 F1: lệnh đúng mà KHÔNG chạy — shell/defaults/working-directory/env kế thừa/with. Mỗi lối một ca.
+    _BN = "bash -n {0}"
+    for _t, _j, _f in (
+            ("gop-shell-chi-cu-phap", _G, lambda v, b, i: _moi_mau(i, b, shell=_BN)),
+            ("manh-shell-chi-cu-phap", _M, lambda v, b, i: _moi_mau(i, b, shell=_BN)),
+            ("gate-shell-chi-cu-phap", "gate", lambda v, b, i: _moi_mau(i, b, shell=_BN)),
+            ("registry-shell-chi-cu-phap", "gate-registry", lambda v, b, i: _moi_mau(i, b, shell=_BN)),
+            ("manh-shell-sh", _M, lambda v, b, i: _moi_mau(i, b, shell="sh")),
+            ("gop-job-defaults-shell", _G, lambda v, b, i: v.update({"defaults": {"run": {"shell": _BN}}})),
+            ("gate-job-defaults-shell", "gate", lambda v, b, i: v.update({"defaults": {"run": {"shell": _BN}}})),
+            ("manh-working-directory", _M, lambda v, b, i: _moi_mau(i, b, **{"working-directory": "ops"})),
+            ("manh-thiet-lap-working-directory", _M, lambda v, b, i: _moi_mau(0, b, **{"working-directory": "ops"})),
+            ("manh-job-env-ban-kinh", _M, lambda v, b, i: v["env"].update({"CONG_CU_TEST_BAN_KINH": "manh"})),
+            ("gate-job-env-thua", "gate", lambda v, b, i: v["env"].update({"BASH_ENV": "x"})),
+            ("gop-runs-on-co-dinh", _G, lambda v, b, i: v.update({"runs-on": "ubuntu-latest"})),
+            ("manh-matrix-os-co-dinh", _M, lambda v, b, i: v["strategy"]["matrix"].update({"os": ["ubuntu-latest"]})),
+            ("manh-fail-fast", _M, lambda v, b, i: v["strategy"].update({"fail-fast": True})),
+            ("gop-checkout-ref", _G, lambda v, b, i: b[1].update({"with": {"ref": "master"}})),
+            ("manh-python-khac", _M, lambda v, b, i: b[2].update({"with": {"python-version": "3.11"}})),
+            ("gate-thiet-lap-env-la", "gate", lambda v, b, i: b[i - 1].update({"env": {"BASH_ENV": "x"}})),
+            ("manh-job-container", _M, lambda v, b, i: v.update({"container": "python:3.12"})),
+    ):
+        _them(f"p668-F1-{_t}", _hong_job(_j, _f))
+    for _k, _v in (("defaults", {"run": {"shell": _BN}}), ("env", {"CONG_CU_TEST_BAN_KINH": "manh"})):
+        _them(f"p668-F1-workflow-{_k}", bool(loi_g5_workflow({**_wf0, _k: _v})))
     _them("p637-A8-khong-ung-vien", chon_so_worker({1: 100, 2: 101, 4: 102}) is None)
     _them("p637-A8-dung-bien", chon_so_worker({1: 200, 2: 110, 4: 100}) == 2)
     _them("p637-A8-vuot-bien", chon_so_worker({1: 200, 2: 110.5, 4: 100}) == 4)

@@ -1685,6 +1685,18 @@ DOT_BIEN = {
         "                    if 'which(\"bash\")' in l]  # đột biến: đo CHUỖI, không đo cấu trúc\n",
         "BASH_NEN", (), "t27_cong_khong_bao_dong_gia_tren_CHU_THICH"),
     # #668 CI-G5-CONG-CU-CHIA-MANH: mỗi chốt gom/ghi/chế độ một đột biến riêng; ca đích đòi THẺ riêng của chốt.
+    'f2_main_du_bo_ban_kinh': ("ops/cong_cu_test.py",
+        '    if che_do == "gate":\n',
+        '    if che_do in ("gate", "du"):  # đột biến: Codex lượt 1 F2\n',
+        "TEP_TEST", _KEM_TEP_TEST, 't54_main_chon_DUNG_vong_ban_kinh_theo_che_do'),
+    'f2_main_gate_van_do': ("ops/cong_cu_test.py",
+        '    if che_do == "gate":\n',
+        '    if False:  # đột biến: gate vẫn đo trọn\n',
+        "TEP_TEST", _KEM_TEP_TEST, 't54_main_chon_DUNG_vong_ban_kinh_theo_che_do'),
+    'f2_main_manh_do_ca_bang': ("ops/cong_cu_test.py",
+        '        ten = _phan_manh(k, n)\n',
+        '        ten = list(DOT_BIEN)  # đột biến: mảnh đo cả bảng\n',
+        "TEP_TEST", _KEM_TEP_TEST, 't54_main_chon_DUNG_vong_ban_kinh_theo_che_do'),
     'g668_gom_bo_thu_muc': ("ops/cong_cu_test.py",
         '    if muc is None:\n',
         '    if False:  # đột biến: thư mục vắng lọt\n',
@@ -6368,6 +6380,22 @@ def t53_che_do_doc_FAIL_CLOSED_moi_cau_hinh_la_co_THE_RIENG():
     bang(not sai, f"`_doc_che_do` đọc sai (thấy, mong): {sai}")
 
 
+@ca
+def t54_main_chon_DUNG_vong_ban_kinh_theo_che_do():
+    """#668 F2 (Codex lượt 1, P2): `main()` phải đo TRỌN `DOT_BIEN` ở `du`, KHÔNG đo gì ở `gate`, ĐÚNG phần mảnh ở `manh`.
+
+    Trước ca này, đột biến `if che_do in ("gate", "du")` sống sót qua mọi ca: CLI mặc định rc=0 mà bỏ trọn vòng bán
+    kính — `t53` chỉ đo bộ ĐỌC chế độ, không đo `main` DÙNG chế độ ấy thế nào. Đo qua cửa `--tu-kiem-main` (chạy chính
+    `main` với giàn giáo rẻ) nên đột biến trên đĩa cắn được.
+    """
+    kq = _doc_kq_tu_kiem("--tu-kiem-main")
+    dung(kq["mong_du"] and kq["mong_manh"], f"giàn giáo không dựng được kỳ vọng: {kq}")
+    mong = {"du": [0, kq["mong_du"], []], "gate": [0, [], []], "manh": [0, [], kq["mong_manh"]]}
+    sai = {t: [len(kq[t][1]), len(kq[t][2]), kq[t][0]] for t, m in mong.items() if kq[t] != m}
+    bang(not sai, f"`main` chọn SAI vòng bán kính (số tên đủ, số tên mảnh, rc) theo chế độ: {sai} — "
+                  f"mong du={len(kq['mong_du'])}/0, gate=0/0, manh 3/8=0/{len(kq['mong_manh'])}")
+
+
 def _cong_tren_cay_that(goc, bo_quet=None):
     """(mã, dòng báo) — CHẠY chính cổng `bash_nen quet` trên cây THẬT.
 
@@ -7015,6 +7043,38 @@ def _in_tu_kiem_gom():
     print("KQ " + json.dumps(kq, ensure_ascii=True))
 
 
+def _in_tu_kiem_main():
+    """Cửa tiến trình con cho `t54` (#668 F2): chạy CHÍNH `main()` ở ba chế độ, ghi lại vòng bán kính nó CHỌN đo.
+
+    Giàn giáo rẻ: 0 ca, tiền kiểm/cổng cây thật/tự kiểm câm, và hai điểm phóng (`_ban_kinh_moi_dot_bien` cho đường
+    đủ, `_phong_con` cho đường mảnh) bị thay bằng bộ GHI tên — nên đo được `main` chọn gì mà không trả giá 242 đột
+    biến. Kỳ vọng in kèm từ CHÍNH tiến trình này (`list(DOT_BIEN)`, `_phan_manh`): ca đo DÂY NỐI của `main`, còn tính
+    đúng của phân hoạch là việc của `t52` — không thế thì một đột biến vào `_phan_manh` có bán kính 2.
+    """
+    import contextlib
+    import io
+    g, goi = globals(), {}
+    CA[:] = []
+    g["_chay_tien_kiem"] = lambda fn: None
+    g["_cong_tren_cay_that"] = lambda goc, bo_quet=None: (0, [])
+    g["_tu_kiem_phan_hang"] = g["_tu_kiem_gian_giao"] = lambda: 0
+    g["_tu_kiem_song_song"] = lambda do_o_nen: 0
+    g["_ban_kinh_moi_dot_bien"] = lambda ten, do_o_nen, so: goi.setdefault("du", []).extend(ten) or []
+    g["_phong_con"] = lambda ten, do_o_nen, so: goi.setdefault("manh", []).extend(ten) or []
+    g["_ket_thuc_manh"] = lambda k, n, ra, ten, ket, ly, vt: ([], 0)
+    kq = {"mong_du": list(DOT_BIEN), "mong_manh": _phan_manh(3, 8)}
+    for ten, env in (("du", {}), ("gate", {_BIEN_BAN_KINH: "manh"}),
+                     ("manh", {_BIEN_MANH: "3/8", _BIEN_MANH_RA: "x"})):
+        goi.clear()
+        for bien in (_BIEN_BAN_KINH, _BIEN_MANH, _BIEN_MANH_RA):
+            os.environ.pop(bien, None)
+        os.environ.update(env)
+        with contextlib.redirect_stdout(io.StringIO()):
+            rc = main()
+        kq[ten] = [rc, goi.get("du", []), goi.get("manh", [])]
+    print("KQ " + json.dumps(kq, ensure_ascii=True))
+
+
 def _in_tu_kiem_che_do():
     """Cửa tiến trình con cho `t53`: `_doc_che_do` trên bảng môi trường cố định, in `KQ`."""
     bang_env = {
@@ -7253,6 +7313,9 @@ if __name__ == "__main__":
         sys.exit(0)
     if "--tu-kiem-che-do" in sys.argv[1:]:
         _in_tu_kiem_che_do()
+        sys.exit(0)
+    if "--tu-kiem-main" in sys.argv[1:]:
+        _in_tu_kiem_main()
         sys.exit(0)
     if "--gop" in sys.argv[1:]:
         sys.exit(_main_gop())

@@ -1,0 +1,53 @@
+# HO SO LAND — packet #650 LAND-DOC-RECEIPT-THU-HOI-C1a1a r5, qua PR #666.
+# Schema chuan: docs/PROTOCOL_DA_PHIEN.md §7, khoi "Land evidence tach approval khoi thao tac".
+# Duong dan ops/land/*-land-evidence.yaml la QUY UOC THUC TE (tien le pr554, pr594), khong ADR nao dat.
+
+schema_version: 1
+mission_id: KHONG-CO-MISSION
+packet_id: LAND-DOC-RECEIPT-THU-HOI-C1a1a
+packet_issue: 650
+generation: 2
+provider: claude
+role: land_operator
+session_id: https://claude.ai/code/session_017KWSXEY9ifmPKmJREKfdSJ
+recorded_by: claude-session
+input_packet_generations:
+  - packet_issue: 650
+    lease_id: c1a1a-exec-2-claude-20260927
+    revision: 5
+    generation: 2
+    spec_sha256: 978058983e8eddefebfba267dbff2ef5cee95daf9b2d4847121d43b8cff89d77
+
+authorized_head_sha: bf63bb1ec485bccf8eec34cc5604f949d70fc7d6
+approver: ducthangho
+authorization_url: https://github.com/ducthangho/tra-luat/pull/666#issuecomment-5864536112
+authorization_url_la_gi: >-
+  Bien ban HUMAN AUDIT cua chu kho (assurance human_audited, verdict approve, reviewed_sha = authorized_head_sha),
+  kem muc "Uy quyen land": merge commit, CHI tren bf63bb1. Dang 06:17:39Z; chu kho SUA tai cho luc ~06:35Z de danh
+  dau [x] du 5 muc tu kiem (ban dau ca 5 de trong — land operator KHONG merge cho toi khi da danh dau). Comment id
+  khong doi qua lan sua.
+land_operator: claude-session (tai khoan GitHub cua chu kho qua MCP github)
+merge_method: merge
+merge_commit: f8a7829cc44f296c25faf1a6439b603ba840f70b
+merged_at: '2026-09-28T06:35:57Z'
+hai_cha: ceb1a3f36912dd4f03fe1741c443cd09e82a44ee bf63bb1ec485bccf8eec34cc5604f949d70fc7d6
+tree: 235f6605809b4f813adf5fdc467aae3944093629
+tree_ghi_chu: 'Tree merge = tree cua bf63bb1: base khong doi tu luc mo PR, merge khong doi noi dung.'
+target: master
+merge_api_expected_head_sha: bf63bb1ec485bccf8eec34cc5604f949d70fc7d6
+
+pre_merge_checks:
+  - 'Head PR = bf63bb1 (git fetch + rev-parse) ngay truoc merge; base origin/master = ceb1a3f khong doi.'
+  - 'CI tren bf63bb1: gate, gate-ops, gate-registry, gate-packet-loop, thu-hoi, chuan-bi = success; launcher, mo = skipped (loc duong dan).'
+  - 'mergeable_state: clean.'
+  - 'Review model (advisory): Codex gpt-6-astra xhigh luot 8 approve 0 P1/0 P2/0 P3 tren cb9ecc8; cay .claude/dev + ops/specs cua bf63bb1 giong het cb9ecc8.'
+  - 'Suite tai cho: 156/156 ca, 162/162 dot bien tren Python 3.10-3.13; ruff F delta 0; doctrine-scan, adr-song, diff --check rc 0.'
+post_merge_checks: []
+post_merge_ghi_chu: >-
+  Chua do CI master tren f8a7829 luc ghi tep nay; ket qua theo doi o PR bookkeeping. Khong chay CI tay, khong
+  Windows (chi thi chu kho).
+bookkeeping:
+  - 'Thu hoi lease c1a1a-exec-2-claude-20260927 bang rut han ve 2026-09-28T06:55Z tren ops/cap-lease-650 (4fe61ac); ops-publish-lease run 36387390312 success.'
+  - 'Dua tep lease (ban da thu hoi) + tep ho so nay vao master qua PR bookkeeping.'
+khong_co_cross_approved: >-
+  Review Codex la advisory_review; cong land cua packet sensitive nay la human_audited cua chu kho tren exact head.

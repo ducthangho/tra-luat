@@ -119,7 +119,7 @@ CA = [("duong_fixture", lambda d: d, ()), ("duong_c_khac_s", doi(**dict.fromkeys
       ("c_ca_nhom_39", doi(**dict.fromkeys(C3, S[:39])), ("K2",)), ("gio_hau_to", doi(thoi_diem_utc="2026-09-25T01:25:14Zx"), ("K2",)),
       ("duong_doi_chung", doi(descriptor_q13_ghim=X64, policy_T={}, profile_digest="x"), ()),  # A1 cho nhóm null (luot2 F16)
       ("int_chuoi", doi(run_id="5"), ("K2",)), ("so_dai_gioi_han", _SO(LIM), ()), ("so_dai_vuot", _SO(LIM + 1), ("K1",) if LIM else ()),
-      ("long_sau", b"[" * 1000 + b"]" * 1000, ("K1",)),
+      ("long_sau", b"[" * 100000 + b"]" * 100000, ("K1",)),  # 1000 tầng KHÔNG ném trên 3.12/3.13 (CI gate-registry 36367726882); 1e5 ném trên 3.10–3.13
       ("k3_ca_nhom_kho", doi(repository="other/repo", kho_canonical="github.com/other/repo", workflow_ref=WFK), ("K3",)),
       ("k3_ca_nhom_nhanh", doi(nhanh_mac_dinh="main", workflow_ref=WFN), ("K3",)),
       ("k4_base", lambda d: d, ("K4",), {"base_hien_hanh": X40}), ("k4_head", lambda d: d, ("K4",), {"head_hien_hanh": X40}),

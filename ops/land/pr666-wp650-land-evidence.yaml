@@ -34,7 +34,10 @@ trang_thai_packet:
     (xem khong_do_duoc), nen CHUA du bang chung duong; (3) bookkeeping — chinh PR bookkeeping mang tep nay chua merge.
     Vi vay trang thai la `merged`, `landed` CON TREO; khong duoc dung tep nay de coi packet la landed.
   dieu_kien_con_thieu_de_landed:
-    - 'Bang chung Gate output (§10.2.2) cho run 36387278453 va 36387278424, hoac quyet dinh mien tru co tham quyen cua chu kho.'
+    - 'Du BON moc provenance §10.2.2 cho moi run lam can cu (PR 36379712476; master 36387278453 va 36387278424): Run (da co),
+      Checkout (not_measured — tu checkout/log/artifact cua dung job/attempt), Workflow definition (not_measured — tu
+      WorkflowRun.file.repositoryFileUrl o exact OID), Gate output (not_measured — command/rc/marker duong/artifact).
+      Hoac quyet dinh mien tru co tham quyen cua chu kho, ghi ro pham vi; mien tru Gate output KHONG tu bao phu hai moc identity.'
     - 'Doc lai required context cua master (ruleset/branch protection), hoac mien tru co tham quyen.'
     - 'PR bookkeeping mang tep nay duoc merge.'
 role: land_operator
@@ -153,7 +156,7 @@ khong_do_duoc:
   - 'Danh sach required context cua ruleset/branch protection cho master (Codex #667 luot 2 P2 4119661439): chua doc
     duoc; ket luan launcher/mo "khong required" chi suy tu mergeable_state => KHONG DO DUOC, khong phai da chung minh.'
   - 'Validator tu dong cho ho so land (cac finding doi "validation case"): kho chua co validator cho ops/land/*.yaml —
-    viec ay la packet rieng, khong lam trong PR bookkeeping.'
+    no co ten LAND-EVIDENCE-VALIDATOR, Issue #669 (con cua #499, chu kho quyet mo 2026-09-28); khong lam trong PR bookkeeping.'
 bookkeeping:
   - 'Thu hoi lease c1a1a-exec-2-claude-20260927 bang rut han ve 2026-09-28T06:55Z tren ops/cap-lease-650 (4fe61ac); ops-publish-lease run 36387390312 success.'
   - 'Dua tep lease (ban da thu hoi) + tep ho so nay vao master qua PR bookkeeping.'
@@ -201,10 +204,10 @@ lech_protocol_khai:
       them +650 dong => A14 cua spec r5 KHONG dat; land dua tren quyet dinh lech co duyet cua chu kho, khong dua tren
       su phu hop voi r5.
     trang_thai: 'LECH DA XAY RA, khai thang; khong tuyen bo A14 dat theo r5.'
-    huong_xu_ly_de_xuat: >-
-      Chu kho quyet: (a) chap nhan la lech co duyet, ghi no ten A14-KHONG-REVISION o sổ nợ #499; hoac (b) them
-      ops/specs/LAND-DOC-RECEIPT-THU-HOI-C1a1a-r5.ERRATA.md (tien le CI-DOT-BIEN-CHIA-MANH-r2.ERRATA.md) ghi nguong
-      moi va can cu. Khong sua spec r5 da dong bang.
+    xu_ly: >-
+      Chu kho chon (phien dieu phoi 2026-09-28) ghi erratum canh spec dong bang:
+      ops/specs/LAND-DOC-RECEIPT-THU-HOI-C1a1a-r5.ERRATA.md (tien le CI-DOT-BIEN-CHIA-MANH-r2.ERRATA.md). Erratum ghi
+      nguong thuc te va can cu; KHONG bien A14 cua r5 thanh dat va KHONG tao revision hoi to.
 nang_tran:
   - truc: LOI_GOI (codex_review_calls_used, tran PROTOCOL §12 = 2/PR)
     tran_cu: 2

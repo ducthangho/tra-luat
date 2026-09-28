@@ -86,6 +86,10 @@ def ca(m, ten, dau_vao, do=(), **tham):
             tb = tb.tb_next
         raise TinHieuChotCa(f"{ten}: NEM:{type(e).__name__}@{so[-1] if so else '?'}#{gd}") from None
     kiem_kq(ten, kq, do)
+    if "K4" in do and "K1" not in do:  # nghĩa lý do K4: ĐÚNG trường lệch, ĐÚNG "stale, chay lai" (luot3 F30 K4-THONG-BAO-STALE)
+        r, t = json.loads(raw), {"S": S, "H": H, **{k: tham[v] for k, v in (("S", "base_hien_hanh"), ("H", "head_hien_hanh")) if v in tham}}
+        if [x for x in kq["ly_do"] if x.startswith("K4: ")] != [f"K4: {k} stale, chay lai" for k in ("S", "H") if r[k] != t[k]]:
+            raise TinHieuChotCa(f"{ten}: ly do K4 sai nghia: {kq['ly_do']}")
 
 
 WFK, WFN = WFR.replace(KHO, "other/repo"), WFR[:-6] + "main"
@@ -358,6 +362,8 @@ DB = [
     ("M5a", "S == base", "bo_base", '("S", base_hien_hanh), ("H", head_hien_hanh)', '("H", head_hien_hanh),', "k4_base", None),
     ("M5b", "H == head", "bo_head", '("S", base_hien_hanh), ("H", head_hien_hanh)', '("S", base_hien_hanh),', "k4_head", None),
     ("M5c", "base lấy từ THAM SỐ", "base_tu_receipt", _K4, '    base_hien_hanh = r["S"]\n' + _K4, "k4_base", None),
+    ("M5e", "lý do K4 nói stale (F30)", "k4_noi_fresh", 'stale, chay lai', 'fresh, khong can chay lai', "k4_base", None),
+    ("M5f", "lý do K4 nêu ĐÚNG trường (F30)", "k4_sai_truong", '[f"{k} stale', '[f"S stale', "k4_head", None),
     ("M5d", "head lấy từ THAM SỐ", "head_tu_receipt", _K4, '    head_hien_hanh = r["H"]\n' + _K4, "k4_head", None),
     ("M6a", "checker_rc == 0", "bo_rc", 'r["checker_rc"] == 0)', 'True)', "k5_rc", None),
     ("M6b", "ket_luan thuộc tập đóng", "bo_ket_luan", 'r["ket_luan"] in KET_LUAN', 'True', "k5_ket_luan", None),

@@ -24,6 +24,7 @@ def _khop(mau):
 
 
 _H40, _H64 = _khop("[0-9a-f]{40}"), _khop("[0-9a-f]{64}")
+_GIO = r"\d{4}-\d\d-\d\dT\d\d:\d\d:\d\dZ"  # đúng regex spec M3 (`\d`), luot1 F11
 KIEU = {k: _H40 for k in ("S", "H", "T", "tree_S", "oid_bo_kiem_da_chay", "workflow_definition_blob") + C}
 KIEU.update({k: lambda v: type(v) is int for k in (  # `type is int` loại luôn bool
     "schema_version", "canh_ancestry", "so_object_da_doc", "tong_bytes", "pull_request", "run_id", "run_attempt",
@@ -32,7 +33,7 @@ KIEU.update({k: lambda v: type(v) is dict for k in ("so_thu_hoi_S", "so_thu_hoi_
 KIEU.update({k: lambda v: type(v) is list for k in ("metadata_T", "thu_hoi_moi")})
 KIEU.update({
     "oid_bo_kiem_tai_S": lambda v: v is None or _H40(v), "workflow_definition_sha256": _H64,
-    "thoi_diem_utc": _khop(r"\d{4}-\d\d-\d\dT\d\d:\d\d:\d\dZ"),  # đúng regex spec M3 (`\d`), luot1 F11
+    "thoi_diem_utc": _khop(_GIO),
     "descriptor_q13_ghim": lambda v: v is None or _H64(v), "policy_T": lambda v: v is None or type(v) is dict,
     "profile_digest": lambda v: v is None or type(v) is str, "discovery": lambda v: type(v) is str})
 # 7 khoá còn lại kiểm theo GIÁ TRỊ: event (K1) · 4 danh tính (K3) · che_do, ket_luan (K5).
@@ -59,6 +60,8 @@ def kiem_json(raw, *, kho, nhanh, base_hien_hanh, head_hien_hanh):
             loi.append("khong phai UTF-8 strict")
         except json.JSONDecodeError:
             loi.append("khong phai JSON")
+        except (ValueError, RecursionError):  # số nguyên vượt int_max_str_digits / lồng quá sâu: fail-close (chủ kho, luot2 F23)
+            loi.append("parser tu choi: so nguyen qua dai hoac long qua sau")
         if r is not _VANG and type(r) is not dict:
             loi.append("goc khong phai object")
         elif r is not _VANG:

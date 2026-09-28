@@ -1,0 +1,4 @@
+# Hien vat review: patch/verdict chep NGUYEN BYTE tu sandbox reviewer (bang chung co bam) — khong strip khoang trang (luot5 F37)
+*.patch -whitespace
+luot*-VERDICT.md -whitespace
+luot*-verdict-day-du.md -whitespace

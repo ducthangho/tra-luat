@@ -11,7 +11,9 @@ khi dòng khai `TD:` kèm lập luận và CẢ bộ ca vẫn xanh trên đột 
 import ast
 import importlib.util
 import json
+import os
 import pathlib
+import re
 import subprocess
 import sys
 import tempfile
@@ -88,12 +90,15 @@ def ca(m, ten, dau_vao, do=(), **tham):
     kiem_kq(ten, kq, do)
     if "K4" in do and "K1" not in do:  # nghĩa lý do K4: ĐÚNG trường lệch, ĐÚNG "stale, chay lai" (luot3 F30 K4-THONG-BAO-STALE)
         r, t = json.loads(raw), {"S": S, "H": H, **{k: tham[v] for k, v in (("S", "base_hien_hanh"), ("H", "head_hien_hanh")) if v in tham}}
-        if [x for x in kq["ly_do"] if x.startswith("K4: ")] != [f"K4: {k} stale, chay lai" for k in ("S", "H") if r[k] != t[k]]:
+        k4 = [re.fullmatch(r"K4: ([SH]) (?:receipt )?stale, ch(?:ay|ạy) l(?:ai|ại)", x) for x in kq["ly_do"] if x.startswith("K4: ")]
+        if not all(k4) or sorted(x[1] for x in k4) != sorted(k for k in ("S", "H") if r[k] != t[k]):  # nghĩa M5, không ghim câu chữ/thứ tự (luot5 F35)
             raise TinHieuChotCa(f"{ten}: ly do K4 sai nghia: {kq['ly_do']}")
 
 
 WFK, WFN = WFR.replace(KHO, "other/repo"), WFR[:-6] + "main"
-LIM = sys.get_int_max_str_digits() or 4300  # F23: bytes dựng tay vì chính json.dumps/int() cũng vướng giới hạn này
+LIM = 4300  # F23: bytes dựng tay vì chính json.dumps/int() cũng vướng giới hạn này. GHIM cho cả tiến trình này lẫn MỌI
+sys.set_int_max_str_digits(LIM)  # tiến trình con (env thừa kế; -X thì không): 0/-X 640 từng làm oracle lệch child (luot5 F34)
+os.environ["PYTHONINTMAXSTRDIGITS"] = str(LIM)
 
 
 def _SO(n):
@@ -127,6 +132,7 @@ CA = [("duong_fixture", lambda d: d, ()), ("duong_c_khac_s", doi(**dict.fromkeys
       ("k3_ca_nhom_kho", doi(repository="other/repo", kho_canonical="github.com/other/repo", workflow_ref=WFK), ("K3",)),
       ("k3_ca_nhom_nhanh", doi(nhanh_mac_dinh="main", workflow_ref=WFN), ("K3",)),
       ("k4_base", lambda d: d, ("K4",), {"base_hien_hanh": X40}), ("k4_head", lambda d: d, ("K4",), {"head_hien_hanh": X40}),
+      ("k4_ca_hai", lambda d: d, ("K4",), {"base_hien_hanh": X40, "head_hien_hanh": X40}),  # oracle K4 hai trường, không ghim thứ tự
       ("k5_rc", doi(checker_rc=1), ("K5",)), ("k5_ket_luan", doi(ket_luan="TAP_THU_HOI_KHAC"), ("K5",)),
       ("k5_che_do", doi(che_do="da_kich_hoat"), ("K5",)), ("k5_ket_luan_list", doi(ket_luan=[]), ("K5",)),
       ("k5_ket_luan_dict", doi(ket_luan={}), ("K5",)), ("k5_ket_luan_null", doi(ket_luan=None), ("K5",)),
@@ -240,7 +246,8 @@ def ca_tinh(ten, m):
         kq = json.loads(r.stdout.splitlines()[-1])
     except (IndexError, ValueError):
         kq = None
-    if r.returncode != 0 or type(kq) is not dict or set(kq) != {"ev", "trang_thai", "tat_dinh"}:
+    if (r.returncode != 0 or type(kq) is not dict or set(kq) != {"ev", "trang_thai", "tat_dinh"} or type(kq["ev"]) is not list
+            or any(type(e) is not str for e in kq["ev"]) or {type(kq["trang_thai"]), type(kq["tat_dinh"])} != {bool}):  # luot5 F36
         raise LoiDo(f"{ten}: probe tinh thuan hong rc={r.returncode}: {r.stderr[-200:]}")  # KHÔNG phải bằng chứng tác dụng phụ (luot4 F32)
     if kq != {"ev": [], "trang_thai": True, "tat_dinh": True}:
         raise TinHieuChotCa(f"{ten}: kiem_json co tac dung phu: {kq}")

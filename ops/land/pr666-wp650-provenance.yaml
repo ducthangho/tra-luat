@@ -114,7 +114,7 @@ windows_bo_qua:
     - 'r351_KHONG_co_chi_thi_thi_van_phai_dat_moc: bo qua: khoi dat moc la shell POSIX'
 
 workflow_definition_nguon: >-
-  measured_nguon_thay_the — KHONG phai WorkflowRun.file (GraphQL 403). PROTOCOL §10.2.2 cho dung nguon khac khi tu chung
+  BYTES: measured_nguon_thay_the; commit nguon chinh xac: not_measured (xem GIOI HAN OID) — KHONG phai WorkflowRun.file (GraphQL 403). PROTOCOL §10.2.2 cho dung nguon khac khi tu chung
   minh cung run/attempt va exact definition identity. Hai phan chung minh:
   (a) IDENTITY BYTES: blob cua ci.yml (6ba1255…) va launcher-windows.yml (24b5516…) GIONG HET tai MOI commit ung vien
   GitHub co the doc dinh nghia: base ceb1a3f, head bf63bb1, synthetic merge 511612f (event pull_request), merge f8a7829

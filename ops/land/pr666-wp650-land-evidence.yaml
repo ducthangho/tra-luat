@@ -151,8 +151,10 @@ provenance_ghi_chu: >-
   Cac truong checkout_suy_ra / workflow_definition_suy_ra duoc DUNG bang git tai commit = head_sha REST cua run. PROTOCOL
   §10.2.2 cam dung REST head_sha thay cho moc Checkout (phai tu checkout/log/artifact cua dung job) va moc Workflow
   definition (phai tu WorkflowRun.file.repositoryFileUrl o exact OID). Nen hai moc ay la not_measured; cac gia tri tren
-  chi la doi chieu tham khao, KHONG phai bang chung provenance. CAP NHAT 16:28Z: bon moc da do tu log/artifact/REST cua
-  dung run/job — ops/land/pr666-wp650-provenance.yaml bon_moc (Workflow definition bang nguon thay the, co gioi han).
+  chi la doi chieu tham khao, KHONG phai bang chung provenance. CAP NHAT 16:28Z (ops/land/pr666-wp650-provenance.yaml
+  bon_moc): Run, Checkout, Gate output DA DO tu log/artifact/REST cua dung run/job. Workflow definition: BYTES da doi
+  chieu bang nguon thay the (GraphQL 403), commit nguon CHINH XAC van not_measured; moc nay DONG THEO QUYET DINH chu kho
+  chap nhan nguon thay the voi gioi han ay, KHONG phai da do du.
 khong_do_duoc:
   - 'DA DONG 16:28Z (xem ops/land/pr666-wp650-provenance.yaml): moc Checkout, Gate output, va BYTES Workflow definition cho ca
     ba run (commit nguon chinh xac van not_measured); artifact gate-evidence 10956094584 + marker duong; required contexts cua master. Con lai khong do duoc:

@@ -2082,6 +2082,18 @@ for _ten, _ca, _tim, _thay in (
     ('f25_bo_chot_doi_so_la', 't52_',
      '    if cua is not None:\n        print(f"  ĐỎ  đối số lạ',
      '    if False:\n        print(f"  ĐỎ  đối số lạ'),
+    ('f26_bq_ly_ca_dau', 't54_',
+     '        print(f"  BỎ QUA {ten}: {ly}")\n',
+     '        print(f"  BỎ QUA {ten}: {bo_qua[0][1]}")\n'),
+    ('f26_do_ly_ca_dau', 't54_',
+     '        print(f"  ĐỎ  {ten}: {ly}")\n',
+     '        print(f"  ĐỎ  {ten}: {hong[0][1]}")\n'),
+    ('f26_tk_ly_dau', 't54_',
+     '        print(f"  BỎ QUA (TIỀN KIỂM) {ten}: {ly}")\n',
+     '        print(f"  BỎ QUA (TIỀN KIỂM) {ten}: {tien_kiem_bo_qua[0][1]}")\n'),
+    ('f26_con_sau_rc0', 't54_',
+     '            nhan, ly = _nhan_ket_qua_con(nhom, rc, ra_con, ())\n',
+     '            nhan, ly = _nhan_ket_qua_con(nhom, rc if not ket else 0, ra_con, ())\n'),
 ):
     DOT_BIEN[_ten] = ("ops/cong_cu_test.py", _tim, _thay, "TEP_TEST", _KEM_TEP_TEST, _CA_668[_ca])
 
@@ -6698,8 +6710,9 @@ def t54_main_chon_DUNG_vong_ban_kinh_theo_che_do():
                 + ([f"du:True:{list(do)}:{so}"] if du else []))
 
     def ra(tk=(), bq=(), do=(), loi=(), duoi=()):   # stdout (bỏ dòng trống) mà `main` PHẢI in, đúng thứ tự
-        return ([f"  BỎ QUA (TIỀN KIỂM) {t}: bỏ qua có chủ đích" for t in tk] + [f"  BỎ QUA {t}: ca giả" for t in bq]
-                + [f"  ĐỎ  {t}: ca giả" for t in do] + [f"  ĐỎ  {t}: RuntimeError: ca giả" for t in loi]
+        return ([f"  BỎ QUA (TIỀN KIỂM) {t}: bỏ qua có chủ đích {t}" for t in tk]
+                + [f"  BỎ QUA {t}: ca giả {t}" for t in bq] + [f"  ĐỎ  {t}: ca giả {t}" for t in do]
+                + [f"  ĐỎ  {t}: RuntimeError: ca giả {t}" for t in loi]
                 + [f"cong_cu_test: {n - len(bq) - len(do) - len(loi)}/{n - len(bq)} đạt; tổng={n}, bỏ qua={len(bq)}, "
                    f"tiền kiểm bỏ qua={len(tk)}"] + list(duoi))
 
@@ -6744,6 +6757,7 @@ def t54_main_chon_DUNG_vong_ban_kinh_theo_che_do():
         "con_rc": [1, dau + phong + ghi("None", "dung-rc3"), ra(duoi=manh_ra())],
         "con_rong": [1, dau + phong + ghi("None", "dung-rc0"), ra(duoi=manh_ra())],
         "con_hai": [1, dau + phong + ghi("None", "dung-rc3"), ra(duoi=manh_ra())],
+        "con_sau": [1, dau + phong + ghi("None", "dung-rc5"), ra(duoi=manh_ra())],
         "ghi_do": [1, dau + phong + ghi_dung, ra(duoi=manh_ra())],
         "ghi_do_1": [1, dau + phong + ghi_dung, ra(duoi=manh_ra())],
         "manh_516": [0, dau + phong + ghi("dung", "none", "5/16"), ra(duoi=manh_ra("5/16"))],
@@ -7561,7 +7575,7 @@ def _in_tu_kiem_main():
             log.append(f"ca:{t}")   # F12: TÊN từng ca, không nén — ca lặp / bỏ / đảo đều lộ ra
             for khoa, loai in (("ca_do", AssertionError), ("ca_loi", RuntimeError), ("ca_bq", BoQuaMoiTruong)):
                 if t in kb.get(khoa, ()):   # F15: TẬP tên — nhiều ca đỏ cùng lúc
-                    raise loai("ca giả")
+                    raise loai(f"ca giả {t}")   # lý do RIÊNG từng ca: "in lý do của ca đầu cho mọi ca" phải lộ
         f.__name__ = t
         return f
 
@@ -7570,7 +7584,7 @@ def _in_tu_kiem_main():
         nhom, phat["gt"] = [ten[0::2], ten[1::2]], bam({t: _ban_ghi_du_gia(t) for t in ten})
         # "rc": nhóm 0 rc=3 mà stdout ĐỦ; "rong": nhóm 0 rc=0 mà stdout rỗng; "hai": nhóm 0 rc=3 VÀ nhóm 1 rc=5
         # (F15: rc khác nhau để biết `main` giữ lý do của nhóm hỏng ĐẦU TIÊN).
-        rc_nhom = {"rc": (3, 0), "hai": (3, 5)}.get(kb.get("con"), (0, 0))
+        rc_nhom = {"rc": (3, 0), "hai": (3, 5), "sau": (0, 5)}.get(kb.get("con"), (0, 0))   # "sau": nhóm ĐẦU lành
         kq_con = [(n, rc_nhom[i], "" if kb.get("con") == "rong" and i == 0 else
                    "".join("BKCON " + json.dumps(_ban_ghi_du_gia(t)) + "\n" for t in n)) for i, n in enumerate(nhom)]
         # F23 (Codex lượt 8): lý do `main` trao bộ ghi phải là NGUYÊN VĂN lý do của nhóm hỏng ĐẦU TIÊN (từ chính
@@ -7598,7 +7612,7 @@ def _in_tu_kiem_main():
                 (["  DONG-BK2-668", "  DONG-BK2-668-B"], kb.get("bk2", 0))]
 
     g["_chay_tien_kiem"] = lambda fn: log.append(f"tk:{fn.__name__}") or (
-        (fn.__name__, "bỏ qua có chủ đích") if fn.__name__ in kb.get("tk", ()) else None)
+        (fn.__name__, f"bỏ qua có chủ đích {fn.__name__}") if fn.__name__ in kb.get("tk", ()) else None)
     g["_cong_tren_cay_that"] = lambda goc, bo_quet=None: log.append(f"cong:{goc == GOC}:{bo_quet}") or (
         kb.get("cong_do", 0), ["  DONG-CONG-668", "  DONG-CONG-668-B"])
     g["_tu_kiem_phan_hang"], g["_tu_kiem_gian_giao"] = tu_kiem("phan_hang", "ph_do"), tu_kiem("gian_giao", "gg_do")
@@ -7622,6 +7636,7 @@ def _in_tu_kiem_main():
         "du_hai_ca_bq": ({}, {"ca_bq": {c1, ten_ca[2]}}),
         "gate_ca_loi": (gate, {"ca_loi": {c0}}), "du_ca_bq": ({}, {"ca_bq": {c1}}),
         "con_rc": (manh, {"con": "rc"}), "con_rong": (manh, {"con": "rong"}), "con_hai": (manh, {"con": "hai"}),
+        "con_sau": (manh, {"con": "sau"}),
         "ghi_do": (manh, {"ghi_do": 2}), "ghi_do_1": (manh, {"ghi_do": 1}),
         "manh_516": ({_BIEN_MANH: "5/16", _BIEN_MANH_RA: "x"}, {}), "manh_12": ({_BIEN_MANH: "1/2", _BIEN_MANH_RA: "x"}, {}),
         "du_cong_do": ({}, {"cong_do": 1}), "gate_cong_do": (gate, {"cong_do": 1}),

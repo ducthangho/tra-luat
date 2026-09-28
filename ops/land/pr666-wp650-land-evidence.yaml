@@ -74,8 +74,8 @@ pre_merge_checks:
       launcher: https://github.com/ducthangho/tra-luat/actions/runs/36379712459
       mo: https://github.com/ducthangho/tra-luat/actions/runs/36379709651
     skipped_ghi_chu: >-
-      Hai job skipped do dieu kien workflow (duong dan / su kien), KHONG phai required check nao cua PR nay theo
-      mergeable_state clean; khong dem chung la bang chung duong.
+      Hai job skipped do dieu kien workflow (duong dan / su kien); KHONG dem la bang chung duong. Chung co phai required
+      context hay khong: KHONG DO DUOC (xem khong_do_duoc) — mergeable_state clean khong chung minh dieu do.
   - 'mergeable_state: clean.'
   - 'Review model (advisory): Codex gpt-6-astra xhigh luot 8 approve 0 P1/0 P2/0 P3 tren cb9ecc8; cay .claude/dev + ops/specs cua bf63bb1 giong het cb9ecc8.'
   - 'Suite tai cho: 156/156 ca, 162/162 dot bien tren Python 3.10-3.13; ruff F delta 0; doctrine-scan, adr-song, diff --check rc 0.'

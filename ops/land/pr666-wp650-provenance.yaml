@@ -104,3 +104,6 @@ khong_do_duoc:
   - 'WorkflowRun.file.repositoryFileUrl (GraphQL 403 tu phien Claude Code).'
   - 'Lich su ruleset tai thoi diem merge (REST history 403) — chi co updated_at truoc merge.'
   - 'Artifact gate-evidence cho luot PR (khong ton tai theo thiet ke) va cho cac job ngoai `gate`.'
+workflow_definition_chu_kho_chap_nhan: >-
+  Chu kho ducthangho chon "Chap nhan" nguon thay the cho moc Workflow definition (phien dieu phoi 2026-09-28, sau khi
+  PR #670 mo). Day la quyet dinh cua chu kho ve do du cua nguon, KHONG bien WorkflowRun.file thanh da do.

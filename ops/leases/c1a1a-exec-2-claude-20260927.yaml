@@ -96,7 +96,9 @@ recorder_note: >-
 authority_basis: '§2 — start/pause/resume/reroute/override/authorize thuoc chu kho'
 
 leased_at_utc: '2026-09-27T15:26:00Z'
-lease_expires_at_utc: '2026-09-29T15:26:00Z'
+lease_expires_at_utc: '2026-09-28T06:55:00Z'
+han_ghi_chu: >-
+  Goc 2026-09-28T15:26:00Z, gia han 2026-09-29T15:26:00Z. RUT NGAN ve 2026-09-28T06:55:00Z — xem thu_hoi_bang_rut_han.
 run_minutes: 2880
 
 preconditions_measured_at_utc: '2026-09-27T15:23:17Z'
@@ -157,7 +159,7 @@ lech_spec_duoc_duyet:
   - 'A1 (F16): nhom null/bool (M3w/M3x/M3y/M1o) dung fixture DOI CHUNG rieng cho chot A1 — chu kho "Fixture doi chung rieng".'
   - 'A2 (F24): M2a tach hai ID hai cap (verdict = equivalent_verified; thu tu = witness_killed) — chu kho "Hai ID, hai cap".'
   - 'M3 (F23): ValueError cua parser (so nguyen qua dai) => K1 do fail-close — chu kho "K1 do fail-close".'
-lease_sua_lan_cuoi: '2026-09-28T02:00:00Z'
+lease_sua_lan_cuoi: '2026-09-28T06:40:00Z'
 gia_han:
   han_cu_utc: '2026-09-28T15:26:00Z'
   han_moi_utc: '2026-09-29T15:26:00Z'
@@ -166,4 +168,26 @@ lease_sua_ghi_chu: >-
   Lan 1 (2026-09-27T15:40Z): them lech_protocol_duoc_duyet. Lan 2 (2026-09-28T00:40Z): them lech_nguong_duoc_duyet.
   Lan 3 (2026-09-28T01:10Z): checkpoint — tran dong <=650, tran Codex 2->3, ba lech spec co duyet.
   Lan 4 (2026-09-28T02:00Z): gia han 24h + tran Codex 3->4 (checkpoint lan 2).
+  Lan 5 (2026-09-28T06:40Z): ghi tran Codex 4->8 (luot 5-8 chu kho cap truc tiep) + thu hoi bang rut han sau land.
   Khong doi write set, spec, baseline.
+review_budget_ghi_chu_2: >-
+  Luot 5-8 do chu kho cap TRUC TIEP trong phien 2026-09-28 ('#650' comment 5862203801, 5862498825, 5862692098;
+  luot 5 theo chi thi "xu ly head drift, sau khi va chay them 1 vong cross review"). Luot 8 approve 0/0/0 tren
+  cb9ecc8 (advisory_review).
+thu_hoi_bang_rut_han:
+  han_goc_utc: '2026-09-29T15:26:00Z'
+  han_moi_utc: '2026-09-28T06:55:00Z'
+  chi_thi: >-
+    Chi thi giao viec ban dau cua packet: sau land lam bookkeeping (thu hoi lease / dua tep lease vao master) theo
+    tien le kho. Chu kho uy quyen land trong human audit PR #666 comment 5864536112.
+  ly_do: >-
+    Packet #650 C1a1a da LAND (PR #666 merge commit f8a7829cc44f296c25faf1a6439b603ba840f70b, 2026-09-28T06:36Z,
+    authorized_head_sha bf63bb1ec485bccf8eec34cc5604f949d70fc7d6).
+  vi_sao_khong_dung_so: >-
+    Theo tien le #661 (b8c625e): so ops/thu-hoi/ chua kich hoat; rut han chi dung co che DA CAI (phan loai lease
+    theo han). Han moi dat vai phut SAU luc push de ops-publish-lease.yml con thay lease song (nhanh rc=9 da dang),
+    khong roi vao rc=8 (bai hoc CLAUDE.md: rc=8 che rc=9).
+  gioi_han: >-
+    Ref mang lease nay: nhanh ops/cap-lease-650 (ban rut han) va master sau PR bookkeeping. Nhanh ma
+    claude/spec-c1a1-doc-receipt-20260925 KHONG mang tep lease. Nghiem thu: ai-dang-giu cho 3 tep write set khong con
+    c1a1a-exec-2-claude-20260927 trong NGUOI_GIU sau 06:55Z khi quet du ref.

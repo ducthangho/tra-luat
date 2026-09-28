@@ -2094,8 +2094,8 @@ for _ten, _ca, _tim, _thay in (
     ('f26_con_sau_rc0', 't54_',
      '            nhan, ly = _nhan_ket_qua_con(nhom, rc, ra_con, ())\n',
      '            nhan, ly = _nhan_ket_qua_con(nhom, rc if not ket else 0, ra_con, ())\n'),    # F26/F27 (Codex lượt 10): cửa CLI mặc định + miền tham số của `main` (k=0, đường ra, worker, lỗi tự kiểm ở `du`).
-    ('f27_entry_drop', 't52_', '    sys.exit(main())\n', '    sys.exit(0)\n'),
-    ('f27_entry_rc', 't52_', '    sys.exit(main())\n', '    main()\n    sys.exit(0)\n'),
+    ('f27_entry_drop', 't54_', '    sys.exit(main())\n', '    sys.exit(0)\n'),
+    ('f27_entry_rc', 't54_', '    sys.exit(main())\n', '    main()\n    sys.exit(0)\n'),
     ('f27_shard_zero', 't54_', '        ten = _phan_manh(k, n)\n', '        ten = _phan_manh(k or 1, n)\n'),
     ('f27_fixed_path', 't54_', '        dong, loi = _ket_thuc_manh(k, n, ra, ten, None if ly_con else ket, ly_con, _van_tay())\n',
      '        dong, loi = _ket_thuc_manh(k, n, "x", ten, None if ly_con else ket, ly_con, _van_tay())\n'),
@@ -6655,7 +6655,7 @@ def t52_gom_manh_phai_DO_khi_thieu_trung_lech_va_moi_chot_co_THE_RIENG():
     cli = {"cli_dung": (0, "GOM MẢNH 3/3", 1), "cli_thieu": (1, "[G-tap]", 1), "cli_doi_so": (2, "[G-doi-so]", 0),
            "cli_tt_rong": (1, "[G-rong]", 0), "cli_tt_doi_so": (2, "[G-doi-so]", 0),
            "cli_tt_ten_cua": (1, "[G-thu-muc]", 0), "cli_tt_cua_sau": (2, "[G-doi-so]", 0),
-           "cli_tt_la": (2, "đối số lạ", 0), "cli_tt_mac_dinh": (2, "  ĐỎ  cấu hình chế độ: [", 0)}
+           "cli_tt_la": (2, "đối số lạ", 0)}
     cli_sai = {t: kq.get(t) for t, (rc, dau_ra, vt) in cli.items()
                if not (kq.get(t) and kq[t][0] == rc and dau_ra in kq[t][1] and kq[t][2] == vt)}
     bang(not cli_sai, f"CLI `--gop` phải gọi gom + `_van_tay` đúng một lần + truyền mã (mong {cli}): {cli_sai}")
@@ -6786,6 +6786,14 @@ def t54_main_chon_DUNG_vong_ban_kinh_theo_che_do():
     mong.update({"manh_w1": [0, dau + phong + ghi_dung, ra(duoi=manh_ra())], "du_w1": [0, day(), ra(duoi=du_ra(0))]})
     sai = {t: str(kq.get(t))[:300] for t, m in mong.items() if kq.get(t) != m}
     bang(not sai, f"`main` nối SAI (kịch bản: thấy [rc, nhật ký, stdout]): {sai}")
+    # F26 (Codex lượt 10): cửa CLI KHÔNG đối số — đúng thứ workflow chạy — phải VÀO `main` và TRUYỀN mã. Ở ĐÂY chứ không ở
+    # `t52`: đột biến nuốt lỗi cấu hình trong `main` (`f7_cau_hinh_nuot`) đã chết ở phép so trên, không tới đây mà chạy
+    # trọn suite. Ba lỗi cấu hình CHỒNG nhau (`C-ca-hai` → `C-hinh-dang` → `int` ném): gỡ một chốt của `_doc_che_do`
+    # (việc của `t53`) vẫn dừng rc=2, không giết oan ca này.
+    p = subprocess.run([sys.executable, str(TEP_TEST)], capture_output=True, text=True, timeout=120, cwd=str(GOC),
+                       env={**os.environ, _BIEN_BAN_KINH: "hong", _BIEN_MANH: "a/b", _BIEN_MANH_RA: ""})
+    bang(p.returncode == 2 and (p.stdout.splitlines() or [""])[0].startswith("  ĐỎ  cấu hình chế độ: ["),
+         f"CLI không đối số phải vào `main` và trả rc=2 cấu hình: rc={p.returncode}, {p.stdout[:200]!r}")
 
 
 def _cong_tren_cay_that(goc, bo_quet=None):
@@ -7517,14 +7525,9 @@ def _in_tu_kiem_gom():
         # số lạ ⇒ rc=2 (env chế độ hỏng để nếu chốt ấy bị gỡ thì `main` dừng ngay ở rc=2 với thông điệp KHÁC).
         for ten, doi in (("cli_tt_rong", ["--gop", str(rong)]), ("cli_tt_doi_so", ["--gop"]),
                          ("cli_tt_ten_cua", ["--gop", "--tu-kiem-che-do"]),
-                         ("cli_tt_cua_sau", ["--gop", str(rong), "--tu-kiem-che-do"]), ("cli_tt_la", ["--khong-co"]),
-                         ("cli_tt_mac_dinh", [])):
-            # F26 (Codex lượt 10): KHÔNG đối số = cửa workflow chạy — phải vào `main` và truyền mã. Ba lỗi cấu hình CHỒNG
-            # nhau (`C-ca-hai` → `C-hinh-dang` → `int` ném): đột biến gỡ một chốt của `_doc_che_do` (việc của `t53`)
-            # vẫn dừng ở rc=2, không chạy trọn suite, không giết oan ca này.
+                         ("cli_tt_cua_sau", ["--gop", str(rong), "--tu-kiem-che-do"]), ("cli_tt_la", ["--khong-co"])):
             p = subprocess.run([sys.executable, str(TEP_TEST), *doi], capture_output=True, text=True,
-                               timeout=120, cwd=str(GOC), env={**os.environ, _BIEN_BAN_KINH: "hong", _BIEN_MANH: "a/b",
-                                                                _BIEN_MANH_RA: ""})
+                               timeout=120, cwd=str(GOC), env={**os.environ, _BIEN_BAN_KINH: "hong"})
             kq[ten] = [p.returncode, (p.stdout.splitlines() or [""])[0], 0]
         # F17 (Codex lượt 6): CLI THẬT trên đường DƯƠNG và trên bộ ≥ 2 lỗi. Vân tay phải khớp đúng tiến trình CLI được
         # đo, nên dựng một kho git TẠM từ CHÍNH tệp đang chạy (kể cả khi nó là bản đột biến) và lấy vân tay tại đó.

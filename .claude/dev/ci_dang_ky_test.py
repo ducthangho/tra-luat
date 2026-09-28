@@ -1158,6 +1158,10 @@ def loi_g5_workflow(data):
             loi.append(f"{j}: bước G5 sai hình dạng: {_dong_lenh(buoc[cham[0]])}")
         elif buoc[cham[0]].get("env") != G5_ENV.get(j):
             loi.append(f"{j}: env bước G5 phải BẰNG ĐÚNG {G5_ENV.get(j)}, thấy {buoc[cham[0]].get('env')}")
+        # #668 F14 (Codex lượt 5): VẮNG `shell` KHÔNG phải Bash — trên Windows mặc định là `pwsh`, và PowerShell lấy mã
+        # thoát của lệnh CUỐI, nên probe đỏ + selftest xanh có thể thành bước xanh. Bước G5 phải KHAI RÕ `shell: bash`.
+        elif buoc[cham[0]].get("shell") != "bash":
+            loi.append(f"{j}: bước G5 phải khai rõ `shell: bash` (thấy {buoc[cham[0]].get('shell')!r})")
         elif {"if", "continue-on-error"} & (set(buoc[cham[0]]) | (set(v) - {"if"} if j == JOB_G5_GOP else set(v))):
             loi.append(f"{j}: bước G5 có điều kiện hoặc được phép bỏ qua lỗi")
         elif any(not set(_dong_lenh(b)) <= (G5_THIET_LAP | {G5_TAI_VE["uses"]} if j == JOB_G5_GOP else G5_THIET_LAP)
@@ -1899,6 +1903,9 @@ def phan_chung():
             ("manh-tab-dau-lenh", _M, lambda v, b, i: _moi_mau(i, b, run="\t" + b[i]["run"])),
     ):
         _them(f"p668-F10-{_t}", _hong_job(_j, _f))
+    # #668 F14: bước G5 bỏ `shell` ⇒ Windows chạy bằng pwsh ⇒ ĐỎ ở mọi job G5.
+    for _j in JOB_G5:
+        _them(f"p668-F14-{_j}-vang-shell", _hong_job(_j, lambda v, b, i: b[i].pop("shell")))
     _them("p637-A8-khong-ung-vien", chon_so_worker({1: 100, 2: 101, 4: 102}) is None)
     _them("p637-A8-dung-bien", chon_so_worker({1: 200, 2: 110, 4: 100}) == 2)
     _them("p637-A8-vuot-bien", chon_so_worker({1: 200, 2: 110.5, 4: 100}) == 4)

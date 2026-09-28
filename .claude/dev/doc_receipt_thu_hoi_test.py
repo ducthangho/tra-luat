@@ -90,15 +90,13 @@ def ca(m, ten, dau_vao, do=(), **tham):
     kiem_kq(ten, kq, do)
     if "K4" in do and "K1" not in do:  # nghĩa lý do K4: ĐÚNG trường lệch, ĐÚNG "stale, chay lai" (luot3 F30 K4-THONG-BAO-STALE)
         r, t = json.loads(raw), {"S": S, "H": H, **{k: tham[v] for k, v in (("S", "base_hien_hanh"), ("H", "head_hien_hanh")) if v in tham}}
-        k4 = [re.fullmatch(r"K4: ([SH]) (?:receipt )?stale, ch(?:ay|ạy) l(?:ai|ại)", x) for x in kq["ly_do"] if x.startswith("K4: ")]
-        if not all(k4) or sorted(x[1] for x in k4) != sorted(k for k in ("S", "H") if r[k] != t[k]):  # nghĩa M5, không ghim câu chữ/thứ tự (luot5 F35)
+        k4 = [re.fullmatch(r"K4\s*:\s*([SH])\s*:?\s*(?:receipt )?stale, ch(?:ay|ạy) l(?:ai|ại)", x) for x in kq["ly_do"] if re.match(r"K4\b", x)]
+        if not all(k4) or sorted(x[1] for x in k4) != sorted(k for k in ("S", "H") if r[k] != t[k]):  # luot5 F35, luot6 F39/F40
             raise TinHieuChotCa(f"{ten}: ly do K4 sai nghia: {kq['ly_do']}")
 
 
 WFK, WFN = WFR.replace(KHO, "other/repo"), WFR[:-6] + "main"
-LIM = 4300  # F23: bytes dựng tay vì chính json.dumps/int() cũng vướng giới hạn này. GHIM cho cả tiến trình này lẫn MỌI
-sys.set_int_max_str_digits(LIM)  # tiến trình con (env thừa kế; -X thì không): 0/-X 640 từng làm oracle lệch child (luot5 F34)
-os.environ["PYTHONINTMAXSTRDIGITS"] = str(LIM)
+LIM, _E = 4300, "PYTHONINTMAXSTRDIGITS"  # F23: bytes dựng tay vì json.dumps/int() cũng vướng giới hạn; _ghim() GHIM nó
 
 
 def _SO(n):
@@ -266,6 +264,20 @@ def ca_dang_ky(ten, mau=MAU):
             raise TinHieuChotCa(f"{ten}: mau dang ky {a} · {b} phai {'nhan' if nhan else 'bac'}")
 
 
+def _ghim(f):  # GHIM giới hạn cho helper + MỌI con (env thừa kế; -X thì không), HOÀN NGUYÊN cả có/vắng env (luot5 F34, luot6 F38)
+    def boc(*a, **kw):
+        cu = sys.get_int_max_str_digits(), os.environ.get(_E)
+        sys.set_int_max_str_digits(LIM), os.environ.__setitem__(_E, str(LIM))
+        try:
+            return f(*a, **kw)
+        finally:
+            sys.set_int_max_str_digits(cu[0]), os.environ.pop(_E) if cu[1] is None else os.environ.__setitem__(_E, cu[1])
+    return boc
+
+
+ca, ca_cli, ca_tinh = map(_ghim, (ca, ca_cli, ca_tinh))
+
+
 def chay_ca(m, path, chi=None, bo=()):
     for c in CA:
         if (chi is None and c[0] not in bo) or (chi is not None and c[0] in chi):
@@ -371,6 +383,7 @@ DB = [
     ("M5c", "base lấy từ THAM SỐ", "base_tu_receipt", _K4, '    base_hien_hanh = r["S"]\n' + _K4, "k4_base", None),
     ("M5e", "lý do K4 nói stale (F30)", "k4_noi_fresh", 'stale, chay lai', 'fresh, khong can chay lai', "k4_base", None),
     ("M5f", "lý do K4 nêu ĐÚNG trường (F30)", "k4_sai_truong", '[f"{k} stale', '[f"S stale', "k4_head", None),
+    ("M5g", "MỌI lý do nhãn K4 được kiểm (F40)", "k4_mau_thuan", _K4, '    ly_do += ["K4:S fresh"] * (r["S"] != base_hien_hanh)\n' + _K4, "k4_base", None),
     ("M5d", "head lấy từ THAM SỐ", "head_tu_receipt", _K4, '    head_hien_hanh = r["H"]\n' + _K4, "k4_head", None),
     ("M6a", "checker_rc == 0", "bo_rc", 'r["checker_rc"] == 0)', 'True)', "k5_rc", None),
     ("M6b", "ket_luan thuộc tập đóng", "bo_ket_luan", 'r["ket_luan"] in KET_LUAN', 'True', "k5_ket_luan", None),

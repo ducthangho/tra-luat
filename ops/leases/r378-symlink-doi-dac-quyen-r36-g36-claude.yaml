@@ -261,3 +261,12 @@ write_set_do_luc_cap:
   do_luc: '2026-09-28T04:13:40Z'
   do_luc_nguon: 'date -u in ra NGAY TRUOC lan chay `ai-dang-giu` cho hai duong write set (sau vong dong bo nhanh).'
   ket_qua: 'TRUOC khi commit g36: ai-dang-giu hai duong rc=12, dung MOT ly do: bia mo mot chieu g35 -> g36 (ve thu nhat 3b09c3c da day, ve thu hai la chinh tep nay); tap ref may chu/cuc bo thieu 0. Do lai SAU commit g36 — ghi trong comment bao cao.'
+
+# ───────────────────────── BIA MỘ — vế THỨ NHẤT của dấu HAI CHIỀU ─────────────────────────
+# Thêm 2026-09-28 khi cấp g37. g36 CÒN HIỆU LỰC (hạn 2026-09-29T06:00:00Z) nên bia mộ hai chiều là
+# BẮT BUỘC. REVISION mới (r36 -> r37): protocol §3.2.
+da_bi_thay_the: r378-symlink-doi-dac-quyen-r37-g37-claude
+da_bi_thay_the_luc: '2026-09-28T05:06:09Z'
+da_bi_thay_the_luc_nguon: 'date -u luc commit bia mo nay; commit dung CHINH gia tri ay lam committer date (GIT_COMMITTER_DATE).'
+da_bi_thay_the_vi_sao: 'r37 (issues/574#issuecomment-5863663710: lượt 30 còn P2, 3 biểu hiện ca âm không selector) — áp hint lượt 30 nguyên văn và
+  đối chứng đúng trục cho mọi ca âm không selector trong tu_kiem (v27); head không đổi 76f199e.'

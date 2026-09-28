@@ -2093,7 +2093,17 @@ for _ten, _ca, _tim, _thay in (
      '        print(f"  BỎ QUA (TIỀN KIỂM) {ten}: {tien_kiem_bo_qua[0][1]}")\n'),
     ('f26_con_sau_rc0', 't54_',
      '            nhan, ly = _nhan_ket_qua_con(nhom, rc, ra_con, ())\n',
-     '            nhan, ly = _nhan_ket_qua_con(nhom, rc if not ket else 0, ra_con, ())\n'),
+     '            nhan, ly = _nhan_ket_qua_con(nhom, rc if not ket else 0, ra_con, ())\n'),    # F26/F27 (Codex lượt 10): cửa CLI mặc định + miền tham số của `main` (k=0, đường ra, worker, lỗi tự kiểm ở `du`).
+    ('f27_entry_drop', 't52_', '    sys.exit(main())\n', '    sys.exit(0)\n'),
+    ('f27_entry_rc', 't52_', '    sys.exit(main())\n', '    main()\n    sys.exit(0)\n'),
+    ('f27_shard_zero', 't54_', '        ten = _phan_manh(k, n)\n', '        ten = _phan_manh(k or 1, n)\n'),
+    ('f27_fixed_path', 't54_', '        dong, loi = _ket_thuc_manh(k, n, ra, ten, None if ly_con else ket, ly_con, _van_tay())\n',
+     '        dong, loi = _ket_thuc_manh(k, n, "x", ten, None if ly_con else ket, ly_con, _van_tay())\n'),
+    ('f27_fixed_workers_manh', 't54_', '        for nhom, rc, ra_con in _phong_con(ten, (), _so_tien_trinh_ban_kinh()) if ten else ():\n',
+     '        for nhom, rc, ra_con in _phong_con(ten, (), 3) if ten else ():\n'),
+    ('f27_fixed_workers_du', 't54_', '    so_tien_trinh = _so_tien_trinh_ban_kinh()\n', '    so_tien_trinh = 3\n'),
+    ('f27_full_seed', 't54_', '    else:\n        print(f"\\nBÁN KÍNH ĐỘT BIẾN ({len(DOT_BIEN)} đột biến, mỗi ca đúng một"',
+     '    else:\n        loi_db = loi_nen\n        print(f"\\nBÁN KÍNH ĐỘT BIẾN ({len(DOT_BIEN)} đột biến, mỗi ca đúng một"'),
 ):
     DOT_BIEN[_ten] = ("ops/cong_cu_test.py", _tim, _thay, "TEP_TEST", _KEM_TEP_TEST, _CA_668[_ca])
 
@@ -6645,7 +6655,7 @@ def t52_gom_manh_phai_DO_khi_thieu_trung_lech_va_moi_chot_co_THE_RIENG():
     cli = {"cli_dung": (0, "GOM MẢNH 3/3", 1), "cli_thieu": (1, "[G-tap]", 1), "cli_doi_so": (2, "[G-doi-so]", 0),
            "cli_tt_rong": (1, "[G-rong]", 0), "cli_tt_doi_so": (2, "[G-doi-so]", 0),
            "cli_tt_ten_cua": (1, "[G-thu-muc]", 0), "cli_tt_cua_sau": (2, "[G-doi-so]", 0),
-           "cli_tt_la": (2, "đối số lạ", 0)}
+           "cli_tt_la": (2, "đối số lạ", 0), "cli_tt_mac_dinh": (2, "  ĐỎ  cấu hình chế độ: [", 0)}
     cli_sai = {t: kq.get(t) for t, (rc, dau_ra, vt) in cli.items()
                if not (kq.get(t) and kq[t][0] == rc and dau_ra in kq[t][1] and kq[t][2] == vt)}
     bang(not cli_sai, f"CLI `--gop` phải gọi gom + `_van_tay` đúng một lần + truyền mã (mong {cli}): {cli_sai}")
@@ -6701,7 +6711,7 @@ def t54_main_chon_DUNG_vong_ban_kinh_theo_che_do():
     n, c0, c1, cn = len(cac), cac[0], cac[1], cac[-1]
     tb, ta = "batch_behavior_test", "python_alias_behavior_test"
     dau = [f"tk:{tb}", f"tk:{ta}"] + [f"ca:{t}" for t in cac]
-    ghi = lambda gt, ly, kn="3/8": [f"ghi:{kn}:x:True:{gt}:{ly}:True"]
+    ghi = lambda gt, ly, kn="3/8", r="d con/manh 3.txt": [f"ghi:{kn}:{r}:True:{gt}:{ly}:True"]
     phong, ghi_dung, ghi_nen = [f"phong:True:[]:{so}"], ghi("dung", "none"), ghi("None", "nen")
     hai = lambda ten: [f"  DONG-{ten}-668", f"  DONG-{ten}-668-B"]   # mọi hàm giả in HAI dòng (F18: "chỉ dòng đầu")
 
@@ -6760,15 +6770,20 @@ def t54_main_chon_DUNG_vong_ban_kinh_theo_che_do():
         "con_sau": [1, dau + phong + ghi("None", "dung-rc5"), ra(duoi=manh_ra())],
         "ghi_do": [1, dau + phong + ghi_dung, ra(duoi=manh_ra())],
         "ghi_do_1": [1, dau + phong + ghi_dung, ra(duoi=manh_ra())],
-        "manh_516": [0, dau + phong + ghi("dung", "none", "5/16"), ra(duoi=manh_ra("5/16"))],
-        "manh_12": [0, dau + phong + ghi("dung", "none", "1/2"), ra(duoi=manh_ra("1/2"))],
         "du_cong_do": [1, day(), ra(duoi=du_ra(0, cong="HỎNG"))],
         "gate_cong_do": [1, day(du=False), ra(duoi=gate_ra(0, cong="HỎNG"))],
         "gate_ph_do": [1, day(du=False), ra(duoi=gate_ra(2))], "gate_gg_do": [1, day(du=False), ra(duoi=gate_ra(2))],
         "gate_ss_do": [1, day(du=False), ra(duoi=gate_ra(2))], "gate_ph_do_1": [1, day(du=False), ra(duoi=gate_ra(1))],
         "gate_nhieu_nguon": [1, day([cn], du=False), ra(do=[cn], duoi=gate_ra(5, nen=1, cong="HỎNG"))],
         "du_bk_do": [1, day(), ra(duoi=du_ra(2))], "du_bk_do_cuoi": [1, day(), ra(duoi=du_ra(2))],
-        "du_bk_hai": [1, day(), ra(duoi=du_ra(4))], "du_bk_do_1": [1, day(), ra(duoi=du_ra(1))]}
+        "du_bk_hai": [1, day(), ra(duoi=du_ra(4))], "du_bk_do_1": [1, day(), ra(duoi=du_ra(1))],
+        "manh_516": [0, dau + phong + ghi("dung", "none", "5/16", "x"), ra(duoi=manh_ra("5/16"))],
+        "manh_12": [0, dau + phong + ghi("dung", "none", "1/2", "x"), ra(duoi=manh_ra("1/2"))],
+        "manh_0": [0, dau + phong + ghi("dung", "none", "0/8", "x"), ra(duoi=manh_ra("0/8"))],
+        "du_nhieu_nguon": [1, day([cn]), ra(do=[cn], duoi=du_ra(55, nen=1))]}
+    so = kq["so1"]   # F27: closure đọc `so` lúc GỌI ⇒ hai kịch bản worker=1 dựng lại kỳ vọng với 1
+    phong = [f"phong:True:[]:{so}"]
+    mong.update({"manh_w1": [0, dau + phong + ghi_dung, ra(duoi=manh_ra())], "du_w1": [0, day(), ra(duoi=du_ra(0))]})
     sai = {t: str(kq.get(t))[:300] for t, m in mong.items() if kq.get(t) != m}
     bang(not sai, f"`main` nối SAI (kịch bản: thấy [rc, nhật ký, stdout]): {sai}")
 
@@ -7502,10 +7517,16 @@ def _in_tu_kiem_gom():
         # số lạ ⇒ rc=2 (env chế độ hỏng để nếu chốt ấy bị gỡ thì `main` dừng ngay ở rc=2 với thông điệp KHÁC).
         for ten, doi in (("cli_tt_rong", ["--gop", str(rong)]), ("cli_tt_doi_so", ["--gop"]),
                          ("cli_tt_ten_cua", ["--gop", "--tu-kiem-che-do"]),
-                         ("cli_tt_cua_sau", ["--gop", str(rong), "--tu-kiem-che-do"]), ("cli_tt_la", ["--khong-co"])):
+                         ("cli_tt_cua_sau", ["--gop", str(rong), "--tu-kiem-che-do"]), ("cli_tt_la", ["--khong-co"]),
+                         ("cli_tt_mac_dinh", [])):
+            # F26 (Codex lượt 10): KHÔNG đối số = cửa workflow chạy — phải vào `main` và truyền mã. Ba lỗi cấu hình CHỒNG
+            # nhau (`C-ca-hai` → `C-hinh-dang` → `int` ném): đột biến gỡ một chốt của `_doc_che_do` (việc của `t53`)
+            # vẫn dừng ở rc=2, không chạy trọn suite, không giết oan ca này.
             p = subprocess.run([sys.executable, str(TEP_TEST), *doi], capture_output=True, text=True,
-                               timeout=120, cwd=str(GOC), env={**os.environ, _BIEN_BAN_KINH: "hong"})
-            kq[ten] = [p.returncode, (p.stdout.splitlines() or [""])[0], 0]        # F17 (Codex lượt 6): CLI THẬT trên đường DƯƠNG và trên bộ ≥ 2 lỗi. Vân tay phải khớp đúng tiến trình CLI được
+                               timeout=120, cwd=str(GOC), env={**os.environ, _BIEN_BAN_KINH: "hong", _BIEN_MANH: "a/b",
+                                                                _BIEN_MANH_RA: ""})
+            kq[ten] = [p.returncode, (p.stdout.splitlines() or [""])[0], 0]
+        # F17 (Codex lượt 6): CLI THẬT trên đường DƯƠNG và trên bộ ≥ 2 lỗi. Vân tay phải khớp đúng tiến trình CLI được
         # đo, nên dựng một kho git TẠM từ CHÍNH tệp đang chạy (kể cả khi nó là bản đột biến) và lấy vân tay tại đó.
         kho = d / "kho"
         (kho / "ops").mkdir(parents=True)
@@ -7621,11 +7642,18 @@ def _in_tu_kiem_main():
         (["  DONG-NEN-668", "  DONG-NEN-668-B"], 1) if d else ([], 0))
     g["_ban_kinh_moi_dot_bien"], g["_phong_con"], g["_ket_thuc_manh"] = du, phong, ghi
     g["_van_tay"] = lambda: dict(vt_gia)
-    kq = {"mong_du": len(DOT_BIEN), "mong_manh": {m: len(_phan_manh(*m)) for m in ((3, 8), (5, 16), (1, 2))},
-          "ten_ca": ten_ca, "so": _so_tien_trinh_ban_kinh()}
+    # F27 (Codex lượt 10): số worker là DỮ LIỆU của kịch bản — 3 mặc định, 1 ở hai kịch bản `_w1`. Kỳ vọng lấy từ CHÍNH
+    # `_so_tien_trinh_ban_kinh` dưới cùng env (đột biến vào hàm ấy là việc của ca khác), nên hằng trong `main` lộ ra.
+    tt = "CONG_CU_TEST_TIEN_TRINH"
+    os.environ[tt] = "1"
+    so1 = _so_tien_trinh_ban_kinh()
+    os.environ[tt] = "3"
+    kq = {"mong_du": len(DOT_BIEN), "mong_manh": {m: len(_phan_manh(*m)) for m in ((3, 8), (5, 16), (1, 2), (0, 8))},
+          "ten_ca": ten_ca, "so": _so_tien_trinh_ban_kinh(), "so1": so1}
     kq["mong_manh"] = {f"{k}/{n}": v for (k, n), v in kq["mong_manh"].items()}
     import re
-    manh, gate = {_BIEN_MANH: "3/8", _BIEN_MANH_RA: "x"}, {_BIEN_BAN_KINH: "manh"}
+    # F27: đường ra KHÁC nhau giữa các kịch bản (có thư mục con + khoảng trắng) — một hằng `ra` trong `main` phải lộ.
+    manh, gate = {_BIEN_MANH: "3/8", _BIEN_MANH_RA: "d con/manh 3.txt"}, {_BIEN_BAN_KINH: "manh"}
     tb, ta, c0, c1, cn = "batch_behavior_test", "python_alias_behavior_test", ten_ca[0], ten_ca[1], ten_ca[-1]
     kich_ban = {
         "du": ({}, {}), "gate": (gate, {}), "manh": (manh, {}), "cau_hinh_sai": ({_BIEN_BAN_KINH: "x"}, {}),
@@ -7645,6 +7673,10 @@ def _in_tu_kiem_main():
         "gate_nhieu_nguon": (gate, {"ph_do": 1, "gg_do": 2, "ss_do": 1, "cong_do": 1, "ca_do": {cn}}),
         "du_bk_do": ({}, {"bk1": 2}), "du_bk_do_cuoi": ({}, {"bk2": 2}), "du_bk_hai": ({}, {"bk1": 2, "bk2": 2}),
         "du_bk_do_1": ({}, {"bk1": 1}),
+        # F27: k=0 (giá trị FALSY) · worker=1 ở cả hai nhánh · lỗi tự kiểm ở nhánh ĐỦ, mỗi nguồn một lũy thừa 2 (nền=1)
+        # để bỏ/gán đè BẤT KỲ nguồn nào cũng ra tổng khác.
+        "manh_0": ({_BIEN_MANH: "0/8", _BIEN_MANH_RA: "x"}, {}), "manh_w1": ({**manh, tt: "1"}, {}),
+        "du_w1": ({tt: "1"}, {}), "du_nhieu_nguon": ({}, {"ph_do": 2, "gg_do": 4, "ss_do": 16, "bk1": 32, "ca_do": {cn}}),
     }
     for ten, (env, dat) in kich_ban.items():
         kb.clear()
@@ -7656,7 +7688,7 @@ def _in_tu_kiem_main():
         phat["mong"] = _phan_manh(int(km[0]), int(km[1]))
         for bien in (_BIEN_BAN_KINH, _BIEN_MANH, _BIEN_MANH_RA):
             os.environ.pop(bien, None)
-        os.environ.update(env)
+        os.environ.update({tt: "3", **env})
         buf = io.StringIO()
         with contextlib.redirect_stdout(buf):
             rc = main()

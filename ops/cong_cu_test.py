@@ -7233,7 +7233,6 @@ def _ban_ghi_du_gia(ten):
 
 def _in_tu_kiem_gom():
     """Cửa tiến trình con cho `t52`: dựng bộ mảnh bằng CHÍNH `_ket_thuc_manh`, làm hỏng từng cách, gom, in `KQ`."""
-    import hashlib
     n = 3
     # Vân tay CỐ ĐỊNH, không `_van_tay()`: dưới đột biến `GOC` là cây tạm, không phải kho git, nên HEAD đọc được
     # hay không là chuyện của RIG — mọi kịch bản sẽ ĐỎ vì `G-head` và ca "giết" mọi đột biến sai lý do.
@@ -7340,7 +7339,7 @@ def _in_tu_kiem_gom():
         # phán quyết thành mã thoát — `t52` trước đây chỉ gọi `_gom_manh` trực tiếp.
         import contextlib
         import io
-        g, cu_vt, argv, goi_vt = globals(), _van_tay, sys.argv, []
+        g, cu_vt, argv, goi_vt, goc_cu = globals(), _van_tay, sys.argv, [], (GOC, TEP_TEST)
         g["_van_tay"] = lambda: goi_vt.append(1) or dict(vt)
         try:
             for ten, doi in (("cli_dung", [str(d / "dung")]), ("cli_thieu", [str(d / "thieu")]),
@@ -7366,8 +7365,14 @@ def _in_tu_kiem_gom():
         git = lambda *a: subprocess.run(["git", "-C", str(kho), "-c", "user.email=t@t", "-c", "user.name=t", "-c",
                                          "commit.gpgsign=false", *a], capture_output=True, text=True, timeout=60)
         git("init", "-q"), git("add", "-A"), git("commit", "-q", "-m", "kho tạm #668")
-        vt_kho = {"sha256_test": hashlib.sha256((kho / "ops" / "cong_cu_test.py").read_bytes()).hexdigest(),
-                  "head": git("rev-parse", "HEAD").stdout.strip()}
+        # Vân tay lấy bằng CHÍNH `_van_tay` trỏ vào kho tạm — đúng hàm CLI sẽ gọi. Tự băm ở đây thì một đột biến vào
+        # NGUỒN vân tay (việc của `t53`) cũng giết `t52` ⇒ bán kính 2 (đo được: `f9_*` lúc đầu 2/56).
+        g["GOC"], g["TEP_TEST"] = kho, kho / "ops" / "cong_cu_test.py"
+        try:
+            vt_kho = _van_tay()
+        finally:
+            g["GOC"], g["TEP_TEST"] = goc_cu
+        dung(vt_kho["head"], f"giàn giáo kho git tạm không có HEAD: {git('log', '-1').stderr[-300:]}")
         for ten, sua in (("cli_git_dung", None), ("cli_git_nhieu", sua_kq)):
             thu = dung_bo(ten, sua, vt_kho)
             p = subprocess.run([sys.executable, str(kho / "ops" / "cong_cu_test.py"), "--gop", str(thu)],

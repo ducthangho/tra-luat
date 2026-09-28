@@ -12,7 +12,8 @@ import re
 import sys
 
 BOM = b"\xef\xbb\xbf"
-EVENT, CHE_DO, KET_LUAN = "thu_hoi_admission_receipt", "chua_kich_hoat", frozenset({"TAP_THU_HOI_RONG"})
+EVENT, CHE_DO = "thu_hoi_admission_receipt", "chua_kich_hoat"
+KET_LUAN = ("TAP_THU_HOI_RONG",)  # tuple: `in` so bằng ==, list/dict trong JSON không ném TypeError (luot1 F1)
 WF = "/.github/workflows/ops-thu-hoi-admission.yml@refs/heads/"
 C = ("checkout_commit", "bo_kiem_da_chay_commit", "workflow_definition_commit")
 _VANG = object()  # `json.loads("null")` trả None, nên None không dùng làm dấu "chưa parse" được
@@ -31,7 +32,7 @@ KIEU.update({k: lambda v: type(v) is dict for k in ("so_thu_hoi_S", "so_thu_hoi_
 KIEU.update({k: lambda v: type(v) is list for k in ("metadata_T", "thu_hoi_moi")})
 KIEU.update({
     "oid_bo_kiem_tai_S": lambda v: v is None or _H40(v), "workflow_definition_sha256": _H64,
-    "thoi_diem_utc": _khop("[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z"),
+    "thoi_diem_utc": _khop(r"\d{4}-\d\d-\d\dT\d\d:\d\d:\d\dZ"),  # đúng regex spec M3 (`\d`), luot1 F11
     "descriptor_q13_ghim": lambda v: v is None or _H64(v), "policy_T": lambda v: v is None or type(v) is dict,
     "profile_digest": lambda v: v is None or type(v) is str, "discovery": lambda v: type(v) is str})
 # 7 khoá còn lại kiểm theo GIÁ TRỊ: event (K1) · 4 danh tính (K3) · che_do, ket_luan (K5).
@@ -52,7 +53,8 @@ def kiem_json(raw, *, kho, nhanh, base_hien_hanh, head_hien_hanh):
     else:
         try:
             chuoi = raw.decode("utf-8", "strict")
-            r = json.loads(chuoi)  # nhận `str`, KHÔNG nhận bytes: overload bytes tự nhận UTF-16/32
+            # nhận `str`, KHÔNG nhận bytes: overload bytes tự nhận UTF-16/32
+            r = json.loads(chuoi)
         except UnicodeDecodeError:
             loi.append("khong phai UTF-8 strict")
         except json.JSONDecodeError:

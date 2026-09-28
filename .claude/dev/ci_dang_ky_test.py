@@ -1110,6 +1110,13 @@ def _loi_thuc_thi_g5(j, v, buoc):
         loi.append(f"{j}: env/runs-on/strategy cấp job lệch hình dạng ghim")
     for b in buoc:
         ten = b.get("name") or b.get("uses")
+        # #668 F10 (Codex lượt 4, P1 — lần thứ BA của lớp này): GitHub nội suy `${{ }}` trên TOÀN thân `run` trước khi
+        # Bash đọc, kể cả trong chú thích, nên một `fromJSON` hằng sinh được xuống dòng + lệnh mới mà ta đã bỏ đi cùng
+        # chú thích. Không vá theo từng biến thể nữa: thân `run` của job G5 chỉ được có ký tự IN ĐƯỢC + `\n`, và không
+        # biểu thức nào. Khi ấy thứ ta đọc (tách `\n`, cắt space/tab) CHÍNH LÀ thứ Bash đọc — đóng F3 lẫn F10 theo cấu trúc.
+        than = str(b.get("run", ""))
+        if "${{" in than or any(not (c == "\n" or c.isprintable()) for c in than):
+            loi.append(f"{j}: bước {ten!r} có biểu thức GitHub hoặc ký tự không in được trong `run`")
         if set(b) - G5_KHOA_BUOC or b.get("shell", "bash") != "bash":
             loi.append(f"{j}: bước {ten!r} có khoá/shell ngoài danh sách cho phép: {sorted(set(b) - G5_KHOA_BUOC)} shell={b.get('shell')!r}")
         elif "uses" in b and b.get("with", {}) not in G5_WITH.get(b["uses"], (b.get("with", {}),)):
@@ -1880,6 +1887,18 @@ def phan_chung():
             _them(f"p668-F3-{_j}-chu-thich-nuot-U{ord(_ch):04X}",
                   _hong_job(_j, lambda v, b, i, c=_ch, l=_lenh: _moi_mau(i, b, run="# x" + c + l.replace("\n", "\n# x" + c))))
     _them("p668-F3-nbsp-truoc-chu-thich-la-lenh-la", _hong_job(_G, lambda v, b, i: _moi_mau(i, b, run="\u00a0# x\n" + G5_GOP)))
+    # #668 F10: biểu thức GitHub trong `run` (kể cả trong chú thích) — mô tả của Codex lượt 4, dựng thành ca ở đây.
+    _BT = "# ${{ fromJSON('\"\\nexit 0\\n\"') }}\n"
+    for _t, _j, _f in (
+            ("gop-chu-thich-fromjson", _G, lambda v, b, i: _moi_mau(i, b, run=_BT + G5_GOP)),
+            ("manh-chu-thich-fromjson", _M, lambda v, b, i: _moi_mau(i, b, run=_BT + b[i]["run"])),
+            ("gate-chu-thich-fromjson", "gate", lambda v, b, i: _moi_mau(i, b, run=_BT + b[i]["run"])),
+            ("registry-chu-thich-fromjson", "gate-registry", lambda v, b, i: _moi_mau(i, b, run=_BT + b[i]["run"])),
+            ("gate-thiet-lap-chu-thich-fromjson", "gate", lambda v, b, i: _moi_mau(0, b, run=_BT + b[0]["run"])),
+            ("gop-chu-thich-bien-matrix", _G, lambda v, b, i: _moi_mau(i, b, run="# ${{ matrix.os }}\n" + G5_GOP)),
+            ("manh-tab-dau-lenh", _M, lambda v, b, i: _moi_mau(i, b, run="\t" + b[i]["run"])),
+    ):
+        _them(f"p668-F10-{_t}", _hong_job(_j, _f))
     _them("p637-A8-khong-ung-vien", chon_so_worker({1: 100, 2: 101, 4: 102}) is None)
     _them("p637-A8-dung-bien", chon_so_worker({1: 200, 2: 110, 4: 100}) == 2)
     _them("p637-A8-vuot-bien", chon_so_worker({1: 200, 2: 110.5, 4: 100}) == 4)

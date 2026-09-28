@@ -540,8 +540,8 @@ jobs:
     # don-nhanh, cgroup + gate_lifecycle, lifecycle nền không cgroup. KHÔNG bỏ bước nào.
     # CỔNG BẮT BUỘC: các bước này chỉ chặn merge khi ruleset `bao-ve-cong-dang-lease` có context
     # `gate-ops (ubuntu-latest)` — chú thích `PLAT-X5` bên dưới nói "job `gate`" là lời viết TRƯỚC lần tách.
-    # Cố ý KHÔNG có: bước chạm `ops/cong_cu` (không vào `JOB_G5`), bước cài actionlint (t152 đếm 4 dòng
-    # `AL_VER:`; wrapper lease-publish tự cài), Ruff (`loi_ruff_ci`). Ma trận/`timeout`/`env` bằng đúng `gate`.
+    # Cố ý KHÔNG có: bước chạm `ops/cong_cu` (không vào `JOB_G5`), bước cài actionlint (t152 đếm 5 dòng
+    # `AL_VER:` từ #668; wrapper lease-publish tự cài), Ruff (`loi_ruff_ci`). Ma trận/`timeout`/`env` bằng đúng `gate`.
     needs: chuan-bi
     strategy:
       fail-fast: false

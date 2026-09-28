@@ -1690,8 +1690,8 @@ DOT_BIEN = {
         '            ket.update({t: None for t in (nhan or {})})  # đột biến: đủ tên, mất giá trị\n',
         "TEP_TEST", _KEM_TEP_TEST, 't54_main_chon_DUNG_vong_ban_kinh_theo_che_do'),
     'f6_main_mat_van_tay': ("ops/cong_cu_test.py",
-        '        dong, loi = _ket_thuc_manh(k, n, ra, ten, ket, ly_con, _van_tay())\n',
-        '        dong, loi = _ket_thuc_manh(k, n, ra, ten, ket, ly_con, {})  # đột biến: mất vân tay\n',
+        '        dong, loi = _ket_thuc_manh(k, n, ra, ten, None if ly_con else ket, ly_con, _van_tay())\n',
+        '        dong, loi = _ket_thuc_manh(k, n, ra, ten, None if ly_con else ket, ly_con, {})  # đột biến: mất vân tay\n',
         "TEP_TEST", _KEM_TEP_TEST, 't54_main_chon_DUNG_vong_ban_kinh_theo_che_do'),
     'f6_main_bo_tien_kiem': ("ops/cong_cu_test.py",
         '        if hong or tien_kiem_bo_qua:\n',
@@ -1706,7 +1706,7 @@ DOT_BIEN = {
         '            pass  # đột biến: bỏ nhận bản ghi\n',
         "TEP_TEST", _KEM_TEP_TEST, 't54_main_chon_DUNG_vong_ban_kinh_theo_che_do'),
     'f5_main_bo_ghi': ("ops/cong_cu_test.py",
-        '        dong, loi = _ket_thuc_manh(k, n, ra, ten, ket, ly_con, _van_tay())\n',
+        '        dong, loi = _ket_thuc_manh(k, n, ra, ten, None if ly_con else ket, ly_con, _van_tay())\n',
         '        dong, loi = [], 0  # đột biến: bỏ gọi bộ ghi\n',
         "TEP_TEST", _KEM_TEP_TEST, 't54_main_chon_DUNG_vong_ban_kinh_theo_che_do'),
     'f5_main_bo_truyen_loi': ("ops/cong_cu_test.py",
@@ -1714,8 +1714,8 @@ DOT_BIEN = {
         '        return 0  # đột biến: nuốt lỗi mảnh\n',
         "TEP_TEST", _KEM_TEP_TEST, 't54_main_chon_DUNG_vong_ban_kinh_theo_che_do'),
     'f5_main_bo_loi_con': ("ops/cong_cu_test.py",
-        '            if nhan is None:\n                ket, ly_con = None,',
-        '            if False:\n                ket, ly_con = None,',
+        '            if nhan is None:\n                ly_con = ly_con or',
+        '            if False:\n                ly_con = ly_con or',
         "TEP_TEST", _KEM_TEP_TEST, 't54_main_chon_DUNG_vong_ban_kinh_theo_che_do'),
     'f5_main_nen_do_van_do': ("ops/cong_cu_test.py",
         '[M-nen]: nền KHÔNG xanh — không đo bán kính, không ghi tệp")\n            return 1\n',
@@ -1820,40 +1820,133 @@ DOT_BIEN = {
     'g668_che_do_bo_ra_le': ("ops/cong_cu_test.py",
         '        if ra is not None:\n            raise ValueError(f"[C-ra-le]',
         '        if False:\n            raise ValueError(f"[C-ra-le]',
-        "TEP_TEST", _KEM_TEP_TEST, 't53_che_do_doc_FAIL_CLOSED_moi_cau_hinh_la_co_THE_RIENG'),
+        "TEP_TEST", _KEM_TEP_TEST, 't53_che_do_doc_FAIL_CLOSED_moi_cau_hinh_la_co_THE_RIENG_va_van_tay_bam_NGUON'),
     'g668_che_do_rong_la_vang': ("ops/cong_cu_test.py",
         '        if bk != "manh":\n',
         '        if bk not in ("manh", ""):  # đột biến: rỗng coi như đúng\n',
-        "TEP_TEST", _KEM_TEP_TEST, 't53_che_do_doc_FAIL_CLOSED_moi_cau_hinh_la_co_THE_RIENG'),
+        "TEP_TEST", _KEM_TEP_TEST, 't53_che_do_doc_FAIL_CLOSED_moi_cau_hinh_la_co_THE_RIENG_va_van_tay_bam_NGUON'),
     'g668_che_do_bo_ca_hai': ("ops/cong_cu_test.py",
         '    if bk is not None:\n        raise ValueError(f"[C-ca-hai]',
         '    if False:\n        raise ValueError(f"[C-ca-hai]',
-        "TEP_TEST", _KEM_TEP_TEST, 't53_che_do_doc_FAIL_CLOSED_moi_cau_hinh_la_co_THE_RIENG'),
+        "TEP_TEST", _KEM_TEP_TEST, 't53_che_do_doc_FAIL_CLOSED_moi_cau_hinh_la_co_THE_RIENG_va_van_tay_bam_NGUON'),
     'g668_che_do_match_khong_full': ("ops/cong_cu_test.py",
         '    m = re.fullmatch(r"(0|[1-9][0-9]?)/([1-9][0-9]?)", mh)\n',
         '    m = re.match(r"(0|[1-9][0-9]?)/([1-9][0-9]?)", mh)  # đột biến: bỏ neo cuối\n',
-        "TEP_TEST", _KEM_TEP_TEST, 't53_che_do_doc_FAIL_CLOSED_moi_cau_hinh_la_co_THE_RIENG'),
+        "TEP_TEST", _KEM_TEP_TEST, 't53_che_do_doc_FAIL_CLOSED_moi_cau_hinh_la_co_THE_RIENG_va_van_tay_bam_NGUON'),
     'g668_che_do_chu_so_unicode': ("ops/cong_cu_test.py",
         '    m = re.fullmatch(r"(0|[1-9][0-9]?)/([1-9][0-9]?)", mh)\n',
         '    m = re.fullmatch(r"(0|[1-9]\\d?|\\d)/([1-9][0-9]?)", mh)  # đột biến: \\d nhận chữ số Unicode\n',
-        "TEP_TEST", _KEM_TEP_TEST, 't53_che_do_doc_FAIL_CLOSED_moi_cau_hinh_la_co_THE_RIENG'),
+        "TEP_TEST", _KEM_TEP_TEST, 't53_che_do_doc_FAIL_CLOSED_moi_cau_hinh_la_co_THE_RIENG_va_van_tay_bam_NGUON'),
     'g668_che_do_nhan_n_1': ("ops/cong_cu_test.py",
         '    if not (2 <= n <= _TRAN_MANH and k < n):\n',
         '    if not (1 <= n <= _TRAN_MANH and k < n):  # đột biến\n',
-        "TEP_TEST", _KEM_TEP_TEST, 't53_che_do_doc_FAIL_CLOSED_moi_cau_hinh_la_co_THE_RIENG'),
+        "TEP_TEST", _KEM_TEP_TEST, 't53_che_do_doc_FAIL_CLOSED_moi_cau_hinh_la_co_THE_RIENG_va_van_tay_bam_NGUON'),
     'g668_che_do_nhan_k_bang_n': ("ops/cong_cu_test.py",
         '    if not (2 <= n <= _TRAN_MANH and k < n):\n',
         '    if not (2 <= n <= _TRAN_MANH and k <= n):  # đột biến\n',
-        "TEP_TEST", _KEM_TEP_TEST, 't53_che_do_doc_FAIL_CLOSED_moi_cau_hinh_la_co_THE_RIENG'),
+        "TEP_TEST", _KEM_TEP_TEST, 't53_che_do_doc_FAIL_CLOSED_moi_cau_hinh_la_co_THE_RIENG_va_van_tay_bam_NGUON'),
     'g668_che_do_bo_tran_tren': ("ops/cong_cu_test.py",
         '    if not (2 <= n <= _TRAN_MANH and k < n):\n',
         '    if not (2 <= n and k < n):  # đột biến: bỏ trần trên\n',
-        "TEP_TEST", _KEM_TEP_TEST, 't53_che_do_doc_FAIL_CLOSED_moi_cau_hinh_la_co_THE_RIENG'),
+        "TEP_TEST", _KEM_TEP_TEST, 't53_che_do_doc_FAIL_CLOSED_moi_cau_hinh_la_co_THE_RIENG_va_van_tay_bam_NGUON'),
     'g668_che_do_ra_rong_lot': ("ops/cong_cu_test.py",
         '    if not ra:\n',
         '    if ra is None:  # đột biến: tệp ra rỗng lọt\n',
-        "TEP_TEST", _KEM_TEP_TEST, 't53_che_do_doc_FAIL_CLOSED_moi_cau_hinh_la_co_THE_RIENG'),
+        "TEP_TEST", _KEM_TEP_TEST, 't53_che_do_doc_FAIL_CLOSED_moi_cau_hinh_la_co_THE_RIENG_va_van_tay_bam_NGUON'),
 }
+
+# #668 F7/F8/F9 (Codex lượt 4): đột biến dây nối `main`, CLI `--gop` và NGUỒN vân tay, sinh từ BẢNG (cùng khuôn 6 trường
+# như mọi mục `DOT_BIEN`, chỉ gọn dòng). Cố ý KHÔNG có đột biến cho `loi_db += loi_nen` và vế `hong` của mã thoát cuối:
+# `hong` khác rỗng ⇒ `_bao_cao_nen_do` trả 1 ⇒ `loi_db ≥ 1`, nên gỡ riêng một trong hai là đột biến TƯƠNG ĐƯƠNG (chúng
+# rào lẫn nhau) — một ca "giết" được nó sẽ phải khẳng định điều sai.
+_CA_668 = {"t52_": 't52_gom_manh_phai_DO_khi_thieu_trung_lech_va_moi_chot_co_THE_RIENG',
+           "t53_": 't53_che_do_doc_FAIL_CLOSED_moi_cau_hinh_la_co_THE_RIENG_va_van_tay_bam_NGUON',
+           "t54_": 't54_main_chon_DUNG_vong_ban_kinh_theo_che_do'}
+for _ten, _ca, _tim, _thay in (
+    ('f7_cau_hinh_nuot', 't54_',
+     '        print(f"  ĐỎ  cấu hình chế độ: {ex}")\n        return 2\n',
+     '        print(f"  ĐỎ  cấu hình chế độ: {ex}")\n        che_do, tham_so = "du", None\n'),
+    ('f7_tk_chi_batch', 't54_',
+     '                                    _chay_tien_kiem(python_alias_behavior_test)) if x]\n',
+     '                                    None) if x]\n'),
+    ('f7_tk_chi_alias', 't54_',
+     '    tien_kiem_bo_qua = [x for x in (_chay_tien_kiem(batch_behavior_test),\n',
+     '    tien_kiem_bo_qua = [x for x in (None,\n'),
+    ('f7_ca_do_nuot', 't54_',
+     '        except AssertionError as ex:\n            hong.append((fn.__name__, str(ex)))\n',
+     '        except AssertionError as ex:\n            qua += 1\n'),
+    ('f7_ca_loi_khac_nuot', 't54_',
+     '            hong.append((fn.__name__, f"{type(ex).__name__}: {ex}"))\n',
+     '            qua += 1\n'),
+    ('f7_bo_qua_thanh_hong', 't54_',
+     '            bo_qua.append((fn.__name__, str(ex)))\n',
+     '            hong.append((fn.__name__, str(ex)))\n'),
+    ('f7_con_rc_bo', 't54_',
+     '            nhan, ly = _nhan_ket_qua_con(nhom, rc, ra_con, ())\n',
+     '            nhan, ly = _nhan_ket_qua_con(nhom, 0, ra_con, ())\n'),
+    ('f7_ghi_ket_du_loi', 't54_',
+     '        dong, loi = _ket_thuc_manh(k, n, ra, ten, None if ly_con else ket, ly_con, _van_tay())\n',
+     '        dong, loi = _ket_thuc_manh(k, n, ra, ten, ket, ly_con, _van_tay())\n'),
+    ('f7_bo_cong', 't54_',
+     '    loi_cong, dong_cong = _cong_tren_cay_that(GOC)\n',
+     '    loi_cong, dong_cong = 0, []\n'),
+    ('f7_cong_goc_sai', 't54_',
+     '    loi_cong, dong_cong = _cong_tren_cay_that(GOC)\n',
+     '    loi_cong, dong_cong = _cong_tren_cay_that(HERE)\n'),
+    ('f7_bo_phan_hang', 't54_',
+     '    loi_db = _tu_kiem_phan_hang()\n',
+     '    loi_db = 0\n'),
+    ('f7_bo_gian_giao', 't54_',
+     '    loi_db += _tu_kiem_gian_giao()\n',
+     '    loi_db += 0\n'),
+    ('f7_nen_rong', 't54_',
+     '    dong_nen, loi_nen = _bao_cao_nen_do(do_o_nen)\n',
+     '    dong_nen, loi_nen = _bao_cao_nen_do([])\n'),
+    ('f7_bo_song_song', 't54_',
+     '    loi_db += _tu_kiem_song_song(do_o_nen)\n',
+     '    loi_db += 0\n'),
+    ('f7_song_song_nen_rong', 't54_',
+     '    loi_db += _tu_kiem_song_song(do_o_nen)\n',
+     '    loi_db += _tu_kiem_song_song([])\n'),
+    ('f7_du_nen_rong', 't54_',
+     '        for cac_dong, loi in _ban_kinh_moi_dot_bien(list(DOT_BIEN), do_o_nen, so_tien_trinh):\n',
+     '        for cac_dong, loi in _ban_kinh_moi_dot_bien(list(DOT_BIEN), [], so_tien_trinh):\n'),
+    ('f7_du_nuot_loi', 't54_',
+     '            loi_db += loi\n',
+     '            loi_db += 0\n'),
+    ('f7_du_mot_tien_trinh', 't54_',
+     '    so_tien_trinh = _so_tien_trinh_ban_kinh()\n',
+     '    so_tien_trinh = 1\n'),
+    ('f7_ket_bo_tien_kiem', 't54_',
+     '    return 1 if (hong or loi_db or tien_kiem_bo_qua or loi_cong) else 0\n',
+     '    return 1 if (hong or loi_db or loi_cong) else 0\n'),
+    ('f7_ket_bo_cong', 't54_',
+     '    return 1 if (hong or loi_db or tien_kiem_bo_qua or loi_cong) else 0\n',
+     '    return 1 if (hong or loi_db or tien_kiem_bo_qua) else 0\n'),
+    ('f7_ket_bo_loi_db', 't54_',
+     '    return 1 if (hong or loi_db or tien_kiem_bo_qua or loi_cong) else 0\n',
+     '    return 1 if (hong or tien_kiem_bo_qua or loi_cong) else 0\n'),
+    ('f8_gop_nuot_ma', 't52_',
+     '        print(d)\n    return 1 if loi else 0\n',
+     '        print(d)\n    return 0\n'),
+    ('f8_gop_bo_goi', 't52_',
+     '    dong, loi = _gom_manh(sys.argv[i + 1], _van_tay())\n',
+     '    dong, loi = ["GOM MẢNH 3/3"], 0\n'),
+    ('f8_gop_van_tay_hang', 't52_',
+     '    dong, loi = _gom_manh(sys.argv[i + 1], _van_tay())\n',
+     '    dong, loi = _gom_manh(sys.argv[i + 1], {"sha256_test": "a" * 64, "head": "b" * 40})\n'),
+    ('f8_gop_bo_doi_so', 't52_',
+     '    if len(sys.argv) != i + 2:\n',
+     '    if False:\n'),
+    ('f9_sha_hang', 't53_',
+     '    return {"sha256_test": hashlib.sha256(Path(TEP_TEST).read_bytes()).hexdigest(),\n',
+     '    return {"sha256_test": "0" * 64,\n'),
+    ('f9_head_hang', 't53_',
+     '            "head": head if re.fullmatch(r"[0-9a-f]{40}|[0-9a-f]{64}", head) else None}\n',
+     '            "head": "b" * 40}\n'),
+):
+    DOT_BIEN[_ten] = ("ops/cong_cu_test.py", _tim, _thay, "TEP_TEST", _KEM_TEP_TEST, _CA_668[_ca])
+
 
 def _la_dong_ho_nhay(ex) -> bool:
     """`TimeoutExpired` mang thời lượng ÂM — chữ ký của ĐỒNG HỒ NHẢY LÙI, không phải quá hạn.
@@ -6393,10 +6486,14 @@ def t52_gom_manh_phai_DO_khi_thieu_trung_lech_va_moi_chot_co_THE_RIENG():
     ghi = {t: kq.get(t) for t, the in (("ghi_loi", "M-loi"), ("ghi_con", "M-con"), ("ghi_head", "M-head"))
            if not (kq.get(t) and kq[t][0] >= 1 and f"[{the}]" in kq[t][1] and kq[t][2] == "khong-tep")}
     bang(not ghi, f"mảnh KHÔNG đạt phải ĐỎ đúng thẻ và KHÔNG để lại tệp: {ghi}")
+    cli = {"cli_dung": (0, "GOM MẢNH 3/3", 1), "cli_thieu": (1, "[G-tap]", 1), "cli_doi_so": (2, "[G-doi-so]", 0)}
+    cli_sai = {t: kq.get(t) for t, (rc, dau_ra, vt) in cli.items()
+               if not (kq.get(t) and kq[t][0] == rc and dau_ra in kq[t][1] and kq[t][2] == vt)}
+    bang(not cli_sai, f"CLI `--gop` phải gọi gom + `_van_tay` đúng một lần + truyền mã (mong {cli}): {cli_sai}")
 
 
 @ca
-def t53_che_do_doc_FAIL_CLOSED_moi_cau_hinh_la_co_THE_RIENG():
+def t53_che_do_doc_FAIL_CLOSED_moi_cau_hinh_la_co_THE_RIENG_va_van_tay_bam_NGUON():
     """#668 M1/M2: `_doc_che_do` nhận ĐÚNG ba chế độ; mọi cấu hình lạ ⇒ lỗi mang ĐÚNG thẻ `[C-…]`.
 
     Chuỗi rỗng KHÔNG phải "vắng": `gate` rơi nhầm về `du` thì chỉ chậm, còn một biến mảnh hỏng rơi về `gate` thì không
@@ -6414,6 +6511,9 @@ def t53_che_do_doc_FAIL_CLOSED_moi_cau_hinh_la_co_THE_RIENG():
             "ca_hai": ["loi", "[C-ca-hai]"], "ra_le": ["loi", "[C-ra-le]"]}
     sai = {t: [kq.get(t), m] for t, m in mong.items() if kq.get(t) != m}
     bang(not sai, f"`_doc_che_do` đọc sai (thấy, mong): {sai}")
+    dung(kq["van_tay"][0], f"giàn giáo git tạm không dựng được commit: {kq['van_tay']}")
+    bang(kq["van_tay"] == [True] * 6, "`_van_tay` phải bám BYTES của TEP_TEST và HEAD thật của GOC, không git ⇒ None "
+                                      f"(không-git, head, sha, đổi-byte-giữ-head, đổi-head): {kq['van_tay'][1:]}")
 
 
 @ca
@@ -6425,21 +6525,31 @@ def t54_main_chon_DUNG_vong_ban_kinh_theo_che_do():
     `main` với giàn giáo rẻ) nên đột biến trên đĩa cắn được.
     """
     kq = _doc_kq_tu_kiem("--tu-kiem-main")
-    du, p = kq["mong_du"], kq["mong_manh"]
-    dung(du and p, f"giàn giáo không dựng được kỳ vọng: {str(kq)[:300]}")
-    so = kq["mong_so"]
-    # Mỗi lời gọi bộ ghi: [k, n, ra, tên, tập tên ket, GIÁ TRỊ ket khớp đúng thứ con phát, lý do đúng dạng, VÂN TAY đúng].
-    dat = [[3, 8, "x", p, sorted(p), True, True, True]]
-    khong = [[3, 8, "x", p, None, None, True, True]]
-    mong = {"du": [0, du, [], [], [[], so], None], "gate": [0, [], [], [], None, None],
-            "manh": [0, [], p, dat, None, [[], so]],        # nhận ĐỦ bản ghi (tên + giá trị) của hai nhóm, gọi ghi đúng một lần
-            "con_hong": [1, [], p, khong, None, [[], so]],  # nhóm con hỏng ⇒ bộ ghi nhận `None` + lý do, rc=1
-            "ghi_do": [1, [], p, dat, None, [[], so]],      # bộ ghi báo lỗi ⇒ `main` phải TRUYỀN lên rc=1
-            "nen_do": [1, [], [], khong, None, None],       # nền đỏ ⇒ không phóng con nào, bộ ghi xoá tệp cũ, rc=1
-            "tien_kiem": [1, [], [], khong, None, None]}    # F6: tiền kiểm KHÔNG ĐO ĐƯỢC cũng là nền không xanh
-    sai = {t: str(kq.get(t))[:200] for t, m in mong.items() if kq.get(t) != m}
-    bang(not sai, f"`main` nối SAI vòng bán kính theo chế độ/kịch bản (thấy): {sai} — mong du={len(du)} tên, "
-                  f"manh 3/8={len(p)} tên, xem docstring `_in_tu_kiem_main`")
+    dung(kq["mong_du"] and kq["mong_manh"] and kq["ten_ca"], f"giàn giáo không dựng được kỳ vọng: {str(kq)[:300]}")
+    so, t0, t1, tn = kq["so"], kq["ten_ca"][0], kq["ten_ca"][1], kq["ten_ca"][-1]
+    dau = ["tk:batch_behavior_test", "tk:python_alias_behavior_test", "ca"]
+    ghi = lambda gt, ly: [f"ghi:3/8:x:True:{gt}:{ly}:True"]
+    phong, ghi_dung, ghi_none = [f"phong:True:[]:{so}"], ghi("dung", False), ghi("None", True)
+
+    def day(do=(), du=True):   # nhánh đủ/gate: cổng cây thật → hai tự kiểm → báo cáo nền → song song → (bán kính đủ)
+        return (dau + ["cong:True:None", "phan_hang:", "gian_giao:", f"nen:{list(do)}", f"song_song:{list(do)}"]
+                + ([f"du:True:{list(do)}:{so}"] if du else []))
+    # [mã thoát, nhật ký]: MỖI nguồn lỗi một kịch bản riêng; nhật ký so NGUYÊN (lời gọi, thứ tự, tham số).
+    mong = {"du": [0, day()], "gate": [0, day(du=False)], "manh": [0, dau + phong + ghi_dung],
+            "cau_hinh_sai": [2, []],
+            "du_tk_batch": [1, day()], "du_tk_alias": [1, day()],
+            "manh_tk_batch": [1, dau + ghi_none], "manh_tk_alias": [1, dau + ghi_none],
+            "manh_ca_do": [1, dau + ghi_none], "manh_ca_loi": [1, dau + ghi_none], "manh_ca_bq": [0, dau + phong + ghi_dung],
+            "du_ca_do": [1, day([tn])], "gate_ca_loi": [1, day([t0], du=False)], "du_ca_bq": [0, day()],
+            "con_rc": [1, dau + phong + ghi_none], "con_rong": [1, dau + phong + ghi_none],
+            "ghi_do": [1, dau + phong + ghi_dung],
+            "du_cong_do": [1, day()], "gate_cong_do": [1, day(du=False)], "gate_ph_do": [1, day(du=False)],
+            "gate_gg_do": [1, day(du=False)], "gate_ss_do": [1, day(du=False)], "du_bk_do": [1, day()]}
+    sai = {t: str(kq.get(t))[:260] for t, m in mong.items() if (kq.get(t) or [None, None])[:2] != m}
+    sai.update({t: f"chạy {kq[t][2]}/{len(kq['ten_ca'])} ca" for t in mong
+                if t != "cau_hinh_sai" and kq.get(t) and kq[t][2] != len(kq["ten_ca"])})
+    bang(not sai and kq["cau_hinh_sai"][2] == 0 and t1,
+         f"`main` nối SAI (kịch bản: thấy [rc, nhật ký]): {sai}; cấu hình sai chạy {kq['cau_hinh_sai'][2]} ca")
 
 
 def _cong_tren_cay_that(goc, bo_quet=None):
@@ -7074,6 +7184,22 @@ def _in_tu_kiem_gom():
         kq["khong_co"] = [_gom_manh(d / "khong_co", vt)[1], _gom_manh(d / "khong_co", vt)[0][0], ""]
         kq["head_gom_none"] = [_gom_manh(d / "dung", {**vt, "head": None})[1],
                                _gom_manh(d / "dung", {**vt, "head": None})[0][0], ""]
+        # F8 (Codex lượt 4): điểm vào CLI `--gop` THẬT (`_main_gop`) phải GỌI gom, lấy vân tay từ `_van_tay`, và TRUYỀN
+        # phán quyết thành mã thoát — `t52` trước đây chỉ gọi `_gom_manh` trực tiếp.
+        import contextlib
+        import io
+        g, cu_vt, argv, goi_vt = globals(), _van_tay, sys.argv, []
+        g["_van_tay"] = lambda: goi_vt.append(1) or dict(vt)
+        try:
+            for ten, doi in (("cli_dung", [str(d / "dung")]), ("cli_thieu", [str(d / "thieu")]),
+                             ("cli_doi_so", [str(d / "dung"), "thua"])):
+                goi_vt.clear()
+                sys.argv, buf = ["cong_cu_test.py", "--gop", *doi], io.StringIO()
+                with contextlib.redirect_stdout(buf):
+                    rc = _main_gop()
+                kq[ten] = [rc, (buf.getvalue().splitlines() or [""])[0], len(goi_vt)]
+        finally:
+            g["_van_tay"], sys.argv = cu_vt, argv
         # Phía GHI: mảnh không đạt KHÔNG được để lại tệp — kể cả tệp cũ cùng tên.
         ghi = d / "ghi"
         ghi.mkdir()
@@ -7090,77 +7216,86 @@ def _in_tu_kiem_gom():
 
 
 def _in_tu_kiem_main():
-    """Cửa tiến trình con cho `t54` (#668 F2/F5): chạy CHÍNH `main()` ở mọi chế độ, ghi lại nó CHỌN đo gì, NHẬN gì,
-    GHI gì và TRẢ mã gì.
+    """Cửa tiến trình con cho `t54` (#668 F2→F5→F6→F7): chạy CHÍNH `main()` trên giàn giáo, in NHẬT KÝ mọi lời gọi.
 
-    Giàn giáo rẻ: bộ ca giả mang ĐÚNG tên ca thật (để bản ghi của đột biến thật hợp lệ theo `_ban_ghi_sai`), tiền kiểm/
-    cổng cây thật/tự kiểm câm, hai điểm phóng thay bằng bộ GHI tên. `_phong_con` giả trả đầu ra `BKCON` THẬT (hai nhóm)
-    hoặc một nhóm hỏng có chủ đích; `_ket_thuc_manh` giả ghi lại lời gọi và trả số lỗi theo kịch bản — nên đo được dây
-    nhận bản ghi, dây gọi bộ ghi và dây truyền lỗi (F5: bỏ bất kỳ dây nào từng sống qua mọi ca). Kỳ vọng in kèm từ CHÍNH
-    tiến trình này (`list(DOT_BIEN)`, `_phan_manh`): ca đo DÂY NỐI, tính đúng của phân hoạch là việc của `t52`.
+    F7 (Codex lượt 4, lần thứ TƯ cùng lớp): vá theo từng đường reviewer chỉ ra thì lượt sau lại có đường khác. Nên
+    ở đây KHÔNG chọn đường: MỌI thứ `main` gọi đều bị thay bằng bộ ghi sự kiện kèm tham số (tiền kiểm batch/alias,
+    từng ca, phóng con, bộ nhận thật, bộ ghi mảnh, cổng cây thật, ba tự kiểm, báo cáo nền, bán kính đủ), và MỖI nguồn
+    lỗi có một kịch bản riêng lẻ. `t54` so NGUYÊN nhật ký + mã thoát. Kỳ vọng tên (`list(DOT_BIEN)`, `_phan_manh`) in
+    từ CHÍNH tiến trình này: ca đo DÂY NỐI, tính đúng của phân hoạch là việc của `t52`.
     """
     import contextlib
     import hashlib
     import io
-    g, goi = globals(), {}
-    ten_ca = [fn.__name__ for fn in CA]
-
-    def dung_ca(do=None):
-        cac = []
-        for t in ten_ca:
-            def f(t=t):
-                if t == do:
-                    raise AssertionError("ca giả đỏ ở nền")
-            f.__name__ = t
-            cac.append(f)
-        CA[:] = cac
-
+    g, ten_ca, kb, log = globals(), [fn.__name__ for fn in CA], {}, []
     bam = lambda x: hashlib.sha256(json.dumps(x, sort_keys=True).encode()).hexdigest()
-    vt_gia = {"sha256_test": "a" * 64, "head": "b" * 40}
+    vt_gia, phat = {"sha256_test": "a" * 64, "head": "b" * 40}, {}
+
+    def ca_gia(t):
+        def f():
+            log.append("ca")
+            loi = {kb.get("ca_do"): AssertionError, kb.get("ca_loi"): RuntimeError, kb.get("ca_bq"): BoQuaMoiTruong}
+            if t in loi:
+                raise loi[t]("ca giả")
+        f.__name__ = t
+        return f
 
     def phong(ten, do_o_nen, so):
-        goi.setdefault("phong", []).extend(ten)
-        goi["phong_tham_so"] = [list(do_o_nen), so]
-        nhom = [ten[0::2], ten[1::2]]
-        goi["phat"] = bam({t: _ban_ghi_du_gia(t) for t in ten})   # đúng thứ con giả phát ra, đo cả GIÁ TRỊ
-        return [(n, 1 if (goi["kb"] == "con_hong" and i == 1) else 0,
-                 "" if (goi["kb"] == "con_hong" and i == 1) else
+        log.append(f"phong:{ten == phat['mong']}:{list(do_o_nen)}:{so}")
+        nhom, phat["gt"] = [ten[0::2], ten[1::2]], bam({t: _ban_ghi_du_gia(t) for t in ten})
+        hong = kb.get("con")   # "rc": nhóm 0 rc=1 mà stdout ĐỦ; "rong": nhóm 0 rc=0 mà stdout rỗng
+        return [(n, 1 if hong == "rc" and i == 0 else 0, "" if hong == "rong" and i == 0 else
                  "".join("BKCON " + json.dumps(_ban_ghi_du_gia(t)) + "\n" for t in n)) for i, n in enumerate(nhom)]
 
     def ghi(k, n, ra, ten, ket, ly, vt):
-        # F6 (Codex lượt 3): ghi lại MỌI thứ `main` trao cho bộ ghi — tên thôi là để lọt "đủ tên, mất giá trị/vân tay".
-        goi.setdefault("ghi", []).append([k, n, ra, list(ten), None if ket is None else sorted(ket),
-                                          None if ket is None else bam(ket) == goi.get("phat"),
-                                          isinstance(ly, str) and bool(ly) if ket is None else ly is None,
-                                          vt == vt_gia])
-        return [], (1 if ket is None or goi["kb"] == "ghi_do" else 0)
+        gt = "None" if ket is None else ("dung" if bam(ket) == phat.get("gt") else "sai")
+        log.append(f"ghi:{k}/{n}:{ra}:{ten == phat['mong']}:{gt}:{isinstance(ly, str) and bool(ly)}:{vt == vt_gia}")
+        return [], (1 if ket is None or kb.get("ghi_do") else 0)
+
+    def tu_kiem(ten, loi):
+        return lambda *a: log.append(f"{ten}:{list(a[0]) if a else ''}") or (1 if kb.get(loi) else 0)
 
     def du(ten, do_o_nen, so):
-        goi.setdefault("du", []).extend(ten)
-        goi["du_tham_so"] = [list(do_o_nen), so]
-        return []
+        log.append(f"du:{ten == list(DOT_BIEN)}:{list(do_o_nen)}:{so}")
+        return [([], 1 if kb.get("bk_do") else 0)]
 
-    g["_chay_tien_kiem"] = lambda fn: ("tk_gia", "bỏ qua có chủ đích") if goi["kb"] == "tien_kiem" else None
-    g["_cong_tren_cay_that"] = lambda goc, bo_quet=None: (0, [])
-    g["_tu_kiem_phan_hang"] = g["_tu_kiem_gian_giao"] = lambda: 0
-    g["_tu_kiem_song_song"] = lambda do_o_nen: 0
+    g["_chay_tien_kiem"] = lambda fn: log.append(f"tk:{fn.__name__}") or (
+        ("tk", "bỏ qua có chủ đích") if fn.__name__ == kb.get("tk") else None)
+    g["_cong_tren_cay_that"] = lambda goc, bo_quet=None: log.append(f"cong:{goc == GOC}:{bo_quet}") or (
+        (1 if kb.get("cong_do") else 0), [])
+    g["_tu_kiem_phan_hang"], g["_tu_kiem_gian_giao"] = tu_kiem("phan_hang", "ph_do"), tu_kiem("gian_giao", "gg_do")
+    g["_tu_kiem_song_song"] = tu_kiem("song_song", "ss_do")
+    g["_bao_cao_nen_do"] = lambda d: log.append(f"nen:{list(d)}") or ([], 1 if d else 0)
     g["_ban_kinh_moi_dot_bien"], g["_phong_con"], g["_ket_thuc_manh"] = du, phong, ghi
     g["_van_tay"] = lambda: dict(vt_gia)
-    kq = {"mong_du": list(DOT_BIEN), "mong_manh": _phan_manh(3, 8), "mong_so": _so_tien_trinh_ban_kinh()}
-    manh = {_BIEN_MANH: "3/8", _BIEN_MANH_RA: "x"}
-    for kb, env, do in (("du", {}, None), ("gate", {_BIEN_BAN_KINH: "manh"}, None), ("manh", manh, None),
-                        ("con_hong", manh, None), ("ghi_do", manh, None), ("nen_do", manh, ten_ca[-1]),
-                        ("tien_kiem", manh, None)):
-        goi.clear()
-        goi["kb"] = kb
-        dung_ca(do)
+    phat["mong"] = _phan_manh(3, 8)
+    kq = {"mong_du": len(DOT_BIEN), "mong_manh": len(phat["mong"]), "ten_ca": ten_ca, "so": _so_tien_trinh_ban_kinh()}
+    manh, gate = {_BIEN_MANH: "3/8", _BIEN_MANH_RA: "x"}, {_BIEN_BAN_KINH: "manh"}
+    kich_ban = {
+        "du": ({}, {}), "gate": (gate, {}), "manh": (manh, {}), "cau_hinh_sai": ({_BIEN_BAN_KINH: "x"}, {}),
+        "du_tk_batch": ({}, {"tk": "batch_behavior_test"}), "du_tk_alias": ({}, {"tk": "python_alias_behavior_test"}),
+        "manh_tk_batch": (manh, {"tk": "batch_behavior_test"}),
+        "manh_tk_alias": (manh, {"tk": "python_alias_behavior_test"}),
+        "manh_ca_do": (manh, {"ca_do": ten_ca[-1]}), "manh_ca_loi": (manh, {"ca_loi": ten_ca[0]}),
+        "manh_ca_bq": (manh, {"ca_bq": ten_ca[1]}), "du_ca_do": ({}, {"ca_do": ten_ca[-1]}),
+        "gate_ca_loi": (gate, {"ca_loi": ten_ca[0]}), "du_ca_bq": ({}, {"ca_bq": ten_ca[1]}),
+        "con_rc": (manh, {"con": "rc"}), "con_rong": (manh, {"con": "rong"}), "ghi_do": (manh, {"ghi_do": 1}),
+        "du_cong_do": ({}, {"cong_do": 1}), "gate_cong_do": (gate, {"cong_do": 1}),
+        "gate_ph_do": (gate, {"ph_do": 1}), "gate_gg_do": (gate, {"gg_do": 1}), "gate_ss_do": (gate, {"ss_do": 1}),
+        "du_bk_do": ({}, {"bk_do": 1}),
+    }
+    for ten, (env, dat) in kich_ban.items():
+        kb.clear()
+        kb.update(dat)
+        log.clear()
+        CA[:] = [ca_gia(t) for t in ten_ca]
         for bien in (_BIEN_BAN_KINH, _BIEN_MANH, _BIEN_MANH_RA):
             os.environ.pop(bien, None)
         os.environ.update(env)
         with contextlib.redirect_stdout(io.StringIO()):
             rc = main()
-        kq[kb] = [rc, goi.get("du", []), goi.get("phong", []), goi.get("ghi", []),
-                  goi.get("du_tham_so"), goi.get("phong_tham_so")]
+        kq[ten] = [rc, [x for i, x in enumerate(log) if not (x == "ca" and i and log[i - 1] == "ca")],
+                   log.count("ca")]
     print("KQ " + json.dumps(kq, ensure_ascii=True))
 
 
@@ -7184,6 +7319,30 @@ def _in_tu_kiem_che_do():
             kq[ten] = list(_doc_che_do(env))
         except ValueError as ex:
             kq[ten] = ["loi", str(ex).split("]")[0] + "]"]
+    # F9 (Codex lượt 4): NGUỒN vân tay — `sha256_test` bám BYTES của `TEP_TEST`, `head` bám HEAD thật của `GOC`, không git
+    # ⇒ `None`. Mọi ca khác dùng vân tay giả, nên thay nguồn bằng hằng số từng sống qua mọi ca.
+    import hashlib
+    g, cu = globals(), (GOC, TEP_TEST)
+    with tempfile.TemporaryDirectory(prefix="vt668_") as d:
+        d = Path(d)
+        tep = d / "t.py"
+        tep.write_bytes(b"a\n")
+        git = lambda *a: subprocess.run(["git", "-C", str(d), "-c", "user.email=t@t", "-c", "user.name=t", "-c",
+                                         "commit.gpgsign=false", *a], capture_output=True, text=True, timeout=60)
+        g["GOC"], g["TEP_TEST"] = d, tep
+        try:
+            khong_git = _van_tay()
+            git("init", "-q"), git("add", "-A"), git("commit", "-q", "-m", "a")
+            v1, h1 = _van_tay(), git("rev-parse", "HEAD").stdout.strip()
+            tep.write_bytes(b"b\n")
+            v2 = _van_tay()
+            git("add", "-A"), git("commit", "-q", "-m", "b")
+            v3, h3 = _van_tay(), git("rev-parse", "HEAD").stdout.strip()
+        finally:
+            g["GOC"], g["TEP_TEST"] = cu
+    sha = lambda b: hashlib.sha256(b).hexdigest()
+    kq["van_tay"] = [bool(h1 and h3), khong_git["head"] is None, v1["head"] == h1, v1["sha256_test"] == sha(b"a\n"),
+                     v2["sha256_test"] == sha(b"b\n") and v2["head"] == h1, v3["head"] == h3 != h1]
     print("KQ " + json.dumps(kq, ensure_ascii=True))
 
 
@@ -7239,14 +7398,15 @@ def main() -> int:
             return 1
         print(f"\nBÁN KÍNH ĐỘT BIẾN — MẢNH {k}/{n} ({len(ten)}/{len(DOT_BIEN)} đột biến; "
               f"{_so_tien_trinh_ban_kinh()} tiến trình):")
+        # Không `break`: nhóm hỏng ĐẦU TIÊN quyết định lý do, mọi nhóm vẫn được nhận — một nhóm hỏng đứng trước nhóm
+        # lành không được làm `ket` thành `None` rồi để vòng sau ném (F7, Codex lượt 4).
         ket, ly_con = {}, None
         for nhom, rc, ra_con in _phong_con(ten, (), _so_tien_trinh_ban_kinh()) if ten else ():
             nhan, ly = _nhan_ket_qua_con(nhom, rc, ra_con, ())
             if nhan is None:
-                ket, ly_con = None, f"{ly}; rc={rc}, đuôi đầu ra: {ra_con[-300:]!r}"
-                break
+                ly_con = ly_con or f"{ly}; rc={rc}, đuôi đầu ra: {ra_con[-300:]!r}"
             ket.update(nhan or {})
-        dong, loi = _ket_thuc_manh(k, n, ra, ten, ket, ly_con, _van_tay())
+        dong, loi = _ket_thuc_manh(k, n, ra, ten, None if ly_con else ket, ly_con, _van_tay())
         for d in dong:
             print(d)
         return 1 if loi else 0

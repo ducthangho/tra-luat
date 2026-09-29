@@ -152,3 +152,8 @@ chua_do_duoc:
   - 'Danh tinh nguoi ky: #566.'
   - 'Model/effort thuc te cua phien executor va reviewer.'
   - 'Windows (chu kho chua cho CI Windows; spec Q6).'
+
+da_bi_thay_the: dot-bien-l-bien-cong-khai-exec-4-claude-20260929
+da_bi_thay_the_vi_sao: >-
+  Chi thi chu kho Q16/Q17 (issues/677#issuecomment-5894685680): tran A7/S4 nang 300 -> 400 dong them; executor
+  giu Sonnet 5.5, effort high/xhigh. Doi dieu kien dung cua executor => generation moi, cap TRUOC luot review ma 2.

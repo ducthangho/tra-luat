@@ -1,71 +1,61 @@
 chua chay tren cay that — executor tu ap, tu do, tu chiu trach nhiem commit
 --- ops/ci_duong_nhanh_test.py
 +++ ops/ci_duong_nhanh_test.py
-@@ -3,12 +3,12 @@
- 
- Packet #674 `CI-DUONG-NHANH-HO-SO` (đặc tả r2). Bốn tầng, mỗi tầng có ĐỘT BIẾN riêng chạy trên BẢN SAO TẠM. Danh sách và
- số lượng ca/đột biến KHÔNG ghi ở đây (đã trôi hai lượt liền): nguồn duy nhất là `CA`, `DOT_BIEN` và dòng `CA:`/`DOT BIEN:` in ra.
--  · ca `t*`: hành vi bộ phân loại và bước kiểm rẻ (đồ giả cho ca thuần + KHO GIT THẬT cho ca cần ngữ nghĩa git);
-+  · ca `t*` ngoài t96/t97/t98/t99: hành vi bộ phân loại và bước kiểm rẻ (đồ giả cho ca thuần + KHO GIT THẬT cho ca cần ngữ nghĩa git);
-   · ca `y*`: cấu trúc `ci.yml`. ĐÂY LÀ CỔNG DUY NHẤT canh `if:` cấp job của `gate-ops` và `if:` cấp bước sau G5. Nợ có tên
-     `ci-if-cap-job-gate-ops-va-buoc-sau-g5-khong-co-cong-canh` (Q6-i chủ kho): `JOB_G5` của `ci_dang_ky_test.py` chỉ có
-     `gate`, `gate-registry`, `gate-packet-loop`, và `cong_cu_test.t6` chỉ soi các bước TRƯỚC G5;
-   · ca `k*`: nối vào sổ test sống (mục `DA_NOI` và lời gọi thật trong `run:`);
--  · `t99`: tự kiểm của chính bộ test.
-+  · `t96`/`t97`/`t98`/`t99`: tự kiểm của chính bộ test.
- 
- CÁCH ĐO ĐỘT BIẾN — bài học CLAUDE.md "đột biến bị giết không phải bị giết ĐÚNG LÝ DO":
-   · Ca đích chỉ báo ĐỎ bằng `TinHieuChotCa` (con của AssertionError) do CHÍNH `bang()` ném. Lỗi vô can trong mã
-@@ -744,6 +744,10 @@
-     bang(chuan_hoa_if(ra.get("che_do")) == "github.event_name == 'pull_request' && steps.phan-loai.outputs.che_do || 'day_du'",
-          f"output che_do phai ve day_du khi khong phai PR hoac rong: {ra.get('che_do')!r}")
-     bang("os" in ra and "fromjson" not in str(ra.get("che_do")).lower(), "output os phai con, che_do khong boc fromJson")
-+    buoc_khac_pr = tim_buoc(wf, "chuan-bi", "che do (push / workflow_dispatch luon day du)")
-+    mong = 'echo "DUONG_NHANH: khong phan loai - su_kien=${SU_KIEN} khong phai pull_request, luon DAY_DU"'
-+    bang(str(buoc_khac_pr.get("run", "")).strip() == mong,
-+         "than run thong bao non-PR phai khop hop dong; khong them/bot lenh")
+@@ -1117,9 +1117,16 @@
+     for ten, vb in (("khoa trung", goc.replace(neo, "    runs-on: windows-latest\n" + neo, 1)),
+                     ("khoa gop", goc.replace("jobs:\n", "x-mau: &mau\n  a: 1\njobs:\n  <<: *mau\n", 1))):
+         bat = False
+-        with contextlib.suppress(TinHieuChotCa):
+-            doc_wf_tu(vb)
+-            bat = True
++        # Di qua reader THAT cua moi ca y*, ke ca khi helper nghiem van con.
++        with tempfile.TemporaryDirectory(prefix="cdn_yaml_reader_") as d:
++            cay_tam = Path(d)
++            tep = cay_tam / ".github" / "workflows" / "ci.yml"
++            tep.parent.mkdir(parents=True)
++            tep.write_text(vb, encoding="utf-8")
++            with mock.patch.dict(globals(), {"CAY": cay_tam}, clear=False):
++                with contextlib.suppress(TinHieuChotCa):
++                    doc_wf()
++                    bat = True
+         bang(not bat, f"loader phai DO khi ci.yml co {ten}")
  
  
- @ca
-@@ -849,6 +853,8 @@
-            if DONG_GOI_TEST in [x.strip() for x in str(b.get("run", "")).splitlines()]]
-     bang(len(goi) == 1 and goi[0][0] == "gate-ops", f"phai co dung mot buoc `{DONG_GOI_TEST}` o gate-ops, thay {[(j, ten_buoc(b)) for j, b in goi]}")
-     b = goi[0][1]
-+    bang(str(b.get("run", "")).strip() == DONG_GOI_TEST,
-+         "than run selftest phai chi co dung lenh goi test; khong them lenh truoc/sau")
-     bang("che_do" not in str(b.get("if", "")) and chuan_hoa_if(b.get("if", "runner.os == 'Linux'")) == "runner.os == 'Linux'",
-          f"buoc goi test CUA CHINH PACKET khong duoc bi bo theo che_do (no la cong duy nhat canh cac `if:`): if={b.get('if')!r}")
-     bang(b.get("continue-on-error", False) is False, "buoc goi test khong duoc co continue-on-error")
-@@ -1097,11 +1103,11 @@
-     nhom = phan_hoach_ca()
-     moi = [ten for ds in nhom.values() for ten in ds]
-     bang(len(moi) == len(set(moi)) == len(CA) and set(moi) == set(CA), "phan hoach phai phu kin va khong giao nhau")
--    doc_lap = {"tu_kiem": [n for n in CA if n.startswith(("t97", "t98", "t99"))],
--               "hanh_vi": [n for n in CA if n.startswith("t") and not n.startswith(("t97", "t98", "t99"))],
-+    doc_lap = {"tu_kiem": [n for n in CA if n.startswith(("t96", "t97", "t98", "t99"))],
-+               "hanh_vi": [n for n in CA if n.startswith("t") and not n.startswith(("t96", "t97", "t98", "t99"))],
-                "cau_truc_yaml": [n for n in CA if n.startswith("y")], "so_dang_ky": [n for n in CA if n.startswith("k")]}
-     bang(nhom == doc_lap, f"phan hoach lech quy tac doc lap: {[(k, len(v), len(doc_lap[k])) for k, v in nhom.items()]}")
--    bang(sum(len(v) for v in nhom.values()) == len(CA) and len(nhom["tu_kiem"]) == 3, "tong nhom phai bang len(CA); tu_kiem la 3 ca t97/t98/t99")
-+    bang(sum(len(v) for v in nhom.values()) == len(CA) and len(nhom["tu_kiem"]) == 4, "tong nhom phai bang len(CA); tu_kiem gom t96/t97/t98/t99")
+@@ -1174,9 +1181,37 @@
  
  
- @ca
-@@ -1168,7 +1174,7 @@
-     """Phan hoach `CA` thanh cac nhom KHONG GIAO NHAU (nguon duy nhat cho moi bang kiem ke; `goi/kiem_ke.py` goi ham nay)."""
-     nhom = {"hanh_vi": [], "cau_truc_yaml": [], "so_dang_ky": [], "tu_kiem": []}
-     for ten in CA:
--        if ten[:3] in ("t97", "t98", "t99"):
-+        if ten[:3] in ("t96", "t97", "t98", "t99"):
-             nhom["tu_kiem"].append(ten)
-         elif ten[0] == "t":
-             nhom["hanh_vi"].append(ten)
-@@ -1368,7 +1374,7 @@
-     ("yml_them_permissions_cap_workflow", _yml("\njobs:\n  chuan-bi:", "\npermissions: {}\njobs:\n  chuan-bi:"), ("y13_khoa_topology_cua_ci_yml_ngoai_than_run",)),
-     ("yml_doi_thu_tu_job", (YML, lambda vb: thay_regex(vb, r"(\n  gate-packet-loop:\n.*)$", "") + "\n  zz-job-them:\n    runs-on: ubuntu-latest\n    steps:\n      - run: 'true'\n"), ("y13_khoa_topology_cua_ci_yml_ngoai_than_run",)),
-     # ---- t96: phan hoach ca cho bang kiem ke
--    ("test_phan_hoach_bo_tu_kiem_t97", _test('if ten[:3] in ("t97", ' + '"t98", "t99"):\n', 'if ten[:3] in ("t98", "t99"):\n'), ("t96_phan_hoach_ca_khong_giao_nhau_va_phu_kin",)),
-+    ("test_phan_hoach_bo_tu_kiem_t97", _test('if ten[:3] in ("t96", "t97", ' + '"t98", "t99"):\n', 'if ten[:3] in ("t96", "t98", "t99"):\n'), ("t96_phan_hoach_ca_khong_giao_nhau_va_phu_kin",)),
-     ("test_phan_hoach_nhanh_else_tra_lai_nhom_cu", _test('        elif ten[0] == "y":\n            nhom["cau_truc_yaml"].append(ten)\n', '        elif ten[0] == "y":\n            nhom["hanh_vi"].append(ten)\n'), ("t96_phan_hoach_ca_khong_giao_nhau_va_phu_kin",)),
-     # ---- tầng YAML (đặc tả nghiệm thu 6, 7)
-     ("yml_go_dieu_kien_pull_request_khoi_buoc_phan_loai", _yml("        id: phan-loai\n        if: ${{ github.event_name == 'pull_request' }}\n", "        id: phan-loai\n"), ("y01_chuan_bi_phan_loai_chi_pull_request_va_khong_lam_do_job",)),
+ @ca_tu_kiem
++def t94_main_in_dong_kiem_ke_that():
++    """Do output cua main voi runner con gia de tranh de quy; so dem van tu CA/DOT_BIEN that."""
++    import io
++    ra = io.StringIO()
++    with mock.patch.dict(globals(), {
++        "CAY": ROOT_THAT,
++        "chay_ca_trong_tien_trinh": lambda _: ("DAT", ""),
++        "chay_tap_dot_bien": lambda _: (len(DOT_BIEN), []),
++        "tu_kiem_phan_hang": lambda: [],
++    }, clear=False), contextlib.redirect_stdout(ra):
++        rc = main([])
++    bang(rc == 0 and ra.getvalue().splitlines().count(dong_kiem_ke()) == 1,
++         "main phai in dung mot dong KIEM KE duoc doi chieu doc lap boi t96")
++
++
++@ca_tu_kiem
+ def t95_lan_chay_day_du_chi_do_kho_chua_test():
+     bang(loi_cay_duoi_do(ROOT_THAT, ROOT_THAT) == "", "kho that phai duoc nhan")
+     bang(loi_cay_duoi_do(Path(tempfile.gettempdir()), ROOT_THAT) != "", "cay khac kho chua test phai bi tu choi o lan chay day du")
++    # Kiem DUONG GOI main, khong chi helper; vo hieu hoa bo ca de khong de quy.
++    import io
++    with tempfile.TemporaryDirectory(prefix="cdn_main_scope_") as d:
++        ra, err = io.StringIO(), io.StringIO()
++        with mock.patch.dict(globals(), {"CAY": Path(d), "CA": {}}, clear=False), \
++             mock.patch.dict(globals(), {"chay_tap_dot_bien": lambda _: (0, []),
++                                         "tu_kiem_phan_hang": lambda: []}, clear=False), \
++             contextlib.redirect_stdout(ra), contextlib.redirect_stderr(err):
++            rc = main([])
++        bang(rc == 2 and "CAY DUOI DO KHAC KHO CHUA TEST" in err.getvalue()
++             and "CA:" not in ra.getvalue() and "TONG:" not in ra.getvalue(),
++             "main phai tu choi cay ngoai TRUOC khi chay/in ket qua suite")
+ 
+ 
+ # ---------------------------------------------------------------- tự kiểm của chính bộ test

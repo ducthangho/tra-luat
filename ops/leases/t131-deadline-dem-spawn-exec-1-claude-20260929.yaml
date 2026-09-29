@@ -85,7 +85,9 @@ recorder_note: >-
 authority_basis: '§2 — start/pause/resume/reroute/override/authorize thuoc chu kho'
 
 leased_at_utc: '2026-09-29T06:05:00Z'
-lease_expires_at_utc: '2026-09-30T06:05:00Z'
+lease_expires_at_utc: '2026-09-29T08:15:00Z'
+han_ghi_chu: >-
+  Goc 2026-09-30T06:05:00Z. RUT NGAN ve 2026-09-29T08:15:00Z — xem thu_hoi_bang_rut_han.
 run_minutes: 1440
 
 preconditions_measured_at_utc: '2026-09-29T06:02:39Z'
@@ -119,3 +121,23 @@ chua_do_duoc:
   - 'Danh tinh nguoi ky: #566.'
   - 'Effort thuc te cua phien executor va reviewer.'
   - 'Windows (chu kho chua cho CI Windows).'
+
+lease_sua_ghi_chu: >-
+  Lan 1 (2026-09-29T08:00Z): thu hoi bang rut han sau land. Khong doi write set, spec, baseline.
+thu_hoi_bang_rut_han:
+  han_goc_utc: '2026-09-30T06:05:00Z'
+  han_moi_utc: '2026-09-29T08:15:00Z'
+  chi_thi: >-
+    Chu kho trong phien 2026-09-29 (~07:59Z): "Da dang, merge, land va bookeeping"; uy quyen land trong human
+    audit PR #680 comment 5886101773 (approve, authorized_head_sha 819d6b041661548b960a14cab0ec46ae097c4f90).
+  ly_do: >-
+    Packet #676 T131-DEADLINE-DEM-SPAWN da MERGE (PR #680 merge commit 89fc4fac8cea65979cc2483043dc8cd07a6e8518,
+    2026-09-29T07:58Z, expectedHeadSha 819d6b0).
+  vi_sao_khong_dung_so: >-
+    Theo tien le #661/#650/#574: so ops/thu-hoi/ chua kich hoat; rut han chi dung co che DA CAI (phan loai lease
+    theo han). Han moi dat vai phut SAU luc push de ops-publish-lease.yml con thay lease song (nhanh rc=9 da dang),
+    khong roi vao rc=8 (bai hoc CLAUDE.md: rc=8 che rc=9).
+  gioi_han: >-
+    Ref mang lease nay: nhanh ops/cap-lease-676 (ban rut han) va master sau PR bookkeeping. Nhanh ma
+    claude/spec-t131-deadline-dem-spawn KHONG mang tep lease. Nghiem thu: ai-dang-giu cho 2 tep write set khong con
+    t131-deadline-dem-spawn-exec-1-claude-20260929 trong NGUOI_GIU sau 08:15Z khi quet du ref.

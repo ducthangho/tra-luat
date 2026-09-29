@@ -2224,20 +2224,8 @@ for _ten, _ca, _tim, _thay in (
      '    return [t for i, t in enumerate(DOT_BIEN if ten is None else ten) if i % n == k]\n',
      '    return [t for i, t in enumerate(list(DOT_BIEN if ten is None else ten)[::-1]) if i % n == k]\n'),
     # F37 (Codex lượt 15): đăng ký theo NĂNG LỰC — điều kiện, và từng phép đăng ký, phải bị chốt siêu dữ liệu của t52 bắt.
-    ('f37_dk_luon_dung', 't52_', 'if _CO_SYMLINK:   # F24: chỉ đo được ở nền có symlink (xem `_do_co_symlink`)\n',
-     'if True:   # đột biến\n'),
     ('f37_dk_dao', 't52_', 'if _CO_SYMLINK:   # F24: chỉ đo được ở nền có symlink (xem `_do_co_symlink`)\n',
      'if not _CO_SYMLINK:   # đột biến\n'),
-    # F38 (Codex lượt 16): đọc/khôi phục `os.symlink` khi thuộc tính VẮNG — ô trạng thái của t52 phải bắt từng đường.
-    ('f38_doc_thang', 't52_', '    cu_sl = getattr(os, "symlink", sl_vang)\n', '    cu_sl = os.symlink\n'),
-    ('f38_bo_nhanh_vang', 't52_', '        if cu_sl is sl_vang:\n            os.__dict__.pop("symlink", None)\n        else:\n            os.symlink = cu_sl\n',
-     '        os.symlink = cu_sl\n'),
-    ('f38_bo_khoi_phuc', 't52_', '        if cu_sl is sl_vang:\n            os.__dict__.pop("symlink", None)\n        else:\n            os.symlink = cu_sl\n',
-     '        pass\n'),
-    ('f38_khoi_phuc_khi_thanh_cong', 't52_',
-     '        kq = [bn._CO_SYMLINK, sorted(t for t in bn.DOT_BIEN if t in _TEN_SL)]\n    except Exception as ex:  # noqa: BLE001\n        kq = ["NEM:" + type(ex).__name__, []]\n    finally:\n        if cu_sl is sl_vang:\n            os.__dict__.pop("symlink", None)\n        else:\n            os.symlink = cu_sl\n',
-     '        kq = [bn._CO_SYMLINK, sorted(t for t in bn.DOT_BIEN if t in _TEN_SL)]\n        if cu_sl is sl_vang:\n            os.__dict__.pop("symlink", None)\n        else:\n            os.symlink = cu_sl\n    except Exception as ex:  # noqa: BLE001\n        kq = ["NEM:" + type(ex).__name__, []]\n    finally:\n        pass\n'),
-    ('f38_probe_bo_attr', 't52_', '    except (OSError, NotImplementedError, AttributeError):\n', '    except (OSError, NotImplementedError):\n'),
     ('f27_full_seed', 't54_', '    else:\n        print(f"\\nBÁN KÍNH ĐỘT BIẾN ({len(DOT_BIEN)} đột biến, mỗi ca đúng một"',
      '    else:\n        loi_db = loi_nen\n        print(f"\\nBÁN KÍNH ĐỘT BIẾN ({len(DOT_BIEN)} đột biến, mỗi ca đúng một"'),
 ):
@@ -6790,10 +6778,8 @@ def t52_gom_manh_phai_DO_khi_thieu_trung_lech_va_moi_chot_co_THE_RIENG():
     sai = {t: kq.get(t) for t, the in mong.items()
            if not (kq.get(t) and kq[t][0] >= 1 and f"[{the}]" in kq[t][1])}
     bang(not sai, f"kịch bản hỏng KHÔNG bị đúng chốt bắt (mong thẻ {mong}): {sai}")
-    # F38: 8 ô — chính · thật · OSError · NotImplementedError · AttributeError · VẮNG hẳn · nạp lỗi · gốc vắng; ô nào cũng phải KHÔI PHỤC đúng.
-    dat, hong_sl = [_CO_SYMLINK, sorted(_TEN_SL) if _CO_SYMLINK else [], True], [False, [], True]
-    mong_sl = [dat, dat] + [hong_sl] * 4 + [["NEM:FileNotFoundError", [], True], hong_sl]
-    bang(kq["nang_luc"] == mong_sl, f"đột biến symlink phải theo NĂNG LỰC ở MỌI trạng thái (mong {mong_sl}): {kq['nang_luc']}")
+    mong_sl = [True, sorted(_TEN_SL)] if _CO_SYMLINK else [False, []]
+    bang(kq["nang_luc"] == mong_sl, f"đột biến symlink phải theo NĂNG LỰC (mong {mong_sl}): {kq['nang_luc']}")
     ghi = {t: kq.get(t) for t, the in (("ghi_loi", "M-loi"), ("ghi_con", "M-con"), ("ghi_head", "M-head"),
                                        ("ghi_do_cuoi", "M-loi"), ("ghi_do_hai", "M-loi"))
            if not (kq.get(t) and kq[t][0] >= 1 and f"[{the}]" in kq[t][1] and kq[t][2] == "khong-tep")}
@@ -7413,6 +7399,12 @@ if _CO_SYMLINK:   # F24: chỉ đo được ở nền có symlink (xem `_do_co_s
          '    _bo = ("ops/cong_cu_test.py", \'    if tep.exists() or tep.is_symlink():\\n\',\n'),
     ):
         DOT_BIEN[_ten] = ("ops/cong_cu_test.py", _tim, _thay, "TEP_TEST", _KEM_TEP_TEST, _CA_668[_ca])
+if not _CO_SYMLINK:
+    # `if True:` chỉ KHÁC bản gốc khi nền không có symlink (khi đó chốt registry của t52 bắt: False mà có tên).
+    DOT_BIEN["f37_dk_luon_dung"] = ("ops/cong_cu_test.py", 'if _CO_SYMLINK:   # F24: chỉ đo được ở nền có symlink (xem `_do_co_symlink`)\n',
+                                    'if True:   # đột biến\n', "TEP_TEST", _KEM_TEP_TEST, _CA_668["t52_"])
+# NỢ (KHÔNG ĐO ĐƯỢC): nền VẮNG thuộc tính `os.symlink` (nhánh AttributeError của `_do_co_symlink`) không được đo trong bộ này —
+# quyết định chủ kho sau review lượt 17 (F39); runner chuẩn Ubuntu/Windows có `os.symlink`; không mô phỏng.
 
 
 def _doc_che_do(env):
@@ -7582,28 +7574,6 @@ def _ban_ghi_du_gia(ten):
 
 
 _TEN_SL = ("f24_nhan_symlink", "f35_writer_broken_link", "f37_bo_f24", "f37_bo_f35")
-
-
-def _nap_lai_sl(cach, tep=None):
-    """F38 (Codex lượt 16): nạp lại TEP_TEST sau khi `cach()` làm hỏng `os.symlink`; trả [_CO_SYMLINK, tên đột biến symlink,
-    khôi phục đúng]. Thuộc tính VẮNG HẲN là miền `_do_co_symlink` hỗ trợ ⇒ đọc bằng getattr, khôi phục = xoá lại nếu gốc vắng."""
-    import importlib.util
-    sl_vang = object()
-    cu_sl = getattr(os, "symlink", sl_vang)
-    sp = importlib.util.spec_from_file_location("cct_f37", tep or TEP_TEST)
-    try:
-        cach()
-        bn = importlib.util.module_from_spec(sp)
-        sp.loader.exec_module(bn)
-        kq = [bn._CO_SYMLINK, sorted(t for t in bn.DOT_BIEN if t in _TEN_SL)]
-    except Exception as ex:  # noqa: BLE001
-        kq = ["NEM:" + type(ex).__name__, []]
-    finally:
-        if cu_sl is sl_vang:
-            os.__dict__.pop("symlink", None)
-        else:
-            os.symlink = cu_sl
-    return kq + [hasattr(os, "symlink") == (cu_sl is not sl_vang) and getattr(os, "symlink", cu_sl) is cu_sl]
 
 
 def _in_tu_kiem_gom():
@@ -7862,29 +7832,8 @@ def _in_tu_kiem_gom():
             os.symlink(ghi / "khong-co", gay)
             _ket_thuc_manh(0, n, str(gay), cac, None, "giả", vt)
             kq["ghi_gay"] = [gay.exists() or gay.is_symlink()]
-    # F37/F38 (Codex lượt 15-16): năng lực symlink ↔ đột biến symlink ở bản CHÍNH và ở bản nạp lại trong TỪNG trạng thái.
-    def sl_lam(kieu):   # cách làm hỏng `os.symlink` cho từng trạng thái; ngoại lệ → DỮ LIỆU, không để con chết
-        def hong(*a, **kw):
-            raise kieu("giả: không có symlink")
-        return lambda: setattr(os, "symlink", hong)
-    def sl_bo():
-        os.__dict__.pop("symlink", None)
-    def sl_goc_vang():   # gốc VẮNG: xoá rồi nạp lại trong lúc gốc vắng — khôi phục phải giữ nó vắng
-        cu = getattr(os, "symlink", None)
-        sl_bo()
-        try:
-            return _nap_lai_sl(lambda: None)
-        finally:
-            if cu is not None:
-                os.symlink = cu
-    kq["nang_luc"] = [[_CO_SYMLINK, sorted(t for t in DOT_BIEN if t in _TEN_SL), True]]
-    for cach, tep in ((lambda: None, None), (sl_lam(OSError), None), (sl_lam(NotImplementedError), None),
-                      (sl_lam(AttributeError), None), (sl_bo, None), (sl_lam(OSError), "/khong/co/cct_f38.py"),
-                      (sl_goc_vang, 0)):
-        try:
-            kq["nang_luc"].append(_nap_lai_sl(cach, tep) if tep != 0 else cach())
-        except Exception as ex:  # noqa: BLE001
-            kq["nang_luc"].append(["NEM:" + type(ex).__name__, [], None])
+    # Chủ kho sau review lượt 17: MỘT ô — năng lực symlink ↔ tên đột biến symlink đã đăng ký (không nạp lại, không mô phỏng).
+    kq["nang_luc"] = [_CO_SYMLINK, sorted(t for t in DOT_BIEN if t in _TEN_SL)]
     print("KQ " + json.dumps(kq, ensure_ascii=True))
 
 
@@ -8026,10 +7975,10 @@ def _luoi_che_do():
 def _mong_che_do(env):
     """Oracle của `t53` — viết lại bằng so sánh ký tự, KHÔNG dùng regex/`int` tự do của `_doc_che_do`."""
     bk, mh, ra = env.get(_BIEN_BAN_KINH), env.get(_BIEN_MANH), env.get(_BIEN_MANH_RA)
-    if mh is None:
+    if mh is None:   # oracle, KHÔNG phải neo f29
         return (["loi", "[C-ra-le]"] if ra is not None else ["du", None] if bk is None else
                 ["gate", None] if bk == "manh" else ["loi", "[C-ban-kinh]"])
-    if bk is not None:
+    if bk is not None:   # oracle, KHÔNG phải neo f29
         return ["loi", "[C-ca-hai]"]
     a, gach, b = mh.partition("/")
     so = lambda x, dau: 0 < len(x) <= 2 and all(c in "0123456789" for c in x) and x[0] in dau

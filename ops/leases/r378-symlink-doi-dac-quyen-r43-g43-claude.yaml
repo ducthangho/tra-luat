@@ -41,7 +41,31 @@ PHAM_VI_LEASE_NAY:
 
 leased_at_utc: '2026-09-28T13:08:31Z'
 leased_at_utc_nguon: 'date -u luc commit tao tep nay; commit dung CHINH gia tri ay lam committer date (GIT_COMMITTER_DATE).'
-lease_expires_at_utc: '2026-09-29T06:00:00Z'
+lease_expires_at_utc: '2026-09-29T01:22:00Z'
+han_ghi_chu: >-
+  Goc 2026-09-29T06:00:00Z. RUT NGAN ve 2026-09-29T01:22:00Z — xem thu_hoi_bang_rut_han.
+lease_sua_lan_cuoi: '2026-09-29T01:06:04Z'
+lease_sua_ghi_chu: >-
+  Lan 1: rut ngan lease_expires_at_utc (thu_hoi_bang_rut_han). Khong doi write set, spec, branch.
+thu_hoi_bang_rut_han:
+  han_goc_utc: '2026-09-29T06:00:00Z'
+  han_moi_utc: '2026-09-29T01:22:00Z'
+  chi_thi: >-
+    Uy quyen land chu kho tren #574 (5873550476 + SUA DOI 3 5880901103 + SUA DOI 4 5881237904 + SUA DOI 5 5881094221
+    + SUA DOI 6 5881612116), muc 'Duoc phep sau merge (bookkeeping)': thu hoi lease
+    r378-symlink-doi-dac-quyen-r43-g43-claude bang rut han tren ops/cap-lease-574-g43.
+  ly_do: >-
+    Packet #574 da MERGE vao master qua PR #672 (merge commit cd23c7dbc7833d64a8e87e8ffd94f194c18e0060,
+    2026-09-29T01:05:14Z, head a602a380a5d6bee8771876fd7066bddf15e0be67 = dcd5fe0 + merge d46163d (#604) + merge 76f199e (#588)).
+    Tree master f905bbb1aeaa6e83c5ce09a603035eb71db9a5fc = tree ky vong. #604 va #588 GitHub tu danh dau merged.
+  vi_sao_khong_dung_so: >-
+    Theo tien le #579 (d513f35) va #650: so ops/thu-hoi/ chua kich hoat; rut han chi dung co che DA CAI (phan loai lease
+    theo han). Han moi dat ~15 phut SAU commit de lan dang bang git con thay lease song (nhanh rc=9 da dang), khong roi
+    vao rc=8 (bai hoc CLAUDE.md: rc=8 che rc=9).
+  gioi_han: >-
+    Ref mang lease nay: nhanh ops/cap-lease-574-g43 (ban rut han) va master sau PR bookkeeping. Nhanh ma
+    claude/va-r378-symlink-20260920 KHONG mang tep lease. Nghiem thu: sau 2026-09-29T01:22:00Z, ai-dang-giu cho write set
+    khong con r378-symlink-doi-dac-quyen-r43-g43-claude trong NGUOI_GIU khi quet du ref.
 han_vi_sao: 'HAN MOI theo moc CHU KHO issues/574#issuecomment-5862999491 ("Noi han + r34 (de xuat)": them 24h toi 2026-09-29T06:00:00Z).
   KHONG phai phien executor tu noi.'
 role: executor

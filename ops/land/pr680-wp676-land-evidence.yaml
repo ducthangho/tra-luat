@@ -1,0 +1,103 @@
+# HO SO LAND — packet #676 T131-DEADLINE-DEM-SPAWN, qua PR #680.
+# Schema chuan: docs/PROTOCOL_DA_PHIEN.md §7, khoi "Land evidence tach approval khoi thao tac".
+# Duong dan ops/land/*-land-evidence.yaml la QUY UOC THUC TE (tien le pr554, pr594, pr666, pr672), khong ADR nao dat.
+
+schema_version: 1
+mission_id: KHONG-CO-MISSION
+packet_id: T131-DEADLINE-DEM-SPAWN
+packet_issue: 676
+generation: 1
+provider: claude
+provider_taxonomy_da_provider: anthropic_claude
+execution_surface: claude_code
+transport: machine/local
+environment: cloud
+operating_system: linux
+github_write_channel: >-
+  MCP github (api.githubcopilot.com) bang credential cua tai khoan chu kho `ducthangho`; merge goi
+  merge_pull_request method=merge, expectedHeadSha=819d6b0. Tai khoan KHONG tach duoc phien agent khoi chu kho
+  (#566) — danh tinh approver lay tu comment human audit cua chu kho, khong tu actor cua lenh merge.
+mat_quan_sat_duoc_the_nao: >-
+  Loi khai co neo (session URL), khong phai phep do doc lap — mot phien Claude khong tu chung minh be mat chay cua chinh no.
+trang_thai_packet:
+  merged: true
+  landed: false
+  landed_ghi_chu: >-
+    PROTOCOL §10: `landed` = da vao canonical o exact SHA duoc duyet, HAU-MERGE GATE XANH va BOOKKEEPING XONG.
+    (1) merge dung head duoc uy quyen 819d6b0 tai 89fc4fa, tree c1699a6 = tree head duyet — CO.
+    (2) hau-merge gate: luot 1 run 36539864381 DO vi ha tang (xem post_merge_checks); da chay lai 1 lan — CHO.
+    (3) bookkeeping: lease g1 thu hoi (92f0284) + PR bookkeeping mang tep nay — CHO.
+    Tep ghi `landed: false` o thoi diem nay; doi CHI khi ca ba dieu kien dat.
+role: land_operator
+session_id: https://claude.ai/code/session_01E3unUqtumWcjaBodjRGS2A
+recorded_by: claude-session
+input_packet_generations:
+  - packet_issue: 676
+    lease_id: t131-deadline-dem-spawn-exec-1-claude-20260929
+    revision: 1
+    generation: 1
+    spec_path: ops/specs/t131-deadline-dem-spawn.md
+    spec_sha256: 986984b63dc3fb745e3bf8907f627e8970a98b9604c33f06a746baab53cd4fc6
+    reviewed_sha: 819d6b041661548b960a14cab0ec46ae097c4f90
+
+candidates:
+  - pr: 680
+    noi_dung: 'ops/lease_publish_test.py (t131/t139 chu thich/t192 docstring) + ops/specs/t131-deadline-dem-spawn.md'
+    authorized_head_sha: 819d6b041661548b960a14cab0ec46ae097c4f90
+
+authorization:
+  approver: ducthangho
+  human_audit: https://github.com/ducthangho/tra-luat/pull/680#issuecomment-5886101773
+  human_audit_tom_tat: 'provider human, assurance human_audited, verdict approve, reviewed_sha 819d6b0, uy quyen land bang merge commit CHI tren 819d6b0'
+  chi_thi_trong_phien: '"Da dang, merge, land va bookeeping" (chu kho, phien session_01E3unUqtumWcjaBodjRGS2A, ~07:58Z 29-09-2026)'
+  ghi_chu_hinh_thuc_audit: >-
+    Ban audit giu ca ba dong verdict (mau dan giu MOT) va o kiem dau ghi `[x ]`; khoi YAML ghi `verdict: approve`
+    neo 819d6b0 nen ket luan khong mo ho. Ghi lai, khong sua ho.
+
+land_operator: claude-session (tai khoan GitHub cua chu kho qua MCP github)
+merge_method: merge
+merge_commit: 89fc4fac8cea65979cc2483043dc8cd07a6e8518
+merged_at: '2026-09-29T07:58Z'
+hai_cha: 1741e0a1ab7ebce4b26912aefadca56ddfcdc691 819d6b041661548b960a14cab0ec46ae097c4f90
+tree: c1699a6b6ff7f110a142efececf23473d2c27978
+tree_ky_vong: c1699a6b6ff7f110a142efececf23473d2c27978
+tree_khop: true
+target: master
+merge_api_expected_head_sha: 819d6b041661548b960a14cab0ec46ae097c4f90
+
+pre_merge_checks:
+  - 'PR #680 head 819d6b0, base 1741e0a, mergeable_state clean; master khong doi tu luc cap lease.'
+  - check: 'CI pull_request tren 819d6b0'
+    workflow_run: https://github.com/ducthangho/tra-luat/actions/runs/36535475568
+    jobs_success: {chuan-bi: 109298407802, gate: 109298438565, gate-ops: 109298438516, gate-packet-loop: 109298438532, gate-registry: 109298438484}
+    thu_hoi: 'run 36535475701 job thu-hoi 109298407619 success'
+    windows: 'not_measured — chu kho mien trong human audit.'
+  - 'Review model (advisory): Codex gpt-6-astra (effort high theo header log) luot 1 approve P1 0 / P2 0 / P3 0 tren 819d6b0 (pull/680#issuecomment-5885508404; than VERDICT.md sha256 87bc387a...de1844a den nguyen byte).'
+  - 'Do cua executor tren 819d6b0: toan suite 187/187 bo qua 0; t125 A/B 40/40 (80 suite con 187/187, lech 0, do boi reviewer); t139 37/34/3/0; ruff F delta 0; doctrine-scan rc 0.'
+
+post_merge_checks:
+  - check: 'CI master tren merge commit 89fc4fa (push) — luot 1'
+    workflow_run: https://github.com/ducthangho/tra-luat/actions/runs/36539864381
+    conclusion: failure
+    phan_loai: infra_runner_khong_cap
+    bang_chung: >-
+      Job chuan-bi (109312444466) chi chay `true`, khong checkout; failure sau 2 giay voi runner_id 0, runner_name
+      rong; log tra 404. Cac job con skipped vi phu thuoc chuan-bi. Chet truoc khi co buoc nao chay => khong phai do diff.
+    re_run: 'Da chay lai run 36539864381 MOT lan (2026-09-29T07:59Z). Ket qua: CHO.'
+khong_do_duoc:
+  - 'Windows: not_measured (chu kho mien trong human audit).'
+  - 'Phan kill/reap cua t131 chua duoc do that (no nen, ngoai pham vi; ghi trong human audit muc 5).'
+
+bookkeeping:
+  - 'Thu hoi lease t131-deadline-dem-spawn-exec-1-claude-20260929 bang rut han ve 2026-09-29T08:15:00Z tren ops/cap-lease-676 (92f0284, sau merge origin/master 89fc4fa vao nhanh lease); lease_publish.py check rc=0 truoc khi day.'
+  - 'Dua tep lease (ban da thu hoi, blob 8622377e giong 92f0284) + tep ho so nay vao master qua PR bookkeeping.'
+
+lech_protocol_khai:
+  - id: CUNG-SESSION-EXECUTOR-VA-LAND-OPERATOR
+    mo_ta: >-
+      session_01E3unUqtumWcjaBodjRGS2A vua la Executor cua #676 vua la land_operator goi merge 89fc4fa.
+      PROTOCOL §1 bat bien 8 va §2 tach vai theo phien; tien le pr594/pr666/pr672 da khai dung loai lech nay.
+    gioi_han_tac_dong: >-
+      Approval do chu kho (human audit 5886101773 + chi thi trong phien). Session nay chi thuc hien thao tac merge da
+      duoc uy quyen tren exact SHA qua expectedHeadSha. Khai lech KHONG xoa vi pham.
+    trang_thai: 'LECH DA XAY RA, khai thang.'

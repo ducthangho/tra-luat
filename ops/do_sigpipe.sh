@@ -167,10 +167,10 @@ cham_diem() {  # cham_diem I GOC
   if [ "$n0" -eq "$LAN" ] && [ "$sai" -eq 0 ]; then ghi 0 "" ""
   else ghi 1 "(d) ${TEN[$i]}/chay-toan-bo" "rc0=$n0 rc141=$n141 khac=$nk dau-vet-sai=$sai (mong '$MONG_GT', thay '$lan_sai')"; fi
 }
-# ── (e) B1. trampa (DEBUG trap, -T): vao frame `lam`, body moi (cksum `declare -f lam`) => do voi 20000 doi so;
+# ── (e) B1. trampa (DEBUG trap, -T): MOI lan vao frame `lam` (khong cache: ham phu doi sau ca dau van bi thay) => do voi 20000 doi so;
 #   env (seam): moi `lam` deu qua day de chay `bash lam.sh` => dem. Trap != seam => KHONG DO DUOC.
 # shellcheck disable=SC2016  # driver la van ban bash, chu y khong khai trien o day
-B1_DRV='set -uT; B_OUT=$1; B_W5=$2; B_N=$3; B_LAN=$4; B_IN=0; B_REC=0; B_V=""; B_SEEN=" "; B_PAD=()
+B1_DRV='set -uT; B_OUT=$1; B_W5=$2; B_N=$3; B_LAN=$4; B_IN=0; B_REC=0; B_V=""; B_PAD=()
 for ((B_k = 1; B_k <= B_N; B_k++)); do B_PAD+=("P$B_k=x"); done
 [ "${#B_PAD[@]}" -eq "$B_N" ] || exit 97
 mktemp -u > "$B_OUT.mk"
@@ -187,7 +187,6 @@ trampa() {
   case " ${FUNCNAME[*]} " in *" lam "*) [ "$B_IN" -eq 0 ] || return 0; B_IN=1 ;; *) B_IN=0; return 0 ;; esac
   local h B_k B_V; echo t >> "$B_OUT.t"
   h="$(declare -f lam | cksum)" && [ -n "$h" ] || { echo cksum >> "$B_OUT.loi"; return 0; }
-  h="${h// /-}"; [[ "$B_SEEN" == *" $h "* ]] && return 0; B_SEEN+="$h "
   echo body >> "$B_OUT"; B_REC=1
   for B_V in khop khong chuoi; do for ((B_k = 0; B_k < B_LAN; B_k++)); do
     case "$B_V" in

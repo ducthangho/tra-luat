@@ -2226,6 +2226,13 @@ for _ten, _ca, _tim, _thay in (
     # F37 (Codex lượt 15): đăng ký theo NĂNG LỰC — điều kiện, và từng phép đăng ký, phải bị chốt siêu dữ liệu của t52 bắt.
     ('f37_dk_dao', 't52_', 'if _CO_SYMLINK:   # F24: chỉ đo được ở nền có symlink (xem `_do_co_symlink`)\n',
      'if not _CO_SYMLINK:   # đột biến\n'),
+    # F42 (Codex lượt 19): `main` phải truyền NGUYÊN miền giá trị k/N/đường ra/worker (lưới `_luoi_noi_main` của t54).
+    ('f42_k_mod_8', 't54_', '        k, n, ra = tham_so\n', '        k, n, ra = tham_so; k %= 8\n'),
+    ('f42_n_luy_thua_2', 't54_', '        k, n, ra = tham_so\n', '        k, n, ra = tham_so; n = 1 << (n.bit_length() - 1)\n'),
+    ('f42_ra_strip', 't54_', '        k, n, ra = tham_so\n', '        k, n, ra = tham_so; ra = ra.strip()\n'),
+    ('f42_ra_lower', 't54_', '        k, n, ra = tham_so\n', '        k, n, ra = tham_so; ra = ra.lower()\n'),
+    ('f42_worker_manh_tran_3', 't54_', '        for nhom, rc, ra_con in _phong_con(ten, (), _so_tien_trinh_ban_kinh()) if ten else ():\n', '        for nhom, rc, ra_con in _phong_con(ten, (), min(3, _so_tien_trinh_ban_kinh())) if ten else ():\n'),
+    ('f42_worker_du_tran_3', 't54_', '    so_tien_trinh = _so_tien_trinh_ban_kinh()\n', '    so_tien_trinh = min(3, _so_tien_trinh_ban_kinh())\n'),
     ('f27_full_seed', 't54_', '    else:\n        print(f"\\nBÁN KÍNH ĐỘT BIẾN ({len(DOT_BIEN)} đột biến, mỗi ca đúng một"',
      '    else:\n        loi_db = loi_nen\n        print(f"\\nBÁN KÍNH ĐỘT BIẾN ({len(DOT_BIEN)} đột biến, mỗi ca đúng một"'),
 ):
@@ -6940,6 +6947,13 @@ def t54_main_chon_DUNG_vong_ban_kinh_theo_che_do():
         "manh_12": [0, dau + phong + ghi("dung", "none", "1/2", "x"), ra(duoi=manh_ra("1/2"))],
         "manh_0": [0, dau + phong + ghi("dung", "none", "0/8", "x"), ra(duoi=manh_ra("0/8"))],
         "du_nhieu_nguon": [1, day([cn]), ra(do=[cn], duoi=du_ra(55, nen=1))]}
+    for name, mode, ki, ni, path, workers in _luoi_noi_main():
+        so = workers
+        if mode == "du":
+            mong[name] = [0, day(), ra(duoi=du_ra(0))]
+        else:
+            kn = f"{ki}/{ni}"
+            mong[name] = [0, dau + [f"phong:True:[]:{so}"] + ghi("dung", "none", kn, path), ra(duoi=manh_ra(kn))]
     so = kq["so1"]   # F27: closure đọc `so` lúc GỌI ⇒ hai kịch bản worker=1 dựng lại kỳ vọng với 1
     phong = [f"phong:True:[]:{so}"]
     mong.update({"manh_w1": [0, dau + phong + ghi_dung, ra(duoi=manh_ra())], "du_w1": [0, day(), ra(duoi=du_ra(0))]})
@@ -7400,13 +7414,20 @@ if _CO_SYMLINK:   # F24: chỉ đo được ở nền có symlink (xem `_do_co_s
         # F40 (Codex lượt 18): khối đăng ký phía False cũng phải có ĐIỀU KIỆN THẬT — `if True:` chỉ khác bản gốc trên nền CÓ symlink
         # (khi đó khối phía False đăng ký thêm `f37_dk_luon_dung` ⇒ ô năng lực của t52 lệch).
         ('f40_false_luon', 't52_', 'if not _CO_SYMLINK:\n', 'if True:\n'),
+        # F41 (Codex lượt 19): danh TÍNH từng tên có điều kiện — chỉ đăng ký ở miền phép đổi thực sự khác gốc.
+        ('f41_bo_f40_luon', 't52_', "        ('f40_false_luon', 't52_', 'if not _CO_SYMLINK:\\n', 'if True:\\n'),\n", '\n'),
+        ('f41_f40_khong_ra_ngoai', 't52_', '    DOT_BIEN["f40_false_khong"] = ("ops/cong_cu_test.py", \'if not _CO_SYMLINK:\\n\', \'if False:\\n\', "TEP_TEST", _KEM_TEP_TEST, _CA_668["t52_"])\n', 'DOT_BIEN["f40_false_khong"] = ("ops/cong_cu_test.py", \'if not _CO_SYMLINK:\\n\', \'if False:\\n\', "TEP_TEST", _KEM_TEP_TEST, _CA_668["t52_"])\n'),
     ):
         DOT_BIEN[_ten] = ("ops/cong_cu_test.py", _tim, _thay, "TEP_TEST", _KEM_TEP_TEST, _CA_668[_ca])
 if not _CO_SYMLINK:
     # `if True:` chỉ KHÁC bản gốc khi nền không có symlink (khi đó chốt registry của t52 bắt: False mà có tên).
     DOT_BIEN["f37_dk_luon_dung"] = ("ops/cong_cu_test.py", 'if _CO_SYMLINK:   # F24: chỉ đo được ở nền có symlink (xem `_do_co_symlink`)\n',
                                     'if True:   # đột biến\n', "TEP_TEST", _KEM_TEP_TEST, _CA_668["t52_"])
-    # F40: `if False:` chỉ khác bản gốc trên nền KHÔNG symlink (khi đó khối phía False không chạy ⇒ `f37_dk_luon_dung` mất).
+    # F41 (Codex lượt 19): bỏ / đẩy ra ngoài TỪNG đăng ký phía False — chỉ khác gốc trên nền KHÔNG symlink. F40 (dòng cuối khối):
+    # `if False:` chỉ khác bản gốc trên nền KHÔNG symlink (khối phía False không chạy ⇒ tên phía False mất).
+    DOT_BIEN["f41_bo_f40_khong"] = ("ops/cong_cu_test.py", '    DOT_BIEN["f40_false_khong"] = ("ops/cong_cu_test.py", \'if not _CO_SYMLINK:\\n\', \'if False:\\n\', "TEP_TEST", _KEM_TEP_TEST, _CA_668["t52_"])\n', '    pass\n', "TEP_TEST", _KEM_TEP_TEST, _CA_668["t52_"])
+    DOT_BIEN["f41_f40_luon_ra_ngoai"] = ("ops/cong_cu_test.py", '    DOT_BIEN["f40_false_khong"] = ("ops/cong_cu_test.py", \'if not _CO_SYMLINK:\\n\', \'if False:\\n\', "TEP_TEST", _KEM_TEP_TEST, _CA_668["t52_"])\n', '    DOT_BIEN["f40_false_khong"] = ("ops/cong_cu_test.py", \'if not _CO_SYMLINK:\\n\', \'if False:\\n\', "TEP_TEST", _KEM_TEP_TEST, _CA_668["t52_"])\n' + 'DOT_BIEN["f40_false_luon"] = DOT_BIEN["f40_false_khong"]\n',
+                                         "TEP_TEST", _KEM_TEP_TEST, _CA_668["t52_"])
     DOT_BIEN["f40_false_khong"] = ("ops/cong_cu_test.py", 'if not _CO_SYMLINK:\n', 'if False:\n', "TEP_TEST", _KEM_TEP_TEST, _CA_668["t52_"])
 # NỢ (KHÔNG ĐO ĐƯỢC): nền VẮNG thuộc tính `os.symlink` (nhánh AttributeError của `_do_co_symlink`) không được đo trong bộ này —
 # quyết định chủ kho sau review lượt 17 (F39); runner chuẩn Ubuntu/Windows có `os.symlink`; không mô phỏng.
@@ -7578,8 +7599,8 @@ def _ban_ghi_du_gia(ten):
                               for t in _cac_ca_da_chay(())}]
 
 
-_TEN_SL = ("f24_nhan_symlink", "f35_writer_broken_link", "f37_bo_f24", "f37_bo_f35")
-_TEN_SL_FALSE = ("f37_dk_luon_dung",)   # F40: đăng ký CHỈ ở nền KHÔNG symlink
+_TEN_SL = ("f24_nhan_symlink", "f35_writer_broken_link", "f37_bo_f24", "f37_bo_f35", "f40_false_luon")
+_TEN_SL_FALSE = ("f37_dk_luon_dung", "f40_false_khong")   # F40: đăng ký CHỈ ở nền KHÔNG symlink
 
 
 def _in_tu_kiem_gom():
@@ -7843,6 +7864,14 @@ def _in_tu_kiem_gom():
     print("KQ " + json.dumps(kq, ensure_ascii=True))
 
 
+def _luoi_noi_main():
+    rows = [(f"noi-k{k}-n{n}", "manh", k, n, "x", 3) for n in range(2, 17) for k in range(n)]
+    rows += [(f"noi-{mode}-w{w}", mode, 9, 16, "x", w) for mode in ("du", "manh") for w in range(1, 17)]
+    rows += [(f"noi-path-{i}", "manh", 9, 16, path, 3) for i, path in enumerate(
+        ("x", " space ", "Mixed.TXT", "dir/Sub Dir/Mảnh.TXT", "  ", "d con/manh 3.txt"))]
+    return rows
+
+
 def _in_tu_kiem_main():
     """Cửa tiến trình con cho `t54` (#668 F2→F5→F6→F7): chạy CHÍNH `main()` trên giàn giáo, in NHẬT KÝ mọi lời gọi.
 
@@ -7916,7 +7945,7 @@ def _in_tu_kiem_main():
     os.environ[tt] = "1"
     so1 = _so_tien_trinh_ban_kinh()
     os.environ[tt] = "3"
-    kq = {"mong_du": len(DOT_BIEN), "mong_manh": {m: len(_phan_manh(*m)) for m in ((3, 8), (5, 16), (1, 2), (0, 8))},
+    kq = {"mong_du": len(DOT_BIEN), "mong_manh": {m: len(_phan_manh(*m)) for m in ((k, n) for n in range(2, 17) for k in range(n))},
           "ten_ca": ten_ca, "so": _so_tien_trinh_ban_kinh(), "so1": so1}
     kq["mong_manh"] = {f"{k}/{n}": v for (k, n), v in kq["mong_manh"].items()}
     import re
@@ -7946,6 +7975,10 @@ def _in_tu_kiem_main():
         "manh_0": ({_BIEN_MANH: "0/8", _BIEN_MANH_RA: "x"}, {}), "manh_w1": ({**manh, tt: "1"}, {}),
         "du_w1": ({tt: "1"}, {}), "du_nhieu_nguon": ({}, {"ph_do": 2, "gg_do": 4, "ss_do": 16, "bk1": 32, "ca_do": {cn}}),
     }
+    noi = {name: (mode, k, n, path, workers) for name, mode, k, n, path, workers in _luoi_noi_main()}
+    for name, (mode, k, n, path, workers) in noi.items():
+        env = {_BIEN_MANH: f"{k}/{n}", _BIEN_MANH_RA: path} if mode == "manh" else {}
+        kich_ban[name] = ({**env, tt: str(workers)}, {})
     for ten, (env, dat) in kich_ban.items():
         kb.clear()
         kb.update(dat)
@@ -7958,8 +7991,16 @@ def _in_tu_kiem_main():
             os.environ.pop(bien, None)
         os.environ.update({tt: "3", **env})
         buf = io.StringIO()
-        with contextlib.redirect_stdout(buf):
-            rc = main()
+        cu_doc, cu_so = g["_doc_che_do"], g["_so_tien_trinh_ban_kinh"]
+        if ten in noi:
+            mode, ki, ni, path, workers = noi[ten]
+            g["_doc_che_do"] = lambda env: (mode, (ki, ni, path) if mode == "manh" else None)
+            g["_so_tien_trinh_ban_kinh"] = lambda: workers
+        try:
+            with contextlib.redirect_stdout(buf):
+                rc = main()
+        finally:
+            g["_doc_che_do"], g["_so_tien_trinh_ban_kinh"] = cu_doc, cu_so
         # F12/F15: stdout cũng là đầu ra — MỌI dòng mang nghĩa hợp đồng (chẩn đoán, đếm, giao mảnh, bảng, SỐ LIỆU),
         # nguyên văn và đúng thứ tự; dòng trống bỏ.
         kq[ten] = [rc, list(log), [x for x in buf.getvalue().splitlines() if x.strip()]]

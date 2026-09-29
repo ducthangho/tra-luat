@@ -3,7 +3,8 @@
 - `packet_id`: **DOT-BIEN-L-BIEN-CONG-KHAI**
 - `packet_issue`: **#677**
 - `mission_issue`: **KHONG_CO**. Đây là nợ số 3 mang sang từ #579, không thuộc lane kế hoạch nào.
-- `revision`: **1** · soạn **08:01Z 29-09-2026** · nền đo `origin/master` **`1741e0a`**
+- `revision`: **1** · soạn **08:01Z 29-09-2026** · nền đo `origin/master` **`1741e0a`**; đo lại 08:05Z trên **`89fc4fa`**
+  (sau khi #676 land, PR #680): giàn Phụ lục A cho cùng `KHAC-GOI 32 · KHAC-RC 4 · = 10`, suite vẫn 187 `@ca`
 - `depends_on`: **`[]`** về mã. Về **lease** thì phải chờ #676 nhả `ops/lease_publish_test.py` (xem §9).
 - `executor`: claude · reviewer: codex `gpt-6-astra` (effort ≥ medium) · `environment`: cloud
 - `risk`: **sensitive** · `review_class`: **sensitive**
@@ -169,7 +170,7 @@ Ca đỏ được đọc từ dòng `ĐỎ  <tên>: <lý do>`.
 | **A3** | Đối chứng dương (M4) xanh | Đột biến **`gh` giả không nằm trên PATH** (chỉ thay chuỗi trong thân bước, như lỗi của §2.1) ⇒ ca M4 **ĐỎ**. |
 | **A4** | Đối chứng dương đo POST thật | Đột biến **`gh` giả in id nhưng KHÔNG ghi comment vào trạng thái** ⇒ ca M4 **ĐỎ** ở chốt "đúng 1 POST". |
 | **A5** | Mỗi đột biến A1–A4 đỏ **đúng lý do** | Với mỗi đột biến: ca đỏ phải là **đúng ca đích**, và lý do phải là **thông điệp chốt tường minh của ca**, không phải `AttributeError`/`KeyError`/`FileNotFoundError`… (hình dạng `GIET-NHUNG-KHONG-DUNG-LY-DO`). Người thi hành ghi nguyên dòng `ĐỎ` cho từng đột biến. |
-| **A6** | Không hồi quy | Toàn suite `python ops/lease_publish_test.py` ⇒ dòng tổng kết `N/N` với **N = số `@ca` đếm tĩnh**, hai số bằng nhau. Nền 187 ca đo 07:57Z 29-09 trên `1741e0a`; đo lại lúc thi hành, vì #676 có thể đã thêm ca. |
+| **A6** | Không hồi quy | Toàn suite `python ops/lease_publish_test.py` ⇒ dòng tổng kết `N/N` với **N = số `@ca` đếm tĩnh**, hai số bằng nhau. Nền 187 ca, đo 07:57Z trên `1741e0a` và 08:05Z trên `89fc4fa` (sau khi #676 land); đo lại lúc thi hành. |
 | **A7** | Trần kích thước | `git diff --numstat origin/master...HEAD -- ops/lease_publish_test.py` ⇒ **≤ 300** dòng thêm; không tệp nào khác trong diff mã. |
 | **A8** | Không đụng giàn cũ | `_chay_buoc_dang` và `t51`–`t68` **bằng byte** `origin/master` (so bằng `ast` hoặc `git diff`); `--chi-ca=t5` và `--chi-ca=t6` xanh. |
 | **A9** | Bỏ qua nền đúng chỗ | Ca mới chỉ ném `BoQuaNen` qua đúng đường của `_chay_buoc_dang`. Phản chứng: trên Linux, ca **không** được `BỎ QUA` (dòng `BỎ QUA` vắng mặt). |
@@ -188,10 +189,12 @@ Ca đỏ được đọc từ dòng `ĐỎ  <tên>: <lý do>`.
 
 ## 9. Lease — điều kiện trước khi cấp
 
-Đo 07:57Z 29-09-2026, sau khi so `ls-remote` 506 với `for-each-ref` 506, thiếu 0:
+Đo 08:05Z 29-09-2026, sau khi so `ls-remote` 508 với `for-each-ref` 508, thiếu 0 (lần đo trước: 07:57Z, 506/506):
 
 - `ai-dang-giu ops/lease_publish_test.py` ⇒ **`NGƯỜI_GIỮ 1`**: `t131-deadline-dem-spawn-exec-1-claude-20260929` (#676).
-- Lease ấy cấp `2026-09-29T06:05:00Z`, hết hạn `2026-09-30T06:05:00Z`, trên ref `origin/ops/cap-lease-676`.
+- Lease ấy cấp `2026-09-29T06:05:00Z`, hết hạn `2026-09-30T06:05:00Z`. Lúc 07:57Z nó nằm trên `origin/ops/cap-lease-676`; lúc 08:05Z trên
+  `origin/claude/bookkeeping-676`. Mã của #676 **đã land** (PR #680 → `89fc4fa`), nhưng lease **vẫn CÒN_HẠN**:
+  land không tự nhả lease (CLAUDE.md, *"LEASE KHÔNG TỰ CHẾT KHI PACKET ĐÃ LAND"*).
 
 **Bất biến (neo quyết định vào đây, không vào con số):** chỉ xin lease cho #677 khi `ai-dang-giu ops/lease_publish_test.py`
 cho `NGƯỜI_GIỮ 0`, đo trên đủ ref ngay trước lúc cấp. `start_from_sha` là `origin/master` **tại lúc cấp**, không phải `1741e0a`.

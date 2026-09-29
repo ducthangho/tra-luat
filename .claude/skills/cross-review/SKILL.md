@@ -562,14 +562,17 @@ Lệnh quét `refs/heads/*`. Một nhánh **cục bộ** tụt sau bản trên m
 `rc=12 NHÁNH_CỤC_BỘ_TỤT_SAU` — nó đang nói "tôi không đo được", không nói "không ai giữ". Đo
 24-09-2026: cùng một đường cho `rc=12`, rồi `rc=11 NGƯỜI_GIỮ 1` ngay sau khi cập nhật ref.
 
-Thông điệp lỗi **nêu đích danh nhánh nào tụt**. Cập nhật đúng nhánh ấy, đừng ép toàn bộ
-`refs/heads/*` — làm thế có thể xoá công việc cục bộ của nhánh khác:
+Thông điệp lỗi nêu **nhánh và upstream thật**, không nhất thiết là `origin/<cùng tên>`.
+Lệnh chữa do `ai-dang-giu` in ra đã phân biệt nhánh rảnh với nhánh đang được worktree giữ:
+nhánh rảnh trỏ tới upstream được báo; worktree sạch dùng `merge --ff-only` tại đúng worktree.
+Nếu báo phân kỳ hoặc `KHÔNG_PHÁT_LỆNH_CHỮA`, không thay bằng một lệnh `branch -f` tự dựng.
+Thời điểm cập nhật ref và checkout chỉ đọc xem protocol §8.1–§8.2; chuyển chẩn đoán cho
+bên dựng bootstrap để cập nhật đúng upstream, rồi nhận lại snapshot. Ví dụ đọc lại từ
+checkout đã cấp (kho đích được neo tường minh, kể cả khi cwd ở nơi khác):
 
 ```bash
 PY="$(command -v python3 || command -v python || command -v py)"
-git -C "$SOURCE" fetch --prune origin '+refs/heads/*:refs/remotes/origin/*'
-git -C "$SOURCE" branch -f <nhanh-lenh-vua-neu-ten> "refs/remotes/origin/<nhanh-ay>"
-"$PY" "$SOURCE/ops/lease_publish.py" ai-dang-giu <duong>; echo "rc=$?"
+"$PY" "$SOURCE/ops/lease_publish.py" ai-dang-giu <duong> --root "$SOURCE"; echo "rc=$?"
 ```
 
 ## Provenance CI

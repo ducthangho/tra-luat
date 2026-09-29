@@ -97,9 +97,11 @@ def run(tl_module):
 
         # ── LỚP B: đòi trường, không kiểm-khi-có ──
         b_queue = go("b1", _st(q_ingest=[{"so_hieu": _MUC}]), {"u1.json": _unit()})
-        b_dot = go("b2", _st(dot=[{"dot_id": "d1", "ten": "D1",
+        # `dot_id` là KHOÁ NGOẠI (chốt lượt 6) ⇒ bản ghi `dot` phải mang ĐÚNG id mà `q_ingest` trỏ tới.
+        b_dot = go("b2", _st(dot=[{"dot_id": "dot-01", "ten": "D1",
                                    "trang_thai": "da_dong_co_gioi_han"}]), {"u1.json": _unit()})
-        b_dot_ok = go("b3", _st(dot=[{"dot_id": "d1", "ten": "D1", "trang_thai": "da_dong_co_gioi_han",
+        b_dot_ok = go("b3", _st(dot=[{"dot_id": "dot-01", "ten": "D1",
+                                      "trang_thai": "da_dong_co_gioi_han",
                                       "dong_luc": "2026-09-05", "gioi_han_da_biet": [{"muc": "x"}]}]),
                       {"u1.json": _unit()})
 
@@ -126,9 +128,9 @@ def run(tl_module):
                         {"u1.json": _unit()}, co=("--dot", "dot-9"))
         f_hai_dangra = go("f2", _st(dot=DOT + [{"dot_id": "b", "ten": "B", "trang_thai": "dang_ra",
                                                 "mo_luc": "x"}]), {"u1.json": _unit()})
-        f_trang = go("f3", _st(dot=[{"dot_id": "a", "ten": "A", "trang_thai": "da_dong",
+        f_trang = go("f3", _st(dot=[{"dot_id": "dot-01", "ten": "A", "trang_thai": "da_dong",
                                      "dong_luc": " "}]), {"u1.json": _unit()})
-        f_list_rong = go("f4", _st(dot=[{"dot_id": "a", "ten": "A", "dong_luc": "x",
+        f_list_rong = go("f4", _st(dot=[{"dot_id": "dot-01", "ten": "A", "dong_luc": "x",
                                          "trang_thai": "da_dong_co_gioi_han",
                                          "gioi_han_da_biet": []}]), {"u1.json": _unit()})
 
@@ -139,6 +141,111 @@ def run(tl_module):
             {"schema": "rasoat_plan.v1", "cap_nhat": "2026-09-05"}, ensure_ascii=False), encoding="utf-8")
         (g / "master" / "u1.json").write_text(json.dumps(_unit(), ensure_ascii=False), encoding="utf-8")
         g_no_claim = _goi(tl_module, ["rasoat-dot-check", "--in", str(g), "--json"])
+
+        # ── LƯỢT 5 — cùng bốn LỚP, các nguồn còn lại ──
+        # B: mục Q-INGEST không `so_hieu` = không chỉ đích được văn bản nào ⇒ claim rỗng bị lọc lặng
+        #    lẽ và cổng không đòi bằng chứng nào. C: dạng đã nhả đòi `id` NULL đúng nghĩa, vì
+        #    `_rasoat_vong_doi_findings` so `is None` — nới thành falsy là để hai chốt phán ngược nhau.
+        i_qi = go("i1", _st(q_ingest=[{"trang_thai": "cho_tai", "dot_id": "dot-01"}]),
+                  {"u1.json": _unit()})
+        i_claim_rong = go("i2", _st(session_claim={"id": "", "released_at": "x"}), {"u1.json": _unit()})
+        i_claim_null = go("i3", _st(session_claim={"id": None, "released_at": "x"}), {"u1.json": _unit()})
+        # A: khuôn LAI (`noi_dung` sai kiểu) từng ném TypeError trần — cổng phải hỏng ĐÚNG KHUÔN.
+        # Gọi CÓ BẮT: chính cú traceback là thứ bản vá chặn, nên nó phải thành PHÉP ĐO chứ không
+        # được thoát ra ngoài. Không bắt thì đột biến gỡ chốt "chết" bằng exception — ca đích không
+        # assert gì cả mà vẫn được tính là giết: đúng định nghĩa TÍN DỤNG GIẢ (đã đo, không phải lo xa).
+        i_lai_no = None
+        try:
+            i_lai = go("i4", _st(), {"u1.json": {"unit_id": "u1", "phat_hien": [], "noi_dung": "bad"}})
+        except BaseException as _e:            # noqa: BLE001 — traceback CHÍNH LÀ ca hỏng cần đo
+            i_lai, i_lai_no = (None, {}), type(_e).__name__
+        # Sổ APPEND-ONLY: dòng CŨ tra nhầm văn bản mang `found` không được khoá vĩnh viễn kết luận;
+        # nếu không, cách duy nhất đi tiếp là XOÁ lịch sử kiểm toán.
+        _j = _dung(t / "i5", _st(), {"u1.json": _unit()})
+        (_j / "rasoat_tra_kho.jsonl").write_text(
+            json.dumps({"thoi_diem": "t", "muc_tieu": _MUC, "khoa_so_hieu": "216/2025/ND-CP",
+                        "khoa_dinh_danh": "216-2025-ND-CP", "ket_qua": "found", "lenh": "x"},
+                       ensure_ascii=False)
+            + "\n" + json.dumps(_dong(), ensure_ascii=False) + "\n", encoding="utf-8")
+        i_append = _goi(tl_module, ["rasoat-dot-check", "--in", str(_j), "--json"])
+
+        # ── LƯỢT 6 — ba nguồn còn lại, trong đó MỘT là hồi quy do chính bản vá lượt 5 gây ra ──
+        # Lượt 5 lọc dòng theo kiểu GIỮ-LẠI-KHI-KHỚP, nên dòng chỉ khai `khoa_ten` (không có khoá
+        # máy-so-được nào) bị loại — kể cả khi mang `found` ⇒ cổng báo SẠCH cho văn bản ĐÃ TÌM THẤY.
+        # Luật đúng là LOẠI-TRỪ: chỉ bỏ dòng NÓI RÕ nó trỏ văn bản khác.
+        _k = _dung(t / "k1", _st(), {"u1.json": _unit()})
+        (_k / "rasoat_tra_kho.jsonl").write_text("".join(json.dumps(x, ensure_ascii=False) + "\n" for x in (
+            {"thoi_diem": "t", "muc_tieu": _MUC, "khoa_ten": "ten day du", "ket_qua": "found", "lenh": "tl locate"},
+            {"thoi_diem": "t", "muc_tieu": _MUC, "khoa_so_hieu": _MUC, "ket_qua": "not_found", "lenh": "x"},
+            {"thoi_diem": "t", "muc_tieu": _MUC, "khoa_dinh_danh": "217-2025-ND-CP",
+             "ket_qua": "not_found", "lenh": "x"})), encoding="utf-8")
+        k_ten_found = _goi(tl_module, ["rasoat-dot-check", "--in", str(_k), "--json"])
+        # `dot_id` là KHOÁ NGOẠI: trỏ tới Đợt không khai thì mục bị lọc ra rồi Đợt đóng khi nó còn treo.
+        k_mo_coi = go("k2", _st(dot=DOT, q_ingest=[{"so_hieu": _MUC, "trang_thai": "cho_tai",
+                                                    "dot_id": "dot-typo"}]), {"u1.json": _unit()})
+        # `.get("id")` trả None cho CẢ khoá vắng mặt ⇒ claim ghi dở bị coi là đã nhả.
+        k_thieu_id = go("k3", _st(session_claim={"released_at": "x"}), {"u1.json": _unit()})
+
+        # ── LƯỢT 7 — ba nguồn còn lại, hai trong số đó do chính bản vá lượt 6 gây ra ──
+        # `da_tra` (theo TRƯỜNG) và `_khop` (theo DÒNG) từng là HAI luật xét khác nhau: dòng khai
+        # đúng `khoa_ten` + `found` nhưng gõ nhầm `khoa_so_hieu` được tính KHOÁ mà không tính KẾT
+        # QUẢ ⇒ báo sạch cho văn bản đã tìm thấy. Nay MỘT quyết định tư cách cho cả hai.
+        _m = _dung(t / "m1", _st(), {"u1.json": _unit()})
+        (_m / "rasoat_tra_kho.jsonl").write_text("".join(json.dumps(x, ensure_ascii=False) + "\n" for x in (
+            {"thoi_diem": "t", "muc_tieu": _MUC, "khoa_ten": "ten day du",
+             "khoa_so_hieu": "216/2025/ND-CP", "ket_qua": "found", "lenh": "x"},
+            {"thoi_diem": "t", "muc_tieu": _MUC, "khoa_so_hieu": _MUC, "ket_qua": "not_found", "lenh": "x"},
+            {"thoi_diem": "t", "muc_tieu": _MUC, "khoa_dinh_danh": "217-2025-ND-CP",
+             "ket_qua": "not_found", "lenh": "x"})), encoding="utf-8")
+        m_lai = _goi(tl_module, ["rasoat-dot-check", "--in", str(_m), "--json"])
+        # Validator KHÔNG được tự crash trên đầu vào hỏng — nếu crash thì nó không còn là validator.
+        m_dot_int_no = None
+        try:
+            m_dot_int = go("m2", {"schema": "rasoat_plan.v1", "cap_nhat": "x", "dot": 1},
+                           {"u1.json": _unit()})
+        except BaseException as _e:        # noqa: BLE001 — traceback CHÍNH LÀ ca hỏng cần ĐO
+            m_dot_int, m_dot_int_no = (None, {}), type(_e).__name__
+        # TƯƠNG THÍCH: chốt `so_hieu` chỉ áp cho trạng thái SINH RA CLAIM. Kho có sẵn fixture
+        # đóng-sạch dùng `{"trang_thai":"flipped"}` không kèm `so_hieu` (tl_selftest.py) — đòi vô
+        # điều kiện là làm mọi `state-put` sau đó ĐỎ, tức chặn oan trên dữ liệu hợp lệ có thật.
+        m_flipped = go("m3", _st(q_ingest=[{"trang_thai": "flipped"}]), {"u1.json": _unit()})
+        m_chotai = go("m4", _st(q_ingest=[{"trang_thai": "cho_tai"}]), {"u1.json": _unit()})
+
+        # ── LƯỢT 8 — BA trạng thái cho một dòng sổ, không phải hai (lần thứ ba luật này bị sửa) ──
+        # `khop` (không khoá máy nào lệch) · `khac` (MỌI khoá đều trỏ nơi khác ⇒ dòng lịch sử, bỏ qua)
+        # · `mau_thuan` (vừa khớp vừa lệch ⇒ SỔ HỎNG, là PHÁT HIỆN). Bản trước gộp hai loại sau làm
+        # một nên NUỐT bằng chứng `found` của dòng lai — nuốt bằng chứng tệ hơn đọc nhầm nó.
+        def _so(ten, rows):
+            _r = _dung(t / ten, _st(), {"u1.json": _unit()})
+            (_r / "rasoat_tra_kho.jsonl").write_text(
+                "".join(json.dumps(x, ensure_ascii=False) + "\n" for x in rows), encoding="utf-8")
+            return _goi(tl_module, ["rasoat-dot-check", "--in", str(_r), "--json"])
+        _sh = {"thoi_diem": "t", "muc_tieu": _MUC, "khoa_so_hieu": _MUC, "ket_qua": "not_found", "lenh": "x"}
+        _dd = {"thoi_diem": "t", "muc_tieu": _MUC, "khoa_dinh_danh": "217-2025-ND-CP",
+               "ket_qua": "not_found", "lenh": "x"}
+        _ten = {"thoi_diem": "t", "muc_tieu": _MUC, "khoa_ten": "ten day du",
+                "ket_qua": "not_found", "lenh": "x"}
+        n_mau_thuan = _so("n1", [dict(_sh, khoa_dinh_danh="216-2025-ND-CP", ket_qua="found"),
+                                 _sh, _dd, _ten])
+        n_lich_su = _so("n2", [{"thoi_diem": "t", "muc_tieu": _MUC, "khoa_so_hieu": "216/2025/ND-CP",
+                                "khoa_dinh_danh": "216-2025-ND-CP", "ket_qua": "found", "lenh": "x"},
+                               _sh, _dd, _ten])
+        n_sach = _so("n3", [_sh, _dd, _ten])
+        n_found = _so("n4", [dict(_sh, ket_qua="found"), _dd, _ten])
+        # LƯỢT 9 — `khac` chỉ đúng khi dòng CHẮC CHẮN nói về văn bản khác. Có `khoa_ten` (tra theo
+        # TÊN, không quy về định danh được) thì KHÔNG chắc: phép tra ấy có thể đã trúng chính mục
+        # tiêu ⇒ drop nó là nuốt một `found`. Không chắc ⇒ MÂU THUẪN (fail-closed).
+        n_ten_lech = _so("n5", [{"thoi_diem": "t", "muc_tieu": _MUC, "khoa_ten": "ten",
+                                 "khoa_so_hieu": "216/2025/ND-CP", "ket_qua": "found", "lenh": "x"},
+                                _sh, _dd, _ten])
+        # `dot_id` trỏ Đợt CHƯA KHAI: là PHÁT HIỆN lúc đóng (rc=1), KHÔNG phải lỗi state (rc=2) —
+        # đặc tả §2 có ví dụ CHUẨN xếp việc cho Đợt sắp mở, nên bác ở validator là chặn oan.
+        n_orphan = go("n6", _st(dot=DOT, q_ingest=[{"so_hieu": _MUC, "trang_thai": "cho_tai",
+                                                    "dot_id": "dot-typo"}]), {"u1.json": _unit()})
+        n_tuong_lai = go("n7", _st(dot=DOT,
+                                   q_units=[{"unit_id": "u1", "dot_id": "dot-01", "trang_thai": "pending"},
+                                            {"unit_id": "u9", "dot_id": "dot-02", "trang_thai": "pending"}]),
+                         {"u1.json": _unit()})
 
         # ── #8 — `--out` dưới thư mục cha CHƯA TỒN TẠI phải ghi được (writer nguyên tử) ──
         _out = t / "chua" / "co" / "kq.json"
@@ -177,9 +284,12 @@ def run(tl_module):
     # LỚP A TOÀN — SÁU nguồn lỗi khác nhau, MỘT hệ quả. Đây là điều "vá từng ca" không bảo đảm.
     lop_a_toan = all(_kd(p) is False and _rong(p) for _, p in (a_dot_sai, a_state))
     # #2 — khoá số hiệu lệch ⇒ không được tính là đã tra, và phải NÊU giá trị sai
+    # `khoa_so_hieu` lệch trong khi `khoa_dinh_danh` khớp ⇒ dòng TỰ MÂU THUẪN (phân loại lượt 8),
+    # và phải NÊU ĐÍCH DANH khoá sai — không được gộp chung thành "thiếu khoá".
     khoa_toan = (e_sai[0] == 1 and any(
-        f.get("ma") == "THIEU_KHOA" and "khoa_so_hieu" in (f.get("khoa_thieu") or [])
-        and any(x.get("khoa") == "khoa_so_hieu" for x in (f.get("khoa_dinh_danh_lech") or []))
+        f.get("ma") == "DONG_TU_MAU_THUAN"
+        and any(x.get("khoa") == "khoa_so_hieu" for d in (f.get("dong") or [])
+                for x in (d.get("khoa_lech") or []))
         for f in (e_sai[1].get("chot_2_tra_kho", {}).get("phat_hien") or [])))
     val_toan = (f_khong_bg[0] == 2 and "DOT_KHONG_CO_BAN_GHI" in str(f_khong_bg[1].get("dot_loi") or "")
                 and f_hai_dangra[0] == 2
@@ -188,5 +298,36 @@ def run(tl_module):
                 and f_trang[0] == 2 and f_list_rong[0] == 2)
     khong_chan_oan = g_no_claim[0] == 0 and g_no_claim[1].get("ok") is True
     out_toan = h_out[0] == 0 and h_out_ok
+    luot5 = (i_qi[0] == 2 and "Q_INGEST[0]_THIEU_SO_HIEU" in str(i_qi[1].get("state", {}).get("loi") or "")
+             and i_claim_rong[0] == 2 and i_claim_null[0] == 0      # đối chứng: `id: None` phải QUA
+             and i_lai_no is None                                   # KHÔNG được ném ra ngoài
+             and i_lai[0] == 1 and i_lai[1].get("ok") is False      # hỏng ĐÚNG KHUÔN, không traceback
+             and any(x.get("ma") == "TRUONG_SAI_KIEU" for x in (i_lai[1].get("master_hong") or []))
+             and i_append[0] == 0 and i_append[1].get("ok") is True)
+    luot6 = (k_ten_found[0] == 1 and k_ten_found[1].get("ok") is False
+             and any(f.get("ma") == "CO_HIT_MA_VAN_KET_LUAN_THIEU"
+                     for f in (k_ten_found[1].get("chot_2_tra_kho", {}).get("phat_hien") or []))
+             # Chốt `dot_id` đã CHUYỂN CHỖ: đặc tả §2 cho phép trỏ Đợt sắp mở, nên bác ở validator là
+             # chặn oan; nay là PHÁT HIỆN lúc đóng (rc=1) — đúng chỗ mới đủ ngữ cảnh để phán.
+             and k_mo_coi[0] == 1
+             and any(x.get("ma") == "DOT_ID_CHUA_KHAI" for x in (k_mo_coi[1].get("thieu_payload") or []))
+             and k_thieu_id[0] == 2
+             and i_claim_null[0] == 0)      # đối chứng dương giữ nguyên: `id: None` TƯỜNG MINH vẫn qua
+    luot7 = (m_lai[0] == 1 and m_lai[1].get("ok") is False          # dòng LAI không được cho qua
+             and m_dot_int_no is None                                # KHÔNG được ném ra ngoài
+             and m_dot_int[0] == 2                                   # hỏng ĐÚNG KHUÔN, không traceback
+             and "DOT_KHONG_PHAI_MANG" in str(m_dot_int[1].get("state", {}).get("loi") or "")
+             and m_flipped[0] == 0 and m_flipped[1].get("ok") is True    # tương thích: PHẢI qua
+             and m_chotai[0] == 2)                                       # còn defect thật: vẫn chặn
+    def _ma(r):
+        return {f.get("ma") for f in (r[1].get("chot_2_tra_kho", {}).get("phat_hien") or [])}
+    luot8 = (n_mau_thuan[0] == 1 and "DONG_TU_MAU_THUAN" in _ma(n_mau_thuan)   # KHÔNG được nuốt
+             and n_lich_su[0] == 0 and n_lich_su[1].get("ok") is True          # append-only vẫn sửa được
+             and n_sach[0] == 0 and n_sach[1].get("ok") is True                # đối chứng dương
+             and n_found[0] == 1 and "CO_HIT_MA_VAN_KET_LUAN_THIEU" in _ma(n_found)   # chốt gốc còn
+             and n_ten_lech[0] == 1 and "DONG_TU_MAU_THUAN" in _ma(n_ten_lech)
+             and n_orphan[0] == 1                       # phát hiện, KHÔNG phải lỗi đầu vào
+             and any(x.get("ma") == "DOT_ID_CHUA_KHAI" for x in (n_orphan[1].get("thieu_payload") or []))
+             and n_tuong_lai[0] == 0 and n_tuong_lai[1].get("ok") is True)  # ví dụ CHUẨN của §2 phải QUA
     return bool(lanh and lop_a and lop_b and lop_c and lop_d
-                and lop_a_toan and khoa_toan and val_toan and khong_chan_oan and out_toan)
+                and lop_a_toan and khoa_toan and val_toan and khong_chan_oan and out_toan and luot5 and luot6 and luot7 and luot8)

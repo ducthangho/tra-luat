@@ -200,23 +200,71 @@ def _dot_check_tra_kho(claims, rows) -> dict:
             continue
         # G1 (P1): bản trước chỉ hỏi trường có RỖNG không, nên một định danh TRỎ ĐI ĐÂU KHÁC vẫn
         # tính là đã tra. Phải KHỚP GIÁ TRỊ sau chuẩn hoá; ghi sai = CHƯA tra, và nói ra chỗ sai.
-        da_tra, lech_dd = set(), []
+        # ★ MỘT quyết định TƯ CÁCH cho mỗi dòng, dùng cho CẢ khoá LẪN kết quả. Bản trước tách đôi:
+        # `da_tra` tính khoá theo từng-trường còn `_khop` lọc theo từng-DÒNG ⇒ một dòng khai đúng
+        # `khoa_ten` + `found` nhưng gõ nhầm `khoa_so_hieu` được TÍNH khoá mà KHÔNG tính kết quả
+        # ⇒ cổng báo sạch cho văn bản đã tìm thấy. Hai luật xét khác nhau trên cùng một dòng là chỗ
+        # lệch tự mọc; nay dòng nào NÓI RÕ trỏ văn bản khác thì bị loại HẲN — không góp khoá, không
+        # góp kết quả. Đó cũng là câu trả lời đúng về ngữ nghĩa: dòng ấy không đáng tin cho mục tiêu này.
+        def _phan_loai_dong(r):
+            """BA trạng thái, không phải hai — và đây là lần thứ ba luật này bị sửa, nên viết rõ.
+
+            Bản trước chỉ hỏi "có khoá nào trỏ nơi khác không"; dòng vừa có khoá KHỚP vừa có khoá
+            LỆCH (vd `khoa_so_hieu=217…` + `khoa_dinh_danh=216…` + `found`) bị xếp là "của văn bản
+            khác" rồi DROP — nuốt mất một bằng chứng `found` ⇒ các dòng `not_found` sau đó phủ đủ ba
+            khoá là cổng trả `ok:true`. Nuốt bằng chứng còn tệ hơn đọc nhầm nó.
+              · `khop`      — không khoá máy nào lệch (kể cả dòng chỉ có `khoa_ten`): TÍNH cả khoá
+                              lẫn kết quả.
+              · `khac`      — MỌI khoá máy đã khai đều trỏ nơi khác: dòng lịch sử của văn bản khác,
+                              BỎ QUA (đây là điều cho sổ append-only sửa được mà không phải xoá).
+              · `mau_thuan` — vừa khớp vừa lệch: SỔ HỎNG, không phải bằng chứng. Là PHÁT HIỆN.
+            """
+            khop, lech = [], []
+            for k in ("khoa_dinh_danh", "khoa_so_hieu"):
+                v = str(r.get(k) or "").strip()
+                if not v:
+                    continue
+                (khop if _dinh_danh_chuan_hoa(v) == dd else lech).append(k)
+            if khop and lech:
+                return "mau_thuan"
+            if lech:
+                # `khac` = dòng CHẮC CHẮN nói về văn bản khác. Một dòng vừa có khoá máy LỆCH vừa khai
+                # `khoa_ten` (tra theo TÊN — không quy về định danh được) thì KHÔNG chắc: phép tra
+                # theo tên ấy có thể đã trúng CHÍNH mục tiêu. Xếp nó là "không liên quan" rồi drop là
+                # nuốt một `found`. Không chắc ⇒ MÂU THUẪN, tức fail-closed.
+                return "mau_thuan" if str(r.get("khoa_ten") or "").strip() else "khac"
+            return "khop"
+
+        da_tra, lech_dd, _khop = set(), [], []
+        mau_thuan = []
         for r in lien_quan:
+            _loai = _phan_loai_dong(r)
+            if _loai != "khop":
+                _ghi = [{"khoa": k, "da_ghi": str(r.get(k) or "").strip(),
+                         "chuan_hoa_thanh": _dinh_danh_chuan_hoa(str(r.get(k) or ""))}
+                        for k in ("khoa_dinh_danh", "khoa_so_hieu")
+                        if str(r.get(k) or "").strip()
+                        and _dinh_danh_chuan_hoa(str(r.get(k) or "")) != dd]
+                lech_dd.extend(_ghi)
+                if _loai == "mau_thuan":
+                    mau_thuan.append({"thoi_diem": str(r.get("thoi_diem") or ""),
+                                      "ket_qua": str(r.get("ket_qua") or ""), "khoa_lech": _ghi})
+                continue
+            _khop.append(r)
             for k in _TRA_KHO_KHOA:
                 v = str(r.get(k) or "").strip()
                 if not v:
                     continue
-                # Bản trước chỉ ràng `khoa_dinh_danh`; `khoa_so_hieu` chỉ cần KHÁC RỖNG nên dòng
-                # ghi NHẦM số hiệu vẫn thoả "đủ 3 khoá". Ràng MỌI khoá máy-so-được với mục tiêu.
                 # Khai thẳng giới hạn: `khoa_ten` là VĂN XUÔI, không quy về định danh được, nên chỉ
                 # kiểm KHÁC RỖNG — đó là chỗ máy KHÔNG gác được, người phải đọc.
-                if k in ("khoa_dinh_danh", "khoa_so_hieu") and _dinh_danh_chuan_hoa(v) != dd:
-                    lech_dd.append({"khoa": k, "da_ghi": v,
-                                    "chuan_hoa_thanh": _dinh_danh_chuan_hoa(v)})
-                    continue
                 da_tra.add(k)
         da_tra = sorted(da_tra)
         thieu = [k for k in _TRA_KHO_KHOA if k not in da_tra]
+        if mau_thuan:
+            # Sổ tự mâu thuẫn thì KHÔNG kết luận gì được từ nó — kể cả kết luận "đủ ba khoá".
+            phat_hien.append({"muc_tieu": c, "dinh_danh": dd, "ma": "DONG_TU_MAU_THUAN",
+                              "dong": mau_thuan[:5]})
+            continue
         if thieu:
             _m = {"muc_tieu": c, "dinh_danh": dd, "ma": "THIEU_KHOA",
                   "khoa_da_tra": da_tra, "khoa_thieu": thieu}
@@ -226,9 +274,20 @@ def _dot_check_tra_kho(claims, rows) -> dict:
             continue
         # F2: đòi MỌI dòng liên quan đều đúng `not_found`. Bản đầu chỉ hỏi "có dòng nào `found`
         # không" — mệnh đề ấy đúng nhưng KHÔNG đủ: nó im lặng với mọi giá trị thứ ba.
-        if not all(str(r.get("ket_qua") or "").strip() == "not_found" for r in lien_quan):
+        # Sổ là APPEND-ONLY: một dòng CŨ tra nhầm văn bản (khoá trỏ 216 trong khi mục tiêu là 217)
+        # mang `found` thì trước đây vẫn tính vào phán quyết, dù chính khoá ấy đã bị loại khỏi
+        # `da_tra` vì không khớp. Hệ quả: các dòng SỬA SAU không bao giờ gỡ được cờ chặn, trừ khi
+        # XOÁ lịch sử — tức cổng ép người ta phá sổ kiểm toán để đi tiếp. Chỉ lấy kết quả từ dòng
+        # có khoá KHỚP mục tiêu; dòng không khớp đã được nêu ở `khoa_dinh_danh_lech`, không mất dấu.
+        # HỒI QUY của chính bản vá trước, và nó mở một đường BÁO SẠCH: bản ấy GIỮ LẠI dòng khi có
+        # khoá máy-so-được KHỚP, nên dòng chỉ khai `khoa_ten` (không có khoá máy-so-được nào) bị
+        # LOẠI — kể cả khi nó mang `found`. Hai dòng kia `not_found` là cổng trả `ok:true` cho văn
+        # bản THỰC RA ĐÃ TÌM THẤY. Luật đúng phải là LOẠI TRỪ, không phải GIỮ LẠI: chỉ bỏ dòng
+        # NÓI RÕ nó trỏ văn bản KHÁC. Dòng không khai khoá máy-so-được nào thì không mâu thuẫn với
+        # mục tiêu ⇒ kết quả của nó VẪN TÍNH (`khoa_ten` vốn đã được tính vào `da_tra` ở trên).
+        if _khop and not all(str(r.get("ket_qua") or "").strip() == "not_found" for r in _khop):
             phat_hien.append({"muc_tieu": c, "dinh_danh": dd, "ma": "CO_HIT_MA_VAN_KET_LUAN_THIEU",
-                              "ket_qua_da_ghi": sorted({str(r.get("ket_qua") or "") for r in lien_quan})})
+                              "ket_qua_da_ghi": sorted({str(r.get("ket_qua") or "") for r in _khop})})
     return {"so_ket_luan_thieu": len(claims), "phat_hien": phat_hien, "ok": not phat_hien}
 
 
@@ -346,6 +405,17 @@ def cmd_rasoat_dot_check(a) -> int:
             master_hong.append({"file": f.name, "ma": "KHUON_KHONG_NHAN_RA",
                                 "chi_tiet": "không phải unit_v1 lẫn bang_v1"})
             continue
+        # `_rasoat_unit_shape` chỉ hỏi trường KIA có phải LIST không, nên `{"phat_hien": [],
+        # "noi_dung": "bad"}` được nhận là `unit_v1`; xuống `_rasoat_trung_lap` thì `[] + "bad"`
+        # ném `TypeError` ⇒ traceback trần thay vì verdict có cấu trúc. Cổng phải hỏng ỒN ÀO ĐÚNG
+        # KHUÔN, không hỏng bằng stack trace. Không sửa `_rasoat_unit_shape` vì `rasoat-merge` dùng
+        # chung nó — chặn ngay tại chỗ gọi, đúng lời hàm ấy tự dặn (bên gọi FAIL-CLOSED).
+        _lai = [_k for _k in ("phat_hien", "noi_dung")
+                if _k in _d and not isinstance(_d.get(_k), list)]
+        if _lai:
+            master_hong.append({"file": f.name, "ma": "TRUONG_SAI_KIEU",
+                                "truong": _lai, "chi_tiet": "phải là list hoặc vắng mặt"})
+            continue
         docs.append((f.name, _d))
         _hop_le.append(f)
 
@@ -362,6 +432,22 @@ def cmd_rasoat_dot_check(a) -> int:
 
     # H3 (P2): hai tệp cùng `unit_id` ⇒ đếm HAI LẦN mà cổng vẫn `ok:true`. Tái dùng
     # `_rasoat_trung_lap` (r216, #15); áp SAU khi lọc Đợt để chỉ xét tập sắp đếm.
+    # `dot_id` trỏ Đợt CHƯA KHAI: đặc tả cho phép ở state (xếp việc cho Đợt sắp mở), nhưng lúc ĐÓNG
+    # thì một mục còn treo mà không thuộc Đợt nào đã khai là thứ phải NHÌN THẤY — nếu không, lọc theo
+    # `--dot` sẽ im lặng bỏ qua nó. Nêu thành PHÁT HIỆN (rc=1), không phải lỗi đầu vào (rc=2): state
+    # vẫn hợp lệ, chỉ là hồ sơ chưa sẵn sàng đóng.
+    _dot_khai = {str(x.get("dot_id") or "").strip()
+                 for x in ((state.get("dot") or []) if isinstance(state, dict) else [])
+                 if isinstance(x, dict)} - {""}
+    if _dot_khai:
+        for _m in ((state.get("q_ingest") or []) if isinstance(state, dict) else []):
+            if not isinstance(_m, dict) or str(_m.get("trang_thai") or "") not in _DOT_CHECK_THIEU_TT:
+                continue
+            _mid = str(_m.get("dot_id") or "").strip()
+            if _mid and _mid not in _dot_khai:
+                thieu_payload.append({"ma": "DOT_ID_CHUA_KHAI", "dot_id": _mid,
+                                      "so_hieu": str(_m.get("so_hieu") or "")})
+
     # A6: MỌI đơn vị `done` phải có phiếu master — chạy ở cả hai chế độ (xem LỚP D ở trên).
     _co = {str((d or {}).get("unit_id") or "").strip() for _, d in docs}
     for _u in sorted(_done_cua_dot):

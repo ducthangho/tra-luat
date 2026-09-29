@@ -84,7 +84,16 @@ kèm mục tương ứng trong `gioi_han_da_biet` (cùng khuôn §7.1 `RASOAT_PL
 5. **CỔNG MÁY CUỐI ĐỢT đạt:** `tl rasoat-dot-check --in <out-dir> --dot <dot_id> --strict` **rc=0**.
    Ba chốt: NFC trước mọi phép đếm · kết luận «kho thiếu X» phải có log tra ĐỦ 3 khoá đều `not_found` ·
    sổ số liệu tái lập. **rc=1 = CÓ PHÁT HIỆN** (verdict dữ liệu), **rc=2** = lỗi đầu vào hoặc `--strict`
-   có phát hiện — **cả hai đều CHẶN đóng Đợt**. Đừng đọc `rc≠0` thành «lệnh hỏng» rồi bỏ qua.
+   có phát hiện. **`rc=1` chặn ĐÓNG BÌNH THƯỜNG (`da_dong`)** — nhưng KHÔNG triệt tiêu đường
+   đóng HẠN CHẾ của chính mục này: vẫn được `da_dong_co_gioi_han` **với điều kiện** chép nguyên
+   phát hiện của cổng vào `gioi_han_da_biet` (§7.1) — tức KHAI RA, không phải bỏ qua. Lệnh
+   KHÔNG có cờ miễn trừ, và đó là cố ý: miễn trừ phải nằm trong sổ người đọc được, không nằm
+   trong một cờ ai cũng gõ được. Đừng đọc `rc≠0` thành «lệnh hỏng» rồi bỏ qua.
+   **`rc=2` thì KHÔNG được miễn trừ — chặn CỨNG, kể cả đường hạn chế.** Lý do không phải
+   nghiêm khắc hơn mà là KHÁC LOẠI: `rc=1` là **đã đo được và thấy vấn đề** — khẩn ra `gioi_han_da_biet`
+   là khai thật; `rc=2` là **CHƯA ĐO ĐƯỢC GÌ** (state hỏng, hoặc `--dot` trỏ sai Đợt). Cho phép
+   chép `rc=2` vào `gioi_han_da_biet` nghĩa là gõ nhầm `--dot dot-10` rồi đóng được `dot-01` MÀ
+   CỔNG CỦA NÓ CHƯA TỪNG CHẠY — biến một phép đo bất khả thi thành một dòng giới hạn nghe như đã cân nhắc.
    *Vì sao là ĐIỀU KIỆN chứ không phải gợi ý:* cả 4 vế trên đều là **lời khai của phiên rà**;
    riêng vế này là **phép ĐO**. Một cổng không nằm trên đường đi mặc định là cổng không tồn tại — đúng
    khuyết tật mà §1bis này sinh ra để chữa. Thẻ `rasoat_hoso` khai nó ở `recommended_commands` + `verify`.

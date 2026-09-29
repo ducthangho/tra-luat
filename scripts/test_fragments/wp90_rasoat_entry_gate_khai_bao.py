@@ -50,6 +50,28 @@ def _dong_dot_ok(loop_md: str) -> bool:
             and _LENH_CONG in loop_md)
 
 
+def _dong_bo_dong_han_che(loop_md: str, card: dict) -> bool:
+    """Văn xuôi và thẻ MÁY-ĐỌC phải nói CÙNG một luật đóng.
+
+    Vá lượt trước sửa văn xuôi (rc≠0 chặn `da_dong` nhưng vẫn cho `da_dong_co_gioi_han` kèm khai
+    giới hạn) mà QUÊN thẻ — thẻ vẫn đòi rc=0 cho CẢ HAI đường. Agent đọc thẻ và người đọc văn xuôi
+    khi ấy nhận hai luật khác nhau, và không ai biết vì mỗi bên tự nhất quán.
+
+    ★ BẢN ĐẦU CỦA CHÍNH HÀM NÀY KHÔNG CÓ RĂNG, và đột biến của tôi cũng sai chỗ nên không lộ ra:
+    nó dò TOKEN rải rác (`da_dong_co_gioi_han`, `gioi_han_da_biet`) trên văn bản ĐÃ NỐI, mà bản
+    mâu thuẫn CŨ cũng chứa đủ hai token ấy ở những câu KHÁC nhau ⇒ hoàn nguyên bản vá vẫn XANH.
+    Đột biến tôi dựng lại XOÁ HẲN token — một hình dạng hỏng KHÁC với hình dạng thật. Nay neo vào
+    MỆNH ĐỀ chỉ tồn tại ở bản đã sửa, ở CẢ hai phía; hoàn nguyên là ĐỎ."""
+    ĐO = ("CHAN dong BINH THUONG", "KHONG triet tieu duong dong HAN CHE")
+    _v = " ".join(str(x) for x in (card.get("verify") or [])
+                  + (card.get("stop_conditions") or []) if _LENH_CONG in str(x))
+    return (all(x in _v for x in ĐO)
+            and "gioi_han_da_biet" in _v
+            and "chặn ĐÓNG BÌNH THƯỜNG (`da_dong`)" in loop_md
+            and "KHÔNG triệt tiêu đường" in loop_md
+            and "đóng HẠN CHẾ" in loop_md)
+
+
 def _loop_ok(loop_md: str) -> bool:
     gate = _block(loop_md, _GATE)
     log = _block(loop_md, "TRA_KHO_LOG_v1")
@@ -65,7 +87,8 @@ def run(tl_module):  # noqa: ARG001 — lint thuần, không cần tl
     skill = (root / "SKILL.md").read_text(encoding="utf-8")
     loop = (root / "references" / "RASOAT_HOSO_LOOP.md").read_text(encoding="utf-8")
     card = json.loads((root / "references" / "workflows" / "rasoat_hoso.json").read_text(encoding="utf-8"))
-    if not (_kernel_ok(skill) and _loop_ok(loop) and _the_ok(card) and _dong_dot_ok(loop)):
+    if not (_kernel_ok(skill) and _loop_ok(loop) and _the_ok(card) and _dong_dot_ok(loop)
+            and _dong_bo_dong_han_che(loop, card)):
         return False
     # PHẢN CHỨNG (phép đo phải phân biệt được):
     #  1. cổng chỉ nằm ở bảng tham chiếu cuối kernel  → ĐỎ
@@ -80,5 +103,20 @@ def run(tl_module):  # noqa: ARG001 — lint thuần, không cần tl
                                               if _LENH_CONG not in str(c)])
     bo_verify = dict(card, verify=[v for v in card["verify"] if _LENH_CONG not in str(v)])
     ha_ve = loop.replace("đủ cả 5", "đủ cả 4").replace("5. **CỔNG MÁY CUỐI ĐỢT", "x. cong may cuoi dot")
+    #  6. thẻ nói luật đóng KHÁC văn xuôi → ĐỎ (chống "vá một chỗ, quên chỗ kia")
+    # PHẢN CHỨNG phải là BẢN MÂU THUẪN THẬT, không phải bản xoá token. Bản cũ vẫn CHỨA đủ token
+    # `da_dong_co_gioi_han`/`gioi_han_da_biet` ở những câu rời — chính vì thế phép dò token cũ mù
+    # với nó, còn đột biến "xoá token" thì lại giết được. Hình dạng hỏng THẬT là: thẻ đòi rc=0 cho
+    # CẢ HAI đường đóng, trong khi văn xuôi cho đóng hạn chế.
+    _cau_cu = ("DONG DOT: `rasoat-dot-check --in <out-dir> --dot <dot_id> --strict` rc=0 TRUOC khi "
+               "chot dot.trang_thai=da_dong hoac da_dong_co_gioi_han; rc=1/2 CHAN dong Dot")
+    the_cu = dict(card,
+                  verify=[_cau_cu if _LENH_CONG in v else v for v in card["verify"]],
+                  stop_conditions=[_cau_cu if _LENH_CONG in v else v
+                                   for v in (card.get("stop_conditions") or [])])
+    loop_cu = (loop.replace("chặn ĐÓNG BÌNH THƯỜNG (`da_dong`)", "CHẶN đóng Đợt")
+                   .replace("KHÔNG triệt tiêu đường", "và triệt tiêu đường"))
     return ((not _kernel_ok(doi_cho)) and (not _loop_ok(thieu_khoa)) and (not _loop_ok(mat_so))
-            and (not _the_ok(bo_rec)) and (not _the_ok(bo_verify)) and (not _dong_dot_ok(ha_ve)))
+            and (not _the_ok(bo_rec)) and (not _the_ok(bo_verify)) and (not _dong_dot_ok(ha_ve))
+            and (not _dong_bo_dong_han_che(loop, the_cu))       # thẻ cũ mâu thuẫn ⇒ ĐỎ
+            and (not _dong_bo_dong_han_che(loop_cu, card)))     # văn xuôi cũ mâu thuẫn ⇒ ĐỎ

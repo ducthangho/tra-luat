@@ -141,8 +141,9 @@ def run(tl_module):
     def _ph(p):
         return p.get("chot_2_tra_kho", {}).get("phat_hien") or []
 
-    g1 = (rc_sai == 1 and any(f["ma"] == "THIEU_KHOA" and f.get("khoa_dinh_danh_lech")
-                              and "khoa_dinh_danh" in f["khoa_thieu"] for f in _ph(p_sai))
+    # Dòng này khai `khoa_so_hieu` KHỚP nhưng `khoa_dinh_danh` LỆCH ⇒ TỰ MÂU THUẪN. Phân loại ba
+    # trạng thái (lượt 8) gọi đúng tên nó thay vì gộp vào `THIEU_KHOA` — sổ hỏng khác với sổ thiếu.
+    g1 = (rc_sai == 1 and any(f["ma"] == "DONG_TU_MAU_THUAN" and f.get("dong") for f in _ph(p_sai))
           and rc_dung == 0 and p_dung.get("ok") is True
           and rc_tuong_duong == 0 and p_tuong_duong.get("ok") is True)
     # phản chứng của CHÍNH fixture: dòng thô PHẢI là ASCII thuần, nếu không thì ca này đo nhầm thứ

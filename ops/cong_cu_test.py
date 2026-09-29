@@ -6778,7 +6778,7 @@ def t52_gom_manh_phai_DO_khi_thieu_trung_lech_va_moi_chot_co_THE_RIENG():
     sai = {t: kq.get(t) for t, the in mong.items()
            if not (kq.get(t) and kq[t][0] >= 1 and f"[{the}]" in kq[t][1])}
     bang(not sai, f"kịch bản hỏng KHÔNG bị đúng chốt bắt (mong thẻ {mong}): {sai}")
-    mong_sl = [True, sorted(_TEN_SL)] if _CO_SYMLINK else [False, []]
+    mong_sl = [True, sorted(_TEN_SL)] if _CO_SYMLINK else [False, sorted(_TEN_SL_FALSE)]
     bang(kq["nang_luc"] == mong_sl, f"đột biến symlink phải theo NĂNG LỰC (mong {mong_sl}): {kq['nang_luc']}")
     ghi = {t: kq.get(t) for t, the in (("ghi_loi", "M-loi"), ("ghi_con", "M-con"), ("ghi_head", "M-head"),
                                        ("ghi_do_cuoi", "M-loi"), ("ghi_do_hai", "M-loi"))
@@ -7397,12 +7397,17 @@ if _CO_SYMLINK:   # F24: chỉ đo được ở nền có symlink (xem `_do_co_s
          '    _bo = ("ops/cong_cu_test.py", \'        if p.is_symlink() or not p.is_file():\\n\', \'        if not p.is_file():  # đột biến: nhận symlink\\n\',\n'),
         ('f37_bo_f35', 't52_', '    DOT_BIEN["f35_writer_broken_link"] = ("ops/cong_cu_test.py", \'    if tep.exists() or tep.is_symlink():\\n\',\n',
          '    _bo = ("ops/cong_cu_test.py", \'    if tep.exists() or tep.is_symlink():\\n\',\n'),
+        # F40 (Codex lượt 18): khối đăng ký phía False cũng phải có ĐIỀU KIỆN THẬT — `if True:` chỉ khác bản gốc trên nền CÓ symlink
+        # (khi đó khối phía False đăng ký thêm `f37_dk_luon_dung` ⇒ ô năng lực của t52 lệch).
+        ('f40_false_luon', 't52_', 'if not _CO_SYMLINK:\n', 'if True:\n'),
     ):
         DOT_BIEN[_ten] = ("ops/cong_cu_test.py", _tim, _thay, "TEP_TEST", _KEM_TEP_TEST, _CA_668[_ca])
 if not _CO_SYMLINK:
     # `if True:` chỉ KHÁC bản gốc khi nền không có symlink (khi đó chốt registry của t52 bắt: False mà có tên).
     DOT_BIEN["f37_dk_luon_dung"] = ("ops/cong_cu_test.py", 'if _CO_SYMLINK:   # F24: chỉ đo được ở nền có symlink (xem `_do_co_symlink`)\n',
                                     'if True:   # đột biến\n', "TEP_TEST", _KEM_TEP_TEST, _CA_668["t52_"])
+    # F40: `if False:` chỉ khác bản gốc trên nền KHÔNG symlink (khi đó khối phía False không chạy ⇒ `f37_dk_luon_dung` mất).
+    DOT_BIEN["f40_false_khong"] = ("ops/cong_cu_test.py", 'if not _CO_SYMLINK:\n', 'if False:\n', "TEP_TEST", _KEM_TEP_TEST, _CA_668["t52_"])
 # NỢ (KHÔNG ĐO ĐƯỢC): nền VẮNG thuộc tính `os.symlink` (nhánh AttributeError của `_do_co_symlink`) không được đo trong bộ này —
 # quyết định chủ kho sau review lượt 17 (F39); runner chuẩn Ubuntu/Windows có `os.symlink`; không mô phỏng.
 
@@ -7574,6 +7579,7 @@ def _ban_ghi_du_gia(ten):
 
 
 _TEN_SL = ("f24_nhan_symlink", "f35_writer_broken_link", "f37_bo_f24", "f37_bo_f35")
+_TEN_SL_FALSE = ("f37_dk_luon_dung",)   # F40: đăng ký CHỈ ở nền KHÔNG symlink
 
 
 def _in_tu_kiem_gom():
@@ -7833,7 +7839,7 @@ def _in_tu_kiem_gom():
             _ket_thuc_manh(0, n, str(gay), cac, None, "giả", vt)
             kq["ghi_gay"] = [gay.exists() or gay.is_symlink()]
     # Chủ kho sau review lượt 17: MỘT ô — năng lực symlink ↔ tên đột biến symlink đã đăng ký (không nạp lại, không mô phỏng).
-    kq["nang_luc"] = [_CO_SYMLINK, sorted(t for t in DOT_BIEN if t in _TEN_SL)]
+    kq["nang_luc"] = [_CO_SYMLINK, sorted(t for t in DOT_BIEN if t in _TEN_SL or t in _TEN_SL_FALSE)]
     print("KQ " + json.dumps(kq, ensure_ascii=True))
 
 

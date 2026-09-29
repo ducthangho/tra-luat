@@ -21,12 +21,15 @@ mat_quan_sat_duoc_the_nao: >-
   Loi khai co neo (session URL), khong phai phep do doc lap — mot phien Claude khong tu chung minh be mat chay cua chinh no.
 trang_thai_packet:
   merged: true
-  landed: false
+  landed: true
+  landed_hieu_luc_tu: 'merge commit cua PR bookkeeping #673 mang tep nay vao master (tep chi co tren master sau thoi diem ay).'
   landed_ghi_chu: >-
     PROTOCOL §10: `landed` = da vao canonical o exact SHA duoc duyet, HAU-MERGE GATE XANH va BOOKKEEPING XONG.
-    (1) merge dung head duoc uy quyen a602a38 tai cd23c7d — CO. (2) hau-merge gate: xem post_merge_checks.
-    (3) bookkeeping: PR bookkeeping mang tep nay. Trang thai doi thanh landed CHI khi ca ba co bang chung;
-    tep nay ghi `landed: false` tai thoi diem viet.
+    (1) merge dung head duoc uy quyen a602a38 tai cd23c7d, tree f905bbb = tree ky vong — CO. (2) hau-merge gate:
+    run 36506212140 tren cd23c7d (push, ubuntu) conclusion success, ca 5 job success — xem post_merge_checks.
+    (3) bookkeeping: lease g43 thu hoi (80faa2b, ops-publish-lease 36506348537 success; ai-dang-giu 02:28Z khong
+    con g43 trong NGUOI_GIU) + PR bookkeeping #673 (CI 36506524121 xanh) mang tep nay. Ban dau tep ghi
+    `landed: false` (89493974, dung o thoi diem ay); doi CHI khi PR #673 merge.
 role: land_operator
 session_id: https://claude.ai/code/session_01KCT2cwg12uUNRPkLqiqo5m
 recorded_by: claude-session
@@ -117,14 +120,26 @@ pre_merge_checks:
 post_merge_checks:
   - check: 'CI master tren merge commit cd23c7d (push, chi ubuntu)'
     workflow_run: https://github.com/ducthangho/tra-luat/actions/runs/36506212140
-    conclusion: CHO_DO
+    workflow: .github/workflows/ci.yml (gate), event push, branch master, run_attempt 1, head_sha cd23c7d
+    runner: ubuntu-latest
+    conclusion: success
+    jobs_success: {chuan-bi: 109208126232, gate: 109208150936, gate-ops: 109208151002, gate-packet-loop: 109208150984, gate-registry: 109208150892}
+    doc_lai_luc: '2026-09-29T02:27:52Z qua MCP github actions_get / list_workflow_jobs (run updated_at 02:27:24Z)'
+    windows: 'not_measured — push master chi chay ubuntu; SUA DOI 4.'
 khong_do_duoc:
   - 'Windows: not_measured cho land nay (SUA DOI 4); loi Windows co san — cong_cu_test t23/t49 va gate-registry Windows qua tran 90 — o #671.'
   - 'Lich su sua comment 5881094221: GitHub API qua MCP khong tra tung ban sua; chi co created_at/updated_at.'
 
 bookkeeping:
   - 'Thu hoi lease r378-symlink-doi-dac-quyen-r43-g43-claude bang rut han ve 2026-09-29T01:22:00Z tren ops/cap-lease-574-g43 (80faa2b, sau merge origin/master cd23c7d vao nhanh lease); lease_publish.py check rc=0 truoc khi day.'
-  - 'Dua tep lease (ban da thu hoi, byte giong 80faa2b) + tep ho so nay vao master qua PR bookkeeping.'
+  - 'ops-publish-lease run 36506348537 tren 80faa2b: success.'
+  - 'Dua tep lease (ban da thu hoi, byte giong 80faa2b) + tep ho so nay vao master qua PR bookkeeping #673 (CI run 36506524121: 5 job success).'
+  - check: 'Lease thoi giu write set sau 01:22Z (dieu kien nghiem thu trong chinh lease)'
+    do_luc: '2026-09-29T02:28:05Z'
+    ref_inventory: 'ban sao scratch fetch --update-head-ok moi refs/heads (502); so TAP TEN voi git ls-remote --heads origin (502): comm -23 = 0, comm -13 = 0'
+    ket_qua:
+      scripts/tl_selftest.py: 'ai-dang-giu rc=0, NGUOI_GIU 0; r378-symlink-doi-dac-quyen-r43-g43-claude = HET_HAN'
+      RELEASE_MANIFEST.json: 'ai-dang-giu rc=0, NGUOI_GIU 0; r378-symlink-doi-dac-quyen-r43-g43-claude = HET_HAN'
 
 lech_protocol_khai:
   - id: CUNG-SESSION-EXECUTOR-VA-LAND-OPERATOR

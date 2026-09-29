@@ -34,8 +34,10 @@ GIỚI HẠN, NÓI THẲNG (không phải ranh giới an ninh):
 
 LỆNH `kiem-re` (bước bù cho các bước bị bỏ, chỉ chạy khi `che_do == duong_nhanh`):
   YAML parse được · `git diff --check` · lease đổi phải qua `lease_publish` · ba ca kiểm DỮ LIỆU của lease_publish_test.
-Hai chỗ khác chữ trần của đặc tả r2, ĐO ngày 29-09-2026 và ghi ở đây để chủ kho đảo được (cross-review lượt 1 gọi
-đúng là lệch đặc tả; ĐANG CHỜ QUYẾT ĐỊNH CỦA CHỦ KHO ở Issue #674, không tự coi là đã duyệt):
+Hai chỗ khác chữ trần của đặc tả r2, ĐO ngày 29-09-2026. CHỦ KHO ĐÃ DUYỆT CẢ HAI (lựa chọn (a)) — erratum của đặc tả r2,
+không sửa r2: https://github.com/ducthangho/tra-luat/issues/674#issuecomment-5887720007 . Với reviewer: đây là HÀNH VI ĐƯỢC
+DUYỆT, không phải finding về chính sách; vẫn tìm lỗi TRONG cách hiện thực (ví dụ `bo_qua_han` bỏ thêm chốt nào khác không,
+ba loại khoảng trắng có bị tắt rộng hơn ba loại đó không).
   · D1 — `git diff --check` chạy với `core.whitespace=-blank-at-eol,-blank-at-eof,-space-before-tab`. Trong 345
     lần merge gần nhất (first-parent, 400 lần gần nhất tính từ 1741e0a), 63 lần chỉ đổi hồ sơ và 8/63 trượt
     `--check` nguyên bản (dấu cách cuối dòng trong verdict `.md`/`.patch`, dòng trống cuối tệp yaml). Chốt cứng

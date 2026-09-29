@@ -2,13 +2,13 @@
 """Phản chứng cho `ops/ci_duong_nhanh.py` và cho các `if:` đường nhanh trong `.github/workflows/ci.yml`.
 
 Packet #674 `CI-DUONG-NHANH-HO-SO` (đặc tả r2). Ba tầng, mỗi tầng có ĐỘT BIẾN riêng chạy trên BẢN SAO TẠM:
-  1. Hành vi bộ phân loại (`ca t01..t22`): đồ giả cho ca thuần + KHO GIT THẬT cho ca cần ngữ nghĩa git
-     (ba chấm, đổi tên, tên tệp có dấu, thiếu object, dấu xung đột).
-  2. Cấu trúc `ci.yml` (`ca y01..y09`): ĐÂY LÀ CỔNG DUY NHẤT canh `if:` cấp job của `gate-ops` và `if:` cấp bước
+  1. Hành vi bộ phân loại và bước kiểm rẻ (các ca `t01`..`t21`, gồm nhánh a-g): đồ giả cho ca thuần + KHO GIT THẬT
+     cho ca cần ngữ nghĩa git (ba chấm, đổi tên, tên tệp có dấu, thiếu object, dấu xung đột, lease, ca dữ liệu).
+  2. Cấu trúc `ci.yml` (các ca `y01`..`y09`): ĐÂY LÀ CỔNG DUY NHẤT canh `if:` cấp job của `gate-ops` và `if:` cấp bước
      sau G5. Nợ có tên `ci-if-cap-job-gate-ops-va-buoc-sau-g5-khong-co-cong-canh` (Q6-i chủ kho): `JOB_G5` của
      `ci_dang_ky_test.py` chỉ có `gate`, `gate-registry`, `gate-packet-loop`, và `cong_cu_test.t6` chỉ soi các bước
      TRƯỚC G5 — nên KHÔNG có cổng máy nào khác đối chiếu độc lập các `if:` mà packet này thêm.
-  3. Nối vào sổ test sống (`ca k01`, `k03`): mục `DA_NOI` và lời gọi thật trong `run:`.
+  3. Nối vào sổ test sống (các ca `k01`, `k02`, `k03`): mục `DA_NOI`, vị trí tệp và lời gọi thật trong `run:`.
 
 CÁCH ĐO ĐỘT BIẾN — bài học CLAUDE.md "đột biến bị giết không phải bị giết ĐÚNG LÝ DO":
   · Ca đích chỉ báo ĐỎ bằng `TinHieuChotCa` (con của AssertionError) do CHÍNH `bang()` ném. Lỗi vô can trong mã
@@ -16,8 +16,9 @@ CÁCH ĐO ĐỘT BIẾN — bài học CLAUDE.md "đột biến bị giết khô
     tính là giết. Ca KHÔNG được có `except Exception: raise TinHieuChotCa` (ca t99 quét AST canh điều đó).
   · Mỗi đột biến: neo `count == 1` (không thì lỗi hạ tầng), kiểm bản đột biến KHÁC bản gốc, chạy trên tệp tạm với
     tên riêng, bytecode tắt; ca đích còn phải XANH trên bản gốc (chứng minh lượt giết là do đột biến).
-  · Phân hạng có ca tự kiểm (`tu_kiem_*`): rc=3 đúng tên ⇒ GIẾT; rc=3 sai tên ⇒ TÍN DỤNG GIẢ; rc=4 ⇒ TÍN DỤNG GIẢ;
-    rc=0 ⇒ SỐNG SÓT; và một đột biến ném KeyError PHẢI rơi vào TÍN DỤNG GIẢ khi chạy thật.
+  · Phân hạng có phần tự kiểm (`tu_kiem_phan_hang`): NĂM mẫu rc (rc=3 đúng tên ⇒ GIẾT; rc=3 sai tên ⇒ TÍN DỤNG GIẢ;
+    rc=4 ⇒ TÍN DỤNG GIẢ; rc=0 ⇒ SỐNG SÓT; rc=-9 ⇒ HỎNG) và BA đột biến thật (KeyError vô can ⇒ TÍN DỤNG GIẢ;
+    chỉ thêm chú thích ⇒ SỐNG SÓT; nới allowlist ⇒ GIẾT). "Sai tên ca" chỉ được kiểm bằng mẫu rc, chưa có đột biến thật.
 
 Ra: `CA: N/N dat` · `DOT BIEN: M/M bi giet` · `TONG: DAT`. Thoát 0 chỉ khi N>0, mọi ca đạt, M>0, mọi đột biến bị giết
 ĐÚNG LÝ DO, mọi ca tự kiểm đạt — `rc=0` một mình không phải bằng chứng.
@@ -457,14 +458,45 @@ def t18_main_khong_ghi_duoc_output_thi_do():
 
 
 # ---------------------------------------------------------------- `kiem-re`
+CA_DU_LIEU_GOI: list = []
+
+
+def chay_that_bo_ca_du_lieu(argv, **kw):
+    """Kho tam trong ca kiem-re khong co lease_publish_test.py: chi CHAN dung lenh ca-du-lieu (ghi lai), con lai chay that."""
+    if "ops/lease_publish_test.py" in argv:
+        CA_DU_LIEU_GOI.append(list(argv))
+        return KQ(0, b"DAT\n")
+    return chay_that(argv, **kw)
+
+
 def kiem_re(m, kho, goc, dau, bay_gio=None):
     bo_dem = tempfile.TemporaryFile("w+", encoding="utf-8")
-    rc = m.lenh_kiem_re(env_pr(goc=goc, dau=dau), chay_that, kho, bo_dem, bay_gio)
+    CA_DU_LIEU_GOI.clear()
+    rc = m.lenh_kiem_re(env_pr(goc=goc, dau=dau), chay_that_bo_ca_du_lieu, kho, bo_dem, bay_gio)
     bo_dem.seek(0)
     return rc, bo_dem.read()
 
 
-LEASE_HET_HAN = "lease_id: cu\nlease_expires_at_utc: '2020-01-01T00:00:00Z'\nghi_chu: chi de doc\n"
+LEASE_HET_HAN = "lease_id: cu\nlease_expires_at_utc: '2020-01-01T00:00:00Z'\nghi_chu: chi de doc\n"   # THIEU truong bat buoc: KHONG hop le
+
+
+def lease_that_het_han_hop_le():
+    """Nguyên văn một lease THẬT đã hết hạn, không neo prompt, không bia mộ, và qua `kiem(bo_qua_han=True)` trong kho."""
+    sys.path.insert(0, str(ROOT_THAT / "ops"))
+    import lease_publish as lp
+    for tep in sorted((ROOT_THAT / "ops" / "leases").glob("*.yaml")):
+        vb = tep.read_text(encoding="utf-8")
+        if any(k in vb for k in ("prompt_path", "prompt_sha256_required", "thay_the_cho", "da_bi_thay_the")):
+            continue
+        try:
+            lp.kiem(lp._doc_yaml(str(tep)), str(tep), str(ROOT_THAT), bo_qua_han=True)
+            lp.kiem(lp._doc_yaml(str(tep)), str(tep), str(ROOT_THAT))
+        except lp.Chan as e:
+            if "het han" in str(e) or "hết hạn" in str(e):
+                return vb
+        except Exception:
+            continue
+    raise RuntimeError("ha tang: khong tim thay lease that het han hop le de lam fixture")
 LEASE_CON_HAN_THIEU = "schema_version: 2\nlease_id: moi\nlease_expires_at_utc: '2099-01-01T00:00:00Z'\n"
 
 
@@ -492,12 +524,13 @@ def t19b_kiem_re_khong_do_duoc_thi_do():
 @ca
 def t20a_kiem_re_ho_so_sach_dat():
     m = nap_module()
-    pr = {"ops/land/x.yaml": "a: 1\nb: [1, 2]\n", "ops/leases/cu.yaml": LEASE_HET_HAN, "ops/specs/S.md": "# s\n"}
-    with kho_that(nhanh_pr=pr) as (kho, goc, dau):
+    pr = {"ops/land/x.yaml": "a: 1\nb: [1, 2]\n", "ops/leases/cu.yaml": lease_that_het_han_hop_le(), "ops/specs/S.md": "# s\n"}
+    with kho_that(nhanh_pr=pr, sao_lease_publish=True) as (kho, goc, dau):
         rc, log = kiem_re(m, kho, goc, dau)
-        bang(rc == 0, f"ho so sach phai DAT, duoc rc={rc}: {log}")
-        bang("da het han" in log, f"lease het han phai in dong giai thich (khong chay check): {log}")
+        bang(rc == 0, f"ho so sach (lease het han HOP LE) phai DAT, duoc rc={rc}: {log}")
+        bang("da het han" in log, f"lease het han phai in dong giai thich: {log}")
         bang("kiem-re DAT" in log, f"phai in dong tong ket DAT: {log}")
+        bang(len(CA_DU_LIEU_GOI) == 1, f"kiem-re phai chay ba ca du lieu DUNG MOT lan, thay {len(CA_DU_LIEU_GOI)}")
 
 
 @ca
@@ -521,8 +554,8 @@ def t20d_kiem_re_khoang_trang_cuoi_dong_khong_do():
     m = nap_module()
     pr = {"ops/reviews/v-verdict.md": "dong co khoang trang cuoi   \nsau\n",
           "ops/reviews/goi-y.patch": "@@ -1 +1 @@\n-a  \n+b \n \n",
-          "ops/leases/thua-dong.yaml": LEASE_HET_HAN + "\n"}
-    with kho_that(nhanh_pr=pr) as (kho, goc, dau):
+          "ops/leases/thua-dong.yaml": lease_that_het_han_hop_le() + "\n"}
+    with kho_that(nhanh_pr=pr, sao_lease_publish=True) as (kho, goc, dau):
         tho = git(kho, "diff", "--check", f"{goc}...{dau}", kiem=False)
         bang(tho.returncode != 0, "fixture vo hieu: `git diff --check` nguyen ban phai bat cac tep nay")
         rc, log = kiem_re(m, kho, goc, dau)
@@ -535,30 +568,74 @@ def t20e_kiem_re_lease_con_han_loi_do():
     with kho_that(nhanh_pr={"ops/leases/moi.yaml": LEASE_CON_HAN_THIEU}, sao_lease_publish=True,
                   nen={"README.md": "x\n"}) as (kho, goc, dau):
         rc, log = kiem_re(m, kho, goc, dau)
-        bang(rc == 1 and "lease_publish.py check" in log, f"lease CON HAN thieu truong phai DO qua check: rc={rc}: {log}")
+        bang(rc == 1 and "kiem lease rc=" in log and "het han" not in log.split("kiem lease rc=")[0].splitlines()[-1], f"lease CON HAN thieu truong phai DO qua check: rc={rc}: {log}")
 
 
 @ca
-def t21_kiem_lease_chi_goi_check_cho_lease_con_han():
+def t20f_kiem_re_lease_het_han_sai_schema_van_do():
+    """Cross-review luot 1 (P2): het han KHONG duoc mien kiem. Lease het han thieu truong bat buoc phai DO."""
+    m = nap_module()
+    with kho_that(nhanh_pr={"ops/leases/cu.yaml": LEASE_HET_HAN}, sao_lease_publish=True) as (kho, goc, dau):
+        rc, log = kiem_re(m, kho, goc, dau)
+        bang(rc == 1 and "het han" in log and "CHAN" in log, f"lease HET HAN thieu truong phai DO qua kiem(bo_qua_han): rc={rc}: {log}")
+
+
+@ca
+def t20g_kiem_re_lease_duoi_yml_van_duoc_kiem():
+    m = nap_module()
+    for ten, vb in (("con-han", LEASE_CON_HAN_THIEU), ("het-han", LEASE_HET_HAN)):
+        with kho_that(nhanh_pr={f"ops/leases/{ten}.yml": vb}, sao_lease_publish=True) as (kho, goc, dau):
+            rc, log = kiem_re(m, kho, goc, dau)
+            bang(rc == 1, f"lease `.yml` {ten} thieu truong phai DO (cung doi xu voi `.yaml`): rc={rc}: {log}")
+
+
+@ca
+def t22_ca_du_lieu_thay_bo_lease_publish_selftest():
+    """Bo `lease-publish selftest` lam mat t23/t26/t27 (doc CAY that). kiem-re giu ba ca do; chay that tren kho that."""
+    m = nap_module()
+    bang(tuple(m.CA_DU_LIEU) == ("t23_MOI_lease_THAT_trong_kho_phai_QUA",
+                                 "t26_moi_bien_nhan_review_phai_khop_BAM_tep_no_tro_toi",
+                                 "t27_canh_bao_trong_bien_nhan_phai_duoc_NANG_len_muc_luc"), f"danh sach ca du lieu sai: {m.CA_DU_LIEU}")
+    bang(m.kiem_ca_du_lieu(ROOT_THAT, chay_that) == [], "ba ca du lieu phai DAT tren kho that")
+    log = []
+    bang(m.kiem_ca_du_lieu(ROOT_THAT, chay_gia(log=log)) == [], "chay gia rc=0 khong loi")
+    bang(len(log) == 1 and log[0][-3:] == list(m.CA_DU_LIEU) and "ops/lease_publish_test.py" in log[0],
+         f"lenh phai truyen du ba ten ca cua ops/lease_publish_test.py: {log}")
+    loi = m.kiem_ca_du_lieu(ROOT_THAT, chay_gia(b"CA DO", rc=1))
+    bang(len(loi) == 1 and "rc=1" in loi[0], f"ca du lieu do phai thanh loi: {loi}")
+    loi = m.kiem_ca_du_lieu(ROOT_THAT, chay_gia(nem=SuDoGia("no")))
+    bang(len(loi) == 1 and "KHONG DO DUOC" in loi[0], f"ngoai le khi chay ca du lieu phai thanh loi KHONG DO DUOC: {loi}")
+
+
+@ca
+def t21_kiem_lease_phan_biet_con_han_het_han_va_duoi_tep():
+    """Lease CON HAN (hoac han khong doc duoc) => `lease_publish.py check`; HET HAN => kiem(bo_qua_han=True) qua `-c`.
+    Ca hai duoi `.yaml`/`.yml`; tep da xoa va tep khong phai yaml bi bo qua. KHONG co nhanh nao la 'khong kiem'."""
     m = nap_module()
     tam = Path(tempfile.mkdtemp(prefix="cdn_lease_"))
     try:
         viet(tam, "ops/leases/het.yaml", LEASE_HET_HAN)
+        viet(tam, "ops/leases/het2.yml", LEASE_HET_HAN)
         viet(tam, "ops/leases/con.yaml", LEASE_CON_HAN_THIEU)
+        viet(tam, "ops/leases/con2.yml", LEASE_CON_HAN_THIEU)
         viet(tam, "ops/leases/hong-han.yaml", "lease_id: x\nlease_expires_at_utc: 'khong-phai-ngay'\n")
         viet(tam, "ops/leases/khong-han.yaml", "lease_id: y\n")
-        doi = {"ops/leases/het.yaml", "ops/leases/con.yaml", "ops/leases/hong-han.yaml", "ops/leases/khong-han.yaml",
-               "ops/leases/da-xoa.yaml", "ops/leases/ghi-chu.md"}
+        doi = {"ops/leases/het.yaml", "ops/leases/het2.yml", "ops/leases/con.yaml", "ops/leases/con2.yml",
+               "ops/leases/hong-han.yaml", "ops/leases/khong-han.yaml", "ops/leases/da-xoa.yaml", "ops/leases/ghi-chu.md"}
         log = []
         bo_dem = tempfile.TemporaryFile("w+", encoding="utf-8")
         loi = m.kiem_lease(doi, tam, chay_gia(log=log), None, bo_dem)
-        goi = sorted(a[3] for a in log)
-        bang(goi == ["ops/leases/con.yaml", "ops/leases/hong-han.yaml", "ops/leases/khong-han.yaml"],
-             f"chi lease CON HAN hoac han khong doc duoc moi bi goi check (het.yaml KHONG): {goi}")
-        bang(all(a[1:3] == ["ops/lease_publish.py", "check"] for a in log), f"sai dang goi check: {log}")
-        bang(loi == [], f"check tra rc=0 thi khong co loi: {loi}")
+        het = sorted(a[-1] for a in log if a[1:3] == ["-B", "-c"])
+        con = sorted(a[3] for a in log if a[1:3] == ["ops/lease_publish.py", "check"])
+        bang(het == ["ops/leases/het.yaml", "ops/leases/het2.yml"], f"lease HET HAN phai qua kiem(bo_qua_han): {het}")
+        bang(con == ["ops/leases/con.yaml", "ops/leases/con2.yml", "ops/leases/hong-han.yaml", "ops/leases/khong-han.yaml"],
+             f"lease CON HAN hoac han khong doc duoc phai qua `check`: {con}")
+        bang(len(log) == len(het) + len(con), f"moi lenh phai thuoc mot trong hai dang: {log}")
+        bang(loi == [], f"rc=0 thi khong co loi: {loi}")
         loi2 = m.kiem_lease({"ops/leases/con.yaml"}, tam, chay_gia(rc=8), None, bo_dem)
+        loi3 = m.kiem_lease({"ops/leases/het.yaml"}, tam, chay_gia(rc=8), None, bo_dem)
         bang(len(loi2) == 1 and "rc=8" in loi2[0], f"check rc!=0 phai thanh loi: {loi2}")
+        bang(len(loi3) == 1 and "rc=8" in loi3[0] and "het han" in loi3[0], f"kiem het han rc!=0 phai thanh loi: {loi3}")
     finally:
         shutil.rmtree(tam, ignore_errors=True)
 
@@ -676,6 +753,7 @@ def y06_job_bat_buoc_khong_bi_bo_ca_job():
     for job in BAT_BUOC:
         bang(job in wf["jobs"], f"thieu job bat buoc {job}")
         bang("if" not in wf["jobs"][job], f"{job}: KHONG duoc co `if:` cap job — check se VANG MAT thay vi bao ket qua")
+        bang(wf["jobs"][job].get("continue-on-error", False) is False, f"{job}: job bat buoc khong duoc nuot loi")
 
 
 @ca
@@ -704,8 +782,11 @@ def y08_buoc_kiem_re_o_gate_ops():
     b = kr[0]
     bang(chuan_hoa_if(b.get("if")) == NHANH, f"buoc kiem re chi chay khi duong nhanh, if={b.get('if')!r}")
     run = str(b.get("run", ""))
-    bang("packet_loop.py doctrine-scan --root ." in run and "set -euo pipefail" in run,
-         f"buoc kiem re phai chay doctrine-scan va set -euo pipefail: {run!r}")
+    bang(b.get("continue-on-error", False) is False, "buoc kiem re khong duoc nuot loi (continue-on-error)")
+    bang(b.get("shell") == "bash", f"buoc kiem re phai dung shell bash, duoc {b.get('shell')!r}")
+    bang([d.strip() for d in run.splitlines() if d.strip()] == [
+        "set -euo pipefail", "python .claude/dev/packet_loop.py doctrine-scan --root .", "python ops/ci_duong_nhanh.py kiem-re"],
+        f"buoc kiem re phai chay DUNG ba dong nay (khong chap nhan comment / them bot lenh): {run!r}")
     env = b.get("env") or {}
     bang(env.get("CI_DUONG_NHANH_GOC") == "${{ github.event.pull_request.base.sha }}"
          and env.get("CI_DUONG_NHANH_DAU") == "${{ github.event.pull_request.head.sha }}"
@@ -896,14 +977,19 @@ DOT_BIEN = [
     ("main_nuot_loi_ghi_output", _ma('        except OSError as e:\n            print(f"DUONG_NHANH: khong ghi duoc GITHUB_OUTPUT ({type(e).__name__}) - DO", file=sys.stderr)\n            return 1',
                                     '        except OSError:\n            return 0'), ("t18_main_khong_ghi_duoc_output_thi_do",)),
     ("kiem_re_khong_doi_khop", _ma("    if che_do != DUONG_NHANH:\n        print(\"DUONG_NHANH: kiem-re CHI", "    if False:\n        print(\"DUONG_NHANH: kiem-re CHI"), ("t19a_kiem_re_co_tep_ma_thi_do",)),
-    ("kiem_re_bo_yaml", _ma("loi = kiem_yaml(doi, kho) + kiem_diff_check", "loi = [] + kiem_diff_check"), ("t20b_kiem_re_yaml_hong_do",)),
+    ("kiem_re_bo_yaml", _ma("loi = (kiem_yaml(doi, kho) +", "loi = ([] +"), ("t20b_kiem_re_yaml_hong_do",)),
     ("kiem_re_bo_diff_check", _ma("kiem_diff_check(env, chay, kho) + kiem_lease(", "[] + kiem_lease("), ("t20c_kiem_re_dau_xung_dot_do",)),
     ("kiem_re_bo_lease", _ma("+ kiem_lease(doi, kho, chay, bay_gio, ra)", "+ []"), ("t20e_kiem_re_lease_con_han_loi_do",)),
     ("diff_check_bo_tinh_chinh_whitespace", _ma('["git", "-c", CAU_HINH_WHITESPACE, "diff", "--check"', '["git", "diff", "--check"'), ("t20d_kiem_re_khoang_trang_cuoi_dong_khong_do",)),
     ("diff_check_bo_check", _ma('"diff", "--check", "--no-renames"', '"diff", "--no-renames"'), ("t20c_kiem_re_dau_xung_dot_do",)),
-    ("lease_het_han_van_goi_check", _ma("    if han is not None and han <= bay_gio:", "    if False:"), ("t21_kiem_lease_chi_goi_check_cho_lease_con_han",)),
-    ("lease_han_hong_coi_la_het_han", _ma('        except ValueError:\n            return None\n        return han if', '        except ValueError:\n            return datetime(1970, 1, 1, tzinfo=timezone.utc)\n        return han if'), ("t21_kiem_lease_chi_goi_check_cho_lease_con_han",)),
-    ("lease_check_rc_khong_kiem", _ma('        if getattr(r, "returncode", None) != 0:\n            cuoi', '        if False:\n            cuoi'), ("t21_kiem_lease_chi_goi_check_cho_lease_con_han",)),
+    ("lease_het_han_coi_nhu_con_han", _ma("        het_han = han is not None and han <= bay_gio\n", "        het_han = False\n"), ("t21_kiem_lease_phan_biet_con_han_het_han_va_duoi_tep",)),
+    ("lease_het_han_duoc_mien_kiem", _ma("        if het_han:\n            print(", "        if het_han:\n            continue\n            print("), ("t20f_kiem_re_lease_het_han_sai_schema_van_do",)),
+    ("lease_bo_duoi_yml", _ma('x.startswith("ops/leases/") and x.endswith((".yaml", ".yml"))', 'x.startswith("ops/leases/") and x.endswith(".yaml")'), ("t20g_kiem_re_lease_duoi_yml_van_duoc_kiem",)),
+    ("kiem_re_bo_ca_du_lieu", _ma("\n           + kiem_ca_du_lieu(kho, chay))", ")"), ("t20a_kiem_re_ho_so_sach_dat",)),
+    ("ca_du_lieu_bo_t27", _ma(',\n              "t27_canh_bao_trong_bien_nhan_phai_duoc_NANG_len_muc_luc")', ")"), ("t22_ca_du_lieu_thay_bo_lease_publish_selftest",)),
+    ("ca_du_lieu_bo_qua_rc", _ma("    if getattr(r, \"returncode\", None) != 0:\n        cuoi = _dau_ra(r).strip().splitlines()[-3:]", "    if False:\n        cuoi = _dau_ra(r).strip().splitlines()[-3:]"), ("t22_ca_du_lieu_thay_bo_lease_publish_selftest",)),
+    ("lease_han_hong_coi_la_het_han", _ma('        except ValueError:\n            return None\n        return han if', '        except ValueError:\n            return datetime(1970, 1, 1, tzinfo=timezone.utc)\n        return han if'), ("t21_kiem_lease_phan_biet_con_han_het_han_va_duoi_tep",)),
+    ("lease_check_rc_khong_kiem", _ma('        if getattr(r, "returncode", None) != 0:\n            cuoi', '        if False:\n            cuoi'), ("t21_kiem_lease_phan_biet_con_han_het_han_va_duoi_tep",)),
     # ---- tầng YAML (đặc tả nghiệm thu 6, 7)
     ("yml_go_dieu_kien_pull_request_khoi_buoc_phan_loai", _yml("        id: phan-loai\n        if: ${{ github.event_name == 'pull_request' }}\n", "        id: phan-loai\n"), ("y01_chuan_bi_phan_loai_chi_pull_request_va_khong_lam_do_job",)),
     ("yml_go_continue_on_error_buoc_phan_loai", _yml("        id: phan-loai\n        if: ${{ github.event_name == 'pull_request' }}\n        continue-on-error: true\n", "        id: phan-loai\n        if: ${{ github.event_name == 'pull_request' }}\n"), ("y01_chuan_bi_phan_loai_chi_pull_request_va_khong_lam_do_job",)),
@@ -920,6 +1006,13 @@ DOT_BIEN = [
     ("yml_if_cap_job_gate_ops", (YML, lambda vb: thay_regex(vb, r"(\n  gate-ops:\n(?:    #[^\n]*\n)+)(    needs: chuan-bi\n)", r"\1    if: ${{ needs.chuan-bi.outputs.che_do != 'duong_nhanh' }}\n\2")), ("y06_job_bat_buoc_khong_bi_bo_ca_job",)),
     ("yml_go_buoc_liet_ke_packet_loop", _yml("      - name: DUONG_NHANH - liet ke buoc bo qua (job gate-packet-loop)\n        if: ${{ needs.chuan-bi.outputs.che_do == 'duong_nhanh' }}\n        run: |\n          echo \"DUONG_NHANH: bo qua packet-loop selftest " + DUOI_LOG + "\"\n", ""), ("y07_buoc_bi_bo_tu_noi_ly_do",)),
     ("yml_liet_ke_thieu_mot_buoc", _yml("          echo \"DUONG_NHANH: bo qua golden-test " + DUOI_LOG + "\"\n", ""), ("y07_buoc_bi_bo_tu_noi_ly_do",)),
+    ("yml_kiem_re_nuot_loi", _yml("        shell: bash\n        env:\n          CI_DUONG_NHANH_SU_KIEN: ${{ github.event_name }}\n", "        continue-on-error: true\n        shell: bash\n        env:\n          CI_DUONG_NHANH_SU_KIEN: ${{ github.event_name }}\n"), ("y08_buoc_kiem_re_o_gate_ops",)),
+    ("yml_kiem_re_shell_pwsh", _yml("        shell: bash\n        env:\n          CI_DUONG_NHANH_SU_KIEN: ${{ github.event_name }}\n", "        shell: pwsh\n        env:\n          CI_DUONG_NHANH_SU_KIEN: ${{ github.event_name }}\n"), ("y08_buoc_kiem_re_o_gate_ops",)),
+    ("yml_kiem_re_comment_doctrine", _yml("          python .claude/dev/packet_loop.py doctrine-scan --root .\n", "          # python .claude/dev/packet_loop.py doctrine-scan --root .\n"), ("y08_buoc_kiem_re_o_gate_ops",)),
+    ("yml_kiem_re_comment_kiem_re", _yml("          python ops/ci_duong_nhanh.py kiem-re\n", "          # python ops/ci_duong_nhanh.py kiem-re\n"), ("y08_buoc_kiem_re_o_gate_ops",)),
+    ("yml_gate_nuot_loi", _yml("  gate:\n    needs: chuan-bi\n", "  gate:\n    needs: chuan-bi\n    continue-on-error: true\n"), ("y06_job_bat_buoc_khong_bi_bo_ca_job",)),
+    ("yml_gate_ops_nuot_loi", (YML, lambda vb: thay_regex(vb, r"(\n  gate-ops:\n(?:    #[^\n]*\n)+)(    needs: chuan-bi\n)", r"\1\2    continue-on-error: true\n")), ("y06_job_bat_buoc_khong_bi_bo_ca_job",)),
+    ("yml_gate_packet_loop_nuot_loi", (YML, lambda vb: thay_regex(vb, r"(\n  gate-packet-loop:\n(?:    #[^\n]*\n)+)(    needs: chuan-bi\n)", r"\1\2    continue-on-error: true\n")), ("y06_job_bat_buoc_khong_bi_bo_ca_job",)),
     ("yml_go_buoc_kiem_re", (YML, lambda vb: thay_regex(vb, r"      - name: DUONG_NHANH - kiem re thay cho buoc bi bo.*?(?=      # Phản chứng của bộ phân loại)", ""),), ("y08_buoc_kiem_re_o_gate_ops",)),
     ("yml_buoc_kiem_re_luon_chay", _yml("      - name: DUONG_NHANH - kiem re thay cho buoc bi bo (doctrine-scan, YAML, diff --check, lease check)\n        if: ${{ needs.chuan-bi.outputs.che_do == 'duong_nhanh' }}\n", "      - name: DUONG_NHANH - kiem re thay cho buoc bi bo (doctrine-scan, YAML, diff --check, lease check)\n"), ("y08_buoc_kiem_re_o_gate_ops",)),
     ("yml_buoc_test_bi_bo_theo_che_do", _yml("        if: runner.os == 'Linux'\n        run: python ops/ci_duong_nhanh_test.py\n", "        if: ${{ needs.chuan-bi.outputs.che_do != 'duong_nhanh' }}\n        run: python ops/ci_duong_nhanh_test.py\n"), ("y09_buoc_goi_test_cua_packet_khong_bi_bo",)),
@@ -955,7 +1048,7 @@ def chay_mot_dot_bien(ten, tep_va_ham, dich):
 
 
 def tu_kiem_phan_hang():
-    """Bốn ca tự kiểm cho CHÍNH bộ phân hạng, cộng ba đột biến thật (sống sót · lỗi vô can · sai tên)."""
+    """Năm mẫu rc cho bộ phân hạng, cộng ba đột biến thật: lỗi vô can · chỉ thêm chú thích (sống sót) · nới allowlist (giết)."""
     loi = []
     for rc, ra, ten, mong in ((3, "DO:t01:vi sao", "t01", "GIET"), (3, "DO:t02:vi sao", "t01", "TIN_DUNG_GIA"),
                               (4, "Traceback", "t01", "TIN_DUNG_GIA"), (0, "", "t01", "SONG_SOT"), (-9, "", "t01", "HONG")):

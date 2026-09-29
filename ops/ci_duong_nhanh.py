@@ -33,17 +33,21 @@ GIỚI HẠN, NÓI THẲNG (không phải ranh giới an ninh):
   · `pull_request.base.sha`/`head.sha` luôn là 40 hex ở mọi sự kiện con: theo tài liệu GitHub, chưa tự đo.
 
 LỆNH `kiem-re` (bước bù cho các bước bị bỏ, chỉ chạy khi `che_do == duong_nhanh`):
-  YAML parse được · `git diff --check` · `lease_publish.py check` cho lease CÒN HẠN đổi trong PR.
-Hai chỗ khác chữ trần của đặc tả, ĐO trên lịch sử kho 29-09-2026 và ghi ở đây để reviewer đảo được:
-  · `git diff --check` chạy với `core.whitespace=-blank-at-eol,-blank-at-eof,-space-before-tab`. Trong 345
-    lần merge gần nhất, 63 lần chỉ đổi hồ sơ và 8/63 trượt `--check` nguyên bản (dấu cách cuối dòng trong
-    verdict `.md`/`.patch` — tự bản chất của hint patch —, dòng trống cuối tệp yaml): chốt cứng sẽ chặn
-    oan ~13% đúng lớp PR mà đường nhanh sinh ra để giải. Bản tinh chỉnh vẫn bắt dấu xung đột còn sót
+  YAML parse được · `git diff --check` · lease đổi phải qua `lease_publish` · ba ca kiểm DỮ LIỆU của lease_publish_test.
+Hai chỗ khác chữ trần của đặc tả r2, ĐO ngày 29-09-2026 và ghi ở đây để chủ kho đảo được (cross-review lượt 1 gọi
+đúng là lệch đặc tả; ĐANG CHỜ QUYẾT ĐỊNH CỦA CHỦ KHO ở Issue #674, không tự coi là đã duyệt):
+  · D1 — `git diff --check` chạy với `core.whitespace=-blank-at-eol,-blank-at-eof,-space-before-tab`. Trong 345
+    lần merge gần nhất (first-parent, 400 lần gần nhất tính từ 1741e0a), 63 lần chỉ đổi hồ sơ và 8/63 trượt
+    `--check` nguyên bản (dấu cách cuối dòng trong verdict `.md`/`.patch`, dòng trống cuối tệp yaml). Chốt cứng
+    sẽ chặn oan ~13% đúng lớp PR mà đường nhanh sinh ra để giải. Bản tinh chỉnh vẫn bắt dấu xung đột còn sót
     (`<<<<<<<`, `=======`, `>>>>>>>`), thứ `--check` báo bất kể cấu hình.
-  · `lease_publish.py check` là cổng ĐĂNG lease: lease đã hết hạn thì nó trả rc=8 theo thiết kế, và bookkeeping
-    thu hồi/đóng lease thường đúng là sửa lease hết hạn. Lease hết hạn chỉ còn phép YAML-parse; lease
-    còn hạn phải qua `check` (lỗi ⇒ ĐỎ). Đo trên master: 6/113 tệp lease trượt `kiem(bo_qua_han=True)`
-    (bia mộ hai chiều), nên "bỏ qua hạn" không phải lối thoát.
+  · D2 — `lease_publish.py check` là cổng ĐĂNG lease: lease đã hết hạn thì nó trả rc=8 "hết hạn" theo thiết kế,
+    mà bookkeeping thu hồi/đóng lease thường đúng là sửa lease hết hạn. Lease CÒN HẠN đổi trong PR chạy đúng
+    `check`; lease HẾT HẠN chạy `kiem(bo_qua_han=True)` — mọi chốt như `check`, chỉ bỏ chốt hạn — nên KHÔNG
+    được miễn kiểm chỉ vì hết hạn. Cả hai đuôi `.yaml` và `.yml`. Giới hạn: bia mộ hai chiều của `kiem`
+    đọc các lease khác trong CÂY; checkout của Actions chỉ có cây PR, không có các nhánh `ops/**`. Trên một
+    clone chỉ-master 6/113 tệp lease trượt `kiem(bo_qua_han=True)`, còn trên bản sao đủ 552 ref thì 0/113
+    (đo bởi reviewer lượt 1): số 6 là số CỦA PHẠM VI clone-một-nhánh, không phải của kho.
 """
 from __future__ import annotations
 
@@ -61,6 +65,15 @@ ALLOWLIST_TIEN_TO = ("ops/land/", "ops/leases/", "ops/reviews/", "ops/specs/")
 MAU_SHA = re.compile(r"[0-9a-f]{40}")
 CAU_HINH_WHITESPACE = "core.whitespace=-blank-at-eol,-blank-at-eof,-space-before-tab"
 TOI_DA_TEN_IN = 5
+CA_DU_LIEU = ("t23_MOI_lease_THAT_trong_kho_phai_QUA", "t26_moi_bien_nhan_review_phai_khop_BAM_tep_no_tro_toi",
+              "t27_canh_bao_trong_bien_nhan_phai_duoc_NANG_len_muc_luc")
+MA_KIEM_HET_HAN = (
+    "import sys\nsys.path.insert(0, 'ops')\nimport lease_publish as lp\n"
+    "try:\n    lp.kiem(lp._doc_yaml(sys.argv[1]), sys.argv[1], '.', bo_qua_han=True)\n"
+    "except lp.Chan as e:\n    print('CHAN [%s]: %s' % (e.ma, e.thong_diep))\n    raise SystemExit(8)\n")
+MA_CHAY_CA = (
+    "import runpy, sys\nm = runpy.run_path(sys.argv[1])\n"
+    "for ten in sys.argv[2:]:\n    m[ten]()\n    print('DAT', ten)\n")
 
 
 def _ep_utf8():
@@ -194,7 +207,7 @@ def kiem_lease(doi, kho=ROOT, chay=subprocess.run, bay_gio=None, ra=None) -> lis
         return ["KHONG DO DUOC: thieu PyYAML - khong doc duoc lease"]
     bay_gio = bay_gio or datetime.now(timezone.utc)
     loi = []
-    for duong in sorted(x for x in doi if x.startswith("ops/leases/") and x.endswith(".yaml")):
+    for duong in sorted(x for x in doi if x.startswith("ops/leases/") and x.endswith((".yaml", ".yml"))):
         tep = Path(kho) / duong
         if not tep.is_file():
             continue
@@ -208,20 +221,38 @@ def kiem_lease(doi, kho=ROOT, chay=subprocess.run, bay_gio=None, ra=None) -> lis
             loi.append(f"lease khong phai mapping: {duong!r}")
             continue
         han = _han_lease(lease.get("lease_expires_at_utc"))
-        if han is not None and han <= bay_gio:
-            print(f"DUONG_NHANH: lease {duong!r} da het han - `check` la cong DANG lease (rc=8 theo thiet ke), "
-                  "chi con phep YAML-parse", file=ra)
-            continue
+        het_han = han is not None and han <= bay_gio
+        if het_han:
+            print(f"DUONG_NHANH: lease {duong!r} da het han - chay kiem(bo_qua_han=True): moi chot nhu `check`, "
+                  "chi bo chot han", file=ra)
+            lenh = [sys.executable, "-B", "-c", MA_KIEM_HET_HAN, duong]
+        else:
+            lenh = [sys.executable, "ops/lease_publish.py", "check", duong, "--root", "."]
         try:
-            r = chay([sys.executable, "ops/lease_publish.py", "check", duong, "--root", "."],
-                     cwd=kho, capture_output=True)
+            r = chay(lenh, cwd=kho, capture_output=True)
         except Exception as e:
-            loi.append(f"KHONG DO DUOC: lease_publish.py check nem {type(e).__name__} cho {duong!r}")
+            loi.append(f"KHONG DO DUOC: kiem lease nem {type(e).__name__} cho {duong!r}")
             continue
         if getattr(r, "returncode", None) != 0:
             cuoi = _dau_ra(r).strip().splitlines()[-1:]
-            loi.append(f"lease_publish.py check rc={getattr(r, 'returncode', None)} cho {duong!r}: {' '.join(cuoi)}")
+            loi.append(f"kiem lease {'(het han) ' if het_han else ''}rc={getattr(r, 'returncode', None)} "
+                       f"cho {duong!r}: {' '.join(cuoi)}")
     return loi
+
+
+def kiem_ca_du_lieu(kho=ROOT, chay=subprocess.run) -> list[str]:
+    """Ba ca kiem DU LIEU that cua bo lease-publish (t23 neo prompt cua moi lease · t26 bam bien nhan review · t27
+    muc luc `ops/reviews`) thay cho ca bo `lease-publish selftest`: ba ca nay doc CAY that nen la thu ma PR ho so
+    co the lam hong; bo ca suite di la mat chung. Chay nguyen ca trong tep test that, ~6 giay."""
+    try:
+        r = chay([sys.executable, "-B", "-c", MA_CHAY_CA, "ops/lease_publish_test.py", *CA_DU_LIEU],
+                 cwd=kho, capture_output=True)
+    except Exception as e:
+        return [f"KHONG DO DUOC: chay ca du lieu nem {type(e).__name__}"]
+    if getattr(r, "returncode", None) != 0:
+        cuoi = _dau_ra(r).strip().splitlines()[-3:]
+        return [f"ca du lieu cua lease_publish_test rc={getattr(r, 'returncode', None)}: " + " | ".join(cuoi)]
+    return []
 
 
 def lenh_kiem_re(env=os.environ, chay=subprocess.run, kho=ROOT, ra=None, bay_gio=None) -> int:
@@ -233,7 +264,8 @@ def lenh_kiem_re(env=os.environ, chay=subprocess.run, kho=ROOT, ra=None, bay_gio
         print("DUONG_NHANH: kiem-re CHI chay khi diff toan ho so; phan loai lai khong ra DUONG_NHANH - DO "
               "(khong khop voi job chuan-bi)", file=ra)
         return 1
-    loi = kiem_yaml(doi, kho) + kiem_diff_check(env, chay, kho) + kiem_lease(doi, kho, chay, bay_gio, ra)
+    loi = (kiem_yaml(doi, kho) + kiem_diff_check(env, chay, kho) + kiem_lease(doi, kho, chay, bay_gio, ra)
+           + kiem_ca_du_lieu(kho, chay))
     for x in loi:
         print("DUONG_NHANH: LOI - " + x, file=ra)
     print(f"DUONG_NHANH: kiem-re {'DO' if loi else 'DAT'} ({len(doi)} tep doi, {len(loi)} loi)", file=ra)

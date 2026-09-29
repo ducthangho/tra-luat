@@ -1,0 +1,19 @@
+# Bien nhan luot review 1 — packet #674 CI-DUONG-NHANH-HO-SO. Nguon co tham quyen = tep verdict (co bam); comment tren Issue chi la ban chieu.
+luot: 1
+reviewed_sha: 1687c693c622177742807f0a2abd765547b0e748
+reviewer: codex (OpenAI Codex CLI)
+model_yeu_cau: gpt-6-astra
+effort_yeu_cau: high
+model_thuc_chay: KHONG DO DUOC (codex khong xuat modelUsage; header stderr chi la khai cua CLI)
+run_short_id: 3cea3ae3
+run_id: 3cea3ae303c24f9687e42ab96fd5ce35
+trang_thai: xong
+ma_thoat: 0
+thoi_luong_giay: 1087.163
+stdout_byte: 379
+stderr_byte: 696596
+prompt_sha256: 6b61a299ebdac50767a6eab22fea377f84257ddc5e23facf8bb802baf754854e
+verdict_tep: ops/reviews/ci-duong-nhanh-674/luot-1-verdict.md
+verdict_sha256: 0c5dd5bc2f1aa4d376286ea85b3f8112578cdbaaf904f8e38734e8d22aabbbe9
+verdict_bytes: 32686
+ghi_chu: run.json nam ngoai kho (scratchpad phien thi cong); scalar tren chep tu do, khong tu doi chieu duoc tu kho.

@@ -1,0 +1,26 @@
+chua chay tren cay that — executor tu ap, tu do, tu chiu trach nhiem commit
+--- ops/ci_duong_nhanh_test.py
++++ ops/ci_duong_nhanh_test.py
+@@ -676,6 +676,8 @@
+     for job in BAT_BUOC:
+         bang(job in wf["jobs"], f"thieu job bat buoc {job}")
+         bang("if" not in wf["jobs"][job], f"{job}: KHONG duoc co `if:` cap job — check se VANG MAT thay vi bao ket qua")
++        bang(wf["jobs"][job].get("continue-on-error", False) is False,
++             f"{job}: job bat buoc khong duoc nuot loi")
+ 
+ 
+ @ca
+@@ -704,6 +706,13 @@
+     b = kr[0]
+     bang(chuan_hoa_if(b.get("if")) == NHANH, f"buoc kiem re chi chay khi duong nhanh, if={b.get('if')!r}")
+     run = str(b.get("run", ""))
++    bang(b.get("continue-on-error", False) is False, "kiem-re khong duoc nuot loi")
++    bang(b.get("shell") == "bash", "kiem-re can shell bash")
++    bang([d.strip() for d in run.splitlines() if d.strip()] == [
++        "set -euo pipefail",
++        "python .claude/dev/packet_loop.py doctrine-scan --root .",
++        "python ops/ci_duong_nhanh.py kiem-re",
++    ], "kiem-re phai chay DUNG hai lenh, khong chap nhan comment/nuot rc")
+     bang("packet_loop.py doctrine-scan --root ." in run and "set -euo pipefail" in run,
+          f"buoc kiem re phai chay doctrine-scan va set -euo pipefail: {run!r}")
+     env = b.get("env") or {}

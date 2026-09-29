@@ -1,21 +1,18 @@
 #!/usr/bin/env bash
-# ops/do_sigpipe.sh [--lan N] [--goc THU_MUC] — phep do phan chung cho #675: khong con pipeline
-# "nguoi doc thoat som" (`| head -1`) duoi `set -e` + `pipefail` trong 3 script ops + B1 cua W5.
-#
-# CO CHE: `printf '%s\n' "$X" | head -1` — neu head thoat truoc lan ghi sau, printf an SIGPIPE, pipefail
-# day 141 len, `set -e` giet script khong in gi. Dau vao 20000 dong: tat dinh rc=141.
-#
-# KIEN TRUC (r2 g3): KHONG chay ban TRICH. Moi phep do chay CHINH tep (khong cat, khong trich van ban roi
-# chay ban trich) trong fixture offline va doc DAU VET O DIEM SU DUNG:
-#   (d) W1: lenh cai da GOI + probe thay PATH/env moi · W2: kiem ban + stdout + GITHUB_PATH · W3: dong
-#       `cong-cu.txt` + ket luan. Chay LAN lan; moi lan phai rc=0 VA dau vet dung (rc va dau vet la hai chot rieng).
-#   (c) tu kiem — dua dong ve dang pipeline cu tren BAN SAO TAM roi goi CHINH `cham_diem` ay: no PHAI ghi DO
-#       vi rc=141. Chi MOT duong quyet dinh cap/khuoc diem (`cham_diem`, `cham_b1`); (c) khong co nhanh cham rieng.
-#   (e) B1 — nap CHINH W5 (`source`, khong sed) duoi DEBUG trap; tai moi ca `lam ...` cua W5 doc `declare -f lam`
-#       THAT (ham dang song, ke ca dinh nghia lai/ham chet), chay `lam` + 20000 doi so voi `env` la recorder.
+# shellcheck disable=SC2030,SC2031  # (c) doi bo dem TONG/DAT trong SUBSHELL la CO Y: ket qua THAT khong lot sang bo dem cha
+# ops/do_sigpipe.sh [--lan N] [--goc THU_MUC] — phep do phan chung cho #675 (r2 g2): khong con pipeline "nguoi doc thoat
+# som" (`| head -1`) duoi `set -e` + `pipefail` trong 3 script ops + B1 cua W5. CO CHE: `printf '%s\n' "$X" | head -1` —
+# head thoat truoc lan ghi sau => printf an SIGPIPE, pipefail day 141, `set -e` giet script. Dau vao 20000 dong: tat dinh.
+# KIEN TRUC: KHONG chay ban TRICH; chay CHINH tep trong fixture offline, doc DAU VET O DIEM SU DUNG:
+#   (d) W1: lenh cai da GOI + probe thay PATH/env · W2: kiem ban + stdout + GITHUB_PATH · W3: `cong-cu.txt` + ket luan.
+#   (c) tu kiem: dua dong ve dang cu tren BAN SAO TAM, chay lai CHINH `cham_diem`/`cham_b1` trong SUBSHELL (cung `ghi`,
+#       khong che do rieng): ket qua THAT (TONG/DAT, ly do) phai la DO vi rc=141.
+#   (e) B1: nap CHINH W5 (`source`) duoi driver bat vao `lam` theo FRAME (FUNCNAME), khong theo cach viet loi goi; do MOI
+#       body `lam` song (ke ca dinh nghia lai) voi 20000 doi so. Bien nhan: so lan vao `lam` (trap) = so lan `lam` cham env
+#       (seam); cksum khong hong; W5 toi dong tong ket — khong chung minh duoc => rc=2. Driver chay `env -i`, moi dich ghi
+#       cua W5 (TMPDIR RUNNER_TEMP NEO_TEP...) duoi TMP rieng. KHONG chan duoc: pha DONG THOI trap + seam.
 #   (a) tuong duong BIEU THUC — dong trich `^BIEN=` chay tren tap dau vao ne (khong noi gi ve duong chay; (d) noi).
-# Dung cu thieu / fixture hong / producer loi hoac ngan -> rc=2 KHONG DO DUOC; khong bao gio xanh im lang.
-# --goc: thu muc goc chua ops/{cai_cong_cu,cai_actionlint,dung_goi_review,don_ref_chot_test}.sh + .github/workflows/ops-don-ref.yml.
+# Dung cu thieu / fixture hong / producer loi hoac ngan => rc=2 KHONG DO DUOC. --goc: goc chua ops/{3 script,W5}.sh + workflow.
 # Ma thoat: 0 = N/N · 1 = co phep do DO · 2 = KHONG DO DUOC (dung sai / trich khong ra / thieu tep — nen TEN tep).
 set -euo pipefail
 
@@ -64,7 +61,8 @@ trap 'rm -rf -- "$TMP"' EXIT
 W5=ops/don_ref_chot_test.sh
 # F2: thieu tep nao => KHONG DO DUOC nen TEN tep, TRUOC moi phep do/chep (khong de `cp` chet rc=1 giua chung).
 for f in "${TEP[@]}" "$W5" .github/workflows/ops-don-ref.yml; do [ -f "$GOC/$f" ] || khong_do "thieu tep $GOC/$f"; done
-for t in git tar awk od find xargs comm sort wc python3; do command -v "$t" >/dev/null 2>&1 || khong_do "thieu cong cu $t"; done
+for t in git tar awk od find xargs comm sort wc python3 env cksum grep tr head tail; do command -v "$t" >/dev/null 2>&1 || khong_do "thieu cong cu $t"; done
+printf x | cksum >/dev/null 2>&1 || khong_do "cong cu cksum (observer B1) khong chay duoc"
 if command -v sha256sum >/dev/null 2>&1; then SHACMD=(sha256sum)
 elif command -v shasum >/dev/null 2>&1; then SHACMD=(shasum -a 256)
 else khong_do "thieu sha256sum/shasum"; fi
@@ -144,26 +142,21 @@ chay_diem() {  # chay_diem I GOC K -> DO_RC, DO_GT (dau vet o diem su dung), MON
   DO_RC=$rc
 }
 
-# ── Ghi diem. Che do CON (CON=1): ghi vao CON_* de (c) hoi "cham co ghi DO khong", KHONG cong vao bo dem cha.
-TONG=0; DAT=0; CON=0; CON_DO=0; CON_LY=""
+# ── Ghi diem: MOT ham cho (d), (e), (c) — (c) chay lai CHINH cham_* trong subshell, khong co che do rieng.
+TONG=0; DAT=0; SAI=0
 ghi() {  # ghi <0|1> nhan chi-tiet
-  if [ "$CON" -eq 1 ]; then
-    if [ "$1" -ne 0 ]; then CON_DO=$((CON_DO + 1)); CON_LY+="$2 $3;"; fi
-    return 0
-  fi
   TONG=$((TONG + 1))
   if [ "$1" -eq 0 ]; then DAT=$((DAT + 1)); else printf '  ĐỎ  %s  %s\n' "$2" "$3"; fi
 }
-tu_kiem() {  # tu_kiem NHAN MAU CMD... : (c) chay CHINH ham cham CMD tren ban sao dot bien; no PHAI ghi DO, ly do chua MAU
-  local nhan="$1" mau="$2"; shift 2
-  CON=1; CON_DO=0; CON_LY=""
-  "$@"
-  CON=0
-  if [ "$CON_DO" -ge 1 ] && [[ "$CON_LY" == *"$mau"* ]]; then ghi 0 "" ""
-  else ghi 1 "(c) $nhan" "cham phai ghi DO co '$mau'; ghi $CON_DO DO, ly do='$CON_LY'"; fi
+tu_kiem() {  # tu_kiem NHAN MAU CMD... : chay CHINH CMD (cham_*) tren ban sao dot bien trong SUBSHELL; TONG/DAT + ly do la cua KET QUA THAT
+  local nhan="$1" mau="$2" out rc=0 t d; shift 2
+  out="$( (TONG=0; DAT=0; "$@"; echo "@@ $TONG $DAT") )" || rc=$?
+  [ "$rc" -eq 0 ] || exit "$rc"
+  t="${out##*@@ }"; d="${t#* }"; t="${t% *}"
+  if [ "$d" -lt "$t" ] && [[ "$out" == *"$mau"* ]]; then ghi 0 "" ""
+  else SAI=1; ghi 1 "(c) $nhan" "cham phai ghi DO co '$mau'; ghi $d/$t DAT, dau ra='$out'"; fi
 }
-
-# MOT duong quyet dinh cap/khuoc diem (d). Ca head lan ban sao dot bien (c) deu di qua day.
+# MOT duong cham (d). Ca head lan ban sao dot bien (c) deu di qua day.
 cham_diem() {  # cham_diem I GOC
   local i="$1" k n0=0 n141=0 nk=0 sai=0 lan_sai=""
   for ((k = 0; k < LAN; k++)); do
@@ -174,39 +167,53 @@ cham_diem() {  # cham_diem I GOC
   if [ "$n0" -eq "$LAN" ] && [ "$sai" -eq 0 ]; then ghi 0 "" ""
   else ghi 1 "(d) ${TEN[$i]}/chay-toan-bo" "rc0=$n0 rc141=$n141 khac=$nk dau-vet-sai=$sai (mong '$MONG_GT', thay '$lan_sai')"; fi
 }
-
-# ── (e) B1. Driver nap CHINH W5 (`source`); DEBUG trap (-T) bat MOI ca `lam ...` cua W5.
+# ── (e) B1. trampa (DEBUG trap, -T): vao frame `lam`, body moi (cksum `declare -f lam`) => do voi 20000 doi so;
+#   env (seam): moi `lam` deu qua day de chay `bash lam.sh` => dem. Trap != seam => KHONG DO DUOC.
 # shellcheck disable=SC2016  # driver la van ban bash, chu y khong khai trien o day
-B1_DRV='set -uT; OUT=$1; W5=$2; N=$3; LAN=$4; H0=""; PAD=()
-for ((k = 1; k <= N; k++)); do PAD+=("P$k=x"); done
-[ "${#PAD[@]}" -eq "$N" ] || exit 97
-lay() {
-  local v k nr nn
-  for v in khop khong chuoi; do for ((k = 0; k < LAN; k++)); do
-    rm -f "$OUT.env"; env() { printf "%s\n" "$@" > "$OUT.env"; }
-    case "$v" in
-      khop)  lam t 0 xoa-nhanh r1 sha thu GIA_REF_STATE=explicit NEO_TEP=explicit "${PAD[@]}" ;;
-      khong) lam t 0 xoa-nhanh r1 sha thu "${PAD[@]}" ;;
-      chuoi) lam t 0 xoa-nhanh r1 sha thu XGIA_REF_STATE=z NEO_TEP_X=z "${PAD[@]}" ;;
-    esac >/dev/null 2>&1
-    unset -f env
-    nr=$(grep -c "^GIA_REF_STATE=" "$OUT.env" || true); nn=$(grep -c "^NEO_TEP=" "$OUT.env" || true)
-    printf "%s\t%s\t%s\t%s\t%s\n" "$v" "$nr" "$nn" "$(grep -m1 "^GIA_REF_STATE=" "$OUT.env" || true)" "$(grep -m1 "^NEO_TEP=" "$OUT.env" || true)" >> "$OUT"
-  done; done
+B1_DRV='set -uT; B_OUT=$1; B_W5=$2; B_N=$3; B_LAN=$4; B_IN=0; B_REC=0; B_V=""; B_SEEN=" "; B_PAD=()
+for ((B_k = 1; B_k <= B_N; B_k++)); do B_PAD+=("P$B_k=x"); done
+[ "${#B_PAD[@]}" -eq "$B_N" ] || exit 97
+mktemp -u > "$B_OUT.mk"
+env() {
+  local a nr=0 nn=0 r="" n=""
+  if [ "$B_REC" -eq 1 ]; then
+    for a; do case "$a" in GIA_REF_STATE=*) nr=$((nr + 1)); : "${r:=$a}" ;; NEO_TEP=*) nn=$((nn + 1)); : "${n:=$a}" ;; esac; done
+    printf "%s\t%s\t%s\t%s\t%s\n" "$B_V" "$nr" "$nn" "$r" "$n" >> "$B_OUT"; return 0
+  fi
+  [ "${FUNCNAME[1]:-}" = lam ] && echo s >> "$B_OUT.s"
+  command env "$@"
 }
-trampa() { case "$BASH_COMMAND" in "lam "*)
-  local h; h="$(declare -f lam | cksum)"
-  if [ -z "$H0" ]; then H0="$h"; lay; elif [ "$h" != "$H0" ]; then echo redef >> "$OUT"; fi ;; esac; return 0; }
-trap() { case "$*" in *DEBUG*) ;; *) builtin trap "$@" ;; esac; }  # W5 khong duoc go/doi trap DEBUG cua driver
-builtin trap trampa DEBUG
-. "$W5"'
+trampa() {
+  case " ${FUNCNAME[*]} " in *" lam "*) [ "$B_IN" -eq 0 ] || return 0; B_IN=1 ;; *) B_IN=0; return 0 ;; esac
+  local h B_k B_V; echo t >> "$B_OUT.t"
+  h="$(declare -f lam | cksum)" && [ -n "$h" ] || { echo cksum >> "$B_OUT.loi"; return 0; }
+  h="${h// /-}"; [[ "$B_SEEN" == *" $h "* ]] && return 0; B_SEEN+="$h "
+  echo body >> "$B_OUT"; B_REC=1
+  for B_V in khop khong chuoi; do for ((B_k = 0; B_k < B_LAN; B_k++)); do
+    case "$B_V" in
+      khop)  lam t 0 xoa-nhanh r1 sha thu GIA_REF_STATE=explicit NEO_TEP=explicit "${B_PAD[@]}" ;;
+      khong) lam t 0 xoa-nhanh r1 sha thu "${B_PAD[@]}" ;;
+      chuoi) lam t 0 xoa-nhanh r1 sha thu XGIA_REF_STATE=z NEO_TEP_X=z "${B_PAD[@]}" ;;
+    esac >/dev/null 2>&1
+  done; done; B_REC=0
+}
+trap trampa DEBUG
+. "$B_W5"'
 V_TAG=(khop khong chuoi)
 V_TEN=(khop-dau-tuong-minh khong-khop-mac-dinh chuoi-con-khong-phai-dau)
-cham_b1() {  # cham_b1 GOC : nap CHINH W5 duoi driver; moi bien the phai cho `env` DUNG 1 dong moi bien, dung gia tri
-  local vi tag nr nn r n bad dem
-  rm -f -- "$TMP/b1.out"
-  bash -c "$B1_DRV" _ "$TMP/b1.out" "$1/$W5" "$DONG_LON" "$LAN" >/dev/null 2>"$TMP/b1.err" || true
+cham_b1() {  # cham_b1 GOC : nap CHINH W5 duoi driver; moi body `lam` phai cho `env` DUNG 1 dong moi bien, dung gia tri
+  local vi tag nr nn r n bad dem nb nt=0 ns=0 sen="$TMP/sen" rt="$TMP/b1t"
+  rm -rf -- "$TMP"/b1.out* "$sen" "$rt"; mkdir -p "$sen" "$rt"; printf 'sentinel\n' > "$sen/don_ref_neo.txt"
+  # H3: bien caller "doc" (sentinel) khong duoc lot vao driver; `env -i` + dich rieng duoi TMP
+  RUNNER_TEMP="$sen" NEO_TEP="$sen/don_ref_neo.txt" TMPDIR="$sen" GIA_REF_STATE="$sen/rs" \
+    env -i PATH="$PATH" HOME="$rt" LC_ALL=C PYTHONDONTWRITEBYTECODE=1 ACTIONLINT="${ACTIONLINT:-}" TMPDIR="$rt" RUNNER_TEMP="$rt" \
+    bash -c "$B1_DRV" _ "$TMP/b1.out" "$1/$W5" "$DONG_LON" "$LAN" >"$TMP/b1.w5" 2>"$TMP/b1.err" </dev/null || true
+  [ ! -e "$TMP/b1.out.loi" ] || khong_do "cong cu observer B1 hong khi do (cksum): khong tin duoc so lieu"
   [ -s "$TMP/b1.out" ] || khong_do "W5 khong toi ca lam() nao ($(tail -n 2 "$TMP/b1.err" | tr '\n' ' '))"
+  [ ! -f "$TMP/b1.out.t" ] || nt=$(wc -l < "$TMP/b1.out.t"); [ ! -f "$TMP/b1.out.s" ] || ns=$(wc -l < "$TMP/b1.out.s")
+  [ "$nt" -ge 1 ] && [ "$nt" -eq "$ns" ] || khong_do "observer B1 khong bao phu moi lan goi lam: trap=$nt seam=$ns"
+  grep -q '^don_ref: ' "$TMP/b1.w5" || khong_do "driver khong chay toi dong tong ket cua W5 (thoat som? $(tail -n 1 "$TMP/b1.err" | tr '\n' ' '))"
+  nb=$(grep -c '^body$' "$TMP/b1.out" || true)
   for vi in "${!V_TAG[@]}"; do
     bad=0; dem=0
     while IFS=$'\t' read -r tag nr nn r n; do
@@ -217,10 +224,11 @@ cham_b1() {  # cham_b1 GOC : nap CHINH W5 duoi driver; moi bien the phai cho `en
         if [ "$r" != GIA_REF_STATE=explicit ] || [ "$n" != NEO_TEP=explicit ]; then bad=$((bad + 1)); fi
       elif [[ "$r" != GIA_REF_STATE=*/refstate ]] || [[ "$n" != NEO_TEP=*/neo_auto ]]; then bad=$((bad + 1)); fi
     done < "$TMP/b1.out"
-    if [ "$dem" -eq "$LAN" ] && [ "$bad" -eq 0 ]; then ghi 0 "" ""
-    else ghi 1 "(e) B1/${V_TEN[$vi]}" "mong $LAN lan dung, thay $dem lan, sai $bad (moi bien DUNG 1 dong)"; fi
+    if [ "$dem" -eq $((LAN * nb)) ] && [ "$bad" -eq 0 ]; then ghi 0 "" ""
+    else ghi 1 "(e) B1/${V_TEN[$vi]}" "mong $((LAN * nb)) lan dung ($nb body), thay $dem lan, sai $bad (moi bien DUNG 1 dong)"; fi
   done
-  if grep -q '^redef' "$TMP/b1.out"; then ghi 1 "(e) B1/lam-bi-dinh-nghia-lai" "declare -f lam doi giua cac ca cua W5"; else ghi 0 "" ""; fi
+  if [ "$(<"$sen/don_ref_neo.txt")" = sentinel ] && [ -e "$rt/don_ref_neo.txt" ] && [[ "$(<"$TMP/b1.out.mk")" == "$rt"/* ]]; then ghi 0 "" ""
+  else ghi 1 "(e) B1/cach-ly-ghi" "tep mau cua caller bi doi, hoac dich mac dinh (NEO_TEP, mktemp) khong nam duoi TMP rieng"; fi
 }
 
 DK="bash $BASH_VERSION, $(nproc 2>/dev/null || echo '?') loi, $LAN lan, $DONG_LON dong"
@@ -229,7 +237,6 @@ for i in "${!TEN[@]}"; do
   trich "$GOC" "$i"
   dong="$TRICH_DONG"
   printf '%s  %s:%s\n    %s\n' "${TEN[$i]}" "${TEP[$i]}" "$TRICH_SO" "$dong"
-
   # (a) tuong duong BIEU THUC tren tap dau vao
   for j in "${!DV_TEN[@]}"; do
     rc=0; moi="$(chay_gia_tri euo\ pipefail "$dong" "${VAO[$i]}" "${RA[$i]}" "${DV_GT[$j]}")" || rc=$?
@@ -237,11 +244,10 @@ for i in "${!TEN[@]}"; do
     if [ "$rc" -eq 0 ] && [ "$rc2" -eq 0 ] && [ "$moi" = "$cu" ]; then ghi 0 "" ""
     else ghi 1 "(a) ${TEN[$i]}/${DV_TEN[$j]}" "trich rc=$rc '$moi' · cu rc=$rc2 '$cu'"; fi
   done
-
   # (d) chay CHINH tep, doc dau vet o diem su dung
   cham_diem "$i" "$GOC"
 
-  # (c) tu kiem: dua dong ve dang cu tren BAN SAO TAM; CHINH `cham_diem` phai ghi DO vi 141 moi lan
+  # (c) dua dong ve dang cu tren BAN SAO TAM
   mkdir -p "$TMP/mut-$i/ops" || khong_do "khong tao duoc $TMP/mut-$i"
   cp -- "$GOC/${TEP[$i]}" "$TMP/mut-$i/${TEP[$i]}" || khong_do "khong chep duoc $GOC/${TEP[$i]}"
   {
@@ -256,8 +262,7 @@ done
 
 # (e) B1 tren W5 that; (c) ban sao W5 dua 2 phep do ve `printf | grep -q` — CHINH `cham_b1` phai ghi DO o bien the khop-dau
 cham_b1 "$GOC"
-mkdir -p "$TMP/mut-b1/ops" "$TMP/mut-b1/.github/workflows"
-cp -- "$GOC/.github/workflows/ops-don-ref.yml" "$TMP/mut-b1/.github/workflows/"
+mkdir -p "$TMP/mut-b1/ops" "$TMP/mut-b1/.github/workflows" && cp -- "$GOC/.github/workflows/ops-don-ref.yml" "$TMP/mut-b1/.github/workflows/"
 src="$(<"$GOC/$W5")"
 for m in ref:GIA_REF_STATE neo:NEO_TEP; do  # dua tung phep do ve dang cu: `printf | grep -q` (SIGPIPE -> `!` dao nhanh)
   src="${src/"  if [ \"\$mac_${m%%:*}\" -eq 1 ]; then"/"  if ! printf '%s\\n' \"\$@\" | grep -q '^${m#*:}='; then"}"
@@ -268,12 +273,11 @@ if ! grep -qF "| grep -q '^GIA_REF_STATE='" "$TMP/mut-b1/$W5" || ! grep -qF "| g
   khong_do "$W5: dot bien B1 khong dua duoc CA HAI phep do ve dang cu"
 fi
 tu_kiem "B1/dot-bien-printf-grep" "khop-dau-tuong-minh" cham_b1 "$TMP/mut-b1"
-
 # Ca CO MAT khac ca co DO: so phep da ghi phai bang so phep khai bao (vong lap khong duoc nuot ca nao).
 MONG=$(( ${#TEN[@]} * (${#DV_TEN[@]} + 2) + 5 ))
 [ "$TONG" -eq "$MONG" ] || khong_do "ghi $TONG phep, khai bao $MONG"
 
-if [ "$DAT" -eq "$TONG" ]; then
+if [ "$DAT" -eq "$TONG" ] && [ "$SAI" -eq 0 ]; then
   echo "do_sigpipe: $DAT/$TONG DAT ($DK)"
   exit 0
 fi

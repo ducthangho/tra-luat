@@ -26,6 +26,7 @@ packet_slug: LEASE-PUBLISH-WINDOWS-DO
 revision: 1
 generation: 1
 lease_id: lease-publish-windows-do-r1-g1-claude
+da_bi_thay_the: lease-publish-windows-do-r2-g2-claude
 thay_the_cho: []
 thay_the_ghi_chu: 'Khong lease nao dang giu write set (ai-dang-giu NGUOI_GIU 0, do 2026-09-29T10:19Z).'
 role: executor

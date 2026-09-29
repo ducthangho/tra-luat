@@ -7,6 +7,7 @@ event: executor_lease_granted
 packet_issue: 674
 granted_by: ducthangho
 granted_on_instruction: https://github.com/ducthangho/tra-luat/issues/674#issuecomment-5885287008
+granted_on_instruction_model: 'Chu kho: Vá bằng sonnet 5.5, effort high (phien Claude Code 2026-09-29 ~08:10Z) — doi model executor tu claude-opus-5-5 sang claude-sonnet-5-5 TRUOC khi g2 duoc dang.'
 granted_on_instruction_r2: 'Chu kho chon huong A (revision 2, them .claude/dev/ci_dang_ky_test.py vao write set) trong phien Claude Code 2026-09-29, tra loi AskUserQuestion cua phien dieu phoi; comment neo ghi ho o Issue #674 (dang ngay sau lease nay).'
 granted_on_instruction_nguyen_van: >-
   'Cấp lease đi. Cross review theo phân lớp, không theo từng lỗi, có hint patch'; 'Không Ci windows. Lặp vá bằng
@@ -35,9 +36,9 @@ role: executor
 provider: anthropic_claude
 executor: claude
 surface: claude_code
-model: claude-opus-5-5
+model: claude-sonnet-5-5
 effort: high
-effort_ghi_chu: 'Tu khai theo chi thi chu kho; KHONG DO DUOC tu ngoai.'
+effort_ghi_chu: 'Tu khai theo chi thi chu kho (2026-09-29 ~08:10Z: va bang Sonnet 5.5, effort high); KHONG DO DUOC tu ngoai.'
 environment: cloud
 risk: sensitive
 review_class: sensitive

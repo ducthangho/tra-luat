@@ -35,9 +35,10 @@ model_ghi_chu: 'Chu kho: sonnet 5.5 neu co, khong thi opus 5.5. Model THUC chay 
 effort: high
 effort_ghi_chu: 'Phien dieu phoi chon high trong pham vi "tùy bạn đánh giá"; tu khai, KHONG DO DUOC tu ngoai.'
 environment: cloud
-risk: normal
-review_class: routine
-effective_review_class: routine
+risk: sensitive
+review_class: sensitive
+effective_review_class: sensitive
+assurance_target: human_audited
 reviewer_provider: openai_codex
 reviewer_surface: codex_cli
 reviewer_ghi_chu: >-

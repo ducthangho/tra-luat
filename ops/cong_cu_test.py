@@ -2120,6 +2120,112 @@ for _ten, _ca, _tim, _thay in (
     ('f32_do_dai', 't53_', '            "head": head if re.fullmatch(r"[0-9a-f]{40}|[0-9a-f]{64}", head) else None}\n', '            "head": head if re.fullmatch(r"[0-9a-f]{40,64}", head) else None}\n'),
     ('f32_bang_chu', 't53_', '            "head": head if re.fullmatch(r"[0-9a-f]{40}|[0-9a-f]{64}", head) else None}\n', '            "head": head if re.fullmatch(r"[0-9a-z]{40}|[0-9a-z]{64}", head) else None}\n'),
     ('f32_hoa', 't53_', '            "head": head if re.fullmatch(r"[0-9a-f]{40}|[0-9a-f]{64}", head) else None}\n', '            "head": head if re.fullmatch(r"[0-9a-fA-F]{40}|[0-9a-fA-F]{64}", head) else None}\n'),
+    # F33/F34/F35 (Codex lượt 14, theo LỚP): miền chế độ, nguồn HEAD hai nhánh + ngoại lệ + bytes, phân hoạch/gom/bộ ghi.
+    ('f33_k_width', 't53_',
+     '    m = re.fullmatch(r"(0|[1-9][0-9]?)/([1-9][0-9]?)", mh)\n',
+     '    m = re.fullmatch(r"(0|[1-9][0-9]*)/([1-9][0-9]?)", mh)\n'),
+    ('f33_n_width', 't53_',
+     '    m = re.fullmatch(r"(0|[1-9][0-9]?)/([1-9][0-9]?)", mh)\n',
+     '    m = re.fullmatch(r"(0|[1-9][0-9]?)/([1-9][0-9]*)", mh)\n'),
+    ('f33_n_zero', 't53_',
+     '    m = re.fullmatch(r"(0|[1-9][0-9]?)/([1-9][0-9]?)", mh)\n',
+     '    m = re.fullmatch(r"(0|[1-9][0-9]?)/([0-9][0-9]?)", mh)\n'),
+    ('f33_n_unicode_first', 't53_',
+     '    m = re.fullmatch(r"(0|[1-9][0-9]?)/([1-9][0-9]?)", mh)\n',
+     '    m = re.fullmatch(r"(0|[1-9][0-9]?)/(\\d[0-9]?)", mh)\n'),
+    ('f33_n_unicode_tail', 't53_',
+     '    m = re.fullmatch(r"(0|[1-9][0-9]?)/([1-9][0-9]?)", mh)\n',
+     '    m = re.fullmatch(r"(0|[1-9][0-9]?)/([1-9]\\d?)", mh)\n'),
+    ('f33_k_unicode_tail', 't53_',
+     '    m = re.fullmatch(r"(0|[1-9][0-9]?)/([1-9][0-9]?)", mh)\n',
+     '    m = re.fullmatch(r"(0|[1-9]\\d?)/([1-9][0-9]?)", mh)\n'),
+    ('f33_k_sign', 't53_',
+     '    m = re.fullmatch(r"(0|[1-9][0-9]?)/([1-9][0-9]?)", mh)\n',
+     '    m = re.fullmatch(r"([+-]?(?:0|[1-9][0-9]?))/([1-9][0-9]?)", mh)\n'),
+    ('f33_n_sign', 't53_',
+     '    m = re.fullmatch(r"(0|[1-9][0-9]?)/([1-9][0-9]?)", mh)\n',
+     '    m = re.fullmatch(r"(0|[1-9][0-9]?)/([+-]?[1-9][0-9]?)", mh)\n'),
+    ('f33_separator', 't53_',
+     '    m = re.fullmatch(r"(0|[1-9][0-9]?)/([1-9][0-9]?)", mh)\n',
+     '    m = re.fullmatch(r"(0|[1-9][0-9]?)[/:]([1-9][0-9]?)", mh)\n'),
+    ('f33_output_trim', 't53_',
+     '    return "manh", (k, n, ra)\n',
+     '    return "manh", (k, n, ra.strip())\n'),
+    ('f33_output_space', 't53_',
+     '    if not ra:\n',
+     '    if not ra or not ra.strip():\n'),
+    ('f34_head_64_alpha', 't53_',
+     '            "head": head if re.fullmatch(r"[0-9a-f]{40}|[0-9a-f]{64}", head) else None}\n',
+     '            "head": head if re.fullmatch(r"[0-9a-f]{40}|[0-9a-z]{64}", head) else None}\n'),
+    ('f34_head_64_case', 't53_',
+     '            "head": head if re.fullmatch(r"[0-9a-f]{40}|[0-9a-f]{64}", head) else None}\n',
+     '            "head": head if re.fullmatch(r"[0-9a-f]{40}|[0-9a-fA-F]{64}", head) else None}\n'),
+    ('f34_head_64_ascii_extra', 't53_',
+     '            "head": head if re.fullmatch(r"[0-9a-f]{40}|[0-9a-f]{64}", head) else None}\n',
+     '            "head": head if re.fullmatch(r"[0-9a-f]{40}|[0-9a-f_]{64}", head) else None}\n'),
+    ('f34_head_40_ascii_extra', 't53_',
+     '            "head": head if re.fullmatch(r"[0-9a-f]{40}|[0-9a-f]{64}", head) else None}\n',
+     '            "head": head if re.fullmatch(r"[0-9a-f_]{40}|[0-9a-f]{64}", head) else None}\n'),
+    ('f34_head_64_narrow', 't53_',
+     '            "head": head if re.fullmatch(r"[0-9a-f]{40}|[0-9a-f]{64}", head) else None}\n',
+     '            "head": head if re.fullmatch(r"[0-9a-f]{40}|[0-9a-e]{64}", head) else None}\n'),
+    ('f34_head_64_decimal_only', 't53_',
+     '            "head": head if re.fullmatch(r"[0-9a-f]{40}|[0-9a-f]{64}", head) else None}\n',
+     '            "head": head if re.fullmatch(r"[0-9a-f]{40}|[a-f]{64}", head) else None}\n'),
+    ('f34_head_strip_left', 't53_',
+     '        head = p.stdout.strip() if p.returncode == 0 else ""\n',
+     '        head = p.stdout.rstrip() if p.returncode == 0 else ""\n'),
+    ('f34_head_rc_two', 't53_',
+     '        head = p.stdout.strip() if p.returncode == 0 else ""\n',
+     '        head = p.stdout.strip() if p.returncode != 1 else ""\n'),
+    ('f34_head_no_oserror', 't53_',
+     '    except (OSError, subprocess.SubprocessError):\n',
+     '    except subprocess.SubprocessError:\n'),
+    ('f34_head_no_subprocesserror', 't53_',
+     '    except (OSError, subprocess.SubprocessError):\n',
+     '    except OSError:\n'),
+    ('f34_head_timeout', 't53_',
+     '        p = subprocess.run(["git", "-C", str(GOC), "rev-parse", "HEAD"], capture_output=True, text=True, timeout=60)\n',
+     '        p = subprocess.run(["git", "-C", str(GOC), "rev-parse", "HEAD"], capture_output=True, text=True, timeout=None)\n'),
+    ('f34_source_text_bytes', 't53_',
+     '    return {"sha256_test": hashlib.sha256(Path(TEP_TEST).read_bytes()).hexdigest(),\n',
+     '    return {"sha256_test": hashlib.sha256(Path(TEP_TEST).read_text().encode()).hexdigest(),\n'),
+    ('f35_gom_n_min', 't52_',
+     '    if not 2 <= n <= _TRAN_MANH:\n',
+     '    if not 3 <= n <= _TRAN_MANH:\n'),
+    ('f35_gom_n_max_low', 't52_',
+     '    if not 2 <= n <= _TRAN_MANH:\n',
+     '    if not 2 <= n < _TRAN_MANH:\n'),
+    ('f35_gom_n_max_high', 't52_',
+     '    if not 2 <= n <= _TRAN_MANH:\n',
+     '    if not 2 <= n <= _TRAN_MANH + 1:\n'),
+    ('f35_gom_n_no_upper', 't52_',
+     '    if not 2 <= n <= _TRAN_MANH:\n',
+     '    if not 2 <= n:\n'),
+    ('f35_gom_drop_head_prefix', 't52_',
+     '            if not dong0.startswith("MANH "):\n',
+     '            if False:\n'),
+    ('f35_gom_manh_float', 't52_',
+     '            if any(type(dau[x]) is not int for x in ("phien_ban", "manh", "so_manh")):\n',
+     '            if any(type(dau[x]) is not int and not (x == "manh" and type(dau[x]) is float) for x in ("phien_ban", "manh", "so_manh")):\n'),
+    ('f35_gom_drop_oserror', 't52_',
+     '        except (OSError, UnicodeDecodeError, ValueError) as ex:\n',
+     '        except (UnicodeDecodeError, ValueError) as ex:\n'),
+    ('f35_writer_broken_link', 't52_',
+     '    if tep.exists() or tep.is_symlink():\n',
+     '    if tep.exists():\n'),
+    ('f35_writer_parents', 't52_',
+     '    tep.parent.mkdir(parents=True, exist_ok=True)\n',
+     '    tep.parent.mkdir(parents=False, exist_ok=True)\n'),
+    ('f35_writer_path_trim', 't52_',
+     '    tep = Path(ra)\n',
+     '    tep = Path(str(ra).strip())\n'),
+    ('f35_phan_hoach_xoay', 't52_',
+     '    return [t for i, t in enumerate(DOT_BIEN if ten is None else ten) if i % n == k]\n',
+     '    return [t for i, t in enumerate(DOT_BIEN if ten is None else ten) if (i + 1) % n == k]\n'),
+    ('f35_phan_hoach_dao_nguon', 't52_',
+     '    return [t for i, t in enumerate(DOT_BIEN if ten is None else ten) if i % n == k]\n',
+     '    return [t for i, t in enumerate(list(DOT_BIEN if ten is None else ten)[::-1]) if i % n == k]\n'),
     ('f27_full_seed', 't54_', '    else:\n        print(f"\\nBÁN KÍNH ĐỘT BIẾN ({len(DOT_BIEN)} đột biến, mỗi ca đúng một"',
      '    else:\n        loi_db = loi_nen\n        print(f"\\nBÁN KÍNH ĐỘT BIẾN ({len(DOT_BIEN)} đột biến, mỗi ca đúng một"'),
 ):
@@ -6659,7 +6765,9 @@ def t52_gom_manh_phai_DO_khi_thieu_trung_lech_va_moi_chot_co_THE_RIENG():
             "ban_ghi": "G-ban-ghi", "tep_la": "G-tep", "rong": "G-rong", "khong_co": "G-thu-muc",
             "head_gom_none": "G-head", "n_1": "G-n", "phan_chong": "G-phan-hoach",
             "kieu_phien_ban_bool": "G-dau", "kieu_phien_ban_so_thuc": "G-dau", "kieu_so_manh_so_thuc": "G-dau",
-            **({"symlink_tep": "G-tep"} if _CO_SYMLINK else {})}
+            **({"symlink_tep": "G-tep"} if _CO_SYMLINK else {}), "bien_17_None": "G-n", "bien_3_0": "G-n",
+            "tien_to": "G-dau", "doc_loi": "G-dau",
+            **{f"kieu_{tr}_{j}": "G-dau" for tr in ("phien_ban", "manh", "so_manh") for j in range(6)}}
     sai = {t: kq.get(t) for t, the in mong.items()
            if not (kq.get(t) and kq[t][0] >= 1 and f"[{the}]" in kq[t][1])}
     bang(not sai, f"kịch bản hỏng KHÔNG bị đúng chốt bắt (mong thẻ {mong}): {sai}")
@@ -6667,6 +6775,16 @@ def t52_gom_manh_phai_DO_khi_thieu_trung_lech_va_moi_chot_co_THE_RIENG():
                                        ("ghi_do_cuoi", "M-loi"), ("ghi_do_hai", "M-loi"))
            if not (kq.get(t) and kq[t][0] >= 1 and f"[{the}]" in kq[t][1] and kq[t][2] == "khong-tep")}
     bang(not ghi, f"mảnh KHÔNG đạt phải ĐỎ đúng thẻ và KHÔNG để lại tệp: {ghi}")
+    # F35 (Codex lượt 14): N=2/16 gom XANH, bảng NGUYÊN VĂN; bộ ghi tạo cha nhiều tầng, giữ nguyên tên, gỡ symlink gãy;
+    # phân hoạch ĐÚNG danh tính `i % N == k` — oracle `nguon[k::N]` tự tính ở đây, không gọi `_phan_manh`.
+    bien = {t: kq.get(t) for t in ("bien_2_None", "bien_16_None")
+            if not (kq.get(t) and kq[t][0] == 0 and kq[t][1] == f"GOM MẢNH {t.split('_')[1]}/{t.split('_')[1]}" and kq[t][3])}
+    bang(not bien and kq["ghi_duong"] == [True, True] and kq.get("ghi_gay", [False]) == [False],
+         f"biên N / bộ ghi sai: {bien} {kq['ghi_duong']} {kq.get('ghi_gay')}")
+    so_ten, nhom = kq["phan_hoach"]
+    lech = [x for x in [f"{k}/{m}" for m in range(2, 17) for k in range(m)]
+            if nhom.get(x) != list(range(int(x.split("/")[0]), so_ten, int(x.split("/")[1])))]
+    bang(not lech, f"`_phan_manh` sai DANH TÍNH (nhóm k/N ≠ nguon[k::N]): {lech[:5]} / {len(lech)}")
     # F21: bộ ghi phải KẾT LUẬN mọi bản ghi `do` (đích sống ở cuối; ở cả đầu và cuối ⇒ ĐÚNG 2 lỗi) và in NGUYÊN bảng.
     bang(kq["ghi_do_cuoi"][0] == 1 and kq["ghi_do_hai"][0] == 2 and kq["ghi_do_cuoi"][3] and kq["ghi_do_hai"][3]
          and "[M-loi]: 2 lỗi" in kq["ghi_do_hai"][1], f"bộ ghi bỏ sót bản ghi sai kết quả: {kq['ghi_do_cuoi']} {kq['ghi_do_hai']}")
@@ -6710,9 +6828,16 @@ def t53_che_do_doc_FAIL_CLOSED_moi_cau_hinh_la_co_THE_RIENG_va_van_tay_bam_NGUON
             "ca_hai": ["loi", "[C-ca-hai]"], "ra_le": ["loi", "[C-ra-le]"], "bk_rong_manh": ["loi", "[C-ca-hai]"],
             "ra_rong_le": ["loi", "[C-ra-le]"], "ra_rong_gate": ["loi", "[C-ra-le]"], "manh_rong": ["loi", "[C-hinh-dang]"],
             "manh_rong_gate": ["loi", "[C-ca-hai]"], "gate_cach": ["loi", "[C-ban-kinh]"],
-            "gate_xuong_dong": ["loi", "[C-ban-kinh]"], "van_tay_git": [True] * 10}
-    sai = {t: [kq.get(t), m] for t, m in mong.items() if kq.get(t) != m}
-    bang(not sai, f"`_doc_che_do` đọc sai (thấy, mong): {sai}")
+            "gate_xuong_dong": ["loi", "[C-ban-kinh]"], "luoi": [_mong_che_do(e) for e in _luoi_che_do()],
+            "luoi_git": [_mong_git(*o) for o in _luoi_git()]}
+    sai = {t: [kq.get(t), m] if t not in ("luoi", "luoi_git") else
+           [(i, x, y) for i, (x, y) in enumerate(zip(kq.get(t) or [], m)) if x != y][:5] + [len(kq.get(t) or []), len(m)]
+           for t, m in mong.items() if kq.get(t) != m}
+    bang(not sai, f"`_doc_che_do`/nguồn HEAD sai (thấy, mong | lưới: [(ô, thấy, mong)…, số ô thấy, số ô mong]): {sai}")
+    # F34: lời gọi `git` — đúng argv trên CHÍNH `GOC` của tiến trình con, đủ capture/text và timeout 60.
+    bang(kq["goi_git"] == [[["git", "-C", kq["goi_git"][1], "rev-parse", "HEAD"],
+                            [["capture_output", True], ["text", True], ["timeout", 60]]], kq["goi_git"][1]],
+         f"`_van_tay` gọi git sai tham số: {kq['goi_git']}")
     dung(kq["van_tay"][0], f"giàn giáo git tạm không dựng được commit: {kq['van_tay']}")
     bang(kq["van_tay"] == [True] * 6, "`_van_tay` phải bám BYTES của TEP_TEST và HEAD thật của GOC, không git ⇒ None "
                                       f"(không-git, head, sha, đổi-byte-giữ-head, đổi-head): {kq['van_tay'][1:]}")
@@ -7548,6 +7673,38 @@ def _in_tu_kiem_gom():
             dung_bo("phan_chong")
         finally:
             g["_phan_manh"] = goc_pm
+        # F35 (Codex lượt 14): biên N (2/16 XANH + bảng nguyên văn; 17 và 0-khai-đồng-loạt ⇒ G-n), tiền tố sai mà JSON
+        # hợp lệ, kiểu SAI trên TỪNG trường đầu tệp, lỗi ĐỌC tệp — mỗi thứ một chốt riêng của `_gom_manh`.
+        for nm, khai in ((2, None), (16, None), (17, None), (3, 0)):
+            thu = d / f"bien_{nm}_{khai}"
+            thu.mkdir()
+            for k in range(nm):
+                cac = _phan_manh(k, nm)
+                _ket_thuc_manh(k, nm, str(thu / f"manh-{k}.txt"), cac, {t: _ban_ghi_du_gia(t) for t in cac}, None, vt)
+                if khai is not None:
+                    sua_dau(k, so_manh=khai)(thu)
+            dong, loi = _gom_manh(thu, vt)
+            kq[thu.name] = [loi, dong[0], dong[-1], dong == ky_vong(thu, nm)[0]]
+        dung_bo("tien_to", sua_dong(0, lambda c: "ABCDE" + c[5:]))
+        for tr in ("phien_ban", "manh", "so_manh"):
+            for j, gt in enumerate((True, "1", None, [], {}, "so_thuc")):
+                def _kieu(chu, tr=tr, gt=gt):
+                    dau = json.loads(chu.partition("\n")[0][5:])
+                    dau[tr] = float(dau[tr]) if gt == "so_thuc" else gt
+                    return "MANH " + json.dumps(dau) + "\n" + chu.partition("\n")[2]
+                dung_bo(f"kieu_{tr}_{j}", sua_dong(0, _kieu))
+        cu_rb = Path.read_bytes
+        Path.read_bytes = lambda self: (_ for _ in ()).throw(OSError("giả đọc hỏng")) if (
+            self.name == "manh-1.txt" and self.parent.name == "doc_loi") else cu_rb(self)
+        try:
+            dung_bo("doc_loi")
+        finally:
+            Path.read_bytes = cu_rb
+        # F35: danh TÍNH phân hoạch — chỉ số từng nhóm theo nguồn của CHÍNH tiến trình này; cha so với `nguon[k::N]`.
+        nguon = list(DOT_BIEN)
+        vi = {t: i for i, t in enumerate(nguon)}
+        kq["phan_hoach"] = [len(nguon), {f"{k}/{m}": [vi[t] for t in _phan_manh(k, m)] for m in range(2, 17)
+                                         for k in range(m)}]
         rong = d / "rong"
         rong.mkdir()
         kq["rong"] = [_gom_manh(rong, vt)[1], _gom_manh(rong, vt)[0][0], ""]
@@ -7626,6 +7783,16 @@ def _in_tu_kiem_gom():
             dong, loi = _ket_thuc_manh(0, n, str(p), cac, ket, ly, v)
             kv = [x for t in cac for x in _ket_luan_ban_ghi(ket[t], ())[0]] if ket else []
             kq[ten] = [loi, dong[-1], "con-tep" if p.exists() else "khong-tep", dong[:-1] == kv if ket else None]
+        # F35: bộ ghi — đường cha NHIỀU tầng chưa có + tên có khoảng trắng cuối (ghi đúng NGUYÊN đường); symlink GÃY
+        # cũ ở nhánh không đạt phải bị gỡ.
+        p = ghi / "a" / "b c" / "manh-0.txt "
+        _ket_thuc_manh(0, n, str(p), cac, {t: _ban_ghi_du_gia(t) for t in cac}, None, vt)
+        kq["ghi_duong"] = [p.is_file(), p.is_file() and p.read_text(encoding="utf-8").startswith("MANH ")]
+        if _CO_SYMLINK:
+            gay = ghi / "gay.txt"
+            os.symlink(ghi / "khong-co", gay)
+            _ket_thuc_manh(0, n, str(gay), cac, None, "giả", vt)
+            kq["ghi_gay"] = [gay.exists() or gay.is_symlink()]
     print("KQ " + json.dumps(kq, ensure_ascii=True))
 
 
@@ -7752,6 +7919,51 @@ def _in_tu_kiem_main():
     print("KQ " + json.dumps(kq, ensure_ascii=True))
 
 
+def _luoi_che_do():
+    """#668 F33 (Codex lượt 14): miền ĐẦU VÀO của `_doc_che_do` — dữ liệu cố định; kỳ vọng do `_mong_che_do` tính ĐỘC LẬP."""
+    B, M, R = _BIEN_BAN_KINH, _BIEN_MANH, _BIEN_MANH_RA
+    o = [{x: v for x, v in ((B, bk), (M, mh), (R, ra)) if v is not None}
+         for bk in (None, "", "manh") for mh in (None, "", "3/8") for ra in (None, "", "x")]
+    so = [f"{k}/{n}" for n in range(2, 17) for k in range(n)] + [f"{k}/{n}" for n in (0, 1, 17, 99) for k in (0, 1)]
+    so += ["16/16", "17/16", "00/8", "0/08", "01/8", "1/08", "100/8", "1/100", "0/016", "+1/8", "-1/8", "1/+8", "1/-8",
+           "1:8", "1\\8", "1 /8", "1/ 8", "1//8", "1/8/", "/8", "1/", "1/8x"]
+    so += ["12/16"[:i] + chr(0x660 + int("12/16"[i])) + "12/16"[i + 1:] for i in (0, 1, 3, 4)]
+    return o + [{M: x, R: "x"} for x in so] + [{M: "3/8", R: r} for r in ("y z", " y ", "  ", "a/b c/manh 3.txt")]
+
+
+def _mong_che_do(env):
+    """Oracle của `t53` — viết lại bằng so sánh ký tự, KHÔNG dùng regex/`int` tự do của `_doc_che_do`."""
+    bk, mh, ra = env.get(_BIEN_BAN_KINH), env.get(_BIEN_MANH), env.get(_BIEN_MANH_RA)
+    if mh is None:
+        return (["loi", "[C-ra-le]"] if ra is not None else ["du", None] if bk is None else
+                ["gate", None] if bk == "manh" else ["loi", "[C-ban-kinh]"])
+    if bk is not None:
+        return ["loi", "[C-ca-hai]"]
+    a, gach, b = mh.partition("/")
+    so = lambda x, dau: 0 < len(x) <= 2 and all(c in "0123456789" for c in x) and x[0] in dau
+    if not (gach and (a == "0" or so(a, "123456789")) and so(b, "123456789")):
+        return ["loi", "[C-hinh-dang]"]
+    k, n = int(a), int(b)
+    return (["loi", "[C-pham-vi]"] if not (2 <= n <= _TRAN_MANH and k < n) else ["loi", "[C-thieu-ra]"] if not ra
+            else ["manh", [k, n, ra]])
+
+
+def _luoi_git():
+    """#668 F34: (rc, stdout, ngoại lệ) cho nguồn HEAD — HAI nhánh 40/64 ĐỘC LẬP; kỳ vọng do `_mong_git` tính."""
+    o = []
+    for dai in (40, 64):
+        hop = ("0123456789abcdef" * 4)[:dai]
+        bien = [hop, hop[:-1], hop + "a", " " + hop + "\n", hop + " " + hop]
+        bien += [hop[:i] + c + hop[i + 1:] for i in (0, dai // 2, dai - 1) for c in ("A", "F", "g", "z", "_", "\u0660")]
+        o += [(0, x, None) for x in bien] + [(rc, hop, None) for rc in (1, 2, -9)]
+    return o + [(0, "", None), (0, "not-a-head", None)] + [(0, "", e) for e in ("OSError", "SubprocessError", "TimeoutExpired")]
+
+
+def _mong_git(rc, ra, loi):
+    s = ra.strip()
+    return s if loi is None and rc == 0 and len(s) in (40, 64) and all(c in "0123456789abcdef" for c in s) else None
+
+
 def _in_tu_kiem_che_do():
     """Cửa tiến trình con cho `t53`: `_doc_che_do` trên bảng môi trường cố định, in `KQ`."""
     bang_env = {
@@ -7773,11 +7985,15 @@ def _in_tu_kiem_che_do():
         "gate_cach": {_BIEN_BAN_KINH: " manh"}, "gate_xuong_dong": {_BIEN_BAN_KINH: "manh\n"},
     }
     kq = {}
-    for ten, env in bang_env.items():
+
+    def doc(env):
         try:
-            kq[ten] = list(_doc_che_do(env))
+            return list(_doc_che_do(env))
         except ValueError as ex:
-            kq[ten] = ["loi", str(ex).split("]")[0] + "]"]
+            return ["loi", str(ex).split("]")[0] + "]"]
+    for ten, env in bang_env.items():
+        kq[ten] = doc(env)
+    kq["luoi"] = [doc(env) for env in _luoi_che_do()]
     # F9 (Codex lượt 4): NGUỒN vân tay — `sha256_test` bám BYTES của `TEP_TEST`, `head` bám HEAD thật của `GOC`, không git
     # ⇒ `None`. Mọi ca khác dùng vân tay giả, nên thay nguồn bằng hằng số từng sống qua mọi ca.
     import hashlib
@@ -7785,7 +8001,7 @@ def _in_tu_kiem_che_do():
     with tempfile.TemporaryDirectory(prefix="vt668_") as d:
         d = Path(d)
         tep = d / "t.py"
-        tep.write_bytes(b"a\n")
+        tep.write_bytes(b"a\r\n")   # F34: CR trước LF — băm BYTES, không băm văn bản đã chuẩn hoá xuống dòng
         git = lambda *a: subprocess.run(["git", "-C", str(d), "-c", "user.email=t@t", "-c", "user.name=t", "-c",
                                          "commit.gpgsign=false", *a], capture_output=True, text=True, timeout=60)
         g["GOC"], g["TEP_TEST"] = d, tep
@@ -7799,23 +8015,28 @@ def _in_tu_kiem_che_do():
             v3, h3 = _van_tay(), git("rev-parse", "HEAD").stdout.strip()
         finally:
             g["GOC"], g["TEP_TEST"] = cu
-    # F30 (Codex lượt 12): HAI chốt nguồn HEAD đo RIÊNG — rc≠0 kèm stdout hợp lệ, rc=0 kèm stdout sai định dạng (kho không
-    # git làm cả hai cùng sai nên che lẫn nhau). `git` giả qua `subprocess` của module.
+    # F30/F32/F34 (Codex lượt 12–14): lưới nguồn HEAD `_luoi_git` (rc × stdout × ngoại lệ, hai nhánh 40/64) qua
+    # `subprocess` giả của module; spy ghi argv/kwargs của lời gọi. Ngoại lệ lọt ra thành DỮ LIỆU, không giết con.
     import types
-    h40, h64, cu_sp = "c" * 40, "d" * 64, g["subprocess"]
-    kq["van_tay_git"] = []
-    # F32 (Codex lượt 13): độ dài và bảng chữ là hai chốt RIÊNG — 39/41/63/65 ký tự hex; 40 ký tự 'g' / hoa.
-    luoi = [(1, h40, None), (0, "not-a-head", None), (0, h40, h40), (0, h64, h64)] + [
-        (0, x, None) for x in ("c" * 39, "c" * 41, "c" * 63, "c" * 65, "g" * 40, "C" * 40)]
-    for rc, ra, mong in luoi:
-        g["subprocess"] = types.SimpleNamespace(run=lambda *a, **k: types.SimpleNamespace(returncode=rc, stdout=ra + "\n"),
-                                                SubprocessError=cu_sp.SubprocessError)
+    cu_sp, goi, kq["luoi_git"] = g["subprocess"], [], []
+    nem = {"OSError": lambda: OSError("giả"), "SubprocessError": lambda: cu_sp.SubprocessError("giả"),
+           "TimeoutExpired": lambda: cu_sp.TimeoutExpired("git", 60)}
+    for rc, ra, loi in _luoi_git():
+        def run(*a, **kw):
+            goi.append([list(a[0]), sorted(kw.items())])
+            if loi:
+                raise nem[loi]()
+            return types.SimpleNamespace(returncode=rc, stdout=ra)
+        g["subprocess"] = types.SimpleNamespace(run=run, SubprocessError=cu_sp.SubprocessError)
         try:
-            kq["van_tay_git"].append(_van_tay()["head"] == mong)
+            kq["luoi_git"].append(_van_tay()["head"])
+        except Exception as ex:  # noqa: BLE001
+            kq["luoi_git"].append("NEM:" + type(ex).__name__)
         finally:
             g["subprocess"] = cu_sp
+    kq["goi_git"] = [goi[0], str(GOC)]
     sha = lambda b: hashlib.sha256(b).hexdigest()
-    kq["van_tay"] = [bool(h1 and h3), khong_git["head"] is None, v1["head"] == h1, v1["sha256_test"] == sha(b"a\n"),
+    kq["van_tay"] = [bool(h1 and h3), khong_git["head"] is None, v1["head"] == h1, v1["sha256_test"] == sha(b"a\r\n"),
                      v2["sha256_test"] == sha(b"b\n") and v2["head"] == h1, v3["head"] == h3 != h1]
     print("KQ " + json.dumps(kq, ensure_ascii=True))
 

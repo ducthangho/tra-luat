@@ -2992,10 +2992,12 @@ def t70_W6_matrix_co_Windows_phai_chay_lai_bay_ca():
     job = {"runs-on": "${{ matrix.os }}", "strategy": {"matrix": {
         "os": ["ubuntu-latest", "windows-latest"]}}}
     ly_do = _ly_do_bo_qua_workflow(WORKFLOW_DANG, "dang", nen="nt", job=job)
-    doc_than = [fn.__name__ for fn in CA if "_chay_buoc_dang" in fn.__code__.co_names]
-    # BẢY, không phải tám: packet #396 gỡ `t52` cùng bước ghi ngược mà nó ghim.
-    bang(not ly_do and len(doc_than) == 7,
-         f"matrix có Windows vẫn bỏ qua hoặc không dẫn xuất đủ bảy ca: {ly_do!r}, {doc_than}")
+    doc_than = [fn.__name__ for fn in CA
+                if {"_chay_buoc_dang", "_chay_buoc_dang_that"} & set(fn.__code__.co_names)]
+    # BẢY cũ (packet #396 gỡ `t52` cùng bước ghi ngược mà nó ghim) + SÁU của #677 (`t195`–`t200`, gọi helper
+    # mới trực tiếp, kể cả ca dùng điểm dò). KIỂM KÊ, không phải bằng chứng nhánh: bằng chứng là `t199` (A9).
+    bang(not ly_do and len(doc_than) == 13,
+         f"matrix có Windows vẫn bỏ qua hoặc không dẫn xuất đủ mười ba ca: {ly_do!r}, {doc_than}")
 
 
 def _chay_main_meta(fn, nen=None):
@@ -10447,6 +10449,232 @@ def t189_duong_chan_doan_KHONG_dinh_dang_THO_ngoai_le_vua_bat():
          f"nhận {_vi_pham_B(gia_SOM)!r}.")
     chot(_vi_pham_C(gia_BC) == ["thân không phải đúng một `try`"],
          f"phản chứng (C): biên không có `try` phải bị bắt, nhận {_vi_pham_C(gia_BC)!r}.")
+
+
+# --- #677: biên CÔNG KHAI của chốt `lease_id` (đột biến `L`) ---------------------------------------
+# Bước `đăng` của workflow chạy với `ops/lease_publish.py` THẬT. `gh` giả nằm trên PATH vì `lease_publish.py`
+# gọi `gh` qua subprocess (thay chuỗi `gh api` trong thân bước KHÔNG đủ: đo 29-09, mọi ô cho rc=1, 0 lời gọi).
+# `gh` giả GIỮ TRẠNG THÁI: POST thêm comment vào tệp trạng thái, mọi GET trong một lượt đọc cùng tệp ấy — không
+# đánh chỉ số theo lần gọi (spec r4 §2.6).
+_GH_GIA_THAT = r'''
+import json, os, pathlib, sys
+a = sys.argv[1:]
+assert a[0] == "api", a
+ep = [x for x in a if x.startswith("repos/")][0]
+method = "POST" if "--input" in a else "GET"
+with pathlib.Path(os.environ["GH_LOG"]).open("a") as f: f.write(json.dumps([method, ep]) + "\n")
+st = pathlib.Path(os.environ["GH_STATE"]); d = json.loads(st.read_text())
+p = ep.split("/"); iss = d["issues"].get(p[4])
+if iss is None or (len(p) == 5 and iss.get("issue_loi")):
+    print("gh: Server Error (HTTP 500)", file=sys.stderr); sys.exit(1)
+if len(p) == 5:
+    loai = "pull" if iss.get("pr") else "issues"
+    print(json.dumps({"number": int(p[4]), "html_url": f"https://github.com/o/r/{loai}/{p[4]}"})); sys.exit(0)
+if method == "GET":
+    print(json.dumps([iss["comments"]])); sys.exit(0)
+body = json.loads(pathlib.Path(a[a.index("--input") + 1]).read_text())["body"]
+cid = 7000 + len(iss["comments"])
+iss["comments"].append({"id": cid, "body": body, "user": {"login": "github-actions[bot]"}})
+st.write_text(json.dumps(d)); print(cid)
+'''
+
+
+def _chay_buoc_dang_that(van_yaml, comments_san=(), la_pr=False, issue_loi=False,
+                         nguon_lease_publish=None, do_qua_guard=False):
+    """Chạy thân bước `đăng` với `lease_publish.py` của cây (hoặc `nguon_lease_publish`) và `gh` giả trên PATH.
+
+    Trả `{rc, goi: [(method, endpoint)], dang: [dòng đầu mỗi comment đã POST], out}`. `do_qua_guard` là điểm dò:
+    ngay SAU guard, TRƯỚC mọi I/O, trả `"QUA_GUARD"` (A9). Tắt thì không đổi hành vi.
+    """
+    import json
+    if _ly_do_bo_qua_workflow(WORKFLOW_DANG, "dang"):
+        raise BoQuaNen(WORKFLOW_DANG, "dang")
+    if do_qua_guard:
+        return "QUA_GUARD"
+    py = Path(sys.executable).resolve().as_posix()
+    than = _buoc_workflow("đăng")["run"].replace("python3 ", f"'{py}' ")
+    bang("python3 " not in than and than.count("gh api ") == 1, "thân bước `đăng` đổi hình dạng")
+    with San() as t:
+        goc, neo, bin_ = t / "goc", t / "neo", t / "bin"
+        for d in (goc / "ops" / "leases", neo / "ops", bin_):
+            d.mkdir(parents=True)
+        (neo / "ops" / "lease_publish.py").write_text(
+            SCRIPT.read_text(encoding="utf-8") if nguon_lease_publish is None else nguon_lease_publish,
+            encoding="utf-8")
+        (neo / "gh_gia.py").write_text(_GH_GIA_THAT, encoding="utf-8")
+        (goc / "ops" / "leases" / "x.yaml").write_text(van_yaml, encoding="utf-8")
+        (goc / "ds.txt").write_text("ops/leases/x.yaml\n", encoding="utf-8")
+        st, log = t / "st.json", t / "gh.log"
+        st.write_text(json.dumps({"issues": {"55": {"comments": list(comments_san), "pr": la_pr,
+                                                    "issue_loi": issue_loi}}}))
+        log.write_text("")
+        (bin_ / "gh").write_text(f"#!/bin/sh\nexec '{py}' '{neo}/gh_gia.py' \"$@\"\n")
+        (bin_ / "gh").chmod(0o755)
+        mt = dict(os.environ, NEO=str(neo), REPO="o/r", GITHUB_REPOSITORY="o/r", GITHUB_ACTOR="ducthangho",
+                  GH_TOKEN="gia", GH_STATE=str(st), GH_LOG=str(log), PYTHONDONTWRITEBYTECODE="1")
+        mt["PATH"] = os.pathsep.join([str(bin_), os.environ["PATH"]])
+        p = subprocess.run([_bash_posix(), "-c", than], cwd=goc, env=mt, capture_output=True, text=True)
+        moi = json.loads(st.read_text())["issues"]["55"]["comments"][len(comments_san):]
+        return {"rc": p.returncode, "goi": [tuple(json.loads(x)) for x in log.read_text().splitlines()],
+                "dang": [c["body"].splitlines()[0] for c in moi], "out": p.stdout + p.stderr}
+
+
+def _yaml_that(lid_raw, het_han=False, bo_lease_id=False, top_list=False) -> str:
+    import yaml
+    d = lease_mau()
+    if het_han:
+        d["lease_expires_at_utc"] = khi_truoc(1)
+    d.pop("lease_id")
+    van = yaml.safe_dump(d, allow_unicode=True, sort_keys=False)
+    if not bo_lease_id:
+        van += f"lease_id: {lid_raw}\n"
+    if top_list:
+        van = "- " + van.replace("\n", "\n  ").rstrip() + "\n"
+    return van
+
+
+def _dau_bot(dau: str) -> dict:
+    """Comment `github-actions[bot]` mang dấu ``**Lease `<str(giá trị)>`**`` — thứ mà phép dò tìm."""
+    return {"id": 1, "body": f"**Lease `{dau}`** — đăng tự động", "user": {"login": "github-actions[bot]"}}
+
+
+# (nhãn, lease_id thô trong YAML, chuỗi `str()` mà dấu bot mang)
+_LID_TAP_I = (("null", "null", "None"), ("danh sách", "[wp579-thu]", "['wp579-thu']"),
+              ("ánh xạ", "{x: 1}", "{'x': 1}"))
+_LID_TAP_II = (("true", "true", "True"), ("1.5", "1.5", "1.5"), ("ngày", "2026-09-29", "2026-09-29"))
+_DA_DANG_BO_QUA = "đã đăng trước đó — bỏ qua"
+
+
+def _o_tap_i():
+    """14 ô của M2: 3 dạng × {Issue, PR} × {trống, có dấu} + 2 dạng tài liệu (chỉ Issue, trống)."""
+    for nhan, raw, dau in _LID_TAP_I:
+        for la_pr in (False, True):
+            for co_dau in (False, True):
+                yield (f"{nhan}/{'PR' if la_pr else 'Issue'}/{'có dấu' if co_dau else 'trống'}",
+                       _yaml_that(raw), [_dau_bot(dau)] if co_dau else [], la_pr)
+    yield "thiếu lease_id/Issue/trống", _yaml_that(None, bo_lease_id=True), [], False
+    yield "tài liệu là danh sách/Issue/trống", _yaml_that("wp-ok-1", top_list=True), [], False
+
+
+def _o_tap_ii(la_pr, het_han):
+    for nhan, raw, dau in _LID_TAP_II:
+        yield (f"{nhan}/{'PR' if la_pr else 'Issue'}/có dấu/{'hết hạn' if het_han else 'còn hạn'}",
+               _yaml_that(raw, het_han=het_han), [_dau_bot(dau)], la_pr)
+
+
+@ca
+def t195_M2_tap_i_bien_cong_khai_khoa_ca_bo_quan_sat():
+    """Tập (i) của #677: dạng `lease_id` mà tiền kiểm CHẶN trước mọi lời gọi GitHub (nền: rc=1, 0 gh, 0 POST).
+
+    (a) Trục đã đo (spec r4 §2.2, 95 dòng × 2 vế, `89fc4fa`, 10:22Z 29-09): `lease_id` (11 dạng) × Issue/PR ×
+        trống/có dấu × còn hạn/hết hạn, + 5 dòng GET loại số hiệu lỗi + 2 dạng tài liệu. Ca này chỉ giữ tập (i).
+    (b) Vì sao khoá DÃY LỜI GỌI: đó là tín hiệu phân biệt của đột biến `L` (gỡ hai dòng chốt `lease_id` trong
+        `_tien_kiem_mien_dang`): nền 0 lời gọi, `L` 1 GET `comments` (đo bởi `t178` ở đơn vị phép dò và bởi giàn
+        này ở biên). Lượt GET thừa tự nó KHÔNG nguy hiểm.
+    (d) Dạng ép kiểu mà hiện đang được ĐĂNG (Issue thật, chưa có dấu) KHÔNG khoá ở đây: việc của #678 (Q2).
+    (e) Tiền đề (§2.6) — chốt khác đều qua: `packet_issue=55` khớp `gh` giả; `granted_by` có thẩm quyền; SHA 40 hex;
+        vắng cặp neo prompt; `gh api` đọc được; mọi GET trong một lượt thấy CÙNG snapshot. Trục CHE MẤT độ phân
+        biệt (lỗi kép, reviewer lượt 1–2 đo): `packet_issue` sai kiểu; tự cấp/prompt thiếu/schema v2/SHA sai (mã
+        thoát trùng, chỉ số lời gọi phân biệt); API `comments` lỗi; comment hỏng đứng TRƯỚC dấu. KHÔNG khoá: phản
+        hồi `comments` đổi giữa các GET (Q13, đồ giả sẽ khoá lịch gọi). Windows: `KHÔNG ĐO ĐƯỢC` (Q6).
+    """
+    lech = []
+    for nhan, van, san, la_pr in _o_tap_i():
+        kq = _chay_buoc_dang_that(van, san, la_pr)
+        if not (kq["rc"] == 1 and not kq["goi"] and not kq["dang"]):
+            lech.append(f"{nhan}: rc={kq['rc']} goi={kq['goi']} POST={len(kq['dang'])}")
+    chot(not lech, "M2 tập (i): nền phải rc=1, 0 lời gọi gh, 0 POST ở cả 14 ô (dãy lời gọi nền = rỗng); lệch: "
+         + "; ".join(lech))
+
+
+def _lech_tap_ii(nhan, kq) -> str:
+    """Rỗng nếu ô đạt (rc≠0, 0 POST, không 'bỏ qua'); ngược lại mô tả ô lệch."""
+    if kq["rc"] != 0 and not kq["dang"] and _DA_DANG_BO_QUA not in kq["out"]:
+        return ""
+    return f"{nhan}: rc={kq['rc']} POST={len(kq['dang'])} bỏ_qua={_DA_DANG_BO_QUA in kq['out']}"
+
+
+@ca
+def t196_M3a_tap_ii_PR_co_dau_con_han_phai_DO_khong_bo_qua():
+    """Tập (ii), họ M3a (#677): `true`/`1.5`/ngày × PR × có dấu × còn hạn. Nền: rc≠0 (`CHAN [8]` số hiệu là PR).
+
+    (c) Chỉ khoá `rc≠0`, 0 POST, không "đã đăng trước đó — bỏ qua"; KHÔNG khoá dãy lời gọi để giữ đúng khi #678
+        đổi đường từ chối (Q9). Đột biến `L` biến ĐỎ thành XANH ở đúng ô này vì nhánh đã-có-dấu không chạy
+        `_kiem_loai_so_hieu` (đo 10:03Z 29-09, `89fc4fa`). Tiền đề & trục che: xem docstring `t195` (a)(e).
+    """
+    lech = []
+    for nhan, van, san, la_pr in _o_tap_ii(True, False):
+        lech.append(_lech_tap_ii(nhan, _chay_buoc_dang_that(van, san, la_pr)))
+    lech = [x for x in lech if x]
+    chot(not lech, "M3a: PR + có dấu + còn hạn phải rc≠0, 0 POST, không 'bỏ qua' (đột biến L cho rc=0); lệch: "
+         + "; ".join(lech))
+
+
+@ca
+def t197_M3b_tap_ii_Issue_co_dau_het_han_phai_DO_khong_bo_qua():
+    """Tập (ii), họ M3b (#677, Q12): `true`/`1.5`/ngày × Issue × có dấu × HẾT HẠN. Nền: rc≠0 (`CHAN [8]` hết hạn).
+
+    (c) Cùng luật với `t196`. Nhánh đã-có-dấu gọi `kiem(bo_qua_han=True)` nên `L` cố ý bỏ chốt hạn (§2.4). Ô này
+        thực tế hơn ô PR: dấu bot mang giá trị ép kiểu trên Issue là thứ workflow tự sinh được (đo 10:03Z 29-09).
+    """
+    lech = []
+    for nhan, van, san, la_pr in _o_tap_ii(False, True):
+        lech.append(_lech_tap_ii(nhan, _chay_buoc_dang_that(van, san, la_pr)))
+    lech = [x for x in lech if x]
+    chot(not lech, "M3b: Issue + có dấu + hết hạn phải rc≠0, 0 POST, không 'bỏ qua' (đột biến L cho rc=0); lệch: "
+         + "; ".join(lech))
+
+
+@ca
+def t198_M4_doi_chung_duong_chuoi_hop_le_dang_dung_mot_POST():
+    """Đối chứng dương (#677): `wp-ok-1` trên Issue trống ⇒ rc=0 và ĐÚNG 1 POST mở bằng ``**Lease `wp-ok-1`**``.
+
+    Thứ làm giàn hỏng không thể xanh: `gh` vắng khỏi PATH ⇒ rc=1, 0 lời gọi (§2.1); `gh` giả không lưu POST ⇒ rc=0
+    nhưng 0 comment trong trạng thái.
+    """
+    kq = _chay_buoc_dang_that(_yaml_that("wp-ok-1"))
+    chot(kq["rc"] == 0, f"M4: chuỗi hợp lệ trên Issue trống phải rc=0; nhận rc={kq['rc']}, out={kq['out'][-300:]!r}")
+    chot(len(kq["dang"]) == 1 and kq["dang"][0].startswith("**Lease `wp-ok-1`**"),
+         f"M4: phải ĐÚNG 1 POST mở bằng **Lease `wp-ok-1`**; nhận POST={kq['dang']!r}, goi={kq['goi']}")
+
+
+@ca
+def t199_A9_guard_nen_cua_helper_qua_diem_do_o_ba_trang_thai():
+    """Guard bỏ-qua-nền của `_chay_buoc_dang_that`, đo qua điểm dò ở ba trạng thái (A9, spec r4 §7).
+
+    S1 posix + workflow thật ⇒ qua guard · S2 `nt` + workflow thật (job chỉ Ubuntu) ⇒ `BoQuaNen` và lý do dẫn xuất
+    được là `chỉ chạy Ubuntu` · S3 `nt` + workflow tạm matrix Ubuntu+Windows ⇒ qua guard. Gom cả ba rồi mới chốt để
+    mỗi đột biến guard (luôn ném ⇒ S1+S3 · gỡ guard ⇒ S2 · chỉ xét `os.name` ⇒ S3) đỏ ĐÚNG trạng thái của nó.
+    Mô phỏng `os.name` KHÔNG phải đã chạy Windows thật (Q6).
+    """
+    from unittest import mock
+    mod, that = sys.modules[__name__], WORKFLOW_DANG
+    with San() as s:
+        tam = s / "w.yml"
+        tam.write_text("jobs:\n  dang:\n    runs-on: ${{ matrix.os }}\n    strategy:\n      matrix:\n"
+                       "        os: [ubuntu-latest, windows-latest]\n", encoding="utf-8")
+        sai = []
+        for nhan, nen, wf, phai_qua in (("S1 posix+workflow thật", "posix", that, True),
+                                        ("S2 nt+workflow thật", "nt", that, False),
+                                        ("S3 nt+matrix Ubuntu+Windows", "nt", tam, True)):
+            with mock.patch.object(os, "name", nen), mock.patch.object(mod, "WORKFLOW_DANG", wf):
+                try:
+                    qua = _chay_buoc_dang_that("", do_qua_guard=True) == "QUA_GUARD"
+                except BoQuaNen:
+                    qua = False
+                ly_do = _ly_do_bo_qua_workflow(wf, "dang")
+            if qua != phai_qua or bool(ly_do) == phai_qua or (not phai_qua and "chỉ chạy Ubuntu" not in ly_do):
+                sai.append(f"{nhan}: qua_guard={qua} (phải {phai_qua}), lý_do={ly_do!r}")
+    chot(not sai, "A9 guard nền: " + "; ".join(sai))
+
+
+@ca
+def t200_M1_nguon_lease_publish_tuy_chon_that_su_duoc_dung():
+    """`nguon_lease_publish` phải thay bản của cây: nguồn giả thoát rc=7 ⇒ bước `đăng` phải báo `rc=7`."""
+    kq = _chay_buoc_dang_that(_yaml_that("wp-ok-1"), nguon_lease_publish="import sys\nsys.exit(7)\n")
+    chot(kq["rc"] == 1 and "rc=7" in kq["out"] and not kq["goi"],
+         f"M1: nguồn tuỳ chọn không được dùng; rc={kq['rc']}, goi={kq['goi']}, out={kq['out'][-300:]!r}")
+
 
 
 def main() -> int:

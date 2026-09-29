@@ -1,0 +1,108 @@
+{
+  "name": "master",
+  "commit": {
+    "sha": "3fee59ec32a37bde7f5eae24ff174c4235cb5a26",
+    "node_id": "C_kwDOTNeRjdoAKDNmZWU1OWVjMzJhMzdiZGU3ZjVlYWUyNGZmMTc0YzQyMzVjYjVhMjY",
+    "commit": {
+      "author": {
+        "name": "ducthangho",
+        "email": "ducthangho@gmail.com",
+        "date": "2026-09-28T10:00:09Z"
+      },
+      "committer": {
+        "name": "GitHub",
+        "email": "noreply@github.com",
+        "date": "2026-09-28T10:00:09Z"
+      },
+      "message": "Merge PR #667: bookkeeping(#650) lease g2 thu hoi + ho so hau-merge PR #666 + erratum A14\n\nPacket #650 van merged, CHUA landed (xem trang_thai_packet trong ops/land/pr666-wp650-land-evidence.yaml).\nCodex CLI luot 5 tren 5fe6f25: 0/0/0 approve (advisory_review). CI 60971e6 xanh.\n\nCo-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_017KWSXEY9ifmPKmJREKfdSJ",
+      "tree": {
+        "sha": "32147c90a76b90c0486f5a00dfeb4ad2381cec08",
+        "url": "https://api.github.com/repos/ducthangho/tra-luat/git/trees/32147c90a76b90c0486f5a00dfeb4ad2381cec08"
+      },
+      "url": "https://api.github.com/repos/ducthangho/tra-luat/git/commits/3fee59ec32a37bde7f5eae24ff174c4235cb5a26",
+      "comment_count": 0,
+      "verification": {
+        "verified": true,
+        "reason": "valid",
+        "signature": "-----BEGIN PGP SIGNATURE-----\n\nwsFcBAABCAAQBQJqujqpCRC1aQ7uu5UhlAAAAOoQAE3yKSzWweA4MuLMd8XqBGwi\n3l/rRgI0dHf5oJI8DDgzRLQ9A2PSF5UKGWY4QhFXRWE800PL8EPy8hIRel7ft6ey\nHAAUIEIC7JsxwHe5V9b8s8KAQ6u78S9SzMYnGYO3vCoWjuGEARCqoZhWpEIffrey\nD2yWBjEisNRoESeF8UtxJqFG+D5/41H+pNqQLw+eE6EHUDd/g744vGF29BpEJKim\noLxZVTziTyVSc2vqViwxN30AnKzpUIG2UrfUxItfwWtah2Mm7781uu5GDWxkPejC\nQcCRI6OwOhUaYc1i+6/Gp6ZeEBHA05CwxwfWUe64fYifP1rBjDz0izbMcbIIur9S\nNp7v0RjEttIQAonfIrXOxKq4TYpz6LYxQ8lqKT57eX84q58QTvh6V/S/Z7wZ8NJy\nTcvcr/T3ex++RhM6oBjganPuw28Ub+ixuTAEodxkI9NGeeGMpTsOH4rzyf2ugr3E\nIGUEgLK33gLXxXyM67FvJHjmjPUtntaDFa19GNQR8kbSGsaaSXMTxneQ5MygqTCg\nuQFhf6SEGtvdxgAtd4MkPsl6zbiSyCuzntQKkO+el8wMTnV16EuYSRbKzsx7KGBV\nknn5pnuUPfZQC3HHtUHHT2xJE3c3U+vrE5jlKZ9rYe7R0MBwWxJWAGcHagafiovx\niViGsphPFZ8HAU9QDMs+\n=rZPA\n-----END PGP SIGNATURE-----\n",
+        "payload": "tree 32147c90a76b90c0486f5a00dfeb4ad2381cec08\nparent f8a7829cc44f296c25faf1a6439b603ba840f70b\nparent 60971e659d4ad9e837a4beee134fb90bc9bab730\nauthor ducthangho <ducthangho@gmail.com> 1790589609 +0700\ncommitter GitHub <noreply@github.com> 1790589609 +0700\n\nMerge PR #667: bookkeeping(#650) lease g2 thu hoi + ho so hau-merge PR #666 + erratum A14\n\nPacket #650 van merged, CHUA landed (xem trang_thai_packet trong ops/land/pr666-wp650-land-evidence.yaml).\nCodex CLI luot 5 tren 5fe6f25: 0/0/0 approve (advisory_review). CI 60971e6 xanh.\n\nCo-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_017KWSXEY9ifmPKmJREKfdSJ",
+        "verified_at": "2026-09-28T10:00:10Z"
+      }
+    },
+    "url": "https://api.github.com/repos/ducthangho/tra-luat/commits/3fee59ec32a37bde7f5eae24ff174c4235cb5a26",
+    "html_url": "https://github.com/ducthangho/tra-luat/commit/3fee59ec32a37bde7f5eae24ff174c4235cb5a26",
+    "comments_url": "https://api.github.com/repos/ducthangho/tra-luat/commits/3fee59ec32a37bde7f5eae24ff174c4235cb5a26/comments",
+    "author": {
+      "login": "ducthangho",
+      "id": 12748935,
+      "node_id": "MDQ6VXNlcjEyNzQ4OTM1",
+      "avatar_url": "https://avatars.githubusercontent.com/u/12748935?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/ducthangho",
+      "html_url": "https://github.com/ducthangho",
+      "followers_url": "https://api.github.com/users/ducthangho/followers",
+      "following_url": "https://api.github.com/users/ducthangho/following{/other_user}",
+      "gists_url": "https://api.github.com/users/ducthangho/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/ducthangho/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/ducthangho/subscriptions",
+      "organizations_url": "https://api.github.com/users/ducthangho/orgs",
+      "repos_url": "https://api.github.com/users/ducthangho/repos",
+      "events_url": "https://api.github.com/users/ducthangho/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/ducthangho/received_events",
+      "type": "User",
+      "user_view_type": "public",
+      "site_admin": false
+    },
+    "committer": {
+      "login": "web-flow",
+      "id": 19864447,
+      "node_id": "MDQ6VXNlcjE5ODY0NDQ3",
+      "avatar_url": "https://avatars.githubusercontent.com/u/19864447?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/web-flow",
+      "html_url": "https://github.com/web-flow",
+      "followers_url": "https://api.github.com/users/web-flow/followers",
+      "following_url": "https://api.github.com/users/web-flow/following{/other_user}",
+      "gists_url": "https://api.github.com/users/web-flow/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/web-flow/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/web-flow/subscriptions",
+      "organizations_url": "https://api.github.com/users/web-flow/orgs",
+      "repos_url": "https://api.github.com/users/web-flow/repos",
+      "events_url": "https://api.github.com/users/web-flow/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/web-flow/received_events",
+      "type": "User",
+      "user_view_type": "public",
+      "site_admin": false
+    },
+    "parents": [
+      {
+        "sha": "f8a7829cc44f296c25faf1a6439b603ba840f70b",
+        "url": "https://api.github.com/repos/ducthangho/tra-luat/commits/f8a7829cc44f296c25faf1a6439b603ba840f70b",
+        "html_url": "https://github.com/ducthangho/tra-luat/commit/f8a7829cc44f296c25faf1a6439b603ba840f70b"
+      },
+      {
+        "sha": "60971e659d4ad9e837a4beee134fb90bc9bab730",
+        "url": "https://api.github.com/repos/ducthangho/tra-luat/commits/60971e659d4ad9e837a4beee134fb90bc9bab730",
+        "html_url": "https://github.com/ducthangho/tra-luat/commit/60971e659d4ad9e837a4beee134fb90bc9bab730"
+      }
+    ]
+  },
+  "_links": {
+    "self": "https://api.github.com/repos/ducthangho/tra-luat/branches/master",
+    "html": "https://github.com/ducthangho/tra-luat/tree/master"
+  },
+  "protected": true,
+  "protection": {
+    "enabled": true,
+    "required_status_checks": {
+      "enforcement_level": "off",
+      "contexts": [
+
+      ],
+      "checks": [
+
+      ]
+    }
+  },
+  "protection_url": "https://api.github.com/repos/ducthangho/tra-luat/branches/master/protection"
+}

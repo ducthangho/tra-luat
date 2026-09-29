@@ -1,0 +1,107 @@
+# LEASE — CAI-CONG-CU-SIGPIPE revision 1 / generation 1 — bo pipeline `| head` thoat som duoi pipefail (3 script ops)
+# GHI HO theo chi thi CHU KHO (chep nguyen van o granted_on_instruction_nguyen_van).
+
+schema_version: 2
+event: executor_lease_granted
+
+packet_issue: 675
+granted_by: ducthangho
+granted_on_instruction: https://github.com/ducthangho/tra-luat/issues/675#issuecomment-5883033056
+granted_on_instruction_nguyen_van: >-
+  Phieu mo packet 'CAI-CONG-CU-SIGPIPE (tách từ #668, chủ kho đã đồng ý mở phiên riêng)' (chu kho, phien Claude
+  Code, 2026-09-29); 'Executor để là claude sonnet 5.5 nếu coa hoặc không thì để opus 5.5, effort high, xhigh tùy
+  bạn đánh giá'; AskUserQuestion write set: 'Làm ngay, tách 2 packet (Recommended)'.
+authority_caveat: >-
+  Comment neo do phien agent dang bang tai khoan chu kho, chep loi chu kho trong phien — yeu hon comment
+  chu kho tu viet (#566). author_association=OWNER khong tach chu kho khoi phien agent dung token chu kho.
+recorded_by: claude-session
+recorder_is_dispatcher: false
+
+leased_at_utc: '2026-09-29T03:35:00Z'
+lease_expires_at_utc: '2026-09-30T03:35:00Z'
+
+packet_id: CAI-CONG-CU-SIGPIPE
+packet_slug: CAI-CONG-CU-SIGPIPE
+revision: 1
+generation: 1
+lease_id: cai-cong-cu-sigpipe-r1-g1-claude
+role: executor
+provider: anthropic_claude
+executor: claude
+surface: claude_code
+model: claude-sonnet-5-5
+model_du_phong: claude-opus-5-5
+model_ghi_chu: 'Chu kho: sonnet 5.5 neu co, khong thi opus 5.5. Model THUC chay ghi vao handoff/verdict.'
+effort: high
+effort_ghi_chu: 'Phien dieu phoi chon high trong pham vi "tùy bạn đánh giá"; tu khai, KHONG DO DUOC tu ngoai.'
+environment: cloud
+risk: sensitive
+review_class: sensitive
+effective_review_class: sensitive
+assurance_target: human_audited
+reviewer_provider: openai_codex
+reviewer_surface: codex_cli
+reviewer_ghi_chu: >-
+  Codex CLI tai cho tren sandbox ngoai kho; lap toi 0 P1/P2/P3 theo phieu mo packet ('Cross-review độc lập
+  (codex) tới khi 0 P1/P2/P3'). Executor KHONG tu merge; chu kho audit va merge.
+access: read-write
+
+spec_path: ops/specs/CAI-CONG-CU-SIGPIPE-r1.md
+spec_ref: refs/heads/ops/cap-lease-cai-cong-cu-sigpipe
+spec_source_oid: 639d9b604c277aa6fb2db6d1c000bc1931763d26
+spec_blob: b247d1e912ebe6ff7e8c80eb002546e3ba0949fe
+spec_sha256: 17a5fee7c12ecab33c870668e762eb0775f253349f57dcdbe60dfd3a4056cd45
+spec_hash: 17a5fee7c12ecab33c870668e762eb0775f253349f57dcdbe60dfd3a4056cd45
+spec_hash_formula: SHA256 of UTF-8 LF Git blob bytes at spec_source_oid:spec_path
+prompt_path: ops/specs/CAI-CONG-CU-SIGPIPE-r1.md
+prompt_sha256_required: 17a5fee7c12ecab33c870668e762eb0775f253349f57dcdbe60dfd3a4056cd45
+
+branch: claude/cai-cong-cu-sigpipe-r1-g1
+branch_ownership: exclusive
+branch_ghi_chu: >-
+  Spec + lease o nhanh ops/cap-lease-cai-cong-cu-sigpipe (de ops-publish-lease.yml dang ban chieu); ma o nhanh
+  claude/cai-cong-cu-sigpipe-r1-g1 dat THANG tren start_from_sha (khong mang commit spec/lease) de diff chi con W1–W4.
+start_from_sha: cd23c7dbc7833d64a8e87e8ffd94f194c18e0060
+immutable_acceptance_baseline: cd23c7dbc7833d64a8e87e8ffd94f194c18e0060
+reviewed_sha_required: cd23c7dbc7833d64a8e87e8ffd94f194c18e0060
+reviewed_sha_required_nghia: 'Chua co head ung vien; moi verdict neo exact head THAT cua nhanh thi cong.'
+
+write_set:
+  - ops/cai_actionlint.sh
+  - ops/cai_cong_cu.sh
+  - ops/do_sigpipe.sh
+  - ops/dung_goi_review.sh
+write_set_hash: 772ebf9ed4b817dfda7e70b288ebf51cc7eb00c9c78884c11a0dd07e82d5c49e
+write_set_hash_cach_tinh: 'sha256 cua cac duong dan DA SAP XEP, noi bang LF, co LF cuoi, utf-8.'
+write_set_da_do_truoc_khi_cap: >-
+  Do 2026-09-29T03:2xZ: fetch '+refs/heads/*'; so TAP TEN ls-remote --heads (502) voi for-each-ref
+  refs/remotes/origin (502): comm -23 = 0, comm -13 = 0. ai-dang-giu (sau git branch -f master origin/master):
+  ops/cai_cong_cu.sh, ops/cai_actionlint.sh, ops/dung_goi_review.sh, ops/do_sigpipe.sh,
+  ops/specs/CAI-CONG-CU-SIGPIPE-r1.md deu NGUOI_GIU 0 rc=0. ops/cong_cu_test.py va .claude/dev/ci_dang_ky_test.py:
+  NGUOI_GIU 1 (ci-g5-cong-cu-chia-manh-r1-g1-claude, #668) — NGOAI write set, KHONG cham.
+
+ci_budget:
+  gate_tu_dong: 'PR draft chay gate PR thuong (ubuntu); khong goi Windows, khong LIVE/deploy'
+  het: 'CI do vi packet => DUNG, bao chu kho'
+
+dieu_kien_dung:
+  - 'S1 — cham duong ngoai W1–W4. DUNG.'
+  - 'S2 — het han lease => ngung ghi, handoff §7.'
+  - 'S3 — cung hinh dang finding >= 3 lan => hoi chu kho.'
+  - 'S4 — khong tu merge/land/approve, khong force-push, khong deploy.'
+  - 'S5 — > 150 dong them. DUNG, hoi chu kho.'
+
+cam_tuyet_doi:
+  - Khong sua spec; khong sua tep ngoai write set
+  - Khong cham ops/cong_cu_test.py, .github/workflows/ci.yml, .claude/dev/ci_dang_ky_test.py (lease #668)
+  - Khong tu review / approve / merge / land
+  - Khong force-push, khong LIVE/deploy
+
+successor_da_hen: >-
+  Packet ke nhiem (chu kho chon 'tách 2 packet'): noi ops/do_sigpipe.sh vao CI (ca trong ops/cong_cu_test.py
+  hoac test moi + dang ky ci_dang_ky_test.py), MO SAU khi #668 land.
+
+chua_do_duoc:
+  - 'Danh tinh nguoi ky: #566.'
+  - 'Effort thuc te cua phien executor.'
+da_bi_thay_the: cai-cong-cu-sigpipe-r2-g2-claude

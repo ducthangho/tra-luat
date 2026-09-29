@@ -1,0 +1,370 @@
+schema_version: 2
+receipt_id: wp523-r15-review-1-codex
+kind: review_delivery_receipt
+role: reviewer
+packet_id: wp523
+packet_slug: QUY-TRINH-LAP-REVIEW-VA-DIEU-KIEN-DUNG
+packet_issue: 523
+revision: 15
+generation_reviewed: 16
+luot: 1
+lease_ung_vien: quy-trinh-lap-review-r15-g16-claude
+lease_ghi_bien_nhan_ban_dau: quy-trinh-lap-review-r15-g17-claude
+lease_ghi_bien_nhan: quy-trinh-lap-review-r15-g20-claude
+lease_ghi_bien_nhan_ghi_chu: >-
+  Ban dau (verdict LF/bo khoang trang, receipt v1 cua PR) ghi duoi quy-trinh-lap-review-r15-g17-claude; ban HIEN HANH (verdict nguyen byte,
+  cac truong sua theo cross-review) ghi duoi quy-trinh-lap-review-r15-g18-claude — theo cung lop thread 4099876847 (tren PR 625 /
+  wp461, ap cho receipt nay; thread cua chinh PR 623 la 4100014483). Ca hai generation deu neo chi thi chu kho;
+  lich su commit giu nguyen. Ba ban ung vien dau (b78c2a01, 97776519, 265528bf) viet trong cua so g17 boi mot
+  phien KHONG giu lease (su co hai writer: issues/523#issuecomment-5824973258); chu kho chap nhan PR 623 va cac
+  generation ke tiep bang issues/523#issuecomment-5820535544. g19 (quy-trinh-lap-review-r15-g19-claude, neo uy quyen chung
+  issues/523#issuecomment-5825373202) chi them readback_lan_3 va sinh lai lich_su_ban_ung_vien tu git log. g20
+  (quy-trinh-lap-review-r15-g20-claude, thay the g19, gom README) sua theo cross-review luot 7
+  (pull/623#issuecomment-5826210424, reviewer claude-fable-5-1 xhigh cung provider).
+lease_reviewer: KHONG_CO — reviewer là GitHub App `chatgpt-codex-connector[bot]`, không có lease
+  reviewer; lượt gọi là issue comment `@codex review` của executor (pull/613#issuecomment-5811858888)
+reviewed_sha: 92adc7112155a6711ec2c86d59ce60293b342314
+reviewed_tree: e5535d73f8df4ee2ec78bfafc0da66f9d70cde0e
+reviewed_sha_nghia: >-
+  Exact head của PR #613 lúc gọi review — đúng `reviewed_sha_required` của lease g17. KHÔNG phải
+  head sau (61a39096, chỉ thêm merge master: `git diff 92adc711 61a39096 -- ops/reviews/` rỗng),
+  KHÔNG phải commit tổng hợp nào. Comment reviewer tự khai `Reviewed commit: 92adc71121`.
+verdict: approve
+assurance: advisory_review
+assurance_ghi_chu: >-
+  Connector không xuất session/model ⇒ theo hợp đồng `bien_nhan_v2` không nâng được
+  `cross_approved`/`same_provider_approved`; `human_audited` là mức của NGƯỜI (audit A7 của chủ kho:
+  pull/613#issuecomment-5813656260 trên 92adc711 và pull/613#issuecomment-5814227641 trên 61a39096,
+  cả hai còn placeholder dòng `tự đo`). Biên nhận này KHÔNG tự cấp mức nào cao hơn.
+so_p0: 0
+so_p1: 0
+so_p2: 0
+so_p3: 0
+findings_ids: []
+doi_chieu_luot_truoc:
+- luot: wp523-r14-review-1-codex
+  reviewed_sha: 15d1b103e8d4dec60f96049eb5ad9b16d436d63f
+  findings_ids_luot_truoc: []
+  phan: r14 lượt 1 để lại 0 finding ⇒ không có slug nào để đối chiếu; r15 chỉ tích hợp hồ sơ r14
+    (M-M11) nên không mở lớp mới.
+luot_2_ngoai_bien_nhan: >-
+  Codex lượt 2/2 trên PR 613: review 5304344210, submitted_at 2026-09-24T12:23:53Z. Hai mỏ neo, ghi cả hai:
+  (a) đối tượng review do GitHub ghi commit_id = 92adc7112155a6711ec2c86d59ce60293b342314 (= reviewed_sha
+  của biên nhận này), body tự khai 'Reviewed commit: 92adc71121'; (b) finding P1 duy nhất (thread 4093538781)
+  đo trên object tổng hợp 76275ebc của reviewer, không có trên server — KHÔNG ĐO ĐƯỢC trên chính nó; đã trả lời
+  ở thread ấy bằng phép đo trên head thật. Không lập biên nhận riêng vì finding đo trên object không tra được
+  (quyết định chủ kho, audit pull/613#issuecomment-5814227641), và trần §12 đã 2/2.
+verdict_path: ops/reviews/wp523-r15-review-1-codex-verdict.md
+verdict_sha256: 568588b08a2a44b22c5b1f5ab2e189105f22eb56188ec9e015f68cb3c0d4c354
+verdict_bytes: 593
+evidence_url: https://github.com/ducthangho/tra-luat/blob/b2134a40243e5cb3ea6d64eaf49a4c9f26794cbc/ops/reviews/wp523-r15-review-1-codex-verdict.md
+model_reviewer_identity:
+  provider: openai_codex
+  surface: codex_service
+  transport: machine
+  surface_nghia: >-
+    GitHub App `chatgpt-codex-connector[bot]` review trên PR — bề mặt `codex_service`
+    theo hợp đồng dữ liệu land ở #617 (master 6980e5bf, wp461 r3 / Mission #470 Q1)
+  model_yeu_cau: KHONG_DO_DUOC
+  effort_yeu_cau: KHONG_DO_DUOC
+  model_da_chay: KHONG_DO_DUOC
+  effort_da_chay: KHONG_DO_DUOC
+  KHONG_do_duoc: GitHub App không xuất session_run_id, model hay effort trong comment/review; không
+    có telemetry độc lập; tính độc lập của phiên reviewer không chứng minh được từ trong kho
+  subagent_cung_phien: false
+  neo_boi_launcher: false
+github_submitter_identity:
+  actor: chatgpt-codex-connector[bot]
+  role: >-
+    GitHub App đã VẬN CHUYỂN comment verdict (PROTOCOL §8 dòng 456-460 — actor vận chuyển);
+    khớp comment_delivery.author
+  recorder_actor: ducthangho
+  recorder_role: >-
+    executor session claude ghi biên nhận này qua GitHub REST API bằng token chủ kho —
+    KHÔNG phải actor vận chuyển verdict, KHÔNG phải bằng chứng model hay phê duyệt
+  model_identity_not_inferred_from_actor: true
+anchor:
+  loai: canonical_ancestry
+  cuong_do: >-
+    candidate ancestry only; canonical inclusion pending — commit verdict b2134a40243e5cb3ea6d64eaf49a4c9f26794cbc (evidence_url)
+    chỉ ở tổ tiên PR #623, vào master khi PR land bằng merge commit; riêng reviewed_sha 92adc711 ĐÃ
+    canonical qua merge commit c10487410cc502e96e9dd43639f2ddb6af104922 (PR #613)
+  gioi_han: >-
+    Validator đo tổ tiên trên checkout hiện hành, không chứng minh canonical inclusion của
+    commit evidence_url; kiểm sau land bằng `git merge-base --is-ancestor b2134a40243e5cb3ea6d64eaf49a4c9f26794cbc
+    origin/master`. Không chứng minh nội dung review đã đọc gì — connector không xuất bằng chứng đọc.
+comment_delivery:
+  url: https://github.com/ducthangho/tra-luat/pull/613#issuecomment-5812074543
+  author: chatgpt-codex-connector[bot]
+  created_at: '2026-09-24T10:06:46Z'
+  readback_byte_equal: true
+  readback_bang_chung:
+    phuong_thuc: GET https://api.github.com/repos/ducthangho/tra-luat/issues/comments/5812074543 (REST, token chu kho)
+    http_status: 200
+    doc_luc_utc: '2026-09-24T18:40:00Z'
+    doc_luc_utc_ghi_chu: giay KHONG duoc luu (chi biet toi phut 2026-09-24T18:40Z); khai thang, khong bia (thread 4100016580 tren PR 625 / wp461, cung lop, ap cho receipt nay)
+    body_sha256_nguon: 568588b08a2a44b22c5b1f5ab2e189105f22eb56188ec9e015f68cb3c0d4c354
+    body_sha256_doc_nguoc: 568588b08a2a44b22c5b1f5ab2e189105f22eb56188ec9e015f68cb3c0d4c354
+    body_bytes: 593
+    so_sanh: bytes UTF-8 cua body sau khi giai ma JSON == bytes tep verdict (khong hash chuoi JSON escape)
+    raw_json_luu: >-
+      Lan 1 (18:40Z) KHONG luu raw JSON — khai thang. Lan 2 (readback_lan_2 duoi day) LUU NGUYEN raw JSON phan hoi
+      (sort_keys, indent 1, khong sua noi dung) ke ca rc tien trinh, theo PROTOCOL §8 dong 456-462 (thread 4100014479).
+  readback_lan_2:
+    doc_luc_utc: '2026-09-25T01:11:15Z'
+    lenh: "REST GET /repos/ducthangho/tra-luat/issues/comments/5812074543 (gh.call, token chu kho, KHONG in token)"
+    http_status: 200
+    rc_tien_trinh: 0
+    body_sha256_doc_nguoc: 568588b08a2a44b22c5b1f5ab2e189105f22eb56188ec9e015f68cb3c0d4c354
+    body_bytes: 593
+    so_voi_tep_verdict: BANG NHAU tung byte (Python bytes ==)
+    raw_json_phan_hoi: |
+      {
+       "author_association": "NONE",
+       "body": "Codex Review: Didn't find any major issues. Chef's kiss.\n\n**Reviewed commit:** `92adc71121`\n\n<details> <summary>ℹ️ About Codex in GitHub</summary>\n<br/>\n\n[Your team has set up Codex to review pull requests in this repo](https://chatgpt.com/codex/cloud/settings/general). Reviews are triggered when you\n- Open a pull request for review\n- Mark a draft as ready\n- Comment \"@codex review\".\n\nIf Codex has suggestions, it will comment; otherwise it will react with 👍.\n\n\n\n\nCodex can also answer questions or update the PR. Try commenting \"@codex address that feedback\".\n            \n</details>",
+       "created_at": "2026-09-24T10:06:46Z",
+       "html_url": "https://github.com/ducthangho/tra-luat/pull/613#issuecomment-5812074543",
+       "id": 5812074543,
+       "issue_url": "https://api.github.com/repos/ducthangho/tra-luat/issues/613",
+       "minimized": null,
+       "node_id": "IC_kwDOTNeRjc8AAAABWm04Lw",
+       "performed_via_github_app": {
+        "created_at": "2025-02-14T01:37:05Z",
+        "description": "Bring ChatGPT and Codex to your GitHub repositories.",
+        "events": [
+         "check_run",
+         "check_suite",
+         "commit_comment",
+         "issues",
+         "issue_comment",
+         "pull_request",
+         "pull_request_review",
+         "pull_request_review_comment",
+         "pull_request_review_thread",
+         "repository",
+         "status",
+         "sub_issues"
+        ],
+        "external_url": "https://www.chatgpt.com",
+        "html_url": "https://github.com/apps/chatgpt-codex-connector",
+        "id": 1144995,
+        "name": "ChatGPT Codex Connector",
+        "node_id": "A_kwHOAOQ6Gs4AEXij",
+        "owner": {
+         "avatar_url": "https://avatars.githubusercontent.com/u/14957082?v=4",
+         "events_url": "https://api.github.com/users/openai/events{/privacy}",
+         "followers_url": "https://api.github.com/users/openai/followers",
+         "following_url": "https://api.github.com/users/openai/following{/other_user}",
+         "gists_url": "https://api.github.com/users/openai/gists{/gist_id}",
+         "gravatar_id": "",
+         "html_url": "https://github.com/openai",
+         "id": 14957082,
+         "login": "openai",
+         "node_id": "MDEyOk9yZ2FuaXphdGlvbjE0OTU3MDgy",
+         "organizations_url": "https://api.github.com/users/openai/orgs",
+         "received_events_url": "https://api.github.com/users/openai/received_events",
+         "repos_url": "https://api.github.com/users/openai/repos",
+         "site_admin": false,
+         "starred_url": "https://api.github.com/users/openai/starred{/owner}{/repo}",
+         "subscriptions_url": "https://api.github.com/users/openai/subscriptions",
+         "type": "Organization",
+         "url": "https://api.github.com/users/openai",
+         "user_view_type": "public"
+        },
+        "permissions": {
+         "actions": "write",
+         "checks": "read",
+         "contents": "write",
+         "emails": "read",
+         "issues": "write",
+         "metadata": "read",
+         "pull_requests": "write",
+         "statuses": "read",
+         "workflows": "write"
+        },
+        "slug": "chatgpt-codex-connector",
+        "updated_at": "2026-09-23T18:52:59Z"
+       },
+       "pin": null,
+       "reactions": {
+        "+1": 0,
+        "-1": 0,
+        "confused": 0,
+        "eyes": 0,
+        "heart": 0,
+        "hooray": 0,
+        "laugh": 0,
+        "rocket": 0,
+        "total_count": 0,
+        "url": "https://api.github.com/repos/ducthangho/tra-luat/issues/comments/5812074543/reactions"
+       },
+       "updated_at": "2026-09-24T10:06:46Z",
+       "url": "https://api.github.com/repos/ducthangho/tra-luat/issues/comments/5812074543",
+       "user": {
+        "avatar_url": "https://avatars.githubusercontent.com/in/1144995?v=4",
+        "events_url": "https://api.github.com/users/chatgpt-codex-connector%5Bbot%5D/events{/privacy}",
+        "followers_url": "https://api.github.com/users/chatgpt-codex-connector%5Bbot%5D/followers",
+        "following_url": "https://api.github.com/users/chatgpt-codex-connector%5Bbot%5D/following{/other_user}",
+        "gists_url": "https://api.github.com/users/chatgpt-codex-connector%5Bbot%5D/gists{/gist_id}",
+        "gravatar_id": "",
+        "html_url": "https://github.com/apps/chatgpt-codex-connector",
+        "id": 199175422,
+        "login": "chatgpt-codex-connector[bot]",
+        "node_id": "BOT_kgDOC98s_g",
+        "organizations_url": "https://api.github.com/users/chatgpt-codex-connector%5Bbot%5D/orgs",
+        "received_events_url": "https://api.github.com/users/chatgpt-codex-connector%5Bbot%5D/received_events",
+        "repos_url": "https://api.github.com/users/chatgpt-codex-connector%5Bbot%5D/repos",
+        "site_admin": false,
+        "starred_url": "https://api.github.com/users/chatgpt-codex-connector%5Bbot%5D/starred{/owner}{/repo}",
+        "subscriptions_url": "https://api.github.com/users/chatgpt-codex-connector%5Bbot%5D/subscriptions",
+        "type": "Bot",
+        "url": "https://api.github.com/users/chatgpt-codex-connector%5Bbot%5D",
+        "user_view_type": "public"
+       }
+      }
+  readback_lan_3:
+    doc_luc_utc: '2026-09-25T02:47:05Z'
+    lenh: "urllib GET https://api.github.com/repos/ducthangho/tra-luat/issues/comments/5812074543 (Accept application/vnd.github+json; token chu kho, KHONG in)"
+    http_status: 200
+    rc_tien_trinh: 0
+    phan_hoi_tho_bytes: 4181
+    phan_hoi_tho_sha256: becb6f9b35dc6392b60e69b515cb8475f48627a5e57e950e3a59c49645681f34
+    phan_hoi_tho_base64: |
+      eyJ1cmwiOiJodHRwczovL2FwaS5naXRodWIuY29tL3JlcG9zL2R1Y3RoYW5naG8vdHJhLWx1YXQv
+      aXNzdWVzL2NvbW1lbnRzLzU4MTIwNzQ1NDMiLCJodG1sX3VybCI6Imh0dHBzOi8vZ2l0aHViLmNv
+      bS9kdWN0aGFuZ2hvL3RyYS1sdWF0L3B1bGwvNjEzI2lzc3VlY29tbWVudC01ODEyMDc0NTQzIiwi
+      aXNzdWVfdXJsIjoiaHR0cHM6Ly9hcGkuZ2l0aHViLmNvbS9yZXBvcy9kdWN0aGFuZ2hvL3RyYS1s
+      dWF0L2lzc3Vlcy82MTMiLCJpZCI6NTgxMjA3NDU0Mywibm9kZV9pZCI6IklDX2t3RE9UTmVSamM4
+      QUFBQUJXbTA0THciLCJ1c2VyIjp7ImxvZ2luIjoiY2hhdGdwdC1jb2RleC1jb25uZWN0b3JbYm90
+      XSIsImlkIjoxOTkxNzU0MjIsIm5vZGVfaWQiOiJCT1Rfa2dET0M5OHNfZyIsImF2YXRhcl91cmwi
+      OiJodHRwczovL2F2YXRhcnMuZ2l0aHVidXNlcmNvbnRlbnQuY29tL2luLzExNDQ5OTU/dj00Iiwi
+      Z3JhdmF0YXJfaWQiOiIiLCJ1cmwiOiJodHRwczovL2FwaS5naXRodWIuY29tL3VzZXJzL2NoYXRn
+      cHQtY29kZXgtY29ubmVjdG9yJTVCYm90JTVEIiwiaHRtbF91cmwiOiJodHRwczovL2dpdGh1Yi5j
+      b20vYXBwcy9jaGF0Z3B0LWNvZGV4LWNvbm5lY3RvciIsImZvbGxvd2Vyc191cmwiOiJodHRwczov
+      L2FwaS5naXRodWIuY29tL3VzZXJzL2NoYXRncHQtY29kZXgtY29ubmVjdG9yJTVCYm90JTVEL2Zv
+      bGxvd2VycyIsImZvbGxvd2luZ191cmwiOiJodHRwczovL2FwaS5naXRodWIuY29tL3VzZXJzL2No
+      YXRncHQtY29kZXgtY29ubmVjdG9yJTVCYm90JTVEL2ZvbGxvd2luZ3svb3RoZXJfdXNlcn0iLCJn
+      aXN0c191cmwiOiJodHRwczovL2FwaS5naXRodWIuY29tL3VzZXJzL2NoYXRncHQtY29kZXgtY29u
+      bmVjdG9yJTVCYm90JTVEL2dpc3Rzey9naXN0X2lkfSIsInN0YXJyZWRfdXJsIjoiaHR0cHM6Ly9h
+      cGkuZ2l0aHViLmNvbS91c2Vycy9jaGF0Z3B0LWNvZGV4LWNvbm5lY3RvciU1QmJvdCU1RC9zdGFy
+      cmVkey9vd25lcn17L3JlcG99Iiwic3Vic2NyaXB0aW9uc191cmwiOiJodHRwczovL2FwaS5naXRo
+      dWIuY29tL3VzZXJzL2NoYXRncHQtY29kZXgtY29ubmVjdG9yJTVCYm90JTVEL3N1YnNjcmlwdGlv
+      bnMiLCJvcmdhbml6YXRpb25zX3VybCI6Imh0dHBzOi8vYXBpLmdpdGh1Yi5jb20vdXNlcnMvY2hh
+      dGdwdC1jb2RleC1jb25uZWN0b3IlNUJib3QlNUQvb3JncyIsInJlcG9zX3VybCI6Imh0dHBzOi8v
+      YXBpLmdpdGh1Yi5jb20vdXNlcnMvY2hhdGdwdC1jb2RleC1jb25uZWN0b3IlNUJib3QlNUQvcmVw
+      b3MiLCJldmVudHNfdXJsIjoiaHR0cHM6Ly9hcGkuZ2l0aHViLmNvbS91c2Vycy9jaGF0Z3B0LWNv
+      ZGV4LWNvbm5lY3RvciU1QmJvdCU1RC9ldmVudHN7L3ByaXZhY3l9IiwicmVjZWl2ZWRfZXZlbnRz
+      X3VybCI6Imh0dHBzOi8vYXBpLmdpdGh1Yi5jb20vdXNlcnMvY2hhdGdwdC1jb2RleC1jb25uZWN0
+      b3IlNUJib3QlNUQvcmVjZWl2ZWRfZXZlbnRzIiwidHlwZSI6IkJvdCIsInVzZXJfdmlld190eXBl
+      IjoicHVibGljIiwic2l0ZV9hZG1pbiI6ZmFsc2V9LCJjcmVhdGVkX2F0IjoiMjAyNi0wOS0yNFQx
+      MDowNjo0NloiLCJ1cGRhdGVkX2F0IjoiMjAyNi0wOS0yNFQxMDowNjo0NloiLCJhdXRob3JfYXNz
+      b2NpYXRpb24iOiJOT05FIiwiYm9keSI6IkNvZGV4IFJldmlldzogRGlkbid0IGZpbmQgYW55IG1h
+      am9yIGlzc3Vlcy4gQ2hlZidzIGtpc3MuXG5cbioqUmV2aWV3ZWQgY29tbWl0OioqIGA5MmFkYzcx
+      MTIxYFxuXG48ZGV0YWlscz4gPHN1bW1hcnk+4oS577iPIEFib3V0IENvZGV4IGluIEdpdEh1Yjwv
+      c3VtbWFyeT5cbjxici8+XG5cbltZb3VyIHRlYW0gaGFzIHNldCB1cCBDb2RleCB0byByZXZpZXcg
+      cHVsbCByZXF1ZXN0cyBpbiB0aGlzIHJlcG9dKGh0dHBzOi8vY2hhdGdwdC5jb20vY29kZXgvY2xv
+      dWQvc2V0dGluZ3MvZ2VuZXJhbCkuIFJldmlld3MgYXJlIHRyaWdnZXJlZCB3aGVuIHlvdVxuLSBP
+      cGVuIGEgcHVsbCByZXF1ZXN0IGZvciByZXZpZXdcbi0gTWFyayBhIGRyYWZ0IGFzIHJlYWR5XG4t
+      IENvbW1lbnQgXCJAY29kZXggcmV2aWV3XCIuXG5cbklmIENvZGV4IGhhcyBzdWdnZXN0aW9ucywg
+      aXQgd2lsbCBjb21tZW50OyBvdGhlcndpc2UgaXQgd2lsbCByZWFjdCB3aXRoIPCfkY0uXG5cblxu
+      XG5cbkNvZGV4IGNhbiBhbHNvIGFuc3dlciBxdWVzdGlvbnMgb3IgdXBkYXRlIHRoZSBQUi4gVHJ5
+      IGNvbW1lbnRpbmcgXCJAY29kZXggYWRkcmVzcyB0aGF0IGZlZWRiYWNrXCIuXG4gICAgICAgICAg
+      ICBcbjwvZGV0YWlscz4iLCJyZWFjdGlvbnMiOnsidXJsIjoiaHR0cHM6Ly9hcGkuZ2l0aHViLmNv
+      bS9yZXBvcy9kdWN0aGFuZ2hvL3RyYS1sdWF0L2lzc3Vlcy9jb21tZW50cy81ODEyMDc0NTQzL3Jl
+      YWN0aW9ucyIsInRvdGFsX2NvdW50IjowLCIrMSI6MCwiLTEiOjAsImxhdWdoIjowLCJob29yYXki
+      OjAsImNvbmZ1c2VkIjowLCJoZWFydCI6MCwicm9ja2V0IjowLCJleWVzIjowfSwicGVyZm9ybWVk
+      X3ZpYV9naXRodWJfYXBwIjp7ImlkIjoxMTQ0OTk1LCJzbHVnIjoiY2hhdGdwdC1jb2RleC1jb25u
+      ZWN0b3IiLCJub2RlX2lkIjoiQV9rd0hPQU9RNkdzNEFFWGlqIiwib3duZXIiOnsibG9naW4iOiJv
+      cGVuYWkiLCJpZCI6MTQ5NTcwODIsIm5vZGVfaWQiOiJNREV5T2s5eVoyRnVhWHBoZEdsdmJqRTBP
+      VFUzTURneSIsImF2YXRhcl91cmwiOiJodHRwczovL2F2YXRhcnMuZ2l0aHVidXNlcmNvbnRlbnQu
+      Y29tL3UvMTQ5NTcwODI/dj00IiwiZ3JhdmF0YXJfaWQiOiIiLCJ1cmwiOiJodHRwczovL2FwaS5n
+      aXRodWIuY29tL3VzZXJzL29wZW5haSIsImh0bWxfdXJsIjoiaHR0cHM6Ly9naXRodWIuY29tL29w
+      ZW5haSIsImZvbGxvd2Vyc191cmwiOiJodHRwczovL2FwaS5naXRodWIuY29tL3VzZXJzL29wZW5h
+      aS9mb2xsb3dlcnMiLCJmb2xsb3dpbmdfdXJsIjoiaHR0cHM6Ly9hcGkuZ2l0aHViLmNvbS91c2Vy
+      cy9vcGVuYWkvZm9sbG93aW5ney9vdGhlcl91c2VyfSIsImdpc3RzX3VybCI6Imh0dHBzOi8vYXBp
+      LmdpdGh1Yi5jb20vdXNlcnMvb3BlbmFpL2dpc3Rzey9naXN0X2lkfSIsInN0YXJyZWRfdXJsIjoi
+      aHR0cHM6Ly9hcGkuZ2l0aHViLmNvbS91c2Vycy9vcGVuYWkvc3RhcnJlZHsvb3duZXJ9ey9yZXBv
+      fSIsInN1YnNjcmlwdGlvbnNfdXJsIjoiaHR0cHM6Ly9hcGkuZ2l0aHViLmNvbS91c2Vycy9vcGVu
+      YWkvc3Vic2NyaXB0aW9ucyIsIm9yZ2FuaXphdGlvbnNfdXJsIjoiaHR0cHM6Ly9hcGkuZ2l0aHVi
+      LmNvbS91c2Vycy9vcGVuYWkvb3JncyIsInJlcG9zX3VybCI6Imh0dHBzOi8vYXBpLmdpdGh1Yi5j
+      b20vdXNlcnMvb3BlbmFpL3JlcG9zIiwiZXZlbnRzX3VybCI6Imh0dHBzOi8vYXBpLmdpdGh1Yi5j
+      b20vdXNlcnMvb3BlbmFpL2V2ZW50c3svcHJpdmFjeX0iLCJyZWNlaXZlZF9ldmVudHNfdXJsIjoi
+      aHR0cHM6Ly9hcGkuZ2l0aHViLmNvbS91c2Vycy9vcGVuYWkvcmVjZWl2ZWRfZXZlbnRzIiwidHlw
+      ZSI6Ik9yZ2FuaXphdGlvbiIsInVzZXJfdmlld190eXBlIjoicHVibGljIiwic2l0ZV9hZG1pbiI6
+      ZmFsc2V9LCJuYW1lIjoiQ2hhdEdQVCBDb2RleCBDb25uZWN0b3IiLCJkZXNjcmlwdGlvbiI6IkJy
+      aW5nIENoYXRHUFQgYW5kIENvZGV4IHRvIHlvdXIgR2l0SHViIHJlcG9zaXRvcmllcy4iLCJleHRl
+      cm5hbF91cmwiOiJodHRwczovL3d3dy5jaGF0Z3B0LmNvbSIsImh0bWxfdXJsIjoiaHR0cHM6Ly9n
+      aXRodWIuY29tL2FwcHMvY2hhdGdwdC1jb2RleC1jb25uZWN0b3IiLCJjcmVhdGVkX2F0IjoiMjAy
+      NS0wMi0xNFQwMTozNzowNVoiLCJ1cGRhdGVkX2F0IjoiMjAyNi0wOS0yM1QxODo1Mjo1OVoiLCJw
+      ZXJtaXNzaW9ucyI6eyJhY3Rpb25zIjoid3JpdGUiLCJjaGVja3MiOiJyZWFkIiwiY29udGVudHMi
+      OiJ3cml0ZSIsImVtYWlscyI6InJlYWQiLCJpc3N1ZXMiOiJ3cml0ZSIsIm1ldGFkYXRhIjoicmVh
+      ZCIsInB1bGxfcmVxdWVzdHMiOiJ3cml0ZSIsInN0YXR1c2VzIjoicmVhZCIsIndvcmtmbG93cyI6
+      IndyaXRlIn0sImV2ZW50cyI6WyJjaGVja19ydW4iLCJjaGVja19zdWl0ZSIsImNvbW1pdF9jb21t
+      ZW50IiwiaXNzdWVzIiwiaXNzdWVfY29tbWVudCIsInB1bGxfcmVxdWVzdCIsInB1bGxfcmVxdWVz
+      dF9yZXZpZXciLCJwdWxsX3JlcXVlc3RfcmV2aWV3X2NvbW1lbnQiLCJwdWxsX3JlcXVlc3RfcmV2
+      aWV3X3RocmVhZCIsInJlcG9zaXRvcnkiLCJzdGF0dXMiLCJzdWJfaXNzdWVzIl19LCJtaW5pbWl6
+      ZWQiOm51bGwsInBpbiI6bnVsbH0=
+    body_sha256_tu_phan_hoi_tho: 568588b08a2a44b22c5b1f5ab2e189105f22eb56188ec9e015f68cb3c0d4c354
+    so_voi_tep_verdict: BANG NHAU tung byte (json.loads(phan_hoi_tho)['body'].encode('utf-8') == bytes tep verdict)
+    ghi_chu: >-
+      Day la BYTE VAN CHUYEN cua phan hoi HTTP, chup bang resp.read() TRUOC json.loads (thread
+      PRRT_kwDOTNeRjc6l1EcK, review 5312180071). readback_lan_2 la ban tai tuan tu hoa (sort_keys/indent) nen
+      KHONG phai raw — giu lai lam lich su, khong xoa. Giai ma: base64 -d, khong chuan hoa xuong dong. Cung
+      hinh dang receipt wp461 (#625, 45de8954). Ghi duoi lease quy-trinh-lap-review-r15-g19-claude.
+format_reissue:
+  khong_bien_doi: true
+  ghi_chu: >-
+    Tep verdict la NGUYEN BYTE body UTF-8 cua comment (readback qua REST), ke ca dong trang co khoang trang
+    truoc </details> va ket thuc goc — §8 dong 456-462 (khong bo newline, khong chuan hoa). Ban truoc
+    (LF, bo khoang trang cuoi) da bi thay the theo cross-review thread 4099651082; verdict_sha256 = hash raw.
+    Vi vay A5 'git diff --check <base> <head> --' tra rc=2 tren PR nay (trailing whitespace verdict.md dong 19):
+    CO Y theo §8 (giu nguyen byte da giao), khong phai hoi quy; CI khong chay diff --check. Spec ke tiep nen loai
+    ops/reviews/*-verdict.md khoi A5.
+budget:
+  codex_review_calls_used_on_pr613: 2
+  codex_review_calls_cap: 2
+  calls:
+  - id: pull/613#issuecomment-5811858888
+    reviewed: 92adc7112155a6711ec2c86d59ce60293b342314
+    ket_qua: pull/613#issuecomment-5812074543 — 0 finding (biên nhận này)
+  - id: auto (Draft marked ready)
+    reviewed: 92adc7112155a6711ec2c86d59ce60293b342314
+    reviewed_nguon: GitHub review 5304344210 commit_id; body 'Reviewed commit 92adc71121'; submitted_at 2026-09-24T12:23:53Z
+    bang_chung_finding_do_tren: >-
+      76275ebc — object tổng hợp của reviewer, không có trên server (git cat-file: not a valid object);
+      KHÔNG ĐO ĐƯỢC trên chính nó
+    ket_qua: review 5304344210 — 1 P1 (thread 4093538781)
+  reviewer_dispatched_ci: 0
+  product_ci_tren_reviewed_sha: >-
+    92adc711 — 7 check-run: chuan-bi, gate, gate-packet-loop, thu-hoi (107581788956) success; gate-registry
+    failure vô can (nhanh_don_duoc_test rig tạm 'Directory not empty', pull/613#issuecomment-5812420143);
+    thu-hoi failure (check-run 107628547502, run 35998333826 tạo 2026-09-24T12:19:31Z, pull_request_target kích bởi
+    ready_for_review 12:19:29Z — TRƯỚC merge 13:38:29Z; workflow thu hồi lease, không phải product CI); mo skipped.
+    Head kế 61a39096 — 8 check-run: 6 success (chuan-bi, gate, gate-packet-loop, gate-registry, thu-hoi x2),
+    mo skipped, thu-hoi failure (check-run 107659460897, run 36007526100 tạo 2026-09-24T13:42:37Z — hậu merge). Đo qua REST commits/SHA/check-runs
+    trong khoảng 2026-09-25T03:32:03Z..2026-09-25T03:38:36Z (giây không lưu; sau comment issues/523 5826219229,
+    trước phép đo ai-dang-giu của g20) theo cross-review lượt 7; thời điểm run đo lại lượt 8.
+  historical_total_spend: KHONG_DO_DUOC
+land:
+  merge_commit: c10487410cc502e96e9dd43639f2ddb6af104922
+  bookkeeping: issues/523#issuecomment-5815274276
+  bien_nhan_viet_sau_land: true
+pending:
+- nợ `receipt-r14-thieu-role-reviewer` vẫn mở (S5 cấm sửa receipt r14)
+- human audit A7 còn placeholder dòng `tự đo` ở hai comment audit
+- nợ bookkeeping CHANGELOG r376 + RELEASE_MANIFEST (wp461 r3)
+lich_su_ban_ung_vien:
+  ghi_chu: >-
+    Receipt nay CHUA duoc giao (chua o master: `git ls-tree origin/master ops/reviews/wp523-r15-*` rong) — moi ban
+    la ban UNG VIEN trong PR #623; sua truoc khi land khong phai 'sua receipt da giao' (S5 r15 / §8 dong 461-462).
+    Lich su cac ban ung vien ghi o day de noi nguon (thread 4100014487); ban hien hanh la dong cuoi (truoc commit nay).
+  cac_ban:
+  - {commit: b78c2a01a286e930a30fa4499662fc897ba8a7ce, luc: '2026-09-24T18:41:24+00:00', receipt_sha256: 1335549153e9ecb571d1d1a377263af8fa8969ada582af41cc71c353b482c84b}
+  - {commit: 9777651940148aabcbd54445933c43acf9db83ff, luc: '2026-09-24T19:18:43+00:00', receipt_sha256: fbc85ad565ffa4e4dcb94c16dede50859958b8bf005514c4dc4132c052395e19}
+  - {commit: 265528bf5281b72e2b3783787fb7aba7fb8942a1, luc: '2026-09-24T19:24:23+00:00', receipt_sha256: 0325576baabdafca1b285efebaaeb0ba3b058dcb1df0fb9c6242b1157c84be02}
+  - {commit: 1dbaf8897d08ebbc91e27f90d6c3a156569eb6f5, luc: '2026-09-25T00:04:49+00:00', receipt_sha256: 835b6c2b956e8708b39b4e69009258e841bb55f0867b3795e11b12c085c9da53}
+  - {commit: d68492e17a3c26edf135bfabf46e3dd4f3d6e8b5, luc: '2026-09-25T00:41:12+00:00', receipt_sha256: 2cb825dd8f123d5f853d8b59f8d3661fae0baded8a9506683cb23887d75788c9}
+  - {commit: f9cd880d38d43460a5e3bd1ec82b1ca6b5d5bcce, luc: '2026-09-25T01:14:29+00:00', receipt_sha256: 65e427f53f38187f608d99007c27c5a12aaa2924cded14540e919500c809b539}
+  - {commit: 5d8b2b01102165dfd19c032a26d552b7d1ecfef5, luc: '2026-09-25T01:22:38+00:00', receipt_sha256: ce8bb82a4b6fb49104675db29ed4e64aa685830fe23ec76cf78d1f3c26828193}
+  - {commit: f2401165053854973b310fc249bda0b4aec2bb2e, luc: '2026-09-25T02:47:45+00:00', receipt_sha256: bcb0af99230a787fc7b554857a42b45e49300d2efef33b3fb108a6554ad12178}
+  - {commit: f088fa28a99931e21ee137aaf2c685e6e30ef6de, luc: '2026-09-25T04:19:33+00:00', receipt_sha256: 6fe676c055defd1627eb498e1b3fcdf1371e5dd664e2844865b02399369db61e}

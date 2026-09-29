@@ -1,0 +1,105 @@
+# LEASE — CI-REGISTRY-PRETOOLUSE-CHE-DO-NHE revision 1 / generation 1 — che do nhe cho pretooluse_guard_test
+# GHI HO theo chi thi CHU KHO trong phien (chep nguyen van o granted_on_instruction_nguyen_van).
+
+schema_version: 2
+event: executor_lease_granted
+
+packet_issue: 647
+granted_by: ducthangho
+granted_on_instruction: https://github.com/ducthangho/tra-luat/issues/647#issuecomment-5846667387
+granted_on_instruction_nguyen_van: >-
+  'Làm chế độ nhẹ cho pretooluse_guard_test, tạo issue cấp lease' (chu kho, phien Claude Code cua executor #643,
+  2026-09-26).
+authority_caveat: >-
+  Comment neo do phien executor dang bang tai khoan chu kho, chep loi chu kho trong phien — yeu hon comment
+  chu kho tu viet (#566). author_association=OWNER khong tach chu kho khoi phien agent dung token chu kho.
+recorded_by: claude-session
+recorder_is_dispatcher: false
+
+leased_at_utc: '2026-09-26T13:31:00Z'
+lease_expires_at_utc: '2026-09-27T13:31:00Z'
+han_ghi_chu: '24 gio theo comment dong bang issues/647#issuecomment-5846667387.'
+
+packet_id: CI-REGISTRY-PRETOOLUSE-CHE-DO-NHE
+packet_slug: CI-REGISTRY-PRETOOLUSE-CHE-DO-NHE
+revision: 1
+generation: 1
+lease_id: ci-registry-pretooluse-che-do-nhe-r1-g1-claude
+thay_the_cho: ci-registry-dot-bien-theo-diff-r1-g1-claude
+thay_the_ghi_chu: >-
+  Lease #643 g1 con han toi 2026-09-27T01:20:00Z va giu .claude/dev/ci_dang_ky_test.py, nhung packet #643 DA LAND
+  (PR #644 merge 6d9581cf11780ffa78a285348563f6b77b448cb6, PR #645 merge 2ab6f13d06dc4815c19dba72b38d89f9531f84ff;
+  Issue 643 dong; bien nhan land issues/643#issuecomment-5845867513). Bia mo hai chieu: da_bi_thay_the trong tep g1
+  cua #643 (sua tren chinh nhanh nay).
+role: executor
+provider: anthropic_claude
+executor: claude
+surface: claude_code
+model: claude-opus-5-5
+effort: medium
+effort_ghi_chu: 'Tu khai; KHONG DO DUOC tu ngoai.'
+environment: cloud
+risk: sensitive
+review_class: sensitive
+effective_review_class: sensitive
+assurance_target: human_audited
+reviewer_provider: openai_codex
+reviewer_surface: codex_service
+reviewer_model_yeu_cau: gpt-6-astra
+reviewer_ghi_chu: 'Codex CLI tai cho truoc push + Codex connector tren PR non-draft (advisory_review); human_audited la cong land.'
+access: read-write
+
+spec_path: ops/specs/CI-REGISTRY-PRETOOLUSE-CHE-DO-NHE-r1.md
+spec_ref: refs/heads/claude/spec-ci-registry-pretooluse-nhe-r1
+spec_source_oid: 95d63ffe987756a06fad2bd87f6c09aaab108b11
+spec_sha256: 4a06855b1911d31a6ef5111c417a6a15e33ea55bbaf15174bdbc8f84d2c46105
+spec_hash: 4a06855b1911d31a6ef5111c417a6a15e33ea55bbaf15174bdbc8f84d2c46105
+spec_hash_formula: SHA256 of UTF-8 LF Git blob bytes at spec_source_oid:spec_path
+prompt_path: ops/specs/CI-REGISTRY-PRETOOLUSE-CHE-DO-NHE-r1.md
+prompt_sha256_required: 4a06855b1911d31a6ef5111c417a6a15e33ea55bbaf15174bdbc8f84d2c46105
+
+branch: claude/ci-registry-pretooluse-nhe-r1-g1
+branch_ownership: exclusive
+start_from_sha: 2ab6f13d06dc4815c19dba72b38d89f9531f84ff
+immutable_acceptance_baseline: 2ab6f13d06dc4815c19dba72b38d89f9531f84ff
+continuation_base: 2ab6f13d06dc4815c19dba72b38d89f9531f84ff
+reviewed_sha_required: 2ab6f13d06dc4815c19dba72b38d89f9531f84ff
+reviewed_sha_required_nghia: 'Chua co head ung vien; moi verdict neo exact head THAT cua PR thi cong.'
+
+write_set:
+  - .claude/dev/ci_dang_ky_test.py
+  - .claude/hooks/pretooluse_guard_test.py
+write_set_hash: 3df544ebb4cd63b4600995da3e50622b02fa71968648dac9eb8102c4988dbe6d
+write_set_hash_cach_tinh: 'sha256 cua cac duong dan DA SAP XEP, noi bang LF, co LF cuoi, utf-8.'
+write_set_da_do_truoc_khi_cap: >-
+  Do 2026-09-26T13:28Z: fetch '+refs/heads/*', hai nguon ref ls-remote 423 / cuc bo 423, comm -23 = 0.
+  ai-dang-giu .claude/hooks/pretooluse_guard_test.py => NGUOI_GIU 0; .claude/dev/ci_dang_ky_test.py => NGUOI_GIU 1 =
+  #643 g1 (da land, thay the o day).
+
+lech_protocol_duoc_duyet: >-
+  Mo rong lech cua #643 (docs/PROTOCOL_DA_PHIEN.md:839-840, selector khong qua shadow) sang bo thu hai
+  .claude/hooks/pretooluse_guard_test.py theo chi thi chu kho; pham vi y het (spec §2).
+
+ci_budget:
+  gate_tu_dong: '0 / 1 / 2 luot pull_request (mot luot = mot workflow run; attempt lai khong tinh them)'
+  phep_do_duoc_cap: '0 / 0 / 0'
+  tham_do_chua_cap: cam
+  het: 'DUNG truoc moi push/chay lai ke tiep, cho quyet dinh cua chu kho'
+
+dieu_kien_dung:
+  - 'S1 — cham duong ngoai W1/W2. DUNG.'
+  - 'S2 — CI do vi packet. DUNG, bao chu kho.'
+  - 'S4 — push chi sau review tai cho sach; het allowance => DUNG.'
+  - 'S5 — > 300 dong them. DUNG truoc review.'
+  - 'S6 — het han lease => ngung ghi, handoff §7.'
+
+cam_tuyet_doi:
+  - Khong sua spec; khong sua tep ngoai write set
+  - Khong tu review / approve / merge / land; land chi bang merge commit
+  - Khong CI tay, khong Windows, khong LIVE/deploy
+  - Khong force-push
+
+chua_do_duoc:
+  - 'Danh tinh nguoi ky: #566.'
+  - 'Effort thuc te cua phien executor.'
+da_bi_thay_the: ci-registry-thu-hep-vung-r1-g1-claude

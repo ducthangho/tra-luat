@@ -1117,9 +1117,16 @@ def y15_loader_nghiem_tu_choi_khoa_trung_va_khoa_gop():
     for ten, vb in (("khoa trung", goc.replace(neo, "    runs-on: windows-latest\n" + neo, 1)),
                     ("khoa gop", goc.replace("jobs:\n", "x-mau: &mau\n  a: 1\njobs:\n  <<: *mau\n", 1))):
         bat = False
-        with contextlib.suppress(TinHieuChotCa):
-            doc_wf_tu(vb)
-            bat = True
+        # Di qua reader THAT cua moi ca y*, ke ca khi helper nghiem van con.
+        with tempfile.TemporaryDirectory(prefix="cdn_yaml_reader_") as d:
+            cay_tam = Path(d)
+            tep = cay_tam / ".github" / "workflows" / "ci.yml"
+            tep.parent.mkdir(parents=True)
+            tep.write_text(vb, encoding="utf-8")
+            with mock.patch.dict(globals(), {"CAY": cay_tam}, clear=False):
+                with contextlib.suppress(TinHieuChotCa):
+                    doc_wf()
+                    bat = True
         bang(not bat, f"loader phai DO khi ci.yml co {ten}")
 
 
@@ -1174,9 +1181,37 @@ def k03_ci_goi_that_muc_da_noi():
 
 
 @ca_tu_kiem
+def t94_main_in_dong_kiem_ke_that():
+    """Do output cua main voi runner con gia de tranh de quy; so dem van tu CA/DOT_BIEN that."""
+    import io
+    ra = io.StringIO()
+    with mock.patch.dict(globals(), {
+        "CAY": ROOT_THAT,
+        "chay_ca_trong_tien_trinh": lambda _: ("DAT", ""),
+        "chay_tap_dot_bien": lambda _: (len(DOT_BIEN), []),
+        "tu_kiem_phan_hang": lambda: [],
+    }, clear=False), contextlib.redirect_stdout(ra):
+        rc = main([])
+    bang(rc == 0 and ra.getvalue().splitlines().count(dong_kiem_ke()) == 1,
+         "main phai in dung mot dong KIEM KE duoc doi chieu doc lap boi t96")
+
+
+@ca_tu_kiem
 def t95_lan_chay_day_du_chi_do_kho_chua_test():
     bang(loi_cay_duoi_do(ROOT_THAT, ROOT_THAT) == "", "kho that phai duoc nhan")
     bang(loi_cay_duoi_do(Path(tempfile.gettempdir()), ROOT_THAT) != "", "cay khac kho chua test phai bi tu choi o lan chay day du")
+    # Kiem DUONG GOI main, khong chi helper; vo hieu hoa bo ca de khong de quy.
+    import io
+    with tempfile.TemporaryDirectory(prefix="cdn_main_scope_") as d:
+        ra, err = io.StringIO(), io.StringIO()
+        with mock.patch.dict(globals(), {"CAY": Path(d), "CA": {}}, clear=False), \
+             mock.patch.dict(globals(), {"chay_tap_dot_bien": lambda _: (0, []),
+                                         "tu_kiem_phan_hang": lambda: []}, clear=False), \
+             contextlib.redirect_stdout(ra), contextlib.redirect_stderr(err):
+            rc = main([])
+        bang(rc == 2 and "CAY DUOI DO KHAC KHO CHUA TEST" in err.getvalue()
+             and "CA:" not in ra.getvalue() and "TONG:" not in ra.getvalue(),
+             "main phai tu choi cay ngoai TRUOC khi chay/in ket qua suite")
 
 
 # ---------------------------------------------------------------- tự kiểm của chính bộ test
@@ -1528,6 +1563,14 @@ DOT_BIEN = [
     ("test_loader_bo_kiem_khoa_gop", _test('            if k.tag == "tag:yaml.org,2002:merge" or getattr(k, "value", None) == "<<":\n', "            if False:\n"), ("y15_loader_nghiem_tu_choi_khoa_trung_va_khoa_gop",)),
     ("test_doc_wf_dung_safe_load", _test("        return yaml.load(van_ban, Loader=_LoaderNghiem)\n", "        return yaml.safe_load(van_ban)\n"), ("y15_loader_nghiem_tu_choi_khoa_trung_va_khoa_gop",)),
     ("test_bo_chot_cay_duoi_do", _test("    if Path(cay).resolve() != Path(goc).resolve():\n", "    if False:\n"), ("t95_lan_chay_day_du_chi_do_kho_chua_test",)),
+    # ---- luot 5 (Codex P2/P3): chot phai do DUONG GOI THAT (main / doc_wf / dong in), khong chi helper
+    ("test_main_khong_goi_chot_cay", _test("    loi_cay = loi_cay_duoi_do(CAY, ROOT_THAT)\n", "    loi_cay = ''\n"), ("t95_lan_chay_day_du_chi_do_kho_chua_test",)),
+    ("test_main_chot_cay_sai_toan_hang", _test("    loi_cay = loi_cay_duoi_do(CAY, ROOT_THAT)\n", "    loi_cay = loi_cay_duoi_do(ROOT_THAT, ROOT_THAT)\n"), ("t95_lan_chay_day_du_chi_do_kho_chua_test",)),
+    ("test_main_chot_cay_bo_return", _test("        print(loi_cay, file=sys.stderr)\n        return 2\n    dat = do = hong = 0\n", "        print(loi_cay, file=sys.stderr)\n    dat = do = hong = 0\n"), ("t95_lan_chay_day_du_chi_do_kho_chua_test",)),
+    ("test_doc_wf_that_dung_safe_load", _test('    return doc_wf_tu((CAY / ".github" / "workflows" / "ci.yml").read_text(encoding="utf-8"))\n', '    return yaml.safe_load((CAY / ".github" / "workflows" / "ci.yml").read_text(encoding="utf-8"))\n'), ("y15_loader_nghiem_tu_choi_khoa_trung_va_khoa_gop",)),
+    ("test_main_khong_in_kiem_ke", _test("    print(dong_kiem_ke())\n", ""), ("t94_main_in_dong_kiem_ke_that",)),
+    ("test_main_in_kiem_ke_hai_lan", _test("    print(dong_kiem_ke())\n", "    print(dong_kiem_ke())\n    print(dong_kiem_ke())\n"), ("t94_main_in_dong_kiem_ke_that",)),
+    ("test_main_in_kiem_ke_bi_doi", _test("    print(dong_kiem_ke())\n", "    print(dong_kiem_ke().replace('tu_kiem', 'tu kiem'))\n"), ("t94_main_in_dong_kiem_ke_that",)),
     # ---- nghiệm thu 9: nối vào sổ test sống
     ("yml_go_buoc_goi_test_khoi_ci", _yml("      - name: ci-duong-nhanh selftest (phan loai diff + khoa cau truc if)\n        if: runner.os == 'Linux'\n        run: python ops/ci_duong_nhanh_test.py\n", ""), ("y09_buoc_goi_test_cua_packet_khong_bi_bo", "k03_ci_goi_that_muc_da_noi")),
     ("dk_go_muc_da_noi", (DK, lambda vb: thay_mot(vb, f'    "{DA_NOI_MUC}",\n', "")), ("k01_so_dang_ky_nhan_muc_da_noi",)),

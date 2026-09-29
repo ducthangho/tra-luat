@@ -7696,8 +7696,10 @@ def _in_tu_kiem_gom():
         cu_rb = Path.read_bytes
         Path.read_bytes = lambda self: (_ for _ in ()).throw(OSError("giả đọc hỏng")) if (
             self.name == "manh-1.txt" and self.parent.name == "doc_loi") else cu_rb(self)
-        try:
+        try:   # ngoại lệ lọt khỏi gom là DỮ LIỆU (ca đích đỏ đúng chốt), không phải con chết (tín dụng giả)
             dung_bo("doc_loi")
+        except Exception as ex:  # noqa: BLE001
+            kq["doc_loi"] = [1, f"NEM:{type(ex).__name__}", ""]
         finally:
             Path.read_bytes = cu_rb
         # F35: danh TÍNH phân hoạch — chỉ số từng nhóm theo nguồn của CHÍNH tiến trình này; cha so với `nguon[k::N]`.
@@ -7786,8 +7788,11 @@ def _in_tu_kiem_gom():
         # F35: bộ ghi — đường cha NHIỀU tầng chưa có + tên có khoảng trắng cuối (ghi đúng NGUYÊN đường); symlink GÃY
         # cũ ở nhánh không đạt phải bị gỡ.
         p = ghi / "a" / "b c" / "manh-0.txt "
-        _ket_thuc_manh(0, n, str(p), cac, {t: _ban_ghi_du_gia(t) for t in cac}, None, vt)
-        kq["ghi_duong"] = [p.is_file(), p.is_file() and p.read_text(encoding="utf-8").startswith("MANH ")]
+        try:
+            _ket_thuc_manh(0, n, str(p), cac, {t: _ban_ghi_du_gia(t) for t in cac}, None, vt)
+            kq["ghi_duong"] = [p.is_file(), p.is_file() and p.read_text(encoding="utf-8").startswith("MANH ")]
+        except Exception as ex:  # noqa: BLE001
+            kq["ghi_duong"] = [f"NEM:{type(ex).__name__}"]
         if _CO_SYMLINK:
             gay = ghi / "gay.txt"
             os.symlink(ghi / "khong-co", gay)

@@ -895,7 +895,7 @@ _KIEU_TRAN = frozenset("srabc")
 _KIEU_KHUECH_DAI = frozenset("diouxXeEfFgG")
 _TRAN_CHU_SO_G = 800      # N120 — trần độ dài `%.Ng` (không `#`) của mọi `double`; `t33` (1o) đo
 def _tach_dinh_dang(van):
-    """Mỗi đặc tả `%` của `van` là một bộ (cờ, độ_rộng, độ_chính_xác, kiểu) — theo ĐÚNG luật tách của CPython.
+    r"""Mỗi đặc tả `%` của `van` là một bộ (cờ, độ_rộng, độ_chính_xác, kiểu) — theo ĐÚNG luật tách của CPython.
 
     N118 (r34, chủ kho — ngân sách `%` lần NĂM, codex vòng 28): bản r33 tách bằng regex `%(?:\([^)]*\))?…`,
     dừng khoá ánh xạ ở `)` ĐẦU TIÊN, nên `"%((a))s" % {"(a)": "bash"}` (ra `'bash'`, phóng bash thật) bị

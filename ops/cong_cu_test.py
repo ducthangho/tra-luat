@@ -8,6 +8,26 @@ import datetime as _dt
 import json, os, runpy, shutil, subprocess, sys, tempfile, time
 from pathlib import Path
 
+# #671 (gộp nợ CONG-CU-TEST-EP-UTF8 của #570) — ÉP UTF-8 TRƯỚC MỌI `print`, cho CHÍNH tệp này và
+# cho MỌI tiến trình con/cháu. Đo 27-09-2026 (Linux, `PYTHONIOENCODING=ascii` cho con): `t29`, `t42`,
+# `t45` chết `tin_dung_gia` vì cháu in chữ Việt ra stdout ASCII; chạy tay trên Windows (cp1252/cp1258)
+# ĐỎ oan, còn CI che mất vì tự đặt hai biến này. Đặt vào `os.environ` chứ không vá từng lời gọi: đo
+# bằng AST có 66 điểm phóng, mọi `env=` tường minh đều dựng TỪ `os.environ` (`moi_truong`,
+# `dict(os.environ, …)`, `{**os.environ, …}`), nên một chỗ này phủ hết — kể cả điểm phóng chưa ai viết.
+# `t60b` đo cả hai vế trong một tiến trình con CỐ Ý ép ASCII, nên nó có răng cả khi CI đã đặt sẵn.
+_BIEN_UTF8 = (("PYTHONIOENCODING", "utf-8"), ("PYTHONUTF8", "1"))
+
+
+def _ep_utf8(moi_truong_con=os.environ) -> None:
+    for luong in (sys.stdout, sys.stderr):
+        if hasattr(luong, "reconfigure"):
+            luong.reconfigure(encoding="utf-8", errors="backslashreplace")
+    for ten, gia_tri in _BIEN_UTF8:
+        moi_truong_con[ten] = gia_tri
+
+
+_ep_utf8()
+
 import yaml
 
 HERE = Path(__file__).resolve().parent
@@ -2198,6 +2218,65 @@ def t23_batch_chiu_duoc_stdout_CRLF_cua_python_windows():
          f"stdout CRLF làm batch hỏng: rc={p.returncode}\n{p.stdout}\n{p.stderr}")
     bang("\\r" not in p.stderr and "khong biet cong cu" not in p.stderr,
          f"vẫn lọt \\r vào tên công cụ: {p.stderr}")
+
+
+@ca
+def t60_import_bash_nen_khong_in_gi_ra_stderr():
+    """#671 — nạp `bash_nen.py` KHÔNG được in gì ra stderr, trên MỌI nền.
+
+    Đo thật: run 36454930689 lane windows-latest, `t23_batch...` ĐỎ với stderr
+    `C:\\Users\\runneradmin\\...\\bash_nen.py:900: SyntaxWarning: invalid escape sequence '\\('`
+    — docstring `_tach_dinh_dang` không raw. Đường dẫn Windows mang `\\r` (`\\runneradmin`)
+    nên chốt "không lọt `\\r`" của `t23` bắt nhầm cảnh báo. Linux không thấy vì `bash_nen`
+    chỉ được import trong `_bash_windows`, và vì 3.11 xếp lỗi này vào `DeprecationWarning`
+    (ẩn mặc định) chứ không phải `SyntaxWarning`. Nên ca đo HAI thứ, không phụ thuộc nền:
+    (1) biên dịch nguồn với mọi cảnh báo thành LỖI; (2) nạp THẬT trong tiến trình con với
+    `-W default` và đòi stderr RỖNG."""
+    import warnings
+    nguon = Path(BASH_NEN).read_text(encoding="utf-8")
+    with warnings.catch_warnings():
+        warnings.simplefilter("error")
+        try:
+            compile(nguon, str(BASH_NEN), "exec")
+        except (SyntaxError, SyntaxWarning, DeprecationWarning) as e:
+            bang(False, f"(1) bash_nen.py biên dịch kèm cảnh báo: {type(e).__name__}: {e}")
+    # Nạp từ BẢN SAO trong thư mục tạm MỚI + `-B`: một `.pyc` còn hợp lệ cạnh nguồn thật sẽ
+    # bỏ qua biên dịch và làm chốt này CÂM (đo được khi soạn: chốt (2) một mình XANH trên nền
+    # đỏ chỉ vì `__pycache__/bash_nen.cpython-312.pyc` có sẵn).
+    with tempfile.TemporaryDirectory(prefix="bn-import-") as td:
+        shutil.copy2(BASH_NEN, Path(td) / "bash_nen.py")
+        p = subprocess.run(
+            [sys.executable, "-B", "-W", "default", "-c",
+             "import sys; sys.path.insert(0, sys.argv[1]); import bash_nen", td],
+            capture_output=True, text=True, timeout=60)
+    bang(p.returncode == 0 and p.stderr == "",
+         f"(2) import bash_nen rc={p.returncode}, stderr không rỗng: {p.stderr[:300]!r}")
+
+
+@ca
+def t61_ep_UTF8_phai_co_RANG_ca_khi_moi_truong_ngoai_la_ASCII():
+    """#671 (nợ CONG-CU-TEST-EP-UTF8) — nạp tệp này trong một tiến trình con CỐ Ý ép ASCII, rồi đòi:
+    (a) chính tiến trình ấy in được chữ Việt; (b) một tiến trình CHÁU phóng KHÔNG truyền `env=` cũng in
+    được. Dựng môi trường ASCII NGAY TẠI ĐÂY vì CI tự đặt `PYTHONIOENCODING=utf-8`: đo trong môi
+    trường thừa hưởng thì gỡ `_ep_utf8` vẫn xanh trên CI — ca không răng. Mã thoát tách hai vế:
+    ném ở `print` (a) ⇒ 1; cháu hỏng (b) ⇒ 7."""
+    ma = (
+        "import importlib.util, subprocess, sys\n"
+        "spec = importlib.util.spec_from_file_location('cct_utf8', sys.argv[1])\n"
+        "m = importlib.util.module_from_spec(spec); spec.loader.exec_module(m)\n"
+        "print('(a) chữ Việt')\n"
+        "p = subprocess.run([sys.executable, '-c', \"print('(b) chữ Việt')\"], capture_output=True)\n"
+        "sys.exit(0 if p.returncode == 0 else 7)\n")
+    env = dict(os.environ, PYTHONIOENCODING="ascii", PYTHONUTF8="0")
+    p = subprocess.run([sys.executable, "-B", "-c", ma, str(TEP_TEST)], env=env, cwd=GOC,
+                       capture_output=True, timeout=120)
+    ra = p.stdout.decode("utf-8", "replace")
+    bang(p.returncode != 1 and "(a) chữ Việt" in ra,
+         f"(a) tiến trình nạp cong_cu_test.py dưới ASCII không in được chữ Việt: rc={p.returncode} "
+         f"{p.stderr.decode('utf-8', 'replace')[-300:]!r}")
+    bang(p.returncode == 0,
+         f"(b) tiến trình CHÁU (không `env=`) không in được chữ Việt: rc={p.returncode} — "
+         f"`PYTHONIOENCODING`/`PYTHONUTF8` chưa được đặt cho con")
 
 
 def python_alias_behavior_test() -> None:
@@ -5376,6 +5455,31 @@ def t49_duong_XAU_ra_JSON_HOP_LE_va_NGAY_GO_phai_duoc_DOC():
             subprocess.run(["git", "-C", str(d)] + l, capture_output=True, timeout=60)
         return d
 
+    def _stage_byte(d, ten: bytes, than: str):
+        """#671 — đặt tên BYTE THÔ thẳng vào INDEX, KHÔNG qua hệ tệp.
+
+        `quet` đọc từ INDEX (`t46`), nên cây làm việc không cần mang tên ấy. Đi qua đĩa thì
+        đo HỆ TỆP chứ không đo cổng: windows-latest (run 36454930689) ra `[]` ở chiều ngược
+        — tái hiện đúng chữ trên Linux bằng `git add -A` hỏng cả lượt. `rc` PHẢI được đo:
+        không stage được là KHÔNG ĐO ĐƯỢC, không phải một cây rỗng xanh/đỏ oan."""
+        # Cây làm việc CŨNG mang tệp khi nền cho phép: t49 đo biên giới BÁO CÁO, không đo
+        # nguồn đọc — thiếu tệp trên đĩa thì đột biến `bn_doc_cay_lam_viec` (đích `t46`)
+        # giết luôn t49 (đo được: bán kính 2/54). Nền từ chối tên ấy thì INDEX vẫn đủ.
+        try:
+            (d / ten.decode("utf-8", "surrogateescape")).write_text(than, encoding="utf-8")
+        except (OSError, UnicodeError):
+            pass
+        oid = subprocess.run(["git", "-C", str(d), "hash-object", "-w", "--stdin"],
+                             input=than.encode("utf-8"), capture_output=True, timeout=60)
+        r = subprocess.run(["git", "-C", str(d), "update-index", "--add", "-z", "--index-info"],
+                           input=b"100644 " + oid.stdout.strip() + b"\t" + ten + b"\0",
+                           capture_output=True, timeout=60)
+        co = ten in subprocess.run(["git", "-C", str(d), "ls-files", "-z"], capture_output=True,
+                                   timeout=60).stdout.split(b"\0")
+        if oid.returncode or r.returncode or not co:
+            raise BoQuaMoiTruong(f"KHÔNG ĐO ĐƯỢC: INDEX không nhận tên {ten!r}: "
+                                 f"rc={oid.returncode}/{r.returncode} {r.stderr[:200]!r}")
+
     BAN = 'import shutil\nb = shutil.which("bash")\n'
     with tempfile.TemporaryDirectory() as tmp:
         tmp = Path(tmp)
@@ -5384,13 +5488,11 @@ def t49_duong_XAU_ra_JSON_HOP_LE_va_NGAY_GO_phai_duoc_DOC():
         # (2) đường mang byte xấu ⇒ JSON vẫn đọc được bằng UTF-8 nghiêm. Chiều ngược: đường
         #     Unicode thường vẫn nguyên vẹn.
         d = _kho(tmp, "duong")
-        try:
-            (d / "ops" / b"xau_\xff.py".decode("utf-8", "surrogateescape")).write_text(
-                BAN, encoding="utf-8")
-        except OSError as e:
-            raise BoQuaMoiTruong(f"nền này không đặt được tên tệp có byte thô: {e}") from e
         (d / "ops" / "bình_thường.py").write_text(BAN, encoding="utf-8")
-        _g(d, "add", "-A")
+        ga = _g(d, "add", "--", "ops/bình_thường.py")
+        if ga.returncode:
+            raise BoQuaMoiTruong(f"KHÔNG ĐO ĐƯỢC: git add rc={ga.returncode} {ga.stderr[:200]!r}")
+        _stage_byte(d, b"ops/xau_\xff.py", BAN)
         pc = subprocess.run([sys.executable, str(bq), "quet", "--root", str(d), "--json"],
                             capture_output=True, timeout=180)
         try:
@@ -5423,9 +5525,7 @@ def t49_duong_XAU_ra_JSON_HOP_LE_va_NGAY_GO_phai_duoc_DOC():
             return False
 
         d_loi = _kho(tmp, "loi")
-        (d_loi / "ops" / b"hong_\xff.py".decode("utf-8", "surrogateescape")).write_text(
-            "def f(:\n", encoding="utf-8")
-        _g(d_loi, "add", "-A")
+        _stage_byte(d_loi, b"ops/hong_\xff.py", "def f(:\n")
         mq = runpy.run_path(str(bq))
         _, bao_ok = mq["quet"](d)              # cây đường XẤU, cú pháp LÀNH  ⇒ lối thành công
         rc_l, bao_l = mq["quet"](d_loi)        # cây đường XẤU, cú pháp HỎNG ⇒ lối fail-close
@@ -5464,12 +5564,10 @@ def t49_duong_XAU_ra_JSON_HOP_LE_va_NGAY_GO_phai_duoc_DOC():
         #      hạn ngạch đếm sai — một vi phạm tàng hình, đúng lớp `t48` đã gặp với `\r`/`\n`.
         d_va = _kho(tmp, "vacham")
         hai = [b"ops/va_\xff.py".decode("utf-8", "surrogateescape"), "ops/va_\\xff.py"]
-        try:
-            for ten in hai:
-                (d_va / ten).write_text(BAN, encoding="utf-8")
-        except OSError as e:
-            raise BoQuaMoiTruong(f"nền này không đặt được hai tên ấy cạnh nhau: {e}") from e
-        _g(d_va, "add", "-A")
+        # Tên thứ hai mang `\` NGUYÊN VĂN — trên Windows đó là dấu phân cách thư mục, nên
+        # đi qua đĩa là đo sai thứ. Đi thẳng INDEX như hai cây trên.
+        for ten in hai:
+            _stage_byte(d_va, ten.encode("utf-8", "surrogateescape"), BAN)
         mv = runpy.run_path(str(bq))
         _, bao_va = mv["quet"](d_va)
         khoa = bao_va.get("co_loi_goi_tran") or {}

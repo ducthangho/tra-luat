@@ -2211,9 +2211,6 @@ for _ten, _ca, _tim, _thay in (
     ('f35_gom_drop_oserror', 't52_',
      '        except (OSError, UnicodeDecodeError, ValueError) as ex:\n',
      '        except (UnicodeDecodeError, ValueError) as ex:\n'),
-    ('f35_writer_broken_link', 't52_',
-     '    if tep.exists() or tep.is_symlink():\n',
-     '    if tep.exists():\n'),
     ('f35_writer_parents', 't52_',
      '    tep.parent.mkdir(parents=True, exist_ok=True)\n',
      '    tep.parent.mkdir(parents=False, exist_ok=True)\n'),
@@ -2226,10 +2223,22 @@ for _ten, _ca, _tim, _thay in (
     ('f35_phan_hoach_dao_nguon', 't52_',
      '    return [t for i, t in enumerate(DOT_BIEN if ten is None else ten) if i % n == k]\n',
      '    return [t for i, t in enumerate(list(DOT_BIEN if ten is None else ten)[::-1]) if i % n == k]\n'),
+    # F37 (Codex lượt 15): đăng ký theo NĂNG LỰC — điều kiện, và từng phép đăng ký, phải bị chốt siêu dữ liệu của t52 bắt.
+    ('f37_dk_luon_dung', 't52_', 'if _CO_SYMLINK:   # F24: chỉ đo được ở nền có symlink (xem `_do_co_symlink`)\n',
+     'if True:   # đột biến\n'),
+    ('f37_dk_dao', 't52_', 'if _CO_SYMLINK:   # F24: chỉ đo được ở nền có symlink (xem `_do_co_symlink`)\n',
+     'if not _CO_SYMLINK:   # đột biến\n'),
     ('f27_full_seed', 't54_', '    else:\n        print(f"\\nBÁN KÍNH ĐỘT BIẾN ({len(DOT_BIEN)} đột biến, mỗi ca đúng một"',
      '    else:\n        loi_db = loi_nen\n        print(f"\\nBÁN KÍNH ĐỘT BIẾN ({len(DOT_BIEN)} đột biến, mỗi ca đúng một"'),
 ):
     DOT_BIEN[_ten] = ("ops/cong_cu_test.py", _tim, _thay, "TEP_TEST", _KEM_TEP_TEST, _CA_668[_ca])
+# F36 (Codex lượt 15): nguồn vân tay — bảy cách băm SAI BYTES của TEP_TEST; con băm bảng byte cố định, cha tự băm lại.
+_A36 = '    return {"sha256_test": hashlib.sha256(Path(TEP_TEST).read_bytes()).hexdigest(),\n'
+for _ten, _doi in (("prefix_4096", "[:4096]"), ("prefix_64", "[:64]"), ("suffix_4096", "[-4096:]"), ("suffix_64", "[-64:]"),
+                   ("ascii_ignore", '.decode("utf-8").encode("ascii", errors="ignore")'), ("casefold", ".lower()"),
+                   ("bo_khoang_trang", '.replace(b" ", b"")')):
+    DOT_BIEN["f36_" + _ten] = ("ops/cong_cu_test.py", _A36, _A36.replace("read_bytes()", "read_bytes()" + _doi),
+                               "TEP_TEST", _KEM_TEP_TEST, _CA_668["t53_"])
 
 
 def _la_dong_ho_nhay(ex) -> bool:
@@ -6771,6 +6780,8 @@ def t52_gom_manh_phai_DO_khi_thieu_trung_lech_va_moi_chot_co_THE_RIENG():
     sai = {t: kq.get(t) for t, the in mong.items()
            if not (kq.get(t) and kq[t][0] >= 1 and f"[{the}]" in kq[t][1])}
     bang(not sai, f"kịch bản hỏng KHÔNG bị đúng chốt bắt (mong thẻ {mong}): {sai}")
+    dat = [True, ["f24_nhan_symlink", "f35_writer_broken_link"]] if _CO_SYMLINK else [False, []]
+    bang(kq["nang_luc"] == [dat, [False, []]], f"đột biến symlink phải theo NĂNG LỰC (mong {[dat, [False, []]]}): {kq['nang_luc']}")
     ghi = {t: kq.get(t) for t, the in (("ghi_loi", "M-loi"), ("ghi_con", "M-con"), ("ghi_head", "M-head"),
                                        ("ghi_do_cuoi", "M-loi"), ("ghi_do_hai", "M-loi"))
            if not (kq.get(t) and kq[t][0] >= 1 and f"[{the}]" in kq[t][1] and kq[t][2] == "khong-tep")}
@@ -6838,6 +6849,10 @@ def t53_che_do_doc_FAIL_CLOSED_moi_cau_hinh_la_co_THE_RIENG_va_van_tay_bam_NGUON
     bang(kq["goi_git"] == [[["git", "-C", kq["goi_git"][1], "rev-parse", "HEAD"],
                             [["capture_output", True], ["text", True], ["timeout", 60]]], kq["goi_git"][1]],
          f"`_van_tay` gọi git sai tham số: {kq['goi_git']}")
+    import hashlib
+    sha = lambda b: hashlib.sha256(b).hexdigest()
+    bang(kq["byte"]["luoi"] == [sha(b) for b in _luoi_byte()] and kq["byte"]["thuc"] == sha(Path(kq["byte"]["tep"]).read_bytes()),
+         f"`_van_tay` phải băm TRỌN bytes (bảng biên/lớn/non-ASCII/hoa/khoảng trắng + TEP_TEST thật): {kq['byte']['luoi'][:3]}")
     dung(kq["van_tay"][0], f"giàn giáo git tạm không dựng được commit: {kq['van_tay']}")
     bang(kq["van_tay"] == [True] * 6, "`_van_tay` phải bám BYTES của TEP_TEST và HEAD thật của GOC, không git ⇒ None "
                                       f"(không-git, head, sha, đổi-byte-giữ-head, đổi-head): {kq['van_tay'][1:]}")
@@ -7375,6 +7390,17 @@ _CO_SYMLINK = _do_co_symlink()
 if _CO_SYMLINK:   # F24: chỉ đo được ở nền có symlink (xem `_do_co_symlink`)
     DOT_BIEN["f24_nhan_symlink"] = ("ops/cong_cu_test.py", '        if p.is_symlink() or not p.is_file():\n', '        if not p.is_file():  # đột biến: nhận symlink\n',
                                     "TEP_TEST", _KEM_TEP_TEST, _CA_668["t52_"])
+    # F37 (Codex lượt 15): đột biến theo NĂNG LỰC, cùng điều kiện với f24 — nền không symlink thì fixture `ghi_gay` không chạy.
+    DOT_BIEN["f35_writer_broken_link"] = ("ops/cong_cu_test.py", '    if tep.exists() or tep.is_symlink():\n',
+                                          '    if tep.exists():\n', "TEP_TEST", _KEM_TEP_TEST, _CA_668["t52_"])
+    # F37: bỏ TỪNG đăng ký chỉ đo được khi nhánh có năng lực chạy — đăng ký vô điều kiện thì nền không symlink sống.
+    for _ten, _ca, _tim, _thay in (
+        ('f37_bo_f24', 't52_', '    DOT_BIEN["f24_nhan_symlink"] = ("ops/cong_cu_test.py", \'        if p.is_symlink() or not p.is_file():\\n\', \'        if not p.is_file():  # đột biến: nhận symlink\\n\',\n',
+         '    _bo = ("ops/cong_cu_test.py", \'        if p.is_symlink() or not p.is_file():\\n\', \'        if not p.is_file():  # đột biến: nhận symlink\\n\',\n'),
+        ('f37_bo_f35', 't52_', '    DOT_BIEN["f35_writer_broken_link"] = ("ops/cong_cu_test.py", \'    if tep.exists() or tep.is_symlink():\\n\',\n',
+         '    _bo = ("ops/cong_cu_test.py", \'    if tep.exists() or tep.is_symlink():\\n\',\n'),
+    ):
+        DOT_BIEN[_ten] = ("ops/cong_cu_test.py", _tim, _thay, "TEP_TEST", _KEM_TEP_TEST, _CA_668[_ca])
 
 
 def _doc_che_do(env):
@@ -7799,6 +7825,23 @@ def _in_tu_kiem_gom():
             os.symlink(ghi / "khong-co", gay)
             _ket_thuc_manh(0, n, str(gay), cac, None, "giả", vt)
             kq["ghi_gay"] = [gay.exists() or gay.is_symlink()]
+    # F37 (Codex lượt 15): năng lực symlink ↔ đột biến symlink, ở bản CHÍNH và ở bản nạp lại lúc `os.symlink` hỏng.
+    import importlib.util
+    ten_sl = lambda D: sorted(t for t in D if t in ("f24_nhan_symlink", "f35_writer_broken_link"))
+    kq["nang_luc"] = [[_CO_SYMLINK, ten_sl(DOT_BIEN)]]
+    cu_sl, sp = os.symlink, importlib.util.spec_from_file_location("cct_f37", TEP_TEST)
+
+    def hong(*a, **kw):
+        raise OSError("giả: không có symlink")
+    os.symlink = hong
+    try:
+        bn = importlib.util.module_from_spec(sp)
+        sp.loader.exec_module(bn)
+        kq["nang_luc"].append([bn._CO_SYMLINK, ten_sl(bn.DOT_BIEN)])
+    except Exception as ex:  # noqa: BLE001
+        kq["nang_luc"].append(["NEM:" + type(ex).__name__, []])
+    finally:
+        os.symlink = cu_sl
     print("KQ " + json.dumps(kq, ensure_ascii=True))
 
 
@@ -7970,6 +8013,14 @@ def _mong_git(rc, ra, loi):
     return s if loi is None and rc == 0 and len(s) in (40, 64) and all(c in "0123456789abcdef" for c in s) else None
 
 
+def _luoi_byte():
+    """#668 F36: bảng BYTES cho `_van_tay` — biên 63/64/65 và 4095/4096/4097/8193, cặp chung tiền tố/hậu tố (>4096),
+    hoa/thường, non-ASCII, khoảng trắng đầu/giữa/cuối, CR LF. Cha tự băm lại từ CHÍNH bảng này."""
+    d = b"x" * 5000
+    return ([b"", b"a\r\nb\n", b" a b ", "é".encode() * 40, b"Ab" * 40, b"ab" * 40, d + b"1", d + b"2", b"1" + d, b"2" + d]
+            + [b"a" * n for n in (63, 64, 65, 4095, 4096, 4097, 8193)])
+
+
 def _in_tu_kiem_che_do():
     """Cửa tiến trình con cho `t53`: `_doc_che_do` trên bảng môi trường cố định, in `KQ`."""
     bang_env = {
@@ -8041,6 +8092,21 @@ def _in_tu_kiem_che_do():
         finally:
             g["subprocess"] = cu_sp
     kq["goi_git"] = [goi[0], str(GOC)]
+    # F36 (Codex lượt 15): NGUỒN băm trên bảng byte lớn/biên — lệnh ngoài giả (không cần `head`); ngoại lệ thành dữ liệu.
+    kq["byte"] = {"tep": str(cu[1]), "thuc": None, "luoi": []}
+    g["subprocess"] = types.SimpleNamespace(run=lambda *a, **kw: types.SimpleNamespace(returncode=1, stdout=""),
+                                            SubprocessError=cu_sp.SubprocessError)
+    try:
+        kq["byte"]["thuc"] = _van_tay()["sha256_test"]
+        with tempfile.TemporaryDirectory(prefix="vb668_") as d:
+            for b in _luoi_byte():
+                (Path(d) / "t.py").write_bytes(b)
+                g["TEP_TEST"] = Path(d) / "t.py"
+                kq["byte"]["luoi"].append(_van_tay()["sha256_test"])
+    except Exception as ex:  # noqa: BLE001
+        kq["byte"]["luoi"].append("NEM:" + type(ex).__name__)
+    finally:
+        g["subprocess"], g["TEP_TEST"] = cu_sp, cu[1]
     sha = lambda b: hashlib.sha256(b).hexdigest()
     kq["van_tay"] = [bool(h1 and h3), khong_git["head"] is None, v1["head"] == h1, v1["sha256_test"] == sha(b"a\r\n"),
                      v2["sha256_test"] == sha(b"b\n") and v2["head"] == h1, v3["head"] == h3 != h1]

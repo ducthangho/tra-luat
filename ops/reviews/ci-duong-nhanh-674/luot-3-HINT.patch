@@ -1,0 +1,30 @@
+chua chay tren cay that — executor tu ap, tu do, tu chiu trach nhiem commit
+--- ops/ci_duong_nhanh_test.py
++++ ops/ci_duong_nhanh_test.py
+@@ -797,7 +797,7 @@
+ @ca
+ def y06_job_bat_buoc_khong_bi_bo_ca_job():
+     wf = doc_wf()
+-    for job in BAT_BUOC:
++    for job in ("chuan-bi", *BAT_BUOC):
+         bang(job in wf["jobs"], f"thieu job bat buoc {job}")
+         bang("if" not in wf["jobs"][job], f"{job}: KHONG duoc co `if:` cap job — check se VANG MAT thay vi bao ket qua")
+         bang(wf["jobs"][job].get("continue-on-error", False) is False, f"{job}: job bat buoc khong duoc nuot loi")
+@@ -1126,6 +1126,9 @@
+ 
+ 
+ def chay_mot_dot_bien(ten, tep_va_ham, dich):
++    dich = tuple(dich)
++    if not dich or any(ten not in CA for ten in dich):
++        return "HONG", "tap ca dich rong hoac khong hop le"
+     tep, ham = tep_va_ham
+     goc = dung_cay_tam({})
+     try:
+@@ -1211,6 +1214,7 @@
+ 
+     giet, xau = 0, []
+     for ten, tv, dich in DOT_BIEN:
++        dich = tuple(dich)
+         for d in dich:
+             if d not in CA:
+                 xau.append(f"{ten}: ca dich {d!r} khong ton tai")

@@ -1,0 +1,68 @@
+chua chay tren cay that — executor tu ap, tu do, tu chiu trach nhiem commit
+--- ops/ci_duong_nhanh_test.py
++++ ops/ci_duong_nhanh_test.py
+@@ -35,6 +35,7 @@
+ import sys
+ import tempfile
+ from pathlib import Path
++from unittest import mock
+ 
+ sys.dont_write_bytecode = True
+ os.environ["PYTHONDONTWRITEBYTECODE"] = "1"
+@@ -273,7 +274,7 @@
+ 
+ # ---------------------------------------------------------------- kho git thật
+ def _env_git():
+-    e = {k: v for k, v in os.environ.items() if not k.startswith("GIT_")}
++    e = {k: v for k, v in os.environ.items() if not k.startswith("GIT_") and k != "GITHUB_ACTOR"}
+     e.update(GIT_CONFIG_GLOBAL=os.devnull, GIT_CONFIG_NOSYSTEM="1", GIT_TERMINAL_PROMPT="0",
+              GIT_AUTHOR_NAME="t", GIT_AUTHOR_EMAIL="t@e.x", GIT_COMMITTER_NAME="t", GIT_COMMITTER_EMAIL="t@e.x")
+     return e
+@@ -489,8 +490,10 @@
+         if any(k in vb for k in ("prompt_path", "prompt_sha256_required", "thay_the_cho", "da_bi_thay_the")):
+             continue
+         try:
+-            lp.kiem(lp._doc_yaml(str(tep)), str(tep), str(ROOT_THAT), bo_qua_han=True)
+-            lp.kiem(lp._doc_yaml(str(tep)), str(tep), str(ROOT_THAT))
++            with mock.patch.dict(os.environ, {k: v for k, v in os.environ.items()
++                                              if k != "GITHUB_ACTOR"}, clear=True):
++                lp.kiem(lp._doc_yaml(str(tep)), str(tep), str(ROOT_THAT), bo_qua_han=True)
++                lp.kiem(lp._doc_yaml(str(tep)), str(tep), str(ROOT_THAT))
+         except lp.Chan as e:
+             if "het han" in str(e) or "hết hạn" in str(e):
+                 return vb
+@@ -640,6 +643,25 @@
+         shutil.rmtree(tam, ignore_errors=True)
+ 
+ 
++
++@ca
++def t22b_ca_du_lieu_phai_thuc_thi_tung_ca():
++    """Mỗi tên ca phải thực sự chạy và truyền lỗi ra ngoài, không chỉ được truyền qua argv."""
++    m = nap_module()
++    with tempfile.TemporaryDirectory(prefix="cdn_data_calls_") as d:
++        root = Path(d)
++        (root / "ops").mkdir()
++        checker = root / "ops/lease_publish_test.py"
++        for dich in m.CA_DU_LIEU:
++            marker = "CHOT_DU_LIEU_" + dich
++            checker.write_text("\n".join(
++                "def " + ten + "():\n    " +
++                ("raise AssertionError(" + repr(marker) + ")" if ten == dich else "pass")
++                for ten in m.CA_DU_LIEU), encoding="utf-8")
++            loi = m.kiem_ca_du_lieu(root, chay_that)
++            bang(len(loi) == 1 and marker in loi[0],
++                 f"{dich}: ca do phai thuc su duoc goi va truyen loi, duoc {loi}")
++
+ # ---------------------------------------------------------------- tầng 2: cấu trúc ci.yml
+ def doc_wf():
+     return yaml.safe_load((CAY / ".github" / "workflows" / "ci.yml").read_text(encoding="utf-8"))
+@@ -802,7 +824,7 @@
+     b = goi[0][1]
+     bang("che_do" not in str(b.get("if", "")) and chuan_hoa_if(b.get("if", "runner.os == 'Linux'")) == "runner.os == 'Linux'",
+          f"buoc goi test CUA CHINH PACKET khong duoc bi bo theo che_do (no la cong duy nhat canh cac `if:`): if={b.get('if')!r}")
+-    bang(b.get("continue-on-error") is not True, "buoc goi test khong duoc co continue-on-error")
++    bang(b.get("continue-on-error", False) is False, "buoc goi test khong duoc co continue-on-error")
+ 
+ 
+ # ---------------------------------------------------------------- tầng 3: nối vào sổ test sống

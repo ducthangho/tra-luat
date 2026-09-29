@@ -160,7 +160,8 @@ AL_BIN="$AL_DICH/actionlint"
 if ! al_raw=$("$AL_BIN" --version 2>&1); then
   loi 4 "actionlint khong chay duoc: $AL_BIN"
 fi
-al_ban=$(printf '%s' "$al_raw" | head -1 | tr -d '\r')
+# #675: khong `| head -1` duoi pipefail (SIGPIPE -> rc=141 tren dau ra dai; do: ops/do_sigpipe.sh).
+al_ban="${al_raw%%$'\n'*}"; al_ban="${al_ban//$'\r'/}"
 [ "$al_ban" = "$AL_VER" ] || loi 4 "actionlint SAI BAN: can '$AL_VER', do duoc '$al_ban' ($AL_BIN)"
 printf '%s\t%s\t%s\n' actionlint "$AL_BIN" "$al_ban" >> "$R/cong-cu.txt"
 

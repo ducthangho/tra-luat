@@ -25,7 +25,7 @@ trang_thai_packet:
   landed_ghi_chu: >-
     PROTOCOL §10: `landed` = da vao canonical o exact SHA duoc duyet, HAU-MERGE GATE XANH va BOOKKEEPING XONG.
     (1) merge dung head duoc uy quyen 819d6b0 tai 89fc4fa, tree c1699a6 = tree head duyet — CO.
-    (2) hau-merge gate: luot 1 run 36539864381 DO vi ha tang (xem post_merge_checks); da chay lai 1 lan — CHO.
+    (2) hau-merge gate: run 36539864381 DO ca luot 1 lan luot 2 vi BILLING GitHub Actions (xem post_merge_checks) — CHO.
     (3) bookkeeping: lease g1 thu hoi (92f0284) + PR bookkeeping mang tep nay — CHO.
     Tep ghi `landed: false` o thoi diem nay; doi CHI khi ca ba dieu kien dat.
 role: land_operator
@@ -79,17 +79,22 @@ post_merge_checks:
   - check: 'CI master tren merge commit 89fc4fa (push) — luot 1'
     workflow_run: https://github.com/ducthangho/tra-luat/actions/runs/36539864381
     conclusion: failure
-    phan_loai: infra_runner_khong_cap
+    phan_loai: billing_actions
     bang_chung: >-
-      Job chuan-bi (109312444466) chi chay `true`, khong checkout; failure sau 2 giay voi runner_id 0, runner_name
-      rong; log tra 404. Cac job con skipped vi phu thuoc chuan-bi. Chet truoc khi co buoc nao chay => khong phai do diff.
-    re_run: 'Da chay lai run 36539864381 MOT lan (2026-09-29T07:59Z). Ket qua: CHO.'
+      Job chuan-bi (luot 1: 109312444466; luot 2: 109312671600) chi chay `true`, khong checkout; failure trong vai giay
+      voi runner_id 0; log tra 404. Annotation check run (doc qua REST check-runs/<id>/annotations): "The job was not
+      started because recent account payments have failed or your spending limit needs to be increased. Please check
+      the 'Billing & plans' section in your settings". Moi workflow trong kho do cung cach tu ~07:55Z (ke ca
+      ops-publish-lease cua #674 run 36539572494). Khong phai do diff.
+    re_run: 'Da chay lai MOT lan (luot 2, 07:59Z): van do cung annotation. Quyen chay lai da dung het; cho chu kho xu ly billing.'
+    bao_chu_kho: https://github.com/ducthangho/tra-luat/pull/680#issuecomment-5886146291
 khong_do_duoc:
   - 'Windows: not_measured (chu kho mien trong human audit).'
   - 'Phan kill/reap cua t131 chua duoc do that (no nen, ngoai pham vi; ghi trong human audit muc 5).'
 
 bookkeeping:
   - 'Thu hoi lease t131-deadline-dem-spawn-exec-1-claude-20260929 bang rut han ve 2026-09-29T08:15:00Z tren ops/cap-lease-676 (92f0284, sau merge origin/master 89fc4fa vao nhanh lease); lease_publish.py check rc=0 truoc khi day.'
+  - 'ops-publish-lease run 36539969939 tren 92f0284: failure vi billing (cung annotation) — ban chieu comment thu hoi CHUA dang; thu hoi co hieu luc theo tep. Chay lai sau khi billing xu ly.'
   - 'Dua tep lease (ban da thu hoi, blob 8622377e giong 92f0284) + tep ho so nay vao master qua PR bookkeeping.'
 
 lech_protocol_khai:

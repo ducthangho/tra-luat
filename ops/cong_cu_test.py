@@ -7563,8 +7563,11 @@ def _in_tu_kiem_gom():
             if sua:
                 sua(thu)
             if v is None:
-                dong, loi = _gom_manh(thu, vt)
-                kq[ten] = [loi, dong[0], dong[-1]]
+                try:   # ngoại lệ lọt khỏi gom là DỮ LIỆU (ca đích đỏ đúng chốt), không phải con chết (tín dụng giả)
+                    dong, loi = _gom_manh(thu, vt)
+                    kq[ten] = [loi, dong[0], dong[-1]]
+                except Exception as ex:  # noqa: BLE001
+                    kq[ten] = [1, f"NEM:{type(ex).__name__}", ""]
             return thu
 
         def sua_kq(thu, chi=3):
@@ -7696,10 +7699,8 @@ def _in_tu_kiem_gom():
         cu_rb = Path.read_bytes
         Path.read_bytes = lambda self: (_ for _ in ()).throw(OSError("giả đọc hỏng")) if (
             self.name == "manh-1.txt" and self.parent.name == "doc_loi") else cu_rb(self)
-        try:   # ngoại lệ lọt khỏi gom là DỮ LIỆU (ca đích đỏ đúng chốt), không phải con chết (tín dụng giả)
+        try:
             dung_bo("doc_loi")
-        except Exception as ex:  # noqa: BLE001
-            kq["doc_loi"] = [1, f"NEM:{type(ex).__name__}", ""]
         finally:
             Path.read_bytes = cu_rb
         # F35: danh TÍNH phân hoạch — chỉ số từng nhóm theo nguồn của CHÍNH tiến trình này; cha so với `nguon[k::N]`.

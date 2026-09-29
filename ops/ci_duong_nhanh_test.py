@@ -8,7 +8,8 @@ số lượng ca/đột biến KHÔNG ghi ở đây (đã trôi hai lượt li�
     `ci-if-cap-job-gate-ops-va-buoc-sau-g5-khong-co-cong-canh` (Q6-i chủ kho): `JOB_G5` của `ci_dang_ky_test.py` chỉ có
     `gate`, `gate-registry`, `gate-packet-loop`, và `cong_cu_test.t6` chỉ soi các bước TRƯỚC G5;
   · ca `k*`: nối vào sổ test sống (mục `DA_NOI` và lời gọi thật trong `run:`);
-  · `t99`: tự kiểm của chính bộ test.
+  · ca khai `@ca_tu_kiem`: tự kiểm của chính bộ test (harness, phân hoạch, docstring, cây dưới đo). Nhóm KHAI tại chỗ,
+    không suy từ tiền tố; `t96` đối chiếu với dấu hiệu AST độc lập, và dòng `KIEM KE:` in số từng nhóm.
 
 CÁCH ĐO ĐỘT BIẾN — bài học CLAUDE.md "đột biến bị giết không phải bị giết ĐÚNG LÝ DO":
   · Ca đích chỉ báo ĐỎ bằng `TinHieuChotCa` (con của AssertionError) do CHÍNH `bang()` ném. Lỗi vô can trong mã
@@ -93,11 +94,24 @@ def bang(dieu_kien, thong_diep):
 
 
 CA: dict = {}
+TU_KIEM_KHAI: set = set()   # nhom KHAI TUONG MINH tai cho dinh nghia (luot 5: phan nhom theo TIEN TO da xep t96 vao "hanh vi")
 
 
 def ca(f):
     CA[f.__name__] = f
     return f
+
+
+def ca_tu_kiem(f):
+    """Ca tu kiem CUA CHINH bo test (harness, phan hoach, docstring...). t96 doi chieu voi dau hieu AST doc lap."""
+    TU_KIEM_KHAI.add(f.__name__)
+    return ca(f)
+
+
+# Dau hieu DOC LAP cua ca tu kiem (t96): than ca cham MOT trong cac ten noi tang nay cua chinh bo test.
+DAU_HIEU_TU_KIEM = frozenset({"CA", "DOT_BIEN", "TU_KIEM_KHAI", "phan_hoach_ca", "dong_kiem_ke", "chay_mot_dot_bien",
+                              "chay_tap_dot_bien", "phan_hang", "loi_cay_duoi_do", "__doc__",
+                              "ci_duong_nhanh_test.py"})
 
 
 def nap_module():
@@ -690,8 +704,36 @@ def t21_kiem_lease_phan_biet_con_han_het_han_va_duoi_tep():
 
 
 # ---------------------------------------------------------------- tầng 2: cấu trúc ci.yml
+class YamlKhacGitHub(ValueError):
+    """Cau truc PyYAML doc KHAC GitHub: khoa trung (PyYAML lay ban CUOI, im lang) hoac khoa gop `<<`."""
+
+
+class _LoaderNghiem(yaml.SafeLoader):
+    def construct_mapping(self, node, deep=False):
+        for k, _ in node.value:
+            if k.tag == "tag:yaml.org,2002:merge" or getattr(k, "value", None) == "<<":
+                raise YamlKhacGitHub(f"khoa gop `<<` o dong {k.start_mark.line + 1}")
+        thay = set()
+        for k, _ in node.value:
+            if k.tag == "tag:yaml.org,2002:merge":
+                continue   # chi den day khi chot tren bi go (dot bien): de PyYAML gop im lang nhu ban goc cua no
+            khoa = self.construct_object(k, deep=deep)
+            if khoa in thay:
+                raise YamlKhacGitHub(f"khoa trung {khoa!r} o dong {k.start_mark.line + 1}")
+            thay.add(khoa)
+        return super().construct_mapping(node, deep=deep)
+
+
+def doc_wf_tu(van_ban):
+    """Luot 5 (lop chot-yaml, cua 'bo phan tich cua test khac GitHub'): moi ca `y*` doc qua loader NGHIEM nay."""
+    try:
+        return yaml.load(van_ban, Loader=_LoaderNghiem)
+    except YamlKhacGitHub as e:
+        bang(False, f"ci.yml: {e} — ca `y*` se do mot cau truc KHAC cai GitHub chay")
+
+
 def doc_wf():
-    return yaml.safe_load((CAY / ".github" / "workflows" / "ci.yml").read_text(encoding="utf-8"))
+    return doc_wf_tu((CAY / ".github" / "workflows" / "ci.yml").read_text(encoding="utf-8"))
 
 
 def chuan_hoa_if(gia_tri):
@@ -1039,6 +1081,48 @@ def y13_khoa_topology_cua_ci_yml_ngoai_than_run():
              f"{next((i for i, (a, b2) in enumerate(zip(thuc, KHUNG_BUOC[j])) if a != b2), min(len(thuc), len(KHUNG_BUOC[j])))}")
 
 
+# LUAT (luot 5, lop chot-yaml): THAN `run:` cua MOI buoc DO PACKET NAY THEM duoc khoa NGUYEN VAN. Truoc do y09 chi doi dong goi test
+# CO MAT trong than ⇒ `exit 0` dat TRUOC no van qua; buoc `che do` cua `chuan-bi` them `exit 1` ⇒ chuan-bi do ⇒ ba job bat buoc
+# `skipped`. Than `run:` cua buoc CO SAN ngoai pham vi packet (bien gioi khai o y13).
+RUN_BUOC_PACKET = {
+    ('chuan-bi', 'phan loai diff (duong nhanh ho so - chi pull_request)'): 'python3 ops/ci_duong_nhanh.py',
+    ('chuan-bi', 'che do (push / workflow_dispatch luon day du)'): 'echo "DUONG_NHANH: khong phan loai - su_kien=${SU_KIEN} khong phai pull_request, luon DAY_DU"\n',
+    ('gate', 'DUONG_NHANH - liet ke buoc bo qua (job gate)'): 'echo "DUONG_NHANH: bo qua tl selftest (luot PR — khong sinh bang chung) vi diff chi gom ops/{land,leases,reviews,specs}/**"\necho "DUONG_NHANH: bo qua golden-test vi diff chi gom ops/{land,leases,reviews,specs}/**"\necho "DUONG_NHANH: bo qua determinism-audit strict vi diff chi gom ops/{land,leases,reviews,specs}/**"\necho "DUONG_NHANH: bo qua release-check full vi diff chi gom ops/{land,leases,reviews,specs}/**"\necho "DUONG_NHANH: bo qua release-bundle x2 cùng SHA-256 vi diff chi gom ops/{land,leases,reviews,specs}/**"\n',
+    ('gate-ops', 'DUONG_NHANH - liet ke buoc bo qua (job gate-ops)'): 'echo "DUONG_NHANH: bo qua lease-publish selftest (đo lại setup sau G5) vi diff chi gom ops/{land,leases,reviews,specs}/**"\necho "DUONG_NHANH: bo qua bo ca gate chay TRONG cgroup duoc uy quyen (Linux) vi diff chi gom ops/{land,leases,reviews,specs}/**"\necho "DUONG_NHANH: bo qua gate lifecycle selftest (nen khong co cgroup) vi diff chi gom ops/{land,leases,reviews,specs}/**"\n',
+    ('gate-ops', 'DUONG_NHANH - kiem re thay cho buoc bi bo (doctrine-scan, YAML, diff --check, lease check)'): 'set -euo pipefail\npython .claude/dev/packet_loop.py doctrine-scan --root .\npython ops/ci_duong_nhanh.py kiem-re\n',
+    ('gate-ops', 'ci-duong-nhanh selftest (phan loai diff + khoa cau truc if)'): 'python ops/ci_duong_nhanh_test.py',
+    ('gate-packet-loop', 'DUONG_NHANH - liet ke buoc bo qua (job gate-packet-loop)'): 'echo "DUONG_NHANH: bo qua packet-loop selftest vi diff chi gom ops/{land,leases,reviews,specs}/**"\n',
+}
+
+
+@ca
+def y14_than_run_cua_buoc_packet_them_khop_nguyen_van():
+    wf = doc_wf()
+    for (job, ten), mong in RUN_BUOC_PACKET.items():
+        bang(tim_buoc(wf, job, ten).get("run") == mong, f"{job}/{ten}: than `run:` lech nguyen van da khoa")
+    them = {(j, b.get("name")) for j, c in wf["jobs"].items() for b in c.get("steps") or []
+            if "run" in b and any(d in f"{b.get('name')}\n{b.get('run')}" for d in ("DUONG_NHANH", "ci_duong_nhanh"))}
+    bang(them == set(RUN_BUOC_PACKET), f"buoc cham duong nhanh ngoai bang khoa: thua {sorted(them - set(RUN_BUOC_PACKET))}, "
+         f"thieu {sorted(set(RUN_BUOC_PACKET) - them)}")
+
+
+@ca
+def y15_loader_nghiem_tu_choi_khoa_trung_va_khoa_gop():
+    """PyYAML lay ban CUOI cua khoa trung, im lang: `runs-on: windows-latest` roi `runs-on: ${{ matrix.os }}` qua het y13 (thay
+    ban cuoi) trong khi cai GitHub doc KHAC. Loader nghiem phai do ca hai dang tren chinh van ban ci.yml, va ban that phai sach."""
+    goc = (CAY / ".github" / "workflows" / "ci.yml").read_text(encoding="utf-8")
+    doc_wf_tu(goc)
+    neo = "    runs-on: ${{ matrix.os }}\n"
+    bang(neo in goc, "ha tang y15: khong thay neo runs-on matrix")
+    for ten, vb in (("khoa trung", goc.replace(neo, "    runs-on: windows-latest\n" + neo, 1)),
+                    ("khoa gop", goc.replace("jobs:\n", "x-mau: &mau\n  a: 1\njobs:\n  <<: *mau\n", 1))):
+        bat = False
+        with contextlib.suppress(TinHieuChotCa):
+            doc_wf_tu(vb)
+            bat = True
+        bang(not bat, f"loader phai DO khi ci.yml co {ten}")
+
+
 CHO_PHEP_NUOT_LOI = {("chuan-bi", "actions/checkout@v4"), ("chuan-bi", "phan loai diff (duong nhanh ho so - chi pull_request)")}
 
 
@@ -1089,22 +1173,47 @@ def k03_ci_goi_that_muc_da_noi():
     bang(f"CI không gọi mục đăng ký: {DA_NOI_MUC}" not in loi, f"CI phai goi that {DA_NOI_MUC}: {loi}")
 
 
+@ca_tu_kiem
+def t95_lan_chay_day_du_chi_do_kho_chua_test():
+    bang(loi_cay_duoi_do(ROOT_THAT, ROOT_THAT) == "", "kho that phai duoc nhan")
+    bang(loi_cay_duoi_do(Path(tempfile.gettempdir()), ROOT_THAT) != "", "cay khac kho chua test phai bi tu choi o lan chay day du")
+
+
 # ---------------------------------------------------------------- tự kiểm của chính bộ test
-@ca
+@ca_tu_kiem
 def t96_phan_hoach_ca_khong_giao_nhau_va_phu_kin():
-    """Cross-review luot 4 (P3, lan 4 cua lop bang-do): phan ra 38/12/3 sai vi mot nhanh else tra lai nhom cu. Nay phan hoach do
-    MOT ham (`phan_hoach_ca`) sinh ra, va ca nay doi chieu voi quy tac VIET LAI DOC LAP: khong giao, phu kin, dung nhom."""
+    """Lop bang-do (P3 luot 4, va luot 5 tu do): phan nhom theo TIEN TO da tu lech hai lan (38/12/3; roi t96 — mot ca tu kiem —
+    bi dem la "hanh vi"). Nay nhom `tu_kiem` KHAI tai cho (`@ca_tu_kiem`) va duoc doi chieu voi DAU HIEU AST DOC LAP: ca nao
+    cham noi tang cua chinh bo test (`CA`, `DOT_BIEN`, phan hang, docstring, tep test) la tu kiem, va nguoc lai. Dong `KIEM KE:`
+    in ra (neo cua moi bang so) phai khop so dem doc lap."""
     nhom = phan_hoach_ca()
     moi = [ten for ds in nhom.values() for ten in ds]
     bang(len(moi) == len(set(moi)) == len(CA) and set(moi) == set(CA), "phan hoach phai phu kin va khong giao nhau")
-    doc_lap = {"tu_kiem": [n for n in CA if n.startswith(("t97", "t98", "t99"))],
-               "hanh_vi": [n for n in CA if n.startswith("t") and not n.startswith(("t97", "t98", "t99"))],
-               "cau_truc_yaml": [n for n in CA if n.startswith("y")], "so_dang_ky": [n for n in CA if n.startswith("k")]}
+    cay = ast.parse((HERE / "ci_duong_nhanh_test.py").read_text(encoding="utf-8"))
+    cham_noi_tang = set()
+    for nut in cay.body:
+        if isinstance(nut, ast.FunctionDef) and nut.name in CA:
+            for x in ast.walk(nut):
+                ten_x = x.id if isinstance(x, ast.Name) else (x.value if isinstance(x, ast.Constant) else None)
+                if ten_x in DAU_HIEU_TU_KIEM:
+                    cham_noi_tang.add(nut.name)
+    bang(set(nhom["tu_kiem"]) == cham_noi_tang,
+         f"nhom tu_kiem lech dau hieu AST: khai ma khong cham noi tang {sorted(set(nhom['tu_kiem']) - cham_noi_tang)}, "
+         f"cham noi tang ma khong khai {sorted(cham_noi_tang - set(nhom['tu_kiem']))}")
+    con_lai = [n for n in CA if n not in cham_noi_tang]
+    doc_lap = {"hanh_vi": [n for n in con_lai if n.startswith("t")], "cau_truc_yaml": [n for n in con_lai if n.startswith("y")],
+               "so_dang_ky": [n for n in con_lai if n.startswith("k")], "tu_kiem": [n for n in CA if n in cham_noi_tang]}
     bang(nhom == doc_lap, f"phan hoach lech quy tac doc lap: {[(k, len(v), len(doc_lap[k])) for k, v in nhom.items()]}")
-    bang(sum(len(v) for v in nhom.values()) == len(CA) and len(nhom["tu_kiem"]) == 3, "tong nhom phai bang len(CA); tu_kiem la 3 ca t97/t98/t99")
+    dem_tep = {}
+    for d in DOT_BIEN:
+        dem_tep[d[1][0]] = dem_tep.get(d[1][0], 0) + 1
+    so = dict(re.findall(r"([\w./-]+)=(\d+)", dong_kiem_ke()))
+    mong = {**{k: str(len(v)) for k, v in doc_lap.items()}, **{t: str(n) for t, n in dem_tep.items()}}
+    bang(so == mong and dong_kiem_ke().count(f"= {len(CA)} ·") == 1 and dong_kiem_ke().endswith(f"= {len(DOT_BIEN)}"),
+         f"dong KIEM KE lech so dem doc lap: {dong_kiem_ke()!r} != {mong}")
 
 
-@ca
+@ca_tu_kiem
 def t97_harness_khong_cap_giet_khi_khong_co_bang_chung_duong():
     """Cross-review luot 3 (P2): `dich=()` va iterator bi tieu thu deu ra GIET gia (`all([])`). Kiem o BA cua: callee
     (`chay_mot_dot_bien`), caller (`chay_tap_dot_bien`), va ten ca khong ton tai."""
@@ -1130,7 +1239,7 @@ def t97_harness_khong_cap_giet_khi_khong_co_bang_chung_duong():
     bang(giet == 1 and not xau, f"caller: iterator hop le + dot bien that phai GIET dung 1: giet={giet} xau={xau}")
 
 
-@ca
+@ca_tu_kiem
 def t98_docstring_khong_ghim_so_ca_va_khoang_ten():
     """Bang giao/docstring troi so HAI luot lien (P3 luot 1 va 2): so ca, so dot bien va khoang `tNN..tMM` chi nguon
     duy nhat la `CA`/`DOT_BIEN`. Docstring cua module va cua `ops/ci_duong_nhanh.py` khong duoc ghim chung."""
@@ -1142,7 +1251,7 @@ def t98_docstring_khong_ghim_so_ca_va_khoang_ten():
         bang(not thay, f"{ten}: docstring ghim so ca/khoang ten (se troi): {thay}")
 
 
-@ca
+@ca_tu_kiem
 def t99_khong_doi_kieu_ngoai_le_thanh_tin_hieu():
     """Bộ phân hạng tin `TinHieuChotCa`; nên KHÔNG có `except` nào bắt ngoại lệ RỘNG mà lại ném/gọi tín hiệu ấy —
     làm vậy thì lỗi vô can của bản đột biến (TypeError...) hoá thành 'giết thật' (đã trả giá ở #355/#359)."""
@@ -1168,7 +1277,7 @@ def phan_hoach_ca():
     """Phan hoach `CA` thanh cac nhom KHONG GIAO NHAU (nguon duy nhat cho moi bang kiem ke; `goi/kiem_ke.py` goi ham nay)."""
     nhom = {"hanh_vi": [], "cau_truc_yaml": [], "so_dang_ky": [], "tu_kiem": []}
     for ten in CA:
-        if ten[:3] in ("t97", "t98", "t99"):
+        if ten in TU_KIEM_KHAI:
             nhom["tu_kiem"].append(ten)
         elif ten[0] == "t":
             nhom["hanh_vi"].append(ten)
@@ -1179,6 +1288,16 @@ def phan_hoach_ca():
         else:
             raise RuntimeError(f"ha tang: ca {ten!r} khong thuoc nhom nao")
     return nhom
+
+
+def dong_kiem_ke(nhom=None):
+    """Dong KIEM KE in ra cung ket qua suite: moi bang/lo khai so nhom phai trich TU dong nay (neo = output suite)."""
+    nhom = phan_hoach_ca() if nhom is None else nhom
+    theo_tep = {}
+    for _, (tep, _), _ in DOT_BIEN:
+        theo_tep[tep] = theo_tep.get(tep, 0) + 1
+    return ("KIEM KE: ca " + " + ".join(f"{k}={len(v)}" for k, v in nhom.items()) + f" = {sum(len(v) for v in nhom.values())}"
+            + " · dot bien " + " + ".join(f"{t}={n}" for t, n in sorted(theo_tep.items())) + f" = {sum(theo_tep.values())}")
 
 
 def chay_ca_trong_tien_trinh(ten):
@@ -1368,7 +1487,11 @@ DOT_BIEN = [
     ("yml_them_permissions_cap_workflow", _yml("\njobs:\n  chuan-bi:", "\npermissions: {}\njobs:\n  chuan-bi:"), ("y13_khoa_topology_cua_ci_yml_ngoai_than_run",)),
     ("yml_doi_thu_tu_job", (YML, lambda vb: thay_regex(vb, r"(\n  gate-packet-loop:\n.*)$", "") + "\n  zz-job-them:\n    runs-on: ubuntu-latest\n    steps:\n      - run: 'true'\n"), ("y13_khoa_topology_cua_ci_yml_ngoai_than_run",)),
     # ---- t96: phan hoach ca cho bang kiem ke
-    ("test_phan_hoach_bo_tu_kiem_t97", _test('if ten[:3] in ("t97", ' + '"t98", "t99"):\n', 'if ten[:3] in ("t98", "t99"):\n'), ("t96_phan_hoach_ca_khong_giao_nhau_va_phu_kin",)),
+    ("test_phan_hoach_bo_qua_khai_tu_kiem", _test("        if ten in TU_KIEM_KHAI:\n", "        if False:\n"), ("t96_phan_hoach_ca_khong_giao_nhau_va_phu_kin",)),
+    ("test_t96_khong_khai_tu_kiem", _test("@ca_tu_kiem\ndef t96_", "@ca\ndef t96_"), ("t96_phan_hoach_ca_khong_giao_nhau_va_phu_kin",)),
+    ("test_khai_nham_hanh_vi_la_tu_kiem", _test("@ca\ndef t01_", "@ca_tu_kiem\ndef t01_"), ("t96_phan_hoach_ca_khong_giao_nhau_va_phu_kin",)),
+    ("test_dong_kiem_ke_lech_so", _test('" + ".join(f"{k}={len(v)' + '}" for k, v in nhom.items())', '" + ".join(f"{k}={len(v) + (k == \'tu_kiem\')}" for k, v in nhom.items())'), ("t96_phan_hoach_ca_khong_giao_nhau_va_phu_kin",)),
+    ("test_dong_kiem_ke_bo_dot_bien_mot_tep", _test("        theo_tep[tep] = theo_tep.get(tep, 0) + 1\n", "        theo_tep[tep] = theo_tep.get(tep, 0) + (tep != TEST)\n"), ("t96_phan_hoach_ca_khong_giao_nhau_va_phu_kin",)),
     ("test_phan_hoach_nhanh_else_tra_lai_nhom_cu", _test('        elif ten[0] == "y":\n            nhom["cau_truc_yaml"].append(ten)\n', '        elif ten[0] == "y":\n            nhom["hanh_vi"].append(ten)\n'), ("t96_phan_hoach_ca_khong_giao_nhau_va_phu_kin",)),
     # ---- tầng YAML (đặc tả nghiệm thu 6, 7)
     ("yml_go_dieu_kien_pull_request_khoi_buoc_phan_loai", _yml("        id: phan-loai\n        if: ${{ github.event_name == 'pull_request' }}\n", "        id: phan-loai\n"), ("y01_chuan_bi_phan_loai_chi_pull_request_va_khong_lam_do_job",)),
@@ -1396,6 +1519,15 @@ DOT_BIEN = [
     ("yml_go_buoc_kiem_re", (YML, lambda vb: thay_regex(vb, r"      - name: DUONG_NHANH - kiem re thay cho buoc bi bo.*?(?=      # Phản chứng của bộ phân loại)", ""),), ("y08_buoc_kiem_re_o_gate_ops",)),
     ("yml_buoc_kiem_re_luon_chay", _yml("      - name: DUONG_NHANH - kiem re thay cho buoc bi bo (doctrine-scan, YAML, diff --check, lease check)\n        if: ${{ needs.chuan-bi.outputs.che_do == 'duong_nhanh' }}\n", "      - name: DUONG_NHANH - kiem re thay cho buoc bi bo (doctrine-scan, YAML, diff --check, lease check)\n"), ("y08_buoc_kiem_re_o_gate_ops",)),
     ("yml_buoc_test_bi_bo_theo_che_do", _yml("        if: runner.os == 'Linux'\n        run: python ops/ci_duong_nhanh_test.py\n", "        if: ${{ needs.chuan-bi.outputs.che_do != 'duong_nhanh' }}\n        run: python ops/ci_duong_nhanh_test.py\n"), ("y09_buoc_goi_test_cua_packet_khong_bi_bo",)),
+    # ---- luot 5, lop chot-yaml: than `run:` cua buoc packet, loader nghiem, cay duoi do
+    ("yml_goi_test_exit0_truoc", _yml("        run: python ops/ci_duong_nhanh_test.py\n", "        run: |\n          exit 0\n          python ops/ci_duong_nhanh_test.py\n"), ("y14_than_run_cua_buoc_packet_them_khop_nguyen_van",)),
+    ("yml_che_do_exit1", _yml('pull_request, luon DAY_DU"\n', 'pull_request, luon DAY_DU"\n          exit 1\n'), ("y14_than_run_cua_buoc_packet_them_khop_nguyen_van",)),
+    ("yml_phan_loai_nuot_loi_trong_run", _yml("        run: python3 ops/ci_duong_nhanh.py\n", "        run: python3 ops/ci_duong_nhanh.py || true\n"), ("y14_than_run_cua_buoc_packet_them_khop_nguyen_van", "y01_chuan_bi_phan_loai_chi_pull_request_va_khong_lam_do_job")),
+    ("yml_them_buoc_duong_nhanh_ngoai_bang", _yml("      - name: packet-loop selftest\n", "      - name: DUONG_NHANH - buoc moi ngoai bang\n        run: echo x\n      - name: packet-loop selftest\n"), ("y14_than_run_cua_buoc_packet_them_khop_nguyen_van",)),
+    ("test_loader_bo_kiem_khoa_trung", _test("            if khoa in thay:\n", "            if False:\n"), ("y15_loader_nghiem_tu_choi_khoa_trung_va_khoa_gop",)),
+    ("test_loader_bo_kiem_khoa_gop", _test('            if k.tag == "tag:yaml.org,2002:merge" or getattr(k, "value", None) == "<<":\n', "            if False:\n"), ("y15_loader_nghiem_tu_choi_khoa_trung_va_khoa_gop",)),
+    ("test_doc_wf_dung_safe_load", _test("        return yaml.load(van_ban, Loader=_LoaderNghiem)\n", "        return yaml.safe_load(van_ban)\n"), ("y15_loader_nghiem_tu_choi_khoa_trung_va_khoa_gop",)),
+    ("test_bo_chot_cay_duoi_do", _test("    if Path(cay).resolve() != Path(goc).resolve():\n", "    if False:\n"), ("t95_lan_chay_day_du_chi_do_kho_chua_test",)),
     # ---- nghiệm thu 9: nối vào sổ test sống
     ("yml_go_buoc_goi_test_khoi_ci", _yml("      - name: ci-duong-nhanh selftest (phan loai diff + khoa cau truc if)\n        if: runner.os == 'Linux'\n        run: python ops/ci_duong_nhanh_test.py\n", ""), ("y09_buoc_goi_test_cua_packet_khong_bi_bo", "k03_ci_goi_that_muc_da_noi")),
     ("dk_go_muc_da_noi", (DK, lambda vb: thay_mot(vb, f'    "{DA_NOI_MUC}",\n', "")), ("k01_so_dang_ky_nhan_muc_da_noi",)),
@@ -1487,6 +1619,15 @@ def tu_kiem_phan_hang():
     return loi
 
 
+def loi_cay_duoi_do(cay, goc):
+    """Luot 5 (lop chot-yaml, cua 'test co MAT nhung do CAY KHAC'): lan chay DAY DU (buoc CI) chi duoc do chinh kho chua tep
+    test. `CI_DUONG_NHANH_CAY` chi danh cho tien trinh con `--mot-ca` cua mot dot bien; dat no cho lan chay day du (vd qua
+    `GITHUB_ENV` o mot buoc truoc) la tro bo test sang cay gia ma van in TONG: DAT."""
+    if Path(cay).resolve() != Path(goc).resolve():
+        return f"CAY DUOI DO KHAC KHO CHUA TEST: {cay} != {goc} — lan chay day du khong nhan CI_DUONG_NHANH_CAY"
+    return ""
+
+
 def main(argv):
     if len(argv) == 4 and argv[0] == "--nguon-test":
         # Chay CA tu BAN SAO (co the bi dot bien) cua chinh tep test; `__file__` giu la tep that de HERE/ROOT_THAT khong doi.
@@ -1511,6 +1652,10 @@ def main(argv):
     if argv:
         print("dung: ci_duong_nhanh_test.py [--mot-ca TEN]", file=sys.stderr)
         return 2
+    loi_cay = loi_cay_duoi_do(CAY, ROOT_THAT)
+    if loi_cay:
+        print(loi_cay, file=sys.stderr)
+        return 2
     dat = do = hong = 0
     for ten in CA:
         kq, ly_do = chay_ca_trong_tien_trinh(ten)
@@ -1525,6 +1670,7 @@ def main(argv):
     giet, xau = chay_tap_dot_bien(DOT_BIEN)
     trung = len(TEN_DOT_BIEN) - len(set(TEN_DOT_BIEN))
     print(f"DOT BIEN: {giet}/{len(DOT_BIEN)} bi giet dung ly do")
+    print(dong_kiem_ke())
     for x in xau:
         print(f"[DOT BIEN KHONG BI GIET DUNG] {x}")
     loi_tu_kiem = tu_kiem_phan_hang()

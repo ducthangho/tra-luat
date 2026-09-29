@@ -17,9 +17,10 @@ CÁCH ĐO ĐỘT BIẾN — bài học CLAUDE.md "đột biến bị giết khô
   · Mỗi đột biến: neo `count == 1` (không thì lỗi hạ tầng), kiểm bản đột biến KHÁC bản gốc, chạy trên tệp tạm với
     tên riêng, bytecode tắt; ca đích còn phải XANH trên bản gốc (chứng minh lượt giết là do đột biến).
   · Đột biến cũng áp cho CHÍNH tệp test (`--nguon-test`): helper fixture (cô lập actor...) có đột biến riêng.
-  · Phân hạng có phần tự kiểm (`tu_kiem_phan_hang`): NĂM mẫu rc (rc=3 đúng tên ⇒ GIẾT; rc=3 sai tên ⇒ TÍN DỤNG GIẢ;
-    rc=4 ⇒ TÍN DỤNG GIẢ; rc=0 ⇒ SỐNG SÓT; rc=-9 ⇒ HỎNG) và BA đột biến thật (KeyError vô can ⇒ TÍN DỤNG GIẢ;
-    chỉ thêm chú thích ⇒ SỐNG SÓT; nới allowlist ⇒ GIẾT). "Sai tên ca" chỉ được kiểm bằng mẫu rc, chưa có đột biến thật.
+  · Phân hạng có phần tự kiểm (`tu_kiem_phan_hang`, dữ liệu ở `MAU_RC` và `TU_KIEM_DOT_BIEN`; dòng `TU KIEM PHAN HANG:` in số
+    lượng ĐẾM TỪ HAI HẰNG SỐ ấy): rc=3 đúng tên ⇒ GIẾT; rc=3 sai tên ⇒ TÍN DỤNG GIẢ; rc=4 ⇒ TÍN DỤNG GIẢ; rc=0 ⇒ SỐNG SÓT;
+    rc=-9 ⇒ HỎNG; đột biến KeyError vô can ⇒ TÍN DỤNG GIẢ; chỉ thêm chú thích ⇒ SỐNG SÓT; nới allowlist ⇒ GIẾT. "Sai tên ca"
+    chỉ được kiểm bằng mẫu rc, chưa có đột biến thật. Không có bằng chứng dương (tập ca đích rỗng/lạ) thì KHÔNG BAO GIỜ GIẾT (`t97`).
 
 Ra: `CA: N/N dat` · `DOT BIEN: M/M bi giet` · `TONG: DAT`. Thoát 0 chỉ khi N>0, mọi ca đạt, M>0, mọi đột biến bị giết
 ĐÚNG LÝ DO, mọi ca tự kiểm đạt — `rc=0` một mình không phải bằng chứng.
@@ -797,7 +798,7 @@ def y05_khong_paths_khong_paths_ignore():
 @ca
 def y06_job_bat_buoc_khong_bi_bo_ca_job():
     wf = doc_wf()
-    for job in BAT_BUOC:
+    for job in ("chuan-bi", *BAT_BUOC):
         bang(job in wf["jobs"], f"thieu job bat buoc {job}")
         bang("if" not in wf["jobs"][job], f"{job}: KHONG duoc co `if:` cap job — check se VANG MAT thay vi bao ket qua")
         bang(wf["jobs"][job].get("continue-on-error", False) is False, f"{job}: job bat buoc khong duoc nuot loi")
@@ -852,6 +853,77 @@ def y09_buoc_goi_test_cua_packet_khong_bi_bo():
     bang(b.get("continue-on-error", False) is False, "buoc goi test khong duoc co continue-on-error")
 
 
+# LUAT: MOI `if:` cap buoc cua ci.yml (ten buoc -> bieu thuc chuan hoa) theo tung job. Buoc nao them/bo/doi `if:` deu do.
+# Chi cac buoc mang che_do la do packet nay; con lai la `if:` co san tu truoc (khong duoc tu y them `if: false` vao buoc giu).
+IF_BUOC_CHUAN = {
+    'chuan-bi': {
+        'actions/checkout@v4': "github.event_name == 'pull_request'",
+        'phan loai diff (duong nhanh ho so - chi pull_request)': "github.event_name == 'pull_request'",
+        'che do (push / workflow_dispatch luon day du)': "github.event_name != 'pull_request'",
+    },
+    'gate': {
+        'DUONG_NHANH - liet ke buoc bo qua (job gate)': "needs.chuan-bi.outputs.che_do == 'duong_nhanh'",
+        'PR head contains required EOL base': "github.event_name == 'pull_request'",
+        'tl selftest (luot PR — khong sinh bang chung)': "github.event_name == 'pull_request' && needs.chuan-bi.outputs.che_do != 'duong_nhanh'",
+        'tl selftest (co bang chung exact-identity)': "github.event_name != 'pull_request'",
+        'tai len gate-evidence': 'always()',
+        'golden-test': "needs.chuan-bi.outputs.che_do != 'duong_nhanh'",
+        'determinism-audit strict': "needs.chuan-bi.outputs.che_do != 'duong_nhanh'",
+        'ci-phamvi selftest (phan chung — cong co rang)': "runner.os != 'Windows'",
+        'release-check full': "needs.chuan-bi.outputs.che_do != 'duong_nhanh'",
+        'release-verify strict (lane LAND — manifest committed)': "github.ref == 'refs/heads/master'",
+        'release-verify strict (lane WORKER — manifest TẠM ngoài repo)': "github.ref != 'refs/heads/master'",
+        'release-bundle x2 cùng SHA-256': "needs.chuan-bi.outputs.che_do != 'duong_nhanh'",
+    },
+    'gate-ops': {
+        'DUONG_NHANH - liet ke buoc bo qua (job gate-ops)': "needs.chuan-bi.outputs.che_do == 'duong_nhanh'",
+        'DUONG_NHANH - kiem re thay cho buoc bi bo (doctrine-scan, YAML, diff --check, lease check)': "needs.chuan-bi.outputs.che_do == 'duong_nhanh'",
+        'ci-duong-nhanh selftest (phan loai diff + khoa cau truc if)': "runner.os == 'Linux'",
+        'lease-publish selftest (đo lại setup sau G5)': "needs.chuan-bi.outputs.che_do != 'duong_nhanh'",
+        'don-nhanh selftest (chốt xoá nhánh)': "runner.os != 'Windows'",
+        'bo ca gate chay TRONG cgroup duoc uy quyen (Linux)': "runner.os == 'Linux' && needs.chuan-bi.outputs.che_do != 'duong_nhanh'",
+        'gate lifecycle selftest (nen khong co cgroup)': "runner.os != 'Linux' && needs.chuan-bi.outputs.che_do != 'duong_nhanh'",
+    },
+    'gate-registry': {
+    },
+    'gate-packet-loop': {
+        'DUONG_NHANH - liet ke buoc bo qua (job gate-packet-loop)': "needs.chuan-bi.outputs.che_do == 'duong_nhanh'",
+        'packet-loop selftest': "needs.chuan-bi.outputs.che_do != 'duong_nhanh'",
+    },
+}
+
+
+JOB_CO_IF_CHO_PHEP = frozenset()   # sau khi #668 land: them `gate-cong-cu-gop` (if: !cancelled()) qua review
+
+
+@ca
+def y11_khong_job_nao_co_if_cap_job_ngoai_danh_sach_cho_phep():
+    """Cross-review luot 3 (P2): y06 chi nhin ba job bat buoc + chuan-bi; job phu khac (gate-registry...) cung khong duoc bi bo
+    hoac sua ket qua bang `if:` cap job. Quet MOI job; danh sach cho phep hien la RONG."""
+    for job, cau in doc_wf()["jobs"].items():
+        bang(not ("if" in cau and job not in JOB_CO_IF_CHO_PHEP), f"{job}: `if:` cap job khong duoc phep, duoc {cau.get('if')!r}")
+
+
+@ca
+def y12_moi_if_cap_buoc_khop_dung_danh_sach_cho_phep():
+    """Cross-review luot 3 (lop chot-yaml): danh sach CHO PHEP toan bo `if:` cap buoc, khong chi cac buoc mang `che_do`.
+    Them `if: false` vao mot buoc GIU (py_compile, eol survey...) hay doi mot `if:` co san deu phai do."""
+    wf = doc_wf()
+    thuc = {}
+    for job, cau in wf["jobs"].items():
+        thuc[job] = {}
+        for b in cau.get("steps") or []:
+            if "if" in b:
+                khoa = b.get("name") or b.get("uses")
+                bang(khoa not in thuc[job], f"{job}: hai buoc trung ten {khoa!r}")
+                thuc[job][khoa] = chuan_hoa_if(b["if"])
+    bang(set(thuc) == set(IF_BUOC_CHUAN), f"tap job lech: thua {sorted(set(thuc) - set(IF_BUOC_CHUAN))}, thieu {sorted(set(IF_BUOC_CHUAN) - set(thuc))}")
+    for job, mong in IF_BUOC_CHUAN.items():
+        bang(thuc[job] == mong, f"{job}: tap `if:` cap buoc lech danh sach cho phep: "
+             f"thua/doi {sorted((k, v) for k, v in thuc[job].items() if mong.get(k) != v)}, "
+             f"thieu {sorted(k for k in mong if k not in thuc[job])}")
+
+
 CHO_PHEP_NUOT_LOI = {("chuan-bi", "actions/checkout@v4"), ("chuan-bi", "phan loai diff (duong nhanh ho so - chi pull_request)")}
 
 
@@ -904,10 +976,37 @@ def k03_ci_goi_that_muc_da_noi():
 
 # ---------------------------------------------------------------- tự kiểm của chính bộ test
 @ca
+def t97_harness_khong_cap_giet_khi_khong_co_bang_chung_duong():
+    """Cross-review luot 3 (P2): `dich=()` va iterator bi tieu thu deu ra GIET gia (`all([])`). Kiem o BA cua: callee
+    (`chay_mot_dot_bien`), caller (`chay_tap_dot_bien`), va ten ca khong ton tai."""
+    vo_hai = (MA, lambda vb: thay_mot(vb, "TOI_DA_TEN_IN = 5\n", "TOI_DA_TEN_IN = 5  # vo hai\n"))
+    that = (MA, lambda vb: thay_mot(vb, '"ops/reviews/", "ops/specs/")\nMAU_SHA', '"ops/reviews/", "ops/specs/", "scripts/")\nMAU_SHA'))
+    t01, t02 = "t01_toan_ho_so_duong_nhanh", "t02_co_tep_ma_day_du"
+    for ten, dich in (("rong", ()), ("ten la", ("ca_khong_ton_tai",)), ("iterator rong", iter(()))):
+        hang, _ = chay_mot_dot_bien("vo_hai_" + ten, vo_hai, dich)
+        bang(hang == "HONG", f"callee: dich {ten} phai la HONG (khong co bang chung duong), duoc {hang}")
+    for ten, dich in (("tuple", (t01,)), ("iterator", iter((t01,))), ("generator", (x for x in (t01,)))):
+        hang, _ = chay_mot_dot_bien("vo_hai_" + ten, vo_hai, dich)
+        bang(hang == "SONG_SOT", f"callee: dot bien VO HAI voi dich {ten} phai SONG_SOT (khong bao gio GIET), duoc {hang}")
+        hang, _ = chay_mot_dot_bien("that_" + ten, that, (x for x in (t02,)) if ten == "generator" else (iter((t02,)) if ten == "iterator" else (t02,)))
+        bang(hang == "GIET", f"callee: dot bien THAT voi dich {ten} phai GIET, duoc {hang}")
+    # ca dich DO san tren ban goc thi lượt giet khong quy duoc cho dot bien => HONG, khong duoc GIET
+    do_san = lambda ten_ca, cay: (3, f"DO:{ten_ca}:do san")   # noqa: E731
+    hang, _ = chay_mot_dot_bien("do_san", that, (t02,), chay=do_san)
+    bang(hang == "HONG", f"ca dich do san tren ban goc phai la HONG (kiem chung ban goc), duoc {hang}")
+    giet, xau = chay_tap_dot_bien([("a_rong", vo_hai, ()), ("b_iter_vo_hai", vo_hai, iter((t01,))), ("c_ten_la", vo_hai, ("khong_co",))])
+    bang(giet == 0 and all(any(x.startswith(t) for x in xau) for t in ("a_rong", "b_iter_vo_hai", "c_ten_la")),
+         f"caller: ba muc khong co bang chung phai deu KHONG bi giet va deu vao danh sach xau: giet={giet} xau={xau}")
+    giet, xau = chay_tap_dot_bien([("d_iter_that", that, iter((t02,)))])
+    bang(giet == 1 and not xau, f"caller: iterator hop le + dot bien that phai GIET dung 1: giet={giet} xau={xau}")
+
+
+@ca
 def t98_docstring_khong_ghim_so_ca_va_khoang_ten():
     """Bang giao/docstring troi so HAI luot lien (P3 luot 1 va 2): so ca, so dot bien va khoang `tNN..tMM` chi nguon
     duy nhat la `CA`/`DOT_BIEN`. Docstring cua module va cua `ops/ci_duong_nhanh.py` khong duoc ghim chung."""
-    mau = re.compile(r"\b\d+\s*/\s*\d+\s*(?:ca|dot bien|đột biến)|`?t\d\d`?\s*(?:\.\.|–|-)\s*`?t\d\d")
+    mau = re.compile(r"\b\d+\s*/\s*\d+\s*(?:ca|dot bien|đột biến)|`?t\d\d`?\s*(?:\.\.|–|-)\s*`?t\d\d"
+                     r"|\b(?:\d+|NĂM|BA|BỐN|SÁU|BẢY|TÁM|năm|ba|bốn|sáu|bảy|tám)\s+(?:mẫu rc|đột biến (?:thật|thực))")
     ma_sp = ast.get_docstring(ast.parse((CAY / "ops" / "ci_duong_nhanh.py").read_text(encoding="utf-8"))) or ""
     for ten, doc in (("ci_duong_nhanh_test.py (module dang chay)", globals().get("__doc__") or ""), ("ci_duong_nhanh.py", ma_sp)):
         thay = mau.findall(doc)
@@ -1091,6 +1190,22 @@ DOT_BIEN = [
     ("ca_du_lieu_bo_t26", _ma('"t26_moi_bien_nhan_review_phai_khop_BAM_tep_no_tro_toi",\n              ', ""), ("t22b_ca_du_lieu_phai_thuc_thi_tung_ca",)),
     ("ca_du_lieu_cwd_sai", _ma('"ops/lease_publish_test.py", *CA_DU_LIEU],\n                 cwd=kho,', '"ops/lease_publish_test.py", *CA_DU_LIEU],\n                 cwd=ROOT,'), ("t22b_ca_du_lieu_phai_thuc_thi_tung_ca",)),
     ("ca_du_lieu_nuot_ngoai_le_trong_con", _ma("m[ten]()", r"try:\n        m[ten]()\n    except AssertionError:\n        pass"), ("t22b_ca_du_lieu_phai_thuc_thi_tung_ca",)),
+    # ---- lop chot-yaml-chi-do-su-hien-dien (luot 3): job tien nhiem va moi job
+    ("yml_chuan_bi_if_false_literal", _yml("    runs-on: ubuntu-latest\n    outputs:\n      os:", "    if: false\n    runs-on: ubuntu-latest\n    outputs:\n      os:"), ("y06_job_bat_buoc_khong_bi_bo_ca_job",)),
+    ("yml_chuan_bi_if_false_bieu_thuc", _yml("    runs-on: ubuntu-latest\n    outputs:\n      os:", "    if: ${{ false }}\n    runs-on: ubuntu-latest\n    outputs:\n      os:"), ("y06_job_bat_buoc_khong_bi_bo_ca_job",)),
+    ("yml_chuan_bi_if_dieu_kien_su_kien", _yml("    runs-on: ubuntu-latest\n    outputs:\n      os:", "    if: ${{ github.event_name == 'push' }}\n    runs-on: ubuntu-latest\n    outputs:\n      os:"), ("y06_job_bat_buoc_khong_bi_bo_ca_job",)),
+    ("yml_chuan_bi_nuot_loi_cap_job", _yml("    runs-on: ubuntu-latest\n    outputs:\n      os:", "    continue-on-error: true\n    runs-on: ubuntu-latest\n    outputs:\n      os:"), ("y06_job_bat_buoc_khong_bi_bo_ca_job",)),
+    ("yml_gate_registry_if_false", _yml("  gate-registry:\n    # packet #463", "  gate-registry:\n    if: false\n    # packet #463"), ("y11_khong_job_nao_co_if_cap_job_ngoai_danh_sach_cho_phep",)),
+    # ---- lop tin-dung-dot-bien-khong-co-ca-dich (luot 3): moi cua mot chot
+    ("test_go_kiem_rong_o_callee", _test('    if not dich:\n        return "HONG", "tap ca dich rong: khong co bang chung duong thi khong duoc cap GIET"\n', ""), ("t97_harness_khong_cap_giet_khi_khong_co_bang_chung_duong",)),
+    ("test_go_vat_hoa_o_callee", _test("    dich = tuple(dich)   # vat hoa " + "TRUOC lan doc dau", "    dich = dich   # vat hoa " + "TRUOC lan doc dau"), ("t97_harness_khong_cap_giet_khi_khong_co_bang_chung_duong",)),
+    ("test_go_vat_hoa_o_caller", _test("    for ten, tv, dich in tap:\n        dich = tuple(dich)\n", "    for ten, tv, dich in tap:\n"), ("t97_harness_khong_cap_giet_khi_khong_co_bang_chung_duong",)),
+    # ---- y12: moi `if:` cap buoc; kiem chung ban goc
+    ("yml_them_if_false_vao_buoc_giu", _yml("      - name: py_compile\n", "      - name: py_compile\n        if: false\n"), ("y12_moi_if_cap_buoc_khop_dung_danh_sach_cho_phep",)),
+    ("yml_doi_if_co_san_thanh_always", _yml("        if: runner.os != 'Windows'\n        run: python .github/checks/ci_phamvi_test.py\n", "        if: always()\n        run: python .github/checks/ci_phamvi_test.py\n"), ("y12_moi_if_cap_buoc_khop_dung_danh_sach_cho_phep",)),
+    ("yml_bo_if_co_san", _yml("        if: runner.os != 'Windows'\n        run: python .github/checks/ci_phamvi_test.py\n", "        run: python .github/checks/ci_phamvi_test.py\n"), ("y12_moi_if_cap_buoc_khop_dung_danh_sach_cho_phep",)),
+    ("yml_them_if_false_vao_buoc_gate_registry", _yml("      - name: test registry (phạm vi + các bộ chưa được nối)\n", "      - name: test registry (phạm vi + các bộ chưa được nối)\n        if: false\n"), ("y12_moi_if_cap_buoc_khop_dung_danh_sach_cho_phep",)),
+    ("test_go_kiem_chung_ban_goc", _test('            if rc != 0:\n                return "HONG", f"ca dich {ten_ca} khong xanh tren ban goc', '            if False:\n                return "HONG", f"ca dich {ten_ca} khong xanh tren ban goc'), ("t97_harness_khong_cap_giet_khi_khong_co_bang_chung_duong",)),
     # ---- tầng YAML (đặc tả nghiệm thu 6, 7)
     ("yml_go_dieu_kien_pull_request_khoi_buoc_phan_loai", _yml("        id: phan-loai\n        if: ${{ github.event_name == 'pull_request' }}\n", "        id: phan-loai\n"), ("y01_chuan_bi_phan_loai_chi_pull_request_va_khong_lam_do_job",)),
     ("yml_go_continue_on_error_buoc_phan_loai", _yml("        id: phan-loai\n        if: ${{ github.event_name == 'pull_request' }}\n        continue-on-error: true\n", "        id: phan-loai\n        if: ${{ github.event_name == 'pull_request' }}\n"), ("y01_chuan_bi_phan_loai_chi_pull_request_va_khong_lam_do_job",)),
@@ -1125,13 +1240,17 @@ DOT_BIEN = [
 TEN_DOT_BIEN = [d[0] for d in DOT_BIEN]
 
 
-def chay_mot_dot_bien(ten, tep_va_ham, dich):
+def chay_mot_dot_bien(ten, tep_va_ham, dich, chay=None):
+    chay = chay or chay_con
+    dich = tuple(dich)   # vat hoa TRUOC lan doc dau: iterator/generator bi vong baseline tieu thu thi `all([])` ra GIET gia
+    if not dich:
+        return "HONG", "tap ca dich rong: khong co bang chung duong thi khong duoc cap GIET"
     tep, ham = tep_va_ham
     goc = dung_cay_tam({})
     try:
         # điều kiện tiên quyết: ca đích XANH trên bản gốc (không thì lượt giết không quy được cho đột biến)
         for ten_ca in dich:
-            rc, ra = chay_con(ten_ca, goc)
+            rc, ra = chay(ten_ca, goc)
             if rc != 0:
                 return "HONG", f"ca dich {ten_ca} khong xanh tren ban goc (rc={rc}): {ra[-300:]}"
         vb = (goc / tep).read_text(encoding="utf-8")
@@ -1139,7 +1258,7 @@ def chay_mot_dot_bien(ten, tep_va_ham, dich):
         (goc / tep).write_text(moi, encoding="utf-8")
         hang = []
         for ten_ca in dich:
-            rc, ra = chay_con(ten_ca, goc)
+            rc, ra = chay(ten_ca, goc)
             hang.append((ten_ca, phan_hang(rc, ra, ten_ca), ra[-200:].strip().splitlines()[-1:] or [""]))
         if all(h[1] == "GIET" for h in hang):
             return "GIET", ""
@@ -1148,26 +1267,48 @@ def chay_mot_dot_bien(ten, tep_va_ham, dich):
         shutil.rmtree(goc, ignore_errors=True)
 
 
+def chay_tap_dot_bien(tap):
+    """(so bi giet, danh sach xau) cho mot tap (ten, tep_va_ham, dich). `dich` co the la iterator: vat hoa MOT LAN o day."""
+    giet, xau = 0, []
+    for ten, tv, dich in tap:
+        dich = tuple(dich)
+        for d in dich:
+            if d not in CA:
+                xau.append(f"{ten}: ca dich {d!r} khong ton tai")
+        try:
+            hang, chi_tiet = chay_mot_dot_bien(ten, tv, dich)
+        except Exception as e:
+            hang, chi_tiet = "HONG", f"{type(e).__name__}: {e}"
+        if hang == "GIET":
+            giet += 1
+        else:
+            xau.append(f"{ten}: {hang} {chi_tiet}")
+    return giet, xau
+
+
+MAU_RC = ((3, "DO:t01:vi sao", "t01", "GIET"), (3, "DO:t02:vi sao", "t01", "TIN_DUNG_GIA"),
+          (4, "Traceback", "t01", "TIN_DUNG_GIA"), (0, "", "t01", "SONG_SOT"), (-9, "", "t01", "HONG"))
+TU_KIEM_DOT_BIEN = [
+    ("sinh_ngoai_le_vo_can_KeyError",
+     (MA, lambda vb: thay_mot(vb, "def phan_loai_tu_diff(doi):\n", "def phan_loai_tu_diff(doi):\n    raise KeyError('vo can')\n")),
+     ("t01_toan_ho_so_duong_nhanh",), "TIN_DUNG_GIA"),
+    ("tuong_duong_chi_them_chu_thich",
+     (MA, lambda vb: thay_mot(vb, "TOI_DA_TEN_IN = 5\n", "TOI_DA_TEN_IN = 5  # vo hai\n")),
+     ("t01_toan_ho_so_duong_nhanh",), "SONG_SOT"),
+    ("dot_bien_that_de_doi_chieu",
+     (MA, lambda vb: thay_mot(vb, '"ops/reviews/", "ops/specs/")\nMAU_SHA', '"ops/reviews/", "ops/specs/", "scripts/")\nMAU_SHA')),
+     ("t02_co_tep_ma_day_du",), "GIET"),
+]
+
+
 def tu_kiem_phan_hang():
-    """Năm mẫu rc cho bộ phân hạng, cộng ba đột biến thật: lỗi vô can · chỉ thêm chú thích (sống sót) · nới allowlist (giết)."""
+    """Bo phan hang tu kiem: cac mau rc (`MAU_RC`) va cac dot bien that (`TU_KIEM_DOT_BIEN`); so luong doc tu hai hang so."""
     loi = []
-    for rc, ra, ten, mong in ((3, "DO:t01:vi sao", "t01", "GIET"), (3, "DO:t02:vi sao", "t01", "TIN_DUNG_GIA"),
-                              (4, "Traceback", "t01", "TIN_DUNG_GIA"), (0, "", "t01", "SONG_SOT"), (-9, "", "t01", "HONG")):
+    for rc, ra, ten, mong in MAU_RC:
         thuc = phan_hang(rc, ra, ten)
         if thuc != mong:
             loi.append(f"phan_hang({rc}, {ra!r}, {ten!r}) = {thuc}, mong {mong}")
-    kiem = [
-        ("sinh_ngoai_le_vo_can_KeyError",
-         (MA, lambda vb: thay_mot(vb, "def phan_loai_tu_diff(doi):\n", "def phan_loai_tu_diff(doi):\n    raise KeyError('vo can')\n")),
-         ("t01_toan_ho_so_duong_nhanh",), "TIN_DUNG_GIA"),
-        ("tuong_duong_chi_them_chu_thich",
-         (MA, lambda vb: thay_mot(vb, "TOI_DA_TEN_IN = 5\n", "TOI_DA_TEN_IN = 5  # vo hai\n")),
-         ("t01_toan_ho_so_duong_nhanh",), "SONG_SOT"),
-        ("dot_bien_that_de_doi_chieu",
-         (MA, lambda vb: thay_mot(vb, '"ops/reviews/", "ops/specs/")\nMAU_SHA', '"ops/reviews/", "ops/specs/", "scripts/")\nMAU_SHA')),
-         ("t02_co_tep_ma_day_du",), "GIET"),
-    ]
-    for ten, tv, dich, mong in kiem:
+    for ten, tv, dich, mong in TU_KIEM_DOT_BIEN:
         hang, chi_tiet = chay_mot_dot_bien(ten, tv, dich)
         if hang != mong:
             loi.append(f"tu kiem {ten}: mong {mong}, duoc {hang} {chi_tiet}")
@@ -1209,25 +1350,13 @@ def main(argv):
             print(f"[{kq}] {ten}: {ly_do}")
     print(f"CA: {dat}/{len(CA)} dat · {do} do · {hong} hong")
 
-    giet, xau = 0, []
-    for ten, tv, dich in DOT_BIEN:
-        for d in dich:
-            if d not in CA:
-                xau.append(f"{ten}: ca dich {d!r} khong ton tai")
-        try:
-            hang, chi_tiet = chay_mot_dot_bien(ten, tv, dich)
-        except Exception as e:
-            hang, chi_tiet = "HONG", f"{type(e).__name__}: {e}"
-        if hang == "GIET":
-            giet += 1
-        else:
-            xau.append(f"{ten}: {hang} {chi_tiet}")
+    giet, xau = chay_tap_dot_bien(DOT_BIEN)
     trung = len(TEN_DOT_BIEN) - len(set(TEN_DOT_BIEN))
     print(f"DOT BIEN: {giet}/{len(DOT_BIEN)} bi giet dung ly do")
     for x in xau:
         print(f"[DOT BIEN KHONG BI GIET DUNG] {x}")
     loi_tu_kiem = tu_kiem_phan_hang()
-    print(f"TU KIEM PHAN HANG: {'DAT' if not loi_tu_kiem else 'DO'}")
+    print(f"TU KIEM PHAN HANG: {'DAT' if not loi_tu_kiem else 'DO'} ({len(MAU_RC)} mau rc, {len(TU_KIEM_DOT_BIEN)} dot bien that)")
     for x in loi_tu_kiem:
         print(f"[TU KIEM] {x}")
     ok = (dat == len(CA) > 0 and giet == len(DOT_BIEN) > 0 and not xau and not loi_tu_kiem and trung == 0)

@@ -2987,17 +2987,27 @@ def t69_W1_W2_thieu_dau_ra_do_gia_phai_bao_du_ba_manh():
              f"lỗi thiếu tệp không giữ đủ phép đo: {loi!r}")
 
 
+def _ca_doc_than_buoc(cac_ca) -> list:
+    return [fn.__name__ for fn in cac_ca
+            if {"_chay_buoc_dang", "_chay_buoc_dang_that"} & set(fn.__code__.co_names)]
+
+
 @ca
 def t70_W6_matrix_co_Windows_phai_chay_lai_bay_ca():
     job = {"runs-on": "${{ matrix.os }}", "strategy": {"matrix": {
         "os": ["ubuntu-latest", "windows-latest"]}}}
     ly_do = _ly_do_bo_qua_workflow(WORKFLOW_DANG, "dang", nen="nt", job=job)
-    doc_than = [fn.__name__ for fn in CA
-                if {"_chay_buoc_dang", "_chay_buoc_dang_that"} & set(fn.__code__.co_names)]
+    doc_than = _ca_doc_than_buoc(CA)
     # BẢY cũ (packet #396 gỡ `t52` cùng bước ghi ngược mà nó ghim) + SÁU của #677 (`t195`–`t200`, gọi helper
     # mới trực tiếp, kể cả ca dùng điểm dò). KIỂM KÊ, không phải bằng chứng nhánh: bằng chứng là `t199` (A9).
-    bang(not ly_do and len(doc_than) == 13,
-         f"matrix có Windows vẫn bỏ qua hoặc không dẫn xuất đủ mười ba ca: {ly_do!r}, {doc_than}")
+    # R1-F6: tập MONG ĐỢI là literal độc lập; hàm giả gọi RIÊNG từng helper chứng minh predicate nhận cả hai.
+    def _a(): _chay_buoc_dang
+    def _b(): _chay_buoc_dang_that
+    def _c(): pass
+    mong = ["t51", "t59", "t60", "t62", "t63", "t66", "t68", "t195", "t196", "t197", "t198", "t199", "t200"]
+    bang(not ly_do and sorted(x.split("_")[0] for x in doc_than) == sorted(mong)
+         and _ca_doc_than_buoc([_a, _b, _c]) == ["_a", "_b"],
+         f"matrix có Windows vẫn bỏ qua hoặc kiểm kê ca đọc thân bước lệch tập mong đợi: {ly_do!r}, {doc_than}")
 
 
 def _chay_main_meta(fn, nen=None):
@@ -10545,6 +10555,16 @@ _LID_TAP_II = (("true", "true", "True"), ("1.5", "1.5", "1.5"), ("ngày", "2026-
 _DA_DANG_BO_QUA = "đã đăng trước đó — bỏ qua"
 
 
+# R1-F2: tập ô MONG ĐỢI dựng từ literal ĐỘC LẬP với `_LID_TAP_*`/generator, để bỏ ô, lặp ô bù số hay bỏ ngày đều đỏ.
+_MA_M2 = ([f"{n}/{p}/{d}" for n in ("null", "danh sách", "ánh xạ") for p in ("Issue", "PR")
+           for d in ("trống", "có dấu")] + ["thiếu lease_id/Issue/trống", "tài liệu là danh sách/Issue/trống"])
+
+
+def _ma_m3(la_pr, het_han):
+    return [f"{n}/{'PR' if la_pr else 'Issue'}/có dấu/{'hết hạn' if het_han else 'còn hạn'}"
+            for n in ("true", "1.5", "ngày")]
+
+
 def _o_tap_i():
     """14 ô của M2: 3 dạng × {Issue, PR} × {trống, có dấu} + 2 dạng tài liệu (chỉ Issue, trống)."""
     for nhan, raw, dau in _LID_TAP_I:
@@ -10570,7 +10590,9 @@ def t195_M2_tap_i_bien_cong_khai_khoa_ca_bo_quan_sat():
         trống/có dấu × còn hạn/hết hạn, + 5 dòng GET loại số hiệu lỗi + 2 dạng tài liệu. Ca này chỉ giữ tập (i).
     (b) Vì sao khoá DÃY LỜI GỌI: đó là tín hiệu phân biệt của đột biến `L` (gỡ hai dòng chốt `lease_id` trong
         `_tien_kiem_mien_dang`): nền 0 lời gọi, `L` 1 GET `comments` (đo bởi `t178` ở đơn vị phép dò và bởi giàn
-        này ở biên). Lượt GET thừa tự nó KHÔNG nguy hiểm.
+        này ở biên). Lượt GET thừa tự nó KHÔNG nguy hiểm. Phạm vi (R1-F8): chỉ 12/14 ô — 3 dạng giá trị × Issue/PR ×
+        trống/có dấu — đổi dãy lời gọi 0→1 GET dưới `L`; hai dạng tài liệu (thiếu `lease_id`, tài liệu là danh sách) là
+        ĐỐI CHỨNG KHÔNG ĐỔI (giàn r4: nền `rc=1`, 0 lời gọi, 0 POST và `L` y hệt, cột `=`), kỳ vọng vẫn 0 lời gọi.
     (d) Dạng ép kiểu mà hiện đang được ĐĂNG (Issue thật, chưa có dấu) KHÔNG khoá ở đây: việc của #678 (Q2).
     (e) Tiền đề (§2.6) — chốt khác đều qua: `packet_issue=55` khớp `gh` giả; `granted_by` có thẩm quyền; SHA 40 hex;
         vắng cặp neo prompt; `gh api` đọc được; mọi GET trong một lượt thấy CÙNG snapshot. Trục CHE MẤT độ phân
@@ -10578,11 +10600,13 @@ def t195_M2_tap_i_bien_cong_khai_khoa_ca_bo_quan_sat():
         thoát trùng, chỉ số lời gọi phân biệt); API `comments` lỗi; comment hỏng đứng TRƯỚC dấu. KHÔNG khoá: phản
         hồi `comments` đổi giữa các GET (Q13, đồ giả sẽ khoá lịch gọi). Windows: `KHÔNG ĐO ĐƯỢC` (Q6).
     """
-    lech = []
+    lech, da_chay = [], []
     for nhan, van, san, la_pr in _o_tap_i():
+        da_chay.append(nhan)
         kq = _chay_buoc_dang_that(van, san, la_pr)
         if not (kq["rc"] == 1 and not kq["goi"] and not kq["dang"]):
             lech.append(f"{nhan}: rc={kq['rc']} goi={kq['goi']} POST={len(kq['dang'])}")
+    chot(sorted(da_chay) == sorted(_MA_M2), f"M2: tập ô đã chạy phải đúng 14 tọa độ mong đợi; nhận {sorted(da_chay)}")
     chot(not lech, "M2 tập (i): nền phải rc=1, 0 lời gọi gh, 0 POST ở cả 14 ô (dãy lời gọi nền = rỗng); lệch: "
          + "; ".join(lech))
 
@@ -10602,10 +10626,12 @@ def t196_M3a_tap_ii_PR_co_dau_con_han_phai_DO_khong_bo_qua():
         đổi đường từ chối (Q9). Đột biến `L` biến ĐỎ thành XANH ở đúng ô này vì nhánh đã-có-dấu không chạy
         `_kiem_loai_so_hieu` (đo 10:03Z 29-09, `89fc4fa`). Tiền đề & trục che: xem docstring `t195` (a)(e).
     """
-    lech = []
+    lech, da_chay = [], []
     for nhan, van, san, la_pr in _o_tap_ii(True, False):
+        da_chay.append(nhan)
         lech.append(_lech_tap_ii(nhan, _chay_buoc_dang_that(van, san, la_pr)))
     lech = [x for x in lech if x]
+    chot(sorted(da_chay) == sorted(_ma_m3(True, False)), f"M3a: tập ô đã chạy sai: {sorted(da_chay)}")
     chot(not lech, "M3a: PR + có dấu + còn hạn phải rc≠0, 0 POST, không 'bỏ qua' (đột biến L cho rc=0); lệch: "
          + "; ".join(lech))
 
@@ -10617,12 +10643,23 @@ def t197_M3b_tap_ii_Issue_co_dau_het_han_phai_DO_khong_bo_qua():
     (c) Cùng luật với `t196`. Nhánh đã-có-dấu gọi `kiem(bo_qua_han=True)` nên `L` cố ý bỏ chốt hạn (§2.4). Ô này
         thực tế hơn ô PR: dấu bot mang giá trị ép kiểu trên Issue là thứ workflow tự sinh được (đo 10:03Z 29-09).
     """
-    lech = []
+    lech, da_chay = [], []
     for nhan, van, san, la_pr in _o_tap_ii(False, True):
+        da_chay.append(nhan)
         lech.append(_lech_tap_ii(nhan, _chay_buoc_dang_that(van, san, la_pr)))
     lech = [x for x in lech if x]
+    chot(sorted(da_chay) == sorted(_ma_m3(False, True)), f"M3b: tập ô đã chạy sai: {sorted(da_chay)}")
     chot(not lech, "M3b: Issue + có dấu + hết hạn phải rc≠0, 0 POST, không 'bỏ qua' (đột biến L cho rc=0); lệch: "
          + "; ".join(lech))
+
+
+def _lech_m4(kq) -> str:
+    """Rỗng nếu đối chứng dương đạt: rc=0 VÀ đúng 1 POST mở bằng tiền tố `wp-ok-1` (R1-F7: `t202` đo riêng)."""
+    if kq["rc"] != 0:
+        return f"M4: chuỗi hợp lệ trên Issue trống phải rc=0; nhận rc={kq['rc']}, out={kq['out'][-300:]!r}"
+    if not (len(kq["dang"]) == 1 and kq["dang"][0].startswith("**Lease `wp-ok-1`**")):
+        return f"M4: phải ĐÚNG 1 POST mở bằng **Lease `wp-ok-1`**; nhận POST={kq['dang']!r}, goi={kq.get('goi')}"
+    return ""
 
 
 @ca
@@ -10632,10 +10669,8 @@ def t198_M4_doi_chung_duong_chuoi_hop_le_dang_dung_mot_POST():
     Thứ làm giàn hỏng không thể xanh: `gh` vắng khỏi PATH ⇒ rc=1, 0 lời gọi (§2.1); `gh` giả không lưu POST ⇒ rc=0
     nhưng 0 comment trong trạng thái.
     """
-    kq = _chay_buoc_dang_that(_yaml_that("wp-ok-1"))
-    chot(kq["rc"] == 0, f"M4: chuỗi hợp lệ trên Issue trống phải rc=0; nhận rc={kq['rc']}, out={kq['out'][-300:]!r}")
-    chot(len(kq["dang"]) == 1 and kq["dang"][0].startswith("**Lease `wp-ok-1`**"),
-         f"M4: phải ĐÚNG 1 POST mở bằng **Lease `wp-ok-1`**; nhận POST={kq['dang']!r}, goi={kq['goi']}")
+    lech = _lech_m4(_chay_buoc_dang_that(_yaml_that("wp-ok-1")))
+    chot(not lech, lech)
 
 
 @ca
@@ -10665,6 +10700,23 @@ def t199_A9_guard_nen_cua_helper_qua_diem_do_o_ba_trang_thai():
                 ly_do = _ly_do_bo_qua_workflow(wf, "dang")
             if qua != phai_qua or bool(ly_do) == phai_qua or (not phai_qua and "chỉ chạy Ubuntu" not in ly_do):
                 sai.append(f"{nhan}: qua_guard={qua} (phải {phai_qua}), lý_do={ly_do!r}")
+        # R1-F1: điểm dò TẮT — guard phải chặn ĐƯỜNG THẬT trước mọi I/O (đột biến "guard chỉ chạy khi bật điểm dò" đỏ ở đây).
+        class _DenIO(Exception):
+            pass
+
+        def _cham(*_a):
+            raise _DenIO()
+        for nhan, nen, phai_chan in (("S4a posix+thật, điểm dò tắt: phải TỚI I/O", "posix", False),
+                                     ("S4b nt+thật, điểm dò tắt: phải bị guard chặn TRƯỚC I/O", "nt", True)):
+            with mock.patch.object(os, "name", nen), mock.patch.object(mod, "_buoc_workflow", _cham):
+                try:
+                    ket = _chay_buoc_dang_that("")
+                except BoQuaNen:
+                    ket = "chan"
+                except Exception:  # noqa: BLE001 — mọi thứ KHÁC `BoQuaNen` nghĩa là guard KHÔNG chặn (đã qua tới I/O)
+                    ket = "toi_IO"
+            if ket != ("chan" if phai_chan else "toi_IO"):
+                sai.append(f"{nhan}: nhận {ket!r}")
     chot(not sai, "A9 guard nền: " + "; ".join(sai))
 
 
@@ -10674,6 +10726,61 @@ def t200_M1_nguon_lease_publish_tuy_chon_that_su_duoc_dung():
     kq = _chay_buoc_dang_that(_yaml_that("wp-ok-1"), nguon_lease_publish="import sys\nsys.exit(7)\n")
     chot(kq["rc"] == 1 and "rc=7" in kq["out"] and not kq["goi"],
          f"M1: nguồn tuỳ chọn không được dùng; rc={kq['rc']}, goi={kq['goi']}, out={kq['out'][-300:]!r}")
+    # R1-F4: KHÔNG truyền nguồn ⇒ phải đọc `SCRIPT` (cây đang test), không phải bản neo nào khác.
+    from unittest import mock
+    with San() as s:
+        (s / "lp.py").write_text("import sys\nsys.exit(7)\n", encoding="utf-8")
+        with mock.patch.object(sys.modules[__name__], "SCRIPT", s / "lp.py"):
+            kq = _chay_buoc_dang_that(_yaml_that("wp-ok-1"))
+    chot(kq["rc"] == 1 and "rc=7" in kq["out"],
+         f"M1: mặc định không đọc SCRIPT của cây; rc={kq['rc']}, out={kq['out'][-300:]!r}")
+
+
+@ca
+def t201_M1_gh_gia_hai_GET_cung_snapshot_va_POST_luu_trang_thai():
+    """Hợp đồng của `gh` giả (spec §2.6, R1-F5): hai GET cùng endpoint trả CÙNG snapshot; POST lưu, GET sau thấy nó."""
+    import json
+    with San() as s:
+        (s / "g.py").write_text(_GH_GIA_THAT, encoding="utf-8")
+        st = s / "st.json"
+        st.write_text(json.dumps({"issues": {"55": {"comments": [_dau_bot("wp-ok-1")], "pr": False}}}))
+        env = dict(os.environ, GH_STATE=str(st), GH_LOG=str(s / "gh.log"))
+        ep = "repos/o/r/issues/55/comments"
+
+        def gh(*a):
+            r = subprocess.run([sys.executable, str(s / "g.py"), "api", *a], capture_output=True, text=True, env=env)
+            return r.returncode, r.stdout
+        g1, g2 = gh(ep), gh(ep)
+        (s / "p.json").write_text(json.dumps({"body": "**Lease `moi`** — x"}), encoding="utf-8")
+        gp, g3 = gh(ep, "--input", str(s / "p.json")), gh(ep)
+    chot(g1 == g2 and g1[0] == 0 and "wp-ok-1" in g1[1], f"hai GET liền nhau phải cùng snapshot có comment: {g1!r} vs {g2!r}")
+    chot(gp[0] == 0 and gp[1].strip() == "7001" and "moi" in g3[1] and "wp-ok-1" in g3[1],
+         f"POST phải lưu vào trạng thái và GET sau thấy: POST={gp!r}, GET sau={g3!r}")
+
+
+@ca
+def t202_M3_M4_moi_chot_quyet_dinh_co_phan_chung_rieng():
+    """Phản chứng cho từng chiều sai của hàm quyết định M3/M4 (R1-F3, R1-F7): mỗi chiều bơm ĐỘC LẬP một lỗi.
+
+    M3: chỉ `rc=0` · chỉ POST thừa · chỉ dòng "bỏ qua" đều phải bị bắt; `rc=1` và `rc=2` sạch phải qua (không ghim
+    `rc=1`, Q9). M4: đúng tiền tố phải qua; sai tiền tố · 0 POST · 2 POST · `rc=1` phải bị bắt.
+    """
+    def kq(rc, dang=(), out=""):
+        return {"rc": rc, "dang": list(dang), "out": out, "goi": []}
+    dau = "**Lease `wp-ok-1`** — đăng tự động"
+    sai = []
+    for nhan, lech, k in (("M3 chỉ rc=0", True, kq(0)), ("M3 chỉ POST thừa", True, kq(1, [dau])),
+                          ("M3 chỉ dòng bỏ qua", True, kq(1, out=_DA_DANG_BO_QUA)),
+                          ("M3 đối chứng rc=1", False, kq(1)), ("M3 đối chứng rc=2", False, kq(2))):
+        if bool(_lech_tap_ii(nhan, k)) != lech:
+            sai.append(nhan)
+    for nhan, lech, k in (("M4 đúng tiền tố", False, kq(0, [dau])),
+                          ("M4 sai tiền tố", True, kq(0, ["**Lease `wrong`** — x"])),
+                          ("M4 0 POST", True, kq(0)), ("M4 2 POST", True, kq(0, [dau, dau])),
+                          ("M4 rc=1 đúng POST", True, kq(1, [dau]))):
+        if bool(_lech_m4(k)) != lech:
+            sai.append(nhan)
+    chot(not sai, "hàm quyết định M3/M4 sai chiều: " + "; ".join(sai))
 
 
 

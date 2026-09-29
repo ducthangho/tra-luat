@@ -2109,6 +2109,13 @@ for _ten, _ca, _tim, _thay in (
     ('f28_du_nuot_ma', 't54_', '    sys.exit(main())\n',
      '    sys.exit(main() if os.environ.get(_BIEN_BAN_KINH) or os.environ.get(_BIEN_MANH) else (main() and 0))\n'),
     ('f28_nen_ma', 't54_', '    sys.exit(main())\n', '    sys.exit(1 if main() else 0)\n'),
+    # F29/F30 (Codex lượt 12): rỗng ≠ vắng ở từng chốt `_doc_che_do`; hai chốt nguồn HEAD của `_van_tay`.
+    ('f29_bk_truthy', 't53_', '    if bk is not None:\n', '    if bk:\n'),
+    ('f29_ra_truthy', 't53_', '        if ra is not None:\n', '        if ra:\n'),
+    ('f29_mh_truthy', 't53_', '    if mh is None:\n', '    if not mh:\n'),
+    ('f30_bo_rc', 't53_', '        head = p.stdout.strip() if p.returncode == 0 else ""\n', '        head = p.stdout.strip()\n'),
+    ('f30_bo_dinh_dang', 't53_', '            "head": head if re.fullmatch(r"[0-9a-f]{40}|[0-9a-f]{64}", head) else None}\n',
+     '            "head": head or None}\n'),
     ('f27_full_seed', 't54_', '    else:\n        print(f"\\nBÁN KÍNH ĐỘT BIẾN ({len(DOT_BIEN)} đột biến, mỗi ca đúng một"',
      '    else:\n        loi_db = loi_nen\n        print(f"\\nBÁN KÍNH ĐỘT BIẾN ({len(DOT_BIEN)} đột biến, mỗi ca đúng một"'),
 ):
@@ -6696,7 +6703,9 @@ def t53_che_do_doc_FAIL_CLOSED_moi_cau_hinh_la_co_THE_RIENG_va_van_tay_bam_NGUON
             "chu": ["loi", "[C-hinh-dang]"], "so_0_dau": ["loi", "[C-hinh-dang]"], "cach": ["loi", "[C-hinh-dang]"],
             "xuong_dong": ["loi", "[C-hinh-dang]"], "so_la": ["loi", "[C-hinh-dang]"],
             "thieu_ra": ["loi", "[C-thieu-ra]"], "ra_rong": ["loi", "[C-thieu-ra]"],
-            "ca_hai": ["loi", "[C-ca-hai]"], "ra_le": ["loi", "[C-ra-le]"]}
+            "ca_hai": ["loi", "[C-ca-hai]"], "ra_le": ["loi", "[C-ra-le]"], "bk_rong_manh": ["loi", "[C-ca-hai]"],
+            "ra_rong_le": ["loi", "[C-ra-le]"], "ra_rong_gate": ["loi", "[C-ra-le]"], "manh_rong": ["loi", "[C-hinh-dang]"],
+            "manh_rong_gate": ["loi", "[C-ca-hai]"], "van_tay_git": [True] * 4}
     sai = {t: [kq.get(t), m] for t, m in mong.items() if kq.get(t) != m}
     bang(not sai, f"`_doc_che_do` đọc sai (thấy, mong): {sai}")
     dung(kq["van_tay"][0], f"giàn giáo git tạm không dựng được commit: {kq['van_tay']}")
@@ -7751,6 +7760,10 @@ def _in_tu_kiem_che_do():
         "ra_rong": {_BIEN_MANH: "0/8", _BIEN_MANH_RA: ""}, "ca_hai": {_BIEN_MANH: "0/8", _BIEN_MANH_RA: "x",
                                                                        _BIEN_BAN_KINH: "manh"},
         "ra_le": {_BIEN_MANH_RA: "x"},
+        # F29 (Codex lượt 12): RỖNG ≠ VẮNG khi PHỐI HỢP biến — đổi `is None` thành truthiness phải lộ ở từng chốt.
+        "bk_rong_manh": {_BIEN_BAN_KINH: "", _BIEN_MANH: "0/8", _BIEN_MANH_RA: "x"}, "ra_rong_le": {_BIEN_MANH_RA: ""},
+        "ra_rong_gate": {_BIEN_MANH_RA: "", _BIEN_BAN_KINH: "manh"}, "manh_rong": {_BIEN_MANH: "", _BIEN_MANH_RA: "x"},
+        "manh_rong_gate": {_BIEN_MANH: "", _BIEN_BAN_KINH: "manh"},
     }
     kq = {}
     for ten, env in bang_env.items():
@@ -7779,6 +7792,18 @@ def _in_tu_kiem_che_do():
             v3, h3 = _van_tay(), git("rev-parse", "HEAD").stdout.strip()
         finally:
             g["GOC"], g["TEP_TEST"] = cu
+    # F30 (Codex lượt 12): HAI chốt nguồn HEAD đo RIÊNG — rc≠0 kèm stdout hợp lệ, rc=0 kèm stdout sai định dạng (kho không
+    # git làm cả hai cùng sai nên che lẫn nhau). `git` giả qua `subprocess` của module.
+    import types
+    h40, h64, cu_sp = "c" * 40, "d" * 64, g["subprocess"]
+    kq["van_tay_git"] = []
+    for rc, ra, mong in ((1, h40, None), (0, "not-a-head", None), (0, h40, h40), (0, h64, h64)):
+        g["subprocess"] = types.SimpleNamespace(run=lambda *a, **k: types.SimpleNamespace(returncode=rc, stdout=ra + "\n"),
+                                                SubprocessError=cu_sp.SubprocessError)
+        try:
+            kq["van_tay_git"].append(_van_tay()["head"] == mong)
+        finally:
+            g["subprocess"] = cu_sp
     sha = lambda b: hashlib.sha256(b).hexdigest()
     kq["van_tay"] = [bool(h1 and h3), khong_git["head"] is None, v1["head"] == h1, v1["sha256_test"] == sha(b"a\n"),
                      v2["sha256_test"] == sha(b"b\n") and v2["head"] == h1, v3["head"] == h3 != h1]

@@ -43,6 +43,9 @@ jobs:
     # chung), khong o bieu thuc YAML. Chi `pull_request` duoc phan loai; push va workflow_dispatch LUON day du.
     # Fail-close: chi dung chuoi `duong_nhanh` moi bo buoc; rong/la/vang => day du (phia job: `!= 'duong_nhanh'`).
     runs-on: ubuntu-latest
+    # Tran ngoai: het gio CAP JOB thi `chuan-bi` DO (ba context bat buoc khong duoc tao => PR bi chan, khong mo) — chi
+    # ngan thoi gian chan tu 360 phut mac dinh xuong day. Tran trong o hai buoc phan loai ben duoi (het gio => roi day_du).
+    timeout-minutes: 20
     outputs:
       os: ${{ (github.event_name == 'workflow_dispatch'
                || contains(github.event.pull_request.labels.*.name, 'windows'))
@@ -50,12 +53,15 @@ jobs:
               || '["ubuntu-latest"]' }}
       che_do: ${{ github.event_name == 'pull_request' && steps.phan-loai.outputs.che_do || 'day_du' }}
     steps:
-      # `continue-on-error` o HAI buoc phan loai la CO CHU DICH, khong phai nuot loi: job `chuan-bi` do thi ba job
-      # bat buoc bi `skipped`, ma check `skipped` duoc GitHub tinh la dat (theo tai lieu GitHub, chua tu do) — tuc PR
-      # merge duoc voi KHONG BUOC NAO chay. Khong phan loai duoc thi phai roi ve `day_du`, khong ve `skipped`.
+      # `continue-on-error` o HAI buoc phan loai la CO CHU DICH, khong phai nuot loi: khong phan loai duoc thi phai roi
+      # ve `day_du` (chay day du), khong lam `chuan-bi` do. Do 29-09 (Issue #674 comment 5889459132, 4 luot that):
+      # `chuan-bi` do thi job phu thuoc `skipped` mang ten TRAN, context bat buoc `(ubuntu-latest)` khong duoc tao ⇒ PR bi
+      # CHAN (dong), khong mo — nhung chan toi 360 phut neu buoc treo. Nen hai buoc co `timeout-minutes` rieng: het gio
+      # ⇒ buoc that bai ⇒ `continue-on-error` giu job xanh ⇒ `che_do` vang ⇒ `day_du`.
       - uses: actions/checkout@v4
         if: ${{ github.event_name == 'pull_request' }}
         continue-on-error: true
+        timeout-minutes: 10
         with:
           # Diff `base...head` can lich su du de tinh merge-base; thieu object => `git diff` loi => day_du.
           fetch-depth: 0
@@ -63,6 +69,7 @@ jobs:
         id: phan-loai
         if: ${{ github.event_name == 'pull_request' }}
         continue-on-error: true
+        timeout-minutes: 5
         env:
           CI_DUONG_NHANH_SU_KIEN: ${{ github.event_name }}
           CI_DUONG_NHANH_GOC: ${{ github.event.pull_request.base.sha }}

@@ -940,7 +940,7 @@ IF_BUOC_CHUAN = {
 # `run:` cua buoc do packet them thi duoc khoa nguyen van o y08/y09. Doi bat ky muc nao duoi day => y13 do => cap nhat CUNG review.
 KHUNG_TOP = {'name': 'gate', True: {'push': {'branches': ['master']}, 'pull_request': None, 'workflow_dispatch': None}, 'concurrency': {'group': '${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}', 'cancel-in-progress': "${{ github.ref != 'refs/heads/master' }}"}}
 KHUNG_JOB = {
-    'chuan-bi': {'runs-on': 'ubuntu-latest', 'outputs': {'os': '${{ (github.event_name == \'workflow_dispatch\' || contains(github.event.pull_request.labels.*.name, \'windows\')) && \'["ubuntu-latest","windows-latest"]\' || \'["ubuntu-latest"]\' }}', 'che_do': "${{ github.event_name == 'pull_request' && steps.phan-loai.outputs.che_do || 'day_du' }}"}},
+    'chuan-bi': {'runs-on': 'ubuntu-latest', 'timeout-minutes': 20, 'outputs': {'os': '${{ (github.event_name == \'workflow_dispatch\' || contains(github.event.pull_request.labels.*.name, \'windows\')) && \'["ubuntu-latest","windows-latest"]\' || \'["ubuntu-latest"]\' }}', 'che_do': "${{ github.event_name == 'pull_request' && steps.phan-loai.outputs.che_do || 'day_du' }}"}},
     'gate': {'needs': 'chuan-bi', 'strategy': {'fail-fast': False, 'matrix': {'os': '${{ fromJson(needs.chuan-bi.outputs.os) }}'}}, 'runs-on': '${{ matrix.os }}', 'timeout-minutes': 60, 'env': {'PYTHONIOENCODING': 'utf-8', 'PYTHONUTF8': '1', 'PYTHONDONTWRITEBYTECODE': '1'}},
     'gate-ops': {'needs': 'chuan-bi', 'strategy': {'fail-fast': False, 'matrix': {'os': '${{ fromJson(needs.chuan-bi.outputs.os) }}'}}, 'runs-on': '${{ matrix.os }}', 'timeout-minutes': 60, 'env': {'PYTHONIOENCODING': 'utf-8', 'PYTHONUTF8': '1', 'PYTHONDONTWRITEBYTECODE': '1'}},
     'gate-registry': {'needs': 'chuan-bi', 'strategy': {'fail-fast': False, 'matrix': {'os': '${{ fromJson(needs.chuan-bi.outputs.os) }}'}}, 'runs-on': '${{ matrix.os }}', 'timeout-minutes': 90, 'env': {'PYTHONIOENCODING': 'utf-8', 'PYTHONUTF8': '1', 'PYTHONDONTWRITEBYTECODE': '1'}},
@@ -948,8 +948,8 @@ KHUNG_JOB = {
 }
 KHUNG_BUOC = {
     'chuan-bi': [
-        ('actions/checkout@v4', {'uses': 'actions/checkout@v4', 'if': "${{ github.event_name == 'pull_request' }}", 'continue-on-error': True, 'with': {'fetch-depth': 0}}),
-        ('phan loai diff (duong nhanh ho so - chi pull_request)', {'id': 'phan-loai', 'if': "${{ github.event_name == 'pull_request' }}", 'continue-on-error': True, 'env': {'CI_DUONG_NHANH_SU_KIEN': '${{ github.event_name }}', 'CI_DUONG_NHANH_GOC': '${{ github.event.pull_request.base.sha }}', 'CI_DUONG_NHANH_DAU': '${{ github.event.pull_request.head.sha }}'}}),
+        ('actions/checkout@v4', {'uses': 'actions/checkout@v4', 'if': "${{ github.event_name == 'pull_request' }}", 'continue-on-error': True, 'timeout-minutes': 10, 'with': {'fetch-depth': 0}}),
+        ('phan loai diff (duong nhanh ho so - chi pull_request)', {'id': 'phan-loai', 'if': "${{ github.event_name == 'pull_request' }}", 'continue-on-error': True, 'timeout-minutes': 5, 'env': {'CI_DUONG_NHANH_SU_KIEN': '${{ github.event_name }}', 'CI_DUONG_NHANH_GOC': '${{ github.event.pull_request.base.sha }}', 'CI_DUONG_NHANH_DAU': '${{ github.event.pull_request.head.sha }}'}}),
         ('che do (push / workflow_dispatch luon day du)', {'if': "${{ github.event_name != 'pull_request' }}", 'env': {'SU_KIEN': '${{ github.event_name }}'}}),
     ],
     'gate': [
@@ -1128,6 +1128,27 @@ def y15_loader_nghiem_tu_choi_khoa_trung_va_khoa_gop():
                     doc_wf()
                     bat = True
         bang(not bat, f"loader phai DO khi ci.yml co {ten}")
+
+
+@ca
+def y16_chuan_bi_co_tran_thoi_gian_buoc_va_job():
+    """Chu kho (Issue #674 comment 5889513175): buoc checkout / phan-loai cua `chuan-bi` treo thi PR bi chan toi 360 phut.
+    Hai buoc phai co `timeout-minutes` nho (<= 10) VA `continue-on-error: true` (het gio => roi `day_du`, khong lam job do);
+    tran cap job phai lon hon tong hai tran buoc (khong thi job het gio TRUOC buoc, tuc do thay vi roi `day_du`)."""
+    wf = doc_wf()
+    cb = wf["jobs"]["chuan-bi"]
+    tong = 0
+    for b in buoc(wf, "chuan-bi"):
+        if b.get("if") and chuan_hoa_if(b["if"]) == "github.event_name == 'pull_request'":
+            tm = b.get("timeout-minutes")
+            bang(isinstance(tm, int) and not isinstance(tm, bool) and 1 <= tm <= 10,
+                 f"chuan-bi/{b.get('name') or b.get('uses')}: timeout-minutes phai la so nguyen 1..10, duoc {tm!r}")
+            bang(b.get("continue-on-error") is True, f"chuan-bi/{b.get('name') or b.get('uses')}: het gio phai roi day_du")
+            tong += tm
+    bang(tong > 0, "chuan-bi: khong thay buoc phan loai nao")
+    tj = cb.get("timeout-minutes")
+    bang(isinstance(tj, int) and not isinstance(tj, bool) and tong < tj <= 30,
+         f"chuan-bi: timeout-minutes cap job phai > {tong} (tong tran buoc) va <= 30, duoc {tj!r}")
 
 
 CHO_PHEP_NUOT_LOI = {("chuan-bi", "actions/checkout@v4"), ("chuan-bi", "phan loai diff (duong nhanh ho so - chi pull_request)")}
@@ -1491,10 +1512,10 @@ DOT_BIEN = [
     ("ca_du_lieu_cwd_sai", _ma('"ops/lease_publish_test.py", *CA_DU_LIEU],\n                 cwd=kho,', '"ops/lease_publish_test.py", *CA_DU_LIEU],\n                 cwd=ROOT,'), ("t22b_ca_du_lieu_phai_thuc_thi_tung_ca",)),
     ("ca_du_lieu_nuot_ngoai_le_trong_con", _ma("m[ten]()", r"try:\n        m[ten]()\n    except AssertionError:\n        pass"), ("t22b_ca_du_lieu_phai_thuc_thi_tung_ca",)),
     # ---- lop chot-yaml-chi-do-su-hien-dien (luot 3): job tien nhiem va moi job
-    ("yml_chuan_bi_if_false_literal", _yml("    runs-on: ubuntu-latest\n    outputs:\n      os:", "    if: false\n    runs-on: ubuntu-latest\n    outputs:\n      os:"), ("y06_job_bat_buoc_khong_bi_bo_ca_job",)),
-    ("yml_chuan_bi_if_false_bieu_thuc", _yml("    runs-on: ubuntu-latest\n    outputs:\n      os:", "    if: ${{ false }}\n    runs-on: ubuntu-latest\n    outputs:\n      os:"), ("y06_job_bat_buoc_khong_bi_bo_ca_job",)),
-    ("yml_chuan_bi_if_dieu_kien_su_kien", _yml("    runs-on: ubuntu-latest\n    outputs:\n      os:", "    if: ${{ github.event_name == 'push' }}\n    runs-on: ubuntu-latest\n    outputs:\n      os:"), ("y06_job_bat_buoc_khong_bi_bo_ca_job",)),
-    ("yml_chuan_bi_nuot_loi_cap_job", _yml("    runs-on: ubuntu-latest\n    outputs:\n      os:", "    continue-on-error: true\n    runs-on: ubuntu-latest\n    outputs:\n      os:"), ("y06_job_bat_buoc_khong_bi_bo_ca_job",)),
+    ("yml_chuan_bi_if_false_literal", _yml("    timeout-minutes: 20\n    outputs:\n      os:", "    if: false\n    timeout-minutes: 20\n    outputs:\n      os:"), ("y06_job_bat_buoc_khong_bi_bo_ca_job",)),
+    ("yml_chuan_bi_if_false_bieu_thuc", _yml("    timeout-minutes: 20\n    outputs:\n      os:", "    if: ${{ false }}\n    timeout-minutes: 20\n    outputs:\n      os:"), ("y06_job_bat_buoc_khong_bi_bo_ca_job",)),
+    ("yml_chuan_bi_if_dieu_kien_su_kien", _yml("    timeout-minutes: 20\n    outputs:\n      os:", "    if: ${{ github.event_name == 'push' }}\n    timeout-minutes: 20\n    outputs:\n      os:"), ("y06_job_bat_buoc_khong_bi_bo_ca_job",)),
+    ("yml_chuan_bi_nuot_loi_cap_job", _yml("    timeout-minutes: 20\n    outputs:\n      os:", "    continue-on-error: true\n    timeout-minutes: 20\n    outputs:\n      os:"), ("y06_job_bat_buoc_khong_bi_bo_ca_job",)),
     ("yml_gate_registry_if_false", _yml("  gate-registry:\n    # packet #463", "  gate-registry:\n    if: false\n    # packet #463"), ("y11_khong_job_nao_co_if_cap_job_ngoai_danh_sach_cho_phep",)),
     # ---- lop tin-dung-dot-bien-khong-co-ca-dich (luot 3): moi cua mot chot
     ("test_go_kiem_rong_o_callee", _test('    if not dich:\n        return "HONG", "tap ca dich rong: khong co bang chung duong thi khong duoc cap GIET"\n', ""), ("t97_harness_khong_cap_giet_khi_khong_co_bang_chung_duong",)),
@@ -1571,6 +1592,12 @@ DOT_BIEN = [
     ("test_main_khong_in_kiem_ke", _test("    print(dong_kiem_ke())\n", ""), ("t94_main_in_dong_kiem_ke_that",)),
     ("test_main_in_kiem_ke_hai_lan", _test("    print(dong_kiem_ke())\n", "    print(dong_kiem_ke())\n    print(dong_kiem_ke())\n"), ("t94_main_in_dong_kiem_ke_that",)),
     ("test_main_in_kiem_ke_bi_doi", _test("    print(dong_kiem_ke())\n", "    print(dong_kiem_ke().replace('tu_kiem', 'tu kiem'))\n"), ("t94_main_in_dong_kiem_ke_that",)),
+    # ---- chu kho 5889513175: tran thoi gian cua chuan-bi
+    ("yml_go_timeout_checkout_chuan_bi", _yml("        continue-on-error: true\n        timeout-minutes: 10\n", "        continue-on-error: true\n"), ("y16_chuan_bi_co_tran_thoi_gian_buoc_va_job", "y13_khoa_topology_cua_ci_yml_ngoai_than_run")),
+    ("yml_go_timeout_phan_loai", _yml("        continue-on-error: true\n        timeout-minutes: 5\n", "        continue-on-error: true\n"), ("y16_chuan_bi_co_tran_thoi_gian_buoc_va_job", "y13_khoa_topology_cua_ci_yml_ngoai_than_run")),
+    ("yml_go_timeout_job_chuan_bi", _yml("    timeout-minutes: 20\n    outputs:\n", "    outputs:\n"), ("y16_chuan_bi_co_tran_thoi_gian_buoc_va_job", "y13_khoa_topology_cua_ci_yml_ngoai_than_run")),
+    ("yml_timeout_job_nho_hon_buoc", _yml("    timeout-minutes: 20\n    outputs:\n", "    timeout-minutes: 12\n    outputs:\n"), ("y16_chuan_bi_co_tran_thoi_gian_buoc_va_job",)),
+    ("yml_timeout_checkout_qua_lon", _yml("        continue-on-error: true\n        timeout-minutes: 10\n", "        continue-on-error: true\n        timeout-minutes: 60\n"), ("y16_chuan_bi_co_tran_thoi_gian_buoc_va_job",)),
     # ---- nghiệm thu 9: nối vào sổ test sống
     ("yml_go_buoc_goi_test_khoi_ci", _yml("      - name: ci-duong-nhanh selftest (phan loai diff + khoa cau truc if)\n        if: runner.os == 'Linux'\n        run: python ops/ci_duong_nhanh_test.py\n", ""), ("y09_buoc_goi_test_cua_packet_khong_bi_bo", "k03_ci_goi_that_muc_da_noi")),
     ("dk_go_muc_da_noi", (DK, lambda vb: thay_mot(vb, f'    "{DA_NOI_MUC}",\n', "")), ("k01_so_dang_ky_nhan_muc_da_noi",)),

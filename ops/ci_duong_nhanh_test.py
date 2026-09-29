@@ -1202,6 +1202,57 @@ def k03_ci_goi_that_muc_da_noi():
 
 
 @ca_tu_kiem
+def t91_ma_thoat_that_khi_ca_dat_do_va_hong():
+    """Exec chính stanza __main__ trong tiến trình con; giữ main/runner thật, cô lập công việc nặng."""
+    chuong_trinh = """
+import ast, runpy, sys
+tep, ket_qua = sys.argv[1:]
+g = runpy.run_path(tep)["main"].__globals__
+def sentinel():
+    print("REVIEW_SENTINEL_CALLED")
+    if ket_qua == "DO":
+        raise g["TinHieuChotCa"]("review sentinel")
+    if ket_qua == "HONG":
+        raise RuntimeError("review sentinel")
+g.update(CA={"t_fixture": sentinel}, CAY=g["ROOT_THAT"],
+         chay_tap_dot_bien=lambda _: (len(g["DOT_BIEN"]), []),
+         tu_kiem_phan_hang=lambda: [], dong_kiem_ke=lambda: "KIEM KE: fixture")
+with open(tep, encoding="utf-8") as f:
+    tree = ast.parse(f.read())
+entry = tree.body[-1]
+assert isinstance(entry, ast.If) and "__name__" in ast.unparse(entry.test)
+g["__name__"] = "__main__"
+sys.argv = [tep]
+exec(compile(ast.Module(body=[entry], type_ignores=[]), tep, "exec"), g)
+"""
+    for ket_qua, rc_mong in (("DAT", 0), ("DO", 1), ("HONG", 1)):
+        r = subprocess.run([sys.executable, "-B", "-c", chuong_trinh,
+                            str(CAY / "ops" / "ci_duong_nhanh_test.py"), ket_qua],
+                           capture_output=True, text=True, timeout=60)
+        bang(r.returncode == rc_mong and r.stdout.count("REVIEW_SENTINEL_CALLED") == 1
+             and r.stdout.rstrip().endswith("TONG: DAT" if rc_mong == 0 else "TONG: DO"),
+             f"entry/{ket_qua}: rc={r.returncode}, stdout={r.stdout[-700:]!r}, stderr={r.stderr[-300:]!r}")
+
+
+@ca_tu_kiem
+def t92_runner_thuc_su_goi_ca_va_phan_biet_loi():
+    goi = []
+    for ket_qua in ("DAT", "DO", "HONG"):
+        def sentinel():
+            goi.append(ket_qua)
+            if ket_qua == "DO":
+                raise TinHieuChotCa("review sentinel DO")
+            if ket_qua == "HONG":
+                raise RuntimeError("review sentinel HONG")
+        with mock.patch.dict(CA, {"t_fixture": sentinel}, clear=True):
+            hang, chi_tiet = chay_ca_trong_tien_trinh("t_fixture")
+        bang(hang == ket_qua and goi.count(ket_qua) == 1,
+             f"runner/{ket_qua}: phai goi dung mot lan va giu phan hang, duoc {hang}/{chi_tiet}, calls={goi}")
+        bang(ket_qua == "DAT" or "review sentinel" in chi_tiet,
+             f"runner/{ket_qua}: mat ly do goc {chi_tiet!r}")
+
+
+@ca_tu_kiem
 def t93_main_ket_luan_va_ma_thoat_theo_duong_goi_that():
     """Luot 6 (lop chot-yaml, tang 'duong goi that' tiep theo — executor tu liet ke): CI chi doc MA THOAT cua tien trinh.
     (1) `main` phai tra 1 + `TONG: DO` khi BAT KY dieu kien nao hong (ca do, dot bien khong giet, xau, tu kiem, ten trung),
@@ -1249,7 +1300,8 @@ def t94_main_in_dong_kiem_ke_that():
         "tu_kiem_phan_hang": lambda: [],
     }, clear=False), contextlib.redirect_stdout(ra):
         rc = main([])
-    bang(rc == 0 and ra.getvalue().splitlines().count(dong_kiem_ke()) == 1,
+    dong = [d for d in ra.getvalue().splitlines() if d.startswith("KIEM KE:")]
+    bang(rc == 0 and dong == [dong_kiem_ke()],
          "main phai in dung mot dong KIEM KE duoc doi chieu doc lap boi t96")
 
 
@@ -1644,6 +1696,14 @@ DOT_BIEN = [
     ("test_main_in_ca_sai_tu_so", _test('    print(f"CA: {dat}' + '/{len(CA)} dat', '    print(f"CA: {len(CA)}' + '/{len(CA)} dat'), ("t93_main_ket_luan_va_ma_thoat_theo_duong_goi_that",)),
     ("test_main_in_dot_bien_sai_tu_so", _test('    print(f"DOT BIEN: {giet}' + '/{len(DOT_BIEN)}', '    print(f"DOT BIEN: {len(DOT_BIEN)}' + '/{len(DOT_BIEN)}'), ("t93_main_ket_luan_va_ma_thoat_theo_duong_goi_that",)),
     ("test_dunder_main_nuot_ma_thoat", _test("    raise SystemExit(main(sys.argv" + "[1:]))\n", "    main(sys.argv" + "[1:])\n    raise SystemExit(0)\n"), ("t93_main_ket_luan_va_ma_thoat_theo_duong_goi_that",)),
+    # ---- luot 6 (Codex P2/P3): runner that goi ca, entrypoint that, tap neo KIEM KE
+    ("test_runner_khong_goi_ca", _test("    try:\n        CA[ten]" + "()\n    except TinHieuChotCa", "    try:\n        pass\n    except TinHieuChotCa"), ("t92_runner_thuc_su_goi_ca_va_phan_biet_loi", "t91_ma_thoat_that_khi_ca_dat_do_va_hong")),
+    ("test_runner_goi_ca_hai_lan", _test("    try:\n        CA[ten]" + "()\n    except TinHieuChotCa", "    try:\n        CA[ten]()\n        CA[ten]()\n    except TinHieuChotCa"), ("t92_runner_thuc_su_goi_ca_va_phan_biet_loi",)),
+    ("test_runner_hong_thanh_do", _test('    except Exception as e:\n        return "HONG", f"{type(e).__name__}' + ': {e}"', '    except Exception as e:\n        return "DO", f"{type(e).__name__}: {e}"'), ("t92_runner_thuc_su_goi_ca_va_phan_biet_loi",)),
+    ("test_runner_nuot_tin_hieu_do", _test('    except TinHieuChotCa as e:\n        return "DO", str(e)' + '\n    except Exception', '    except TinHieuChotCa as e:\n        return "DAT", ""\n    except Exception'), ("t92_runner_thuc_su_goi_ca_va_phan_biet_loi", "t91_ma_thoat_that_khi_ca_dat_do_va_hong")),
+    ("test_entrypoint_rc1_thanh_0", _test("    raise SystemExit(main(sys.argv" + "[1:]))\n", "    _rc = main(sys.argv[1:])\n    raise SystemExit(0 if _rc == 1 else _rc)\n"), ("t91_ma_thoat_that_khi_ca_dat_do_va_hong",)),
+    ("test_main_in_them_dong_kiem_ke_sai", _test("    print(dong_kiem_ke())" + "\n    for x in xau", "    print(dong_kiem_ke())\n    print('KIEM KE: ca hanh_vi=999 = 999')\n    for x in xau"), ("t94_main_in_dong_kiem_ke_that",)),
+    ("test_main_in_dong_kiem_ke_sai_truoc", _test("    print(dong_kiem_ke())" + "\n    for x in xau", "    print('KIEM KE: sai')\n    print(dong_kiem_ke())\n    for x in xau"), ("t94_main_in_dong_kiem_ke_that",)),
     # ---- nghiệm thu 9: nối vào sổ test sống
     ("yml_go_buoc_goi_test_khoi_ci", _yml("      - name: ci-duong-nhanh selftest (phan loai diff + khoa cau truc if)\n        if: runner.os == 'Linux'\n        run: python ops/ci_duong_nhanh_test.py\n", ""), ("y09_buoc_goi_test_cua_packet_khong_bi_bo", "k03_ci_goi_that_muc_da_noi")),
     ("dk_go_muc_da_noi", (DK, lambda vb: thay_mot(vb, f'    "{DA_NOI_MUC}",\n', "")), ("k01_so_dang_ky_nhan_muc_da_noi",)),

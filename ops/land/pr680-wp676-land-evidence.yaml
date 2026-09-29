@@ -21,20 +21,19 @@ mat_quan_sat_duoc_the_nao: >-
   Loi khai co neo (session URL), khong phai phep do doc lap — mot phien Claude khong tu chung minh be mat chay cua chinh no.
 trang_thai_packet:
   merged: true
-  landed: false
+  landed: true
+  landed_hieu_luc_tu: 'merge commit cua PR bookkeeping #683 mang tep nay vao master (tep chi co tren master sau thoi diem ay).'
   landed_ghi_chu: >-
     PROTOCOL §10: `landed` = da vao canonical o exact SHA duoc duyet, HAU-MERGE GATE XANH va BOOKKEEPING XONG.
     (1) merge dung head duoc uy quyen 819d6b0 tai 89fc4fa, tree c1699a6 = tree head duyet — CO.
-    (2) hau-merge gate: run 36539864381 luot 3 conclusion success, 5 job success. Ba moc §10.2.2 do duoc (Run,
-    Checkout, Gate output); moc Workflow definition = not_measured (GraphQL 403 tu phien Claude Code, REST run
-    khong co OID dinh nghia) — xem post_merge_checks. §10.2.2: "Thieu mot moc bat buoc thi ghi thieu, khong suy de
-    lap receipt"; §7: "Thieu evidence bat buoc chan transition tuong ung".
+    (2) hau-merge gate: run 36539864381 luot 3 conclusion success, 5 job success. Moc Run, Checkout, Gate output do
+    duoc; moc Workflow definition = not_measured, disposition owner_waived (waiver ben
+    pull/683#issuecomment-5888362843, dung pham vi run/attempt/SHA nay) — xem post_merge_checks.
     (3) bookkeeping: lease g1 thu hoi + ai-dang-giu NGUOI_GIU 0 co lenh/rc/bam — xem bookkeeping.
-    => `landed` GIU false cho toi khi (a) do duoc moc Workflow definition tu mot client co GraphQL
-    (`WorkflowRun.file.repositoryFileUrl` cua run 36539864381 attempt 3), HOAC (b) chu kho ghi waiver ben
-    `owner_waived` dung pham vi (§10.2.3). Ban truoc cua tep (4c46bdf) ghi `landed: true` la SAI — codex connector
-    bat duoc (PR #683 review comment 4131666015, P1).
-  cho_quyet_dinh: 'moc Workflow definition cua CI master hau merge — do bang client khac hay chu kho waiver.'
+  lich_su_landed: >-
+    4c46bdf ghi `landed: true` khi thieu moc (SAI, codex connector bat P1 4131666015); c928ba9 ha ve false vi moc
+    Workflow definition not_measured; ban nay len true CHI nho waiver owner_waived cua chu kho (§10.2.3), khong vi
+    moc da duoc do.
 role: land_operator
 session_id: https://claude.ai/code/session_01E3unUqtumWcjaBodjRGS2A
 recorded_by: claude-session
@@ -132,6 +131,17 @@ post_merge_checks:
       tree_ngoai_job_gate: 'not_measured — ba job con lai chi in checkout SHA, khong in tree.'
     moc_workflow_definition:
       trang_thai: not_measured
+      disposition: owner_waived
+      waiver:
+        url: https://github.com/ducthangho/tra-luat/pull/683#issuecomment-5888362843
+        actor: ducthangho
+        nguon: 'chi thi chu kho trong phien session_01E3unUqtumWcjaBodjRGS2A ~10:26Z: "Chon cach 2, owner_waived."'
+        exact_sha: 89fc4fac8cea65979cc2483043dc8cd07a6e8518
+        context: 'gate — .github/workflows/ci.yml, run 36539864381 attempt 3, push master, ubuntu-latest'
+        pham_vi: 'CHI moc Workflow definition cua dung run/attempt/SHA nay; khong tai su dung'
+        dieu_kien_thay_the: 'do duoc WorkflowRun.file.repositoryFileUrl cua dung run/attempt thi ket qua do thay waiver; dinh nghia khac du kien => waiver mat hieu luc, danh gia lai land'
+        authority_caveat: 'comment do phien agent dang bang tai khoan chu kho, chep loi chu kho (#566)'
+        khong_viet_lai: 'waiver KHONG bien moc thanh passed (§10.2.3).'
       da_thu:
         - 'GraphQL node(id: WFR_kwLOTNeRjc8AAAAIgfIVPQ){... on WorkflowRun{file{path repositoryFileUrl}}} -> HTTP 403 "GitHub GraphQL is not available from Claude Code sessions" (09:14Z).'
         - 'REST run attempt 3: chi co path .github/workflows/ci.yml va referenced_workflows [] — KHONG co commit/blob OID cua dinh nghia.'

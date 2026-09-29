@@ -1,0 +1,111 @@
+# HO SO LAND — dac ta packet wp678 (#678) LEASE-ID-EP-KIEU-YAML, qua PR #679.
+# Schema chuan: docs/PROTOCOL_DA_PHIEN.md §7, khoi "Land evidence tach approval khoi thao tac".
+# Duong dan ops/land/*-land-evidence.yaml la QUY UOC THUC TE (tien le pr554, pr594, pr666, pr672, pr680).
+#
+# PHAM VI: PR #679 CHI land DAC TA (ops/specs/lease-id-ep-kieu-yaml-r1..r6.md). Packet wp678 CHUA THI HANH:
+# chua co lease, chua co ma. "landed" o tep nay la landed cua PR dac ta, KHONG phai packet da xong.
+
+schema_version: 1
+mission_id: '682'
+mission_issue: 682
+packet_id: wp678
+packet_slug: LEASE-ID-EP-KIEU-YAML
+packet_issue: 678
+pham_vi_land: dac_ta
+provider: claude
+provider_taxonomy_da_provider: anthropic_claude
+execution_surface: claude_code
+transport: machine/local
+environment: cloud
+operating_system: linux
+github_write_channel: >-
+  MCP github (api.githubcopilot.com) bang credential cua tai khoan chu kho `ducthangho`; merge goi
+  merge_pull_request method=merge, expectedHeadSha=03a7219. Tai khoan KHONG tach duoc phien agent khoi chu kho
+  (#566) — danh tinh nguoi uy quyen lay tu comment neo chi thi, khong tu actor cua lenh merge.
+mat_quan_sat_duoc_the_nao: >-
+  Loi khai co neo (session URL), khong phai phep do doc lap — mot phien Claude khong tu chung minh be mat chay cua chinh no.
+trang_thai_packet:
+  merged: true
+  landed: false
+  landed_ghi_chu: >-
+    PROTOCOL §10: `landed` = da vao canonical o exact SHA duoc duyet, HAU-MERGE GATE XANH va BOOKKEEPING XONG.
+    (1) merge dung head duoc uy quyen 03a7219 tai c57df32, cha thu hai = 03a7219 — CO (do bang git show).
+    (2) hau-merge gate: run 36564795511 (push, c57df32) con in_progress luc ghi (12:1xZ 29-09) — CHUA.
+    (3) bookkeeping: tep nay + 6 verdict nguyen byte + 6 bien nhan v2 + 6 hang README — PR bookkeeping chua merge.
+    Nang len `true` bang commit rieng khi (2) va (3) cung dat.
+  packet_thi_hanh: 'CHUA — wp678 chua co lease; lease hen cap 2026-09-30T12:15Z (Q8, #682 comment 5888631719).'
+role: land_operator
+session_id: https://claude.ai/code/session_01CSM7GNazhN6uGJb4v1TqBT
+recorded_by: claude-session
+input_packet_generations:
+  - packet_issue: 678
+    lease_id: khong-co-lease
+    revision: 6
+    generation: 0
+    spec_path: ops/specs/lease-id-ep-kieu-yaml-r6.md
+    spec_sha256: d1f9dd7903c99df03b9e65bc06a2175eb43e0e602758a6945508ff33af76244c
+    reviewed_sha: 03a7219c9f3df4e6304f499b79df968aa7d386cb
+
+candidates:
+  - pr: 679
+    noi_dung: 'ops/specs/lease-id-ep-kieu-yaml-r1.md .. -r6.md (+2761/-0, chi dac ta, khong ma)'
+    authorized_head_sha: 03a7219c9f3df4e6304f499b79df968aa7d386cb
+
+authorized_head_sha: 03a7219c9f3df4e6304f499b79df968aa7d386cb
+approver: ducthangho
+authorization_url: https://github.com/ducthangho/tra-luat/pull/679#issuecomment-5889749874
+authorization_url_ghi_chu: >-
+  Comment neo BEN chi thi chu kho "#679: merge, land va bookeeping" (go trong phien ~12:0xZ 29-09), do PHIEN AGENT
+  dang ho bang credential chu kho va tu khai dieu do o dau comment. Neo dung authorized_head_sha 03a7219.
+authorization:
+  approver: ducthangho
+  chi_thi_trong_phien: '"#679: merge, land va bookeeping" (chu kho, phien session_01CSM7GNazhN6uGJb4v1TqBT, ~12:0xZ 29-09-2026)'
+  assurance: cross_approved
+  assurance_ghi_chu: >-
+    Cross-review codex luot 6 approve 0/0/0 tren dung 03a7219 (ops/reviews/wp678-spec-review-6-codex-verdict.md).
+    Executor ho Claude, reviewer ho Codex. KHONG co verdict human_audited: ho so audit da soan
+    (pull/679#issuecomment-5889555584) nhung chu kho chua dang verdict audit; chi thi merge KHONG thay cho no va
+    KHONG duoc ghi la human_audited.
+  guard: 'packet_loop.py guard --action merge rc=7 (nhac vai); ghi-uy-quyen --action merge --head-sha 03a7219 rc=0 (LOI KHAI).'
+
+land_operator: claude-session (tai khoan GitHub cua chu kho qua MCP github)
+merge_method: merge
+merge_commit: c57df32f0fd8c992ed363d7000f4f761275750ea
+hai_cha: 1c23933b13f33d6b0ebdb2901a3dec33c474d34c 03a7219c9f3df4e6304f499b79df968aa7d386cb
+tree: 290f924741377aa2e406b67ef26fccdc268b1a18
+target: master
+merge_api_expected_head_sha: 03a7219c9f3df4e6304f499b79df968aa7d386cb
+base_luc_merge: >-
+  1c23933 (nhanh PR tut sau base 2 tep ghi so #676: ops/land/pr680-wp676-land-evidence.yaml,
+  ops/leases/t131-deadline-dem-spawn-exec-1-claude-20260929.yaml — khong giao 6 tep cua PR; merge commit khong xung dot).
+r6_tren_master_sha256: d1f9dd7903c99df03b9e65bc06a2175eb43e0e602758a6945508ff33af76244c
+
+pre_merge_checks:
+  - check: 'CI pull_request tren 03a7219'
+    gate: 'run 36558616927 completed success (doc 11:5xZ)'
+    thu_hoi: 'run 36558614230 completed success'
+    windows: 'not_run — PR chi dac ta; chi thi thuong truc khong chay CI Windows.'
+  - 'Cross-review: 6 luot codex gpt-6-astra/xhigh (header); luot 6 approve 0/0/0 tren 03a7219; HINT rong.'
+  - 'Cong nhanh tai cho tren 03a7219: doctrine-scan rc 0; doc-claims-check ok true.'
+  - '7/7 commit cua PR ky SSH (dem khoi BEGIN SSH SIGNATURE).'
+
+post_merge_checks:
+  - check: 'CI master tren merge commit c57df32 (push)'
+    workflow_run: https://github.com/ducthangho/tra-luat/actions/runs/36564795511
+    trang_thai_luc_ghi: in_progress
+    ghi_chu: 'Cap nhat ket qua va nang landed khi run xong.'
+  - check: 'ref delta quanh merge (ls-remote truoc/sau, sort LC_ALL=C)'
+    truoc: 'REFS 1103 d58f565876b70cb1bfa67abbb823fa63a0d07d750b5c1eb3fe18244c39c7b035'
+    sau: 'REFS 1102 ebd3dea7c9bd843252b51d06ab212cbc837831b99150afb3a9824afccadf1136'
+    delta: 'HEAD va refs/heads/master 1c23933 -> c57df32; refs/pull/679/merge xoa. Khong ref nao khac doi.'
+
+bookkeeping:
+  verdicts: >-
+    ops/reviews/wp678-spec-review-{1..6}-codex-verdict.md nguyen byte (commit 92f21eb) + 6 bien nhan v2
+    (anchor canonical_ancestry neo blob o 92f21eb) + 6 hang README "Muc luc". bien_nhan_v2 --root: 0 vi pham,
+    0 KHONG DO DUOC.
+  lease: 'Khong co lease nao cua wp678 de thu hoi (PR dac ta truoc khi giao packet).'
+  issue_678: 'MO — packet chua thi hanh.'
+  ghi_chu_loi_khai_sai: >-
+    Thong diep commit 03a7219 khai "sua mot cau cut" — SAI; cau ay chua tung cut, noi dung tep khong bi anh huong
+    (dinh chinh: pull/679#issuecomment-5889116818).

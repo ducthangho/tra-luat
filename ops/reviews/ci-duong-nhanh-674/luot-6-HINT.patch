@@ -1,0 +1,71 @@
+chua chay tren cay that — executor tu ap, tu do, tu chiu trach nhiem commit
+--- ops/ci_duong_nhanh_test.py
++++ ops/ci_duong_nhanh_test.py
+@@ -1202,6 +1202,57 @@
+ 
+ 
+ @ca_tu_kiem
++def t91_ma_thoat_that_khi_ca_dat_do_va_hong():
++    """Exec chính stanza __main__ trong tiến trình con; giữ main/runner thật, cô lập công việc nặng."""
++    chuong_trinh = """
++import ast, runpy, sys
++tep, ket_qua = sys.argv[1:]
++g = runpy.run_path(tep)["main"].__globals__
++def sentinel():
++    print("REVIEW_SENTINEL_CALLED")
++    if ket_qua == "DO":
++        raise g["TinHieuChotCa"]("review sentinel")
++    if ket_qua == "HONG":
++        raise RuntimeError("review sentinel")
++g.update(CA={"t_fixture": sentinel}, CAY=g["ROOT_THAT"],
++         chay_tap_dot_bien=lambda _: (len(g["DOT_BIEN"]), []),
++         tu_kiem_phan_hang=lambda: [], dong_kiem_ke=lambda: "KIEM KE: fixture")
++with open(tep, encoding="utf-8") as f:
++    tree = ast.parse(f.read())
++entry = tree.body[-1]
++assert isinstance(entry, ast.If) and "__name__" in ast.unparse(entry.test)
++g["__name__"] = "__main__"
++sys.argv = [tep]
++exec(compile(ast.Module(body=[entry], type_ignores=[]), tep, "exec"), g)
++"""
++    for ket_qua, rc_mong in (("DAT", 0), ("DO", 1), ("HONG", 1)):
++        r = subprocess.run([sys.executable, "-B", "-c", chuong_trinh,
++                            str(CAY / "ops" / "ci_duong_nhanh_test.py"), ket_qua],
++                           capture_output=True, text=True, timeout=60)
++        bang(r.returncode == rc_mong and r.stdout.count("REVIEW_SENTINEL_CALLED") == 1
++             and r.stdout.rstrip().endswith("TONG: DAT" if rc_mong == 0 else "TONG: DO"),
++             f"entry/{ket_qua}: rc={r.returncode}, stdout={r.stdout[-700:]!r}, stderr={r.stderr[-300:]!r}")
++
++
++@ca_tu_kiem
++def t92_runner_thuc_su_goi_ca_va_phan_biet_loi():
++    goi = []
++    for ket_qua in ("DAT", "DO", "HONG"):
++        def sentinel():
++            goi.append(ket_qua)
++            if ket_qua == "DO":
++                raise TinHieuChotCa("review sentinel DO")
++            if ket_qua == "HONG":
++                raise RuntimeError("review sentinel HONG")
++        with mock.patch.dict(CA, {"t_fixture": sentinel}, clear=True):
++            hang, chi_tiet = chay_ca_trong_tien_trinh("t_fixture")
++        bang(hang == ket_qua and goi.count(ket_qua) == 1,
++             f"runner/{ket_qua}: phai goi dung mot lan va giu phan hang, duoc {hang}/{chi_tiet}, calls={goi}")
++        bang(ket_qua == "DAT" or "review sentinel" in chi_tiet,
++             f"runner/{ket_qua}: mat ly do goc {chi_tiet!r}")
++
++
++@ca_tu_kiem
+ def t93_main_ket_luan_va_ma_thoat_theo_duong_goi_that():
+     """Luot 6 (lop chot-yaml, tang 'duong goi that' tiep theo — executor tu liet ke): CI chi doc MA THOAT cua tien trinh.
+     (1) `main` phai tra 1 + `TONG: DO` khi BAT KY dieu kien nao hong (ca do, dot bien khong giet, xau, tu kiem, ten trung),
+@@ -1249,7 +1300,8 @@
+         "tu_kiem_phan_hang": lambda: [],
+     }, clear=False), contextlib.redirect_stdout(ra):
+         rc = main([])
+-    bang(rc == 0 and ra.getvalue().splitlines().count(dong_kiem_ke()) == 1,
++    dong = [d for d in ra.getvalue().splitlines() if d.startswith("KIEM KE:")]
++    bang(rc == 0 and dong == [dong_kiem_ke()],
+          "main phai in dung mot dong KIEM KE duoc doi chieu doc lap boi t96")
+ 
+ 

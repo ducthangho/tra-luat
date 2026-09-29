@@ -1202,6 +1202,42 @@ def k03_ci_goi_that_muc_da_noi():
 
 
 @ca_tu_kiem
+def t93_main_ket_luan_va_ma_thoat_theo_duong_goi_that():
+    """Luot 6 (lop chot-yaml, tang 'duong goi that' tiep theo — executor tu liet ke): CI chi doc MA THOAT cua tien trinh.
+    (1) `main` phai tra 1 + `TONG: DO` khi BAT KY dieu kien nao hong (ca do, dot bien khong giet, xau, tu kiem, ten trung),
+    va dong `CA:`/`DOT BIEN:` in dung tu so/mau. (2) `__main__` phai chuyen ma cua `main` ra ma thoat that (tien trinh con)."""
+    import io
+    n, m = len(CA), len(DOT_BIEN)
+    ds_trung = list(DOT_BIEN) + list(DOT_BIEN[:1])
+    kich_ban = (
+        ("sach", {}, 0),
+        ("mot ca do", {"chay_ca_trong_tien_trinh": lambda t: ("DO", "gia") if t == next(iter(CA)) else ("DAT", "")}, 1),
+        ("dot bien thieu giet", {"chay_tap_dot_bien": lambda _: (m - 1, [])}, 1),
+        ("co xau", {"chay_tap_dot_bien": lambda _: (m, ["x: HONG"])}, 1),
+        ("tu kiem hong", {"tu_kiem_phan_hang": lambda: ["gia"]}, 1),
+        ("ten dot bien trung", {"DOT_BIEN": ds_trung, "TEN_DOT_BIEN": [d[0] for d in ds_trung],
+                                "chay_tap_dot_bien": lambda _: (len(ds_trung), [])}, 1),
+    )
+    for ten, va, mong in kich_ban:
+        ra = io.StringIO()
+        goc = {"CAY": ROOT_THAT, "chay_ca_trong_tien_trinh": lambda _: ("DAT", ""),
+               "chay_tap_dot_bien": lambda _: (m, []), "tu_kiem_phan_hang": lambda: [], "dong_kiem_ke": lambda: "KIEM KE: gia"}
+        with mock.patch.dict(globals(), {**goc, **va}, clear=False), contextlib.redirect_stdout(ra):
+            rc = main([])
+        dong = ra.getvalue().splitlines()
+        bang(rc == mong and dong[-1] == ("TONG: DAT" if mong == 0 else "TONG: DO"), f"main/{ten}: rc={rc} mong {mong}, dong cuoi {dong[-1:]}")
+        dong_ca = {"sach": f"CA: {n}/{n} dat · 0 do · 0 hong", "mot ca do": f"CA: {n - 1}/{n} dat · 1 do · 0 hong"}.get(ten)
+        dong_db = {"sach": f"DOT BIEN: {m}/{m} bi giet dung ly do", "dot bien thieu giet": f"DOT BIEN: {m - 1}/{m} bi giet dung ly do"}.get(ten)
+        for mong_dong in (dong_ca, dong_db):
+            bang(mong_dong is None or mong_dong in dong,
+                 f"main/{ten}: thieu dong {mong_dong!r} (tu so phai la so dem THAT, khong phai mau): "
+                 f"{[d for d in dong if d.startswith(('CA:', 'DOT BIEN:'))]}")
+    r = subprocess.run([sys.executable, "-B", str(CAY / "ops" / "ci_duong_nhanh_test.py"), "doi-so-la"],
+                       capture_output=True, timeout=60, env=dict(os.environ, PYTHONDONTWRITEBYTECODE="1"))
+    bang(r.returncode == 2, f"__main__ phai chuyen ma cua main (2 voi doi so la) ra ma thoat that, duoc rc={r.returncode}")
+
+
+@ca_tu_kiem
 def t94_main_in_dong_kiem_ke_that():
     """Do output cua main voi runner con gia de tranh de quy; so dem van tu CA/DOT_BIEN that."""
     import io
@@ -1598,6 +1634,16 @@ DOT_BIEN = [
     ("yml_go_timeout_job_chuan_bi", _yml("    timeout-minutes: 20\n    outputs:\n", "    outputs:\n"), ("y16_chuan_bi_co_tran_thoi_gian_buoc_va_job", "y13_khoa_topology_cua_ci_yml_ngoai_than_run")),
     ("yml_timeout_job_nho_hon_buoc", _yml("    timeout-minutes: 20\n    outputs:\n", "    timeout-minutes: 12\n    outputs:\n"), ("y16_chuan_bi_co_tran_thoi_gian_buoc_va_job",)),
     ("yml_timeout_checkout_qua_lon", _yml("        continue-on-error: true\n        timeout-minutes: 10\n", "        continue-on-error: true\n        timeout-minutes: 60\n"), ("y16_chuan_bi_co_tran_thoi_gian_buoc_va_job",)),
+    # ---- luot 6 (executor tu liet ke): ket luan va ma thoat cua main / __main__
+    ("test_main_ok_luon_dung", _test("    ok = (dat == len(CA) " + "> 0 and giet", "    ok = True or (dat == len(CA) " + "> 0 and giet"), ("t93_main_ket_luan_va_ma_thoat_theo_duong_goi_that",)),
+    ("test_main_bo_kiem_ca_dat", _test("    ok = (dat == len(CA) " + "> 0 and giet", "    ok = (len(CA) " + "> 0 and giet"), ("t93_main_ket_luan_va_ma_thoat_theo_duong_goi_that",)),
+    ("test_main_bo_kiem_so_giet", _test("and giet == len(DOT_BIEN) " + "> 0 and not xau", "and len(DOT_BIEN) " + "> 0 and not xau"), ("t93_main_ket_luan_va_ma_thoat_theo_duong_goi_that",)),
+    ("test_main_bo_kiem_xau", _test("> 0 and not xau " + "and not loi_tu_kiem", "> 0 " + "and not loi_tu_kiem"), ("t93_main_ket_luan_va_ma_thoat_theo_duong_goi_that",)),
+    ("test_main_bo_kiem_tu_kiem", _test("and not loi_tu_kiem " + "and trung == 0)", "and trung == 0)"), ("t93_main_ket_luan_va_ma_thoat_theo_duong_goi_that",)),
+    ("test_main_bo_kiem_ten_trung", _test("and not loi_tu_kiem and trung " + "== 0)", "and not loi_tu_kiem)"), ("t93_main_ket_luan_va_ma_thoat_theo_duong_goi_that",)),
+    ("test_main_in_ca_sai_tu_so", _test('    print(f"CA: {dat}' + '/{len(CA)} dat', '    print(f"CA: {len(CA)}' + '/{len(CA)} dat'), ("t93_main_ket_luan_va_ma_thoat_theo_duong_goi_that",)),
+    ("test_main_in_dot_bien_sai_tu_so", _test('    print(f"DOT BIEN: {giet}' + '/{len(DOT_BIEN)}', '    print(f"DOT BIEN: {len(DOT_BIEN)}' + '/{len(DOT_BIEN)}'), ("t93_main_ket_luan_va_ma_thoat_theo_duong_goi_that",)),
+    ("test_dunder_main_nuot_ma_thoat", _test("    raise SystemExit(main(sys.argv" + "[1:]))\n", "    main(sys.argv" + "[1:])\n    raise SystemExit(0)\n"), ("t93_main_ket_luan_va_ma_thoat_theo_duong_goi_that",)),
     # ---- nghiệm thu 9: nối vào sổ test sống
     ("yml_go_buoc_goi_test_khoi_ci", _yml("      - name: ci-duong-nhanh selftest (phan loai diff + khoa cau truc if)\n        if: runner.os == 'Linux'\n        run: python ops/ci_duong_nhanh_test.py\n", ""), ("y09_buoc_goi_test_cua_packet_khong_bi_bo", "k03_ci_goi_that_muc_da_noi")),
     ("dk_go_muc_da_noi", (DK, lambda vb: thay_mot(vb, f'    "{DA_NOI_MUC}",\n', "")), ("k01_so_dang_ky_nhan_muc_da_noi",)),

@@ -19,7 +19,9 @@ recorded_by: claude-session
 recorder_is_dispatcher: false
 
 leased_at_utc: '2026-09-29T10:20:00Z'
-lease_expires_at_utc: '2026-09-30T10:20:00Z'
+lease_expires_at_utc: '2026-09-29T11:50:00Z'
+han_ghi_chu: >-
+  Goc 2026-09-30T10:20:00Z. RUT NGAN ve 2026-09-29T11:50:00Z — xem thu_hoi_bang_rut_han.
 
 packet_id: LEASE-PUBLISH-WINDOWS-DO
 packet_slug: LEASE-PUBLISH-WINDOWS-DO
@@ -99,5 +101,23 @@ cam_tuyet_doi:
 chua_do_duoc:
   - 'Danh tinh nguoi ky: #566.'
   - 'Effort thuc te cua subagent executor.'
-lease_sua_lan_cuoi: '2026-09-29T11:05:00Z'
-lease_sua_ghi_chu: 'Lan 1: doi model/effort executor theo chi thi chu kho; khong doi write set, han, spec.'
+lease_sua_lan_cuoi: '2026-09-29T11:36:00Z'
+lease_sua_ghi_chu: >-
+  Lan 1: doi model/effort executor theo chi thi chu kho; khong doi write set, han, spec.
+  Lan 2 (2026-09-29T11:36Z): thu hoi bang rut han ve 11:50Z — xem thu_hoi_bang_rut_han. Khong doi write set, spec.
+thu_hoi_bang_rut_han:
+  han_goc_utc: '2026-09-30T10:20:00Z'
+  han_moi_utc: '2026-09-29T11:50:00Z'
+  chi_thi: >-
+    Chu kho trong phien session_01E3unUqtumWcjaBodjRGS2A (~11:30Z 29-09-2026), tra loi cau hoi xep thu tu hai packet
+    cung giu ops/lease_publish_test.py: "Dao: no-3 di truoc". No-3 (#677, PR #689) di truoc; no-2 (#687) TAM DUNG.
+  ly_do: >-
+    ai-dang-giu ops/lease_publish_test.py luc 11:25Z (du ref) = NGUOI_GIU 2: lease nay va
+    dot-bien-l-bien-cong-khai-exec-1-claude-20260929 (#677) — cua so hai writer tren cung tep. Chu kho chon chay tuan tu.
+  khong_phai: 'KHONG phai packet da land. #687 van mo; cong viec tren nhanh (807c6c2, 29a0e9f) giu nguyen, khong xoa.'
+  tiep_theo: >-
+    Sau khi #677 land va lease cua no thoi giu tep: xin chu kho cap lease g2 cho #687 (thay_the_cho: [] vi g1 da het
+    han — CLAUDE.md: bia mo vao lease het han la mua rc=8), merge origin/master vao nhanh roi lam tiep. Chu kho du dinh
+    chay #687 tren may Windows local.
+  thuc_hien_boi: 'phien session_01E3unUqtumWcjaBodjRGS2A (go ho chu kho); phien executor no-2 session_01RU4YGGdYMx94uVcywPjo4F da duoc ngat va dang IDLE luc 11:33Z.'
+  vi_sao_khong_dung_so: 'Theo tien le #661/#650/#574/#676: so ops/thu-hoi/ chua kich hoat; rut han dung co che da cai.'

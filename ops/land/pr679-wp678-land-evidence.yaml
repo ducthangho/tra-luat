@@ -97,11 +97,11 @@ authorized_head_sha: 03a7219c9f3df4e6304f499b79df968aa7d386cb
 approver: ducthangho
 authorization_url: https://github.com/ducthangho/tra-luat/pull/679#issuecomment-5889749874
 authorization_url_ghi_chu: >-
-  Comment neo BEN chi thi chu kho "#679: merge, land va bookeeping" (go trong phien ~12:0xZ 29-09), do PHIEN AGENT
+  Comment neo BEN chi thi chu kho "#679: merge, land va bookeeping" (go trong phien 11:54:52Z 29-09, xem authorization.thu_tu_voi_merge), do PHIEN AGENT
   dang ho bang credential chu kho va tu khai dieu do o dau comment. Neo dung authorized_head_sha 03a7219.
 authorization:
   approver: ducthangho
-  chi_thi_trong_phien: '"#679: merge, land va bookeeping" (chu kho, phien session_01CSM7GNazhN6uGJb4v1TqBT, ~12:0xZ 29-09-2026)'
+  chi_thi_trong_phien: '"#679: merge, land va bookeeping" (chu kho, phien session_01CSM7GNazhN6uGJb4v1TqBT, 11:54:52Z 29-09-2026)'
   assurance: cross_approved
   assurance_ghi_chu: >-
     Cross-review codex luot 6 approve 0/0/0 tren dung 03a7219 (ops/reviews/wp678-spec-review-6-codex-verdict.md).
@@ -110,14 +110,19 @@ authorization:
     KHONG duoc ghi la human_audited.
   guard: 'packet_loop.py guard --action merge rc=7 (nhac vai); ghi-uy-quyen --action merge --head-sha 03a7219 rc=0 (LOI KHAI).'
   thu_tu_voi_merge:
-    trang_thai: not_measured
+    trang_thai: measured
+    ket_luan: 'chi thi (11:54:52Z) -> comment uy quyen (11:55:17Z) -> merge (11:55:40Z): uy quyen DI TRUOC merge.'
+    chi_thi_luc: >-
+      2026-09-29T11:54:52.573Z (b: timestamp tin nhan chu kho trong transcript phien session_01CSM7GNazhN6uGJb4v1TqBT,
+      doc lai tu tep jsonl cua phien; LOI KHAI co neo cua land operator, transcript khong nam trong kho).
+    comment_uy_quyen_luc: >-
+      2026-09-29T11:55:17Z (a: created_at = updated_at cua issue comment 5889749874, doc qua REST
+      GET /repos/ducthangho/tra-luat/issues/comments/5889749874 luc 2026-09-29T23:2xZ).
     merge_luc: '2026-09-29T11:55:40Z (a: committer date c57df32; readback-run.json head_commit.timestamp cung gia tri)'
-    chi_thi_luc: '~12:0xZ (b: uoc luong thuat lai trong phien, KHONG co hien vat)'
-    mau_thuan: >-
-      Theo chinh hai dong tren, chi thi DEN SAU merge 5-14 phut. Hoac uoc luong sai, hoac merge di truoc uy quyen; ho so
-      nay KHONG phan dinh duoc. authorization_url la comment do PHIEN AGENT dang ho (ben), created_at cua no chua doc.
-      Can: created_at cua comment 5889749874 va cua tin nhan chi thi goc; neu sau 11:55:40Z thi ghi ro merge truoc uy
-      quyen va xin chu kho xac nhan hau ky, KHONG ghi landed.
+    dinh_chinh: >-
+      Ban truoc ghi chi thi luc "~12:0xZ" — SAI: do la uoc luong cua phien viet comment, khong phai phep do; than comment
+      5889749874 cung chep lai uoc luong sai ay. created_at (11:55:17Z) va timestamp tin nhan (11:54:52Z) deu truoc merge.
+      Dieu kien (d) cua landed_ghi_chu: DA DAT.
 
 land_operator: claude-session (tai khoan GitHub cua chu kho qua MCP github)
 merge_method: merge

@@ -562,15 +562,51 @@ def _buoc_workflow(ten: str) -> dict:
     return ds[0]
 
 
+# #687 L1 — QUYỀN BỎ CA là một SỔ khai tĩnh (tên ca → (tệp workflow, job)), không phải một ngoại lệ ai ném
+# cũng được: bản trước miễn BẤT KỲ ca nào ném `BoQuaNen(WORKFLOW_DANG, 'dang')` (probe r1: `0/0 đạt; bỏ
+# qua=1; rc=0`). `t193` đòi sổ BẰNG ĐÚNG tập ca đọc thân bước `đăng` — nới sổ là ĐỎ.
+SO_BO_QUA = {ten: (WORKFLOW_DANG, "dang") for ten in (
+    "t51_lease_giua_bi_chan_van_xu_ly_het_nhung_luot_DO", "t59_moi_lease_goi_kiem_github_truoc_check",
+    "t60_kiem_github_hong_khong_POST_va_lam_buoc_DO", "t62_kiem_github_rc9_bo_qua_lease_va_buoc_XANH",
+    "t63_check_rc9_bo_qua_lease_va_buoc_XANH", "t66_moi_guard_co_phan_chung_va_ve_theo_vi_tri",
+    "t68_post_rc_hong_van_COMMENT_DA_LEN_va_buoc_phai_DO")}
+# DANH SÁCH CHO PHÉP, không khớp tiền tố: `ubuntu-not-a-runner` khớp `ubuntu-` mà không phải runner nào.
+NHAN_UBUNTU_CHO_PHEP = frozenset({"ubuntu-latest", "ubuntu-24.04", "ubuntu-22.04"})
+
+
+def _nhan_runs_on(job):
+    """TOÀN BỘ tập nhãn `runs-on` có thể nhận, hoặc `None` = không chứng minh được (#687 A2, fail-closed).
+
+    `include` được CỘNG vào tập; `exclude`, matrix/strategy không phải dict, khoá không nằm trong matrix
+    gốc, entry `include` thiếu khoá mà trùng khoá gốc (sinh tổ hợp MỚI không có nhãn) ⇒ `None`.
+    """
+    raw = job.get("runs-on") if isinstance(job, dict) else None
+    if isinstance(raw, list):
+        return list(raw)
+    if not isinstance(raw, str):
+        return None
+    m = re.fullmatch(r"\$\{\{\s*matrix\.([A-Za-z_][\w-]*)\s*\}\}", raw)
+    if not m:
+        return [raw]
+    khoa, st = m.group(1), job.get("strategy")
+    mx = st.get("matrix") if isinstance(st, dict) else None
+    if not isinstance(mx, dict) or "exclude" in mx or khoa in ("include", "exclude"):
+        return None
+    goc, inc = mx.get(khoa), mx.get("include", [])
+    if not isinstance(goc, list) or not goc or not isinstance(inc, list):
+        return None
+    khoa_goc = set(mx) - {"include", "exclude"}
+    if any(not isinstance(i, dict) or (khoa not in i and khoa_goc & set(i)) for i in inc):
+        return None
+    return goc + [i[khoa] for i in inc if khoa in i]
+
+
 def _ly_do_bo_qua_workflow(tep: Path, ten_job: str, nen=None, job=None) -> str:
     import os, yaml
     job = job or yaml.safe_load(tep.read_text(encoding="utf-8"))["jobs"][ten_job]
-    raw, nhan = job.get("runs-on"), []
-    m = re.fullmatch(r"\$\{\{\s*matrix\.([A-Za-z_][\w-]*)\s*\}\}", raw) if isinstance(raw, str) else None
-    nhan = (((job.get("strategy") or {}).get("matrix") or {}).get(m.group(1))
-            if m else raw if isinstance(raw, list) else [raw])
+    raw, nhan = job.get("runs-on"), _nhan_runs_on(job)
     if (nen or os.name) == "nt" and nhan and all(
-            isinstance(x, str) and x.lower().startswith("ubuntu-") for x in nhan):
+            isinstance(x, str) and x in NHAN_UBUNTU_CHO_PHEP for x in nhan):
         return (f"{tep.name}:{ten_job} chỉ chạy Ubuntu; runs-on đã đọc được: "
                 f"{raw!r}, phân giải thành {nhan!r}")
     return ""
@@ -2998,16 +3034,20 @@ def t70_W6_matrix_co_Windows_phai_chay_lai_bay_ca():
          f"matrix có Windows vẫn bỏ qua hoặc không dẫn xuất đủ bảy ca: {ly_do!r}, {doc_than}")
 
 
-def _chay_main_meta(fn, nen=None):
-    import contextlib, io, os
-    from unittest import mock
-    cu, out = CA[:], io.StringIO()
-    CA[:] = [fn]
-    try:
-        with contextlib.redirect_stdout(out), (mock.patch.object(os, "name", nen)
-                                                if nen else contextlib.nullcontext()):
-            rc = main()
-    finally: CA[:] = cu
+def _ca_gia(ten: str, tep, job: str):
+    """Ca giả mang TÊN `ten` (sổ tra theo tên) và ném `BoQuaNen(tep, job)`."""
+    def fn(): raise BoQuaNen(tep, job)
+    fn.__name__ = ten
+    return fn
+
+
+def _chay_main_meta(fn, nen=None, so=None):
+    # #687: seam qua THAM SỐ của `main()`, không vá `CA`/`os.name` toàn cục: vá `os.name='nt'` thì `Path(...)`
+    # của chốt sổ ném NotImplementedError trên Linux; và `--chi-ca=t71_` từng lọc mất ca giả (t71 ĐỎ khi chạy riêng).
+    import contextlib, io
+    out = io.StringIO()
+    with contextlib.redirect_stdout(out):
+        rc = main(chon=[fn], nen=nen, so=so)
     return rc, out.getvalue()
 
 
@@ -3016,28 +3056,29 @@ def t71_W7_workflow_khong_ubuntu_only_cam_bo_qua():
     with San() as s:
         tep = s / "w.yml"
         tep.write_text("jobs:\n  j:\n    runs-on: windows-latest\n", encoding="utf-8")
-        def sai(): raise BoQuaNen(tep, "j")
-        rc, out = _chay_main_meta(sai, "nt")
-        bang(rc == 1 and "ĐỎ" in out, f"main tin lời bỏ qua không dẫn xuất được: {out}")
+        # #687: ca TRONG sổ (tiêm), đúng cặp — chỉ còn runs-on quyết định, nên ĐỎ là ĐỎ vì runs-on.
+        rc, out = _chay_main_meta(_ca_gia("t_w7", tep, "j"), "nt", so={"t_w7": (tep, "j")})
+        bang(rc == 1 and "không dẫn xuất được" in out, f"main tin lời bỏ qua không dẫn xuất được: {out}")
 
 
 @ca
 def t72_W8_bo_qua_phai_in_runs_on_va_tong_ket():
     with San() as s:
-        nhan = "ubuntu-" + next(tempfile._get_candidate_names())
+        # #687 A2: bản trước dựng `ubuntu-<ngẫu nhiên>` và TỰ chấp thuận nó — đúng lỗ tiền tố. Nay chạy MỌI
+        # nhãn của danh sách cho phép (lý do ghi cứng một nhãn sẽ trượt hai nhãn kia); nhãn rác đỏ ở `t193`.
         tep = s / "w.yml"
-        tep.write_text(f"jobs:\n  j:\n    runs-on: {nhan}\n", encoding="utf-8")
-        def bo(): raise BoQuaNen(tep, "j")
-        rc, out = _chay_main_meta(bo, "nt")
-        bang(rc == 0 and nhan in out and "bỏ qua=1" in out,
-             f"main không in lý do tự dẫn xuất/tổng kết: rc={rc}, {out!r}")
+        for nhan in sorted(NHAN_UBUNTU_CHO_PHEP):
+            tep.write_text(f"jobs:\n  j:\n    runs-on: {nhan}\n", encoding="utf-8")
+            rc, out = _chay_main_meta(_ca_gia("t_w8", tep, "j"), "nt", so={"t_w8": (tep, "j")})
+            bang(rc == 0 and nhan in out and "bỏ qua=1" in out,
+                 f"main không in lý do tự dẫn xuất/tổng kết: rc={rc}, {out!r}")
 
 
 @ca
 def t73_nen_posix_khong_duoc_bo_qua_ca_nao():
-    def bo(): raise BoQuaNen(WORKFLOW_DANG, "dang")
+    bo = _ca_gia(next(iter(SO_BO_QUA)), WORKFLOW_DANG, "dang")   # trong sổ (#687): chỉ NỀN còn quyết định
     rc, out = _chay_main_meta(bo, "posix")
-    bang(rc == 1 and "ĐỎ" in out and "bỏ qua=0" in out,
+    bang(rc == 1 and "không dẫn xuất được" in out and "bỏ qua=0" in out,
          f"nền posix mà vẫn bỏ qua được: rc={rc}, {out!r}")
 
 
@@ -3517,7 +3558,7 @@ def t98_truc_phan_biet_la_NEN_chu_khong_phai_TEN_TEP():
 
     Đi qua `main()`, KHÔNG gọi thẳng `_ly_do_bo_qua_workflow` — tuân `r4/Q8`.
     """
-    def bo(): raise BoQuaNen(WORKFLOW_DANG, "dang")
+    bo = _ca_gia(next(iter(SO_BO_QUA)), WORKFLOW_DANG, "dang")   # trong sổ (#687)
     rc, out = _chay_main_meta(bo, "nt")
     bang(rc == 0 and "bỏ qua=1" in out,
          f"cùng tuple mà nền nt KHÔNG bỏ qua: rc={rc}, {out!r}")
@@ -4532,6 +4573,46 @@ def _theo_duoi_va_in(duong, tien_to: str, dung, khoa) -> None:
             time.sleep(0.05)
 
 
+RE_TONG_KET = r"(?m)^lease_publish: (\d+)/(\d+) đạt; đã chạy=(\d+), bỏ qua=(\d+)[ \t\r]*$"
+
+
+def _xac_minh_transcript_ab(out: str, ten_ca: list, so=None, rc=None) -> list:
+    """#687 B1 — một lượt con của t125 có ĐỦ BẰNG CHỨNG để đem so không? Trả danh sách lý do hỏng (rỗng = đủ).
+
+    Bản trước lấy dòng tổng kết ĐẦU TIÊN (regex không neo) + tập ĐỎ/BỎ QUA rồi so: hai con cùng in `0/0`
+    hay `1/1` vẫn QUA — "hai vế giống nhau" đúng trong khi CẢ HAI vế không đo gì (probe r1). Nay: đúng MỘT
+    dòng tổng kết neo đầu dòng · chuỗi `>>> vao`/`<<< ra` BẰNG ĐÚNG `ten_ca`, xen kẽ, cùng thứ tự · dòng
+    ĐỎ/BỎ QUA khớp kết quả `<<< ra` · BỎ QUA ⊆ sổ · số tổng kết khớp số ĐẾM từ transcript. So TẬP/CHUỖI
+    TÊN, không so số tổng. Đọc BẢN RIÊNG trong tệp của con, nên không có tiền tố tee `[A]`/`[B]`.
+    """
+    so, loi = SO_BO_QUA if so is None else so, []
+    tk = re.findall(RE_TONG_KET, out)
+    if len(tk) != 1:
+        loi.append(f"dòng tổng kết phải có ĐÚNG MỘT, neo đầu dòng; neo={len(tk)}")
+    su_kien = re.findall(r"(?m)^(>>> vao|<<< ra) (\S+)", out)
+    if su_kien != [(m, t) for t in ten_ca for m in (">>> vao", "<<< ra")]:
+        vao = [t for m, t in su_kien if m == ">>> vao"]
+        ra = [t for m, t in su_kien if m == "<<< ra"]
+        loi.append(f"chuỗi vao/ra KHÁC tập ca kỳ vọng: thiếu={sorted(set(ten_ca) - set(vao))}, "
+                   f"lạ={sorted(set(vao + ra) - set(ten_ca))}, trùng={sorted({t for t in vao if vao.count(t) > 1})}, "
+                   f"thiếu ra={sorted(set(vao) - set(ra))}, vao={len(vao)} ra={len(ra)} kỳ vọng={len(ten_ca)}")
+    kq = re.findall(r"(?m)^<<< ra (\S+) \d+\.\d{3}s (QUA|DO|BO_QUA)[ \t\r]*$", out)
+    do_ = sorted(t for t, k in kq if k == "DO")
+    bo_ = sorted(t for t, k in kq if k == "BO_QUA")
+    if (sorted(re.findall(r"(?m)^  ĐỎ  (\w+):", out)) != do_
+            or sorted(re.findall(r"(?m)^  BỎ QUA (\w+):", out)) != bo_):
+        loi.append(f"dòng ĐỎ/BỎ QUA lệch kết quả `<<< ra` (ĐỎ={do_}, BỎ QUA={bo_})")
+    if set(bo_) - set(so):
+        loi.append(f"BỎ QUA ngoài sổ: {sorted(set(bo_) - set(so))}")
+    dem = tuple(str(x) for x in (len(kq) - len(do_) - len(bo_), len(ten_ca) - len(bo_),
+                                 len(ten_ca) - len(bo_), len(bo_)))
+    if len(tk) == 1 and tk[0] != dem:
+        loi.append(f"tổng kết lệch marker: dòng ghi {tk[0]}, đếm được {dem}")
+    if rc is not None and rc != (1 if do_ else 0):
+        loi.append(f"mã thoát {rc} lệch số ca ĐỎ ({len(do_)})")
+    return loi
+
+
 @ca
 def t125_AB_toan_suite_KHONG_doi_verdict_theo_ambient_actor():
     """A/B: chạy lại TOÀN SUITE hai lượt, khác nhau ĐÚNG một biến `GITHUB_ACTOR`.
@@ -4609,7 +4690,11 @@ def t125_AB_toan_suite_KHONG_doi_verdict_theo_ambient_actor():
             bang(False, f"lượt {nhan}: lượt con KHÔNG XONG trong {AB_HAN_GIAY}s — kết quả thu hồi "
                         f"({nhat_ky_giet}); ca treo (vao không ra): {treo!r}; đã xong {len(ra)} ca; "
                         f"stdout cuối={out[-300:]!r}; stderr cuối={err[-300:]!r}")
-        m = re.search(r"lease_publish: (\d+)/(\d+) đạt", out)
+        # #687 B1: đủ BẰNG CHỨNG (đủ ca, đúng thứ tự, số khớp marker) TRƯỚC khi đem so hai vế.
+        thieu = _xac_minh_transcript_ab(out, [f.__name__ for f in CA], rc=p.returncode)
+        bang(not thieu, f"lượt {nhan}: transcript KHÔNG đủ bằng chứng để so A/B: {thieu}; "
+                        f"rc={p.returncode}, stdout cuối={out[-300:]!r}, stderr cuối={err[-300:]!r}")
+        m = re.search(RE_TONG_KET, out)
         bang(m, f"lượt {nhan}: KHÔNG ĐO ĐƯỢC dòng tổng kết; rc={p.returncode}, "
                 f"stdout={out[-400:]!r}, stderr={err[-400:]!r}")
         do = frozenset(re.findall(r"(?m)^  ĐỎ  (\w+):", out))
@@ -6679,7 +6764,7 @@ def t158_tee_chi_song_khi_con_KHONG_DEM_nen_moi_truong_con_phai_TAT_DEM():
     khong_actor = {k: v for k, v in nen_kiem.items() if k != "GITHUB_ACTOR"}
     def sinh_gia(lenh, env, stdout, stderr):
         moi_truong.append(dict(env))
-        stdout.write("lease_publish: 1/1 đạt; đã chạy=1, bỏ qua=0\n")
+        stdout.write(_dung_transcript_ab([(f.__name__, "QUA") for f in CA]))   # #687: đủ ca, qua verifier thật
         stdout.flush()
         p = mock.Mock(returncode=0)
         p.poll.return_value = 0
@@ -6768,16 +6853,21 @@ def t160_lech_AB_phai_giu_bang_chung_va_CHAN_tai_consumer_t125():
                 stdout.write(f"  ĐỎ  {ten}: lý do gốc của fixture\n")
             for ten in sorted(k[4]):
                 stdout.write(f"  BỎ QUA {ten}: nền fixture\n")
-            stdout.write(f"lease_publish: {k[1]}/{k[2]} đạt\n")
+            stdout.write(f"lease_publish: {k[1]}/{k[2]} đạt; đã chạy={k[2]}, bỏ qua={len(k[4])}\n")
             stdout.flush()
             p = mock.Mock(returncode=k[0])
             p.poll.return_value = k[0]
             return p
         loi, tee = None, mock.Mock()
         phan_loai = mock.Mock(wraps=_phan_loai_lech_ab)
+        # #687 B2: fixture này đo classifier/consumer/tee, không dựng marker vao/ra nên verifier THẬT sẽ đỏ
+        # trước classifier. Thay bằng bản ghi nhận: phải được gọi cho CẢ HAI vế, TRƯỚC classifier. Verifier
+        # thật và wiring thật (không mock) đo ở `t194`.
+        xac_minh = mock.Mock(side_effect=lambda out, *a, **k: [] if not phan_loai.called else ["sau so"])
         with mock.patch.object(sys, "argv", [sys.argv[0]]), \
                 mock.patch.dict(globals(), {"_mo_con_nhom_rieng": sinh_gia,
                                             "_theo_duoi_va_in": tee,
+                                            "_xac_minh_transcript_ab": xac_minh,
                                             "_phan_loai_lech_ab": phan_loai}), \
                 mock.patch.object(subprocess, "run") as chay_them, \
                 mock.patch.object(subprocess, "Popen") as mo_them:
@@ -6785,6 +6875,9 @@ def t160_lech_AB_phai_giu_bang_chung_va_CHAN_tai_consumer_t125():
                 t125_AB_toan_suite_KHONG_doi_verdict_theo_ambient_actor()
             except AssertionError as ex:
                 loi = str(ex)
+        bang(sorted(re.search(RE_TONG_KET, c.args[0]).group(0) for c in xac_minh.call_args_list)
+             == sorted(f"lease_publish: {k[1]}/{k[2]} đạt; đã chạy={k[2]}, bỏ qua={len(k[4])}" for k in cap),
+             f"t125 phải xác minh transcript của CẢ HAI vế trước khi so: {xac_minh.call_args_list!r}")
         cac_cap_da_so = list(phan_loai.call_args_list)
         bang(cac_cap_da_so == [mock.call(*cap)],
              f"classifier phải nhận đúng tuple theo nhãn không-actor rồi có-actor: {cac_cap_da_so!r}")
@@ -10449,14 +10542,144 @@ def t189_duong_chan_doan_KHONG_dinh_dang_THO_ngoai_le_vua_bat():
          f"phản chứng (C): biên không có `try` phải bị bắt, nhận {_vi_pham_C(gia_BC)!r}.")
 
 
-def main() -> int:
+@ca
+def t193_hop_dong_bo_qua_chi_cap_cho_ca_da_dang_ky():
+    """#687 L1 — BỎ QUA chỉ cấp cho ca TRONG SỔ, đúng cặp (tệp, job), và chỉ khi CHỨNG MINH được "chỉ Ubuntu".
+
+    Đi qua CHÍNH `main()` (seam `nen='nt'` là tham số, không vá toàn cục). Vế (a)(b) có tiền điều "bộ dẫn
+    xuất SẼ miễn" để ĐỎ là do SỔ; vế (c)(d) đòi lý do "không dẫn xuất được" để ĐỎ là do BỘ GIẢI; (e) là đối
+    chứng dương — thiếu nó, một `main()` luôn đỏ cũng qua.
+    ĐỘT BIẾN LÀM CA NÀY ĐỎ: bỏ kiểm sổ (a)(b) · bỏ xử lý `include` (c) · khớp tiền tố `ubuntu-` (d) · thêm
+    BẤT KỲ tên vào `SO_BO_QUA` (vế sổ). KHÔNG ĐO ĐƯỢC ở đây: Windows thật — seam chỉ đổi nhánh nền.
+    """
+    import yaml
+    doc_than = {fn.__name__ for fn in CA if "_chay_buoc_dang" in fn.__code__.co_names}
+    chot(set(SO_BO_QUA) == doc_than and len(doc_than) == 7
+         and sorted(k.split("_")[0] for k in SO_BO_QUA) == ["t51", "t59", "t60", "t62", "t63", "t66", "t68"]
+         and all(v == (WORKFLOW_DANG, "dang") for v in SO_BO_QUA.values()),
+         f"sổ phải BẰNG ĐÚNG bảy ca đọc thân bước `đăng`, cặp (ops-publish-lease.yml, dang): "
+         f"lệch={sorted(set(SO_BO_QUA) ^ doc_than)}, giá trị={set(SO_BO_QUA.values())!r}")
+    ten = next(iter(SO_BO_QUA))
+
+    def dung(s, tep_ten, job, runs_on, matrix=None):
+        j = {"runs-on": runs_on, **({"strategy": {"matrix": matrix}} if matrix is not None else {})}
+        (s / tep_ten).write_text(yaml.safe_dump({"jobs": {job: j}}), encoding="utf-8")
+        return s / tep_ten
+
+    with San() as s:
+        chot(_ly_do_bo_qua_workflow(WORKFLOW_DANG, "dang", nen="nt"), "tiền điều: `dang` thật phải Ubuntu-only")
+        # (a) ca NGOÀI sổ, workflow thật Ubuntu-only ⇒ chỉ sổ chặn được.
+        for ca_ngoai in ("t01_lease_hop_le_thi_QUA", "t_ca_tan_cong_chua_dang_ky"):
+            rc, out = _chay_main_meta(_ca_gia(ca_ngoai, WORKFLOW_DANG, "dang"), "nt")
+            chot(rc == 1 and "NGOÀI SỔ" in out and "bỏ qua=0" in out,
+                 f"(a) ca ngoài sổ {ca_ngoai!r} được miễn hoặc đỏ sai lý do: rc={rc}, {out!r}")
+        # (b) ca TRONG sổ, cặp khác: khác tệp dù CÙNG TÊN tệp · cùng tệp khác job; đích đều Ubuntu-only.
+        (s / "k").mkdir()
+        hai = s / "hai.yml"
+        hai.write_text("jobs:\n  dang:\n    runs-on: ubuntu-latest\n  ghi:\n    runs-on: ubuntu-latest\n",
+                       encoding="utf-8")
+        for tep, job, so in ((dung(s / "k", "ops-publish-lease.yml", "dang", "ubuntu-latest"), "dang", None),
+                             (hai, "ghi", {ten: (hai, "dang")})):
+            chot(_ly_do_bo_qua_workflow(tep, job, nen="nt"), f"tiền điều (b): {tep}:{job} Ubuntu-only")
+            rc, out = _chay_main_meta(_ca_gia(ten, tep, job), "nt", so=so)
+            chot(rc == 1 and "NGOÀI SỔ" in out and "bỏ qua=0" in out,
+                 f"(b) cặp ({tep}, {job}) khác sổ mà được miễn/đỏ sai lý do: rc={rc}, {out!r}")
+        # (c)(d) trong sổ (tiêm, đúng cặp) nhưng KHÔNG chứng minh được "chỉ Ubuntu".
+        mx = "${{ matrix.os }}"
+        for mo_ta, ro, m in (
+                ("include thêm windows", mx, {"os": ["ubuntu-latest"], "include": [{"os": "windows-latest"}]}),
+                ("chỉ include", mx, {"include": [{"os": "ubuntu-latest"}]}),
+                ("include sinh tổ hợp thiếu os", mx, {"os": ["ubuntu-latest"], "v": [1], "include": [{"v": 2}]}),
+                ("exclude", mx, {"os": ["ubuntu-latest"], "exclude": [{"os": "ubuntu-22.04"}]}),
+                ("matrix là biểu thức", mx, "${{ fromJSON(needs.x.outputs.m) }}"),
+                ("ubuntu-not-a-runner", "ubuntu-not-a-runner", None),
+                ("danh sách lẫn windows", ["ubuntu-latest", "windows-latest"], None)):
+            tep = dung(s, "w.yml", "j", ro, m)
+            rc, out = _chay_main_meta(_ca_gia(ten, tep, "j"), "nt", so={ten: (tep, "j")})
+            chot(rc == 1 and "không dẫn xuất được" in out and "bỏ qua=0" in out,
+                 f"(c/d) {mo_ta}: phải ĐỎ vì bộ giải, được rc={rc}, {out!r}")
+        # (e) đối chứng DƯƠNG: sổ THẬT + workflow Ubuntu-only thật; và include toàn Ubuntu.
+        rc, out = _chay_main_meta(_ca_gia(ten, WORKFLOW_DANG, "dang"), "nt")
+        chot(rc == 0 and "bỏ qua=1" in out and "ubuntu-latest" in out,
+             f"(e) ca trong sổ + workflow Ubuntu-only thật phải BỎ QUA: rc={rc}, {out!r}")
+        tep = dung(s, "w.yml", "j", mx, {"os": ["ubuntu-22.04"], "include": [{"os": "ubuntu-24.04"}, {"x": 1}]})
+        rc, out = _chay_main_meta(_ca_gia(ten, tep, "j"), "nt", so={ten: (tep, "j")})
+        chot(rc == 0 and "bỏ qua=1" in out, f"(e) matrix + include toàn Ubuntu bị chặn oan: rc={rc}, {out!r}")
+
+
+def _dung_transcript_ab(ca_kq, tong_ket=None) -> str:
+    """Transcript ĐÚNG DẠNG của `main()`; `ca_kq` = [(tên, QUA|DO|BO_QUA)], `tong_ket` ghi đè dòng cuối."""
+    d, n = [], {k: sum(x == k for _t, x in ca_kq) for k in ("QUA", "DO", "BO_QUA")}
+    for t, k in ca_kq:
+        d += [f">>> vao {t} 2026-09-29T00:00:00Z", f"<<< ra {t} 0.001s {k}"] + [f"!!! do {t} x"] * (k == "DO")
+    d += [f"  BỎ QUA {t}: nền" for t, k in ca_kq if k == "BO_QUA"] + [f"  ĐỎ  {t}: x" for t, k in ca_kq if k == "DO"]
+    m = len(ca_kq) - n["BO_QUA"]
+    return "\n".join(d + [tong_ket or f"\nlease_publish: {n['QUA']}/{m} đạt; đã chạy={m}, bỏ qua={n['BO_QUA']}"]) + "\n"
+
+
+@ca
+def t194_AB_phai_du_bang_chung_truoc_khi_so():
+    """#687 L2 — hàm xác minh transcript (B1) và CHỖ NỐI của nó vào t125 (không mock verifier).
+
+    Mỗi vế ĐỎ đòi ĐÚNG từ khoá lý do của nó, để một verifier hỏng theo cách khác không nhận tín dụng giả.
+    "trùng tên" và "tên lạ" giữ NGUYÊN số ca (3 = 3) ⇒ đột biến "chỉ so số tổng" làm chúng lọt.
+    ĐỘT BIẾN LÀM CA NÀY ĐỎ: bỏ gọi `_xac_minh_transcript_ab` trong t125 (vế nối) · so số lượng thay cho
+    chuỗi tên · bỏ đối chiếu số tổng kết với marker.
+    """
+    from unittest import mock
+    ca3, so, dd = ["ta", "tb", "tc"], {"tb": ("f.yml", "j")}, _dung_transcript_ab
+    q = [(t, "QUA") for t in ca3]
+    for mo_ta, out, tu_khoa in (
+            ("cùng 0/0", dd([]), "thiếu=['ta', 'tb', 'tc']"),
+            ("cùng 1/1", dd(q[:1]), "thiếu=['tb', 'tc']"),
+            ("hụt một ca", dd([q[0], q[2]]), "thiếu=['tb']"),
+            ("trùng tên, đủ số ca", dd([q[0], q[1], q[1]]), "trùng=['tb']"),
+            ("tên lạ, đủ số ca", dd([q[0], q[1], ("tx", "QUA")]), "lạ=['tx']"),
+            ("thiếu ra", dd(q).replace("<<< ra tb 0.001s QUA\n", ""), "thiếu ra=['tb']"),
+            ("tổng kết lệch marker", dd(q, "\nlease_publish: 2/3 đạt; đã chạy=3, bỏ qua=0"), "lệch marker"),
+            ("hai dòng tổng kết", dd(q) + dd([], "lease_publish: 3/3 đạt; đã chạy=3, bỏ qua=0"), "ĐÚNG MỘT"),
+            ("bỏ qua ngoài sổ", dd([("ta", "BO_QUA"), q[1], q[2]]), "ngoài sổ"),
+            ("ĐỎ thiếu dòng ĐỎ", dd([q[0], ("tb", "DO"), q[2]]).replace("  ĐỎ  tb: x\n", ""), "ĐỎ/BỎ QUA lệch")):
+        loi = _xac_minh_transcript_ab(out, ca3, so)
+        chot(any(tu_khoa in x for x in loi), f"vế ĐỎ {mo_ta!r}: chờ lý do chứa {tu_khoa!r}, nhận {loi!r}")
+    for mo_ta, kq, rc in (("đủ ca", q, 0), ("bỏ qua trong sổ", [q[0], ("tb", "BO_QUA"), q[2]], 0),
+                          ("ĐỎ nhất quán", [q[0], ("tb", "DO"), q[2]], 1)):
+        chot(_xac_minh_transcript_ab(dd(kq), ca3, so, rc=rc) == [], f"vế QUA {mo_ta!r} bị chặn oan")
+
+    def qua_t125(noi_dung):     # CHỖ NỐI: hai con giả cùng in `noi_dung`; verifier và classifier THẬT
+        def sinh_gia(lenh, env, stdout, stderr):
+            stdout.write(noi_dung); stdout.flush()
+            p = mock.Mock(returncode=0); p.poll.return_value = 0
+            return p
+        pl, loi = mock.Mock(wraps=_phan_loai_lech_ab), None
+        with mock.patch.object(sys, "argv", [sys.argv[0]]), mock.patch.dict(globals(), {
+                "_mo_con_nhom_rieng": sinh_gia, "_theo_duoi_va_in": mock.Mock(), "_phan_loai_lech_ab": pl}):
+            try:
+                t125_AB_toan_suite_KHONG_doi_verdict_theo_ambient_actor()
+            except AssertionError as ex:
+                loi = str(ex)
+        return loi, pl.call_count
+    for mo_ta, noi_dung in (("cùng 0/0", dd([])), ("cùng 1/1", dd([(CA[0].__name__, "QUA")]))):
+        loi, n = qua_t125(noi_dung)
+        chot(loi is not None and "KHÔNG đủ bằng chứng" in loi and n == 0,
+             f"nối: hai con {mo_ta} phải làm t125 ĐỎ TRƯỚC khi so (classifier gọi {n} lần): {loi!r}")
+    loi, n = qua_t125(dd([(f.__name__, "QUA") for f in CA]))
+    chot(loi is None and n == 1, f"nối: hai con đủ ca phải QUA và so đúng một lần: {n}, {loi!r}")
+
+
+def main(chon=None, nen=None, so=None) -> int:
+    """`chon`/`nen`/`so` là SEAM của ca meta (`_chay_main_meta`): danh sách ca, nền, sổ bỏ ca — không vá
+    `CA`/`os.name` toàn cục. Chạy thật (`sys.exit(main())`) thì cả ba là None ⇒ argv, `os.name`, `SO_BO_QUA`."""
     qua, hong, bo_qua = 0, [], []
+    so = SO_BO_QUA if so is None else so
     # Selector không khớp ca nào ⇒ KHÔNG chạy gì và KHÔNG xanh (cross-review codex 11-09-2026, P2).
     # Bản trước in `lease_publish: 0/0 đạt` rồi rc=0: một cổng VẮNG MẶT trông y hệt một cổng XANH, nên
     # một prefix gõ sai hay một tên ca đã đổi sinh ra phép đo giả. Dòng lỗi dưới đây CỐ Ý không khớp
     # regex dòng tổng kết, để không ai đọc nó thành một kết quả.
     cac_co = [x for x in sys.argv[1:] if x.startswith(CO_CHI_CA)]
-    if cac_co:
+    if chon is not None:
+        cac_ca = list(chon)
+    elif cac_co:
         tien_to = cac_co[-1][len(CO_CHI_CA):]
         cac_ca = [fn for fn in CA if fn.__name__.startswith(tien_to)]
         if not tien_to or not cac_ca:
@@ -10474,9 +10697,16 @@ def main() -> int:
             fn()
             qua += 1
         except BoQuaNen as ex:
-            try: ly_do = _ly_do_bo_qua_workflow(ex.tep, ex.ten_job)
+            # #687 A1: chỉ ca TRONG SỔ, đúng cặp (tệp, job) đã đăng ký, mới được hỏi tới runs-on.
+            dk = so.get(fn.__name__)
+            try: dung_cap = dk is not None and (Path(ex.tep).resolve(), ex.ten_job) == (Path(dk[0]).resolve(), dk[1])
+            except Exception: dung_cap = False
+            try: ly_do = _ly_do_bo_qua_workflow(ex.tep, ex.ten_job, nen=nen) if dung_cap else ""
             except Exception: ly_do = ""
-            if ly_do:
+            if not dung_cap:
+                hong.append((fn.__name__, f"bỏ qua NGOÀI SỔ: ca khai ({getattr(ex.tep, 'name', ex.tep)!r}, "
+                                          f"{ex.ten_job!r}), sổ cho {dk and (Path(dk[0]).name, dk[1])!r}")); ket = "DO"
+            elif ly_do:
                 bo_qua.append((fn.__name__, ly_do)); ket = "BO_QUA"
             else:
                 hong.append((fn.__name__, "bỏ qua không dẫn xuất được từ runs-on")); ket = "DO"

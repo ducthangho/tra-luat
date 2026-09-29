@@ -32,9 +32,12 @@ role: executor
 provider: anthropic_claude
 executor: claude
 surface: claude_code
-model: claude-sonnet-5-5
-effort: high
-effort_ghi_chu: 'Vá giao subagent Sonnet 5.5 effort high theo chi thi chu kho; phien dieu phoi Opus 5.5. Tu khai; KHONG DO DUOC tu ngoai.'
+model: claude-opus-5-5
+effort: medium
+effort_ghi_chu: >-
+  Chi thi chu kho (phien, 2026-09-29, sau khi cap): 'Lặp vá (opus 5.5, effort medium trở lên)' thay chi thi truoc
+  'Vá bằng sonnet 5.5, effort high'. Luot Sonnet bi DUNG giua chung, ban nhap khong duoc dung lam ban va. Cong cu
+  subagent khong dat duoc effort => effort la chi dan trong prompt, KHONG DO DUOC tu ngoai.
 environment: cloud
 risk: sensitive
 review_class: sensitive
@@ -95,3 +98,5 @@ cam_tuyet_doi:
 chua_do_duoc:
   - 'Danh tinh nguoi ky: #566.'
   - 'Effort thuc te cua subagent executor.'
+lease_sua_lan_cuoi: '2026-09-29T11:05:00Z'
+lease_sua_ghi_chu: 'Lan 1: doi model/effort executor theo chi thi chu kho; khong doi write set, han, spec.'

@@ -199,7 +199,8 @@ def _han_lease(gia_tri):
 
 
 def kiem_lease(doi, kho=ROOT, chay=subprocess.run, bay_gio=None, ra=None) -> list[str]:
-    """Lease CÒN HẠN đổi trong PR phải qua `lease_publish.py check`; lease hết hạn chỉ cần YAML-parse."""
+    """Lease CÒN HẠN (hoặc hạn không đọc được) qua `lease_publish.py check`; lease HẾT HẠN qua `kiem(bo_qua_han=True)` — vẫn kiểm mọi
+    chốt khác, chỉ bỏ chốt hạn. Cả `.yaml` và `.yml`. D2 (quyết định của chủ kho) còn mở: xem docstring module."""
     ra = ra if ra is not None else sys.stdout
     try:
         import yaml

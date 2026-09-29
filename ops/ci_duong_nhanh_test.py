@@ -1,14 +1,14 @@
 #!/usr/bin/env python3
 """Phản chứng cho `ops/ci_duong_nhanh.py` và cho các `if:` đường nhanh trong `.github/workflows/ci.yml`.
 
-Packet #674 `CI-DUONG-NHANH-HO-SO` (đặc tả r2). Ba tầng, mỗi tầng có ĐỘT BIẾN riêng chạy trên BẢN SAO TẠM:
-  1. Hành vi bộ phân loại và bước kiểm rẻ (các ca `t01`..`t21`, gồm nhánh a-g): đồ giả cho ca thuần + KHO GIT THẬT
-     cho ca cần ngữ nghĩa git (ba chấm, đổi tên, tên tệp có dấu, thiếu object, dấu xung đột, lease, ca dữ liệu).
-  2. Cấu trúc `ci.yml` (các ca `y01`..`y09`): ĐÂY LÀ CỔNG DUY NHẤT canh `if:` cấp job của `gate-ops` và `if:` cấp bước
-     sau G5. Nợ có tên `ci-if-cap-job-gate-ops-va-buoc-sau-g5-khong-co-cong-canh` (Q6-i chủ kho): `JOB_G5` của
-     `ci_dang_ky_test.py` chỉ có `gate`, `gate-registry`, `gate-packet-loop`, và `cong_cu_test.t6` chỉ soi các bước
-     TRƯỚC G5 — nên KHÔNG có cổng máy nào khác đối chiếu độc lập các `if:` mà packet này thêm.
-  3. Nối vào sổ test sống (các ca `k01`, `k02`, `k03`): mục `DA_NOI`, vị trí tệp và lời gọi thật trong `run:`.
+Packet #674 `CI-DUONG-NHANH-HO-SO` (đặc tả r2). Bốn tầng, mỗi tầng có ĐỘT BIẾN riêng chạy trên BẢN SAO TẠM. Danh sách và
+số lượng ca/đột biến KHÔNG ghi ở đây (đã trôi hai lượt liền): nguồn duy nhất là `CA`, `DOT_BIEN` và dòng `CA:`/`DOT BIEN:` in ra.
+  · ca `t*`: hành vi bộ phân loại và bước kiểm rẻ (đồ giả cho ca thuần + KHO GIT THẬT cho ca cần ngữ nghĩa git);
+  · ca `y*`: cấu trúc `ci.yml`. ĐÂY LÀ CỔNG DUY NHẤT canh `if:` cấp job của `gate-ops` và `if:` cấp bước sau G5. Nợ có tên
+    `ci-if-cap-job-gate-ops-va-buoc-sau-g5-khong-co-cong-canh` (Q6-i chủ kho): `JOB_G5` của `ci_dang_ky_test.py` chỉ có
+    `gate`, `gate-registry`, `gate-packet-loop`, và `cong_cu_test.t6` chỉ soi các bước TRƯỚC G5;
+  · ca `k*`: nối vào sổ test sống (mục `DA_NOI` và lời gọi thật trong `run:`);
+  · `t99`: tự kiểm của chính bộ test.
 
 CÁCH ĐO ĐỘT BIẾN — bài học CLAUDE.md "đột biến bị giết không phải bị giết ĐÚNG LÝ DO":
   · Ca đích chỉ báo ĐỎ bằng `TinHieuChotCa` (con của AssertionError) do CHÍNH `bang()` ném. Lỗi vô can trong mã
@@ -16,6 +16,7 @@ CÁCH ĐO ĐỘT BIẾN — bài học CLAUDE.md "đột biến bị giết khô
     tính là giết. Ca KHÔNG được có `except Exception: raise TinHieuChotCa` (ca t99 quét AST canh điều đó).
   · Mỗi đột biến: neo `count == 1` (không thì lỗi hạ tầng), kiểm bản đột biến KHÁC bản gốc, chạy trên tệp tạm với
     tên riêng, bytecode tắt; ca đích còn phải XANH trên bản gốc (chứng minh lượt giết là do đột biến).
+  · Đột biến cũng áp cho CHÍNH tệp test (`--nguon-test`): helper fixture (cô lập actor...) có đột biến riêng.
   · Phân hạng có phần tự kiểm (`tu_kiem_phan_hang`): NĂM mẫu rc (rc=3 đúng tên ⇒ GIẾT; rc=3 sai tên ⇒ TÍN DỤNG GIẢ;
     rc=4 ⇒ TÍN DỤNG GIẢ; rc=0 ⇒ SỐNG SÓT; rc=-9 ⇒ HỎNG) và BA đột biến thật (KeyError vô can ⇒ TÍN DỤNG GIẢ;
     chỉ thêm chú thích ⇒ SỐNG SÓT; nới allowlist ⇒ GIẾT). "Sai tên ca" chỉ được kiểm bằng mẫu rc, chưa có đột biến thật.
@@ -35,6 +36,7 @@ import subprocess
 import sys
 import tempfile
 from pathlib import Path
+from unittest import mock
 
 sys.dont_write_bytecode = True
 os.environ["PYTHONDONTWRITEBYTECODE"] = "1"
@@ -65,11 +67,18 @@ BO_QUA = {
     "gate-packet-loop": {"packet-loop selftest": FAST},
 }
 DA_NOI_MUC = "ops/ci_duong_nhanh_test.py"
+# LUAT cua bo test (khong doc lai tu ma duoi do): ba ca du lieu ma `kiem-re` phai chay that.
+CA_DU_LIEU_CHUAN = ("t23_MOI_lease_THAT_trong_kho_phai_QUA", "t26_moi_bien_nhan_review_phai_khop_BAM_tep_no_tro_toi",
+                    "t27_canh_bao_trong_bien_nhan_phai_duoc_NANG_len_muc_luc")
 DONG_GOI_TEST = "python ops/ci_duong_nhanh_test.py"
 
 
 class TinHieuChotCa(AssertionError):
     """Chỉ `bang()` ném lớp này. Mã triển khai và lỗi vô can KHÔNG ném được nó ⇒ phân biệt được giết thật/giả."""
+
+
+class KhongCoFixture(RuntimeError):
+    """Rieng cho viec khong chon duoc fixture lease sach; ca chi bat DUNG lop nay de doi thanh tin hieu."""
 
 
 class SuDoGia(Exception):
@@ -273,7 +282,8 @@ def t10f_duong_dan_tuyet_doi_day_du():
 
 # ---------------------------------------------------------------- kho git thật
 def _env_git():
-    e = {k: v for k, v in os.environ.items() if not k.startswith("GIT_")}
+    # GITHUB_ACTOR bi loai: `lease_publish.kiem` doi actor thuoc nguoi cap lease; fixture SACH khong duoc do theo ai bam nut CI.
+    e = {k: v for k, v in os.environ.items() if not k.startswith("GIT_") and k != "GITHUB_ACTOR"}
     e.update(GIT_CONFIG_GLOBAL=os.devnull, GIT_CONFIG_NOSYSTEM="1", GIT_TERMINAL_PROMPT="0",
              GIT_AUTHOR_NAME="t", GIT_AUTHOR_EMAIL="t@e.x", GIT_COMMITTER_NAME="t", GIT_COMMITTER_EMAIL="t@e.x")
     return e
@@ -489,14 +499,15 @@ def lease_that_het_han_hop_le():
         if any(k in vb for k in ("prompt_path", "prompt_sha256_required", "thay_the_cho", "da_bi_thay_the")):
             continue
         try:
-            lp.kiem(lp._doc_yaml(str(tep)), str(tep), str(ROOT_THAT), bo_qua_han=True)
-            lp.kiem(lp._doc_yaml(str(tep)), str(tep), str(ROOT_THAT))
+            with mock.patch.dict(os.environ, {k: v for k, v in os.environ.items() if k != "GITHUB_ACTOR"}, clear=True):
+                lp.kiem(lp._doc_yaml(str(tep)), str(tep), str(ROOT_THAT), bo_qua_han=True)
+                lp.kiem(lp._doc_yaml(str(tep)), str(tep), str(ROOT_THAT))
         except lp.Chan as e:
             if "het han" in str(e) or "hết hạn" in str(e):
                 return vb
         except Exception:
             continue
-    raise RuntimeError("ha tang: khong tim thay lease that het han hop le de lam fixture")
+    raise KhongCoFixture("khong tim thay lease that het han hop le de lam fixture")
 LEASE_CON_HAN_THIEU = "schema_version: 2\nlease_id: moi\nlease_expires_at_utc: '2099-01-01T00:00:00Z'\n"
 
 
@@ -590,12 +601,48 @@ def t20g_kiem_re_lease_duoi_yml_van_duoc_kiem():
 
 
 @ca
+def t23_fixture_sach_khong_phu_thuoc_actor_ci():
+    """Cross-review luot 2 (P2): selftest chay tren MOI PR — actor khac nguoi cap lease khong duoc lam fixture SACH do oan.
+    Hai duong vao: chon fixture trong tien trinh (mock.patch.dict) va validator con (loc o `_env_git`)."""
+    truoc = os.environ.get("GITHUB_ACTOR")
+    os.environ["GITHUB_ACTOR"] = "notebyme88"
+    try:
+        try:
+            lease_that_het_han_hop_le()
+        except KhongCoFixture as e:
+            raise TinHieuChotCa(f"duoi actor la khong chon duoc fixture sach: {e}") from e
+        t20a_kiem_re_ho_so_sach_dat()
+        t20d_kiem_re_khoang_trang_cuoi_dong_khong_do()
+    finally:
+        if truoc is None:
+            os.environ.pop("GITHUB_ACTOR", None)
+        else:
+            os.environ["GITHUB_ACTOR"] = truoc
+    bang(os.environ.get("GITHUB_ACTOR") == truoc, "actor cua tien trinh cha phai duoc khoi phuc")
+
+
+@ca
+def t22b_ca_du_lieu_phai_thuc_thi_tung_ca():
+    """Cross-review luot 2 (P2): t22 chi do argv/rc qua do gia. O day ba ham gia mang DUNG TEN; moi lan chi MOT ham ne
+    sentinel, qua chinh subprocess cua checker: no-call, bo tung ten, cwd sai deu phai lam ca nay do."""
+    m = nap_module()
+    with tempfile.TemporaryDirectory(prefix="cdn_data_calls_") as d:
+        goc = Path(d)
+        (goc / "ops").mkdir()
+        for dich in CA_DU_LIEU_CHUAN:
+            marker = "CHOT_DU_LIEU_" + dich
+            (goc / "ops" / "lease_publish_test.py").write_text("\n".join(
+                "def " + ten + "():\n    " + ("raise AssertionError(" + repr(marker) + ")" if ten == dich else "pass")
+                for ten in CA_DU_LIEU_CHUAN) + "\n", encoding="utf-8")
+            loi = m.kiem_ca_du_lieu(goc, chay_that)
+            bang(len(loi) == 1 and marker in loi[0], f"{dich}: ca do phai thuc su duoc GOI va truyen loi, duoc {loi}")
+
+
+@ca
 def t22_ca_du_lieu_thay_bo_lease_publish_selftest():
     """Bo `lease-publish selftest` lam mat t23/t26/t27 (doc CAY that). kiem-re giu ba ca do; chay that tren kho that."""
     m = nap_module()
-    bang(tuple(m.CA_DU_LIEU) == ("t23_MOI_lease_THAT_trong_kho_phai_QUA",
-                                 "t26_moi_bien_nhan_review_phai_khop_BAM_tep_no_tro_toi",
-                                 "t27_canh_bao_trong_bien_nhan_phai_duoc_NANG_len_muc_luc"), f"danh sach ca du lieu sai: {m.CA_DU_LIEU}")
+    bang(tuple(m.CA_DU_LIEU) == CA_DU_LIEU_CHUAN, f"danh sach ca du lieu sai: {m.CA_DU_LIEU}")
     bang(m.kiem_ca_du_lieu(ROOT_THAT, chay_that) == [], "ba ca du lieu phai DAT tren kho that")
     log = []
     bang(m.kiem_ca_du_lieu(ROOT_THAT, chay_gia(log=log)) == [], "chay gia rc=0 khong loi")
@@ -802,7 +849,26 @@ def y09_buoc_goi_test_cua_packet_khong_bi_bo():
     b = goi[0][1]
     bang("che_do" not in str(b.get("if", "")) and chuan_hoa_if(b.get("if", "runner.os == 'Linux'")) == "runner.os == 'Linux'",
          f"buoc goi test CUA CHINH PACKET khong duoc bi bo theo che_do (no la cong duy nhat canh cac `if:`): if={b.get('if')!r}")
-    bang(b.get("continue-on-error") is not True, "buoc goi test khong duoc co continue-on-error")
+    bang(b.get("continue-on-error", False) is False, "buoc goi test khong duoc co continue-on-error")
+
+
+CHO_PHEP_NUOT_LOI = {("chuan-bi", "actions/checkout@v4"), ("chuan-bi", "phan loai diff (duong nhanh ho so - chi pull_request)")}
+
+
+@ca
+def y10_khong_continue_on_error_ngoai_danh_sach_cho_phep():
+    """Cross-review luot 2 (P2): moi cua nuot loi phai dong bang MOT ca — o TOAN ci.yml, moi job va moi buoc, moi dang
+    (literal, `${{ true }}`, chuoi, bieu thuc dieu kien). Chi hai buoc phan loai cua `chuan-bi` PHAI la literal True."""
+    wf = doc_wf()
+    for job, cau in wf["jobs"].items():
+        bang(cau.get("continue-on-error", False) is False, f"{job}: continue-on-error cap job phai vang hoac false, duoc {cau.get('continue-on-error')!r}")
+        for b in cau.get("steps") or []:
+            khoa = (job, b.get("name") or b.get("uses"))
+            gia_tri = b.get("continue-on-error", False)
+            if khoa in CHO_PHEP_NUOT_LOI:
+                bang(gia_tri is True, f"{khoa}: phai la literal true (fail-close ve day_du), duoc {gia_tri!r}")
+            else:
+                bang(gia_tri is False, f"{khoa}: continue-on-error phai vang hoac literal false, duoc {gia_tri!r}")
 
 
 # ---------------------------------------------------------------- tầng 3: nối vào sổ test sống
@@ -837,6 +903,17 @@ def k03_ci_goi_that_muc_da_noi():
 
 
 # ---------------------------------------------------------------- tự kiểm của chính bộ test
+@ca
+def t98_docstring_khong_ghim_so_ca_va_khoang_ten():
+    """Bang giao/docstring troi so HAI luot lien (P3 luot 1 va 2): so ca, so dot bien va khoang `tNN..tMM` chi nguon
+    duy nhat la `CA`/`DOT_BIEN`. Docstring cua module va cua `ops/ci_duong_nhanh.py` khong duoc ghim chung."""
+    mau = re.compile(r"\b\d+\s*/\s*\d+\s*(?:ca|dot bien|đột biến)|`?t\d\d`?\s*(?:\.\.|–|-)\s*`?t\d\d")
+    ma_sp = ast.get_docstring(ast.parse((CAY / "ops" / "ci_duong_nhanh.py").read_text(encoding="utf-8"))) or ""
+    for ten, doc in (("ci_duong_nhanh_test.py (module dang chay)", globals().get("__doc__") or ""), ("ci_duong_nhanh.py", ma_sp)):
+        thay = mau.findall(doc)
+        bang(not thay, f"{ten}: docstring ghim so ca/khoang ten (se troi): {thay}")
+
+
 @ca
 def t99_khong_doi_kieu_ngoai_le_thanh_tin_hieu():
     """Bộ phân hạng tin `TinHieuChotCa`; nên KHÔNG có `except` nào bắt ngoại lệ RỘNG mà lại ném/gọi tín hiệu ấy —
@@ -882,7 +959,8 @@ def phan_hang(rc, dau_ra, ten_dich):
 
 def chay_con(ten_ca, cay, thoi_han=120):
     env = dict(os.environ, CI_DUONG_NHANH_CAY=str(cay), PYTHONDONTWRITEBYTECODE="1")
-    r = subprocess.run([sys.executable, "-B", str(HERE / "ci_duong_nhanh_test.py"), "--mot-ca", ten_ca],
+    r = subprocess.run([sys.executable, "-B", str(HERE / "ci_duong_nhanh_test.py"),
+                        "--nguon-test", str(Path(cay) / "ops" / "ci_duong_nhanh_test.py"), "--mot-ca", ten_ca],
                        capture_output=True, env=env, timeout=thoi_han)
     return r.returncode, (r.stdout + r.stderr).decode("utf-8", "replace")
 
@@ -890,7 +968,7 @@ def chay_con(ten_ca, cay, thoi_han=120):
 def dung_cay_tam(thay):
     """Bản sao TỐI THIỂU của cây: chỉ những tệp mà các ca đọc. `thay` = {đường dẫn: văn bản mới}."""
     goc = Path(tempfile.mkdtemp(prefix="cdn_cay_"))
-    for dp in ("ops/ci_duong_nhanh.py", ".claude/dev/ci_dang_ky_test.py"):
+    for dp in ("ops/ci_duong_nhanh.py", "ops/ci_duong_nhanh_test.py", ".claude/dev/ci_dang_ky_test.py"):
         (goc / dp).parent.mkdir(parents=True, exist_ok=True)
         shutil.copyfile(ROOT_THAT / dp, goc / dp)
     (goc / ".github/workflows").mkdir(parents=True, exist_ok=True)
@@ -934,6 +1012,11 @@ def thay_regex(vb, mau, moi, co=re.S):
 
 
 MA, YML, DK = "ops/ci_duong_nhanh.py", ".github/workflows/ci.yml", ".claude/dev/ci_dang_ky_test.py"
+TEST = "ops/ci_duong_nhanh_test.py"
+
+
+def _test(cu, moi):
+    return (TEST, lambda vb: thay_mot(vb, cu, moi))
 
 
 def _ma(cu, moi):
@@ -990,6 +1073,24 @@ DOT_BIEN = [
     ("ca_du_lieu_bo_qua_rc", _ma("    if getattr(r, \"returncode\", None) != 0:\n        cuoi = _dau_ra(r).strip().splitlines()[-3:]", "    if False:\n        cuoi = _dau_ra(r).strip().splitlines()[-3:]"), ("t22_ca_du_lieu_thay_bo_lease_publish_selftest",)),
     ("lease_han_hong_coi_la_het_han", _ma('        except ValueError:\n            return None\n        return han if', '        except ValueError:\n            return datetime(1970, 1, 1, tzinfo=timezone.utc)\n        return han if'), ("t21_kiem_lease_phan_biet_con_han_het_han_va_duoi_tep",)),
     ("lease_check_rc_khong_kiem", _ma('        if getattr(r, "returncode", None) != 0:\n            cuoi', '        if False:\n            cuoi'), ("t21_kiem_lease_phan_biet_con_han_het_han_va_duoi_tep",)),
+    # ---- lop fixture-lease-phu-thuoc-actor-ci (luot 2): hai duong vao, moi duong mot chot
+    ("test_bo_loc_actor_o_env_git", _test('if not k.startswith("GIT_") and k != "GITHUB_ACTOR"}\n', 'if not k.startswith("GIT_")}\n'), ("t23_fixture_sach_khong_phu_thuoc_actor_ci",)),
+    ("test_bo_patch_dict_o_helper_fixture", _test('            with mock.patch.dict(os.environ, {k: v for k, v in os.environ.items() if k != "GITHUB_ACTOR"}, clear=True):\n', '            with contextlib.nullcontext():\n'), ("t23_fixture_sach_khong_phu_thuoc_actor_ci",)),
+    # ---- lop chot-yaml-chi-do-su-hien-dien (luot 2): moi dang nuot loi o MOI buoc/job
+    ("yml_nuot_loi_selftest_literal", _yml("        if: runner.os == 'Linux'\n        run: python ops/ci_duong_nhanh_test.py\n", "        if: runner.os == 'Linux'\n        continue-on-error: true\n        run: python ops/ci_duong_nhanh_test.py\n"), ("y09_buoc_goi_test_cua_packet_khong_bi_bo",)),
+    ("yml_nuot_loi_selftest_bieu_thuc_true", _yml("        if: runner.os == 'Linux'\n        run: python ops/ci_duong_nhanh_test.py\n", "        if: runner.os == 'Linux'\n        continue-on-error: ${{ true }}\n        run: python ops/ci_duong_nhanh_test.py\n"), ("y09_buoc_goi_test_cua_packet_khong_bi_bo",)),
+    ("yml_nuot_loi_selftest_bieu_thuc_dieu_kien", _yml("        if: runner.os == 'Linux'\n        run: python ops/ci_duong_nhanh_test.py\n", "        if: runner.os == 'Linux'\n        continue-on-error: ${{ github.event_name == 'pull_request' }}\n        run: python ops/ci_duong_nhanh_test.py\n"), ("y09_buoc_goi_test_cua_packet_khong_bi_bo",)),
+    ("yml_nuot_loi_buoc_nang_literal", _yml("      - name: golden-test\n" + IF_XOA, "      - name: golden-test\n" + IF_XOA + "        continue-on-error: true\n"), ("y10_khong_continue_on_error_ngoai_danh_sach_cho_phep",)),
+    ("yml_nuot_loi_buoc_nang_chuoi", _yml("      - name: release-check full\n" + IF_XOA, "      - name: release-check full\n" + IF_XOA + "        continue-on-error: 'true'\n"), ("y10_khong_continue_on_error_ngoai_danh_sach_cho_phep",)),
+    ("yml_nuot_loi_job_gate_registry", _yml("  gate-registry:\n    # packet #463", "  gate-registry:\n    continue-on-error: true\n    # packet #463"), ("y10_khong_continue_on_error_ngoai_danh_sach_cho_phep",)),
+    ("yml_buoc_phan_loai_bieu_thuc", _yml("        id: phan-loai\n        if: ${{ github.event_name == 'pull_request' }}\n        continue-on-error: true\n", "        id: phan-loai\n        if: ${{ github.event_name == 'pull_request' }}\n        continue-on-error: ${{ true }}\n"), ("y10_khong_continue_on_error_ngoai_danh_sach_cho_phep",)),
+    ("test_docstring_ghim_so_ca", _test("(đã trôi hai lượt " + "liền): nguồn", "(đã trôi hai lượt " + "liền; hien 43/55 ca): nguồn"), ("t98_docstring_khong_ghim_so_ca_va_khoang_ten",)),
+    # ---- lop dac-ta-bo-mat-kiem-du-lieu-ho-so (luot 2): thao tac GOI ca that
+    ("ca_du_lieu_khong_goi_ham", _ma("m[ten]()", "m[ten]"), ("t22b_ca_du_lieu_phai_thuc_thi_tung_ca",)),
+    ("ca_du_lieu_bo_t23", _ma('CA_DU_LIEU = ("t23_MOI_lease_THAT_trong_kho_phai_QUA", ', "CA_DU_LIEU = ("), ("t22b_ca_du_lieu_phai_thuc_thi_tung_ca",)),
+    ("ca_du_lieu_bo_t26", _ma('"t26_moi_bien_nhan_review_phai_khop_BAM_tep_no_tro_toi",\n              ', ""), ("t22b_ca_du_lieu_phai_thuc_thi_tung_ca",)),
+    ("ca_du_lieu_cwd_sai", _ma('"ops/lease_publish_test.py", *CA_DU_LIEU],\n                 cwd=kho,', '"ops/lease_publish_test.py", *CA_DU_LIEU],\n                 cwd=ROOT,'), ("t22b_ca_du_lieu_phai_thuc_thi_tung_ca",)),
+    ("ca_du_lieu_nuot_ngoai_le_trong_con", _ma("m[ten]()", r"try:\n        m[ten]()\n    except AssertionError:\n        pass"), ("t22b_ca_du_lieu_phai_thuc_thi_tung_ca",)),
     # ---- tầng YAML (đặc tả nghiệm thu 6, 7)
     ("yml_go_dieu_kien_pull_request_khoi_buoc_phan_loai", _yml("        id: phan-loai\n        if: ${{ github.event_name == 'pull_request' }}\n", "        id: phan-loai\n"), ("y01_chuan_bi_phan_loai_chi_pull_request_va_khong_lam_do_job",)),
     ("yml_go_continue_on_error_buoc_phan_loai", _yml("        id: phan-loai\n        if: ${{ github.event_name == 'pull_request' }}\n        continue-on-error: true\n", "        id: phan-loai\n        if: ${{ github.event_name == 'pull_request' }}\n"), ("y01_chuan_bi_phan_loai_chi_pull_request_va_khong_lam_do_job",)),
@@ -1074,6 +1175,11 @@ def tu_kiem_phan_hang():
 
 
 def main(argv):
+    if len(argv) == 4 and argv[0] == "--nguon-test":
+        # Chay CA tu BAN SAO (co the bi dot bien) cua chinh tep test; `__file__` giu la tep that de HERE/ROOT_THAT khong doi.
+        g = {"__name__": "cdn_test_dot_bien", "__file__": str(HERE / "ci_duong_nhanh_test.py")}
+        exec(compile(Path(argv[1]).read_text(encoding="utf-8"), str(HERE / "ci_duong_nhanh_test.py"), "exec"), g)
+        return g["main"](argv[2:])
     if len(argv) == 2 and argv[0] == "--mot-ca":
         if argv[1] not in CA:
             print(f"khong co ca {argv[1]!r}", file=sys.stderr)

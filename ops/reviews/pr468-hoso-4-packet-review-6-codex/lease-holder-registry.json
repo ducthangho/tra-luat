@@ -1,0 +1,12 @@
+{
+  "name": "lease-holder-registry",
+  "command": [
+    "/usr/local/bin/python",
+    "ops/lease_publish.py",
+    "ai-dang-giu",
+    ".claude/dev/ci_dang_ky_test.py"
+  ],
+  "start_utc": "2026-09-07T06:17:57.536857+00:00",
+  "seconds": 0.0854271890000291,
+  "rc": 12
+}

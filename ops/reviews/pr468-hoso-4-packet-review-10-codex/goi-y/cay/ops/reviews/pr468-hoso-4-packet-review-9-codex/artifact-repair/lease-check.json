@@ -1,0 +1,16 @@
+{
+  "name": "lease-check",
+  "command": [
+    "python3",
+    "ops/lease_publish.py",
+    "check",
+    "ops/leases/gate-tach-job-cat-chi-phi-exec-1r2-claude-20260906.yaml"
+  ],
+  "start_utc": "2026-09-07T09:21:47.646408+00:00",
+  "end_utc": "2026-09-07T09:21:48.499218+00:00",
+  "seconds": 0.8528019799999811,
+  "rc": 0,
+  "stdout_bytes": 235,
+  "stdout_sha256": "27924ee14325f81d7590c1c22bc3c78ecfd3dca155f1fdce3f93396425229717",
+  "stderr_bytes": 0
+}

@@ -1,0 +1,14 @@
+[
+  {
+    "path": ".claude/hooks/pretooluse_guard_test.py",
+    "digits_per_number": 5000,
+    "BASE": "ValueError",
+    "H": "ValueError"
+  },
+  {
+    "path": "ops/nhanh_don_duoc_test.py",
+    "digits_per_number": 5000,
+    "BASE": "ValueError",
+    "H": "ValueError"
+  }
+]

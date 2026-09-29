@@ -1,0 +1,18 @@
+{
+  "name": "bien-nhan-v2",
+  "command": [
+    "python3",
+    "-B",
+    "ops/bien_nhan_v2.py",
+    "--root",
+    "."
+  ],
+  "cwd": "cay-kho",
+  "utc": "2026-09-07T11:39:27.569715+00:00",
+  "rc": 0,
+  "seconds": 1.1871428449999826,
+  "stdout_bytes": 163,
+  "stdout_sha256": "3c544c214d75a8f4d2c10c6c8259b4e6c79b442790e67247225598a9f13ba22f",
+  "stderr_bytes": 0,
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+}

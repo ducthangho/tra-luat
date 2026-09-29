@@ -1,0 +1,19 @@
+{
+  "name": "adr-song",
+  "command": [
+    "python3",
+    "-B",
+    ".claude/dev/packet_loop.py",
+    "adr-song",
+    "--root",
+    "."
+  ],
+  "cwd": "cay-kho",
+  "utc": "2026-09-07T09:59:00.929067+00:00",
+  "rc": 0,
+  "seconds": 0.11521275199993397,
+  "stdout_bytes": 113,
+  "stdout_sha256": "751fa693b8d22f3c7d0089ad96461c3ccb88887a847c5bca3e08ff24ec3a07aa",
+  "stderr_bytes": 0,
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+}

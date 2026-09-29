@@ -1,0 +1,150 @@
+# BIÊN NHẬN GIAO HÀNG — cross-review LƯỢT 10 (LƯỢT CUỐI — approve) của PR #505 (packet #503 M9-FETCH-AUTH, #499 C2a),
+# KHÁC NỀN (codex), generation 4 · lượt 1 trong gen, trên head `de49fa0` — head ĐÃ MERGE vào master (`fe05fa6d`, merge commit, không squash).
+#
+# Verdict: approve — 0 P1 / 0 P2 / 0 P3 — approve dưới điều kiện dừng gen 4. Mười vòng qua bốn generation; mọi finding đều ở ca test t152, workflow 11 dòng
+# KHÔNG đổi từ round 1 (sha256 184a54a6…). `approve` (round 10) là ĐIỀU KIỆN DỪNG, không phải merge authorization:
+# uỷ quyền merge là chỉ thị chủ kho #503 comment 5632304817; merge `fe05fa6d` sau khi gate ubuntu xanh trên de49fa0.
+
+schema_version: 2
+receipt_id: pr505-review-10-codex-20260911-cb013b5c
+kind: review_delivery_receipt
+packet_id: 'wp503'
+lease_id: m9-fetch-auth-exec-4-claude-20260911
+phase_key: M9-FETCH-AUTH
+luot: 10
+role: reviewer
+provider: codex
+executor_provider: claude
+cross_provider: true
+assurance: cross_approved
+verdict: approve
+verdict_path: ops/reviews/pr505-review-10-codex-verdict.md
+verdict_sha256: fea4c51180dc5e2e7c3e9532b1b817df1c55aaf0b0b2dbc536270b26c118f9b1
+verdict_bytes: 23827
+reviewed_sha: de49fa0d077a2a00e9f936240378979a8ebc080c
+reviewed_base: 27c413c3e531800431cad9db4452d7236505a5a9
+evidence_url: https://github.com/ducthangho/tra-luat/blob/9dc8460f55a61b8b9670606a62f6db40905d851c/ops/reviews/pr505-review-10-codex-verdict.md
+evidence_url_ghi_chu: >-
+  Neo BLOB ghim `9dc8460` — commit ĐẦU TIÊN chứa 10 tệp verdict PR #505 (`git log --all --diff-filter=A`, đúng 1 commit).
+  Bản chiếu công khai sớm hơn: PR #505 comment 5633349186 — chiếu frontmatter, ĐỐI CHIẾU LƯỢT TRƯỚC, kết luận, Findings,
+  Mutant, chua_do_duoc; `## BẢNG ĐO` và các bảng shell/bề mặt lộ token CHỈ có trong tệp này.
+so_p1: 0
+so_p2: 0
+so_p3: 0
+findings_ids: []
+hint_patch:
+  sha256: aef424079ab23e52419281856345c5fb4e559d51762688e3e4734edd024564aa
+  bytes: 158
+  noi_dung: '0 hunk — approve, không có P1/P2 cần vá'
+
+noi_dung_do_duoc_van_dung:
+  - 'ĐỐI CHIẾU: finding hoa/thường ĐÃ VÁ THẬT (apply trùng byte; kích thước tệp không đổi 304776 B — reviewer chạy python3 -B). m23 SỐNG với test 3ae4f61, GIẾT với HEAD.'
+  - 'm1–m34: 33 GIẾT / 1 SỐNG hợp lệ (m17); m27–m34 mới đều GIẾT. Không tìm được mutant âm sống thêm — không suy ra test hoàn chỉnh.'
+  - 'Áp điều kiện dừng gen 4 (chỉ P1 hoặc P2 workflow chặn): KHÔNG có finding nào ở cả hai nhóm ⇒ approve; NỢ GHI SANG #499: không có P2 fixture mới; A3/M3 chưa đo.'
+  - 'Suite và wrapper 147/147; actionlint 1.7.7 + ShellCheck 0.9.0 rc=0; Git 2.43.0 fetch thật qua helper cục bộ: HEAD nhận H, NHAN==TL_H.'
+
+model_reviewer_identity:
+  provider: openai_codex
+  surface: codex_cli
+  transport: machine
+  model_yeu_cau: gpt-6-astra
+  model_da_chay: 'KHONG_DO_DUOC — codex exec không xuất modelUsage; reviewer tự khai `GPT-6 / Codex` trong model_tu_khai'
+  effort: xhigh
+  session_run_id: cb013b5c
+  run_id_day_du: cb013b5cc4794b40842c55d06b7e6ced
+  prompt_sha256: a763af6edd2bea333420f28a7cab2286db8344b651c2e82a4fe43c90319482af
+  bat_dau_utc: '2026-09-11T10:34:32.130972+00:00'
+  ket_thuc_utc: '2026-09-11T10:50:12.354197+00:00'
+  thoi_luong_giay: 940.223
+  ma_thoat: 0
+  trang_thai: xong
+  stdout_byte: 333
+  stdout_sha256: 8e7123ceed2db5ae57051e21f32d82a86639c52b1e7cf576cdd3e7060e671ce7
+  stderr_byte: 580663
+  stderr_sha256: d40ed3479adf342f7ddf9ff18f082255ed4578e90c69bded38ead645266d6294
+  so_lan_chet_truoc_khi_xong: 0
+  nguon_cac_scalar_tren: >-
+    ĐỐI CHIẾU ĐƯỢC với run.json (ngoài kho, `scratchpad/runs/cb013b5c/`): run_id/short_id, prompt_sha256, bat_dau_utc,
+    ket_thuc_utc, thoi_luong_giay, ma_thoat, trang_thai, stdout_byte/sha256, stderr_byte/sha256, worktree_sach, head.
+    Dòng cuối stdout `XONG VERDICT sha256=fea4c511…` khớp băm tệp. transport: machine CÓ trong run.json.
+    model_yeu_cau và effort có trong header stderr.log (cấu hình yêu cầu, không chứng thực model thực chạy),
+    KHÔNG có khoá tương ứng trong run.json. so_lan_chet_truoc_khi_xong là ATTESTATION điều phối,
+    không có khoá hoặc lịch sử retry tương ứng trong run.json.
+
+nang_luc_do_cua_goi:
+  mirror: 'clone mới từ guong.git (fetch sau push de49fa0), detached de49fa0, core.abbrev 7, không nông; nguon/ có spec M9-FETCH-AUTH.md (sha b8200141…) + actionlint 1.7.7 + VERDICT/HINT các lượt trước của chính reviewer; EVIDENCE.md bổ sung từng lượt'
+  chua_do_duoc: 'Không mạng; không đọc doctrine; prompt snapshot/stderr.log không kèm; suite chạy trên bản sao ops/.github (t82 copytree) — không phải trực tiếp trong clone.'
+
+hien_vat_reviewer_vao_kho:
+  duong_dan: KHONG_CO
+  ghi_chu: 'scratch/logs/*.json|log, scratch/mutants/, script tái lập (review_matrix.py, probe*.py, validate_hint.py, extra*.py) ở sandbox ngoài kho.'
+
+tuan_thu_cam_cua_reviewer:
+  cay_kho_sach: true
+  commit_them_ngoai_head: 0
+  bang_chung: 'run.json worktree_sach: true; điều phối đo sau lượt: git status --porcelain rỗng.'
+
+github_submitter_identity:
+  actor: ducthangho
+  la_tac_gia_PR: true
+  ghi_chu: '`ADR-0040`: verdict do tài khoản tác giả PR vận chuyển KHÔNG là merge authorization; uỷ quyền merge là chỉ thị chủ kho #503 comment 5632304817 ("các PR thuộc phiên này thực hiện theo khuyến nghị") + "Tôi chọn A" (#503 comment 5633059702, gen 4 kèm điều kiện dừng).'
+  phien_van_chuyen: https://claude.ai/code/session_01Lnos1VZ4KSzHLG9u4UETiW
+
+anchor:
+  loai: canonical_ancestry
+  cuong_do: cao
+  mo_ta: 'Blob verdict ghim `9dc8460`. Head đã review `de49fa0` là tổ tiên của master (`fe05fa6d`, merge commit #505, hai cha fa717ee + de49fa0; nhánh claude/m9-fetch-auth tuyến tính 62c299a → de49fa0).'
+  gioi_han: 'Vững khi land bằng merge commit hoặc fast-forward; squash phá quan hệ tổ tiên.'
+
+verdict_usage_caveats:
+  - id: APPROVE-THEO-DIEU-KIEN-DUNG-GEN-4-chu-kho-duyet-P2-fixture-khong-chan
+    muc: P2
+    mo_ta: >-
+      `approve` round 10 được kết luận dưới ĐIỀU KIỆN DỪNG do chủ kho duyệt (phương án A, #503 comment 5633059702; ghi
+      trong lease `m9-fetch-auth-exec-4-claude-20260911` khoá `dieu_kien_dung`): chỉ P1 hoặc P2 có mutant sống ở
+      WORKFLOW mới chặn; P2 thuần fixture/độ phủ t152 ⇒ approve kèm nợ. Round 10 KHÔNG có finding ở cả hai nhóm và mục
+      `## NỢ GHI SANG #499` không có P2 fixture mới, nhưng vẫn ghi A3/M3 chưa đo — tức approve này không dùng tới điều kiện nới, nhưng người đọc phải biết điều kiện
+      ấy tồn tại. `approve` vẫn là điều kiện DỪNG, không phải merge authorization (ADR-0040); uỷ quyền merge là chỉ
+      thị chủ kho #503 comment 5632304817.
+    phai_lam_gi_khi_chay_lai: >-
+      Đừng dùng round 10 làm tiền lệ 'P2 fixture không bao giờ chặn' — điều kiện chỉ có hiệu lực cho generation 4 của
+      packet này, sau 9 vòng workflow không đổi.
+  - id: A3-M3-CANARY-RUNNER-THAT-CHUA-DO-luc-viet-bien-nhan
+    muc: P2
+    mo_ta: >-
+      Cả 10 verdict đều ghi `chua_do_duoc`: fetch trên runner GitHub thật, secret masker, receipt/artifact thật. Tới
+      lúc viết biên nhận này (sau merge `fe05fa6`), A3 CHƯA đo: PR đầu tiên có sự kiện `pull_request_target` sau land
+      là PR hồ sơ r366 — kết quả ghi ở CHANGELOG r366 và #503, KHÔNG ở verdict.
+    phai_lam_gi_khi_chay_lai: >-
+      Muốn biết bản vá có làm `thu-hoi` xanh trên runner thật không: đọc run `thu-hoi` của PR hồ sơ r366 (hoặc PR kế
+      tiếp), đừng đọc 10 verdict — chúng đo offline.
+  - id: BANG-DO-KHONG-LEN-COMMENT-tep-trong-kho-la-ban-du-10-vong
+    muc: P3
+    mo_ta: >-
+      Bản chiếu của cả 10 verdict lên PR #505 (comment 5629894965 … 5633349186) chỉ mang frontmatter, kết luận, ĐỐI
+      CHIẾU, Findings, bảng mutant, chua_do_duoc; `## BẢNG ĐO` (17–25 hàng dữ liệu, không tính tiêu đề/phân cách) và các bảng shell/bề mặt lộ token CHỈ có
+      trong tệp verdict.
+    phai_lam_gi_khi_chay_lai: >-
+      Tra bảng đo trong chính tệp verdict (băm ở biên nhận); sự vắng mặt ở comment không phải reviewer không đo.
+
+khong_do_duoc:
+  - 'Model build và danh tính model thật của codex exec: không có modelUsage, chỉ có lời tự khai.'
+  - 'run.json/stdout.log/stderr.log không vào kho ⇒ scalar runtime là attestation.'
+  - 'Fetch trên runner GitHub thật, secret masker, receipt/artifact thật (A3/M3): sandbox không mạng — đo ở PR hồ sơ r366 sau land, ghi ở CHANGELOG r366/#503, không ở verdict.'
+  - 'Git 2.31/toàn dải, ảnh ubuntu-latest hiện hành, Windows: không chạy trong sandbox.'
+
+codex_connector_cung_head:
+  kich_luc: '2026-09-11T10:51:29Z — bỏ draft để merge (merge fe05fa6 lúc 11:06Z)'
+  hoan_tat_luc: '2026-09-11T10:53:13Z — TRƯỚC merge'
+  ket_qua: 'KHÔNG có review object, KHÔNG có review comment (chỉ bảng tóm tắt Completed, comment 5633351771, commit de49fa0) ⇒ 0 finding theo những gì API trả về — điều phối đọc qua MCP trước khi merge; không phải điều kiện merge, chỉ là kiểm bổ sung.'
+
+delivered: true
+delivered_by: claude-session
+authoritative_source: repo_file
+receipt_written_by: claude-session
+receipt_written_at_utc: '2026-09-11T11:2xZ'
+receipt_khong_khai:
+  - 'Không khai `thu-hoi` đã xanh trên #505 — nó ĐỎ tất định (định nghĩa từ master) tới lúc land; chủ kho quyết merge bằng chỉ thị.'
+  - 'Không khai A3 đã đạt — chưa đo lúc viết.'
+  - 'Không khai model đã chạy — codex không đo được.'
+  - 'Không khai các lease gen 1–3 "hết hạn" hay "bị thu hồi vì lỗi bản vá" — chúng bị thay thế vì hết lượt/vòng theo ADR-0043, chủ kho reroute.'

@@ -1,0 +1,119 @@
+# LEASE — CI-SONG-SONG-REGISTRY-G5-MOT-LAN revision 1 / generation 1 — registry song song co doi chieu, G5 mot lan
+# GHI HO theo chi thi CHU KHO trong phien (chep nguyen van o granted_on_instruction_nguyen_van).
+
+schema_version: 2
+event: executor_lease_granted
+
+packet_issue: 637
+granted_by: ducthangho
+granted_on_instruction: https://github.com/ducthangho/tra-luat/issues/637#issuecomment-5829167916
+granted_on_instruction_truoc: https://github.com/ducthangho/tra-luat/issues/637#issuecomment-5829047823
+granted_on_instruction_nguyen_van: >-
+  'Dong y voi CI spec, tao phien moi opus 5.5 medium, tao PR, cap lease xu ly noi dung nay'
+  (chu kho, phien Claude Code session_01EfoFDAAquT8HRqXft6QDeQ, 2026-09-25).
+authority_caveat: >-
+  Comment neo do phien executor dang bang tai khoan chu kho, chep loi chu kho trong phien — yeu hon comment
+  chu kho tu viet (#566). author_association=OWNER khong tach chu kho khoi phien agent dung token chu kho.
+recorded_by: claude-session
+recorder_is_dispatcher: false
+
+leased_at_utc: '2026-09-25T08:04:30Z'
+lease_expires_at_utc: '2026-09-25T09:34:30Z'
+han_ghi_chu: >-
+  90 phut theo comment dong bang cua chu kho issues/637#issuecomment-5829167916 (08:13:24Z): 'hạn 90 phút'. Ban
+  dau ghi 24 gio (08:04:30Z, truoc comment ay) — RONG HON quyen duoc cap nen thu ve 90 phut, KHONG tu mo rong.
+  Benchmark A6/A8 co the can lau hon 90 phut: het han => handoff §7, generation moi can chu kho cap.
+
+packet_id: CI-SONG-SONG-REGISTRY-G5-MOT-LAN
+packet_slug: CI-SONG-SONG-REGISTRY-G5-MOT-LAN
+revision: 1
+generation: 1
+lease_id: ci-song-song-registry-g5-mot-lan-r1-g1-claude
+thay_the_cho: tien-de-ha-tang-khong-duoc-thanh-chot-r2-g4-claude
+thay_the_ghi_chu: >-
+  Lease #593 r2-g4 con han toi 2026-09-26T01:55:00Z va giu .github/workflows/ci.yml, nhung packet #593 DA LAND
+  (PR #629 merge 0e2fe847; nhanh ung vien cf67a76b la to tien origin/master 4c53c76d; Issue 593 dong; bien nhan land
+  issues/593#issuecomment-5827127277). Khong thu hoi thi hai lease song giao write set. Bia mo hai chieu:
+  da_bi_thay_the trong tep g4 tren nhanh ops/cap-lease-593.
+role: executor
+provider: anthropic_claude
+executor: claude
+surface: claude_code
+model: claude-opus-5-5
+effort: medium
+effort_ghi_chu: >-
+  Phien executor tao bang create_session voi model claude-opus-5-5; cong cu tao phien KHONG co tham so effort,
+  nen effort 'medium' duoc dat trong prompt/khai — KHONG DO DUOC tu ngoai. Executor tu khai effort thuc te trong PR.
+environment: cloud
+risk: sensitive
+review_class: sensitive
+effective_review_class: sensitive
+assurance_target: human_audited
+reviewer_provider: openai_codex
+reviewer_surface: codex_service
+reviewer_model_yeu_cau: gpt-6-astra
+reviewer_ghi_chu: >-
+  Spec §3: review Codex qua GitHub connector (advisory_review) + human_audited la cong land. Codex het quota =>
+  fallback reviewer Claude cung provider phien moi (same_provider_approved) theo chi thi chu kho
+  issues/523#issuecomment-5826219229; van can human_audited.
+access: read-write
+
+spec_path: ops/specs/CI-SONG-SONG-REGISTRY-G5-MOT-LAN-r1.md
+spec_ref: refs/heads/claude/spec-ci-song-song-registry-r1
+spec_source_oid: e2aca219e212efc42f24ca9dfedd96d82d134cb1
+spec_sha256: 3ff5dd7434566489cc9f640febc5906f8004467f3e2aeb8ca68ea6cf93b96d79
+spec_hash: 3ff5dd7434566489cc9f640febc5906f8004467f3e2aeb8ca68ea6cf93b96d79
+spec_hash_formula: SHA256 of UTF-8 LF Git blob bytes at spec_source_oid:spec_path
+prompt_path: ops/specs/CI-SONG-SONG-REGISTRY-G5-MOT-LAN-r1.md
+prompt_sha256_required: 3ff5dd7434566489cc9f640febc5906f8004467f3e2aeb8ca68ea6cf93b96d79
+
+branch: claude/ci-song-song-registry-r1-g1
+branch_ownership: exclusive
+start_from_sha: 4c53c76d1955595a5659ab577d9dc1b64f9600ad
+immutable_acceptance_baseline: 4c53c76d1955595a5659ab577d9dc1b64f9600ad
+continuation_base: 4c53c76d1955595a5659ab577d9dc1b64f9600ad
+reviewed_sha_required: 4c53c76d1955595a5659ab577d9dc1b64f9600ad
+reviewed_sha_required_nghia: >-
+  Chua co head ung vien; moi verdict neo exact head THAT cua PR thi cong.
+
+write_set:
+  - .claude/dev/ci_dang_ky_test.py
+  - .github/workflows/ci.yml
+write_set_hash: 0f7b869da648e9b21023e461925efd0d45bca58fb308a8fcc82bc55ad9f66ef0
+write_set_hash_cach_tinh: >-
+  sha256 cua cac duong dan DA SAP XEP, noi bang LF, co LF cuoi, utf-8.
+write_set_da_do_truoc_khi_cap: >-
+  Do trong clone sach (fetch '+refs/heads/*'), cong ref hai nguon comm -23 = 0, is-shallow=false.
+  ai-dang-giu .claude/dev/ci_dang_ky_test.py => NGUOI_GIU 0. ai-dang-giu .github/workflows/ci.yml => NGUOI_GIU 1 =
+  #593 r2-g4 (da land, thay the o day). PR #447 cham ci_dang_ky_test.py nhung khong co lease song (cap nhat cuoi
+  2026-09-14).
+
+ci_budget:
+  gate_tu_dong: '0 / 1 / 1 luot pull_request tren head cuoi (spec §7)'
+  phep_do_duoc_cap: '0 / 0 / 0'
+  tham_do_chua_cap: cam
+  het: 'DUNG truoc moi push/chay lai ke tiep, cho quyet dinh ben cua chu kho'
+
+rui_ro_da_biet: >-
+  gate-registry tren master 4c53c76d DO vi ca r546 cua ops/nhanh_don_duoc_test.py ('Directory not empty
+  .../remote.git', issues/593#issuecomment-5828404355). Tep ay NGOAI write set. Luot push xac nhan co the do vi loi
+  nen nay; gap thi DUNG (S2/S4), bao chu kho, khong noi phep do, khong sua tep ngoai write set.
+
+dieu_kien_dung:
+  - 'S1 — cham duong ngoai W1/W2. DUNG.'
+  - 'S2 — doi chieu N=1/N>1 lech (A3, A6) hoac N chon khong nhanh hon nen tren CI (A8). DUNG.'
+  - 'S3 — kiem ke M2: mot bo chi song song an toan khi sua chinh bo ay. DUNG, bao chu kho.'
+  - 'S4 — push MOT lan sau review tai cho sach; het allowance => DUNG.'
+  - 'S5 — > 300 dong them. DUNG truoc review.'
+  - 'S6 — het han lease => ngung ghi, handoff §7.'
+
+cam_tuyet_doi:
+  - Khong sua spec; khong sua tep ngoai write set
+  - Khong tu review / approve / merge / land; land chi bang merge commit
+  - Khong CI tay, khong Windows, khong LIVE/deploy
+  - Khong force-push
+
+chua_do_duoc:
+  - 'Danh tinh nguoi ky: #566.'
+  - 'Effort thuc te cua phien executor (xem effort_ghi_chu).'
+da_bi_thay_the: ci-song-song-registry-g5-mot-lan-r1-g2-claude

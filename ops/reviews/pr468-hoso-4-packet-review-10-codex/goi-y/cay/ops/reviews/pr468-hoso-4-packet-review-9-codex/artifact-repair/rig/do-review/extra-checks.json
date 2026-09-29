@@ -1,0 +1,317 @@
+{
+  "formatter_measurements": [
+    {
+      "path": ".claude/dev/chon_reviewer_test.py",
+      "rc": 0,
+      "H_red": 0,
+      "span_chars": 2745,
+      "span_utf8_bytes": 2764,
+      "groups": 2,
+      "pairs_in_span": 1,
+      "captured_pairs_in_TONG": 1
+    },
+    {
+      "path": ".claude/dev/gh_readback_test.py",
+      "rc": 0,
+      "H_red": 0,
+      "span_chars": 38,
+      "span_utf8_bytes": 38,
+      "groups": 2,
+      "pairs_in_span": 1,
+      "captured_pairs_in_TONG": 1
+    },
+    {
+      "path": ".claude/dev/mcp_gh_test.py",
+      "rc": 1,
+      "H_red": 1,
+      "span_chars": null,
+      "span_utf8_bytes": null,
+      "groups": 2,
+      "pairs_in_span": null,
+      "captured_pairs_in_TONG": 2
+    },
+    {
+      "path": ".claude/dev/mcp_github_doc_test.py",
+      "rc": 0,
+      "H_red": 0,
+      "span_chars": 53,
+      "span_utf8_bytes": 53,
+      "groups": 2,
+      "pairs_in_span": 1,
+      "captured_pairs_in_TONG": 1
+    },
+    {
+      "path": ".claude/dev/probe_mang_test.py",
+      "rc": 0,
+      "H_red": 0,
+      "span_chars": 456,
+      "span_utf8_bytes": 496,
+      "groups": 0,
+      "pairs_in_span": 3,
+      "captured_pairs_in_TONG": 3
+    },
+    {
+      "path": ".claude/hooks/pretooluse_guard_test.py",
+      "rc": 1,
+      "H_red": 1,
+      "span_chars": null,
+      "span_utf8_bytes": null,
+      "groups": 2,
+      "pairs_in_span": null,
+      "captured_pairs_in_TONG": 2
+    },
+    {
+      "path": ".claude/hooks/subagent_ghi_detect_test.py",
+      "rc": 0,
+      "H_red": 0,
+      "span_chars": 53,
+      "span_utf8_bytes": 54,
+      "groups": 2,
+      "pairs_in_span": 2,
+      "captured_pairs_in_TONG": 2
+    },
+    {
+      "path": "ops/nhanh_don_duoc_test.py",
+      "rc": 0,
+      "H_red": 0,
+      "span_chars": 3,
+      "span_utf8_bytes": 3,
+      "groups": 2,
+      "pairs_in_span": 1,
+      "captured_pairs_in_TONG": 1
+    }
+  ],
+  "mutants_on_1213": [
+    {
+      "name": "no_positions",
+      "changed_count": 5,
+      "changed_cases": [
+        "law7-T: (9)/(9)(?:1/1|\\d+/\\d+)",
+        "law7-T: (9)/(9) (?:1/1|\\d+/\\d+)",
+        "law7-T: (?=(\\d+)/(\\d+))(\\d+)/(\\d+)",
+        "law7-T: (9)/(9) 0/0",
+        "law7-T: (9)/(9) 33/34"
+      ],
+      "exception_count": 11,
+      "exceptions": [
+        {
+          "case": "bad-grammar-chon_reviewer-0-nền: (\\d+)/(\\d+) đạt(?: (\\d+)/(\\d+))?",
+          "exception": "TypeError"
+        },
+        {
+          "case": "bad-grammar-gh_readback-0-gh_readback tests: (\\d+)/(\\d+) ca QUA \\(hong 0\\)(?: (\\d+)/(\\d+))?",
+          "exception": "TypeError"
+        },
+        {
+          "case": "bad-grammar-mcp_gh-0-CA\\s+: (\\d+)/(\\d+) đạt · 0 đỏ · ĐẠT(?: (\\d+)/(\\d+))?",
+          "exception": "TypeError"
+        },
+        {
+          "case": "bad-grammar-mcp_gh-1-ĐỘT BIẾN\\s+: đã đo (\\d+)/(\\d+) tập giết · ĐẠT(?: (\\d+)/(\\d+))?",
+          "exception": "TypeError"
+        },
+        {
+          "case": "bad-grammar-mcp_github_doc-0-mcp_github_doc tests: (\\d+)/(\\d+) ca QUA \\(hong 0, bo qua 0\\)(?: (\\d+)/(\\d+))?",
+          "exception": "TypeError"
+        },
+        {
+          "case": "bad-grammar-probe_mang-0-tự đột biến cổng: (9)/(9) chết(?: \\(m1\\.\\.m5 \\+ 4 dòng cơ chế\\))?(?: (\\d+)/(\\d+))?",
+          "exception": "TypeError"
+        },
+        {
+          "case": "bad-grammar-probe_mang-1-named mutant probe_missing_tool_executes_git: (1)/(1) chết(?: (\\d+)/(\\d+))?",
+          "exception": "TypeError"
+        },
+        {
+          "case": "bad-grammar-probe_mang-2-nền: (11)/(11) đạt(?: (\\d+)/(\\d+))?",
+          "exception": "TypeError"
+        },
+        {
+          "case": "bad-grammar-pretooluse_guard-0-TONG: CA (\\d+)/(\\d+) dat · DOT BIEN (\\d+)/(\\d+) bi giet(?: (\\d+)/(\\d+))?",
+          "exception": "TypeError"
+        },
+        {
+          "case": "bad-grammar-subagent_ghi_detect-0-TONG: CA (\\d+)/(\\d+) dat · DOT BIEN (\\d+)/(\\d+) bi giet(?: (\\d+)/(\\d+))?",
+          "exception": "TypeError"
+        },
+        {
+          "case": "bad-grammar-nhanh_don_duoc-0-(\\d+)/(\\d+)(?: (\\d+)/(\\d+))?",
+          "exception": "TypeError"
+        }
+      ]
+    },
+    {
+      "name": "no_unique",
+      "changed_count": 51,
+      "changed_cases": [
+        "extra-record-chon_reviewer-0-after-''",
+        "extra-record-chon_reviewer-0-after-'\\t0/0'",
+        "extra-record-chon_reviewer-0-after-': 0/0'",
+        "extra-record-chon_reviewer-0-after-'\\xa00/0'",
+        "extra-record-chon_reviewer-0-after-' 0/0'",
+        "extra-record-chon_reviewer-0-after-' '",
+        "extra-record-gh_readback-0-after-''",
+        "extra-record-gh_readback-0-after-'\\t0/0'",
+        "extra-record-gh_readback-0-after-': 0/0'",
+        "extra-record-gh_readback-0-after-'\\xa00/0'",
+        "extra-record-gh_readback-0-after-' 0/0'",
+        "extra-record-gh_readback-0-after-' '",
+        "extra-record-mcp_gh-0-after-''",
+        "extra-record-mcp_gh-0-after-'\\t0/0'",
+        "extra-record-mcp_gh-0-after-': 0/0'",
+        "extra-record-mcp_gh-0-after-'\\xa00/0'",
+        "extra-record-mcp_gh-0-after-' 0/0'",
+        "extra-record-mcp_gh-0-after-' '",
+        "extra-record-mcp_gh-1-after-''",
+        "extra-record-mcp_gh-1-after-'\\t0/0'",
+        "extra-record-mcp_gh-1-after-': 0/0'",
+        "extra-record-mcp_gh-1-after-'\\xa00/0'",
+        "extra-record-mcp_gh-1-after-' 0/0'",
+        "extra-record-mcp_gh-1-after-' '",
+        "extra-record-mcp_github_doc-0-after-''",
+        "extra-record-mcp_github_doc-0-after-'\\t0/0'",
+        "extra-record-mcp_github_doc-0-after-': 0/0'",
+        "extra-record-mcp_github_doc-0-after-'\\xa00/0'",
+        "extra-record-mcp_github_doc-0-after-' 0/0'",
+        "extra-record-mcp_github_doc-0-after-' '",
+        "extra-record-probe_mang-0-after-''",
+        "extra-record-probe_mang-0-after-'\\t0/0'",
+        "extra-record-probe_mang-0-after-': 0/0'",
+        "extra-record-probe_mang-0-after-'\\xa00/0'",
+        "extra-record-probe_mang-0-after-' 0/0'",
+        "extra-record-probe_mang-0-after-' '",
+        "extra-record-probe_mang-1-after-''",
+        "extra-record-probe_mang-1-after-'\\t0/0'",
+        "extra-record-probe_mang-1-after-': 0/0'",
+        "extra-record-probe_mang-1-after-'\\xa00/0'",
+        "extra-record-probe_mang-1-after-' 0/0'",
+        "extra-record-probe_mang-1-after-' '",
+        "extra-record-probe_mang-2-after-''",
+        "extra-record-probe_mang-2-after-'\\t0/0'",
+        "extra-record-probe_mang-2-after-': 0/0'",
+        "extra-record-probe_mang-2-after-'\\xa00/0'",
+        "extra-record-probe_mang-2-after-' 0/0'",
+        "extra-record-probe_mang-2-after-' '",
+        "extra-record-nhanh_don_duoc-0-after-''",
+        "extra-record-nhanh_don_duoc-0-after-' '",
+        "windows-duplicate-True"
+      ],
+      "exception_count": 0,
+      "exceptions": []
+    },
+    {
+      "name": "no_positive",
+      "changed_count": 42,
+      "changed_cases": [
+        "bad-pair-chon_reviewer-0-0-0/0",
+        "bad-pair-chon_reviewer-0-0-00/00",
+        "bad-pair-chon_reviewer-0-0-٠/٠",
+        "bad-pair-gh_readback-0-0-0/0",
+        "bad-pair-gh_readback-0-0-00/00",
+        "bad-pair-gh_readback-0-0-٠/٠",
+        "bad-pair-mcp_gh-0-0-0/0",
+        "bad-pair-mcp_gh-0-0-00/00",
+        "bad-pair-mcp_gh-0-0-٠/٠",
+        "bad-pair-mcp_gh-1-0-0/0",
+        "bad-pair-mcp_gh-1-0-00/00",
+        "bad-pair-mcp_gh-1-0-٠/٠",
+        "bad-pair-mcp_github_doc-0-0-0/0",
+        "bad-pair-mcp_github_doc-0-0-00/00",
+        "bad-pair-mcp_github_doc-0-0-٠/٠",
+        "bad-pair-pretooluse_guard-0-0-0/0",
+        "bad-pair-pretooluse_guard-0-0-00/00",
+        "bad-pair-pretooluse_guard-0-0-٠/٠",
+        "bad-pair-pretooluse_guard-0-1-0/0",
+        "bad-pair-pretooluse_guard-0-1-00/00",
+        "bad-pair-pretooluse_guard-0-1-٠/٠",
+        "bad-pair-subagent_ghi_detect-0-0-0/0",
+        "bad-pair-subagent_ghi_detect-0-0-00/00",
+        "bad-pair-subagent_ghi_detect-0-0-٠/٠",
+        "bad-pair-subagent_ghi_detect-0-1-0/0",
+        "bad-pair-subagent_ghi_detect-0-1-00/00",
+        "bad-pair-subagent_ghi_detect-0-1-٠/٠",
+        "bad-pair-nhanh_don_duoc-0-0-0/0",
+        "bad-pair-nhanh_don_duoc-0-0-00/00",
+        "bad-pair-nhanh_don_duoc-0-0-٠/٠",
+        "exhaustive-0-0-0-0",
+        "exhaustive-0-0-1-1",
+        "exhaustive-0-0-2-2",
+        "exhaustive-0-0-3-3",
+        "exhaustive-0-0-4-4",
+        "exhaustive-1-1-0-0",
+        "exhaustive-2-2-0-0",
+        "exhaustive-3-3-0-0",
+        "exhaustive-4-4-0-0",
+        "linux-empty-False",
+        "bare-2-0",
+        "bare-4-0"
+      ],
+      "exception_count": 0,
+      "exceptions": []
+    },
+    {
+      "name": "remove_dead_bool",
+      "changed_count": 0,
+      "changed_cases": [],
+      "exception_count": 0,
+      "exceptions": []
+    }
+  ],
+  "job_workload_at_11_heads": [
+    {
+      "sha": "8ce02fd",
+      "steps": 40,
+      "has_receipt_v2": true
+    },
+    {
+      "sha": "82e01a4",
+      "steps": 40,
+      "has_receipt_v2": true
+    },
+    {
+      "sha": "1b3caa1",
+      "steps": 39,
+      "has_receipt_v2": false
+    },
+    {
+      "sha": "c0f18ac",
+      "steps": 40,
+      "has_receipt_v2": true
+    },
+    {
+      "sha": "28cb898",
+      "steps": 40,
+      "has_receipt_v2": true
+    },
+    {
+      "sha": "b912e5f",
+      "steps": 40,
+      "has_receipt_v2": true
+    },
+    {
+      "sha": "cacaba3",
+      "steps": 40,
+      "has_receipt_v2": true
+    },
+    {
+      "sha": "d28c4b1",
+      "steps": 40,
+      "has_receipt_v2": true
+    },
+    {
+      "sha": "62a6385",
+      "steps": 40,
+      "has_receipt_v2": true
+    },
+    {
+      "sha": "771c6ed",
+      "steps": 40,
+      "has_receipt_v2": true
+    },
+    {
+      "sha": "0c3405f",
+      "steps": 40,
+      "has_receipt_v2": true
+    }
+  ]
+}

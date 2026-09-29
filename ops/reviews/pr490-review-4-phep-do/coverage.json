@@ -1,0 +1,32 @@
+{
+  "scalar": {
+    "total": 214,
+    "covered": 214,
+    "uncovered": []
+  },
+  "key": {
+    "total": 225,
+    "covered": 225,
+    "uncovered": []
+  },
+  "comment": {
+    "total": 27,
+    "covered": 27,
+    "uncovered": []
+  },
+  "numeric_lines": {
+    "total": 241,
+    "covered": 241,
+    "uncovered": []
+  },
+  "audit_rows": 95,
+  "kind_counts": {
+    "DO": 36,
+    "KHONG": 25,
+    "DINH_DANH": 1,
+    "HON_HOP": 28,
+    "CHUAN_TAC": 4,
+    "DU_KIEN": 1
+  },
+  "method": "Recursive YAML values and keys; ScalarToken spans for real comments; manual semantic audit; numeric regex is a secondary inventory only."
+}

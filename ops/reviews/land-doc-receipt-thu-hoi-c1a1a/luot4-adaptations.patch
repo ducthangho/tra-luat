@@ -1,0 +1,38 @@
+--- luot3/audit.py
++++ luot4/audit.py
+@@ -59,7 +59,7 @@
+     experiments=[
+       ('pure_sys_list', edit(old,old+'\n    sys.path.append("c1a1a-review-probe")')),
+       ('pure_module_list',edit(old,old+'\n    _REVIEW_LOG.append(len(raw))').replace('BOM = b','_REVIEW_LOG = []\nBOM = b')),
+-      ('pure_io_file',edit(old,old+'\n    with __import__("io").open("/tmp/review650-r3/purity-marker.txt", "w") as f:\n        f.write("side-effect")')),
++      ('pure_io_file',edit(old,old+'\n    with __import__("io").open("/tmp/review650-r4-output/purity-marker.txt", "w") as f:\n        f.write("side-effect")')),
+     ]
+     for name,src in experiments:
+         m,p=suite(name,src)
+@@ -75,7 +75,6 @@
+         p=OUT/(name+'.py');p.write_text(edit(T._TRA1,replacement));m=load(p,name)
+         emit(kind='missing_cell',name=name,baseline=target(M,DEV/'doc_receipt_thu_hoi.py','bom'),mutant=target(m,p,'bom'))
+     # Declared hex64 fullmatch/str dimensions; preserve existing mutation anchors.
+-    suite('hex64_partial_match',edit('def _khop(mau):','def _khop(mau):\n    if mau == "[0-9a-f]{64}":\n        return lambda v: type(v) is str and re.match(mau, v) is not None'),T.ma({**T.FIX,'workflow_definition_sha256':T.X64+'x'}))
+     suite('hex64_number_coerce',edit('def _khop(mau):','def _khop(mau):\n    if mau == "[0-9a-f]{64}":\n        return lambda v: re.fullmatch(mau, str(v)) is not None'),T.ma({**T.FIX,'workflow_definition_sha256':int('1'*64)}))
+ 
+ def classifier():
+@@ -91,8 +90,8 @@
+     # Chosen exception must remain specific to its unique source line.
+     for name,source,row in [
+       ('correct',SRC,r),
+-      ('wrong_type',SRC,(*r[:6],('TypeError',r[6][1]))),
+-      ('wrong_line',SRC,(*r[:6],(r[6][0],'r = json.loads(chuoi)'))),
++      ('wrong_type',SRC,(*r[:6],('TypeError',r[6][1],r[6][2]))),
++      ('wrong_line',SRC,(*r[:6],(r[6][0],'r = json.loads(chuoi)',r[6][2]))),
+       ('duplicate_line',SRC+'\ndef unreachable(raw):\n    '+r[6][1]+'\n',r),
+     ]:emit(kind='exception_control',name=name,disposition=T.chay_dot_bien(source,row))
+     # A wrong guard name silently passes; demonstrate as a classifier limitation on its declared A1 axis.
+--- luot3/supplement.py
++++ luot4/supplement.py
+@@ -63,5 +63,4 @@
+     finally:os.posix_spawn=original
+     A.emit(kind='process_probe',oracle=result,spawn_calls=events)
+     # Debt inherited from the round-2 audit; K4 message semantics has no dimension in the closed catalog.
+-    A.suite('debt_stale_message',A.edit('stale, chay lai','fresh, khong can chay lai'),T.ma(T.FIX).replace(T.S.encode(),T.X40.encode()))
+ if __name__=='__main__':globals()[sys.argv[2]]()

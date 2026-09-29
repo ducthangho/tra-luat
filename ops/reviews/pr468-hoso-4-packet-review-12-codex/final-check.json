@@ -1,0 +1,29 @@
+{
+  "utc": "2026-09-07T13:31:12.065339+00:00",
+  "head": "02b0b86bf64a89b561a75ff060164332792fb73d",
+  "tree": "cee08e8eeecbb581c36a2058153b43dc29724b0a",
+  "status": "",
+  "tracked_diff": "",
+  "index_diff": "",
+  "new_commits": 0,
+  "artifact_count": 178,
+  "findings": [
+    [
+      "bia-mo-mot-ref-khong-thu-hoi-moi-ban",
+      "P1"
+    ],
+    [
+      "mirror-thieu-ref-khong-du-do-a9",
+      "P1"
+    ],
+    [
+      "bien-nhan-luot10-bo-sot-va-tron-dau-vet-phien",
+      "P2"
+    ],
+    [
+      "ghi-nhan-luot11-gan-sai-commit-va-moc-van-chuyen",
+      "P2"
+    ]
+  ],
+  "verdict_sha256": "b4b2671d5d053785232486460251a519b6efd47cff196e672260f3258228d0bd"
+}

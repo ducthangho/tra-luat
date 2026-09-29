@@ -1,0 +1,28 @@
+# HẬU KIỂM PR #486 — bản ghi nợ, không phải approval hoặc merge authorization.
+schema_version: 1
+kind: post_merge_review_debt
+pr_number: 486 # đơn vị: số hiệu PR
+reviewed_sha: da481f94eee0adf1fe5fc4260a535a9b48fc2627
+base_sha: c87b0679a837055ee4cc33ac48c9adb8d7ad8784
+merged_pr_head_sha: 359d38e8c449e009acc4123fa6110257ad800949
+trang_thai: cho_executor_doi_chieu_va_va
+nguon_timeline: >-
+  Chỉ thị hậu kiểm trực tiếp của chủ kho: PR #486 đã merge trước khi có verdict cross-review
+  hoàn tất. Reviewer không có mạng hoặc snapshot API để xác minh lại timeline; các mốc dưới
+  đây là ATTESTATION được cung cấp trong chỉ thị, không phải phép đo GitHub mới.
+timeline_utc:
+  go_draft: '2026-09-09T08:54:36Z'
+  connector_bat_dau: '2026-09-09T08:54:45Z'
+  merged_at_theo_chi_thi: '2026-09-09T08:55:09Z'
+  connector_trang_thai_duoc_khai: Running
+so_hoc_tu_moc_duoc_khai:
+  draft_den_review_giay: 9
+  review_den_merge_giay: 24
+gioi_han: >-
+  Git commit chứng minh topology của merge; commit timestamp không phải merged_at của API.
+  Verdict lượt 6 của PR #478 chỉ neo ff3431f, không review head PR #486. Gate xanh hoặc human
+  APPROVED không tự thành verdict cross-review. Không ghi lượt connector Running thành approve.
+xu_ly: >-
+  Lưu verdict hậu kiểm tại exact SHA cùng biên nhận của executor, đối chiếu từng P1/P2 và mở
+  PR vá riêng. Lần hậu kiểm này không hồi tố biến thời điểm merge thành đã qua cross-review.
+  Không đóng nợ chỉ vì bản ghi này tồn tại; executor phải áp, đo và lưu kết quả vá.

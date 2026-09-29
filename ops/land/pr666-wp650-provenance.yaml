@@ -1,0 +1,140 @@
+# DO PROVENANCE §10.2.2 + REQUIRED CONTEXTS cho packet #650 (PR #666, merge f8a7829).
+# Bo sung cho ops/land/pr666-wp650-land-evidence.yaml (trang_thai_packet.dieu_kien_con_thieu_de_landed muc 1-2).
+# Chu kho chi thi "Do tiep" (phien dieu phoi 2026-09-28). Do luc 2026-09-28T16:24Z-16:28Z qua REST api.github.com
+# bang credential GITHUB_PAT cua phien (tai khoan chu kho). Readback nguyen van o ops/land/pr666-wp650-provenance/.
+schema_version: 1
+packet_id: LAND-DOC-RECEIPT-THU-HOI-C1a1a
+packet_issue: 650
+do_luc: '2026-09-28T16:28:12Z'
+duong_do: >-
+  REST api.github.com (200 kem X-Github-Request-Id; tuc toi GitHub that, khong phai proxy tu sinh). GraphQL tra 403
+  ("GitHub GraphQL is not available from Claude Code sessions") => khong doc duoc WorkflowRun.file.repositoryFileUrl.
+  Log job tai bang GET /actions/jobs/{id}/logs (khong commit vi ~2.7MB; sha256 bytes da tai o
+  pr666-wp650-provenance/SHA256SUMS-log-va-artifact.txt — log co the tai lai de doi chieu).
+
+required_contexts:
+  trang_thai: measured
+  nguon: GET /repos/ducthangho/tra-luat/rules/branches/master (200) + GET /rulesets/20856202 (200) + GET /branches/master (200)
+  ruleset: {id: 20856202, name: bao-ve-cong-dang-lease, enforcement: active, target: '~DEFAULT_BRANCH', bypass_actors: [], updated_at: '2026-09-27T20:19:13.048+07:00'}
+  required_status_checks:
+    - {context: 'gate (ubuntu-latest)', integration_id: 15368}
+    - {context: 'gate-packet-loop (ubuntu-latest)', integration_id: 15368}
+    - {context: 'gate-ops (ubuntu-latest)', integration_id: 15368}
+  strict_required_status_checks_policy: false
+  branch_protection_co_dien: 'protected: true; required_status_checks.enforcement_level: off, contexts: [], checks: [] (GET /branches/master). GET /branches/master/protection tra 403 — khong dung lam can cu.'
+  doi_chieu:
+    - 'PR run 36379712476 (bf63bb1, pull_request, attempt 1): gate 108792765498, gate-packet-loop 108792765529, gate-ops 108792765497 — ca ba success.'
+    - 'Master run 36387278453 (f8a7829, push, attempt 1): gate 108815233339, gate-packet-loop 108815233290, gate-ops 108815233211 — ca ba success.'
+    - 'launcher / mo KHONG nam trong required contexts => skipped cua chung khong chan gate; van KHONG tinh la pass.'
+  gioi_han: >-
+    Day la readback HIEN TAI (16:28Z). updated_at cua ruleset (2026-09-27T13:19:13Z) SOM HON merge (2026-09-28T06:35:57Z),
+    nen khong co ban cap nhat ruleset nao sau merge. Lich su ruleset (GET /rulesets/20856202/history) tra 403 — khong
+    doc duoc noi dung TAI thoi diem merge ngoai suy luan tu updated_at; ghi ro la gioi han, khong phai phep do.
+
+bon_moc:
+  # Moc 1 — Run: tu GET /actions/runs/{id} cua dung run.
+  # Moc 2 — Checkout: SHA tu log dung job (dong sau `git log -1 --format=%H` cua actions/checkout@v4); parents/tree tu
+  #   object git cua CHINH SHA ay (dia chi noi dung => parents/tree xac dinh duy nhat).
+  # Moc 3 — Workflow definition: xem workflow_definition_nguon ben duoi.
+  # Moc 4 — Gate output: job/runner/OS tu log + API jobs; rc tu step conclusion; marker duong tu log; artifact neu co.
+  - run: {id: 36379712476, repo: ducthangho/tra-luat, attempt: 1, event: pull_request, head_sha: bf63bb1ec485bccf8eec34cc5604f949d70fc7d6, path: .github/workflows/ci.yml, conclusion: success}
+    checkout:
+      trang_thai: measured
+      sha: 511612f1f9383097e06d87a2b860de9c8335471e
+      nguon: 'log 4 job gate* deu in "HEAD is now at 511612f Merge bf63bb1... into ceb1a3f..." va git log -1 = 511612f (checkout refs/remotes/pull/666/merge, fetch +511612f:refs/remotes/pull/666/merge)'
+      parents: [ceb1a3f36912dd4f03fe1741c443cd09e82a44ee, bf63bb1ec485bccf8eec34cc5604f949d70fc7d6]
+      tree: 235f6605809b4f813adf5fdc467aae3944093629
+      parents_tree_nguon: 'GET /git/commits/511612f (readback-commit-511612f.json) va git cat-file -p 511612f — khop nhau'
+      synthetic_merge: 'parent 1 = base ceb1a3f (master truoc merge), parent 2 = head bf63bb1 (authorized_head_sha). Tree = tree cua merge commit f8a7829.'
+    workflow_definition: {path: .github/workflows/ci.yml, blob: 6ba1255b5ae5635e1ffc9495b11462b3f5c2fd14, sha256: 69100292ffee7b13b71053006df98239ffe1c86328d2c3af8e089b46dc243d16, bytes: measured_nguon_thay_the, commit_nguon_chinh_xac: not_measured, commit_ung_vien_cung_bytes: [ceb1a3f, bf63bb1, 511612f, f8a7829]}
+    gate_output:
+      - {job: 'gate (ubuntu-latest)', id: 108792765498, runner: 'GitHub Actions 1000008029', os: 'Ubuntu 24.04', python: 3.12.14, steps_non_success: [], steps_skipped: ['tl selftest (co bang chung exact-identity)', 'release-verify strict (lane LAND — manifest committed)'], marker: '== tl selftest 1711/1711 ==', artifact: 'KHONG CO (luot PR khong upload gate-evidence theo thiet ke ci.yml); bang chung = log job, sha256 f604780c…'}
+      - {job: 'gate-packet-loop (ubuntu-latest)', id: 108792765529, steps_non_success: [], steps_skipped: [], marker: 'nền: 291/291 đạt · BỎ QUA: 1', artifact: 'KHONG CO; log sha256 e49f69e0…'}
+      - {job: 'gate-ops (ubuntu-latest)', id: 108792765497, steps_non_success: [], steps_skipped: 1, marker: 'bien_nhan_v2_test: 68/68 ca đạt · 74/74 đột biến thường CÓ RĂNG', artifact: 'KHONG CO; log sha256 18074548…'}
+      - {job: 'gate-registry (ubuntu-latest)', id: 108792765482, steps_non_success: [], steps_skipped: [], marker: 'doc_receipt_thu_hoi tests: 156/156 ca QUA · 162/162 dot bien GIET', artifact: 'KHONG CO; log sha256 92d444da…', ghi_chu: 'khong phai required context'}
+  - run: {id: 36387278453, repo: ducthangho/tra-luat, attempt: 1, event: push, head_sha: f8a7829cc44f296c25faf1a6439b603ba840f70b, path: .github/workflows/ci.yml, conclusion: success}
+    checkout:
+      trang_thai: measured
+      sha: f8a7829cc44f296c25faf1a6439b603ba840f70b
+      nguon: 'log 4 job gate*: checkout -B master refs/remotes/origin/master, git log -1 = f8a7829; artifact gate-evidence identity.head_sha = f8a7829, tree_sha = 235f660, tracked_clean/worktree_clean = true'
+      parents: [ceb1a3f36912dd4f03fe1741c443cd09e82a44ee, bf63bb1ec485bccf8eec34cc5604f949d70fc7d6]
+      tree: 235f6605809b4f813adf5fdc467aae3944093629
+    workflow_definition: {path: .github/workflows/ci.yml, blob: 6ba1255b5ae5635e1ffc9495b11462b3f5c2fd14, sha256: 69100292ffee7b13b71053006df98239ffe1c86328d2c3af8e089b46dc243d16, bytes: measured_nguon_thay_the, commit_nguon_chinh_xac: not_measured, commit_ung_vien_cung_bytes: [ceb1a3f, bf63bb1, 511612f, f8a7829]}
+    gate_output:
+      - job: 'gate (ubuntu-latest)'
+        id: 108815233339
+        runner: 'GitHub Actions 1000008042'
+        os: 'Ubuntu 24.04 (Linux 6.17.0-1022-azure), CPython 3.12.14'
+        steps_non_success: []
+        steps_skipped: ['PR head contains required EOL base', 'tl selftest (luot PR — khong sinh bang chung)', 'release-verify strict (lane WORKER — manifest TẠM ngoài repo)']
+        command: 'python scripts/tl.py --selftest'
+        rc: 0
+        marker: '== tl selftest 1711/1711 == (positive_verified: true)'
+        artifact: {id: 10956094584, name: gate-evidence-ubuntu-latest-1, zip_sha256: 517a22a4579ac5a09b526e5cbd26ebcfb5ca844bb5d43ecfa8d0b1b12e374fb1, output_sha256: 99cf571924ec9c5488a029b463f3bd35f117f840f1b5fd65b4d7ce2e1269838d, expires_at: '2026-12-27T06:36:01Z'}
+        artifact_zip_sha256_khop_log_upload: true
+      - {job: 'gate-packet-loop (ubuntu-latest)', id: 108815233290, steps_non_success: [], steps_skipped: [], marker: 'nền: 291/291 đạt · BỎ QUA: 1', artifact: 'KHONG CO; log sha256 2198e2dd…'}
+      - {job: 'gate-ops (ubuntu-latest)', id: 108815233211, steps_non_success: [], steps_skipped: 1, marker: 'bien_nhan_v2_test: 68/68 ca đạt · 74/74 đột biến thường CÓ RĂNG', artifact: 'KHONG CO; log sha256 eea204c8…'}
+      - {job: 'gate-registry (ubuntu-latest)', id: 108815233275, steps_non_success: [], steps_skipped: [], marker: 'doc_receipt_thu_hoi tests: 156/156 ca QUA · 162/162 dot bien GIET', artifact: 'KHONG CO; log sha256 c5d49040…', ghi_chu: 'khong phai required context'}
+  - run: {id: 36387278424, repo: ducthangho/tra-luat, attempt: 1, event: push, head_sha: f8a7829cc44f296c25faf1a6439b603ba840f70b, path: .github/workflows/launcher-windows.yml, conclusion: success}
+    checkout:
+      trang_thai: measured
+      sha: f8a7829cc44f296c25faf1a6439b603ba840f70b
+      nguon: 'log job windows-latest 108815209421 va ubuntu-latest 108815209553: git log -1 = f8a7829'
+      parents: [ceb1a3f36912dd4f03fe1741c443cd09e82a44ee, bf63bb1ec485bccf8eec34cc5604f949d70fc7d6]
+      tree: 235f6605809b4f813adf5fdc467aae3944093629
+    workflow_definition: {path: .github/workflows/launcher-windows.yml, blob: 24b55164eca4fef5c76aae13cb691e4bb103d05e, sha256: fd382397fe05b6d98ee9957cee19a732dbe4855c88d090a49462ec7c6cc6233f, bytes: measured_nguon_thay_the, commit_nguon_chinh_xac: not_measured, commit_ung_vien_cung_bytes: [ceb1a3f, bf63bb1, 511612f, f8a7829]}
+    gate_output:
+      - {job: 'launcher (windows-latest)', id: 108815209421, os: 'Microsoft Windows Server 2025', steps_non_success: [], steps_skipped: 0, marker: '172/172 ca DA CHAY QUA (tong 189, bo qua 17, hong 0)', artifact: 'KHONG CO; log sha256 472af5b8…', ghi_chu: '17 ca BO QUA, KHONG tinh la pass, KHONG phai bang chung Windows. Ly do nguyen van o windows_bo_qua ben duoi. Khong phai required context.'}
+      - {job: 'launcher (ubuntu-latest)', id: 108815209553, os: 'Ubuntu 24.04', steps_non_success: [], steps_skipped: 4, marker: '188/188 ca DA CHAY QUA (tong 189, bo qua 1, hong 0)', artifact: 'KHONG CO; log sha256 26e0bfb2…'}
+
+windows_bo_qua:
+  nguon: 'log job 108815209421 (dong 241-257), ly do CHEP NGUYEN VAN; khong phan loai lai thanh "chi-Linux".'
+  so_ca: 17
+  gioi_han: >-
+    Nhieu ca ghi can shim/fixture/kiem RIENG tren Windows — tuc la NGHIA VU CHUA DO tren Windows, khong phai bang chung
+    tinh chat khong ap dung Windows. Mot so ca ghi la khai niem POSIX co duong Windows rieng (t62). Ca hai nhom deu
+    khong duoc tinh la pass.
+  ca:
+    - 't03_git_gia_thoat_0_im_lang_van_bi_chan: bo qua tren Windows (can shim .cmd)'
+    - 't108_hook_phai_probe_CHAY_DUOC_khong_chi_CO_MAT: bo qua tren Windows (can shim .cmd cho fixture)'
+    - 't125_bridge_bo_bash_hong_dau_PATH_va_truyen_rc_hook_ve_nguyen_ven: bo qua tren Windows (can fake bash .exe chay duoc; duong POSIX do o CI ubuntu)'
+    - 't126_bridge_hook_vuot_han_phai_rc124_khong_phai_treo_hay_0: bo qua tren Windows (can fake bash .exe chay duoc; duong POSIX do o CI ubuntu)'
+    - 't28_qua_han_giet_ca_CON_CHAU: bo qua tren Windows (can kiem bang cay tien trinh that)'
+    - 't33_stop_giet_that: bo qua tren Windows'
+    - 't50_stop_roi_runner_KHONG_duoc_de_len_so: bo qua tren Windows (can kiem rieng)'
+    - 't51_ma_thoat_ngoai_khoang_khong_bi_cat_cut: bo qua tren Windows (can tin hieu POSIX)'
+    - 't55_doctor_nhan_python_khong_can_ten_python3: bo qua tren Windows (can shim khong duoi .exe)'
+    - 't60_doctor_KHONG_tin_which_khi_cong_cu_khong_chay_duoc: bo qua tren Windows (can .exe rong)'
+    - 't63_chau_phot_lo_SIGTERM_ma_bao_da_giet_ca_cay_la_noi_doi: ca nay dung SIG_IGN cua POSIX; duong Windows la t62'
+    - 't66_chau_setsid_roi_khoi_nhom_van_phai_bi_giet: setsid la khai niem POSIX; duong Windows la t62'
+    - 't67_chau_sinh_SAU_luc_chup_van_phai_bi_dem: dua tren SIGTERM cua POSIX; duong Windows la t62'
+    - 't72_bi_ngat_KHONG_duoc_ghi_thanh_xong: SIGINT tren Windows khong cung ngu nghia; can ca rieng'
+    - 't76_wrapper_thoat_khong_duoc_xoa_prompt_cua_chau: ca nhom tien trinh POSIX; Windows can fixture that rieng'
+    - 'r351_co_chi_thi_thi_KHONG_duoc_dat_moc: bo qua: khoi dat moc la shell POSIX'
+    - 'r351_KHONG_co_chi_thi_thi_van_phai_dat_moc: bo qua: khoi dat moc la shell POSIX'
+
+workflow_definition_nguon: >-
+  BYTES: measured_nguon_thay_the; commit nguon chinh xac: not_measured (xem GIOI HAN OID) — KHONG phai WorkflowRun.file (GraphQL 403). PROTOCOL §10.2.2 cho dung nguon khac khi tu chung
+  minh cung run/attempt va exact definition identity. Hai phan chung minh:
+  (a) IDENTITY BYTES: blob cua ci.yml (6ba1255…) va launcher-windows.yml (24b5516…) GIONG HET tai MOI commit ung vien
+  GitHub co the doc dinh nghia: base ceb1a3f, head bf63bb1, synthetic merge 511612f (event pull_request), merge f8a7829
+  (event push) — do bang git rev-parse <commit>:<path> + sha256 bytes. ci.yml doi lan cuoi o 6f2b0f9 (27-09),
+  launcher-windows.yml o f568e34 (05-09); ca hai deu la to tien cua moi commit ung vien. Vi vay du GitHub doc o commit nao trong bon commit ay, bytes dinh nghia la mot.
+  (b) GAN VAO DUNG RUN/JOB: doi_chieu_buoc.py so than `run:` cua tung buoc trong dinh nghia (tai f8a7829) voi than
+  buoc log cua CHINH job/attempt in ra (dong ESC[36;1m), theo thu tu: 10/10 job khop het (gate PR 28/28 buoc chay,
+  gate master 27/27, gate-ops 8/8, gate-packet-loop 8/8, gate-registry 8/8, launcher windows 11/11, ubuntu 7/7; cac buoc
+  con lai bi `if:` bo qua). Phan chung dot bien: sua MOT dong trong ban sao log gate master => all_in_order false,
+  21/27. Gioi han: (b) chung minh noi dung buoc da chay khop dinh nghia, KHONG chung minh bytes ngoai than buoc (trigger,
+  comment); phan ay dua vao (a).
+  GIOI HAN OID: (a) va (b) chung minh BYTES dinh nghia, KHONG phan biet GitHub da doc tu commit nao trong bon commit
+  ung vien (doi ref doc dinh nghia tu f8a7829 sang ceb1a3f cho ket qua giong het — Codex #670 luot 1 N2). Vi vay
+  commit_nguon_chinh_xac = not_measured. Chu kho chap nhan nguon thay the VOI gioi han nay: bytes dinh nghia da do,
+  OID nguon chinh xac khong do duoc.
+khong_do_duoc:
+  - 'WorkflowRun.file.repositoryFileUrl (GraphQL 403 tu phien Claude Code) — nen commit nguon CHINH XAC cua dinh nghia workflow (khong phai bytes) la not_measured cho ca ba run.'
+  - 'Lich su ruleset tai thoi diem merge (REST history 403) — chi co updated_at truoc merge.'
+  - 'Artifact gate-evidence cho luot PR (khong ton tai theo thiet ke) va cho cac job ngoai `gate`.'
+workflow_definition_chu_kho_chap_nhan: >-
+  Chu kho ducthangho chon "Chap nhan" nguon thay the cho moc Workflow definition (phien dieu phoi 2026-09-28, sau khi
+  PR #670 mo; cau hoi neu dung hai phan chung minh: blob giong het o moi commit ung vien + than buoc log khop). Day
+  la quyet dinh ve do du cua nguon, KHONG bien WorkflowRun.file hay commit nguon chinh xac thanh da do.

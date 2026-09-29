@@ -1,0 +1,17 @@
+{
+  "command": [
+    "python3",
+    "-B",
+    ".claude/dev/packet_loop.py",
+    "adr-song",
+    "--root",
+    "."
+  ],
+  "cwd": "cay-kho",
+  "started_utc": "2026-09-07T20:54:08.123746+00:00",
+  "ended_utc": "2026-09-07T20:54:08.421742+00:00",
+  "elapsed_seconds": 0.298,
+  "rc": 0,
+  "stdout_bytes": 113,
+  "stderr_bytes": 0
+}

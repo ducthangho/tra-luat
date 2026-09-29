@@ -1,0 +1,152 @@
+# Lease EXECUTOR — `wp461` (Issue #461), revision 2. Neo spec_hash db4980e3… và Mission #470.
+# THAY THE lease r1 `…-exec-1-claude-20260907` bằng bia mộ HAI CHIỀU.
+
+schema_version: 2
+event: executor_lease_granted
+packet_issue: 461
+packet_id: wp461
+packet_ten: WP461-BE-MAT-THU-HAI-CUA-CODEX
+mission_issue: 470
+revision: 2
+generation: 1
+lease_id: wp461-be-mat-thu-hai-cua-codex-exec-1r2-claude-20260907
+thay_the_cho:
+  - wp461-be-mat-thu-hai-cua-codex-exec-1-claude-20260907
+da_bi_thay_the: wp461-be-mat-thu-hai-cua-codex-exec-1g2-claude-20260907
+da_bi_thay_the_ly_do: >-
+  THU HOI SOM, khong doi het han (2026-09-08T05:27:42Z). Lease nay giu `generation: 1` va nhanh
+  `agent/wp461-g1-claude` Y HET lease r1 ma no thay the, trong khi ADR-0025 doi hop dong Packet
+  doi thi phai tao revision moi, THU HOI lease cu VA CAP GENERATION MOI — no lam 2/3.
+  Generation la FENCING TOKEN: cung generation + cung nhanh nghia la mot worker r1 hoi sinh va
+  executor r2 khong phan biet duoc. Bia mo trong tep lease la DU LIEU, khong phai khoa.
+  Tim ra boi `chatgpt-codex-connector[bot]`, P1 tren PR #471 luc 2026-09-07T09:45:16Z
+  (discussion_r3948491404); cross-review luot 2 da neu dung cho nay hai lan ma phien ghi lease
+  khong nang thanh viec phai lam. Da do: chua nhanh `agent/wp461-*` nao ton tai tren may chu va
+  `launcher.py` tren master chua co `codex_service` ⇒ chua co viec nao mo coi.
+  Cong KHONG canh duoc `generation` (`ops/lease_publish.py` nhac chu ay 0 lan) — no #473.
+role: executor
+provider: claude
+executor: claude
+model: opus-5
+effort: xhigh
+environment: cloud
+assurance_target: cross_approved
+access: read-write
+risk: sensitive
+
+spec_path: ops/specs/wp461-be-mat-thu-hai-cua-codex.md
+spec_sha256: db4980e3c5e12b3f9ffaac63e20d7f5d2316551f0b04a05449d2a87e85969b03
+spec_hash: db4980e3c5e12b3f9ffaac63e20d7f5d2316551f0b04a05449d2a87e85969b03
+spec_ban: r2
+spec_hash_ban_truoc: e74812cf1082daa39226ad3eae74c061afbbf65922b3f886adf3a84ac422df63
+
+write_set:
+  - .claude/dev/launcher.py
+  - CHANGELOG.md
+  - ops/KE_HOACH_THI_CONG_DA_PROVIDER.md
+  - ops/bien_nhan_v2_test.py
+
+write_set_hash: 8c8b4729863c18d66d6824442195a9b5bbee350c03e144bc039cfcd903774c0d
+write_set_hash_cach_tinh: >-
+  `sha256` của các đường dẫn ĐÃ SẮP XẾP, nối bằng `\n`, có `\n` cuối, mã hoá utf-8 —
+  cùng công thức và cùng cách ghi như `wp427-n9-ci-manifest-lane-g1-claude-20260831.yaml`,
+  vốn tự khai "PHẢI ghi cách tính ra đây vì KHÔNG CÓ TIỀN LỆ". Một băm không kèm công thức
+  là một băm không ai kiểm lại được; đây là lý do trường `_cach_tinh` tồn tại.
+depends_on:
+  - 460
+
+branch: agent/wp461-g1-claude
+branch_ownership: exclusive
+target_branch_neu_land: master
+base_sha: d28c4b1062e8505cbdaaf0237fcbe3f9b8ee4705
+start_from_sha: d28c4b1062e8505cbdaaf0237fcbe3f9b8ee4705
+reviewed_sha_required: d28c4b1062e8505cbdaaf0237fcbe3f9b8ee4705
+
+granted_by: ducthangho
+granted_on_instruction: >-
+  Mission Issue https://github.com/ducthangho/tra-luat/issues/470 — dấu vết BỀN, readback được,
+  ghi cả bốn quyết định Q1–Q4 kèm phép đo. Chủ kho chốt trong phiên
+  `session_01U1x8jNn8u6VADDAYnvdzCj` ("làm đường (a), duyệt phương án bạn đề xuất"); câu chat ấy
+  KHÔNG phải neo — Issue #470 mới là neo. Đây chính là bản vá cho P1 `uy-quyen-khong-co-neo-ben`
+  của cross-review lượt 1, vốn chỉ ra r1 neo vào lời kể lại một câu chat.
+authority_basis: '§2 — start/pause/resume/reroute/override/authorize thuộc chủ kho'
+recorded_by: claude-session
+recorder_is_dispatcher: false
+
+leased_at_utc: '2026-09-07T05:27:42Z'
+lease_expires_at_utc: '2026-09-08T05:27:42Z'
+heartbeat_at: '2026-09-07T05:27:42Z'
+lease_until: '2026-09-08T05:27:42Z'
+run_minutes: 1440
+heartbeat_required_minutes: 30
+attempts_used: 0
+attempts_limit: 3
+
+reviewer_provider: codex
+review_class: sensitive
+effective_review_class: sensitive
+review_class_ghi_chu: >-
+  Phân theo HẬU QUẢ: lease chuyển quyền ghi lên nguồn hợp đồng mà `ops/bien_nhan_v2.py` bắt buộc
+  đọc để quyết nhận/từ chối mọi biên nhận. Reviewer lượt 1 xác nhận cách phân này đúng §8.
+
+hinh_dang_ban_va_da_dong_bang:
+  noi_dat_hang_moi: '_PROVIDER_NGOAI_CLI'
+  hang: '("openai_codex", "codex_service", "machine")'
+  vi_sao: >-
+    r1 để executor tự chọn, và cách hiểu hiển nhiên nhất (thêm vào `_TRANSPORT_CONTRACTS`) ĐÃ ĐƯỢC
+    ĐO là KHÔNG CHẠY: `_dinh_danh_van_chuyen` (`launcher.py:199-204`) ném
+    `RuntimeError: provider co nhieu transport: openai_codex` khi một provider có hai contract —
+    cả ba lệnh nền hỏng, kể cả biến thể tuple tên lệnh RỖNG. Chi tiết ở spec §3bis.
+  executor_khong_duoc_doi: >-
+    Đổi hình dạng này ⇒ verdict `blocked` + revision mới. Đây không phải gợi ý.
+
+bang_chung_phuong_an_da_do:
+  moi_truong: 'worktree rời tại d28c4b1, đã dọn sau khi đo (`git worktree remove --force`)'
+  be_mat_gop: "PROVIDER_HOP_DONG['openai_codex']['be_mat']: ['codex_cli'] -> ['codex_cli','codex_service']"
+  bien_nhan_that: >-
+    Lấy `ops/reviews/phan-bien-quy-trinh-review-3-codex-verdict.receipt.yaml` (schema v2,
+    provider openai_codex), chỉ đổi trường `surface`, gọi thẳng `_thieu`:
+    `codex_service` TỔNG lỗi 1 -> **0** · `codex_api` 1 -> **1** · `chatgpt_web` 1 -> **1** ·
+    `codex_cli` 0 -> **0**. Tức nhận đúng bề mặt mới, KHÔNG nới cho tên khác.
+  bat_bien_runtime: '`_TRANSPORT_CONTRACTS` không đổi một byte (diff khối); arity vẫn {4}'
+  toan_kho: 'bien_nhan_v2.py --root . rc THẬT 0 · 20 ĐẠT v2 · 0 vi phạm · 0 KHÔNG ĐO ĐƯỢC · tổng 73'
+  gioi_han: >-
+    Đây là phép đo TRÊN BẢN SAO, chứng minh hình dạng KHẢ THI. Nó KHÔNG thay bản vá thật, không
+    thay `c44`, không thay đột biến. Executor vẫn phải làm đủ tiêu chí §5 của spec.
+
+dieu_kien_ready_DA_THOA:
+  depends_on_460: '#460 merge bằng MERGE COMMIT `d28c4b1` (2 cha 8ce02fd + 0c3405f)'
+  gate_master_xanh: 'run 34074288203 trên d28c4b1: ubuntu 27ph37s + windows 48ph00s, cả hai success'
+  spec_dong_bang: 'sha256 ops/specs/wp461-… = db4980e3c5e12b3f…, 9789 byte, bản r2'
+  neo_uy_quyen: 'Mission Issue #470 — readback được, không phải lời kể lại chat'
+  bon_quyet_dinh: 'Q1 Q2 Q3 Q4 ĐỦ BỐN, ghi trong spec §3 và Mission #470. r1 thiếu Q4.'
+  truong_S4: 'write_set_hash · heartbeat_at · lease_until — ĐỦ, kèm công thức tính'
+
+do_va_cham:
+  cach_do: >-
+    KHÔNG dùng lại bộ lọc của r1. r1 grep `^[+-].*_TRANSPORT_CONTRACTS` nên mù với một HÀNG MỚI
+    bên trong bảng, và khai SAI rằng #447 không sửa bảng. Lượt này so KHỐI ĐÃ TRÍCH bằng AST/awk.
+  ket_qua: >-
+    #447 (`bc9aaf7`) CÓ thêm hàng `("github", ("gh",), "github_cli", "machine")` vào
+    `_TRANSPORT_CONTRACTS`: 3 hàng ở merge-base `c03a409` -> 4 hàng ở head.
+  he_qua: >-
+    Vì r2 đặt hàng mới ở `_PROVIDER_NGOAI_CLI`, wp461 KHÔNG còn chạm `_TRANSPORT_CONTRACTS`.
+    Va chạm với #447 tụt xuống mức HAI THAY ĐỔI TRONG CÙNG MỘT TỆP, không còn chung một hằng.
+    Vẫn phải merge master về khi #447 land; KHÔNG rebase, KHÔNG force-push, KHÔNG dọn hộ #447.
+  no_khai: >-
+    Reviewer lượt 1 đo được 22 ref không phải tổ tiên HEAD có diff giao write set, trong khi bảng
+    của r1 chỉ liệt kê 4 PR đang mở. Danh mục va chạm theo LEASE là chưa đủ; nợ này CHƯA đóng và
+    KHÔNG thuộc packet wp461.
+
+dieu_kien_dung:
+  - 'Chạm đường dẫn ngoài BỐN đường đã khai — đặc biệt `ops/bien_nhan_v2.py`. Phương án r2 đã
+     chứng minh không cần nó; phải sửa nó nghĩa là spec THIẾU ⇒ `blocked` + revision mới.'
+  - 'Đổi `_TRANSPORT_CONTRACTS` — dù chỉ một byte. Nó phá bất biến một-provider-một-contract VÀ
+     làm hỏng hai chỗ giải nén bộ-4 của PR #447.'
+  - 'Sửa hiện vật `ops/reviews/*.md` hoặc `*.receipt.yaml` — chúng neo băm. Q2 chốt 12 receipt ĐÚNG.'
+  - 'Thêm miễn trừ / danh sách bỏ qua để receipt lịch sử khỏi đỏ. Chúng đỏ ⇒ bản vá SAI, đó là
+     tín hiệu chứ không phải chướng ngại.'
+  - 'Biến Q2 thành một phép đo giả. Không có cách nào từ trong kho xác định một lượt chạy LỊCH SỬ
+     đi qua bề mặt nào — `codex` không phát `modelUsage`. Đó là QUYẾT ĐỊNH và đã được quyết.'
+  - 'Sửa `ops/reviews/README.md` — ngoài write set. Nếu có lý do chính đáng thì BẮT BUỘC chạy lại
+     `ops/lease_publish_test.py` (`t26`/`t27` đọc chính tệp ấy — `R9-F01`, trả giá ở `fa3f282`).'

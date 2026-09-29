@@ -9097,10 +9097,39 @@ def run() -> int:
     import io as _io110, contextlib as _ctx110, tempfile as _tf110
     from pathlib import Path as _P110
 
+    # #565 `M2`/`M4` — KHI NUỐT MỘT NGOẠI LỆ THÌ PHẢI NÓI RA NÓ LÀ NGOẠI LỆ GÌ.
+    #
+    # Bản trước chỉ in khi có `TL_SELFTEST_DEBUG`, nên không đặt biến ấy thì MỌI ca chết vì
+    # HẠ TẦNG (`PermissionError`, `TimeoutExpired`, `OSError`, `ImportError`) trông Y HỆT một
+    # ca thất bại vì MÃ SAI. Hai thứ ấy cần hai cách xử khác nhau, mà log không phân biệt nổi.
+    #
+    # Đã trả giá đo được: `r330_deploy_msg_khong_chay_lenh` chập chờn trên Windows suốt BỐN
+    # lượt đo của đợt #551, và mỗi lượt chỉ để lại đúng một dòng `[FAIL] r330` trần. Nguyên
+    # nhân thật là `TemporaryDirectory.__exit__` ném `PermissionError [WinError 32]` vì WSL
+    # còn giữ handle trên cwd — đo 16/20 = 80%. Bốn lượt ấy mất công vì DÒNG NÀY im lặng.
+    #
+    # NÉM ra ngoài thì KHÔNG được: một ca hạ tầng sẽ giết cả lượt chạy 1710 ca. Phải IN.
+    # Và phép PHÂN LOẠI không đổi một chút nào — `cases` vẫn nhận `(name, False)`, đúng thứ
+    # tự, đúng số lượng; dòng in chỉ ĐI KÈM.
+    _TRAN_CHAN_DOAN_110 = 400
+
+    def _goi_loi_110(exc):
+        """Kiểu VÀ thông điệp, một dòng, và KHAI RÕ khi phải cắt.
+
+        Thân ngoại lệ có thể NHIỀU DÒNG (một `AssertionError` của `run()` mang cả stdout lẫn
+        stderr của lệnh con), nên dừng ở dòng đầu là tái lập đúng bệnh đang chữa, chỉ nhỏ hơn.
+        Nuốt lặng phần dư cũng vậy — cắt thì phải nói đã cắt BAO NHIÊU ký tự.
+        """
+        than = f"{type(exc).__name__}: {exc}".replace("\n", " | ").strip() or "(rong)"
+        if len(than) <= _TRAN_CHAN_DOAN_110:
+            return than
+        return f"{than[:_TRAN_CHAN_DOAN_110]} …[CAT {len(than) - _TRAN_CHAN_DOAN_110} ky tu]"
+
     def _t110(name, fn):
         try:
             cases.append((name, bool(fn())))
-        except Exception:
+        except Exception as _e110:      # noqa: BLE001
+            print(f"  [LOI-VO-CAN?] {name}: {_goi_loi_110(_e110)}", flush=True)
             if os.environ.get("TL_SELFTEST_DEBUG"):
                 import traceback as _tb110; _tb110.print_exc()
             cases.append((name, False))
@@ -21264,15 +21293,117 @@ def run() -> int:
         # KÊ KHAI SLOT (MANG-SANDBOX-CODEX / #334): 70 → **71** Markdown dưới `docs/`. Thêm đúng
         # `docs/MANG_SANDBOX_CODEX.md`, dev-side/NGOÀI gói. `RELEASE_MANIFEST.json` KHÔNG đổi nên
         # gói giữ **180**, trần Package 200 không nhúc nhích; cây thật = 180 + 71 = **251**.
-        ok3 = int(j.get("file_count") or 0) == len(paths) and len(paths) + 71 == 251
+        # KÊ KHAI SLOT (PR #475 — ADR nguồn tin cậy cho cổng đọc lease): 71 → **72** Markdown dưới
+        # `docs/`. Thêm ĐÚNG MỘT tệp dev-side/ngoài gói:
+        #   + `docs/adr/0047-nguon-tin-cay-cho-cong-doc-lease.md`
+        # `docs/PROTOCOL_DA_PHIEN.md` (dòng §20) là sửa, không thêm; `ops/specs/**` và `ops/reviews/**`
+        # cùng PR nằm ngoài `docs/` nên ratchet này không đếm. `RELEASE_MANIFEST.json` KHÔNG đổi ⇒ gói
+        # giữ **180**, trần Package 200 không nhúc nhích; cây thật = 180 + 72 = **252**.
+        # TRẢ GIÁ LẦN THỨ TƯ đúng nếp "ĐÃ TRẢ GIÁ" trong ca này: phiên #475 chạy `adr-song` +
+        # `doctrine-scan` + `doc-claims-check --strict` (cả ba xanh) rồi đẩy; CI mới là nơi ca này đỏ
+        # (`tl selftest 1708/1709`, run 34183079571). Kê khai này viết SAU khi đọc đúng ca đỏ ấy.
+        # KÊ KHAI SLOT (PR #526 — ADR-0048 nâng trần trục VÒNG, packet #522 r3): 72 → **73** Markdown
+        # dưới `docs/`. Thêm ĐÚNG MỘT tệp dev-side/ngoài gói:
+        #   + `docs/adr/0048-tran-vong-review-len-muoi.md`
+        # `docs/PROTOCOL_DA_PHIEN.md` (dòng §20) là sửa, không thêm. `RELEASE_MANIFEST.json` có đổi
+        # trong cùng PR ấy, nhưng CHỈ vì băm của CHÍNH TỆP NÀY đổi — không tệp runtime nào được thêm
+        # nên `file_count` giữ **180** và trần Package 200 không nhúc nhích; cây thật = 180 + 73 = **253**.
+        # TRẢ GIÁ LẦN THỨ NĂM, và lần này cái giá nằm ở chỗ khác hai lần trước nên ghi cho rõ: phiên
+        # thi công r2 chạy `adr-song` + `doctrine-scan` + `doc-claims-check --strict` + `git diff --check`
+        # — BỐN cổng, tất cả xanh — rồi bàn giao với lời khai "MỌI cổng xanh". Nó KHÔNG chạy `tl
+        # selftest`. Bàn giao còn ghi `gate` đang `in_progress` ⇒ "KHÔNG ĐO ĐƯỢC"; đo lại thì `gate`
+        # đã `completed/failure` TỪ TRƯỚC lúc bàn giao (run 34685943174 trên `a3f5f21`, run
+        # 34684537107 trên `7059cbb`). Tức bốn cổng kia trả lời một câu hỏi KHÁC, y như ba lần đã ghi
+        # ở trên — nhưng lần này còn thêm một cách sập mới: **đọc một lượt CI chưa xong thành "chưa
+        # biết" rồi bàn giao, trong khi nó đã đỏ**. Phép đo delta hai vế dựng trong MỘT lệnh (hai
+        # clone rời, cùng các bước, cùng ghim `core.abbrev 7`, chạy song song): nền `015ffcc` cho
+        # `rc=0` với `1709/1709` và 0 FAIL; head packet `a3f5f21` cho `rc=1` với `1708/1709` và đúng
+        # MỘT FAIL là chính ca này. Nền XANH ⇒ delta là của packet, không phải đỏ sẵn, không phải
+        # nhiễu rig.
+        # NỢ CÓ TÊN, vì kê khai slot là chữa TRIỆU CHỨNG: **`R291-DAM-SO-CUNG`**. Mỗi tệp `docs/*.md`
+        # thêm vào kho lại làm ca này đỏ và lại đòi một lần kê khai — đó chính là hình dạng đã lặp NĂM
+        # lần, và doctrine của kho nói lặp từ ba lần trở lên thì câu hỏi đúng là *"có nên làm việc này
+        # không"*, không phải *"vá thế nào"*. Cách chữa là cho ca này TÍNH số docs từ cây và chỉ
+        # ratchet phần thực sự là bất biến (số tệp trong GÓI); việc ấy ngoài phạm vi packet #522
+        # (`S6` của lease gen 3 chặn đúng chỗ này).
+        # KÊ KHAI SLOT (Packet #551 r2 — ADR-0050): 74 → **75** Markdown dưới `docs/`.
+        # Thêm ĐÚNG MỘT tệp dev-side/ngoài gói:
+        #   + `docs/adr/0050-assurance-neo-vao-ho-model-khong-phai-hang-cong-cu.md`
+        # Đây là lần thứ BA cùng một cách sập (R291-DAM-SO-CUNG = 3: #522, #548, #551).
+        # `docs/PROTOCOL_DA_PHIEN.md` (dòng §20) là sửa, không thêm. `RELEASE_MANIFEST.json` có đổi
+        # trong cùng packet, nhưng CHỈ vì băm của CHÍNH TỆP NÀY đổi — không tệp runtime nào được thêm
+        # nên `file_count` giữ **180** và trần Package 200 không nhúc nhích; cây thật = 180 + 75 = **255**.
+        ok3 = int(j.get("file_count") or 0) == len(paths) and len(paths) + 75 == 255
         d = root / "docs"
         tren_dia = sorted(d.rglob("*.md")) if d.is_dir() else []
-        ok4 = (len(tren_dia) == 71
+        ok4 = (len(tren_dia) == 75
                and all(not _rel209._release_should_include(q, root) for q in tren_dia)
                and all(set(q.relative_to(root).parts) & _rel209._RELEASE_EXCLUDE_DIRS == {"docs"}
                        for q in tren_dia))
         return ok1 and ok2 and ok3 and ok4
     _t110("r291_docs_ngoai_goi", _c291_docs_ngoai_goi)
+    def _c357_agents_ngoai_goi():
+        # r357 — `.agents/` la ANH EM THU BA cua `.claude`/`.codex`: vi tri adapter phia Codex ma
+        # `docs/adr/0019-ba-skill-adapter-hai-agent-mot-protocol.md` thiet ke, va
+        # `docs/KE_HOACH_TRIEN_KHAI_PROTOCOL_DA_PHIEN.md:273` khai thang "phai bi loai khoi release
+        # bundle". Tran goi la 200 tep CUNG (goi dang 180).
+        #
+        # DO TRUOC KHI VA (06-09-2026): chep mot cay `.agents/` 10 tep vao kho roi hoi
+        # `_release_should_include` => 10/10 SE VAO GOI, tuc 180 -> 190, an 10 trong 20 khe con lai.
+        # Cung hinh dang ca `.codex` (r331), khac dung mot dieu: bat duoc TRUOC khi tep vao git.
+        #
+        # VI SAO KHONG DO CAY THAT CUA KHO. `.agents/` CO Y khong nam trong kho: noi dung hien co la
+        # ban thay-chuoi-mu va con hong (22 tham chieu `.Codex/dev/*.py` tro thu muc khong ton tai,
+        # `--executor Codex` sai allowlist `PROVIDERS`, mot lenh Claude CLI bi doi ten thanh `Codex`)
+        # — de packet rieng. Neu ve nay soi `root/".agents"` thi cay rong => `all()` tren danh sach
+        # rong DUNG VO DIEU KIEN => "co MAT ma khong DO", dung benh `t24`.
+        #
+        # VA MOT LOI KHAI DA BI BAC NGAY TRONG LUOT VIET CA NAY, ghi lai vi no la cai bay that:
+        # ban nhap dung DUONG DAN TONG HOP (khong tao tep) va chu thich khai `_release_should_include`
+        # "thuan path, khong stat tep". SAI — dong cuoi cua ham la `return path.is_file()`
+        # (`release.py:593`). Duong dan khong ton tai luon tra False, nen ve "go khoa phai quay lai
+        # vao goi" KHONG THE do => ca se xanh ma khong co rang. Do duoc: go khoa ra van cho False.
+        # Nay dung CAY TAM voi TEP THAT, va lay chinh thu muc tam lam `root`.
+        import tempfile as _tf357
+        from pathlib import Path as _Path357
+        root = _ROOT209
+        ok1 = ".agents" in _rel209._RELEASE_EXCLUDE_DIRS
+        mf = root / "RELEASE_MANIFEST.json"
+        ok2 = ok3 = ok_git = True
+        if not mf.exists():
+            if (root / ".git").exists():
+                ok_git = False
+        else:
+            j = _j209.loads(mf.read_text(encoding="utf-8"))
+            paths = [str(x.get("path") or "") for x in (j.get("files") or [])]
+            ok2 = not [p for p in paths if p.startswith(".agents/")]
+            # RATCHET: goi giu 180. Do o day => co tep RUNTIME duoc them, phai ke khai slot CO CHU DICH.
+            ok3 = int(j.get("file_count") or 0) == len(paths) and len(paths) == 180
+        # RANG HAI CHIEU tren CAY TAM: khoa VAO => loai; go khoa RA => phai QUAY LAI vao goi.
+        # Khong co ve thu hai thi ca chi chung minh "hang co chua chuoi", khong chung minh hang ay
+        # CO HIEU LUC — va mot phep kiem khong the do thi khong phai bang chung.
+        with _tf357.TemporaryDirectory() as _td:
+            troot = _Path357(_td)
+            mau = [troot / ".agents" / "skills" / "cross-review" / "SKILL.md",
+                   troot / ".agents" / "skills" / "grill-me" / "LICENSE"]
+            mau_giu = [troot / "my.agents" / "file.txt",
+                       troot / "scripts" / ".agents_tools" / "file.py",
+                       troot / "scripts" / "tl.py"]
+            for q in mau + mau_giu:
+                q.parent.mkdir(parents=True, exist_ok=True)
+                q.write_text("x\n", encoding="utf-8")
+            loai = bool(mau) and all(not _rel209._release_should_include(q, troot) for q in mau)
+            giu = bool(mau_giu) and all(_rel209._release_should_include(q, troot) for q in mau_giu)
+            goc = set(_rel209._RELEASE_EXCLUDE_DIRS)
+            try:
+                _rel209._RELEASE_EXCLUDE_DIRS.discard(".agents")
+                quay_lai = bool(mau) and all(_rel209._release_should_include(q, troot) for q in mau)
+            finally:
+                _rel209._RELEASE_EXCLUDE_DIRS.clear()
+                _rel209._RELEASE_EXCLUDE_DIRS.update(goc)
+        ok4 = loai and quay_lai and giu and ".agents" in _rel209._RELEASE_EXCLUDE_DIRS
+        return ok1 and ok2 and ok3 and ok4 and ok_git
+    _t110("r357_agents_ngoai_goi", _c357_agents_ngoai_goi)
     def _c307_changelog_mot_version_mot_dot():
         # r307 — SỔ: MỘT version phải ứng ĐÚNG MỘT số đợt. Lớp này trước nay KHÔNG cổng nào soi:
         # merge PR #6 (`dfb9418`) đi qua CI xanh + gate local 8/8 xanh mà vẫn khai 15 số version
@@ -22258,13 +22389,32 @@ def run() -> int:
                 '(cần `gws auth login` có quyền GHI Drive)"; exit 3; }')
 
         def _goi(line):
-            """True ⇔ `gws` BỊ GỌI khi chạy đúng dòng đó với drive-push hỏng."""
-            with _tf330.TemporaryDirectory() as _td:
+            """True ⇔ `gws` BỊ GỌI khi chạy đúng dòng đó với drive-push hỏng.
+
+            #565 `M1` — DỌN DẸP KHÔNG ĐƯỢC NẰM TRÊN ĐƯỜNG QUYẾT ĐỊNH. Bản trước dùng
+            `TemporaryDirectory()` làm CONTEXT MANAGER, mà `ignore_cleanup_errors` mặc định
+            `False` ⇒ `__exit__` NÉM. Trên Windows `_bash` là alias WSL (đo: `uname -s` →
+            `Linux`), và WSL GIỮ HANDLE trên cwd sau khi tiến trình con trả về — đo 16/20 =
+            80% thư mục tạm không xoá được, `PermissionError [WinError 32]` trên chính THƯ
+            MỤC. `_t110` nuốt lỗi ấy thành `False`, nên ca ĐỎ vì RIG chứ không vì thứ nó đo.
+            `_goi` được gọi HAI lần mỗi lượt ⇒ P(≥1 lần hỏng) ≈ 0,96; quan sát thực 3 đỏ /
+            1 xanh trên bốn lượt. Trên Linux không có WSL nên ca luôn [OK] — đó là lý do CI
+            chưa bao giờ thấy.
+
+            Chữa bằng KIẾN TRÚC chứ không bằng một `try` bọc thêm: đọc kết quả XONG rồi mới
+            dọn, và dọn là việc BỎ QUA ĐƯỢC. Hình dạng `RIG-QUYET-MAU-CUA-PHEP-DO` đã đếm
+            tới NĂM lần trong kho này, quá ngưỡng "lặp ba lần thì hỏi có nên làm thế không".
+            """
+            _td = _tf330.mkdtemp()
+            try:
                 _sp = os.path.join(_td, "p.sh")
                 with open(_sp, "w", encoding="utf-8", newline="\n") as _f:
                     _f.write("bad(){ :; }\ngws(){ echo CALLED >> goi.txt; }\nTL=false\nZIP=x\n" + line + "\n")
                 _sp330.run([_bash, "p.sh"], cwd=_td, capture_output=True, timeout=60)
+                # ĐỌC TRƯỚC, DỌN SAU. Đảo thứ tự là đọc một thư mục vừa bị xoá.
                 return os.path.exists(os.path.join(_td, "goi.txt"))
+            finally:
+                _sh330.rmtree(_td, ignore_errors=True)
         return okA and okB and okC and _goi(_old) and not _goi(_new[0])
     _t110("r330_deploy_msg_khong_chay_lenh", _c330_deploy_msg_khong_chay_lenh)
 
@@ -22305,6 +22455,104 @@ def run() -> int:
         ok4 = any(ln.strip() == ".codex/" for ln in _gi.splitlines())
         return ok1 and ok2 and ok3 and ok4
     _t110("r331_codex_ngoai_cay_phat_hanh", _c331_codex_ngoai_cay_phat_hanh)
+
+    # ═══ r379 — RIG KHÔNG ĐƯỢC QUYẾT MÀU, và NGOẠI LỆ KHÔNG ĐƯỢC BỊ NUỐT LẶNG ═══
+    def _c379_rig_khong_quyet_mau_va_ngoai_le_khong_bi_nuot_lang():
+        """Packet #565. Hai khuyết tật CÙNG GỐC — rig quyết màu thay vì nội dung được đo.
+
+        VẾ A (`M1`) — `_goi` của `r330` để `TemporaryDirectory.__exit__` quyết màu. Đo trên máy
+          chủ kho 10:53Z 19-09-2026: 16/20 = 80% thư mục tạm không xoá được (`PermissionError
+          [WinError 32]` trên chính THƯ MỤC, vì `_bash` là alias WSL và WSL giữ handle trên cwd).
+          Ca này KHÔNG chạy lại `r330` — nó đo HÌNH DẠNG của `_goi` trên AST: dọn dẹp phải nằm
+          trong `finally` và phải `ignore_errors`, và `return` phải đứng TRƯỚC nó.
+        VẾ B (`M2`/`M4`) — `_t110` phải IN kiểu VÀ thông điệp khi nuốt, KHÔNG điều kiện
+          `TL_SELFTEST_DEBUG`. Đo THẲNG bằng cách gọi `_goi_loi_110` — nó là sản phẩm, không
+          phải bản sao.
+
+        HAI VẾ PHẢI PHÂN BIỆT ĐƯỢC BẰNG ĐẦU VÀO. Một đột biến gỡ vế A không được làm vế B đỏ và
+        ngược lại; nếu không chúng là bộ TƯƠNG ĐƯƠNG và ca này chỉ đang đo MỘT thứ (bài học đo
+        được ở #566 lượt này: `m76` phải đổi đối chứng vì đối chứng cũ đỏ theo).
+        """
+        import ast as _ast379
+        import inspect as _in379
+        import textwrap as _tw379
+        # ĐO ĐÚNG THỨ CẦN ĐO, ĐỪNG MƯỢN CẢ TỆP LÀM ĐẦU VÀO. Bản đầu của ca này `ast.parse`
+        # NGUYÊN `scripts/tl_selftest.py` (2 153 584 B, 30 340 dòng) chỉ để tìm một hàm ~30
+        # dòng. Ngày 20-09-2026 01:35Z nó ĐỎ trên máy chủ kho:
+        #     SyntaxError: invalid syntax (<unknown>, line 1602)
+        # trong khi CHÍNH tệp ấy đang chạy — tức thứ ĐỌC ĐƯỢC khác thứ đang THỰC THI. Cùng
+        # commit, cùng máy, cùng python, lượt 00:55Z cùng ngày thì ca này XANH. **NGUYÊN NHÂN
+        # CHƯA BIẾT.** Kho có sẵn một lớp sự cố cùng hình dạng — `scripts/tl_boot.py`: *"strip
+        # NUL phòng mount NUL-pad #51435 … Cắt cụt thật → SyntaxError"* — nhưng đó là GIẢ
+        # THUYẾT, không phải phép đo; chớ đọc nó thành lời giải thích (CLAUDE.md: một nguyên
+        # nhân sai trong doctrine tệ hơn không ghi).
+        #
+        # Hai việc làm ngay, CẢ HAI độc lập với nguyên nhân:
+        #   (1) lấy NGUỒN CỦA HÀM qua `inspect` thay vì đọc tệp 2 MB — bề mặt đầu vào từ
+        #       30 340 dòng xuống còn thân `_c330…`, và phép tra `_goi` hết mơ hồ;
+        #   (2) khi vẫn hỏng thì chẩn đoán phải NÊU được nó đã đọc GÌ. `ast.parse` không có
+        #       `filename=` nên in `<unknown>` — một chẩn đoán không gọi được tên đầu vào của
+        #       chính nó. Nay ném kèm đường dẫn, số byte và băm của tệp trên đĩa; `_t110` (vế
+        #       B của chính ca này) sẽ in ra, nên một lượt đỏ là đủ để biết.
+        try:
+            _src379 = _tw379.dedent(_in379.getsource(_c330_deploy_msg_khong_chay_lenh))
+            cay = _ast379.parse(_src379, filename="<nguon _c330 lay qua inspect>")
+        except Exception as _e379:
+            import hashlib as _h379
+            _p379 = _ROOT209 / "scripts" / "tl_selftest.py"
+            try:
+                _b379 = _p379.read_bytes()
+                _tt379 = (f"{len(_b379)} byte · sha256/16 "
+                          f"{_h379.sha256(_b379).hexdigest()[:16]}")
+            except Exception as _e2379:
+                _tt379 = f"KHONG DOC DUOC ({type(_e2379).__name__}: {_e2379})"
+            raise RuntimeError(
+                f"khong lay/parse duoc nguon `_c330_deploy_msg_khong_chay_lenh` "
+                f"({type(_e379).__name__}: {_e379}) | tep tren dia {_p379}: {_tt379}") from None
+        goi = next((n for n in _ast379.walk(cay)
+                    if isinstance(n, _ast379.FunctionDef) and n.name == "_goi"), None)
+        if goi is None:
+            return False                      # KHÔNG ĐO ĐƯỢC ⇒ ĐỎ, không phải "sạch"
+        # A1 — KHÔNG còn `with TemporaryDirectory()`; `mkdtemp` + `finally`.
+        okA1 = (not any(isinstance(n, _ast379.With) and any(
+                    isinstance(i.context_expr, _ast379.Call)
+                    and getattr(i.context_expr.func, "attr", "") == "TemporaryDirectory"
+                    for i in n.items) for n in _ast379.walk(goi))
+                and any(isinstance(n, _ast379.Call)
+                        and getattr(n.func, "attr", "") == "mkdtemp" for n in _ast379.walk(goi)))
+        thu = [n for n in _ast379.walk(goi) if isinstance(n, _ast379.Try) and n.finalbody]
+        # A1b — dọn nằm trong `finally` VÀ bỏ qua lỗi: `rmtree(..., ignore_errors=True)`.
+        okA1b = any(
+            isinstance(c, _ast379.Call) and getattr(c.func, "attr", "") == "rmtree"
+            and any(k.arg == "ignore_errors" and getattr(k.value, "value", False) is True
+                    for k in c.keywords)
+            for t in thu for n in t.finalbody for c in _ast379.walk(n))
+        # A2 — ĐỌC TRƯỚC, DỌN SAU: `return` phải nằm trong THÂN `try`, không nằm sau `finally`.
+        #      Đây là vế PHÂN BIỆT với A1: một bản vá dọn đúng mà đọc SAU khi dọn vẫn sai.
+        okA2 = any(isinstance(n, _ast379.Return) for t in thu for n in _ast379.walk(t.body[0])
+                   if t.body) or any(isinstance(n, _ast379.Return)
+                                     for t in thu for b in t.body for n in _ast379.walk(b))
+        # B — `_goi_loi_110` mang KIỂU và THÔNG ĐIỆP, và KHAI khi cắt.
+        try:
+            raise RuntimeError("MOC-B-dong-mot\nMOC-B-dong-hai")
+        except RuntimeError as e:
+            goi_ra = _goi_loi_110(e)
+        okB1 = "RuntimeError" in goi_ra and "MOC-B-dong-mot" in goi_ra
+        okB2 = "MOC-B-dong-hai" in goi_ra           # dòng THỨ HAI phải tới nơi
+        # SỐ KÝ TỰ CẮT phải tính từ THỨ ĐƯỢC ĐỊNH DẠNG, không từ thông điệp thô. Bản đầu
+        # của ca này đòi `"37"` — đúng phần đuôi mà quên tiền tố `"ValueError: "` (12 ký tự),
+        # nên số thật là 49 và ca ĐỎ vì CHÍNH NÓ tính sai, không vì sản phẩm sai. Ghi lại vì
+        # đó đúng lớp "lời khai rộng hơn phép đo", chỉ ở quy mô một hằng số.
+        _than379 = f"ValueError: {'x' * (_TRAN_CHAN_DOAN_110 + 37)}"
+        try:
+            raise ValueError("x" * (_TRAN_CHAN_DOAN_110 + 37))
+        except ValueError as e:
+            dai = _goi_loi_110(e)
+        okB3 = "CAT" in dai and str(len(_than379) - _TRAN_CHAN_DOAN_110) in dai
+        okB4 = _goi_loi_110(ValueError("ngan")) == "ValueError: ngan"
+        return okA1 and okA1b and okA2 and okB1 and okB2 and okB3 and okB4
+    _t110("r379_rig_khong_quyet_mau_va_ngoai_le_khong_bi_nuot_lang",
+          _c379_rig_khong_quyet_mau_va_ngoai_le_khong_bi_nuot_lang)
 
     def _c300_dac_ta_khop_ma():
         # Chống trôi prose↔mã: enum trong tài liệu/thẻ phải khớp hằng trong lookup_ops.
@@ -24873,17 +25121,76 @@ def run() -> int:
         return normal and cat == "killed"
     _t110("r378_l7_claim_khop_tung_byte", _c378_claim_khop_byte)
 
+    # r378 (#574) — phản chứng dựng bằng GIÁN TIẾP THƯ MỤC, KHÔNG bằng symlink TỆP.
+    #
+    # Vì sao đổi: symlink TỆP đòi SeCreateSymbolicLinkPrivilege, nên trên Windows thiếu đặc quyền
+    # `link.symlink_to(outside)` ném `OSError [WinError 1314]`, `_t110` bắt rồi hạ ca xuống False.
+    # Ca ĐỎ vì RIG, không vì mã — đo được trên máy chủ kho 20-09-2026 ở CẢ HAI vế nền `dc85dd0a`
+    # và ứng viên `8c425b1`, nên nó không phải hồi quy của #565. Đó là hình dạng
+    # RIG-QUYET-MAU-CUA-PHEP-DO, đã đếm 5 lần trong kho ⇒ quá ngưỡng ba lần ⇒ phải chữa bằng
+    # KIẾN TRÚC (bỏ hẳn nhu cầu đặc quyền khỏi đường chính), không bằng một `try` bọc thêm.
+    #
+    # Mẫu KHÔNG tự nghĩ ra: lấy nguyên hình dạng của `_c41_fragment_read_error` trong CHÍNH tệp
+    # này — junction (`mklink /J`) trên Windows, directory symlink trên POSIX, cả hai KHÔNG đòi
+    # đặc quyền — cộng đúng bộ tên lỗi của nó. #574 đoán đúng cơ chế ("junction chỉ làm được cho
+    # THƯ MỤC") nhưng kết luận kèm theo ("giả thuyết, CHƯA CHẠY") HẸP HƠN phép đo: mẫu ấy đã tồn
+    # tại và đang xanh. Lời khai lệch phép đo theo chiều HẸP cũng là lệch.
+    #
+    # Chủ kho chốt cách xử `KHÔNG ĐO ĐƯỢC`: **ĐỎ — fail loud như `_c41`**. Dựng không được thì ném
+    # `AssertionError` CÓ TÊN, không tha êm. Giá phải trả, ghi thẳng: trên nền không dựng nổi
+    # reparse point, suite ĐỎ vì MÔI TRƯỜNG — nhưng nó NÓI RA lý do bằng một tên đọc được thay vì
+    # đỏ câm, và `_t110` in `[LOI-VO-CAN?] <ca>: <kiểu lỗi>` ra stdout.
+    def _r378_gian_tiep(link_dir, dich):
+        """Dựng gián tiếp THƯ MỤC trỏ `link_dir` -> `dich`. Không đòi đặc quyền trên cả hai nền."""
+        import os as _os378g
+        import subprocess as _sp378g
+        if _os378g.name == "nt":
+            jr = _sp378g.run(
+                [_os378g.environ.get("COMSPEC", "cmd.exe"), "/d", "/c", "mklink", "/J",
+                 str(link_dir), str(dich)],
+                capture_output=True, text=True, encoding="utf-8", errors="replace")
+            if jr.returncode != 0:
+                raise AssertionError(
+                    f"JUNCTION_CREATE_FAILED:{jr.returncode}:{jr.stderr.strip()}")
+        else:
+            try:
+                link_dir.symlink_to(dich, target_is_directory=True)
+            except OSError as exc:
+                raise AssertionError("DIRECTORY_SYMLINK_CREATE_FAILED") from exc
+
+    def _r378_go_gian_tiep(link_dir):
+        """Junction gỡ bằng `rmdir`, symlink thư mục gỡ bằng `unlink` — hai nền, hai lệnh."""
+        import os as _os378u
+        if _os378u.name == "nt":
+            link_dir.rmdir()
+        else:
+            link_dir.unlink()
+
+    def _r378_kiem_thoat(target, root):
+        """Tiền đề phải CÓ THẬT trước khi đo (M4).
+
+        Thiếu chốt này thì ca có thể XANH vì phản chứng chưa từng tồn tại — đúng bệnh
+        'ca có MẶT khác ca có ĐO' mà `t24` đã trả giá. `_c41` gọi nó là PATH_MISMATCH_NOT_CREATED;
+        giữ nguyên tên để hai chỗ đọc như một."""
+        if target.resolve(strict=True).is_relative_to(root.resolve(strict=True)):
+            raise AssertionError("PATH_MISMATCH_NOT_CREATED")
+
     def _c378_resolve_phai_o_trong_kho():
         import tempfile as _tf378
         with _tf378.TemporaryDirectory() as td:
             root = Path(td) / "repo"
             root.mkdir()
-            outside = Path(td) / "outside.py"
-            outside.write_text("x = 1\n", encoding="utf-8")
-            link = root / "r378_escape.py"
+            outside = Path(td) / "outside"
+            outside.mkdir()
+            (outside / "r378_escape.py").write_text("x = 1\n", encoding="utf-8")
+            link_dir = root / "r378_ngoai"
+            _r378_gian_tiep(link_dir, outside)
             try:
-                link.symlink_to(outside)
-                body = "r378_escape.py:99999999"
+                _r378_kiem_thoat(link_dir / "r378_escape.py", root)
+                # Có dấu `/` nên L7 đi nhánh `root / repo_fname` — tường minh, KHÔNG qua `pyindex`.
+                # Cố ý: `rglob` của pathlib BỎ thư mục là liên kết, nên một chỉ mục quét cây sẽ
+                # không thấy tệp này và ca sẽ xanh vì lý do sai.
+                body = "r378_ngoai/r378_escape.py:99999999"
                 oracle = lambda r: _r378_expect(
                     [(x["claim"], x["reason"]) for x in _r378_l7(r)]
                     == [(body, "PYLOC_FILE_MISSING")])
@@ -24896,8 +25203,284 @@ def run() -> int:
                                      body, oracle, root=root)
                 return normal and cat == "killed"
             finally:
-                link.unlink(missing_ok=True)
+                _r378_go_gian_tiep(link_dir)
     _t110("r378_l7_resolve_phai_o_trong_kho", _c378_resolve_phai_o_trong_kho)
+
+    def _c378_pyindex_cung_phai_o_trong_kho():
+        """A7 (#574 lượt 2) — CỬA THỨ HAI của cùng chốt containment: nhánh `pyindex`.
+
+        CA NÀY SINH RA TỪ MỘT ĐỘT BIẾN SỐNG SÓT, do cross-review codex lượt 1 bắt
+        (`mat-phu-pyindex-khi-doi-fixture`). Khi đổi phản chứng sang GIÁN TIẾP THƯ MỤC, thân
+        tài liệu phải mang dấu `/` (`r378_ngoai/r378_escape.py`) để trỏ được vào trong liên
+        kết — mà L7 rẽ theo ĐÚNG dấu ấy:
+
+            có `/`    -> cands = [root / repo_fname, doc.parent / fname]   (tường minh)
+            không `/` -> cands = ctx["pyindex"].get(<tên trần>)            (chỉ mục)
+
+        Nên fixture mới chỉ còn đo cửa TƯỜNG MINH. Fixture CŨ (symlink TỆP, tên trần) đo cửa
+        CHỈ MỤC. Đổi xong thì cửa chỉ mục KHÔNG còn ca nào — đo được: đột biến gỡ chốt
+        containment vẫn **sống sót 1714/1714** trên head, trong khi nền bắt được.
+
+        Đó là HỒI QUY ĐỘ PHỦ của bản vá test, không phải lỗi runtime: chốt sản phẩm vẫn còn
+        nguyên. Nhưng một chốt không có ca canh là một chốt sẽ âm thầm hở lại — cùng bài học
+        `ĐỘT BIẾN SỐNG SÓT ... là khoảng TRỐNG của bộ test`.
+
+        DỰNG CỬA CHỈ MỤC MÀ KHÔNG CẦN ĐẶC QUYỀN: `pyindex` quét bằng `glob("*.py")` trên BỐN
+        thư mục cố định (`scripts`, `scripts/tl_core`, `scripts/_fallback`, `.`) — không phải
+        `rglob`, nên nó KHÔNG bỏ qua thư mục liên kết như `rglob` làm. Cho chính `root/scripts`
+        là gián tiếp thư mục trỏ RA NGOÀI root: `glob` liệt kê tệp bên ngoài, ứng viên
+        `root/scripts/<tên>.py` `resolve()` ra ngoài, và chốt containment phải loại nó.
+
+        Dùng lại NGUYÊN `_r378_gian_tiep` / `_r378_go_gian_tiep` / `_r378_kiem_thoat` của ca
+        trước — cùng hợp đồng hai nền, cùng tên lỗi, không dựng cơ chế thứ hai.
+
+        ĐỘT BIẾN LÀM CA NÀY ĐỎ: bỏ chốt `resolved.is_relative_to(root_resolved)`
+        (`scripts/tl_core/workflow.py`) ⇒ ứng viên ngoài kho được nhận, tệp CÓ THẬT nên L7
+        thôi báo `PYLOC_FILE_MISSING` ⇒ oracle vỡ. Đây là CÙNG đột biến mà
+        `r378_l7_resolve_phai_o_trong_kho` giết — có chủ đích: hai ca, hai CỬA, một chốt.
+        """
+        import tempfile as _tf378
+        with _tf378.TemporaryDirectory() as td:
+            root = Path(td) / "repo"
+            root.mkdir()
+            outside = Path(td) / "ngoai_scripts"
+            outside.mkdir()
+            (outside / "r378_pyidx.py").write_text("x = 1\n", encoding="utf-8")
+            link_dir = root / "scripts"
+            _r378_gian_tiep(link_dir, outside)
+            try:
+                # Tiền đề PHẢI có thật: ứng viên chỉ mục thoát khỏi root. Thiếu chốt này thì ca
+                # xanh vì phản chứng chưa từng tồn tại (`t24`: ca có MẶT khác ca có ĐO).
+                _r378_kiem_thoat(link_dir / "r378_pyidx.py", root)
+                # KHÔNG có dấu `/` ⇒ L7 bắt buộc đi nhánh `ctx["pyindex"]`.
+                body = "r378_pyidx.py:99999999"
+                oracle = lambda r: _r378_expect(
+                    [(x["claim"], x["reason"]) for x in _r378_l7(r)]
+                    == [(body, "PYLOC_FILE_MISSING")])
+                normal = True
+                try:
+                    oracle(_r378_run(body, root=root))
+                except _R378SaiKyVong:
+                    normal = False
+                cat = _r378_classify("if resolved.is_relative_to(root_resolved):", "if True:",
+                                     body, oracle, root=root)
+                return normal and cat == "killed"
+            finally:
+                _r378_go_gian_tiep(link_dir)
+    _t110("r378_l7_pyindex_cung_phai_o_trong_kho", _c378_pyindex_cung_phai_o_trong_kho)
+
+    def _c378_dung_hong_thi_do_co_ten():
+        """A4 — dựng không được thì ĐỎ CÓ TÊN, không nuốt thành `False` câm.
+
+        Ép hỏng bằng một đích ĐÃ TỒN TẠI: POSIX ném `FileExistsError` (một `OSError`), Windows
+        cho `mklink` mã thoát khác 0. Hai nền hai đường, cùng một hợp đồng."""
+        import tempfile as _tf378
+        with _tf378.TemporaryDirectory() as td:
+            dich = Path(td) / "dich"
+            dich.mkdir()
+            ke = Path(td) / "ke"
+            ke.mkdir()
+            try:
+                _r378_gian_tiep(ke, dich)
+            except AssertionError as exc:
+                return str(exc).split(":", 1)[0] in (
+                    "JUNCTION_CREATE_FAILED", "DIRECTORY_SYMLINK_CREATE_FAILED")
+            return False
+    _t110("r378_dung_gian_tiep_hong_thi_do_co_ten", _c378_dung_hong_thi_do_co_ten)
+
+    def _c378_tien_de_khong_thoat_thi_do():
+        """A5 — gián tiếp dựng xong mà `resolve()` KHÔNG thoát khỏi `root` thì phải ném.
+
+        Đây là chốt chống 'ca có MẶT khác ca có ĐO': trỏ liên kết vào một thư mục NẰM TRONG
+        `root` thì phản chứng không tồn tại, và ca đo an ninh sẽ xanh mà chẳng đo gì."""
+        import tempfile as _tf378
+        with _tf378.TemporaryDirectory() as td:
+            root = Path(td) / "repo"
+            root.mkdir()
+            trong = root / "trong"
+            trong.mkdir()
+            (trong / "r378_escape.py").write_text("x = 1\n", encoding="utf-8")
+            link_dir = root / "r378_ngoai"
+            _r378_gian_tiep(link_dir, trong)
+            try:
+                _r378_kiem_thoat(link_dir / "r378_escape.py", root)
+            except AssertionError as exc:
+                return str(exc) == "PATH_MISMATCH_NOT_CREATED"
+            finally:
+                _r378_go_gian_tiep(link_dir)
+            return False
+    _t110("r378_tien_de_khong_thoat_thi_do", _c378_tien_de_khong_thoat_thi_do)
+
+    def _c378_ma_tran_phan_hang():
+        """A6 — MA TRẬN cho `_r378_classify`. Mỗi nhãn là một HỌ, không phải một đại diện.
+
+        LỊCH SỬ NGẮN, vì nó giải thích hình dạng hiện tại. Slug
+        `phan-hang-giet-gia-thieu-doi-chung` đã lặp NĂM lượt cross-review:
+
+            lượt 1  m5       mất phủ CỦA CHỈ MỤC khi đổi fixture
+            lượt 2  m7/m9    bộ phân hạng có BA hạng, ca chỉ canh MỘT
+            lượt 3  m10      ba hạng đã canh, nhưng canh bằng THÔNG ĐIỆP
+            lượt 4  m11      canh theo lớp, nhưng so bằng TÊN lớp
+            lượt 5  m12/m13/m14 + MẤT PHỦ m3
+            (sau)   phiên điều phối TỰ ĐO khi soạn r3: `m10` và `m14` cho TẬP ô đỏ BẰNG NHAU
+                    (27 toạ độ, hai chiều rỗng) ⇒ một BỘ TƯƠNG ĐƯƠNG mà ma trận SÁU dạng của
+                    bản đầu theo HỌ (`576774b`) không phân biệt nổi. Không reviewer nào nêu; nó lộ ra vì `A11` đòi so TẬP
+                    chứ không so SỐ ĐẾM — và hai cái đó cùng cho `27` nên phép đếm im lặng.
+
+        Lượt 5 là lượt đắt nhất, và nó bắt hai thứ KHÁC NHAU:
+
+        (a) **MẤT PHỦ.** Bản r2 thay TRỌN bốn vế rời của r1 bằng ma trận, và đánh rơi đối
+            chứng `AssertionError` mà vế (a) của r1 có. Đo được: `r1/m3` ⇒ `False` (bắt
+            được), `r2/m3` ⇒ `1715/1715` (SỐNG). Thay một bộ đo mà không kiểm bộ cũ còn bị
+            bắt không là một hồi quy PHỦ, và nó không lộ ra bằng đọc.
+
+        (b) **NHÃN RỘNG HƠN TẬP FIXTURE.** r2 lấy MỘT đại diện cho mỗi nhãn: `RuntimeError`
+            là toàn bộ lớp "thường"; lớp con duy nhất dựng CÙNG module; mọi ngoại lệ tạo
+            bằng MỘT đối số chuỗi. Nên ba cài đặt sai NẰM NGAY TRONG các trục r2 đã khai vẫn
+            qua cả 14 ô: `m12` (nhận diện bằng tuple/`ValueError`) lọt ở `LỚP=thường`, `m13`
+            (giới hạn lớp con theo module) lọt ở `LỚP=con`, `m14` (phân hạng theo `args`)
+            lọt ở thông điệp rỗng.
+
+        Tức lời khai của r2 — con trỏ ⟦r2:67 #a64cff8f|dù nó sai theo chiều nào⟧
+        (ops/specs/r378-symlink-doi-dac-quyen-r2.md; băm nội dung dòng, và mảnh neo phải nằm
+        trong dòng ấy; kiểm bằng con_tro.py của đặc tả r11) — RỘNG HƠN phép đo. Không chép
+        lại lời r2 vào đây: hai bản trước chép, một bản diễn ý trong ngoặc (cross-review #574
+        lượt 4 bắt), và đặc tả r10 bỏ hẳn lời trích viết tay. Ma trận có trục, nhưng **mỗi trục chỉ có một điểm**, nên nó
+        vẫn là 14 ĐIỂM được sắp thành bảng. Đúng cái bẫy nó sinh ra để thoát.
+
+        NÊN BẢN NÀY ĐỔI BA THỨ:
+
+          1. Mỗi nhãn mang một HỌ thành viên. Lớp "thường" gồm cả `AssertionError` (khôi phục
+             phủ `m3`), `ValueError` (khoá `m12`), `TypeError`, `KeyError`. Lớp "con" gồm cả
+             lớp con KHÁC module (khoá `m13`) và lớp ĐA KẾ THỪA. "Trùng tên" gồm cả một bản
+             là lớp con của `ValueError`.
+          2. Dạng đối số thành một TRỤC THẬT, không phải một chuỗi duy nhất: không đối số ·
+             chuỗi rỗng · thông điệp gốc · thông điệp khác · hai đối số · **mốc KÈM đối số
+             thứ hai** · `None` (khoá `m14`, và tách `m10` khỏi `m14` — xem chú thích tại
+             `DOI_SO`).
+          3. Thu TẬP ô đỏ ĐẦY ĐỦ rồi mới ném, thay vì dừng ở ô hỏng đầu tiên. `A11` đòi so
+             TẬP ô của từng đột biến; dừng ở ô đầu thì không kiểm được điều đó.
+
+        Và thêm một vế mà r2 thiếu: nhánh oracle THOẢ phải chốt SỐ LẦN GỌI, không chỉ chốt
+        kết quả — một cài đặt gọi oracle hai lần vẫn cho `survived`.
+
+        `expected` mỗi ô là DỮ LIỆU: suy từ cờ `bat_duoc` VIẾT TAY và `lop.__name__`, KHÔNG
+        từ `_r378_classify`. Có chốt tự kiểm so `bat_duoc` với `issubclass` để bảng fixture
+        không âm thầm trôi.
+
+        GIỮ NGUYÊN ngữ nghĩa `except` của Python: lớp CON vẫn là `killed`. Ma trận ĐO bộ phân
+        hạng; nó KHÔNG tự quyết đổi sang so kiểu chính xác.
+
+        PHẠM VI, KHAI CHO ĐÚNG — và r2 đã khai quá rộng đúng chỗ này: ma trận bảo đảm cho
+        MIỀN ĐÃ LIỆT KÊ dưới đây (11 lớp × 7 dạng đối số × 3 trạng thái oracle, 79 ô), KHÔNG cho
+        mọi cài đặt sai có thể viết bằng Python (cách nói của đặc tả r3, con trỏ
+        ⟦r3:323-324 #e70e42b5|mọi cài đặt sai có thể viết bằng Python⟧ — bản trước ghi §8.4,
+        sai, nguồn thật là §8.3; KHÔNG phải lời của r2). Một `m17` theo một chiều chưa ai nêu vẫn
+        có thể tồn tại; `A11` đòi bằng chứng cho các chiều ĐÃ BIẾT, không đòi bằng chứng phủ
+        định về những chiều chưa biết.
+        """
+        class _ConCungModule(_R378SaiKyVong):
+            pass
+
+        class _DaKeThua(_R378SaiKyVong, ValueError):
+            pass
+
+        # Lớp CON nhưng khai `__module__` KHÁC — ô mà `m13` (giới hạn theo module) chết.
+        _ConKhacModule = type("_ConKhacModule", (_R378SaiKyVong,),
+                              {"__module__": "mot_module_hoan_toan_khac"})
+        # TRÙNG TÊN, khác `id()`, KHÔNG phải lớp con — ô mà `m11` chết.
+        _TrungTen = type("_R378SaiKyVong", (Exception,), {})
+        # Trùng tên VÀ là lớp con của một lớp thường — hai chiều cùng lúc.
+        _TrungTenCon = type("_R378SaiKyVong", (ValueError,), {})
+
+        # (ten, lop, bat_duoc) — `bat_duoc` là DỮ LIỆU viết tay, không suy từ bộ phân hạng.
+        LOP = (("that", _R378SaiKyVong, True),
+               ("con_cung_module", _ConCungModule, True),
+               ("con_khac_module", _ConKhacModule, True),
+               ("da_ke_thua", _DaKeThua, True),
+               ("thuong_runtime", RuntimeError, False),
+               ("thuong_assert", AssertionError, False),
+               ("thuong_value", ValueError, False),
+               ("thuong_type", TypeError, False),
+               ("thuong_key", KeyError, False),
+               ("trung_ten", _TrungTen, False),
+               ("trung_ten_con", _TrungTenCon, False))
+
+        # Chốt tự kiểm bảng fixture: cờ viết tay phải khớp ngữ nghĩa `except` của Python.
+        for ten, lop, bat_duoc in LOP:
+            if issubclass(lop, _R378SaiKyVong) is not bat_duoc:
+                raise AssertionError(
+                    f"R378_MA_TRAN_FIXTURE_TROI: lớp {ten!r} khai bat_duoc={bat_duoc} mà "
+                    f"issubclass cho {issubclass(lop, _R378SaiKyVong)}")
+        for ten in ("trung_ten", "trung_ten_con"):
+            lop = dict((a, b) for a, b, _c in LOP)[ten]
+            if lop.__name__ != _R378SaiKyVong.__name__:
+                raise AssertionError(
+                    f"R378_MA_TRAN_FIXTURE_TROI: lớp {ten!r} phải TRÙNG TÊN, đang là "
+                    f"{lop.__name__!r}")
+        if _ConKhacModule.__module__ == _R378SaiKyVong.__module__:
+            raise AssertionError("R378_MA_TRAN_FIXTURE_TROI: lớp con khác module lại cùng module")
+
+        # Trục ĐỐI SỐ. `R()` và `R("")` cùng hợp đồng nhưng KHÁC biểu diễn — r2 chỉ thử dạng
+        # sau, và đó là một trong ba chỗ `m14` lọt.
+        DOI_SO = (("khong_doi_so", ()),
+                  ("chuoi_rong", ("",)),
+                  ("thong_diep_goc", ("R378_EXPECTATION_MISMATCH",)),
+                  ("thong_diep_khac", ("MOT_THONG_DIEP_KHAC",)),
+                  ("hai_doi_so", ("a", "b")),
+                  # PHÂN GIẢI `m10` KHỎI `m14`. Đo 21-09: với 6 dạng trên, hai đột biến ấy cho
+                  # TẬP ô đỏ BẰNG NHAU (27 toạ độ, hai chiều rỗng) ⇒ ma trận không phân biệt
+                  # nổi "so bằng CHUỖI" với "so bằng `args`". Dạng này tách chúng: `str()` của
+                  # một ngoại lệ HAI đối số là `('...', 'x')` — CHỨA mốc, nên `m10` cấp `killed`
+                  # — trong khi `args` KHÁC tuple một phần tử, nên `m14` cấp tín dụng giả.
+                  ("moc_kem_doi_so_2", ("R378_EXPECTATION_MISMATCH", "x")),
+                  ("doi_so_None", (None,)))
+
+        sai = []          # THU TẬP ĐẦY ĐỦ, không dừng ở ô đầu — xem docstring mục 3.
+
+        def _ghi(toa_do, expected, quan_sat, so_goi=None):
+            if quan_sat != expected:
+                sai.append(f"[{toa_do}] expected={expected!r} observed={quan_sat!r}"
+                           + (f" oracle_calls={so_goi}" if so_goi is not None else ""))
+
+        # ---- KHỐI A: oracle CHẠY và NÉM. 11 lớp x 7 dạng đối số = 77 ô. ----
+        for ten, lop, bat_duoc in LOP:
+            for ten_ds, args in DOI_SO:
+                expected = "killed" if bat_duoc else "false_credit:" + lop.__name__
+                goi = []
+                def _oracle(_r, lop=lop, args=args, goi=goi):
+                    goi.append(1)
+                    raise lop(*args)
+                quan_sat = _r378_classify(*_R378_REGEX, ".claude/dev/launcher.py:1", _oracle)
+                _ghi(f"lop={ten},ds={ten_ds}", expected, quan_sat, len(goi))
+                if len(goi) != 1:
+                    sai.append(f"[lop={ten},ds={ten_ds}] oracle phải chạy ĐÚNG 1 lần, "
+                               f"chạy {len(goi)}")
+
+        # ---- KHỐI B: oracle CHẠY và THOẢ ⇒ `survived`, VÀ đúng MỘT lần gọi. ----
+        # Vế số lần gọi là MỚI ở bản này: r2 chỉ chốt kết quả, nên một cài đặt gọi oracle hai
+        # lần vẫn cho `survived` và không ô nào đỏ.
+        goi_b = []
+        quan_sat_b = _r378_classify(*_R378_REGEX, ".claude/dev/launcher.py:1",
+                                    lambda _r: goi_b.append(1))
+        _ghi("oracle=thoa", "survived", quan_sat_b, len(goi_b))
+        if len(goi_b) != 1:
+            sai.append(f"[oracle=thoa] oracle phải chạy ĐÚNG 1 lần, chạy {len(goi_b)}")
+
+        # ---- KHỐI C: khâu DỰNG hỏng ⇒ tín dụng giả, và oracle KHÔNG chạy lần nào. ----
+        goi_c = []
+        quan_sat_c = _r378_classify("R378_MO_NEO_KHONG_BAO_GIO_TON_TAI_TRONG_TEP_NAY", "x",
+                                    ".claude/dev/launcher.py:1", lambda _r: goi_c.append(1))
+        _ghi("dung=hong", "false_credit:RuntimeError", quan_sat_c, len(goi_c))
+        if goi_c:
+            sai.append(f"[dung=hong] oracle KHÔNG được chạy, đã chạy {len(goi_c)} lần. "
+                       f"`killed` ở đây là tín dụng cho một phép thử CHƯA XẢY RA.")
+
+        if sai:
+            raise AssertionError("R378_MA_TRAN_O_SAI (%d/%d ô): %s"
+                                 % (len(sai), len(LOP) * len(DOI_SO) + 2, " | ".join(sai)))
+        return True
+    _t110("r378_ma_tran_phan_hang", _c378_ma_tran_phan_hang)
 
     def _c378_giu_con_tro_cham_gach_cheo():
         body = "./scripts/tl.py:99999999\n../scripts/tl.py:99999999"
@@ -24922,6 +25505,89 @@ def run() -> int:
                              'raise AttributeError("r378-mutant-vo-can")', body, oracle)
         return cat == "false_credit:AttributeError"
     _t110("r378_dot_bien_attributeerror_la_tin_dung_gia", _c378_phan_hang_tin_dung_gia)
+
+    # r337 (đo 02-09-2026, container remote) — `tl doctor` KHÔNG được chết vì một phép đo phụ thuộc.
+    # Ca thật: `import pypdf` kéo `cryptography` 41.0.7 thiếu `cffi` ⇒ pyo3 ném `PanicException`
+    # (kế thừa BaseException), `except Exception` cũ để nó xuyên qua và giết cả doctor. Đo bằng
+    # module GIẢ trên sys.path, không phụ thuộc máy có cryptography hỏng hay không.
+    def _r337_chay(ten_loi, fn=None):
+        """Đặt `pypdf`/`pdfplumber` giả ném `ten_loi` lúc import rồi gọi `_doc_dep_probe`.
+        Trả ("ok", ket_qua) · ("nem", lop_ngoai_le). Khôi phục sys.path/sys.modules trong finally."""
+        import tempfile as _tf337, sys as _sys337
+        from pathlib import Path as _P337
+        import tl_core.ops_misc as _om337
+        fn = fn or _om337._doc_dep_probe
+        cu = {t: _sys337.modules.pop(t, None) for t in ("pypdf", "pdfplumber")}
+        with _tf337.TemporaryDirectory() as td:
+            for t in cu:
+                (_P337(td) / f"{t}.py").write_text(f"raise {ten_loi}('r337-gia')\n", encoding="utf-8")
+            _sys337.path.insert(0, td)
+            try:
+                return ("ok", fn())
+            except BaseException as e:  # noqa: BLE001 — oracle test, phân hạng theo LỚP
+                return ("nem", type(e))
+            finally:
+                if td in _sys337.path:
+                    _sys337.path.remove(td)
+                for t, m in cu.items():
+                    _sys337.modules.pop(t, None)
+                    if m is not None:
+                        _sys337.modules[t] = m
+
+    def _c337_khong_chet_vi_BaseException():
+        tt, kq = _r337_chay("BaseException")
+        pdf = next((d for d in (kq if tt == "ok" else []) if d["ten"].startswith("pypdf")), None)
+        return tt == "ok" and pdf is not None and pdf["co"] is False
+    _t110("r337_doctor_dep_probe_khong_chet_vi_BaseException", _c337_khong_chet_vi_BaseException)
+
+    def _c337_van_nha_KeyboardInterrupt():
+        tt, kq = _r337_chay("KeyboardInterrupt")
+        return tt == "nem" and kq is KeyboardInterrupt
+    _t110("r337_doctor_dep_probe_van_nha_KeyboardInterrupt", _c337_van_nha_KeyboardInterrupt)
+
+    def _c337_dot_bien_except_Exception_lam_DO():
+        """Đột biến quay về `except Exception` phải làm ca thuận ĐỎ — không có nó thì ca trên đo gì?"""
+        import inspect as _ins337, textwrap as _tw337
+        import tl_core.ops_misc as _om337
+        old = "        except BaseException as e:  # noqa: BLE001"
+        src = _tw337.dedent(_ins337.getsource(_om337._doc_dep_probe))
+        old = _tw337.dedent(old)
+        if src.count(old) != 1:
+            raise RuntimeError(f"R337_MUTATION_ANCHOR_COUNT:{src.count(old)}")
+        ns = dict(_om337.__dict__)
+        exec(compile(src.replace(old, old.replace("BaseException", "Exception")),
+                     _om337.__file__ + ":r337-mutant", "exec"), ns)
+        tt, kq = _r337_chay("BaseException", fn=ns["_doc_dep_probe"])
+        return tt == "nem" and kq is BaseException
+    _t110("r337_dot_bien_except_Exception_lam_DO", _c337_dot_bien_except_Exception_lam_DO)
+
+    def _c337_import_hong_khac_thieu():
+        """Module CÓ MẶT mà import nổ ⇒ hậu quả phải nêu 'import HỎNG' kèm LỚP lỗi; THIẾU hẳn thì không."""
+        tt, kq = _r337_chay("BaseException")
+        pdf = next((d for d in (kq if tt == "ok" else []) if d["ten"].startswith("pypdf")), None)
+        hong_ok = pdf is not None and "import HỎNG" in pdf["hau_qua"] and "BaseException" in pdf["hau_qua"]
+        import sys as _sys337b
+        import tl_core.ops_misc as _om337b
+        cu = {t: _sys337b.modules.pop(t, None) for t in ("pypdf", "pdfplumber")}
+        try:
+            # THIẾU hẳn: che import bằng finder trả None cho hai tên này.
+            class _Chan337:
+                def find_spec(self, name, path=None, target=None):
+                    if name in ("pypdf", "pdfplumber"):
+                        raise ModuleNotFoundError(name)
+                    return None
+            _sys337b.meta_path.insert(0, _Chan337())
+            try:
+                thieu = next(d for d in _om337b._doc_dep_probe() if d["ten"].startswith("pypdf"))
+            finally:
+                _sys337b.meta_path.pop(0)
+        finally:
+            for t, m in cu.items():
+                _sys337b.modules.pop(t, None)
+                if m is not None:
+                    _sys337b.modules[t] = m
+        return hong_ok and thieu["co"] is False and "import HỎNG" not in thieu["hau_qua"]
+    _t110("r337_import_hong_khac_thieu", _c337_import_hong_khac_thieu)
 
     def _c218_che_nhieu_fence_va_span():
         """§2.4 — ca QUYẾT ĐỊNH chất lượng: CÙNG MỘT chuỗi, trong fence ⇒ IM, ngoài fence ⇒ NỔ.

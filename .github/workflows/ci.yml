@@ -32,20 +32,24 @@ concurrency:
   cancel-in-progress: ${{ github.ref != 'refs/heads/master' }}
 
 jobs:
+  chuan-bi:
+    # packet #548 (CI-MA-TRAN-WINDOWS-CHAY-MOI-LAN-LAND): nguon duy nhat cho ma tran os.
+    # Chi ubuntu-latest, khong checkout ma nguon; bo github.ref == 'refs/heads/master'.
+    runs-on: ubuntu-latest
+    outputs:
+      os: ${{ (github.event_name == 'workflow_dispatch'
+               || contains(github.event.pull_request.labels.*.name, 'windows'))
+              && '["ubuntu-latest","windows-latest"]'
+              || '["ubuntu-latest"]' }}
+    steps:
+      - run: 'true'
+
   gate:
+    needs: chuan-bi
     strategy:
       fail-fast: false
       matrix:
-        # Windows tốn GẤP ĐÔI phút. Chạy nó ở nơi thật sự cần: trước khi vào master,
-        # khi gọi tay, hoặc khi PR được gắn nhãn `windows` (dùng cho PR đụng đường
-        # phụ thuộc nền). PR thường vẫn được Linux soi mỗi lần đẩy.
-        # KHÔNG phải nới gate: master vẫn luôn qua CẢ HAI nền trước khi phát hành.
-        os: ${{ fromJSON(
-              (github.event_name == 'workflow_dispatch'
-               || github.ref == 'refs/heads/master'
-               || contains(github.event.pull_request.labels.*.name, 'windows'))
-              && '["ubuntu-latest","windows-latest"]'
-              || '["ubuntu-latest"]') }}
+        os: ${{ fromJson(needs.chuan-bi.outputs.os) }}
     runs-on: ${{ matrix.os }}
     # r391 — NÂNG 25 -> 45 THEO CHỈ ĐẠO CHỦ KHO, và lý do phải ghi lại vì con số cũ
     # KHÔNG sai lúc nó được đặt: gate đã chậm dần tới sát trần. Đo 29-08-2026:
@@ -107,6 +111,10 @@ jobs:
         run: |
           python ops/cong_cu.py kiem-tra --json
           python ops/cong_cu_test.py
+      - name: cài Ruff 0.15.15 và in probe dương
+        run: |
+          python -m pip install --quiet ruff==0.15.15
+          ruff --version
       # Kiểm CHÍNH head của PR, không dùng GITHUB_SHA vì trên pull_request đó là synthetic merge.
       # `cat-file` và `merge-base` đều không có nhánh bỏ qua: thiếu object/fetch/lỗi git phải đỏ.
       - name: PR head contains required EOL base
@@ -125,12 +133,6 @@ jobs:
         run: python -m py_compile scripts/tl.py scripts/tl_boot.py scripts/gen_instructions.py scripts/tl_core/__init__.py scripts/tl_core/deterministic.py scripts/tl_core/jsonio.py scripts/tl_core/workflow.py scripts/tl_core/release.py scripts/tl_core/live.py scripts/tl_core/zip_ingest.py scripts/tl_core/ocr.py scripts/tl_core/chunking.py scripts/tl_core/command_registry.py
       - name: "codex credential selftest (packet #300)"
         run: python .claude/dev/codex_cred_test.py
-      - name: packet-loop selftest
-        run: python .claude/dev/packet_loop_test.py
-      # Sổ ở ci_dang_ky_test.py được đối chiếu với phép tìm tệp trên cây. Các tệp dưới
-      # ops/reviews/** là hiện vật review bất biến, không phải mã sống để CI chạy.
-      - name: test registry (phạm vi + các bộ chưa được nối)
-        run: python .claude/dev/ci_dang_ky_test.py --chay
       # HOP DONG IDIOM BA TEN (packet #345, ke nhiem #337). Cung doctrine voi hai buoc
       # duoi: guard khong noi vao duong TU DONG thi guard chi la tai lieu (bai hoc r225).
       # Bo phan chung cua #337 song o thu muc tam, ngoai kho, khong cong => se chet theo
@@ -152,160 +154,6 @@ jobs:
         run: python .githooks/eol_policy_test.py
       - name: pre-push selftest
         run: python .githooks/pre_push_test.py
-      # CỔNG ĐĂNG LEASE — cùng doctrine với hai bước ngay trên: guard không nối vào
-      # đường TỰ ĐỘNG thì guard chỉ là tài liệu (bài học r225).
-      #
-      # ĐÃ TRẢ GIÁ, 16-08-2026, và đây là ca thật chứ không phải giả định. PR #132
-      # thêm năm tệp `ops/reviews/*-verdict.md` mà KHÔNG thêm chúng vào bảng mục lục
-      # của `ops/reviews/README.md`. `t27` sinh ra để chặn đúng chuyện đó và nó ĐỎ
-      # ngay: `29/30`. Nhưng bộ này chỉ chạy ở `ops-publish-lease.yml`, mà workflow
-      # ấy CHỈ bắn trên nhánh `ops/**` — nên master đỏ ở một chốt mà cổng master
-      # KHÔNG đo. `ci.yml` xanh, PR merge trơn, và trạng thái đỏ nằm im cho tới khi
-      # một phiên khác tình cờ chạy tay mới lộ.
-      #
-      # Cùng họ với "cổng không nói dối, nó VẮNG MẶT": người merge đã kiểm cổng và
-      # kiểm đúng cái cổng có mặt — chỉ là cái cổng cần thì không ở đó.
-      #
-      # Vì sao đặt Ở ĐÂY chứ không để `ops-publish-lease.yml` lo: workflow ấy trả lời
-      # câu "lease này đăng được không", còn câu cần trả lời trước mỗi lần vào master
-      # là "cây này còn hợp lệ không". Hai câu khác nhau, và chỉ câu thứ hai mới chặn
-      # được một PR không đụng `ops/leases/**`.
-      #
-      # Chạy trên CẢ hai nền: bộ này gọi lệnh qua `sys.executable` nên thuần Python;
-      # `t19` (symlink) tự bỏ qua khi nền không cho tạo symlink. Đo 16-08: 3,4 giây,
-      # không đáng kể so với trần 25 phút của job.
-      # PyYAML đã được cài ở vùng setup trước G5. GHIM EXACT, không để spec trần.
-      # Cross-review PR "#134" (codex) nêu
-      # `unpinned-pyyaml-ci-dependency`: spec trần làm CÙNG MỘT SHA có thể xanh hôm nay
-      # và đỏ sau này mà cây không đổi — cùng lớp với tiền lệ `pypdf>=4.0` không có trần.
-      # Chọn exact chứ không phải `>=6.0,<7` vì job này đã ghim `python-version: "3.12"`
-      # ở vùng setup: ghim một nửa thì tính tất định cũng chỉ được một nửa.
-      # Nâng bản là việc CÓ CHỦ ĐÍCH — đổi số ở bước setup, đừng để PyPI đổi hộ.
-      # actionlint đã cài + đối chiếu trước G5. Wrapper dưới đây cố ý đo lại sau biên G5:
-      # t34 đang cấm workflow gọi thẳng file test, và wrapper giữ installer + selftest khép kín.
-      #
-      # NỢ CÓ TÊN `PLAT-X5-required-status-check`: selftest không thể tự chứng minh job
-      # này thật sự được GitHub gọi. Branch protection phải require status của job `gate`;
-      # t34 chỉ còn canh lời gọi thẳng tệp `.py`, không giả làm bộ phân tích shell.
-      - name: lease-publish selftest (đo lại setup sau G5)
-        shell: bash
-        env:
-          AL_VER: 1.7.7
-        run: bash ops/chay_lease_publish_test.sh
-      # `don-nhanh.ps1` XOÁ NHÁNH REMOTE — thao tác không hoàn tác được ở phía PR: xoá
-      # nhầm một nhánh đang là BASE của PR đang mở thì GitHub ĐÓNG các PR ấy, và tạo lại
-      # nhánh không mở lại chúng. Bộ này khoá đúng chỗ đó, cộng chốt fail-close khi không
-      # đọc được danh sách PR.
-      #
-      # VÌ SAO NỐI VÀO CI: script này land ngày 17-08 KHÔNG có phản chứng nào, và cùng
-      # ngày lộ ra một lỗ (base) mà không phép đo tự động nào bắt được. Cùng bài học với
-      # `eol-policy` ngay dưới — guard không nối vào đường TỰ ĐỘNG thì guard chỉ là tài liệu.
-      #
-      # CHỈ CHẠY TRÊN LINUX — và đây là một lời KHAI NỢ, không phải một lựa chọn thiết kế.
-      #
-      # Bản đầu của bước này khai "Chạy trên CẢ ubuntu lẫn windows: cả lớp hỏng của script
-      # này là lớp hỏng theo NỀN". Câu ấy MÔ TẢ Ý ĐỊNH, không mô tả thực tế, và không ai đo
-      # nó: bộ test + bước CI này CHỈ có trên nhánh của #150 (master không có cả hai), mà
-      # PR thường chỉ chạy `ubuntu` ⇒ nó CHƯA TỪNG chạy trên Windows. Lần đo Windows đầu
-      # tiên là một `workflow_dispatch` gọi tay trước khi merge, và kết quả là:
-      #
-      #     windows-latest ⇒ `don-nhanh: 3/21 dat`   (run 32060230138, head a66cad69)
-      #     ubuntu-latest  ⇒ `don-nhanh: 21/21 dat`  (cùng run)
-      #
-      # 18 ca đỏ cùng một thông điệp `THIEU git tren PATH.` rc=12. Nguyên nhân gốc nằm
-      # trong `Chay-KichBan` của bộ test: nó dựng lại PATH thành `<gh-giả>;/usr/bin;/bin`
-      # — dùng `[IO.Path]::PathSeparator` nên DẤU PHÂN CÁCH đúng nền, nhưng ĐƯỜNG DẪN thì
-      # ghim cứng POSIX. Port MỘT NỬA, nên đọc lướt thì nó *trông* đã cross-platform.
-      # Còn một blocker thứ hai nằm xa hơn, chưa lượt chạy nào chạm tới: `gh` giả là script
-      # `#!/bin/sh` cài bằng `chmod +x` — trên Windows không có `chmod`, và tệp không phần
-      # mở rộng không chạy được qua `PATH` (`PATHEXT`).
-      #
-      # VÌ SAO CHẶN Ở ĐÂY thay vì vá ngay: master chạy CẢ HAI nền, nên để nguyên là đẩy
-      # một cổng ĐỎ vào master; còn port bộ giả sang Windows là thay đổi lớn, phải có lượt
-      # review riêng (và §8 đòi cross-provider cho phạm vi workflow). Giữa "cổng đỏ" và
-      # "cổng khai đúng phạm vi mình phủ", chọn cái thứ hai — nhưng KHÔNG được đọc nó thành
-      # "đã phủ Windows".
-      #
-      # NỢ CÓ TÊN: `don-nhanh-test-chua-chay-duoc-tren-windows`. Đáng trả, vì `don-nhanh.ps1`
-      # vốn là script CHO Windows (có `don-nhanh.cmd` đi kèm) — tức hiện tại thứ duy nhất
-      # KHÔNG được đo lại chính là nền nó chạy thật.
-      - name: don-nhanh selftest (chốt xoá nhánh)
-        if: runner.os != 'Windows'
-        shell: pwsh
-        run: pwsh -NoProfile -File scripts/don-nhanh_test.ps1
-      # Cùng doctrine với bước ngay trên và với hai bước eol/pre-push: guard không nối
-      # vào đường TỰ ĐỘNG thì guard chỉ là tài liệu (bài học r225).
-      # `gate_lifecycle.py` là cơ chế dev-side chống chạy trùng gate + ghi/validate
-      # evidence. Nó KHÔNG deselect test và KHÔNG thay promotion gate A2 — xem
-      # `docs/PROTOCOL_DA_PHIEN.md`. Bộ này thuần Python, đo 16-08: 13 ca.
-      # CHẠY BỘ CA GATE BÊN TRONG MỘT CGROUP ĐƯỢC UỶ QUYỀN — một bước duy nhất.
-      #
-      # Vì sao gộp: tư cách thành viên cgroup KHÔNG mang được sang bước khác (mỗi
-      # `run:` là một shell con của runner agent, không phải con của bước trước).
-      # Muốn bộ ca chạy BÊN TRONG vùng được uỷ quyền thì việc chuyển vào và việc
-      # chạy phải nằm cùng một shell.
-      #
-      # Đo được trên `ef82ca3`: không uỷ quyền thì `mkdir` cgroup con trả
-      # `[Errno 13]`, gate tụt về QUÉT CÂY và hai ca cgroup lặng lẽ bỏ qua trong
-      # khi tổng vẫn xanh — tức con số nói về đường dự phòng.
-      #
-      # THU HỒI QUYỀN Ở CHA SAU KHI VÀO (P1 cross-review trên `19a9c0e`): muốn
-      # chuyển tiến trình vào cgroup con thì luật delegation containment đòi ghi
-      # được `cgroup.procs` của TỔ TIÊN CHUNG. Mở đủ lâu để bước vào, rồi TRẢ LẠI
-      # root ngay — thu hẹp được một tầng.
-      #
-      # NHƯNG ĐỪNG ĐỌC ĐÂY THÀNH "ĐÃ KHOÁ ĐƯỜNG RA" (P1 cross-review trên
-      # `052d100`; bản trước của chính chú thích này khai đúng như vậy và đó là
-      # lời khai SAI). `RIENG/cgroup.procs` vẫn thuộc UID của runner, mà lệnh gate
-      # chạy bằng CHÍNH UID ấy trong một `tl-gate-*` con của `RIENG` — nên nó vẫn
-      # tự ghi mình ngược lên `RIENG` được, không cần đụng `CHA/cgroup.procs` đã
-      # trả về root. Khe "cố tình trèo ra" là khe ĐƯỢC HOÃN CÓ CHỦ Ý; xem khối
-      # "PHẠM VI CỦA CHÍNH LỚP CGROUP" trong `gate_lifecycle.py` và
-      # `ops/NO_KY_THUAT.md` mục 1. Bước này chặn thoát VÔ TÌNH, không chặn cố ý.
-      - name: bo ca gate chay TRONG cgroup duoc uy quyen (Linux)
-        if: runner.os == 'Linux'
-        run: |
-          set -euo pipefail
-          MOUNT="$(awk '{for(i=1;i<=NF;i++) if($i=="-" && $(i+1)=="cgroup2"){print $5; exit}}' /proc/self/mountinfo)"
-          GOC="$(awk -F: '$1=="0"{print $3}' /proc/self/cgroup)"
-          echo "mount cgroup2 = ${MOUNT:-KHONG CO} | cgroup cua ta = ${GOC:-KHONG CO}"
-          if [ -z "$MOUNT" ] || [ -z "$GOC" ] || [ "$GOC" = "/" ]; then
-            echo "KHONG uy quyen duoc (khong co cgroup2, hoac ta dang o GOC diem gan)"
-            exit 1
-          fi
-          CHA="${MOUNT}${GOC}"
-          RIENG="${CHA}/tl-gate-ci"
-          sudo mkdir -p "$RIENG"
-          # Chỉ hai tệp, KHÔNG đệ quy: thư mục (để `mkdir` cgroup con) và
-          # `cgroup.procs` của nó. KHÔNG đụng `cgroup.subtree_control`, KHÔNG đụng
-          # cgroup con nào đang có dưới service.
-          sudo chown "$(id -u):$(id -g)" "$RIENG" "$RIENG/cgroup.procs"
-          # Mở tạm ở CHA đúng để bước vào...
-          sudo chown "$(id -u):$(id -g)" "$CHA/cgroup.procs"
-          echo $$ > "$RIENG/cgroup.procs"
-          # ...rồi TRẢ LẠI root ngay. Việc này đóng đúng MỘT đường: ghi thẳng vào
-          # `CHA/cgroup.procs`. Con cháu vẫn ghi ngược lên `RIENG` được vì
-          # `RIENG/cgroup.procs` phải thuộc UID runner mới chuyển vào được — xem
-          # khối trên. ĐỪNG đọc dòng này thành "đã hết đường ra".
-          sudo chown root:root "$CHA/cgroup.procs"
-          echo "da vao $(awk -F: '$1=="0"{print $3}' /proc/self/cgroup)"
-          # FAIL-CLOSE CHO CHÍNH PHÉP ĐO: Linux mà không cấp được cgroup thì lượt
-          # này KHÔNG đo lớp vùng chứa, và một lượt xanh như thế là lời khai sai
-          # về độ phủ. Thà đỏ ở đây — đỏ thì có người đọc.
-          python - <<'PY'
-          import sys
-          sys.path.insert(0, ".claude/dev")
-          import gate_lifecycle as gl
-          cg = gl._tao_cgroup_gate()
-          print("cap cgroup:", "DUOC" if cg is not None else "KHONG DUOC")
-          if cg is None:
-              sys.exit(1)
-          gl._don_cgroup(cg)
-          PY
-          python .claude/dev/gate_lifecycle_test.py
-      - name: gate lifecycle selftest (nen khong co cgroup)
-        if: runner.os != 'Linux'
-        run: python .claude/dev/gate_lifecycle_test.py
       # `--all` soi TOÀN BỘ index, không chỉ tệp đang stage — đây là thứ duy nhất bắt được nợ
       # CRLF có sẵn (hook cũ so với HEAD nên mù hoàn toàn với nó).
       #
@@ -582,3 +430,336 @@ jobs:
           PY
       - name: tl_boot smoke
         run: python scripts/tl_boot.py --version
+
+  gate-ops:
+    # packet #660 (CI-GATE-TACH-GATE-OPS r1): tách khỏi `gate` để cắt thời gian tường của PR, cùng hình dạng
+    # #463. Đo 27-09-2026 (12 run PR, REST): `gate` trung vị 910 s trên runner 2 lõi ⇒ chỉ tách JOB mới cắt được.
+    # Năm bước dưới đây CHUYỂN NGUYÊN VĂN từ `gate` (kể cả khối chú thích): bien-nhan v2, lease-publish,
+    # don-nhanh, cgroup + gate_lifecycle, lifecycle nền không cgroup. KHÔNG bỏ bước nào.
+    # CỔNG BẮT BUỘC: các bước này chỉ chặn merge khi ruleset `bao-ve-cong-dang-lease` có context
+    # `gate-ops (ubuntu-latest)` — chú thích `PLAT-X5` bên dưới nói "job `gate`" là lời viết TRƯỚC lần tách.
+    # Cố ý KHÔNG có: bước chạm `ops/cong_cu` (không vào `JOB_G5`), bước cài actionlint (t152 đếm 4 dòng
+    # `AL_VER:`; wrapper lease-publish tự cài), Ruff (`loi_ruff_ci`). Ma trận/`timeout`/`env` bằng đúng `gate`.
+    needs: chuan-bi
+    strategy:
+      fail-fast: false
+      matrix:
+        os: ${{ fromJson(needs.chuan-bi.outputs.os) }}
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 60
+    env:
+      PYTHONIOENCODING: utf-8
+      PYTHONUTF8: "1"
+      PYTHONDONTWRITEBYTECODE: "1"
+    steps:
+      - name: Force LF checkout (hash parity với manifest)
+        run: |
+          git config --global core.autocrlf false
+          git config --global core.eol lf
+          # r226 — NGƯỠNG L2 CỦA doc-claims-check PHẢI TẤT ĐỊNH. `sha_lens` lấy từ `git rev-parse --short`,
+          # mà git tự nới độ dài viết tắt theo SỐ OBJECT của kho. ĐO trên chính kho này: clone `--depth 1`
+          # → 7 · clone đủ lịch sử (281 commit, 17.783 object) → 8. Mà 8 đúng bằng độ dài tiền tố UUID
+          # notebook (743ed200, 45739ff7, dbe706a0…) ⇒ ngưỡng trôi lên 8 thì 18 tiền tố UUID bị hô
+          # SHA_NOT_A_COMMIT và ca r218_docclaims_l2_sha_khong_ton_tai (mồi `deadbee`, 7 ký tự) cũng đỏ
+          # theo. Ghim 7 = giữ ĐÚNG ngưỡng mọi phép đo của r218 dựa vào, KHÔNG phải nới lỏng guard.
+          git config --global core.abbrev 7
+      - uses: actions/checkout@v4
+        with:
+          # bien-nhan v2 cần đủ lịch sử (`ops/bien_nhan_v2.py`), như job `gate`.
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: cài PyYAML + jsonschema (cổng đăng lease + validator verdict cần)
+        run: python -m pip install --quiet PyYAML==6.0.3 jsonschema==4.26.0
+      - name: cài shellcheck cho G5 (cài xong đo lại)
+        shell: bash
+        run: bash ops/cai_cong_cu.sh shellcheck
+      - name: cài rg cho G5 (cài xong đo lại)
+        shell: bash
+        run: bash ops/cai_cong_cu.sh rg
+      # CONG LUOC DO v2 CHO BIEN NHAN REVIEW (PROTOCOL §8, dong 453-458). Dac ta co tu
+      # `2f84531` (18-08-2026) va KHONG AI THI CONG: do tren `3bc2895`, 62 bien nhan / 10
+      # khai v2 / chi 4 du truong, va `t26` chi kiem verdict path + bam. Chinh hai bien nhan
+      # v2 dau tien cua kho da TU KHAI khoang trong ay (`PLAT-X8b-CHUA-CO-BO-KIEM-RECEIPT-V2`).
+      # Noi vao day vi guard khong nam tren duong TU DONG thi guard chi la tai lieu (r225) —
+      # va do chinh la bai hoc `ops/kiem_trang_quyet_dinh.sh` con dang no.
+      - name: bien-nhan v2 selftest
+        run: python ops/bien_nhan_v2_test.py
+      # CỔNG ĐĂNG LEASE — cùng doctrine với hai bước ngay trên: guard không nối vào
+      # đường TỰ ĐỘNG thì guard chỉ là tài liệu (bài học r225).
+      #
+      # ĐÃ TRẢ GIÁ, 16-08-2026, và đây là ca thật chứ không phải giả định. PR #132
+      # thêm năm tệp `ops/reviews/*-verdict.md` mà KHÔNG thêm chúng vào bảng mục lục
+      # của `ops/reviews/README.md`. `t27` sinh ra để chặn đúng chuyện đó và nó ĐỎ
+      # ngay: `29/30`. Nhưng bộ này chỉ chạy ở `ops-publish-lease.yml`, mà workflow
+      # ấy CHỈ bắn trên nhánh `ops/**` — nên master đỏ ở một chốt mà cổng master
+      # KHÔNG đo. `ci.yml` xanh, PR merge trơn, và trạng thái đỏ nằm im cho tới khi
+      # một phiên khác tình cờ chạy tay mới lộ.
+      #
+      # Cùng họ với "cổng không nói dối, nó VẮNG MẶT": người merge đã kiểm cổng và
+      # kiểm đúng cái cổng có mặt — chỉ là cái cổng cần thì không ở đó.
+      #
+      # Vì sao đặt Ở ĐÂY chứ không để `ops-publish-lease.yml` lo: workflow ấy trả lời
+      # câu "lease này đăng được không", còn câu cần trả lời trước mỗi lần vào master
+      # là "cây này còn hợp lệ không". Hai câu khác nhau, và chỉ câu thứ hai mới chặn
+      # được một PR không đụng `ops/leases/**`.
+      #
+      # Chạy trên CẢ hai nền: bộ này gọi lệnh qua `sys.executable` nên thuần Python;
+      # `t19` (symlink) tự bỏ qua khi nền không cho tạo symlink. Đo 16-08: 3,4 giây,
+      # không đáng kể so với trần 25 phút của job.
+      # PyYAML đã được cài ở vùng setup trước G5. GHIM EXACT, không để spec trần.
+      # Cross-review PR "#134" (codex) nêu
+      # `unpinned-pyyaml-ci-dependency`: spec trần làm CÙNG MỘT SHA có thể xanh hôm nay
+      # và đỏ sau này mà cây không đổi — cùng lớp với tiền lệ `pypdf>=4.0` không có trần.
+      # Chọn exact chứ không phải `>=6.0,<7` vì job này đã ghim `python-version: "3.12"`
+      # ở vùng setup: ghim một nửa thì tính tất định cũng chỉ được một nửa.
+      # Nâng bản là việc CÓ CHỦ ĐÍCH — đổi số ở bước setup, đừng để PyPI đổi hộ.
+      # actionlint đã cài + đối chiếu trước G5. Wrapper dưới đây cố ý đo lại sau biên G5:
+      # t34 đang cấm workflow gọi thẳng file test, và wrapper giữ installer + selftest khép kín.
+      #
+      # NỢ CÓ TÊN `PLAT-X5-required-status-check`: selftest không thể tự chứng minh job
+      # này thật sự được GitHub gọi. Branch protection phải require status của job `gate`;
+      # t34 chỉ còn canh lời gọi thẳng tệp `.py`, không giả làm bộ phân tích shell.
+      - name: lease-publish selftest (đo lại setup sau G5)
+        shell: bash
+        env:
+          AL_VER: 1.7.7
+        run: bash ops/chay_lease_publish_test.sh
+      # `don-nhanh.ps1` XOÁ NHÁNH REMOTE — thao tác không hoàn tác được ở phía PR: xoá
+      # nhầm một nhánh đang là BASE của PR đang mở thì GitHub ĐÓNG các PR ấy, và tạo lại
+      # nhánh không mở lại chúng. Bộ này khoá đúng chỗ đó, cộng chốt fail-close khi không
+      # đọc được danh sách PR.
+      #
+      # VÌ SAO NỐI VÀO CI: script này land ngày 17-08 KHÔNG có phản chứng nào, và cùng
+      # ngày lộ ra một lỗ (base) mà không phép đo tự động nào bắt được. Cùng bài học với
+      # `eol-policy` ngay dưới — guard không nối vào đường TỰ ĐỘNG thì guard chỉ là tài liệu.
+      #
+      # CHỈ CHẠY TRÊN LINUX — và đây là một lời KHAI NỢ, không phải một lựa chọn thiết kế.
+      #
+      # Bản đầu của bước này khai "Chạy trên CẢ ubuntu lẫn windows: cả lớp hỏng của script
+      # này là lớp hỏng theo NỀN". Câu ấy MÔ TẢ Ý ĐỊNH, không mô tả thực tế, và không ai đo
+      # nó: bộ test + bước CI này CHỈ có trên nhánh của #150 (master không có cả hai), mà
+      # PR thường chỉ chạy `ubuntu` ⇒ nó CHƯA TỪNG chạy trên Windows. Lần đo Windows đầu
+      # tiên là một `workflow_dispatch` gọi tay trước khi merge, và kết quả là:
+      #
+      #     windows-latest ⇒ `don-nhanh: 3/21 dat`   (run 32060230138, head a66cad69)
+      #     ubuntu-latest  ⇒ `don-nhanh: 21/21 dat`  (cùng run)
+      #
+      # 18 ca đỏ cùng một thông điệp `THIEU git tren PATH.` rc=12. Nguyên nhân gốc nằm
+      # trong `Chay-KichBan` của bộ test: nó dựng lại PATH thành `<gh-giả>;/usr/bin;/bin`
+      # — dùng `[IO.Path]::PathSeparator` nên DẤU PHÂN CÁCH đúng nền, nhưng ĐƯỜNG DẪN thì
+      # ghim cứng POSIX. Port MỘT NỬA, nên đọc lướt thì nó *trông* đã cross-platform.
+      # Còn một blocker thứ hai nằm xa hơn, chưa lượt chạy nào chạm tới: `gh` giả là script
+      # `#!/bin/sh` cài bằng `chmod +x` — trên Windows không có `chmod`, và tệp không phần
+      # mở rộng không chạy được qua `PATH` (`PATHEXT`).
+      #
+      # VÌ SAO CHẶN Ở ĐÂY thay vì vá ngay: master chạy CẢ HAI nền, nên để nguyên là đẩy
+      # một cổng ĐỎ vào master; còn port bộ giả sang Windows là thay đổi lớn, phải có lượt
+      # review riêng (và §8 đòi cross-provider cho phạm vi workflow). Giữa "cổng đỏ" và
+      # "cổng khai đúng phạm vi mình phủ", chọn cái thứ hai — nhưng KHÔNG được đọc nó thành
+      # "đã phủ Windows".
+      #
+      # NỢ CÓ TÊN: `don-nhanh-test-chua-chay-duoc-tren-windows`. Đáng trả, vì `don-nhanh.ps1`
+      # vốn là script CHO Windows (có `don-nhanh.cmd` đi kèm) — tức hiện tại thứ duy nhất
+      # KHÔNG được đo lại chính là nền nó chạy thật.
+      - name: don-nhanh selftest (chốt xoá nhánh)
+        if: runner.os != 'Windows'
+        shell: pwsh
+        run: pwsh -NoProfile -File scripts/don-nhanh_test.ps1
+      # Cùng doctrine với bước ngay trên và với hai bước eol/pre-push: guard không nối
+      # vào đường TỰ ĐỘNG thì guard chỉ là tài liệu (bài học r225).
+      # `gate_lifecycle.py` là cơ chế dev-side chống chạy trùng gate + ghi/validate
+      # evidence. Nó KHÔNG deselect test và KHÔNG thay promotion gate A2 — xem
+      # `docs/PROTOCOL_DA_PHIEN.md`. Bộ này thuần Python, đo 16-08: 13 ca.
+      # CHẠY BỘ CA GATE BÊN TRONG MỘT CGROUP ĐƯỢC UỶ QUYỀN — một bước duy nhất.
+      #
+      # Vì sao gộp: tư cách thành viên cgroup KHÔNG mang được sang bước khác (mỗi
+      # `run:` là một shell con của runner agent, không phải con của bước trước).
+      # Muốn bộ ca chạy BÊN TRONG vùng được uỷ quyền thì việc chuyển vào và việc
+      # chạy phải nằm cùng một shell.
+      #
+      # Đo được trên `ef82ca3`: không uỷ quyền thì `mkdir` cgroup con trả
+      # `[Errno 13]`, gate tụt về QUÉT CÂY và hai ca cgroup lặng lẽ bỏ qua trong
+      # khi tổng vẫn xanh — tức con số nói về đường dự phòng.
+      #
+      # THU HỒI QUYỀN Ở CHA SAU KHI VÀO (P1 cross-review trên `19a9c0e`): muốn
+      # chuyển tiến trình vào cgroup con thì luật delegation containment đòi ghi
+      # được `cgroup.procs` của TỔ TIÊN CHUNG. Mở đủ lâu để bước vào, rồi TRẢ LẠI
+      # root ngay — thu hẹp được một tầng.
+      #
+      # NHƯNG ĐỪNG ĐỌC ĐÂY THÀNH "ĐÃ KHOÁ ĐƯỜNG RA" (P1 cross-review trên
+      # `052d100`; bản trước của chính chú thích này khai đúng như vậy và đó là
+      # lời khai SAI). `RIENG/cgroup.procs` vẫn thuộc UID của runner, mà lệnh gate
+      # chạy bằng CHÍNH UID ấy trong một `tl-gate-*` con của `RIENG` — nên nó vẫn
+      # tự ghi mình ngược lên `RIENG` được, không cần đụng `CHA/cgroup.procs` đã
+      # trả về root. Khe "cố tình trèo ra" là khe ĐƯỢC HOÃN CÓ CHỦ Ý; xem khối
+      # "PHẠM VI CỦA CHÍNH LỚP CGROUP" trong `gate_lifecycle.py` và
+      # `ops/NO_KY_THUAT.md` mục 1. Bước này chặn thoát VÔ TÌNH, không chặn cố ý.
+      - name: bo ca gate chay TRONG cgroup duoc uy quyen (Linux)
+        if: runner.os == 'Linux'
+        run: |
+          set -euo pipefail
+          MOUNT="$(awk '{for(i=1;i<=NF;i++) if($i=="-" && $(i+1)=="cgroup2"){print $5; exit}}' /proc/self/mountinfo)"
+          GOC="$(awk -F: '$1=="0"{print $3}' /proc/self/cgroup)"
+          echo "mount cgroup2 = ${MOUNT:-KHONG CO} | cgroup cua ta = ${GOC:-KHONG CO}"
+          if [ -z "$MOUNT" ] || [ -z "$GOC" ] || [ "$GOC" = "/" ]; then
+            echo "KHONG uy quyen duoc (khong co cgroup2, hoac ta dang o GOC diem gan)"
+            exit 1
+          fi
+          CHA="${MOUNT}${GOC}"
+          RIENG="${CHA}/tl-gate-ci"
+          sudo mkdir -p "$RIENG"
+          # Chỉ hai tệp, KHÔNG đệ quy: thư mục (để `mkdir` cgroup con) và
+          # `cgroup.procs` của nó. KHÔNG đụng `cgroup.subtree_control`, KHÔNG đụng
+          # cgroup con nào đang có dưới service.
+          sudo chown "$(id -u):$(id -g)" "$RIENG" "$RIENG/cgroup.procs"
+          # Mở tạm ở CHA đúng để bước vào...
+          sudo chown "$(id -u):$(id -g)" "$CHA/cgroup.procs"
+          echo $$ > "$RIENG/cgroup.procs"
+          # ...rồi TRẢ LẠI root ngay. Việc này đóng đúng MỘT đường: ghi thẳng vào
+          # `CHA/cgroup.procs`. Con cháu vẫn ghi ngược lên `RIENG` được vì
+          # `RIENG/cgroup.procs` phải thuộc UID runner mới chuyển vào được — xem
+          # khối trên. ĐỪNG đọc dòng này thành "đã hết đường ra".
+          sudo chown root:root "$CHA/cgroup.procs"
+          echo "da vao $(awk -F: '$1=="0"{print $3}' /proc/self/cgroup)"
+          # FAIL-CLOSE CHO CHÍNH PHÉP ĐO: Linux mà không cấp được cgroup thì lượt
+          # này KHÔNG đo lớp vùng chứa, và một lượt xanh như thế là lời khai sai
+          # về độ phủ. Thà đỏ ở đây — đỏ thì có người đọc.
+          python - <<'PY'
+          import sys
+          sys.path.insert(0, ".claude/dev")
+          import gate_lifecycle as gl
+          cg = gl._tao_cgroup_gate()
+          print("cap cgroup:", "DUOC" if cg is not None else "KHONG DUOC")
+          if cg is None:
+              sys.exit(1)
+          gl._don_cgroup(cg)
+          PY
+          python .claude/dev/gate_lifecycle_test.py
+      - name: gate lifecycle selftest (nen khong co cgroup)
+        if: runner.os != 'Linux'
+        run: python .claude/dev/gate_lifecycle_test.py
+
+  gate-registry:
+    # packet #463 (GATE-TACH-JOB-CAT-CHI-PHI): tách khỏi `gate` để cắt wall-clock của job dài nhất
+    # (đo 06-09-2026, run 34045664423: Windows 43,20 phút, hai bước nặng = 63,5 % tổng bước). Cùng
+    # ma trận/`timeout-minutes`/tiền tố 9 bước với `gate`, KHÔNG thêm mặt điều kiện nào; phút TÍNH
+    # TIỀN tăng vì trả tiền thiết lập ba lần. Consumer `loi_ruff_ci` đọc MỌI job, không chỉ `gate`.
+    # Bước `test registry` (41,0 % tổng bước Windows) sống ở đây.
+    # #593 r2-g4 (đo 25-09-2026, ubuntu): trần 60 cắt job 107895998908 — `test registry` chạy TUẦN TỰ;
+    # bước ấy 32,65 phút trên master (run 36076793429) → 52,15 phút với #593 (job 107910512895) ⇒ 60 → 90.
+    # 90 cỡ theo UBUNTU: windows-latest đã chạm trần 60 từ run 35637741169 (trước #593) — 90 KHÔNG đủ Windows.
+    # Timeout KHÁC `gate`/`gate-packet-loop` (vẫn 60) có chủ đích; tiền tố 9 bước và ma trận vẫn chung.
+    needs: chuan-bi
+    strategy:
+      fail-fast: false
+      matrix:
+        os: ${{ fromJson(needs.chuan-bi.outputs.os) }}
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 90
+    env:
+      PYTHONIOENCODING: utf-8
+      PYTHONUTF8: "1"
+      PYTHONDONTWRITEBYTECODE: "1"
+    steps:
+      - name: Force LF checkout (hash parity với manifest)
+        run: |
+          git config --global core.autocrlf false
+          git config --global core.eol lf
+          # r226 — vì sao ghim `core.abbrev 7`: xem chú thích cùng bước ở job `gate`.
+          git config --global core.abbrev 7
+      - uses: actions/checkout@v4
+        with:
+          # r226 — vì sao `fetch-depth: 0`: xem chú thích cùng bước ở job `gate`.
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      # Vì sao cài trước phép test đầu tiên (G5/T6): xem job `gate`.
+      - name: cài PyYAML + jsonschema (cổng đăng lease + validator verdict cần)
+        run: python -m pip install --quiet PyYAML==6.0.3 jsonschema==4.26.0
+      - name: cài actionlint cho G5
+        shell: bash
+        env:
+          AL_VER: 1.7.7
+        run: bash ops/cai_actionlint.sh
+      - name: cài shellcheck cho G5 (cài xong đo lại)
+        shell: bash
+        run: bash ops/cai_cong_cu.sh shellcheck
+      - name: cài rg cho G5 (cài xong đo lại)
+        shell: bash
+        run: bash ops/cai_cong_cu.sh rg
+      - name: G5 probe ban ke cong cu (#290; selftest T1..T8 chi o job gate, chot M6 #637)
+        shell: bash
+        run: python ops/cong_cu.py kiem-tra --json
+      - name: cài Ruff 0.15.15 và in probe dương
+        run: |
+          python -m pip install --quiet ruff==0.15.15
+          ruff --version
+      # Sổ ở ci_dang_ky_test.py được đối chiếu với phép tìm tệp trên cây. Các tệp dưới
+      # ops/reviews/** là hiện vật review bất biến, không phải mã sống để CI chạy.
+      # #643 (CI-REGISTRY-DOT-BIEN-THEO-DIFF): N=2; ba biến sự kiện/diff cho kế hoạch chế độ (vòng đột biến
+      # `nhanh_don_duoc` chỉ chạy khi diff chạm vùng của nó). Qua `env:`, KHÔNG nội suy vào `run`; chốt M4 so từng chữ.
+      - name: test registry (phạm vi + các bộ chưa được nối)
+        env:
+          CI_DANG_KY_WORKERS: "2"
+          CI_DANG_KY_SU_KIEN: ${{ github.event_name }}
+          CI_DANG_KY_GOC: ${{ github.event.pull_request.base.sha || github.event.before }}
+          CI_DANG_KY_DAU: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: python .claude/dev/ci_dang_ky_test.py --chay
+
+  gate-packet-loop:
+    # packet #463 (GATE-TACH-JOB-CAT-CHI-PHI): tách khỏi `gate` để cắt wall-clock của job dài nhất
+    # (đo 06-09-2026, run 34045664423: Windows 43,20 phút, hai bước nặng = 63,5 % tổng bước). Cùng
+    # ma trận/`timeout-minutes`/tiền tố 9 bước với `gate`, KHÔNG thêm mặt điều kiện nào; phút TÍNH
+    # TIỀN tăng vì trả tiền thiết lập ba lần. Consumer `loi_ruff_ci` đọc MỌI job, không chỉ `gate`.
+    # Bước `packet-loop selftest` (22,5 % tổng bước Windows) sống ở đây.
+    needs: chuan-bi
+    strategy:
+      fail-fast: false
+      matrix:
+        os: ${{ fromJson(needs.chuan-bi.outputs.os) }}
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 60
+    env:
+      PYTHONIOENCODING: utf-8
+      PYTHONUTF8: "1"
+      PYTHONDONTWRITEBYTECODE: "1"
+    steps:
+      - name: Force LF checkout (hash parity với manifest)
+        run: |
+          git config --global core.autocrlf false
+          git config --global core.eol lf
+          # r226 — vì sao ghim `core.abbrev 7`: xem chú thích cùng bước ở job `gate`.
+          git config --global core.abbrev 7
+      - uses: actions/checkout@v4
+        with:
+          # r226 — vì sao `fetch-depth: 0`: xem chú thích cùng bước ở job `gate`.
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      # Vì sao cài trước phép test đầu tiên (G5/T6): xem job `gate`.
+      - name: cài PyYAML + jsonschema (cổng đăng lease + validator verdict cần)
+        run: python -m pip install --quiet PyYAML==6.0.3 jsonschema==4.26.0
+      - name: cài actionlint cho G5
+        shell: bash
+        env:
+          AL_VER: 1.7.7
+        run: bash ops/cai_actionlint.sh
+      - name: cài shellcheck cho G5 (cài xong đo lại)
+        shell: bash
+        run: bash ops/cai_cong_cu.sh shellcheck
+      - name: cài rg cho G5 (cài xong đo lại)
+        shell: bash
+        run: bash ops/cai_cong_cu.sh rg
+      - name: G5 probe ban ke cong cu (#290; selftest T1..T8 chi o job gate, chot M6 #637)
+        shell: bash
+        run: python ops/cong_cu.py kiem-tra --json
+      - name: cài Ruff 0.15.15 và in probe dương
+        run: |
+          python -m pip install --quiet ruff==0.15.15
+          ruff --version
+      - name: packet-loop selftest
+        run: python .claude/dev/packet_loop_test.py

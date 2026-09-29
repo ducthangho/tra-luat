@@ -12,7 +12,7 @@
 # Chạy thử tay:  CLAUDE_CODE_REMOTE=true ./.claude/hooks/session-start.sh
 #
 # ------------------------------------------------------------------------------------
-# hook-nang-luc: codex-auth-restore rg-bat-buoc doctor-kha-dung pip-bang-chung-duong codex-env-policy codex-env-policy-thu-hoi codex-env-policy-fail-close codex-env-policy-chi-doc co-chay-probe moi-truong-doc-truoc github-nguon-that
+# hook-nang-luc: codex-auth-restore rg-bat-buoc doctor-kha-dung pip-bang-chung-duong codex-env-policy codex-env-policy-thu-hoi codex-env-policy-fail-close codex-env-policy-chi-doc co-chay-probe moi-truong-doc-truoc github-nguon-that pip-bang-chung-import
 # ------------------------------------------------------------------------------------
 # DÒNG TRÊN LÀ HỢP ĐỒNG, KHÔNG PHẢI CHÚ THÍCH. `launcher.py doctor` (mục `hook-phien`)
 # đọc nó ở CẢ hook đang checkout LẪN hook trên `origin/master`, rồi báo động khi bản
@@ -33,15 +33,36 @@
 # tăng, còn tên thì tự nói nó là gì khi báo động.
 set -euo pipefail
 
+GOC="${CLAUDE_PROJECT_DIR:-$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)}"
+ghi_dau_vet_hook() {
+  local nhan="${1:-chay}"
+  for d in "$GOC/.claude/.packet_state" "$GOC/.tl_state"; do
+    if mkdir -p "$d" 2>/dev/null; then
+      printf "%s %s\n" "$(date -u +"%Y-%m-%dT%H:%M:%SZ")" "$nhan" > "$d/session-start.ran" 2>/dev/null || true
+      return 0
+    fi
+  done
+  return 1
+}
+
 # Chỉ chạy trong môi trường remote. Máy cá nhân đã có sẵn công cụ theo ý người
 # dùng; cài đè vào đó là vượt quyền.
 if [ "${CLAUDE_CODE_REMOTE:-}" != "true" ]; then
+  ghi_dau_vet_hook "cuc_bo" || true
   echo "[session-start] khong phai moi truong remote — bo qua"
   exit 0
 fi
 
-GOC="${CLAUDE_PROJECT_DIR:-$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)}"
+ghi_dau_vet_hook "remote" || echo "[session-start] CANH BAO: khong ghi duoc dau vet hook"
+PATH_GOC="$PATH"   # chup PATH cua PHIEN truoc khi hook tu noi PATH cho rieng no
 cd "$GOC"
+
+# M4 / L4: Cưỡng chế UTF-8 tránh lỗi cp1258/charmap trên Windows (source hook de co o shell cha)
+export PYTHONUTF8=1
+export PYTHONIOENCODING=utf-8
+
+# M4 / A4: Ghim phiên bản actionlint đồng bộ với 4 chỗ trong .github/workflows/ci.yml
+AL_VER="1.7.7"
 
 # `command -v` chứ không `which`: có sẵn ở mọi shell POSIX và không phụ thuộc gói ngoài.
 co() { command -v "$1" >/dev/null 2>&1; }
@@ -155,6 +176,23 @@ if ! co_chay rg; then
   fi
 fi
 
+# --- actionlint (M4 / L2): cài actionlint bản ghim để kiểm tra workflow GitHub Actions
+if ! co_chay actionlint; then
+  echo "[session-start] cai actionlint $AL_VER ..."
+  AL_DICH="${HOME}/.local/bin"
+  mkdir -p "$AL_DICH" 2>/dev/null || AL_DICH="/tmp/actionlint"
+  if AL_VER="$AL_VER" AL_DICH="$AL_DICH" bash "$GOC/ops/cai_actionlint.sh" >/dev/null 2>&1; then
+    export PATH="$AL_DICH:$PATH"
+    if env -u PATH PATH="$PATH_GOC" command -v actionlint >/dev/null 2>&1; then
+      echo "[session-start] actionlint: $(actionlint --version 2>/dev/null | head -1)"
+    else
+      echo "[session-start] CANH BAO: da cai actionlint vao $AL_DICH nhung PHIEN KHONG thay no (chua co trong PATH)"
+    fi
+  else
+    echo "[session-start] CANH BAO: KHONG cai duoc actionlint — kiem tra GitHub Actions workflow se gay giua chung"
+  fi
+fi
+
 # --- KHONG cai `gh`. Da DO 15-08-2026: REST truc tiep toi api.github.com bi PROXY
 # tra 403 ("GitHub access is not enabled for this session") BAT KE token — `GITHUB_PAT`
 # that cung 403, `/user` lai 200, tuc chinh sach theo DUONG DAN chu khong theo danh
@@ -177,31 +215,262 @@ fi
 #   qua du chua bao gio cai o do (sai han khi moi du an mot venv).
 # Sua hai chuyen: (1) moc neo theo CA sha LAN sys.prefix (venv nao), va nam trong
 # .git/ cua du an chu khong phai TMPDIR dung chung; (2) truoc khi tin moc, DOI
-# BANG CHUNG DUONG bang `pip install --dry-run` - no im lang va nhanh khi da du,
-# va bao thieu khi moi truong khong con khop.
+# BANG CHUNG DUONG. Ban dau lay `pip install --dry-run` lam bang chung — SAI, xem
+# r337 ngay duoi: dry-run tra rc=0 ke ca khi "Would install", nen no khong bao thieu
+# bao gio. Bang chung duong nay la IMPORT DUOC tung goi trong requirements.txt.
 if [ -f requirements.txt ]; then
   KHO_MOC="$("$PY" -c "import subprocess,sys;print(subprocess.run(['git','rev-parse','--git-dir'],capture_output=True,text=True).stdout.strip() or '.')" 2>/dev/null || echo .)"
-  VAN_TAY="$( "$PY" -c "
+  # VAN TAY phai bao gom CA TEP DUOC INCLUDE (r345). Ban truoc bam MOI tep ngoai, nen
+  # `-r extra.txt` sua noi dung ma bam khong doi ⇒ moc con hieu luc ⇒ hook bo qua cai dat
+  # mai mai. Theo `-r`/`-c` de quy, giai duong TUONG DOI theo tep CHUA no, va chan chu
+  # trinh bang tap da tham. Doc khong duoc mot tep include ⇒ dua CHINH DUONG DAN vao bam
+  # (KHONG DO DUOC != giong nhau): tep xuat hien lai sau nay se doi bam.
+  # r351 — NGUNG BAT CHUOC CU PHAP PIP. Doc ky truoc khi "them lai cho day du".
+  #
+  # Hinh dang loi nay lap LAN THU HAI. Lan mot (r338-r341, 5 finding): tu phan tich DONG
+  # REQUIREMENT ⇒ chua bang cach uy quyen cho pip. Lan hai (r347/r349/r350 + vong 10,
+  # ~7 finding): tu phan tich CHI THI INCLUDE — chu thich, noi dong, bien moi truong,
+  # symlink, va cham bam. Moi vong vá xong lai lo ra mot luat cua pip ma ta chua chep
+  # dung: `expand_env_variables` chi nhan `${UPPER}` va bo gia tri rong · `join_lines`
+  # dung `strip(backslash)` chu khong bo mot ky tu · `realpath` gop lam mat mot nhanh
+  # symlink · va chuoi 'KHONG_DOC_DUOC' trong tep that trung voi trang thai tep bi xoa.
+  #
+  # Lan nay KHONG uy quyen duoc: phep bam phai chay OFFLINE, ma pip thi khong.
+  # Nen cach dung la NGUNG DOAN: neu requirements.txt co BAT KY dong chi thi nao thi ta
+  # KHONG DU SUC noi "khong doi", va phai noi thang thay vi doan cho ra ve chinh xac.
+  #
+  # r352 — luat tho lan mot con THUNG: pip GIAI BIEN MOI TRUONG TRUOC khi phan tich
+  # option, nen mot dong `${INCLUDE}` voi `INCLUDE='-r extra.txt'` keo duoc tep khac
+  # vao trong khi ky tu dau la dola chu khong phai gach ngang. Do duoc: pip keo
+  # `extra.txt`, luat cu tra 0. Chua bang cach THO HON — dong nao CHUA dau dola cung
+  # tinh la co chi thi. Khong doc gia tri bien, khong chep luat `${UPPER}` cua pip:
+  # chep luat chinh la thu da hong bay lan.
+  #
+  # Phep do rat tho — ky tu dau khong-trang la '-', hoac dong co dola — va tho CO CHU
+  # DICH: no khong can biet cu phap pip. Mot dong chu thich '# -r x' bi tinh nham chi la
+  # chay pip thua mot lan; chieu sai duy nhat cua no la AN TOAN. Doi lay: ca lop loi
+  # "chep sai luat cua pip" chet theo KIEN TRUC, khong con nhanh nao de vá.
+  #
+  # GIA PHAI TRA, khai thang: kho nao DUNG `-r`/`-c`/`-e` se chay pip MOI lan mo phien
+  # (mat moc). Kho nay khong dung chi thi nao nen gia o day bang KHONG — do duoc bang
+  # chinh phep kiem ben duoi.
+  KQ_VT="$( "$PY" -c "
 import hashlib, sys
-h = hashlib.sha256(open('requirements.txt','rb').read()).hexdigest()[:16]
-print(h + '_' + hashlib.sha256(sys.prefix.encode()).hexdigest()[:8])" )"
+noi_dung = open('requirements.txt','rb').read()
+h = hashlib.sha256(noi_dung).hexdigest()[:16]
+tien_to = hashlib.sha256(sys.prefix.encode()).hexdigest()[:8]
+co = any(d.lstrip().startswith(b'-') or b'\x24' in d
+         for d in noi_dung.splitlines())
+print(h + '_' + tien_to + ' ' + ('1' if co else '0'))" )"
+  VAN_TAY="${KQ_VT%% *}"
+  CO_CHI_THI="${KQ_VT##* }"
   DAU="$KHO_MOC/.tl_reqs_$VAN_TAY"
+  # BANG CHUNG DUONG = IMPORT DUOC, khong phai `pip install --dry-run` (r337, do 02-09-2026).
+  # Ban truoc tin ma thoat cua dry-run: no tra rc=0 KE CA khi in "Would install cffi-2.1.1"
+  # (pip 24.0 — dry-run chi that bai khi KHONG GIAI DUOC phu thuoc), nen chot ay chua bao gio
+  # noi "thieu"; hook in "moi truong con khop" roi bo qua pip mai. Va ke ca khi pip du, goi
+  # co mat van co the KHONG NAP DUOC: pypdf 6.16.2 co mat ma `import pypdf` chet PanicException
+  # vi cryptography he thong thieu _cffi_backend — duong nap PDF hong ma khong ai biet toi luc
+  # `tl doctor` (luc do cung chet theo). Cung benh "CO MAT != DUNG DUOC" cua `co_chay`, doi
+  # doi tuong tu binary sang module. Ten module = ten goi da chuan hoa (pypdf, cffi); bat
+  # BaseException vi PanicException KHONG phai Exception; chi cho KeyboardInterrupt xuyen qua.
+  reqs_import_duoc() {
+    "$PY" - "$@" <<'PYEOF'
+import re, sys
+
+# r345 — BO HAN PHEP HOI PIP. Doc ky truoc khi "khoi phuc cho chac".
+#
+# Bay luot review ra MUOI BA finding. Nam vong dau cung mot hinh dang (ta tu lam thay
+# pip), nen r342 uy quyen cho pip. Ba vong sau lai cung mot hinh dang KHAC: moi cach
+# lam cho phep hoi ay AN TOAN deu thua.
+#   r343: `--no-index` khong chan direct reference ⇒ host chet lam moi phien cham 8,5s.
+#   r344: danh sach CAM (`@ scheme://`) lot URL TRAN va `git+https://`.
+#   r345: va day la PHAN CHUNG giet ca thiet ke — mot goi DA CAI co `Requires-Dist:
+#         childpkg @ http://.../x.whl` khien pip di lay URL do NGAY CA khi tep
+#         requirements.txt chi co mot dong TRAN. Do truc tiep: dung mot socket lang
+#         nghe va DEM ket noi ⇒ **1 ket noi**. Tuc KHONG THE bao dam offline bang cach
+#         soi tep requirements — thu quyet dinh nam trong metadata cua goi da cai.
+#
+# Do khong phai khe ho va duoc; do la phan chung cho BAO DAM cua thiet ke. Nen phep hoi
+# pip bi BO, va ca lop rui ro "mo phien cham vi mang" chet theo KIEN TRUC chu khong theo
+# ban va: khong con subprocess nao, khong con duong mang nao.
+#
+# Con lai la ba phep do CUC BO, deu offline theo cau tao:
+#   1. BAN da cai co thoa specifier khong  — `importlib.metadata` + `SpecifierSet`.
+#   2. Goi co CON DO khong                 — `distribution()`; VANG MAT la hong.
+#   3. `import` co chay khong              — lop loi r337 ma pip khong bao gio thay
+#      (goi du, dung ban, ma pyo3 nem PanicException).
+#
+# KHAI THANG THU DA MAT: khong con phep giai phu thuoc cua pip, nen extras sau va
+# `-r` long nhau khong duoc kiem noi dung. Bu lai o cho khac: VAN_TAY nay bam CA cac tep
+# `-r`/`-c` (xem khoi tren), nen sua tep include se lam moc het hieu luc va pip that su
+# chay lai. Doi mot phep do KHONG BAO DAM DUOC lay mot phep do BAO DAM DUOC.
+kiem_ban = "--kiem-ban" in sys.argv[1:]
+hong = []
+
+_Req = _Spec = None
+for _m in ("packaging", "pip._vendor.packaging"):
+    # `packaging` tran KHONG co trong venv tran (do 06-09-2026); ban vendor cua pip thi
+    # co o CA HAI nen — ma hook nay von da doi pip. Do la ly do co duong lui.
+    try:
+        _Req = __import__(_m + ".requirements", fromlist=["Requirement"]).Requirement
+        _Spec = __import__(_m + ".specifiers", fromlist=["SpecifierSet"]).SpecifierSet
+        break
+    except ImportError:
+        _Req = _Spec = None
+
+# IMPORT RIENG TUNG TEN, khong gop mot cau. Tren Python 3.8/3.9 `packages_distributions`
+# chua co nhung `distribution` DA co; gop chung mot `from ... import a, b` lam nhanh
+# `except ImportError` vut luon `distribution` ⇒ phep kiem VANG MAT im lang bien mat
+# tren dung cac nen ma ta co y ho tro.
+try:
+    from importlib.metadata import distribution as _dist
+except ImportError:
+    _dist = None
+try:
+    from importlib.metadata import version as _ban
+except ImportError:
+    _ban = None
+try:
+    from importlib.metadata import packages_distributions
+except ImportError:                 # Python < 3.10
+    packages_distributions = None
+
+# pip chi coi `#` la chu thich khi no o DAU DONG hoac di sau KHOANG TRANG; `#` giua mot
+# chuoi (marker, fragment cua URL) la ky tu HOP LE. Chep LUAT cua pip, KHONG import
+# `pip._internal` — API khong on dinh, buoc hook vao do la doi mot lop troi lay lop khac.
+_CHU_THICH = re.compile(r"(^|\s)#.*$")
+
+# r347 — DUONG LUI CHO Python 3.8/3.9. `packages_distributions` chi co tu 3.10, nen tren
+# hai nen ta CO Y ho tro thi `ban_do` rong ⇒ vong tham import khong tham gi ca ⇒ lop bao
+# ve r337 (goi du, dung ban, ma `import` chet) BIEN MAT IM LANG. Do duoc: gia lap bo
+# `packages_distributions` roi pha `pypdf/__init__.py` ⇒ chot tra 0 thay vi 1.
+def _module_cua(ten_goi):
+    """Tap module top-level cua mot dist, KHONG can `packages_distributions`."""
+    if _dist is None:
+        return set()
+    try:
+        d = _dist(ten_goi)
+    except KeyboardInterrupt:
+        raise
+    except BaseException:
+        return set()
+    try:
+        tl = d.read_text("top_level.txt")
+    except KeyboardInterrupt:
+        raise
+    except BaseException:
+        tl = None
+    if tl:
+        return {x.strip() for x in tl.splitlines() if x.strip() and not x.startswith("_")}
+    ra = set()
+    try:
+        tep = d.files or ()
+    except KeyboardInterrupt:
+        raise
+    except BaseException:
+        tep = ()
+    for f in tep:
+        dau = str(f).replace("\\", "/").split("/")[0]
+        if dau.endswith(".py"):
+            dau = dau[:-3]
+        # `isidentifier()` la chot QUYET DINH, khong phai lam dep: RECORD cua mot goi
+        # CHI CO CLI ghi duong kieu `../../../bin/clix`, nen doan dau la `..` — khong
+        # bat dau bang gach duoi, khong trung hau to nao — va ban truoc di
+        # `__import__("..")` roi bao BAO DONG GIA. Do duoc truoc khi va: rc=1 cho mot
+        # moi truong HOAN TOAN DUNG. Ten module hop le luon la mot dinh danh Python.
+        if (dau and dau.isidentifier() and not dau.startswith("_")
+                and not dau.endswith((".dist-info", ".data", ".egg-info", ".pth"))):
+            ra.add(dau)
+    return ra
+
+
+ban_do = {}
+if packages_distributions is not None:
+    for _mod, _dists in packages_distributions().items():
+        # BO module gach duoi: chung la ban tang toc TUY CHON. Phan chung: PyYAML khai ca
+        # `_yaml` (C ext cua libyaml), ma `yaml/__init__.py` boc no trong
+        # `try: from .cyaml import * / except ImportError` — chan `_yaml` roi `import yaml`
+        # VAN OK. Doi `_yaml` la bao gia tren may cai PyYAML thuan Python.
+        if _mod.startswith("_"):
+            continue
+        for _d in _dists:
+            ban_do.setdefault(_d.lower().replace("-", "_"), set()).add(_mod)
+
+if _Req is not None:
+    for dong in open("requirements.txt", encoding="utf-8"):
+        dong = _CHU_THICH.sub("", dong).strip()
+        if not dong or dong.startswith("-"):
+            continue          # chi thi cua pip: noi dung da nam trong VAN_TAY
+        try:
+            _r = _Req(dong)
+            if _r.marker is not None and not _r.marker.evaluate():
+                continue      # khong ap dung tren nen nay
+        except KeyboardInterrupt:
+            raise
+        except BaseException:
+            continue          # khong hieu dong nay ⇒ THAM IT HON, khong bao hong
+        if _dist is not None:
+            try:
+                _dist(_r.name)
+            except KeyboardInterrupt:
+                raise
+            except BaseException:
+                hong.append(f"{_r.name}: VANG MAT (khong co metadata)")
+                continue
+        # BAN chi kiem o che do `--kiem-ban`, tuc luc hoi "co duoc BO QUA pip khong".
+        # Sau khi pip vua chay xong thi pip la tham quyen; doi them mot phep do o do chi
+        # tao chot do thuong truc tren may thieu bo phan tich.
+        if kiem_ban and str(_r.specifier) and _Spec is not None and _ban is not None:
+            try:
+                b = _ban(_r.name)
+                thoa = _Spec(str(_r.specifier)).contains(b, prereleases=True)
+            except KeyboardInterrupt:
+                raise
+            except BaseException as e:
+                hong.append(f"{_r.name}: KHONG_DO_DUOC_BAN ({type(e).__name__})")
+                continue
+            if not thoa:
+                hong.append(f"{_r.name}: ban {b} KHONG thoa {_r.specifier}")
+                continue
+        # `or _module_cua(...)`: tren <3.10 `ban_do` rong nen phai suy tu metadata.
+        _mods = ban_do.get(_r.name.lower().replace("-", "_")) or _module_cua(_r.name)
+        for ten in sorted(_mods):
+            try:
+                __import__(ten)
+            except KeyboardInterrupt:
+                raise
+            except BaseException as e:  # PanicException (pyo3) KHONG phai Exception
+                hong.append(f"{ten}: {type(e).__name__}")
+
+if hong:
+    print("[session-start] requirements.txt CHUA THOA: " + " · ".join(hong))
+    sys.exit(1)
+PYEOF
+  }
   CAN_CAI=1
-  if [ -f "$DAU" ]; then
-    # Moc noi da cai. Kiem lai bang bang chung duong truoc khi tin.
-    if "$PY" -m pip install --dry-run --quiet -r requirements.txt >/dev/null 2>&1; then
-      echo "[session-start] requirements.txt khong doi va moi truong con khop — bo qua pip"
+  # `CO_CHI_THI` (r351): tep co chi thi `-r`/`-c`/`-e` thi ta KHONG DU SUC noi "khong doi"
+  # — noi dung that nam o tep khac ma ta khong phan tich duong dan nua. Khong tin moc,
+  # de pip lam. Chieu sai duy nhat la chay pip THUA, khong bao gio la BO SOT.
+  if [ "$CO_CHI_THI" = 1 ]; then
+    echo "[session-start] requirements.txt co chi thi -r/-c/-e — khong dung moc, de pip quyet"
+  elif [ -f "$DAU" ]; then
+    if reqs_import_duoc --kiem-ban; then
+      echo "[session-start] requirements.txt khong doi va moi goi import duoc — bo qua pip"
       CAN_CAI=0
     else
-      echo "[session-start] moc con nhung moi truong KHONG con khop — cai lai"
+      echo "[session-start] moc con nhung goi KHONG import duoc — cai lai"
     fi
   fi
   if [ "$CAN_CAI" = 1 ]; then
     echo "[session-start] cai requirements.txt ..."
-    if "$PY" -m pip install --quiet -r requirements.txt; then
-      : > "$DAU"
+    if "$PY" -m pip install --quiet -r requirements.txt && reqs_import_duoc; then
+      # Co chi thi ⇒ KHONG dat moc: dat vao la tu khai mot dieu ta khong do duoc.
+      [ "$CO_CHI_THI" = 1 ] || : > "$DAU"   # moc CHI dat khi da chung minh import duoc
     else
-      echo "[session-start] CANH BAO: pip that bai"
+      rm -f "$DAU"   # khong de lai moc "da cai" cho mot moi truong chua chung minh
+      echo "[session-start] CANH BAO: requirements.txt CHUA DUNG DUOC (xem dong tren)."
+      echo "[session-start]   chua: $PY -m pip install --force-reinstall -r requirements.txt ; roi $PY scripts/tl.py doctor --offline"
     fi
   fi
 fi

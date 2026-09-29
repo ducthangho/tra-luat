@@ -1,0 +1,16 @@
+{
+  "command": [
+    "python3",
+    "-B",
+    "ops/lease_publish.py",
+    "check",
+    "ops/leases/gate-tach-job-cat-chi-phi-exec-1r4-claude-20260906.yaml"
+  ],
+  "cwd": "cay-kho",
+  "started_utc": "2026-09-07T20:54:08.049238+00:00",
+  "ended_utc": "2026-09-07T20:54:11.021148+00:00",
+  "elapsed_seconds": 2.972,
+  "rc": 0,
+  "stdout_bytes": 235,
+  "stderr_bytes": 0
+}

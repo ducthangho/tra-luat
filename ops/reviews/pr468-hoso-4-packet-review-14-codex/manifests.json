@@ -1,0 +1,193 @@
+[
+  {
+    "manifest": "full-gate-pr468-20260907/ARTIFACTS.sha256",
+    "n": 12,
+    "unique": 12,
+    "rc": 0,
+    "ok": 12,
+    "direct_rc": 0,
+    "direct_ok": 12,
+    "all_files_in_directory": 13,
+    "outside_manifest": [
+      "ARTIFACTS.sha256"
+    ],
+    "symlinks": []
+  },
+  {
+    "manifest": "pr468-hoso-4-packet-review-10-codex/goi-y/cay/ops/reviews/pr468-hoso-4-packet-review-9-codex/artifact-repair/ARTIFACTS.sha256",
+    "n": 69,
+    "unique": 69,
+    "rc": 0,
+    "ok": 69,
+    "direct_rc": 0,
+    "direct_ok": 69,
+    "all_files_in_directory": 71,
+    "outside_manifest": [
+      "ARTIFACTS.sha256",
+      "README.md"
+    ],
+    "symlinks": []
+  },
+  {
+    "manifest": "pr468-hoso-4-packet-review-11-codex/ARTIFACTS.sha256",
+    "n": 128,
+    "unique": 128,
+    "rc": 0,
+    "ok": 128,
+    "direct_rc": 1,
+    "direct_ok": 0,
+    "all_files_in_directory": 129,
+    "outside_manifest": [
+      "ARTIFACTS.sha256",
+      "DOC-MANIFEST.md"
+    ],
+    "symlinks": []
+  },
+  {
+    "manifest": "pr468-hoso-4-packet-review-11-codex/artifact9-repair/ARTIFACTS.sha256",
+    "n": 69,
+    "unique": 69,
+    "rc": 0,
+    "ok": 69,
+    "direct_rc": 0,
+    "direct_ok": 69,
+    "all_files_in_directory": 70,
+    "outside_manifest": [
+      "ARTIFACTS.sha256"
+    ],
+    "symlinks": []
+  },
+  {
+    "manifest": "pr468-hoso-4-packet-review-12-codex/ARTIFACTS.sha256",
+    "n": 178,
+    "unique": 178,
+    "rc": 0,
+    "ok": 178,
+    "direct_rc": 1,
+    "direct_ok": 0,
+    "all_files_in_directory": 179,
+    "outside_manifest": [
+      "ARTIFACTS.sha256",
+      "DOC-MANIFEST.md"
+    ],
+    "symlinks": []
+  },
+  {
+    "manifest": "pr468-hoso-4-packet-review-12-codex/manifest11-layout/ARTIFACTS.sha256",
+    "n": 128,
+    "unique": 128,
+    "rc": 0,
+    "ok": 128,
+    "direct_rc": 0,
+    "direct_ok": 128,
+    "all_files_in_directory": 129,
+    "outside_manifest": [
+      "ARTIFACTS.sha256"
+    ],
+    "symlinks": []
+  },
+  {
+    "manifest": "pr468-hoso-4-packet-review-12-codex/manifest11-layout/do-review10/artifact9-repair/ARTIFACTS.sha256",
+    "n": 69,
+    "unique": 69,
+    "rc": 0,
+    "ok": 69,
+    "direct_rc": 0,
+    "direct_ok": 69,
+    "all_files_in_directory": 70,
+    "outside_manifest": [
+      "ARTIFACTS.sha256"
+    ],
+    "symlinks": []
+  },
+  {
+    "manifest": "pr468-hoso-4-packet-review-13-codex/ARTIFACTS.sha256",
+    "n": 48,
+    "unique": 48,
+    "rc": 0,
+    "ok": 48,
+    "direct_rc": 1,
+    "direct_ok": 0,
+    "all_files_in_directory": 55,
+    "outside_manifest": [
+      "ARTIFACTS.sha256",
+      "DOC-MANIFEST.md",
+      "bundle-EVIDENCE.md",
+      "bundle-PROMPT.md",
+      "bundle-PROMPT.sha256",
+      "bundle-ai-dang-giu-readback.txt",
+      "bundle-ls-remote-heads.txt",
+      "bundle-ref-coverage.txt"
+    ],
+    "symlinks": []
+  },
+  {
+    "manifest": "pr468-hoso-4-packet-review-6-codex/ARTIFACTS.sha256",
+    "n": 62,
+    "unique": 62,
+    "rc": 0,
+    "ok": 62,
+    "direct_rc": 0,
+    "direct_ok": 62,
+    "all_files_in_directory": 75,
+    "outside_manifest": [
+      "ARTIFACTS.sha256",
+      "d2-ci-results.json",
+      "d2-that-results.json",
+      "nen-a1-a5/buoc.tsv",
+      "nen-a1-a5/job.tsv",
+      "nen-a1-a5/khong_do_duoc.txt",
+      "nen-a1-a5/raw/jobs.txt",
+      "nen-a1-a5/raw/runs.json",
+      "nen-a1-a5/tinh.py",
+      "nen-a1-a5/tom_tat.md",
+      "outputs-that/mcp_gh_test.stdout",
+      "outputs-that/pretooluse_guard_test.DO-rc1.stdout",
+      "outputs-that/pretooluse_guard_test.stdout"
+    ],
+    "symlinks": []
+  },
+  {
+    "manifest": "pr468-hoso-4-packet-review-7-codex/ARTIFACTS.sha256",
+    "n": 66,
+    "unique": 66,
+    "rc": 0,
+    "ok": 66,
+    "direct_rc": 0,
+    "direct_ok": 66,
+    "all_files_in_directory": 67,
+    "outside_manifest": [
+      "ARTIFACTS.sha256"
+    ],
+    "symlinks": []
+  },
+  {
+    "manifest": "pr468-hoso-4-packet-review-8-codex/ARTIFACTS.sha256",
+    "n": 69,
+    "unique": 69,
+    "rc": 0,
+    "ok": 69,
+    "direct_rc": 0,
+    "direct_ok": 69,
+    "all_files_in_directory": 71,
+    "outside_manifest": [
+      "ARTIFACTS.sha256",
+      "verdict-format-check.json"
+    ],
+    "symlinks": []
+  },
+  {
+    "manifest": "pr468-hoso-4-packet-review-9-codex/artifact-repair/ARTIFACTS.sha256",
+    "n": 69,
+    "unique": 69,
+    "rc": 0,
+    "ok": 69,
+    "direct_rc": 0,
+    "direct_ok": 69,
+    "all_files_in_directory": 70,
+    "outside_manifest": [
+      "ARTIFACTS.sha256"
+    ],
+    "symlinks": []
+  }
+]

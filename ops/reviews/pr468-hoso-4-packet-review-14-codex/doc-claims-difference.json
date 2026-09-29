@@ -1,0 +1,7 @@
+[
+  {
+    "path": "/advisories/74/reason",
+    "old": "SHA_NOT_A_COMMIT_IN_HISTORICAL_DOC",
+    "new": "SHA_NOT_REACHABLE_FROM_HEAD"
+  }
+]

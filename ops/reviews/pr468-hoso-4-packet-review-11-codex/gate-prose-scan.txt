@@ -1,0 +1,37 @@
+tai-lieu/gate-tach-job-cat-chi-phi-exec-1r4-claude-20260906.yaml:163:     = 110,65 (lượt master 34048685345 = 111,08 để đối chiếu nhiễu). Công bố kèm thời gian
+tai-lieu/463-GATE-TACH-JOB-CAT-CHI-PHI.md:27:| **biên độ** | — | 9,42 | **10,28** |
+tai-lieu/463-GATE-TACH-JOB-CAT-CHI-PHI.md:33:**Hệ quả cho `nghiem_thu` (sửa theo lượt 7–8):** biên độ `10,28` phút là **khoảng biến thiên của một mẫu tiện tay
+tai-lieu/463-GATE-TACH-JOB-CAT-CHI-PHI.md:34:gộp khác tải (39/40 bước) lẫn khác nhánh (5 master + 6 nhánh)** — không phải nhiễu runner thuần, không phải phương
+tai-lieu/463-GATE-TACH-JOB-CAT-CHI-PHI.md:59:1 head 39 bước + 10 head 40 bước — tức biên độ `10,28` gộp cả khác tải lẫn khác nhánh (finding P2
+tai-lieu/GATE-TACH-JOB-CAT-CHI-PHI.md:11:  (g) câu *"nhiễu runner cỡ 1–2,3 phút là có thật"* và các chỗ A1/A5 gọi chênh giữa hai lượt là "nhiễu" viết lại cho đúng: hai lượt ấy cùng
+tai-lieu/GATE-TACH-JOB-CAT-CHI-PHI.md:12:  tree nhưng KHÁC event/lane (`workflow_dispatch` nhánh so `push` master ⇒ 4 bộ ba thêm/4 mất do release-verify lane), phần do runner
+tai-lieu/GATE-TACH-JOB-CAT-CHI-PHI.md:13:  KHÔNG tách được (nợ `NHIEU-RUNNER-CHUA-TACH-KHOI-TAI`); biên `~4` phút của A1 và `~9` của A5 là **biên thiết kế**, không phải nhiễu đo được;
+tai-lieu/GATE-TACH-JOB-CAT-CHI-PHI.md:14:  (h) *"hai lượt master"* ⇒ một lượt nhánh/dispatch + một lượt master/push; (i) hàng *"số đo của GATE (A1/A2/A5)"* trong bảng chọn thứ tự
+tai-lieu/GATE-TACH-JOB-CAT-CHI-PHI.md:17:  là lượt **cùng base của lease, cùng event/lane** (P1 `a2-neo-nen-cu-trai-write-set-hien-tai`); (f) gỡ nốt hai câu "mười một/mọi
+tai-lieu/GATE-TACH-JOB-CAT-CHI-PHI.md:18:  lượt master" ở phần bối cảnh (P2 `bien-do-khac-head-khong-phai-nhieu-runner`, VÁ HỜ ở r2). Revision 2 (băm `bda86f12…`) mở theo chỉ thị chủ kho 07-09-2026 (dấu vết bền: https://github.com/ducthangho/tra-luat/issues/463#issuecomment-5567157629) sau
+tai-lieu/GATE-TACH-JOB-CAT-CHI-PHI.md:23:  1 head 39 bước + 10 head 40 bước — không phải "mười một lượt master"; (c) gỡ mâu thuẫn *"A1 ≤ 25,00 nhưng nới theo phương
+tai-lieu/GATE-TACH-JOB-CAT-CHI-PHI.md:24:  sai"*: **A1 giữ ≤ 25,00**, biên độ quan sát KHÔNG phải phương sai và KHÔNG là giấy phép nới; (d) run `34048229370`
+tai-lieu/GATE-TACH-JOB-CAT-CHI-PHI.md:80:Run `34048685345` (**lượt MASTER**), head `1b3caa1` (đẩy master sau khi merge PR #457), **lượt đã
+tai-lieu/GATE-TACH-JOB-CAT-CHI-PHI.md:88:**Biên dưới trần 60 trên master: `17,72` phút.** Phút tính tiền của lượt master:
+tai-lieu/GATE-TACH-JOB-CAT-CHI-PHI.md:94:`1b3caa1`) mà biên độ giữa hai lượt, **tách theo đơn vị** (bản đầu gộp thành "tới 1,2 phút", đúng
+tai-lieu/GATE-TACH-JOB-CAT-CHI-PHI.md:103:⇒ **chênh `0,92`–`2,27` phút ở mức job giữa hai lượt cùng tree là có thật — nhưng hai lượt ấy KHÁC event/lane**
+tai-lieu/GATE-TACH-JOB-CAT-CHI-PHI.md:107:phép đo nhiễu. Hai lượt là **hai điểm dữ liệu** — **và câu ấy đã HẾT HẠN sau 6 giờ**: phép đo
+tai-lieu/GATE-TACH-JOB-CAT-CHI-PHI.md:115:Hai bảng trên viết lúc 18:10Z 06-09-2026 khi chỉ có **hai** lượt chạy trọn (một `workflow_dispatch` trên nhánh `34045664423`, một `push` master `34048685345` — revision 4 sửa chữ "hai lượt master"). Bảng này là
+tai-lieu/GATE-TACH-JOB-CAT-CHI-PHI.md:137:- **min `40,20` · max `50,48` · biên độ `10,28` phút · trung vị `46,02` · trung bình `45,84`.**
+tai-lieu/GATE-TACH-JOB-CAT-CHI-PHI.md:141:**Biên độ `10,28` phút LỚN HƠN mọi khoản tiết kiệm mà bảng "cái giá của việc tách job" hứa cho
+tai-lieu/GATE-TACH-JOB-CAT-CHI-PHI.md:142:một bước đơn lẻ.** Nhưng — revision 2 nói cho đúng mức — biên độ ấy **gộp cả khác tải lẫn khác nhánh** (5 master + 6
+tai-lieu/GATE-TACH-JOB-CAT-CHI-PHI.md:143:nhánh, 39 so 40 bước), **không** phải nhiễu runner thuần và **không** phải phương sai; nó là lý do để ĐỌC kết quả A1 thận
+tai-lieu/GATE-TACH-JOB-CAT-CHI-PHI.md:152:| **biên độ** | 9,42 | **10,28** | **+0,86** |
+tai-lieu/GATE-TACH-JOB-CAT-CHI-PHI.md:159:(*biên độ lớn hơn khoản tiết kiệm; trần đã bị chạm; hệ số nền không phải một con số*) **bền qua cả hai**
+tai-lieu/GATE-TACH-JOB-CAT-CHI-PHI.md:326:  `34045664423`** (bản đầu gọi nhầm là "một lượt master" — lượt master `34048685345` là `111,08`):
+tai-lieu/GATE-TACH-JOB-CAT-CHI-PHI.md:456:giữa hai lượt cùng tree KHÁC event/lane không tách được phần runner — không gọi là nhiễu đo được; nợ
+tai-lieu/GATE-TACH-JOB-CAT-CHI-PHI.md:474:  YAML, có `bien-nhan v2 selftest`) — **cùng base, cùng event, cùng lane**; executor phóng lượt nền ấy TRƯỚC khi đẩy commit tách.
+tai-lieu/GATE-TACH-JOB-CAT-CHI-PHI.md:478:  mới cùng cách, không dùng lượt khác event/lane;
+tai-lieu/GATE-TACH-JOB-CAT-CHI-PHI.md:540:mọi số "sau" suy từ nó); lượt **master** `34048685345` = **111,08** (để đối chiếu — cùng tree, khác event/lane). Ước sau:
+tai-lieu/GATE-TACH-JOB-CAT-CHI-PHI.md:542:(`126,22 + ~9` **biên thiết kế**, tức `~7 %` — rộng hơn chênh job `2,27` giữa hai lượt khác lane nhân hệ số; revision 4).
+tai-lieu/GATE-TACH-JOB-CAT-CHI-PHI.md:628:3. **ĐÃ ĐÓNG MỘT PHẦN — có mười một lượt (5 master + 6 nhánh), biên độ `10,28` phút; A1 GIỮ NGUYÊN `≤ 25,00`.**
+tai-lieu/GATE-TACH-JOB-CAT-CHI-PHI.md:629:   Bản đầu viết *"chỉ có HAI lượt chạy trọn"*, bản hai *"chín lượt, biên độ 9,42"*, bản ba *"mười một lượt master,
+tai-lieu/GATE-TACH-JOB-CAT-CHI-PHI.md:630:   phương sai… ngưỡng A1 phải nới theo phương sai ĐO ĐƯỢC"*. Revision 2 (lượt 7, P2 `bien-do-khac-head-khong-phai-nhieu-runner`)
+tai-lieu/GATE-TACH-JOB-CAT-CHI-PHI.md:631:   rút câu cuối: biên độ là **khoảng biến thiên của một mẫu tiện tay gộp khác tải và khác nhánh**, không phải phương sai
+tai-lieu/GATE-TACH-JOB-CAT-CHI-PHI.md:632:   và không đo được nhiễu runner riêng. Hệ quả: **A1 đứng nguyên `≤ 25,00`**; kết quả thật được BÁO đúng như đo (A1 đã
+tai-lieu/GATE-TACH-JOB-CAT-CHI-PHI.md:634:   **cùng head, cùng tập bước, cùng event** để tách nhiễu runner khỏi tải — nợ có tên `NHIEU-RUNNER-CHUA-TACH-KHOI-TAI`.

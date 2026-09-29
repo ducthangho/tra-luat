@@ -1,0 +1,18 @@
+{
+  "reviewed_sha": "c42fc74cca04720627836e187f81a71ab44e9b76",
+  "windows_precheck": {
+    "ten": "CI Windows trên head",
+    "trang_thai": "not_run",
+    "ly_do": "Không chạy trên PR thường: không gắn nhãn `windows`, không gọi `workflow_dispatch`. Nhắc kèm: gắn nhãn KHÔNG đủ — `ci.yml` khai `pull_request:` mà không khai `types:`, nên `labeled` không sinh lượt chạy nào."
+  },
+  "windows_postcheck": {
+    "do_duoc": "Đọc `.github/workflows/ci.yml:43-48`: `matrix.os` giải ra `[\"ubuntu-latest\", \"windows-latest\"]` khi `github.event_name == 'workflow_dispatch'` HOẶC `github.ref == 'refs/heads/master'` HOẶC nhãn PR chứa `windows`; ngược lại chỉ `[\"ubuntu-latest\"]`. Đó là TOÀN BỘ những gì tệp nói.",
+    "khong_do_duoc": "PR này có gắn nhãn `windows` hay không · có ai gọi `workflow_dispatch` hay không · runner Windows đã chạy lần nào cho mã này hay chưa · lượt push master có phải lần ĐẦU TIÊN hay không. Bốn mệnh đề ấy đều nói về LỊCH SỬ SỰ KIỆN; YAML chỉ chứa ĐIỀU KIỆN xét sự kiện, không chứa sự kiện. Hồ sơ này không đọc run nào, không giữ run JSON, không quét lịch sử.",
+    "dinh_chinh_hai_ban_truoc": "Bản đầu viết \"lượt push master là lần đo Windows ĐẦU TIÊN của mã này\". Bản thứ hai đổi \"đo\" thành \"lên lịch\" và tưởng thế là đủ — KHÔNG: nó vẫn khẳng định THỨ TỰ ĐẦU TIÊN, và vẫn khai nhãn/dispatch như sự kiện đã biết, ngay sau chữ \"ĐO ĐƯỢC\". Đổi một động từ không đổi được đối tượng của mệnh đề. Cross-review lượt 3 chấm lại đúng chỗ ấy và nó ĐÚNG — lượt thứ BA liên tiếp của cùng slug `van-xuoi-do-duoc-van-vuot-nguon`.",
+    "he_qua_thuc_hanh_con_lai": "Chỉ còn một câu CÓ ĐIỀU KIỆN, không kèm bảo đảm: NẾU lượt push master thật sự chạy VÀ ma trận giải ra như trên, thì kết quả Windows đến SAU thời điểm merge. Hồ sơ không tuyên điều kiện nào trong hai điều kiện ấy đã xảy ra."
+  },
+  "matrix": "${{ fromJSON( (github.event_name == 'workflow_dispatch' || github.ref == 'refs/heads/master' || contains(github.event.pull_request.labels.*.name, 'windows')) && '[\"ubuntu-latest\",\"windows-latest\"]' || '[\"ubuntu-latest\"]') }}",
+  "historical_events": "KHÔNG CÓ label/dispatch/run history trong gói cho lượt được dẫn.",
+  "old_table": "Đếm được lá nguồn, không tái lập được phép so giữ nguyên mọi lá vì không có TSV gốc.",
+  "all_gates": "Literal search và AST có phạm vi ghi rõ; không chứng minh mọi consumer/cổng ngoài phạm vi."
+}

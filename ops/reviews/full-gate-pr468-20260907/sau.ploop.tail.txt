@@ -1,0 +1,5 @@
+  lớp lách         : 78
+  ca bắt-oan       : 35
+  ngoại lệ AC 18   : 0
+
+TỔNG: ĐẠT

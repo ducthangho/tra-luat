@@ -5915,6 +5915,159 @@ def t148_doctor_chay_agy_models_MOT_lan_cho_ca_CONG_CU_lan_KHA_NANG():
 
 
 @ca
+def t149_doctor_do_actionlint_va_shellcheck():
+    """A1 / M1: doctor đo actionlint và shellcheck, không tính vào DUNG_DUOC."""
+    m = _tai_launcher_thu()
+    al = [c for c in m.CONG_CU if c.get("ten") == "actionlint"]
+    sc = [c for c in m.CONG_CU if c.get("ten") == "shellcheck"]
+    bang(len(al) == 1 and len(sc) == 1 and al[0]["bat_buoc"] is False and sc[0]["bat_buoc"] is False, "M1: tool co mat va khong bat buoc")
+    bang(m.DA_CHUNG_MINH_KHA_DUNG == frozenset({"DUNG_DUOC"}), "DA_CHUNG_MINH_KHA_DUNG chi chua DUNG_DUOC")
+    # Ca am: thieu tool tuy chon van thoat 0
+    m.CONG_CU, m.MODULE_PY, m.KHA_NANG = [dict(al[0]), dict(sc[0])], [], []
+    m._cac_duong_dan = lambda _c, _e: []
+    rc, d = _doctor_json(m)
+    cc = {c["ten"]: c for c in d["cong_cu"]}
+    bang(rc == 0 and cc["actionlint"]["co"] is False and bool(cc["actionlint"].get("lenh_cai")), "ca am actionlint co=False co lenh_cai")
+    bang(cc["shellcheck"]["co"] is False, "ca am shellcheck co=False")
+    # Ca duong: co tool tren PATH
+    m._cac_duong_dan = lambda c, _e: [(c["ten"], f"/bin/{c['ten']}")]
+    m._phien_ban = lambda d, **kw: (True, "1.7.7" if "actionlint" in d else "0.10.0", False)
+    _, d2 = _doctor_json(m)
+    cc2 = {c["ten"]: c for c in d2["cong_cu"]}
+    bang(cc2["actionlint"]["co"] is True and cc2["actionlint"]["phien_ban"] == "1.7.7", "ca duong actionlint co=True ban 1.7.7")
+    bang(cc2["shellcheck"]["co"] is True, "ca duong shellcheck co=True")
+
+
+@ca
+def t150_doctor_do_bien_utf8_in_ca_khi_xanh():
+    """A2 / M2: doctor đo hai biến UTF-8, in ra KỂ CẢ KHI XANH, cảnh báo khi thiếu."""
+    m = _tai_launcher_thu()
+    m.CONG_CU, m.MODULE_PY, m.KHA_NANG = [], [], []
+    in_dong = []
+    goc_in = m._in_an_toan
+    m._in_an_toan = lambda msg="": in_dong.append(msg)
+    m._doc_moi_truong = lambda: ({"PYTHONUTF8": "1", "PYTHONIOENCODING": "utf-8"}, {})
+    rc = m.lenh_doctor(argparse.Namespace(json=False, workspace=None, kiem_song=False, doi_kha_dung=False))
+    bang(rc == 0 and "BIEN UTF-8" in "\n".join(in_dong) and not any("CANH BAO" in d and "UTF-8" in d for d in in_dong), "xanh in du khong canh bao")
+    in_dong.clear()
+    m._doc_moi_truong = lambda: ({"PYTHONIOENCODING": "utf-8"}, {})
+    rc_v = m.lenh_doctor(argparse.Namespace(json=False, workspace=None, kiem_song=False, doi_kha_dung=False))
+    bang(rc_v == 0 and any("CANH BAO" in d and "UTF-8" in d for d in in_dong), "thieu phai canh bao")
+    m._in_an_toan = goc_in
+    bang("bien_utf8" in _doctor_json(m)[1], "json phai co bien_utf8")
+
+
+@ca
+def t151_m3_phan_biet_da_chay_voi_tep_moi():
+    """A3 / M3: phân biệt ĐÃ CHẠY với TỆP MỚI; phân biệt cuc_bo và remote."""
+    m = _tai_launcher_thu()
+    MASTER = "#!/bin/bash\n# hook-nang-luc: codex-auth-restore\necho hi\n"
+    with San() as s:
+        cay = s / "cay_test"
+        (cay / ".claude" / "hooks").mkdir(parents=True)
+        (cay / ".claude" / "hooks" / "session-start.sh").write_text(MASTER, encoding="utf-8")
+        m._git = lambda ws, *a: ((0, MASTER, "") if "session-start.sh" in a[-1] else (1, "", ""))
+        tt_h, _ = m._do_hook_cu(str(cay))
+        tt_c, mo_ta_c = m._do_hook_da_chay(str(cay))
+        bang(tt_h == "DUNG_DUOC" and tt_c == "CHUA_CHAY" and "CHƯA CHẠY" in mo_ta_c, f"ca (a) CHUA_CHAY: {tt_c}")
+        vd = cay / ".claude" / ".packet_state"
+        vd.mkdir(parents=True)
+        (vd / "session-start.ran").write_text("2026-09-17T00:00:00Z cuc_bo\n", encoding="utf-8")
+        bang(m._do_hook_da_chay(str(cay))[0] == "DA_CHAY" and "bo qua theo thiet ke" in m._do_hook_da_chay(str(cay))[1], "ca (b) cuc_bo DA_CHAY")
+        (vd / "session-start.ran").write_text("2026-09-17T00:00:00Z remote\n", encoding="utf-8")
+        bang(m._do_hook_da_chay(str(cay))[0] == "DA_CHAY" and "bo qua" not in m._do_hook_da_chay(str(cay))[1], "ca (c) remote DA_CHAY")
+        tt_kws, _ = m._do_hook_da_chay(None)
+        bang(tt_kws == "KHONG_DO_DUOC", f"None ws phai KHONG_DO_DUOC: {tt_kws}")
+        # Lop 4: hook-da-chay DA_CHAY khong vao chua_chung_minh; CHUA_CHAY thi vao
+        m.CONG_CU, m.MODULE_PY = [], []
+        m.KHA_NANG = [{"ten": "hook-da-chay", "do": lambda *_: ("DA_CHAY", "da chay"), "vi_sao": ""}]
+        bang("hook-da-chay" not in _doctor_json(m)[1]["chua_chung_minh"], "DA_CHAY khong vao chua_chung_minh")
+        m.KHA_NANG = [{"ten": "hook-da-chay", "do": lambda *_: ("CHUA_CHAY", "chua chay"), "vi_sao": ""}]
+        bang("hook-da-chay" in _doctor_json(m)[1]["chua_chung_minh"], "CHUA_CHAY phai vao chua_chung_minh")
+
+
+@ca
+def t152_hook_cai_dat_va_khop_al_ver_ci():
+    """A4 / M4: hook cài actionlint, export UTF-8; khóa giới hạn tiến trình con không đổi biến ở cha."""
+    goc = Path(__file__).resolve().parents[2]
+    hook_path = goc / ".claude" / "hooks" / "session-start.sh"
+    hook_txt = hook_path.read_text(encoding="utf-8", errors="replace")
+    ci_txt = (goc / ".github" / "workflows" / "ci.yml").read_text(encoding="utf-8", errors="replace")
+    m_hook = re.search(r'^\s*AL_VER=["\']?([0-9]+\.[0-9]+\.[0-9]+)["\']?', hook_txt, re.MULTILINE)
+    bang(bool(m_hook), f"hook phai ghim AL_VER: {hook_txt[:200]}")
+    al_ver = m_hook.group(1)
+    ci_vers = re.findall(r'^\s*AL_VER:\s*([0-9]+\.[0-9]+\.[0-9]+)', ci_txt, re.MULTILINE)
+    bang(len(ci_vers) == 4 and all(v == al_ver for v in ci_vers), f"ci.yml 4 cho phai khop {al_ver}: {ci_vers}")
+    bang("PYTHONUTF8=1" in hook_txt and "PYTHONIOENCODING=utf-8" in hook_txt, "hook phai export UTF-8")
+    bang("cai_actionlint.sh" in hook_txt and "CANH BAO" in hook_txt, "hook phai co cai_actionlint va CANH BAO")
+    # Lop 2: Do hanh vi gioi han tien trinh — hook chay nhu con khong doi duoc bien o cha
+    bash = (shutil.which("bash") if not LA_WINDOWS else
+            ("C:/Program Files/Git/bin/bash.exe" if Path("C:/Program Files/Git/bin/bash.exe").exists() else shutil.which("bash")))
+    if bash:
+        p = subprocess.run([bash, "-c", f"unset PYTHONUTF8; '{hook_path.as_posix()}' >/dev/null 2>&1 || true; echo -n \"${{PYTHONUTF8:-<chua dat>}}\""],
+                           capture_output=True, text=True)
+        bang(p.stdout == "<chua dat>", f"tien trinh cha phai <chua dat>: {p.stdout}")
+
+
+@ca
+def t153_doctor_do_duong_dan_kho_co_dau_cach_hoac_phi_ascii():
+    """A5 / M5: doctor ĐO đường dẫn kho: có dấu cách hoặc ngoài ASCII thì nêu ra; âm thì không."""
+    m = _tai_launcher_thu()
+    for d, sub in [("/duong dan/kho", "dau cach"), ("/duong_dan/\u0111\u1ed9/kho", "ky tu ngoai ASCII"),
+                  ("D:/Qu\u1ed1c h\u1ed9i/tra-luat", "dau cach")]:
+        co, mo = m._kiem_tra_duong_dan_kho(d)
+        bang(co is True and sub in mo and "6 ca da biet se do" in mo, f"phai canh bao cho {d}: {mo}")
+    co4, mo4 = m._kiem_tra_duong_dan_kho("/opt/tra-luat/repo_pure_ascii")
+    co5, mo5 = m._kiem_tra_duong_dan_kho(None)
+    bang(co4 is False and mo4 == "" and co5 is False and mo5 == "", "ca am va None ws phai False, ''")
+
+
+@ca
+def t154_m3_dau_vet_CU_KHONG_con_la_DA_CHAY():
+    """M3 / Lop 1: dau vet CU hon nguong => KHONG_DO_DUOC, khong phai DA_CHAY."""
+    m = _tai_launcher_thu()
+    MASTER = "#!/bin/bash\n# hook-nang-luc: codex-auth-restore\necho hi\n"
+    with San() as s:
+        cay = s / "cay_tuoi"
+        (cay / ".claude" / "hooks").mkdir(parents=True)
+        (cay / ".claude" / "hooks" / "session-start.sh").write_text(MASTER, encoding="utf-8")
+        vd = cay / ".claude" / ".packet_state"
+        vd.mkdir(parents=True)
+        vet = vd / "session-start.ran"
+        vet.write_text("2026-08-17T00:00:00Z\n", encoding="utf-8")
+        gio = vet.stat().st_mtime
+        # Ca (a): dau vet TUOI => DA_CHAY
+        tt_a, _ = m._do_hook_da_chay(str(cay), bay_gio=gio + 60)
+        bang(tt_a == "DA_CHAY", f"dau vet tuoi phai DA_CHAY: {tt_a}")
+        # Ca (b): dau vet CU hon nguong => KHONG_DO_DUOC
+        tt_b, mo_b = m._do_hook_da_chay(str(cay), bay_gio=gio + m._HAN_DAU_VET_HOOK_GIAY + 60)
+        bang(tt_b == "KHONG_DO_DUOC" and "KHÔNG ĐO ĐƯỢC" in mo_b, f"dau vet CU phai KHONG_DO_DUOC: {tt_b} · {mo_b}")
+        # Ca (c): khong dau vet => CHUA_CHAY
+        vet.unlink()
+        tt_c, _ = m._do_hook_da_chay(str(cay), bay_gio=gio)
+        bang(tt_c == "CHUA_CHAY", f"khong dau vet phai CHUA_CHAY: {tt_c}")
+
+
+@ca
+def t155_m3_hook_cuc_bo_ghi_dau_vet_truoc_cong_remote():
+    """Lop 8: hook cuc bo (khong co CLAUDE_CODE_REMOTE) phai ghi dau vet cuc_bo truoc khi thoat o cong."""
+    goc = Path(__file__).resolve().parents[2]
+    hook_path = goc / ".claude" / "hooks" / "session-start.sh"
+    bash = (shutil.which("bash") if not LA_WINDOWS else
+            ("C:/Program Files/Git/bin/bash.exe" if Path("C:/Program Files/Git/bin/bash.exe").exists() else shutil.which("bash")))
+    if not bash:
+        return "bo qua vi khong co bash"
+    with San() as s:
+        p = subprocess.run(
+            [bash, "-c", f"unset CLAUDE_CODE_REMOTE; CLAUDE_PROJECT_DIR='{s.as_posix()}' '{hook_path.as_posix()}' >/dev/null 2>&1 || true"],
+            capture_output=True, text=True)
+        vet = s / ".claude" / ".packet_state" / "session-start.ran"
+        bang(vet.is_file(), "Lop 8: hook cuc bo phai ghi dau vet truoc khi thoat")
+        truong = vet.read_text(encoding="utf-8").strip().split()
+        bang(len(truong) >= 2 and truong[1] == "cuc_bo", f"Lop 8: dau vet phai mang nhan cuc_bo, thuc te: {truong}")
+
+
+@ca
 def r01_worktree_that_bi_chan():
     with San() as s:
         wt = tao_worktree(s); dau = s / "da-chay"; rr = s / "runs"
@@ -6285,9 +6438,602 @@ def r21_bon_mutant_noi_semantic_allowlist_phai_lam_oracle_DO():
         bang(False, f"mutant noi allowlist SONG SOT: {truong}")
 
 
+# r338 (đo 06-09-2026) — bằng chứng dương của hook phải phủ ĐÚNG gói trong
+# requirements.txt, và TÊN GÓI (pip) không phải TÊN MODULE (import).
+#
+# Ca thật: thêm `PyYAML==6.0.3` vào requirements.txt ⇒ bản cũ suy ra `pyyaml` ⇒
+# `ModuleNotFoundError` trong khi `import yaml` chạy tốt ⇒ hook fail-close vì một
+# BÁO ĐỘNG GIẢ. Cùng họ "CÓ MẶT ≠ DÙNG ĐƯỢC", lật ngược: ở đây thứ dùng được lại
+# bị khai là hỏng, và cái giá vẫn là chặn phiên.
+#
+# TRÍCH thân Python TỪ CHÍNH tệp hook, không chép lại — chép lại là hai bản trôi
+# lệch, đúng bài học `ops/don_ref_chot_test.sh` đã trả giá.
+def _r338_than_hook() -> str:
+    duong = LAUNCHER.parent.parent / "hooks" / "session-start.sh"
+    ly_do = _bo_qua_neu_ban_sao_roi_thieu(duong)
+    if ly_do:
+        return ""
+    m = re.search(r"<<'PYEOF'\n(.*?)\nPYEOF", duong.read_text(encoding="utf-8"), re.S)
+    bang(m is not None, "khong tim thay than PYEOF trong session-start.sh")
+    return m.group(1)
+
+
+# r345 — HỢP ĐỒNG CUỐI: KHÔNG gọi pip nữa. Các ca `r342`–`r344` đã được THAY, không phải
+# sửa cho xanh — chúng khoá một thiết kế bị PHẢN CHỨNG bác bỏ, không phải một thiết kế
+# còn đúng mà cài sai.
+#
+# Bảy lượt review ra MƯỜI BA finding. Năm vòng đầu cùng một hình dạng (ta tự làm thay
+# pip) ⇒ r342 uỷ quyền cho pip. Ba vòng sau cùng một hình dạng KHÁC: mọi cách làm cho
+# phép hỏi ấy an toàn đều thua — `--no-index` không chặn direct reference (r343), danh
+# sách CẤM lọt URL trần và `git+` (r344), và cuối cùng phản chứng giết cả thiết kế: một
+# gói ĐÃ CÀI có `Requires-Dist: childpkg @ http://…` khiến pip đi lấy URL ấy dù
+# `requirements.txt` chỉ có một dòng TRẦN. Đo trực tiếp bằng socket đếm kết nối: 1.
+# Tức không thể bảo đảm offline bằng cách soi tệp requirements.
+#
+# Nên phép hỏi pip bị BỎ. Ba bất biến còn lại, tất cả CỤC BỘ và offline theo cấu tạo.
+def _r345_venv(td: Path):
+    """venv thật + `pypdf` 3.17.4 (cố ý CŨ hơn `>=4.0`). None nếu không dựng được."""
+    v = td / "v"
+    subprocess.run([PY, "-m", "venv", str(v)], capture_output=True, timeout=300)
+    py = v / ("Scripts" if os.name == "nt" else "bin") / ("python.exe" if os.name == "nt" else "python")
+    if not py.exists():
+        return None
+    if subprocess.run([str(py), "-m", "pip", "install", "--quiet", "pypdf==3.17.4"],
+                      capture_output=True, timeout=600).returncode != 0:
+        return None
+    return py
+
+
+def _r345_chay(py: Path, d: Path, than: str, reqs: str, *them: str) -> int:
+    (d / "requirements.txt").write_text(reqs, encoding="utf-8")
+    return subprocess.run([str(py), "-c", than, *them], cwd=d,
+                          capture_output=True, text=True, timeout=600).returncode
+
+
+@ca
+def r345_than_hook_KHONG_duoc_co_duong_mang_nao():
+    """MÃ HOOK không có đường mạng nào — và PHẠM VI của câu ấy hẹp hơn tôi từng viết.
+
+    Đo được: trong cây cú pháp của thân hook không có `subprocess`, `socket`, `urllib`,
+    `http`. Bản r345 gọi đó là "cả lớp mở-phiên-chậm-vì-mạng chết theo KIẾN TRÚC" — câu
+    ấy RỘNG HƠN PHÉP ĐO theo HAI hướng, và cả hai đã được đo:
+
+    · phép đo AST chỉ thấy `import` TĨNH: `__import__('socket')`, `__import__` với tên
+      dựng động, `importlib.import_module`, `ctypes` đều LỌT (tự kiểm, r346) ⇒ đã bù
+      bằng ca chặn socket theo HÀNH VI;
+    · mạng vẫn có thể đến từ chính việc `import` một gói ĐÃ KHAI, nếu module ấy mở kết
+      nối lúc nạp (reviewer đo bằng một gói tổng hợp: 1 kết nối) ⇒ KHÔNG bịt được ở
+      đây, vì phép thăm import — thứ duy nhất thấy lớp lỗi r337 — buộc phải nạp mã gói.
+
+    Nên câu đúng là: **mã hook không tự gọi mạng**; hook có thể chạm mạng gián tiếp qua
+    gói được khai. Đó là GIỚI HẠN được khai, không phải lỗ được vá.
+    """
+    than = _r338_than_hook()
+    if not than:
+        return "bo qua ban sao roi (khong co session-start.sh)"
+    import ast as _ast
+    cay = _ast.parse(than)
+    ten = set()
+    for n in _ast.walk(cay):
+        if isinstance(n, _ast.Import):
+            ten.update(a.name.split(".")[0] for a in n.names)
+        elif isinstance(n, _ast.ImportFrom) and n.module:
+            ten.add(n.module.split(".")[0])
+    cam = ten & {"subprocess", "socket", "urllib", "http", "requests", "ftplib", "asyncio"}
+    bang(not cam, f"than hook import module co duong mang: {sorted(cam)}")
+    goi = {getattr(n.func, "attr", None) for n in _ast.walk(cay) if isinstance(n, _ast.Call)}
+    xau = goi & {"system", "popen", "spawn", "urlopen"}
+    bang(not xau, f"than hook goi ham chay tien trinh/mang: {sorted(xau)}")
+
+
+# Chặn socket ở tầng THƯ VIỆN rồi chạy thân hook: nếu nó chạm mạng bằng BẤT KỲ cách nào,
+# phép mở socket sẽ ném và thân hook (vốn bắt `BaseException` khắp nơi) biến nó thành một
+# mục `hong` ⇒ mã thoát đổi. Đây là phép đo HÀNH VI, không phải phép đo cú pháp.
+_R345_CHAN_MANG = (
+    "import socket as _s\n"
+    "def _cam(*a, **k):\n"
+    "    raise OSError('r345: cam mo socket')\n"
+    "_s.socket = _cam\n"
+    "_s.create_connection = _cam\n"
+    "_s.socketpair = _cam\n"
+)
+
+
+@ca
+def r345_chan_socket_that_ma_than_hook_van_chay_dung():
+    """Lớp HÀNH VI, vì lớp AST có ĐIỂM MÙ đã đo được.
+
+    Phép đo AST chỉ thấy `import x` tĩnh. Tự kiểm bằng bốn phản chứng: `__import__('socket')`
+    · `__import__` với tên dựng động · `importlib.import_module` · `ctypes` — **cả bốn LỌT**.
+    Nên nó bắt được ca thực tế (ai đó thêm lại `import subprocess`) chứ không phải mọi
+    đường, và khai đúng như thế thay vì để người đọc tưởng nó phủ hết.
+
+    Ca này đóng phần còn lại theo HÀNH VI: chặn `socket` rồi đòi thân hook vẫn trả lời
+    ĐÚNG — chạm mạng kiểu gì cũng lộ.
+    """
+    than = _r338_than_hook()
+    if not than:
+        return "bo qua ban sao roi (khong co session-start.sh)"
+    with tempfile.TemporaryDirectory() as td:
+        d = Path(td)
+        py = _r345_venv(d)
+        if py is None:
+            return "KHONG DO DUOC: khong dung duoc venv/pip (co the khong co mang)"
+        bang(_r345_chay(py, d, _R345_CHAN_MANG + than, "pypdf>=3.0\n", "--kiem-ban") == 0,
+             "chan socket lam than hook doi cau tra loi — tuc no CO cham mang")
+        bang(_r345_chay(py, d, _R345_CHAN_MANG + than, "pypdf>=4.0\n", "--kiem-ban") == 1,
+             "chan socket lam mat phep do lech ban")
+        # RĂNG: một thân hook CÓ chạm mạng phải làm ca này ĐỎ, nếu không nó đo cái gì?
+        co_mang = than + ("\nimport socket as _t\n_t.socket()\n")
+        bang(_r345_chay(py, d, _R345_CHAN_MANG + co_mang, "pypdf>=3.0\n", "--kiem-ban") != 0,
+             "than hook CO cham mang ma ca nay VAN xanh — phep chan socket khong co rang")
+
+
+@ca
+def r345_cac_phep_do_cuc_bo_van_dung():
+    than = _r338_than_hook()
+    if not than:
+        return "bo qua ban sao roi (khong co session-start.sh)"
+    with tempfile.TemporaryDirectory() as td:
+        d = Path(td)
+        py = _r345_venv(d)
+        if py is None:
+            return "KHONG DO DUOC: khong dung duoc venv/pip (co the khong co mang)"
+        ca_ds = [
+            ("ban thoa",                   "pypdf>=3.0\n", 0),
+            ("lech ban",                   "pypdf>=4.0\n", 1),
+            # r356 — KY VONG CUA FIXTURE KHONG DUOC PHU THUOC NEN CHAY.
+            # Ban truoc viet 'pywin32; sys_platform == "win32"' va mong 0. Marker ay DUNG
+            # tren windows-latest, nen pywin32 THAT SU bi doi, venv khong co no => 1. Ca
+            # nay xanh tren Ubuntu va do tren Windows THEO THIET KE CUA FIXTURE, khong
+            # phai theo loi san pham: master do lien tuc tu khi #449 land (run
+            # 34023635438, 34025725347) va tai hien duoc tai cho tren Windows.
+            # Nay dung mot MENH DE MAU THUAN — SAI theo CAU TAO, khong phu thuoc gia tri
+            # cua bien — va DUNG goi
+            # `khong_he_ton_tai_r345` nhu hang "goi thieu han" ngay duoi. Hai hang ay khac
+            # nhau DUNG MOT BIEN: cai marker. Nen go phep loc marker la hang nay lat
+            # 0 -> 1 tren CA HAI nen — dot bien khoa dieu do o
+            # `r345_dot_bien_ba_phep_do_cuc_bo_lam_ca_dich_DO`.
+            # r356b — cross-review lượt 1 (codex) P1-01: sentinel VẪN có một giá trị làm
+            # marker ĐÚNG. Đo được: `evaluate({"sys_platform": "khong_he_co"})` -> True.
+            # Đường override ấy KHÔNG do caller của hook cung cấp (dòng 369 gọi
+            # `evaluate()` KHÔNG đối số), và CHƯA chứng minh được lỗi reachable trong đường
+            # hook thật đã đo. KHÔNG khẳng định "rủi ro bằng 0" cho mọi môi trường — lượt 2
+            # (codex) đo: `evaluate()` không đối số KHÔNG chứng minh `sys.platform` bất biến;
+            # sửa `sys.platform` ngay trong interpreter thì sentinel CŨ cho True kể cả khi
+            # không đối số, còn mâu thuẫn MỚI vẫn False. Đổi, vì một MÂU THUẪN đúng theo
+            # CẤU TẠO mạnh hơn một sentinel chỉ đúng chừng nào chưa ai đặt tên nền như vậy
+            # — đúng nếp "đảo danh sách CẤM thành danh sách CHO PHÉP" của kho. Đo lại cả bốn:
+            #   mac_dinh=False · ep khong_he_co=False · ep win32=False · ep linux=False
+            ("marker khong khop",
+             'khong_he_ton_tai_r345; sys_platform == "win32" and sys_platform != "win32"\n', 0),
+            ("marker chua dau thang",      'pypdf; os_name == "posix#x"\n', 0),
+            ("chu thich sau khoang trang", "pypdf>=3.0  # ghi chu\n", 0),
+            ("URL tran toi host chet",     "http://127.0.0.1:9/x-1.0-py3-none-any.whl\n", 0),
+            ("VCS git+http",               "git+http://127.0.0.1:9/x.git\n", 0),
+            ("goi VANG MAT + direct ref",  "definitely_not_installed_r345 @ http://127.0.0.1:9/x.whl\n", 1),
+            ("goi CO MAT + direct ref",    "pypdf @ http://127.0.0.1:9/x.whl\n", 0),
+            ("goi thieu han",              "khong_he_ton_tai_r345\n", 1),
+        ]
+        sai = []
+        for nhan, reqs, mong in ca_ds:
+            ma = _r345_chay(py, d, than, reqs, "--kiem-ban")
+            if ma != mong:
+                sai.append(f"{nhan}: duoc {ma}, mong {mong}")
+        bang(not sai, "phep do cuc bo sai: " + " · ".join(sai))
+        # Che do hau-pip KHONG duoc doi ban (pip vua chay xong la tham quyen).
+        bang(_r345_chay(py, d, than, "pypdf>=4.0\n") == 0,
+             "che do hau-pip van doi ban — se thanh chot do thuong truc")
+
+
+@ca
+def r345_lop_tham_import_van_co_rang():
+    """Lý do DUY NHẤT lớp thăm import tồn tại: pip không nhìn thấy lớp lỗi này (r337)."""
+    than = _r338_than_hook()
+    if not than:
+        return "bo qua ban sao roi (khong co session-start.sh)"
+    with tempfile.TemporaryDirectory() as td:
+        d = Path(td)
+        py = _r345_venv(d)
+        if py is None:
+            return "KHONG DO DUOC: khong dung duoc venv/pip (co the khong co mang)"
+        bang(_r345_chay(py, d, than, "pypdf>=3.0\n", "--kiem-ban") == 0, "nen chua sach")
+        sp = list(d.glob("v/lib/python*/site-packages")) or list(d.glob("v/Lib/site-packages"))
+        bang(bool(sp), "khong tim thay site-packages")
+        # PHA import nhung GIU metadata: ban con du, `import` thi chet.
+        (sp[0] / "pypdf" / "__init__.py").write_text(
+            "raise BaseException('r345-gia-lap-pyo3-panic')\n", encoding="utf-8")
+        bang(_r345_chay(py, d, than, "pypdf>=3.0\n", "--kiem-ban") == 1,
+             "goi DU va DUNG BAN ma import CHET van xanh — lop tham mat rang")
+
+
+@ca
+def r345_dot_bien_ba_phep_do_cuc_bo_lam_ca_dich_DO():
+    """Ba đột biến, mỗi cái nhắm một phép đo cục bộ. Không có chúng thì ca trên đo gì?
+
+    r356 thêm cái thứ ba — phép lọc environment marker. Trước đó hàng "marker khong khop"
+    KHÔNG có đột biến nào, và đó chính là cách nó trôi thành một kỳ vọng phụ thuộc nền mà
+    không ai thấy: hàng ấy xanh trên Ubuntu vì marker SAI ở đó, chứ không vì hook lọc đúng.
+    Hai lý do khác nhau cho cùng một con số trên MỘT nền — chỉ nền KIA tách được chúng, và
+    không có đột biến thì không tách được ở đâu cả.
+    """
+    than = _r338_than_hook()
+    if not than:
+        return "bo qua ban sao roi (khong co session-start.sh)"
+    neo_ban = "            if not thoa:"
+    neo_vang = '                hong.append(f"{_r.name}: VANG MAT (khong co metadata)")'
+    neo_marker = "            if _r.marker is not None and not _r.marker.evaluate():"
+    bang(than.count(neo_ban) == 1, f"R345_ANCHOR_BAN:{than.count(neo_ban)}")
+    bang(than.count(neo_vang) == 1, f"R345_ANCHOR_VANG:{than.count(neo_vang)}")
+    bang(than.count(neo_marker) == 1, f"R345_ANCHOR_MARKER:{than.count(neo_marker)}")
+    with tempfile.TemporaryDirectory() as td:
+        d = Path(td)
+        py = _r345_venv(d)
+        if py is None:
+            return "KHONG DO DUOC: khong dung duoc venv/pip (co the khong co mang)"
+        bang(_r345_chay(py, d, than.replace(neo_ban, "            if False:"),
+                        "pypdf>=4.0\n", "--kiem-ban") == 0,
+             "dot bien bo phep so specifier VAN DO — ca lech ban khong do phep so ay")
+        bang(_r345_chay(py, d, than.replace(neo_vang, "                pass"),
+                        "definitely_not_installed_r345 @ http://127.0.0.1:9/x.whl\n",
+                        "--kiem-ban") == 0,
+             "dot bien bo phep kiem VANG MAT VAN DO — ca vang mat khong do phep kiem ay")
+        # r356 — RANG cho hang "marker khong khop". Go phep loc marker thi goi VANG MAT
+        # phai lo ra => 1. Hang ay va hang "goi thieu han" dung CHUNG mot goi vang mat,
+        # nen bien duy nhat con lai la cai marker: dot bien nay do DUNG phep loc ay chu
+        # khong do thu gi khac. Ca hai ve deu doc lap voi nen, nen no DO tren CA HAI nen.
+        bang(_r345_chay(py, d, than.replace(neo_marker, "            if False:"),
+                        'khong_he_ton_tai_r345; sys_platform == "win32" and sys_platform != "win32"\n',
+                        "--kiem-ban") == 1,
+             "dot bien bo phep loc marker VAN XANH — ca marker khong do phep loc ay")
+
+
+# r347 — hai lỗ CỤ THỂ của r345, cộng một LỜI KHAI bị thu hẹp.
+#
+# (a) Python 3.8/3.9: `packages_distributions` chỉ có từ 3.10, nên trên hai nền ta CỐ Ý
+#     hỗ trợ thì `ban_do` rỗng ⇒ vòng thăm import không thăm gì ⇒ lớp bảo vệ r337 biến
+#     mất IM LẶNG. Đo được: giả lập bỏ `packages_distributions` rồi phá `pypdf/__init__`
+#     ⇒ chốt trả 0 thay vì 1.
+# (b) Cú pháp include: `-r 'có nháy'`, nối dòng bằng dấu chéo ngược, và biến môi trường —
+#     pip nhận cả ba, regex cũ bỏ sót cả ba ⇒ sửa tệp include mà vân tay KHÔNG ĐỔI ⇒ mốc
+#     sống sót ⇒ hook bỏ qua cài đặt.
+#
+# (c) LỜI KHAI THU HẸP, ghi ở đây vì nó sửa một câu tôi đã viết: r345/r346 nói hook
+#     "offline theo cấu tạo". Đúng cho MÃ HOOK, KHÔNG đúng cho toàn cục — mạng vẫn có
+#     thể đến từ chính việc `import` một gói đã khai, nếu module ấy mở kết nối lúc nạp.
+#     Reviewer đo được điều đó bằng một gói tổng hợp. Đây là GIỚI HẠN được khai, không
+#     phải lỗ được vá: bịt nó cần một hộp cát mạng thật, và phép thăm import — thứ duy
+#     nhất thấy được lớp lỗi r337 — vốn phải nạp mã của gói.
+_R347_CHE_310 = ("import importlib.metadata as _m\n"
+                 "if hasattr(_m, 'packages_distributions'):\n"
+                 "    del _m.packages_distributions\n")
+
+
+@ca
+def r347_tham_import_van_song_tren_python_truoc_310():
+    than = _r338_than_hook()
+    if not than:
+        return "bo qua ban sao roi (khong co session-start.sh)"
+    with tempfile.TemporaryDirectory() as td:
+        d = Path(td)
+        py = _r345_venv(d)
+        if py is None:
+            return "KHONG DO DUOC: khong dung duoc venv/pip (co the khong co mang)"
+        bang(_r345_chay(py, d, _R347_CHE_310 + than, "pypdf>=3.0\n", "--kiem-ban") == 0,
+             "gia lap <3.10 lam bao dong gia tren moi truong DA THOA")
+        sp = list(d.glob("v/lib/python*/site-packages")) or list(d.glob("v/Lib/site-packages"))
+        bang(bool(sp), "khong tim thay site-packages")
+        (sp[0] / "pypdf" / "__init__.py").write_text(
+            "raise BaseException('r347-gia-lap')\n", encoding="utf-8")
+        # CA DICH: tren <3.10, goi DU va DUNG BAN ma import CHET van phai DO.
+        bang(_r345_chay(py, d, _R347_CHE_310 + than, "pypdf>=3.0\n", "--kiem-ban") == 1,
+             "tren <3.10 phep tham import BIEN MAT — lop bao ve r337 khong con")
+        # ...va tren >=3.10 van DO nhu cu (khong hoi quy).
+        bang(_r345_chay(py, d, than, "pypdf>=3.0\n", "--kiem-ban") == 1,
+             "tren >=3.10 phep tham import cung mat")
+
+
+@ca
+def r347_dot_bien_bo_duong_lui_310_lam_ca_dich_DO():
+    """Gỡ đường lui ⇒ ca trên phải ĐỎ. Không có nó thì ca kia đo gì?"""
+    than = _r338_than_hook()
+    if not than:
+        return "bo qua ban sao roi (khong co session-start.sh)"
+    neo = "or _module_cua(_r.name)"
+    bang(than.count(neo) == 1, f"R347_ANCHOR_LUI:{than.count(neo)}")
+    dot_bien = than.replace(neo, "or set()")
+    with tempfile.TemporaryDirectory() as td:
+        d = Path(td)
+        py = _r345_venv(d)
+        if py is None:
+            return "KHONG DO DUOC: khong dung duoc venv/pip (co the khong co mang)"
+        sp = list(d.glob("v/lib/python*/site-packages")) or list(d.glob("v/Lib/site-packages"))
+        (sp[0] / "pypdf" / "__init__.py").write_text(
+            "raise BaseException('r347-gia-lap')\n", encoding="utf-8")
+        bang(_r345_chay(py, d, _R347_CHE_310 + dot_bien, "pypdf>=3.0\n", "--kiem-ban") == 0,
+             "dot bien go duong lui VAN DO — ca dich khong do duong lui ay")
+
+
+# r351 — NGỪNG BẮT CHƯỚC CÚ PHÁP PIP. Hai ca `r347_van_tay…` và `r349_van_tay…` đã được
+# THAY, không phải sửa cho xanh: chúng khoá một bộ phân tích không còn tồn tại.
+#
+# Hình dạng lỗi này lặp LẦN THỨ HAI. Lần một (r338–r341, 5 finding): tự phân tích DÒNG
+# REQUIREMENT ⇒ chữa bằng uỷ quyền cho pip. Lần hai (r347/r349/r350 + vòng 10, ~7
+# finding): tự phân tích CHỈ THỊ INCLUDE. Mỗi vòng vá xong lại lộ một luật của pip chưa
+# chép đúng — `expand_env_variables` chỉ nhận `${UPPER}` và bỏ giá trị rỗng ·
+# `join_lines` dùng `strip(backslash)` chứ không bỏ MỘT ký tự · `realpath` gộp làm mất
+# một nhánh symlink · chuỗi `KHONG_DOC_DUOC` trong tệp thật trùng trạng thái tệp bị xoá.
+#
+# Lần này KHÔNG uỷ quyền được: phép băm phải chạy OFFLINE, mà pip thì không. Nên cách
+# đúng là NGỪNG ĐOÁN — có chỉ thị thì nói thẳng "không đủ sức nói khớp" thay vì đoán cho
+# ra vẻ chính xác.
+#
+# Phép đo cố ý THÔ (ký tự đầu không-trắng của một dòng là `-`) và đó là điểm mạnh: nó
+# không cần biết cú pháp pip. Một dòng `# -r x` bị tính nhầm chỉ là chạy pip thừa một
+# lượt; **chiều sai duy nhất của nó là AN TOÀN**.
+_R351_CHI_THI = [
+    ("khong nhay",       "-r extra.txt\n"),
+    ("co nhay",          "-r 'extra file.txt'\n"),
+    ("noi dong",         "-r \\\nextra.txt\n"),
+    ("bien moi truong",  "--requirement=${REQ}\n"),
+    ("dinh lien",        "-rextra.txt\n"),
+    ("nhieu dau cheo",   "-r \\\\\nextra.txt\n"),
+    ("constraint",       "-c con.txt\n"),
+    ("editable",         "-e .\n"),
+    ("thut dau dong",    "   -r extra.txt\n"),
+    # r352 — pip GIAI BIEN MOI TRUONG TRUOC khi phan tich option, nen mot dong `${BIEN}`
+    # keo duoc tep khac vao trong khi ky tu dau la dola. Do duoc: pip keo `extra.txt`,
+    # luat tho lan mot tra 0. Toi da TU HOI dung cau nay ("dang nao khong bat dau bang
+    # `-` ma van keo tep?") va thu `pypdf -r extra.txt` roi ket luan "khong thung" — cau
+    # hoi dung, PHEP THU THIEU MOT DANG. Nen ca duoi giu ca hai dang bien.
+    ("bien moi truong ${}", "${INCLUDE}\n"),
+    ("bien moi truong $",   "$INCLUDE\n"),
+]
+
+# BIEN PHAI DUOC DAT, khong thi ca KHONG CO RANG — do duoc, khong phai lo xa: bien
+# khong dat ⇒ pip that bai ⇒ khong dat moc ⇒ ca XANH tren CA hook chua va. Phep do rang
+# hai chieu bat duoc dung chuyen nay (nen 1 moc / sau 0 moc chi hien khi bien co dat).
+_R351_MOI_TRUONG = {"INCLUDE": "-r extra.txt"}
+
+
+def _r351_khoi_moc(d: Path, reqs: str) -> tuple:
+    """Chạy KHỐI ĐẶT MỐC thật của hook hai lượt; trả (số mốc sau lượt 1, dòng cuối lượt 2)."""
+    hook = (LAUNCHER.parent.parent / "hooks" / "session-start.sh").read_text(encoding="utf-8")
+    kh = hook[hook.index("if [ -f requirements.txt ]; then"):hook.index("# --- Xác thực codex")]
+    (d / "chay.sh").write_text("set -euo pipefail\nPY=" + PY + "\n" + kh, encoding="utf-8")
+    (d / "requirements.txt").write_text(reqs, encoding="utf-8")
+    (d / "extra.txt").write_text("pypdf>=3.0\n", encoding="utf-8")
+    (d / "extra file.txt").write_text("pypdf>=3.0\n", encoding="utf-8")
+    (d / "con.txt").write_text("pypdf>=3.0\n", encoding="utf-8")
+    for f in (d / ".git").glob(".tl_reqs_*"):
+        f.unlink()
+    vo = shutil.which("bash") or "/bin/bash"
+    env = dict(os.environ)
+    env.update(_R351_MOI_TRUONG)
+    subprocess.run([vo, "chay.sh"], cwd=d, capture_output=True, text=True, timeout=600, env=env)
+    return len(list((d / ".git").glob(".tl_reqs_*")))
+
+
+@ca
+def r351_co_chi_thi_thi_KHONG_duoc_dat_moc():
+    """Bất biến thay cho cả bộ phân tích: có chỉ thị ⇒ không mốc ⇒ pip quyết.
+
+    Chín dạng chỉ thị, gồm bốn dạng mà bản phân tích cũ đã phải vá từng cái và hai dạng
+    vòng 10 vừa bắt được. Ở đây không dạng nào cần luật riêng — phép đo không biết cú
+    pháp pip, nên không có gì để chép sai.
+    """
+    duong = LAUNCHER.parent.parent / "hooks" / "session-start.sh"
+    ly_do = _bo_qua_neu_ban_sao_roi_thieu(duong)
+    if ly_do:
+        return ly_do
+    if os.name == "nt":
+        return "bo qua: khoi dat moc la shell POSIX"
+    lot = []
+    for nhan, reqs in _R351_CHI_THI:
+        with tempfile.TemporaryDirectory() as td:
+            d = Path(td)
+            subprocess.run(["git", "init", "-q", str(d)], capture_output=True, timeout=120)
+            if _r351_khoi_moc(d, reqs) != 0:
+                lot.append(nhan)
+    bang(not lot, "co chi thi ma VAN dat moc (moc se song sot sai): " + " · ".join(lot))
+
+
+@ca
+def r351_KHONG_co_chi_thi_thi_van_phai_dat_moc():
+    """RĂNG chiều ngược: nếu không có chỉ thị mà cũng không đặt mốc thì hook chạy pip mãi.
+
+    Thiếu vế này, bản vá "không bao giờ đặt mốc" sẽ làm ca trên XANH tuyệt đối — đúng
+    kiểu chốt không thể đỏ mà kho này đã trả giá nhiều lần.
+    """
+    duong = LAUNCHER.parent.parent / "hooks" / "session-start.sh"
+    ly_do = _bo_qua_neu_ban_sao_roi_thieu(duong)
+    if ly_do:
+        return ly_do
+    if os.name == "nt":
+        return "bo qua: khoi dat moc la shell POSIX"
+    with tempfile.TemporaryDirectory() as td:
+        d = Path(td)
+        subprocess.run(["git", "init", "-q", str(d)], capture_output=True, timeout=120)
+        bang(_r351_khoi_moc(d, "pypdf>=3.0\n") == 1,
+             "khong co chi thi ma cung khong dat moc — hook se chay pip moi luot")
+
+
+@ca
+def r351_requirements_cua_kho_khong_phai_tra_gia():
+    """Giá của r351 chỉ rơi vào kho DÙNG chỉ thị. Đo trên kho này thay vì khẳng định."""
+    duong = Path(__file__).resolve().parents[2] / "requirements.txt"
+    ly_do = _bo_qua_neu_ban_sao_roi_thieu(duong)
+    if ly_do:
+        return ly_do
+    co = [d for d in duong.read_text(encoding="utf-8").splitlines() if d.lstrip().startswith("-")]
+    bang(not co,
+         "requirements.txt cua kho CO chi thi ⇒ hook se chay pip moi luot mo phien; "
+         f"neu co y thi cap nhat ca nay: {co[:3]}")
+
+
+# r348 — `_module_cua()` suy SAI cho gói CHỈ CÓ CLI, và tôi tự tìm ra khi kiểm chính câu
+# hỏi mình vừa gửi reviewer.
+#
+# RECORD của một gói chỉ có CLI ghi đường kiểu `../../../bin/clix`, nên đoạn đầu là `..`
+# — không bắt đầu bằng gạch dưới, không trùng hậu tố loại trừ nào — và bản trước đi
+# `__import__("..")` rồi báo hỏng. Đo được trước khi vá: `rc=1` cho một môi trường HOÀN
+# TOÀN ĐÚNG. Đúng lớp BÁO ĐỘNG GIẢ đã sinh ra bảy finding đầu của chuỗi này, lần này do
+# chính đường lui vừa thêm ở r347 mang vào.
+#
+# Chốt là `isidentifier()`: tên module hợp lệ luôn là một định danh Python. Đây là danh
+# sách CHO PHÉP (thứ hợp lệ mới qua), không phải danh sách CẤM thêm `..` vào — bài học
+# r344 áp thẳng vào đây.
+def _r348_dist(sp: Path, ten: str, tep, top=None):
+    di = sp / f"{ten}-1.0.dist-info"
+    di.mkdir(parents=True, exist_ok=True)
+    (di / "METADATA").write_text(f"Metadata-Version: 2.1\nName: {ten}\nVersion: 1.0\n",
+                                 encoding="utf-8")
+    (di / "INSTALLER").write_text("pip\n", encoding="utf-8")
+    (di / "WHEEL").write_text("Wheel-Version: 1.0\nGenerator: t\nRoot-Is-Purelib: true\n"
+                              "Tag: py3-none-any\n", encoding="utf-8")
+    (di / "RECORD").write_text("\n".join(tep), encoding="utf-8")
+    if top is not None:
+        (di / "top_level.txt").write_text(top, encoding="utf-8")
+    for t in tep:
+        f = sp / t
+        if f.suffix in (".py", ".pth") or "/" in t:
+            f.parent.mkdir(parents=True, exist_ok=True)
+            f.write_text("", encoding="utf-8")
+
+
+_R348_CHE_310 = ("import importlib.metadata as _m\n"
+                 "if hasattr(_m, 'packages_distributions'):\n"
+                 "    del _m.packages_distributions\n")
+
+
+@ca
+def r348_goi_chi_co_CLI_khong_duoc_bao_dong_gia():
+    than = _r338_than_hook()
+    if not than:
+        return "bo qua ban sao roi (khong co session-start.sh)"
+    with tempfile.TemporaryDirectory() as td:
+        d = Path(td)
+        py = _r345_venv(d)
+        if py is None:
+            return "KHONG DO DUOC: khong dung duoc venv/pip (co the khong co mang)"
+        sp = (list(d.glob("v/lib/python*/site-packages")) or list(d.glob("v/Lib/site-packages")))[0]
+        # RECORD tro RA NGOAI cay: dung hinh dang cua mot goi chi co CLI.
+        _r348_dist(sp, "clionly", ["clionly-1.0.dist-info/METADATA", "../../../bin/clix"], top="")
+        _r348_dist(sp, "datapkg", ["datapkg/__init__.py", "datapkg-1.0.data/scripts/x"])
+        _r348_dist(sp, "nofiletop", ["nofiletop/__init__.py"])
+        sai = []
+        for ten in ("clionly", "datapkg", "nofiletop"):
+            ma = _r345_chay(py, d, _R348_CHE_310 + than, ten + "\n", "--kiem-ban")
+            if ma != 0:
+                sai.append(f"{ten}: rc={ma}")
+        bang(not sai, "bao dong gia tren moi truong DUNG: " + " · ".join(sai))
+
+
+@ca
+def r348_dot_bien_bo_isidentifier_lam_ca_dich_DO():
+    """Gỡ chốt `isidentifier()` ⇒ ca trên phải ĐỎ. Không có nó thì ca kia đo gì?"""
+    than = _r338_than_hook()
+    if not than:
+        return "bo qua ban sao roi (khong co session-start.sh)"
+    neo = "if (dau and dau.isidentifier() and not dau.startswith(\"_\")"
+    bang(than.count(neo) == 1, f"R348_ANCHOR:{than.count(neo)}")
+    dot_bien = than.replace(neo, "if (dau and not dau.startswith(\"_\")")
+    with tempfile.TemporaryDirectory() as td:
+        d = Path(td)
+        py = _r345_venv(d)
+        if py is None:
+            return "KHONG DO DUOC: khong dung duoc venv/pip (co the khong co mang)"
+        sp = (list(d.glob("v/lib/python*/site-packages")) or list(d.glob("v/Lib/site-packages")))[0]
+        _r348_dist(sp, "clionly", ["clionly-1.0.dist-info/METADATA", "../../../bin/clix"], top="")
+        bang(_r345_chay(py, d, _R348_CHE_310 + dot_bien, "clionly\n", "--kiem-ban") != 0,
+             "dot bien go `isidentifier()` VAN xanh — ca dich khong do chot ay")
+
+
+@ca
+def r349_backend_PDF_du_phong_chay_thi_dung_noi_la_bi_chan():
+    """Một chẩn đoán TỰ MÂU THUẪN đẩy người đọc đi sai hướng.
+
+    r337 tính `co = pypdf or pdfplumber` (đúng) nhưng vẫn in `loi_import` (sai): `pypdf`
+    hỏng + `pdfplumber` chạy ⇒ `co=True` mà hậu quả vẫn ghi *"MỌI .pdf bị chặn … cài lại
+    phụ thuộc"*. Cùng doctrine với `codex login status` NÓI DỐI — công cụ báo sai trạng
+    thái tệ hơn công cụ vắng mặt.
+
+    CHẠY TRONG TIẾN TRÌNH CON, không `import tl_core` ở đây. Hai lý do, và lý do thứ hai
+    là một cổng thật đã bắt được: (a) đo trên interpreter SẠCH thì không phải nghịch
+    `sys.modules`/`sys.meta_path` của chính bộ test — hai lần đầu tôi dựng fixture sai
+    đúng vì chuyện ấy; (b) `t16` trong `ops/cong_cu_test.py` đòi mọi gói bên thứ ba
+    import trong cây phải được khai ở `ops/cong_cu.yaml`, và một `import tl_core` ở đây
+    làm cổng ĐỎ — nới bản kê để lách là hạ một chốt thật, không phải sửa test.
+    """
+    goc = Path(__file__).resolve().parents[2] / "scripts"
+    duong = goc / "tl_core" / "ops_misc.py"
+    ly_do = _bo_qua_neu_ban_sao_roi_thieu(duong)
+    if ly_do:
+        return ly_do
+    kich = (
+        "import json, sys, tempfile, pathlib\n"
+        "sys.path.insert(0, sys.argv[1])\n"
+        "import tl_core.ops_misc as om\n"
+        "hong, tot, chan = json.loads(sys.argv[2])\n"
+        "class C:\n"
+        "    def find_spec(self, name, path=None, target=None):\n"
+        "        if name in chan: raise ModuleNotFoundError(name)\n"
+        "        return None\n"
+        "td = tempfile.mkdtemp(); p = pathlib.Path(td)\n"
+        "for t in hong: (p / (t + '.py')).write_text(\"raise BaseException('r349')\\n\")\n"
+        "for t in tot:  (p / (t + '.py')).write_text('')\n"
+        "sys.path.insert(0, td); sys.meta_path.insert(0, C())\n"
+        "d = next(x for x in om._doc_dep_probe() if x['ten'].startswith('pypdf'))\n"
+        "print(json.dumps({'co': d['co'], 'hau_qua': d['hau_qua']}))\n"
+    )
+
+    def do(hong, tot, chan):
+        p = subprocess.run([PY, "-c", kich, str(goc), json.dumps([hong, tot, chan])],
+                           capture_output=True, text=True, timeout=300)
+        bang(p.returncode == 0, f"kich ban con hong: {(p.stdout + p.stderr)[-200:]!r}")
+        return json.loads(p.stdout.strip().splitlines()[-1])
+
+    d1 = do(["pypdf"], ["pdfplumber"], [])
+    bang(d1["co"] is True, "backend du phong chay ma `co` van False")
+    bang("bị chặn" not in d1["hau_qua"],
+         f"du phong CHAY ma van noi bi chan: {d1['hau_qua'][:110]!r}")
+    bang("pypdf" in d1["hau_qua"], "khong nhac backend hong — mat thong tin chan doan that")
+    # RĂNG hai chiều: hỏng THẬT thì vẫn phải nói bị chặn.
+    d2 = do(["pypdf"], [], ["pdfplumber"])
+    bang(d2["co"] is False and "bị chặn" in d2["hau_qua"],
+         "ca hai duong hong ma khong noi bi chan — chot mat rang")
+    d3 = do([], [], ["pypdf", "pdfplumber"])
+    bang(d3["co"] is False and "pip install pypdf" in d3["hau_qua"],
+         "thieu han ma khong khuyen cai")
+
+
 # ------------------------------------------------------ tự đột biến: có răng không
 
 DOT_BIEN = [
+    ("m1_xoa_actionlint_khoi_cong_cu",
+     ('    {"ten": "actionlint", "bat_buoc": False, "ung_vien": ["actionlint"],',
+      '    {"ten": "actionlint_disabled", "bat_buoc": False, "ung_vien": ["actionlint"],'),
+     ["t149_doctor_do_actionlint_va_shellcheck"]),
+    ("m2_im_lang_khi_bien_utf8_xanh",
+     ('        # M2: LUẬT ĐỌC BIẾN UTF-8 TRƯỚC KHI KẾT LUẬN — in KỂ CẢ khi mọi thứ xanh.\n        b_u8 = _do_bien_utf8(moi_truong)\n        _in_an_toan("BIEN UTF-8 (chong loi charmap/cp1258 tren Windows):")',
+      '        # M2: ĐỘT BIẾN IM LẶNG KHI XANH\n        b_u8 = _do_bien_utf8(moi_truong)\n        if b_u8["canh_bao"]:\n            _in_an_toan("BIEN UTF-8 (chong loi charmap/cp1258 tren Windows):")'),
+     ["t150_doctor_do_bien_utf8_in_ca_khi_xanh"]),
+    ("m3_doc_bam_tep_thay_vi_dau_vet",
+     ('    for rel in _CAC_DUONG_VET_HOOK:\n        tep = goc / rel\n        if not tep.is_file():\n            continue',
+      '    for rel in _CAC_DUONG_VET_HOOK:\n        tep = goc / rel\n        if not duong.is_file():  # doc tep hook thay vi dau vet\n            continue'),
+     ["t151_m3_phan_biet_da_chay_voi_tep_moi"]),
+    ("m3b_bo_kiem_do_tuoi_dau_vet",
+     ('        if tuoi > _HAN_DAU_VET_HOOK_GIAY:',
+      '        if False:  # bo kiem do tuoi'),
+     ["t154_m3_dau_vet_CU_KHONG_con_la_DA_CHAY"]),
+    ("m4_noi_long_da_chung_minh_kha_dung",
+     ('DA_CHUNG_MINH_KHA_DUNG = frozenset({"DUNG_DUOC"})',
+      'DA_CHUNG_MINH_KHA_DUNG = frozenset({"DUNG_DUOC", "DA_CHAY"})'),
+     ["t149_doctor_do_actionlint_va_shellcheck"]),
+    ("m5_bo_kiem_tra_ngoai_ascii",
+     ('    co_ngoai_ascii = any(ord(c) > 127 for c in duong)',
+      '    co_ngoai_ascii = False  # dot bien bo kiem tra ngoai ascii'),
+     ["t153_doctor_do_duong_dan_kho_co_dau_cach_hoac_phi_ascii"]),
     ("bo_ky_ban_ghi_luot",
      ('    if khoa_ky:\n        ban_ghi["chu_ky"] = ky_ban_ghi_luot(ban_ghi, khoa_ky)',
       '    if False:\n        ban_ghi["chu_ky"] = ky_ban_ghi_luot(ban_ghi, khoa_ky)'),

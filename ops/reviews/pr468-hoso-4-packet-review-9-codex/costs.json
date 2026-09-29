@@ -1,0 +1,1129 @@
+{
+  "regenerate_rc": 0,
+  "regenerate_equal": {
+    "buoc.tsv": true,
+    "tom_tat.md": true,
+    "job.tsv": true,
+    "khong_do_duoc.txt": true,
+    "tinh.py": true
+  },
+  "runs": 13,
+  "jobs": 26,
+  "steps": 1140,
+  "columns_job": 14,
+  "columns_step": 9,
+  "eleven": [
+    {
+      "head": "8ce02fd",
+      "run": "34068433781",
+      "branch": "master",
+      "event": "push",
+      "steps": 40,
+      "windows_seconds": 2412.0,
+      "windows_minutes": 40.2
+    },
+    {
+      "head": "82e01a4",
+      "run": "34058508426",
+      "branch": "claude/priceless-volhard-329577",
+      "event": "pull_request",
+      "steps": 40,
+      "windows_seconds": 2499.0,
+      "windows_minutes": 41.65
+    },
+    {
+      "head": "1b3caa1",
+      "run": "34048685345",
+      "branch": "master",
+      "event": "push",
+      "steps": 39,
+      "windows_seconds": 2537.0,
+      "windows_minutes": 42.28333333333333
+    },
+    {
+      "head": "c0f18ac",
+      "run": "34052910676",
+      "branch": "claude/tra-luat-process-review-o4d7kb",
+      "event": "pull_request",
+      "steps": 40,
+      "windows_seconds": 2630.0,
+      "windows_minutes": 43.833333333333336
+    },
+    {
+      "head": "28cb898",
+      "run": "34060879398",
+      "branch": "master",
+      "event": "push",
+      "steps": 40,
+      "windows_seconds": 2735.0,
+      "windows_minutes": 45.583333333333336
+    },
+    {
+      "head": "b912e5f",
+      "run": "34049592719",
+      "branch": "claude/tra-luat-process-review-o4d7kb",
+      "event": "pull_request",
+      "steps": 40,
+      "windows_seconds": 2761.0,
+      "windows_minutes": 46.016666666666666
+    },
+    {
+      "head": "cacaba3",
+      "run": "34055467808",
+      "branch": "master",
+      "event": "push",
+      "steps": 40,
+      "windows_seconds": 2831.0,
+      "windows_minutes": 47.18333333333333
+    },
+    {
+      "head": "d28c4b1",
+      "run": "34074288203",
+      "branch": "master",
+      "event": "push",
+      "steps": 40,
+      "windows_seconds": 2880.0,
+      "windows_minutes": 48.0
+    },
+    {
+      "head": "62a6385",
+      "run": "34062997697",
+      "branch": "claude/tra-luat-process-review-o4d7kb",
+      "event": "workflow_dispatch",
+      "steps": 40,
+      "windows_seconds": 2962.0,
+      "windows_minutes": 49.36666666666667
+    },
+    {
+      "head": "771c6ed",
+      "run": "34065779670",
+      "branch": "claude/tra-luat-process-review-o4d7kb",
+      "event": "workflow_dispatch",
+      "steps": 40,
+      "windows_seconds": 2977.0,
+      "windows_minutes": 49.61666666666667
+    },
+    {
+      "head": "0c3405f",
+      "run": "34070122978",
+      "branch": "claude/tra-luat-process-review-o4d7kb",
+      "event": "workflow_dispatch",
+      "steps": 40,
+      "windows_seconds": 3029.0,
+      "windows_minutes": 50.483333333333334
+    }
+  ],
+  "sample": {
+    "master": 5,
+    "other": 6,
+    "workloads": {
+      "40": 10,
+      "39": 1
+    },
+    "windows_stats": {
+      "n": 11,
+      "minimum": 40.2,
+      "maximum": 50.483333333333334,
+      "median": 46.016666666666666,
+      "mean": 45.837878787878786,
+      "range": 10.283333333333331
+    }
+  },
+  "ratios": {
+    "test registry": {
+      "n": 11,
+      "minimum": 1.0679501698754248,
+      "maximum": 1.7070866141732284,
+      "median": 1.2125435540069687,
+      "mean": 1.2499042113497771,
+      "range": 0.6391364442978036,
+      "rounding_lower": 1.2112594312246083,
+      "rounding_upper": 1.2138291690877396,
+      "expected": [
+        "11",
+        "1,07",
+        "1,71",
+        "1,21"
+      ],
+      "display": [
+        "11",
+        "1,07",
+        "1,71",
+        "1,21"
+      ],
+      "cells_match": [
+        true,
+        true,
+        true,
+        true
+      ],
+      "range_expected": [
+        "1,21",
+        "1,21"
+      ],
+      "range_display": [
+        "1,21",
+        "1,21"
+      ],
+      "range_matches": true,
+      "pairs": [
+        {
+          "head": "8ce02fd",
+          "run": "34068433781",
+          "ubuntu_seconds": 749,
+          "windows_seconds": 927,
+          "ratio": 1.2376502002670227,
+          "lower": 1.2361574382921947,
+          "upper": 1.2391449565798263
+        },
+        {
+          "head": "82e01a4",
+          "run": "34058508426",
+          "ubuntu_seconds": 869,
+          "windows_seconds": 968,
+          "ratio": 1.1139240506329113,
+          "lower": 1.112708453133985,
+          "upper": 1.1151410477835348
+        },
+        {
+          "head": "1b3caa1",
+          "run": "34048685345",
+          "ubuntu_seconds": 860,
+          "windows_seconds": 1028,
+          "ratio": 1.1953488372093024,
+          "lower": 1.1940732132481116,
+          "upper": 1.1966259453170447
+        },
+        {
+          "head": "c0f18ac",
+          "run": "34052910676",
+          "ubuntu_seconds": 869,
+          "windows_seconds": 1024,
+          "ratio": 1.1783659378596087,
+          "lower": 1.1771132834962623,
+          "upper": 1.1796200345423142
+        },
+        {
+          "head": "28cb898",
+          "run": "34060879398",
+          "ubuntu_seconds": 883,
+          "windows_seconds": 943,
+          "ratio": 1.0679501698754248,
+          "lower": 1.0667798528579513,
+          "upper": 1.0691218130311615
+        },
+        {
+          "head": "b912e5f",
+          "run": "34049592719",
+          "ubuntu_seconds": 867,
+          "windows_seconds": 1113,
+          "ratio": 1.2837370242214532,
+          "lower": 1.282420749279539,
+          "upper": 1.2850548182342758
+        },
+        {
+          "head": "cacaba3",
+          "run": "34055467808",
+          "ubuntu_seconds": 742,
+          "windows_seconds": 989,
+          "ratio": 1.3328840970350404,
+          "lower": 1.3313131313131312,
+          "upper": 1.3344571813890762
+        },
+        {
+          "head": "d28c4b1",
+          "run": "34074288203",
+          "ubuntu_seconds": 872,
+          "windows_seconds": 975,
+          "ratio": 1.1181192660550459,
+          "lower": 1.1169054441260744,
+          "upper": 1.1193344807802639
+        },
+        {
+          "head": "62a6385",
+          "run": "34062997697",
+          "ubuntu_seconds": 635,
+          "windows_seconds": 1084,
+          "ratio": 1.7070866141732284,
+          "lower": 1.7049567269866248,
+          "upper": 1.7092198581560283
+        },
+        {
+          "head": "771c6ed",
+          "run": "34065779670",
+          "ubuntu_seconds": 861,
+          "windows_seconds": 1044,
+          "ratio": 1.2125435540069687,
+          "lower": 1.2112594312246083,
+          "upper": 1.2138291690877396
+        },
+        {
+          "head": "0c3405f",
+          "run": "34070122978",
+          "ubuntu_seconds": 823,
+          "windows_seconds": 1071,
+          "ratio": 1.3013365735115432,
+          "lower": 1.299939283545841,
+          "upper": 1.3027355623100303
+        }
+      ]
+    },
+    "tl selftest": {
+      "n": 11,
+      "minimum": 1.4054054054054055,
+      "maximum": 2.2577319587628866,
+      "median": 1.8305084745762712,
+      "mean": 1.8314963953304,
+      "range": 0.8523265533574811,
+      "rounding_lower": 1.8185654008438819,
+      "rounding_upper": 1.8425531914893618,
+      "expected": [
+        "11",
+        "1,41",
+        "2,26",
+        "1,83"
+      ],
+      "display": [
+        "11",
+        "1,41",
+        "2,26",
+        "1,83"
+      ],
+      "cells_match": [
+        true,
+        true,
+        true,
+        true
+      ],
+      "range_expected": [
+        "1,82",
+        "1,84"
+      ],
+      "range_display": [
+        "1,82",
+        "1,84"
+      ],
+      "range_matches": true,
+      "pairs": [
+        {
+          "head": "8ce02fd",
+          "run": "34068433781",
+          "ubuntu_seconds": 111,
+          "windows_seconds": 156,
+          "ratio": 1.4054054054054055,
+          "lower": 1.3946188340807175,
+          "upper": 1.416289592760181
+        },
+        {
+          "head": "82e01a4",
+          "run": "34058508426",
+          "ubuntu_seconds": 116,
+          "windows_seconds": 171,
+          "ratio": 1.4741379310344827,
+          "lower": 1.463519313304721,
+          "upper": 1.4848484848484849
+        },
+        {
+          "head": "1b3caa1",
+          "run": "34048685345",
+          "ubuntu_seconds": 117,
+          "windows_seconds": 246,
+          "ratio": 2.1025641025641026,
+          "lower": 2.0893617021276594,
+          "upper": 2.11587982832618
+        },
+        {
+          "head": "c0f18ac",
+          "run": "34052910676",
+          "ubuntu_seconds": 118,
+          "windows_seconds": 182,
+          "ratio": 1.5423728813559323,
+          "lower": 1.5316455696202531,
+          "upper": 1.553191489361702
+        },
+        {
+          "head": "28cb898",
+          "run": "34060879398",
+          "ubuntu_seconds": 119,
+          "windows_seconds": 215,
+          "ratio": 1.8067226890756303,
+          "lower": 1.794979079497908,
+          "upper": 1.8185654008438819
+        },
+        {
+          "head": "b912e5f",
+          "run": "34049592719",
+          "ubuntu_seconds": 118,
+          "windows_seconds": 210,
+          "ratio": 1.7796610169491525,
+          "lower": 1.7679324894514767,
+          "upper": 1.7914893617021277
+        },
+        {
+          "head": "cacaba3",
+          "run": "34055467808",
+          "ubuntu_seconds": 108,
+          "windows_seconds": 226,
+          "ratio": 2.0925925925925926,
+          "lower": 2.078341013824885,
+          "upper": 2.1069767441860465
+        },
+        {
+          "head": "d28c4b1",
+          "run": "34074288203",
+          "ubuntu_seconds": 118,
+          "windows_seconds": 216,
+          "ratio": 1.8305084745762712,
+          "lower": 1.8185654008438819,
+          "upper": 1.8425531914893618
+        },
+        {
+          "head": "62a6385",
+          "run": "34062997697",
+          "ubuntu_seconds": 97,
+          "windows_seconds": 219,
+          "ratio": 2.2577319587628866,
+          "lower": 2.241025641025641,
+          "upper": 2.2746113989637307
+        },
+        {
+          "head": "771c6ed",
+          "run": "34065779670",
+          "ubuntu_seconds": 118,
+          "windows_seconds": 227,
+          "ratio": 1.923728813559322,
+          "lower": 1.9113924050632911,
+          "upper": 1.9361702127659575
+        },
+        {
+          "head": "0c3405f",
+          "run": "34070122978",
+          "ubuntu_seconds": 116,
+          "windows_seconds": 224,
+          "ratio": 1.9310344827586208,
+          "lower": 1.9184549356223175,
+          "upper": 1.9437229437229437
+        }
+      ]
+    },
+    "packet-loop selftest": {
+      "n": 11,
+      "minimum": 1.8775510204081634,
+      "maximum": 2.893854748603352,
+      "median": 2.3692946058091287,
+      "mean": 2.3654846950250774,
+      "range": 1.0163037281951885,
+      "rounding_lower": 2.36231884057971,
+      "rounding_upper": 2.3762993762993765,
+      "expected": [
+        "11",
+        "1,88",
+        "2,89",
+        "2,37"
+      ],
+      "display": [
+        "11",
+        "1,88",
+        "2,89",
+        "2,37"
+      ],
+      "cells_match": [
+        true,
+        true,
+        true,
+        true
+      ],
+      "range_expected": [
+        "2,36",
+        "2,38"
+      ],
+      "range_display": [
+        "2,36",
+        "2,38"
+      ],
+      "range_matches": true,
+      "pairs": [
+        {
+          "head": "8ce02fd",
+          "run": "34068433781",
+          "ubuntu_seconds": 207,
+          "windows_seconds": 451,
+          "ratio": 2.178743961352657,
+          "lower": 2.1710843373493978,
+          "upper": 2.1864406779661016
+        },
+        {
+          "head": "82e01a4",
+          "run": "34058508426",
+          "ubuntu_seconds": 245,
+          "windows_seconds": 460,
+          "ratio": 1.8775510204081634,
+          "lower": 1.8716904276985744,
+          "upper": 1.883435582822086
+        },
+        {
+          "head": "1b3caa1",
+          "run": "34048685345",
+          "ubuntu_seconds": 239,
+          "windows_seconds": 562,
+          "ratio": 2.3514644351464433,
+          "lower": 2.3444676409185803,
+          "upper": 2.358490566037736
+        },
+        {
+          "head": "c0f18ac",
+          "run": "34052910676",
+          "ubuntu_seconds": 238,
+          "windows_seconds": 464,
+          "ratio": 1.949579831932773,
+          "lower": 1.9433962264150944,
+          "upper": 1.9557894736842105
+        },
+        {
+          "head": "28cb898",
+          "run": "34060879398",
+          "ubuntu_seconds": 243,
+          "windows_seconds": 578,
+          "ratio": 2.3786008230452675,
+          "lower": 2.371663244353183,
+          "upper": 2.3855670103092783
+        },
+        {
+          "head": "b912e5f",
+          "run": "34049592719",
+          "ubuntu_seconds": 236,
+          "windows_seconds": 587,
+          "ratio": 2.48728813559322,
+          "lower": 2.4799154334038054,
+          "upper": 2.494692144373673
+        },
+        {
+          "head": "cacaba3",
+          "run": "34055467808",
+          "ubuntu_seconds": 211,
+          "windows_seconds": 586,
+          "ratio": 2.7772511848341233,
+          "lower": 2.768321513002364,
+          "upper": 2.786223277909739
+        },
+        {
+          "head": "d28c4b1",
+          "run": "34074288203",
+          "ubuntu_seconds": 241,
+          "windows_seconds": 571,
+          "ratio": 2.3692946058091287,
+          "lower": 2.36231884057971,
+          "upper": 2.3762993762993765
+        },
+        {
+          "head": "62a6385",
+          "run": "34062997697",
+          "ubuntu_seconds": 179,
+          "windows_seconds": 518,
+          "ratio": 2.893854748603352,
+          "lower": 2.883008356545961,
+          "upper": 2.9047619047619047
+        },
+        {
+          "head": "771c6ed",
+          "run": "34065779670",
+          "ubuntu_seconds": 240,
+          "windows_seconds": 551,
+          "ratio": 2.2958333333333334,
+          "lower": 2.288981288981289,
+          "upper": 2.3027139874739038
+        },
+        {
+          "head": "0c3405f",
+          "run": "34070122978",
+          "ubuntu_seconds": 230,
+          "windows_seconds": 566,
+          "ratio": 2.4608695652173913,
+          "lower": 2.453362255965293,
+          "upper": 2.468409586056645
+        }
+      ]
+    },
+    "G5 kiem ban ke": {
+      "n": 11,
+      "minimum": 1.9137931034482758,
+      "maximum": 3.0930232558139537,
+      "median": 2.396551724137931,
+      "mean": 2.447311565388704,
+      "range": 1.1792301523656779,
+      "rounding_lower": 2.3675213675213675,
+      "rounding_upper": 2.4260869565217393,
+      "expected": [
+        "11",
+        "1,91",
+        "3,09",
+        "2,40"
+      ],
+      "display": [
+        "11",
+        "1,91",
+        "3,09",
+        "2,40"
+      ],
+      "cells_match": [
+        true,
+        true,
+        true,
+        true
+      ],
+      "range_expected": [
+        "2,37",
+        "2,43"
+      ],
+      "range_display": [
+        "2,37",
+        "2,43"
+      ],
+      "range_matches": true,
+      "pairs": [
+        {
+          "head": "8ce02fd",
+          "run": "34068433781",
+          "ubuntu_seconds": 51,
+          "windows_seconds": 111,
+          "ratio": 2.176470588235294,
+          "lower": 2.145631067961165,
+          "upper": 2.207920792079208
+        },
+        {
+          "head": "82e01a4",
+          "run": "34058508426",
+          "ubuntu_seconds": 58,
+          "windows_seconds": 111,
+          "ratio": 1.9137931034482758,
+          "lower": 1.8888888888888888,
+          "upper": 1.9391304347826086
+        },
+        {
+          "head": "1b3caa1",
+          "run": "34048685345",
+          "ubuntu_seconds": 57,
+          "windows_seconds": 138,
+          "ratio": 2.4210526315789473,
+          "lower": 2.391304347826087,
+          "upper": 2.4513274336283186
+        },
+        {
+          "head": "c0f18ac",
+          "run": "34052910676",
+          "ubuntu_seconds": 59,
+          "windows_seconds": 129,
+          "ratio": 2.1864406779661016,
+          "lower": 2.1596638655462184,
+          "upper": 2.213675213675214
+        },
+        {
+          "head": "28cb898",
+          "run": "34060879398",
+          "ubuntu_seconds": 60,
+          "windows_seconds": 140,
+          "ratio": 2.3333333333333335,
+          "lower": 2.3057851239669422,
+          "upper": 2.361344537815126
+        },
+        {
+          "head": "b912e5f",
+          "run": "34049592719",
+          "ubuntu_seconds": 56,
+          "windows_seconds": 145,
+          "ratio": 2.5892857142857144,
+          "lower": 2.5575221238938055,
+          "upper": 2.6216216216216215
+        },
+        {
+          "head": "cacaba3",
+          "run": "34055467808",
+          "ubuntu_seconds": 50,
+          "windows_seconds": 141,
+          "ratio": 2.82,
+          "lower": 2.782178217821782,
+          "upper": 2.8585858585858586
+        },
+        {
+          "head": "d28c4b1",
+          "run": "34074288203",
+          "ubuntu_seconds": 60,
+          "windows_seconds": 143,
+          "ratio": 2.3833333333333333,
+          "lower": 2.355371900826446,
+          "upper": 2.411764705882353
+        },
+        {
+          "head": "62a6385",
+          "run": "34062997697",
+          "ubuntu_seconds": 43,
+          "windows_seconds": 133,
+          "ratio": 3.0930232558139537,
+          "lower": 3.045977011494253,
+          "upper": 3.1411764705882352
+        },
+        {
+          "head": "771c6ed",
+          "run": "34065779670",
+          "ubuntu_seconds": 58,
+          "windows_seconds": 139,
+          "ratio": 2.396551724137931,
+          "lower": 2.3675213675213675,
+          "upper": 2.4260869565217393
+        },
+        {
+          "head": "0c3405f",
+          "run": "34070122978",
+          "ubuntu_seconds": 56,
+          "windows_seconds": 146,
+          "ratio": 2.607142857142857,
+          "lower": 2.575221238938053,
+          "upper": 2.6396396396396398
+        }
+      ]
+    },
+    "lease-publish selftest": {
+      "n": 11,
+      "minimum": 2.4166666666666665,
+      "maximum": 3.843137254901961,
+      "median": 2.9420289855072466,
+      "mean": 2.9381524487381636,
+      "range": 1.4264705882352944,
+      "rounding_lower": 2.9136690647482015,
+      "rounding_upper": 2.9708029197080292,
+      "expected": [
+        "11",
+        "2,42",
+        "3,84",
+        "2,94"
+      ],
+      "display": [
+        "11",
+        "2,42",
+        "3,84",
+        "2,94"
+      ],
+      "cells_match": [
+        true,
+        true,
+        true,
+        true
+      ],
+      "range_expected": [
+        "2,91",
+        "2,97"
+      ],
+      "range_display": [
+        "2,91",
+        "2,97"
+      ],
+      "range_matches": true,
+      "pairs": [
+        {
+          "head": "8ce02fd",
+          "run": "34068433781",
+          "ubuntu_seconds": 57,
+          "windows_seconds": 147,
+          "ratio": 2.5789473684210527,
+          "lower": 2.5478260869565217,
+          "upper": 2.6106194690265485
+        },
+        {
+          "head": "82e01a4",
+          "run": "34058508426",
+          "ubuntu_seconds": 70,
+          "windows_seconds": 170,
+          "ratio": 2.4285714285714284,
+          "lower": 2.404255319148936,
+          "upper": 2.4532374100719423
+        },
+        {
+          "head": "1b3caa1",
+          "run": "34048685345",
+          "ubuntu_seconds": 69,
+          "windows_seconds": 208,
+          "ratio": 3.0144927536231885,
+          "lower": 2.985611510791367,
+          "upper": 3.0437956204379564
+        },
+        {
+          "head": "c0f18ac",
+          "run": "34052910676",
+          "ubuntu_seconds": 72,
+          "windows_seconds": 174,
+          "ratio": 2.4166666666666665,
+          "lower": 2.393103448275862,
+          "upper": 2.4405594405594404
+        },
+        {
+          "head": "28cb898",
+          "run": "34060879398",
+          "ubuntu_seconds": 71,
+          "windows_seconds": 187,
+          "ratio": 2.6338028169014085,
+          "lower": 2.6083916083916083,
+          "upper": 2.6595744680851063
+        },
+        {
+          "head": "b912e5f",
+          "run": "34049592719",
+          "ubuntu_seconds": 69,
+          "windows_seconds": 203,
+          "ratio": 2.9420289855072466,
+          "lower": 2.9136690647482015,
+          "upper": 2.9708029197080292
+        },
+        {
+          "head": "cacaba3",
+          "run": "34055467808",
+          "ubuntu_seconds": 58,
+          "windows_seconds": 191,
+          "ratio": 3.293103448275862,
+          "lower": 3.2564102564102564,
+          "upper": 3.3304347826086955
+        },
+        {
+          "head": "d28c4b1",
+          "run": "34074288203",
+          "ubuntu_seconds": 71,
+          "windows_seconds": 190,
+          "ratio": 2.676056338028169,
+          "lower": 2.6503496503496504,
+          "upper": 2.702127659574468
+        },
+        {
+          "head": "62a6385",
+          "run": "34062997697",
+          "ubuntu_seconds": 51,
+          "windows_seconds": 196,
+          "ratio": 3.843137254901961,
+          "lower": 3.796116504854369,
+          "upper": 3.891089108910891
+        },
+        {
+          "head": "771c6ed",
+          "run": "34065779670",
+          "ubuntu_seconds": 68,
+          "windows_seconds": 220,
+          "ratio": 3.235294117647059,
+          "lower": 3.204379562043796,
+          "upper": 3.2666666666666666
+        },
+        {
+          "head": "0c3405f",
+          "run": "34070122978",
+          "ubuntu_seconds": 66,
+          "windows_seconds": 215,
+          "ratio": 3.257575757575758,
+          "lower": 3.225563909774436,
+          "upper": 3.2900763358778624
+        }
+      ]
+    },
+    "bien-nhan v2 selftest": {
+      "n": 10,
+      "minimum": 7.066666666666666,
+      "maximum": 9.74468085106383,
+      "median": 7.792929292929292,
+      "mean": 8.10748348601652,
+      "range": 2.6780141843971634,
+      "rounding_lower": 7.7051777051777055,
+      "rounding_upper": 7.882486341614267,
+      "expected": [
+        "10",
+        "7,07",
+        "9,74",
+        "7,79"
+      ],
+      "display": [
+        "10",
+        "7,07",
+        "9,74",
+        "7,79"
+      ],
+      "cells_match": [
+        true,
+        true,
+        true,
+        true
+      ],
+      "range_expected": [
+        "7,71",
+        "7,88"
+      ],
+      "range_display": [
+        "7,71",
+        "7,88"
+      ],
+      "range_matches": true,
+      "pairs": [
+        {
+          "head": "8ce02fd",
+          "run": "34068433781",
+          "ubuntu_seconds": 37,
+          "windows_seconds": 311,
+          "ratio": 8.405405405405405,
+          "lower": 8.28,
+          "upper": 8.534246575342467
+        },
+        {
+          "head": "82e01a4",
+          "run": "34058508426",
+          "ubuntu_seconds": 45,
+          "windows_seconds": 320,
+          "ratio": 7.111111111111111,
+          "lower": 7.021978021978022,
+          "upper": 7.202247191011236
+        },
+        {
+          "head": "c0f18ac",
+          "run": "34052910676",
+          "ubuntu_seconds": 45,
+          "windows_seconds": 343,
+          "ratio": 7.622222222222222,
+          "lower": 7.527472527472527,
+          "upper": 7.719101123595506
+        },
+        {
+          "head": "28cb898",
+          "run": "34060879398",
+          "ubuntu_seconds": 45,
+          "windows_seconds": 318,
+          "ratio": 7.066666666666666,
+          "lower": 6.978021978021978,
+          "upper": 7.157303370786517
+        },
+        {
+          "head": "b912e5f",
+          "run": "34049592719",
+          "ubuntu_seconds": 14,
+          "windows_seconds": 128,
+          "ratio": 9.142857142857142,
+          "lower": 8.793103448275861,
+          "upper": 9.518518518518519
+        },
+        {
+          "head": "cacaba3",
+          "run": "34055467808",
+          "ubuntu_seconds": 37,
+          "windows_seconds": 334,
+          "ratio": 9.027027027027026,
+          "lower": 8.893333333333333,
+          "upper": 9.164383561643836
+        },
+        {
+          "head": "d28c4b1",
+          "run": "34074288203",
+          "ubuntu_seconds": 57,
+          "windows_seconds": 427,
+          "ratio": 7.491228070175438,
+          "lower": 7.417391304347826,
+          "upper": 7.566371681415929
+        },
+        {
+          "head": "62a6385",
+          "run": "34062997697",
+          "ubuntu_seconds": 47,
+          "windows_seconds": 458,
+          "ratio": 9.74468085106383,
+          "lower": 9.631578947368421,
+          "upper": 9.86021505376344
+        },
+        {
+          "head": "771c6ed",
+          "run": "34065779670",
+          "ubuntu_seconds": 58,
+          "windows_seconds": 435,
+          "ratio": 7.5,
+          "lower": 7.427350427350428,
+          "upper": 7.573913043478261
+        },
+        {
+          "head": "0c3405f",
+          "run": "34070122978",
+          "ubuntu_seconds": 55,
+          "windows_seconds": 438,
+          "ratio": 7.963636363636364,
+          "lower": 7.882882882882883,
+          "upper": 8.045871559633028
+        }
+      ]
+    },
+    "job trọn": {
+      "n": 11,
+      "minimum": 1.523780487804878,
+      "maximum": 2.3582802547770703,
+      "median": 1.7267041901188243,
+      "mean": 1.7798048382197824,
+      "range": 0.8344997669721923,
+      "rounding_lower": 1.7258518286964677,
+      "rounding_upper": 1.727557084766969,
+      "expected": [
+        "11",
+        "1,52",
+        "2,36",
+        "1,73"
+      ],
+      "display": [
+        "11",
+        "1,52",
+        "2,36",
+        "1,73"
+      ],
+      "cells_match": [
+        true,
+        true,
+        true,
+        true
+      ],
+      "range_expected": [],
+      "range_display": [],
+      "range_matches": true,
+      "pairs": [
+        {
+          "head": "8ce02fd",
+          "run": "34068433781",
+          "ubuntu_seconds": 1436.0,
+          "windows_seconds": 2412.0,
+          "ratio": 1.6796657381615598,
+          "lower": 1.6787330316742082,
+          "upper": 1.6805990943921978
+        },
+        {
+          "head": "82e01a4",
+          "run": "34058508426",
+          "ubuntu_seconds": 1640.0,
+          "windows_seconds": 2499.0,
+          "ratio": 1.523780487804878,
+          "lower": 1.52301127704968,
+          "upper": 1.5245501677340652
+        },
+        {
+          "head": "1b3caa1",
+          "run": "34048685345",
+          "ubuntu_seconds": 1591.0,
+          "windows_seconds": 2537.0,
+          "ratio": 1.5945945945945945,
+          "lower": 1.5937794533459,
+          "upper": 1.5954102483495756
+        },
+        {
+          "head": "c0f18ac",
+          "run": "34052910676",
+          "ubuntu_seconds": 1642.0,
+          "windows_seconds": 2630.0,
+          "ratio": 1.6017052375152254,
+          "lower": 1.6009132420091323,
+          "upper": 1.602497715504112
+        },
+        {
+          "head": "28cb898",
+          "run": "34060879398",
+          "ubuntu_seconds": 1661.0,
+          "windows_seconds": 2735.0,
+          "ratio": 1.6465984346779048,
+          "lower": 1.645801986157087,
+          "upper": 1.6473953628425173
+        },
+        {
+          "head": "b912e5f",
+          "run": "34049592719",
+          "ubuntu_seconds": 1599.0,
+          "windows_seconds": 2761.0,
+          "ratio": 1.7267041901188243,
+          "lower": 1.7258518286964677,
+          "upper": 1.727557084766969
+        },
+        {
+          "head": "cacaba3",
+          "run": "34055467808",
+          "ubuntu_seconds": 1428.0,
+          "windows_seconds": 2831.0,
+          "ratio": 1.9824929971988796,
+          "lower": 1.9814490724536227,
+          "upper": 1.98353765323993
+        },
+        {
+          "head": "d28c4b1",
+          "run": "34074288203",
+          "ubuntu_seconds": 1657.0,
+          "windows_seconds": 2880.0,
+          "ratio": 1.7380808690404346,
+          "lower": 1.7372549019607844,
+          "upper": 1.7389073347419257
+        },
+        {
+          "head": "62a6385",
+          "run": "34062997697",
+          "ubuntu_seconds": 1256.0,
+          "windows_seconds": 2962.0,
+          "ratio": 2.3582802547770703,
+          "lower": 2.356943891762833,
+          "upper": 2.3596176821983272
+        },
+        {
+          "head": "771c6ed",
+          "run": "34065779670",
+          "ubuntu_seconds": 1648.0,
+          "windows_seconds": 2977.0,
+          "ratio": 1.8064320388349515,
+          "lower": 1.8055808310585382,
+          "upper": 1.8072837632776935
+        },
+        {
+          "head": "0c3405f",
+          "run": "34070122978",
+          "ubuntu_seconds": 1578.0,
+          "windows_seconds": 3029.0,
+          "ratio": 1.9195183776932827,
+          "lower": 1.9185936015204308,
+          "upper": 1.9204437400950871
+        }
+      ]
+    }
+  },
+  "costs": {
+    "ubuntu": {
+      "job": 24.25,
+      "step_sum": 24.2,
+      "setup": 1.1833333333333333,
+      "registry": 13.133333333333333,
+      "packet": 3.65,
+      "remaining": 7.416666666666666,
+      "split_registry": 14.316666666666666,
+      "split_packet": 4.833333333333333,
+      "total_after": 26.566666666666666
+    },
+    "windows": {
+      "job": 43.2,
+      "step_sum": 43.166666666666664,
+      "setup": 3.3333333333333335,
+      "registry": 17.7,
+      "packet": 9.7,
+      "remaining": 15.766666666666666,
+      "split_registry": 21.03333333333333,
+      "split_packet": 13.033333333333333,
+      "total_after": 49.83333333333333
+    }
+  },
+  "cost_arithmetic": {
+    "before": 110.65,
+    "after_raw_seconds": 126.23333333333332,
+    "longest_windows": 21.03333333333333,
+    "A1_threshold": 25,
+    "A5_threshold": 135
+  },
+  "cancelled": [
+    {
+      "run_id": "34048229370",
+      "head7": "4cd80c5",
+      "head_branch": "claude/tra-luat-process-review-o4d7kb",
+      "event": "workflow_dispatch",
+      "job_name": "gate (windows-latest)",
+      "conclusion": "cancelled",
+      "seconds": 3610.0,
+      "minutes": 60.166666666666664
+    }
+  ],
+  "step_seconds_match_timestamps": true
+}

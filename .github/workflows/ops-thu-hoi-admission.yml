@@ -1,0 +1,178 @@
+name: thu-hoi
+
+# CỔNG TIẾP NHẬN SỔ THU HỒI LEASE (spec `ops/specs/THU-HOI-LEASE-VA-CAP-LAI.md` r9 §M9; ADR-0047).
+# TRẠNG THÁI: CÀI ở slice A0, CHƯA KÍCH HOẠT — `SO_THU_HOI_KICH_HOAT = False` trong
+# `ops/lease_publish.py`, nên bộ kiểm chỉ chứng minh tập revocation RỖNG ở cả S lẫn T và
+# ghi receipt; chưa là required check, chưa có consumer đọc receipt (dependency
+# LAND-DOC-RECEIPT-THU-HOI). Nghiệm thu + bật là slice A1, quyết định của chủ kho.
+#
+# VÌ SAO `pull_request_target` mà KHÔNG chạy code ứng viên: cổng phải chạy MÃ CANONICAL — bộ kiểm
+# lấy từ cây C = `workflow_sha` (packet #618; trước đó là base.sha) — trên đúng head ứng viên (H)
+# đã được fetch vào object-store; cây của H chỉ
+# được ĐỌC qua object-store, không checkout, không hook, không action nào của cây ứng viên chạy.
+# `ops-publish-lease.yml` từng ăn P1 vì bộ kiểm nằm cùng nhánh với thứ nó kiểm (PR #104).
+# `pull_request_target` là cách duy nhất có token đọc + định nghĩa workflow từ base; token ở đây
+# CHỈ ĐỌC (`contents: read`, `pull-requests: read`) — job này không ghi Issue/PR/kho.
+#
+# BỐN mỏ neo ĐO, không tin lời khai của event (packet #618 tách S khỏi C — trước đó hai mốc là một):
+#   C — cây chạy = CHÍNH commit định nghĩa: `git rev-parse HEAD` phải bằng `github.workflow_sha`, và
+#       `workflow_ref` phải trỏ `refs/heads/<nhánh mặc định>` (finding F07 cross-review A0: checkout đúng
+#       một commit không tự chứng minh tệp workflow được lấy từ commit ấy — nên đo cả hai).
+#   S — `base.sha` của event: mốc SO SỔ revocation (`--canonical-base`), KHÔNG còn là mốc checkout.
+#       Chống lùi: S phải là tổ tiên của C. Bộ kiểm còn đòi S là tổ tiên của H — đó là thiết kế
+#       fail-close giữ nguyên theo quyết định chủ kho cho #618 (đường (a)), không phải dương tính giả.
+#   H — fetch `refs/pull/<n>/head` từ endpoint canonical tường minh; OID nhận được phải bằng `head.sha`.
+#   T — tree(H) do bộ kiểm tự lấy từ bytes đã băm.
+# Vì sao gỡ `workflow_sha == base.sha`: với `pull_request_target`, GitHub nạp định nghĩa từ HEAD nhánh
+# MẶC ĐỊNH lúc chạy (kể cả khi PR nhắm base khác; lane này chỉ nhận base master), nên hai giá trị chỉ bằng nhau khi nhánh mặc định chưa tiến — chốt ấy chặn việc ĐÚNG.
+# KHÔNG `workflow_dispatch` (hợp đồng R5/S5: consumer từ chối mọi event khác kể cả cùng tên).
+# Không lọc `paths:` — mọi PR vào nhánh mặc định đều qua admission (A11: docs/bot/rc9/standalone).
+
+on:
+  pull_request_target:
+    types: [opened, reopened, synchronize, ready_for_review, edited]
+    branches: [master]
+
+permissions:
+  contents: read
+  pull-requests: read
+  actions: read      # đọc jobs của chính run này để lấy check_run_url (không ghi gì)
+
+concurrency:
+  group: thu-hoi-${{ github.event.pull_request.number }}
+  cancel-in-progress: false   # receipt của attempt trước không bị huỷ giữa chừng
+
+jobs:
+  thu-hoi:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: read
+      actions: read
+    steps:
+      # packet #618: mốc checkout là `workflow_sha`, KHÔNG phải `base.sha`. Lý do ở khối chú thích
+      # "BỐN MỎ NEO ĐO" phía trên. Vẫn không bao giờ là head PR: với `pull_request_target`, GitHub
+      # nạp định nghĩa từ nhánh MẶC ĐỊNH, nên `workflow_sha` luôn là một commit của nhánh ấy.
+      - name: lấy MÃ CANONICAL tại workflow_sha — không bao giờ head PR
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.workflow_sha }}
+          fetch-depth: 0
+          persist-credentials: false
+
+      # GHIM EXACT, cùng số với `ci.yml` và `ops-publish-lease.yml` (t31 đòi mọi workflow cùng một bản).
+      - name: cài PyYAML
+        run: python3 -m pip install --quiet PyYAML==6.0.3
+
+      - name: đo S, fetch H từ endpoint canonical, chạy bộ kiểm canonical, ghi receipt
+        env:
+          TL_S: ${{ github.event.pull_request.base.sha }}
+          TL_H: ${{ github.event.pull_request.head.sha }}
+          TL_PR: ${{ github.event.pull_request.number }}
+          TL_NHANH: ${{ github.event.pull_request.base.ref }}
+          TL_KHO: ${{ github.repository }}
+          TL_RUN_ID: ${{ github.run_id }}
+          TL_RUN_ATTEMPT: ${{ github.run_attempt }}
+          TL_WF_SHA: ${{ github.workflow_sha }}
+          TL_WF_REF: ${{ github.workflow_ref }}
+          TL_JOB: ${{ github.job }}
+          TL_API: ${{ github.api_url }}
+          TL_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          # Input đi qua env rồi validate ở shell TRƯỚC khi thành argv — không nội suy biểu thức vào thân script.
+          case "$TL_S" in *[!0-9a-f]*|"") echo "S không phải sha40: $TL_S" >&2; exit 12;; esac
+          case "$TL_H" in *[!0-9a-f]*|"") echo "H không phải sha40: $TL_H" >&2; exit 12;; esac
+          if [ "${#TL_S}" -ne 40 ] || [ "${#TL_H}" -ne 40 ]; then echo "S/H phải dài 40" >&2; exit 12; fi
+          case "$TL_PR" in *[!0-9]*|"") echo "số PR hỏng: $TL_PR" >&2; exit 12;; esac
+          case "$TL_NHANH" in */*|"") echo "tên nhánh mặc định hỏng: $TL_NHANH" >&2; exit 12;; esac
+          [ "$TL_KHO" = "ducthangho/tra-luat" ] || { echo "kho không phải canonical: $TL_KHO" >&2; exit 12; }
+          case "$TL_WF_SHA" in *[!0-9a-f]*|"") echo "workflow_sha hỏng: $TL_WF_SHA" >&2; exit 12;; esac
+          if [ "${#TL_WF_SHA}" -ne 40 ]; then echo "workflow_sha phải dài 40: $TL_WF_SHA" >&2; exit 12; fi
+          # packet #618 — CÂY PHẢI LÀ CHÍNH COMMIT ĐỊNH NGHĨA. Bản trước đòi `workflow_sha == base.sha`,
+          # và vế ấy KHÔNG phục vụ bất biến nào: với `pull_request_target`, GitHub nạp định nghĩa từ HEAD
+          # nhánh mặc định lúc chạy, nên hai giá trị bằng nhau CHỈ KHI nhánh mặc định chưa tiến kể từ base của
+          # PR. Mọi PR không rebase liên tục đều trượt — đo trên PR #601: head fa263ef2 ăn exit 12 (run
+          # 35981638892) trong khi bộ kiểm canonical chạy lại tại chỗ cho rc=0. Cổng chết ở bước neo, TRƯỚC
+          # khi tới bộ kiểm; tức nó chặn việc ĐÚNG. Nay neo cây và định nghĩa vào CÙNG một commit canonical.
+          THUC="$(git rev-parse HEAD)"
+          [ "$THUC" = "$TL_WF_SHA" ] || { echo "checkout HEAD $THUC != workflow_sha $TL_WF_SHA" >&2; exit 12; }
+          # CHỐNG LÙI: định nghĩa không được là commit TRƯỚC base của PR. `--is-ancestor` fail-close: rc!=0
+          # gồm cả "không đo được" (S không nằm trong lịch sử đã fetch) và "S không phải tổ tiên" ⇒ cả hai ĐỎ.
+          git merge-base --is-ancestor "$TL_S" HEAD \
+              || { echo "S $TL_S không phải tổ tiên của workflow_sha $TL_WF_SHA (hoặc không đo được)" >&2; exit 12; }
+          [ "$TL_WF_REF" = "$TL_KHO/.github/workflows/ops-thu-hoi-admission.yml@refs/heads/$TL_NHANH" ] \
+              || { echo "workflow_ref lạ: $TL_WF_REF" >&2; exit 12; }
+          WF_BLOB="$(git rev-parse "$TL_WF_SHA:.github/workflows/ops-thu-hoi-admission.yml")"
+          # H: fetch ref PR từ endpoint canonical TƯỜNG MINH (không qua `origin` của checkout), vào ref tạm;
+          # OID nhận được phải bằng head.sha của event, nếu không receipt stale ⇒ 12.
+          # M9-FETCH-AUTH (#503, khắc phục #499 C2a): checkout C (= workflow_sha, #618) cố ý `persist-credentials: false`, nên lời gọi
+          # fetch dưới đây là nơi DUY NHẤT mang xác thực — header Basic từ TL_TOKEN, phạm vi đúng MỘT tiến trình git
+          # (GIT_CONFIG_KEY_0/VALUE_0: không ghi config, không nằm trong argv, không token trong URL). Chuỗi base64
+          # của token KHÔNG được GitHub tự mask, nên mask tay trước khi dùng. Đo lần đầu 10-09-2026: fetch nặc danh
+          # ⇒ rc=128 `could not read Username` trên mọi PR — cổng fail-close nhưng không bao giờ xanh. t152 khoá.
+          AUTH_B64="$(printf 'x-access-token:%s' "$TL_TOKEN" | base64 -w0)"
+          echo "::add-mask::$AUTH_B64"
+          GIT_CONFIG_COUNT=1 \
+          GIT_CONFIG_KEY_0="http.https://github.com/.extraheader" \
+          GIT_CONFIG_VALUE_0="AUTHORIZATION: basic $AUTH_B64" \
+          git -c protocol.allow=never -c protocol.https.allow=always \
+              fetch --no-tags "https://github.com/$TL_KHO" \
+              "+refs/pull/$TL_PR/head:refs/thu-hoi/ung-vien"
+          unset AUTH_B64
+          NHAN="$(git rev-parse refs/thu-hoi/ung-vien)"
+          [ "$NHAN" = "$TL_H" ] || { echo "fetch refs/pull/$TL_PR/head cho $NHAN != head.sha $TL_H" >&2; exit 12; }
+          # Bộ kiểm CANONICAL (tệp của cây C = workflow_sha vừa checkout) đọc H qua object-store, không checkout
+          # cây ứng viên. S chỉ đi vào qua `--canonical-base`: mốc so sổ, không phải mã đang chạy.
+          mkdir -p "$RUNNER_TEMP/thu-hoi-receipt"
+          # F12 (review lượt 2): dưới `set -e`, `X=$?` sau lệnh fail là dòng chết — lấy rc THẬT vào biến rồi mới thoát fail-close.
+          CHECKER_RC=0
+          python3 ops/lease_publish.py kiem-thu-hoi-github "$TL_H" \
+              --canonical-base "$TL_S" --nhanh-mac-dinh "$TL_NHANH" \
+              --receipt "$RUNNER_TEMP/thu-hoi-receipt/receipt.json" || CHECKER_RC=$?
+          [ "$CHECKER_RC" -eq 0 ] || { echo "bộ kiểm canonical rc=$CHECKER_RC" >&2; exit "$CHECKER_RC"; }
+          # check_run_id: đọc jobs của ĐÚNG run/attempt này qua API (token chỉ đọc), lấy `check_run_url` của job
+          # tên $TL_JOB — KHÔNG đồng nhất job ID với check-run ID. Không lấy được ⇒ 12 (thiếu/mơ hồ là 12).
+          curl -sS -f -H "Authorization: Bearer $TL_TOKEN" -H "Accept: application/vnd.github+json" \
+              "$TL_API/repos/$TL_KHO/actions/runs/$TL_RUN_ID/attempts/$TL_RUN_ATTEMPT/jobs?per_page=100" \
+              > "$RUNNER_TEMP/jobs.json" || { echo "không đọc được jobs của run $TL_RUN_ID attempt $TL_RUN_ATTEMPT" >&2; exit 12; }
+          python3 - "$RUNNER_TEMP/thu-hoi-receipt/receipt.json" "$RUNNER_TEMP/jobs.json" "$TL_KHO" "$TL_PR" \
+              "$TL_RUN_ID" "$TL_RUN_ATTEMPT" "$TL_WF_SHA" "$TL_WF_REF" "$WF_BLOB" "$TL_JOB" "$CHECKER_RC" <<'PY'
+          import hashlib, json, subprocess, sys
+          tep, tep_jobs, kho, pr, run_id, attempt, wf_sha, wf_ref, wf_blob, ten_job, checker_rc = sys.argv[1:12]
+          jobs = json.load(open(tep_jobs, encoding="utf-8")).get("jobs") or []
+          khop = [j for j in jobs if j.get("name") == ten_job and str(j.get("run_attempt")) == attempt]
+          if len(khop) != 1 or not str(khop[0].get("check_run_url", "")).rstrip("/").split("/")[-1].isdigit():
+              print(f"jobs API không cho đúng MỘT job {ten_job!r} attempt {attempt} có check_run_url: {len(khop)}", file=sys.stderr)
+              sys.exit(12)
+          check_run_id = int(khop[0]["check_run_url"].rstrip("/").split("/")[-1])
+          # sha256 của BLOB định nghĩa tại đúng commit workflow_sha (không phải tệp trong checkout)
+          than = subprocess.run(["git", "cat-file", "blob", wf_blob], capture_output=True, check=True).stdout
+          d = json.load(open(tep, encoding="utf-8"))
+          d["repository"] = kho; d["pull_request"] = int(pr)
+          d["run_id"] = int(run_id); d["run_attempt"] = int(attempt)
+          d["check_run_id"] = check_run_id; d["job_id"] = khop[0].get("id"); d["checker_rc"] = int(checker_rc)
+          d["workflow_definition_commit"] = wf_sha; d["workflow_ref"] = wf_ref; d["checkout_commit"] = wf_sha
+          # #618 F2: `oid_bo_kiem_tai_S` (do bộ kiểm tự ghi) là dữ liệu NỀN về S, KHÔNG phải identity của mã
+          # đã chạy — từ #618 mã chạy ở C = workflow_sha, có thể khác S. Consumer phải dùng cặp dưới đây để
+          # biết mã nào đã chạy; đọc `oid_bo_kiem_tai_S` làm identity là đọc sai. Hợp đồng consumer M9 trong
+          # spec THU-HOI-LEASE-VA-CAP-LAI còn giả định C == S: nợ có tên, ghi trên Issue #618.
+          d["bo_kiem_da_chay_commit"] = wf_sha
+          d["oid_bo_kiem_da_chay"] = subprocess.run(
+              ["git", "rev-parse", wf_sha + ":ops/lease_publish.py"],
+              capture_output=True, check=True, text=True).stdout.strip()
+          d["workflow_definition_blob"] = wf_blob; d["workflow_definition_sha256"] = hashlib.sha256(than).hexdigest()
+          json.dump(d, open(tep, "w", encoding="utf-8"), ensure_ascii=False, sort_keys=True, indent=1)
+          print("receipt:", d["ket_luan"], "S", d["S"][:12], "H", d["H"][:12], "T", d["T"][:12],
+                "definition", wf_sha[:12], "check_run", check_run_id)
+          PY
+
+      # Tên artifact KHÔNG phải danh tính (consumer dùng artifact ID + metadata run sau readback);
+      # `if-no-files-found: error` để "không có receipt" là job ĐỎ chứ không phải job xanh rỗng.
+      - name: tải receipt lên artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: thu-hoi-receipt-${{ github.event.pull_request.head.sha }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/thu-hoi-receipt/receipt.json
+          if-no-files-found: error
+          retention-days: 90

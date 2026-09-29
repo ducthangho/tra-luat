@@ -1,0 +1,163 @@
+{
+  "formatters": [
+    {
+      "path": ".claude/dev/chon_reviewer_test.py",
+      "rc": 0,
+      "H_red": 0,
+      "span_chars": 2745,
+      "span_utf8_bytes": 2764,
+      "groups": 2,
+      "pairs_in_span": 1,
+      "captured_pairs_in_TONG": 1
+    },
+    {
+      "path": ".claude/dev/gh_readback_test.py",
+      "rc": 0,
+      "H_red": 0,
+      "span_chars": 38,
+      "span_utf8_bytes": 38,
+      "groups": 2,
+      "pairs_in_span": 1,
+      "captured_pairs_in_TONG": 1
+    },
+    {
+      "path": ".claude/dev/mcp_gh_test.py",
+      "rc": 1,
+      "H_red": 1,
+      "span_chars": null,
+      "span_utf8_bytes": null,
+      "groups": 2,
+      "pairs_in_span": null,
+      "captured_pairs_in_TONG": 2
+    },
+    {
+      "path": ".claude/dev/mcp_github_doc_test.py",
+      "rc": 0,
+      "H_red": 0,
+      "span_chars": 53,
+      "span_utf8_bytes": 53,
+      "groups": 2,
+      "pairs_in_span": 1,
+      "captured_pairs_in_TONG": 1
+    },
+    {
+      "path": ".claude/dev/probe_mang_test.py",
+      "rc": 0,
+      "H_red": 0,
+      "span_chars": 456,
+      "span_utf8_bytes": 496,
+      "groups": 0,
+      "pairs_in_span": 3,
+      "captured_pairs_in_TONG": 3
+    },
+    {
+      "path": ".claude/hooks/pretooluse_guard_test.py",
+      "rc": 1,
+      "H_red": 1,
+      "span_chars": null,
+      "span_utf8_bytes": null,
+      "groups": 2,
+      "pairs_in_span": null,
+      "captured_pairs_in_TONG": 2
+    },
+    {
+      "path": ".claude/hooks/subagent_ghi_detect_test.py",
+      "rc": 0,
+      "H_red": 0,
+      "span_chars": 53,
+      "span_utf8_bytes": 54,
+      "groups": 2,
+      "pairs_in_span": 2,
+      "captured_pairs_in_TONG": 2
+    },
+    {
+      "path": "ops/nhanh_don_duoc_test.py",
+      "rc": 0,
+      "H_red": 0,
+      "span_chars": 3,
+      "span_utf8_bytes": 3,
+      "groups": 2,
+      "pairs_in_span": 1,
+      "captured_pairs_in_TONG": 1
+    }
+  ],
+  "mutants": [
+    {
+      "name": "no_positions",
+      "changed_count": 5,
+      "exception_count": 11
+    },
+    {
+      "name": "no_unique",
+      "changed_count": 51,
+      "exception_count": 0
+    },
+    {
+      "name": "no_positive",
+      "changed_count": 42,
+      "exception_count": 0
+    },
+    {
+      "name": "remove_dead_bool",
+      "changed_count": 0,
+      "exception_count": 0
+    }
+  ],
+  "workloads": [
+    {
+      "sha": "8ce02fd",
+      "steps": 40,
+      "has_receipt_v2": true
+    },
+    {
+      "sha": "82e01a4",
+      "steps": 40,
+      "has_receipt_v2": true
+    },
+    {
+      "sha": "1b3caa1",
+      "steps": 39,
+      "has_receipt_v2": false
+    },
+    {
+      "sha": "c0f18ac",
+      "steps": 40,
+      "has_receipt_v2": true
+    },
+    {
+      "sha": "28cb898",
+      "steps": 40,
+      "has_receipt_v2": true
+    },
+    {
+      "sha": "b912e5f",
+      "steps": 40,
+      "has_receipt_v2": true
+    },
+    {
+      "sha": "cacaba3",
+      "steps": 40,
+      "has_receipt_v2": true
+    },
+    {
+      "sha": "d28c4b1",
+      "steps": 40,
+      "has_receipt_v2": true
+    },
+    {
+      "sha": "62a6385",
+      "steps": 40,
+      "has_receipt_v2": true
+    },
+    {
+      "sha": "771c6ed",
+      "steps": 40,
+      "has_receipt_v2": true
+    },
+    {
+      "sha": "0c3405f",
+      "steps": 40,
+      "has_receipt_v2": true
+    }
+  ]
+}

@@ -1,0 +1,10 @@
+{
+  "name": "ci-dang-ky",
+  "command": [
+    "/usr/local/bin/python",
+    ".claude/dev/ci_dang_ky_test.py"
+  ],
+  "start_utc": "2026-09-07T06:17:57.126719+00:00",
+  "seconds": 0.3148366209999267,
+  "rc": 0
+}

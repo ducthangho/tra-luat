@@ -1,0 +1,17 @@
+{
+  "name": "doctrine-scan",
+  "command": [
+    "python3",
+    ".claude/dev/packet_loop.py",
+    "doctrine-scan",
+    "--root",
+    "."
+  ],
+  "start_utc": "2026-09-07T09:21:47.652563+00:00",
+  "end_utc": "2026-09-07T09:21:47.897199+00:00",
+  "seconds": 0.24462836800000787,
+  "rc": 0,
+  "stdout_bytes": 69,
+  "stdout_sha256": "9ee1866d82544445d0b015d90aaeb90aead5e9ebf0ffa8ae6556f3ca2963f5cb",
+  "stderr_bytes": 0
+}

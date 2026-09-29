@@ -1,0 +1,19 @@
+{
+  "name": "doc-claims",
+  "command": [
+    "python3",
+    "-B",
+    "scripts/tl.py",
+    "doc-claims-check",
+    "--strict",
+    "--json"
+  ],
+  "cwd": "cay-kho",
+  "utc": "2026-09-07T11:39:27.568919+00:00",
+  "rc": 0,
+  "seconds": 3.608858354000006,
+  "stdout_bytes": 70861,
+  "stdout_sha256": "b9001f390f47286930965480160e62b23da1e47354acc0e9172b94a48d758286",
+  "stderr_bytes": 0,
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+}

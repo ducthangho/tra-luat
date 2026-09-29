@@ -1,0 +1,125 @@
+# BIEN NHAN GIAO HANG — cross-review LUOT 3 cua PR #452, KHAC NEN (codex).
+#
+# DAY LA LUOT DAU TIEN CUA DOT CO cross_provider: true. Hai luot truoc deu la phien
+# Claude (cung nen voi tac gia) vi codex het han xac thuc; khoi phuc bang
+# `codex login --device-auth` luc 07:07Z ngay 06-09-2026.
+#
+# VA NO TRA LOI DUOC CAU M6: bon reviewer cung nen khong tim ra finding nao thuoc lop
+# duoi day; codex tim ra ngay luot dau, o dung cau vua duoc viet ra de sua hai loi
+# truoc. Phien dieu phoi DO LAI DOC LAP toan bo so cua N1 va N2 — khop tung so.
+
+schema_version: 2
+receipt_id: phan-bien-quy-trinh-review-3-codex-20260906-4f5341d4
+kind: review_delivery_receipt
+packet_id: 'PR452-PHAN-BIEN-QUY-TRINH'
+lease_id: khong-co-lease
+phase_key: PHAN-BIEN-QUY-TRINH-BUILD-REVIEW
+luot: 3
+role: reviewer
+provider: codex
+executor_provider: claude
+cross_provider: true
+assurance: cross_approved
+verdict: changes_requested
+verdict_path: ops/reviews/phan-bien-quy-trinh-review-3-codex-verdict.md
+verdict_sha256: 93b4c862f219f35a7e6d51ce941e206c1260950de7dbc285bdeb5fea5fe05ae1
+verdict_bytes: 20339
+reviewed_sha: 76318fa106019611fbd5ea9ec6e2553bb7773faf
+
+model_reviewer_identity:
+  provider: openai_codex
+  surface: codex_cli
+  session_run_id: 4f5341d473c8442380dc2182f9cde013
+  prompt_sha256: d0e56f1a0ce68702c8d0bf8c5feff31ebad79e813e19b8d8a2af6779705e7a53
+  prompt_kin_hoan_toan: true
+  thoi_luong_giay: 645.553
+  ma_thoat: 0
+  neo_boi_launcher: >-
+    `launcher.py run` bọc `codex exec` trong CLONE RỜI, detached đúng `reviewed_sha`,
+    `--require-clean`, prompt truyền qua `{PROMPT_FILE}` nên con đọc BẢN CHỤP BẤT BIẾN.
+    Launcher TỪ CHỐI chạy nếu lệch ⇒ ba thứ ấy đo được, KHÔNG phải lời khai.
+  KHONG_do_duoc: >-
+    ID MODEL CỤ THỂ và phiên bản của nó. `codex-cli` không trả model đang phục vụ, và không
+    có biên nhận độc lập nào chứng thực. Khai `openai_codex/codex_cli` là mức chính xác nhất
+    đo được; đừng đọc trường này thành bằng chứng về model.
+
+github_submitter_identity:
+  actor: ducthangho
+  la_tac_gia_PR: true
+  ghi_chu: >-
+    `ADR-0040`: biên nhận do tài khoản tác giả đăng KHÔNG thành required check hay merge
+    authorization. Trường này ghi AI VẬN CHUYỂN, không cấp thẩm quyền.
+
+anchor:
+  loai: canonical_ancestry
+  cuong_do: trung_binh
+  mo_ta: >-
+    Neo bằng `verdict_sha256` + commit ĐẦU TIÊN chứa tệp verdict (`2fb43fc8`), đã đo
+    là byte-identical với bản hôm nay. KHÔNG tag `luu-tru/*`, KHÔNG protected ref, KHÔNG check
+    object ⇒ mỏ neo TRUNG BÌNH: nó chết nếu lịch sử bị viết lại. Phiên web không đẩy được
+    `refs/tags/*` (đo 16-08-2026: 403 do proxy egress), nên nâng lên mức MẠNH cần đường khác.
+
+run_neo:
+  run_id: 4f5341d473c8442380dc2182f9cde013
+  prompt_sha256: d0e56f1a0ce68702c8d0bf8c5feff31ebad79e813e19b8d8a2af6779705e7a53
+  prompt_kin_hoan_toan: true
+  worktree_sach: true
+  thoi_luong_giay: 645.553
+  stdout_byte: 335
+  stderr_byte: 729268
+  ma_thoat: 0
+  con_kiem_duoc_gi: >-
+    Kiem duoc: prompt NAO (sha256) da chay tren head NAO, cay luc chay sach, va luot
+    chay THAT SU lam viec — 645,6 giay, verdict 20.339 byte. Con so thoi luong la chot
+    chong dung cai bay da gap o luot chay DAU cua chinh packet nay: trang_thai='xong',
+    ma_thoat=0, ma thoi_luong_giay=0,209 va stdout=0 byte vi codex doc stdin roi thoat.
+
+phat_hien_chinh: >-
+  N2 (P1) — ket luan trung tam cua ban 3 KHONG CO CO SO. Cau "luat khong cong van rang
+  buoc duoc 61-99%" dem su VANG MAT cua khoa nang_tran thanh TUAN THU. Do: 41 lease
+  khong khai review_rounds_limit, 23 khai 2, 18 khai >2, va 17/18 trong so ay KHONG co
+  nang_tran; 6 lease tu ghi da dung >2 vong. Codex noi thang KHONG duoc dao thanh
+  "17-18 vi pham" — con ngay hieu luc ADR, mien tru/tham quyen, don vi vong, nhieu lease
+  cung mot viec. Dung doctrine ba trang thai.
+  N1 (P2) — "bat ky mo neo nao = 50/82 = 61%" dem thua: 3 lease chi co spec_path va tu
+  khai la BAN THAO CHUA DUYET (co y khong neo), 3 lease co KHOA spec_path nhung gia tri
+  null. So dung duoc la 44/82 co it nhat mot truong bam khong rong — va ngay ca 44 cung
+  chua phai "44 lease tuan thu".
+  H3 — SAU cong do rang bang dot bien tren ban sao: RC_DOCTRINE, bien-nhan, RC_LOP, t26,
+  t27, t33 deu DO dung ca dich, kiem bang NOI DUNG assertion chu khong chi rc khac 0.
+  Control 4/4, rc=0, bo qua=0. Reviewer tu khai: "khong suy thanh moi cong deu duoc bao ve".
+
+verdict_nguon: >-
+  launcher.py run boc codex exec --sandbox workspace-write trong CLONE ROI (khong phai
+  worktree — launcher tu choi bang MA_WORKTREE), day du 1683 commit sau --unshallow,
+  detached dung reviewed_sha, core.abbrev ghim 7. Prompt neo bang sha256 va truyen qua
+  cho thay PROMPT_FILE nen con doc BAN CHUP BAT BIEN (prompt_kin_hoan_toan: true).
+verdict_doi_chieu: >-
+  CHUNG MINH: prompt nao chay tren head nao, cay sach, luot chay co lam viec that.
+  KHONG CHUNG MINH: noi dung verdict khop tung chu thu reviewer sinh ra — bam do tren
+  BAN SAO da chep vao kho, nen chi noi ban sao khop CHINH NO. Cat vong tron ay can mot
+  client thu hai lay ban goc roi bam doc lap; container nay khong co duong ay. Trang
+  thai dung la KHONG DO DUOC.
+authoritative_source: repo_file
+evidence_channel: repo_file
+evidence_url: https://github.com/ducthangho/tra-luat/blob/2fb43fc8e3fd6dacd6bb9e42731e751d3de2e262/ops/reviews/phan-bien-quy-trinh-review-3-codex-verdict.md
+evidence_url_ghi_chu: >-
+  ĐÃ GHIM theo commit `2fb43fc8` — commit ĐẦU TIÊN chứa tệp verdict; đã đo bản tại
+  commit ấy khớp từng byte với bản hôm nay. Bản trước trỏ URL PR, là mỏ neo TRÔI: `t26` chỉ
+  kiểm hình dạng `https://` nên URL nào cũng qua — cổng không phân biệt bền với trôi.
+
+verdict_usage_caveats:
+  - id: cross-approved-KHONG-phai-da-duyet-noi-dung
+    noi_dung: >-
+      assurance cross_approved noi luot review KHAC NEN da chay va neo duoc, KHONG noi
+      tai lieu da dat. Verdict la changes_requested.
+  - id: phan-cong-CAM-tu-soan-phan-chung
+    noi_dung: >-
+      Luot nay CAM reviewer tu soan chuoi tan cong — rang buoc do phien dieu phoi dat,
+      sau khi hai luot cross-review truoc cua kho chet vi dung viec ay. He qua: moi huong
+      can soan noi dung nhay cam chi duoc MO TA BANG LOI, nen do phu cua luot nay hep hon
+      mot luot khong rang buoc.
+
+delivered: true
+delivered_by: claude-session
+recorder_cung_la_nguoi_thi_cong: true

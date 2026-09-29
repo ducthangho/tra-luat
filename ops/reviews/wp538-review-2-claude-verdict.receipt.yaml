@@ -1,0 +1,192 @@
+# BIEN NHAN GIAO HANG — cross-review LUOT 2 cua PR #539 (packet #538,
+# SKILL-PREFLIGHT-REVIEW-LAND revision 4 / generation 4), KHAC NEN (claude review antigravity),
+# tren `7c21bf60`. **`approve`** — 0 P1 + 0 P2 + 1 P3 = 1 LOP MO, 1 THE HIEN.
+#
+# VIET TAY TUNG TRUONG, khong dung bang phep thay chuoi tu bien nhan luot 1.
+
+schema_version: 2
+receipt_id: wp538-review-2-claude-20260916-d4c386a8
+kind: review_delivery_receipt
+packet_id: '538'
+packet_slug: 'SKILL-PREFLIGHT-REVIEW-LAND'
+lease_id: wp538-r4-g4-antigravity
+phase_key: WP538-R4-GEN4-PHIEN-20260916
+luot: 2
+role: reviewer
+provider: claude
+executor_provider: antigravity
+cross_provider: true
+
+assurance: advisory_review
+assurance_ghi_chu: >-
+  VERDICT la `approve` (0 P1, 0 P2) — phan doan ve MA. MUC ASSURANCE ghi o day la
+  `advisory_review`, KHONG phai `cross_approved`, cung ly do va cung cach nhu bien nhan WP540
+  luot 1: cong `bien_nhan_v2` doi bang chung phien doc lap (`session_run_id` hoac `phien_doc_lap`)
+  cho moi muc thuoc ASSURANCE_CAN_DOC_LAP. Phien nay khong co `session_run_id` (khong phong duoc
+  bang launcher.py run), va khai `phien_doc_lap` se SAI vi chinh phien nay soan spec r4 va ghi ho
+  lease g4. DOC CHO DUNG: WP538 co mot VERDICT approve khac nen, nhung packet CHUA DAT
+  `cross_approved`. Lan nay toi khai dung ngay tu dau thay vi de cong tu choi roi moi ha.
+
+verdict: approve
+verdict_path: ops/reviews/wp538-review-2-claude-verdict.md
+verdict_sha256: d4c386a8fd67b4f4fba83e5f4c095b5fa491da20b001855c9a9e0d07ea33a6f8
+verdict_bytes: 7571
+reviewed_sha: 7c21bf60f062d0076370fc8144e382962cd817ba
+reviewed_base: c66415aa8dabb48a23fc23751a1eb54aab0330eb
+reviewed_sha_vi_sao: >-
+  Lease g4 khai `reviewed_sha_required: f2aa1f9f` kem ghi chu 'mo neo DUOI: agy se day them
+  commit, nen verdict cuoi PHAI neo SHA ung vien that'. agy da day, nen verdict neo 7c21bf60.
+
+evidence_url: https://github.com/ducthangho/tra-luat/blob/ab27f786a45de5df7aae23f7df7b4c4fb8eecb92/ops/reviews/wp538-review-2-claude-verdict.md
+evidence_url_ghi_chu: >-
+  Neo BLOB ghim `f9f25e4753f167168484cc7a110ff845e1f98fcd` — commit DAU TIEN chua tep verdict, do
+  bang `git log --diff-filter=A -- ops/reviews/wp538/wp538-review-2-claude-verdict.md` (tra DUNG
+  MOT dong). Dien trong MOT commit RIENG. KHONG amend.
+
+doi_chieu_luot_truoc:
+  luot_1_verdict: changes_requested
+  luot_1_tren_sha: f2aa1f9fd0dc0d7914c2f5ce34563f60fdec3f72
+  luot_1_so: '0 P1 / 1 P2 / 1 P3'
+  p2_adr_0044_khai_ngoai_le_chi_phu_mot_trong_hai_nguong: >-
+    DA VA THAT — nhung KHONG phai agy va: spec r4 (do chinh phien nay soan) them khoi khai ngan
+    sach DONG. Xem PHAT HIEN 1: con so trong khoi ay nay DA TROI (+772 -> +775).
+  p3_hien_vat_review_wp538_khong_co_trong_kho: >-
+    DA VA MOT PHAN — verdict + bien nhan luot 1 da commit vao ops/reviews/wp538/. Phan CON LAI
+    van mo va KHONG duoc doc la da dong: ba cong cham ops/reviews/ deu glob TANG DAU nen hien vat
+    o thu muc con khong cong nao cham. Doi quyet dinh chu kho.
+  hai_ca_do_cua_luot_1: >-
+    ba_nen_path va hop_dong_khoi (4 khoi) — CA HAI DA HET: idiom_py_test tren 7c21bf60 cho
+    7/7 dat, 0 dong DO, dung con so origin/master cho.
+
+phan_loai_finding: theo_lop
+so_p1: 0
+so_p2: 0
+so_p3: 1
+so_the_hien: 1
+
+findings_ids:
+  - slug: khai-ngan-sach-dong-r4-neo-so-cu
+    hang: P3
+    the_hien: 1
+    doi_chieu: LOP MOI
+    ghi_chu: >-
+      spec r4 khai ngan sach dong ADR-0044 bang con so +772 (boi so 2,6x), do tren
+      c66415aa..f2aa1f9f. Do lai tren c66415aa..7c21bf60: 7 tep san pham, +775 -64. Ban va idiom
+      them 4 dong bo 1 nen con so DA TROI 3 dong so luc dong bang spec. CHI P3 vi noi dung loi
+      khai khong doi: van vuot nguong 300, van tren diem PLAT-X4 (+721), ly do van dung. Thu lech
+      la mot con so minh hoa, lech theo huong vo hai. VAN GHI RA vi CLAUDE.md co dung bai hoc nay
+      ('MOT BAT BIEN CON DUNG KHONG CHUNG MINH CAC SO HANG CON DUNG'). DAY LA LOI CUA SPEC r4 —
+      tuc cua chinh phien reviewer nay — KHONG phai cua agy. Sua phai qua revision moi (§3.2).
+
+bang_san:
+  - huong: bon dong them co NGUYEN VAN chuoi chuan khong
+    ket_qua: 'trich IDIOM tu idiom_py_test.py:55 roi so tung dong => 4/4 KHOP tuyet doi'
+    phan: SACH
+  - huong: vi tri phep gan co y nghia khong hay chot chi dem su co mat
+    ket_qua: 'dot bien M-b chuyen mot phep gan xuong SAU lan dung dau => rc=1, work-packet/SKILL.md:62 GAN_MUON, 6/7'
+    phan: SACH
+  - huong: pham vi ghi
+    ket_qua: 'git show 7c21bf60 --stat => dung 2 tep, ca hai trong write_set g4; khong dung idiom_py_test.py'
+    phan: SACH
+  - huong: ban sao .agents/skills co khoi hong cung loai khong
+    ket_qua: 'quet moi khoi ma co "$PY": 0 THIEU_GAN, 0 SAI_DANG'
+    phan: SACH
+  - huong: packet_loop_test 6 ca do la cua ai
+    ket_qua: 'cung dung 6 ten ay do tren origin/master; comm hai chieu RONG ca hai. Moi ca khai ly_do_dung=workspace la git worktree, probe.workspace=DO, ma_thoat=14'
+    phan: SACH
+  - huong: base drift thu-hoi rc=12 da het chua
+    ket_qua: 'merge-base --is-ancestor origin/master HEAD => CO; CI thu-hoi success'
+    phan: SACH
+
+cong_da_chay_tren_cay_ung_vien:
+  idiom_py_test: 0
+  idiom_py_test_bang_chung: 'nen: 7/7 dat, BO QUA 0, 0 dong DO — dung con so origin/master cho'
+  doctrine_scan: 0
+  adr_song: 0
+  doc_claims_check_strict: 0
+  doc_claims_check_dieu_kien_do: 'core.abbrev=7'
+  git_diff_check: 0
+  release_verify_strict: 0
+  release_verify_bang_chung: 'ok=true, expected_file_count == checked_file_count == 180'
+  bien_nhan_v2: 0
+  packet_loop_test: 1
+  packet_loop_test_ghi_chu: >-
+    rc=1 voi 6 ca do, NHUNG delta so origin/master = 0 (comm hai chieu rong). Tao tac RIG cua
+    reviewer: sandbox la `git worktree` va chay_cac_probe nem Chan(MA_WORKTREE) khi .git la TEP.
+    Dung lop CLAUDE.md da ghi. CI that xac nhan doc lap: gate-packet-loop success ca ubuntu lan
+    windows (CI chay trong clone, khong phai worktree).
+
+ci_tu_dong_tren_ung_vien:
+  run_id: 35090041011
+  thu_hoi: success
+  gate_ubuntu: success
+  gate_packet_loop_ubuntu: success
+  gate_packet_loop_windows: success
+  gate_windows: con_chay_luc_cham
+  gate_registry: con_chay_luc_cham
+  lane_windows_vi_sao_chay: >-
+    PR #539 mang NHAN `windows`, nen ma tran ci.yml bat lane ay theo su kien TU DONG. Reviewer
+    KHONG goi tay, KHONG workflow_dispatch. manual_ci_budget: 0 van duoc giu.
+
+model_reviewer_identity:
+  provider: anthropic_claude
+  surface: claude_code
+  transport: machine/local
+  model_yeu_cau: claude-opus-5
+  model_da_chay: 'claude-opus-5 (phien dieu phoi, khong phai tien trinh CLI rieng)'
+  effort: KHONG_KHAI
+  KHONG_do_duoc: >-
+    Khong co `session_run_id`: luot nay khong phong duoc bang `launcher.py run` vi
+    `launcher.py doctor` tra rc=12 voi CHUA_XAC_THUC claude trong container nay.
+  xung_dot_loi_ich_da_khai: >-
+    Phien nay soan spec r4 va ghi ho lease g4, trong do co khoi khai ngan sach dong ma PHAT HIEN 1
+    noi toi — tuc dang cham mot con so do chinh minh viet. Khai o dau VERDICT.md.
+
+danh_tinh_executor_KHONG_do_duoc: >-
+  Commit 7c21bf60 mang Author: ducthangho <ducthangho@gmail.com>, khong co header CLI nao chung
+  minh model/effort cua agy. Lease g4 khai model va effort la KHONG_KHAI nen khong co loi khai nao
+  bi mau thuan — nhung cung khong co gi de kiem. Ghi ra thay vi im.
+
+github_submitter_identity:
+  actor: ducthangho
+  ghi_chu: 'Ban chieu dang qua MCP github. Nguon co tham quyen la TEP CO BAM trong kho.'
+
+anchor:
+  loai: canonical_ancestry
+  cuong_do: thap
+  mo_ta: >-
+    Blob verdict ghim tren nhanh claude/review-wp538-luot2-20260916, tao tu 7c21bf60 — dung head
+    da review. Quan he to tien voi master CHUA CO: WP538 chua land.
+  gioi_han: >-
+    cuong_do thap vi mo neo hien chi la mot nhanh, khong phai tag luu-tru/*. Manh len cao khi
+    WP538 land bang merge commit hoac fast-forward; squash pha quan he to tien.
+
+pham_vi_approve: >-
+  CHI PHU THU DO DUOC: doc ma, mot dot bien co rang (M-b), bay cong tai cho, va BON check CI da
+  xong. KHONG phu `gate (windows)` va `gate-registry` con chay luc cham. KHONG phu hanh vi that
+  tren mot may Windows thieu python3 (idiom_py_test dung nen GIA cho ca ba_nen_path). KHONG thay
+  nghia vu land.
+
+verdict_usage_caveats:
+  - id: HIEN-VAT-TRONG-THU-MUC-CON-NAM-NGOAI-TAM-BA-CONG
+    muc: P2
+    mo_ta: >-
+      Ba cong cham ops/reviews/ deu glob TANG DAU (bien_nhan_v2 dong 879 va 989; t26/t27 trong
+      ops/lease_publish_test.py). Tep nay o ops/reviews/wp538/ tuc THU MUC CON nen khong cong nao
+      cham toi, va khong co hang trong ops/reviews/README.md. Dat o day vi write_set lease g4 liet
+      ke dung `ops/reviews/wp538/`; dat len tang dau la ghi ngoai pham vi. DA DO BU: chay
+      bien_nhan_v2 voi ban sao tam o tang dau => DAT.
+  - id: LUOT-REVIEW-KHONG-CO-run.json-NEN-DOC-LAP-CHI-DUOC-LAP-LUAN
+    muc: P2
+    mo_ta: >-
+      Luot nay chay TRONG phien dieu phoi. Tinh doc lap ma lease doi chi bao dam MOT PHAN: CHECKOUT
+      rieng (worktree detached tai 7c21bf60, porcelain rong), con CONTEXT thi khong. Khac provider
+      thi VAN THAT: diff do agy viet. Vi the bien nhan khai `advisory_review`.
+  - id: SO-CUA-SPEC-r4-DA-TROI-VA-REVIEWER-LA-NGUOI-VIET-NO
+    muc: P3
+    mo_ta: >-
+      PHAT HIEN 1 noi ve mot con so trong spec r4, ma spec r4 do CHINH phien reviewer nay soan.
+      Doc finding ay nhu mot lo'i tu dinh chinh, khong phai mot phat hien ve cong viec cua agy.
+
+nguon_co_tham_quyen: >-
+  TEP CO BAM trong kho (verdict_path + verdict_sha256 o tren). Comment GitHub chi la BAN CHIEU.

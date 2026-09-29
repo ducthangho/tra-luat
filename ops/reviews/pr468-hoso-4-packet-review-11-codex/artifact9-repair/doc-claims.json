@@ -1,0 +1,17 @@
+{
+  "name": "doc-claims",
+  "command": [
+    "python3",
+    "scripts/tl.py",
+    "doc-claims-check",
+    "--strict",
+    "--json"
+  ],
+  "start_utc": "2026-09-07T09:21:48.075296+00:00",
+  "end_utc": "2026-09-07T09:21:51.563084+00:00",
+  "seconds": 3.4877889669999718,
+  "rc": 0,
+  "stdout_bytes": 70861,
+  "stdout_sha256": "b9001f390f47286930965480160e62b23da1e47354acc0e9172b94a48d758286",
+  "stderr_bytes": 0
+}

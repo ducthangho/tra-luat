@@ -1,0 +1,20 @@
+sha256sum: rig/do-review/attack-h-cases.json: No such file or directory
+sha256sum: rig/do-review/attack-h-summary.json: No such file or directory
+sha256sum: rig/do-review/extra-checks.json: No such file or directory
+sha256sum: rig/do-review/h_predicate.py: No such file or directory
+sha256sum: rig/do-review/h_tong.py: No such file or directory
+sha256sum: rig/do-review/nhanh-rerun.json: No such file or directory
+sha256sum: rig/do-review/outputs/chon_reviewer_test.stdout: No such file or directory
+sha256sum: rig/do-review/outputs/gh_readback_test.stdout: No such file or directory
+sha256sum: rig/do-review/outputs/mcp_gh_test.stdout: No such file or directory
+sha256sum: rig/do-review/outputs/mcp_github_doc_test.stdout: No such file or directory
+sha256sum: rig/do-review/outputs/nhanh_don_duoc_test.rerun.stdout: No such file or directory
+sha256sum: rig/do-review/outputs/nhanh_don_duoc_test.stdout: No such file or directory
+sha256sum: rig/do-review/outputs/pretooluse_guard_test.stdout: No such file or directory
+sha256sum: rig/do-review/outputs/probe_mang_test.stdout: No such file or directory
+sha256sum: rig/do-review/outputs/subagent_ghi_detect_test.stdout: No such file or directory
+sha256sum: rig/do-review/real-results.json: No such file or directory
+sha256sum: rig/source/attack_h.py: No such file or directory
+sha256sum: rig/source/extra_checks.py: No such file or directory
+sha256sum: rig/source/harness.py: No such file or directory
+sha256sum: WARNING: 19 listed files could not be read

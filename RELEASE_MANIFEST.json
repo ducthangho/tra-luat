@@ -6,9 +6,9 @@
   "webapp_target": "2.21.2p",
   "root_name": "tra-luat",
   "file_count": 180,
-  "total_bytes": 7943144,
-  "package_hash": "3416357457db806c6e32efbb17310831d990ff6dec94a817ebb27d8173fd8386",
-  "content_hash": "3416357457db806c6e32efbb17310831d990ff6dec94a817ebb27d8173fd8386",
+  "total_bytes": 8447590,
+  "package_hash": "931b51c001a3cac3b1e69ebf773b5b00e8283678a4135a79aea2bd529054101f",
+  "content_hash": "931b51c001a3cac3b1e69ebf773b5b00e8283678a4135a79aea2bd529054101f",
   "required_missing": [],
   "files": [
     {
@@ -28,8 +28,8 @@
     },
     {
       "path": "CHANGELOG.md",
-      "size": 658670,
-      "sha256": "25a7ae030d9f681f04052f220949cb59f2e4daa12abc2ce3af15a9e207335082"
+      "size": 1111587,
+      "sha256": "738642fc9dcacfff3f9ade0aff6406c716ce0e3847619fb0598296b9c48cbeac"
     },
     {
       "path": "CONTEXT.md",
@@ -498,8 +498,8 @@
     },
     {
       "path": "requirements.txt",
-      "size": 1761,
-      "sha256": "baa00d08d382f4e9505c508d9ee724ab6f27085017ea8a3ea9efa1b6f13d59f9"
+      "size": 4553,
+      "sha256": "97733a880d95f8a900f39af2bcd1a59a3ecb357dfc928c01c7a06636b1b07657"
     },
     {
       "path": "scripts/_fallback/README.md",
@@ -788,8 +788,8 @@
     },
     {
       "path": "scripts/tl_core/ops_misc.py",
-      "size": 179302,
-      "sha256": "8849d2b24fefe11796c41e456183d0989b7aa36a638ba42f94d77e4c049290dd"
+      "size": 181989,
+      "sha256": "142f7ad75fb66a55461748a247952f2818067b6052dd86757b895043bc24df76"
     },
     {
       "path": "scripts/tl_core/profile_env.py",
@@ -808,8 +808,8 @@
     },
     {
       "path": "scripts/tl_core/release.py",
-      "size": 83336,
-      "sha256": "a76c2dfb98b436bc0466a6446c73c4c7c96959fdeb987bc464f4f14fff6bd354"
+      "size": 83993,
+      "sha256": "ef0e7ef8a5b68b93d5f4a7c9ebbf9156b7be72baa449f981e9d0073a4239640b"
     },
     {
       "path": "scripts/tl_core/resolve.py",
@@ -858,8 +858,8 @@
     },
     {
       "path": "scripts/tl_selftest.py",
-      "size": 2132318,
-      "sha256": "3ffabb08f6742482d4a731f2157a7ef1c1433af7737d07acf734d2ee1999bb67"
+      "size": 2177711,
+      "sha256": "81bbfc18f2c2b6ce8876f9ee23eb1ec8fa3b2d0154780014610af3a6a8f49f5d"
     },
     {
       "path": "scripts/tl_test_fragments_bundled.py",

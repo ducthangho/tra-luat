@@ -1,0 +1,423 @@
+{
+  "template": {
+    "schema_version": 1,
+    "mission_id": "gh-<issue>",
+    "generation": "<land-attempt-integer>",
+    "provider": "claude | codex | human | github-actions",
+    "role": "land_operator",
+    "session_id": "<stable-run-id>",
+    "input_packet_generations": [],
+    "authorized_head_sha": "<git-oid>",
+    "approver": "<actor>",
+    "authorization_url": "<durable-url>",
+    "land_operator": "<actor>",
+    "merge_method": "merge | squash | rebase",
+    "merge_commit": "<git-oid>",
+    "pre_merge_checks": [],
+    "post_merge_checks": [],
+    "bookkeeping": []
+  },
+  "files": [
+    {
+      "path": "ops/land/plat-x8-land-evidence.yaml",
+      "missing": [],
+      "types": {
+        "schema_version": "int",
+        "mission_id": "str",
+        "generation": "int",
+        "provider": "str",
+        "role": "str",
+        "session_id": "str",
+        "input_packet_generations": "list",
+        "authorized_head_sha": "str",
+        "approver": "str",
+        "authorization_url": "NoneType",
+        "land_operator": "str",
+        "merge_method": "str",
+        "merge_commit": "str",
+        "pre_merge_checks": "list",
+        "post_merge_checks": "list",
+        "bookkeeping": "list"
+      },
+      "bookkeeping_items": 3
+    },
+    {
+      "path": "ops/land/pr468-hoso-4-packet-land-evidence.yaml",
+      "missing": [],
+      "types": {
+        "schema_version": "int",
+        "mission_id": "str",
+        "generation": "int",
+        "provider": "str",
+        "role": "str",
+        "session_id": "str",
+        "input_packet_generations": "list",
+        "authorized_head_sha": "str",
+        "approver": "str",
+        "authorization_url": "str",
+        "land_operator": "str",
+        "merge_method": "str",
+        "merge_commit": "str",
+        "pre_merge_checks": "list",
+        "post_merge_checks": "list",
+        "bookkeeping": "list"
+      },
+      "bookkeeping_items": 5
+    },
+    {
+      "path": "ops/land/pr477-dung-goi-review-land-evidence.yaml",
+      "missing": [
+        "session_id"
+      ],
+      "types": {
+        "schema_version": "int",
+        "mission_id": "str",
+        "generation": "int",
+        "provider": "str",
+        "role": "str",
+        "session_id": "NoneType",
+        "input_packet_generations": "list",
+        "authorized_head_sha": "str",
+        "approver": "str",
+        "authorization_url": "str",
+        "land_operator": "str",
+        "merge_method": "str",
+        "merge_commit": "str",
+        "pre_merge_checks": "list",
+        "post_merge_checks": "list",
+        "bookkeeping": "list"
+      },
+      "bookkeeping_items": 4
+    },
+    {
+      "path": "ops/land/pr478-land-evidence.yaml",
+      "missing": [],
+      "types": {
+        "schema_version": "int",
+        "mission_id": "str",
+        "generation": "int",
+        "provider": "str",
+        "role": "str",
+        "session_id": "str",
+        "input_packet_generations": "list",
+        "authorized_head_sha": "str",
+        "approver": "str",
+        "authorization_url": "str",
+        "land_operator": "str",
+        "merge_method": "str",
+        "merge_commit": "str",
+        "pre_merge_checks": "list",
+        "post_merge_checks": "list",
+        "bookkeeping": "list"
+      },
+      "bookkeeping_items": 6
+    },
+    {
+      "path": "ops/land/pr480-land-evidence.yaml",
+      "missing": [],
+      "types": {
+        "schema_version": "int",
+        "mission_id": "str",
+        "generation": "int",
+        "provider": "str",
+        "role": "str",
+        "session_id": "str",
+        "input_packet_generations": "list",
+        "authorized_head_sha": "str",
+        "approver": "str",
+        "authorization_url": "str",
+        "land_operator": "str",
+        "merge_method": "str",
+        "merge_commit": "str",
+        "pre_merge_checks": "list",
+        "post_merge_checks": "list",
+        "bookkeeping": "list"
+      },
+      "bookkeeping_items": 8
+    },
+    {
+      "path": "ops/land/pr487-land-evidence.yaml",
+      "missing": [],
+      "types": {
+        "schema_version": "int",
+        "mission_id": "str",
+        "generation": "int",
+        "provider": "str",
+        "role": "str",
+        "session_id": "str",
+        "input_packet_generations": "list",
+        "authorized_head_sha": "str",
+        "approver": "str",
+        "authorization_url": "str",
+        "land_operator": "str",
+        "merge_method": "str",
+        "merge_commit": "str",
+        "pre_merge_checks": "list",
+        "post_merge_checks": "list",
+        "bookkeeping": "list"
+      },
+      "bookkeeping_items": 7
+    },
+    {
+      "path": "ops/land/pr489-land-evidence.yaml",
+      "missing": [],
+      "types": {
+        "schema_version": "int",
+        "mission_id": "str",
+        "generation": "int",
+        "provider": "str",
+        "role": "str",
+        "session_id": "str",
+        "input_packet_generations": "list",
+        "authorized_head_sha": "str",
+        "approver": "str",
+        "authorization_url": "str",
+        "land_operator": "str",
+        "merge_method": "str",
+        "merge_commit": "str",
+        "pre_merge_checks": "list",
+        "post_merge_checks": "list",
+        "bookkeeping": "list"
+      },
+      "bookkeeping_items": 5
+    }
+  ],
+  "checks": [
+    {
+      "path": "pre_merge_checks[0]",
+      "result_keys": [
+        "ket_qua_tho"
+      ],
+      "has_status": true,
+      "ten": "CI được báo cho PR có head efa397eb2515658a1e3e9b4cdfd6e887b492b957",
+      "value": {
+        "ten": "CI được báo cho PR có head efa397eb2515658a1e3e9b4cdfd6e887b492b957",
+        "trang_thai": "KHONG_XAC_THUC_EXACT_HEAD",
+        "loai_nguon": "attestation của điều phối, đọc qua MCP `get_check_runs`",
+        "ket_qua_tho": "`gate (ubuntu-latest)` = **success**, hoàn tất `14:47:25Z`, chạy **1 411 giây**.",
+        "vi_sao_KHONG_dat_o_khoa_ket_qua": "Đổi tên khoá từ `ket_qua` sang `ket_qua_tho` và thêm `trang_thai` CÓ CẤU TRÚC vì cảnh báo bằng VĂN XUÔI không chặn được bộ đọc schema: một mục mang `ket_qua` trông như một cổng ĐÃ ĐẠT. Codex connector chấm đúng chỗ này (P1 `Do not treat the PR check as an exact-head gate`) trên `a48f576`, và nó ĐÚNG. Mục này KHÔNG được đếm vào tập cổng đã đạt cho `authorized_head_sha`.",
+        "canh_bao_doc_ket_qua": "Đây là lời khai kết quả PR, KHÔNG phải bằng chứng CI exact head. Đọc `.github/workflows/ci.yml` chỉ cho biết workflow DỰ KIẾN dùng cây merge tổng hợp (1 bước checkout, không khai `with.ref`) — đó là CẤU HÌNH, ĐO ĐƯỢC. Cây mà runner thật đã checkout thì KHÔNG ĐO ĐƯỢC: không có log checkout hay run JSON. Chính lỗi lẫn hai thứ này là P3 `ci-pr-khong-chung-minh-exact-head` của lượt 2.",
+        "nen_so_sanh": "Lượt `gate` trước trên cùng nhánh (`98ef1f1`) chạy 1 541 giây và cũng `success` — nhịp bình thường, không phải treo."
+      }
+    },
+    {
+      "path": "pre_merge_checks[1]",
+      "result_keys": [
+        "ket_qua"
+      ],
+      "has_status": false,
+      "ten": "duyet khac danh tinh (cong) trên head efa397e",
+      "value": {
+        "ten": "duyet khac danh tinh (cong) trên head efa397e",
+        "ket_qua": "`success` — run `34366297752`, chạy lại ở event `pull_request_review` sau khi `notebyme88` APPROVED.",
+        "lan_do_truoc_do": "Cùng check ĐỎ ở run `34363322760`. Nguyên văn log: `số bản ghi review=2` và *\"chưa có bản duyệt nào từ danh tính khác `ducthangho` mang thẩm quyền COLLABORATOR, MEMBER, OWNER\"*. Điều phối lần đầu khai nó đỏ *\"vì số bản ghi review đang là 0\"* — SAI: cổng đếm review của PR, không đếm theo head; nó đỏ vì KHÔNG BẢN NÀO đủ thẩm quyền từ danh tính khác tác giả. Hai cách hỏng ấy nhìn giống nhau và đòi hai cách chữa khác nhau. Đã đính chính ở `#issuecomment-5603536795`."
+      }
+    },
+    {
+      "path": "pre_merge_checks[2]",
+      "result_keys": [
+        "ket_qua"
+      ],
+      "has_status": false,
+      "ten": "phan chung duyet khac danh tinh",
+      "value": {
+        "ten": "phan chung duyet khac danh tinh",
+        "ket_qua": "`success` (23 giây)"
+      }
+    },
+    {
+      "path": "pre_merge_checks[4]",
+      "result_keys": [
+        "ket_qua"
+      ],
+      "has_status": false,
+      "ten": "bien_nhan_v2 trên head efa397e",
+      "value": {
+        "ten": "bien_nhan_v2 trên head efa397e",
+        "ket_qua": "`rc=0` · **94** bản ghi · **41** ĐẠT v2 · **11/11** miễn trừ legacy · **42** nợ đóng băng · **0 vi phạm** · **0** KHÔNG ĐO ĐƯỢC · `TỔNG: ĐẠT`"
+      }
+    },
+    {
+      "path": "pre_merge_checks[5]",
+      "result_keys": [
+        "ket_qua"
+      ],
+      "has_status": false,
+      "ten": "doctrine-scan trên head",
+      "value": {
+        "ten": "doctrine-scan trên head",
+        "ket_qua": "`rc=0` · sạch — **7 tệp quét, 0 chỗ chép doctrine**"
+      }
+    },
+    {
+      "path": "pre_merge_checks[6]",
+      "result_keys": [
+        "ket_qua"
+      ],
+      "has_status": false,
+      "ten": "adr-song trên head",
+      "value": {
+        "ten": "adr-song trên head",
+        "ket_qua": "`rc=0` · sạch — **46 ADR / 46 dòng §20**, khớp 1–1 (tha thiếu trạng thái: ADR-0016)"
+      }
+    },
+    {
+      "path": "pre_merge_checks[7]",
+      "result_keys": [
+        "ket_qua"
+      ],
+      "has_status": false,
+      "ten": "doc-claims-check --strict trên head",
+      "value": {
+        "ten": "doc-claims-check --strict trên head",
+        "ket_qua": "`rc=0` · **`ok: true`** · **106** tệp · **0** cờ cứng · **367** advisory"
+      }
+    },
+    {
+      "path": "post_merge_checks[0]",
+      "result_keys": [
+        "ket_qua"
+      ],
+      "has_status": false,
+      "ten": "kho KHÔNG nông — chốt phải chạy TRƯỚC mọi cổng đọc lịch sử",
+      "value": {
+        "ten": "kho KHÔNG nông — chốt phải chạy TRƯỚC mọi cổng đọc lịch sử",
+        "loai_nguon": "phép đo Git",
+        "ket_qua": "`rev-parse --is-shallow-repository` ⇒ **false**; `rev-list --count origin/master` ⇒ **1 879** commit.",
+        "vi_sao_dat_len_dau": "Đây là bài học ĐẮT NHẤT của phiên: mọi con số `bien_nhan_v2` mà điều phối khai suốt buổi sáng đều đo trong KHO NÔNG, và một P1 ĐÚNG của codex connector đã bị bác bằng chính những con số ấy. Chốt này rẻ và phải chạy trước, không phải chạy khi nghi ngờ."
+      }
+    },
+    {
+      "path": "post_merge_checks[1]",
+      "result_keys": [
+        "ket_qua"
+      ],
+      "has_status": false,
+      "ten": "head đã vào master",
+      "value": {
+        "ten": "head đã vào master",
+        "loai_nguon": "phép đo Git",
+        "ket_qua": "`merge-base --is-ancestor efa397e origin/master` ⇒ ĐÚNG. `master` = `c0a5cbe`."
+      }
+    },
+    {
+      "path": "post_merge_checks[2]",
+      "result_keys": [
+        "ket_qua"
+      ],
+      "has_status": false,
+      "ten": "hai cha của merge commit",
+      "value": {
+        "ten": "hai cha của merge commit",
+        "loai_nguon": "phép đo Git",
+        "ket_qua": "`f4d74fe` + `efa397e` — đúng cặp mong đợi."
+      }
+    },
+    {
+      "path": "post_merge_checks[3]",
+      "result_keys": [
+        "ket_qua"
+      ],
+      "has_status": false,
+      "ten": "nhánh không còn commit ngoài master",
+      "value": {
+        "ten": "nhánh không còn commit ngoài master",
+        "loai_nguon": "phép đo Git",
+        "ket_qua": "`rev-list --count origin/master..origin/claude/land-480-20260909` ⇒ **0**"
+      }
+    },
+    {
+      "path": "post_merge_checks[4]",
+      "result_keys": [
+        "ket_qua"
+      ],
+      "has_status": false,
+      "ten": "bien_nhan_v2 trên master",
+      "value": {
+        "ten": "bien_nhan_v2 trên master",
+        "ket_qua": "`rc=0` · **`TỔNG: ĐẠT`** · **0 vi phạm** — `41 ĐẠT v2 · 11/11 legacy · 42 nợ · tổng 94` trên `c0a5cbe`."
+      }
+    },
+    {
+      "path": "post_merge_checks[5]",
+      "result_keys": [
+        "ket_qua"
+      ],
+      "has_status": false,
+      "ten": "doctrine-scan trên master",
+      "value": {
+        "ten": "doctrine-scan trên master",
+        "ket_qua": "`rc=0` · sạch — **7 tệp quét, 0 chỗ chép doctrine**"
+      }
+    },
+    {
+      "path": "post_merge_checks[6]",
+      "result_keys": [
+        "ket_qua"
+      ],
+      "has_status": false,
+      "ten": "adr-song trên master",
+      "value": {
+        "ten": "adr-song trên master",
+        "ket_qua": "`rc=0` · sạch — **46 ADR / 46 dòng §20**, khớp 1–1"
+      }
+    },
+    {
+      "path": "post_merge_checks[7]",
+      "result_keys": [
+        "ket_qua"
+      ],
+      "has_status": false,
+      "ten": "doc-claims-check --strict trên master",
+      "value": {
+        "ten": "doc-claims-check --strict trên master",
+        "ket_qua": "`rc=0` · **`ok: true`** · **106** tệp"
+      }
+    },
+    {
+      "path": "post_merge_checks[8]",
+      "result_keys": [
+        "ket_qua"
+      ],
+      "has_status": false,
+      "ten": "shellcheck ops/dung_goi_review.sh trên master",
+      "value": {
+        "ten": "shellcheck ops/dung_goi_review.sh trên master",
+        "ket_qua": "`rc=0` (ShellCheck 0.9.0)"
+      }
+    },
+    {
+      "path": "post_merge_checks[9]",
+      "result_keys": [
+        "ket_qua"
+      ],
+      "has_status": false,
+      "ten": "lease_publish trên master — HAI PHÉP ĐO, và cái thứ nhất là TÍNH NĂNG",
+      "value": {
+        "ten": "lease_publish trên master — HAI PHÉP ĐO, và cái thứ nhất là TÍNH NĂNG",
+        "ket_qua": "`rc=0` · **121/121 đạt; đã chạy=121, bỏ qua=0**",
+        "do_lan_dau_thieu_cong_cu": {
+          "ket_qua": "`rc=1` · **120/121** — `t33_workflow_dang_lease_phai_qua_actionlint` ĐỎ với lý do `KHÔNG ĐO ĐƯỢC: thiếu actionlint`.",
+          "vi_sao_khong_phai_hoi_quy": "Container này KHÔNG cài sẵn `actionlint`; `t33` fail-close đúng thiết kế — `CLAUDE.md` ghi *\"một cổng tự tắt khi thiếu công cụ là cổng không tồn tại đúng lúc nó cần nhất\"*. Cài `actionlint` 1.7.7 bằng `ops/cai_actionlint.sh` (đòi `AL_VER` dạng X.Y.Z, thiếu thì nó từ chối) rồi chạy lại ⇒ 121/121, `rc=0`.",
+          "dieu_kien_do_kem_theo": "`shellcheck` CÓ MẶT (0.9.0) trong lần đo này. `CLAUDE.md` ghi rõ thiếu `shellcheck` thì `actionlint` IM LẶNG bỏ toàn bộ luật nền ấy — nên một con số `lease_publish` không kèm điều kiện đo là con số sẽ trôi mà không ai biết."
+        }
+      }
+    },
+    {
+      "path": "post_merge_checks[9].do_lan_dau_thieu_cong_cu",
+      "result_keys": [
+        "ket_qua"
+      ],
+      "has_status": false,
+      "ten": null,
+      "value": {
+        "ket_qua": "`rc=1` · **120/121** — `t33_workflow_dang_lease_phai_qua_actionlint` ĐỎ với lý do `KHÔNG ĐO ĐƯỢC: thiếu actionlint`.",
+        "vi_sao_khong_phai_hoi_quy": "Container này KHÔNG cài sẵn `actionlint`; `t33` fail-close đúng thiết kế — `CLAUDE.md` ghi *\"một cổng tự tắt khi thiếu công cụ là cổng không tồn tại đúng lúc nó cần nhất\"*. Cài `actionlint` 1.7.7 bằng `ops/cai_actionlint.sh` (đòi `AL_VER` dạng X.Y.Z, thiếu thì nó từ chối) rồi chạy lại ⇒ 121/121, `rc=0`.",
+        "dieu_kien_do_kem_theo": "`shellcheck` CÓ MẶT (0.9.0) trong lần đo này. `CLAUDE.md` ghi rõ thiếu `shellcheck` thì `actionlint` IM LẶNG bỏ toàn bộ luật nền ấy — nên một con số `lease_publish` không kèm điều kiện đo là con số sẽ trôi mà không ai biết."
+      }
+    }
+  ],
+  "missing_status_count": 17,
+  "actual_cross_review_status_path": "head_da_cross_review_khac_head_merge.no_review_head_da_merge.dieu_kien_cross_review_CHO_HEAD_DA_MERGE",
+  "bookkeeping_reference_resolves": false
+}

@@ -1,0 +1,662 @@
+{
+  "before": [
+    {
+      "path": "pre_merge_checks[0]",
+      "result_keys": [
+        "ket_qua_tho"
+      ],
+      "has_status": true,
+      "status": "KHONG_XAC_THUC_EXACT_HEAD",
+      "ten": "CI được báo cho PR có head efa397eb2515658a1e3e9b4cdfd6e887b492b957"
+    },
+    {
+      "path": "pre_merge_checks[1]",
+      "result_keys": [
+        "ket_qua"
+      ],
+      "has_status": false,
+      "status": null,
+      "ten": "duyet khac danh tinh (cong) trên head efa397e"
+    },
+    {
+      "path": "pre_merge_checks[2]",
+      "result_keys": [
+        "ket_qua"
+      ],
+      "has_status": false,
+      "status": null,
+      "ten": "phan chung duyet khac danh tinh"
+    },
+    {
+      "path": "pre_merge_checks[4]",
+      "result_keys": [
+        "ket_qua"
+      ],
+      "has_status": false,
+      "status": null,
+      "ten": "bien_nhan_v2 trên head efa397e"
+    },
+    {
+      "path": "pre_merge_checks[5]",
+      "result_keys": [
+        "ket_qua"
+      ],
+      "has_status": false,
+      "status": null,
+      "ten": "doctrine-scan trên head"
+    },
+    {
+      "path": "pre_merge_checks[6]",
+      "result_keys": [
+        "ket_qua"
+      ],
+      "has_status": false,
+      "status": null,
+      "ten": "adr-song trên head"
+    },
+    {
+      "path": "pre_merge_checks[7]",
+      "result_keys": [
+        "ket_qua"
+      ],
+      "has_status": false,
+      "status": null,
+      "ten": "doc-claims-check --strict trên head"
+    },
+    {
+      "path": "post_merge_checks[0]",
+      "result_keys": [
+        "ket_qua"
+      ],
+      "has_status": false,
+      "status": null,
+      "ten": "kho KHÔNG nông — chốt phải chạy TRƯỚC mọi cổng đọc lịch sử"
+    },
+    {
+      "path": "post_merge_checks[1]",
+      "result_keys": [
+        "ket_qua"
+      ],
+      "has_status": false,
+      "status": null,
+      "ten": "head đã vào master"
+    },
+    {
+      "path": "post_merge_checks[2]",
+      "result_keys": [
+        "ket_qua"
+      ],
+      "has_status": false,
+      "status": null,
+      "ten": "hai cha của merge commit"
+    },
+    {
+      "path": "post_merge_checks[3]",
+      "result_keys": [
+        "ket_qua"
+      ],
+      "has_status": false,
+      "status": null,
+      "ten": "nhánh không còn commit ngoài master"
+    },
+    {
+      "path": "post_merge_checks[4]",
+      "result_keys": [
+        "ket_qua"
+      ],
+      "has_status": false,
+      "status": null,
+      "ten": "bien_nhan_v2 trên master"
+    },
+    {
+      "path": "post_merge_checks[5]",
+      "result_keys": [
+        "ket_qua"
+      ],
+      "has_status": false,
+      "status": null,
+      "ten": "doctrine-scan trên master"
+    },
+    {
+      "path": "post_merge_checks[6]",
+      "result_keys": [
+        "ket_qua"
+      ],
+      "has_status": false,
+      "status": null,
+      "ten": "adr-song trên master"
+    },
+    {
+      "path": "post_merge_checks[7]",
+      "result_keys": [
+        "ket_qua"
+      ],
+      "has_status": false,
+      "status": null,
+      "ten": "doc-claims-check --strict trên master"
+    },
+    {
+      "path": "post_merge_checks[8]",
+      "result_keys": [
+        "ket_qua"
+      ],
+      "has_status": false,
+      "status": null,
+      "ten": "shellcheck ops/dung_goi_review.sh trên master"
+    },
+    {
+      "path": "post_merge_checks[9]",
+      "result_keys": [
+        "ket_qua"
+      ],
+      "has_status": false,
+      "status": null,
+      "ten": "lease_publish trên master — HAI PHÉP ĐO, và cái thứ nhất là TÍNH NĂNG"
+    },
+    {
+      "path": "post_merge_checks[9].do_lan_dau_thieu_cong_cu",
+      "result_keys": [
+        "ket_qua"
+      ],
+      "has_status": false,
+      "status": null,
+      "ten": null
+    }
+  ],
+  "checks": [
+    {
+      "path": "pre_merge_checks[0]",
+      "result_keys": [
+        "ket_qua_tho"
+      ],
+      "has_status": true,
+      "status": "KHONG_XAC_THUC_EXACT_HEAD",
+      "ten": "CI được báo cho PR có head efa397eb2515658a1e3e9b4cdfd6e887b492b957"
+    },
+    {
+      "path": "pre_merge_checks[1]",
+      "result_keys": [
+        "ket_qua"
+      ],
+      "has_status": true,
+      "status": "DAT_THEO_LOI_KHAI_API",
+      "ten": "duyet khac danh tinh (cong) trên head efa397e"
+    },
+    {
+      "path": "pre_merge_checks[2]",
+      "result_keys": [
+        "ket_qua"
+      ],
+      "has_status": true,
+      "status": "DAT_THEO_LOI_KHAI_API",
+      "ten": "phan chung duyet khac danh tinh"
+    },
+    {
+      "path": "pre_merge_checks[4]",
+      "result_keys": [
+        "ket_qua"
+      ],
+      "has_status": true,
+      "status": "DAT_DO_LAI_CUC_BO",
+      "ten": "bien_nhan_v2 trên head efa397e"
+    },
+    {
+      "path": "pre_merge_checks[5]",
+      "result_keys": [
+        "ket_qua"
+      ],
+      "has_status": true,
+      "status": "DAT_DO_LAI_CUC_BO",
+      "ten": "doctrine-scan trên head"
+    },
+    {
+      "path": "pre_merge_checks[6]",
+      "result_keys": [
+        "ket_qua"
+      ],
+      "has_status": true,
+      "status": "DAT_DO_LAI_CUC_BO",
+      "ten": "adr-song trên head"
+    },
+    {
+      "path": "pre_merge_checks[7]",
+      "result_keys": [
+        "ket_qua"
+      ],
+      "has_status": true,
+      "status": "DAT_DO_LAI_CUC_BO",
+      "ten": "doc-claims-check --strict trên head"
+    },
+    {
+      "path": "post_merge_checks[0]",
+      "result_keys": [
+        "ket_qua"
+      ],
+      "has_status": true,
+      "status": "DAT_DO_GIT",
+      "ten": "kho KHÔNG nông — chốt phải chạy TRƯỚC mọi cổng đọc lịch sử"
+    },
+    {
+      "path": "post_merge_checks[1]",
+      "result_keys": [
+        "ket_qua"
+      ],
+      "has_status": true,
+      "status": "DAT_DO_GIT",
+      "ten": "head đã vào master"
+    },
+    {
+      "path": "post_merge_checks[2]",
+      "result_keys": [
+        "ket_qua"
+      ],
+      "has_status": true,
+      "status": "DAT_DO_GIT",
+      "ten": "hai cha của merge commit"
+    },
+    {
+      "path": "post_merge_checks[3]",
+      "result_keys": [
+        "ket_qua"
+      ],
+      "has_status": true,
+      "status": "DAT_DO_GIT",
+      "ten": "nhánh không còn commit ngoài master"
+    },
+    {
+      "path": "post_merge_checks[4]",
+      "result_keys": [
+        "ket_qua"
+      ],
+      "has_status": true,
+      "status": "DAT_DO_LAI_CUC_BO",
+      "ten": "bien_nhan_v2 trên master"
+    },
+    {
+      "path": "post_merge_checks[5]",
+      "result_keys": [
+        "ket_qua"
+      ],
+      "has_status": true,
+      "status": "DAT_DO_LAI_CUC_BO",
+      "ten": "doctrine-scan trên master"
+    },
+    {
+      "path": "post_merge_checks[6]",
+      "result_keys": [
+        "ket_qua"
+      ],
+      "has_status": true,
+      "status": "DAT_DO_LAI_CUC_BO",
+      "ten": "adr-song trên master"
+    },
+    {
+      "path": "post_merge_checks[7]",
+      "result_keys": [
+        "ket_qua"
+      ],
+      "has_status": true,
+      "status": "DAT_DO_LAI_CUC_BO",
+      "ten": "doc-claims-check --strict trên master"
+    },
+    {
+      "path": "post_merge_checks[8]",
+      "result_keys": [
+        "ket_qua"
+      ],
+      "has_status": true,
+      "status": "DAT_DO_LAI_CUC_BO",
+      "ten": "shellcheck ops/dung_goi_review.sh trên master"
+    },
+    {
+      "path": "post_merge_checks[9]",
+      "result_keys": [
+        "ket_qua"
+      ],
+      "has_status": true,
+      "status": "DAT_DO_LAI_CUC_BO",
+      "ten": "lease_publish trên master — HAI PHÉP ĐO, và cái thứ nhất là TÍNH NĂNG"
+    },
+    {
+      "path": "post_merge_checks[9].do_lan_dau_thieu_cong_cu",
+      "result_keys": [
+        "ket_qua"
+      ],
+      "has_status": true,
+      "status": "DO_THIEU_CONG_CU",
+      "ten": null
+    }
+  ],
+  "before_missing": 17,
+  "missing_status_count": 0,
+  "original_artifact_paths_match": true,
+  "patched_paths": [
+    "pre_merge_checks[1]",
+    "pre_merge_checks[2]",
+    "pre_merge_checks[4]",
+    "pre_merge_checks[5]",
+    "pre_merge_checks[6]",
+    "pre_merge_checks[7]",
+    "post_merge_checks[0]",
+    "post_merge_checks[1]",
+    "post_merge_checks[2]",
+    "post_merge_checks[3]",
+    "post_merge_checks[4]",
+    "post_merge_checks[5]",
+    "post_merge_checks[6]",
+    "post_merge_checks[7]",
+    "post_merge_checks[8]",
+    "post_merge_checks[9]",
+    "post_merge_checks[9].do_lan_dau_thieu_cong_cu"
+  ],
+  "top_level_gates": [
+    {
+      "path": "pre_merge_checks[0]",
+      "status": "KHONG_XAC_THUC_EXACT_HEAD"
+    },
+    {
+      "path": "pre_merge_checks[1]",
+      "status": "DAT_THEO_LOI_KHAI_API"
+    },
+    {
+      "path": "pre_merge_checks[2]",
+      "status": "DAT_THEO_LOI_KHAI_API"
+    },
+    {
+      "path": "pre_merge_checks[3]",
+      "status": "skipped"
+    },
+    {
+      "path": "pre_merge_checks[4]",
+      "status": "DAT_DO_LAI_CUC_BO"
+    },
+    {
+      "path": "pre_merge_checks[5]",
+      "status": "DAT_DO_LAI_CUC_BO"
+    },
+    {
+      "path": "pre_merge_checks[6]",
+      "status": "DAT_DO_LAI_CUC_BO"
+    },
+    {
+      "path": "pre_merge_checks[7]",
+      "status": "DAT_DO_LAI_CUC_BO"
+    },
+    {
+      "path": "pre_merge_checks[8]",
+      "status": "not_run"
+    },
+    {
+      "path": "pre_merge_checks[9]",
+      "status": "not_run"
+    },
+    {
+      "path": "post_merge_checks[0]",
+      "status": "DAT_DO_GIT"
+    },
+    {
+      "path": "post_merge_checks[1]",
+      "status": "DAT_DO_GIT"
+    },
+    {
+      "path": "post_merge_checks[2]",
+      "status": "DAT_DO_GIT"
+    },
+    {
+      "path": "post_merge_checks[3]",
+      "status": "DAT_DO_GIT"
+    },
+    {
+      "path": "post_merge_checks[4]",
+      "status": "DAT_DO_LAI_CUC_BO"
+    },
+    {
+      "path": "post_merge_checks[5]",
+      "status": "DAT_DO_LAI_CUC_BO"
+    },
+    {
+      "path": "post_merge_checks[6]",
+      "status": "DAT_DO_LAI_CUC_BO"
+    },
+    {
+      "path": "post_merge_checks[7]",
+      "status": "DAT_DO_LAI_CUC_BO"
+    },
+    {
+      "path": "post_merge_checks[8]",
+      "status": "DAT_DO_LAI_CUC_BO"
+    },
+    {
+      "path": "post_merge_checks[9]",
+      "status": "DAT_DO_LAI_CUC_BO"
+    },
+    {
+      "path": "post_merge_checks[10]",
+      "status": "not_run"
+    }
+  ],
+  "top_level_gate_count": 21,
+  "status_distribution": {
+    "KHONG_XAC_THUC_EXACT_HEAD": 1,
+    "DAT_THEO_LOI_KHAI_API": 2,
+    "skipped": 1,
+    "DAT_DO_LAI_CUC_BO": 10,
+    "not_run": 3,
+    "DAT_DO_GIT": 4
+  },
+  "result_mapping_count": 18,
+  "result_status_distribution": {
+    "KHONG_XAC_THUC_EXACT_HEAD": 1,
+    "DAT_THEO_LOI_KHAI_API": 2,
+    "DAT_DO_LAI_CUC_BO": 10,
+    "DAT_DO_GIT": 4,
+    "DO_THIEU_CONG_CU": 1
+  },
+  "cross_review_records": [
+    {
+      "luot": 1,
+      "reviewed_sha": "9a99dd8aa137ef118a00671482c29ea2438cbdbb",
+      "verdict": "changes_requested",
+      "p1": 1,
+      "p2": 4,
+      "p3": 6,
+      "thoi_luong_giay": 1559.927
+    },
+    {
+      "luot": 2,
+      "reviewed_sha": "98ef1f1629a2ac786ff91e352dd02da9b693e81e",
+      "verdict": "approve",
+      "p1": 0,
+      "p2": 0,
+      "p3": 4,
+      "thoi_luong_giay": 982.697
+    }
+  ],
+  "cross_review_container_has_status": false,
+  "bookkeeping_reference": "head_da_cross_review_khac_head_merge.no_review_head_da_merge.dieu_kien_cross_review_CHO_HEAD_DA_MERGE",
+  "reference_value": "KHONG_THOA",
+  "template": {
+    "schema_version": 1,
+    "mission_id": "gh-<issue>",
+    "generation": "<land-attempt-integer>",
+    "provider": "claude | codex | human | github-actions",
+    "role": "land_operator",
+    "session_id": "<stable-run-id>",
+    "input_packet_generations": [],
+    "authorized_head_sha": "<git-oid>",
+    "approver": "<actor>",
+    "authorization_url": "<durable-url>",
+    "land_operator": "<actor>",
+    "merge_method": "merge | squash | rebase",
+    "merge_commit": "<git-oid>",
+    "pre_merge_checks": [],
+    "post_merge_checks": [],
+    "bookkeeping": []
+  },
+  "files": [
+    {
+      "path": "ops/land/plat-x8-land-evidence.yaml",
+      "missing": [],
+      "types": {
+        "schema_version": "int",
+        "mission_id": "str",
+        "generation": "int",
+        "provider": "str",
+        "role": "str",
+        "session_id": "str",
+        "input_packet_generations": "list",
+        "authorized_head_sha": "str",
+        "approver": "str",
+        "authorization_url": "NoneType",
+        "land_operator": "str",
+        "merge_method": "str",
+        "merge_commit": "str",
+        "pre_merge_checks": "list",
+        "post_merge_checks": "list",
+        "bookkeeping": "list"
+      },
+      "bookkeeping_items": 3
+    },
+    {
+      "path": "ops/land/pr468-hoso-4-packet-land-evidence.yaml",
+      "missing": [],
+      "types": {
+        "schema_version": "int",
+        "mission_id": "str",
+        "generation": "int",
+        "provider": "str",
+        "role": "str",
+        "session_id": "str",
+        "input_packet_generations": "list",
+        "authorized_head_sha": "str",
+        "approver": "str",
+        "authorization_url": "str",
+        "land_operator": "str",
+        "merge_method": "str",
+        "merge_commit": "str",
+        "pre_merge_checks": "list",
+        "post_merge_checks": "list",
+        "bookkeeping": "list"
+      },
+      "bookkeeping_items": 5
+    },
+    {
+      "path": "ops/land/pr477-dung-goi-review-land-evidence.yaml",
+      "missing": [
+        "session_id"
+      ],
+      "types": {
+        "schema_version": "int",
+        "mission_id": "str",
+        "generation": "int",
+        "provider": "str",
+        "role": "str",
+        "session_id": "NoneType",
+        "input_packet_generations": "list",
+        "authorized_head_sha": "str",
+        "approver": "str",
+        "authorization_url": "str",
+        "land_operator": "str",
+        "merge_method": "str",
+        "merge_commit": "str",
+        "pre_merge_checks": "list",
+        "post_merge_checks": "list",
+        "bookkeeping": "list"
+      },
+      "bookkeeping_items": 4
+    },
+    {
+      "path": "ops/land/pr478-land-evidence.yaml",
+      "missing": [],
+      "types": {
+        "schema_version": "int",
+        "mission_id": "str",
+        "generation": "int",
+        "provider": "str",
+        "role": "str",
+        "session_id": "str",
+        "input_packet_generations": "list",
+        "authorized_head_sha": "str",
+        "approver": "str",
+        "authorization_url": "str",
+        "land_operator": "str",
+        "merge_method": "str",
+        "merge_commit": "str",
+        "pre_merge_checks": "list",
+        "post_merge_checks": "list",
+        "bookkeeping": "list"
+      },
+      "bookkeeping_items": 6
+    },
+    {
+      "path": "ops/land/pr480-land-evidence.yaml",
+      "missing": [],
+      "types": {
+        "schema_version": "int",
+        "mission_id": "str",
+        "generation": "int",
+        "provider": "str",
+        "role": "str",
+        "session_id": "str",
+        "input_packet_generations": "list",
+        "authorized_head_sha": "str",
+        "approver": "str",
+        "authorization_url": "str",
+        "land_operator": "str",
+        "merge_method": "str",
+        "merge_commit": "str",
+        "pre_merge_checks": "list",
+        "post_merge_checks": "list",
+        "bookkeeping": "list"
+      },
+      "bookkeeping_items": 8
+    },
+    {
+      "path": "ops/land/pr487-land-evidence.yaml",
+      "missing": [],
+      "types": {
+        "schema_version": "int",
+        "mission_id": "str",
+        "generation": "int",
+        "provider": "str",
+        "role": "str",
+        "session_id": "str",
+        "input_packet_generations": "list",
+        "authorized_head_sha": "str",
+        "approver": "str",
+        "authorization_url": "str",
+        "land_operator": "str",
+        "merge_method": "str",
+        "merge_commit": "str",
+        "pre_merge_checks": "list",
+        "post_merge_checks": "list",
+        "bookkeeping": "list"
+      },
+      "bookkeeping_items": 7
+    },
+    {
+      "path": "ops/land/pr489-land-evidence.yaml",
+      "missing": [],
+      "types": {
+        "schema_version": "int",
+        "mission_id": "str",
+        "generation": "int",
+        "provider": "str",
+        "role": "str",
+        "session_id": "str",
+        "input_packet_generations": "list",
+        "authorized_head_sha": "str",
+        "approver": "str",
+        "authorization_url": "str",
+        "land_operator": "str",
+        "merge_method": "str",
+        "merge_commit": "str",
+        "pre_merge_checks": "list",
+        "post_merge_checks": "list",
+        "bookkeeping": "list"
+      },
+      "bookkeeping_items": 5
+    }
+  ],
+  "duplicate_keys": []
+}

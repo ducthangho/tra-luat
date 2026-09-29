@@ -1,0 +1,455 @@
+# BIÊN NHẬN — lượt `human_audited` của `R330-RIG-QUYET-MAU-VA-NGOAI-LE-BI-NUOT` (#565).
+#
+# ĐÂY LÀ MỨC ASSURANCE THẬT SỰ ĐẠT ĐƯỢC CỦA PACKET NÀY, và nó YẾU HƠN khuôn `PLAT-M4` —
+# vì CÙNG MỘT LÝ DO như #551: comment mang chữ ký chủ kho do chính PHIÊN AGENT đăng hộ.
+# `cross_approved` KHÔNG đạt được (codex hết quota review, agy hết quota, claude LÀ executor).
+# Chữ ký chủ kho THAY cho `cross_approved`, KHÔNG cộng vào nó.
+#
+# VIẾT TAY TỪNG TRƯỜNG. Mọi số đo lại lúc 03:3xZ 20-09-2026 trong chính phiên này.
+
+schema_version: 2
+receipt_id: r330-rig-quyet-mau-audit-nguoi-ducthangho-20260920-8da9fdb8
+kind: review_delivery_receipt
+packet_id: '565'
+packet_slug: 'R330-RIG-QUYET-MAU-VA-NGOAI-LE-BI-NUOT'
+packet_issue: 565
+luot: 1
+lease_id: null
+lease_ghi_chu: >-
+  KHÔNG có lease cho lượt audit này, và đó là ĐÚNG. Lease là công cụ cấp việc cho một PHIÊN
+  agent; chủ kho không tự cấp lease cho chính mình. Lease của EXECUTOR là
+  `r330-rig-quyet-mau-r1-g1-claude` (hạn 2026-09-20T16:02Z) — nó cấp việc VÁ, không cấp việc
+  AUDIT. Thẩm quyền của lượt này đến từ §2, không từ một tệp YAML.
+provider: human
+role: auditor
+nguoi_audit: ducthangho
+executor_provider: claude
+verdict: approve
+cross_provider: false
+assurance_dat: human_audited
+assurance_KHONG_dat: cross_approved
+assurance_ghi_chu: >-
+  `human_audited` là MỘT TRONG HAI đường §8 cho class `sensitive`; đường kia ĐO ĐƯỢC là KHÔNG
+  ĐẠT ĐƯỢC, không phải "chưa đo". Căn cứ đo được, chép từ lease: codex hết quota review
+  (`chatgpt-codex-connector[bot]` đăng nguyên văn *"You have reached your Codex usage limits
+  for code reviews"* trên PR #567, comment 5741527193, 11:38Z 19-09), agy hết quota (chỉ thị
+  chủ kho, đợt #551), claude LÀ executor.
+reviewed_sha: 8c425b1934ec416dc9001da19b5f30eedcebd7d5
+base_sha: dc85dd0a34188238aa6537ce843ff3688e488fd3
+merge_commit: a270aea8d51792c1300b2add580e95df1ff02dd6
+merge_commit_ghi_chu: >-
+  ĐÃ MERGE lúc 04:50Z 20-09-2026 qua PR #573, SAU khi biên nhận này được viết. Khối `land` ở
+  cuối tệp là phần ghi THÊM, viết trên chính nhánh hồ sơ này trước khi nó được land.
+target_pull_request: 573
+review_class_hieu_luc: sensitive
+review_class_ghi_chu: >-
+  Lease khai `review_class: sensitive` vì packet chạm `scripts/tl_selftest.py` (legacy harness
+  dùng chung, protocol §5 nêu đích danh) VÀ `RELEASE_MANIFEST.json` (đường phát hành). KHÔNG hạ
+  lớp.
+
+# ---- NGUỒN CÓ THẨM QUYỀN: ĐẢO CHIỀU SO VỚI VERDICT CỦA MÔ HÌNH ----
+authoritative_source: github_comment
+authoritative_source_ghi_chu: >-
+  Với verdict của một MÔ HÌNH, nguồn có thẩm quyền là tệp có băm trong kho và comment là bản
+  chiếu. Ở đây NGƯỢC LẠI: §8 đòi DANH TÍNH BỀN TRÊN GITHUB của người audit. Nhưng xem
+  `muc_bao_chung_YEU_HON_khuon` — cái neo ấy đã ĐO ĐƯỢC ở #551 là không phân biệt nổi.
+evidence_channel: github_comment
+evidence_url: https://github.com/ducthangho/tra-luat/blob/5c713298c49c1dde5c550112d6bc4daf6b876735/ops/reviews/r330-rig-quyet-mau-audit-nguoi-verdict.md
+nguon_co_tham_quyen_url: https://github.com/ducthangho/tra-luat/issues/565#issuecomment-5747352008
+evidence_url_vi_sao_KHONG_tro_vao_comment: >-
+  `evidence_url` phải là BLOB thì `anchor.loai: canonical_ancestry` mới ĐO ĐƯỢC. Nguồn có thẩm
+  quyền thật của lượt `human_audited` là COMMENT, và nó nằm ở `nguon_co_tham_quyen_url`. Hai
+  trường tách ra chứ không gộp, để đừng ai đọc blob thành thẩm quyền.
+posted_comment_id: 5747352008
+posted_at_utc: '2026-09-20T03:35:10Z'
+author_association: OWNER
+author_association_KHONG_LA_BANG_CHUNG: >-
+  ĐO ĐƯỢC ở #551 và tái xác nhận ở lượt này: comment do PHIÊN AGENT đăng trả về
+  `author_association: OWNER` và `user.login: ducthangho` y hệt comment chủ kho tự gõ, vì phiên
+  chạy bằng credential chủ kho. Trường này có mặt để tra cứu, KHÔNG phải để chứng minh ai đã ký.
+  Nợ #566.
+
+# ---- KHAI THẲNG: AI ĐĂNG, VÀ VÌ SAO ĐIỀU ĐÓ QUAN TRỌNG ----
+dang_boi: phien_agent_dang_ho
+dang_boi_chi_thi_nguyen_van: >-
+  Chủ kho, phiên điều phối 20-09-2026: "Nhánh bookkeeping riêng đi, rồi đăng hộ tôi verdict".
+  Nối tiếp chuỗi cùng phiên: "Thi công #565 đi" → "#565: cho tôi script chạy trên WIndows local
+  để test bản vá. Chỉ 1 script và phải tự bảo đảm đo đúng" → "Mở nợ MAX_PATH, sửa script rồi
+  tôi chạy nốt tầng 4" → các lượt gửi log đo trên máy chủ kho.
+dang_boi_KHAI_TRONG_THAN_COMMENT: true
+dang_boi_KHAI_TRONG_THAN_COMMENT_ghi_chu: >-
+  Khối "CÁCH ĐĂNG" là ĐOẠN ĐẦU TIÊN của thân comment, không giấu ở biên nhận. Người đọc comment
+  biết ngay ai đăng mà không phải tìm tệp này.
+muc_bao_chung_YEU_HON_khuon: >-
+  Khuôn `plat-m4-human-audit-ducthangho-verdict.receipt.yaml` khai `tac_gia: ducthangho,
+  author_association OWNER — không phải bot, không phải phiên agent`. Biên nhận NÀY cố ý KHÔNG
+  khai câu ấy: nó đã được ĐO là không kiểm chứng được. Thẩm quyền lượt này neo vào CHỈ THỊ trong
+  phiên, không vào tác giả comment.
+KHONG_duoc_dung_lam_tien_le: >-
+  Đừng dùng lượt này làm tiền lệ cho việc phiên agent đăng hộ chữ ký người. Khuôn chuẩn đòi chủ
+  kho TỰ ĐĂNG; lượt này không đạt điều đó và khai thẳng ra. Đây là lần THỨ HAI (sau #551) —
+  hai lần cùng một hình dạng, và mục này ghi ra để lần thứ ba phải hỏi "có nên làm thế không".
+
+verdict_path: ops/reviews/r330-rig-quyet-mau-audit-nguoi-verdict.md
+verdict_sha256: 8da9fdb800c5eb044e88d2692e96e06d76fabeb4e8c641fcbb6e136e9241067a
+verdict_bytes: 13093
+verdict_path_ghi_chu: >-
+  Bản CHIẾU để tra ngoại tuyến. Tệp này được dựng TRƯỚC khi đăng và khớp TỪNG BYTE với thân
+  comment đã gửi, kể cả dòng attribution cuối — cố ý, để phép "đọc ngược về rồi diff" có thể
+  tìm lệch VỀ KÝ TỰ THẬT.
+
+# ---- ĐO THỨ ĐÃ ĐẾN, không dừng ở lời khai ----
+doi_chieu_boi_phien_chinh:
+  cach_do: >-
+    Đọc NGƯỢC comment về qua MCP `issue_read get_comments` ngay sau khi đăng, thay vì tin giá
+    trị trả về của lời gọi đăng.
+  so_lan_VERDICT: 1
+  so_lan_Reviewed_commit: 1
+  quy_uoc_KHOP: >-
+    Quy ước của kho là "đúng hai dòng, mỗi dòng xuất hiện ĐÚNG MỘT LẦN". Lượt này KHỚP, kiểm cả
+    TRƯỚC khi đăng (trên tệp) lẫn SAU khi đăng (trên bản đọc ngược).
+  sha_khop_head: true
+  phep_thu_DAU_CHEO_NGUOC: >-
+    Chỗ nguy hiểm nhất của lượt này là các đường dẫn Windows trong thân comment — `\W` `\s`
+    `\b` `\U` đều LÀ dạng escape hợp lệ ở một tầng tuần tự hoá nào đó. Bản đọc ngược trả
+    `C:\\Windows\\system32\\bash.EXE` và `D:\\…\\_do_565_tam` trong chuỗi JSON, tức chuỗi đã
+    lưu mang ĐÚNG MỘT dấu chéo — không tầng nào giải mã chúng. ĐẠT.
+  thuc_the_HTML: >-
+    Lượt này KHÔNG thấy `&#39;`/`&gt;` như lượt lease `#238`. Thứ thấy được chỉ là
+    `\u003c`/`\u003e` — chữ ký `encoding/json` của Go bật HTMLEscape, tức tạo tác của đường ĐỌC
+    chứ không phải của nội dung. Không ghi thành phát hiện.
+  byte_exact_KHONG_DO_DUOC: >-
+    KHÔNG khai "khớp từng byte". Để khẳng định byte trên GitHub cần một client THỨ HAI, mà
+    container này không có: REST thẳng tới `api.github.com/repos/…` bị proxy chặn 403 (đo
+    17-08-2026, và lại đúng trong phiên này). Nên trạng thái là KHÔNG ĐO ĐƯỢC, không phải ĐẠT.
+    Thứ ĐÃ đo: các mỏ neo quyết định và phép thử dấu chéo ngược ở trên.
+
+# ---- BA ÁNH XẠ v2 BẮT BUỘC ----
+model_reviewer_identity:
+  provider: human
+  surface: manual_audit
+  transport: human
+  model_yeu_cau: khong_ap_dung
+  model_da_chay: khong_ap_dung
+  model_evidence: khong_ap_dung
+  effort: KHONG_KHAI
+  KHONG_do_duoc: >-
+    Không có `session_run_id`: đây là lượt của người, không phải lượt chạy máy. Và comment nguồn
+    do PHIÊN AGENT đăng hộ, nên ngay cả danh tính người ký cũng không kiểm chứng được bằng máy.
+  phien_doc_lap: true
+  phien_doc_lap_can_cu: >-
+    Bên độc lập là CHỦ KHO — một người ở ngoài phiên agent — và ở lượt này họ làm một việc mà
+    #551 không có: **họ CHẠY phép đo trên MÁY CỦA HỌ**, bốn lượt (bản 4 `00:55Z`, bản 5
+    `01:35Z`, b6 `02:13Z`, b7 `02:37Z`), rồi gửi log thô về. Phiên agent KHÔNG chạm được máy ấy.
+    Chính một trong bốn lượt đó (bản 5) đã BÁC BỎ bản nháp verdict v1 của phiên agent.
+  phien_doc_lap_GIOI_HAN_phai_doc_kem: >-
+    "Độc lập" ở đây có nghĩa: người quyết định nằm ngoài phiên agent, VÀ nền đo nằm ngoài phiên
+    agent. Nó KHÔNG có nghĩa là một vòng kiểm độc lập bằng máy đã chạy. Ba giới hạn đo được:
+    (a) bộ đo chạy trên máy chủ kho là bộ đo do PHIÊN AGENT viết — chủ kho chạy nó, không viết
+    nó, và nó đã sai ba lần trong chính packet này; (b) comment mang chữ ký do chính phiên agent
+    đăng hộ; (c) không có `session_run_id`. Ai đọc `human_audited` ở đây thành "đã có một vòng
+    kiểm độc lập bằng máy" là đọc SAI.
+  xung_dot_loi_ich_da_khai: >-
+    Một phiên claude soạn đặc tả r1, ghi hộ lease g1, LÀ executor, viết bộ đo ra kết luận cho
+    chính bản vá của mình, soạn bản nháp verdict, VÀ đăng hộ comment audit này. Không còn vòng
+    độc lập nào bằng máy. Thứ CÓ giá trị độc lập: nền đo (máy chủ kho, có WSL — phiên agent
+    không có), và việc chính nền ấy đã bác bỏ một bản nháp verdict.
+
+github_submitter_identity:
+  actor: ducthangho
+  ghi_chu: >-
+    Comment đăng qua MCP github bởi PHIÊN AGENT, không phải chủ kho tự gõ. `actor` là tài khoản
+    mà credential thuộc về, KHÔNG phải bằng chứng ai đã gõ. Xem #566.
+
+anchor:
+  loai: canonical_ancestry
+  cuong_do: thap
+  mo_ta: 'Blob bản chiếu verdict, ghim trên commit 5c713298c49c1dde5c550112d6bc4daf6b876735.'
+  gioi_han: >-
+    Mỏ neo này trỏ vào BẢN CHIẾU, KHÔNG vào nguồn có thẩm quyền (comment 5747352008). Lược đồ v2
+    có đúng loại cho nó — `protected_evidence_ref` — nhưng cổng `bien_nhan_v2` trên master CHƯA
+    có đường đo cho loại ấy nên nó rơi vào trạng thái thứ ba và làm cổng ĐỎ. Bản vá cho đúng khe
+    này đang nằm ở packet #566 (`claude/human-audited-khai-ai-dang-r1`, `604b8d9`) và CHƯA land.
+    Nên lượt này neo `canonical_ancestry` cho ĐO ĐƯỢC, và khai thẳng rằng thứ được neo yếu hơn
+    thứ có thẩm quyền. Thêm: commit 5c71329 CHƯA phải tổ tiên của master, nên `cuong_do: thap`.
+
+# ---- NHỮNG GÌ CHỮ KÝ NÀY CHẤP NHẬN — nêu TƯỜNG MINH trong thân comment ----
+da_chap_nhan_tuong_minh:
+- id: r379-do-mot-lan-nguyen-nhan-chua-biet
+  noi_dung: >-
+    01:35Z 20-09 trên `dbaf3a7`, ca MỚI `r379` ném `SyntaxError: invalid syntax (line 1602)` khi
+    `ast.parse` nguyên `scripts/tl_selftest.py` — trong khi CHÍNH tệp ấy đang chạy. Cùng commit,
+    cùng máy, cùng python, lượt 00:55Z thì xanh. NGUYÊN NHÂN CHƯA BIẾT. Đã loại trừ tĩnh (blob /
+    cây / worktree: parse 0/30 NÉM mỗi nguồn, băm khớp, không CRLF/CR lẻ/BOM/NUL) và loại trừ
+    "tệp đổi giữa chừng" (b7 chụp băm mỗi 2s: 355 và 374 ảnh chụp, mỗi vế ĐÚNG MỘT trạng thái).
+    Bản vá `8c425b1` thu hẹp bề mặt PARSE 30 374 dòng → thân một hàm, nhưng KHÔNG thu hẹp bề mặt
+    ĐỌC (`inspect.getsource` đi qua `linecache`, vẫn nạp cả tệp). Bằng chứng nay 2/2 xanh trên
+    `8c425b1` — mạnh hơn, KHÔNG phải chứng minh.
+- id: hieu-ung-nguoi-quan-sat-cua-b7
+  noi_dung: >-
+    Phép canh của b7 tự nó đọc tệp 2 MB hàng trăm lần trong lúc chạy, và tầng 4 chậm hơn b6 rõ
+    rệt (nền 345,6s → 720,7s; ứng viên 235,4s → 763,6s). Trùng thời điểm, CHƯA tách được nguyên
+    nhân. Lượt xanh của b7 vì thế chạy dưới điều kiện I/O khác lượt đã đỏ.
+- id: r378-do-ca-hai-ve-vi-moi-truong
+  noi_dung: >-
+    `r378_l7_resolve_phai_o_trong_kho` đỏ ở CẢ HAI vế vì `OSError [WinError 1314] A required
+    privilege is not held by the client` (máy chủ kho thiếu quyền tạo symlink). Bản vá làm nó
+    HIỆN RA — trước đó nó đỏ CÂM — chứ không chữa nó. Nợ riêng, chưa ai mở.
+- id: cong-cu-do-sai-ba-lan
+  noi_dung: >-
+    Bộ đo do phiên agent viết đã sai BA lần trong packet này, cả ba do chính phiên ấy khai:
+    (a) bản 4 đòi `rc == 0` tuyệt đối nên in "r330 vẫn hỏng trong suite" trong khi r330 đã [OK]
+    — câu SAI VỀ SỰ VIỆC; (b) bản vá cho (a) hụt một bậc (`>` đáng ra `>=`), suýt cấp ĐẠT cho
+    một lượt CÓ ca mới đỏ; (c) bộ gom chỉ bắt tên `r330` nên tự làm mù mình, rồi khai rằng ca đỏ
+    thứ hai của nền "không nêu tên được" — dữ liệu vẫn luôn nằm trong log. Công cụ đo KHÔNG nằm
+    trong write set và KHÔNG vào kho; chữ ký chỉ bảo chứng cho bản vá.
+- id: cross-approved-khong-dat-duoc
+  noi_dung: >-
+    codex hết quota review, agy hết quota, claude là executor ⇒ không còn bên thứ hai khác họ
+    model. Chữ ký THAY cho cross_approved, không cộng vào nó.
+- id: chu-ky-nay-do-phien-agent-dang-ho
+  noi_dung: >-
+    Comment nguồn do PHIÊN AGENT đăng hộ theo chỉ thị, KHÔNG phải chủ kho tự gõ — khai ngay ở
+    ĐOẠN ĐẦU thân comment. Lần thứ HAI sau #551.
+
+bang_chung_may_tren_exact_head:
+  nen_so_sanh: dc85dd0a34188238aa6537ce843ff3688e488fd3
+  ung_vien: 8c425b1934ec416dc9001da19b5f30eedcebd7d5
+  tl_selftest_linux: 'rc=0 — 1711/1711, hai số BẰNG NHAU, 0 [FAIL], 0 dòng [LOI-VO-CAN?]'
+  release_verify_strict: 'rc=0 — ok=true, expected_file_count == checked_file_count == 180, 0 failed, 0 extra'
+  adr_song: 'rc=0'
+  doctrine_scan: 'rc=0'
+  doc_claims_check_strict: 'rc=0 (core.abbrev=7)'
+  git_diff_check: 'rc=0'
+  numstat: '2 tệp, +154/-8 so dc85dd0a — trong trần ADR-0044:5 (<=3 tệp, <=300 dòng thêm)'
+  dot_bien_r379: >-
+    3/3 bị giết, đo trong BA bản sao cây riêng chạy song song: mA1 (thêm
+    `with TemporaryDirectory()` vào `_goi`) · mA1b (`ignore_errors=True→False`) · mA2 (đưa
+    `return` ra ngoài `try`) — cả ba cho `1710/1711` với `[FAIL] r379` trong khi nền `1711/1711`
+    `[OK]`, và cả ba GIỮ `[OK] r330` ⇒ r379 đo HÌNH DẠNG độc lập với kết quả chạy của r330.
+  windows_nen_chu_kho:
+    b6_0213Z: 'nền 1708/1710 [FAIL] r330 · ứng viên 1710/1711 [OK] r330 · tầng 2 NÉM 17/20 → 0/20'
+    b7_0237Z: >-
+      nền 1708/1710, ca đỏ CÓ TÊN {r330, r378} · ứng viên 1710/1711, ca đỏ CÓ TÊN {r378},
+      [OK] r379 · tầng 2 NÉM 16/20 → 0/20 · tệp 1 trạng thái suốt cả hai vế
+    ket_luan_delta: >-
+      r330 [FAIL] → [OK]; ca đỏ 2 → 1; và NGOÀI r330 thì TẬP TÊN ca đỏ hai vế BẰNG NHAU = {r378}
+      — so TẬP, không so số đếm, nên loại hẳn ca "mất một đỏ cũ, thêm một đỏ mới, tổng không đổi".
+  gate_windows_CI: KHONG_DO_DUOC
+  gate_windows_CI_ly_do: >-
+    `manual_ci_budget: 0` (chỉ thị chủ kho "CI Window gặp lỗi đã biết, để đỡ tốn tiền, không chạy
+    CI Windows") cộng chỉ thị "Không chạy CI, full CI cho đến khi merge". Là CHỌN KHÔNG ĐO, KHÔNG
+    phải "đã đo và xanh". Nền Windows dùng để kết luận là MÁY CHỦ KHO, không phải runner.
+  ci_tu_dong: KHONG_CO
+  ci_tu_dong_ly_do: >-
+    Nhánh `claude/r330-rig-quyet-mau-r1` KHÔNG có PR mở, và đẩy lên một ref không có PR thì
+    không workflow nào bắn. Đây là hệ quả TRỰC TIẾP của chỉ thị "không chạy CI cho đến khi
+    merge", không phải sơ suất. Cổng đã chạy là cổng chạy TẠI CHỖ, liệt kê ở trên.
+
+chua_co_pull_request:
+  trang_thai_luc_viet: 'Chưa mở PR cho `claude/r330-rig-quyet-mau-r1` lẫn cho nhánh hồ sơ này.'
+  vi_sao: >-
+    Mở PR sẽ bắn `gate`. Chỉ thị chủ kho khi ấy: "Không chạy CI, full CI cho đến khi merge".
+    Phiên agent KHÔNG tự mở PR dưới chỉ thị ấy.
+  DA_THAY_DOI: >-
+    Chủ kho ra chỉ thị "Merge cả hai nhánh đi" lúc ~04:2xZ 20-09-2026 ⇒ mở PR là ĐÚNG lúc ấy,
+    vì "cho đến khi merge" chính là mốc này. PR #573 mở 04:32Z, merge 04:50Z. Giữ mục này thay
+    vì xoá, để người đọc sau thấy điều kiện đã đổi chứ không tưởng biên nhận tự mâu thuẫn.
+
+verdict_usage_caveats:
+- id: khong-doc-thanh-cross-provider
+  noi_dung: >-
+    ĐỪNG đọc lượt này thành cross-review. Nó đạt `human_audited` vì §8 cho mức ấy NGANG HÀNG với
+    `cross_approved` — và vì đường kia ĐO ĐƯỢC là bị chặn. Packet khác phải tự chứng minh lại.
+- id: author-association-khong-phan-biet-duoc
+  noi_dung: >-
+    ĐỪNG dùng `author_association` làm bằng chứng "người đã ký" ở bất kỳ biên nhận nào. Nợ #566.
+- id: khong-dong-no-r330-tren-moi-windows
+  noi_dung: >-
+    `approve` này KHÔNG khai r330 đã chữa trên MỌI cấu hình Windows. Nó khai: chữa được, đo hai
+    lượt độc lập, trên MỘT máy Windows 11 + WSL, với đối chứng âm ĐẠT ở cả hai lượt.
+- id: no-r379-va-r378-van-mo
+  noi_dung: >-
+    KHÔNG đóng hai chỗ: (1) nguyên nhân `SyntaxError` của r379 vẫn CHƯA BIẾT và 2/2 xanh không
+    phải chứng minh; (2) `r378` đỏ vì thiếu quyền symlink trên máy chủ kho, chưa ai mở nợ. Packet
+    kế tiếp chạm `scripts/tl_selftest.py` phải biết cả hai.
+- id: khe-protected-evidence-ref-van-mo
+  noi_dung: >-
+    Biên nhận này phải neo `canonical_ancestry` cho ĐO ĐƯỢC trong khi thứ có thẩm quyền là
+    comment — đúng khe mà #566 sinh ra để vá, và #566 CHƯA land. Lần thứ HAI một biên nhận
+    human_audited phải đi vòng như vậy.
+
+hinh_dang_ke_thua_sau_packet:
+  RIG-QUYET-MAU-CUA-PHEP-DO: 5
+  NGOAI-LE-BI-NUOT-LANG: 2
+  LOI-KHAI-RONG-HON-PHEP-DO: 6
+  GIA-THUYET-CHUA-KIEM-VIET-NHU-DA-KIEM: 1
+  vi_sao: >-
+    Luật L4 — packet kế tiếp phải CHÉP bộ đếm này, không bắt đầu lại từ 0. `LOI-KHAI-RONG-HON-
+    PHEP-DO` lên 6 (+3 so lúc cấp lease): cả ba ca mới nằm trong CÔNG CỤ ĐO của phiên agent, chi
+    tiết ở `da_chap_nhan_tuong_minh/cong-cu-do-sai-ba-lan`. Đã QUÁ ngưỡng ba lần ⇒ câu hỏi đúng
+    cho lần sau là "có nên để phiên viết bản vá tự viết bộ đo cho bản vá ấy không".
+
+receipt_written_by: claude-session
+receipt_written_at_utc: '2026-09-20T03:40:00Z'
+receipt_basis: >-
+  `verdict_sha256`/`verdict_bytes` đo bằng `sha256sum`/`wc -c` trên tệp TRƯỚC khi commit;
+  `posted_comment_id`/`posted_at_utc`/`author_association` đọc NGƯỢC về từ MCP `issue_read
+  get_comments` sau khi đăng; số cổng Linux đo tại chỗ trên `8c425b1` lúc ~02:5xZ; số Windows
+  chép từ hai tệp log b6/b7 do chủ kho gửi; `ai-dang-giu ops/reviews/` trả `NGƯỜI_GIỮ 0` sau khi
+  đồng bộ đủ ref (so TẬP TÊN hai nguồn: `comm -23` RỖNG, 472/472).
+receipt_khong_khai:
+- 'Không khai `cross_approved`. Trần §8 còn nguyên; xem `assurance_ghi_chu`.'
+- >-
+  Không khai Packet complete. Lease executor còn hiệu lực tới 2026-09-20T16:02Z, chưa merge,
+  chưa có PR.
+- >-
+  Không khai "comment khớp TỪNG BYTE". Cần client thứ hai mới khẳng định được byte trên GitHub,
+  mà container này không có (REST tới `repos/…` bị proxy chặn 403). Xem
+  `doi_chieu_boi_phien_chinh/byte_exact_KHONG_DO_DUOC`.
+- >-
+  Không khai gì về `gate (windows-latest)`. Nó KHÔNG chạy, theo chỉ thị. Bằng chứng Windows của
+  packet này đến từ MÁY CHỦ KHO, không từ runner.
+nguon_co_tham_quyen: >-
+  COMMENT trên GitHub (`nguon_co_tham_quyen_url`) — ngược chiều với verdict của một mô hình.
+  `verdict_path` + `verdict_sha256` chỉ là BẢN CHIẾU để tra ngoại tuyến.
+
+# ---------------------------------------------------------------------------
+# LAND — §13.1. Viết SAU khi chủ kho ra chỉ thị merge và SAU khi CI hậu merge xong.
+# Mọi số dưới đây đo trong chính phiên này, 04:50Z–05:2xZ 20-09-2026.
+# ---------------------------------------------------------------------------
+land:
+  pull_request: 573
+  uy_quyen_merge: >-
+    Chủ kho ducthangho, phiên điều phối 20-09-2026, nguyên văn: "Merge cả hai nhánh đi".
+    Uỷ quyền đã ghi cho head 9950177ab3a96de57b9aa0616e251ade7bad300b TRƯỚC khi merge, và
+    lời gọi merge neo `expectedHeadSha` đúng SHA ấy — không merge được một head khác.
+  merged_by: ducthangho
+  merged_at_utc: '2026-09-20T04:50:2xZ'
+  phuong_thuc: merge_commit
+  merge_commit: a270aea8d51792c1300b2add580e95df1ff02dd6
+  merge_parents:
+    - e1324285eea1b7bf2719a301332fdaa3a94c17f9   # target trước
+    - 9950177ab3a96de57b9aa0616e251ade7bad300b   # candidate
+  merge_tree: 81608851cd59bc6bf95e21294bd70554c21b59bb
+  merge_tree_VI_SAO_DANG_KE: >-
+    Băm cây này TRÙNG băm cây mà phiên đã chạy trọn bộ cổng TẠI CHỖ trước khi mở PR. Nghĩa là
+    `selftest 1711/1711`, `release-verify --strict 180==180`, `lease_publish_test 166/166` là
+    số đo trên CHÍNH thứ nay nằm trên master, không phải trên một cây gần giống. Đây là chốt
+    chống đúng lớp lỗi "đo một cây, đẩy một cây khác".
+  quan_he_da_xac_minh:
+    candidate_la_to_tien_cua_merge: true
+    target_truoc_la_to_tien_cua_merge: true
+    master_hien_tai_bang_merge_commit: true
+
+  head_da_doi_TRUOC_merge:
+    head_cu: 8c425b1934ec416dc9001da19b5f30eedcebd7d5
+    head_moi: 9950177ab3a96de57b9aa0616e251ade7bad300b
+    vi_sao: >-
+      Cổng `thu-hoi` ĐỎ trên head cũ, `CHAN [12]: KHÔNG_XÁC_ĐỊNH: S e1324285eea1 không phải
+      tổ tiên của H 8c425b1934ec`. Nhánh rẽ từ `dc85dd0a`, master đã đi 8 commit ⇒ quan hệ tổ
+      tiên đứt. Chữa bằng MERGE `origin/master` vào nhánh, không bằng re-run — và re-run cũng
+      không được phép (`manual_ci_budget: 0`).
+    xac_minh_sau_khi_chua: '`merge-base --is-ancestor origin/master HEAD` rc=0'
+    khong_phai_do_san: >-
+      ĐO được là của PR NÀY, không phải nền: cùng cổng ấy trả `success` ngay ở lượt kế tiếp sau
+      khi merge, mà không ai đụng vào mã sản phẩm.
+
+  full_ref_fence:
+    do_truoc_utc: '2026-09-20T04:3xZ (trước khi mở PR #573)'
+    so_ref_truoc: 968
+    sha256_truoc: 64b8f08e8c485a5612e18033f6ec97406715fd9a41c194e4c711ec1caf7c4953
+    do_sau_utc: '2026-09-20T04:5xZ (ngay sau merge, TRƯỚC mọi thao tác ghi khác của phiên)'
+    so_ref_sau: 969
+    sha256_sau: e0f8984c63077c0e0acd3fec85476d8eb0f021004e927da734f468a284ca9736
+    ref_doi: 4
+    ref_doi_chi_tiet:
+      - 'HEAD: e1324285eea1 -> a270aea8d517'
+      - 'refs/heads/master: e1324285eea1 -> a270aea8d517'
+      - 'refs/heads/claude/r330-rig-quyet-mau-r1: 8c425b1934ec -> 9950177ab3a9  (merge master vào nhánh)'
+      - 'refs/pull/573/head: VẮNG -> 9950177ab3a9  (PR mới mở)'
+    ket_luan: 'Đúng 4 ref, mỗi ref giải thích được. Không ref lạ, không ghi ngoài dự kiến.'
+
+  ci_hau_merge:
+    run_id: 35490150852
+    head_sha: a270aea8d51792c1300b2add580e95df1ff02dd6
+    bat_dau_utc: '2026-09-20T04:50:31Z'
+    ket_thuc_utc: '2026-09-20T05:11:35Z'
+    ket_luan: success
+    so_job: 4
+    job:
+      - {ten: 'chuan-bi', nen: ubuntu-latest, ket_qua: success}
+      - {ten: 'gate (ubuntu-latest)', nen: ubuntu-latest, ket_qua: success}
+      - {ten: 'gate-registry (ubuntu-latest)', nen: ubuntu-latest, ket_qua: success}
+      - {ten: 'gate-packet-loop (ubuntu-latest)', nen: ubuntu-latest, ket_qua: success}
+    buoc_dang_ke:
+      buoc_36_release_verify_strict_lane_LAND: >-
+        success — lane DUY NHẤT bắt được lệch manifest. Lane PR KHÔNG bắt được: nó có
+        `if: github.ref == refs/heads/master`, còn lane WORKER sinh manifest TẠM từ chính cây
+        nên HẤP THỤ mọi thay đổi nội dung. Đó là lý do phiên chạy đúng lệnh này TẠI CHỖ trước
+        khi merge, thay vì tin lane PR.
+      buoc_27_tl_selftest_co_bang_chung: 'success'
+      buoc_37_lane_WORKER: 'skipped — đúng, vì đây là lượt master'
+      buoc_11_PR_head_contains_required_EOL_base: >-
+        skipped — ĐÚNG như phải thế trên lượt master, vì bước ấy có
+        `if: github.event_name == pull_request`. Tiêu chí "không bước nào skipped" CHỈ áp cho
+        lượt PR; bê nguyên sang lượt master là tự báo động giả.
+      buoc_21_gate_lifecycle_nen_khong_cgroup: 'skipped — nền CÓ cgroup, đúng nhánh loại trừ'
+    windows: KHONG_CHAY
+    windows_ghi_chu: >-
+      4/4 job đều `ubuntu-latest`, 0 job windows — đúng như packet #548 đã đổi cho lượt master.
+      Không phát sinh phút Windows nào. Đây là CHỌN KHÔNG ĐO, không phải "đã đo và xanh".
+
+  nen_do_san_da_loai_tru:
+    quan_sat: >-
+      Lượt master NGAY TRƯỚC (`e1324285`, merge PR #554 của packet #541) có
+      `conclusion: failure` — run 35458025667, attempt 2, job `gate-registry`.
+    nguyen_nhan_do_duoc: >-
+      "CASE T6: ĐỎ — OSError: [Errno 39] Directory not empty: '/tmp/.../work/.git'" ⇒ "7/8" ⇒
+      "CI_DANG_KY ops/nhanh_don_duoc_test.py: ĐỎ rc=1". Tệp ấy thuộc packet #568 (PR #572,
+      phiên khác), KHÔNG thuộc write set #565.
+    ket_qua_luot_nay: >-
+      `gate-registry` trên a270aea = success. Ca T6 KHÔNG tái diễn. Nên lượt này không phải
+      "xanh nhờ may": nó xanh ở đúng job đã đỏ, mà #565 không đụng tệp gây đỏ.
+    vi_sao_ghi_vao_day: >-
+      Ghi để người đọc sau KHÔNG đọc "master từng đỏ" thành "bản vá này làm đỏ". Và để biết ca
+      T6 là một chập chờn CHƯA có nguyên nhân — nó thuộc #568, không thuộc packet này.
+
+  trang_thai_theo_10_2_4:
+    merged: true
+    landed: true
+    landed_can_cu: >-
+      Kết quả đã vào canonical ở đúng SHA được duyệt (9950177, parent thứ hai của a270aea),
+      CI hậu merge 4/4 xanh gồm `release-verify strict (lane LAND)`, ref fence chỉ đổi 4 ref
+      giải thích được, và cây merge trùng băm cây đã chạy cổng.
+    packet_complete: false
+    packet_complete_vi_sao_KHONG: >-
+      §10.2.4 đòi "không còn open work/lease". Lease `r330-rig-quyet-mau-r1-g1-claude` VẪN CÒN
+      HIỆU LỰC tới 2026-09-20T16:02:00Z: `ai-dang-giu scripts/tl_selftest.py` đo lúc 05:0xZ trả
+      `rc=11 · NGƯỜI_GIỮ 1`. Xem `lease_chua_thu_hoi_duoc`.
+
+  lease_chua_thu_hoi_duoc:
+    lease_id: r330-rig-quyet-mau-r1-g1-claude
+    het_han_utc: '2026-09-20T16:02:00Z'
+    do_luc_utc: '2026-09-20T05:0xZ'
+    ai_dang_giu: 'rc=11 · NGƯỜI_GIỮ 1 trên scripts/tl_selftest.py'
+    vi_sao_khong_thu_hoi_duoc: >-
+      Đây là nợ `AG-T0-01B-thu-hoi-lease-chua-co-duong` hiện ra thành một ca SỐNG, lần thứ hai
+      đo được trong kho (lần trước: packet #548). Hai đường tồn tại, không đường nào dùng được
+      trong quyền của phiên này:
+      (a) BIA MỘ HAI CHIỀU — cơ chế KẾ TỤC revision, và `_kiem_bia_mo` không đòi cùng `packet_id`
+      nên VẪN chạy được xuyên packet; nhưng đó là một KHE, và đợt này đã lách nó BẢY lần. Chủ kho
+      được hỏi và đã CHỌN KHÔNG đi đường ấy.
+      (b) SỔ THU HỒI `ops/thu-hoi/` (wp488 / ADR-0047) — đường chữa THẬT, và cửa đã mở vì
+      `ops/lease_publish.py` nay NGƯỜI_GIỮ 0 sau khi #541 land. Nhưng nó bị chặn ở chỗ CHỈ CHỦ
+      KHO mở được: `ops/lease_publish.py:937` `PROFILE_ADAPTER_DA_DUYET = frozenset()`, chú thích
+      ngay tại đó khai "Rỗng có chủ đích ở A0: … cho tới khi chủ kho duyệt một manifest
+      (ADR-0047 lớp 2)", và ADR-0047 lớp 2 CẤM executor tự đo rồi tự đăng ký
+      ("executor không tự duyệt"). Kèm `DESCRIPTOR_Q13_SHA256 = None` và `BIA_MO_LICH_SU = ()`
+      cùng dạng rỗng-có-chủ-đích. ADR-0047 trạng thái `Proposed`.
+    ket_luan: >-
+      KHÔNG CÓ ĐƯỜNG THU HỒI SỚM trong quyền của phiên này. Lease tự hết hiệu lực lúc
+      2026-09-20T16:02:00Z.
+    he_qua: >-
+      Packet kế tiếp chạm `scripts/tl_selftest.py` — cụ thể là nợ `r378` vừa mở (Issue #574) —
+      KHÔNG cấp lease được trước mốc ấy, trừ khi chủ kho chọn một trong hai đường trên.

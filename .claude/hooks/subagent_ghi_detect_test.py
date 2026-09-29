@@ -1,7 +1,8 @@
 """Phan chung cho packet #329 pha 2 — may phat hien ghi cua subagent read-only.
 
 Chay: python3 .claude/hooks/subagent_ghi_detect_test.py
-Thoat 0 khi VA CHI KHI moi ca DAT va moi dot bien BI GIET.
+Thoat 0 khi VA CHI KHI moi ca DAT va moi dot bien BI GIET — che do DU. Che do NHE (#651,
+`SUBAGENT_GHI_DETECT_KHONG_DOT_BIEN=1`): 0 khi moi ca DAT, KHONG chay dot bien nao.
 
 Doc truoc khi sua: bo test nay do DETECTOR, khong do hook runtime cua nen. Ranh gioi ay
 duoc ghi thang o `A10` cuoi tep — dung doc "N/N dat" thanh "chot da co hieu
@@ -11,6 +12,7 @@ Moi ca dung cay git TAM (khong bao gio cham kho that), va anh chup di sang thu m
 RIENG qua `TL_SUBAGENT_SNAP_DIR`.
 """
 import contextlib
+import functools
 import importlib.util
 import json
 import os
@@ -26,7 +28,7 @@ HOOK = HERE / "subagent_ghi_detect.py"
 
 def _la_cau_hinh_pham_vi_lenh(k):
     """`GIT_CONFIG_COUNT` + `GIT_CONFIG_KEY_<n>`/`VALUE_<n>` — kenh cau hinh PHAM VI LENH."""
-    if k == "GIT_CONFIG_COUNT":
+    if k in ("GIT_CONFIG_COUNT", "GIT_CONFIG_PARAMETERS"):
         return True
     for tien_to in ("GIT_CONFIG_KEY_", "GIT_CONFIG_VALUE_"):
         # Xoa MOI cap danh so, khong chi nhung cap duoi `COUNT` hien tai: bo sot mot cap
@@ -36,7 +38,7 @@ def _la_cau_hinh_pham_vi_lenh(k):
     return False
 
 
-def _moi_truong_git_dong(env=None):
+def _moi_truong_git_dong(env=None, safe_directory=None):
     """Moi truong KHONG doc cau hinh git ngoai nao. Nhan `env` lam DOI SO de `t22b` goi
     duoc voi mot nen THU DICH dung san — mot ham chi sua `os.environ` thi khong co cach
     nao cho no mot ca biet truoc dap an."""
@@ -46,6 +48,9 @@ def _moi_truong_git_dong(env=None):
     e.update({"GIT_CONFIG_GLOBAL": os.devnull, "GIT_CONFIG_SYSTEM": os.devnull,
               "GIT_AUTHOR_NAME": "tl329", "GIT_AUTHOR_EMAIL": "tl329@invalid",
               "GIT_COMMITTER_NAME": "tl329", "GIT_COMMITTER_EMAIL": "tl329@invalid"})
+    if safe_directory is not None:
+        e.update({"GIT_CONFIG_COUNT": "1", "GIT_CONFIG_KEY_0": "safe.directory",
+                  "GIT_CONFIG_VALUE_0": str(pathlib.Path(safe_directory).resolve())})
     return e
 
 
@@ -459,7 +464,57 @@ def t20_duong_KHONG_bam_duoc_thi_UNKNOWN_khong_phai_clean(h):
 _VAN_TAY_DA_IN = []      # in DUNG MOT LAN moi tien trinh — ly do o cuoi `t21`
 
 
-def _bash_tuyet_doi():
+@functools.lru_cache(maxsize=1)
+def _git_for_windows_usr_bin():
+    if os.name != "nt":
+        return None
+    git = shutil.which("git")
+    if not git:
+        return None
+    candidates = [pathlib.Path(git)]
+    try:
+        probe = subprocess.run([git, "--exec-path"], capture_output=True, text=True,
+                               encoding="utf-8", errors="replace", timeout=20)
+        if probe.returncode == 0 and probe.stdout.strip():
+            candidates.append(pathlib.Path(probe.stdout.strip()))
+    except (OSError, subprocess.SubprocessError):
+        pass
+    for candidate in candidates:
+        try:
+            candidate = candidate.resolve()
+        except OSError:
+            continue
+        for root in (candidate, *candidate.parents):
+            usr_bin = root / "usr" / "bin"
+            if usr_bin.is_dir():
+                return usr_bin
+    return None
+
+
+def _ung_vien_bash():
+    """Liet ke co thu tu, khong dong nhat `co tep` voi `chay duoc`."""
+    ds = []
+
+    def them(p):
+        if not p:
+            return
+        p = str(pathlib.Path(p))
+        khoa = os.path.normcase(os.path.abspath(p))
+        if all(os.path.normcase(os.path.abspath(x)) != khoa for x in ds):
+            ds.append(p)
+
+    # Giu ung vien PATH dau tien de probe co the TU CHOI vo System32 that.
+    them(shutil.which("bash"))
+    if os.name == "nt":
+        usr_bin = _git_for_windows_usr_bin()
+        if usr_bin:
+            root = usr_bin.parents[1]
+            them(root / "bin" / "bash.exe")
+            them(usr_bin / "bash.exe")
+    return ds
+
+
+def _bash_tuyet_doi(ung_vien=None, chay=subprocess.run):
     """Phan giai `bash` thanh DUONG DAN TUYET DOI truoc khi phong. `(duong, None)` hoac
     `(None, ly_do)` — KHONG bao gio im lang cho qua.
 
@@ -477,12 +532,58 @@ def _bash_tuyet_doi():
     von phai do: lenh hook co chay duoc duoi mot shell POSIX that hay khong. Day KHONG
     phai rut ruot ca — khang dinh van doi du `4/4`, xem `t21`.
     """
-    duong = shutil.which("bash")
-    if not duong:
-        return None, "khong phan giai duoc `bash` tren PATH"
-    if not pathlib.Path(duong).is_file():
-        return None, f"`bash` phan giai ve {duong} nhung do khong phai mot tep"
-    return duong, None
+    cac = list(_ung_vien_bash() if ung_vien is None else ung_vien)
+    bi_tu_choi = []
+    for duong in cac:
+        if not pathlib.Path(duong).is_file():
+            bi_tu_choi.append(f"{duong}: khong phai tep")
+            continue
+        try:
+            v = chay([duong, "--version"], stdout=subprocess.PIPE,
+                     stderr=subprocess.PIPE, timeout=15)
+            c = chay([duong, "-c", ":"], stdout=subprocess.PIPE,
+                     stderr=subprocess.PIPE, timeout=15)
+        except (OSError, subprocess.SubprocessError) as e:
+            bi_tu_choi.append(f"{duong}: {type(e).__name__}: {e}")
+            continue
+        dau_ra = (v.stdout or b"") + (v.stderr or b"")
+        dung_duoc = (v.returncode == 0 and b"gnu bash" in dau_ra.lower()
+                     and c.returncode == 0)
+        if not dung_duoc:  # named-mutant: reject-present-unusable-bash
+            tom = dau_ra[:100].decode("utf-8", "backslashreplace").strip()
+            bi_tu_choi.append(f"{duong}: version_rc={v.returncode} shell_rc={c.returncode} "
+                              f"output={tom or 'RONG'}")
+            continue
+        return duong, None
+    if not cac:
+        return None, "khong phan giai duoc `bash`"
+    return None, "khong co bash dung duoc: " + "; ".join(bi_tu_choi)
+
+
+def _probe_bash_co_rang():
+    """Phan chung: rc, GNU-output va `bash -c` la ba conjunct doc lap."""
+    with tempfile.TemporaryDirectory(prefix="tl329-bash-") as d:
+        base = pathlib.Path(d)
+        hong, khong_gnu, khong_c, tot = (base / x for x in
+            ("hong.exe", "khong-gnu.exe", "khong-c.exe", "tot.exe"))
+        for path in (hong, khong_gnu, khong_c, tot):
+            path.touch()
+
+        def gia(argv, **_kwargs):
+            path = os.path.normcase(os.path.abspath(argv[0]))
+            if path == os.path.normcase(str(hong)):
+                return subprocess.CompletedProcess(argv, 1, b"", b"")
+            if argv[1] == "--version":
+                out = (("Windows Subsystem for Linux has no installed distributions.")
+                       .encode("utf-16-le") if path == os.path.normcase(str(khong_gnu))
+                       else b"GNU bash, version fixture")
+                return subprocess.CompletedProcess(argv, 0, out, b"")
+            rc = 1 if path == os.path.normcase(str(khong_c)) else 0
+            return subprocess.CompletedProcess(argv, rc, b"", b"")
+
+        chon, _ = _bash_tuyet_doi(
+            [str(hong), str(khong_gnu), str(khong_c), str(tot)], gia)
+        return chon is not None and os.path.normcase(chon) == os.path.normcase(str(tot))
 
 
 def _van_tay_nen_chay():
@@ -498,7 +599,9 @@ def _van_tay_nen_chay():
     VANG MAT va RONG la hai ket luan khac nhau, nen chuoi rong van phai in ra chu.
     """
     duong = shutil.which("bash")
-    ra = ["VANTAY bash-which  : " + (duong if duong else "KHONG TIM THAY")]
+    chon, ly_do = _bash_tuyet_doi()
+    ra = ["VANTAY bash-which  : " + (duong if duong else "KHONG TIM THAY"),
+          "VANTAY bash-chon   : " + (chon if chon else f"KHONG ({ly_do})")]
     # GOI HAI LAN CO CHU Y: ten tran (di qua `CreateProcess`) va duong dan tuyet doi.
     # Hai dong khac nhau CHINH LA con bo — xem `_bash_tuyet_doi`. Giu ca hai thi lan sau
     # ai doc log cung thay ngay, khong phai suy dien lai tu dau.
@@ -539,6 +642,8 @@ def t21_lenh_hook_chay_duoc_khi_CLAUDE_PROJECT_DIR_KHONG_DAT(h, doi_lenh=None):
     `doi_lenh` la moc cua KENH DOT BIEN THU BA (`DOT_BIEN_SETTINGS`): mot ham nhan chuoi
     lenh va tra ve ban da doi. Chi `_chay_dot_bien_settings` truyen no; nen that luon
     `None`. No ton tai de chinh ca nay CHUNG MINH duoc minh con do duoc."""
+    if not _probe_bash_co_rang():
+        return (False, "fixture resolver da chap nhan bash co mat nhung khong chay duoc")
     goc = HERE.parent.parent
     bash, ly_do = _bash_tuyet_doi()
     if bash is None:
@@ -557,7 +662,9 @@ def t21_lenh_hook_chay_duoc_khi_CLAUDE_PROJECT_DIR_KHONG_DAT(h, doi_lenh=None):
             lenh = doi_lenh(lenh)
         for nhan, moi_truong in (("khong dat", {}),
                                  ("co dat", {"CLAUDE_PROJECT_DIR": str(goc)})):
-            env = {k: v for k, v in os.environ.items() if k != "CLAUDE_PROJECT_DIR"}
+            env = _moi_truong_git_dong(
+                {k: v for k, v in os.environ.items() if k != "CLAUDE_PROJECT_DIR"},
+                safe_directory=goc)
             env.update(moi_truong)
             env["TL_SUBAGENT_SNAP_DIR"] = _snap()
             r = subprocess.run([bash, "-c", lenh], cwd=str(goc / ".claude" / "dev"),
@@ -865,6 +972,215 @@ def t22b_fixture_KHONG_an_cau_hinh_git_ngoai(h):
                      if rc == 0 else f"cau hinh PHAM VI LENH van lot: rc={rc}")
 
 
+def t26a_ten_unicode_duoc_giai_ma_dung_byte_khi_quotePath_true(h):
+    c, s = _cay(), _snap()
+    subprocess.run(["git", "config", "core.quotePath", "true"], cwd=c, capture_output=True)
+    ten = "chữ-việt.txt"
+    f = pathlib.Path(c) / ten
+    f.write_text("1", encoding="utf-8")
+
+    goi_byte("SubagentStart", "tl-auditor", "a26a_clean", c, s, h)
+    rc1, kq1, ly1, ct1 = goi_byte("SubagentStop", "tl-auditor", "a26a_clean", c, s, h)
+    if kq1 != "clean" or ct1.get("so_duong_da_bam_noi_dung", 0) == 0:
+        shutil.rmtree(c, ignore_errors=True)
+        return False, f"quotePath=true (unchanged): {kq1}, hashed={ct1.get('so_duong_da_bam_noi_dung')}"
+
+    goi_byte("SubagentStart", "tl-auditor", "a26a_changed", c, s, h)
+    f.write_text("2", encoding="utf-8")
+    rc2, kq2, ly2, ct2 = goi_byte("SubagentStop", "tl-auditor", "a26a_changed", c, s, h)
+    shutil.rmtree(c, ignore_errors=True)
+    return kq2 == "changed", f"quotePath=true: {kq1} -> {kq2}"
+
+def t26b_ten_unicode_giai_ma_dung_byte_khi_quotePath_false(h):
+    c, s = _cay(), _snap()
+    subprocess.run(["git", "config", "core.quotePath", "false"], cwd=c, capture_output=True)
+    ten = "chữ-việt.txt"
+    f = pathlib.Path(c) / ten
+    f.write_text("1", encoding="utf-8")
+
+    goi_byte("SubagentStart", "tl-auditor", "a26b_clean", c, s, h)
+    rc1, kq1, ly1, ct1 = goi_byte("SubagentStop", "tl-auditor", "a26b_clean", c, s, h)
+    if kq1 != "clean" or ct1.get("so_duong_da_bam_noi_dung", 0) == 0:
+        shutil.rmtree(c, ignore_errors=True)
+        return False, f"quotePath=false (unchanged): {kq1}, hashed={ct1.get('so_duong_da_bam_noi_dung')}"
+
+    goi_byte("SubagentStart", "tl-auditor", "a26b_changed", c, s, h)
+    f.write_text("2", encoding="utf-8")
+    rc2, kq2, ly2, ct2 = goi_byte("SubagentStop", "tl-auditor", "a26b_changed", c, s, h)
+    shutil.rmtree(c, ignore_errors=True)
+    return kq2 == "changed", f"quotePath=false: {kq1} -> {kq2}"
+
+def t26c_escaped_names_duoc_giai_ma_dung(h):
+    hook = _nap_hook_de_do(h, "t26c")
+    res = hook._duong_tu_porcelain('?? "tep\\n\\"voi\\"\\\\slash.txt"')
+    mong_doi = 'tep\n"voi"\\slash.txt'
+    return res == mong_doi, f"escaped names parser: {res!r} (mong doi {mong_doi!r})"
+
+def t26d_valid_non_utf8_byte_roundtrip(h):
+    # This tests VALID non-UTF8 byte path round-trip (which is octal escaped in git)
+    hook = _nap_hook_de_do(h, "t26d")
+    res = hook._duong_tu_porcelain('?? "bad-\\377.txt"')
+    mong_doi = "bad-\udcff.txt"
+    return res == mong_doi, f"valid non-utf8 parser: {res!r} (mong doi {mong_doi!r})"
+
+def t26e_mixed_literal_unicode_and_escapes(h):
+    hook = _nap_hook_de_do(h, "t26e")
+    res = hook._duong_tu_porcelain('?? "chữ\\n.txt"')
+    mong_doi = "chữ\n.txt"
+    return res == mong_doi, f"mixed literal and escapes: {res!r} (mong doi {mong_doi!r})"
+
+def t26f_arrow_name_decoy_collision_false_clean(h):
+    hook = _nap_hook_de_do(h, "t26f")
+    res1 = hook._duong_tu_porcelain('?? "victim -> decoy"')
+    res2 = hook._duong_tu_porcelain('R  "victim" -> "decoy"')
+    res3 = hook._duong_tu_porcelain('R  "victim -> decoy" -> "new"')
+    mong_doi1 = "victim -> decoy"
+    mong_doi2 = "decoy"
+    mong_doi3 = "new"
+    return res1 == mong_doi1 and res2 == mong_doi2 and res3 == mong_doi3, f"arrow collision: {res1!r}, {res2!r}, {res3!r}"
+
+def t26g_malformed_syntax_rejection(h):
+    hook = _nap_hook_de_do(h, "t26g")
+    res1 = hook._duong_tu_porcelain('?? "bad-\\x61"')
+    res2 = hook._duong_tu_porcelain('?? "bad-\\q"')
+    res3 = hook._duong_tu_porcelain('?? "unterminated')
+    return res1 is None and res2 is None and res3 is None, f"malformed rejection: {res1}, {res2}, {res3}"
+
+def t26h_real_git_rename_of_arrow_filename(h):
+    if os.name == 'nt':
+        return True, "CAPABILITY LIMITATION: Windows khong ho tro ky tu > trong ten tep."
+    c, s = _cay(), _snap()
+    r = subprocess.run(["git", "config", "core.quotePath", "true"], cwd=c, capture_output=True)
+    if r.returncode != 0: return False, "setup git config that bai"
+
+    f_arrow = pathlib.Path(c) / "victim -> decoy"
+    f_arrow.write_text("1", encoding="utf-8")
+    r = subprocess.run(["git", "add", "victim -> decoy"], cwd=c, capture_output=True)
+    if r.returncode != 0: return False, "setup git add that bai"
+    r = subprocess.run(["git", "commit", "-m", "init"], cwd=c, capture_output=True)
+    if r.returncode != 0: return False, "setup git commit that bai"
+
+    r = subprocess.run(["git", "mv", "victim -> decoy", "new"], cwd=c, capture_output=True)
+    if r.returncode != 0: return False, "setup git mv that bai"
+
+    f_new = pathlib.Path(c) / "new"
+
+    goi_byte("SubagentStart", "tl-auditor", "a26h_clean", c, s, h)
+    rc1, kq1, ly1, ct1 = goi_byte("SubagentStop", "tl-auditor", "a26h_clean", c, s, h)
+    if kq1 != "clean":
+        shutil.rmtree(c, ignore_errors=True)
+        return False, f"real git rename (unchanged): {kq1}"
+    if not ct1.get("so_duong_da_bam_noi_dung"):
+        shutil.rmtree(c, ignore_errors=True)
+        return False, "real git rename (unchanged): zero hashed paths"
+
+    goi_byte("SubagentStart", "tl-auditor", "a26h_changed", c, s, h)
+    f_new.write_text("2", encoding="utf-8")
+    rc2, kq2, ly2, ct2 = goi_byte("SubagentStop", "tl-auditor", "a26h_changed", c, s, h)
+    shutil.rmtree(c, ignore_errors=True)
+    return kq2 == "changed", f"real git rename: {kq1} -> {kq2}"
+
+
+def t26i_record_boundary_regression(h):
+    if os.name == 'nt':
+        chars = ["\u0085", "\u2028", "\u2029", " "]
+    else:
+        chars = ["\u0085", "\u2028", "\u2029", " \r\n\t"]
+
+    xau = []
+    so_ca = 0
+    for qp in ["true", "false"]:
+        for i, char in enumerate(chars):
+            c, s = _cay(), _snap()
+            r = subprocess.run(["git", "config", "core.quotePath", qp], cwd=c, capture_output=True)
+            if r.returncode != 0:
+                xau.append(f"qp={qp}: git config rc={r.returncode}")
+                shutil.rmtree(c, ignore_errors=True)
+                continue
+
+            fname = f"line{char}break.txt"
+            fpath = pathlib.Path(c) / fname
+            fpath.write_text("1", encoding="utf-8")
+            r = subprocess.run(["git", "add", fname], cwd=c, capture_output=True)
+            if r.returncode != 0:
+                xau.append(f"qp={qp} char={repr(char)}: git add rc={r.returncode}")
+                shutil.rmtree(c, ignore_errors=True)
+                continue
+
+            aid = f"a26i_{qp}_{i}"
+            goi_byte("SubagentStart", "tl-auditor", aid + "_clean", c, s, h)
+            rc1, kq1, ly1, ct1 = goi_byte("SubagentStop", "tl-auditor", aid + "_clean", c, s, h)
+
+            if kq1 != "clean":
+                xau.append(f"qp={qp} char={repr(char)}: {kq1}")
+            elif not ct1.get("so_duong_da_bam_noi_dung") or ct1.get("khong_bam_duoc"):
+                xau.append(f"qp={qp} char={repr(char)}: missing paths or zero hashes")
+            else:
+                goi_byte("SubagentStart", "tl-auditor", aid + "_changed", c, s, h)
+                fpath.write_text("2", encoding="utf-8")
+                rc2, kq2, ly2, ct2 = goi_byte("SubagentStop", "tl-auditor", aid + "_changed", c, s, h)
+                if kq2 != "changed":
+                    xau.append(f"qp={qp} char={repr(char)}: {kq1} -> {kq2}")
+                else:
+                    so_ca += 1
+
+            shutil.rmtree(c, ignore_errors=True)
+
+    if so_ca != len(chars) * 2:
+        xau.append(f"thieu ca: do {so_ca} mong doi {len(chars) * 2}")
+
+    return not xau, "loi: " + "; ".join(xau) if xau else f"matrix passed ({so_ca} cases)"
+
+
+# ── CHE DO NHE (#651): bo MOI vong dot bien, ca NEN chay du (run 36246637438: 291,81 s; ca nen 7,6 s) ──
+CO_NHE = "SUBAGENT_GHI_DETECT_KHONG_DOT_BIEN"
+
+
+def che_do_chay(env=None):
+    """`nhe` | `du`. Co nhe chi nhan dung "1" — rong/"0"/"true" deu la `du`."""
+    return "nhe" if (os.environ if env is None else env).get(CO_NHE) == "1" else "du"
+
+
+def dong_nhe(so_ca_dat, so_ca, so_dot_bien):
+    """Dong bang chung nhe. KHONG mang chu `bi giet` ⇒ PHAI truot `MAU_DAY_DU` cua so dang ky."""
+    return (f"TONG: CA {so_ca_dat}/{so_ca} dat · "
+            f"DOT BIEN {so_dot_bien} muc CHE DO NHE — do khi diff cham vung")
+
+
+def dat_nhe(so_ca, do, so_dot_bien):
+    """Tieu chi DAT cua che do nhe van doi SO DUONG hai ve (#319): bang dot bien rong la DO."""
+    return so_ca > 0 and do == 0 and so_dot_bien > 0
+
+
+def ket_thuc_nhe(so_ca, do, so_dot_bien):
+    """Duoi nhanh nhe: dong bang chung, TONG, roi cong bo gioi han. Tra ma thoat."""
+    dat = dat_nhe(so_ca, do, so_dot_bien)
+    print(dong_nhe(so_ca - do, so_ca, so_dot_bien))
+    print("TONG:", "DAT" if dat else "DO")
+    _in_gioi_han()  # #651 Codex luot 3-4: nhe KHONG duoc cat khoi nay
+    return 0 if dat else 1
+
+
+def t27_che_do_nhe_chi_khi_co_DUNG_1(h):
+    ok = (che_do_chay({CO_NHE: "1"}) == "nhe" and che_do_chay({}) == "du"
+          and all(che_do_chay({CO_NHE: v}) == "du" for v in ("", "0", "true", " 1", "1 ")))
+    return ok, "vi tu che do: nhe chi khi co == '1'"
+
+
+def t28_dong_nhe_KHONG_gia_dang_dong_du_va_bang_rong_thi_DO(h):
+    d = dong_nhe(42, 42, 25)
+    ok = ("bi giet" not in d and "CHE DO NHE" in d and dat_nhe(42, 0, 25)
+          and not dat_nhe(42, 0, 0) and not dat_nhe(42, 1, 25) and not dat_nhe(0, 0, 25))
+    return ok, "che do nhe: dong bang chung rieng, bang dot bien rong -> DO"
+
+
+def t29_nhanh_nhe_VAN_cong_bo_gioi_han(h):
+    with contextlib.redirect_stdout(__import__("io").StringIO()) as b:
+        rc = ket_thuc_nhe(2, 0, 1)
+    ok = rc == 0 and "TONG: DAT" in (o := b.getvalue()) and "A10 :" in o and "NO  :" in o and o.index("TONG: DAT") < o.index("A10 :")
+    return ok, "nhanh nhe: rc=0, A10/NO in SAU `TONG`"
+
+
 CA = [t1_khong_ghi_thi_clean, t2_ghi_tep_theo_doi_thi_changed,
       t3_ghi_tep_BI_IGNORE_van_changed, t4_sua_tep_da_theo_doi_thi_changed,
       t4b_XOA_tep_da_theo_doi_thi_changed, t4c_DOI_TEN_tep_da_theo_doi_thi_changed,
@@ -888,7 +1204,19 @@ CA = [t1_khong_ghi_thi_clean, t2_ghi_tep_theo_doi_thi_changed,
       # --- #412 loi B: giai ma utf-8 tuong minh o ca hai duong ---
       t25a_git_doc_byte_utf8_khong_phu_thuoc_locale,
       t25b_stdin_doc_byte_utf8_khong_phu_thuoc_locale,
-      t25_duong_dan_NGOAI_ASCII_van_bam_duoc_noi_dung]
+      t25_duong_dan_NGOAI_ASCII_van_bam_duoc_noi_dung,
+      t26a_ten_unicode_duoc_giai_ma_dung_byte_khi_quotePath_true,
+      t26b_ten_unicode_giai_ma_dung_byte_khi_quotePath_false,
+      t26c_escaped_names_duoc_giai_ma_dung,
+      t26d_valid_non_utf8_byte_roundtrip,
+      t26e_mixed_literal_unicode_and_escapes,
+      t26f_arrow_name_decoy_collision_false_clean,
+      t26g_malformed_syntax_rejection,
+      t26h_real_git_rename_of_arrow_filename,
+      t26i_record_boundary_regression,
+      # --- #651: che do nhe ---
+      t27_che_do_nhe_chi_khi_co_DUNG_1,
+      t28_dong_nhe_KHONG_gia_dang_dong_du_va_bang_rong_thi_DO, t29_nhanh_nhe_VAN_cong_bo_gioi_han]
 
 # --- DOT BIEN: moi cai go DUNG MOT tinh chat, va phai lam it nhat mot ca DO ---
 DOT_BIEN = [
@@ -969,6 +1297,15 @@ DOT_BIEN = [
     ("m18_index_ghep_chuoi_top_git_index",
      '    rc_idx, duong_idx = _git(cwd, "rev-parse", "--git-path", "index")',
      '    rc_idx, duong_idx = 0, ".git/index"'),
+    ("m27_bo_codecs_escape_decode",
+     '    if p.startswith(b\'"\'):\n        res, end_idx = _consume_c_style_bytes(p)',
+     '    if p.startswith(b\'"\'):\n        return p[1:-1].decode("unicode_escape")'),
+    ("m29_bo_xu_ly_arrow_rename",
+     '        if p.startswith(b\'"\'):\n            res, end_idx = _consume_c_style_bytes(p)\n            if res is None: return None\n            if end_idx + 4 <= len(p) and p[end_idx:end_idx+4] == b\' -> \':\n                p = p[end_idx+4:]\n            else:\n                return None\n        else:\n            idx = p.find(b\' -> \')\n            if idx != -1:\n                p = p[idx+4:]\n            else:\n                return None',
+     '        if b\' -> \' in p:\n            p = p.split(b\' -> \', 1)[1]'),
+    ("m30_record_boundary_splitlines",
+     "    for dong in st.split('\\n'):",
+     "    for dong in st.splitlines():"),
 ]
 
 
@@ -991,6 +1328,35 @@ DOT_BIEN_NHAM_TEST = [
      "    for k in [k for k in e if _la_cau_hinh_pham_vi_lenh(k)]:\n        del e[k]\n",
      "    pass  # dot bien: bo sot kenh cau hinh pham vi lenh\n",
      "t22b_fixture_KHONG_an_cau_hinh_git_ngoai"),
+    ("subagent_missing_gnu_bash_output_conjunct",
+     "        dung_duoc = (v.returncode == 0 and b\"gnu bash\" in dau_ra.lower()\n"
+     "                     and c.returncode == 0)\n",
+     "        dung_duoc = (v.returncode == 0 and c.returncode == 0)\n",
+     "t21_lenh_hook_chay_duoc_khi_CLAUDE_PROJECT_DIR_KHONG_DAT"),
+    ("subagent_missing_bash_c_conjunct",
+     "        dung_duoc = (v.returncode == 0 and b\"gnu bash\" in dau_ra.lower()\n"
+     "                     and c.returncode == 0)\n",
+     "        dung_duoc = (v.returncode == 0 and b\"gnu bash\" in dau_ra.lower())\n",
+     "t21_lenh_hook_chay_duoc_khi_CLAUDE_PROJECT_DIR_KHONG_DAT"),
+    ("subagent_present_unusable_bash_is_accepted",
+     "        if not dung_duoc:  # named-mutant: reject-present-unusable-bash\n",
+     "        if False:  # named-mutant: subagent_present_unusable_bash_is_accepted\n",
+     "t21_lenh_hook_chay_duoc_khi_CLAUDE_PROJECT_DIR_KHONG_DAT"),
+    # #651: moi chot cua che do nhe mot dot bien rieng.
+    ("mt4_co_nhe_nhan_moi_gia_tri_khac_rong",
+     '    return "nhe" if (os.environ if env is None else env).get(CO_NHE) == "1" else "du"\n',
+     '    return "nhe" if (os.environ if env is None else env).get(CO_NHE) else "du"\n',
+     "t27_che_do_nhe_chi_khi_co_DUNG_1"),
+    ("mt5_dat_nhe_bo_doi_so_dot_bien_duong",
+     "    return so_ca > 0 and do == 0 and so_dot_bien > 0\n",
+     "    return so_ca > 0 and do == 0\n",
+     "t28_dong_nhe_KHONG_gia_dang_dong_du_va_bang_rong_thi_DO"),
+    ("mt6_dong_nhe_gia_dang_dong_du",
+     '            f"DOT BIEN {so_dot_bien} muc CHE DO NHE — do khi diff cham vung")\n',
+     '            f"DOT BIEN {so_dot_bien}/{so_dot_bien} bi giet")\n',
+     "t28_dong_nhe_KHONG_gia_dang_dong_du_va_bang_rong_thi_DO"),
+    ("mt7_nhe_cat_cong_bo_gioi_han", "    _in_gioi_han()  # #651 Codex luot 3-4: nhe KHONG duoc cat khoi nay\n",
+     "    pass\n", "t29_nhanh_nhe_VAN_cong_bo_gioi_han"),
 ]
 
 
@@ -1077,6 +1443,28 @@ def _chay_dot_bien_nham_test():
     return song
 
 
+def _in_gioi_han():
+    """Cong bo gioi han cua bo — in o CA HAI che do (#651: nhe tung cat mat khoi nay).
+    Review Codex CLI luot 2 tren 1b885af, P3."""
+    # ── A10 — RANH GIOI CUA CHINH BO TEST NAY, khai o day chu khong giau trong PR ──
+    print("A10 : hieu luc cua `SubagentStop` exit 2 tren nen — KHONG DO DUOC trong bo nay.")
+    print("      Bo nay do DETECTOR bang payload tong hop; no KHONG chung minh hook that su")
+    print("      duoc nen goi, cung khong chung minh ma thoat 2 co tac dung. Muon do phai")
+    print("      phong mot subagent THAT. D1 (CHI TO CAO) chon chinh vi phep do ay chua co.")
+    # ── NO CO TEN, khai o DAY chu khong giau trong PR ────────────────────────────────────
+    # Cross-review luot 2 (PR #342) doi bon tieu chi; luot 3 dong duoc HAI, con HAI khong
+    # dong duoc bang mot ca test va noi thang vi sao, thay vi de trong.
+    print("NO  : `snapshot-ngoai-cay-KHONG-co-bien-toan-ven` — anh chup nam NGOAI cay nhung")
+    print("      subagent VAN ghi de duoc no. `agent_id` nay da nam TRONG anh chup (t23),")
+    print("      nhung do la chot chong DOI TEN, khong phai bien toan ven: ke sua duoc tep")
+    print("      thi sua duoc ca truong ay. Bien toan ven that doi mot KHOA ma subagent")
+    print("      khong doc duoc, va D1 khong co thu ay. Khong va bang bam dai hon.")
+    print("NO  : `A3/A8/A11-chua-co-ca-dong` — `install`, `tl nlm-reconcile`, ghi NGOAI kho,")
+    print("      mo phong mang: bo nay dung payload TONG HOP nen khong dieu khien duoc mot")
+    print("      agent THAT lam nhung viec ay. Ba dang GHI cua A4 (xoa · doi ten · staged)")
+    print("      DA co ca rieng tu luot 3 — xem t4b/t4c/t4d.")
+
+
 def chay():
     do_san = set()          # ca DA DO o NEN — doc chu thich duoi truoc khi sua
     do = 0
@@ -1088,6 +1476,8 @@ def chay():
             print(f"  DO   {f.__name__:52} {msg}")
         else:
             print(f"  ok   {f.__name__:52} {msg}")
+    if che_do_chay() == "nhe":  # #651: cat DUNG ba vong dot bien; ca NEN o tren DA chay du
+        return ket_thuc_nhe(len(CA), do, len(DOT_BIEN))
     goc = HOOK.read_text(encoding="utf-8")
     song = []
     # ── DOT BIEN CHI CO NGHIA KHI NEN XANH ───────────────────────────────────────────────
@@ -1143,23 +1533,7 @@ def chay():
               f"DOT BIEN {tap_giet}/{len(DOT_BIEN)} bi giet")
     dat = (len(CA) > 0 and do == 0 and len(DOT_BIEN) > 0 and not song)
     print("TONG:", "DAT" if dat else "DO")
-    # ── A10 — RANH GIOI CUA CHINH BO TEST NAY, khai o day chu khong giau trong PR ──
-    print("A10 : hieu luc cua `SubagentStop` exit 2 tren nen — KHONG DO DUOC trong bo nay.")
-    print("      Bo nay do DETECTOR bang payload tong hop; no KHONG chung minh hook that su")
-    print("      duoc nen goi, cung khong chung minh ma thoat 2 co tac dung. Muon do phai")
-    print("      phong mot subagent THAT. D1 (CHI TO CAO) chon chinh vi phep do ay chua co.")
-    # ── NO CO TEN, khai o DAY chu khong giau trong PR ────────────────────────────────────
-    # Cross-review luot 2 (PR #342) doi bon tieu chi; luot 3 dong duoc HAI, con HAI khong
-    # dong duoc bang mot ca test va noi thang vi sao, thay vi de trong.
-    print("NO  : `snapshot-ngoai-cay-KHONG-co-bien-toan-ven` — anh chup nam NGOAI cay nhung")
-    print("      subagent VAN ghi de duoc no. `agent_id` nay da nam TRONG anh chup (t23),")
-    print("      nhung do la chot chong DOI TEN, khong phai bien toan ven: ke sua duoc tep")
-    print("      thi sua duoc ca truong ay. Bien toan ven that doi mot KHOA ma subagent")
-    print("      khong doc duoc, va D1 khong co thu ay. Khong va bang bam dai hon.")
-    print("NO  : `A3/A8/A11-chua-co-ca-dong` — `install`, `tl nlm-reconcile`, ghi NGOAI kho,")
-    print("      mo phong mang: bo nay dung payload TONG HOP nen khong dieu khien duoc mot")
-    print("      agent THAT lam nhung viec ay. Ba dang GHI cua A4 (xoa · doi ten · staged)")
-    print("      DA co ca rieng tu luot 3 — xem t4b/t4c/t4d.")
+    _in_gioi_han()
     return 0 if dat else 1
 
 

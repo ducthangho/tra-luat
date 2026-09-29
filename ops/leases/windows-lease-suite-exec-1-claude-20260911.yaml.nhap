@@ -1,0 +1,87 @@
+# TỆP NHÁP — đuôi `.yaml.nhap` CÓ CHỦ ĐÍCH (không bị `ai-dang-giu` / `ops-publish-lease.yml` / `t23` tính là lease).
+# ĐỔI TÊN VỀ `.yaml` LÀ BƯỚC CUỐI khi cấp thật, SAU khi điền các ô chủ kho và ĐO LẠI `spec_sha256`.
+schema_version: 2
+event: executor_lease_granted
+
+# ── CÁC Ô CHỦ KHO ĐIỀN TẠI LÚC CẤP ──────────────────────────────────────────────────────────────────
+packet_issue: 504
+mission_issue: 499
+granted_by:               # `ducthangho`
+granted_on_instruction:   # URL comment cấp lease trên Packet Issue; phải ghi câu trả lời Q1 (ngưỡng phút) và Q2
+leased_at_utc:
+lease_expires_at_utc:     # = leased_at_utc + run_minutes
+# ─────────────────────────────────────────────────────────────────────────────────────────────────────
+
+packet_id: WINDOWS-LEASE-SUITE
+revision: 1
+generation: 1
+lease_id: windows-lease-suite-exec-1-claude-20260911
+role: executor
+provider: claude
+executor: claude
+environment: cloud
+risk: sensitive
+assurance_target: cross_approved
+access: read-write
+
+spec_path: ops/specs/WINDOWS-LEASE-SUITE.md
+spec_sha256: 6af324a368550eda667c67315052cf4fe1a1fb861e2c0da77202163deb34d105   # bản 1 chốt 11-09-2026; ĐO LẠI khi cấp
+spec_hash: 6af324a368550eda667c67315052cf4fe1a1fb861e2c0da77202163deb34d105
+
+write_set:
+  - ops/lease_publish_test.py
+  - ops/chay_lease_publish_test.sh
+
+write_set_da_do_truoc_khi_cap: >-
+  02:54:23Z 11-09-2026, bản sao sạch detach origin/master 27c413c3, hai nguồn ref 324/324, comm 0/0: cả hai đường
+  NGƯỜI_GIỮ 0. Giao thoa với M9-FETCH-AUTH (cấp TRƯỚC) và THU-HOI-LEASE-A1 (cấp SAU). CHỦ KHO ĐO LẠI bằng
+  `ai-dang-giu` ngay trước khi cấp; M9 chưa land ⇒ chưa cấp.
+
+branch: claude/windows-lease-suite
+branch_ownership: exclusive
+target_branch_neu_land: master
+# 3 MỎ NEO — chỗ giữ, ĐO LẠI lúc cấp = head origin/master SAU khi M9-FETCH-AUTH land.
+base_sha: 27c413c3e531800431cad9db4452d7236505a5a9
+start_from_sha: 27c413c3e531800431cad9db4452d7236505a5a9
+reviewed_sha_required: 27c413c3e531800431cad9db4452d7236505a5a9
+
+authority_basis: '§2 — start/pause/resume/reroute/override/authorize thuộc chủ kho'
+recorded_by: claude-session
+recorder_is_dispatcher: false
+recorder_cung_la_nguoi_thi_cong: true
+recorder_xung_dot_loi_ich: >-
+  Phiên ghi nháp cũng là phiên viết `t125`/`t139` ở A0 — tức có động cơ bênh giả thuyết H1. Bước M4 (đo Windows
+  thật) là bắt buộc trước M5 chính vì thế. Cross-review phải là phiên `codex` KHÁC.
+
+run_minutes: 1440
+heartbeat_required_minutes: 30
+attempts_used: 0
+attempts_limit: 3
+
+reviewer_provider: codex
+review_class: sensitive
+effective_review_class: sensitive
+
+depends_on:
+  - M9-FETCH-AUTH
+thay_the_cho: []
+
+ly_do_cap: >-
+  #499 C3: bước `lease-publish selftest` của lane Windows trên master bị huỷ ở trần 60 phút kể từ khi A0 land
+  (0721811: ≥ 25 phút 50 s chưa xong; trước A0: 2 phút 58 s). Gate master vắng mặt trên Windows. Đo Linux tại chỗ
+  02:58Z 11-09-2026: `t125` (A/B toàn suite, 2 subprocess, không timeout) = 90,3/136,9 s. Chi tiết: spec §VÌ SAO.
+
+viec_trong_lease:
+  - 'M1+M2: nhật ký >>> vao / <<< ra từng ca, flush; PYTHONUNBUFFERED=1 trong wrapper; giữ NGUYÊN BYTE dòng tổng kết.'
+  - 'M3: ca t152 (cặp vao/ra, tổng kết vẫn khớp regex t125).'
+  - 'M4 TRƯỚC M5: workflow_dispatch ci.yml trên head PR, đọc log bước 20 Windows, ghi run_id + ca chậm/treo vào PR.'
+  - 'M5: sửa đúng ca M4 chỉ ra theo một trong ba đường (a)(b)(c) của spec; đường khác ⇒ Q3 ⇒ DỪNG.'
+  - 'A3: workflow_dispatch lần hai: Windows bước 20 hoàn tất ≤ ngưỡng Q1; ubuntu không chậm quá 10 %.'
+
+dieu_kien_dung:
+  - 'S1 cần đường dẫn thứ ba (kể cả ci.yml).'
+  - 'S2 dòng thêm > 300.'
+  - 'S3 ca treo nằm trong ops/lease_publish.py — DỪNG, revision.'
+  - 'S4 muốn skip/cách ly/nâng timeout-minutes.'
+  - 'S5 M9-FETCH-AUTH chưa land, hoặc A1 đã cấp.'
+  - 'S6 trần HAI vòng review (ADR-0043).'

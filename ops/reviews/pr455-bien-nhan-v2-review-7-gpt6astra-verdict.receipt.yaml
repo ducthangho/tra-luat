@@ -1,0 +1,131 @@
+# BIEN NHAN v2 — cross-review luot 7 cua PR #455, tren head ca96016.
+#
+# LUOT DAU TIEN DUNG MODEL KHAC: `codex exec -m gpt-6-astra -c model_reasoning_effort="max"`.
+# 4 P2 + 1 P3, KHONG P1. Hai finding dau bat HAI CHIEU NGUOC NHAU cua cung mot lop: R7-01 la
+# loi DO bien thanh loi DU LIEU (ket toi oan 11 receipt), R7-02 la CHAN QUA RONG (cam
+# `human_audited` vo dieu kien du protocol §8 cho phep). Sau luot truoc chi bat duoc chieu
+# thu nhat.
+
+schema_version: 2
+receipt_id: pr455-bien-nhan-v2-review-7-gpt6astra-20260906-035d3cac
+kind: review_delivery_receipt
+packet_id: 'PR455-BIEN-NHAN-V2'
+lease_id: khong-co-lease
+phase_key: PR455-CONG-LUOC-DO-BIEN-NHAN-V2
+luot: 7
+role: reviewer
+provider: codex
+executor_provider: claude
+cross_provider: true
+assurance: cross_approved
+verdict: approve_with_findings
+verdict_path: ops/reviews/pr455-bien-nhan-v2-review-7-gpt6astra-verdict.md
+verdict_sha256: cee6b762fb08c1724c56ccbb1c6aaef8cedb22eb91b334840aa09f18ef2ebee8
+verdict_bytes: 35912
+reviewed_sha: ca960160b477cd16346a293aaa8752772a9921d4
+
+model_reviewer_identity:
+  provider: openai_codex
+  surface: codex_cli
+  transport: machine
+  session_run_id: 035d3cac9f2e4b7188d6a0c53e1b74af
+  prompt_sha256: 28fdd729798c4156237b6bc8f5910568eec15b6b41afcb11946f8b290840c581
+  prompt_kin_hoan_toan: true
+  thoi_luong_giay: 1405.657
+  ma_thoat: 0
+  model_yeu_cau: gpt-6-astra
+  reasoning_effort_yeu_cau: max
+  neo_boi_launcher: >-
+    launcher.py run boc `codex exec -m gpt-6-astra -c model_reasoning_effort="max"` trong
+    CLONE ROI 1748 commit (is-shallow=false), detached dung reviewed_sha, --require-clean,
+    prompt truyen qua bien PROMPT_FILE.
+  KHONG_do_duoc: >-
+    MODEL THUC SU DA PHUC VU. `model_yeu_cau` la thu TA YEU CAU, khong phai thu da chay:
+    `codex` KHONG phat truong `modelUsage` nhu `claude`, nen khong co duong doi chieu sau
+    luot chay. Thu DO DUOC truoc luot chay chi la: id `gpt-6-astra` DUOC MAY CHU CHAP NHAN
+    (ba id khac — `gpt-6`, `astra`, `gpt-6-astra-max` — tra HTTP 400, ma `rc` van 0), va
+    `model_reasoning_effort="max"` DUOC CHAP NHAN (doi chung: gia tri bia tra HTTP 400).
+    Hai phep do ay loai duoc ca "id khong ton tai" va "effort bi lui im lang"; chung KHONG
+    chung minh model nao da sinh ra van ban nay.
+
+github_submitter_identity:
+  actor: ducthangho
+  la_tac_gia_PR: true
+  ghi_chu: >-
+    ADR-0040: bien nhan do tai khoan tac gia dang KHONG thanh required check hay merge
+    authorization.
+
+anchor:
+  loai: canonical_ancestry
+  cuong_do: trung_binh
+  mo_ta: Neo bang verdict_sha256 + commit DAU TIEN chua tep verdict (4488ff1d).
+evidence_url: https://github.com/ducthangho/tra-luat/blob/4488ff1d2ce6d9b9b1c25667f5f2338835e1e5dc/ops/reviews/pr455-bien-nhan-v2-review-7-gpt6astra-verdict.md
+authoritative_source: repo_file
+evidence_channel: repo_file
+
+phat_hien_chinh: >-
+  KHONG CON P1 (luot thu nam lien tiep khong co P1 tu duong launcher).
+  R7-01 (P2): bang CO CAU TRUC chua duoc kiem DU CAU TRUC — `_bang` nhan hang bat ky so cot,
+  hai vong unpack alias nam ngoai khoi bat loi, kiem kieu chi ap cho TEN provider. Va khi doc
+  nguon that bai, `_HD={}` bien MOI provider thanh "khong hop dong" nen `_thieu` van KET TOI:
+  do duoc 11 CAO BUOC OAN tren 68 receipt nguyen byte. Lan thu NAM cua hinh dang "loi DO
+  bien thanh loi DU LIEU".
+  R7-02 (P2): CHAN QUA RONG — `human` CO hop dong trong bang provider (`human / manual_audit
+  / human`) va protocol §8 cho `human_audited`, nhung hang chep tay
+  `PROVIDER_KHONG_HOP_DONG={"human"}` cam toan bo ASSURANCE_CAN_DOC_LAP vo dieu kien. Day la
+  ANH GUONG cua R7-01: chan nham viec HOP LE.
+  R7-03 (P2): `c28` khong thu mat bang alias BE MAT, khong thu AGENTS lech BE MAT; parity van
+  so bon hang cu, bo `PROVIDER_HOP_DONG`/`PROVIDER_BI_DANH`. Hai phep lam yeu qua ca suite.
+  R7-04 (P2): `m43` giet `c37` bang THONG BAO KHAC, khong bang thuoc tinh no cong bo — cung
+  lop `R2-04`, tin dung do sai thuoc tinh.
+  R7-05 (P3): bien nhan luot 6 CUA CHINH PHIEN NAY goi R6-02 la "do phu" trong khi no la
+  HANH VI SAN PHAM; va hai con so chep tay sai ("0/15 khai transport" — thuc la 1/15 vi chinh
+  bien nhan luot 6 khai no; "khong ten nao chep tay" — `human` dung la chep tay).
+
+verdict_nguon: >-
+  launcher.py run boc codex exec (-m gpt-6-astra, effort max) trong clone roi 1748 commit,
+  detached dung ca96016, worktree sach, prompt neo sha256 28fdd729.
+verdict_doi_chieu: >-
+  CHUNG MINH: 1405,7 giay (dai gap ~2,5 lan cac luot truoc), verdict 35.912 byte, stderr
+  1.185.194 byte. Ban trong kho BYTE-EXACT (cmp rc=0, sha256 cee6b762). Reviewer chi tao
+  VERDICT.md: `git status --porcelain` mot dong `?? VERDICT.md`, `git log ca96016..HEAD` RONG.
+  Reviewer chay phan chung TREN 68 RECEIPT NGUYEN BYTE cua kho, khong sua receipt nao.
+  KHONG CHUNG MINH: model nao da phuc vu (xem KHONG_do_duoc o tren). KHONG DO DUOC.
+
+verdict_usage_caveats:
+  - id: R7-02-la-CHAN-QUA-RONG-khong-phai-lo-bao-mat
+    noi_dung: >-
+      R7-02 khac loai voi moi finding truoc cua PR nay: bon vong dau deu la CHAN THIEU (cong
+      cho qua thu khong nen cho), R7-02 la CHAN THUA (cong tu choi thu protocol cho phep).
+      Sua no phai CAN THAN theo chieu nguoc lai — reviewer canh bao dung: "chi them tuple
+      human moi dong mot nua; map hien tai khong tu gioi han muc assurance, nen de MO NHAM
+      hai muc model". Doc "da va" o day ma khong kiem chieu con lai la tai tao dung benh
+      "ban va nua voi" da tra gia ba lan trong PR nay.
+  - id: R7-02-CHUA-DO-DUOC-end-to-end
+    noi_dung: >-
+      Reviewer khai thang: KHONG DO DUOC mot receipt v2 human-audit hop le end-to-end — cay
+      khong co fixture ay va luot review bi CAM tu soan noi dung attestation moi. Nen finding
+      dung ve MAU THUAN LUAT (doc duoc tu nguon), nhung duong human hoat dong hay khong thi
+      chua ai do. Dung doc thanh "da chung minh human-audit chay duoc".
+  - id: MODEL-YEU-CAU-khac-MODEL-DA-PHUC-VU
+    noi_dung: >-
+      `model_yeu_cau: gpt-6-astra` la thu TA YEU CAU. `codex` khong phat `modelUsage` nen
+      khong doi chieu duoc sau luot chay. Hai phep do truoc luot chay chi loai duoc "id khong
+      ton tai" va "effort bi lui im lang" — chung KHONG chung minh model nao da sinh van ban.
+      Dung doc ten model trong bien nhan nay thanh mot lo attestation da do.
+  - id: NAM-PHAT-HIEN-VONG-7-CHUA-VA-luc-ghi-bien-nhan
+    noi_dung: >-
+      Luc ghi bien nhan nay, ca nam finding CHUA duoc va — mot executor khac (claude
+      fable-5-1, max effort) dang thi cong theo cac o GOI Y VA. Dung doc su ton tai cua bien
+      nhan thanh "da dong".
+  - id: approve_with_findings-KHONG-phai-du-dieu-kien-LAND
+    noi_dung: >-
+      Nhu cac luot truoc. Trang thai GitHub truc tiep la KHONG DO DUOC tu sandbox.
+  - id: phan-cong-CAM-tu-soan-phan-chung
+    noi_dung: >-
+      Nhu cac luot truoc — va luot nay rang buoc ay CHAN DUOC mot huong do that (fixture
+      human-audit cua R7-02), nen do phu ve phia do hep hon that su.
+
+delivered: true
+delivered_by: claude-session
+recorder_cung_la_nguoi_thi_cong: true

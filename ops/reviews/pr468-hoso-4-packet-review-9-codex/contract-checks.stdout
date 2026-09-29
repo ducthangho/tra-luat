@@ -1,0 +1,208 @@
+{
+  "round8_countermodel": {
+    "old_count": 86,
+    "lease_base_count": 88,
+    "split_count": 88,
+    "old_A2_full_pass": false,
+    "old_A2_drop_pass": true,
+    "r3_same_base_full_pass": true,
+    "r3_same_base_drop_pass": false,
+    "missing_if_drop": [
+      [
+        "bien-nhan v2 selftest",
+        "ubuntu",
+        "success"
+      ],
+      [
+        "bien-nhan v2 selftest",
+        "windows",
+        "success"
+      ]
+    ]
+  },
+  "r3_dispatch_model": {
+    "context": "workflow_dispatch, refs/heads/claude/gate-tach-job-cat-chi-phi, start_from_sha=d28c4b1, before and after same lane/OS; success model, not a recorded GitHub run",
+    "yaml_steps": 40,
+    "before": 88,
+    "after": 88,
+    "full_pass": true,
+    "drop_receipt_pass": false,
+    "removed": [
+      [
+        "bien-nhan v2 selftest",
+        "ubuntu",
+        "success"
+      ],
+      [
+        "bien-nhan v2 selftest",
+        "windows",
+        "success"
+      ]
+    ],
+    "lane_changes_from_stored_master": [
+      {
+        "step": "release-verify strict (lane LAND — manifest committed)",
+        "platform": "ubuntu",
+        "before": "success",
+        "after": "skipped"
+      },
+      {
+        "step": "release-verify strict (lane WORKER — manifest TẠM ngoài repo)",
+        "platform": "ubuntu",
+        "before": "skipped",
+        "after": "success"
+      },
+      {
+        "step": "release-verify strict (lane LAND — manifest committed)",
+        "platform": "windows",
+        "before": "success",
+        "after": "skipped"
+      },
+      {
+        "step": "release-verify strict (lane WORKER — manifest TẠM ngoài repo)",
+        "platform": "windows",
+        "before": "skipped",
+        "after": "success"
+      }
+    ],
+    "compare_master_same_yaml_wrong_lane_pass": false,
+    "wrong_lane_added": [
+      [
+        "release-verify strict (lane LAND — manifest committed)",
+        "ubuntu",
+        "skipped"
+      ],
+      [
+        "release-verify strict (lane LAND — manifest committed)",
+        "windows",
+        "skipped"
+      ],
+      [
+        "release-verify strict (lane WORKER — manifest TẠM ngoài repo)",
+        "ubuntu",
+        "success"
+      ],
+      [
+        "release-verify strict (lane WORKER — manifest TẠM ngoài repo)",
+        "windows",
+        "success"
+      ]
+    ],
+    "wrong_lane_removed": [
+      [
+        "release-verify strict (lane LAND — manifest committed)",
+        "ubuntu",
+        "success"
+      ],
+      [
+        "release-verify strict (lane LAND — manifest committed)",
+        "windows",
+        "success"
+      ],
+      [
+        "release-verify strict (lane WORKER — manifest TẠM ngoài repo)",
+        "ubuntu",
+        "skipped"
+      ],
+      [
+        "release-verify strict (lane WORKER — manifest TẠM ngoài repo)",
+        "windows",
+        "skipped"
+      ]
+    ]
+  },
+  "r3_pr_model": {
+    "candidates": [
+      {
+        "head": "82e01a4",
+        "run": "34058508426",
+        "event": "pull_request",
+        "branch": "claude/priceless-volhard-329577",
+        "ci_yaml_equal": true,
+        "started": "2026-09-06T20:36:16Z"
+      },
+      {
+        "head": "c0f18ac",
+        "run": "34052910676",
+        "event": "pull_request",
+        "branch": "claude/tra-luat-process-review-o4d7kb",
+        "ci_yaml_equal": true,
+        "started": "2026-09-06T18:48:58Z"
+      },
+      {
+        "head": "b912e5f",
+        "run": "34049592719",
+        "event": "pull_request",
+        "branch": "claude/tra-luat-process-review-o4d7kb",
+        "ci_yaml_equal": true,
+        "started": "2026-09-06T17:45:46Z"
+      }
+    ],
+    "chosen": {
+      "head": "82e01a4",
+      "run": "34058508426",
+      "event": "pull_request",
+      "branch": "claude/priceless-volhard-329577",
+      "ci_yaml_equal": true,
+      "started": "2026-09-06T20:36:16Z"
+    },
+    "projection": "ubuntu only, pull_request, worker lane; split is model over saved observed baseline",
+    "before": 44,
+    "after": 44,
+    "full_pass": true,
+    "drop_receipt_pass": false,
+    "removed": [
+      [
+        "bien-nhan v2 selftest",
+        "ubuntu",
+        "success"
+      ]
+    ]
+  },
+  "h_decision": {
+    "url_in_three": [
+      true,
+      true,
+      true
+    ],
+    "selected_spec": true,
+    "selected_heading": true,
+    "selected_lease": true,
+    "selected_issue": true,
+    "draft_grant_null": true,
+    "null_keys": [
+      "mission_issue",
+      "granted_by",
+      "granted_on_instruction",
+      "leased_at_utc",
+      "lease_expires_at_utc"
+    ],
+    "stale_heading": false,
+    "stale_lease_denial": false,
+    "conditions": [
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "no_implementation_lease_in_heading": true,
+    "lease_conditions_retained": true
+  },
+  "a2_text": {
+    "text": "**A2 (M2) — độ phủ không đổi, đo bằng TẬP HỢP, không bằng số đếm, trên HAI loại cò.**\nLấy `(job, tên bước, nền, conclusion)` của lượt TRƯỚC và của lượt SAU. Bỏ cột `job`, rồi so **tập**\n`(tên bước, nền, conclusion)`. Hai tập phải **bằng nhau**. Làm HAI lần:\n- (revision 3 — P1 `a2-neo-nen-cu-trai-write-set-hien-tai`, lượt 8) lượt `workflow_dispatch` SAU tách trên nhánh packet (cả hai\n  nền) so với lượt `workflow_dispatch` **TRƯỚC tách trên CÙNG nhánh tại `start_from_sha` của lease** (nền `d28c4b1`: **40** bước\n  YAML, có `bien-nhan v2 selftest`) — **cùng base, cùng event, cùng lane**; executor phóng lượt nền ấy TRƯỚC khi đẩy commit tách.\n  Run master `34048685345` (`1b3caa1`, 39 bước, `push`) chỉ còn là đối chiếu lịch sử: so với nó thì tách đủ bước **không thể**\n  khớp (thiếu bộ ba `bien-nhan v2`) còn bỏ bước ấy lại khớp — reviewer lượt 8 dựng phản mô hình, đúng thứ M2 sinh ra để chặn.\n  `conclusion` từng mục đọc lại bằng `list_workflow_jobs` khi so, không suy từ phép trừ; base trôi lúc thi công thì lấy lượt nền\n  mới cùng cách, không dùng lượt khác event/lane;\n- lượt `pull_request` của chính PR packet (ubuntu) so với lượt `pull_request` gần nhất mà `ci.yml` nền BẰNG BYTE `ci.yml` của\n  `start_from_sha` (ví dụ lượt `pull_request` của PR #468 tại head ≥ `2adb681`, đã merge `d28c4b1`) — đây là lượt DUY NHẤT\n  chứng minh ba job **có mặt trên PR**, tức chứng minh không ai đã thêm điều kiện chỉ-dispatch (xem A3).\nĐơn vị: **tập bộ ba**, không phải `wc -l`. Lý do dùng tập chứ không dùng số đếm là bài học đã đo\ncủa kho: hai tập lệch vẫn có thể cùng lực lượng (`CLAUDE.md`, mục `git for-each-ref`).\nPhép làm ĐỎ: quên chép `if: runner.os != 'Windows'` sang job mới ⇒ một bước đổi từ `skipped` sang\n`success` (hoặc ngược lại) ⇒ tập lệch ⇒ ĐỎ. Mười bước có `if:` là mười cơ hội để hỏng chỗ này.\n\n",
+    "same_base_event_lane": true,
+    "forbid_other_lane": true,
+    "pr_byte_exact": true,
+    "stale_ordering_row": [
+      [
+        387,
+        "| số đo của GATE (A1/A2/A5) | đo trên cây **chưa đổi** — nền `34045664423`/`34048685345` còn đúng | nền trôi sau ba packet cắt `test registry` (41 % chi phí Windows) ⇒ đo lại cả bảng |"
+      ]
+    ]
+  },
+  "yaml_steps": {
+    "1b3caa1": 39,
+    "d28c4b1": 40
+  }
+}

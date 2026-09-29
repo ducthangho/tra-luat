@@ -1,0 +1,173 @@
+# BIEN NHAN GIAO HANG — cross-review LUOT 5 cua PR #452, KHAC NEN (codex).
+#
+# LUOT NAY CHAY SAU KHI PR DA MERGE — va do la LY DO no ton tai.
+# Phien dieu phoi merge PR #452 MOT PHUT sau khi connector codex bat dau mot luot
+# review, tuc hai commit cuoi (a0978ee, bbf05ea) vao master ma KHONG co luot khac
+# nen nao ket luan ve chung. Bien nhan nay KHONG phai bang chung hai commit ay da
+# duoc review TRUOC khi land; no la ban VA LO HONG do, ghi lai dung nhu the.
+# Doi chieu CLAUDE.md: "Gate xanh KHONG phai da duoc review" — day la lan tra gia.
+#
+# KET QUA DANG NHO NHAT: R5-01 do duoc rang ban va R4-04 CHI dong duoc phan chung
+# CU THE, khong dong duoc LOP. Do la lan thu SAU trong cung dot cua cung mot lop
+# loi "va dung DONG duoc goi ten, bo sot HINH DANG cua no" — lan nay nam trong
+# chinh ban va dung ra de chan lop loi ay.
+
+schema_version: 2
+receipt_id: phan-bien-quy-trinh-review-5-codex-20260906-12574e98
+kind: review_delivery_receipt
+packet_id: 'PR452-PHAN-BIEN-QUY-TRINH'
+lease_id: khong-co-lease
+phase_key: PHAN-BIEN-QUY-TRINH-BUILD-REVIEW
+luot: 5
+role: reviewer
+provider: codex
+executor_provider: claude
+cross_provider: true
+assurance: cross_approved
+verdict: changes_requested
+verdict_path: ops/reviews/phan-bien-quy-trinh-review-5-codex-verdict.md
+verdict_sha256: 9da70314dbe1e3dbfcdb6dbc7df96fc6c1974d2cf977b6e67cdcf6b780c5c040
+verdict_bytes: 21050
+reviewed_sha: 4951f5517cc9cc7fbde060aa11c7ca5e5db0823c
+
+model_reviewer_identity:
+  provider: openai_codex
+  surface: codex_cli
+  session_run_id: 12574e98d66c4875b2333fa1adc0bf4c
+  prompt_sha256: 9475fab239f4a23ba0db9523eddd1037c54c78e95be054e6a0395324b04b6993
+  prompt_kin_hoan_toan: true
+  thoi_luong_giay: 662.192
+  ma_thoat: 0
+  neo_boi_launcher: >-
+    `launcher.py run` bọc `codex exec` trong CLONE RỜI, detached đúng `reviewed_sha`,
+    `--require-clean`, prompt truyền qua `{PROMPT_FILE}` nên con đọc BẢN CHỤP BẤT BIẾN.
+    Launcher TỪ CHỐI chạy nếu lệch ⇒ ba thứ ấy đo được, KHÔNG phải lời khai.
+  KHONG_do_duoc: >-
+    ID MODEL CỤ THỂ và phiên bản của nó. `codex-cli` không trả model đang phục vụ, và không
+    có biên nhận độc lập nào chứng thực. Khai `openai_codex/codex_cli` là mức chính xác nhất
+    đo được; đừng đọc trường này thành bằng chứng về model.
+
+github_submitter_identity:
+  actor: ducthangho
+  la_tac_gia_PR: true
+  ghi_chu: >-
+    `ADR-0040`: biên nhận do tài khoản tác giả đăng KHÔNG thành required check hay merge
+    authorization. Trường này ghi AI VẬN CHUYỂN, không cấp thẩm quyền.
+
+anchor:
+  loai: canonical_ancestry
+  cuong_do: trung_binh
+  mo_ta: >-
+    Neo bằng `verdict_sha256` + commit ĐẦU TIÊN chứa tệp verdict (`3d5eaeb8`), đã đo
+    là byte-identical với bản hôm nay. KHÔNG tag `luu-tru/*`, KHÔNG protected ref, KHÔNG check
+    object ⇒ mỏ neo TRUNG BÌNH: nó chết nếu lịch sử bị viết lại. Phiên web không đẩy được
+    `refs/tags/*` (đo 16-08-2026: 403 do proxy egress), nên nâng lên mức MẠNH cần đường khác.
+
+run_neo:
+  run_id: 12574e98d66c4875b2333fa1adc0bf4c
+  prompt_sha256: 9475fab239f4a23ba0db9523eddd1037c54c78e95be054e6a0395324b04b6993
+  prompt_kin_hoan_toan: true
+  worktree_sach: true
+  thoi_luong_giay: 662.192
+  stdout_byte: 411
+  stderr_byte: 777037
+  ma_thoat: 0
+
+phat_hien_chinh: >-
+  R5-01 (P2) — BAN VA R4-04 LA "VA HO O CAP LOP". Lop ngoai le rieng
+  TinHieuChotCa chi chung minh loi di qua bang() cua CA DANG CHAY; no KHONG chung
+  minh ASSERTION NGHIEP VU DICH da chay. Ca t22 dung chinh bang() de kiem
+  subprocess khoi chay thanh cong TRUOC khi doc ket qua A/B/C/D. Do: them duy nhat
+  `raise KeyError("rv5_unrelated_crash")` o dau _bash_windows tren ban sao — child
+  chet rc=1, khong toi phep kiem chon Git Bash, va _chay_1_ca van tra `giet_that`.
+  Chay toan ban kinh: CHI t22 chet, 0 ca tin_dung_gia — nen ca kiem TEN CA lan
+  nhanh xet `gia` deu khong ngan duoc. Phan chung cu the cua luot 4 DA VA THAT
+  (mutant t13 moi giu metadata, chet dung assertion trang thai; chay lai
+  replacement t13 CU lay tu AST ban truoc duoi bo phan hang moi ⇒ dung
+  `tin_dung_gia: JSONDecodeError`).
+  R5-02 (P2) — chot shell ops/kiem_trang_quyet_dinh.sh DONG NHAT "phep do that
+  bai" voi "khong tim thay": grep tra 1 khi khong khop va 2 khi khong do duoc,
+  ca hai deu roi xuong nhanh in SACH; `set -euo pipefail` KHONG chua duoc lenh
+  nam trong dieu kien `if`. Bang phan chung 6 hang: regex khong hop le ⇒ rc=0
+  "sach"; cat tai lieu ngay truoc PHU LUC (mat moc ket thuc) ⇒ rc=0 "da soi 77
+  dong"; doi ten moc PHU LUC ⇒ rc=1 bat oan.
+  R5-03 (P2/H4) — buoc 2 cua trang quyet dinh chon SAI TAP DAU VAO: no kiem dieu
+  kien tren VERDICT, trong khi PROTOCOL §8 doi phan loai khang dinh phu thuoc kho
+  trong dac ta / handoff / bang bang chung / verdict NGAY KHI DONG BUNDLE. Kiem o
+  verdict bo sot con so nam trong spec, va neu hieu verdict la dau ra cua luot sap
+  chay thi kiem o do da QUA MUON de cap nang luc cho chinh luot ay.
+  R5-04 (P3/H3) — tai cau truc de lai con tro va "ban da sua" cua thu tu CU: doan
+  MOI SUA tai 438/462 van dan "xem §0" (§0 khong con); phu luc E tu gioi thieu la
+  "ban da sua" roi goi MVP-4 la so mot trong khi §1 chon thu tu khac; cuoi J van
+  co cau "R4-02 ... CHUA xu ly".
+  XAC NHAN DA VA THAT: R4-01 (phan ra 44/3/3/32 = 82 doc lai duoc o CA BON snapshot
+  c03a409/2fb43fc/bbf05ea/HEAD), R4-03 (grep ba snapshot: cau 61-99% VANG o
+  07eb236 va ba76a78, CO o d3bc218), R4-05 (control dat; go loi goi so comment ⇒
+  ca BA do; go rieng tung chot ⇒ dung mot ca do).
+  AM TINH GIA: chay 18 cap control-mutant hien co va doc chi tiet assertion tung
+  dich ⇒ 18 control qua, 18 mutant chet DUNG THUOC TINH dang do, KHONG thay am
+  tinh gia trong tap nay. Reviewer TU KHAI gioi han: cac ca tu kiem deu nam trong
+  CUNG TIEN TRINH nen bo sot dung duong R5-01.
+
+verdict_nguon: >-
+  launcher.py run boc codex exec trong CLONE ROI, 1710 commit, detached dung
+  reviewed_sha 4951f55, core.abbrev ghim 7, worktree sach. Prompt neo sha256,
+  truyen qua cho thay PROMPT_FILE nen con doc BAN CHUP BAT BIEN
+  (prompt_kin_hoan_toan: true).
+verdict_doi_chieu: >-
+  CHUNG MINH: prompt nao chay tren head nao, cay sach, luot chay lam viec that
+  (662,2 giay, verdict 21.050 byte, stderr 777.037 byte). Ban trong kho la
+  BYTE-EXACT voi ban reviewer sinh ra trong clone (cmp rc=0, cung sha256
+  9da70314) — manh hon luot 3-4 mot bac. KHONG CHUNG MINH: identity model cua
+  luot nay (khong co receipt doc lap chung thuc), va byte cua output goc BEN
+  NGOAI clone. KHONG DO DUOC.
+authoritative_source: repo_file
+evidence_channel: repo_file
+evidence_url: https://github.com/ducthangho/tra-luat/blob/3d5eaeb814f48d2de76f24049aa1eeea9387122c/ops/reviews/phan-bien-quy-trinh-review-5-codex-verdict.md
+evidence_url_ghi_chu: >-
+  ĐÃ GHIM theo commit `3d5eaeb8` — commit ĐẦU TIÊN chứa tệp verdict; đã đo bản tại
+  commit ấy khớp từng byte với bản hôm nay. Bản trước trỏ URL PR, là mỏ neo TRÔI: `t26` chỉ
+  kiểm hình dạng `https://` nên URL nào cũng qua — cổng không phân biệt bền với trôi.
+
+verdict_usage_caveats:
+  - id: REVIEW-SAU-MERGE-khong-phai-cong-tien-merge
+    noi_dung: >-
+      Luot nay chay tren master DA MERGE (4951f55), khong phai tren PR dang mo.
+      No KHONG chung minh hai commit a0978ee/bbf05ea da duoc review truoc khi
+      land — chung KHONG duoc. Bien nhan nay la ban VA LO HONG, khong phai bang
+      chung quy trinh da chay dung. Chua dong.
+  - id: R4-04-moi-VA-DUOC-PHAN-CHUNG-chua-va-duoc-LOP
+    noi_dung: >-
+      Dung doc "cong_cu_test 23/23, 18 mutant, loi=0" thanh "bo phan hang da dung
+      voi moi crash". R5-01 do duoc mot crash qua SUBPROCESS van an tin dung
+      giet_that, va ca 5 tu kiem lan phep kiem ten ca deu khong bat duoc — vi tu
+      kiem chay trong CUNG TIEN TRINH. Con so mutant cua ban va R4-04 chi co hieu
+      luc trong lop loi TRONG-TIEN-TRINH. Chua dong.
+  - id: chot-kiem-trang-quyet-dinh-CO-DUONG-BAO-SACH-KHI-HONG
+    noi_dung: >-
+      ops/kiem_trang_quyet_dinh.sh co the in "trang quyet dinh sach" khi phep do
+      KHONG THUC HIEN DUOC (grep rc=2) hoac khi moc ket thuc bi mat. Dung dan no
+      lam bang chung tai lieu sach cho toi khi vá xong. Chua dong.
+  - id: phan-cong-CAM-tu-soan-phan-chung
+    noi_dung: >-
+      Nhu luot 3 va 4: cam reviewer tu soan chuoi tan cong, nen do phu hep hon mot
+      luot khong rang buoc. Reviewer tu khai da khong chay them cac hinh thuc noi
+      dung nhay cam.
+  - id: cross_approved-dua-tren-PROVIDER-khong-phai-MODEL
+    noi_dung: >-
+      Cross-review cua chinh luot nay (tren PR #454) bat dung cho nay: bien nhan khai
+      `cross_approved` trong khi ID MODEL la KHONG DO DUOC. Nay `model_reviewer_identity`
+      da co va TU KHAI gioi han ay. Muc `cross_approved` dung theo `PROTOCOL §8.1` — no
+      phan biet PROVIDER (claude thi cong · codex review), va provider thi do duoc bang
+      `launcher.py run` (run_id, bam prompt, thoi luong). Thu KHONG do duoc la MODEL nao
+      trong provider ay. Dung doc truong identity manh hon the; day la cung muc gioi han
+      ma bon bien nhan v2 chuan cua kho deu tu khai.
+  - id: luot-connector-tren-bbf05ea-KHONG-DO-DUOC
+    noi_dung: >-
+      Prompt co ke lai rang mot luot connector codex da khoi dong tren bbf05ea.
+      Reviewer luot 5 xep no la KHONG DO DUOC — khong co ket luan/receipt nao cua
+      luot ay de nhan lam evidence, va no KHONG tinh la approve.
+
+delivered: true
+delivered_by: claude-session
+recorder_cung_la_nguoi_thi_cong: true

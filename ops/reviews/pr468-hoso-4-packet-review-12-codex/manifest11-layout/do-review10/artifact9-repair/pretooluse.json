@@ -1,0 +1,14 @@
+{
+  "name": "pretooluse",
+  "command": [
+    "python3",
+    ".claude/hooks/pretooluse_guard_test.py"
+  ],
+  "start_utc": "2026-09-07T09:27:45.642641+00:00",
+  "end_utc": "2026-09-07T09:39:03.415140+00:00",
+  "seconds": 677.772462442,
+  "rc": 0,
+  "stdout_bytes": 9995,
+  "stdout_sha256": "69878c4f9efb24a6666d1cf0e4dea99d1ac87fa0aa904e28c6d397fd08cb7991",
+  "stderr_bytes": 0
+}

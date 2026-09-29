@@ -1,0 +1,93 @@
+# BIÊN NHẬN GIAO HÀNG — cross-review LƯỢT 13/17 của PR #493, KHÁC NỀN (codex).
+#
+# Verdict: changes_requested — 0 P1 · 0 P2 · 2 P3 trên head `89d938e`.
+# Head ấy KHÔNG phải head đã merge (`99aef14`); xem `verdict_usage_caveats`.
+#
+# Gói hiện vật của lượt này do `ops/dung_goi_review.sh` dựng và KHÔNG vào kho.
+schema_version: 2
+receipt_id: pr493-review-13-codex-20260911-dd32cf9e
+kind: review_delivery_receipt
+packet_id: PR493-R360-LAND-EVIDENCE-PR491
+lease_id: khong-co-lease
+phase_key: HO-SO-CROSS-REVIEW-PR493-20260909-20260911
+luot: 13
+role: reviewer
+provider: codex
+executor_provider: claude
+cross_provider: true
+assurance: cross_reviewed
+verdict: changes_requested
+verdict_path: ops/reviews/pr493-review-13-codex-verdict.md
+verdict_sha256: 063e510d9d1caf0e4b74b19cd6f5a90fe059c844708e6c0f0e59edb764f71d0f
+verdict_bytes: 22387
+evidence_url: https://github.com/ducthangho/tra-luat/blob/98f931bc3cd5e72184de2d2c5d815dc66be64f8b/ops/reviews/pr493-review-13-codex-verdict.md
+evidence_url_ghi_chu: 'Neo BLOB ghim `98f931b` — commit ĐẦU TIÊN chứa tệp verdict, đo bằng `git log
+  --diff-filter=A --format=%H -1 -- <path>`. Commit ấy CỐ Ý chỉ mang 17 tệp verdict và không mang biên
+  nhận nào: `evidence_url` phải neo được TRƯỚC khi biên nhận tồn tại.'
+reviewed_sha: 89d938efbc03a50a3efbc163d0f1ade29f66de08
+so_p1: 0
+so_p2: 0
+so_p3: 2
+so_p1_p2_p3_do_bang_may: 'Đếm HEADING finding trên chính tệp verdict: 2 tiêu đề dạng `[P1]/[P2]/[P3]`;
+  tách nhãn ⇒ 0 P1 · 0 P2 · 2 P3. Tổng 0+0+2 = 2, khớp số tiêu đề. KHÔNG chép số từ văn xuôi của reviewer
+  — chính verdict lượt 10 nêu đúng kỷ luật này.'
+model_reviewer_identity:
+  provider: openai_codex
+  surface: codex_cli
+  transport: machine
+  model_khai_boi_cong_cu: gpt-6-astra
+  reasoning_effort_khai_boi_cong_cu: none
+  phien_ban_cong_cu: v0.154.0
+  codex_session_id: 01a08ead-d4e0-7232-9574-f15f76524247
+  approval_mode: never
+  sandbox: workspace-write [workdir, /tmp, $TMPDIR]
+  model_da_chay: KHONG_DO_DUOC
+  session_run_id: dd32cf9e
+  run_id_day_du: dd32cf9ea3c842c9842850c3340a65b9
+  prompt_sha256: a8ce0656c53952928d562c037a4296ca2fad417bf330bb78765d7edfad1ec03b
+  bat_dau_utc: '2026-09-11T04:15:47.867332+00:00'
+  ket_thuc_utc: '2026-09-11T04:29:30.893013+00:00'
+  thoi_luong_giay: 823.026
+  ma_thoat: 0
+  trang_thai: xong
+  stdout_byte: 329
+  stdout_sha256: f1b1882c4a5ab4579569e4ef301a736367a7d13ff7f96e07eaa7e3675181e277
+  stderr_byte: 499784
+  stderr_sha256: 20166c766a44fab85c3c314c866b436f422545f209007c854f22444d3de26be1
+  nguon_cac_scalar_tren: HAI nguồn, tách ra vì độ tin KHÁC NHAU. (a) `run.json` do `launcher.py run`
+    ghi — ID/thời điểm/thời lượng/mã thoát/byte+hash stdout,stderr; (b) HEADER PHIÊN do CHÍNH `codex`
+    in ra `stderr.log` — `model_khai_boi_cong_cu`, `reasoning_effort_khai_boi_cong_cu`, `phien_ban_cong_cu`,
+    `codex_session_id`, `approval_mode`, `sandbox`. Cả hai tệp NGOÀI kho ⇒ với người đọc kho đây là
+    ATTESTATION; nhưng (b) là lời tự khai của CÔNG CỤ, không phải của phiên điều phối, nên nó bác được
+    lời khai của phiên.
+  neo_boi_launcher: '`launcher.py run --expected-repo github.com/ducthangho/tra-luat --expected-root-commit
+    394e93468fc8d84ec20938e6df8fb7ab72b2cc37 --expected-head <reviewed_sha> --prompt-file PROMPT.md
+    --expected-prompt-sha256 <prompt_sha256>` bọc `codex exec`. Probe: workspace DAT, ghi DAT, spawn
+    DAT.'
+github_submitter_identity:
+  actor: ducthangho
+  la_tac_gia_PR: true
+  ghi_chu: '`ADR-0040`: verdict do tài khoản tác giả PR vận chuyển KHÔNG là merge authorization.'
+  phien_van_chuyen: https://claude.ai/code/session_012KBPdsckzqhbnufu7JBSZz
+anchor:
+  loai: canonical_ancestry
+  cuong_do: cao
+  mo_ta: Blob verdict ghim ở `98f931b` trên nhánh `claude/land-493-bookkeeping`.
+  gioi_han: Chỉ vững nếu land bằng MERGE hoặc fast-forward; SQUASH phá quan hệ tổ tiên.
+verdict_usage_caveats:
+- id: HEAD-LUOT-13-KHONG-PHAI-HEAD-DA-MERGE
+  canh_bao: Lượt này review `89d938e`. Head ĐÃ MERGE là `99aef14` (merge commit `e82af37`). Đừng đọc
+    bất kỳ finding nào ở đây thành trạng thái của master.
+- id: MODEL-KHAI-BOI-CONG-CU-khac-MODEL-DA-PHUC-VU
+  canh_bao: '`gpt-6-astra` là thứ **codex tự khai ở header phiên** (đo được: dòng `model:` trong `stderr.log`),
+    KHÔNG phải bằng chứng model nào đã phục vụ từng lượt — `codex exec` không phát `modelUsage`. `cross_provider`
+    ở đây phân biệt PROVIDER, không phải MODEL.'
+- id: REASONING-EFFORT-DO-DUOC-LA-none
+  canh_bao: 'Header phiên khai `reasoning effort: none` ở **17/17** lượt. Nó KHÔNG khớp lời khai
+    `xhigh` ở một số mục của kho cho chuỗi này. Ghi lại vì hai lời khai mâu thuẫn nhau và chỉ một
+    trong hai có phép đo. KHÔNG suy ra điều gì về ĐỘ PHỦ: ảnh hưởng của `effort` lên độ phủ chưa
+    được đo ở đây, và hồ sơ này không đo nó.'
+- id: phan-cong-CAM-tu-soan-phan-chung
+  canh_bao: '`PROMPT.md` CẤM reviewer tự soạn chuỗi tấn công đường dẫn / payload thoát thư mục (hai
+    lượt cross-review của kho đã chết giữa chừng vì đúng việc ấy). Nên ĐỘ PHỦ về phía đó HẸP HƠN một
+    lượt không ràng buộc — không đọc "không có finding loại ấy" thành "không có lỗ loại ấy".'

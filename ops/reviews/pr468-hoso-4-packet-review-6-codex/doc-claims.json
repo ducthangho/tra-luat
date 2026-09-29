@@ -1,0 +1,13 @@
+{
+  "name": "doc-claims",
+  "command": [
+    "/usr/local/bin/python",
+    "scripts/tl.py",
+    "doc-claims-check",
+    "--strict",
+    "--json"
+  ],
+  "start_utc": "2026-09-07T06:17:56.855904+00:00",
+  "seconds": 5.311086105999948,
+  "rc": 0
+}

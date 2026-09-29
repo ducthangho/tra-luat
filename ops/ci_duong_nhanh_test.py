@@ -28,6 +28,7 @@ Ra: `CA: N/N dat` · `DOT BIEN: M/M bi giet` · `TONG: DAT`. Thoát 0 chỉ khi 
 from __future__ import annotations
 
 import ast
+import concurrent.futures
 import contextlib
 import importlib.util
 import os
@@ -893,6 +894,102 @@ IF_BUOC_CHUAN = {
 }
 
 
+# LUAT (khoa topology): moi thu KHAC thân `run:` cua ci.yml. `run:` cua buoc co san ngoai pham vi packet nay (do cong khac + review canh);
+# `run:` cua buoc do packet them thi duoc khoa nguyen van o y08/y09. Doi bat ky muc nao duoi day => y13 do => cap nhat CUNG review.
+KHUNG_TOP = {'name': 'gate', True: {'push': {'branches': ['master']}, 'pull_request': None, 'workflow_dispatch': None}, 'concurrency': {'group': '${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}', 'cancel-in-progress': "${{ github.ref != 'refs/heads/master' }}"}}
+KHUNG_JOB = {
+    'chuan-bi': {'runs-on': 'ubuntu-latest', 'outputs': {'os': '${{ (github.event_name == \'workflow_dispatch\' || contains(github.event.pull_request.labels.*.name, \'windows\')) && \'["ubuntu-latest","windows-latest"]\' || \'["ubuntu-latest"]\' }}', 'che_do': "${{ github.event_name == 'pull_request' && steps.phan-loai.outputs.che_do || 'day_du' }}"}},
+    'gate': {'needs': 'chuan-bi', 'strategy': {'fail-fast': False, 'matrix': {'os': '${{ fromJson(needs.chuan-bi.outputs.os) }}'}}, 'runs-on': '${{ matrix.os }}', 'timeout-minutes': 60, 'env': {'PYTHONIOENCODING': 'utf-8', 'PYTHONUTF8': '1', 'PYTHONDONTWRITEBYTECODE': '1'}},
+    'gate-ops': {'needs': 'chuan-bi', 'strategy': {'fail-fast': False, 'matrix': {'os': '${{ fromJson(needs.chuan-bi.outputs.os) }}'}}, 'runs-on': '${{ matrix.os }}', 'timeout-minutes': 60, 'env': {'PYTHONIOENCODING': 'utf-8', 'PYTHONUTF8': '1', 'PYTHONDONTWRITEBYTECODE': '1'}},
+    'gate-registry': {'needs': 'chuan-bi', 'strategy': {'fail-fast': False, 'matrix': {'os': '${{ fromJson(needs.chuan-bi.outputs.os) }}'}}, 'runs-on': '${{ matrix.os }}', 'timeout-minutes': 90, 'env': {'PYTHONIOENCODING': 'utf-8', 'PYTHONUTF8': '1', 'PYTHONDONTWRITEBYTECODE': '1'}},
+    'gate-packet-loop': {'needs': 'chuan-bi', 'strategy': {'fail-fast': False, 'matrix': {'os': '${{ fromJson(needs.chuan-bi.outputs.os) }}'}}, 'runs-on': '${{ matrix.os }}', 'timeout-minutes': 60, 'env': {'PYTHONIOENCODING': 'utf-8', 'PYTHONUTF8': '1', 'PYTHONDONTWRITEBYTECODE': '1'}},
+}
+KHUNG_BUOC = {
+    'chuan-bi': [
+        ('actions/checkout@v4', {'uses': 'actions/checkout@v4', 'if': "${{ github.event_name == 'pull_request' }}", 'continue-on-error': True, 'with': {'fetch-depth': 0}}),
+        ('phan loai diff (duong nhanh ho so - chi pull_request)', {'id': 'phan-loai', 'if': "${{ github.event_name == 'pull_request' }}", 'continue-on-error': True, 'env': {'CI_DUONG_NHANH_SU_KIEN': '${{ github.event_name }}', 'CI_DUONG_NHANH_GOC': '${{ github.event.pull_request.base.sha }}', 'CI_DUONG_NHANH_DAU': '${{ github.event.pull_request.head.sha }}'}}),
+        ('che do (push / workflow_dispatch luon day du)', {'if': "${{ github.event_name != 'pull_request' }}", 'env': {'SU_KIEN': '${{ github.event_name }}'}}),
+    ],
+    'gate': [
+        ('Force LF checkout (hash parity với manifest)', {}),
+        ('actions/checkout@v4', {'uses': 'actions/checkout@v4', 'with': {'fetch-depth': 0}}),
+        ('actions/setup-python@v5', {'uses': 'actions/setup-python@v5', 'with': {'python-version': '3.12'}}),
+        ('cài PyYAML + jsonschema (cổng đăng lease + validator verdict cần)', {}),
+        ('cài actionlint cho G5', {'shell': 'bash', 'env': {'AL_VER': '1.7.7'}}),
+        ('cài shellcheck cho G5 (cài xong đo lại)', {'shell': 'bash'}),
+        ('cài rg cho G5 (cài xong đo lại)', {'shell': 'bash'}),
+        ('G5 kiem ban ke cong cu + T1..T8 (packet', {'shell': 'bash'}),
+        ('cài Ruff 0.15.15 và in probe dương', {}),
+        ('DUONG_NHANH - liet ke buoc bo qua (job gate)', {'if': "${{ needs.chuan-bi.outputs.che_do == 'duong_nhanh' }}"}),
+        ('PR head contains required EOL base', {'if': "${{ github.event_name == 'pull_request' }}", 'shell': 'bash', 'env': {'PR_HEAD_SHA': '${{ github.event.pull_request.head.sha }}', 'EOL_BASE_SHA': '1880346d2be3c0be9a93de7624ee108d99b6c88c'}}),
+        ('py_compile', {}),
+        ('codex credential selftest (packet #300)', {}),
+        ('idiom-ba-ten selftest', {}),
+        ('eol-policy selftest', {}),
+        ('pre-push selftest', {}),
+        ('eol-policy survey', {}),
+        ('bundled-fragment check (topology gói)', {}),
+        ('gen_instructions selftest', {}),
+        ('command-registry unit test (AG-T0-03)', {}),
+        ('tl selftest (luot PR — khong sinh bang chung)', {'if': "${{ github.event_name == 'pull_request' && needs.chuan-bi.outputs.che_do != 'duong_nhanh' }}"}),
+        ('tl selftest (co bang chung exact-identity)', {'if': "${{ github.event_name != 'pull_request' }}", 'shell': 'bash'}),
+        ('tai len gate-evidence', {'if': 'always()', 'uses': 'actions/upload-artifact@v4', 'with': {'name': 'gate-evidence-${{ matrix.os }}-${{ github.run_attempt }}', 'path': 'scripts/.tl_state/gate/', 'if-no-files-found': 'warn'}}),
+        ('workflow-audit strict', {}),
+        ('golden-test', {'if': "${{ needs.chuan-bi.outputs.che_do != 'duong_nhanh' }}"}),
+        ('doc-claims-check strict', {}),
+        ('determinism-audit strict', {'if': "${{ needs.chuan-bi.outputs.che_do != 'duong_nhanh' }}"}),
+        ('ci-phamvi guard (bang phu thuoc khop ma)', {}),
+        ('ci-phamvi selftest (phan chung — cong co rang)', {'if': "runner.os != 'Windows'"}),
+        ('release-check full', {'if': "${{ needs.chuan-bi.outputs.che_do != 'duong_nhanh' }}"}),
+        ('release-verify strict (lane LAND — manifest committed)', {'if': "github.ref == 'refs/heads/master'"}),
+        ('release-verify strict (lane WORKER — manifest TẠM ngoài repo)', {'if': "github.ref != 'refs/heads/master'", 'shell': 'bash'}),
+        ('release-bundle x2 cùng SHA-256', {'if': "${{ needs.chuan-bi.outputs.che_do != 'duong_nhanh' }}", 'shell': 'bash'}),
+        ('tl_boot smoke', {}),
+    ],
+    'gate-ops': [
+        ('Force LF checkout (hash parity với manifest)', {}),
+        ('actions/checkout@v4', {'uses': 'actions/checkout@v4', 'with': {'fetch-depth': 0}}),
+        ('actions/setup-python@v5', {'uses': 'actions/setup-python@v5', 'with': {'python-version': '3.12'}}),
+        ('cài PyYAML + jsonschema (cổng đăng lease + validator verdict cần)', {}),
+        ('cài shellcheck cho G5 (cài xong đo lại)', {'shell': 'bash'}),
+        ('cài rg cho G5 (cài xong đo lại)', {'shell': 'bash'}),
+        ('DUONG_NHANH - liet ke buoc bo qua (job gate-ops)', {'if': "${{ needs.chuan-bi.outputs.che_do == 'duong_nhanh' }}"}),
+        ('DUONG_NHANH - kiem re thay cho buoc bi bo (doctrine-scan, YAML, diff --check, lease check)', {'if': "${{ needs.chuan-bi.outputs.che_do == 'duong_nhanh' }}", 'shell': 'bash', 'env': {'CI_DUONG_NHANH_SU_KIEN': '${{ github.event_name }}', 'CI_DUONG_NHANH_GOC': '${{ github.event.pull_request.base.sha }}', 'CI_DUONG_NHANH_DAU': '${{ github.event.pull_request.head.sha }}'}}),
+        ('ci-duong-nhanh selftest (phan loai diff + khoa cau truc if)', {'if': "runner.os == 'Linux'"}),
+        ('bien-nhan v2 selftest', {}),
+        ('lease-publish selftest (đo lại setup sau G5)', {'if': "${{ needs.chuan-bi.outputs.che_do != 'duong_nhanh' }}", 'shell': 'bash', 'env': {'AL_VER': '1.7.7'}}),
+        ('don-nhanh selftest (chốt xoá nhánh)', {'if': "runner.os != 'Windows'", 'shell': 'pwsh'}),
+        ('bo ca gate chay TRONG cgroup duoc uy quyen (Linux)', {'if': "${{ runner.os == 'Linux' && needs.chuan-bi.outputs.che_do != 'duong_nhanh' }}"}),
+        ('gate lifecycle selftest (nen khong co cgroup)', {'if': "${{ runner.os != 'Linux' && needs.chuan-bi.outputs.che_do != 'duong_nhanh' }}"}),
+    ],
+    'gate-registry': [
+        ('Force LF checkout (hash parity với manifest)', {}),
+        ('actions/checkout@v4', {'uses': 'actions/checkout@v4', 'with': {'fetch-depth': 0}}),
+        ('actions/setup-python@v5', {'uses': 'actions/setup-python@v5', 'with': {'python-version': '3.12'}}),
+        ('cài PyYAML + jsonschema (cổng đăng lease + validator verdict cần)', {}),
+        ('cài actionlint cho G5', {'shell': 'bash', 'env': {'AL_VER': '1.7.7'}}),
+        ('cài shellcheck cho G5 (cài xong đo lại)', {'shell': 'bash'}),
+        ('cài rg cho G5 (cài xong đo lại)', {'shell': 'bash'}),
+        ('G5 probe ban ke cong cu (#290; selftest T1..T8 chi o job gate, chot M6', {'shell': 'bash'}),
+        ('cài Ruff 0.15.15 và in probe dương', {}),
+        ('test registry (phạm vi + các bộ chưa được nối)', {'env': {'CI_DANG_KY_WORKERS': '2', 'CI_DANG_KY_SU_KIEN': '${{ github.event_name }}', 'CI_DANG_KY_GOC': '${{ github.event.pull_request.base.sha || github.event.before }}', 'CI_DANG_KY_DAU': '${{ github.event.pull_request.head.sha || github.sha }}'}}),
+    ],
+    'gate-packet-loop': [
+        ('Force LF checkout (hash parity với manifest)', {}),
+        ('actions/checkout@v4', {'uses': 'actions/checkout@v4', 'with': {'fetch-depth': 0}}),
+        ('actions/setup-python@v5', {'uses': 'actions/setup-python@v5', 'with': {'python-version': '3.12'}}),
+        ('cài PyYAML + jsonschema (cổng đăng lease + validator verdict cần)', {}),
+        ('cài actionlint cho G5', {'shell': 'bash', 'env': {'AL_VER': '1.7.7'}}),
+        ('cài shellcheck cho G5 (cài xong đo lại)', {'shell': 'bash'}),
+        ('cài rg cho G5 (cài xong đo lại)', {'shell': 'bash'}),
+        ('G5 probe ban ke cong cu (#290; selftest T1..T8 chi o job gate, chot M6', {'shell': 'bash'}),
+        ('cài Ruff 0.15.15 và in probe dương', {}),
+        ('DUONG_NHANH - liet ke buoc bo qua (job gate-packet-loop)', {'if': "${{ needs.chuan-bi.outputs.che_do == 'duong_nhanh' }}"}),
+        ('packet-loop selftest', {'if': "${{ needs.chuan-bi.outputs.che_do != 'duong_nhanh' }}"}),
+    ],
+}
+
+
 JOB_CO_IF_CHO_PHEP = frozenset()   # sau khi #668 land: them `gate-cong-cu-gop` (if: !cancelled()) qua review
 
 
@@ -922,6 +1019,24 @@ def y12_moi_if_cap_buoc_khop_dung_danh_sach_cho_phep():
         bang(thuc[job] == mong, f"{job}: tap `if:` cap buoc lech danh sach cho phep: "
              f"thua/doi {sorted((k, v) for k, v in thuc[job].items() if mong.get(k) != v)}, "
              f"thieu {sorted(k for k in mong if k not in thuc[job])}")
+
+
+@ca
+def y13_khoa_topology_cua_ci_yml_ngoai_than_run():
+    """Cross-review luot 4 (P2): doi `gate-ops.runs-on` sang windows-latest van qua suite. Goc: khoa DINH TUYEN va MOI khoa
+    khac ngoai than `run:` — cap workflow, cap job (runs-on, needs, strategy/matrix gom include/exclude, timeout, env, outputs,
+    permissions...), cap buoc (tap khoa, uses/with/env/shell/working-directory/timeout/id/if/continue-on-error), THU TU buoc."""
+    wf = doc_wf()
+    top = {k: v for k, v in wf.items() if k != "jobs"}
+    bang(top == KHUNG_TOP, f"cap workflow lech khung: {top} != {KHUNG_TOP}")
+    bang(list(wf["jobs"]) == list(KHUNG_JOB), f"tap/thu tu job lech: {list(wf['jobs'])} != {list(KHUNG_JOB)}")
+    for j, cau in wf["jobs"].items():
+        khung = {k: v for k, v in cau.items() if k != "steps"}
+        bang(khung == KHUNG_JOB[j], f"{j}: cau hinh cap job lech khung (runs-on/needs/strategy/timeout/env/...): "
+             f"khac {sorted(k for k in set(khung) | set(KHUNG_JOB[j]) if khung.get(k) != KHUNG_JOB[j].get(k))}")
+        thuc = [(b.get("name") or b.get("uses"), {k: v for k, v in b.items() if k not in ("run", "name")}) for b in cau.get("steps") or []]
+        bang(thuc == KHUNG_BUOC[j], f"{j}: danh sach/thu tu/khoa cua buoc lech khung; buoc dau tien lech: "
+             f"{next((i for i, (a, b2) in enumerate(zip(thuc, KHUNG_BUOC[j])) if a != b2), min(len(thuc), len(KHUNG_BUOC[j])))}")
 
 
 CHO_PHEP_NUOT_LOI = {("chuan-bi", "actions/checkout@v4"), ("chuan-bi", "phan loai diff (duong nhanh ho so - chi pull_request)")}
@@ -975,6 +1090,20 @@ def k03_ci_goi_that_muc_da_noi():
 
 
 # ---------------------------------------------------------------- tự kiểm của chính bộ test
+@ca
+def t96_phan_hoach_ca_khong_giao_nhau_va_phu_kin():
+    """Cross-review luot 4 (P3, lan 4 cua lop bang-do): phan ra 38/12/3 sai vi mot nhanh else tra lai nhom cu. Nay phan hoach do
+    MOT ham (`phan_hoach_ca`) sinh ra, va ca nay doi chieu voi quy tac VIET LAI DOC LAP: khong giao, phu kin, dung nhom."""
+    nhom = phan_hoach_ca()
+    moi = [ten for ds in nhom.values() for ten in ds]
+    bang(len(moi) == len(set(moi)) == len(CA) and set(moi) == set(CA), "phan hoach phai phu kin va khong giao nhau")
+    doc_lap = {"tu_kiem": [n for n in CA if n.startswith(("t97", "t98", "t99"))],
+               "hanh_vi": [n for n in CA if n.startswith("t") and not n.startswith(("t97", "t98", "t99"))],
+               "cau_truc_yaml": [n for n in CA if n.startswith("y")], "so_dang_ky": [n for n in CA if n.startswith("k")]}
+    bang(nhom == doc_lap, f"phan hoach lech quy tac doc lap: {[(k, len(v), len(doc_lap[k])) for k, v in nhom.items()]}")
+    bang(sum(len(v) for v in nhom.values()) == len(CA) and len(nhom["tu_kiem"]) == 3, "tong nhom phai bang len(CA); tu_kiem la 3 ca t97/t98/t99")
+
+
 @ca
 def t97_harness_khong_cap_giet_khi_khong_co_bang_chung_duong():
     """Cross-review luot 3 (P2): `dich=()` va iterator bi tieu thu deu ra GIET gia (`all([])`). Kiem o BA cua: callee
@@ -1035,6 +1164,23 @@ def t99_khong_doi_kieu_ngoai_le_thanh_tin_hieu():
 
 
 # ---------------------------------------------------------------- chạy ca và đột biến
+def phan_hoach_ca():
+    """Phan hoach `CA` thanh cac nhom KHONG GIAO NHAU (nguon duy nhat cho moi bang kiem ke; `goi/kiem_ke.py` goi ham nay)."""
+    nhom = {"hanh_vi": [], "cau_truc_yaml": [], "so_dang_ky": [], "tu_kiem": []}
+    for ten in CA:
+        if ten[:3] in ("t97", "t98", "t99"):
+            nhom["tu_kiem"].append(ten)
+        elif ten[0] == "t":
+            nhom["hanh_vi"].append(ten)
+        elif ten[0] == "y":
+            nhom["cau_truc_yaml"].append(ten)
+        elif ten[0] == "k":
+            nhom["so_dang_ky"].append(ten)
+        else:
+            raise RuntimeError(f"ha tang: ca {ten!r} khong thuoc nhom nao")
+    return nhom
+
+
 def chay_ca_trong_tien_trinh(ten):
     try:
         CA[ten]()
@@ -1206,6 +1352,24 @@ DOT_BIEN = [
     ("yml_bo_if_co_san", _yml("        if: runner.os != 'Windows'\n        run: python .github/checks/ci_phamvi_test.py\n", "        run: python .github/checks/ci_phamvi_test.py\n"), ("y12_moi_if_cap_buoc_khop_dung_danh_sach_cho_phep",)),
     ("yml_them_if_false_vao_buoc_gate_registry", _yml("      - name: test registry (phạm vi + các bộ chưa được nối)\n", "      - name: test registry (phạm vi + các bộ chưa được nối)\n        if: false\n"), ("y12_moi_if_cap_buoc_khop_dung_danh_sach_cho_phep",)),
     ("test_go_kiem_chung_ban_goc", _test('            if rc != 0:\n                return "HONG", f"ca dich {ten_ca} khong xanh tren ban goc', '            if False:\n                return "HONG", f"ca dich {ten_ca} khong xanh tren ban goc'), ("t97_harness_khong_cap_giet_khi_khong_co_bang_chung_duong",)),
+    # ---- y13: topology/dinh tuyen — moi khoa khac ngoai than run
+    ("yml_gate_ops_runs_on_windows", (YML, lambda vb: thay_regex(vb, r"(\n  gate-ops:\n.*?\n    runs-on: )\$\{\{ matrix\.os \}\}", r"\1windows-latest")), ("y13_khoa_topology_cua_ci_yml_ngoai_than_run",)),
+    ("yml_gate_ops_matrix_chi_windows", (YML, lambda vb: thay_regex(vb, r"(\n  gate-ops:\n.*?\n        os: )\$\{\{ fromJson\(needs\.chuan-bi\.outputs\.os\) \}\}", r"\1[windows-latest]")), ("y13_khoa_topology_cua_ci_yml_ngoai_than_run",)),
+    ("yml_packet_loop_matrix_exclude_linux", (YML, lambda vb: thay_regex(vb, r"(\n  gate-packet-loop:\n.*?\n        os: \$\{\{ fromJson\(needs\.chuan-bi\.outputs\.os\) \}\}\n)", r"\1        exclude:\n          - os: ubuntu-latest\n")), ("y13_khoa_topology_cua_ci_yml_ngoai_than_run",)),
+    ("yml_gate_needs_doi_dang", (YML, lambda vb: thay_regex(vb, r"(\n  gate:\n)    needs: chuan-bi\n", r"\1    needs: [chuan-bi]\n")), ("y13_khoa_topology_cua_ci_yml_ngoai_than_run",)),
+    ("yml_gate_timeout_1_phut", (YML, lambda vb: thay_regex(vb, r"(\n  gate:\n.*?\n    timeout-minutes: )60\n", r"\g<1>1\n")), ("y13_khoa_topology_cua_ci_yml_ngoai_than_run",)),
+    ("yml_gate_ops_env_doi", (YML, lambda vb: thay_regex(vb, r"(\n  gate-ops:\n.*?\n      PYTHONDONTWRITEBYTECODE: )\"1\"\n", r'\g<1>"0"\n')), ("y13_khoa_topology_cua_ci_yml_ngoai_than_run",)),
+    ("yml_buoc_giu_them_working_directory", _yml("      - name: py_compile\n", "      - name: py_compile\n        working-directory: /tmp\n"), ("y13_khoa_topology_cua_ci_yml_ngoai_than_run",)),
+    ("yml_buoc_giu_doi_shell_pwsh", _yml("      - name: py_compile\n", "      - name: py_compile\n        shell: pwsh\n"), ("y13_khoa_topology_cua_ci_yml_ngoai_than_run",)),
+    ("yml_buoc_nang_them_timeout_1", _yml("      - name: golden-test\n" + IF_XOA, "      - name: golden-test\n" + IF_XOA + "        timeout-minutes: 1\n"), ("y13_khoa_topology_cua_ci_yml_ngoai_than_run",)),
+    ("yml_gate_checkout_nong", (YML, lambda vb: thay_regex(vb, r"(\n  gate:\n.*?\n          fetch-depth: )0\n", r"\g<1>1\n")), ("y13_khoa_topology_cua_ci_yml_ngoai_than_run",)),
+    ("yml_go_buoc_giu_py_compile", (YML, lambda vb: thay_regex(vb, r"      - name: py_compile\n        run: [^\n]*\n", "")), ("y13_khoa_topology_cua_ci_yml_ngoai_than_run",)),
+    ("yml_concurrency_luon_huy", _yml("  cancel-in-progress: ${{ github.ref != 'refs/heads/master' }}\n", "  cancel-in-progress: true\n"), ("y13_khoa_topology_cua_ci_yml_ngoai_than_run",)),
+    ("yml_them_permissions_cap_workflow", _yml("\njobs:\n  chuan-bi:", "\npermissions: {}\njobs:\n  chuan-bi:"), ("y13_khoa_topology_cua_ci_yml_ngoai_than_run",)),
+    ("yml_doi_thu_tu_job", (YML, lambda vb: thay_regex(vb, r"(\n  gate-packet-loop:\n.*)$", "") + "\n  zz-job-them:\n    runs-on: ubuntu-latest\n    steps:\n      - run: 'true'\n"), ("y13_khoa_topology_cua_ci_yml_ngoai_than_run",)),
+    # ---- t96: phan hoach ca cho bang kiem ke
+    ("test_phan_hoach_bo_tu_kiem_t97", _test('if ten[:3] in ("t97", ' + '"t98", "t99"):\n', 'if ten[:3] in ("t98", "t99"):\n'), ("t96_phan_hoach_ca_khong_giao_nhau_va_phu_kin",)),
+    ("test_phan_hoach_nhanh_else_tra_lai_nhom_cu", _test('        elif ten[0] == "y":\n            nhom["cau_truc_yaml"].append(ten)\n', '        elif ten[0] == "y":\n            nhom["hanh_vi"].append(ten)\n'), ("t96_phan_hoach_ca_khong_giao_nhau_va_phu_kin",)),
     # ---- tầng YAML (đặc tả nghiệm thu 6, 7)
     ("yml_go_dieu_kien_pull_request_khoi_buoc_phan_loai", _yml("        id: phan-loai\n        if: ${{ github.event_name == 'pull_request' }}\n", "        id: phan-loai\n"), ("y01_chuan_bi_phan_loai_chi_pull_request_va_khong_lam_do_job",)),
     ("yml_go_continue_on_error_buoc_phan_loai", _yml("        id: phan-loai\n        if: ${{ github.event_name == 'pull_request' }}\n        continue-on-error: true\n", "        id: phan-loai\n        if: ${{ github.event_name == 'pull_request' }}\n"), ("y01_chuan_bi_phan_loai_chi_pull_request_va_khong_lam_do_job",)),
@@ -1270,15 +1434,23 @@ def chay_mot_dot_bien(ten, tep_va_ham, dich, chay=None):
 def chay_tap_dot_bien(tap):
     """(so bi giet, danh sach xau) cho mot tap (ten, tep_va_ham, dich). `dich` co the la iterator: vat hoa MOT LAN o day."""
     giet, xau = 0, []
+    muc = []
     for ten, tv, dich in tap:
         dich = tuple(dich)
         for d in dich:
             if d not in CA:
                 xau.append(f"{ten}: ca dich {d!r} khong ton tai")
+        muc.append((ten, tv, dich))
+
+    def mot(m):
         try:
-            hang, chi_tiet = chay_mot_dot_bien(ten, tv, dich)
+            return chay_mot_dot_bien(m[0], m[1], m[2])
         except Exception as e:
-            hang, chi_tiet = "HONG", f"{type(e).__name__}: {e}"
+            return "HONG", f"{type(e).__name__}: {e}"
+    # Moi dot bien dung cay tam RIENG + tien trinh con RIENG => song song an toan; ket qua doc theo THU TU khai bao.
+    with concurrent.futures.ThreadPoolExecutor(max_workers=max(1, min(4, os.cpu_count() or 1))) as pool:
+        kq = list(pool.map(mot, muc))
+    for (ten, _, _), (hang, chi_tiet) in zip(muc, kq):
         if hang == "GIET":
             giet += 1
         else:

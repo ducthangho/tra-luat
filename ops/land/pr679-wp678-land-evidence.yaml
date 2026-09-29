@@ -2,12 +2,35 @@
 # Schema chuan: docs/PROTOCOL_DA_PHIEN.md §7, khoi "Land evidence tach approval khoi thao tac".
 # Duong dan ops/land/*-land-evidence.yaml la QUY UOC THUC TE (tien le pr554, pr594, pr666, pr672, pr680).
 #
-# PHAM VI: PR #679 CHI land DAC TA (ops/specs/lease-id-ep-kieu-yaml-r1..r6.md). Packet wp678 CHUA THI HANH:
+# PHAM VI: PR #679 CHI mang DAC TA (ops/specs/lease-id-ep-kieu-yaml-r1..r6.md). Packet wp678 CHUA THI HANH:
 # chua co lease, chua co ma. "landed" o tep nay la landed cua PR dac ta, KHONG phai packet da xong.
+# TRANG THAI HIEN TAI: merged (c57df32), `landed: false` — xem trang_thai_packet. "merged" KHONG dong nghia "landed"
+# (PROTOCOL §10); moi cho trong ho so nay noi toi PR #679 chi khai merged.
 
 schema_version: 1
-mission_id: '682'
+mission_id: gh-682
 mission_issue: 682
+generation: 1
+generation_trang_thai: measured
+generation_nguon: >-
+  Land operator (phien session_01CSM7GNazhN6uGJb4v1TqBT) doc transcript cua chinh phien: dem moi tool_use
+  `mcp__github__merge_pull_request` => DUNG 1 loi goi, 2026-09-29T11:55:39Z, pullNumber 679, expectedHeadSha 03a7219,
+  thanh cong (merge commit c57df32). Khong co lan goi merge nao that bai hay bi tu choi truoc do. Day la LOI KHAI co neo
+  cua land operator (transcript khong nam trong kho), khong phai phep do doc lap; khop voi chan duoi do duoc ben duoi.
+generation_lich_su: >-
+  Ban vá truoc (cross-review #691 luot 1, `land-attempt-thieu-dinh-danh`) ghi `null`/not_measured vi chi tim nguon trong
+  git; phien dieu phoi dien so tu transcript cua chinh land operator. Khong muon `generation: 0` cua packet.
+generation_do_duoc_lien_quan:
+  so_merge_commit_dua_commit_pr679_vao_lich_su: 1
+  merge_commit: c57df32f0fd8c992ed363d7000f4f761275750ea
+  y_nghia: 'CHAN DUOI cho so lan land da tao merge; KHONG phai so lan thu (lan thu that bai khong de vet trong git).'
+  lenh: >-
+    MB=$(git merge-base 1c23933 03a7219)  => 89fc4fac8cea65979cc2483043dc8cd07a6e8518;
+    git rev-list $MB..03a7219  => 7 commit cua PR;
+    git rev-list --merges --parents <ref>, loc merge co it nhat mot cha thuoc 7 commit ay
+    => 1 (c57df32, cha 1c23933 + 03a7219) tren ca 947fd1f (HEAD nhanh ghi so) lan origin/master 44620e8 (ban cache cuc bo,
+    KHONG hoi may chu).
+  do_luc: '2026-09-29, worktree nhanh claude/bookkeeping-678-spec-land @ 947fd1f'
 packet_id: wp678
 packet_slug: LEASE-ID-EP-KIEU-YAML
 packet_issue: 678
@@ -31,12 +54,16 @@ trang_thai_packet:
     PROTOCOL §10: `landed` = da vao canonical o exact SHA duoc duyet, HAU-MERGE GATE XANH va BOOKKEEPING XONG.
     (1) merge dung head duoc uy quyen 03a7219 tai c57df32, cha thu hai = 03a7219 — CO (do bang git show).
     (2) hau-merge gate: run 36564795511 attempt 1 (push, c57df32) conclusion success, 5/5 job success; ba required
-    context cua master (gate, gate-packet-loop, gate-ops ubuntu-latest) deu success. Moc Run, Checkout, Gate output
-    DO DUOC; moc Workflow definition: BYTES do bang NGUON THAY THE (GraphQL 403), commit nguon CHINH XAC not_measured —
-    xem post_merge_checks. CHUA dong: can chu kho chap nhan nguon thay the (tien le pr666) hoac waiver owner_waived
-    (tien le pr680); agent KHONG tu dong moc nay.
+    context cua master (gate, gate-packet-loop, gate-ops ubuntu-latest) deu success. Moc Run, Checkout DO DUOC. Moc
+    Gate output DO DUOC voi gioi han: runner/OS/python/command/marker cua ca bon job; rc SO cua tien trinh chi do
+    duoc o job gate (artifact returncode 0) — ba job gate-packet-loop/gate-ops/gate-registry rc not_measured, chi co
+    step_conclusion success (xem gate_output_nguon_va_gioi_han). Moc Workflow definition: BYTES + SHA-256 do bang
+    NGUON THAY THE (GraphQL 403), commit nguon CHINH XAC not_measured — xem post_merge_checks. CHUA dong: can chu kho
+    chap nhan nguon thay the (tien le pr666) hoac waiver owner_waived (tien le pr680); agent KHONG tu dong moc nay.
     (3) bookkeeping: tep nay + 6 verdict nguyen byte + 6 bien nhan v2 + 6 hang README — PR bookkeeping #691 chua merge.
-    Nang len `true` bang commit rieng CHI khi moc Workflow definition co quyet dinh chu kho; hieu luc tu merge #691.
+    Con thieu HAI thu truoc khi `landed: true`: (a) quyet dinh chu kho cho moc Workflow definition; (b) merge #691.
+    Nang len `true` bang commit rieng CHI khi co (a); hieu luc tu merge #691. Truoc do moi noi khai "land" cho PR #679
+    (muc luc ops/reviews/README.md, tom tat, comment) phai doc la MERGED, khong phai landed.
   packet_thi_hanh: 'CHUA — wp678 chua co lease; lease hen cap 2026-09-30T12:15Z (Q8, #682 comment 5888631719).'
 role: land_operator
 session_id: https://claude.ai/code/session_01CSM7GNazhN6uGJb4v1TqBT
@@ -129,12 +156,23 @@ post_merge_checks:
       parents_nguon: 'object commit (git show -s --format=%P c57df32); log checkout KHONG in parents.'
       tree_ngoai_job_gate: 'not_measured — ba job con lai chi in checkout SHA, khong in tree.'
     moc_workflow_definition:
-      trang_thai: 'BYTES measured_nguon_thay_the; commit nguon CHINH XAC not_measured'
+      trang_thai: 'BYTES + SHA-256 measured_nguon_thay_the; commit nguon CHINH XAC not_measured'
       ly_do: 'GraphQL tra 403 ("GitHub GraphQL is not available from Claude Code sessions") => khong doc duoc WorkflowRun.file.repositoryFileUrl.'
+      repository: ducthangho/tra-luat
       path: .github/workflows/ci.yml
+      exact_commit_oid: not_measured
+      exact_commit_oid_ghi_chu: >-
+        Ba commit duoi day la UNG VIEN co cung bytes, KHONG phai commit nguon chinh xac cua run; khong dong nhat
+        voi run head c57df32 (§10.2.2 cam).
       blob: 6ba1255b5ae5635e1ffc9495b11462b3f5c2fd14
-      commit_ung_vien_cung_bytes: [c57df32, 1c23933, 03a7219]
-      commit_doi_cuoi: '6f2b0f9 (2026-09-27), to tien cua ca ba ung vien'
+      bytes: 51121
+      sha256: 69100292ffee7b13b71053006df98239ffe1c86328d2c3af8e089b46dc243d16
+      sha256_nguon: >-
+        Do 2026-09-29 tren worktree 947fd1f: `git show <c>:.github/workflows/ci.yml | sha256sum` va `| wc -c` voi
+        <c> = c57df32, 1c23933, 03a7219 — ca ba cho blob 6ba1255…, 51121 byte, sha256 69100292…3d16;
+        `git cat-file blob 6ba1255b5ae5635e1ffc9495b11462b3f5c2fd14 | sha256sum` cho cung gia tri.
+      commit_ung_vien_cung_bytes: [c57df32f0fd8c992ed363d7000f4f761275750ea, 1c23933b13f33d6b0ebdb2901a3dec33c474d34c, 03a7219c9f3df4e6304f499b79df968aa7d386cb]
+      commit_doi_cuoi: '6f2b0f96165a9292e34943b1a10904d4262b6549 (2026-09-27), to tien cua ca ba ung vien (git merge-base --is-ancestor rc=0 ca ba)'
       gan_vao_run: >-
         So than `run:` tung buoc cua ci.yml tai c57df32 voi than buoc in trong log CHINH job/attempt (dong ESC[36;1m),
         theo thu tu (cung phuong phap ops/land/pr666-wp650-provenance/doi_chieu_buoc.py): gate 27/27 buoc chay khop,
@@ -142,11 +180,109 @@ post_merge_checks:
         than buoc da chay khop dinh nghia, KHONG chung minh bytes ngoai than buoc (trigger, comment) — phan ay dua vao
         blob giong het o moi ung vien.
       disposition: CHO_CHU_KHO
+    gate_output_nguon_va_gioi_han: >-
+      Runner = runner_name trong readback-jobs.json. OS = nhom "Operating System" o dau log dung job; image = nhom
+      "Runner Image". Python = dong "Successfully set up CPython (...)" cua setup-python trong log dung job (buoc chua
+      marker KHONG tu in version; rieng job gate con co identity.python_version trong artifact). Command = than buoc
+      (dong ESC[36;1m) cua nhom "Run" gan nhat TRUOC dong marker, va marker nam truoc nhom "Run" ke tiep; ten buoc/
+      conclusion doi chieu readback-jobs.json va ci.yml tai c57df32. Command ay la command cua BUOC chua marker, KHONG
+      dai dien moi lenh cua job. rc: job gate lay returncode tu artifact tl-selftest-Linux.json; bon job con lai
+      rc so cua tien trinh not_measured — readback-jobs.json khong co khoa exit_code o buoc nao, va ca nam log co 0
+      dong chua "exit code"/"Process completed with". KHONG doi step_conclusion success thanh phep do rc. Bam log o
+      SHA256SUMS-log-va-artifact.txt (lap lai o log_sha256 tung job, khop lai 2026-09-29 bang sha256sum).
     moc_gate_output:
-      - {job: 'gate (ubuntu-latest)', id: 109394022096, runner: 'GitHub Actions 1000008490', os: 'Linux 6.17.0-1022-azure', python: 3.12.14, steps_non_success: [], steps_skipped: ['PR head contains required EOL base', 'tl selftest (luot PR — khong sinh bang chung)', 'release-verify strict (lane WORKER — manifest TẠM ngoài repo)'], marker: '== tl selftest 1715/1715 ==', artifact: {id: 11033502736, digest: 'sha256:46a5b70708439a3c9fac11ad41751d627f7bcd5d751c69e4dc9ebf4aeb1b825f'}}
-      - {job: 'gate-packet-loop (ubuntu-latest)', id: 109394022018, steps_non_success: [], steps_skipped: [], marker: 'nền: 291/291 đạt · BỎ QUA: 1'}
-      - {job: 'gate-ops (ubuntu-latest)', id: 109394022146, steps_non_success: [], steps_skipped: ['gate lifecycle selftest (nen khong co cgroup)'], marker: 'bien_nhan_v2_test: 68/68 ca đạt · 74/74 đột biến thường CÓ RĂNG'}
-      - {job: 'gate-registry (ubuntu-latest)', id: 109394022358, steps_non_success: [], steps_skipped: [], marker: 'doc_receipt_thu_hoi tests: 156/156 ca QUA · 162/162 dot bien GIET', ghi_chu: 'khong phai required context'}
+      - job: 'gate (ubuntu-latest)'
+        id: 109394022096
+        run_attempt: 1
+        runner: 'GitHub Actions 1000008490'
+        os: 'Ubuntu 24.04.5 LTS'
+        image: 'ubuntu-24.04 20260920.314.1'
+        kernel: 'Linux 6.17.0-1022-azure x86_64'
+        kernel_nguon: 'artifact identity.system / system_release / machine'
+        python: 'CPython 3.12.14'
+        python_nguon: 'artifact identity.python_implementation/python_version; log setup-python cung 3.12.14'
+        step: 'tl selftest (co bang chung exact-identity)'
+        step_conclusion: success
+        command: 'python scripts/tl.py --selftest'
+        command_nguon: >-
+          artifact `command`; chay QUA wrapper `python .claude/dev/gate_lifecycle.py run --kind heavy --name tl-selftest
+          ... -- python scripts/tl.py --selftest` (than buoc trong log)
+        rc: 0
+        rc_nguon: 'artifact-11033502736-tl-selftest-Linux.json returncode (status pass, positive_verified true)'
+        output_sha256: 1236e8af59ad8b847d167a7aaa574035c2eba1b73bcdfed5fbafea612b3ac853
+        steps_non_success: []
+        steps_skipped: ['PR head contains required EOL base', 'tl selftest (luot PR — khong sinh bang chung)', 'release-verify strict (lane WORKER — manifest TẠM ngoài repo)']
+        marker: '== tl selftest 1715/1715 =='
+        artifact: {id: 11033502736, digest: 'sha256:46a5b70708439a3c9fac11ad41751d627f7bcd5d751c69e4dc9ebf4aeb1b825f'}
+        log_sha256: f93f00486f1d923689a4aaea389e67619c225ee3b56fdbc06cb8d559bc388dbb
+      - job: 'gate-packet-loop (ubuntu-latest)'
+        id: 109394022018
+        run_attempt: 1
+        runner: 'GitHub Actions 1000008489'
+        os: 'Ubuntu 24.04.5 LTS'
+        image: 'ubuntu-24.04 20260920.314.1'
+        python: 'CPython 3.12.14'
+        python_nguon: 'log setup-python'
+        step: 'packet-loop selftest'
+        step_conclusion: success
+        command: 'python .claude/dev/packet_loop_test.py'
+        command_nguon: 'than buoc trong log (shell /usr/bin/bash -e)'
+        rc: not_measured
+        steps_non_success: []
+        steps_skipped: []
+        marker: 'nền: 291/291 đạt · BỎ QUA: 1'
+        log_sha256: a60428c016c674dabbfa61d3a2e191b69a3597bbaa91d21c9bb5461a1e388b1a
+      - job: 'gate-ops (ubuntu-latest)'
+        id: 109394022146
+        run_attempt: 1
+        runner: 'GitHub Actions 1000008491'
+        os: 'Ubuntu 24.04.5 LTS'
+        image: 'ubuntu-24.04 20260920.314.1'
+        python: 'CPython 3.12.14'
+        python_nguon: 'log setup-python'
+        step: 'bien-nhan v2 selftest'
+        step_conclusion: success
+        command: 'python ops/bien_nhan_v2_test.py'
+        command_nguon: 'than buoc trong log (shell /usr/bin/bash -e)'
+        rc: not_measured
+        steps_non_success: []
+        steps_skipped: ['gate lifecycle selftest (nen khong co cgroup)']
+        marker: 'bien_nhan_v2_test: 68/68 ca đạt · 74/74 đột biến thường CÓ RĂNG'
+        log_sha256: b56bda70b2dff847bc0f8dfe9bb93043781dde6e5da89e5c32295ab2cc7f00fd
+      - job: 'gate-registry (ubuntu-latest)'
+        id: 109394022358
+        run_attempt: 1
+        runner: 'GitHub Actions 1000008492'
+        os: 'Ubuntu 24.04.5 LTS'
+        image: 'ubuntu-24.04 20260920.314.1'
+        python: 'CPython 3.12.14'
+        python_nguon: 'log setup-python'
+        step: 'test registry (phạm vi + các bộ chưa được nối)'
+        step_conclusion: success
+        command: 'python .claude/dev/ci_dang_ky_test.py --chay'
+        command_nguon: 'than buoc trong log (shell /usr/bin/bash -e); marker do bo con doc_receipt_thu_hoi in ra TRONG buoc nay'
+        rc: not_measured
+        steps_non_success: []
+        steps_skipped: []
+        marker: 'doc_receipt_thu_hoi tests: 156/156 ca QUA · 162/162 dot bien GIET'
+        log_sha256: 38b73f49cb5884bd55cdbca57122072b4e122b44d7e33ccd3d66d933b7e0f785
+        ghi_chu: 'khong phai required context'
+    job_khong_phai_gate:
+      - job: chuan-bi
+        id: 109393984562
+        run_attempt: 1
+        runner: 'GitHub Actions 1000008488'
+        os: 'Ubuntu 24.04.5 LTS'
+        image: 'ubuntu-24.04 20260920.314.1'
+        python: not_measured
+        python_ghi_chu: 'job khong co buoc setup-python'
+        step: 'Run true'
+        step_conclusion: success
+        command: 'true'
+        rc: not_measured
+        marker: null
+        log_sha256: 185c25f70df43a88aeb9764bacaaa3fb1d07de68769726c8435176edeb3e2c1a
+        ghi_chu: 'Chi chay `true` va xuat output `os`; khong checkout, khong marker duong — khong tinh la bang chung gate.'
   - check: 'ref delta quanh merge (ls-remote truoc/sau, sort LC_ALL=C)'
     truoc: 'REFS 1103 d58f565876b70cb1bfa67abbb823fa63a0d07d750b5c1eb3fe18244c39c7b035'
     sau: 'REFS 1102 ebd3dea7c9bd843252b51d06ab212cbc837831b99150afb3a9824afccadf1136'

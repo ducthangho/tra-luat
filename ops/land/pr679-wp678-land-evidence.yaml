@@ -11,15 +11,23 @@ schema_version: 1
 mission_id: gh-682
 mission_issue: 682
 generation: 1
-generation_trang_thai: measured
+generation_trang_thai: loi_khai_co_neo
+generation_trang_thai_ghi_chu: >-
+  Nhan (b) THUAT LAI, KHONG phai (a) do duoc: gia tri 1 lay tu transcript cua land operator, ma PROTOCOL §7 ghi
+  "chat transcript hoac loi tu khai khong thay the GitHub object, commit va workflow run". Phan (a) duy nhat la chan
+  duoi o generation_do_duoc_lien_quan (1 merge commit dua PR #679 vao master). Nang len measured chi khi co hien vat
+  GitHub (vd. PR timeline/merge event) doc lai duoc va luu kem.
 generation_nguon: >-
   Land operator (phien session_01CSM7GNazhN6uGJb4v1TqBT) doc transcript cua chinh phien: dem moi tool_use
   `mcp__github__merge_pull_request` => DUNG 1 loi goi, 2026-09-29T11:55:39Z, pullNumber 679, expectedHeadSha 03a7219,
   thanh cong (merge commit c57df32). Khong co lan goi merge nao that bai hay bi tu choi truoc do. Day la LOI KHAI co neo
   cua land operator (transcript khong nam trong kho), khong phai phep do doc lap; khop voi chan duoi do duoc ben duoi.
 generation_lich_su: >-
-  Ban vá truoc (cross-review #691 luot 1, `land-attempt-thieu-dinh-danh`) ghi `null`/not_measured vi chi tim nguon trong
-  git; phien dieu phoi dien so tu transcript cua chinh land operator. Khong muon `generation: 0` cua packet.
+  Ba commit truoc cua tep nay (79d9840, 252f3a9, 947fd1f) KHONG co khoa `generation` cap cao nhat
+  (do: `git show <c>:ops/land/pr679-wp678-land-evidence.yaml | grep -c '^generation'` => 0 ca ba). Finding tuong ung
+  trong verdict duy nhat cua luot 1 PR #691 da biet (codex, tren 947fd1f) la R1-SCHEMA (P2). ID
+  `land-attempt-thieu-dinh-danh` ma commit bcd65d3 nhac KHONG co trong verdict ay va khong co ban ghi nao trong kho: nguon
+  (b), KHONG DO DUOC. Khong muon `generation: 0` cua packet.
 generation_do_duoc_lien_quan:
   so_merge_commit_dua_commit_pr679_vao_lich_su: 1
   merge_commit: c57df32f0fd8c992ed363d7000f4f761275750ea
@@ -27,9 +35,10 @@ generation_do_duoc_lien_quan:
   lenh: >-
     MB=$(git merge-base 1c23933 03a7219)  => 89fc4fac8cea65979cc2483043dc8cd07a6e8518;
     git rev-list $MB..03a7219  => 7 commit cua PR;
-    git rev-list --merges --parents <ref>, loc merge co it nhat mot cha thuoc 7 commit ay
-    => 1 (c57df32, cha 1c23933 + 03a7219) tren ca 947fd1f (HEAD nhanh ghi so) lan origin/master 44620e8 (ban cache cuc bo,
-    KHONG hoi may chu).
+    git rev-list --merges --parents <ref>, loc merge co it nhat mot cha thuoc 7 commit ay VA ban than KHONG thuoc 7 commit
+    ay => 1 (c57df32, cha 1c23933 + 03a7219) tren ca 947fd1f (HEAD nhanh ghi so) lan origin/master 44620e8 (ban cache cuc
+    bo, KHONG hoi may chu). Bo dieu kien "khong thuoc 7 commit" thi ra 2: 589336f (merge origin/master vao nhanh spec, NAM
+    TRONG PR) cung co cha aecdccd thuoc tap ay.
   do_luc: '2026-09-29, worktree nhanh claude/bookkeeping-678-spec-land @ 947fd1f'
 packet_id: wp678
 packet_slug: LEASE-ID-EP-KIEU-YAML
@@ -61,8 +70,10 @@ trang_thai_packet:
     NGUON THAY THE (GraphQL 403), commit nguon CHINH XAC not_measured — xem post_merge_checks. CHUA dong: can chu kho
     chap nhan nguon thay the (tien le pr666) hoac waiver owner_waived (tien le pr680); agent KHONG tu dong moc nay.
     (3) bookkeeping: tep nay + 6 verdict nguyen byte + 6 bien nhan v2 + 6 hang README — PR bookkeeping #691 chua merge.
-    Con thieu HAI thu truoc khi `landed: true`: (a) quyet dinh chu kho cho moc Workflow definition; (b) merge #691.
-    Nang len `true` bang commit rieng CHI khi co (a); hieu luc tu merge #691. Truoc do moi noi khai "land" cho PR #679
+    Con thieu BON thu truoc khi `landed: true`: (a) quyet dinh chu kho cho moc Workflow definition; (b) merge #691;
+    (c) rc so cua hai required context gate-packet-loop va gate-ops (not_measured — chi co step_conclusion) hoac quyet
+    dinh chu kho chap nhan step_conclusion thay rc; (d) moc thoi gian BEN cua chi thi uy quyen DI TRUOC merge 11:55:40Z
+    (xem authorization.thu_tu_voi_merge). Nang len `true` bang commit rieng CHI khi co (a), (c), (d); hieu luc tu merge #691. Truoc do moi noi khai "land" cho PR #679
     (muc luc ops/reviews/README.md, tom tat, comment) phai doc la MERGED, khong phai landed.
   packet_thi_hanh: 'CHUA — wp678 chua co lease; lease hen cap 2026-09-30T12:15Z (Q8, #682 comment 5888631719).'
 role: land_operator
@@ -98,6 +109,15 @@ authorization:
     (pull/679#issuecomment-5889555584) nhung chu kho chua dang verdict audit; chi thi merge KHONG thay cho no va
     KHONG duoc ghi la human_audited.
   guard: 'packet_loop.py guard --action merge rc=7 (nhac vai); ghi-uy-quyen --action merge --head-sha 03a7219 rc=0 (LOI KHAI).'
+  thu_tu_voi_merge:
+    trang_thai: not_measured
+    merge_luc: '2026-09-29T11:55:40Z (a: committer date c57df32; readback-run.json head_commit.timestamp cung gia tri)'
+    chi_thi_luc: '~12:0xZ (b: uoc luong thuat lai trong phien, KHONG co hien vat)'
+    mau_thuan: >-
+      Theo chinh hai dong tren, chi thi DEN SAU merge 5-14 phut. Hoac uoc luong sai, hoac merge di truoc uy quyen; ho so
+      nay KHONG phan dinh duoc. authorization_url la comment do PHIEN AGENT dang ho (ben), created_at cua no chua doc.
+      Can: created_at cua comment 5889749874 va cua tin nhan chi thi goc; neu sau 11:55:40Z thi ghi ro merge truoc uy
+      quyen va xin chu kho xac nhan hau ky, KHONG ghi landed.
 
 land_operator: claude-session (tai khoan GitHub cua chu kho qua MCP github)
 merge_method: merge
@@ -289,12 +309,26 @@ post_merge_checks:
     delta: 'HEAD va refs/heads/master 1c23933 -> c57df32; refs/pull/679/merge xoa. Khong ref nao khac doi.'
 
 bookkeeping:
-  verdicts: >-
-    ops/reviews/wp678-spec-review-{1..6}-codex-verdict.md nguyen byte (commit 92f21eb) + 6 bien nhan v2
-    (anchor canonical_ancestry neo blob o 92f21eb) + 6 hang README "Muc luc". bien_nhan_v2 --root: 0 vi pham,
-    0 KHONG DO DUOC.
-  lease: 'Khong co lease nao cua wp678 de thu hoi (PR dac ta truoc khi giao packet).'
-  issue_678: 'MO — packet chua thi hanh.'
-  ghi_chu_loi_khai_sai: >-
-    Thong diep commit 03a7219 khai "sua mot cau cut" — SAI; cau ay chua tung cut, noi dung tep khong bi anh huong
-    (dinh chinh: pull/679#issuecomment-5889116818).
+  - muc: verdicts
+    noi_dung: >-
+      ops/reviews/wp678-spec-review-{1..6}-codex-verdict.md nguyen byte (commit 92f21eb) + 6 bien nhan v2
+      (anchor canonical_ancestry neo blob o 92f21eb) + 6 hang README "Muc luc" + 6 hang "Canh bao" (caveat nguon).
+    bien_nhan_v2: >-
+      PHAM VI 6 bien nhan wp678: 0 dong DO, ca sau vao DAT v2. TOAN KHO tren checkout NONG (shallow) cua bcd65d3:
+      `python ops/bien_nhan_v2.py --root .` rc=2, 97 DAT · 44 vi pham · 111 KHONG DO DUOC; tren base 44620e8 cung
+      checkout: 91 DAT · 44 · 111 — delta = +6 DAT, 0 chan doan moi (tap dong DO bang nhau). 44/111 la do lich su nong,
+      KHONG phai do PR nay; tren clone day du chua do lai.
+  - muc: lease
+    noi_dung: 'Khong co lease nao cua wp678 de thu hoi (PR dac ta truoc khi giao packet).'
+  - muc: issue_678
+    noi_dung: 'MO — packet chua thi hanh.'
+  - muc: ghi_chu_loi_khai_sai
+    noi_dung: >-
+      Thong diep commit 03a7219 khai "sua mot cau cut" — SAI; cau ay chua tung cut, noi dung tep khong bi anh huong
+      (dinh chinh: pull/679#issuecomment-5889116818 — cung comment la evidence_ban_chieu cua verdict luot 6; (b) chua doc lai).
+  - muc: ghi_chu_loi_khai_sai_bcd65d3
+    noi_dung: >-
+      Thong diep commit bcd65d3 khai "va theo cross-review #691 luot 1 (1 P1 / 2 P2)" voi ba ID
+      (tom-tat-danh-dong-merged-voi-landed, land-attempt-thieu-dinh-danh, ci-provenance-thieu-truong-bat-buoc). Verdict
+      luot 1 da biet (codex, 947fd1f) la 0 P1 / 1 P2 / 1 P3 voi R1-SCHEMA, R1-NGUON; ba ID tren KHONG co ban ghi trong kho.
+      Thong diep commit khong sua duoc; dinh chinh o day.

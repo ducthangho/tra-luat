@@ -4993,7 +4993,13 @@ def t130_S2_seam_bytes_lech_OID_12_va_parser_KHONG_nhan_byte():
 @ca
 def t131_S8_tam_tran_bound_tru_1_bound_bound_cong_1_va_deadline():
     """Q4.5: bảy trần count/byte/depth biên INCLUSIVE — bound−1/bound/bound+1 ⇒ 12/0/0 (đo theo n = giá trị
-    thực); deadline theo clock tiêm và subprocess im lặng bị KILL."""
+    thực); subprocess im lặng bị KILL trong deadline thật.
+
+    KHÔNG đo "hết deadline ⇒ 12 TRƯỚC spawn" (packet #676). Bản cũ suy điều ấy từ THÔNG ĐIỆP
+    (`"deadline" in td and "kill" not in td` và `memo` rỗng); dưới `S8-bo-deadline` lời "hết deadline reader chờ
+    cat-file … kết thúc" thoả đủ ba vế, nên khi reader đọc xong mà child chưa thoát thì ca QUA sai — đo 29-09-2026 trên
+    `1741e0a`: lịch ép ấy lọt 20/20. Phép đo đó nay chỉ ở `t192` (clock tiêm, ĐẾM `Popen`), và catalog `t139` trỏ
+    `S8-bo-deadline` về `t192`, không về đây. Tên ca giữ nguyên vì catalog và tài liệu tham chiếu nó."""
     import time
     mod = _nap_cong()
     with San() as s:
@@ -5055,19 +5061,7 @@ def t131_S8_tam_tran_bound_tru_1_bound_bound_cong_1_va_deadline():
             if rc == 0:
                 td.dong()
             chot(rc == mong, f"max_alternate_stores={bound} với 3 store đợi {mong}, được {rc}: {td}")
-        # deadline theo clock tiêm: đúng deadline khi việc còn chờ ⇒ 12; trước deadline ⇒ 0
-        kho = mod.KhoObject(cay, bay_gio=lambda: 100.0, deadline=100.0)
-        try:
-            rc, td = _ma_chan(mod, kho.commit, c3)
-            chot(rc == 12 and "deadline" in td and "kill" not in td and kho.memo == {},
-                 f"chạm deadline phải 12 ở lớp TRƯỚC spawn (không phải lớp join-timeout/kill): {rc} {td}")
-        finally:
-            kho.dong()
-        kho = mod.KhoObject(cay, bay_gio=lambda: 100.0, deadline=100.5)
-        try:
-            chot(kho.commit(c3)[0] == tree3, "trước deadline phải đọc được")
-        finally:
-            kho.dong()
+        # Deadline theo clock tiêm (12 TRƯỚC spawn / trước hạn đọc được) KHÔNG đo ở đây: đo ở `t192` — xem docstring.
         # subprocess IM LẶNG (không bao giờ trả header) phải bị ngắt và kill trong deadline thật.
         # Launcher phải là thứ NỀN NẠP ĐƯỢC: `.sh` + shebang là giao ước POSIX, còn Windows nạp
         # thẳng một `.sh` cho `OSError [WinError 193] %1 is not a valid Win32 application` — đo
@@ -5685,7 +5679,7 @@ def t139_A12_catalog_mutant_A0_giet_dung_ly_do_va_ghi_SONG_kem_seam():
          t129_Q45_reader_object_store_bam_lai_va_canh_tu_bytes, "GIET", "KhoObject.doc"),
         ("S8-bo-tran-parent", "                if sau + 1 > gioi_han:\n", "                if False:\n",
          t131_S8_tam_tran_bound_tru_1_bound_bound_cong_1_va_deadline, "GIET", "KhoObject.to_tien"),
-        # F3-L36: ca đích là `t192` (đếm spawn, tất định) — `t131` suy "trước spawn" từ thông điệp nên tuỳ lịch, và lease cấm chạm nó
+        # F3-L36: ca đích là `t192` (đếm spawn, tất định) — `t131` không còn đo deadline (packet #676)
         ("S8-bo-deadline", "        if con <= 0:\n", "        if False:\n",
          t192_S8_het_deadline_la_12_va_KHONG_spawn_cat_file_dem_bang_Popen, "GIET", "KhoObject._con_thoi_gian"),
         ("S8-bo-tran-tree-edges", "            if buoc > self.ngan_sach[\"max_tree_or_alias_edges\"]:\n", "            if False:\n",
@@ -9899,10 +9893,10 @@ def t191_MOI_chot_cua_kiem_deu_duoc_t190_phu_o_nhanh_DA_DANG():
 def t192_S8_het_deadline_la_12_va_KHONG_spawn_cat_file_dem_bang_Popen():
     """F3-L35/F3-L36: deadline đã hết ⇒ `KhoObject.doc` ném 12 mà KHÔNG spawn `cat-file` lần nào — ĐẾM `Popen`, không suy từ lời.
 
-    `t131` suy "trước spawn" từ THÔNG ĐIỆP và `memo`. Dưới `S8-bo-deadline` (bỏ `if con <= 0`), `doc` vẫn spawn; nếu đọc xong mà
-    child chưa thoát thì lỗi "chờ cat-file … kết thúc" cũng mang chữ `deadline`, không `kill`, `memo` rỗng ⇒ `t131` QUA tuỳ lịch
-    (cross-review lượt 36 dựng được). Ở đây clock TIÊM, và spawn đếm ở chính `subprocess.Popen` ⇒ tất định. Lease cấm chạm
-    `t131`/`t132`, nên phép đo nằm ở ca riêng và catalog `t139` trỏ `S8-bo-deadline` về đây. Chốt KẾT QUẢ trước, ĐẾM sau (nếp
+    `t131` từng suy "trước spawn" từ THÔNG ĐIỆP và `memo`. Dưới `S8-bo-deadline` (bỏ `if con <= 0`), `doc` vẫn spawn; nếu đọc xong
+    mà child chưa thoát thì lỗi "chờ cat-file … kết thúc" cũng mang chữ `deadline`, không `kill`, `memo` rỗng ⇒ `t131` QUA tuỳ lịch
+    (cross-review lượt 36 dựng được). Ở đây clock TIÊM, và spawn đếm ở chính `subprocess.Popen` ⇒ tất định. Packet #676 đã gỡ
+    phần deadline khỏi `t131`, nên đây là ca DUY NHẤT đo nó và catalog `t139` trỏ `S8-bo-deadline` về đây. Chốt KẾT QUẢ trước, ĐẾM sau (nếp
     `_goi_dem_lop_gh`). ĐỐI CHỨNG: trước deadline đúng MỘT spawn — bộ đếm THẤY được spawn, nên "0" là số đo, không phải bộ đếm câm."""
     from unittest import mock
     mod = _nap_cong()

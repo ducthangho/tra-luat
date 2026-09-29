@@ -14,7 +14,7 @@ from pathlib import Path
 # ĐỎ oan, còn CI che mất vì tự đặt hai biến này. Đặt vào `os.environ` chứ không vá từng lời gọi: đo
 # bằng AST có 66 điểm phóng, mọi `env=` tường minh đều dựng TỪ `os.environ` (`moi_truong`,
 # `dict(os.environ, …)`, `{**os.environ, …}`), nên một chỗ này phủ hết — kể cả điểm phóng chưa ai viết.
-# `t60b` đo cả hai vế trong một tiến trình con CỐ Ý ép ASCII, nên nó có răng cả khi CI đã đặt sẵn.
+# `t61` đo cả hai vế trong một tiến trình con CỐ Ý ép ASCII, nên nó có răng cả khi CI đã đặt sẵn.
 _BIEN_UTF8 = (("PYTHONIOENCODING", "utf-8"), ("PYTHONUTF8", "1"))
 
 
@@ -27,6 +27,17 @@ def _ep_utf8(moi_truong_con=os.environ) -> None:
 
 
 _ep_utf8()
+
+# #671 (đo 30-09-2026 trên Windows local, Python 3.13, locale cp1258) — ép CON ghi UTF-8 CHƯA ĐỦ:
+# CHA vẫn giải `subprocess.run(..., text=True)` bằng mã hoá LOCALE, nên con in UTF-8 đúng mà cha đọc
+# vỡ (`UnicodeDecodeError: 'charmap' … 0x90`) ⇒ `t29`/`t39`/`t42`/`t45` ĐỎ, 47/51. Linux không thấy vì
+# locale ở đó đã là UTF-8. Đặt `PYTHONUTF8` lúc chạy KHÔNG đổi chế độ của tiến trình ĐANG chạy, nên
+# chạy làm `__main__` ngoài chế độ UTF-8 thì phóng LẠI chính mình với `-X utf8` — đúng chế độ CI đang
+# chạy (CI đặt `PYTHONUTF8=1`, nên CI không bao giờ đi nhánh này). Chỉ ở `__main__`: `t61` NẠP tệp
+# này bằng importlib, và nạp thì không được phóng gì. `-X utf8` bật cờ bất kể môi trường ⇒ không lặp.
+# `t62` khoá.
+if __name__ == "__main__" and not sys.flags.utf8_mode:
+    sys.exit(subprocess.run([sys.executable, "-X", "utf8", *sys.orig_argv[1:]]).returncode)
 
 import yaml
 
@@ -2277,6 +2288,22 @@ def t61_ep_UTF8_phai_co_RANG_ca_khi_moi_truong_ngoai_la_ASCII():
     bang(p.returncode == 0,
          f"(b) tiến trình CHÁU (không `env=`) không in được chữ Việt: rc={p.returncode} — "
          f"`PYTHONIOENCODING`/`PYTHONUTF8` chưa được đặt cho con")
+
+
+@ca
+def t62_chay_lam_main_phai_o_che_do_UTF8_ca_khi_PYTHONUTF8_0():
+    """#671 — chạy tệp này làm `__main__` với `PYTHONUTF8=0` thì tiến trình CHẠY BỘ CA vẫn phải ở chế
+    độ UTF-8. Đo CỜ (`sys.flags.utf8_mode`) chứ không đo một lần giải mã: trên Linux locale đã là UTF-8
+    nên phép giải mã xanh cả khi gỡ bản vá, còn cờ thì phân biệt được trên MỌI nền. Hậu quả đo được
+    khi cờ tắt (Windows cp1258): `t29`/`t39`/`t42`/`t45` ĐỎ vì cha đọc `text=True` bằng locale."""
+    env = dict(os.environ, PYTHONUTF8="0", PYTHONIOENCODING="ascii")
+    p = subprocess.run([sys.executable, str(TEP_TEST), "--tu-kiem-che-do-utf8"], env=env, cwd=GOC,
+                       capture_output=True, timeout=120)
+    ra = p.stdout.decode("utf-8", "replace")
+    dung(p.returncode == 0 and "UTF8_MODE=" in ra,
+         f"cửa --tu-kiem-che-do-utf8 hỏng: rc={p.returncode} {p.stderr.decode('utf-8', 'replace')[-300:]!r}")
+    bang("UTF8_MODE=1" in ra,
+         f"chạy làm __main__ với PYTHONUTF8=0 mà tiến trình chạy bộ ca KHÔNG ở chế độ UTF-8: {ra.strip()!r}")
 
 
 def python_alias_behavior_test() -> None:
@@ -6812,6 +6839,9 @@ def _in_tu_kiem_ban_kinh():
 
 
 if __name__ == "__main__":
+    if "--tu-kiem-che-do-utf8" in sys.argv[1:]:
+        print(f"UTF8_MODE={sys.flags.utf8_mode}")
+        sys.exit(0)
     if "--tu-kiem-ban-kinh" in sys.argv[1:]:
         _in_tu_kiem_ban_kinh()
         sys.exit(0)

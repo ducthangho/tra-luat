@@ -2116,6 +2116,10 @@ for _ten, _ca, _tim, _thay in (
     ('f30_bo_rc', 't53_', '        head = p.stdout.strip() if p.returncode == 0 else ""\n', '        head = p.stdout.strip()\n'),
     ('f30_bo_dinh_dang', 't53_', '            "head": head if re.fullmatch(r"[0-9a-f]{40}|[0-9a-f]{64}", head) else None}\n',
      '            "head": head or None}\n'),
+    ('f31_trim_gate', 't53_', '        if bk != "manh":\n', '        if bk.strip() != "manh":\n'),
+    ('f32_do_dai', 't53_', '            "head": head if re.fullmatch(r"[0-9a-f]{40}|[0-9a-f]{64}", head) else None}\n', '            "head": head if re.fullmatch(r"[0-9a-f]{40,64}", head) else None}\n'),
+    ('f32_bang_chu', 't53_', '            "head": head if re.fullmatch(r"[0-9a-f]{40}|[0-9a-f]{64}", head) else None}\n', '            "head": head if re.fullmatch(r"[0-9a-z]{40}|[0-9a-z]{64}", head) else None}\n'),
+    ('f32_hoa', 't53_', '            "head": head if re.fullmatch(r"[0-9a-f]{40}|[0-9a-f]{64}", head) else None}\n', '            "head": head if re.fullmatch(r"[0-9a-fA-F]{40}|[0-9a-fA-F]{64}", head) else None}\n'),
     ('f27_full_seed', 't54_', '    else:\n        print(f"\\nBÁN KÍNH ĐỘT BIẾN ({len(DOT_BIEN)} đột biến, mỗi ca đúng một"',
      '    else:\n        loi_db = loi_nen\n        print(f"\\nBÁN KÍNH ĐỘT BIẾN ({len(DOT_BIEN)} đột biến, mỗi ca đúng một"'),
 ):
@@ -6705,7 +6709,8 @@ def t53_che_do_doc_FAIL_CLOSED_moi_cau_hinh_la_co_THE_RIENG_va_van_tay_bam_NGUON
             "thieu_ra": ["loi", "[C-thieu-ra]"], "ra_rong": ["loi", "[C-thieu-ra]"],
             "ca_hai": ["loi", "[C-ca-hai]"], "ra_le": ["loi", "[C-ra-le]"], "bk_rong_manh": ["loi", "[C-ca-hai]"],
             "ra_rong_le": ["loi", "[C-ra-le]"], "ra_rong_gate": ["loi", "[C-ra-le]"], "manh_rong": ["loi", "[C-hinh-dang]"],
-            "manh_rong_gate": ["loi", "[C-ca-hai]"], "van_tay_git": [True] * 4}
+            "manh_rong_gate": ["loi", "[C-ca-hai]"], "gate_cach": ["loi", "[C-ban-kinh]"],
+            "gate_xuong_dong": ["loi", "[C-ban-kinh]"], "van_tay_git": [True] * 10}
     sai = {t: [kq.get(t), m] for t, m in mong.items() if kq.get(t) != m}
     bang(not sai, f"`_doc_che_do` đọc sai (thấy, mong): {sai}")
     dung(kq["van_tay"][0], f"giàn giáo git tạm không dựng được commit: {kq['van_tay']}")
@@ -7764,6 +7769,8 @@ def _in_tu_kiem_che_do():
         "bk_rong_manh": {_BIEN_BAN_KINH: "", _BIEN_MANH: "0/8", _BIEN_MANH_RA: "x"}, "ra_rong_le": {_BIEN_MANH_RA: ""},
         "ra_rong_gate": {_BIEN_MANH_RA: "", _BIEN_BAN_KINH: "manh"}, "manh_rong": {_BIEN_MANH: "", _BIEN_MANH_RA: "x"},
         "manh_rong_gate": {_BIEN_MANH: "", _BIEN_BAN_KINH: "manh"},
+        # F31 (Codex lượt 13): gate khớp ĐÚNG chuỗi — chuẩn hoá khoảng trắng không được biến cấu hình sai thành gate.
+        "gate_cach": {_BIEN_BAN_KINH: " manh"}, "gate_xuong_dong": {_BIEN_BAN_KINH: "manh\n"},
     }
     kq = {}
     for ten, env in bang_env.items():
@@ -7797,7 +7804,10 @@ def _in_tu_kiem_che_do():
     import types
     h40, h64, cu_sp = "c" * 40, "d" * 64, g["subprocess"]
     kq["van_tay_git"] = []
-    for rc, ra, mong in ((1, h40, None), (0, "not-a-head", None), (0, h40, h40), (0, h64, h64)):
+    # F32 (Codex lượt 13): độ dài và bảng chữ là hai chốt RIÊNG — 39/41/63/65 ký tự hex; 40 ký tự 'g' / hoa.
+    luoi = [(1, h40, None), (0, "not-a-head", None), (0, h40, h40), (0, h64, h64)] + [
+        (0, x, None) for x in ("c" * 39, "c" * 41, "c" * 63, "c" * 65, "g" * 40, "C" * 40)]
+    for rc, ra, mong in luoi:
         g["subprocess"] = types.SimpleNamespace(run=lambda *a, **k: types.SimpleNamespace(returncode=rc, stdout=ra + "\n"),
                                                 SubprocessError=cu_sp.SubprocessError)
         try:

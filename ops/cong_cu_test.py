@@ -2102,6 +2102,13 @@ for _ten, _ca, _tim, _thay in (
     ('f27_fixed_workers_manh', 't54_', '        for nhom, rc, ra_con in _phong_con(ten, (), _so_tien_trinh_ban_kinh()) if ten else ():\n',
      '        for nhom, rc, ra_con in _phong_con(ten, (), 3) if ten else ():\n'),
     ('f27_fixed_workers_du', 't54_', '    so_tien_trinh = _so_tien_trinh_ban_kinh()\n', '    so_tien_trinh = 3\n'),
+    ('f28_can_cau_hinh', 't54_', '    sys.exit(main())\n',
+     '    sys.exit(main() if os.environ.get(_BIEN_BAN_KINH) or os.environ.get(_BIEN_MANH) else 0)\n'),
+    ('f28_gate_di_tat', 't54_', '    sys.exit(main())\n',
+     '    sys.exit(0 if os.environ.get(_BIEN_BAN_KINH) == "manh" else main())\n'),
+    ('f28_du_nuot_ma', 't54_', '    sys.exit(main())\n',
+     '    sys.exit(main() if os.environ.get(_BIEN_BAN_KINH) or os.environ.get(_BIEN_MANH) else (main() and 0))\n'),
+    ('f28_nen_ma', 't54_', '    sys.exit(main())\n', '    sys.exit(1 if main() else 0)\n'),
     ('f27_full_seed', 't54_', '    else:\n        print(f"\\nBÁN KÍNH ĐỘT BIẾN ({len(DOT_BIEN)} đột biến, mỗi ca đúng một"',
      '    else:\n        loi_db = loi_nen\n        print(f"\\nBÁN KÍNH ĐỘT BIẾN ({len(DOT_BIEN)} đột biến, mỗi ca đúng một"'),
 ):
@@ -6794,6 +6801,36 @@ def t54_main_chon_DUNG_vong_ban_kinh_theo_che_do():
                        env={**os.environ, _BIEN_BAN_KINH: "hong", _BIEN_MANH: "a/b", _BIEN_MANH_RA: ""})
     bang(p.returncode == 2 and (p.stdout.splitlines() or [""])[0].startswith("  ĐỎ  cấu hình chế độ: ["),
          f"CLI không đối số phải vào `main` và trả rc=2 cấu hình: rc={p.returncode}, {p.stdout[:200]!r}")
+    # F28 (Codex lượt 11): phép trên chỉ đo cấu hình HỎNG. Miền DƯƠNG (du/gate/mảnh hợp lệ × rc 0/1/2) chạy `main` thật
+    # thì tốn cả suite mỗi đột biến, nên chạy CHÍNH khối `__main__` trích từ `TEP_TEST` (bản đột biến nếu có) với `main`
+    # giả ghi lời gọi: dispatcher phải gọi `main` ĐÚNG một lần và trả NGUYÊN mã của nó, ở mọi chế độ.
+    import types
+    nguon = Path(TEP_TEST).read_text(encoding="utf-8")
+    khoi = compile(nguon[nguon.index('\nif __name__ == "__main__":') + 1:], str(TEP_TEST), "exec")
+    cu_env, sai = dict(os.environ), []
+
+    def thoat(ma=0):
+        raise SystemExit(ma)
+    try:
+        for ten, env in (("du", {}), ("gate", {_BIEN_BAN_KINH: "manh"}), ("manh", {_BIEN_MANH: "3/8", _BIEN_MANH_RA: "x"})):
+            for ma in (0, 1, 2):
+                for bien in (_BIEN_BAN_KINH, _BIEN_MANH, _BIEN_MANH_RA):
+                    os.environ.pop(bien, None)
+                os.environ.update(env)
+                goi = []
+                ns = {**globals(), "__name__": "__main__", "main": lambda: goi.append(1) or ma,
+                      "sys": types.SimpleNamespace(argv=[str(TEP_TEST)], exit=thoat)}
+                try:
+                    exec(khoi, ns)
+                    thay = "không thoát"
+                except SystemExit as ex:
+                    thay = ex.code
+                if (thay, len(goi)) != (ma, 1):
+                    sai.append((ten, ma, thay, len(goi)))
+    finally:
+        os.environ.clear()
+        os.environ.update(cu_env)
+    bang(not sai, f"dispatcher không đối số phải gọi `main` đúng 1 lần và trả nguyên mã (chế độ, mã main, thấy, số lời gọi): {sai}")
 
 
 def _cong_tren_cay_that(goc, bo_quet=None):

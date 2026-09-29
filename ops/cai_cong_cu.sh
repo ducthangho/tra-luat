@@ -61,7 +61,9 @@ DAU_RA="$("${PY[@]}" "$GOC/ops/cong_cu.py" cai-lenh "$TEN")" || {
   exit 3
 }
 DAU_RA="${DAU_RA//$'\r'/}"  # cung ly do CRLF o tren: LENH/bien moi truong khong duoc mang \r
-LENH="$(printf '%s\n' "$DAU_RA" | head -1)"
+# #675: `| head -1` duoi pipefail = SIGPIPE khi head thoat truoc printf (do 2/3000; 20000 dong -> rc=141).
+# Khai trien tham so khong co pipeline; do lai: ops/do_sigpipe.sh
+LENH="${DAU_RA%%$'\n'*}"
 while IFS= read -r dong; do
   case "$dong" in *=*) export "${dong?}" ;; esac
 done < <(printf '%s\n' "$DAU_RA" | tail -n +2)

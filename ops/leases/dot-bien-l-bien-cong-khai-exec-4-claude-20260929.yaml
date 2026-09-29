@@ -13,6 +13,7 @@ packet_id_ben: wp677
 generation: 4
 revision: 7
 lease_id: dot-bien-l-bien-cong-khai-exec-4-claude-20260929
+da_bi_thay_the: dot-bien-l-bien-cong-khai-exec-5-claude-20260929
 thay_the_cho: dot-bien-l-bien-cong-khai-exec-3-claude-20260929
 thay_the_vi_sao: >-
   Chi thi chu kho Q16/Q17 (issues/677#issuecomment-5894685680): tran A7/S4 nang 300 -> 400 dong them (diff PR #689

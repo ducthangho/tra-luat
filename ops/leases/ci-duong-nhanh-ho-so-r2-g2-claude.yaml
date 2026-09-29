@@ -115,3 +115,4 @@ chua_do_duoc:
   - 'Effort thuc te cua phien executor.'
   - 'ai-dang-giu chay day du: chua chay (chi biet #668 g2 giao ci.yml va ci_dang_ky_test.py qua doc tep lease).'
   - 'Thoi gian that cua gate rut gon tren PR ho so (chi do duoc sau khi co PR that).'
+da_bi_thay_the: ci-duong-nhanh-ho-so-r2-g3-claude

@@ -247,6 +247,35 @@ def run(tl_module):
                                             {"unit_id": "u9", "dot_id": "dot-02", "trang_thai": "pending"}]),
                          {"u1.json": _unit()})
 
+        # ── LƯỢT 10 — năm nguồn của lượt review thứ 9 ──
+        _FULL = {"thoi_diem": "t", "muc_tieu": _MUC, "khoa_so_hieu": _MUC, "khoa_ten": "ten day du",
+                 "khoa_dinh_danh": "217-2025-ND-CP", "ket_qua": "not_found", "lenh": "x"}
+        def _sok(ten, rows, st=None, co=()):
+            _r = _dung(t / ten, st or _st(), {"u1.json": _unit()})
+            (_r / "rasoat_tra_kho.jsonl").write_text(
+                "".join(json.dumps(x, ensure_ascii=False) + "\n" for x in rows), encoding="utf-8")
+            return _goi(tl_module, ["rasoat-dot-check", "--in", str(_r), "--json"] + list(co)), _r
+        # `str([""])` là `"['']"` — KHÁC RỖNG. `str()` nhận MỌI thứ nên nó là phép ÉP KIỂU đội lốt
+        # phép KIỂM: khoá `[""]`  từng được tính là "đã tra bằng tên".
+        o_ten_list, _ = _sok("o1", [dict(_FULL, khoa_ten=[""])])
+        o_ten_str, _ = _sok("o2", [_FULL])
+        # `--strict` gộp rc=1 vào rc=2 ⇒ quyết theo rc thì đường đóng HẠN CHẾ biến mất. Phải quyết
+        # theo `loai_verdict`: đã đo được thì vẫn đóng hạn chế được, dù rc=2 vì `--strict`.
+        o_strict, _ = _sok("o3", [dict(_FULL, khoa_ten=None, khoa_dinh_danh=None)], co=("--strict",))
+        o_hong, _ = _sok("o4", [_FULL], st=_st(dot="broken"), co=("--strict",))
+        # Hỏi MỘT Đợt thì mục của Đợt KHÁC không được làm nhiễu; soi cả hồ sơ thì vẫn phải nêu.
+        _QI = [{"so_hieu": _MUC, "trang_thai": "cho_tai", "dot_id": "dot-01"},
+               {"so_hieu": "9/2026/ND-CP", "trang_thai": "cho_tai", "dot_id": "dot-02"}]
+        _STD = _st(dot=DOT, q_units=[{"unit_id": "u1", "dot_id": "dot-01", "trang_thai": "pending"}],
+                   q_ingest=_QI)
+        o_dot, _ = _sok("o5", [_FULL], st=_STD, co=("--dot", "dot-01"))
+        o_ca_ho_so, _ = _sok("o6", [_FULL], st=_STD)
+        # Sổ tái lập phải nhận diện TẬP NGUỒN, không chỉ thư mục.
+        o_dem, _r6 = _sok("o7", [_FULL])
+        # `--out` trỏ vào `--in` phá chính lời khai READ-ONLY của lệnh.
+        o_out = _goi(tl_module, ["rasoat-dot-check", "--in", str(_r6), "--json",
+                                 "--out", str(_r6 / "rasoat_state.json")])
+
         # ── #8 — `--out` dưới thư mục cha CHƯA TỒN TẠI phải ghi được (writer nguyên tử) ──
         _out = t / "chua" / "co" / "kq.json"
         h_out = _goi(tl_module, ["rasoat-dot-check", "--in", str(t / "lanh"), "--json", "--out", str(_out)])
@@ -329,5 +358,16 @@ def run(tl_module):
              and n_orphan[0] == 1                       # phát hiện, KHÔNG phải lỗi đầu vào
              and any(x.get("ma") == "DOT_ID_CHUA_KHAI" for x in (n_orphan[1].get("thieu_payload") or []))
              and n_tuong_lai[0] == 0 and n_tuong_lai[1].get("ok") is True)  # ví dụ CHUẨN của §2 phải QUA
+    _so1 = (o_dem[1].get("chot_3_so_lieu", {}).get("so_lieu") or [{}])[0].get("dem_tren") or ""
+    luot10 = (o_ten_list[0] == 1 and o_ten_str[0] == 0          # khoá phải là CHUỖI; đối chứng dương
+              and o_strict[1].get("loai_verdict") == "do_duoc"
+              and o_strict[1].get("co_the_dong_han_che") is True   # rc=2 vì --strict, VẪN đóng hạn chế được
+              and o_hong[1].get("loai_verdict") == "khong_do_duoc"
+              and o_hong[1].get("co_the_dong_han_che") is False    # state hỏng ⇒ chặn CỨNG
+              and o_dot[0] == 0 and o_dot[1].get("ok") is True     # Đợt khác không làm nhiễu
+              and any(x.get("ma") == "DOT_ID_CHUA_KHAI"            # …nhưng soi cả hồ sơ thì vẫn nêu
+                      for x in (o_ca_ho_so[1].get("thieu_payload") or []))
+              and "sha256=" in _so1 and "phiếu" in _so1            # sổ nhận diện được TẬP NGUỒN
+              and o_out[0] == 2 and "OUT_TRONG_IN" in str(o_out[1].get("out_loi") or ""))
     return bool(lanh and lop_a and lop_b and lop_c and lop_d
-                and lop_a_toan and khoa_toan and val_toan and khong_chan_oan and out_toan and luot5 and luot6 and luot7 and luot8)
+                and lop_a_toan and khoa_toan and val_toan and khong_chan_oan and out_toan and luot5 and luot6 and luot7 and luot8 and luot10)

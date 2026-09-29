@@ -1546,7 +1546,7 @@ _STUB_MAP = {
         '_rasoat_state_validate', '_rasoat_state_newest', '_rasoat_thieu_gia_tri',   # r295 RAS-09/RAS-03 (note CUỐI dòng — I11)
     ],
     "rasoat_dot_check": [
-        '_dinh_danh_chuan_hoa', '_nfc_lech', '_nfc_lech_json', '_dot_check_nfc', '_tra_kho_doc',
+        '_khoa_hop_le', '_dinh_danh_chuan_hoa', '_nfc_lech', '_nfc_lech_json', '_dot_check_nfc', '_tra_kho_doc',
         '_dot_check_tra_kho', '_dot_check_so_lieu', 'cmd_rasoat_dot_check',   # LỚP 3 (note CUỐI dòng — I11)
     ],
     "nlm_ops": [

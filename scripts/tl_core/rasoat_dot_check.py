@@ -59,6 +59,16 @@ _DOT_CHECK_SO_TRA_KHO = "rasoat_tra_kho.jsonl"
 _TRA_KHO_KET_QUA = ("not_found", "found")
 
 
+def _khoa_hop_le(v) -> str:
+    """Giá trị khoá tra kho chỉ hợp lệ khi nó là CHUỖI khác rỗng — trả bản đã strip, hoặc "".
+
+    Bản trước dùng `str(v).strip()` khắp nơi, mà `str([""])` là `"['']"` — KHÁC RỖNG. Một dòng
+    khai `khoa_ten: [""]` vì thế được tính là "đã tra bằng tên", và cổng trả `ok:true` cho một
+    kết luận «kho thiếu» chưa có bằng chứng nào về tên. `str()` nhận MỌI thứ, nên nó không phải
+    phép kiểm — nó là phép ép kiểu đội lốt phép kiểm."""
+    return v.strip() if isinstance(v, str) else ""
+
+
 def _dinh_danh_chuan_hoa(s) -> str:
     """Khoá THỨ BA khi tra kho (`references/RASOAT_HOSO_LOOP.md` §10). BỌC `norm_sohieu` SẴN CÓ — SKILL.md
     §0 #15 cấm viết lại cái đã có — và chỉ thêm đúng hai biệt lệ ĐÃ ĐO ĐƯỢC:
@@ -171,7 +181,7 @@ def _tra_kho_doc(path) -> tuple:
             hong.append({"dong": i, "ma": "THIEU_TRUONG", "truong": thieu})
             continue
         # Dòng KHÔNG khai khoá nào = không nói được đã tra bằng gì ⇒ vô nghĩa với chốt 3 khoá.
-        if not any(str(r.get(k) or "").strip() for k in _TRA_KHO_KHOA):
+        if not any(_khoa_hop_le(r.get(k)) for k in _TRA_KHO_KHOA):
             hong.append({"dong": i, "ma": "KHONG_KHAI_KHOA", "truong": list(_TRA_KHO_KHOA)})
             continue
         # F2: `ket_qua` phải nằm trong enum ĐÓNG. `error`/lỗi chính tả/phản hồi lạ = KHÔNG BIẾT kết
@@ -221,7 +231,7 @@ def _dot_check_tra_kho(claims, rows) -> dict:
             """
             khop, lech = [], []
             for k in ("khoa_dinh_danh", "khoa_so_hieu"):
-                v = str(r.get(k) or "").strip()
+                v = _khoa_hop_le(r.get(k))
                 if not v:
                     continue
                 (khop if _dinh_danh_chuan_hoa(v) == dd else lech).append(k)
@@ -240,11 +250,11 @@ def _dot_check_tra_kho(claims, rows) -> dict:
         for r in lien_quan:
             _loai = _phan_loai_dong(r)
             if _loai != "khop":
-                _ghi = [{"khoa": k, "da_ghi": str(r.get(k) or "").strip(),
-                         "chuan_hoa_thanh": _dinh_danh_chuan_hoa(str(r.get(k) or ""))}
+                _ghi = [{"khoa": k, "da_ghi": _khoa_hop_le(r.get(k)),
+                         "chuan_hoa_thanh": _dinh_danh_chuan_hoa(_khoa_hop_le(r.get(k)))}
                         for k in ("khoa_dinh_danh", "khoa_so_hieu")
-                        if str(r.get(k) or "").strip()
-                        and _dinh_danh_chuan_hoa(str(r.get(k) or "")) != dd]
+                        if _khoa_hop_le(r.get(k))
+                        and _dinh_danh_chuan_hoa(_khoa_hop_le(r.get(k))) != dd]
                 lech_dd.extend(_ghi)
                 if _loai == "mau_thuan":
                     mau_thuan.append({"thoi_diem": str(r.get("thoi_diem") or ""),
@@ -252,7 +262,7 @@ def _dot_check_tra_kho(claims, rows) -> dict:
                 continue
             _khop.append(r)
             for k in _TRA_KHO_KHOA:
-                v = str(r.get(k) or "").strip()
+                v = _khoa_hop_le(r.get(k))
                 if not v:
                     continue
                 # Khai thẳng giới hạn: `khoa_ten` là VĂN XUÔI, không quy về định danh được, nên chỉ
@@ -444,6 +454,11 @@ def cmd_rasoat_dot_check(a) -> int:
             if not isinstance(_m, dict) or str(_m.get("trang_thai") or "") not in _DOT_CHECK_THIEU_TT:
                 continue
             _mid = str(_m.get("dot_id") or "").strip()
+            # Khi hỏi MỘT Đợt thì chỉ xét mục CỦA Đợt ấy. Bản trước duyệt mọi mục còn treo, nên một
+            # mục của `dot-02` sắp mở làm số liệu `dot-01` thành `kha_dung:false` — trái điều kiện
+            # đóng (chỉ xét Q-INGEST **thuộc Đợt này**) và biến Đợt khác thành nguồn nhiễu.
+            if dot and _mid != dot:
+                continue
             if _mid and _mid not in _dot_khai:
                 thieu_payload.append({"ma": "DOT_ID_CHUA_KHAI", "dot_id": _mid,
                                       "so_hieu": str(_m.get("so_hieu") or "")})
@@ -479,7 +494,19 @@ def cmd_rasoat_dot_check(a) -> int:
 
     # ④ chốt 3 — số liệu tái lập
     ngay_chot = str(getattr(a, "ngay_chot", "") or "").strip() or str((state or {}).get("cap_nhat") or "").strip()
-    dem_tren = str(master_dir) if master_dir.is_dir() else "(không có thư mục master/)"
+    # "Đếm trên gì" phải nhận diện được TẬP NGUỒN, không chỉ thư mục: master đổi trong cùng ngày thì
+    # cùng đường dẫn + cùng ngày chốt vẫn cho số khác, tức sổ không tái lập được.
+    _ten_dem = sorted(n for n, _ in docs)
+    _map = dict(docs)
+    _bam = hashlib.sha256()
+    for _n in _ten_dem:
+        _bam.update(_n.encode("utf-8"))
+        _bam.update(json.dumps(_map[_n], ensure_ascii=False, sort_keys=True).encode("utf-8"))
+    dem_tren = (("%s | %d phiếu: %s | sha256=%s"
+                 % (master_dir, len(_ten_dem),
+                    ",".join(_ten_dem[:12]) + ("…" if len(_ten_dem) > 12 else ""),
+                    _bam.hexdigest()[:16])) if master_dir.is_dir()
+                else "(không có thư mục master/)")
     # LỚP A — MỘT vị từ cho MỌI lỗi tính toàn vẹn, thay vì vá từng ca. Ba lượt cross-review liên
     # tiếp ra CÙNG một hình dạng: NFC lệch (F6) · thiếu phiếu/đếm đúp (H2) · master hỏng (#5) — mỗi
     # lần chỉ chặn đúng ca vừa nêu rồi ca kế tiếp lại lọt. Gom vào một danh sách thì nguồn lỗi thứ
@@ -508,8 +535,16 @@ def cmd_rasoat_dot_check(a) -> int:
     findings = (len(nfc["lech"]) + len(tra_kho["phat_hien"]) + len(tra_kho_hong)
                 + len(master_hong) + len(thieu_payload) + (1 if so_lieu["thieu_ngay_chot"] else 0)
                 + (0 if so_lieu.get("kha_dung", True) else 1))
+    # ★ `--strict` gộp rc=1 và rc=2 làm một, mà workflow lại BẮT chạy `--strict` ⇒ đọc theo rc thì
+    # đường đóng HẠN CHẾ biến mất (rc=2 bị luật đóng coi là "chưa đo được gì"). Sửa ở chỗ đúng:
+    # khai TƯỜNG MINH loại verdict, để người đọc quyết theo NGUYÊN NHÂN chứ không theo mã thoát.
+    #   `do_duoc`        — đã đo xong, có/không phát hiện: `co_the_dong_han_che` = True
+    #   `khong_do_duoc`  — state hỏng hoặc `--dot` không giải được: CHẶN CỨNG, không miễn trừ
+    _khong_do = bool(state_loi or dot_loi) or not so_lieu.get("kha_dung", True)
     payload = {"schema": _DOT_CHECK_SCHEMA, "in": str(p), "dot": dot or None,
                "dot_loi": dot_loi or None,
+               "loai_verdict": "khong_do_duoc" if _khong_do else "do_duoc",
+               "co_the_dong_han_che": not _khong_do,
                "ok": findings == 0 and not state_loi and not dot_loi,
                "state": {"file": str(state_path), "loi": state_loi or None},
                "chot_1_nfc": nfc, "chot_2_tra_kho": tra_kho, "chot_3_so_lieu": so_lieu,
@@ -522,7 +557,25 @@ def cmd_rasoat_dot_check(a) -> int:
         # Seam canonical (`release.py::_write_text_atomic`): tạo thư mục cha, UTF-8+LF bất kể OS,
         # ghi tmp cùng thư mục rồi `os.replace`. `write_text` trần: thiếu cha ⇒ FileNotFoundError,
         # ngắt giữa chừng ⇒ tệp CỤT, Windows còn dính CRLF — ba đường hỏng cho một dòng.
-        _write_text_atomic(Path(out), _json_dumps(payload) + "\n")
+        _o = Path(out).resolve()
+        try:
+            _trong_in = _o.is_relative_to(p.resolve())
+        except Exception:  # noqa: BLE001 — Python cũ / đường dẫn lạ
+            _trong_in = str(_o).startswith(str(p.resolve()))
+        if _trong_in:
+            # Lệnh tự khai READ-ONLY với hồ sơ rà. `--out` trỏ vào chính `<in>` phá lời khai ấy —
+            # tệ nhất là trỏ thẳng `rasoat_state.json` rồi thay state bằng payload NGAY SAU khi
+            # vừa đọc nó. Từ chối, đừng ghi rồi mới giải thích.
+            payload["out_loi"] = ("OUT_TRONG_IN: --out không được nằm trong --in "
+                                  "(lệnh READ-ONLY với hồ sơ rà)")
+            _print_json_or_text(payload, True)
+            return 2
+        try:
+            _write_text_atomic(_o, _json_dumps(payload) + "\n")
+        except Exception as _e:  # noqa: BLE001 — hỏng đường ghi là LỖI LỆNH, không phải traceback
+            payload["out_loi"] = "OUT_GHI_HONG: " + str(_e)
+            _print_json_or_text(payload, True)
+            return 2
         payload["out"] = out
     _print_json_or_text(payload, True)
     # đầu vào KHÔNG ĐO ĐƯỢC (state hỏng · `--dot` không ánh xạ được) = LỖI LỆNH rc=2, khác hẳn

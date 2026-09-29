@@ -13,8 +13,8 @@ Chủ kho chọn ghi erratum (phiên điều phối 2026-09-28, lựa chọn "Er
 làm lease cũ mất hiệu lực; việc nâng trần đã được làm bằng quyết định trong lease, không qua revision. Đó là một
 lệch quy trình đã xảy ra, khai ở `ops/land/pr666-wp650-land-evidence.yaml` (`lech_protocol_khai: A14-KHONG-REVISION`).
 Tệp này chỉ ghi lại ngưỡng thực tế đã được duyệt và căn cứ của nó, cạnh spec đóng băng, để người đọc spec không
-hiểu nhầm rằng ứng viên đã merge nằm trong ≤ 400. Không tạo revision hồi tố cho packet đã merge. Trạng thái packet là
-`merged`, CHƯA `landed` — xem `trang_thai_packet` trong `ops/land/pr666-wp650-land-evidence.yaml`.
+hiểu nhầm rằng ứng viên đã merge nằm trong ≤ 400. Không tạo revision hồi tố cho packet đã merge. Lúc ghi erratum này (PR #667), packet
+mới `merged`, CHƯA `landed`; trạng thái HIỆN HÀNH xem `trang_thai_packet` trong `ops/land/pr666-wp650-land-evidence.yaml`.
 
 Phạm vi đo cần phân biệt: +650 là so với master ngay trước merge (`ceb1a3f`). So với acceptance baseline gốc của
 lease (`5618f61…`), numstat ba đường là +730/−10 vì master đã tiến (Codex CLI #667 lượt 1, G5). Không dùng mốc sau

@@ -109,3 +109,4 @@ chua_do_duoc:
   - 'Effort thuc te cua phien executor.'
   - 'ai-dang-giu tren ban sao DU ref (chua fetch +refs/heads/* day du luc cap).'
   - 'Thoi gian that cua gate rut gon tren PR ho so (chi do duoc sau khi co PR that).'
+da_bi_thay_the: ci-duong-nhanh-ho-so-r2-g2-claude

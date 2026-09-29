@@ -151,3 +151,8 @@ chua_do_duoc:
   - 'Danh tinh nguoi ky: #566.'
   - 'Model/effort thuc te cua phien executor va reviewer.'
   - 'Windows (chu kho chua cho CI Windows; spec Q6).'
+
+da_bi_thay_the: dot-bien-l-bien-cong-khai-exec-3-claude-20260929
+da_bi_thay_the_vi_sao: >-
+  Spec len r7 (review connector codex tren PR #684 04483e8: 1 P1 + 5 P2; Review Rescue Checkpoint Q14/Q15). r7 doi
+  A7 (so tap duong dan khong loc) va A8 (neo start_from_sha) => doi nghiem thu cua executor => generation moi.

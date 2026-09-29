@@ -1,0 +1,28 @@
+chua chay tren cay that — executor tu ap, tu do, tu chiu trach nhiem commit
+--- ops/ci_duong_nhanh_test.py
++++ ops/ci_duong_nhanh_test.py
+@@ -922,6 +922,24 @@
+         bang(thuc[job] == mong, f"{job}: tap `if:` cap buoc lech danh sach cho phep: "
+              f"thua/doi {sorted((k, v) for k, v in thuc[job].items() if mong.get(k) != v)}, "
+              f"thieu {sorted(k for k in mong if k not in thuc[job])}")
++
++
++@ca
++def y13_dinh_tuyen_runner_khong_lam_mat_ca_linux():
++    wf = doc_wf()
++    cb = wf["jobs"]["chuan-bi"]
++    bang(cb.get("runs-on") == "ubuntu-latest" and "strategy" not in cb and "needs" not in cb,
++         "chuan-bi: runner/topology phai giu nhu hop dong")
++    os_chuan = "(github.event_name == 'workflow_dispatch' || contains(github.event.pull_request.labels.*.name, 'windows')) && '[\"ubuntu-latest\",\"windows-latest\"]' || '[\"ubuntu-latest\"]'"
++    bang(chuan_hoa_if(cb.get("outputs", {}).get("os")) == os_chuan,
++         "chuan-bi: output os phai bao dam Linux tren moi su kien")
++    for job in (*BAT_BUOC, "gate-registry"):
++        cau = wf["jobs"][job]
++        bang(cau.get("needs") == "chuan-bi", f"{job}: sai duong phu thuoc")
++        bang(cau.get("runs-on") == "${{ matrix.os }}", f"{job}: runner khong doc matrix.os")
++        bang(cau.get("strategy") == {"fail-fast": False, "matrix": {
++            "os": "${{ fromJson(needs.chuan-bi.outputs.os) }}"}},
++            f"{job}: matrix khong doc tron output os, hoac co include/exclude/ghi de")
+ 
+ 
+ CHO_PHEP_NUOT_LOI = {("chuan-bi", "actions/checkout@v4"), ("chuan-bi", "phan loai diff (duong nhanh ho so - chi pull_request)")}

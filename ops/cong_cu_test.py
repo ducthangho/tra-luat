@@ -2334,7 +2334,8 @@ def t62_chay_lam_main_phai_o_che_do_UTF8_ca_khi_PYTHONUTF8_0():
     Lượt 4 (đột biến sống 56/56 ở review lượt 2+3): khoá TỪNG vế còn lại của hợp đồng phóng lại — (1) mã
     thoát (cửa trả mã RIÊNG, nuốt thành 0 là đỏ); (2) `-B` còn; (3) dấu phóng lại không sót sang con; (4)
     `-X utf8=0` vẫn ra UTF-8 sau đúng MỘT lần; (5) đã mang dấu mà vẫn ngoài UTF-8 thì DỪNG; (6) nguồn stdin
-    (`-` và trần) thì DỪNG ồn ào, không `rc=0` rỗng. `t62` không phụ thuộc bộ ca có tự phóng lại hay không."""
+    (`-` và trần) thì DỪNG ồn ào, không `rc=0` rỗng. `t62` không phụ thuộc bộ ca có tự phóng lại hay không.
+    `env` đã gỡ `PYTHONDONTWRITEBYTECODE` ⇒ MỌI lời gọi mang `-B`, (0)(4) đòi `B=1`: không ghi `.pyc` vào cây."""
     env = dict(os.environ, PYTHONUTF8="0", PYTHONIOENCODING="ascii")
     for k in (_DAU_PHONG_LAI, "PYTHONDONTWRITEBYTECODE"):
         env.pop(k, None)
@@ -2351,10 +2352,10 @@ def t62_chay_lam_main_phai_o_che_do_UTF8_ca_khi_PYTHONUTF8_0():
     bang(rc == _MA_TU_KIEM_UTF8, f"(1) mã thoát KHÔNG đi qua lần phóng lại: rc={rc}, chờ {_MA_TU_KIEM_UTF8}")
     bang("B=1" in ra, f"(2) cờ `-B` mất ở lần phóng lại: {ra.strip()!r}")
     bang("DAU_SOT=0" in ra, f"(3) dấu phóng lại còn trong môi trường của bản phóng lại: {ra.strip()!r}")
-    rc, ra, loi = hoi("-X", "utf8=0", str(TEP_TEST), "--tu-kiem-che-do-utf8")
-    bang(rc == _MA_TU_KIEM_UTF8 and "UTF8_MODE=1" in ra and "DA_PHONG_LAI=1" in ra,
-         f"(4) gọi `-X utf8=0` mà không ra UTF-8 sau đúng MỘT lần phóng: rc={rc} {ra.strip()!r} {loi!r}")
-    rc, ra, loi = hoi(str(TEP_TEST), "--tu-kiem-che-do-utf8", **{_DAU_PHONG_LAI: "1"})
+    rc, ra, loi = hoi("-B", "-X", "utf8=0", str(TEP_TEST), "--tu-kiem-che-do-utf8")
+    bang(rc == _MA_TU_KIEM_UTF8 and "UTF8_MODE=1" in ra and "DA_PHONG_LAI=1" in ra and "B=1" in ra,
+         f"(4) gọi `-X utf8=0` mà không ra UTF-8 (giữ `-B`) sau đúng MỘT lần phóng: rc={rc} {ra.strip()!r} {loi!r}")
+    rc, ra, loi = hoi("-B", str(TEP_TEST), "--tu-kiem-che-do-utf8", **{_DAU_PHONG_LAI: "1"})
     bang(rc not in (0, _MA_TU_KIEM_UTF8) and "KHONG_PHONG_LAI" in loi and "UTF8_MODE" not in ra,
          f"(5) đã mang dấu phóng lại mà vẫn ngoài UTF-8 phải DỪNG, không phóng tiếp: rc={rc} {ra.strip()!r} {loi!r}")
     for co in (("-B", "-", "--tu-kiem-che-do-utf8"), ("-B",)):
@@ -5510,7 +5511,7 @@ def t51_cache_phai_HET_HIEU_LUC_khi_chinh_TEP_ung_vien_doi():
 
 
 @ca
-def t49_duong_XAU_ra_JSON_HOP_LE_va_NGAY_GO_phai_duoc_DOC(goi_git=subprocess.run):
+def t49_duong_XAU_ra_JSON_HOP_LE_va_NGAY_GO_phai_duoc_DOC(goi_git=subprocess.run, nap=runpy.run_path):
     """THUỘC TÍNH: biên giới BÁO CÁO ra JSON hợp lệ, và NGÀY GỠ là một hạn ĐỌC ĐƯỢC.
 
     SINH TỪ CROSS-REVIEW CODEX vòng 8 trên `f6189e3`, ba trong sáu P2:
@@ -5640,41 +5641,6 @@ def t49_duong_XAU_ra_JSON_HOP_LE_va_NGAY_GO_phai_duoc_DOC(goi_git=subprocess.run
              f"hàng rào THỨ HAI và phải bảo đảm stdout LUÔN giải mã được bằng UTF-8 nghiêm "
              f"ngặt, độc lập với việc từng trường đã sạch hay chưa.")
 
-        # (2d) N54 (r17) — PHÉP HIỂN THỊ PHẢI ĐƠN ÁNH, và khoá báo cáo thì không dùng nó.
-        #      Đặc tả r15 tự khai chỗ chưa đo: *"hai đường khác nhau về byte CÓ THỂ in ra
-        #      giống nhau — chưa đo trường hợp ấy"*. Vòng 11 đo được: `ops/bad_<0xff>.py` và
-        #      một đường chứa đúng bốn ký tự ASCII `\`,`x`,`f`,`f` cùng ra `ops/bad_\xff.py`.
-        #      Chuỗi ấy LÀ KHOÁ của `co_loi_goi_tran`, nên một tệp ĐÈ vị trí của tệp kia và
-        #      hạn ngạch đếm sai — một vi phạm tàng hình, đúng lớp `t48` đã gặp với `\r`/`\n`.
-        d_va = _kho(tmp, "vacham")
-        hai = [b"ops/va_\xff.py".decode("utf-8", "surrogateescape"), "ops/va_\\xff.py"]
-        mv = runpy.run_path(str(bq))
-        # #671 (review) — hai chốt THUẦN này và cả (3) KHÔNG cần tên mang `\` nằm trong INDEX,
-        # nên đo chúng TRƯỚC và chỉ HOÃN phần cần INDEX. Đo trên Windows (Git for Windows bỏ
-        # tên ấy với `Ignoring path`): để `BoQuaMoiTruong` nổ ngay ở đây thì hai đột biến đích
-        # t49 `bn_hien_thi_khong_don_anh`, `bn_ngay_go_chi_la_chu` thành KHÔNG ĐO ĐƯỢC.
-        bang(mv["_duong_bao_cao"](hai[0]) != mv["_duong_bao_cao"](hai[1]),
-             f"(2d) `_duong_bao_cao` vẫn KHÔNG đơn ánh: "
-             f"{mv['_duong_bao_cao'](hai[0])!r} == {mv['_duong_bao_cao'](hai[1])!r}")
-        bang(mv["_duong_bao_cao"]("ops/bình_thường.py") == "ops/bình_thường.py",
-             "(2d) chiều ngược: đường Unicode THƯỜNG phải nguyên vẹn sau khi làm đơn ánh")
-        # Tên thứ hai mang `\` NGUYÊN VĂN — trên Windows đó là dấu phân cách thư mục, nên
-        # đi qua đĩa là đo sai thứ. Đi thẳng INDEX như hai cây trên.
-        bo_qua_va = None
-        try:
-            for ten in hai:
-                _stage_byte(d_va, ten.encode("utf-8", "surrogateescape"), BAN)
-        except BoQuaMoiTruong as e:
-            bo_qua_va = e                      # ném SAU (3), không phải ở đây
-        if bo_qua_va is None:
-            _, bao_va = mv["quet"](d_va)
-            khoa = bao_va.get("co_loi_goi_tran") or {}
-            bang(len(khoa) == 2,
-                 f"(2d) HAI đường khác nhau về byte chỉ còn MỘT khoá trong báo cáo: "
-                 f"{sorted(map(repr, khoa))} — phép hiển thị không đơn ánh mà lại được dùng làm "
-                 f"khoá, nên một tệp ĐÈ tệp kia và hạn ngạch đếm hụt. Khoá phải giữ đường NGUYÊN "
-                 f"VẸN; `_ra_json` lo phần an toàn ở biên giới.")
-
         # (3) NGÀY GỠ là một HẠN đọc được, không phải chữ trong lý do.
         d = _kho(tmp, "ngay")
         (d / "ops" / "no_cu.py").write_text(BAN, encoding="utf-8")
@@ -5690,8 +5656,35 @@ def t49_duong_XAU_ra_JSON_HOP_LE_va_NGAY_GO_phai_duoc_DOC(goi_git=subprocess.run
         bang(rc_qua != 0 and "ops/no_cu.py" in (bao_qua.get("ratchet_qua_han") or []),
              f"(3) QUA ngày gỡ một ngày mà ratchet vẫn pass: rc={rc_qua} "
              f"qua_han={bao_qua.get('ratchet_qua_han')} — ngày gỡ đang là chữ trang trí")
-        if bo_qua_va is not None:
-            raise bo_qua_va
+
+        # (2d) N54 (r17) — PHÉP HIỂN THỊ PHẢI ĐƠN ÁNH, và khoá báo cáo thì không dùng nó.
+        #      Đặc tả r15 tự khai chỗ chưa đo: *"hai đường khác nhau về byte CÓ THỂ in ra
+        #      giống nhau — chưa đo trường hợp ấy"*. Vòng 11 đo được: `ops/bad_<0xff>.py` và
+        #      một đường chứa đúng bốn ký tự ASCII `\`,`x`,`f`,`f` cùng ra `ops/bad_\xff.py`.
+        #      Chuỗi ấy LÀ KHOÁ của `co_loi_goi_tran`, nên một tệp ĐÈ vị trí của tệp kia và
+        #      hạn ngạch đếm sai — một vi phạm tàng hình, đúng lớp `t48` đã gặp với `\r`/`\n`.
+        d_va = _kho(tmp, "vacham")
+        hai = [b"ops/va_\xff.py".decode("utf-8", "surrogateescape"), "ops/va_\\xff.py"]
+        mv = nap(str(bq))                      # `nap`: `t63` thấy hai chốt THUẦN chạy TRƯỚC stage
+        # #671 (S5, chủ kho 30-09) — (3) ở trên và hai chốt THUẦN dưới đây KHÔNG cần tên mang `\` trong INDEX
+        # nên chạy TRƯỚC; phần stage đứng CUỐI ca, `BoQuaMoiTruong` nổ tự nhiên (Git for Windows bỏ tên ấy với
+        # `Ignoring path` — lời khai trong thân `bd6ad5d`): không cơ chế hoãn nào để nuốt/ném sớm. `t63` khoá thứ tự.
+        bang(mv["_duong_bao_cao"](hai[0]) != mv["_duong_bao_cao"](hai[1]),
+             f"(2d) `_duong_bao_cao` vẫn KHÔNG đơn ánh: "
+             f"{mv['_duong_bao_cao'](hai[0])!r} == {mv['_duong_bao_cao'](hai[1])!r}")
+        bang(mv["_duong_bao_cao"]("ops/bình_thường.py") == "ops/bình_thường.py",
+             "(2d) chiều ngược: đường Unicode THƯỜNG phải nguyên vẹn sau khi làm đơn ánh")
+        # Tên thứ hai mang `\` NGUYÊN VĂN — trên Windows đó là dấu phân cách thư mục, nên
+        # đi qua đĩa là đo sai thứ. Đi thẳng INDEX như hai cây trên.
+        for ten in hai:
+            _stage_byte(d_va, ten.encode("utf-8", "surrogateescape"), BAN)
+        _, bao_va = mv["quet"](d_va)
+        khoa = bao_va.get("co_loi_goi_tran") or {}
+        bang(len(khoa) == 2,
+             f"(2d) HAI đường khác nhau về byte chỉ còn MỘT khoá trong báo cáo: "
+             f"{sorted(map(repr, khoa))} — phép hiển thị không đơn ánh mà lại được dùng làm "
+             f"khoá, nên một tệp ĐÈ tệp kia và hạn ngạch đếm hụt. Khoá phải giữ đường NGUYÊN "
+             f"VẸN; `_ra_json` lo phần an toàn ở biên giới.")
 
 
 @ca
@@ -5699,8 +5692,11 @@ def t63_t49_hong_STAGE_tung_buoc_phai_BO_QUA_dung_buoc():
     """#671 (CA-KHOA-STAGING, review lượt 1–3: gỡ riêng từng chốt `rc`/`co` mà `t49` vẫn xanh, vì Linux
     luôn stage được) — chạy lại `t49` với git THẬT, chỉ TRÁO bằng chứng của ĐÚNG MỘT bước, đòi `t49` BỎ QUA
     mang dấu bước ấy. Ca `bo_ten` mô phỏng điều phiên Windows đo: Git for Windows bỏ tên mang dấu chéo ngược
-    (`Ignoring path`, rc=0) — `t49` phải đo xong (3) rồi MỚI bỏ qua (`bd6ad5d`), không nuốt, không ném sớm.
-    Đối chứng thành công là chính `t49`. `t49` đỏ/bỏ qua vì lý do KHÁC dưới phép tráo ⇒ KHÔNG ĐO ĐƯỢC."""
+    (`Ignoring path`, rc=0) — `t49` phải đo xong (3) và hai chốt THUẦN (2d) rồi MỚI bỏ qua (stage đứng CUỐI), không
+    nuốt, không ném sớm; `bo_hong` bỏ riêng `hong_` (2b) — chỗ gọi mà mọi phép tráo khác dừng trước khi tới.
+    ĐỐI CHỨNG: `t49` KHÔNG tráo chạy trước. Nó XANH mà `t49` ĐỎ dưới phép tráo ⇒ ĐỎ OAN khi stage hỏng (spec §2B)
+    ⇒ giết; nó ĐỎ ⇒ KHÔNG ĐO ĐƯỢC (đột biến đích `t49` giữ bán kính 1/N); nó BỎ QUA (nền không stage được) ⇒
+    chiều ĐỎ oan không đo ở nền ấy. `t49` bỏ qua vì lý do KHÁC dưới phép tráo ⇒ KHÔNG ĐO ĐƯỢC."""
     nhat_ky = []
 
     def trao(buoc, cach):
@@ -5708,30 +5704,47 @@ def t63_t49_hong_STAGE_tung_buoc_phai_BO_QUA_dung_buoc():
             nhat_ky.append(lenh)
             if buoc not in lenh:
                 return subprocess.run(lenh, **kw)
-            if cach == "bo_ten" and bytes([92]) in kw["input"]:
+            bo = {"bo_ten": bytes([92]), "bo_hong": b"hong_"}.get(cach)
+            if bo is not None and bo in kw["input"]:
                 return subprocess.CompletedProcess(lenh, 0, b"", b"Ignoring path")
             p = subprocess.run(lenh, **kw)
             return subprocess.CompletedProcess(lenh, 128 if cach == "rc" else p.returncode,
                                                b"" if cach == "rong" else p.stdout, p.stderr)
         return goi
 
+    def nap(duong):
+        m = runpy.run_path(duong); goc = m["_duong_bao_cao"]
+        m["_duong_bao_cao"] = lambda s: nhat_ky.append(("(2d)", s)) or goc(s)
+        return m
+
+    try:
+        t49_duong_XAU_ra_JSON_HOP_LE_va_NGAY_GO_phai_duoc_DOC()
+        doi_chung_xanh = True
+    except BoQuaMoiTruong:
+        doi_chung_xanh = False
+    except TinHieuChotCa as ex:
+        raise BoQuaMoiTruong(f"KHÔNG ĐO ĐƯỢC: t49 ĐỎ cả khi KHÔNG tráo: {ex}") from ex
     for buoc, cach, dau in (("hash-object", "rc", "rc=128/0"), ("update-index", "rc", "rc=0/128"),
                             ("ls-files", "rong", "xau_"), ("add", "rc", "bình_thường"),
-                            ("ops/no_cu.py", "rc", "no_cu"), ("update-index", "bo_ten", "va_")):
+                            ("ops/no_cu.py", "rc", "no_cu"), ("update-index", "bo_ten", "va_"),
+                            ("update-index", "bo_hong", "hong_")):
         nhat_ky.clear()
         try:
-            t49_duong_XAU_ra_JSON_HOP_LE_va_NGAY_GO_phai_duoc_DOC(goi_git=trao(buoc, cach))
+            t49_duong_XAU_ra_JSON_HOP_LE_va_NGAY_GO_phai_duoc_DOC(goi_git=trao(buoc, cach), nap=nap)
             ly = None
         except BoQuaMoiTruong as ex:
             ly = str(ex)
         except TinHieuChotCa as ex:
-            raise BoQuaMoiTruong(f"KHÔNG ĐO ĐƯỢC: t49 ĐỎ vì chốt khác khi tráo {buoc}/{cach}: {ex}") from ex
+            bang(not doi_chung_xanh, f"({buoc}/{cach}) stage hỏng mà t49 ĐỎ thay vì BỎ QUA — ĐỎ OAN: {ex}")
+            raise BoQuaMoiTruong(f"KHÔNG ĐO ĐƯỢC: t49 ĐỎ khi tráo {buoc}/{cach}, đối chứng không XANH: {ex}") from ex
         if ly is not None and not ly.startswith(("KHÔNG ĐO ĐƯỢC: INDEX", "KHÔNG ĐO ĐƯỢC: git add")):
             raise BoQuaMoiTruong(f"KHÔNG ĐO ĐƯỢC: t49 bỏ qua vì lý do khác khi tráo {buoc}/{cach}: {ly}")
         bang(ly is not None and dau in ly,
              f"({buoc}/{cach}) bằng chứng stage hỏng mà t49 không BỎ QUA đúng bước (chờ {dau!r}): {ly!r}")
         bang(cach != "bo_ten" or any("ops/no_cu.py" in lenh for lenh in nhat_ky),
-             "(bo_ten) t49 BỎ QUA trước khi đo (3) — phần HOÃN của bd6ad5d đã mất")
+             "(bo_ten) t49 BỎ QUA trước khi đo (3) — phần stage phải đứng CUỐI ca")
+        bang(cach != "bo_ten" or any(lenh[0] == "(2d)" for lenh in nhat_ky),
+             "(bo_ten) t49 BỎ QUA trước hai chốt THUẦN (2d) — phần stage phải đứng CUỐI ca")
 
 
 @ca

@@ -135,11 +135,11 @@ Cả ba đều cho một cổng đỏ trông y hệt lỗi thật. Đo trước 
 | triệu chứng | nguyên nhân | phép đo |
 |---|---|---|
 | `doc-claims-check --strict` `rc=2`, cờ `SHA_NOT_A_COMMIT` trên các tiền tố 8 ký tự | `core.abbrev` của git tự nới theo số object của kho; `ci.yml` ghim **7** | cùng một cây: abbrev 8 → `rc=2`; `git config core.abbrev 7` → `rc=0`, `flags 0` |
-| `packet_loop_test.py` đỏ SÁU ca, `rc=14`, `ly_do_dung: workspace la git worktree` | đang chạy trong một `git worktree` LIÊN KẾT | `git rev-parse --git-dir` khác `--git-common-dir` ⇒ đang ở worktree; dựng clone độc lập rồi đo lại |
+| `packet_loop_test.py` đỏ SÁU ca (suite `rc=1`; năm ca in `rc=14` của tiến trình con kèm `ly_do_dung: workspace la git worktree`, một ca `AssertionError` rỗng) | đang chạy trong một `git worktree` LIÊN KẾT (hoặc submodule) | đúng tiêu chí `_probe_workspace` của launcher: `[ -f "$(git rev-parse --show-toplevel)/.git" ]` ⇒ `.git` là TỆP; đừng so chuỗi `--git-dir` với `--git-common-dir` (thư mục con của clone thường: một bên tuyệt đối, một bên tương đối ⇒ báo nhầm; submodule ⇒ bỏ sót). Dựng clone độc lập rồi đo lại |
 | `ops/cong_cu.py kiem-tra` `rc=2` và `cong_cu_test.py` `rc=1` | thiếu một công cụ trong bản kê (đo được: `jsonschema` `trang_thai: DO`) | đọc `trang_thai` TỪNG mục trong JSON, đừng dừng ở `trang_thai_tong` |
 
 Hai nếp git mà `ci.yml` đặt trước checkout và bộ chạy cục bộ phải đặt lại: `core.autocrlf=false`
-+ `core.eol=lf` (RELEASE_MANIFEST băm theo LF), và `core.abbrev=7` ở trên. Thiếu chúng thì cổng
+cùng `core.eol=lf` (RELEASE_MANIFEST băm theo LF), và `core.abbrev=7` ở trên. Thiếu chúng thì cổng
 nói thật — chỉ là nói về cây của bạn, không về bản vá.
 
 ## Cú pháp máy trạng thái

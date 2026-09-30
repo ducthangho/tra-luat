@@ -539,40 +539,75 @@ gh api repos/ducthangho/tra-luat/actions/jobs/<id>/logs
 không có `gh`, và hệ quả không dừng ở lệnh này — `ops/lease_publish.py kiem-github` trả
 `rc=8: KHÔNG ĐO ĐƯỢC loại số hiệu: không gọi được gh api`. `rc=8` ấy **không phải một phán
 quyết**, nó là một khoảng trống công cụ; đọc nó thành "cổng chặn" là khai rộng hơn phép đo.
-Đường vòng chỉ cần token và HTTP; endpoint logs trả 302 nên phải theo redirect:
+Đường vòng chỉ cần token và HTTP; endpoint logs trả 302 sang host lưu trữ KHÁC nên phải theo
+redirect (curl ≥ 7.58 tự bỏ `Authorization` khi đổi host — đừng thêm `--location-trusted`).
+Thiếu `-f` thì 401/403/404 vẫn `rc=0` và `job.log` chứa JSON lỗi thay cho log; biến rỗng thì
+gửi `Bearer` trống, cũng `rc=0`:
 
 ```bash
-curl -sS -L -H "Authorization: Bearer $GITHUB_PAT" \
-  "https://api.github.com/repos/ducthangho/tra-luat/actions/jobs/<id>/logs" -o "$SCRATCH/job.log"
+: "${GITHUB_PAT:?GITHUB_PAT rong - khong co credential thi dung doc job.log}"
+curl -fsS -L -H "Authorization: Bearer $GITHUB_PAT" \
+  "https://api.github.com/repos/ducthangho/tra-luat/actions/jobs/<id>/logs" -o "$SCRATCH/job.log"; echo "rc=$?"
 ```
 
 **MÀU KHÔNG PHẢI NGUYÊN NHÂN.** `conclusion=failure` chỉ nói lượt chạy kết thúc khác 0. Nó không
 nói cổng hỏng, và nó không nói hai lượt đỏ trên cùng một nhánh là cùng một bệnh. Phân loại TỪNG
 lượt đỏ bằng log của chính nó **trước khi đếm**.
 
-Đã trả giá đúng chỗ này: một lượt rà 40 lần chạy `ops-publish-lease.yml` đọc 10 lượt đỏ thành
-"cổng chập chờn 25%". Mở log từng lượt thì **8/10 là cổng từ chối ĐÚNG** (`CHAN [8]` thiếu bia
-mộ, hoặc lease đã hết hạn) và chỉ **2/10** là lệch thật — khoảng 5%. Chuỗi "đỏ rồi xanh trên
+Đã trả giá đúng chỗ này: một lượt rà 40 lần chạy `ops-publish-lease.yml` (30 xanh, 10 đỏ —
+danh sách ở #619) đọc 10 lượt đỏ thành "cổng chập chờn 25%". Mở log từng lượt thì **6/10 là
+cổng từ chối ĐÚNG** (`CHAN [8]` thiếu bia mộ, hoặc `thay_the_cho` sai); **2/10** là `CHAN [8]`
+"lease đã hết hạn" trên lease ĐÃ có bản chiếu của bot (#461 g2/r2, #579 g4) — đúng hình dạng
+`rc=8` che `rc=9` mà `kiem_github` trên `master` đã chữa (cùng đầu vào, `master` trả `rc=9`
+bỏ qua), tức lỗi CỔNG chứ không phải từ chối đúng; chỉ **2/10** là lệch A/B thật — 2/40 lượt,
+khoảng 5%. THÔNG ĐIỆP cũng chưa phải nguyên nhân: "hết hạn" đúng về dữ kiện mà vẫn có thể là
+cổng hỏng — kiểm cả trạng thái đã-đăng trước khi xếp loại. Chuỗi "đỏ rồi xanh trên
 cùng nhánh" cũng bị đọc nhầm: nội dung giữa hai lượt KHÁC nhau (người ta thêm bia mộ rồi đẩy
 lại), nên nó chứng minh cổng hoạt động chứ không chứng minh gì về tính tất định.
 
 ## `ai-dang-giu` — `rc=12` là lệnh TỪ CHỐI TRẢ LỜI, không phải câu trả lời
 
-Lệnh quét `refs/heads/*`. Một nhánh **cục bộ** tụt sau bản trên máy chủ làm nó trả
-`rc=12 NHÁNH_CỤC_BỘ_TỤT_SAU` — nó đang nói "tôi không đo được", không nói "không ai giữ". Đo
-24-09-2026: cùng một đường cho `rc=12`, rồi `rc=11 NGƯỜI_GIỮ 1` ngay sau khi cập nhật ref.
+Lệnh quét mọi ref cục bộ (`refs/heads/*` lẫn `refs/remotes/*`). Một nhánh **cục bộ** tụt sau
+upstream **trong cache** (`refs/remotes/*`) làm nó trả `rc=12 NHÁNH_CỤC_BỘ_TỤT_SAU` — nó đang
+nói "tôi không đo được", không nói "không ai giữ". Đo 24-09-2026: cùng một đường cho `rc=12`,
+rồi `rc=11 NGƯỜI_GIỮ 1` ngay sau khi cập nhật ref.
+
+Lệnh KHÔNG so SHA với máy chủ: `ls-remote` chỉ để đối chiếu TÊN nhánh. Cache cũ mà nhánh cục
+bộ bằng cache thì nó trả lời từ dữ liệu cũ — có thể `rc=0 NGƯỜI_GIỮ 0` trong khi máy chủ đã có
+lease giữ đường ấy. Nên `rc=0` chỉ đọc thành "không ai giữ" khi bước 1 của khối dưới in
+`CACHE_TUOI` (bước ấy chỉ ĐỌC, không ghi ref).
 
 Thông điệp lỗi nêu **nhánh và upstream thật**, không nhất thiết là `origin/<cùng tên>`.
 Lệnh chữa do `ai-dang-giu` in ra đã phân biệt nhánh rảnh với nhánh đang được worktree giữ:
-nhánh rảnh trỏ tới upstream được báo; worktree sạch dùng `merge --ff-only` tại đúng worktree.
+worktree sạch nhận `git -C <worktree> merge --ff-only`; nhánh rảnh nhận `git branch -f` **KHÔNG
+kèm `-C`** và không mang SHA kỳ vọng — tương đối với cwd của người CHẠY nó chứ không với
+`--root`: chạy nguyên văn từ kho khác là ép nhánh cùng tên của KHO ĐÓ, có thể làm rơi commit
+chưa đẩy. Bên bootstrap chạy nó dưới dạng CAS neo đúng `<root>` (khối thứ hai dưới đây).
 Nếu báo phân kỳ hoặc `KHÔNG_PHÁT_LỆNH_CHỮA`, không thay bằng một lệnh `branch -f` tự dựng.
 Thời điểm cập nhật ref và checkout chỉ đọc xem protocol §8.1–§8.2; chuyển chẩn đoán cho
 bên dựng bootstrap để cập nhật đúng upstream, rồi nhận lại snapshot. Ví dụ đọc lại từ
-checkout đã cấp (kho đích được neo tường minh, kể cả khi cwd ở nơi khác):
+checkout đã cấp (kho đích được neo tường minh, kể cả khi cwd ở nơi khác; `GIT_DIR` và họ
+biến ấy trong môi trường vẫn đè `--root`, nên gỡ chúng):
 
 ```bash
 PY="$(command -v python3 || command -v python || command -v py)"
-"$PY" "$SOURCE/ops/lease_publish.py" ai-dang-giu <duong> --root "$SOURCE"; echo "rc=$?"
+# 1) CHỈ ĐỌC: SHA máy chủ có khớp cache không (ai-dang-giu chỉ so TÊN). Lệch ⇒ chuyển bootstrap.
+if MC="$(git -C "$SOURCE" ls-remote --heads origin)"; then
+  LECH="$(LC_ALL=C comm -23 <(printf '%s\n' "$MC" | awk 'NF{sub("^refs/heads/","",$2); print $1" "$2}' | LC_ALL=C sort) \
+    <(git -C "$SOURCE" for-each-ref --format='%(objectname) %(refname:lstrip=3)' refs/remotes/origin | LC_ALL=C sort))"
+  [ -z "$LECH" ] && echo "CACHE_TUOI" || printf 'CACHE_CU:\n%s\n' "$LECH"
+else echo "KHONG_DO_DUOC: ls-remote hong"; fi
+# 2) rc=0 chỉ là "không ai giữ" khi bước 1 in CACHE_TUOI
+env -u GIT_DIR -u GIT_WORK_TREE -u GIT_COMMON_DIR \
+  "$PY" "$SOURCE/ops/lease_publish.py" ai-dang-giu <duong> --root "$SOURCE"; echo "rc=$?"
+```
+
+Bên bootstrap chữa nhánh rảnh `<nhanh>` về `<upstream>` (cả hai lấy từ chẩn đoán) bằng CAS:
+
+```bash
+CU="$(git -C "<root>" rev-parse "refs/heads/<nhanh>")"   # ghi ngay khi nhận chẩn đoán
+git -C "<root>" merge-base --is-ancestor "$CU" "<upstream>" \
+  && git -C "<root>" update-ref "refs/heads/<nhanh>" "<upstream>" "$CU"; echo "rc=$?"
 ```
 
 ## Provenance CI

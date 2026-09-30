@@ -254,19 +254,21 @@ if ($gitDir -and $gitCommon -and ($gitDir -ne $gitCommon)) {
 # ───────────────────────────── công cụ ─────────────────────────────
 # `AL_DICH` RIÊNG của bản clone (như `$RUNNER_TEMP` của job CI), KHÔNG phải TEMP dùng chung: thư mục này lên ĐẦU PATH SAU khi
 # Tim-Python đã chứng minh Python, mà `ops/chay_lease_publish_test.sh` chèn `$AL_DICH` lên đầu PATH rồi gọi `python` theo TÊN
-# (cổng Python của script từng cũng vậy — nay chạy đường dẫn tuyệt đối của Tim-Python). `GetTempPath()` trên Linux là `/tmp/`
+# (cổng Python của script từng cũng vậy — nay chạy `.Source` mà Tim-Python đã chứng minh). `GetTempPath()` trên Linux là `/tmp/`
 # (1777) ⇒ ai cũng tạo được `/tmp/actionlint`; đặt `python` vào đó là mọi cổng Python ĐẠT mà không chạy gì (đo trên 131c2e7:
 # 5/5 ĐẠT, rc=0; đối chứng 4 ĐỎ, rc=1). `dist/` đã bị `.gitignore` và nằm
 # trong `_RELEASE_EXCLUDE_DIRS` (đo: 9 cổng quét cây giữ nguyên rc khi có `dist/actionlint`).
 $AlDich = Join-Path $Goc (Join-Path 'dist' 'actionlint')
-# `dist/` bị `.gitignore`: tệp THEO DÕI dưới `dist/actionlint` chỉ vào được bằng `git add -f`, tức là DỮ LIỆU của nhánh đang đo —
-# mà thư mục này lên ĐẦU PATH của wrapper lease (gọi `python` theo tên; `ops/`, ngoài write set). Đo: `python` giả theo dõi ở
-# đó ⇒ `lease-publish selftest` ĐẠT dù bộ test thoát 1 (131c2e7, AL_DICH = TEMP: ĐỎ). Chốt này chỉ thấy tệp THEO DÕI dưới
-# đúng chuỗi `dist/actionlint`; các đường còn lại (symlink `dist`, hoa thường, tệp chưa theo dõi) do danh sách CHO PHÉP chặn,
-# TẠI LÚC chèn PATH — một cổng chạy trước wrapper (mã của nhánh) vẫn ghi được vào đó.
-$alTheoDoi = @(& git ls-files -- 'dist/actionlint' 2>$null)
+# `dist/` bị `.gitignore`: mọi thứ dưới nó là của MÁY (installer, nhật ký), không phải DỮ LIỆU của nhánh đang đo — mà
+# `dist/actionlint` lên ĐẦU PATH của script lẫn wrapper lease (gọi `python` theo tên; `ops/`, ngoài write set). Đo: `python` giả
+# theo dõi ở đó ⇒ `lease-publish selftest` ĐẠT dù bộ test thoát 1 (131c2e7, AL_DICH = TEMP: ĐỎ). Hỏi CẢ mục `dist`, KHÔNG phân
+# biệt hoa thường: symlink `dist` THEO DÕI (mẫu `dist/` chỉ khớp THƯ MỤC nên nó vào bằng `git add` thường) và `DIST/…` theo dõi
+# đều làm `ls-files -- dist/actionlint` RỖNG, còn danh sách CHO PHÉP bên dưới chỉ so TÊN — `actionlint` giả qua symlink ấy lọt cả
+# hai (đo trên f1f753b: `cong_cu kiem-tra` ĐẠT, script rc=0; không có actionlint: cổng rc=3 ĐỎ). `GIT_LITERAL_PATHSPECS` làm git từ chối
+# `--icase-pathspecs` (rc=128) ⇒ rơi vào nhánh "không hỏi được git", không fail-open.
+$alTheoDoi = @(& git --icase-pathspecs ls-files -- 'dist' 2>$null)
 if ($LASTEXITCODE -ne 0 -or $alTheoDoi.Count -gt 0) {
-    Loi "dist/actionlint có tệp THEO DÕI ($($alTheoDoi -join ', ')) hoặc không hỏi được git — thư mục này lên đầu PATH nên không dùng dữ liệu của nhánh."
+    Loi "dist có mục THEO DÕI ($($alTheoDoi -join ', ')) hoặc không hỏi được git — dist/actionlint lên đầu PATH nên không dùng dữ liệu của nhánh."
     exit 2
 }
 if ($CaiCongCu) {
@@ -286,12 +288,11 @@ if ($CaiCongCu) {
         Canh 'không có bash — bỏ qua actionlint/shellcheck/rg.'
     }
 }
-# Danh sách CHO PHÉP, không phải danh sách CẤM: thư mục đầu PATH (của script lẫn wrapper lease) chỉ được chứa ĐÚNG sản phẩm của
-# `ops/cai_actionlint.sh` (đo trên ba gói ghim 1.7.7: `actionlint[.exe] LICENSE.txt README.md docs man` + gói tạm). Chốt `ls-files` ở
-# trên không thấy: symlink `dist` THEO DÕI (mẫu `.gitignore` `dist/` chỉ khớp THƯ MỤC nên nó vào bằng `git add` thường) trỏ sang
-# thư mục theo dõi có `python` (đo: `ls-files` rỗng, `lease-publish selftest` ĐẠT dù bộ test thoát 1; 131c2e7: ĐỎ); `DIST/…` theo
-# dõi (đo: `ls-files` rỗng kể cả `core.ignorecase=true`; trên hệ tệp không phân biệt hoa thường nó là `dist\…` — KHÔNG ĐO ĐƯỢC ở
-# Linux); tệp chưa theo dõi.
+# Danh sách CHO PHÉP theo TÊN, không phải danh sách CẤM: thư mục đầu PATH (của script lẫn wrapper lease) chỉ được chứa TÊN mà
+# `ops/cai_actionlint.sh` sinh ra (đo trên ba gói ghim 1.7.7: `actionlint[.exe] LICENSE.txt README.md docs man` + gói tạm). Nó chặn
+# thứ git KHÔNG thấy: tệp chưa theo dõi, symlink/junction `dist` chưa theo dõi (đo: `python` qua symlink ⇒ rc=2). Nó KHÔNG chứng
+# minh XUẤT XỨ: một `actionlint` chưa theo dõi mà installer không ghi (vd. mã của nhánh ở một lượt trước) vẫn qua; chỉ một lượt
+# installer THÀNH CÔNG (`-CaiCongCu`, wrapper lease) giải nén đè nó từ gói đã băm (đo với GNU tar: tệp giả lẫn symlink đều bị thay).
 $AlChoPhep = @('actionlint', 'actionlint.exe', 'LICENSE.txt', 'README.md', 'docs', 'man',
                'goi.gz', 'goi.zip', 'goi_giai_nen.tar.gz', 'goi_giai_nen.zip')
 if (Test-Path -LiteralPath $AlDich) {

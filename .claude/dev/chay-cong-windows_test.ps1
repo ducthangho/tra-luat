@@ -28,16 +28,20 @@
 #   t23 bo-giai-cong-cu-theo-ten-thu-tu (tuyệt đối) Tim-Python trả ĐƯỜNG DẪN của tệp đã kiểm, không trả TÊN (hàm nạp từ AST)
 #   t24 bo-giai-cong-cu-theo-ten-thu-tu (theo dõi) tệp THEO DÕI dưới `dist/actionlint` (đầu PATH của wrapper lease) ⇒ rc=2
 #   t25 bo-giai-cong-cu-theo-ten-thu-tu (cho phép) `dist/actionlint` chứa thứ installer không sinh ra — `python` chưa theo dõi;
-#                                                 symlink `dist` THEO DÕI trỏ sang thư mục có `actionlint/python` ⇒ rc=2
+#                                                 symlink `dist` CHƯA theo dõi trỏ sang thư mục có `actionlint/python` ⇒ rc=2
 #   t26 duong-dan-du-lieu-thanh-mau-wildcard (FilePath) đường dẫn công cụ chứa `[ ]` ⇒ KHÔNG gọi Start-Process, KHÔNG ĐO ĐƯỢC
+#   t27 bo-giai-cong-cu-theo-ten-thu-tu (mục dist) `dist` THEO DÕI ở dạng mà `ls-files -- dist/actionlint` không thấy — symlink `dist`;
+#                                                 `DIST/…` — kèm `actionlint` giả (TÊN được phép) ⇒ rc=2; `GIT_LITERAL_PATHSPECS` ⇒ rc=2
 # Bộ này KÍN với config git của máy chạy, với biến git trỏ kho khác (khối ngay dưới `$script:Rac`), với code page của
 # console (`Doc-Utf8`), với dấu thập phân của locale (t18 nhận `5,1s`) và với `<TEMP>/actionlint` của máy (t7, t21 tự đặt TEMP).
-# ĐỘT BIẾN để đo răng (đo trên pwsh 7.4.6/Linux, bộ 26 ca): `-Script` trỏ f2392df ⇒ 2/26 (đạt t17 — bản ấy đã so băm — và t21 —
-# dấu `;` ghim cứng dán AL_DICH vào mục PATH kế nên nó không thành một mục); 8b82d40 ⇒ 13/26 (đỏ t7 t13 t14 t15 t16 t18 t19 t21
-# t22 t23 t24 t25 t26); 66efc78 ⇒ 15/26 (đỏ t7 t13 t16 t18 t19 t21 t22 t23 t24 t25 t26); 131c608 ⇒ 16/26 (đỏ t7 t13 t18 t19 t21
-# t22 t23 t24 t25 t26); bd62cad ⇒ 18/26 (đỏ t7 t19 t21 t22 t23 t24 t25 t26); 131c2e7 ⇒ 19/26 (đỏ t7 t21 t22 t23 t24 t25 t26);
-# c8c2c6a ⇒ 21/26 (đỏ t22 t23 t24 t25 t26); 623864e ⇒ 24/26 (đỏ t25 t26).
-# Lượt 8, mỗi chốt một ca: bỏ chốt wildcard của Chay-Cong ⇒ chỉ t26; bỏ danh sách CHO PHÉP ⇒ chỉ t25 (riêng đường symlink cũng làm
+# ĐỘT BIẾN để đo răng (đo trên pwsh 7.4.6/Linux, bộ 27 ca, TMPDIR sạch): `-Script` trỏ f2392df ⇒ 2/27 (đạt t17 — bản ấy đã so băm —
+# và t21 — dấu `;` ghim cứng dán AL_DICH vào mục PATH kế nên nó không thành một mục); 8b82d40 ⇒ 13/27 (đỏ t7 t13 t14 t15 t16 t18 t19
+# t21 t22 t23 t24 t25 t26 t27); 66efc78 ⇒ 15/27 (đỏ t7 t13 t16 t18 t19 t21 t22 t23 t24 t25 t26 t27); 131c608 ⇒ 16/27 (đỏ t7 t13 t18
+# t19 t21 t22 t23 t24 t25 t26 t27); bd62cad ⇒ 18/27 (đỏ t7 t19 t21 t22 t23 t24 t25 t26 t27); 131c2e7 ⇒ 19/27 (đỏ t7 t21 t22 t23 t24
+# t25 t26 t27); c8c2c6a ⇒ 21/27 (đỏ t22 t23 t24 t25 t26 t27); 623864e ⇒ 24/27 (đỏ t25 t26 t27); f1f753b ⇒ 26/27 (chỉ t27).
+# Lượt 9: hỏi lại `ls-files -- dist/actionlint` ⇒ chỉ t27; bỏ `--icase-pathspecs` ⇒ chỉ t27 (lượt
+# `DIST/…`); `:(icase)dist` thay cờ ⇒ chỉ t27 (lượt `GIT_LITERAL_PATHSPECS`); bộ này bỏ lượt 1 của t25 × bỏ CHO PHÉP ⇒ t25 (lượt symlink
+# CHƯA theo dõi). Lượt 8, mỗi chốt một ca: bỏ chốt wildcard của Chay-Cong ⇒ chỉ t26; bỏ danh sách CHO PHÉP ⇒ chỉ t25 (riêng đường symlink cũng làm
 # t25 đỏ trên 623864e); so tên KHÔNG phân biệt hoa thường ⇒ SỐNG 26/26 (TƯƠNG ĐƯƠNG: tên chỉ khác hoa thường là CÙNG tệp trên hệ tệp
 # không phân biệt, còn trên hệ tệp phân biệt thì PATH không đọc nó thành `actionlint`). Lượt 7: Tim-Python trả TÊN ⇒ chỉ t23; bỏ chốt
 # phân cách PATH ⇒ chỉ t22; bỏ chốt tệp theo dõi ⇒ chỉ t24; AL_DICH về TEMP ⇒ t7 t21 t25 (danh sách CHO PHÉP nay soi `<TEMP>/actionlint`;
@@ -61,7 +65,8 @@
 # 2144 → 34 mục — không có ca); dòng ép UTF-8 trong harness t11/t19 (chỉ có tác dụng khi console của tiến trình con là
 # code page cũ — Windows); `try/catch` quanh danh sách CHO PHÉP (chỉ khi không liệt kê được thư mục). CHƯA ĐÓNG — khai thẳng:
 # `ops/chay_lease_publish_test.sh` (ngoài write set) vẫn gọi `python` theo tên SAU khi chèn AL_DICH; script chỉ bảo đảm thư mục ấy
-# chứa đúng sản phẩm installer TẠI LÚC chèn — một cổng chạy trước wrapper (mã của nhánh) vẫn ghi được vào đó.
+# không có mục THEO DÕI và chỉ chứa TÊN installer sinh ra TẠI LÚC chèn — một cổng chạy trước wrapper (mã của nhánh) vẫn ghi được vào
+# đó, và một `actionlint` chưa theo dõi mà installer không ghi (lượt trước) vẫn qua tới lượt installer thành công kế tiếp.
 [CmdletBinding()]
 param([string]$Script)
 Set-StrictMode -Version Latest
@@ -612,9 +617,10 @@ Ca 't24 tep THEO DOI duoi dist/actionlint => rc=2' {
     if ($a.rc -ne 2 -or $a.ra -notmatch 'THEO DÕI') { throw "dist/actionlint co tep theo doi ma khong bi tu choi (rc=$($a.rc))" }
 }
 
-# Thư mục đầu PATH (của script lẫn wrapper lease, vốn gọi `python` theo tên) chỉ được chứa ĐÚNG sản phẩm của installer — danh sách
-# CHO PHÉP. Hai đường mà chốt `ls-files` (t24) KHÔNG thấy, mỗi đường một lượt. Đo trên 623864e với wrapper + installer thật: symlink
-# `dist` THEO DÕI ⇒ `lease-publish selftest` ĐẠT dù bộ test thoát 1 (131c2e7: ĐỎ).
+# Thư mục đầu PATH (của script lẫn wrapper lease, vốn gọi `python` theo tên) chỉ được chứa TÊN mà installer sinh ra — danh sách
+# CHO PHÉP. Hai đường git KHÔNG thấy (tệp, symlink `dist` CHƯA theo dõi), mỗi đường một lượt. Lượt 8 đo trên 623864e với wrapper +
+# installer thật: symlink `dist` THEO DÕI ⇒ `lease-publish selftest` ĐẠT dù bộ test thoát 1 (131c2e7: ĐỎ) — dạng THEO DÕI nay do
+# chốt `ls-files` chặn trước (t27).
 Ca 't25 dist/actionlint chua thu installer khong sinh ra => rc=2' {
     $k = Dung-Kho
     $al = Join-Path $k (Join-Path 'dist' 'actionlint')
@@ -622,19 +628,17 @@ Ca 't25 dist/actionlint chua thu installer khong sinh ra => rc=2' {
     Set-Content -LiteralPath (Join-Path $al 'python') -Value "#!/bin/sh`nexit 0" -Encoding utf8NoBOM
     $a = Chay $k
     if ($a.rc -ne 2 -or $a.ra -notmatch 'installer không sinh ra') { throw "python CHUA theo doi trong dist/actionlint ma khong bi tu choi (rc=$($a.rc))" }
-    # Symlink `dist` THEO DÕI (mẫu `.gitignore` `dist/` chỉ khớp THƯ MỤC ⇒ `git add` thường) — `ls-files -- dist/actionlint` rỗng.
+    # Symlink/junction `dist` CHƯA theo dõi — thứ git không thấy (`ls-files -- dist` rỗng), nên chỉ danh sách CHO PHÉP chặn được.
+    # (Symlink `dist` THEO DÕI thì chốt `ls-files` chặn trước — t27.)
     $k2 = Dung-Kho
     $t = Join-Path $k2 (Join-Path 'tools' 'actionlint')
     New-Item -ItemType Directory -Force -Path $t | Out-Null
     Set-Content -LiteralPath (Join-Path $t 'python') -Value "#!/bin/sh`nexit 0" -Encoding utf8NoBOM
     if ($IsWindows) { New-Item -ItemType Junction -Path (Join-Path $k2 'dist') -Target (Join-Path $k2 'tools') | Out-Null }
-    else {
-        & ln -s tools (Join-Path $k2 'dist')
-        & git -C $k2 add -A
-        & git -C $k2 -c user.email=t@t -c user.name=t commit -qm symlink
-        if (@(& git -C $k2 ls-files -- 'dist/actionlint').Count -ne 0 -or @(& git -C $k2 ls-files -- 'dist').Count -ne 1) {
-            throw 'KHONG DO DUOC: kho gia khong dung duoc symlink dist THEO DOI ma ls-files dist/actionlint rong' }
-    }
+    else { & ln -s tools (Join-Path $k2 'dist') }
+    if (@(& git -C $k2 ls-files -- 'dist').Count -ne 0 -or
+        -not (Test-Path -LiteralPath (Join-Path $k2 (Join-Path 'dist' (Join-Path 'actionlint' 'python'))))) {
+        throw 'KHONG DO DUOC: kho gia khong dung duoc symlink dist CHUA theo doi tro toi actionlint/python' }
     $b = Chay $k2
     if ($b.rc -ne 2 -or $b.ra -notmatch 'installer không sinh ra') { throw "symlink dist tro sang thu muc co python ma khong bi tu choi (rc=$($b.rc))" }
 }
@@ -670,6 +674,44 @@ Write-Host ("TRANG_THAI=" + $(switch ($KetQua[0].TrangThai) { 'ĐẠT' { 'DAT' }
     $ra = (Doc-Utf8 { & $PwshExe -NoProfile -File $h 2>&1 } | ForEach-Object { "$_" }) -join "`n"
     if ($ra -notmatch 'TRANG_THAI=') { throw "harness khong chay toi het Chay-Cong: $ra" }
     if ($ra -notmatch 'TRANG_THAI=KDD SO_GOI=0') { throw "duong dan co wildcard van duoc dua cho Start-Process: $ra" }
+}
+
+# `dist` THEO DÕI ở hai dạng mà `ls-files -- dist/actionlint` không thấy, mỗi dạng một lượt, kèm `actionlint` giả — TÊN nằm trong danh
+# sách CHO PHÉP, nên chỉ chốt `ls-files` cản được. Đo trên f1f753b với cổng `cong_cu kiem-tra` THẬT và symlink `dist` theo dõi: ĐẠT,
+# script rc=0 (không có actionlint: cổng rc=3 ĐỎ). Windows: symlink theo dõi đòi `core.symlinks`, nên lượt ấy ghi mục 120000 vào index.
+Ca 't27 dist THEO DOI (symlink dist, DIST/...) kem actionlint gia => rc=2' {
+    $k = Dung-Kho
+    $t = Join-Path $k (Join-Path 'tools' 'actionlint')
+    New-Item -ItemType Directory -Force -Path $t | Out-Null
+    Set-Content -LiteralPath (Join-Path $t 'actionlint') -Value "#!/bin/sh`nexit 0" -Encoding utf8NoBOM
+    & git -C $k add -A
+    if ($IsWindows) {
+        $sha = @('tools' | & git -C $k hash-object -w --stdin)[0]
+        & git -C $k update-index --add --cacheinfo "120000,$sha,dist"
+    } else {
+        & ln -s tools (Join-Path $k 'dist')
+        & git -C $k add -A
+    }
+    & git -C $k -c user.email=t@t -c user.name=t commit -qm symlink
+    if (@(& git -C $k ls-files -- 'dist/actionlint').Count -ne 0 -or @(& git -C $k ls-files -- 'dist').Count -ne 1) {
+        throw 'KHONG DO DUOC: kho gia khong dung duoc symlink dist THEO DOI ma ls-files dist/actionlint rong' }
+    $a = Chay $k
+    if ($a.rc -ne 2 -or $a.ra -notmatch 'THEO DÕI') { throw "symlink dist THEO DOI kem actionlint gia ma khong bi tu choi (rc=$($a.rc))" }
+    # `GIT_LITERAL_PATHSPECS` đọc pathspec NGUYÊN VĂN: dạng `:(icase)dist` thành tên tệp lạ ⇒ rỗng ⇒ lọt; cờ `--icase-pathspecs` thì
+    # git từ chối (rc=128) ⇒ phải rc=2.
+    $c = Chay $k @() @{ GIT_LITERAL_PATHSPECS = '1' }
+    if ($c.rc -ne 2 -or $c.ra -notmatch 'không hỏi được git') { throw "GIT_LITERAL_PATHSPECS lam chot ls-files mu (rc=$($c.rc))" }
+    # `DIST/…` theo dõi: trên hệ tệp không phân biệt hoa thường (NTFS, APFS) nó CHÍNH LÀ `dist/actionlint`.
+    $k2 = Dung-Kho
+    $al = Join-Path $k2 (Join-Path 'DIST' 'actionlint')
+    New-Item -ItemType Directory -Force -Path $al | Out-Null
+    Set-Content -LiteralPath (Join-Path $al 'actionlint') -Value "#!/bin/sh`nexit 0" -Encoding utf8NoBOM
+    & git -C $k2 add -f -- DIST
+    & git -C $k2 -c user.email=t@t -c user.name=t commit -qm hoa-thuong
+    if (@(& git -C $k2 ls-files -- 'dist/actionlint').Count -ne 0 -or @(& git -C $k2 ls-files -- 'DIST').Count -ne 1) {
+        throw 'KHONG DO DUOC: kho gia khong dung duoc DIST/actionlint THEO DOI ma ls-files dist/actionlint rong' }
+    $b = Chay $k2
+    if ($b.rc -ne 2 -or $b.ra -notmatch 'THEO DÕI') { throw "DIST/actionlint THEO DOI ma khong bi tu choi (rc=$($b.rc))" }
 }
 
 foreach ($d in $script:Rac) { Remove-Item -LiteralPath $d -Recurse -Force -ErrorAction SilentlyContinue }

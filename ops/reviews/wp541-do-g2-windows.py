@@ -72,7 +72,7 @@ SHA_G1   = "2f70869a0537843e9cae78618ee7ae8c261d972d"
 # do that 18-09 tren ban va g2 cua agy cho 5 tep / +812, trong khi viec cua agy la 2 tep / +353.
 # Mot chot nhu the se bao "vuot tran" cho mot ban va KHONG vuot. Base dung la MERGE-BASE.
 SHA_BASE_SPEC = "d705623162b75b7340ee7cca54ac2d2abbddbb6f"
-BAN_BO_DO = "2026-09-30g"              # doi MOI khi sua bo do - log tu khai ban nao
+BAN_BO_DO = "2026-09-30h"              # doi MOI khi sua bo do - log tu khai ban nao
 TRAN_TEP, TRAN_DONG = 2, 400          # N7' cua spec r3
 MAU_WIN  = 'if nen_thuc == "windows":'
 # Write set cua packet #541 g2. Diff khong cham tep nao o day => do NHAM NHANH.
@@ -190,21 +190,27 @@ _PY_GIU = frozenset({"PYTHONHOME", "PYTHONUSERBASE", "PYTHONNOUSERSITE"})
 # NGOAI_PHAM_VI). Global la TEP TAM chua DUNG
 # global cua CI cong init.defaultBranch ghim ve mac dinh cua git (dat duoc ca o he thong): global de len he thong nhu tren CI,
 # con cau hinh CUC BO cua fixture van de len global (GIT_CONFIG_COUNT thi de len ca cuc bo). Doi buoc ay trong ci.yml thi
-# doi _GIT_GLOBAL_CI. Con lai (khoa he thong khac) la gioi han da biet, khong phai da dong.
+# doi _GIT_GLOBAL_CI. GIT_CONFIG_GLOBAL chi thay TEP CONFIG: ignore/attributes mac dinh ($XDG_CONFIG_HOME hoac ~/.config/git/
+# ignore|attributes) cua nguoi do VAN ap cho git con (do tren 2026-09-30g, 0ea95de: ~/.config/git/ignore `*.yaml` => ban 30g
+# 154/166, 11 ca "la"); CI khong co tep nao o do => XDG_CONFIG_HOME tro vao thu muc TAM RONG. Con lai (khoa he thong khac)
+# la gioi han da biet, khong phai da dong.
 _GIT_GLOBAL_CI = "[init]\n\tdefaultBranch = master\n[core]\n\tautocrlf = false\n\teol = lf\n\tabbrev = 7\n"
 def chay(argv, cwd, phut=60):
     fd, gc = tempfile.mkstemp(prefix="wp541-gitconfig-ci-", suffix=".ini")
+    xdg = None
     try:
+        xdg = tempfile.mkdtemp(prefix="wp541-xdg-")
         with os.fdopen(fd, "w", encoding="ascii", newline="\n") as f: f.write(_GIT_GLOBAL_CI)
         mt = {k: v for k, v in os.environ.items()
               if not k.upper().startswith("GIT_") and (not k.upper().startswith("PYTHON") or k.upper() in _PY_GIU)}
         mt.update(PYTHONUTF8="1", PYTHONIOENCODING="utf-8", PYTHONDONTWRITEBYTECODE="1", PYTHONUNBUFFERED="1",
-                  GIT_CONFIG_GLOBAL=gc)
+                  GIT_CONFIG_GLOBAL=gc, XDG_CONFIG_HOME=xdg)
         p = subprocess.run([sys.executable] + argv, cwd=str(cwd), capture_output=True,
                            text=True, encoding="utf-8", errors="replace", timeout=phut*60, env=mt)
     finally:
         try: os.remove(gc)
         except OSError: pass
+        if xdg: shutil.rmtree(xdg, ignore_errors=True)
     return p.returncode, (p.stdout or "") + (p.stderr or "")
 
 def mau_ca(out, t):
@@ -452,6 +458,14 @@ if not ("--chi-kich-thuoc" in sys.argv or "--chi-probe" in sys.argv):
         loi.append(f"python nay KHONG co PyYAML dung duoc ({(_ra_dk.strip().splitlines() or [''])[-1][:90]}):"
                    f" \"{sys.executable}\" -m pip install pyyaml"
                    " (ban nhung ps1 tu tai KHONG co pip: chay lai voi -Py <python da co PyYAML>)")
+    # Bo test con goi `shutil.which` cho bash/actionlint/shellcheck (0ea95de: t33 t137 t159 can actionlint, t137 can
+    # shellcheck, cac ca chay ops/cai_actionlint.sh can bash). Thieu thi cac ca ay in "KHONG DO DUOC: thieu `...`" va bo do ra
+    # rc=3 — nhung chi SAU ca bo test lan N7 (do tren 2026-09-30g, PATH thieu actionlint: `Cong cu day du de do` KDD, rc=3
+    # sau 2 luot bo test). Cung ly do PyYAML duoc hoi o day: hoi TRUOC, cung PATH ma chay() truyen cho bo test.
+    _thieu_cc = [c for c in ("bash", "actionlint", "shellcheck") if not shutil.which(c)]
+    if _thieu_cc:
+        loi.append(f"thieu cong cu bo test goi qua PATH: {_thieu_cc} (actionlint: ops/cai_actionlint.sh voi AL_VER;"
+                   " bash: Git Bash, khong phai bash.exe cua WSL)")
 
 rc, head, _ = git(goc, "rev-parse", "HEAD")
 if rc: loi.append("khong doc duoc HEAD")
@@ -559,8 +573,13 @@ else:
         ket("N7' kich thuoc", KDD, f"doi tuong khong phai ung vien: {len(hang)} tep, cham {cham}, ca moi "
                                    f"g2 mang vao {mang!r} — da land? nham nhanh? packet khac?")
     else:
-        ket("N7' kich thuoc", DAT if (len(hang) <= TRAN_TEP and them <= TRAN_DONG) else TRUOT,
-            f"{len(hang)} tep / +{them}")
+        # numstat in `-` (khong co so dong) cho tep binary/-diff theo attributes — ke ca attributes CUA NGUOI DO (do tren
+        # 2026-09-30g: core.attributesFile `*.py -diff` => "2 tep / +0" DAT cho 0ea95de, that +397). `-` la KHONG DO DUOC,
+        # khong phai 0; TRUOT theo so tep / so dong DA dem duoc van giu (quan sat truc tiep).
+        khong_so = [h[2] for h in hang if not (h[0].isdigit() and h[1].isdigit())]; ghi("tep_khong_so_dong", khong_so)
+        vuot = len(hang) > TRAN_TEP or them > TRAN_DONG
+        ket("N7' kich thuoc", TRUOT if vuot else (KDD if khong_so else DAT),
+            f"{len(hang)} tep / +{them}" + (f" — numstat KHONG co so dong cho {khong_so}" if khong_so else ""))
 
 # Dinh danh THAT nam o N7' (ca moi g2 mang vao), KHONG o "hau due g1": g1 da land nen moi nhanh deu
 # la hau due. Dong dau khoi dan phai tu khai theo ket qua ay (do duoc: master 44620e8 mo khoi bang

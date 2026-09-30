@@ -635,9 +635,15 @@ else echo "KHONG_DO_DUOC: ls-remote hong hoac rong"; fi
 # 2) rc=0 chỉ là "không ai giữ" khi bước 1 in CACHE_TUOI; refs/replace cục bộ đổi được nội dung lease, info/grafts
 #    (GIT_NO_REPLACE_OBJECTS KHÔNG tắt nó) biến PHÂN_KỲ thành TỤT_SAU: tắt cả hai (tệp /dev/null/grafts không thể có).
 #    Git < 2.42: core.useReplaceRefs=true ở BẤT KỲ tầng config nào bật lại replace bất chấp biến ấy ⇒ đòi refs/replace RỖNG.
-if RP="$(git -C "$SOURCE" for-each-ref refs/replace/)" && [ -z "$RP" ]; then
-  GIT_NO_REPLACE_OBJECTS=1 GIT_GRAFT_FILE=/dev/null/grafts "$PY" "$SOURCE/ops/lease_publish.py" ai-dang-giu <duong> --root "$SOURCE"; echo "rc=$?"
-else echo "KHONG_DO_DUOC: refs/replace khong rong hoac khong doc duoc"; fi
+#    Đường dẫn được chứa $ ? * [ ` ; và dấu cách: để trần thì $/glob hỏi sang đường KHÁC (rc=0 dù đường thật đang bị
+#    giữ), ; và dấu cách tách lệnh. Điền NGUYÊN VĂN vào heredoc nháy đơn; rỗng hay còn dạng <…> (quên điền) ⇒ không hỏi.
+#    `read` KHÔNG kèm `IFS=`: bỏ khoảng trắng đầu/cuối như `ai-dang-giu` strip() mục write_set (giữ lại ⇒ rc=0 giả).
+read -r D <<'TEN:'
+<duong>
+TEN:
+if RP="$(git -C "$SOURCE" for-each-ref refs/replace/)" && [ -z "$RP" ] && [ -n "${D##<*>}" ]; then
+  GIT_NO_REPLACE_OBJECTS=1 GIT_GRAFT_FILE=/dev/null/grafts "$PY" "$SOURCE/ops/lease_publish.py" ai-dang-giu "$D" --root "$SOURCE"; echo "rc=$?"
+else echo "KHONG_DO_DUOC: refs/replace khong rong hoac khong doc duoc, hoac duong dan rong/chua dien"; fi
 ```
 
 Bên bootstrap chữa nhánh rảnh `<nhanh>` về `<upstream>` (cả hai lấy từ chẩn đoán) bằng `fetch .`
@@ -663,17 +669,21 @@ thành `D`), và `commit` kế tiếp xoá lại chúng:
 ```bash
 unset GIT_DIR GIT_WORK_TREE GIT_COMMON_DIR   # đè -C như ở khối trên
 # Tên nhánh HỢP LỆ được chứa $ ` ' " ; — điền TÊN THÔ (phần "<nhánh> -> <upstream>" của chẩn đoán) vào heredoc nháy đơn: không khai triển gì.
-IFS= read -r N <<'TEN'
+# Delimiter mang `:` — ký tự tên ref KHÔNG được chứa. `TEN` trần là tên nhánh HỢP LỆ: điền nó sẽ đóng heredoc sớm.
+IFS= read -r N <<'TEN:'
 <nhanh>
-TEN
-IFS= read -r U <<'TEN'
+TEN:
+IFS= read -r U <<'TEN:'
 <upstream>
-TEN
+TEN:
 case "$(git version)" in
   "git version 1."*|"git version 2."[0-9].*|"git version 2."[12][0-9].*|"git version 2.3"[0-4].*)
     echo "KHONG_CHAY: $(git version) < 2.35 khong tu choi nhanh dang checkout o worktree khac hay dang rebase/bisect" ;;
-  *) GIT_NO_REPLACE_OBJECTS=1 GIT_GRAFT_FILE=/dev/null/grafts \
-       git -C "<root>" -c core.useReplaceRefs=false fetch --no-write-fetch-head . "$U:refs/heads/$N"; echo "rc=$?" ;;
+  *) # fetch TẠO nhánh đích khi chưa có (quên điền <nhanh> ⇒ rc=0, nhánh rác, nhánh thật đứng yên): đòi CẢ HAI ref có sẵn.
+     if git -C "<root>" show-ref --verify --quiet -- "refs/heads/$N" "$U"; then
+       GIT_NO_REPLACE_OBJECTS=1 GIT_GRAFT_FILE=/dev/null/grafts \
+         git -C "<root>" -c core.useReplaceRefs=false fetch --no-write-fetch-head . "$U:refs/heads/$N"; echo "rc=$?"
+     else echo "KHONG_CHAY: refs/heads/$N hoac $U khong co san trong <root> (quen dien ten?)"; fi ;;
 esac
 ```
 

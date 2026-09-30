@@ -1862,6 +1862,9 @@ DOT_BIEN = {
 _CA_668 = {"t52_": 't52_gom_manh_phai_DO_khi_thieu_trung_lech_va_moi_chot_co_THE_RIENG',
            "t53_": 't53_che_do_doc_FAIL_CLOSED_moi_cau_hinh_la_co_THE_RIENG_va_van_tay_bam_NGUON',
            "t54_": 't54_main_chon_DUNG_vong_ban_kinh_theo_che_do'}
+# F44: neo TRỌN DÒNG (kèm xuống dòng) của nhánh nền đỏ trong `main` — không trùng chính bảng này (thay ở lần xuất hiện ĐẦU).
+_NEN_M = '            _ket_thuc_manh(k, n, ra, ten, None, "nền đỏ hoặc tiền kiểm bị bỏ qua — không đo", _van_tay())\n'
+_NEN_IN = '            print(f"  ĐỎ  mảnh {k}/{n} [M-nen]: nền KHÔNG xanh — không đo bán kính, không ghi tệp")\n'
 for _ten, _ca, _tim, _thay in (
     ('f7_cau_hinh_nuot', 't54_',
      '        print(f"  ĐỎ  cấu hình chế độ: {ex}")\n        return 2\n',
@@ -2233,6 +2236,14 @@ for _ten, _ca, _tim, _thay in (
     ('f42_ra_lower', 't54_', '        k, n, ra = tham_so\n', '        k, n, ra = tham_so; ra = ra.lower()\n'),
     ('f42_worker_manh_tran_3', 't54_', '        for nhom, rc, ra_con in _phong_con(ten, (), _so_tien_trinh_ban_kinh()) if ten else ():\n', '        for nhom, rc, ra_con in _phong_con(ten, (), min(3, _so_tien_trinh_ban_kinh())) if ten else ():\n'),
     ('f42_worker_du_tran_3', 't54_', '    so_tien_trinh = _so_tien_trinh_ban_kinh()\n', '    so_tien_trinh = min(3, _so_tien_trinh_ban_kinh())\n'),
+    # F44 (review lượt 20): nhánh NỀN ĐỎ `[M-nen]` của `main` cũng phải nhận NGUYÊN k/N/đường ra (ô `noi-nen-*` của t54).
+    ('f44_nen_k_mod_8', 't54_', _NEN_M, _NEN_M.replace('(k, n, ra, ten,', '(k % 8, n, ra, ten,')),
+    ('f44_nen_n_luy_thua_2', 't54_', _NEN_M, _NEN_M.replace('(k, n, ra,', '(k, 1 << (n.bit_length() - 1), ra,')),
+    ('f44_nen_ra_strip', 't54_', _NEN_M, _NEN_M.replace('n, ra, ten', 'n, ra.strip(), ten')),
+    ('f44_nen_ra_lower', 't54_', _NEN_M, _NEN_M.replace('n, ra, ten', 'n, ra.lower(), ten')),
+    ('f44_nen_ten_n8', 't54_', _NEN_M, _NEN_M.replace('ra, ten, None', 'ra, _phan_manh(k, 8), None')),
+    ('f44_nen_in_k_mod_8', 't54_', _NEN_IN, _NEN_IN.replace('mảnh {k}/{n}', 'mảnh {k % 8}/{n}')),
+    ('f44_nen_chi_tien_kiem', 't54_', '        if hong or tien_kiem_bo_qua:\n            _ket_thuc_manh(', '        if tien_kiem_bo_qua:\n            _ket_thuc_manh('),
     ('f27_full_seed', 't54_', '    else:\n        print(f"\\nBÁN KÍNH ĐỘT BIẾN ({len(DOT_BIEN)} đột biến, mỗi ca đúng một"',
      '    else:\n        loi_db = loi_nen\n        print(f"\\nBÁN KÍNH ĐỘT BIẾN ({len(DOT_BIEN)} đột biến, mỗi ca đúng một"'),
 ):
@@ -6951,6 +6962,10 @@ def t54_main_chon_DUNG_vong_ban_kinh_theo_che_do():
         so = workers
         if mode == "du":
             mong[name] = [0, day(), ra(duoi=du_ra(0))]
+        elif mode in ("nen", "nen_do"):   # F44: nền đỏ do TIỀN KIỂM bỏ qua / do CA đỏ (`hong or tien_kiem_bo_qua`)
+            kn = f"{ki}/{ni}"
+            mong[name] = [1, dau + ghi("None", "nen", kn, path),
+                          ra(**({"tk": [tb]} if mode == "nen" else {"do": [cn]}), duoi=[f"  ĐỎ  mảnh {kn} [M-nen]: nền KHÔNG xanh — không đo bán kính, không ghi tệp"])]
         else:
             kn = f"{ki}/{ni}"
             mong[name] = [0, dau + [f"phong:True:[]:{so}"] + ghi("dung", "none", kn, path), ra(duoi=manh_ra(kn))]
@@ -7398,6 +7413,7 @@ def _do_co_symlink():
         return False
 
 
+_TRUOC_NANG_LUC = frozenset(DOT_BIEN)   # F43: ảnh DOT_BIEN TRƯỚC mọi đăng ký theo năng lực
 _CO_SYMLINK = _do_co_symlink()
 if _CO_SYMLINK:   # F24: chỉ đo được ở nền có symlink (xem `_do_co_symlink`)
     DOT_BIEN["f24_nhan_symlink"] = ("ops/cong_cu_test.py", '        if p.is_symlink() or not p.is_file():\n', '        if not p.is_file():  # đột biến: nhận symlink\n',
@@ -7429,6 +7445,8 @@ if not _CO_SYMLINK:
     DOT_BIEN["f41_f40_luon_ra_ngoai"] = ("ops/cong_cu_test.py", '    DOT_BIEN["f40_false_khong"] = ("ops/cong_cu_test.py", \'if not _CO_SYMLINK:\\n\', \'if False:\\n\', "TEP_TEST", _KEM_TEP_TEST, _CA_668["t52_"])\n', '    DOT_BIEN["f40_false_khong"] = ("ops/cong_cu_test.py", \'if not _CO_SYMLINK:\\n\', \'if False:\\n\', "TEP_TEST", _KEM_TEP_TEST, _CA_668["t52_"])\n' + 'DOT_BIEN["f40_false_luon"] = DOT_BIEN["f40_false_khong"]\n',
                                          "TEP_TEST", _KEM_TEP_TEST, _CA_668["t52_"])
     DOT_BIEN["f40_false_khong"] = ("ops/cong_cu_test.py", 'if not _CO_SYMLINK:\n', 'if False:\n', "TEP_TEST", _KEM_TEP_TEST, _CA_668["t52_"])
+# F43: tên đăng ký theo năng lực = HIỆU hai ảnh — quan sát KHÔNG lọc theo oracle, tên mới ngoài oracle ⇒ t52 ĐỎ.
+_TEN_NANG_LUC = frozenset(DOT_BIEN) - _TRUOC_NANG_LUC
 # NỢ (KHÔNG ĐO ĐƯỢC): nền VẮNG thuộc tính `os.symlink` (nhánh AttributeError của `_do_co_symlink`) không được đo trong bộ này —
 # quyết định chủ kho sau review lượt 17 (F39); runner chuẩn Ubuntu/Windows có `os.symlink`; không mô phỏng.
 
@@ -7599,8 +7617,9 @@ def _ban_ghi_du_gia(ten):
                               for t in _cac_ca_da_chay(())}]
 
 
-_TEN_SL = ("f24_nhan_symlink", "f35_writer_broken_link", "f37_bo_f24", "f37_bo_f35", "f40_false_luon")
-_TEN_SL_FALSE = ("f37_dk_luon_dung", "f40_false_khong")   # F40: đăng ký CHỈ ở nền KHÔNG symlink
+_TEN_SL = ("f24_nhan_symlink", "f35_writer_broken_link", "f37_bo_f24", "f37_bo_f35", "f40_false_luon",
+           "f41_bo_f40_luon", "f41_f40_khong_ra_ngoai")
+_TEN_SL_FALSE = ("f37_dk_luon_dung", "f40_false_khong", "f41_bo_f40_khong", "f41_f40_luon_ra_ngoai")   # F40: đăng ký CHỈ ở nền KHÔNG symlink
 
 
 def _in_tu_kiem_gom():
@@ -7860,7 +7879,7 @@ def _in_tu_kiem_gom():
             _ket_thuc_manh(0, n, str(gay), cac, None, "giả", vt)
             kq["ghi_gay"] = [gay.exists() or gay.is_symlink()]
     # Chủ kho sau review lượt 17: MỘT ô — năng lực symlink ↔ tên đột biến symlink đã đăng ký (không nạp lại, không mô phỏng).
-    kq["nang_luc"] = [_CO_SYMLINK, sorted(t for t in DOT_BIEN if t in _TEN_SL or t in _TEN_SL_FALSE)]
+    kq["nang_luc"] = [_CO_SYMLINK, sorted(_TEN_NANG_LUC)]
     print("KQ " + json.dumps(kq, ensure_ascii=True))
 
 
@@ -7869,6 +7888,10 @@ def _luoi_noi_main():
     rows += [(f"noi-{mode}-w{w}", mode, 9, 16, "x", w) for mode in ("du", "manh") for w in range(1, 17)]
     rows += [(f"noi-path-{i}", "manh", 9, 16, path, 3) for i, path in enumerate(
         ("x", " space ", "Mixed.TXT", "dir/Sub Dir/Mảnh.TXT", "  ", "d con/manh 3.txt"))]
+    # F44: nhánh NỀN ĐỎ `[M-nen]` của main cũng nhận NGUYÊN k/N/đường ra (k>=8, N không lũy thừa 2, đường khoảng trắng/hoa).
+    rows += [(f"noi-nen-{i}", "nen", k, n, path, 3) for i, (k, n, path) in enumerate(
+        ((9, 16, " space "), (15, 16, "Mixed.TXT"), (4, 5, "dir/Sub Dir/Mảnh.TXT"), (10, 11, "x"), (0, 2, "  ")))]
+    rows += [("noi-nen-do", "nen_do", 10, 11, " Đỏ Sub/Mixed.TXT ", 3)]
     return rows
 
 
@@ -7977,8 +8000,8 @@ def _in_tu_kiem_main():
     }
     noi = {name: (mode, k, n, path, workers) for name, mode, k, n, path, workers in _luoi_noi_main()}
     for name, (mode, k, n, path, workers) in noi.items():
-        env = {_BIEN_MANH: f"{k}/{n}", _BIEN_MANH_RA: path} if mode == "manh" else {}
-        kich_ban[name] = ({**env, tt: str(workers)}, {})
+        env = {_BIEN_MANH: f"{k}/{n}", _BIEN_MANH_RA: path} if mode != "du" else {}
+        kich_ban[name] = ({**env, tt: str(workers)}, {"tk": {tb}} if mode == "nen" else {"ca_do": {cn}} if mode == "nen_do" else {})
     for ten, (env, dat) in kich_ban.items():
         kb.clear()
         kb.update(dat)
@@ -7994,7 +8017,7 @@ def _in_tu_kiem_main():
         cu_doc, cu_so = g["_doc_che_do"], g["_so_tien_trinh_ban_kinh"]
         if ten in noi:
             mode, ki, ni, path, workers = noi[ten]
-            g["_doc_che_do"] = lambda env: (mode, (ki, ni, path) if mode == "manh" else None)
+            g["_doc_che_do"] = lambda env: ("du", None) if mode == "du" else ("manh", (ki, ni, path))
             g["_so_tien_trinh_ban_kinh"] = lambda: workers
         try:
             with contextlib.redirect_stdout(buf):

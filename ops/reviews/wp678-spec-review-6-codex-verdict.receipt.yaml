@@ -1,0 +1,91 @@
+# BIEN NHAN GIAO HANG — cross-review LUOT 6 dac ta wp678 (PR #679), KHAC NEN (codex).
+# Doi tuong review: DAC TA ops/specs/lease-id-ep-kieu-yaml-r6.md (khong phai ma).
+
+schema_version: 2
+receipt_id: wp678-spec-review-6-codex-aa0cc89f
+kind: review_delivery_receipt
+packet_id: wp678
+packet_slug: LEASE-ID-EP-KIEU-YAML
+packet_issue: 678
+mission_issue: 682
+revision_reviewed: 6
+spec_path: ops/specs/lease-id-ep-kieu-yaml-r6.md
+spec_sha256: d1f9dd7903c99df03b9e65bc06a2175eb43e0e602758a6945508ff33af76244c
+lease_id: khong-co-lease
+lease_ghi_chu: >-
+  Luot review DAC TA truoc khi packet duoc giao; wp678 chua co lease (Q8 o #682: cap sau khi lease cua #687 va #677
+  nha ops/lease_publish_test.py). Bien nhan duoc ghi so theo chi thi chu kho "merge, land va bookeeping"
+  (neo ben: pull/679#issuecomment-5889749874), khong co lease ghi bien nhan.
+luot: 6
+role: reviewer
+provider: codex
+executor_provider: claude
+executor_ghi_chu: 'Sonnet 5.5, effort high (agent va-spec-sonnet)'
+cross_provider: true
+assurance: cross_approved
+verdict: approve
+so_p0: 0
+so_p1: 0
+so_p2: 0
+so_p3: 0
+so_dem_theo: lop
+verdict_path: ops/reviews/wp678-spec-review-6-codex-verdict.md
+verdict_sha256: 9569bf0d715fe8daed90aba00ccdb2e39262dd12f094713ceb38722f8d10c18d
+verdict_bytes: 31932
+hint_patch_sha256: e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+hint_patch_bytes: 0
+hint_patch_ghi_chu: HINT.patch cua luot nay KHONG luu vao kho; chi neo bang bam. Ban chieu tom tat o evidence_ban_chieu.
+reviewed_sha: 03a7219c9f3df4e6304f499b79df968aa7d386cb
+evidence_url: https://github.com/ducthangho/tra-luat/blob/92f21eb899ba26360787c3bcab4f5b6fc6dc2721/ops/reviews/wp678-spec-review-6-codex-verdict.md
+evidence_ban_chieu: https://github.com/ducthangho/tra-luat/pull/679#issuecomment-5889116818
+
+model_reviewer_identity:
+  provider: openai_codex
+  surface: codex_cli
+  session_run_id: aa0cc89ffe6e4333b17a245516126fd6
+  prompt_sha256: fb5a65bf47a41448fb959de94a7450cc0ba6f0b0e65eafbf54f56716b5379471
+  prompt_kin_hoan_toan: true
+  thoi_luong_giay: 1059.341
+  ma_thoat: 0
+  model_yeu_cau: gpt-6-astra
+  effort_yeu_cau: xhigh
+  header_luot_chay: 'model: gpt-6-astra · reasoning effort: xhigh (doc tu stderr.log cua run)'
+  neo_boi_launcher: >-
+    `launcher.py run` boc `codex exec` trong mirror RIENG (clone day du, detached dung reviewed_sha), prompt qua
+    {PROMPT_FILE} (ban chup bat bien), --expected-head va --expected-repo. (b) THUAT LAI boi phien dieu phoi: run.json/prompt/stderr.log cua launcher
+    KHONG luu trong kho nen KHONG tai kiem duoc tu kho — xem caveat NGUON-LAUNCHER-THUAT-LAI.
+  KHONG_do_duoc: >-
+    Model thuc su phuc vu moi yeu cau. codex-cli khong xuat modelUsage; header chi la dieu CLI cong bo cho luot.
+
+github_submitter_identity:
+  actor: ducthangho
+  la_tac_gia_PR: true
+  ghi_chu: >-
+    ADR-0040: bien nhan do tai khoan tac gia dang KHONG thanh required check hay merge authorization. Truong nay ghi
+    AI VAN CHUYEN (phien agent bang credential chu kho), khong cap tham quyen.
+
+anchor:
+  loai: canonical_ancestry
+  cuong_do: trung_binh
+  mo_ta: >-
+    Neo bang verdict_sha256 + commit dau tien chua tep verdict (92f21eb8), to tien cua HEAD khi bien nhan duoc ghi.
+    Khong tag luu-tru/*, khong protected ref, khong check object ⇒ TRUNG BINH: chet neu lich su bi viet lai.
+
+run_neo:
+  run_id: aa0cc89ffe6e4333b17a245516126fd6
+  prompt_sha256: fb5a65bf47a41448fb959de94a7450cc0ba6f0b0e65eafbf54f56716b5379471
+  prompt_kin_hoan_toan: true
+  worktree_sach: true
+  thoi_luong_giay: 1059.341
+  stdout_byte: 220
+  stderr_byte: 1063053
+  ma_thoat: 0
+
+verdict_usage_caveats:
+  - id: NGUON-LAUNCHER-THUAT-LAI
+    muc: P3
+    mo_ta: >-
+      (a) DO DUOC tu kho luc ghi so: verdict_sha256/verdict_bytes, spec_sha256 tai reviewed_sha, reviewed_sha, mo neo 92f21eb.
+      (b) THUAT LAI, KHONG tai kiem duoc tu kho: model_reviewer_identity (header model/effort, run_id, prompt_sha256,
+      thoi_luong, ma_thoat), run_neo (worktree_sach, stdout/stderr byte), hint_patch_sha256/bytes, evidence_ban_chieu va chi
+      thi chu kho. (c) Ket qua sandbox trong verdict la cua luot review luc ay, KHONG phai phep chay lai luc ghi so.

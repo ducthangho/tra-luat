@@ -1,8 +1,8 @@
-#Requires -Version 7.0
+#Requires -Version 7.1
 # Phản chứng cho `.claude/dev/chay-cong-windows.ps1` — dựng một kho GIẢ (đích cổng là stub) rồi chạy
 # script THẬT, byte-identical, trong tiến trình riêng. Mỗi ca khoá một lớp của cross-review PR #602:
 #   t1 trang-thai-lac-quan-song-sot-cau-lenh-nem  release-bundle rc=0 mà không ghi zip / zip CŨ ⇒ ĐỎ
-#   t2 bo-giai-cong-cu-theo-ten-thu-tu            `bash.exe` nuốt argv đầu PATH ⇒ không được ĐẠT
+#   t2 bo-giai-cong-cu-theo-ten-thu-tu            `bash`/`bash.exe` nuốt argv đầu PATH ⇒ không được ĐẠT
 #   t3 runner-tu-nhiem-cay-dang-do                sau một lượt, `git status` của kho giả SẠCH
 #   t4 nhan-noi-hon-phep-do (nếp git)             `.git/config.lock` ⇒ rc=4, không in "→ 7" suông
 #   t5 nhan-noi-hon-phep-do (khởi động)           Start-Process hỏng ⇒ không in "TREO"
@@ -13,19 +13,26 @@
 #   t10 duong-dan-du-lieu-thanh-mau-wildcard      gốc kho dưới `…[1]…` ⇒ rc=2 + nói "wildcard", không "không tìm thấy gốc"
 #   t11 nhan-noi-hon-phep-do (giết)               `Kill` ném, tiến trình còn sống ⇒ không in "ĐÃ GIẾT"
 #   t12 nhan-noi-hon-phep-do (tham số)            `-HanGiay 0` bị từ chối, không thành "TREO > 0s"
-#   t13 do-loi-goi-khong-do-hieu-qua (git)        biến môi trường VÀ `[include]` đè `core.abbrev` ⇒ rc=4 (mỗi đường một chốt)
+#   t13 do-loi-goi-khong-do-hieu-qua (git)        biến môi trường, `[include]`, biến `GIT_CONFIG` (legacy) che `core.abbrev` ⇒ rc=4 (mỗi đường một chốt)
 #   t14 cong-chay-ngoai-hop-dong-chay-cong        bundle treo quá `-HanGiay` ⇒ không ĐẠT, không chờ trọn
 #   t15 do-loi-goi-khong-do-hieu-qua (zip)        zip cũ KHÔNG xoá được + bundle rc=0 không ghi ⇒ không ĐẠT
-#   t16 treo-ngoai-han-gio                        cổng thoát ngay, CHÁU giữ stdout ⇒ không chờ quá `-HanGiay`
+#   t16 treo-ngoai-han-gio                        cổng thoát ngay, CHÁU giữ stdout ⇒ chờ THÊM < 15 s so với lượt nền; ngoài Windows rc=4
 #   t17 khoa-hep-hon-hop-dong (tất định)          hai zip KHÁC nhau ⇒ tất định ĐỎ
-# Bộ này KÍN với config git của máy chạy (khối `GIT_CONFIG_*` ngay dưới `$script:Rac`).
-# ĐỘT BIẾN để đo răng (đo trên pwsh 7.4.6/Linux): `-Script` trỏ f2392df ⇒ 1/17 (chỉ t17 đạt — bản ấy đã so băm);
-# 8b82d40 ⇒ 13/17 (đỏ t13 t14 t15 t16); 66efc78 ⇒ 16/17 (đỏ t16). Gỡ riêng MỘT mảnh vá thì chỉ ca của mảnh ấy
-# ĐỎ (14 đột biến trên script + 1 gỡ khối kín của chính bộ này, đo dưới config toàn cục của ci.yml ⇒ chỉ t4);
-# riêng gỡ `exit 4` của nếp git đỏ cả t4 lẫn t13 (chung chốt), `$td` khởi ĐẠT đỏ t1 t14 t15 (chung giá trị khởi tạo).
-# `$ha -eq $hb` từng không có ca nào (bỏ nó sống qua 15 ca cũ) — nay là t17. Mảnh KHÔNG ca nào đo được — khai thẳng:
-# `[bool]$ha`, `[string]$ban`, `-ErrorAction Stop` của Start-Process (tương đương: nó vốn ném lỗi kết thúc), và
-# `$null = $tt.Handle` (phòng ngừa CHỈ-Windows; gỡ ra trên Linux vẫn 17/17 — cần lượt Windows thật để có răng).
+#   t18 xa-qua-han-nuot-cong-do                   cổng rc=1 + CHÁU giữ stdout ⇒ vẫn ĐỎ (rc=1), in log cổng, thời lượng gồm phần chờ
+# Bộ này KÍN với config git của máy chạy VÀ với biến git trỏ kho khác (khối ngay dưới `$script:Rac`).
+# ĐỘT BIẾN để đo răng (đo trên pwsh 7.4.6/Linux): `-Script` trỏ f2392df ⇒ 1/18 (chỉ t17 đạt — bản ấy đã so băm);
+# 8b82d40 ⇒ 13/18 (đỏ t13 t14 t15 t16 t18); 66efc78 ⇒ 15/18 (đỏ t13 t16 t18); 131c608 ⇒ 16/18 (đỏ t13 t18).
+# 29 đột biến trên script: 25 đỏ ÍT NHẤT ca của mảnh nó gỡ, 4 sống đúng là bốn mảnh khai ở cuối đoạn này. Ca chung
+# chốt thì khai: gỡ `exit 4` của nếp git đỏ t4 lẫn t13; `$td` khởi ĐẠT đỏ t1 t14 t15; bỏ xả luồng có hạn (bỏ hẳn /
+# vô hạn / `WaitForExit()` / cố định 30 s) đỏ t16 lẫn t18 (vế thời lượng). Gỡ khối kín config của chính bộ này,
+# dưới config toàn cục của ci.yml ⇒ chỉ t4.
+# Từng SỐNG rồi mới có ca: `$ha -eq $hb` (nay t17); nhánh xả-quá-hạn in "TREO" mà vẫn đếm ĐẠT (nay t16 đọc rc);
+# giải `bash` theo tên trên Linux (nay t2 đặt cả `bash`). Mảnh KHÔNG ca nào đo được trên nền này — khai thẳng:
+# `[bool]$ha`, `[string]$ban`, `-ErrorAction Stop` của Start-Process (tương đương: nó vốn ném lỗi kết thúc);
+# `$null = $tt.Handle` và `catch { $xa = $false }` (chỉ có tác dụng khi `.Handle`/`WaitForExitAsync` ném — Windows,
+# pwsh 7.0); `#Requires -Version 7.1` (bộ này chạy bằng pwsh ≥ 7.1); sàn 1 s của `$conMs` (chỉ đổi kết quả khi cổng
+# thoát sát hạn); phần khối kín cho `GIT_INDEX_FILE`/`GIT_DIR` (đo bằng chạy dưới biến ấy — gỡ ra ⇒ index kho khác
+# 2144 → 34 mục — không có ca).
 [CmdletBinding()]
 param([string]$Script)
 Set-StrictMode -Version Latest
@@ -64,6 +71,11 @@ Set-Content -LiteralPath $GitRong -Value '' -Encoding utf8NoBOM
 $script:Rac += $GitRong
 $env:GIT_CONFIG_GLOBAL = $GitRong; $env:GIT_CONFIG_NOSYSTEM = '1'
 $env:GIT_CONFIG_COUNT = $null; $env:GIT_CONFIG_PARAMETERS = $null
+# …và KÍN với biến git trỏ KHO KHÁC: hook `pre-commit` của `git commit -a` xuất `GIT_INDEX_FILE` TUYỆT ĐỐI, khi ấy
+# `git -C <kho giả> add -A` ghi đè index của kho THẬT (đo: 2144 → 34 mục, index trỏ blob không có); `GIT_DIR` cùng họ
+# (đo: `git -C <kho giả> commit` ghi vào kho mà biến trỏ tới). t13 tự đặt lại `GIT_CONFIG` qua `Chay`.
+foreach ($n in 'GIT_DIR', 'GIT_WORK_TREE', 'GIT_INDEX_FILE', 'GIT_OBJECT_DIRECTORY', 'GIT_ALTERNATE_OBJECT_DIRECTORIES',
+               'GIT_COMMON_DIR', 'GIT_CONFIG') { [Environment]::SetEnvironmentVariable($n, $null) }
 function Dung-Kho {
     $d = Join-Path ([IO.Path]::GetTempPath()) ('ccw-' + [guid]::NewGuid().ToString('N').Substring(0, 10))
     $script:Rac += $d
@@ -145,8 +157,12 @@ Ca 't2 bash.exe nuot argv dau PATH => lease khong DAT' {
     if ($IsWindows) {
         Set-Content -LiteralPath (Join-Path $shim 'bash.cmd') -Value '@exit /b 0' -Encoding ascii
     } else {
-        Set-Content -LiteralPath (Join-Path $shim 'bash.exe') -Value "#!/bin/sh`nexit 0" -Encoding utf8NoBOM
-        & chmod +x (Join-Path $shim 'bash.exe')
+        # Cả tên TRẦN `bash`: chỉ đặt `bash.exe` thì ca chỉ bắt bộ giải thử `bash.exe` trước — bộ giải `Get-Command bash`
+        # (cùng lớp "theo tên") sống qua cả bộ trên Linux (đo: 18/18).
+        foreach ($n in 'bash.exe', 'bash') {
+            Set-Content -LiteralPath (Join-Path $shim $n) -Value "#!/bin/sh`nexit 0" -Encoding utf8NoBOM
+            & chmod +x (Join-Path $shim $n)
+        }
     }
     $a = Chay $k @() @{ STUB_RC_LEASE = '1'; PATH = "$shim$Sep$env:PATH" }
     if ($a.ra -match 'lease-publish selftest\s+rc=0') { throw 'shim duoc chon, cong lease DAT ma khong chay gi' }
@@ -318,6 +334,16 @@ Ca 't13 bien moi truong / [include] de core.abbrev => rc=4, khong in "→ 7" suo
     & git -C $k2 config --local include.path $inc
     $b = Chay $k2
     if ($b.rc -ne 4 -or $b.ra -notmatch 'KHÔNG ĐẶT ĐƯỢC') { throw "[include] de abbrev 8 ma script bao nep dung (rc=$($b.rc))" }
+    # Đường thứ ba, chốt riêng: biến `GIT_CONFIG` (legacy) làm `--local` ghi trượt (rc=129) và `--get` CHỈ đọc tệp ấy —
+    # tệp nói 7 trong khi mọi lệnh git khác dùng 8 từ `[include]`.
+    $k3 = Dung-Kho
+    $inc3 = Join-Path (Split-Path $k3) 'inc.gitconfig'
+    Set-Content -LiteralPath $inc3 -Value "[core]`n`tabbrev = 8" -Encoding utf8NoBOM
+    & git -C $k3 config --local include.path $inc3
+    $leg = Join-Path (Split-Path $k3) 'legacy.gitconfig'
+    Set-Content -LiteralPath $leg -Value "[core]`n`tautocrlf = false`n`teol = lf`n`tabbrev = 7" -Encoding utf8NoBOM
+    $c = Chay $k3 @() @{ GIT_CONFIG = $leg }
+    if ($c.rc -ne 4 -or $c.ra -notmatch 'KHÔNG ĐẶT ĐƯỢC') { throw "GIT_CONFIG legacy che abbrev 8 ma script bao nep dung (rc=$($c.rc))" }
 }
 
 Ca 't14 bundle treo qua HanGiay => khong DAT, khong cho tron' {
@@ -360,7 +386,12 @@ Ca 't15 zip cu KHONG xoa duoc + bundle rc=0 khong ghi => khong DAT' {
 
 # Cổng thoát NGAY nhưng để lại CHÁU giữ stdout: hạn giờ phải phủ cả phần xả luồng (Start-Process trên Unix đọc qua
 # ỐNG, `WaitForExit()` không hạn chờ EOF). Windows chuyển hướng bằng handle tệp ⇒ vế trạng thái chỉ đòi ngoài Windows.
+# Đo phần chờ THÊM so với một lượt nền cùng tham số: trần tuyệt đối 40 s để lọt một bản xả cố định 30 s — gấp 6 lần
+# `-HanGiay 5` (đo: 34 s vẫn ĐẠT). Vế trạng thái đọc MÃ THOÁT, không chỉ đọc chữ: một bản in "TREO" mà vẫn đếm ĐẠT
+# thì script thoát 0 (đo).
 Ca 't16 cong thoat ngay, CHAU giu stdout => khong treo qua -HanGiay' {
+    $k0 = Dung-Kho
+    $w0 = [Diagnostics.Stopwatch]::StartNew(); $null = Chay $k0 @('-HanGiay', '5'); $w0.Stop()
     $k = Dung-Kho
     $pidf = Join-Path (Split-Path $k) 'chau.pid'
     Set-Content -LiteralPath (Join-Path $k 'ops/cong_cu.py') -Encoding utf8NoBOM -Value @'
@@ -376,8 +407,10 @@ sys.exit(0)
         $w.Stop()
         if (Test-Path -LiteralPath $pidf) { Stop-Process -Id ([int](Get-Content -LiteralPath $pidf)) -Force -ErrorAction SilentlyContinue }
     }
-    if ($w.Elapsed.TotalSeconds -ge 40) { throw "cong thoat roi ma cho CHAU $([math]::Round($w.Elapsed.TotalSeconds))s voi HanGiay 5" }
+    $them = $w.Elapsed.TotalSeconds - $w0.Elapsed.TotalSeconds
+    if ($them -ge 15) { throw "cong thoat roi ma cho CHAU them $([math]::Round($them))s so voi luot nen $([math]::Round($w0.Elapsed.TotalSeconds))s (HanGiay 5)" }
     if (-not $IsWindows -and $a.ra -match 'cong_cu kiem-tra\s+rc=0') { throw 'CHAU con giu stdout ma cong van DAT' }
+    if (-not $IsWindows -and $a.rc -ne 4) { throw "CHAU con giu stdout ma rc_script=$($a.rc), mong 4 (KHONG DO DUOC)" }
 }
 
 # Lõi của cổng: hai lần build ra zip KHÁC nhau ⇒ ĐỎ. Mọi ca khác dùng stub ghi CÙNG byte, nên bỏ `$ha -eq $hb` không ca nào thấy.
@@ -385,6 +418,28 @@ Ca 't17 hai zip KHAC nhau => tat dinh DO' {
     $k = Dung-Kho
     $a = Chay $k @('-Muc', 'day-du') @{ STUB_BUNDLE = 'khac' }
     if ($a.ra -notmatch 'release-bundle tất định\s+rc=1' -or $a.rc -eq 0) { throw "a.zip khac b.zip ma tat dinh khong DO (rc_script=$($a.rc))" }
+}
+
+# Cổng ĐỎ (rc=1) mà để lại CHÁU giữ stdout — hai sự cố hay đi cùng nhau (ca hỏng bỏ dở phần dọn). rc đã đọc từ chính
+# tiến trình ⇒ vẫn ĐỎ; hạ thành KHÔNG ĐO ĐƯỢC là exit 4 + "ĐỎ 0" + log cổng không in (đo trên 131c608).
+Ca 't18 cong rc=1 + CHAU giu stdout => van DO, in log' {
+    $k = Dung-Kho
+    $pidf = Join-Path (Split-Path $k) 'chau.pid'
+    Set-Content -LiteralPath (Join-Path $k 'ops/cong_cu.py') -Encoding utf8NoBOM -Value @'
+import os, subprocess, sys
+if sys.argv[1:2] == ["kiem-tra"]:
+    print("DONG-LOI-CUA-CONG-T18", flush=True)
+    p = subprocess.Popen([sys.executable, "-c", "import time; time.sleep(60)"])
+    open(os.environ["STUB_CHAU_PID"], "w").write(str(p.pid))
+    sys.exit(1)
+sys.exit(0)
+'@
+    try { $a = Chay $k @('-HanGiay', '5') @{ STUB_CHAU_PID = $pidf } }
+    finally { if (Test-Path -LiteralPath $pidf) { Stop-Process -Id ([int](Get-Content -LiteralPath $pidf)) -Force -ErrorAction SilentlyContinue } }
+    if ($a.rc -ne 1) { throw "cong rc=1 ma rc_script=$($a.rc), mong 1 (DO)" }
+    if ($a.ra -notmatch 'DONG-LOI-CUA-CONG-T18') { throw 'cong DO ma log cua no khong duoc in' }
+    # Ngoài Windows script chờ cháu tới hạn 5 s: cột thời lượng phải gồm phần ấy, không in "0.1s".
+    if (-not $IsWindows -and $a.ra -notmatch 'cong_cu kiem-tra\s+rc=1\s+([4-9]|1\d)(\.\d+)?s') { throw 'cot thoi luong khong gom phan cho CHAU' }
 }
 
 foreach ($d in $script:Rac) { Remove-Item -LiteralPath $d -Recurse -Force -ErrorAction SilentlyContinue }

@@ -17,7 +17,8 @@
     `workflow_dispatch`, KHÔNG re-run, KHÔNG đẩy gì lên remote, KHÔNG gọi GitHub API.
     Viết ra để tôn chỉ thị `manual_ci_budget: 0` mà vẫn đo được trên nền Windows.
 
-    BA THỨ PHẢI ĐẶT ĐÚNG TRƯỚC KHI ĐO, nếu không cổng sẽ ĐỎ vì máy chứ không vì mã:
+    BA NẾP ĐẶT TRƯỚC KHI ĐO để máy chạy giống CI. Cột phải nói điều gì ĐO ĐƯỢC khi thiếu — chỉ
+    `core.abbrev` làm cổng ĐỎ vì máy; hai nếp EOL là hàng rào thứ hai, UTF-8 chỉ làm hỏng nhật ký:
 
       core.autocrlf=false, core.eol=lf   Gương `ci.yml`. `RELEASE_MANIFEST.json` băm theo LF,
                                          nhưng thứ ép LF lúc checkout là `.gitattributes`
@@ -182,6 +183,10 @@ if (-not $Pwsh) { Canh 'không có pwsh 7 — `don-nhanh_test.ps1` sẽ chạy b
 
 # ───────────────────────────── nếp git cho hash parity ─────────────────────────────
 Tieu 'nếp git (bắt buộc cho hash parity)'
+# Biến `GIT_CONFIG` (legacy) chỉ tác động lên LỆNH `git config`: có nó thì `--local` ném "only one config file at a time"
+# (ghi trượt, rc=129) và `--get` CHỈ đọc tệp ấy, không đọc giá trị mà mọi lệnh git khác dùng (đo: in "→ 7" trong khi
+# `rev-parse --short` dài 8). `ci.yml` không đặt biến này — bỏ nó cho tiến trình này và mọi cổng con.
+$env:GIT_CONFIG = $null
 $cu = @{}
 foreach ($k in 'core.autocrlf', 'core.eol', 'core.abbrev') {
     $v = (& git config --local --get $k 2>$null)
@@ -303,7 +308,6 @@ function Chay-Cong {
     # sau khi tiến trình thoát `ExitCode`/`WaitForExitAsync` có thể không đọc được (lỗi đã biết; KHÔNG ĐO ĐƯỢC ở Linux).
     try { $null = $tt.Handle } catch { }
     $xong = $tt.WaitForExit($Han * 1000)
-    $giay = [math]::Round(((Get-Date) - $t0).TotalSeconds, 1)
 
     if (-not $xong) {
         try { $tt.Kill($true) } catch { try { $tt.Kill() } catch { } }
@@ -324,10 +328,16 @@ function Chay-Cong {
     $xa = $false
     try { $xa = $tt.WaitForExitAsync([Threading.CancellationToken]::None).Wait($conMs) } catch { $xa = $false }
     if (-not $xa) {
-        Write-Host ("  {0,-42} TREO  > {1}s — tiến trình đã thoát rc={2} nhưng CHÁU còn giữ stdout/stderr" -f $Ten, $Han, $rc) -ForegroundColor Yellow
-        [void]$KetQua.Add([pscustomobject]@{ Ten = $Ten; Rc = $rc; TrangThai = 'KHÔNG ĐO ĐƯỢC'; NhatKy = $fOut })
-        return
+        Write-Host ("  {0,-42} TREO  > {1}s — tiến trình đã thoát rc={2} nhưng CHÁU còn giữ stdout/stderr (CÒN SỐNG — cổng sau có thể bị nhiễu)" -f $Ten, $Han, $rc) -ForegroundColor Yellow
+        # rc ĐÃ đọc từ chính tiến trình: rc≠0 là ĐỎ THẬT. Hạ nó xuống KHÔNG ĐO ĐƯỢC là giấu một cổng đỏ (đo: exit 4 thay
+        # vì 1, "ĐỎ 0", log của cổng không in). Chỉ rc=0 (hoặc rc không đọc được) mới chưa kết luận được.
+        if ($null -eq $rc -or $rc -eq 0) {
+            [void]$KetQua.Add([pscustomobject]@{ Ten = $Ten; Rc = $rc; TrangThai = 'KHÔNG ĐO ĐƯỢC'; NhatKy = $fOut })
+            return
+        }
     }
+    # Thời lượng tính TỚI khi xả xong: cổng chưa xong khi script còn chờ cây tiến trình của nó (đo: cháu 3 s ⇒ in "0.2s").
+    $giay = [math]::Round(((Get-Date) - $t0).TotalSeconds, 1)
 
     $tt2 = if ($rc -eq 0) { 'ĐẠT' } else { 'ĐỎ' }
     $mau = if ($rc -eq 0) { 'Green' } else { 'Red' }

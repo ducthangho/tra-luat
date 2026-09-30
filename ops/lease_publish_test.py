@@ -6480,11 +6480,20 @@ def t154_giet_ca_cay_thu_hoi_CHAU_chu_khong_chi_CON():
             b = nhip.stat().st_size if nhip.exists() else -1
             return b > a, a, b
 
-        def don_chau(pid_tep):
+        def doc_pid(tep, nhan, han=15.0):
+            """Tệp PID do tiến trình KHÁC ghi (`open(..,'w').write(..)`) KHÔNG nguyên tử: CÓ mà còn RỖNG — t154
+            ĐỎ `int('')` dưới tải t125 (30-09-2026). Chờ tới khi là số nguyên; hết hạn ⇒ `bang`, không nuốt/treo."""
+            het = time.monotonic() + han
+            while True:
+                try: nd = tep.read_text(encoding="utf-8").strip()
+                except OSError: nd = None
+                if nd and re.fullmatch(r"[0-9]+", nd): return int(nd)
+                bang(time.monotonic() < het, f"{nhan}: tệp PID không thành số nguyên sau {han} s (đọc cuối: {nd!r})")
+                time.sleep(0.05)
+
+        def don_chau(so):
             """Dọn cháu mồ côi của chiều 1. Cháu cũng tự huỷ sau 30 s — hai lớp, vì một lớp có thể hỏng."""
-            try:
-                so = int(pid_tep.read_text(encoding="utf-8").strip())
-            except (OSError, ValueError):
+            if so is None:
                 return
             try:
                 if os.name == "posix":
@@ -6496,7 +6505,9 @@ def t154_giet_ca_cay_thu_hoi_CHAU_chu_khong_chi_CON():
 
         # ── CHIỀU 1: giết ĐÚNG PID con ⇒ cháu còn sống (phản chứng có răng)
         p1, nhip1, pid1 = sinh("chieu1")
+        so1 = None
         try:
+            so1 = doc_pid(pid1, "fixture hỏng: cháu chiều 1")
             bang(doi_nhip(nhip1), "fixture hỏng: cháu chiều 1 không đập nhịp trong 15 s — chưa đo được gì")
             gp = getattr(os, "getpgid", None)
             if gp is not None:
@@ -6511,11 +6522,13 @@ def t154_giet_ca_cay_thu_hoi_CHAU_chu_khong_chi_CON():
         finally:
             if p1.poll() is None:
                 p1.kill(); p1.wait(timeout=5)
-            don_chau(pid1)
+            don_chau(so1)
 
         # ── CHIỀU 2: `_giet_ca_cay` ⇒ cháu im
         p2, nhip2, pid2 = sinh("chieu2")
+        so2 = None
         try:
+            so2 = doc_pid(pid2, "fixture hỏng: cháu chiều 2")
             bang(doi_nhip(nhip2), "fixture hỏng: cháu chiều 2 không đập nhịp trong 15 s")
             nhat_ky = _giet_ca_cay(p2)
             bang(p2.poll() is not None, f"con chưa chết sau `_giet_ca_cay`: {nhat_ky}")
@@ -6525,7 +6538,7 @@ def t154_giet_ca_cay_thu_hoi_CHAU_chu_khong_chi_CON():
         finally:
             if p2.poll() is None:
                 p2.kill(); p2.wait(timeout=5)
-            don_chau(pid2)
+            don_chau(so2)
 
 
     # Giữ chốt nhóm của runner bằng seam tín hiệu: không gửi tín hiệu thật tới nhóm ấy.
@@ -6562,11 +6575,7 @@ def t154_giet_ca_cay_thu_hoi_CHAU_chu_khong_chi_CON():
                                       nen, subprocess.DEVNULL, subprocess.DEVNULL)
                 pid, khoa_pid = None, None
                 try:
-                    het = time.monotonic() + 15
-                    while not pid_tep.exists() and time.monotonic() < het:
-                        time.sleep(0.05)
-                    bang(pid_tep.exists(), f"fixture {dau} chưa ghi PID cháu")
-                    pid = int(pid_tep.read_text(encoding="utf-8"))
+                    pid = doc_pid(pid_tep, f"fixture {dau}: cháu")
                     khoa_pid = thu_hoi._khoa_danh_tinh(pid)
                     bang(khoa_pid is not None and thu_hoi._con_song_dung_khoa(pid, khoa_pid),
                          f"fixture {dau}: chưa đo được cháu sống trước thu hồi")

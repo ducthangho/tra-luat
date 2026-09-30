@@ -72,7 +72,7 @@ SHA_G1   = "2f70869a0537843e9cae78618ee7ae8c261d972d"
 # do that 18-09 tren ban va g2 cua agy cho 5 tep / +812, trong khi viec cua agy la 2 tep / +353.
 # Mot chot nhu the se bao "vuot tran" cho mot ban va KHONG vuot. Base dung la MERGE-BASE.
 SHA_BASE_SPEC = "d705623162b75b7340ee7cca54ac2d2abbddbb6f"
-BAN_BO_DO = "2026-09-30a"              # doi MOI khi sua bo do - log tu khai ban nao
+BAN_BO_DO = "2026-09-30b"              # doi MOI khi sua bo do - log tu khai ban nao
 TRAN_TEP, TRAN_DONG = 2, 400          # N7' cua spec r3
 MAU_WIN  = 'if nen_thuc == "windows":'
 # Write set cua packet #541 g2. Diff khong cham tep nao o day => do NHAM NHANH.
@@ -80,12 +80,25 @@ WRITE_SET_G2 = {"ops/lease_publish.py", "ops/lease_publish_test.py"}
 # "Tuoi" chi co nghia khi so voi MAY CHU THAT. Mot mirror cuc bo cu cung tra ls-remote ==
 # origin/master (do duoc: master c16bd32 -> "ve nen TUOI", 46 tep / +7118 cho 0ea95de).
 # Danh sach CHO PHEP; `remote get-url` da khai trien insteadOf nen chuyen huong cung lo ra.
-URL_KHO_HOP_LE = {"https://github.com/ducthangho/tra-luat", "https://github.com/ducthangho/tra-luat.git"}
+URL_KHO_HOP_LE = {"https://github.com/ducthangho/tra-luat", "https://github.com/ducthangho/tra-luat.git",
+                  # SSH toi CUNG kho (sau _url_sach): `url."git@github.com:".insteadOf "https://github.com/"`
+                  # rat pho bien o may dev; thieu hai dang nay thi kho THAT bi bao "KHONG phai kho that".
+                  "ssh://github.com/ducthangho/tra-luat", "ssh://github.com/ducthangho/tra-luat.git",
+                  "git@github.com:ducthangho/tra-luat", "git@github.com:ducthangho/tra-luat.git"}
 # `remote get-url` KHAI TRIEN insteadOf, ma mau `url."https://<token>@github.com/".insteadOf` rat pho
 # bien. In/ghi nguyen van la dua TOKEN vao log va vao khoi JSON ps1 bao dan cho reviewer (do duoc:
 # 3 dong trong khoi dan). Bo userinfo TRUOC khi in va TRUOC khi so — token van la GitHub that.
-_RX_USERINFO = re.compile(r"^([A-Za-z][A-Za-z0-9+.-]*://)[^/]*@")
+# Authority ket thuc o `/`, `?` hoac `#` DAU TIEN — dung luat git/curl. Ban `[^/]*@` nuot ca `?`/`#`
+# nen mot URL tro toi MAY KHAC (host dung truoc `?`, duoi `?` la `@github.com/<kho>`) duoc "lam sach"
+# thanh dung mot muc CHO PHEP, trong khi git noi toi may kia (do duoc: mirror cu phuc vu qua HTTPS =>
+# "ve nen TUOI", TRUOT 46 tep / +7118). Van bo toi `@` CUOI trong authority: userinfo co `@` tran thi
+# curl tu choi ("Bad hostname"), con khi in thi khong lo phan sau `@` thu nhat.
+_RX_USERINFO = re.compile(r"^([A-Za-z][A-Za-z0-9+.-]*://)[^/?#]*@")
 def _url_sach(u): return _RX_USERINFO.sub(r"\1", u or "")
+# Thong bao loi cua git CHI bo userinfo toi `@` DAU TIEN: userinfo co `@` tran (vd. ten dang nhap la
+# email) thi phan sau van ra stderr ls-remote, ma stderr ay duoc in vao dong KDD cua N7' (do duoc:
+# 2 dong trong log, 1 trong khoi dan). Lam sach MOI URL trong van ban truoc khi in.
+def _an_userinfo(t): return re.sub(r"([A-Za-z][A-Za-z0-9+.-]*://)[^\s/?#'\"]*@", r"\1", t or "")
 # Ca ngoai pham vi r3 §ngoai_pham_vi — do CHINH SPEC khai, khong phai bo do tu quyet.
 # Do la DANH SACH CHO PHEP: ca do nao KHONG nam trong day va KHONG phai "thieu cong cu"
 # thi la TRUOT. Danh sach cam thi bao gio cung thieu; danh sach cho phep thi biet truoc.
@@ -414,6 +427,7 @@ url_o = _url_sach(url_o)
 ghi("origin_url", url_o); inn(f"  origin       : {url_o or '(khong doc duoc)'}")
 url_ok = (not rc_u) and url_o.rstrip("/") in URL_KHO_HOP_LE
 rc_lr, out_lr, er_lr = git(goc, "ls-remote", "origin", "refs/heads/master") if url_ok else (1, "", "")
+er_lr = _an_userinfo(er_lr)
 rc_lm, lm, er_lm     = git(goc, "rev-parse", "origin/master")
 rm = out_lr.split()[0] if (not rc_lr and out_lr.strip()) else ""
 if not url_ok:
@@ -483,6 +497,14 @@ else:
     else:
         ket("N7' kich thuoc", DAT if (len(hang) <= TRAN_TEP and them <= TRAN_DONG) else TRUOT,
             f"{len(hang)} tep / +{them}")
+
+# Dinh danh THAT nam o N7' (ca moi g2 mang vao), KHONG o "hau due g1": g1 da land nen moi nhanh deu
+# la hau due. Dong dau khoi dan phai tu khai theo ket qua ay (do duoc: master 44620e8 mo khoi bang
+# "THE HE DO DUOC: g2", JSON "the_he": "g2", trong khi N7' da ket luan "khong phai ung vien").
+if the_he == "g2" and not so.get("ca_moi_g2_mang_vao"):
+    the_he = ("KHONG phai ung vien g2" if so.get("ca_moi_g2_mang_vao") == []
+              else "g2? (CHUA dinh danh duoc doi tuong)")
+    ghi("the_he", the_he)
 
 # Cong nhanh: do RIENG kich thuoc (vai giay) roi dung. Dung khi can xac minh lai
 # ve nen ma khong muon tra 20-45 phut cho ca bo test.

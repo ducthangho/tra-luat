@@ -75,7 +75,9 @@ trang_thai_packet:
     returncode 0); gate-packet-loop/gate-ops/gate-registry chi co step_conclusion success — chu kho CHAP NHAN
     step_conclusion thay rc cho hai required context (quyet_dinh_chu_kho). Moc Workflow definition: BYTES + SHA-256 do
     bang NGUON THAY THE (GraphQL 403), commit nguon CHINH XAC van not_measured — chu kho CHAP NHAN nguon thay the (tien
-    le pr666). Hai moc nay DONG THEO QUYET DINH CHU KHO, KHONG phai do du.
+    le pr666). Hai moc nay DONG THEO QUYET DINH CHU KHO, KHONG phai do du. Tu cach cua chinh quyet dinh ay (neo
+    5904784660 do phien agent dang ho) la loi_khai_co_neo; chu kho xac nhan luc 07:01:30Z la quyet dinh 06:14:01Z phu
+    no (authorization.tu_cach_uy_quyen.pham_vi_voi_quyet_dinh_0533).
     (3) bookkeeping: tep nay + 6 verdict nguyen byte + 6 bien nhan v2 + 6 hang README; muc cuoi la merge PR #691.
     (4) uy quyen. THU TU do duoc: comment uy quyen 5889749874 tao 11:55:17Z < merge 11:55:40Z, ca hai moc measured va
     co hien vat trong kho; gio chi thi 11:54:52Z la loi_khai_co_neo (authorization.thu_tu_voi_merge). TU CACH nguoi uy
@@ -87,9 +89,11 @@ trang_thai_packet:
     GitHub object), §13.1 (khong goi landed khi thieu bang chung tuong ung), va tien le pr594 (uy quyen thieu nguon ben
     TRUOC thao tac ghi — o pr594 la phe chuan hau kiem, comment 4h46m SAU merge — va comment ay do phien agent dang ho
     => ho so khong tu chon, dat muc giai quyet uy quyen cho chu kho phan xu vao CON_THIEU_DE_GOI_LANDED, giu
-    LANDED: CHUA). Theo cac can cu ay, land operator KHONG duoc tu giu `true` khi tu cach uy quyen chua duoc quyet: neu
-    khong co quyet dinh 06:14:01Z, ban nay phai ha ve `false`. Nguoi co tham quyen da quyet chap nhan loi khai co neo,
-    nen `true` dung, voi dieu kien tu cach van ghi loi_khai_co_neo, KHONG nang len measured hay human_audited.
+    LANDED: CHUA). Theo cac can cu ay, land operator KHONG duoc tu giu `true` khi tu cach uy quyen (4) hay tu cach cua
+    quyet dinh hai moc (2) chua duoc quyet: neu khong co quyet dinh 06:14:01Z, hoac khong co xac nhan pham vi 07:01:30Z
+    (authorization.tu_cach_uy_quyen.pham_vi_voi_quyet_dinh_0533), ban nay phai ha ve `false`. Nguoi co tham quyen da
+    quyet ca hai, nen `true` dung, voi dieu kien tu cach van ghi loi_khai_co_neo, KHONG nang len measured hay
+    human_audited.
   lich_su_landed: >-
     79d9840..d1661f7 ghi `landed: false` (dung o thoi diem ay: thieu quyet dinh chu kho cho hai moc va do thu tu uy
     quyen). fa22ad0 len `true` nho quyet_dinh_chu_kho (hai moc o (2)) khi TU CACH uy quyen o (4) chua duoc xet; review
@@ -219,7 +223,8 @@ authorization:
       pham_vi_trong_than_neo: >-
         Than comment 5905293622 co muc Pham vi (chi lan merge PR #679 tai c57df32, khong tai su dung cho merge khac) va
         muc Quyet dinh dien dat lai — ca hai la DIEN GIAI cua phien agent soan comment, KHONG phai loi chu kho; loi chu kho
-        chi la cau o nguyen_van.
+        chi la cau o nguyen_van. Muc Pham vi ay HEP hon pham vi hien hanh: chu kho xac nhan luc 07:01:30Z quyet dinh
+        phu ca 5904784660 — xem pham_vi_voi_quyet_dinh_0533.
       vien_dan_pr594: >-
         Loi chu kho vien dan pr594. Do tren ops/land/pr594-wp578-land-evidence.yaml (sua cuoi fa263ef, 2026-09-24): pr594
         KHONG ghi quyet dinh chu kho nao ve uy quyen, van `LANDED: CHUA`, con muc "Giai quyet uy quyen" cho chu kho phan xu
@@ -234,8 +239,10 @@ authorization:
       dieu_kien_thay_the: >-
         Chu kho tu tay tao mot hien vat GitHub (khong do phien agent dang) xac nhan uy quyen head 03a7219 thi hien vat ay
         thay quyet dinh nay va tu cach duoc xet lai; co bang chung 5889749874 chep sai chi thi thi quyet dinh mat hieu
-        luc va danh gia lai landed.
-      authority_caveat: 'comment 5905293622 do phien agent dang bang tai khoan chu kho, chep loi chu kho (#566) — nhu pr680.'
+        luc va danh gia lai landed. Tuong tu cho 5904784660 (pham vi mo rong 07:01:30Z): chu kho tu tay tao hien vat
+        GitHub xac nhan quyet dinh hai moc thi hien vat ay thay; co bang chung 5904784660 chep sai loi chu kho 05:33:01Z
+        thi quyet dinh mat hieu luc cho (2) va danh gia lai landed.
+      authority_caveat: 'comment 5905293622 (chep loi chu kho) va 5905950521 (chep lua chon cua chu kho) do phien agent dang bang tai khoan chu kho (#566) — nhu pr680.'
       khong_viet_lai: >-
         Quyet dinh KHONG bien tu cach thanh measured, KHONG bien uy quyen thanh human_audited, KHONG xoa nhan
         loi_khai_co_neo cua chi_thi_luc.
@@ -243,14 +250,35 @@ authorization:
         Chinh quyet dinh nay cung chi co transcript va comment dang ho, tuc CUNG loai bang chung ma no chap nhan. Ghi ra
         de nguoi doc khong doc no thanh mot hien vat do chu kho tu tao.
     pham_vi_voi_quyet_dinh_0533:
-      trang_thai: chu_kho_xac_nhan_phu_ca_hai
+      trang_thai: loi_khai_co_neo
+      disposition: chu_kho_xac_nhan_phu_ca_hai
       cau_hoi: >-
-        Quyet dinh 06:14:01Z co ap luon cho quyet dinh 05:33:01Z (neo 5904784660, dong hai moc o (2)) khong? Hai quyet
-        dinh cung loai tu cach: loi chu kho chi nam trong transcript, neo ben la comment do phien agent dang ho.
-      tra_loi: '"Có, phủ cả hai" — phuong an chu kho CHON trong cau hoi trac nghiem cua phien (khong phai cau chu kho tu go)'
-      luc: '2026-09-30T07:01:30.814Z (loi_khai_co_neo: timestamp trong transcript phien session_01CSM7GNazhN6uGJb4v1TqBT)'
+        DIEN GIAI cua land operator, KHONG phai nguyen van: Quyet dinh 06:14:01Z co ap luon cho quyet dinh 05:33:01Z
+        (neo 5904784660, dong hai moc o (2)) khong? Hai quyet dinh cung loai tu cach: loi chu kho chi nam trong
+        transcript, neo ben la comment do phien agent dang ho. Nguyen van o cau_hoi_nguyen_van.
+      cau_hoi_nguyen_van: '#691: Quyết định lúc 06:14 ("chấp nhận lời khai có neo, như pr594") có áp dụng luôn cho quyết định lúc 05:33 (chấp nhận nguồn thay thế và step_conclusion, comment 5904784660) không? Quyết định 05:33 cũng chỉ có lời của bạn trong transcript, còn comment trên GitHub do phiên agent đăng hộ.'
+      hoi_luc: '2026-09-30T07:01:00.951Z (loi_khai_co_neo: timestamp tool_use AskUserQuestion trong transcript)'
+      phuong_an:
+        - nhan: 'Có, phủ cả hai (Recommended)'
+          mo_ta: 'Tư cách của cả comment 5889749874 và 5904784660 đều là lời khai có neo mà bạn đã chấp nhận. Hồ sơ giữ `landed: true`.'
+        - nhan: 'Chỉ phủ uỷ quyền merge'
+          mo_ta: 'Quyết định 05:33 chưa có tư cách được chấp nhận, nên hồ sơ hạ `landed` về false cho tới khi bạn tự xác nhận trên GitHub.'
+      phuong_an_ghi_chu: >-
+        Cau hoi, hai phuong an, mo ta va dau "(Recommended)" deu do PHIEN AGENT soan. Dau ay la khuyen nghi cua agent,
+        gan vao dung phuong an giu `landed: true`. Chu kho chi CHON; khong co tin nhan chu kho tu go nao cho xac nhan
+        nay. Byte-exact voi transcript: cau_hoi_nguyen_van 345 byte UTF-8 (NFC), nhan hai phuong an 33 va 30 byte.
+      tra_loi: 'Có, phủ cả hai (Recommended)'
+      tra_loi_ghi_chu: >-
+        Nguyen van nhan phuong an chu kho chon (33 byte UTF-8, NFC), theo ket qua AskUserQuestion trong transcript. Ban
+        9baaef8 cua khoa nay trich "Có, phủ cả hai" (19 byte), tuc cat mat dau khuyen nghi cua agent — da thay. Than
+        comment neo_ben cung cat nhu vay va khong chep phuong an con lai.
+      luc: '2026-09-30T07:01:30.814Z (loi_khai_co_neo: timestamp ket qua AskUserQuestion trong transcript phien session_01CSM7GNazhN6uGJb4v1TqBT)'
       neo_ben: https://github.com/ducthangho/tra-luat/pull/691#issuecomment-5905950521
-      neo_ben_ghi_chu: 'Comment do PHIEN AGENT dang ho chu kho, tu khai o dong dau.'
+      neo_ben_ghi_chu: >-
+        Comment do PHIEN AGENT dang ho chu kho, tu khai o dong dau cua than DA GUI (1319 byte UTF-8, sha256
+        64711b4fd9b0db8d885552c0f93de344eaafb079eedb3c324f43f83733dd9893). id 5905950521 lay tu ket qua loi goi
+        add_issue_comment (07:01:43.904Z); comment CHUA duoc doc lai qua REST, nen created_at va than DA DEN la KHONG DO
+        DUOC, readback KHONG luu.
       he_qua: >-
         Tu cach cua CA uy quyen merge 5889749874 LAN quyet dinh hai moc 5904784660 deu la loi_khai_co_neo DA DUOC CHU KHO
         CHAP NHAN. `landed: true` o (2) va (4) dung tren cac quyet dinh ay, KHONG vi da do du.

@@ -50,6 +50,10 @@ ba loại khoảng trắng có bị tắt rộng hơn ba loại đó không).
     đọc các lease khác trong CÂY; checkout của Actions chỉ có cây PR, không có các nhánh `ops/**`. Trên một
     clone chỉ-master 6/113 tệp lease trượt `kiem(bo_qua_han=True)`, còn trên bản sao đủ 552 ref thì 0/113
     (đo bởi reviewer lượt 1): số 6 là số CỦA PHẠM VI clone-một-nhánh, không phải của kho.
+    Hệ quả CÓ CHỦ ĐÍCH về actor (chủ kho chọn khai, không đổi chốt — Issue #674, 2026-09-30): `kiem`/`check`
+    giữ chốt thẩm quyền theo `GITHUB_ACTOR`, nên PR hồ sơ chạm `ops/leases/` do bot (actor khác chủ kho) đẩy
+    sẽ ĐỎ ở đường nhanh (`CHAN [4]`) trong khi đường đầy đủ không chạy chốt này. Đỏ ở đây là fail-close đúng
+    hướng; muốn đường nhanh cho PR lease do bot đẩy thì phải là quyết định mới về thẩm quyền, không phải nới tại chỗ.
 """
 from __future__ import annotations
 
@@ -174,6 +178,14 @@ def kiem_yaml(doi, kho=ROOT) -> list[str]:
     return loi
 
 
+def kiem_loai_tep(doi, kho=ROOT) -> list[str]:
+    """Mọi tệp hồ sơ đổi (còn trong cây) phải là tệp THƯỜNG, không phải symlink. Bước bị bỏ `lease-publish selftest`
+    có `t82` `copytree` CẢ cây (kể cả ops/{land,leases,reviews,specs}/**): symlink treo dưới allowlist làm nó ĐỎ trên
+    master trong khi mọi kiểm khác của `kiem-re` vẫn DAT. Hồ sơ không cần symlink ⇒ chặn mọi symlink, treo hay không."""
+    return [f"tep ho so la symlink (duong nhanh chi nhan tep thuong): {duong!r}"
+            for duong in sorted(doi) if (Path(kho) / duong).is_symlink()]
+
+
 def kiem_diff_check(env=os.environ, chay=subprocess.run, kho=ROOT) -> list[str]:
     goc, dau = env.get(BIEN_GOC) or "", env.get(BIEN_DAU) or ""
     try:
@@ -267,7 +279,7 @@ def lenh_kiem_re(env=os.environ, chay=subprocess.run, kho=ROOT, ra=None, bay_gio
         print("DUONG_NHANH: kiem-re CHI chay khi diff toan ho so; phan loai lai khong ra DUONG_NHANH - DO "
               "(khong khop voi job chuan-bi)", file=ra)
         return 1
-    loi = (kiem_yaml(doi, kho) + kiem_diff_check(env, chay, kho) + kiem_lease(doi, kho, chay, bay_gio, ra)
+    loi = (kiem_yaml(doi, kho) + kiem_loai_tep(doi, kho) + kiem_diff_check(env, chay, kho) + kiem_lease(doi, kho, chay, bay_gio, ra)
            + kiem_ca_du_lieu(kho, chay))
     for x in loi:
         print("DUONG_NHANH: LOI - " + x, file=ra)

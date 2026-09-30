@@ -7,6 +7,9 @@ KHONG ghim SHA. No do BAT KY dau nao dang o tren nhanh, roi TU PHAN LOAI:
   head == 2f70869a  -> day la g1, CHUA co ban va g2. Van do, nhung nhan la NEN DO.
   head la hau due    -> ung vien g2.
   khac               -> KHONG DO DUOC (rebase? nham nhanh?) -> rc=3, khong ket luan.
+Tu 20-09 g1 DA LAND vao master, nen "hau due cua g1" KHONG con loai duoc nhanh nao (do duoc:
+master 44620e8 va mot nhanh bookkeeping deu ra "ung vien g2", DAT rc=0). Vi vay doi tuong con
+phai (a) co thay doi so voi merge-base va (b) cham WRITE_SET_G2 — khong thi KHONG DO DUOC.
 
 BA TRANG THAI o moi chot: DAT / TRUOT / KHONG DO DUOC. Cai thu ba KHONG duoc lang le
 thanh mot trong hai cai kia — do la ca doctrine `None != False` cua kho.
@@ -38,6 +41,21 @@ def inn(*p):
         try: sys.stdout.buffer.write(van.encode("utf-8", "replace") + b"\n"); sys.stdout.flush()
         except Exception: print(van.encode("ascii", "backslashreplace").decode("ascii"), flush=True)
 
+# Ngoai le KHONG bat => Python thoat rc=1, ma rc=1 o day DA CO NGHIA "co chot TRUOT" (dong
+# cuoi tep) — dung ly do ps1 dat `trap` -> rc=3. Do duoc: git vang PATH (dong `git(goc,
+# "rev-parse")` chay TRUOC `if loi:`), bo test qua han, ung vien thieu _git_windows, probe
+# that nem ngoai le — ca bon tung ra rc=1 ma phep do CHUA HE chay xong.
+def _ngoai_le_la_KDD(kieu, gt, vet):
+    import traceback
+    traceback.print_exception(kieu, gt, vet)
+    inn(""); inn(f"KHONG DO DUOC: ngoai le khong luong truoc {kieu.__name__}: {gt}")
+    inn("Phep do CHUA chay xong. Khong ket luan gi.")
+    for _l in (sys.stdout, sys.stderr):
+        try: _l.flush()
+        except Exception: pass
+    os._exit(3)
+sys.excepthook = _ngoai_le_la_KDD
+
 SHA_G1   = "2f70869a0537843e9cae78618ee7ae8c261d972d"
 # KHONG ghim base. Spec r3 N6' khai do numstat so d705623 — NHUNG spec CUNG bao executor
 # `git merge origin/master`. Sau merge, phep do so d705623 NUOT ca phan master mang vao:
@@ -47,6 +65,12 @@ SHA_BASE_SPEC = "d705623162b75b7340ee7cca54ac2d2abbddbb6f"
 BAN_BO_DO = "2026-09-19e"              # doi MOI khi sua bo do - log tu khai ban nao
 TRAN_TEP, TRAN_DONG = 2, 400          # N7' cua spec r3
 MAU_WIN  = 'if nen_thuc == "windows":'
+# Write set cua packet #541 g2. Diff khong cham tep nao o day => do NHAM NHANH.
+WRITE_SET_G2 = {"ops/lease_publish.py", "ops/lease_publish_test.py"}
+# "Tuoi" chi co nghia khi so voi MAY CHU THAT. Mot mirror cuc bo cu cung tra ls-remote ==
+# origin/master (do duoc: master c16bd32 -> "ve nen TUOI", 46 tep / +7118 cho 0ea95de).
+# Danh sach CHO PHEP; `remote get-url` da khai trien insteadOf nen chuyen huong cung lo ra.
+URL_KHO_HOP_LE = {"https://github.com/ducthangho/tra-luat", "https://github.com/ducthangho/tra-luat.git"}
 # Ca ngoai pham vi r3 §ngoai_pham_vi — do CHINH SPEC khai, khong phai bo do tu quyet.
 # Do la DANH SACH CHO PHEP: ca do nao KHONG nam trong day va KHONG phai "thieu cong cu"
 # thi la TRUOT. Danh sach cam thi bao gio cung thieu; danh sach cho phep thi biet truoc.
@@ -265,6 +289,21 @@ if "--tu-kiem-probe" in sys.argv:
         for _k, _v in (_dl or {}).items(): print(f"        {_k:34}: {_v}")
     sys.exit(0)
 
+# --- che do KIEM DONG BO: tep .py nay phai TRUNG TUNG BYTE voi ban nhung trong ps1 ---
+# Khong cong nao buoc hai ban sao khop: do duoc, noi tran 2/400 -> 99/99999 CHI trong .py
+# thi ci_dang_ky lan t26/t27 van xanh, con chot SHA cua ps1 chi so ban nhung voi hang so
+# cua CHINH no. Chay: python wp541-do-g2-windows.py --kiem-dong-bo wp541-do-g2.ps1  (rc 0|3)
+if "--kiem-dong-bo" in sys.argv:
+    import base64
+    _ps = Path(sys.argv[sys.argv.index("--kiem-dong-bo") + 1]).read_text(encoding="ascii")
+    _m = re.search(r"(?ms)^\$B64 = @\((.*?)^\)", _ps)
+    _k = re.search(r"(?m)^\$ShaBoDo\s*=\s*'([0-9a-f]{64})'", _ps)
+    _nhung = base64.b64decode("".join(re.findall(r"'([A-Za-z0-9+/=]*)'", _m.group(1)))) if _m else b""
+    _toi = Path(__file__).read_bytes()
+    _ok = bool(_m and _k) and _nhung == _toi and hashlib.sha256(_toi).hexdigest() == _k.group(1)
+    inn(f"KIEM DONG BO: {DAT if _ok else KDD}  (nhung {len(_nhung)} byte, tep {len(_toi)} byte)")
+    sys.exit(0 if _ok else 3)
+
 inn("=" * 78); inn("WP541 g2 - phep do tren Windows that (spec r3: N1-N4, N8-N12, N7, kich thuoc)"); inn("=" * 78)
 
 # ---------------- tu kiem bo doc ----------------
@@ -353,10 +392,16 @@ inn(""); inn("-" * 78); inn("1. KICH THUOC — tran spec r3: <= 2 tep va <= 400 
 # lech mot chut, no sai ca mot bac do lon.
 # Cho nen: nen khong chung minh duoc la tuoi => KHONG DO DUOC (rc=3), KHONG phai TRUOT.
 # TRUOT la mot PHAN QUYET ve ban va; phan quyet chi duoc phep phat ra khi da do duoc.
-rc_lr, out_lr, er_lr = git(goc, "ls-remote", "origin", "refs/heads/master")
+rc_u, url_o, _ = git(goc, "remote", "get-url", "origin")
+ghi("origin_url", url_o); inn(f"  origin       : {url_o or '(khong doc duoc)'}")
+url_ok = (not rc_u) and url_o.rstrip("/") in URL_KHO_HOP_LE
+rc_lr, out_lr, er_lr = git(goc, "ls-remote", "origin", "refs/heads/master") if url_ok else (1, "", "")
 rc_lm, lm, er_lm     = git(goc, "rev-parse", "origin/master")
 rm = out_lr.split()[0] if (not rc_lr and out_lr.strip()) else ""
-if not rm:
+if not url_ok:
+    ket("N7' kich thuoc", KDD, f"origin={url_o!r} KHONG phai kho that — 'tuoi' so voi no khong chung minh duoc gi")
+    rc_mb, mb, ns, rc = 1, "", "", 1
+elif not rm:
     ket("N7' kich thuoc", KDD,
         f"khong hoi duoc master tren remote (ls-remote rc={rc_lr}): {er_lr[:60]} "
         f"— khong chung minh duoc ve nen con tuoi")
@@ -388,7 +433,7 @@ else:
     inn(f"  merge-base(origin/master, HEAD) = {mb[:12]}")
     if mb != SHA_BASE_SPEC:
         inn(f"  LUU Y: khac base ma spec r3 khai ({SHA_BASE_SPEC[:12]}) — vi nhanh da merge master.")
-        inn(f"         Do so base cu se NUOT phan master mang vao. Dung merge-base moi la viec cua executor.")
+        inn("         Do so base cu se NUOT phan master mang vao. Dung merge-base moi la viec cua executor.")
         rc_x, ns_x, _ = git(goc, "diff", "--numstat", SHA_BASE_SPEC, head)
         if not rc_x:
             h = [l.split("\t") for l in ns_x.splitlines() if l.strip()]
@@ -405,8 +450,14 @@ else:
     ghi("so_tep", len(hang)); ghi("dong_them", them); ghi("dong_xoa", xoa)
     for h in hang: inn(f"    {h[2]:34} +{h[0]:<5} -{h[1]}")
     inn(f"    TONG: {len(hang)} tep, +{them}, -{xoa}   (tran: {TRAN_TEP} tep / {TRAN_DONG} dong them)")
-    ket("N7' kich thuoc", DAT if (len(hang) <= TRAN_TEP and them <= TRAN_DONG) else TRUOT,
-        f"{len(hang)} tep / +{them}")
+    cham = sorted({h[2] for h in hang} & WRITE_SET_G2); ghi("cham_write_set", cham)
+    if not cham:
+        # Do RONG (da land, hoac chinh master) hay do nham nhanh deu khong phai DAT.
+        ket("N7' kich thuoc", KDD, f"doi tuong khong phai ung vien: {len(hang)} tep, khong cham "
+                                   f"{sorted(WRITE_SET_G2)} — da land? nham nhanh?")
+    else:
+        ket("N7' kich thuoc", DAT if (len(hang) <= TRAN_TEP and them <= TRAN_DONG) else TRUOT,
+            f"{len(hang)} tep / +{them}")
 
 # Cong nhanh: do RIENG kich thuoc (vai giay) roi dung. Dung khi can xac minh lai
 # ve nen ma khong muon tra 20-45 phut cho ca bo test.
@@ -453,9 +504,22 @@ if not CHI_PROBE:
     inn(f"  ca DO ngoai pham vi (r3 khai): {[_khoa(x) for x in sorted(do_het, key=so_ca) if _khoa(x) in NGOAI_PHAM_VI]}")
     inn(f"  ca DO vi THIEU CONG CU       : {[_khoa(x) for x in do_thieu_cong_cu] or 'khong co'}")
     inn(f"  ca DO LA (khong giai thich duoc): {[_khoa(x) for x in do_la] or 'khong co'}")
-    ket("Khong ca nao cua PACKET bi DO", DAT if not do_packet else TRUOT,
+    # ---- CHOT: phep do phai TRON truoc khi mot chu DAT nao duoc phat ----
+    # Ban truoc chi IN `tin`/`rc_suite`: bo test chet giua t171 (rc=134, khong dong tong)
+    # van ra "DAT 12 | TRUOT 0" rc=0; ca PACKET vang mat hay bi BO QUA cung duoc cham nhu
+    # "khong do". Vang mat khong phai "khong do" — la KHONG DO DUOC.
+    vang = [t for t in sorted(CA_PACKET, key=so_ca) if mau_ca(out_n, t) not in ("QUA", "DO")]
+    ly_kdd = []
+    if not tin: ly_kdd.append("danh sach do KHONG day du")
+    if rc_n not in (0, 1) or (rc_n == 1) != bool(do_het):
+        ly_kdd.append(f"rc bo test={rc_n} khong khop {len(do_het)} ca DO doc duoc")
+    if vang: ly_kdd.append(f"ca PACKET vang/bo qua: {vang}")
+    ghi("ca_packet_vang", vang); ghi("ly_do_chua_tron", ly_kdd)
+    if ly_kdd: ket("Bo test chay TRON va doc DU", KDD, "; ".join(ly_kdd))
+    chua_tron = KDD if ly_kdd else DAT
+    ket("Khong ca nao cua PACKET bi DO", chua_tron if not do_packet else TRUOT,
         "" if not do_packet else f"DO: {[_khoa(x) for x in do_packet]} — ban va CHUA xong")
-    ket("Moi ca DO deu giai thich duoc", DAT if not do_la else TRUOT,
+    ket("Moi ca DO deu giai thich duoc", chua_tron if not do_la else TRUOT,
         "" if not do_la else f"la: {[_khoa(x) for x in do_la]}")
     if do_thieu_cong_cu:
         ket("Cong cu day du de do", KDD, f"thieu cong cu cho {[_khoa(x) for x in do_thieu_cong_cu]}")
@@ -466,8 +530,9 @@ if not CHI_PROBE:
     inn(""); inn("  N1-N4 (t165-t168), tieu chi nghiem thu cua r2, nay la chi bao hoi quy:")
     b4 = {t: mau_ca(out_n, t) for t in CAMOI}; ghi("ca_moi", b4)
     for t in CAMOI: inn(f"     {t}: {b4[t]}")
+    # BO_QUA/vang la CHUA CHAY, khong phai DO: chi mot ca DO moi duoc phat TRUOT.
     ket("N1-N4 (t165-t168)", DAT if all(v == "QUA" for v in b4.values())
-        else (KDD if any(v is None for v in b4.values()) else TRUOT), str(b4))
+        else (TRUOT if any(v == "DO" for v in b4.values()) else KDD), str(b4))
 
     inn(""); inn("  15 ca tung do tren CI:")
     b15 = {t: mau_ca(out_n, t) for t in CA15}; ghi("ca15", b15)
@@ -477,8 +542,8 @@ if not CHI_PROBE:
     t136_ten = next((t for t in do_het if t.startswith("t136")), None)
     if b15.get("t136") == "QUA":
         ket("N12 t136 (qua ket qua ca)", DAT, "t136 QUA")
-    elif b15.get("t136") is None:
-        ket("N12 t136 (qua ket qua ca)", KDD, "khong thay t136 trong log")
+    elif b15.get("t136") != "DO":
+        ket("N12 t136 (qua ket qua ca)", KDD, f"t136 = {b15.get('t136')!r} — khong chay/khong thay")
     else:
         ly = do_het.get(t136_ten, "")
         ket("N12 t136 (qua ket qua ca)", TRUOT, f"DO: {ly[:90]}")
@@ -520,8 +585,8 @@ if not rig_ok:
 # phat ra mot chu DAT.
 #
 # Nen truoc khi DUNG nam cong nay de phan quyet, bat tung cong giet mot dot bien da
-# biet trong. Cong nao khong giet duoc thi ket qua that cua no bi HA xuong KHONG DO
-# DUOC — khong cho no noi DAT nua. Dot bien chay tren BAN SAO TAM; cay that khong bi
+# biet trong. Cong nao khong giet duoc thi chu DAT cua no bi HA xuong KHONG DO DUOC;
+# TRUOT giu nguyen (quan sat truc tiep, vd. g1 van nhan git.bat). Dot bien chay tren BAN SAO TAM; cay that khong bi
 # dung toi (cung ky luat nhu N7).
 DOT_BIEN_TU_KIEM = [
     ("N8", "ops/lease_publish.py",

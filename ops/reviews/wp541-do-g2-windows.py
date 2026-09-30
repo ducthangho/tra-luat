@@ -6,7 +6,7 @@ Chay:  py wp541-do-g2-windows.py "<thu-muc-kho>"
 KHONG ghim SHA. No do BAT KY dau nao dang o tren nhanh, roi TU PHAN LOAI:
   head == 2f70869a  -> day la g1, CHUA co ban va g2. Probe van in (lam NEN DO) nhung N7' ra
                        KHONG DO DUOC (g1 da land, diff rong) nen rc=3.
-  head la hau due    -> ung vien g2.
+  head la hau due    -> CHUA dinh danh: chi N7' (ca moi g2 mang vao, xem duoi) moi noi ung vien g2 hay khong.
   khac               -> KHONG DO DUOC (rebase? nham nhanh?) -> rc=3, khong ket luan.
 Tu 20-09 g1 DA LAND vao master, nen "hau due cua g1" KHONG con loai duoc nhanh nao (do duoc:
 master 44620e8 va mot nhanh bookkeeping deu ra "ung vien g2", DAT rc=0). Vi vay doi tuong con
@@ -72,7 +72,7 @@ SHA_G1   = "2f70869a0537843e9cae78618ee7ae8c261d972d"
 # do that 18-09 tren ban va g2 cua agy cho 5 tep / +812, trong khi viec cua agy la 2 tep / +353.
 # Mot chot nhu the se bao "vuot tran" cho mot ban va KHONG vuot. Base dung la MERGE-BASE.
 SHA_BASE_SPEC = "d705623162b75b7340ee7cca54ac2d2abbddbb6f"
-BAN_BO_DO = "2026-09-30c"              # doi MOI khi sua bo do - log tu khai ban nao
+BAN_BO_DO = "2026-09-30d"              # doi MOI khi sua bo do - log tu khai ban nao
 TRAN_TEP, TRAN_DONG = 2, 400          # N7' cua spec r3
 MAU_WIN  = 'if nen_thuc == "windows":'
 # Write set cua packet #541 g2. Diff khong cham tep nao o day => do NHAM NHANH.
@@ -97,9 +97,13 @@ _RX_USERINFO = re.compile(r"^([A-Za-z][A-Za-z0-9+.-]*://)[^/?#]*@")
 def _url_sach(u): return _RX_USERINFO.sub(r"\1", u or "")          # de SO (luat git/curl)
 # IN phai che RONG hon SO: mat khau co `?`/`#` TRAN thi `[^/?#]*@` khong khop nen URL ra log NGUYEN VAN
 # (do duoc tren 2026-09-30b: 3 dong o --chi-kich-thuoc, 3 dong trong khoi dan --chi-probe; ban 30a: 0).
-# Che toi `@` CUOI truoc `/` dau tien, va DE DAU `***@` de ban in khong tu nhan la github.com khi git noi
-# toi may khac (vd. host truoc `?`). Hai quy tac, hai muc dich: SO theo git, IN theo "thua con hon lo".
-def _url_in(u): return re.sub(r"^([A-Za-z][A-Za-z0-9+.-]*://)[^/]*@", r"\1***@", u or "")
+# Che toi `@` CUOI CUNG cua CA chuoi (co hay khong co scheme), va DE DAU `***@` de ban in khong tu nhan la
+# github.com khi git noi toi may khac (vd. host truoc `?`). Ban 30c che "toi `@` cuoi truoc `/` dau tien"
+# nen VAN lo khi mat khau co `/` tran, hoac URL dang scp `user:mk@host:duong` (khong scheme) — do tren
+# 2026-09-30c: 3 dong / 1 trong khoi dan --chi-kich-thuoc, 5 / 3 o --chi-probe, moi dang. Moi ky tu DUNG
+# la mot duong nua; "toi `@` cuoi" khong con ky tu dung nao. Hai quy tac, hai muc dich: SO theo git, IN
+# theo "thua con hon lo".
+def _url_in(u): return re.sub(r"^([A-Za-z][A-Za-z0-9+.-]*://)?.*@", r"\1***@", u or "")
 # Thong bao loi cua git CHI bo userinfo toi `@` DAU TIEN: userinfo co `@` tran (vd. ten dang nhap la
 # email) thi phan sau van ra stderr ls-remote, ma stderr ay duoc in vao dong KDD cua N7' (do duoc:
 # 2 dong trong log, 1 trong khoi dan). Lam sach MOI URL trong van ban truoc khi in.
@@ -127,7 +131,11 @@ def ket(ten, trang_thai, chi_tiet=""):
 RX_DO_CHO  = re.compile(r"(?m)^!!! do (\S+) (.*)$")
 RX_DO_CUOI = re.compile(r"(?m)^ {2}(\S{1,4}) {2}(\S+): (.*)$")
 RX_BO_QUA  = re.compile(r"(?m)^ {2}\S{1,6} QUA (\S+): (.*)$")
-RX_TONG    = re.compile(r"lease_publish: (\d+)/(\d+)\b[^\n]*?=(\d+),[^\n]*?=(\d+)")
+# Dong tong ket THAT o DAU dong. Ca DO co the in lai stdout cua mot luot CON (t155 chay lai t01, t72/t98 chay
+# "bo") — dong tong LONG ay nam GIUA dong (do: 20 dong long deu o giua dong, chi dong tong that o dau dong), ma
+# `search` khong neo bat no TRUOC. Do tren 2026-09-30c, 0ea95de + dot bien lam t01 DO: doc ra "0/1" =>
+# "danh sach KHONG day du", "LECH SO HOC: thieu -20 ca", trong khi tong that 166-145=21 == 21 ca doc duoc.
+RX_TONG    = re.compile(r"(?m)^lease_publish: (\d+)/(\d+)\b[^\n]*?=(\d+),[^\n]*?=(\d+)")
 
 def so_ca(t):
     m = re.match(r"t(\d+)", t); return (int(m.group(1)) if m else 10**6, t)
@@ -151,7 +159,8 @@ def doc_do(out):
             gc.append(f"LECH SO HOC: thieu {tren-dat-len(hop)} ca"); tin = False
     return hop, gc, tin
 
-_MAU = ("!!! do t02b_ten_KHONG_CO_THAM_QUYEN a\n"
+# Mau co dong tong LONG giua dong (dang t155 in lai luot con): bo doc bat dong tong DAU TIEN la tu kiem DO.
+_MAU = ("!!! do t02b_ten_KHONG_CO_THAM_QUYEN a 'lease_publish: 0/1 đạt; đã chạy=1, bỏ qua=0'\n"
         "!!! do t150_x WinError 1314 required privilege\n"
         "  BỎ QUA t131_y: nen fixture\n"
         "  ĐỎ  t02b_ten_KHONG_CO_THAM_QUYEN: a\n"
@@ -159,8 +168,10 @@ _MAU = ("!!! do t02b_ten_KHONG_CO_THAM_QUYEN a\n"
         "lease_publish: 1/3 đạt; đã chạy=3, bỏ qua=1\n")
 
 def chay(argv, cwd, phut=60):
+    # PYTHONOPTIMIZE cua may nguoi do lot vao bo test thi moi `assert` trong ca bi BO (do tren 2026-09-30c:
+    # chay() + PYTHONOPTIMIZE=1 => `assert False` qua, rc=0). Chuoi RONG = khong dat (tai lieu CPython).
     mt = dict(os.environ, PYTHONUTF8="1", PYTHONIOENCODING="utf-8",
-              PYTHONDONTWRITEBYTECODE="1", PYTHONUNBUFFERED="1")
+              PYTHONDONTWRITEBYTECODE="1", PYTHONUNBUFFERED="1", PYTHONOPTIMIZE="")
     p = subprocess.run([sys.executable] + argv, cwd=str(cwd), capture_output=True,
                        text=True, encoding="utf-8", errors="replace", timeout=phut*60, env=mt)
     return p.returncode, (p.stdout or "") + (p.stderr or "")
@@ -393,6 +404,13 @@ if sys.platform != "win32" and "--chi-kich-thuoc" not in sys.argv:
 if not tep.is_file():  loi.append(f"khong thay {tep}")
 if not tept.is_file(): loi.append(f"khong thay {tept}")
 if not shutil.which("git"): loi.append("khong co `git` trong PATH")
+# Bo test (muc 2 va N7) can PyYAML: thieu no, 0ea95de ra 96/166 ca DO (89 bao thang "No module named 'yaml'",
+# 7 qua luot con; co PyYAML: 166/166 QUA). Bo do goi chung la "ca DO LA" roi phat TRUOT — do tren 2026-09-30c
+# bang python KHONG co PyYAML (dung nhu ban nhung ps1 tu tai): "ca DO vi THIEU CONG CU: khong co", TRUOT "Moi
+# ca DO deu giai thich duoc"; rc=3 chi nho bo doc log bat nham dong tong LONG (sua bo doc thi rc=1). Hoi TRUOC.
+if not ("--chi-kich-thuoc" in sys.argv or "--chi-probe" in sys.argv) and importlib.util.find_spec("yaml") is None:
+    loi.append(f"python nay THIEU PyYAML ma bo test can no: \"{sys.executable}\" -m pip install pyyaml"
+               " (ban nhung ps1 tu tai KHONG co pip: chay lai voi -Py <python da co PyYAML>)")
 
 rc, head, _ = git(goc, "rev-parse", "HEAD")
 if rc: loi.append("khong doc duoc HEAD")

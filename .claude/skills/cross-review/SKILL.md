@@ -541,13 +541,20 @@ không có `gh`, và hệ quả không dừng ở lệnh này — `ops/lease_pub
 quyết**, nó là một khoảng trống công cụ; đọc nó thành "cổng chặn" là khai rộng hơn phép đo.
 Đường vòng chỉ cần token và HTTP; endpoint logs trả 302 sang host lưu trữ KHÁC nên phải theo
 redirect (curl ≥ 7.58 tự bỏ `Authorization` khi đổi host — đừng thêm `--location-trusted`).
-Thiếu `-f` thì 401/403/404 vẫn `rc=0` và `job.log` chứa JSON lỗi thay cho log; biến rỗng thì
-gửi `Bearer` trống, cũng `rc=0`:
+Thiếu `-f` thì 401/403/404 vẫn `rc=0` và tệp chứa JSON lỗi thay cho log. CÓ `-f` thì lỗi
+KHÔNG ghi tệp — tệp CÙNG TÊN còn nguyên log của lần tải TRƯỚC (của job khác, hoặc bản cắt ngang
+`rc=18` của chính job ấy), đọc y hệt log thật; nên mỗi job một tệp, xoá trước khi tải. Kho này
+public: không token vẫn tải được log (đo 30-09-2026: không header ⇒ 200), token chỉ để có hạn
+mức riêng. `: "${GITHUB_PAT:?}"` chỉ dừng shell KHÔNG tương tác — dán vào terminal thì dòng sau
+vẫn chạy — nên chốt nằm trong CÙNG một `if`:
 
 ```bash
-: "${GITHUB_PAT:?GITHUB_PAT rong - khong co credential thi dung doc job.log}"
-curl -fsS -L -H "Authorization: Bearer $GITHUB_PAT" \
-  "https://api.github.com/repos/ducthangho/tra-luat/actions/jobs/<id>/logs" -o "$SCRATCH/job.log"; echo "rc=$?"
+J="<id>"
+if [ -n "${GITHUB_PAT:-}" ] && [ -n "${SCRATCH:-}" ]; then
+  OUT="$SCRATCH/job-$J.log"; rm -f "$OUT"
+  curl -fsS -L -H "Authorization: Bearer $GITHUB_PAT" \
+    "https://api.github.com/repos/ducthangho/tra-luat/actions/jobs/$J/logs" -o "$OUT"; echo "rc=$? $OUT"
+else echo "KHONG_DO_DUOC: GITHUB_PAT hoac SCRATCH rong"; fi
 ```
 
 **MÀU KHÔNG PHẢI NGUYÊN NHÂN.** `conclusion=failure` chỉ nói lượt chạy kết thúc khác 0. Nó không
@@ -575,39 +582,49 @@ rồi `rc=11 NGƯỜI_GIỮ 1` ngay sau khi cập nhật ref.
 Lệnh KHÔNG so SHA với máy chủ: `ls-remote` chỉ để đối chiếu TÊN nhánh. Cache cũ mà nhánh cục
 bộ bằng cache thì nó trả lời từ dữ liệu cũ — có thể `rc=0 NGƯỜI_GIỮ 0` trong khi máy chủ đã có
 lease giữ đường ấy. Nên `rc=0` chỉ đọc thành "không ai giữ" khi bước 1 của khối dưới in
-`CACHE_TUOI` (bước ấy chỉ ĐỌC, không ghi ref).
+`CACHE_TUOI` (bước ấy chỉ ĐỌC, không ghi ref). `CACHE_TUOI` đòi tập (SHA, tên) HAI phía BẰNG
+nhau: nhánh máy chủ đã xoá mà cache còn giữ (bootstrap chữa bằng `fetch --prune`) vẫn góp lease
+và bia mộ vào câu trả lời — bia mộ trỏ tới lease chỉ còn trên nhánh ấy đổi `rc=12` thành
+`rc=0 NGƯỜI_GIỮ 0`; `ls-remote` `rc=0` mà RỖNG không phải bằng chứng — máy chủ thật luôn có
+nhánh mặc định.
 
 Thông điệp lỗi nêu **nhánh và upstream thật**, không nhất thiết là `origin/<cùng tên>`.
 Lệnh chữa do `ai-dang-giu` in ra đã phân biệt nhánh rảnh với nhánh đang được worktree giữ:
 worktree sạch nhận `git -C <worktree> merge --ff-only`; nhánh rảnh nhận `git branch -f` **KHÔNG
 kèm `-C`** và không mang SHA kỳ vọng — tương đối với cwd của người CHẠY nó chứ không với
 `--root`: chạy nguyên văn từ kho khác là ép nhánh cùng tên của KHO ĐÓ, có thể làm rơi commit
-chưa đẩy. Bên bootstrap chạy nó dưới dạng CAS neo đúng `<root>` (khối thứ hai dưới đây).
+chưa đẩy. Bên bootstrap chạy nó dưới dạng `fetch .` neo đúng `<root>` (khối thứ hai dưới đây).
 Nếu báo phân kỳ hoặc `KHÔNG_PHÁT_LỆNH_CHỮA`, không thay bằng một lệnh `branch -f` tự dựng.
 Thời điểm cập nhật ref và checkout chỉ đọc xem protocol §8.1–§8.2; chuyển chẩn đoán cho
 bên dựng bootstrap để cập nhật đúng upstream, rồi nhận lại snapshot. Ví dụ đọc lại từ
 checkout đã cấp (kho đích được neo tường minh, kể cả khi cwd ở nơi khác; `GIT_DIR` và họ
-biến ấy trong môi trường vẫn đè `--root`, nên gỡ chúng):
+biến ấy trong môi trường đè cả `git -C` lẫn `--root`, nên gỡ chúng TRƯỚC CẢ HAI bước):
 
 ```bash
 PY="$(command -v python3 || command -v python || command -v py)"
-# 1) CHỈ ĐỌC: SHA máy chủ có khớp cache không (ai-dang-giu chỉ so TÊN). Lệch ⇒ chuyển bootstrap.
-if MC="$(git -C "$SOURCE" ls-remote --heads origin)"; then
-  LECH="$(LC_ALL=C comm -23 <(printf '%s\n' "$MC" | awk 'NF{sub("^refs/heads/","",$2); print $1" "$2}' | LC_ALL=C sort) \
-    <(git -C "$SOURCE" for-each-ref --format='%(objectname) %(refname:lstrip=3)' refs/remotes/origin | LC_ALL=C sort))"
-  [ -z "$LECH" ] && echo "CACHE_TUOI" || printf 'CACHE_CU:\n%s\n' "$LECH"
-else echo "KHONG_DO_DUOC: ls-remote hong"; fi
+unset GIT_DIR GIT_WORK_TREE GIT_COMMON_DIR   # đè cả -C lẫn --root: gỡ trước CẢ HAI bước
+git -C "$SOURCE" ls-remote --get-url origin | sed -E 's#://[^/@]*@#://***@#'   # endpoint đang hỏi, che userinfo (§8.1)
+# 1) CHỈ ĐỌC: tập (SHA, tên) máy chủ phải BẰNG tập cache, cả hai chiều (ai-dang-giu chỉ so TÊN, một chiều).
+if MC="$(git -C "$SOURCE" ls-remote --heads origin)" && [ -n "$MC" ]; then
+  LECH="$(LC_ALL=C comm -3 <(printf '%s\n' "$MC" | awk 'NF{sub("^refs/heads/","",$2); print $1" "$2}' | LC_ALL=C sort) \
+    <(git -C "$SOURCE" for-each-ref --format='%(if)%(symref)%(then)%(else)%(objectname) %(refname:lstrip=3)%(end)' refs/remotes/origin \
+      | awk NF | LC_ALL=C sort))"
+  [ -z "$LECH" ] && echo "CACHE_TUOI" || printf 'CACHE_CU (sat le: chi may chu co; thut TAB: chi cache co):\n%s\n' "$LECH"
+else echo "KHONG_DO_DUOC: ls-remote hong hoac rong"; fi
 # 2) rc=0 chỉ là "không ai giữ" khi bước 1 in CACHE_TUOI
-env -u GIT_DIR -u GIT_WORK_TREE -u GIT_COMMON_DIR \
-  "$PY" "$SOURCE/ops/lease_publish.py" ai-dang-giu <duong> --root "$SOURCE"; echo "rc=$?"
+"$PY" "$SOURCE/ops/lease_publish.py" ai-dang-giu <duong> --root "$SOURCE"; echo "rc=$?"
 ```
 
-Bên bootstrap chữa nhánh rảnh `<nhanh>` về `<upstream>` (cả hai lấy từ chẩn đoán) bằng CAS:
+Bên bootstrap chữa nhánh rảnh `<nhanh>` về `<upstream>` (cả hai lấy từ chẩn đoán) bằng `fetch .`
+KHÔNG kèm `+`: git đòi fast-forward trên đầu nhánh HIỆN TẠI (commit cục bộ chưa có ở upstream ⇒
+`rejected`) và từ chối nhánh đang được BẤT KỲ worktree nào checkout, kể cả worktree chính của
+`<root>` — "rảnh" lúc chẩn đoán chưa chắc còn rảnh lúc chữa. Đừng thay bằng `update-ref <mới>
+<cũ>`: nó so được giá trị cũ nhưng KHÔNG từ chối nhánh đang checkout — HEAD của worktree ấy nhảy,
+index và tệp đứng yên, `status` hiện staged NGƯỢC đúng các commit upstream (lease vừa về hiện
+thành `D`), và `commit` kế tiếp xoá lại chúng:
 
 ```bash
-CU="$(git -C "<root>" rev-parse "refs/heads/<nhanh>")"   # ghi ngay khi nhận chẩn đoán
-git -C "<root>" merge-base --is-ancestor "$CU" "<upstream>" \
-  && git -C "<root>" update-ref "refs/heads/<nhanh>" "<upstream>" "$CU"; echo "rc=$?"
+git -C "<root>" fetch --no-write-fetch-head . "<upstream>:refs/heads/<nhanh>"; echo "rc=$?"
 ```
 
 ## Provenance CI

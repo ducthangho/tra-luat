@@ -108,6 +108,10 @@ jobs:
         run: bash ops/cai_cong_cu.sh rg
       - name: G5 kiem ban ke cong cu + T1..T8 (packet #290)
         shell: bash
+        # #668: vòng bán kính đột biến (~93 % bước này, ~43 phút) giao cho `gate-cong-cu` (8 mảnh) + `gate-cong-cu-gop`.
+        # Ở đây vẫn chạy mọi ca + cổng cây thật + tự kiểm. Giá trị khác `manh` ⇒ `cong_cu_test` ĐỎ trước mọi ca.
+        env:
+          CONG_CU_TEST_BAN_KINH: manh
         run: |
           python ops/cong_cu.py kiem-tra --json
           python ops/cong_cu_test.py
@@ -431,6 +435,104 @@ jobs:
       - name: tl_boot smoke
         run: python scripts/tl_boot.py --version
 
+  # #668 CI-G5-CONG-CU-CHIA-MANH — bán kính đột biến của `ops/cong_cu_test.py` chia 8 mảnh chạy song song. Đo
+  # 28-09-2026: G5 45m56s (run 36362558889) mà ~93 % là vòng bán kính (mỗi đột biến chạy lại trọn bộ ca, runner 2 lõi),
+  # nên chỉ nhiều RUNNER mới rút được thời gian tường. Mỗi mảnh chạy lại ĐÚNG phần thiết lập G5 của `gate` (ca của
+  # mảnh cần đủ công cụ, thiếu thì ca đích bị BỎ QUA và bán kính KHÔNG ĐO ĐƯỢC). `loi_g5_workflow`
+  # (`.claude/dev/ci_dang_ky_test.py`) ghim hình dạng hai job này; `N` trong `CONG_CU_TEST_MANH` phải khớp matrix.
+  gate-cong-cu:
+    needs: chuan-bi
+    strategy:
+      fail-fast: false
+      matrix:
+        os: ${{ fromJson(needs.chuan-bi.outputs.os) }}
+        manh: [0, 1, 2, 3, 4, 5, 6, 7]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 30
+    env:
+      PYTHONIOENCODING: utf-8
+      PYTHONUTF8: "1"
+      PYTHONDONTWRITEBYTECODE: "1"
+    steps:
+      - name: Force LF checkout (hash parity với manifest)
+        run: |
+          git config --global core.autocrlf false
+          git config --global core.eol lf
+          # r226 — vì sao ghim `core.abbrev 7`: xem chú thích cùng bước ở job `gate`.
+          git config --global core.abbrev 7
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: cài PyYAML + jsonschema (cổng đăng lease + validator verdict cần)
+        run: python -m pip install --quiet PyYAML==6.0.3 jsonschema==4.26.0
+      - name: cài actionlint cho G5
+        shell: bash
+        env:
+          AL_VER: 1.7.7
+        run: bash ops/cai_actionlint.sh
+      - name: cài shellcheck cho G5 (cài xong đo lại)
+        shell: bash
+        run: bash ops/cai_cong_cu.sh shellcheck
+      - name: cài rg cho G5 (cài xong đo lại)
+        shell: bash
+        run: bash ops/cai_cong_cu.sh rg
+      - name: G5 manh ban kinh dot bien (#668)
+        shell: bash
+        # Biểu thức chỉ nằm trong `env`, không bao giờ trong `run` (`loi_ruff_ci` ngoài miền `${{ }}`).
+        env:
+          CONG_CU_TEST_MANH: ${{ matrix.manh }}/8
+          CONG_CU_TEST_MANH_RA: manh/manh-${{ matrix.manh }}.txt
+        run: |
+          python ops/cong_cu.py kiem-tra --json
+          python ops/cong_cu_test.py
+      - uses: actions/upload-artifact@v4
+        with:
+          name: gate-cong-cu-manh-${{ matrix.os }}-${{ matrix.manh }}
+          path: manh/manh-${{ matrix.manh }}.txt
+          if-no-files-found: error
+
+  # Job GOM: KHÔNG tin phán quyết của mảnh — dựng lại phân hoạch từ `DOT_BIEN` của chính nó, kiểm từng bản ghi bằng
+  # cùng bộ nhận của đường song song, ĐỎ khi thiếu/trùng mảnh, lệch băm/HEAD, lệch tổng. `!cancelled()`: mảnh đỏ thì
+  # gom VẪN chạy và ĐỎ vì thiếu mảnh — `needs` mặc định sẽ cho nó `skipped`, mà `skipped` đọc như xanh ở check bắt buộc.
+  # Sau land: chủ kho thêm context `gate-cong-cu-gop (ubuntu-latest)` vào ruleset (spec #668 §7).
+  gate-cong-cu-gop:
+    needs: [chuan-bi, gate-cong-cu]
+    if: ${{ !cancelled() }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: ${{ fromJson(needs.chuan-bi.outputs.os) }}
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 10
+    env:
+      PYTHONIOENCODING: utf-8
+      PYTHONUTF8: "1"
+      PYTHONDONTWRITEBYTECODE: "1"
+    steps:
+      # BẮT BUỘC cả ở gom: `sha256_test` của mảnh đo trên checkout LF; Windows mặc định autocrlf thì băm lệch ⇒ ĐỎ oan.
+      - name: Force LF checkout (hash parity với manifest)
+        run: |
+          git config --global core.autocrlf false
+          git config --global core.eol lf
+          git config --global core.abbrev 7
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: cài PyYAML + jsonschema (cổng đăng lease + validator verdict cần)
+        run: python -m pip install --quiet PyYAML==6.0.3 jsonschema==4.26.0
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: gate-cong-cu-manh-${{ matrix.os }}-*
+          path: manh
+          merge-multiple: true
+      - name: G5 gom manh ban kinh dot bien (#668)
+        shell: bash
+        run: python ops/cong_cu_test.py --gop manh
+
   gate-ops:
     # packet #660 (CI-GATE-TACH-GATE-OPS r1): tách khỏi `gate` để cắt thời gian tường của PR, cùng hình dạng
     # #463. Đo 27-09-2026 (12 run PR, REST): `gate` trung vị 910 s trên runner 2 lõi ⇒ chỉ tách JOB mới cắt được.
@@ -438,8 +540,8 @@ jobs:
     # don-nhanh, cgroup + gate_lifecycle, lifecycle nền không cgroup. KHÔNG bỏ bước nào.
     # CỔNG BẮT BUỘC: các bước này chỉ chặn merge khi ruleset `bao-ve-cong-dang-lease` có context
     # `gate-ops (ubuntu-latest)` — chú thích `PLAT-X5` bên dưới nói "job `gate`" là lời viết TRƯỚC lần tách.
-    # Cố ý KHÔNG có: bước chạm `ops/cong_cu` (không vào `JOB_G5`), bước cài actionlint (t152 đếm 4 dòng
-    # `AL_VER:`; wrapper lease-publish tự cài), Ruff (`loi_ruff_ci`). Ma trận/`timeout`/`env` bằng đúng `gate`.
+    # Cố ý KHÔNG có: bước chạm `ops/cong_cu` (không vào `JOB_G5`), bước cài actionlint (t152 đếm 5 dòng
+    # `AL_VER:` từ #668; wrapper lease-publish tự cài), Ruff (`loi_ruff_ci`). Ma trận/`timeout`/`env` bằng đúng `gate`.
     needs: chuan-bi
     strategy:
       fail-fast: false

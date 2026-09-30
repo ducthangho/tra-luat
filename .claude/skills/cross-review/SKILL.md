@@ -545,7 +545,9 @@ qua `~/.curlrc`: một dòng `location-trusted` ở đó đưa token theo sang h
 ĐẦU TIÊN để curl bỏ qua tệp ấy).
 Thiếu `-f` thì 401/403/404 vẫn `rc=0` và tệp chứa JSON lỗi thay cho log. CÓ `-f` thì lỗi
 KHÔNG ghi tệp — tệp CÙNG TÊN còn nguyên log của lần tải TRƯỚC (của job khác, hoặc bản cắt ngang
-`rc=18` của chính job ấy), đọc y hệt log thật; nên mỗi job một tệp, xoá trước khi tải. Đừng
+`rc=18` của chính job ấy), đọc y hệt log thật; nên mỗi LƯỢT tải một thư mục MỚI (`mktemp -d`). Một tệp
+cố định theo job chưa đủ: `$SCRATCH` là của cả run, hai lượt tải CÙNG job song song thì lượt sau xoá tệp
+của lượt trước rồi ghi lại, và lượt xong trước in `rc=0` trỏ vào bản ĐANG GHI DỞ, cụt mất dòng cuối. Đừng
 suy "không cần token" từ một `200` trong phiên web: proxy của phiên TỰ CHÈN credential GitHub
 (đo 30-09-2026, không header: `/rate_limit` báo limit 15000, `/user` 200). Ẩn danh thật
 (`--noproxy`, limit 60, egress là một DẢI IP dùng chung): 22/25 lượt `403` cạn hạn mức, 3/25 lượt
@@ -557,11 +559,12 @@ builtin): `-H "Authorization: …"` để nguyên token trong argv (`ps`, `/proc
 
 ```bash
 J="<id>"
-if [ -n "${GITHUB_PAT:-}" ] && [ -n "${SCRATCH:-}" ]; then
-  OUT="$SCRATCH/job-$J.log"; rm -f "$OUT"
+if [ -n "${GITHUB_PAT:-}" ] && [ -n "${SCRATCH:-}" ] && mkdir -p "$SCRATCH" \
+  && JD="$(mktemp -d "$SCRATCH/job-$J.XXXXXX")"; then
+  OUT="$JD/job-$J.log"
   printf 'Authorization: Bearer %s\n' "$GITHUB_PAT" | curl -q -fsS -L -H @- \
     "https://api.github.com/repos/ducthangho/tra-luat/actions/jobs/$J/logs" -o "$OUT"; echo "rc=$? $OUT"
-else echo "KHONG_DO_DUOC: GITHUB_PAT hoac SCRATCH rong"; fi
+else echo "KHONG_DO_DUOC: GITHUB_PAT hoac SCRATCH rong, hoac khong tao duoc thu muc tai"; fi
 ```
 
 **MÀU KHÔNG PHẢI NGUYÊN NHÂN.** `conclusion=failure` chỉ nói lượt chạy kết thúc khác 0. Nó không

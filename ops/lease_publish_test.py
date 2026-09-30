@@ -10520,17 +10520,19 @@ def _chay_buoc_dang_that(van_yaml, comments_san=(), la_pr=False, issue_loi=False
         st.write_text(json.dumps({"issues": {"55": {"comments": list(comments_san), "pr": la_pr,
                                                     "issue_loi": issue_loi}}}))
         log.write_text("")
-        if ghi_toa_do is not None:
-            tt = json.loads(st.read_text())["issues"]["55"]
-            ghi_toa_do.append(_toa_do_that((goc / "ops" / "leases" / "x.yaml").read_text(encoding="utf-8"),
-                                           tt["comments"], tt["pr"]))
         (bin_ / "gh").write_text(f"#!/bin/sh\nexec '{py}' '{neo}/gh_gia.py' \"$@\"\n")
         (bin_ / "gh").chmod(0o755)
         mt = dict(os.environ, NEO=str(neo), REPO="o/r", GITHUB_REPOSITORY="o/r", GITHUB_ACTOR="ducthangho",
                   GH_TOKEN="gia", GH_STATE=str(st), GH_LOG=str(log), PYTHONDONTWRITEBYTECODE="1")
         mt["PATH"] = os.pathsep.join([str(bin_), os.environ["PATH"]])
         p = subprocess.run([_bash_posix(), "-c", than], cwd=goc, env=mt, capture_output=True, text=True)
-        moi = json.loads(st.read_text())["issues"]["55"]["comments"][len(comments_san):]
+        # Tọa độ đọc SAU lượt chạy, từ ĐÚNG đường dẫn mà bước (`ds.txt`) và `gh` giả (`$GH_STATE`) đã dùng.
+        cac = json.loads(Path(mt["GH_STATE"]).read_text())["issues"]
+        moi = cac["55"]["comments"][len(comments_san):]
+        if ghi_toa_do is not None:
+            tep = goc / (goc / "ds.txt").read_text(encoding="utf-8").strip()
+            ghi_toa_do.append(_toa_do_that(tep.read_text(encoding="utf-8"),
+                                           cac["55"]["comments"][:len(comments_san)], cac["55"]["pr"], cac))
         return {"rc": p.returncode, "goi": [tuple(json.loads(x)) for x in log.read_text().splitlines()],
                 "dang": [c["body"].splitlines()[0] for c in moi], "out": p.stdout + p.stderr}
 
@@ -10561,7 +10563,7 @@ _LID_TAP_II = (("true", "true", "True"), ("1.5", "1.5", "1.5"), ("ngày", "2026-
 _DA_DANG_BO_QUA = "đã đăng trước đó — bỏ qua"
 
 
-def _toa_do_that(van, san, la_pr):
+def _toa_do_that(van, san, la_pr, cac=None):
     """Tọa độ THẬT của một lượt: (`lease_id` sau YAML, dấu bot trong comment, số hiệu là PR, hết hạn) — R2-L1.
 
     Đọc từ CHÍNH thứ đã ghi vào sandbox, nên nhãn của ô chỉ để chẩn đoán: đổi đầu vào mà giữ nhãn thì tọa độ đổi.
@@ -10573,18 +10575,29 @@ def _toa_do_that(van, san, la_pr):
     han = dd["lease_expires_at_utc"]
     han = datetime.strptime(han, "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=timezone.utc) if isinstance(han, str) else han
     dau = tuple(m.group(1) for c in san for m in [re.search(r"\*\*Lease `([^`]*)`\*\*", c["body"])] if m)
-    return lid, dau, bool(la_pr), han < datetime.now(timezone.utc)
+    tien_de = []   # bảng §2.6, literal ĐỘC LẬP với `lease_mau()`
+    pi = dd.get("packet_issue")
+    if not (type(pi) is int and pi == 55 and cac is not None and set(cac) == {"55"}
+            and not cac["55"].get("issue_loi")):
+        tien_de.append(f"packet_issue/gh giả: {pi!r}")
+    if dd.get("schema_version") != 1 or dd.get("granted_by") != "ducthangho":
+        tien_de.append("schema_version/granted_by")
+    if not re.fullmatch(r"[0-9a-f]{40}", str(dd.get("reviewed_sha_required"))):
+        tien_de.append("reviewed_sha_required")
+    if {"prompt_path", "prompt_sha256_required"} & set(dd):
+        tien_de.append("neo prompt")
+    return lid, dau, bool(la_pr), han < datetime.now(timezone.utc), tuple(tien_de)
 
 
 # Tập tọa độ MONG ĐỢI: literal ĐỘC LẬP với `_LID_TAP_*` và generator (R1-F2, R2-L1). So dạng multiset (sắp theo repr)
 # nên bỏ ô, lặp ô bù số, đổi dạng thật mà giữ nhãn đều đỏ.
-_TD_M2 = ([(lid, (lid,) if c else (), pr, False) for lid in ("None", "['wp579-thu']", "{'x': 1}")
+_TD_M2 = ([(lid, (lid,) if c else (), pr, False, ()) for lid in ("None", "['wp579-thu']", "{'x': 1}")
            for pr in (False, True) for c in (False, True)]
-          + [("<thiếu>", (), False, False), ("<top-level list>", (), False, False)])
+          + [("<thiếu>", (), False, False, ()), ("<top-level list>", (), False, False, ())])
 
 
 def _td_m3(la_pr, het_han):
-    return [(lid, (dau,), la_pr, het_han) for lid, dau in (("True", "True"), ("1.5", "1.5"),
+    return [(lid, (dau,), la_pr, het_han, ()) for lid, dau in (("True", "True"), ("1.5", "1.5"),
                                                             ("datetime.date(2026, 9, 29)", "2026-09-29"))]
 
 
@@ -10626,12 +10639,19 @@ def t195_M2_tap_i_bien_cong_khai_khoa_ca_bo_quan_sat():
     lech, da_chay = [], []
     for nhan, van, san, la_pr in _o_tap_i():
         kq = _chay_buoc_dang_that(van, san, la_pr, ghi_toa_do=da_chay)
-        if not (kq["rc"] == 1 and not kq["goi"] and not kq["dang"]):
-            lech.append(f"{nhan}: rc={kq['rc']} goi={kq['goi']} POST={len(kq['dang'])}")
+        lech.append(_lech_tap_i(nhan, kq))
+    lech = [x for x in lech if x]
     chot(sorted(da_chay, key=repr) == sorted(_TD_M2, key=repr),
          f"M2: tọa độ THẬT đã chạy phải đúng 14 tọa độ mong đợi (không chỉ nhãn); nhận {sorted(da_chay, key=repr)}")
     chot(not lech, "M2 tập (i): nền phải rc=1, 0 lời gọi gh, 0 POST ở cả 14 ô (dãy lời gọi nền = rỗng); lệch: "
          + "; ".join(lech))
+
+
+def _lech_tap_i(nhan, kq) -> str:
+    """Rỗng nếu ô M2 đạt: rc=1, dãy lời gọi RỖNG, 0 POST."""
+    if kq["rc"] == 1 and kq["goi"] == [] and kq["dang"] == []:
+        return ""
+    return f"{nhan}: rc={kq['rc']} goi={kq['goi']} POST={len(kq['dang'])}"
 
 
 def _lech_tap_ii(nhan, kq) -> str:
@@ -10682,6 +10702,9 @@ def _lech_m4(kq) -> str:
         return f"M4: chuỗi hợp lệ trên Issue trống phải rc=0; nhận rc={kq['rc']}, out={kq['out'][-300:]!r}"
     if not (len(kq["dang"]) == 1 and kq["dang"][0].startswith("**Lease `wp-ok-1`**")):
         return f"M4: phải ĐÚNG 1 POST mở bằng **Lease `wp-ok-1`**; nhận POST={kq['dang']!r}, goi={kq.get('goi')}"
+    ep = "repos/o/r/issues/55/comments"
+    if not (("GET", ep) in kq["goi"] and [g for g in kq["goi"] if g[0] == "POST"] == [("POST", ep)]):
+        return f"M4: nhật ký lời gọi phải có GET `comments` và ĐÚNG 1 POST `comments`; nhận goi={kq['goi']}"
     return ""
 
 
@@ -10739,6 +10762,16 @@ def t199_A9_guard_nen_cua_helper_qua_diem_do_o_ba_trang_thai():
                     sai.append(f"{ten} điểm dò {'bật' if bat else 'tắt'}: nhận {ket!r}, phải {mong[(ten, bat)]!r}")
                 if bat and (bool(ly_do) != (ten == "S2") or (ten == "S2" and "chỉ chạy Ubuntu" not in ly_do)):
                     sai.append(f"{ten}: lý_do dẫn xuất sai: {ly_do!r}")
+    # M1 "bắt đầu bằng ĐÚNG guard": sentinel chỉ canh `_buoc_workflow`, nên I/O chèn TRƯỚC guard (tệp tạm, San)
+    # không bị thấy. Chốt tĩnh: hai câu lệnh đầu (sau docstring/import) phải là guard rồi điểm dò, nguyên văn.
+    import ast, inspect, textwrap
+    than = [x for x in ast.parse(textwrap.dedent(inspect.getsource(_chay_buoc_dang_that))).body[0].body
+            if not isinstance(x, (ast.Import, ast.ImportFrom))
+            and not (isinstance(x, ast.Expr) and isinstance(x.value, ast.Constant))]
+    mau = ast.parse('if _ly_do_bo_qua_workflow(WORKFLOW_DANG, "dang"):\n    raise BoQuaNen(WORKFLOW_DANG, "dang")\n'
+                    'if do_qua_guard:\n    return "QUA_GUARD"\n').body
+    if [ast.dump(x) for x in than[:2]] != [ast.dump(x) for x in mau]:
+        sai.append("M1: hai câu lệnh đầu của helper phải là guard rồi điểm dò (không I/O nào trước chúng)")
     chot(not sai, "A9 guard nền: " + "; ".join(sai))
 
 
@@ -10802,10 +10835,18 @@ def t202_M3_M4_moi_chot_quyet_dinh_co_phan_chung_rieng():
     `rc=1`, Q9). M4: đúng tiền tố (hậu tố tuỳ ý) phải qua; sai tiền tố · tiền tố đúng ở GIỮA chuỗi · 0 POST · 2 POST · `rc=1` ·
     `rc=2` · `rc` âm phải bị bắt (R2-L1: không ghim `rc=1`, không ghim toàn thân comment).
     """
-    def kq(rc, dang=(), out=""):
-        return {"rc": rc, "dang": list(dang), "out": out, "goi": []}
+    sai, ep = [], "repos/o/r/issues/55/comments"
+    GOI_M4 = [("GET", ep), ("GET", "repos/o/r/issues/55"), ("GET", ep), ("POST", ep)]
+
+    def kq(rc, dang=(), out="", goi=None):
+        return {"rc": rc, "dang": list(dang), "out": out, "goi": (GOI_M4 if dang else []) if goi is None else goi}
+    for nhan, lech, k in (("M2 đối chứng", False, kq(1)), ("M2 rc=0", True, kq(0)), ("M2 rc=2", True, kq(2)),
+                          ("M2 một GET", True, kq(1, goi=[("GET", ep)])),
+                          ("M2 GET loại số hiệu", True, kq(1, goi=[("GET", "repos/o/r/issues/55")])),
+                          ("M2 POST", True, kq(1, ["x"], goi=[]))):
+        if bool(_lech_tap_i(nhan, k)) != lech:
+            sai.append(nhan)
     dau = "**Lease `wp-ok-1`** — đăng tự động"
-    sai = []
     for nhan, lech, k in (("M3 chỉ rc=0", True, kq(0)), ("M3 chỉ POST thừa", True, kq(1, [dau])),
                           ("M3 chỉ dòng bỏ qua", True, kq(1, out=_DA_DANG_BO_QUA)),
                           ("M3 đối chứng rc=1", False, kq(1)), ("M3 đối chứng rc=2", False, kq(2))):
@@ -10817,7 +10858,9 @@ def t202_M3_M4_moi_chot_quyet_dinh_co_phan_chung_rieng():
                           ("M4 rc=1 đúng POST", True, kq(1, [dau])), ("M4 rc=2 đúng POST", True, kq(2, [dau])),
                           ("M4 rc=-1 đúng POST", True, kq(-1, [dau])),
                           ("M4 tiền tố ĐÚNG nhưng ở GIỮA chuỗi", True, kq(0, ["xx" + dau])),
-                          ("M4 đúng tiền tố, hậu tố tuỳ ý", False, kq(0, ["**Lease `wp-ok-1`** — hậu tố khác"]))):
+                          ("M4 đúng tiền tố, hậu tố tuỳ ý", False, kq(0, ["**Lease `wp-ok-1`** — hậu tố khác"])),
+                          ("M4 nhật ký rỗng", True, kq(0, [dau], goi=[])),
+                          ("M4 nhật ký chỉ POST", True, kq(0, [dau], goi=[("POST", ep)]))):
         if bool(_lech_m4(k)) != lech:
             sai.append(nhan)
     chot(not sai, "hàm quyết định M3/M4 sai chiều: " + "; ".join(sai))

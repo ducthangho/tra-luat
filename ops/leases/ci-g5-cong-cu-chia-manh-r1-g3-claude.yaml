@@ -19,7 +19,9 @@ recorded_by: claude-session
 recorder_is_dispatcher: false
 
 leased_at_utc: '2026-09-30T03:25:00Z'
-lease_expires_at_utc: '2026-10-01T03:25:00Z'
+lease_expires_at_utc: '2026-09-30T09:55:00Z'
+han_ghi_chu: >-
+  Goc 24 gio (2026-10-01T03:25:00Z). RUT NGAN ve 2026-09-30T09:55:00Z — xem thu_hoi_bang_rut_han.
 
 packet_id: CI-G5-CONG-CU-CHIA-MANH
 packet_slug: CI-G5-CONG-CU-CHIA-MANH
@@ -130,3 +132,24 @@ chua_do_duoc:
   - 'Danh tinh nguoi ky: #566.'
   - 'Effort thuc te cua phien executor.'
   - 'Thoi gian that cua gate-cong-cu / gate-cong-cu-gop (A9, chi sau land).'
+lease_sua_lan_cuoi: '2026-09-30T09:31Z'
+lease_sua_ghi_chu: >-
+  Lan 1: rut ngan lease_expires_at_utc (thu_hoi_bang_rut_han). Khong doi write set, spec, branch.
+thu_hoi_bang_rut_han:
+  han_goc_utc: '2026-10-01T03:25:00Z'
+  han_moi_utc: '2026-09-30T09:55:00Z'
+  chi_thi: >-
+    Chu kho trong phien Claude Code session_01CSM7GNazhN6uGJb4v1TqBT 2026-09-30: "#668: merge, land và bookkeeping"
+    (08:09:13Z, neo #668 comment 5906990399) va "Nếu #668 land rồi thì bookeeping và đóng đi".
+  ly_do: >-
+    Packet #668 da MERGE: PR #696 merge 423b4ba14078701859b9e6ac101a68a3fc4ddef4 (2026-09-30T09:30:11Z), head
+    3ddda02 = cc78b33 (human_audited, #668 comment 5906970256) + merge master; 5 tep write set giong het byte cc78b33.
+  vi_sao_khong_dung_so: >-
+    Theo tien le #651/#660/#661: so ops/thu-hoi/ chua kich hoat; rut han chi dung co che DA CAI (phan loai lease theo
+    han). Han moi dat vai phut SAU luc push de ops-publish-lease.yml con thay lease song (nhanh rc=9 da dang), khong roi
+    vao rc=8 (bai hoc CLAUDE.md: rc=8 che rc=9).
+  nguoi_rut: 'land operator session_01CSM7GNazhN6uGJb4v1TqBT (KHONG phai executor session_01WktdUCQr2FQQ5j76LjrxgF)'
+  gioi_han: >-
+    Ref mang lease nay: nhanh ops/cap-lease-ci-g5-cong-cu-chia-manh (ban rut han) va master sau PR bookkeeping. Nhanh
+    ma claude/g5-job-gate-optimization-dkevre KHONG mang tep lease. Nghiem thu: ai-dang-giu cho 5 tep W1-W5 khong con
+    ci-g5-cong-cu-chia-manh-r1-g3-claude trong NGUOI_GIU sau 09:55Z khi quet du ref.

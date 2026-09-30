@@ -72,7 +72,7 @@ SHA_G1   = "2f70869a0537843e9cae78618ee7ae8c261d972d"
 # do that 18-09 tren ban va g2 cua agy cho 5 tep / +812, trong khi viec cua agy la 2 tep / +353.
 # Mot chot nhu the se bao "vuot tran" cho mot ban va KHONG vuot. Base dung la MERGE-BASE.
 SHA_BASE_SPEC = "d705623162b75b7340ee7cca54ac2d2abbddbb6f"
-BAN_BO_DO = "2026-09-30i"              # doi MOI khi sua bo do - log tu khai ban nao
+BAN_BO_DO = "2026-09-30j"              # doi MOI khi sua bo do - log tu khai ban nao
 TRAN_TEP, TRAN_DONG = 2, 400          # N7' cua spec r3
 MAU_WIN  = 'if nen_thuc == "windows":'
 # Write set cua packet #541 g2. Diff khong cham tep nao o day => do NHAM NHANH.
@@ -473,8 +473,13 @@ if not ("--chi-kich-thuoc" in sys.argv or "--chi-probe" in sys.argv):
                    " bash: Git Bash, khong phai bash.exe cua WSL)")
     # shellcheck KHONG nhan --norc thi actionlint 1.7.7 (tu truyen --norc) lam t33 DO, va SHELLCHECK_OPTS=--norc cua chay() lam
     # t137 DO — ca "la" => TRUOT gia (do tren 2026-09-30h, shellcheck gia tu choi --norc: ban 30h rc=1 `la: ['t33']` sau ca
-    # bo test). `which` chi hoi CO MAT; o day hoi DUNG DUOC.
-    elif subprocess.run([shutil.which("shellcheck"), "--norc", "--version"], capture_output=True, timeout=60).returncode:
+    # bo test). `which` chi hoi CO MAT; o day hoi DUNG DUOC. Nguong do tren shellcheck THAT: 0.4.7/0.5.0/0.6.0 tu choi --norc
+    # (rc=3), 0.7.0 tro len nhan. Phep hoi phai thay DUNG SHELLCHECK_OPTS ma chay() dat cho luot con: ban 30i hoi voi bien CUA
+    # NGUOI DO — do tren 2026-09-30i, shellcheck 0.9.0 + SHELLCHECK_OPTS=--extended-analysis=true (co cua 0.10): rc=3 "khong nhan
+    # --norc: cap nhat shellcheck" trong khi t33/t137 qua chay() deu 1/1. Goi THANG (khong qua chay()): qua han thi run() giet
+    # dung shellcheck; qua chay() thi chi giet python con, shellcheck treo o lai mo coi (do tren 2026-09-30i: 1/1 con song).
+    elif subprocess.run([shutil.which("shellcheck"), "--norc", "--version"], capture_output=True, timeout=60,
+                        env=dict(os.environ, SHELLCHECK_OPTS="--norc")).returncode:
         loi.append("shellcheck tren PATH khong nhan --norc (actionlint 1.7.7 va chay() deu truyen co ay): cap nhat shellcheck")
 
 rc, head, _ = git(goc, "rev-parse", "HEAD")
@@ -555,13 +560,20 @@ else:
     if mb != SHA_BASE_SPEC:
         inn(f"  LUU Y: khac base ma spec r3 khai ({SHA_BASE_SPEC[:12]}) — vi nhanh da merge master.")
         inn("         Do so base cu se NUOT phan master mang vao. Dung merge-base moi la viec cua executor.")
-        rc_x, ns_x, _ = git(goc, "diff", "--numstat", SHA_BASE_SPEC, head)
+        rc_x, ns_x, _ = git(goc, "diff-tree", "-r", "-M", "--diff-algorithm=myers", "--numstat", SHA_BASE_SPEC, head)
         if not rc_x:
             h = [l.split("\t") for l in ns_x.splitlines() if l.strip()]
             a = sum(int(x[0]) for x in h if x[0].isdigit())
             ghi("numstat_theo_base_spec", {"tep": len(h), "them": a})
             inn(f"         (doi chieu: so base spec = {len(h)} tep / +{a} — con so ay KHONG dung de cham)")
-    rc, ns, er = git(goc, "diff", "--numstat", mb, head)
+    # PLUMBING, khong PORCELAIN: `git diff` doc cau hinh UI CUA NGUOI DO (diff.algorithm, diff.renames, diff.orderFile,
+    # color.diff), va gia tri HOP LE doi luon SO dong ma van ra chu so — do tren 2026-09-30i: ung vien tong hop (myers +401) =>
+    # ban 30i DAT 2 tep / +400 duoi `diff.algorithm = histogram` hoac `patience`, TRUOT +401 khi mac dinh; 10/75 commit cham
+    # write set co so dong doi theo thuat toan. `diff-tree -r -M` = mac dinh cua `git diff` (renames bat) va KHONG doc cac khoa
+    # ay. Thuat toan phai TUONG MINH: diff.<driver>.algorithm (qua core.attributesFile cua nguoi do) VAN lot vao plumbing —
+    # do tren 2026-09-30i, `*.py diff=alg` + diff.alg.algorithm=histogram: diff-tree +401 cho ung vien myers +400; co tuong minh
+    # thang khoa ay. attributes `-diff`/core.bigFileThreshold van ap => `-` => KHONG DO DUOC (chot duoi).
+    rc, ns, er = git(goc, "diff-tree", "-r", "-M", "--diff-algorithm=myers", "--numstat", mb, head)
 if rc:
     pass
 else:
@@ -573,7 +585,9 @@ else:
     inn(f"    TONG: {len(hang)} tep, +{them}, -{xoa}   (tran: {TRAN_TEP} tep / {TRAN_DONG} dong them)")
     cham = sorted({h[2] for h in hang} & WRITE_SET_G2); ghi("cham_write_set", cham)
     def _ca_moi_co(rev):
-        r_, nd_, _ = git(goc, "show", f"{rev}:ops/lease_publish_test.py")
+        # cat-file, khong `show`: `git show` chet voi cau hinh UI go sai (do tren 2026-09-30i: log.date go sai => ban 30i goi
+        # 0ea95de la "khong phai ung vien ... None — da land? nham nhanh?").
+        r_, nd_, _ = git(goc, "cat-file", "-p", f"{rev}:ops/lease_publish_test.py")
         return None if r_ else {t for t in CA_MOI_G2 if re.search(r"(?m)^def " + t + r"[a-z]?_", nd_)}
     o_mb, o_h = _ca_moi_co(mb), _ca_moi_co(head)
     mang = sorted(o_h - o_mb, key=so_ca) if (o_mb is not None and o_h is not None) else None
@@ -592,11 +606,12 @@ else:
         ket("N7' kich thuoc", TRUOT if vuot else (KDD if khong_so else DAT),
             f"{len(hang)} tep / +{them}" + (f" — numstat KHONG co so dong cho {khong_so}" if khong_so else ""))
 
-# Cong kich thuoc PHAI de lai MOT ket qua. `git diff --numstat` hong thi nhanh `if rc: pass` khong ghi gi, va vang mat o day
+# Cong kich thuoc PHAI de lai MOT ket qua. Lenh numstat hong thi nhanh `if rc: pass` khong ghi gi, va vang mat o day
 # thanh DAT o bo gop: cau hinh diff CUA NGUOI DO hong (diff.orderFile tro tep khong co, diff.algorithm go sai => rc=128) cho
 # --chi-kich-thuoc rc=0 voi 0 chot, luot day du "DAT 11" rc=0 (do tren 2026-09-30h, 0ea95de). Vang mat la KHONG DO DUOC.
+# Tu 30j numstat la diff-tree (khong doc hai khoa ay); duong con lai do duoc: diff.renameLimit go sai => rc=128.
 if not any(c[0] == "N7' kich thuoc" for c in chot):
-    ket("N7' kich thuoc", KDD, f"cong KHONG ra ket qua (git diff --numstat rc={rc}): {_an_userinfo(er)[:70]}")
+    ket("N7' kich thuoc", KDD, f"cong KHONG ra ket qua (git diff-tree --numstat rc={rc}): {_an_userinfo(er)[:70]}")
 
 # Dinh danh THAT nam o N7' (ca moi g2 mang vao), KHONG o "hau due g1": g1 da land nen moi nhanh deu
 # la hau due. Dong dau khoi dan phai tu khai theo ket qua ay (do duoc: master 44620e8 mo khoi bang

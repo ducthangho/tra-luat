@@ -1135,6 +1135,15 @@ def t20zb_kiem_mode_git_khong_do_duoc_thi_do():
         ("raw trung duong", dict(raw={"ba_cham": (0, tot + tot)}), "ban ghi la"),
         ("D mode khac 0", dict(raw={"ba_cham": (0, raw_ghi(("160000", "D", d)))}), "mode 160000, D"),
         ("tap lech", dict(raw={"ba_cham": (0, tot + raw_ghi(("100644", "A", "ops/land/them.md")))}), "lech tap da phan loai"),
+        # Cross-review luot 11 (`kiem-mode-git-chot-khong-rang`): chieu NGUOC cua chot tap — duong dan da phan loai ma KHONG cap
+        # `--raw` nao liet ke thi mode cua no KHONG duoc kiem; va `D` mang mode tep thuong (khong phai 000000) la ban ghi hong.
+        ("tap thieu", dict(raw={"ba_cham": (0, b""), "cay": (0, b"")}), "lech tap da phan loai"),
+        ("D mode tep thuong", dict(raw={"ba_cham": (0, raw_ghi(("100644", "D", d)))}), "mode 100644, D"),
+        # Luot 12 (liet ke het chot cua `_doc_raw`/`kiem_mode_git`, moi chot mot dot bien rieng): stdout KHONG phai bytes ma
+        # `bytes()` van nhan (memoryview) => chot kieu la thu DUY NHAT chan; duong dan RONG trong ban ghi; bo qua loi cua mot cap.
+        ("raw stdout khong phai bytes", dict(raw={"ba_cham": (0, memoryview(tot))}), "--raw " + GOC_A + "..." + GOC_B + " rc=0"),
+        ("merge-tree stdout khong phai bytes", dict(merge_tree=(0, memoryview((CAY_GIA + "\n").encode()))), "merge-tree (kiem mode) rc=0"),
+        ("raw duong rong", dict(raw={"ba_cham": (0, tot.split(b"\0")[0] + b"\0\0")}), "ban ghi la"),
     )
     for ten, kw, can in kich_ban:
         kw.setdefault("raw", {})
@@ -1146,6 +1155,35 @@ def t20zb_kiem_mode_git_khong_do_duoc_thi_do():
         bang(loi and any(can in x for x in loi), f"{ten}: phai DO voi '{can}', duoc {loi}")
     bang(m.kiem_mode_git(env_pr(), chay_gia(raw={"ba_cham": (0, tot), "cay": (0, tot), "hop": (0, b"")}), ROOT_THAT, {d}) == [],
          "doi chung: ba cap sach, tap khop phai DAT")
+
+
+@ca
+def t20zd_kiem_mode_git_dia_la_symlink_do():
+    """Luot 12: chot DIA cua cap `goc -> merge ref` co HAI ve — `not is_file()` (t20z) va `is_symlink()`. Symlink tro toi tep
+    thuong co `is_file()` DUNG nen chi ve `is_symlink()` chan; o muc `kiem-re` ve ay trung voi `kiem_loai_tep` (t20n/t20q), nen
+    phep do nay goi THANG `kiem_mode_git` de ve ay co rang rieng theo dung hop dong docstring ("tren dia phai LA tep thuong")."""
+    m = nap_module()
+    duong = "ops/land/s.md"
+    tot = raw_ghi(("100644", "M", duong))
+    with _cay_tam({"ops/land/that.md": "t\n"}) as kho:
+        (kho / duong).symlink_to("that.md")   # nhu t20n/t20q/t20x: khong tha im lang khi nen khong tao duoc symlink
+        bang((kho / duong).is_file(), "fixture vo hieu: symlink phai tro toi tep thuong (is_file DUNG)")
+        loi = m.kiem_mode_git(env_pr(), chay_gia(raw={k: (0, tot) for k in ("ba_cham", "cay", "hop")}), kho, {duong})
+        bang(len(loi) == 1 and "tren dia KHONG phai tep thuong" in loi[0], f"git noi tep thuong ma dia la symlink phai DO: {loi}")
+
+
+@ca
+def t20zc_kiem_re_doi_ten_tep_ho_so_dat():
+    """Cross-review luot 11 (`kiem-mode-git-chot-khong-rang`): `git diff` mac dinh DO doi ten (`diff.renames`), ban ghi `--raw`
+    khi do la `R100` kem HAI duong dan => `_doc_raw` bao dau ra hong. `--no-renames` la dieu kien de PR doi ten tep ho so
+    (thao tac thuong ngay) khong DO OAN o required check; khong ca nao khoa co ay."""
+    m = nap_module()
+    with kho_that(nen={"README.md": "x\n", "ops/land/a.yaml": "a: 1\nb: 2\n"},
+                  nhanh_pr={"ops/land/a.yaml": None, "ops/land/b.yaml": "a: 1\nb: 2\n"}) as (kho, goc, dau):
+        raw = git(kho, "diff", "--raw", "--no-abbrev", f"{goc}...{dau}").stdout.decode()
+        bang(" R100\t" in raw, f"fixture vo hieu: git diff mac dinh phai do doi ten (R100): {raw!r}")
+        rc, log = kiem_re(m, kho, goc, dau)
+        bang(rc == 0, f"PR doi ten tep ho so phai DAT kiem-re: rc={rc}: {log}")
 
 
 @ca
@@ -2447,6 +2485,29 @@ DOT_BIEN = [
     ('mode_git_bo_kiem_trung', _ma(' or not duong or duong in kq:', ' or not duong:'), ('t20zb_kiem_mode_git_khong_do_duoc_thi_do',)),
     ('mode_git_xoa_bo_kiem_mode', _ma('            if trang_thai == "D" and mode == "000000":', '            if trang_thai == "D":'), ('t20zb_kiem_mode_git_khong_do_duoc_thi_do',)),
     ('mode_git_bo_kiem_tap', _ma('    if thay != set(doi):', '    if False:'), ('t20zb_kiem_mode_git_khong_do_duoc_thi_do',)),
+    # ---- cross-review luot 11, lop `kiem-mode-git-chot-khong-rang`
+    ('mode_git_raw_bo_no_renames', _ma('"diff", "--raw", "-z", "--no-renames", "--no-abbrev"', '"diff", "--raw", "-z", "--no-abbrev"'), ('t20zc_kiem_re_doi_ten_tep_ho_so_dat',)),
+    ('mode_git_tap_chi_bat_thua', _ma('    if thay != set(doi):', '    if not thay <= set(doi):'), ('t20zb_kiem_mode_git_khong_do_duoc_thi_do',)),
+    ('mode_git_xoa_chi_theo_mode', _ma('            if trang_thai == "D" or mode not in MODE_THUONG:', '            if mode not in MODE_THUONG:'), ('t20zb_kiem_mode_git_khong_do_duoc_thi_do',)),
+    # ---- luot 12: liet ke het chot/doi so cua `_doc_raw` + `kiem_mode_git`, MOI chot mot dot bien rieng
+    ('mode_git_raw_bo_z', _ma('"diff", "--raw", "-z", "--no-renames", "--no-abbrev"', '"diff", "--raw", "--no-renames", "--no-abbrev"'), ('t20zc_kiem_re_doi_ten_tep_ho_so_dat',)),
+    ('mode_git_raw_bo_no_abbrev', _ma('"diff", "--raw", "-z", "--no-renames", "--no-abbrev"', '"diff", "--raw", "-z", "--no-renames"'), ('t20zc_kiem_re_doi_ten_tep_ho_so_dat',)),
+    ('mode_git_raw_bo_co_raw', _ma('"diff", "--raw", "-z", "--no-renames", "--no-abbrev"', '"diff", "-z", "--no-renames", "--no-abbrev"'), ('t20zc_kiem_re_doi_ten_tep_ho_so_dat',)),
+    ('mode_git_raw_attr_la_dau', _ma('r = chay(["git", "--attr-source=" + goc, "diff", "--raw"', 'r = chay(["git", "--attr-source=" + cap[-1], "diff", "--raw"'), ('t20u_moi_loi_goi_git_doc_thuoc_tinh_tu_goc',)),
+    ('mode_git_merge_tree_attr_la_dau', _ma('mt_mode = chay(["git", "--attr-source=" + goc, "merge-tree"', 'mt_mode = chay(["git", "--attr-source=" + dau, "merge-tree"'), ('t20u_moi_loi_goi_git_doc_thuoc_tinh_tu_goc',)),
+    ('mode_git_raw_bo_kiem_kieu', _ma('    if getattr(r, "returncode", None) != 0 or not isinstance(ra, (bytes, bytearray)):', '    if getattr(r, "returncode", None) != 0:'), ('t20zb_kiem_mode_git_khong_do_duoc_thi_do',)),
+    ('mode_git_merge_tree_bo_kiem_kieu', _ma('    if getattr(mt_mode, "returncode", None) != 0 or not isinstance(ra_cay, (bytes, bytearray)) \\', '    if getattr(mt_mode, "returncode", None) != 0 \\'), ('t20zb_kiem_mode_git_khong_do_duoc_thi_do',)),
+    ('mode_git_raw_rong_la_cut', _ma('    if ra and not bytes(ra).endswith(b"\\0"):\n        return f"KHONG DO DUOC: git diff --raw', '    if not bytes(ra).endswith(b"\\0"):\n        return f"KHONG DO DUOC: git diff --raw'), ('t20zb_kiem_mode_git_khong_do_duoc_thi_do',)),
+    ('mode_git_raw_trang_thai_long', _ma('r":([0-7]{6}) ([0-7]{6}) ([0-9a-f]{40}(?:[0-9a-f]{24})?) ([0-9a-f]{40}(?:[0-9a-f]{24})?) ([AMDT])"', 'r":([0-7]{6}) ([0-7]{6}) ([0-9a-f]{40}(?:[0-9a-f]{24})?) ([0-9a-f]{40}(?:[0-9a-f]{24})?) ([A-Z])"'), ('t20zb_kiem_mode_git_khong_do_duoc_thi_do',)),
+    ('mode_git_raw_sha_long', _ma('r":([0-7]{6}) ([0-7]{6}) ([0-9a-f]{40}(?:[0-9a-f]{24})?) ([0-9a-f]{40}(?:[0-9a-f]{24})?) ([AMDT])"', 'r":([0-7]{6}) ([0-7]{6}) (\\S+) (\\S+) ([AMDT])"'), ('t20zb_kiem_mode_git_khong_do_duoc_thi_do',)),
+    ('mode_git_raw_nhan_duong_rong', _ma(' or not duong or duong in kq:', ' or duong in kq:'), ('t20zb_kiem_mode_git_khong_do_duoc_thi_do',)),
+    ('mode_git_raw_doc_mode_cu', _ma('kq[duong] = (k.group(2), k.group(5))', 'kq[duong] = (k.group(1), k.group(5))'), ('t20zc_kiem_re_doi_ten_tep_ho_so_dat',)),
+    ('mode_git_loi_cap_bo_qua', _ma('        if isinstance(ban_ghi, str):\n            return [ban_ghi]', '        if isinstance(ban_ghi, str):\n            continue'), ('t20zb_kiem_mode_git_khong_do_duoc_thi_do',)),
+    ('mode_git_thay_gan_de', _ma('        thay |= set(ban_ghi)', '        thay = set(ban_ghi)'), ('t20zb_kiem_mode_git_khong_do_duoc_thi_do',)),
+    ('mode_git_tap_chi_bat_thieu', _ma('    if thay != set(doi):', '    if not thay >= set(doi):'), ('t20zb_kiem_mode_git_khong_do_duoc_thi_do',)),
+    ('mode_git_dia_bo_is_file', _ma('((Path(kho) / duong).is_symlink() or not (Path(kho) / duong).is_file())', '((Path(kho) / duong).is_symlink())'), ('t20z_kiem_re_git_co_tep_ma_dia_khong_co_do',)),
+    ('mode_git_dia_bo_is_symlink', _ma('((Path(kho) / duong).is_symlink() or not (Path(kho) / duong).is_file())', '(not (Path(kho) / duong).is_file())'), ('t20zd_kiem_mode_git_dia_la_symlink_do',)),
+    ('mode_git_dia_moi_cap', _ma('            elif ten_cap == "goc -> merge ref" and (', '            elif ('), ('t20zb_kiem_mode_git_khong_do_duoc_thi_do',)),
     ('mode_git_merge_tree_rc_cho_qua', _ma('    if getattr(mt_mode, "returncode", None) != 0 or not isinstance(ra_cay,', '    if not isinstance(ra_cay,'), ('t20zb_kiem_mode_git_khong_do_duoc_thi_do',)),
     ('mode_git_merge_tree_nem_lot', _ma('    except Exception as e:\n        return [f"KHONG DO DUOC: merge-tree (kiem mode) nem', '    except ZeroDivisionError as e:\n        return [f"KHONG DO DUOC: merge-tree (kiem mode) nem'), ('t20zb_kiem_mode_git_khong_do_duoc_thi_do',)),
     ('mode_git_merge_tree_bo_kiem_dang', _ma('            or not re.fullmatch(rb"[0-9a-f]{40}(?:[0-9a-f]{24})?\\n", bytes(ra_cay)):', '            or False:'), ('t20zb_kiem_mode_git_khong_do_duoc_thi_do',)),

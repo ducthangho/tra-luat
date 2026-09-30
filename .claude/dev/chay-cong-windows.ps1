@@ -44,8 +44,8 @@
     `day-du` — gương toàn bộ ba job gate của CI, trừ bước cgroup (chỉ có trên Linux).
 
 .PARAMETER CaiCongCu
-    Cài PyYAML/jsonschema/ruff bản GHIM, rồi `actionlint`, `shellcheck`, `rg` bằng chính
-    installer của kho. Không có cờ này thì script chỉ ĐO xem công cụ có chưa và báo thiếu.
+    Cài PyYAML/jsonschema/ruff bản GHIM, rồi `actionlint` (vào `dist/actionlint` của bản clone), `shellcheck`, `rg`
+    bằng chính installer của kho. Không có cờ này thì script chỉ ĐO xem công cụ có chưa và báo thiếu.
 
 .PARAMETER ChiTiet
     In toàn bộ output của mọi cổng. Mặc định chỉ in output của cổng ĐỎ.
@@ -236,7 +236,12 @@ if ($gitDir -and $gitCommon -and ($gitDir -ne $gitCommon)) {
 }
 
 # ───────────────────────────── công cụ ─────────────────────────────
-$AlDich = Join-Path ([System.IO.Path]::GetTempPath()) 'actionlint'
+# `AL_DICH` RIÊNG của bản clone (như `$RUNNER_TEMP` của job CI), KHÔNG phải TEMP dùng chung: thư mục này lên ĐẦU PATH SAU khi
+# Tim-Python đã chứng minh Python, mà cổng Python gọi Python theo TÊN (`ops/chay_lease_publish_test.sh` cũng chèn `$AL_DICH` lên đầu
+# PATH rồi gọi `python` theo tên). `GetTempPath()` trên Linux là `/tmp/` (1777) ⇒ ai cũng tạo được `/tmp/actionlint`; đặt `python`
+# vào đó là mọi cổng Python ĐẠT mà không chạy gì (đo: 5/5 ĐẠT, rc=0; đối chứng 4 ĐỎ, rc=1). `dist/` đã bị `.gitignore` và nằm
+# trong `_RELEASE_EXCLUDE_DIRS` (đo: 9 cổng quét cây giữ nguyên rc khi có `dist/actionlint`).
+$AlDich = Join-Path $Goc (Join-Path 'dist' 'actionlint')
 if ($CaiCongCu) {
     Tieu 'cài công cụ bản ghim'
     & $PyTen @PyDau -m pip install --quiet PyYAML==6.0.3 jsonschema==4.26.0 ruff==0.15.15

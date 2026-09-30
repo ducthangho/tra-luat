@@ -7,7 +7,7 @@
 #   t4 nhan-noi-hon-phep-do (nếp git)             `.git/config.lock` ⇒ rc=4, không in "→ 7" suông
 #   t5 nhan-noi-hon-phep-do (khởi động)           Start-Process hỏng ⇒ không in "TREO"
 #   t6 guong-ci-bo-dieu-kien-nen                  bước ci.yml `runner.os != 'Windows'` ⇒ script bỏ trên Windows
-#   t7 sua-moi-truong-phien-goi                   PATH dùng dấu phân cách của nền, không chèn lặp AL_DICH
+#   t7 sua-moi-truong-phien-goi                   PATH dùng dấu phân cách của nền, không chèn lặp AL_DICH (`dist/actionlint`)
 #   t8 bo-giai-cong-cu-theo-ten-thu-tu            `python` thoát 0 cho mọi lời gọi ⇒ không được ĐẠT
 #   t9 han-mac-dinh-duoi-thoi-luong-da-do         mặc định -HanGiay ≥ `timeout-minutes` của job CI
 #   t10 duong-dan-du-lieu-thanh-mau-wildcard      gốc kho dưới `…[1]…` ⇒ rc=2 + nói "wildcard", không "không tìm thấy gốc"
@@ -20,13 +20,16 @@
 #   t17 khoa-hep-hon-hop-dong (tất định)          hai zip KHÁC nhau ⇒ tất định ĐỎ
 #   t18 xa-qua-han-nuot-cong-do                   cổng rc=1 + CHÁU giữ stdout ⇒ vẫn ĐỎ (rc=1), in log cổng; cổng thoát ở giây 3 ⇒ thời
 #                                                 lượng trong [HanGiay−0,5; HanGiay+2,5] (gồm phần chờ, xả chỉ bằng phần hạn CÒN LẠI)
-#   t19 mot-du-lieu-hai-nhan                      `ExitCode` KHÔNG đọc được ở đường chung ⇒ KHÔNG ĐO ĐƯỢC, không ĐỎ
+#   t19 mot-du-lieu-hai-nhan                      `ExitCode` KHÔNG đọc được ở đường chung ⇒ KHÔNG ĐO ĐƯỢC, không ĐỎ; cột rc in `-`
 #   t20 tep-test-khong-kin-moi-truong-may         console code page 437 ⇒ vẫn đọc đúng output UTF-8 của script
+#   t21 bo-giai-cong-cu-theo-ten-thu-tu (PATH)    `python` giả trong `<TEMP>/actionlint` (TEMP dùng chung) ⇒ cổng Python không ĐẠT
 # Bộ này KÍN với config git của máy chạy, với biến git trỏ kho khác (khối ngay dưới `$script:Rac`), với code page của
-# console (`Doc-Utf8`) và với dấu thập phân của locale (t18 nhận `5,1s`).
-# ĐỘT BIẾN để đo răng (đo trên pwsh 7.4.6/Linux): `-Script` trỏ f2392df ⇒ 1/20 (chỉ t17 đạt — bản ấy đã so băm);
-# 8b82d40 ⇒ 14/20 (đỏ t13 t14 t15 t16 t18 t19); 66efc78 ⇒ 16/20 (đỏ t13 t16 t18 t19); 131c608 ⇒ 17/20 (đỏ t13 t18 t19);
-# bd62cad ⇒ 19/20 (đỏ t19). 29 đột biến trên script (lượt 4): 25 đỏ ÍT NHẤT ca của mảnh nó gỡ, 4 sống đúng là bốn mảnh
+# console (`Doc-Utf8`), với dấu thập phân của locale (t18 nhận `5,1s`) và với `<TEMP>/actionlint` dùng chung (t21).
+# ĐỘT BIẾN để đo răng (đo trên pwsh 7.4.6/Linux, bộ 21 ca): `-Script` trỏ f2392df ⇒ 2/21 (đạt t17 — bản ấy đã so băm — và
+# t21 — dấu `;` ghim cứng dán AL_DICH vào mục PATH kế nên nó không thành một mục); 8b82d40 ⇒ 13/21 (đỏ t7 t13 t14 t15 t16 t18
+# t19 t21); 66efc78 ⇒ 15/21 (đỏ t7 t13 t16 t18 t19 t21); 131c608 ⇒ 16/21 (đỏ t7 t13 t18 t19 t21); bd62cad ⇒ 18/21 (đỏ t7 t19
+# t21); 131c2e7 ⇒ 19/21 (đỏ t7 t21). Lượt 6: AL_DICH về TEMP ⇒ t7 lẫn t21 (ca chung chốt — t7 đòi AL_DICH = `dist/actionlint`);
+# cột rc in TRỐNG thay cho `-` ⇒ t19. 29 đột biến trên script (lượt 4): 25 đỏ ÍT NHẤT ca của mảnh nó gỡ, 4 sống đúng là bốn mảnh
 # khai ở cuối đoạn này. Lượt 5 đo lại trên bộ 20 ca: gỡ nhánh rc≠0 của xả / `$giay` trước xả / bỏ trừ phần hạn đã trôi /
 # xả 2×HanGiay / sàn 12 s ⇒ chỉ t18; xả cố định 30 s ⇒ t16 t18; nhánh xả đếm ĐẠT ⇒ t16; rc=null đếm ĐỎ ⇒ t19; giải bash
 # theo tên ⇒ t2; bỏ `$env:GIT_CONFIG = $null` ⇒ t13; sàn 0 ⇒ SỐNG (đã khai). Trên chính bộ này: `Doc-Utf8` rỗng ⇒ t20;
@@ -35,7 +38,9 @@
 # lượng). Gỡ khối kín config của chính bộ này, dưới config toàn cục của ci.yml ⇒ t4 lẫn t20 (cùng dựng `config.lock`).
 # Từng SỐNG rồi mới có ca: `$ha -eq $hb` (nay t17); nhánh xả-quá-hạn in "TREO" mà vẫn đếm ĐẠT (nay t16 đọc rc);
 # giải `bash` theo tên trên Linux (nay t2 đặt cả `bash`); xả KHÔNG trừ phần hạn đã trôi / xả 2×HanGiay / sàn 12 s (18/18
-# khi cổng thoát ngay — nay t18 cho cổng thoát ở giây 3). Mảnh KHÔNG ca nào đo được trên nền này — khai thẳng:
+# khi cổng thoát ngay — nay t18 cho cổng thoát ở giây 3); cột rc in `-` (20/20 — nay t19). Mảnh KHÔNG ca nào đo được trên
+# nền này — khai thẳng: `$null -eq $rc` của nhánh xả (TƯƠNG ĐƯƠNG từ lượt 5: rc=null rơi xuống đường chung cũng ra KHÔNG ĐO
+# ĐƯỢC — gỡ ra vẫn 21/21);
 # `[bool]$ha`, `[string]$ban`, `-ErrorAction Stop` của Start-Process (tương đương: nó vốn ném lỗi kết thúc);
 # `$null = $tt.Handle` và `catch { $xa = $false }` (chỉ có tác dụng khi `.Handle`/`WaitForExitAsync` ném — Windows,
 # pwsh 7.0); `#Requires -Version 7.1` (bộ này chạy bằng pwsh ≥ 7.1); sàn 1 s của `$conMs` (chỉ đổi kết quả khi cổng
@@ -89,7 +94,8 @@ foreach ($n in 'GIT_DIR', 'GIT_WORK_TREE', 'GIT_INDEX_FILE', 'GIT_OBJECT_DIRECTO
 # Windows mặc định là code page OEM/ANSI (437/1252; chính script khai ở `.DESCRIPTION`) — còn script và harness GHI UTF-8. Không ép
 # thì mọi regex tiếng Việt thành rác (giả lập console 437 trên Linux: 13/18, t1 t4 t11 t13 t17 ĐỎ oan, vế phủ định `tất định … rc=0`
 # của t14/t15 mù). Ép UTF-8 quanh lời gọi rồi trả lại (trên Windows setter đổi code page của CẢ console). Setter ném (máy không
-# có console) thì đi tiếp: giải mã sai làm ca ĐỎ, không làm ca ĐẠT — t20 đòi đúng điều đó.
+# có console) thì đi tiếp: giải mã sai làm ca đòi KHỚP thành ĐỎ nhưng làm MÙ vế phủ định (đo, 437 + setter gỡ + `$td` khởi ĐẠT ⇒
+# t14 ĐẠT) — cả bộ vẫn ĐỎ vì t20 đỏ trong đúng tình huống ấy.
 function Doc-Utf8 { param([scriptblock]$Lam)
     $enc = [Console]::OutputEncoding
     try { [Console]::OutputEncoding = [Text.UTF8Encoding]::new($false) } catch { }
@@ -243,8 +249,7 @@ Ca 't6 buoc ci.yml bo tren Windows => script cung bo tren Windows' {
 
 Ca 't7 PATH: dau phan cach cua NEN, khong chen lap AL_DICH' {
     $k = Dung-Kho
-    $tam = Join-Path (Split-Path $k) 'tmp'
-    $al = Join-Path $tam 'actionlint'
+    $al = Join-Path $k (Join-Path 'dist' 'actionlint')
     New-Item -ItemType Directory -Force -Path $al | Out-Null
     Set-Content -LiteralPath (Join-Path $k 'ops/cong_cu.py') -Encoding utf8NoBOM -Value @'
 import os, sys
@@ -257,7 +262,7 @@ dan = os.name != "nt" and any(";" in d for d in ds)
 sys.exit(0 if al and ds.count(al) == 1 and not dan else 7)
 '@
     # PATH đã có sẵn AL_DICH = lượt thứ hai trong cùng một phiên.
-    $a = Chay $k @() @{ TMPDIR = $tam; TEMP = $tam; TMP = $tam; PATH = "$al$Sep$env:PATH" }
+    $a = Chay $k @() @{ PATH = "$al$Sep$env:PATH" }
     if ($a.ra -notmatch 'cong_cu kiem-tra\s+rc=0') { throw 'PATH sai dau phan cach hoac chen lap AL_DICH' }
 }
 
@@ -501,6 +506,8 @@ Write-Host ("TRANG_THAI=" + $(switch ($KetQua[0].TrangThai) { 'ĐẠT' { 'DAT' }
     $ra = (Doc-Utf8 { & $PwshExe -NoProfile -File $h 2>&1 } | ForEach-Object { "$_" }) -join "`n"
     if ($ra -notmatch 'TRANG_THAI=') { throw "harness khong chay toi het Chay-Cong: $ra" }
     if ($ra -notmatch 'TRANG_THAI=KDD') { throw "ExitCode null o duong chung ma khong ra KHONG DO DUOC: $ra" }
+    # Cột rc in `-`, không in TRỐNG (bản vá lượt 5 khai vậy; thiếu vế này thì gỡ nó vẫn 20/20).
+    if ($ra -notmatch 'gia\s+rc=-\s') { throw "ExitCode null ma cot rc khong in '-': $ra" }
 }
 
 # Đo được trên MỌI nền: đặt console 437 (mặc định kiểu Windows) ngay trong ca rồi đòi `Chay` vẫn thấy chữ tiếng Việt của script.
@@ -516,6 +523,25 @@ Ca 't20 console code page 437 => van doc dung output UTF-8 cua script' {
         Remove-Item -LiteralPath (Join-Path $k '.git/config.lock') -Force -ErrorAction SilentlyContinue
     }
     if ($a.ra -notmatch 'KHÔNG ĐẶT ĐƯỢC') { throw 'console 437: output UTF-8 cua script bi giai ma thanh rac' }
+}
+
+# `AL_DICH` lên ĐẦU PATH SAU khi Tim-Python đã kiểm Python, mà cổng Python gọi theo TÊN: nếu nó là TEMP dùng chung (`/tmp/` 1777
+# trên Linux) thì ai cũng đặt được `python` vào `<TEMP>/actionlint` ⇒ Python đã kiểm ≠ Python được chạy (cùng lớp t8, đường thứ ba).
+Ca 't21 python gia trong <TEMP>/actionlint => cong Python khong DAT' {
+    $k = Dung-Kho
+    $tam = Join-Path (Split-Path $k) 'tmp'
+    $al = Join-Path $tam 'actionlint'
+    New-Item -ItemType Directory -Force -Path $al | Out-Null
+    foreach ($n in 'py', 'python', 'python3') {
+        if ($IsWindows) { Set-Content -LiteralPath (Join-Path $al "$n.cmd") -Value '@exit /b 0' -Encoding ascii }
+        else {
+            $f = Join-Path $al $n
+            Set-Content -LiteralPath $f -Value "#!/bin/sh`nexit 0" -Encoding utf8NoBOM
+            & chmod +x $f
+        }
+    }
+    $a = Chay $k @() @{ TMPDIR = $tam; TEMP = $tam; TMP = $tam; STUB_RC_cong_cu_py = '1' }
+    if ($a.ra -notmatch 'cong_cu kiem-tra\s+rc=1') { throw "python gia trong TEMP/actionlint duoc chon, cong Python khong chay that (rc_script=$($a.rc))" }
 }
 
 foreach ($d in $script:Rac) { Remove-Item -LiteralPath $d -Recurse -Force -ErrorAction SilentlyContinue }

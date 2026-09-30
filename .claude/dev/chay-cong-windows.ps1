@@ -188,9 +188,16 @@ $nepHong = @()
 foreach ($k in $muon.Keys) {
     & git config --local $k $muon[$k]
     # ĐỌC LẠI, đừng tin lời gọi ghi: `.git/config.lock` còn sót ⇒ ghi trượt mà ta vẫn in "→ 7".
-    $that = (& git config --local --get $k 2>$null)
+    # Và đọc giá trị CÓ HIỆU LỰC (mọi tầng) chứ không đọc lại tầng `--local` vừa ghi: biến
+    # `GIT_CONFIG_COUNT/KEY/VALUE`, `--worktree`, `[include]` đè `--local` mà `--local --get` không thấy
+    # (đo: in "→ 7" trong khi git dùng 8 ⇒ `doc-claims-check` rc=2, 5 cờ — ĐỎ vì máy mà bị đếm là ĐỎ vì mã).
+    $that = (& git config --get $k 2>$null)
     if ($that -ne $muon[$k]) { $nepHong += $k }
     Noi ("  {0,-13} {1} → {2}{3}" -f $k, $cu[$k], $that, $(if ($that -ne $muon[$k]) { '   (KHÔNG ĐẶT ĐƯỢC)' } else { '' }))
+    if ($that -ne $muon[$k]) {
+        $tang = @(& git config --show-scope --show-origin --get $k 2>$null)
+        if ($tang.Count -gt 0) { Noi "      tầng đang thắng: $($tang -join ' ')" }
+    }
 }
 Noi '  (chỉ đổi --local; khôi phục: `git config --local <khoá> <giá trị cũ in bên trái>`, hoặc `--unset` nếu cũ là "(chưa đặt)")'
 if ($nepHong.Count -gt 0) {
@@ -381,31 +388,40 @@ if ($Muc -eq 'day-du') {
     # release-bundle x2 phải cho CÙNG sha256 — đo tất định, không phải đo "chạy được".
     Tieu 'release-bundle x2 cùng SHA-256'
     New-Item -ItemType Directory -Force -Path (Join-Path $Goc 'dist') | Out-Null
-    # MẶC ĐỊNH ĐỎ. Chỉ một phép băm ĐÃ CHẠY XONG mới được lật sang ĐẠT: một câu lệnh ném (tệp thiếu
-    # ⇒ `$null.Hash` ⇒ `$ha` chưa gán) phải để lại ĐỎ, không để lại giá trị khởi tạo.
-    $bamOk = $false
     $za = Join-Path $Goc (Join-Path 'dist' 'a.zip')
     $zb = Join-Path $Goc (Join-Path 'dist' 'b.zip')
-    # Zip của LƯỢT TRƯỚC còn nằm đó thì "băm khớp" là đo lượt trước — xoá trước khi build.
+    # Zip của LƯỢT TRƯỚC còn nằm đó thì "băm khớp" là đo lượt trước — xoá trước khi build, rồi KIỂM
+    # LẠI: "đã gọi lệnh xoá" ≠ "đã mất" (tệp bị khoá/bất biến ⇒ xoá trượt im lặng; đo: ĐẠT bằng băm lượt trước).
     Remove-Item -LiteralPath $za, $zb -Force -ErrorAction SilentlyContinue
-    $rcBundle = 0
-    foreach ($f in 'a', 'b') {
-        & $PyTen @PyDau 'scripts/tl.py' 'release-bundle' '--out' "dist/$f.zip" '--json' *> (Join-Path $NhatKy "bundle-$f.log")
-        if ($LASTEXITCODE -ne 0) { $rcBundle = $LASTEXITCODE }
+    $conCu = @(@($za, $zb) | Where-Object { Test-Path -LiteralPath $_ })
+    # Ba trạng thái. MẶC ĐỊNH KHÔNG ĐO ĐƯỢC (zip cũ còn / build không ĐẠT); build ĐẠT thì mặc định ĐỎ,
+    # và chỉ một phép băm ĐÃ CHẠY XONG mới lật sang ĐẠT — câu lệnh ném để lại ĐỎ, không để lại giá trị khởi tạo.
+    $td = 'KHÔNG ĐO ĐƯỢC'
+    if ($conCu.Count -gt 0) {
+        Canh "không xoá được zip của lượt trước ($($conCu -join ', ')) — KHÔNG build, tất định KHÔNG ĐO ĐƯỢC."
+    } else {
+        # Hai lần build đi QUA `Chay-Cong`: cùng hạn giờ, cùng `KHÔNG KHỞI ĐỘNG ĐƯỢC`, rc đọc từ chính
+        # tiến trình — đo: gọi bằng `&` thì `-HanGiay 3` vẫn chờ trọn 2×25 s rồi đếm ĐẠT.
+        $build = @()
+        foreach ($f in 'a', 'b') {
+            Chay-Py "release-bundle $f" @('scripts/tl.py', 'release-bundle', '--out', "dist/$f.zip", '--json')
+            $build += $KetQua[$KetQua.Count - 1].TrangThai
+        }
+        if (@($build | Where-Object { $_ -ne 'ĐẠT' }).Count -eq 0) {
+            $td = 'ĐỎ'
+            try {
+                $ha = (Get-FileHash -Algorithm SHA256 -LiteralPath $za -ErrorAction Stop).Hash
+                $hb = (Get-FileHash -Algorithm SHA256 -LiteralPath $zb -ErrorAction Stop).Hash
+                if ([bool]$ha -and ($ha -eq $hb)) { $td = 'ĐẠT' }
+                Noi "      a=$ha"
+                Noi "      b=$hb"
+            } catch { Canh "release-bundle trả rc=0 mà không băm được zip: $($_.Exception.Message)" }
+        }
     }
-    if ($rcBundle -eq 0) {
-        try {
-            $ha = (Get-FileHash -Algorithm SHA256 -LiteralPath $za -ErrorAction Stop).Hash
-            $hb = (Get-FileHash -Algorithm SHA256 -LiteralPath $zb -ErrorAction Stop).Hash
-            $bamOk = [bool]$ha -and ($ha -eq $hb)
-            Noi "      a=$ha"
-            Noi "      b=$hb"
-        } catch { Canh "release-bundle trả rc=0 mà không băm được zip: $($_.Exception.Message)" }
-    }
-    $rcB = if ($bamOk) { 0 } else { 1 }
-    Write-Host ("  {0,-42} rc={1,-4} {2}" -f 'release-bundle tất định', $rcB, $(if ($bamOk) { 'ĐẠT' } else { 'ĐỎ' })) `
-        -ForegroundColor $(if ($bamOk) { 'Green' } else { 'Red' })
-    [void]$KetQua.Add([pscustomobject]@{ Ten = 'release-bundle tất định'; Rc = $rcB; TrangThai = $(if ($bamOk) { 'ĐẠT' } else { 'ĐỎ' }); NhatKy = '' })
+    $rcB = switch ($td) { 'ĐẠT' { 0 } 'ĐỎ' { 1 } default { $null } }
+    Write-Host ("  {0,-42} rc={1,-4} {2}" -f 'release-bundle tất định', $(if ($null -eq $rcB) { '-' } else { $rcB }), $td) `
+        -ForegroundColor $(switch ($td) { 'ĐẠT' { 'Green' } 'ĐỎ' { 'Red' } default { 'Yellow' } })
+    [void]$KetQua.Add([pscustomobject]@{ Ten = 'release-bundle tất định'; Rc = $rcB; TrangThai = $td; NhatKy = '' })
 
     Noi ''
     Noi 'KHÔNG CHẠY (chỉ có trên Linux runner): "bo ca gate chay TRONG cgroup duoc uy quyen".'

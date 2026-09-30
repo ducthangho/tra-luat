@@ -72,7 +72,7 @@ SHA_G1   = "2f70869a0537843e9cae78618ee7ae8c261d972d"
 # do that 18-09 tren ban va g2 cua agy cho 5 tep / +812, trong khi viec cua agy la 2 tep / +353.
 # Mot chot nhu the se bao "vuot tran" cho mot ban va KHONG vuot. Base dung la MERGE-BASE.
 SHA_BASE_SPEC = "d705623162b75b7340ee7cca54ac2d2abbddbb6f"
-BAN_BO_DO = "2026-09-30b"              # doi MOI khi sua bo do - log tu khai ban nao
+BAN_BO_DO = "2026-09-30c"              # doi MOI khi sua bo do - log tu khai ban nao
 TRAN_TEP, TRAN_DONG = 2, 400          # N7' cua spec r3
 MAU_WIN  = 'if nen_thuc == "windows":'
 # Write set cua packet #541 g2. Diff khong cham tep nao o day => do NHAM NHANH.
@@ -94,7 +94,12 @@ URL_KHO_HOP_LE = {"https://github.com/ducthangho/tra-luat", "https://github.com/
 # "ve nen TUOI", TRUOT 46 tep / +7118). Van bo toi `@` CUOI trong authority: userinfo co `@` tran thi
 # curl tu choi ("Bad hostname"), con khi in thi khong lo phan sau `@` thu nhat.
 _RX_USERINFO = re.compile(r"^([A-Za-z][A-Za-z0-9+.-]*://)[^/?#]*@")
-def _url_sach(u): return _RX_USERINFO.sub(r"\1", u or "")
+def _url_sach(u): return _RX_USERINFO.sub(r"\1", u or "")          # de SO (luat git/curl)
+# IN phai che RONG hon SO: mat khau co `?`/`#` TRAN thi `[^/?#]*@` khong khop nen URL ra log NGUYEN VAN
+# (do duoc tren 2026-09-30b: 3 dong o --chi-kich-thuoc, 3 dong trong khoi dan --chi-probe; ban 30a: 0).
+# Che toi `@` CUOI truoc `/` dau tien, va DE DAU `***@` de ban in khong tu nhan la github.com khi git noi
+# toi may khac (vd. host truoc `?`). Hai quy tac, hai muc dich: SO theo git, IN theo "thua con hon lo".
+def _url_in(u): return re.sub(r"^([A-Za-z][A-Za-z0-9+.-]*://)[^/]*@", r"\1***@", u or "")
 # Thong bao loi cua git CHI bo userinfo toi `@` DAU TIEN: userinfo co `@` tran (vd. ten dang nhap la
 # email) thi phan sau van ra stderr ls-remote, ma stderr ay duoc in vao dong KDD cua N7' (do duoc:
 # 2 dong trong log, 1 trong khoi dan). Lam sach MOI URL trong van ban truoc khi in.
@@ -397,7 +402,7 @@ la_hau_due = (rc_a == 0)
 if head == SHA_G1:
     the_he = "g1"; inn(f"  HEAD = {head[:8]} -> DAY LA g1. CHUA co ban va g2; ket qua duoi la NEN DO.")
 elif la_hau_due:
-    the_he = "g2"; inn(f"  HEAD = {head[:8]} -> hau due cua g1 ({SHA_G1[:8]}): ung vien g2.")
+    the_he = "g2"; inn(f"  HEAD = {head[:8]} -> hau due cua g1 ({SHA_G1[:8]}); ung vien g2 hay khong: N7' (muc 1) dinh danh.")
 else:
     the_he = "?"; loi.append(f"HEAD={head[:8]} KHONG phai g1 va KHONG phai hau due cua {SHA_G1[:8]} — rebase? nham nhanh?")
 ghi("the_he", the_he)
@@ -422,16 +427,16 @@ inn(""); inn("-" * 78); inn("1. KICH THUOC — tran spec r3: <= 2 tep va <= 400 
 # lech mot chut, no sai ca mot bac do lon.
 # Cho nen: nen khong chung minh duoc la tuoi => KHONG DO DUOC (rc=3), KHONG phai TRUOT.
 # TRUOT la mot PHAN QUYET ve ban va; phan quyet chi duoc phep phat ra khi da do duoc.
-rc_u, url_o, _ = git(goc, "remote", "get-url", "origin")
-url_o = _url_sach(url_o)
-ghi("origin_url", url_o); inn(f"  origin       : {url_o or '(khong doc duoc)'}")
+rc_u, url_tho, _ = git(goc, "remote", "get-url", "origin")
+url_o, url_in = _url_sach(url_tho), _url_in(url_tho)
+ghi("origin_url", url_in); inn(f"  origin       : {url_in or '(khong doc duoc)'}")
 url_ok = (not rc_u) and url_o.rstrip("/") in URL_KHO_HOP_LE
 rc_lr, out_lr, er_lr = git(goc, "ls-remote", "origin", "refs/heads/master") if url_ok else (1, "", "")
 er_lr = _an_userinfo(er_lr)
 rc_lm, lm, er_lm     = git(goc, "rev-parse", "origin/master")
 rm = out_lr.split()[0] if (not rc_lr and out_lr.strip()) else ""
 if not url_ok:
-    ket("N7' kich thuoc", KDD, f"origin={url_o!r} KHONG phai kho that — 'tuoi' so voi no khong chung minh duoc gi")
+    ket("N7' kich thuoc", KDD, f"origin={url_in!r} KHONG phai kho that — 'tuoi' so voi no khong chung minh duoc gi")
     rc_mb, mb, ns, rc = 1, "", "", 1
 elif not rm:
     ket("N7' kich thuoc", KDD,
@@ -501,8 +506,10 @@ else:
 # Dinh danh THAT nam o N7' (ca moi g2 mang vao), KHONG o "hau due g1": g1 da land nen moi nhanh deu
 # la hau due. Dong dau khoi dan phai tu khai theo ket qua ay (do duoc: master 44620e8 mo khoi bang
 # "THE HE DO DUOC: g2", JSON "the_he": "g2", trong khi N7' da ket luan "khong phai ung vien").
+# Nhan chi duoc noi DUNG cai do duoc: `[]` khong tach "da land" khoi "nham nhanh"/"packet khac" (do
+# duoc tren 2026-09-30b: ung vien 2a67968 DA LAND bi goi "KHONG phai ung vien g2").
 if the_he == "g2" and not so.get("ca_moi_g2_mang_vao"):
-    the_he = ("KHONG phai ung vien g2" if so.get("ca_moi_g2_mang_vao") == []
+    the_he = ("KHONG mang ca moi g2 nao (da land? nham nhanh? packet khac?)" if so.get("ca_moi_g2_mang_vao") == []
               else "g2? (CHUA dinh danh duoc doi tuong)")
     ghi("the_he", the_he)
 

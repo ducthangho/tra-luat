@@ -54,7 +54,9 @@
     Hạn giờ cho MỘT cổng, tính bằng giây. Mặc định 3600 = `timeout-minutes: 60` của job CI
     (`test registry` đo trên CI Windows ≈ 41 % × 43,2 phút ≈ 1060 s — VƯỢT 900 cũ, nên với hạn cũ
     mức mặc định KHÔNG BAO GIỜ ra ĐẠT được). Quá hạn thì cổng bị giết và đếm
-    là **TREO** — tức `KHÔNG ĐO ĐƯỢC`, KHÔNG phải `ĐẠT`. Có tham số này vì `don-nhanh_test.ps1`
+    là **TREO** — tức `KHÔNG ĐO ĐƯỢC`, KHÔNG phải `ĐẠT`. Cổng đã THOÁT mà CHÁU còn giữ stdout/stderr
+    tới hạn thì không giết được gì (cháu đã mồ côi): rc=0 ⇒ `KHÔNG ĐO ĐƯỢC`, rc≠0 ⇒ vẫn `ĐỎ` — rc đọc từ
+    chính tiến trình; rc KHÔNG đọc được ⇒ `KHÔNG ĐO ĐƯỢC` ở mọi nhánh. Có tham số này vì `don-nhanh_test.ps1`
     dựng kho git thật cho từng ca và đã ĐO ĐƯỢC một lần treo quá 10 phút; một bộ chạy cục bộ
     không được phép treo vô hạn rồi bắt người ngồi đoán.
 
@@ -339,9 +341,11 @@ function Chay-Cong {
     # Thời lượng tính TỚI khi xả xong: cổng chưa xong khi script còn chờ cây tiến trình của nó (đo: cháu 3 s ⇒ in "0.2s").
     $giay = [math]::Round(((Get-Date) - $t0).TotalSeconds, 1)
 
-    $tt2 = if ($rc -eq 0) { 'ĐẠT' } else { 'ĐỎ' }
-    $mau = if ($rc -eq 0) { 'Green' } else { 'Red' }
-    Write-Host ("  {0,-42} rc={1,-4} {2,7}s  {3}" -f $Ten, $rc, $giay, $tt2) -ForegroundColor $mau
+    # rc KHÔNG đọc được (`ExitCode` = $null — lỗi handle ở trên; getter ném cũng ra $null, kể cả dưới StrictMode) là KHÔNG ĐO ĐƯỢC ở
+    # MỌI nhánh, như nhánh xả đã nói: rơi xuống `else` là đếm một lỗi của MÁY thành cổng ĐỎ (đo: `rc=  0.1s ĐỎ`, exit 1).
+    $tt2 = if ($null -eq $rc) { 'KHÔNG ĐO ĐƯỢC' } elseif ($rc -eq 0) { 'ĐẠT' } else { 'ĐỎ' }
+    $mau = switch ($tt2) { 'ĐẠT' { 'Green' } 'ĐỎ' { 'Red' } default { 'Yellow' } }
+    Write-Host ("  {0,-42} rc={1,-4} {2,7}s  {3}" -f $Ten, $(if ($null -eq $rc) { '-' } else { $rc }), $giay, $tt2) -ForegroundColor $mau
     if ($ChiTiet -or $rc -ne 0) {
         foreach ($f in @($fOut, $fErr)) {
             if ((Test-Path -LiteralPath $f) -and (Get-Item -LiteralPath $f).Length -gt 0) {
@@ -469,7 +473,7 @@ foreach ($r in $do)    { Write-Host ("    ĐỎ            {0}  → {1}" -f $r.T
 foreach ($r in $khong) { Write-Host ("    KHÔNG ĐO ĐƯỢC {0}" -f $r.Ten) -ForegroundColor Yellow }
 Noi ''
 Noi "  nhật ký đầy đủ: $NhatKy"
-Noi '  BA TRẠNG THÁI, không hai: ĐẠT / ĐỎ / KHÔNG ĐO ĐƯỢC (gồm cả TREO quá hạn).'
+Noi '  BA TRẠNG THÁI, không hai: ĐẠT / ĐỎ / KHÔNG ĐO ĐƯỢC (gồm TREO quá hạn và rc không đọc được; cổng đã thoát rc≠0 luôn ĐỎ).'
 Noi '  Một cổng không chạy được'
 Noi '  KHÔNG phải một cổng đã đạt — script này không bao giờ đếm nó là xanh.'
 

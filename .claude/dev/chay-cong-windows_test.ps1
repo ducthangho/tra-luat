@@ -18,21 +18,30 @@
 #   t15 do-loi-goi-khong-do-hieu-qua (zip)        zip cũ KHÔNG xoá được + bundle rc=0 không ghi ⇒ không ĐẠT
 #   t16 treo-ngoai-han-gio                        cổng thoát ngay, CHÁU giữ stdout ⇒ chờ THÊM < 15 s so với lượt nền; ngoài Windows rc=4
 #   t17 khoa-hep-hon-hop-dong (tất định)          hai zip KHÁC nhau ⇒ tất định ĐỎ
-#   t18 xa-qua-han-nuot-cong-do                   cổng rc=1 + CHÁU giữ stdout ⇒ vẫn ĐỎ (rc=1), in log cổng, thời lượng gồm phần chờ
-# Bộ này KÍN với config git của máy chạy VÀ với biến git trỏ kho khác (khối ngay dưới `$script:Rac`).
-# ĐỘT BIẾN để đo răng (đo trên pwsh 7.4.6/Linux): `-Script` trỏ f2392df ⇒ 1/18 (chỉ t17 đạt — bản ấy đã so băm);
-# 8b82d40 ⇒ 13/18 (đỏ t13 t14 t15 t16 t18); 66efc78 ⇒ 15/18 (đỏ t13 t16 t18); 131c608 ⇒ 16/18 (đỏ t13 t18).
-# 29 đột biến trên script: 25 đỏ ÍT NHẤT ca của mảnh nó gỡ, 4 sống đúng là bốn mảnh khai ở cuối đoạn này. Ca chung
-# chốt thì khai: gỡ `exit 4` của nếp git đỏ t4 lẫn t13; `$td` khởi ĐẠT đỏ t1 t14 t15; bỏ xả luồng có hạn (bỏ hẳn /
-# vô hạn / `WaitForExit()` / cố định 30 s) đỏ t16 lẫn t18 (vế thời lượng). Gỡ khối kín config của chính bộ này,
-# dưới config toàn cục của ci.yml ⇒ chỉ t4.
+#   t18 xa-qua-han-nuot-cong-do                   cổng rc=1 + CHÁU giữ stdout ⇒ vẫn ĐỎ (rc=1), in log cổng; cổng thoát ở giây 3 ⇒ thời
+#                                                 lượng trong [HanGiay−0,5; HanGiay+2,5] (gồm phần chờ, xả chỉ bằng phần hạn CÒN LẠI)
+#   t19 mot-du-lieu-hai-nhan                      `ExitCode` KHÔNG đọc được ở đường chung ⇒ KHÔNG ĐO ĐƯỢC, không ĐỎ
+#   t20 tep-test-khong-kin-moi-truong-may         console code page 437 ⇒ vẫn đọc đúng output UTF-8 của script
+# Bộ này KÍN với config git của máy chạy, với biến git trỏ kho khác (khối ngay dưới `$script:Rac`), với code page của
+# console (`Doc-Utf8`) và với dấu thập phân của locale (t18 nhận `5,1s`).
+# ĐỘT BIẾN để đo răng (đo trên pwsh 7.4.6/Linux): `-Script` trỏ f2392df ⇒ 1/20 (chỉ t17 đạt — bản ấy đã so băm);
+# 8b82d40 ⇒ 14/20 (đỏ t13 t14 t15 t16 t18 t19); 66efc78 ⇒ 16/20 (đỏ t13 t16 t18 t19); 131c608 ⇒ 17/20 (đỏ t13 t18 t19);
+# bd62cad ⇒ 19/20 (đỏ t19). 29 đột biến trên script (lượt 4): 25 đỏ ÍT NHẤT ca của mảnh nó gỡ, 4 sống đúng là bốn mảnh
+# khai ở cuối đoạn này. Lượt 5 đo lại trên bộ 20 ca: gỡ nhánh rc≠0 của xả / `$giay` trước xả / bỏ trừ phần hạn đã trôi /
+# xả 2×HanGiay / sàn 12 s ⇒ chỉ t18; xả cố định 30 s ⇒ t16 t18; nhánh xả đếm ĐẠT ⇒ t16; rc=null đếm ĐỎ ⇒ t19; giải bash
+# theo tên ⇒ t2; bỏ `$env:GIT_CONFIG = $null` ⇒ t13; sàn 0 ⇒ SỐNG (đã khai). Trên chính bộ này: `Doc-Utf8` rỗng ⇒ t20;
+# bộ đọc thời lượng chỉ nhận dấu chấm ⇒ t18. Ca chung chốt thì khai: gỡ `exit 4` của nếp git đỏ t4 lẫn t13; `$td` khởi
+# ĐẠT đỏ t1 t14 t15; bỏ xả luồng có hạn (bỏ hẳn / vô hạn / `WaitForExit()` / cố định 30 s) đỏ t16 lẫn t18 (vế thời
+# lượng). Gỡ khối kín config của chính bộ này, dưới config toàn cục của ci.yml ⇒ t4 lẫn t20 (cùng dựng `config.lock`).
 # Từng SỐNG rồi mới có ca: `$ha -eq $hb` (nay t17); nhánh xả-quá-hạn in "TREO" mà vẫn đếm ĐẠT (nay t16 đọc rc);
-# giải `bash` theo tên trên Linux (nay t2 đặt cả `bash`). Mảnh KHÔNG ca nào đo được trên nền này — khai thẳng:
+# giải `bash` theo tên trên Linux (nay t2 đặt cả `bash`); xả KHÔNG trừ phần hạn đã trôi / xả 2×HanGiay / sàn 12 s (18/18
+# khi cổng thoát ngay — nay t18 cho cổng thoát ở giây 3). Mảnh KHÔNG ca nào đo được trên nền này — khai thẳng:
 # `[bool]$ha`, `[string]$ban`, `-ErrorAction Stop` của Start-Process (tương đương: nó vốn ném lỗi kết thúc);
 # `$null = $tt.Handle` và `catch { $xa = $false }` (chỉ có tác dụng khi `.Handle`/`WaitForExitAsync` ném — Windows,
 # pwsh 7.0); `#Requires -Version 7.1` (bộ này chạy bằng pwsh ≥ 7.1); sàn 1 s của `$conMs` (chỉ đổi kết quả khi cổng
 # thoát sát hạn); phần khối kín cho `GIT_INDEX_FILE`/`GIT_DIR` (đo bằng chạy dưới biến ấy — gỡ ra ⇒ index kho khác
-# 2144 → 34 mục — không có ca).
+# 2144 → 34 mục — không có ca); dòng ép UTF-8 trong harness t11/t19 (chỉ có tác dụng khi console của tiến trình con là
+# code page cũ — Windows).
 [CmdletBinding()]
 param([string]$Script)
 Set-StrictMode -Version Latest
@@ -76,6 +85,15 @@ $env:GIT_CONFIG_COUNT = $null; $env:GIT_CONFIG_PARAMETERS = $null
 # (đo: `git -C <kho giả> commit` ghi vào kho mà biến trỏ tới). t13 tự đặt lại `GIT_CONFIG` qua `Chay`.
 foreach ($n in 'GIT_DIR', 'GIT_WORK_TREE', 'GIT_INDEX_FILE', 'GIT_OBJECT_DIRECTORY', 'GIT_ALTERNATE_OBJECT_DIRECTORIES',
                'GIT_COMMON_DIR', 'GIT_CONFIG') { [Environment]::SetEnvironmentVariable($n, $null) }
+# …và KÍN với code page của console: pwsh GIẢI MÃ output lệnh ngoài bằng `[Console]::OutputEncoding` của tiến trình NÀY — trên
+# Windows mặc định là code page OEM/ANSI (437/1252; chính script khai ở `.DESCRIPTION`) — còn script và harness GHI UTF-8. Không ép
+# thì mọi regex tiếng Việt thành rác (giả lập console 437 trên Linux: 13/18, t1 t4 t11 t13 t17 ĐỎ oan, vế phủ định `tất định … rc=0`
+# của t14/t15 mù). Ép UTF-8 quanh lời gọi rồi trả lại (trên Windows setter đổi code page của CẢ console). Setter ném (máy không
+# có console) thì đi tiếp: giải mã sai làm ca ĐỎ, không làm ca ĐẠT — t20 đòi đúng điều đó.
+function Doc-Utf8 { param([scriptblock]$Lam)
+    $enc = [Console]::OutputEncoding
+    try { [Console]::OutputEncoding = [Text.UTF8Encoding]::new($false) } catch { }
+    try { & $Lam } finally { try { [Console]::OutputEncoding = $enc } catch { } } }
 function Dung-Kho {
     $d = Join-Path ([IO.Path]::GetTempPath()) ('ccw-' + [guid]::NewGuid().ToString('N').Substring(0, 10))
     $script:Rac += $d
@@ -112,7 +130,7 @@ function Chay {
     $cu = @{}
     foreach ($n in $Env.Keys) { $cu[$n] = [Environment]::GetEnvironmentVariable($n); [Environment]::SetEnvironmentVariable($n, $Env[$n]) }
     try {
-        $ra = & $PwshExe -NoProfile -File (Join-Path $Kho '.claude/dev/chay-cong-windows.ps1') @Doi 2>&1
+        $ra = Doc-Utf8 { & $PwshExe -NoProfile -File (Join-Path $Kho '.claude/dev/chay-cong-windows.ps1') @Doi 2>&1 }
         $rc = $LASTEXITCODE
     } finally { foreach ($n in $cu.Keys) { [Environment]::SetEnvironmentVariable($n, $cu[$n]) } }
     $txt = (($ra | ForEach-Object { "$_" }) -join "`n") -replace "\x1b\[[0-9;]*m", ''
@@ -298,6 +316,7 @@ Ca 't11 Kill nem + tien trinh con song => khong in "DA GIET"' {
     $h = Join-Path $d 'h.ps1'
     Set-Content -LiteralPath $h -Encoding utf8NoBOM -Value (@'
 Set-StrictMode -Version Latest
+[Console]::OutputEncoding = [Text.UTF8Encoding]::new($false)
 $KetQua = New-Object System.Collections.ArrayList
 $NhatKy = $PSScriptRoot; $Goc = $PSScriptRoot; $HanGiay = 1; $ChiTiet = $false
 $script:SoKill = 0
@@ -311,7 +330,7 @@ function Start-Process {
 Chay-Cong -Ten 'gia' -Tep 'khong-co' -DoiSo @()
 Write-Host ("TRANG_THAI=" + $KetQua[0].TrangThai + " SO_KILL=" + $script:SoKill)
 '@)
-    $ra = (& $PwshExe -NoProfile -File $h 2>&1 | ForEach-Object { "$_" }) -join "`n"
+    $ra = (Doc-Utf8 { & $PwshExe -NoProfile -File $h 2>&1 } | ForEach-Object { "$_" }) -join "`n"
     if ($ra -notmatch 'TRANG_THAI=KHÔNG ĐO ĐƯỢC SO_KILL=[1-9]') { throw "harness khong chay toi Kill: $ra" }
     if ($ra -match 'ĐÃ GIẾT') { throw 'Kill nem, tien trinh con song ma van in "DA GIET"' }
 }
@@ -428,9 +447,11 @@ Ca 't18 cong rc=1 + CHAU giu stdout => van DO, in log' {
     Set-Content -LiteralPath (Join-Path $k 'ops/cong_cu.py') -Encoding utf8NoBOM -Value @'
 import os, subprocess, sys
 if sys.argv[1:2] == ["kiem-tra"]:
+    import time
     print("DONG-LOI-CUA-CONG-T18", flush=True)
     p = subprocess.Popen([sys.executable, "-c", "import time; time.sleep(60)"])
     open(os.environ["STUB_CHAU_PID"], "w").write(str(p.pid))
+    time.sleep(3)
     sys.exit(1)
 sys.exit(0)
 '@
@@ -438,8 +459,63 @@ sys.exit(0)
     finally { if (Test-Path -LiteralPath $pidf) { Stop-Process -Id ([int](Get-Content -LiteralPath $pidf)) -Force -ErrorAction SilentlyContinue } }
     if ($a.rc -ne 1) { throw "cong rc=1 ma rc_script=$($a.rc), mong 1 (DO)" }
     if ($a.ra -notmatch 'DONG-LOI-CUA-CONG-T18') { throw 'cong DO ma log cua no khong duoc in' }
-    # Ngoài Windows script chờ cháu tới hạn 5 s: cột thời lượng phải gồm phần ấy, không in "0.1s".
-    if (-not $IsWindows -and $a.ra -notmatch 'cong_cu kiem-tra\s+rc=1\s+([4-9]|1\d)(\.\d+)?s') { throw 'cot thoi luong khong gom phan cho CHAU' }
+    # Ngoài Windows script chờ cháu tới hạn 5 s. Cổng thoát ở giây 3 nên hạn CÒN LẠI ≈ 2 s: cột thời lượng ≈ 5 s — không phải 3
+    # (bỏ phần chờ), không phải 3 + 5 (xả bằng CẢ hạn: đo 8,1 s), 13 s (xả 2×HanGiay), 15 s (sàn 12 s). Số in theo văn hoá của máy:
+    # locale vi_VN in `5,1s` (đo: regex chỉ nhận dấu chấm ĐỎ oan 1/6 lượt dưới tải) — lỗi ấy chập chờn theo phép làm tròn, nên bộ
+    # đọc tự kiểm trên một dòng CỐ ĐỊNH trước khi đọc dòng thật.
+    $reGiay = 'cong_cu kiem-tra\s+rc=1\s+(\d+(?:[.,]\d+)?)s'
+    if ('  cong_cu kiem-tra   rc=1        5,1s  ĐỎ' -notmatch $reGiay) { throw 'bo doc cot thoi luong khong nhan dau phay thap phan (locale vi_VN)' }
+    if (-not $IsWindows) {
+        $m = [regex]::Match($a.ra, $reGiay)
+        if (-not $m.Success) { throw 'khong thay cot thoi luong cua cong_cu kiem-tra' }
+        $g = [double]($m.Groups[1].Value -replace ',', '.')
+        if ($g -lt 4.5 -or $g -gt 7.5) { throw "cot thoi luong ${g}s ngoai [4.5; 7.5] (HanGiay 5, cong thoat o giay 3)" }
+    }
+}
+
+# rc KHÔNG đọc được (`ExitCode` = $null — lỗi handle của Start-Process trên Windows; getter ném cũng ra $null) phải là KHÔNG ĐO ĐƯỢC
+# ở đường CHUNG, không chỉ ở nhánh xả-quá-hạn (đo trên bd62cad: `rc=  0.1s ĐỎ`, exit 1). Nạp NGUYÊN VĂN `Chay-Cong` như t11.
+Ca 't19 ExitCode khong doc duoc => KHONG DO DUOC, khong DO' {
+    $ast = [System.Management.Automation.Language.Parser]::ParseFile($Script, [ref]$null, [ref]$null)
+    $fn = $ast.Find({ param($n) $n -is [System.Management.Automation.Language.FunctionDefinitionAst] -and $n.Name -eq 'Chay-Cong' }, $true)
+    if (-not $fn) { throw 'khong thay ham Chay-Cong trong script' }
+    $d = Join-Path ([IO.Path]::GetTempPath()) ('ccw-' + [guid]::NewGuid().ToString('N').Substring(0, 10))
+    $script:Rac += $d
+    New-Item -ItemType Directory -Force -Path $d | Out-Null
+    $h = Join-Path $d 'h.ps1'
+    Set-Content -LiteralPath $h -Encoding utf8NoBOM -Value (@'
+Set-StrictMode -Version Latest
+[Console]::OutputEncoding = [Text.UTF8Encoding]::new($false)
+$KetQua = New-Object System.Collections.ArrayList
+$NhatKy = $PSScriptRoot; $Goc = $PSScriptRoot; $HanGiay = 5; $ChiTiet = $false
+function Start-Process {
+    $o = [pscustomobject]@{ HasExited = $true; ExitCode = $null }
+    $o | Add-Member -MemberType ScriptMethod -Name WaitForExit -Value { $true }
+    $o | Add-Member -MemberType ScriptMethod -Name WaitForExitAsync -Value { [Threading.Tasks.Task]::CompletedTask }
+    return $o
+}
+'@ + "`n" + $fn.Extent.Text + "`n" + @'
+Chay-Cong -Ten 'gia' -Tep 'khong-co' -DoiSo @()
+Write-Host ("TRANG_THAI=" + $(switch ($KetQua[0].TrangThai) { 'ĐẠT' { 'DAT' } 'ĐỎ' { 'DO' } 'KHÔNG ĐO ĐƯỢC' { 'KDD' } default { '?' } }))
+'@)
+    $ra = (Doc-Utf8 { & $PwshExe -NoProfile -File $h 2>&1 } | ForEach-Object { "$_" }) -join "`n"
+    if ($ra -notmatch 'TRANG_THAI=') { throw "harness khong chay toi het Chay-Cong: $ra" }
+    if ($ra -notmatch 'TRANG_THAI=KDD') { throw "ExitCode null o duong chung ma khong ra KHONG DO DUOC: $ra" }
+}
+
+# Đo được trên MỌI nền: đặt console 437 (mặc định kiểu Windows) ngay trong ca rồi đòi `Chay` vẫn thấy chữ tiếng Việt của script.
+Ca 't20 console code page 437 => van doc dung output UTF-8 cua script' {
+    $k = Dung-Kho
+    New-Item -ItemType File -Path (Join-Path $k '.git/config.lock') | Out-Null
+    $enc = [Console]::OutputEncoding
+    try {
+        try { [Console]::OutputEncoding = [Text.Encoding]::GetEncoding(437) } catch { throw "KHONG DO DUOC: khong dat duoc code page 437 ($($_.Exception.Message))" }
+        $a = Chay $k
+    } finally {
+        [Console]::OutputEncoding = $enc
+        Remove-Item -LiteralPath (Join-Path $k '.git/config.lock') -Force -ErrorAction SilentlyContinue
+    }
+    if ($a.ra -notmatch 'KHÔNG ĐẶT ĐƯỢC') { throw 'console 437: output UTF-8 cua script bi giai ma thanh rac' }
 }
 
 foreach ($d in $script:Rac) { Remove-Item -LiteralPath $d -Recurse -Force -ErrorAction SilentlyContinue }

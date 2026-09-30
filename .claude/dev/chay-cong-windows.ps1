@@ -1,9 +1,10 @@
-#Requires -Version 7.0
-# ĐÒI pwsh 7, KHÔNG phải Windows PowerShell 5.1 — và đây là phép đo, không phải sở thích:
+#Requires -Version 7.1
+# ĐÒI pwsh 7.1+, KHÔNG phải Windows PowerShell 5.1 — và đây là phép đo, không phải sở thích:
 #   · Tệp này UTF-8 KHÔNG BOM, LF — theo nhóm `scripts/*.ps1` + `tl-setup.ps1` (5 tệp không BOM).
 #     Kho KHÔNG có một quy ước duy nhất: 5/10 tệp `.ps1` có sẵn (`docs/runbooks/**`) CÓ BOM (đo
 #     `git ls-tree` + 3 byte đầu). PowerShell 5.1 đọc tệp không BOM theo ANSI ⇒ tiếng Việt thành rác.
 #   · `$tt.Kill($true)` (giết cả cây tiến trình, dùng cho hạn giờ) chỉ có từ .NET Core 3.0.
+#   · `$tt.WaitForExitAsync()` (xả stdout/stderr CÓ HẠN sau khi cổng thoát) chỉ có từ .NET 5 = pwsh 7.1.
 #   · `ci.yml` đã gọi `pwsh -NoProfile -File scripts/don-nhanh_test.ps1`, nên pwsh 7 vốn là
 #     giả định sẵn có của kho chứ không phải đòi hỏi mới.
 <#
@@ -18,9 +19,12 @@
 
     BA THỨ PHẢI ĐẶT ĐÚNG TRƯỚC KHI ĐO, nếu không cổng sẽ ĐỎ vì máy chứ không vì mã:
 
-      core.autocrlf=false, core.eol=lf   `RELEASE_MANIFEST.json` băm theo LF. Checkout
-                                         CRLF làm `release-verify --strict` đỏ hàng loạt
-                                         — đỏ THẬT nhưng nguyên nhân là checkout.
+      core.autocrlf=false, core.eol=lf   Gương `ci.yml`. `RELEASE_MANIFEST.json` băm theo LF,
+                                         nhưng thứ ép LF lúc checkout là `.gitattributes`
+                                         (`* text=auto eol=lf`, ADR-0018) — đo: clone với
+                                         autocrlf=true ⇒ 0 tệp CRLF ngoài 3 tệp `*.cmd`,
+                                         `release-verify --strict` ok. Hai nếp này là hàng
+                                         rào THỨ HAI (tệp bị công cụ ghi lại CRLF vẫn đỏ).
       core.abbrev=7                      Ngưỡng L2 của `doc-claims-check` lấy độ dài SHA
                                          viết tắt từ git. Kho đủ lịch sử tự nới lên 8, mà
                                          8 đúng bằng độ dài tiền tố UUID notebook
@@ -295,6 +299,9 @@ function Chay-Cong {
         [void]$KetQua.Add([pscustomobject]@{ Ten = $Ten; Rc = $null; TrangThai = 'KHÔNG ĐO ĐƯỢC'; NhatKy = '' })
         return
     }
+    # Giữ handle NGAY: trên Windows, Start-Process chuyển hướng bằng CreateProcess rồi trả `Process` KHÔNG giữ handle, nên
+    # sau khi tiến trình thoát `ExitCode`/`WaitForExitAsync` có thể không đọc được (lỗi đã biết; KHÔNG ĐO ĐƯỢC ở Linux).
+    try { $null = $tt.Handle } catch { }
     $xong = $tt.WaitForExit($Han * 1000)
     $giay = [math]::Round(((Get-Date) - $t0).TotalSeconds, 1)
 
@@ -308,8 +315,19 @@ function Chay-Cong {
         [void]$KetQua.Add([pscustomobject]@{ Ten = $Ten; Rc = $null; TrangThai = 'KHÔNG ĐO ĐƯỢC'; NhatKy = $fOut })
         return
     }
-    $tt.WaitForExit()
+    # `WaitForExit()` KHÔNG hạn còn chờ EOF của stdout/stderr, mà Start-Process trên Unix chuyển hướng qua ỐNG
+    # (`StartInfo.RedirectStandardOutput=True`): một tiến trình CHÁU còn giữ ống làm nó chờ tới khi cháu chết,
+    # vượt `-HanGiay` (đo: cổng thoát sau 0,1 s, cháu ngủ 40 s ⇒ chờ 42 s với HanGiay 5 rồi ĐẠT; cháu sống lâu ⇒
+    # treo vô hạn). Xả luồng CÓ HẠN bằng phần hạn còn lại; quá hạn ⇒ cây tiến trình của cổng CHƯA xong ⇒ KHÔNG ĐO ĐƯỢC.
     $rc = $tt.ExitCode
+    $conMs = [math]::Max(1000, [int]($Han * 1000 - ((Get-Date) - $t0).TotalMilliseconds))
+    $xa = $false
+    try { $xa = $tt.WaitForExitAsync([Threading.CancellationToken]::None).Wait($conMs) } catch { $xa = $false }
+    if (-not $xa) {
+        Write-Host ("  {0,-42} TREO  > {1}s — tiến trình đã thoát rc={2} nhưng CHÁU còn giữ stdout/stderr" -f $Ten, $Han, $rc) -ForegroundColor Yellow
+        [void]$KetQua.Add([pscustomobject]@{ Ten = $Ten; Rc = $rc; TrangThai = 'KHÔNG ĐO ĐƯỢC'; NhatKy = $fOut })
+        return
+    }
 
     $tt2 = if ($rc -eq 0) { 'ĐẠT' } else { 'ĐỎ' }
     $mau = if ($rc -eq 0) { 'Green' } else { 'Red' }

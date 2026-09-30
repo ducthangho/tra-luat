@@ -13,13 +13,19 @@
 #   t10 duong-dan-du-lieu-thanh-mau-wildcard      gốc kho dưới `…[1]…` ⇒ rc=2 + nói "wildcard", không "không tìm thấy gốc"
 #   t11 nhan-noi-hon-phep-do (giết)               `Kill` ném, tiến trình còn sống ⇒ không in "ĐÃ GIẾT"
 #   t12 nhan-noi-hon-phep-do (tham số)            `-HanGiay 0` bị từ chối, không thành "TREO > 0s"
-#   t13 do-loi-goi-khong-do-hieu-qua (git)        biến môi trường đè `core.abbrev` ⇒ rc=4, không in "→ 7" suông
+#   t13 do-loi-goi-khong-do-hieu-qua (git)        biến môi trường VÀ `[include]` đè `core.abbrev` ⇒ rc=4 (mỗi đường một chốt)
 #   t14 cong-chay-ngoai-hop-dong-chay-cong        bundle treo quá `-HanGiay` ⇒ không ĐẠT, không chờ trọn
 #   t15 do-loi-goi-khong-do-hieu-qua (zip)        zip cũ KHÔNG xoá được + bundle rc=0 không ghi ⇒ không ĐẠT
-# ĐỘT BIẾN để đo răng (đo trên pwsh 7.4.6/Linux): `-Script` trỏ f2392df ⇒ 0/15; trỏ 8b82d40 ⇒ 12/15, đỏ đúng
-# t13 t14 t15. Gỡ riêng MỘT mảnh vá thì chỉ ca của mảnh ấy ĐỎ (20 đột biến; riêng gỡ `exit 4` của nếp git
-# đỏ cả t4 lẫn t13 vì hai ca dùng chung chốt ấy). Mảnh TƯƠNG ĐƯƠNG, không ca nào đo được — khai thẳng:
-# `[bool]$ha`, `[string]$ban`, `-ErrorAction Stop` của Start-Process (nó vốn ném lỗi kết thúc).
+#   t16 treo-ngoai-han-gio                        cổng thoát ngay, CHÁU giữ stdout ⇒ không chờ quá `-HanGiay`
+#   t17 khoa-hep-hon-hop-dong (tất định)          hai zip KHÁC nhau ⇒ tất định ĐỎ
+# Bộ này KÍN với config git của máy chạy (khối `GIT_CONFIG_*` ngay dưới `$script:Rac`).
+# ĐỘT BIẾN để đo răng (đo trên pwsh 7.4.6/Linux): `-Script` trỏ f2392df ⇒ 1/17 (chỉ t17 đạt — bản ấy đã so băm);
+# 8b82d40 ⇒ 13/17 (đỏ t13 t14 t15 t16); 66efc78 ⇒ 16/17 (đỏ t16). Gỡ riêng MỘT mảnh vá thì chỉ ca của mảnh ấy
+# ĐỎ (14 đột biến trên script + 1 gỡ khối kín của chính bộ này, đo dưới config toàn cục của ci.yml ⇒ chỉ t4);
+# riêng gỡ `exit 4` của nếp git đỏ cả t4 lẫn t13 (chung chốt), `$td` khởi ĐẠT đỏ t1 t14 t15 (chung giá trị khởi tạo).
+# `$ha -eq $hb` từng không có ca nào (bỏ nó sống qua 15 ca cũ) — nay là t17. Mảnh KHÔNG ca nào đo được — khai thẳng:
+# `[bool]$ha`, `[string]$ban`, `-ErrorAction Stop` của Start-Process (tương đương: nó vốn ném lỗi kết thúc), và
+# `$null = $tt.Handle` (phòng ngừa CHỈ-Windows; gỡ ra trên Linux vẫn 17/17 — cần lượt Windows thật để có răng).
 [CmdletBinding()]
 param([string]$Script)
 Set-StrictMode -Version Latest
@@ -42,11 +48,22 @@ if a and a[0] == "release-bundle":
         import time; time.sleep(float(os.environ.get("STUB_NGU", "30")))
     if m in ("same", "ghi-rc1", "ngu"):
         open(out, "wb").write(b"ZIP-CO-DINH")
+    if m == "khac":
+        open(out, "wb").write(b"ZIP-" + out.encode())
     sys.exit(1 if m == "ghi-rc1" else 0)
 sys.exit(0)
 '@
 
 $script:Rac = @()
+# KÍN với config git của MÁY CHẠY: `ci.yml` đặt `core.autocrlf/eol/abbrev` bằng `--global` ở cả ba job gate, nên khi ghi
+# `--local` trượt (t4) giá trị CÓ HIỆU LỰC vẫn đúng và script chạy tiếp ⇒ t4 ĐỎ oan đúng nơi bộ này sẽ được nối (đo:
+# 14/15 dưới config toàn cục của ci.yml). Mọi git — của bộ test lẫn của script đang đo — đọc config toàn cục RỖNG,
+# bỏ tầng system, bỏ tham số truyền qua biến.
+$GitRong = Join-Path ([IO.Path]::GetTempPath()) ('ccw-' + [guid]::NewGuid().ToString('N').Substring(0, 10) + '.gitconfig')
+Set-Content -LiteralPath $GitRong -Value '' -Encoding utf8NoBOM
+$script:Rac += $GitRong
+$env:GIT_CONFIG_GLOBAL = $GitRong; $env:GIT_CONFIG_NOSYSTEM = '1'
+$env:GIT_CONFIG_COUNT = $null; $env:GIT_CONFIG_PARAMETERS = $null
 function Dung-Kho {
     $d = Join-Path ([IO.Path]::GetTempPath()) ('ccw-' + [guid]::NewGuid().ToString('N').Substring(0, 10))
     $script:Rac += $d
@@ -290,10 +307,17 @@ Ca 't12 -HanGiay 0 bi tu choi, khong thanh "TREO > 0s"' {
     if ($a.rc -eq 0 -or $a.ra -notmatch 'HanGiay') { throw "HanGiay 0 khong bi tu choi dung cho (rc=$($a.rc))" }
 }
 
-Ca 't13 bien moi truong de core.abbrev => rc=4, khong in "→ 7" suong' {
+Ca 't13 bien moi truong / [include] de core.abbrev => rc=4, khong in "→ 7" suong' {
     $k = Dung-Kho
     $a = Chay $k @() @{ GIT_CONFIG_COUNT = '1'; GIT_CONFIG_KEY_0 = 'core.abbrev'; GIT_CONFIG_VALUE_0 = '8' }
     if ($a.rc -ne 4 -or $a.ra -notmatch 'KHÔNG ĐẶT ĐƯỢC') { throw "git dung abbrev 8 ma script bao nep dung (rc=$($a.rc))" }
+    # Đường thứ hai, chốt riêng: `[include]` nằm SAU `[core]` trong `.git/config` ⇒ thắng giá trị `--local` vừa ghi.
+    $k2 = Dung-Kho
+    $inc = Join-Path (Split-Path $k2) 'inc.gitconfig'
+    Set-Content -LiteralPath $inc -Value "[core]`n`tabbrev = 8" -Encoding utf8NoBOM
+    & git -C $k2 config --local include.path $inc
+    $b = Chay $k2
+    if ($b.rc -ne 4 -or $b.ra -notmatch 'KHÔNG ĐẶT ĐƯỢC') { throw "[include] de abbrev 8 ma script bao nep dung (rc=$($b.rc))" }
 }
 
 Ca 't14 bundle treo qua HanGiay => khong DAT, khong cho tron' {
@@ -332,6 +356,35 @@ Ca 't15 zip cu KHONG xoa duoc + bundle rc=0 khong ghi => khong DAT' {
     }
     if ($a.ra -match 'release-bundle tất định\s+rc=0') { throw "zip CU khong xoa duoc ma tat dinh DAT (rc_script=$($a.rc))" }
     if ($a.rc -eq 0) { throw 'rc=0 khi tat dinh khong do duoc' }
+}
+
+# Cổng thoát NGAY nhưng để lại CHÁU giữ stdout: hạn giờ phải phủ cả phần xả luồng (Start-Process trên Unix đọc qua
+# ỐNG, `WaitForExit()` không hạn chờ EOF). Windows chuyển hướng bằng handle tệp ⇒ vế trạng thái chỉ đòi ngoài Windows.
+Ca 't16 cong thoat ngay, CHAU giu stdout => khong treo qua -HanGiay' {
+    $k = Dung-Kho
+    $pidf = Join-Path (Split-Path $k) 'chau.pid'
+    Set-Content -LiteralPath (Join-Path $k 'ops/cong_cu.py') -Encoding utf8NoBOM -Value @'
+import os, subprocess, sys
+if sys.argv[1:2] == ["kiem-tra"]:
+    p = subprocess.Popen([sys.executable, "-c", "import time; time.sleep(60)"])
+    open(os.environ["STUB_CHAU_PID"], "w").write(str(p.pid))
+sys.exit(0)
+'@
+    $w = [Diagnostics.Stopwatch]::StartNew()
+    try { $a = Chay $k @('-HanGiay', '5') @{ STUB_CHAU_PID = $pidf } }
+    finally {
+        $w.Stop()
+        if (Test-Path -LiteralPath $pidf) { Stop-Process -Id ([int](Get-Content -LiteralPath $pidf)) -Force -ErrorAction SilentlyContinue }
+    }
+    if ($w.Elapsed.TotalSeconds -ge 40) { throw "cong thoat roi ma cho CHAU $([math]::Round($w.Elapsed.TotalSeconds))s voi HanGiay 5" }
+    if (-not $IsWindows -and $a.ra -match 'cong_cu kiem-tra\s+rc=0') { throw 'CHAU con giu stdout ma cong van DAT' }
+}
+
+# Lõi của cổng: hai lần build ra zip KHÁC nhau ⇒ ĐỎ. Mọi ca khác dùng stub ghi CÙNG byte, nên bỏ `$ha -eq $hb` không ca nào thấy.
+Ca 't17 hai zip KHAC nhau => tat dinh DO' {
+    $k = Dung-Kho
+    $a = Chay $k @('-Muc', 'day-du') @{ STUB_BUNDLE = 'khac' }
+    if ($a.ra -notmatch 'release-bundle tất định\s+rc=1' -or $a.rc -eq 0) { throw "a.zip khac b.zip ma tat dinh khong DO (rc_script=$($a.rc))" }
 }
 
 foreach ($d in $script:Rac) { Remove-Item -LiteralPath $d -Recurse -Force -ErrorAction SilentlyContinue }

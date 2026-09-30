@@ -35,7 +35,9 @@ _ep_utf8()
 # chạy làm `__main__` ngoài chế độ UTF-8 thì phóng LẠI chính mình với `-X utf8` — đúng chế độ CI đang
 # chạy (CI đặt `PYTHONUTF8=1`, nên CI không bao giờ đi nhánh này). Chỉ ở `__main__`: `t61` NẠP tệp
 # này bằng importlib, và nạp thì không được phóng gì. `-X utf8` bật cờ bất kể môi trường ⇒ không lặp.
-# `t62` khoá.
+# `t62` khoá. GIỚI HẠN đã đo (review #671, P3): Windows không giết cả cây, nên harness NGOÀI có
+# hạn chót mà `kill()` tiến trình này thì tiến trình phóng lại vẫn chạy và giữ pipe — hạn chót kéo
+# dài tới lúc nó tự xong (`timeout=3` đo được 15,7s). Chạy tay có hạn chót thì đặt `PYTHONUTF8=1`.
 if __name__ == "__main__" and not sys.flags.utf8_mode:
     sys.exit(subprocess.run([sys.executable, "-X", "utf8", *sys.orig_argv[1:]]).returncode)
 
@@ -5591,23 +5593,32 @@ def t49_duong_XAU_ra_JSON_HOP_LE_va_NGAY_GO_phai_duoc_DOC():
         #      hạn ngạch đếm sai — một vi phạm tàng hình, đúng lớp `t48` đã gặp với `\r`/`\n`.
         d_va = _kho(tmp, "vacham")
         hai = [b"ops/va_\xff.py".decode("utf-8", "surrogateescape"), "ops/va_\\xff.py"]
-        # Tên thứ hai mang `\` NGUYÊN VĂN — trên Windows đó là dấu phân cách thư mục, nên
-        # đi qua đĩa là đo sai thứ. Đi thẳng INDEX như hai cây trên.
-        for ten in hai:
-            _stage_byte(d_va, ten.encode("utf-8", "surrogateescape"), BAN)
         mv = runpy.run_path(str(bq))
-        _, bao_va = mv["quet"](d_va)
-        khoa = bao_va.get("co_loi_goi_tran") or {}
-        bang(len(khoa) == 2,
-             f"(2d) HAI đường khác nhau về byte chỉ còn MỘT khoá trong báo cáo: "
-             f"{sorted(map(repr, khoa))} — phép hiển thị không đơn ánh mà lại được dùng làm "
-             f"khoá, nên một tệp ĐÈ tệp kia và hạn ngạch đếm hụt. Khoá phải giữ đường NGUYÊN "
-             f"VẸN; `_ra_json` lo phần an toàn ở biên giới.")
+        # #671 (review) — hai chốt THUẦN này và cả (3) KHÔNG cần tên mang `\` nằm trong INDEX,
+        # nên đo chúng TRƯỚC và chỉ HOÃN phần cần INDEX. Đo trên Windows (Git for Windows bỏ
+        # tên ấy với `Ignoring path`): để `BoQuaMoiTruong` nổ ngay ở đây thì hai đột biến đích
+        # t49 `bn_hien_thi_khong_don_anh`, `bn_ngay_go_chi_la_chu` thành KHÔNG ĐO ĐƯỢC.
         bang(mv["_duong_bao_cao"](hai[0]) != mv["_duong_bao_cao"](hai[1]),
              f"(2d) `_duong_bao_cao` vẫn KHÔNG đơn ánh: "
              f"{mv['_duong_bao_cao'](hai[0])!r} == {mv['_duong_bao_cao'](hai[1])!r}")
         bang(mv["_duong_bao_cao"]("ops/bình_thường.py") == "ops/bình_thường.py",
              "(2d) chiều ngược: đường Unicode THƯỜNG phải nguyên vẹn sau khi làm đơn ánh")
+        # Tên thứ hai mang `\` NGUYÊN VĂN — trên Windows đó là dấu phân cách thư mục, nên
+        # đi qua đĩa là đo sai thứ. Đi thẳng INDEX như hai cây trên.
+        bo_qua_va = None
+        try:
+            for ten in hai:
+                _stage_byte(d_va, ten.encode("utf-8", "surrogateescape"), BAN)
+        except BoQuaMoiTruong as e:
+            bo_qua_va = e                      # ném SAU (3), không phải ở đây
+        if bo_qua_va is None:
+            _, bao_va = mv["quet"](d_va)
+            khoa = bao_va.get("co_loi_goi_tran") or {}
+            bang(len(khoa) == 2,
+                 f"(2d) HAI đường khác nhau về byte chỉ còn MỘT khoá trong báo cáo: "
+                 f"{sorted(map(repr, khoa))} — phép hiển thị không đơn ánh mà lại được dùng làm "
+                 f"khoá, nên một tệp ĐÈ tệp kia và hạn ngạch đếm hụt. Khoá phải giữ đường NGUYÊN "
+                 f"VẸN; `_ra_json` lo phần an toàn ở biên giới.")
 
         # (3) NGÀY GỠ là một HẠN đọc được, không phải chữ trong lý do.
         d = _kho(tmp, "ngay")
@@ -5624,6 +5635,8 @@ def t49_duong_XAU_ra_JSON_HOP_LE_va_NGAY_GO_phai_duoc_DOC():
         bang(rc_qua != 0 and "ops/no_cu.py" in (bao_qua.get("ratchet_qua_han") or []),
              f"(3) QUA ngày gỡ một ngày mà ratchet vẫn pass: rc={rc_qua} "
              f"qua_han={bao_qua.get('ratchet_qua_han')} — ngày gỡ đang là chữ trang trí")
+        if bo_qua_va is not None:
+            raise bo_qua_va
 
 
 @ca

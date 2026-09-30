@@ -659,14 +659,16 @@ else echo "KHONG_DO_DUOC: ls-remote hong hoac rong"; fi
 #    checkout hay dạng không chuẩn thì khớp đúng chuỗi không trả lời được ⇒ không hỏi.
 #    Mã đọc lease lấy từ origin/master (bước 1 vừa so với máy chủ), KHÔNG từ checkout: checkout là cây ỨNG VIÊN
 #    (§8.1) — ứng viên sửa ops/lease_publish.py, hay thêm ops/yaml.py (thư mục của script đứng đầu sys.path), thì
-#    tự trả rc=0. Chép vào thư mục RIÊNG trong $SCRATCH; SCRATCH rỗng hay không đọc được blob ⇒ không hỏi.
+#    tự trả rc=0. Chép vào thư mục MỚI của riêng lượt này (`mktemp -d`) trong $SCRATCH: $SCRATCH là của cả run, nên một
+#    đường cố định bị lượt chạy song song (hai lời gọi cùng lúc) ghi đè giữa chừng ⇒ Python chạy tệp RỖNG, rc=0 mà không
+#    in NGƯỜI_GIỮ. SCRATCH rỗng hay không đọc được blob ⇒ không hỏi.
 read -r D <<'TEN:'
 <duong>
 TEN:
 D="${D#planned:}"
-LEASE_PY="${SCRATCH:-}/lp-origin-master/lease_publish.py"
 if RP="$(git -C "$SOURCE" for-each-ref refs/replace/)" && [ -z "$RP" ] && [ -n "${D##<*>}" ] && [ -n "${SCRATCH:-}" ] \
-  && mkdir -p "${LEASE_PY%/*}" && git -C "$SOURCE" cat-file blob refs/remotes/origin/master:ops/lease_publish.py > "$LEASE_PY"; then
+  && mkdir -p "$SCRATCH" && LP_DIR="$(mktemp -d "$SCRATCH/lp-origin-master.XXXXXX")" && LEASE_PY="$LP_DIR/lease_publish.py" \
+  && git -C "$SOURCE" cat-file blob refs/remotes/origin/master:ops/lease_publish.py > "$LEASE_PY"; then
   case "$D" in
     -*|/*|[A-Za-z]:/*|./*|../*|.|..|*/|*//*|*/./*|*/../*|*/.|*/..|*\\*) echo "KHONG_DO_DUOC: prefix …/ hoac duong dan khong chuan" ;;
     *) if [ -d "$SOURCE/$D" ]; then echo "KHONG_DO_DUOC: thu muc co trong checkout ma thieu / cuoi, tuc prefix …/"; else
@@ -676,6 +678,7 @@ if RP="$(git -C "$SOURCE" for-each-ref refs/replace/)" && [ -z "$RP" ] && [ -n "
          case "$P" in "$D/") P="$D" ;; */*/) P="${P%/*/}/" ;; */?*) P="${P%/*}/" ;; *) break ;; esac
        done; echo "rc=$M"; fi ;;
   esac
+  rm -rf -- "$LP_DIR"
 else echo "KHONG_DO_DUOC: refs/replace khong rong/khong doc duoc, duong dan rong/chua dien, SCRATCH rong, hoac khong lay duoc lease_publish.py cua origin/master"; fi
 ```
 

@@ -1,0 +1,155 @@
+# LEASE — CI-G5-CONG-CU-CHIA-MANH revision 1 / generation 3 (tiep quan + gia han; thay g2 con han) — chia ban kinh dot bien cong_cu_test 8 manh + job gom
+# GHI HO theo chi thi CHU KHO (chep nguyen van o granted_on_instruction_nguyen_van).
+
+schema_version: 2
+event: executor_lease_granted
+
+packet_issue: 668
+granted_by: ducthangho
+granted_on_instruction: https://github.com/ducthangho/tra-luat/issues/668#issuecomment-5903148218
+granted_on_instruction_nguyen_van: >-
+  Phien Claude Code session_01WktdUCQr2FQQ5j76LjrxgF, 2026-09-30 ~03:1xZ: 'Gia hạn lease g3, đổi reviewer cho lượt
+  20' roi 'Tiếp quản, chạy lượt 20 mới trên 0842283, trần ~2.000'. Chi thi dung tu truoc van ap dung: 'Không chạy
+  CI. Cross review theo phân lớp (không theo từng lỗi), có hint patch'; 'Tiếp tục lặp tới hết P1, P2, P3'. Tien
+  than g2: issuecomment-5885754401; g1: issuecomment-5865431816.
+authority_caveat: >-
+  Comment neo do phien agent dang bang tai khoan chu kho, chep loi chu kho trong phien — yeu hon comment
+  chu kho tu viet (#566). author_association=OWNER khong tach chu kho khoi phien agent dung token chu kho.
+recorded_by: claude-session
+recorder_is_dispatcher: false
+
+leased_at_utc: '2026-09-30T03:25:00Z'
+lease_expires_at_utc: '2026-09-30T09:55:00Z'
+han_ghi_chu: >-
+  Goc 24 gio (2026-10-01T03:25:00Z). RUT NGAN ve 2026-09-30T09:55:00Z — xem thu_hoi_bang_rut_han.
+
+packet_id: CI-G5-CONG-CU-CHIA-MANH
+packet_slug: CI-G5-CONG-CU-CHIA-MANH
+revision: 1
+generation: 3
+lease_id: ci-g5-cong-cu-chia-manh-r1-g3-claude
+thay_the_cho:
+  - ci-g5-cong-cu-chia-manh-r1-g2-claude
+thay_the_cho_ghi_chu: >-
+  Ke nhiem g2 (con han toi 2026-09-30T07:41:00Z luc cap g3) => KHAI bia mo da_bi_thay_the tren tep g2 (hai chieu,
+  _kiem_bia_mo). TIEP QUAN: phien executor cu session_01VYtkByMHqYAvwAToWoesy5 thoi dieu phoi #668; tu g3 executor
+  DUY NHAT la phien session_01WktdUCQr2FQQ5j76LjrxgF (chu kho: 'Tiếp quản').
+role: executor
+provider: anthropic_claude
+executor: claude
+surface: claude_code
+model: claude-opus-5-5
+effort: high
+effort_ghi_chu: 'Tu khai; KHONG DO DUOC tu ngoai.'
+environment: cloud
+risk: sensitive
+review_class: sensitive
+effective_review_class: sensitive
+assurance_target: human_audited
+reviewer_provider: anthropic_claude
+reviewer_surface: claude_cli
+reviewer_model_yeu_cau: claude-opus-5-5
+reviewer_assurance: same_provider_approved
+reviewer_ghi_chu: >-
+  REROUTE do nen het han muc, chu kho quyet (khong phai doi provider de lach budget, §8): Codex bao 'You've hit your
+  usage limit … try again at Oct 3rd, 2026 6:31 PM', do lai trong container nay 2026-09-30 ~03:1xZ; khong co OpenAI
+  API key hay provider Google. Luot 20 la same_provider_approved: phien claude -p MOI, read-only, clone rieng, khong
+  mang context executor — YEU HON cross_approved; human_audited van la cong land. Luot 20 an (0842283 khai 'va
+  F43/F44 review luot 20') KHONG co verdict trong kho => chu kho: coi nhu khong co, chay luot 20 MOI tren 0842283.
+  So luot vuot tran 2 luot §8 theo chi thi chu kho (nhu g2).
+access: read-write
+
+spec_path: ops/specs/CI-G5-CONG-CU-CHIA-MANH-r1.md
+spec_ref: refs/heads/ops/cap-lease-ci-g5-cong-cu-chia-manh
+spec_source_oid: 8bda84b0f0748601cfc8947df0e8e92099d7922b
+spec_blob: 47355031c3137af61c57431ed2916bcee1c6c397
+spec_sha256: dd2ada1b8511bec1c6c30ffdd7a94a3c34f4024836761878caf73ce339516b15
+spec_hash: dd2ada1b8511bec1c6c30ffdd7a94a3c34f4024836761878caf73ce339516b15
+spec_hash_formula: SHA256 of UTF-8 LF Git blob bytes at spec_source_oid:spec_path
+prompt_path: ops/specs/CI-G5-CONG-CU-CHIA-MANH-r1.md
+prompt_sha256_required: dd2ada1b8511bec1c6c30ffdd7a94a3c34f4024836761878caf73ce339516b15
+
+branch: claude/g5-job-gate-optimization-dkevre
+branch_ownership: exclusive
+branch_ghi_chu: >-
+  Spec + lease o nhanh ops/cap-lease-ci-g5-cong-cu-chia-manh (de ops-publish-lease.yml dang ban chieu); ma o nhanh
+  claude/g5-job-gate-optimization-dkevre dat THANG tren start_from_sha (khong mang commit spec/lease) de diff chi con
+  W1–W5. KHONG mo PR toi khi chu kho bao (mo PR = ban gate).
+start_from_sha: f8a7829cc44f296c25faf1a6439b603ba840f70b
+immutable_acceptance_baseline: f8a7829cc44f296c25faf1a6439b603ba840f70b
+reviewed_sha_required: f8a7829cc44f296c25faf1a6439b603ba840f70b
+reviewed_sha_required_nghia: 'Moi verdict neo exact head THAT cua nhanh thi cong (head luc cap g3: 0842283e86ef8f575b0c4423a340d8ac300198d0); baseline nghiem thu giu f8a7829.'
+
+write_set:
+  - .claude/dev/ci_dang_ky_test.py
+  - .claude/dev/launcher_test.py
+  - .claude/hooks/session-start.sh
+  - .github/workflows/ci.yml
+  - ops/cong_cu_test.py
+write_set_hash: 78b659ed69a34f8c0e62aa8b8474f57c0955126e28654fa177d0026ed59a5be6
+write_set_hash_cach_tinh: 'sha256 cua cac duong dan DA SAP XEP, noi bang LF, co LF cuoi, utf-8.'
+write_set_da_do_truoc_khi_cap: >-
+  Do 2026-09-28T07:2xZ: fetch --unshallow '+refs/heads/*'; so TAP TEN ls-remote --heads (488) voi for-each-ref
+  refs/remotes/origin: comm -23 = 0. ai-dang-giu (sau git branch -f master origin/master): ops/cong_cu_test.py,
+  ops/bash_nen.py, .github/workflows/ci.yml, .claude/dev/ci_dang_ky_test.py deu NGUOI_GIU 0 rc=0 (lease #570
+  g40-g45 CON_HAN nhung DA_BI_THAY_THE). .claude/dev/launcher_test.py, .claude/hooks/session-start.sh: NGUOI_GIU 0
+  rc=0 (do 07:4xZ).
+
+chong_lan_duoc_duyet: >-
+  ai-dang-giu (2026-09-30T03:2xZ, sau fetch du: so TAP TEN ls-remote --heads 518 / for-each-ref 518, thieu 0 thua 0;
+  repo khong nong) do duoc lease CON HAN chong write set, CUNG HAI PACKET da duoc duyet chong lan o g2:
+  ci-duong-nhanh-ho-so-r2-g3-claude (#674, ke nhiem g1 da duyet; giu ci.yml + ci_dang_ky_test.py, toi
+  2026-09-30T10:52Z) va wp671-windows-bash-nen-escape-r1-g1-claude (#671, giu ops/cong_cu_test.py, toi
+  2026-09-30T05:45Z). Quyet dinh chu kho khong doi: '#668 land trước' (g2) va thu tu land '#668 → #671 → c'
+  (issuecomment-5902944422). #671/#674 merge master sau roi giai xung dot.
+lech_protocol_duoc_duyet: >-
+  (1) so luot Codex vuot tran 2 luot §8 theo chi thi chu kho (reviewer_ghi_chu). (2) khong CI truoc land.
+lech_nguong_duoc_duyet: >-
+  spec §2: tran <= 5 tep, ~600 dong them; chu kho nang dan ~800 -> ~1.100 -> ~1.400 -> ~1.600 -> ~1.650 -> ~1.900
+  (sau luot 14) -> ~2.000 (2026-09-30, khi diff do duoc +1967/-49 tai 0842283). Van <= 5 tep.
+
+ci_budget:
+  gate_tu_dong: '0 — chu kho: "Không Ci, full CI, CI do lỗi đã biết"; KHONG mo PR toi khi chu kho bao'
+  phep_do_duoc_cap: '0 / 0 / 0'
+  tham_do_chua_cap: cam
+  het: 'DUNG truoc moi CI; cho quyet dinh cua chu kho'
+
+dieu_kien_dung:
+  - 'S1 — cham duong ngoai W1–W5. DUNG.'
+  - 'S2 — CI do vi packet. DUNG, bao chu kho (hien khong chay CI).'
+  - 'S3 — lap va + Codex review theo chi thi chu kho toi het P1/P2/P3; cung hinh dang finding >= 3 lan => hoi chu kho.'
+  - 'S4 — push chi sau review tai cho; KHONG mo PR.'
+  - 'S5 — > ~2.000 dong them. DUNG, hoi chu kho.'
+  - 'S6 — het han lease => ngung ghi, handoff §7.'
+
+cam_tuyet_doi:
+  - Khong sua spec; khong sua tep ngoai write set
+  - Khong tu review / approve / merge / land; land chi bang merge commit
+  - Khong CI (ke ca full, CI do loi da biet), khong LIVE/deploy
+  - Khong force-push
+
+chua_do_duoc:
+  - 'Danh tinh nguoi ky: #566.'
+  - 'Effort thuc te cua phien executor.'
+  - 'Thoi gian that cua gate-cong-cu / gate-cong-cu-gop (A9, chi sau land).'
+lease_sua_lan_cuoi: '2026-09-30T09:31Z'
+lease_sua_ghi_chu: >-
+  Lan 1: rut ngan lease_expires_at_utc (thu_hoi_bang_rut_han). Khong doi write set, spec, branch.
+thu_hoi_bang_rut_han:
+  han_goc_utc: '2026-10-01T03:25:00Z'
+  han_moi_utc: '2026-09-30T09:55:00Z'
+  chi_thi: >-
+    Chu kho trong phien Claude Code session_01CSM7GNazhN6uGJb4v1TqBT 2026-09-30: "#668: merge, land và bookkeeping"
+    (08:09:13Z, neo #668 comment 5906990399) va "Nếu #668 land rồi thì bookeeping và đóng đi".
+  ly_do: >-
+    Packet #668 da MERGE: PR #696 merge 423b4ba14078701859b9e6ac101a68a3fc4ddef4 (2026-09-30T09:30:11Z), head
+    3ddda02 = cc78b33 (human_audited, #668 comment 5906970256) + merge master; 5 tep write set giong het byte cc78b33.
+  vi_sao_khong_dung_so: >-
+    Theo tien le #651/#660/#661: so ops/thu-hoi/ chua kich hoat; rut han chi dung co che DA CAI (phan loai lease theo
+    han). Han moi dat vai phut SAU luc push de ops-publish-lease.yml con thay lease song (nhanh rc=9 da dang), khong roi
+    vao rc=8 (bai hoc CLAUDE.md: rc=8 che rc=9).
+  nguoi_rut: 'land operator session_01CSM7GNazhN6uGJb4v1TqBT (KHONG phai executor session_01WktdUCQr2FQQ5j76LjrxgF)'
+  gioi_han: >-
+    Ref mang lease nay: nhanh ops/cap-lease-ci-g5-cong-cu-chia-manh (ban rut han) va master sau PR bookkeeping. Nhanh
+    ma claude/g5-job-gate-optimization-dkevre KHONG mang tep lease. Nghiem thu: ai-dang-giu cho 5 tep W1-W5 khong con
+    ci-g5-cong-cu-chia-manh-r1-g3-claude trong NGUOI_GIU sau 09:55Z khi quet du ref.

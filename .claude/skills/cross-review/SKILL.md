@@ -606,10 +606,14 @@ set là đường dẫn HOẶC prefix thư mục `…/` (protocol §5): hỏi `o
 `ops/reviews/x/`, hỏi `planned:a.md` KHÔNG thấy lease giữ `a.md` — `CACHE_TUOI` rồi `rc=0 NGƯỜI_GIỮ 0`. Bước 2
 bỏ `planned:`, hỏi đường ấy kèm `/` (tên thư mục gõ thiếu `/`), chính nó rồi mọi thư mục cha `…/`, và KHÔNG hỏi dạng
 mà khớp đúng chuỗi không trả lời được: prefix `…/` hay thư mục CÓ trong checkout mà thiếu `/` cuối (lease giữ tệp
-BÊN DƯỚI nó không hiện), `./` `//` `..` `\` `C:/…` hay `-…`. Còn lại vẫn `rc=0` dù có người giữ: thư mục CHƯA
-có trong checkout, gõ thiếu `/`, mà lease giữ tệp bên dưới nó; khác hoa/thường hay dạng Unicode (§5 case-fold và
-chuẩn hoá NFC, lệnh thì không); và ký tự trắng khác ở hai đầu — `\r`, NBSP, U+3000…: 26 ký tự `str.isspace()`
-ngoài dấu cách, tab, xuống dòng (`read` chỉ bỏ dấu cách/tab, `strip()` bỏ cả chúng).
+BÊN DƯỚI nó không hiện), `/…` `./` `//` `..` `\` `C:/…` hay `-…`. `rc=0` chỉ chứng minh một điều: không lease CÒN
+HẠN, chưa bị thay thế nào có mục write_set (sau `strip()` và bỏ `planned:`) BẰNG ĐÚNG một chuỗi đã hỏi — mọi khác
+biệt khác, ở phía hỏi LẪN phía lease, vẫn `rc=0` dù có người giữ. Đã đo, KHÔNG phải danh sách đủ: thư mục CHƯA có
+trong checkout, gõ thiếu `/`, mà lease giữ tệp bên dưới nó; khác hoa/thường hay dạng Unicode (§5 case-fold và chuẩn
+hoá NFC, lệnh thì không); ký tự trắng khác ở hai đầu — `\r`, NBSP, U+3000…: 26 ký tự `str.isspace()` ngoài dấu
+cách, tab, xuống dòng (`read` chỉ bỏ dấu cách/tab, `strip()` bỏ cả chúng); và mục lease khác dạng chuẩn —
+`docs\a.md`, `./docs/a.md`, `docs//a.md`, `planned: docs/a.md` (cổng đăng chỉ dùng `write_set` để xếp lớp, không
+từ chối dạng nào) — hỏi `docs/a.md` không thấy.
 
 Thông điệp lỗi nêu **nhánh và upstream thật**, không nhất thiết là `origin/<cùng tên>` — từ git 2.36:
 trước đó (`worktree list -z` chưa có) nhánh TỤT_SAU dừng ở `KHÔNG_XÁC_ĐỊNH: git worktree list --porcelain -z

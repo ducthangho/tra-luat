@@ -628,8 +628,9 @@ if MC="$(git -C "$SOURCE" ls-remote --heads origin)" && [ -n "$MC" ]; then
     <(git -C "$SOURCE" for-each-ref --format='%(objectname) %(refname)' refs/heads refs/remotes))"
   [ -z "$LECH$NGOAI" ] && echo "CACHE_TUOI" || printf 'CACHE_CU (sat le: chi may chu co; thut TAB: chi cache co; refs/: ref ngoai may chu):\n%s\n%s\n' "$LECH" "$NGOAI"
 else echo "KHONG_DO_DUOC: ls-remote hong hoac rong"; fi
-# 2) rc=0 chỉ là "không ai giữ" khi bước 1 in CACHE_TUOI; refs/replace cục bộ đổi được nội dung lease nên tắt nó
-GIT_NO_REPLACE_OBJECTS=1 "$PY" "$SOURCE/ops/lease_publish.py" ai-dang-giu <duong> --root "$SOURCE"; echo "rc=$?"
+# 2) rc=0 chỉ là "không ai giữ" khi bước 1 in CACHE_TUOI; refs/replace cục bộ đổi được nội dung lease, info/grafts
+#    (GIT_NO_REPLACE_OBJECTS KHÔNG tắt nó) biến PHÂN_KỲ thành TỤT_SAU: tắt cả hai (tệp /dev/null/grafts không thể có)
+GIT_NO_REPLACE_OBJECTS=1 GIT_GRAFT_FILE=/dev/null/grafts "$PY" "$SOURCE/ops/lease_publish.py" ai-dang-giu <duong> --root "$SOURCE"; echo "rc=$?"
 ```
 
 Bên bootstrap chữa nhánh rảnh `<nhanh>` về `<upstream>` (cả hai lấy từ chẩn đoán) bằng `fetch .`
@@ -638,17 +639,23 @@ KHÔNG kèm `+`: git đòi fast-forward trên đầu nhánh HIỆN TẠI (commit
 `<root>` — "rảnh" lúc chẩn đoán chưa chắc còn rảnh lúc chữa. Chốt từ chối ấy PHỤ THUỘC phiên bản
 git (đo 30-09-2026): 2.30.2 và 2.34.1 (mặc định Ubuntu 22.04) trả `rc=0` và CẬP NHẬT nhánh đang
 checkout ở worktree LIÊN KẾT (`status` ở đó hiện `D` đúng lease vừa về, y hệt `update-ref` dưới
-đây), cả nhánh đang rebase/bisect ở đó; 2.37.2, 2.39.2, 2.43.0 từ chối; 2.35–2.36 chưa đo. Nên
-khối dưới KHÔNG chạy với git < 2.37. Đừng thay bằng `update-ref <mới>
+đây), cả nhánh đang rebase/bisect ở đó hay ở worktree chính; 2.35.0, 2.36.0, 2.37.0, 2.37.2,
+2.39.2, 2.43.0 từ chối (phép kiểm mọi worktree có từ 2.35.0). Nên khối dưới KHÔNG chạy với git < 2.35.
+Phép so fast-forward đọc commit QUA `refs/replace` và `info/grafts` (đo: graft đầu upstream lên commit
+chưa đẩy ⇒ `ai-dang-giu` báo TỤT_SAU thay vì PHÂN_KỲ, `fetch .` trả `rc=0`, commit rơi khỏi nhánh),
+còn `GIT_DIR` đè `-C` (đo: trỏ kho khác ⇒ `rc=0`, nhánh của kho ĐÓ đổi, `<root>` đứng yên) — nên
+khối tắt cả ba như hai bước trên. Đừng thay bằng `update-ref <mới>
 <cũ>`: nó so được giá trị cũ nhưng KHÔNG từ chối nhánh đang checkout — HEAD của worktree ấy nhảy,
 index và tệp đứng yên, `status` hiện staged NGƯỢC đúng các commit upstream (lease vừa về hiện
 thành `D`), và `commit` kế tiếp xoá lại chúng:
 
 ```bash
+unset GIT_DIR GIT_WORK_TREE GIT_COMMON_DIR   # đè -C như ở khối trên
 case "$(git version)" in
-  "git version 1."*|"git version 2."[0-9].*|"git version 2."[12][0-9].*|"git version 2.3"[0-6].*)
-    echo "KHONG_CHAY: $(git version) < 2.37 khong tu choi nhanh dang checkout o worktree LIEN KET" ;;
-  *) git -C "<root>" fetch --no-write-fetch-head . "<upstream>:refs/heads/<nhanh>"; echo "rc=$?" ;;
+  "git version 1."*|"git version 2."[0-9].*|"git version 2."[12][0-9].*|"git version 2.3"[0-4].*)
+    echo "KHONG_CHAY: $(git version) < 2.35 khong tu choi nhanh dang checkout o worktree khac hay dang rebase/bisect" ;;
+  *) GIT_NO_REPLACE_OBJECTS=1 GIT_GRAFT_FILE=/dev/null/grafts \
+       git -C "<root>" fetch --no-write-fetch-head . "<upstream>:refs/heads/<nhanh>"; echo "rc=$?" ;;
 esac
 ```
 

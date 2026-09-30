@@ -42,7 +42,8 @@ GIỚI HẠN, NÓI THẲNG (không phải ranh giới an ninh):
   · `pull_request.base.sha`/`head.sha` luôn là 40 hex ở mọi sự kiện con: theo tài liệu GitHub, chưa tự đo.
 
 LỆNH `kiem-re` (bước bù cho các bước bị bỏ, chỉ chạy khi `che_do == duong_nhanh`):
-  YAML parse được · `git diff --check` · lease đổi phải qua `lease_publish` · ba ca kiểm DỮ LIỆU của lease_publish_test.
+  YAML parse được · `git diff --check` · lease đổi phải qua `lease_publish` · ba ca kiểm DỮ LIỆU của lease_publish_test ·
+  mọi đường dẫn đổi là TỆP THƯỜNG theo MODE TRONG GIT (`kiem_mode_git`: 100644/100755 hoặc xoá; gitlink, symlink ⇒ ĐỎ).
 Hai chỗ khác chữ trần của đặc tả r2, ĐO ngày 29-09-2026. CHỦ KHO ĐÃ DUYỆT CẢ HAI (lựa chọn (a)) — erratum của đặc tả r2,
 không sửa r2: https://github.com/ducthangho/tra-luat/issues/674#issuecomment-5887720007 . Với reviewer: đây là HÀNH VI ĐƯỢC
 DUYỆT, không phải finding về chính sách; vẫn tìm lỗi TRONG cách hiện thực (ví dụ `bo_qua_han` bỏ thêm chốt nào khác không,
@@ -58,7 +59,8 @@ ba loại khoảng trắng có bị tắt rộng hơn ba loại đó không).
     CRLF làm `merge-tree` mất dò đổi tên thư mục, biến merge XUNG ĐỘT thành merge sạch (tự đo khi vá lượt 9, `t11e`).
     Nên MỌI lệnh git chạy bộ máy diff/merge của tệp này đọc thuộc tính từ cây GỐC (`--attr-source=<goc>`; git không
     có cờ này ⇒ lệnh lỗi ⇒ `day_du` / kiem-re ĐỎ, tức fail-close — phiên bản git của runner chưa đo): ba chấm
-    `--name-only`, `merge-tree`, diff `goc -> cây` (cây merge-tree và `github.sha`), `--check`, `--numstat`. Các lệnh
+    `--name-only`, `merge-tree`, diff `goc -> cây` (cây merge-tree và `github.sha`), `--check`, `--numstat`, và
+    `merge-tree` + ba `--raw` của `kiem_mode_git`. Các lệnh
     `--name-only --no-renames` so OID giữa hai cây, không dò đổi tên nên không có bước nào đọc thuộc tính —
     `--attr-source` ở đó là chốt thống nhất (`t20u` khoá đối số từng lời gọi), không phải vá một đường đã đo được.
     `merge-base --all` chỉ đọc đồ thị commit: không cần chốt.
@@ -266,9 +268,83 @@ def kiem_loai_tep(doi, kho=ROOT) -> list[str]:
     """Mọi tệp hồ sơ đổi (còn trong cây) phải là tệp THƯỜNG, không phải symlink. Bước bị bỏ `lease-publish selftest`
     có `t82` `copytree` CẢ cây (kể cả ops/{land,leases,reviews,specs}/**): symlink treo dưới allowlist làm nó ĐỎ trên
     master trong khi mọi kiểm khác của `kiem-re` vẫn DAT. Hồ sơ không cần symlink ⇒ chặn mọi symlink, treo hay không,
-    mọi đuôi tệp. (`.gitattributes` KHÔNG bị chặn ở đây — xem D1 và `kiem_diff_check`.)"""
+    mọi đuôi tệp. (`.gitattributes` KHÔNG bị chặn ở đây — xem D1 và `kiem_diff_check`.) Chốt này đọc ĐĨA; nó không thấy
+    gitlink (thư mục rỗng) hay symlink trên nền `core.symlinks=false` — `kiem_mode_git` đọc mode trong GIT và phủ cả hai."""
     return [f"tep ho so la symlink (duong nhanh chi nhan tep thuong): {duong!r}"
             for duong in sorted(doi) if (Path(kho) / duong).is_symlink()]
+
+
+MODE_THUONG = {"100644", "100755"}
+MAU_BAN_GHI_RAW = re.compile(r":([0-7]{6}) ([0-7]{6}) ([0-9a-f]{40}(?:[0-9a-f]{24})?) ([0-9a-f]{40}(?:[0-9a-f]{24})?) ([AMDT])")
+
+
+def _doc_raw(goc, cap, chay, kho):
+    """{đường dẫn: (mode mới, trạng thái)} của `git diff --raw` trên MỘT cặp; hoặc một chuỗi lỗi (KHÔNG ĐO ĐƯỢC)."""
+    try:
+        r = chay(["git", "--attr-source=" + goc, "diff", "--raw", "-z", "--no-renames", "--no-abbrev", *cap],
+                 cwd=kho, capture_output=True)
+    except Exception as e:
+        return f"KHONG DO DUOC: git diff --raw {' '.join(cap)} nem {type(e).__name__}"
+    ra = getattr(r, "stdout", None)
+    if getattr(r, "returncode", None) != 0 or not isinstance(ra, (bytes, bytearray)):
+        return f"KHONG DO DUOC: git diff --raw {' '.join(cap)} rc={getattr(r, 'returncode', None)}"
+    if ra and not bytes(ra).endswith(b"\0"):
+        return f"KHONG DO DUOC: git diff --raw {' '.join(cap)} dau ra cut"
+    muc = bytes(ra).decode("utf-8", "surrogateescape").split("\0")[:-1]
+    if len(muc) % 2:
+        return f"KHONG DO DUOC: git diff --raw {' '.join(cap)} so muc le (dau ra hong)"
+    kq = {}
+    for dau_ghi, duong in zip(muc[0::2], muc[1::2]):
+        k = MAU_BAN_GHI_RAW.fullmatch(dau_ghi)
+        if not k or not duong or duong in kq:
+            return f"KHONG DO DUOC: git diff --raw {' '.join(cap)} ban ghi la: {dau_ghi!r} {duong!r}"
+        kq[duong] = (k.group(2), k.group(5))
+    return kq
+
+
+def kiem_mode_git(env, chay=subprocess.run, kho=ROOT, doi=frozenset()) -> list[str]:
+    """Loại tệp theo MODE TRONG GIT, không theo cây làm việc (cross-review lượt 10, lớp `kiem-re-cua-fail-close-chua-co-ca`).
+    Mọi chốt nội dung khác của kiem-re đọc ĐĨA, và đĩa nói dối theo nhiều cách: gitlink (mode 160000) checkout thành THƯ MỤC
+    rỗng nên `kiem_yaml`/`kiem_lease` coi `not is_file()` là ĐÃ XOÁ và bỏ qua (kể cả tên `.yaml`), `--check` không có nội dung
+    để đọc, numstat `1 0` không phải nhị phân; symlink trên nền `core.symlinks=false` (Windows) checkout thành tệp THƯỜNG chứa
+    đường đích nên `kiem_loai_tep` không thấy. Git thì không nói dối: `git diff --raw` trên ĐÚNG ba cặp mà bộ phân loại dùng
+    (`goc...dau`, `goc -> cây merge-tree`, `goc -> github.sha`), thuộc tính từ cây GỐC như mọi lệnh diff khác. Chỉ nhận mode
+    mới 100644/100755, hoặc XOÁ (`D`, mode mới 000000); mọi thứ khác (gitlink, symlink, trạng thái lạ) ⇒ ĐỎ. Git lỗi/ném,
+    đầu ra cụt/lẻ/bản ghi lạ, hoặc tập đường dẫn của ba cặp KHÁC tập `doi` mà bộ phân loại đã đo ⇒ KHÔNG ĐO ĐƯỢC ⇒ ĐỎ.
+    Thêm một chốt ĐĨA cho cặp `goc -> github.sha` (commit mà Actions checkout): đường dẫn git nói là tệp thường thì trên đĩa
+    phải LÀ tệp thường — git có mà đĩa không có (va chạm tên không phân biệt hoa thường, checkout thưa…) thì các chốt đọc
+    đĩa sẽ bỏ qua nó như tệp đã xoá. Tệp đổi thành thư mục cùng tên là HỢP LỆ: git báo `D` cho tệp và `A` 100644 cho tệp con."""
+    goc, dau, hop = (env.get(k) or "" for k in (BIEN_GOC, BIEN_DAU, BIEN_MERGE))
+    try:
+        mt_mode = chay(["git", "--attr-source=" + goc, "merge-tree", "--write-tree", "--no-messages", goc, dau],
+                       cwd=kho, capture_output=True)
+    except Exception as e:
+        return [f"KHONG DO DUOC: merge-tree (kiem mode) nem {type(e).__name__}"]
+    ra_cay = getattr(mt_mode, "stdout", None)
+    if getattr(mt_mode, "returncode", None) != 0 or not isinstance(ra_cay, (bytes, bytearray)) \
+            or not re.fullmatch(rb"[0-9a-f]{40}(?:[0-9a-f]{24})?\n", bytes(ra_cay)):
+        return [f"KHONG DO DUOC: merge-tree (kiem mode) rc={getattr(mt_mode, 'returncode', None)}"]
+    cay = bytes(ra_cay).decode("ascii").strip()
+    loi, thay = [], set()
+    for ten_cap, cap in (("ba cham", (f"{goc}...{dau}",)), ("goc -> cay merge-tree", (goc, cay)),
+                         ("goc -> merge ref", (goc, hop))):
+        ban_ghi = _doc_raw(goc, cap, chay, kho)
+        if isinstance(ban_ghi, str):
+            return [ban_ghi]
+        thay |= set(ban_ghi)
+        for duong, (mode, trang_thai) in sorted(ban_ghi.items()):
+            if trang_thai == "D" and mode == "000000":
+                continue
+            if trang_thai == "D" or mode not in MODE_THUONG:
+                loi.append(f"tep ho so khong phai tep thuong theo git (mode {mode}, {trang_thai}, cap {ten_cap}) - "
+                           f"kiem-re khong kiem duoc noi dung: {duong!r}")
+            elif ten_cap == "goc -> merge ref" and ((Path(kho) / duong).is_symlink() or not (Path(kho) / duong).is_file()):
+                loi.append(f"git (merge ref) noi {duong!r} la tep thuong nhung tren dia KHONG phai tep thuong - "
+                           "cac chot doc dia se bo qua no")
+    if thay != set(doi):
+        lech = sorted(thay ^ set(doi))
+        return loi + [f"KHONG DO DUOC: tap duong dan cua git diff --raw lech tap da phan loai: {lech[:TOI_DA_TEN_IN]!r}"]
+    return loi
 
 
 def kiem_diff_check(env=os.environ, chay=subprocess.run, kho=ROOT) -> list[str]:
@@ -387,6 +463,7 @@ def lenh_kiem_re(env=os.environ, chay=subprocess.run, kho=ROOT, ra=None, bay_gio
               "(khong khop voi job chuan-bi)", file=ra)
         return 1
     loi = (kiem_yaml(doi, kho) + kiem_loai_tep(doi, kho) + kiem_diff_check(env, chay, kho) + kiem_nhi_phan(env, chay, kho)
+           + kiem_mode_git(env, chay, kho, doi)
            + kiem_lease(doi, kho, chay, bay_gio, ra)
            + kiem_ca_du_lieu(kho, chay))
     for x in loi:

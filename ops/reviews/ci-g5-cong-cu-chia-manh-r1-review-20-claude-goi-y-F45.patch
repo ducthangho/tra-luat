@@ -1,0 +1,43 @@
+diff --git a/ops/cong_cu_test.py b/ops/cong_cu_test.py
+index 24678d5..9edea6b 100644
+--- a/ops/cong_cu_test.py
++++ b/ops/cong_cu_test.py
+@@ -1865,6 +1865,7 @@ _CA_668 = {"t52_": 't52_gom_manh_phai_DO_khi_thieu_trung_lech_va_moi_chot_co_THE
+ # F44: neo TRỌN DÒNG (kèm xuống dòng) của nhánh nền đỏ trong `main` — không trùng chính bảng này (thay ở lần xuất hiện ĐẦU).
+ _NEN_M = '            _ket_thuc_manh(k, n, ra, ten, None, "nền đỏ hoặc tiền kiểm bị bỏ qua — không đo", _van_tay())\n'
+ _NEN_IN = '            print(f"  ĐỎ  mảnh {k}/{n} [M-nen]: nền KHÔNG xanh — không đo bán kính, không ghi tệp")\n'
++_D45 = 'if not _CO_SYMLINK:\n'   # F45: neo ĐỘC LẬP với dòng quan sát — gỡ chốt quan sát thì neo vẫn còn
+ for _ten, _ca, _tim, _thay in (
+     ('f7_cau_hinh_nuot', 't54_',
+      '        print(f"  ĐỎ  cấu hình chế độ: {ex}")\n        return 2\n',
+@@ -2244,6 +2245,11 @@ for _ten, _ca, _tim, _thay in (
+     ('f44_nen_ten_n8', 't54_', _NEN_M, _NEN_M.replace('ra, ten, None', 'ra, _phan_manh(k, 8), None')),
+     ('f44_nen_in_k_mod_8', 't54_', _NEN_IN, _NEN_IN.replace('mảnh {k}/{n}', 'mảnh {k % 8}/{n}')),
+     ('f44_nen_chi_tien_kiem', 't54_', '        if hong or tien_kiem_bo_qua:\n            _ket_thuc_manh(', '        if tien_kiem_bo_qua:\n            _ket_thuc_manh('),
++    # F45 (review lượt 20): bộ quan sát registry năng lực phải thấy THÊM tên ngoài oracle, XOÁ và GHI ĐÈ tên có sẵn
++    # trong cửa sổ hai ảnh — vô điều kiện, cùng một phép trên cả hai nền (không thêm tên có điều kiện).
++    ('f45_them_ten_la', 't52_', _D45, 'DOT_BIEN["f45_ten_la"] = DOT_BIEN["f45_xoa_ten"]\n' + _D45),
++    ('f45_xoa_ten', 't52_', _D45, 'DOT_BIEN.pop("f45_them_ten_la")\n' + _D45),
++    ('f45_ghi_de_ten', 't52_', _D45, 'DOT_BIEN["f45_them_ten_la"] = DOT_BIEN["f45_xoa_ten"]\n' + _D45),
+     ('f27_full_seed', 't54_', '    else:\n        print(f"\\nBÁN KÍNH ĐỘT BIẾN ({len(DOT_BIEN)} đột biến, mỗi ca đúng một"',
+      '    else:\n        loi_db = loi_nen\n        print(f"\\nBÁN KÍNH ĐỘT BIẾN ({len(DOT_BIEN)} đột biến, mỗi ca đúng một"'),
+ ):
+@@ -7413,7 +7419,7 @@ def _do_co_symlink():
+         return False
+ 
+ 
+-_TRUOC_NANG_LUC = frozenset(DOT_BIEN)   # F43: ảnh DOT_BIEN TRƯỚC mọi đăng ký theo năng lực
++_TRUOC_NANG_LUC = dict(DOT_BIEN)   # F43/F45: ảnh DOT_BIEN (tên VÀ định nghĩa) TRƯỚC mọi đăng ký theo năng lực
+ _CO_SYMLINK = _do_co_symlink()
+ if _CO_SYMLINK:   # F24: chỉ đo được ở nền có symlink (xem `_do_co_symlink`)
+     DOT_BIEN["f24_nhan_symlink"] = ("ops/cong_cu_test.py", '        if p.is_symlink() or not p.is_file():\n', '        if not p.is_file():  # đột biến: nhận symlink\n',
+@@ -7446,7 +7452,8 @@ if not _CO_SYMLINK:
+                                          "TEP_TEST", _KEM_TEP_TEST, _CA_668["t52_"])
+     DOT_BIEN["f40_false_khong"] = ("ops/cong_cu_test.py", 'if not _CO_SYMLINK:\n', 'if False:\n', "TEP_TEST", _KEM_TEP_TEST, _CA_668["t52_"])
+ # F43: tên đăng ký theo năng lực = HIỆU hai ảnh — quan sát KHÔNG lọc theo oracle, tên mới ngoài oracle ⇒ t52 ĐỎ.
+-_TEN_NANG_LUC = frozenset(DOT_BIEN) - _TRUOC_NANG_LUC
++# F45: tên THÊM, BỚT hay ĐỔI định nghĩa giữa hai ảnh — hiệu tập khoá bỏ sót xoá/ghi đè trong cửa sổ.
++_TEN_NANG_LUC = frozenset(t for t in DOT_BIEN.keys() | _TRUOC_NANG_LUC.keys() if DOT_BIEN.get(t) != _TRUOC_NANG_LUC.get(t))
+ # NỢ (KHÔNG ĐO ĐƯỢC): nền VẮNG thuộc tính `os.symlink` (nhánh AttributeError của `_do_co_symlink`) không được đo trong bộ này —
+ # quyết định chủ kho sau review lượt 17 (F39); runner chuẩn Ubuntu/Windows có `os.symlink`; không mô phỏng.
+ 

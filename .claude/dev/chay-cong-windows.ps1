@@ -1,9 +1,8 @@
 #Requires -Version 7.0
 # ĐÒI pwsh 7, KHÔNG phải Windows PowerShell 5.1 — và đây là phép đo, không phải sở thích:
-#   · Quy ước `.ps1` của kho là UTF-8 KHÔNG BOM (đo: don-nhanh.ps1, don-nhanh_test.ps1,
-#     deploy-guard.ps1, tl-setup.ps1 — cả bốn đều không BOM, LF). PowerShell 5.1 đọc một tệp
-#     không BOM theo ANSI, nên mọi dòng tiếng Việt trong script này sẽ thành rác. Thêm BOM thì
-#     phá quy ước của kho; nâng bản pwsh thì không.
+#   · Tệp này UTF-8 KHÔNG BOM, LF — theo nhóm `scripts/*.ps1` + `tl-setup.ps1` (5 tệp không BOM).
+#     Kho KHÔNG có một quy ước duy nhất: 5/10 tệp `.ps1` có sẵn (`docs/runbooks/**`) CÓ BOM (đo
+#     `git ls-tree` + 3 byte đầu). PowerShell 5.1 đọc tệp không BOM theo ANSI ⇒ tiếng Việt thành rác.
 #   · `$tt.Kill($true)` (giết cả cây tiến trình, dùng cho hạn giờ) chỉ có từ .NET Core 3.0.
 #   · `ci.yml` đã gọi `pwsh -NoProfile -File scripts/don-nhanh_test.ps1`, nên pwsh 7 vốn là
 #     giả định sẵn có của kho chứ không phải đòi hỏi mới.
@@ -25,9 +24,10 @@
       core.abbrev=7                      Ngưỡng L2 của `doc-claims-check` lấy độ dài SHA
                                          viết tắt từ git. Kho đủ lịch sử tự nới lên 8, mà
                                          8 đúng bằng độ dài tiền tố UUID notebook
-                                         (`743ed200`, `45739ff7`…) ⇒ 18 tiền tố bị hô
-                                         `SHA_NOT_A_COMMIT`. ĐÃ ĐO: abbrev 8 → rc=2;
-                                         abbrev 7 → rc=0, cùng một cây.
+                                         (`743ed200`, `45739ff7`…) ⇒ tiền tố bị hô
+                                         `SHA_NOT_A_COMMIT`. ĐÃ ĐO trên f2392df: abbrev 8 →
+                                         rc=2, 5 cờ L2; abbrev 7 → rc=0, cùng một cây.
+                                         (Số 18 trong `ci.yml` r226 là số LỊCH SỬ.)
       UTF-8 ở console                    Nhật ký từng ca in tiếng Việt. Code page 437/1252
                                          làm output thành rác và che mất tên ca đỏ.
 
@@ -46,7 +46,9 @@
     In toàn bộ output của mọi cổng. Mặc định chỉ in output của cổng ĐỎ.
 
 .PARAMETER HanGiay
-    Hạn giờ cho MỘT cổng, tính bằng giây. Mặc định 900. Quá hạn thì cổng bị giết và đếm
+    Hạn giờ cho MỘT cổng, tính bằng giây. Mặc định 3600 = `timeout-minutes: 60` của job CI
+    (`test registry` đo trên CI Windows ≈ 41 % × 43,2 phút ≈ 1060 s — VƯỢT 900 cũ, nên với hạn cũ
+    mức mặc định KHÔNG BAO GIỜ ra ĐẠT được). Quá hạn thì cổng bị giết và đếm
     là **TREO** — tức `KHÔNG ĐO ĐƯỢC`, KHÔNG phải `ĐẠT`. Có tham số này vì `don-nhanh_test.ps1`
     dựng kho git thật cho từng ca và đã ĐO ĐƯỢC một lần treo quá 10 phút; một bộ chạy cục bộ
     không được phép treo vô hạn rồi bắt người ngồi đoán.
@@ -55,9 +57,13 @@
     Bản ghim của `actionlint`. Mặc định `1.7.7` — đúng bản mà `ci.yml` ghim.
 
 .EXAMPLE
-    .\chay-cong-windows.ps1 -CaiCongCu
+    pwsh -NoProfile -File .\.claude\dev\chay-cong-windows.ps1 -CaiCongCu
 .EXAMPLE
-    .\chay-cong-windows.ps1 -Muc day-du -ChiTiet
+    pwsh -NoProfile -File .\.claude\dev\chay-cong-windows.ps1 -Muc day-du -ChiTiet
+.NOTES
+    Gọi bằng `pwsh -File` (tiến trình RIÊNG). Script đổi cwd, PATH, PYTHON*, AL_* và
+    [Console]::OutputEncoding của tiến trình đang chạy nó; gọi thẳng `.\chay-cong-windows.ps1`
+    trong một phiên pwsh thì mọi thay đổi ấy Ở LẠI phiên sau khi script kết thúc.
 #>
 [CmdletBinding()]
 param(
@@ -66,7 +72,8 @@ param(
     [string]$Muc = 'nhanh',
     [switch]$CaiCongCu,
     [switch]$ChiTiet,
-    [int]$HanGiay = 900,
+    [ValidateRange(1, 86400)]
+    [int]$HanGiay = 3600,
     [string]$AlVer = '1.7.7'
 )
 
@@ -94,19 +101,31 @@ if (-not $Goc) {
     $Goc = if ($PSScriptRoot) { $PSScriptRoot } else { (Get-Location).Path }
 }
 $Goc = (Resolve-Path -LiteralPath $Goc).Path
-while ($Goc -and -not (Test-Path (Join-Path $Goc (Join-Path 'ops' 'lease_publish_test.py')))) {
+while ($Goc -and -not (Test-Path -LiteralPath (Join-Path $Goc (Join-Path 'ops' 'lease_publish_test.py')))) {
     $cha = Split-Path -Parent $Goc
     if ($cha -eq $Goc -or -not $cha) { break }
     $Goc = $cha
 }
-if (-not (Test-Path (Join-Path $Goc (Join-Path 'ops' 'lease_publish_test.py')))) {
+# `-LiteralPath`: đường dẫn là DỮ LIỆU — kho nằm dưới `…\[x]\…` thì `-Path` coi `[x]` là lớp ký tự
+# và không bao giờ thấy gốc (đo: rc=2 kể cả khi truyền `-Goc` đúng).
+if (-not (Test-Path -LiteralPath (Join-Path $Goc (Join-Path 'ops' 'lease_publish_test.py')))) {
     Loi "không tìm thấy gốc kho tra-luat (thiếu ops\lease_publish_test.py). Dùng -Goc <đường dẫn>."
+    exit 2
+}
+# Start-Process diễn giải `-WorkingDirectory` và `-RedirectStandard*` như MẪU (đo: gốc chứa `[1]` ⇒
+# "Unable to find the specified file" cho MỌI cổng; `[WildcardPattern]::Escape` cứu được thư mục làm việc
+# nhưng KHÔNG cứu được tệp chuyển hướng). Nói đúng nguyên nhân thay vì để mọi cổng KHÔNG KHỞI ĐỘNG ĐƯỢC.
+if ([WildcardPattern]::ContainsWildcardCharacters($Goc)) {
+    Loi "gốc kho '$Goc' chứa ký tự wildcard ([ ] * ?) — Start-Process coi đường dẫn là MẪU nên không cổng nào chạy được. Dời kho sang đường dẫn không có các ký tự ấy."
     exit 2
 }
 Set-Location -LiteralPath $Goc
 Noi "gốc kho: $Goc"
 
-$NhatKy = Join-Path $Goc '.cong-windows'
+# Nhật ký KHÔNG được nằm trong cây đang đo: `.cong-windows/` ở gốc làm `release-verify --strict`
+# hô `extra_files` (đo: 12 tệp sau mức `nhanh`) và `release-bundle` đóng chúng vào zip. `dist/`
+# vừa nằm trong `_RELEASE_EXCLUDE_DIRS` vừa bị `.gitignore` — cùng chỗ bước bundle x2 ghi zip.
+$NhatKy = Join-Path $Goc (Join-Path 'dist' 'cong-windows')
 New-Item -ItemType Directory -Force -Path $NhatKy | Out-Null
 
 # ───────────────────────────── tìm python ─────────────────────────────
@@ -122,8 +141,10 @@ function Tim-Python {
     foreach ($u in $ungVien) {
         if (Get-Command $u.Ten -ErrorAction SilentlyContinue) {
             $d = $u.Dau
-            & $u.Ten @d -c "import sys" *> $null
-            if ($LASTEXITCODE -eq 0) { return $u }
+            # CHỨNG MINH là Python bằng ĐẦU RA, không bằng rc: một shim thoát 0 cho mọi lời gọi
+            # qua được `-c "import sys"` rồi làm MỌI cổng Python "ĐẠT" mà không chạy gì (đã đo).
+            $ra = @(& $u.Ten @d -c "import sys; print('TLPY=%d.%d.%d' % sys.version_info[:3])" 2>$null)
+            if ($LASTEXITCODE -eq 0 -and @($ra -match '^TLPY=3\.\d+\.\d+$').Count -gt 0) { return $u }
         }
     }
     return $null
@@ -134,25 +155,23 @@ if (-not $py) { Loi 'không tìm thấy Python (py / python / python3).'; exit 3
 $PyTen = $py.Ten; $PyDau = $py.Dau
 $ban = (& $PyTen @PyDau -c "import sys; print('%d.%d.%d' % sys.version_info[:3])")
 Noi "python : $PyTen $($PyDau -join ' ') → $ban"
-if ($ban -notlike '3.12.*') {
+if ([string]$ban -notlike '3.12.*') {   # ép [string]: đầu ra RỖNG làm `-notlike` trả mảng rỗng ⇒ im lặng
     Canh "CI ghim Python 3.12, máy này $ban. Khác bản thì một cổng đỏ CHƯA chắc là lỗi mã."
 }
 
-# ───────────────────────────── tìm bash (Git for Windows) ─────────────────────────────
+# ───────────────────────────── tìm bash — QUA bộ giải dùng chung ─────────────────────────────
+# KHÔNG giải theo TÊN: `bash.exe` đầu PATH trên Windows thường là `C:\Windows\System32\bash.exe`
+# (bộ phóng WSL — nuốt argv, chạy NỀN KHÁC). `ops/bash_nen.py` quyết bằng NĂNG LỰC (Issue #570)
+# và là chỗ DUY NHẤT được giải bash; rc=3 ⇒ KHÔNG ĐO ĐƯỢC, không đoán.
 function Tim-Bash {
-    foreach ($n in 'bash.exe', 'bash') {
-        $c = Get-Command $n -ErrorAction SilentlyContinue
-        if ($c) { return $c.Source }
-    }
-    foreach ($d in @("$env:ProgramFiles\Git\bin\bash.exe",
-                     "${env:ProgramFiles(x86)}\Git\bin\bash.exe",
-                     "$env:LOCALAPPDATA\Programs\Git\bin\bash.exe")) {
-        if (Test-Path $d) { return $d }
-    }
+    $ra = @(& $PyTen @PyDau 'ops/bash_nen.py' 'tim' 2>$null)
+    if ($LASTEXITCODE -ne 0 -or $ra.Count -eq 0) { return $null }
+    $d = ([string]$ra[-1]).Trim()
+    if ($d -and (Test-Path -LiteralPath $d -PathType Leaf)) { return $d }
     return $null
 }
 $Bash = Tim-Bash
-if ($Bash) { Noi "bash   : $Bash" } else { Canh 'không có bash.exe — các cổng chạy qua Git Bash sẽ bị BỎ QUA (đếm là KHÔNG ĐO ĐƯỢC, không phải ĐẠT).' }
+if ($Bash) { Noi "bash   : $Bash" } else { Canh 'ops/bash_nen.py không tìm được bash LÀM ĐƯỢC VIỆC — các cổng chạy qua bash sẽ bị BỎ QUA (đếm là KHÔNG ĐO ĐƯỢC, không phải ĐẠT).' }
 
 $Pwsh = (Get-Command pwsh -ErrorAction SilentlyContinue)
 if (-not $Pwsh) { Canh 'không có pwsh 7 — `don-nhanh_test.ps1` sẽ chạy bằng PowerShell hiện hành.' }
@@ -164,13 +183,20 @@ foreach ($k in 'core.autocrlf', 'core.eol', 'core.abbrev') {
     $v = (& git config --local --get $k 2>$null)
     $cu[$k] = if ($LASTEXITCODE -eq 0) { $v } else { '(chưa đặt)' }
 }
-& git config --local core.autocrlf false
-& git config --local core.eol lf
-& git config --local core.abbrev 7
-Noi ("  core.autocrlf {0} → false" -f $cu['core.autocrlf'])
-Noi ("  core.eol      {0} → lf"    -f $cu['core.eol'])
-Noi ("  core.abbrev   {0} → 7"     -f $cu['core.abbrev'])
-Noi '  (chỉ đổi --local; khôi phục bằng: git config --local --unset <khoá>)'
+$muon = [ordered]@{ 'core.autocrlf' = 'false'; 'core.eol' = 'lf'; 'core.abbrev' = '7' }
+$nepHong = @()
+foreach ($k in $muon.Keys) {
+    & git config --local $k $muon[$k]
+    # ĐỌC LẠI, đừng tin lời gọi ghi: `.git/config.lock` còn sót ⇒ ghi trượt mà ta vẫn in "→ 7".
+    $that = (& git config --local --get $k 2>$null)
+    if ($that -ne $muon[$k]) { $nepHong += $k }
+    Noi ("  {0,-13} {1} → {2}{3}" -f $k, $cu[$k], $that, $(if ($that -ne $muon[$k]) { '   (KHÔNG ĐẶT ĐƯỢC)' } else { '' }))
+}
+Noi '  (chỉ đổi --local; khôi phục: `git config --local <khoá> <giá trị cũ in bên trái>`, hoặc `--unset` nếu cũ là "(chưa đặt)")'
+if ($nepHong.Count -gt 0) {
+    Loi ("không đặt được nếp: {0}. Đo trong môi trường sai thì kết quả KHÔNG ĐO ĐƯỢC." -f ($nepHong -join ', '))
+    exit 4
+}
 
 # CRLF đã nằm trong CÂY LÀM VIỆC thì đổi config KHÔNG cứu được — phải normalize lại.
 $eol = (& git ls-files --eol -- 'ops/*.py' 'scripts/*.py' 2>$null)
@@ -210,7 +236,11 @@ if ($CaiCongCu) {
         Canh 'không có bash — bỏ qua actionlint/shellcheck/rg.'
     }
 }
-if (Test-Path $AlDich) { $env:PATH = "$AlDich;$env:PATH" }
+# Dấu phân cách của NỀN (không ghim `;`), và không chèn lặp khi PATH đã có sẵn thư mục ấy.
+$SepPath = [IO.Path]::PathSeparator
+if ((Test-Path -LiteralPath $AlDich) -and (($env:PATH -split [regex]::Escape($SepPath)) -notcontains $AlDich)) {
+    $env:PATH = "$AlDich$SepPath$env:PATH"
+}
 $env:AL_VER  = $AlVer
 $env:AL_DICH = $AlDich
 
@@ -251,13 +281,23 @@ function Chay-Cong {
     if ($DoiSo -and $DoiSo.Count -gt 0) { $thamSo['ArgumentList'] = $DoiSo }
 
     $t0 = Get-Date
-    $tt = Start-Process @thamSo
+    try { $tt = Start-Process @thamSo -ErrorAction Stop }
+    catch {
+        # KHÔNG KHỞI ĐỘNG được ≠ TREO: không có gì chạy, không có gì để giết.
+        Write-Host ("  {0,-42} KHÔNG KHỞI ĐỘNG ĐƯỢC — {1}" -f $Ten, $_.Exception.Message) -ForegroundColor Yellow
+        [void]$KetQua.Add([pscustomobject]@{ Ten = $Ten; Rc = $null; TrangThai = 'KHÔNG ĐO ĐƯỢC'; NhatKy = '' })
+        return
+    }
     $xong = $tt.WaitForExit($Han * 1000)
     $giay = [math]::Round(((Get-Date) - $t0).TotalSeconds, 1)
 
     if (-not $xong) {
         try { $tt.Kill($true) } catch { try { $tt.Kill() } catch { } }
-        Write-Host ("  {0,-42} TREO  > {1}s — ĐÃ GIẾT" -f $Ten, $Han) -ForegroundColor Yellow
+        # "Đã gọi lệnh giết" ≠ "đã chết" (CLAUDE.md, tách 124/125): KIỂM LẠI.
+        $chet = $false
+        try { $chet = $tt.WaitForExit(10000) -and $tt.HasExited } catch { $chet = $false }
+        $nhanGiet = if ($chet) { 'ĐÃ GIẾT' } else { 'GIẾT KHÔNG ĐƯỢC — tiến trình CÒN SỐNG, cổng sau có thể bị nhiễu' }
+        Write-Host ("  {0,-42} TREO  > {1}s — {2}" -f $Ten, $Han, $nhanGiet) -ForegroundColor Yellow
         [void]$KetQua.Add([pscustomobject]@{ Ten = $Ten; Rc = $null; TrangThai = 'KHÔNG ĐO ĐƯỢC'; NhatKy = $fOut })
         return
     }
@@ -269,7 +309,7 @@ function Chay-Cong {
     Write-Host ("  {0,-42} rc={1,-4} {2,7}s  {3}" -f $Ten, $rc, $giay, $tt2) -ForegroundColor $mau
     if ($ChiTiet -or $rc -ne 0) {
         foreach ($f in @($fOut, $fErr)) {
-            if ((Test-Path $f) -and (Get-Item $f).Length -gt 0) {
+            if ((Test-Path -LiteralPath $f) -and (Get-Item -LiteralPath $f).Length -gt 0) {
                 Get-Content -LiteralPath $f -Tail $(if ($ChiTiet) { 10000 } else { 40 }) |
                     ForEach-Object { Noi "      | $_" }
             }
@@ -294,9 +334,16 @@ Chay-Bash 'lease-publish selftest'  @('ops/chay_lease_publish_test.sh')
 Chay-Py   'packet-loop selftest'    @('.claude/dev/packet_loop_test.py')
 Chay-Py   'registry test'           @('.claude/dev/ci_dang_ky_test.py', '--chay')
 
-$psExe = if ($Pwsh) { $Pwsh.Source } else { (Get-Process -Id $PID).Path }
-Chay-Cong -Ten 'don-nhanh selftest (ps1)' -Tep $psExe -Han ([math]::Min($HanGiay, 600)) `
-          -DoiSo @('-NoProfile', '-File', 'scripts/don-nhanh_test.ps1')
+# GƯƠNG CẢ `if:` của CI, không chỉ lệnh: `ci.yml` chạy bước này với `if: runner.os != 'Windows'`
+# (NỢ CÓ TÊN `don-nhanh-test-chua-chay-duoc-tren-windows`, ops/NO_KY_THUAT.md §10 — bộ test ghim
+# PATH POSIX + `gh` giả `#!/bin/sh`). Chạy nó trên Windows là ĐỎ vì NỢ, không vì mã.
+if ($IsWindows) {
+    Noi '  KHÔNG CHẠY trên Windows (ci.yml cũng không): "don-nhanh selftest" — nợ don-nhanh-test-chua-chay-duoc-tren-windows.'
+} else {
+    $psExe = if ($Pwsh) { $Pwsh.Source } else { (Get-Process -Id $PID).Path }
+    Chay-Cong -Ten 'don-nhanh selftest (ps1)' -Tep $psExe -Han ([math]::Min($HanGiay, 600)) `
+              -DoiSo @('-NoProfile', '-File', 'scripts/don-nhanh_test.ps1')
+}
 
 if ($Muc -eq 'day-du') {
     Tieu 'cổng — phần còn lại của job gate'
@@ -324,7 +371,9 @@ if ($Muc -eq 'day-du') {
     Chay-Py 'doc-claims-check strict'   @('scripts/tl.py', 'doc-claims-check', '--strict', '--json')
     Chay-Py 'determinism-audit strict'  @('scripts/tl.py', 'determinism-audit', '--strict', '--json')
     Chay-Py 'ci-phamvi guard'           @('.github/checks/ci_phamvi.py', '--kiem-bam')
-    Chay-Py 'ci-phamvi selftest'        @('.github/checks/ci_phamvi_test.py')
+    # `ci.yml`: `if: runner.os != 'Windows'` — nợ `ci-phamvi-test-chua-chay-duoc-tren-windows` (§20).
+    if ($IsWindows) { Noi '  KHÔNG CHẠY trên Windows (ci.yml cũng không): "ci-phamvi selftest".' }
+    else { Chay-Py 'ci-phamvi selftest' @('.github/checks/ci_phamvi_test.py') }
     Chay-Py 'release-check full'        @('scripts/tl.py', 'release-check', '--full', '--json')
     Chay-Py 'release-verify strict'     @('scripts/tl.py', 'release-verify', 'RELEASE_MANIFEST.json', '--strict', '--json')
     Chay-Py 'tl_boot smoke'             @('scripts/tl_boot.py', '--version')
@@ -332,17 +381,26 @@ if ($Muc -eq 'day-du') {
     # release-bundle x2 phải cho CÙNG sha256 — đo tất định, không phải đo "chạy được".
     Tieu 'release-bundle x2 cùng SHA-256'
     New-Item -ItemType Directory -Force -Path (Join-Path $Goc 'dist') | Out-Null
-    $bamOk = $true
+    # MẶC ĐỊNH ĐỎ. Chỉ một phép băm ĐÃ CHẠY XONG mới được lật sang ĐẠT: một câu lệnh ném (tệp thiếu
+    # ⇒ `$null.Hash` ⇒ `$ha` chưa gán) phải để lại ĐỎ, không để lại giá trị khởi tạo.
+    $bamOk = $false
+    $za = Join-Path $Goc (Join-Path 'dist' 'a.zip')
+    $zb = Join-Path $Goc (Join-Path 'dist' 'b.zip')
+    # Zip của LƯỢT TRƯỚC còn nằm đó thì "băm khớp" là đo lượt trước — xoá trước khi build.
+    Remove-Item -LiteralPath $za, $zb -Force -ErrorAction SilentlyContinue
+    $rcBundle = 0
     foreach ($f in 'a', 'b') {
         & $PyTen @PyDau 'scripts/tl.py' 'release-bundle' '--out' "dist/$f.zip" '--json' *> (Join-Path $NhatKy "bundle-$f.log")
-        if ($LASTEXITCODE -ne 0) { $bamOk = $false }
+        if ($LASTEXITCODE -ne 0) { $rcBundle = $LASTEXITCODE }
     }
-    if ($bamOk) {
-        $ha = (Get-FileHash -Algorithm SHA256 (Join-Path $Goc (Join-Path 'dist' 'a.zip'))).Hash
-        $hb = (Get-FileHash -Algorithm SHA256 (Join-Path $Goc (Join-Path 'dist' 'b.zip'))).Hash
-        $bamOk = ($ha -eq $hb)
-        Noi "      a=$ha"
-        Noi "      b=$hb"
+    if ($rcBundle -eq 0) {
+        try {
+            $ha = (Get-FileHash -Algorithm SHA256 -LiteralPath $za -ErrorAction Stop).Hash
+            $hb = (Get-FileHash -Algorithm SHA256 -LiteralPath $zb -ErrorAction Stop).Hash
+            $bamOk = [bool]$ha -and ($ha -eq $hb)
+            Noi "      a=$ha"
+            Noi "      b=$hb"
+        } catch { Canh "release-bundle trả rc=0 mà không băm được zip: $($_.Exception.Message)" }
     }
     $rcB = if ($bamOk) { 0 } else { 1 }
     Write-Host ("  {0,-42} rc={1,-4} {2}" -f 'release-bundle tất định', $rcB, $(if ($bamOk) { 'ĐẠT' } else { 'ĐỎ' })) `
@@ -351,8 +409,9 @@ if ($Muc -eq 'day-du') {
 
     Noi ''
     Noi 'KHÔNG CHẠY (chỉ có trên Linux runner): "bo ca gate chay TRONG cgroup duoc uy quyen".'
-    Noi 'KHÔNG CHẠY (đòi ngữ cảnh pull_request): "PR head contains required EOL base",'
-    Noi '            "tl selftest (co bang chung exact-identity)", "release-verify lane WORKER".'
+    Noi 'KHÔNG CHẠY (đòi event pull_request): "PR head contains required EOL base".'
+    Noi 'KHÔNG CHẠY (đòi event KHÁC pull_request + gate_lifecycle evidence): "tl selftest (co bang chung exact-identity)".'
+    Noi 'KHÔNG CHẠY (đòi ref KHÁC master): "release-verify lane WORKER" — script chạy lane LAND thay vào.'
 }
 
 # ───────────────────────────── tổng kết ─────────────────────────────

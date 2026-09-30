@@ -604,10 +604,12 @@ mà lệnh cũng bỏ.
 Lệnh còn so KHỚP ĐÚNG chuỗi (`_lease_cham_duong`: `strip()` rồi bỏ `planned:`, CHỈ ở phía lease), còn write
 set là đường dẫn HOẶC prefix thư mục `…/` (protocol §5): hỏi `ops/reviews/x/a.md` KHÔNG thấy lease giữ
 `ops/reviews/x/`, hỏi `planned:a.md` KHÔNG thấy lease giữ `a.md` — `CACHE_TUOI` rồi `rc=0 NGƯỜI_GIỮ 0`. Bước 2
-bỏ `planned:`, hỏi cả mọi thư mục cha `…/`, và KHÔNG hỏi dạng mà khớp đúng chuỗi không trả lời được: prefix
-`…/` (lease giữ tệp BÊN DƯỚI nó không hiện), `./` `//` `..` `\` hay `-…`. Còn lại vẫn `rc=0` dù có người
-giữ: khác hoa/thường hay dạng Unicode (§5 case-fold và chuẩn hoá NFC, lệnh thì không), và `\r`/NBSP ở hai đầu
-(`read` chỉ bỏ dấu cách/tab, `strip()` bỏ cả chúng).
+bỏ `planned:`, hỏi đường ấy kèm `/` (tên thư mục gõ thiếu `/`), chính nó rồi mọi thư mục cha `…/`, và KHÔNG hỏi dạng
+mà khớp đúng chuỗi không trả lời được: prefix `…/` hay thư mục CÓ trong checkout mà thiếu `/` cuối (lease giữ tệp
+BÊN DƯỚI nó không hiện), `./` `//` `..` `\` `C:/…` hay `-…`. Còn lại vẫn `rc=0` dù có người giữ: thư mục CHƯA
+có trong checkout, gõ thiếu `/`, mà lease giữ tệp bên dưới nó; khác hoa/thường hay dạng Unicode (§5 case-fold và
+chuẩn hoá NFC, lệnh thì không); và ký tự trắng khác ở hai đầu — `\r`, NBSP, U+3000…: 26 ký tự `str.isspace()`
+ngoài dấu cách, tab, xuống dòng (`read` chỉ bỏ dấu cách/tab, `strip()` bỏ cả chúng).
 
 Thông điệp lỗi nêu **nhánh và upstream thật**, không nhất thiết là `origin/<cùng tên>` — từ git 2.36:
 trước đó (`worktree list -z` chưa có) nhánh TỤT_SAU dừng ở `KHÔNG_XÁC_ĐỊNH: git worktree list --porcelain -z
@@ -646,20 +648,22 @@ else echo "KHONG_DO_DUOC: ls-remote hong hoac rong"; fi
 #    Đường dẫn được chứa $ ? * [ ` ; và dấu cách: để trần thì $/glob hỏi sang đường KHÁC (rc=0 dù đường thật đang bị
 #    giữ), ; và dấu cách tách lệnh. Điền NGUYÊN VĂN vào heredoc nháy đơn; rỗng hay còn dạng <…> (quên điền) ⇒ không hỏi.
 #    `read` KHÔNG kèm `IFS=`: bỏ khoảng trắng đầu/cuối như `ai-dang-giu` strip() mục write_set (giữ lại ⇒ rc=0 giả).
-#    Lệnh khớp ĐÚNG chuỗi, write set là path/prefix: bỏ `planned:` như phía lease, hỏi cả mọi thư mục cha `…/`
-#    (dừng ở rc khác 0 đầu tiên); prefix `…/` hay dạng không chuẩn thì khớp đúng chuỗi không trả lời được ⇒ không hỏi.
+#    Lệnh khớp ĐÚNG chuỗi, write set là path/prefix: bỏ `planned:` như phía lease, hỏi `$D/` (tên thư mục gõ
+#    thiếu `/`), chính nó rồi mọi thư mục cha `…/` (dừng ở rc khác 0 đầu tiên); prefix `…/`, thư mục CÓ trong
+#    checkout hay dạng không chuẩn thì khớp đúng chuỗi không trả lời được ⇒ không hỏi.
 read -r D <<'TEN:'
 <duong>
 TEN:
 D="${D#planned:}"
 if RP="$(git -C "$SOURCE" for-each-ref refs/replace/)" && [ -z "$RP" ] && [ -n "${D##<*>}" ]; then
   case "$D" in
-    -*|/*|./*|../*|.|..|*/|*//*|*/./*|*/../*|*/.|*/..|*\\*) echo "KHONG_DO_DUOC: prefix …/ hoac duong dan khong chuan" ;;
-    *) M=0; P="$D"
+    -*|/*|[A-Za-z]:/*|./*|../*|.|..|*/|*//*|*/./*|*/../*|*/.|*/..|*\\*) echo "KHONG_DO_DUOC: prefix …/ hoac duong dan khong chuan" ;;
+    *) if [ -d "$SOURCE/$D" ]; then echo "KHONG_DO_DUOC: thu muc co trong checkout ma thieu / cuoi, tuc prefix …/"; else
+       M=0; P="$D/"
        while :; do
          GIT_NO_REPLACE_OBJECTS=1 GIT_GRAFT_FILE=/dev/null/grafts "$PY" "$SOURCE/ops/lease_publish.py" ai-dang-giu "$P" --root "$SOURCE" || { M=$?; break; }
-         case "$P" in */*/) P="${P%/*/}/" ;; */?*) P="${P%/*}/" ;; *) break ;; esac
-       done; echo "rc=$M" ;;
+         case "$P" in "$D/") P="$D" ;; */*/) P="${P%/*/}/" ;; */?*) P="${P%/*}/" ;; *) break ;; esac
+       done; echo "rc=$M"; fi ;;
   esac
 else echo "KHONG_DO_DUOC: refs/replace khong rong hoac khong doc duoc, hoac duong dan rong/chua dien"; fi
 ```

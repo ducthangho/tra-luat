@@ -4,8 +4,8 @@
 #
 # PHAM VI: PR #679 CHI mang DAC TA (ops/specs/lease-id-ep-kieu-yaml-r1..r6.md). Packet wp678 CHUA THI HANH:
 # chua co lease, chua co ma. "landed" o tep nay la landed cua PR dac ta, KHONG phai packet da xong.
-# TRANG THAI HIEN TAI: merged (c57df32), `landed: false` — xem trang_thai_packet. "merged" KHONG dong nghia "landed"
-# (PROTOCOL §10); moi cho trong ho so nay noi toi PR #679 chi khai merged.
+# TRANG THAI: merged (c57df32); `landed: true` CO HIEU LUC tu merge commit cua PR bookkeeping #691 (tep nay chi co tren
+# master sau thoi diem ay) — xem trang_thai_packet. "merged" KHONG dong nghia "landed" (PROTOCOL §10).
 
 schema_version: 1
 mission_id: gh-682
@@ -58,23 +58,31 @@ mat_quan_sat_duoc_the_nao: >-
   Loi khai co neo (session URL), khong phai phep do doc lap — mot phien Claude khong tu chung minh be mat chay cua chinh no.
 trang_thai_packet:
   merged: true
-  landed: false
+  landed: true
+  landed_hieu_luc_tu: 'merge commit cua PR bookkeeping #691 mang tep nay vao master (tep chi co tren master sau thoi diem ay).'
   landed_ghi_chu: >-
     PROTOCOL §10: `landed` = da vao canonical o exact SHA duoc duyet, HAU-MERGE GATE XANH va BOOKKEEPING XONG.
     (1) merge dung head duoc uy quyen 03a7219 tai c57df32, cha thu hai = 03a7219 — CO (do bang git show).
     (2) hau-merge gate: run 36564795511 attempt 1 (push, c57df32) conclusion success, 5/5 job success; ba required
     context cua master (gate, gate-packet-loop, gate-ops ubuntu-latest) deu success. Moc Run, Checkout DO DUOC. Moc
-    Gate output DO DUOC voi gioi han: runner/OS/python/command/marker cua ca bon job; rc SO cua tien trinh chi do
-    duoc o job gate (artifact returncode 0) — ba job gate-packet-loop/gate-ops/gate-registry rc not_measured, chi co
-    step_conclusion success (xem gate_output_nguon_va_gioi_han). Moc Workflow definition: BYTES + SHA-256 do bang
-    NGUON THAY THE (GraphQL 403), commit nguon CHINH XAC not_measured — xem post_merge_checks. CHUA dong: can chu kho
-    chap nhan nguon thay the (tien le pr666) hoac waiver owner_waived (tien le pr680); agent KHONG tu dong moc nay.
-    (3) bookkeeping: tep nay + 6 verdict nguyen byte + 6 bien nhan v2 + 6 hang README — PR bookkeeping #691 chua merge.
-    Con thieu BON thu truoc khi `landed: true`: (a) quyet dinh chu kho cho moc Workflow definition; (b) merge #691;
-    (c) rc so cua hai required context gate-packet-loop va gate-ops (not_measured — chi co step_conclusion) hoac quyet
-    dinh chu kho chap nhan step_conclusion thay rc; (d) moc thoi gian BEN cua chi thi uy quyen DI TRUOC merge 11:55:40Z
-    (xem authorization.thu_tu_voi_merge). Nang len `true` bang commit rieng CHI khi co (a), (c), (d); hieu luc tu merge #691. Truoc do moi noi khai "land" cho PR #679
-    (muc luc ops/reviews/README.md, tom tat, comment) phai doc la MERGED, khong phai landed.
+    Gate output: runner/OS/python/command/marker cua ca bon job DO DUOC; rc SO chi do duoc o job gate (artifact
+    returncode 0); gate-packet-loop/gate-ops/gate-registry chi co step_conclusion success — chu kho CHAP NHAN
+    step_conclusion thay rc cho hai required context (quyet_dinh_chu_kho). Moc Workflow definition: BYTES + SHA-256 do
+    bang NGUON THAY THE (GraphQL 403), commit nguon CHINH XAC van not_measured — chu kho CHAP NHAN nguon thay the (tien
+    le pr666). Hai moc nay DONG THEO QUYET DINH CHU KHO, KHONG phai do du.
+    (3) bookkeeping: tep nay + 6 verdict nguyen byte + 6 bien nhan v2 + 6 hang README; muc cuoi la merge PR #691.
+    (4) thu tu uy quyen: chi thi 11:54:52Z -> comment 11:55:17Z -> merge 11:55:40Z (authorization.thu_tu_voi_merge).
+  lich_su_landed: >-
+    79d9840..d1661f7 ghi `landed: false` (dung o thoi diem ay: thieu quyet dinh chu kho cho hai moc va do thu tu uy
+    quyen). Len `true` CHI nho quyet_dinh_chu_kho duoi day, khong vi hai moc da duoc do.
+  quyet_dinh_chu_kho:
+    nguyen_van: '"#691: chap nhan nguon thay the, chap nhan step_conclusion. Chay them review opus 5.5, xhigh"'
+    luc: '2026-09-30T05:33:01Z (timestamp tin nhan trong transcript phien session_01CSM7GNazhN6uGJb4v1TqBT)'
+    neo_ben: https://github.com/ducthangho/tra-luat/pull/691#issuecomment-5904784660
+    neo_ben_ghi_chu: 'Comment do PHIEN AGENT dang ho chu kho bang credential chu kho, tu khai dieu do o dau comment.'
+    pham_vi: 'run 36564795511 attempt 1, push master, SHA c57df32f0fd8c992ed363d7000f4f761275750ea'
+    moc_workflow_definition: chap_nhan_nguon_thay_the
+    rc_gate_packet_loop_va_gate_ops: chap_nhan_step_conclusion
   packet_thi_hanh: 'CHUA — wp678 chua co lease; lease hen cap 2026-09-30T12:15Z (Q8, #682 comment 5888631719).'
 role: land_operator
 session_id: https://claude.ai/code/session_01CSM7GNazhN6uGJb4v1TqBT
@@ -204,7 +212,8 @@ post_merge_checks:
         gate-ops 8/8, gate-packet-loop 8/8, gate-registry 8/8; cac buoc con lai bi `if:` bo qua. Gioi han: chung minh
         than buoc da chay khop dinh nghia, KHONG chung minh bytes ngoai than buoc (trigger, comment) — phan ay dua vao
         blob giong het o moi ung vien.
-      disposition: CHO_CHU_KHO
+      disposition: chu_kho_chap_nhan_nguon_thay_the
+      disposition_neo: https://github.com/ducthangho/tra-luat/pull/691#issuecomment-5904784660
     gate_output_nguon_va_gioi_han: >-
       Runner = runner_name trong readback-jobs.json. OS = nhom "Operating System" o dau log dung job; image = nhom
       "Runner Image". Python = dong "Successfully set up CPython (...)" cua setup-python trong log dung job (buoc chua

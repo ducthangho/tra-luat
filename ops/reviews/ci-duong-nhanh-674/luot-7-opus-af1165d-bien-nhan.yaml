@@ -1,0 +1,17 @@
+schema_version: 1
+packet_issue: 674
+luot: 7
+reviewer_provider: anthropic_claude
+reviewer_model_yeu_cau: opus (subagent Claude Code; model thuc chay va effort KHONG DO DUOC)
+ly_do_khong_dung_codex: chu kho bao Codex het quota (chat truc tiep, 2026-09-30)
+do_doc_lap: YEU HON Codex — Claude review code do Claude viet; KHONG thay duoc luot Codex human_audited khi land
+reviewed_sha: af1165d04977f2e3de1fa0fdbaa9a1775dd9bd30
+ket_luan: changes_requested
+p0_p1_p2_p3: [0, 0, 1, 1]
+verdict_file: luot-7-opus-af1165d-verdict.md
+verdict_sha256: 5e9e5e8997352e07d545fa98cbd05d0a5c9f6efe412719feaf51338f7fa46218
+hint_file: luot-7-opus-af1165d-HINT.patch
+hint_sha256: e160320b41eba610d8aea80a636c7e6c131474f929d3181c200fd95852c2c804
+hint_git_apply_check: OK tren af1165d (do lai boi phien Sonnet)
+do_lai_suite_cua_hint: reviewer khai 69/69 ca, 160/160 dot bien; phien Sonnet CHUA chay lai
+luu_boi: session_01BxzKQaSmg6qVeSaQWH4dr5 (Sonnet 5.5), khong phai executor g3

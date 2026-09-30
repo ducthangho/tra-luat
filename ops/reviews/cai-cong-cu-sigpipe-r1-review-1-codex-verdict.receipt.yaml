@@ -1,0 +1,75 @@
+# BIEN NHAN — cross-review Codex luot 1/5 cua packet #675 (PR #681).
+schema_version: 2
+receipt_id: cai-cong-cu-sigpipe-r1-review-1-codex-20260929-1fcba72b
+kind: review_delivery_receipt
+packet_id: CAI-CONG-CU-SIGPIPE
+packet_issue: 675
+target_pull_request: 681
+lease_id: cai-cong-cu-sigpipe-r1-g1-claude
+luot: 1
+role: reviewer
+provider: codex
+executor_provider: claude
+cross_provider: true
+assurance: cross_reviewed
+verdict: changes_requested
+verdict_path: ops/reviews/cai-cong-cu-sigpipe-r1-review-1-codex-verdict.md
+verdict_sha256: c8e86ff1a7ec5ec366d9b5ef0ba7ab3e09e419cb624c817ce2eccbb4a5c47352
+verdict_bytes: 24278
+evidence_url: https://github.com/ducthangho/tra-luat/blob/ed0259819e8dcc00f89d4c6800d4795e7c17ff81/ops/reviews/cai-cong-cu-sigpipe-r1-review-1-codex-verdict.md
+evidence_url_ghi_chu: Neo BLOB ghim `ed02598` — commit DAU TIEN chua tep verdict (git log --diff-filter=A), tren
+  nhanh ops/cap-lease-cai-cong-cu-sigpipe; commit ay KHONG mang bien nhan nao.
+reviewed_sha: 41d03d8c0ab3374adef6e3d159ac568ae67bc429
+so_p1: 0
+so_p2: 2
+so_p3: 1
+so_p1_p2_p3_ghi_chu: 'Bang findings cua verdict: F1 P2, F3 P2, F2 P3 tren diff; them B1 P2 la loi CO SAN o nen (don_ref_chot_test.sh:327,333,
+  ngoai write set r1) — KHONG dem vao so_p2 cua diff.'
+model_reviewer_identity:
+  provider: openai_codex
+  surface: codex_cli
+  transport: machine
+  model_khai_boi_cong_cu: gpt-6-astra
+  reasoning_effort_khai_boi_cong_cu: xhigh
+  phien_ban_cong_cu: v0.158.0
+  codex_session_id: 01a0ec21-4fa0-7760-a073-e6c6e1a0bceb
+  approval_mode: never
+  sandbox: workspace-write [workdir, /tmp, $TMPDIR]
+  model_da_chay: KHONG_DO_DUOC
+  session_run_id: 1fcba72b
+  run_id_day_du: 1fcba72b661a4cd9a41ade9e43e18369
+  prompt_sha256: eea6d6b1d5af034f767fc2a99278fc01b5f0e4346db3727ca92e5226a0193aed
+  bat_dau_utc: '2026-09-29T07:46:40.764387+00:00'
+  ket_thuc_utc: '2026-09-29T07:59:17.594748+00:00'
+  thoi_luong_giay: 756.83
+  ma_thoat: 0
+  trang_thai: xong
+  stdout_byte: 296
+  stdout_sha256: 78635f4b9bd5bd21cb13bcfd14c6154dd1cc6e3af751ae36f4ae59bd4d97d51f
+  stderr_byte: 708062
+  stderr_sha256: 690a0ad5da3a09e223ffcd4dd31fda051d5c234d1c362217937fe84a4078dc97
+  nguon_cac_scalar_tren: 'HAI nguon: (a) run.json do launcher.py run ghi — ID/thoi diem/thoi luong/ma thoat/byte+hash
+    stdout,stderr; (b) HEADER PHIEN do codex in ra stderr.log — model/effort/phien ban/session id/approval/sandbox.
+    Ca hai NGOAI kho => voi nguoi doc kho day la ATTESTATION.'
+  neo_boi_launcher: launcher.py run --expected-repo ducthangho/tra-luat --expected-root-commit 394e93468fc8d84ec20938e6df8fb7ab72b2cc37
+    --expected-head 41d03d8c0ab3374adef6e3d159ac568ae67bc429 --require-clean --prompt-file PROMPT.md --expected-prompt-sha256
+    eea6d6b1d5af034f767fc2a99278fc01b5f0e4346db3727ca92e5226a0193aed boc `codex exec`.
+github_submitter_identity:
+  actor: ducthangho
+  la_tac_gia_PR: true
+  ghi_chu: 'Verdict do phien dieu phoi (token chu kho) dua vao kho bang git; ADR-0040: tai khoan tac gia PR van
+    chuyen verdict KHONG la merge authorization.'
+  phien_van_chuyen: https://claude.ai/code/session_01WktdUCQr2FQQ5j76LjrxgF
+anchor:
+  loai: canonical_ancestry
+  cuong_do: cao
+  mo_ta: Blob verdict ghim o `ed02598`, to tien cua HEAD nhanh bookkeeping (nhanh lease duoc MERGE nguyen, khong
+    squash).
+  gioi_han: Chi vung neu PR bookkeeping land bang MERGE hoac fast-forward; SQUASH pha quan he to tien.
+verdict_usage_caveats:
+- id: MODEL-KHAI-BOI-CONG-CU-khac-MODEL-DA-PHUC-VU
+  canh_bao: '`gpt-6-astra` / `xhigh` la thu codex TU KHAI o header phien (dong `model:`/`reasoning effort:` trong
+    stderr.log), KHONG phai bang chung model nao da phuc vu — `codex exec` khong phat modelUsage.'
+- id: HEAD-LUOT-1-KHONG-PHAI-HEAD-CUOI
+  canh_bao: Luot nay review `41d03d8`; head da duoc approve va human_audited la `41d52ae`. Dung doc finding o day
+    thanh trang thai cua head cuoi.

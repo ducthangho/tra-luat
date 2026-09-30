@@ -28,6 +28,13 @@ from pathlib import Path, PurePosixPath, PureWindowsPath
 
 os.environ.setdefault("PYTHONUTF8", "1")
 os.environ.setdefault("PYTHONIOENCODING", "utf-8")
+# CONG_CU_GIT la bien DIEU KHIEN cua CHINH ma duoc do: _git_windows (buoc 1) doc os.environ khi KHONG duoc truyen cong_cu_git,
+# ma rig doi chung + probe N9-N11 (muc 3, chay TRONG tien trinh nay) va cac ca N1-N3/N9-N11 cua bo test (qua chay(), von chi bo
+# GIT_*/PYTHON*) deu khong truyen. CI KHONG dat bien nay. Do tren 2026-09-30j, 0ea95de, CONG_CU_GIT tro mot git.exe hop le: bo
+# test 160/166, 6 ca PACKET DO (t165 t166 t167 t170 t171 t172) => "Khong ca nao cua PACKET bi DO" TRUOT "ban va CHUA xong", roi
+# RIG doi chung KDD "rig sai" rc=3 sau ca bo test (chi rig VO TINH chan phan quyet sai); --tu-kiem-probe: N9 TRUOT, N10/N11 KDD.
+# Bo o GOC — tien trinh nay va moi tien trinh con cung thay nhu CI — va GHI LAI gia tri de muc 0 tu khai.
+_CONG_CU_GIT_NGUOI_DO = os.environ.pop("CONG_CU_GIT", None)
 for _l in (sys.stdout, sys.stderr):
     try: _l.reconfigure(encoding="utf-8", errors="replace")
     except Exception: pass
@@ -72,7 +79,7 @@ SHA_G1   = "2f70869a0537843e9cae78618ee7ae8c261d972d"
 # do that 18-09 tren ban va g2 cua agy cho 5 tep / +812, trong khi viec cua agy la 2 tep / +353.
 # Mot chot nhu the se bao "vuot tran" cho mot ban va KHONG vuot. Base dung la MERGE-BASE.
 SHA_BASE_SPEC = "d705623162b75b7340ee7cca54ac2d2abbddbb6f"
-BAN_BO_DO = "2026-09-30j"              # doi MOI khi sua bo do - log tu khai ban nao
+BAN_BO_DO = "2026-09-30k"              # doi MOI khi sua bo do - log tu khai ban nao
 TRAN_TEP, TRAN_DONG = 2, 400          # N7' cua spec r3
 MAU_WIN  = 'if nen_thuc == "windows":'
 # Write set cua packet #541 g2. Diff khong cham tep nao o day => do NHAM NHANH.
@@ -418,7 +425,9 @@ inn(f"  BO DO        : sha256 {_tu[:16]}  (ban {BAN_BO_DO})")
 inn("  sys.platform :", sys.platform, "| python", sys.version.split()[0])
 inn("  os.pathsep   :", repr(os.pathsep), "| PATHEXT:", repr(os.environ.get("PATHEXT"))[:60])
 inn("  ProgramFiles :", repr(os.environ.get("ProgramFiles")), "| SystemRoot:", repr(os.environ.get("SystemRoot")))
-inn("  CONG_CU_GIT  :", repr(os.environ.get("CONG_CU_GIT")))
+inn("  CONG_CU_GIT  :", repr(_CONG_CU_GIT_NGUOI_DO)
+    + ("  -> DA BO khoi luot do (CI khong dat bien nay; xem dau tep)" if _CONG_CU_GIT_NGUOI_DO is not None else ""))
+ghi("cong_cu_git_nguoi_do", _CONG_CU_GIT_NGUOI_DO)
 inn("  goc kho      :", goc)
 
 quyen = None
@@ -481,6 +490,14 @@ if not ("--chi-kich-thuoc" in sys.argv or "--chi-probe" in sys.argv):
     elif subprocess.run([shutil.which("shellcheck"), "--norc", "--version"], capture_output=True, timeout=60,
                         env=dict(os.environ, SHELLCHECK_OPTS="--norc")).returncode:
         loi.append("shellcheck tren PATH khong nhan --norc (actionlint 1.7.7 va chay() deu truyen co ay): cap nhat shellcheck")
+    # actionlint cung phai DUNG DUOC, khong chi CO MAT: t33/t137/t159 goi no THANG, va mot actionlint khong chay (sai kien truc,
+    # hong) lam ca ba DO "actionlint DO (rc=...)" — ca "la" => TRUOT gia sau ca bo test (do tren 2026-09-30j: actionlint gia
+    # rc=1 => muc 0 im lang, t33 "la"). Ban THAT 1.6.27/1.7.7/1.7.8/1.7.12 deu rc=0 va deu cho t33/t137/t159 QUA tren 0ea95de.
+    # bash CHI hoi CO MAT, co chu dich: bash WSL (System32) lam t35-t40 DO nhung ca sau deu NGOAI_PHAM_VI, con t32/t152 tu chon
+    # Git Bash (_bash_posix cua ung vien) — do tren 2026-09-30j: bash kieu WSL => t35-t40 DO, deu roi vao ngoai pham vi.
+    if not _thieu_cc and subprocess.run([shutil.which("actionlint"), "-version"], capture_output=True,
+                                        timeout=60).returncode:
+        loi.append("actionlint tren PATH co mat nhung `actionlint -version` rc!=0 (khong chay duoc): cai lai ban ghim AL_VER")
 
 rc, head, _ = git(goc, "rev-parse", "HEAD")
 if rc: loi.append("khong doc duoc HEAD")

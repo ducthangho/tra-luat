@@ -19,7 +19,13 @@ Chỉ MỘT giá trị (`duong_nhanh`) mở đường bỏ bước; mọi giá t
 `ci.yml` (`!= 'duong_nhanh'`). Diff rỗng ⇒ `duong_nhanh` (Q3 chủ kho), có dòng log riêng để phân biệt.
 
 Diff là `base...head` (BA chấm = từ merge-base tới head), KHÔNG phải `base..head`: hai chấm tính cả việc
-nhánh đích đã tiến thêm sau khi PR rẽ ra, biến PR hồ sơ thành "có tệp mã" (đo ở test t11). `--no-renames`
+nhánh đích đã tiến thêm sau khi PR rẽ ra, biến PR hồ sơ thành "có tệp mã" (đo ở test t11). Ba chấm có hai chỗ
+mù do LỊCH SỬ (đo 30-09-2026), và đều đóng theo M4: (1) nhiều merge-base (criss-cross) ⇒ ba chấm dùng MỘT base,
+giấu thay đổi mã mà merge thật mang vào ⇒ đòi `merge-base --all` ra ĐÚNG một SHA, không thì KHÔNG ĐO ĐƯỢC;
+(2) base ĐỔI TÊN tệp/thư mục hồ sơ ra vùng mã ⇒ merge thật (ort, dò đổi tên) mang sửa đổi của PR sang đường dẫn
+MỚI trong vùng mã, ba chấm vẫn chỉ thấy đường dẫn cũ ⇒ phân loại trên HỢP của ba chấm và diff `goc -> cây merge`
+(`git merge-tree --write-tree`, cùng thuật toán merge với GitHub — tương đương đó theo tài liệu, chưa tự đo trên
+GitHub). `--no-renames`
 để đổi tên KHỎI vùng cũng tính là chạm tệp cũ; nếu không, `git mv scripts/tl.py ops/land/tl.py` chỉ hiện
 đường dẫn ĐÍCH và PR mã lọt vào đường nhanh (test t12). `-z` để tên tệp có dấu/xuống dòng không bị git
 bọc dấu nháy.
@@ -42,7 +48,13 @@ ba loại khoảng trắng có bị tắt rộng hơn ba loại đó không).
     lần merge gần nhất (first-parent, 400 lần gần nhất tính từ 1741e0a), 63 lần chỉ đổi hồ sơ và 8/63 trượt
     `--check` nguyên bản (dấu cách cuối dòng trong verdict `.md`/`.patch`, dòng trống cuối tệp yaml). Chốt cứng
     sẽ chặn oan ~13% đúng lớp PR mà đường nhanh sinh ra để giải. Bản tinh chỉnh vẫn bắt dấu xung đột còn sót
-    (`<<<<<<<`, `=======`, `>>>>>>>`), thứ `--check` báo bất kể cấu hình.
+    (`<<<<<<<`, `=======`, `>>>>>>>`), thứ `--check` báo bất kể `core.whitespace`. Thuộc tính thì KHÁC: một
+    `.gitattributes` do PR mang vào (ở mọi độ sâu) với `conflict-marker-size`/`binary`/`-diff` tắt được báo dấu xung
+    đột (reviewer lượt 8 đo; đo lại 30-09-2026). Nên `--check` đọc thuộc tính từ cây GỐC (`--attr-source=<goc>`),
+    không từ cây làm việc: dữ liệu hồ sơ không cấu hình được chốt kiểm hồ sơ. KHÔNG chặn `.gitattributes` — master
+    có ba tệp như thế dưới `ops/reviews/` (`-whitespace` cho verdict chép nguyên byte), do chính PR hồ sơ thêm vào.
+    Tệp NHỊ PHÂN (git đoán theo nội dung) thì `--check` bỏ qua hẳn ⇒ `kiem_nhi_phan` coi là KHÔNG ĐO ĐƯỢC, ĐỎ
+    (master: 0 tệp nhị phân dưới allowlist).
   · D2 — `lease_publish.py check` là cổng ĐĂNG lease: lease đã hết hạn thì nó trả rc=8 "hết hạn" theo thiết kế,
     mà bookkeeping thu hồi/đóng lease thường đúng là sửa lease hết hạn. Lease CÒN HẠN đổi trong PR chạy đúng
     `check`; lease HẾT HẠN chạy `kiem(bo_qua_han=True)` — mọi chốt như `check`, chỉ bỏ chốt hạn — nên KHÔNG
@@ -51,8 +63,9 @@ ba loại khoảng trắng có bị tắt rộng hơn ba loại đó không).
     clone chỉ-master 6/113 tệp lease trượt `kiem(bo_qua_han=True)`, còn trên bản sao đủ 552 ref thì 0/113
     (đo bởi reviewer lượt 1): số 6 là số CỦA PHẠM VI clone-một-nhánh, không phải của kho.
     Hệ quả CÓ CHỦ ĐÍCH về actor (chủ kho chọn khai, không đổi chốt — Issue #674, 2026-09-30): `kiem`/`check`
-    giữ chốt thẩm quyền theo `GITHUB_ACTOR`, nên PR hồ sơ chạm `ops/leases/` do bot (actor khác chủ kho) đẩy
-    sẽ ĐỎ ở đường nhanh (`CHAN [4]`) trong khi đường đầy đủ không chạy chốt này. Đỏ ở đây là fail-close đúng
+    giữ chốt thẩm quyền theo `GITHUB_ACTOR`, nên PR hồ sơ THÊM/SỬA lease dưới `ops/leases/` do bot (actor khác chủ
+    kho) đẩy sẽ ĐỎ ở đường nhanh (`CHAN [4]`) trong khi đường đầy đủ không chạy chốt này. XOÁ lease thì KHÔNG đỏ:
+    `kiem_lease` bỏ qua tệp đã xoá (không còn gì để kiểm). Đỏ ở đây là fail-close đúng
     hướng; muốn đường nhanh cho PR lease do bot đẩy thì phải là quyết định mới về thẩm quyền, không phải nới tại chỗ.
 """
 from __future__ import annotations
@@ -111,6 +124,16 @@ def doc_diff(env=os.environ, chay=subprocess.run, kho=ROOT):
         return None
     if not all(MAU_SHA.fullmatch(x) and x.strip("0") for x in (goc, dau)):
         return None
+    # Ba cham chi dung MOT merge-base. Lich su criss-cross (>1 merge-base) thi `base...head` co the GIAU thay doi
+    # ma merge that mang vao base (reviewer luot 8: PR dao scripts/tl.py van ra duong_nhanh) => KHONG DO DUOC.
+    try:
+        mb = chay(["git", "merge-base", "--all", goc, dau], cwd=kho, capture_output=True)
+    except Exception:
+        return None
+    ra_mb = getattr(mb, "stdout", None)
+    if getattr(mb, "returncode", None) != 0 or not isinstance(ra_mb, (bytes, bytearray)) \
+            or not re.fullmatch(rb"[0-9a-f]{40}\n", bytes(ra_mb)):
+        return None
     try:
         r = chay(["git", "diff", "--name-only", "--no-renames", "-z", f"{goc}...{dau}"],
                  cwd=kho, capture_output=True)
@@ -124,7 +147,37 @@ def doc_diff(env=os.environ, chay=subprocess.run, kho=ROOT):
     # `-z` kết thúc MỖI mục bằng NUL; đầu ra khác rỗng mà không kết thúc bằng NUL là bị cắt cụt giữa chừng.
     if ra and not bytes(ra).endswith(b"\0"):
         return None
-    return {x for x in bytes(ra).decode("utf-8", "surrogateescape").split("\0") if x}
+    ba_cham = {x for x in bytes(ra).decode("utf-8", "surrogateescape").split("\0") if x}
+    khi_merge = doc_diff_merge(goc, dau, chay, kho)
+    if khi_merge is None:
+        return None
+    return ba_cham | khi_merge
+
+
+def doc_diff_merge(goc, dau, chay=subprocess.run, kho=ROOT):
+    """Tập đường dẫn mà MERGE THẬT đổi so với `goc`, hoặc None = KHÔNG ĐO ĐƯỢC. Ba chấm chỉ đo phía head; merge còn
+    đọc phía base (merge-base -> goc) và phép dò ĐỔI TÊN của nó mang sửa đổi của head sang đường dẫn khác: base đổi tên
+    `ops/land/f.md` -> `scripts/f.py` (hoặc cả thư mục) mà PR sửa `ops/land/f.md` thì ba chấm chỉ thấy `ops/land/f.md`
+    còn merge thật SỬA `scripts/f.py`. Merge xung đột (rc=1) cũng là None: GitHub không dựng merge ref cho PR xung đột."""
+    try:
+        mt = chay(["git", "merge-tree", "--write-tree", "--no-messages", goc, dau], cwd=kho, capture_output=True)
+    except Exception:
+        return None
+    ra_mt = getattr(mt, "stdout", None)
+    if getattr(mt, "returncode", None) != 0 or not isinstance(ra_mt, (bytes, bytearray)) \
+            or not re.fullmatch(rb"[0-9a-f]{40}\n", bytes(ra_mt)):
+        return None
+    cay = bytes(ra_mt).decode("ascii").strip()
+    try:
+        dt = chay(["git", "diff", "--no-renames", "--name-only", "-z", goc, cay], cwd=kho, capture_output=True)
+    except Exception:
+        return None
+    ra_dt = getattr(dt, "stdout", None)
+    if getattr(dt, "returncode", None) != 0 or not isinstance(ra_dt, (bytes, bytearray)):
+        return None
+    if ra_dt and not bytes(ra_dt).endswith(b"\0"):
+        return None
+    return {x for x in bytes(ra_dt).decode("utf-8", "surrogateescape").split("\0") if x}
 
 
 def phan_loai_tu_diff(doi):
@@ -181,15 +234,18 @@ def kiem_yaml(doi, kho=ROOT) -> list[str]:
 def kiem_loai_tep(doi, kho=ROOT) -> list[str]:
     """Mọi tệp hồ sơ đổi (còn trong cây) phải là tệp THƯỜNG, không phải symlink. Bước bị bỏ `lease-publish selftest`
     có `t82` `copytree` CẢ cây (kể cả ops/{land,leases,reviews,specs}/**): symlink treo dưới allowlist làm nó ĐỎ trên
-    master trong khi mọi kiểm khác của `kiem-re` vẫn DAT. Hồ sơ không cần symlink ⇒ chặn mọi symlink, treo hay không."""
+    master trong khi mọi kiểm khác của `kiem-re` vẫn DAT. Hồ sơ không cần symlink ⇒ chặn mọi symlink, treo hay không,
+    mọi đuôi tệp. (`.gitattributes` KHÔNG bị chặn ở đây — xem D1 và `kiem_diff_check`.)"""
     return [f"tep ho so la symlink (duong nhanh chi nhan tep thuong): {duong!r}"
             for duong in sorted(doi) if (Path(kho) / duong).is_symlink()]
 
 
 def kiem_diff_check(env=os.environ, chay=subprocess.run, kho=ROOT) -> list[str]:
+    """`git diff --check` trên ba chấm, mọi đuôi tệp. Thuộc tính đọc từ cây GỐC (`--attr-source`), không từ cây làm
+    việc: `.gitattributes` do PR thêm (vd `conflict-marker-size=40`, `binary`, `-diff`) KHÔNG tắt được báo dấu xung đột."""
     goc, dau = env.get(BIEN_GOC) or "", env.get(BIEN_DAU) or ""
     try:
-        r = chay(["git", "-c", CAU_HINH_WHITESPACE, "diff", "--check", "--no-renames", f"{goc}...{dau}"],
+        r = chay(["git", "--attr-source=" + goc, "-c", CAU_HINH_WHITESPACE, "diff", "--check", "--no-renames", f"{goc}...{dau}"],
                  cwd=kho, capture_output=True)
     except Exception as e:
         return [f"KHONG DO DUOC: git diff --check nem {type(e).__name__}"]
@@ -197,6 +253,23 @@ def kiem_diff_check(env=os.environ, chay=subprocess.run, kho=ROOT) -> list[str]:
         return []
     dong = _dau_ra(r).splitlines()[:3]
     return [f"git diff --check rc={getattr(r, 'returncode', None)}: " + " | ".join(dong)]
+
+
+def kiem_nhi_phan(env=os.environ, chay=subprocess.run, kho=ROOT) -> list[str]:
+    """`git diff --check` BỎ QUA tệp git coi là nhị phân (NUL trong nội dung) — dấu xung đột trong đó lọt êm (đo
+    30-09-2026). Hồ sơ không cần nhị phân (master: 0 tệp dưới allowlist) ⇒ tệp nhị phân đổi = KHÔNG ĐO ĐƯỢC ⇒ ĐỎ."""
+    goc, dau = env.get(BIEN_GOC) or "", env.get(BIEN_DAU) or ""
+    try:
+        ns = chay(["git", "diff", "--numstat", "-z", "--no-renames", f"{goc}...{dau}"], cwd=kho, capture_output=True)
+    except Exception as e:
+        return [f"KHONG DO DUOC: git diff --numstat nem {type(e).__name__}"]
+    ra_ns = getattr(ns, "stdout", None)
+    if getattr(ns, "returncode", None) != 0 or not isinstance(ra_ns, (bytes, bytearray)):
+        return [f"KHONG DO DUOC: git diff --numstat rc={getattr(ns, 'returncode', None)}"]
+    if ra_ns and not bytes(ra_ns).endswith(b"\0"):
+        return ["KHONG DO DUOC: git diff --numstat dau ra cut"]
+    return [f"tep ho so nhi phan (diff --check khong kiem duoc): {ban_ghi[4:]!r}"
+            for ban_ghi in bytes(ra_ns).decode("utf-8", "surrogateescape").split("\0") if ban_ghi.startswith("-\t-\t")]
 
 
 def _han_lease(gia_tri):
@@ -279,7 +352,8 @@ def lenh_kiem_re(env=os.environ, chay=subprocess.run, kho=ROOT, ra=None, bay_gio
         print("DUONG_NHANH: kiem-re CHI chay khi diff toan ho so; phan loai lai khong ra DUONG_NHANH - DO "
               "(khong khop voi job chuan-bi)", file=ra)
         return 1
-    loi = (kiem_yaml(doi, kho) + kiem_loai_tep(doi, kho) + kiem_diff_check(env, chay, kho) + kiem_lease(doi, kho, chay, bay_gio, ra)
+    loi = (kiem_yaml(doi, kho) + kiem_loai_tep(doi, kho) + kiem_diff_check(env, chay, kho) + kiem_nhi_phan(env, chay, kho)
+           + kiem_lease(doi, kho, chay, bay_gio, ra)
            + kiem_ca_du_lieu(kho, chay))
     for x in loi:
         print("DUONG_NHANH: LOI - " + x, file=ra)

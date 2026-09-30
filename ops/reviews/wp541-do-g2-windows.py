@@ -72,7 +72,7 @@ SHA_G1   = "2f70869a0537843e9cae78618ee7ae8c261d972d"
 # do that 18-09 tren ban va g2 cua agy cho 5 tep / +812, trong khi viec cua agy la 2 tep / +353.
 # Mot chot nhu the se bao "vuot tran" cho mot ban va KHONG vuot. Base dung la MERGE-BASE.
 SHA_BASE_SPEC = "d705623162b75b7340ee7cca54ac2d2abbddbb6f"
-BAN_BO_DO = "2026-09-30f"              # doi MOI khi sua bo do - log tu khai ban nao
+BAN_BO_DO = "2026-09-30g"              # doi MOI khi sua bo do - log tu khai ban nao
 TRAN_TEP, TRAN_DONG = 2, 400          # N7' cua spec r3
 MAU_WIN  = 'if nen_thuc == "windows":'
 # Write set cua packet #541 g2. Diff khong cham tep nao o day => do NHAM NHANH.
@@ -182,17 +182,29 @@ _PY_GIU = frozenset({"PYTHONHOME", "PYTHONUSERBASE", "PYTHONNOUSERSITE"})
 # Cau hinh git CUA NGUOI DO lot vao bo test y nhu bien PYTHON*: ca test goi git bang dict(os.environ), nen doc cau hinh
 # ca nhan va bien GIT_* cua may do. Do tren 2026-09-30e, 0ea95de: `init.defaultBranch = main` => 163/166, t134 t139 t151
 # DO => rc=1 "TRUOT Moi ca DO deu giai thich duoc" cho ung vien sach (sach: 166/166) — o pham vi global LAN he thong.
-# CI khong co cau hinh CA NHAN: bo MOI bien GIT_*, global = rong (cung gia tri lease_publish.py dat cho git con cua no);
-# GIU cau hinh HE THONG (ban cai Git — CI Windows cung co), rieng init.defaultBranch GHIM ve mac dinh cua git vi no dat
-# duoc ca o he thong. Con lai (khoa he thong khac) la gioi han da biet, khong phai da dong.
+# Bo MOI bien GIT_* va thay global CA NHAN bang global CUA CI. CI KHONG co global rong: job `gate` cua ci.yml (buoc "Force LF
+# checkout", ca ubuntu lan windows) dat global core.autocrlf=false, core.eol=lf, core.abbrev=7 TRUOC buoc chay bo test —
+# vi (ci.yml:7-8 tu khai) khong tat thi runner Windows checkout CRLF: autocrlf=true cua ban cai Git o HE THONG. Ban 30f
+# dat global = rong nen bo test thay autocrlf=true con CI thay false: do tren 2026-09-30f, 0ea95de, he thong autocrlf=true
+# + global nhu CI => ban 30e 166/166, ban 30f 165/166 (t150 DO — chi khong thanh TRUOT vi t150 tinh co nam trong
+# NGOAI_PHAM_VI). Global la TEP TAM chua DUNG
+# global cua CI cong init.defaultBranch ghim ve mac dinh cua git (dat duoc ca o he thong): global de len he thong nhu tren CI,
+# con cau hinh CUC BO cua fixture van de len global (GIT_CONFIG_COUNT thi de len ca cuc bo). Doi buoc ay trong ci.yml thi
+# doi _GIT_GLOBAL_CI. Con lai (khoa he thong khac) la gioi han da biet, khong phai da dong.
+_GIT_GLOBAL_CI = "[init]\n\tdefaultBranch = master\n[core]\n\tautocrlf = false\n\teol = lf\n\tabbrev = 7\n"
 def chay(argv, cwd, phut=60):
-    mt = {k: v for k, v in os.environ.items()
-          if not k.upper().startswith("GIT_") and (not k.upper().startswith("PYTHON") or k.upper() in _PY_GIU)}
-    mt.update(PYTHONUTF8="1", PYTHONIOENCODING="utf-8", PYTHONDONTWRITEBYTECODE="1", PYTHONUNBUFFERED="1",
-              GIT_CONFIG_GLOBAL=os.devnull, GIT_CONFIG_COUNT="1",
-              GIT_CONFIG_KEY_0="init.defaultBranch", GIT_CONFIG_VALUE_0="master")
-    p = subprocess.run([sys.executable] + argv, cwd=str(cwd), capture_output=True,
-                       text=True, encoding="utf-8", errors="replace", timeout=phut*60, env=mt)
+    fd, gc = tempfile.mkstemp(prefix="wp541-gitconfig-ci-", suffix=".ini")
+    try:
+        with os.fdopen(fd, "w", encoding="ascii", newline="\n") as f: f.write(_GIT_GLOBAL_CI)
+        mt = {k: v for k, v in os.environ.items()
+              if not k.upper().startswith("GIT_") and (not k.upper().startswith("PYTHON") or k.upper() in _PY_GIU)}
+        mt.update(PYTHONUTF8="1", PYTHONIOENCODING="utf-8", PYTHONDONTWRITEBYTECODE="1", PYTHONUNBUFFERED="1",
+                  GIT_CONFIG_GLOBAL=gc)
+        p = subprocess.run([sys.executable] + argv, cwd=str(cwd), capture_output=True,
+                           text=True, encoding="utf-8", errors="replace", timeout=phut*60, env=mt)
+    finally:
+        try: os.remove(gc)
+        except OSError: pass
     return p.returncode, (p.stdout or "") + (p.stderr or "")
 
 def mau_ca(out, t):

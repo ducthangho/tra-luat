@@ -12,8 +12,9 @@
     Chạy các cổng của kho `tra-luat` trên máy Windows — KHÔNG chạm CI.
 
 .DESCRIPTION
-    Script này gương lại các bước của job `gate`, `gate-registry` và `gate-packet-loop`
-    trong `.github/workflows/ci.yml`, nhưng chạy TẠI MÁY. Nó KHÔNG gọi
+    Script này gương lại LỆNH của các bước cổng trong các job `gate*` của `.github/workflows/ci.yml`
+    (tên job là cách CI chia máy và trôi theo master: nền gốc d553efa có `gate`, `gate-registry`,
+    `gate-packet-loop`; master fc852ff tách thêm `gate-ops`, `gate-cong-cu`), nhưng chạy TẠI MÁY. Nó KHÔNG gọi
     `workflow_dispatch`, KHÔNG re-run, KHÔNG đẩy gì lên remote, KHÔNG gọi GitHub API.
     Viết ra để tôn chỉ thị `manual_ci_budget: 0` mà vẫn đo được trên nền Windows.
 
@@ -41,7 +42,7 @@
 
 .PARAMETER Muc
     `nhanh`  — bộ cổng cốt lõi (mặc định), đủ để biết một bản vá có làm vỡ gì không.
-    `day-du` — gương toàn bộ ba job gate của CI, trừ bước cgroup (chỉ có trên Linux).
+    `day-du` — gương mọi bước cổng của các job `gate*` của CI, trừ bước cgroup (chỉ có trên Linux).
 
 .PARAMETER CaiCongCu
     Cài PyYAML/jsonschema/ruff bản GHIM, rồi `actionlint` (vào `dist/actionlint` của bản clone), `shellcheck`, `rg`
@@ -51,9 +52,11 @@
     In toàn bộ output của mọi cổng. Mặc định chỉ in output của cổng ĐỎ.
 
 .PARAMETER HanGiay
-    Hạn giờ cho MỘT cổng, tính bằng giây. Mặc định 3600 = `timeout-minutes: 60` của job CI
-    (`test registry` đo trên CI Windows ≈ 41 % × 43,2 phút ≈ 1060 s — VƯỢT 900 cũ, nên với hạn cũ
-    mức mặc định KHÔNG BAO GIỜ ra ĐẠT được). Quá hạn thì cổng bị giết và đếm
+    Hạn giờ cho MỘT cổng, tính bằng giây. Mặc định 5400 = `timeout-minutes: 90` của job `gate-registry`
+    trên master fc852ff — trần LỚN NHẤT của các job `gate*` (t9 đọc `ci.yml` của cây và đòi ≥). Chính
+    `ci.yml` ghi lý do: `test registry` chạy tuần tự, 52,15 phút trên ubuntu ⇒ 60 → 90, và "90 KHÔNG đủ
+    Windows". Hạn 3600 cũ (= 60 phút của nền gốc d553efa) làm t9 ĐỎ ngay khi merge (đo: cây fc852ff + PR ⇒
+    26/27, t9), như hạn 900 trước đó: thấp hơn trần CI thì mức mặc định có thể KHÔNG BAO GIỜ ra ĐẠT. Quá hạn thì cổng bị giết và đếm
     là **TREO** — tức `KHÔNG ĐO ĐƯỢC`, KHÔNG phải `ĐẠT`. Cổng đã THOÁT mà CHÁU còn giữ stdout/stderr
     tới hạn thì không giết được gì (cháu đã mồ côi): rc=0 ⇒ `KHÔNG ĐO ĐƯỢC`, rc≠0 ⇒ vẫn `ĐỎ` — rc đọc từ
     chính tiến trình; rc KHÔNG đọc được ⇒ `KHÔNG ĐO ĐƯỢC` ở mọi nhánh. Có tham số này vì `don-nhanh_test.ps1`
@@ -80,7 +83,7 @@ param(
     [switch]$CaiCongCu,
     [switch]$ChiTiet,
     [ValidateRange(1, 86400)]
-    [int]$HanGiay = 3600,
+    [int]$HanGiay = 5400,
     [string]$AlVer = '1.7.7'
 )
 
@@ -289,12 +292,18 @@ if ($CaiCongCu) {
     }
 }
 # Danh sách CHO PHÉP theo TÊN, không phải danh sách CẤM: thư mục đầu PATH (của script lẫn wrapper lease) chỉ được chứa TÊN mà
-# `ops/cai_actionlint.sh` sinh ra (đo trên ba gói ghim 1.7.7: `actionlint[.exe] LICENSE.txt README.md docs man` + gói tạm). Nó chặn
-# thứ git KHÔNG thấy: tệp chưa theo dõi, symlink/junction `dist` chưa theo dõi (đo: `python` qua symlink ⇒ rc=2). Nó KHÔNG chứng
-# minh XUẤT XỨ: một `actionlint` chưa theo dõi mà installer không ghi (vd. mã của nhánh ở một lượt trước) vẫn qua; chỉ một lượt
-# installer THÀNH CÔNG (`-CaiCongCu`, wrapper lease) giải nén đè nó từ gói đã băm (đo với GNU tar: tệp giả lẫn symlink đều bị thay).
-$AlChoPhep = @('actionlint', 'actionlint.exe', 'LICENSE.txt', 'README.md', 'docs', 'man',
-               'goi.gz', 'goi.zip', 'goi_giai_nen.tar.gz', 'goi_giai_nen.zip')
+# `ops/cai_actionlint.sh` sinh ra TRÊN NỀN NÀY — không phải hợp của hai nền. Gói ghim 1.7.7: linux/darwin `actionlint LICENSE.txt
+# README.md docs man` + `goi.gz goi_giai_nen.tar.gz`; windows `actionlint.exe LICENSE.txt README.md docs man` + `goi.zip
+# goi_giai_nen.zip` (đo `unzip -l` gói `7f12f180…`: KHÔNG có `actionlint` không đuôi). Hợp hai nền từng cho `actionlint` không đuôi
+# qua trên Windows, mà lượt cài KHÔNG BAO GIỜ giải nén đè tên ấy — và `ops/cai_actionlint.sh` còn chọn nó TRƯỚC `actionlint.exe` để
+# đối chiếu bản (đo trên 543f2e8: installer thật, `AL_NEN=Windows`, gói Windows thật, `actionlint` giả in `1.7.7` ⇒ rc=0, băm tệp giả
+# không đổi). Nó chặn thứ git KHÔNG thấy: tệp chưa theo dõi, symlink/junction `dist` chưa theo dõi (đo: `python` qua symlink ⇒
+# rc=2). Nó KHÔNG chứng minh XUẤT XỨ: một `actionlint[.exe]` (tên của nền này) chưa theo dõi mà installer không ghi (vd. mã của nhánh
+# ở một lượt trước) vẫn qua, tới khi một lượt installer THÀNH CÔNG (`-CaiCongCu`, wrapper lease) giải nén đè ĐÚNG tên ấy từ gói đã
+# băm (đo trên Linux: GNU tar với gói linux, Info-ZIP `unzip -o` với gói windows — tệp giả lẫn symlink đều bị thay; công cụ giải
+# nén trên Windows thật: KHÔNG ĐO ĐƯỢC).
+$AlChoPhep = if ($IsWindows) { @('actionlint.exe', 'LICENSE.txt', 'README.md', 'docs', 'man', 'goi.zip', 'goi_giai_nen.zip') }
+             else            { @('actionlint', 'LICENSE.txt', 'README.md', 'docs', 'man', 'goi.gz', 'goi_giai_nen.tar.gz') }
 if (Test-Path -LiteralPath $AlDich) {
     try { $alLa = @(Get-ChildItem -LiteralPath $AlDich -Force -ErrorAction Stop | Where-Object { $AlChoPhep -cnotcontains $_.Name } | ForEach-Object Name) }
     catch { $alLa = @("(không liệt kê được: $($_.Exception.Message))") }

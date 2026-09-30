@@ -10,7 +10,7 @@
 #   t7 sua-moi-truong-phien-goi                   PATH dùng dấu phân cách của nền, không chèn lặp AL_DICH; AL_DICH CHÍNH LÀ
 #                                                 `dist/actionlint` (samefile — kể cả khi TEMP có sẵn `actionlint/`)
 #   t8 bo-giai-cong-cu-theo-ten-thu-tu            `python` thoát 0 cho mọi lời gọi ⇒ không được ĐẠT
-#   t9 han-mac-dinh-duoi-thoi-luong-da-do         mặc định -HanGiay ≥ `timeout-minutes` của job CI
+#   t9 han-mac-dinh-duoi-thoi-luong-da-do         mặc định -HanGiay ≥ `timeout-minutes` LỚN NHẤT của MỌI job `gate*` trong ci.yml
 #   t10 duong-dan-du-lieu-thanh-mau-wildcard      gốc kho dưới `…[1]…` ⇒ rc=2 + nói "wildcard", không "không tìm thấy gốc"
 #   t11 nhan-noi-hon-phep-do (giết)               `Kill` ném, tiến trình còn sống ⇒ không in "ĐÃ GIẾT"
 #   t12 nhan-noi-hon-phep-do (tham số)            `-HanGiay 0` bị từ chối, không thành "TREO > 0s"
@@ -32,15 +32,23 @@
 #   t26 duong-dan-du-lieu-thanh-mau-wildcard (FilePath) đường dẫn công cụ chứa `[ ]` ⇒ KHÔNG gọi Start-Process, KHÔNG ĐO ĐƯỢC
 #   t27 bo-giai-cong-cu-theo-ten-thu-tu (mục dist) `dist` THEO DÕI ở dạng mà `ls-files -- dist/actionlint` không thấy — symlink `dist`;
 #                                                 `DIST/…` — kèm `actionlint` giả (TÊN được phép) ⇒ rc=2; `GIT_LITERAL_PATHSPECS` ⇒ rc=2
+#   t28 bo-giai-cong-cu-theo-ten-thu-tu (nền)     danh sách CHO PHÉP là của NỀN ĐANG CHẠY: tên installer chỉ sinh ra ở nền KHÁC
+#                                                 (`actionlint` không đuôi trên Windows, `actionlint.exe` ngoài Windows) ⇒ rc=2; đúng bộ
+#                                                 tên của nền này ⇒ KHÔNG bị chặn
 # Bộ này KÍN với config git của máy chạy, với biến git trỏ kho khác (khối ngay dưới `$script:Rac`), với code page của
 # console (`Doc-Utf8`), với dấu thập phân của locale (t18 nhận `5,1s`) và với `<TEMP>/actionlint` của máy (t7, t21 tự đặt TEMP).
-# ĐỘT BIẾN để đo răng (đo trên pwsh 7.4.6/Linux, bộ 27 ca, TMPDIR sạch): `-Script` trỏ f2392df ⇒ 2/27 (đạt t17 — bản ấy đã so băm —
-# và t21 — dấu `;` ghim cứng dán AL_DICH vào mục PATH kế nên nó không thành một mục); 8b82d40 ⇒ 13/27 (đỏ t7 t13 t14 t15 t16 t18 t19
-# t21 t22 t23 t24 t25 t26 t27); 66efc78 ⇒ 15/27 (đỏ t7 t13 t16 t18 t19 t21 t22 t23 t24 t25 t26 t27); 131c608 ⇒ 16/27 (đỏ t7 t13 t18
-# t19 t21 t22 t23 t24 t25 t26 t27); bd62cad ⇒ 18/27 (đỏ t7 t19 t21 t22 t23 t24 t25 t26 t27); 131c2e7 ⇒ 19/27 (đỏ t7 t21 t22 t23 t24
-# t25 t26 t27); c8c2c6a ⇒ 21/27 (đỏ t22 t23 t24 t25 t26 t27); 623864e ⇒ 24/27 (đỏ t25 t26 t27); f1f753b ⇒ 26/27 (chỉ t27).
+# ĐỘT BIẾN để đo răng (đo trên pwsh 7.4.6/Linux, bộ 28 ca, TMPDIR sạch): `-Script` trỏ f2392df ⇒ 2/28 (đạt t17 — bản ấy đã so băm —
+# và t21 — dấu `;` ghim cứng dán AL_DICH vào mục PATH kế nên nó không thành một mục); 8b82d40 ⇒ 13/28 (đỏ t7 t13 t14 t15 t16 t18 t19
+# t21 t22 t23 t24 t25 t26 t27 t28); 66efc78 ⇒ 15/28 (đỏ t7 t13 t16 t18 t19 t21 t22 t23 t24 t25 t26 t27 t28); 131c608 ⇒ 16/28 (đỏ t7
+# t13 t18 t19 t21 t22 t23 t24 t25 t26 t27 t28); bd62cad ⇒ 18/28 (đỏ t7 t19 t21 t22 t23 t24 t25 t26 t27 t28); 131c2e7 ⇒ 19/28 (đỏ t7
+# t21 t22 t23 t24 t25 t26 t27 t28); c8c2c6a ⇒ 21/28 (đỏ t22 t23 t24 t25 t26 t27 t28); 623864e ⇒ 24/28 (đỏ t25 t26 t27 t28); f1f753b ⇒
+# 26/28 (đỏ t27 t28); 543f2e8 ⇒ 27/28 (chỉ t28).
+# Lượt 10: danh sách hợp hai nền (543f2e8) ⇒ chỉ t28 (lượt 1); đảo nền ⇒ chỉ t28 (lượt 1); danh sách của nền này rỗng / thiếu `goi.gz`
+# ⇒ chỉ t28 (lượt 2); bỏ danh sách CHO PHÉP nay ⇒ t25 t28; nhánh Windows của t27 ép chạy trên Linux: fixture mới ⇒ 28/28, fixture dẫn
+# `'tools'` qua ống (blob 6 byte) ⇒ chỉ t27 (chốt tự kiểm KHÔNG ĐO ĐƯỢC).
 # Lượt 9: hỏi lại `ls-files -- dist/actionlint` ⇒ chỉ t27; bỏ `--icase-pathspecs` ⇒ chỉ t27 (lượt
-# `DIST/…`); `:(icase)dist` thay cờ ⇒ chỉ t27 (lượt `GIT_LITERAL_PATHSPECS`); bộ này bỏ lượt 1 của t25 × bỏ CHO PHÉP ⇒ t25 (lượt symlink
+# `DIST/…`); `:(icase)dist` thay cờ ⇒ chỉ t27 (lượt `GIT_LITERAL_PATHSPECS`); gỡ vế `$LASTEXITCODE -ne 0` của chốt `ls-files` ⇒ chỉ t27
+# (cùng lượt ấy — đo trên bộ 27 lẫn 28 ca); bộ này bỏ lượt 1 của t25 × bỏ CHO PHÉP ⇒ t25 (lượt symlink
 # CHƯA theo dõi). Lượt 8, mỗi chốt một ca: bỏ chốt wildcard của Chay-Cong ⇒ chỉ t26; bỏ danh sách CHO PHÉP ⇒ chỉ t25 (riêng đường symlink cũng làm
 # t25 đỏ trên 623864e); so tên KHÔNG phân biệt hoa thường ⇒ SỐNG 26/26 (TƯƠNG ĐƯƠNG: tên chỉ khác hoa thường là CÙNG tệp trên hệ tệp
 # không phân biệt, còn trên hệ tệp phân biệt thì PATH không đọc nó thành `actionlint`). Lượt 7: Tim-Python trả TÊN ⇒ chỉ t23; bỏ chốt
@@ -58,7 +66,6 @@
 # nền này — khai thẳng: `$null -eq $rc` của nhánh xả (TƯƠNG ĐƯƠNG từ lượt 5: rc=null rơi xuống đường chung cũng ra KHÔNG ĐO
 # ĐƯỢC — gỡ ra vẫn 24/24);
 # `[bool]$ha`, `[string]$ban`, `-ErrorAction Stop` của Start-Process (tương đương: nó vốn ném lỗi kết thúc);
-# vế `$LASTEXITCODE -ne 0` của chốt tệp theo dõi (git hỏng giữa chừng — nếp git đã đòi git chạy được);
 # `$null = $tt.Handle` và `catch { $xa = $false }` (chỉ có tác dụng khi `.Handle`/`WaitForExitAsync` ném — Windows,
 # pwsh 7.0); `#Requires -Version 7.1` (bộ này chạy bằng pwsh ≥ 7.1); sàn 1 s của `$conMs` (chỉ đổi kết quả khi cổng
 # thoát sát hạn); phần khối kín cho `GIT_INDEX_FILE`/`GIT_DIR` (đo bằng chạy dưới biến ấy — gỡ ra ⇒ index kho khác
@@ -66,7 +73,8 @@
 # code page cũ — Windows); `try/catch` quanh danh sách CHO PHÉP (chỉ khi không liệt kê được thư mục). CHƯA ĐÓNG — khai thẳng:
 # `ops/chay_lease_publish_test.sh` (ngoài write set) vẫn gọi `python` theo tên SAU khi chèn AL_DICH; script chỉ bảo đảm thư mục ấy
 # không có mục THEO DÕI và chỉ chứa TÊN installer sinh ra TẠI LÚC chèn — một cổng chạy trước wrapper (mã của nhánh) vẫn ghi được vào
-# đó, và một `actionlint` chưa theo dõi mà installer không ghi (lượt trước) vẫn qua tới lượt installer thành công kế tiếp.
+# đó, và một `actionlint[.exe]` (tên của NỀN NÀY) chưa theo dõi mà installer không ghi (lượt trước) vẫn qua tới lượt installer thành
+# công kế tiếp.
 [CmdletBinding()]
 param([string]$Script)
 Set-StrictMode -Version Latest
@@ -309,12 +317,13 @@ Ca 't8 python gia thoat 0 dau PATH => cong Python khong DAT' {
 }
 
 # Hạn mặc định cho MỘT cổng không được thấp hơn trần job CI chạy chính cổng ấy: thấp hơn thì mức
-# mặc định có thể KHÔNG BAO GIỜ ra ĐẠT (đo: `test registry` > 900 s cả trên CI Windows lẫn ở đây).
+# mặc định có thể KHÔNG BAO GIỜ ra ĐẠT (đo: `test registry` > 900 s cả trên CI Windows lẫn ở đây). Đọc MỌI job `gate*`, không
+# ghim ba tên: master fc852ff đã tách cổng sang `gate-ops`/`gate-cong-cu`, và ba tên ghim cứng là danh sách sẽ trôi.
 Ca 't9 han mac dinh >= timeout-minutes cua job CI' {
     $ci = Join-Path $GocKho '.github/workflows/ci.yml'
     $py = Tim-PyYaml; $pd = $py.Dau
     $ma = "import sys,yaml`nd=yaml.safe_load(open(sys.argv[1],encoding='utf-8'))`n" +
-          "print(max(int(d['jobs'][j]['timeout-minutes']) for j in ('gate','gate-registry','gate-packet-loop')))"
+          "print(max(int(d['jobs'][j]['timeout-minutes']) for j in d['jobs'] if j.startswith('gate')))"
     $phut = @(& $py.Ten @pd -c $ma $ci)
     if ($LASTEXITCODE -ne 0 -or $phut.Count -ne 1) { throw "khong doc duoc timeout-minutes (rc=$LASTEXITCODE)" }
     $ast = [System.Management.Automation.Language.Parser]::ParseFile($Script, [ref]$null, [ref]$null)
@@ -686,15 +695,20 @@ Ca 't27 dist THEO DOI (symlink dist, DIST/...) kem actionlint gia => rc=2' {
     Set-Content -LiteralPath (Join-Path $t 'actionlint') -Value "#!/bin/sh`nexit 0" -Encoding utf8NoBOM
     & git -C $k add -A
     if ($IsWindows) {
-        $sha = @('tools' | & git -C $k hash-object -w --stdin)[0]
+        # Blob của symlink phải đúng 5 byte `tools`: dẫn chuỗi qua ỐNG vào lệnh ngoài thì pwsh THÊM dấu xuống dòng của nền (đo trên
+        # Linux: blob 6 byte, checkout ra symlink trỏ tới `tools` + LF — treo). Ghi tệp tạm KHÔNG xuống dòng rồi băm nó.
+        $dich = Join-Path (Split-Path $k) 'dich-symlink'
+        [IO.File]::WriteAllBytes($dich, [Text.Encoding]::ASCII.GetBytes('tools'))
+        $sha = @(& git -C $k hash-object -w --no-filters -- $dich)[0]
         & git -C $k update-index --add --cacheinfo "120000,$sha,dist"
     } else {
         & ln -s tools (Join-Path $k 'dist')
         & git -C $k add -A
     }
     & git -C $k -c user.email=t@t -c user.name=t commit -qm symlink
-    if (@(& git -C $k ls-files -- 'dist/actionlint').Count -ne 0 -or @(& git -C $k ls-files -- 'dist').Count -ne 1) {
-        throw 'KHONG DO DUOC: kho gia khong dung duoc symlink dist THEO DOI ma ls-files dist/actionlint rong' }
+    if (@(& git -C $k ls-files -- 'dist/actionlint').Count -ne 0 -or @(& git -C $k ls-files -- 'dist').Count -ne 1 -or
+        [string]@(& git -C $k cat-file -s ':dist')[0] -ne '5') {
+        throw 'KHONG DO DUOC: kho gia khong dung duoc symlink dist -> tools THEO DOI ma ls-files dist/actionlint rong' }
     $a = Chay $k
     if ($a.rc -ne 2 -or $a.ra -notmatch 'THEO DÕI') { throw "symlink dist THEO DOI kem actionlint gia ma khong bi tu choi (rc=$($a.rc))" }
     # `GIT_LITERAL_PATHSPECS` đọc pathspec NGUYÊN VĂN: dạng `:(icase)dist` thành tên tệp lạ ⇒ rỗng ⇒ lọt; cờ `--icase-pathspecs` thì
@@ -712,6 +726,29 @@ Ca 't27 dist THEO DOI (symlink dist, DIST/...) kem actionlint gia => rc=2' {
         throw 'KHONG DO DUOC: kho gia khong dung duoc DIST/actionlint THEO DOI ma ls-files dist/actionlint rong' }
     $b = Chay $k2
     if ($b.rc -ne 2 -or $b.ra -notmatch 'THEO DÕI') { throw "DIST/actionlint THEO DOI ma khong bi tu choi (rc=$($b.rc))" }
+}
+
+# Danh sách CHO PHÉP là của NỀN ĐANG CHẠY, không phải hợp hai nền. Gói Windows ghim chỉ có `actionlint.exe`, nên `actionlint` KHÔNG
+# đuôi ở đó không bao giờ bị lượt cài giải nén đè — và `ops/cai_actionlint.sh` còn chọn nó TRƯỚC `.exe` để đối chiếu bản (đo trên
+# 543f2e8: installer thật, `AL_NEN=Windows`, gói Windows thật, `actionlint` giả in `1.7.7` ⇒ rc=0, băm tệp giả không đổi; danh sách
+# hợp hai nền cho nó qua). Lượt 1: tên chỉ nền KHÁC sinh ra ⇒ rc=2. Lượt 2 (đối chứng): đúng bộ tên installer sinh ra trên nền này
+# ⇒ KHÔNG bị chặn — thiếu lượt này thì một danh sách RỖNG hay thiếu tên vẫn qua ca.
+Ca 't28 dist/actionlint chua ten cua NEN KHAC => rc=2; ten cua nen nay => qua' {
+    $khac = if ($IsWindows) { 'actionlint' } else { 'actionlint.exe' }
+    $nay  = if ($IsWindows) { @('actionlint.exe', 'goi.zip', 'goi_giai_nen.zip') } else { @('actionlint', 'goi.gz', 'goi_giai_nen.tar.gz') }
+    $k = Dung-Kho
+    $al = Join-Path $k (Join-Path 'dist' 'actionlint')
+    New-Item -ItemType Directory -Force -Path $al | Out-Null
+    Set-Content -LiteralPath (Join-Path $al $khac) -Value "#!/bin/sh`necho 1.7.7" -Encoding utf8NoBOM
+    $a = Chay $k
+    if ($a.rc -ne 2 -or $a.ra -notmatch "installer không sinh ra: $([regex]::Escape($khac))") {
+        throw "ten cua nen khac '$khac' trong dist/actionlint ma khong bi tu choi (rc=$($a.rc))" }
+    $k2 = Dung-Kho
+    $al2 = Join-Path $k2 (Join-Path 'dist' 'actionlint')
+    foreach ($d in 'docs', 'man') { New-Item -ItemType Directory -Force -Path (Join-Path $al2 $d) | Out-Null }
+    foreach ($f in @('LICENSE.txt', 'README.md') + $nay) { Set-Content -LiteralPath (Join-Path $al2 $f) -Value 'x' -Encoding utf8NoBOM }
+    $b = Chay $k2
+    if ($b.rc -ne 0 -or $b.ra -match 'installer không sinh ra') { throw "bo ten installer sinh ra tren nen nay bi chan (rc=$($b.rc))" }
 }
 
 foreach ($d in $script:Rac) { Remove-Item -LiteralPath $d -Recurse -Force -ErrorAction SilentlyContinue }

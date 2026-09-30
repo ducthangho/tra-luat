@@ -1194,6 +1194,67 @@ def t20ze_kiem_re_ten_tep_khong_utf8_dat():
 
 
 @ca
+def t20zf_kiem_re_symlink_doi_thanh_tep_thuong_dat():
+    """Cross-review luot 13 (`kiem-mode-git-chot-khong-rang`, nhanh CHAP NHAN cua ve `trang_thai == "D" or mode not in
+    MODE_THUONG`): trang thai `T` voi mode moi 100644 (symlink tren nen -> tep thuong trong PR) LA tep thuong theo git => DAT.
+    Khong co ca nay thi dot bien coi moi `T` la loi (DO oan mot PR hop le) song qua moi ca."""
+    m = nap_module()
+    with kho_that() as (kho, _goc, _dau):
+        git(kho, "checkout", "-q", "main")
+        (kho / "ops" / "specs").mkdir(parents=True, exist_ok=True)
+        (kho / "ops" / "specs" / "that.md").write_text("# t\n", encoding="utf-8")
+        (kho / "ops" / "specs" / "x.md").symlink_to("that.md")   # nhu t20n/t20q/t20x: khong tha im lang khi nen khong tao duoc symlink
+        git(kho, "add", "-A")
+        git(kho, "commit", "-q", "-m", "nen co symlink")
+        goc = git(kho, "rev-parse", "HEAD").stdout.decode().strip()
+        git(kho, "checkout", "-q", "-b", "pr2")
+        (kho / "ops" / "specs" / "x.md").unlink()
+        (kho / "ops" / "specs" / "x.md").write_text("# x\n", encoding="utf-8")
+        git(kho, "add", "-A")
+        git(kho, "commit", "-q", "-m", "symlink thanh tep thuong")
+        dau = git(kho, "rev-parse", "HEAD").stdout.decode().strip()
+        raw = git(kho, "diff", "--raw", "--no-abbrev", f"{goc}...{dau}").stdout.decode()
+        bang(re.search(r"^:120000 100644 [0-9a-f]+ [0-9a-f]+ T\tops/specs/x\.md$", raw, re.M) is not None,
+             f"fixture vo hieu: phai la doi kieu T 120000 -> 100644: {raw!r}")
+        rc, log = kiem_re(m, kho, goc, dau)
+        bang(rc == 0, f"symlink -> tep thuong (T, 100644) phai DAT kiem-re: rc={rc}: {log}")
+
+
+@ca
+def t20zg_kiem_re_o_chap_nhan_con_lai_dat():
+    """Luot 14 (`kiem-mode-git-chot-khong-rang`, tu liet ke nhanh CHAP NHAN theo trang thai x mode moi): cac o chua co ca git
+    that ghim — `A` 100755 (tep ho so MOI co bit thuc thi), `M` 100644 (sua noi dung tep thuong), `T` 120000 -> 100755
+    (symlink tren nen -> tep thuc thi). Ca ba LA tep thuong theo git => DAT. Moi o mot dot bien rieng coi DUNG o do la loi."""
+    m = nap_module()
+    with kho_that() as (kho, _goc, _dau):
+        git(kho, "checkout", "-q", "main")
+        (kho / "ops" / "specs").mkdir(parents=True, exist_ok=True)
+        (kho / "ops" / "specs" / "that.md").write_text("# t\n", encoding="utf-8")
+        (kho / "ops" / "specs" / "sua.md").write_text("# a\n", encoding="utf-8")
+        (kho / "ops" / "specs" / "y.md").symlink_to("that.md")   # nhu t20zf: khong tha im lang khi nen khong tao duoc symlink
+        git(kho, "add", "-A")
+        git(kho, "commit", "-q", "-m", "nen")
+        goc = git(kho, "rev-parse", "HEAD").stdout.decode().strip()
+        git(kho, "checkout", "-q", "-b", "pr3")
+        (kho / "ops" / "specs" / "sua.md").write_text("# b\n", encoding="utf-8")
+        (kho / "ops" / "specs" / "y.md").unlink()
+        (kho / "ops" / "specs" / "y.md").write_text("# y\n", encoding="utf-8")
+        (kho / "ops" / "specs" / "y.md").chmod(0o755)
+        (kho / "ops" / "specs" / "moi.md").write_text("# m\n", encoding="utf-8")
+        (kho / "ops" / "specs" / "moi.md").chmod(0o755)
+        git(kho, "add", "-A")
+        git(kho, "commit", "-q", "-m", "ba o chap nhan")
+        dau = git(kho, "rev-parse", "HEAD").stdout.decode().strip()
+        raw = git(kho, "diff", "--raw", "--no-abbrev", "--no-renames", f"{goc}...{dau}").stdout.decode()
+        for mau, o in ((r"^:000000 100755 [0-9a-f]+ [0-9a-f]+ A\tops/specs/moi\.md$", "A 100755"),
+                       (r"^:100644 100644 [0-9a-f]+ [0-9a-f]+ M\tops/specs/sua\.md$", "M 100644"),
+                       (r"^:120000 100755 [0-9a-f]+ [0-9a-f]+ T\tops/specs/y\.md$", "T 120000 -> 100755")):
+            bang(re.search(mau, raw, re.M) is not None, f"fixture vo hieu: thieu o {o}: {raw!r}")
+        rc, log = kiem_re(m, kho, goc, dau)
+        bang(rc == 0, f"A 100755 / M 100644 / T -> 100755 deu la tep thuong, phai DAT kiem-re: rc={rc}: {log}")
+
+
+@ca
 def t20zc_kiem_re_doi_ten_tep_ho_so_dat():
     """Cross-review luot 11 (`kiem-mode-git-chot-khong-rang`): `git diff` mac dinh DO doi ten (`diff.renames`), ban ghi `--raw`
     khi do la `R100` kem HAI duong dan => `_doc_raw` bao dau ra hong. `--no-renames` la dieu kien de PR doi ten tep ho so
@@ -2544,6 +2605,15 @@ DOT_BIEN = [
     ('mode_git_raw_split_khong_cat', _ma('decode("utf-8", "surrogateescape").split("\\0")[:-1]', 'decode("utf-8", "surrogateescape").split("\\0")'), ('t20zc_kiem_re_doi_ten_tep_ho_so_dat',)),
     ('mode_git_raw_zip_dao', _ma('zip(muc[0::2], muc[1::2])', 'zip(muc[1::2], muc[0::2])'), ('t20zc_kiem_re_doi_ten_tep_ho_so_dat',)),
     ('mode_git_bo_644', _ma('MODE_THUONG = {"100644", "100755"}', 'MODE_THUONG = {"100755"}'), ('t20zc_kiem_re_doi_ten_tep_ho_so_dat',)),
+    # ---- cross-review luot 13: nhanh CHAP NHAN cua trang thai `T` voi mode tep thuong
+    ('mode_git_doi_kieu_thanh_tep_la_loi', _ma('            if trang_thai == "D" or mode not in MODE_THUONG:', '            if trang_thai in ("D", "T") or mode not in MODE_THUONG:'), ('t20zf_kiem_re_symlink_doi_thanh_tep_thuong_dat',)),
+    # ---- luot 14: moi o CHAP NHAN (trang thai x mode moi) mot dot bien rieng coi dung o do la loi
+    ('mode_git_o_A_644_la_loi', _ma('            if trang_thai == "D" or mode not in MODE_THUONG:', '            if trang_thai == "D" or mode not in MODE_THUONG or (trang_thai == "A" and mode == "100644"):'), ('t20a_kiem_re_ho_so_sach_dat',)),
+    ('mode_git_o_A_755_la_loi', _ma('            if trang_thai == "D" or mode not in MODE_THUONG:', '            if trang_thai == "D" or mode not in MODE_THUONG or (trang_thai == "A" and mode == "100755"):'), ('t20zg_kiem_re_o_chap_nhan_con_lai_dat',)),
+    ('mode_git_o_M_644_la_loi', _ma('            if trang_thai == "D" or mode not in MODE_THUONG:', '            if trang_thai == "D" or mode not in MODE_THUONG or (trang_thai == "M" and mode == "100644"):'), ('t20zg_kiem_re_o_chap_nhan_con_lai_dat',)),
+    ('mode_git_o_M_755_la_loi', _ma('            if trang_thai == "D" or mode not in MODE_THUONG:', '            if trang_thai == "D" or mode not in MODE_THUONG or (trang_thai == "M" and mode == "100755"):'), ('t20y_kiem_re_mode_755_va_tep_thanh_thu_muc_dat',)),
+    ('mode_git_o_T_644_la_loi', _ma('            if trang_thai == "D" or mode not in MODE_THUONG:', '            if trang_thai == "D" or mode not in MODE_THUONG or (trang_thai == "T" and mode == "100644"):'), ('t20zf_kiem_re_symlink_doi_thanh_tep_thuong_dat',)),
+    ('mode_git_o_T_755_la_loi', _ma('            if trang_thai == "D" or mode not in MODE_THUONG:', '            if trang_thai == "D" or mode not in MODE_THUONG or (trang_thai == "T" and mode == "100755"):'), ('t20zg_kiem_re_o_chap_nhan_con_lai_dat',)),
     ('mode_git_merge_tree_rc_cho_qua', _ma('    if getattr(mt_mode, "returncode", None) != 0 or not isinstance(ra_cay,', '    if not isinstance(ra_cay,'), ('t20zb_kiem_mode_git_khong_do_duoc_thi_do',)),
     ('mode_git_merge_tree_nem_lot', _ma('    except Exception as e:\n        return [f"KHONG DO DUOC: merge-tree (kiem mode) nem', '    except ZeroDivisionError as e:\n        return [f"KHONG DO DUOC: merge-tree (kiem mode) nem'), ('t20zb_kiem_mode_git_khong_do_duoc_thi_do',)),
     ('mode_git_merge_tree_bo_kiem_dang', _ma('            or not re.fullmatch(rb"[0-9a-f]{40}(?:[0-9a-f]{24})?\\n", bytes(ra_cay)):', '            or False:'), ('t20zb_kiem_mode_git_khong_do_duoc_thi_do',)),

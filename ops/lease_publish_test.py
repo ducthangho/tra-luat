@@ -10742,7 +10742,8 @@ def t199_A9_guard_nen_cua_helper_qua_diem_do_o_ba_trang_thai():
     (luôn ném ⇒ S1/S3 · gỡ guard ⇒ S2 · chỉ xét `os.name` ⇒ S3 · guard chỉ khi bật điểm dò ⇒ S2 tắt · thêm nhánh
     `nt` khi tắt điểm dò ⇒ S3 tắt). Mô phỏng `os.name` KHÔNG phải đã chạy Windows thật (Q6); không chạy I/O thật.
     Sentinel chỉ bắt thao tác SAU guard; thao tác đứng TRƯỚC guard (lượt 3 L3, NA11) đo bằng `ast`: guard rồi điểm dò
-    phải là HAI câu lệnh đầu tiên (chỉ bỏ docstring — KHÔNG tha `import`) và hàm không có decorator.
+    phải là HAI câu lệnh đầu tiên (chỉ bỏ docstring — KHÔNG tha `import`) và hàm không có decorator; lượt 4 (L2): đối
+    tượng THẬT được gọi phải là chính hàm biên dịch từ def ấy (mã byte), nên gán lại bằng wrapper — có `wraps` — đỏ.
     """
     from unittest import mock
     mod, that = sys.modules[__name__], WORKFLOW_DANG
@@ -10777,20 +10778,32 @@ def t199_A9_guard_nen_cua_helper_qua_diem_do_o_ba_trang_thai():
                 if bat and (bool(ly_do) != (ten == "S2") or (ten == "S2" and "chỉ chạy Ubuntu" not in ly_do)):
                     sai.append(f"{ten}: lý_do dẫn xuất sai: {ly_do!r}")
     # M1 "bắt đầu bằng ĐÚNG guard": sentinel chỉ canh `_buoc_workflow`, nên thao tác chèn TRƯỚC guard không bị thấy.
+    # Lượt 4 L2: đo trên ĐỐI TƯỢNG consumer thật sự gọi (ô `globals()` mà LOAD_GLOBAL đọc), không qua `getsource` (nó tự
+    # `unwrap`): phải là hàm thuần, không `__wrapped__`, cùng globals của module, MÃ BYTE bằng mã biên dịch lại từ def
+    # DUY NHẤT (không decorator, hai câu đầu là guard) trong tệp nguồn ⇒ bọc/gán lại/thay `__code__` đều lệch.
     import ast
-    import inspect
-    import textwrap
-    try:   # helper bị bọc (decorator/gán lại) có thể trả nguồn không parse được: đỏ ở CHỐT, không bằng SyntaxError
-        nut = ast.parse(textwrap.dedent(inspect.getsource(_chay_buoc_dang_that))).body[0]
-    except (OSError, TypeError, SyntaxError) as e:
-        nut = e
-    cau = [] if isinstance(nut, Exception) else [ast.dump(x) for x in nut.body if not (
+    import types
+    f, nguon = globals()["_chay_buoc_dang_that"], Path(__file__).read_text(encoding="utf-8")
+    defs = [n for n in ast.parse(nguon).body if isinstance(n, ast.FunctionDef) and n.name == "_chay_buoc_dang_that"]
+    nut = defs[0] if len(defs) == 1 else None
+    cau = [] if nut is None else [ast.dump(x) for x in nut.body if not (
         isinstance(x, ast.Expr) and isinstance(x.value, ast.Constant))][:2]
     mau = [ast.dump(x) for x in ast.parse('if _ly_do_bo_qua_workflow(WORKFLOW_DANG, "dang"):\n'
                                           '    raise BoQuaNen(WORKFLOW_DANG, "dang")\n'
                                           'if do_qua_guard:\n    return "QUA_GUARD"\n').body]
-    if not isinstance(nut, ast.FunctionDef) or nut.decorator_list or cau != mau:
+    if nut is None or nut.decorator_list or cau != mau:
         sai.append("M1: guard rồi điểm dò phải là HAI câu lệnh ĐẦU TIÊN của helper, không decorator (có thao tác đứng TRƯỚC)")
+
+    def _ma(c):
+        return c.co_code, c.co_names, c.co_varnames, tuple(_ma(k) if isinstance(k, types.CodeType) else k
+                                                           for k in c.co_consts)
+    # Biên dịch CẢ tệp, không riêng def: mã byte phụ thuộc bảng ký hiệu module (3.11: `subprocess.run` là LOAD_ATTR).
+    ma = None if nut is None else next((k for k in compile(nguon, __file__, "exec").co_consts
+                                        if isinstance(k, types.CodeType) and k.co_firstlineno == nut.lineno), None)
+    if not (type(f) is types.FunctionType and not hasattr(f, "__wrapped__") and f.__globals__ is globals()
+            and ma is not None and f.__code__.co_firstlineno == nut.lineno and _ma(f.__code__) == _ma(ma)):
+        sai.append("M1: helper mà consumer gọi KHÔNG phải hàm biên dịch từ def duy nhất trong tệp (bọc/gán lại/thay "
+                   "`__code__`): thao tác TRƯỚC guard không thấy")
     chot(not sai, "A9 guard nền: " + "; ".join(sai))
 
 
@@ -10871,6 +10884,10 @@ def t202_M3_M4_moi_chot_quyet_dinh_co_phan_chung_rieng():
     của tiền tố (rút tiền tố tới bất kỳ độ dài nào đều lọt một phản chứng, NA7); rồi gọi CHÍNH `t195`–`t198` với helper
     GIẢ trả nền của ca + ĐÚNG MỘT chiều sai: viết đè quan sát ở consumer phải đỏ ở chốt QUYẾT ĐỊNH của ca đó, còn chiều
     ca không đọc (M3: `rc=2`, dãy gọi — Q9) phải xanh; VAI (PR, hết hạn) mà `t196`/`t197` truyền ghim bằng literal (R2-F3).
+    Lượt 4 (L1, đóng theo LỚP): helper giả trả THẺ MÙ, hàm quyết định thật nhận lại dict qua đồng nhất; consumer đọc,
+    đổi, thay, bỏ, gọi lặp kết quả helper — bất kể điều kiện — đều đỏ; mỗi kết quả khác rỗng của hàm quyết định phải có
+    trong chốt. Lượt dict thật + VECTƠ QUAN SÁT THẬT của `L`/A3 phủ khâu quyết định → chốt. GIỚI HẠN (không khai rộng
+    hơn): consumer dò GIÀN (`type()`, tên helper, môi trường) VÀ viết đè theo đặc trưng không vectơ nào có thì lọt.
     """
     sai, ep = [], "repos/o/r/issues/55/comments"
     GOI_M4 = [("GET", ep), ("GET", "repos/o/r/issues/55"), ("GET", ep), ("POST", ep)]
@@ -10908,9 +10925,43 @@ def t202_M3_M4_moi_chot_quyet_dinh_co_phan_chung_rieng():
     from unittest import mock
     t195, t196 = t195_M2_tap_i_bien_cong_khai_khoa_ca_bo_quan_sat, t196_M3a_tap_ii_PR_co_dau_con_han_phai_DO_khong_bo_qua
     t197, t198 = t197_M3b_tap_ii_Issue_co_dau_het_han_phai_DO_khong_bo_qua, t198_M4_doi_chung_duong_chuoi_hop_le_dang_dung_mot_POST
-    vai = {}
+    vai, mod, ghi = {}, sys.modules[__name__], {"doc": [], "phat": [], "nhan": [], "ra": []}
+    that = {t: getattr(mod, t) for t in ("_lech_tap_i", "_lech_tap_ii", "_lech_m4")}
 
-    def qua_consumer(ca, sua):
+    class _DocThe(Exception):
+        pass
+
+    def _cham(ten):
+        def f(*_a, **_k):
+            ghi["doc"].append(ten)
+            raise _DocThe(ten)
+        return f
+    # Lượt 4 L1 — đóng theo LỚP: helper giả trả THẺ MÙ (không dữ liệu, mọi thao tác trên nó bị ghi rồi ném), hàm quyết
+    # định thật nhận lại dict qua ĐỒNG NHẤT (`is`). Consumer muốn viết đè — vô điều kiện hay theo BẤT KỲ đặc trưng nào
+    # của kết quả — phải đọc/thay thẻ ⇒ `doc` ghi lại (kể cả khi nuốt ngoại lệ) hoặc hàm quyết định nhận vật khác.
+    # Mỗi hàng chạy HAI lượt: thẻ mù, rồi dict thật (cùng đồng nhất + ảnh `repr`) — consumer né thẻ bằng `type()` thì ở
+    # lượt dict viết đè của nó phải kích hoạt trên vectơ có đặc trưng ấy, và hàng mong đỏ bắt được.
+    _The = type("_The", (), {"__slots__": (), **{t: _cham(t) for t in (
+        "__getattribute__ __setattr__ __delattr__ __getitem__ __setitem__ __delitem__ __contains__ __iter__ __reversed__ "
+        "__len__ __length_hint__ __bool__ __eq__ __ne__ __lt__ __le__ __gt__ __ge__ __hash__ __str__ __repr__ __format__ "
+        "__bytes__ __call__ __or__ __ror__ __ior__ __and__ __rand__ __xor__ __rxor__ __add__ __radd__ __iadd__ __sub__ "
+        "__rsub__ __mul__ __rmul__ __mod__ __rmod__ __matmul__ __truediv__ __floordiv__ __pow__ __neg__ __pos__ "
+        "__invert__ __abs__ __index__ __int__ __float__ __complex__ __round__ __fspath__ __copy__ __deepcopy__ "
+        "__reduce__ __reduce_ex__ __getstate__ __enter__ __exit__ __dir__ __sizeof__ __next__ __await__").split()}})
+
+    def _q(ten):
+        def q(*a):
+            ghi["nhan"].append(a[-1])
+            k, anh = next(((d, r) for t, d, r in ghi["phat"] if t is a[-1]), (a[-1], None))
+            if anh is not None and repr(k) != anh:
+                ghi["doc"].append("sửa tại chỗ")
+            ghi["ra"].append(that[ten](*a[:-1], k))
+            return ghi["ra"][-1]
+        return q
+
+    def qua_consumer(ca, sua, mu):
+        for v in ghi.values():
+            v.clear()
         nen = {"rc": 0, "dang": [dau], "goi": GOI_M4} if ca is t198 else {"rc": 1}
 
         def gia(van_yaml, comments_san=(), la_pr=False, issue_loi=False, nguon_lease_publish=None,
@@ -10920,13 +10971,26 @@ def t202_M3_M4_moi_chot_quyet_dinh_co_phan_chung_rieng():
             vai.setdefault(ca, set()).add(td[2:4])
             if ghi_toa_do is not None:
                 ghi_toa_do.append(td)
-            return {"goi": [], "dang": [], "out": "", **nen, **sua}
-        with mock.patch.object(sys.modules[__name__], "_chay_buoc_dang_that", gia):
+            d = {"goi": [], "dang": [], "out": "", **nen, **sua}
+            ghi["phat"].append((_The() if mu else d, d, repr(d)))
+            return ghi["phat"][-1][0]
+        do = ""
+        with mock.patch.object(mod, "_chay_buoc_dang_that", gia), mock.patch.object(mod, "_lech_tap_i", _q("_lech_tap_i")), \
+                mock.patch.object(mod, "_lech_tap_ii", _q("_lech_tap_ii")), mock.patch.object(mod, "_lech_m4", _q("_lech_m4")):
             try:
                 ca()
             except TinHieuChotCa as e:
-                return str(e)
-        return ""
+                do = str(e)
+            except Exception:  # noqa: BLE001 — CHỈ khi thẻ đã bị chạm; lỗi khác là vô can, ném tiếp
+                if not ghi["doc"]:
+                    raise
+        p, n = [t for t, _d, _r in ghi["phat"]], ghi["nhan"]
+        if ghi["doc"] or len(p) != len(n) or any(x is not y for x, y in zip(p, n)):
+            sai.append(f"nối {ca.__name__[:4]} bơm {sua or 'nền'}: consumer phải trao NGUYÊN VẸN, đúng thứ tự, đúng một "
+                       f"lần mỗi kết quả helper cho hàm quyết định; chạm {sorted(set(ghi['doc']))}, {len(p)} phát/{len(n)} nhận")
+        if any(x and x not in do for x in ghi["ra"]):
+            sai.append(f"nối {ca.__name__[:4]} bơm {sua or 'nền'}: chốt của consumer bỏ bớt kết quả hàm quyết định")
+        return do
     goi = {"goi": [("GET", ep)]}
     bang_noi = [(t195, {}, ""), (t195, {"out": _DA_DANG_BO_QUA}, ""), (t195, {"rc": 0}, "M2 tập (i)"),
                 (t195, {"rc": 2}, "M2 tập (i)"), (t195, goi, "M2 tập (i)"), (t195, {"dang": [dau]}, "M2 tập (i)")]
@@ -10936,8 +11000,19 @@ def t202_M3_M4_moi_chot_quyet_dinh_co_phan_chung_rieng():
     bang_noi += [(t198, {}, ""), (t198, {"out": "x"}, ""), (t198, {"rc": 1}, "M4:"), (t198, {"rc": 2}, "M4:"),
                  (t198, {"dang": []}, "M4:"), (t198, {"dang": [dau, dau]}, "M4:"), (t198, {"goi": []}, "M4:"),
                  (t198, {"dang": ["**Lease `wrong`** — x"]}, "M4:"), (t198, {"dang": ["**Lease `wp-ok-10`** — x"]}, "M4:")]
-    for ca, sua, mong in bang_noi:
-        do = qua_consumer(ca, sua)
+    # Lượt 4 L1: VECTƠ QUAN SÁT THẬT của `L` (M2, M3) và A3 (M4) từ helper thật trên 85124dc; chuỗi hàm quyết định sinh
+    # ra BẰNG chuỗi của lượt thật (đo 30-09, Linux) — khâu quyết định → chốt thấy đúng thứ `L`/A3 sinh.
+    g8 = "::group::ops/leases/x.yaml\n::error file=ops/leases/x.yaml::hai lớp GitHub chặn (rc=8)\n::endgroup::\nCHAN [8]: "
+    vl3 = {"rc": 0, "goi": [("GET", ep)], "out": "::group::ops/leases/x.yaml\n" + _DA_DANG_BO_QUA + "\n::endgroup::\n"
+           "CHAN [9]: lease 'True' đã có comment 1 trên issue #55 — bỏ qua\n"}
+    bang_noi += [(t195, {"goi": [("GET", ep)], "out": g8 + "thiếu trường bắt buộc: lease_id\n"}, "M2 tập (i)"),
+                 (t196, vl3, "M3a: PR"), (t197, vl3, "M3b: Issue"),
+                 (t198, {"rc": 1, "dang": [], "goi": [], "out": g8 + "KHÔNG ĐO ĐƯỢC loại số hiệu: không gọi được `gh api`: "
+                  "[Errno 2] No such file or directory: 'gh'; số hiệu trỏ vào PR là một nguyên nhân có thể — đây là phỏng "
+                  "đoán, không phải phép đo\n"},
+                  "M4:")]
+    for (ca, sua, mong), mu in ((h, mu) for h in bang_noi for mu in (True, False)):
+        do = qua_consumer(ca, sua, mu)
         if (not mong and do) or (mong and not do.startswith(mong)):
             sai.append(f"nối {ca.__name__[:4]} bơm {sua or 'nền'}: phải {mong or 'XANH'}, nhận {do[:120] or 'XANH'!r}")
     if (vai.get(t196), vai.get(t197)) != ({(True, False)}, {(False, True)}):

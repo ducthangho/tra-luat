@@ -101,6 +101,12 @@ trang_thai_packet:
     luc (merge #691); ban nay giu `true` va ghi them can cu ay. Hai moc (2) va tu cach (4) deu dong theo quyet dinh,
     khong vi da duoc do. Tu cach cua CHINH quyet dinh o (2): chu kho xac nhan
     luc 07:01:30Z la quyet dinh 06:14 phu ca hai — xem authorization.tu_cach_uy_quyen.pham_vi_voi_quyet_dinh_0533.
+    KHOANG HO THU HAI, cung hinh dang voi (4): fa22ad0 (0 cau ve tu cach) va 25b02af (neo_ben_ghi_chu cua 5904784660
+    ghi "Cung tu cach voi uy quyen merge" trong khi khong_tai_su_dung cua quyet dinh 06:14 ghi "CHI cho uy quyen
+    5889749874") deu giu `true` khi tu cach cua CHINH quyet dinh hai moc (2) chua duoc chu kho xet — theo nguyen tac o
+    landed_ly_do_giu_true, ca hai ban ay le ra phai `false`. Review luot 4 cua PR #691 (5905936797, lop
+    tu-cach-quyet-dinh-0533-ngoai-pham-vi-da-ghi) bat; tu 9baaef8 (07:02:18Z, sau xac nhan 07:01:30Z) moi du can cu.
+    `landed` chua co hieu luc o ban nao trong so ay (chi co hieu luc tu merge #691).
   quyet_dinh_chu_kho:
     nguyen_van: '#691: chấp nhận nguồn thay thế, chấp nhận step_conclusion. Chạy thêm review opus 5.5, xhigh'
     nguyen_van_ghi_chu: >-
@@ -252,6 +258,14 @@ authorization:
     pham_vi_voi_quyet_dinh_0533:
       trang_thai: loi_khai_co_neo
       disposition: chu_kho_xac_nhan_phu_ca_hai
+      lop: tu-cach-quyet-dinh-0533-ngoai-pham-vi-da-ghi
+      nguon_lop: >-
+        Review advisory luot 4 cua PR #691 (pull/691#issuecomment-5905936797; subagent va-spec-opus cua phien
+        session_01CSM7GNazhN6uGJb4v1TqBT, Claude Opus 5.5 xhigh, cung ho executor; tren 25b02af). Comment do phien land
+        operator dang; id lay tu ket qua loi goi add_issue_comment (2026-09-30T07:00:51Z), than DA GUI 2790 byte UTF-8,
+        sha256 a3c08b01f3cea9fd26d765c8802c388d584def346b89e7883621e8b76ecd5530. CHUA doc lai qua REST nen created_at va
+        than DA DEN la KHONG DO DUOC, readback KHONG luu. VERDICT.md luot 4 (sha256 34100f3d…a2ab) nam trong goi review
+        ngoai kho. Cau hoi 07:01:00Z la phan hoi cho lop nay.
       cau_hoi: >-
         DIEN GIAI cua land operator, KHONG phai nguyen van: Quyet dinh 06:14:01Z co ap luon cho quyet dinh 05:33:01Z
         (neo 5904784660, dong hai moc o (2)) khong? Hai quyet dinh cung loai tu cach: loi chu kho chi nam trong
@@ -270,7 +284,9 @@ authorization:
       tra_loi: 'Có, phủ cả hai (Recommended)'
       tra_loi_ghi_chu: >-
         Nguyen van nhan phuong an chu kho chon (33 byte UTF-8, NFC), theo ket qua AskUserQuestion trong transcript. Ban
-        9baaef8 cua khoa nay trich "Có, phủ cả hai" (19 byte), tuc cat mat dau khuyen nghi cua agent — da thay. Than
+        9baaef8 cua khoa nay trich "Có, phủ cả hai" (19 byte), tuc cat mat dau khuyen nghi cua agent — da thay theo
+        review luot 5 cua PR #691 (5906269711; id tu ket qua loi goi add_issue_comment 07:23:07Z, chua doc lai qua REST;
+        lop xac-nhan-0701-trich-cat-khuyen-nghi-cua-agent). Than
         comment neo_ben cung cat nhu vay va khong chep phuong an con lai.
       luc: '2026-09-30T07:01:30.814Z (loi_khai_co_neo: timestamp ket qua AskUserQuestion trong transcript phien session_01CSM7GNazhN6uGJb4v1TqBT)'
       neo_ben: https://github.com/ducthangho/tra-luat/pull/691#issuecomment-5905950521

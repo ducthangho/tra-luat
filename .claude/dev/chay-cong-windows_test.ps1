@@ -25,17 +25,23 @@
 #   t20 tep-test-khong-kin-moi-truong-may         console code page 437 ⇒ vẫn đọc đúng output UTF-8 của script
 #   t21 bo-giai-cong-cu-theo-ten-thu-tu (PATH)    `python` giả trong `<TEMP>/actionlint` (TEMP dùng chung) ⇒ cổng Python không ĐẠT
 #   t22 bo-giai-cong-cu-theo-ten-thu-tu (tách)    gốc kho chứa dấu phân cách PATH (AL_DICH vỡ đôi, tiền tố lên đầu PATH) ⇒ rc=2
-#   t23 bo-giai-cong-cu-theo-ten-thu-tu (tuyệt đối) `python` giả trong `dist/actionlint` ⇒ cổng Python vẫn chạy tệp ĐÃ KIỂM
+#   t23 bo-giai-cong-cu-theo-ten-thu-tu (tuyệt đối) Tim-Python trả ĐƯỜNG DẪN của tệp đã kiểm, không trả TÊN (hàm nạp từ AST)
 #   t24 bo-giai-cong-cu-theo-ten-thu-tu (theo dõi) tệp THEO DÕI dưới `dist/actionlint` (đầu PATH của wrapper lease) ⇒ rc=2
+#   t25 bo-giai-cong-cu-theo-ten-thu-tu (cho phép) `dist/actionlint` chứa thứ installer không sinh ra — `python` chưa theo dõi;
+#                                                 symlink `dist` THEO DÕI trỏ sang thư mục có `actionlint/python` ⇒ rc=2
+#   t26 duong-dan-du-lieu-thanh-mau-wildcard (FilePath) đường dẫn công cụ chứa `[ ]` ⇒ KHÔNG gọi Start-Process, KHÔNG ĐO ĐƯỢC
 # Bộ này KÍN với config git của máy chạy, với biến git trỏ kho khác (khối ngay dưới `$script:Rac`), với code page của
 # console (`Doc-Utf8`), với dấu thập phân của locale (t18 nhận `5,1s`) và với `<TEMP>/actionlint` của máy (t7, t21 tự đặt TEMP).
-# ĐỘT BIẾN để đo răng (đo trên pwsh 7.4.6/Linux, bộ 24 ca): `-Script` trỏ f2392df ⇒ 3/24 (đạt t17 — bản ấy đã so băm —, t21 —
-# dấu `;` ghim cứng dán AL_DICH vào mục PATH kế nên nó không thành một mục — và t23 — AL_DICH là TEMP); 8b82d40 ⇒ 14/24 (đỏ t7
-# t13 t14 t15 t16 t18 t19 t21 t22 t24); 66efc78 ⇒ 16/24 (đỏ t7 t13 t16 t18 t19 t21 t22 t24); 131c608 ⇒ 17/24 (đỏ t7 t13 t18 t19
-# t21 t22 t24); bd62cad ⇒ 19/24 (đỏ t7 t19 t21 t22 t24); 131c2e7 ⇒ 20/24 (đỏ t7 t21 t22 t24); c8c2c6a ⇒ 21/24 (đỏ t22 t23 t24).
-# Lượt 7, mỗi chốt một ca: Tim-Python trả TÊN ⇒ chỉ t23; bỏ chốt phân cách PATH ⇒ chỉ t22; bỏ chốt tệp theo dõi ⇒ chỉ t24;
-# AL_DICH về TEMP ⇒ chỉ t7, kể cả khi TEMP của máy có sẵn `actionlint/` (bỏ vế samefile của t7 thì đột biến ấy SỐNG 24/24);
-# TÊN + TEMP ⇒ t7 t21. Lượt 6: cột rc in TRỐNG thay cho `-` ⇒ t19. 29 đột biến trên script (lượt 4): 25 đỏ ÍT NHẤT ca
+# ĐỘT BIẾN để đo răng (đo trên pwsh 7.4.6/Linux, bộ 26 ca): `-Script` trỏ f2392df ⇒ 2/26 (đạt t17 — bản ấy đã so băm — và t21 —
+# dấu `;` ghim cứng dán AL_DICH vào mục PATH kế nên nó không thành một mục); 8b82d40 ⇒ 13/26 (đỏ t7 t13 t14 t15 t16 t18 t19 t21
+# t22 t23 t24 t25 t26); 66efc78 ⇒ 15/26 (đỏ t7 t13 t16 t18 t19 t21 t22 t23 t24 t25 t26); 131c608 ⇒ 16/26 (đỏ t7 t13 t18 t19 t21
+# t22 t23 t24 t25 t26); bd62cad ⇒ 18/26 (đỏ t7 t19 t21 t22 t23 t24 t25 t26); 131c2e7 ⇒ 19/26 (đỏ t7 t21 t22 t23 t24 t25 t26);
+# c8c2c6a ⇒ 21/26 (đỏ t22 t23 t24 t25 t26); 623864e ⇒ 24/26 (đỏ t25 t26).
+# Lượt 8, mỗi chốt một ca: bỏ chốt wildcard của Chay-Cong ⇒ chỉ t26; bỏ danh sách CHO PHÉP ⇒ chỉ t25 (riêng đường symlink cũng làm
+# t25 đỏ trên 623864e); so tên KHÔNG phân biệt hoa thường ⇒ SỐNG 26/26 (TƯƠNG ĐƯƠNG: tên chỉ khác hoa thường là CÙNG tệp trên hệ tệp
+# không phân biệt, còn trên hệ tệp phân biệt thì PATH không đọc nó thành `actionlint`). Lượt 7: Tim-Python trả TÊN ⇒ chỉ t23; bỏ chốt
+# phân cách PATH ⇒ chỉ t22; bỏ chốt tệp theo dõi ⇒ chỉ t24; AL_DICH về TEMP ⇒ t7 t21 t25 (danh sách CHO PHÉP nay soi `<TEMP>/actionlint`;
+# bỏ vế samefile của t7 thì t7 SỐNG trước đột biến ấy); TÊN + TEMP ⇒ t7 t21 t23 t25. Lượt 6: cột rc in TRỐNG thay cho `-` ⇒ t19. 29 đột biến trên script (lượt 4): 25 đỏ ÍT NHẤT ca
 # của mảnh nó gỡ, 4 sống đúng là bốn mảnh khai ở cuối đoạn này. Lượt 5 đo lại trên bộ 20 ca: gỡ nhánh rc≠0 của xả / `$giay` trước xả / bỏ trừ phần hạn đã trôi /
 # xả 2×HanGiay / sàn 12 s ⇒ chỉ t18; xả cố định 30 s ⇒ t16 t18; nhánh xả đếm ĐẠT ⇒ t16; rc=null đếm ĐỎ ⇒ t19; giải bash
 # theo tên ⇒ t2; bỏ `$env:GIT_CONFIG = $null` ⇒ t13; sàn 0 ⇒ SỐNG (đã khai). Trên chính bộ này: `Doc-Utf8` rỗng ⇒ t20;
@@ -53,8 +59,9 @@
 # pwsh 7.0); `#Requires -Version 7.1` (bộ này chạy bằng pwsh ≥ 7.1); sàn 1 s của `$conMs` (chỉ đổi kết quả khi cổng
 # thoát sát hạn); phần khối kín cho `GIT_INDEX_FILE`/`GIT_DIR` (đo bằng chạy dưới biến ấy — gỡ ra ⇒ index kho khác
 # 2144 → 34 mục — không có ca); dòng ép UTF-8 trong harness t11/t19 (chỉ có tác dụng khi console của tiến trình con là
-# code page cũ — Windows). CHƯA ĐÓNG — khai thẳng: tệp CHƯA theo dõi trong `dist/actionlint` vẫn lên đầu PATH của wrapper lease
-# (`ops/chay_lease_publish_test.sh` gọi `python` theo tên; ngoài write set) — đó là tệp của chính người chạy, không phải của nhánh.
+# code page cũ — Windows); `try/catch` quanh danh sách CHO PHÉP (chỉ khi không liệt kê được thư mục). CHƯA ĐÓNG — khai thẳng:
+# `ops/chay_lease_publish_test.sh` (ngoài write set) vẫn gọi `python` theo tên SAU khi chèn AL_DICH; script chỉ bảo đảm thư mục ấy
+# chứa đúng sản phẩm installer TẠI LÚC chèn — một cổng chạy trước wrapper (mã của nhánh) vẫn ghi được vào đó.
 [CmdletBinding()]
 param([string]$Script)
 Set-StrictMode -Version Latest
@@ -571,23 +578,25 @@ Ca 't22 goc kho co dau phan cach PATH => rc=2, noi dung nguyen nhan' {
     if ($a.rc -ne 2 -or $a.ra -notmatch 'phân cách PATH') { throw "goc co dau phan cach PATH ma khong bi tu choi dung cho (rc=$($a.rc))" }
 }
 
-# `python` giả trong `dist/actionlint` (thư mục lên ĐẦU PATH sau khi Tim-Python đã kiểm): cổng Python phải chạy ĐÚNG tệp đã
-# kiểm (đường dẫn tuyệt đối), không chạy `python` đầu PATH. Tệp CHƯA theo dõi để ca đo riêng chốt đường dẫn tuyệt đối (t24 đo
-# chốt tệp THEO DÕI).
-Ca 't23 python gia trong dist/actionlint => cong Python van chay tep DA KIEM' {
-    $k = Dung-Kho
-    $al = Join-Path $k (Join-Path 'dist' 'actionlint')
-    New-Item -ItemType Directory -Force -Path $al | Out-Null
-    foreach ($n in 'py', 'python', 'python3') {
-        if ($IsWindows) { Set-Content -LiteralPath (Join-Path $al "$n.cmd") -Value '@exit /b 0' -Encoding ascii }
-        else {
-            $f = Join-Path $al $n
-            Set-Content -LiteralPath $f -Value "#!/bin/sh`nexit 0" -Encoding utf8NoBOM
-            & chmod +x $f
-        }
-    }
-    $a = Chay $k @() @{ STUB_RC_cong_cu_py = '1' }
-    if ($a.ra -notmatch 'cong_cu kiem-tra\s+rc=1') { throw "python gia trong dist/actionlint duoc chon, cong Python khong chay tep da kiem (rc_script=$($a.rc))" }
+# Tim-Python trả `.Source` của tệp ĐÃ KIỂM, không trả TÊN: sau nó `dist/actionlint` lên ĐẦU PATH, nên `python` theo tên lúc chạy cổng
+# có thể là tệp KHÁC (đo trên c8c2c6a: `python` giả trong `dist/actionlint` ⇒ 6/6 ĐẠT, rc=0). Đường vào ấy nay bị danh sách CHO PHÉP
+# chặn trước (t25), nên ca đo THẲNG trên hàm — nạp NGUYÊN VĂN `Tim-Python` từ AST như t11 — để chốt này có ca riêng.
+Ca 't23 Tim-Python tra DUONG DAN tep da kiem, khong tra TEN' {
+    $ast = [System.Management.Automation.Language.Parser]::ParseFile($Script, [ref]$null, [ref]$null)
+    $fn = $ast.Find({ param($n) $n -is [System.Management.Automation.Language.FunctionDefinitionAst] -and $n.Name -eq 'Tim-Python' }, $true)
+    if (-not $fn) { throw 'khong thay ham Tim-Python trong script' }
+    $d = Join-Path ([IO.Path]::GetTempPath()) ('ccw-' + [guid]::NewGuid().ToString('N').Substring(0, 10))
+    $script:Rac += $d
+    New-Item -ItemType Directory -Force -Path $d | Out-Null
+    $h = Join-Path $d 'h.ps1'
+    Set-Content -LiteralPath $h -Encoding utf8NoBOM -Value ("Set-StrictMode -Version Latest`n" + $fn.Extent.Text + "`n" +
+        '$p = Tim-Python; Write-Host ("TEN=" + $(if ($p) { $p.Ten } else { "(null)" }))')
+    $ra = (Doc-Utf8 { & $PwshExe -NoProfile -File $h 2>&1 } | ForEach-Object { "$_" }) -join "`n"
+    $m = [regex]::Match($ra, '(?m)^TEN=(.+)$')
+    if (-not $m.Success -or $m.Groups[1].Value.Trim() -eq '(null)') { throw "harness khong tim duoc Python: $ra" }
+    # Có dấu cheo ⇒ đường dẫn (`.Source` tuyệt đối, hoặc tương đối khi PATH có mục tương đối); không có ⇒ TÊN.
+    $ten = $m.Groups[1].Value.Trim()
+    if ($ten.IndexOfAny([char[]]@('/', '\')) -lt 0) { throw "Tim-Python tra TEN '$ten', khong tra duong dan tep da kiem" }
 }
 
 # Tệp THEO DÕI dưới `dist/actionlint` (bị `.gitignore`, chỉ vào được bằng `git add -f`) là dữ liệu của NHÁNH, mà thư mục ấy lên
@@ -601,6 +610,66 @@ Ca 't24 tep THEO DOI duoi dist/actionlint => rc=2' {
     & git -C $k -c user.email=t@t -c user.name=t commit -qm theo-doi
     $a = Chay $k
     if ($a.rc -ne 2 -or $a.ra -notmatch 'THEO DÕI') { throw "dist/actionlint co tep theo doi ma khong bi tu choi (rc=$($a.rc))" }
+}
+
+# Thư mục đầu PATH (của script lẫn wrapper lease, vốn gọi `python` theo tên) chỉ được chứa ĐÚNG sản phẩm của installer — danh sách
+# CHO PHÉP. Hai đường mà chốt `ls-files` (t24) KHÔNG thấy, mỗi đường một lượt. Đo trên 623864e với wrapper + installer thật: symlink
+# `dist` THEO DÕI ⇒ `lease-publish selftest` ĐẠT dù bộ test thoát 1 (131c2e7: ĐỎ).
+Ca 't25 dist/actionlint chua thu installer khong sinh ra => rc=2' {
+    $k = Dung-Kho
+    $al = Join-Path $k (Join-Path 'dist' 'actionlint')
+    New-Item -ItemType Directory -Force -Path $al | Out-Null
+    Set-Content -LiteralPath (Join-Path $al 'python') -Value "#!/bin/sh`nexit 0" -Encoding utf8NoBOM
+    $a = Chay $k
+    if ($a.rc -ne 2 -or $a.ra -notmatch 'installer không sinh ra') { throw "python CHUA theo doi trong dist/actionlint ma khong bi tu choi (rc=$($a.rc))" }
+    # Symlink `dist` THEO DÕI (mẫu `.gitignore` `dist/` chỉ khớp THƯ MỤC ⇒ `git add` thường) — `ls-files -- dist/actionlint` rỗng.
+    $k2 = Dung-Kho
+    $t = Join-Path $k2 (Join-Path 'tools' 'actionlint')
+    New-Item -ItemType Directory -Force -Path $t | Out-Null
+    Set-Content -LiteralPath (Join-Path $t 'python') -Value "#!/bin/sh`nexit 0" -Encoding utf8NoBOM
+    if ($IsWindows) { New-Item -ItemType Junction -Path (Join-Path $k2 'dist') -Target (Join-Path $k2 'tools') | Out-Null }
+    else {
+        & ln -s tools (Join-Path $k2 'dist')
+        & git -C $k2 add -A
+        & git -C $k2 -c user.email=t@t -c user.name=t commit -qm symlink
+        if (@(& git -C $k2 ls-files -- 'dist/actionlint').Count -ne 0 -or @(& git -C $k2 ls-files -- 'dist').Count -ne 1) {
+            throw 'KHONG DO DUOC: kho gia khong dung duoc symlink dist THEO DOI ma ls-files dist/actionlint rong' }
+    }
+    $b = Chay $k2
+    if ($b.rc -ne 2 -or $b.ra -notmatch 'installer không sinh ra') { throw "symlink dist tro sang thu muc co python ma khong bi tu choi (rc=$($b.rc))" }
+}
+
+# `-FilePath` của Start-Process là MẪU: đường dẫn công cụ chứa `[ ]` làm nó chạy tệp KHÁC tệp đã kiểm (đo trên 623864e: đã kiểm
+# `…/p[1]/python`, chạy `…/p1/python` ⇒ 6/6 ĐẠT, rc=0; bash dưới `b[1]` cũng vậy, có sẵn từ trước). Nạp NGUYÊN VĂN `Chay-Cong` như
+# t19; Start-Process giả ĐẾM lời gọi và trả rc=0, nên thiếu chốt thì ca thấy `ĐẠT` + một lời gọi.
+Ca 't26 duong dan cong cu co wildcard => khong goi Start-Process, KHONG DO DUOC' {
+    $ast = [System.Management.Automation.Language.Parser]::ParseFile($Script, [ref]$null, [ref]$null)
+    $fn = $ast.Find({ param($n) $n -is [System.Management.Automation.Language.FunctionDefinitionAst] -and $n.Name -eq 'Chay-Cong' }, $true)
+    if (-not $fn) { throw 'khong thay ham Chay-Cong trong script' }
+    $d = Join-Path ([IO.Path]::GetTempPath()) ('ccw-' + [guid]::NewGuid().ToString('N').Substring(0, 10))
+    $script:Rac += $d
+    New-Item -ItemType Directory -Force -Path $d | Out-Null
+    $h = Join-Path $d 'h.ps1'
+    Set-Content -LiteralPath $h -Encoding utf8NoBOM -Value (@'
+Set-StrictMode -Version Latest
+[Console]::OutputEncoding = [Text.UTF8Encoding]::new($false)
+$KetQua = New-Object System.Collections.ArrayList
+$NhatKy = $PSScriptRoot; $Goc = $PSScriptRoot; $HanGiay = 5; $ChiTiet = $false
+$script:SoGoi = 0
+function Start-Process {
+    $script:SoGoi++
+    $o = [pscustomobject]@{ HasExited = $true; ExitCode = 0 }
+    $o | Add-Member -MemberType ScriptMethod -Name WaitForExit -Value { $true }
+    $o | Add-Member -MemberType ScriptMethod -Name WaitForExitAsync -Value { [Threading.Tasks.Task]::CompletedTask }
+    return $o
+}
+'@ + "`n" + $fn.Extent.Text + "`n" + @'
+Chay-Cong -Ten 'gia' -Tep (Join-Path (Join-Path $PSScriptRoot 'p[1]') 'python') -DoiSo @()
+Write-Host ("TRANG_THAI=" + $(switch ($KetQua[0].TrangThai) { 'ĐẠT' { 'DAT' } 'ĐỎ' { 'DO' } 'KHÔNG ĐO ĐƯỢC' { 'KDD' } default { '?' } }) + " SO_GOI=" + $script:SoGoi)
+'@)
+    $ra = (Doc-Utf8 { & $PwshExe -NoProfile -File $h 2>&1 } | ForEach-Object { "$_" }) -join "`n"
+    if ($ra -notmatch 'TRANG_THAI=') { throw "harness khong chay toi het Chay-Cong: $ra" }
+    if ($ra -notmatch 'TRANG_THAI=KDD SO_GOI=0') { throw "duong dan co wildcard van duoc dua cho Start-Process: $ra" }
 }
 
 foreach ($d in $script:Rac) { Remove-Item -LiteralPath $d -Recurse -Force -ErrorAction SilentlyContinue }

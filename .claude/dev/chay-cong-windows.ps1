@@ -154,7 +154,8 @@ function Tim-Python {
         [pscustomobject]@{ Ten = 'python3'; Dau = @()        }
     )
     foreach ($u in $ungVien) {
-        # Trả ĐƯỜNG DẪN TUYỆT ĐỐI của đúng tệp đã chứng minh, KHÔNG trả TÊN: sau hàm này script chèn `dist/actionlint` lên ĐẦU
+        # Trả `.Source` của đúng tệp đã chứng minh (tuyệt đối; mục PATH TƯƠNG ĐỐI cho `rel/python`, tương đối với `$Goc` — cwd
+        # không đổi nên vẫn đúng tệp), KHÔNG trả TÊN: sau hàm này script chèn `dist/actionlint` lên ĐẦU
         # PATH, nên `python` theo tên lúc chạy cổng có thể là tệp KHÁC tệp đã kiểm — lớp này đã tái phát ba lần (shim đầu PATH;
         # `<TEMP>/actionlint`; `python` trong `dist/actionlint` ⇒ đo: 6/6 cổng ĐẠT, rc=0).
         $lenh = @(Get-Command $u.Ten -CommandType Application -ErrorAction SilentlyContinue)
@@ -260,8 +261,9 @@ if ($gitDir -and $gitCommon -and ($gitDir -ne $gitCommon)) {
 $AlDich = Join-Path $Goc (Join-Path 'dist' 'actionlint')
 # `dist/` bị `.gitignore`: tệp THEO DÕI dưới `dist/actionlint` chỉ vào được bằng `git add -f`, tức là DỮ LIỆU của nhánh đang đo —
 # mà thư mục này lên ĐẦU PATH của wrapper lease (gọi `python` theo tên; `ops/`, ngoài write set). Đo: `python` giả theo dõi ở
-# đó ⇒ `lease-publish selftest` ĐẠT dù bộ test thoát 1 (131c2e7, AL_DICH = TEMP: ĐỎ). Cổng Python của script đã an toàn nhờ
-# đường dẫn tuyệt đối; chốt này đóng đường qua wrapper. Tệp CHƯA theo dõi là của chính người chạy — không phải dữ liệu nhánh.
+# đó ⇒ `lease-publish selftest` ĐẠT dù bộ test thoát 1 (131c2e7, AL_DICH = TEMP: ĐỎ). Chốt này chỉ thấy tệp THEO DÕI dưới
+# đúng chuỗi `dist/actionlint`; các đường còn lại (symlink `dist`, hoa thường, tệp chưa theo dõi) do danh sách CHO PHÉP chặn,
+# TẠI LÚC chèn PATH — một cổng chạy trước wrapper (mã của nhánh) vẫn ghi được vào đó.
 $alTheoDoi = @(& git ls-files -- 'dist/actionlint' 2>$null)
 if ($LASTEXITCODE -ne 0 -or $alTheoDoi.Count -gt 0) {
     Loi "dist/actionlint có tệp THEO DÕI ($($alTheoDoi -join ', ')) hoặc không hỏi được git — thư mục này lên đầu PATH nên không dùng dữ liệu của nhánh."
@@ -282,6 +284,22 @@ if ($CaiCongCu) {
         }
     } else {
         Canh 'không có bash — bỏ qua actionlint/shellcheck/rg.'
+    }
+}
+# Danh sách CHO PHÉP, không phải danh sách CẤM: thư mục đầu PATH (của script lẫn wrapper lease) chỉ được chứa ĐÚNG sản phẩm của
+# `ops/cai_actionlint.sh` (đo trên ba gói ghim 1.7.7: `actionlint[.exe] LICENSE.txt README.md docs man` + gói tạm). Chốt `ls-files` ở
+# trên không thấy: symlink `dist` THEO DÕI (mẫu `.gitignore` `dist/` chỉ khớp THƯ MỤC nên nó vào bằng `git add` thường) trỏ sang
+# thư mục theo dõi có `python` (đo: `ls-files` rỗng, `lease-publish selftest` ĐẠT dù bộ test thoát 1; 131c2e7: ĐỎ); `DIST/…` theo
+# dõi (đo: `ls-files` rỗng kể cả `core.ignorecase=true`; trên hệ tệp không phân biệt hoa thường nó là `dist\…` — KHÔNG ĐO ĐƯỢC ở
+# Linux); tệp chưa theo dõi.
+$AlChoPhep = @('actionlint', 'actionlint.exe', 'LICENSE.txt', 'README.md', 'docs', 'man',
+               'goi.gz', 'goi.zip', 'goi_giai_nen.tar.gz', 'goi_giai_nen.zip')
+if (Test-Path -LiteralPath $AlDich) {
+    try { $alLa = @(Get-ChildItem -LiteralPath $AlDich -Force -ErrorAction Stop | Where-Object { $AlChoPhep -cnotcontains $_.Name } | ForEach-Object Name) }
+    catch { $alLa = @("(không liệt kê được: $($_.Exception.Message))") }
+    if ($alLa.Count -gt 0) {
+        Loi "dist/actionlint lên đầu PATH mà chứa thứ installer không sinh ra: $($alLa -join ', '). Xoá thư mục ấy rồi chạy lại (-CaiCongCu cài lại)."
+        exit 2
     }
 }
 # Dấu phân cách của NỀN (không ghim `;`), và không chèn lặp khi PATH đã có sẵn thư mục ấy.
@@ -313,6 +331,15 @@ function Chay-Cong {
         return
     }
     if ($Han -le 0) { $Han = $HanGiay }
+    # `-FilePath` cũng là MẪU với Start-Process, như `-WorkingDirectory` ở chốt gốc kho (đo: Python đã kiểm bằng `&` là
+    # `…/p[1]/python`, Start-Process chạy `…/p1/python` ⇒ 6/6 cổng ĐẠT, rc=0; `[WildcardPattern]::Escape` ⇒ "No such file").
+    # Đường dẫn công cụ là DỮ LIỆU — Python của Tim-Python, bash của `ops/bash_nen.py`, pwsh — nên CỬA DUY NHẤT tới Start-Process
+    # từ chối nó ở đây: tệp được chạy có thể không phải tệp đã kiểm.
+    if ([WildcardPattern]::ContainsWildcardCharacters($Tep)) {
+        Write-Host ("  {0,-42} KHÔNG KHỞI ĐỘNG ĐƯỢC — '{1}' chứa ký tự wildcard ([ ] * ?): Start-Process coi đường dẫn là MẪU" -f $Ten, $Tep) -ForegroundColor Yellow
+        [void]$KetQua.Add([pscustomobject]@{ Ten = $Ten; Rc = $null; TrangThai = 'KHÔNG ĐO ĐƯỢC'; NhatKy = '' })
+        return
+    }
 
     $nen  = $Ten -replace '[^\w\.-]', '_'
     $fOut = Join-Path $NhatKy ($nen + '.out')

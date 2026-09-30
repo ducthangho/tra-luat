@@ -12,8 +12,8 @@ from pathlib import Path
 # cho MỌI tiến trình con/cháu. Đo 27-09-2026 (Linux, `PYTHONIOENCODING=ascii` cho con): `t29`, `t42`,
 # `t45` chết `tin_dung_gia` vì cháu in chữ Việt ra stdout ASCII; chạy tay trên Windows (cp1252/cp1258)
 # ĐỎ oan, còn CI che mất vì tự đặt hai biến này. Đặt vào `os.environ` chứ không vá từng lời gọi. Phạm vi
-# ĐÃ ĐO (AST, lượt vá 4): 36 Call mang `env=` trong tệp này — 12 `moi_truong(…)`, 3 `dict(os.environ, …)`,
-# 3 `{**os.environ, …}`, 18 biến/`dict(biến, …)` truy tay về ba dạng ấy hoặc tham số `None` (= thừa kế); lời
+# ĐÃ ĐO (AST, sau ghép #668): 38 Call mang `env=` trong tệp này — 12 `moi_truong(…)`, 3 `dict(os.environ, …)`,
+# 5 `{**os.environ, …}` (2 của #668), 18 biến/`dict(biến, …)` truy tay về các dạng ấy hoặc `None` (= thừa kế); lời
 # gọi không `env=` thì thừa kế. Điểm phóng viết SAU phải tự giữ điều đó — chưa ca nào khoá.
 # `t61` đo từng vế trong một tiến trình con CỐ Ý ép ASCII, nên nó có răng cả khi CI đã đặt sẵn.
 _BIEN_UTF8 = (("PYTHONIOENCODING", "utf-8"), ("PYTHONUTF8", "1"))
@@ -37,20 +37,41 @@ _ep_utf8()
 # chạy (CI đặt `PYTHONUTF8=1`, nên CI không bao giờ đi nhánh này). Hợp đồng lần phóng lại, mỗi vế một
 # chốt: chỉ ở `__main__` (`t61` (e)); mã thoát đi qua, `-B` còn, dấu không sót, `-X utf8=0` ra UTF-8 sau
 # đúng MỘT lần, đã phóng mà vẫn ngoài UTF-8 thì DỪNG (không lặp), nguồn stdin không đọc lại được thì DỪNG
-# thay vì chạy chương trình RỖNG ra `rc=0` (`t62` (1)–(6); `-c` đi cùng chốt `isfile`, không ca riêng). NỢ:
-# harness NGOÀI giết tiến trình này thì bản phóng lại vẫn chạy, giữ pipe — mồ côi trên CẢ POSIX (lượt 4 đo: 3
-# tiến trình còn sống) lẫn Windows (`timeout=3` kéo thành 15,7s); con chết vì SIGTERM ⇒ mã 241 (vẫn ≠ 0).
-# Hướng: POSIX `os.execv` / Windows Job Object — cả hai tách nhánh Windows khỏi phép đo Linux, nên để riêng.
-# Chạy tay có hạn chót thì đặt `PYTHONUTF8=1`.
+# thay vì chạy chương trình RỖNG ra `rc=0` (`t62` (1)–(6); `-c` đi cùng chốt `isfile`, không ca riêng).
+# Lượt 6 — MỒ CÔI (`t64`; `8757a84`: giết bao ⇒ bộ ca sống tiếp, SIGTERM bộ ca ⇒ bao 241): POSIX `os.execve` (CÙNG PID);
+# Windows tự gán Job Object KILL_ON_JOB_CLOSE TRƯỚC khi phóng; không gắn được ⇒ vẫn chạy, in `CANH_BAO_MO_COI`.
 _MA_TU_KIEM_UTF8, _DAU_PHONG_LAI = 5, "CONG_CU_TEST_DA_PHONG_LAI"
 _DA_PHONG_LAI = os.environ.pop(_DAU_PHONG_LAI, None) == "1"
+
+
+def _phong_lai(lenh, env, nen=os.name, k32=None, popen=subprocess.Popen, execve=os.execve):
+    if nen != "nt":
+        return sys.stdout.flush() or sys.stderr.flush() or execve(lenh[0], lenh, env)  # xả đệm rồi exec — không trở về
+    try:
+        import ctypes
+        k32, u32, sz, vp, i = k32 or ctypes.WinDLL("kernel32", use_last_error=True), ctypes.c_uint32, ctypes.c_size_t, \
+            ctypes.c_void_p, ctypes.c_int  # JOBOBJECT_EXTENDED_LIMIT_INFORMATION trải phẳng dưới: x64 144 byte, x86 112
+        _GioiHan = type("_GioiHan", (ctypes.Structure,), {"_fields_": [("tg", ctypes.c_int64 * 2), ("co", u32), ("ws", sz * 2),
+                        ("sl", u32), ("aff", sz), ("uu", u32 * 2), ("io", ctypes.c_uint64 * 6), ("mem", sz * 4)]})
+        for f, kq, ds in ((k32.CreateJobObjectW, vp, (vp, vp)), (k32.SetInformationJobObject, i, (vp, i, vp, u32)),
+                          (k32.AssignProcessToJobObject, i, (vp, vp)), (k32.GetCurrentProcess, vp, ())):
+            f.restype, f.argtypes = kq, ds  # HANDLE 64 bit: mặc định c_int cắt còn 32
+        gh, job = _GioiHan(co=0x2000), k32.CreateJobObjectW(None, None)  # 0x2000 = LIMIT_KILL_ON_JOB_CLOSE
+        if not (job and k32.SetInformationJobObject(job, 9, ctypes.byref(gh), ctypes.sizeof(gh))  # 9 = Extended
+                and k32.AssignProcessToJobObject(job, k32.GetCurrentProcess())):
+            raise OSError(f"GetLastError={getattr(ctypes, 'get_last_error', int)()}")
+    except Exception as ex:  # noqa: BLE001 — không chặn: vẫn chạy, nhưng NÓI ra
+        sys.stderr.write(f"cong_cu_test: CANH_BAO_MO_COI — không gắn được Job Object ({type(ex).__name__}: {ex}); harness "
+                         "giết tiến trình này thì bản phóng lại MỒ CÔI — có hạn chót thì đặt PYTHONUTF8=1\n")
+    return popen(lenh, env=env).wait()
+
+
 if __name__ == "__main__" and not sys.flags.utf8_mode:
     _nguon = globals().get("__file__") or ""
     if _DA_PHONG_LAI or not os.path.isfile(_nguon):
         sys.exit("cong_cu_test: KHONG_PHONG_LAI — " + ("đã phóng một lần mà vẫn ngoài UTF-8" if _DA_PHONG_LAI
                  else f"nguồn {_nguon!r} không đọc lại được") + "; chạy `python -X utf8 …` hoặc đặt PYTHONUTF8=1")
-    sys.exit(subprocess.run([sys.executable, "-X", "utf8", *sys.orig_argv[1:]],
-                            env={**os.environ, _DAU_PHONG_LAI: "1"}).returncode)
+    sys.exit(_phong_lai([sys.executable, "-X", "utf8", *sys.orig_argv[1:]], {**os.environ, _DAU_PHONG_LAI: "1"}))
 
 import yaml
 
@@ -2940,6 +2961,89 @@ def t62_chay_lam_main_phai_o_che_do_UTF8_ca_khi_PYTHONUTF8_0():
         bang(rc != 0 and "KHONG_PHONG_LAI" in loi,
              f"(6) `python {' '.join(co)} < cong_cu_test.py` ngoài UTF-8 phải DỪNG ồn ào, không chạy chương "
              f"trình RỖNG: rc={rc} stdout={len(ra)} ký tự {loi!r}")
+
+
+def _k32_gia(hong=""):
+    """kernel32 GIẢ cho `t64` — giữ TRẠNG THÁI (bảng job, cờ đọc từ BYTE cấu trúc, thành viên, kế thừa lúc phóng), không
+    diễn kịch bản: `cha_chet()` giết ai là do trạng thái `_phong_lai` đã dựng. `hong` = tên API trả 0."""
+    import ctypes, threading, types
+    k = types.SimpleNamespace(job={}, con=[], exec=[], co=threading.Event())
+
+    def api(ten, f, handle=False):  # ABI thật: chưa khai kiểu thì HANDLE 64 bit không qua nguyên vẹn ⇒ coi như hỏng
+        def goi(*a):
+            return f(*a) if ten != hong and goi.argtypes is not None and (not handle or goi.restype is ctypes.c_void_p) else 0
+        goi.argtypes = goi.restype = None; setattr(k, ten, goi)
+
+    def dat(h, lop, p, n):
+        c = getattr(p, "_obj", p)
+        ok = h in k.job and lop == 9 and n == ctypes.sizeof(c) == (144 if ctypes.sizeof(ctypes.c_void_p) == 8 else 112)
+        return ok and not k.job[h].update(co=int.from_bytes(ctypes.string_at(ctypes.addressof(c), n)[16:20], "little"))
+
+    def popen(lenh, **kw):
+        k.con.append(subprocess.Popen(lenh, **kw)); k.co.set()  # phóng từ thành viên ⇒ con thuộc job, trừ khi cho thoát lặng
+        [j["tv"].add(k.con[-1]) for j in k.job.values() if "cha" in j["tv"] and not j["co"] & 0x1000]
+        return k.con[-1]
+    api("CreateJobObjectW", lambda bm, ten: k.job.setdefault(len(k.job) + 1, {"co": 0, "tv": set()}) and len(k.job), 1)
+    api("SetInformationJobObject", dat)
+    api("AssignProcessToJobObject", lambda h, hp: h in k.job and hp == -1 and not k.job[h]["tv"].add("cha"))
+    api("GetCurrentProcess", lambda: -1, 1)
+    k.popen, k.execve = popen, lambda *a: (k.exec.append(a), k.co.set())
+    k.cha_chet = lambda: [p.kill() for j in k.job.values() if j["co"] & 0x2000 for p in j["tv"] - {"cha"}]  # handle cuối đóng
+    return k
+
+
+@ca
+def t64_phong_lai_KHONG_de_MO_COI_khi_bi_giet_va_ma_thoat_giu_TIN_HIEU():
+    """#671 lượt 6 — MỒ CÔI. Chạy PHẦN ĐẦU chính tệp này (tới `import yaml`: `_phong_lai` + khối phóng lại) + cửa chờ stdin,
+    `PYTHONUTF8=0` ⇒ phóng lại THẬT: (k1) harness `kill()` pid nó biết ⇒ stdout EOF ≤10s, mọi nền (Windows: Job THẬT). POSIX:
+    (k2) SIGTERM tới pid CHẠY BỘ CA ⇒ harness thấy -15 (`subprocess` ra 241); (k3) bộ ca KHÔNG lờ SIGINT (SIG_IGN trước exec KẾ
+    THỪA) — đọc TRẠNG THÁI: GỬI SIGINT thì đua (tới trước khi `read()` chặn ⇒ treo; đo 2/240 trên Python trần); con khởi đầu với
+    SIGINT/SIGTERM mặc định (chạy nền `&` là SIG_IGN — đo 45/45 đỏ oan). Mô phỏng `_k32_gia`: (w0) nt KHÔNG exec; (w1) cha chết ⇒
+    con chết; (w2) Job hỏng ⇒ vẫn chạy + nói ra."""
+    import contextlib, io, signal, threading
+    nguon, cat = TEP_TEST.read_text(encoding="utf-8"), "\nimport yaml\n"
+    dung(nguon.count(cat) == 1, "giàn giáo: không cắt được phần đầu tại `import yaml`")
+    env = dict({k: v for k, v in os.environ.items() if k != _DAU_PHONG_LAI}, PYTHONUTF8="0")
+    mac_dinh = (lambda: [signal.signal(s, signal.SIG_DFL) for s in (signal.SIGINT, signal.SIGTERM)]) if os.name == "posix" else None
+    with tempfile.TemporaryDirectory(prefix="t64-") as td:
+        (tep := Path(td) / "dau.py").write_text(nguon.split(cat)[0] + "\nimport signal\nprint(f'PID={os.getpid()} U8={sys.flags.utf8_mode} PL="
+                                                "{int(_DA_PHONG_LAI)} INT={signal.getsignal(2) is signal.default_int_handler:d}', flush=True)"
+                                                "\nsys.stdin.read()\n", encoding="utf-8")
+        for sig in (None,) + ((signal.SIGTERM,) if os.name == "posix" else ()):
+            with subprocess.Popen([sys.executable, str(tep)], stdin=subprocess.PIPE, stdout=subprocess.PIPE,
+                                  stderr=subprocess.PIPE, env=env, preexec_fn=mac_dinh) as p:
+                dau, rc = p.stdout.readline().decode("utf-8", "replace"), None
+                dung("U8=1 PL=1" in dau, f"giàn giáo: phần đầu không phóng lại sang UTF-8 — không đo gì: {dau!r}")
+                pid = int(dau.split()[0][4:])
+                bang(os.name != "posix" or "INT=1" in dau, f"(k3) tiến trình chạy bộ ca {pid} LỜ SIGINT/Ctrl-C: {dau!r}")
+                if sig is None:
+                    p.kill(); (doc := threading.Thread(target=p.stdout.read)).start(); doc.join(10)
+                    song = doc.is_alive(); p.stdin.close(); doc.join(60)
+                    bang(not song, f"(k1) harness kill() pid {p.pid} mà tiến trình chạy bộ ca {pid} vẫn giữ pipe sau 10s — MỒ CÔI")
+                    continue
+                os.kill(pid, sig)
+                with contextlib.suppress(subprocess.TimeoutExpired):
+                    rc = p.wait(10)  # (còn sống thì `__exit__` đóng stdin ⇒ EOF ⇒ tự thoát)
+                bang(rc == -sig, f"(k2) SIGTERM tới tiến trình chạy bộ ca {pid} (harness biết {p.pid}) mà harness thấy rc={rc}, chờ {-sig}")
+
+    def phong(k, lenh, gia=True):
+        with contextlib.redirect_stderr(loi := io.StringIO()):
+            try:
+                rc = _phong_lai(lenh, dict(os.environ), nen="nt", k32=k if gia else None, popen=k.popen, execve=k.execve)
+            except Exception as ex:  # noqa: BLE001 — sản phẩm NÉM thay vì chạy là KẾT QUẢ cho chốt đọc, không phải giàn giáo
+                rc = ex
+        return rc, loi.getvalue()
+
+    k, kq = _k32_gia(), {}
+    (th := threading.Thread(target=lambda: kq.update(zip("rl", phong(k, [sys.executable, "-c", "import time; time.sleep(60)"]))))).start()
+    k.co.wait(15); k.cha_chet(); th.join(10)
+    song = th.is_alive(); [p.kill() for p in k.con]; th.join(60)
+    bang(not k.exec, f"(w0) nhánh Windows gọi exec — trên nt `os.exec*` phóng MỚI rồi thoát cha ⇒ MỒ CÔI: {k.exec}")
+    bang(k.con and not song and not kq.get("l"), f"(w1) cha chết mà con còn sống: job={k.job} stderr={kq.get('l')!r}")
+    for hong in ("CreateJobObjectW", "SetInformationJobObject", "AssignProcessToJobObject") + ("WinDLL",) * (os.name != "nt"):
+        rc, loi = phong(k := _k32_gia(hong), [sys.executable, "-c", "raise SystemExit(7)"], gia=hong != "WinDLL")
+        bang(rc == 7 and "CANH_BAO_MO_COI" in loi and len(k.con) == 1, f"(w2) Job hỏng ở {hong} (nt KHÔNG thử WinDLL: Job THẬT "
+             f"sẽ gắn vào CHÍNH bộ test): phải VẪN chạy đúng một lần, mã 7 đi qua, và NÓI ra: rc={rc} {loi!r}")
 
 
 def python_alias_behavior_test() -> None:
@@ -8619,6 +8723,13 @@ def _in_tu_kiem_ban_kinh():
             print(d)
 
 
+def _in_tu_kiem_che_do_utf8():
+    """Cửa `t62` (#671), mã thoát RIÊNG; phải ở TRONG `_CUA` (ngoài bảng ⇒ `f25_cua_moi_vi_tri` tín dụng giả)."""
+    print(f"UTF8_MODE={sys.flags.utf8_mode} B={sys.flags.dont_write_bytecode} "
+          f"DA_PHONG_LAI={int(_DA_PHONG_LAI)} DAU_SOT={int(_DAU_PHONG_LAI in os.environ)}")
+    sys.exit(_MA_TU_KIEM_UTF8)
+
+
 if __name__ == "__main__":
     # #668 F25 (Codex lượt 8): cửa CHỈ đọc ở argv[1]. Bản trước dò MỌI vị trí, nên `--gop --tu-kiem-che-do` chạy cửa tự
     # kiểm, rc=0, KHÔNG gom — một giá trị đối số chiếm quyền chọn chế độ. Đối số lạ ⇒ rc=2, không lặng lẽ chạy `main`.
@@ -8626,13 +8737,9 @@ if __name__ == "__main__":
             "--tu-kiem-tien-kiem": _in_tu_kiem_tien_kiem, "--tu-kiem-dong-ho": _in_tu_kiem_dong_ho,
             "--tu-kiem-luat-phan-quyet": _in_tu_kiem_luat_phan_quyet, "--tu-kiem-cong-that": _in_tu_kiem_cong_that,
             "--ban-kinh-con": _in_ban_kinh_con, "--tu-kiem-gom": _in_tu_kiem_gom,
-            "--tu-kiem-che-do": _in_tu_kiem_che_do, "--tu-kiem-main": _in_tu_kiem_main}
+            "--tu-kiem-che-do": _in_tu_kiem_che_do, "--tu-kiem-main": _in_tu_kiem_main,
+            "--tu-kiem-che-do-utf8": _in_tu_kiem_che_do_utf8}
     cua = sys.argv[1] if len(sys.argv) > 1 else None
-    # #671: cửa tự kiểm chế độ UTF-8 (`t62`) — theo quy ước #668, CHỈ đọc argv[1]; mã thoát RIÊNG `_MA_TU_KIEM_UTF8`.
-    if cua == "--tu-kiem-che-do-utf8":
-        print(f"UTF8_MODE={sys.flags.utf8_mode} B={sys.flags.dont_write_bytecode} "
-              f"DA_PHONG_LAI={int(_DA_PHONG_LAI)} DAU_SOT={int(_DAU_PHONG_LAI in os.environ)}")
-        sys.exit(_MA_TU_KIEM_UTF8)
     if cua == "--gop":
         sys.exit(_main_gop())
     if cua in _CUA:

@@ -607,13 +607,15 @@ set là đường dẫn HOẶC prefix thư mục `…/` (protocol §5): hỏi `o
 bỏ `planned:`, hỏi đường ấy kèm `/` (tên thư mục gõ thiếu `/`), chính nó rồi mọi thư mục cha `…/`, và KHÔNG hỏi dạng
 mà khớp đúng chuỗi không trả lời được: prefix `…/` hay thư mục CÓ trong checkout mà thiếu `/` cuối (lease giữ tệp
 BÊN DƯỚI nó không hiện), `/…` `./` `//` `..` `\` `C:/…` hay `-…`. `rc=0` chỉ chứng minh một điều: không lease CÒN
-HẠN, chưa bị thay thế nào có mục write_set (sau `strip()` và bỏ `planned:`) BẰNG ĐÚNG một chuỗi đã hỏi — mọi khác
+HẠN, chưa bị thay thế nào có mục CHUỖI của write_set DẠNG DANH SÁCH (sau `strip()` và bỏ `planned:`) BẰNG ĐÚNG một
+chuỗi đã hỏi, đọc bằng mã của `origin/master` (khối dưới) — mọi khác
 biệt khác, ở phía hỏi LẪN phía lease, vẫn `rc=0` dù có người giữ. Đã đo, KHÔNG phải danh sách đủ: thư mục CHƯA có
 trong checkout, gõ thiếu `/`, mà lease giữ tệp bên dưới nó; khác hoa/thường hay dạng Unicode (§5 case-fold và chuẩn
 hoá NFC, lệnh thì không); ký tự trắng khác ở hai đầu — `\r`, NBSP, U+3000…: 26 ký tự `str.isspace()` ngoài dấu
 cách, tab, xuống dòng (`read` chỉ bỏ dấu cách/tab, `strip()` bỏ cả chúng); và mục lease khác dạng chuẩn —
-`docs\a.md`, `./docs/a.md`, `docs//a.md`, `planned: docs/a.md` (cổng đăng chỉ dùng `write_set` để xếp lớp, không
-từ chối dạng nào) — hỏi `docs/a.md` không thấy.
+`docs\a.md`, `./docs/a.md`, `docs//a.md`, `planned: docs/a.md`, hay cả write_set là MỘT chuỗi đơn
+`write_set: docs/a.md` (cổng đăng chỉ dùng `write_set` để xếp lớp, không từ chối dạng nào) — hỏi `docs/a.md` không
+thấy.
 
 Thông điệp lỗi nêu **nhánh và upstream thật**, không nhất thiết là `origin/<cùng tên>` — từ git 2.36:
 trước đó (`worktree list -z` chưa có) nhánh TỤT_SAU dừng ở `KHÔNG_XÁC_ĐỊNH: git worktree list --porcelain -z
@@ -655,21 +657,26 @@ else echo "KHONG_DO_DUOC: ls-remote hong hoac rong"; fi
 #    Lệnh khớp ĐÚNG chuỗi, write set là path/prefix: bỏ `planned:` như phía lease, hỏi `$D/` (tên thư mục gõ
 #    thiếu `/`), chính nó rồi mọi thư mục cha `…/` (dừng ở rc khác 0 đầu tiên); prefix `…/`, thư mục CÓ trong
 #    checkout hay dạng không chuẩn thì khớp đúng chuỗi không trả lời được ⇒ không hỏi.
+#    Mã đọc lease lấy từ origin/master (bước 1 vừa so với máy chủ), KHÔNG từ checkout: checkout là cây ỨNG VIÊN
+#    (§8.1) — ứng viên sửa ops/lease_publish.py, hay thêm ops/yaml.py (thư mục của script đứng đầu sys.path), thì
+#    tự trả rc=0. Chép vào thư mục RIÊNG trong $SCRATCH; SCRATCH rỗng hay không đọc được blob ⇒ không hỏi.
 read -r D <<'TEN:'
 <duong>
 TEN:
 D="${D#planned:}"
-if RP="$(git -C "$SOURCE" for-each-ref refs/replace/)" && [ -z "$RP" ] && [ -n "${D##<*>}" ]; then
+LEASE_PY="${SCRATCH:-}/lp-origin-master/lease_publish.py"
+if RP="$(git -C "$SOURCE" for-each-ref refs/replace/)" && [ -z "$RP" ] && [ -n "${D##<*>}" ] && [ -n "${SCRATCH:-}" ] \
+  && mkdir -p "${LEASE_PY%/*}" && git -C "$SOURCE" cat-file blob refs/remotes/origin/master:ops/lease_publish.py > "$LEASE_PY"; then
   case "$D" in
     -*|/*|[A-Za-z]:/*|./*|../*|.|..|*/|*//*|*/./*|*/../*|*/.|*/..|*\\*) echo "KHONG_DO_DUOC: prefix …/ hoac duong dan khong chuan" ;;
     *) if [ -d "$SOURCE/$D" ]; then echo "KHONG_DO_DUOC: thu muc co trong checkout ma thieu / cuoi, tuc prefix …/"; else
        M=0; P="$D/"
        while :; do
-         GIT_NO_REPLACE_OBJECTS=1 GIT_GRAFT_FILE=/dev/null/grafts "$PY" "$SOURCE/ops/lease_publish.py" ai-dang-giu "$P" --root "$SOURCE" || { M=$?; break; }
+         GIT_NO_REPLACE_OBJECTS=1 GIT_GRAFT_FILE=/dev/null/grafts "$PY" -B "$LEASE_PY" ai-dang-giu "$P" --root "$SOURCE" || { M=$?; break; }
          case "$P" in "$D/") P="$D" ;; */*/) P="${P%/*/}/" ;; */?*) P="${P%/*}/" ;; *) break ;; esac
        done; echo "rc=$M"; fi ;;
   esac
-else echo "KHONG_DO_DUOC: refs/replace khong rong hoac khong doc duoc, hoac duong dan rong/chua dien"; fi
+else echo "KHONG_DO_DUOC: refs/replace khong rong/khong doc duoc, duong dan rong/chua dien, SCRATCH rong, hoac khong lay duoc lease_publish.py cua origin/master"; fi
 ```
 
 Bên bootstrap chữa nhánh rảnh `<nhanh>` về `<upstream>` (cả hai lấy từ chẩn đoán) bằng `fetch .`

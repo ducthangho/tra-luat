@@ -1,76 +1,79 @@
-diff --git a/ops/ci_duong_nhanh.py b/ops/ci_duong_nhanh.py
-index ef831d75..078dc0f9 100644
---- a/ops/ci_duong_nhanh.py
-+++ b/ops/ci_duong_nhanh.py
-@@ -174,6 +174,14 @@ def kiem_yaml(doi, kho=ROOT) -> list[str]:
-     return loi
+chua chay tren cay that — executor tu ap, tu do, tu chiu trach nhiem commit
+--- ops/ci_duong_nhanh_test.py
++++ ops/ci_duong_nhanh_test.py
+@@ -581,10 +581,18 @@
+     m = nap_module()
+     pr = {"ops/reviews/v-verdict.md": "dong co khoang trang cuoi   \nsau\n",
+           "ops/reviews/goi-y.patch": "@@ -1 +1 @@\n-a  \n+b \n \n",
++          "ops/reviews/tab.md": "a\n \tb\n",
+           "ops/leases/thua-dong.yaml": lease_that_het_han_hop_le() + "\n"}
+     with kho_that(nhanh_pr=pr, sao_lease_publish=True) as (kho, goc, dau):
+         tho = git(kho, "diff", "--check", f"{goc}...{dau}", kiem=False)
+         bang(tho.returncode != 0, "fixture vo hieu: `git diff --check` nguyen ban phai bat cac tep nay")
++        # D1 duyet DUNG ba loai; moi loai mot tep, moi tep phai tu no lam `--check` tho do (khong thi loai ay mat chot).
++        for tep, loai in (("ops/reviews/v-verdict.md", "blank-at-eol"), ("ops/leases/thua-dong.yaml", "blank-at-eof"),
++                          ("ops/reviews/tab.md", "space-before-tab")):
++            chi_loai = git(kho, "-c", "core.whitespace=-" + ",-".join(
++                x for x in ("blank-at-eol", "blank-at-eof", "space-before-tab") if x != loai),
++                "diff", "--check", f"{goc}...{dau}", "--", tep, kiem=False)
++            bang(chi_loai.returncode != 0, f"fixture vo hieu: {tep} phai do DUNG loai {loai} khi chi loai ay bat")
+         rc, log = kiem_re(m, kho, goc, dau)
+         bang(rc == 0, f"khoang trang cuoi dong / dong trong cuoi tep khong duoc chan oan (do 8/63 lan merge): rc={rc}: {log}")
+ 
+@@ -617,6 +625,21 @@
  
  
-+def kiem_loai_tep(doi, kho=ROOT) -> list[str]:
-+    """Mọi tệp hồ sơ đổi (còn trong cây) phải là tệp THƯỜNG, không phải symlink. Bước bị bỏ `lease-publish selftest`
-+    có `t82` `copytree` CẢ cây (kể cả ops/{land,leases,reviews,specs}/**): symlink treo dưới allowlist làm nó ĐỎ trên
-+    master trong khi mọi kiểm khác của `kiem-re` vẫn DAT. Hồ sơ không cần symlink ⇒ chặn mọi symlink, treo hay không."""
-+    return [f"tep ho so la symlink (duong nhanh chi nhan tep thuong): {duong!r}"
-+            for duong in sorted(doi) if (Path(kho) / duong).is_symlink()]
-+
-+
- def kiem_diff_check(env=os.environ, chay=subprocess.run, kho=ROOT) -> list[str]:
-     goc, dau = env.get(BIEN_GOC) or "", env.get(BIEN_DAU) or ""
-     try:
-@@ -267,7 +275,7 @@ def lenh_kiem_re(env=os.environ, chay=subprocess.run, kho=ROOT, ra=None, bay_gio
-         print("DUONG_NHANH: kiem-re CHI chay khi diff toan ho so; phan loai lai khong ra DUONG_NHANH - DO "
-               "(khong khop voi job chuan-bi)", file=ra)
-         return 1
--    loi = (kiem_yaml(doi, kho) + kiem_diff_check(env, chay, kho) + kiem_lease(doi, kho, chay, bay_gio, ra)
-+    loi = (kiem_yaml(doi, kho) + kiem_loai_tep(doi, kho) + kiem_diff_check(env, chay, kho) + kiem_lease(doi, kho, chay, bay_gio, ra)
-            + kiem_ca_du_lieu(kho, chay))
-     for x in loi:
-         print("DUONG_NHANH: LOI - " + x, file=ra)
-diff --git a/ops/ci_duong_nhanh_test.py b/ops/ci_duong_nhanh_test.py
-index 7b56be09..c80b87ba 100644
---- a/ops/ci_duong_nhanh_test.py
-+++ b/ops/ci_duong_nhanh_test.py
-@@ -616,6 +616,32 @@ def t20g_kiem_re_lease_duoi_yml_van_duoc_kiem():
-             bang(rc == 1, f"lease `.yml` {ten} thieu truong phai DO (cung doi xu voi `.yaml`): rc={rc}: {log}")
- 
- 
-+@ca
-+def t20n_kiem_re_symlink_ho_so_do():
-+    """Cross-review luot 7 (P2 `buoc-bi-bo-doc-ca-cay`): symlink treo duoi allowlist DAT o kiem-re cu nhung lam `t82`
-+    (lease-publish selftest, bi bo o duong nhanh) DO tren master. Doi chung: cung PR khong symlink phai DAT."""
-+    m = nap_module()
-+    with kho_that(nhanh_pr={"ops/specs/S.md": "# s\n"}) as (kho, goc, dau):
-+        rc0, log0 = kiem_re(m, kho, goc, dau)
-+        bang(rc0 == 0, f"doi chung khong symlink phai DAT: rc={rc0}: {log0}")
-+        (kho / "ops" / "specs" / "treo.md").symlink_to("khong-ton-tai")
-+        git(kho, "add", "-A")
-+        git(kho, "commit", "-q", "-m", "symlink")
-+        dau2 = git(kho, "rev-parse", "HEAD").stdout.decode().strip()
-+        rc, log = kiem_re(m, kho, goc, dau2)
-+        bang(rc == 1 and "symlink" in log and "treo.md" in log, f"symlink ho so phai DO kiem-re: rc={rc}: {log}")
-+
-+
-+@ca
-+def t20o_kiem_re_yaml_nhieu_tai_lieu_hong_o_sau_do():
-+    """Cross-review luot 7 (P2 `kiem-re-cua-fail-close-chua-co-ca`): tai lieu DAU hop le, tai lieu SAU hong — kiem_yaml
-+    phai tieu thu HET `safe_load_all`, khong chi lay tai lieu dau."""
-+    m = nap_module()
-+    with kho_that(nhanh_pr={"ops/land/nhieu.yaml": "a: 1\n---\nb: [1, 2\n"}) as (kho, goc, dau):
-+        rc, log = kiem_re(m, kho, goc, dau)
-+        bang(rc == 1 and "YAML khong parse duoc" in log and "nhieu.yaml" in log, f"tai lieu sau hong phai DO: rc={rc}: {log}")
-+
-+
  @ca
++def t20h_kiem_re_yaml_duoi_yml_va_tep_xoa_dung_truoc():
++    """kiem_yaml qua duong goi that (kiem-re): duoi `.yml` phai duoc parse nhu `.yaml`; mot tep YAML da XOA dung truoc
++    trong thu tu sap xep khong duoc lam bo qua tep YAML hong dung sau."""
++    m = nap_module()
++    for ten, nen, pr in (
++        ("duoi yml", None, {"ops/land/hong.yml": "a: [1, 2\n"}),
++        ("xoa dung truoc", {"README.md": "x\n", "ops/land/a.yaml": "a: 1\n"},
++         {"ops/land/a.yaml": None, "ops/land/b.yaml": "a: [1, 2\n"}),
++    ):
++        with kho_that(nen=nen, nhanh_pr=pr) as (kho, goc, dau):
++            rc, log = kiem_re(m, kho, goc, dau)
++            bang(rc == 1 and "YAML khong parse duoc" in log, f"{ten}: YAML hong phai DO, duoc rc={rc}: {log}")
++
++
++@ca
  def t23_fixture_sach_khong_phu_thuoc_actor_ci():
      """Cross-review luot 2 (P2): selftest chay tren MOI PR — actor khac nguoi cap lease khong duoc lam fixture SACH do oan.
-@@ -1708,6 +1734,10 @@ DOT_BIEN = [
+     Hai duong vao: chon fixture trong tien trinh (mock.patch.dict) va validator con (loc o `_env_git`)."""
+@@ -1283,6 +1306,13 @@
+             bang(mong_dong is None or mong_dong in dong,
+                  f"main/{ten}: thieu dong {mong_dong!r} (tu so phai la so dem THAT, khong phai mau): "
+                  f"{[d for d in dong if d.startswith(('CA:', 'DOT BIEN:'))]}")
++        tk = "TU KIEM PHAN HANG: " + ("DO" if ten == "tu kiem hong" else "DAT") + \
++            f" ({len(MAU_RC)} mau rc, {len(TU_KIEM_DOT_BIEN)} dot bien that)"
++        bang([d for d in dong if d.startswith("TU KIEM PHAN HANG:")] == [tk], f"main/{ten}: dong tu kiem phai DUNG {tk!r}")
++        if ten == "sach":
++            nhan = ("CA:", "DOT BIEN:", "KIEM KE:", "TU KIEM PHAN HANG:", "TONG:")
++            bang([d for d in dong if d.startswith(nhan)] == [dong_ca, dong_db, "KIEM KE: gia", tk, "TONG: DAT"],
++                 f"main/{ten}: tap dong tong ket phai khop DUNG: {[d for d in dong if d.startswith(nhan)]}")
+     r = subprocess.run([sys.executable, "-B", str(CAY / "ops" / "ci_duong_nhanh_test.py"), "doi-so-la"],
+                        capture_output=True, timeout=60, env=dict(os.environ, PYTHONDONTWRITEBYTECODE="1"))
+     bang(r.returncode == 2, f"__main__ phai chuyen ma cua main (2 voi doi so la) ra ma thoat that, duoc rc={r.returncode}")
+@@ -1575,6 +1605,11 @@
+     ("diff_check_bo_check", _ma('"diff", "--check", "--no-renames"', '"diff", "--no-renames"'), ("t20c_kiem_re_dau_xung_dot_do",)),
+     ("lease_het_han_coi_nhu_con_han", _ma("        het_han = han is not None and han <= bay_gio\n", "        het_han = False\n"), ("t21_kiem_lease_phan_biet_con_han_het_han_va_duoi_tep",)),
+     ("lease_het_han_duoc_mien_kiem", _ma("        if het_han:\n            print(", "        if het_han:\n            continue\n            print("), ("t20f_kiem_re_lease_het_han_sai_schema_van_do",)),
++    ("diff_check_bo_mien_space_before_tab", _ma('CAU_HINH_WHITESPACE = "core.whitespace=-blank-at-eol,-blank-at-eof,-space-before-tab"', 'CAU_HINH_WHITESPACE = "core.whitespace=-blank-at-eol,-blank-at-eof"'), ("t20d_kiem_re_khoang_trang_cuoi_dong_khong_do",)),
++    ("diff_check_bo_mien_blank_at_eof", _ma('CAU_HINH_WHITESPACE = "core.whitespace=-blank-at-eol,-blank-at-eof,-space-before-tab"', 'CAU_HINH_WHITESPACE = "core.whitespace=-blank-at-eol,-space-before-tab"'), ("t20d_kiem_re_khoang_trang_cuoi_dong_khong_do",)),
++    ("diff_check_bo_mien_blank_at_eol", _ma('CAU_HINH_WHITESPACE = "core.whitespace=-blank-at-eol,-blank-at-eof,-space-before-tab"', 'CAU_HINH_WHITESPACE = "core.whitespace=-blank-at-eof,-space-before-tab"'), ("t20d_kiem_re_khoang_trang_cuoi_dong_khong_do",)),
++    ("kiem_yaml_bo_duoi_yml", _ma('for duong in sorted(x for x in doi if x.endswith((".yaml", ".yml"))):', 'for duong in sorted(x for x in doi if x.endswith(".yaml")):'), ("t20h_kiem_re_yaml_duoi_yml_va_tep_xoa_dung_truoc",)),
++    ("kiem_yaml_break_sau_tep_xoa", _ma('        if not tep.is_file():\n            continue\n        try:\n            with tep.open(encoding="utf-8") as f:\n                list(', '        if not tep.is_file():\n            break\n        try:\n            with tep.open(encoding="utf-8") as f:\n                list('), ("t20h_kiem_re_yaml_duoi_yml_va_tep_xoa_dung_truoc",)),
+     ("lease_bo_duoi_yml", _ma('x.startswith("ops/leases/") and x.endswith((".yaml", ".yml"))', 'x.startswith("ops/leases/") and x.endswith(".yaml")'), ("t20g_kiem_re_lease_duoi_yml_van_duoc_kiem",)),
+     ("kiem_re_bo_ca_du_lieu", _ma("\n           + kiem_ca_du_lieu(kho, chay))", ")"), ("t20a_kiem_re_ho_so_sach_dat",)),
+     ("ca_du_lieu_bo_t27", _ma(',\n              "t27_canh_bao_trong_bien_nhan_phai_duoc_NANG_len_muc_luc")', ")"), ("t22_ca_du_lieu_thay_bo_lease_publish_selftest",)),
+@@ -1703,6 +1738,8 @@
+     ("test_runner_nuot_tin_hieu_do", _test('    except TinHieuChotCa as e:\n        return "DO", str(e)' + '\n    except Exception', '    except TinHieuChotCa as e:\n        return "DAT", ""\n    except Exception'), ("t92_runner_thuc_su_goi_ca_va_phan_biet_loi", "t91_ma_thoat_that_khi_ca_dat_do_va_hong")),
+     ("test_entrypoint_rc1_thanh_0", _test("    raise SystemExit(main(sys.argv" + "[1:]))\n", "    _rc = main(sys.argv[1:])\n    raise SystemExit(0 if _rc == 1 else _rc)\n"), ("t91_ma_thoat_that_khi_ca_dat_do_va_hong",)),
+     ("test_main_in_them_dong_kiem_ke_sai", _test("    print(dong_kiem_ke())" + "\n    for x in xau", "    print(dong_kiem_ke())\n    print('KIEM KE: ca hanh_vi=999 = 999')\n    for x in xau"), ("t94_main_in_dong_kiem_ke_that",)),
++    ("test_main_tu_kiem_in_so_sai", _test("({len(MAU_RC)}" + " mau rc, {len(TU_KIEM_DOT_BIEN)} dot bien that)\")", "({len(MAU_RC) + 1} mau rc, {len(TU_KIEM_DOT_BIEN)} dot bien that)\")"), ("t93_main_ket_luan_va_ma_thoat_theo_duong_goi_that",)),
++    ("test_main_tu_kiem_luon_in_dat", _test("{'DAT' if not loi_tu_kiem" + " else 'DO'} (", "{'DAT'} ("), ("t93_main_ket_luan_va_ma_thoat_theo_duong_goi_that",)),
+     ("test_main_in_dong_kiem_ke_sai_truoc", _test("    print(dong_kiem_ke())" + "\n    for x in xau", "    print('KIEM KE: sai')\n    print(dong_kiem_ke())\n    for x in xau"), ("t94_main_in_dong_kiem_ke_that",)),
+     # ---- nghiệm thu 9: nối vào sổ test sống
      ("yml_go_buoc_goi_test_khoi_ci", _yml("      - name: ci-duong-nhanh selftest (phan loai diff + khoa cau truc if)\n        if: runner.os == 'Linux'\n        run: python ops/ci_duong_nhanh_test.py\n", ""), ("y09_buoc_goi_test_cua_packet_khong_bi_bo", "k03_ci_goi_that_muc_da_noi")),
-     ("dk_go_muc_da_noi", (DK, lambda vb: thay_mot(vb, f'    "{DA_NOI_MUC}",\n', "")), ("k01_so_dang_ky_nhan_muc_da_noi",)),
-     ("dk_go_muc_da_noi_kiem_dem_so", (DK, lambda vb: thay_mot(vb, f'    "{DA_NOI_MUC}",\n', "")), ("k02_da_noi_dung_mot_lan_va_test_song_khop_tep",)),
-+    # ---- cross-review luot 7: loai tep ho so (symlink)
-+    ("kiem_re_bo_loai_tep", _ma("kiem_yaml(doi, kho) + kiem_loai_tep(doi, kho) + ", "kiem_yaml(doi, kho) + "), ("t20n_kiem_re_symlink_ho_so_do",)),
-+    ("kiem_yaml_chi_tai_lieu_dau", _ma("list(yaml.safe_load_all(f))", "next(yaml.safe_load_all(f), None)"), ("t20o_kiem_re_yaml_nhieu_tai_lieu_hong_o_sau_do",)),
-+    ("loai_tep_cho_symlink_qua", _ma("for duong in sorted(doi) if (Path(kho) / duong).is_symlink()]", "for duong in sorted(doi) if False]"), ("t20n_kiem_re_symlink_ho_so_do",)),
- ]
- TEN_DOT_BIEN = [d[0] for d in DOT_BIEN]
- 

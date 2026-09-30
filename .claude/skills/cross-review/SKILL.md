@@ -621,14 +621,16 @@ unset GIT_DIR GIT_WORK_TREE GIT_COMMON_DIR GIT_REPLACE_REF_BASE   # đè -C/--ro
 git -C "$SOURCE" ls-remote --get-url origin | sed -E 's#://[^/@]*@#://***@#'   # endpoint đang hỏi, che userinfo (§8.1)
 # 1) CHỈ ĐỌC: tập (SHA, tên) máy chủ phải BẰNG tập cache, cả hai chiều (ai-dang-giu chỉ so TÊN, một chiều).
 if MC="$(git -C "$SOURCE" ls-remote --heads origin)" && [ -n "$MC" ]; then
-  LECH="$(LC_ALL=C comm -3 <(printf '%s\n' "$MC" | awk 'NF{sub("^refs/heads/","",$2); print $1" "$2}' | LC_ALL=C sort) \
-    <(git -C "$SOURCE" for-each-ref --format='%(objectname) %(refname:lstrip=3)' refs/remotes/origin \
-      | awk 'NF && $2!="HEAD"' | LC_ALL=C sort))"
+  SV="$(printf '%s\n' "$MC" | awk 'NF{sub("^refs/heads/","",$2); print $1" "$2}' | LC_ALL=C sort)"
+  CB="$(git -C "$SOURCE" for-each-ref --format='%(objectname) %(refname:lstrip=3)' refs/remotes/origin \
+    | awk 'NF && $2!="HEAD"' | LC_ALL=C sort)"
+  LECH="$(LC_ALL=C comm -3 <(printf '%s\n' "$SV") <(printf '%s\n' "$CB"))"
   # ref NGOÀI origin mà ai-dang-giu vẫn đọc (refs/heads/*, remote khác): SHA phải là đầu một nhánh máy chủ.
   # Lọc theo TÊN */HEAD như lệnh, KHÔNG theo symref: symref khác nó đọc nội dung ĐÍCH (vd refs/tags/*).
   NGOAI="$(awk 'NR==FNR{if(NF)s[$1];next} NF && index($2,"refs/remotes/origin/")!=1 && substr($2,length($2)-4)!="/HEAD" && !($1 in s)' <(printf '%s\n' "$MC") \
     <(git -C "$SOURCE" for-each-ref --format='%(objectname) %(refname)' refs/heads refs/remotes))"
-  [ -z "$LECH$NGOAI" ] && echo "CACHE_TUOI" || printf 'CACHE_CU (sat le: chi may chu co; thut TAB: chi cache co; refs/: ref ngoai may chu):\n%s\n%s\n' "$LECH" "$NGOAI"
+  # CACHE_TUOI đòi BẰNG CHỨNG DƯƠNG: SV khác rỗng và BẰNG CB. LECH rỗng thì chưa đủ — thiếu awk/sort/comm cũng cho rỗng.
+  [ -n "$SV" ] && [ "$SV" = "$CB" ] && [ -z "$LECH$NGOAI" ] && echo "CACHE_TUOI" || printf 'CACHE_CU (sat le: chi may chu co; thut TAB: chi cache co; refs/: ref ngoai may chu):\n%s\n%s\n' "$LECH" "$NGOAI"
 else echo "KHONG_DO_DUOC: ls-remote hong hoac rong"; fi
 # 2) rc=0 chỉ là "không ai giữ" khi bước 1 in CACHE_TUOI; refs/replace cục bộ đổi được nội dung lease, info/grafts
 #    (GIT_NO_REPLACE_OBJECTS KHÔNG tắt nó) biến PHÂN_KỲ thành TỤT_SAU: tắt cả hai (tệp /dev/null/grafts không thể có).
@@ -660,11 +662,18 @@ thành `D`), và `commit` kế tiếp xoá lại chúng:
 
 ```bash
 unset GIT_DIR GIT_WORK_TREE GIT_COMMON_DIR   # đè -C như ở khối trên
+# Tên nhánh HỢP LỆ được chứa $ ` ' " ; — điền TÊN THÔ (phần "<nhánh> -> <upstream>" của chẩn đoán) vào heredoc nháy đơn: không khai triển gì.
+IFS= read -r N <<'TEN'
+<nhanh>
+TEN
+IFS= read -r U <<'TEN'
+<upstream>
+TEN
 case "$(git version)" in
   "git version 1."*|"git version 2."[0-9].*|"git version 2."[12][0-9].*|"git version 2.3"[0-4].*)
     echo "KHONG_CHAY: $(git version) < 2.35 khong tu choi nhanh dang checkout o worktree khac hay dang rebase/bisect" ;;
   *) GIT_NO_REPLACE_OBJECTS=1 GIT_GRAFT_FILE=/dev/null/grafts \
-       git -C "<root>" -c core.useReplaceRefs=false fetch --no-write-fetch-head . "<upstream>:refs/heads/<nhanh>"; echo "rc=$?" ;;
+       git -C "<root>" -c core.useReplaceRefs=false fetch --no-write-fetch-head . "$U:refs/heads/$N"; echo "rc=$?" ;;
 esac
 ```
 

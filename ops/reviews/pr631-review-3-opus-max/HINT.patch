@@ -1,0 +1,21 @@
+NHÃN: chưa chạy trên cây thật — executor tự áp, tự đo, tự chịu trách nhiệm commit
+--- CLAUDE.md
++++ CLAUDE.md
+@@ -656,12 +656,15 @@
+   người đọc đi sai hướng — cùng họ `codex login status` NÓI DỐI. `launcher.py doctor` nay
+   **ĐO** hai đường REST đó (`rest-chung`/`rest-kho`) thay vì nối thêm câu "có thể bị chặn";
+   câu ấy là ĐOÁN, và nó từng được nối vào MỌI kết quả, vô điều kiện.
+-  · **Câu 403 REST Ở TRÊN ĐÃ TRÔI — CHỈ ở `/repos/<kho>`, PR, comment, CHỈ ở các phiên đã đo** —
++  · **Câu 403 REST Ở TRÊN ĐÃ TRÔI — ở các đường THEO KHO đã đo (KHÔNG phải mọi đường con), CHỈ ở các phiên đã đo** —
+   15-08 (*"REST … 403 bất kể token"*) và 17-08 (*`/repos/<kho>` · `/pulls/N` → 403*, *"REST bị chặn
+   ĐÚNG CHỖ làm việc"*). Đo `2026-09-25T01:1xZ` (một phiên remote, có/không token, bảng trong thân PR
+   #631: `/rate_limit` · `/user` · `/repos/<kho>` · `/pulls/623` đều 200, chỉ ghi `hdr_github=True`) và
+   `2026-09-30` (`06:30–06:31Z` `urllib` + `curl`; `07:10Z` `urllib`; ba vế không/thật/giả token): bốn
+-  đường ấy, với `/pulls/631`, đều **200 CÓ `X-GitHub-*`**, `Server: github.com`. **Chính sách theo
++  đường ấy, với `/pulls/631`, đều **200 CÓ `X-GitHub-*`**, `Server: github.com`. KHÔNG chỉ ba loại
++  `/repos/<kho>` · PR · comment: `commits/…` có biên nhận 200 ngày 21-09 (gạch "Bài học gốc" dưới), và
++  `2026-09-30` (phiên review lượt 3: `urllib` `07:32Z`, `curl` `07:40Z`, ba vế y hệt) `commits/8394f74…` ·
++  `issues/631` · `actions/runs` · `git/refs/heads/master` · `contents/VERSION` cũng **200 CÓ `X-GitHub-*`**. **Chính sách theo
+   ĐƯỜNG DẪN của proxy VẪN SỐNG** ở phiên đo 30-09: `07:10–07:11Z`, GET, ba vế y hệt, **403 không
+   `Server`, 0 `X-GitHub-*`** ở `/graphql` (*"GitHub GraphQL is not available from Claude Code sessions;
+   use the REST API (gh api repos/…)"*; GraphQL 403 cũng có biên nhận 21-09 · 28-09 · 29-09 trong

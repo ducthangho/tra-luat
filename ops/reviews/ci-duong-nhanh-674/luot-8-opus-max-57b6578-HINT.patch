@@ -1,0 +1,158 @@
+diff --git a/ops/ci_duong_nhanh.py b/ops/ci_duong_nhanh.py
+index 40501f00..6da10944 100644
+--- a/ops/ci_duong_nhanh.py
++++ b/ops/ci_duong_nhanh.py
+@@ -181,9 +181,35 @@ def kiem_yaml(doi, kho=ROOT) -> list[str]:
+ def kiem_loai_tep(doi, kho=ROOT) -> list[str]:
+     """Mọi tệp hồ sơ đổi (còn trong cây) phải là tệp THƯỜNG, không phải symlink. Bước bị bỏ `lease-publish selftest`
+     có `t82` `copytree` CẢ cây (kể cả ops/{land,leases,reviews,specs}/**): symlink treo dưới allowlist làm nó ĐỎ trên
+-    master trong khi mọi kiểm khác của `kiem-re` vẫn DAT. Hồ sơ không cần symlink ⇒ chặn mọi symlink, treo hay không."""
+-    return [f"tep ho so la symlink (duong nhanh chi nhan tep thuong): {duong!r}"
+-            for duong in sorted(doi) if (Path(kho) / duong).is_symlink()]
++    master trong khi mọi kiểm khác của `kiem-re` vẫn DAT. Hồ sơ không cần symlink ⇒ chặn mọi symlink, treo hay không.
++    Đường vào THỨ HAI (cross-review lượt 8): symlink CÓ SẴN dưới allowlist (đường đầy đủ không cấm symlink hợp lệ) mà PR hồ sơ
++    này XOÁ ĐÍCH thì thành TREO, không nằm trong `doi`, mà `t82` vẫn ĐỎ trên master ⇒ quét cả cây hồ sơ tìm symlink treo."""
++    loi = [f"tep ho so la symlink (duong nhanh chi nhan tep thuong): {duong!r}"
++           for duong in sorted(doi) if (Path(kho) / duong).is_symlink()]
++    try:
++        treo = _symlink_treo_trong_ho_so(kho)
++    except OSError as e:
++        return loi + [f"KHONG DO DUOC: quet symlink ho so nem {type(e).__name__}"]
++    return loi + [f"symlink ho so co san bi TREO sau PR nay (dich da mat): {duong!r}" for duong in treo if duong not in doi]
++
++
++def _nem(e):
++    raise e
++
++
++def _symlink_treo_trong_ho_so(kho=ROOT) -> list[str]:
++    """Mọi symlink TREO trong cây dưới bốn tiền tố allowlist (đường dẫn repo-relative, đã sắp). `followlinks=False`: không đi vào
++    symlink thư mục; lỗi đọc thư mục NÉM (không im lặng bỏ qua — quét hụt là fail-open)."""
++    ra = []
++    for tien_to in ALLOWLIST_TIEN_TO:
++        if not (Path(kho) / tien_to).is_dir():
++            continue   # vùng chưa tồn tại trong cây: không có gì để quét
++        for thu_muc, con, tep in os.walk(Path(kho) / tien_to, onerror=_nem):
++            for ten in con + tep:
++                duong = Path(thu_muc) / ten
++                if duong.is_symlink() and not duong.exists():
++                    ra.append(duong.relative_to(Path(kho)).as_posix())
++    return sorted(ra)
+ 
+ 
+ def kiem_diff_check(env=os.environ, chay=subprocess.run, kho=ROOT) -> list[str]:
+diff --git a/ops/ci_duong_nhanh_test.py b/ops/ci_duong_nhanh_test.py
+index 20dbafa4..48f743d5 100644
+--- a/ops/ci_duong_nhanh_test.py
++++ b/ops/ci_duong_nhanh_test.py
+@@ -640,6 +640,85 @@ def t20n_kiem_re_symlink_ho_so_do():
+         bang(rc == 1 and "symlink" in log and "treo.md" in log, f"symlink ho so phai DO kiem-re: rc={rc}: {log}")
+ 
+ 
++def _commit_symlink(kho, cap):
++    """Tao cac symlink {duong: dich} (xoa tep thuong cung ten neu co = doi kieu), commit, tra SHA."""
++    for duong, dich in cap.items():
++        p = kho / duong
++        p.parent.mkdir(parents=True, exist_ok=True)
++        if p.exists() or p.is_symlink():
++            p.unlink()
++        p.symlink_to(dich)
++    git(kho, "add", "-A")
++    git(kho, "commit", "-q", "-m", "symlink")
++    return git(kho, "rev-parse", "HEAD").stdout.decode().strip()
++
++
++@ca
++def t20p_kiem_re_symlink_moi_hinh_dang_do():
++    """Cross-review luot 8: t20n chi co MOT hinh dang (treo, `.md`, ops/specs, them moi). Moi hinh dang duoi day phai ra
++    DUNG dong `tep ho so la symlink` cho CHINH duong dan ay: hop le · toi thu muc · duoi `.yaml` · duoi ops/leases · doi kieu."""
++    m = nap_module()
++    with kho_that(nen={"README.md": "x\n", "ops/specs/dich.md": "# d\n", "ops/reviews/doi-kieu.md": "# thuong\n"},
++                  nhanh_pr={"ops/specs/S.md": "# s\n"}) as (kho, goc, _dau):
++        cap = {"ops/reviews/hop-le.md": "../specs/dich.md", "ops/land/thu-muc": "../specs",
++               "ops/land/ten.yaml": "../specs/dich.md", "ops/leases/l.yaml": "../specs/dich.md",
++               "ops/reviews/doi-kieu.md": "../specs/dich.md"}
++        dau = _commit_symlink(kho, cap)
++        rc, log = kiem_re(m, kho, goc, dau)
++        dong = [d for d in log.splitlines() if "tep ho so la symlink" in d]
++        thieu = [d for d in cap if not any(repr(d) in x for x in dong)]
++        bang(rc == 1 and not thieu, f"moi hinh dang symlink phai co dong rieng: rc={rc} thieu={thieu}: {log}")
++
++
++@ca
++def t20q_kiem_re_xoa_tep_ho_so_khong_do():
++    """Cross-review luot 8: PR ho so XOA tep (9 lan trong lich su) phai DAT — khong ca kiem-re nao di qua tep bi xoa."""
++    m = nap_module()
++    with kho_that(nen={"README.md": "x\n", "ops/specs/cu.md": "# c\n", "ops/land/cu.yaml": "a: 1\n"},
++                  nhanh_pr={"ops/specs/cu.md": None, "ops/land/cu.yaml": None}) as (kho, goc, dau):
++        rc, log = kiem_re(m, kho, goc, dau)
++        bang(rc == 0 and "(2 tep doi, 0 loi)" in log, f"xoa tep ho so khong duoc chan oan: rc={rc}: {log}")
++
++
++@ca
++def t20r_kiem_re_symlink_co_san_bi_treo_do():
++    """Cross-review luot 8: symlink HOP LE co san (land qua duong day du) + PR ho so XOA dich => symlink treo NGOAI `doi`,
++    t82 DO tren master. Doi chung: symlink hop le co san + PR ho so KHONG dong dich => DAT (khong chan oan)."""
++    m = nap_module()
++    with kho_that(nen={"README.md": "x\n", "ops/specs/dich.md": "# d\n", "ops/specs/khac.md": "# k\n"}) as (kho, _g, _d):
++        s1 = _commit_symlink(kho, {"ops/reviews/l.md": "../specs/dich.md"})
++        viet(kho, "ops/specs/khac.md", "# k2\n")
++        git(kho, "commit", "-q", "-am", "doi khac")
++        s2 = git(kho, "rev-parse", "HEAD").stdout.decode().strip()
++        rc0, log0 = kiem_re(m, kho, s1, s2)
++        bang(rc0 == 0, f"doi chung: symlink hop le co san, dich con => DAT: rc={rc0}: {log0}")
++        git(kho, "rm", "-q", "ops/specs/dich.md")
++        git(kho, "commit", "-q", "-m", "xoa dich")
++        s3 = git(kho, "rev-parse", "HEAD").stdout.decode().strip()
++        rc, log = kiem_re(m, kho, s2, s3)
++        bang(rc == 1 and "co san bi TREO" in log and "'ops/reviews/l.md'" in log,
++             f"xoa dich cua symlink co san phai DO: rc={rc}: {log}")
++
++
++@ca
++def t20s_quet_symlink_nem_la_khong_do_duoc():
++    """Cross-review luot 8: quet cay ho so ma NEM (thu muc khong doc duoc) phai thanh loi KHONG DO DUOC, khong im lang cho qua."""
++    m = nap_module()
++    with _cay_tam({"ops/specs/a.md": "# a\n"}) as tam:
++        with mock.patch.object(m, "_symlink_treo_trong_ho_so", side_effect=PermissionError("khong doc duoc")):
++            loi = m.kiem_loai_tep({"ops/specs/a.md"}, tam)
++        bang(len(loi) == 1 and "KHONG DO DUOC" in loi[0], f"quet symlink nem phai DO, duoc {loi}")
++        (tam / "ops" / "specs" / "khoa").mkdir()
++        (tam / "ops" / "specs" / "khoa").chmod(0)
++        try:
++            if os.access(tam / "ops" / "specs" / "khoa", os.R_OK):
++                return   # chay voi quyen root: khong dung duoc thu muc khong doc duoc; nhanh mock o tren van da do
++            loi = m.kiem_loai_tep({"ops/specs/a.md"}, tam)
++            bang(len(loi) == 1 and "KHONG DO DUOC" in loi[0], f"os.walk loi doc thu muc phai NEM ra, duoc {loi}")
++        finally:
++            (tam / "ops" / "specs" / "khoa").chmod(0o755)
++
++
+ @ca
+ def t20o_kiem_re_yaml_nhieu_tai_lieu_hong_o_sau_do():
+     """Cross-review luot 7 (P2 `kiem-re-cua-fail-close-chua-co-ca`): tai lieu DAU hop le, tai lieu SAU hong — kiem_yaml
+@@ -1655,6 +1734,8 @@ def _yml(cu, moi):
+ 
+ IF_XOA = "        if: ${{ needs.chuan-bi.outputs.che_do != 'duong_nhanh' }}\n"
+ TAT_CA_BUOC_GOLDEN = "      - name: golden-test\n" + IF_XOA
++LOAI_TEP_NEO = '    loi = [f"tep ho so la symlink'
++
+ DOT_BIEN = [
+     # (tên, (tệp, hàm biến đổi), (ca đích phải ĐỎ ...))
+     ("noi_allowlist_them_scripts", _ma('"ops/reviews/", "ops/specs/")\nMAU_SHA', '"ops/reviews/", "ops/specs/", "scripts/")\nMAU_SHA'), ("t02_co_tep_ma_day_du",)),
+@@ -1846,6 +1927,15 @@ DOT_BIEN = [
+     ("kiem_re_bo_loai_tep", _ma("kiem_yaml(doi, kho) + kiem_loai_tep(doi, kho) + ", "kiem_yaml(doi, kho) + "), ("t20n_kiem_re_symlink_ho_so_do",)),
+     ("kiem_yaml_chi_tai_lieu_dau", _ma("list(yaml.safe_load_all(f))", "next(yaml.safe_load_all(f), None)"), ("t20o_kiem_re_yaml_nhieu_tai_lieu_hong_o_sau_do",)),
+     ("loai_tep_cho_symlink_qua", _ma("for duong in sorted(doi) if (Path(kho) / duong).is_symlink()]", "for duong in sorted(doi) if False]"), ("t20n_kiem_re_symlink_ho_so_do",)),
++    # ---- cross-review luot 8: moi hinh dang symlink, tep xoa, symlink co san bi treo
++    ("loai_tep_chi_chan_symlink_treo", _ma(LOAI_TEP_NEO, "    doi = {d for d in doi if not (Path(kho) / d).exists()}\n" + LOAI_TEP_NEO), ("t20p_kiem_re_symlink_moi_hinh_dang_do",)),
++    ("loai_tep_bo_ops_leases", _ma(LOAI_TEP_NEO, "    doi = {d for d in doi if not d.startswith('ops/leases/')}\n" + LOAI_TEP_NEO), ("t20p_kiem_re_symlink_moi_hinh_dang_do",)),
++    ("loai_tep_bo_symlink_thu_muc", _ma(LOAI_TEP_NEO, "    doi = {d for d in doi if not (Path(kho) / d).is_dir()}\n" + LOAI_TEP_NEO), ("t20p_kiem_re_symlink_moi_hinh_dang_do",)),
++    ("loai_tep_chi_duoi_md", _ma(LOAI_TEP_NEO, "    doi = {d for d in doi if d.endswith('.md')}\n" + LOAI_TEP_NEO), ("t20p_kiem_re_symlink_moi_hinh_dang_do",)),
++    ("loai_tep_chan_tep_da_xoa", _ma(LOAI_TEP_NEO, "    doi = set(doi)\n    if any(not (Path(kho) / d).exists() for d in doi):\n        return ['xoa']\n" + LOAI_TEP_NEO), ("t20q_kiem_re_xoa_tep_ho_so_khong_do",)),
++    ("loai_tep_bo_quet_symlink_co_san", _ma("        treo = _symlink_treo_trong_ho_so(kho)\n", "        treo = []\n"), ("t20r_kiem_re_symlink_co_san_bi_treo_do",)),
++    ("loai_tep_quet_nem_cho_qua", _ma('        return loi + [f"KHONG DO DUOC: quet symlink ho so nem {type(e).__name__}"]', "        return loi"), ("t20s_quet_symlink_nem_la_khong_do_duoc",)),
++    ("loai_tep_quet_tinh_ca_symlink_hop_le", _ma("if duong.is_symlink() and not duong.exists():", "if duong.is_symlink():"), ("t20r_kiem_re_symlink_co_san_bi_treo_do",)),
+ ]
+ TEN_DOT_BIEN = [d[0] for d in DOT_BIEN]
+ 

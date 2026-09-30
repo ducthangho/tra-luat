@@ -1,0 +1,17 @@
+schema_version: 1
+packet_issue: 674
+luot: 8
+loai: advisory_review
+ly_do: reviewer cung ho Claude voi executor; Codex het quota (chu kho); KHONG phai cross_approved/human_audited
+reviewer_provider: anthropic_claude
+reviewer_vai: review-opus-max (subagent general-purpose, model opus; tep agent chua nap duoc nen dong vai qua prompt); effort max chi la khai, KHONG DO DUOC
+reviewed_sha: 57b6578398a63c2afe4e583061440b3156aec155
+ket_luan: changes_requested
+p0_p1_p2_p3: [0, 0, 0, 2]
+verdict_file: luot-8-opus-max-57b6578-verdict.md
+verdict_sha256: 1ae6df7b1fec2e1b11c6671b68d8319ea10031db75f72ea466ebceccf0414972
+hint_file: luot-8-opus-max-57b6578-HINT.patch
+hint_sha256: 37f4cc945015881691d42366abfe15bdf60659d5d0fedd711b9e8df9099f5092
+hint_git_apply_check: OK tren 57b6578 (phien Sonnet do lai)
+do_lai_suite_cua_hint: reviewer khai 75/75 ca, 176/176 dot bien; phien Sonnet CHUA chay lai
+luu_boi: session_01BxzKQaSmg6qVeSaQWH4dr5 (Sonnet 5.5), khong phai executor g3

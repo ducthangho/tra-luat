@@ -72,7 +72,7 @@ SHA_G1   = "2f70869a0537843e9cae78618ee7ae8c261d972d"
 # do that 18-09 tren ban va g2 cua agy cho 5 tep / +812, trong khi viec cua agy la 2 tep / +353.
 # Mot chot nhu the se bao "vuot tran" cho mot ban va KHONG vuot. Base dung la MERGE-BASE.
 SHA_BASE_SPEC = "d705623162b75b7340ee7cca54ac2d2abbddbb6f"
-BAN_BO_DO = "2026-09-30h"              # doi MOI khi sua bo do - log tu khai ban nao
+BAN_BO_DO = "2026-09-30i"              # doi MOI khi sua bo do - log tu khai ban nao
 TRAN_TEP, TRAN_DONG = 2, 400          # N7' cua spec r3
 MAU_WIN  = 'if nen_thuc == "windows":'
 # Write set cua packet #541 g2. Diff khong cham tep nao o day => do NHAM NHANH.
@@ -194,6 +194,11 @@ _PY_GIU = frozenset({"PYTHONHOME", "PYTHONUSERBASE", "PYTHONNOUSERSITE"})
 # ignore|attributes) cua nguoi do VAN ap cho git con (do tren 2026-09-30g, 0ea95de: ~/.config/git/ignore `*.yaml` => ban 30g
 # 154/166, 11 ca "la"); CI khong co tep nao o do => XDG_CONFIG_HOME tro vao thu muc TAM RONG. Con lai (khoa he thong khac)
 # la gioi han da biet, khong phai da dong.
+# Cau hinh shellcheck CUA NGUOI DO lot vao bo test y nhu git: t137 goi shellcheck THANG, t33/t137 goi actionlint -> shellcheck,
+# ca hai doc SHELLCHECK_OPTS, va t137 doc ~/.shellcheckrc (XDG_CONFIG_HOME tam KHONG che duoc; cho tep rc tren Windows: KHONG DO DUOC).
+# Do tren 2026-09-30h, 0ea95de: SHELLCHECK_OPTS=--enable=all => t33 + t137 DO; ~/.shellcheckrc `enable=all` => t137 DO — ca "la"
+# => TRUOT cho ung vien sach. CI khong co ca hai. SHELLCHECK_OPTS=--norc de len bien cua nguoi do VA tat moi tep rc (shellcheck
+# phai NHAN --norc — muc 0 hoi truoc). BASH_ENV (ke ca `set -euo pipefail`) do: 166/166, khong lot.
 _GIT_GLOBAL_CI = "[init]\n\tdefaultBranch = master\n[core]\n\tautocrlf = false\n\teol = lf\n\tabbrev = 7\n"
 def chay(argv, cwd, phut=60):
     fd, gc = tempfile.mkstemp(prefix="wp541-gitconfig-ci-", suffix=".ini")
@@ -204,7 +209,7 @@ def chay(argv, cwd, phut=60):
         mt = {k: v for k, v in os.environ.items()
               if not k.upper().startswith("GIT_") and (not k.upper().startswith("PYTHON") or k.upper() in _PY_GIU)}
         mt.update(PYTHONUTF8="1", PYTHONIOENCODING="utf-8", PYTHONDONTWRITEBYTECODE="1", PYTHONUNBUFFERED="1",
-                  GIT_CONFIG_GLOBAL=gc, XDG_CONFIG_HOME=xdg)
+                  GIT_CONFIG_GLOBAL=gc, XDG_CONFIG_HOME=xdg, SHELLCHECK_OPTS="--norc")
         p = subprocess.run([sys.executable] + argv, cwd=str(cwd), capture_output=True,
                            text=True, encoding="utf-8", errors="replace", timeout=phut*60, env=mt)
     finally:
@@ -466,6 +471,11 @@ if not ("--chi-kich-thuoc" in sys.argv or "--chi-probe" in sys.argv):
     if _thieu_cc:
         loi.append(f"thieu cong cu bo test goi qua PATH: {_thieu_cc} (actionlint: ops/cai_actionlint.sh voi AL_VER;"
                    " bash: Git Bash, khong phai bash.exe cua WSL)")
+    # shellcheck KHONG nhan --norc thi actionlint 1.7.7 (tu truyen --norc) lam t33 DO, va SHELLCHECK_OPTS=--norc cua chay() lam
+    # t137 DO — ca "la" => TRUOT gia (do tren 2026-09-30h, shellcheck gia tu choi --norc: ban 30h rc=1 `la: ['t33']` sau ca
+    # bo test). `which` chi hoi CO MAT; o day hoi DUNG DUOC.
+    elif subprocess.run([shutil.which("shellcheck"), "--norc", "--version"], capture_output=True, timeout=60).returncode:
+        loi.append("shellcheck tren PATH khong nhan --norc (actionlint 1.7.7 va chay() deu truyen co ay): cap nhat shellcheck")
 
 rc, head, _ = git(goc, "rev-parse", "HEAD")
 if rc: loi.append("khong doc duoc HEAD")
@@ -500,6 +510,7 @@ inn(""); inn("-" * 78); inn("1. KICH THUOC — tran spec r3: <= 2 tep va <= 400 
 # lech mot chut, no sai ca mot bac do lon.
 # Cho nen: nen khong chung minh duoc la tuoi => KHONG DO DUOC (rc=3), KHONG phai TRUOT.
 # TRUOT la mot PHAN QUYET ve ban va; phan quyet chi duoc phep phat ra khi da do duoc.
+er = ""
 rc_u, url_tho, _ = git(goc, "remote", "get-url", "origin")
 url_o, url_in = _url_sach(url_tho), _url_in(url_tho)
 ghi("origin_url", url_in); inn(f"  origin       : {url_in or '(khong doc duoc)'}")
@@ -580,6 +591,12 @@ else:
         vuot = len(hang) > TRAN_TEP or them > TRAN_DONG
         ket("N7' kich thuoc", TRUOT if vuot else (KDD if khong_so else DAT),
             f"{len(hang)} tep / +{them}" + (f" — numstat KHONG co so dong cho {khong_so}" if khong_so else ""))
+
+# Cong kich thuoc PHAI de lai MOT ket qua. `git diff --numstat` hong thi nhanh `if rc: pass` khong ghi gi, va vang mat o day
+# thanh DAT o bo gop: cau hinh diff CUA NGUOI DO hong (diff.orderFile tro tep khong co, diff.algorithm go sai => rc=128) cho
+# --chi-kich-thuoc rc=0 voi 0 chot, luot day du "DAT 11" rc=0 (do tren 2026-09-30h, 0ea95de). Vang mat la KHONG DO DUOC.
+if not any(c[0] == "N7' kich thuoc" for c in chot):
+    ket("N7' kich thuoc", KDD, f"cong KHONG ra ket qua (git diff --numstat rc={rc}): {_an_userinfo(er)[:70]}")
 
 # Dinh danh THAT nam o N7' (ca moi g2 mang vao), KHONG o "hau due g1": g1 da land nen moi nhanh deu
 # la hau due. Dong dau khoi dan phai tu khai theo ket qua ay (do duoc: master 44620e8 mo khoi bang

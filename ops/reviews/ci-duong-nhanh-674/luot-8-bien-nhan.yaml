@@ -1,0 +1,22 @@
+schema_version: 1
+packet_issue: 674
+luot: 8
+review_class: advisory_review
+reviewer_provider: anthropic_claude
+reviewer_vai: review-opus-max (dinh nghia ~/.claude/agents; phien nay chua nap duoc theo ten nen chay general-purpose model=opus voi nguyen luat cua vai)
+reviewer_model_yeu_cau: claude-opus-5-5
+effort_yeu_cau: max
+effort_thuc_te: KHONG DO DUOC (Agent tool khong dat effort cho general-purpose)
+do_doc_lap: cung ho model voi executor — KHONG phai cross_approved; land can Codex cross_approved hoac human_audited
+reviewed_sha: 57b6578398a63c2afe4e583061440b3156aec155
+spec_sha256: b6e719c999d5990f987628963c248b1ac53d377dfa5b668ac06adce76981da57
+prompt_sha256: 1ba48a44271c00ff3829d7296a240b23586a0b1e2a081ed5cb47bfef25ae7766
+ket_luan: changes_requested
+p0_p1_p2_p3: [0, 0, 1, 1]
+ma_thoat: 0
+thoi_luong_giay: 5506
+verdict_file: luot-8-verdict.md
+verdict_sha256: 2f8a5e6aa8e31ff69a22f2862564e56554b7682f800c1e25d6e744de0b580434
+hint_file: luot-8-HINT.patch
+hint_sha256: 71096290fa9998174ed4f1bc80e205a71e8717ef329628f39cb2c6bbd097bd69
+hint_git_apply_check: OK tren 57b6578 (do lai boi phien dieu phoi)

@@ -543,9 +543,11 @@ quyết**, nó là một khoảng trống công cụ; đọc nó thành "cổng 
 redirect (curl ≥ 7.58 tự bỏ `Authorization` khi đổi host — đừng thêm `--location-trusted`).
 Thiếu `-f` thì 401/403/404 vẫn `rc=0` và tệp chứa JSON lỗi thay cho log. CÓ `-f` thì lỗi
 KHÔNG ghi tệp — tệp CÙNG TÊN còn nguyên log của lần tải TRƯỚC (của job khác, hoặc bản cắt ngang
-`rc=18` của chính job ấy), đọc y hệt log thật; nên mỗi job một tệp, xoá trước khi tải. Kho này
-public: không token vẫn tải được log (đo 30-09-2026: không header ⇒ 200), token chỉ để có hạn
-mức riêng. `: "${GITHUB_PAT:?}"` chỉ dừng shell KHÔNG tương tác — dán vào terminal thì dòng sau
+`rc=18` của chính job ấy), đọc y hệt log thật; nên mỗi job một tệp, xoá trước khi tải. Đừng
+suy "không cần token" từ một `200` trong phiên web: proxy của phiên TỰ CHÈN credential GitHub
+(đo 30-09-2026, không header: `/rate_limit` báo limit 15000, `/user` 200; `--noproxy`: limit 60,
+IP dùng chung đã cạn ⇒ 403). Tải log ẩn danh thật KHÔNG ĐO ĐƯỢC ở đây, nên khối dưới đòi
+token. `: "${GITHUB_PAT:?}"` chỉ dừng shell KHÔNG tương tác — dán vào terminal thì dòng sau
 vẫn chạy — nên chốt nằm trong CÙNG một `if`:
 
 ```bash
@@ -586,7 +588,10 @@ lease giữ đường ấy. Nên `rc=0` chỉ đọc thành "không ai giữ" kh
 nhau: nhánh máy chủ đã xoá mà cache còn giữ (bootstrap chữa bằng `fetch --prune`) vẫn góp lease
 và bia mộ vào câu trả lời — bia mộ trỏ tới lease chỉ còn trên nhánh ấy đổi `rc=12` thành
 `rc=0 NGƯỜI_GIỮ 0`; `ls-remote` `rc=0` mà RỖNG không phải bằng chứng — máy chủ thật luôn có
-nhánh mặc định.
+nhánh mặc định. Tập ấy mới chỉ là `refs/remotes/origin`, còn lệnh đọc cả `refs/heads/*` và
+`refs/remotes/<remote khác>/*`: nhánh cục bộ chưa đẩy, nhánh không upstream sót lại sau
+`fetch --prune`, hay một remote thứ hai cũng góp lease và bia mộ y hệt. Nên bước 1 còn đòi mọi
+ref ngoài origin trỏ đúng một đầu nhánh máy chủ (dòng `refs/…` trong `CACHE_CU`).
 
 Thông điệp lỗi nêu **nhánh và upstream thật**, không nhất thiết là `origin/<cùng tên>`.
 Lệnh chữa do `ai-dang-giu` in ra đã phân biệt nhánh rảnh với nhánh đang được worktree giữ:
@@ -609,10 +614,13 @@ if MC="$(git -C "$SOURCE" ls-remote --heads origin)" && [ -n "$MC" ]; then
   LECH="$(LC_ALL=C comm -3 <(printf '%s\n' "$MC" | awk 'NF{sub("^refs/heads/","",$2); print $1" "$2}' | LC_ALL=C sort) \
     <(git -C "$SOURCE" for-each-ref --format='%(if)%(symref)%(then)%(else)%(objectname) %(refname:lstrip=3)%(end)' refs/remotes/origin \
       | awk NF | LC_ALL=C sort))"
-  [ -z "$LECH" ] && echo "CACHE_TUOI" || printf 'CACHE_CU (sat le: chi may chu co; thut TAB: chi cache co):\n%s\n' "$LECH"
+  # ref NGOÀI origin mà ai-dang-giu vẫn đọc (refs/heads/*, remote khác): SHA phải là đầu một nhánh máy chủ
+  NGOAI="$(awk 'NR==FNR{if(NF)s[$1];next} NF && index($2,"refs/remotes/origin/")!=1 && !($1 in s)' <(printf '%s\n' "$MC") \
+    <(git -C "$SOURCE" for-each-ref --format='%(if)%(symref)%(then)%(else)%(objectname) %(refname)%(end)' refs/heads refs/remotes))"
+  [ -z "$LECH$NGOAI" ] && echo "CACHE_TUOI" || printf 'CACHE_CU (sat le: chi may chu co; thut TAB: chi cache co; refs/: ref ngoai may chu):\n%s\n%s\n' "$LECH" "$NGOAI"
 else echo "KHONG_DO_DUOC: ls-remote hong hoac rong"; fi
-# 2) rc=0 chỉ là "không ai giữ" khi bước 1 in CACHE_TUOI
-"$PY" "$SOURCE/ops/lease_publish.py" ai-dang-giu <duong> --root "$SOURCE"; echo "rc=$?"
+# 2) rc=0 chỉ là "không ai giữ" khi bước 1 in CACHE_TUOI; refs/replace cục bộ đổi được nội dung lease nên tắt nó
+GIT_NO_REPLACE_OBJECTS=1 "$PY" "$SOURCE/ops/lease_publish.py" ai-dang-giu <duong> --root "$SOURCE"; echo "rc=$?"
 ```
 
 Bên bootstrap chữa nhánh rảnh `<nhanh>` về `<upstream>` (cả hai lấy từ chẩn đoán) bằng `fetch .`

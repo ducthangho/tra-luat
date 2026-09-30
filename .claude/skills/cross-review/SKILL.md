@@ -540,7 +540,9 @@ không có `gh`, và hệ quả không dừng ở lệnh này — `ops/lease_pub
 `rc=8: KHÔNG ĐO ĐƯỢC loại số hiệu: không gọi được gh api`. `rc=8` ấy **không phải một phán
 quyết**, nó là một khoảng trống công cụ; đọc nó thành "cổng chặn" là khai rộng hơn phép đo.
 Đường vòng chỉ cần token và HTTP; endpoint logs trả 302 sang host lưu trữ KHÁC nên phải theo
-redirect (curl ≥ 7.58 tự bỏ `Authorization` khi đổi host — đừng thêm `--location-trusted`).
+redirect (curl ≥ 7.58 tự bỏ `Authorization` khi đổi host — đừng thêm `--location-trusted`, kể cả
+qua `~/.curlrc`: một dòng `location-trusted` ở đó đưa token theo sang host lưu trữ, nên `-q` đứng
+ĐẦU TIÊN để curl bỏ qua tệp ấy).
 Thiếu `-f` thì 401/403/404 vẫn `rc=0` và tệp chứa JSON lỗi thay cho log. CÓ `-f` thì lỗi
 KHÔNG ghi tệp — tệp CÙNG TÊN còn nguyên log của lần tải TRƯỚC (của job khác, hoặc bản cắt ngang
 `rc=18` của chính job ấy), đọc y hệt log thật; nên mỗi job một tệp, xoá trước khi tải. Đừng
@@ -557,7 +559,7 @@ builtin): `-H "Authorization: …"` để nguyên token trong argv (`ps`, `/proc
 J="<id>"
 if [ -n "${GITHUB_PAT:-}" ] && [ -n "${SCRATCH:-}" ]; then
   OUT="$SCRATCH/job-$J.log"; rm -f "$OUT"
-  printf 'Authorization: Bearer %s\n' "$GITHUB_PAT" | curl -fsS -L -H @- \
+  printf 'Authorization: Bearer %s\n' "$GITHUB_PAT" | curl -q -fsS -L -H @- \
     "https://api.github.com/repos/ducthangho/tra-luat/actions/jobs/$J/logs" -o "$OUT"; echo "rc=$? $OUT"
 else echo "KHONG_DO_DUOC: GITHUB_PAT hoac SCRATCH rong"; fi
 ```
@@ -633,13 +635,21 @@ GIT_NO_REPLACE_OBJECTS=1 "$PY" "$SOURCE/ops/lease_publish.py" ai-dang-giu <duong
 Bên bootstrap chữa nhánh rảnh `<nhanh>` về `<upstream>` (cả hai lấy từ chẩn đoán) bằng `fetch .`
 KHÔNG kèm `+`: git đòi fast-forward trên đầu nhánh HIỆN TẠI (commit cục bộ chưa có ở upstream ⇒
 `rejected`) và từ chối nhánh đang được BẤT KỲ worktree nào checkout, kể cả worktree chính của
-`<root>` — "rảnh" lúc chẩn đoán chưa chắc còn rảnh lúc chữa. Đừng thay bằng `update-ref <mới>
+`<root>` — "rảnh" lúc chẩn đoán chưa chắc còn rảnh lúc chữa. Chốt từ chối ấy PHỤ THUỘC phiên bản
+git (đo 30-09-2026): 2.30.2 và 2.34.1 (mặc định Ubuntu 22.04) trả `rc=0` và CẬP NHẬT nhánh đang
+checkout ở worktree LIÊN KẾT (`status` ở đó hiện `D` đúng lease vừa về, y hệt `update-ref` dưới
+đây), cả nhánh đang rebase/bisect ở đó; 2.37.2, 2.39.2, 2.43.0 từ chối; 2.35–2.36 chưa đo. Nên
+khối dưới KHÔNG chạy với git < 2.37. Đừng thay bằng `update-ref <mới>
 <cũ>`: nó so được giá trị cũ nhưng KHÔNG từ chối nhánh đang checkout — HEAD của worktree ấy nhảy,
 index và tệp đứng yên, `status` hiện staged NGƯỢC đúng các commit upstream (lease vừa về hiện
 thành `D`), và `commit` kế tiếp xoá lại chúng:
 
 ```bash
-git -C "<root>" fetch --no-write-fetch-head . "<upstream>:refs/heads/<nhanh>"; echo "rc=$?"
+case "$(git version)" in
+  "git version 1."*|"git version 2."[0-9].*|"git version 2."[12][0-9].*|"git version 2.3"[0-6].*)
+    echo "KHONG_CHAY: $(git version) < 2.37 khong tu choi nhanh dang checkout o worktree LIEN KET" ;;
+  *) git -C "<root>" fetch --no-write-fetch-head . "<upstream>:refs/heads/<nhanh>"; echo "rc=$?" ;;
+esac
 ```
 
 ## Provenance CI

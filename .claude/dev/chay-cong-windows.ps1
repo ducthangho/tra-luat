@@ -126,6 +126,14 @@ if ([WildcardPattern]::ContainsWildcardCharacters($Goc)) {
     Loi "gốc kho '$Goc' chứa ký tự wildcard ([ ] * ?) — Start-Process coi đường dẫn là MẪU nên không cổng nào chạy được. Dời kho sang đường dẫn không có các ký tự ấy."
     exit 2
 }
+# `dist/actionlint` (AL_DICH, DẪN TỪ `$Goc`) lên ĐẦU PATH — của script lẫn của `ops/chay_lease_publish_test.sh` (nó tự chèn
+# `$AL_DICH` rồi gọi `python` theo TÊN). Gốc chứa dấu phân cách PATH của nền (`:` POSIX, `;` Windows) thì mục ấy VỠ ĐÔI: tiền tố
+# lên ĐẦU PATH, phần sau thành mục TƯƠNG ĐỐI (đo: gốc `…/a:b/k` ⇒ PATH0=`…/a`, PATH1=`b/k/dist/actionlint`, AL_DICH không nằm
+# trên PATH; `python` giả trong `…/a` ⇒ 6/6 cổng ĐẠT, rc=0). Từ chối như gốc có wildcard.
+if ($Goc.Contains([string][IO.Path]::PathSeparator)) {
+    Loi "gốc kho '$Goc' chứa dấu phân cách PATH '$([IO.Path]::PathSeparator)' — dist/actionlint lên đầu PATH sẽ vỡ thành hai mục. Dời kho sang đường dẫn không có ký tự ấy."
+    exit 2
+}
 Set-Location -LiteralPath $Goc
 Noi "gốc kho: $Goc"
 
@@ -146,12 +154,19 @@ function Tim-Python {
         [pscustomobject]@{ Ten = 'python3'; Dau = @()        }
     )
     foreach ($u in $ungVien) {
-        if (Get-Command $u.Ten -ErrorAction SilentlyContinue) {
+        # Trả ĐƯỜNG DẪN TUYỆT ĐỐI của đúng tệp đã chứng minh, KHÔNG trả TÊN: sau hàm này script chèn `dist/actionlint` lên ĐẦU
+        # PATH, nên `python` theo tên lúc chạy cổng có thể là tệp KHÁC tệp đã kiểm — lớp này đã tái phát ba lần (shim đầu PATH;
+        # `<TEMP>/actionlint`; `python` trong `dist/actionlint` ⇒ đo: 6/6 cổng ĐẠT, rc=0).
+        $lenh = @(Get-Command $u.Ten -CommandType Application -ErrorAction SilentlyContinue)
+        if ($lenh.Count -gt 0) {
+            $exe = $lenh[0].Source
             $d = $u.Dau
             # CHỨNG MINH là Python bằng ĐẦU RA, không bằng rc: một shim thoát 0 cho mọi lời gọi
             # qua được `-c "import sys"` rồi làm MỌI cổng Python "ĐẠT" mà không chạy gì (đã đo).
-            $ra = @(& $u.Ten @d -c "import sys; print('TLPY=%d.%d.%d' % sys.version_info[:3])" 2>$null)
-            if ($LASTEXITCODE -eq 0 -and @($ra -match '^TLPY=3\.\d+\.\d+$').Count -gt 0) { return $u }
+            $ra = @(& $exe @d -c "import sys; print('TLPY=%d.%d.%d' % sys.version_info[:3])" 2>$null)
+            if ($LASTEXITCODE -eq 0 -and @($ra -match '^TLPY=3\.\d+\.\d+$').Count -gt 0) {
+                return [pscustomobject]@{ Ten = $exe; Dau = $u.Dau }
+            }
         }
     }
     return $null
@@ -237,11 +252,21 @@ if ($gitDir -and $gitCommon -and ($gitDir -ne $gitCommon)) {
 
 # ───────────────────────────── công cụ ─────────────────────────────
 # `AL_DICH` RIÊNG của bản clone (như `$RUNNER_TEMP` của job CI), KHÔNG phải TEMP dùng chung: thư mục này lên ĐẦU PATH SAU khi
-# Tim-Python đã chứng minh Python, mà cổng Python gọi Python theo TÊN (`ops/chay_lease_publish_test.sh` cũng chèn `$AL_DICH` lên đầu
-# PATH rồi gọi `python` theo tên). `GetTempPath()` trên Linux là `/tmp/` (1777) ⇒ ai cũng tạo được `/tmp/actionlint`; đặt `python`
-# vào đó là mọi cổng Python ĐẠT mà không chạy gì (đo: 5/5 ĐẠT, rc=0; đối chứng 4 ĐỎ, rc=1). `dist/` đã bị `.gitignore` và nằm
+# Tim-Python đã chứng minh Python, mà `ops/chay_lease_publish_test.sh` chèn `$AL_DICH` lên đầu PATH rồi gọi `python` theo TÊN
+# (cổng Python của script từng cũng vậy — nay chạy đường dẫn tuyệt đối của Tim-Python). `GetTempPath()` trên Linux là `/tmp/`
+# (1777) ⇒ ai cũng tạo được `/tmp/actionlint`; đặt `python` vào đó là mọi cổng Python ĐẠT mà không chạy gì (đo trên 131c2e7:
+# 5/5 ĐẠT, rc=0; đối chứng 4 ĐỎ, rc=1). `dist/` đã bị `.gitignore` và nằm
 # trong `_RELEASE_EXCLUDE_DIRS` (đo: 9 cổng quét cây giữ nguyên rc khi có `dist/actionlint`).
 $AlDich = Join-Path $Goc (Join-Path 'dist' 'actionlint')
+# `dist/` bị `.gitignore`: tệp THEO DÕI dưới `dist/actionlint` chỉ vào được bằng `git add -f`, tức là DỮ LIỆU của nhánh đang đo —
+# mà thư mục này lên ĐẦU PATH của wrapper lease (gọi `python` theo tên; `ops/`, ngoài write set). Đo: `python` giả theo dõi ở
+# đó ⇒ `lease-publish selftest` ĐẠT dù bộ test thoát 1 (131c2e7, AL_DICH = TEMP: ĐỎ). Cổng Python của script đã an toàn nhờ
+# đường dẫn tuyệt đối; chốt này đóng đường qua wrapper. Tệp CHƯA theo dõi là của chính người chạy — không phải dữ liệu nhánh.
+$alTheoDoi = @(& git ls-files -- 'dist/actionlint' 2>$null)
+if ($LASTEXITCODE -ne 0 -or $alTheoDoi.Count -gt 0) {
+    Loi "dist/actionlint có tệp THEO DÕI ($($alTheoDoi -join ', ')) hoặc không hỏi được git — thư mục này lên đầu PATH nên không dùng dữ liệu của nhánh."
+    exit 2
+}
 if ($CaiCongCu) {
     Tieu 'cài công cụ bản ghim'
     & $PyTen @PyDau -m pip install --quiet PyYAML==6.0.3 jsonschema==4.26.0 ruff==0.15.15

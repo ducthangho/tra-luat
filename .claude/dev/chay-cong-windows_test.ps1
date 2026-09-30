@@ -7,7 +7,8 @@
 #   t4 nhan-noi-hon-phep-do (nếp git)             `.git/config.lock` ⇒ rc=4, không in "→ 7" suông
 #   t5 nhan-noi-hon-phep-do (khởi động)           Start-Process hỏng ⇒ không in "TREO"
 #   t6 guong-ci-bo-dieu-kien-nen                  bước ci.yml `runner.os != 'Windows'` ⇒ script bỏ trên Windows
-#   t7 sua-moi-truong-phien-goi                   PATH dùng dấu phân cách của nền, không chèn lặp AL_DICH (`dist/actionlint`)
+#   t7 sua-moi-truong-phien-goi                   PATH dùng dấu phân cách của nền, không chèn lặp AL_DICH; AL_DICH CHÍNH LÀ
+#                                                 `dist/actionlint` (samefile — kể cả khi TEMP có sẵn `actionlint/`)
 #   t8 bo-giai-cong-cu-theo-ten-thu-tu            `python` thoát 0 cho mọi lời gọi ⇒ không được ĐẠT
 #   t9 han-mac-dinh-duoi-thoi-luong-da-do         mặc định -HanGiay ≥ `timeout-minutes` của job CI
 #   t10 duong-dan-du-lieu-thanh-mau-wildcard      gốc kho dưới `…[1]…` ⇒ rc=2 + nói "wildcard", không "không tìm thấy gốc"
@@ -23,14 +24,19 @@
 #   t19 mot-du-lieu-hai-nhan                      `ExitCode` KHÔNG đọc được ở đường chung ⇒ KHÔNG ĐO ĐƯỢC, không ĐỎ; cột rc in `-`
 #   t20 tep-test-khong-kin-moi-truong-may         console code page 437 ⇒ vẫn đọc đúng output UTF-8 của script
 #   t21 bo-giai-cong-cu-theo-ten-thu-tu (PATH)    `python` giả trong `<TEMP>/actionlint` (TEMP dùng chung) ⇒ cổng Python không ĐẠT
+#   t22 bo-giai-cong-cu-theo-ten-thu-tu (tách)    gốc kho chứa dấu phân cách PATH (AL_DICH vỡ đôi, tiền tố lên đầu PATH) ⇒ rc=2
+#   t23 bo-giai-cong-cu-theo-ten-thu-tu (tuyệt đối) `python` giả trong `dist/actionlint` ⇒ cổng Python vẫn chạy tệp ĐÃ KIỂM
+#   t24 bo-giai-cong-cu-theo-ten-thu-tu (theo dõi) tệp THEO DÕI dưới `dist/actionlint` (đầu PATH của wrapper lease) ⇒ rc=2
 # Bộ này KÍN với config git của máy chạy, với biến git trỏ kho khác (khối ngay dưới `$script:Rac`), với code page của
-# console (`Doc-Utf8`), với dấu thập phân của locale (t18 nhận `5,1s`) và với `<TEMP>/actionlint` dùng chung (t21).
-# ĐỘT BIẾN để đo răng (đo trên pwsh 7.4.6/Linux, bộ 21 ca): `-Script` trỏ f2392df ⇒ 2/21 (đạt t17 — bản ấy đã so băm — và
-# t21 — dấu `;` ghim cứng dán AL_DICH vào mục PATH kế nên nó không thành một mục); 8b82d40 ⇒ 13/21 (đỏ t7 t13 t14 t15 t16 t18
-# t19 t21); 66efc78 ⇒ 15/21 (đỏ t7 t13 t16 t18 t19 t21); 131c608 ⇒ 16/21 (đỏ t7 t13 t18 t19 t21); bd62cad ⇒ 18/21 (đỏ t7 t19
-# t21); 131c2e7 ⇒ 19/21 (đỏ t7 t21). Lượt 6: AL_DICH về TEMP ⇒ t7 lẫn t21 (ca chung chốt — t7 đòi AL_DICH = `dist/actionlint`);
-# cột rc in TRỐNG thay cho `-` ⇒ t19. 29 đột biến trên script (lượt 4): 25 đỏ ÍT NHẤT ca của mảnh nó gỡ, 4 sống đúng là bốn mảnh
-# khai ở cuối đoạn này. Lượt 5 đo lại trên bộ 20 ca: gỡ nhánh rc≠0 của xả / `$giay` trước xả / bỏ trừ phần hạn đã trôi /
+# console (`Doc-Utf8`), với dấu thập phân của locale (t18 nhận `5,1s`) và với `<TEMP>/actionlint` của máy (t7, t21 tự đặt TEMP).
+# ĐỘT BIẾN để đo răng (đo trên pwsh 7.4.6/Linux, bộ 24 ca): `-Script` trỏ f2392df ⇒ 3/24 (đạt t17 — bản ấy đã so băm —, t21 —
+# dấu `;` ghim cứng dán AL_DICH vào mục PATH kế nên nó không thành một mục — và t23 — AL_DICH là TEMP); 8b82d40 ⇒ 14/24 (đỏ t7
+# t13 t14 t15 t16 t18 t19 t21 t22 t24); 66efc78 ⇒ 16/24 (đỏ t7 t13 t16 t18 t19 t21 t22 t24); 131c608 ⇒ 17/24 (đỏ t7 t13 t18 t19
+# t21 t22 t24); bd62cad ⇒ 19/24 (đỏ t7 t19 t21 t22 t24); 131c2e7 ⇒ 20/24 (đỏ t7 t21 t22 t24); c8c2c6a ⇒ 21/24 (đỏ t22 t23 t24).
+# Lượt 7, mỗi chốt một ca: Tim-Python trả TÊN ⇒ chỉ t23; bỏ chốt phân cách PATH ⇒ chỉ t22; bỏ chốt tệp theo dõi ⇒ chỉ t24;
+# AL_DICH về TEMP ⇒ chỉ t7, kể cả khi TEMP của máy có sẵn `actionlint/` (bỏ vế samefile của t7 thì đột biến ấy SỐNG 24/24);
+# TÊN + TEMP ⇒ t7 t21. Lượt 6: cột rc in TRỐNG thay cho `-` ⇒ t19. 29 đột biến trên script (lượt 4): 25 đỏ ÍT NHẤT ca
+# của mảnh nó gỡ, 4 sống đúng là bốn mảnh khai ở cuối đoạn này. Lượt 5 đo lại trên bộ 20 ca: gỡ nhánh rc≠0 của xả / `$giay` trước xả / bỏ trừ phần hạn đã trôi /
 # xả 2×HanGiay / sàn 12 s ⇒ chỉ t18; xả cố định 30 s ⇒ t16 t18; nhánh xả đếm ĐẠT ⇒ t16; rc=null đếm ĐỎ ⇒ t19; giải bash
 # theo tên ⇒ t2; bỏ `$env:GIT_CONFIG = $null` ⇒ t13; sàn 0 ⇒ SỐNG (đã khai). Trên chính bộ này: `Doc-Utf8` rỗng ⇒ t20;
 # bộ đọc thời lượng chỉ nhận dấu chấm ⇒ t18. Ca chung chốt thì khai: gỡ `exit 4` của nếp git đỏ t4 lẫn t13; `$td` khởi
@@ -40,13 +46,15 @@
 # giải `bash` theo tên trên Linux (nay t2 đặt cả `bash`); xả KHÔNG trừ phần hạn đã trôi / xả 2×HanGiay / sàn 12 s (18/18
 # khi cổng thoát ngay — nay t18 cho cổng thoát ở giây 3); cột rc in `-` (20/20 — nay t19). Mảnh KHÔNG ca nào đo được trên
 # nền này — khai thẳng: `$null -eq $rc` của nhánh xả (TƯƠNG ĐƯƠNG từ lượt 5: rc=null rơi xuống đường chung cũng ra KHÔNG ĐO
-# ĐƯỢC — gỡ ra vẫn 21/21);
+# ĐƯỢC — gỡ ra vẫn 24/24);
 # `[bool]$ha`, `[string]$ban`, `-ErrorAction Stop` của Start-Process (tương đương: nó vốn ném lỗi kết thúc);
+# vế `$LASTEXITCODE -ne 0` của chốt tệp theo dõi (git hỏng giữa chừng — nếp git đã đòi git chạy được);
 # `$null = $tt.Handle` và `catch { $xa = $false }` (chỉ có tác dụng khi `.Handle`/`WaitForExitAsync` ném — Windows,
 # pwsh 7.0); `#Requires -Version 7.1` (bộ này chạy bằng pwsh ≥ 7.1); sàn 1 s của `$conMs` (chỉ đổi kết quả khi cổng
 # thoát sát hạn); phần khối kín cho `GIT_INDEX_FILE`/`GIT_DIR` (đo bằng chạy dưới biến ấy — gỡ ra ⇒ index kho khác
 # 2144 → 34 mục — không có ca); dòng ép UTF-8 trong harness t11/t19 (chỉ có tác dụng khi console của tiến trình con là
-# code page cũ — Windows).
+# code page cũ — Windows). CHƯA ĐÓNG — khai thẳng: tệp CHƯA theo dõi trong `dist/actionlint` vẫn lên đầu PATH của wrapper lease
+# (`ops/chay_lease_publish_test.sh` gọi `python` theo tên; ngoài write set) — đó là tệp của chính người chạy, không phải của nhánh.
 [CmdletBinding()]
 param([string]$Script)
 Set-StrictMode -Version Latest
@@ -259,10 +267,16 @@ ds = os.environ.get("PATH", "").split(os.pathsep)
 # `"$AlDich;$env:PATH"` dán AL_DICH vào thư mục ấy chứ không đụng mục AL_DICH có sẵn —
 # chỉ đếm `ds.count(al)` là ca KHÔNG CÓ RĂNG trên Linux (đã đo: bản gốc vẫn qua).
 dan = os.name != "nt" and any(";" in d for d in ds)
-sys.exit(0 if al and ds.count(al) == 1 and not dan else 7)
+# AL_DICH phải CHÍNH LÀ `dist/actionlint` của gốc (cwd của cổng) — so bằng samefile, không so chuỗi. Thiếu vế này thì
+# AL_DICH về TEMP vẫn qua t7 trên máy CÓ SẴN `<TEMP>/actionlint` (đo: 131c2e7 ⇒ 20/21, chỉ t21 đỏ).
+dung = bool(al) and os.path.isdir(al) and os.path.samefile(al, os.path.join(os.getcwd(), "dist", "actionlint"))
+sys.exit(0 if dung and ds.count(al) == 1 and not dan else 7)
 '@
-    # PATH đã có sẵn AL_DICH = lượt thứ hai trong cùng một phiên.
-    $a = Chay $k @() @{ PATH = "$al$Sep$env:PATH" }
+    # PATH đã có sẵn AL_DICH = lượt thứ hai trong cùng một phiên. TEMP CÓ SẴN `actionlint/` (như máy đã từng chạy installer
+    # với mặc định `/tmp/actionlint`) ⇒ kết quả ca không phụ thuộc máy chạy.
+    $tam = Join-Path (Split-Path $k) 'tmp'
+    New-Item -ItemType Directory -Force -Path (Join-Path $tam 'actionlint') | Out-Null
+    $a = Chay $k @() @{ PATH = "$al$Sep$env:PATH"; TMPDIR = $tam; TEMP = $tam; TMP = $tam }
     if ($a.ra -notmatch 'cong_cu kiem-tra\s+rc=0') { throw 'PATH sai dau phan cach hoac chen lap AL_DICH' }
 }
 
@@ -542,6 +556,51 @@ Ca 't21 python gia trong <TEMP>/actionlint => cong Python khong DAT' {
     }
     $a = Chay $k @() @{ TMPDIR = $tam; TEMP = $tam; TMP = $tam; STUB_RC_cong_cu_py = '1' }
     if ($a.ra -notmatch 'cong_cu kiem-tra\s+rc=1') { throw "python gia trong TEMP/actionlint duoc chon, cong Python khong chay that (rc_script=$($a.rc))" }
+}
+
+# Gốc kho chứa dấu phân cách PATH của nền ⇒ AL_DICH (DẪN TỪ gốc) vỡ đôi trên PATH: tiền tố lên ĐẦU PATH của script VÀ của
+# wrapper lease. Đo trên c8c2c6a: `python` giả trong tiền tố ⇒ 6/6 cổng ĐẠT, rc=0. Từ chối như gốc có wildcard (t10).
+Ca 't22 goc kho co dau phan cach PATH => rc=2, noi dung nguyen nhan' {
+    $k = Dung-Kho
+    $moi = Join-Path (Split-Path $k) ('a' + $Sep + 'b')
+    New-Item -ItemType Directory -Force -Path $moi | Out-Null
+    & git clone -q $k (Join-Path $moi 'k')
+    if ($LASTEXITCODE -ne 0) { throw "git clone vao duong dan co dau phan cach PATH that bai (rc=$LASTEXITCODE)" }
+    New-Item -ItemType Directory -Force -Path (Join-Path $moi (Join-Path 'k' (Join-Path 'dist' 'actionlint'))) | Out-Null
+    $a = Chay (Join-Path $moi 'k')
+    if ($a.rc -ne 2 -or $a.ra -notmatch 'phân cách PATH') { throw "goc co dau phan cach PATH ma khong bi tu choi dung cho (rc=$($a.rc))" }
+}
+
+# `python` giả trong `dist/actionlint` (thư mục lên ĐẦU PATH sau khi Tim-Python đã kiểm): cổng Python phải chạy ĐÚNG tệp đã
+# kiểm (đường dẫn tuyệt đối), không chạy `python` đầu PATH. Tệp CHƯA theo dõi để ca đo riêng chốt đường dẫn tuyệt đối (t24 đo
+# chốt tệp THEO DÕI).
+Ca 't23 python gia trong dist/actionlint => cong Python van chay tep DA KIEM' {
+    $k = Dung-Kho
+    $al = Join-Path $k (Join-Path 'dist' 'actionlint')
+    New-Item -ItemType Directory -Force -Path $al | Out-Null
+    foreach ($n in 'py', 'python', 'python3') {
+        if ($IsWindows) { Set-Content -LiteralPath (Join-Path $al "$n.cmd") -Value '@exit /b 0' -Encoding ascii }
+        else {
+            $f = Join-Path $al $n
+            Set-Content -LiteralPath $f -Value "#!/bin/sh`nexit 0" -Encoding utf8NoBOM
+            & chmod +x $f
+        }
+    }
+    $a = Chay $k @() @{ STUB_RC_cong_cu_py = '1' }
+    if ($a.ra -notmatch 'cong_cu kiem-tra\s+rc=1') { throw "python gia trong dist/actionlint duoc chon, cong Python khong chay tep da kiem (rc_script=$($a.rc))" }
+}
+
+# Tệp THEO DÕI dưới `dist/actionlint` (bị `.gitignore`, chỉ vào được bằng `git add -f`) là dữ liệu của NHÁNH, mà thư mục ấy lên
+# ĐẦU PATH của wrapper lease (gọi `python` theo tên). Đo trên c8c2c6a với wrapper thật: lease ĐẠT dù bộ test thoát 1.
+Ca 't24 tep THEO DOI duoi dist/actionlint => rc=2' {
+    $k = Dung-Kho
+    $al = Join-Path $k (Join-Path 'dist' 'actionlint')
+    New-Item -ItemType Directory -Force -Path $al | Out-Null
+    Set-Content -LiteralPath (Join-Path $al 'python') -Value "#!/bin/sh`nexit 0" -Encoding utf8NoBOM
+    & git -C $k add -f -- dist/actionlint
+    & git -C $k -c user.email=t@t -c user.name=t commit -qm theo-doi
+    $a = Chay $k
+    if ($a.rc -ne 2 -or $a.ra -notmatch 'THEO DÕI') { throw "dist/actionlint co tep theo doi ma khong bi tu choi (rc=$($a.rc))" }
 }
 
 foreach ($d in $script:Rac) { Remove-Item -LiteralPath $d -Recurse -Force -ErrorAction SilentlyContinue }

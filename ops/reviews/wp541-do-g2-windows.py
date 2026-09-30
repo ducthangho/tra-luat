@@ -79,8 +79,9 @@ SHA_G1   = "2f70869a0537843e9cae78618ee7ae8c261d972d"
 # do that 18-09 tren ban va g2 cua agy cho 5 tep / +812, trong khi viec cua agy la 2 tep / +353.
 # Mot chot nhu the se bao "vuot tran" cho mot ban va KHONG vuot. Base dung la MERGE-BASE.
 SHA_BASE_SPEC = "d705623162b75b7340ee7cca54ac2d2abbddbb6f"
-BAN_BO_DO = "2026-09-30k"              # doi MOI khi sua bo do - log tu khai ban nao
+BAN_BO_DO = "2026-09-30l"              # doi MOI khi sua bo do - log tu khai ban nao
 TRAN_TEP, TRAN_DONG = 2, 400          # N7' cua spec r3
+AL_SAN = (1, 7, 7)                    # san actionlint = ban ghim CI: AL_VER cua ci.yml = ban_ghim cua ops/cong_cu.yaml
 MAU_WIN  = 'if nen_thuc == "windows":'
 # Write set cua packet #541 g2. Diff khong cham tep nao o day => do NHAM NHANH.
 WRITE_SET_G2 = {"ops/lease_publish.py", "ops/lease_publish_test.py"}
@@ -476,7 +477,19 @@ if not ("--chi-kich-thuoc" in sys.argv or "--chi-probe" in sys.argv):
     # shellcheck, cac ca chay ops/cai_actionlint.sh can bash). Thieu thi cac ca ay in "KHONG DO DUOC: thieu `...`" va bo do ra
     # rc=3 — nhung chi SAU ca bo test lan N7 (do tren 2026-09-30g, PATH thieu actionlint: `Cong cu day du de do` KDD, rc=3
     # sau 2 luot bo test). Cung ly do PyYAML duoc hoi o day: hoi TRUOC, cung PATH ma chay() truyen cho bo test.
-    _thieu_cc = [c for c in ("bash", "actionlint", "shellcheck") if not shutil.which(c)]
+    # VA cung CHO bo test dung: tren Windows `shutil.which` tra THU MUC HIEN HANH TRUOC PATH, ma bo test chay voi cwd = goc con
+    # tien trinh nay dung o cwd CUA NGUOI DO (noi goi ps1, vd. Downloads — dung noi giai nen actionlint.exe). Do tren 2026-09-30k
+    # (nhanh win32 THAT cua shutil.which): actionlint tot o cwd nguoi do + ban hong dau PATH => muc 0 hoi ban o cwd (rc=0), bo test
+    # dung ban tren PATH => rc=1 `DAT 11 | TRUOT 1`, `la: ['t33', 't137', 't159']`. Giai ten voi cwd = goc roi goi THANG bang duong
+    # TUYET DOI da giai (qua han thi run() giet dung tien trinh — ly do ban 30i khong hoi qua chay()).
+    _cwd_nguoi_do = os.getcwd()
+    try:
+        if goc.is_dir(): os.chdir(goc)
+        _cc = {c: (os.path.abspath(p) if p else None) for c, p in
+               ((c, shutil.which(c)) for c in ("bash", "actionlint", "shellcheck"))}
+    finally:
+        os.chdir(_cwd_nguoi_do)
+    _thieu_cc = [c for c, p in _cc.items() if not p]
     if _thieu_cc:
         loi.append(f"thieu cong cu bo test goi qua PATH: {_thieu_cc} (actionlint: ops/cai_actionlint.sh voi AL_VER;"
                    " bash: Git Bash, khong phai bash.exe cua WSL)")
@@ -487,7 +500,7 @@ if not ("--chi-kich-thuoc" in sys.argv or "--chi-probe" in sys.argv):
     # NGUOI DO — do tren 2026-09-30i, shellcheck 0.9.0 + SHELLCHECK_OPTS=--extended-analysis=true (co cua 0.10): rc=3 "khong nhan
     # --norc: cap nhat shellcheck" trong khi t33/t137 qua chay() deu 1/1. Goi THANG (khong qua chay()): qua han thi run() giet
     # dung shellcheck; qua chay() thi chi giet python con, shellcheck treo o lai mo coi (do tren 2026-09-30i: 1/1 con song).
-    elif subprocess.run([shutil.which("shellcheck"), "--norc", "--version"], capture_output=True, timeout=60,
+    elif subprocess.run([_cc["shellcheck"], "--norc", "--version"], capture_output=True, timeout=60,
                         env=dict(os.environ, SHELLCHECK_OPTS="--norc")).returncode:
         loi.append("shellcheck tren PATH khong nhan --norc (actionlint 1.7.7 va chay() deu truyen co ay): cap nhat shellcheck")
     # actionlint cung phai DUNG DUOC, khong chi CO MAT: t33/t137/t159 goi no THANG, va mot actionlint khong chay (sai kien truc,
@@ -495,9 +508,23 @@ if not ("--chi-kich-thuoc" in sys.argv or "--chi-probe" in sys.argv):
     # rc=1 => muc 0 im lang, t33 "la"). Ban THAT 1.6.27/1.7.7/1.7.8/1.7.12 deu rc=0 va deu cho t33/t137/t159 QUA tren 0ea95de.
     # bash CHI hoi CO MAT, co chu dich: bash WSL (System32) lam t35-t40 DO nhung ca sau deu NGOAI_PHAM_VI, con t32/t152 tu chon
     # Git Bash (_bash_posix cua ung vien) — do tren 2026-09-30j: bash kieu WSL => t35-t40 DO, deu roi vao ngoai pham vi.
-    if not _thieu_cc and subprocess.run([shutil.which("actionlint"), "-version"], capture_output=True,
-                                        timeout=60).returncode:
-        loi.append("actionlint tren PATH co mat nhung `actionlint -version` rc!=0 (khong chay duoc): cai lai ban ghim AL_VER")
+    # CHAY DUOC chua phai DUNG DUOC: do tren 2026-09-30k, 0ea95de, actionlint THAT 1.4.3/1.5.0/1.5.3/1.6.0/1.6.8/1.6.15/1.6.20/
+    # 1.6.22 deu `-version` rc=0, ma ca tam lam t137/t159 DO (`property "run_attempt"/"workflow_sha" is not defined`), 1.4.3/1.5.0
+    # them t33 (`must be contained within ${{ }}`) — e2e 1.6.22: rc=1 `DAT 11 | TRUOT 1`, `la: ['t137', 't159']` cho ung vien
+    # sach; 1.6.23/1.6.24/1.6.26/1.6.27/1.7.0/1.7.6/1.7.7/1.7.12 QUA ca ba. San la ban
+    # ghim CI (AL_SAN), KHONG phai 1.6.23 do tren MOT ung vien: workflow cua ung vien sau co the dung cu phap moi hon, ma CI chi do
+    # bang ban ghim. Cu hon san => KHONG DO DUOC (chan ca 1.6.23-1.7.6 dang QUA: fail-close, khong phai phan quyet). `v` dau: ban
+    # `go install` in `v1.7.7`; khong doc duoc so (vd. `(devel)`) => KHONG DO DUOC.
+    if not _thieu_cc:
+        _al = subprocess.run([_cc["actionlint"], "-version"], capture_output=True, text=True, encoding="utf-8",
+                             errors="replace", timeout=60)
+        _al_v = re.search(r"(?m)^v?(\d+)\.(\d+)\.(\d+)", _al.stdout or "")
+        if _al.returncode:
+            loi.append("actionlint tren PATH co mat nhung `actionlint -version` rc!=0 (khong chay duoc): cai lai ban ghim AL_VER")
+        elif not _al_v or tuple(int(x) for x in _al_v.groups()) < AL_SAN:
+            loi.append(f"actionlint {_al_v.group(0) if _al_v else '(khong doc duoc phien ban)'} cu hon ban ghim CI "
+                       f"{'.'.join(map(str, AL_SAN))} (AL_VER): ban cu lam t137/t159 DO 'la' tren ung vien sach —"
+                       " cai ban ghim (ops/cai_actionlint.sh voi AL_VER)")
 
 rc, head, _ = git(goc, "rev-parse", "HEAD")
 if rc: loi.append("khong doc duoc HEAD")

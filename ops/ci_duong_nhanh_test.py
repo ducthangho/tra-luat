@@ -131,6 +131,13 @@ def nul(*duong):
 
 
 CAY_GIA = "c" * 40
+HOP_GIA = "e" * 40   # `github.sha` gia (merge ref)
+
+
+def bo_attr_source(argv):
+    """argv khong co `--attr-source=...` ngay sau `git` — de dinh tuyen do gia doc lap voi chot thuoc tinh (t20u do rieng)."""
+    argv = list(argv)
+    return argv[:1] + argv[2:] if len(argv) > 1 and str(argv[1]).startswith("--attr-source=") else argv
 
 
 def _tra_gia(gia_tri):
@@ -143,19 +150,20 @@ def _tra_gia(gia_tri):
 
 
 def chay_gia(out=b"", rc=0, nem=None, log=None, merge_base=(GOC_A + "\n").encode(),
-             merge_tree=(CAY_GIA + "\n").encode(), diff_cay=(0, b"")):
-    """Do gia git. `merge-base --all`, `merge-tree` va `diff goc -> cay merge` co gia tri RIENG, doc lap voi `out`/`rc`/`nem`
-    cua ba cham (mac dinh: MOT base, merge sach, merge khong doi them gi) — de moi chot cua ba cham van co rang rieng
-    thay vi bi chot cua `doc_diff_merge` che."""
+             merge_tree=(CAY_GIA + "\n").encode(), diff_cay=(0, b""), merge_ref=(0, b"")):
+    """Do gia git. `merge-base --all`, `merge-tree`, `diff goc -> cay merge` va `diff goc -> merge ref` (`HOP_GIA`) co gia tri
+    RIENG, doc lap voi `out`/`rc`/`nem` cua ba cham (mac dinh: MOT base, merge sach, merge va merge ref khong doi them gi) —
+    de moi chot cua ba cham van co rang rieng thay vi bi chot cua `doc_diff_merge` che. `log` ghi argv NGUYEN VAN."""
     def chay(argv, **kw):
         if log is not None:
             log.append(list(argv))
-        if list(argv[:3]) == ["git", "merge-base", "--all"]:
+        a = bo_attr_source(argv)
+        if a[:3] == ["git", "merge-base", "--all"]:
             return _tra_gia(merge_base)
-        if list(argv[:3]) == ["git", "merge-tree", "--write-tree"]:
+        if a[:3] == ["git", "merge-tree", "--write-tree"]:
             return _tra_gia(merge_tree)
-        if list(argv[:4]) == ["git", "diff", "--no-renames", "--name-only"]:
-            return _tra_gia(diff_cay)
+        if a[:4] == ["git", "diff", "--no-renames", "--name-only"]:
+            return _tra_gia(merge_ref if a[-1] == HOP_GIA else diff_cay)
         if nem is not None:
             raise nem
         return KQ(rc, out)
@@ -163,7 +171,8 @@ def chay_gia(out=b"", rc=0, nem=None, log=None, merge_base=(GOC_A + "\n").encode
 
 
 def env_pr(su_kien="pull_request", goc=GOC_A, dau=GOC_B, **them):
-    e = {"CI_DUONG_NHANH_SU_KIEN": su_kien, "CI_DUONG_NHANH_GOC": goc, "CI_DUONG_NHANH_DAU": dau}
+    e = {"CI_DUONG_NHANH_SU_KIEN": su_kien, "CI_DUONG_NHANH_GOC": goc, "CI_DUONG_NHANH_DAU": dau,
+         "CI_DUONG_NHANH_MERGE": HOP_GIA}
     e.update(them)
     return e
 
@@ -217,6 +226,11 @@ def t05_thieu_hoac_hong_sha_day_du():
         "goc ngan": env_pr(goc="abc1234"), "dau 41 ky tu": env_pr(dau="b" * 41),
         "goc chu hoa": env_pr(goc="A" * 40), "dau co khoang trang": env_pr(dau=" " + "b" * 39),
         "goc khong phai hex": env_pr(goc="g" * 40), "vang bien": {"CI_DUONG_NHANH_SU_KIEN": "pull_request"},
+        # cross-review luot 9: merge ref (`github.sha`) BAT BUOC — vang/hong thi KHONG DO DUOC, khong lui ve mo phong
+        "thieu merge ref": env_pr(CI_DUONG_NHANH_MERGE=""), "merge ref toan 0": env_pr(CI_DUONG_NHANH_MERGE="0" * 40),
+        "merge ref chu hoa": env_pr(CI_DUONG_NHANH_MERGE="E" * 40), "merge ref ngan": env_pr(CI_DUONG_NHANH_MERGE="e" * 7),
+        "merge ref lac dang": env_pr(CI_DUONG_NHANH_MERGE="xyz"),
+        "vang bien merge ref": {k: v for k, v in env_pr().items() if k != "CI_DUONG_NHANH_MERGE"},
     }
     for ten, env in hong.items():
         log = []
@@ -388,8 +402,19 @@ def kho_that(nen=None, nhanh_pr=None, nen_tien=None, sao_lease_publish=False):
         shutil.rmtree(tam, ignore_errors=True)
 
 
-def phan_loai_that(m, kho, goc, dau):
-    return m.phan_loai(env_pr(goc=goc, dau=dau), chay_that, kho)
+def merge_ref_that(kho, goc, dau):
+    """Commit merge kieu GitHub (cha 1 = goc, cha 2 = dau) dung tu cay `merge-tree` cua CAY LAM VIEC hien tai — ke ca khi
+    xung dot (GitHub khong dung merge ref cho PR xung dot, nhung phan loai tu fail-close o merge-tree). Khong dung duoc
+    (thieu object) => SHA khong ton tai (phan loai phai tu KHONG DO DUOC)."""
+    mt = git(kho, "merge-tree", "--write-tree", "--no-messages", goc, dau, kiem=False)
+    cay = mt.stdout.decode("ascii", "replace").split("\n", 1)[0].strip()
+    if not re.fullmatch(r"[0-9a-f]{40}", cay):
+        return "f" * 40
+    return git(kho, "commit-tree", cay, "-p", goc, "-p", dau, "-m", "merge ref").stdout.decode().strip()
+
+
+def phan_loai_that(m, kho, goc, dau, hop=None):
+    return m.phan_loai(env_pr(goc=goc, dau=dau, CI_DUONG_NHANH_MERGE=hop or merge_ref_that(kho, goc, dau)), chay_that, kho)
 
 
 @ca
@@ -509,6 +534,72 @@ def t11c_goc_doi_ten_ho_so_ra_vung_ma_day_du():
 
 
 @ca
+def t11d_merge_ref_that_dung_base_moi_hon_day_du():
+    """Cross-review luot 9 (`phan-loai-khong-neo-merge-ref-that`): merge-tree mo phong tu `pull_request.base.sha`; commit GitHub
+    test THAT (`github.sha`) co the dung tren dau nhanh dich MOI hon. Nhanh dich doi ten tep ho so ra vung ma SAU base.sha
+    => merge that sua ma => phai `day_du`. Kem cac cua fail-close cua diff `goc -> merge ref` (do gia)."""
+    m = nap_module()
+    dong = "".join(f"dong {i}\n" for i in range(20))
+    with kho_that(nen={"README.md": "x\n", "ops/land/f.md": dong},
+                  nhanh_pr={"ops/land/f.md": dong.replace("dong 5", "dong NAM")}) as (kho, goc_cu, dau):
+        goc_moi = _kho_doi_ten_phia_goc(kho, "ops/land/f.md", "scripts/f.py")
+        git(kho, "checkout", "-q", "--detach", goc_moi)
+        git(kho, "merge", "-q", "--no-ff", dau, "-m", "merge ref")
+        hop = git(kho, "rev-parse", "HEAD").stdout.decode().strip()
+        git(kho, "checkout", "-q", "pr")
+        bang("scripts/f.py" in set(git(kho, "diff", "--name-only", f"{hop}^1", hop).stdout.decode().split()),
+             "fixture vo hieu: merge that phai SUA scripts/f.py")
+        bang(phan_loai_that(m, kho, goc_cu, dau)[0] == "duong_nhanh",
+             "fixture vo hieu: merge ref dung tren base.sha cu phai cho duong nhanh (khong thi ca nay khong do gi)")
+        che_do, ly_do = phan_loai_that(m, kho, goc_cu, dau, hop)
+        bang(che_do == "day_du" and "scripts/f.py" in ly_do, f"merge ref that sua ma: phai day_du, duoc {che_do!r}: {ly_do}")
+    ho_so = nul("ops/land/x.yaml")
+    bang(m.phan_loai(env_pr(), chay_gia(ho_so))[0] == "duong_nhanh", "doi chung: merge ref khong doi them => duong nhanh")
+    cac = {
+        "merge ref doi tep ma": dict(merge_ref=nul("ops/land/x.yaml", "scripts/f.py")),
+        "merge ref rc=128": dict(merge_ref=(128, b"")),
+        "merge ref nem": dict(merge_ref=SuDoGia("git no")),
+        "merge ref cut": dict(merge_ref=(0, b"ops/land/x.yaml\0ops/land/y")),
+    }
+    for ten, kw in cac.items():
+        try:
+            che_do = m.phan_loai(env_pr(), chay_gia(ho_so, **kw))[0]
+        except SuDoGia as e:
+            raise TinHieuChotCa(f"{ten}: git nem ma phan loai KHONG bat: {e}") from e
+        bang(che_do == "day_du", f"{ten}: phai la day_du (fail-close), duoc {che_do!r}")
+
+
+@ca
+def t11e_thuoc_tinh_cua_pr_khong_cau_hinh_duoc_merge_tree():
+    """Lop `kiem-re-bi-cau-hinh-boi-du-lieu-ho-so`, cua `merge-tree` (tu do khi va luot 9): PR mang `ops/land/.gitattributes`
+    `* -diff`; tep hien co duoi `ops/land/d/` la CRLF, nhanh goc doi ten thu muc ra `scripts/d/` va doi sang LF. Doc thuoc
+    tinh cay lam viec thi phep do doi ten tinh bam kieu NHI PHAN => mat doi ten thu muc => merge XUNG DOT thanh merge
+    SACH, tep moi cua PR o lai `ops/land/d/` => duong nhanh. Thuoc tinh GOC => xung dot => `day_du`."""
+    m = nap_module()
+    crlf = {f"ops/land/d/{t}.md": "".join(f"{t} dong so {i} noi dung kha dai de dem\r\n" for i in range(30)).encode()
+            for t in "abc"}
+    pr = {"ops/land/d/moi.md": "moi\n", "ops/land/.gitattributes": "* -diff\n"}
+    with kho_that(nen={"README.md": "x\n", **crlf}, nhanh_pr=pr) as (kho, _a, dau):
+        git(kho, "checkout", "-q", "main")
+        (kho / "scripts").mkdir(exist_ok=True)
+        git(kho, "mv", "ops/land/d", "scripts/d")
+        for t in "abc":
+            tep = kho / "scripts" / "d" / f"{t}.md"
+            tep.write_bytes(tep.read_bytes().replace(b"\r\n", b"\n"))
+        git(kho, "add", "-A")
+        git(kho, "commit", "-q", "-m", "goc doi ten thu muc + LF")
+        goc = git(kho, "rev-parse", "HEAD").stdout.decode().strip()
+        git(kho, "checkout", "-q", "pr")
+        cay_lam_viec = git(kho, "merge-tree", "--write-tree", "--no-messages", goc, dau, kiem=False)
+        bang(cay_lam_viec.returncode == 0,
+             f"fixture vo hieu: thuoc tinh cay lam viec (PR) phai lam merge SACH, rc={cay_lam_viec.returncode}")
+        bang(git(kho, f"--attr-source={goc}", "merge-tree", "--write-tree", "--no-messages", goc, dau, kiem=False).returncode == 1,
+             "fixture vo hieu: thuoc tinh GOC phai cho merge XUNG DOT (doi ten thu muc dua tep moi vao scripts/d/)")
+        che_do, ly_do = phan_loai_that(m, kho, goc, dau)
+        bang(che_do == "day_du", f"thuoc tinh cua PR khong duoc bien merge xung dot thanh duong nhanh: {che_do!r}: {ly_do}")
+
+
+@ca
 def t12_doi_ten_ra_khoi_vung_ma_day_du():
     m = nap_module()
     noi = "def f():\n    return 1\n" * 20
@@ -523,11 +614,12 @@ def t12_doi_ten_ra_khoi_vung_ma_day_du():
     # con do rieng `--no-renames` cua BA CHAM. Do gia mo phong dung ngu nghia vua chung minh bang fixture: thieu co thi
     # git chi in duong dan DICH; merge (gia) khong doi them gi — chi ba cham quyet dinh.
     def chay_doi_ten(argv, **kw):
-        if list(argv[:3]) == ["git", "merge-base", "--all"]:
+        argv = bo_attr_source(argv)
+        if argv[:3] == ["git", "merge-base", "--all"]:
             return KQ(0, (GOC_A + "\n").encode())
-        if list(argv[:3]) == ["git", "merge-tree", "--write-tree"]:
+        if argv[:3] == ["git", "merge-tree", "--write-tree"]:
             return KQ(0, (CAY_GIA + "\n").encode())
-        if list(argv[:4]) == ["git", "diff", "--no-renames", "--name-only"]:
+        if argv[:4] == ["git", "diff", "--no-renames", "--name-only"]:
             return KQ(0, b"")
         return KQ(0, nul("ops/land/tl.py", "scripts/tl.py") if "--no-renames" in argv else nul("ops/land/tl.py"))
     che_do, ly_do = m.phan_loai(env_pr(), chay_doi_ten)
@@ -639,7 +731,8 @@ def chay_that_bo_ca_du_lieu(argv, **kw):
 def kiem_re(m, kho, goc, dau, bay_gio=None):
     bo_dem = tempfile.TemporaryFile("w+", encoding="utf-8")
     CA_DU_LIEU_GOI.clear()
-    rc = m.lenh_kiem_re(env_pr(goc=goc, dau=dau), chay_that_bo_ca_du_lieu, kho, bo_dem, bay_gio)
+    env = env_pr(goc=goc, dau=dau, CI_DUONG_NHANH_MERGE=merge_ref_that(kho, goc, dau))
+    rc = m.lenh_kiem_re(env, chay_that_bo_ca_du_lieu, kho, bo_dem, bay_gio)
     bo_dem.seek(0)
     return rc, bo_dem.read()
 
@@ -824,6 +917,55 @@ def t20s_kiem_re_tep_nhi_phan_la_khong_do_duoc():
         except SuDoGia as e:
             raise TinHieuChotCa(f"{ten}: numstat nem ma kiem_nhi_phan KHONG bat: {e}") from e
         bang(len(loi) == 1 and can in loi[0], f"numstat {ten} phai thanh loi, duoc {loi}")
+
+
+@ca
+def t20t_kiem_re_thuoc_tinh_diff_cua_pr_khong_bien_nhi_phan_thanh_van_ban():
+    """Cross-review luot 9 (`kiem-re-bi-cau-hinh-boi-du-lieu-ho-so`, cua `--numstat`): `diff` (set) do PR mang vao ep tep co
+    NUL la van ban cho `--numstat` doc thuoc tinh cay lam viec, trong khi `--check` (thuoc tinh GOC) van bo qua no."""
+    m = nap_module()
+    noi = b"a\0\n<<<<<<< HEAD\nb\n=======\nc\n>>>>>>> nhanh\n"
+    for thu_muc, attr in (("ops/land", "* diff\n"), ("ops/reviews/a/b", "x.md diff\n")):
+        with kho_that(nhanh_pr={f"{thu_muc}/.gitattributes": attr, f"{thu_muc}/x.md": noi}) as (kho, goc, dau):
+            ns = git(kho, "diff", "--numstat", f"{goc}...{dau}").stdout.decode()
+            bang(f"\t{thu_muc}/x.md" in ns and f"-\t-\t{thu_muc}/x.md" not in ns,
+                 f"fixture vo hieu ({thu_muc}): thuoc tinh cua PR phai ep numstat cay-lam-viec coi tep la van ban: {ns!r}")
+            bang(git(kho, f"--attr-source={goc}", "diff", "--check", f"{goc}...{dau}", kiem=False).returncode == 0,
+                 f"fixture vo hieu ({thu_muc}): `--check` doc thuoc tinh goc phai BO QUA tep nhi phan")
+            rc, log = kiem_re(m, kho, goc, dau)
+            bang(rc == 1 and "nhi phan" in log and f"{thu_muc}/x.md" in log,
+                 f"{thu_muc}: tep co NUL phai DO du PR mang `diff`: rc={rc}: {log}")
+
+
+# Hop dong doi so (lop `kiem-re-bi-cau-hinh-boi-du-lieu-ho-so`): MOI loi goi git chay bo may diff/merge cua bo phan loai
+# va kiem-re doc thuoc tinh tu cay GOC. `merge-base --all` chi doc do thi commit nen KHONG thuoc tap nay (khai rieng).
+LOI_GOI_DOC_THUOC_TINH = {
+    "ba cham --name-only": lambda a: a[1:3] == ["diff", "--name-only"] and a[-1] == f"{GOC_A}...{GOC_B}",
+    "merge-tree": lambda a: a[1:3] == ["merge-tree", "--write-tree"],
+    "diff goc -> cay merge-tree": lambda a: a[1:4] == ["diff", "--no-renames", "--name-only"] and a[-1] == CAY_GIA,
+    "diff goc -> merge ref": lambda a: a[1:4] == ["diff", "--no-renames", "--name-only"] and a[-1] == HOP_GIA,
+    "diff --check": lambda a: "--check" in a,
+    "diff --numstat": lambda a: "--numstat" in a,
+}
+
+
+@ca
+def t20u_moi_loi_goi_git_doc_thuoc_tinh_tu_goc():
+    """Khoa tung DUONG VAO cua lop: moi loi goi git (tru `merge-base`) mang `--attr-source=<goc>` NGAY SAU `git`. Ba duong
+    (`merge-tree`, `--check`, `--numstat`) co ca hanh vi rieng (t11e, t20p, t20t); ba duong `--name-only --no-renames` khong doc
+    thuoc tinh nen chi hop dong nay canh — go chot o do khong doi hanh vi hom nay, nhung mo cua neu ai bo `--no-renames`."""
+    m = nap_module()
+    log = []
+    rc = _kiem_re_gia(m, env_pr(), chay_gia(nul("ops/land/khong-co-trong-cay.md"), log=log))
+    bang(rc == 0, f"fixture vo hieu: kiem-re do gia phai DAT, duoc rc={rc}")
+    goi_git = [a for a in log if a[:1] == ["git"]]
+    for ten, khop in LOI_GOI_DOC_THUOC_TINH.items():
+        thay = [a for a in goi_git if khop(bo_attr_source(a))]
+        bang(len(thay) == 1, f"{ten}: phai co DUNG MOT loi goi, thay {len(thay)}: {goi_git}")
+        bang(thay[0][1] == f"--attr-source={GOC_A}", f"{ten}: thuoc tinh phai doc tu cay GOC (--attr-source ngay sau git): {thay[0]}")
+    con_lai = [a for a in goi_git if not any(k(bo_attr_source(a)) for k in LOI_GOI_DOC_THUOC_TINH.values())]
+    bang([a[1:3] for a in con_lai] == [["merge-base", "--all"]],
+         f"loi goi git ngoai hop dong (phai xep vao LOI_GOI_DOC_THUOC_TINH hoac khai mien): {con_lai}")
 
 
 @ca
@@ -1094,9 +1236,11 @@ def y01_chuan_bi_phan_loai_chi_pull_request_va_khong_lam_do_job():
     env = b.get("env") or {}
     bang(env.get("CI_DUONG_NHANH_SU_KIEN") == "${{ github.event_name }}"
          and env.get("CI_DUONG_NHANH_GOC") == "${{ github.event.pull_request.base.sha }}"
-         and env.get("CI_DUONG_NHANH_DAU") == "${{ github.event.pull_request.head.sha }}", f"env buoc phan loai sai: {env}")
+         and env.get("CI_DUONG_NHANH_DAU") == "${{ github.event.pull_request.head.sha }}"
+         and env.get("CI_DUONG_NHANH_MERGE") == "${{ github.sha }}", f"env buoc phan loai sai: {env}")
     bang(b.get("continue-on-error") is True,
-         "buoc phan loai phai co `continue-on-error: true`: chuan-bi do => ba job bat buoc `skipped` (GitHub tinh la dat)")
+         "buoc phan loai phai co `continue-on-error: true`: phan loai loi phai roi ve day_du; chuan-bi DO thi context bat buoc "
+         "`(ubuntu-latest)` KHONG duoc tao va PR bi CHAN (do 4 luot that, xem ci.yml)")
     co = [x for x in buoc(wf, "chuan-bi") if str(x.get("uses", "")).startswith("actions/checkout")]
     bang(len(co) == 1 and (co[0].get("with") or {}).get("fetch-depth") == 0, f"chuan-bi phai checkout fetch-depth 0: {co}")
     bang(chuan_hoa_if(co[0].get("if")) == "github.event_name == 'pull_request'" and co[0].get("continue-on-error") is True,
@@ -1205,7 +1349,8 @@ def y08_buoc_kiem_re_o_gate_ops():
     env = b.get("env") or {}
     bang(env.get("CI_DUONG_NHANH_GOC") == "${{ github.event.pull_request.base.sha }}"
          and env.get("CI_DUONG_NHANH_DAU") == "${{ github.event.pull_request.head.sha }}"
-         and env.get("CI_DUONG_NHANH_SU_KIEN") == "${{ github.event_name }}", f"env buoc kiem re sai: {env}")
+         and env.get("CI_DUONG_NHANH_SU_KIEN") == "${{ github.event_name }}"
+         and env.get("CI_DUONG_NHANH_MERGE") == "${{ github.sha }}", f"env buoc kiem re sai: {env}")
 
 
 @ca
@@ -1273,7 +1418,7 @@ KHUNG_JOB = {
 KHUNG_BUOC = {
     'chuan-bi': [
         ('actions/checkout@v4', {'uses': 'actions/checkout@v4', 'if': "${{ github.event_name == 'pull_request' }}", 'continue-on-error': True, 'timeout-minutes': 10, 'with': {'fetch-depth': 0}}),
-        ('phan loai diff (duong nhanh ho so - chi pull_request)', {'id': 'phan-loai', 'if': "${{ github.event_name == 'pull_request' }}", 'continue-on-error': True, 'timeout-minutes': 5, 'env': {'CI_DUONG_NHANH_SU_KIEN': '${{ github.event_name }}', 'CI_DUONG_NHANH_GOC': '${{ github.event.pull_request.base.sha }}', 'CI_DUONG_NHANH_DAU': '${{ github.event.pull_request.head.sha }}'}}),
+        ('phan loai diff (duong nhanh ho so - chi pull_request)', {'id': 'phan-loai', 'if': "${{ github.event_name == 'pull_request' }}", 'continue-on-error': True, 'timeout-minutes': 5, 'env': {'CI_DUONG_NHANH_SU_KIEN': '${{ github.event_name }}', 'CI_DUONG_NHANH_GOC': '${{ github.event.pull_request.base.sha }}', 'CI_DUONG_NHANH_DAU': '${{ github.event.pull_request.head.sha }}', 'CI_DUONG_NHANH_MERGE': '${{ github.sha }}'}}),
         ('che do (push / workflow_dispatch luon day du)', {'if': "${{ github.event_name != 'pull_request' }}", 'env': {'SU_KIEN': '${{ github.event_name }}'}}),
     ],
     'gate': [
@@ -1320,7 +1465,7 @@ KHUNG_BUOC = {
         ('cài shellcheck cho G5 (cài xong đo lại)', {'shell': 'bash'}),
         ('cài rg cho G5 (cài xong đo lại)', {'shell': 'bash'}),
         ('DUONG_NHANH - liet ke buoc bo qua (job gate-ops)', {'if': "${{ needs.chuan-bi.outputs.che_do == 'duong_nhanh' }}"}),
-        ('DUONG_NHANH - kiem re thay cho buoc bi bo (doctrine-scan, YAML, diff --check, lease check)', {'if': "${{ needs.chuan-bi.outputs.che_do == 'duong_nhanh' }}", 'shell': 'bash', 'env': {'CI_DUONG_NHANH_SU_KIEN': '${{ github.event_name }}', 'CI_DUONG_NHANH_GOC': '${{ github.event.pull_request.base.sha }}', 'CI_DUONG_NHANH_DAU': '${{ github.event.pull_request.head.sha }}'}}),
+        ('DUONG_NHANH - kiem re thay cho buoc bi bo (doctrine-scan, YAML, diff --check, lease check)', {'if': "${{ needs.chuan-bi.outputs.che_do == 'duong_nhanh' }}", 'shell': 'bash', 'env': {'CI_DUONG_NHANH_SU_KIEN': '${{ github.event_name }}', 'CI_DUONG_NHANH_GOC': '${{ github.event.pull_request.base.sha }}', 'CI_DUONG_NHANH_DAU': '${{ github.event.pull_request.head.sha }}', 'CI_DUONG_NHANH_MERGE': '${{ github.sha }}'}}),
         ('ci-duong-nhanh selftest (phan loai diff + khoa cau truc if)', {'if': "runner.os == 'Linux'"}),
         ('bien-nhan v2 selftest', {}),
         ('lease-publish selftest (đo lại setup sau G5)', {'if': "${{ needs.chuan-bi.outputs.che_do != 'duong_nhanh' }}", 'shell': 'bash', 'env': {'AL_VER': '1.7.7'}}),
@@ -1407,7 +1552,7 @@ def y13_khoa_topology_cua_ci_yml_ngoai_than_run():
 
 # LUAT (luot 5, lop chot-yaml): THAN `run:` cua MOI buoc DO PACKET NAY THEM duoc khoa NGUYEN VAN. Truoc do y09 chi doi dong goi test
 # CO MAT trong than ⇒ `exit 0` dat TRUOC no van qua; buoc `che do` cua `chuan-bi` them `exit 1` ⇒ chuan-bi do ⇒ ba job bat buoc
-# `skipped`. Than `run:` cua buoc CO SAN ngoai pham vi packet (bien gioi khai o y13).
+# `skipped`, context bat buoc khong duoc tao ⇒ PR bi CHAN tren MOI su kien (xem ci.yml). Than `run:` cua buoc CO SAN ngoai pham vi packet (bien gioi khai o y13).
 RUN_BUOC_PACKET = {
     ('chuan-bi', 'phan loai diff (duong nhanh ho so - chi pull_request)'): 'python3 ops/ci_duong_nhanh.py',
     ('chuan-bi', 'che do (push / workflow_dispatch luon day du)'): 'echo "DUONG_NHANH: khong phan loai - su_kien=${SU_KIEN} khong phai pull_request, luon DAY_DU"\n',
@@ -1985,6 +2130,9 @@ DOT_BIEN = [
     ("yml_go_buoc_liet_ke_packet_loop", _yml("      - name: DUONG_NHANH - liet ke buoc bo qua (job gate-packet-loop)\n        if: ${{ needs.chuan-bi.outputs.che_do == 'duong_nhanh' }}\n        run: |\n          echo \"DUONG_NHANH: bo qua packet-loop selftest " + DUOI_LOG + "\"\n", ""), ("y07_buoc_bi_bo_tu_noi_ly_do",)),
     ("yml_liet_ke_thieu_mot_buoc", _yml("          echo \"DUONG_NHANH: bo qua golden-test " + DUOI_LOG + "\"\n", ""), ("y07_buoc_bi_bo_tu_noi_ly_do",)),
     ("yml_kiem_re_nuot_loi", _yml("        shell: bash\n        env:\n          CI_DUONG_NHANH_SU_KIEN: ${{ github.event_name }}\n", "        continue-on-error: true\n        shell: bash\n        env:\n          CI_DUONG_NHANH_SU_KIEN: ${{ github.event_name }}\n"), ("y08_buoc_kiem_re_o_gate_ops",)),
+    ("yml_phan_loai_bo_bien_merge", _yml("          CI_DUONG_NHANH_MERGE: ${{ github.sha }}\n        run: python3 ops/ci_duong_nhanh.py\n", "        run: python3 ops/ci_duong_nhanh.py\n"), ("y01_chuan_bi_phan_loai_chi_pull_request_va_khong_lam_do_job", "y13_khoa_topology_cua_ci_yml_ngoai_than_run")),
+    ("yml_phan_loai_merge_la_head", _yml("          CI_DUONG_NHANH_MERGE: ${{ github.sha }}\n        run: python3 ops/ci_duong_nhanh.py\n", "          CI_DUONG_NHANH_MERGE: ${{ github.event.pull_request.head.sha }}\n        run: python3 ops/ci_duong_nhanh.py\n"), ("y01_chuan_bi_phan_loai_chi_pull_request_va_khong_lam_do_job", "y13_khoa_topology_cua_ci_yml_ngoai_than_run")),
+    ("yml_kiem_re_bo_bien_merge", _yml("          CI_DUONG_NHANH_MERGE: ${{ github.sha }}\n        run: |\n          set -euo pipefail\n", "        run: |\n          set -euo pipefail\n"), ("y08_buoc_kiem_re_o_gate_ops", "y13_khoa_topology_cua_ci_yml_ngoai_than_run")),
     ("yml_kiem_re_shell_pwsh", _yml("        shell: bash\n        env:\n          CI_DUONG_NHANH_SU_KIEN: ${{ github.event_name }}\n", "        shell: pwsh\n        env:\n          CI_DUONG_NHANH_SU_KIEN: ${{ github.event_name }}\n"), ("y08_buoc_kiem_re_o_gate_ops",)),
     ("yml_kiem_re_comment_doctrine", _yml("          python .claude/dev/packet_loop.py doctrine-scan --root .\n", "          # python .claude/dev/packet_loop.py doctrine-scan --root .\n"), ("y08_buoc_kiem_re_o_gate_ops",)),
     ("yml_kiem_re_comment_kiem_re", _yml("          python ops/ci_duong_nhanh.py kiem-re\n", "          # python ops/ci_duong_nhanh.py kiem-re\n"), ("y08_buoc_kiem_re_o_gate_ops",)),
@@ -2062,7 +2210,14 @@ DOT_BIEN = [
     ("mot_merge_base_bo_kiem_rc", _ma('    if getattr(mb, "returncode", None) != 0 or not isinstance(ra_mb,', '    if not isinstance(ra_mb,'), ("t11b_nhieu_merge_base_la_khong_do_duoc",)),
     ("mot_merge_base_nem_lot", _ma("    except Exception:\n        return None\n    ra_mb", "    except ZeroDivisionError:\n        return None\n    ra_mb"), ("t11b_nhieu_merge_base_la_khong_do_duoc",)),
     # ---- luot 9: duong vao thu hai cua lop ba-cham (goc doi ten ho so ra vung ma) — moi cua mot dot bien
-    ("merge_that_bo_hop", _ma("    return ba_cham | khi_merge\n", "    return ba_cham\n"), ("t11c_goc_doi_ten_ho_so_ra_vung_ma_day_du",)),
+    ("merge_that_bo_hop", _ma("    return ba_cham | khi_merge | khi_merge_that\n", "    return ba_cham | khi_merge_that\n"), ("t11c_goc_doi_ten_ho_so_ra_vung_ma_day_du",)),
+    # ---- cross-review luot 9, lop `phan-loai-khong-neo-merge-ref-that`: moi cua mot dot bien
+    ("merge_ref_bo_hop", _ma("    return ba_cham | khi_merge | khi_merge_that\n", "    return ba_cham | khi_merge\n"), ("t11d_merge_ref_that_dung_base_moi_hon_day_du",)),
+    ("merge_ref_bo_kiem_dang", _ma('    if not (MAU_SHA.fullmatch(hop) and hop.strip("0")):\n        return None\n', ""), ("t05_thieu_hoac_hong_sha_day_du",)),
+    ("merge_ref_chi_kiem_hex", _ma('    if not (MAU_SHA.fullmatch(hop) and hop.strip("0")):', "    if not MAU_SHA.fullmatch(hop):"), ("t05_thieu_hoac_hong_sha_day_du",)),
+    ("merge_ref_loi_thanh_rong", _ma("    khi_merge_that = doc_diff_cay(goc, hop, chay, kho)\n", "    khi_merge_that = doc_diff_cay(goc, hop, chay, kho) or set()\n"), ("t11d_merge_ref_that_dung_base_moi_hon_day_du",)),
+    ("merge_ref_doc_nham_dau", _ma("    khi_merge_that = doc_diff_cay(goc, hop, chay, kho)\n", "    khi_merge_that = doc_diff_cay(goc, dau, chay, kho)\n"), ("t11d_merge_ref_that_dung_base_moi_hon_day_du",)),
+    ("merge_ref_doc_sai_bien", _ma('BIEN_MERGE = "CI_DUONG_NHANH_MERGE"', 'BIEN_MERGE = "CI_DUONG_NHANH_DAU"'), ("t11d_merge_ref_that_dung_base_moi_hon_day_du",)),
     ("merge_tree_bo_kiem_rc", _ma('    if getattr(mt, "returncode", None) != 0 or not isinstance(ra_mt,', '    if not isinstance(ra_mt,'), ("t11c_goc_doi_ten_ho_so_ra_vung_ma_day_du",)),
     ("merge_tree_bo_kiem_dang", _ma('            or not re.fullmatch(rb"[0-9a-f]{40}\\n", bytes(ra_mt)):', "            or False:"), ("t11c_goc_doi_ten_ho_so_ra_vung_ma_day_du",)),
     ("merge_tree_nem_thanh_rong", _ma("    except Exception:\n        return None\n    ra_mt", "    except Exception:\n        return set()\n    ra_mt"), ("t11c_goc_doi_ten_ho_so_ra_vung_ma_day_du",)),
@@ -2070,7 +2225,14 @@ DOT_BIEN = [
     ("diff_cay_nem_thanh_rong", _ma("    except Exception:\n        return None\n    ra_dt", "    except Exception:\n        return set()\n    ra_dt"), ("t11c_goc_doi_ten_ho_so_ra_vung_ma_day_du",)),
     ("diff_cay_bo_kiem_cut", _ma('    if ra_dt and not bytes(ra_dt).endswith(b"\\0"):\n        return None\n', ""), ("t11c_goc_doi_ten_ho_so_ra_vung_ma_day_du",)),
     # ---- luot 9: lop kiem-re-bi-cau-hinh-boi-du-lieu-ho-so — thuoc tinh doc tu cay GOC; va phan chung: khong chan .gitattributes
-    ("diff_check_bo_attr_source", _ma('"--attr-source=" + goc, ', ""), ("t20p_kiem_re_gitattributes_trong_ho_so_khong_cau_hinh_duoc_diff_check",)),
+    ("diff_check_bo_attr_source", _ma('["git", "--attr-source=" + goc, "-c", CAU_HINH_WHITESPACE', '["git", "-c", CAU_HINH_WHITESPACE'), ("t20p_kiem_re_gitattributes_trong_ho_so_khong_cau_hinh_duoc_diff_check", "t20u_moi_loi_goi_git_doc_thuoc_tinh_tu_goc")),
+    # ---- cross-review luot 9, lop `kiem-re-bi-cau-hinh-boi-du-lieu-ho-so`: MOI duong vao doc thuoc tinh mot dot bien
+    ("nhi_phan_bo_attr_source", _ma('ns = chay(["git", "--attr-source=" + goc, "diff", "--numstat"', 'ns = chay(["git", "diff", "--numstat"'), ("t20t_kiem_re_thuoc_tinh_diff_cua_pr_khong_bien_nhi_phan_thanh_van_ban", "t20u_moi_loi_goi_git_doc_thuoc_tinh_tu_goc")),
+    ("merge_tree_bo_attr_source", _ma('mt = chay(["git", "--attr-source=" + goc, "merge-tree"', 'mt = chay(["git", "merge-tree"'), ("t11e_thuoc_tinh_cua_pr_khong_cau_hinh_duoc_merge_tree", "t20u_moi_loi_goi_git_doc_thuoc_tinh_tu_goc")),
+    ("ba_cham_bo_attr_source", _ma('r = chay(["git", "--attr-source=" + goc, "diff", "--name-only"', 'r = chay(["git", "diff", "--name-only"'), ("t20u_moi_loi_goi_git_doc_thuoc_tinh_tu_goc",)),
+    ("diff_cay_bo_attr_source", _ma('dt = chay(["git", "--attr-source=" + goc, "diff", "--no-renames"', 'dt = chay(["git", "diff", "--no-renames"'), ("t20u_moi_loi_goi_git_doc_thuoc_tinh_tu_goc",)),
+    ("nhi_phan_attr_source_la_dau", _ma('ns = chay(["git", "--attr-source=" + goc, "diff", "--numstat"', 'ns = chay(["git", "--attr-source=" + dau, "diff", "--numstat"'), ("t20t_kiem_re_thuoc_tinh_diff_cua_pr_khong_bien_nhi_phan_thanh_van_ban", "t20u_moi_loi_goi_git_doc_thuoc_tinh_tu_goc")),
+    ("merge_tree_attr_source_la_dau", _ma('mt = chay(["git", "--attr-source=" + goc, "merge-tree"', 'mt = chay(["git", "--attr-source=" + dau, "merge-tree"'), ("t11e_thuoc_tinh_cua_pr_khong_cau_hinh_duoc_merge_tree", "t20u_moi_loi_goi_git_doc_thuoc_tinh_tu_goc")),
     ("loai_tep_chan_gitattributes", _ma("            for duong in sorted(doi) if (Path(kho) / duong).is_symlink()]", "            for duong in sorted(doi) if (Path(kho) / duong).is_symlink() or duong.endswith('.gitattributes')]"), ("t20p_kiem_re_gitattributes_trong_ho_so_khong_cau_hinh_duoc_diff_check",)),
     # ---- luot 9: pham vi diff --check — tep nhi phan
     ("kiem_re_bo_nhi_phan", _ma(" + kiem_nhi_phan(env, chay, kho)\n", "\n"), ("t20s_kiem_re_tep_nhi_phan_la_khong_do_duoc",)),

@@ -14,7 +14,7 @@ sống ở ĐÂY (Python, có phản chứng chạy được — ops/ci_duong_nh
 BA TRẠNG THÁI, FAIL-CLOSE (danh sách CHO PHÉP, không phải danh sách CẤM)
   · đo được diff VÀ mọi tệp đổi khớp `ALLOWLIST_TIEN_TO`  ⇒ `duong_nhanh`
   · đo được diff VÀ có ít nhất một tệp ngoài allowlist     ⇒ `day_du`
-  · KHÔNG ĐO ĐƯỢC (không phải pull_request, thiếu/hỏng SHA, git lỗi/ném, đầu ra cụt) ⇒ `day_du`
+  · KHÔNG ĐO ĐƯỢC (không phải pull_request, thiếu/hỏng SHA — kể cả `github.sha` —, git lỗi/ném, đầu ra cụt) ⇒ `day_du`
 Chỉ MỘT giá trị (`duong_nhanh`) mở đường bỏ bước; mọi giá trị lạ, rỗng hay vắng đều thành đầy đủ ở phía
 `ci.yml` (`!= 'duong_nhanh'`). Diff rỗng ⇒ `duong_nhanh` (Q3 chủ kho), có dòng log riêng để phân biệt.
 
@@ -25,7 +25,10 @@ giấu thay đổi mã mà merge thật mang vào ⇒ đòi `merge-base --all` r
 (2) base ĐỔI TÊN tệp/thư mục hồ sơ ra vùng mã ⇒ merge thật (ort, dò đổi tên) mang sửa đổi của PR sang đường dẫn
 MỚI trong vùng mã, ba chấm vẫn chỉ thấy đường dẫn cũ ⇒ phân loại trên HỢP của ba chấm và diff `goc -> cây merge`
 (`git merge-tree --write-tree`, cùng thuật toán merge với GitHub — tương đương đó theo tài liệu, chưa tự đo trên
-GitHub). `--no-renames`
+GitHub). Mô phỏng ấy xuất phát từ `pull_request.base.sha` của SỰ KIỆN, còn commit mà mọi job thật sự checkout và test
+là `github.sha` (merge ref) — hai thứ trùng nhau hay không là KHÔNG ĐO ĐƯỢC offline. Nên hợp thêm diff `goc -> github.sha`
+(cross-review lượt 9): base.sha cũ hơn đầu nhánh đích mà nhánh đích đã đổi tên hồ sơ ra vùng mã thì merge THẬT sửa mã
+⇒ `day_du`. Thiếu/hỏng `github.sha` hoặc git không đọc được nó ⇒ KHÔNG ĐO ĐƯỢC ⇒ `day_du`. `--no-renames`
 để đổi tên KHỎI vùng cũng tính là chạm tệp cũ; nếu không, `git mv scripts/tl.py ops/land/tl.py` chỉ hiện
 đường dẫn ĐÍCH và PR mã lọt vào đường nhanh (test t12). `-z` để tên tệp có dấu/xuống dòng không bị git
 bọc dấu nháy.
@@ -49,12 +52,22 @@ ba loại khoảng trắng có bị tắt rộng hơn ba loại đó không).
     `--check` nguyên bản (dấu cách cuối dòng trong verdict `.md`/`.patch`, dòng trống cuối tệp yaml). Chốt cứng
     sẽ chặn oan ~13% đúng lớp PR mà đường nhanh sinh ra để giải. Bản tinh chỉnh vẫn bắt dấu xung đột còn sót
     (`<<<<<<<`, `=======`, `>>>>>>>`), thứ `--check` báo bất kể `core.whitespace`. Thuộc tính thì KHÁC: một
-    `.gitattributes` do PR mang vào (ở mọi độ sâu) với `conflict-marker-size`/`binary`/`-diff` tắt được báo dấu xung
-    đột (reviewer lượt 8 đo; đo lại 30-09-2026). Nên `--check` đọc thuộc tính từ cây GỐC (`--attr-source=<goc>`),
-    không từ cây làm việc: dữ liệu hồ sơ không cấu hình được chốt kiểm hồ sơ. KHÔNG chặn `.gitattributes` — master
-    có ba tệp như thế dưới `ops/reviews/` (`-whitespace` cho verdict chép nguyên byte), do chính PR hồ sơ thêm vào.
-    Tệp NHỊ PHÂN (git đoán theo nội dung) thì `--check` bỏ qua hẳn ⇒ `kiem_nhi_phan` coi là KHÔNG ĐO ĐƯỢC, ĐỎ
-    (master: 0 tệp nhị phân dưới allowlist).
+    `.gitattributes` do PR mang vào (ở mọi độ sâu) được git đọc từ CÂY LÀM VIỆC (= merge ref của PR) và cấu hình được
+    chính các chốt. Đo 30-09-2026: `conflict-marker-size`/`binary`/`-diff` tắt báo dấu xung đột của `--check`
+    (reviewer lượt 8); `diff` (set) ép tệp có NUL thành "văn bản" cho `--numstat` (reviewer lượt 9); `-diff` trên tệp
+    CRLF làm `merge-tree` mất dò đổi tên thư mục, biến merge XUNG ĐỘT thành merge sạch (tự đo khi vá lượt 9, `t11e`).
+    Nên MỌI lệnh git chạy bộ máy diff/merge của tệp này đọc thuộc tính từ cây GỐC (`--attr-source=<goc>`; git không
+    có cờ này ⇒ lệnh lỗi ⇒ `day_du` / kiem-re ĐỎ, tức fail-close — phiên bản git của runner chưa đo): ba chấm
+    `--name-only`, `merge-tree`, diff `goc -> cây` (cây merge-tree và `github.sha`), `--check`, `--numstat`. Các lệnh
+    `--name-only --no-renames` so OID giữa hai cây, không dò đổi tên nên không có bước nào đọc thuộc tính —
+    `--attr-source` ở đó là chốt thống nhất (`t20u` khoá đối số từng lời gọi), không phải vá một đường đã đo được.
+    `merge-base --all` chỉ đọc đồ thị commit: không cần chốt.
+    Ngoài phạm vi của câu này (không phải lệnh git của tệp này): byte trong cây làm việc do `actions/checkout` dựng
+    đã chịu thuộc tính của PR (`eol`/`text`/`working-tree-encoding`/`ident`) — `kiem_yaml`/`kiem_loai_tep`/`kiem_lease`
+    đọc đúng các byte ấy, cũng là byte mà các bước bị bỏ và checkout của master đọc; chưa đo riêng. KHÔNG chặn
+    `.gitattributes` — master có ba tệp như thế dưới `ops/reviews/` (`-whitespace` cho verdict chép nguyên byte), do
+    chính PR hồ sơ thêm vào. Tệp NHỊ PHÂN (git đoán theo nội dung + thuộc tính GỐC) thì `--check` bỏ qua hẳn ⇒
+    `kiem_nhi_phan` coi là KHÔNG ĐO ĐƯỢC, ĐỎ (master: 0 tệp nhị phân dưới allowlist).
   · D2 — `lease_publish.py check` là cổng ĐĂNG lease: lease đã hết hạn thì nó trả rc=8 "hết hạn" theo thiết kế,
     mà bookkeeping thu hồi/đóng lease thường đúng là sửa lease hết hạn. Lease CÒN HẠN đổi trong PR chạy đúng
     `check`; lease HẾT HẠN chạy `kiem(bo_qua_han=True)` — mọi chốt như `check`, chỉ bỏ chốt hạn — nên KHÔNG
@@ -80,6 +93,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 DAY_DU, DUONG_NHANH = "day_du", "duong_nhanh"
 BIEN_SU_KIEN, BIEN_GOC, BIEN_DAU = "CI_DUONG_NHANH_SU_KIEN", "CI_DUONG_NHANH_GOC", "CI_DUONG_NHANH_DAU"
+BIEN_MERGE = "CI_DUONG_NHANH_MERGE"   # `github.sha`: commit merge THAT ma moi job checkout va test (cross-review luot 9)
 ALLOWLIST_TIEN_TO = ("ops/land/", "ops/leases/", "ops/reviews/", "ops/specs/")
 MAU_SHA = re.compile(r"[0-9a-f]{40}")
 CAU_HINH_WHITESPACE = "core.whitespace=-blank-at-eol,-blank-at-eof,-space-before-tab"
@@ -117,12 +131,16 @@ def khop_allowlist(duong: str) -> bool:
 
 
 def doc_diff(env=os.environ, chay=subprocess.run, kho=ROOT):
-    """Tập đường dẫn đổi trong `base...head`, hoặc None = KHÔNG ĐO ĐƯỢC (⇒ đầy đủ).
-    Ba trạng thái: tập khác rỗng · tập rỗng · None. Không gọi git khi sự kiện không phải pull_request."""
-    su_kien, goc, dau = (env.get(k) or "" for k in (BIEN_SU_KIEN, BIEN_GOC, BIEN_DAU))
+    """Tập đường dẫn đổi: HỢP của `base...head`, diff `goc -> cây merge-tree` và diff `goc -> github.sha`; hoặc None =
+    KHÔNG ĐO ĐƯỢC (⇒ đầy đủ). Ba trạng thái: tập khác rỗng · tập rỗng · None. Không gọi git khi sự kiện không phải
+    pull_request hoặc một trong ba SHA (goc, dau, merge ref) vắng/hỏng."""
+    su_kien, goc, dau, hop = (env.get(k) or "" for k in (BIEN_SU_KIEN, BIEN_GOC, BIEN_DAU, BIEN_MERGE))
     if su_kien != "pull_request":
         return None
     if not all(MAU_SHA.fullmatch(x) and x.strip("0") for x in (goc, dau)):
+        return None
+    # merge ref THAT (`github.sha`) la BAT BUOC: vang/hong thi KHONG DO DUOC, khong lui ve mo phong (cross-review luot 9).
+    if not (MAU_SHA.fullmatch(hop) and hop.strip("0")):
         return None
     # Ba cham chi dung MOT merge-base. Lich su criss-cross (>1 merge-base) thi `base...head` co the GIAU thay doi
     # ma merge that mang vao base (reviewer luot 8: PR dao scripts/tl.py van ra duong_nhanh) => KHONG DO DUOC.
@@ -135,7 +153,7 @@ def doc_diff(env=os.environ, chay=subprocess.run, kho=ROOT):
             or not re.fullmatch(rb"[0-9a-f]{40}\n", bytes(ra_mb)):
         return None
     try:
-        r = chay(["git", "diff", "--name-only", "--no-renames", "-z", f"{goc}...{dau}"],
+        r = chay(["git", "--attr-source=" + goc, "diff", "--name-only", "--no-renames", "-z", f"{goc}...{dau}"],
                  cwd=kho, capture_output=True)
     except Exception:
         return None
@@ -151,7 +169,12 @@ def doc_diff(env=os.environ, chay=subprocess.run, kho=ROOT):
     khi_merge = doc_diff_merge(goc, dau, chay, kho)
     if khi_merge is None:
         return None
-    return ba_cham | khi_merge
+    # merge-tree mo phong tu base.sha cua SU KIEN; commit GitHub THAT SU test (github.sha) co the dung tren dau nhanh dich
+    # MOI hon (base.sha cu) => hop them diff goc -> merge ref that. Git khong doc duoc no => KHONG DO DUOC.
+    khi_merge_that = doc_diff_cay(goc, hop, chay, kho)
+    if khi_merge_that is None:
+        return None
+    return ba_cham | khi_merge | khi_merge_that
 
 
 def doc_diff_merge(goc, dau, chay=subprocess.run, kho=ROOT):
@@ -160,16 +183,24 @@ def doc_diff_merge(goc, dau, chay=subprocess.run, kho=ROOT):
     `ops/land/f.md` -> `scripts/f.py` (hoặc cả thư mục) mà PR sửa `ops/land/f.md` thì ba chấm chỉ thấy `ops/land/f.md`
     còn merge thật SỬA `scripts/f.py`. Merge xung đột (rc=1) cũng là None: GitHub không dựng merge ref cho PR xung đột."""
     try:
-        mt = chay(["git", "merge-tree", "--write-tree", "--no-messages", goc, dau], cwd=kho, capture_output=True)
+        # Thuoc tinh tu cay GOC: `-diff` cua PR tren tep CRLF lam merge-tree mat do doi ten thu muc => XUNG DOT thanh merge
+        # sach (do 30-09-2026, t11e). Merge driver/conflict-marker-size/renormalize cung la thuoc tinh.
+        mt = chay(["git", "--attr-source=" + goc, "merge-tree", "--write-tree", "--no-messages", goc, dau],
+                  cwd=kho, capture_output=True)
     except Exception:
         return None
     ra_mt = getattr(mt, "stdout", None)
     if getattr(mt, "returncode", None) != 0 or not isinstance(ra_mt, (bytes, bytearray)) \
             or not re.fullmatch(rb"[0-9a-f]{40}\n", bytes(ra_mt)):
         return None
-    cay = bytes(ra_mt).decode("ascii").strip()
+    return doc_diff_cay(goc, bytes(ra_mt).decode("ascii").strip(), chay, kho)
+
+
+def doc_diff_cay(goc, cay, chay=subprocess.run, kho=ROOT):
+    """Tập đường dẫn đổi `goc -> cay` (cây merge-tree, hoặc commit merge ref), `--no-renames`; None = KHÔNG ĐO ĐƯỢC."""
     try:
-        dt = chay(["git", "diff", "--no-renames", "--name-only", "-z", goc, cay], cwd=kho, capture_output=True)
+        dt = chay(["git", "--attr-source=" + goc, "diff", "--no-renames", "--name-only", "-z", goc, cay],
+                  cwd=kho, capture_output=True)
     except Exception:
         return None
     ra_dt = getattr(dt, "stdout", None)
@@ -257,10 +288,13 @@ def kiem_diff_check(env=os.environ, chay=subprocess.run, kho=ROOT) -> list[str]:
 
 def kiem_nhi_phan(env=os.environ, chay=subprocess.run, kho=ROOT) -> list[str]:
     """`git diff --check` BỎ QUA tệp git coi là nhị phân (NUL trong nội dung) — dấu xung đột trong đó lọt êm (đo
-    30-09-2026). Hồ sơ không cần nhị phân (master: 0 tệp dưới allowlist) ⇒ tệp nhị phân đổi = KHÔNG ĐO ĐƯỢC ⇒ ĐỎ."""
+    30-09-2026). Hồ sơ không cần nhị phân (master: 0 tệp dưới allowlist) ⇒ tệp nhị phân đổi = KHÔNG ĐO ĐƯỢC ⇒ ĐỎ.
+    Thuộc tính đọc từ cây GỐC như `kiem_diff_check`: hai chốt phải phân loại nhị phân theo CÙNG một cây, không thì
+    `diff` (set) do PR mang vào ép tệp có NUL thành "văn bản" cho numstat trong khi `--check` vẫn bỏ qua nó (lượt 9)."""
     goc, dau = env.get(BIEN_GOC) or "", env.get(BIEN_DAU) or ""
     try:
-        ns = chay(["git", "diff", "--numstat", "-z", "--no-renames", f"{goc}...{dau}"], cwd=kho, capture_output=True)
+        ns = chay(["git", "--attr-source=" + goc, "diff", "--numstat", "-z", "--no-renames", f"{goc}...{dau}"],
+                  cwd=kho, capture_output=True)
     except Exception as e:
         return [f"KHONG DO DUOC: git diff --numstat nem {type(e).__name__}"]
     ra_ns = getattr(ns, "stdout", None)

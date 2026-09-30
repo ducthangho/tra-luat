@@ -74,6 +74,8 @@ jobs:
           CI_DUONG_NHANH_SU_KIEN: ${{ github.event_name }}
           CI_DUONG_NHANH_GOC: ${{ github.event.pull_request.base.sha }}
           CI_DUONG_NHANH_DAU: ${{ github.event.pull_request.head.sha }}
+          # Commit merge THAT ma moi job checkout va test; phan loai hop them diff base -> no (vang/hong => day_du).
+          CI_DUONG_NHANH_MERGE: ${{ github.sha }}
         run: python3 ops/ci_duong_nhanh.py
       - name: che do (push / workflow_dispatch luon day du)
         if: ${{ github.event_name != 'pull_request' }}
@@ -546,6 +548,7 @@ jobs:
           CI_DUONG_NHANH_SU_KIEN: ${{ github.event_name }}
           CI_DUONG_NHANH_GOC: ${{ github.event.pull_request.base.sha }}
           CI_DUONG_NHANH_DAU: ${{ github.event.pull_request.head.sha }}
+          CI_DUONG_NHANH_MERGE: ${{ github.sha }}
         run: |
           set -euo pipefail
           python .claude/dev/packet_loop.py doctrine-scan --root .

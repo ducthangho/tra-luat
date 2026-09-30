@@ -641,7 +641,7 @@ không tra được.
   tính · `gh` không cài, và **cài cũng vô ích** vì nó đi đúng đường bị chặn. Việc của kho
   đi bằng **MCP github + git**, không bằng REST thẳng.
   *(Trạng thái PHIÊN 15-08 — trôi MỘT PHẦN: `/repos/<kho>`, PR, comment nay 200 (phiên đo 25-09,
-  30-09), còn "403 bất kể token, theo ĐƯỜNG DẪN" vẫn đúng ở `/graphql` và 4 đường khác đo 30-09 (gạch
+  30-09; KHÔNG chỉ ba loại ấy), còn "403 bất kể token, theo ĐƯỜNG DẪN" vẫn đúng ở `/graphql` và các đường khác liệt kê (gạch
   "Câu 403 REST" dưới). "`gh` cài cũng vô ích" chỉ mất chân đỡ CŨ; `gh` thì phiên đo không có ⇒ KHÔNG ĐO
   ĐƯỢC; chỉ thị "không bằng REST thẳng" mất lý do cũ — giữ hay bỏ thì tệp này chưa ghi quyết định.)*
   · **ĐO LẠI 17-08-2026 — dấu hiệu phân biệt là HEADER, không phải mã trạng thái.**
@@ -656,12 +656,16 @@ không tra được.
   người đọc đi sai hướng — cùng họ `codex login status` NÓI DỐI. `launcher.py doctor` nay
   **ĐO** hai đường REST đó (`rest-chung`/`rest-kho`) thay vì nối thêm câu "có thể bị chặn";
   câu ấy là ĐOÁN, và nó từng được nối vào MỌI kết quả, vô điều kiện.
-  · **Câu 403 REST Ở TRÊN ĐÃ TRÔI — CHỈ ở `/repos/<kho>`, PR, comment, CHỈ ở các phiên đã đo** —
+  · **Câu 403 REST Ở TRÊN ĐÃ TRÔI ở các đường ĐÃ ĐO ra 200 (liệt kê dưới; đường chưa đo: KHÔNG ĐO ĐƯỢC), CHỈ ở các phiên đã đo** —
   15-08 (*"REST … 403 bất kể token"*) và 17-08 (*`/repos/<kho>` · `/pulls/N` → 403*, *"REST bị chặn
   ĐÚNG CHỖ làm việc"*). Đo `2026-09-25T01:1xZ` (một phiên remote, có/không token, bảng trong thân PR
   #631: `/rate_limit` · `/user` · `/repos/<kho>` · `/pulls/623` đều 200, chỉ ghi `hdr_github=True`) và
   `2026-09-30` (`06:30–06:31Z` `urllib` + `curl`; `07:10Z` `urllib`; ba vế không/thật/giả token): bốn
-  đường ấy, với `/pulls/631`, đều **200 CÓ `X-GitHub-*`**, `Server: github.com`. **Chính sách theo
+  đường ấy, với `/pulls/631`, đều **200 CÓ `X-GitHub-*`**, `Server: github.com`. Đo thêm
+  `2026-09-30T07:51–07:57Z` (14 đường: `urllib` cả 14, `curl` 10; ba vế y hệt): comment `5811128755` và 10
+  đường con theo kho — `commits/<sha>` (biên nhận 200 từ 21-09, gạch "Bài học gốc" dưới) · `issues/631` ·
+  `issues` · `issues/238/comments` · `pulls` · `actions/runs` · `git/refs/heads/master` · `contents/VERSION` ·
+  `branches/master` · `rulesets` — cũng **200 CÓ `X-GitHub-*`**; `hooks` · `keys` · `actions/secrets` thì 403 do proxy như dưới. **Chính sách theo
   ĐƯỜNG DẪN của proxy VẪN SỐNG** ở phiên đo 30-09: `07:10–07:11Z`, GET, ba vế y hệt, **403 không
   `Server`, 0 `X-GitHub-*`** ở `/graphql` (*"GitHub GraphQL is not available from Claude Code sessions;
   use the REST API (gh api repos/…)"*; GraphQL 403 cũng có biên nhận 21-09 · 28-09 · 29-09 trong
@@ -719,7 +723,7 @@ không tra được.
   (`/rate_limit`, MỞ nhưng không đọc nổi PR nào) vào `any(...)` và `t103` đỏ ngay. Chỉ đường
   **LÀM ĐƯỢC VIỆC** mới được tính vào `DUNG_DUOC`, và tập ấy là **`git` · `gh-kho` · `rest-kho`**
   — KHÔNG có `gh-cli`. Đó là lần sửa thứ ba: `gh auth status` hỏi `/user`, tức đường proxy CHO
-  PHÉP, nên nó xanh trong khi mọi thao tác kho trả 403 (trạng thái 17-08: ở phiên đo 25-09/30-09
+  PHÉP, nên nó xanh trong khi mọi thao tác kho trả 403 ("mọi" đã rộng hơn phép đo 17-08 ghi ở trên — 2 đường kho; ở phiên đo 25-09/30-09
   `/repos/<kho>` và PR trả 200, GraphQL vẫn 403 do proxy (đo 30-09), `gh` KHÔNG ĐO ĐƯỢC — bài học
   đứng nguyên). "Đã xác thực" không phải "làm được việc";
   `gh-kho` chạy thật `gh api repos/<slug>`. `gh-cli` và `rest-chung` vẫn được ĐO và IN ra làm

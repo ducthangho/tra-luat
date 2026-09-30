@@ -1,0 +1,104 @@
+# Trich log job GitHub Actions — ho so land PR #696 (#668). Log tho KHONG commit; bam o SHA256SUMS-log-va-artifact.txt.
+# Moi dong: <so dong trong log tho>: <noi dung, da bo dau thoi gian va ma mau ANSI>. Dong sau 'log -1 --format=%H' la checkout SHA.
+
+== gate (ubuntu-latest) · run 36696528580 · job-109832781733.log · 670127 byte · sha256 2e36a556f66f292dfb585edde434aedf31f1c978fee98b3c0d23549039c7292e
+668: 423b4ba14078701859b9e6ac101a68a3fc4ddef4
+807:   CONG_CU_TEST_BAN_KINH: manh
+1041: BÁN KÍNH ĐỘT BIẾN (416 đột biến): GIAO cho job `gate-cong-cu` (mảnh) + `gate-cong-cu-gop` (gom) — KHÔNG đo trong tiến trình này (CONG_CU_TEST_BAN_KINH=manh)
+3185: == tl selftest 1715/1715 ==
+
+== gate-packet-loop (ubuntu-latest) · run 36696528580 · job-109832783087.log · 106201 byte · sha256 1aa8b512f3f191d85452f3af0cba4b3f37ab130fe472d1e9af492c6be03be9cf
+662: 423b4ba14078701859b9e6ac101a68a3fc4ddef4
+951: nền: 291/291 đạt · BỎ QUA: 1
+
+== gate-ops (ubuntu-latest) · run 36696528580 · job-109832781847.log · 279659 byte · sha256 058aab1b390875a747f5afde88a3b9035725247455cf4cf1b8b3475029c4c4a7
+667: 423b4ba14078701859b9e6ac101a68a3fc4ddef4
+940: bien_nhan_v2_test: 68/68 ca đạt · 74/74 đột biến thường CÓ RĂNG · 2/2 ca TỰ KIỂM đạt · 56/74 đột biến thường khai đối chứng
+2195: [A] lease_publish: 187/187 đạt; đã chạy=187, bỏ qua=0
+2214: [B] lease_publish: 187/187 đạt; đã chạy=187, bỏ qua=0
+2400: lease_publish: 187/187 đạt; đã chạy=187, bỏ qua=0
+
+== gate-registry (ubuntu-latest) · run 36696528580 · job-109832781748.log · 232309 byte · sha256 d7f6a8a52171e2056064c49adaeba4fea8b318e627bd04600e35ca1e9f58e913
+662: 423b4ba14078701859b9e6ac101a68a3fc4ddef4
+1962: CI_DANG_KY_KE_HOACH ops/nhanh_don_duoc_test.py: day_du — diff chạm .github/workflows/ci.yml, ops/cong_cu_test.py
+2438: …CI_DANG_KY ops/nhanh_don_duoc_test.py: ĐỎ — LỖI HẠ TẦNG: hết giờ 4500 giây, rc=-9
+2440: TỔNG: ĐỎ
+2441: ##[error]Process completed with exit code 1.
+
+== gate-cong-cu (ubuntu-latest, 0) · run 36696528580 · job-109832781963.log · 103203 byte · sha256 9b7705acd5b3eac075c3c91735b05eb154f1cb0454a8842ad55f812dcc3908b6
+663: 423b4ba14078701859b9e6ac101a68a3fc4ddef4
+802:   CONG_CU_TEST_MANH: 0/8
+937: cong_cu_test: 56/56 đạt; tổng=56, bỏ qua=0, tiền kiểm bỏ qua=0
+992: MẢNH 0/8: 52/52 đột biến bán kính 1 · ghi manh/manh-0.txt
+1024: Artifact gate-cong-cu-manh-ubuntu-latest-0 has been successfully uploaded! Final size is 15919 bytes. Artifact ID is 11089731992
+
+== gate-cong-cu (ubuntu-latest, 1) · run 36696528580 · job-109832782054.log · 103050 byte · sha256 b7cc96d387d4bf13367d6bb33d7e6ce5eec13c697d39f07f1afd11b2d3b54414
+663: 423b4ba14078701859b9e6ac101a68a3fc4ddef4
+802:   CONG_CU_TEST_MANH: 1/8
+937: cong_cu_test: 56/56 đạt; tổng=56, bỏ qua=0, tiền kiểm bỏ qua=0
+992: MẢNH 1/8: 52/52 đột biến bán kính 1 · ghi manh/manh-1.txt
+1024: Artifact gate-cong-cu-manh-ubuntu-latest-1 has been successfully uploaded! Final size is 15699 bytes. Artifact ID is 11089945927
+
+== gate-cong-cu (ubuntu-latest, 2) · run 36696528580 · job-109832782147.log · 103097 byte · sha256 eeb603b161d525822183962558a29dde2c4cef4c89893dbddd4eba4eff5ec03f
+663: 423b4ba14078701859b9e6ac101a68a3fc4ddef4
+802:   CONG_CU_TEST_MANH: 2/8
+937: cong_cu_test: 56/56 đạt; tổng=56, bỏ qua=0, tiền kiểm bỏ qua=0
+992: MẢNH 2/8: 52/52 đột biến bán kính 1 · ghi manh/manh-2.txt
+1024: Artifact gate-cong-cu-manh-ubuntu-latest-2 has been successfully uploaded! Final size is 12167 bytes. Artifact ID is 11088664289
+
+== gate-cong-cu (ubuntu-latest, 3) · run 36696528580 · job-109832781925.log · 103057 byte · sha256 3b74c09d3ad4d506441e2133b97222a721f84af88d3f5c81549c70f9e77db87d
+663: 423b4ba14078701859b9e6ac101a68a3fc4ddef4
+802:   CONG_CU_TEST_MANH: 3/8
+937: cong_cu_test: 56/56 đạt; tổng=56, bỏ qua=0, tiền kiểm bỏ qua=0
+992: MẢNH 3/8: 52/52 đột biến bán kính 1 · ghi manh/manh-3.txt
+1024: Artifact gate-cong-cu-manh-ubuntu-latest-3 has been successfully uploaded! Final size is 11842 bytes. Artifact ID is 11088859248
+
+== gate-cong-cu (ubuntu-latest, 4) · run 36696528580 · job-109832782454.log · 103113 byte · sha256 c56a264ad5c8f571e66b22620ab0cab7c0763c9236697d26cae3459f53848edc
+663: 423b4ba14078701859b9e6ac101a68a3fc4ddef4
+802:   CONG_CU_TEST_MANH: 4/8
+937: cong_cu_test: 56/56 đạt; tổng=56, bỏ qua=0, tiền kiểm bỏ qua=0
+992: MẢNH 4/8: 52/52 đột biến bán kính 1 · ghi manh/manh-4.txt
+1024: Artifact gate-cong-cu-manh-ubuntu-latest-4 has been successfully uploaded! Final size is 16658 bytes. Artifact ID is 11089637749
+
+== gate-cong-cu (ubuntu-latest, 5) · run 36696528580 · job-109832782231.log · 103156 byte · sha256 06d2a5a763fc6d7fe8de56949a01b0b1b2c8564b1d6b1da2f7c680aa7e4d633d
+663: 423b4ba14078701859b9e6ac101a68a3fc4ddef4
+802:   CONG_CU_TEST_MANH: 5/8
+937: cong_cu_test: 56/56 đạt; tổng=56, bỏ qua=0, tiền kiểm bỏ qua=0
+992: MẢNH 5/8: 52/52 đột biến bán kính 1 · ghi manh/manh-5.txt
+1024: Artifact gate-cong-cu-manh-ubuntu-latest-5 has been successfully uploaded! Final size is 18349 bytes. Artifact ID is 11088738635
+
+== gate-cong-cu (ubuntu-latest, 6) · run 36696528580 · job-109832782080.log · 103084 byte · sha256 9472225b66867e4e1b5c19fa660d913afea78948aeb839d968b38c453798b922
+663: 423b4ba14078701859b9e6ac101a68a3fc4ddef4
+802:   CONG_CU_TEST_MANH: 6/8
+937: cong_cu_test: 56/56 đạt; tổng=56, bỏ qua=0, tiền kiểm bỏ qua=0
+992: MẢNH 6/8: 52/52 đột biến bán kính 1 · ghi manh/manh-6.txt
+1024: Artifact gate-cong-cu-manh-ubuntu-latest-6 has been successfully uploaded! Final size is 10809 bytes. Artifact ID is 11088614773
+
+== gate-cong-cu (ubuntu-latest, 7) · run 36696528580 · job-109832782109.log · 103178 byte · sha256 cccb6aa24f10d0d7fad4306df1c20dc64571742c7924388f004f6ca6620c64c9
+663: 423b4ba14078701859b9e6ac101a68a3fc4ddef4
+802:   CONG_CU_TEST_MANH: 7/8
+937: cong_cu_test: 56/56 đạt; tổng=56, bỏ qua=0, tiền kiểm bỏ qua=0
+992: MẢNH 7/8: 52/52 đột biến bán kính 1 · ghi manh/manh-7.txt
+1024: Artifact gate-cong-cu-manh-ubuntu-latest-7 has been successfully uploaded! Final size is 22336 bytes. Artifact ID is 11089364820
+
+== gate-cong-cu-gop (ubuntu-latest) · run 36696528580 · job-109838992820.log · 86309 byte · sha256 8727a288a14e1c453a3269103035a04c650f9cf6ca87f876dd35148177c80e44
+139: 423b4ba14078701859b9e6ac101a68a3fc4ddef4
+258: GOM MẢNH 8/8
+676: SỐ LIỆU GOM: ca=56 · đột biến=416 · lỗi đột biến=0
+
+== launcher (windows-latest) · run 36696528630 · job-109825711407.log · 67958 byte · sha256 e20f4969786410665decd2039aee9e6dd5748784ffbfd619e01652b4aadd1a45
+116: 423b4ba14078701859b9e6ac101a68a3fc4ddef4
+
+== launcher (ubuntu-latest) · run 36696528630 · job-109825710705.log · 49347 byte · sha256 ca1c0f685ff9e28ebfe6bab9de6bab9047a1a8e18ab27bd165fbe9c22a4832a2
+129: 423b4ba14078701859b9e6ac101a68a3fc4ddef4
+
+== gate-registry (ubuntu-latest) · run 36689211190 (PR, head 3ddda02) · pre-job-109802672781.log · 250286 byte · sha256 dd9e9f684ed341644b9b2a0373e066a146c37bbea5961d4f7f7731f87f6ea15e
+2028: TỔNG: ĐẠT
+2080: TỔNG: ĐẠT
+2094: TỔNG: ĐẠT
+2590: CI_DANG_KY ops/nhanh_don_duoc_test.py: ĐẠT rc=0
+2592: TỔNG: ĐẠT
+
+== thu-hoi · run 36688032631 (PR, head cc78b33) · pre-job-109798324879.log · 86518 byte · sha256 e6588ee14a95f52b2fca613f86279090076fa36aecbc534fe9c7962398f314af
+765: CHAN [12]: KHÔNG_XÁC_ĐỊNH: S c16bec639efa không phải tổ tiên của H cc78b33bd04d
+767: ##[error]Process completed with exit code 12.

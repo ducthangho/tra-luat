@@ -601,7 +601,9 @@ kết thúc bằng `/HEAD`; symref khác (vd `refs/heads/x` → `refs/tags/y`, h
 → một tag) nó đọc nội dung ĐÍCH, nên cả hai phép so tính symref theo SHA ĐÍCH và chỉ bỏ tên `…/HEAD`
 mà lệnh cũng bỏ.
 
-Thông điệp lỗi nêu **nhánh và upstream thật**, không nhất thiết là `origin/<cùng tên>`.
+Thông điệp lỗi nêu **nhánh và upstream thật**, không nhất thiết là `origin/<cùng tên>` — từ git 2.36:
+trước đó (`worktree list -z` chưa có) nhánh TỤT_SAU dừng ở `KHÔNG_XÁC_ĐỊNH: git worktree list --porcelain -z
+rc=129` (vẫn `rc=12`), không nêu nhánh, không in lệnh chữa — đo 2.30.2 · 2.34.1 · 2.35.0.
 Lệnh chữa do `ai-dang-giu` in ra đã phân biệt nhánh rảnh với nhánh đang được worktree giữ:
 worktree sạch nhận `git -C <worktree> merge --ff-only`; nhánh rảnh nhận `git branch -f` **KHÔNG
 kèm `-C`** và không mang SHA kỳ vọng — tương đối với cwd của người CHẠY nó chứ không với
@@ -615,7 +617,7 @@ biến ấy trong môi trường đè cả `git -C` lẫn `--root`, nên gỡ ch
 
 ```bash
 PY="$(command -v python3 || command -v python || command -v py)"
-unset GIT_DIR GIT_WORK_TREE GIT_COMMON_DIR   # đè cả -C lẫn --root: gỡ trước CẢ HAI bước
+unset GIT_DIR GIT_WORK_TREE GIT_COMMON_DIR GIT_REPLACE_REF_BASE   # đè -C/--root, dời refs/replace: gỡ trước CẢ HAI bước
 git -C "$SOURCE" ls-remote --get-url origin | sed -E 's#://[^/@]*@#://***@#'   # endpoint đang hỏi, che userinfo (§8.1)
 # 1) CHỈ ĐỌC: tập (SHA, tên) máy chủ phải BẰNG tập cache, cả hai chiều (ai-dang-giu chỉ so TÊN, một chiều).
 if MC="$(git -C "$SOURCE" ls-remote --heads origin)" && [ -n "$MC" ]; then
@@ -629,8 +631,11 @@ if MC="$(git -C "$SOURCE" ls-remote --heads origin)" && [ -n "$MC" ]; then
   [ -z "$LECH$NGOAI" ] && echo "CACHE_TUOI" || printf 'CACHE_CU (sat le: chi may chu co; thut TAB: chi cache co; refs/: ref ngoai may chu):\n%s\n%s\n' "$LECH" "$NGOAI"
 else echo "KHONG_DO_DUOC: ls-remote hong hoac rong"; fi
 # 2) rc=0 chỉ là "không ai giữ" khi bước 1 in CACHE_TUOI; refs/replace cục bộ đổi được nội dung lease, info/grafts
-#    (GIT_NO_REPLACE_OBJECTS KHÔNG tắt nó) biến PHÂN_KỲ thành TỤT_SAU: tắt cả hai (tệp /dev/null/grafts không thể có)
-GIT_NO_REPLACE_OBJECTS=1 GIT_GRAFT_FILE=/dev/null/grafts "$PY" "$SOURCE/ops/lease_publish.py" ai-dang-giu <duong> --root "$SOURCE"; echo "rc=$?"
+#    (GIT_NO_REPLACE_OBJECTS KHÔNG tắt nó) biến PHÂN_KỲ thành TỤT_SAU: tắt cả hai (tệp /dev/null/grafts không thể có).
+#    Git < 2.42: core.useReplaceRefs=true ở BẤT KỲ tầng config nào bật lại replace bất chấp biến ấy ⇒ đòi refs/replace RỖNG.
+if RP="$(git -C "$SOURCE" for-each-ref refs/replace/)" && [ -z "$RP" ]; then
+  GIT_NO_REPLACE_OBJECTS=1 GIT_GRAFT_FILE=/dev/null/grafts "$PY" "$SOURCE/ops/lease_publish.py" ai-dang-giu <duong> --root "$SOURCE"; echo "rc=$?"
+else echo "KHONG_DO_DUOC: refs/replace khong rong hoac khong doc duoc"; fi
 ```
 
 Bên bootstrap chữa nhánh rảnh `<nhanh>` về `<upstream>` (cả hai lấy từ chẩn đoán) bằng `fetch .`
@@ -644,7 +649,11 @@ checkout ở worktree LIÊN KẾT (`status` ở đó hiện `D` đúng lease v�
 Phép so fast-forward đọc commit QUA `refs/replace` và `info/grafts` (đo: graft đầu upstream lên commit
 chưa đẩy ⇒ `ai-dang-giu` báo TỤT_SAU thay vì PHÂN_KỲ, `fetch .` trả `rc=0`, commit rơi khỏi nhánh),
 còn `GIT_DIR` đè `-C` (đo: trỏ kho khác ⇒ `rc=0`, nhánh của kho ĐÓ đổi, `<root>` đứng yên) — nên
-khối tắt cả ba như hai bước trên. Đừng thay bằng `update-ref <mới>
+khối tắt cả ba như hai bước trên. `GIT_NO_REPLACE_OBJECTS` chỉ thắng config từ git 2.42: trước đó
+`core.useReplaceRefs=true` ở BẤT KỲ tầng nào (kho, global, `-c`) bật lại replace (đo 30-09-2026: bước 2
+trên 2.30.2 · 2.34.1 · 2.35.0 · 2.41.0 in `CACHE_TUOI` rồi `rc=0 NGƯỜI_GIỮ 0` cho lease đang giữ; `fetch .`
+trên 2.35.0 · 2.41.0 và `merge --ff-only` do chẩn đoán in ra trên 2.41.0 trả `rc=0`, commit rơi) — nên
+bước 2 đòi `refs/replace` RỖNG và khối dưới thêm `-c core.useReplaceRefs=false`. Đừng thay bằng `update-ref <mới>
 <cũ>`: nó so được giá trị cũ nhưng KHÔNG từ chối nhánh đang checkout — HEAD của worktree ấy nhảy,
 index và tệp đứng yên, `status` hiện staged NGƯỢC đúng các commit upstream (lease vừa về hiện
 thành `D`), và `commit` kế tiếp xoá lại chúng:
@@ -655,7 +664,7 @@ case "$(git version)" in
   "git version 1."*|"git version 2."[0-9].*|"git version 2."[12][0-9].*|"git version 2.3"[0-4].*)
     echo "KHONG_CHAY: $(git version) < 2.35 khong tu choi nhanh dang checkout o worktree khac hay dang rebase/bisect" ;;
   *) GIT_NO_REPLACE_OBJECTS=1 GIT_GRAFT_FILE=/dev/null/grafts \
-       git -C "<root>" fetch --no-write-fetch-head . "<upstream>:refs/heads/<nhanh>"; echo "rc=$?" ;;
+       git -C "<root>" -c core.useReplaceRefs=false fetch --no-write-fetch-head . "<upstream>:refs/heads/<nhanh>"; echo "rc=$?" ;;
 esac
 ```
 

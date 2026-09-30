@@ -1065,30 +1065,112 @@ def chon_so_worker(trung_vi_theo_N):
     return min((n for n, t in ung.items() if t * 100 <= 110 * t_min), default=None)
 
 
-G5_SELFTEST, G5_PROBE, JOB_G5 = "python ops/cong_cu_test.py", "python ops/cong_cu.py kiem-tra --json", ("gate", "gate-registry", "gate-packet-loop")
+G5_SELFTEST, G5_PROBE = "python ops/cong_cu_test.py", "python ops/cong_cu.py kiem-tra --json"
+# #668: bán kính đột biến của `cong_cu_test` chia `SO_MANH_G5` job mảnh + một job gom. Mọi giá trị dưới đây GHIM, so
+# BẰNG ĐÚNG (danh sách CHO PHÉP): `N` của env mảnh, matrix, tên/mẫu artifact và `if` của gom không được trôi lệch nhau.
+JOB_G5_MANH, JOB_G5_GOP, SO_MANH_G5 = "gate-cong-cu", "gate-cong-cu-gop", 8
+JOB_G5 = ("gate", "gate-registry", "gate-packet-loop", JOB_G5_MANH, JOB_G5_GOP)
+G5_GOP = "python ops/cong_cu_test.py --gop manh"
+G5_LENH = {"gate": [G5_PROBE, G5_SELFTEST], JOB_G5_MANH: [G5_PROBE, G5_SELFTEST], JOB_G5_GOP: [G5_GOP]}
+G5_ENV = {"gate": {"CONG_CU_TEST_BAN_KINH": "manh"},
+          JOB_G5_MANH: {"CONG_CU_TEST_MANH": f"${{{{ matrix.manh }}}}/{SO_MANH_G5}",
+                        "CONG_CU_TEST_MANH_RA": "manh/manh-${{ matrix.manh }}.txt"}}
+G5_TAI_LEN = {"uses": "actions/upload-artifact@v4", "with": {
+    "name": "gate-cong-cu-manh-${{ matrix.os }}-${{ matrix.manh }}", "path": "manh/manh-${{ matrix.manh }}.txt",
+    "if-no-files-found": "error"}}
+G5_TAI_VE = {"uses": "actions/download-artifact@v4", "with": {
+    "pattern": "gate-cong-cu-manh-${{ matrix.os }}-*", "path": "manh", "merge-multiple": True}}
+G5_GOP_IF, G5_GOP_NEEDS = "${{ !cancelled() }}", ["chuan-bi", JOB_G5_MANH]
 G5_THIET_LAP = frozenset({"git config --global core.autocrlf false", "git config --global core.eol lf", "git config --global core.abbrev 7",
                           "python -m pip install --quiet PyYAML==6.0.3 jsonschema==4.26.0", "bash ops/cai_actionlint.sh",
                           "bash ops/cai_cong_cu.sh shellcheck", "bash ops/cai_cong_cu.sh rg",
                           "actions/checkout@v4", "actions/setup-python@v5"})
-def _dong_lenh(b): return [b.get("uses")] * ("uses" in b) + [x.strip() for x in str(b.get("run", "")).splitlines() if x.strip() and not x.lstrip().startswith("#")]
+# #668 F3 (Codex lượt 2, P1): tách dòng như BASH — chỉ `\n`, và chỉ cắt `space`/`tab` (blank của Bash). `splitlines()` cắt cả
+# VT/FF/`\x1c`–`\x1e`/`\x85`/U+2028/U+2029/CR, nên `# x<VT>python ops/cong_cu_test.py --gop manh` hiện ra một lệnh gom mà
+# Bash coi trọn là CHÚ THÍCH ⇒ bước gom rc=0 mà không gom gì. Mọi lệch còn lại (NBSP/VT ở đầu, CR/VT ở cuối) đều làm
+# Bash chạy một lệnh KHÁC lệnh ghim ⇒ không tìm thấy lệnh hay sai đối số ⇒ ĐỎ, tức lệch về phía fail-closed.
+def _dong_lenh(b): return [b.get("uses")] * ("uses" in b) + [x.strip(" \t") for x in str(b.get("run", "")).split("\n") if x.strip(" \t") and not x.lstrip(" \t").startswith("#")]
+# #668 F1 (Codex lượt 1, P1): lệnh đúng chưa phải lệnh CHẠY. `shell: bash -n {0}` chỉ kiểm cú pháp ⇒ `--gop` rc=0 mà không
+# gom gì; `defaults.run.shell`, `working-directory`, env kế thừa, `with.ref` của checkout là những lối khác cùng hình dạng.
+# Nên NGỮ NGHĨA THỰC THI của job G5 cũng theo danh sách CHO PHÉP: khoá job/bước, shell, env, `with`, `runs-on`, matrix os.
+G5_JOB_ENV = {"PYTHONIOENCODING": "utf-8", "PYTHONUTF8": "1", "PYTHONDONTWRITEBYTECODE": "1"}
+G5_KHOA_JOB = frozenset({"needs", "strategy", "runs-on", "timeout-minutes", "env", "steps"})
+G5_KHOA_BUOC = frozenset({"name", "run", "shell", "env", "uses", "with"})
+G5_WITH = {"actions/checkout@v4": ({}, {"fetch-depth": 0}), "actions/setup-python@v5": ({"python-version": "3.12"},)}
+G5_OS = "${{ fromJson(needs.chuan-bi.outputs.os) }}"
+
+
+def _loi_thuc_thi_g5(j, v, buoc):
+    """Lỗi ngữ nghĩa thực thi của job G5 `j` trên các bước `buoc` (từ đầu tới HẾT bước G5; job mới: mọi bước)."""
+    loi = [f"{j}: khoá job ngoài danh sách cho phép: {sorted(set(v) - G5_KHOA_JOB - ({'if'} if j == JOB_G5_GOP else set()))}"] \
+        if set(v) - G5_KHOA_JOB - ({"if"} if j == JOB_G5_GOP else set()) else []
+    st = v.get("strategy") or {}
+    if v.get("env") != G5_JOB_ENV or v.get("runs-on") != "${{ matrix.os }}" or set(st) != {"fail-fast", "matrix"} \
+            or st.get("fail-fast") is not False or (st.get("matrix") or {}).get("os") != G5_OS:
+        loi.append(f"{j}: env/runs-on/strategy cấp job lệch hình dạng ghim")
+    for b in buoc:
+        ten = b.get("name") or b.get("uses")
+        # #668 F10 (Codex lượt 4, P1 — lần thứ BA của lớp này): GitHub nội suy `${{ }}` trên TOÀN thân `run` trước khi
+        # Bash đọc, kể cả trong chú thích, nên một `fromJSON` hằng sinh được xuống dòng + lệnh mới mà ta đã bỏ đi cùng
+        # chú thích. Không vá theo từng biến thể nữa: thân `run` của job G5 chỉ được có ký tự IN ĐƯỢC + `\n`, và không
+        # biểu thức nào. Khi ấy thứ ta đọc (tách `\n`, cắt space/tab) CHÍNH LÀ thứ Bash đọc — đóng F3 lẫn F10 theo cấu trúc.
+        than = str(b.get("run", ""))
+        if "${{" in than or any(not (c == "\n" or c.isprintable()) for c in than):
+            loi.append(f"{j}: bước {ten!r} có biểu thức GitHub hoặc ký tự không in được trong `run`")
+        if set(b) - G5_KHOA_BUOC or b.get("shell", "bash") != "bash":
+            loi.append(f"{j}: bước {ten!r} có khoá/shell ngoài danh sách cho phép: {sorted(set(b) - G5_KHOA_BUOC)} shell={b.get('shell')!r}")
+        elif "uses" in b and b.get("with", {}) not in G5_WITH.get(b["uses"], (b.get("with", {}),)):
+            loi.append(f"{j}: bước {ten!r} có `with` lệch ghim: {b.get('with')}")
+        elif "env" in b and not re.search(r"(?<![A-Za-z0-9_])cong_cu", str(b.get("run", ""))) and set(b["env"]) != {"AL_VER"}:
+            loi.append(f"{j}: bước thiết lập {ten!r} có env ngoài AL_VER: {sorted(b['env'])}")
+    return loi
+
+
+def _loi_g5_manh_gop(j, v, buoc, i):
+    """#668: phần RIÊNG của hai job mảnh/gom — matrix, `needs`, `if`, và bước artifact, mọi thứ so BẰNG ĐÚNG."""
+    ma = ((v.get("strategy") or {}).get("matrix") or {})
+    if j == JOB_G5_MANH:
+        loi = [] if ma.get("manh") == list(range(SO_MANH_G5)) and set(ma) == {"os", "manh"} else [
+            f"{j}: matrix phải đúng os + manh {list(range(SO_MANH_G5))}, thấy {ma}"]
+        loi += [] if v.get("needs") == "chuan-bi" and "if" not in v else [f"{j}: needs/if lệch: {v.get('needs')!r}/{v.get('if')!r}"]
+        return loi + ([] if buoc[i + 1:] == [G5_TAI_LEN] else [f"{j}: sau bước G5 phải đúng MỘT bước tải lên {G5_TAI_LEN}"])
+    loi = [] if set(ma) == {"os"} else [f"{j}: matrix chỉ được có os, thấy {ma}"]
+    loi += [] if v.get("needs") == G5_GOP_NEEDS and v.get("if") == G5_GOP_IF else [
+        f"{j}: needs/if phải đúng {G5_GOP_NEEDS}/{G5_GOP_IF!r}, thấy {v.get('needs')!r}/{v.get('if')!r}"]
+    loi += [] if i + 1 == len(buoc) else [f"{j}: bước gom phải là bước CUỐI"]
+    return loi + ([] if [b for b in buoc[:i] if "download-artifact" in str(b.get("uses", ""))] == [G5_TAI_VE] else
+                  [f"{j}: trước bước gom phải có đúng MỘT bước tải về {G5_TAI_VE}"])
 
 
 def loi_g5_workflow(data):
     """M6 theo HÌNH DẠNG BƯỚC + danh sách CHO PHÉP (review tại chỗ lượt 1–3: nhận diện theo văn bản lọt ba lần): mỗi job G5
-    đúng MỘT bước chạm `ops/cong_cu`, lệnh BẰNG ĐÚNG [probe](+selftest ở gate), vô điều kiện; trước nó chỉ lệnh thiết lập."""
+    đúng MỘT bước chạm `ops/cong_cu`, lệnh BẰNG ĐÚNG `G5_LENH` (mặc định [probe]), `env` BẰNG ĐÚNG `G5_ENV` (mặc định
+    vắng), vô điều kiện; trước nó chỉ lệnh thiết lập (gom: thêm đúng bước tải về). #668: job mảnh/gom qua `_loi_g5_manh_gop`."""
     jobs = (data or {}).get("jobs") or {}
     loi = [f"thiếu job {j}" for j in JOB_G5 if j not in jobs]
+    loi += [f"workflow có khoá `{k}` cấp workflow — kế thừa vào mọi job G5" for k in ("defaults", "env") if k in (data or {})]
     for j, v in jobs.items():
         buoc = (v or {}).get("steps") or []
         cham = [i for i, b in enumerate(buoc) if re.search(r"(?<![A-Za-z0-9_])cong_cu", str(b.get("run", "")))]
         if j not in JOB_G5 or len(cham) != 1:
             loi += [f"{j}: phải có đúng một bước G5 (chỉ ở {JOB_G5}), thấy {len(cham)}"] if cham or j in JOB_G5 else []
-        elif _dong_lenh(buoc[cham[0]]) != [G5_PROBE] + [G5_SELFTEST] * (j == "gate"):
+        elif _dong_lenh(buoc[cham[0]]) != G5_LENH.get(j, [G5_PROBE]):
             loi.append(f"{j}: bước G5 sai hình dạng: {_dong_lenh(buoc[cham[0]])}")
-        elif {"if", "continue-on-error"} & (set(buoc[cham[0]]) | set(v)):
+        elif buoc[cham[0]].get("env") != G5_ENV.get(j):
+            loi.append(f"{j}: env bước G5 phải BẰNG ĐÚNG {G5_ENV.get(j)}, thấy {buoc[cham[0]].get('env')}")
+        # #668 F14 (Codex lượt 5): VẮNG `shell` KHÔNG phải Bash — trên Windows mặc định là `pwsh`, và PowerShell lấy mã
+        # thoát của lệnh CUỐI, nên probe đỏ + selftest xanh có thể thành bước xanh. Bước G5 phải KHAI RÕ `shell: bash`.
+        elif buoc[cham[0]].get("shell") != "bash":
+            loi.append(f"{j}: bước G5 phải khai rõ `shell: bash` (thấy {buoc[cham[0]].get('shell')!r})")
+        elif {"if", "continue-on-error"} & (set(buoc[cham[0]]) | (set(v) - {"if"} if j == JOB_G5_GOP else set(v))):
             loi.append(f"{j}: bước G5 có điều kiện hoặc được phép bỏ qua lỗi")
-        elif any(not set(_dong_lenh(b)) <= G5_THIET_LAP for b in buoc[:cham[0]]):
+        elif any(not set(_dong_lenh(b)) <= (G5_THIET_LAP | {G5_TAI_VE["uses"]} if j == JOB_G5_GOP else G5_THIET_LAP)
+                 for b in buoc[:cham[0]]):
             loi.append(f"{j}: có lệnh ngoài danh sách thiết lập đứng trước probe G5")
+        else:
+            moi = j in (JOB_G5_MANH, JOB_G5_GOP)
+            loi += _loi_thuc_thi_g5(j, v, buoc if moi else buoc[:cham[0] + 1])
+            loi += _loi_g5_manh_gop(j, v, buoc, cham[0]) if moi else []
     return loi
 
 
@@ -1741,6 +1823,89 @@ def phan_chung():
     _them("p637-A7-probe-continue-on-error", _hong_wf("gate-registry", lambda b, i: b[i].update({"continue-on-error": True})))
     _them("p637-A7-job-continue-on-error", bool(loi_g5_workflow({"jobs": {**_wf0["jobs"], "gate": {**_wf0["jobs"]["gate"], "continue-on-error": True}}})))
     _them("p637-A7-nhan-doi-selftest-trong-gate", _hong_wf("gate", lambda b, i: b.insert(i + 1, {"run": G5_SELFTEST})))
+    # ── #668 A6: job mảnh/gom — mỗi hình dạng lệch một ca, sửa trên BẢN SAO của ci.yml thật. ──
+    def _hong_job(j, f):
+        w = json.loads(json.dumps(_wf0)); v = w["jobs"][j]; b = v["steps"]
+        f(v, b, next(i for i, x in enumerate(b) if re.search(r"(?<![A-Za-z0-9_])cong_cu", str(x.get("run", "")))))
+        return bool(loi_g5_workflow(w))
+    _M, _G = JOB_G5_MANH, JOB_G5_GOP
+    def _moi_mau(i, b, **kv): b[i] = {**b[i], **kv}
+    for _t, _j, _f in (
+            ("gate-thieu-env-ban-kinh", "gate", lambda v, b, i: b[i].pop("env")),
+            ("gate-env-ban-kinh-la", "gate", lambda v, b, i: _moi_mau(i, b, env={"CONG_CU_TEST_BAN_KINH": "du"})),
+            ("gate-env-thua-bien", "gate", lambda v, b, i: b[i]["env"].update({"CONG_CU_TEST_MANH": "0/8"})),
+            ("registry-co-env-ban-kinh", "gate-registry", lambda v, b, i: _moi_mau(i, b, env={"CONG_CU_TEST_BAN_KINH": "manh"})),
+            ("manh-sai-n", _M, lambda v, b, i: b[i]["env"].update({"CONG_CU_TEST_MANH": "${{ matrix.manh }}/7"})),
+            ("manh-thieu-ra", _M, lambda v, b, i: b[i]["env"].pop("CONG_CU_TEST_MANH_RA")),
+            ("manh-thieu-selftest", _M, lambda v, b, i: _moi_mau(i, b, run=G5_PROBE)),
+            ("manh-matrix-thieu", _M, lambda v, b, i: v["strategy"]["matrix"].update({"manh": list(range(SO_MANH_G5 - 1))})),
+            ("manh-matrix-thua", _M, lambda v, b, i: v["strategy"]["matrix"].update({"manh": list(range(SO_MANH_G5 + 1))})),
+            ("manh-matrix-khoa-la", _M, lambda v, b, i: v["strategy"]["matrix"].update({"include": [{"manh": 9}]})),
+            ("manh-job-if", _M, lambda v, b, i: v.update({"if": "${{ !cancelled() }}"})),
+            ("manh-buoc-continue", _M, lambda v, b, i: _moi_mau(i, b, **{"continue-on-error": True})),
+            ("manh-bo-tai-len", _M, lambda v, b, i: b.pop(i + 1)),
+            ("manh-tai-len-khong-loi", _M, lambda v, b, i: b[i + 1]["with"].update({"if-no-files-found": "warn"})),
+            ("manh-them-buoc-sau", _M, lambda v, b, i: b.append({"run": "true"})),
+            ("gop-khong-needs-manh", _G, lambda v, b, i: v.update({"needs": "chuan-bi"})),
+            ("gop-khong-if", _G, lambda v, b, i: v.pop("if")),
+            ("gop-if-always", _G, lambda v, b, i: v.update({"if": "${{ always() }}"})),
+            ("gop-lenh-khac", _G, lambda v, b, i: _moi_mau(i, b, run="python ops/cong_cu_test.py --gop khac")),
+            ("gop-co-env", _G, lambda v, b, i: _moi_mau(i, b, env={"CONG_CU_TEST_BAN_KINH": "manh"})),
+            ("gop-bo-tai-ve", _G, lambda v, b, i: b.pop(next(k for k, x in enumerate(b) if "download" in str(x.get("uses"))))),
+            ("gop-tai-ve-mau-khac", _G, lambda v, b, i: b[i - 1]["with"].update({"pattern": "gate-cong-cu-manh-*"})),
+            ("gop-hai-tai-ve", _G, lambda v, b, i: b.insert(i, dict(b[i - 1]))),
+            ("gop-buoc-sau-gom", _G, lambda v, b, i: b.append({"run": "true"})),
+            ("gop-matrix-them-manh", _G, lambda v, b, i: v["strategy"]["matrix"].update({"manh": [0]})),
+    ):
+        _them(f"p668-A6-{_t}", _hong_job(_j, _f))
+    for _j in (_M, _G):
+        _them(f"p668-A6-thieu-job-{_j}", bool(loi_g5_workflow({"jobs": {k: v for k, v in _wf0["jobs"].items() if k != _j}})))
+    # #668 F1: lệnh đúng mà KHÔNG chạy — shell/defaults/working-directory/env kế thừa/with. Mỗi lối một ca.
+    _BN = "bash -n {0}"
+    for _t, _j, _f in (
+            ("gop-shell-chi-cu-phap", _G, lambda v, b, i: _moi_mau(i, b, shell=_BN)),
+            ("manh-shell-chi-cu-phap", _M, lambda v, b, i: _moi_mau(i, b, shell=_BN)),
+            ("gate-shell-chi-cu-phap", "gate", lambda v, b, i: _moi_mau(i, b, shell=_BN)),
+            ("registry-shell-chi-cu-phap", "gate-registry", lambda v, b, i: _moi_mau(i, b, shell=_BN)),
+            ("manh-shell-sh", _M, lambda v, b, i: _moi_mau(i, b, shell="sh")),
+            ("gop-job-defaults-shell", _G, lambda v, b, i: v.update({"defaults": {"run": {"shell": _BN}}})),
+            ("gate-job-defaults-shell", "gate", lambda v, b, i: v.update({"defaults": {"run": {"shell": _BN}}})),
+            ("manh-working-directory", _M, lambda v, b, i: _moi_mau(i, b, **{"working-directory": "ops"})),
+            ("manh-thiet-lap-working-directory", _M, lambda v, b, i: _moi_mau(0, b, **{"working-directory": "ops"})),
+            ("manh-job-env-ban-kinh", _M, lambda v, b, i: v["env"].update({"CONG_CU_TEST_BAN_KINH": "manh"})),
+            ("gate-job-env-thua", "gate", lambda v, b, i: v["env"].update({"BASH_ENV": "x"})),
+            ("gop-runs-on-co-dinh", _G, lambda v, b, i: v.update({"runs-on": "ubuntu-latest"})),
+            ("manh-matrix-os-co-dinh", _M, lambda v, b, i: v["strategy"]["matrix"].update({"os": ["ubuntu-latest"]})),
+            ("manh-fail-fast", _M, lambda v, b, i: v["strategy"].update({"fail-fast": True})),
+            ("gop-checkout-ref", _G, lambda v, b, i: b[1].update({"with": {"ref": "master"}})),
+            ("manh-python-khac", _M, lambda v, b, i: b[2].update({"with": {"python-version": "3.11"}})),
+            ("gate-thiet-lap-env-la", "gate", lambda v, b, i: b[i - 1].update({"env": {"BASH_ENV": "x"}})),
+            ("manh-job-container", _M, lambda v, b, i: v.update({"container": "python:3.12"})),
+    ):
+        _them(f"p668-F1-{_t}", _hong_job(_j, _f))
+    for _k, _v in (("defaults", {"run": {"shell": _BN}}), ("env", {"CONG_CU_TEST_BAN_KINH": "manh"})):
+        _them(f"p668-F1-workflow-{_k}", bool(loi_g5_workflow({**_wf0, _k: _v})))
+    # #668 F3: mọi ký tự `splitlines()` coi là xuống dòng mà Bash KHÔNG coi — giấu lệnh gom/lệnh mảnh trong một chú thích.
+    for _ch in ("\x0b", "\x0c", "\r", "\x1c", "\x1d", "\x1e", "\x85", "\u2028", "\u2029"):
+        for _j, _lenh in ((_G, G5_GOP), (_M, G5_PROBE + "\n" + G5_SELFTEST), ("gate", G5_PROBE + "\n" + G5_SELFTEST)):
+            _them(f"p668-F3-{_j}-chu-thich-nuot-U{ord(_ch):04X}",
+                  _hong_job(_j, lambda v, b, i, c=_ch, l=_lenh: _moi_mau(i, b, run="# x" + c + l.replace("\n", "\n# x" + c))))
+    _them("p668-F3-nbsp-truoc-chu-thich-la-lenh-la", _hong_job(_G, lambda v, b, i: _moi_mau(i, b, run="\u00a0# x\n" + G5_GOP)))
+    # #668 F10: biểu thức GitHub trong `run` (kể cả trong chú thích) — mô tả của Codex lượt 4, dựng thành ca ở đây.
+    _BT = "# ${{ fromJSON('\"\\nexit 0\\n\"') }}\n"
+    for _t, _j, _f in (
+            ("gop-chu-thich-fromjson", _G, lambda v, b, i: _moi_mau(i, b, run=_BT + G5_GOP)),
+            ("manh-chu-thich-fromjson", _M, lambda v, b, i: _moi_mau(i, b, run=_BT + b[i]["run"])),
+            ("gate-chu-thich-fromjson", "gate", lambda v, b, i: _moi_mau(i, b, run=_BT + b[i]["run"])),
+            ("registry-chu-thich-fromjson", "gate-registry", lambda v, b, i: _moi_mau(i, b, run=_BT + b[i]["run"])),
+            ("gate-thiet-lap-chu-thich-fromjson", "gate", lambda v, b, i: _moi_mau(0, b, run=_BT + b[0]["run"])),
+            ("gop-chu-thich-bien-matrix", _G, lambda v, b, i: _moi_mau(i, b, run="# ${{ matrix.os }}\n" + G5_GOP)),
+            ("manh-tab-dau-lenh", _M, lambda v, b, i: _moi_mau(i, b, run="\t" + b[i]["run"])),
+    ):
+        _them(f"p668-F10-{_t}", _hong_job(_j, _f))
+    # #668 F14: bước G5 bỏ `shell` ⇒ Windows chạy bằng pwsh ⇒ ĐỎ ở mọi job G5.
+    for _j in JOB_G5:
+        _them(f"p668-F14-{_j}-vang-shell", _hong_job(_j, lambda v, b, i: b[i].pop("shell")))
     _them("p637-A8-khong-ung-vien", chon_so_worker({1: 100, 2: 101, 4: 102}) is None)
     _them("p637-A8-dung-bien", chon_so_worker({1: 200, 2: 110, 4: 100}) == 2)
     _them("p637-A8-vuot-bien", chon_so_worker({1: 200, 2: 110.5, 4: 100}) == 4)

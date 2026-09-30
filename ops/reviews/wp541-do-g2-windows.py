@@ -72,7 +72,7 @@ SHA_G1   = "2f70869a0537843e9cae78618ee7ae8c261d972d"
 # do that 18-09 tren ban va g2 cua agy cho 5 tep / +812, trong khi viec cua agy la 2 tep / +353.
 # Mot chot nhu the se bao "vuot tran" cho mot ban va KHONG vuot. Base dung la MERGE-BASE.
 SHA_BASE_SPEC = "d705623162b75b7340ee7cca54ac2d2abbddbb6f"
-BAN_BO_DO = "2026-09-30e"              # doi MOI khi sua bo do - log tu khai ban nao
+BAN_BO_DO = "2026-09-30f"              # doi MOI khi sua bo do - log tu khai ban nao
 TRAN_TEP, TRAN_DONG = 2, 400          # N7' cua spec r3
 MAU_WIN  = 'if nen_thuc == "windows":'
 # Write set cua packet #541 g2. Diff khong cham tep nao o day => do NHAM NHANH.
@@ -102,8 +102,10 @@ def _url_sach(u): return _RX_USERINFO.sub(r"\1", u or "")          # de SO (luat
 # nen VAN lo khi mat khau co `/` tran, hoac URL dang scp `user:mk@host:duong` (khong scheme) — do tren
 # 2026-09-30c: 3 dong / 1 trong khoi dan --chi-kich-thuoc, 5 / 3 o --chi-probe, moi dang. Moi ky tu DUNG
 # la mot duong nua; "toi `@` cuoi" khong con ky tu dung nao. Hai quy tac, hai muc dich: SO theo git, IN
-# theo "thua con hon lo".
-def _url_in(u): return re.sub(r"^([A-Za-z][A-Za-z0-9+.-]*://)?.*@", r"\1***@", u or "")
+# theo "thua con hon lo". "CA chuoi" phai dung ca khi chuoi co XUONG DONG: git() doc bang text=True nen CR/LF trong URL
+# da thanh LF, ma `.` khong khop LF. Token doc tu tep CRLF (`https://x-access-token:<token>` + CR + `@github.com/...`)
+# thi ban 30e KHONG che gi: in NGUYEN token o dong `origin :` va o "origin_url" trong khoi JSON dan (do tren 2026-09-30e).
+def _url_in(u): return re.sub(r"^([A-Za-z][A-Za-z0-9+.-]*://)?.*@", r"\1***@", u or "", flags=re.S)
 # Thong bao loi cua git CHI bo userinfo toi `@` DAU TIEN: userinfo co `@` tran (vd. ten dang nhap la
 # email) thi phan sau van ra stderr ls-remote, ma stderr ay duoc in vao dong KDD cua N7' (do duoc:
 # 2 dong trong log, 1 trong khoi dan). Lam sach MOI URL trong van ban truoc khi in — che toi `@` CUOI tren
@@ -177,9 +179,18 @@ _MAU = ("!!! do t02b_ten_KHONG_CO_THAM_QUYEN a 'lease_publish: 0/1 đạt; đã 
 # dich CHAY va tim goi DA CAI; PYTHONPATH KHONG giu (CI khong co no). Phep hoi dieu kien tien quyet o muc 0
 # cung chay qua day, nen no thay DUNG moi truong ma bo test se thay.
 _PY_GIU = frozenset({"PYTHONHOME", "PYTHONUSERBASE", "PYTHONNOUSERSITE"})
+# Cau hinh git CUA NGUOI DO lot vao bo test y nhu bien PYTHON*: ca test goi git bang dict(os.environ), nen doc cau hinh
+# ca nhan va bien GIT_* cua may do. Do tren 2026-09-30e, 0ea95de: `init.defaultBranch = main` => 163/166, t134 t139 t151
+# DO => rc=1 "TRUOT Moi ca DO deu giai thich duoc" cho ung vien sach (sach: 166/166) — o pham vi global LAN he thong.
+# CI khong co cau hinh CA NHAN: bo MOI bien GIT_*, global = rong (cung gia tri lease_publish.py dat cho git con cua no);
+# GIU cau hinh HE THONG (ban cai Git — CI Windows cung co), rieng init.defaultBranch GHIM ve mac dinh cua git vi no dat
+# duoc ca o he thong. Con lai (khoa he thong khac) la gioi han da biet, khong phai da dong.
 def chay(argv, cwd, phut=60):
-    mt = {k: v for k, v in os.environ.items() if not k.upper().startswith("PYTHON") or k.upper() in _PY_GIU}
-    mt.update(PYTHONUTF8="1", PYTHONIOENCODING="utf-8", PYTHONDONTWRITEBYTECODE="1", PYTHONUNBUFFERED="1")
+    mt = {k: v for k, v in os.environ.items()
+          if not k.upper().startswith("GIT_") and (not k.upper().startswith("PYTHON") or k.upper() in _PY_GIU)}
+    mt.update(PYTHONUTF8="1", PYTHONIOENCODING="utf-8", PYTHONDONTWRITEBYTECODE="1", PYTHONUNBUFFERED="1",
+              GIT_CONFIG_GLOBAL=os.devnull, GIT_CONFIG_COUNT="1",
+              GIT_CONFIG_KEY_0="init.defaultBranch", GIT_CONFIG_VALUE_0="master")
     p = subprocess.run([sys.executable] + argv, cwd=str(cwd), capture_output=True,
                        text=True, encoding="utf-8", errors="replace", timeout=phut*60, env=mt)
     return p.returncode, (p.stdout or "") + (p.stderr or "")

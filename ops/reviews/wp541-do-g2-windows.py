@@ -72,7 +72,7 @@ SHA_G1   = "2f70869a0537843e9cae78618ee7ae8c261d972d"
 # do that 18-09 tren ban va g2 cua agy cho 5 tep / +812, trong khi viec cua agy la 2 tep / +353.
 # Mot chot nhu the se bao "vuot tran" cho mot ban va KHONG vuot. Base dung la MERGE-BASE.
 SHA_BASE_SPEC = "d705623162b75b7340ee7cca54ac2d2abbddbb6f"
-BAN_BO_DO = "2026-09-30d"              # doi MOI khi sua bo do - log tu khai ban nao
+BAN_BO_DO = "2026-09-30e"              # doi MOI khi sua bo do - log tu khai ban nao
 TRAN_TEP, TRAN_DONG = 2, 400          # N7' cua spec r3
 MAU_WIN  = 'if nen_thuc == "windows":'
 # Write set cua packet #541 g2. Diff khong cham tep nao o day => do NHAM NHANH.
@@ -106,8 +106,11 @@ def _url_sach(u): return _RX_USERINFO.sub(r"\1", u or "")          # de SO (luat
 def _url_in(u): return re.sub(r"^([A-Za-z][A-Za-z0-9+.-]*://)?.*@", r"\1***@", u or "")
 # Thong bao loi cua git CHI bo userinfo toi `@` DAU TIEN: userinfo co `@` tran (vd. ten dang nhap la
 # email) thi phan sau van ra stderr ls-remote, ma stderr ay duoc in vao dong KDD cua N7' (do duoc:
-# 2 dong trong log, 1 trong khoi dan). Lam sach MOI URL trong van ban truoc khi in.
-def _an_userinfo(t): return re.sub(r"([A-Za-z][A-Za-z0-9+.-]*://)[^\s/?#'\"]*@", r"\1", t or "")
+# 2 dong trong log, 1 trong khoi dan). Lam sach MOI URL trong van ban truoc khi in — che toi `@` CUOI tren
+# DONG (cung luat IN voi _url_in: khong con ky tu dung nao). Ban 30d dung o `\s'"` nen phan git de lai co
+# `'`/`"`/khoang trang (vd. `u@x:p'<bi mat>@github.com`) VAN lo — do tren 2026-09-30d: 2 dong / 1 trong
+# khoi dan --chi-kich-thuoc, 3 / 2 o --chi-probe, moi dang.
+def _an_userinfo(t): return re.sub(r"([A-Za-z][A-Za-z0-9+.-]*://)[^\n]*@", r"\1***@", t or "")
 # Ca ngoai pham vi r3 §ngoai_pham_vi — do CHINH SPEC khai, khong phai bo do tu quyet.
 # Do la DANH SACH CHO PHEP: ca do nao KHONG nam trong day va KHONG phai "thieu cong cu"
 # thi la TRUOT. Danh sach cam thi bao gio cung thieu; danh sach cho phep thi biet truoc.
@@ -167,11 +170,16 @@ _MAU = ("!!! do t02b_ten_KHONG_CO_THAM_QUYEN a 'lease_publish: 0/1 đạt; đã 
         "  ĐỎ  t150_x: WinError 1314 required privilege\n"
         "lease_publish: 1/3 đạt; đã chạy=3, bỏ qua=1\n")
 
+# Bien PYTHON* cua may nguoi do lot vao bo test la DOI HANH VI bo test: PYTHONOPTIMIZE bo moi `assert` (do tren
+# 2026-09-30c: `assert False` qua, rc=0); ban 30d chi trung hoa MOT bien ay, con PYTHONDEVMODE=1 lam t154 DO 2/4
+# lan tren 3.11 (sach: 4/4 QUA) => rc=1 "TRUOT Moi ca DO deu giai thich duoc" cho ung vien sach (do tren
+# 2026-09-30d). Danh sach CAM luon thieu mot bien — nen day la danh sach CHO PHEP: chi giu bien de trinh thong
+# dich CHAY va tim goi DA CAI; PYTHONPATH KHONG giu (CI khong co no). Phep hoi dieu kien tien quyet o muc 0
+# cung chay qua day, nen no thay DUNG moi truong ma bo test se thay.
+_PY_GIU = frozenset({"PYTHONHOME", "PYTHONUSERBASE", "PYTHONNOUSERSITE"})
 def chay(argv, cwd, phut=60):
-    # PYTHONOPTIMIZE cua may nguoi do lot vao bo test thi moi `assert` trong ca bi BO (do tren 2026-09-30c:
-    # chay() + PYTHONOPTIMIZE=1 => `assert False` qua, rc=0). Chuoi RONG = khong dat (tai lieu CPython).
-    mt = dict(os.environ, PYTHONUTF8="1", PYTHONIOENCODING="utf-8",
-              PYTHONDONTWRITEBYTECODE="1", PYTHONUNBUFFERED="1", PYTHONOPTIMIZE="")
+    mt = {k: v for k, v in os.environ.items() if not k.upper().startswith("PYTHON") or k.upper() in _PY_GIU}
+    mt.update(PYTHONUTF8="1", PYTHONIOENCODING="utf-8", PYTHONDONTWRITEBYTECODE="1", PYTHONUNBUFFERED="1")
     p = subprocess.run([sys.executable] + argv, cwd=str(cwd), capture_output=True,
                        text=True, encoding="utf-8", errors="replace", timeout=phut*60, env=mt)
     return p.returncode, (p.stdout or "") + (p.stderr or "")
@@ -405,12 +413,22 @@ if not tep.is_file():  loi.append(f"khong thay {tep}")
 if not tept.is_file(): loi.append(f"khong thay {tept}")
 if not shutil.which("git"): loi.append("khong co `git` trong PATH")
 # Bo test (muc 2 va N7) can PyYAML: thieu no, 0ea95de ra 96/166 ca DO (89 bao thang "No module named 'yaml'",
-# 7 qua luot con; co PyYAML: 166/166 QUA). Bo do goi chung la "ca DO LA" roi phat TRUOT — do tren 2026-09-30c
-# bang python KHONG co PyYAML (dung nhu ban nhung ps1 tu tai): "ca DO vi THIEU CONG CU: khong co", TRUOT "Moi
-# ca DO deu giai thich duoc"; rc=3 chi nho bo doc log bat nham dong tong LONG (sua bo doc thi rc=1). Hoi TRUOC.
-if not ("--chi-kich-thuoc" in sys.argv or "--chi-probe" in sys.argv) and importlib.util.find_spec("yaml") is None:
-    loi.append(f"python nay THIEU PyYAML ma bo test can no: \"{sys.executable}\" -m pip install pyyaml"
-               " (ban nhung ps1 tu tai KHONG co pip: chay lai voi -Py <python da co PyYAML>)")
+# 7 qua luot con; co PyYAML: 166/166 QUA). Bo do goi chung la "ca DO LA" roi phat TRUOT — do tren 2026-09-30c.
+# Dieu kien tien quyet phai hoi bang CHINH tien trinh con se chay bo test (chay(): cung moi truong; cwd = ops/ =
+# sys.path[0] cua bo test) va hoi DUNG DUOC chu khong hoi CO MAT. Ban 30d hoi `find_spec("yaml")` o tien trinh
+# NAY va nguong 3.8 suy tu NGU PHAP (`:=`) — do tren 2026-09-30d, ca hai ra rc=1 TRUOT cho ung vien sach:
+# thu muc du lieu `yaml/` tren PYTHONPATH qua find_spec ma `yaml.safe_dump` khong co (87 ca "la"); python 3.8.20
+# THAT co PyYAML, bo test dung `str.removeprefix` (3.9) luc CHAY (33 ca "la"; 3.9.23: 166/166).
+if not ("--chi-kich-thuoc" in sys.argv or "--chi-probe" in sys.argv):
+    _rc_dk, _ra_dk = chay(["-c", "import sys; sys.exit(9) if sys.version_info < (3, 9) else None; import yaml;"
+                                 " yaml.safe_dump(yaml.safe_load('a: 1'))"],
+                          goc / "ops" if (goc / "ops").is_dir() else Path.cwd(), phut=2)
+    if _rc_dk == 9:
+        loi.append(f"python {sys.version.split()[0]} < 3.9: bo test cua ung vien dung str.removeprefix (3.9) luc CHAY")
+    elif _rc_dk:
+        loi.append(f"python nay KHONG co PyYAML dung duoc ({(_ra_dk.strip().splitlines() or [''])[-1][:90]}):"
+                   f" \"{sys.executable}\" -m pip install pyyaml"
+                   " (ban nhung ps1 tu tai KHONG co pip: chay lai voi -Py <python da co PyYAML>)")
 
 rc, head, _ = git(goc, "rev-parse", "HEAD")
 if rc: loi.append("khong doc duoc HEAD")

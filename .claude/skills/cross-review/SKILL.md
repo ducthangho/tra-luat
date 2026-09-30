@@ -545,16 +545,19 @@ Thiếu `-f` thì 401/403/404 vẫn `rc=0` và tệp chứa JSON lỗi thay cho 
 KHÔNG ghi tệp — tệp CÙNG TÊN còn nguyên log của lần tải TRƯỚC (của job khác, hoặc bản cắt ngang
 `rc=18` của chính job ấy), đọc y hệt log thật; nên mỗi job một tệp, xoá trước khi tải. Đừng
 suy "không cần token" từ một `200` trong phiên web: proxy của phiên TỰ CHÈN credential GitHub
-(đo 30-09-2026, không header: `/rate_limit` báo limit 15000, `/user` 200; `--noproxy`: limit 60,
-IP dùng chung đã cạn ⇒ 403). Tải log ẩn danh thật KHÔNG ĐO ĐƯỢC ở đây, nên khối dưới đòi
-token. `: "${GITHUB_PAT:?}"` chỉ dừng shell KHÔNG tương tác — dán vào terminal thì dòng sau
-vẫn chạy — nên chốt nằm trong CÙNG một `if`:
+(đo 30-09-2026, không header: `/rate_limit` báo limit 15000, `/user` 200). Ẩn danh thật
+(`--noproxy`, limit 60, egress là một DẢI IP dùng chung): 22/25 lượt `403` cạn hạn mức, 3/25 lượt
+còn hạn mức ⇒ `404 Not Found` kèm `x-github-request-id`, cho đúng job mà bản có credential tải
+được (200) — nên khối dưới đòi token.
+`: "${GITHUB_PAT:?}"` chỉ dừng shell KHÔNG tương tác — dán vào terminal thì dòng sau
+vẫn chạy — nên chốt nằm trong CÙNG một `if`. Token vào curl qua STDIN (`-H @-`, `printf` là
+builtin): `-H "Authorization: …"` để nguyên token trong argv (`ps`, `/proc/<pid>/cmdline`) suốt lượt tải:
 
 ```bash
 J="<id>"
 if [ -n "${GITHUB_PAT:-}" ] && [ -n "${SCRATCH:-}" ]; then
   OUT="$SCRATCH/job-$J.log"; rm -f "$OUT"
-  curl -fsS -L -H "Authorization: Bearer $GITHUB_PAT" \
+  printf 'Authorization: Bearer %s\n' "$GITHUB_PAT" | curl -fsS -L -H @- \
     "https://api.github.com/repos/ducthangho/tra-luat/actions/jobs/$J/logs" -o "$OUT"; echo "rc=$? $OUT"
 else echo "KHONG_DO_DUOC: GITHUB_PAT hoac SCRATCH rong"; fi
 ```
@@ -591,7 +594,10 @@ và bia mộ vào câu trả lời — bia mộ trỏ tới lease chỉ còn tr�
 nhánh mặc định. Tập ấy mới chỉ là `refs/remotes/origin`, còn lệnh đọc cả `refs/heads/*` và
 `refs/remotes/<remote khác>/*`: nhánh cục bộ chưa đẩy, nhánh không upstream sót lại sau
 `fetch --prune`, hay một remote thứ hai cũng góp lease và bia mộ y hệt. Nên bước 1 còn đòi mọi
-ref ngoài origin trỏ đúng một đầu nhánh máy chủ (dòng `refs/…` trong `CACHE_CU`).
+ref ngoài origin trỏ đúng một đầu nhánh máy chủ (dòng `refs/…` trong `CACHE_CU`). Lệnh chỉ bỏ ref có TÊN
+kết thúc bằng `/HEAD`; symref khác (vd `refs/heads/x` → `refs/tags/y`, hay `refs/remotes/origin/z`
+→ một tag) nó đọc nội dung ĐÍCH, nên cả hai phép so tính symref theo SHA ĐÍCH và chỉ bỏ tên `…/HEAD`
+mà lệnh cũng bỏ.
 
 Thông điệp lỗi nêu **nhánh và upstream thật**, không nhất thiết là `origin/<cùng tên>`.
 Lệnh chữa do `ai-dang-giu` in ra đã phân biệt nhánh rảnh với nhánh đang được worktree giữ:
@@ -612,11 +618,12 @@ git -C "$SOURCE" ls-remote --get-url origin | sed -E 's#://[^/@]*@#://***@#'   #
 # 1) CHỈ ĐỌC: tập (SHA, tên) máy chủ phải BẰNG tập cache, cả hai chiều (ai-dang-giu chỉ so TÊN, một chiều).
 if MC="$(git -C "$SOURCE" ls-remote --heads origin)" && [ -n "$MC" ]; then
   LECH="$(LC_ALL=C comm -3 <(printf '%s\n' "$MC" | awk 'NF{sub("^refs/heads/","",$2); print $1" "$2}' | LC_ALL=C sort) \
-    <(git -C "$SOURCE" for-each-ref --format='%(if)%(symref)%(then)%(else)%(objectname) %(refname:lstrip=3)%(end)' refs/remotes/origin \
-      | awk NF | LC_ALL=C sort))"
-  # ref NGOÀI origin mà ai-dang-giu vẫn đọc (refs/heads/*, remote khác): SHA phải là đầu một nhánh máy chủ
-  NGOAI="$(awk 'NR==FNR{if(NF)s[$1];next} NF && index($2,"refs/remotes/origin/")!=1 && !($1 in s)' <(printf '%s\n' "$MC") \
-    <(git -C "$SOURCE" for-each-ref --format='%(if)%(symref)%(then)%(else)%(objectname) %(refname)%(end)' refs/heads refs/remotes))"
+    <(git -C "$SOURCE" for-each-ref --format='%(objectname) %(refname:lstrip=3)' refs/remotes/origin \
+      | awk 'NF && $2!="HEAD"' | LC_ALL=C sort))"
+  # ref NGOÀI origin mà ai-dang-giu vẫn đọc (refs/heads/*, remote khác): SHA phải là đầu một nhánh máy chủ.
+  # Lọc theo TÊN */HEAD như lệnh, KHÔNG theo symref: symref khác nó đọc nội dung ĐÍCH (vd refs/tags/*).
+  NGOAI="$(awk 'NR==FNR{if(NF)s[$1];next} NF && index($2,"refs/remotes/origin/")!=1 && substr($2,length($2)-4)!="/HEAD" && !($1 in s)' <(printf '%s\n' "$MC") \
+    <(git -C "$SOURCE" for-each-ref --format='%(objectname) %(refname)' refs/heads refs/remotes))"
   [ -z "$LECH$NGOAI" ] && echo "CACHE_TUOI" || printf 'CACHE_CU (sat le: chi may chu co; thut TAB: chi cache co; refs/: ref ngoai may chu):\n%s\n%s\n' "$LECH" "$NGOAI"
 else echo "KHONG_DO_DUOC: ls-remote hong hoac rong"; fi
 # 2) rc=0 chỉ là "không ai giữ" khi bước 1 in CACHE_TUOI; refs/replace cục bộ đổi được nội dung lease nên tắt nó

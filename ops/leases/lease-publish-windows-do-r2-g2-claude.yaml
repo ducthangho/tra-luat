@@ -1,0 +1,119 @@
+# LEASE — LEASE-PUBLISH-WINDOWS-DO revision 2 / generation 2 — S5' <=600 + bo sung L1/L2/L4 (cross-review r2)
+# GHI HO theo chi thi CHU KHO trong phien (chep nguyen van o granted_on_instruction_nguyen_van).
+
+schema_version: 2
+event: executor_lease_granted
+
+packet_issue: 687
+granted_by: ducthangho
+granted_on_instruction: https://github.com/ducthangho/tra-luat/issues/687
+granted_on_instruction_nguyen_van: >-
+  g2: chu kho chon 'Nâng trần, revision r2' (phien, 2026-09-29, sau cross-review r2). g1:
+  'Chọn 1' (chu kho, phien Claude Code, 2026-09-29), tra loi cho de xuat cua phien: "1. Cấp lease cho
+  ops/lease_publish_test.py để vá L1 (hợp đồng skip) và L2 (A/B không kiểm đủ ca) bằng Sonnet 5.5 effort high".
+  Chi thi truoc do cung phien: "Nếu cần lặp vá, cross-review, đăng verdict tới hết P1, P2, P3. Vá bằng sonnet 5.5,
+  effort high".
+authority_caveat: >-
+  Chi thi nam trong phien, khong co comment chu kho tu viet tren #687; Issue va lease do phien executor dang bang
+  tai khoan chu kho (#566) — yeu hon comment chu kho tu viet.
+recorded_by: claude-session
+recorder_is_dispatcher: false
+
+leased_at_utc: '2026-09-29T11:29:37Z'
+lease_expires_at_utc: '2026-09-29T11:45:00Z'
+han_ghi_chu: >-
+  Ban dau ghi leased_at 12:10Z / het han 2026-09-30T12:10Z — SAI: gio do phien tu uoc, KHONG do dong ho (commit that
+  8e922e2 luc 11:29:37Z), tuc ghi mot moc TUONG LAI. Sua leased_at ve gio commit that; RUT NGAN het han ve 11:45Z —
+  xem thu_hoi_bang_rut_han.
+
+packet_id: LEASE-PUBLISH-WINDOWS-DO
+packet_slug: LEASE-PUBLISH-WINDOWS-DO
+revision: 2
+generation: 2
+lease_id: lease-publish-windows-do-r2-g2-claude
+thay_the_cho: lease-publish-windows-do-r1-g1-claude
+thay_the_ghi_chu: >-
+  g1 (r1) CON HAN toi 2026-09-30T10:20:00Z va giu cung write set; spec doi sang r2 => lease cu mat hieu luc theo
+  protocol §3.2. Bia mo hai chieu: da_bi_thay_the trong tep g1 (sua tren chinh nhanh nay). Khong co luot review nao
+  dang chay luc cap g2 (r2 da ket thuc, verdict da dang).
+role: executor
+provider: anthropic_claude
+executor: claude
+surface: claude_code
+model: claude-opus-5-5
+effort: medium
+effort_ghi_chu: >-
+  Chi thi chu kho (phien, 2026-09-29, sau khi cap): 'Lặp vá (opus 5.5, effort medium trở lên)' thay chi thi truoc
+  'Vá bằng sonnet 5.5, effort high'. Luot Sonnet bi DUNG giua chung, ban nhap khong duoc dung lam ban va. Cong cu
+  subagent khong dat duoc effort => effort la chi dan trong prompt, KHONG DO DUOC tu ngoai.
+environment: cloud
+risk: sensitive
+review_class: sensitive
+effective_review_class: sensitive
+assurance_target: human_audited
+reviewer_provider: openai_codex
+reviewer_surface: codex_cli
+reviewer_model_yeu_cau: gpt-6-astra
+reviewer_ghi_chu: 'Codex CLI tai cho, effort >= medium, phan LOP kem hint patch; human_audited la cong land.'
+access: read-write
+
+spec_path: ops/specs/lease-publish-windows-do-r2.md
+spec_ref: refs/heads/claude/lease-publish-windows-do
+spec_source_oid: 3d375ccdee162f8056858477e3224ed5ae3deb59
+spec_sha256: cab12ba992409130d4957c68d9dffbbd51055ee7a407f480024abbb6f35972a9
+spec_hash: cab12ba992409130d4957c68d9dffbbd51055ee7a407f480024abbb6f35972a9
+spec_hash_formula: SHA256 of UTF-8 LF Git blob bytes at spec_source_oid:spec_path
+prompt_path: ops/specs/lease-publish-windows-do-r2.md
+prompt_sha256_required: cab12ba992409130d4957c68d9dffbbd51055ee7a407f480024abbb6f35972a9
+
+branch: claude/lease-publish-windows-do
+branch_ownership: exclusive
+branch_ghi_chu: >-
+  Spec, lease va ma di cung nhanh nay. Nhanh khong thuoc ops/** nen ops-publish-lease.yml KHONG dang ban chieu
+  comment — ai-dang-giu van thay lease vi no quet moi ref.
+start_from_sha: 89fc4fac8cea65979cc2483043dc8cd07a6e8518
+immutable_acceptance_baseline: 89fc4fac8cea65979cc2483043dc8cd07a6e8518
+continuation_base: 807c6c2898b2338cbc8f97cbcd8540519fbe4f8a
+reviewed_sha_required: 807c6c2898b2338cbc8f97cbcd8540519fbe4f8a
+reviewed_sha_required_nghia: 'Chua co head ung vien; moi verdict neo exact head THAT cua nhanh thi cong.'
+
+write_set:
+  - ops/lease_publish_test.py
+write_set_hash: 94d43dbfd09ef93bc4e24aeaae23e66641567dcfd65e8b88aa5f67422e5a25fd
+write_set_hash_cach_tinh: 'sha256 cua cac duong dan DA SAP XEP, noi bang LF, co LF cuoi, utf-8.'
+write_set_da_do_truoc_khi_cap: >-
+  Do 2026-09-29T10:19Z: fetch '+refs/heads/*'; so TAP TEN ls-remote 511 / cuc bo sau fetch, comm -23 = 0.
+  ai-dang-giu ops/lease_publish_test.py => NGUOI_GIU 0. #677 (no 3 cua #579) dang mo nhung chua giu lease;
+  #676 (no 1) da land PR #680.
+
+ci_budget:
+  gate_tu_dong: '0 / 1 / 2 luot pull_request'
+  phep_do_duoc_cap: '0 luot Windows — xin chu kho truoc moi luot workflow_dispatch'
+  het: 'DUNG truoc moi push/chay lai ke tiep, cho quyet dinh cua chu kho'
+
+dieu_kien_dung:
+  - 'S1 — cham duong ngoai write set. DUNG.'
+  - 'S2 — CI do vi packet. DUNG, bao chu kho.'
+  - "S5' — ops/lease_publish_test.py > 600 dong them so baseline (spec/lease khong tinh). DUNG truoc review."
+  - 'S6 — het han lease => ngung ghi, handoff §7.'
+
+cam_tuyet_doi:
+  - Khong sua spec; khong sua tep ngoai write set
+  - Khong tu review / approve / merge / land
+  - Khong CI tay, khong Windows khi chua duoc phep, khong LIVE/deploy
+  - Khong force-push
+
+chua_do_duoc:
+  - 'Danh tinh nguoi ky: #566.'
+  - 'Effort thuc te cua subagent executor.'
+thu_hoi_bang_rut_han:
+  han_goc_utc: '2026-09-30T12:10:00Z'
+  han_moi_utc: '2026-09-29T11:45:00Z'
+  chi_thi: >-
+    Chu kho trong phien session_01RU4YGGdYMx94uVcywPjo4F (~11:40Z 29-09-2026), hoi ve hai chi thi mau thuan (phien
+    session_01E3un... chon 'Dao: no-3 di truoc'; phien nay chon '#687 di truoc'), chon: '#677 di truoc (giu 814b4e5)'.
+  ly_do: 'Tam dung #687 de #677 (PR #689) giu mot minh ops/lease_publish_test.py. g2 chua duoc dung de ghi ma.'
+  tiep_theo: 'Nhu 814b4e5: cho #677 land va lease cua no thoi giu tep, xin chu kho lease moi (thay_the_cho: []), merge origin/master.'
+  thuc_hien_boi: 'phien session_01RU4YGGdYMx94uVcywPjo4F'
+lease_sua_lan_cuoi: '2026-09-29T11:41:00Z'
+lease_sua_ghi_chu: 'Lan 1: sua leased_at sai gio + thu hoi bang rut han; khong doi write set, spec.'

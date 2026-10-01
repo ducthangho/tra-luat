@@ -21,7 +21,9 @@ recorded_by: claude-session
 recorder_is_dispatcher: false
 
 leased_at_utc: '2026-09-30T15:55:00Z'
-lease_expires_at_utc: '2026-10-01T15:55:00Z'
+lease_expires_at_utc: '2026-10-01T10:15:00Z'
+han_ghi_chu: >-
+  Goc 2026-10-01T15:55:00Z. RUT NGAN ve 2026-10-01T10:15:00Z — xem thu_hoi_bang_rut_han.
 
 packet_id: CI-DUONG-NHANH-HO-SO
 packet_slug: CI-DUONG-NHANH-HO-SO
@@ -122,3 +124,22 @@ chua_do_duoc:
   - 'Effort thuc te cua phien executor.'
   - 'Thoi gian that cua gate rut gon tren PR ho so (chi do duoc sau khi co PR that).'
   - 'Sau merge master 423b4ba: bo test 90/93 ca 244/269 dot bien TONG DO (y11 y12 y13) theo do cua g3 tren clone nhap — chua sua.'
+lease_sua_lan_cuoi: '2026-10-01T09:56Z'
+lease_sua_ghi_chu: >-
+  Lan 1: rut ngan lease_expires_at_utc (thu_hoi_bang_rut_han). Khong doi write set, spec, branch.
+thu_hoi_bang_rut_han:
+  han_goc_utc: '2026-10-01T15:55:00Z'
+  han_moi_utc: '2026-10-01T10:15:00Z'
+  chi_thi: >-
+    Chu kho trong phien Claude Code session_01269GBDswLRWNxxkcxjuByt: "Đã đăng. Merge, land và bookeeping đi" (~08:45Z),
+    sau human_audited issues/674#issuecomment-5927873457 (approve, neo 46bc11d); lenh land ghi o
+    issues/674#issuecomment-5928182145.
+  ly_do: >-
+    Packet #674 da MERGE: PR #703 merge 7e5958e (2026-10-01 ~09:53Z), cha thu hai 46bc11d = head duoc human_audited.
+  vi_sao_khong_dung_so: >-
+    Theo tien le #651/#660/#661/#668/#677/#687: so ops/thu-hoi/ chua kich hoat; rut han dung co che DA CAI. Han moi dat
+    sau luc push vai phut de luot dang lease (neu chay) con thay lease song, tranh rc=8 che rc=9 (bai hoc 20-09).
+  nguoi_rut: 'land operator session_01269GBDswLRWNxxkcxjuByt (cung phien executor g4)'
+  gioi_han: >-
+    Ref mang ban rut han: nhanh ops/cap-lease-ci-duong-nhanh-ho-so. Tep lease nay CHUA co tren master. Nghiem thu:
+    ai-dang-giu .github/workflows/ci.yml khong con ci-duong-nhanh-ho-so-r2-g4-claude trong NGUOI_GIU sau 10:15Z.

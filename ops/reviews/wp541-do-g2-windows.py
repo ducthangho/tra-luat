@@ -79,7 +79,7 @@ SHA_G1   = "2f70869a0537843e9cae78618ee7ae8c261d972d"
 # do that 18-09 tren ban va g2 cua agy cho 5 tep / +812, trong khi viec cua agy la 2 tep / +353.
 # Mot chot nhu the se bao "vuot tran" cho mot ban va KHONG vuot. Base dung la MERGE-BASE.
 SHA_BASE_SPEC = "d705623162b75b7340ee7cca54ac2d2abbddbb6f"
-BAN_BO_DO = "2026-09-30m"              # doi MOI khi sua bo do - log tu khai ban nao
+BAN_BO_DO = "2026-10-01a"              # doi MOI khi sua bo do - log tu khai ban nao
 TRAN_TEP, TRAN_DONG = 2, 400          # N7' cua spec r3
 AL_SAN = (1, 7, 7)                    # san actionlint = ban ghim CI: AL_VER cua ci.yml = ban_ghim cua ops/cong_cu.yaml
 GIT_SAN = (2, 36, 0)                  # san git: ung vien goi `git worktree list --porcelain -z` (co `-z` tu 2.36); ban_ghim git = null
@@ -466,7 +466,8 @@ if not shutil.which("git"): loi.append("khong co `git` trong PATH")
 # THAT co PyYAML, bo test dung `str.removeprefix` (3.9) luc CHAY (33 ca "la"; 3.9.23: 166/166).
 # "Dung duoc" nghia la dung DUNG API bo test goi: viet() (43 loi goi) va lease_publish.py goi safe_dump(..., allow_unicode=True,
 # sort_keys=False), ma `sort_keys` chi co tu PyYAML 5.1. Do tren 2026-09-30l, 0ea95de: python 3.9.23 + PyYAML 3.13 THAT qua probe
-# cu (rc=0), bo test 109/166 (56 ca "la" `unexpected keyword argument 'sort_keys'`), e2e rc=1 `DAT 11 | TRUOT 1`; PyYAML 5.1: 166/166.
+# cu (rc=0), bo test 109/166 — 56 ca "la": 52 `unexpected keyword argument 'sort_keys'`, t26/t27 `ReaderError` (ky tu ngoai BMP),
+# t124/t153 DO theo luot con — e2e rc=1 `DAT 11 | TRUOT 1`; PyYAML 5.1: 166/166 (do lai 2026-10-01: cung so).
 # (Python >= 3.10 + PyYAML 3.13 da truot probe cu vi `collections.Hashable`.) Probe cua ps1 ($maThu) phai GIONG HET dong duoi.
 if not ("--chi-kich-thuoc" in sys.argv or "--chi-probe" in sys.argv):
     _rc_dk, _ra_dk = chay(["-c", "import sys; sys.exit(9) if sys.version_info < (3, 9) else None; import yaml;"
@@ -491,7 +492,7 @@ if not ("--chi-kich-thuoc" in sys.argv or "--chi-probe" in sys.argv):
     try:
         if goc.is_dir(): os.chdir(goc)
         _cc = {c: (os.path.abspath(p) if p else None) for c, p in
-               ((c, shutil.which(c)) for c in ("bash", "actionlint", "shellcheck", "git"))}
+               ((c, shutil.which(c)) for c in ("bash", "actionlint", "shellcheck"))}
     finally:
         os.chdir(_cwd_nguoi_do)
     _thieu_cc = [c for c, p in _cc.items() if not p]
@@ -535,11 +536,20 @@ if not ("--chi-kich-thuoc" in sys.argv or "--chi-probe" in sys.argv):
         # worktree list --porcelain -z` rc=129 `unknown switch z`), e2e 2.35.1 rc=1 `DAT 11 | TRUOT 1`; 2.36.1 => 166/166. San lay
         # tu tinh nang ma CHINH ma duoc do goi (ops/cong_cu.yaml de ban_ghim git = null nen khong co ban ghim CI de dua vao).
         # `git version 2.47.1.windows.1` (Git for Windows) va `2.39.3 (Apple Git-146)` deu doc duoc ba so dau.
-        _gv = subprocess.run([_cc["git"], "--version"], capture_output=True, text=True, encoding="utf-8",
-                             errors="replace", timeout=60)
-        _gv_m = re.search(r"(?m)^git version\s+(\d+)\.(\d+)\.(\d+)", _gv.stdout or "")
-        if _gv.returncode:
-            loi.append("git tren PATH co mat nhung `git --version` rc!=0 (khong chay duoc): cai lai git")
+        # Va phai hoi DUNG git ma bo test SE GOI. Bo test KHONG `shutil.which("git")` nhu ba cong cu tren: GOI_GIT cua ung vien va moi
+        # fixture goi `git` TRAN — tren Windows la CreateProcessW: CHI tu them `.exe` (KHONG PATHEXT), tra thu muc python.exe, cwd
+        # va System32 TRUOC PATH. `which` thi tra PATHEXT, nen mot `git.cmd`/`git.bat` dung truoc `git.exe` CU tren PATH duoc hoi
+        # THAY no — do tren 2026-10-01 (nhanh win32 THAT cua shutil.which; shim `git.CMD` moi truoc git 2.35.1 THAT): ban 30m muc 0
+        # im, e2e rc=1 `DAT 11 | TRUOT 1`, `la: ['t109', 't110', 't111']`. Nen hoi bang CHINH duong ay: tien trinh con cua chay()
+        # (cung python, cung moi truong, cwd = goc nhu bo test) goi `git --version` TRAN.
+        _rc_gv, _ra_gv = chay(["-c", "import subprocess, sys; p = subprocess.run(['git', '--version'], capture_output=True,"
+                                     " text=True, timeout=60); print(p.stdout); sys.exit(p.returncode)"],
+                              goc if goc.is_dir() else Path.cwd(), phut=2)
+        _gv_m = re.search(r"(?m)^git version\s+(\d+)\.(\d+)\.(\d+)", _ra_gv)
+        ghi("git_bo_test", _gv_m.group(0) if _gv_m else None)
+        inn("  git bo test  :", _gv_m.group(0) if _gv_m else f"(khong doc duoc phien ban, rc={_rc_gv})")
+        if _rc_gv:
+            loi.append(f"`git --version` goi TRAN nhu bo test rc!=0 ({(_ra_gv.strip().splitlines() or [''])[-1][:90]}): cai lai git")
         elif not _gv_m or tuple(int(x) for x in _gv_m.groups()) < GIT_SAN:
             loi.append(f"git {'.'.join(_gv_m.groups()) if _gv_m else '(khong doc duoc phien ban)'} cu hon "
                        f"{'.'.join(map(str, GIT_SAN))} (ung vien goi `git worktree list --porcelain -z`): cap nhat git")

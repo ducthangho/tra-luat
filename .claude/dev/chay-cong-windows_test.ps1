@@ -46,8 +46,12 @@
 #                                                 `git rev-parse --local-env-vars` — `GIT_WORK_TREE` đổi cây mà `git status` đo, `GIT_DIR`
 #                                                 đổi kho nhận nếp git), `BASH_ENV` và hàm bash export `BASH_FUNC_*` (hàm che cả lệnh
 #                                                 nội trú `exit`/`exec`) RÒ từ phiên gọi đều bị xoá trước khi tới cổng
-#   t32 guong-ci-troi-theo-master                 mọi bước `gate*` của ci.yml (trừ bước chỉ chạy ở chế độ `duong_nhanh`) có đích
-#                                                 `.py/.sh/.ps1` là hằng chuỗi trong script, hoặc có TÊN trong một dòng `KHÔNG CHẠY`
+#   t32 guong-ci-troi-theo-master                 mọi bước `gate*` của ci.yml (trừ bước chỉ chạy ở chế độ `duong_nhanh`) có LỆNH trong
+#                                                 script — mỗi cặp (đích `.py/.sh/.ps1`, đối số ngay sau nó) là hai phần tử LIỀN NHAU —
+#                                                 hoặc có TÊN ĐÚNG trong một hằng chuỗi; bước không có đích nào phải nằm trong danh sách
+#                                                 nếp/cài đặt của ca (danh sách CHO PHÉP: bước mới ⇒ ĐỎ)
+#   t33 bo-giai-cong-cu-theo-ten-thu-tu (wrapper) `python` giả (thoát 0) ĐẦU PATH, `python3` thật sau nó ⇒ cổng lease (wrapper THẬT
+#                                                 chọn Python theo TÊN) không ĐẠT
 # Bộ này KÍN với config git của máy chạy, với biến git trỏ kho khác (khối ngay dưới `$script:Rac`), với code page của
 # console (`Doc-Utf8`), với dấu thập phân của locale (t18 nhận `5,1s`) và với `<TEMP>/actionlint` của máy (t7, t21 tự đặt TEMP).
 # ĐỘT BIẾN để đo răng (đo trên pwsh 7.4.6/Linux, bộ 28 ca, TMPDIR sạch): `-Script` trỏ f2392df ⇒ 2/28 (đạt t17 — bản ấy đã so băm —
@@ -76,6 +80,10 @@
 # bỏ xoá ⇒ t31 "ro toi cong_cu_test", kèm bỏ vế THẤY TÊN ⇒ t31 "ham export che lenh noi tru exit"; bỏ xoá `CI_DUONG_NHANH_MERGE` (giữ
 # hằng) ⇒ t30 "ro toi cong_cu_test" ở cả hai cây; bỏ dòng `KHÔNG CHẠY` của `ci-duong-nhanh selftest` ⇒ t32 (cây merge); bỏ cổng
 # `bien-nhan v2 selftest` ⇒ t32 (cây nhánh).
+# Lượt 16: bộ 33 ca — 9b8a420 ⇒ chỉ t32 (cặp `scripts/tl.py release-manifest` của lane WORKER không có trong script và tên dòng
+# `KHÔNG CHẠY` không ĐÚNG tên bước; cây merge thêm `ops/cong_cu_test.py --gop`) và t33. Trước lượt này t32 so theo TỆP: `scripts/tl.py`
+# là đích của 11 bước, nên bỏ `golden-test` ⇒ SỐNG 32/32, bỏ chín cổng dùng chung tệp ⇒ SỐNG 32/32 (cả hai cây); ci.yml thêm bước
+# `scripts/tl.py new-audit`, `ruff check … scripts/tl.py`, `actionlint` ⇒ t32 vẫn ĐẠT.
 # Lượt 10: danh sách hợp hai nền (543f2e8) ⇒ chỉ t28 (lượt 1); đảo nền ⇒ chỉ t28 (lượt 1); danh sách của nền này rỗng / thiếu `goi.gz`
 # ⇒ chỉ t28 (lượt 2); bỏ danh sách CHO PHÉP nay ⇒ t25 t28; nhánh Windows của t27 ép chạy trên Linux: fixture mới ⇒ 28/28, fixture dẫn
 # `'tools'` qua ống (blob 6 byte) ⇒ chỉ t27 (chốt tự kiểm KHÔNG ĐO ĐƯỢC).
@@ -965,6 +973,11 @@ Ca 't31 bien trinh thong dich / git / bash cua phien goi bi xoa truoc cong' {
 # (t6 chỉ đọc bước bỏ trên Windows, t30 chỉ đọc khoá `env`). Đo: cây merge ad4e724 với master 7e5958e có bước `ci-duong-nhanh selftest`
 # (`ops/ci_duong_nhanh_test.py`, chỉ Linux) — script ad4e724 im lặng, bộ 31 ca chỉ đỏ t30. Bước chỉ chạy ở chế độ `duong_nhanh` thì
 # bỏ: script luôn chạy ĐỦ. Python in UTF-8 (tên bước có tiếng Việt; console Windows không phải UTF-8) và regex không dùng dấu chéo ngược.
+# So LỆNH, không so TỆP: `scripts/tl.py` là đích của 11 bước, nên "tệp có trong script" không nói bước nào được gương (đo trên 9b8a420:
+# bỏ chín cổng dùng chung tệp ⇒ 32/32). Mỗi cặp (đích, đối số ngay sau nó — `<END>` khi hết dòng) phải là hai phần tử LIỀN NHAU của
+# một mảng/lệnh trong script; phần tử sau là biến ⇒ khớp mọi đối số. Bước KHÔNG có đích nào phải có tên trong `$NepCaiDat` (nếp git
+# và `-CaiCongCu` của script; tên mang bản ghim nên đổi bản ghim ở ci.yml cũng làm ca ĐỎ). Giới hạn: lệnh nối dòng (dấu chéo ngược cuối dòng)
+# đọc đối số kế tiếp là `<END>` — fail-closed.
 Ca 't32 moi buoc gate* co guong trong script hoac co ten trong dong KHONG CHAY' {
     $ci = Join-Path $GocKho '.github/workflows/ci.yml'
     $py = Tim-PyYaml; $pd = $py.Dau
@@ -973,24 +986,79 @@ import re, sys, yaml
 sys.stdout.reconfigure(encoding='utf-8')
 d = yaml.safe_load(open(sys.argv[1], encoding='utf-8'))
 mau = re.compile('(?<![A-Za-z0-9_./-])[A-Za-z0-9_./-]+[.](?:py|sh|ps1)(?![A-Za-z0-9_.])')
+tok = re.compile('^[A-Za-z0-9_.-][A-Za-z0-9_./=-]*$')
 for j, v in (d.get('jobs') or {}).items():
     if not j.startswith('gate'):
         continue
     for b in v.get('steps') or []:
-        if '== ' + chr(39) + 'duong_nhanh' + chr(39) in str(b.get('if', '')):
+        if '== ' + chr(39) + 'duong_nhanh' + chr(39) in str(b.get('if', '')) or not b.get('run'):
             continue
-        for t in sorted(set(mau.findall(b.get('run') or ''))):
-            print(str(b.get('name') or '') + chr(9) + t)
+        cap = set()
+        for dong in b['run'].splitlines():
+            if dong.strip().startswith('#'):
+                continue
+            for m in mau.finditer(dong):
+                sau = dong[m.end():].split()
+                cap.add((m.group(0), sau[0] if sau and tok.match(sau[0]) else '<END>'))
+        for t, s in sorted(cap) or [('<KHONG-DICH>', '<END>')]:
+            print(str(b.get('name') or '') + chr(9) + t + chr(9) + s)
 '@
     $dong = @(Doc-Utf8 { & $py.Ten @pd -c $ma $ci } | Where-Object { $_ })
     if ($LASTEXITCODE -ne 0 -or $dong.Count -eq 0) { throw "KHONG DO DUOC: khong doc duoc dich cua buoc gate* trong ci.yml (rc=$LASTEXITCODE)" }
     $ast = [System.Management.Automation.Language.Parser]::ParseFile($Script, [ref]$null, [ref]$null)
     $hang = @($ast.FindAll({ param($x) $x -is [System.Management.Automation.Language.StringConstantExpressionAst] }, $true) | ForEach-Object Value)
+    # Cặp LIỀN NHAU trong script: phần tử của mảng / của lệnh, hoặc hằng đứng một mình (`@('x')`) ⇒ (x, <END>).
+    $cap = @{}
+    foreach ($n in $ast.FindAll({ param($x) $x -is [System.Management.Automation.Language.StringConstantExpressionAst] }, $true)) {
+        $p = $n.Parent
+        $ds = @(if ($p -is [System.Management.Automation.Language.ArrayLiteralAst]) { $p.Elements }
+                elseif ($p -is [System.Management.Automation.Language.CommandAst]) { $p.CommandElements } else { $n })
+        $i = [array]::IndexOf($ds, $n)
+        $sau = if ($i + 1 -ge $ds.Count) { '<END>' }
+               elseif ($ds[$i + 1] -is [System.Management.Automation.Language.StringConstantExpressionAst]) { $ds[$i + 1].Value } else { '*' }
+        $cap[$n.Value + "`t" + $sau] = 1
+    }
+    $NepCaiDat = @('Force LF checkout (hash parity với manifest)', 'cài PyYAML + jsonschema (cổng đăng lease + validator verdict cần)',
+                   'cài Ruff 0.15.15 và in probe dương')
     $thieu = @(foreach ($x in $dong) {
-        $ten, $dich = $x -split "`t", 2
-        if ($hang -cnotcontains $dich -and @($hang | Where-Object { $_.Contains('"' + $ten + '"') }).Count -eq 0) { "$ten :: $dich" }
+        $ten, $dich, $sau = $x -split "`t", 3
+        $coLenh = ($dich -ne '<KHONG-DICH>') -and ($cap.ContainsKey("$dich`t$sau") -or $cap.ContainsKey("$dich`t*"))
+        $coNep = ($dich -eq '<KHONG-DICH>') -and ($NepCaiDat -ccontains $ten)
+        if (-not $coLenh -and -not $coNep -and @($hang | Where-Object { $_.Contains('"' + $ten + '"') }).Count -eq 0) { "$ten :: $dich $sau" }
     })
     if ($thieu.Count -gt 0) { throw "buoc gate* khong co guong trong script, khong co ten trong dong KHONG CHAY: $($thieu -join ' | ')" }
+}
+
+# Wrapper lease THẬT (`ops/chay_lease_publish_test.sh`) chọn Python THEO TÊN trên PATH của phiên gọi. `python` giả (thoát 0) ĐẦU PATH,
+# `python3` thật sau nó: Tim-Python bỏ nó, wrapper thì chạy nó ⇒ đo trên 9b8a420: `lease-publish selftest` rc=0 ĐẠT, script rc=0, bộ
+# test (giả, thoát 1) không chạy. Lượt đối chứng không shim: wrapper THẬT phải tới được bộ test (dấu in ra, rc=1) — không thế thì ca
+# không có răng. Windows: shim là bản chép `whoami.exe` (thoát 0, không in `TLPY=`) — KHÔNG ĐO ĐƯỢC trên nền này.
+Ca 't33 python gia chi o ten python dau PATH => cong lease (wrapper chon theo TEN) khong DAT' {
+    $k = Dung-Kho
+    Copy-Item -LiteralPath (Join-Path $GocKho 'ops/chay_lease_publish_test.sh') -Destination (Join-Path $k 'ops/chay_lease_publish_test.sh') -Force
+    Set-Content -LiteralPath (Join-Path $k 'ops/cai_actionlint.sh') -Encoding utf8NoBOM -Value @'
+mkdir -p "$AL_DICH"
+echo '#!/bin/sh' > "$AL_DICH/actionlint"
+echo 'echo 1.7.7' >> "$AL_DICH/actionlint"
+chmod +x "$AL_DICH/actionlint"
+'@
+    Set-Content -LiteralPath (Join-Path $k 'ops/lease_publish_test.py') -Encoding utf8NoBOM -Value "import sys; print('THAT-CHAY-LEASE-T33'); sys.exit(1)"
+    & git -C $k add -A
+    & git -C $k -c user.email=t@t -c user.name=t commit -qm wrapper-that
+    $a = Chay $k
+    if ($a.ra -notmatch 'lease-publish selftest +rc=1' -or $a.ra -notmatch 'THAT-CHAY-LEASE-T33') {
+        throw "KHONG DO DUOC: wrapper THAT khong toi duoc bo test o luot doi chung (rc_script=$($a.rc))" }
+    Remove-Item -LiteralPath (Join-Path $k 'dist') -Recurse -Force -ErrorAction SilentlyContinue
+    $shim = Join-Path (Split-Path $k) 'shim-python'
+    New-Item -ItemType Directory -Force -Path $shim | Out-Null
+    if ($IsWindows) { Copy-Item -LiteralPath (Join-Path $env:SystemRoot 'System32/whoami.exe') -Destination (Join-Path $shim 'python.exe') }
+    else {
+        Set-Content -LiteralPath (Join-Path $shim 'python') -Value "#!/bin/sh`nexit 0" -Encoding utf8NoBOM
+        & chmod +x (Join-Path $shim 'python')
+    }
+    $b = Chay $k @() @{ PATH = "$shim$Sep$env:PATH" }
+    if ($b.ra -match 'lease-publish selftest +rc=0' -or $b.rc -eq 0) {
+        throw "python gia chi o ten python: wrapper chon no, cong lease DAT ma bo test khong chay (rc_script=$($b.rc))" }
 }
 
 foreach ($d in $script:Rac) { Remove-Item -LiteralPath $d -Recurse -Force -ErrorAction SilentlyContinue }

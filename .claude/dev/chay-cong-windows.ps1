@@ -49,9 +49,12 @@
     `day-du` — gương các bước cổng của các job `gate*` của CI. Bước KHÔNG gương được thì script in `KHÔNG CHẠY` ở
                cuối mức này — năm dòng: cgroup và `ci-duong-nhanh selftest` (chỉ có trên Linux; bước sau có từ master
                7e5958e), EOL base (đòi event `pull_request`), `tl selftest` có bằng chứng exact-identity, `release-verify`
-               lane WORKER — cộng hai bước `ci.yml` bỏ trên Windows. Bước chỉ chạy ở chế độ `duong_nhanh` (PR chỉ đổi hồ
-               sơ) thì không gương: script luôn chạy ĐỦ như lượt push/`workflow_dispatch`. t32 đòi mọi bước `gate*` còn
-               lại có đích trong script hoặc có TÊN trong một dòng `KHÔNG CHẠY`.
+               lane WORKER — cộng hai bước `ci.yml` bỏ trên Windows, và một dòng `THAY BẰNG` cho mảnh + gom của
+               `cong_cu_test` (master từ fc852ff). Bước chỉ chạy ở chế độ `duong_nhanh` (PR chỉ đổi hồ sơ) thì không
+               gương: script luôn chạy ĐỦ như lượt push/`workflow_dispatch`. t32 đòi mọi bước `gate*` còn lại có LỆNH
+               trong script — từng cặp (đích, đối số ngay sau nó) của `ci.yml` là hai phần tử LIỀN NHAU trong script —
+               hoặc có TÊN ĐÚNG trong một dòng `KHÔNG CHẠY`/`THAY BẰNG`; bước không có đích `.py/.sh/.ps1` nào phải nằm
+               trong danh sách nếp/cài đặt của t32.
 
 .PARAMETER CaiCongCu
     Cài PyYAML/jsonschema/ruff bản GHIM, rồi `actionlint` (vào `dist/actionlint` của bản clone), `shellcheck`, `rg`
@@ -487,7 +490,18 @@ Tieu ('cổng — mức ' + $Muc)
 
 Chay-Py   'cong_cu kiem-tra'        @('ops/cong_cu.py', 'kiem-tra', '--json')
 Chay-Py   'cong_cu_test'            @('ops/cong_cu_test.py')
-Chay-Bash 'lease-publish selftest'  @('ops/chay_lease_publish_test.sh')
+# Wrapper lease (`ops/`, ngoài write set) chọn Python THEO TÊN — `python`, rồi `python3`, rồi `py -3` — trên PATH của phiên gọi, KHÔNG
+# dùng tệp Tim-Python đã chứng minh. Đo trên 9b8a420 (wrapper THẬT, bộ test giả thoát 1): `python` giả thoát 0 đầu PATH, `python3` thật
+# sau nó ⇒ Tim-Python bỏ `python` và chọn `python3`, mà `lease-publish selftest` rc=0 ĐẠT, script rc=0. Hỏi CHÍNH bash ấy theo đúng
+# thứ tự của wrapper, rồi đòi bằng chứng dương như Tim-Python; không chứng minh được ⇒ KHÔNG ĐO ĐƯỢC. Phần `AL_DICH` (một cổng chạy
+# trước wrapper ghi vào đó) vẫn là phần đã khai CHƯA ĐÓNG ở bộ test. t33 khoá.
+$PyLeaseDung = $false
+if ($Bash) {
+    $raL = @(& $Bash -c 'if command -v python >/dev/null 2>&1; then P=(python); elif command -v python3 >/dev/null 2>&1; then P=(python3); elif command -v py >/dev/null 2>&1; then P=(py -3); else exit 11; fi; exec "${P[@]}" -c "$1"' 'tl-lease' "import sys; print('TLPY=%d.%d.%d' % sys.version_info[:3])" 2>$null)
+    $PyLeaseDung = ($LASTEXITCODE -eq 0) -and (@($raL -match '^TLPY=3[.][0-9]+[.][0-9]+$').Count -gt 0)
+}
+if (-not $Bash -or $PyLeaseDung) { Chay-Bash 'lease-publish selftest'  @('ops/chay_lease_publish_test.sh') }
+else { Chay-Cong -Ten 'lease-publish selftest' -Tep '' -DoiSo @() -BoQua -LyDoBoQua 'Python mà wrapper chọn THEO TÊN (python → python3 → py -3) không chứng minh được là Python' }
 Chay-Py   'packet-loop selftest'    @('.claude/dev/packet_loop_test.py')
 # Bước `test registry` của master khai `env:` (`CI_DANG_KY_WORKERS: "2"` + sự kiện/GOC/DAU). Vắng ⇒ `doc_diff` KHÔNG ĐO ĐƯỢC ⇒ kế
 # hoạch ĐỦ cho cả ba vòng đột biến, `nhanh_don_duoc` không chia mảnh — lượt PR THƯỜNG của CI giao khối việc ấy cho lượt tuần + 4 job
@@ -601,7 +615,8 @@ if ($Muc -eq 'day-du') {
     Noi 'KHÔNG CHẠY (chỉ có trên Linux runner; master từ 7e5958e): "ci-duong-nhanh selftest (phan loai diff + khoa cau truc if)".'
     Noi 'KHÔNG CHẠY (đòi event pull_request): "PR head contains required EOL base".'
     Noi 'KHÔNG CHẠY (đòi event KHÁC pull_request + gate_lifecycle evidence): "tl selftest (co bang chung exact-identity)".'
-    Noi 'KHÔNG CHẠY (đòi ref KHÁC master): "release-verify lane WORKER" — script chạy lane LAND thay vào.'
+    Noi 'KHÔNG CHẠY (đòi ref KHÁC master): "release-verify strict (lane WORKER — manifest TẠM ngoài repo)" — script chạy lane LAND thay vào.'
+    Noi 'THAY BẰNG MỘT LƯỢT (master từ fc852ff): "G5 manh ban kinh dot bien (#668)" + "G5 gom manh ban kinh dot bien (#668)" — script chạy ops/cong_cu_test.py TRỌN.'
 }
 
 # ───────────────────────────── tổng kết ─────────────────────────────

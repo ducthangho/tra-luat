@@ -76,9 +76,10 @@
 .EXAMPLE
     pwsh -NoProfile -File .\.claude\dev\chay-cong-windows.ps1 -Muc day-du -ChiTiet
 .NOTES
-    Gọi bằng `pwsh -File` (tiến trình RIÊNG). Script đổi cwd, PATH, PYTHON*, AL_* và
-    [Console]::OutputEncoding của tiến trình đang chạy nó; gọi thẳng `.\chay-cong-windows.ps1`
-    trong một phiên pwsh thì mọi thay đổi ấy Ở LẠI phiên sau khi script kết thúc.
+    Gọi bằng `pwsh -File` (tiến trình RIÊNG). Script đổi cwd, PATH, PYTHON*, AL_*, GIT_CONFIG, xoá khoá `env:` của bước cổng
+    (danh sách ở đầu script) rồi ĐẶT `CI_DANG_KY_*` (kể cả GOC/DAU là SHA lúc chạy), và [Console]::OutputEncoding của tiến
+    trình đang chạy nó; gọi thẳng `.\chay-cong-windows.ps1` trong một phiên pwsh thì mọi thay đổi ấy Ở LẠI phiên sau khi
+    script kết thúc — một `ci_dang_ky_test.py --chay` gõ tay sau đó trong phiên ấy lấy kế hoạch NHẸ từ SHA CŨ.
 #>
 [CmdletBinding()]
 param(
@@ -112,10 +113,13 @@ $env:PYTHONUNBUFFERED     = '1'
 $env:PYTHONDONTWRITEBYTECODE = '1'
 # `env:` của BƯỚC cổng là một phần của lệnh: biến chế độ RÒ từ phiên gọi đổi cổng thành bản NHẸ hơn mà rc vẫn 0 (đo trên cây merge
 # 20ec8d5: `CONG_CU_TEST_BAN_KINH=manh` ⇒ `cong_cu_test` rc=0 sau 258 s, bán kính 416 đột biến "GIAO cho job gate-cong-cu" — không
-# cổng nào ở đây chạy job ấy). XOÁ mọi khoá mà một bước `gate*` của `ci.yml` khai (t30 đọc `ci.yml` và đòi đủ) cộng biến mảnh của
-# lượt tuần; bước nào CI ĐẶT thì script đặt lại đúng giá trị ấy ở chỗ chạy bước (AL_VER; `test registry`).
+# cổng nào ở đây chạy job ấy). XOÁ mọi khoá `env` mà một job `gate*` của `ci.yml` hay một job của `ci-dot-bien-du.yml` (lượt tuần)
+# khai — t30 đọc cả hai tệp và đòi đủ, rồi RÒ từng khoá vào cổng; bước nào CI ĐẶT thì script đặt lại đúng giá trị ấy ở chỗ chạy
+# bước (AL_VER; `test registry`). `NHANH_DON_DUOC_MANH` rò (đo trên cây merge: tới registry, `nhanh_don_duoc_test` bỏ chế độ NHẸ để
+# chạy MẢNH, registry ĐỎ vì máy) và `CONG_CU_TEST_MANH` rò (đo: `cong_cu_test` rc=0, 26/416 đột biến, bỏ cổng cây thật).
 foreach ($n in 'AL_VER', 'PR_HEAD_SHA', 'EOL_BASE_SHA', 'CONG_CU_TEST_BAN_KINH', 'CONG_CU_TEST_MANH', 'CONG_CU_TEST_MANH_RA',
-               'CI_DANG_KY_WORKERS', 'CI_DANG_KY_SU_KIEN', 'CI_DANG_KY_GOC', 'CI_DANG_KY_DAU', 'CI_DANG_KY_DOT_BIEN_MANH') {
+               'CI_DANG_KY_WORKERS', 'CI_DANG_KY_SU_KIEN', 'CI_DANG_KY_GOC', 'CI_DANG_KY_DAU', 'CI_DANG_KY_DOT_BIEN_MANH',
+               'NHANH_DON_DUOC_MANH', 'NHANH_DON_DUOC_MANH_RA') {
     [Environment]::SetEnvironmentVariable($n, $null)
 }
 
@@ -454,20 +458,26 @@ Chay-Py   'cong_cu_test'            @('ops/cong_cu_test.py')
 Chay-Bash 'lease-publish selftest'  @('ops/chay_lease_publish_test.sh')
 Chay-Py   'packet-loop selftest'    @('.claude/dev/packet_loop_test.py')
 # Bước `test registry` của master khai `env:` (`CI_DANG_KY_WORKERS: "2"` + sự kiện/GOC/DAU). Vắng ⇒ `doc_diff` KHÔNG ĐO ĐƯỢC ⇒ kế
-# hoạch ĐỦ cho cả ba vòng đột biến, `nhanh_don_duoc` không chia mảnh — khối việc CI dồn sang lượt tuần + 4 job mảnh, không job 90
-# phút nào chạy nó (đo trên cây merge 20ec8d5: vắng ⇒ ĐỦ ×3; env `pull_request` của chính diff PR ⇒ NHẸ ×3; `nhanh_don_duoc_test`
-# ĐỦ > 540 s, NHẸ 2 s). Gương như lượt `pull_request` CHỈ KHI đo được diff như CI: cây SẠCH (CI đo commit, không đo cây làm việc)
+# hoạch ĐỦ cho cả ba vòng đột biến, `nhanh_don_duoc` không chia mảnh — lượt PR THƯỜNG của CI giao khối việc ấy cho lượt tuần + 4 job
+# mảnh, nhưng job `gate-registry` 90 phút VẪN chạy nó khi diff không đo được hoặc chạm vùng chung (`workflow_dispatch` — đường chắc
+# có lượt Windows, N=1 —; PR chạm `ci.yml`, `requirements.txt`, `ops/cong_cu*`, `ops/cai_*`, tệp gốc: đo bằng `ke_hoach` THẬT ⇒ ĐỦ ×3)
+# (đo trên cây merge 20ec8d5: vắng ⇒ ĐỦ ×3; env `pull_request` của chính diff PR ⇒ NHẸ ×3; `nhanh_don_duoc_test` ĐỦ > 540 s, NHẸ 2 s). Gương như lượt `pull_request` CHỈ KHI đo được diff như CI: cây SẠCH (CI đo commit, không đo cây làm việc)
 # và HEAD đi TRƯỚC `origin/master`; không thì để vắng ⇒ ĐỦ (fail-closed như chính `doc_diff`). Nhánh gốc d553efa không đọc các biến.
+# `git status` TIN cờ index: mục `assume-unchanged` (thẻ thường của `ls-files -v`) / `skip-worktree` (`S`) bị sửa thì status RỖNG mà
+# cây làm việc KHÁC commit (đo: sửa `ops/nhanh_don_duoc.py` + `--assume-unchanged` ⇒ status rỗng ⇒ NHẸ; `.claude/settings.json` +
+# `--skip-worktree` ⇒ NHẸ cho bộ SGD; không cờ ⇒ ĐỦ). Có mục mang cờ, hoặc không hỏi được git ⇒ không coi là SẠCH.
 $env:CI_DANG_KY_WORKERS = '2'
 $regGoc = [string](& git rev-parse --verify --quiet 'refs/remotes/origin/master^{commit}' 2>$null)
 $regDau = [string](& git rev-parse --verify --quiet 'HEAD^{commit}' 2>$null)
 $regBan = @(& git status --porcelain --untracked-files=all 2>$null)
 $regSach = ($LASTEXITCODE -eq 0) -and ($regBan.Count -eq 0)
+$regCo = @(& git ls-files -v 2>$null)
+$regSach = $regSach -and ($LASTEXITCODE -eq 0) -and (@($regCo | Where-Object { $_ -cmatch '^[a-zS] ' }).Count -eq 0)
 $regTruoc = if ($regGoc -and $regDau) { [string](& git rev-list --count "$regGoc..$regDau" 2>$null) } else { '' }
 if ($regSach -and $regTruoc -match '^[1-9]\d*$') {
     $env:CI_DANG_KY_SU_KIEN = 'pull_request'; $env:CI_DANG_KY_GOC = $regGoc; $env:CI_DANG_KY_DAU = $regDau
 } else {
-    Canh 'registry test: không đo được diff như CI (cây bẩn, thiếu origin/master, hoặc HEAD không đi trước nó) — kế hoạch ĐỦ của lượt tuần, có thể vượt -HanGiay.'
+    Canh 'registry test: không đo được diff như CI (cây bẩn hoặc có mục assume-unchanged/skip-worktree, thiếu origin/master, hoặc HEAD không đi trước nó) — kế hoạch ĐỦ (như lượt workflow_dispatch của CI), có thể vượt -HanGiay.'
 }
 Chay-Py   'registry test'           @('.claude/dev/ci_dang_ky_test.py', '--chay')
 

@@ -1,0 +1,48 @@
+chua chay tren cay that — executor tu ap, tu do, tu chiu trach nhiem commit
+(cross-review luot 11, reviewed 712ef9bef610b00a6cc2574712b52ad4e23a355b; ap: cd <goc cay> && patch -p0 --fuzz=0 < HINT.patch)
+
+--- ops/ci_duong_nhanh_test.py
++++ ops/ci_duong_nhanh_test.py
+@@ -1135,6 +1135,10 @@
+         ("raw trung duong", dict(raw={"ba_cham": (0, tot + tot)}), "ban ghi la"),
+         ("D mode khac 0", dict(raw={"ba_cham": (0, raw_ghi(("160000", "D", d)))}), "mode 160000, D"),
+         ("tap lech", dict(raw={"ba_cham": (0, tot + raw_ghi(("100644", "A", "ops/land/them.md")))}), "lech tap da phan loai"),
++        # Cross-review luot 11 (`kiem-mode-git-chot-khong-rang`): chieu NGUOC cua chot tap — duong dan da phan loai ma KHONG cap
++        # `--raw` nao liet ke thi mode cua no KHONG duoc kiem; va `D` mang mode tep thuong (khong phai 000000) la ban ghi hong.
++        ("tap thieu", dict(raw={"ba_cham": (0, b""), "cay": (0, b"")}), "lech tap da phan loai"),
++        ("D mode tep thuong", dict(raw={"ba_cham": (0, raw_ghi(("100644", "D", d)))}), "mode 100644, D"),
+     )
+     for ten, kw, can in kich_ban:
+         kw.setdefault("raw", {})
+@@ -1149,6 +1153,20 @@
+ 
+ 
+ @ca
++def t20zc_kiem_re_doi_ten_tep_ho_so_dat():
++    """Cross-review luot 11 (`kiem-mode-git-chot-khong-rang`): `git diff` mac dinh DO doi ten (`diff.renames`), ban ghi `--raw`
++    khi do la `R100` kem HAI duong dan => `_doc_raw` bao dau ra hong. `--no-renames` la dieu kien de PR doi ten tep ho so
++    (thao tac thuong ngay) khong DO OAN o required check; khong ca nao khoa co ay."""
++    m = nap_module()
++    with kho_that(nen={"README.md": "x\n", "ops/land/a.yaml": "a: 1\nb: 2\n"},
++                  nhanh_pr={"ops/land/a.yaml": None, "ops/land/b.yaml": "a: 1\nb: 2\n"}) as (kho, goc, dau):
++        raw = git(kho, "diff", "--raw", "--no-abbrev", f"{goc}...{dau}").stdout.decode()
++        bang(" R100\t" in raw, f"fixture vo hieu: git diff mac dinh phai do doi ten (R100): {raw!r}")
++        rc, log = kiem_re(m, kho, goc, dau)
++        bang(rc == 0, f"PR doi ten tep ho so phai DAT kiem-re: rc={rc}: {log}")
++
++
++@ca
+ def t20q_kiem_re_symlink_hop_le_moi_duoi_do():
+     """Cross-review luot 8: docstring khai chan MOI symlink "treo hay khong"; t20n chi co symlink TREO duoi `.md`."""
+     m = nap_module()
+@@ -2447,6 +2465,10 @@
+     ('mode_git_bo_kiem_trung', _ma(' or not duong or duong in kq:', ' or not duong:'), ('t20zb_kiem_mode_git_khong_do_duoc_thi_do',)),
+     ('mode_git_xoa_bo_kiem_mode', _ma('            if trang_thai == "D" and mode == "000000":', '            if trang_thai == "D":'), ('t20zb_kiem_mode_git_khong_do_duoc_thi_do',)),
+     ('mode_git_bo_kiem_tap', _ma('    if thay != set(doi):', '    if False:'), ('t20zb_kiem_mode_git_khong_do_duoc_thi_do',)),
++    # ---- cross-review luot 11, lop `kiem-mode-git-chot-khong-rang`
++    ('mode_git_raw_bo_no_renames', _ma('"diff", "--raw", "-z", "--no-renames", "--no-abbrev"', '"diff", "--raw", "-z", "--no-abbrev"'), ('t20zc_kiem_re_doi_ten_tep_ho_so_dat',)),
++    ('mode_git_tap_chi_bat_thua', _ma('    if thay != set(doi):', '    if not thay <= set(doi):'), ('t20zb_kiem_mode_git_khong_do_duoc_thi_do',)),
++    ('mode_git_xoa_chi_theo_mode', _ma('            if trang_thai == "D" or mode not in MODE_THUONG:', '            if mode not in MODE_THUONG:'), ('t20zb_kiem_mode_git_khong_do_duoc_thi_do',)),
+     ('mode_git_merge_tree_rc_cho_qua', _ma('    if getattr(mt_mode, "returncode", None) != 0 or not isinstance(ra_cay,', '    if not isinstance(ra_cay,'), ('t20zb_kiem_mode_git_khong_do_duoc_thi_do',)),
+     ('mode_git_merge_tree_nem_lot', _ma('    except Exception as e:\n        return [f"KHONG DO DUOC: merge-tree (kiem mode) nem', '    except ZeroDivisionError as e:\n        return [f"KHONG DO DUOC: merge-tree (kiem mode) nem'), ('t20zb_kiem_mode_git_khong_do_duoc_thi_do',)),
+     ('mode_git_merge_tree_bo_kiem_dang', _ma('            or not re.fullmatch(rb"[0-9a-f]{40}(?:[0-9a-f]{24})?\\n", bytes(ra_cay)):', '            or False:'), ('t20zb_kiem_mode_git_khong_do_duoc_thi_do',)),

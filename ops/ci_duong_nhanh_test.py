@@ -142,7 +142,7 @@ def bo_attr_source(argv):
 
 
 def _tra_gia(gia_tri):
-    """Mot gia tri do gia: ngoai le => nem; (rc, out) => dung nhu vay; bytes => rc 0 neu khac rong, rc 1 neu rong."""
+    """Mot gia tri do gia: ngoai le => nem; (rc, out) => dung nhu vay; bytes => rc=0 neu khac rong, rc=1 neu rong."""
     if isinstance(gia_tri, BaseException):
         raise gia_tri
     if isinstance(gia_tri, tuple):
@@ -427,7 +427,7 @@ def kho_that(nen=None, nhanh_pr=None, nen_tien=None, sao_lease_publish=False):
 
 
 def merge_ref_that(kho, goc, dau):
-    """Commit merge kieu GitHub (cha 1 = goc, cha 2 = dau) dung tu cay `merge-tree` cua CAY LAM VIEC hien tai — ke ca khi
+    """Commit merge kieu GitHub (cha THU NHAT = goc, cha THU HAI = dau) dung tu cay `merge-tree` cua CAY LAM VIEC hien tai — ke ca khi
     xung dot (GitHub khong dung merge ref cho PR xung dot, nhung phan loai tu fail-close o merge-tree). Khong dung duoc
     (thieu object) => SHA khong ton tai (phan loai phai tu KHONG DO DUOC)."""
     mt = git(kho, "merge-tree", "--write-tree", "--no-messages", goc, dau, kiem=False)
@@ -926,7 +926,8 @@ def t20p_kiem_re_gitattributes_trong_ho_so_khong_cau_hinh_duoc_diff_check():
 @ca
 def t20s_kiem_re_tep_nhi_phan_la_khong_do_duoc():
     """Luot 9 (lop `kiem-re-cua-fail-close-chua-co-ca`, pham vi `diff --check`): git coi tep co NUL la nhi phan va
-    `--check` BO QUA no — dau xung dot trong do lot. Master: 0 tep nhi phan duoi allowlist ⇒ nhi phan = DO."""
+    `--check` BO QUA no — dau xung dot trong do lot. Tai 3569472cb9: 0/1991 tep duoi allowlist la nhi phan ⇒ nhi phan
+    = DO."""
     m = nap_module()
     with kho_that(nhanh_pr={"ops/land/x.md": b"a\0\n<<<<<<< HEAD\nb\n=======\nc\n>>>>>>> nhanh\n"}) as (kho, goc, dau):
         bang(git(kho, "diff", "--check", f"{goc}...{dau}", kiem=False).returncode == 0,
@@ -977,7 +978,7 @@ LOI_GOI_DOC_THUOC_TINH = {
     "raw goc -> cay merge-tree (kiem_mode_git)": lambda a: a[1:3] == ["diff", "--raw"] and a[-2:] == [GOC_A, CAY_GIA],
     "raw goc -> merge ref (kiem_mode_git)": lambda a: a[1:3] == ["diff", "--raw"] and a[-2:] == [GOC_A, HOP_GIA],
 }
-# So loi goi mong doi khac 1: `merge-tree` chay HAI lan o kiem-re (bo phan loai + kiem_mode_git), cung doi so.
+# So loi goi mong doi != 1: `merge-tree` chay HAI lan o kiem-re (bo phan loai + kiem_mode_git), cung doi so.
 SO_LOI_GOI = {"merge-tree": 2}
 
 
@@ -1018,7 +1019,8 @@ def _commit_gitlink(kho, goc, duong):
 def t20v_kiem_re_gitlink_ho_so_do():
     """Cross-review luot 10 (`kiem-re-cua-fail-close-chua-co-ca`, cua gitlink THEM MOI): tree entry mode 160000 duoi allowlist;
     actions/checkout (khong submodule) dung THU MUC rong. `kiem_loai_tep` chi hoi symlink; `kiem_yaml`/`kiem_lease` coi
-    `not is_file()` la DA XOA (ke ca ten `.yaml`); `--check` khong co noi dung, numstat `1 0`. Chot: mode TRONG GIT."""
+    `not is_file()` la DA XOA (ke ca ten `.yaml`); `--check` khong co noi dung, numstat dem duoc dong (khong ra `-`).
+    Chot: mode TRONG GIT."""
     m = nap_module()
     for duong in ("ops/land/zz.yaml", "ops/specs/con"):
         with kho_that(nhanh_pr={"ops/specs/S.md": "# s\n"}) as (kho, goc, dau):
@@ -1269,12 +1271,13 @@ O_CHAP_NHAN = frozenset({("A", "100644"), ("A", "100755"), ("M", "100644"), ("M"
 @ca
 def t20zh_kiem_mode_git_bang_quyet_dinh_day_du():
     """Cross-review luot 14 (`kiem-mode-git-chot-khong-rang`, LAN THU 4 — chu kho chot: dong bang MOT ca bang quyet dinh roi
-    DUNG lop): duyet TOAN BO {A,M,T,D} x {000000,100644,100755,120000,160000} = 20 o qua `kiem_mode_git` voi ban ghi `--raw`
+    DUNG lop): duyet TOAN BO {A,M,T,D} x {000000,100644,100755,120000,160000} = hai muoi o qua `kiem_mode_git` voi ban ghi `--raw`
     gia (cung dang byte voi git that — t20zf/t20zg ghim dang ay tren git that) o CA BA cap. O CHAP NHAN ⇒ khong loi; o TU CHOI
     ⇒ DUNG ba loi, moi cap mot loi, moi loi neu dung `mode <mode>, <trang thai>`.
     Bay o git KHONG sinh duoc van nam trong bang, ky vong TU CHOI (ban ghi hong ⇒ fail-close): `A`/`M`/`T` voi mode moi 000000
     (chi `D` co mode moi 000000) va `D` voi mode moi khac 000000 (git luon ghi 000000 cho phia moi cua `D`). Muoi ba o con lai
     git sinh duoc (bay CHAP NHAN; sau TU CHOI: A/M/T x 120000/160000 — them, doi dich/nang con tro, doi kieu thanh symlink/gitlink).
+    Kich thuoc va phan ra ay (hai muoi = bay + muoi ba; muoi ba = bay + sau) do o dong `ha tang bang` cua chinh ca nay.
     Moi o co mot dot bien LAT RIENG (`mode_git_lat_o_*`, sinh tu chinh bang nay), cong dot bien mien tru trang thai `M` (dot bien
     X1 cua reviewer luot 14, SONG SOT toan suite truoc ca nay) — ca nay la dich DUY NHAT cua tat ca."""
     m = nap_module()
@@ -1293,8 +1296,12 @@ def t20zh_kiem_mode_git_bang_quyet_dinh_day_du():
                 cap = {k.group(1) for k in (re.search(rf"\(mode {mode}, {tt}, cap ([^)]+)\)", x) for x in loi) if k}
                 if not (len(loi) == 3 and cap == cap_mong):
                     sai.append(f"({tt}, {mode}) phai TU CHOI o DUNG ba cap, duoc {loi}")
-    bang(len(TRANG_THAI_BANG) * len(MODE_BANG) == 20 and O_CHAP_NHAN < {(t, x) for t in TRANG_THAI_BANG for x in MODE_BANG},
-         "ha tang bang: tich phai du 20 o va moi o chap nhan phai thuoc tich")
+    tich = {(t, x) for t in TRANG_THAI_BANG for x in MODE_BANG}
+    khong_sinh = {(t, "000000") for t in TRANG_THAI_BANG if t != "D"} | {("D", x) for x in MODE_BANG if x != "000000"}
+    bang(len(tich) == 20 and O_CHAP_NHAN < tich and khong_sinh < tich and not (khong_sinh & O_CHAP_NHAN)
+         and (len(khong_sinh), len(tich - khong_sinh), len(O_CHAP_NHAN), len(tich - khong_sinh - O_CHAP_NHAN)) == (7, 13, 7, 6),
+         "ha tang bang: tich phai du 20 o, moi o chap nhan thuoc tich, phan ra 7 o git khong sinh + 13 o sinh duoc "
+         "(7 chap nhan + 6 tu choi) phai khop docstring")
     bang(not sai, f"bang quyet dinh kiem_mode_git lech {len(sai)} o: {sai}")
 
 
@@ -1349,7 +1356,7 @@ NHANH_XOA = {   # nhanh PR -> (lenh git rm, symlink phai bi bao TREO)
 @ca
 def t20zi_kiem_re_symlink_treo_ngoai_diff_do():
     """Cross-review luot 8b (P2 `buoc-bi-bo-doc-ca-cay-khong-chi-ba-ca`): `kiem_loai_tep`/`kiem_mode_git` chi nhin duong dan DOI,
-    con `t82` (bi bo o duong nhanh) `copytree` CA cay va theo symlink. Do tren HEAD 6803012 TRUOC khi va (rig kho tam, hai ve mot
+    con `t82` (bi bo o duong nhanh) `copytree` CA cay va theo symlink. Do tren HEAD 680301261e TRUOC khi va (rig kho tam, hai ve mot
     lenh): ca nam nhanh duoi deu `kiem-re rc=0` va `t82 rc=1 shutil.Error`. Doi chung (PR sua tep KHAC; symlink treo CHUA THEO DOI
     trong `.git/`, `__pycache__/`, `*.pyc` — t82 bo qua chung) phai DAT. Khong phai duong vao (do, khong co delta): dich doi tu
     tep thanh THU MUC (t82 van chep duoc, rc=0); ten trung tep ma t82 GHI vao ban sao (`ops/leases/hong.yaml/` la thu muc) —
@@ -2191,7 +2198,7 @@ def t92_runner_thuc_su_goi_ca_va_phan_biet_loi():
 @ca_tu_kiem
 def t93_main_ket_luan_va_ma_thoat_theo_duong_goi_that():
     """Luot 6 (lop chot-yaml, tang 'duong goi that' tiep theo — executor tu liet ke): CI chi doc MA THOAT cua tien trinh.
-    (1) `main` phai tra 1 + `TONG: DO` khi BAT KY dieu kien nao hong (ca do, dot bien khong giet, xau, tu kiem, ten trung),
+    (1) `main` phai tra rc=1 + `TONG: DO` khi BAT KY dieu kien nao hong (ca do, dot bien khong giet, xau, tu kiem, ten trung),
     va dong `CA:`/`DOT BIEN:` in dung tu so/mau. (2) `__main__` phai chuyen ma cua `main` ra ma thoat that (tien trinh con)."""
     import io
     n, m = len(CA), len(DOT_BIEN)
@@ -2269,10 +2276,10 @@ def t95_lan_chay_day_du_chi_do_kho_chua_test():
 # ---------------------------------------------------------------- tự kiểm của chính bộ test
 @ca_tu_kiem
 def t96_phan_hoach_ca_khong_giao_nhau_va_phu_kin():
-    """Lop bang-do (P3 luot 4, va luot 5 tu do): phan nhom theo TIEN TO da tu lech hai lan (38/12/3; roi t96 — mot ca tu kiem —
-    bi dem la "hanh vi"). Nay nhom `tu_kiem` KHAI tai cho (`@ca_tu_kiem`) va duoc doi chieu voi DAU HIEU AST DOC LAP: ca nao
-    cham noi tang cua chinh bo test (`CA`, `DOT_BIEN`, phan hang, docstring, tep test) la tu kiem, va nguoc lai. Dong `KIEM KE:`
-    in ra (neo cua moi bang so) phai khop so dem doc lap."""
+    """Lop bang-do (P3 luot 4, va luot 5 tu do): phan nhom theo TIEN TO da tu lech hai lan (tai 7b8c856 kiem ke theo tien to
+    khai 38/12/3, do that 35/12/3/3; roi t96 — mot ca tu kiem — bi dem la "hanh vi"). Nay nhom `tu_kiem` KHAI tai cho
+    (`@ca_tu_kiem`) va duoc doi chieu voi DAU HIEU AST DOC LAP: ca nao cham noi tang cua chinh bo test (`CA`, `DOT_BIEN`, phan
+    hang, docstring, tep test) la tu kiem, va nguoc lai. Dong `KIEM KE:` in ra (neo cua moi bang so) phai khop so dem doc lap."""
     nhom = phan_hoach_ca()
     moi = [ten for ds in nhom.values() for ten in ds]
     bang(len(moi) == len(set(moi)) == len(CA) and set(moi) == set(CA), "phan hoach phai phu kin va khong giao nhau")
@@ -2328,7 +2335,7 @@ def t97_harness_khong_cap_giet_khi_khong_co_bang_chung_duong():
 
 @ca_tu_kiem
 def t98_docstring_khong_ghim_so_ca_va_khoang_ten():
-    """Bang giao/docstring troi so HAI luot lien (P3 luot 1 va 2): so ca, so dot bien va khoang `tNN..tMM` chi nguon
+    """Bang giao/docstring troi so HAI luot lien (P3 luot 1 va luot 2): so ca, so dot bien va khoang `tNN..tMM` chi nguon
     duy nhat la `CA`/`DOT_BIEN`. Docstring cua module va cua `ops/ci_duong_nhanh.py` khong duoc ghim chung."""
     mau = re.compile(r"\b\d+\s*/\s*\d+\s*(?:ca|dot bien|đột biến)|`?t\d\d`?\s*(?:\.\.|–|-)\s*`?t\d\d"
                      r"|\b(?:\d+|NĂM|BA|BỐN|SÁU|BẢY|TÁM|năm|ba|bốn|sáu|bảy|tám)\s+(?:mẫu rc|đột biến (?:thật|thực))")
@@ -2336,6 +2343,114 @@ def t98_docstring_khong_ghim_so_ca_va_khoang_ten():
     for ten, doc in (("ci_duong_nhanh_test.py (module dang chay)", globals().get("__doc__") or ""), ("ci_duong_nhanh.py", ma_sp)):
         thay = mau.findall(doc)
         bang(not thay, f"{ten}: docstring ghim so ca/khoang ten (se troi): {thay}")
+
+
+# ---- lop `bang-do-thieu-neo-va-thieu-kiem-ke` (cross-review luot 15): con so trong van xuoi la PHEP DO tai MOT thoi diem; khong
+# neo thi no troi khi merge master ma khong ai thay. Don vi neo la CAU, trong MOI doan docstring va MOI khoi chu thich, o CA hai tep.
+MAU_TACH_DOAN = re.compile(r"\n[ \t]*\n|\n[ \t]*(?=·\s)")
+MAU_TACH_CAU = re.compile(r"(?<=[.;!?])\s+")
+MAU_SO_TRONG_VAN = re.compile(r"\d+(?:[.,/]\d+)*")
+MAU_NGAY = re.compile(r"(?<!\d)(?:\d{1,2}-\d{1,2}-\d{4}|\d{4}-\d{1,2}-\d{1,2})(?!\d)")
+MODE_GIT_HOP_LE = frozenset({"000000", "100644", "100755", "120000", "160000"})
+# Danh sach CHO PHEP (khong phai danh sach CAM): ngu canh NGAY TRUOC con so lam no thanh DINH DANH hay MA, khong phai so do.
+# Con so khong khop dang nao o day la SO DO, va CHINH cau chua no phai co neo.
+TRUOC_KHONG_PHAI_SO_DO = re.compile(
+    r"(?:[^\W\d]-?"                                                            # dinh danh: t20zh, r2, F821, UTF-8
+    r"|#|\bissues/|\bpull/|\brun |\bcomment "                                   # so hieu Issue/PR/run Actions/comment
+    r"|(?i:\b(?:lượt|luot|lần thứ|lan thu|lan|tầng|nghiệm thu|nghiem thu)) "     # so thu tu luot/tang/nghiem thu
+    r"|[^\W\d]=-?"                                                             # khoa=gia tri: rc=8, rc=-9, size=40
+    r"|(?:==|!=|<=|>=|<|>) ?"                                                  # phep so sanh
+    r"|(?i:\b(?:exit|thoát|thoat)) )$")                                         # ma thoat
+# Neo: SHA (bay toi bon muoi ky tu hex, co CA chu a-f LAN chu so) hoac dinh danh BEN cua nguon ngoai (run Actions, comment).
+MAU_NEO_SO_DO = re.compile(r"(?<![0-9A-Za-z_])(?=[0-9a-f]*[a-f])(?=[0-9a-f]*[0-9])[0-9a-f]{7,40}(?![0-9A-Za-z_])"
+                           r"|\brun \d{6,}|\bcomment \d{6,}|\bissuecomment-\d{6,}")
+
+
+def cau_tai_lieu(nguon):
+    """(dong, loai, cau) cho MOI cau cua MOI doan docstring (module/class/def; doan tach theo dong trong va gach `·`) va cua
+    MOI khoi chu thich (cac dong `#` lien tiep)."""
+    import io
+    import tokenize
+    doan = []
+    for nut in ast.walk(ast.parse(nguon)):
+        if isinstance(nut, (ast.Module, ast.ClassDef, ast.FunctionDef, ast.AsyncFunctionDef)):
+            d = ast.get_docstring(nut, clean=False)
+            if d:
+                doan += [(nut.body[0].lineno, "docstring", p) for p in MAU_TACH_DOAN.split(d)]
+    khoi = []
+    for tok in tokenize.generate_tokens(io.StringIO(nguon).readline):
+        if tok.type == tokenize.COMMENT:
+            if khoi and khoi[-1][3] == tok.start[0] - 1:
+                khoi[-1] = (khoi[-1][0], "chu thich", khoi[-1][2] + "\n" + tok.string, tok.start[0])
+            else:
+                khoi.append((tok.start[0], "chu thich", tok.string, tok.start[0]))
+    doan += [k[:3] for k in khoi]
+    return [(dong, loai, cau) for dong, loai, p in doan for cau in MAU_TACH_CAU.split(p) if cau.strip()]
+
+
+def so_do_trong_cau(cau):
+    """Con so trong `cau` KHONG thuoc dang cho phep (dinh danh, ngay, so hieu, ma, mode git, danh so `(N)`/`[N]`)."""
+    ngay = [k.span() for k in MAU_NGAY.finditer(cau)]
+    so = []
+    for k in MAU_SO_TRONG_VAN.finditer(cau):
+        a, b = k.span()
+        truoc, sau = cau[:a], cau[b:]
+        if (any(x <= a and b <= y for x, y in ngay) or sau[:1].isalpha() or sau[:1] == "_"
+                or TRUOC_KHONG_PHAI_SO_DO.search(truoc[-30:])
+                or (truoc[-1:], sau[:1]) in (("(", ")"), ("[", "]"))
+                or set(re.split(r"[/,]", k.group())) <= MODE_GIT_HOP_LE):
+            continue
+        so.append(k.group())
+    return so
+
+
+def so_do_khong_neo(nguon):
+    """(so con so do tim thay, [(dong, loai, cac so, cau)] cua moi cau co so do ma KHONG co neo trong CHINH cau ay)."""
+    tong, thieu = 0, []
+    for dong, loai, cau in cau_tai_lieu(nguon):
+        so = so_do_trong_cau(cau)
+        tong += len(so)
+        if so and not MAU_NEO_SO_DO.search(cau):
+            thieu.append((dong, loai, so, " ".join(cau.split())[:120]))
+    return tong, thieu
+
+
+@ca_tu_kiem
+def t98b_moi_so_do_trong_docstring_va_chu_thich_phai_co_neo():
+    """Cross-review luot 15 (`bang-do-thieu-neo-va-thieu-kiem-ke`): con so trong van xuoi la PHEP DO tai MOT commit. Khong neo
+    thi no troi khi merge master: ti le lease cua D2 giu mau so cu sau merge 20ec8d5 trong khi tu so dung NGAU NHIEN (cung
+    sau tep cu). Cau nao co so do thi CHINH cau ay phai co neo: SHA (co ca chu a-f lan chu so) hoac dinh danh ben cua nguon
+    ngoai (`run <id>`, `comment <id>`).
+
+    Duong vao, moi duong mot mau tu kiem va mot dot bien rieng: docstring MODULE · docstring HAM/CLASS · CHU THICH · neo o
+    CAU KHAC · so tran khong phai ti le (thoi gian, phan tram, so dem) · so thuan bi nham la neo · tep TEST (khong chi san
+    pham). Dang KHONG phai so do (dinh danh, ngay, so hieu, ma thoat, mode git, danh so) la danh sach CHO PHEP
+    `TRUOC_KHONG_PHAI_SO_DO`, khong phai danh sach don vi doan truoc.
+
+    Gioi han, noi thang: (a) so viet bang CHU (ba, bon...) ca nay KHONG thay — quy uoc: so do ve KHO viet bang chu so, so dem
+    CAU TRUC viet bang chu thi do o ca so huu no (vd `t20zh`); (b) chot do su CO MAT cua neo, khong kiem SHA ton tai (clone
+    nong se do oan); (c) mot neo phu moi so trong cung cau."""
+    # (1) Tu kiem bo quet: moi DUONG VAO mot mau phai bi bao; mau co neo hoac toan dang cho phep thi khong.
+    mau = (
+        ('"""Kho co 6/119 lease."""\n', True),                                      # ti le, docstring MODULE
+        ('def f():\n    """Ba ca chay mat 7 giay."""\n', True),                     # docstring HAM, so tran (thoi gian)
+        ('class K:\n    """Chiem 13% so PR."""\n', True),                            # docstring CLASS, phan tram
+        ('x = 1  # 3 tep .gitattributes duoi ops/reviews\n', True),                 # CHU THICH
+        ('"""Do tai 20ec8d5c. Kho co 119 lease."""\n', True),                       # neo o CAU KHAC
+        ('"""HEAD 6803012: chay 5 nhanh."""\n', True),                              # so thuan KHONG phai neo
+        ('"""Kho co 6/119 lease tai 3569472cb9, run 36518707072 mat 52 phut."""\n', False),
+        ('"""Luot 15, LAN THU 4, rc=3, rc=-9, N>0, mode 100644, #674, 01-10-2026, (1), CHAN [8], UTF-8, t20zh."""\n', False),
+    )
+    lech = [(nguon, mong) for nguon, mong in mau if bool(so_do_khong_neo(nguon)[1]) is not mong]
+    bang(not lech, f"bo quet so do lech mau tu kiem (nguon, mong bi bao): {lech}")
+    # (2) Cay duoi do: CA hai tep; moi tep phai CON so do (ca co MAT phai co DO) va moi so do phai co neo trong cung cau.
+    dem, thieu = {}, []
+    for tep in (CAY / "ops" / "ci_duong_nhanh.py", CAY / "ops" / "ci_duong_nhanh_test.py"):
+        dem[tep.name], th = so_do_khong_neo(tep.read_text(encoding="utf-8"))
+        thieu += [(tep.name, *x) for x in th]
+    bang(set(dem) == {"ci_duong_nhanh.py", "ci_duong_nhanh_test.py"} and all(dem.values()),
+         f"ha tang: phai quet DUNG hai tep va moi tep phai con so do (khong thi ca khong do gi): {dem}")
+    bang(not thieu, f"so do trong docstring/chu thich KHONG co neo trong cung cau (se troi khi merge master): {thieu}")
 
 
 @ca_tu_kiem
@@ -2536,6 +2651,21 @@ DOT_BIEN = [
     ("yml_nuot_loi_job_gate_registry", _yml("  gate-registry:\n    # packet #463", "  gate-registry:\n    continue-on-error: true\n    # packet #463"), ("y10_khong_continue_on_error_ngoai_danh_sach_cho_phep",)),
     ("yml_buoc_phan_loai_bieu_thuc", _yml("        id: phan-loai\n        if: ${{ github.event_name == 'pull_request' }}\n        continue-on-error: true\n", "        id: phan-loai\n        if: ${{ github.event_name == 'pull_request' }}\n        continue-on-error: ${{ true }}\n"), ("y10_khong_continue_on_error_ngoai_danh_sach_cho_phep",)),
     ("test_docstring_ghim_so_ca", _test("(đã trôi hai lượt " + "liền): nguồn", "(đã trôi hai lượt " + "liền; hien 43/55 ca): nguồn"), ("t98_docstring_khong_ghim_so_ca_va_khoang_ten",)),
+    # ---- cross-review luot 15 (`bang-do-thieu-neo-va-thieu-kiem-ke`): MOI duong vao mot dot bien — tai lieu mat neo / chen so
+    # khong neo (D1, D2 la hai dot bien cua HINT), roi go TUNG chot cua bo quet (moi chot do mot mau tu kiem cua ca dich)
+    ("docstring_ti_le_D1_mat_neo", _ma("first-parent tính tới 1741e0a (lệnh", "first-parent tính tới HEAD (lệnh"), ("t98b_moi_so_do_trong_docstring_va_chu_thich_phai_co_neo",)),
+    ("docstring_ti_le_D2_mat_neo", _ma('Nên số tệp trượt là số CỦA PHẠM VI ref,\n    không phải của kho: reviewer lượt 1 đo tại 1741e0a (113 tệp lease) — clone chỉ-master 6/113 trượt\n    `kiem(bo_qua_han=True)`, bản sao đủ 552 ref 0/113. Đo lại tại 3569472cb9 (119 tệp lease, sau merge master 20ec8d5):\n    một ref (chỉ nhánh đang checkout) 6/119 trượt — đúng 6 tệp cũ, cùng `CHAN [8]` bia mộ — còn trên 529 ref cục bộ thì\n    0/119 (529 chưa đối chiếu `ls-remote`, nên không khẳng định là đủ).', 'Trên một\n    clone chỉ-master 6/113 tệp lease trượt `kiem(bo_qua_han=True)`, còn trên bản sao đủ 552 ref thì 0/113\n    (đo bởi reviewer lượt 1): số 6 là số CỦA PHẠM VI clone-một-nhánh, không phải của kho.'), ("t98b_moi_so_do_trong_docstring_va_chu_thich_phai_co_neo",)),
+    ("docstring_ham_mat_neo_nhi_phan", _ma("Hồ sơ không cần nhị phân (tại 3569472cb9: 0/1991", "Hồ sơ không cần nhị phân (master: 0/1991"), ("t98b_moi_so_do_trong_docstring_va_chu_thich_phai_co_neo",)),
+    ("docstring_ham_mat_neo_thoi_gian", _ma("~7 giay (do tai 3569472cb9,", "~7 giay (do tren may dev,"), ("t98b_moi_so_do_trong_docstring_va_chu_thich_phai_co_neo",)),
+    ("chu_thich_san_pham_so_khong_neo", _ma("TOI_DA_TEN_IN = 5\n", "TOI_DA_TEN_IN = 5\n# Kho co 119 tep lease.\n"), ("t98b_moi_so_do_trong_docstring_va_chu_thich_phai_co_neo",)),
+    ("docstring_test_mat_neo_kiem_ke", _test("(tai 7b8c856 kiem ke " + "theo tien to", "(tai luot 4 kiem ke " + "theo tien to"), ("t98b_moi_so_do_trong_docstring_va_chu_thich_phai_co_neo",)),
+    ("chu_thich_test_so_khong_neo", _test("\nclass SuDoGia(Exception):\n", "\n# Kho co 6/119 lease truot.\nclass SuDoGia(Exception):\n"), ("t98b_moi_so_do_trong_docstring_va_chu_thich_phai_co_neo",)),
+    ("bo_quet_so_chi_docstring_module", _test("(ast.Module, ast.ClassDef, " + "ast.FunctionDef, ast.AsyncFunctionDef)", "(ast.Module,)"), ("t98b_moi_so_do_trong_docstring_va_chu_thich_phai_co_neo",)),
+    ("bo_quet_so_bo_chu_thich", _test("if tok.type == tokenize." + "COMMENT:", "if False:"), ("t98b_moi_so_do_trong_docstring_va_chu_thich_phai_co_neo",)),
+    ("bo_quet_so_khong_tach_cau", _test("for cau in MAU_TACH_CAU." + "split(p)", "for cau in [p]"), ("t98b_moi_so_do_trong_docstring_va_chu_thich_phai_co_neo",)),
+    ("bo_quet_so_chi_ti_le", _test("MAU_SO_TRONG_VAN = " + "re.compile(", 'MAU_SO_TRONG_VAN = ' + 're.compile(r"\\d{1,4}/\\d{1,4}") or re.compile('), ("t98b_moi_so_do_trong_docstring_va_chu_thich_phai_co_neo",)),
+    ("bo_quet_so_neo_nhan_so_thuan", _test("(?=[0-9a-f]*[a-f])" + "(?=[0-9a-f]*[0-9])", "(?=[0-9a-f]*[0-9])"), ("t98b_moi_so_do_trong_docstring_va_chu_thich_phai_co_neo",)),
+    ("bo_quet_so_bo_tep_test", _test('CAY / "ops" / "ci_duong_nhanh.py", CAY / "ops" / ' + '"ci_duong_nhanh_test.py")', 'CAY / "ops" / "ci_duong_nhanh.py",)'), ("t98b_moi_so_do_trong_docstring_va_chu_thich_phai_co_neo",)),
     # ---- lop dac-ta-bo-mat-kiem-du-lieu-ho-so (luot 2): thao tac GOI ca that
     ("ca_du_lieu_khong_goi_ham", _ma("m[ten]()", "m[ten]"), ("t22b_ca_du_lieu_phai_thuc_thi_tung_ca",)),
     ("ca_du_lieu_bo_t23", _ma('CA_DU_LIEU = ("t23_MOI_lease_THAT_trong_kho_phai_QUA", ', "CA_DU_LIEU = ("), ("t22b_ca_du_lieu_phai_thuc_thi_tung_ca",)),
@@ -2587,7 +2717,7 @@ DOT_BIEN = [
     ("test_dong_kiem_ke_lech_so", _test('" + ".join(f"{k}={len(v)' + '}" for k, v in nhom.items())', '" + ".join(f"{k}={len(v) + (k == \'tu_kiem\')}" for k, v in nhom.items())'), ("t96_phan_hoach_ca_khong_giao_nhau_va_phu_kin",)),
     ("test_dong_kiem_ke_bo_dot_bien_mot_tep", _test("        theo_tep[tep] = theo_tep.get(tep, 0) + 1\n", "        theo_tep[tep] = theo_tep.get(tep, 0) + (tep != TEST)\n"), ("t96_phan_hoach_ca_khong_giao_nhau_va_phu_kin",)),
     ("test_phan_hoach_nhanh_else_tra_lai_nhom_cu", _test('        elif ten[0] == "y":\n            nhom["cau_truc_yaml"].append(ten)\n', '        elif ten[0] == "y":\n            nhom["hanh_vi"].append(ten)\n'), ("t96_phan_hoach_ca_khong_giao_nhau_va_phu_kin",)),
-    # ---- tầng YAML (đặc tả nghiệm thu 6, 7)
+    # ---- tầng YAML (đặc tả nghiệm thu 6 và nghiệm thu 7)
     ("yml_go_dieu_kien_pull_request_khoi_buoc_phan_loai", _yml("        id: phan-loai\n        if: ${{ github.event_name == 'pull_request' }}\n", "        id: phan-loai\n"), ("y01_chuan_bi_phan_loai_chi_pull_request_va_khong_lam_do_job",)),
     ("yml_go_continue_on_error_buoc_phan_loai", _yml("        id: phan-loai\n        if: ${{ github.event_name == 'pull_request' }}\n        continue-on-error: true\n", "        id: phan-loai\n        if: ${{ github.event_name == 'pull_request' }}\n"), ("y01_chuan_bi_phan_loai_chi_pull_request_va_khong_lam_do_job",)),
     ("yml_output_che_do_fail_open", _yml("steps.phan-loai.outputs.che_do || 'day_du' }}", "steps.phan-loai.outputs.che_do || 'duong_nhanh' }}"), ("y02_output_che_do_fail_close",)),
@@ -2633,7 +2763,7 @@ DOT_BIEN = [
     ("test_main_khong_in_kiem_ke", _test("    print(dong_kiem_ke())\n", ""), ("t94_main_in_dong_kiem_ke_that",)),
     ("test_main_in_kiem_ke_hai_lan", _test("    print(dong_kiem_ke())\n", "    print(dong_kiem_ke())\n    print(dong_kiem_ke())\n"), ("t94_main_in_dong_kiem_ke_that",)),
     ("test_main_in_kiem_ke_bi_doi", _test("    print(dong_kiem_ke())\n", "    print(dong_kiem_ke().replace('tu_kiem', 'tu kiem'))\n"), ("t94_main_in_dong_kiem_ke_that",)),
-    # ---- chu kho 5889513175: tran thoi gian cua chuan-bi
+    # ---- chu kho (comment 5889513175): tran thoi gian cua chuan-bi
     ("yml_go_timeout_checkout_chuan_bi", _yml("        continue-on-error: true\n        timeout-minutes: 10\n", "        continue-on-error: true\n"), ("y16_chuan_bi_co_tran_thoi_gian_buoc_va_job", "y13_khoa_topology_cua_ci_yml_ngoai_than_run")),
     ("yml_go_timeout_phan_loai", _yml("        continue-on-error: true\n        timeout-minutes: 5\n", "        continue-on-error: true\n"), ("y16_chuan_bi_co_tran_thoi_gian_buoc_va_job", "y13_khoa_topology_cua_ci_yml_ngoai_than_run")),
     ("yml_go_timeout_job_chuan_bi", _yml("    timeout-minutes: 20\n    outputs:\n", "    outputs:\n"), ("y16_chuan_bi_co_tran_thoi_gian_buoc_va_job", "y13_khoa_topology_cua_ci_yml_ngoai_than_run")),

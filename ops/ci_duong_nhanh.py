@@ -4,9 +4,9 @@
 Packet #674 `CI-DUONG-NHANH-HO-SO` (đặc tả r2, ops/specs/CI-DUONG-NHANH-HO-SO-r2.md).
 
 VÌ SAO CÓ TỆP NÀY, VÀ VÌ SAO LOGIC KHÔNG NẰM TRONG YAML
-Ruleset `bao-ve-cong-dang-lease` đòi ba check (`gate`, `gate-ops`, `gate-packet-loop`) xanh trên ĐÚNG head,
-nên PR bookkeeping chỉ thêm `ops/land/*.yaml` vẫn phải chạy trọn gate (đo 29-09-2026: run 36518707072,
-job `gate (ubuntu-latest)` 52 phút). Không được dùng `paths:` / `paths-ignore:` — workflow không chạy thì
+Ruleset `bao-ve-cong-dang-lease` đòi ba check (`gate`, `gate-ops`, `gate-packet-loop`) xanh trên ĐÚNG head (theo đặc tả
+r2; cấu hình ruleset thật trên GitHub KHÔNG ĐO ĐƯỢC offline), nên PR bookkeeping chỉ thêm `ops/land/*.yaml` vẫn phải
+chạy trọn gate (đo 29-09-2026: run 36518707072, job `gate (ubuntu-latest)` 52 phút). Không được dùng `paths:` / `paths-ignore:` — workflow không chạy thì
 check VẮNG MẶT, PR kẹt `blocked`, và "vắng mặt" nhìn giống hệt "xanh". Nên ba job vẫn KHỞI ĐỘNG và báo
 kết quả; chỉ các bước nặng có `if:` mức bước theo output `che_do` của job `chuan-bi`. Quyết định `che_do`
 sống ở ĐÂY (Python, có phản chứng chạy được — ops/ci_duong_nhanh_test.py), không sống trong biểu thức YAML.
@@ -39,7 +39,8 @@ GIỚI HẠN, NÓI THẲNG (không phải ranh giới an ninh):
     chặn NHẦM LẪN, không chặn tác giả cố ý.
   · Allowlist theo TIỀN TỐ, không theo phần mở rộng: một `.py` đặt dưới `ops/land/**` vẫn là đường nhanh
     (Q2 chủ kho giữ đúng bốn tiền tố).
-  · `pull_request.base.sha`/`head.sha` luôn là 40 hex ở mọi sự kiện con: theo tài liệu GitHub, chưa tự đo.
+  · `pull_request.base.sha`/`head.sha` luôn là SHA đầy đủ (khớp `MAU_SHA`) ở mọi sự kiện con: theo tài liệu GitHub,
+    chưa tự đo.
 
 LỆNH `kiem-re` (bước bù cho các bước bị bỏ, chỉ chạy khi `che_do == duong_nhanh`):
   YAML parse được · `git diff --check` · lease đổi phải qua `lease_publish` · ba ca kiểm DỮ LIỆU của lease_publish_test ·
@@ -49,11 +50,11 @@ Hai chỗ khác chữ trần của đặc tả r2, ĐO ngày 29-09-2026. CHỦ K
 không sửa r2: https://github.com/ducthangho/tra-luat/issues/674#issuecomment-5887720007 . Với reviewer: đây là HÀNH VI ĐƯỢC
 DUYỆT, không phải finding về chính sách; vẫn tìm lỗi TRONG cách hiện thực (ví dụ `bo_qua_han` bỏ thêm chốt nào khác không,
 ba loại khoảng trắng có bị tắt rộng hơn ba loại đó không).
-  · D1 — `git diff --check` chạy với `core.whitespace=-blank-at-eol,-blank-at-eof,-space-before-tab`. Trong 345
-    lần merge gần nhất (first-parent, 400 lần gần nhất tính từ 1741e0a), 63 lần chỉ đổi hồ sơ và 8/63 trượt
-    `--check` nguyên bản (dấu cách cuối dòng trong verdict `.md`/`.patch`, dòng trống cuối tệp yaml). Chốt cứng
-    sẽ chặn oan ~13% đúng lớp PR mà đường nhanh sinh ra để giải. Bản tinh chỉnh vẫn bắt dấu xung đột còn sót
-    (`<<<<<<<`, `=======`, `>>>>>>>`), thứ `--check` báo bất kể `core.whitespace`. Thuộc tính thì KHÁC: một
+  · D1 — `git diff --check` chạy với `core.whitespace=-blank-at-eol,-blank-at-eof,-space-before-tab`. Trên TOÀN
+    BỘ 345 merge first-parent tính tới 1741e0a (lệnh lấy tối đa 400, không chạm trần — đo lại 01-10-2026: khớp), 63 lần chỉ
+    đổi hồ sơ và 8/63 trượt `--check` nguyên bản (dấu cách cuối dòng trong verdict `.md`/`.patch`, dòng trống cuối tệp
+    yaml). Chốt cứng sẽ chặn oan ~13% (8/63 tại 1741e0a) đúng lớp PR mà đường nhanh sinh ra để giải. Bản tinh chỉnh
+    vẫn bắt dấu xung đột còn sót (`<<<<<<<`, `=======`, `>>>>>>>`), thứ `--check` báo bất kể `core.whitespace`. Thuộc tính thì KHÁC: một
     `.gitattributes` do PR mang vào (ở mọi độ sâu) được git đọc từ CÂY LÀM VIỆC (= merge ref của PR) và cấu hình được
     chính các chốt. Đo 30-09-2026: `conflict-marker-size`/`binary`/`-diff` tắt báo dấu xung đột của `--check`
     (reviewer lượt 8); `diff` (set) ép tệp có NUL thành "văn bản" cho `--numstat` (reviewer lượt 9); `-diff` trên tệp
@@ -68,16 +69,19 @@ ba loại khoảng trắng có bị tắt rộng hơn ba loại đó không).
     Ngoài phạm vi của câu này (không phải lệnh git của tệp này): byte trong cây làm việc do `actions/checkout` dựng
     đã chịu thuộc tính của PR (`eol`/`text`/`working-tree-encoding`/`ident`) — `kiem_yaml`/`kiem_loai_tep`/`kiem_lease`
     đọc đúng các byte ấy, cũng là byte mà các bước bị bỏ và checkout của master đọc; chưa đo riêng. KHÔNG chặn
-    `.gitattributes` — master có ba tệp như thế dưới `ops/reviews/` (`-whitespace` cho verdict chép nguyên byte), do
-    chính PR hồ sơ thêm vào. Tệp NHỊ PHÂN (git đoán theo nội dung + thuộc tính GỐC) thì `--check` bỏ qua hẳn ⇒
-    `kiem_nhi_phan` coi là KHÔNG ĐO ĐƯỢC, ĐỎ (master: 0 tệp nhị phân dưới allowlist).
+    `.gitattributes` — tại 3569472cb9 có 3 tệp như thế dưới allowlist, cả 3 dưới `ops/reviews/` (`-whitespace` cho verdict
+    chép nguyên byte), do chính PR hồ sơ thêm vào. Tệp NHỊ PHÂN (git đoán theo nội dung + thuộc tính GỐC) thì `--check`
+    bỏ qua hẳn ⇒ `kiem_nhi_phan` coi là KHÔNG ĐO ĐƯỢC, ĐỎ (tại 3569472cb9: 0/1991 tệp dưới allowlist là nhị phân).
   · D2 — `lease_publish.py check` là cổng ĐĂNG lease: lease đã hết hạn thì nó trả rc=8 "hết hạn" theo thiết kế,
     mà bookkeeping thu hồi/đóng lease thường đúng là sửa lease hết hạn. Lease CÒN HẠN đổi trong PR chạy đúng
     `check`; lease HẾT HẠN chạy `kiem(bo_qua_han=True)` — mọi chốt như `check`, chỉ bỏ chốt hạn — nên KHÔNG
     được miễn kiểm chỉ vì hết hạn. Cả hai đuôi `.yaml` và `.yml`. Giới hạn: bia mộ hai chiều của `kiem`
-    đọc các lease khác trong CÂY; checkout của Actions chỉ có cây PR, không có các nhánh `ops/**`. Trên một
-    clone chỉ-master 6/113 tệp lease trượt `kiem(bo_qua_han=True)`, còn trên bản sao đủ 552 ref thì 0/113
-    (đo bởi reviewer lượt 1): số 6 là số CỦA PHẠM VI clone-một-nhánh, không phải của kho.
+    đọc các lease khác trên mọi REF cục bộ (`_quet_lease_toan_kho`: `for-each-ref` rồi `ls-tree` từng ref), không đọc cây
+    làm việc; checkout của Actions chỉ có ref của PR, không có các nhánh `ops/**`. Nên số tệp trượt là số CỦA PHẠM VI ref,
+    không phải của kho: reviewer lượt 1 đo tại 1741e0a (113 tệp lease) — clone chỉ-master 6/113 trượt
+    `kiem(bo_qua_han=True)`, bản sao đủ 552 ref 0/113. Đo lại tại 3569472cb9 (119 tệp lease, sau merge master 20ec8d5):
+    một ref (chỉ nhánh đang checkout) 6/119 trượt — đúng 6 tệp cũ, cùng `CHAN [8]` bia mộ — còn trên 529 ref cục bộ thì
+    0/119 (529 chưa đối chiếu `ls-remote`, nên không khẳng định là đủ).
     Hệ quả CÓ CHỦ ĐÍCH về actor (chủ kho chọn khai, không đổi chốt — Issue #674, 2026-09-30): `kiem`/`check`
     giữ chốt thẩm quyền theo `GITHUB_ACTOR`, nên PR hồ sơ THÊM/SỬA lease dưới `ops/leases/` do bot (actor khác chủ
     kho) đẩy sẽ ĐỎ ở đường nhanh (`CHAN [4]`) trong khi đường đầy đủ không chạy chốt này. XOÁ lease thì KHÔNG đỏ:
@@ -339,8 +343,8 @@ def kiem_mode_git(env, chay=subprocess.run, kho=ROOT, doi=frozenset()) -> list[s
     """Loại tệp theo MODE TRONG GIT, không theo cây làm việc (cross-review lượt 10, lớp `kiem-re-cua-fail-close-chua-co-ca`).
     Mọi chốt nội dung khác của kiem-re đọc ĐĨA, và đĩa nói dối theo nhiều cách: gitlink (mode 160000) checkout thành THƯ MỤC
     rỗng nên `kiem_yaml`/`kiem_lease` coi `not is_file()` là ĐÃ XOÁ và bỏ qua (kể cả tên `.yaml`), `--check` không có nội dung
-    để đọc, numstat `1 0` không phải nhị phân; symlink trên nền `core.symlinks=false` (Windows) checkout thành tệp THƯỜNG chứa
-    đường đích nên `kiem_loai_tep` không thấy. Git thì không nói dối: `git diff --raw` trên ĐÚNG ba cặp mà bộ phân loại dùng
+    để đọc, numstat đếm được dòng (không ra `-`) nên không bị coi là nhị phân; symlink trên nền `core.symlinks=false`
+    (Windows) checkout thành tệp THƯỜNG chứa đường đích nên `kiem_loai_tep` không thấy. Git thì không nói dối: `git diff --raw` trên ĐÚNG ba cặp mà bộ phân loại dùng
     (`goc...dau`, `goc -> cây merge-tree`, `goc -> github.sha`), thuộc tính từ cây GỐC như mọi lệnh diff khác. Chỉ nhận mode
     mới 100644/100755, hoặc XOÁ (`D`, mode mới 000000); mọi thứ khác (gitlink, symlink, trạng thái lạ) ⇒ ĐỎ. Git lỗi/ném,
     đầu ra cụt/lẻ/bản ghi lạ, hoặc tập đường dẫn của ba cặp KHÁC tập `doi` mà bộ phân loại đã đo ⇒ KHÔNG ĐO ĐƯỢC ⇒ ĐỎ.
@@ -397,7 +401,8 @@ def kiem_diff_check(env=os.environ, chay=subprocess.run, kho=ROOT) -> list[str]:
 
 def kiem_nhi_phan(env=os.environ, chay=subprocess.run, kho=ROOT) -> list[str]:
     """`git diff --check` BỎ QUA tệp git coi là nhị phân (NUL trong nội dung) — dấu xung đột trong đó lọt êm (đo
-    30-09-2026). Hồ sơ không cần nhị phân (master: 0 tệp dưới allowlist) ⇒ tệp nhị phân đổi = KHÔNG ĐO ĐƯỢC ⇒ ĐỎ.
+    30-09-2026). Hồ sơ không cần nhị phân (tại 3569472cb9: 0/1991 tệp dưới allowlist là nhị phân) ⇒ tệp nhị phân đổi
+    = KHÔNG ĐO ĐƯỢC ⇒ ĐỎ.
     Thuộc tính đọc từ cây GỐC như `kiem_diff_check`: hai chốt phải phân loại nhị phân theo CÙNG một cây, không thì
     `diff` (set) do PR mang vào ép tệp có NUL thành "văn bản" cho numstat trong khi `--check` vẫn bỏ qua nó (lượt 9)."""
     goc, dau = env.get(BIEN_GOC) or "", env.get(BIEN_DAU) or ""
@@ -474,7 +479,8 @@ def kiem_lease(doi, kho=ROOT, chay=subprocess.run, bay_gio=None, ra=None) -> lis
 def kiem_ca_du_lieu(kho=ROOT, chay=subprocess.run) -> list[str]:
     """Ba ca kiem DU LIEU that cua bo lease-publish (t23 neo prompt cua moi lease · t26 bam bien nhan review · t27
     muc luc `ops/reviews`) thay cho ca bo `lease-publish selftest`: ba ca nay doc CAY that nen la thu ma PR ho so
-    co the lam hong; bo ca suite di la mat chung. Chay nguyen ca trong tep test that, ~6 giay."""
+    co the lam hong; bo ca suite di la mat chung. Chay nguyen ca trong tep test that, ~7 giay (do tai 3569472cb9,
+    container Linux 4 vCPU, Python 3.11: 6,6-6,8 giay qua ba lan; phu thuoc may, khong ngoai suy sang runner Actions)."""
     try:
         r = chay([sys.executable, "-B", "-c", MA_CHAY_CA, "ops/lease_publish_test.py", *CA_DU_LIEU],
                  cwd=kho, capture_output=True)

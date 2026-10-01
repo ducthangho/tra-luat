@@ -16,8 +16,9 @@
     (tên job là cách CI chia máy và trôi theo master: nền gốc d553efa có `gate`, `gate-registry`,
     `gate-packet-loop`; master fc852ff tách thêm `gate-ops`, `gate-cong-cu` (8 mảnh) và `gate-cong-cu-gop` (gom mảnh —
     script chạy `ops/cong_cu_test.py` TRỌN một lượt thay cho mảnh + gom)), nhưng chạy TẠI MÁY. `env:` của bước do script
-    làm chủ: khoá chế độ rò từ phiên gọi bị xoá, cùng `PYTHON*` lạ, biến git trỏ kho/cây/index khác và `BASH_ENV` (job CI
-    không có biến nào trong số đó), `test registry` mang env như lượt `pull_request` khi đo được diff. Nó KHÔNG gọi
+    làm chủ: khoá chế độ rò từ phiên gọi bị xoá, cùng `PYTHON*` lạ, biến git trỏ kho/cây/index khác, `BASH_ENV` và hàm bash
+    export `BASH_FUNC_*` (job CI không có biến nào trong số đó), `test registry` mang env như lượt `pull_request` khi đo
+    được diff. Nó KHÔNG gọi
     `workflow_dispatch`, KHÔNG re-run, KHÔNG đẩy gì lên remote, KHÔNG gọi GitHub API.
     Viết ra để tôn chỉ thị `manual_ci_budget: 0` mà vẫn đo được trên nền Windows.
 
@@ -46,8 +47,11 @@
 .PARAMETER Muc
     `nhanh`  — bộ cổng cốt lõi (mặc định), đủ để biết một bản vá có làm vỡ gì không.
     `day-du` — gương các bước cổng của các job `gate*` của CI. Bước KHÔNG gương được thì script in `KHÔNG CHẠY` ở
-               cuối mức này — bốn dòng: cgroup (chỉ có trên Linux), EOL base (đòi event `pull_request`), `tl selftest`
-               có bằng chứng exact-identity, `release-verify` lane WORKER — cộng hai bước `ci.yml` bỏ trên Windows.
+               cuối mức này — năm dòng: cgroup và `ci-duong-nhanh selftest` (chỉ có trên Linux; bước sau có từ master
+               7e5958e), EOL base (đòi event `pull_request`), `tl selftest` có bằng chứng exact-identity, `release-verify`
+               lane WORKER — cộng hai bước `ci.yml` bỏ trên Windows. Bước chỉ chạy ở chế độ `duong_nhanh` (PR chỉ đổi hồ
+               sơ) thì không gương: script luôn chạy ĐỦ như lượt push/`workflow_dispatch`. t32 đòi mọi bước `gate*` còn
+               lại có đích trong script hoặc có TÊN trong một dòng `KHÔNG CHẠY`.
 
 .PARAMETER CaiCongCu
     Cài PyYAML/jsonschema/ruff bản GHIM, rồi `actionlint` (vào `dist/actionlint` của bản clone), `shellcheck`, `rg`
@@ -78,7 +82,7 @@
     pwsh -NoProfile -File .\.claude\dev\chay-cong-windows.ps1 -Muc day-du -ChiTiet
 .NOTES
     Gọi bằng `pwsh -File` (tiến trình RIÊNG). Script đổi cwd, PATH, PYTHON* (xoá HẾT rồi đặt bốn biến), AL_*, GIT_CONFIG, xoá
-    khoá `env:` của bước cổng, biến git cục bộ của kho và BASH_ENV (danh sách ở đầu script) rồi ĐẶT `CI_DANG_KY_*` (kể cả GOC/DAU là SHA lúc chạy), và [Console]::OutputEncoding của tiến
+    khoá `env:` của bước cổng, biến git cục bộ của kho, BASH_ENV và BASH_FUNC_* (danh sách ở đầu script) rồi ĐẶT `CI_DANG_KY_*` (kể cả GOC/DAU là SHA lúc chạy), và [Console]::OutputEncoding của tiến
     trình đang chạy nó; gọi thẳng `.\chay-cong-windows.ps1` trong một phiên pwsh thì mọi thay đổi ấy Ở LẠI phiên sau khi
     script kết thúc — một `ci_dang_ky_test.py --chay` gõ tay sau đó trong phiên ấy lấy kế hoạch NHẸ từ SHA CŨ.
 #>
@@ -125,9 +129,12 @@ $env:PYTHONDONTWRITEBYTECODE = '1'
 # khai — t30 đọc cả hai tệp và đòi đủ, rồi RÒ từng khoá vào cổng; bước nào CI ĐẶT thì script đặt lại đúng giá trị ấy ở chỗ chạy
 # bước (AL_VER; `test registry`). `NHANH_DON_DUOC_MANH` rò (đo trên cây merge: tới registry, `nhanh_don_duoc_test` bỏ chế độ NHẸ để
 # chạy MẢNH, registry ĐỎ vì máy) và `CONG_CU_TEST_MANH` rò (đo: `cong_cu_test` rc=0, 26/416 đột biến, bỏ cổng cây thật).
+# `CI_DUONG_NHANH_*`: env bước `kiem re` của `gate-ops` (master 7e5958e, packet #674) — script không chạy bước ấy (chỉ có ở chế độ
+# `duong_nhanh`), nên xoá như mọi khoá khác (đo: cây merge 7e5958e với ad4e724 ⇒ t30 vế tĩnh ĐỎ, thiếu đúng bốn khoá này).
 foreach ($n in 'AL_VER', 'PR_HEAD_SHA', 'EOL_BASE_SHA', 'CONG_CU_TEST_BAN_KINH', 'CONG_CU_TEST_MANH', 'CONG_CU_TEST_MANH_RA',
                'CI_DANG_KY_WORKERS', 'CI_DANG_KY_SU_KIEN', 'CI_DANG_KY_GOC', 'CI_DANG_KY_DAU', 'CI_DANG_KY_DOT_BIEN_MANH',
-               'NHANH_DON_DUOC_MANH', 'NHANH_DON_DUOC_MANH_RA') {
+               'NHANH_DON_DUOC_MANH', 'NHANH_DON_DUOC_MANH_RA', 'CI_DUONG_NHANH_SU_KIEN', 'CI_DUONG_NHANH_GOC',
+               'CI_DUONG_NHANH_DAU', 'CI_DUONG_NHANH_MERGE') {
     [Environment]::SetEnvironmentVariable($n, $null)
 }
 # Biến git CỤC BỘ CỦA KHO (đúng tập `git rev-parse --local-env-vars` in ra, trừ `GIT_CONFIG*` — nếp git đọc giá trị CÓ HIỆU LỰC, t13)
@@ -138,6 +145,13 @@ foreach ($n in 'AL_VER', 'PR_HEAD_SHA', 'EOL_BASE_SHA', 'CONG_CU_TEST_BAN_KINH',
 foreach ($n in 'GIT_ALTERNATE_OBJECT_DIRECTORIES', 'GIT_OBJECT_DIRECTORY', 'GIT_DIR', 'GIT_WORK_TREE', 'GIT_IMPLICIT_WORK_TREE',
                'GIT_GRAFT_FILE', 'GIT_INDEX_FILE', 'GIT_NO_REPLACE_OBJECTS', 'GIT_REPLACE_REF_BASE', 'GIT_PREFIX', 'GIT_SHALLOW_FILE',
                'GIT_COMMON_DIR', 'BASH_ENV') {
+    [Environment]::SetEnvironmentVariable($n, $null)
+}
+# Hàm bash EXPORT (`BASH_FUNC_<tên>%%`): bash nạp chúng lúc khởi động như `BASH_ENV`, và một hàm che được cả lệnh NỘI TRÚ. Đo trên
+# ad4e724 với wrapper lease THẬT (installer giả): hàm `exec` ⇒ dòng `exec … lease_publish_test.py` cuối wrapper thành lời gọi hàm,
+# `lease-publish selftest` rc=0 ĐẠT, script rc=0, trong khi bộ test thoát 1. Xoá cả HỌ như `PYTHON*`: không workflow nào khai
+# `BASH_FUNC_*` (đo: 0 dòng ở cả ba cây nhánh / merge 163fd5d / merge 7e5958e).
+foreach ($n in @(Get-ChildItem Env: | Where-Object Name -like 'BASH_FUNC_*' | ForEach-Object Name)) {
     [Environment]::SetEnvironmentVariable($n, $null)
 }
 
@@ -584,6 +598,7 @@ if ($Muc -eq 'day-du') {
 
     Noi ''
     Noi 'KHÔNG CHẠY (chỉ có trên Linux runner): "bo ca gate chay TRONG cgroup duoc uy quyen".'
+    Noi 'KHÔNG CHẠY (chỉ có trên Linux runner; master từ 7e5958e): "ci-duong-nhanh selftest (phan loai diff + khoa cau truc if)".'
     Noi 'KHÔNG CHẠY (đòi event pull_request): "PR head contains required EOL base".'
     Noi 'KHÔNG CHẠY (đòi event KHÁC pull_request + gate_lifecycle evidence): "tl selftest (co bang chung exact-identity)".'
     Noi 'KHÔNG CHẠY (đòi ref KHÁC master): "release-verify lane WORKER" — script chạy lane LAND thay vào.'

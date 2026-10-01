@@ -44,7 +44,10 @@
 #                                                 skip-worktree bị sửa, hoặc khi không đi trước
 #   t31 env-cong-cu-phien-goi-lot-qua             `PYTHON*` lạ (`PYTHONOPTIMIZE` gỡ `assert` trần), biến git cục bộ của kho (tập lấy từ
 #                                                 `git rev-parse --local-env-vars` — `GIT_WORK_TREE` đổi cây mà `git status` đo, `GIT_DIR`
-#                                                 đổi kho nhận nếp git) và `BASH_ENV` RÒ từ phiên gọi đều bị xoá trước khi tới cổng
+#                                                 đổi kho nhận nếp git), `BASH_ENV` và hàm bash export `BASH_FUNC_*` (hàm che cả lệnh
+#                                                 nội trú `exit`/`exec`) RÒ từ phiên gọi đều bị xoá trước khi tới cổng
+#   t32 guong-ci-troi-theo-master                 mọi bước `gate*` của ci.yml (trừ bước chỉ chạy ở chế độ `duong_nhanh`) có đích
+#                                                 `.py/.sh/.ps1` là hằng chuỗi trong script, hoặc có TÊN trong một dòng `KHÔNG CHẠY`
 # Bộ này KÍN với config git của máy chạy, với biến git trỏ kho khác (khối ngay dưới `$script:Rac`), với code page của
 # console (`Doc-Utf8`), với dấu thập phân của locale (t18 nhận `5,1s`) và với `<TEMP>/actionlint` của máy (t7, t21 tự đặt TEMP).
 # ĐỘT BIẾN để đo răng (đo trên pwsh 7.4.6/Linux, bộ 28 ca, TMPDIR sạch): `-Script` trỏ f2392df ⇒ 2/28 (đạt t17 — bản ấy đã so băm —
@@ -68,6 +71,11 @@
 # cong_cu_test" (`PYTHONWARNINGS`); giữ tên mà bỏ xoá `GIT_WORK_TREE` / `GIT_DIR` / `BASH_ENV` / `GIT_SHALLOW_FILE` ⇒ t31 "ro toi
 # cong_cu_test". Bỏ vế THẤY TÊN của đồ giả (`STUB_KHOA_RO` không trùng biến nào) thì ba đột biến đầu vẫn chết ở vế HỆ QUẢ: `GIT_WORK_TREE`
 # ⇒ registry mang env diff trên cây BẨN; `GIT_DIR` ⇒ `core.abbrev=7` trong config kho khác; `BASH_ENV` ⇒ bash nạp tệp ấy 3 lần.
+# Lượt 15: bộ 32 ca — ad4e724 ⇒ cây nhánh 30/32 (t30: khoá `CI_DUONG_NHANH_*` của danh sách cố định rò tới `cong_cu_test`; t31: vế tĩnh
+# `BASH_FUNC_*`), cây merge 7e5958e 29/32 (t30 vế tĩnh, t31, t32 `ci-duong-nhanh selftest`). Đột biến bản vá: giữ hằng `BASH_FUNC_*` mà
+# bỏ xoá ⇒ t31 "ro toi cong_cu_test", kèm bỏ vế THẤY TÊN ⇒ t31 "ham export che lenh noi tru exit"; bỏ xoá `CI_DUONG_NHANH_MERGE` (giữ
+# hằng) ⇒ t30 "ro toi cong_cu_test" ở cả hai cây; bỏ dòng `KHÔNG CHẠY` của `ci-duong-nhanh selftest` ⇒ t32 (cây merge); bỏ cổng
+# `bien-nhan v2 selftest` ⇒ t32 (cây nhánh).
 # Lượt 10: danh sách hợp hai nền (543f2e8) ⇒ chỉ t28 (lượt 1); đảo nền ⇒ chỉ t28 (lượt 1); danh sách của nền này rỗng / thiếu `goi.gz`
 # ⇒ chỉ t28 (lượt 2); bỏ danh sách CHO PHÉP nay ⇒ t25 t28; nhánh Windows của t27 ép chạy trên Linux: fixture mới ⇒ 28/28, fixture dẫn
 # `'tools'` qua ống (blob 6 byte) ⇒ chỉ t27 (chốt tự kiểm KHÔNG ĐO ĐƯỢC).
@@ -96,7 +104,8 @@
 # thoát sát hạn); phần khối kín cho `GIT_INDEX_FILE`/`GIT_DIR` (đo bằng chạy dưới biến ấy — gỡ ra ⇒ index kho khác
 # 2144 → 34 mục — không có ca); dòng ép UTF-8 trong harness t11/t19 (chỉ có tác dụng khi console của tiến trình con là
 # code page cũ — Windows); `try/catch` quanh danh sách CHO PHÉP (chỉ khi không liệt kê được thư mục); vế `$LASTEXITCODE -eq 0` của
-# chốt `ls-files -v` (`git status` vừa chạy được mà `ls-files` hỏng là ca không dựng được — gỡ ra ⇒ 30/30). CHƯA ĐÓNG — khai thẳng:
+# chốt `ls-files -v` (`git status` vừa chạy được mà `ls-files` hỏng là ca không dựng được — gỡ ra ⇒ SỐNG ở mọi bộ đã đo: 30/30 bộ 30
+# ca, 31/31 bộ 31 ca, 32/32 bộ 32 ca). CHƯA ĐÓNG — khai thẳng:
 # `ops/chay_lease_publish_test.sh` (ngoài write set) vẫn gọi `python` theo tên SAU khi chèn AL_DICH; script chỉ bảo đảm thư mục ấy
 # không có mục THEO DÕI và chỉ chứa TÊN installer sinh ra TẠI LÚC chèn — một cổng chạy trước wrapper (mã của nhánh) vẫn ghi được vào
 # đó, và một `actionlint[.exe]` (tên của NỀN NÀY) chưa theo dõi mà installer không ghi (lượt trước) vẫn qua tới lượt installer thành
@@ -832,7 +841,8 @@ Ca 't30 env cua buoc cong: khoa ci.yml co mat, bien ro bi xoa, registry mang env
     # đặt lại sau khi xoá, nên đồ giả `cong_cu_test` (chạy TRƯỚC registry) đòi vắng mọi khoá trừ AL_VER, đồ giả registry đòi vắng mọi
     # khoá trừ AL_VER và bốn khoá nó tự đặt.
     $tenRo = @(@($khoa) + @('CONG_CU_TEST_BAN_KINH', 'CONG_CU_TEST_MANH', 'CONG_CU_TEST_MANH_RA', 'CI_DANG_KY_DOT_BIEN_MANH',
-                            'NHANH_DON_DUOC_MANH', 'NHANH_DON_DUOC_MANH_RA', 'PR_HEAD_SHA', 'EOL_BASE_SHA') |
+                            'NHANH_DON_DUOC_MANH', 'NHANH_DON_DUOC_MANH_RA', 'PR_HEAD_SHA', 'EOL_BASE_SHA', 'CI_DUONG_NHANH_SU_KIEN',
+                            'CI_DUONG_NHANH_GOC', 'CI_DUONG_NHANH_DAU', 'CI_DUONG_NHANH_MERGE') |
                Where-Object { $_ -notlike 'PYTHON*' } | Sort-Object -Unique)
     $k = Dung-Kho
     Set-Content -LiteralPath (Join-Path $k '.claude/dev/ci_dang_ky_test.py') -Encoding utf8NoBOM -Value @'
@@ -898,8 +908,8 @@ Ca 't31 bien trinh thong dich / git / bash cua phien goi bi xoa truoc cong' {
     $ast = [System.Management.Automation.Language.Parser]::ParseFile($Script, [ref]$null, [ref]$null)
     $co = @{}
     foreach ($n in $ast.FindAll({ param($x) $x -is [System.Management.Automation.Language.StringConstantExpressionAst] }, $true)) { $co[$n.Value] = 1 }
-    $thieu = @(@($gitCucBo) + 'BASH_ENV' | Where-Object { -not $co.ContainsKey($_) })
-    if ($thieu.Count -gt 0) { throw "bien git cuc bo cua kho / BASH_ENV khong co trong script: $($thieu -join ', ')" }
+    $thieu = @(@($gitCucBo) + 'BASH_ENV' + 'BASH_FUNC_*' | Where-Object { -not $co.ContainsKey($_) })
+    if ($thieu.Count -gt 0) { throw "bien git cuc bo cua kho / BASH_ENV / BASH_FUNC_* khong co trong script: $($thieu -join ', ')" }
     $k = Dung-Kho
     $d = Split-Path $k
     $ktRo = "import os, sys`nro = [n for n in os.environ.get('STUB_KHOA_RO', '').split(',') if n and n in os.environ]`n" +
@@ -931,8 +941,12 @@ Ca 't31 bien trinh thong dich / git / bash cua phien goi bi xoa truoc cong' {
                GIT_ALTERNATE_OBJECT_DIRECTORIES = $rong; GIT_COMMON_DIR = (Join-Path $k '.git'); GIT_IMPLICIT_WORK_TREE = '1'
                GIT_GRAFT_FILE = (Join-Path $d 'graft-khong-co'); GIT_SHALLOW_FILE = (Join-Path $d 'shallow-khong-co')
                GIT_NO_REPLACE_OBJECTS = '1'; GIT_REPLACE_REF_BASE = 'refs/replace/'; GIT_PREFIX = 'x/' }
+    # Hàm bash EXPORT mang tên lệnh NỘI TRÚ `exit` (wrapper giả kết thúc bằng `exit`): ghi tệp đánh dấu rồi `builtin exit` giữ rc.
+    $dauHam = Join-Path $d 'dau-bash-func'
     $ro = @{ PYTHONOPTIMIZE = '1'; PYTHONWARNINGS = 'ignore'; PYTHONHASHSEED = '0'; BASH_ENV = $benv
-             GIT_DIR = (Join-Path $khac '.git'); GIT_WORK_TREE = $sach; STUB_KHOA_RO = (@(@($gitCucBo) + 'BASH_ENV') -join ',') }
+             GIT_DIR = (Join-Path $khac '.git'); GIT_WORK_TREE = $sach
+             STUB_KHOA_RO = (@(@($gitCucBo) + 'BASH_ENV' + 'BASH_FUNC_exit%%') -join ',') }
+    $ro['BASH_FUNC_exit%%'] = '() { echo nap >> ''' + $dauHam.Replace([string][char]92, '/') + '''; builtin exit "$@"; }'
     foreach ($n in $gitCucBo) { if (-not $ro.ContainsKey($n)) { $ro[$n] = if ($lanh.ContainsKey($n)) { $lanh[$n] } else { Join-Path $d "khong-co-$n" } } }
     $a = Chay $k @() $ro
     if ($a.ra -notmatch 'packet-loop selftest +rc=1' -or $a.ra -notmatch 'assert phai chay') {
@@ -942,8 +956,41 @@ Ca 't31 bien trinh thong dich / git / bash cua phien goi bi xoa truoc cong' {
         throw "GIT_WORK_TREE ro: cay BAN duoc do la SACH nen registry mang env diff, hoac bien ro toi registry (rc_script=$($a.rc))" }
     if ($a.ra -notmatch 'lease-publish selftest +rc=') { throw 'KHONG DO DUOC: cong bash khong chay, ve BASH_ENV khong co rang' }
     if (Test-Path -LiteralPath $dau) { throw "BASH_ENV ro tu phien goi: bash nap tep ay truoc cong ($(@(Get-Content -LiteralPath $dau).Count) lan)" }
+    if (Test-Path -LiteralPath $dauHam) { throw "BASH_FUNC_* ro tu phien goi: ham export che lenh noi tru exit ($(@(Get-Content -LiteralPath $dauHam).Count) lan)" }
     $ab = @(& git -C $khac config --local --get core.abbrev)
     if ($ab.Count -gt 0) { throw "GIT_DIR ro tu phien goi: nep git ghi vao config cua KHO KHAC (core.abbrev=$($ab -join ''))" }
+}
+
+# Gương CI trôi theo master: `ci.yml` thêm một bước `gate*` mà script không gương và không khai `KHÔNG CHẠY` thì không ca nào ở trên ĐỎ
+# (t6 chỉ đọc bước bỏ trên Windows, t30 chỉ đọc khoá `env`). Đo: cây merge ad4e724 với master 7e5958e có bước `ci-duong-nhanh selftest`
+# (`ops/ci_duong_nhanh_test.py`, chỉ Linux) — script ad4e724 im lặng, bộ 31 ca chỉ đỏ t30. Bước chỉ chạy ở chế độ `duong_nhanh` thì
+# bỏ: script luôn chạy ĐỦ. Python in UTF-8 (tên bước có tiếng Việt; console Windows không phải UTF-8) và regex không dùng dấu chéo ngược.
+Ca 't32 moi buoc gate* co guong trong script hoac co ten trong dong KHONG CHAY' {
+    $ci = Join-Path $GocKho '.github/workflows/ci.yml'
+    $py = Tim-PyYaml; $pd = $py.Dau
+    $ma = @'
+import re, sys, yaml
+sys.stdout.reconfigure(encoding='utf-8')
+d = yaml.safe_load(open(sys.argv[1], encoding='utf-8'))
+mau = re.compile('(?<![A-Za-z0-9_./-])[A-Za-z0-9_./-]+[.](?:py|sh|ps1)(?![A-Za-z0-9_.])')
+for j, v in (d.get('jobs') or {}).items():
+    if not j.startswith('gate'):
+        continue
+    for b in v.get('steps') or []:
+        if '== ' + chr(39) + 'duong_nhanh' + chr(39) in str(b.get('if', '')):
+            continue
+        for t in sorted(set(mau.findall(b.get('run') or ''))):
+            print(str(b.get('name') or '') + chr(9) + t)
+'@
+    $dong = @(Doc-Utf8 { & $py.Ten @pd -c $ma $ci } | Where-Object { $_ })
+    if ($LASTEXITCODE -ne 0 -or $dong.Count -eq 0) { throw "KHONG DO DUOC: khong doc duoc dich cua buoc gate* trong ci.yml (rc=$LASTEXITCODE)" }
+    $ast = [System.Management.Automation.Language.Parser]::ParseFile($Script, [ref]$null, [ref]$null)
+    $hang = @($ast.FindAll({ param($x) $x -is [System.Management.Automation.Language.StringConstantExpressionAst] }, $true) | ForEach-Object Value)
+    $thieu = @(foreach ($x in $dong) {
+        $ten, $dich = $x -split "`t", 2
+        if ($hang -cnotcontains $dich -and @($hang | Where-Object { $_.Contains('"' + $ten + '"') }).Count -eq 0) { "$ten :: $dich" }
+    })
+    if ($thieu.Count -gt 0) { throw "buoc gate* khong co guong trong script, khong co ten trong dong KHONG CHAY: $($thieu -join ' | ')" }
 }
 
 foreach ($d in $script:Rac) { Remove-Item -LiteralPath $d -Recurse -Force -ErrorAction SilentlyContinue }

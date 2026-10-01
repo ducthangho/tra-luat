@@ -1,0 +1,117 @@
+diff --git a/.github/workflows/ci.yml b/.github/workflows/ci.yml
+index a90fd1b..37bf5d9 100644
+--- a/.github/workflows/ci.yml
++++ b/.github/workflows/ci.yml
+@@ -42,7 +42,8 @@ jobs:
+     # chi cac buoc nang bi `if:` muc buoc bo qua. KHONG dung `paths:` / `paths-ignore:` — workflow khong chay
+     # thi required check VANG MAT va PR ket `blocked`. Logic phan loai o `ops/ci_duong_nhanh.py` (co phan
+     # chung), khong o bieu thuc YAML. Chi `pull_request` duoc phan loai; push va workflow_dispatch LUON day du.
+-    # Fail-close: chi dung chuoi `duong_nhanh` moi bo buoc; rong/la/vang => day du (phia job: `!= 'duong_nhanh'`).
++    # Fail-close: chi chuoi `duong_nhanh` moi bo buoc — so chuoi cua bieu thuc Actions KHONG phan biet hoa thuong, nen moi
++    # cach viet hoa/thuong cua no cung bo (ops/ci_duong_nhanh.py chi ghi chu thuong); rong/la/vang => day du (`!= 'duong_nhanh'`).
+     runs-on: ubuntu-latest
+     # Tran ngoai: het gio CAP JOB thi `chuan-bi` DO (ba context bat buoc khong duoc tao => PR bi chan, khong mo) — chi
+     # ngan thoi gian chan tu 360 phut mac dinh xuong day. Tran trong o hai buoc phan loai ben duoi (het gio => roi day_du).
+diff --git a/ops/ci_duong_nhanh.py b/ops/ci_duong_nhanh.py
+index 5f557ac..652ae5f 100644
+--- a/ops/ci_duong_nhanh.py
++++ b/ops/ci_duong_nhanh.py
+@@ -15,8 +15,10 @@ BA TRẠNG THÁI, FAIL-CLOSE (danh sách CHO PHÉP, không phải danh sách C
+   · đo được diff VÀ mọi tệp đổi khớp `ALLOWLIST_TIEN_TO`  ⇒ `duong_nhanh`
+   · đo được diff VÀ có ít nhất một tệp ngoài allowlist     ⇒ `day_du`
+   · KHÔNG ĐO ĐƯỢC (không phải pull_request, thiếu/hỏng SHA — kể cả `github.sha` —, git lỗi/ném, đầu ra cụt) ⇒ `day_du`
+-Chỉ MỘT giá trị (`duong_nhanh`) mở đường bỏ bước; mọi giá trị lạ, rỗng hay vắng đều thành đầy đủ ở phía
+-`ci.yml` (`!= 'duong_nhanh'`). Diff rỗng ⇒ `duong_nhanh` (Q3 chủ kho), có dòng log riêng để phân biệt.
++Chỉ MỘT giá trị (`duong_nhanh`) mở đường bỏ bước — nhưng phép so chuỗi của biểu thức Actions KHÔNG phân biệt hoa
++thường (tài liệu GitHub), nên mọi cách viết hoa/thường của nó cũng bỏ bước; tệp này chỉ ghi hằng chữ thường (`t16`
++khoá). Mọi giá trị khác — lạ, rỗng hay vắng — thành đầy đủ ở phía `ci.yml` (`!= 'duong_nhanh'`). Diff rỗng ⇒
++`duong_nhanh` (Q3 chủ kho), có dòng log riêng để phân biệt.
+ 
+ Diff là `base...head` (BA chấm = từ merge-base tới head), KHÔNG phải `base..head`: hai chấm tính cả việc
+ nhánh đích đã tiến thêm sau khi PR rẽ ra, biến PR hồ sơ thành "có tệp mã" (đo ở test t11). Ba chấm có hai chỗ
+@@ -315,10 +317,11 @@ def _doc_raw(goc, cap, chay, kho):
+ 
+ def kiem_mode_git(env, chay=subprocess.run, kho=ROOT, doi=frozenset()) -> list[str]:
+     """Loại tệp theo MODE TRONG GIT, không theo cây làm việc (cross-review lượt 10, lớp `kiem-re-cua-fail-close-chua-co-ca`).
+-    Mọi chốt nội dung khác của kiem-re đọc ĐĨA, và đĩa nói dối theo nhiều cách: gitlink (mode 160000) checkout thành THƯ MỤC
+-    rỗng nên `kiem_yaml`/`kiem_lease` coi `not is_file()` là ĐÃ XOÁ và bỏ qua (kể cả tên `.yaml`), `--check` không có nội dung
+-    để đọc, numstat `1 0` không phải nhị phân; symlink trên nền `core.symlinks=false` (Windows) checkout thành tệp THƯỜNG chứa
+-    đường đích nên `kiem_loai_tep` không thấy. Git thì không nói dối: `git diff --raw` trên ĐÚNG ba cặp mà bộ phân loại dùng
++    Các chốt nội dung khác không thấy loại tệp. Chốt đọc ĐĨA (`kiem_yaml`/`kiem_loai_tep`/`kiem_lease`) bị đĩa nói dối:
++    gitlink (mode 160000) checkout thành THƯ MỤC rỗng nên `kiem_yaml`/`kiem_lease` coi `not is_file()` là ĐÃ XOÁ và bỏ qua (kể
++    cả tên `.yaml`); symlink trên nền `core.symlinks=false` (Windows) checkout thành tệp THƯỜNG chứa đường đích nên
++    `kiem_loai_tep` không thấy. Hai chốt đọc GIT (`kiem_diff_check`, `kiem_nhi_phan`) thì gitlink KHÔNG có nội dung trong git:
++    `--check` im, numstat `1 0` không phải nhị phân. Git thì không nói dối: `git diff --raw` trên ĐÚNG ba cặp mà bộ phân loại dùng
+     (`goc...dau`, `goc -> cây merge-tree`, `goc -> github.sha`), thuộc tính từ cây GỐC như mọi lệnh diff khác. Chỉ nhận mode
+     mới 100644/100755, hoặc XOÁ (`D`, mode mới 000000); mọi thứ khác (gitlink, symlink, trạng thái lạ) ⇒ ĐỎ. Git lỗi/ném,
+     đầu ra cụt/lẻ/bản ghi lạ, hoặc tập đường dẫn của ba cặp KHÁC tập `doi` mà bộ phân loại đã đo ⇒ KHÔNG ĐO ĐƯỢC ⇒ ĐỎ.
+@@ -408,7 +411,7 @@ def _han_lease(gia_tri):
+ 
+ def kiem_lease(doi, kho=ROOT, chay=subprocess.run, bay_gio=None, ra=None) -> list[str]:
+     """Lease CÒN HẠN (hoặc hạn không đọc được) qua `lease_publish.py check`; lease HẾT HẠN qua `kiem(bo_qua_han=True)` — vẫn kiểm mọi
+-    chốt khác, chỉ bỏ chốt hạn. Cả `.yaml` và `.yml`. D2 (quyết định của chủ kho) còn mở: xem docstring module."""
++    chốt khác, chỉ bỏ chốt hạn. Cả `.yaml` và `.yml`. D2 là hành vi chủ kho ĐÃ DUYỆT (erratum đặc tả r2): xem docstring module."""
+     ra = ra if ra is not None else sys.stdout
+     try:
+         import yaml
+diff --git a/ops/ci_duong_nhanh_test.py b/ops/ci_duong_nhanh_test.py
+index 130d08e..e253817 100644
+--- a/ops/ci_duong_nhanh_test.py
++++ b/ops/ci_duong_nhanh_test.py
+@@ -13,15 +13,20 @@ số lượng ca/đột biến KHÔNG ghi ở đây (đã trôi hai lượt li
+     không suy từ tiền tố; `t96` đối chiếu với dấu hiệu AST độc lập, và dòng `KIEM KE:` in số từng nhóm.
+ 
+ CÁCH ĐO ĐỘT BIẾN — bài học CLAUDE.md "đột biến bị giết không phải bị giết ĐÚNG LÝ DO":
+-  · Ca đích chỉ báo ĐỎ bằng `TinHieuChotCa` (con của AssertionError) do CHÍNH `bang()` ném. Lỗi vô can trong mã
+-    bị đột biến (TypeError, KeyError, ...) đi ra dưới TÊN THẬT ⇒ tiến trình con thoát rc=4 ⇒ `TIN_DUNG_GIA`, không
+-    tính là giết. Ca KHÔNG được có `except Exception: raise TinHieuChotCa` (ca t99 quét AST canh điều đó).
+-  · Mỗi đột biến: neo `count == 1` (không thì lỗi hạ tầng), kiểm bản đột biến KHÁC bản gốc, chạy trên tệp tạm với
+-    tên riêng, bytecode tắt; ca đích còn phải XANH trên bản gốc (chứng minh lượt giết là do đột biến).
++  · Ca đích báo ĐỎ bằng `TinHieuChotCa` (con của AssertionError): do `bang()` ném, hoặc do chính ca ném khi bắt lớp
++    ngoại lệ RIÊNG của bộ test (`SuDoGia` của đồ giả, `KhongCoFixture`). Lỗi vô can trong mã bị đột biến đi ra dưới
++    TÊN THẬT ⇒ tiến trình con thoát rc=4 ⇒ `TIN_DUNG_GIA`, không tính là giết — TRỪ hai ca cố ý đổi lớp DỰNG SẴN thành
++    tín hiệu vì "không được ném" chính là thuộc tính chúng đo: `t06` (TypeError/ValueError/AttributeError) và `t20ze`
++    (UnicodeError). Ở hai ca ấy lỗi vô can CÙNG LỚP được đếm là GIẾT (đo 01-10-2026: `raise TypeError` ở đầu
++    `phan_loai_tu_diff` ⇒ đích `t06` GIET, đích `t01` TIN_DUNG_GIA). `t99` chỉ cấm `except` RỘNG (trần, Exception,
++    BaseException, AssertionError) đổi thành tín hiệu, không canh hai ca trên.
++  · Mỗi đột biến: neo `count == 1` (không thì lỗi hạ tầng; `thay_mot` còn kiểm bản đột biến KHÁC bản gốc, `thay_regex`
++    thì không — đột biến đồng nhất ở đó SỐNG SÓT nên suite vẫn ĐỎ), chạy trên tệp tạm với tên riêng, bytecode tắt; ca
++    đích còn phải XANH trên bản gốc (chứng minh lượt giết là do đột biến).
+   · Đột biến cũng áp cho CHÍNH tệp test (`--nguon-test`): helper fixture (cô lập actor...) có đột biến riêng.
+   · Phân hạng có phần tự kiểm (`tu_kiem_phan_hang`, dữ liệu ở `MAU_RC` và `TU_KIEM_DOT_BIEN`; dòng `TU KIEM PHAN HANG:` in số
+     lượng ĐẾM TỪ HAI HẰNG SỐ ấy): rc=3 đúng tên ⇒ GIẾT; rc=3 sai tên ⇒ TÍN DỤNG GIẢ; rc=4 ⇒ TÍN DỤNG GIẢ; rc=0 ⇒ SỐNG SÓT;
+-    rc=-9 ⇒ HỎNG; đột biến KeyError vô can ⇒ TÍN DỤNG GIẢ; chỉ thêm chú thích ⇒ SỐNG SÓT; nới allowlist ⇒ GIẾT. "Sai tên ca"
++    rc=-9 ⇒ HỎNG; đột biến KeyError vô can (đích `t01`) ⇒ TÍN DỤNG GIẢ; chỉ thêm chú thích ⇒ SỐNG SÓT; nới allowlist ⇒ GIẾT. "Sai tên ca"
+     chỉ được kiểm bằng mẫu rc, chưa có đột biến thật. Không có bằng chứng dương (tập ca đích rỗng/lạ) thì KHÔNG BAO GIỜ GIẾT (`t97`).
+ 
+ Ra: `CA: N/N dat` · `DOT BIEN: M/M bi giet` · `TONG: DAT`. Thoát 0 chỉ khi N>0, mọi ca đạt, M>0, mọi đột biến bị giết
+@@ -81,7 +86,8 @@ DONG_GOI_TEST = "python ops/ci_duong_nhanh_test.py"
+ 
+ 
+ class TinHieuChotCa(AssertionError):
+-    """Chỉ `bang()` ném lớp này. Mã triển khai và lỗi vô can KHÔNG ném được nó ⇒ phân biệt được giết thật/giả."""
++    """Do `bang()` ném, hoặc do ca ném khi bắt đúng lớp nó đo (xem docstring module). Mã triển khai KHÔNG ném được nó ⇒
++    phân biệt được giết thật/giả — trừ lỗi vô can CÙNG LỚP ở hai ca đổi lớp dựng sẵn (`t06`, `t20ze`)."""
+ 
+ 
+ class KhongCoFixture(RuntimeError):
+@@ -1213,7 +1219,7 @@ def t20ze_kiem_re_ten_tep_khong_utf8_dat():
+         bang(b"t\xff.md" in raw, f"fixture vo hieu: ten tep phai giu byte khong UTF-8: {raw!r}")
+         try:
+             rc, log = kiem_re(m, kho, goc, dau)
+-        except UnicodeError as e:   # CHI loi giai ma — dung dieu ca nay do; loi khac van la HONG (khong cap tin dung)
++        except UnicodeError as e:   # lop UnicodeError (dung dieu ca nay do); UnicodeError VO CAN cung thanh GIET — xem docstring module
+             raise TinHieuChotCa(f"kiem-re nem {type(e).__name__} tren ten tep khong UTF-8: {e}") from e
+         bang(rc == 0, f"PR ten tep khong UTF-8 phai DAT kiem-re: rc={rc}: {log}")
+ 
+@@ -2177,8 +2183,8 @@ def y13_khoa_topology_cua_ci_yml_ngoai_than_run():
+ 
+ 
+ # LUAT (luot 5, lop chot-yaml): THAN `run:` cua MOI buoc DO PACKET NAY THEM duoc khoa NGUYEN VAN. Truoc do y09 chi doi dong goi test
+-# CO MAT trong than ⇒ `exit 0` dat TRUOC no van qua; buoc `che do` cua `chuan-bi` them `exit 1` ⇒ chuan-bi do ⇒ ba job bat buoc
+-# `skipped`, context bat buoc khong duoc tao ⇒ PR bi CHAN tren MOI su kien (xem ci.yml). Than `run:` cua buoc CO SAN ngoai pham vi packet (bien gioi khai o y13).
++# CO MAT trong than ⇒ `exit 0` dat TRUOC no van qua; buoc `che do` cua `chuan-bi` (chi chay o push/workflow_dispatch, KHONG o
++# pull_request) them `exit 1` ⇒ chuan-bi do o MOI lan push/dispatch ⇒ ba job bat buoc `skipped` ⇒ gate cua master mat (xem ci.yml). Than `run:` cua buoc CO SAN ngoai pham vi packet (bien gioi khai o y13).
+ RUN_BUOC_PACKET = {
+     ('chuan-bi', 'phan loai diff (duong nhanh ho so - chi pull_request)'): 'python3 ops/ci_duong_nhanh.py',
+     ('chuan-bi', 'che do (push / workflow_dispatch luon day du)'): 'echo "DUONG_NHANH: khong phan loai - su_kien=${SU_KIEN} khong phai pull_request, luon DAY_DU"\n',

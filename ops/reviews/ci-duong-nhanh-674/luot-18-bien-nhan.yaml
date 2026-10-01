@@ -1,0 +1,24 @@
+schema_version: 1
+packet_issue: 674
+luot: 18
+lease: ci-duong-nhanh-ho-so-r2-g4-claude
+review_class: advisory_review
+reviewer_provider: anthropic_claude
+reviewer_vai: review-opus-max (agent ~/.claude/agents, nap theo ten)
+reviewer_model_yeu_cau: claude-opus-5-5
+effort_yeu_cau: max
+effort_thuc_te: KHONG DO DUOC tu ngoai (khai trong dinh nghia agent)
+do_doc_lap: cung ho model voi executor — KHONG phai cross_approved; land can human_audited
+reviewed_sha: aad37ad2cd129943cac578a48f0ee377e58439c6
+reviewed_sha_trang_thai: commit CUC BO co chu ky, CHUA day (cha 98377f8)
+spec_sha256: b6e719c999d5990f987628963c248b1ac53d377dfa5b668ac06adce76981da57
+prompt_sha256: 2fd6df5ba239a6c19ac40e9375aac36d716c067b6cccb1bdcd906e9561dedcb3
+ket_luan: changes_requested
+p0_p1_p2_p3: [0, 0, 0, 2]
+ma_thoat: 0
+thoi_luong_giay: 2611
+verdict_file: luot-18-verdict.md
+verdict_sha256: 96b165ebb76ef4fba553550246bc06264857a6526f97304cadc604878a738b89
+hint_file: luot-18-HINT.patch
+hint_sha256: 0e3fee25b6b329a284ba770b7ef837b819f47982b47a974f6a64bd1a09234a3e
+hint_git_apply_check: OK tren aad37ad (do lai boi executor g4)

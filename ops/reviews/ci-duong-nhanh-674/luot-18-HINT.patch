@@ -1,0 +1,221 @@
+diff --git a/ops/ci_duong_nhanh_test.py b/ops/ci_duong_nhanh_test.py
+index 2cb140d..89077c5 100644
+--- a/ops/ci_duong_nhanh_test.py
++++ b/ops/ci_duong_nhanh_test.py
+@@ -13,18 +13,22 @@ số lượng ca/đột biến KHÔNG ghi ở đây (đã trôi hai lượt li
+     không suy từ tiền tố; `t96` đối chiếu với dấu hiệu AST độc lập, và dòng `KIEM KE:` in số từng nhóm.
+ 
+ CÁCH ĐO ĐỘT BIẾN — bài học CLAUDE.md "đột biến bị giết không phải bị giết ĐÚNG LÝ DO":
+-  · Ca đích báo ĐỎ bằng `TinHieuChotCa` (con của AssertionError), và CHỈ `bang()` dựng được lớp ấy (thẻ `_THE_BANG`; dựng
+-    ở chỗ khác ⇒ `LoiHaTangTinHieu`, tức HỎNG). `bang()` gọi trong lúc đang xử lý một lỗi KHÔNG thuộc `LOP_RIENG_BO_TEST`
+-    (`SuDoGia`, `KhongCoFixture`, `YamlKhacGitHub` — lớp do chính bộ test dựng) cũng ra `LoiHaTangTinHieu`. Nên lỗi vô can
+-    trong mã bị đột biến (TypeError, AttributeError, UnicodeError, ...) đi ra dưới TÊN THẬT ⇒ tiến trình con thoát rc=4 ⇒
+-    `TIN_DUNG_GIA`, ở MỌI ca. Không ca nào còn đổi lớp DỰNG SẴN thành tín hiệu: lượt 17 đo được hai ca làm thế (`t06`,
+-    `t20ze`: lỗi vô can cùng lớp ở đó từng được đếm GIẾT); lượt 18 đo `t06` bằng QUYẾT ĐỊNH trên đầu ra lạc kiểu và `t20ze`
+-    bằng MÃ THOÁT của tiến trình con, kèm đối chứng chạy trước. Sáu đường vào, mỗi đường có chốt: (1) dựng tín hiệu ngoài
+-    `bang()` (`t99a` chạy, `t99` luật S1) · (2) `except` đổi kiểu gọi `bang()` (`t99b` chạy, luật S2) · (3) đổi kiểu qua biến
+-    cờ trong một hàm (luật S3, chỉ tĩnh) · (4) đổi kiểu qua GIÁ TRỊ TRẢ VỀ của hàm khác (luật S5 + danh sách cho phép
+-    `HAM_DOI_KIEU_CHO_PHEP`; kèm phép tiêm vô can, xem dưới) · (5) `bang()` trong `finally`/`__exit__` lúc lỗi đang lan
+-    (`t99b` chạy, luật S4) · (6) helper nuốt lỗi lạ rồi ném lớp riêng mà ca đổi thành tín hiệu (`t23b`). `t99` quét tệp
+-    test của CÂY DƯỚI ĐO, tức bản đột biến khi chạy như ca đích.
++  · Ca đích báo ĐỎ bằng `TinHieuChotCa` (con của AssertionError). Gọi lớp ấy theo cách thường (`TinHieuChotCa(...)`, kể cả
++    qua bí danh/chuỗi) ngoài `bang()` ⇒ `LoiHaTangTinHieu`, tức HỎNG (thẻ `_THE_BANG`, `t99a`); `__new__` hay thẻ thật lấy qua
++    chuỗi thì thẻ KHÔNG chặn (review lượt 18 đo) — chốt cho chỗ ấy là luật S6 bên dưới. `bang()` gọi trong lúc đang xử lý một
++    lỗi KHÔNG thuộc `LOP_RIENG_BO_TEST` (`SuDoGia`, `KhongCoFixture`, `YamlKhacGitHub` — lớp do chính bộ test dựng) cũng ra
++    `LoiHaTangTinHieu` (chỉ trong CÙNG luồng: `sys.exc_info()` là của từng luồng). Nên lỗi vô can trong mã bị đột biến
++    (TypeError, AttributeError, UnicodeError, ...) đi ra dưới TÊN THẬT ⇒ rc=4 ⇒ `TIN_DUNG_GIA` ở mọi ca chạy TRONG tiến trình;
++    ca đọc MÃ THOÁT tiến trình con (`t20ze`, `t91`, phần `__main__` của `t93`) thì mọi thất bại của con mà đối chứng không có
++    là vi phạm chính tính chất ca ấy đo, nên được đếm GIẾT dù lớp lỗi là gì (theo thiết kế). Không ca nào còn đổi lớp DỰNG SẴN
++    thành tín hiệu: lượt 17 đo được hai ca làm thế (`t06`, `t20ze`); lượt 18 đo `t06` bằng QUYẾT ĐỊNH trên đầu ra lạc kiểu và
++    `t20ze` bằng MÃ THOÁT của tiến trình con, kèm đối chứng chạy trước. Chốt chạy ở `bang()` đóng đường `except`/`finally` gọi
++    `bang()` (`t99b`). Mọi đường còn lại — biến cờ, nuốt rồi giữ giá trị mặc định, `suppress`, tham số ra, `return` trong
++    `finally`, đổi thành lớp riêng, tín hiệu cất sẵn hay phát ở luồng khác — đều phải NUỐT một lỗi dựng sẵn bằng cú pháp
++    (`except`, `suppress`, `return`/`break`/`continue` trong `finally`), nên chốt của chúng là MỘT danh sách CHO PHÉP (luật S6
++    của `t99`): chỉ hàm trong `HAM_DOI_KIEU_CHO_PHEP` được nuốt lỗi dựng sẵn; S1–S5 giữ làm thông báo cụ thể. Còn lọt, nói
++    thẳng: nuốt KHÔNG qua cú pháp ấy (`Future.exception()`, luồng mà lỗi đi vào excepthook, `__exit__` tự viết trả True,
++    `gather(return_exceptions=True)`). `t99` quét tệp test của CÂY DƯỚI ĐO, tức bản đột biến khi chạy như ca đích.
+   · Mỗi đột biến: neo `count == 1` (không thì lỗi hạ tầng; `thay_mot` còn kiểm bản đột biến KHÁC bản gốc, `thay_regex`
+     thì không — đột biến đồng nhất ở đó SỐNG SÓT nên suite vẫn ĐỎ), chạy trên tệp tạm với tên riêng, bytecode tắt; ca
+     đích còn phải XANH trên bản gốc (chứng minh lượt giết là do đột biến).
+@@ -34,7 +38,8 @@ CÁCH ĐO ĐỘT BIẾN — bài học CLAUDE.md "đột biến bị giết khô
+     rc=-9 ⇒ HỎNG; đột biến vô can (KeyError đích `t01`, AttributeError đích `t06`, UnicodeError đích `t20ze`) ⇒ TÍN DỤNG GIẢ;
+     `except` đổi kiểu HẸP thêm vào `t01` (qua `bang()`, hoặc dựng lớp tín hiệu trực tiếp) ⇒ TÍN DỤNG GIẢ; chỉ thêm chú thích ⇒
+     SỐNG SÓT; nới allowlist ⇒ GIẾT. Kèm phép TIÊM LỖI VÔ CAN vào MỌI ca đích của `DOT_BIEN` (`tiem_vo_can_moi_ca_dich`, dòng
+-    `TIEM VO CAN:`; mỗi điểm tiêm chỉ nổ ở lời gọi ĐẦU TIÊN của ca; có đối chứng có răng): GIẾT hay HỎNG ở bất kỳ ca nào ⇒
++    `TIEM VO CAN:`; điểm `bang` chỉ nổ ở lời gọi ĐẦU TIÊN, điểm `ma` nổ ở MỌI lời gọi hàm mã nhưng lời gọi đầu không bọc thì ca
++    dừng ngay ở đó; có đối chứng có răng; `t99c` đo phép tiêm CÓ chạy đủ hai điểm và phân hạng đúng): GIẾT hay HỎNG ở bất kỳ ca nào ⇒
+     tự kiểm ĐỎ. "Sai tên ca" chỉ được kiểm bằng mẫu rc, chưa có đột biến thật. Không có bằng chứng dương (tập ca đích
+     rỗng/lạ) thì KHÔNG BAO GIỜ GIẾT (`t97`).
+ 
+@@ -102,8 +107,9 @@ _THE_BANG = object()   # thẻ riêng của `bang()`: chỉ nó dựng được
+ 
+ 
+ class TinHieuChotCa(AssertionError):
+-    """CHỈ `bang()` dựng được lớp này (thẻ `_THE_BANG`); `TinHieuChotCa(...)` ở chỗ khác ném `LoiHaTangTinHieu` thay vì
+-    phát tín hiệu — kể cả qua bí danh/chuỗi (`globals()["TinHieuChotCa"]`) mà quét AST (`t99`) không thấy (`t99a` đo)."""
++    """`TinHieuChotCa(...)` ngoài `bang()` (thẻ `_THE_BANG` thiếu/sai) ném `LoiHaTangTinHieu` thay vì phát tín hiệu — kể cả qua
++    bí danh/chuỗi (`globals()["TinHieuChotCa"]`) mà quét AST (`t99`) không thấy (`t99a` đo). Thẻ KHÔNG chặn `__new__` hay thẻ
++    thật lấy qua chuỗi (review lượt 18 đo: GIẾT giả); đường đưa lỗi vô can tới chỗ dựng ấy phải nuốt lỗi dựng sẵn — S6 chặn."""
+ 
+     def __init__(self, thong_diep, *, _the=None):
+         if _the is not _THE_BANG:
+@@ -135,8 +141,9 @@ LOP_RIENG_BO_TEST = (SuDoGia, KhongCoFixture, YamlKhacGitHub)
+ 
+ 
+ def bang(dieu_kien, thong_diep):
+-    """Đường DUY NHẤT phát `TinHieuChotCa`. Gọi trong lúc đang xử lý ngoại lệ KHÔNG thuộc `LOP_RIENG_BO_TEST` (tức một
+-    `except` đổi lỗi dựng sẵn thành tín hiệu, hẹp hay rộng, trực tiếp hay qua hàm/lambda) ⇒ `LoiHaTangTinHieu` (`t99b` đo)."""
++    """Đường phát `TinHieuChotCa` của bộ test. Gọi trong lúc đang xử lý ngoại lệ KHÔNG thuộc `LOP_RIENG_BO_TEST` (tức một
++    `except` đổi lỗi dựng sẵn thành tín hiệu, hẹp hay rộng, trực tiếp hay qua hàm/lambda CÙNG luồng) ⇒ `LoiHaTangTinHieu`
++    (`t99b` đo). `sys.exc_info()` là của từng luồng: gọi qua luồng khác thì chốt này không thấy — S6 của `t99` chặn `except` ấy."""
+     if not dieu_kien:
+         dang_xu_ly = sys.exc_info()[1]
+         if dang_xu_ly is not None and not isinstance(dang_xu_ly, LOP_RIENG_BO_TEST):
+@@ -2623,9 +2630,15 @@ def quet_doi_kieu_tin_hieu(van_ban):
+            thân `except`, hoặc gán/đổi một tên mà `return` của hàm đọc) là một BỘ ĐỔI KIỂU; chỉ các hàm trong danh sách CHO
+            PHÉP `HAM_DOI_KIEU_CHO_PHEP` (mỗi hàm một lý do) được như vậy ⇒ đường vào 4 (đổi kiểu qua GIÁ TRỊ TRẢ VỀ của hàm khác,
+            rồi ca `bang()` trên giá trị ấy — S3 không thấy vì cờ đi qua ranh giới hàm).
+-    Giới hạn, nói thẳng: tĩnh chỉ đọc được lớp viết bằng TÊN và luồng trong MỘT hàm; phép TIÊM LỖI VÔ CAN ở mọi ca đích
+-    (`tiem_vo_can_moi_ca_dich`, chạy trong tự kiểm phân hạng) đo thêm bằng hành vi, nhưng chỉ ở lời gọi ĐẦU TIÊN của mỗi điểm
+-    tiêm trong ca — `except` chỉ bọc một lời gọi về sau thì chỉ còn các luật tĩnh và chốt chạy ở `bang()` canh."""
++      S6 — DANH SÁCH CHO PHÉP (review lượt 18: S1–S5 là danh sách CẤM theo hình dạng, và đo được chín dạng lọt cả năm — nuốt
++           rồi giữ mặc định, cờ qua biến trung gian, `suppress`, tham số ra, `return` trong `finally`, đổi thành lớp riêng, tín
++           hiệu cất sẵn, `__new__`, luồng khác): MỌI chỗ nuốt được lỗi dựng sẵn — `except` bắt lớp ngoài `LOP_RIENG_BO_TEST` và
++           ngoài hai lớp tín hiệu của bộ đo (trừ khi thân kết thúc bằng `raise` trần, tức ném lại NGUYÊN lỗi), `suppress(...)` lớp
++           ngoài các tập ấy, `return`/`break`/`continue` trong `finally` — chỉ được nằm trong hàm thuộc `HAM_DOI_KIEU_CHO_PHEP`.
++    Giới hạn, nói thẳng: tĩnh chỉ đọc được lớp viết bằng TÊN; nuốt KHÔNG qua cú pháp (`Future.exception()`, luồng/excepthook,
++    `__exit__` tự viết trả True, `gather(return_exceptions=True)`) thì S6 không thấy. Phép TIÊM LỖI VÔ CAN ở mọi ca đích
++    (`tiem_vo_can_moi_ca_dich`, chạy trong tự kiểm phân hạng) đo thêm bằng hành vi, nhưng chỉ khi chỗ nuốt bọc lời gọi mã ĐẦU
++    TIÊN của ca — bọc một lời gọi về sau thì chỉ còn S6 và chốt chạy ở `bang()` canh."""
+     cay = ast.parse(van_ban)
+     rieng = {c.__name__ for c in LOP_RIENG_BO_TEST}
+     cha = {c: n for n in ast.walk(cay) for c in ast.iter_child_nodes(n)}
+@@ -2685,6 +2698,24 @@ def quet_doi_kieu_tin_hieu(van_ban):
+                 if dua_ra or _ten_bi_gan_hoac_doi(n.body) & tra_ve:
+                     loi.append(f"S5 dong {n.lineno}: ham {ham.name} dua gia tri ra tu except "
+                                f"{ast.unparse(n.type) if n.type else '(tran)'} — bo doi kieu ngoai HAM_DOI_KIEU_CHO_PHEP")
++        if isinstance(n, (ast.ExceptHandler, ast.Call, ast.Try, getattr(ast, "TryStar", ast.Try))):
++            ham6 = next((a for a in to_tien(n) if isinstance(a, (ast.FunctionDef, ast.AsyncFunctionDef))), None)
++            mien6 = ham6 is not None and ham6.name in HAM_DOI_KIEU_CHO_PHEP
++            duoc_bat6 = rieng | {"TinHieuChotCa", "LoiHaTangTinHieu"}
++            if isinstance(n, ast.ExceptHandler) and not mien6:
++                lop6 = _ten_lop_bat(n)
++                nem_lai_nguyen = bool(n.body) and isinstance(n.body[-1], ast.Raise) and n.body[-1].exc is None
++                if (lop6 is None or not lop6 <= duoc_bat6) and not nem_lai_nguyen:
++                    loi.append(f"S6 dong {n.lineno}: except {ast.unparse(n.type) if n.type else '(tran)'} nuot loi dung san "
++                               "ngoai HAM_DOI_KIEU_CHO_PHEP")
++            la_suppress6 = isinstance(n, ast.Call) and ((isinstance(n.func, ast.Attribute) and n.func.attr == "suppress")
++                                                      or (isinstance(n.func, ast.Name) and n.func.id == "suppress"))
++            if la_suppress6 and not mien6 and not all(isinstance(a, ast.Name) and a.id in duoc_bat6 for a in n.args):
++                loi.append(f"S6 dong {n.lineno}: suppress({', '.join(ast.unparse(a) for a in n.args)}) nuot loi dung san "
++                           "ngoai HAM_DOI_KIEU_CHO_PHEP")
++            if isinstance(n, (ast.Try, getattr(ast, "TryStar", ast.Try))) and not mien6 and any(
++                    isinstance(x, (ast.Return, ast.Break, ast.Continue)) for x in ast.walk(ast.Module(body=n.finalbody, type_ignores=[]))):
++                loi.append(f"S6 dong {n.lineno}: return/break/continue trong finally nuot loi dang lan, ngoai HAM_DOI_KIEU_CHO_PHEP")
+     return loi
+ 
+ 
+@@ -2695,6 +2726,8 @@ HAM_DOI_KIEU_CHO_PHEP = {
+     "main": "runner `--mot-ca`: loi -> rc=4 (HONG); tin hieu -> rc=3 chi tu nhanh `except TinHieuChotCa`",
+     "mot": "runner dot bien (trong chay_tap_dot_bien): loi -> 'HONG'",
+     "lease_that_het_han_hop_le": "chi `lp.Chan` (tu choi cua lease_publish) moi tra fixture; loi khac bi ghi lai (t23b)",
++    "t99a_tin_hieu_chi_dung_duoc_qua_bang": "tu kiem: bat tin hieu THAT (AssertionError) chi de lay lop, roi do LoiHaTangTinHieu",
++    "t23b_fixture_khong_doi_loi_vo_can_thanh_khong_co_fixture": "bat FixtureNuotLoiLa la KET QUA MONG cua ca (khong goi ma duoi do)",
+     "_bat_ha_tang": "chi bat hai lop cua chinh bo do (TinHieuChotCa, LoiHaTangTinHieu); loi vo can di qua nguyen ten",
+     "_trong_luc_xu_ly": "chi bat dung loi no TU nem ngay truoc do, khong bat loi nao tu ma duoi do",
+ }
+@@ -2729,8 +2762,24 @@ MAU_DOI_KIEU = (
+      "        bang(False, str(e))\n", None),
+     ("doi chung suppress va except tin hieu", "def f():\n    with contextlib.suppress(TinHieuChotCa):\n        g()\n"
+      "    try:\n        g()\n    except TinHieuChotCa as e:\n        print(e)\n", None),
+-    ("doi chung except ngoai bo test khong cham bang", "def f():\n    ds = []\n    try:\n        g()\n"
+-     "    except OSError as e:\n        ds.append(e)\n    bang(True, 'x')\n    print(ds)\n", None),
++    ("S6 except ngoai bo test khong cham bang (danh sach cho phep)", "def f():\n    ds = []\n    try:\n        g()\n"
++     "    except OSError as e:\n        ds.append(e)\n    bang(True, 'x')\n    print(ds)\n", "S6"),
++    ("S6 nuot roi giu mac dinh", "def f():\n    kq = None\n    try:\n        kq = g()\n    except AttributeError:\n"
++     "        pass\n    bang(kq is not None, 'x')\n", "S6"),
++    ("S6 co qua bien trung gian", "def f():\n    loi = None\n    try:\n        g()\n    except AttributeError as e:\n"
++     "        loi = e\n    ok = loi is None\n    bang(ok, 'x')\n", "S6"),
++    ("S6 suppress lop dung san", "def f():\n    kq = None\n    with contextlib.suppress(AttributeError):\n        kq = g()\n"
++     "    bang(kq is not None, 'x')\n", "S6"),
++    ("S6 helper ghi tham so ra", "def _nuot(m, ra):\n    try:\n        ra.append(m.f())\n    except AttributeError:\n"
++     "        ra.append(None)\n", "S6"),
++    ("S6 return trong finally", "def _nuot(m):\n    kq = None\n    try:\n        kq = m.f()\n    finally:\n        return kq\n", "S6"),
++    ("S6 doi thanh lop rieng roi bat", "def f():\n    try:\n        try:\n            g()\n        except AttributeError as e:\n"
++     "            raise SuDoGia(str(e)) from e\n    except SuDoGia as e:\n        bang(False, str(e))\n", "S6"),
++    ("S6 nem lai tin hieu cat san", "def f():\n    try:\n        g()\n    except AttributeError:\n        raise tin\n", "S6"),
++    ("S6 bang qua luong khac", "def f():\n    try:\n        g()\n    except AttributeError:\n"
++     "        pool.submit(bang, False, 'x').result()\n", "S6"),
++    ("doi chung S6 nem lai nguyen loi", "def f():\n    try:\n        g()\n    except OSError:\n        don_dep()\n        raise\n"
++     "    bang(True, 'x')\n", None),
+ )
+ 
+ 
+@@ -2813,6 +2862,38 @@ def t99b_bang_tu_choi_khi_dang_xu_ly_loi_ngoai_bo_test():
+         bang(loai == "TIN_HIEU" and args == ("lop rieng",), f"bang(False) khi xu ly {lop.__name__} phai la tin hieu: {loai}")
+ 
+ 
++@ca_tu_kiem
++def t99c_phep_tiem_vo_can_chay_du_diem_va_phan_hang_dung():
++    """Review lượt 18 (lớp `tiem-vo-can-vang-mat-van-xanh`): phép tiêm là phản chứng BẮT BUỘC nhưng gỡ lời gọi nó, bỏ điểm
++    `ma`, hay nới phân hạng của nó đều để suite XANH (đo). Ca này đo bằng đồ giả, không chạy tiến trình con: (1)
++    `tu_kiem_phan_hang` phải gọi `tiem_vo_can_moi_ca_dich` và giữ lỗi nó trả; (2) phép tiêm phải chạy MỌI ca đích với CẢ HAI
++    điểm `ma` và `bang`; (3) GIET, HONG, hoặc SONG_SOT có dòng nổ ở một (ca, điểm) ⇒ lỗi; tất cả TIN_DUNG_GIA có nổ ⇒ rỗng."""
++    import io
++    mong_tu_kiem = {ten: mong for ten, _, _, mong in TU_KIEM_DOT_BIEN}
++    with mock.patch.dict(globals(), {"chay_mot_dot_bien": lambda ten, tv, dich: (mong_tu_kiem[ten], ""),
++                                     "tiem_vo_can_moi_ca_dich": lambda: ["LOI_TIEM_GIA"]}, clear=False):
++        loi = tu_kiem_phan_hang()
++    bang(loi == ["LOI_TIEM_GIA"], f"tu_kiem_phan_hang phai goi phep tiem va giu loi cua no, duoc {loi}")
++    dich = sorted({d for _, _, ds in DOT_BIEN for d in ds})
++    sach = (4, "TIEM_VO_CAN_NO:gia")
++    for ten, xau, mong_loi in (("sach", sach, False), ("mot GIET", (3, f"TIEM_VO_CAN_NO:gia\nDO:{dich[0]}:x"), True),
++                               ("mot HONG", (-9, "TIEM_VO_CAN_NO:gia"), True), ("mot SONG_SOT co no", (0, "TIEM_VO_CAN_NO:gia"), True)):
++        goi = []
++
++        def gia(ten_ca, diem, cay=None, _xau=xau):
++            goi.append((ten_ca, diem))
++            if cay is not None:   # doi chung co rang cua chinh phep tiem: gia la GIET
++                return 3, f"DO:{ten_ca}:doi chung"
++            return _xau if (ten_ca, diem) == (dich[0], "ma") else sach
++        with mock.patch.dict(globals(), {"chay_tiem_vo_can": gia, "chay_con": lambda ten_ca, cay, thoi_han=120: (0, ""),
++                                         "dung_cay_tam": lambda thay: Path(tempfile.mkdtemp(prefix="cdn_t99c_"))}, clear=False), \
++                contextlib.redirect_stdout(io.StringIO()):
++            loi = tiem_vo_can_moi_ca_dich()
++        thieu = {(t, d) for t in dich for d in ("ma", "bang")} - set(goi)
++        bang(not thieu, f"{ten}: phep tiem phai chay moi ca dich voi ca hai diem ma/bang, thieu {sorted(thieu)[:3]}")
++        bang(bool(loi) == mong_loi, f"{ten}: loi cua phep tiem phai {'KHAC RONG' if mong_loi else 'RONG'}, duoc {loi[:2]}")
++
++
+ # ---------------------------------------------------------------- chạy ca và đột biến
+ def phan_hoach_ca():
+     """Phan hoach `CA` thanh cac nhom KHONG GIAO NHAU (nguon duy nhat cho moi bang kiem ke; `goi/kiem_ke.py` goi ham nay)."""
+@@ -3302,6 +3383,16 @@ DOT_BIEN = [
+     ("test_t99_S5_noi_cho_phep_ten_tan_cong", _test('khong bat loi nao tu ma duoi do",\n}\n', 'khong bat loi nao tu ma duoi do",\n    "_thu": "noi",\n}\n'), ("t99_khong_doi_kieu_ngoai_le_thanh_tin_hieu",)),
+     # duong 6 (helper nuot loi la roi nem lop RIENG ma ca doi thanh tin hieu): chot = helper ghi loi nuot (t23b)
+     ("test_fixture_nuot_loi_khong_ghi", _test('        except Exception as e:\n            nuot.append(f"{tep.name}: {type(e).__name__}")\n            continue\n', "        except Exception:\n            continue\n"), ("t23b_fixture_khong_doi_loi_vo_can_thanh_khong_co_fixture",)),
++    # ---- hint review luot 18: S6 (danh sach cho phep) moi nhanh mot dot bien; ca t99c canh phep tiem
++    ("test_t99_bo_luat_S6_except", _test("                if (lop6 is None or not lop6 <= duoc_bat6) and not nem_lai_nguyen:\n", "                if False:\n"), ("t99_khong_doi_kieu_ngoai_le_thanh_tin_hieu",)),
++    ("test_t99_bo_luat_S6_suppress", _test("            if la_suppress6 " + "and not mien6 and", "            if False and"), ("t99_khong_doi_kieu_ngoai_le_thanh_tin_hieu",)),
++    ("test_t99_bo_luat_S6_finally", _test("                    isinstance(x, (ast.Return, ast.Break, " + "ast.Continue)) for x in", "                    False for x in"), ("t99_khong_doi_kieu_ngoai_le_thanh_tin_hieu",)),
++    ("test_t99_S6_mien_moi_raise", _test("isinstance(n.body[-1], ast.Raise) and n.body[-1].exc is None\n", "isinstance(n.body[-1], ast.Raise)\n"), ("t99_khong_doi_kieu_ngoai_le_thanh_tin_hieu",)),
++    ("test_t99_S6_noi_cho_phep_ten_tan_cong", _test('    "_bat_ha_tang": ' + '"chi bat', '    "_nuot": "noi",\n    "_bat_ha_tang": ' + '"chi bat'), ("t99_khong_doi_kieu_ngoai_le_thanh_tin_hieu",)),
++    ("test_chen_nuot_vao_lan_goi_sau_cua_t01", _test('    che_do, _ = phan_loai_gia(m, ["ops/land/a.yaml", "ops/leases/b.yaml", "ops/reviews/c.md", "ops/specs/d.md"])\n', '    che_do = None\n    try:\n        che_do, _ = phan_loai_gia(m, ["ops/land/a.yaml", "ops/leases/b.yaml", "ops/reviews/c.md", "ops/specs/d.md"])\n    except AttributeError:\n        pass\n'), ("t99_khong_doi_kieu_ngoai_le_thanh_tin_hieu",)),
++    ("test_tu_kiem_khong_goi_tiem", _test("    loi += tiem_vo_can_moi_ca_dich" + "()\n", ""), ("t99c_phep_tiem_vo_can_chay_du_diem_va_phan_hang_dung",)),
++    ("test_tiem_bo_diem_ma", _test('DIEM_TIEM = ("ma", ' + '"bang")', 'DIEM_TIEM = ("bang",)'), ("t99c_phep_tiem_vo_can_chay_du_diem_va_phan_hang_dung",)),
++    ("test_tiem_phan_hang_long", _test('        elif not (hang == "SONG_SOT" ' + 'and not no):\n', '        elif hang == "GIET":\n'), ("t99c_phep_tiem_vo_can_chay_du_diem_va_phan_hang_dung",)),
+ ]
+ TEN_DOT_BIEN = [d[0] for d in DOT_BIEN]
+ 
+@@ -3395,8 +3486,9 @@ TU_KIEM_DOT_BIEN = [
+ # Phep TIEM LOI VO CAN o MOI ca dich (luot 18): moi ca dich chay mot lan cho moi diem tiem, trong tien trinh con, qua CHINH
+ # `main --mot-ca` va CHINH `phan_hang`. Loi tiem la MOT doi tuong dong thoi la UnicodeError, AttributeError, TypeError, KeyError,
+ # IndexError, ZeroDivisionError, RuntimeError, AssertionError — nen `except` nao BOC lan goi bi tiem ma bat mot trong cac lop
+-# ay (hep hay rong, trong ca hay trong helper, ke ca qua gia tri tra ve) roi doi no thanh tin hieu deu lo ra thanh GIET. Moi
+-# diem tiem chi no o lan goi DAU TIEN cua ca: `except` chi boc mot lan goi ve sau thi phep tiem khong thay (luat tinh S1–S5 canh).
++# ay (hep hay rong, trong ca hay trong helper, ke ca qua gia tri tra ve) roi doi no thanh tin hieu deu lo ra thanh GIET. Diem
++# `bang` chi no o lan goi DAU TIEN; diem `ma` no o MOI lan goi ham ma, nhung lan goi dau khong boc thi ca dung ngay o do — cho
++# nuot chi boc mot lan goi ve sau thi phep tiem khong thay (luat S6 cua t99 canh: chi HAM_DOI_KIEU_CHO_PHEP duoc nuot loi dung san).
+ DIEM_TIEM = ("ma", "bang")   # ma: moi ham cua bo phan loai nap qua `nap_module` · bang: lan goi `bang()` dau tien cua ca
+ MA_TIEM_VO_CAN = r'''
+ import runpy, sys, types

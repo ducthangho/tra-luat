@@ -1,0 +1,49 @@
+diff --git a/ops/lease_publish_test.py b/ops/lease_publish_test.py
+index 2eba10a..e2b6a42 100644
+--- a/ops/lease_publish_test.py
++++ b/ops/lease_publish_test.py
+@@ -3060,15 +3060,17 @@ def _ca_ung_vien_gian_tiep(cac_ca, g=None) -> list:
+     g, dich = globals() if g is None else g, {"_chay_buoc_dang", "_chay_buoc_dang_that"}
+ 
+     def toi(f):
+-        thay, ngan = set(), [f]
++        thay, ngan = set(), [f.__code__]
+         while ngan:
+-            for n in ngan.pop().__code__.co_names:
++            ma = ngan.pop()
++            ngan += [k for k in ma.co_consts if hasattr(k, "co_names")]   # def/lambda/class LỒNG trong ca hay trong helper
++            for n in ma.co_names:
+                 if n in dich:
+                     return True
+                 h = g.get(n)
+                 if hasattr(h, "__code__") and n not in thay:
+                     thay.add(n)
+-                    ngan.append(h)
++                    ngan.append(h.__code__)
+         return False
+     return [f.__name__ for f in cac_ca if toi(f)]
+ 
+@@ -10640,9 +10642,10 @@ def t193_hop_dong_bo_qua_chi_cap_cho_ca_da_dang_ky():
+                 pass
+         return None
+     gia = {}
+-    exec("def _a(): _chay_buoc_dang\ndef _h(): _a()\ndef _k(): _h()\ndef _c(): pass", gia)
+-    chot(_ca_ung_vien_gian_tiep([gia["_k"], gia["_c"]], gia) == ["_k"],
+-         "ứng viên phải tính cả ca gọi helper BỌC `_chay_buoc_dang*` (gián tiếp, nhiều tầng), không tính ca không gọi")
++    exec("def _a(): _chay_buoc_dang\ndef _h(): _a()\ndef _k(): _h()\ndef _c(): pass\n"
++         "def _n():\n    def i(): _chay_buoc_dang_that\n    i()\ndef _l(): (lambda: _chay_buoc_dang)()", gia)
++    chot(_ca_ung_vien_gian_tiep([gia["_k"], gia["_c"], gia["_n"], gia["_l"]], gia) == ["_k", "_n", "_l"],
++         "ứng viên phải tính cả ca gọi helper BỌC `_chay_buoc_dang*` (gián tiếp, nhiều tầng; def/lambda LỒNG), không tính ca không gọi")
+     uv = set(_ca_ung_vien_gian_tiep(CA))
+     do_duoc = {f.__name__: c for f in CA if f.__name__ in uv and (c := nem_nt(f))}
+     so_that = {k: (Path(v[0]).resolve(), v[1]) for k, v in SO_BO_QUA.items()}
+@@ -11405,7 +11408,8 @@ def t203_seam_main_KHONG_ro_trang_thai_qua_luot_goi():
+     def anh():
+         return {"CA": list(CA), "SO_BO_QUA": dict(SO_BO_QUA), "os.name": os.name, "sys.argv": list(sys.argv),
+                 "os.environ": dict(os.environ), "cwd": os.getcwd(), "sys.path": list(sys.path),
+-                "globals": {k: id(v) for k, v in list(globals().items()) if not k.startswith("__")}}
++                "globals": {k: (id(v), repr(v) if isinstance(v, (list, dict, set, bytearray)) else None)   # ĐỔI TẠI CHỖ cũng lộ
++                            for k, v in list(globals().items()) if not k.startswith("__")}}
+ 
+     def no():
+         raise RuntimeError("fixture ném lỗi")

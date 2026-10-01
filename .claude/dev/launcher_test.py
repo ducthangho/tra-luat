@@ -5997,7 +5997,8 @@ def t152_hook_cai_dat_va_khop_al_ver_ci():
     bang(bool(m_hook), f"hook phai ghim AL_VER: {hook_txt[:200]}")
     al_ver = m_hook.group(1)
     ci_vers = re.findall(r'^\s*AL_VER:\s*([0-9]+\.[0-9]+\.[0-9]+)', ci_txt, re.MULTILINE)
-    bang(len(ci_vers) == 4 and all(v == al_ver for v in ci_vers), f"ci.yml 4 cho phai khop {al_ver}: {ci_vers}")
+    # #668: cho thu 5 la job `gate-cong-cu` (8 manh ban kinh dot bien cua cong_cu_test can actionlint that).
+    bang(len(ci_vers) == 5 and all(v == al_ver for v in ci_vers), f"ci.yml 5 cho phai khop {al_ver}: {ci_vers}")
     bang("PYTHONUTF8=1" in hook_txt and "PYTHONIOENCODING=utf-8" in hook_txt, "hook phai export UTF-8")
     bang("cai_actionlint.sh" in hook_txt and "CANH BAO" in hook_txt, "hook phai co cai_actionlint va CANH BAO")
     # Lop 2: Do hanh vi gioi han tien trinh — hook chay nhu con khong doi duoc bien o cha

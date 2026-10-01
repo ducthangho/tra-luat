@@ -1,0 +1,124 @@
+# LEASE — LEASE-PUBLISH-WINDOWS-DO revision 3 / generation 3 — mo lai sau khi #677 land (PR #689, 20ec8d5)
+# GHI HO theo chi thi CHU KHO trong phien (chep nguyen van o granted_on_instruction_nguyen_van).
+
+schema_version: 2
+event: executor_lease_granted
+
+packet_issue: 687
+granted_by: ducthangho
+granted_on_instruction: 'Loi chu kho trong phien Claude Code session_01RU4YGGdYMx94uVcywPjo4F, 2026-10-01 ~01:00-01:05Z'
+granted_on_instruction_nguyen_van: >-
+  "Hãy land và bookeeping. Cấp leaase nếu cần. #687: ĐỒNg ý, cấp lease và làm đi" (~01:00Z, sau khi chu kho tu merge
+  PR #689); va voi cau hoi ve tran S5' va review codex het quota, chu kho chon "Spec r3: đo trần so merge-base, Sonnet
+  review (Recommended)" (~01:05Z).
+authority_caveat: >-
+  Chi thi nam trong phien; lease do phien agent ghi va day bang credential cua tai khoan chu kho (#566) — yeu hon
+  comment chu kho tu viet.
+recorded_by: claude-session
+recorder_is_dispatcher: false
+
+leased_at_utc: '2026-10-01T01:12:00Z'
+lease_expires_at_utc: '2026-10-01T05:55:00Z'
+han_ghi_chu: >-
+  Goc 2026-10-02T01:12:00Z. RUT NGAN ve 2026-10-01T05:55:00Z — xem thu_hoi_bang_rut_han.
+han_vi_sao: 'Mot vong merge master + va + review + day mot lan: 24h. Phien khong tu noi han.'
+
+packet_id: LEASE-PUBLISH-WINDOWS-DO
+packet_slug: LEASE-PUBLISH-WINDOWS-DO
+revision: 3
+generation: 3
+lease_id: lease-publish-windows-do-r3-g3-claude
+thay_the_cho: []
+thay_the_ghi_chu: >-
+  g2 (lease-publish-windows-do-r2-g2-claude) DA HET HAN 2026-09-29T11:45:00Z (thu hoi bang rut han, 6112b89); g1 het
+  han 11:50Z (814b4e5). Lease da chet => khong viet bia mo (CLAUDE.md: bia mo chi cho lease con song). Lease g6 cua
+  #677 giu cung tep da thu hoi bang rut han ve 2026-10-01T01:10:00Z (claude/cap-lease-677-g6 @ 35e23d7) vi #677 da merge.
+role: executor
+provider: anthropic_claude
+executor: claude
+surface: claude_code
+model: claude-opus-5-5
+effort: max
+effort_ghi_chu: 'Agent va-spec-opus-max (dinh nghia khai effort max); harness co ap hay khong => KHONG DO DUOC.'
+environment: cloud
+risk: sensitive
+review_class: sensitive
+effective_review_class: sensitive
+assurance_target: human_audited
+reviewer_provider: anthropic_claude
+reviewer_surface: claude_code_subagent
+reviewer_model_yeu_cau: claude-sonnet-5-5
+reviewer_ghi_chu: >-
+  Spec r3 §4: Sonnet 5.5 (agent review-sonnet), cung ho voi executor => advisory_review; codex het quota toi
+  2026-10-03. human_audited cua chu kho la cong land. Khong khai cross_approved.
+access: read-write
+
+spec_path: ops/specs/lease-publish-windows-do-r3.md
+spec_ref: refs/heads/claude/lease-publish-windows-do
+spec_source_oid: 050e62577651e409a7e2ec8b9c9ab73d8032e983
+spec_sha256: d4d6715d9f4129d4ceb7dcb47dfe2ede67b53a01e8ac1df350111de8e627543e
+spec_hash: d4d6715d9f4129d4ceb7dcb47dfe2ede67b53a01e8ac1df350111de8e627543e
+spec_hash_formula: SHA256 of UTF-8 LF Git blob bytes at spec_source_oid:spec_path
+prompt_path: ops/specs/lease-publish-windows-do-r3.md
+prompt_sha256_required: d4d6715d9f4129d4ceb7dcb47dfe2ede67b53a01e8ac1df350111de8e627543e
+
+branch: claude/lease-publish-windows-do
+branch_ownership: exclusive
+branch_ghi_chu: 'Spec, lease va ma di cung nhanh nay (khong thuoc ops/**). ai-dang-giu van thay vi quet moi ref.'
+start_from_sha: 89fc4fac8cea65979cc2483043dc8cd07a6e8518
+immutable_acceptance_baseline: 89fc4fac8cea65979cc2483043dc8cd07a6e8518
+continuation_base: 6112b89eefaa358a715d90800789b2d1456c1729
+master_sha_at_grant: 20ec8d5d0e86cb7dc01f202c7596407a957e5961
+reviewed_sha_required: 807c6c2898b2338cbc8f97cbcd8540519fbe4f8a
+reviewed_sha_required_nghia: 'Head ma da review cuoi (r2). Moi verdict moi neo exact head THAT cua nhanh sau merge master + va.'
+
+write_set:
+  - ops/lease_publish_test.py
+write_set_hash: 94d43dbfd09ef93bc4e24aeaae23e66641567dcfd65e8b88aa5f67422e5a25fd
+write_set_hash_cach_tinh: 'sha256 cua cac duong dan DA SAP XEP, noi bang LF, co LF cuoi, utf-8.'
+write_set_da_do_truoc_khi_cap: >-
+  Do 2026-10-01T01:11:07Z tren clone moi: fetch '+refs/heads/*' --prune; so TAP TEN ls-remote --heads (459) voi
+  for-each-ref refs/remotes/origin (459): comm -23 = 0. ai-dang-giu ops/lease_publish_test.py => NGUOI_GIU 0
+  (g6 cua #677, g1/g2 cua #687 deu HET_HAN).
+
+ci_budget:
+  gate_tu_dong: '1 luot pull_request khi mo PR luc san sang merge'
+  phep_do_duoc_cap: '0 luot Windows'
+  het: 'DUNG truoc moi push/chay lai ke tiep, cho quyet dinh cua chu kho'
+
+dieu_kien_dung:
+  - 'S1 — cham duong ngoai write set. DUNG.'
+  - 'S2 — CI do vi packet. DUNG, bao chu kho.'
+  - "S5'' — ops/lease_publish_test.py > 600 dong them so merge-base voi origin/master (spec r3 §2). DUNG truoc review."
+  - 'S6 — het han lease => ngung ghi, handoff §7.'
+
+cam_tuyet_doi:
+  - Khong sua spec; khong sua tep ngoai write set
+  - Khong tu review / approve / merge / land
+  - Khong CI tay, khong Windows khi chua duoc phep, khong LIVE/deploy
+  - Khong force-push; khong viet chuoi bo-qua-CI nguyen van trong commit message
+
+chua_do_duoc:
+  - 'Danh tinh nguoi ky: #566.'
+  - 'Model/effort thuc te cua executor va reviewer.'
+  - 'Windows.'
+lease_sua_lan_cuoi: '2026-10-01T05:44Z'
+lease_sua_ghi_chu: >-
+  Lan 1: rut ngan lease_expires_at_utc (thu_hoi_bang_rut_han). Khong doi write set, spec, branch.
+thu_hoi_bang_rut_han:
+  han_goc_utc: '2026-10-02T01:12:00Z'
+  han_moi_utc: '2026-10-01T05:55:00Z'
+  chi_thi: >-
+    Chu kho trong phien Claude Code session_01RU4YGGdYMx94uVcywPjo4F: "#687: ĐỒNg ý, cấp lease và làm đi" (~01:00Z);
+    chu kho human_audited (pull/701#issuecomment-5925449076, approve, neo 9d7a523) roi tu merge PR #701.
+  ly_do: >-
+    Packet #687 da MERGE: PR #701 merge 163fd5d (2026-10-01 ~05:42Z), cha thu hai 9d7a523 = head duoc human_audited.
+  vi_sao_khong_dung_so: >-
+    Theo tien le #651/#660/#661/#668/#677: so ops/thu-hoi/ chua kich hoat; rut han dung co che DA CAI. Lease nam tren
+    nhanh claude/** nen khong co workflow dang lease nao doc no; han moi dat vai phut sau luc push.
+  nguoi_rut: 'land operator session_01RU4YGGdYMx94uVcywPjo4F (cung phien dieu phoi executor; khong co phien executor rieng)'
+  gioi_han: >-
+    Ref mang ban rut han: nhanh claude/cap-lease-687-g3. Ban CHUA rut han cua tep nay da vao master qua PR #701
+    (163fd5d) — ban rut han ve master qua PR ghi so #687. Nghiem thu: ai-dang-giu ops/lease_publish_test.py khong con
+    lease-publish-windows-do-r3-g3-claude trong NGUOI_GIU sau 05:55Z khi quet du ref (ca ref master: han goc 2026-10-02
+    van con tren master cho toi khi PR ghi so merge).

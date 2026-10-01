@@ -1,0 +1,123 @@
+# LEASE — LEASE-PUBLISH-WINDOWS-DO revision 1 / generation 1 — hop dong bo ca (L1) + A/B du bang chung (L2)
+# GHI HO theo chi thi CHU KHO trong phien (chep nguyen van o granted_on_instruction_nguyen_van).
+
+schema_version: 2
+event: executor_lease_granted
+
+packet_issue: 687
+granted_by: ducthangho
+granted_on_instruction: https://github.com/ducthangho/tra-luat/issues/687
+granted_on_instruction_nguyen_van: >-
+  'Chọn 1' (chu kho, phien Claude Code, 2026-09-29), tra loi cho de xuat cua phien: "1. Cấp lease cho
+  ops/lease_publish_test.py để vá L1 (hợp đồng skip) và L2 (A/B không kiểm đủ ca) bằng Sonnet 5.5 effort high".
+  Chi thi truoc do cung phien: "Nếu cần lặp vá, cross-review, đăng verdict tới hết P1, P2, P3. Vá bằng sonnet 5.5,
+  effort high".
+authority_caveat: >-
+  Chi thi nam trong phien, khong co comment chu kho tu viet tren #687; Issue va lease do phien executor dang bang
+  tai khoan chu kho (#566) — yeu hon comment chu kho tu viet.
+recorded_by: claude-session
+recorder_is_dispatcher: false
+
+leased_at_utc: '2026-09-29T10:20:00Z'
+lease_expires_at_utc: '2026-09-29T11:50:00Z'
+han_ghi_chu: >-
+  Goc 2026-09-30T10:20:00Z. RUT NGAN ve 2026-09-29T11:50:00Z — xem thu_hoi_bang_rut_han.
+
+packet_id: LEASE-PUBLISH-WINDOWS-DO
+packet_slug: LEASE-PUBLISH-WINDOWS-DO
+revision: 1
+generation: 1
+lease_id: lease-publish-windows-do-r1-g1-claude
+da_bi_thay_the: lease-publish-windows-do-r2-g2-claude
+thay_the_cho: []
+thay_the_ghi_chu: 'Khong lease nao dang giu write set (ai-dang-giu NGUOI_GIU 0, do 2026-09-29T10:19Z).'
+role: executor
+provider: anthropic_claude
+executor: claude
+surface: claude_code
+model: claude-opus-5-5
+effort: medium
+effort_ghi_chu: >-
+  Chi thi chu kho (phien, 2026-09-29, sau khi cap): 'Lặp vá (opus 5.5, effort medium trở lên)' thay chi thi truoc
+  'Vá bằng sonnet 5.5, effort high'. Luot Sonnet bi DUNG giua chung, ban nhap khong duoc dung lam ban va. Cong cu
+  subagent khong dat duoc effort => effort la chi dan trong prompt, KHONG DO DUOC tu ngoai.
+environment: cloud
+risk: sensitive
+review_class: sensitive
+effective_review_class: sensitive
+assurance_target: human_audited
+reviewer_provider: openai_codex
+reviewer_surface: codex_cli
+reviewer_model_yeu_cau: gpt-6-astra
+reviewer_ghi_chu: 'Codex CLI tai cho, effort >= medium, phan LOP kem hint patch; human_audited la cong land.'
+access: read-write
+
+spec_path: ops/specs/lease-publish-windows-do-r1.md
+spec_ref: refs/heads/claude/lease-publish-windows-do
+spec_source_oid: c78d438ef71f49ff02c9b52f4c70838afa173d79
+spec_sha256: 87375af33e23157a89a9fee88696d5ad2466b388182aff4d896386ee6b16e230
+spec_hash: 87375af33e23157a89a9fee88696d5ad2466b388182aff4d896386ee6b16e230
+spec_hash_formula: SHA256 of UTF-8 LF Git blob bytes at spec_source_oid:spec_path
+prompt_path: ops/specs/lease-publish-windows-do-r1.md
+prompt_sha256_required: 87375af33e23157a89a9fee88696d5ad2466b388182aff4d896386ee6b16e230
+
+branch: claude/lease-publish-windows-do
+branch_ownership: exclusive
+branch_ghi_chu: >-
+  Spec, lease va ma di cung nhanh nay. Nhanh khong thuoc ops/** nen ops-publish-lease.yml KHONG dang ban chieu
+  comment — ai-dang-giu van thay lease vi no quet moi ref.
+start_from_sha: 89fc4fac8cea65979cc2483043dc8cd07a6e8518
+immutable_acceptance_baseline: 89fc4fac8cea65979cc2483043dc8cd07a6e8518
+continuation_base: 89fc4fac8cea65979cc2483043dc8cd07a6e8518
+reviewed_sha_required: 89fc4fac8cea65979cc2483043dc8cd07a6e8518
+reviewed_sha_required_nghia: 'Chua co head ung vien; moi verdict neo exact head THAT cua nhanh thi cong.'
+
+write_set:
+  - ops/lease_publish_test.py
+write_set_hash: 94d43dbfd09ef93bc4e24aeaae23e66641567dcfd65e8b88aa5f67422e5a25fd
+write_set_hash_cach_tinh: 'sha256 cua cac duong dan DA SAP XEP, noi bang LF, co LF cuoi, utf-8.'
+write_set_da_do_truoc_khi_cap: >-
+  Do 2026-09-29T10:19Z: fetch '+refs/heads/*'; so TAP TEN ls-remote 511 / cuc bo sau fetch, comm -23 = 0.
+  ai-dang-giu ops/lease_publish_test.py => NGUOI_GIU 0. #677 (no 3 cua #579) dang mo nhung chua giu lease;
+  #676 (no 1) da land PR #680.
+
+ci_budget:
+  gate_tu_dong: '0 / 1 / 2 luot pull_request'
+  phep_do_duoc_cap: '0 luot Windows — xin chu kho truoc moi luot workflow_dispatch'
+  het: 'DUNG truoc moi push/chay lai ke tiep, cho quyet dinh cua chu kho'
+
+dieu_kien_dung:
+  - 'S1 — cham duong ngoai write set. DUNG.'
+  - 'S2 — CI do vi packet. DUNG, bao chu kho.'
+  - 'S5 — > 300 dong them. DUNG truoc review.'
+  - 'S6 — het han lease => ngung ghi, handoff §7.'
+
+cam_tuyet_doi:
+  - Khong sua spec; khong sua tep ngoai write set
+  - Khong tu review / approve / merge / land
+  - Khong CI tay, khong Windows khi chua duoc phep, khong LIVE/deploy
+  - Khong force-push
+
+chua_do_duoc:
+  - 'Danh tinh nguoi ky: #566.'
+  - 'Effort thuc te cua subagent executor.'
+lease_sua_lan_cuoi: '2026-09-29T11:36:00Z'
+lease_sua_ghi_chu: >-
+  Lan 1: doi model/effort executor theo chi thi chu kho; khong doi write set, han, spec.
+  Lan 2 (2026-09-29T11:36Z): thu hoi bang rut han ve 11:50Z — xem thu_hoi_bang_rut_han. Khong doi write set, spec.
+thu_hoi_bang_rut_han:
+  han_goc_utc: '2026-09-30T10:20:00Z'
+  han_moi_utc: '2026-09-29T11:50:00Z'
+  chi_thi: >-
+    Chu kho trong phien session_01E3unUqtumWcjaBodjRGS2A (~11:30Z 29-09-2026), tra loi cau hoi xep thu tu hai packet
+    cung giu ops/lease_publish_test.py: "Dao: no-3 di truoc". No-3 (#677, PR #689) di truoc; no-2 (#687) TAM DUNG.
+  ly_do: >-
+    ai-dang-giu ops/lease_publish_test.py luc 11:25Z (du ref) = NGUOI_GIU 2: lease nay va
+    dot-bien-l-bien-cong-khai-exec-1-claude-20260929 (#677) — cua so hai writer tren cung tep. Chu kho chon chay tuan tu.
+  khong_phai: 'KHONG phai packet da land. #687 van mo; cong viec tren nhanh (807c6c2, 29a0e9f) giu nguyen, khong xoa.'
+  tiep_theo: >-
+    Sau khi #677 land va lease cua no thoi giu tep: xin chu kho cap lease g2 cho #687 (thay_the_cho: [] vi g1 da het
+    han — CLAUDE.md: bia mo vao lease het han la mua rc=8), merge origin/master vao nhanh roi lam tiep. Chu kho du dinh
+    chay #687 tren may Windows local.
+  thuc_hien_boi: 'phien session_01E3unUqtumWcjaBodjRGS2A (go ho chu kho); phien executor no-2 session_01RU4YGGdYMx94uVcywPjo4F da duoc ngat va dang IDLE luc 11:33Z.'
+  vi_sao_khong_dung_so: 'Theo tien le #661/#650/#574/#676: so ops/thu-hoi/ chua kich hoat; rut han dung co che da cai.'

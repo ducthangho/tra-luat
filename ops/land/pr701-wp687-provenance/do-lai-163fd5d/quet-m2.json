@@ -1,0 +1,648 @@
+{
+"tom": {
+"so_ca": 198,
+"QUA": 183,
+"NEM": 12,
+"KHAC": [
+"t199_A9_guard_nen_cua_helper_qua_diem_do_o_ba_trang_thai",
+"t203_seam_main_KHONG_ro_trang_thai_qua_luot_goi"
+],
+"BO_KHOI_QUET": [
+"t125_AB_toan_suite_KHONG_doi_verdict_theo_ambient_actor"
+],
+"tap_nem_bang_so": true,
+"nem_ngoai_so": [],
+"so_khong_nem": [],
+"cap_nem": [
+[
+"/tmp/claude-0/-home-user-tra-luat/0c469e32-6eae-522a-ad2b-aacdd0027d2d/scratchpad/bk687-qd/m2tree/.github/workflows/ops-publish-lease.yml",
+"dang"
+]
+],
+"giay": 164.4
+},
+"res": {
+"t01_lease_hop_le_thi_QUA": [
+"QUA"
+],
+"t02_granted_by_la_ten_provider_bi_CHAN": [
+"QUA"
+],
+"t02b_ten_KHONG_CO_THAM_QUYEN_bi_CHAN": [
+"QUA"
+],
+"t02c_nguoi_CO_tham_quyen_thi_QUA_moi_cach_viet": [
+"QUA"
+],
+"t02d_GITHUB_ACTOR_khong_co_tham_quyen_bi_CHAN": [
+"QUA"
+],
+"t03_lease_da_het_han_bi_CHAN": [
+"QUA"
+],
+"t04_han_thieu_mui_gio_bi_CHAN": [
+"QUA"
+],
+"t05_thieu_truong_bat_buoc_bi_CHAN": [
+"QUA"
+],
+"t06_sha_khong_dung_dang_bi_CHAN": [
+"QUA"
+],
+"t07_packet_issue_khong_phai_so_bi_CHAN": [
+"QUA"
+],
+"t09_body_in_ra_nguyen_van_YAML_de_doi_chieu": [
+"QUA"
+],
+"t10_body_TU_CHOI_lease_khong_hop_le": [
+"QUA"
+],
+"t12_tep_khong_ton_tai_bao_ro": [
+"QUA"
+],
+"t13_yaml_hong_khong_duoc_no_traceback": [
+"QUA"
+],
+"t14_neo_prompt_DUNG_thi_QUA": [
+"QUA"
+],
+"t15_bam_LECH_thi_CHAN": [
+"QUA"
+],
+"t16_tep_prompt_KHONG_CO_thi_CHAN": [
+"QUA"
+],
+"t17_neo_NUA_VOI_thi_CHAN_CA_HAI_CHIEU": [
+"QUA"
+],
+"t18_prompt_path_VUOT_RA_NGOAI_kho_thi_CHAN": [
+"QUA"
+],
+"t19_symlink_tro_RA_NGOAI_kho_thi_CHAN": [
+"QUA"
+],
+"t20_sha256_SAI_DANG_thi_CHAN": [
+"QUA"
+],
+"t21_bam_theo_BYTE_chu_khong_theo_van_ban": [
+"QUA"
+],
+"t22_body_cung_bi_CHAN_khi_neo_hong": [
+"QUA"
+],
+"t23_MOI_lease_THAT_trong_kho_phai_QUA": [
+"QUA"
+],
+"t24_workflow_KHONG_duoc_nhet_dau_skip_ci_vao_commit": [
+"QUA"
+],
+"t25_workflow_dang_lease_phai_chay_bo_kiem_NEO_khong_lay_tu_head": [
+"QUA"
+],
+"t41_t25_chi_cat_chu_thich_run_inline_khi_chac_chan": [
+"QUA"
+],
+"t26_moi_bien_nhan_review_phai_khop_BAM_tep_no_tro_toi": [
+"QUA"
+],
+"t27_canh_bao_trong_bien_nhan_phai_duoc_NANG_len_muc_luc": [
+"QUA"
+],
+"t31_moi_workflow_cai_pyyaml_phai_GHIM_va_ghim_CUNG_MOT_ban": [
+"QUA"
+],
+"t32_buoc_chon_lease_KHONG_duoc_quet_CA_THU_MUC": [
+"QUA"
+],
+"t33_workflow_dang_lease_phai_qua_actionlint": [
+"QUA"
+],
+"t34_workflow_khong_duoc_goi_THANG_tep_bo_test": [
+"QUA"
+],
+"t35_script_cai_actionlint_phai_TU_CHOI_ban_sai": [
+"QUA"
+],
+"t36_giai_nen_phai_chiu_duoc_duong_dan_mang_DAU_HAI_CHAM": [
+"QUA"
+],
+"t37_goi_tai_ve_phai_qua_DOI_CHIEU_BAM_truoc_khi_chay": [
+"QUA"
+],
+"t38_bam_phai_dung_khi_DUONG_DAN_co_dau_cheo_nguoc": [
+"QUA"
+],
+"t39_loai_archive_phai_do_NOI_DUNG_khong_doan_tu_ten": [
+"QUA"
+],
+"t40_wrapper_phai_CAI_truoc_CHAY_va_giu_rc_cua_bo_test": [
+"QUA"
+],
+"t42_marker_NO_CO_TEN_va_muc_so_no_phai_khop_HAI_CHIEU": [
+"QUA"
+],
+"t43_PR_phai_CHAN_va_neu_pull_requests": [
+"QUA"
+],
+"t44_loi_do_loai_phai_CHAN_khong_dang": [
+"QUA"
+],
+"t45_ISSUE_phai_QUA_lop_do_loai": [
+"QUA"
+],
+"t46_comment_da_co_thi_BO_QUA_xuyen_nhanh": [
+"QUA"
+],
+"t47_dau_lease_KHAC_khong_duoc_chan": [
+"QUA"
+],
+"t48_loi_doc_comment_phai_CHAN_khong_dang": [
+"QUA"
+],
+"t49_env_va_lease_khong_duoc_chon_moi_noi": [
+"QUA"
+],
+"t50_ngoai_Actions_phai_KHAI_hai_lop_vang": [
+"QUA"
+],
+"t51_lease_giua_bi_chan_van_xu_ly_het_nhung_luot_DO": [
+"NEM",
+"/tmp/claude-0/-home-user-tra-luat/0c469e32-6eae-522a-ad2b-aacdd0027d2d/scratchpad/bk687-qd/m2tree/.github/workflows/ops-publish-lease.yml",
+"dang"
+],
+"t53_check_trong_Actions_khong_gh_van_QUA": [
+"QUA"
+],
+"t54_comment_nguoi_ngoai_khong_duoc_bit_lease": [
+"QUA"
+],
+"t55a_thieu_user_login_phai_CHAN": [
+"QUA"
+],
+"t55b_dau_khong_o_dau_than_thi_khong_tinh": [
+"QUA"
+],
+"t56_lease_id_ky_tu_dac_biet_phai_CHAN": [
+"QUA"
+],
+"t57_slurp_khong_trang_CHAN_mot_trang_rong_QUA": [
+"QUA"
+],
+"t58_check_body_thuan_va_check_khai_lop_chua_chay": [
+"QUA"
+],
+"t59_moi_lease_goi_kiem_github_truoc_check": [
+"NEM",
+"/tmp/claude-0/-home-user-tra-luat/0c469e32-6eae-522a-ad2b-aacdd0027d2d/scratchpad/bk687-qd/m2tree/.github/workflows/ops-publish-lease.yml",
+"dang"
+],
+"t60_kiem_github_hong_khong_POST_va_lam_buoc_DO": [
+"NEM",
+"/tmp/claude-0/-home-user-tra-luat/0c469e32-6eae-522a-ad2b-aacdd0027d2d/scratchpad/bk687-qd/m2tree/.github/workflows/ops-publish-lease.yml",
+"dang"
+],
+"t62_kiem_github_rc9_bo_qua_lease_va_buoc_XANH": [
+"NEM",
+"/tmp/claude-0/-home-user-tra-luat/0c469e32-6eae-522a-ad2b-aacdd0027d2d/scratchpad/bk687-qd/m2tree/.github/workflows/ops-publish-lease.yml",
+"dang"
+],
+"t63_check_rc9_bo_qua_lease_va_buoc_XANH": [
+"NEM",
+"/tmp/claude-0/-home-user-tra-luat/0c469e32-6eae-522a-ad2b-aacdd0027d2d/scratchpad/bk687-qd/m2tree/.github/workflows/ops-publish-lease.yml",
+"dang"
+],
+"t64_guard_dan_xuat_tu_YAML_khop_so_dang_ky": [
+"QUA"
+],
+"t65_bo_trich_rong_hoac_hong_phai_DO": [
+"QUA"
+],
+"t66_moi_guard_co_phan_chung_va_ve_theo_vi_tri": [
+"NEM",
+"/tmp/claude-0/-home-user-tra-luat/0c469e32-6eae-522a-ad2b-aacdd0027d2d/scratchpad/bk687-qd/m2tree/.github/workflows/ops-publish-lease.yml",
+"dang"
+],
+"t67_ve_khang_dinh_phai_khop_vi_tri_dan_xuat_tu_YAML": [
+"QUA"
+],
+"t68_post_rc_hong_van_COMMENT_DA_LEN_va_buoc_phai_DO": [
+"NEM",
+"/tmp/claude-0/-home-user-tra-luat/0c469e32-6eae-522a-ad2b-aacdd0027d2d/scratchpad/bk687-qd/m2tree/.github/workflows/ops-publish-lease.yml",
+"dang"
+],
+"t69_W1_W2_thieu_dau_ra_do_gia_phai_bao_du_ba_manh": [
+"QUA"
+],
+"t70_W6_matrix_co_Windows_phai_chay_lai_bay_ca": [
+"QUA"
+],
+"t71_W7_workflow_khong_ubuntu_only_cam_bo_qua": [
+"QUA"
+],
+"t72_W8_bo_qua_phai_in_runs_on_va_tong_ket": [
+"QUA"
+],
+"t73_nen_posix_khong_duoc_bo_qua_ca_nao": [
+"QUA"
+],
+"t74_A1_A2_executor_khong_duoc_ha_lop_va_ve_dung_phai_QUA": [
+"QUA"
+],
+"t75_A3_A13_reviewer_sensitive_va_KHONG_doc_thu_muc_lease": [
+"QUA"
+],
+"t76_A4_reviewer_khai_thap_phai_bi_CHAN": [
+"QUA"
+],
+"t77_A5_planned_duoc_cat_truoc_khi_tra_bang": [
+"QUA"
+],
+"t78_A6_write_set_thieu_rong_hong_deu_sensitive": [
+"QUA"
+],
+"t79_A7_noi_bang_launcher_lam_ca_dich_DO": [
+"QUA"
+],
+"t80_A8_schema_v1_bo_qua_chot_va_co_canh_bao": [
+"QUA"
+],
+"t81_A14_ve_duong_executor_routine_phai_song": [
+"QUA"
+],
+"t82_A10_dot_bien_A1_A8_tren_ban_sao_CA_CAY_ten_rieng": [
+"QUA"
+],
+"t83_traversal_duoc_chuan_hoa_truoc_khi_tra_bang": [
+"QUA"
+],
+"t88_traversal_khong_duoc_nhan_lop_thap_truoc_khi_chuan_hoa": [
+"QUA"
+],
+"t84_schema_version_hong_vo_huong_phai_bi_CHAN": [
+"QUA"
+],
+"t85_schema_version_hong_container_phai_bi_CHAN": [
+"QUA"
+],
+"t86_moi_muc_bang_seed_deu_phai_sensitive": [
+"QUA"
+],
+"t87_ba_duong_van_hanh_phai_sensitive": [
+"QUA"
+],
+"t89_A1_A2b_quet_du_hai_nguoi_giu_va_ba_trang_thai": [
+"QUA"
+],
+"t90_A2_yaml_hong_fail_close": [
+"QUA"
+],
+"t91_A2c_da_bi_thay_the_van_in_nhung_khong_giu": [
+"QUA"
+],
+"t92_A3_A4_A5_A6_so_tap_ten_ref": [
+"QUA"
+],
+"t94_A8_moi_ca_co_dot_bien_ma_san_pham_lam_DO": [
+"QUA"
+],
+"t95_git_that_bai_phai_fail_close_khong_duoc_nuot_loi": [
+"QUA"
+],
+"t96_lease_cham_duong_khop_tuyet_doi_khong_phai_chua": [
+"QUA"
+],
+"t98_truc_phan_biet_la_NEN_chu_khong_phai_TEN_TEP": [
+"QUA"
+],
+"t99_con_tro_treo_chan_xau_khong_chan_ten_truong_cua_spec_va_quet_nguoc": [
+"QUA"
+],
+"t100_bia_mo_doi_dau_cu_thieu_danh_dau_nhung_cho_ca_dung": [
+"QUA"
+],
+"t101_dot_bien_con_tro_treo_va_bia_mo_deu_bi_giet": [
+"QUA"
+],
+"t102_nhanh_cuc_bo_tut_sau_phai_CHAN_truoc_khu_trung_lease_id": [
+"QUA"
+],
+"t103_nhanh_cuc_bo_bang_origin_phai_QUA": [
+"QUA"
+],
+"t104_nhanh_cuc_bo_di_truoc_origin_phai_QUA": [
+"QUA"
+],
+"t105_nhanh_cuc_bo_khong_co_origin_phai_QUA": [
+"QUA"
+],
+"t106_cung_lease_id_khac_noi_dung_chi_dem_MOT": [
+"QUA"
+],
+"t107_hai_lease_id_khac_nhau_phai_dem_HAI": [
+"QUA"
+],
+"t108_moi_chot_ref_cuc_bo_co_dot_bien_rieng": [
+"QUA"
+],
+"t109_lenh_chua_nhanh_ranh_phai_chay_duoc_va_khop_origin": [
+"QUA"
+],
+"t110_lenh_chua_nhanh_bi_worktree_giu_phai_chay_duoc_va_khop_origin": [
+"QUA"
+],
+"t111_allowlist_worktree_nam_trang_thai_va_dot_bien": [
+"QUA"
+],
+"t112_cac_ca_khoa_upstream_that_va_bon_trang_thai": [
+"QUA"
+],
+"t113_sau_dot_bien_upstream_va_phan_ky_deu_bi_giet": [
+"QUA"
+],
+"t114_khong_config_nhung_co_origin_cung_ten_phai_duoc_phan_loai": [
+"QUA"
+],
+"t115_tag_khong_nam_trong_pham_vi_quet_lease_va_dot_bien": [
+"QUA"
+],
+"t116_ref_chinh_xac_hinh_dang_va_bon_dot_bien_bat_buoc": [
+"QUA"
+],
+"t117_bia_mo_tro_lease_khong_ton_tai_phai_KHONG_XAC_DINH": [
+"QUA"
+],
+"t118_bia_mo_co_lease_moi_nhung_khong_tro_nguoc_phai_CHAN": [
+"QUA"
+],
+"t119_bia_mo_hai_chieu_day_du_van_go_lease_cu": [
+"QUA"
+],
+"t120_thay_the_cho_danh_sach_hai_lease_deu_co_bia_mo_phai_QUA": [
+"QUA"
+],
+"t121_thay_the_cho_danh_sach_thieu_mot_bia_mo_phai_CHAN": [
+"QUA"
+],
+"t122_hai_lease_tro_vong_cho_ket_qua_xac_dinh_khong_de_quy": [
+"QUA"
+],
+"t123_bia_mo_hong_het_han_va_khong_cham_duong_khong_duoc_lan_toa": [
+"QUA"
+],
+"t124_bay_dot_bien_bia_mo_giet_dung_va_chi_dung_tap_dich": [
+"QUA"
+],
+"t126_dau_da_dang_la_HIEN_VAT_SUA_DUOC_chu_khong_phai_ban_ghi_git": [
+"QUA"
+],
+"t125_AB_toan_suite_KHONG_doi_verdict_theo_ambient_actor": [
+"BO_KHOI_QUET"
+],
+"t127_A7_M1_ma_tran_ban_ghi_thu_hoi_thu_tu_loi_12_4_8": [
+"QUA"
+],
+"t128_S7_dinh_tuyen_metadata_dung_MOT_path_va_schema_retired": [
+"QUA"
+],
+"t129_Q45_reader_object_store_bam_lai_va_canh_tu_bytes": [
+"QUA"
+],
+"t130_S2_seam_bytes_lech_OID_12_va_parser_KHONG_nhan_byte": [
+"QUA"
+],
+"t131_S8_tam_tran_bound_tru_1_bound_bound_cong_1_va_deadline": [
+"QUA"
+],
+"t132_shallow_va_object_thieu_la_12_khong_phai_vang": [
+"QUA"
+],
+"t133_M4_kiem_thu_hoi_github_receipt_append_only_va_che_do_chua_kich_hoat": [
+"QUA"
+],
+"t134_M2_ai_dang_giu_so_khong_rong_khi_co_False_la_12_va_du_bao_khong_doi_rc": [
+"QUA"
+],
+"t135_M3_check_thuan_mac_dinh_va_du_bao_chi_them_dong": [
+"QUA"
+],
+"t136_A2_adapter_nguon_ghim_danh_tinh_profile_duyet_va_khong_doc_config_kho": [
+"QUA"
+],
+"t137_M9_workflow_admission_hop_dong_tinh_va_actionlint_shellcheck": [
+"QUA"
+],
+"t138_A12_bien_nhan_receipt_du_truong_va_neo_doc_lap_cay_PR": [
+"QUA"
+],
+"t139_A12_catalog_mutant_A0_giet_dung_ly_do_va_ghi_SONG_kem_seam": [
+"QUA"
+],
+"t140_review_F01_Q13_policy_hong_va_binding_sai_phai_12": [
+"QUA"
+],
+"t141_review_F02_ten_tieng_Viet_khong_duoc_bien_so_thanh_rong": [
+"QUA"
+],
+"t142_review_F02_namespace_sai_type_khong_phai_vang": [
+"QUA"
+],
+"t143_review_F03_tree_entry_co_slash_phai_12": [
+"QUA"
+],
+"t144_review_F04_deadline_ap_cho_memo_va_luc_hoan_tat": [
+"QUA"
+],
+"t145_review_F05_object_lon_phai_12_va_thu_hoi_cat_file": [
+"QUA"
+],
+"t146_review_F05_total_budget_truoc_doc_body_va_rc_cat_file": [
+"QUA"
+],
+"t147_review_F06_schema_version_la_integer_va_ngay_hop_le": [
+"QUA"
+],
+"t148_review_F07_M9_definition_receipt_va_commit_pin": [
+"QUA"
+],
+"t149_review_F09_preflight_object_store_khong_ke_thua_env": [
+"QUA"
+],
+"t150_review2_F10_nguon_khong_utf8_la_12_khong_traceback": [
+"QUA"
+],
+"t151_review_codex_to_tien_non_tree_metadata_rac_va_khoa_lan_kieu": [
+"QUA"
+],
+"t152_C2a_M9_fetch_H_mang_xac_thuc_qua_header_khong_token_trong_URL": [
+"QUA"
+],
+"t155_618_neo_dinh_nghia_theo_workflow_sha_khong_theo_base_sha": [
+"QUA"
+],
+"t153_nhat_ky_tung_ca_vao_ra_cap_doi_va_khong_dem": [
+"QUA"
+],
+"t154_giet_ca_cay_thu_hoi_CHAU_chu_khong_chi_CON": [
+"QUA"
+],
+"t157_tee_dua_dong_con_LEN_NGAY_trong_luc_con_CON_DANG_CHAY": [
+"QUA"
+],
+"t158_tee_chi_song_khi_con_KHONG_DEM_nen_moi_truong_con_phai_TAT_DEM": [
+"QUA"
+],
+"t160_lech_AB_phai_giu_bang_chung_va_CHAN_tai_consumer_t125": [
+"QUA"
+],
+"t155_chon_ca_khong_khop_hoac_RONG_thi_KHONG_XANH": [
+"QUA"
+],
+"t156_han_NGOAI_khong_nho_hon_tong_han_TRONG_va_duoi_tran_cung": [
+"QUA"
+],
+"t159_t137_can_do_DU_ket_qua_va_dung_nhan_than_timeout": [
+"QUA"
+],
+"t161_M3_chot_nguon_duy_nhat_ma_tran_ci": [
+"QUA"
+],
+"t162_M4_evaluator_toi_gian_chuan_bi": [
+"QUA"
+],
+"t165_N1_giai_git_windows_program_files_va_fail_closed": [
+"QUA"
+],
+"t166_N2_giai_git_windows_loai_tru_cwd": [
+"QUA"
+],
+"t167_N3_giai_git_windows_loai_tru_system_root_va_chan_doan": [
+"QUA"
+],
+"t168_N4_posix_khong_hoi_quy_usr_bin_git": [
+"QUA"
+],
+"t169_N8_cong_cu_git_chi_nhan_git_exe": [
+"QUA"
+],
+"t170_N9_path_boc_nhay_kep_va_khoang_trang": [
+"QUA"
+],
+"t171_N10_path_dung_DUNG_dau_phan_cach_duoc_truyen": [
+"QUA"
+],
+"t172_N11_chan_doan_chuyen_kenh_stderr_0_byte": [
+"QUA"
+],
+"t173_N12_hang_fixture_dung_tren_CA_HAI_nen": [
+"QUA"
+],
+"t174_het_han_ma_DA_co_dau_thi_bo_qua_chu_khong_ket_toi_het_han": [
+"QUA"
+],
+"t175_het_han_ma_KHONG_co_dau_thi_van_la_het_han": [
+"QUA"
+],
+"t176_con_han_ma_DA_co_dau_van_bo_qua_nhu_cu": [
+"QUA"
+],
+"t177_con_han_KHONG_dau_thi_MOI_CHOT_cua_kiem_van_phai_chay": [
+"QUA"
+],
+"t178_tien_kiem_mien_chan_TRUOC_khi_cham_mang": [
+"QUA"
+],
+"t179_do_dau_KHONG_DO_DUOC_thi_nhuong_lai_cho_chuoi_cu": [
+"QUA"
+],
+"t180_hai_loi_cung_luc_thi_tien_kiem_KHONG_duoc_cuop_quyen_phan": [
+"QUA"
+],
+"t181_cua_CUOI_van_phai_chan_khi_API_comment_hong": [
+"QUA"
+],
+"t182_lease_KHONG_PHAI_anh_xa_thi_chan_co_ten_chu_khong_vo_tran": [
+"QUA"
+],
+"t183_do_dau_HONG_roi_PHUC_HOI_thi_cua_cuoi_van_phai_bo_qua": [
+"QUA"
+],
+"t184_chinh_HELPER_phai_doi_ngoai_le_TRAN_thanh_ca_DO_chu_khong_vo_tran": [
+"QUA"
+],
+"t187_chan_doan_phai_ha_ve_CHUOI_THUAN_chu_khong_chi_isinstance": [
+"QUA"
+],
+"t190_DA_DANG_ma_tep_bi_SUA_van_phai_qua_kiem_tru_chot_han": [
+"QUA"
+],
+"t191_MOI_chot_cua_kiem_deu_duoc_t190_phu_o_nhanh_DA_DANG": [
+"QUA"
+],
+"t192_S8_het_deadline_la_12_va_KHONG_spawn_cat_file_dem_bang_Popen": [
+"QUA"
+],
+"t185_cua_DEM_phai_chot_KET_QUA_truoc_khi_chot_SO_LOI_GOI": [
+"QUA"
+],
+"t186_KHONG_ca_nao_duoc_chot_SO_LOI_GOI_ngoai_CUA": [
+"QUA"
+],
+"t174_GOI_GIT_giai_ma_dong_bo_va_giu_hop_dong_text": [
+"QUA"
+],
+"t188_moi_ve_DOI_TRA_VE_cua_t184_phai_qua_CUA_chi_ve_d_duoc_goi_tran": [
+"QUA"
+],
+"t189_duong_chan_doan_KHONG_dinh_dang_THO_ngoai_le_vua_bat": [
+"QUA"
+],
+"t193_hop_dong_bo_qua_chi_cap_cho_ca_da_dang_ky": [
+"QUA"
+],
+"t194_AB_phai_du_bang_chung_truoc_khi_so": [
+"QUA"
+],
+"t195_M2_tap_i_bien_cong_khai_khoa_ca_bo_quan_sat": [
+"NEM",
+"/tmp/claude-0/-home-user-tra-luat/0c469e32-6eae-522a-ad2b-aacdd0027d2d/scratchpad/bk687-qd/m2tree/.github/workflows/ops-publish-lease.yml",
+"dang"
+],
+"t196_M3a_tap_ii_PR_co_dau_con_han_phai_DO_khong_bo_qua": [
+"NEM",
+"/tmp/claude-0/-home-user-tra-luat/0c469e32-6eae-522a-ad2b-aacdd0027d2d/scratchpad/bk687-qd/m2tree/.github/workflows/ops-publish-lease.yml",
+"dang"
+],
+"t197_M3b_tap_ii_Issue_co_dau_het_han_phai_DO_khong_bo_qua": [
+"NEM",
+"/tmp/claude-0/-home-user-tra-luat/0c469e32-6eae-522a-ad2b-aacdd0027d2d/scratchpad/bk687-qd/m2tree/.github/workflows/ops-publish-lease.yml",
+"dang"
+],
+"t198_M4_doi_chung_duong_chuoi_hop_le_dang_dung_mot_POST": [
+"NEM",
+"/tmp/claude-0/-home-user-tra-luat/0c469e32-6eae-522a-ad2b-aacdd0027d2d/scratchpad/bk687-qd/m2tree/.github/workflows/ops-publish-lease.yml",
+"dang"
+],
+"t199_A9_guard_nen_cua_helper_qua_diem_do_o_ba_trang_thai": [
+"KHAC",
+"TinHieuChotCa",
+"A9 guard nền: S1 điểm dò bật: nhận 'chan', phải 'qua'; S1: lý_do dẫn xuất sai: \"ops-publish-lease.yml:dang chỉ chạy Ubuntu; runs-on đã đọc được: 'ubuntu-latest'"
+],
+"t200_M1_nguon_lease_publish_tuy_chon_that_su_duoc_dung": [
+"NEM",
+"/tmp/claude-0/-home-user-tra-luat/0c469e32-6eae-522a-ad2b-aacdd0027d2d/scratchpad/bk687-qd/m2tree/.github/workflows/ops-publish-lease.yml",
+"dang"
+],
+"t201_M1_gh_gia_hai_GET_cung_snapshot_va_POST_luu_trang_thai": [
+"QUA"
+],
+"t202_M3_M4_moi_chot_quyet_dinh_co_phan_chung_rieng": [
+"QUA"
+],
+"t203_seam_main_KHONG_ro_trang_thai_qua_luot_goi": [
+"KHAC",
+"TinHieuChotCa",
+"lượt mặc định phải dùng argv + nền thật (posix) + sổ thật: rc=0, \"5:15Z\\n<<< ra t51_lease_giua_bi_chan_van_xu_ly_het_nhung_luot_DO 0.014s BO_QUA\\n  BỎ QUA t51_l"
+]
+}
+}

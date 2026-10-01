@@ -42,6 +42,9 @@
 #                                                 trước khi tới cổng; `test registry` mang env `pull_request` (GOC/DAU đúng) khi cây
 #                                                 SẠCH + HEAD đi trước `origin/master`, vắng (ĐỦ) khi bẩn, khi có mục assume-unchanged /
 #                                                 skip-worktree bị sửa, hoặc khi không đi trước
+#   t31 env-cong-cu-phien-goi-lot-qua             `PYTHON*` lạ (`PYTHONOPTIMIZE` gỡ `assert` trần), biến git cục bộ của kho (tập lấy từ
+#                                                 `git rev-parse --local-env-vars` — `GIT_WORK_TREE` đổi cây mà `git status` đo, `GIT_DIR`
+#                                                 đổi kho nhận nếp git) và `BASH_ENV` RÒ từ phiên gọi đều bị xoá trước khi tới cổng
 # Bộ này KÍN với config git của máy chạy, với biến git trỏ kho khác (khối ngay dưới `$script:Rac`), với code page của
 # console (`Doc-Utf8`), với dấu thập phân của locale (t18 nhận `5,1s`) và với `<TEMP>/actionlint` của máy (t7, t21 tự đặt TEMP).
 # ĐỘT BIẾN để đo răng (đo trên pwsh 7.4.6/Linux, bộ 28 ca, TMPDIR sạch): `-Script` trỏ f2392df ⇒ 2/28 (đạt t17 — bản ấy đã so băm —
@@ -57,8 +60,14 @@
 # GOC/DAU ⇒ lượt 1.
 # Lượt 13: b5a9f79 ⇒ chỉ t30 (cây merge: vế tĩnh thiếu `NHANH_DON_DUOC_MANH(_RA)` của `ci-dot-bien-du.yml`; cây nhánh: lượt 1 — biến ấy
 # rò tới cổng). Giữ tên trong danh sách nhưng bỏ xoá `CONG_CU_TEST_MANH*` ⇒ t30 lượt 1 (trước lượt này: SỐNG 30/30 cả hai cây); bỏ
-# chốt cờ index ⇒ t30 lượt 4 (assume-unchanged); chốt chỉ nhận thẻ thường (bỏ `S`) ⇒ lượt 5 (skip-worktree); bỏ riêng
-# `NHANH_DON_DUOC_MANH_RA` khỏi danh sách ⇒ lượt 1.
+# chốt cờ index ⇒ t30 lượt 3 (assume-unchanged); chốt chỉ nhận thẻ thường (bỏ `S`) ⇒ lượt 4 (skip-worktree); bỏ riêng
+# `NHANH_DON_DUOC_MANH_RA` khỏi danh sách ⇒ lượt 1. Từ lượt này t30 có NĂM lượt `Chay`: sạch+trước · bẩn · assume-unchanged ·
+# skip-worktree · không đi trước — nên "bỏ vế đi TRƯỚC ⇒ lượt 3" của dòng Lượt 12 nay là lượt 5 (đo: thông báo "HEAD khong di truoc").
+# Lượt 14: bộ 31 ca — 34e7a9d ⇒ chỉ t31 (vế tĩnh: thiếu 12 biến git cục bộ + `BASH_ENV`; cả cây nhánh lẫn cây merge). Đột biến bản vá,
+# mỗi cửa một lượt: bỏ xoá `PYTHON*` ⇒ t31 "assert tran bi go"; xoá `PYTHON*` theo danh sách CẤM chỉ có `PYTHONOPTIMIZE` ⇒ t31 "ro toi
+# cong_cu_test" (`PYTHONWARNINGS`); giữ tên mà bỏ xoá `GIT_WORK_TREE` / `GIT_DIR` / `BASH_ENV` / `GIT_SHALLOW_FILE` ⇒ t31 "ro toi
+# cong_cu_test". Bỏ vế THẤY TÊN của đồ giả (`STUB_KHOA_RO` không trùng biến nào) thì ba đột biến đầu vẫn chết ở vế HỆ QUẢ: `GIT_WORK_TREE`
+# ⇒ registry mang env diff trên cây BẨN; `GIT_DIR` ⇒ `core.abbrev=7` trong config kho khác; `BASH_ENV` ⇒ bash nạp tệp ấy 3 lần.
 # Lượt 10: danh sách hợp hai nền (543f2e8) ⇒ chỉ t28 (lượt 1); đảo nền ⇒ chỉ t28 (lượt 1); danh sách của nền này rỗng / thiếu `goi.gz`
 # ⇒ chỉ t28 (lượt 2); bỏ danh sách CHO PHÉP nay ⇒ t25 t28; nhánh Windows của t27 ép chạy trên Linux: fixture mới ⇒ 28/28, fixture dẫn
 # `'tools'` qua ống (blob 6 byte) ⇒ chỉ t27 (chốt tự kiểm KHÔNG ĐO ĐƯỢC).
@@ -86,7 +95,8 @@
 # pwsh 7.0); `#Requires -Version 7.1` (bộ này chạy bằng pwsh ≥ 7.1); sàn 1 s của `$conMs` (chỉ đổi kết quả khi cổng
 # thoát sát hạn); phần khối kín cho `GIT_INDEX_FILE`/`GIT_DIR` (đo bằng chạy dưới biến ấy — gỡ ra ⇒ index kho khác
 # 2144 → 34 mục — không có ca); dòng ép UTF-8 trong harness t11/t19 (chỉ có tác dụng khi console của tiến trình con là
-# code page cũ — Windows); `try/catch` quanh danh sách CHO PHÉP (chỉ khi không liệt kê được thư mục). CHƯA ĐÓNG — khai thẳng:
+# code page cũ — Windows); `try/catch` quanh danh sách CHO PHÉP (chỉ khi không liệt kê được thư mục); vế `$LASTEXITCODE -eq 0` của
+# chốt `ls-files -v` (`git status` vừa chạy được mà `ls-files` hỏng là ca không dựng được — gỡ ra ⇒ 30/30). CHƯA ĐÓNG — khai thẳng:
 # `ops/chay_lease_publish_test.sh` (ngoài write set) vẫn gọi `python` theo tên SAU khi chèn AL_DICH; script chỉ bảo đảm thư mục ấy
 # không có mục THEO DÕI và chỉ chứa TÊN installer sinh ra TẠI LÚC chèn — một cổng chạy trước wrapper (mã của nhánh) vẫn ghi được vào
 # đó, và một `actionlint[.exe]` (tên của NỀN NÀY) chưa theo dõi mà installer không ghi (lượt trước) vẫn qua tới lượt installer thành
@@ -874,6 +884,66 @@ sys.exit(7 if ro else 0)
     & git -C $k update-ref refs/remotes/origin/master HEAD
     $c = Chay $k @() ($ro + @{ STUB_REG_MONG = '2||||' })
     if ($c.ra -notmatch 'registry test\s+rc=0') { throw "HEAD khong di truoc origin/master ma registry van mang env diff (rc_script=$($c.rc))" }
+}
+
+# Biến của TRÌNH THÔNG DỊCH / git / bash từ phiên gọi — job CI không có biến nào trong số đó, nên chúng là một phần của lệnh như `env:`
+# của bước (t30). Đo với 34e7a9d: `PYTHONOPTIMIZE=1` gỡ mọi `assert` trần ⇒ cổng `assert False` ĐẠT, script rc=0 (đích THẬT:
+# `lease_publish_test.py --chi-ca=t33_` với workflow actionlint ĐỎ ⇒ rc=0 `1/1 đạt`); `GIT_WORK_TREE` trỏ bản sạch ⇒ `git status` đo
+# cây KHÁC ⇒ registry mang env `pull_request` trên cây BẨN; `GIT_DIR` trỏ kho khác ⇒ nếp git ghi vào config kho ấy; `BASH_ENV` ⇒ bash
+# nạp tệp ấy trước wrapper lease. Tập biến git lấy từ CHÍNH git (`rev-parse --local-env-vars`, trừ `GIT_CONFIG*` — t13 khoá đường ấy
+# bằng giá trị CÓ HIỆU LỰC); mỗi biến mang giá trị LÀNH trừ hai biến đo hệ quả, nên đột biến bỏ một tên chết vì đồ giả THẤY tên ấy.
+Ca 't31 bien trinh thong dich / git / bash cua phien goi bi xoa truoc cong' {
+    $gitCucBo = @(& git rev-parse --local-env-vars | Where-Object { $_ -and $_ -notlike 'GIT_CONFIG*' })
+    if ($LASTEXITCODE -ne 0 -or $gitCucBo.Count -eq 0) { throw "KHONG DO DUOC: git rev-parse --local-env-vars (rc=$LASTEXITCODE)" }
+    $ast = [System.Management.Automation.Language.Parser]::ParseFile($Script, [ref]$null, [ref]$null)
+    $co = @{}
+    foreach ($n in $ast.FindAll({ param($x) $x -is [System.Management.Automation.Language.StringConstantExpressionAst] }, $true)) { $co[$n.Value] = 1 }
+    $thieu = @(@($gitCucBo) + 'BASH_ENV' | Where-Object { -not $co.ContainsKey($_) })
+    if ($thieu.Count -gt 0) { throw "bien git cuc bo cua kho / BASH_ENV khong co trong script: $($thieu -join ', ')" }
+    $k = Dung-Kho
+    $d = Split-Path $k
+    $ktRo = "import os, sys`nro = [n for n in os.environ.get('STUB_KHOA_RO', '').split(',') if n and n in os.environ]`n" +
+            "ro += [n for n in os.environ if n.upper().startswith('PYTHON') and n.upper() not in ('PYTHONUTF8', 'PYTHONIOENCODING', 'PYTHONUNBUFFERED', 'PYTHONDONTWRITEBYTECODE')]`n"
+    Set-Content -LiteralPath (Join-Path $k 'ops/cong_cu_test.py') -Encoding utf8NoBOM -Value ($ktRo + "print('CC_RO=' + ','.join(ro)); sys.exit(7 if ro else 0)")
+    Set-Content -LiteralPath (Join-Path $k '.claude/dev/ci_dang_ky_test.py') -Encoding utf8NoBOM -Value ($ktRo +
+        "thay = '|'.join(os.environ.get(n) or '' for n in ('CI_DANG_KY_WORKERS', 'CI_DANG_KY_SU_KIEN', 'CI_DANG_KY_GOC', 'CI_DANG_KY_DAU'))`n" +
+        "print('REG_ENV=' + thay + ' RO=' + ','.join(ro)); sys.exit(0 if thay == '2|||' and not ro else 7)")
+    # Cổng Python chỉ ĐỎ được qua `assert` trần.
+    Set-Content -LiteralPath (Join-Path $k '.claude/dev/packet_loop_test.py') -Encoding utf8NoBOM -Value "assert False, 'assert phai chay'"
+    & git -C $k add -A
+    & git -C $k -c user.email=t@t -c user.name=t commit -qm stub-t31
+    & git -C $k update-ref refs/remotes/origin/master HEAD
+    Set-Content -LiteralPath (Join-Path $k 'vung-t31') -Value 'x' -Encoding utf8NoBOM
+    & git -C $k add -A
+    & git -C $k -c user.email=t@t -c user.name=t commit -qm di-truoc
+    $sach = Join-Path $d 'sach'
+    & git clone -q $k $sach
+    Set-Content -LiteralPath (Join-Path $k 'vung-t31') -Value 'sua' -Encoding utf8NoBOM
+    if (@(& git -C $k status --porcelain).Count -eq 0) { throw 'KHONG DO DUOC: kho gia khong BAN' }
+    $khac = Join-Path $d 'khac'
+    & git init -q $khac
+    $dau = Join-Path $d 'dau-bash-env'
+    $benv = Join-Path $d 'benv.sh'
+    Set-Content -LiteralPath $benv -Value ("echo nap >> '" + $dau.Replace([string][char]92, '/') + "'") -Encoding utf8NoBOM
+    $rong = Join-Path $d 'obj-rong'
+    New-Item -ItemType Directory -Force -Path $rong | Out-Null
+    $lanh = @{ GIT_INDEX_FILE = (Join-Path $k '.git/index'); GIT_OBJECT_DIRECTORY = (Join-Path $k '.git/objects')
+               GIT_ALTERNATE_OBJECT_DIRECTORIES = $rong; GIT_COMMON_DIR = (Join-Path $k '.git'); GIT_IMPLICIT_WORK_TREE = '1'
+               GIT_GRAFT_FILE = (Join-Path $d 'graft-khong-co'); GIT_SHALLOW_FILE = (Join-Path $d 'shallow-khong-co')
+               GIT_NO_REPLACE_OBJECTS = '1'; GIT_REPLACE_REF_BASE = 'refs/replace/'; GIT_PREFIX = 'x/' }
+    $ro = @{ PYTHONOPTIMIZE = '1'; PYTHONWARNINGS = 'ignore'; PYTHONHASHSEED = '0'; BASH_ENV = $benv
+             GIT_DIR = (Join-Path $khac '.git'); GIT_WORK_TREE = $sach; STUB_KHOA_RO = (@(@($gitCucBo) + 'BASH_ENV') -join ',') }
+    foreach ($n in $gitCucBo) { if (-not $ro.ContainsKey($n)) { $ro[$n] = if ($lanh.ContainsKey($n)) { $lanh[$n] } else { Join-Path $d "khong-co-$n" } } }
+    $a = Chay $k @() $ro
+    if ($a.ra -notmatch 'packet-loop selftest +rc=1' -or $a.ra -notmatch 'assert phai chay') {
+        throw "PYTHON* ro tu phien goi: assert tran bi go, cong khong do gi (rc_script=$($a.rc))" }
+    if ($a.ra -notmatch 'cong_cu_test +rc=0') { throw "bien trinh thong dich / git / BASH_ENV ro toi cong_cu_test (rc_script=$($a.rc))" }
+    if ($a.ra -notmatch 'registry test +rc=0') {
+        throw "GIT_WORK_TREE ro: cay BAN duoc do la SACH nen registry mang env diff, hoac bien ro toi registry (rc_script=$($a.rc))" }
+    if ($a.ra -notmatch 'lease-publish selftest +rc=') { throw 'KHONG DO DUOC: cong bash khong chay, ve BASH_ENV khong co rang' }
+    if (Test-Path -LiteralPath $dau) { throw "BASH_ENV ro tu phien goi: bash nap tep ay truoc cong ($(@(Get-Content -LiteralPath $dau).Count) lan)" }
+    $ab = @(& git -C $khac config --local --get core.abbrev)
+    if ($ab.Count -gt 0) { throw "GIT_DIR ro tu phien goi: nep git ghi vao config cua KHO KHAC (core.abbrev=$($ab -join ''))" }
 }
 
 foreach ($d in $script:Rac) { Remove-Item -LiteralPath $d -Recurse -Force -ErrorAction SilentlyContinue }

@@ -16,7 +16,8 @@
     (tên job là cách CI chia máy và trôi theo master: nền gốc d553efa có `gate`, `gate-registry`,
     `gate-packet-loop`; master fc852ff tách thêm `gate-ops`, `gate-cong-cu` (8 mảnh) và `gate-cong-cu-gop` (gom mảnh —
     script chạy `ops/cong_cu_test.py` TRỌN một lượt thay cho mảnh + gom)), nhưng chạy TẠI MÁY. `env:` của bước do script
-    làm chủ: khoá chế độ rò từ phiên gọi bị xoá, `test registry` mang env như lượt `pull_request` khi đo được diff. Nó KHÔNG gọi
+    làm chủ: khoá chế độ rò từ phiên gọi bị xoá, cùng `PYTHON*` lạ, biến git trỏ kho/cây/index khác và `BASH_ENV` (job CI
+    không có biến nào trong số đó), `test registry` mang env như lượt `pull_request` khi đo được diff. Nó KHÔNG gọi
     `workflow_dispatch`, KHÔNG re-run, KHÔNG đẩy gì lên remote, KHÔNG gọi GitHub API.
     Viết ra để tôn chỉ thị `manual_ci_budget: 0` mà vẫn đo được trên nền Windows.
 
@@ -76,8 +77,8 @@
 .EXAMPLE
     pwsh -NoProfile -File .\.claude\dev\chay-cong-windows.ps1 -Muc day-du -ChiTiet
 .NOTES
-    Gọi bằng `pwsh -File` (tiến trình RIÊNG). Script đổi cwd, PATH, PYTHON*, AL_*, GIT_CONFIG, xoá khoá `env:` của bước cổng
-    (danh sách ở đầu script) rồi ĐẶT `CI_DANG_KY_*` (kể cả GOC/DAU là SHA lúc chạy), và [Console]::OutputEncoding của tiến
+    Gọi bằng `pwsh -File` (tiến trình RIÊNG). Script đổi cwd, PATH, PYTHON* (xoá HẾT rồi đặt bốn biến), AL_*, GIT_CONFIG, xoá
+    khoá `env:` của bước cổng, biến git cục bộ của kho và BASH_ENV (danh sách ở đầu script) rồi ĐẶT `CI_DANG_KY_*` (kể cả GOC/DAU là SHA lúc chạy), và [Console]::OutputEncoding của tiến
     trình đang chạy nó; gọi thẳng `.\chay-cong-windows.ps1` trong một phiên pwsh thì mọi thay đổi ấy Ở LẠI phiên sau khi
     script kết thúc — một `ci_dang_ky_test.py --chay` gõ tay sau đó trong phiên ấy lấy kế hoạch NHẸ từ SHA CŨ.
 #>
@@ -107,6 +108,13 @@ try {
     [Console]::OutputEncoding = [System.Text.UTF8Encoding]::new($false)
     $OutputEncoding = [System.Text.UTF8Encoding]::new($false)
 } catch { Canh "không đặt được console UTF-8: $($_.Exception.Message)" }
+# `PYTHON*` của phiên gọi đổi NGỮ NGHĨA mọi cổng Python, và job CI không đặt biến `PYTHON*` nào ngoài bốn biến dưới đây:
+# `PYTHONOPTIMIZE` gỡ mọi `assert` trần (đo trên cây merge 163fd5d: `lease_publish_test.py --chi-ca=t33_` với workflow actionlint
+# ĐỎ ⇒ rc=0 `1/1 đạt`; đầu-cuối trên 34e7a9d: cổng `assert False` ⇒ ĐẠT, script rc=0). Danh sách CHO PHÉP, không danh sách CẤM:
+# xoá HẾT `PYTHON*` (không phân biệt hoa thường — Windows cũng không) rồi đặt đúng bốn biến.
+foreach ($n in @(Get-ChildItem Env: | Where-Object Name -like 'PYTHON*' | ForEach-Object Name)) {
+    [Environment]::SetEnvironmentVariable($n, $null)
+}
 $env:PYTHONUTF8           = '1'
 $env:PYTHONIOENCODING     = 'utf-8'
 $env:PYTHONUNBUFFERED     = '1'
@@ -120,6 +128,16 @@ $env:PYTHONDONTWRITEBYTECODE = '1'
 foreach ($n in 'AL_VER', 'PR_HEAD_SHA', 'EOL_BASE_SHA', 'CONG_CU_TEST_BAN_KINH', 'CONG_CU_TEST_MANH', 'CONG_CU_TEST_MANH_RA',
                'CI_DANG_KY_WORKERS', 'CI_DANG_KY_SU_KIEN', 'CI_DANG_KY_GOC', 'CI_DANG_KY_DAU', 'CI_DANG_KY_DOT_BIEN_MANH',
                'NHANH_DON_DUOC_MANH', 'NHANH_DON_DUOC_MANH_RA') {
+    [Environment]::SetEnvironmentVariable($n, $null)
+}
+# Biến git CỤC BỘ CỦA KHO (đúng tập `git rev-parse --local-env-vars` in ra, trừ `GIT_CONFIG*` — nếp git đọc giá trị CÓ HIỆU LỰC, t13)
+# trỏ mọi lệnh git — của script lẫn của cổng con — sang kho/cây/index KHÁC; hook `pre-commit` của `git commit -a` xuất
+# `GIT_INDEX_FILE` tuyệt đối. Đo trên 34e7a9d: `GIT_WORK_TREE` trỏ bản sạch ⇒ `git status` đo cây KHÁC ⇒ registry mang env
+# `pull_request` trên cây BẨN; `GIT_DIR` trỏ kho khác ⇒ nếp git ghi vào config KHO ẤY. `BASH_ENV`: bash nạp tệp ấy trước mọi cổng
+# bash (đo: 3 lần, có lần ngay trước `ops/chay_lease_publish_test.sh`). t31 đọc tập ấy từ git và RÒ từng biến.
+foreach ($n in 'GIT_ALTERNATE_OBJECT_DIRECTORIES', 'GIT_OBJECT_DIRECTORY', 'GIT_DIR', 'GIT_WORK_TREE', 'GIT_IMPLICIT_WORK_TREE',
+               'GIT_GRAFT_FILE', 'GIT_INDEX_FILE', 'GIT_NO_REPLACE_OBJECTS', 'GIT_REPLACE_REF_BASE', 'GIT_PREFIX', 'GIT_SHALLOW_FILE',
+               'GIT_COMMON_DIR', 'BASH_ENV') {
     [Environment]::SetEnvironmentVariable($n, $null)
 }
 
@@ -460,7 +478,8 @@ Chay-Py   'packet-loop selftest'    @('.claude/dev/packet_loop_test.py')
 # Bước `test registry` của master khai `env:` (`CI_DANG_KY_WORKERS: "2"` + sự kiện/GOC/DAU). Vắng ⇒ `doc_diff` KHÔNG ĐO ĐƯỢC ⇒ kế
 # hoạch ĐỦ cho cả ba vòng đột biến, `nhanh_don_duoc` không chia mảnh — lượt PR THƯỜNG của CI giao khối việc ấy cho lượt tuần + 4 job
 # mảnh, nhưng job `gate-registry` 90 phút VẪN chạy nó khi diff không đo được hoặc chạm vùng chung (`workflow_dispatch` — đường chắc
-# có lượt Windows, N=1 —; PR chạm `ci.yml`, `requirements.txt`, `ops/cong_cu*`, `ops/cai_*`, tệp gốc: đo bằng `ke_hoach` THẬT ⇒ ĐỦ ×3)
+# có lượt Windows, N=1 —; PR chạm `ci.yml`, `requirements.txt`, `ops/cong_cu*`, `ops/cai_*`, tệp gốc NGOÀI bảy tài liệu `GOC_TAI_LIEU`: đo bằng `ke_hoach` THẬT ⇒
+# ĐỦ ×3; `README.md`, `CHANGELOG.md` ⇒ NHẸ ×3)
 # (đo trên cây merge 20ec8d5: vắng ⇒ ĐỦ ×3; env `pull_request` của chính diff PR ⇒ NHẸ ×3; `nhanh_don_duoc_test` ĐỦ > 540 s, NHẸ 2 s). Gương như lượt `pull_request` CHỈ KHI đo được diff như CI: cây SẠCH (CI đo commit, không đo cây làm việc)
 # và HEAD đi TRƯỚC `origin/master`; không thì để vắng ⇒ ĐỦ (fail-closed như chính `doc_diff`). Nhánh gốc d553efa không đọc các biến.
 # `git status` TIN cờ index: mục `assume-unchanged` (thẻ thường của `ls-files -v`) / `skip-worktree` (`S`) bị sửa thì status RỖNG mà

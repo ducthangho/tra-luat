@@ -1,0 +1,14 @@
+# {"runner_sha256": "3feb397199e358b1a0f947ac43a776a86637b6159dd9211cd7a8de6cf9bee214", "driver_sha256": "1e974b8e06b9c65b92b2b1afb00232de9cbfba6b12a8f04ee32175b0fd7c3e07", "test_sha256_nen": "09cf6c78fae10c695436f7fb9b0803cb9295f69786377212e0dd4ff1b516816c", "lease_publish_sha256_nen": "dd17b94cb880f27ba0291fa9a020c2ee3465dd55b13195f99424dfa10c834f83", "python": "3.11.15", "so_dot_bien": 2}
+NEN                                                  t70   kv=SONG         SONG         OK  |
+NEN                                                  t160  kv=SONG         SONG         OK  |
+NEN                                                  t178  kv=SONG         SONG         OK  |
+NEN                                                  t193  kv=SONG         SONG         OK  |
+NEN                                                  t194  kv=SONG         SONG         OK  |
+NEN                                                  t195  kv=SONG         SONG         OK  |
+NEN                                                  t196  kv=SONG         SONG         OK  |
+NEN                                                  t197  kv=SONG         SONG         OK  |
+NEN                                                  t198  kv=SONG         SONG         OK  |
+NEN                                                  t203  kv=SONG         SONG         OK  |
+moi:R15q-tin-so-ly-do-giu-nhan                       t193  kv=GIET         GIET         OK  | A4 có Windows: sổ mặc định + YAML ở WORKFLOW_DANG: rc=0, "01T06:45:26Z\n<<< ra t51_lease_giua_bi_chan_van_xu_ly_het_nhung_luot_DO 0.000s BO_QUA\n  BỎ
+moi:V7q-bo-thoi-luong-giu-trang-thai                 t194  kv=GHI          SONG         OK  |
+TONG: 2 cap (dot bien, ca dich) tren 2 dot bien | {'GIET': 1, 'SONG': 1} | lech ky vong: 0 | nen: [('t70', 'SONG'), ('t160', 'SONG'), ('t178', 'SONG'), ('t193', 'SONG'), ('t194', 'SONG'), ('t195', 'SONG'), ('t196', 'SONG'), ('t197', 'SONG'), ('t198', 'SONG'), ('t203', 'SONG')]

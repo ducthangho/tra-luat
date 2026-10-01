@@ -1,0 +1,125 @@
+# BIEN NHAN GIAO HANG — review R1 cua packet #687 LEASE-PUBLISH-WINDOWS-DO (PR #701, merge 163fd5d),
+# KHAC NEN (codex review, executor claude), tren `4bc9432`. **`changes_requested`** —
+# 0 P1 / 3 P2 / 0 P3 / 0 P4 theo bang lop.
+#
+# GHI SO HAU KY boi subagent bookkeeping cua phien session_01RU4YGG (CUNG phien da dieu phoi luot review nay).
+# Khong co run.json. Nhan: (a) DO tu kho/REST/tep luc ghi so 2026-10-01 · (b) THUAT LAI · KHONG_DO_DUOC.
+
+schema_version: 2
+receipt_id: lease-publish-windows-do-review-r1-codex-20261001-412d0825
+kind: review_delivery_receipt
+packet_id: LEASE-PUBLISH-WINDOWS-DO
+packet_slug: LEASE-PUBLISH-WINDOWS-DO
+packet_issue: 687
+target_pull_request: 701
+land_merge_commit: 163fd5d448d8d3e65766ee238f33be0f47ae72c4
+revision: 1
+generation: 0
+lease_id: null
+lease_gan_theo: >-
+  (a) KHONG lease nao: luot chay ~2026-09-29T08:11Z (mtime VERDICT.md, file rc va log cung phut) — TRUOC lease
+  g1 (leased_at 2026-09-29T10:20Z). Comment ban chieu 10:16:52Z cung truoc g1. Spec r1 (revision 1) dan
+  verdict nay lam nguon finding; revision/generation ghi 1/0 = 'truoc g1'.
+luot: r1
+role: reviewer
+provider: codex
+executor_provider: claude
+executor_ghi_chu: >-
+  (a) commit 4bc9432 tac gia 'Claude', trailer Claude-Session session_01RU4YGG; doi tuong review la BAO CAO DO
+  (REPORT.md sha256 a24d2c97...) cua phien ay. Model phien: KHONG DO DUOC.
+cross_provider: true
+review_class: sensitive
+assurance: cross_reviewed
+assurance_KHONG_dat: cross_approved
+assurance_ghi_chu: >-
+  Khac ho model theo khai bao (reviewer codex gpt-6-astra, executor Claude) nhung KHONG khai `cross_approved`:
+  (1) verdict la changes_requested; (2) khong run.json nen ho model da phuc vu KHONG_DO_DUOC (header CLI la
+  loi tu in). Muc nay ghi nhan mot luot review khac nen DA CHAY, khong phai approval. Cong land cua packet la
+  human_audited (pull/701#issuecomment-5925449076).
+verdict: changes_requested
+verdict_nguyen_van: CHANGES_REQUIRED
+verdict_nguon: '(a) dong `VERDICT:` cuoi tep; tep co 1 dong bat dau bang `VERDICT:`'
+verdict_path: ops/reviews/lease-publish-windows-do/review-r1-codex-VERDICT.md
+verdict_sha256: 412d0825335de5850ae4412aa55ad37915c32158f29b89e61a965d3bb875ea81
+verdict_bytes: 22805
+hint_path: null
+hint_ghi_chu: 'Luot nay KHONG co tep HINT.patch rieng (sandbox chi co VERDICT.md, REPORT, PROMPT).'
+reviewed_sha: 4bc94325e647ee5e32373f3af30b8f83b98a90fa
+reviewed_sha_nguon: '(a) doc tu tep verdict: chuoi `reviewed_sha` xuat hien dung 1 lan, kem SHA day du'
+reviewed_sha_commit_utc: '2026-09-29T06:39:39Z'
+reviewed_sha_to_tien: >-
+  (a) git merge-base --is-ancestor 4bc9432 163fd5d rc 1: KHONG la to tien master. Commit 'ci-tam' nang timeout
+  cho luot do Windows (thong diep: 'commit nay KHONG land'), cha 1741e0a (merge PR #673). Chi nam tren
+  origin/ops/do-lease-publish-windows-150 (for-each-ref --contains, 461 ref); 0/64 tag giu no.
+evidence_url: https://github.com/ducthangho/tra-luat/blob/ff98b0f6957e98ac14d585a58f87d43edbe0c663/ops/reviews/lease-publish-windows-do/review-r1-codex-VERDICT.md
+evidence_url_ghi_chu: >-
+  Neo BLOB ghim commit cua PR bookkeeping mang ban chieu (commit chi chua ban chieu; bien nhan di o commit
+  sau, nen mo neo la to tien cua HEAD). ff98b0f6957e98ac14d585a58f87d43edbe0c663 phai duoc thay bang SHA that truoc khi commit
+  bien nhan.
+evidence_ban_chieu: https://github.com/ducthangho/tra-luat/issues/687#issuecomment-5888197946
+evidence_ban_chieu_created_at: '2026-09-29T10:16:52Z'
+evidence_ban_chieu_doi_chieu: >-
+  (a) Doc lai qua REST GET issues/687/comments (2026-10-01T05:45:34Z): user ducthangho, app claude, than 23323
+  byte. sha256 tep verdict co mat NGUYEN 64 hex trong than: true. Than comment la CHIEU NGUYEN VAN tep: cat
+  phan sau dong 'CHIEU nguyen van', strip, them LF cuoi thi sha256 trung verdict_sha256 (do lai luc ghi so).
+  So bang chuoi hex nen chuan hoa thuc the HTML cua duong doc khong anh huong phep so.
+so_p1: 0
+so_p2: 3
+so_p3: 0
+so_p4: 0
+so_dem_theo: lop
+so_dem_nguon: >-
+  (a) bang lop cuoi tep (dong 153-157): L1 P2, L2 P2, L3 P2
+model_reviewer_identity:
+  provider: openai_codex
+  surface: codex_cli
+  surface_nguon: >-
+    (a) tep log stderr NGOAI kho (cr/r1.stderr.log, sha256
+    bfbd0c87d46f4cae1e86d4aed68a87b846320a7077b4a55fa7a629ceaba6b572) mo bang header 'OpenAI Codex v0.158.0' —
+    tuc codex exec (CLI). (b) lease g1 khai reviewer_surface codex_cli.
+  model_yeu_cau: gpt-6-astra
+  effort_yeu_cau: 'high (tu khai; KHONG DO DUOC)'
+  header_cli: 'model: gpt-6-astra · reasoning effort: high · session id: 01a0ec30-37d7-7e02-912d-8cd04a1cdce2 (loi CLI tu in)'
+  rc_tep: "'rc=0' (tep rc ngoai kho, sha256 93ff7811a209e2a8479230bbb9b6bc19f7f311d3af383ec350c1db2a7e7d5494)"
+  model_da_chay: KHONG_DO_DUOC
+  KHONG_do_duoc: >-
+    Khong co session_run_id/run.json: luot goi codex exec truc tiep, khong qua launcher.py. Model thuc phuc vu
+    (codex exec khong phat modelUsage), thoi luong, prompt that su da gui KHONG tai kiem duoc tu kho; log va
+    prompt nam o scratchpad phien, KHONG commit.
+github_submitter_identity:
+  actor: ducthangho
+  actor_nguon: '(a) user.login cua comment 5888197946 doc qua REST luc ghi so'
+  ghi_chu: >-
+    Comment do PHIEN AGENT dang bang credential chu kho (performed_via_github_app.slug claude);
+    author_association OWNER khong tach chu kho khoi phien agent (#566).
+anchor:
+  loai: canonical_ancestry
+  cuong_do: thap
+  mo_ta: >-
+    (a) Blob verdict ghim o commit ban chieu cua nhanh bookkeeping claude/bookkeeping-687-pr701; to tien cua HEAD
+    nhanh ay; CHUA la to tien cua master luc ghi so.
+  gioi_han: >-
+    Len trung_binh/cao chi khi PR bookkeeping land bang MERGE commit hoac fast-forward; SQUASH pha quan he to tien.
+verdict_usage_caveats:
+  - id: KHONG-CO-run.json-LOG-CODEX-NGOAI-KHO
+    muc: P3
+    mo_ta: >-
+      Luot codex goi truc tiep (khong qua launcher.py, khong run.json). Log stderr cua luot nam NGOAI kho
+      (scratchpad cr/r1.stderr.log, sha256 bfbd0c87...b572): header CLI ghi codex v0.158.0, model gpt-6-astra,
+      reasoning effort high, session id 01a0ec30...; file rc ghi 'rc=0'. Do la LOI CLI TU IN, khong phai do may
+      model da phuc vu. Thoi luong, prompt that su da gui: KHONG DO DUOC tu kho.
+  - id: REVIEWED-SHA-CHI-SONG-TREN-NHANH-CI-TAM
+    muc: P2
+    mo_ta: >-
+      reviewed_sha 4bc9432 KHONG la to tien master va 0/64 tag giu no; chi nhanh ops/do-lease-publish-windows-150
+      giu. Xoa nhanh ay thi bien_nhan_v2 se KHONG DO DUOC reviewed_sha cua bien nhan nay (rc 2, cong DO). Truoc
+      khi xoa phai co tag luu-tru/* giu 4bc9432, hoac chu kho quyet cach khac.
+  - id: LUOT-NAY-TRUOC-LEASE-LA-NGUON-MO-PACKET
+    muc: P3
+    mo_ta: >-
+      Luot r1 cham BAO CAO DO (REPORT.md) cua no 2 #579 tren cay 4bc9432, KHONG cham ma cua packet: chay ~08:11Z
+      29-09, TRUOC lease g1 (cap 10:20Z). Spec r1 dan no lam nguon finding mo packet. CHANGES_REQUIRED nay la ly
+      do packet ton tai, khong phai verdict tren head da land.
+nguon_co_tham_quyen: >-
+  TEP CO BAM trong kho (verdict_path + verdict_sha256). Comment tren #687 chi la BAN CHIEU: sua duoc. Hai ban
+  lech thi tin blob.

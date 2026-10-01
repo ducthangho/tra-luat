@@ -79,7 +79,7 @@ SHA_G1   = "2f70869a0537843e9cae78618ee7ae8c261d972d"
 # do that 18-09 tren ban va g2 cua agy cho 5 tep / +812, trong khi viec cua agy la 2 tep / +353.
 # Mot chot nhu the se bao "vuot tran" cho mot ban va KHONG vuot. Base dung la MERGE-BASE.
 SHA_BASE_SPEC = "d705623162b75b7340ee7cca54ac2d2abbddbb6f"
-BAN_BO_DO = "2026-10-01b"              # doi MOI khi sua bo do - log tu khai ban nao
+BAN_BO_DO = "2026-10-01c"              # doi MOI khi sua bo do - log tu khai ban nao
 TRAN_TEP, TRAN_DONG = 2, 400          # N7' cua spec r3
 AL_SAN = (1, 7, 7)                    # san actionlint = ban ghim CI: AL_VER cua ci.yml = ban_ghim cua ops/cong_cu.yaml
 GIT_SAN = (2, 36, 0)                  # san git: ung vien goi `git worktree list --porcelain -z` (co `-z` tu 2.36); ban_ghim git = null
@@ -569,12 +569,19 @@ if not ("--chi-kich-thuoc" in sys.argv or "--chi-probe" in sys.argv):
         # 165/166, e2e rc=1 `DAT 11 | TRUOT 1`, `la: ['t152']` cho ung vien sach; 2.31.0 THAT => 166/166. Hoi CHINH ham ay va
         # CHINH bash ay trong tien trinh con cua chay() (cung python, cung moi truong, cwd = goc); ung vien khong co ham thi khong
         # hoi (giu chot CO MAT).
+        # Doc dong `git version` CUOI cua stdout, KHONG doc dong DAU: chay() giu BASH_ENV (bo test 166/166 voi no, xem tren), ma
+        # bash nap BASH_ENV TRUOC lenh -c. Do tren 2026-10-01 (ban 01b), BASH_ENV `echo` mot dong: muc 0 KDD "khong doc duoc phien
+        # ban" trong khi bo test 166/166. Bash treo/khong chay duoc thi bat ngoai le TRONG con: ban 01b de con chet rc=1 nen loi
+        # do cho "khong hoi duoc `_bash_posix()`" (do: bash treo => TimeoutExpired sau 60 s) trong khi ham ay da tra ve.
         _rc_bp, _ra_bp = chay(["-c", "import subprocess, sys\nsys.path.insert(0, 'ops')\nimport lease_publish_test as T\n"
                                      "f = getattr(T, '_bash_posix', None)\nb = '?' if f is None else f()\nprint('BASH_POSIX=' + b)\n"
-                                     "if b and b != '?':\n    p = subprocess.run([b, '--noprofile', '--norc', '-c', 'git --version'],"
+                                     "if b and b != '?':\n  try:\n"
+                                     "    p = subprocess.run([b, '--noprofile', '--norc', '-c', 'git --version'],"
                                      " capture_output=True, text=True, timeout=60)\n"
-                                     "    print('BASH_GIT=' + (p.stdout.strip().splitlines() or [''])[0]"
-                                     " + ' rc=' + str(p.returncode))\n"],
+                                     "    v = [x for x in p.stdout.splitlines() if x.startswith('git version')]"
+                                     " or p.stdout.strip().splitlines() or ['']\n"
+                                     "    print('BASH_GIT=' + v[-1] + ' rc=' + str(p.returncode))\n"
+                                     "  except Exception as e:\n    print('BASH_GIT=(' + type(e).__name__ + ') rc=-1')\n"],
                               goc if goc.is_dir() else Path.cwd(), phut=2)
         _bp_m = re.search(r"(?m)^BASH_POSIX=(.*)$", _ra_bp)
         _bp = _bp_m.group(1).strip() if (_bp_m and not _rc_bp) else None

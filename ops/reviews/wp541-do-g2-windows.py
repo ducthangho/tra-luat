@@ -79,10 +79,11 @@ SHA_G1   = "2f70869a0537843e9cae78618ee7ae8c261d972d"
 # do that 18-09 tren ban va g2 cua agy cho 5 tep / +812, trong khi viec cua agy la 2 tep / +353.
 # Mot chot nhu the se bao "vuot tran" cho mot ban va KHONG vuot. Base dung la MERGE-BASE.
 SHA_BASE_SPEC = "d705623162b75b7340ee7cca54ac2d2abbddbb6f"
-BAN_BO_DO = "2026-10-01a"              # doi MOI khi sua bo do - log tu khai ban nao
+BAN_BO_DO = "2026-10-01b"              # doi MOI khi sua bo do - log tu khai ban nao
 TRAN_TEP, TRAN_DONG = 2, 400          # N7' cua spec r3
 AL_SAN = (1, 7, 7)                    # san actionlint = ban ghim CI: AL_VER cua ci.yml = ban_ghim cua ops/cong_cu.yaml
 GIT_SAN = (2, 36, 0)                  # san git: ung vien goi `git worktree list --porcelain -z` (co `-z` tu 2.36); ban_ghim git = null
+GIT_SAN_BASH = (2, 31, 0)             # san git TRONG bash cua bo test: t152 dung GIT_CONFIG_COUNT (co tu 2.31)
 MAU_WIN  = 'if nen_thuc == "windows":'
 # Write set cua packet #541 g2. Diff khong cham tep nao o day => do NHAM NHANH.
 WRITE_SET_G2 = {"ops/lease_publish.py", "ops/lease_publish_test.py"}
@@ -512,8 +513,8 @@ if not ("--chi-kich-thuoc" in sys.argv or "--chi-probe" in sys.argv):
     # actionlint cung phai DUNG DUOC, khong chi CO MAT: t33/t137/t159 goi no THANG, va mot actionlint khong chay (sai kien truc,
     # hong) lam ca ba DO "actionlint DO (rc=...)" — ca "la" => TRUOT gia sau ca bo test (do tren 2026-09-30j: actionlint gia
     # rc=1 => muc 0 im lang, t33 "la"). Ban THAT 1.6.27/1.7.7/1.7.8/1.7.12 deu rc=0 va deu cho t33/t137/t159 QUA tren 0ea95de.
-    # bash CHI hoi CO MAT, co chu dich: bash WSL (System32) lam t35-t40 DO nhung ca sau deu NGOAI_PHAM_VI, con t32/t152 tu chon
-    # Git Bash (_bash_posix cua ung vien) — do tren 2026-09-30j: bash kieu WSL => t35-t40 DO, deu roi vao ngoai pham vi.
+    # bash qua `which` CHI hoi CO MAT, co chu dich: t35-t40 goi `bash` TRAN (bash WSL lam chung DO, deu NGOAI_PHAM_VI — do tren
+    # 2026-09-30j). 9 ca TRONG pham vi KHONG goi bash qua `which` — xem chot `_bash_posix()` duoi chot git.
     # CHAY DUOC chua phai DUNG DUOC: do tren 2026-09-30k, 0ea95de, actionlint THAT 1.4.3/1.5.0/1.5.3/1.6.0/1.6.8/1.6.15/1.6.20/
     # 1.6.22 deu `-version` rc=0, ma ca tam lam t137/t159 DO (`property "run_attempt"/"workflow_sha" is not defined`), 1.4.3/1.5.0
     # them t33 (`must be contained within ${{ }}`) — e2e 1.6.22: rc=1 `DAT 11 | TRUOT 1`, `la: ['t137', 't159']` cho ung vien
@@ -553,6 +554,46 @@ if not ("--chi-kich-thuoc" in sys.argv or "--chi-probe" in sys.argv):
         elif not _gv_m or tuple(int(x) for x in _gv_m.groups()) < GIT_SAN:
             loi.append(f"git {'.'.join(_gv_m.groups()) if _gv_m else '(khong doc duoc phien ban)'} cu hon "
                        f"{'.'.join(map(str, GIT_SAN))} (ung vien goi `git worktree list --porcelain -z`): cap nhat git")
+        # bash cung HOI SAI CHO nhu git: 9 ca TRONG pham vi (t32 t51 t59 t60 t62 t63 t66 t68 t152) chay bash bang `_bash_posix()`
+        # cua ung vien — Git Bash o duong CO DINH `C:\Program Files\Git\bin\bash.exe` (va `(x86)`, `usr\bin`), roi
+        # `which("bash")` NHUNG loai ket qua trong System32 (WSL); khong thay thi tra "". May co WSL ma Git khong o Program Files
+        # (MinGit do CHINH ps1 tu tai — MinGit KHONG co bash; scoop; cai per-user) qua chot `which` o tren, roi `_bash_posix()`
+        # == "": t32 "KHONG DO DUOC" + 8 ca "la" `subprocess.run([""...])`, chi lo ra SAU ca hai luot bo test. Do tren 2026-10-01:
+        # ham THAT, nhanh os.name='nt' (WSL + MinGit/scoop/per-user) => ''; bo test voi gia tri ay 157/166; e2e (win32 gia) rc=3
+        # sau 347 s, `TRUOT Moi ca DO deu giai thich duoc  la: ['t51', 't59', 't60', 't62', 't63', 't66', 't68', 't152']`. Phep
+        # do 30j chay tren Linux, noi `_bash_posix()` luon tra "bash", nen khong the thay duong nay.
+        # Va `git` TRONG bash ay la git THU BA: `Git\bin\bash.exe` la compat-bash cua git-wrapper, `setup_environment()` day
+        # `<goc Git>\mingw64\bin;<goc Git>\usr\bin` len DAU PATH (git-for-windows/MINGW-packages: git-wrapper.c + compat-bash.rc,
+        # khong co MINIMAL_PATH) — tuc git DI KEM ban Git ay, KHONG phai git TRAN da hoi o tren. t152 chay GIT_CONFIG_COUNT (git
+        # 2.31) trong bash ay. Do tren 2026-10-01 (bash boc day git di kem len dau PATH, git TRAN 2.43): git di kem 2.30.2 THAT =>
+        # 165/166, e2e rc=1 `DAT 11 | TRUOT 1`, `la: ['t152']` cho ung vien sach; 2.31.0 THAT => 166/166. Hoi CHINH ham ay va
+        # CHINH bash ay trong tien trinh con cua chay() (cung python, cung moi truong, cwd = goc); ung vien khong co ham thi khong
+        # hoi (giu chot CO MAT).
+        _rc_bp, _ra_bp = chay(["-c", "import subprocess, sys\nsys.path.insert(0, 'ops')\nimport lease_publish_test as T\n"
+                                     "f = getattr(T, '_bash_posix', None)\nb = '?' if f is None else f()\nprint('BASH_POSIX=' + b)\n"
+                                     "if b and b != '?':\n    p = subprocess.run([b, '--noprofile', '--norc', '-c', 'git --version'],"
+                                     " capture_output=True, text=True, timeout=60)\n"
+                                     "    print('BASH_GIT=' + (p.stdout.strip().splitlines() or [''])[0]"
+                                     " + ' rc=' + str(p.returncode))\n"],
+                              goc if goc.is_dir() else Path.cwd(), phut=2)
+        _bp_m = re.search(r"(?m)^BASH_POSIX=(.*)$", _ra_bp)
+        _bp = _bp_m.group(1).strip() if (_bp_m and not _rc_bp) else None
+        _bg_m = re.search(r"(?m)^BASH_GIT=git version\s+(\d+)\.(\d+)\.(\d+)[^\n]*\src=0$", _ra_bp)
+        ghi("bash_bo_test", _bp); ghi("git_trong_bash_bo_test", _bg_m.group(0)[9:] if _bg_m else None)
+        inn("  bash bo test :", repr(_bp) if _bp is not None else f"(khong hoi duoc, rc={_rc_bp})",
+            "| git trong bash:", _bg_m.group(0)[9:] if _bg_m else "(khong doc duoc)")
+        if _bp is None:
+            loi.append(f"khong hoi duoc `_bash_posix()` cua bo test (rc={_rc_bp}:"
+                       f" {(_ra_bp.strip().splitlines() or [''])[-1][:90]})")
+        elif not _bp:
+            loi.append(f"`_bash_posix()` cua bo test KHONG thay bash POSIX (`which`: {_cc['bash']}; System32 = WSL bi loai):"
+                       " cai Git for Windows vao C:\\Program Files\\Git, hoac dat thu muc Git\\bin len DAU PATH (truoc System32)")
+        elif _bp != "?" and not _bg_m:
+            loi.append(f"`git --version` TRONG bash cua bo test ({_bp}) khong chay/khong doc duoc phien ban:"
+                       f" {(re.findall(r'(?m)^BASH_GIT=(.*)$', _ra_bp) or ['(khong co dong BASH_GIT)'])[-1][:90]}")
+        elif _bp != "?" and tuple(int(x) for x in _bg_m.groups()) < GIT_SAN_BASH:
+            loi.append(f"git {'.'.join(_bg_m.groups())} TRONG bash cua bo test ({_bp}) cu hon {'.'.join(map(str, GIT_SAN_BASH))}"
+                       " (t152 dung GIT_CONFIG_COUNT): cap nhat ban Git chua bash ay")
 
 rc, head, _ = git(goc, "rev-parse", "HEAD")
 if rc: loi.append("khong doc duoc HEAD")

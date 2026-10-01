@@ -79,7 +79,7 @@ SHA_G1   = "2f70869a0537843e9cae78618ee7ae8c261d972d"
 # do that 18-09 tren ban va g2 cua agy cho 5 tep / +812, trong khi viec cua agy la 2 tep / +353.
 # Mot chot nhu the se bao "vuot tran" cho mot ban va KHONG vuot. Base dung la MERGE-BASE.
 SHA_BASE_SPEC = "d705623162b75b7340ee7cca54ac2d2abbddbb6f"
-BAN_BO_DO = "2026-10-01e"              # doi MOI khi sua bo do - log tu khai ban nao
+BAN_BO_DO = "2026-10-01f"              # doi MOI khi sua bo do - log tu khai ban nao
 TRAN_TEP, TRAN_DONG = 2, 400          # N7' cua spec r3
 AL_SAN = (1, 7, 7)                    # san actionlint = ban ghim CI: AL_VER cua ci.yml = ban_ghim cua ops/cong_cu.yaml
 GIT_SAN = (2, 36, 0)                  # san git: ung vien goi `git worktree list --porcelain -z` (co `-z` tu 2.36); ban_ghim git = null
@@ -217,8 +217,18 @@ _PY_GIU = frozenset({"PYTHONHOME", "PYTHONUSERBASE", "PYTHONNOUSERSITE"})
 # _BASH_KHOI_DONG. Chi hai muc tren DO DUOC lam DO; cac ten con lai bo vi CI khong dat, KHONG vi da thay DO (do 2026-10-01: SHELLOPTS
 # xtrace/nounset/pipefail/noglob/allexport, BASHOPTS failglob/nullglob/xpg_echo, POSIXLY_CORRECT, CDPATH, FUNCNEST=1, TMOUT=1 =>
 # 9/9 ca bash). IFS bash KHONG nhan tu moi truong. t152 von chi truyen PATH nen khong doi. Muc 0 tu khai TEN (khong in gia tri).
+# TAP ay con mot cua KHONG mang ten bien khoi dong: bash(1) INVOCATION — stdin la SOCKET (rshd), hoac SSH_CLIENT/SSH2_CLIENT trong
+# moi truong (ban dich bat SSH_SOURCE_BASHRC: Git for Windows bat ca no lan SYS_BASHRC — 0001-bash-4.4-cygwin.patch sua config-top.h;
+# bash Ubuntu cung bat), cong SHLVL rong/0 => `bash -c` nap /etc/bash.bashrc va ~/.bashrc CUA NGUOI DO, va BO QUA BASH_ENV. CI chay
+# bo test qua `bash ops/chay_lease_publish_test.sh` trong buoc `shell: bash` => SHLVL=2 (do tren chuoi gia lap buoc -> script ->
+# python) nen duong nay TAT tren CI; pwsh/cmd khong dat SHLVL nen tren may do no MO. Do tren 2026-10-01 (ban 01e, bash 5.2.21),
+# 0ea95de: SSH_CLIENT + ~/.bashrc `set -o noclobber` => t32 t51 t60 t62 t63 t66 t68 DO, e2e rc=1 `DAT 11 | TRUOT 1` (159/166);
+# ~/.bashrc `cd "$HOME"` => 8 ca (them t59); stdin SOCKET + noclobber => cung 7 ca. Muc 0 khong thay (probe goi `--norc`, ma --norc
+# tat duong nay) va tu khai "bien bash: (khong co)". Phien SSH vao may Windows do la duong vao (Windows THAT: KHONG DO DUOC). Bo HAI
+# bien ay (CI khong dat) VA cho luot con stdin = DEVNULL — hai co che rieng, hai chot rieng; t152 (env chi PATH) thua ke stdin ay nen
+# cung dong.
 _BASH_KHOI_DONG = frozenset({"SHELLOPTS", "ENV", "POSIXLY_CORRECT", "CDPATH", "GLOBIGNORE", "GLOBSORT", "EXECIGNORE",
-                             "FUNCNEST", "TMOUT"})
+                             "FUNCNEST", "TMOUT", "SSH_CLIENT", "SSH2_CLIENT"})
 def _bien_bash(k): return k.upper().startswith("BASH") or k.upper() in _BASH_KHOI_DONG
 _GIT_GLOBAL_CI = "[init]\n\tdefaultBranch = master\n[core]\n\tautocrlf = false\n\teol = lf\n\tabbrev = 7\n"
 def chay(argv, cwd, phut=60):
@@ -232,7 +242,7 @@ def chay(argv, cwd, phut=60):
               and (not k.upper().startswith("PYTHON") or k.upper() in _PY_GIU)}
         mt.update(PYTHONUTF8="1", PYTHONIOENCODING="utf-8", PYTHONDONTWRITEBYTECODE="1", PYTHONUNBUFFERED="1",
                   GIT_CONFIG_GLOBAL=gc, XDG_CONFIG_HOME=xdg, SHELLCHECK_OPTS="--norc")
-        p = subprocess.run([sys.executable] + argv, cwd=str(cwd), capture_output=True,
+        p = subprocess.run([sys.executable] + argv, cwd=str(cwd), capture_output=True, stdin=subprocess.DEVNULL,
                            text=True, encoding="utf-8", errors="replace", timeout=phut*60, env=mt)
     finally:
         try: os.remove(gc)

@@ -95,7 +95,9 @@ recorder_note: >-
 authority_basis: '§2 — start/pause/resume/reroute/override/authorize thuoc chu kho'
 
 leased_at_utc: '2026-09-30T15:27:00Z'
-lease_expires_at_utc: '2026-10-01T03:27:00Z'
+lease_expires_at_utc: '2026-10-01T01:10:00Z'
+han_ghi_chu: >-
+  Goc 2026-10-01T03:27:00Z. RUT NGAN ve 2026-10-01T01:10:00Z — xem thu_hoi_bang_rut_han.
 han_vi_sao: 'Mot luot va + mot luot review + day mot lan: 12h. Phien khong tu noi han.'
 run_minutes: 720
 
@@ -152,3 +154,22 @@ chua_do_duoc:
   - 'Danh tinh nguoi ky: #566.'
   - 'Model/effort thuc te cua phien executor va reviewer.'
   - 'Windows (chu kho chua cho CI Windows; spec Q6).'
+lease_sua_lan_cuoi: '2026-10-01T01:02Z'
+lease_sua_ghi_chu: >-
+  Lan 1: rut ngan lease_expires_at_utc (thu_hoi_bang_rut_han). Khong doi write set, spec, branch.
+thu_hoi_bang_rut_han:
+  han_goc_utc: '2026-10-01T03:27:00Z'
+  han_moi_utc: '2026-10-01T01:10:00Z'
+  chi_thi: >-
+    Chu kho trong phien Claude Code session_01RU4YGGdYMx94uVcywPjo4F 2026-10-01 ~01:00Z: "Hãy land và bookeeping.
+    Cấp leaase nếu cần." — sau khi tu merge PR #689.
+  ly_do: >-
+    Packet #677 da MERGE: PR #689 merge 20ec8d5d0e86cb7dc01f202c7596407a957e5961 (2026-10-01T00:55Z), head
+    0614f7f = head duoc human_audited (pull/689#issuecomment-5922154333, VERDICT approve).
+  vi_sao_khong_dung_so: >-
+    Theo tien le #651/#660/#661/#668 (86b23c0): so ops/thu-hoi/ chua kich hoat; rut han dung co che DA CAI. Lease
+    nay nam tren nhanh claude/** nen khong co workflow dang lease nao doc no; han moi van dat vai phut sau luc push.
+  nguoi_rut: 'land operator session_01RU4YGGdYMx94uVcywPjo4F (cung phien da dieu phoi executor; khong co phien executor rieng)'
+  gioi_han: >-
+    Ref mang lease nay: nhanh claude/cap-lease-677-g6. Nghiem thu: ai-dang-giu ops/lease_publish_test.py khong con
+    dot-bien-l-bien-cong-khai-exec-6-claude-20260930 trong NGUOI_GIU sau 01:10Z khi quet du ref.

@@ -1,0 +1,102 @@
+# LEASE — NO-TON-677-687 revision 1 / generation 1 — dong no P4 cua dot #677/#687 (packet #704)
+# GHI HO theo chi thi CHU KHO trong phien (chep nguyen van o granted_on_instruction_nguyen_van).
+
+schema_version: 2
+event: executor_lease_granted
+
+packet_issue: 704
+granted_by: ducthangho
+granted_on_instruction: 'Loi chu kho trong phien Claude Code session_01RU4YGGdYMx94uVcywPjo4F, 2026-10-01 ~09:47Z'
+granted_on_instruction_nguyen_van: >-
+  "Dọn cho tôi. Các vấn đề tồn cho sang packet riêng, cấp lease và xử lý luôn"
+authority_caveat: >-
+  Chi thi nam trong phien; lease do phien agent ghi va day bang credential cua tai khoan chu kho (#566) — yeu hon
+  comment chu kho tu viet.
+recorded_by: claude-session
+recorder_is_dispatcher: false
+
+leased_at_utc: '2026-10-01T09:55:00Z'
+lease_expires_at_utc: '2026-10-02T09:55:00Z'
+han_vi_sao: 'Mot vong va + review lap + merge master + day mot lan: 24h. Phien khong tu noi han.'
+
+packet_id: NO-TON-677-687
+packet_slug: NO-TON-677-687
+revision: 1
+generation: 1
+lease_id: no-ton-677-687-r1-g1-claude
+thay_the_cho: []
+thay_the_ghi_chu: 'Packet moi, khong co lease truoc.'
+role: executor
+provider: anthropic_claude
+executor: claude
+surface: claude_code
+model: claude-opus-5-5
+effort: max
+effort_ghi_chu: 'Agent va-spec-opus-max (dinh nghia khai effort max); harness co ap hay khong => KHONG DO DUOC.'
+environment: cloud
+risk: sensitive
+review_class: sensitive
+effective_review_class: sensitive
+assurance_target: human_audited
+reviewer_provider: anthropic_claude
+reviewer_surface: claude_code_subagent
+reviewer_model_yeu_cau: claude-sonnet-5-5
+reviewer_ghi_chu: >-
+  Spec r1 §6: Sonnet 5.5 (agent review-sonnet), cung ho voi executor => advisory_review. human_audited cua chu kho
+  la cong land. Khong khai cross_approved.
+access: read-write
+
+spec_path: ops/specs/no-ton-677-687-r1.md
+spec_ref: refs/heads/claude/no-ton-677-687
+spec_source_oid: a9ec5503b8fcad63dfdde584c78795fb1071ff8d
+spec_sha256: 905fdccb3acc59ad549283b18d630c3d7d5e78f59a07510df5dd1b7337e752bd
+spec_hash: 905fdccb3acc59ad549283b18d630c3d7d5e78f59a07510df5dd1b7337e752bd
+spec_hash_formula: SHA256 of UTF-8 LF Git blob bytes at spec_source_oid:spec_path
+prompt_path: ops/specs/no-ton-677-687-r1.md
+prompt_sha256_required: 905fdccb3acc59ad549283b18d630c3d7d5e78f59a07510df5dd1b7337e752bd
+
+branch: claude/no-ton-677-687
+branch_ownership: exclusive
+branch_ghi_chu: 'Spec, lease va ma di cung nhanh nay (khong thuoc ops/**). ai-dang-giu van thay vi quet moi ref.'
+start_from_sha: a6de9d12d0ddd13bb35c4decea54bf626806162c
+immutable_acceptance_baseline: a6de9d12d0ddd13bb35c4decea54bf626806162c
+master_sha_at_grant: a6de9d12d0ddd13bb35c4decea54bf626806162c
+reviewed_sha_required: a6de9d12d0ddd13bb35c4decea54bf626806162c
+reviewed_sha_required_nghia: 'Chua co head ung vien; moi verdict neo exact head THAT cua nhanh thi cong.'
+
+write_set:
+  - ops/land/pr689-wp677-land-evidence.yaml
+  - ops/lease_publish_test.py
+  - ops/reviews/README.md
+  - ops/reviews/lease-publish-windows-do-review-r1-codex.receipt.yaml
+  - ops/reviews/lease-publish-windows-do-review-r2-codex.receipt.yaml
+  - ops/reviews/lease-publish-windows-do-review-r3-claude.receipt.yaml
+  - ops/reviews/lease-publish-windows-do-review-r3-luot2-claude.receipt.yaml
+  - ops/specs/no-ton-677-687-r1.md
+write_set_hash: 27ebcd1ea16ab96a715e4f5bfbd425693befbed4bf6cbecaa0fdd6039e093b65
+write_set_hash_cach_tinh: 'sha256 cua cac duong dan DA SAP XEP (LC_ALL=C), noi bang LF, co LF cuoi, utf-8.'
+write_set_da_do_truoc_khi_cap: >-
+  Do 2026-10-01T09:53:05Z tren clone day du: fetch '+refs/heads/*' --prune; so TAP TEN ls-remote --heads (454) voi
+  for-each-ref refs/remotes/origin: comm -23 = 0. ai-dang-giu tung duong dan trong write_set => NGUOI_GIU 0 (ca 8).
+
+ci_budget:
+  gate_tu_dong: '1 luot pull_request khi mo PR luc san sang merge'
+  phep_do_duoc_cap: '0 luot Windows'
+  het: 'DUNG truoc moi push/chay lai ke tiep, cho quyet dinh cua chu kho'
+
+dieu_kien_dung:
+  - 'S1 — cham duong ngoai write set. DUNG.'
+  - 'S2 — CI do vi packet. DUNG, bao chu kho.'
+  - 'S4 — ops/lease_publish_test.py vuot +150/-20 so a6de9d1 (spec §2 B3.4). DUNG truoc review.'
+  - 'S6 — het han lease => ngung ghi, handoff §7.'
+
+cam_tuyet_doi:
+  - Khong sua spec; khong sua tep ngoai write set
+  - Khong tu review / approve / merge / land
+  - Khong CI tay, khong Windows, khong LIVE/deploy
+  - Khong force-push; khong viet chuoi bo-qua-CI nguyen van trong commit message
+
+chua_do_duoc:
+  - 'Danh tinh nguoi ky: #566.'
+  - 'Model/effort thuc te cua executor va reviewer.'
+  - 'Windows.'

@@ -5,38 +5,41 @@ Packet #674 `CI-DUONG-NHANH-HO-SO` (đặc tả r2, ops/specs/CI-DUONG-NHANH-HO-
 
 VÌ SAO CÓ TỆP NÀY, VÀ VÌ SAO LOGIC KHÔNG NẰM TRONG YAML
 Ruleset `bao-ve-cong-dang-lease` đòi ba check (`gate`, `gate-ops`, `gate-packet-loop`) xanh trên ĐÚNG head (theo đặc tả
-r2; cấu hình ruleset thật trên GitHub KHÔNG ĐO ĐƯỢC offline), nên PR bookkeeping chỉ thêm `ops/land/*.yaml` vẫn phải
-chạy trọn gate (đo 29-09-2026: run 36518707072, job `gate (ubuntu-latest)` 52 phút). Không được dùng `paths:` / `paths-ignore:` — workflow không chạy thì
-check VẮNG MẶT, PR kẹt `blocked`, và "vắng mặt" nhìn giống hệt "xanh". Nên ba job vẫn KHỞI ĐỘNG và báo
-kết quả; chỉ các bước nặng có `if:` mức bước theo output `che_do` của job `chuan-bi`. Quyết định `che_do`
-sống ở ĐÂY (Python, có phản chứng chạy được — ops/ci_duong_nhanh_test.py), không sống trong biểu thức YAML.
+r2 — cấu hình ruleset thật trên GitHub KHÔNG ĐO ĐƯỢC offline), nên PR bookkeeping chỉ thêm `ops/land/*.yaml` vẫn phải
+chạy trọn gate (đo 29-09-2026: run 36518707072, job `gate (ubuntu-latest)` 52 phút). Không được dùng `paths:` /
+`paths-ignore:`: workflow không chạy thì check bắt buộc VẮNG MẶT và PR kẹt chờ (hành vi GitHub theo tài liệu, chưa tự đo
+trên kho này), mà "vắng mặt" nhìn giống hệt "xanh". Nên ba job vẫn KHỞI ĐỘNG và báo kết quả; chỉ các bước nặng có `if:`
+mức bước theo output `che_do` của job `chuan-bi` (`y03`, `y06` khoá). Quyết định `che_do` sống ở ĐÂY (Python, có phản
+chứng chạy được — ops/ci_duong_nhanh_test.py), không sống trong biểu thức YAML.
 
 BA TRẠNG THÁI, FAIL-CLOSE (danh sách CHO PHÉP, không phải danh sách CẤM)
   · đo được diff VÀ mọi tệp đổi khớp `ALLOWLIST_TIEN_TO`  ⇒ `duong_nhanh`
   · đo được diff VÀ có ít nhất một tệp ngoài allowlist     ⇒ `day_du`
   · KHÔNG ĐO ĐƯỢC (không phải pull_request, thiếu/hỏng SHA — kể cả `github.sha` —, git lỗi/ném, đầu ra cụt) ⇒ `day_du`
 Chỉ MỘT giá trị (`duong_nhanh`) mở đường bỏ bước; mọi giá trị lạ, rỗng hay vắng đều thành đầy đủ ở phía
-`ci.yml` (`!= 'duong_nhanh'`). Diff rỗng ⇒ `duong_nhanh` (Q3 chủ kho), có dòng log riêng để phân biệt.
+`ci.yml` (`!= 'duong_nhanh'`; `y02`, `y03` khoá dạng biểu thức, còn output VẮNG đọc thành chuỗi rỗng là ngữ nghĩa biểu
+thức GitHub Actions theo tài liệu, chưa tự đo). Diff rỗng ⇒ `duong_nhanh` (Q3 chủ kho), có dòng log riêng để phân biệt.
 
 Diff là `base...head` (BA chấm = từ merge-base tới head), KHÔNG phải `base..head`: hai chấm tính cả việc
-nhánh đích đã tiến thêm sau khi PR rẽ ra, biến PR hồ sơ thành "có tệp mã" (đo ở test t11). Ba chấm có hai chỗ
-mù do LỊCH SỬ (đo 30-09-2026), và đều đóng theo M4: (1) nhiều merge-base (criss-cross) ⇒ ba chấm dùng MỘT base,
+nhánh đích đã tiến thêm sau khi PR rẽ ra, biến PR hồ sơ thành "có tệp mã" (đo ở test t11). Ba chấm có (ít nhất)
+hai chỗ mù do LỊCH SỬ, đã đo 30-09-2026 và đều đóng theo M4: (1) nhiều merge-base (criss-cross) ⇒ ba chấm dùng MỘT base,
 giấu thay đổi mã mà merge thật mang vào ⇒ đòi `merge-base --all` ra ĐÚNG một SHA, không thì KHÔNG ĐO ĐƯỢC;
 (2) base ĐỔI TÊN tệp/thư mục hồ sơ ra vùng mã ⇒ merge thật (ort, dò đổi tên) mang sửa đổi của PR sang đường dẫn
 MỚI trong vùng mã, ba chấm vẫn chỉ thấy đường dẫn cũ ⇒ phân loại trên HỢP của ba chấm và diff `goc -> cây merge`
 (`git merge-tree --write-tree`, cùng thuật toán merge với GitHub — tương đương đó theo tài liệu, chưa tự đo trên
-GitHub). Mô phỏng ấy xuất phát từ `pull_request.base.sha` của SỰ KIỆN, còn commit mà mọi job thật sự checkout và test
-là `github.sha` (merge ref) — hai thứ trùng nhau hay không là KHÔNG ĐO ĐƯỢC offline. Nên hợp thêm diff `goc -> github.sha`
-(cross-review lượt 9): base.sha cũ hơn đầu nhánh đích mà nhánh đích đã đổi tên hồ sơ ra vùng mã thì merge THẬT sửa mã
-⇒ `day_du`. Thiếu/hỏng `github.sha` hoặc git không đọc được nó ⇒ KHÔNG ĐO ĐƯỢC ⇒ `day_du`. `--no-renames`
-để đổi tên KHỎI vùng cũng tính là chạm tệp cũ; nếu không, `git mv scripts/tl.py ops/land/tl.py` chỉ hiện
-đường dẫn ĐÍCH và PR mã lọt vào đường nhanh (test t12). `-z` để tên tệp có dấu/xuống dòng không bị git
-bọc dấu nháy.
+GitHub). Mô phỏng ấy xuất phát từ `pull_request.base.sha` của SỰ KIỆN, còn commit mà các job checkout và test là
+`github.sha` (merge ref: không bước `actions/checkout` nào của `ci.yml` khai `ref:` — `y13` khoá `with:` của mọi bước — và
+khi ấy checkout lấy `github.sha` theo tài liệu GitHub, chưa tự đo trên runner) — hai thứ trùng nhau hay không là KHÔNG ĐO
+ĐƯỢC offline. Nên hợp thêm diff `goc -> github.sha` (cross-review lượt 9): base.sha cũ hơn đầu nhánh đích mà nhánh đích
+đã đổi tên hồ sơ ra vùng mã thì merge THẬT sửa mã ⇒ `day_du`. Thiếu/hỏng `github.sha` hoặc git không đọc được nó ⇒
+KHÔNG ĐO ĐƯỢC ⇒ `day_du`. `--no-renames` để đổi tên KHỎI vùng cũng tính là chạm tệp cũ; nếu không,
+`git mv scripts/tl.py ops/land/tl.py` chỉ hiện đường dẫn ĐÍCH và PR mã lọt vào đường nhanh (test t12). `-z` để tên tệp
+có dấu/xuống dòng không bị git bọc dấu nháy.
 
 GIỚI HẠN, NÓI THẲNG (không phải ranh giới an ninh):
-  · Bộ phân loại chạy từ CÂY MERGE của PR và `ci.yml` cũng do PR mang theo. PR sửa CHÍNH tệp này hoặc
-    `ci.yml` tự quyết đường của mình; chốt cho việc đó là review (`sensitive`), không phải mã. Allowlist
-    chặn NHẦM LẪN, không chặn tác giả cố ý.
+  · Bộ phân loại chạy từ CÂY MERGE của PR và `ci.yml` cũng do PR mang theo (sự kiện `pull_request` chạy workflow của
+    merge ref — theo tài liệu GitHub, chưa tự đo). PR sửa CHÍNH tệp này hoặc `ci.yml` tự quyết đường của mình; chốt
+    cho việc đó là review (`sensitive`), không phải mã. Allowlist chặn NHẦM LẪN, không chặn tác giả cố ý.
   · Allowlist theo TIỀN TỐ, không theo phần mở rộng: một `.py` đặt dưới `ops/land/**` vẫn là đường nhanh
     (Q2 chủ kho giữ đúng bốn tiền tố).
   · `pull_request.base.sha`/`head.sha` luôn là SHA đầy đủ (khớp `MAU_SHA`) ở mọi sự kiện con: theo tài liệu GitHub,
@@ -45,7 +48,8 @@ GIỚI HẠN, NÓI THẲNG (không phải ranh giới an ninh):
 LỆNH `kiem-re` (bước bù cho các bước bị bỏ, chỉ chạy khi `che_do == duong_nhanh`):
   YAML parse được · `git diff --check` · lease đổi phải qua `lease_publish` · ba ca kiểm DỮ LIỆU của lease_publish_test ·
   mọi đường dẫn đổi là TỆP THƯỜNG theo MODE TRONG GIT (`kiem_mode_git`: 100644/100755 hoặc xoá; gitlink, symlink ⇒ ĐỎ) ·
-  KHÔNG symlink treo ở BẤT KỲ đâu trong cây, kể cả ngoài diff (`kiem_symlink_treo_ca_cay`: `t82` của bước bị bỏ chép CẢ cây).
+  KHÔNG symlink treo trong cây ĐĨA, kể cả ngoài diff (`kiem_symlink_treo_ca_cay`: `t82` của bước bị bỏ chép CẢ cây; phạm vi
+  duyệt và chỗ nó không tới được ghi ở docstring hàm).
 Hai chỗ khác chữ trần của đặc tả r2, ĐO ngày 29-09-2026. CHỦ KHO ĐÃ DUYỆT CẢ HAI (lựa chọn (a)) — erratum của đặc tả r2,
 không sửa r2: https://github.com/ducthangho/tra-luat/issues/674#issuecomment-5887720007 . Với reviewer: đây là HÀNH VI ĐƯỢC
 DUYỆT, không phải finding về chính sách; vẫn tìm lỗi TRONG cách hiện thực (ví dụ `bo_qua_han` bỏ thêm chốt nào khác không,
@@ -54,37 +58,42 @@ ba loại khoảng trắng có bị tắt rộng hơn ba loại đó không).
     BỘ 345 merge first-parent tính tới 1741e0a (lệnh lấy tối đa 400, không chạm trần — đo lại 01-10-2026: khớp), 63 lần chỉ
     đổi hồ sơ và 8/63 trượt `--check` nguyên bản (dấu cách cuối dòng trong verdict `.md`/`.patch`, dòng trống cuối tệp
     yaml). Chốt cứng sẽ chặn oan ~13% (8/63 tại 1741e0a) đúng lớp PR mà đường nhanh sinh ra để giải. Bản tinh chỉnh
-    vẫn bắt dấu xung đột còn sót (`<<<<<<<`, `=======`, `>>>>>>>`), thứ `--check` báo bất kể `core.whitespace`. Thuộc tính thì KHÁC: một
-    `.gitattributes` do PR mang vào (ở mọi độ sâu) được git đọc từ CÂY LÀM VIỆC (= merge ref của PR) và cấu hình được
-    chính các chốt. Đo 30-09-2026: `conflict-marker-size`/`binary`/`-diff` tắt báo dấu xung đột của `--check`
-    (reviewer lượt 8); `diff` (set) ép tệp có NUL thành "văn bản" cho `--numstat` (reviewer lượt 9); `-diff` trên tệp
+    vẫn bắt dấu xung đột còn sót (`<<<<<<<`, `=======`, `>>>>>>>`): `--check` báo chúng ngoài `core.whitespace` (`t20c`,
+    `t20r` đo dưới đúng cấu hình trên). Thuộc tính thì KHÁC: một `.gitattributes` do PR mang vào (ở mọi độ sâu theo tài
+    liệu git; `t20p` đo ở nhiều độ sâu) được git đọc từ CÂY LÀM VIỆC và cấu hình được chính các chốt. Đo được:
+    `conflict-marker-size` (cross-review lượt 8), `binary`, `-diff` (`t20p`, 01-10-2026) tắt báo dấu xung đột của
+    `--check`; `diff` (set) ép tệp có NUL thành "văn bản" cho `--numstat` (cross-review lượt 9, `t20t`); `-diff` trên tệp
     CRLF làm `merge-tree` mất dò đổi tên thư mục, biến merge XUNG ĐỘT thành merge sạch (tự đo khi vá lượt 9, `t11e`).
     Nên MỌI lệnh git chạy bộ máy diff/merge của tệp này đọc thuộc tính từ cây GỐC (`--attr-source=<goc>`; git không
     có cờ này ⇒ lệnh lỗi ⇒ `day_du` / kiem-re ĐỎ, tức fail-close — phiên bản git của runner chưa đo): ba chấm
     `--name-only`, `merge-tree`, diff `goc -> cây` (cây merge-tree và `github.sha`), `--check`, `--numstat`, và
-    `merge-tree` + ba `--raw` của `kiem_mode_git`. Các lệnh
-    `--name-only --no-renames` so OID giữa hai cây, không dò đổi tên nên không có bước nào đọc thuộc tính —
-    `--attr-source` ở đó là chốt thống nhất (`t20u` khoá đối số từng lời gọi), không phải vá một đường đã đo được.
+    `merge-tree` + ba `--raw` của `kiem_mode_git`. Các lệnh `--name-only --no-renames` so OID giữa hai cây và không dò
+    đổi tên; chúng có đọc thuộc tính hay không là CHƯA ĐO — `--attr-source` ở đó là chốt thống nhất (`t20u` khoá đối số
+    từng lời gọi), không phải vá một đường đã đo được.
     `merge-base --all` chỉ đọc đồ thị commit: không cần chốt.
     Ngoài phạm vi của câu này (không phải lệnh git của tệp này): byte trong cây làm việc do `actions/checkout` dựng
     đã chịu thuộc tính của PR (`eol`/`text`/`working-tree-encoding`/`ident`) — `kiem_yaml`/`kiem_loai_tep`/`kiem_lease`
-    đọc đúng các byte ấy, cũng là byte mà các bước bị bỏ và checkout của master đọc; chưa đo riêng. KHÔNG chặn
-    `.gitattributes` — tại 3569472cb9 có 3 tệp như thế dưới allowlist, cả 3 dưới `ops/reviews/` (`-whitespace` cho verdict
-    chép nguyên byte), do chính PR hồ sơ thêm vào. Tệp NHỊ PHÂN (git đoán theo nội dung + thuộc tính GỐC) thì `--check`
-    bỏ qua hẳn ⇒ `kiem_nhi_phan` coi là KHÔNG ĐO ĐƯỢC, ĐỎ (tại 3569472cb9: 0/1991 tệp dưới allowlist là nhị phân).
+    đọc đúng các byte ấy, cũng là byte mà các bước bị bỏ và checkout của master đọc (chưa đo riêng, kể cả trên runner).
+    KHÔNG chặn `.gitattributes`: PR hồ sơ có thêm tệp như thế dưới `ops/reviews/` (`-whitespace` cho verdict chép nguyên
+    byte — PR #667 merge 3fee59e, PR #670 merge dcd5fe0). Tệp NHỊ PHÂN (git đoán theo nội dung + thuộc tính GỐC) thì
+    `--check` bỏ qua hẳn ⇒ `kiem_nhi_phan` coi là KHÔNG ĐO ĐƯỢC, ĐỎ (tại 3569472cb9: 0/1991 tệp dưới allowlist là nhị phân).
   · D2 — `lease_publish.py check` là cổng ĐĂNG lease: lease đã hết hạn thì nó trả rc=8 "hết hạn" theo thiết kế,
-    mà bookkeeping thu hồi/đóng lease thường đúng là sửa lease hết hạn. Lease CÒN HẠN đổi trong PR chạy đúng
-    `check`; lease HẾT HẠN chạy `kiem(bo_qua_han=True)` — mọi chốt như `check`, chỉ bỏ chốt hạn — nên KHÔNG
-    được miễn kiểm chỉ vì hết hạn. Cả hai đuôi `.yaml` và `.yml`. Giới hạn: bia mộ hai chiều của `kiem`
-    đọc các lease khác trên mọi REF cục bộ (`_quet_lease_toan_kho`: `for-each-ref` rồi `ls-tree` từng ref), không đọc cây
-    làm việc; checkout của Actions chỉ có ref của PR, không có các nhánh `ops/**`. Nên số tệp trượt là số CỦA PHẠM VI ref,
-    không phải của kho: reviewer lượt 1 đo tại 1741e0a (113 tệp lease) — clone chỉ-master 6/113 trượt
-    `kiem(bo_qua_han=True)`, bản sao đủ 552 ref 0/113. Đo lại tại 3569472cb9 (119 tệp lease, sau merge master 20ec8d5):
-    một ref (chỉ nhánh đang checkout) 6/119 trượt — đúng 6 tệp cũ, cùng `CHAN [8]` bia mộ — còn trên 529 ref cục bộ thì
-    0/119 (529 chưa đối chiếu `ls-remote`, nên không khẳng định là đủ).
+    mà bookkeeping thu hồi/đóng lease có thể chính là sửa một lease đã hết hạn. Lease CÒN HẠN đổi trong PR chạy đúng
+    `check`; lease HẾT HẠN chạy `kiem(bo_qua_han=True)` — mọi chốt như `check` không `--du-bao` (đúng lời gọi của
+    kiem-re), chỉ bỏ chốt hạn (`t191` của `ops/lease_publish_test.py` đòi đúng một chốt được miễn) — nên KHÔNG được
+    miễn kiểm chỉ vì hết hạn. Cả hai đuôi `.yaml` và `.yml`. Giới hạn: bia mộ hai chiều của `kiem` đọc các lease khác
+    trên mọi ref dưới `refs/heads` và `refs/remotes` (`_quet_lease_toan_kho` qua `_cac_ref_cuc_bo`: `for-each-ref` rồi
+    `ls-tree` từng ref), KHÔNG đọc tag và KHÔNG đọc cây làm việc (`t21b` đo cả bốn vị trí trên `lease_publish` thật).
+    Nên số tệp lease trượt là số CỦA PHẠM VI ref, không phải của kho: tại 3569472cb9 (119 tệp lease) một kho chỉ có
+    nhánh đang checkout cho 6/119 trượt (cả 6 `CHAN [8]` bia mộ), một bản sao có 529 ref cục bộ cho 0/119 (529 chưa đối
+    chiếu `ls-remote`, nên không khẳng định là đủ). Trên CI, job `gate-ops` checkout TOÀN BỘ lịch sử (`fetch-depth`
+    không giới hạn); nó có nạp `refs/remotes/origin/*` của các nhánh `ops/**` hay không là KHÔNG ĐO ĐƯỢC offline — tài
+    liệu `actions/checkout` nói chế độ ấy lấy mọi nhánh và tag. Nếu có, bia mộ thấy các nhánh ấy như ở bản sao nhiều
+    ref; nếu không, PR hồ sơ sửa một lease hết hạn mà bia mộ chỉ nằm trên nhánh khác sẽ ĐỎ (`CHAN [8]`, fail-close).
     Hệ quả CÓ CHỦ ĐÍCH về actor (chủ kho chọn khai, không đổi chốt — Issue #674, 2026-09-30): `kiem`/`check`
     giữ chốt thẩm quyền theo `GITHUB_ACTOR`, nên PR hồ sơ THÊM/SỬA lease dưới `ops/leases/` do bot (actor khác chủ
-    kho) đẩy sẽ ĐỎ ở đường nhanh (`CHAN [4]`) trong khi đường đầy đủ không chạy chốt này. XOÁ lease thì KHÔNG đỏ:
+    kho) đẩy sẽ ĐỎ ở đường nhanh (`CHAN [4]`; `GITHUB_ACTOR` là tài khoản kích hoạt lượt chạy theo tài liệu GitHub,
+    chưa tự đo với bot) trong khi đường đầy đủ không chạy chốt này. XOÁ lease thì KHÔNG đỏ:
     `kiem_lease` bỏ qua tệp đã xoá (không còn gì để kiểm). Đỏ ở đây là fail-close đúng
     hướng; muốn đường nhanh cho PR lease do bot đẩy thì phải là quyết định mới về thẩm quyền, không phải nới tại chỗ.
 """
@@ -101,7 +110,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 DAY_DU, DUONG_NHANH = "day_du", "duong_nhanh"
 BIEN_SU_KIEN, BIEN_GOC, BIEN_DAU = "CI_DUONG_NHANH_SU_KIEN", "CI_DUONG_NHANH_GOC", "CI_DUONG_NHANH_DAU"
-BIEN_MERGE = "CI_DUONG_NHANH_MERGE"   # `github.sha`: commit merge THAT ma moi job checkout va test (cross-review luot 9)
+BIEN_MERGE = "CI_DUONG_NHANH_MERGE"   # `github.sha`: commit merge cac job checkout va test (theo tai lieu GitHub, xem docstring)
 ALLOWLIST_TIEN_TO = ("ops/land/", "ops/leases/", "ops/reviews/", "ops/specs/")
 MAU_SHA = re.compile(r"[0-9a-f]{40}")
 CAU_HINH_WHITESPACE = "core.whitespace=-blank-at-eol,-blank-at-eof,-space-before-tab"
@@ -125,8 +134,8 @@ def _ep_utf8():
 
 def _duong_dan_sach(duong: str) -> bool:
     """Đường dẫn repo-relative dạng chuẩn: khác rỗng, không `/` đầu, không `\\`, không ký tự điều khiển
-    (chặn giả dòng log), không thành phần rỗng / `.` / `..`. Git không sinh `..` trong cây, nhưng bộ phân
-    loại không được dựa vào điều đó: khớp tiền tố trần cho `ops/land/../../scripts/tl.py` là fail-OPEN."""
+    (chặn giả dòng log), không thành phần rỗng / `.` / `..`. Dù git có sinh `..` trong cây hay không, bộ phân
+    loại không dựa vào điều đó: khớp tiền tố trần cho `ops/land/../../scripts/tl.py` là fail-OPEN."""
     if not duong or duong.startswith("/") or "\\" in duong:
         return False
     if any(ord(c) < 32 or ord(c) == 127 for c in duong):
@@ -178,7 +187,8 @@ def doc_diff(env=os.environ, chay=subprocess.run, kho=ROOT):
     if khi_merge is None:
         return None
     # merge-tree mo phong tu base.sha cua SU KIEN; commit GitHub THAT SU test (github.sha) co the dung tren dau nhanh dich
-    # MOI hon (base.sha cu) => hop them diff goc -> merge ref that. Git khong doc duoc no => KHONG DO DUOC.
+    # MOI hon (base.sha cu) — chua tu do tren GitHub, nen hop them diff goc -> merge ref that. Git khong doc duoc no =>
+    # KHONG DO DUOC.
     khi_merge_that = doc_diff_cay(goc, hop, chay, kho)
     if khi_merge_that is None:
         return None
@@ -189,7 +199,8 @@ def doc_diff_merge(goc, dau, chay=subprocess.run, kho=ROOT):
     """Tập đường dẫn mà MERGE THẬT đổi so với `goc`, hoặc None = KHÔNG ĐO ĐƯỢC. Ba chấm chỉ đo phía head; merge còn
     đọc phía base (merge-base -> goc) và phép dò ĐỔI TÊN của nó mang sửa đổi của head sang đường dẫn khác: base đổi tên
     `ops/land/f.md` -> `scripts/f.py` (hoặc cả thư mục) mà PR sửa `ops/land/f.md` thì ba chấm chỉ thấy `ops/land/f.md`
-    còn merge thật SỬA `scripts/f.py`. Merge xung đột (rc=1) cũng là None: GitHub không dựng merge ref cho PR xung đột."""
+    còn merge thật SỬA `scripts/f.py`. Merge xung đột (rc=1) cũng là None: PR xung đột thì workflow `pull_request` không
+    chạy (theo tài liệu GitHub, chưa tự đo)."""
     try:
         # Thuoc tinh tu cay GOC: `-diff` cua PR tren tep CRLF lam merge-tree mat do doi ten thu muc => XUNG DOT thanh merge
         # sach (do 30-09-2026, t11e). Merge driver/conflict-marker-size/renormalize cung la thuoc tinh.
@@ -286,14 +297,17 @@ BO_QUA_NHU_T82 = (".git", "__pycache__", "*.pyc")
 
 
 def kiem_symlink_treo_ca_cay(kho=ROOT) -> list[str]:
-    """Symlink TREO ở BẤT KỲ đâu trong cây (không chỉ tệp trong diff) ⇒ ĐỎ. Cross-review lượt 8 (P2
-    `buoc-bi-bo-doc-ca-cay-khong-chi-ba-ca`): bước bị bỏ `lease-publish selftest` có `t82` `copytree` CẢ cây, theo symlink;
+    """Symlink TREO ở mọi chỗ trong cây mà bộ duyệt dưới đây tới được (không chỉ tệp trong diff) ⇒ ĐỎ. Cross-review
+    lượt 8 (P2 `buoc-bi-bo-doc-ca-cay-khong-chi-ba-ca`): bước bị bỏ `lease-publish selftest` có `t82` `copytree` CẢ cây, theo symlink;
     `kiem_loai_tep`/`kiem_mode_git` chỉ nhìn đường dẫn ĐỔI. PR hồ sơ XOÁ/đổi tên đích của một symlink HỢP LỆ có sẵn (vào
     qua PR đầy đủ, ở `docs/`, dưới allowlist hay trong thư mục chấm) — hoặc xoá hết một thư mục hồ sơ mà đường dẫn symlink
     đi XUYÊN qua — làm symlink ấy treo trong khi nó KHÔNG nằm trong diff ⇒ PR xanh, `t82` ĐỎ trên master (đo 01-10-2026).
     Treo đo bằng `os.path.exists` (stat của nhân, theo từng thành phần), KHÔNG bằng ghép đường dẫn từ vựng: `a/b/../c` cần
     `a/b` có thật. `os.walk` xếp symlink treo vào danh sách TỆP (kể cả symlink từng trỏ thư mục) và không đi vào symlink thư
-    mục. Không đọc được một thư mục ⇒ KHÔNG ĐO ĐƯỢC ⇒ ĐỎ. Không lệnh git nào: đây là cây ĐĨA mà `t82` sẽ chép."""
+    mục. Giới hạn, chưa có ca: `t82` (copytree không `symlinks=True`) thì CÓ theo vào symlink thư mục, nên symlink treo chỉ
+    với tới được QUA một symlink thư mục trỏ ra ngoài cây thì `t82` vấp mà chốt này không thấy (đo 01-10-2026 trên kho tạm:
+    copytree ném `shutil.Error`, os.walk không liệt kê). Không đọc được một thư mục ⇒ KHÔNG ĐO ĐƯỢC ⇒ ĐỎ. Không lệnh git
+    nào: đây là cây ĐĨA mà `t82` sẽ chép."""
     bo_qua = shutil.ignore_patterns(*BO_QUA_NHU_T82)
     loi = []
 
@@ -341,14 +355,18 @@ def _doc_raw(goc, cap, chay, kho):
 
 def kiem_mode_git(env, chay=subprocess.run, kho=ROOT, doi=frozenset()) -> list[str]:
     """Loại tệp theo MODE TRONG GIT, không theo cây làm việc (cross-review lượt 10, lớp `kiem-re-cua-fail-close-chua-co-ca`).
-    Mọi chốt nội dung khác của kiem-re đọc ĐĨA, và đĩa nói dối theo nhiều cách: gitlink (mode 160000) checkout thành THƯ MỤC
-    rỗng nên `kiem_yaml`/`kiem_lease` coi `not is_file()` là ĐÃ XOÁ và bỏ qua (kể cả tên `.yaml`), `--check` không có nội dung
-    để đọc, numstat đếm được dòng (không ra `-`) nên không bị coi là nhị phân; symlink trên nền `core.symlinks=false`
-    (Windows) checkout thành tệp THƯỜNG chứa đường đích nên `kiem_loai_tep` không thấy. Git thì không nói dối: `git diff --raw` trên ĐÚNG ba cặp mà bộ phân loại dùng
+    Các chốt nội dung khác của kiem-re đọc ĐĨA (vd `kiem_yaml`, `kiem_loai_tep`, `kiem_lease`) hoặc đọc NỘI DUNG diff
+    (`--check`, `--numstat`), và cả hai mù theo nhiều cách: gitlink (mode 160000) checkout thành THƯ MỤC rỗng (git cục bộ đo 01-10-2026:
+    clone để lại thư mục rỗng — trên runner chưa đo) nên `kiem_yaml`/`kiem_lease` coi `not is_file()` là ĐÃ XOÁ và bỏ qua
+    (kể cả tên `.yaml`), `--check` không có nội dung để đọc, numstat đếm được dòng (không ra `-`) nên không bị coi là nhị
+    phân; symlink trên nền `core.symlinks=false` (mặc định của Git for Windows theo tài liệu) checkout thành tệp THƯỜNG
+    chứa đường đích (`t20x` đo bằng git thật) nên `kiem_loai_tep` không thấy. Mode trong git thì không phụ thuộc cách
+    checkout: `git diff --raw` trên ĐÚNG ba cặp mà bộ phân loại dùng
     (`goc...dau`, `goc -> cây merge-tree`, `goc -> github.sha`), thuộc tính từ cây GỐC như mọi lệnh diff khác. Chỉ nhận mode
     mới 100644/100755, hoặc XOÁ (`D`, mode mới 000000); mọi thứ khác (gitlink, symlink, trạng thái lạ) ⇒ ĐỎ. Git lỗi/ném,
     đầu ra cụt/lẻ/bản ghi lạ, hoặc tập đường dẫn của ba cặp KHÁC tập `doi` mà bộ phân loại đã đo ⇒ KHÔNG ĐO ĐƯỢC ⇒ ĐỎ.
-    Thêm một chốt ĐĨA cho cặp `goc -> github.sha` (commit mà Actions checkout): đường dẫn git nói là tệp thường thì trên đĩa
+    Thêm một chốt ĐĨA cho cặp `goc -> github.sha` (commit mà Actions checkout theo tài liệu, chưa tự đo — xem docstring
+    module): đường dẫn git nói là tệp thường thì trên đĩa
     phải LÀ tệp thường — git có mà đĩa không có (va chạm tên không phân biệt hoa thường, checkout thưa…) thì các chốt đọc
     đĩa sẽ bỏ qua nó như tệp đã xoá. Tệp đổi thành thư mục cùng tên là HỢP LỆ: git báo `D` cho tệp và `A` 100644 cho tệp con."""
     goc, dau, hop = (env.get(k) or "" for k in (BIEN_GOC, BIEN_DAU, BIEN_MERGE))
@@ -386,7 +404,8 @@ def kiem_mode_git(env, chay=subprocess.run, kho=ROOT, doi=frozenset()) -> list[s
 
 def kiem_diff_check(env=os.environ, chay=subprocess.run, kho=ROOT) -> list[str]:
     """`git diff --check` trên ba chấm, mọi đuôi tệp. Thuộc tính đọc từ cây GỐC (`--attr-source`), không từ cây làm
-    việc: `.gitattributes` do PR thêm (vd `conflict-marker-size=40`, `binary`, `-diff`) KHÔNG tắt được báo dấu xung đột."""
+    việc: `.gitattributes` do PR thêm (vd `conflict-marker-size=40`, `binary`, `-diff` — `t20p` đo cả ba) KHÔNG tắt được báo
+    dấu xung đột."""
     goc, dau = env.get(BIEN_GOC) or "", env.get(BIEN_DAU) or ""
     try:
         r = chay(["git", "--attr-source=" + goc, "-c", CAU_HINH_WHITESPACE, "diff", "--check", "--no-renames", f"{goc}...{dau}"],
@@ -435,7 +454,8 @@ def _han_lease(gia_tri):
 
 def kiem_lease(doi, kho=ROOT, chay=subprocess.run, bay_gio=None, ra=None) -> list[str]:
     """Lease CÒN HẠN (hoặc hạn không đọc được) qua `lease_publish.py check`; lease HẾT HẠN qua `kiem(bo_qua_han=True)` — vẫn kiểm mọi
-    chốt khác, chỉ bỏ chốt hạn. Cả `.yaml` và `.yml`. D2 (quyết định của chủ kho) còn mở: xem docstring module."""
+    chốt khác, chỉ bỏ chốt hạn. Cả `.yaml` và `.yml`. D2 là hành vi chủ kho ĐÃ DUYỆT (issuecomment-5887720007): xem
+    docstring module."""
     ra = ra if ra is not None else sys.stdout
     try:
         import yaml
@@ -480,7 +500,7 @@ def kiem_ca_du_lieu(kho=ROOT, chay=subprocess.run) -> list[str]:
     """Ba ca kiem DU LIEU that cua bo lease-publish (t23 neo prompt cua moi lease · t26 bam bien nhan review · t27
     muc luc `ops/reviews`) thay cho ca bo `lease-publish selftest`: ba ca nay doc CAY that nen la thu ma PR ho so
     co the lam hong; bo ca suite di la mat chung. Chay nguyen ca trong tep test that, ~7 giay (do tai 3569472cb9,
-    container Linux 4 vCPU, Python 3.11: 6,6-6,8 giay qua ba lan; phu thuoc may, khong ngoai suy sang runner Actions)."""
+    container Linux, Python 3.11; phu thuoc may, khong ngoai suy sang runner Actions)."""
     try:
         r = chay([sys.executable, "-B", "-c", MA_CHAY_CA, "ops/lease_publish_test.py", *CA_DU_LIEU],
                  cwd=kho, capture_output=True)

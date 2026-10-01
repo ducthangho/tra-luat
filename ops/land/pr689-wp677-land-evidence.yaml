@@ -2,8 +2,10 @@
 # Schema chuan: docs/PROTOCOL_DA_PHIEN.md §7, khoi "Land evidence tach approval khoi thao tac".
 # Duong dan ops/land/*-land-evidence.yaml la QUY UOC THUC TE (tien le pr684 cung packet — land SPEC, pr696 #668).
 #
-# TRANG THAI: merged (20ec8d5). `landed: false` — xem trang_thai_packet.con_thieu_de_goi_landed. "merged" KHONG
-# dong nghia "landed" (PROTOCOL §10.2.4).
+# TRANG THAI: merged (20ec8d5). `landed: true` CO HIEU LUC tu merge commit cua PR bookkeeping #699 (tep nay chi co
+# tren master sau thoi diem ay). Ba diem mo (moc Workflow definition, rc, lech base) DONG THEO QUYET DINH CHU KHO
+# (2026-10-01 ~03:29Z, neo issues/677#issuecomment-5924153402), KHONG phai do du — xem trang_thai_packet.
+# "merged" KHONG dong nghia "landed" (PROTOCOL §10.2.4).
 # NHAN: measured = do lai trong phien soan ho so (lenh ghi kem); loi_khai_co_neo = chi co loi khai cua phien agent,
 # co neo; thuat_lai = so lieu cua mot luot review advisory, KHONG tai chay; not_measured = khong do duoc, ghi ly do.
 # Readback tho: ops/land/pr689-wp677-provenance/. Moi phep do REST: GET https://api.github.com/<duong dan> bang Bearer
@@ -43,20 +45,38 @@ do_luc: '2026-10-01T01:36Z..01:58Z (worktree claude/bookkeeping-677-pr689, core.
 trang_thai_packet:
   merged: true
   merged_nguon: 'measured — readback-pr-689.json: merged true, merged_at 2026-10-01T00:55:22Z, merge_commit_sha 20ec8d5d0e86cb7dc01f202c7596407a957e5961'
-  landed: false
+  landed: true
+  landed_hieu_luc_tu: 'merge commit cua PR bookkeeping #699 (nhanh claude/bookkeeping-677-pr689) dua tep nay vao master — tep chi co tren master sau thoi diem ay.'
   landed_ghi_chu: >-
     PROTOCOL §10.2.4: `landed` = da vao canonical o exact SHA duoc duyet, HAU-MERGE GATE XANH va bookkeeping Packet
     xong. (1) Exact SHA: cha thu hai cua 20ec8d5 = 0614f7f = reviewed_sha cua human audit (measured). (2) Hau-merge:
     run 36798575727 conclusion success, 14/14 job success (measured); moc Run, Checkout measured; moc Workflow
-    definition: exact_commit_oid not_measured (GraphQL 403, do lai luc soan), bytes do bang nguon thay the; rc so chi co
-    o job gate (artifact returncode 0), cac job con lai chi step_conclusion success. Tien le #668/#691 dong hai moc ay
-    bang QUYET DINH CHU KHO RIENG cho tung run, va ghi ro quyet dinh cu KHONG tai su dung — ho so nay KHONG co quyet
-    dinh nao cho run 36798575727. (3) Bookkeeping: nhanh bookkeeping chua merge. Vi vay `false`.
-  landed_dieu_kien_len_true: >-
-    (a) chu kho quyet hai moc MOC-WORKFLOW-DEFINITION va RC-SO-CHI-CO-STEP-CONCLUSION cho RIENG run 36798575727
-    (hoac do duoc that); (b) chu kho xac nhan hoac bo qua LECH-BASE-GIUA-AUDIT-VA-MERGE; (c) PR bookkeeping cua nhanh
-    claude/bookkeeping-677-pr689 merge bang MERGE commit. Land operator KHONG tu dong muc nao.
-  con_thieu_de_goi_landed:
+    definition: exact_commit_oid not_measured (GraphQL 403), bytes do bang nguon thay the — chu kho CHAP NHAN nguon
+    thay the cho RIENG run nay; rc so chi co o job gate (returncode 0), cac job con lai chi step_conclusion success —
+    chu kho CHAP NHAN job success thay rc cho RIENG run nay. Lech base fc852ff -> 91eb8fb: chu kho XAC NHAN. Ba moc ay
+    DONG THEO QUYET DINH CHU KHO (quyet_dinh_chu_kho_ba_moc), KHONG phai do du. (3) Bookkeeping: dieu kien con lai DUY
+    NHAT la merge PR #699 bang merge commit (landed co hieu luc tu merge commit ay); dong Issue #677 la buoc sau do.
+  lich_su_landed: >-
+    Ban dau cua tep nay (soan 2026-10-01 01:36Z..01:58Z) ghi `landed: false`: ba moc chua co quyet dinh chu kho cho run
+    36798575727, bookkeeping chua xong. Len `true` sau quyet dinh chu kho ~03:29Z (neo 5924153402) — dong theo quyet
+    dinh, khong vi da do du. `landed` chua co hieu luc o ban nao truoc merge PR #699.
+  quyet_dinh_chu_kho_ba_moc:
+    trang_thai: loi_khai_co_neo
+    luc: '2026-10-01 ~03:29Z (loi_khai_co_neo: cau tra loi AskUserQuestion trong phien session_01RU4YGG; ho so nay khong doc transcript)'
+    neo_ben: https://github.com/ducthangho/tra-luat/issues/677#issuecomment-5924153402
+    neo_ben_do_duoc: >-
+      measured (readback-comment-5924153402.json): created_at 2026-10-01T03:30:15Z, than 1317 byte sha256
+      fcc9ec4af1a26adbe2b0f83e32174a208238ce4b71f703184b9d55ea8cfa7887, dong dau tu khai "Comment này do PHIÊN AGENT
+      đăng HỘ chủ kho". Readback bang nguyen van ban gui (doi chieu byte trong phien).
+    cau_hoi_nguyen_van: 'PR ghi sổ #699 khai `landed: false` cho #677 vì còn 3 mục chưa đo được trên run hậu-merge 36798575727. Anh quyết thế nào?'
+    phuong_an:
+      - {nhan: 'Chấp nhận cả 3, đổi landed: true (Recommended)', chon: true}
+      - {nhan: 'Giữ landed: false', chon: false}
+    pham_vi: 'CHI run 36798575727 attempt 1, SHA 20ec8d5, va lech base fc852ff -> 91eb8fb cua lan merge nay.'
+    khong_tai_su_dung: 'Khong ap cho run, attempt, SHA hay land nao khac.'
+    dieu_kien_thay_the: 'Doc duoc WorkflowRun.file.repositoryFileUrl hoac rc so cho cac job thi ket qua do thay quyet dinh; chu kho tu tao hien vat GitHub thi hien vat ay thay neo.'
+  con_thieu_de_goi_landed_luc_soan_ghi_chu: 'Danh sach luc soan ban dau (landed false); ba muc dau DONG THEO quyet_dinh_chu_kho_ba_moc, muc cuoi dong khi PR #699 merge.'
+  con_thieu_de_goi_landed_luc_soan:
     - id: MOC-WORKFLOW-DEFINITION
       trang_thai: not_measured
       mo_ta: >-

@@ -691,9 +691,12 @@ def dem_la_do(chap_nhan, o_trong_ci):
 
 # CI-SONG-SONG-REGISTRY-G5-MOT-LAN r1 (#637): M1–M3, M6, M7. Hằng số trong W1 theo spec M3.
 # #643 (chủ kho chọn "b", PR #644): 3600 → 4500. Đo run 36208617323, N=2 chế độ đủ: `nhanh_don_duoc_test` 3306,45 s = 92 %
-# trần cũ. KHÔNG bảo đảm cả job dưới `timeout-minutes: 90`: bộ ấy còn chờ worker trống (run trên: bắt đầu sau 337 s),
+# trần cũ. KHÔNG bảo đảm cả job dưới `timeout-minutes` (nay 105): bộ ấy còn chờ worker trống (run trên: bắt đầu sau 337 s),
 # Windows ép N=1 ⇒ dài hơn; trần job là trần NGOÀI. Ca `p643-tran-bo-nho-hon-timeout-job` chỉ khoá trần bộ < trần job.
-GIAY_TOI_DA_MOT_BO, GIAY_CHO_CAY_DUNG, BIEN_WORKERS, BIEN_MOC = 4500, 10, "CI_DANG_KY_WORKERS", "CI_DANG_KY_MOC"
+# #705 (CI-REGISTRY-NANG-TRAN-BO-DAY-DU, chủ kho Q4): 4500 → 5400, job 90 → 105 phút. `nhanh_don_duoc_test` chế độ đủ:
+# 3645 s xanh (run 36642392330) rồi > 4500 s ĐỎ ba lần (36696528580 ×2, 36839918701) — runner chậm 25–40 %, KHÔNG phải
+# bộ chậm đi (delta tại chỗ 7b308bc 4604 s / 423b4ba 4586 s). 3645 × 1,40 ≈ 5100 + ~6 % ⇒ 5400; giải pháp bền là chia mảnh.
+GIAY_TOI_DA_MOT_BO, GIAY_CHO_CAY_DUNG, BIEN_WORKERS, BIEN_MOC = 5400, 10, "CI_DANG_KY_WORKERS", "CI_DANG_KY_MOC"
 
 
 def _gio_utc(): return datetime.datetime.now(datetime.timezone.utc)
@@ -735,7 +738,7 @@ LENH_REGISTRY = frozenset({"git config --global core.autocrlf false", "git confi
                            "bash ops/cai_cong_cu.sh shellcheck", "bash ops/cai_cong_cu.sh rg",
                            "python ops/cong_cu.py kiem-tra --json", "python -m pip install --quiet ruff==0.15.15",
                            "ruff --version", "python .claude/dev/ci_dang_ky_test.py --chay"})
-BAM_GATE_REGISTRY = "b42a413f852e0852f0e59ef8acaf6757a771c2e55e296714426a73e7e308ebc9"
+BAM_GATE_REGISTRY = "9dd2c23db45fd97c4ce44a98ff0abe74e21b4b2c64a97dab318addb92d3458d9"
 GOC_TAI_LIEU = frozenset({"AGENTS.md", "CHANGELOG.md", "CLAUDE.md", "CONTEXT.md", "INSTALL.md", "README.md", "SKILL.md"})
 
 
@@ -2091,7 +2094,7 @@ def phan_chung():
                    ("matrix-float", lambda w, j: _j(w, JOB_MANH)["strategy"]["matrix"].update(manh=[0.0, 1, 2, 3])),
                    ("manh-timeout-float", lambda w, j: _j(w, JOB_MANH).update({"timeout-minutes": 30.0})),
                    ("du-fetch-depth-false", lambda w, j: j["steps"][1]["with"].update({"fetch-depth": False})),
-                   ("du-timeout-float", lambda w, j: j.update({"timeout-minutes": 90.0})),
+                   ("du-timeout-float", lambda w, j: j.update({"timeout-minutes": 105.0})),
                    ("env-reg-thieu-manh", lambda w, j: _buoc_reg(j)["env"].pop(BIEN_MANH)),
                    ("env-reg-thua", lambda w, j: _buoc_reg(j)["env"].update(X="1"))):
         _them("p661-M5-" + _t + "-do", _hong_du(_f))
@@ -2111,7 +2114,7 @@ def phan_chung():
         _tho, _w = WF_DOT_BIEN_DU.read_text(encoding="utf-8"), pathlib.Path(_d, "w.yml")
         for _t, _a, _b in (("goc", "", ""), ("on-thanh-true", "\non:\n", "\ntrue:\n"), ("khoa-True-rac", "\npermissions:", '\n"True": rac\npermissions:'),
                            ("cron-trung", '    - cron: "17', '    - cron: "0 0 1 1 *"\n      cron: "17'),
-                           ("timeout-trung", "    timeout-minutes: 90\n", "    timeout-minutes: 5\n    timeout-minutes: 90\n")):
+                           ("timeout-trung", "    timeout-minutes: 105\n", "    timeout-minutes: 5\n    timeout-minutes: 105\n")):
             _w.write_text(_v := _tho.replace(_a, _b, 1) if _a else _tho, encoding="utf-8")
             _them(f"p651-M4-yaml-tho-{_t}", not loi_actionlint(_w) if not _a else (
                 _v != _tho and not loi_workflow_dot_bien_du(yaml.safe_load(_v), _wf0) and bool(loi_actionlint(_w))))
@@ -2154,7 +2157,7 @@ def phan_chung():
     _them("p643-lenh-registry-deu-trong-vung", all(_cham_vung(t, set(VUNG_CHUNG)) for x in LENH_REGISTRY
                                                    for t in x.split() if "/" in t and "@" not in t
                                                    and t != ".claude/dev/ci_dang_ky_test.py"))
-    _them("p643-tran-bo-nho-hon-timeout-job", GIAY_TOI_DA_MOT_BO == 4500
+    _them("p643-tran-bo-nho-hon-timeout-job", GIAY_TOI_DA_MOT_BO == 5400
           and GIAY_TOI_DA_MOT_BO < 60 * _wf0["jobs"]["gate-registry"]["timeout-minutes"])
     for _k in ENV_REGISTRY:
         _them(f"p643-A4-thieu-{_k}", _hong_env(lambda b, w: b["env"].pop(_k)))

@@ -840,7 +840,7 @@ jobs:
       matrix:
         os: ${{ fromJson(needs.chuan-bi.outputs.os) }}
     runs-on: ${{ matrix.os }}
-    timeout-minutes: 90
+    timeout-minutes: 105
     env:
       PYTHONIOENCODING: utf-8
       PYTHONUTF8: "1"

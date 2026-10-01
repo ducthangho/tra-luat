@@ -79,7 +79,7 @@ SHA_G1   = "2f70869a0537843e9cae78618ee7ae8c261d972d"
 # do that 18-09 tren ban va g2 cua agy cho 5 tep / +812, trong khi viec cua agy la 2 tep / +353.
 # Mot chot nhu the se bao "vuot tran" cho mot ban va KHONG vuot. Base dung la MERGE-BASE.
 SHA_BASE_SPEC = "d705623162b75b7340ee7cca54ac2d2abbddbb6f"
-BAN_BO_DO = "2026-10-01d"              # doi MOI khi sua bo do - log tu khai ban nao
+BAN_BO_DO = "2026-10-01e"              # doi MOI khi sua bo do - log tu khai ban nao
 TRAN_TEP, TRAN_DONG = 2, 400          # N7' cua spec r3
 AL_SAN = (1, 7, 7)                    # san actionlint = ban ghim CI: AL_VER cua ci.yml = ban_ghim cua ops/cong_cu.yaml
 GIT_SAN = (2, 36, 0)                  # san git: ung vien goi `git worktree list --porcelain -z` (co `-z` tu 2.36); ban_ghim git = null
@@ -208,8 +208,18 @@ _PY_GIU = frozenset({"PYTHONHOME", "PYTHONUSERBASE", "PYTHONNOUSERSITE"})
 # ca hai doc SHELLCHECK_OPTS, va t137 doc ~/.shellcheckrc (XDG_CONFIG_HOME tam KHONG che duoc; cho tep rc tren Windows: KHONG DO DUOC).
 # Do tren 2026-09-30h, 0ea95de: SHELLCHECK_OPTS=--enable=all => t33 + t137 DO; ~/.shellcheckrc `enable=all` => t137 DO — ca "la"
 # => TRUOT cho ung vien sach. CI khong co ca hai. SHELLCHECK_OPTS=--norc de len bien cua nguoi do VA tat moi tep rc (shellcheck
-# phai NHAN --norc — muc 0 hoi truoc). BASH_ENV (ke ca `set -euo pipefail`) do: 166/166; BASH_ENV in byte ngoai UTF-8 thi
-# t32/t51-t68 DO (152/166, do 2026-10-01) — muc 0 hoi bash trong CHINH moi truong ay (chot `_bash_posix()` duoi).
+# phai NHAN --norc — muc 0 hoi truoc).
+# Bien KHOI DONG cua bash CUA NGUOI DO lot vao bo test y nhu ba nhom tren: t32/t51-t68 chay bash voi dict(os.environ, ...). Do
+# tren 2026-10-01 (ban 01d), 0ea95de: SHELLOPTS=noclobber, hoac BASH_ENV chua `set -o noclobber` => t32 t51 t60 t62 t63 t66 t68 DO
+# "cannot overwrite existing file" — ca "la" => TRUOT cho ung vien sach — trong khi muc 0 cho qua: no hoi `git --version`
+# trong bash, cau HEP hon cau bo test can. BASH_ENV in byte ngoai UTF-8 => 152/166. CI khong dat bien nao trong nhom nay. Bo
+# theo TAP bash(1) doc khi chay script: moi ten bat dau `BASH` (BASH_ENV BASHOPTS BASH_FUNC_* BASH_XTRACEFD BASH_COMPAT ...) cong
+# _BASH_KHOI_DONG. Chi hai muc tren DO DUOC lam DO; cac ten con lai bo vi CI khong dat, KHONG vi da thay DO (do 2026-10-01: SHELLOPTS
+# xtrace/nounset/pipefail/noglob/allexport, BASHOPTS failglob/nullglob/xpg_echo, POSIXLY_CORRECT, CDPATH, FUNCNEST=1, TMOUT=1 =>
+# 9/9 ca bash). IFS bash KHONG nhan tu moi truong. t152 von chi truyen PATH nen khong doi. Muc 0 tu khai TEN (khong in gia tri).
+_BASH_KHOI_DONG = frozenset({"SHELLOPTS", "ENV", "POSIXLY_CORRECT", "CDPATH", "GLOBIGNORE", "GLOBSORT", "EXECIGNORE",
+                             "FUNCNEST", "TMOUT"})
+def _bien_bash(k): return k.upper().startswith("BASH") or k.upper() in _BASH_KHOI_DONG
 _GIT_GLOBAL_CI = "[init]\n\tdefaultBranch = master\n[core]\n\tautocrlf = false\n\teol = lf\n\tabbrev = 7\n"
 def chay(argv, cwd, phut=60):
     fd, gc = tempfile.mkstemp(prefix="wp541-gitconfig-ci-", suffix=".ini")
@@ -218,7 +228,8 @@ def chay(argv, cwd, phut=60):
         xdg = tempfile.mkdtemp(prefix="wp541-xdg-")
         with os.fdopen(fd, "w", encoding="ascii", newline="\n") as f: f.write(_GIT_GLOBAL_CI)
         mt = {k: v for k, v in os.environ.items()
-              if not k.upper().startswith("GIT_") and (not k.upper().startswith("PYTHON") or k.upper() in _PY_GIU)}
+              if not k.upper().startswith("GIT_") and not _bien_bash(k)
+              and (not k.upper().startswith("PYTHON") or k.upper() in _PY_GIU)}
         mt.update(PYTHONUTF8="1", PYTHONIOENCODING="utf-8", PYTHONDONTWRITEBYTECODE="1", PYTHONUNBUFFERED="1",
                   GIT_CONFIG_GLOBAL=gc, XDG_CONFIG_HOME=xdg, SHELLCHECK_OPTS="--norc")
         p = subprocess.run([sys.executable] + argv, cwd=str(cwd), capture_output=True,
@@ -432,6 +443,8 @@ inn("  ProgramFiles :", repr(os.environ.get("ProgramFiles")), "| SystemRoot:", r
 inn("  CONG_CU_GIT  :", repr(_CONG_CU_GIT_NGUOI_DO)
     + ("  -> DA BO khoi luot do (CI khong dat bien nay; xem dau tep)" if _CONG_CU_GIT_NGUOI_DO is not None else ""))
 ghi("cong_cu_git_nguoi_do", _CONG_CU_GIT_NGUOI_DO)
+_bash_bo = ghi("bien_bash_nguoi_do_da_bo", sorted(k for k in os.environ if _bien_bash(k)))
+inn("  bien bash    :", (", ".join(_bash_bo) + "  -> DA BO khoi luot con (CI khong dat; xem chay())") if _bash_bo else "(khong co)")
 inn("  goc kho      :", goc)
 
 quyen = None
@@ -570,16 +583,17 @@ if not ("--chi-kich-thuoc" in sys.argv or "--chi-probe" in sys.argv):
         # 165/166, e2e rc=1 `DAT 11 | TRUOT 1`, `la: ['t152']` cho ung vien sach; 2.31.0 THAT => 166/166. Hoi CHINH ham ay va
         # CHINH bash ay trong tien trinh con cua chay() (cung python, cung moi truong, cwd = goc); ung vien khong co ham thi khong
         # hoi (giu chot CO MAT).
-        # Doc dong `git version` CUOI cua stdout, KHONG doc dong DAU: bash nap BASH_ENV TRUOC lenh -c (ban 01b: BASH_ENV `echo` mot
-        # dong => muc 0 KDD oan, bo test 166/166). Bash treo thi bat ngoai le TRONG con (ban 01b do loi cho `_bash_posix()`) va
-        # DUNG luon (khong hoi lan hai: giu tran 60 s va mot tien trinh mo coi nhu ban 01c).
+        # Doc dong `git version` CUOI cua stdout, KHONG doc dong DAU (ban 01b: BASH_ENV `echo` mot dong => muc 0 KDD oan; tu ban 01e
+        # chay() bo BASH_ENV, cach doc nay giu lai vi vo hai). Bash treo thi bat ngoai le TRONG con (ban 01b do loi cho
+        # `_bash_posix()`) va DUNG luon (khong hoi lan hai: giu tran 60 s va mot tien trinh mo coi nhu ban 01c).
         # Va hoi HAI lan, dung HAI moi truong bo test THAT dung: 3 loi goi `_bash_posix()` cua ung vien chay bash voi 2 moi truong —
-        # t32/t51-t68 `dict(os.environ, ...)` (CO BASH_ENV), con t152 (ca DUY NHAT can san 2.31) `dict(PATH=os.environ["PATH"],
-        # TL_*, GIT_CONFIG_*)` (KHONG BASH_ENV). Ban 01c hoi o moi truong THU NHAT roi ap san cua t152 — do tren 2026-10-01: git di
-        # kem 2.30.2 THAT + BASH_ENV day git 2.43 len dau PATH => muc 0 thay 2.43, e2e rc=1 `DAT 11 | TRUOT 1`, `la: ['t152']` cho
-        # ung vien sach; BASH_ENV day git 2.30.2 => muc 0 KDD, bo test 166/166. Moi truong thu nhat VAN phai hoi: BASH_ENV in byte
-        # ngoai UTF-8 => bo test 152/166 (t32/t51-t68 `UnicodeDecodeError`). BASH_GIT = moi truong t32/t51-t68 (doi CHAY duoc);
-        # BASH_GIT_T152 = moi truong t152 (doi san GIT_SAN_BASH).
+        # t32/t51-t68 `dict(os.environ, ...)` (moi truong cua chay()), con t152 (ca DUY NHAT can san 2.31)
+        # `dict(PATH=os.environ["PATH"], TL_*, GIT_CONFIG_*)`. Ban 01c hoi o moi truong THU NHAT roi ap san cua t152 — do tren
+        # 2026-10-01: git di kem 2.30.2 THAT + BASH_ENV day git 2.43 len dau PATH => muc 0 thay 2.43, e2e rc=1 `DAT 11 | TRUOT 1`,
+        # `la: ['t152']` cho ung vien sach. Tu ban 01e chay() bo BASH_ENV nen duong ay dong o GOC; hai lan hoi giu lai vi hai moi
+        # truong VAN khac nhau. Lan hoi o moi truong thu nhat CHI chung minh git CHAY duoc trong bash ay, KHONG chung minh bash
+        # "dung duoc" cho t32/t51-t68 (do: noclobber qua cau hoi nay ma lam 7 ca DO — vi vay chay() bo bien khoi dong bash, xem
+        # tren). BASH_GIT = moi truong t32/t51-t68 (doi CHAY duoc); BASH_GIT_T152 = moi truong t152 (doi san GIT_SAN_BASH).
         _rc_bp, _ra_bp = chay(["-c", "import os, subprocess, sys\nsys.path.insert(0, 'ops')\nimport lease_publish_test as T\n"
                                      "f = getattr(T, '_bash_posix', None)\nb = '?' if f is None else f()\nprint('BASH_POSIX=' + b)\n"
                                      "if b and b != '?':\n  for k in ('BASH_GIT', 'BASH_GIT_T152'):\n    try:\n"

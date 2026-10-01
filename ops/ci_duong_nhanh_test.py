@@ -35,9 +35,11 @@ import ast
 import concurrent.futures
 import contextlib
 import importlib.util
+import json
 import os
 import re
 import shutil
+import socket
 import subprocess
 import sys
 import tempfile
@@ -1414,25 +1416,289 @@ def t20zi_kiem_re_symlink_treo_ngoai_diff_do():
                  f"{nhanh}: symlink {mong!r} treo NGOAI diff phai DO kiem-re, dung mot dong: rc={rc}: {log}")
 
 
+def loi_goi_copytree_t82(nguon):
+    """(mau bo qua | None, [ly do lech]) cua loi goi `copytree` DUY NHAT trong ham `t82_*` cua `nguon`. Danh sach CHO PHEP
+    cach goi: dung hai doi so vi tri (nguon, dich), khong doi so sao, dung mot tu khoa `ignore=` la `ignore_patterns(<hang>...)`.
+    Moi tham so khac (`symlinks`, `ignore_dangling_symlinks`, `copy_function`, `**`, doi so vi tri thu ba = `symlinks`...) doi
+    ngu nghia ma `kiem_symlink_treo_ca_cay` mo phong (theo symlink, vap o symlink treo, mo va doc tung tep) nen la LECH."""
+    cay = ast.parse(nguon)
+    t82 = [n for n in cay.body if isinstance(n, ast.FunctionDef) and n.name.startswith("t82_")]
+    if len(t82) != 1:
+        return None, [f"phai co dung mot ham t82_, thay {len(t82)}"]
+    chep = [n for n in ast.walk(t82[0]) if isinstance(n, ast.Call) and isinstance(n.func, ast.Attribute) and n.func.attr == "copytree"]
+    if len(chep) != 1:
+        return None, [f"t82 phai co dung mot copytree, thay {len(chep)}"]
+    goi, lech = chep[0], []
+    if len(goi.args) != 2 or any(isinstance(a, ast.Starred) for a in goi.args):
+        lech.append(f"doi so vi tri phai DUNG (nguon, dich), khong sao: {ast.unparse(goi)}")
+    kw = {k.arg: k.value for k in goi.keywords}
+    if set(kw) != {"ignore"}:
+        lech.append(f"tu khoa phai DUNG ignore=: {sorted(map(str, kw))}")
+    mau = kw.get("ignore")
+    if not (isinstance(mau, ast.Call) and getattr(mau.func, "attr", None) == "ignore_patterns" and not mau.keywords
+            and all(isinstance(a, ast.Constant) for a in mau.args)):
+        return None, lech + [f"ignore= phai la ignore_patterns(<hang>...): {ast.unparse(goi)}"]
+    return tuple(a.value for a in mau.args), lech
+
+
+def mau_bo_qua_t82():
+    """Mau bo qua doc tu CHINH `t82` (khong tu san pham): fixture do `t82` bang du lieu cua `t82`."""
+    mau, lech = loi_goi_copytree_t82((ROOT_THAT / "ops" / "lease_publish_test.py").read_text(encoding="utf-8"))
+    if mau is None:
+        raise RuntimeError(f"ha tang: khong doc duoc mau bo qua cua t82: {lech}")
+    return mau
+
+
+def chep_nhu_t82(kho):
+    """`copytree` THAT, dung cach goi cua `t82` (khong `symlinks=True`, mau bo qua cua `t82`) => "CHEP_DUOC" hoac "VAP"."""
+    dich = Path(tempfile.mkdtemp(prefix="cdn_t82_"))
+    try:
+        shutil.copytree(kho, dich / "ban", ignore=shutil.ignore_patterns(*mau_bo_qua_t82()))
+        return "CHEP_DUOC"
+    except shutil.Error:
+        return "VAP"
+    finally:
+        shutil.rmtree(dich, ignore_errors=True)
+
+
+LOAI_DONG_CAY = (("symlink TREO trong cay", "TREO"), ("VONG symlink thu muc", "VONG"), ("khong phai tep thuong", "LA"))
+
+
+def phan_dong(loi):
+    """[(loai, duong tuong doi)] cua tung dong `kiem_symlink_treo_ca_cay`; dong khong khop loai nao => ("?", dong)."""
+    ra = []
+    for x in loi:
+        loai = next((ten for tien_to, ten in LOAI_DONG_CAY if x.startswith(tien_to)), None)
+        ra.append((loai, ast.literal_eval(x.rsplit(": ", 1)[-1])) if loai else ("?", x))
+    return ra
+
+
+NEN_DIA = {"README.md": "x\n", "ops/specs/E.md": "# e\n", "ops/land/x.yaml": "a: 1\n"}
+
+
 @ca
 def t20zj_symlink_treo_khong_duyet_duoc_va_dong_bo_t82():
     """Hai chot con lai cua `kiem_symlink_treo_ca_cay`: (a) `os.walk` loi (thu muc khong doc duoc) => KHONG DO DUOC, khong nuot;
-    (b) tap bo qua phai BANG DUNG tap `t82` bo qua, va `t82` van chep THEO symlink (khong `symlinks=True`) — doc lai tu chinh
-    `ops/lease_publish_test.py` (kho that: ban sao toi thieu cua dot bien chi co tep cho). Lech thi chot nay bao sai cho."""
+    (b) tap bo qua phai BANG DUNG tap `t82` bo qua, va CACH GOI `copytree` cua `t82` phai nam trong danh sach cho phep
+    (`loi_goi_copytree_t82`) — doc lai tu chinh `ops/lease_publish_test.py` (kho that: ban sao toi thieu cua dot bien chi co
+    tep cho). Cross-review luot 17 dong theo lop o luot 18: chot nay mo phong ca `followlinks`, vap o symlink treo lan mo va
+    doc tung tep — them BAT KY tham so nao cho `copytree` cua `t82` (khong chi `symlinks=True`) la doi ngu nghia ay. (c) tu
+    kiem bo doc cach goi: moi cach goi lech mot mau phai bi bao, cach goi dung thi khong."""
     m = nap_module()
     loi = m.kiem_symlink_treo_ca_cay(Path(tempfile.gettempdir()) / "cdn-khong-ton-tai-4f1c")
     bang(len(loi) == 1 and "KHONG DO DUOC" in loi[0], f"khong duyet duoc cay phai DO (khong nuot loi os.walk), duoc {loi}")
-    cay = ast.parse((ROOT_THAT / "ops" / "lease_publish_test.py").read_text(encoding="utf-8"))
-    t82 = [n for n in cay.body if isinstance(n, ast.FunctionDef) and n.name.startswith("t82_")]
-    bang(len(t82) == 1, f"ha tang: phai co dung mot ham t82_ trong lease_publish_test.py, thay {len(t82)}")
-    chep = [n for n in ast.walk(t82[0]) if isinstance(n, ast.Call) and isinstance(n.func, ast.Attribute) and n.func.attr == "copytree"]
-    bang(len(chep) == 1, f"ha tang: t82 phai co dung mot copytree, thay {len(chep)}")
-    kw = {k.arg: k.value for k in chep[0].keywords}
-    mau = kw.get("ignore")
-    bang(isinstance(mau, ast.Call) and getattr(mau.func, "attr", None) == "ignore_patterns"
-         and all(isinstance(a, ast.Constant) for a in mau.args), f"ha tang: t82 copytree khong con ignore_patterns hang: {ast.dump(chep[0])}")
-    bang(tuple(a.value for a in mau.args) == tuple(m.BO_QUA_NHU_T82) and "symlinks" not in kw,
-         f"tap bo qua lech t82 hoac t82 thoi theo symlink: t82={[a.value for a in mau.args]} kw={sorted(kw)} vs {m.BO_QUA_NHU_T82}")
+    mau, lech = loi_goi_copytree_t82((ROOT_THAT / "ops" / "lease_publish_test.py").read_text(encoding="utf-8"))
+    bang(not lech and mau == tuple(m.BO_QUA_NHU_T82),
+         f"tap bo qua lech t82 hoac cach goi copytree cua t82 doi ngu nghia: t82={mau} lech={lech} vs {m.BO_QUA_NHU_T82}")
+    khung = 'def t82_x():\n    shutil.copytree({})\n'
+    dung = 'HERE.parent, goc, ignore=shutil.ignore_patterns(".git", "__pycache__", "*.pyc")'
+    _, lech0 = loi_goi_copytree_t82(khung.format(dung))
+    bang(not lech0, f"doi chung: cach goi DUNG nhu t82 khong duoc bi bao lech: {lech0}")
+    for ten, doi in (("symlinks", dung + ", symlinks=True"), ("ignore_dangling_symlinks", dung + ", ignore_dangling_symlinks=True"),
+                     ("copy_function", dung + ", copy_function=shutil.copy"), ("**", dung + ", **kw"),
+                     ("vi tri thu ba", dung.replace("goc, ", "goc, True, ")), ("sao", dung.replace("goc, ", "*goc, "))):
+        _, l = loi_goi_copytree_t82(khung.format(doi))
+        bang(l, f"cach goi copytree doi ngu nghia ({ten}) phai bi bao LECH: {doi}")
+
+
+# Lop `buoc-bi-bo-doc-ca-cay-khong-chi-ba-ca` (cross-review luot 17 mo lai; luot 18 dong THEO LOP): bat bien la bo duyet cua
+# `kiem_symlink_treo_ca_cay` di DUNG nhung duong `t82` di. Moi cho hai ben co the lech la mot ca rieng — `t20zk` bi danh thu
+# muc · `t20zl` mau bo qua ap theo ten muc o moi cap · `t20zm` vong · `t20zn` chuoi khong vong · `t20zo` la khong phai tep
+# thuong · `t20zj` cach goi copytree cua `t82` — moi chot mot dot bien rieng. Moi fixture tu chung minh `t82` VAP hay CHEP_DUOC
+# bang `copytree` THAT voi mau bo qua doc tu CHINH `t82` (`chep_nhu_t82`), roi doi ket qua cua chot KHOP tung dong.
+@ca
+def t20zk_kiem_re_symlink_treo_qua_bi_danh_thu_muc_do():
+    """Cross-review luot 17 (`buoc-bi-bo-doc-ca-cay-khong-chi-ba-ca`, duong vao BI DANH THU MUC): `t82` copytree KHONG
+    `symlinks=True` nen THEO symlink thu muc, con `os.walk` mac dinh thi khong. Symlink treo nam trong thu muc ten bi bo qua
+    (`*.pyc`, `__pycache__`), chi voi toi qua mot bi danh thu muc TRONG cay => `t82` vap, kiem-re phai DO. Mau bo qua ap len
+    TEN MUC cua bi danh, KHONG len ten DICH: moi ten dich mot nhanh con (dot bien ap mau len ten dich chi lam DO dung nhanh ay).
+    Doi chung: khong bi danh (ca hai cung bo qua thu muc ay), hoac PR sua tep khac => DAT. Bien the bi danh tro RA NGOAI cay
+    cung co che nay; ca rieng can dung mot symlink tro ra ngoai kho tam nen KHONG dung o day — de lai cho phien dieu phoi soan."""
+    m = nap_module()
+    for ten_tm, co_bi_danh in (("kho.pyc", True), ("__pycache__", True), ("kho.pyc", False)):
+        nhan = f"{ten_tm}, bi danh={co_bi_danh}"
+        with kho_that(nen={"README.md": "x\n", f"ops/land/{ten_tm}/f.yaml": "a: 1\n", "ops/specs/E.md": "# e\n"}) as (kho, _a, _h):
+            git(kho, "checkout", "-q", "main")
+            (kho / "ops" / "land" / ten_tm / "s").symlink_to("f.yaml")
+            if co_bi_danh:
+                (kho / "ops" / "land" / "bd").symlink_to(ten_tm)
+            git(kho, "add", "-A", "-f")
+            git(kho, "commit", "-q", "-m", "PR day du: symlink hop le")
+            goc = git(kho, "rev-parse", "HEAD").stdout.decode().strip()
+            bang(chep_nhu_t82(kho) == "CHEP_DUOC", f"fixture vo hieu ({nhan}): t82 phai chep duoc cay goc")
+            git(kho, "checkout", "-q", "-b", "doi-chung", goc)
+            viet(kho, "ops/specs/E.md", "# e2\n")
+            git(kho, "commit", "-q", "-am", "PR ho so sua tep khac")
+            rc0, log0 = kiem_re(m, kho, goc, git(kho, "rev-parse", "HEAD").stdout.decode().strip())
+            bang(rc0 == 0, f"doi chung ({nhan}, PR sua tep khac) phai DAT: rc={rc0}: {log0}")
+            git(kho, "checkout", "-q", "-b", "xoa", goc)
+            git(kho, "rm", "-q", f"ops/land/{ten_tm}/f.yaml")
+            git(kho, "commit", "-q", "-m", "PR ho so xoa dich")
+            dau = git(kho, "rev-parse", "HEAD").stdout.decode().strip()
+            bang(phan_loai_that(m, kho, goc, dau)[0] == m.DUONG_NHANH, f"fixture vo hieu ({nhan}): PR phai ra duong nhanh")
+            bang(chep_nhu_t82(kho) == ("VAP" if co_bi_danh else "CHEP_DUOC"),
+                 f"fixture vo hieu ({nhan}): t82 phai vap KHI VA CHI KHI co bi danh")
+            rc, log = kiem_re(m, kho, goc, dau)
+            treo = [d for d in log.splitlines() if "symlink TREO trong cay" in d]
+            if co_bi_danh:
+                bang(rc == 1 and len(treo) == 1 and repr("ops/land/bd/s") in treo[0],
+                     f"{nhan}: symlink treo chi voi toi qua bi danh thu muc phai DO kiem-re, dung mot dong: rc={rc}: {log}")
+            else:
+                bang(rc == 0, f"doi chung ({nhan}): khong bi danh thi t82 va kiem-re cung bo qua thu muc ay, phai DAT: rc={rc}: {log}")
+
+
+@ca
+def t20zl_mau_bo_qua_ap_theo_ten_muc_o_moi_cap_nhu_t82():
+    """Duong vao THU TU AP MAU BO QUA: `t82` goi `ignore` voi TEN MUC o MOI cap no vao, ke ca cap o sau mot bi danh, va mot bi
+    danh mang ten bi bo qua thi `t82` khong theo. Ap hep hon (khong ap sau bi danh, hay theo bi danh ten bi bo qua) la DO oan
+    dung cay `t82` chep duoc — chot nay doi DAT tren cay ay. Nhanh: symlink treo trong `sub.pyc/` va `__pycache__/` chi voi
+    toi qua bi danh `bd`, `bd2`; bi danh `bd.pyc` va `__pycache__` (ten bi bo qua) tro vao thu muc chua symlink treo."""
+    m = nap_module()
+    with _cay_tam(NEN_DIA) as kho:
+        land = kho / "ops" / "land"
+        for tm in ("kho.pyc/sub.pyc", "that/__pycache__", "tm.pyc"):
+            (land / tm).mkdir(parents=True)
+            (land / tm / "s").symlink_to("khong-co")
+        (land / "bd").symlink_to("kho.pyc")
+        (land / "bd2").symlink_to("that")
+        (land / "bd.pyc").symlink_to("tm.pyc")
+        (land / "__pycache__").symlink_to("tm.pyc")
+        bang(chep_nhu_t82(kho) == "CHEP_DUOC", "fixture vo hieu: t82 phai chep duoc (moi symlink treo nam duoi ten bi bo qua)")
+        loi = m.kiem_symlink_treo_ca_cay(kho)
+        bang(loi == [], f"t82 chep duoc thi chot phai DAT (mau bo qua ap theo TEN MUC o moi cap, ke ca sau bi danh): {loi}")
+
+
+CON_DUYET_CAY = ("import importlib.util, json, sys\n"
+                 "s = importlib.util.spec_from_file_location('m', sys.argv[1]); m = importlib.util.module_from_spec(s)\n"
+                 "s.loader.exec_module(m); print(json.dumps(m.kiem_symlink_treo_ca_cay(sys.argv[2])))\n")
+
+
+@ca
+def t20zm_vong_symlink_thu_muc_do_va_khong_bung_no():
+    """Duong vao VONG: `t82` theo vong toi khi nhan tu choi phan giai duong dan, roi vap; chot phai DO NGAY o bi danh khep
+    vong — so danh tinh `(st_dev, st_ino)` voi TO TIEN tren chinh duong dang duyet — khong lap. Nhanh, theo thu tu: (i) doi
+    chung bi danh KHONG vong toi thu muc anh em => DAT (so voi "da tham" toan cuc la DO oan); (ii) tu vong `vong -> .`;
+    (iii) vong ve GOC `len -> ../..` (so moi thu muc cha la sot); (iv) vong hai buoc qua thu muc anh em; (v) khong lay duoc
+    danh tinh mot thu muc => KHONG DO DUOC; (vi) HAI vong ve goc — `t82` khong ket thuc (do ngoai suite tren 41508cd cong ban
+    va goi y luot 17: qua han 15 s, bo duyet chi theo symlink cung qua han) — chot chay trong tien trinh con co tran thoi gian,
+    phai ra dung hai dong VONG. (vi) dung CUOI: dot bien go chot vong lam (ii) DO truoc khi toi day."""
+    m = nap_module()
+    with _cay_tam(dict(NEN_DIA, **{"ops/specs/a/x.md": "x\n"})) as kho:
+        (kho / "ops" / "land" / "al").symlink_to("../specs/a")
+        bang(chep_nhu_t82(kho) == "CHEP_DUOC", "fixture vo hieu: bi danh khong vong thi t82 phai chep duoc")
+        loi = m.kiem_symlink_treo_ca_cay(kho)
+        bang(loi == [], f"doi chung: bi danh KHONG vong toi thu muc anh em la duong t82 di binh thuong, phai DAT: {loi}")
+    for nhan, tao, mong in (
+            ("tu vong", {"ops/specs/vong": "."}, [("VONG", "ops/specs/vong")]),
+            ("vong ve goc", {"ops/specs/len": "../.."}, [("VONG", "ops/specs/len")]),
+            ("vong hai buoc", {"ops/specs/a/sang": "../b", "ops/specs/b/ve": "../a"},
+             [("VONG", "ops/specs/a/sang/ve"), ("VONG", "ops/specs/b/ve/sang")])):
+        with _cay_tam(NEN_DIA) as kho:
+            for duong, dich in tao.items():
+                (kho / duong).parent.mkdir(parents=True, exist_ok=True)
+                (kho / duong).symlink_to(dich)
+            bang(chep_nhu_t82(kho) == "VAP", f"fixture vo hieu ({nhan}): vong symlink thu muc phai lam t82 vap")
+            loi = m.kiem_symlink_treo_ca_cay(kho)
+            bang(phan_dong(loi) == mong, f"{nhan}: chot phai DO dung o bi danh khep vong, moi vong mot dong VONG: {loi}")
+    with _cay_tam(NEN_DIA) as kho:
+        dich_hong = os.path.join(os.fspath(kho), "ops", "specs")
+        that = os.stat
+
+        def stat_gia(p, *a, **k):
+            if os.fspath(p) == dich_hong:
+                raise PermissionError(13, "gia: khong stat duoc", os.fspath(p))
+            return that(p, *a, **k)
+        with mock.patch.object(os, "stat", stat_gia):
+            loi = m.kiem_symlink_treo_ca_cay(kho)
+        bang(len(loi) == 1 and loi[0].startswith("KHONG DO DUOC") and repr(dich_hong) in loi[0],
+             f"khong lay duoc danh tinh mot thu muc phai la KHONG DO DUOC, dung mot dong: {loi}")
+    with _cay_tam(NEN_DIA) as kho:
+        (kho / "ops" / "specs" / "len").symlink_to("../..")
+        (kho / "ops" / "land" / "len").symlink_to("../..")
+        try:
+            r = subprocess.run([sys.executable, "-B", "-c", CON_DUYET_CAY, str(CAY / "ops" / "ci_duong_nhanh.py"), str(kho)],
+                               capture_output=True, timeout=60)
+        except subprocess.TimeoutExpired:
+            r = None
+        bang(r is not None, "hai vong ve goc: chot khong ket thuc trong tran thoi gian (phai DO ngay o bi danh khep vong)")
+        loi = json.loads(r.stdout.decode("utf-8")) if r.returncode == 0 else [f"tien trinh con rc={r.returncode}"]
+        bang(phan_dong(loi) == [("VONG", "ops/land/len"), ("VONG", "ops/specs/len")],
+             f"hai vong ve goc: phai dung hai dong VONG: {loi}")
+
+
+@ca
+def t20zn_chuoi_symlink_khong_vong_qua_gioi_han_phan_giai_do():
+    """Duong vao KHU TRUNG: chuoi bi danh KHONG vong (moi `d_i/l` tro toi thu muc KE TIEP cua chuoi) du dai de nhan tu choi phan giai duong dan di qua ca
+    chuoi. `t82` di dung duong ay va vap; chot cung phai DO, dung mot dong TREO tai phan tu nhan tu choi. Chot KHONG duoc khu
+    trung thu muc "da tham": khi thu tu ten dua thu muc cuoi chuoi toi TRUOC (nhanh `nguoc`), tap da tham toan cuc bo qua
+    duong dai va lot. Moi thu tu ten la mot nhanh; nhanh xuoi la doi chung cho thay loi khu trung chi lo theo thu tu."""
+    m = nap_module()
+    for nhan, nguoc in (("xuoi", False), ("nguoc", True)):
+        with _cay_tam(NEN_DIA) as kho:
+            ten = [f"d{i:02d}" for i in range(42)]
+            if nguoc:
+                ten.reverse()
+            c = kho / "ops" / "specs" / "c"
+            for t in ten:
+                (c / t).mkdir(parents=True)
+            for a, b in zip(ten, ten[1:]):
+                (c / a / "l").symlink_to(f"../{b}")
+            bang(chep_nhu_t82(kho) == "VAP", f"fixture vo hieu ({nhan}): chuoi phai qua gioi han phan giai, t82 phai vap")
+            pd = phan_dong(m.kiem_symlink_treo_ca_cay(kho))
+            bang(len(pd) == 1 and pd[0][0] == "TREO" and re.fullmatch(rf"ops/specs/c/{ten[0]}(?:/l)+", pd[0][1]),
+                 f"{nhan}: chuoi khong vong qua gioi han phan giai phai DO, dung mot dong TREO tu dau chuoi: {pd}")
+
+
+def _tao_socket(thu_muc, ten):
+    """Socket UNIX tai `thu_muc/ten`; bind bang ten TUONG DOI vi duong dan socket co tran do dai."""
+    cu = os.getcwd()
+    os.chdir(thu_muc)
+    try:
+        s = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+        try:
+            s.bind(ten)
+        finally:
+            s.close()
+    finally:
+        os.chdir(cu)
+
+
+@ca
+def t20zo_la_khong_phai_tep_thuong_do():
+    """Duong vao LA: `t82` MO va DOC tung tep (copy2) — FIFO nem `SpecialFileError`, socket nem `OSError` — nen moi la ma no
+    toi duoc, sau khi theo symlink, phai la TEP THUONG (danh sach CHO PHEP). Nhanh, moi nhanh mot dong LA dung duong dan:
+    FIFO · socket · symlink toi FIFO nam trong thu muc ten bi bo qua (doc la THEO symlink) · FIFO chi voi toi qua bi danh thu
+    muc. Doi chung: tep thuong va symlink toi tep thuong => DAT."""
+    m = nap_module()
+    with _cay_tam(NEN_DIA) as kho:
+        (kho / "ops" / "land" / "sx").symlink_to("x.yaml")
+        bang(chep_nhu_t82(kho) == "CHEP_DUOC", "fixture vo hieu: tep thuong va symlink toi tep thuong thi t82 chep duoc")
+        loi = m.kiem_symlink_treo_ca_cay(kho)
+        bang(loi == [], f"doi chung: tep thuong va symlink toi tep thuong phai DAT: {loi}")
+
+    def fifo(land):
+        os.mkfifo(land / "p")
+
+    def sock(land):
+        _tao_socket(land, "sk")
+
+    def symlink_toi_fifo(land):
+        (land / "kho.pyc").mkdir()
+        os.mkfifo(land / "kho.pyc" / "p")
+        (land / "sp").symlink_to("kho.pyc/p")
+
+    def fifo_qua_bi_danh(land):
+        (land / "kho.pyc").mkdir()
+        os.mkfifo(land / "kho.pyc" / "p")
+        (land / "bd").symlink_to("kho.pyc")
+    for nhan, tao, mong in (("FIFO", fifo, "ops/land/p"), ("socket", sock, "ops/land/sk"),
+                            ("symlink toi FIFO", symlink_toi_fifo, "ops/land/sp"),
+                            ("FIFO qua bi danh", fifo_qua_bi_danh, "ops/land/bd/p")):
+        with _cay_tam(NEN_DIA) as kho:
+            tao(kho / "ops" / "land")
+            bang(chep_nhu_t82(kho) == "VAP", f"fixture vo hieu ({nhan}): t82 phai vap")
+            loi = m.kiem_symlink_treo_ca_cay(kho)
+            bang(phan_dong(loi) == [("LA", mong)], f"{nhan}: la khong phai tep thuong phai DO, dung mot dong: {loi}")
 
 
 @ca
@@ -2764,6 +3030,7 @@ def _yml(cu, moi):
     return (YML, lambda vb: thay_mot(vb, cu, moi))
 
 
+_NEO_TREN = "        tren = frozenset({danh_tinh(goc)}) if goc == goc_cay else to_tien.pop(goc)\n"
 IF_XOA = "        if: ${{ needs.chuan-bi.outputs.che_do != 'duong_nhanh' }}\n"
 TAT_CA_BUOC_GOLDEN = "      - name: golden-test\n" + IF_XOA
 DOT_BIEN = [
@@ -3127,15 +3394,40 @@ DOT_BIEN = [
     # ---- cross-review luot 8b (P2 `buoc-bi-bo-doc-ca-cay-khong-chi-ba-ca`): symlink TREO ngoai diff — moi duong vao mot dot bien
     ("kiem_re_bo_symlink_treo_ca_cay", _ma("           + kiem_symlink_treo_ca_cay(kho)\n", ""), ("t20zi_kiem_re_symlink_treo_ngoai_diff_do",)),
     ("symlink_treo_vi_tu_luon_sai", _ma("            if os.path.islink(p) and not os.path.exists(p):\n", "            if False:\n"), ("t20zi_kiem_re_symlink_treo_ngoai_diff_do",)),
-    ("symlink_treo_chi_cap_goc", _ma("    for goc, thu_muc, tep in os.walk(kho, onerror=khong_doc_duoc):\n", "    for goc, thu_muc, tep in [next(os.walk(kho, onerror=khong_doc_duoc), (str(kho), [], []))]:\n"), ("t20zi_kiem_re_symlink_treo_ngoai_diff_do",)),
+    ("symlink_treo_chi_cap_goc", _ma("    for goc, thu_muc, tep in os.walk(kho, onerror=khong_doc_duoc, followlinks=True):\n", "    for goc, thu_muc, tep in [next(os.walk(kho, onerror=khong_doc_duoc, followlinks=True), (str(kho), [], []))]:\n"), ("t20zi_kiem_re_symlink_treo_ngoai_diff_do",)),
     ("symlink_treo_bo_qua_allowlist", _ma("        thu_muc[:] = sorted(d for d in thu_muc if d not in bo)\n", "        thu_muc[:] = sorted(d for d in thu_muc if d not in bo and not (os.path.relpath(os.path.join(goc, d), kho).replace(os.sep, '/') + '/').startswith(ALLOWLIST_TIEN_TO))\n"), ("t20zi_kiem_re_symlink_treo_ngoai_diff_do",)),
     ("symlink_treo_doc_tu_vung", _ma("            if os.path.islink(p) and not os.path.exists(p):\n", "            if os.path.islink(p) and not os.path.exists(os.path.normpath(os.path.join(goc, os.readlink(p)))):\n"), ("t20zi_kiem_re_symlink_treo_ngoai_diff_do",)),
     ("symlink_treo_bo_qua_thu_muc_cham", _ma("        bo = bo_qua(goc, thu_muc + tep)\n", "        bo = bo_qua(goc, thu_muc + tep) | {x for x in thu_muc if x.startswith('.')}\n"), ("t20zi_kiem_re_symlink_treo_ngoai_diff_do",)),
     ("symlink_treo_khong_bo_git", _ma('BO_QUA_NHU_T82 = (".git", "__pycache__", "*.pyc")', 'BO_QUA_NHU_T82 = ("__pycache__", "*.pyc")'), ("t20zi_kiem_re_symlink_treo_ngoai_diff_do",)),
     ("symlink_treo_khong_bo_pycache", _ma('BO_QUA_NHU_T82 = (".git", "__pycache__", "*.pyc")', 'BO_QUA_NHU_T82 = (".git", "*.pyc")'), ("t20zi_kiem_re_symlink_treo_ngoai_diff_do",)),
     ("symlink_treo_khong_bo_pyc", _ma('BO_QUA_NHU_T82 = (".git", "__pycache__", "*.pyc")', 'BO_QUA_NHU_T82 = (".git", "__pycache__")'), ("t20zi_kiem_re_symlink_treo_ngoai_diff_do",)),
-    ("symlink_treo_nuot_loi_duyet", _ma("os.walk(kho, onerror=khong_doc_duoc)", "os.walk(kho)"), ("t20zj_symlink_treo_khong_duyet_duoc_va_dong_bo_t82",)),
+    ("symlink_treo_nuot_loi_duyet", _ma("os.walk(kho, onerror=khong_doc_duoc, followlinks=True)", "os.walk(kho, followlinks=True)"), ("t20zj_symlink_treo_khong_duyet_duoc_va_dong_bo_t82",)),
     ("symlink_treo_bo_qua_rong_hon_t82", _ma('BO_QUA_NHU_T82 = (".git", "__pycache__", "*.pyc")', 'BO_QUA_NHU_T82 = (".git", "__pycache__", "*.pyc", "*.md")'), ("t20zj_symlink_treo_khong_duyet_duoc_va_dong_bo_t82",)),
+    # ---- lop `buoc-bi-bo-doc-ca-cay-khong-chi-ba-ca` (cross-review luot 17 mo lai, luot 18 dong THEO LOP): bo duyet phai di DUNG
+    # duong `t82` di. Moi duong vao mot chot, moi chot mot dot bien chi ca cua duong vao ay bat (xem khoi chu thich truoc `t20zk`).
+    # (1) bi danh thu muc: thoi theo symlink thu muc; ap mau bo qua len TEN DICH cua bi danh (moi ten dich mot dot bien)
+    ("symlink_treo_khong_theo_bi_danh", _ma("onerror=khong_doc_duoc, followlinks=True)", "onerror=khong_doc_duoc)"), ("t20zk_kiem_re_symlink_treo_qua_bi_danh_thu_muc_do", "t20zo_la_khong_phai_tep_thuong_do")),
+    ("symlink_treo_ap_mau_len_ten_dich_pycache", _ma("            di_tiep.append(d)\n", "            if not (os.path.islink(p) and os.path.basename(os.path.realpath(p)) == '__pycache__'):\n                di_tiep.append(d)\n"), ("t20zk_kiem_re_symlink_treo_qua_bi_danh_thu_muc_do",)),
+    ("symlink_treo_ap_mau_len_ten_dich_pyc", _ma("            di_tiep.append(d)\n", "            if not (os.path.islink(p) and os.path.realpath(p).endswith('.pyc')):\n                di_tiep.append(d)\n"), ("t20zk_kiem_re_symlink_treo_qua_bi_danh_thu_muc_do",)),
+    # (2) thu tu ap mau bo qua: khong ap o cap sau bi danh; theo bi danh mang ten bi bo qua
+    ("symlink_treo_bo_qua_khong_ap_sau_bi_danh", _ma("        bo = bo_qua(goc, thu_muc + tep)\n", "        bo = bo_qua(goc, thu_muc + tep) if os.path.realpath(goc) == os.path.abspath(goc) else set()\n"), ("t20zl_mau_bo_qua_ap_theo_ten_muc_o_moi_cap_nhu_t82",)),
+    ("symlink_treo_theo_bi_danh_ten_bi_bo_qua", _ma("        thu_muc[:] = sorted(d for d in thu_muc if d not in bo)\n", "        thu_muc[:] = sorted(d for d in thu_muc if d not in bo or os.path.islink(os.path.join(goc, d)))\n"), ("t20zl_mau_bo_qua_ap_theo_ten_muc_o_moi_cap_nhu_t82",)),
+    # (3) vong: khong phat hien; chi so thu muc cha (sot vong ve to tien); bao ca lan tham lai KHONG vong; nuot loi lay danh tinh
+    ("vong_khong_phat_hien", _ma("            if dd in tren:\n", "            if False:\n"), ("t20zm_vong_symlink_thu_muc_do_va_khong_bung_no",)),
+    ("vong_chi_so_thu_muc_cha", _ma("            if dd in tren:\n", "            if dd == danh_tinh(goc):\n"), ("t20zm_vong_symlink_thu_muc_do_va_khong_bung_no",)),
+    ("vong_bao_ca_tham_lai_khong_vong", _ma("            if dd in tren:\n", "            da = to_tien.setdefault('', set())\n            moi = dd not in da\n            da.add(dd)\n            if dd in tren or not moi:\n"), ("t20zm_vong_symlink_thu_muc_do_va_khong_bung_no",)),
+    ("vong_danh_tinh_nuot_loi", _ma("            khong_doc_duoc(e)\n            return None\n", "            return None\n"), ("t20zm_vong_symlink_thu_muc_do_va_khong_bung_no",)),
+    # (4) khu trung thu muc DA VAO (toan cuc, im lang): lot chuoi khong vong khi thu tu ten dua duong ngan toi truoc
+    ("chuoi_khu_trung_da_vao_toan_cuc", (MA, lambda vb: thay_mot(thay_mot(vb, _NEO_TREN, _NEO_TREN + "        to_tien.setdefault('', set()).update(tren)\n"), "            if dd in tren:\n", "            if dd in to_tien[''] and dd not in tren:\n                continue\n            if dd in tren:\n")), ("t20zn_chuoi_symlink_khong_vong_qua_gioi_han_phan_giai_do",)),
+    # (5) la: bo chot tep thuong; noi danh sach cho phep them FIFO / socket; doc la KHONG theo symlink
+    ("la_bo_chot_tep_thuong", _ma("            elif not os.path.isfile(p):\n", "            elif False:\n"), ("t20zo_la_khong_phai_tep_thuong_do",)),
+    ("la_cho_phep_fifo", _ma("            elif not os.path.isfile(p):\n", "            elif not (os.path.isfile(p) or __import__('stat').S_ISFIFO(os.stat(p).st_mode)):\n"), ("t20zo_la_khong_phai_tep_thuong_do",)),
+    ("la_cho_phep_socket", _ma("            elif not os.path.isfile(p):\n", "            elif not (os.path.isfile(p) or __import__('stat').S_ISSOCK(os.stat(p).st_mode)):\n"), ("t20zo_la_khong_phai_tep_thuong_do",)),
+    ("la_khong_theo_symlink", _ma("            elif not os.path.isfile(p):\n", "            elif not os.path.islink(p) and not os.path.isfile(p):\n"), ("t20zo_la_khong_phai_tep_thuong_do",)),
+    # (6) cach goi copytree cua t82 (danh sach cho phep, tren CHINH tep test): noi tu khoa; bo chot doi so vi tri thu ba; bo chot sao
+    ("dong_bo_t82_cho_tu_khoa_la", _test('    if set(kw) != {"ignore"}:\n', '    if "symlinks" in kw:\n'), ("t20zj_symlink_treo_khong_duyet_duoc_va_dong_bo_t82",)),
+    ("dong_bo_t82_cho_vi_tri_thu_ba", _test("    if len(goi.args) != 2 or any(isinstance(a, ast.Starred) for a in goi.args):\n", "    if any(isinstance(a, ast.Starred) for a in goi.args):\n"), ("t20zj_symlink_treo_khong_duyet_duoc_va_dong_bo_t82",)),
+    ("dong_bo_t82_cho_doi_so_sao", _test("    if len(goi.args) != 2 or any(isinstance(a, ast.Starred) for a in goi.args):\n", "    if len(goi.args) != 2:\n"), ("t20zj_symlink_treo_khong_duyet_duoc_va_dong_bo_t82",)),
 ]
 # Lop `kiem-mode-git-chot-khong-rang` (luot 14, dong theo CAU TRUC): moi o cua bang quyet dinh mot dot bien LAT dung o ay — o
 # CHAP NHAN thanh TU CHOI, o TU CHOI thanh CHAP NHAN — chen ngay dau vong quyet dinh nen KHONG o nao khac doi. Dich: t20zh.

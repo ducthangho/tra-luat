@@ -48,8 +48,9 @@ GIỚI HẠN, NÓI THẲNG (không phải ranh giới an ninh):
 LỆNH `kiem-re` (bước bù cho các bước bị bỏ, chỉ chạy khi `che_do == duong_nhanh`):
   YAML parse được · `git diff --check` · lease đổi phải qua `lease_publish` · ba ca kiểm DỮ LIỆU của lease_publish_test ·
   mọi đường dẫn đổi là TỆP THƯỜNG theo MODE TRONG GIT (`kiem_mode_git`: 100644/100755 hoặc xoá; gitlink, symlink ⇒ ĐỎ) ·
-  KHÔNG symlink treo trong cây ĐĨA, kể cả ngoài diff (`kiem_symlink_treo_ca_cay`: `t82` của bước bị bỏ chép CẢ cây; phạm vi
-  duyệt và chỗ nó không tới được ghi ở docstring hàm).
+  cây ĐĨA chép được như `t82` của bước bị bỏ, kể cả ngoài diff (`kiem_symlink_treo_ca_cay`: duyệt ĐÚNG đường `t82` đi — CẢ
+  cây, THEO symlink thư mục; ĐỎ khi có symlink treo, vòng symlink thư mục hay lá không phải tệp thường; bất biến, từng chốt
+  và giới hạn ở docstring hàm).
 Hai chỗ khác chữ trần của đặc tả r2, ĐO ngày 29-09-2026. CHỦ KHO ĐÃ DUYỆT CẢ HAI (lựa chọn (a)) — erratum của đặc tả r2,
 không sửa r2: https://github.com/ducthangho/tra-luat/issues/674#issuecomment-5887720007 . Với reviewer: đây là HÀNH VI ĐƯỢC
 DUYỆT, không phải finding về chính sách; vẫn tìm lỗi TRONG cách hiện thực (ví dụ `bo_qua_han` bỏ thêm chốt nào khác không,
@@ -297,31 +298,85 @@ BO_QUA_NHU_T82 = (".git", "__pycache__", "*.pyc")
 
 
 def kiem_symlink_treo_ca_cay(kho=ROOT) -> list[str]:
-    """Symlink TREO ở mọi chỗ trong cây mà bộ duyệt dưới đây tới được (không chỉ tệp trong diff) ⇒ ĐỎ. Cross-review
-    lượt 8 (P2 `buoc-bi-bo-doc-ca-cay-khong-chi-ba-ca`): bước bị bỏ `lease-publish selftest` có `t82` `copytree` CẢ cây, theo symlink;
+    """Cây ĐĨA mà `t82` sẽ chép phải chép được: ở mọi chỗ bộ duyệt dưới đây tới được (không chỉ tệp trong diff), symlink
+    TREO, VÒNG symlink thư mục hay một lá KHÔNG phải tệp thường ⇒ ĐỎ. Cross-review lượt 8 (P2
+    `buoc-bi-bo-doc-ca-cay-khong-chi-ba-ca`): bước bị bỏ `lease-publish selftest` có `t82` `copytree` CẢ cây, theo symlink;
     `kiem_loai_tep`/`kiem_mode_git` chỉ nhìn đường dẫn ĐỔI. PR hồ sơ XOÁ/đổi tên đích của một symlink HỢP LỆ có sẵn (vào
     qua PR đầy đủ, ở `docs/`, dưới allowlist hay trong thư mục chấm) — hoặc xoá hết một thư mục hồ sơ mà đường dẫn symlink
     đi XUYÊN qua — làm symlink ấy treo trong khi nó KHÔNG nằm trong diff ⇒ PR xanh, `t82` ĐỎ trên master (đo 01-10-2026).
     Treo đo bằng `os.path.exists` (stat của nhân, theo từng thành phần), KHÔNG bằng ghép đường dẫn từ vựng: `a/b/../c` cần
-    `a/b` có thật. `os.walk` xếp symlink treo vào danh sách TỆP (kể cả symlink từng trỏ thư mục) và không đi vào symlink thư
-    mục. Giới hạn, chưa có ca: `t82` (copytree không `symlinks=True`) thì CÓ theo vào symlink thư mục, nên symlink treo chỉ
-    với tới được QUA một symlink thư mục trỏ ra ngoài cây thì `t82` vấp mà chốt này không thấy (đo 01-10-2026 trên kho tạm:
-    copytree ném `shutil.Error`, os.walk không liệt kê). Không đọc được một thư mục ⇒ KHÔNG ĐO ĐƯỢC ⇒ ĐỎ. Không lệnh git
-    nào: đây là cây ĐĨA mà `t82` sẽ chép."""
+    `a/b` có thật; `os.walk` xếp symlink treo vào danh sách TỆP (kể cả symlink từng trỏ thư mục).
+
+    BẤT BIẾN (cross-review lượt 17 mở lại lớp; lượt 18 đóng theo lớp): bộ duyệt đi ĐÚNG những đường `t82` đi — `copytree`
+    không `symlinks=True`, mẫu bỏ qua `BO_QUA_NHU_T82`; `t20zj` khoá cả CÁCH GỌI `copytree` của `t82` (chỉ nguồn, đích và
+    `ignore=`), vì mọi tham số khác đổi ngữ nghĩa mà chốt này mô phỏng. Mỗi chỗ hai bên có thể lệch là một chốt riêng:
+    · THEO symlink thư mục (`followlinks=True`): bí danh thư mục trỏ vào thư mục tên bị bỏ qua (`*.pyc`, `__pycache__`) hay
+      ra ngoài cây thì `t82` chép QUA nó, nên symlink treo chỉ với tới được qua bí danh cũng làm `t82` vấp (`t20zk`).
+    · Mẫu bỏ qua áp THEO TÊN MỤC ở MỌI cấp, kể cả sau khi đi qua bí danh, và KHÔNG áp lên tên ĐÍCH của bí danh — `t82` cũng
+      vậy; áp rộng hơn là ĐỎ oan, hẹp hơn là lọt (`t20zl`, `t20zk`).
+    · VÒNG: thư mục sắp vào trùng `(st_dev, st_ino)` với một TỔ TIÊN trên chính đường đang duyệt ⇒ ĐỎ, không đi vào. `t82`
+      theo vòng tới khi nhân từ chối phân giải đường dẫn, rồi vấp; hai vòng về gốc thì số đường bùng nổ và `t82` không
+      kết thúc (đo trên 41508cd cộng bản vá gợi ý lượt 17: quá hạn 15 s, bộ duyệt chỉ theo symlink cũng quá hạn).
+      Chỉ so TỔ TIÊN, không so "đã thăm" toàn cục: bí danh KHÔNG vòng tới thư mục anh em vẫn được duyệt như `t82` (`t20zm`).
+    · KHÔNG khử trùng thư mục đã thăm: chuỗi symlink lồng sâu (không vòng) làm nhân từ chối phân giải tuỳ ĐƯỜNG đi chứ
+      không tuỳ thư mục; `t82` theo đúng đường ấy và vấp, còn tập "đã thăm" bỏ sót nó khi thứ tự tên đưa đường ngắn tới
+      trước (`t20zn`). Phần tử nhân từ chối phân giải hiện ra như symlink TREO.
+    · LÁ phải là TỆP THƯỜNG sau khi theo symlink (danh sách CHO PHÉP, không liệt kê loại cấm): `copytree` MỞ và ĐỌC từng
+      tệp — FIFO ném `SpecialFileError`, socket ném `OSError` (đo trên 41508cd, kho tạm). Tệp thiết bị: theo mã `copyfile`
+      (đọc, chưa đo) `t82` có khi chép được, nên ở đây CHẶT hơn `t82` — chấp nhận vì fail-close và git không lưu được loại
+      tệp ấy (`t20zo`).
+    Không đọc được một thư mục, hay không lấy được danh tính của nó ⇒ KHÔNG ĐO ĐƯỢC ⇒ ĐỎ.
+    Giới hạn, nói thẳng: (a) bí danh KHÔNG vòng mà số đường bùng nổ (mỗi tầng nhiều bí danh xuống cùng tầng dưới) thì bộ
+    duyệt bùng nổ y như `t82` (suy từ cách duyệt, chưa đo riêng) — không khử trùng là giá của bất biến trên; PR hồ sơ không
+    thêm được symlink (`kiem_mode_git`), nên cấu trúc ấy phải có sẵn trên master, nơi `t82` đã treo trước. (b) tệp thường
+    KHÔNG ĐỌC ĐƯỢC, hay đường dẫn ĐÍCH của `copytree` vượt giới hạn độ dài (tiền tố thư mục tạm của `t82` khác gốc kho), làm
+    `t82` vấp mà chốt này không thấy: KHÔNG ĐO ĐƯỢC ở đây (máy đo chạy quyền root; tiền tố tạm của máy chạy chưa đo). Không
+    lệnh git nào: đây là cây ĐĨA mà `t82` sẽ chép."""
     bo_qua = shutil.ignore_patterns(*BO_QUA_NHU_T82)
     loi = []
 
     def khong_doc_duoc(e):
         loi.append(f"KHONG DO DUOC: khong duyet duoc cay de tim symlink treo: {type(e).__name__}: {getattr(e, 'filename', '')!r}")
 
-    for goc, thu_muc, tep in os.walk(kho, onerror=khong_doc_duoc):
+    def tuong_doi(p):
+        return os.path.relpath(p, kho).replace(os.sep, "/")
+
+    def danh_tinh(p):
+        """`(st_dev, st_ino)` của thư mục mà `p` trỏ tới (THEO symlink); không stat được ⇒ None và một dòng KHÔNG ĐO ĐƯỢC."""
+        try:
+            st = os.stat(p)
+        except OSError as e:
+            khong_doc_duoc(e)
+            return None
+        return st.st_dev, st.st_ino
+
+    goc_cay = os.fspath(kho)
+    to_tien = {}   # thư mục sẽ vào -> danh tính MỌI thư mục trên đường từ gốc cây tới nó, kể cả chính nó
+    for goc, thu_muc, tep in os.walk(kho, onerror=khong_doc_duoc, followlinks=True):
+        tren = frozenset({danh_tinh(goc)}) if goc == goc_cay else to_tien.pop(goc)
         bo = bo_qua(goc, thu_muc + tep)
         thu_muc[:] = sorted(d for d in thu_muc if d not in bo)
+        di_tiep = []
+        for d in thu_muc:
+            p = os.path.join(goc, d)
+            dd = danh_tinh(p)
+            if dd is None:
+                continue
+            if dd in tren:
+                loi.append("VONG symlink thu muc (t82 cua lease-publish selftest theo vong toi khi nhan tu choi phan giai, se DO): "
+                           f"{tuong_doi(p)!r}")
+                continue
+            to_tien[p] = tren | {dd}
+            di_tiep.append(d)
+        thu_muc[:] = di_tiep
         for ten in sorted(t for t in tep if t not in bo):
             p = os.path.join(goc, ten)
             if os.path.islink(p) and not os.path.exists(p):
                 loi.append("symlink TREO trong cay (t82 cua lease-publish selftest chep CA cay se DO): "
-                           f"{os.path.relpath(p, kho).replace(os.sep, '/')!r}")
+                           f"{tuong_doi(p)!r}")
+            elif not os.path.isfile(p):
+                loi.append("khong phai tep thuong (FIFO/socket/thiet bi hay khong stat duoc; copytree cua t82 mo va doc tung tep, "
+                           f"se DO): {tuong_doi(p)!r}")
     return loi
 
 

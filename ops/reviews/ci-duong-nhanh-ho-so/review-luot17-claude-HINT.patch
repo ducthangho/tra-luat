@@ -1,0 +1,85 @@
+chua chay tren cay that — executor tu ap, tu do, tu chiu trach nhiem commit
+HINT luot 17 (reviewer Claude Opus 5.5, advisory_review) cho lop buoc-bi-bo-doc-ca-cay-khong-chi-ba-ca — CHI tep test; PHAI ap kem khoi diff san pham trong VERDICT (neo dot bien symlink_treo_chi_cap_goc / symlink_treo_nuot_loi_duyet / symlink_treo_khong_theo_bi_danh tro vao dong os.walk MOI cua san pham).
+--- ops/ci_duong_nhanh_test.py
++++ ops/ci_duong_nhanh_test.py
+@@ -1436,6 +1436,61 @@
+ 
+ 
+ @ca
++def t20zk_kiem_re_symlink_treo_qua_bi_danh_thu_muc_do():
++    """Cross-review luot 17 (`buoc-bi-bo-doc-ca-cay-khong-chi-ba-ca`, duong vao BI DANH THU MUC): `t82` copytree KHONG
++    `symlinks=True` nen THEO symlink thu muc, con `os.walk` mac dinh thi khong. Symlink treo nam trong thu muc ten bi bo qua
++    (`*.pyc`, `__pycache__`), chi voi toi qua mot bi danh thu muc TRONG cay => `t82` vap, kiem-re phai DO. Doi chung: khong bi
++    danh (ca hai cung bo qua thu muc ay), hoac PR sua tep khac => DAT. Vong symlink thu muc => DO (t82 cung vap), khong lap vo han.
++    Bien the bi danh tro RA NGOAI cay cung co che nay, khong dung o day."""
++    m = nap_module()
++
++    def t82_vap(kho):
++        dich = Path(tempfile.mkdtemp(prefix="cdn_t82_"))
++        try:
++            shutil.copytree(kho, dich / "ban", ignore=shutil.ignore_patterns(*m.BO_QUA_NHU_T82))
++            return False
++        except shutil.Error:
++            return True
++        finally:
++            shutil.rmtree(dich, ignore_errors=True)
++
++    for ten_tm, co_bi_danh in (("kho.pyc", True), ("__pycache__", True), ("kho.pyc", False)):
++        nhan = f"{ten_tm}, bi danh={co_bi_danh}"
++        with kho_that(nen={"README.md": "x\n", f"ops/land/{ten_tm}/f.yaml": "a: 1\n", "ops/specs/E.md": "# e\n"}) as (kho, _a, _h):
++            git(kho, "checkout", "-q", "main")
++            (kho / "ops" / "land" / ten_tm / "s").symlink_to("f.yaml")
++            if co_bi_danh:
++                (kho / "ops" / "land" / "bd").symlink_to(ten_tm)
++            git(kho, "add", "-A", "-f")
++            git(kho, "commit", "-q", "-m", "PR day du: symlink hop le")
++            goc = git(kho, "rev-parse", "HEAD").stdout.decode().strip()
++            bang(not t82_vap(kho), f"fixture vo hieu ({nhan}): t82 phai chep duoc cay goc")
++            git(kho, "checkout", "-q", "-b", "doi-chung", goc)
++            viet(kho, "ops/specs/E.md", "# e2\n")
++            git(kho, "commit", "-q", "-am", "PR ho so sua tep khac")
++            rc0, log0 = kiem_re(m, kho, goc, git(kho, "rev-parse", "HEAD").stdout.decode().strip())
++            bang(rc0 == 0, f"doi chung ({nhan}, PR sua tep khac) phai DAT: rc={rc0}: {log0}")
++            git(kho, "checkout", "-q", "-b", "xoa", goc)
++            git(kho, "rm", "-q", f"ops/land/{ten_tm}/f.yaml")
++            git(kho, "commit", "-q", "-m", "PR ho so xoa dich")
++            dau = git(kho, "rev-parse", "HEAD").stdout.decode().strip()
++            bang(phan_loai_that(m, kho, goc, dau)[0] == m.DUONG_NHANH, f"fixture vo hieu ({nhan}): PR phai ra duong nhanh")
++            bang(t82_vap(kho) is co_bi_danh, f"fixture vo hieu ({nhan}): t82 phai vap KHI VA CHI KHI co bi danh")
++            rc, log = kiem_re(m, kho, goc, dau)
++            treo = [d for d in log.splitlines() if "symlink TREO trong cay" in d]
++            if co_bi_danh:
++                bang(rc == 1 and len(treo) == 1 and repr("ops/land/bd/s") in treo[0],
++                     f"{nhan}: symlink treo chi voi toi qua bi danh thu muc phai DO kiem-re, dung mot dong: rc={rc}: {log}")
++            else:
++                bang(rc == 0, f"doi chung ({nhan}): khong bi danh thi t82 va kiem-re cung bo qua thu muc ay, phai DAT: rc={rc}: {log}")
++    with kho_that(nen={"README.md": "x\n", "ops/specs/E.md": "# e\n"}) as (kho, _a, _h):
++        (kho / "ops" / "specs" / "vong").symlink_to(".")
++        bang(t82_vap(kho), "fixture vo hieu: vong symlink thu muc phai lam t82 vap")
++        loi = m.kiem_symlink_treo_ca_cay(kho)
++        bang(bool(loi) and all("ops/specs/vong" in x for x in loi), f"vong symlink thu muc phai DO, dung duong vong: {loi}")
++
++
++@ca
+ def t20r_kiem_re_dau_xung_dot_moi_duoi_tep_do():
+     """Cross-review luot 8: t20c chi co dau xung dot trong `.md`; `--check` thu hep ve `*.md` van xanh. Tep KHONG phai
+     YAML (kiem_yaml khong bat ho) phai tu DO qua diff --check."""
+@@ -3127,14 +3182,16 @@
+     # ---- cross-review luot 8b (P2 `buoc-bi-bo-doc-ca-cay-khong-chi-ba-ca`): symlink TREO ngoai diff — moi duong vao mot dot bien
+     ("kiem_re_bo_symlink_treo_ca_cay", _ma("           + kiem_symlink_treo_ca_cay(kho)\n", ""), ("t20zi_kiem_re_symlink_treo_ngoai_diff_do",)),
+     ("symlink_treo_vi_tu_luon_sai", _ma("            if os.path.islink(p) and not os.path.exists(p):\n", "            if False:\n"), ("t20zi_kiem_re_symlink_treo_ngoai_diff_do",)),
+-    ("symlink_treo_chi_cap_goc", _ma("    for goc, thu_muc, tep in os.walk(kho, onerror=khong_doc_duoc):\n", "    for goc, thu_muc, tep in [next(os.walk(kho, onerror=khong_doc_duoc), (str(kho), [], []))]:\n"), ("t20zi_kiem_re_symlink_treo_ngoai_diff_do",)),
++    ("symlink_treo_chi_cap_goc", _ma("    for goc, thu_muc, tep in os.walk(kho, onerror=khong_doc_duoc, followlinks=True):\n", "    for goc, thu_muc, tep in [next(os.walk(kho, onerror=khong_doc_duoc, followlinks=True), (str(kho), [], []))]:\n"), ("t20zi_kiem_re_symlink_treo_ngoai_diff_do",)),
+     ("symlink_treo_bo_qua_allowlist", _ma("        thu_muc[:] = sorted(d for d in thu_muc if d not in bo)\n", "        thu_muc[:] = sorted(d for d in thu_muc if d not in bo and not (os.path.relpath(os.path.join(goc, d), kho).replace(os.sep, '/') + '/').startswith(ALLOWLIST_TIEN_TO))\n"), ("t20zi_kiem_re_symlink_treo_ngoai_diff_do",)),
+     ("symlink_treo_doc_tu_vung", _ma("            if os.path.islink(p) and not os.path.exists(p):\n", "            if os.path.islink(p) and not os.path.exists(os.path.normpath(os.path.join(goc, os.readlink(p)))):\n"), ("t20zi_kiem_re_symlink_treo_ngoai_diff_do",)),
+     ("symlink_treo_bo_qua_thu_muc_cham", _ma("        bo = bo_qua(goc, thu_muc + tep)\n", "        bo = bo_qua(goc, thu_muc + tep) | {x for x in thu_muc if x.startswith('.')}\n"), ("t20zi_kiem_re_symlink_treo_ngoai_diff_do",)),
+     ("symlink_treo_khong_bo_git", _ma('BO_QUA_NHU_T82 = (".git", "__pycache__", "*.pyc")', 'BO_QUA_NHU_T82 = ("__pycache__", "*.pyc")'), ("t20zi_kiem_re_symlink_treo_ngoai_diff_do",)),
+     ("symlink_treo_khong_bo_pycache", _ma('BO_QUA_NHU_T82 = (".git", "__pycache__", "*.pyc")', 'BO_QUA_NHU_T82 = (".git", "*.pyc")'), ("t20zi_kiem_re_symlink_treo_ngoai_diff_do",)),
+     ("symlink_treo_khong_bo_pyc", _ma('BO_QUA_NHU_T82 = (".git", "__pycache__", "*.pyc")', 'BO_QUA_NHU_T82 = (".git", "__pycache__")'), ("t20zi_kiem_re_symlink_treo_ngoai_diff_do",)),
+-    ("symlink_treo_nuot_loi_duyet", _ma("os.walk(kho, onerror=khong_doc_duoc)", "os.walk(kho)"), ("t20zj_symlink_treo_khong_duyet_duoc_va_dong_bo_t82",)),
++    ("symlink_treo_nuot_loi_duyet", _ma("os.walk(kho, onerror=khong_doc_duoc, followlinks=True)", "os.walk(kho, followlinks=True)"), ("t20zj_symlink_treo_khong_duyet_duoc_va_dong_bo_t82",)),
++    # cross-review luot 17 (`buoc-bi-bo-doc-ca-cay-khong-chi-ba-ca`, duong vao BI DANH THU MUC): bo duyet thoi theo symlink thu muc
++    ("symlink_treo_khong_theo_bi_danh", _ma("onerror=khong_doc_duoc, followlinks=True)", "onerror=khong_doc_duoc)"), ("t20zk_kiem_re_symlink_treo_qua_bi_danh_thu_muc_do",)),
+     ("symlink_treo_bo_qua_rong_hon_t82", _ma('BO_QUA_NHU_T82 = (".git", "__pycache__", "*.pyc")', 'BO_QUA_NHU_T82 = (".git", "__pycache__", "*.pyc", "*.md")'), ("t20zj_symlink_treo_khong_duyet_duoc_va_dong_bo_t82",)),
+ ]
+ # Lop `kiem-mode-git-chot-khong-rang` (luot 14, dong theo CAU TRUC): moi o cua bang quyet dinh mot dot bien LAT dung o ay — o

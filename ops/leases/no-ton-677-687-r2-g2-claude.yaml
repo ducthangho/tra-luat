@@ -1,0 +1,110 @@
+# LEASE — NO-TON-677-687 revision 2 / generation 2 — spec r2: B3 mo rong 5 duong ke + sua loi khai cu xoa nhanh r1 (packet #704)
+# GHI HO theo chi thi CHU KHO trong phien (chep nguyen van o granted_on_instruction_nguyen_van).
+
+schema_version: 2
+event: executor_lease_granted
+
+packet_issue: 704
+granted_by: ducthangho
+granted_on_instruction: 'Lua chon cua chu kho trong phien Claude Code session_01RU4YGGdYMx94uVcywPjo4F, 2026-10-01 ~12:00Z'
+granted_on_instruction_nguyen_van: >-
+  Chu kho chon "Spec r2, vá cả 2, review lượt 2 (Recommended)" khi duoc hoi ve hai P4 cua review luot 1 (L2b, L4);
+  chi thi goc cua packet: "Dọn cho tôi. Các vấn đề tồn cho sang packet riêng, cấp lease và xử lý luôn" (~09:47Z).
+authority_caveat: >-
+  Chi thi nam trong phien; lease do phien agent ghi va day bang credential cua tai khoan chu kho (#566) — yeu hon
+  comment chu kho tu viet.
+recorded_by: claude-session
+recorder_is_dispatcher: false
+
+leased_at_utc: '2026-10-01T12:10:00Z'
+lease_expires_at_utc: '2026-10-02T12:10:00Z'
+han_vi_sao: 'Mot vong va + review lap + merge master + day mot lan: 24h. Phien khong tu noi han.'
+
+packet_id: NO-TON-677-687
+packet_slug: NO-TON-677-687
+revision: 2
+generation: 2
+lease_id: no-ton-677-687-r2-g2-claude
+thay_the_cho: no-ton-677-687-r1-g1-claude
+thay_the_ghi_chu: >-
+  g1 CON HAN (toi 2026-10-02T09:55Z) nen thu hoi bang bia mo hai chieu: da_bi_thay_the trong tep g1 (sua tren chinh
+  nhanh nay), thay_the_cho o day. Spec r2 thay r1; write set them ops/specs/no-ton-677-687-r2.md.
+role: executor
+provider: anthropic_claude
+executor: claude
+surface: claude_code
+model: claude-opus-5-5
+effort: max
+effort_ghi_chu: 'Agent va-spec-opus-max (dinh nghia khai effort max); harness co ap hay khong => KHONG DO DUOC.'
+environment: cloud
+risk: sensitive
+review_class: sensitive
+effective_review_class: sensitive
+assurance_target: human_audited
+reviewer_provider: anthropic_claude
+reviewer_surface: claude_code_subagent
+reviewer_model_yeu_cau: claude-sonnet-5-5
+reviewer_ghi_chu: >-
+  Spec r2 §4 (giu r1 §6): Sonnet 5.5 (agent review-sonnet), cung ho voi executor => advisory_review. human_audited cua chu kho
+  la cong land. Khong khai cross_approved.
+access: read-write
+
+spec_path: ops/specs/no-ton-677-687-r2.md
+spec_ref: refs/heads/claude/cap-lease-704-g2
+spec_source_oid: c2c753abdbd5b71210067c1700e50b59379335d2
+spec_sha256: 5b25ca020bc89059d7b4091ab65a1042f88dc3fce12b69cab3251eb51d6a47d7
+spec_hash: 5b25ca020bc89059d7b4091ab65a1042f88dc3fce12b69cab3251eb51d6a47d7
+spec_hash_formula: SHA256 of UTF-8 LF Git blob bytes at spec_source_oid:spec_path
+prompt_path: ops/specs/no-ton-677-687-r2.md
+prompt_sha256_required: 5b25ca020bc89059d7b4091ab65a1042f88dc3fce12b69cab3251eb51d6a47d7
+
+branch: claude/no-ton-677-687
+branch_ownership: exclusive
+branch_ghi_chu: >-
+  Ma va spec r1 o nhanh nay; spec r2 + lease g2 + bia mo g1 dang tren claude/cap-lease-704-g2 roi merge vao day.
+  ai-dang-giu thay ca hai vi quet moi ref.
+start_from_sha: a6de9d12d0ddd13bb35c4decea54bf626806162c
+immutable_acceptance_baseline: a6de9d12d0ddd13bb35c4decea54bf626806162c
+master_sha_at_grant: a6de9d12d0ddd13bb35c4decea54bf626806162c
+continuation_base: 8e7d1282c65a56247fd5a7949938fd72a2a6deb4
+reviewed_sha_required: 8e7d1282c65a56247fd5a7949938fd72a2a6deb4
+reviewed_sha_required_nghia: 'Head da review luot 1 (PASS). Moi verdict moi neo exact head THAT cua nhanh sau va r2.'
+
+write_set:
+  - ops/land/pr689-wp677-land-evidence.yaml
+  - ops/lease_publish_test.py
+  - ops/reviews/README.md
+  - ops/reviews/lease-publish-windows-do-review-r1-codex.receipt.yaml
+  - ops/reviews/lease-publish-windows-do-review-r2-codex.receipt.yaml
+  - ops/reviews/lease-publish-windows-do-review-r3-claude.receipt.yaml
+  - ops/reviews/lease-publish-windows-do-review-r3-luot2-claude.receipt.yaml
+  - ops/specs/no-ton-677-687-r1.md
+  - ops/specs/no-ton-677-687-r2.md
+write_set_hash: a79cdda2e23f5237a4374aab1da1cfcab0fc200fe1811cf904a3784ae783c297
+write_set_hash_cach_tinh: 'sha256 cua cac duong dan DA SAP XEP (LC_ALL=C), noi bang LF, co LF cuoi, utf-8.'
+write_set_da_do_truoc_khi_cap: >-
+  Do 2026-10-01T12:06:37Z tren clone day du: fetch '+refs/heads/*' --prune; so TAP TEN ls-remote --heads (457) voi
+  for-each-ref refs/remotes/origin: comm -23 = 0. ai-dang-giu: 8 duong dan cua r1 => NGUOI_GIU 1 = chinh g1
+  (no-ton-677-687-r1-g1-claude, bi thay bang bia mo hai chieu); ops/specs/no-ton-677-687-r2.md => NGUOI_GIU 0.
+
+ci_budget:
+  gate_tu_dong: '1 luot pull_request khi mo PR luc san sang merge'
+  phep_do_duoc_cap: '0 luot Windows'
+  het: 'DUNG truoc moi push/chay lai ke tiep, cho quyet dinh cua chu kho'
+
+dieu_kien_dung:
+  - 'S1 — cham duong ngoai write set. DUNG.'
+  - 'S2 — CI do vi packet. DUNG, bao chu kho.'
+  - 'S4 — ops/lease_publish_test.py vuot +150/-20 so a6de9d1 (spec r2 §2 B3.4′, tong r1+r2). DUNG truoc review.'
+  - 'S6 — het han lease => ngung ghi, handoff §7.'
+
+cam_tuyet_doi:
+  - Khong sua spec; khong sua tep ngoai write set
+  - Khong tu review / approve / merge / land
+  - Khong CI tay, khong Windows, khong LIVE/deploy
+  - Khong force-push; khong viet chuoi bo-qua-CI nguyen van trong commit message
+
+chua_do_duoc:
+  - 'Danh tinh nguoi ky: #566.'
+  - 'Model/effort thuc te cua executor va reviewer.'
+  - 'Windows.'

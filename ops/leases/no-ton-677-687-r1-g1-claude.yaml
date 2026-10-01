@@ -24,6 +24,7 @@ packet_slug: NO-TON-677-687
 revision: 1
 generation: 1
 lease_id: no-ton-677-687-r1-g1-claude
+da_bi_thay_the: no-ton-677-687-r2-g2-claude
 thay_the_cho: []
 thay_the_ghi_chu: 'Packet moi, khong co lease truoc.'
 role: executor

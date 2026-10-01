@@ -14,7 +14,8 @@
 .DESCRIPTION
     Script này gương lại LỆNH của các bước cổng trong các job `gate*` của `.github/workflows/ci.yml`
     (tên job là cách CI chia máy và trôi theo master: nền gốc d553efa có `gate`, `gate-registry`,
-    `gate-packet-loop`; master fc852ff tách thêm `gate-ops`, `gate-cong-cu`), nhưng chạy TẠI MÁY. Nó KHÔNG gọi
+    `gate-packet-loop`; master fc852ff tách thêm `gate-ops`, `gate-cong-cu` (8 mảnh) và `gate-cong-cu-gop` (gom mảnh —
+    script chạy `ops/cong_cu_test.py` TRỌN một lượt thay cho mảnh + gom)), nhưng chạy TẠI MÁY. Nó KHÔNG gọi
     `workflow_dispatch`, KHÔNG re-run, KHÔNG đẩy gì lên remote, KHÔNG gọi GitHub API.
     Viết ra để tôn chỉ thị `manual_ci_budget: 0` mà vẫn đo được trên nền Windows.
 
@@ -42,7 +43,9 @@
 
 .PARAMETER Muc
     `nhanh`  — bộ cổng cốt lõi (mặc định), đủ để biết một bản vá có làm vỡ gì không.
-    `day-du` — gương mọi bước cổng của các job `gate*` của CI, trừ bước cgroup (chỉ có trên Linux).
+    `day-du` — gương các bước cổng của các job `gate*` của CI. Bước KHÔNG gương được thì script in `KHÔNG CHẠY` ở
+               cuối mức này — bốn dòng: cgroup (chỉ có trên Linux), EOL base (đòi event `pull_request`), `tl selftest`
+               có bằng chứng exact-identity, `release-verify` lane WORKER — cộng hai bước `ci.yml` bỏ trên Windows.
 
 .PARAMETER CaiCongCu
     Cài PyYAML/jsonschema/ruff bản GHIM, rồi `actionlint` (vào `dist/actionlint` của bản clone), `shellcheck`, `rg`
@@ -139,12 +142,6 @@ if ($Goc.Contains([string][IO.Path]::PathSeparator)) {
 }
 Set-Location -LiteralPath $Goc
 Noi "gốc kho: $Goc"
-
-# Nhật ký KHÔNG được nằm trong cây đang đo: `.cong-windows/` ở gốc làm `release-verify --strict`
-# hô `extra_files` (đo: 12 tệp sau mức `nhanh`) và `release-bundle` đóng chúng vào zip. `dist/`
-# vừa nằm trong `_RELEASE_EXCLUDE_DIRS` vừa bị `.gitignore` — cùng chỗ bước bundle x2 ghi zip.
-$NhatKy = Join-Path $Goc (Join-Path 'dist' 'cong-windows')
-New-Item -ItemType Directory -Force -Path $NhatKy | Out-Null
 
 # ───────────────────────────── tìm python ─────────────────────────────
 function Tim-Python {
@@ -319,6 +316,14 @@ if ((Test-Path -LiteralPath $AlDich) -and (($env:PATH -split [regex]::Escape($Se
 }
 $env:AL_VER  = $AlVer
 $env:AL_DICH = $AlDich
+
+# Nhật ký KHÔNG được nằm trong cây đang đo: `.cong-windows/` ở gốc làm `release-verify --strict`
+# hô `extra_files` (đo: 12 tệp sau mức `nhanh`) và `release-bundle` đóng chúng vào zip. `dist/`
+# vừa nằm trong `_RELEASE_EXCLUDE_DIRS` vừa bị `.gitignore` — cùng chỗ bước bundle x2 ghi zip.
+# Tạo SAU hai chốt `dist` ở trên, không trước: `dist` THEO DÕI là dữ liệu của nhánh, `New-Item` qua nó là ghi vào chỗ nhánh
+# chọn RỒI mới bị từ chối (đo trên eba9b1d: symlink `dist` theo dõi sang `tools` ⇒ `tools/cong-windows` mọc ra, rồi rc=2).
+$NhatKy = Join-Path $Goc (Join-Path 'dist' 'cong-windows')
+New-Item -ItemType Directory -Force -Path $NhatKy | Out-Null
 
 # ───────────────────────────── bộ chạy ─────────────────────────────
 $KetQua = New-Object System.Collections.ArrayList

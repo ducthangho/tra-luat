@@ -35,6 +35,8 @@
 #   t28 bo-giai-cong-cu-theo-ten-thu-tu (nền)     danh sách CHO PHÉP là của NỀN ĐANG CHẠY: tên installer chỉ sinh ra ở nền KHÁC
 #                                                 (`actionlint` không đuôi trên Windows, `actionlint.exe` ngoài Windows) ⇒ rc=2; đúng bộ
 #                                                 tên của nền này ⇒ KHÔNG bị chặn
+#   t29 chot-dat-sau-diem-dung                    `dist` THEO DÕI (symlink sang `tools`) ⇒ rc=2 và KHÔNG gì được ghi qua nó trước khi bị
+#                                                 từ chối (thư mục nhật ký từng được tạo TRƯỚC chốt `ls-files`)
 # Bộ này KÍN với config git của máy chạy, với biến git trỏ kho khác (khối ngay dưới `$script:Rac`), với code page của
 # console (`Doc-Utf8`), với dấu thập phân của locale (t18 nhận `5,1s`) và với `<TEMP>/actionlint` của máy (t7, t21 tự đặt TEMP).
 # ĐỘT BIẾN để đo răng (đo trên pwsh 7.4.6/Linux, bộ 28 ca, TMPDIR sạch): `-Script` trỏ f2392df ⇒ 2/28 (đạt t17 — bản ấy đã so băm —
@@ -43,6 +45,7 @@
 # t13 t18 t19 t21 t22 t23 t24 t25 t26 t27 t28); bd62cad ⇒ 18/28 (đỏ t7 t19 t21 t22 t23 t24 t25 t26 t27 t28); 131c2e7 ⇒ 19/28 (đỏ t7
 # t21 t22 t23 t24 t25 t26 t27 t28); c8c2c6a ⇒ 21/28 (đỏ t22 t23 t24 t25 t26 t27 t28); 623864e ⇒ 24/28 (đỏ t25 t26 t27 t28); f1f753b ⇒
 # 26/28 (đỏ t27 t28); 543f2e8 ⇒ 27/28 (chỉ t28).
+# Lượt 11: bộ 29 ca — mỗi hàng ở trên đỏ thêm t29 (eba9b1d ⇒ 28/29, chỉ t29: `New-Item $NhatKy` đứng TRƯỚC chốt `dist`).
 # Lượt 10: danh sách hợp hai nền (543f2e8) ⇒ chỉ t28 (lượt 1); đảo nền ⇒ chỉ t28 (lượt 1); danh sách của nền này rỗng / thiếu `goi.gz`
 # ⇒ chỉ t28 (lượt 2); bỏ danh sách CHO PHÉP nay ⇒ t25 t28; nhánh Windows của t27 ép chạy trên Linux: fixture mới ⇒ 28/28, fixture dẫn
 # `'tools'` qua ống (blob 6 byte) ⇒ chỉ t27 (chốt tự kiểm KHÔNG ĐO ĐƯỢC).
@@ -749,6 +752,34 @@ Ca 't28 dist/actionlint chua ten cua NEN KHAC => rc=2; ten cua nen nay => qua' {
     foreach ($f in @('LICENSE.txt', 'README.md') + $nay) { Set-Content -LiteralPath (Join-Path $al2 $f) -Value 'x' -Encoding utf8NoBOM }
     $b = Chay $k2
     if ($b.rc -ne 0 -or $b.ra -match 'installer không sinh ra') { throw "bo ten installer sinh ra tren nen nay bi chan (rc=$($b.rc))" }
+}
+
+# `dist` THEO DÕI là dữ liệu của nhánh: script phải từ chối nó TRƯỚC khi ghi bất cứ gì qua nó. Đo trên eba9b1d: thư mục nhật ký
+# `dist/cong-windows` được tạo TRƯỚC chốt `ls-files` ⇒ symlink `dist` theo dõi sang `tools` làm `tools/cong-windows` mọc ra, rồi
+# mới rc=2. Windows: mục 120000 trong index (như t27) cộng junction `dist` → `tools`, để cây làm việc đi qua đúng đích ấy.
+Ca 't29 dist THEO DOI => tu choi TRUOC khi ghi qua no' {
+    $k = Dung-Kho
+    $t = Join-Path $k 'tools'
+    New-Item -ItemType Directory -Force -Path $t | Out-Null
+    Set-Content -LiteralPath (Join-Path $t 'giu') -Value 'x' -Encoding utf8NoBOM
+    & git -C $k add -A
+    if ($IsWindows) {
+        $dich = Join-Path (Split-Path $k) 'dich-symlink'
+        [IO.File]::WriteAllBytes($dich, [Text.Encoding]::ASCII.GetBytes('tools'))
+        $sha = @(& git -C $k hash-object -w --no-filters -- $dich)[0]
+        & git -C $k update-index --add --cacheinfo "120000,$sha,dist"
+        New-Item -ItemType Junction -Path (Join-Path $k 'dist') -Target $t | Out-Null
+    } else {
+        & ln -s tools (Join-Path $k 'dist')
+        & git -C $k add -A
+    }
+    & git -C $k -c user.email=t@t -c user.name=t commit -qm symlink
+    if (@(& git -C $k ls-files -- 'dist').Count -ne 1 -or -not (Test-Path -LiteralPath (Join-Path $k (Join-Path 'dist' 'giu')))) {
+        throw 'KHONG DO DUOC: kho gia khong dung duoc dist THEO DOI di qua tools' }
+    $a = Chay $k
+    if ($a.rc -ne 2 -or $a.ra -notmatch 'THEO DÕI') { throw "dist THEO DOI ma khong bi tu choi (rc=$($a.rc))" }
+    $sot = @(Get-ChildItem -LiteralPath $t -Force | Where-Object { $_.Name -ne 'giu' } | ForEach-Object Name)
+    if ($sot.Count -gt 0) { throw "script ghi qua dist THEO DOI TRUOC khi tu choi: tools/$($sot -join ', tools/')" }
 }
 
 foreach ($d in $script:Rac) { Remove-Item -LiteralPath $d -Recurse -Force -ErrorAction SilentlyContinue }

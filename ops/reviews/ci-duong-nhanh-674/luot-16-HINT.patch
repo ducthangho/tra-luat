@@ -1,0 +1,30 @@
+diff --git a/ops/ci_duong_nhanh.py b/ops/ci_duong_nhanh.py
+index 5cc308e..5f557ac 100644
+--- a/ops/ci_duong_nhanh.py
++++ b/ops/ci_duong_nhanh.py
+@@ -276,7 +276,8 @@ def kiem_loai_tep(doi, kho=ROOT) -> list[str]:
+     """Mọi tệp hồ sơ đổi (còn trong cây) phải là tệp THƯỜNG, không phải symlink. Bước bị bỏ `lease-publish selftest`
+     có `t82` `copytree` CẢ cây (kể cả ops/{land,leases,reviews,specs}/**): symlink treo dưới allowlist làm nó ĐỎ trên
+     master trong khi mọi kiểm khác của `kiem-re` LÚC ẤY (lượt 7) vẫn DAT — nay `kiem_mode_git` (mode 120000: mọi symlink
+-    trong diff) và chính `t82` chạy trong `kiem-re` (`kiem_ca_chep_cay`: symlink TREO ở mọi đâu trong cây) cũng bắt;
++    trong diff) và chính `t82` chạy trong `kiem-re` (`kiem_ca_chep_cay`: symlink TREO ở mọi chỗ `copytree` của `t82` đi
++    qua, tức TRỪ đúng các tên nó bỏ qua — `.git`, `__pycache__`, `*.pyc`) cũng bắt;
+     `t20n`/`t20q` đòi DÒNG của chính chốt này. Hồ sơ không cần symlink ⇒ chặn mọi symlink, treo hay
+     không, mọi đuôi tệp. (`.gitattributes` KHÔNG bị chặn ở đây — xem D1 và `kiem_diff_check`.) Chốt này đọc ĐĨA; nó không
+     thấy gitlink (thư mục rỗng) hay symlink trên nền `core.symlinks=false` — `kiem_mode_git` đọc mode trong GIT và phủ cả hai."""
+diff --git a/ops/ci_duong_nhanh_test.py b/ops/ci_duong_nhanh_test.py
+index 62b4bd5..7382311 100644
+--- a/ops/ci_duong_nhanh_test.py
++++ b/ops/ci_duong_nhanh_test.py
+@@ -1318,8 +1318,9 @@ def t20zh_kiem_mode_git_bang_quyet_dinh_tron_ven():
+ def cay_t82():
+     """Cay TOI THIEU de chay CHINH `t82` qua CHINH runner: hai tep THAT `ops/lease_publish.py` + `ops/lease_publish_test.py`
+     (chep tu kho that, nen t82 doi thi ca di theo) va thu muc `ops/leases/` (t82 ghi `hong.yaml` vao ban sao cua no). Khong chep
+-    CA cay that (do 01-10-2026: ~120 MB, 4,1 giay moi lan); doi chung tren CAY THAT la `t22c`. Moi ca dung cay nay doi doi chung
+-    DAT tren CHINH cay ay truoc khi them dau vao, nen DO chi quy duoc cho dau vao."""
++    CA cay that (do 01-10-2026: ~120 MB, 4,1 giay moi lan); doi chung tren CAY THAT la `t22c`. Moi ca dung cay nay ma MONG DO
++    doi doi chung DAT tren CHINH cay ay truoc khi them dau vao, nen DO chi quy duoc cho dau vao. Ca do chuoi khung va ca doi
++    chinh `t82` KHONG mong DO nen khong co doi chung ay (fixture cua chung la dieu kien khac)."""
+     tam = Path(tempfile.mkdtemp(prefix="cdn_t82_"))
+     try:
+         cay = tam / "cay"

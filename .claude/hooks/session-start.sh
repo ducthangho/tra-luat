@@ -61,7 +61,7 @@ cd "$GOC"
 export PYTHONUTF8=1
 export PYTHONIOENCODING=utf-8
 
-# M4 / A4: Ghim phiên bản actionlint đồng bộ với 4 chỗ trong .github/workflows/ci.yml
+# M4 / A4: Ghim phiên bản actionlint đồng bộ với 5 chỗ trong .github/workflows/ci.yml
 AL_VER="1.7.7"
 
 # `command -v` chứ không `which`: có sẵn ở mọi shell POSIX và không phụ thuộc gói ngoài.

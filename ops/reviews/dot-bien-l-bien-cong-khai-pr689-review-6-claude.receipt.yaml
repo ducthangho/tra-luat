@@ -53,7 +53,8 @@ reviewed_sha_to_tien: >-
 evidence_url: https://github.com/ducthangho/tra-luat/blob/0eb7a3121c64591eb0a9341714335fb06dfc4171/ops/reviews/dot-bien-l-bien-cong-khai/pr689-review-6-claude-VERDICT.md
 evidence_url_ghi_chu: >-
   Neo BLOB ghim commit cua PR bookkeeping mang ban chieu (commit chi chua ban chieu; bien nhan di o commit sau,
-  nen mo neo la to tien cua HEAD). 0eb7a3121c64591eb0a9341714335fb06dfc4171 phai duoc thay bang SHA that truoc khi commit bien nhan.
+  nen mo neo la to tien cua HEAD). 0eb7a3121c64591eb0a9341714335fb06dfc4171 la SHA THAT cua commit ban chieu (do: git show --name-only 0eb7a31 = 10
+  ban chieu; git merge-base --is-ancestor 0eb7a31 5d52485 rc 0).
 evidence_ban_chieu: https://github.com/ducthangho/tra-luat/pull/689#issuecomment-5908673396
 evidence_ban_chieu_created_at: '2026-09-30T09:48:06Z'
 evidence_ban_chieu_doi_chieu: >-

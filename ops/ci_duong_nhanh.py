@@ -43,7 +43,8 @@ GIỚI HẠN, NÓI THẲNG (không phải ranh giới an ninh):
 
 LỆNH `kiem-re` (bước bù cho các bước bị bỏ, chỉ chạy khi `che_do == duong_nhanh`):
   YAML parse được · `git diff --check` · lease đổi phải qua `lease_publish` · ba ca kiểm DỮ LIỆU của lease_publish_test ·
-  mọi đường dẫn đổi là TỆP THƯỜNG theo MODE TRONG GIT (`kiem_mode_git`: 100644/100755 hoặc xoá; gitlink, symlink ⇒ ĐỎ).
+  mọi đường dẫn đổi là TỆP THƯỜNG theo MODE TRONG GIT (`kiem_mode_git`: 100644/100755 hoặc xoá; gitlink, symlink ⇒ ĐỎ) ·
+  KHÔNG symlink treo ở BẤT KỲ đâu trong cây, kể cả ngoài diff (`kiem_symlink_treo_ca_cay`: `t82` của bước bị bỏ chép CẢ cây).
 Hai chỗ khác chữ trần của đặc tả r2, ĐO ngày 29-09-2026. CHỦ KHO ĐÃ DUYỆT CẢ HAI (lựa chọn (a)) — erratum của đặc tả r2,
 không sửa r2: https://github.com/ducthangho/tra-luat/issues/674#issuecomment-5887720007 . Với reviewer: đây là HÀNH VI ĐƯỢC
 DUYỆT, không phải finding về chính sách; vẫn tìm lỗi TRONG cách hiện thực (ví dụ `bo_qua_han` bỏ thêm chốt nào khác không,
@@ -87,6 +88,7 @@ from __future__ import annotations
 
 import os
 import re
+import shutil
 import subprocess
 import sys
 from datetime import datetime, timezone
@@ -272,6 +274,37 @@ def kiem_loai_tep(doi, kho=ROOT) -> list[str]:
     gitlink (thư mục rỗng) hay symlink trên nền `core.symlinks=false` — `kiem_mode_git` đọc mode trong GIT và phủ cả hai."""
     return [f"tep ho so la symlink (duong nhanh chi nhan tep thuong): {duong!r}"
             for duong in sorted(doi) if (Path(kho) / duong).is_symlink()]
+
+
+# Bỏ qua ĐÚNG những gì `t82` của ops/lease_publish_test.py bỏ khi `shutil.copytree` cả cây — cùng hàm `ignore_patterns`, cùng
+# mẫu (ca `t20zj` đọc lại mẫu từ chính t82 và đòi khớp, để hai bên không trôi lệch).
+BO_QUA_NHU_T82 = (".git", "__pycache__", "*.pyc")
+
+
+def kiem_symlink_treo_ca_cay(kho=ROOT) -> list[str]:
+    """Symlink TREO ở BẤT KỲ đâu trong cây (không chỉ tệp trong diff) ⇒ ĐỎ. Cross-review lượt 8 (P2
+    `buoc-bi-bo-doc-ca-cay-khong-chi-ba-ca`): bước bị bỏ `lease-publish selftest` có `t82` `copytree` CẢ cây, theo symlink;
+    `kiem_loai_tep`/`kiem_mode_git` chỉ nhìn đường dẫn ĐỔI. PR hồ sơ XOÁ/đổi tên đích của một symlink HỢP LỆ có sẵn (vào
+    qua PR đầy đủ, ở `docs/`, dưới allowlist hay trong thư mục chấm) — hoặc xoá hết một thư mục hồ sơ mà đường dẫn symlink
+    đi XUYÊN qua — làm symlink ấy treo trong khi nó KHÔNG nằm trong diff ⇒ PR xanh, `t82` ĐỎ trên master (đo 01-10-2026).
+    Treo đo bằng `os.path.exists` (stat của nhân, theo từng thành phần), KHÔNG bằng ghép đường dẫn từ vựng: `a/b/../c` cần
+    `a/b` có thật. `os.walk` xếp symlink treo vào danh sách TỆP (kể cả symlink từng trỏ thư mục) và không đi vào symlink thư
+    mục. Không đọc được một thư mục ⇒ KHÔNG ĐO ĐƯỢC ⇒ ĐỎ. Không lệnh git nào: đây là cây ĐĨA mà `t82` sẽ chép."""
+    bo_qua = shutil.ignore_patterns(*BO_QUA_NHU_T82)
+    loi = []
+
+    def khong_doc_duoc(e):
+        loi.append(f"KHONG DO DUOC: khong duyet duoc cay de tim symlink treo: {type(e).__name__}: {getattr(e, 'filename', '')!r}")
+
+    for goc, thu_muc, tep in os.walk(kho, onerror=khong_doc_duoc):
+        bo = bo_qua(goc, thu_muc + tep)
+        thu_muc[:] = sorted(d for d in thu_muc if d not in bo)
+        for ten in sorted(t for t in tep if t not in bo):
+            p = os.path.join(goc, ten)
+            if os.path.islink(p) and not os.path.exists(p):
+                loi.append("symlink TREO trong cay (t82 cua lease-publish selftest chep CA cay se DO): "
+                           f"{os.path.relpath(p, kho).replace(os.sep, '/')!r}")
+    return loi
 
 
 MODE_THUONG = {"100644", "100755"}
@@ -464,6 +497,7 @@ def lenh_kiem_re(env=os.environ, chay=subprocess.run, kho=ROOT, ra=None, bay_gio
         return 1
     loi = (kiem_yaml(doi, kho) + kiem_loai_tep(doi, kho) + kiem_diff_check(env, chay, kho) + kiem_nhi_phan(env, chay, kho)
            + kiem_mode_git(env, chay, kho, doi)
+           + kiem_symlink_treo_ca_cay(kho)
            + kiem_lease(doi, kho, chay, bay_gio, ra)
            + kiem_ca_du_lieu(kho, chay))
     for x in loi:

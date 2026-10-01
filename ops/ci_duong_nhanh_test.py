@@ -5,8 +5,9 @@ Packet #674 `CI-DUONG-NHANH-HO-SO` (đặc tả r2). Bốn tầng, mỗi tầng 
 số lượng ca/đột biến KHÔNG ghi ở đây (đã trôi hai lượt liền): nguồn duy nhất là `CA`, `DOT_BIEN` và dòng `CA:`/`DOT BIEN:` in ra.
   · ca `t*`: hành vi bộ phân loại và bước kiểm rẻ (đồ giả cho ca thuần + KHO GIT THẬT cho ca cần ngữ nghĩa git);
   · ca `y*`: cấu trúc `ci.yml`. ĐÂY LÀ CỔNG DUY NHẤT canh `if:` cấp job của `gate-ops` và `if:` cấp bước sau G5. Nợ có tên
-    `ci-if-cap-job-gate-ops-va-buoc-sau-g5-khong-co-cong-canh` (Q6-i chủ kho): `JOB_G5` của `ci_dang_ky_test.py` chỉ có
-    `gate`, `gate-registry`, `gate-packet-loop`, và `cong_cu_test.t6` chỉ soi các bước TRƯỚC G5;
+    `ci-if-cap-job-gate-ops-va-buoc-sau-g5-khong-co-cong-canh` (Q6-i chủ kho): `JOB_G5` của `ci_dang_ky_test.py` KHÔNG chứa
+    `gate-ops` (đo lại sau khi #668 land: thêm `gate-cong-cu`, `gate-cong-cu-gop`, vẫn không có `gate-ops`), và
+    `cong_cu_test.t6` chỉ soi các bước TRƯỚC G5;
   · ca `k*`: nối vào sổ test sống (mục `DA_NOI` và lời gọi thật trong `run:`);
   · ca khai `@ca_tu_kiem`: tự kiểm của chính bộ test (harness, phân hoạch, docstring, cây dưới đo). Nhóm KHAI tại chỗ,
     không suy từ tiền tố; `t96` đối chiếu với dấu hiệu AST độc lập, và dòng `KIEM KE:` in số từng nhóm.
@@ -894,7 +895,9 @@ def t20n_kiem_re_symlink_ho_so_do():
         git(kho, "commit", "-q", "-m", "symlink")
         dau2 = git(kho, "rev-parse", "HEAD").stdout.decode().strip()
         rc, log = kiem_re(m, kho, goc, dau2)
-        bang(rc == 1 and "symlink" in log and "treo.md" in log, f"symlink ho so phai DO kiem-re: rc={rc}: {log}")
+        # Chuoi RIENG cua `kiem_loai_tep`: `kiem_symlink_treo_ca_cay` cung bat symlink treo nay ("symlink TREO trong cay") nen
+        # chi doi "symlink" thi chot ca cay CHE mat dot bien go `kiem_loai_tep` (luot 8b, HINT F2).
+        bang(rc == 1 and "tep ho so la symlink" in log and "treo.md" in log, f"symlink ho so phai DO kiem-re: rc={rc}: {log}")
 
 
 @ca
@@ -1254,6 +1257,47 @@ def t20zg_kiem_re_o_chap_nhan_con_lai_dat():
         bang(rc == 0, f"A 100755 / M 100644 / T -> 100755 deu la tep thuong, phai DAT kiem-re: rc={rc}: {log}")
 
 
+# LUAT (lop `kiem-mode-git-chot-khong-rang`, dong theo CAU TRUC o luot 14): bang quyet dinh DAY DU cua `kiem_mode_git` tren
+# (trang thai, mode MOI). San pham chi quyet theo hai truong nay, nen tich duoi day la TOAN BO khong gian dau vao cua nhanh quyet
+# dinh. CHI bay o CHAP NHAN; moi o con lai TU CHOI. Day la luat cua bo test, KHONG doc lai tu ma duoi do.
+TRANG_THAI_BANG = ("A", "M", "T", "D")
+MODE_BANG = ("000000", "100644", "100755", "120000", "160000")
+O_CHAP_NHAN = frozenset({("A", "100644"), ("A", "100755"), ("M", "100644"), ("M", "100755"),
+                         ("T", "100644"), ("T", "100755"), ("D", "000000")})
+
+
+@ca
+def t20zh_kiem_mode_git_bang_quyet_dinh_day_du():
+    """Cross-review luot 14 (`kiem-mode-git-chot-khong-rang`, LAN THU 4 — chu kho chot: dong bang MOT ca bang quyet dinh roi
+    DUNG lop): duyet TOAN BO {A,M,T,D} x {000000,100644,100755,120000,160000} = 20 o qua `kiem_mode_git` voi ban ghi `--raw`
+    gia (cung dang byte voi git that — t20zf/t20zg ghim dang ay tren git that) o CA BA cap. O CHAP NHAN ⇒ khong loi; o TU CHOI
+    ⇒ DUNG ba loi, moi cap mot loi, moi loi neu dung `mode <mode>, <trang thai>`.
+    Bay o git KHONG sinh duoc van nam trong bang, ky vong TU CHOI (ban ghi hong ⇒ fail-close): `A`/`M`/`T` voi mode moi 000000
+    (chi `D` co mode moi 000000) va `D` voi mode moi khac 000000 (git luon ghi 000000 cho phia moi cua `D`). Muoi ba o con lai
+    git sinh duoc (bay CHAP NHAN; sau TU CHOI: A/M/T x 120000/160000 — them, doi dich/nang con tro, doi kieu thanh symlink/gitlink).
+    Moi o co mot dot bien LAT RIENG (`mode_git_lat_o_*`, sinh tu chinh bang nay), cong dot bien mien tru trang thai `M` (dot bien
+    X1 cua reviewer luot 14, SONG SOT toan suite truoc ca nay) — ca nay la dich DUY NHAT cua tat ca."""
+    m = nap_module()
+    duong = "ops/land/g"
+    cap_mong = {"ba cham", "goc -> cay merge-tree", "goc -> merge ref"}
+    sai = []
+    with _cay_tam({duong: "g\n"}) as kho:   # dia CO tep thuong: chot dia cua cap merge ref khong xen vao phep do
+        for tt in TRANG_THAI_BANG:
+            for mode in MODE_BANG:
+                ghi = raw_ghi((mode, tt, duong))
+                loi = m.kiem_mode_git(env_pr(), chay_gia(raw={k: (0, ghi) for k in ("ba_cham", "cay", "hop")}), kho, {duong})
+                if (tt, mode) in O_CHAP_NHAN:
+                    if loi != []:
+                        sai.append(f"({tt}, {mode}) phai CHAP NHAN, duoc {loi}")
+                    continue
+                cap = {k.group(1) for k in (re.search(rf"\(mode {mode}, {tt}, cap ([^)]+)\)", x) for x in loi) if k}
+                if not (len(loi) == 3 and cap == cap_mong):
+                    sai.append(f"({tt}, {mode}) phai TU CHOI o DUNG ba cap, duoc {loi}")
+    bang(len(TRANG_THAI_BANG) * len(MODE_BANG) == 20 and O_CHAP_NHAN < {(t, x) for t in TRANG_THAI_BANG for x in MODE_BANG},
+         "ha tang bang: tich phai du 20 o va moi o chap nhan phai thuoc tich")
+    bang(not sai, f"bang quyet dinh kiem_mode_git lech {len(sai)} o: {sai}")
+
+
 @ca
 def t20zc_kiem_re_doi_ten_tep_ho_so_dat():
     """Cross-review luot 11 (`kiem-mode-git-chot-khong-rang`): `git diff` mac dinh DO doi ten (`diff.renames`), ban ghi `--raw`
@@ -1281,7 +1325,97 @@ def t20q_kiem_re_symlink_hop_le_moi_duoi_do():
             git(kho, "commit", "-q", "-m", "symlink")
             dau2 = git(kho, "rev-parse", "HEAD").stdout.decode().strip()
             rc, log = kiem_re(m, kho, goc, dau2)
-            bang(rc == 1 and "symlink" in log, f"{ten}: symlink phai DO kiem-re: rc={rc}: {log}")
+            bang(rc == 1 and "tep ho so la symlink" in log, f"{ten}: symlink phai DO kiem-re: rc={rc}: {log}")
+
+
+# Lop `buoc-bi-bo-doc-ca-cay-khong-chi-ba-ca` (cross-review luot 8b, P2): moi DUONG VAO mot nhanh rieng cua t20zi, moi nhanh mot
+# dot bien rieng chi nhanh ay bat. Symlink HOP LE co san tren goc (vao qua PR day du); PR ho so chi XOA => symlink TREO ngoai diff.
+SYMLINK_GOC = {   # duong symlink -> dich (tuong doi thu muc cha cua symlink)
+    "docs/l1.md": "../ops/specs/D1.md",                      # E1: ngoai allowlist, dich la TEP
+    "docs/tm": "../ops/specs/tm",                            # E1b: ngoai allowlist, dich la THU MUC (os.walk xep symlink treo vao TEP)
+    "ops/land/l3.md": "../specs/D3.md",                      # E3: DUOI allowlist nhung KHONG trong diff
+    "docs/xuyen.md": "../ops/specs/qua/../../../README.md",  # E4: dich ngoai ho so, DUONG DI xuyen thu muc ho so
+    ".claude/l5.md": "../ops/specs/D5.md",                   # E5: trong thu muc CHAM (t82 chep ca thu muc cham, tru .git)
+}
+NHANH_XOA = {   # nhanh PR -> (lenh git rm, symlink phai bi bao TREO)
+    "e1-xoa-dich-tep": (("ops/specs/D1.md",), "docs/l1.md"),
+    "e1b-xoa-thu-muc-dich": (("-r", "ops/specs/tm"), "docs/tm"),
+    "e3-xoa-dich-trong-allowlist": (("ops/specs/D3.md",), "ops/land/l3.md"),
+    "e4-xoa-thu-muc-tren-duong-di": (("-r", "ops/specs/qua"), "docs/xuyen.md"),
+    "e5-xoa-dich-cua-thu-muc-cham": (("ops/specs/D5.md",), ".claude/l5.md"),
+}
+
+
+@ca
+def t20zi_kiem_re_symlink_treo_ngoai_diff_do():
+    """Cross-review luot 8b (P2 `buoc-bi-bo-doc-ca-cay-khong-chi-ba-ca`): `kiem_loai_tep`/`kiem_mode_git` chi nhin duong dan DOI,
+    con `t82` (bi bo o duong nhanh) `copytree` CA cay va theo symlink. Do tren HEAD 6803012 TRUOC khi va (rig kho tam, hai ve mot
+    lenh): ca nam nhanh duoi deu `kiem-re rc=0` va `t82 rc=1 shutil.Error`. Doi chung (PR sua tep KHAC; symlink treo CHUA THEO DOI
+    trong `.git/`, `__pycache__/`, `*.pyc` — t82 bo qua chung) phai DAT. Khong phai duong vao (do, khong co delta): dich doi tu
+    tep thanh THU MUC (t82 van chep duoc, rc=0); ten trung tep ma t82 GHI vao ban sao (`ops/leases/hong.yaml/` la thu muc) —
+    `kiem-re` DA DO nho ca du lieu t23 (glob `*.yaml`). E1b dung chung duong voi E1 (symlink treo luon nam trong danh sach TEP
+    cua `os.walk`), nen khong co dot bien rieng."""
+    m = nap_module()
+    nen = {"README.md": "x\n", "ops/specs/E.md": "# e\n", "ops/specs/D1.md": "# 1\n", "ops/specs/tm/a.md": "a\n",
+           "ops/specs/D3.md": "# 3\n", "ops/specs/qua/q.md": "q\n", "ops/specs/D5.md": "# 5\n", "ops/land/x.yaml": "a: 1\n"}
+    with kho_that(nen=nen) as (kho, _a, _h):
+        git(kho, "checkout", "-q", "main")
+        for duong, dich in SYMLINK_GOC.items():
+            (kho / duong).parent.mkdir(parents=True, exist_ok=True)
+            (kho / duong).symlink_to(dich)   # nhu t20n/t20q/t20x: khong tha im lang khi nen khong tao duoc symlink
+        git(kho, "add", "-A")
+        git(kho, "commit", "-q", "-m", "PR day du: symlink hop le")
+        goc = git(kho, "rev-parse", "HEAD").stdout.decode().strip()
+        bang(all((kho / d).is_symlink() and (kho / d).exists() for d in SYMLINK_GOC),
+             "fixture vo hieu: moi symlink tren goc phai HOP LE (khong thi ca nay do mot cay da hong san)")
+        git(kho, "checkout", "-q", "-b", "doi-chung", goc)
+        viet(kho, "ops/specs/E.md", "# e2\n")
+        git(kho, "commit", "-q", "-am", "PR ho so sua tep khac")
+        dau0 = git(kho, "rev-parse", "HEAD").stdout.decode().strip()
+        rac = (kho / ".git" / "zz-treo", kho / "docs" / "__pycache__" / "zz", kho / "docs" / "zz.pyc")
+        for p in rac:
+            p.parent.mkdir(parents=True, exist_ok=True)
+            p.symlink_to("khong-co-dich")
+        try:
+            rc0, log0 = kiem_re(m, kho, goc, dau0)
+        finally:
+            for p in rac:
+                p.unlink()
+        bang(rc0 == 0, f"doi chung (symlink van hop le; rac treo dung cho t82 bo qua) phai DAT: rc={rc0}: {log0}")
+        for nhanh, (rm, mong) in NHANH_XOA.items():
+            git(kho, "checkout", "-q", "-b", nhanh, goc)
+            git(kho, "rm", "-q", *rm)
+            git(kho, "commit", "-q", "-m", "PR ho so xoa")
+            dau = git(kho, "rev-parse", "HEAD").stdout.decode().strip()
+            bang(phan_loai_that(m, kho, goc, dau)[0] == m.DUONG_NHANH, f"fixture vo hieu ({nhanh}): PR phai ra duong nhanh")
+            bang(mong not in git(kho, "diff", "--name-only", f"{goc}...{dau}").stdout.decode().split("\n")
+                 and os.path.islink(kho / mong) and not os.path.exists(kho / mong),
+                 f"fixture vo hieu ({nhanh}): {mong} phai TREO tren dia ma KHONG nam trong diff")
+            rc, log = kiem_re(m, kho, goc, dau)
+            treo = [d for d in log.splitlines() if "symlink TREO trong cay" in d]
+            bang(rc == 1 and len(treo) == 1 and repr(mong) in treo[0],
+                 f"{nhanh}: symlink {mong!r} treo NGOAI diff phai DO kiem-re, dung mot dong: rc={rc}: {log}")
+
+
+@ca
+def t20zj_symlink_treo_khong_duyet_duoc_va_dong_bo_t82():
+    """Hai chot con lai cua `kiem_symlink_treo_ca_cay`: (a) `os.walk` loi (thu muc khong doc duoc) => KHONG DO DUOC, khong nuot;
+    (b) tap bo qua phai BANG DUNG tap `t82` bo qua, va `t82` van chep THEO symlink (khong `symlinks=True`) — doc lai tu chinh
+    `ops/lease_publish_test.py` (kho that: ban sao toi thieu cua dot bien chi co tep cho). Lech thi chot nay bao sai cho."""
+    m = nap_module()
+    loi = m.kiem_symlink_treo_ca_cay(Path(tempfile.gettempdir()) / "cdn-khong-ton-tai-4f1c")
+    bang(len(loi) == 1 and "KHONG DO DUOC" in loi[0], f"khong duyet duoc cay phai DO (khong nuot loi os.walk), duoc {loi}")
+    cay = ast.parse((ROOT_THAT / "ops" / "lease_publish_test.py").read_text(encoding="utf-8"))
+    t82 = [n for n in cay.body if isinstance(n, ast.FunctionDef) and n.name.startswith("t82_")]
+    bang(len(t82) == 1, f"ha tang: phai co dung mot ham t82_ trong lease_publish_test.py, thay {len(t82)}")
+    chep = [n for n in ast.walk(t82[0]) if isinstance(n, ast.Call) and isinstance(n.func, ast.Attribute) and n.func.attr == "copytree"]
+    bang(len(chep) == 1, f"ha tang: t82 phai co dung mot copytree, thay {len(chep)}")
+    kw = {k.arg: k.value for k in chep[0].keywords}
+    mau = kw.get("ignore")
+    bang(isinstance(mau, ast.Call) and getattr(mau.func, "attr", None) == "ignore_patterns"
+         and all(isinstance(a, ast.Constant) for a in mau.args), f"ha tang: t82 copytree khong con ignore_patterns hang: {ast.dump(chep[0])}")
+    bang(tuple(a.value for a in mau.args) == tuple(m.BO_QUA_NHU_T82) and "symlinks" not in kw,
+         f"tap bo qua lech t82 hoac t82 thoi theo symlink: t82={[a.value for a in mau.args]} kw={sorted(kw)} vs {m.BO_QUA_NHU_T82}")
 
 
 @ca
@@ -1687,6 +1821,11 @@ IF_BUOC_CHUAN = {
         'release-verify strict (lane WORKER — manifest TẠM ngoài repo)': "github.ref != 'refs/heads/master'",
         'release-bundle x2 cùng SHA-256': "needs.chuan-bi.outputs.che_do != 'duong_nhanh'",
     },
+    # #668: hai job G5 chia manh KHONG co `if:` cap buoc nao (do 01-10-2026 tren ci.yml sau merge 20ec8d5).
+    'gate-cong-cu': {
+    },
+    'gate-cong-cu-gop': {
+    },
     'gate-ops': {
         'DUONG_NHANH - liet ke buoc bo qua (job gate-ops)': "needs.chuan-bi.outputs.che_do == 'duong_nhanh'",
         'DUONG_NHANH - kiem re thay cho buoc bi bo (doctrine-scan, YAML, diff --check, lease check)': "needs.chuan-bi.outputs.che_do == 'duong_nhanh'",
@@ -1711,6 +1850,9 @@ KHUNG_TOP = {'name': 'gate', True: {'push': {'branches': ['master']}, 'pull_requ
 KHUNG_JOB = {
     'chuan-bi': {'runs-on': 'ubuntu-latest', 'timeout-minutes': 20, 'outputs': {'os': '${{ (github.event_name == \'workflow_dispatch\' || contains(github.event.pull_request.labels.*.name, \'windows\')) && \'["ubuntu-latest","windows-latest"]\' || \'["ubuntu-latest"]\' }}', 'che_do': "${{ github.event_name == 'pull_request' && steps.phan-loai.outputs.che_do || 'day_du' }}"}},
     'gate': {'needs': 'chuan-bi', 'strategy': {'fail-fast': False, 'matrix': {'os': '${{ fromJson(needs.chuan-bi.outputs.os) }}'}}, 'runs-on': '${{ matrix.os }}', 'timeout-minutes': 60, 'env': {'PYTHONIOENCODING': 'utf-8', 'PYTHONUTF8': '1', 'PYTHONDONTWRITEBYTECODE': '1'}},
+    # #668 (land truoc #674, tich hop o g4): hai job G5 chia manh. KHONG mang `if:` theo `che_do` (chay du = fail-close).
+    'gate-cong-cu': {'needs': 'chuan-bi', 'strategy': {'fail-fast': False, 'matrix': {'os': '${{ fromJson(needs.chuan-bi.outputs.os) }}', 'manh': [0, 1, 2, 3, 4, 5, 6, 7]}}, 'runs-on': '${{ matrix.os }}', 'timeout-minutes': 30, 'env': {'PYTHONIOENCODING': 'utf-8', 'PYTHONUTF8': '1', 'PYTHONDONTWRITEBYTECODE': '1'}},
+    'gate-cong-cu-gop': {'needs': ['chuan-bi', 'gate-cong-cu'], 'if': '${{ !cancelled() }}', 'strategy': {'fail-fast': False, 'matrix': {'os': '${{ fromJson(needs.chuan-bi.outputs.os) }}'}}, 'runs-on': '${{ matrix.os }}', 'timeout-minutes': 10, 'env': {'PYTHONIOENCODING': 'utf-8', 'PYTHONUTF8': '1', 'PYTHONDONTWRITEBYTECODE': '1'}},
     'gate-ops': {'needs': 'chuan-bi', 'strategy': {'fail-fast': False, 'matrix': {'os': '${{ fromJson(needs.chuan-bi.outputs.os) }}'}}, 'runs-on': '${{ matrix.os }}', 'timeout-minutes': 60, 'env': {'PYTHONIOENCODING': 'utf-8', 'PYTHONUTF8': '1', 'PYTHONDONTWRITEBYTECODE': '1'}},
     'gate-registry': {'needs': 'chuan-bi', 'strategy': {'fail-fast': False, 'matrix': {'os': '${{ fromJson(needs.chuan-bi.outputs.os) }}'}}, 'runs-on': '${{ matrix.os }}', 'timeout-minutes': 90, 'env': {'PYTHONIOENCODING': 'utf-8', 'PYTHONUTF8': '1', 'PYTHONDONTWRITEBYTECODE': '1'}},
     'gate-packet-loop': {'needs': 'chuan-bi', 'strategy': {'fail-fast': False, 'matrix': {'os': '${{ fromJson(needs.chuan-bi.outputs.os) }}'}}, 'runs-on': '${{ matrix.os }}', 'timeout-minutes': 60, 'env': {'PYTHONIOENCODING': 'utf-8', 'PYTHONUTF8': '1', 'PYTHONDONTWRITEBYTECODE': '1'}},
@@ -1729,7 +1871,7 @@ KHUNG_BUOC = {
         ('cài actionlint cho G5', {'shell': 'bash', 'env': {'AL_VER': '1.7.7'}}),
         ('cài shellcheck cho G5 (cài xong đo lại)', {'shell': 'bash'}),
         ('cài rg cho G5 (cài xong đo lại)', {'shell': 'bash'}),
-        ('G5 kiem ban ke cong cu + T1..T8 (packet', {'shell': 'bash'}),
+        ('G5 kiem ban ke cong cu + T1..T8 (packet', {'shell': 'bash', 'env': {'CONG_CU_TEST_BAN_KINH': 'manh'}}),
         ('cài Ruff 0.15.15 và in probe dương', {}),
         ('DUONG_NHANH - liet ke buoc bo qua (job gate)', {'if': "${{ needs.chuan-bi.outputs.che_do == 'duong_nhanh' }}"}),
         ('PR head contains required EOL base', {'if': "${{ github.event_name == 'pull_request' }}", 'shell': 'bash', 'env': {'PR_HEAD_SHA': '${{ github.event.pull_request.head.sha }}', 'EOL_BASE_SHA': '1880346d2be3c0be9a93de7624ee108d99b6c88c'}}),
@@ -1756,6 +1898,25 @@ KHUNG_BUOC = {
         ('release-verify strict (lane WORKER — manifest TẠM ngoài repo)', {'if': "github.ref != 'refs/heads/master'", 'shell': 'bash'}),
         ('release-bundle x2 cùng SHA-256', {'if': "${{ needs.chuan-bi.outputs.che_do != 'duong_nhanh' }}", 'shell': 'bash'}),
         ('tl_boot smoke', {}),
+    ],
+    'gate-cong-cu': [
+        ('Force LF checkout (hash parity với manifest)', {}),
+        ('actions/checkout@v4', {'uses': 'actions/checkout@v4', 'with': {'fetch-depth': 0}}),
+        ('actions/setup-python@v5', {'uses': 'actions/setup-python@v5', 'with': {'python-version': '3.12'}}),
+        ('cài PyYAML + jsonschema (cổng đăng lease + validator verdict cần)', {}),
+        ('cài actionlint cho G5', {'shell': 'bash', 'env': {'AL_VER': '1.7.7'}}),
+        ('cài shellcheck cho G5 (cài xong đo lại)', {'shell': 'bash'}),
+        ('cài rg cho G5 (cài xong đo lại)', {'shell': 'bash'}),
+        ('G5 manh ban kinh dot bien (#668)', {'shell': 'bash', 'env': {'CONG_CU_TEST_MANH': '${{ matrix.manh }}/8', 'CONG_CU_TEST_MANH_RA': 'manh/manh-${{ matrix.manh }}.txt'}}),
+        ('actions/upload-artifact@v4', {'uses': 'actions/upload-artifact@v4', 'with': {'name': 'gate-cong-cu-manh-${{ matrix.os }}-${{ matrix.manh }}', 'path': 'manh/manh-${{ matrix.manh }}.txt', 'if-no-files-found': 'error'}}),
+    ],
+    'gate-cong-cu-gop': [
+        ('Force LF checkout (hash parity với manifest)', {}),
+        ('actions/checkout@v4', {'uses': 'actions/checkout@v4'}),
+        ('actions/setup-python@v5', {'uses': 'actions/setup-python@v5', 'with': {'python-version': '3.12'}}),
+        ('cài PyYAML + jsonschema (cổng đăng lease + validator verdict cần)', {}),
+        ('actions/download-artifact@v4', {'uses': 'actions/download-artifact@v4', 'with': {'pattern': 'gate-cong-cu-manh-${{ matrix.os }}-*', 'path': 'manh', 'merge-multiple': True}}),
+        ('G5 gom manh ban kinh dot bien (#668)', {'shell': 'bash'}),
     ],
     'gate-ops': [
         ('Force LF checkout (hash parity với manifest)', {}),
@@ -1801,15 +1962,21 @@ KHUNG_BUOC = {
 }
 
 
-JOB_CO_IF_CHO_PHEP = frozenset()   # sau khi #668 land: them `gate-cong-cu-gop` (if: !cancelled()) qua review
+# LUAT: job -> bieu thuc `if:` cap job CHUAN HOA, khop DUNG (khong phai chi "job co trong danh sach"). #668 land truoc #674
+# (tich hop g4, master 20ec8d5): `gate-cong-cu-gop` can `!cancelled()` de manh DO thi gom van chay va DO vi thieu manh —
+# `needs` mac dinh se cho no `skipped`, ma `skipped` doc nhu xanh. Doi bieu thuc (vd `always()`), bo no, hay them `if:` cap
+# job vao job KHAC (ke ca cung bieu thuc) deu phai DO. `ci_dang_ky_test.loi_g5_workflow` canh cung khoa ay tu phia #668.
+JOB_CO_IF_CHO_PHEP = {"gate-cong-cu-gop": "!cancelled()"}
 
 
 @ca
 def y11_khong_job_nao_co_if_cap_job_ngoai_danh_sach_cho_phep():
     """Cross-review luot 3 (P2): y06 chi nhin ba job bat buoc + chuan-bi; job phu khac (gate-registry...) cung khong duoc bi bo
-    hoac sua ket qua bang `if:` cap job. Quet MOI job; danh sach cho phep hien la RONG."""
-    for job, cau in doc_wf()["jobs"].items():
-        bang(not ("if" in cau and job not in JOB_CO_IF_CHO_PHEP), f"{job}: `if:` cap job khong duoc phep, duoc {cau.get('if')!r}")
+    hoac sua ket qua bang `if:` cap job. Quet MOI job; anh xa {job: `if:` chuan hoa} phai BANG DUNG `JOB_CO_IF_CHO_PHEP`."""
+    thuc = {job: chuan_hoa_if(cau["if"]) for job, cau in doc_wf()["jobs"].items() if "if" in cau}
+    bang(thuc == JOB_CO_IF_CHO_PHEP,
+         f"`if:` cap job lech danh sach cho phep: thua/doi {sorted((j, v) for j, v in thuc.items() if JOB_CO_IF_CHO_PHEP.get(j) != v)}, "
+         f"thieu {sorted(j for j in JOB_CO_IF_CHO_PHEP if j not in thuc)}")
 
 
 @ca
@@ -2381,6 +2548,13 @@ DOT_BIEN = [
     ("yml_chuan_bi_if_dieu_kien_su_kien", _yml("    timeout-minutes: 20\n    outputs:\n      os:", "    if: ${{ github.event_name == 'push' }}\n    timeout-minutes: 20\n    outputs:\n      os:"), ("y06_job_bat_buoc_khong_bi_bo_ca_job",)),
     ("yml_chuan_bi_nuot_loi_cap_job", _yml("    timeout-minutes: 20\n    outputs:\n      os:", "    continue-on-error: true\n    timeout-minutes: 20\n    outputs:\n      os:"), ("y06_job_bat_buoc_khong_bi_bo_ca_job",)),
     ("yml_gate_registry_if_false", _yml("  gate-registry:\n    # packet #463", "  gate-registry:\n    if: false\n    # packet #463"), ("y11_khong_job_nao_co_if_cap_job_ngoai_danh_sach_cho_phep",)),
+    # ---- g4, tich hop #668: y11 so DUNG bieu thuc theo job (khong chi membership); khoa job moi o y12/y13
+    ("yml_gop_if_doi_always", _yml("    needs: [chuan-bi, gate-cong-cu]\n    if: ${{ !cancelled() }}\n", "    needs: [chuan-bi, gate-cong-cu]\n    if: ${{ always() }}\n"), ("y11_khong_job_nao_co_if_cap_job_ngoai_danh_sach_cho_phep",)),
+    ("yml_gop_bo_if", _yml("    needs: [chuan-bi, gate-cong-cu]\n    if: ${{ !cancelled() }}\n", "    needs: [chuan-bi, gate-cong-cu]\n"), ("y11_khong_job_nao_co_if_cap_job_ngoai_danh_sach_cho_phep",)),
+    ("yml_them_if_cung_bieu_thuc_vao_job_manh", _yml("  gate-cong-cu:\n    needs: chuan-bi\n", "  gate-cong-cu:\n    if: ${{ !cancelled() }}\n    needs: chuan-bi\n"), ("y11_khong_job_nao_co_if_cap_job_ngoai_danh_sach_cho_phep",)),
+    ("yml_them_if_false_vao_buoc_gom", _yml("      - name: G5 gom manh ban kinh dot bien (#668)\n", "      - name: G5 gom manh ban kinh dot bien (#668)\n        if: false\n"), ("y12_moi_if_cap_buoc_khop_dung_danh_sach_cho_phep",)),
+    ("yml_bot_manh_g5", _yml("        manh: [0, 1, 2, 3, 4, 5, 6, 7]\n", "        manh: [0, 1, 2, 3]\n"), ("y13_khoa_topology_cua_ci_yml_ngoai_than_run",)),
+    ("yml_g5_gate_bo_env_ban_kinh", _yml("        env:\n          CONG_CU_TEST_BAN_KINH: manh\n", ""), ("y13_khoa_topology_cua_ci_yml_ngoai_than_run",)),
     # ---- lop tin-dung-dot-bien-khong-co-ca-dich (luot 3): moi cua mot chot
     ("test_go_kiem_rong_o_callee", _test('    if not dich:\n        return "HONG", "tap ca dich rong: khong co bang chung duong thi khong duoc cap GIET"\n', ""), ("t97_harness_khong_cap_giet_khi_khong_co_bang_chung_duong",)),
     ("test_go_vat_hoa_o_callee", _test("    dich = tuple(dich)   # vat hoa " + "TRUOC lan doc dau", "    dich = dich   # vat hoa " + "TRUOC lan doc dau"), ("t97_harness_khong_cap_giet_khi_khong_co_bang_chung_duong",)),
@@ -2614,10 +2788,39 @@ DOT_BIEN = [
     ('mode_git_o_M_755_la_loi', _ma('            if trang_thai == "D" or mode not in MODE_THUONG:', '            if trang_thai == "D" or mode not in MODE_THUONG or (trang_thai == "M" and mode == "100755"):'), ('t20y_kiem_re_mode_755_va_tep_thanh_thu_muc_dat',)),
     ('mode_git_o_T_644_la_loi', _ma('            if trang_thai == "D" or mode not in MODE_THUONG:', '            if trang_thai == "D" or mode not in MODE_THUONG or (trang_thai == "T" and mode == "100644"):'), ('t20zf_kiem_re_symlink_doi_thanh_tep_thuong_dat',)),
     ('mode_git_o_T_755_la_loi', _ma('            if trang_thai == "D" or mode not in MODE_THUONG:', '            if trang_thai == "D" or mode not in MODE_THUONG or (trang_thai == "T" and mode == "100755"):'), ('t20zg_kiem_re_o_chap_nhan_con_lai_dat',)),
+    # ---- cross-review luot 14 (lop `kiem-mode-git-chot-khong-rang`, LAN 4): dot bien X1 cua reviewer — mien tru trang thai `M`
+    # khoi chot mode (FAIL-OPEN: doi dich symlink / nang con tro gitlink da co tren nen). Cac o lat rieng: `mode_git_lat_o_*`.
+    ('mode_git_mien_tru_M', _ma('            if trang_thai == "D" or mode not in MODE_THUONG:', '            if trang_thai == "D" or (mode not in MODE_THUONG and trang_thai != "M"):'), ('t20zh_kiem_mode_git_bang_quyet_dinh_day_du',)),
     ('mode_git_merge_tree_rc_cho_qua', _ma('    if getattr(mt_mode, "returncode", None) != 0 or not isinstance(ra_cay,', '    if not isinstance(ra_cay,'), ('t20zb_kiem_mode_git_khong_do_duoc_thi_do',)),
     ('mode_git_merge_tree_nem_lot', _ma('    except Exception as e:\n        return [f"KHONG DO DUOC: merge-tree (kiem mode) nem', '    except ZeroDivisionError as e:\n        return [f"KHONG DO DUOC: merge-tree (kiem mode) nem'), ('t20zb_kiem_mode_git_khong_do_duoc_thi_do',)),
     ('mode_git_merge_tree_bo_kiem_dang', _ma('            or not re.fullmatch(rb"[0-9a-f]{40}(?:[0-9a-f]{24})?\\n", bytes(ra_cay)):', '            or False:'), ('t20zb_kiem_mode_git_khong_do_duoc_thi_do',)),
+    # ---- cross-review luot 8b (P2 `buoc-bi-bo-doc-ca-cay-khong-chi-ba-ca`): symlink TREO ngoai diff — moi duong vao mot dot bien
+    ("kiem_re_bo_symlink_treo_ca_cay", _ma("           + kiem_symlink_treo_ca_cay(kho)\n", ""), ("t20zi_kiem_re_symlink_treo_ngoai_diff_do",)),
+    ("symlink_treo_vi_tu_luon_sai", _ma("            if os.path.islink(p) and not os.path.exists(p):\n", "            if False:\n"), ("t20zi_kiem_re_symlink_treo_ngoai_diff_do",)),
+    ("symlink_treo_chi_cap_goc", _ma("    for goc, thu_muc, tep in os.walk(kho, onerror=khong_doc_duoc):\n", "    for goc, thu_muc, tep in [next(os.walk(kho, onerror=khong_doc_duoc), (str(kho), [], []))]:\n"), ("t20zi_kiem_re_symlink_treo_ngoai_diff_do",)),
+    ("symlink_treo_bo_qua_allowlist", _ma("        thu_muc[:] = sorted(d for d in thu_muc if d not in bo)\n", "        thu_muc[:] = sorted(d for d in thu_muc if d not in bo and not (os.path.relpath(os.path.join(goc, d), kho).replace(os.sep, '/') + '/').startswith(ALLOWLIST_TIEN_TO))\n"), ("t20zi_kiem_re_symlink_treo_ngoai_diff_do",)),
+    ("symlink_treo_doc_tu_vung", _ma("            if os.path.islink(p) and not os.path.exists(p):\n", "            if os.path.islink(p) and not os.path.exists(os.path.normpath(os.path.join(goc, os.readlink(p)))):\n"), ("t20zi_kiem_re_symlink_treo_ngoai_diff_do",)),
+    ("symlink_treo_bo_qua_thu_muc_cham", _ma("        bo = bo_qua(goc, thu_muc + tep)\n", "        bo = bo_qua(goc, thu_muc + tep) | {x for x in thu_muc if x.startswith('.')}\n"), ("t20zi_kiem_re_symlink_treo_ngoai_diff_do",)),
+    ("symlink_treo_khong_bo_git", _ma('BO_QUA_NHU_T82 = (".git", "__pycache__", "*.pyc")', 'BO_QUA_NHU_T82 = ("__pycache__", "*.pyc")'), ("t20zi_kiem_re_symlink_treo_ngoai_diff_do",)),
+    ("symlink_treo_khong_bo_pycache", _ma('BO_QUA_NHU_T82 = (".git", "__pycache__", "*.pyc")', 'BO_QUA_NHU_T82 = (".git", "*.pyc")'), ("t20zi_kiem_re_symlink_treo_ngoai_diff_do",)),
+    ("symlink_treo_khong_bo_pyc", _ma('BO_QUA_NHU_T82 = (".git", "__pycache__", "*.pyc")', 'BO_QUA_NHU_T82 = (".git", "__pycache__")'), ("t20zi_kiem_re_symlink_treo_ngoai_diff_do",)),
+    ("symlink_treo_nuot_loi_duyet", _ma("os.walk(kho, onerror=khong_doc_duoc)", "os.walk(kho)"), ("t20zj_symlink_treo_khong_duyet_duoc_va_dong_bo_t82",)),
+    ("symlink_treo_bo_qua_rong_hon_t82", _ma('BO_QUA_NHU_T82 = (".git", "__pycache__", "*.pyc")', 'BO_QUA_NHU_T82 = (".git", "__pycache__", "*.pyc", "*.md")'), ("t20zj_symlink_treo_khong_duyet_duoc_va_dong_bo_t82",)),
 ]
+# Lop `kiem-mode-git-chot-khong-rang` (luot 14, dong theo CAU TRUC): moi o cua bang quyet dinh mot dot bien LAT dung o ay — o
+# CHAP NHAN thanh TU CHOI, o TU CHOI thanh CHAP NHAN — chen ngay dau vong quyet dinh nen KHONG o nao khac doi. Dich: t20zh.
+# Bo sot mot o trong vong lap cua ca, hay ky vong sai mot o, thi dot bien cua o ay SONG.
+_NEO_O_BANG = "        for duong, (mode, trang_thai) in sorted(ban_ghi.items()):\n"
+
+
+def _lat_o(tt, mode):
+    than = ('                loi.append("dot bien: o chap nhan bi lat thanh tu choi")\n                continue\n'
+            if (tt, mode) in O_CHAP_NHAN else "                continue\n")
+    return _ma(_NEO_O_BANG, _NEO_O_BANG + f'            if (trang_thai, mode) == ("{tt}", "{mode}"):\n' + than)
+
+
+DOT_BIEN += [(f"mode_git_lat_o_{tt}_{mode}", _lat_o(tt, mode), ("t20zh_kiem_mode_git_bang_quyet_dinh_day_du",))
+             for tt in TRANG_THAI_BANG for mode in MODE_BANG]
 TEN_DOT_BIEN = [d[0] for d in DOT_BIEN]
 
 

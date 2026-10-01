@@ -1,0 +1,139 @@
+diff --git a/.github/workflows/ci.yml b/.github/workflows/ci.yml
+index 3392c2b..34293b6 100644
+--- a/.github/workflows/ci.yml
++++ b/.github/workflows/ci.yml
+@@ -34,7 +34,8 @@ concurrency:
+ jobs:
+   chuan-bi:
+     # packet #548 (CI-MA-TRAN-WINDOWS-CHAY-MOI-LAN-LAND): nguon duy nhat cho ma tran os.
+-    # Chi ubuntu-latest, khong checkout ma nguon; bo github.ref == 'refs/heads/master'.
++    # Chi ubuntu-latest; bo github.ref == 'refs/heads/master'. (#548 khong checkout ma nguon — #674 THEM checkout,
++    # CHI o pull_request, de buoc phan loai duoi chay `ops/ci_duong_nhanh.py` cua CAY MERGE cua PR.)
+     #
+     # packet #674 (CI-DUONG-NHANH-HO-SO r2): nguon duy nhat cho `che_do`. PR chi doi ho so
+     # (ops/{land,leases,reviews,specs}/**) => `duong_nhanh`: ba job bat buoc VAN KHOI DONG va bao ket qua,
+@@ -269,7 +270,8 @@ jobs:
+       # merge chính là thứ đáng test trước khi vào master. Nên bằng chứng chỉ sinh
+       # ở `push`/`workflow_dispatch`, đúng luồng `gate-targeted.md` mô tả ("T1
+       # push/handoff: chờ CI tạo full evidence exact-head"). Lượt PR vẫn chạy
+-      # selftest, chỉ không giả vờ sinh ra chứng cho một commit không có trong lịch sử.
++      # selftest, chỉ không giả vờ sinh ra chứng cho một commit không có trong lịch sử —
++      # TRỪ PR chỉ đổi hồ sơ (#674, `che_do == duong_nhanh`): bước này bị bỏ, bước liệt kê ở trên in lý do.
+       - name: tl selftest (luot PR — khong sinh bang chung)
+         if: ${{ github.event_name == 'pull_request' && needs.chuan-bi.outputs.che_do != 'duong_nhanh' }}
+         run: python scripts/tl.py --selftest
+diff --git a/ops/ci_duong_nhanh.py b/ops/ci_duong_nhanh.py
+index fcdf743..a4280d9 100644
+--- a/ops/ci_duong_nhanh.py
++++ b/ops/ci_duong_nhanh.py
+@@ -42,7 +42,8 @@ GIỚI HẠN, NÓI THẲNG (không phải ranh giới an ninh):
+   · `pull_request.base.sha`/`head.sha` luôn là 40 hex ở mọi sự kiện con: theo tài liệu GitHub, chưa tự đo.
+ 
+ LỆNH `kiem-re` (bước bù cho các bước bị bỏ, chỉ chạy khi `che_do == duong_nhanh`):
+-  YAML parse được · `git diff --check` · lease đổi phải qua `lease_publish` · ba ca kiểm DỮ LIỆU của lease_publish_test ·
++  YAML parse được · `git diff --check` · lease đổi phải qua `lease_publish` · ba ca kiểm DỮ LIỆU của lease_publish_test cộng
++  CHÍNH `t82` (chép CẢ cây bằng `copytree`: mọi cách cây làm phép chép hỏng — kể cả ĐỘ SÂU — đo bằng cùng mã) ·
+   mọi đường dẫn đổi là TỆP THƯỜNG theo MODE TRONG GIT (`kiem_mode_git`: 100644/100755 hoặc xoá; gitlink, symlink ⇒ ĐỎ) ·
+   KHÔNG có symlink TREO ở BẤT KỲ đâu trong CÂY (`kiem_symlink_treo_ca_cay`): chốt này phán trên CÂY, không trên DIFF,
+   vì bước bị bỏ mà nó bù (`t82`) phán trên cây.
+@@ -105,6 +106,10 @@ CAU_HINH_WHITESPACE = "core.whitespace=-blank-at-eol,-blank-at-eof,-space-before
+ TOI_DA_TEN_IN = 5
+ CA_DU_LIEU = ("t23_MOI_lease_THAT_trong_kho_phai_QUA", "t26_moi_bien_nhan_review_phai_khop_BAM_tep_no_tro_toi",
+               "t27_canh_bao_trong_bien_nhan_phai_duoc_NANG_len_muc_luc")
++# Cross-review luot 15 (`buoc-bi-bo-doc-ca-cay-khong-chi-ba-ca`, duong vao KHONG phai symlink): `t82` chep CA cay bang `copytree`
++# de quy HAI khung/tang, nen PR ho so them MOT thu muc sau >= ~500 tang lam no RecursionError (do 01-10-2026: 490 DAT, 500 DO)
++# trong khi `kiem_symlink_treo_ca_cay` (de quy MOT khung/tang) van DAT. Chay CHINH t82 thay vi mo phong them mot lop (~1,5 giay).
++CA_DU_LIEU += ("t82_A10_dot_bien_A1_A8_tren_ban_sao_CA_CAY_ten_rieng",)
+ MA_KIEM_HET_HAN = (
+     "import sys\nsys.path.insert(0, 'ops')\nimport lease_publish as lp\n"
+     "try:\n    lp.kiem(lp._doc_yaml(sys.argv[1]), sys.argv[1], '.', bo_qua_han=True)\n"
+@@ -270,9 +275,11 @@ def kiem_yaml(doi, kho=ROOT) -> list[str]:
+ def kiem_loai_tep(doi, kho=ROOT) -> list[str]:
+     """Mọi tệp hồ sơ đổi (còn trong cây) phải là tệp THƯỜNG, không phải symlink. Bước bị bỏ `lease-publish selftest`
+     có `t82` `copytree` CẢ cây (kể cả ops/{land,leases,reviews,specs}/**): symlink treo dưới allowlist làm nó ĐỎ trên
+-    master trong khi mọi kiểm khác của `kiem-re` vẫn DAT. Hồ sơ không cần symlink ⇒ chặn mọi symlink, treo hay không,
+-    mọi đuôi tệp. (`.gitattributes` KHÔNG bị chặn ở đây — xem D1 và `kiem_diff_check`.) Chốt này đọc ĐĨA; nó không thấy
+-    gitlink (thư mục rỗng) hay symlink trên nền `core.symlinks=false` — `kiem_mode_git` đọc mode trong GIT và phủ cả hai."""
++    master trong khi mọi kiểm khác của `kiem-re` LÚC ẤY (lượt 7) vẫn DAT — nay `kiem_mode_git` (mode 120000) và
++    `kiem_symlink_treo_ca_cay` (cả cây) cũng bắt; `t20n`/`t20q` đòi DÒNG của chính chốt này. Hồ sơ không cần symlink ⇒
++    chặn mọi symlink, treo hay không, mọi đuôi tệp. (`.gitattributes` KHÔNG bị chặn ở đây — xem D1 và `kiem_diff_check`.)
++    Chốt này đọc ĐĨA; nó không thấy gitlink (thư mục rỗng) hay symlink trên nền `core.symlinks=false` — `kiem_mode_git`
++    đọc mode trong GIT và phủ cả hai."""
+     return [f"tep ho so la symlink (duong nhanh chi nhan tep thuong): {duong!r}"
+             for duong in sorted(doi) if (Path(kho) / duong).is_symlink()]
+ 
+@@ -504,7 +511,8 @@ def kiem_lease(doi, kho=ROOT, chay=subprocess.run, bay_gio=None, ra=None) -> lis
+ def kiem_ca_du_lieu(kho=ROOT, chay=subprocess.run) -> list[str]:
+     """Ba ca kiem DU LIEU that cua bo lease-publish (t23 neo prompt cua moi lease · t26 bam bien nhan review · t27
+     muc luc `ops/reviews`) thay cho ca bo `lease-publish selftest`: ba ca nay doc CAY that nen la thu ma PR ho so
+-    co the lam hong; bo ca suite di la mat chung. Chay nguyen ca trong tep test that, ~6 giay."""
++    co the lam hong; bo ca suite di la mat chung. Cong `t82` (copytree CA cay): moi loi chep cay — symlink treo, vong,
++    do sau vuot tran de quy — do bang CHINH ma cua buoc bi bo. Chay nguyen ca trong tep test that, ~7 giay."""
+     try:
+         r = chay([sys.executable, "-B", "-c", MA_CHAY_CA, "ops/lease_publish_test.py", *CA_DU_LIEU],
+                  cwd=kho, capture_output=True)
+diff --git a/ops/ci_duong_nhanh_test.py b/ops/ci_duong_nhanh_test.py
+index 6085e10..c308dda 100644
+--- a/ops/ci_duong_nhanh_test.py
++++ b/ops/ci_duong_nhanh_test.py
+@@ -73,7 +73,8 @@ BO_QUA = {
+ DA_NOI_MUC = "ops/ci_duong_nhanh_test.py"
+ # LUAT cua bo test (khong doc lai tu ma duoi do): ba ca du lieu ma `kiem-re` phai chay that.
+ CA_DU_LIEU_CHUAN = ("t23_MOI_lease_THAT_trong_kho_phai_QUA", "t26_moi_bien_nhan_review_phai_khop_BAM_tep_no_tro_toi",
+-                    "t27_canh_bao_trong_bien_nhan_phai_duoc_NANG_len_muc_luc")
++                    "t27_canh_bao_trong_bien_nhan_phai_duoc_NANG_len_muc_luc",
++                    "t82_A10_dot_bien_A1_A8_tren_ban_sao_CA_CAY_ten_rieng")   # luot 15: t82 copytree CA cay (do sau)
+ DONG_GOI_TEST = "python ops/ci_duong_nhanh_test.py"
+ 
+ 
+@@ -1434,6 +1435,31 @@ def t20zk_symlink_treo_khong_duyet_duoc_cay_la_do():
+                  f"{cua} khong doc duoc phai DO, duoc {loi}")
+ 
+ 
++@ca
++def t20zl_ca_du_lieu_chay_chinh_t82_bat_cay_qua_sau():
++    """Cross-review luot 15 (`buoc-bi-bo-doc-ca-cay-khong-chi-ba-ca`, duong vao KHONG phai symlink): `t82` chep CA cay bang
++    `copytree` de quy hai khung/tang; PR ho so them MOT thu muc sau 600 tang (khong symlink, khong ra ngoai cay) lam t82
++    RecursionError (do 01-10-2026: 490 DAT, 500 DO) ma chot symlink ca cay van DAT. `kiem_ca_du_lieu` phai chay CHINH t82 tren
++    cay ay va DO. Doi chung (cay that, khong thu muc sau => DAT) la t22."""
++    m = nap_module()
++    tam = Path(tempfile.mkdtemp(prefix="cdn_sau_"))
++    try:
++        cay = tam / "cay"
++        shutil.copytree(ROOT_THAT, cay, ignore=shutil.ignore_patterns(".git", "__pycache__", "*.pyc"), symlinks=True)
++        p = cay / "ops" / "reviews" / "zz-sau"
++        p.mkdir()
++        for _ in range(600):   # vong lap, khong `os.makedirs` (de quy) — fixture khong duoc tu cham tran de quy
++            p = p / "a"
++            p.mkdir()
++        (p / "f.md").write_text("# sau\n", encoding="utf-8")
++        bang(m.kiem_symlink_treo_ca_cay(cay) == [], "fixture vo hieu: cay sau khong co symlink, chot symlink ca cay phai DAT")
++        loi = m.kiem_ca_du_lieu(cay, chay_that)
++        bang(len(loi) == 1 and "RecursionError" in loi[0],
++             f"cay sau 600 tang: kiem_ca_du_lieu phai chay CHINH t82 (copytree) va DO, duoc {loi}")
++    finally:
++        shutil.rmtree(tam, ignore_errors=True)
++
++
+ @ca
+ def t20zc_kiem_re_doi_ten_tep_ho_so_dat():
+     """Cross-review luot 11 (`kiem-mode-git-chot-khong-rang`): `git diff` mac dinh DO doi ten (`diff.renames`), ban ghi `--raw`
+@@ -1538,8 +1564,8 @@ def t22_ca_du_lieu_thay_bo_lease_publish_selftest():
+     bang(m.kiem_ca_du_lieu(ROOT_THAT, chay_that) == [], "ba ca du lieu phai DAT tren kho that")
+     log = []
+     bang(m.kiem_ca_du_lieu(ROOT_THAT, chay_gia(log=log)) == [], "chay gia rc=0 khong loi")
+-    bang(len(log) == 1 and log[0][-3:] == list(m.CA_DU_LIEU) and "ops/lease_publish_test.py" in log[0],
+-         f"lenh phai truyen du ba ten ca cua ops/lease_publish_test.py: {log}")
++    bang(len(log) == 1 and log[0][-len(CA_DU_LIEU_CHUAN):] == list(m.CA_DU_LIEU) and "ops/lease_publish_test.py" in log[0],
++         f"lenh phai truyen du moi ten ca cua ops/lease_publish_test.py: {log}")
+     loi = m.kiem_ca_du_lieu(ROOT_THAT, chay_gia(b"CA DO", rc=1))
+     bang(len(loi) == 1 and "rc=1" in loi[0], f"ca du lieu do phai thanh loi: {loi}")
+     loi = m.kiem_ca_du_lieu(ROOT_THAT, chay_gia(nem=SuDoGia("no")))
+@@ -2878,6 +2904,7 @@ DOT_BIEN = [
+     ("loai_tep_bo_symlink_thu_muc", _ma('    return [f"tep ho so la symlink', '    doi = {d for d in doi if not (Path(kho) / d).is_dir()}\n    return [f"tep ho so la symlink'), ("t20q_kiem_re_symlink_hop_le_moi_duoi_do",)),
+     ("loai_tep_bo_ops_leases", _ma('    return [f"tep ho so la symlink', "    doi = {d for d in doi if not d.startswith('ops/leases/')}\n    return [f\"tep ho so la symlink"), ("t20q_kiem_re_symlink_hop_le_moi_duoi_do",)),
+     ("loai_tep_chi_ops_specs", _ma('    return [f"tep ho so la symlink', "    doi = {d for d in doi if d.startswith('ops/specs/')}\n    return [f\"tep ho so la symlink"), ("t20q_kiem_re_symlink_hop_le_moi_duoi_do",)),
++    ("ca_du_lieu_bo_t82", _ma('CA_DU_LIEU += ("t82_A10_dot_bien_A1_A8_tren_ban_sao_CA_CAY_ten_rieng",)\n', ""), ("t20zl_ca_du_lieu_chay_chinh_t82_bat_cay_qua_sau",)),
+     ("loai_tep_chan_tep_da_xoa", _ma('    return [f"tep ho so la symlink', "    if any(not (Path(kho) / d).exists() and not (Path(kho) / d).is_symlink() for d in doi):\n        return ['tep da xoa']\n    return [f\"tep ho so la symlink"), ("t20zc_kiem_re_doi_ten_tep_ho_so_dat",)),
+ ]
+ TEN_DOT_BIEN = [d[0] for d in DOT_BIEN]

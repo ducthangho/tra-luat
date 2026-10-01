@@ -79,9 +79,10 @@ SHA_G1   = "2f70869a0537843e9cae78618ee7ae8c261d972d"
 # do that 18-09 tren ban va g2 cua agy cho 5 tep / +812, trong khi viec cua agy la 2 tep / +353.
 # Mot chot nhu the se bao "vuot tran" cho mot ban va KHONG vuot. Base dung la MERGE-BASE.
 SHA_BASE_SPEC = "d705623162b75b7340ee7cca54ac2d2abbddbb6f"
-BAN_BO_DO = "2026-09-30l"              # doi MOI khi sua bo do - log tu khai ban nao
+BAN_BO_DO = "2026-09-30m"              # doi MOI khi sua bo do - log tu khai ban nao
 TRAN_TEP, TRAN_DONG = 2, 400          # N7' cua spec r3
 AL_SAN = (1, 7, 7)                    # san actionlint = ban ghim CI: AL_VER cua ci.yml = ban_ghim cua ops/cong_cu.yaml
+GIT_SAN = (2, 36, 0)                  # san git: ung vien goi `git worktree list --porcelain -z` (co `-z` tu 2.36); ban_ghim git = null
 MAU_WIN  = 'if nen_thuc == "windows":'
 # Write set cua packet #541 g2. Diff khong cham tep nao o day => do NHAM NHANH.
 WRITE_SET_G2 = {"ops/lease_publish.py", "ops/lease_publish_test.py"}
@@ -463,15 +464,19 @@ if not shutil.which("git"): loi.append("khong co `git` trong PATH")
 # NAY va nguong 3.8 suy tu NGU PHAP (`:=`) — do tren 2026-09-30d, ca hai ra rc=1 TRUOT cho ung vien sach:
 # thu muc du lieu `yaml/` tren PYTHONPATH qua find_spec ma `yaml.safe_dump` khong co (87 ca "la"); python 3.8.20
 # THAT co PyYAML, bo test dung `str.removeprefix` (3.9) luc CHAY (33 ca "la"; 3.9.23: 166/166).
+# "Dung duoc" nghia la dung DUNG API bo test goi: viet() (43 loi goi) va lease_publish.py goi safe_dump(..., allow_unicode=True,
+# sort_keys=False), ma `sort_keys` chi co tu PyYAML 5.1. Do tren 2026-09-30l, 0ea95de: python 3.9.23 + PyYAML 3.13 THAT qua probe
+# cu (rc=0), bo test 109/166 (56 ca "la" `unexpected keyword argument 'sort_keys'`), e2e rc=1 `DAT 11 | TRUOT 1`; PyYAML 5.1: 166/166.
+# (Python >= 3.10 + PyYAML 3.13 da truot probe cu vi `collections.Hashable`.) Probe cua ps1 ($maThu) phai GIONG HET dong duoi.
 if not ("--chi-kich-thuoc" in sys.argv or "--chi-probe" in sys.argv):
     _rc_dk, _ra_dk = chay(["-c", "import sys; sys.exit(9) if sys.version_info < (3, 9) else None; import yaml;"
-                                 " yaml.safe_dump(yaml.safe_load('a: 1'))"],
+                                 " yaml.safe_dump(yaml.safe_load('a: 1'), allow_unicode=True, sort_keys=False)"],
                           goc / "ops" if (goc / "ops").is_dir() else Path.cwd(), phut=2)
     if _rc_dk == 9:
         loi.append(f"python {sys.version.split()[0]} < 3.9: bo test cua ung vien dung str.removeprefix (3.9) luc CHAY")
     elif _rc_dk:
         loi.append(f"python nay KHONG co PyYAML dung duoc ({(_ra_dk.strip().splitlines() or [''])[-1][:90]}):"
-                   f" \"{sys.executable}\" -m pip install pyyaml"
+                   f" \"{sys.executable}\" -m pip install -U pyyaml"
                    " (ban nhung ps1 tu tai KHONG co pip: chay lai voi -Py <python da co PyYAML>)")
     # Bo test con goi `shutil.which` cho bash/actionlint/shellcheck (0ea95de: t33 t137 t159 can actionlint, t137 can
     # shellcheck, cac ca chay ops/cai_actionlint.sh can bash). Thieu thi cac ca ay in "KHONG DO DUOC: thieu `...`" va bo do ra
@@ -486,7 +491,7 @@ if not ("--chi-kich-thuoc" in sys.argv or "--chi-probe" in sys.argv):
     try:
         if goc.is_dir(): os.chdir(goc)
         _cc = {c: (os.path.abspath(p) if p else None) for c, p in
-               ((c, shutil.which(c)) for c in ("bash", "actionlint", "shellcheck"))}
+               ((c, shutil.which(c)) for c in ("bash", "actionlint", "shellcheck", "git"))}
     finally:
         os.chdir(_cwd_nguoi_do)
     _thieu_cc = [c for c, p in _cc.items() if not p]
@@ -525,6 +530,19 @@ if not ("--chi-kich-thuoc" in sys.argv or "--chi-probe" in sys.argv):
             loi.append(f"actionlint {_al_v.group(0) if _al_v else '(khong doc duoc phien ban)'} cu hon ban ghim CI "
                        f"{'.'.join(map(str, AL_SAN))} (AL_VER): ban cu lam t137/t159 DO 'la' tren ung vien sach —"
                        " cai ban ghim (ops/cai_actionlint.sh voi AL_VER)")
+        # git cung the: CO MAT khong phai DUNG DUOC, va git CU la cong cu PHO BIEN nhat trong bon. Do tren 2026-09-30l, 0ea95de, git
+        # THAT qua cung chay(): 2.25.1 => 140/166 (23 ca "la": `init -b`...), 2.34.1 va 2.35.1 => 163/166 (t109 t110 t111: `git
+        # worktree list --porcelain -z` rc=129 `unknown switch z`), e2e 2.35.1 rc=1 `DAT 11 | TRUOT 1`; 2.36.1 => 166/166. San lay
+        # tu tinh nang ma CHINH ma duoc do goi (ops/cong_cu.yaml de ban_ghim git = null nen khong co ban ghim CI de dua vao).
+        # `git version 2.47.1.windows.1` (Git for Windows) va `2.39.3 (Apple Git-146)` deu doc duoc ba so dau.
+        _gv = subprocess.run([_cc["git"], "--version"], capture_output=True, text=True, encoding="utf-8",
+                             errors="replace", timeout=60)
+        _gv_m = re.search(r"(?m)^git version\s+(\d+)\.(\d+)\.(\d+)", _gv.stdout or "")
+        if _gv.returncode:
+            loi.append("git tren PATH co mat nhung `git --version` rc!=0 (khong chay duoc): cai lai git")
+        elif not _gv_m or tuple(int(x) for x in _gv_m.groups()) < GIT_SAN:
+            loi.append(f"git {'.'.join(_gv_m.groups()) if _gv_m else '(khong doc duoc phien ban)'} cu hon "
+                       f"{'.'.join(map(str, GIT_SAN))} (ung vien goi `git worktree list --porcelain -z`): cap nhat git")
 
 rc, head, _ = git(goc, "rev-parse", "HEAD")
 if rc: loi.append("khong doc duoc HEAD")

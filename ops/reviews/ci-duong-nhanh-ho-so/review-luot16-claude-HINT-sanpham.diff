@@ -1,0 +1,27 @@
+--- ops/ci_duong_nhanh.py
++++ ops/ci_duong_nhanh.py
+@@ -70,16 +70,19 @@
+     đã chịu thuộc tính của PR (`eol`/`text`/`working-tree-encoding`/`ident`) — `kiem_yaml`/`kiem_loai_tep`/`kiem_lease`
+     đọc đúng các byte ấy, cũng là byte mà các bước bị bỏ và checkout của master đọc; chưa đo riêng. KHÔNG chặn
+     `.gitattributes` — tại 3569472cb9 có 3 tệp như thế dưới allowlist, cả 3 dưới `ops/reviews/` (`-whitespace` cho verdict
+-    chép nguyên byte), do chính PR hồ sơ thêm vào. Tệp NHỊ PHÂN (git đoán theo nội dung + thuộc tính GỐC) thì `--check`
++    chép nguyên byte): 2/3 do PR hồ sơ thêm (#667, #670), 1/3 đi kèm PR mã (#666). Tệp NHỊ PHÂN (git đoán theo nội dung + thuộc tính GỐC) thì `--check`
+     bỏ qua hẳn ⇒ `kiem_nhi_phan` coi là KHÔNG ĐO ĐƯỢC, ĐỎ (tại 3569472cb9: 0/1991 tệp dưới allowlist là nhị phân).
+   · D2 — `lease_publish.py check` là cổng ĐĂNG lease: lease đã hết hạn thì nó trả rc=8 "hết hạn" theo thiết kế,
+     mà bookkeeping thu hồi/đóng lease thường đúng là sửa lease hết hạn. Lease CÒN HẠN đổi trong PR chạy đúng
+     `check`; lease HẾT HẠN chạy `kiem(bo_qua_han=True)` — mọi chốt như `check`, chỉ bỏ chốt hạn — nên KHÔNG
+     được miễn kiểm chỉ vì hết hạn. Cả hai đuôi `.yaml` và `.yml`. Giới hạn: bia mộ hai chiều của `kiem`
+-    đọc các lease khác trên mọi REF cục bộ (`_quet_lease_toan_kho`: `for-each-ref` rồi `ls-tree` từng ref), không đọc cây
+-    làm việc; checkout của Actions chỉ có ref của PR, không có các nhánh `ops/**`. Nên số tệp trượt là số CỦA PHẠM VI ref,
+-    không phải của kho: reviewer lượt 1 đo tại 1741e0a (113 tệp lease) — clone chỉ-master 6/113 trượt
+-    `kiem(bo_qua_han=True)`, bản sao đủ 552 ref 0/113. Đo lại tại 3569472cb9 (119 tệp lease, sau merge master 20ec8d5):
++    đọc các lease khác trên mọi ref dưới `refs/heads` và `refs/remotes` (`_quet_lease_toan_kho` qua `_cac_ref_cuc_bo`:
++    `for-each-ref` rồi `ls-tree` từng ref), KHÔNG đọc tag và KHÔNG đọc cây làm việc (đo cross-review lượt 16). Checkout của
++    job `gate-ops` lấy TOÀN BỘ lịch sử; nó có nạp `refs/remotes/origin/*` của các nhánh `ops/**` hay không là CHƯA ĐO —
++    tài liệu `actions/checkout` nói chế độ ấy lấy mọi nhánh và tag, mà nếu đúng thế thì bia mộ thấy các nhánh ấy và giới
++    hạn này không xảy ra trên CI. Nên số tệp trượt là số CỦA PHẠM VI ref, không phải của kho: tại 1741e0a (113 tệp lease)
++    một clone chỉ-master cho 6/113 trượt `kiem(bo_qua_han=True)` (số của executor, cross-review lượt 16 tái lập bằng kho
++    đúng một ref), bản sao đủ 552 ref cho 0/113 (reviewer lượt 1 đo trên 1687c69, cây `ops/leases` trùng 1741e0a). Đo lại tại 3569472cb9 (119 tệp lease, sau merge master 20ec8d5):
+     một ref (chỉ nhánh đang checkout) 6/119 trượt — đúng 6 tệp cũ, cùng `CHAN [8]` bia mộ — còn trên 529 ref cục bộ thì
+     0/119 (529 chưa đối chiếu `ls-remote`, nên không khẳng định là đủ).
+     Hệ quả CÓ CHỦ ĐÍCH về actor (chủ kho chọn khai, không đổi chốt — Issue #674, 2026-09-30): `kiem`/`check`

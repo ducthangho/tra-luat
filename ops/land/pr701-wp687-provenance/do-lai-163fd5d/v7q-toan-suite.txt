@@ -1,0 +1,11 @@
+# Dot bien V7q (bo kiem THOI LUONG, giu phan tich trang thai) tren BAN SAO DAY DU git archive 163fd5d — TOAN SUITE
+# thay DUNG 1 lan trong ops/lease_publish_test.py (dong 4643):
+#   re.fullmatch(r" \d+\.\d{3}s (QUA|DO|BO_QUA)[ \t\r]*", d)  ->  re.fullmatch(r".*?(QUA|DO|BO_QUA)[ \t\r]*", d)
+# sha256 tep test sau dot bien: b77c68c8aeffb5f09c5d1ac55b9b3d7de7b9dc60c778c1b1272e6f4ed95f4e17 (nen 09cf6c78fae10c695436f7fb9b0803cb9295f69786377212e0dd4ff1b516816c)
+# lenh: cd <ban sao> && env PYTHONUTF8=1 PYTHONDONTWRITEBYTECODE=1 python3 -B ops/lease_publish_test.py   (python 3.11.15)
+# bat dau 2026-10-01T06:45:51Z · xong 2026-10-01T06:51:39Z · log 127037 byte sha256 b0194d3375b5384e1fe33fd3864833b4bff8be8939e0bf76536ec65467331344 (log KHONG commit)
+[A] lease_publish: 198/198 đạt; đã chạy=198, bỏ qua=0
+[B] lease_publish: 198/198 đạt; đã chạy=198, bỏ qua=0
+lease_publish: 198/198 đạt; đã chạy=198, bỏ qua=0
+rc=0
+dong '  ĐỎ  ' dau dong: 0 · '>>> vao' (ngoai): 198 · '<<< ra ... QUA' (ngoai): 198

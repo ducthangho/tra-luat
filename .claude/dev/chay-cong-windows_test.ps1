@@ -37,6 +37,9 @@
 #                                                 tên của nền này ⇒ KHÔNG bị chặn
 #   t29 chot-dat-sau-diem-dung                    `dist` THEO DÕI (symlink sang `tools`) ⇒ rc=2 và KHÔNG gì được ghi qua nó trước khi bị
 #                                                 từ chối (thư mục nhật ký từng được tạo TRƯỚC chốt `ls-files`)
+#   t30 guong-lenh-bo-env-buoc                    `env:` của bước cổng: mọi khoá `env` của một bước `gate*` trong ci.yml có mặt trong script;
+#                                                 biến chế độ RÒ từ phiên gọi bị xoá; `test registry` mang env `pull_request` (GOC/DAU đúng)
+#                                                 khi cây SẠCH + HEAD đi trước `origin/master`, vắng (ĐỦ) khi bẩn hoặc không đi trước
 # Bộ này KÍN với config git của máy chạy, với biến git trỏ kho khác (khối ngay dưới `$script:Rac`), với code page của
 # console (`Doc-Utf8`), với dấu thập phân của locale (t18 nhận `5,1s`) và với `<TEMP>/actionlint` của máy (t7, t21 tự đặt TEMP).
 # ĐỘT BIẾN để đo răng (đo trên pwsh 7.4.6/Linux, bộ 28 ca, TMPDIR sạch): `-Script` trỏ f2392df ⇒ 2/28 (đạt t17 — bản ấy đã so băm —
@@ -46,6 +49,10 @@
 # t21 t22 t23 t24 t25 t26 t27 t28); c8c2c6a ⇒ 21/28 (đỏ t22 t23 t24 t25 t26 t27 t28); 623864e ⇒ 24/28 (đỏ t25 t26 t27 t28); f1f753b ⇒
 # 26/28 (đỏ t27 t28); 543f2e8 ⇒ 27/28 (chỉ t28).
 # Lượt 11: bộ 29 ca — mỗi hàng ở trên đỏ thêm t29 (eba9b1d ⇒ 28/29, chỉ t29: `New-Item $NhatKy` đứng TRƯỚC chốt `dist`).
+# Lượt 12: bộ 30 ca — mỗi hàng ở trên đỏ thêm t30 (87eea22 ⇒ 29/30, chỉ t30: thiếu khoá `env` của bước `gate*`, ở cả cây nhánh lẫn
+# cây merge). Đột biến bản vá, mỗi chốt một lượt của t30: bỏ `CONG_CU_TEST_BAN_KINH` khỏi danh sách xoá ⇒ lượt 1 (cây merge: vế tĩnh);
+# bỏ `CI_DANG_KY_DOT_BIEN_MANH` ⇒ lượt 1; bỏ `CI_DANG_KY_SU_KIEN` ⇒ lượt 2; bỏ vế cây SẠCH ⇒ lượt 2; bỏ vế đi TRƯỚC ⇒ lượt 3; đảo
+# GOC/DAU ⇒ lượt 1.
 # Lượt 10: danh sách hợp hai nền (543f2e8) ⇒ chỉ t28 (lượt 1); đảo nền ⇒ chỉ t28 (lượt 1); danh sách của nền này rỗng / thiếu `goi.gz`
 # ⇒ chỉ t28 (lượt 2); bỏ danh sách CHO PHÉP nay ⇒ t25 t28; nhánh Windows của t27 ép chạy trên Linux: fixture mới ⇒ 28/28, fixture dẫn
 # `'tools'` qua ống (blob 6 byte) ⇒ chỉ t27 (chốt tự kiểm KHÔNG ĐO ĐƯỢC).
@@ -780,6 +787,57 @@ Ca 't29 dist THEO DOI => tu choi TRUOC khi ghi qua no' {
     if ($a.rc -ne 2 -or $a.ra -notmatch 'THEO DÕI') { throw "dist THEO DOI ma khong bi tu choi (rc=$($a.rc))" }
     $sot = @(Get-ChildItem -LiteralPath $t -Force | Where-Object { $_.Name -ne 'giu' } | ForEach-Object Name)
     if ($sot.Count -gt 0) { throw "script ghi qua dist THEO DOI TRUOC khi tu choi: tools/$($sot -join ', tools/')" }
+}
+
+# `env:` của bước cổng là một phần của lệnh. Vế tĩnh (đúng ở cả hai phía merge): mọi khoá `env` của một bước trong job `gate*` của
+# ci.yml phải có mặt trong script (hằng chuỗi hoặc `$env:`) — thêm khoá vào ci.yml mà quên script thì ĐỎ. Vế hành vi: đồ giả THOÁT 0
+# CHỈ KHI env nó thấy đúng kỳ vọng. Đo trên cây merge 20ec8d5 với 87eea22: vắng env ⇒ registry ĐỦ ×3 (`nhanh_don_duoc_test` ĐỦ > 540 s,
+# NHẸ 2 s); `CONG_CU_TEST_BAN_KINH=manh` rò từ phiên gọi ⇒ `cong_cu_test` rc=0 mà bỏ trọn bán kính 416 đột biến.
+Ca 't30 env cua buoc cong: khoa ci.yml co mat, bien ro bi xoa, registry mang env pull_request khi do duoc diff' {
+    $ci = Join-Path $GocKho '.github/workflows/ci.yml'
+    $py = Tim-PyYaml; $pd = $py.Dau
+    $ma = "import sys,yaml`nd=yaml.safe_load(open(sys.argv[1],encoding='utf-8'))`n" +
+          "print(chr(10).join(sorted({k for j,v in d['jobs'].items() if j.startswith('gate') for s in (v.get('steps') or []) for k in (s.get('env') or {})})))"
+    $khoa = @(& $py.Ten @pd -c $ma $ci | Where-Object { $_ })
+    if ($LASTEXITCODE -ne 0 -or $khoa.Count -eq 0) { throw "KHONG DO DUOC: khong doc duoc khoa env cua buoc gate* trong ci.yml (rc=$LASTEXITCODE)" }
+    $ast = [System.Management.Automation.Language.Parser]::ParseFile($Script, [ref]$null, [ref]$null)
+    $co = @{}
+    foreach ($n in $ast.FindAll({ param($x) $x -is [System.Management.Automation.Language.StringConstantExpressionAst] }, $true)) { $co[$n.Value] = 1 }
+    foreach ($n in $ast.FindAll({ param($x) $x -is [System.Management.Automation.Language.VariableExpressionAst] -and $x.VariablePath.DriveName -eq 'env' }, $true)) {
+        $co[$n.VariablePath.UserPath.Substring(4)] = 1 }
+    $thieu = @($khoa | Where-Object { -not $co.ContainsKey($_) })
+    if ($thieu.Count -gt 0) { throw "khoa env cua buoc gate* trong ci.yml khong co trong script: $($thieu -join ', ')" }
+    $k = Dung-Kho
+    Set-Content -LiteralPath (Join-Path $k '.claude/dev/ci_dang_ky_test.py') -Encoding utf8NoBOM -Value @'
+import os, sys
+g = lambda n: os.environ.get(n) or ""
+thay = "|".join(g(n) for n in ("CI_DANG_KY_WORKERS", "CI_DANG_KY_SU_KIEN", "CI_DANG_KY_GOC", "CI_DANG_KY_DAU", "CI_DANG_KY_DOT_BIEN_MANH"))
+print("REG_ENV=" + thay)
+sys.exit(0 if thay == os.environ.get("STUB_REG_MONG") else 7)
+'@
+    Set-Content -LiteralPath (Join-Path $k 'ops/cong_cu_test.py') -Encoding utf8NoBOM -Value @'
+import os, sys
+sys.exit(7 if any(os.environ.get(n) for n in ("CONG_CU_TEST_BAN_KINH", "CONG_CU_TEST_MANH", "CONG_CU_TEST_MANH_RA")) else 0)
+'@
+    & git -C $k add -A
+    & git -C $k -c user.email=t@t -c user.name=t commit -qm stub-env
+    & git -C $k update-ref refs/remotes/origin/master HEAD
+    Set-Content -LiteralPath (Join-Path $k 'di-truoc-t30') -Value 'x' -Encoding utf8NoBOM
+    & git -C $k add -A
+    & git -C $k -c user.email=t@t -c user.name=t commit -qm di-truoc
+    $goc = @(& git -C $k rev-parse 'refs/remotes/origin/master')[0]; $dau = @(& git -C $k rev-parse HEAD)[0]
+    # Biến RÒ từ phiên gọi — GOC/DAU cố ý đảo — phải bị xoá hoặc đè ở mọi lượt.
+    $ro = @{ CONG_CU_TEST_BAN_KINH = 'manh'; CI_DANG_KY_DOT_BIEN_MANH = 'ops/nhanh_don_duoc_test.py'; CI_DANG_KY_SU_KIEN = 'push'
+             CI_DANG_KY_GOC = $dau; CI_DANG_KY_DAU = $goc }
+    $a = Chay $k @() ($ro + @{ STUB_REG_MONG = "2|pull_request|$goc|$dau|" })
+    if ($a.ra -notmatch 'cong_cu_test\s+rc=0') { throw "bien che do ro tu phien goi toi cong_cu_test (rc_script=$($a.rc))" }
+    if ($a.ra -notmatch 'registry test\s+rc=0') { throw "cay SACH + di truoc origin/master ma registry khong mang env pull_request dung GOC/DAU (rc_script=$($a.rc))" }
+    Set-Content -LiteralPath (Join-Path $k 'ban-t30') -Value 'x' -Encoding utf8NoBOM
+    try { $b = Chay $k @() ($ro + @{ STUB_REG_MONG = '2||||' }) } finally { Remove-Item -LiteralPath (Join-Path $k 'ban-t30') -Force }
+    if ($b.ra -notmatch 'registry test\s+rc=0') { throw "cay BAN ma registry van mang env diff (rc_script=$($b.rc))" }
+    & git -C $k update-ref refs/remotes/origin/master HEAD
+    $c = Chay $k @() ($ro + @{ STUB_REG_MONG = '2||||' })
+    if ($c.ra -notmatch 'registry test\s+rc=0') { throw "HEAD khong di truoc origin/master ma registry van mang env diff (rc_script=$($c.rc))" }
 }
 
 foreach ($d in $script:Rac) { Remove-Item -LiteralPath $d -Recurse -Force -ErrorAction SilentlyContinue }

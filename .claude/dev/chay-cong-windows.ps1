@@ -15,7 +15,8 @@
     Script này gương lại LỆNH của các bước cổng trong các job `gate*` của `.github/workflows/ci.yml`
     (tên job là cách CI chia máy và trôi theo master: nền gốc d553efa có `gate`, `gate-registry`,
     `gate-packet-loop`; master fc852ff tách thêm `gate-ops`, `gate-cong-cu` (8 mảnh) và `gate-cong-cu-gop` (gom mảnh —
-    script chạy `ops/cong_cu_test.py` TRỌN một lượt thay cho mảnh + gom)), nhưng chạy TẠI MÁY. Nó KHÔNG gọi
+    script chạy `ops/cong_cu_test.py` TRỌN một lượt thay cho mảnh + gom)), nhưng chạy TẠI MÁY. `env:` của bước do script
+    làm chủ: khoá chế độ rò từ phiên gọi bị xoá, `test registry` mang env như lượt `pull_request` khi đo được diff. Nó KHÔNG gọi
     `workflow_dispatch`, KHÔNG re-run, KHÔNG đẩy gì lên remote, KHÔNG gọi GitHub API.
     Viết ra để tôn chỉ thị `manual_ci_budget: 0` mà vẫn đo được trên nền Windows.
 
@@ -58,8 +59,9 @@
     Hạn giờ cho MỘT cổng, tính bằng giây. Mặc định 5400 = `timeout-minutes: 90` của job `gate-registry`
     trên master fc852ff — trần LỚN NHẤT của các job `gate*` (t9 đọc `ci.yml` của cây và đòi ≥). Chính
     `ci.yml` ghi lý do: `test registry` chạy tuần tự, 52,15 phút trên ubuntu ⇒ 60 → 90, và "90 KHÔNG đủ
-    Windows". Hạn 3600 cũ (= 60 phút của nền gốc d553efa) làm t9 ĐỎ ngay khi merge (đo: cây fc852ff + PR ⇒
-    26/27, t9), như hạn 900 trước đó: thấp hơn trần CI thì mức mặc định có thể KHÔNG BAO GIỜ ra ĐẠT. Quá hạn thì cổng bị giết và đếm
+    Windows". Hạn 3600 cũ (= 60 phút của nền gốc d553efa) làm t9 ĐỎ ngay khi merge (đo: cây merge + PR ⇒ chỉ
+    t9 ĐỎ), như hạn 900 trước đó: thấp hơn trần CI thì mức mặc định có thể KHÔNG BAO GIỜ ra ĐẠT. Trần ấy chỉ so được khi khối việc
+    BẰNG của CI — vì thế `test registry` mang cả `env:` của bước (xem chỗ gọi). Quá hạn thì cổng bị giết và đếm
     là **TREO** — tức `KHÔNG ĐO ĐƯỢC`, KHÔNG phải `ĐẠT`. Cổng đã THOÁT mà CHÁU còn giữ stdout/stderr
     tới hạn thì không giết được gì (cháu đã mồ côi): rc=0 ⇒ `KHÔNG ĐO ĐƯỢC`, rc≠0 ⇒ vẫn `ĐỎ` — rc đọc từ
     chính tiến trình; rc KHÔNG đọc được ⇒ `KHÔNG ĐO ĐƯỢC` ở mọi nhánh. Có tham số này vì `don-nhanh_test.ps1`
@@ -108,6 +110,14 @@ $env:PYTHONUTF8           = '1'
 $env:PYTHONIOENCODING     = 'utf-8'
 $env:PYTHONUNBUFFERED     = '1'
 $env:PYTHONDONTWRITEBYTECODE = '1'
+# `env:` của BƯỚC cổng là một phần của lệnh: biến chế độ RÒ từ phiên gọi đổi cổng thành bản NHẸ hơn mà rc vẫn 0 (đo trên cây merge
+# 20ec8d5: `CONG_CU_TEST_BAN_KINH=manh` ⇒ `cong_cu_test` rc=0 sau 258 s, bán kính 416 đột biến "GIAO cho job gate-cong-cu" — không
+# cổng nào ở đây chạy job ấy). XOÁ mọi khoá mà một bước `gate*` của `ci.yml` khai (t30 đọc `ci.yml` và đòi đủ) cộng biến mảnh của
+# lượt tuần; bước nào CI ĐẶT thì script đặt lại đúng giá trị ấy ở chỗ chạy bước (AL_VER; `test registry`).
+foreach ($n in 'AL_VER', 'PR_HEAD_SHA', 'EOL_BASE_SHA', 'CONG_CU_TEST_BAN_KINH', 'CONG_CU_TEST_MANH', 'CONG_CU_TEST_MANH_RA',
+               'CI_DANG_KY_WORKERS', 'CI_DANG_KY_SU_KIEN', 'CI_DANG_KY_GOC', 'CI_DANG_KY_DAU', 'CI_DANG_KY_DOT_BIEN_MANH') {
+    [Environment]::SetEnvironmentVariable($n, $null)
+}
 
 # ───────────────────────────── gốc kho ─────────────────────────────
 if (-not $Goc) {
@@ -443,6 +453,22 @@ Chay-Py   'cong_cu kiem-tra'        @('ops/cong_cu.py', 'kiem-tra', '--json')
 Chay-Py   'cong_cu_test'            @('ops/cong_cu_test.py')
 Chay-Bash 'lease-publish selftest'  @('ops/chay_lease_publish_test.sh')
 Chay-Py   'packet-loop selftest'    @('.claude/dev/packet_loop_test.py')
+# Bước `test registry` của master khai `env:` (`CI_DANG_KY_WORKERS: "2"` + sự kiện/GOC/DAU). Vắng ⇒ `doc_diff` KHÔNG ĐO ĐƯỢC ⇒ kế
+# hoạch ĐỦ cho cả ba vòng đột biến, `nhanh_don_duoc` không chia mảnh — khối việc CI dồn sang lượt tuần + 4 job mảnh, không job 90
+# phút nào chạy nó (đo trên cây merge 20ec8d5: vắng ⇒ ĐỦ ×3; env `pull_request` của chính diff PR ⇒ NHẸ ×3; `nhanh_don_duoc_test`
+# ĐỦ > 540 s, NHẸ 2 s). Gương như lượt `pull_request` CHỈ KHI đo được diff như CI: cây SẠCH (CI đo commit, không đo cây làm việc)
+# và HEAD đi TRƯỚC `origin/master`; không thì để vắng ⇒ ĐỦ (fail-closed như chính `doc_diff`). Nhánh gốc d553efa không đọc các biến.
+$env:CI_DANG_KY_WORKERS = '2'
+$regGoc = [string](& git rev-parse --verify --quiet 'refs/remotes/origin/master^{commit}' 2>$null)
+$regDau = [string](& git rev-parse --verify --quiet 'HEAD^{commit}' 2>$null)
+$regBan = @(& git status --porcelain --untracked-files=all 2>$null)
+$regSach = ($LASTEXITCODE -eq 0) -and ($regBan.Count -eq 0)
+$regTruoc = if ($regGoc -and $regDau) { [string](& git rev-list --count "$regGoc..$regDau" 2>$null) } else { '' }
+if ($regSach -and $regTruoc -match '^[1-9]\d*$') {
+    $env:CI_DANG_KY_SU_KIEN = 'pull_request'; $env:CI_DANG_KY_GOC = $regGoc; $env:CI_DANG_KY_DAU = $regDau
+} else {
+    Canh 'registry test: không đo được diff như CI (cây bẩn, thiếu origin/master, hoặc HEAD không đi trước nó) — kế hoạch ĐỦ của lượt tuần, có thể vượt -HanGiay.'
+}
 Chay-Py   'registry test'           @('.claude/dev/ci_dang_ky_test.py', '--chay')
 
 # GƯƠNG CẢ `if:` của CI, không chỉ lệnh: `ci.yml` chạy bước này với `if: runner.os != 'Windows'`

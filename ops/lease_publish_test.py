@@ -663,6 +663,16 @@ def t01_ag_identity_and_family_gate():
         legacy_same = lease_mau(provider="codex", reviewer="codex")
         rc, _, e = chay("check", viet(s, legacy_same, ten="legacy-same.yaml"))
         bang(rc == RC_OK, f"legacy same-provider lease changed behavior: rc={rc} {e}")
+        legacy_review = lease_mau(role="reviewer", provider="codex", reviewer="codex",
+                                  executor="claude", assurance_target="cross_approved")
+        rc, _, e = chay("check", viet(s, legacy_review, ten="legacy-cross-review.yaml"))
+        bang(rc == RC_OK, f"legacy Claude/Codex review falsely rejected: rc={rc} {e}")
+        ag_same_review = lease_mau(role="reviewer", provider="google_antigravity",
+                                   executor="claude", model_family="claude",
+                                   execution_surface="antigravity", transport="machine/local",
+                                   assurance_target="cross_approved")
+        rc, _, e = chay("check", viet(s, ag_same_review, ten="ag-same-review.yaml"))
+        bang(rc == RC_LOP, f"same-family AG reviewer falsely accepted: rc={rc} {e}")
         for executor_provider, same_family in (("codex", "openai"), ("claude", "claude")):
             legacy_to_ag = lease_mau(role="executor", provider=executor_provider,
                                      reviewer="google_antigravity",

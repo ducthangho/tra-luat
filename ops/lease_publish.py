@@ -93,6 +93,7 @@ MODEL_FAMILIES = ("claude", "openai", "gemini")
 
 def _kiem_provider_identity(lease):
     """Validate declared runtime identity; legacy leases without identity remain valid."""
+    role = str(lease.get("role") or "").strip()
     provider = str(lease.get("provider") or lease.get("executor") or "").strip()
     if not provider:
         return
@@ -107,28 +108,53 @@ def _kiem_provider_identity(lease):
                             (PROVIDER_FAMILIES[provider] and declared_family != PROVIDER_FAMILIES[provider])):
         raise Chan(RC_NOI_DUNG, f"model_family không hợp lệ: {declared_family!r}")
     family = declared_family or PROVIDER_FAMILIES[provider]
-    reviewer = str(lease.get("reviewer") or "").strip()
-    if reviewer and reviewer not in PROVIDERS and reviewer != "human":
-        raise Chan(RC_NOI_DUNG, f"reviewer không hợp lệ: {reviewer!r}")
-    reviewer_family = str(lease.get("reviewer_model_family") or
-                          PROVIDER_FAMILIES.get(reviewer) or "").strip()
-    reviewer_surface = str(lease.get("reviewer_execution_surface") or "").strip()
-    reviewer_transport = str(lease.get("reviewer_transport") or "").strip()
-    if reviewer == "google_antigravity" and not all((reviewer_family,
-                                                       reviewer_surface, reviewer_transport)):
-        raise Chan(RC_NOI_DUNG, "google_antigravity reviewer cần model_family, execution_surface, transport")
     if provider == "google_antigravity" and (surface, transport) != ("antigravity", "machine/local"):
         raise Chan(RC_NOI_DUNG, "google_antigravity cần execution_surface=antigravity, transport=machine/local")
-    if reviewer == "google_antigravity" and (reviewer_surface, reviewer_transport) != ("antigravity", "machine/local"):
-        raise Chan(RC_NOI_DUNG, "google_antigravity reviewer cần execution_surface=antigravity, transport=machine/local")
-    if reviewer_family and reviewer_family not in MODEL_FAMILIES:
-        raise Chan(RC_NOI_DUNG, f"reviewer_model_family không hợp lệ: {reviewer_family!r}")
-    if reviewer in ("claude", "codex") and reviewer_family != PROVIDER_FAMILIES[reviewer]:
-        raise Chan(RC_NOI_DUNG, f"reviewer_model_family không khớp provider {reviewer!r}")
+
+    declared_executor_family = ""
+    declared_reviewer_family = ""
+    if role == "reviewer":
+        executor = str(lease.get("executor") or "").strip()
+        reviewer = provider
+        declared_executor_family = str(lease.get("executor_model_family") or "").strip()
+        if lease.get("reviewer") and str(lease["reviewer"]).strip() != reviewer:
+            raise Chan(RC_NOI_DUNG, "reviewer không khớp provider của lease reviewer")
+        executor_surface = str(lease.get("executor_execution_surface") or "").strip()
+        executor_transport = str(lease.get("executor_transport") or "").strip()
+        reviewer_family = family
+        executor_family = declared_executor_family or PROVIDER_FAMILIES.get(executor)
+    else:
+        executor = provider
+        reviewer = str(lease.get("reviewer") or "").strip()
+        executor_family = family
+        declared_reviewer_family = str(lease.get("reviewer_model_family") or "").strip()
+        reviewer_family = declared_reviewer_family or PROVIDER_FAMILIES.get(reviewer)
+        reviewer_surface = str(lease.get("reviewer_execution_surface") or "").strip()
+        reviewer_transport = str(lease.get("reviewer_transport") or "").strip()
+        if reviewer == "google_antigravity" and not all((reviewer_family,
+                                                           reviewer_surface, reviewer_transport)):
+            raise Chan(RC_NOI_DUNG, "google_antigravity reviewer cần model_family, execution_surface, transport")
+        if reviewer == "google_antigravity" and (reviewer_surface, reviewer_transport) != ("antigravity", "machine/local"):
+            raise Chan(RC_NOI_DUNG, "google_antigravity reviewer cần execution_surface=antigravity, transport=machine/local")
+
+    if executor and executor not in PROVIDERS:
+        raise Chan(RC_NOI_DUNG, f"executor không hợp lệ: {executor!r}")
+    if reviewer and reviewer not in PROVIDERS and reviewer != "human":
+        raise Chan(RC_NOI_DUNG, f"reviewer không hợp lệ: {reviewer!r}")
+    for actor, declared, effective in ((executor, declared_executor_family, executor_family),
+                                        (reviewer, declared_reviewer_family, reviewer_family)):
+        if declared and (declared not in MODEL_FAMILIES or
+                         (PROVIDER_FAMILIES.get(actor) and declared != PROVIDER_FAMILIES[actor])):
+            raise Chan(RC_NOI_DUNG, f"model_family không khớp provider {actor!r}: {declared!r}")
+        if actor == "google_antigravity" and not effective:
+            raise Chan(RC_NOI_DUNG, "google_antigravity cần model_family")
+    if role == "reviewer" and executor == "google_antigravity" and (
+            executor_surface, executor_transport) != ("antigravity", "machine/local"):
+        raise Chan(RC_NOI_DUNG, "google_antigravity executor cần execution_surface=antigravity, transport=machine/local")
     assurance = str(lease.get("assurance_target") or "").strip()
     claims_cross = "cross_approved" in assurance
-    if claims_cross and reviewer and reviewer != "human" and (provider == reviewer or
-                    (reviewer_family and family == reviewer_family)):
+    if claims_cross and reviewer and reviewer != "human" and (executor == reviewer or
+                    (executor_family and reviewer_family and executor_family == reviewer_family)):
         raise Chan(RC_LOP, "reviewer cùng provider hoặc model family không đạt cross-review")
 
 # CHỐT THẬT — danh sách CHO PHÉP, không phải danh sách cấm.

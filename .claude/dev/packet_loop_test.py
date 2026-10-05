@@ -5146,6 +5146,16 @@ def case_ag_identity_and_cross_family(c: Ctx):
     rc, _, e = run(c.script, ["transition", "--packet", 55, "--to", "reviewing",
                              "--comment-id", cid, "--head-sha", c.head(1)], sd5)
     _doi(0, rc, e, "AG reviewer transition")
+    for family, surface, expected_rc in (("openai", "antigravity", 4),
+                                         ("gemini", "codex_cli", 2)):
+        rc, _, e = run(c.script, ["record-review", "--packet", 55,
+                                 "--provider", "google_antigravity", "--model-family", family,
+                                 "--execution-surface", surface, "--transport", "machine/local",
+                                 "--verdict", "approve", "--reviewed-sha", c.head(1)], sd5)
+        _doi(expected_rc, rc, e, "AG reviewer runtime identity mismatch")
+        st = json.loads((sd5 / "wp55.json").read_text(encoding="utf-8"))
+        if st["state"] != "reviewing" or st["reviews"]:
+            raise AssertionError("failed AG review changed state or added verdict")
     rc, _, e = run(c.script, ["record-review", "--packet", 55, "--provider", "google_antigravity",
                              "--model-family", "gemini", "--execution-surface", "antigravity",
                              "--transport", "machine/local", "--verdict", "approve",

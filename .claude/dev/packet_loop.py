@@ -65,6 +65,14 @@ RC_BIEN_NHAN = 11
 PROVIDER_FAMILIES = {"claude": "claude", "codex": "openai", "google_antigravity": None}
 PROVIDERS = tuple(PROVIDER_FAMILIES)
 MODEL_FAMILIES = ("claude", "openai", "gemini")
+RUNTIME_CAPABILITIES = {
+    "claude": {"claude_code": ("machine/local",)},
+    # machine/local là cách khai legacy của Codex CLI/Desktop; service chỉ nhận machine.
+    "codex": {"codex_cli": ("machine", "machine/local"),
+              "codex_desktop": ("machine", "machine/local"),
+              "codex_service": ("machine",)},
+    "google_antigravity": {"antigravity": ("machine/local",)},
+}
 
 
 def _identity(provider, model_family=None, surface=None, transport=None):
@@ -73,6 +81,8 @@ def _identity(provider, model_family=None, surface=None, transport=None):
     family = model_family.strip() if isinstance(model_family, str) else model_family
     surface = surface.strip() if isinstance(surface, str) else surface
     transport = transport.strip() if isinstance(transport, str) else transport
+    if surface == "" or transport == "":
+        _die(RC_ARG, "execution_surface/transport đã khai không được rỗng")
     if provider == "google_antigravity" and not all((family, surface, transport)):
         _die(RC_ARG, "google_antigravity cần model_family, execution_surface và transport")
     family = family or PROVIDER_FAMILIES[provider]
@@ -80,8 +90,13 @@ def _identity(provider, model_family=None, surface=None, transport=None):
         _die(RC_ARG, f"model_family phải thuộc {MODEL_FAMILIES}")
     if provider != "google_antigravity" and family != PROVIDER_FAMILIES[provider]:
         _die(RC_ARG, f"{provider} không thể khai model_family={family!r}")
-    if provider == "google_antigravity" and (surface, transport) != ("antigravity", "machine/local"):
-        _die(RC_ARG, "google_antigravity cần execution_surface=antigravity, transport=machine/local")
+    capabilities = RUNTIME_CAPABILITIES[provider]
+    if surface is not None and surface not in capabilities:
+        _die(RC_ARG, f"{provider} không hỗ trợ execution_surface={surface!r}")
+    allowed_transports = (capabilities[surface] if surface is not None else
+                          {t for options in capabilities.values() for t in options})
+    if transport is not None and transport not in allowed_transports:
+        _die(RC_ARG, f"{provider} không hỗ trợ transport={transport!r} trên {surface!r}")
     return {"provider": provider, "model_family": family,
             "execution_surface": surface,
             "transport": transport}

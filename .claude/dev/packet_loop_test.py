@@ -5184,11 +5184,11 @@ def case_codex_runtime_surface_transport(c: Ctx):
     state = json.loads((sd / "wp55.json").read_text(encoding="utf-8"))
     if state["executor_identity"]["execution_surface"] != "codex_desktop":
         raise AssertionError("Codex Desktop surface was replaced")
-    for surface, transport in (("codex_cli", "machine/local"),
-                               ("codex_desktop", "service")):
+    for surface, transport, expected_rc in (("codex_cli", "machine/local", 4),
+                                            ("codex_desktop", "service", 2)):
         rc, _, e = run(c.script, ["begin-attempt", "--packet", 55, "--provider", "codex",
                                  "--execution-surface", surface, "--transport", transport], sd)
-        _doi(4, rc, e, "Codex executor runtime mismatch")
+        _doi(expected_rc, rc, e, "Codex executor runtime mismatch")
         if c.state(sd, 55) != "leased":
             raise AssertionError("mismatched Codex runtime opened attempt")
     rc, _, e = run(c.script, ["begin-attempt", "--packet", 55, "--provider", "codex",
@@ -5201,12 +5201,12 @@ def case_codex_runtime_surface_transport(c: Ctx):
                              "--reviewer-transport", "machine/local"))
     _doi(0, rc, e, "Codex reviewer identity init")
     c.den_reviewing(sd2, 55, 1)
-    for surface, transport in (("codex_service", "machine/local"),
-                               ("codex_desktop", "service")):
+    for surface, transport, expected_rc in (("codex_cli", "machine/local", 4),
+                                            ("codex_desktop", "service", 2)):
         rc, _, e = run(c.script, ["record-review", "--packet", 55, "--provider", "codex",
                                  "--execution-surface", surface, "--transport", transport,
                                  "--verdict", "approve", "--reviewed-sha", c.head(1)], sd2)
-        _doi(4, rc, e, "Codex reviewer runtime mismatch")
+        _doi(expected_rc, rc, e, "Codex reviewer runtime mismatch")
         st = json.loads((sd2 / "wp55.json").read_text(encoding="utf-8"))
         if st["state"] != "reviewing" or st["reviews"]:
             raise AssertionError("mismatched Codex reviewer recorded verdict")
@@ -5227,10 +5227,10 @@ def case_codex_runtime_surface_transport(c: Ctx):
     service = c.sd()
     rc, _, e = c.init(service, executor="codex", reviewer="claude",
                       extra=("--executor-execution-surface", "codex_service",
-                             "--executor-transport", "service"))
+                             "--executor-transport", "machine"))
     _doi(0, rc, e, "Codex service identity init")
     rc, _, e = run(c.script, ["begin-attempt", "--packet", 55, "--provider", "codex",
-                             "--execution-surface", "codex_service", "--transport", "service"], service)
+                             "--execution-surface", "codex_service", "--transport", "machine"], service)
     _doi(0, rc, e, "Codex service runtime match")
 
     claude = c.sd()
@@ -5242,10 +5242,20 @@ def case_codex_runtime_surface_transport(c: Ctx):
                                ("claude_code", "service")):
         rc, _, e = run(c.script, ["begin-attempt", "--packet", 55, "--provider", "claude",
                                  "--execution-surface", surface, "--transport", transport], claude)
-        _doi(4, rc, e, "Claude declared runtime mismatch")
+        _doi(2, rc, e, "Claude invalid runtime tuple")
     rc, _, e = run(c.script, ["begin-attempt", "--packet", 55, "--provider", "claude",
                              "--execution-surface", "claude_code", "--transport", "machine/local"], claude)
     _doi(0, rc, e, "Claude declared runtime match")
+
+    for provider, reviewer, surface, transport in (
+            ("codex", "claude", "antigravity", "machine/local"),
+            ("codex", "claude", "codex_service", "machine/local"),
+            ("claude", "codex", "codex_desktop", "machine/local")):
+        invalid = c.sd()
+        rc, _, e = c.init(invalid, executor=provider, reviewer=reviewer,
+                          extra=("--executor-execution-surface", surface,
+                                 "--executor-transport", transport), lease=False)
+        _doi(2, rc, e, "provider cannot declare foreign/invalid runtime tuple")
 
 
 CASES.append(("codex_runtime_surface_transport", case_codex_runtime_surface_transport))

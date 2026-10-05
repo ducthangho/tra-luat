@@ -1,7 +1,7 @@
 # Manual successor handoff D0
 
 Dùng mẫu này sau **mọi phiên** cho tới khi deterministic dispatcher + auto-review loop được promote. Người giữ
-tạo một task Claude/Codex mới bằng prompt bên dưới; không tiếp tục trong task cũ bằng cách đổi vai.
+tạo một task Claude/Codex/Antigravity mới bằng prompt bên dưới; không tiếp tục trong task cũ bằng cách đổi vai.
 
 ## Gói handoff bắt buộc
 
@@ -13,7 +13,7 @@ packet_id: wp<number>
 revision: <integer>
 generation: <integer>
 spec_hash: <sha256>
-provider: claude | codex | google_antigravity | human
+provider: <provider-đúng-vai-theo-bảng-dưới>
 model_family: claude | openai | gemini | null
 execution_surface: <actual-runtime-surface>
 transport: <actual-transport>
@@ -42,6 +42,13 @@ manual_next_action: <one concrete action>
 superseded_identity: <sha/generation-or-null>
 stop_conditions: []
 ```
+
+Provider được phép theo vai: `executor` = `claude | codex | google_antigravity`;
+`reviewer` = `claude | codex | google_antigravity | human` (human chỉ với
+`human_audited` hoặc fallback được khai); `land_operator` = `claude | codex | human`.
+AG không giữ vai land. Họ model của AG lấy từ lượt chạy thực tế; Codex có surface
+`codex_cli`, `codex_desktop` hoặc `codex_service`, Claude dùng `claude_code`.
+Surface/transport chưa đo được để `null`, không suy Codex Desktop thành CLI.
 
 Trước khi phát prompt, đọc lại remote PR head và Issue projection. `head_sha`, generation, revision và spec hash
 không khớp thì ghi `blocked` và không đề nghị worker chọn head/rebase khác. Evidence chỉ hợp lệ cho exact SHA.

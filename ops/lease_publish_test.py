@@ -750,6 +750,7 @@ def t01_ag_identity_and_family_gate():
             if executor_provider == "google_antigravity":
                 contradictory["provider"] = "codex"
                 contradictory.pop("model_family")
+                contradictory["execution_surface"] = "codex_desktop"
             rc, _, e = chay("check", viet(s, contradictory,
                                           ten=f"contradictory-{executor_provider}.yaml"))
             bang(rc == RC_NOI_DUNG and "executor không khớp provider" in e,
@@ -767,6 +768,38 @@ def t01_ag_identity_and_family_gate():
                                   executor="claude", assurance_target="cross_approved")
         rc, _, e = chay("check", viet(s, legacy_review, ten="legacy-cross-review.yaml"))
         bang(rc == RC_OK, f"legacy Claude/Codex review falsely rejected: rc={rc} {e}")
+        for provider, surface, transport in (
+                ("codex", "codex_cli", "machine"),
+                ("codex", "codex_desktop", "machine"),
+                ("codex", "codex_service", "machine"),
+                ("claude", "claude_code", "machine/local")):
+            declared = lease_mau(role="reviewer", provider=provider,
+                                  execution_surface=surface, transport=transport)
+            rc, _, e = chay("check", viet(s, declared,
+                                          ten=f"valid-{provider}-{surface}.yaml"))
+            bang(rc == RC_OK, f"valid provider runtime blocked: {provider}/{surface}, rc={rc} {e}")
+        for provider, surface, transport in (
+                ("codex", "antigravity", "machine/local"),
+                ("codex", "codex_service", "machine/local"),
+                ("claude", "codex_desktop", "machine/local"),
+                ("claude", "claude_code", "human_mediated")):
+            invalid = lease_mau(role="reviewer", provider=provider,
+                                 execution_surface=surface, transport=transport)
+            rc, _, e = chay("check", viet(s, invalid,
+                                          ten=f"invalid-{provider}-{surface}-{transport.replace('/', '_')}.yaml"))
+            bang(rc == RC_NOI_DUNG, f"foreign provider runtime accepted: {provider}/{surface}/{transport}, rc={rc} {e}")
+        invalid_reviewer = lease_mau(role="executor", provider="claude", reviewer="codex",
+                                     reviewer_execution_surface="antigravity",
+                                     reviewer_transport="machine/local")
+        rc, _, e = chay("check", viet(s, invalid_reviewer,
+                                      ten="invalid-declared-codex-reviewer.yaml"))
+        bang(rc == RC_NOI_DUNG, f"foreign reviewer runtime accepted: rc={rc} {e}")
+        invalid_executor = lease_mau(role="reviewer", provider="claude", executor="codex",
+                                     executor_execution_surface="antigravity",
+                                     executor_transport="machine/local")
+        rc, _, e = chay("check", viet(s, invalid_executor,
+                                      ten="invalid-declared-codex-executor.yaml"))
+        bang(rc == RC_NOI_DUNG, f"foreign executor runtime accepted: rc={rc} {e}")
         ag_same_review = lease_mau(role="reviewer", provider="google_antigravity",
                                    executor="claude", model_family="claude",
                                    execution_surface="antigravity", transport="machine/local",

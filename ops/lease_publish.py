@@ -89,6 +89,32 @@ def GOI_GIT(*doi_so, cwd=None):
 PROVIDER_FAMILIES = {"claude": "claude", "codex": "openai", "google_antigravity": None}
 PROVIDERS = tuple(PROVIDER_FAMILIES)
 MODEL_FAMILIES = ("claude", "openai", "gemini")
+RUNTIME_CAPABILITIES = {
+    "claude": {"claude_code": ("machine/local",)},
+    # machine/local là cách khai legacy của Codex CLI/Desktop; service chỉ nhận machine.
+    "codex": {"codex_cli": ("machine", "machine/local"),
+              "codex_desktop": ("machine", "machine/local"),
+              "codex_service": ("machine",)},
+    "google_antigravity": {"antigravity": ("machine/local",)},
+    "human": {"manual_audit": ("human",)},
+}
+
+
+def _kiem_capability_khai(lease, provider, surface_key, transport_key, *, required=False):
+    """Check only declared metadata, except AG paths that require a complete tuple."""
+    surface = str(lease.get(surface_key) or "").strip()
+    transport = str(lease.get(transport_key) or "").strip()
+    if required and not (surface and transport):
+        raise Chan(RC_NOI_DUNG, f"{provider} cần {surface_key} và {transport_key}")
+    if (surface_key in lease and not surface) or (transport_key in lease and not transport):
+        raise Chan(RC_NOI_DUNG, f"{provider} khai {surface_key}/{transport_key} rỗng")
+    capabilities = RUNTIME_CAPABILITIES[provider]
+    if surface and surface not in capabilities:
+        raise Chan(RC_NOI_DUNG, f"{provider} không hỗ trợ {surface_key}={surface!r}")
+    allowed = (capabilities[surface] if surface else
+               {t for options in capabilities.values() for t in options})
+    if transport and transport not in allowed:
+        raise Chan(RC_NOI_DUNG, f"{provider} không hỗ trợ {transport_key}={transport!r}")
 
 
 def _kiem_executor_khai_voi_human_reviewer(lease, executor):
@@ -97,14 +123,15 @@ def _kiem_executor_khai_voi_human_reviewer(lease, executor):
     surface_key = "executor_execution_surface"
     transport_key = "executor_transport"
     family = str(lease.get(family_key) or "").strip()
-    surface = str(lease.get(surface_key) or "").strip()
-    transport = str(lease.get(transport_key) or "").strip()
     if executor == "google_antigravity":
-        if any(key in lease for key in (family_key, surface_key, transport_key)):
-            if family not in MODEL_FAMILIES or (surface, transport) != ("antigravity", "machine/local"):
-                raise Chan(RC_NOI_DUNG, "executor google_antigravity khai identity thiếu hoặc sai family/surface/transport")
+        declared = any(key in lease for key in (family_key, surface_key, transport_key))
+        if declared and family not in MODEL_FAMILIES:
+            raise Chan(RC_NOI_DUNG, "executor google_antigravity khai model_family thiếu hoặc sai")
+        _kiem_capability_khai(lease, executor, surface_key, transport_key, required=declared)
     elif family_key in lease and family != PROVIDER_FAMILIES.get(executor):
         raise Chan(RC_NOI_DUNG, f"executor_model_family không khớp provider {executor!r}")
+    else:
+        _kiem_capability_khai(lease, executor, surface_key, transport_key)
 
 
 def _kiem_provider_identity(lease):
@@ -119,6 +146,7 @@ def _kiem_provider_identity(lease):
             raise Chan(RC_LOP, "human chỉ có thể là reviewer với human_audited")
         if str(lease.get("model_family") or "").strip():
             raise Chan(RC_NOI_DUNG, "human reviewer không có model_family")
+        _kiem_capability_khai(lease, "human", "execution_surface", "transport")
         if lease.get("reviewer") and str(lease["reviewer"]).strip() != "human":
             raise Chan(RC_NOI_DUNG, "reviewer không khớp provider human")
         executor = str(lease.get("executor") or "").strip()
@@ -143,8 +171,8 @@ def _kiem_provider_identity(lease):
                             (PROVIDER_FAMILIES[provider] and declared_family != PROVIDER_FAMILIES[provider])):
         raise Chan(RC_NOI_DUNG, f"model_family không hợp lệ: {declared_family!r}")
     family = declared_family or PROVIDER_FAMILIES[provider]
-    if provider == "google_antigravity" and (surface, transport) != ("antigravity", "machine/local"):
-        raise Chan(RC_NOI_DUNG, "google_antigravity cần execution_surface=antigravity, transport=machine/local")
+    _kiem_capability_khai(lease, provider, "execution_surface", "transport",
+                         required=provider == "google_antigravity")
 
     declared_executor_family = ""
     declared_reviewer_family = ""
@@ -158,6 +186,9 @@ def _kiem_provider_identity(lease):
         executor_transport = str(lease.get("executor_transport") or "").strip()
         reviewer_family = family
         executor_family = declared_executor_family or PROVIDER_FAMILIES.get(executor)
+        if executor in PROVIDERS:
+            _kiem_capability_khai(lease, executor, "executor_execution_surface",
+                                 "executor_transport", required=executor == "google_antigravity")
     else:
         if role == "executor" and "executor" in lease and str(lease["executor"]).strip() != provider:
             raise Chan(RC_NOI_DUNG, "executor không khớp provider của lease executor")
@@ -171,8 +202,9 @@ def _kiem_provider_identity(lease):
         if reviewer == "google_antigravity" and not all((reviewer_family,
                                                            reviewer_surface, reviewer_transport)):
             raise Chan(RC_NOI_DUNG, "google_antigravity reviewer cần model_family, execution_surface, transport")
-        if reviewer == "google_antigravity" and (reviewer_surface, reviewer_transport) != ("antigravity", "machine/local"):
-            raise Chan(RC_NOI_DUNG, "google_antigravity reviewer cần execution_surface=antigravity, transport=machine/local")
+        if reviewer in RUNTIME_CAPABILITIES:
+            _kiem_capability_khai(lease, reviewer, "reviewer_execution_surface",
+                                 "reviewer_transport", required=reviewer == "google_antigravity")
 
     if executor and executor not in PROVIDERS:
         raise Chan(RC_NOI_DUNG, f"executor không hợp lệ: {executor!r}")
@@ -187,9 +219,6 @@ def _kiem_provider_identity(lease):
             raise Chan(RC_NOI_DUNG, f"model_family không khớp provider {actor!r}: {declared!r}")
         if actor == "google_antigravity" and not effective:
             raise Chan(RC_NOI_DUNG, "google_antigravity cần model_family")
-    if role == "reviewer" and executor == "google_antigravity" and (
-            executor_surface, executor_transport) != ("antigravity", "machine/local"):
-        raise Chan(RC_NOI_DUNG, "google_antigravity executor cần execution_surface=antigravity, transport=machine/local")
     strict_cross = assurance == "cross_approved"
     claims_cross = "cross_approved" in assurance
     if assurance == "human_audited" and reviewer != "human":

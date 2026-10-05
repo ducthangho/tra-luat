@@ -1,0 +1,53 @@
+schema_version: 1
+mission_id: gh-686
+revision: 1
+plan_hash: 3fed9aadb018a6808c766d838164d0a79d935b7bb5d4e3d63bc45ea6865a8a04
+status: retrospective_reconstruction
+supersedes_revision: null
+change_request: null
+base_sha: 89fc4fac8cea65979cc2483043dc8cd07a6e8518
+objective: >-
+  Sửa race ProcessLookupError trong launcher _con_song theo Packet wp685,
+  giữ đúng phân biệt ESRCH với lỗi khác và hoàn tất nghiệm thu, review, land.
+acceptance_criteria:
+  - Packet wp685 đáp ứng đặc tả được đóng băng của generation thi hành.
+  - Chỉ sửa hai tệp launcher.py và launcher_test.py thuộc effective write set.
+  - Bằng chứng B1-B8, review khác họ model trên exact SHA và các required checks đủ dương.
+  - Chủ kho audit và quyết định land; đọc lại launcher-windows.yml hậu merge trước khi đóng packet.
+risk: sensitive
+requires_live: false
+envelope:
+  max_packets: 1
+  max_successor_depth: 0
+  max_attempts_per_packet: 3
+  max_run_minutes: 90
+  same_failure_limit: 2
+  max_parallel_workers: 1
+  max_agent_invocations: 30
+  max_cloud_minutes: 360
+  max_inbox_backlog: 100
+  provider_budgets: {}
+packet_plan:
+  - packet_id: wp685
+    packet_issue: 685
+    dependency_issues: [668]
+    executor: claude
+    model: claude-sonnet-5-5
+    effort: high
+    environment: cloud
+    review_class: sensitive
+    write_set:
+      - .claude/dev/launcher.py
+      - .claude/dev/launcher_test.py
+    source_spec_revision: 1
+    source_spec_sha256: ee44238c88667e7435abb6b7a513d563d043e8e5e8189e5380f1151b9be337d9
+provenance:
+  reconstructed_on: '2026-10-05'
+  source_mission_issue: https://github.com/ducthangho/tra-luat/issues/686
+  source_packet_issue: https://github.com/ducthangho/tra-luat/issues/685
+  source_initial_spec_commit: d96d075
+  note: >-
+    Bản tái dựng có phiên bản từ quyết định chủ kho ngày 29-09; không tuyên bố
+    tệp này đã tồn tại hoặc đã được hash vào thời điểm đó. Các giới hạn envelope
+    ngoài max_packets/max_parallel_workers là giá trị profile khởi điểm tại
+    protocol §3.1, không phải quyết định Q0-Q5 được ghi nguyên văn.

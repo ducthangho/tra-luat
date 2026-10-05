@@ -1,0 +1,26 @@
+schema_version: 1
+change_request_id: mcr-686-01
+mission_issue: 686
+requested_by: ducthangho
+reason: Claude hết quota; chủ kho chọn Antigravity agy để tiếp tục wp685.
+proposed_changes:
+  - Mission Q3 đổi executor từ Claude Sonnet 5.5 high sang Google Antigravity Gemini 3.1 Pro High.
+  - Packet wp685 đổi executor và environment, tạo spec revision và generation mới.
+  - Giữ objective, effective write set hai tệp, review_class sensitive và nghiệm thu B1-B8.
+affected_packets: [wp685]
+landed_work_impact: none
+risk_change: none
+decision: approved
+decision_source: human
+approved_by: ducthangho
+decision_url: https://github.com/ducthangho/tra-luat/issues/686#issuecomment-5988699983
+proposal_url: https://github.com/ducthangho/tra-luat/issues/686#issuecomment-5988682502
+supersedes_revision: 1
+impact_analysis: >-
+  Local evidence C:/Users/admin/cw/wp685-mcr-impact-20261005.md;
+  #668 landed, both write-set paths had NGUOI_GIU 0 on fresh 459-head mirror,
+  and their bytes were unchanged from 423b4ba to 8c98afa on 2026-10-05.
+audit_note: >-
+  Approval covered the substantive provider change. The original proposal
+  omitted change_request_id and supersedes_revision; those fields are supplied
+  here after reconstructing Mission revision 1 and require exact-record readback.

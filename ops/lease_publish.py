@@ -98,14 +98,15 @@ def _kiem_provider_identity(lease):
         return
     if provider not in PROVIDERS:
         raise Chan(RC_NOI_DUNG, f"provider không hợp lệ: {provider!r}")
-    family = str(lease.get("model_family") or "").strip()
+    declared_family = str(lease.get("model_family") or "").strip()
     surface = str(lease.get("execution_surface") or "").strip()
     transport = str(lease.get("transport") or "").strip()
-    if provider == "google_antigravity" and not all((family, surface, transport)):
+    if provider == "google_antigravity" and not all((declared_family, surface, transport)):
         raise Chan(RC_NOI_DUNG, "google_antigravity cần model_family, execution_surface, transport")
-    if family and (family not in MODEL_FAMILIES or
-                   (PROVIDER_FAMILIES[provider] and family != PROVIDER_FAMILIES[provider])):
-        raise Chan(RC_NOI_DUNG, f"model_family không hợp lệ: {family!r}")
+    if declared_family and (declared_family not in MODEL_FAMILIES or
+                            (PROVIDER_FAMILIES[provider] and declared_family != PROVIDER_FAMILIES[provider])):
+        raise Chan(RC_NOI_DUNG, f"model_family không hợp lệ: {declared_family!r}")
+    family = declared_family or PROVIDER_FAMILIES[provider]
     reviewer = str(lease.get("reviewer") or "").strip()
     if reviewer and reviewer not in PROVIDERS and reviewer != "human":
         raise Chan(RC_NOI_DUNG, f"reviewer không hợp lệ: {reviewer!r}")
@@ -122,7 +123,7 @@ def _kiem_provider_identity(lease):
     assurance = str(lease.get("assurance_target") or "").strip()
     claims_cross = "cross_approved" in assurance
     if claims_cross and reviewer and reviewer != "human" and (provider == reviewer or
-                    (family and reviewer_family and family == reviewer_family)):
+                    (reviewer_family and family == reviewer_family)):
         raise Chan(RC_LOP, "reviewer cùng provider hoặc model family không đạt cross-review")
 
 # CHỐT THẬT — danh sách CHO PHÉP, không phải danh sách cấm.

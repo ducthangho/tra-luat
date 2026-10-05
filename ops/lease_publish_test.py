@@ -655,6 +655,20 @@ def t01_ag_identity_and_family_gate():
         legacy_same = lease_mau(provider="codex", reviewer="codex")
         rc, _, e = chay("check", viet(s, legacy_same, ten="legacy-same.yaml"))
         bang(rc == RC_OK, f"legacy same-provider lease changed behavior: rc={rc} {e}")
+        for executor_provider, same_family in (("codex", "openai"), ("claude", "claude")):
+            legacy_to_ag = lease_mau(role="executor", provider=executor_provider,
+                                     reviewer="google_antigravity",
+                                     reviewer_model_family=same_family,
+                                     reviewer_execution_surface="antigravity",
+                                     reviewer_transport="machine/local",
+                                     assurance_target="cross_approved_or_human_audited")
+            rc, _, e = chay("check", viet(s, legacy_to_ag,
+                                          ten=f"legacy-{executor_provider}-same-family.yaml"))
+            bang(rc == RC_LOP, f"missing legacy family bypassed cross gate: {executor_provider}, rc={rc} {e}")
+            legacy_to_ag["reviewer_model_family"] = "gemini"
+            rc, _, e = chay("check", viet(s, legacy_to_ag,
+                                          ten=f"legacy-{executor_provider}-cross-family.yaml"))
+            bang(rc == RC_OK, f"valid legacy-to-AG cross blocked: {executor_provider}, rc={rc} {e}")
 
 
 @ca

@@ -1,4 +1,4 @@
-# Protocol đa phiên Claude–Codex
+# Protocol đa phiên đa provider
 
 ## Google Antigravity provider identity
 
@@ -15,7 +15,7 @@ Danh tính này không cấp lease: người cấp vẫn phải qua allowlist v�
 - **Trạng thái:** Thiết kế đã chốt qua grilling ngày 2026-08-03
 - **Protocol version:** 1
 - **Governance baseline:** MCR-54-02, chấp thuận ngày 2026-08-08
-- **Phạm vi:** Claude Code, Codex, Windows local, cloud worker và Android
+- **Phạm vi:** Claude Code, Codex, Google Antigravity, Windows local, cloud worker và Android
 - **Nguồn quyết định:** §20 là bảng định tuyến ADR đang hiệu lực — MỘT dòng cho MỖI ADR, máy canh bằng `packet_loop.py adr-song`. Dòng cũ ghi một PHẠM VI (`ADR-0017 đến ADR-0035`) và phạm vi ấy đã chết: 45 ADR tồn tại, 10 ADR quản trị nằm ngoài nó.
 - **Kế hoạch thi công:** `docs/KE_HOACH_TRIEN_KHAI_PROTOCOL_DA_PHIEN.md`
 
@@ -23,7 +23,7 @@ Danh tính này không cấp lease: người cấp vẫn phải qua allowlist v�
 
 Hệ thống cho phép nhiều agent run tự xử lý một mission đến `awaiting_land` mà không cần người dùng gõ lại prompt;
 người có thẩm quyền có thể apply exact head SHA và hoàn tất mission từ local, web hoặc Android. GitHub Issue/PR
-là control plane và nguồn trạng thái bền; Claude, Codex, ứng dụng desktop/mobile và local controller chỉ là các
+là control plane và nguồn trạng thái bền; Claude, Codex, Antigravity, ứng dụng desktop/mobile và local controller chỉ là các
 giao diện/executor có thể thay thế.
 
 Các bất biến không được hạ chuẩn:
@@ -150,12 +150,16 @@ write_set:
   - type: exact | prefix
     path: <repo-relative-path>
 depends_on: []
-executor: claude | codex
+executor: claude | codex | google_antigravity
 environment: cloud | local
 risk: normal | sensitive
 review_class: routine | systemic | sensitive
 acceptance_criteria: []
 ```
+
+`executor` trong Packet là provider được giao, không phải phép suy họ model. Khi giao
+`google_antigravity`, lease và evidence lượt chạy phải khai riêng họ model, surface và
+transport thực tế theo hợp đồng provider ở đầu tài liệu.
 
 Khi vào `ready`, spec được đóng băng bằng `spec_hash`. Đổi objective, acceptance, write set, dependency, executor
 hoặc environment tạo revision mới và làm lease cũ mất hiệu lực. Dispatcher bổ sung các trường phái sinh, không
@@ -244,7 +248,13 @@ Lease gồm:
 
 ```yaml
 packet_id: wp<issue>
-executor: claude | codex
+role: executor
+executor: claude | codex | google_antigravity
+provider: claude | codex | google_antigravity  # phải khớp executor của lease Executor
+model_family: claude | openai | gemini          # AG khai họ model thực chạy
+execution_surface: <actual-surface>             # AG: antigravity
+transport: <actual-transport>                   # AG: machine/local
+reviewer: claude | codex | google_antigravity | human | null  # nếu đã được định tuyến
 environment: cloud | local
 branch: agent/wp<issue>-g<generation>-<executor>
 write_set_hash: <sha256>
@@ -252,6 +262,14 @@ generation: <integer>
 heartbeat_at: <timestamp>
 lease_until: <timestamp>
 ```
+
+Lease `role: reviewer` khai `provider: claude | codex | google_antigravity | human`
+và `executor` là provider đã viết code. Reviewer AG khai `model_family`,
+`execution_surface: antigravity`, `transport: machine/local` của chính lượt review;
+Reviewer human chỉ dùng với `human_audited` hoặc fallback được khai tường minh,
+không mang họ model. Lease Executor dự kiến Reviewer AG còn khai
+`reviewer_model_family`, `reviewer_execution_surface`, `reviewer_transport` khi
+đã định tuyến. `cross_approved` nghiêm ngặt cần cả hai actor và họ model xác định.
 
 Sau 30 phút không có tiến triển, dispatcher thu hồi lease, tăng generation rồi mới reroute. Worker cũ sống lại
 không thể heartbeat, push hợp lệ hoặc handoff. Branch/PR cũ chuyển `stale`; generation mới được đọc diff cũ nhưng
@@ -412,7 +430,10 @@ schema_version: 1
 packet_id: wp<issue>
 generation: <integer>
 spec_hash: <sha256>
-provider: claude | codex
+provider: claude | codex | google_antigravity
+model_family: claude | openai | gemini
+execution_surface: <actual-surface>  # AG: antigravity
+transport: <actual-transport>        # AG: machine/local
 role: executor
 session_id: <stable-run-id>
 base_sha: <git-oid>
@@ -433,7 +454,8 @@ test_selection:
 remaining_work: []
 hint_provenance:          # tuỳ chọn — chỉ khai khi có hunk bắt nguồn từ hint của reviewer (§8)
   - finding_id: <slug>
-    reviewer: claude | codex | human
+    reviewer: claude | codex | google_antigravity | human
+    # Identity thực của hint nằm ở review receipt; AG ghi family/surface/transport tại đó.
     paths: []             # hunk/tệp bắt nguồn từ hint
     da_tai_dan_xuat: true # executor đã re-derive + tự đo, không chép mù
 next_role: reviewer | executor | land_operator | human | null
@@ -447,7 +469,8 @@ successors:
     objective: <text>
     write_set: []
     depends_on: []
-    executor: claude | codex
+    executor: claude | codex | google_antigravity
+    # Runtime family/surface/transport được neo trong lease và handoff của successor.
     environment: cloud | local
     acceptance_criteria: []
 ```
@@ -480,7 +503,7 @@ chỉ được đọc/phân tích/soạn nháp ngoài cây;
 không commit/push vào nhánh packet.
 
 Khi dispatcher/reviewer automation chưa được promote, mỗi phiên còn phải điền `next_role`,
-`manual_next_action` và `copyable_prompt` đủ để người giữ tạo một phiên Claude/Codex mới. Prompt phải neo
+`manual_next_action` và `copyable_prompt` đủ để người giữ tạo một phiên Claude/Codex/Antigravity mới. Prompt phải neo
 mission/packet/revision/generation/exact SHA, vai trò, phạm vi, gate và stop conditions; nó là tiện ích bootstrap,
 không phải lease, approval hay authority. Mẫu chuẩn ở `docs/prompts/MANUAL_SUCCESSOR_HANDOFF_D0.md`.
 
@@ -490,8 +513,11 @@ Reviewer xuất evidence độc lập:
 schema_version: 1
 packet_id: wp<issue>
 generation: <integer>
-provider: claude | codex | human
+provider: claude | codex | google_antigravity | human
 role: reviewer
+model_family: claude | openai | gemini | null  # human: null
+execution_surface: <actual-surface>             # AG: antigravity
+transport: <actual-transport>                   # AG: machine/local
 session_id: <stable-run-id>
 model_reviewer_identity: <provider/model/session attestation>
 github_submitter_identity: <github actor or null when not published>
@@ -536,8 +562,11 @@ Land evidence tách approval khỏi thao tác:
 schema_version: 1
 mission_id: gh-<issue>
 generation: <land-attempt-integer>
-provider: claude | codex | human | github-actions
+provider: claude | codex | google_antigravity | human | github-actions
 role: land_operator
+model_family: claude | openai | gemini | null  # human/github-actions: null
+execution_surface: <actual-surface>
+transport: <actual-transport>
 session_id: <stable-run-id>
 input_packet_generations: []
 authorized_head_sha: <git-oid>

@@ -5077,6 +5077,75 @@ CASES += [
 
 WINDOWS_ONLY = {"luong_canonical_chay_that"}
 
+
+def case_ag_identity_and_cross_family(c: Ctx):
+    sd = c.sd()
+    ag = ("--executor-model-family", "gemini", "--executor-execution-surface",
+          "antigravity", "--executor-transport", "machine/local")
+    rc, _, e = c.init(sd, executor="google_antigravity", reviewer="claude", extra=ag)
+    _doi(0, rc, e, "AG identity init")
+    state = json.loads((sd / "wp55.json").read_text(encoding="utf-8"))
+    if state["executor_identity"]["model_family"] != "gemini":
+        raise AssertionError("AG model family not preserved")
+    rc, _, e = run(c.script, ["begin-attempt", "--packet", 55, "--provider", "google_antigravity"], sd)
+    _doi(2, rc, e, "AG runtime missing family")
+    rc, _, e = run(c.script, ["begin-attempt", "--packet", 55, "--provider", "google_antigravity",
+                             "--model-family", "claude", "--execution-surface", "antigravity",
+                             "--transport", "machine/local"], sd)
+    _doi(4, rc, e, "AG runtime wrong family")
+    rc, _, e = run(c.script, ["begin-attempt", "--packet", 55, "--provider", "google_antigravity",
+                             "--model-family", "gemini", "--execution-surface", "antigravity",
+                             "--transport", "machine/local"], sd)
+    _doi(0, rc, e, "AG runtime correct identity")
+    rc, _, e = run(c.script, ["record-review", "--packet", 55, "--provider", "claude",
+                             "--verdict", "approve", "--reviewed-sha", c.head(1)], sd)
+    _doi(8, rc, e, "AG invalid review state")
+    cid = "9000055002"
+    rc, _, e = run(c.script, ["record-post", "--packet", 55, "--for", "reviewing",
+                             "--comment-id", cid], sd)
+    _doi(0, rc, e, "AG review post")
+    rc, _, e = run(c.script, ["transition", "--packet", 55, "--to", "reviewing",
+                             "--comment-id", cid, "--head-sha", c.head(1)], sd)
+    _doi(0, rc, e, "AG reviewing transition")
+    rc, _, e = run(c.script, ["record-review", "--packet", 55, "--provider", "claude",
+                             "--verdict", "approve", "--reviewed-sha", "b" * 40], sd)
+    _doi(5, rc, e, "AG stale reviewed SHA")
+    rc, _, e = run(c.script, ["record-review", "--packet", 55, "--provider", "claude",
+                             "--verdict", "approve", "--reviewed-sha", c.head(1)], sd)
+    _doi(0, rc, e, "AG exact SHA review")
+    sd2 = c.sd()
+    rc, _, e = c.init(sd2, executor="google_antigravity", reviewer="claude",
+                      extra=("--executor-model-family", "claude", *ag[2:]), lease=False)
+    _doi(4, rc, e, "same family cross-review")
+    sd3 = c.sd()
+    rc, _, e = c.init(sd3, executor="google_antigravity", reviewer="claude", lease=False)
+    _doi(2, rc, e, "AG missing identity")
+    sd4 = c.sd()
+    rc, _, e = c.init(sd4, executor="unknown", reviewer="claude", lease=False)
+    _doi(2, rc, e, "unknown provider")
+    sd5 = c.sd()
+    rc, _, e = c.init(sd5, executor="codex", reviewer="google_antigravity",
+                      extra=("--reviewer-model-family", "gemini", "--reviewer-execution-surface",
+                             "antigravity", "--reviewer-transport", "machine/local"))
+    _doi(0, rc, e, "AG reviewer identity init")
+    rc, _, e = run(c.script, ["begin-attempt", "--packet", 55, "--provider", "codex"], sd5)
+    _doi(0, rc, e, "AG reviewer executor begin")
+    cid = "9000055004"
+    rc, _, e = run(c.script, ["record-post", "--packet", 55, "--for", "reviewing",
+                             "--comment-id", cid], sd5)
+    _doi(0, rc, e, "AG reviewer post")
+    rc, _, e = run(c.script, ["transition", "--packet", 55, "--to", "reviewing",
+                             "--comment-id", cid, "--head-sha", c.head(1)], sd5)
+    _doi(0, rc, e, "AG reviewer transition")
+    rc, _, e = run(c.script, ["record-review", "--packet", 55, "--provider", "google_antigravity",
+                             "--model-family", "gemini", "--execution-surface", "antigravity",
+                             "--transport", "machine/local", "--verdict", "approve",
+                             "--reviewed-sha", c.head(1)], sd5)
+    _doi(0, rc, e, "AG reviewer exact SHA")
+
+
+CASES.append(("ag_identity_and_cross_family", case_ag_identity_and_cross_family))
+
 def chay_suite(script: Path, tmp: Path, chi_chay=None):
     ket = {}
     for ten, fn in CASES:

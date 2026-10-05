@@ -86,7 +86,44 @@ def GOI_GIT(*doi_so, cwd=None):
 # ĐÂY CHỈ LÀ DANH SÁCH CẤM, và một danh sách cấm KHÔNG BAO GIỜ ĐỦ. Giữ lại vì thông
 # điệp của nó chỉ đúng tên bệnh ("agent tự ký cho mình"), nhưng thứ thật sự chặn là
 # `NGUOI_CO_THAM_QUYEN` bên dưới.
-PROVIDERS = ("claude", "codex")
+PROVIDER_FAMILIES = {"claude": "claude", "codex": "openai", "google_antigravity": None}
+PROVIDERS = tuple(PROVIDER_FAMILIES)
+MODEL_FAMILIES = ("claude", "openai", "gemini")
+
+
+def _kiem_provider_identity(lease):
+    """Validate declared runtime identity; legacy leases without identity remain valid."""
+    provider = str(lease.get("provider") or lease.get("executor") or "").strip()
+    if not provider:
+        return
+    if provider not in PROVIDERS:
+        raise Chan(RC_NOI_DUNG, f"provider không hợp lệ: {provider!r}")
+    family = str(lease.get("model_family") or "").strip()
+    surface = str(lease.get("execution_surface") or "").strip()
+    transport = str(lease.get("transport") or "").strip()
+    if provider == "google_antigravity" and not all((family, surface, transport)):
+        raise Chan(RC_NOI_DUNG, "google_antigravity cần model_family, execution_surface, transport")
+    if family and (family not in MODEL_FAMILIES or
+                   (PROVIDER_FAMILIES[provider] and family != PROVIDER_FAMILIES[provider])):
+        raise Chan(RC_NOI_DUNG, f"model_family không hợp lệ: {family!r}")
+    reviewer = str(lease.get("reviewer") or "").strip()
+    if reviewer and reviewer not in PROVIDERS and reviewer != "human":
+        raise Chan(RC_NOI_DUNG, f"reviewer không hợp lệ: {reviewer!r}")
+    reviewer_family = str(lease.get("reviewer_model_family") or
+                          PROVIDER_FAMILIES.get(reviewer) or "").strip()
+    if reviewer == "google_antigravity" and not all((lease.get("reviewer_model_family"),
+                                                         lease.get("reviewer_execution_surface"),
+                                                         lease.get("reviewer_transport"))):
+        raise Chan(RC_NOI_DUNG, "google_antigravity reviewer cần model_family, execution_surface, transport")
+    if reviewer_family and reviewer_family not in MODEL_FAMILIES:
+        raise Chan(RC_NOI_DUNG, f"reviewer_model_family không hợp lệ: {reviewer_family!r}")
+    if reviewer in ("claude", "codex") and reviewer_family != PROVIDER_FAMILIES[reviewer]:
+        raise Chan(RC_NOI_DUNG, f"reviewer_model_family không khớp provider {reviewer!r}")
+    assurance = str(lease.get("assurance_target") or "").strip()
+    claims_cross = "cross_approved" in assurance
+    if claims_cross and reviewer and reviewer != "human" and (provider == reviewer or
+                    (family and reviewer_family and family == reviewer_family)):
+        raise Chan(RC_LOP, "reviewer cùng provider hoặc model family không đạt cross-review")
 
 # CHỐT THẬT — danh sách CHO PHÉP, không phải danh sách cấm.
 #
@@ -822,6 +859,7 @@ def kiem(lease: dict, tep=None, goc=None, bo_qua_han: bool = False) -> tuple:
     thieu = [k for k in BAT_BUOC if lease.get(k) in (None, "")]
     if thieu:
         raise Chan(RC_NOI_DUNG, f"thiếu trường bắt buộc: {', '.join(thieu)}")
+    _kiem_provider_identity(lease)
 
     nguoi_cap = str(lease["granted_by"]).strip()
     # CHỐT CỐT LÕI. Một agent tự ký cho chính mình thì thứ ghi ra không phải lease,

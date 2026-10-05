@@ -62,7 +62,36 @@ RC_ADR = 9
 RC_MOI_TRUONG = 10
 RC_BIEN_NHAN = 11
 
-PROVIDERS = ("claude", "codex")
+PROVIDER_FAMILIES = {"claude": "claude", "codex": "openai", "google_antigravity": None}
+PROVIDERS = tuple(PROVIDER_FAMILIES)
+MODEL_FAMILIES = ("claude", "openai", "gemini")
+
+
+def _identity(provider, model_family=None, surface=None, transport=None):
+    if provider not in PROVIDERS:
+        _die(RC_ARG, f"provider phải thuộc {PROVIDERS}")
+    family = model_family or PROVIDER_FAMILIES[provider]
+    if family not in MODEL_FAMILIES:
+        _die(RC_ARG, f"model_family phải thuộc {MODEL_FAMILIES}")
+    if provider != "google_antigravity" and family != PROVIDER_FAMILIES[provider]:
+        _die(RC_ARG, f"{provider} không thể khai model_family={family!r}")
+    if provider == "google_antigravity" and not all((model_family, surface, transport)):
+        _die(RC_ARG, "google_antigravity cần model_family, execution_surface và transport")
+    return {"provider": provider, "model_family": family,
+            "execution_surface": surface or ("claude_code" if provider == "claude" else "codex_cli"),
+            "transport": transport or "machine/local"}
+
+
+def _check_runtime_identity(a, st, role):
+    expected = st.get(f"{role}_identity")
+    if expected is None:
+        if st[role] == "google_antigravity":
+            _die(RC_STATE, f"{role} thiếu identity trong state")
+        return
+    if st[role] == "google_antigravity":
+        actual = _identity(a.provider, a.model_family, a.execution_surface, a.transport)
+        if actual != expected:
+            _die(RC_PROVIDER, f"{role} runtime identity khác state: {actual!r} != {expected!r}")
 
 # CHỐT THẬT của `--granted-by` — danh sách CHO PHÉP, không phải danh sách cấm.
 #
@@ -640,10 +669,12 @@ def _tieu_thu_comment_id(st: dict, comment_id: str | None, cho: str) -> dict:
 
 
 def cmd_init(a, state_dir: Path) -> int:
-    if a.executor not in PROVIDERS or a.reviewer not in PROVIDERS:
-        _die(RC_ARG, f"provider phải thuộc {PROVIDERS}")
+    executor_identity = _identity(a.executor, a.executor_model_family,
+                                  a.executor_execution_surface, a.executor_transport)
+    reviewer_identity = _identity(a.reviewer, a.reviewer_model_family,
+                                  a.reviewer_execution_surface, a.reviewer_transport)
     # Cross-provider: chặn NGAY từ init, không đợi tới lúc ghi review.
-    if a.executor == a.reviewer:
+    if a.executor == a.reviewer or executor_identity["model_family"] == reviewer_identity["model_family"]:
         _die(
             RC_PROVIDER,
             f"executor và reviewer cùng là {a.executor!r} — mặc định phải khác nền "
@@ -668,6 +699,8 @@ def cmd_init(a, state_dir: Path) -> int:
         "mission": a.mission,
         "executor": a.executor,
         "reviewer": a.reviewer,
+        "executor_identity": executor_identity,
+        "reviewer_identity": reviewer_identity,
         # `awaiting_lease`, KHÔNG phải `leased`. Bản trước ghi thẳng `leased` ở đây,
         # nghĩa là bất kỳ ai gõ được `init` đều tự cấp cho mình một lease hợp lệ rồi
         # `begin-attempt` sang `running` — đường vòng qua đúng doctrine "không tự cấp
@@ -875,6 +908,7 @@ def cmd_begin_attempt(a, state_dir: Path) -> int:
             RC_PROVIDER,
             f"provider {a.provider!r} không phải executor của packet này ({st['executor']!r})",
         )
+    _check_runtime_identity(a, st, "executor")
     # Một lượt ĐANG MỞ thì không mở thêm được. Thiếu chốt này, gõ `begin-attempt`
     # bốn lần liên tiếp sẽ đốt sạch trần dù chưa lượt nào chạy xong — trần bị
     # tiêu bởi thao tác lặp, không phải bởi công việc thật.
@@ -1004,6 +1038,7 @@ def cmd_record_review(a, state_dir: Path) -> int:
             RC_PROVIDER,
             f"reviewer {a.provider!r} sai nền — packet này đòi {st['reviewer']!r}",
         )
+    _check_runtime_identity(a, st, "reviewer")
 
     # LỚP THỨ HAI của `void-reviewing-accepts-attempt-zero`, độc lập với chốt trong
     # `cmd_void_attempt`. Một bản duyệt phải nói về một LƯỢT CÓ THẬT: có lượt đang
@@ -2083,6 +2118,10 @@ def build_parser() -> argparse.ArgumentParser:
     q.add_argument("--mission", type=int, required=True)
     q.add_argument("--executor", required=True)
     q.add_argument("--reviewer", required=True)
+    for role in ("executor", "reviewer"):
+        q.add_argument(f"--{role}-model-family")
+        q.add_argument(f"--{role}-execution-surface")
+        q.add_argument(f"--{role}-transport")
     q.add_argument("--attempts-limit", type=int, default=MAC_DINH_TRAN_ATTEMPT)
     q.add_argument("--same-failure-limit", type=int, default=MAC_DINH_TRAN_SAME_FAILURE)
     q.set_defaults(fn=cmd_init)
@@ -2103,6 +2142,9 @@ def build_parser() -> argparse.ArgumentParser:
     q = sub.add_parser("begin-attempt", help="mở một lượt executor")
     q.add_argument("--packet", type=int, required=True)
     q.add_argument("--provider", required=True)
+    q.add_argument("--model-family")
+    q.add_argument("--execution-surface")
+    q.add_argument("--transport")
     q.add_argument("--bang-chung-moi-truong",
                    help=f"ảnh launcher doctor --json; thiếu thì đọc ${BIEN_BANG_CHUNG}")
     q.set_defaults(fn=cmd_begin_attempt)
@@ -2125,6 +2167,9 @@ def build_parser() -> argparse.ArgumentParser:
     q = sub.add_parser("record-review", help="ghi một lượt review")
     q.add_argument("--packet", type=int, required=True)
     q.add_argument("--provider", required=True)
+    q.add_argument("--model-family")
+    q.add_argument("--execution-surface")
+    q.add_argument("--transport")
     q.add_argument("--verdict", required=True, choices=("approve", "changes_requested", "blocked"))
     q.add_argument("--reviewed-sha", help="exact head đã đọc; phải khớp head đưa ra review")
     q.add_argument(

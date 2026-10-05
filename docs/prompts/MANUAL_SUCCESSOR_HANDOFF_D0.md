@@ -13,7 +13,10 @@ packet_id: wp<number>
 revision: <integer>
 generation: <integer>
 spec_hash: <sha256>
-provider: claude | codex | human
+provider: claude | codex | google_antigravity | human
+model_family: claude | openai | gemini | null
+execution_surface: <actual-runtime-surface>
+transport: <actual-transport>
 role: executor | reviewer | land_operator
 session_id: <stable-run-id>
 base_sha: <git-oid>
@@ -54,6 +57,9 @@ Packet: #{{PACKET_ISSUE}} / {{PACKET_ID}}, revision {{REVISION}}, generation {{G
 PR: {{PR_URL}}
 Exact head bắt buộc: {{HEAD_SHA}}
 Executor provider/session: {{EXECUTOR_PROVIDER}} / {{EXECUTOR_SESSION}}
+Executor model family/surface/transport: {{EXECUTOR_MODEL_FAMILY}} / {{EXECUTOR_EXECUTION_SURFACE}} / {{EXECUTOR_TRANSPORT}}
+Reviewer phải khai model family/surface/transport thực tế. Antigravity dùng provider google_antigravity;
+cùng họ model không được ghi cross_approved dù khác công cụ.
 
 Preflight fail-closed: đọc trực tiếp Mission, Packet, PR, protocol và Executor evidence; xác minh remote PR head,
 spec hash, generation và starting tree đều khớp exact identity trên. Nếu khác, dừng và báo blocker; không tự

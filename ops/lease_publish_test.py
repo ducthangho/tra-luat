@@ -633,6 +633,31 @@ def t01_lease_hop_le_thi_QUA():
 
 
 @ca
+def t01_ag_identity_and_family_gate():
+    with San() as s:
+        ag = lease_mau(role="executor", provider="google_antigravity", executor="google_antigravity",
+                       model_family="gemini", execution_surface="antigravity",
+                       transport="machine/local", reviewer="claude",
+                       assurance_target="cross_approved_or_human_audited")
+        rc, _, e = chay("check", viet(s, ag, ten="ag.yaml"))
+        bang(rc == RC_OK, f"AG valid identity blocked: rc={rc} {e}")
+        for field, value, expected in (("model_family", "claude", RC_LOP),
+                                       ("execution_surface", "", RC_NOI_DUNG),
+                                       ("provider", "unknown", RC_NOI_DUNG),
+                                       ("granted_by", "google_antigravity", RC_TU_CAP)):
+            invalid = dict(ag, **{field: value})
+            rc, _, e = chay("check", viet(s, invalid, ten="ag-bad.yaml"))
+            bang(rc == expected, f"AG {field}={value!r} accepted/wrong gate: rc={rc} {e}")
+        ag_reviewer = lease_mau(provider="google_antigravity", model_family="gemini",
+                                execution_surface="antigravity", transport="machine/local")
+        rc, _, e = chay("check", viet(s, ag_reviewer, ten="ag-review.yaml"))
+        bang(rc == RC_OK, f"AG reviewer lease blocked: rc={rc} {e}")
+        legacy_same = lease_mau(provider="codex", reviewer="codex")
+        rc, _, e = chay("check", viet(s, legacy_same, ten="legacy-same.yaml"))
+        bang(rc == RC_OK, f"legacy same-provider lease changed behavior: rc={rc} {e}")
+
+
+@ca
 def t02_granted_by_la_ten_provider_bi_CHAN():
     """Chốt CỐT LÕI, cùng luật với `packet_loop.py record-lease`.
 

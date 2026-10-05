@@ -1,5 +1,16 @@
 # Protocol đa phiên Claude–Codex
 
+## Google Antigravity provider identity
+
+`google_antigravity` là provider riêng cho Executor hoặc Reviewer khi Packet và lease
+cấp đúng vai. Mỗi lượt phải ghi `provider`, họ model thực sự phục vụ lượt chạy
+(`model_family`: `claude`, `openai` hoặc `gemini`), `execution_surface` và
+`transport`; không suy họ model từ tên ứng dụng. Lượt Antigravity thiếu một trong
+ba thuộc tính sau provider phải dừng. Claude Code và Codex giữ identity cũ tương
+ứng họ `claude` và `openai`. Review cùng provider hoặc cùng họ model không được
+ghi `cross_approved`; chỉ review độc lập trên exact SHA mới có thể được xét assurance.
+Danh tính này không cấp lease: người cấp vẫn phải qua allowlist và authority bền.
+
 - **Trạng thái:** Thiết kế đã chốt qua grilling ngày 2026-08-03
 - **Protocol version:** 1
 - **Governance baseline:** MCR-54-02, chấp thuận ngày 2026-08-08

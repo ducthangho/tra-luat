@@ -679,8 +679,40 @@ def t01_ag_identity_and_family_gate():
                                   executor="claude", assurance_target="human_audited")
         rc, _, e = chay("check", viet(s, human_review, ten="human-review.yaml"))
         bang(rc == RC_OK, f"legacy human-audited reviewer falsely rejected: rc={rc} {e}")
+        for executor_provider, family in (("claude", "claude"), ("codex", "openai"),
+                                          ("google_antigravity", "gemini")):
+            legacy = dict(human_review, executor=executor_provider)
+            rc, _, e = chay("check", viet(s, legacy,
+                                          ten=f"human-legacy-{executor_provider}.yaml"))
+            bang(rc == RC_OK, f"legacy human audit without optional metadata blocked: {executor_provider}, rc={rc} {e}")
+            declared = dict(legacy, executor_model_family=family)
+            if executor_provider == "google_antigravity":
+                declared.update(executor_execution_surface="antigravity",
+                                executor_transport="machine/local")
+            rc, _, e = chay("check", viet(s, declared,
+                                          ten=f"human-declared-{executor_provider}.yaml"))
+            bang(rc == RC_OK, f"valid declared executor blocked: {executor_provider}, rc={rc} {e}")
+            invalid_family = dict(declared, executor_model_family="invalid-family")
+            rc, _, e = chay("check", viet(s, invalid_family,
+                                          ten=f"human-bad-family-{executor_provider}.yaml"))
+            bang(rc == RC_NOI_DUNG, f"invalid declared executor family passed: {executor_provider}, rc={rc} {e}")
+        valid_ag_executor = dict(human_review, executor="google_antigravity",
+                                 executor_model_family="gemini",
+                                 executor_execution_surface="antigravity",
+                                 executor_transport="machine/local")
+        for field, value in (("executor_model_family", " "),
+                             ("executor_execution_surface", "codex_cli"),
+                             ("executor_transport", "human_mediated")):
+            bad = dict(valid_ag_executor, **{field: value})
+            rc, _, e = chay("check", viet(s, bad, ten=f"human-ag-bad-{field}.yaml"))
+            bang(rc == RC_NOI_DUNG, f"human audit bypassed declared AG {field}: rc={rc} {e}")
+        human_orphan_metadata = dict(human_review, executor="", executor_model_family="gemini")
+        rc, _, e = chay("check", viet(s, human_orphan_metadata,
+                                      ten="human-orphan-executor-metadata.yaml"))
+        bang(rc == RC_NOI_DUNG, f"human audit accepted executor metadata without executor: rc={rc} {e}")
         for bad, label in ((dict(human_review, role="executor"), "human-executor"),
-                           (dict(human_review, assurance_target="cross_approved"), "human-cross")):
+                           (dict(human_review, assurance_target="cross_approved"), "human-cross"),
+                           (dict(human_review, assurance_target="unverified_human_audited"), "human-assurance-unknown")):
             rc, _, e = chay("check", viet(s, bad, ten=f"{label}.yaml"))
             bang(rc != RC_OK, f"{label} falsely accepted: rc={rc} {e}")
         human_cross = dict(ag, reviewer="human", reviewer_model_family="claude",
@@ -690,6 +722,10 @@ def t01_ag_identity_and_family_gate():
         human_fallback = dict(ag, reviewer="human", assurance_target="cross_approved_or_human_audited")
         rc, _, e = chay("check", viet(s, human_fallback, ten="human-fallback.yaml"))
         bang(rc == RC_OK, f"human fallback falsely rejected: rc={rc} {e}")
+        claude_review_cross = lease_mau(role="reviewer", provider="claude", reviewer="claude",
+                                        executor="codex", assurance_target="cross_approved")
+        rc, _, e = chay("check", viet(s, claude_review_cross, ten="claude-review-cross.yaml"))
+        bang(rc == RC_OK, f"valid Claude reviewer/Codex executor cross blocked: rc={rc} {e}")
         for executor_provider in ("codex", "google_antigravity"):
             contradictory = dict(ag, executor=executor_provider)
             if executor_provider == "google_antigravity":

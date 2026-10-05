@@ -91,6 +91,22 @@ PROVIDERS = tuple(PROVIDER_FAMILIES)
 MODEL_FAMILIES = ("claude", "openai", "gemini")
 
 
+def _kiem_executor_khai_voi_human_reviewer(lease, executor):
+    """Legacy human audit may omit executor runtime metadata; declarations must be valid."""
+    family_key = "executor_model_family"
+    surface_key = "executor_execution_surface"
+    transport_key = "executor_transport"
+    family = str(lease.get(family_key) or "").strip()
+    surface = str(lease.get(surface_key) or "").strip()
+    transport = str(lease.get(transport_key) or "").strip()
+    if executor == "google_antigravity":
+        if any(key in lease for key in (family_key, surface_key, transport_key)):
+            if family not in MODEL_FAMILIES or (surface, transport) != ("antigravity", "machine/local"):
+                raise Chan(RC_NOI_DUNG, "executor google_antigravity khai identity thiếu hoặc sai family/surface/transport")
+    elif family_key in lease and family != PROVIDER_FAMILIES.get(executor):
+        raise Chan(RC_NOI_DUNG, f"executor_model_family không khớp provider {executor!r}")
+
+
 def _kiem_provider_identity(lease):
     """Validate declared runtime identity; legacy leases without identity remain valid."""
     role = str(lease.get("role") or "").strip()
@@ -99,7 +115,7 @@ def _kiem_provider_identity(lease):
     if not provider:
         return
     if provider == "human":
-        if role != "reviewer" or "human_audited" not in assurance or assurance == "cross_approved":
+        if role != "reviewer" or assurance not in ("human_audited", "cross_approved_or_human_audited"):
             raise Chan(RC_LOP, "human chỉ có thể là reviewer với human_audited")
         if str(lease.get("model_family") or "").strip():
             raise Chan(RC_NOI_DUNG, "human reviewer không có model_family")
@@ -108,6 +124,11 @@ def _kiem_provider_identity(lease):
         executor = str(lease.get("executor") or "").strip()
         if executor and executor not in PROVIDERS:
             raise Chan(RC_NOI_DUNG, f"executor không hợp lệ: {executor!r}")
+        if not executor and any(key in lease for key in
+                                ("executor_model_family", "executor_execution_surface", "executor_transport")):
+            raise Chan(RC_NOI_DUNG, "executor metadata không có executor provider")
+        if executor:
+            _kiem_executor_khai_voi_human_reviewer(lease, executor)
         return
     if provider not in PROVIDERS:
         raise Chan(RC_NOI_DUNG, f"provider không hợp lệ: {provider!r}")

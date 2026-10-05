@@ -6753,7 +6753,7 @@ def t155_618_neo_dinh_nghia_theo_workflow_sha_khong_theo_base_sha():
 @ca
 def t153_nhat_ky_tung_ca_vao_ra_cap_doi_va_khong_dem():
     """M3 packet #504 (#499 C3): mỗi ca in đúng một `>>> vao X` rồi đúng một `<<< ra X` SAU nó, và dòng tổng
-    kết vẫn khớp regex của t125. Chạy chính tệp này trong tiến trình con với đúng một ca rẻ (`--chi-ca=t01_`),
+    kết vẫn khớp regex của t125. Chạy chính tệp này trong tiến trình con với đúng một ca rẻ,
     stdout qua PIPE và KHÔNG đọc cho tới khi tiến trình con kết thúc.
 
     Spec ghi tên ca này là `t152_…`; số ấy đã bị M9 (#503) dùng nên ở đây là t153 — ý nghĩa giữ nguyên.
@@ -6766,7 +6766,8 @@ def t153_nhat_ky_tung_ca_vao_ra_cap_doi_va_khong_dem():
     """
     import subprocess
     nen = {k: v for k, v in os.environ.items() if k != "GITHUB_ACTOR"}
-    p = subprocess.Popen([sys.executable, str(Path(__file__).resolve()), CO_CHI_CA + "t01_"],
+    p = subprocess.Popen([sys.executable, str(Path(__file__).resolve()),
+                          CO_CHI_CA + "t01_lease_hop_le_thi_QUA"],
                          stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, env=nen)
     try:
         p.wait(timeout=30)  # M4 t153=0.250 s; 30 s là trần cho con chỉ chạy t01, chưa đọc PIPE
@@ -7252,11 +7253,11 @@ def t155_chon_ca_khong_khop_hoac_RONG_thi_KHONG_XANH():
                            capture_output=True, text=True, env=nen, timeout=180)
         return p.returncode, p.stdout, p.stderr
 
-    rc, out, err = chay_con(CO_CHI_CA + "t01_")
+    rc, out, err = chay_con(CO_CHI_CA + "t01_lease_hop_le_thi_QUA")
     bang(rc == 0 and re.search(r"lease_publish: 1/1 đạt", out),
          f"prefix hợp lệ phải còn chạy đúng một ca: rc={rc}, stdout={out[-300:]!r}, stderr={err[-200:]!r}")
 
-    rc, out, err = chay_con(CO_AB, CO_CHI_CA + "t01_")
+    rc, out, err = chay_con(CO_AB, CO_CHI_CA + "t01_lease_hop_le_thi_QUA")
     bang(rc == 0 and re.search(r"lease_publish: 1/1 đạt", out),
          f"đường CO_AB phải còn chạy ca: rc={rc}, stdout={out[-300:]!r}, stderr={err[-200:]!r}")
 
@@ -9313,6 +9314,7 @@ def t190_DA_DANG_ma_tep_bi_SUA_van_phai_qua_kiem_tru_chot_han():
                         effective_review_class="systemic", lease_id="wp579-thu", packet_issue=55)
     for nhan, lease, mong in (
             ("review_class hạ lớp (fixture t74)", lop_sai, RC_LOP),
+            ("provider khai rỗng", L(provider=" "), RC_NOI_DUNG),
             ("người cấp ngoài danh sách cho phép", L(granted_by="nguoi-la"), RC_TU_CAP),
             ("reviewed_sha_required sai dạng", L(reviewed_sha_required="abc123"), RC_NOI_DUNG)):
         for co_dau in (False, True):

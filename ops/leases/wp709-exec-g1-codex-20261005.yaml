@@ -50,9 +50,10 @@ prompt_sha256_required: 554c70281aa34a64c24e60f0834c0f9742d59b8db3453692d72e1872
 granted_by: ducthangho
 granted_on_instruction: 'direct, in-session, 2026-10-05 ("Đồng ý làm đi, cho phép cấp lease riêng"; later "ĐỒng ý ngoại lệ, làm ngay đi")'
 grant_context_url: https://github.com/ducthangho/tra-luat/issues/709#issuecomment-5992314234
+grant_confirmation_url: https://github.com/ducthangho/tra-luat/issues/709#issuecomment-5992862650
 recorded_by: codex-dispatcher-session
 recorder_is_executor: false
-leased_at_utc: '2026-10-05T10:05:21Z'
+leased_at_utc: '2026-10-05T10:42:46Z'
 lease_expires_at_utc: '2026-10-06T10:30:00Z'
 run_minutes: 90
 heartbeat_minutes: 30

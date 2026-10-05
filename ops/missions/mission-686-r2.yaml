@@ -1,0 +1,51 @@
+schema_version: 1
+mission_id: gh-686
+revision: 2
+plan_hash: 0a05d5e147132964f18d3df055f0b745012779c18b92120e38365938edc44f14
+status: proposed
+supersedes_revision: 1
+change_request: mcr-686-01
+base_sha: 89fc4fac8cea65979cc2483043dc8cd07a6e8518
+objective: >-
+  Sửa race ProcessLookupError trong launcher _con_song theo Packet wp685,
+  giữ đúng phân biệt ESRCH với lỗi khác và hoàn tất nghiệm thu, review, land.
+acceptance_criteria:
+  - Packet wp685 đáp ứng đặc tả được đóng băng của generation thi hành.
+  - Chỉ sửa hai tệp launcher.py và launcher_test.py thuộc effective write set.
+  - Bằng chứng B1-B8, review khác họ model trên exact SHA và các required checks đủ dương.
+  - Chủ kho audit và quyết định land; đọc lại launcher-windows.yml hậu merge trước khi đóng packet.
+risk: sensitive
+requires_live: false
+envelope:
+  max_packets: 1
+  max_successor_depth: 0
+  max_attempts_per_packet: 3
+  max_run_minutes: 90
+  same_failure_limit: 2
+  max_parallel_workers: 1
+  max_agent_invocations: 30
+  max_cloud_minutes: 360
+  max_inbox_backlog: 100
+  provider_budgets: {}
+packet_plan:
+  - packet_id: wp685
+    packet_issue: 685
+    dependency_issues: [668]
+    executor: google_antigravity
+    model: gemini-3.1-pro-high
+    effort: high
+    execution_surface: antigravity
+    transport: machine/local
+    environment: local
+    review_class: sensitive
+    write_set:
+      - .claude/dev/launcher.py
+      - .claude/dev/launcher_test.py
+    target_spec_revision: 18
+    packet_generation: pending_spec_freeze
+    environment_gate: Linux Python 3.11 and 3.12 required before executor lease
+provenance:
+  prepared_on: '2026-10-05'
+  source_mission_issue: https://github.com/ducthangho/tra-luat/issues/686
+  approved_decision_url: https://github.com/ducthangho/tra-luat/issues/686#issuecomment-5988699983
+  status: candidate_not_installed

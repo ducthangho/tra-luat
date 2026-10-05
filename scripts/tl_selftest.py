@@ -4640,7 +4640,7 @@ def run() -> int:
     # ═══ v1.33.39 (log Cowork: stage cookie 'mới' [extracted_at tiến] mà NLM từ chối MỌI endpoint — cookie hết
     # hạn NHANH, chết cả local; stage cookie chết = Cowork kẹt vòng lặp) — r50_* ═══
     # cmd_nlm_auth_stage VERIFY LIVE (canary notebook_get, KHÔNG tin nlm login --check) TRƯỚC stage:
-    # dead+không-force → rc=4 TỪ CHỐI (KHÔNG upload); dead+--force → bỏ qua cổng, upload chạy; alive → stage.
+    # Every negative or uncertain canary blocks upload, including --force.
     _tg50 = _need_base("tl_gws")
     _o_files50, _o_alive50, _o_up50 = _tg50._nlm_auth_files, _tg50._nlm_auth_alive, _tg50._stage_enc_upload
     _o_tok50 = _os38.environ.get("TL_TOKEN")
@@ -4651,14 +4651,22 @@ def run() -> int:
         _tg50._stage_enc_upload = lambda name, blob, folder, fid, force, g=None: (_uploaded50.append(fid) or (fid, True))
         _mkns50 = lambda force: argparse.Namespace(config=None, profile=None, refresh=False, folder=None,
                                                    cred_file_id="F50", new=False, force=force)
-        _tg50._nlm_auth_alive = lambda nb, timeout=30: (False, "AUTH_EXPIRED (test)")
+        _blocked50 = []
+        for _result50, _force50 in [((False, "AUTH_EXPIRED"), False),
+                                      ((False, "AUTH_EXPIRED"), True),
+                                      ((None, "NETWORK_FAILURE"), False),
+                                      ((None, "TIMEOUT"), False),
+                                      ((None, "INCONCLUSIVE"), False)]:
+            _tg50._nlm_auth_alive = lambda nb, timeout=30, result=_result50: result
+            with _hush():
+                _rc50 = _tg50.cmd_nlm_auth_stage(_mkns50(_force50))
+            _blocked50.append(_rc50 == 4 and len(_uploaded50) == 0)
+        def _raise50(nb, timeout=30):
+            raise TimeoutError("test")
+        _tg50._nlm_auth_alive = _raise50
         with _hush():
-            _rc50_dead = _tg50.cmd_nlm_auth_stage(_mkns50(False))
-        _refused = (_rc50_dead == 4 and _uploaded50 == [])
-        with _hush():
-            _rc50_force = _tg50.cmd_nlm_auth_stage(_mkns50(True))
-        _forced = (_rc50_force == 0 and _uploaded50 == ["F50"])
-        _uploaded50.clear()
+            _rc50_exception = _tg50.cmd_nlm_auth_stage(_mkns50(True))
+        _blocked50.append(_rc50_exception == 4 and len(_uploaded50) == 0)
         _tg50._nlm_auth_alive = lambda nb, timeout=30: (True, "LIVE OK (test)")
         with _hush():
             _rc50_alive = _tg50.cmd_nlm_auth_stage(_mkns50(False))
@@ -4669,7 +4677,7 @@ def run() -> int:
             _os38.environ.pop("TL_TOKEN", None)
         else:
             _os38.environ["TL_TOKEN"] = _o_tok50
-    cases.append(("r50_nlm_stage_refuses_dead_cookie", _refused and _forced and _allowed))
+    cases.append(("wp710_nlm_stage_true_only_upload_count", all(_blocked50) and _allowed))
 
     # ═══ v1.33.40 (MERGE bundle-15 'complete': source-delete (a) KHÔNG trash Drive dù docstring nói, (b) reg_delete
     # SAI shape g.get(fileId,force) — GAS đòi POST+drive_ids[]+confirm=yes) — r51_* ═══

@@ -663,3 +663,45 @@ Nguyên tắc hygiene: giữ bản canonical có `nlm_source_id` + cat đúng + 
 - Trước mọi nạp nguồn web/NLM-native, chạy `tl external-ingest <url> ... --json` để kiểm kế hoạch. Lệnh này chỉ kiểm, không ghi Drive/NLM.
 - `research_start/research_status` chỉ dùng để phát hiện URL; `research_import/source_add(url)` không được dùng để nạp VBQPPL làm nguồn canonical.
 - Instruction dùng cho Claude Project/NLM phải qua `tl instruction-audit` hoặc sinh bằng `tl instructions`/`scripts/gen_instructions.py`; thiếu `SKILL_OF_RECORD`, `ingest_handoff`, `confirm_gate_web` thì không dùng.
+# WP710: refresh NLM credentials on the original browser host
+
+Run this only on the Windows host that owns the original logged-in browser profile and
+the local `~/.notebooklm-mcp-cli` credentials. The script does not copy a browser
+profile or perform a login. Prepare a trusted local JSON config outside the repository:
+
+```json
+{"notebook_id":"YOUR_EXISTING_NOTEBOOK_ID","browser_profile_path":"C:\\path\\to\\original\\browser-profile"}
+```
+
+Select and independently verify the notebook ID before starting. The refresh command
+is `nlm auth refresh`; the canary is `nlm notebook get <id> -j`. The canary must return
+the selected ID and a notebook title or name. A successful refresh rc, `nlm login
+--check`, or a notebook count alone does not authorize upload. Record only the
+script's machine-readable status, rc, elapsed seconds, CLI version and profile path
+fingerprint; child output may contain credentials and is deliberately suppressed.
+
+```powershell
+pwsh -NoProfile -File scripts/nlm-credential-refresh.ps1 -ConfigPath C:\private\nlm-refresh.json
+```
+
+`staged` means the stage command returned rc 0. `auth_failure` requires a fresh
+interactive login on the original host before retrying. `network_failure` requires
+checking connectivity and retrying. `timeout` requires checking the stalled step.
+`inconclusive` means inspect the config, selected notebook and CLI locally; no upload
+was attempted. `stage_failure` means the canary passed but upload did not report
+success; inspect Drive state before any retry to avoid an unnecessary duplicate.
+No status from offline tests proves the real credential or Drive state.
+
+Keepalive is opt in and bounded. The following runs at most three cycles, spaced by
+one hour; stop it with Ctrl+C or terminate its process. There is no Scheduled Task or
+automatic startup. A named Windows mutex serializes all refresh, canary and stage
+steps across processes on the host. An abandoned mutex is taken only when Windows reports
+that the former owning process ended.
+
+```powershell
+pwsh -NoProfile -File scripts/nlm-credential-refresh.ps1 -ConfigPath C:\private\nlm-refresh.json -EnableKeepalive -IntervalSeconds 3600 -MaxCycles 3
+```
+
+The `tl nlm-auth-stage` command itself requires a positive live canary even when
+`--force` is supplied. If it refuses to stage, fix the canary or credentials first;
+do not use `--force` as a recovery path.

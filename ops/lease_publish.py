@@ -154,9 +154,10 @@ def _kiem_provider_identity(lease):
             executor_surface, executor_transport) != ("antigravity", "machine/local"):
         raise Chan(RC_NOI_DUNG, "google_antigravity executor cần execution_surface=antigravity, transport=machine/local")
     assurance = str(lease.get("assurance_target") or "").strip()
+    strict_cross = assurance == "cross_approved"
     claims_cross = "cross_approved" in assurance
-    if claims_cross and role == "reviewer" and not executor:
-        raise Chan(RC_LOP, "lease reviewer khai cross_approved nhưng thiếu executor identity")
+    if strict_cross and not (executor and reviewer and executor_family and reviewer_family):
+        raise Chan(RC_LOP, "lease khai cross_approved nhưng thiếu executor/reviewer identity hoặc model family")
     if claims_cross and reviewer and reviewer != "human" and (executor == reviewer or
                     (executor_family and reviewer_family and executor_family == reviewer_family)):
         raise Chan(RC_LOP, "reviewer cùng provider hoặc model family không đạt cross-review")

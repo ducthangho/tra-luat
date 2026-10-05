@@ -657,8 +657,24 @@ def t01_ag_identity_and_family_gate():
         ag_cross_without_executor = dict(ag_reviewer, assurance_target="cross_approved")
         rc, _, e = chay("check", viet(s, ag_cross_without_executor,
                                       ten="ag-review-missing-executor.yaml"))
-        bang(rc == RC_LOP and "thiếu executor identity" in e,
+        bang(rc == RC_LOP and "thiếu executor/reviewer identity" in e,
              f"AG cross review without executor passed/wrong reason: rc={rc} {e}")
+        ag_review_fallback = dict(ag_reviewer, assurance_target="cross_approved_or_human_audited")
+        rc, _, e = chay("check", viet(s, ag_review_fallback,
+                                      ten="ag-review-human-fallback.yaml"))
+        bang(rc == RC_OK, f"AG reviewer human audit fallback falsely rejected: rc={rc} {e}")
+        ag_cross_without_reviewer = dict(ag)
+        ag_cross_without_reviewer.pop("reviewer")
+        ag_cross_without_reviewer["assurance_target"] = "cross_approved"
+        rc, _, e = chay("check", viet(s, ag_cross_without_reviewer,
+                                      ten="ag-exec-missing-reviewer.yaml"))
+        bang(rc == RC_LOP and "thiếu executor/reviewer identity" in e,
+             f"strict AG cross executor without reviewer passed/wrong reason: rc={rc} {e}")
+        ag_fallback_without_reviewer = dict(ag_cross_without_reviewer,
+                                            assurance_target="cross_approved_or_human_audited")
+        rc, _, e = chay("check", viet(s, ag_fallback_without_reviewer,
+                                      ten="ag-exec-human-fallback.yaml"))
+        bang(rc == RC_OK, f"explicit human audit fallback falsely rejected: rc={rc} {e}")
         for executor_provider in ("codex", "google_antigravity"):
             contradictory = dict(ag, executor=executor_provider)
             if executor_provider == "google_antigravity":

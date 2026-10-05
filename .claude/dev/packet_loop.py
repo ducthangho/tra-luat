@@ -83,8 +83,8 @@ def _identity(provider, model_family=None, surface=None, transport=None):
     if provider == "google_antigravity" and (surface, transport) != ("antigravity", "machine/local"):
         _die(RC_ARG, "google_antigravity cần execution_surface=antigravity, transport=machine/local")
     return {"provider": provider, "model_family": family,
-            "execution_surface": surface or ("claude_code" if provider == "claude" else "codex_cli"),
-            "transport": transport or "machine/local"}
+            "execution_surface": surface,
+            "transport": transport}
 
 
 def _check_runtime_identity(a, st, role):
@@ -93,10 +93,10 @@ def _check_runtime_identity(a, st, role):
         if st[role] == "google_antigravity":
             _die(RC_STATE, f"{role} thiếu identity trong state")
         return
-    if st[role] == "google_antigravity":
-        actual = _identity(a.provider, a.model_family, a.execution_surface, a.transport)
-        if actual != expected:
-            _die(RC_PROVIDER, f"{role} runtime identity khác state: {actual!r} != {expected!r}")
+    actual = _identity(a.provider, a.model_family, a.execution_surface, a.transport)
+    if any(expected.get(field) is not None and actual[field] != expected[field]
+           for field in ("provider", "model_family", "execution_surface", "transport")):
+        _die(RC_PROVIDER, f"{role} runtime identity khác state: {actual!r} != {expected!r}")
 
 # CHỐT THẬT của `--granted-by` — danh sách CHO PHÉP, không phải danh sách cấm.
 #

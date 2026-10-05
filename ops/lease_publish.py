@@ -132,6 +132,8 @@ def _kiem_provider_identity(lease):
         return
     if provider not in PROVIDERS:
         raise Chan(RC_NOI_DUNG, f"provider không hợp lệ: {provider!r}")
+    if provider == "google_antigravity" and role not in ("executor", "reviewer"):
+        raise Chan(RC_LOP, "google_antigravity chỉ giữ vai executor hoặc reviewer")
     declared_family = str(lease.get("model_family") or "").strip()
     surface = str(lease.get("execution_surface") or "").strip()
     transport = str(lease.get("transport") or "").strip()
@@ -190,6 +192,8 @@ def _kiem_provider_identity(lease):
         raise Chan(RC_NOI_DUNG, "google_antigravity executor cần execution_surface=antigravity, transport=machine/local")
     strict_cross = assurance == "cross_approved"
     claims_cross = "cross_approved" in assurance
+    if assurance == "human_audited" and reviewer != "human":
+        raise Chan(RC_LOP, "human_audited đòi reviewer human")
     if strict_cross and not (executor and reviewer and executor_family and reviewer_family):
         raise Chan(RC_LOP, "lease khai cross_approved nhưng thiếu executor/reviewer identity hoặc model family")
     if strict_cross and (executor not in PROVIDERS or reviewer not in PROVIDERS):

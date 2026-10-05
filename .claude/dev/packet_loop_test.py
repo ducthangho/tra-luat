@@ -5174,6 +5174,82 @@ def case_ag_identity_and_cross_family(c: Ctx):
 
 CASES.append(("ag_identity_and_cross_family", case_ag_identity_and_cross_family))
 
+
+def case_codex_runtime_surface_transport(c: Ctx):
+    sd = c.sd()
+    rc, _, e = c.init(sd, executor="codex", reviewer="claude",
+                      extra=("--executor-execution-surface", "codex_desktop",
+                             "--executor-transport", "machine/local"))
+    _doi(0, rc, e, "Codex Desktop identity init")
+    state = json.loads((sd / "wp55.json").read_text(encoding="utf-8"))
+    if state["executor_identity"]["execution_surface"] != "codex_desktop":
+        raise AssertionError("Codex Desktop surface was replaced")
+    for surface, transport in (("codex_cli", "machine/local"),
+                               ("codex_desktop", "service")):
+        rc, _, e = run(c.script, ["begin-attempt", "--packet", 55, "--provider", "codex",
+                                 "--execution-surface", surface, "--transport", transport], sd)
+        _doi(4, rc, e, "Codex executor runtime mismatch")
+        if c.state(sd, 55) != "leased":
+            raise AssertionError("mismatched Codex runtime opened attempt")
+    rc, _, e = run(c.script, ["begin-attempt", "--packet", 55, "--provider", "codex",
+                             "--execution-surface", "codex_desktop", "--transport", "machine/local"], sd)
+    _doi(0, rc, e, "Codex Desktop runtime match")
+
+    sd2 = c.sd()
+    rc, _, e = c.init(sd2, executor="claude", reviewer="codex",
+                      extra=("--reviewer-execution-surface", "codex_desktop",
+                             "--reviewer-transport", "machine/local"))
+    _doi(0, rc, e, "Codex reviewer identity init")
+    c.den_reviewing(sd2, 55, 1)
+    for surface, transport in (("codex_service", "machine/local"),
+                               ("codex_desktop", "service")):
+        rc, _, e = run(c.script, ["record-review", "--packet", 55, "--provider", "codex",
+                                 "--execution-surface", surface, "--transport", transport,
+                                 "--verdict", "approve", "--reviewed-sha", c.head(1)], sd2)
+        _doi(4, rc, e, "Codex reviewer runtime mismatch")
+        st = json.loads((sd2 / "wp55.json").read_text(encoding="utf-8"))
+        if st["state"] != "reviewing" or st["reviews"]:
+            raise AssertionError("mismatched Codex reviewer recorded verdict")
+    rc, _, e = run(c.script, ["record-review", "--packet", 55, "--provider", "codex",
+                             "--execution-surface", "codex_desktop", "--transport", "machine/local",
+                             "--verdict", "approve", "--reviewed-sha", c.head(1)], sd2)
+    _doi(0, rc, e, "Codex Desktop reviewer match")
+
+    legacy = c.sd()
+    rc, _, e = c.init(legacy, executor="codex", reviewer="claude")
+    _doi(0, rc, e, "legacy Codex init")
+    state = json.loads((legacy / "wp55.json").read_text(encoding="utf-8"))
+    if state["executor_identity"]["execution_surface"] is not None:
+        raise AssertionError("legacy unknown Codex surface was fabricated")
+    rc, _, e = run(c.script, ["begin-attempt", "--packet", 55, "--provider", "codex"], legacy)
+    _doi(0, rc, e, "legacy unknown Codex runtime")
+
+    service = c.sd()
+    rc, _, e = c.init(service, executor="codex", reviewer="claude",
+                      extra=("--executor-execution-surface", "codex_service",
+                             "--executor-transport", "service"))
+    _doi(0, rc, e, "Codex service identity init")
+    rc, _, e = run(c.script, ["begin-attempt", "--packet", 55, "--provider", "codex",
+                             "--execution-surface", "codex_service", "--transport", "service"], service)
+    _doi(0, rc, e, "Codex service runtime match")
+
+    claude = c.sd()
+    rc, _, e = c.init(claude, executor="claude", reviewer="codex",
+                      extra=("--executor-execution-surface", "claude_code",
+                             "--executor-transport", "machine/local"))
+    _doi(0, rc, e, "Claude declared identity init")
+    for surface, transport in (("codex_desktop", "machine/local"),
+                               ("claude_code", "service")):
+        rc, _, e = run(c.script, ["begin-attempt", "--packet", 55, "--provider", "claude",
+                                 "--execution-surface", surface, "--transport", transport], claude)
+        _doi(4, rc, e, "Claude declared runtime mismatch")
+    rc, _, e = run(c.script, ["begin-attempt", "--packet", 55, "--provider", "claude",
+                             "--execution-surface", "claude_code", "--transport", "machine/local"], claude)
+    _doi(0, rc, e, "Claude declared runtime match")
+
+
+CASES.append(("codex_runtime_surface_transport", case_codex_runtime_surface_transport))
+
 def chay_suite(script: Path, tmp: Path, chi_chay=None):
     ket = {}
     for ten, fn in CASES:

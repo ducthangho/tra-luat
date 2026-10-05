@@ -654,6 +654,16 @@ def t01_ag_identity_and_family_gate():
                                 execution_surface="antigravity", transport="machine/local")
         rc, _, e = chay("check", viet(s, ag_reviewer, ten="ag-review.yaml"))
         bang(rc == RC_OK, f"AG reviewer lease blocked: rc={rc} {e}")
+        ag_review_human_claim = dict(ag_reviewer, schema_version=2, review_class="sensitive",
+                                     effective_review_class="sensitive", assurance_target="human_audited")
+        rc, _, e = chay("check", viet(s, ag_review_human_claim,
+                                      ten="ag-review-human-claim.yaml"))
+        bang(rc == RC_LOP, f"AG model reviewer claimed human audit: rc={rc} {e}")
+        codex_review_human_claim = lease_mau(role="reviewer", provider="codex",
+                                             assurance_target="human_audited")
+        rc, _, e = chay("check", viet(s, codex_review_human_claim,
+                                      ten="codex-review-human-claim.yaml"))
+        bang(rc == RC_LOP, f"Codex model reviewer claimed human audit: rc={rc} {e}")
         ag_cross_without_executor = dict(ag_reviewer, assurance_target="cross_approved")
         rc, _, e = chay("check", viet(s, ag_cross_without_executor,
                                       ten="ag-review-missing-executor.yaml"))
@@ -722,6 +732,15 @@ def t01_ag_identity_and_family_gate():
         human_fallback = dict(ag, reviewer="human", assurance_target="cross_approved_or_human_audited")
         rc, _, e = chay("check", viet(s, human_fallback, ten="human-fallback.yaml"))
         bang(rc == RC_OK, f"human fallback falsely rejected: rc={rc} {e}")
+        human_audit_target = dict(ag, reviewer="human", assurance_target="human_audited")
+        rc, _, e = chay("check", viet(s, human_audit_target, ten="human-audit-target.yaml"))
+        bang(rc == RC_OK, f"executor targeting actual human audit blocked: rc={rc} {e}")
+        ag_land = dict(ag, role="land_operator")
+        rc, _, e = chay("check", viet(s, ag_land, ten="ag-land.yaml"))
+        bang(rc == RC_LOP, f"AG land operator outside role scope passed: rc={rc} {e}")
+        codex_land = lease_mau(role="land_operator", provider="codex")
+        rc, _, e = chay("check", viet(s, codex_land, ten="codex-land.yaml"))
+        bang(rc == RC_OK, f"legacy Codex land operator falsely blocked: rc={rc} {e}")
         claude_review_cross = lease_mau(role="reviewer", provider="claude", reviewer="claude",
                                         executor="codex", assurance_target="cross_approved")
         rc, _, e = chay("check", viet(s, claude_review_cross, ten="claude-review-cross.yaml"))

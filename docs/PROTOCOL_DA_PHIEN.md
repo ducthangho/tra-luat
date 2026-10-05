@@ -562,9 +562,9 @@ Land evidence tách approval khỏi thao tác:
 schema_version: 1
 mission_id: gh-<issue>
 generation: <land-attempt-integer>
-provider: claude | codex | google_antigravity | human | github-actions
+provider: claude | codex | human | github-actions
 role: land_operator
-model_family: claude | openai | gemini | null  # human/github-actions: null
+model_family: claude | openai | null  # human/github-actions: null
 execution_surface: <actual-surface>
 transport: <actual-transport>
 session_id: <stable-run-id>
@@ -579,6 +579,9 @@ pre_merge_checks: []
 post_merge_checks: []
 bookkeeping: []
 ```
+
+`google_antigravity` chỉ được định tuyến làm Executor hoặc Reviewer theo Packet;
+không có quyền `land_operator` trong schema này.
 
 Thiếu evidence bắt buộc chặn transition tương ứng; chat transcript hoặc lời tự khai không thay thế GitHub object,
 commit và workflow run. Khi `head_sha` đổi, review verdict, CI và authorization của SHA cũ mất hiệu lực.

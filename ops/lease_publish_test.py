@@ -654,6 +654,20 @@ def t01_ag_identity_and_family_gate():
                                 execution_surface="antigravity", transport="machine/local")
         rc, _, e = chay("check", viet(s, ag_reviewer, ten="ag-review.yaml"))
         bang(rc == RC_OK, f"AG reviewer lease blocked: rc={rc} {e}")
+        ag_cross_without_executor = dict(ag_reviewer, assurance_target="cross_approved")
+        rc, _, e = chay("check", viet(s, ag_cross_without_executor,
+                                      ten="ag-review-missing-executor.yaml"))
+        bang(rc == RC_LOP and "thiếu executor identity" in e,
+             f"AG cross review without executor passed/wrong reason: rc={rc} {e}")
+        for executor_provider in ("codex", "google_antigravity"):
+            contradictory = dict(ag, executor=executor_provider)
+            if executor_provider == "google_antigravity":
+                contradictory["provider"] = "codex"
+                contradictory.pop("model_family")
+            rc, _, e = chay("check", viet(s, contradictory,
+                                          ten=f"contradictory-{executor_provider}.yaml"))
+            bang(rc == RC_NOI_DUNG and "executor không khớp provider" in e,
+                 f"contradictory executor/provider passed/wrong reason: rc={rc} {e}")
         for field, value in (("model_family", " "),
                              ("execution_surface", "codex_cli"),
                              ("transport", "human_mediated")):

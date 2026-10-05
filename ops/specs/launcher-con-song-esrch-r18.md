@@ -3682,7 +3682,7 @@ VERDICT với tệp VERDICT (gạch đầu dòng "Dữ kiện do điều phối 
    r10 KHÔNG chọn. Chủ kho giữ (a) ⇒ lease r10; chọn (b) hay (c) ⇒ revision mới (đổi B4, B5, B8, §6, §8). r11 và r12
    cũng không chọn; giữ (a) ⇒ lease r12. r13 cũng không chọn; giữ (a) ⇒ lease r13 (kích thước ở §4 là của phương án (a)).
    r14 cũng không chọn; giữ (a) ⇒ lease r14. r15 cũng không chọn; giữ (a) ⇒ lease r15. r16 cũng không chọn; giữ (a)
-   ⇒ lease r16. r17 cũng không chọn; giữ (a) ⇒ lease r17 (ghi nhận lịch sử r17). Hiện tại r18 đang là DỰ THẢO, chưa cấp lease.
+   ⇒ lease r16. Về mặt lịch sử r17 đã chọn (a); nếu lease từng được cấp tại r17 thì nó phải neo vào hash của r17, nhưng không có bằng chứng nào ở đây cho thấy lease đã thực sự được cấp; hiện tại r18 đang là DỰ THẢO, chưa có lease.
 4. **(r11) Điều kiện cấp lease của Q5 — ĐÃ ĐỌC, không phải câu hỏi mới.** Mission #686 comment `5888633201` (phiên
    agent đăng hộ chủ kho; đăng 2026-09-29T10:45:55Z), r11 đọc qua REST lần đầu (r2 đến r10 không đọc): chủ kho *"Cấp
    lease cho wp 678, wp685 (khi #668 nhả launcher_test.py)"*, kèm ba điều kiện, TẤT CẢ đo lại ngay trước khi cấp:

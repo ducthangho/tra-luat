@@ -1,0 +1,24 @@
+schema_version: 1
+change_request_id: mcr-686-02
+mission_issue: 686
+requested_by: ducthangho
+reason: >-
+  Codex review round 2 of PR 688 found the protocol and packet_loop do not
+  accept google_antigravity; wp709 must land before wp685 can execute.
+proposed_changes:
+  - Add wp709 as a dependency of wp685 and land wp709 first.
+  - Increase max_packets from 1 to 2 and max_successor_depth from 0 to 1.
+  - Preserve the wp685 launcher objective, its two-file write set, and Q4.
+  - Use Codex executor for wp709 bootstrap and independent sensitive review.
+affected_packets: [wp709, wp685]
+landed_work_impact: none
+risk_change: increased
+decision: approved
+decision_source: human
+approved_by: ducthangho
+decision_url: https://github.com/ducthangho/tra-luat/issues/686#issuecomment-5991924869
+proposal_url: https://github.com/ducthangho/tra-luat/issues/686#issuecomment-5991696513
+supersedes_revision: 2
+audit_note: >-
+  The owner approved the exact MCR in a direct GitHub comment. Mission r3 is
+  installed only after its state event and projection have been read back.

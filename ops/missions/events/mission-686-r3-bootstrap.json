@@ -1,0 +1,36 @@
+{
+  "event_hash": "fd97e35cf6b1a1576d9ae34de6c92df05054f9c945e9ad0cad1005f480e62cbd",
+  "event_type": "mission_revision_installed",
+  "expected_state_revision": null,
+  "legacy_note": "r1 retrospective and r2 proposed; neither had an installed event",
+  "mission_issue": 686,
+  "mission_revision": 3,
+  "post_state": {
+    "manual_bootstrap": true,
+    "mcr_decision_url": "https://github.com/ducthangho/tra-luat/issues/686#issuecomment-5991924869",
+    "mission_issue": 686,
+    "mission_revision": 3,
+    "mission_state": "running",
+    "packet_states": {
+      "wp685": {
+        "generation": null,
+        "reason": "depends_on_wp709_land",
+        "state": "blocked",
+        "target_revision": 18
+      },
+      "wp709": {
+        "generation": 1,
+        "lease_id": null,
+        "revision": 1,
+        "spec_hash": "f569b613cf7369b70845728972d4f1f0227dcdf96df2ff7508ffb815f21d005c",
+        "state": "ready"
+      }
+    },
+    "plan_hash": "38b2b3ef9d4a410e2a6a00fdc1861611fd39295b7652062d2988ebc3513feb8a",
+    "reconciler_implemented": false,
+    "schema_version": 1
+  },
+  "prev_event_hash": null,
+  "schema_version": 1,
+  "state_hash": "cd45a08f2f1b16d63f9f88c4b0d59868c5bb4c697713d8ad6a0f720d17c0dc7e"
+}

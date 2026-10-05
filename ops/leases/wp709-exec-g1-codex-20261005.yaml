@@ -1,0 +1,64 @@
+schema_version: 2
+event: executor_lease_granted
+packet_issue: 709
+packet_id: wp709
+mission_issue: 686
+mission_revision: 3
+plan_hash: 38b2b3ef9d4a410e2a6a00fdc1861611fd39295b7652062d2988ebc3513feb8a
+revision: 1
+generation: 1
+lease_id: wp709-exec-g1-codex-20261005
+role: executor
+provider: codex
+executor: codex
+model: gpt-6-astra
+execution_surface: codex_desktop
+transport: machine/local
+reviewer: claude
+assurance_target: cross_approved_or_human_audited
+access: read-write
+review_class: sensitive
+effective_review_class: sensitive
+spec_path: ops/specs/wp709-r1.yaml
+spec_sha256_required: f739b4aacf0e27e4ad3b786279507c2fcf84f0816d68285cc2c473631d8be69c
+spec_hash: f569b613cf7369b70845728972d4f1f0227dcdf96df2ff7508ffb815f21d005c
+write_set:
+  - docs/PROTOCOL_DA_PHIEN.md
+  - .claude/dev/packet_loop.py
+  - .claude/dev/packet_loop_test.py
+  - ops/lease_publish.py
+  - ops/lease_publish_test.py
+  - docs/prompts/MANUAL_SUCCESSOR_HANDOFF_D0.md
+effective_write_set:
+  - docs/PROTOCOL_DA_PHIEN.md
+  - .claude/dev/packet_loop.py
+  - .claude/dev/packet_loop_test.py
+  - ops/lease_publish.py
+  - ops/lease_publish_test.py
+  - docs/prompts/MANUAL_SUCCESSOR_HANDOFF_D0.md
+write_set_hash: a45f20f34d210111489a78328a21d62ba338a7255b47229e2633aea7ab77816c
+change_policy_sha: null
+closure_basis: approved_mcr_686_02_and_six_path_spec
+branch: codex/wp709-g1
+branch_ownership: exclusive
+target_branch_neu_land: master
+base_sha: 8c98afacb9285aa71e5200739236284f7a190d4f
+start_from_sha: 8c98afacb9285aa71e5200739236284f7a190d4f
+reviewed_sha_required: 8c98afacb9285aa71e5200739236284f7a190d4f
+prompt_path: ops/prompts/wp709-exec-g1-codex-20261005.md
+prompt_sha256_required: 554c70281aa34a64c24e60f0834c0f9742d59b8db3453692d72e1872028d3662
+granted_by: ducthangho
+granted_on_instruction: 'direct, in-session, 2026-10-05 ("Đồng ý làm đi, cho phép cấp lease riêng"; later "ĐỒng ý ngoại lệ, làm ngay đi")'
+grant_context_url: https://github.com/ducthangho/tra-luat/issues/709#issuecomment-5992314234
+recorded_by: codex-dispatcher-session
+recorder_is_executor: false
+leased_at_utc: '2026-10-05T10:05:21Z'
+lease_expires_at_utc: '2026-10-06T10:30:00Z'
+run_minutes: 90
+heartbeat_minutes: 30
+attempts_used: 0
+attempts_limit: 3
+review_rounds_limit: 2
+requires_live: false
+ci_policy: no_ci_or_full_ci_until_merge_readiness
+push_policy: bootstrap_push_authorized_then_one_code_push_after_zero_p1_p2_p3

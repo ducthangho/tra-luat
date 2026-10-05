@@ -1,0 +1,60 @@
+schema_version: 1
+packet_id: wp709
+mission_issue: 686
+mission_change_request: mcr-686-02
+revision: 1
+base_sha: 8c98afacb9285aa71e5200739236284f7a190d4f
+objective: >-
+  Add first-class google_antigravity executor and reviewer identity to the
+  protocol, packet state path, and lease validator without weakening authority
+  or cross-review assurance; unblock wp685 after this Packet is landed.
+depends_on: []
+blocks: [wp685]
+executor: codex
+environment: local
+risk: sensitive
+review_class: sensitive
+requires_live: false
+write_set:
+  - {type: exact, path: docs/PROTOCOL_DA_PHIEN.md}
+  - {type: exact, path: .claude/dev/packet_loop.py}
+  - {type: exact, path: .claude/dev/packet_loop_test.py}
+  - {type: exact, path: ops/lease_publish.py}
+  - {type: exact, path: ops/lease_publish_test.py}
+  - {type: exact, path: docs/prompts/MANUAL_SUCCESSOR_HANDOFF_D0.md}
+change_policy_sha: null
+closure_basis: >-
+  Explicit manual six-path effective write set in Issue 709 and approved
+  mcr-686-02; no canonical change-impact policy was located at base_sha.
+effective_write_set:
+  - {type: exact, path: docs/PROTOCOL_DA_PHIEN.md}
+  - {type: exact, path: .claude/dev/packet_loop.py}
+  - {type: exact, path: .claude/dev/packet_loop_test.py}
+  - {type: exact, path: ops/lease_publish.py}
+  - {type: exact, path: ops/lease_publish_test.py}
+  - {type: exact, path: docs/prompts/MANUAL_SUCCESSOR_HANDOFF_D0.md}
+effective_review_class: sensitive
+acceptance_criteria:
+  - AG has its own executor/reviewer identity, model family, surface and transport.
+  - Legacy Claude and Codex packet paths keep their behavior.
+  - Invalid provider, self-granted lease, same-family cross-review, stale SHA and invalid state fail closed.
+  - AG positive and negative cases run in packet_loop_test.py and lease_publish_test.py.
+  - A distinct reviewer or independent human auditor binds verdict to exact SHA.
+  - No launcher, workflow, manifest, golden, LIVE or out-of-set edits.
+required_checks:
+  local_before_review:
+    - python .claude/dev/packet_loop_test.py
+    - python ops/lease_publish_test.py
+  merge_readiness:
+    - gate-packet-loop (ubuntu-latest)
+    - gate-ops (ubuntu-latest)
+    - gate (ubuntu-latest)
+land_obligations:
+  - Independent exact-SHA review with zero P1/P2/P3.
+  - Human audit and separate land authorization on exact SHA.
+  - Required checks with positive evidence at merge readiness.
+  - Mission #686 and wp685 generation/readback after enabler lands.
+constraints:
+  - Do not run CI or full CI until merge readiness.
+  - Push code to GitHub once after all findings are closed.
+  - Do not grant a lease from executor output or a zero-holder scan.

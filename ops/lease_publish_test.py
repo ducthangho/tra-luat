@@ -643,6 +643,8 @@ def t01_ag_identity_and_family_gate():
         bang(rc == RC_OK, f"AG valid identity blocked: rc={rc} {e}")
         for field, value, expected in (("model_family", "claude", RC_LOP),
                                        ("execution_surface", "", RC_NOI_DUNG),
+                                       ("execution_surface", "codex_cli", RC_NOI_DUNG),
+                                       ("transport", "human_mediated", RC_NOI_DUNG),
                                        ("provider", "unknown", RC_NOI_DUNG),
                                        ("granted_by", "google_antigravity", RC_TU_CAP)):
             invalid = dict(ag, **{field: value})
@@ -652,6 +654,12 @@ def t01_ag_identity_and_family_gate():
                                 execution_surface="antigravity", transport="machine/local")
         rc, _, e = chay("check", viet(s, ag_reviewer, ten="ag-review.yaml"))
         bang(rc == RC_OK, f"AG reviewer lease blocked: rc={rc} {e}")
+        for field, value in (("model_family", " "),
+                             ("execution_surface", "codex_cli"),
+                             ("transport", "human_mediated")):
+            invalid = dict(ag_reviewer, **{field: value})
+            rc, _, e = chay("check", viet(s, invalid, ten=f"ag-review-bad-{field}.yaml"))
+            bang(rc == RC_NOI_DUNG, f"AG reviewer invalid {field} passed: rc={rc} {e}")
         legacy_same = lease_mau(provider="codex", reviewer="codex")
         rc, _, e = chay("check", viet(s, legacy_same, ten="legacy-same.yaml"))
         bang(rc == RC_OK, f"legacy same-provider lease changed behavior: rc={rc} {e}")
@@ -665,6 +673,10 @@ def t01_ag_identity_and_family_gate():
             rc, _, e = chay("check", viet(s, legacy_to_ag,
                                           ten=f"legacy-{executor_provider}-same-family.yaml"))
             bang(rc == RC_LOP, f"missing legacy family bypassed cross gate: {executor_provider}, rc={rc} {e}")
+            legacy_to_ag["reviewer_model_family"] = " "
+            rc, _, e = chay("check", viet(s, legacy_to_ag,
+                                          ten=f"legacy-{executor_provider}-blank-family.yaml"))
+            bang(rc == RC_NOI_DUNG, f"blank AG reviewer family bypassed gate: rc={rc} {e}")
             legacy_to_ag["reviewer_model_family"] = "gemini"
             rc, _, e = chay("check", viet(s, legacy_to_ag,
                                           ten=f"legacy-{executor_provider}-cross-family.yaml"))

@@ -112,10 +112,15 @@ def _kiem_provider_identity(lease):
         raise Chan(RC_NOI_DUNG, f"reviewer không hợp lệ: {reviewer!r}")
     reviewer_family = str(lease.get("reviewer_model_family") or
                           PROVIDER_FAMILIES.get(reviewer) or "").strip()
-    if reviewer == "google_antigravity" and not all((lease.get("reviewer_model_family"),
-                                                         lease.get("reviewer_execution_surface"),
-                                                         lease.get("reviewer_transport"))):
+    reviewer_surface = str(lease.get("reviewer_execution_surface") or "").strip()
+    reviewer_transport = str(lease.get("reviewer_transport") or "").strip()
+    if reviewer == "google_antigravity" and not all((reviewer_family,
+                                                       reviewer_surface, reviewer_transport)):
         raise Chan(RC_NOI_DUNG, "google_antigravity reviewer cần model_family, execution_surface, transport")
+    if provider == "google_antigravity" and (surface, transport) != ("antigravity", "machine/local"):
+        raise Chan(RC_NOI_DUNG, "google_antigravity cần execution_surface=antigravity, transport=machine/local")
+    if reviewer == "google_antigravity" and (reviewer_surface, reviewer_transport) != ("antigravity", "machine/local"):
+        raise Chan(RC_NOI_DUNG, "google_antigravity reviewer cần execution_surface=antigravity, transport=machine/local")
     if reviewer_family and reviewer_family not in MODEL_FAMILIES:
         raise Chan(RC_NOI_DUNG, f"reviewer_model_family không hợp lệ: {reviewer_family!r}")
     if reviewer in ("claude", "codex") and reviewer_family != PROVIDER_FAMILIES[reviewer]:

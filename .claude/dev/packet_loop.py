@@ -70,13 +70,18 @@ MODEL_FAMILIES = ("claude", "openai", "gemini")
 def _identity(provider, model_family=None, surface=None, transport=None):
     if provider not in PROVIDERS:
         _die(RC_ARG, f"provider phải thuộc {PROVIDERS}")
-    family = model_family or PROVIDER_FAMILIES[provider]
+    family = model_family.strip() if isinstance(model_family, str) else model_family
+    surface = surface.strip() if isinstance(surface, str) else surface
+    transport = transport.strip() if isinstance(transport, str) else transport
+    if provider == "google_antigravity" and not all((family, surface, transport)):
+        _die(RC_ARG, "google_antigravity cần model_family, execution_surface và transport")
+    family = family or PROVIDER_FAMILIES[provider]
     if family not in MODEL_FAMILIES:
         _die(RC_ARG, f"model_family phải thuộc {MODEL_FAMILIES}")
     if provider != "google_antigravity" and family != PROVIDER_FAMILIES[provider]:
         _die(RC_ARG, f"{provider} không thể khai model_family={family!r}")
-    if provider == "google_antigravity" and not all((model_family, surface, transport)):
-        _die(RC_ARG, "google_antigravity cần model_family, execution_surface và transport")
+    if provider == "google_antigravity" and (surface, transport) != ("antigravity", "machine/local"):
+        _die(RC_ARG, "google_antigravity cần execution_surface=antigravity, transport=machine/local")
     return {"provider": provider, "model_family": family,
             "execution_surface": surface or ("claude_code" if provider == "claude" else "codex_cli"),
             "transport": transport or "machine/local"}

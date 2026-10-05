@@ -5123,6 +5123,15 @@ def case_ag_identity_and_cross_family(c: Ctx):
     sd4 = c.sd()
     rc, _, e = c.init(sd4, executor="unknown", reviewer="claude", lease=False)
     _doi(2, rc, e, "unknown provider")
+    for surface, transport in (("codex_cli", "machine/local"),
+                               ("antigravity", "human_mediated"),
+                               (" ", "machine/local")):
+        invalid_sd = c.sd()
+        rc, _, e = c.init(invalid_sd, executor="google_antigravity", reviewer="claude",
+                          extra=("--executor-model-family", "gemini",
+                                 "--executor-execution-surface", surface,
+                                 "--executor-transport", transport), lease=False)
+        _doi(2, rc, e, "AG unsupported executor surface/transport")
     sd5 = c.sd()
     rc, _, e = c.init(sd5, executor="codex", reviewer="google_antigravity",
                       extra=("--reviewer-model-family", "gemini", "--reviewer-execution-surface",
@@ -5142,6 +5151,15 @@ def case_ag_identity_and_cross_family(c: Ctx):
                              "--transport", "machine/local", "--verdict", "approve",
                              "--reviewed-sha", c.head(1)], sd5)
     _doi(0, rc, e, "AG reviewer exact SHA")
+    for family, surface, transport in ((" ", "antigravity", "machine/local"),
+                                       ("gemini", "codex_cli", "machine/local"),
+                                       ("gemini", "antigravity", "human_mediated")):
+        invalid_sd = c.sd()
+        rc, _, e = c.init(invalid_sd, executor="codex", reviewer="google_antigravity",
+                          extra=("--reviewer-model-family", family,
+                                 "--reviewer-execution-surface", surface,
+                                 "--reviewer-transport", transport), lease=False)
+        _doi(2, rc, e, "AG unsupported reviewer identity")
 
 
 CASES.append(("ag_identity_and_cross_family", case_ag_identity_and_cross_family))

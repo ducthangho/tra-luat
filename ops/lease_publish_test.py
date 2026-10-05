@@ -2685,20 +2685,46 @@ raise SystemExit(int(os.environ.get("WRAPPER_TEST_RC", "0")))
             actionlint_ngoai = shutil.which("actionlint")
             bang(actionlint_ngoai and actionlint_ngoai.lower().endswith(".exe"),
                  "[Windows] KHÔNG ĐO ĐƯỢC: PATH không có `actionlint.exe` thật")
-            do_ban = subprocess.run([actionlint_ngoai, "--version"],
-                                    capture_output=True, text=True)
-            dong = (do_ban.stdout or "").strip().splitlines()
-            bang(do_ban.returncode == 0 and dong and dong[0] == VER,
-                 f"[Windows] actionlint ngoài không đúng {VER}: rc={do_ban.returncode}, "
-                 f"stdout={do_ban.stdout!r}, stderr={do_ban.stderr!r}")
+            # Chocolatey có thể đặt một shim trên PATH: nó chạy tại chỗ nhưng bản
+            # sao trong archive không chạy. Chỉ dùng PE đã CHÉP sang cây tạm và
+            # tự chứng minh `--version` tại vị trí ấy, đúng hành vi fixture cần.
+            duong_path = _P(actionlint_ngoai).resolve()
+            goc_choco = []
+            if os.environ.get("ChocolateyInstall"):
+                goc_choco.append(_P(os.environ["ChocolateyInstall"]))
+            if duong_path.parent.name.lower() == "bin":
+                goc_choco.append(duong_path.parent.parent)
+            ung_vien = [duong_path] + [
+                root / "lib" / "actionlint" / "tools" / "actionlint.exe"
+                for root in goc_choco]
+            actionlint_portable = None
+            loi_ung_vien = []
+            for thu, nguon in enumerate(dict.fromkeys(ung_vien)):
+                if not nguon.is_file():
+                    loi_ung_vien.append(f"{nguon}: không có tệp")
+                    continue
+                ban_sao = goc / f"actionlint-portable-{thu}.exe"
+                shutil.copy2(nguon, ban_sao)
+                do_ban = subprocess.run([str(ban_sao), "--version"],
+                                        capture_output=True, text=True)
+                dong = (do_ban.stdout or "").strip().splitlines()
+                if do_ban.returncode == 0 and dong and dong[0] == VER:
+                    actionlint_portable = ban_sao
+                    break
+                loi_ung_vien.append(
+                    f"{nguon}: bản sao rc={do_ban.returncode}, "
+                    f"stdout={do_ban.stdout!r}, stderr={do_ban.stderr!r}")
+            bang(actionlint_portable is not None,
+                 f"[Windows] KHÔNG ĐO ĐƯỢC: không có actionlint {VER} portable; "
+                 + "; ".join(loi_ung_vien))
 
             # Gói dương chứa đúng loại file của archive chính thức: `actionlint.exe`.
             # Copy PE thật thay vì đổi đuôi một shell script rồi giả định Windows chạy nó.
             import zipfile
             goi_dung = goc / "actionlint-windows-dung.zip"
             with zipfile.ZipFile(goi_dung, "w", zipfile.ZIP_DEFLATED) as z:
-                z.write(actionlint_ngoai, "actionlint.exe")
-            shutil.copy2(actionlint_ngoai, path_ban_dau / "actionlint.exe")
+                z.write(actionlint_portable, "actionlint.exe")
+            shutil.copy2(actionlint_portable, path_ban_dau / "actionlint.exe")
             nen = "Windows"
         else:
             moi = path_ban_dau / "actionlint"

@@ -675,6 +675,21 @@ def t01_ag_identity_and_family_gate():
         rc, _, e = chay("check", viet(s, ag_fallback_without_reviewer,
                                       ten="ag-exec-human-fallback.yaml"))
         bang(rc == RC_OK, f"explicit human audit fallback falsely rejected: rc={rc} {e}")
+        human_review = lease_mau(role="reviewer", provider="human", reviewer="human",
+                                  executor="claude", assurance_target="human_audited")
+        rc, _, e = chay("check", viet(s, human_review, ten="human-review.yaml"))
+        bang(rc == RC_OK, f"legacy human-audited reviewer falsely rejected: rc={rc} {e}")
+        for bad, label in ((dict(human_review, role="executor"), "human-executor"),
+                           (dict(human_review, assurance_target="cross_approved"), "human-cross")):
+            rc, _, e = chay("check", viet(s, bad, ten=f"{label}.yaml"))
+            bang(rc != RC_OK, f"{label} falsely accepted: rc={rc} {e}")
+        human_cross = dict(ag, reviewer="human", reviewer_model_family="claude",
+                           assurance_target="cross_approved")
+        rc, _, e = chay("check", viet(s, human_cross, ten="synthetic-human-cross.yaml"))
+        bang(rc != RC_OK, f"synthetic model family made human cross pass: rc={rc} {e}")
+        human_fallback = dict(ag, reviewer="human", assurance_target="cross_approved_or_human_audited")
+        rc, _, e = chay("check", viet(s, human_fallback, ten="human-fallback.yaml"))
+        bang(rc == RC_OK, f"human fallback falsely rejected: rc={rc} {e}")
         for executor_provider in ("codex", "google_antigravity"):
             contradictory = dict(ag, executor=executor_provider)
             if executor_provider == "google_antigravity":

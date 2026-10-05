@@ -94,8 +94,20 @@ MODEL_FAMILIES = ("claude", "openai", "gemini")
 def _kiem_provider_identity(lease):
     """Validate declared runtime identity; legacy leases without identity remain valid."""
     role = str(lease.get("role") or "").strip()
+    assurance = str(lease.get("assurance_target") or "").strip()
     provider = str(lease.get("provider") or lease.get("executor") or "").strip()
     if not provider:
+        return
+    if provider == "human":
+        if role != "reviewer" or "human_audited" not in assurance or assurance == "cross_approved":
+            raise Chan(RC_LOP, "human chỉ có thể là reviewer với human_audited")
+        if str(lease.get("model_family") or "").strip():
+            raise Chan(RC_NOI_DUNG, "human reviewer không có model_family")
+        if lease.get("reviewer") and str(lease["reviewer"]).strip() != "human":
+            raise Chan(RC_NOI_DUNG, "reviewer không khớp provider human")
+        executor = str(lease.get("executor") or "").strip()
+        if executor and executor not in PROVIDERS:
+            raise Chan(RC_NOI_DUNG, f"executor không hợp lệ: {executor!r}")
         return
     if provider not in PROVIDERS:
         raise Chan(RC_NOI_DUNG, f"provider không hợp lệ: {provider!r}")
@@ -145,6 +157,8 @@ def _kiem_provider_identity(lease):
         raise Chan(RC_NOI_DUNG, f"reviewer không hợp lệ: {reviewer!r}")
     for actor, declared, effective in ((executor, declared_executor_family, executor_family),
                                         (reviewer, declared_reviewer_family, reviewer_family)):
+        if actor == "human" and declared:
+            raise Chan(RC_NOI_DUNG, "human reviewer không có model_family")
         if declared and (declared not in MODEL_FAMILIES or
                          (PROVIDER_FAMILIES.get(actor) and declared != PROVIDER_FAMILIES[actor])):
             raise Chan(RC_NOI_DUNG, f"model_family không khớp provider {actor!r}: {declared!r}")
@@ -153,11 +167,12 @@ def _kiem_provider_identity(lease):
     if role == "reviewer" and executor == "google_antigravity" and (
             executor_surface, executor_transport) != ("antigravity", "machine/local"):
         raise Chan(RC_NOI_DUNG, "google_antigravity executor cần execution_surface=antigravity, transport=machine/local")
-    assurance = str(lease.get("assurance_target") or "").strip()
     strict_cross = assurance == "cross_approved"
     claims_cross = "cross_approved" in assurance
     if strict_cross and not (executor and reviewer and executor_family and reviewer_family):
         raise Chan(RC_LOP, "lease khai cross_approved nhưng thiếu executor/reviewer identity hoặc model family")
+    if strict_cross and (executor not in PROVIDERS or reviewer not in PROVIDERS):
+        raise Chan(RC_LOP, "cross_approved đòi hai model provider, không nhận human")
     if claims_cross and reviewer and reviewer != "human" and (executor == reviewer or
                     (executor_family and reviewer_family and executor_family == reviewer_family)):
         raise Chan(RC_LOP, "reviewer cùng provider hoặc model family không đạt cross-review")

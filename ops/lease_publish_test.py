@@ -635,6 +635,31 @@ def t01_lease_hop_le_thi_QUA():
 @ca
 def t01_ag_identity_and_family_gate():
     with San() as s:
+        legacy_without_actor = lease_mau()
+        legacy_without_actor.pop("provider")
+        rc, _, e = chay("check", viet(s, legacy_without_actor,
+                                      ten="legacy-provider-omitted.yaml"))
+        bang(rc == RC_OK, f"genuinely omitted legacy provider blocked: rc={rc} {e}")
+        for field, value in (("provider", ""), ("provider", " "),
+                             ("executor", ""), ("executor", " ")):
+            blank_actor = dict(legacy_without_actor, **{field: value})
+            rc, _, e = chay("check", viet(s, blank_actor,
+                                          ten=f"blank-{field}-{len(value)}.yaml"))
+            bang(rc == RC_NOI_DUNG, f"explicit blank {field} accepted: rc={rc} {e}")
+        blank_provider_with_fallback = dict(legacy_without_actor, provider=" ", executor="claude")
+        rc, _, e = chay("check", viet(s, blank_provider_with_fallback,
+                                      ten="blank-provider-with-executor.yaml"))
+        bang(rc == RC_NOI_DUNG, f"blank provider fell through to executor: rc={rc} {e}")
+        missing_cross_actors = dict(legacy_without_actor, assurance_target="cross_approved")
+        rc, _, e = chay("check", viet(s, missing_cross_actors,
+                                      ten="cross-without-actors.yaml"))
+        bang(rc == RC_LOP and "thiếu executor/reviewer identity" in e,
+             f"strict cross without model actors passed/wrong reason: rc={rc} {e}")
+        valid_cross = dict(missing_cross_actors, provider="codex", executor="claude",
+                           reviewer="codex")
+        rc, _, e = chay("check", viet(s, valid_cross,
+                                      ten="cross-with-two-actors.yaml"))
+        bang(rc == RC_OK, f"valid two-model cross reviewer blocked: rc={rc} {e}")
         ag = lease_mau(role="executor", provider="google_antigravity", executor="google_antigravity",
                        model_family="gemini", execution_surface="antigravity",
                        transport="machine/local", reviewer="claude",

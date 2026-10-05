@@ -138,8 +138,14 @@ def _kiem_provider_identity(lease):
     """Validate declared runtime identity; legacy leases without identity remain valid."""
     role = str(lease.get("role") or "").strip()
     assurance = str(lease.get("assurance_target") or "").strip()
+    # A missing legacy identity differs from an actor field explicitly declared blank.
+    for key in ("provider", "executor"):
+        if key in lease and not str(lease[key] or "").strip():
+            raise Chan(RC_NOI_DUNG, f"{key} khai rỗng")
     provider = str(lease.get("provider") or lease.get("executor") or "").strip()
     if not provider:
+        if assurance == "cross_approved":
+            raise Chan(RC_LOP, "lease khai cross_approved nhưng thiếu executor/reviewer identity hoặc model family")
         return
     if provider == "human":
         if role != "reviewer" or assurance not in ("human_audited", "cross_approved_or_human_audited"):

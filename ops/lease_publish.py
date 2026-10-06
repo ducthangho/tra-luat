@@ -151,7 +151,7 @@ def _kiem_provider_identity(lease):
             raise Chan(RC_NOI_DUNG, f"{key} khai rỗng")
     provider = str(lease.get("provider") or lease.get("executor") or "").strip()
     if not provider:
-        if assurance == "cross_approved":
+        if assurance == "cross_approved" and role != "executor":
             raise Chan(RC_LOP, "lease khai cross_approved nhưng thiếu executor/reviewer identity hoặc model family")
         return
     if provider == "human":
@@ -232,9 +232,12 @@ def _kiem_provider_identity(lease):
             raise Chan(RC_NOI_DUNG, f"model_family không khớp provider {actor!r}: {declared!r}")
         if actor == "google_antigravity" and not effective:
             raise Chan(RC_NOI_DUNG, "google_antigravity cần model_family")
-    strict_cross = assurance == "cross_approved"
+    # An executor grant names a future assurance target, not an achieved review.
+    # It may precede reviewer assignment; any explicitly assigned pair still
+    # has to satisfy the declared cross-provider constraints below.
+    strict_cross = assurance == "cross_approved" and (role != "executor" or bool(reviewer))
     claims_cross = "cross_approved" in assurance
-    if assurance == "human_audited" and reviewer != "human":
+    if assurance == "human_audited" and role != "executor" and reviewer != "human":
         raise Chan(RC_LOP, "human_audited đòi reviewer human")
     if strict_cross and not (executor and reviewer and executor_family and reviewer_family):
         raise Chan(RC_LOP, "lease khai cross_approved nhưng thiếu executor/reviewer identity hoặc model family")

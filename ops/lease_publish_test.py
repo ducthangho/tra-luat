@@ -665,26 +665,64 @@ def t01_legacy_provider_aliases():
                 rc, _, e = chay("check", viet(s, invalid))
                 bang(rc == expected, f"alias bypassed identity/assurance: {invalid}, rc={rc} {e}")
 
-    # Real expired historical lease: exercise identity only, not liveness. Its
-    # human_audited claim lacks reviewer=human and must still fail that gate.
+    # A historical executor grant records a future human-audit target; it does
+    # not claim that its code reviewer has already performed a human audit.
     historical = yaml.safe_load((HERE / "leases/c1a1a-exec-2-claude-20260927.yaml").read_text(encoding="utf-8"))
     bang(historical["provider"] == "anthropic_claude", "historical alias fixture drifted")
     original = copy.deepcopy(historical)
     canonical = dict(historical, provider="claude")
     mod = _nap_cong()
     for lease in (historical, canonical):
-        try:
-            mod._kiem_provider_identity(lease)
-        except mod.Chan as exc:
-            bang("human_audited" in str(exc), f"historical identity failed before audit gate: {exc}")
-        else:
-            bang(False, "historical human audit claim bypassed reviewer gate")
+        mod._kiem_provider_identity(lease)
     bang(historical == original, "validation rewrote recorded provider identity")
     valid = lease_mau(provider="openai_codex", executor="anthropic_claude",
                       reviewer="codex", assurance_target="cross_approved")
     original = copy.deepcopy(valid)
     mod._kiem_provider_identity(valid)
     bang(valid == original, "successful validation rewrote recorded identity")
+
+
+@ca
+def t01_executor_assurance_target_is_not_review_verdict():
+    import copy
+    import yaml
+
+    mod = _nap_cong()
+    for name in ("ci-noi-bang-vao-gate-exec-1-claude-20260822.yaml",
+                 "ci-noi-bang-vao-gate-exec-1r2-claude-20260823.yaml",
+                 "t131-deadline-dem-spawn-exec-1-claude-20260929.yaml"):
+        path = HERE / "leases" / name
+        lease = yaml.safe_load(path.read_text(encoding="utf-8"))
+        original = copy.deepcopy(lease)
+        bang(lease["role"] == "executor", f"historical fixture role drifted: {name}")
+        checked, _ = mod.kiem(lease, tep=path, goc=HERE.parent, bo_qua_han=True)
+        bang(checked == original and lease == original, f"historical grant changed: {name}")
+        try:
+            mod.kiem(lease, tep=path, goc=HERE.parent)
+        except mod.Chan as exc:
+            bang(exc.ma == RC_NOI_DUNG and "hết hạn" in str(exc),
+                 f"historical expiry gate changed: {name}: {exc}")
+        else:
+            bang(False, f"expired executor grant accepted as live: {name}")
+
+    with San() as s:
+        for assurance in ("cross_approved", "human_audited"):
+            for provider, fields in (("claude", {}), ("codex", {}),
+                                     ("google_antigravity", {"model_family": "gemini",
+                                      "execution_surface": "antigravity", "transport": "machine/local"})):
+                grant = lease_mau(role="executor", provider=provider,
+                                  assurance_target=assurance, **fields)
+                rc, _, e = chay("check", viet(s, grant))
+                bang(rc == RC_OK, f"executor future target blocked: {provider}/{assurance}: {rc} {e}")
+                review = dict(grant, role="reviewer")
+                rc, _, e = chay("check", viet(s, review))
+                bang(rc == RC_LOP, f"review without assurance evidence accepted: {provider}/{assurance}: {rc} {e}")
+                if provider == "google_antigravity":
+                    for key in fields:
+                        bad = dict(grant)
+                        bad.pop(key)
+                        rc, _, e = chay("check", viet(s, bad))
+                        bang(rc == RC_NOI_DUNG, f"AG executor missing {key} accepted: {rc} {e}")
 
 
 @ca
@@ -758,8 +796,8 @@ def t01_ag_identity_and_family_gate():
         ag_cross_without_reviewer["assurance_target"] = "cross_approved"
         rc, _, e = chay("check", viet(s, ag_cross_without_reviewer,
                                       ten="ag-exec-missing-reviewer.yaml"))
-        bang(rc == RC_LOP and "thiếu executor/reviewer identity" in e,
-             f"strict AG cross executor without reviewer passed/wrong reason: rc={rc} {e}")
+        bang(rc == RC_OK,
+             f"AG executor future cross-review target required assigned reviewer: rc={rc} {e}")
         ag_fallback_without_reviewer = dict(ag_cross_without_reviewer,
                                             assurance_target="cross_approved_or_human_audited")
         rc, _, e = chay("check", viet(s, ag_fallback_without_reviewer,

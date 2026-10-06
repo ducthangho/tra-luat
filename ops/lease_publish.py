@@ -135,6 +135,14 @@ def _kiem_executor_khai_voi_human_reviewer(lease, executor):
 
 def _kiem_provider_identity(lease):
     """Validate declared runtime identity; legacy leases without identity remain valid."""
+    # Historical full IDs name the same providers. Normalize only this validation
+    # view: the recorded lease (and any serialized evidence) must keep its bytes.
+    aliases = {"anthropic_claude": "claude", "openai_codex": "codex"}
+    lease = dict(lease)
+    for key in ("provider", "executor", "reviewer"):
+        if key in lease:
+            value = str(lease[key] or "").strip()
+            lease[key] = aliases.get(value, value)
     role = str(lease.get("role") or "").strip()
     assurance = str(lease.get("assurance_target") or "").strip()
     # A missing legacy identity differs from an actor field explicitly declared blank.

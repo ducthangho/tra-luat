@@ -633,6 +633,61 @@ def t01_lease_hop_le_thi_QUA():
 
 
 @ca
+def t01_legacy_provider_aliases():
+    import copy
+    import yaml
+
+    with San() as s:
+        for alias, canonical, other in (("anthropic_claude", "claude", "openai_codex"),
+                                         ("openai_codex", "codex", "anthropic_claude")):
+            for provider, actor in ((alias, canonical), (canonical, alias), (alias, alias)):
+                for role in ("executor", "reviewer"):
+                    actors = ({"executor": actor, "reviewer": other} if role == "executor"
+                              else {"reviewer": actor, "executor": other})
+                    lease = lease_mau(role=role, provider=provider,
+                                      assurance_target="cross_approved", **actors)
+                    rc, _, e = chay("check", viet(s, lease))
+                    bang(rc == RC_OK, f"legacy aliases blocked: {lease}, rc={rc} {e}")
+            human = lease_mau(provider="human", reviewer="human", executor=alias,
+                              assurance_target="human_audited")
+            rc, _, e = chay("check", viet(s, human))
+            bang(rc == RC_OK, f"human audit with legacy executor blocked: rc={rc} {e}")
+            for invalid, expected in (
+                (lease_mau(provider=alias, reviewer=canonical, executor=alias,
+                           assurance_target="cross_approved"), RC_LOP),
+                (lease_mau(provider=alias, reviewer=alias, executor=other,
+                           assurance_target="human_audited"), RC_LOP),
+                (lease_mau(provider=alias, execution_surface="antigravity"), RC_NOI_DUNG),
+                (lease_mau(provider=alias, executor="unknown"), RC_NOI_DUNG),
+                (lease_mau(provider=alias, reviewer="unknown"), RC_NOI_DUNG),
+                (lease_mau(provider=alias + "_unknown"), RC_NOI_DUNG),
+            ):
+                rc, _, e = chay("check", viet(s, invalid))
+                bang(rc == expected, f"alias bypassed identity/assurance: {invalid}, rc={rc} {e}")
+
+    # Real expired historical lease: exercise identity only, not liveness. Its
+    # human_audited claim lacks reviewer=human and must still fail that gate.
+    historical = yaml.safe_load((HERE / "leases/c1a1a-exec-2-claude-20260927.yaml").read_text(encoding="utf-8"))
+    bang(historical["provider"] == "anthropic_claude", "historical alias fixture drifted")
+    original = copy.deepcopy(historical)
+    canonical = dict(historical, provider="claude")
+    mod = _nap_cong()
+    for lease in (historical, canonical):
+        try:
+            mod._kiem_provider_identity(lease)
+        except mod.Chan as exc:
+            bang("human_audited" in str(exc), f"historical identity failed before audit gate: {exc}")
+        else:
+            bang(False, "historical human audit claim bypassed reviewer gate")
+    bang(historical == original, "validation rewrote recorded provider identity")
+    valid = lease_mau(provider="openai_codex", executor="anthropic_claude",
+                      reviewer="codex", assurance_target="cross_approved")
+    original = copy.deepcopy(valid)
+    mod._kiem_provider_identity(valid)
+    bang(valid == original, "successful validation rewrote recorded identity")
+
+
+@ca
 def t01_ag_identity_and_family_gate():
     with San() as s:
         legacy_without_actor = lease_mau()

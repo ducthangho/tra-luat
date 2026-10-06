@@ -686,6 +686,7 @@ def t01_legacy_provider_aliases():
 def t01_executor_assurance_target_is_not_review_verdict():
     import copy
     import yaml
+    from unittest import mock
 
     mod = _nap_cong()
     for name in ("ci-noi-bang-vao-gate-exec-1-claude-20260822.yaml",
@@ -695,15 +696,19 @@ def t01_executor_assurance_target_is_not_review_verdict():
         lease = yaml.safe_load(path.read_text(encoding="utf-8"))
         original = copy.deepcopy(lease)
         bang(lease["role"] == "executor", f"historical fixture role drifted: {name}")
-        checked, _ = mod.kiem(lease, tep=path, goc=HERE.parent, bo_qua_han=True)
-        bang(checked == original and lease == original, f"historical grant changed: {name}")
-        try:
-            mod.kiem(lease, tep=path, goc=HERE.parent)
-        except mod.Chan as exc:
-            bang(exc.ma == RC_NOI_DUNG and "hết hạn" in str(exc),
-                 f"historical expiry gate changed: {name}: {exc}")
-        else:
-            bang(False, f"expired executor grant accepted as live: {name}")
+        # Historical schema/expiry checks must not inherit the runner's actor.
+        # t02d independently supplies hostile and authorized actors to the CLI.
+        with mock.patch.dict(os.environ, {k: v for k, v in os.environ.items()
+                                          if k != "GITHUB_ACTOR"}, clear=True):
+            checked, _ = mod.kiem(lease, tep=path, goc=HERE.parent, bo_qua_han=True)
+            bang(checked == original and lease == original, f"historical grant changed: {name}")
+            try:
+                mod.kiem(lease, tep=path, goc=HERE.parent)
+            except mod.Chan as exc:
+                bang(exc.ma == RC_NOI_DUNG and "hết hạn" in str(exc),
+                     f"historical expiry gate changed: {name}: {exc}")
+            else:
+                bang(False, f"expired executor grant accepted as live: {name}")
 
     with San() as s:
         for assurance in ("cross_approved", "human_audited"):

@@ -21019,15 +21019,12 @@ def run() -> int:
         #
         # r308 (T0-F/GATE-05): ca này TỪNG dựng package-set bằng `rglob` trên ĐĨA — sai nguồn. Cây dev
         # rộng hơn gói, nên con trỏ tới tệp CÓ-trên-đĩa-nhưng-NGOÀI-gói lọt test mà ĐỎ ở `release-verify`
-        # (đúng thứ guard sinh ra để chặn). Nay đọc `RELEASE_MANIFEST.json` như khuôn r289, và doc-set
-        # lấy MỌI *.md trong manifest để khớp guard sản xuất sau r308. Vế (e)-(g) dưới là phép đo
+        # (đúng thứ guard sinh ra để chặn). Dựng manifest tạm của cây ứng viên bằng helper release,
+        # rồi lấy MỌI *.md trong manifest để khớp guard sản xuất sau r308. Vế (e)-(g) dưới là phép đo
         # FALSIFY được: cùng một tài liệu, nguồn-manifest ĐỎ mà nguồn-đĩa XANH ⇒ lỗ có thật, đã bịt.
         root = _ROOT209
-        mf = root / "RELEASE_MANIFEST.json"
-        if not mf.exists():
-            return True
         paths = sorted(str(x.get("path") or "") for x in
-                       (_j209.loads(mf.read_text(encoding="utf-8")).get("files") or []))
+                       (_rel209._build_release_manifest(root).get("files") or []))
         pset = set(paths)
         docs = {}
         for rel in sorted(p for p in paths if p.lower().endswith(".md")):

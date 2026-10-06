@@ -69,3 +69,4 @@ prohibited_actions:
   - edit_untracked_scripts_nlm_auth_ps1
 land_authority_note: Separate exact-candidate approval is required before any merge or land
 orchestration: Owner-authorized manual Issue and receipt journal; do not claim computed closure or packet_loop state
+da_bi_thay_the: wp710-r4-g2-codex

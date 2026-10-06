@@ -5077,6 +5077,189 @@ CASES += [
 
 WINDOWS_ONLY = {"luong_canonical_chay_that"}
 
+
+def case_ag_identity_and_cross_family(c: Ctx):
+    sd = c.sd()
+    ag = ("--executor-model-family", "gemini", "--executor-execution-surface",
+          "antigravity", "--executor-transport", "machine/local")
+    rc, _, e = c.init(sd, executor="google_antigravity", reviewer="claude", extra=ag)
+    _doi(0, rc, e, "AG identity init")
+    state = json.loads((sd / "wp55.json").read_text(encoding="utf-8"))
+    if state["executor_identity"]["model_family"] != "gemini":
+        raise AssertionError("AG model family not preserved")
+    rc, _, e = run(c.script, ["begin-attempt", "--packet", 55, "--provider", "google_antigravity"], sd)
+    _doi(2, rc, e, "AG runtime missing family")
+    rc, _, e = run(c.script, ["begin-attempt", "--packet", 55, "--provider", "google_antigravity",
+                             "--model-family", "claude", "--execution-surface", "antigravity",
+                             "--transport", "machine/local"], sd)
+    _doi(4, rc, e, "AG runtime wrong family")
+    rc, _, e = run(c.script, ["begin-attempt", "--packet", 55, "--provider", "google_antigravity",
+                             "--model-family", "gemini", "--execution-surface", "antigravity",
+                             "--transport", "machine/local"], sd)
+    _doi(0, rc, e, "AG runtime correct identity")
+    rc, _, e = run(c.script, ["record-review", "--packet", 55, "--provider", "claude",
+                             "--verdict", "approve", "--reviewed-sha", c.head(1)], sd)
+    _doi(8, rc, e, "AG invalid review state")
+    cid = "9000055002"
+    rc, _, e = run(c.script, ["record-post", "--packet", 55, "--for", "reviewing",
+                             "--comment-id", cid], sd)
+    _doi(0, rc, e, "AG review post")
+    rc, _, e = run(c.script, ["transition", "--packet", 55, "--to", "reviewing",
+                             "--comment-id", cid, "--head-sha", c.head(1)], sd)
+    _doi(0, rc, e, "AG reviewing transition")
+    rc, _, e = run(c.script, ["record-review", "--packet", 55, "--provider", "claude",
+                             "--verdict", "approve", "--reviewed-sha", "b" * 40], sd)
+    _doi(5, rc, e, "AG stale reviewed SHA")
+    rc, _, e = run(c.script, ["record-review", "--packet", 55, "--provider", "claude",
+                             "--verdict", "approve", "--reviewed-sha", c.head(1)], sd)
+    _doi(0, rc, e, "AG exact SHA review")
+    sd2 = c.sd()
+    rc, _, e = c.init(sd2, executor="google_antigravity", reviewer="claude",
+                      extra=("--executor-model-family", "claude", *ag[2:]), lease=False)
+    _doi(4, rc, e, "same family cross-review")
+    sd3 = c.sd()
+    rc, _, e = c.init(sd3, executor="google_antigravity", reviewer="claude", lease=False)
+    _doi(2, rc, e, "AG missing identity")
+    sd4 = c.sd()
+    rc, _, e = c.init(sd4, executor="unknown", reviewer="claude", lease=False)
+    _doi(2, rc, e, "unknown provider")
+    for surface, transport in (("codex_cli", "machine/local"),
+                               ("antigravity", "human_mediated"),
+                               (" ", "machine/local")):
+        invalid_sd = c.sd()
+        rc, _, e = c.init(invalid_sd, executor="google_antigravity", reviewer="claude",
+                          extra=("--executor-model-family", "gemini",
+                                 "--executor-execution-surface", surface,
+                                 "--executor-transport", transport), lease=False)
+        _doi(2, rc, e, "AG unsupported executor surface/transport")
+    sd5 = c.sd()
+    rc, _, e = c.init(sd5, executor="codex", reviewer="google_antigravity",
+                      extra=("--reviewer-model-family", "gemini", "--reviewer-execution-surface",
+                             "antigravity", "--reviewer-transport", "machine/local"))
+    _doi(0, rc, e, "AG reviewer identity init")
+    rc, _, e = run(c.script, ["begin-attempt", "--packet", 55, "--provider", "codex"], sd5)
+    _doi(0, rc, e, "AG reviewer executor begin")
+    cid = "9000055004"
+    rc, _, e = run(c.script, ["record-post", "--packet", 55, "--for", "reviewing",
+                             "--comment-id", cid], sd5)
+    _doi(0, rc, e, "AG reviewer post")
+    rc, _, e = run(c.script, ["transition", "--packet", 55, "--to", "reviewing",
+                             "--comment-id", cid, "--head-sha", c.head(1)], sd5)
+    _doi(0, rc, e, "AG reviewer transition")
+    for family, surface, expected_rc in (("openai", "antigravity", 4),
+                                         ("gemini", "codex_cli", 2)):
+        rc, _, e = run(c.script, ["record-review", "--packet", 55,
+                                 "--provider", "google_antigravity", "--model-family", family,
+                                 "--execution-surface", surface, "--transport", "machine/local",
+                                 "--verdict", "approve", "--reviewed-sha", c.head(1)], sd5)
+        _doi(expected_rc, rc, e, "AG reviewer runtime identity mismatch")
+        st = json.loads((sd5 / "wp55.json").read_text(encoding="utf-8"))
+        if st["state"] != "reviewing" or st["reviews"]:
+            raise AssertionError("failed AG review changed state or added verdict")
+    rc, _, e = run(c.script, ["record-review", "--packet", 55, "--provider", "google_antigravity",
+                             "--model-family", "gemini", "--execution-surface", "antigravity",
+                             "--transport", "machine/local", "--verdict", "approve",
+                             "--reviewed-sha", c.head(1)], sd5)
+    _doi(0, rc, e, "AG reviewer exact SHA")
+    for family, surface, transport in ((" ", "antigravity", "machine/local"),
+                                       ("gemini", "codex_cli", "machine/local"),
+                                       ("gemini", "antigravity", "human_mediated")):
+        invalid_sd = c.sd()
+        rc, _, e = c.init(invalid_sd, executor="codex", reviewer="google_antigravity",
+                          extra=("--reviewer-model-family", family,
+                                 "--reviewer-execution-surface", surface,
+                                 "--reviewer-transport", transport), lease=False)
+        _doi(2, rc, e, "AG unsupported reviewer identity")
+
+
+CASES.append(("ag_identity_and_cross_family", case_ag_identity_and_cross_family))
+
+
+def case_codex_runtime_surface_transport(c: Ctx):
+    sd = c.sd()
+    rc, _, e = c.init(sd, executor="codex", reviewer="claude",
+                      extra=("--executor-execution-surface", "codex_desktop",
+                             "--executor-transport", "machine/local"))
+    _doi(0, rc, e, "Codex Desktop identity init")
+    state = json.loads((sd / "wp55.json").read_text(encoding="utf-8"))
+    if state["executor_identity"]["execution_surface"] != "codex_desktop":
+        raise AssertionError("Codex Desktop surface was replaced")
+    for surface, transport, expected_rc in (("codex_cli", "machine/local", 4),
+                                            ("codex_desktop", "service", 2)):
+        rc, _, e = run(c.script, ["begin-attempt", "--packet", 55, "--provider", "codex",
+                                 "--execution-surface", surface, "--transport", transport], sd)
+        _doi(expected_rc, rc, e, "Codex executor runtime mismatch")
+        if c.state(sd, 55) != "leased":
+            raise AssertionError("mismatched Codex runtime opened attempt")
+    rc, _, e = run(c.script, ["begin-attempt", "--packet", 55, "--provider", "codex",
+                             "--execution-surface", "codex_desktop", "--transport", "machine/local"], sd)
+    _doi(0, rc, e, "Codex Desktop runtime match")
+
+    sd2 = c.sd()
+    rc, _, e = c.init(sd2, executor="claude", reviewer="codex",
+                      extra=("--reviewer-execution-surface", "codex_desktop",
+                             "--reviewer-transport", "machine/local"))
+    _doi(0, rc, e, "Codex reviewer identity init")
+    c.den_reviewing(sd2, 55, 1)
+    for surface, transport, expected_rc in (("codex_cli", "machine/local", 4),
+                                            ("codex_desktop", "service", 2)):
+        rc, _, e = run(c.script, ["record-review", "--packet", 55, "--provider", "codex",
+                                 "--execution-surface", surface, "--transport", transport,
+                                 "--verdict", "approve", "--reviewed-sha", c.head(1)], sd2)
+        _doi(expected_rc, rc, e, "Codex reviewer runtime mismatch")
+        st = json.loads((sd2 / "wp55.json").read_text(encoding="utf-8"))
+        if st["state"] != "reviewing" or st["reviews"]:
+            raise AssertionError("mismatched Codex reviewer recorded verdict")
+    rc, _, e = run(c.script, ["record-review", "--packet", 55, "--provider", "codex",
+                             "--execution-surface", "codex_desktop", "--transport", "machine/local",
+                             "--verdict", "approve", "--reviewed-sha", c.head(1)], sd2)
+    _doi(0, rc, e, "Codex Desktop reviewer match")
+
+    legacy = c.sd()
+    rc, _, e = c.init(legacy, executor="codex", reviewer="claude")
+    _doi(0, rc, e, "legacy Codex init")
+    state = json.loads((legacy / "wp55.json").read_text(encoding="utf-8"))
+    if state["executor_identity"]["execution_surface"] is not None:
+        raise AssertionError("legacy unknown Codex surface was fabricated")
+    rc, _, e = run(c.script, ["begin-attempt", "--packet", 55, "--provider", "codex"], legacy)
+    _doi(0, rc, e, "legacy unknown Codex runtime")
+
+    service = c.sd()
+    rc, _, e = c.init(service, executor="codex", reviewer="claude",
+                      extra=("--executor-execution-surface", "codex_service",
+                             "--executor-transport", "machine"))
+    _doi(0, rc, e, "Codex service identity init")
+    rc, _, e = run(c.script, ["begin-attempt", "--packet", 55, "--provider", "codex",
+                             "--execution-surface", "codex_service", "--transport", "machine"], service)
+    _doi(0, rc, e, "Codex service runtime match")
+
+    claude = c.sd()
+    rc, _, e = c.init(claude, executor="claude", reviewer="codex",
+                      extra=("--executor-execution-surface", "claude_code",
+                             "--executor-transport", "machine/local"))
+    _doi(0, rc, e, "Claude declared identity init")
+    for surface, transport in (("codex_desktop", "machine/local"),
+                               ("claude_code", "service")):
+        rc, _, e = run(c.script, ["begin-attempt", "--packet", 55, "--provider", "claude",
+                                 "--execution-surface", surface, "--transport", transport], claude)
+        _doi(2, rc, e, "Claude invalid runtime tuple")
+    rc, _, e = run(c.script, ["begin-attempt", "--packet", 55, "--provider", "claude",
+                             "--execution-surface", "claude_code", "--transport", "machine/local"], claude)
+    _doi(0, rc, e, "Claude declared runtime match")
+
+    for provider, reviewer, surface, transport in (
+            ("codex", "claude", "antigravity", "machine/local"),
+            ("codex", "claude", "codex_service", "machine/local"),
+            ("claude", "codex", "codex_desktop", "machine/local")):
+        invalid = c.sd()
+        rc, _, e = c.init(invalid, executor=provider, reviewer=reviewer,
+                          extra=("--executor-execution-surface", surface,
+                                 "--executor-transport", transport), lease=False)
+        _doi(2, rc, e, "provider cannot declare foreign/invalid runtime tuple")
+
+
+CASES.append(("codex_runtime_surface_transport", case_codex_runtime_surface_transport))
+
 def chay_suite(script: Path, tmp: Path, chi_chay=None):
     ket = {}
     for ten, fn in CASES:

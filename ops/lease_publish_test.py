@@ -633,6 +633,338 @@ def t01_lease_hop_le_thi_QUA():
 
 
 @ca
+def t01_legacy_provider_aliases():
+    import copy
+    import yaml
+
+    with San() as s:
+        for alias, canonical, other in (("anthropic_claude", "claude", "openai_codex"),
+                                         ("openai_codex", "codex", "anthropic_claude")):
+            for provider, actor in ((alias, canonical), (canonical, alias), (alias, alias)):
+                for role in ("executor", "reviewer"):
+                    actors = ({"executor": actor, "reviewer": other} if role == "executor"
+                              else {"reviewer": actor, "executor": other})
+                    lease = lease_mau(role=role, provider=provider,
+                                      assurance_target="cross_approved", **actors)
+                    rc, _, e = chay("check", viet(s, lease))
+                    bang(rc == RC_OK, f"legacy aliases blocked: {lease}, rc={rc} {e}")
+            human = lease_mau(provider="human", reviewer="human", executor=alias,
+                              assurance_target="human_audited")
+            rc, _, e = chay("check", viet(s, human))
+            bang(rc == RC_OK, f"human audit with legacy executor blocked: rc={rc} {e}")
+            for invalid, expected in (
+                (lease_mau(provider=alias, reviewer=canonical, executor=alias,
+                           assurance_target="cross_approved"), RC_LOP),
+                (lease_mau(provider=alias, reviewer=alias, executor=other,
+                           assurance_target="human_audited"), RC_LOP),
+                (lease_mau(provider=alias, execution_surface="antigravity"), RC_NOI_DUNG),
+                (lease_mau(provider=alias, executor="unknown"), RC_NOI_DUNG),
+                (lease_mau(provider=alias, reviewer="unknown"), RC_NOI_DUNG),
+                (lease_mau(provider=alias + "_unknown"), RC_NOI_DUNG),
+            ):
+                rc, _, e = chay("check", viet(s, invalid))
+                bang(rc == expected, f"alias bypassed identity/assurance: {invalid}, rc={rc} {e}")
+
+    # A historical executor grant records a future human-audit target; it does
+    # not claim that its code reviewer has already performed a human audit.
+    historical = yaml.safe_load((HERE / "leases/c1a1a-exec-2-claude-20260927.yaml").read_text(encoding="utf-8"))
+    bang(historical["provider"] == "anthropic_claude", "historical alias fixture drifted")
+    original = copy.deepcopy(historical)
+    canonical = dict(historical, provider="claude")
+    mod = _nap_cong()
+    for lease in (historical, canonical):
+        mod._kiem_provider_identity(lease)
+    bang(historical == original, "validation rewrote recorded provider identity")
+    valid = lease_mau(provider="openai_codex", executor="anthropic_claude",
+                      reviewer="codex", assurance_target="cross_approved")
+    original = copy.deepcopy(valid)
+    mod._kiem_provider_identity(valid)
+    bang(valid == original, "successful validation rewrote recorded identity")
+
+
+@ca
+def t01_executor_assurance_target_is_not_review_verdict():
+    import copy
+    import yaml
+    from unittest import mock
+
+    mod = _nap_cong()
+    for name in ("ci-noi-bang-vao-gate-exec-1-claude-20260822.yaml",
+                 "ci-noi-bang-vao-gate-exec-1r2-claude-20260823.yaml",
+                 "t131-deadline-dem-spawn-exec-1-claude-20260929.yaml"):
+        path = HERE / "leases" / name
+        lease = yaml.safe_load(path.read_text(encoding="utf-8"))
+        original = copy.deepcopy(lease)
+        bang(lease["role"] == "executor", f"historical fixture role drifted: {name}")
+        # Historical schema/expiry checks must not inherit the runner's actor.
+        # t02d independently supplies hostile and authorized actors to the CLI.
+        with mock.patch.dict(os.environ, {k: v for k, v in os.environ.items()
+                                          if k != "GITHUB_ACTOR"}, clear=True):
+            checked, _ = mod.kiem(lease, tep=path, goc=HERE.parent, bo_qua_han=True)
+            bang(checked == original and lease == original, f"historical grant changed: {name}")
+            try:
+                mod.kiem(lease, tep=path, goc=HERE.parent)
+            except mod.Chan as exc:
+                bang(exc.ma == RC_NOI_DUNG and "hết hạn" in str(exc),
+                     f"historical expiry gate changed: {name}: {exc}")
+            else:
+                bang(False, f"expired executor grant accepted as live: {name}")
+
+    with San() as s:
+        for assurance in ("cross_approved", "human_audited"):
+            for provider, fields in (("claude", {}), ("codex", {}),
+                                     ("google_antigravity", {"model_family": "gemini",
+                                      "execution_surface": "antigravity", "transport": "machine/local"})):
+                grant = lease_mau(role="executor", provider=provider,
+                                  assurance_target=assurance, **fields)
+                rc, _, e = chay("check", viet(s, grant))
+                bang(rc == RC_OK, f"executor future target blocked: {provider}/{assurance}: {rc} {e}")
+                review = dict(grant, role="reviewer")
+                rc, _, e = chay("check", viet(s, review))
+                bang(rc == RC_LOP, f"review without assurance evidence accepted: {provider}/{assurance}: {rc} {e}")
+                if provider == "google_antigravity":
+                    for key in fields:
+                        bad = dict(grant)
+                        bad.pop(key)
+                        rc, _, e = chay("check", viet(s, bad))
+                        bang(rc == RC_NOI_DUNG, f"AG executor missing {key} accepted: {rc} {e}")
+
+
+@ca
+def t01_ag_identity_and_family_gate():
+    with San() as s:
+        legacy_without_actor = lease_mau()
+        legacy_without_actor.pop("provider")
+        rc, _, e = chay("check", viet(s, legacy_without_actor,
+                                      ten="legacy-provider-omitted.yaml"))
+        bang(rc == RC_OK, f"genuinely omitted legacy provider blocked: rc={rc} {e}")
+        for field, value in (("provider", ""), ("provider", " "),
+                             ("executor", ""), ("executor", " ")):
+            blank_actor = dict(legacy_without_actor, **{field: value})
+            rc, _, e = chay("check", viet(s, blank_actor,
+                                          ten=f"blank-{field}-{len(value)}.yaml"))
+            bang(rc == RC_NOI_DUNG, f"explicit blank {field} accepted: rc={rc} {e}")
+        blank_provider_with_fallback = dict(legacy_without_actor, provider=" ", executor="claude")
+        rc, _, e = chay("check", viet(s, blank_provider_with_fallback,
+                                      ten="blank-provider-with-executor.yaml"))
+        bang(rc == RC_NOI_DUNG, f"blank provider fell through to executor: rc={rc} {e}")
+        missing_cross_actors = dict(legacy_without_actor, assurance_target="cross_approved")
+        rc, _, e = chay("check", viet(s, missing_cross_actors,
+                                      ten="cross-without-actors.yaml"))
+        bang(rc == RC_LOP and "thiếu executor/reviewer identity" in e,
+             f"strict cross without model actors passed/wrong reason: rc={rc} {e}")
+        valid_cross = dict(missing_cross_actors, provider="codex", executor="claude",
+                           reviewer="codex")
+        rc, _, e = chay("check", viet(s, valid_cross,
+                                      ten="cross-with-two-actors.yaml"))
+        bang(rc == RC_OK, f"valid two-model cross reviewer blocked: rc={rc} {e}")
+        ag = lease_mau(role="executor", provider="google_antigravity", executor="google_antigravity",
+                       model_family="gemini", execution_surface="antigravity",
+                       transport="machine/local", reviewer="claude",
+                       assurance_target="cross_approved_or_human_audited")
+        rc, _, e = chay("check", viet(s, ag, ten="ag.yaml"))
+        bang(rc == RC_OK, f"AG valid identity blocked: rc={rc} {e}")
+        for field, value, expected in (("model_family", "claude", RC_LOP),
+                                       ("execution_surface", "", RC_NOI_DUNG),
+                                       ("execution_surface", "codex_cli", RC_NOI_DUNG),
+                                       ("transport", "human_mediated", RC_NOI_DUNG),
+                                       ("provider", "unknown", RC_NOI_DUNG),
+                                       ("granted_by", "google_antigravity", RC_TU_CAP)):
+            invalid = dict(ag, **{field: value})
+            rc, _, e = chay("check", viet(s, invalid, ten="ag-bad.yaml"))
+            bang(rc == expected, f"AG {field}={value!r} accepted/wrong gate: rc={rc} {e}")
+        ag_reviewer = lease_mau(provider="google_antigravity", model_family="gemini",
+                                execution_surface="antigravity", transport="machine/local")
+        rc, _, e = chay("check", viet(s, ag_reviewer, ten="ag-review.yaml"))
+        bang(rc == RC_OK, f"AG reviewer lease blocked: rc={rc} {e}")
+        ag_review_human_claim = dict(ag_reviewer, schema_version=2, review_class="sensitive",
+                                     effective_review_class="sensitive", assurance_target="human_audited")
+        rc, _, e = chay("check", viet(s, ag_review_human_claim,
+                                      ten="ag-review-human-claim.yaml"))
+        bang(rc == RC_LOP, f"AG model reviewer claimed human audit: rc={rc} {e}")
+        codex_review_human_claim = lease_mau(role="reviewer", provider="codex",
+                                             assurance_target="human_audited")
+        rc, _, e = chay("check", viet(s, codex_review_human_claim,
+                                      ten="codex-review-human-claim.yaml"))
+        bang(rc == RC_LOP, f"Codex model reviewer claimed human audit: rc={rc} {e}")
+        ag_cross_without_executor = dict(ag_reviewer, assurance_target="cross_approved")
+        rc, _, e = chay("check", viet(s, ag_cross_without_executor,
+                                      ten="ag-review-missing-executor.yaml"))
+        bang(rc == RC_LOP and "thiếu executor/reviewer identity" in e,
+             f"AG cross review without executor passed/wrong reason: rc={rc} {e}")
+        ag_review_fallback = dict(ag_reviewer, assurance_target="cross_approved_or_human_audited")
+        rc, _, e = chay("check", viet(s, ag_review_fallback,
+                                      ten="ag-review-human-fallback.yaml"))
+        bang(rc == RC_OK, f"AG reviewer human audit fallback falsely rejected: rc={rc} {e}")
+        ag_cross_without_reviewer = dict(ag)
+        ag_cross_without_reviewer.pop("reviewer")
+        ag_cross_without_reviewer["assurance_target"] = "cross_approved"
+        rc, _, e = chay("check", viet(s, ag_cross_without_reviewer,
+                                      ten="ag-exec-missing-reviewer.yaml"))
+        bang(rc == RC_OK,
+             f"AG executor future cross-review target required assigned reviewer: rc={rc} {e}")
+        ag_fallback_without_reviewer = dict(ag_cross_without_reviewer,
+                                            assurance_target="cross_approved_or_human_audited")
+        rc, _, e = chay("check", viet(s, ag_fallback_without_reviewer,
+                                      ten="ag-exec-human-fallback.yaml"))
+        bang(rc == RC_OK, f"explicit human audit fallback falsely rejected: rc={rc} {e}")
+        human_review = lease_mau(role="reviewer", provider="human", reviewer="human",
+                                  executor="claude", assurance_target="human_audited")
+        rc, _, e = chay("check", viet(s, human_review, ten="human-review.yaml"))
+        bang(rc == RC_OK, f"legacy human-audited reviewer falsely rejected: rc={rc} {e}")
+        for executor_provider, family in (("claude", "claude"), ("codex", "openai"),
+                                          ("google_antigravity", "gemini")):
+            legacy = dict(human_review, executor=executor_provider)
+            rc, _, e = chay("check", viet(s, legacy,
+                                          ten=f"human-legacy-{executor_provider}.yaml"))
+            expected = RC_NOI_DUNG if executor_provider == "google_antigravity" else RC_OK
+            bang(rc == expected, f"human audit missing executor identity: {executor_provider}, rc={rc} {e}")
+            declared = dict(legacy, executor_model_family=family)
+            if executor_provider == "google_antigravity":
+                declared.update(executor_execution_surface="antigravity",
+                                executor_transport="machine/local")
+            rc, _, e = chay("check", viet(s, declared,
+                                          ten=f"human-declared-{executor_provider}.yaml"))
+            bang(rc == RC_OK, f"valid declared executor blocked: {executor_provider}, rc={rc} {e}")
+            invalid_family = dict(declared, executor_model_family="invalid-family")
+            rc, _, e = chay("check", viet(s, invalid_family,
+                                          ten=f"human-bad-family-{executor_provider}.yaml"))
+            bang(rc == RC_NOI_DUNG, f"invalid declared executor family passed: {executor_provider}, rc={rc} {e}")
+        valid_ag_executor = dict(human_review, executor="google_antigravity",
+                                 executor_model_family="gemini",
+                                 executor_execution_surface="antigravity",
+                                 executor_transport="machine/local")
+        identity_fields = ("executor_model_family", "executor_execution_surface", "executor_transport")
+        for assurance in ("human_audited", "cross_approved_or_human_audited"):
+            # Every incomplete subset must fail, including no declared metadata.
+            for mask in range(8):
+                candidate = dict(valid_ag_executor, assurance_target=assurance)
+                for bit, field in enumerate(identity_fields):
+                    if not mask & (1 << bit):
+                        candidate.pop(field)
+                rc, _, e = chay("check", viet(s, candidate,
+                                              ten=f"human-ag-tuple-{assurance}-{mask}.yaml"))
+                expected = RC_OK if mask == 7 else RC_NOI_DUNG
+                bang(rc == expected, f"human AG tuple mask={mask}, assurance={assurance}: rc={rc} {e}")
+        for field, value in (("executor_model_family", " "),
+                             ("executor_execution_surface", " "),
+                             ("executor_transport", " "),
+                             ("executor_execution_surface", "codex_cli"),
+                             ("executor_transport", "human_mediated")):
+            bad = dict(valid_ag_executor, **{field: value})
+            rc, _, e = chay("check", viet(s, bad, ten=f"human-ag-bad-{field}.yaml"))
+            bang(rc == RC_NOI_DUNG, f"human audit bypassed declared AG {field}: rc={rc} {e}")
+        human_orphan_metadata = dict(human_review, executor="", executor_model_family="gemini")
+        rc, _, e = chay("check", viet(s, human_orphan_metadata,
+                                      ten="human-orphan-executor-metadata.yaml"))
+        bang(rc == RC_NOI_DUNG, f"human audit accepted executor metadata without executor: rc={rc} {e}")
+        for bad, label in ((dict(human_review, role="executor"), "human-executor"),
+                           (dict(human_review, assurance_target="cross_approved"), "human-cross"),
+                           (dict(human_review, assurance_target="unverified_human_audited"), "human-assurance-unknown")):
+            rc, _, e = chay("check", viet(s, bad, ten=f"{label}.yaml"))
+            bang(rc != RC_OK, f"{label} falsely accepted: rc={rc} {e}")
+        human_cross = dict(ag, reviewer="human", reviewer_model_family="claude",
+                           assurance_target="cross_approved")
+        rc, _, e = chay("check", viet(s, human_cross, ten="synthetic-human-cross.yaml"))
+        bang(rc != RC_OK, f"synthetic model family made human cross pass: rc={rc} {e}")
+        human_fallback = dict(ag, reviewer="human", assurance_target="cross_approved_or_human_audited")
+        rc, _, e = chay("check", viet(s, human_fallback, ten="human-fallback.yaml"))
+        bang(rc == RC_OK, f"human fallback falsely rejected: rc={rc} {e}")
+        human_audit_target = dict(ag, reviewer="human", assurance_target="human_audited")
+        rc, _, e = chay("check", viet(s, human_audit_target, ten="human-audit-target.yaml"))
+        bang(rc == RC_OK, f"executor targeting actual human audit blocked: rc={rc} {e}")
+        ag_land = dict(ag, role="land_operator")
+        rc, _, e = chay("check", viet(s, ag_land, ten="ag-land.yaml"))
+        bang(rc == RC_LOP, f"AG land operator outside role scope passed: rc={rc} {e}")
+        codex_land = lease_mau(role="land_operator", provider="codex")
+        rc, _, e = chay("check", viet(s, codex_land, ten="codex-land.yaml"))
+        bang(rc == RC_OK, f"legacy Codex land operator falsely blocked: rc={rc} {e}")
+        claude_review_cross = lease_mau(role="reviewer", provider="claude", reviewer="claude",
+                                        executor="codex", assurance_target="cross_approved")
+        rc, _, e = chay("check", viet(s, claude_review_cross, ten="claude-review-cross.yaml"))
+        bang(rc == RC_OK, f"valid Claude reviewer/Codex executor cross blocked: rc={rc} {e}")
+        for executor_provider in ("codex", "google_antigravity"):
+            contradictory = dict(ag, executor=executor_provider)
+            if executor_provider == "google_antigravity":
+                contradictory["provider"] = "codex"
+                contradictory.pop("model_family")
+                contradictory["execution_surface"] = "codex_desktop"
+            rc, _, e = chay("check", viet(s, contradictory,
+                                          ten=f"contradictory-{executor_provider}.yaml"))
+            bang(rc == RC_NOI_DUNG and "executor không khớp provider" in e,
+                 f"contradictory executor/provider passed/wrong reason: rc={rc} {e}")
+        for field, value in (("model_family", " "),
+                             ("execution_surface", "codex_cli"),
+                             ("transport", "human_mediated")):
+            invalid = dict(ag_reviewer, **{field: value})
+            rc, _, e = chay("check", viet(s, invalid, ten=f"ag-review-bad-{field}.yaml"))
+            bang(rc == RC_NOI_DUNG, f"AG reviewer invalid {field} passed: rc={rc} {e}")
+        legacy_same = lease_mau(provider="codex", reviewer="codex")
+        rc, _, e = chay("check", viet(s, legacy_same, ten="legacy-same.yaml"))
+        bang(rc == RC_OK, f"legacy same-provider lease changed behavior: rc={rc} {e}")
+        legacy_review = lease_mau(role="reviewer", provider="codex", reviewer="codex",
+                                  executor="claude", assurance_target="cross_approved")
+        rc, _, e = chay("check", viet(s, legacy_review, ten="legacy-cross-review.yaml"))
+        bang(rc == RC_OK, f"legacy Claude/Codex review falsely rejected: rc={rc} {e}")
+        for provider, surface, transport in (
+                ("codex", "codex_cli", "machine"),
+                ("codex", "codex_desktop", "machine"),
+                ("codex", "codex_service", "machine"),
+                ("claude", "claude_code", "machine/local")):
+            declared = lease_mau(role="reviewer", provider=provider,
+                                  execution_surface=surface, transport=transport)
+            rc, _, e = chay("check", viet(s, declared,
+                                          ten=f"valid-{provider}-{surface}.yaml"))
+            bang(rc == RC_OK, f"valid provider runtime blocked: {provider}/{surface}, rc={rc} {e}")
+        for provider, surface, transport in (
+                ("codex", "antigravity", "machine/local"),
+                ("codex", "codex_service", "machine/local"),
+                ("claude", "codex_desktop", "machine/local"),
+                ("claude", "claude_code", "human_mediated")):
+            invalid = lease_mau(role="reviewer", provider=provider,
+                                 execution_surface=surface, transport=transport)
+            rc, _, e = chay("check", viet(s, invalid,
+                                          ten=f"invalid-{provider}-{surface}-{transport.replace('/', '_')}.yaml"))
+            bang(rc == RC_NOI_DUNG, f"foreign provider runtime accepted: {provider}/{surface}/{transport}, rc={rc} {e}")
+        invalid_reviewer = lease_mau(role="executor", provider="claude", reviewer="codex",
+                                     reviewer_execution_surface="antigravity",
+                                     reviewer_transport="machine/local")
+        rc, _, e = chay("check", viet(s, invalid_reviewer,
+                                      ten="invalid-declared-codex-reviewer.yaml"))
+        bang(rc == RC_NOI_DUNG, f"foreign reviewer runtime accepted: rc={rc} {e}")
+        invalid_executor = lease_mau(role="reviewer", provider="claude", executor="codex",
+                                     executor_execution_surface="antigravity",
+                                     executor_transport="machine/local")
+        rc, _, e = chay("check", viet(s, invalid_executor,
+                                      ten="invalid-declared-codex-executor.yaml"))
+        bang(rc == RC_NOI_DUNG, f"foreign executor runtime accepted: rc={rc} {e}")
+        ag_same_review = lease_mau(role="reviewer", provider="google_antigravity",
+                                   executor="claude", model_family="claude",
+                                   execution_surface="antigravity", transport="machine/local",
+                                   assurance_target="cross_approved")
+        rc, _, e = chay("check", viet(s, ag_same_review, ten="ag-same-review.yaml"))
+        bang(rc == RC_LOP, f"same-family AG reviewer falsely accepted: rc={rc} {e}")
+        for executor_provider, same_family in (("codex", "openai"), ("claude", "claude")):
+            legacy_to_ag = lease_mau(role="executor", provider=executor_provider,
+                                     reviewer="google_antigravity",
+                                     reviewer_model_family=same_family,
+                                     reviewer_execution_surface="antigravity",
+                                     reviewer_transport="machine/local",
+                                     assurance_target="cross_approved_or_human_audited")
+            rc, _, e = chay("check", viet(s, legacy_to_ag,
+                                          ten=f"legacy-{executor_provider}-same-family.yaml"))
+            bang(rc == RC_LOP, f"missing legacy family bypassed cross gate: {executor_provider}, rc={rc} {e}")
+            legacy_to_ag["reviewer_model_family"] = " "
+            rc, _, e = chay("check", viet(s, legacy_to_ag,
+                                          ten=f"legacy-{executor_provider}-blank-family.yaml"))
+            bang(rc == RC_NOI_DUNG, f"blank AG reviewer family bypassed gate: rc={rc} {e}")
+            legacy_to_ag["reviewer_model_family"] = "gemini"
+            rc, _, e = chay("check", viet(s, legacy_to_ag,
+                                          ten=f"legacy-{executor_provider}-cross-family.yaml"))
+            bang(rc == RC_OK, f"valid legacy-to-AG cross blocked: {executor_provider}, rc={rc} {e}")
+
+
+@ca
 def t02_granted_by_la_ten_provider_bi_CHAN():
     """Chốt CỐT LÕI, cùng luật với `packet_loop.py record-lease`.
 
@@ -2466,20 +2798,46 @@ raise SystemExit(int(os.environ.get("WRAPPER_TEST_RC", "0")))
             actionlint_ngoai = shutil.which("actionlint")
             bang(actionlint_ngoai and actionlint_ngoai.lower().endswith(".exe"),
                  "[Windows] KHÔNG ĐO ĐƯỢC: PATH không có `actionlint.exe` thật")
-            do_ban = subprocess.run([actionlint_ngoai, "--version"],
-                                    capture_output=True, text=True)
-            dong = (do_ban.stdout or "").strip().splitlines()
-            bang(do_ban.returncode == 0 and dong and dong[0] == VER,
-                 f"[Windows] actionlint ngoài không đúng {VER}: rc={do_ban.returncode}, "
-                 f"stdout={do_ban.stdout!r}, stderr={do_ban.stderr!r}")
+            # Chocolatey có thể đặt một shim trên PATH: nó chạy tại chỗ nhưng bản
+            # sao trong archive không chạy. Chỉ dùng PE đã CHÉP sang cây tạm và
+            # tự chứng minh `--version` tại vị trí ấy, đúng hành vi fixture cần.
+            duong_path = _P(actionlint_ngoai).resolve()
+            goc_choco = []
+            if os.environ.get("ChocolateyInstall"):
+                goc_choco.append(_P(os.environ["ChocolateyInstall"]))
+            if duong_path.parent.name.lower() == "bin":
+                goc_choco.append(duong_path.parent.parent)
+            ung_vien = [duong_path] + [
+                root / "lib" / "actionlint" / "tools" / "actionlint.exe"
+                for root in goc_choco]
+            actionlint_portable = None
+            loi_ung_vien = []
+            for thu, nguon in enumerate(dict.fromkeys(ung_vien)):
+                if not nguon.is_file():
+                    loi_ung_vien.append(f"{nguon}: không có tệp")
+                    continue
+                ban_sao = goc / f"actionlint-portable-{thu}.exe"
+                shutil.copy2(nguon, ban_sao)
+                do_ban = subprocess.run([str(ban_sao), "--version"],
+                                        capture_output=True, text=True)
+                dong = (do_ban.stdout or "").strip().splitlines()
+                if do_ban.returncode == 0 and dong and dong[0] == VER:
+                    actionlint_portable = ban_sao
+                    break
+                loi_ung_vien.append(
+                    f"{nguon}: bản sao rc={do_ban.returncode}, "
+                    f"stdout={do_ban.stdout!r}, stderr={do_ban.stderr!r}")
+            bang(actionlint_portable is not None,
+                 f"[Windows] KHÔNG ĐO ĐƯỢC: không có actionlint {VER} portable; "
+                 + "; ".join(loi_ung_vien))
 
             # Gói dương chứa đúng loại file của archive chính thức: `actionlint.exe`.
             # Copy PE thật thay vì đổi đuôi một shell script rồi giả định Windows chạy nó.
             import zipfile
             goi_dung = goc / "actionlint-windows-dung.zip"
             with zipfile.ZipFile(goi_dung, "w", zipfile.ZIP_DEFLATED) as z:
-                z.write(actionlint_ngoai, "actionlint.exe")
-            shutil.copy2(actionlint_ngoai, path_ban_dau / "actionlint.exe")
+                z.write(actionlint_portable, "actionlint.exe")
+            shutil.copy2(actionlint_portable, path_ban_dau / "actionlint.exe")
             nen = "Windows"
         else:
             moi = path_ban_dau / "actionlint"
@@ -6508,7 +6866,7 @@ def t155_618_neo_dinh_nghia_theo_workflow_sha_khong_theo_base_sha():
 @ca
 def t153_nhat_ky_tung_ca_vao_ra_cap_doi_va_khong_dem():
     """M3 packet #504 (#499 C3): mỗi ca in đúng một `>>> vao X` rồi đúng một `<<< ra X` SAU nó, và dòng tổng
-    kết vẫn khớp regex của t125. Chạy chính tệp này trong tiến trình con với đúng một ca rẻ (`--chi-ca=t01_`),
+    kết vẫn khớp regex của t125. Chạy chính tệp này trong tiến trình con với đúng một ca rẻ,
     stdout qua PIPE và KHÔNG đọc cho tới khi tiến trình con kết thúc.
 
     Spec ghi tên ca này là `t152_…`; số ấy đã bị M9 (#503) dùng nên ở đây là t153 — ý nghĩa giữ nguyên.
@@ -6521,7 +6879,8 @@ def t153_nhat_ky_tung_ca_vao_ra_cap_doi_va_khong_dem():
     """
     import subprocess
     nen = {k: v for k, v in os.environ.items() if k != "GITHUB_ACTOR"}
-    p = subprocess.Popen([sys.executable, str(Path(__file__).resolve()), CO_CHI_CA + "t01_"],
+    p = subprocess.Popen([sys.executable, str(Path(__file__).resolve()),
+                          CO_CHI_CA + "t01_lease_hop_le_thi_QUA"],
                          stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, env=nen)
     try:
         p.wait(timeout=30)  # M4 t153=0.250 s; 30 s là trần cho con chỉ chạy t01, chưa đọc PIPE
@@ -7007,11 +7366,11 @@ def t155_chon_ca_khong_khop_hoac_RONG_thi_KHONG_XANH():
                            capture_output=True, text=True, env=nen, timeout=180)
         return p.returncode, p.stdout, p.stderr
 
-    rc, out, err = chay_con(CO_CHI_CA + "t01_")
+    rc, out, err = chay_con(CO_CHI_CA + "t01_lease_hop_le_thi_QUA")
     bang(rc == 0 and re.search(r"lease_publish: 1/1 đạt", out),
          f"prefix hợp lệ phải còn chạy đúng một ca: rc={rc}, stdout={out[-300:]!r}, stderr={err[-200:]!r}")
 
-    rc, out, err = chay_con(CO_AB, CO_CHI_CA + "t01_")
+    rc, out, err = chay_con(CO_AB, CO_CHI_CA + "t01_lease_hop_le_thi_QUA")
     bang(rc == 0 and re.search(r"lease_publish: 1/1 đạt", out),
          f"đường CO_AB phải còn chạy ca: rc={rc}, stdout={out[-300:]!r}, stderr={err[-200:]!r}")
 
@@ -9068,6 +9427,7 @@ def t190_DA_DANG_ma_tep_bi_SUA_van_phai_qua_kiem_tru_chot_han():
                         effective_review_class="systemic", lease_id="wp579-thu", packet_issue=55)
     for nhan, lease, mong in (
             ("review_class hạ lớp (fixture t74)", lop_sai, RC_LOP),
+            ("provider khai rỗng", L(provider=" "), RC_NOI_DUNG),
             ("người cấp ngoài danh sách cho phép", L(granted_by="nguoi-la"), RC_TU_CAP),
             ("reviewed_sha_required sai dạng", L(reviewed_sha_required="abc123"), RC_NOI_DUNG)):
         for co_dau in (False, True):

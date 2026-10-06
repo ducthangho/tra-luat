@@ -118,16 +118,15 @@ def _kiem_capability_khai(lease, provider, surface_key, transport_key, *, requir
 
 
 def _kiem_executor_khai_voi_human_reviewer(lease, executor):
-    """Legacy human audit may omit executor runtime metadata; declarations must be valid."""
+    """Human audit requires AG identity; legacy Claude/Codex metadata stays optional."""
     family_key = "executor_model_family"
     surface_key = "executor_execution_surface"
     transport_key = "executor_transport"
     family = str(lease.get(family_key) or "").strip()
     if executor == "google_antigravity":
-        declared = any(key in lease for key in (family_key, surface_key, transport_key))
-        if declared and family not in MODEL_FAMILIES:
+        if family not in MODEL_FAMILIES:
             raise Chan(RC_NOI_DUNG, "executor google_antigravity khai model_family thiếu hoặc sai")
-        _kiem_capability_khai(lease, executor, surface_key, transport_key, required=declared)
+        _kiem_capability_khai(lease, executor, surface_key, transport_key, required=True)
     elif family_key in lease and family != PROVIDER_FAMILIES.get(executor):
         raise Chan(RC_NOI_DUNG, f"executor_model_family không khớp provider {executor!r}")
     else:

@@ -719,7 +719,8 @@ def t01_ag_identity_and_family_gate():
             legacy = dict(human_review, executor=executor_provider)
             rc, _, e = chay("check", viet(s, legacy,
                                           ten=f"human-legacy-{executor_provider}.yaml"))
-            bang(rc == RC_OK, f"legacy human audit without optional metadata blocked: {executor_provider}, rc={rc} {e}")
+            expected = RC_NOI_DUNG if executor_provider == "google_antigravity" else RC_OK
+            bang(rc == expected, f"human audit missing executor identity: {executor_provider}, rc={rc} {e}")
             declared = dict(legacy, executor_model_family=family)
             if executor_provider == "google_antigravity":
                 declared.update(executor_execution_surface="antigravity",
@@ -735,7 +736,21 @@ def t01_ag_identity_and_family_gate():
                                  executor_model_family="gemini",
                                  executor_execution_surface="antigravity",
                                  executor_transport="machine/local")
+        identity_fields = ("executor_model_family", "executor_execution_surface", "executor_transport")
+        for assurance in ("human_audited", "cross_approved_or_human_audited"):
+            # Every incomplete subset must fail, including no declared metadata.
+            for mask in range(8):
+                candidate = dict(valid_ag_executor, assurance_target=assurance)
+                for bit, field in enumerate(identity_fields):
+                    if not mask & (1 << bit):
+                        candidate.pop(field)
+                rc, _, e = chay("check", viet(s, candidate,
+                                              ten=f"human-ag-tuple-{assurance}-{mask}.yaml"))
+                expected = RC_OK if mask == 7 else RC_NOI_DUNG
+                bang(rc == expected, f"human AG tuple mask={mask}, assurance={assurance}: rc={rc} {e}")
         for field, value in (("executor_model_family", " "),
+                             ("executor_execution_surface", " "),
+                             ("executor_transport", " "),
                              ("executor_execution_surface", "codex_cli"),
                              ("executor_transport", "human_mediated")):
             bad = dict(valid_ag_executor, **{field: value})

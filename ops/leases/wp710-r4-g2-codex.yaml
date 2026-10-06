@@ -52,14 +52,13 @@ write_set_hash_scope: sorted NFC casefold exact manual product paths encoded as 
   closure
 coordination_paths:
 - ops/specs/wp710-nlm-credential-refresh-r4.md
-- ops/thu-hoi/wp710-r3-g1-codex.yaml
 - ops/leases/wp710-r4-g2-codex.yaml
 - ops/reviews/wp710/
 closure_status: 'Owner-approved renewed bounded manual six-path write set under policy debt #473; no computed dispatcher closure
   claimed'
-lease_overlap_evidence: 2026-10-06 UTC scan of 1329 lease blobs across refreshed remote branch refs; only r3/g1 path overlap
-  was owner-revoked in ops/thu-hoi/wp710-r3-g1-codex.yaml at Git commit 64efdc8b3b630ec7a73513912570b9f3339f85e2; two malformed/undated
-  historical blobs have unrelated or empty write sets
+lease_overlap_evidence: '2026-10-06 scan of 1329 historical lease blobs: only r3/g1 overlaps six product paths; owner-approved
+  A0 two-way tombstones on g1/g2 tips supersede it; two malformed/undated historical blobs have unrelated or empty write sets.
+  Recheck after correction.'
 run_minutes: 90
 heartbeat_required_minutes: 30
 review_sla_minutes: 120
@@ -73,12 +72,13 @@ prohibited_actions:
 - land
 - edit_untracked_scripts_nlm_auth_ps1
 land_authority_note: Separate exact-candidate approval is required before any merge or land
-orchestration: Owner-authorized manual Issue and revocation/lease receipt journal; do not claim computed closure or packet_loop
-  state
+orchestration: Owner-authorized manual Issue and A0 two-way tombstone/lease receipt journal; no computed closure or packet_loop
+  state claimed
 supersedes_lease_id: wp710-r3-g1-codex
-revocation_authority: https://github.com/ducthangho/tra-luat/issues/710#issuecomment-6011470229
-revocation_record: ops/thu-hoi/wp710-r3-g1-codex.yaml
 validation_lane: WSL Ubuntu-Clean permitted only for offline admission/checks using canonical base checker and scratch outside
   product checkout; no LIVE credentials
 r209_scope_note: Only r209_cay_that_va_phan_chung in scripts/tl_selftest.py may switch to candidate temporary manifest while
   preserving eight assertions and negative pointer probe
+thay_the_cho: wp710-r3-g1-codex
+corrective_authority: https://github.com/ducthangho/tra-luat/issues/710#issuecomment-6013824558
+tombstone_evidence: r3/g1 branch commit 249fff65d9381360c3ed365c8f7c6d0a15f0f8ff; r3/g1 lease also marked on this g2 branch

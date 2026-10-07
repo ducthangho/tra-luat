@@ -5,13 +5,11 @@ status: running
 supersedes_revision: 3
 change_request: mcr-686-03
 base_sha: 8c98afacb9285aa71e5200739236284f7a190d4f
-objective: Sửa race ProcessLookupError trong launcher _con_song theo Packet wp685, giữ đúng phân biệt
-  ESRCH với lỗi khác và hoàn tất nghiệm thu, review, land.
+objective: Sửa race ProcessLookupError trong launcher _con_song theo Packet wp685, giữ đúng phân biệt ESRCH với lỗi khác và hoàn tất nghiệm thu, review, land.
 acceptance_criteria:
 - wp709 installs first-class Google Antigravity provider support under its six-path effective write set.
 - wp685 repairs the launcher race under its two-path effective write set and frozen generation.
-- Both packets have independent exact-SHA review and positive required checks before land; wp685 uses
-  a separate Codex same-provider reviewer session and an exact-SHA human audit.
+- Both packets have independent exact-SHA review and positive required checks before land; wp685 uses a separate Codex same-provider reviewer session and an exact-SHA human audit.
 - Human audits and authorizes land; launcher-windows.yml is read after merge before wp685 closure.
 risk: sensitive
 requires_live: false
@@ -63,12 +61,12 @@ packet_plan:
   environment_gate: Linux Python 3.11 and 3.12 required before executor lease
   reviewer: codex_independent_session
   review_assurance: same_provider_approved_plus_human_audited
+  spec_hash: 40a14a6e0a82e65b1ec3b4a13d7aa62b01507dcd8a50c208d42e9ff12cdc604f
 provenance:
   prepared_on: '2026-10-07'
   source_mission_issue: https://github.com/ducthangho/tra-luat/issues/686
   approved_decision_url: https://github.com/ducthangho/tra-luat/issues/686#issuecomment-6027925595
   prior_plan_hash: 38b2b3ef9d4a410e2a6a00fdc1861611fd39295b7652062d2988ebc3513feb8a
   status: approved_pending_event_readback
-  plan_hash_formula: sha256(canonical JSON of parsed YAML excluding plan_hash; sort_keys=True, separators=(comma,colon),
-    ensure_ascii=False)
-plan_hash: 5932b27ed10c1c3c52e31e6e0c423b0bd36abb6972b5bad31c3980fd2b8fb0d5
+  plan_hash_formula: sha256(canonical JSON of parsed YAML excluding plan_hash; sort_keys=True, separators=(comma,colon), ensure_ascii=False)
+plan_hash: afc910e9a9076282126d4b2e39723145d15abcad8b5f0c9f0382d4b1c362b27e

@@ -1,0 +1,27 @@
+schema_version: 1
+change_request_id: mcr-686-03
+mission_issue: 686
+requested_by: ducthangho
+reason: >-
+  Google Antigravity executor for wp685 exhausted its quota during generation 1.
+  The owner authorized Codex to continue as executor and a separate Codex
+  session to perform independent review with patch hints.
+proposed_changes:
+  - Replace the wp685 Google Antigravity executor with Codex on the local execution surface.
+  - Use a separate Codex reviewer session and read-only checkout; record any clean verdict as same_provider_approved, not cross_approved.
+  - Require an exact-SHA human audit before land because wp685 remains sensitive.
+  - Supersede the generation 1 Antigravity lease and install wp685 specification revision 19, generation 2, with a new Codex lease.
+  - Preserve the B1-B8 acceptance criteria, launcher objective, two-file effective write set, dependencies, and one code push after all P1-P3 findings are resolved.
+affected_packets: [wp685]
+landed_work_impact: none
+risk_change: none
+decision: approved
+decision_source: human
+approved_by: ducthangho
+decision_url: https://github.com/ducthangho/tra-luat/issues/686#issuecomment-6027925595
+supersedes_revision: 3
+audit_note: >-
+  The approval changes provider and assurance route only. Codex executor and
+  reviewer must use independent sessions. No existing review or gate is
+  inherited across the generation change. The affected packet remains paused
+  until the new Mission event, lease supersession, and exact readback succeed.

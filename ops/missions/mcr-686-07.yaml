@@ -1,0 +1,25 @@
+schema_version: 1
+change_request_id: mcr-686-07
+mission_issue: 686
+requested_by: claude-dispatcher-session
+reason: Owner set the same-failure stop condition for wp685 generation 4 to 10 (answer to the dispatcher session question on 2026-10-07). Mission r6 leaves envelope.same_failure_limit 2 binding wp685 g4; this request makes the owner's per-packet limit explicit in the frozen plan.
+proposed_changes:
+- 'Add same_failure_limit: 10 and same_failure_limit_basis to the wp685 entry of packet_plan; scope is ONLY wp685 generation 4.'
+- envelope.same_failure_limit stays 2 and still binds every other packet and any later wp685 generation; no other envelope field changes.
+- Same-failure counting for the generation-4 limit starts at 0 at generation 4; g2/g3 same-failure history is kept as data, not counted.
+- Spec r23 (sha256 96387f833a0f102742b5f9c86948f2b3f0597d3032dd1817ce732557ae2af939), packet revision 23, generation 4, executor, review class, write set, attempt_limit null, required checks and land obligations are unchanged.
+- 'Lease wp685-r23-g4-codex-20261007 anchors mission_revision 6 / plan_hash b01ef7da5d4db646cea9b96c9fe004b30a69f8c0f0c70245bfa67f6dcc1894e1; it is superseded by a new lease of the same revision 23 / generation 4 anchored to Mission r7 (precedent: g2 -> g2b when the r4 plan hash changed), with a two-way tombstone if the g4 lease is still unexpired (expires 2026-10-08T14:20:35Z) at grant time.'
+- 'Install Mission revision 7 with a new exact plan hash only after the owner''s durable #686 decision; grant the new lease only after event readback, holder scan on both paths and base check.'
+affected_packets:
+- wp685
+landed_work_impact: none
+risk_change: none
+decision: approved
+decision_source: human
+approved_by: ducthangho
+decision_url: https://claude.ai/code/session_01CSM7GNazhN6uGJb4v1TqBT
+owner_decision_text: same_failure_limit cho wp685 g4 là 10
+durable_ratification: '#686 owner comment approving exact sha256 of this file and exact Mission r7 plan_hash; its URL is recorded as mcr_decision_url in the mission_revision_installed event, not in this file (the comment cites this file''s hash)'
+supersedes_revision: 6
+supersedes_change_request: none (adds a wp685 g4 field; mcr-686-06 stays in force for spec r23, generation 4 and attempt_limit null)
+audit_note: 'Owner decision given in a Claude Code session; the durable record is the #686 comment that cites the exact sha256 of this file and the r7 plan hash. Packet spec, revision and generation are unchanged (protocol 3.1.1 lists objective/acceptance/write-set/dependency/executor/environment as the triggers for a new generation). Not a human code audit; no merge, land or LIVE authority.'

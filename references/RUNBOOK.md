@@ -188,7 +188,8 @@ python scripts/tl.py ping ; python scripts/tl.py gws-ping --env cowork
     (tuần) nên đủ; CSRF/session tự sinh trong phiên từ cookie đĩa. Refresh THẬT xảy ra ở **Code** (browser profile).
   - **Bảo trì ~2–4 tuần** (bootstrap báo "cookie ~N ngày tuổi", >14 ngày thì cảnh báo): ở Code chạy `nlm login`
     (hoặc để nlm tự headless-refresh khi dùng) rồi **`tl secrets-set --nlm`** (refresh cookie tại chỗ vào bundle,
-    giữ nguyên fileId — `secrets-stage` tự `nlm login --check` trước khi gói để bắt cookie mới nhất).
+    giữ nguyên fileId — `secrets-stage` tự `nlm login --check` trước khi gói để bắt cookie mới nhất). Từ WP710 cả
+    hai lệnh đòi canary LIVE dương (thân JSON đúng notebook) trước mọi upload — xem mục WP710 cuối tệp.
 - **Lỗi `exporttext`: "không có quyền UrlFetchApp.fetch / cần script.external_request"** = webapp deploy
   THIẾU scope đã-cấp-quyền (dù `exportBlob_` ưu tiên `Drive.Files.export`, gặp quirk thì rơi xuống UrlFetchApp).
   Fix (chủ webapp, KHÔNG agent làm được): (1) appsscript.json có `https://www.googleapis.com/auth/
@@ -663,45 +664,81 @@ Nguyên tắc hygiene: giữ bản canonical có `nlm_source_id` + cat đúng + 
 - Trước mọi nạp nguồn web/NLM-native, chạy `tl external-ingest <url> ... --json` để kiểm kế hoạch. Lệnh này chỉ kiểm, không ghi Drive/NLM.
 - `research_start/research_status` chỉ dùng để phát hiện URL; `research_import/source_add(url)` không được dùng để nạp VBQPPL làm nguồn canonical.
 - Instruction dùng cho Claude Project/NLM phải qua `tl instruction-audit` hoặc sinh bằng `tl instructions`/`scripts/gen_instructions.py`; thiếu `SKILL_OF_RECORD`, `ingest_handoff`, `confirm_gate_web` thì không dùng.
-# WP710: refresh NLM credentials on the original browser host
+## WP710 — làm tươi credential NLM trên máy giữ hồ sơ trình duyệt gốc
 
-Run this only on the Windows host that owns the original logged-in browser profile and
-the local `~/.notebooklm-mcp-cli` credentials. The script does not copy a browser
-profile or perform a login. Prepare a trusted local JSON config outside the repository:
+**Điều kiện tiên quyết** (chỉ chạy trên máy Windows đang giữ hồ sơ trình duyệt đã đăng nhập và
+`~/.notebooklm-mcp-cli` cục bộ): PowerShell 7 trở lên (`pwsh`; script khai `#requires -Version 7.0`,
+Windows PowerShell 5.1 không chạy), `nlm` và `python` gọi được trên PATH (script tự giải ra đường dẫn
+thật, kể cả shim `.cmd`), và `tl` có webapp token (`TL_TOKEN` hoặc config) để mã hoá. Lệnh stage mặc
+định là `scripts/tl.py` neo theo thư mục của script, nên không phụ thuộc thư mục hiện hành. Script KHÔNG
+chép hồ sơ trình duyệt, KHÔNG đăng nhập. Chuẩn bị một config JSON tin cậy, đặt NGOÀI kho:
 
 ```json
 {"notebook_id":"YOUR_EXISTING_NOTEBOOK_ID","browser_profile_path":"C:\\path\\to\\original\\browser-profile"}
 ```
 
-Select and independently verify the notebook ID before starting. The refresh command
-is `nlm auth refresh`; the canary is `nlm notebook get <id> -j`. The canary must return
-the selected ID and a notebook title or name. A successful refresh rc, `nlm login
---check`, or a notebook count alone does not authorize upload. Record only the
-script's machine-readable status, rc, elapsed seconds, CLI version and profile path
-fingerprint; child output may contain credentials and is deliberately suppressed.
+Chọn và tự kiểm notebook ID trước khi chạy. Chuỗi bước luôn là `nlm auth refresh` → canary
+`nlm notebook get <id> -j` → `tl nlm-auth-stage`. Canary chỉ dương khi trả về đúng ID đã chọn (so
+phân biệt hoa/thường) kèm tiêu đề hoặc tên notebook; rc 0 của refresh, `nlm login --check` hay số
+notebook đều KHÔNG cho phép upload. Bước stage nhận `TL_NOTEBOOK_ID` của config, nên canary riêng của
+lệnh stage dò CÙNG notebook ấy.
 
 ```powershell
 pwsh -NoProfile -File scripts/nlm-credential-refresh.ps1 -ConfigPath C:\private\nlm-refresh.json
 ```
 
-`staged` means the stage command returned rc 0. `auth_failure` requires a fresh
-interactive login on the original host before retrying. `network_failure` requires
-checking connectivity and retrying. `timeout` requires checking the stalled step.
-`inconclusive` means inspect the config, selected notebook and CLI locally; no upload
-was attempted. `stage_failure` means the canary passed but upload did not report
-success; inspect Drive state before any retry to avoid an unnecessary duplicate.
-No status from offline tests proves the real credential or Drive state.
+**Bằng chứng ghi lại.** Mỗi chu kỳ in MỘT dòng JSON: `status`, `step` (bước kết thúc chu kỳ), `rc` và
+`elapsed_seconds` của bước đó, `cycle`, `cli_version`, và `steps` mang `rc`/`elapsed_seconds`/`timeout`/
+`child_confirmed_exited` của TỪNG bước đã chạy (`version`, `refresh`, `canary`, `stage`). Đầu ra của
+tiến trình con KHÔNG bao giờ được in vì có thể chứa cookie. `profile_fingerprint` là 16 ký tự hex đầu
+của SHA-256 trên đường dẫn `browser_profile_path` (viết thường, đầy đủ) khai trong config — nó định danh
+ĐƯỜNG DẪN đã khai, không phải nội dung hồ sơ; và `profile_bound_to_cli` luôn là `false`: script chỉ
+kiểm thư mục ấy tồn tại, KHÔNG truyền nó cho `nlm`. "Chạy trên hồ sơ gốc" là điều người vận hành bảo
+đảm bằng việc chọn máy.
 
-Keepalive is opt in and bounded. The following runs at most three cycles, spaced by
-one hour; stop it with Ctrl+C or terminate its process. There is no Scheduled Task or
-automatic startup. A named Windows mutex serializes all refresh, canary and stage
-steps across processes on the host. An abandoned mutex is taken only when Windows reports
-that the former owning process ended.
+**Ý nghĩa trạng thái và mã thoát** (chỉ `staged` có upload; mọi trạng thái khác: 0 lần stage):
+
+| `status` / `step` | mã thoát | nghĩa và việc cần làm |
+|---|---|---|
+| `staged` / `stage` | 0 | lệnh stage trả rc 0 sau canary dương. |
+| `auth_failure` / `refresh`·`canary` | 2 | thông báo lỗi khớp một cụm lỗi xác thực có neo (vd `Authentication expired`, `HTTP 401`); đăng nhập tương tác lại trên máy gốc rồi chạy lại. |
+| `network_failure` / `refresh`·`canary` | 2 | khớp một cụm lỗi mạng có neo (vd `connection reset`, `503 Service Unavailable`); kiểm kết nối rồi chạy lại. |
+| `inconclusive` / `refresh`·`canary` | 2 | rc khác 0 nhưng không khớp cụm nào, hoặc khớp CẢ HAI loại; đọc lỗi tại máy, không suy là auth. |
+| `timeout` / `refresh`·`canary` | 3 | bước quá `-TimeoutSeconds`, kể cả khi CLI đã thoát mà một tiến trình con của nó còn giữ ống ra. Tiến trình bị giết; nếu không xác nhận được đã chết thì bản ghi thao tác được GIỮ để lần chạy sau chờ. |
+| `inconclusive` / `canary` | 4 | canary rc 0 nhưng thân không phải JSON của đúng notebook (sai ID, thiếu tiêu đề/tên, rỗng, mảng nhiều phần tử). |
+| `inconclusive` / `preflight` | 4 | config/notebook_id/hồ sơ thiếu, không tìm thấy `nlm`/`python`, hoặc lỗi ngoài dự kiến. |
+| `inconclusive` / `lock_busy` | 5 | không giành được khoá trong `-LockWaitSeconds`, HOẶC tiến trình con của một lần chạy trước (chủ khoá đã bị giết) vẫn còn sống. |
+| `stage_failure` / `stage` | 6 | canary dương nhưng lệnh stage không trả rc 0: gồm upload lỗi, thiếu `TL_TOKEN` (rc 2), và canary RIÊNG của lệnh stage từ chối (rc 4). Kiểm trạng thái Drive trước khi thử lại. |
+
+Phân loại `auth_failure`/`network_failure` là đọc VĂN BẢN lỗi theo danh sách cụm có neo (danh sách
+cho phép); từ trần như `auth`, `login`, `cookie` không được tính vì chính tên lệnh `nlm auth refresh`
+và gợi ý `nlm login` chứa chúng. Nhãn là chỉ dẫn, không phải phép đo; điều được bảo đảm là 0 lần stage.
+Không trạng thái nào từ bộ test offline chứng minh credential thật hay trạng thái Drive.
+
+**Keepalive** là opt-in và có giới hạn: thiếu `-EnableKeepalive` thì `-MaxCycles` bị bỏ qua và chỉ chạy
+một chu kỳ. Lệnh dưới chạy tối đa ba chu kỳ, cách nhau một giờ; dừng bằng Ctrl+C hoặc giết tiến trình.
+Không có Scheduled Task, không tự khởi động.
 
 ```powershell
 pwsh -NoProfile -File scripts/nlm-credential-refresh.ps1 -ConfigPath C:\private\nlm-refresh.json -EnableKeepalive -IntervalSeconds 3600 -MaxCycles 3
 ```
 
-The `tl nlm-auth-stage` command itself requires a positive live canary even when
-`--force` is supplied. If it refuses to stage, fix the canary or credentials first;
-do not use `--force` as a recovery path.
+**Tuần tự hoá.** Một mutex Windows có tên `Global\tra_luat_nlm_credential_refresh` bao TRỌN một tiến trình
+wrapper — từ lúc giành khoá tới lúc thoát, GỒM CẢ các khoảng nghỉ keepalive. Vì vậy một lần chạy tay
+trong lúc keepalive đang nghỉ sẽ nhận `lock_busy` (mã 5) sau `-LockWaitSeconds`. Khoá của một chủ đã
+chết được nhận lại, nhưng chủ chết KHÔNG kéo theo con chết: mỗi tiến trình con đang chạy được ghi
+(pid + thời điểm khởi động) vào `tra_luat_nlm_credential_refresh.operation.json` trong thư mục tạm của
+người dùng, và chủ mới CHỜ tới khi tiến trình đó hết sống (trong `-LockWaitSeconds`) trước khi chạy bước
+nào. Bản ghi hỏng/không đọc được làm lần chạy dừng ở `lock_busy`: xác nhận không còn tiến trình `nlm`/
+`python` nào của lần trước rồi xoá tệp ấy. Giới hạn đã biết: tiến trình CHÁU còn sống sau khi con trực
+tiếp đã thoát (ví dụ trình duyệt do `nlm` mở) không được ghi và không bị giết — wrapper chỉ bảo đảm
+không chờ nó quá hạn (trả `timeout`, 0 stage); thư mục tạm là theo người dùng nên tiến trình con của
+NGƯỜI DÙNG KHÁC không được thấy.
+
+**Cổng nằm ở lệnh, không chỉ ở wrapper.** `tl nlm-auth-stage`, `tl secrets-set --nlm` (bundle và
+`nlm_cred.enc` public) và `tl secrets-stage` (bundle mang `nlm_auth`) cùng đi qua MỘT hàm cổng: canary
+phải dương với thân JSON đúng notebook (`TL_NOTEBOOK_ID` hoặc notebook nền) trước khi đọc jar và trước
+mọi upload; không dương thì từ chối cả lệnh (mã 4), không upload gì. `--force` của `nlm-auth-stage`
+không bỏ qua được cổng (trợ giúp CLI của cờ này còn mô tả cũ — nợ ngoài write set). Bị từ chối thì sửa
+canary hoặc credential trước; đừng tìm cờ để ép. Với `secrets-stage` mà chủ ý không gói NLM, dùng
+`--no-nlm`.

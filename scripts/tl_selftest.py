@@ -4980,6 +4980,24 @@ def run() -> int:
         ("title_dung_name_rong", json.dumps({"id": _NB714d, "title": "C", "name": ""}), 0),
         ("id_mang", json.dumps({"id": [_NB714d], "title": "C"}), 0), ("data_mang", json.dumps({"data": [_good714d]}), 0),
         ("null", "null", 0), ("so", "42", 0), ("chuoi", '"x"', 0), ("mang_null", "[null]", 0), ("rong", "", 0),
+        # WP714 review: Python json.loads accepts these non-JSON constants by default.
+        ("json_nan", '{"id":"' + _NB714d + '","title":"C","source_count":NaN}', 0),
+        ("json_infinity", '{"id":"' + _NB714d + '","title":"C","source_count":Infinity}', 0),
+        ("json_negative_infinity", '{"id":"' + _NB714d + '","title":"C","source_count":-Infinity}', 0),
+        # WP714 vòng 3 (executor Claude): cùng cơ chế "bộ đọc Python nhận thứ bộ đọc PS từ chối" — đo song song
+        # cùng đầu vào trên pwsh 7.4.6. Số TRÀN double (Python ra inf/int khổng lồ, PS ra ±∞), surrogate LẺ dạng
+        # thoát (PS ném khi đọc chuỗi/tên khoá), lồng > 64 mức (PS ném). Kèm ĐỐI CHỨNG DƯƠNG ngay biên.
+        ("so_tran_double", '{"id":"' + _NB714d + '","title":"C","n":1e400}', 0),
+        ("so_tran_am", '{"id":"' + _NB714d + '","title":"C","n":-1e400}', 0),
+        ("so_nguyen_400_chu_so", '{"id":"' + _NB714d + '","title":"C","n":1' + "0" * 400 + '}', 0),
+        ("surrogate_le_gia_tri", '{"id":"' + _NB714d + '","title":"C","n":"\\ud800"}', 0),
+        ("surrogate_le_khoa", '{"id":"' + _NB714d + '","title":"C","\\udc00":1}', 0),
+        ("long_65_muc", '{"id":"' + _NB714d + '","title":"C","n":' + "[" * 64 + "]" * 64 + '}', 0),
+        ("bom_dau", "\ufeff" + json.dumps(_good714d), 0), ("phay_thua", json.dumps(_good714d)[:-1] + ",}", 0),
+        ("chu_thich", json.dumps(_good714d)[:-1] + "/*x*/}", 0),
+        ("dc_so_nguyen_300_chu_so", '{"id":"' + _NB714d + '","title":"C","n":1' + "0" * 300 + '}', 1),
+        ("dc_cap_surrogate_hop_le", '{"id":"' + _NB714d + '","title":"\\ud83d\\ude00"}', 1),
+        ("dc_long_64_muc", '{"id":"' + _NB714d + '","title":"C","n":' + "[" * 63 + "]" * 63 + '}', 1),
     ]
     _res714d = {}
     try:
@@ -5190,6 +5208,21 @@ def run() -> int:
         _nc714g._run, _nc714g.nlm_available = _saved714g
         _os38.environ.clear(); _os38.environ.update(_env714g)
     cases.append(("wp714_nlm_canary_ghim_notebook_qua_hai_profile", len(_res714g) == 3 and all(_res714g.values())))
+
+    # (6) WP714 vòng 3 (Codex lượt 2, lớp P3 `khai-rong-hon-phep-do-trong-changelog-runbook`): chốt payload làm
+    # `secrets-set` thiếu `--nlm` trả mã 4 khi bundle mang nlm_auth, nên MỌI lệnh mẫu xoay token/webapp/GWS (một
+    # đoạn trong dấu backtick) ở RUNBOOK và trong tl_gws (lời khắc phục GWS in ra) phải mang `--nlm` NGAY TRONG lệnh
+    # — chỉ dẫn cũ đưa người vận hành thẳng vào mã 4. Đếm số lệnh mẫu để ca không xanh rỗng khi chuỗi đổi dạng.
+    import re as _re714h
+    _pat714h = _re714h.compile(r"`[^`\n]*secrets-set --(?:gas-token|webapp|gws)[^`\n]*`")
+    _dir714h = _os38.path.dirname(_os38.path.dirname(_os38.path.abspath(_tg50.__file__)))
+    _cmd714h = {}
+    for _rel714h in (("references", "RUNBOOK.md"), ("scripts", "tl_gws.py")):
+        with open(_os38.path.join(_dir714h, *_rel714h), encoding="utf-8") as _f714h:
+            _cmd714h[_rel714h[-1]] = _pat714h.findall(_f714h.read())
+    cases.append(("wp714_huong_dan_secrets_set_kem_nlm",
+                  len(_cmd714h["RUNBOOK.md"]) >= 3 and len(_cmd714h["tl_gws.py"]) >= 4
+                  and all("--nlm" in _c for _v in _cmd714h.values() for _c in _v)))
 
     # ═══ v1.33.40 (MERGE bundle-15 'complete': source-delete (a) KHÔNG trash Drive dù docstring nói, (b) reg_delete
     # SAI shape g.get(fileId,force) — GAS đòi POST+drive_ids[]+confirm=yes) — r51_* ═══

@@ -59,8 +59,8 @@ def _access_token(cred):
     # v1.31.2 (chẩn đoán LIVE 2026-07-03): lỗi ở đây từng nổi lên chỉ là 'HTTPError 400: Bad Request' ở MỌI đường
     # direct-media → không ai biết là CRED HẾT HẠN (invalid_grant). Đọc body + raise thông điệp tự-chẩn-đoán.
     # Kiến trúc: credentials.json (FILE — nguồn của direct-media) TÁCH RỜI token keyring của gws CLI binary
-    # → gws CLI vẫn chạy tốt trong khi file cred hết hạn. Làm mới: `gws auth login` rồi `tl secrets-set --gws`
-    # (cập nhật bundle để Cowork cũng nhận cred mới).
+    # → gws CLI vẫn chạy tốt trong khi file cred hết hạn. Làm mới: `gws auth login` rồi `tl secrets-set --gws --nlm`
+    # (cập nhật bundle để Cowork cũng nhận cred mới; WP710: `--nlm` bắt buộc khi bundle mang nlm_auth).
     import urllib.error as _ue
     try:
         with _u.urlopen(_u.Request("https://oauth2.googleapis.com/token", data=data), timeout=30) as r:
@@ -77,9 +77,10 @@ def _access_token(cred):
             # file (action download b64 — DriveApp); op ĐỌC TEXT (exporttext) CHẾT THEO vì webapp thiếu OAuth scope
             # script.external_request → extract/corpus-audit/header-verify không còn đường Drive nào.
             raise RuntimeError("GWS_CRED_EXPIRED: refresh_token trong ~/.config/gws/credentials.json HẾT HẠN/bị thu hồi "
-                               "(invalid_grant) → chạy `gws auth login` trên máy user rồi `tl secrets-set --gws` "
+                               "(invalid_grant) → chạy `gws auth login` trên máy user rồi `tl secrets-set --gws --nlm` "
                                "(v1.33.1: 1 lệnh làm tươi CẢ bundle LẪN file public TẠI CHỖ — Chat/Cowork tự nhận, "
-                               "không bake lại; chỉ-public: `tl gws-auth-stage`). ⚠ Fallback GAS chỉ cứu DOWNLOAD file; op ĐỌC TEXT "
+                               "không bake lại; WP710: `--nlm` bắt buộc khi bundle mang nlm_auth, cần jar nlm + canary "
+                               "dương ở máy này; máy không có jar ⇒ chỉ-public: `tl gws-auth-stage`). ⚠ Fallback GAS chỉ cứu DOWNLOAD file; op ĐỌC TEXT "
                                "(exporttext) chết theo (webapp thiếu scope script.external_request) — tạm rà verbatim "
                                "qua `tl nlm-content <source_id> --dieu N` (corpus-audit/backfill-title-vn tự thử đường NLM).") from None
         raise RuntimeError(f"GWS_TOKEN_REFRESH_HTTP_{e.code}: {_body or e.reason}") from None
@@ -121,9 +122,25 @@ def _auth_fix_hint_short() -> str:
 _NLM_CANARY_KNOWN_KEYS = ("id", "notebook_id", "title", "name", "data", "ok", "error")
 
 
+_NLM_CANARY_MAX_DEPTH = 64     # = MaxDepth mặc định của System.Text.Json (đo: 64 mức lồng nhận, 65 ném)
+
+
 def _nlm_canary_json_strict(text):
     """WP714 (cross-review PR #714 lớp P1 `stage-canary-true-khi-than-rong-hoac-sai-id`): parse JSON và TỪ CHỐI
-    khoá trùng ở MỌI mức — `{"id":"KHAC","id":"<đúng>"}` là trả lời hai nghĩa, `json.loads` âm thầm lấy vế sau."""
+    khoá trùng ở MỌI mức — `{"id":"KHAC","id":"<đúng>"}` là trả lời hai nghĩa, `json.loads` âm thầm lấy vế sau.
+    WP714 vòng 3 (Codex lượt 2, cùng lớp): `json.loads` mặc định NHẬN cả thứ KHÔNG phải JSON chuẩn — đo:
+    `NaN`/`Infinity`/`-Infinity` thành float rồi canary DƯƠNG, upload=1 ở cả ba lệnh. Hợp đồng là JSON RFC 8259
+    và phải KHỚP bộ đọc của wrapper PS (`System.Text.Json.JsonDocument`, đo cùng đầu vào trên pwsh 7.4.6):
+      · hằng ngoài JSON (`NaN`/`Infinity`/`-Infinity`): PS ném lúc parse ⇒ ở đây `parse_constant` ném;
+      · số hợp lệ cú pháp nhưng TRÀN double (`1e400`, số nguyên 400 chữ số): Python ra `inf`/int khổng lồ, PS
+        `TryGetDouble` ra ±∞ ⇒ cả hai phía TỪ CHỐI số không hữu hạn. Thử bằng `float()` TRƯỚC `int()` nên không
+        phụ thuộc giới hạn `int_max_str_digits` (biến môi trường đổi được giới hạn ấy);
+      · surrogate LẺ (`"\\ud800"` dạng thoát) ở khoá hoặc giá trị: Python nhận, PS `GetString()`/`.Name` ném
+        ⇒ từ chối ở cả hai. (Byte UTF-8 hỏng thì `nlm_cli._run` và .NET đều thay bằng U+FFFD — đã cùng nghĩa.)
+      · lồng quá 64 mức: PS ném ⇒ ở đây cũng từ chối (Python tự nhận tới ~1000 mức).
+    BOM, dấu phẩy thừa, chú thích, ký tự điều khiển thô, khoảng trắng ngoài 4 ký tự JSON: cả hai bộ đọc vốn đã
+    từ chối (đo) — giữ nguyên, có ca khoá trong selftest."""
+    import math   # cục bộ: không dựa vào namespace dùng chung của tl.py
     def _no_dup(pairs):
         seen = set()
         for k, _ in pairs:
@@ -131,7 +148,43 @@ def _nlm_canary_json_strict(text):
                 raise ValueError("CANARY_DUPLICATE_KEY")
             seen.add(k)
         return dict(pairs)
-    return json.loads(text, object_pairs_hook=_no_dup)
+
+    def _no_constant(_name):
+        raise ValueError("CANARY_NON_JSON_CONSTANT")
+
+    def _finite_float(s):
+        v = float(s)
+        if not math.isfinite(v):
+            raise ValueError("CANARY_NUMBER_NOT_FINITE")
+        return v
+
+    def _finite_int(s):
+        if not math.isfinite(float(s)):
+            raise ValueError("CANARY_NUMBER_NOT_FINITE")
+        return int(s)
+
+    body = json.loads(text, object_pairs_hook=_no_dup, parse_constant=_no_constant,
+                      parse_float=_finite_float, parse_int=_finite_int)
+    stack = [(body, 1)]
+    while stack:                                      # duyệt lặp (không đệ quy) — kiểm độ sâu + surrogate lẻ
+        node, depth = stack.pop()
+        if isinstance(node, (dict, list)):
+            if depth > _NLM_CANARY_MAX_DEPTH:
+                raise ValueError("CANARY_TOO_DEEP")
+            items = list(node.items()) if isinstance(node, dict) else [(None, v) for v in node]
+            for k, v in items:
+                if isinstance(k, str) and _has_lone_surrogate(k):
+                    raise ValueError("CANARY_LONE_SURROGATE")
+                stack.append((v, depth + 1))
+        elif isinstance(node, str) and _has_lone_surrogate(node):
+            raise ValueError("CANARY_LONE_SURROGATE")
+    return body
+
+
+def _has_lone_surrogate(s: str) -> bool:
+    """Cặp surrogate hợp lệ dạng thoát đã được `json` gộp thành MỘT code point; còn lại trong khoảng
+    U+D800–U+DFFF nghĩa là surrogate lẻ — thứ .NET không đọc thành chuỗi được."""
+    return any(0xD800 <= ord(ch) <= 0xDFFF for ch in s)
 
 
 def _nlm_canary_level_ok(obj) -> bool:
@@ -536,8 +589,9 @@ def cmd_gws_ping(a) -> int:
     _alive, _amsg = _gws_cred_alive()
     info["cred_alive"] = _alive
     if not _alive:
-        info["issues"].append(f"CRED CHẾT (canary token): {_amsg} → `gws auth login` rồi `tl secrets-set --gws` "
-                              "(1 lệnh làm tươi CẢ bundle + public tại chỗ; chỉ-public: `tl gws-auth-stage`). "
+        info["issues"].append(f"CRED CHẾT (canary token): {_amsg} → `gws auth login` rồi `tl secrets-set --gws --nlm` "
+                              "(1 lệnh làm tươi CẢ bundle + public tại chỗ; `--nlm` cần jar + canary dương ở máy này; "
+                              "máy không có jar ⇒ chỉ-public: `tl gws-auth-stage`). "
                               "⚠ đọc Drive (extract/corpus-audit) CHẾT tới khi refresh "
                               "— tạm rà verbatim qua `tl nlm-content <source_id> --dieu N`.")
 
@@ -558,7 +612,8 @@ def _gws_ping_emit(info: dict, want_json: bool) -> None:
         if info.get("cred_alive") is False:
             # v1.32.1: cred CHẾT ≠ 'chưa nạp' — op ĐỌC Drive (extract/corpus-audit/header-verify) CHẾT
             # (fallback GAS exporttext thiếu scope); chỉ download-manifest/upload còn đường khác.
-            print("  ⚠ CRED CHẾT: op ĐỌC Drive sẽ hỏng tới khi `gws auth login` + `tl secrets-set --gws`; "
+            print("  ⚠ CRED CHẾT: op ĐỌC Drive sẽ hỏng tới khi `gws auth login` + `tl secrets-set --gws --nlm` "
+                  "(máy không có jar nlm ⇒ `tl gws-auth-stage`, chỉ đường public); "
                   "tạm rà verbatim qua `tl nlm-content` / backfill-title-vn --from-tukhoa (offline).")
         else:
             print("  ℹ gws chưa sẵn → op A/B/C tự [FALLBACK→GAS] (chỉ `upload` cần gws); skill VẪN DÙNG ĐƯỢC.")

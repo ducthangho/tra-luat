@@ -46,9 +46,10 @@ if mode == "timeout" and op == "auth":
     time.sleep(5)
 if mode == "timeout_canary" and op == "notebook":
     time.sleep(5)
-if mode == "descendant_exit" and op == "auth":
+if mode in ("descendant_exit", "descendant_scrubbed_exit") and op == "auth":
     child_code = "import os,time;[(open(os.environ['WP714_BEAT_FILE'],'a').write(str(time.time())+'\\n'),time.sleep(0.1)) for _ in range(300)]"
-    child = subprocess.Popen([sys.executable, "-c", child_code])
+    env = {k: v for k, v in os.environ.items() if k != "TRA_LUAT_NLM_OP"} if mode == "descendant_scrubbed_exit" else dict(os.environ)
+    child = subprocess.Popen([sys.executable, "-c", child_code], env=env)
     with open(os.environ["WP714_CHILD_PID_FILE"], "w") as f:
         f.write(str(child.pid))
     sys.exit(0)
@@ -74,15 +75,16 @@ if mode == "hang_orphan" and op == "auth":
              "open(os.environ['WP714_LINGER_PID'], 'w').write(str(c.pid))")
     subprocess.run([sys.executable, "-c", inner], stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
     time.sleep(5)
-if mode == "scrub_daemon" and op == "auth":
+if mode in ("scrub_daemon", "scrub_daemon_hold") and op == "auth":
     # WP714 round 3: like `daemon`, but the descendant also CLEARED the operation marker from its environment.
+    # WP714 round 4, scrub_daemon_hold: the CLI stays a little longer, so a test can kill the owner meanwhile.
     beat = "import os,time;[(open(os.environ['WP714_BEAT_FILE'],'a').write(str(time.time())+'\\n'),time.sleep(0.1)) for _ in range(300)]"
     env = {k: v for k, v in os.environ.items() if k != "TRA_LUAT_NLM_OP"}
     child = subprocess.Popen([sys.executable, "-c", beat], env=env, stdin=subprocess.DEVNULL,
                              stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
     with open(os.environ["WP714_CHILD_PID_FILE"], "w") as f:
         f.write(str(child.pid))
-    time.sleep(0.5)
+    time.sleep(1.5 if mode == "scrub_daemon_hold" else 0.5)
     sys.exit(0)
 if mode == "err_conn_reset" and op == "auth":
     print("Error running `nlm auth refresh`: connection reset by peer", file=sys.stderr)
@@ -148,6 +150,25 @@ if op == "notebook":
             "singleton": json.dumps([good]),
             "title_date": json.dumps({"id": sys.argv[3], "title": "2026-01-01T00:00:00"}),
         }[mode])
+    elif mode.startswith("control_title_") or mode.startswith("control_name_"):
+        # lop: stage-canary-true-khi-than-rong-hoac-sai-id
+        key = "title" if mode.startswith("control_title_") else "name"
+        print(json.dumps({"id": sys.argv[3], key: chr(int(mode.rsplit("_", 1)[1], 16))}))
+    elif mode == "bom_canary":
+        print("\ufeff" + json.dumps({"id": sys.argv[3], "title": "Canary"}))
+    elif mode.startswith("transport_"):
+        # WP714 round 4: what nlm_cli._run + _strip_keyring do to stdout before the Python stage command judges it.
+        nb = sys.argv[3]
+        sys.stdout.buffer.write({
+            "transport_keyring_noise": "Using keyring backend: fake\n" + json.dumps({"id": nb, "title": "Canary"}) + "\n",
+            "transport_crlf_pretty": '{\r\n  "id": "' + nb + '",\r\n  "title": "Canary"\r\n}\r\n',
+            "transport_ff_between": '{"id":"' + nb + '",\f"title":"Canary"}\n',
+            "transport_u2028_title": '{"id":"' + nb + '","title":"Ca\u2028nary"}\n',
+            "transport_nel_title": '{"id":"' + nb + '","title":"Ca\u0085nary"}\n',
+            "transport_keyring_title": '{\n "id": "' + nb + '",\n "name": "N",\n "title": "using keyring backend"\n}\n',
+            "transport_bad_utf8_title": None,
+        }[mode].encode("utf-8") if mode != "transport_bad_utf8_title" else
+            b'{"id":"' + nb.encode() + b'","title":"\xc0\xa2"}\n')
     elif mode in ("nan_meta", "overflow_meta", "surrogate_title", "surrogate_key", "surrogate_meta", "dup_nested", "deep65", "meta_ok"):
         # WP714 round 3: documents the Python reader (json.loads) used to accept and System.Text.Json reads
         # differently. Raw text: json.dumps cannot write most of these.
@@ -280,7 +301,10 @@ note("end")
     # <<case:n
     foreach ($mode in @('title_bool','title_array','title_object','title_space','id_array','conflict_id',
                         'multi','multi_same','dup_id','case_key','ok_false','error_set',
-                        'nan_meta','overflow_meta','surrogate_title','surrogate_key','surrogate_meta','dup_nested','deep65')) {
+                        'nan_meta','overflow_meta','surrogate_title','surrogate_key','surrogate_meta','dup_nested','deep65','control_title_001c','control_title_001d','control_title_001e','control_title_001f','control_name_001c','control_name_001d','control_name_001e','control_name_001f','bom_canary',
+                        # WP714 round 4: the one blank table (both readers) and the stage command's view of stdout.
+                        'control_title_0085','control_title_00a0','control_title_180e','control_title_200b','control_title_feff',
+                        'control_name_3000','transport_u2028_title','transport_nel_title','transport_keyring_title')) {
         $r = Invoke-Wrapper $mode @('-TimeoutSeconds','5')
         # step must be 'canary': a reader exception escaping to 'preflight' is the same rc 4 for a different reason.
         if ($r.Rc -ne 4 -or $r.Json.status -ne 'inconclusive' -or $r.Json.step -ne 'canary' -or
@@ -290,7 +314,8 @@ note("end")
     }
     # WP714: positive controls, so the allow-list is not "reject everything": one notebook object in the
     # three accepted shapes, and a date-like title stays a string (ConvertFrom-Json would turn it into DateTime).
-    foreach ($mode in @('data_wrapped','singleton','title_date','meta_ok')) {
+    foreach ($mode in @('data_wrapped','singleton','title_date','meta_ok',
+                        'transport_keyring_noise','transport_crlf_pretty','transport_ff_between','transport_bad_utf8_title')) {
         $r = Invoke-Wrapper $mode @('-TimeoutSeconds','5')
         if ($r.Rc -ne 0 -or $r.Json.status -ne 'staged' -or
             @($r.Calls | Where-Object { $_ -like 'start:stage:*' }).Count -ne 1) {
@@ -586,6 +611,9 @@ Start-Sleep -Seconds 30
         @{marker=$markerP; pid=$null; start_ticks=$null; tree_unconfirmed=$false} | ConvertTo-Json -Compress | Set-Content -LiteralPath $recP
         $r = Invoke-Wrapper 'ok' @('-TimeoutSeconds','5','-LockWaitSeconds','1')
         if ($r.Rc -ne 5 -or $r.Json.step -ne 'lock_busy' -or $r.Calls.Count -ne 0) { throw 'a live marked process must block the new owner with zero operations' }
+        # WP714 round 4: the manual exit never releases a tree proven alive.
+        $r = Invoke-Wrapper 'ok' @('-TimeoutSeconds','5','-LockWaitSeconds','1','-OperatorReleaseReason','operator checked the old tree')
+        if ($r.Rc -ne 5 -or $r.Json.step -ne 'lock_busy' -or $r.Json.takeover -ne 'none' -or $r.Calls.Count -ne 0) { throw 'an operator release must never release a live marked tree' }
         @{marker=$markerP; pid=$gone.Id; start_ticks=$goneTicks; tree_unconfirmed=$false} | ConvertTo-Json -Compress | Set-Content -LiteralPath $recP
         $r = Invoke-Wrapper 'ok' @('-TimeoutSeconds','5','-LockWaitSeconds','1')
         if ($IsLinux -and ($r.Rc -ne 5 -or $r.Json.step -ne 'lock_busy' -or $r.Calls.Count -ne 0)) {
@@ -640,56 +668,59 @@ Start-Sleep -Seconds 30
     }
     $cases++
     # >>case:q
+    # lop: khoa-va-timeout-khong-rang-buoc-cay-tien-trinh-con
     # <<case:r
-    # Reuse descendant_exit: kill its wrapper after the direct CLI has exited, then test takeover.
-    # The operation marker must come from the real writer rather than a record assembled by the test.
-    $env:WP714_BEAT_FILE = Join-Path $root 'owner-exit-beats.txt'
-    $env:WP714_CHILD_PID_FILE = Join-Path $root 'owner-exit-child.pid'
-    Remove-Item -LiteralPath $env:WP714_BEAT_FILE, $env:WP714_CHILD_PID_FILE -ErrorAction SilentlyContinue
-    $ownerR = $null
-    $childR = $null
-    try {
-        $env:WP710_MODE = 'descendant_exit'; $env:WP710_DELAY = '0'
-        $argR = '-NoProfile -File "' + $script + '" -ConfigPath "' + $config + '" -NlmCommand "' + $python + '" -NlmArgumentsPrefix "' + $fake + '" -StageCommand "' + $python + '" -StageArguments "' + $fake + '" -TimeoutSeconds 20'
-        $ownerR = Start-Process -FilePath (Get-Command pwsh).Source -ArgumentList $argR -PassThru @hidden
-        for ($i=0; $i -lt 100 -and -not (Test-Path -LiteralPath $env:WP714_CHILD_PID_FILE); $i++) { Start-Sleep -Milliseconds 100 }
-        if (-not (Test-Path -LiteralPath $env:WP714_CHILD_PID_FILE)) { throw 'orphan takeover fixture never started' }
-        $childR = [int](Get-Content -LiteralPath $env:WP714_CHILD_PID_FILE -Raw)
-        $recordR = Join-Path ([IO.Path]::GetTempPath()) 'tra_luat_nlm_credential_refresh.operation.json'
-        $writtenR = Get-Content -LiteralPath $recordR -Raw | ConvertFrom-Json
-        if ([string]$writtenR.marker -notmatch '^[0-9a-f]{32}$') { throw 'actual operation record did not retain its child marker' }
-        $directGoneR = $false
-        for ($i=0; $i -lt 50 -and -not $directGoneR; $i++) {
-            $directGoneR = $null -eq (Get-Process -Id ([int]$writtenR.pid) -ErrorAction SilentlyContinue)
-            if ($IsLinux -and -not $directGoneR) {
-                try { $directGoneR = [IO.File]::ReadAllText("/proc/$([int]$writtenR.pid)/stat") -match '\)\s+Z\s' } catch { $directGoneR = $true }
+    foreach ($takeoverMode in @('descendant_exit', 'descendant_scrubbed_exit')) {
+        # Reuse descendant_exit: kill its wrapper after the direct CLI has exited, then test takeover.
+        # The operation marker must come from the real writer rather than a record assembled by the test.
+        $env:WP714_BEAT_FILE = Join-Path $root 'owner-exit-beats.txt'
+        $env:WP714_CHILD_PID_FILE = Join-Path $root 'owner-exit-child.pid'
+        Remove-Item -LiteralPath $env:WP714_BEAT_FILE, $env:WP714_CHILD_PID_FILE -ErrorAction SilentlyContinue
+        $ownerR = $null
+        $childR = $null
+        try {
+            $env:WP710_MODE = $takeoverMode; $env:WP710_DELAY = '0'
+            $argR = '-NoProfile -File "' + $script + '" -ConfigPath "' + $config + '" -NlmCommand "' + $python + '" -NlmArgumentsPrefix "' + $fake + '" -StageCommand "' + $python + '" -StageArguments "' + $fake + '" -TimeoutSeconds 20'
+            $ownerR = Start-Process -FilePath (Get-Command pwsh).Source -ArgumentList $argR -PassThru @hidden
+            for ($i=0; $i -lt 100 -and -not (Test-Path -LiteralPath $env:WP714_CHILD_PID_FILE); $i++) { Start-Sleep -Milliseconds 100 }
+            if (-not (Test-Path -LiteralPath $env:WP714_CHILD_PID_FILE)) { throw 'orphan takeover fixture never started' }
+            $childR = [int](Get-Content -LiteralPath $env:WP714_CHILD_PID_FILE -Raw)
+            $recordR = Join-Path ([IO.Path]::GetTempPath()) 'tra_luat_nlm_credential_refresh.operation.json'
+            $writtenR = Get-Content -LiteralPath $recordR -Raw | ConvertFrom-Json
+            if ([string]$writtenR.marker -notmatch '^[0-9a-f]{32}$') { throw 'actual operation record did not retain its child marker' }
+            $directGoneR = $false
+            for ($i=0; $i -lt 50 -and -not $directGoneR; $i++) {
+                $directGoneR = $null -eq (Get-Process -Id ([int]$writtenR.pid) -ErrorAction SilentlyContinue)
+                if ($IsLinux -and -not $directGoneR) {
+                    try { $directGoneR = [IO.File]::ReadAllText("/proc/$([int]$writtenR.pid)/stat") -match '\)\s+Z\s' } catch { $directGoneR = $true }
+                }
+                if (-not $directGoneR) { Start-Sleep -Milliseconds 100 }
             }
-            if (-not $directGoneR) { Start-Sleep -Milliseconds 100 }
+            if (-not $directGoneR) { throw 'fixture direct CLI did not exit before owner death' }
+            Stop-Process -Id $ownerR.Id -Force
+            $ownerR.WaitForExit()
+            $r = Invoke-Wrapper 'ok' @('-TimeoutSeconds','5','-LockWaitSeconds','1')
+            $beforeR = @(Get-Content -LiteralPath $env:WP714_BEAT_FILE -ErrorAction SilentlyContinue).Count
+            Start-Sleep -Milliseconds 400
+            $afterR = @(Get-Content -LiteralPath $env:WP714_BEAT_FILE -ErrorAction SilentlyContinue).Count
+            if ($r.Calls.Count -gt 0 -and $afterR -gt $beforeR) { throw 'new owner overlapped a descendant of the exited old CLI' }
+            if ($r.Rc -eq 0) {
+                if ($r.Json.status -ne 'staged' -or $afterR -ne $beforeR) { throw 'successful takeover lacks dead-tree evidence' }
+            } elseif ($r.Rc -ne 5 -or $r.Calls.Count -ne 0) { throw 'unconfirmed old tree must block with zero operations' }
+            if ($IsLinux -and ($r.Rc -ne 5 -or $r.Json.takeover_reason -ne 'marked_alive')) { throw 'Linux: the live marked grandchild of a killed owner must block' }
+            if ($IsLinux -and -not ([int64]$writtenR.owner_start_jiffies -gt 0)) { throw 'actual operation record did not retain the owner start (quarantine floor)' }
+            Stop-Process -Id $childR -Force -ErrorAction SilentlyContinue
+            # Off Linux the old tree is not measurable: the takeover is the bounded quarantine, stamped by the run above.
+            $r = Invoke-Wrapper 'ok' @('-TimeoutSeconds','5','-LockWaitSeconds','3','-UnconfirmedQuarantineSeconds','1')
+            if ($r.Rc -ne 0 -or $r.Json.status -ne 'staged') { throw 'takeover after the fixture tree ended must stage' }
+            if ($IsLinux -and $r.Json.takeover -ne 'none') { throw 'Linux: a proven-gone tree is a plain takeover, not a quarantine release' }
+        } finally {
+            if ($null -ne $ownerR -and -not $ownerR.HasExited) { Stop-Process -Id $ownerR.Id -Force -ErrorAction SilentlyContinue }
+            if ($null -ne $childR) { Stop-Process -Id $childR -Force -ErrorAction SilentlyContinue }
+            Remove-Item Env:WP714_BEAT_FILE, Env:WP714_CHILD_PID_FILE -ErrorAction SilentlyContinue
         }
-        if (-not $directGoneR) { throw 'fixture direct CLI did not exit before owner death' }
-        Stop-Process -Id $ownerR.Id -Force
-        $ownerR.WaitForExit()
-        $r = Invoke-Wrapper 'ok' @('-TimeoutSeconds','5','-LockWaitSeconds','1')
-        $beforeR = @(Get-Content -LiteralPath $env:WP714_BEAT_FILE -ErrorAction SilentlyContinue).Count
-        Start-Sleep -Milliseconds 400
-        $afterR = @(Get-Content -LiteralPath $env:WP714_BEAT_FILE -ErrorAction SilentlyContinue).Count
-        if ($r.Calls.Count -gt 0 -and $afterR -gt $beforeR) { throw 'new owner overlapped a descendant of the exited old CLI' }
-        if ($r.Rc -eq 0) {
-            if ($r.Json.status -ne 'staged' -or $afterR -ne $beforeR) { throw 'successful takeover lacks dead-tree evidence' }
-        } elseif ($r.Rc -ne 5 -or $r.Calls.Count -ne 0) { throw 'unconfirmed old tree must block with zero operations' }
-        if ($IsLinux -and ($r.Rc -ne 5 -or $r.Json.takeover_reason -ne 'marked_alive')) { throw 'Linux: the live marked grandchild of a killed owner must block' }
-        if ($IsLinux -and -not ([int64]$writtenR.owner_start_jiffies -gt 0)) { throw 'actual operation record did not retain the owner start (quarantine floor)' }
-        Stop-Process -Id $childR -Force -ErrorAction SilentlyContinue
-        # Off Linux the old tree is not measurable: the takeover is the bounded quarantine, stamped by the run above.
-        $r = Invoke-Wrapper 'ok' @('-TimeoutSeconds','5','-LockWaitSeconds','3','-UnconfirmedQuarantineSeconds','1')
-        if ($r.Rc -ne 0 -or $r.Json.status -ne 'staged') { throw 'takeover after the fixture tree ended must stage' }
-        if ($IsLinux -and $r.Json.takeover -ne 'none') { throw 'Linux: a proven-gone tree is a plain takeover, not a quarantine release' }
-    } finally {
-        if ($null -ne $ownerR -and -not $ownerR.HasExited) { Stop-Process -Id $ownerR.Id -Force -ErrorAction SilentlyContinue }
-        if ($null -ne $childR) { Stop-Process -Id $childR -Force -ErrorAction SilentlyContinue }
-        Remove-Item Env:WP714_BEAT_FILE, Env:WP714_CHILD_PID_FILE -ErrorAction SilentlyContinue
+        $cases++
     }
-    $cases++
     # >>case:r
     # lop: khoa-va-timeout-khong-rang-buoc-cay-tien-trinh-con (WP714 round 3)
     # <<case:s
@@ -698,7 +729,7 @@ Start-Sleep -Seconds 30
     #     sandbox child would). Whether its environment is readable depends on privilege (root with
     #     CAP_SYS_PTRACE reads it - measured in the container this suite was written in), so the case asserts the
     #     branch it actually observed: readable => marked_alive, blocked even past the bound; unreadable =>
-    #     tree_unknown, quarantined then released with evidence. Part B, Linux: the classifier itself, on a
+    #     tree_unknown, blocked until the tree is proven gone. Part B, Linux: the classifier itself, on a
     #     projection whose enumeration root (the script's one $ProcRoot line) is a fixture tree in which root
     #     cannot read an environment either (it is a directory): unknown, floor, readable and marked controls.
     if ($IsLinux) {
@@ -723,7 +754,7 @@ Start-Sleep -Seconds 30
             Start-Sleep -Milliseconds 1200
             $r = Invoke-Wrapper 'ok' @('-TimeoutSeconds','5','-LockWaitSeconds','1','-UnconfirmedQuarantineSeconds','1')
             if ($readableS -and ($r.Rc -ne 5 -or $r.Json.step -ne 'lock_busy' -or $r.Calls.Count -ne 0)) { throw 'the quarantine bound must never release a tree proven alive' }
-            if (-not $readableS -and ($r.Rc -ne 0 -or $r.Json.takeover -ne 'quarantine_elapsed')) { throw 'an unknown tree must be released only through the reported quarantine' }
+            if (-not $readableS -and ($r.Rc -ne 5 -or $r.Calls.Count -ne 0)) { throw 'quarantine expiry must not release a live unreadable child' }
         } finally { Stop-Process -Id $hiddenS.Id -Force -ErrorAction SilentlyContinue }
         $hiddenS.WaitForExit()
         Remove-Item -LiteralPath $recS -ErrorAction SilentlyContinue
@@ -770,8 +801,8 @@ Start-Sleep -Seconds 30
             $r = Invoke-Wrapper 'ok' @('-TimeoutSeconds','5','-LockWaitSeconds','1')
             Start-Sleep -Milliseconds 1200
             $r = Invoke-Wrapper 'ok' @('-TimeoutSeconds','5','-LockWaitSeconds','1','-UnconfirmedQuarantineSeconds','1')
-            if ($r.Rc -ne 0 -or $r.Json.takeover -ne 'quarantine_elapsed' -or $r.Json.takeover_reason -ne 'tree_unknown') {
-                throw ('an unknown tree must be released only after the bound, with evidence: rc=' + $r.Rc + ' takeover=' + $r.Json.takeover)
+            if ($r.Rc -ne 5 -or $r.Json.step -ne 'tree_quarantine' -or $r.Calls.Count -ne 0) {
+                throw ('expiry is not dead-tree proof: rc=' + $r.Rc + ' takeover=' + $r.Json.takeover)
             }
         } finally {
             $script = $realScriptS
@@ -880,6 +911,98 @@ Start-Sleep -Seconds 30
         $cases++
     }
     # >>case:u
+    # lop: linux-subreaper-khong-thu-hoi-zombie
+    # <<case:v
+    # Reuse daemon; measure cleanup while the keepalive owner still lives.
+    if ($IsLinux) {
+        $env:WP710_MODE = 'daemon'; $env:WP710_DELAY = '0'
+        $env:WP714_BEAT_FILE = Join-Path $root 'reap-beats.txt'
+        $env:WP714_CHILD_PID_FILE = Join-Path $root 'reap-child.pid'
+        $ownerV = $null; $childV = $null
+        $outV = Join-Path $root 'reap-owner.out'
+        $errV = Join-Path $root 'reap-owner.err'
+        try {
+            $argsV = '-NoProfile -File "' + $script + '" -ConfigPath "' + $config + '" -NlmCommand "' + $python + '" -NlmArgumentsPrefix "' + $fake + '" -StageCommand "' + $python + '" -StageArguments "' + $fake + '" -TimeoutSeconds 5 -EnableKeepalive -IntervalSeconds 10 -MaxCycles 2'
+            $ownerV = Start-Process -FilePath (Get-Command pwsh).Source -ArgumentList $argsV -PassThru -RedirectStandardOutput $outV -RedirectStandardError $errV
+            $firstV = $null
+            for ($i=0; $i -lt 120 -and $null -eq $firstV; $i++) {
+                $lineV = Get-Content -LiteralPath $outV -ErrorAction SilentlyContinue | Select-Object -First 1
+                if ($lineV) { $firstV = $lineV | ConvertFrom-Json }
+                if ($null -eq $firstV) { Start-Sleep -Milliseconds 100 }
+            }
+            if ($null -eq $firstV -or $firstV.status -ne 'staged' -or $ownerV.HasExited) { throw 'zombie fixture did not reach a live keepalive interval' }
+            $childV = [int](Get-Content -LiteralPath $env:WP714_CHILD_PID_FILE -Raw)
+            Start-Sleep -Milliseconds 500
+            if (Test-Path -LiteralPath "/proc/$childV/stat") {
+                throw ('subreaper must reap its stopped adopted descendant before keepalive sleeps: ' + [IO.File]::ReadAllText("/proc/$childV/stat"))
+            }
+        } finally {
+            if ($null -ne $ownerV -and -not $ownerV.HasExited) { Stop-Process -Id $ownerV.Id -Force -ErrorAction SilentlyContinue; $ownerV.WaitForExit() }
+            if ($null -ne $childV) { Stop-Process -Id $childV -Force -ErrorAction SilentlyContinue }
+            Remove-Item Env:WP714_BEAT_FILE, Env:WP714_CHILD_PID_FILE -ErrorAction SilentlyContinue
+        }
+        $cases++
+    }
+    # >>case:v
+    # lop: khoa-va-timeout-khong-rang-buoc-cay-tien-trinh-con (WP714 round 4)
+    # <<case:w
+    # (w) Linux, real script: the owner is killed while a descendant that CLEARED the marker and DROPPED the pipes
+    #     still runs; the owner's parent is a child subreaper (as a terminal multiplexer or systemd --user is), so
+    #     the orphan is adopted by a living ancestor of the dead owner. Nothing proves that process unrelated: the
+    #     next owner is quarantined as tree_unknown, the timer does NOT release it, a malformed operator reason is
+    #     refused at preflight, and a well-formed one releases it with the reason in the evidence.
+    if ($IsLinux) {
+        $env:WP714_BEAT_FILE = Join-Path $root 'escape-beats.txt'
+        $env:WP714_CHILD_PID_FILE = Join-Path $root 'escape.pid'
+        $ownerFileW = Join-Path $root 'escape-owner.pid'
+        Remove-Item -LiteralPath $env:WP714_BEAT_FILE, $env:WP714_CHILD_PID_FILE, $ownerFileW -ErrorAction SilentlyContinue
+        $helperW = $null; $childW = $null
+        try {
+            $env:WP710_MODE = 'scrub_daemon_hold'; $env:WP710_DELAY = '0'
+            $psiW = [Diagnostics.ProcessStartInfo]::new($python)
+            $helperCode = 'import ctypes, subprocess, sys, time; ctypes.CDLL(None).prctl(36, 1, 0, 0, 0); p = subprocess.Popen(sys.argv[2:]); open(sys.argv[1], "w").write(str(p.pid)); time.sleep(120)'
+            foreach ($a in @('-c', $helperCode, $ownerFileW, (Get-Command pwsh).Source, '-NoProfile', '-File', $script, '-ConfigPath', $config,
+                             '-NlmCommand', $python, '-NlmArgumentsPrefix', $fake, '-StageCommand', $python, '-StageArguments', $fake, '-TimeoutSeconds', '20')) {
+                $psiW.ArgumentList.Add($a)
+            }
+            $psiW.UseShellExecute = $false
+            $helperW = [Diagnostics.Process]::Start($psiW)
+            for ($i=0; $i -lt 150 -and -not (Test-Path -LiteralPath $env:WP714_CHILD_PID_FILE); $i++) { Start-Sleep -Milliseconds 100 }
+            if (-not (Test-Path -LiteralPath $env:WP714_CHILD_PID_FILE)) { throw 'escape fixture never started' }
+            $childW = [int](Get-Content -LiteralPath $env:WP714_CHILD_PID_FILE -Raw)
+            $recordW = Get-Content -LiteralPath (Join-Path ([IO.Path]::GetTempPath()) $recName) -Raw | ConvertFrom-Json
+            Stop-Process -Id ([int](Get-Content -LiteralPath $ownerFileW -Raw)) -Force
+            $directGoneW = $false
+            for ($i=0; $i -lt 50 -and -not $directGoneW; $i++) {
+                try { $directGoneW = [IO.File]::ReadAllText("/proc/$([int]$recordW.pid)/stat") -match '\)\s+Z\s' } catch { $directGoneW = $true }
+                if (-not $directGoneW) { Start-Sleep -Milliseconds 100 }
+            }
+            if (-not $directGoneW) { throw 'fixture direct CLI did not exit' }
+            $statW = [IO.File]::ReadAllText("/proc/$childW/stat")
+            if ($statW -notmatch ('\)\s+[RS]\s+' + $helperW.Id + '\s')) { throw ('fixture orphan was not adopted by the subreaper ancestor: ' + $statW) }
+            $r = Invoke-Wrapper 'ok' @('-TimeoutSeconds','5','-LockWaitSeconds','1')
+            if ($r.Rc -ne 5 -or $r.Json.step -ne 'tree_quarantine' -or $r.Json.takeover_reason -ne 'tree_unknown' -or $r.Calls.Count -ne 0) {
+                throw ('an orphan that cleared the marker and dropped the pipes must quarantine the next owner: rc=' + $r.Rc + ' step=' + $r.Json.step + ' reason=' + $r.Json.takeover_reason)
+            }
+            Start-Sleep -Milliseconds 1200
+            $r = Invoke-Wrapper 'ok' @('-TimeoutSeconds','5','-LockWaitSeconds','1','-UnconfirmedQuarantineSeconds','1')
+            if ($r.Rc -ne 5 -or $r.Json.step -ne 'tree_quarantine' -or $r.Calls.Count -ne 0) { throw ('the quarantine timer must not release an unknown tree: rc=' + $r.Rc) }
+            $r = Invoke-Wrapper 'ok' @('-TimeoutSeconds','5','-LockWaitSeconds','1','-OperatorReleaseReason','x')
+            if ($r.Rc -ne 4 -or $r.Json.step -ne 'preflight' -or $r.Calls.Count -ne 0) { throw 'a malformed operator reason must be refused before any operation' }
+            $r = Invoke-Wrapper 'ok' @('-TimeoutSeconds','5','-LockWaitSeconds','1','-OperatorReleaseReason','operator checked case w by hand')
+            if ($r.Rc -ne 0 -or $r.Json.status -ne 'staged' -or $r.Json.takeover -ne 'operator_release' -or
+                $r.Json.takeover_reason -ne 'tree_unknown' -or $r.Json.operator_reason -ne 'operator checked case w by hand') {
+                throw ('an operator release must stage and say so: rc=' + $r.Rc + ' takeover=' + $r.Json.takeover)
+            }
+        } finally {
+            if ($null -ne $childW) { Stop-Process -Id $childW -Force -ErrorAction SilentlyContinue }
+            if ($null -ne $helperW) { Stop-Process -Id $helperW.Id -Force -ErrorAction SilentlyContinue; $helperW.WaitForExit() }
+            Remove-Item Env:WP714_BEAT_FILE, Env:WP714_CHILD_PID_FILE -ErrorAction SilentlyContinue
+            Remove-Item -LiteralPath (Join-Path ([IO.Path]::GetTempPath()) $recName) -ErrorAction SilentlyContinue
+        }
+        $cases++
+    }
+    # >>case:w
     "passed=$cases failed=0"
 } finally {
     Remove-Item -LiteralPath $root -Recurse -Force -ErrorAction SilentlyContinue

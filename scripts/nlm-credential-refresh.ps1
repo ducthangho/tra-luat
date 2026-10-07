@@ -13,8 +13,12 @@ param(
     [switch]$EnableKeepalive,
     [int]$IntervalSeconds = 3600,
     [int]$MaxCycles = 1,
-    # Bounded exit for an operation record whose process tree cannot be proven gone (see Get-RecordVerdict).
-    [int]$UnconfirmedQuarantineSeconds = 900
+    # Bounded exit for an operation record whose process tree cannot be MEASURED (see Get-RecordVerdict). It never
+    # releases a tree that was measured and found alive or unknown.
+    [int]$UnconfirmedQuarantineSeconds = 900,
+    # WP714 round 4: the manual exit, with evidence. An operator who has checked the old tree by hand releases a
+    # quarantined record (never a tree proven alive); the reason is carried in the emitted evidence.
+    [string]$OperatorReleaseReason = ''
 )
 
 $ErrorActionPreference = 'Stop'
@@ -27,15 +31,19 @@ $ProgressPreference = 'SilentlyContinue'
 $OperationRecord = Join-Path ([IO.Path]::GetTempPath()) 'tra_luat_nlm_credential_refresh.operation.json'
 $MarkerName = 'TRA_LUAT_NLM_OP'
 $Evidence = [ordered]@{ cycle = 0; profile_fingerprint = ''; cli_version = ''; takeover = 'none'; takeover_reason = '';
-    steps = [ordered]@{} }
+    operator_reason = ''; steps = [ordered]@{} }
 
 # WP714 round 3: the ONE place that decides whether this platform can enumerate the operation's process
 # tree. Only Linux can (/proc). Everywhere else every "no descendant found" is NOT MEASURED, never "none".
 $TreeMeasurable = [bool]$IsLinux
 $ProcRoot = '/proc'   # where the operation tree is enumerated (the wrapper's own entry is always /proc/$PID)
 $Subreaper = $false
+$CanReap = $false
 $OwnUid = $null
 $OwnerStartJiffies = $null
+# WP714 round 4: "pid:start" of this wrapper and every ancestor, recorded so a later owner knows who could have
+# ADOPTED an orphan of this run (only an ancestor subreaper or init can). $null = could not be read.
+$OwnerChain = $null
 
 function Read-ProcStat([string]$dir) {
     # /proc/<pid>/stat -> @{State; Ppid; Start}; $null when the process is gone. Throws when it exists but
@@ -60,14 +68,30 @@ if ($TreeMeasurable) {
     # A child subreaper adopts every orphan of this wrapper's subtree (a daemon that double-forked, cleared its
     # environment or made itself non-dumpable), so while this wrapper lives its descendants are found by
     # parent links, not only by the inherited marker. Failure leaves the marker scan, with unknowns blocking.
+    # WP714 round 4: an adopted orphan that is stopped stays a ZOMBIE child of this wrapper until it is waited
+    # for, and .NET only waits for the processes it started itself. waitpid reaps the adopted ones (see
+    # Invoke-ReapAdopted); the direct child of each step is left to .NET.
     try {
-        Add-Type -Namespace TraLuatWp710 -Name NativeLinux -MemberDefinition '[DllImport("libc", SetLastError = true)] public static extern int prctl(int option, ulong arg2, ulong arg3, ulong arg4, ulong arg5);'
+        Add-Type -Namespace TraLuatWp710 -Name NativeLinux -MemberDefinition ('[DllImport("libc", SetLastError = true)] public static extern int prctl(int option, ulong arg2, ulong arg3, ulong arg4, ulong arg5);' +
+            ' [DllImport("libc", SetLastError = true)] public static extern int waitpid(int pid, out int status, int options);')
         $Subreaper = ([TraLuatWp710.NativeLinux]::prctl(36, 1, 0, 0, 0) -eq 0)
-    } catch { $Subreaper = $false }
+        $CanReap = $Subreaper
+    } catch { $Subreaper = $false; $CanReap = $false }
     try {
         $OwnUid = Read-ProcUid "/proc/$PID"
         $OwnerStartJiffies = (Read-ProcStat "/proc/$PID").Start
     } catch { $OwnUid = $null; $OwnerStartJiffies = $null }
+    try {
+        $chain = [Collections.Generic.List[string]]::new()
+        $walk = $PID
+        while ($walk -gt 1 -and $chain.Count -lt 512) {
+            $stat = Read-ProcStat "/proc/$walk"
+            if ($null -eq $stat) { break }
+            $chain.Add("$walk`:$($stat.Start)")
+            $walk = $stat.Ppid
+        }
+        $OwnerChain = @($chain)
+    } catch { $OwnerChain = $null }
 }
 
 function Emit([string]$status, [string]$step, [int]$rc, [double]$elapsed) {
@@ -80,6 +104,7 @@ function Emit([string]$status, [string]$step, [int]$rc, [double]$elapsed) {
         cli_version = $Evidence.cli_version
         tree_measurement = $(if (-not $TreeMeasurable) { 'not_measurable' } elseif ($Subreaper) { 'linux_subreaper_and_marker' } else { 'linux_marker' })
         takeover = $Evidence.takeover; takeover_reason = $Evidence.takeover_reason
+        operator_reason = $Evidence.operator_reason
         steps = $Evidence.steps
     } | ConvertTo-Json -Compress -Depth 5
 }
@@ -94,24 +119,33 @@ function Get-StartTicks($process) {
     try { return $process.StartTime.ToUniversalTime().Ticks } catch { return $null }
 }
 
-function Get-OperationTree([string]$marker, $floor, [bool]$inRun) {
+function Get-OperationTree([string]$marker, $floor, [bool]$inRun, $escape = $null) {
     # Ids: live processes of the operation (marker in the inherited environment, plus - while this wrapper
     # runs - every descendant by parent link). Unknown: processes that COULD belong to it but whose
     # environment cannot be read (non-dumpable, or a vanished /proc entry that still exists), counted only
     # when they started after $floor and run under this user. Measured=$false: nothing was enumerated.
+    # WP714 round 4, $escape (takeover of a record written by this version only): after the owner died a
+    # descendant that CLEARED the marker is no longer linked to anything. Such a process started after the
+    # step began (Floor). It is found when it still holds one of the step's redirected pipes (Pipes), and
+    # otherwise it is UNKNOWN unless its parent line proves it unrelated: an orphan is re-parented only to an
+    # ancestor subreaper of the dead owner (Chain) or to init, so a candidate whose oldest in-scope ancestor
+    # hangs under init, under the recorded chain or under nothing readable cannot be told apart from an orphan.
     $tree = [pscustomobject]@{ Measured = $false; Ids = @(); Unknown = 0 }
     if (-not $TreeMeasurable) { return $tree }
     $haveMarker = $marker -match '^[0-9a-f]{32}$'
     $needle = "`0$MarkerName=$marker`0"
     $children = @{}
+    $stats = @{}
     $found = [Collections.Generic.HashSet[int]]::new()
     $unreadable = [Collections.Generic.List[int]]::new()
+    $candidates = [Collections.Generic.List[int]]::new()
     foreach ($dir in [IO.Directory]::GetDirectories($ProcRoot)) {
         $name = [IO.Path]::GetFileName($dir)
         if ($name -notmatch '^\d+$' -or [int]$name -eq $PID) { continue }
         $id = [int]$name
         try { $stat = Read-ProcStat $dir } catch { $unreadable.Add($id); continue }
         if ($null -eq $stat -or $stat.State -in @('Z', 'X')) { continue }   # zombies are dead
+        $stats[$id] = $stat
         if (-not $children.ContainsKey($stat.Ppid)) { $children[$stat.Ppid] = [Collections.Generic.List[int]]::new() }
         $children[$stat.Ppid].Add($id)
         # Init (pid 1) is the ancestor of every process and kernel threads are not user processes: neither can
@@ -126,8 +160,35 @@ function Get-OperationTree([string]$marker, $floor, [bool]$inRun) {
         try {
             $environ = "`0" + [Text.Encoding]::Latin1.GetString([IO.File]::ReadAllBytes("$dir/environ"))
             if ($environ.Contains($needle)) { [void]$found.Add($id) }
+            elseif ($null -ne $escape -and $stat.Start -ge [uint64]$escape.Floor) { $candidates.Add($id) }
         } catch {
             if ([IO.Directory]::Exists($dir)) { $unreadable.Add($id) }   # exists but unreadable: UNKNOWN
+        }
+    }
+    $escaped = 0
+    if ($null -ne $escape -and -not $inRun -and $candidates.Count -gt 0) {
+        # The new owner and its own ancestors are not the old operation.
+        $self = [Collections.Generic.HashSet[int]]::new()
+        [void]$self.Add($PID)
+        try { $walk = (Read-ProcStat "/proc/$PID").Ppid } catch { $walk = 0 }
+        while ($walk -gt 1 -and $self.Add($walk) -and $stats.ContainsKey($walk)) { $walk = $stats[$walk].Ppid }
+        foreach ($id in $candidates) {
+            if ($self.Contains($id)) { continue }
+            if ($escape.Pipes.Count -gt 0) {
+                $holds = $false
+                try {
+                    foreach ($fd in [IO.Directory]::GetFileSystemEntries("$ProcRoot/$id/fd")) {
+                        if ($escape.Pipes.Contains([string]([IO.FileInfo]::new($fd)).LinkTarget)) { $holds = $true; break }
+                    }
+                } catch { if ([IO.Directory]::Exists("$ProcRoot/$id")) { $escaped++; continue } }
+                if ($holds) { [void]$found.Add($id); continue }
+            }
+            $parent = $stats[$id].Ppid
+            for ($hop = 0; $hop -lt 4096 -and $stats.ContainsKey($parent) -and -not $self.Contains($parent) -and
+                 $stats[$parent].Start -ge [uint64]$escape.Floor; $hop++) { $parent = $stats[$parent].Ppid }
+            if ($self.Contains($parent)) { continue }   # forked under the new owner's own line: not adopted
+            if ($parent -le 1 -or -not $stats.ContainsKey($parent) -or $null -eq $escape.Chain -or
+                $escape.Chain.Contains("$parent`:$($stats[$parent].Start)")) { $escaped++ }
         }
     }
     if ($inRun) {
@@ -142,32 +203,80 @@ function Get-OperationTree([string]$marker, $floor, [bool]$inRun) {
     $tree.Measured = $true
     $tree.Ids = @($found)
     # With the subreaper active every descendant is adopted, so parent links are complete in-run.
-    $tree.Unknown = if ($inRun -and $Subreaper) { 0 } else { @($unreadable | Where-Object { -not $found.Contains($_) }).Count }
+    $tree.Unknown = if ($inRun -and $Subreaper) { 0 } else { @($unreadable | Where-Object { -not $found.Contains($_) }).Count + $escaped }
     return $tree
 }
 
-function Stop-OperationTree([string]$marker, [bool]$inRun) {
+function Invoke-ReapAdopted([int]$direct) {
+    # WP714 round 4: wait for every ZOMBIE child of this wrapper except the step's direct child, which .NET
+    # started and waits for itself (reaping it here would race Process.WaitForExit). With the subreaper set,
+    # those zombies are the adopted descendants stopped above; without waitpid they pile up for the whole
+    # keepalive run. WNOHANG (1): never blocks; a pid already reaped elsewhere returns -1 and is ignored.
+    if (-not $CanReap) { return 0 }
+    $reaped = 0
+    for ($pass = 0; $pass -lt 20; $pass++) {
+        $zombies = [Collections.Generic.List[int]]::new()
+        foreach ($dir in [IO.Directory]::GetDirectories('/proc')) {
+            $name = [IO.Path]::GetFileName($dir)
+            if ($name -notmatch '^\d+$' -or [int]$name -eq $direct) { continue }
+            try { $stat = Read-ProcStat $dir } catch { continue }
+            if ($null -ne $stat -and $stat.Ppid -eq $PID -and $stat.State -eq 'Z') { $zombies.Add([int]$name) }
+        }
+        if ($zombies.Count -eq 0) { break }
+        foreach ($zombie in $zombies) {
+            $status = 0
+            if ([TraLuatWp710.NativeLinux]::waitpid($zombie, [ref]$status, 1) -eq $zombie) { $reaped++ }
+        }
+    }
+    return $reaped
+}
+
+function Stop-OperationTree([string]$marker, [bool]$inRun, [int]$direct = 0) {
     # Kill the operation's processes and confirm. State: gone | alive | unknown | not_measurable.
-    # Only 'gone' is a proof; the other three keep the operation record.
+    # Only 'gone' is a proof; the other three keep the operation record. In-run, the stopped adopted
+    # descendants are then reaped (Invoke-ReapAdopted), whatever the state.
     $tree = Get-OperationTree $marker $OwnerStartJiffies $inRun
     if (-not $tree.Measured) { return @{ State = 'not_measurable'; Stopped = 0 } }
     $stopped = [Collections.Generic.HashSet[int]]::new()
     $watch = [Diagnostics.Stopwatch]::StartNew()
-    while ($tree.Ids.Count -gt 0) {
-        foreach ($id in $tree.Ids) { [void]$stopped.Add($id); Stop-Process -Id $id -Force -ErrorAction SilentlyContinue }
-        if ($watch.ElapsedMilliseconds -gt 5000) { return @{ State = 'alive'; Stopped = $stopped.Count } }
-        Start-Sleep -Milliseconds 50
-        $tree = Get-OperationTree $marker $OwnerStartJiffies $inRun
+    try {
+        while ($tree.Ids.Count -gt 0) {
+            foreach ($id in $tree.Ids) { [void]$stopped.Add($id); Stop-Process -Id $id -Force -ErrorAction SilentlyContinue }
+            if ($watch.ElapsedMilliseconds -gt 5000) { return @{ State = 'alive'; Stopped = $stopped.Count } }
+            Start-Sleep -Milliseconds 50
+            $tree = Get-OperationTree $marker $OwnerStartJiffies $inRun
+        }
+        if ($tree.Unknown -gt 0) { return @{ State = 'unknown'; Stopped = $stopped.Count } }
+        return @{ State = 'gone'; Stopped = $stopped.Count }
+    } finally {
+        if ($inRun) { [void](Invoke-ReapAdopted $direct) }
     }
-    if ($tree.Unknown -gt 0) { return @{ State = 'unknown'; Stopped = $stopped.Count } }
-    return @{ State = 'gone'; Stopped = $stopped.Count }
 }
 
-function Write-OperationRecord($marker, $process, [bool]$unconfirmed) {
-    $data = [ordered]@{ marker = $marker; pid = $null; start_ticks = $null; tree_unconfirmed = $unconfirmed
-        owner_start_jiffies = $OwnerStartJiffies }
-    if ($process) { $data.pid = $process.Id; $data.start_ticks = (Get-StartTicks $process) }
-    Set-Content -LiteralPath $OperationRecord -Value ($data | ConvertTo-Json -Compress) -Encoding utf8
+function Write-OperationRecord($marker, $process, [bool]$unconfirmed, [string[]]$pipes = @()) {
+    # format 2 (WP714 round 4) adds what a later owner needs to look for descendants that cleared the marker:
+    # the step's start (before the spawn: the owner's own start, a lower bound), the step's redirected pipes
+    # and the owner's ancestor chain. A record without format 2 is checked by marker only.
+    $data = [ordered]@{ format = 2; marker = $marker; pid = $null; start_ticks = $null; tree_unconfirmed = $unconfirmed
+        owner_start_jiffies = $OwnerStartJiffies; step_start_jiffies = $OwnerStartJiffies; owner_chain = $OwnerChain
+        pipes = @($pipes) }
+    if ($process) {
+        $data.pid = $process.Id; $data.start_ticks = (Get-StartTicks $process)
+        if ($TreeMeasurable) {
+            try { $childStat = Read-ProcStat "/proc/$($process.Id)" } catch { $childStat = $null }
+            if ($null -ne $childStat) { $data.step_start_jiffies = $childStat.Start }   # else keep the owner's (lower)
+        }
+    }
+    Set-Content -LiteralPath $OperationRecord -Value ($data | ConvertTo-Json -Compress -Depth 4) -Encoding utf8
+}
+
+function Get-StepPipes($process) {
+    # "pipe:[inode]" of the step's redirected stdout/stderr, as this wrapper holds them. Linux only.
+    if (-not $TreeMeasurable) { return @() }
+    $pipes = foreach ($stream in @($process.StandardOutput.BaseStream, $process.StandardError.BaseStream)) {
+        try { [string]([IO.FileInfo]::new("/proc/$PID/fd/" + $stream.SafePipeHandle.DangerousGetHandle().ToInt32())).LinkTarget } catch { }
+    }
+    return @($pipes | Where-Object { $_ -match '^pipe:\[\d+\]$' })
 }
 
 function Test-RecordedRootAlive($record) {
@@ -185,12 +294,21 @@ function Test-RecordedRootAlive($record) {
     return $true
 }
 
+function ConvertTo-Jiffies($value) {
+    if (($value -is [long] -or $value -is [int]) -and $value -ge 0) { return [uint64]$value }
+    return $null
+}
+
 function Get-RecordVerdict {
-    # clear: no record, or Linux proved the old tree gone. alive: the old root or a marked process lives, or
-    # the record cannot be read (fail closed; an operator deletes it). quarantine / released: the root is
-    # not alive but the tree cannot be proven gone (not Linux, no marker, or unreadable environments). That
-    # state is BOUNDED: the first owner that sees it stamps the record, and once -UnconfirmedQuarantineSeconds
-    # have passed a takeover is released with takeover=quarantine_elapsed in the evidence. It is not a proof.
+    # clear: no record, or Linux proved the old tree gone. alive: the old root or a member of the old operation
+    # lives (marker, or a recorded pipe still held), or the record cannot be read (fail closed; an operator
+    # deletes it). quarantine: the root is not alive but the tree is not proven gone.
+    # WP714 round 4 - the timer is NOT evidence. A tree that was MEASURED and found unknown (Linux: unreadable
+    # environments, or a candidate orphan that cleared the marker) stays quarantined: each run waits at most
+    # -LockWaitSeconds and returns rc 5; it ends when the tree is proven gone, or by -OperatorReleaseReason.
+    # Only a tree that cannot be measured at all (not Linux, or a record without a marker) still has the
+    # bounded exit: the first owner that sees it stamps the record, and once -UnconfirmedQuarantineSeconds have
+    # passed a takeover is released with takeover=quarantine_elapsed in the evidence (owner decision pending).
     if (-not (Test-Path -LiteralPath $OperationRecord -PathType Leaf)) { return @{ State = 'clear'; Reason = '' } }
     try { $record = [string](Get-Content -LiteralPath $OperationRecord -Raw) | ConvertFrom-Json } catch { $record = $null }
     if ($null -eq $record -or $record -isnot [pscustomobject]) { return @{ State = 'alive'; Reason = 'record_unreadable' } }
@@ -198,20 +316,31 @@ function Get-RecordVerdict {
     $reason = 'tree_not_measurable'
     $marker = [string]$record.marker
     if ($marker -match '^[0-9a-f]{32}$') {
-        $floor = $null
-        if ($record.owner_start_jiffies -is [long] -or $record.owner_start_jiffies -is [int]) { $floor = [uint64]$record.owner_start_jiffies }
-        $tree = Get-OperationTree $marker $floor $false
+        $floor = ConvertTo-Jiffies $record.owner_start_jiffies
+        $escape = $null
+        if ($record.format -eq 2) {
+            $chain = $null
+            if ($null -ne $record.owner_chain) {
+                $chain = [Collections.Generic.HashSet[string]]::new([string[]]@($record.owner_chain | Where-Object { $_ -is [string] }))
+            }
+            $pipes = [Collections.Generic.HashSet[string]]::new([string[]]@($record.pipes | Where-Object { $_ -is [string] -and $_ -match '^pipe:\[\d+\]$' }))
+            $escapeFloor = ConvertTo-Jiffies $record.step_start_jiffies
+            if ($null -eq $escapeFloor) { $escapeFloor = $floor }
+            if ($null -eq $escapeFloor) { $escapeFloor = [uint64]0 }   # no bound: every process is in scope
+            $escape = @{ Floor = $escapeFloor; Chain = $chain; Pipes = $pipes }
+        }
+        $tree = Get-OperationTree $marker $floor $false $escape
         if ($tree.Measured) {
             if ($tree.Ids.Count -gt 0) { return @{ State = 'alive'; Reason = 'marked_alive' } }
             if ($tree.Unknown -eq 0) { return @{ State = 'clear'; Reason = '' } }
-            $reason = 'tree_unknown'
+            return @{ State = 'quarantine'; Reason = 'tree_unknown' }   # measured, not proven gone: no timer exit
         }
     }
     $now = [DateTime]::UtcNow.Ticks
     $seen = $record.root_dead_seen_utc_ticks
     if ($null -eq $seen) {
         $record | Add-Member -NotePropertyName root_dead_seen_utc_ticks -NotePropertyValue $now -Force
-        Set-Content -LiteralPath $OperationRecord -Value ($record | ConvertTo-Json -Compress) -Encoding utf8
+        Set-Content -LiteralPath $OperationRecord -Value ($record | ConvertTo-Json -Compress -Depth 4) -Encoding utf8
         $seen = $now
     }
     if (-not ($seen -is [long] -or $seen -is [int])) { return @{ State = 'alive'; Reason = 'record_unreadable' } }
@@ -243,8 +372,13 @@ function Invoke-Bounded([string]$file, [string[]]$arguments, [int]$seconds, [has
     try {
         [void]$process.Start()
         $started = $true
-        Write-OperationRecord $marker $process $false
-        $stdout = $process.StandardOutput.ReadToEndAsync()
+        $pipes = Get-StepPipes $process
+        Write-OperationRecord $marker $process $false $pipes
+        # WP714 round 4: stdout is read as BYTES and decoded once, the way the Python stage command does
+        # (strict UTF-8 with U+FFFD for bad bytes, nothing stripped). StandardOutput would drop a UTF-8 BOM
+        # (StreamReader detects it) and, on Windows, decode with the console code page.
+        $outBytes = [IO.MemoryStream]::new()
+        $stdout = $process.StandardOutput.BaseStream.CopyToAsync($outBytes)
         $stderr = $process.StandardError.ReadToEndAsync()
         $done = $process.WaitForExit([int][Math]::Max(0, $budget - $watch.ElapsedMilliseconds))
         # A descendant can keep the redirected pipes open after the CLI exits; the budget covers both.
@@ -260,25 +394,25 @@ function Invoke-Bounded([string]$file, [string[]]$arguments, [int]$seconds, [has
             try { if (-not $process.HasExited) { $process.Kill($true) } } catch { }
             $rootGone = $false
             try { $rootGone = $process.WaitForExit(5000) } catch { $rootGone = $false }
-            $tree = Stop-OperationTree $marker $true
+            $tree = Stop-OperationTree $marker $true $process.Id
             $pipesClosed = $false
             try { $pipesClosed = [Threading.Tasks.Task]::WaitAll([Threading.Tasks.Task[]]@($stdout, $stderr), 5000) } catch { $pipesClosed = $false }
             $confirmed = $rootGone -and $pipesClosed -and $tree.State -eq 'gone'
-            if (-not $confirmed) { Write-OperationRecord $marker $process $true }
+            if (-not $confirmed) { Write-OperationRecord $marker $process $true $pipes }
             return @{timeout=$true; rc=-1; out=''; err=''; elapsed=$watch.Elapsed.TotalSeconds; exited=$confirmed;
                 reaped=$tree.Stopped; tree=$tree.State}
         }
         # Success path: a descendant that dropped the pipes may still run; it is part of this operation and
         # must not overlap the next step, so it is stopped and confirmed first (Linux). Off Linux nothing can
         # be enumerated: the step proceeds and its evidence says tree_state=not_measurable.
-        $tree = Stop-OperationTree $marker $true
+        $tree = Stop-OperationTree $marker $true $process.Id
         if ($tree.State -in @('alive', 'unknown')) {
-            Write-OperationRecord $marker $process $true
+            Write-OperationRecord $marker $process $true $pipes
             return @{timeout=$true; rc=-1; out=''; err=''; elapsed=$watch.Elapsed.TotalSeconds; exited=$false;
                 reaped=$tree.Stopped; tree=$tree.State}
         }
         $confirmed = $true
-        return @{timeout=$false; rc=$process.ExitCode; out=$stdout.Result; err=$stderr.Result;
+        return @{timeout=$false; rc=$process.ExitCode; out=$Utf8Lenient.GetString($outBytes.ToArray()); err=$stderr.Result;
             elapsed=$watch.Elapsed.TotalSeconds; exited=$true; reaped=$tree.Stopped; tree=$tree.State}
     } finally {
         if (-not $started -or $confirmed) { Remove-Item -LiteralPath $OperationRecord -ErrorAction SilentlyContinue }
@@ -286,7 +420,41 @@ function Invoke-Bounded([string]$file, [string[]]$arguments, [int]$seconds, [has
     }
 }
 
+$Utf8Lenient = [Text.UTF8Encoding]::new($false, $false)   # no BOM handling, bad bytes -> U+FFFD (Python errors='replace')
+
 $CanaryKnownKeys = @('id', 'notebook_id', 'title', 'name', 'data', 'ok', 'error')
+
+# WP714 round 4: ONE table of "blank" characters for title/name, the same numbers as
+# tl_gws._NLM_CANARY_BLANK_CODEPOINTS (selftest wp714_canary_bang_trang_khop_ps compares them). Neither
+# String.IsNullOrWhiteSpace nor Python str.strip(): their sets differ (U+001C-U+001F), measured.
+$CanaryBlankCodePoints = @(
+    0x0009, 0x000A, 0x000B, 0x000C, 0x000D, 0x001C, 0x001D, 0x001E, 0x001F, 0x0020, 0x0085, 0x00A0, 0x1680,
+    0x180E, 0x2000, 0x2001, 0x2002, 0x2003, 0x2004, 0x2005, 0x2006, 0x2007, 0x2008, 0x2009, 0x200A, 0x200B,
+    0x200C, 0x200D, 0x2028, 0x2029, 0x202F, 0x205F, 0x2060, 0x3000, 0xFEFF
+)
+$CanaryBlank = [Collections.Generic.HashSet[int]]::new([int[]]$CanaryBlankCodePoints)
+
+function Test-CanaryBlank([string]$text) {
+    foreach ($ch in $text.ToCharArray()) { if (-not $CanaryBlank.Contains([int]$ch)) { return $false } }
+    return $true
+}
+
+# WP714 round 4: the stdout the Python stage command judges is not the raw stdout. nlm_cli._run reads it with
+# text=True (\r\n and \r become \n) and _strip_keyring then splits it with str.splitlines (which also breaks
+# at \v \f \x1c \x1d \x1e \x85 \u2028 \u2029), drops keyring-noise lines that carry no {}[] and joins
+# with \n. The wrapper applies the SAME transformation so both judge the same text. The pattern below is
+# nlm_cli._KEYRING_NOISE_RE with Python's re semantics spelled out: \s is Python's str.isspace set and
+# (?i) matches the case variants Python 3.11 matches (K: U+212A, S: U+017F, I: U+0130 U+0131), measured.
+$KeyringNoise = '(?:[Uu][Ss\u017F][Ii\u0130\u0131][Nn][Gg]{0}+[Kk\u212A][Ee][Yy][Rr][Ii\u0130\u0131][Nn][Gg]{0}+[Bb][Aa][Cc][Kk\u212A][Ee][Nn][Dd]|[Kk\u212A][Ee][Yy][Rr][Ii\u0130\u0131][Nn][Gg]\.[Bb][Aa][Cc][Kk\u212A][Ee][Nn][Dd][Ss\u017F]?|[Nn][Oo]{0}+[Rr][Ee][Cc][Oo][Mm][Mm][Ee][Nn][Dd][Ee][Dd]{0}+[Bb][Aa][Cc][Kk\u212A][Ee][Nn][Dd])' -f '[\t\n\x0B\f\r\x1C-\x20\x85\xA0\u1680\u2000-\u200A\u2028\u2029\u202F\u205F\u3000]'
+
+function ConvertTo-StageText([string]$text) {
+    $text = $text.Replace("`r`n", "`n").Replace("`r", "`n")
+    if ($text.Length -eq 0) { return $text }
+    $lines = [Collections.Generic.List[string]]::new([string[]][regex]::Split($text, '[\n\x0B\f\x1C\x1D\x1E\x85\u2028\u2029]'))
+    if ($lines[$lines.Count - 1] -eq '') { $lines.RemoveAt($lines.Count - 1) }   # splitlines: no empty last line
+    $kept = @($lines | Where-Object { -not ([regex]::IsMatch($_, $KeyringNoise) -and $_.IndexOfAny([char[]]'{}[]') -lt 0) })
+    return ($kept -join "`n")
+}
 
 function Get-CanaryLevel($element) {
     # One object level as an ordinal (case-sensitive) map, or $null: duplicate key, a known key in another
@@ -367,7 +535,7 @@ function Test-CanaryBody([string]$text, [string]$notebook) {
         if ($titles.Count -eq 0) { return $false }
         foreach ($key in $titles) {
             $value = $props[$key]
-            if ($value.ValueKind -ne [Text.Json.JsonValueKind]::String -or [string]::IsNullOrWhiteSpace($value.GetString())) { return $false }
+            if ($value.ValueKind -ne [Text.Json.JsonValueKind]::String -or (Test-CanaryBlank $value.GetString())) { return $false }
         }
         return $true
     } catch { return $false } finally { $doc.Dispose() }
@@ -391,6 +559,7 @@ try {
         $UnconfirmedQuarantineSeconds -lt 1) {
         throw 'invalid bounded timing parameters'
     }
+    if ($OperatorReleaseReason -and $OperatorReleaseReason -cnotmatch '^[^\p{C}]{8,200}$') { throw 'invalid operator release reason' }
     $configFull = [IO.Path]::GetFullPath($ConfigPath)
     $config = [string](Get-Content -LiteralPath $configFull -Raw) | ConvertFrom-Json
     $notebook = [string]$config.notebook_id
@@ -415,6 +584,12 @@ try {
         if ($verdict.State -eq 'clear') { break }
         if ($verdict.State -eq 'released') {
             $Evidence.takeover = 'quarantine_elapsed'; $Evidence.takeover_reason = $verdict.Reason
+            break
+        }
+        if ($verdict.State -eq 'quarantine' -and $OperatorReleaseReason) {
+            # Manual exit: never for a tree proven alive (State alive), and always on the record.
+            $Evidence.takeover = 'operator_release'; $Evidence.takeover_reason = $verdict.Reason
+            $Evidence.operator_reason = $OperatorReleaseReason
             break
         }
         if ([DateTime]::UtcNow -ge $deadline) {
@@ -453,7 +628,7 @@ try {
             Emit (Classify ($canary.err + ' ' + $canary.out)) 'canary' $canary.rc $canary.elapsed
             exit 2
         }
-        if (-not (Test-CanaryBody $canary.out $notebook)) {
+        if (-not (Test-CanaryBody (ConvertTo-StageText $canary.out) $notebook)) {
             Emit 'inconclusive' 'canary' $canary.rc $canary.elapsed
             exit 4
         }

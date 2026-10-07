@@ -4998,6 +4998,14 @@ def run() -> int:
         ("dc_so_nguyen_300_chu_so", '{"id":"' + _NB714d + '","title":"C","n":1' + "0" * 300 + '}', 1),
         ("dc_cap_surrogate_hop_le", '{"id":"' + _NB714d + '","title":"\\ud83d\\ude00"}', 1),
         ("dc_long_64_muc", '{"id":"' + _NB714d + '","title":"C","n":' + "[" * 63 + "]" * 63 + '}', 1),
+        # WP714 vòng 4 (Codex lượt 3, cùng lớp): "trắng" theo MỘT bảng tường minh (`_NLM_CANARY_BLANK_CODEPOINTS`),
+        # không theo `strip()` — U+001C–U+001F từng Python=âm/PS=dương; ký tự độ rộng 0 nay cũng là trắng. Kèm đối
+        # chứng dương: ký tự trong bảng nằm GIỮA chữ thật vẫn là tên.
+        *[("title_trang_%04x" % _cp714d, json.dumps({"id": _NB714d, "title": chr(_cp714d)}), 0)
+          for _cp714d in (0x1C, 0x1D, 0x1E, 0x1F, 0x85, 0xA0, 0x180E, 0x200B, 0x2060, 0x3000, 0xFEFF)],
+        *[("name_trang_%04x" % _cp714d, json.dumps({"notebook_id": _NB714d, "name": " " + chr(_cp714d) + "\t"}), 0)
+          for _cp714d in (0x1C, 0x1F, 0x200B, 0xFEFF)],
+        ("dc_title_co_chu_giua_trang", json.dumps({"id": _NB714d, "title": "\u200bC\u001c"}), 1),
     ]
     _res714d = {}
     try:
@@ -5223,6 +5231,44 @@ def run() -> int:
     cases.append(("wp714_huong_dan_secrets_set_kem_nlm",
                   len(_cmd714h["RUNBOOK.md"]) >= 3 and len(_cmd714h["tl_gws.py"]) >= 4
                   and all("--nlm" in _c for _v in _cmd714h.values() for _c in _v)))
+
+    # (7) WP714 vòng 4 (Codex lượt 3, lớp `stage-canary-true-khi-than-rong-hoac-sai-id`): wrapper PS và lệnh stage
+    # Python phải phán xét CÙNG một văn bản bằng CÙNG một luật. CI không có pwsh, nên ở đây khoá các BẢNG mà wrapper
+    # chép lại — đọc thẳng từ tệp .ps1, so với nguồn Python — để sửa một bên mà quên bên kia thì ĐỎ:
+    #   a. bảng ký tự "trắng": `$CanaryBlankCodePoints` == `_NLM_CANARY_BLANK_CODEPOINTS`, và Test-CanaryBody không
+    #      còn dùng `IsNullOrWhiteSpace` (tập .NET khác tập Python ở U+001C–U+001F, đo);
+    #   b. lớp ký tự ngắt dòng của `ConvertTo-StageText` (+ `\r`, đã đổi trước) == tập ký tự `str.splitlines` ngắt
+    #      (đo trên BMP) — `nlm_cli._strip_keyring` cắt dòng bằng `splitlines`;
+    #   c. mẫu nhiễu keyring của wrapper, biên dịch bằng `re` KHÔNG cờ, trả CÙNG kết quả `search` với
+    #      `nlm_cli._KEYRING_NOISE_RE` trên một bộ dòng thay từng ký tự bằng mọi biến thể hoa/thường Python nhận
+    #      (gồm U+017F, U+212A, U+0130, U+0131) và mọi ký tự `isspace`. Đếm số dòng để ca không xanh rỗng.
+    _ps714j = open(_os38.path.join(_dir714h, "scripts", "nlm-credential-refresh.ps1"), encoding="utf-8").read()
+    _m714j = _re714h.search(r"\$CanaryBlankCodePoints = @\(([^)]*)\)", _ps714j)
+    _blank714j = [int(_x, 16) for _x in _re714h.findall(r"0x[0-9A-Fa-f]+", _m714j.group(1))] if _m714j else []
+    _body714j = _ps714j.split("function Test-CanaryBody", 1)[-1].split("function Classify", 1)[0]
+    cases.append(("wp714_canary_bang_trang_khop_ps",
+                  _blank714j == list(_tg50._NLM_CANARY_BLANK_CODEPOINTS) and len(_blank714j) >= 30
+                  and "Test-CanaryBlank" in _body714j and "IsNullOrWhiteSpace" not in _body714j))
+    _nc714j = _tg50._imp("nlm_cli")
+    _split714j = _re714h.search(r"\[regex\]::Split\(\$text, '(\[[^']*\])'\)", _ps714j)
+    _want714j = {_c for _c in range(0x10000) if len(("a" + chr(_c) + "b").splitlines()) == 2}
+    _got714j = ({_c for _c in range(0x10000) if _re714h.fullmatch(_split714j.group(1), chr(_c))} | {0x0D}) if _split714j else set()
+    _kr714j = _re714h.search(r"\$KeyringNoise = '([^']*)' -f '([^']*)'", _ps714j)
+    _same714j, _n714j = False, 0
+    if _kr714j:
+        _psre714j = _re714h.compile(_kr714j.group(1).replace("{0}", _kr714j.group(2)))
+        _cand714j = ([chr(_c) for _c in range(0x21, 0x7F)] + ["\u017f", "\u212a", "\u0130", "\u0131", "\u00e9"]
+                     + [chr(_c) for _c in range(0x10000) if chr(_c).isspace()])
+        _same714j = True
+        for _base714j in ("using keyring backend", "keyring.backends", "keyring.backend", "no recommended backend"):
+            for _i714j in range(len(_base714j)):
+                for _ch714j in _cand714j:
+                    _line714j = "x " + _base714j[:_i714j] + _ch714j + _base714j[_i714j + 1:] + " y"
+                    _n714j += 1
+                    if bool(_psre714j.search(_line714j)) != bool(_nc714j._KEYRING_NOISE_RE.search(_line714j)):
+                        _same714j = False
+    cases.append(("wp714_canary_van_chuyen_khop_nlm_cli",
+                  bool(_want714j) and _got714j == _want714j and _same714j and _n714j > 5000))
 
     # ═══ v1.33.40 (MERGE bundle-15 'complete': source-delete (a) KHÔNG trash Drive dù docstring nói, (b) reg_delete
     # SAI shape g.get(fileId,force) — GAS đòi POST+drive_ids[]+confirm=yes) — r51_* ═══

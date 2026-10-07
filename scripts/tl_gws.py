@@ -124,6 +124,24 @@ _NLM_CANARY_KNOWN_KEYS = ("id", "notebook_id", "title", "name", "data", "ok", "e
 
 _NLM_CANARY_MAX_DEPTH = 64     # = MaxDepth mặc định của System.Text.Json (đo: 64 mức lồng nhận, 65 ném)
 
+# WP714 vòng 4 (Codex lượt 3, lớp `stage-canary-true-khi-than-rong-hoac-sai-id`): title/name "trắng" theo MỘT bảng
+# TƯỜNG MINH, không theo `str.strip()` (Python) hay `String.IsNullOrWhiteSpace` (.NET) — hai tập ấy KHÁC nhau (đo:
+# U+001C–U+001F là khoảng trắng với Python, không với .NET ⇒ title "\u001c" từng Python=âm / PS=dương). Bảng = mọi
+# ký tự `str.isspace()` của Python 3.11 (tập .NET là tập con của nó) cộng các ký tự định dạng độ rộng 0 (U+180E,
+# U+200B–U+200D, U+2060, U+FEFF). Wrapper PS giữ ĐÚNG danh sách này ở `$CanaryBlankCodePoints`; selftest
+# `wp714_canary_bang_trang_khop_ps` so hai danh sách theo từng số. Title chỉ gồm ký tự trong bảng (kể cả rỗng) = trắng.
+_NLM_CANARY_BLANK_CODEPOINTS = (
+    0x0009, 0x000A, 0x000B, 0x000C, 0x000D, 0x001C, 0x001D, 0x001E, 0x001F, 0x0020, 0x0085, 0x00A0, 0x1680,
+    0x180E, 0x2000, 0x2001, 0x2002, 0x2003, 0x2004, 0x2005, 0x2006, 0x2007, 0x2008, 0x2009, 0x200A, 0x200B,
+    0x200C, 0x200D, 0x2028, 0x2029, 0x202F, 0x205F, 0x2060, 0x3000, 0xFEFF,
+)
+_NLM_CANARY_BLANK = frozenset(_NLM_CANARY_BLANK_CODEPOINTS)
+
+
+def _nlm_canary_blank(s: str) -> bool:
+    """Chuỗi chỉ gồm ký tự của `_NLM_CANARY_BLANK_CODEPOINTS` (kể cả chuỗi rỗng) = không có tên."""
+    return all(ord(ch) in _NLM_CANARY_BLANK for ch in s)
+
 
 def _nlm_canary_json_strict(text):
     """WP714 (cross-review PR #714 lớp P1 `stage-canary-true-khi-than-rong-hoac-sai-id`): parse JSON và TỪ CHỐI
@@ -136,10 +154,16 @@ def _nlm_canary_json_strict(text):
         `TryGetDouble` ra ±∞ ⇒ cả hai phía TỪ CHỐI số không hữu hạn. Thử bằng `float()` TRƯỚC `int()` nên không
         phụ thuộc giới hạn `int_max_str_digits` (biến môi trường đổi được giới hạn ấy);
       · surrogate LẺ (`"\\ud800"` dạng thoát) ở khoá hoặc giá trị: Python nhận, PS `GetString()`/`.Name` ném
-        ⇒ từ chối ở cả hai. (Byte UTF-8 hỏng thì `nlm_cli._run` và .NET đều thay bằng U+FFFD — đã cùng nghĩa.)
+        ⇒ từ chối ở cả hai.
       · lồng quá 64 mức: PS ném ⇒ ở đây cũng từ chối (Python tự nhận tới ~1000 mức).
-    BOM, dấu phẩy thừa, chú thích, ký tự điều khiển thô, khoảng trắng ngoài 4 ký tự JSON: cả hai bộ đọc vốn đã
-    từ chối (đo) — giữ nguyên, có ca khoá trong selftest."""
+    BOM đầu chuỗi, dấu phẩy thừa, chú thích, ký tự điều khiển thô, khoảng trắng ngoài 4 ký tự JSON: hai HÀM đọc
+    cùng từ chối khi nhận cùng một chuỗi (đo) — giữ nguyên, có ca khoá trong selftest.
+    PHẠM VI của lời khai trên là HÀM ĐỌC, không phải đường tiến trình. Văn bản hàm này nhận đã qua `nlm_cli._run`
+    (UTF-8, byte hỏng ⇒ U+FFFD, đổi `\r\n`/`\r`, `_strip_keyring` cắt dòng bằng `splitlines` và bỏ dòng nhiễu
+    keyring). Lượt 3 đo được wrapper PS khi ấy đọc stdout bằng StreamReader — BỎ BOM — nên BOM qua tiến trình
+    thật từng dương ở wrapper. Từ vòng 4 wrapper đọc BYTE và áp đúng phép biến đổi ấy (`ConvertTo-StageText`);
+    selftest `wp714_canary_van_chuyen_khop_nlm_cli` khoá các bảng nó chép. Phép đo qua tiến trình thật chỉ có
+    trên Linux/pwsh 7.4.6/Python 3.11; Windows native và CLI `nlm` thật CHƯA đo."""
     import math   # cục bộ: không dựa vào namespace dùng chung của tl.py
     def _no_dup(pairs):
         seen = set()
@@ -212,7 +236,8 @@ def _nlm_canary_body_ok(r, notebook_id: str) -> tuple[bool, str]:
       · đối tượng không có `id`/`notebook_id` mà có `data` là đối tượng ⇒ bóc `data` MỘT lần (khuôn wrapper PS);
       · mỗi mức đi qua: khoá đã biết đúng hoa/thường, `ok` (nếu có) là `True`, `error` (nếu có) rỗng;
       · có ít nhất một trong `id`/`notebook_id`, và MỌI khoá id có mặt là chuỗi BẰNG ĐÚNG id đang probe;
-      · có ít nhất một trong `title`/`name`, và MỌI khoá ấy có mặt là chuỗi khác rỗng sau strip.
+      · có ít nhất một trong `title`/`name`, và MỌI khoá ấy có mặt là chuỗi KHÔNG trắng theo bảng
+        `_NLM_CANARY_BLANK_CODEPOINTS` (không theo `strip()`; xem bảng).
     Mọi dạng khác — kể cả kiểu lạ, hai id mâu thuẫn, mảng nhiều phần tử dù đều đúng — KHÔNG dương. Trả MÃ CỐ ĐỊNH."""
     text = r.get("stdout") if isinstance(r, dict) else None
     if not isinstance(text, str) or not text.strip():
@@ -235,7 +260,7 @@ def _nlm_canary_body_ok(r, notebook_id: str) -> tuple[bool, str]:
     if not ids or not all(isinstance(v, str) and v == notebook_id for v in ids):
         return False, "CANARY_ID_MISMATCH"
     titles = [body[k] for k in ("title", "name") if k in body]
-    if not titles or not all(isinstance(v, str) and v.strip() for v in titles):
+    if not titles or not all(isinstance(v, str) and not _nlm_canary_blank(v) for v in titles):
         return False, "CANARY_BODY_INCOMPLETE"
     return True, "CANARY_BODY_OK"
 

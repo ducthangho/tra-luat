@@ -72,3 +72,4 @@ fix_scope: Close classes of Claude cross-review on PR #713 (comment 6035515969, 
 validation_lane: Linux cloud container, offline only; pwsh 7.4.x from the official release tarball for Tests.ps1; no LIVE credentials, no nlm login
 thay_the_cho: []
 thay_the_cho_note: wp710-r4-g2-codex expired at 2026-10-07T07:29:53Z before this lease; per CLAUDE.md lesson no two-way tombstone is written into an expired lease
+da_bi_thay_the: wp710-r4-g4-claude-windows

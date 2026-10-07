@@ -56,3 +56,4 @@ requires_live: false
 ci_policy: no_ci_or_full_ci_until_merge_readiness
 push_policy: one_code_push_after_zero_p1_p2_p3
 da_bi_thay_the: wp685-r19-g2-codex-20261007
+# Metadata branch includes the frozen prompt for this superseded lease.

@@ -2159,8 +2159,16 @@ def phan_chung():
     _them("p643-lenh-registry-deu-trong-vung", all(_cham_vung(t, set(VUNG_CHUNG)) for x in LENH_REGISTRY
                                                    for t in x.split() if "/" in t and "@" not in t
                                                    and t != ".claude/dev/ci_dang_ky_test.py"))
+    # #705: đo trần tới communicate qua đường runtime, không chỉ giá trị hằng.
+    def _tran_runtime_dung():
+        from unittest.mock import Mock, patch
+        p = Mock(returncode=0, pid=1234567)
+        p.communicate.return_value = ("", None)
+        with patch.object(subprocess, "Popen", return_value=p), patch.dict(globals(), {"_pid_song": lambda *a: []}):
+            ket_qua = _chay_that("bo-gia.py")
+        return ket_qua == (0, "", None) and p.communicate.call_args.kwargs.get("timeout") == GIAY_TOI_DA_MOT_BO
     _them("p643-tran-bo-nho-hon-timeout-job", GIAY_TOI_DA_MOT_BO == 5400
-          and GIAY_TOI_DA_MOT_BO < 60 * _wf0["jobs"]["gate-registry"]["timeout-minutes"])
+          and GIAY_TOI_DA_MOT_BO < 60 * _wf0["jobs"]["gate-registry"]["timeout-minutes"] and _tran_runtime_dung())
     for _k in ENV_REGISTRY:
         _them(f"p643-A4-thieu-{_k}", _hong_env(lambda b, w: b["env"].pop(_k)))
         _them(f"p643-A4-lech-{_k}", _hong_env(lambda b, w: b["env"].update({_k: b["env"][_k] + " "})))

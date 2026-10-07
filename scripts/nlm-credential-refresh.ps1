@@ -19,8 +19,11 @@ $ErrorActionPreference = 'Stop'
 $ProgressPreference = 'SilentlyContinue'
 
 # A child that outlives a killed wrapper keeps running after the OS mutex is released. The wrapper
-# records each running child (pid + start time) here and a new owner waits until that child is gone.
+# records each operation here BEFORE spawning it (marker, then pid + start time) and a new owner waits
+# until that operation is gone. Every child gets TRA_LUAT_NLM_OP=<marker> in its environment; descendants
+# inherit it, so on Linux the whole tree is found again even after the direct child exited.
 $OperationRecord = Join-Path ([IO.Path]::GetTempPath()) 'tra_luat_nlm_credential_refresh.operation.json'
+$MarkerName = 'TRA_LUAT_NLM_OP'
 $Evidence = [ordered]@{ cycle = 0; profile_fingerprint = ''; cli_version = ''; steps = [ordered]@{} }
 
 function Emit([string]$status, [string]$step, [int]$rc, [double]$elapsed) {
@@ -37,18 +40,67 @@ function Emit([string]$status, [string]$step, [int]$rc, [double]$elapsed) {
 
 function Write-Step([string]$name, $result) {
     $Evidence.steps[$name] = [ordered]@{ rc = $result.rc; elapsed_seconds = $result.elapsed
-        timeout = $result.timeout; child_confirmed_exited = $result.exited }
+        timeout = $result.timeout; child_confirmed_exited = $result.exited; descendants_stopped = $result.reaped }
 }
 
 function Get-StartTicks($process) {
     try { return $process.StartTime.ToUniversalTime().Ticks } catch { return $null }
 }
 
+function Get-MarkedProcessIds([string]$marker) {
+    # Linux only: processes whose initial environment carries this operation marker (the child and every
+    # descendant that did not scrub its environment). Zombies are dead. Returns $null where not measurable.
+    if (-not $IsLinux -or $marker -notmatch '^[0-9a-f]{32}$') { return $null }
+    $needle = "`0$MarkerName=$marker`0"
+    $found = [Collections.Generic.List[int]]::new()
+    foreach ($dir in [IO.Directory]::GetDirectories('/proc')) {
+        $name = [IO.Path]::GetFileName($dir)
+        if ($name -notmatch '^\d+$' -or [int]$name -eq $PID) { continue }
+        try {
+            $environ = "`0" + [Text.Encoding]::Latin1.GetString([IO.File]::ReadAllBytes("$dir/environ"))
+            if (-not $environ.Contains($needle)) { continue }
+            if ([IO.File]::ReadAllText("$dir/stat") -match '\)\s+Z\s') { continue }
+            $found.Add([int]$name)
+        } catch { continue }
+    }
+    return ,$found.ToArray()
+}
+
+function Stop-MarkedTree([string]$marker) {
+    # Kill every marked process and confirm none is left. $true = confirmed empty, $false = still alive,
+    # $null = not measurable on this platform.
+    $ids = Get-MarkedProcessIds $marker
+    if ($null -eq $ids) { return $null }
+    $watch = [Diagnostics.Stopwatch]::StartNew()
+    while ($ids.Count -gt 0) {
+        foreach ($id in $ids) { Stop-Process -Id $id -Force -ErrorAction SilentlyContinue }
+        if ($watch.ElapsedMilliseconds -gt 5000) { return $false }
+        Start-Sleep -Milliseconds 50
+        $ids = Get-MarkedProcessIds $marker
+    }
+    return $true
+}
+
+function Write-OperationRecord($marker, $process, [bool]$unconfirmed) {
+    $data = [ordered]@{ marker = $marker; pid = $null; start_ticks = $null; tree_unconfirmed = $unconfirmed }
+    if ($process) { $data.pid = $process.Id; $data.start_ticks = (Get-StartTicks $process) }
+    Set-Content -LiteralPath $OperationRecord -Value ($data | ConvertTo-Json -Compress) -Encoding utf8
+}
+
 function Test-RecordedChildAlive {
     if (-not (Test-Path -LiteralPath $OperationRecord -PathType Leaf)) { return $false }
     # An unreadable record fails closed: an operator must confirm no child is left, then delete it.
     try { $record = [string](Get-Content -LiteralPath $OperationRecord -Raw) | ConvertFrom-Json } catch { return $true }
-    if ($null -eq $record -or $null -eq $record.pid -or $null -eq $record.start_ticks) { return $true }
+    if ($null -eq $record) { return $true }
+    if ($record.PSObject.Properties.Name -contains 'marker') {
+        # Linux: the marker finds the whole tree, including descendants of an exited child.
+        $ids = Get-MarkedProcessIds ([string]$record.marker)
+        if ($null -ne $ids) { return ($ids.Count -gt 0) }
+        # Elsewhere descendants cannot be enumerated: a tree this wrapper saw unconfirmed (a pipe writer
+        # outlived the kill) fails closed until an operator deletes the record; otherwise pid + start time.
+        if ($record.tree_unconfirmed -eq $true) { return $true }
+    }
+    if ($null -eq $record.pid -or $null -eq $record.start_ticks) { return $true }
     $process = Get-Process -Id ([int]$record.pid) -ErrorAction SilentlyContinue
     if (-not $process) { return $false }
     $ticks = Get-StartTicks $process
@@ -62,6 +114,7 @@ function Test-RecordedChildAlive {
 }
 
 function Invoke-Bounded([string]$file, [string[]]$arguments, [int]$seconds, [hashtable]$environment = @{}) {
+    $marker = [guid]::NewGuid().ToString('N')
     $info = [System.Diagnostics.ProcessStartInfo]::new()
     $info.FileName = $file
     $info.UseShellExecute = $false
@@ -69,17 +122,20 @@ function Invoke-Bounded([string]$file, [string[]]$arguments, [int]$seconds, [has
     $info.RedirectStandardError = $true
     foreach ($arg in $arguments) { [void]$info.ArgumentList.Add($arg) }
     foreach ($key in $environment.Keys) { $info.Environment[$key] = [string]$environment[$key] }
+    $info.Environment[$MarkerName] = $marker
     $process = [System.Diagnostics.Process]::new()
     $process.StartInfo = $info
     $budget = [int64]$seconds * 1000
     $watch = [System.Diagnostics.Stopwatch]::StartNew()
     $started = $false
-    $exited = $false
+    $confirmed = $false
+    # Record BEFORE spawning: a wrapper killed between Start() and the pid write leaves the marker behind
+    # (Linux finds the tree by marker; elsewhere a record without pid fails closed).
+    Write-OperationRecord $marker $null $false
     try {
         [void]$process.Start()
         $started = $true
-        $record = [ordered]@{ pid = $process.Id; start_ticks = (Get-StartTicks $process) } | ConvertTo-Json -Compress
-        Set-Content -LiteralPath $OperationRecord -Value $record -Encoding utf8
+        Write-OperationRecord $marker $process $false
         $stdout = $process.StandardOutput.ReadToEndAsync()
         $stderr = $process.StandardError.ReadToEndAsync()
         $done = $process.WaitForExit([int][Math]::Max(0, $budget - $watch.ElapsedMilliseconds))
@@ -89,18 +145,91 @@ function Invoke-Bounded([string]$file, [string[]]$arguments, [int]$seconds, [has
                 [int][Math]::Max(0, $budget - $watch.ElapsedMilliseconds))
         }
         if (-not $done) {
+            # The direct child may have exited while a descendant still holds the pipes: Kill($true) cannot
+            # reach an orphan, so the marker sweep does. Asking to kill is not proof of death: confirm the
+            # child, the marked tree (Linux) and that every pipe writer is gone, or keep the record.
             try { if (-not $process.HasExited) { $process.Kill($true) } } catch { }
-            # Asking to kill is not proof of death: confirm, or keep the record so the next owner waits.
-            try { $exited = $process.WaitForExit(5000) } catch { $exited = $false }
-            return @{timeout=$true; rc=-1; out=''; err=''; elapsed=$watch.Elapsed.TotalSeconds; exited=$exited}
+            $rootGone = $false
+            try { $rootGone = $process.WaitForExit(5000) } catch { $rootGone = $false }
+            $treeGone = Stop-MarkedTree $marker
+            $pipesClosed = $false
+            try { $pipesClosed = [Threading.Tasks.Task]::WaitAll([Threading.Tasks.Task[]]@($stdout, $stderr), 5000) } catch { $pipesClosed = $false }
+            $confirmed = $rootGone -and $pipesClosed -and ($treeGone -ne $false)
+            if (-not $confirmed) { Write-OperationRecord $marker $process $true }
+            return @{timeout=$true; rc=-1; out=''; err=''; elapsed=$watch.Elapsed.TotalSeconds; exited=$confirmed; reaped=0}
         }
-        $exited = $true
+        # Success path: a descendant that dropped the pipes may still run (Linux shows it); it is part of
+        # this operation and must not overlap the next step, so it is stopped and confirmed first.
+        $leftover = Get-MarkedProcessIds $marker
+        $reaped = if ($null -eq $leftover) { 0 } else { $leftover.Count }
+        $treeGone = if ($reaped -gt 0) { Stop-MarkedTree $marker } else { $true }
+        if ($treeGone -eq $false) {
+            Write-OperationRecord $marker $process $true
+            return @{timeout=$true; rc=-1; out=''; err=''; elapsed=$watch.Elapsed.TotalSeconds; exited=$false; reaped=$reaped}
+        }
+        $confirmed = $true
         return @{timeout=$false; rc=$process.ExitCode; out=$stdout.Result; err=$stderr.Result;
-            elapsed=$watch.Elapsed.TotalSeconds; exited=$true}
+            elapsed=$watch.Elapsed.TotalSeconds; exited=$true; reaped=$reaped}
     } finally {
-        if ($started -and $exited) { Remove-Item -LiteralPath $OperationRecord -ErrorAction SilentlyContinue }
+        if (-not $started -or $confirmed) { Remove-Item -LiteralPath $OperationRecord -ErrorAction SilentlyContinue }
         $process.Dispose()
     }
+}
+
+$CanaryKnownKeys = @('id', 'notebook_id', 'title', 'name', 'data', 'ok', 'error')
+
+function Get-CanaryLevel($element) {
+    # One object level as an ordinal (case-sensitive) map, or $null: duplicate key, a known key in another
+    # case, `ok` present but not true, or `error` present and not null/false/"" make the answer ambiguous.
+    if ($element.ValueKind -ne [Text.Json.JsonValueKind]::Object) { return $null }
+    $props = [Collections.Generic.Dictionary[string, Text.Json.JsonElement]]::new([StringComparer]::Ordinal)
+    foreach ($property in $element.EnumerateObject()) {
+        if ($props.ContainsKey($property.Name)) { return $null }
+        if ($CanaryKnownKeys -contains $property.Name -and $CanaryKnownKeys -cnotcontains $property.Name) { return $null }
+        $props[$property.Name] = $property.Value
+    }
+    if ($props.ContainsKey('ok') -and $props['ok'].ValueKind -ne [Text.Json.JsonValueKind]::True) { return $null }
+    if ($props.ContainsKey('error')) {
+        $e = $props['error']
+        $empty = $e.ValueKind -in @([Text.Json.JsonValueKind]::Null, [Text.Json.JsonValueKind]::False) -or
+            ($e.ValueKind -eq [Text.Json.JsonValueKind]::String -and $e.GetString() -eq '')
+        if (-not $empty) { return $null }
+    }
+    return ,$props
+}
+
+function Test-CanaryBody([string]$text, [string]$notebook) {
+    # Allow-list, same rules as tl_gws._nlm_canary_body_ok: exactly ONE notebook object; every id key
+    # present is a string equal to the trusted id; every title/name present is a non-blank string.
+    # System.Text.Json keeps JSON types and sees duplicate keys (ConvertFrom-Json keeps the last one silently
+    # and turns date-like strings into DateTime).
+    try { $doc = [Text.Json.JsonDocument]::Parse($text) } catch { return $false }
+    try {
+        $node = $doc.RootElement
+        if ($node.ValueKind -eq [Text.Json.JsonValueKind]::Array) {
+            if ($node.GetArrayLength() -ne 1) { return $false }
+            $node = $node[0]
+        }
+        $props = Get-CanaryLevel $node
+        if ($null -eq $props) { return $false }
+        if (-not $props.ContainsKey('id') -and -not $props.ContainsKey('notebook_id') -and $props.ContainsKey('data')) {
+            $props = Get-CanaryLevel $props['data']
+            if ($null -eq $props) { return $false }
+        }
+        $ids = @(@('id', 'notebook_id') | Where-Object { $props.ContainsKey($_) })
+        if ($ids.Count -eq 0) { return $false }
+        foreach ($key in $ids) {
+            $value = $props[$key]
+            if ($value.ValueKind -ne [Text.Json.JsonValueKind]::String -or $value.GetString() -cne $notebook) { return $false }
+        }
+        $titles = @(@('title', 'name') | Where-Object { $props.ContainsKey($_) })
+        if ($titles.Count -eq 0) { return $false }
+        foreach ($key in $titles) {
+            $value = $props[$key]
+            if ($value.ValueKind -ne [Text.Json.JsonValueKind]::String -or [string]::IsNullOrWhiteSpace($value.GetString())) { return $false }
+        }
+        return $true
+    } finally { $doc.Dispose() }
 }
 
 function Classify([string]$message) {
@@ -169,18 +298,14 @@ try {
             Emit (Classify ($canary.err + ' ' + $canary.out)) 'canary' $canary.rc $canary.elapsed
             exit 2
         }
-        try {
-            $body = $canary.out | ConvertFrom-Json
-            if ($body -is [array]) { if ($body.Count -ne 1) { throw 'ambiguous array' }; $body = $body[0] }
-            if ($body.data) { $body = $body.data }
-            if ([string]$body.id -cne $notebook -and [string]$body.notebook_id -cne $notebook) { throw 'id mismatch' }
-            if (-not $body.title -and -not $body.name) { throw 'missing notebook body' }
-        } catch {
+        if (-not (Test-CanaryBody $canary.out $notebook)) {
             Emit 'inconclusive' 'canary' $canary.rc $canary.elapsed
             exit 4
         }
-        # The stage command repeats its own canary; give it the same trusted notebook.
-        try { $stage = Invoke-Bounded $stagePath $StageArguments $TimeoutSeconds @{ TL_NOTEBOOK_ID = $notebook } }
+        # The stage command repeats its own canary; give it the same trusted notebook. TL_CANARY_NOTEBOOK_ID
+        # is the pin: a profile config loaded by the stage command rewrites TL_NOTEBOOK_ID, never this one.
+        $pin = @{ TL_NOTEBOOK_ID = $notebook; TL_CANARY_NOTEBOOK_ID = $notebook }
+        try { $stage = Invoke-Bounded $stagePath $StageArguments $TimeoutSeconds $pin }
         catch { Emit 'stage_failure' 'stage' -1 0; exit 6 }
         Write-Step 'stage' $stage
         if ($stage.timeout -or $stage.rc -ne 0) {

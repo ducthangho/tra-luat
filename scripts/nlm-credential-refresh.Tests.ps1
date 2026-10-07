@@ -24,7 +24,7 @@ def note(kind):
 note("start")
 if op == "stage" and os.environ.get("WP710_ENVLOG"):
     with open(os.environ["WP710_ENVLOG"], "w", encoding="utf-8") as elog:
-        elog.write(os.environ.get("TL_NOTEBOOK_ID", "<absent>"))
+        elog.write(os.environ.get("TL_NOTEBOOK_ID", "<absent>") + "|" + os.environ.get("TL_CANARY_NOTEBOOK_ID", "<absent>"))
 mode = os.environ.get("WP710_MODE", "ok")
 if mode == "leak_all":
     print("SECRET_SENTINEL", file=sys.stderr)
@@ -40,8 +40,26 @@ if mode == "timeout" and op == "auth":
     time.sleep(5)
 if mode == "timeout_canary" and op == "notebook":
     time.sleep(5)
+if mode == "descendant_exit" and op == "auth":
+    child_code = "import os,time;[(open(os.environ['WP714_BEAT_FILE'],'a').write(str(time.time())+'\\n'),time.sleep(0.1)) for _ in range(300)]"
+    child = subprocess.Popen([sys.executable, "-c", child_code])
+    with open(os.environ["WP714_CHILD_PID_FILE"], "w") as f:
+        f.write(str(child.pid))
+    sys.exit(0)
 if mode == "linger" and op == "auth":
-    subprocess.Popen([sys.executable, "-c", "import time; time.sleep(20)"])
+    child = subprocess.Popen([sys.executable, "-c", "import time; time.sleep(20)"])
+    if os.environ.get("WP714_LINGER_PID"):
+        with open(os.environ["WP714_LINGER_PID"], "w") as f:
+            f.write(str(child.pid))
+    sys.exit(0)
+if mode == "daemon" and op == "auth":
+    # A descendant that drops the redirected pipes and keeps working after the CLI returned rc 0.
+    beat = "import os,time;[(open(os.environ['WP714_BEAT_FILE'],'a').write(str(time.time())+'\\n'),time.sleep(0.1)) for _ in range(300)]"
+    child = subprocess.Popen([sys.executable, "-c", beat], stdin=subprocess.DEVNULL,
+                             stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    with open(os.environ["WP714_CHILD_PID_FILE"], "w") as f:
+        f.write(str(child.pid))
+    time.sleep(0.5)
     sys.exit(0)
 if mode == "err_conn_reset" and op == "auth":
     print("Error running `nlm auth refresh`: connection reset by peer", file=sys.stderr)
@@ -85,6 +103,28 @@ if op == "notebook":
         print("{}")
     elif mode == "wrongcase":
         print(json.dumps({"id": sys.argv[3].lower(), "title": "Test"}))
+    elif mode in ("title_bool", "title_array", "title_object", "title_space", "id_array", "conflict_id"):
+        body = {"id": sys.argv[3], "title": "Canary"}
+        if mode == "title_bool": body["title"] = True
+        elif mode == "title_array": body["title"] = ["Canary"]
+        elif mode == "title_object": body["title"] = {"text": "Canary"}
+        elif mode == "title_space": body["title"] = "   "
+        elif mode == "id_array": body["id"] = [sys.argv[3]]
+        else: body.update(id="NB-OTHER-9999", notebook_id=sys.argv[3])
+        print(json.dumps(body))
+    elif mode in ("multi", "multi_same", "dup_id", "case_key", "ok_false", "error_set", "data_wrapped", "singleton", "title_date"):
+        good = {"id": sys.argv[3], "title": "Canary"}
+        print({
+            "multi": json.dumps([good, {"id": "NB-OTHER-9999", "title": "Other"}]),
+            "multi_same": json.dumps([good, good]),
+            "dup_id": '{"id": "NB-OTHER-9999", "id": "' + sys.argv[3] + '", "title": "Canary"}',
+            "case_key": json.dumps({"id": sys.argv[3], "ID": "NB-OTHER-9999", "title": "Canary"}),
+            "ok_false": json.dumps(dict(good, ok=False)),
+            "error_set": json.dumps(dict(good, error="offline failure")),
+            "data_wrapped": json.dumps({"data": good}),
+            "singleton": json.dumps([good]),
+            "title_date": json.dumps({"id": sys.argv[3], "title": "2026-01-01T00:00:00"}),
+        }[mode])
     elif mode == "noname":
         print(json.dumps({"id": sys.argv[3]}))
     else:
@@ -199,6 +239,27 @@ note("end")
     if ($r.Json.status -ne 'inconclusive' -or @($r.Calls | Where-Object { $_ -like 'start:stage:*' }).Count -ne 0) { throw 'notebook id must match case-sensitively' }
     $cases++
     # >>case:d
+    # lop: stage-canary-true-khi-than-rong-hoac-sai-id
+    # <<case:n
+    foreach ($mode in @('title_bool','title_array','title_object','title_space','id_array','conflict_id',
+                        'multi','multi_same','dup_id','case_key','ok_false','error_set')) {
+        $r = Invoke-Wrapper $mode @('-TimeoutSeconds','5')
+        if ($r.Rc -ne 4 -or $r.Json.status -ne 'inconclusive' -or
+            @($r.Calls | Where-Object { $_ -like 'start:stage:*' }).Count -ne 0) {
+            throw ('ambiguous or non-string notebook body must not stage: ' + $mode)
+        }
+    }
+    # WP714: positive controls, so the allow-list is not "reject everything": one notebook object in the
+    # three accepted shapes, and a date-like title stays a string (ConvertFrom-Json would turn it into DateTime).
+    foreach ($mode in @('data_wrapped','singleton','title_date')) {
+        $r = Invoke-Wrapper $mode @('-TimeoutSeconds','5')
+        if ($r.Rc -ne 0 -or $r.Json.status -ne 'staged' -or
+            @($r.Calls | Where-Object { $_ -like 'start:stage:*' }).Count -ne 1) {
+            throw ('a single valid notebook object must stage: ' + $mode)
+        }
+    }
+    $cases++
+    # >>case:n
     # <<case:e
     # (e) thu tu refresh -> canary -> stage, dung 1 lan moi buoc, va bang chung ghi lai (Spec r4 #1, #4)
     $r = Invoke-Wrapper 'ok' @('-TimeoutSeconds','5')
@@ -301,8 +362,34 @@ Start-Sleep -Seconds 30
     $env:WP710_DELAY = '0'
     # <<case:a
     # (a) mot hau due (trinh duyet/daemon) giu pipe stdout/stderr sau khi CLI thoat rc 0 khong duoc keo dai qua -TimeoutSeconds
-    $r = Invoke-Wrapper 'linger' @('-TimeoutSeconds','2')
-    if ($r.Seconds -gt 12) { throw ('wrapper exceeded its own timeout budget: ' + [int]$r.Seconds + 's with -TimeoutSeconds 2 (a descendant held the redirected pipes)') }
+    $env:WP714_LINGER_PID = Join-Path $root 'linger.pid'
+    try {
+        $r = Invoke-Wrapper 'linger' @('-TimeoutSeconds','2')
+        if ($r.Seconds -gt 12) { throw ('wrapper exceeded its own timeout budget: ' + [int]$r.Seconds + 's with -TimeoutSeconds 2 (a descendant held the redirected pipes)') }
+        # WP714: the outcome, not only the wall clock: a pipe held past the budget is a timeout with zero
+        # stage, and on return the descendant is gone (Linux marker sweep) or the record stays (elsewhere).
+        if ($r.Rc -ne 3 -or $r.Json.status -ne 'timeout' -or $r.Json.step -ne 'refresh' -or
+            @($r.Calls | Where-Object { $_ -like 'start:stage:*' -or $_ -like 'start:notebook:*' }).Count -ne 0) {
+            throw ('a lingering pipe writer must end as timeout with zero later steps: rc=' + $r.Rc + ' status=' + $r.Json.status)
+        }
+        $lingerPid = [int](Get-Content -LiteralPath $env:WP714_LINGER_PID -Raw)
+        $lingerAlive = $null -ne (Get-Process -Id $lingerPid -ErrorAction SilentlyContinue)
+        if ($IsLinux -and $lingerAlive) {
+            try { $lingerAlive = [IO.File]::ReadAllText("/proc/$lingerPid/stat") -notmatch '\)\s+Z\s' } catch { $lingerAlive = $false }
+        }
+        $recLinger = Join-Path ([IO.Path]::GetTempPath()) 'tra_luat_nlm_credential_refresh.operation.json'
+        if ($lingerAlive -and -not (Test-Path -LiteralPath $recLinger)) {
+            throw 'a live descendant was left behind and its operation record was deleted'
+        }
+        if ($IsLinux -and ($lingerAlive -or $r.Json.steps.refresh.child_confirmed_exited -ne $true)) {
+            throw 'Linux: the marked descendant must be stopped and confirmed before the wrapper returns'
+        }
+    } finally {
+        if (Test-Path -LiteralPath $env:WP714_LINGER_PID) {
+            Stop-Process -Id ([int](Get-Content -LiteralPath $env:WP714_LINGER_PID -Raw)) -Force -ErrorAction SilentlyContinue
+        }
+        Remove-Item Env:WP714_LINGER_PID -ErrorAction SilentlyContinue
+    }
     $cases++
     # >>case:a
     # <<case:b
@@ -340,7 +427,8 @@ Start-Sleep -Seconds 30
         $s.canary.rc -ne 0 -or $s.canary.elapsed_seconds -le 0 -or $s.stage.rc -ne 0 -or $s.stage.elapsed_seconds -le 0) {
         throw ('per-step evidence missing or wrong: ' + ($r.Json | ConvertTo-Json -Compress -Depth 5))
     }
-    if ((Get-Content -LiteralPath $env:WP710_ENVLOG -Raw) -cne 'NOTEBOOK12345') { throw 'stage child did not receive TL_NOTEBOOK_ID of the trusted config' }
+    # WP714: TL_CANARY_NOTEBOOK_ID is the pin a profile config cannot rewrite; TL_NOTEBOOK_ID stays for older stage commands.
+    if ((Get-Content -LiteralPath $env:WP710_ENVLOG -Raw) -cne 'NOTEBOOK12345|NOTEBOOK12345') { throw 'stage child did not receive TL_NOTEBOOK_ID and TL_CANARY_NOTEBOOK_ID of the trusted config' }
     $r = Invoke-Wrapper 'auth' @('-TimeoutSeconds','5')
     if ($r.Json.steps.refresh.rc -ne 7 -or $null -ne $r.Json.steps.canary -or $null -ne $r.Json.steps.stage) {
         throw 'refresh failure evidence must carry the real refresh rc and no later step'
@@ -395,6 +483,97 @@ Start-Sleep -Seconds 30
     if ($r.Rc -ne 5 -or $r.Calls.Count -ne 0) { throw 'an unreadable operation record must fail closed' }
     $cases++
     # >>case:m
+    # lop: khoa-va-timeout-khong-rang-buoc-cay-tien-trinh-con
+    # <<case:o
+    $env:WP714_BEAT_FILE = Join-Path $root 'grandchild-beats.txt'
+    $env:WP714_CHILD_PID_FILE = Join-Path $root 'grandchild.pid'
+    try {
+        $r = Invoke-Wrapper 'descendant_exit' @('-TimeoutSeconds','2')
+        if ($r.Rc -ne 3 -or $r.Json.status -ne 'timeout') { throw 'inherited pipes must time out' }
+        $childPid = [int](Get-Content -LiteralPath $env:WP714_CHILD_PID_FILE -Raw)
+        $r = Invoke-Wrapper 'ok' @('-TimeoutSeconds','5','-LockWaitSeconds','1')
+        $before = @(Get-Content -LiteralPath $env:WP714_BEAT_FILE -ErrorAction SilentlyContinue).Count
+        Start-Sleep -Milliseconds 400
+        $after = @(Get-Content -LiteralPath $env:WP714_BEAT_FILE -ErrorAction SilentlyContinue).Count
+        if ($r.Rc -eq 0 -and $after -gt $before) {
+            throw 'new owner staged while the old owner grandchild still performed operations'
+        }
+        # WP714: no overlap is not enough; a vacuous pass (B never ran) must fail too. On Linux the marked
+        # grandchild is stopped and confirmed, so B must take over and stage; elsewhere B must not overlap.
+        if ($IsLinux -and ($r.Rc -ne 0 -or $r.Json.status -ne 'staged' -or $after -ne $before)) {
+            throw ('takeover after a confirmed-dead old tree must stage: rc=' + $r.Rc + ' status=' + $r.Json.status)
+        }
+        if (-not $IsLinux -and $r.Rc -ne 0 -and $r.Rc -ne 5) { throw ('unexpected takeover outcome rc=' + $r.Rc) }
+    } finally {
+        if (Test-Path -LiteralPath $env:WP714_CHILD_PID_FILE) {
+            Stop-Process -Id ([int](Get-Content -LiteralPath $env:WP714_CHILD_PID_FILE -Raw)) -Force -ErrorAction SilentlyContinue
+        }
+        Remove-Item Env:WP714_BEAT_FILE, Env:WP714_CHILD_PID_FILE -ErrorAction SilentlyContinue
+    }
+    $cases++
+    # >>case:o
+    # <<case:p
+    # (p) WP714: a record carrying an operation marker blocks a new owner while ANY process with that marker
+    #     lives (the direct child may be long gone). Elsewhere a marker record without a pid fails closed.
+    $recP = Join-Path ([IO.Path]::GetTempPath()) 'tra_luat_nlm_credential_refresh.operation.json'
+    $markerP = [guid]::NewGuid().ToString('N')
+    $markVar = [regex]::Match((Get-Content -LiteralPath $script -Raw), "MarkerName\s*=\s*'([^']+)'").Groups[1].Value
+    if (-not $markVar) { throw 'operation marker variable not found in script' }
+    $psi = [Diagnostics.ProcessStartInfo]::new($python)
+    $psi.ArgumentList.Add('-c'); $psi.ArgumentList.Add('import time; time.sleep(60)')
+    $psi.UseShellExecute = $false
+    $psi.Environment[$markVar] = $markerP
+    $marked = [Diagnostics.Process]::Start($psi)
+    # The recorded pid is a direct child that already EXITED: only the marker can still see the live descendant.
+    $gone = Start-Process -FilePath $python -ArgumentList '-c "import time; time.sleep(1)"' -PassThru @hidden
+    $goneTicks = $gone.StartTime.ToUniversalTime().Ticks   # read while alive: StartTime is gone after exit
+    $gone.WaitForExit()
+    try {
+        @{marker=$markerP; pid=$null; start_ticks=$null; tree_unconfirmed=$false} | ConvertTo-Json -Compress | Set-Content -LiteralPath $recP
+        $r = Invoke-Wrapper 'ok' @('-TimeoutSeconds','5','-LockWaitSeconds','1')
+        if ($r.Rc -ne 5 -or $r.Json.step -ne 'lock_busy' -or $r.Calls.Count -ne 0) { throw 'a live marked process must block the new owner with zero operations' }
+        @{marker=$markerP; pid=$gone.Id; start_ticks=$goneTicks; tree_unconfirmed=$false} | ConvertTo-Json -Compress | Set-Content -LiteralPath $recP
+        $r = Invoke-Wrapper 'ok' @('-TimeoutSeconds','5','-LockWaitSeconds','1')
+        if ($IsLinux -and ($r.Rc -ne 5 -or $r.Json.step -ne 'lock_busy' -or $r.Calls.Count -ne 0)) {
+            throw 'Linux: a live marked descendant must block even when the recorded child pid is dead'
+        }
+        Remove-Item -LiteralPath $recP -ErrorAction SilentlyContinue
+    } finally { Stop-Process -Id $marked.Id -Force -ErrorAction SilentlyContinue }
+    @{marker=$markerP; pid=$null; start_ticks=$null; tree_unconfirmed=$false} | ConvertTo-Json -Compress | Set-Content -LiteralPath $recP
+    $marked.WaitForExit()
+    $r = Invoke-Wrapper 'ok' @('-TimeoutSeconds','5','-LockWaitSeconds','1')
+    if ($IsLinux) {
+        if ($r.Rc -ne 0 -or $r.Json.status -ne 'staged') { throw 'Linux: a marker with no live process must not block' }
+    } elseif ($r.Rc -ne 5 -or $r.Calls.Count -ne 0) { throw 'non-Linux: a marker record without a pid must fail closed' }
+    Remove-Item -LiteralPath $recP -ErrorAction SilentlyContinue
+    $cases++
+    # >>case:p
+    # <<case:q
+    # (q) WP714: a descendant that dropped the pipes after `auth refresh` returned rc 0 is part of the operation:
+    #     on Linux it is stopped and confirmed before the canary runs, and the evidence says so.
+    $env:WP714_BEAT_FILE = Join-Path $root 'daemon-beats.txt'
+    $env:WP714_CHILD_PID_FILE = Join-Path $root 'daemon.pid'
+    $env:WP710_TIMELOG = Join-Path $root 'daemon-times.log'
+    Remove-Item -LiteralPath $env:WP714_BEAT_FILE, $env:WP710_TIMELOG -ErrorAction SilentlyContinue
+    try {
+        $r = Invoke-Wrapper 'daemon' @('-TimeoutSeconds','5')
+        if ($IsLinux) {
+            $startNb = [double]((@(Get-Content -LiteralPath $env:WP710_TIMELOG) | Where-Object { $_ -like 'start notebook *' } | Select-Object -First 1) -split ' ')[2]
+            $late = @(Get-Content -LiteralPath $env:WP714_BEAT_FILE | Where-Object { [double]$_ -gt $startNb })
+            if ($r.Rc -ne 0 -or $r.Json.status -ne 'staged' -or $r.Json.steps.refresh.descendants_stopped -lt 1 -or $late.Count -ne 0) {
+                throw ('Linux: a pipe-less descendant must be stopped before the canary: rc=' + $r.Rc + ' stopped=' + $r.Json.steps.refresh.descendants_stopped + ' late=' + $late.Count)
+            }
+        } elseif ($r.Json.steps.refresh.descendants_stopped -ne 0) {
+            throw 'non-Linux: descendants cannot be enumerated, the evidence must not claim any were stopped'
+        }
+    } finally {
+        if (Test-Path -LiteralPath $env:WP714_CHILD_PID_FILE) {
+            Stop-Process -Id ([int](Get-Content -LiteralPath $env:WP714_CHILD_PID_FILE -Raw)) -Force -ErrorAction SilentlyContinue
+        }
+        Remove-Item Env:WP714_BEAT_FILE, Env:WP714_CHILD_PID_FILE, Env:WP710_TIMELOG -ErrorAction SilentlyContinue
+    }
+    $cases++
+    # >>case:q
     "passed=$cases failed=0"
 } finally {
     Remove-Item -LiteralPath $root -Recurse -Force -ErrorAction SilentlyContinue

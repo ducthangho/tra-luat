@@ -118,22 +118,113 @@ def _auth_fix_hint_short() -> str:
         return _AUTH_FIX_FALLBACK_GWS
 
 
+_NLM_CANARY_KNOWN_KEYS = ("id", "notebook_id", "title", "name", "data", "ok", "error")
+
+
+def _nlm_canary_json_strict(text):
+    """WP714 (cross-review PR #714 lớp P1 `stage-canary-true-khi-than-rong-hoac-sai-id`): parse JSON và TỪ CHỐI
+    khoá trùng ở MỌI mức — `{"id":"KHAC","id":"<đúng>"}` là trả lời hai nghĩa, `json.loads` âm thầm lấy vế sau."""
+    def _no_dup(pairs):
+        seen = set()
+        for k, _ in pairs:
+            if k in seen:
+                raise ValueError("CANARY_DUPLICATE_KEY")
+            seen.add(k)
+        return dict(pairs)
+    return json.loads(text, object_pairs_hook=_no_dup)
+
+
+def _nlm_canary_level_ok(obj) -> bool:
+    """Một mức đối tượng: khoá đã biết chỉ được đúng hoa/thường (`ID`, `Title` = mơ hồ); `ok` có mặt thì phải
+    đúng `True`; `error` có mặt thì chỉ được null/false/"". Không phải dict = không dương."""
+    if not isinstance(obj, dict):
+        return False
+    for k in obj:
+        if isinstance(k, str) and k.lower() in _NLM_CANARY_KNOWN_KEYS and k not in _NLM_CANARY_KNOWN_KEYS:
+            return False
+    if "ok" in obj and obj["ok"] is not True:
+        return False
+    if "error" in obj and not (obj["error"] is None or obj["error"] is False or obj["error"] == ""):
+        return False                                  # cùng luật với Get-CanaryLevel của wrapper PS
+    return True
+
+
 def _nlm_canary_body_ok(r, notebook_id: str) -> tuple[bool, str]:
-    """WP710 r4/g3 (cross-review PR #713, lớp `stage-canary-true-khi-than-rong-hoac-sai-id`): rc=0 của
-    `nlm notebook get` KHÔNG phải bằng chứng. `_run_json` rơi về {ok:True,text} khi stdout không phải JSON,
-    và `notebook_get` không so ID — đo ở 52f32db: không-JSON / `{}` / `[]` / rỗng / JSON notebook KHÁC đều
-    upload=1. Danh sách CHO PHÉP: chỉ một ĐỐI TƯỢNG JSON có `id`|`notebook_id` BẰNG ĐÚNG id đang probe VÀ có
-    `title`|`name` là chuỗi khác rỗng mới dương; mọi thứ khác (kể cả kiểu lạ) = không dương."""
-    raw = r.get("raw") if isinstance(r, dict) else None
-    if isinstance(raw, dict) and isinstance(raw.get("data"), dict) and not ({"id", "notebook_id"} & set(raw)):
-        raw = raw["data"]                             # cùng phép bóc `data` như wrapper PowerShell
-    if not isinstance(raw, dict) or not raw:
-        return False, "CANARY_BODY_ABSENT: trả lời rc=0 nhưng không có đối tượng JSON của notebook"
-    if not any(isinstance(raw.get(k), str) and raw.get(k) == notebook_id for k in ("id", "notebook_id")):
-        return False, "CANARY_ID_MISMATCH: trả lời không mang đúng notebook id đang probe"
-    if not any(isinstance(raw.get(k), str) and raw.get(k).strip() for k in ("title", "name")):
-        return False, "CANARY_BODY_INCOMPLETE: thiếu title/name của notebook"
+    """WP710 r4/g3 + WP714 (cross-review PR #713/#714, lớp `stage-canary-true-khi-than-rong-hoac-sai-id`): rc=0 của
+    `nlm notebook get` KHÔNG phải bằng chứng. Phán xét trên STDOUT THÔ (`r["stdout"]`), KHÔNG trên `raw` của
+    `nlm_cli.notebook_get` — hàm ấy bóc phần tử ĐẦU của mảng và vứt phần còn lại, nên `[đúng, sai]` từng thành dương
+    (đo PR #714: upload=1 kể cả --force). DANH SÁCH CHO PHÉP — dương CHỈ KHI có ĐÚNG MỘT đối tượng notebook:
+      · JSON hợp lệ, không khoá trùng ở mức nào;
+      · mức đỉnh là đối tượng, hoặc mảng có ĐÚNG MỘT phần tử là đối tượng;
+      · đối tượng không có `id`/`notebook_id` mà có `data` là đối tượng ⇒ bóc `data` MỘT lần (khuôn wrapper PS);
+      · mỗi mức đi qua: khoá đã biết đúng hoa/thường, `ok` (nếu có) là `True`, `error` (nếu có) rỗng;
+      · có ít nhất một trong `id`/`notebook_id`, và MỌI khoá id có mặt là chuỗi BẰNG ĐÚNG id đang probe;
+      · có ít nhất một trong `title`/`name`, và MỌI khoá ấy có mặt là chuỗi khác rỗng sau strip.
+    Mọi dạng khác — kể cả kiểu lạ, hai id mâu thuẫn, mảng nhiều phần tử dù đều đúng — KHÔNG dương. Trả MÃ CỐ ĐỊNH."""
+    text = r.get("stdout") if isinstance(r, dict) else None
+    if not isinstance(text, str) or not text.strip():
+        return False, "CANARY_BODY_ABSENT"
+    try:
+        body = _nlm_canary_json_strict(text)
+    except (ValueError, TypeError, RecursionError):
+        return False, "CANARY_BODY_NOT_JSON"
+    if isinstance(body, list):
+        if len(body) != 1:
+            return False, "CANARY_BODY_AMBIGUOUS"
+        body = body[0]
+    if not _nlm_canary_level_ok(body):
+        return False, "CANARY_BODY_AMBIGUOUS"
+    if not ({"id", "notebook_id"} & set(body)) and "data" in body:
+        body = body["data"]                           # cùng phép bóc `data` như wrapper PowerShell, MỘT lần
+        if not _nlm_canary_level_ok(body):
+            return False, "CANARY_BODY_AMBIGUOUS"
+    ids = [body[k] for k in ("id", "notebook_id") if k in body]
+    if not ids or not all(isinstance(v, str) and v == notebook_id for v in ids):
+        return False, "CANARY_ID_MISMATCH"
+    titles = [body[k] for k in ("title", "name") if k in body]
+    if not titles or not all(isinstance(v, str) and v.strip() for v in titles):
+        return False, "CANARY_BODY_INCOMPLETE"
     return True, "CANARY_BODY_OK"
+
+
+def _nlm_canary_raw_get(nc, notebook_id: str, timeout: int) -> dict:
+    """WP714: gọi `nlm notebook get <id> -j` qua `nlm_cli._run` để GIỮ STDOUT THÔ cho `_nlm_canary_body_ok`
+    (`notebook_get` làm mất phần tử thứ hai trở đi — tệp ấy ngoài write set nên chặn ở đây). Nhánh rc≠0 giữ ĐÚNG
+    phép gắn `auth_hint` của `nlm_cli._run_json` để vòng retry/EXPIRED của `_nlm_auth_alive` không đổi nghĩa."""
+    rc, out, err = nc._run(["notebook", "get", notebook_id, "-j"], timeout=timeout)
+    if rc != 0:
+        low = (str(err) + str(out)).lower()
+        auth = any(t in low for t in ("auth", "401", "login", "unauthor", "credential"))
+        return {"ok": False, "rc": rc, "error": f"nlm rc={rc}: {(err or out)[:300]}",
+                "auth_hint": getattr(nc, "AUTH_FIX_HINT", "auth") if auth else None}
+    return {"ok": True, "stdout": out}
+
+
+# WP714 (lớp P1 `stage-error-output-leaks-credential`): mã CỐ ĐỊNH duy nhất được in ra từ cổng stage. Thông điệp
+# của `_nlm_auth_alive` mang stderr/stdout THÔ của tiến trình con (có thể chứa cookie) — không bao giờ in nó.
+_NLM_PROBE_CODES = ("NLM_CLI_IMPORT_FAIL", "NO_BINARY", "NO_NOTEBOOK", "AUTH_EXPIRED", "PROBE_EXC",
+                    "CANARY_BODY_ABSENT", "CANARY_BODY_NOT_JSON", "CANARY_BODY_AMBIGUOUS", "CANARY_ID_MISMATCH",
+                    "CANARY_BODY_INCOMPLETE")
+
+
+def _nlm_probe_code(alive, msg) -> str:
+    """(alive, msg) của `_nlm_auth_alive` → MỘT mã trong tập cố định. Chỉ so TIỀN TỐ/khung do mã ta tự viết;
+    văn bản con có giả mã nào thì kết quả vẫn là một chuỗi cố định, không phải văn bản con."""
+    if alive is True:
+        return "LIVE_OK"
+    s = msg if isinstance(msg, str) else ""
+    for code in _NLM_PROBE_CODES:
+        if s.startswith(code) or s.startswith(f"PROBE_INCONCLUSIVE ({code})"):
+            return code
+    if s.startswith("PROBE_INCONCLUSIVE (transient"):
+        return "PROBE_TRANSIENT"
+    return "PROBE_INCONCLUSIVE"
+
+
+def _safe_exc(exc) -> str:
+    """WP714: lỗi chỉ được in bằng TÊN LỚP (không `str(e)` — thông điệp có thể mang đường dẫn/token/thân HTTP)."""
+    name = type(exc).__name__
+    return name if re.fullmatch(r"[A-Za-z_][A-Za-z0-9_]{0,63}", name or "") else "Exception"
 
 
 def _nlm_auth_alive(notebook_id: str, timeout: int = 30,
@@ -164,7 +255,9 @@ def _nlm_auth_alive(notebook_id: str, timeout: int = 30,
     r = {}
     for _att in range(3):
         try:
-            r = nc.notebook_get(notebook_id, timeout=timeout)
+            # WP714: cổng stage đọc STDOUT THÔ (`notebook_get` vứt phần tử thứ 2+ của mảng); doctor giữ đường cũ.
+            r = (_nlm_canary_raw_get(nc, notebook_id, timeout) if require_notebook_body
+                 else nc.notebook_get(notebook_id, timeout=timeout))
         except Exception as e:  # noqa: BLE001
             r = {"ok": False, "error": f"PROBE_EXC: {type(e).__name__}: {str(e)[:120]}"}
         if r.get("ok"):
@@ -172,6 +265,7 @@ def _nlm_auth_alive(notebook_id: str, timeout: int = 30,
                 _body_ok, _body_msg = _nlm_canary_body_ok(r, notebook_id)
                 if not _body_ok:
                     return None, f"PROBE_INCONCLUSIVE ({_body_msg})"
+                return True, "LIVE OK (canary body)"
             return True, f"LIVE OK (base notebook {int(r.get('source_count') or 0)} nguồn)"
         if _att < 2:
             _errl = str(r.get("error") or "").lower()
@@ -665,7 +759,22 @@ def _nlm_cookie_age_note(age):
             "ở Code `nlm login` → `tl nlm-auth-stage` (hoặc `tl secrets-set --nlm`).")
 
 
-def _nlm_files_after_live_canary(tag: str):
+def _nlm_canary_notebook(entry_notebook: str | None) -> str:
+    """WP714 (lớp P2 `trusted-notebook-overwritten-by-stage-config`): notebook mà cổng canary dò, theo thứ tự tin cậy:
+      1. `TL_CANARY_NOTEBOOK_ID` — ghim TƯỜNG MINH (wrapper PS đặt). `load_creds`/overlay profile KHÔNG BAO GIỜ ghi
+         khoá này (bảng ánh xạ profile chỉ có `TL_NOTEBOOK_ID`…), nên nó sống qua mọi lần nạp credential — kể cả lần
+         `tl.main` nạp TRƯỚC khi vào `secrets-set`/`secrets-stage` (hai lệnh không thuộc `_CREDS_LAZY_CMDS`).
+      2. `TL_NOTEBOOK_ID` đo ở LỐI VÀO lệnh, TRƯỚC `load_creds` của chính lệnh (đo PR #714: token chỉ có trong config
+         ⇒ `load_creds` áp `notebookId` của profile và ghi đè ID wrapper đã truyền ⇒ canary dò notebook KHÁC, rc0).
+      3. `TL_NOTEBOOK_ID` hiện tại — tức `notebookId` của profile mà `load_creds` vừa áp (hành vi trước WP714 khi
+         không ai ghim).
+      4. notebook nền `NLM_BASE_NOTEBOOK`."""
+    pin = (os.environ.get("TL_CANARY_NOTEBOOK_ID") or "").strip()
+    return (pin or (entry_notebook or "").strip() or (os.environ.get("TL_NOTEBOOK_ID") or "").strip()
+            or NLM_BASE_NOTEBOOK)
+
+
+def _nlm_files_after_live_canary(tag: str, notebook_id: str | None = None):
     """WP710 r4/g3 — CỔNG DUY NHẤT cho MỌI đường đưa credential NLM lên Drive (`nlm-auth-stage`,
     `secrets-set --nlm` [bundle + nlm_cred.enc public], `secrets-stage` [bundle có nlm_auth]).
     Cross-review PR #713 lớp `stage-nlm-ngoai-nlm-auth-stage-khong-qua-canary` đo ở 52f32db: canary CHẾT
@@ -673,29 +782,63 @@ def _nlm_files_after_live_canary(tag: str):
     hướng dẫn đặt lịch hằng ngày. Cổng ở TỪNG lệnh là danh sách sẽ thiếu; nên đây là đường DUY NHẤT lấy
     được bytes credential để stage: canary dương (`is True`, thân đúng notebook) rồi MỚI đọc jar
     (lớp P3 `ban-chup-credential-doc-truoc-canary`: blob = trạng thái SAU khi canary xác nhận).
-    Không có cờ nào bỏ qua được (kể cả `--force`). Trả (files|None, rc, msg): rc 4 = canary không dương,
-    rc 3 = canary dương nhưng không còn jar để gói."""
-    _nb = os.environ.get("TL_NOTEBOOK_ID") or NLM_BASE_NOTEBOOK
+    Không có cờ nào bỏ qua được (kể cả `--force`). Trả (files|None, rc, code): rc 4 = canary không dương,
+    rc 3 = canary dương nhưng không còn jar để gói. WP714: chỉ in MÃ CỐ ĐỊNH (`_nlm_probe_code`), không bao giờ
+    in thông điệp của probe (mang stderr thô của `nlm`). `notebook_id` = giá trị đã ghim ở lối vào lệnh."""
+    _nb = _nlm_canary_notebook(notebook_id)
     try:
         _alive, _amsg = _nlm_auth_alive(_nb, require_notebook_body=True)
     except Exception as exc:  # noqa: BLE001
-        _alive, _amsg = None, f"PROBE_EXC: {type(exc).__name__}"
+        _alive, _amsg = None, f"PROBE_EXC: {_safe_exc(exc)}"
+    _code = _nlm_probe_code(_alive, _amsg)
     if _alive is not True:
-        print(f"[{tag}] ✗ TỪ CHỐI STAGE credential NLM: canary chưa xác nhận sống ({_amsg}).", file=sys.stderr)
+        print(f"[{tag}] ✗ TỪ CHỐI STAGE credential NLM: canary chưa xác nhận sống ({_code}).", file=sys.stderr)
         print("  → Stage cookie chết = Cowork/Chat nhận cookie chết (kẹt vòng lặp). Làm tươi ở máy có hồ sơ "
               "trình duyệt gốc rồi chạy lại; không có cờ nào ép stage.", file=sys.stderr)
-        return None, 4, _amsg
-    print(f"[{tag}] ✓ verify LIVE trước stage: {_amsg}")
+        return None, 4, _code
+    print(f"[{tag}] ✓ verify LIVE trước stage: {_code}")
     files = _nlm_auth_files()
     if not files:
         print(f"[{tag}] ✗ canary sống nhưng không đọc được jar nlm ở máy này.", file=sys.stderr)
         return None, 3, "NO_JAR_AFTER_CANARY"
-    return files, 0, _amsg
+    return files, 0, _code
+
+
+def _nlm_bundle_guard(tag: str, bundle: dict, confirmed) -> int:
+    """WP714 (lớp P1 `stage-nlm-ngoai-nlm-auth-stage-khong-qua-canary`, phần CÒN HỞ ở PR #714): bất biến đặt ở
+    PAYLOAD, ngay trước sink bundle — `nlm_auth` chỉ được rời máy nếu nó LÀ ĐÚNG đối tượng mà cổng canary vừa trả
+    trong lượt này (so `is`, không so nội dung). Các nguồn khác của `nlm_auth` — bản đang có trên Drive mà
+    `secrets-set` tải về rồi ghi lại, bản nằm sẵn trong config mà `secrets-stage` gói nguyên — đều chưa qua canary
+    nên bị chặn (rc 4), không âm thầm gửi lại. Trả 0 khi được phép."""
+    if "nlm_auth" in bundle and (confirmed is None or bundle.get("nlm_auth") is not confirmed):
+        print(f"[{tag}] ✗ TỪ CHỐI: bundle mang nlm_auth KHÔNG đến từ jar vừa qua canary ở lượt này "
+              "(bản tải từ Drive hoặc nằm sẵn trong config) — không gửi lại credential chưa xác nhận.", file=sys.stderr)
+        print("  → `--nlm` (secrets-set) để thay bằng jar tươi đã qua canary; `--no-nlm` (secrets-stage) để bỏ hẳn "
+              "nlm_auth khỏi bundle.", file=sys.stderr)
+        return 4
+    return 0
+
+
+def _nlm_contained(tag: str, body, a) -> int:
+    """WP714 (lớp P1 `stage-error-output-leaks-credential`): ranh giới lỗi của ba lệnh stage credential. Ngoại lệ lan
+    ra `tl.main` sẽ in traceback kèm thông điệp (đo PR #714: lỗi upload mang sentinel ⇒ leaked=true ở cả ba lệnh).
+    Ở đây chỉ in TÊN LỚP; rc 5 = dừng giữa chừng — KHÔNG bảo đảm chưa upload gì (lỗi có thể đến sau sink)."""
+    try:
+        return body(a)
+    except Exception as exc:  # noqa: BLE001
+        print(f"[{tag}] ✗ dừng vì lỗi {_safe_exc(exc)} — không in chi tiết (có thể mang credential). Kiểm Drive "
+              "trước khi coi là chưa upload gì.", file=sys.stderr)
+        return 5
 
 
 def cmd_secrets_stage(a) -> int:
     """[CODE] Gom {webappUrl, token GAS, gws_cred, nlm_auth} → MÃ HOÁ (TL_MASTER_KEY) → upload Drive (tl_secrets.enc).
     In fileId để baked vào SECRETS_FILEID. Cred/token chỉ ở RAM, KHÔNG plaintext ra Drive/zip."""
+    _entry_nb = os.environ.get("TL_NOTEBOOK_ID")      # WP714: ghim TRƯỚC load_creds của lệnh
+    return _nlm_contained("secrets-stage", lambda _a: _secrets_stage_body(_a, _entry_nb), a)
+
+
+def _secrets_stage_body(a, entry_notebook) -> int:
     master = _master_key()
     if not master:
         print("[secrets-stage] ✗ thiếu TL_MASTER_KEY — đặt: export TL_MASTER_KEY='<passphrase mạnh>'", file=sys.stderr)
@@ -721,20 +864,31 @@ def cmd_secrets_stage(a) -> int:
             bundle["gws_cred"] = cred.decode("utf-8")
         else:
             print("[secrets-stage] ⚠ bỏ qua gws_cred (gws chưa cài/auth ở máy này).", file=sys.stderr)
-    if not getattr(a, "no_nlm", False):
+    nlm_confirmed = None
+    if getattr(a, "no_nlm", False):
+        # WP714: `--no-nlm` phải BỎ THẬT — config gói nguyên có thể mang sẵn `nlm_auth` (đo PR #714: --no-nlm vẫn
+        # upload nlm_auth của config, 0 canary).
+        if bundle.pop("nlm_auth", None) is not None:
+            print("[secrets-stage] --no-nlm: đã bỏ nlm_auth có sẵn trong config khỏi bundle.", file=sys.stderr)
+    else:
         _refresh_nlm_auth()                           # ép nlm tái sinh cookie từ browser profile → gói bản mới nhất
-        if _nlm_auth_files():                          # chỉ hỏi CÓ jar không; bytes để gói đọc SAU canary
-            # WP710 r4/g3: bundle này GHI ĐÈ SECRETS_FILEID — gói nlm_auth chết (hoặc gói thiếu nó) đều làm hỏng
-            # bản đang có trên Drive ⇒ canary không dương thì TỪ CHỐI CẢ LỆNH, không upload gì (`--no-nlm` để bỏ).
-            nlm, _rc_gate, _ = _nlm_files_after_live_canary("secrets-stage")
-            if nlm is None:
-                return _rc_gate
-            bundle["nlm_auth"] = nlm
-            age = _nlm_auth_age_days(nlm)
-            agestr = f", cookie ~{age:.0f} ngày tuổi" if age is not None else ""
-            print(f"[secrets-stage] ✓ gói nlm_auth ({len(nlm)} file{agestr}) — Cowork khỏi `nlm login`.")
-        else:
-            print("[secrets-stage] ⚠ bỏ qua nlm_auth (chưa `nlm login` ở máy này).", file=sys.stderr)
+        if not _nlm_auth_files():                      # chỉ hỏi CÓ jar không; bytes để gói đọc SAU canary
+            # WP714: bundle GHI ĐÈ SECRETS_FILEID — gói thiếu NLM (hoặc gói nlm_auth cũ của config) mà rc0 là âm thầm
+            # xoá/đẩy lại credential trên Drive (đo PR #714). Thiếu jar ⇒ DỪNG; chủ ý bỏ NLM thì `--no-nlm`.
+            print("[secrets-stage] ✗ chưa có jar nlm ở máy này — bundle sẽ GHI ĐÈ bản trên Drive nên KHÔNG gói "
+                  "thiếu/cũ: `nlm login` rồi chạy lại, hoặc `--no-nlm` nếu chủ ý gói không có NLM.", file=sys.stderr)
+            return 3
+        # WP710 r4/g3: canary không dương thì TỪ CHỐI CẢ LỆNH, không upload gì.
+        nlm, _rc_gate, _ = _nlm_files_after_live_canary("secrets-stage", entry_notebook)
+        if nlm is None:
+            return _rc_gate
+        bundle["nlm_auth"] = nlm_confirmed = nlm
+        age = _nlm_auth_age_days(nlm)
+        agestr = f", cookie ~{age:.0f} ngày tuổi" if age is not None else ""
+        print(f"[secrets-stage] ✓ gói nlm_auth ({len(nlm)} file{agestr}) — Cowork khỏi `nlm login`.")
+    _rc_guard = _nlm_bundle_guard("secrets-stage", bundle, nlm_confirmed)
+    if _rc_guard:
+        return _rc_guard
     blob = _imp("gws_cred_store").encrypt(json.dumps(bundle, ensure_ascii=False).encode("utf-8"), master)
     fid, _ = _secrets_upload(blob, getattr(a, "folder", None) or HOPNAP_FOLDER_ID,
                              getattr(a, "secrets_id", None) or (SECRETS_FILEID or None))
@@ -747,6 +901,11 @@ def cmd_secrets_stage(a) -> int:
 def cmd_secrets_set(a) -> int:
     """[CODE] Xoay vòng/đổi secret trong bundle: --gas-token <t> / --webapp <url> / --gws (re-export).
     Tải bundle hiện có → giải mã → cập nhật trường → mã hoá lại → ghi đè TẠI CHỖ (fileId giữ nguyên)."""
+    _entry_nb = os.environ.get("TL_NOTEBOOK_ID")      # WP714: ghim TRƯỚC load_creds của lệnh
+    return _nlm_contained("secrets-set", lambda _a: _secrets_set_body(_a, _entry_nb), a)
+
+
+def _secrets_set_body(a, entry_notebook) -> int:
     master = _master_key()
     if not master:
         print("[secrets-set] ✗ thiếu TL_MASTER_KEY.", file=sys.stderr)
@@ -764,9 +923,10 @@ def cmd_secrets_set(a) -> int:
     try:
         bundle = json.loads(store.decrypt(blob, master).decode("utf-8"))
     except Exception as e:  # noqa: BLE001
-        print(f"[secrets-set] ✗ giải mã lỗi: {e}", file=sys.stderr)
+        print(f"[secrets-set] ✗ giải mã lỗi: {_safe_exc(e)}", file=sys.stderr)   # WP714: chỉ tên lớp
         return 3
     changed = []
+    nlm_confirmed = None
     if getattr(a, "gas_token", None):
         bundle["token"] = a.gas_token; changed.append("token")
     if getattr(a, "webapp", None):
@@ -784,16 +944,22 @@ def cmd_secrets_set(a) -> int:
             return 3
         # WP710 r4/g3: đường này đẩy CẢ bundle LẪN nlm_cred.enc public — cùng cổng canary như nlm-auth-stage,
         # chạy TRƯỚC mọi upload; không dương ⇒ từ chối cả lệnh (kể cả các trường khác đổi cùng lượt).
-        nlm, _rc_gate, _ = _nlm_files_after_live_canary("secrets-set")
+        nlm, _rc_gate, _ = _nlm_files_after_live_canary("secrets-set", entry_notebook)
         if nlm is None:
             return _rc_gate
-        bundle["nlm_auth"] = nlm; changed.append("nlm_auth")
+        bundle["nlm_auth"] = nlm_confirmed = nlm; changed.append("nlm_auth")
         age = _nlm_auth_age_days(nlm)
         if age is not None:
             print(f"[secrets-set] nlm cookie ~{age:.0f} ngày tuổi." + _nlm_cookie_age_note(age))
     if not changed:
         print("[secrets-set] ⚠ không có trường nào để đổi (--gas-token/--webapp/--gws/--nlm).", file=sys.stderr)
         return 1
+    # WP714: bundle tải từ Drive có `nlm_auth` mà lượt này KHÔNG `--nlm` ⇒ ghi lại = gửi lại credential chưa qua
+    # canary (đo PR #714: đổi --webapp ⇒ rc0, 0 canary, bundle mang nlm_auth lên lại). Chọn TỪ CHỐI (không tự xoá,
+    # không tự thay): canary chỉ chứng minh jar CỤC BỘ, không chứng minh được bytes trên Drive.
+    _rc_guard = _nlm_bundle_guard("secrets-set", bundle, nlm_confirmed)
+    if _rc_guard:
+        return _rc_guard
     new = store.encrypt(json.dumps(bundle, ensure_ascii=False).encode("utf-8"), master)
     _secrets_upload(new, getattr(a, "folder", None) or HOPNAP_FOLDER_ID, fid)
     print(f"[secrets-set] ✓ đã đổi {changed} → ghi đè bundle id={fid} ({len(new)}B).")
@@ -821,7 +987,7 @@ def cmd_secrets_set(a) -> int:
                                       _folder, os.environ.get("TL_NLM_CRED_FILEID") or NLM_CRED_FILEID, False)
                     _pub.append(f"nlm_cred.enc→{os.environ.get('TL_NLM_CRED_FILEID') or NLM_CRED_FILEID}")
             except Exception as e:  # noqa: BLE001
-                print(f"[secrets-set] ⚠ đồng bộ public .enc lỗi ({e}) — bundle ĐÃ tươi; vá đường public bằng "
+                print(f"[secrets-set] ⚠ đồng bộ public .enc lỗi ({_safe_exc(e)}) — bundle ĐÃ tươi; vá đường public bằng "
                       "`tl gws-auth-stage` / `tl nlm-auth-stage`.", file=sys.stderr)
         if _pub:
             print(f"[secrets-set] ✓ đồng bộ PUBLIC tại chỗ: {', '.join(_pub)} — Chat/Cowork đường public cũng tươi.")
@@ -1295,15 +1461,15 @@ def _stage_enc_upload(name: str, blob: bytes, folder: str, fid_inplace: str | No
             except Exception as e:  # noqa: BLE001  gws chết (vd rc=5 HTTP request failed) → FALLBACK gcloud (OAuth production, GIỮ fileId, verify md5)
                 gtok, gerr = _gcloud_access_token()
                 if not gtok:
+                    # WP714 (lớp `stage-error-output-leaks-credential`): KHÔNG nhúng `{e}`/`gerr` — văn bản lỗi của
+                    # gws/gcloud do đầu kia quyết định; chỉ tên lớp + mã cố định đi ra ngoài.
                     raise RuntimeError(
-                        f"stage-enc: gws update_content lỗi ({type(e).__name__}: {e}) và gcloud fallback KHÔNG sẵn ({gerr})"
-                    ) from e
-                print(f"[stage-enc] ⚠ gws update lỗi ({type(e).__name__}: {e}) → [FALLBACK→gcloud] giữ fileId {fid_inplace}…", file=sys.stderr)
+                        f"STAGE_ENC_GWS_FAILED ({_safe_exc(e)}); GCLOUD_FALLBACK_UNAVAILABLE"
+                    ) from None
+                print(f"[stage-enc] ⚠ gws update lỗi ({_safe_exc(e)}) → [FALLBACK→gcloud] giữ fileId {fid_inplace}…", file=sys.stderr)
                 r = _gcloud_drive_update(gtok, fid_inplace, fp, "application/octet-stream")
                 if not r.get("ok"):
-                    raise RuntimeError(
-                        f"stage-enc: gcloud fallback lỗi: {r.get('error')}" + (f" — {r.get('fix')}" if r.get('fix') else "")
-                    ) from e
+                    raise RuntimeError("STAGE_ENC_GCLOUD_FAILED") from None
                 print(f"[stage-enc] ✓ [gcloud] cập nhật {fid_inplace} (md5 verified).", file=sys.stderr)
             return fid_inplace, True
         r = g.upload(name, fp, parents=[folder], mime="application/octet-stream")
@@ -1480,6 +1646,11 @@ def _nlm_auth_load(token: str, fid: str, force: bool = False):
 def cmd_nlm_auth_stage(a) -> int:
     """[CHẠY Ở CODE, sau `nlm login`] Gói cookie nlm → MÃ HOÁ (khoá=webapp token) → upload Drive. In fileId để baked.
     Cho Cowork nạp nlm HEADLESS bằng `nlm-auth-load` KHÔNG cần master key (mirror gws-auth-stage)."""
+    _entry_nb = os.environ.get("TL_NOTEBOOK_ID")      # WP714: ghim TRƯỚC load_creds (token chỉ ở config)
+    return _nlm_contained("nlm-auth-stage", lambda _a: _nlm_auth_stage_body(_a, _entry_nb), a)
+
+
+def _nlm_auth_stage_body(a, entry_notebook) -> int:
     store = _imp("gws_cred_store")
     token = os.environ.get("TL_TOKEN") or ""
     if not token:
@@ -1501,7 +1672,7 @@ def cmd_nlm_auth_stage(a) -> int:
     # lặp stage-lại-vô-ích). VERIFY LIVE bằng canary notebook_get (KHÔNG tin `nlm login --check` — false-red).
     # WP710: lệnh tự giữ cổng (script shell cũ cũng đi qua đây); --force KHÔNG bỏ qua được; cổng dùng chung
     # với secrets-set --nlm / secrets-stage qua `_nlm_files_after_live_canary`.
-    nlm, _rc_gate, _ = _nlm_files_after_live_canary("nlm-auth-stage")
+    nlm, _rc_gate, _ = _nlm_files_after_live_canary("nlm-auth-stage", entry_notebook)
     if nlm is None:
         return _rc_gate
     blob = store.encrypt(json.dumps(nlm, ensure_ascii=False).encode("utf-8"), token)   # cookie chỉ ở RAM

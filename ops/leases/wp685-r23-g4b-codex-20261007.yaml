@@ -1,0 +1,63 @@
+schema_version: 2
+event: executor_lease_granted
+packet_issue: 685
+packet_id: wp685
+mission_issue: 686
+mission_revision: 7
+plan_hash: 6d49b8ec8848c8f8b2fe0690d1d4bcae75bc67486ece1dbb5edc39fb77626d4a
+revision: 23
+generation: 4
+lease_id: wp685-r23-g4b-codex-20261007
+role: executor
+provider: codex
+executor: codex
+model: gpt-6-astra
+model_family: openai
+execution_surface: codex_desktop
+transport: machine/local
+reviewer: codex
+assurance_target: human_audited
+access: read-write
+review_class: sensitive
+effective_review_class: sensitive
+spec_path: ops/specs/launcher-con-song-esrch-r23.md
+spec_sha256_required: 96387f833a0f102742b5f9c86948f2b3f0597d3032dd1817ce732557ae2af939
+spec_hash: 96387f833a0f102742b5f9c86948f2b3f0597d3032dd1817ce732557ae2af939
+write_set:
+- .claude/dev/launcher.py
+- .claude/dev/launcher_test.py
+effective_write_set:
+- .claude/dev/launcher.py
+- .claude/dev/launcher_test.py
+write_set_hash: ae3e61d02ad972d642942871d4d83cb48b3d4ba87244fdfe1cc18333bc6db053
+change_policy_sha: null
+branch: agent/wp685-r23-g4-codex
+branch_ownership: exclusive
+target_branch_neu_land: master
+base_sha: ab457c651eb4428705f0492163080b661c858b72
+start_from_sha: ab457c651eb4428705f0492163080b661c858b72
+reviewed_sha_required: ab457c651eb4428705f0492163080b661c858b72
+prompt_path: ops/prompts/wp685-r23-g4b-codex-20261007.md
+prompt_sha256_required: 243c51ef668a38a47493af1b11fb92ef5752a42f9aa854518d85edcba13b1ded
+granted_by: ducthangho
+granted_on_instruction: https://github.com/ducthangho/tra-luat/issues/686
+granted_on_instruction_note: hieu luc khi chu kho dang comment cap quyen tren #686 neo lease_id + plan_hash r7 + spec sha256 nay (nhu comment 6039942131 cho g4)
+grant_context_url: https://github.com/ducthangho/tra-luat/issues/686#issuecomment-6043646850
+recorded_by: claude-dispatcher-session
+recorder_is_executor: false
+leased_at_utc: '2026-10-07T23:00:00Z'
+lease_expires_at_utc: '2026-10-08T23:00:00Z'
+run_minutes: 90
+heartbeat_minutes: 30
+attempts_used: 0
+attempts_limit: null
+review_rounds_limit: 10
+requires_live: false
+ci_policy: no_ci_or_full_ci_until_merge_readiness
+push_policy: one_code_push_after_zero_p1_p2_p3
+thay_the_cho: wp685-r23-g4-codex-20261007
+thay_the_cho_note: g4 neo Mission revision 6 (plan hash b01ef7da...); MCR-686-07 cai revision 7 nen g4 bi anh huong (PROTOCOL §3 thu hoi moi lease bi anh huong); g4 con han toi 2026-10-08T14:20:35Z, chua attempt nao bat dau (khong co event executor_attempt_started, khong co nhanh agent/wp685*) => bia mo hai chieu ghi trong commit nay
+attempts_limit_basis: owner decision MCR-686-06 (#686 comment 6039700009) - generation 4 has no attempt cap; other envelope caps unchanged
+same_failure_limit: 10
+same_failure_limit_basis: owner decision MCR-686-07 (#686 comment 6043646850) - generation 4 only, counter starts at 0; g2/g3 same-failure history is data only; envelope same_failure_limit 2 still binds every other packet and later generations
+mission_event_url: https://github.com/ducthangho/tra-luat/issues/686#issuecomment-6048383107

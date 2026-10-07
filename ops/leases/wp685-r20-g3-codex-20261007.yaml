@@ -56,3 +56,4 @@ requires_live: false
 ci_policy: no_ci_or_full_ci_until_merge_readiness
 push_policy: one_code_push_after_zero_p1_p2_p3
 thay_the_cho: wp685-r19-g2b-codex-20261007
+da_bi_thay_the: wp685-r23-g4-codex-20261007

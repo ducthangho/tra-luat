@@ -33,7 +33,9 @@ recorder_is_dispatcher: false
 recorder_ghi_chu: 'Subagent cua phien dieu phoi session_01CSM7GNazhN6uGJb4v1TqBT soan; KHONG push, KHONG dang.'
 
 leased_at_utc: '2026-10-08T05:45:00Z'
-lease_expires_at_utc: '2026-10-09T05:45:00Z'
+lease_expires_at_utc: '2026-10-08T19:00:00Z'
+han_ghi_chu: >-
+  Goc 2026-10-09T05:45:00Z. RUT NGAN ve 2026-10-08T19:00:00Z — xem thu_hoi_bang_rut_han.
 
 role: executor
 provider: anthropic_claude
@@ -146,3 +148,26 @@ chua_do_duoc:
   - 'Dieu kien (2) khong luot review nao dang chay: theo xac nhan cua phien dieu phoi, phien soan lease KHONG DO DUOC.'
   - 'Effort thuc te cua phien executor.'
   - 'Cua so giua do va cap khong nguyen tu (spec r17 muc Gioi han).'
+lease_sua_lan_cuoi: '2026-10-08T15:29Z'
+lease_sua_ghi_chu: >-
+  Lan 1: rut ngan lease_expires_at_utc (thu_hoi_bang_rut_han). Khong doi write set, spec, branch.
+thu_hoi_bang_rut_han:
+  han_goc_utc: '2026-10-09T05:45:00Z'
+  han_moi_utc: '2026-10-08T19:00:00Z'
+  chi_thi: >-
+    Chu kho trong phien Claude Code session_01CSM7GNazhN6uGJb4v1TqBT giao ghi so land #678 / PR #718 va thu hoi lease
+    g1 theo tien le #705 g3 (c5881a0) (chi thi giao viec cho subagent bookkeeping; loi_khai_co_neo, khong phai comment
+    GitHub). land_obligations cua chinh lease nay: "thu hoi lease sau land".
+  ly_do: >-
+    Packet #678 da MERGE: PR #718 merge a671920 (2026-10-08 ~15:26Z), cha thu hai 57bb4b3 = head duoc human_audited
+    (pull/718#issuecomment-6063240400). Lease khong tu chet khi land (CLAUDE.md).
+  vi_sao_khong_dung_so: >-
+    Theo tien le #651/#660/#661/#668/#677/#687/#674/#705: so ops/thu-hoi/ chua kich hoat; rut han dung co che DA CAI. Han
+    moi dat SAU luc push du kien de luot dang lease (neu chay) con thay lease song, tranh rc=8 che rc=9 (bai hoc 20-09).
+    Neu nhanh chua push truoc ~18:50Z thi phai doi han_moi_utc ve sau luc push TRUOC khi push. Khong bia mo: khong co
+    lease ke nhiem (bia mo chi dung khi co lease moi thay_the_cho).
+  nguoi_rut: 'subagent bookkeeping cua phien session_01CSM7GNazhN6uGJb4v1TqBT (cung phien dieu phoi executor g1 va review)'
+  gioi_han: >-
+    Commit rut han chi o CUC BO luc ghi (nhanh bk678-rut-han-g1, tien len tu origin/ops/wp678-r17-g1-lease ee55165); phien
+    chinh push no thanh ops/wp678-r17-g1-lease (fast-forward). Nghiem thu: ai-dang-giu cho ops/lease_publish.py va
+    ops/lease_publish_test.py khong con wp678-r17-g1-claude trong NGUOI_GIU sau 19:00Z — CHUA DO.

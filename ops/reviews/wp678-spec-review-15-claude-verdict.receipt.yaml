@@ -1,0 +1,105 @@
+# BIEN NHAN GIAO HANG — review LUOT 15 dac ta wp678 (Issue #678), CUNG HO (Claude Opus 5.5, subagent).
+# Doi tuong review: DAC TA ops/specs/lease-id-ep-kieu-yaml-r15.md tai b533621 tren nhanh spec claude/spec-wp678-r7 (khong phai ma).
+# GHI SO HAU KY trong bookkeeping land #678 / PR #718 boi subagent bookkeeping cua phien session_01CSM7GNazhN6uGJb4v1TqBT
+# (CUNG phien da dieu phoi luot review nay). Nhan: (a) DO tu kho/REST/tep luc ghi so 2026-10-08 · (b) THUAT LAI · KHONG_DO_DUOC.
+
+schema_version: 2
+receipt_id: wp678-spec-review-15-claude-93da81f8
+kind: review_delivery_receipt
+packet_id: wp678
+packet_slug: LEASE-ID-EP-KIEU-YAML
+packet_issue: 678
+mission_issue: 682
+revision_reviewed: 15
+spec_path: ops/specs/lease-id-ep-kieu-yaml-r15.md
+spec_sha256: 41791ab0f4f9e7bf6352c39c3a96f2173f9a3248782a899935fa491fc1833569
+spec_ghi_chu: >-
+  (a) sha256 cua `git show b533621:ops/specs/lease-id-ep-kieu-yaml-r15.md` = spec_sha256 dong 3 tep verdict = so trong
+  comment ban chieu. Dac ta r15 vao master cung PR bookkeeping nay (merge nhanh rut han lease bk678-rut-han-g1 =
+  ops/wp678-r17-g1-lease + 1 commit, merge commit 78b49f4 cuc bo luc ghi so).
+lease_id: khong-co-lease
+lease_ghi_chu: >-
+  Luot review DAC TA truoc khi packet duoc giao; wp678 chua co lease luc review (lease dau tien wp678-r17-g1-claude
+  cap 2026-10-08T05:45Z).
+luot: 15
+role: reviewer
+provider: claude
+executor_provider: claude
+executor_ghi_chu: '(a) commit r15 b533621 author ''Claude'' tren nhanh spec; phien/subagent soan cu the: KHONG_DO_DUOC luc ghi so (khong doc transcript).'
+cross_provider: false
+assurance: review_deferred
+assurance_ghi_chu: >-
+  Subagent review-opus-max trong phien dieu phoi, cung ho Claude voi phien soan r15; dong 4 tep verdict tu khai
+  subagent, model/effort la CAU HINH. Khong co bang chung phien doc lap. Tien le luot 7-11.
+verdict: changes_requested
+verdict_nguon: '(a) dong 1 tep `verdict: changes_requested`; tep co DUNG 1 dong bat dau bang `verdict:`'
+so_p0: 0
+so_p1: 0
+so_p2: 1
+so_p3: 0
+so_dem_theo: lop
+so_dem_nguon: '(a) dong 11 tep verdict (Ket luan); khop tieu de comment ban chieu (0 P1 · 1 P2 · 0 P3 theo lop)'
+verdict_path: ops/reviews/wp678-spec-review-15-claude-verdict.md
+verdict_sha256: 93da81f8e540e898a8684e017e3094dc75aea8df088deedd527d30fda8f70697
+verdict_bytes: 59697
+verdict_ban_goc: 'tep goc cr678-r15/goi/VERDICT.md trong scratchpad cua phien (cp, do lai sha256 tren blob 9e5da35)'
+hint_patch_sha256: 90e749bfae44f8c7ad7ccd6ba4a3eaba5a12f65a109bb777e3f431f503a60a92
+hint_patch_bytes: 13053
+hint_patch_ghi_chu: 'HINT.patch KHONG luu vao kho (tien le luot 7-12); chi neo bang bam. (a) bam do tren cr678-r15/goi/HINT.patch, khop bam khai trong comment.'
+reviewed_sha: b53362159766f51c1a03c5eac65efd94544d8ce9
+reviewed_sha_nguon: '(a) dong 2 tep verdict; `git cat-file -t` = commit; to tien cua HEAD nhanh bookkeeping qua merge 78b49f4'
+reviewed_sha_trang_thai: 'tren nhanh claude/spec-wp678-r7 va ops/wp678-r17-g1-lease (da day); vao master khi PR bookkeeping nay land bang merge commit'
+evidence_url: https://github.com/ducthangho/tra-luat/blob/9e5da35b0cb96d2d3f3ddcc01ac5fc434c7f8ed1/ops/reviews/wp678-spec-review-15-claude-verdict.md
+evidence_url_ghi_chu: >-
+  Neo BLOB ghim commit 9e5da35 cua nhanh bookkeeping claude/bookkeeping-678-land, commit CHI mang ban sao verdict;
+  bien nhan di o commit sau, nen mo neo la to tien cua HEAD nhanh. Luc ghi so commit ay CHUA day; link chi song sau
+  khi phien chinh push nhanh nguyen ven (khong rebase/squash).
+evidence_ban_chieu: https://github.com/ducthangho/tra-luat/issues/678#issuecomment-6049075233
+evidence_ban_chieu_created_at: '2026-10-07T23:41:23Z'
+evidence_ban_chieu_doi_chieu: >-
+  (a) Doc lai qua REST GET repos/ducthangho/tra-luat/issues/678/comments (gh api, 2026-10-08 ~15:30Z,
+  readback-comments-678-p1.json trong ops/land/pr718-wp678-provenance/): user ducthangho, app claude,
+  author_association OWNER, than 2594 byte, sha256 5780c44286611d5963bb547e18b8a4bce2c84e249f48ad2fbb9904287a905661.
+  verdict_sha256, spec_sha256, hint_patch_sha256 co mat NGUYEN 64 hex trong than. Comment la BAN TOM TAT, khong phai
+  nguyen van tep.
+
+model_reviewer_identity:
+  provider: anthropic_claude
+  surface: claude_code
+  transport: machine/local
+  che_do: 'subagent review-opus-max (Claude Opus 5.5) trong phien dieu phoi, khong qua launcher.py'
+  che_do_nguon: '(a) dong 4 tep verdict tu khai subagent do phien dieu phoi giao; tieu de comment ban chieu'
+  model_yeu_cau: claude-opus-5-5
+  effort_yeu_cau: max
+  model_tu_khai: '(a) dong 4 tep verdict: Claude Opus 5.5 (claude-opus-5-5), effort max — CAU HINH duoc giao'
+  model_da_chay: KHONG_DO_DUOC
+  KHONG_do_duoc: >-
+    Khong co session_run_id/run.json: luot la subagent trong phien, khong qua launcher.py. Model thuc chay, effort, thoi
+    luong, ma thoat va tinh doc lap cua reviewer so voi phien soan KHONG tai kiem duoc.
+
+github_submitter_identity:
+  actor: ducthangho
+  actor_nguon: '(a) user.login cua comment 6049075233 doc qua REST luc ghi so'
+  ghi_chu: >-
+    Comment do PHIEN AGENT dang bang credential chu kho (performed_via_github_app.slug claude); ADR-0040: khong cap tham
+    quyen, chi ghi AI VAN CHUYEN.
+
+anchor:
+  loai: canonical_ancestry
+  cuong_do: thap
+  mo_ta: >-
+    Blob verdict ghim o commit ban sao 9e5da35 cua nhanh claude/bookkeeping-678-land; to tien cua HEAD nhanh ay; CHUA la
+    to tien cua master luc ghi so (va CHUA day).
+  gioi_han: >-
+    Len trung_binh chi khi nhanh duoc push nguyen ven va PR bookkeeping land bang MERGE commit hoac fast-forward;
+    SQUASH/rebase pha quan he to tien.
+
+verdict_usage_caveats:
+  - id: SUBAGENT-CUNG-HO-REVIEW-DEFERRED
+    muc: P2
+    mo_ta: >-
+      Reviewer Claude Opus 5.5 chay bang SUBAGENT review-opus-max trong phien dieu phoi session_01CSM7GNazhN6uGJb4v1TqBT,
+      CUNG ho Claude voi phien soan r15; khong session_run_id, khong run.json, khong modelUsage. Muc review_deferred: dung
+      doc luot nay thanh cross_approved hay same_provider_approved.
+nguon_co_tham_quyen: >-
+  TEP CO BAM trong kho (verdict_path + verdict_sha256). Comment tren #678 chi la BAN CHIEU. Hai ban lech thi tin blob.

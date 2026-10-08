@@ -296,6 +296,59 @@ class Chan(Exception):
         self.thong_diep = thong_diep
 
 
+def _repr_an_toan(gia_tri, tran: int = 120) -> str:
+    """`repr` cho THÔNG ĐIỆP chẩn đoán — KHÔNG BAO GIỜ ném, luôn có trần (review thi hành wp678 lượt 1).
+
+    `repr()` thô của giá trị YAML hỏng ĐÃ ĐO sai hai cách: `int` vượt `sys.get_int_max_str_digits()` — YAML 1.1 dựng
+    được qua `0x…`, `0b…`, `0…` hay lục thập phân mà `safe_load` KHÔNG ném — làm `repr()` ném `ValueError`, nên cửa
+    "chỉ ném `Chan`" thành traceback rc=1; bí danh YAML lồng nhau nở theo cấp số nhân (tệp 591 byte ⇒ 2,79 triệu ký
+    tự stderr). `reprlib` cắt theo cấu trúc; 3.11/3.12 vẫn ném ở `int` lớn nên phải bọc `try`.
+    """
+    import reprlib
+    r = reprlib.Repr()
+    r.maxlevel, r.maxlist, r.maxtuple, r.maxdict, r.maxset, r.maxstring, r.maxother, r.maxlong = 2, 4, 4, 4, 4, 60, 60, 40
+    try:
+        hien = r.repr(gia_tri)
+    except Exception:  # noqa: BLE001 — đường chẩn đoán không được nổ
+        hien = f"<{type(gia_tri).__name__} không in được>"
+    return hien if len(hien) <= tran else hien[:tran] + "…"
+
+
+def _nhan_lease_id_sai(gia_tri) -> str:
+    """Nhãn chẩn đoán: `sai kiểu` (không phải `str`) khác `sai dạng` (`str` không khớp `LEASE_ID`), kèm repr có trần."""
+    return f"{'sai dạng' if isinstance(gia_tri, str) else 'sai kiểu'} {_repr_an_toan(gia_tri)}"
+
+
+def _lease_id_hop_le(gia_tri) -> str:
+    """wp678 Q1/Q2 — cửa DUY NHẤT biến `lease_id` thô thành DANH TÍNH.
+
+    Hợp lệ khi và chỉ khi giá trị là `str` NGAY SAU `yaml.safe_load` VÀ khớp `LEASE_ID`; mọi thứ
+    khác ⇒ `Chan(RC_NOI_DUNG)`. KHÔNG `str()` lên giá trị thô: YAML 1.1 ép `yes`/`on` thành `True`,
+    `0x1F`/`017`/`1_000` thành `int`, `1.50` thành `float`, `2026-09-29` thành `date`, nên ép về chuỗi
+    là gộp nhiều cách viết khác nhau vào CÙNG một danh tính (`yes` và `on` cùng thành ``True``) —
+    và danh tính ấy là thứ cổng đăng dùng để chống đăng trùng (bảng đo §1 đặc tả wp678). `int` cũng
+    bị từ chối (Q1). Cách viết YAML khác nhau mà CHO RA cùng một chuỗi (`'yes'`, `!!str yes`) là
+    cùng danh tính một cách CỐ Ý: danh tính là giá trị sau `safe_load`, không phải cú pháp.
+    """
+    if not isinstance(gia_tri, str) or not LEASE_ID.fullmatch(gia_tri):
+        raise Chan(RC_NOI_DUNG,
+                   f"lease_id phải là CHUỖI YAML chỉ chứa ASCII chữ/số/`.`/`_`/`-` (không ép kiểu); "
+                   f"được {type(gia_tri).__name__} {_repr_an_toan(gia_tri)}")
+    return gia_tri
+
+
+def _lease_id_quet(gia_tri) -> str | None:
+    """Bản KHÔNG ném của `_lease_id_hop_le` cho các đường QUÉT lease KHÁC (D5–D8, Q3).
+
+    Sai kiểu ⇒ ``None``: KHÔNG khớp bất kỳ tên nào, và người gọi phải tự quyết fail-close (D7 in
+    `KHÔNG_XÁC_ĐỊNH`). Cùng một luật với `_lease_id_hop_le` — gọi thẳng nó, không chép điều kiện.
+    """
+    try:
+        return _lease_id_hop_le(gia_tri)
+    except Chan:
+        return None
+
+
 def _khop_tien_to(duong: str, tien_to: str) -> bool:
     """Khớp một tệp chính xác hoặc một prefix thư mục có dấu `/` cuối."""
     return duong.startswith(tien_to) if tien_to.endswith("/") else duong == tien_to
@@ -743,12 +796,13 @@ def _bia_mo_doi_xung(lease: dict, cac_lease: list[dict]) -> bool | None:
     if not isinstance(raw_moi, str) or not raw_moi.strip():
         return False
     lease_moi = raw_moi.strip()
-    lease_cu = str(lease.get("lease_id") or "").strip()
-    if not lease_cu:
+    # wp678 D5 (Q3): `lease_id` sai kiểu KHÔNG ép sang chuỗi để so — nó không khớp tên nào.
+    lease_cu = _lease_id_quet(lease.get("lease_id"))
+    if lease_cu is None:
         return False
     for muc in cac_lease:
         ban_moi = muc["lease"]
-        if str(ban_moi.get("lease_id") or "").strip() != lease_moi:
+        if _lease_id_quet(ban_moi.get("lease_id")) != lease_moi:
             continue
         thay_the_cho = _danh_sach_thay_the_cho(ban_moi.get("thay_the_cho"))
         if thay_the_cho is not None and lease_cu in thay_the_cho:
@@ -758,6 +812,8 @@ def _bia_mo_doi_xung(lease: dict, cac_lease: list[dict]) -> bool | None:
 
 def _kiem_bia_mo(lease: dict, tep, goc=None) -> None:
     """Lease mới chỉ được thay mọi X sau khi từng X trỏ ngược đúng lease mới."""
+    # wp678 D6: chốt RIÊNG cho lease đang kiểm — không dựa vào việc `kiem()` đã chạy D1 trước.
+    lease_moi = _lease_id_hop_le(lease.get("lease_id"))
     thay_the_cho = _danh_sach_thay_the_cho(lease.get("thay_the_cho"))
     if thay_the_cho is None:
         raise Chan(RC_NOI_DUNG,
@@ -765,10 +821,10 @@ def _kiem_bia_mo(lease: dict, tep, goc=None) -> None:
     if not thay_the_cho:
         return
     root = _goc_kho(Path(tep), goc)
-    lease_moi = str(lease.get("lease_id") or "").strip()
     cac_lease = _quet_lease_toan_kho(root, doi_chieu_ref=False)
+    # Lease cũ được QUÉT mang `lease_id` sai kiểu thì không khớp tên nào (Q3) ⇒ bia mộ trỏ tới nó không thoả.
     chua_danh_dau = [ten for ten in thay_the_cho if not any(
-        str(muc["lease"].get("lease_id") or "").strip() == ten
+        _lease_id_quet(muc["lease"].get("lease_id")) == ten
         and isinstance(muc["lease"].get("da_bi_thay_the"), str)
         and muc["lease"]["da_bi_thay_the"].strip() == lease_moi
         for muc in cac_lease)]
@@ -824,7 +880,9 @@ def _kiem_loai_so_hieu(repo: str, so: int) -> None:
 
 
 def _kiem_comment_da_co(repo: str, lease: dict) -> None:
-    so, lease_id = lease["packet_issue"], str(lease["lease_id"])
+    # wp678 D3: chốt RIÊNG, TRƯỚC `_doc_gh` — `str(True)` từng cho ``**Lease `True`**`` khớp dấu của
+    # một lease KHÁC (`yes` ↔ `on`) ⇒ rc=9, lease mới không bao giờ được đăng.
+    so, lease_id = lease["packet_issue"], _lease_id_hop_le(lease.get("lease_id"))
     cac_trang = _doc_gh("comment hiện có", "--paginate", "--slurp",
                         f"repos/{repo}/issues/{so}/comments")
     if not isinstance(cac_trang, list):
@@ -1018,9 +1076,7 @@ def kiem(lease: dict, tep=None, goc=None, bo_qua_han: bool = False) -> tuple:
     if isinstance(so, bool) or not isinstance(so, int) or so <= 0:
         raise Chan(RC_NOI_DUNG, f"packet_issue phải là số nguyên dương, được {so!r}")
 
-    lease_id = str(lease["lease_id"])
-    if not LEASE_ID.fullmatch(lease_id):
-        raise Chan(RC_NOI_DUNG, f"lease_id chỉ được chứa ASCII chữ/số/`.`/`_`/`-`; được {lease_id!r}")
+    _lease_id_hop_le(lease["lease_id"])   # wp678 D1: chuỗi thật, KHÔNG `str()` trước khi so (Q1)
 
     if tep is not None:
         _kiem_con_tro_treo(lease)
@@ -1081,6 +1137,14 @@ def _tien_kiem_mien_dang(lease) -> None:
     1 lần ở cả hai — mã thoát KHÔNG còn đổi. Răng CÒN LẠI của hàm là số lời gọi GitHub của
     phép dò: 0 (bản đúng) so 1 (bản gỡ). `t178` chốt đúng đại lượng ấy.
 
+    wp678 (D2, Q1/Q2) — tách bằng chứng LỊCH SỬ khỏi hành vi SAU D3. Trước wp678 dòng chốt
+    `lease_id` ở đây nhận `str|int` (lệch D1) và là chốt DUY NHẤT giữ `lease_id` sai kiểu khỏi
+    mạng; mọi số "0 so 1 lời gọi" của trục `lease_id` ở trên là phép đo thời ấy. Nay nó đọc qua
+    `_lease_id_hop_le` (cùng luật D1, `int` cũng bị chặn), và `_kiem_comment_da_co` (D3) có chốt
+    RIÊNG trước `_doc_gh`. Hệ quả ĐO 08-10-2026 trên ứng viên: gỡ riêng dòng ấy (đột biến `L`)
+    vẫn 0 lời gọi ở trục `lease_id` của `t178`, `t195`–`t197` (D3 đỡ) — ca đích của `L` là
+    `t205`, đo hàm này TRỰC TIẾP. (Trục `packet_issue` của hàm này KHÔNG được đo lại ở wp678.)
+
     `bool` bị loại tường minh vì `isinstance(True, int)` là `True` trong Python: một
     `packet_issue: true` lọt phép kiểm kiểu ngây thơ rồi thành `issues/True` trên URL.
     CA `bool` NAY ĐÃ ĐO — `t178` giữ nó bằng SỐ LỜI GỌI GitHub (`0`), không bằng mã thoát
@@ -1106,8 +1170,8 @@ def _tien_kiem_mien_dang(lease) -> None:
     SAI khi mắc hai. `t177` chỉ dựng từng lỗi riêng nên không bắt được. `t180` khoá ca hai
     lỗi đồng thời.
     """
-    if not isinstance(lease.get("lease_id"), (str, int)) or isinstance(lease.get("lease_id"), bool):
-        raise Chan(RC_NOI_DUNG, "tiền kiểm: thiếu `lease_id` hoặc sai kiểu")
+    # wp678 D2: cùng luật với D1 (bản trước nhận `str|int`, lệch D1); `int` cũng bị chặn TRƯỚC mạng.
+    _lease_id_hop_le(lease.get("lease_id"))
     so = lease.get("packet_issue")
     if isinstance(so, bool) or not isinstance(so, int):
         raise Chan(RC_NOI_DUNG, "tiền kiểm: thiếu `packet_issue` hoặc sai kiểu (đòi số nguyên)")
@@ -1225,9 +1289,10 @@ def kiem_github(lease: dict, tep=None, goc=None) -> tuple:
 def dung_than(lease: dict, duong_dan: str) -> str:
     """Thân comment: nói rõ đây là bản CHIẾU, nguồn sự thật nằm trong kho."""
     import yaml
+    lease_id = _lease_id_hop_le(lease.get("lease_id"))   # wp678 D4: chốt riêng, dấu đăng là CHUỖI thật
     khoi = yaml.safe_dump(lease, allow_unicode=True, sort_keys=False).rstrip()
     return (
-        f"**Lease `{lease['lease_id']}`** — đăng tự động từ `{duong_dan}`.\n\n"
+        f"**Lease `{lease_id}`** — đăng tự động từ `{duong_dan}`.\n\n"
         f"Nguồn sự thật là tệp trong kho, comment này chỉ là **bản chiếu**. Sửa lease "
         f"thì sửa tệp rồi push; đừng sửa tay comment này.\n\n"
         f"```yaml\n{khoi}\n```\n"
@@ -2080,6 +2145,8 @@ def _doc_policy_json(noi_dung: bytes):
 
 def _du_bao_check(lease: dict, goc: Path, nhanh_mac_dinh: str) -> list[str]:
     """M3 dự báo — luật mới (precedence Q3) trên ref canonical CỤC BỘ; KHÔNG đổi rc, chỉ in `DU_BAO:`."""
+    # wp678 D8: chốt RIÊNG — `lenh_check` đã qua D1, nhưng hàm này không dựa vào đó (A7).
+    lease_id = _lease_id_hop_le(lease.get("lease_id"))
     dong = [f"DU_BAO: chế độ CHƯA KÍCH HOẠT (SO_THU_HOI_KICH_HOAT={SO_THU_HOI_KICH_HOAT}); verdict sản phẩm = luật cũ"]
     ref = f"refs/remotes/origin/{nhanh_mac_dinh}"
     so = {m["path"]: m for m in _quet_so_thu_hoi_moi_ref(goc, [ref])} if _ref_ton_tai(goc, ref) else None
@@ -2095,15 +2162,15 @@ def _du_bao_check(lease: dict, goc: Path, nhanh_mac_dinh: str) -> list[str]:
                 d = kiem_ban_ghi_thu_hoi(muc["path"], muc["mode"], muc["type"],
                                          GOI_GIT("cat-file", "-p", muc["oid"], cwd=goc).stdout.encode("utf-8"))
                 dich = d["cap_lai_cho"]
-                rc = 0 if dich in (None, lease.get("lease_id")) else 8
+                rc = 0 if dich in (None, lease_id) else 8
                 dong.append(f"DU_BAO: sổ có {x}: cap_lai_cho={dich!r} ⇒ rc dự báo {rc}")
             except Chan as e:
                 dong.append(f"DU_BAO: sổ có {x} nhưng bản ghi hỏng ⇒ rc dự báo {e.ma}: {e.thong_diep[:100]}")
-        elif any(x == cu and lease.get("lease_id") == moi for cu, moi, *_ in BIA_MO_LICH_SU):
+        elif any(x == cu and lease_id == moi for cu, moi, *_ in BIA_MO_LICH_SU):
             dong.append(f"DU_BAO: {x} có trong BIA_MO_LICH_SU ⇒ rc dự báo 0")
         else:
             dong.append(f"DU_BAO: {x} không có trong sổ lẫn BIA_MO_LICH_SU ⇒ rc dự báo 8 (luật cũ: bia mộ hai chiều)")
-    if f"{THU_MUC_SO}/{lease.get('lease_id')}.yaml" in so:
+    if f"{THU_MUC_SO}/{lease_id}.yaml" in so:
         dong.append("DU_BAO: chiều ngược — lease đang kiểm CÓ trong sổ ⇒ rc dự báo 8")
     return dong
 
@@ -2124,7 +2191,12 @@ def _du_bao_ai_dang_giu(goc: Path, refs: list[str], cac_lease: list[dict], nhanh
             if loai == "blob":
                 map_ref.setdefault((oid, duong), []).append(r)
     for muc in cac_lease:
-        lid = str(muc["lease"].get("lease_id") or "?")
+        # wp678 D8 (Q3): lease sai kiểu KHÔNG được ép sang chuỗi để tra sổ thu hồi (`1_000` từng tra ra `1000`).
+        lid = _lease_id_quet(muc["lease"].get("lease_id"))
+        if lid is None:
+            dong.append(f"DU_BAO: KHÔNG_XÁC_ĐỊNH lease_id {_nhan_lease_id_sai(muc['lease'].get('lease_id'))} "
+                        f"tại {muc['ref']}:{muc['path']} — không tra sổ")
+            continue
         nhan = " · ĐÃ_THU_HỒI" if lid in so_ids else ""
         dong.append(f"DU_BAO: {lid}{nhan}\tMAP_REF {len(map_ref.get((muc['blob'], muc['path']), []))} ref")
     dong.append(f"DU_BAO: MÙ 0 · {len(refs)} ref")
@@ -2262,12 +2334,20 @@ def lenh_ai_dang_giu(a) -> int:
         for dong in _du_bao_ai_dang_giu(root, refs_a0, cac_lease, getattr(a, "nhanh_mac_dinh", None) or "master"):
             print(dong)
     nguoi_giu = {}
+    sai_kieu = 0
     for muc in cac_lease:
         lease = muc["lease"]
         if not _lease_cham_duong(lease, a.duong_dan):
             continue
+        # wp678 D7 (Q3): `lease_id` không phải chuỗi hợp lệ thì KHÔNG ép thành khoá người giữ (`yes` và
+        # `on` từng gộp về ``True``). In `KHÔNG_XÁC_ĐỊNH` cho TỪNG lease lỗi (kèm ref:path) rồi mới thoát
+        # khác 0 — fail-close, không dừng ở lease lỗi đầu tiên để người đọc thấy đủ cả tập.
+        lease_id = _lease_id_quet(lease.get("lease_id"))
+        if lease_id is None:
+            sai_kieu += 1
+            print(f"KHÔNG_XÁC_ĐỊNH\tlease_id {_nhan_lease_id_sai(lease.get('lease_id'))}\t{muc['ref']}:{muc['path']}")
+            continue
         trang_thai = _phan_loai_lease(lease)
-        lease_id = str(lease.get("lease_id") or "<thiếu lease_id>")
         bia_mo = (_bia_mo_doi_xung(lease, cac_lease)
                   if trang_thai == "CÒN_HẠN" else None)
         if bia_mo is False:
@@ -2281,8 +2361,18 @@ def lenh_ai_dang_giu(a) -> int:
         print(f"{trang_thai}{nhan}\t{lease_id}\t{muc['ref']}:{muc['path']}")
         if trang_thai == "CÒN_HẠN" and not da_chet:
             nguoi_giu[lease_id] = None
+    if sai_kieu:
+        raise Chan(RC_KHONG_XAC_DINH,
+                   f"KHÔNG_XÁC_ĐỊNH: {sai_kieu} lease chạm {a.duong_dan} mang lease_id không hợp lệ (sai kiểu hoặc sai dạng) — "
+                   "không kết luận được ai đang giữ (wp678 Q3)")
     print(f"NGƯỜI_GIỮ {len(nguoi_giu)}: " + (", ".join(sorted(nguoi_giu)) or "không có"))
     return RC_DANG_GIU if nguoi_giu else RC_OK
+
+
+def _lease_id_hien_thi(lease: dict) -> str:
+    """wp678 D9 — CHỈ để in: chuỗi hợp lệ in nguyên, còn lại in dạng thô có nhãn, KHÔNG `str()` thành danh tính."""
+    lid = _lease_id_quet(lease.get("lease_id"))
+    return lid if lid is not None else f"<lease_id không hợp lệ: {_repr_an_toan(lease.get('lease_id'))}>"
 
 
 def lenh_con_tro_treo(a) -> int:
@@ -2296,11 +2386,11 @@ def lenh_con_tro_treo(a) -> int:
             continue
         for ten in _cac_con_tro_treo(lease):
             tim_thay += 1
-            lease_id = str(lease.get("lease_id") or "<thiếu lease_id>")
+            lease_id = _lease_id_hien_thi(lease)
             print(f"CON_TRỎ_TREO\t{lease_id}\t{ten}\t{muc['ref']}:{muc['path']}")
         for ten in _cac_nhac_mo_ho(lease):
             goi_y += 1
-            lease_id = str(lease.get("lease_id") or "<thiếu lease_id>")
+            lease_id = _lease_id_hien_thi(lease)
             print(f"CON_TRỎ_GỢI_Ý\t{lease_id}\t{ten}\t{muc['ref']}:{muc['path']}")
     print(f"CON_TRỎ_TREO {tim_thay}; chỉ báo cáo, không sửa lease đã đăng")
     print(f"CON_TRỎ_GỢI_Ý {goi_y}; văn xuôi chỉ là advisory")

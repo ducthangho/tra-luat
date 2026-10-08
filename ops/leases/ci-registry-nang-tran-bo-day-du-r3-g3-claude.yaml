@@ -18,7 +18,9 @@ recorded_by: claude-session
 recorder_is_dispatcher: false
 
 leased_at_utc: '2026-10-07T17:00:00Z'
-lease_expires_at_utc: '2026-10-08T17:00:00Z'
+lease_expires_at_utc: '2026-10-08T07:00:00Z'
+han_ghi_chu: >-
+  Goc 2026-10-08T17:00:00Z. RUT NGAN ve 2026-10-08T07:00:00Z — xem thu_hoi_bang_rut_han.
 
 packet_id: CI-REGISTRY-NANG-TRAN-BO-DAY-DU
 packet_slug: CI-REGISTRY-NANG-TRAN-BO-DAY-DU
@@ -110,3 +112,24 @@ chua_do_duoc:
   - 'Danh tinh nguoi ky: #566.'
   - 'Effort thuc te cua phien executor.'
   - '5400 s co du tren runner cham nhat (chi A5 sau PR).'
+lease_sua_lan_cuoi: '2026-10-08T03:41Z'
+lease_sua_ghi_chu: >-
+  Lan 1: rut ngan lease_expires_at_utc (thu_hoi_bang_rut_han). Khong doi write set, spec, branch.
+thu_hoi_bang_rut_han:
+  han_goc_utc: '2026-10-08T17:00:00Z'
+  han_moi_utc: '2026-10-08T07:00:00Z'
+  chi_thi: >-
+    Chu kho trong phien Claude Code session_01CSM7GNazhN6uGJb4v1TqBT giao lap ho so land #705 / PR #707 va thu hoi lease
+    g3 theo tien le #674 (chi thi giao viec cho subagent bookkeeping; loi_khai_co_neo, khong phai comment GitHub).
+  ly_do: >-
+    Packet #705 da MERGE: PR #707 merge 19ca703 (2026-10-08T03:21:34Z, merged_by ducthangho), cha thu hai 36190a3 = head
+    duoc human_audited (pull/707#issuecomment-6049196146).
+  vi_sao_khong_dung_so: >-
+    Theo tien le #651/#660/#661/#668/#677/#687/#674: so ops/thu-hoi/ chua kich hoat; rut han dung co che DA CAI. Han moi dat
+    SAU luc push du kien de luot dang lease (neu chay) con thay lease song, tranh rc=8 che rc=9 (bai hoc 20-09). Neu
+    nhanh chua push truoc ~06:50Z thi phai doi han_moi_utc ve sau luc push TRUOC khi push.
+  nguoi_rut: 'subagent bookkeeping cua phien session_01CSM7GNazhN6uGJb4v1TqBT (cung phien executor g3 va dieu phoi review)'
+  gioi_han: >-
+    Commit rut han chi o CUC BO luc ghi (nhanh bk705-rut-han-g3, tien len tu origin/ops/cap-lease-ci-registry-nang-tran
+    b156e8d); phien chinh push no thanh ops/cap-lease-ci-registry-nang-tran (fast-forward). Nghiem thu:
+    ai-dang-giu cho W1-W4 khong con ci-registry-nang-tran-bo-day-du-r3-g3-claude trong NGUOI_GIU sau 07:00Z — CHUA DO.

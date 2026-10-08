@@ -15,7 +15,7 @@ spec_path: ops/specs/lease-id-ep-kieu-yaml-r9.md
 spec_sha256: 45c8d31441f027fb8e7d8425f2ca66770043edd4b958b0e6ad6c4e7a09e64b5a
 spec_ghi_chu: >-
   (a) sha256 cua `git show 2469f3e:ops/specs/lease-id-ep-kieu-yaml-r9.md` = spec_sha256 dong 3 tep verdict = so
-  trong comment ban chieu. Dac ta r9 CHUA co tren master; chi o commit cuc bo cua nhanh claude/spec-wp678-r7.
+  trong comment ban chieu. Dac ta r9 CHUA co tren master; chi o nhanh claude/spec-wp678-r7 (luc review: commit cuc bo; da day len origin 2026-10-07 17:49Z, head luc do 284a03f).
 lease_id: khong-co-lease
 lease_ghi_chu: >-
   Luot review DAC TA truoc khi packet duoc giao; wp678 chua co lease. Bien nhan ghi so theo quyet dinh chu kho
@@ -95,7 +95,7 @@ verdict_usage_caveats:
   - id: REVIEWED-SHA-CHI-TREN-NHANH-SPEC
     muc: P2
     mo_ta: >-
-      reviewed_sha 2469f3e chi nam tren nhanh claude/spec-wp678-r7 (khong phai master). Nhanh da DAY len origin 2026-10-07 ~17:5xZ (head 284a03f) TRUOC commit bien nhan, nen tra duoc tu clone day du. Nhanh spec la ref TRUOT: xoa nhanh truoc khi r* vao master hoac co ref luu-tru thi bien_nhan_v2 se tra KHONG DO DUOC (rc=2). Comment ban chieu luc review tu khai 'CUC BO, CHUA DAY' — dung o thoi diem do.
+      reviewed_sha 2469f3e chi nam tren nhanh claude/spec-wp678-r7 (khong phai master). Nhanh da DAY len origin 2026-10-07 17:49Z (head 284a03f) TRUOC commit bien nhan, nen tra duoc tu clone day du. Nhanh spec la ref TRUOT: xoa nhanh truoc khi r* vao master hoac co ref luu-tru thi bien_nhan_v2 se tra KHONG DO DUOC (rc=2). Comment ban chieu luc review tu khai 'CUC BO, CHUA DAY' — dung o thoi diem do.
   - id: SUBAGENT-CUNG-HO-REVIEW-DEFERRED
     muc: P2
     mo_ta: >-

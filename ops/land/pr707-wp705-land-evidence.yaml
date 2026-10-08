@@ -117,7 +117,7 @@ input_packet_generations:
     ban_chieu_lease: 'issues/705#issuecomment-6042869522 (github-actions[bot], 17:10:01Z)'
     human_audited_sha: 36190a35db647e65d7c6fd4b684d5178dfd82544
   - {packet_issue: 705, lease_id: ci-registry-nang-tran-bo-day-du-r2-g2-claude, revision: 2, generation: 2, han: '2026-10-01T11:58Z..2026-10-02T11:58Z (het han tu nhien)', head: 'f783fbf (va luot 1 Opus), f9c8dbd (merge master)'}
-  - {packet_issue: 705, lease_id: ci-registry-nang-tran-bo-day-du-r1-g1-claude, revision: 1, generation: 1, han: '2026-10-01T10:40Z, thay boi g2 (da_bi_thay_the trong tep g1)', head: 031f360}
+  - {packet_issue: 705, lease_id: ci-registry-nang-tran-bo-day-du-r1-g1-claude, revision: 1, generation: 1, han: '2026-10-01T10:40Z..2026-10-02T10:40Z (con han luc g2 cap 2026-10-01T11:58Z; thay boi g2: da_bi_thay_the trong tep g1 tai 385ff12)', head: 031f360}
 
 candidates:
   - pr: 707
@@ -168,8 +168,9 @@ hai_cha: ab457c651eb4428705f0492163080b661c858b72 36190a35db647e65d7c6fd4b684d51
 tree: 2d66d5b091a3e4b59eb1b587cb33e620217f2f98
 tree_khop: >-
   measured — `git merge-tree --write-tree ab457c6 36190a3` = 2d66d5b = tree 19ca703; Codex luot 2 ghi cung tree tren clone.
-  Merge ref CI d59131e co cung hai cha (log checkout "Merge 36190a3… into ab457c6…"), nen tree CI = 2d66d5b theo suy dien
-  (object d59131e khong fetch duoc sau merge: not_measured truc tiep).
+  Merge ref CI d59131e: `gh api repos/ducthangho/tra-luat/git/commits/d59131ebc9eaf5f6f9c85ec70056a318442d6e9b` (GET, doc
+  2026-10-08T06:15Z, readback-commit-d59131e.json) tra tree 2d66d5b, hai cha ab457c6 + 36190a3 => tree CI = tree 19ca703,
+  DO TRUC TIEP; log checkout "Merge 36190a3… into ab457c6…" chi con la nguon phu.
 merged_at: '2026-10-08T03:21:34Z (= merged_at readback-pr-707.json; committer date 19ca703 10:21:33+07:00)'
 merge_commit_ky: 'measured — git cat-file -p 19ca703: 1 khoi chu ky, committer GitHub'
 target: master
@@ -295,9 +296,12 @@ lease:
     ref_goc: origin/ops/cap-lease-ci-registry-nang-tran @ b156e8da075267aa40dc6d3880a269e3615e2de2
     han_goc: '2026-10-08T17:00:00Z'
     rut_han: >-
-      Commit CUC BO c5881a0 (nhanh bk705-rut-han-g3, cha b156e8d): lease_expires_at_utc 07:00:00Z + khoi
+      Commit c5881a0 (nhanh bk705-rut-han-g3, cha b156e8d; luc ghi so chi o CUC BO, sau do day FF len
+      ops/cap-lease-ci-registry-nang-tran 2026-10-08T04:48Z — REST: branch head c5881a0, run 37729282378 success):
+      lease_expires_at_utc 07:00:00Z + khoi
       thu_hoi_bang_rut_han. `python3 -B ops/lease_publish.py check <tep>` sau commit: rc 0 ("ĐĂNG ĐƯỢC … hết hạn
-      2026-10-08T07:00:00Z … khớp băm ce14c656"). Khong viet bia mo vao g2 (het han) — bai hoc 20-09.
+      2026-10-08T07:00:00Z … khớp băm ce14c656"); rc 0 CHI DUNG TRUOC 07:00Z — sau moc do `check` tra rc=8 "lease da
+      het han", DUNG theo thiet ke (khong phai loi). Khong viet bia mo vao g2 (het han) — bai hoc 20-09.
     han_moi_vi_sao_07: >-
       Han moi phai SAU luc push nhanh ops (de luot dang lease neu chay con thay lease song; rc=8 che rc=9). Gio push do
       phien chinh quyet, khong biet luc ghi so; push sau ~06:50Z thi doi han_moi_utc truoc khi push.
@@ -337,7 +341,6 @@ khong_do_duoc:
   - 'Nguoi/phien bam merge PR #707.'
   - 'Tep goc verdict Opus luot 1/2 (#705 comment 5930405321 / 5932114633).'
   - 'Model/effort thuc chay cua executor va reviewer (khong run.json).'
-  - 'Object merge ref d59131e (khong fetch truc tiep; tree suy tu hai cha).'
   - 'Nghiem thu rut han g3 (sau push + sau 07:00Z).'
   - 'Xac minh chu ky commit (khong co allowedSignersFile).'
 

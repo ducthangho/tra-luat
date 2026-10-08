@@ -9413,6 +9413,9 @@ def t190_DA_DANG_ma_tep_bi_SUA_van_phai_qua_kiem_tru_chot_han():
             185/185 trước vế này.
       (vi)  neo prompt CÓ `tep` (đúng / lệch băm / tệp không tồn tại), `lease_id` sai ký tự,
             `packet_issue = 0` — cả chưa đăng lẫn đã đăng (lượt 16, F1/F2: C1, C2, C3 sống 185/185);
+            TỪ wp678 hàng `lease_id sai ký tự` ở cột ĐÃ đăng KHÔNG còn vào nhánh đã-có-dấu: D2/D3 chặn trước
+            (đầu dò review thi hành lượt 1: 1 lời gọi `kiem(bo_qua_han=True)` ở nền, 0 ở f809249), nên nó chỉ
+            còn đo tính chất đầu-cuối; răng của chốt `lease_id` trên đường `bo_qua_han` nằm ở `t219`;
             (vi-b) nhánh đã-có-dấu phải nêu CÙNG lý do với nhánh chưa đăng cho lease tự cấp bằng tên
             provider — chốt provider bị chốt allowlist che về mã thoát, `t191` bắt.
     """
@@ -9491,6 +9494,8 @@ def t190_DA_DANG_ma_tep_bi_SUA_van_phai_qua_kiem_tru_chot_han():
     # `kiem-github "$tep"`. Cùng lượt: miễn regex `lease_id` (C2) và miễn `packet_issue > 0` (C3) khi
     # `bo_qua_han` cũng sống. Vá vế này thôi thì lần thứ tư đến y hệt — nên `t191` LIỆT KÊ BẰNG MÁY
     # mọi chốt của `kiem()` và đòi `t190` phủ từng cái; vế này là phần fixture cho ba chốt còn trống.
+    # TỪ wp678 C2 KHÔNG còn do cặp này canh: chốt `lease_id` là lời gọi `_lease_id_hop_le`, `_la_chot` (chỉ
+    # `raise Chan` / `_kiem_*` / `_doc_*`) không thấy nó, và D2/D3 chặn trước nhánh đã-có-dấu — `t219` canh C2.
     with San() as s:
         (s / ".git").mkdir()
         duong, sha = dat_prompt(s, b"prompt that cho t190 ve (vi)\n")
@@ -10310,7 +10315,9 @@ def t191_MOI_chot_cua_kiem_deu_duoc_t190_phu_o_nhanh_DA_DANG():
         nào chạm ⇒ liệt kê +1 và phán quyết phải là `KHONG_CHAM`, không được là `PHU`.
 
     Phạm vi CÒN HỞ (khai cả ở r12): chốt ngoài `kiem()`; chốt bên trong từng hàm `_kiem_*`; lời gọi qua
-    bí danh/thuộc tính; ngoại lệ không phải `Chan`.
+    bí danh/thuộc tính; ngoại lệ không phải `Chan`; chốt là lời gọi hàm tên KHÁC `_kiem_*`/`_doc_*` — từ wp678 đó là
+    D1 `_lease_id_hop_le` (đổi tên thuần sang `_kiem_…` làm ca này ĐỎ `KHONG_CHAM`, vì D2/D3 chặn trước nhánh
+    đã-có-dấu; review thi hành lượt 1 đo). Răng của D1 trên đường `bo_qua_han` nằm ở `t219`.
     """
     import ast
     import tempfile
@@ -11892,6 +11899,26 @@ def t204_wp678_A1_lease_id_ep_kieu_YAML_qua_doc_yaml_bi_kiem_tu_choi_rc8():
 
 
 @ca
+def t219_wp678_kiem_bo_qua_han_van_chan_lease_id_khong_hop_le():
+    """Review thi hành wp678 lượt 1, lớp `phu-nhanh-da-dang-chot-lease-id-mat-rang`. Hợp đồng `kiem()` (chú thích ngay
+    trên chốt hạn): `bo_qua_han` bỏ ĐÚNG MỘT chốt — chốt HẠN. Ở nền chốt `lease_id` là `raise Chan` trong `kiem()`, nên
+    `t191` liệt kê nó và `t190` vế (vi) phủ nó ở nhánh đã-có-dấu (đột biến miễn chốt khi `bo_qua_han` bị CẢ HAI giết).
+    Từ wp678 D2/D3 chặn `lease_id` sai TRƯỚC nhánh ấy và `_la_chot` không nhận tên `_lease_id_hop_le`, nên đột biến
+    `if not bo_qua_han:` trước D1 SỐNG toàn suite (256/256, đo trên f809249). Ca này cho D1 răng riêng trên đường
+    `bo_qua_han`, không dựa vào việc D2/D3 đã chạy trước (đặc tả §6 mục 2: mỗi đường một chốt riêng)."""
+    mod = _nap_cong()
+    with San() as s:
+        for raw, _kieu in _WP678_EP_KIEU + (("'co khoang trang'", str),):
+            lease = _wp678_doc(mod, s, _yaml_that(raw))
+            rc, td = _ma_chan(mod, _kiem_sach, mod, lease, None, None, True)
+            chot(rc == RC_NOI_DUNG and "lease_id" in str(td),
+                 f"kiem(bo_qua_han=True), `lease_id: {raw}`: phải rc=8 (bo_qua_han chỉ bỏ chốt hạn), được rc={rc}: {td!r}")
+        lease = _wp678_doc(mod, s, _yaml_that("wp-ok-1", het_han=True))
+        rc, td = _ma_chan(mod, _kiem_sach, mod, lease, None, None, True)
+        chot(rc == 0, f"đối chứng: chuỗi hợp lệ HẾT HẠN với bo_qua_han=True phải qua, được rc={rc}: {td!r}")
+
+
+@ca
 def t205_wp678_A2_tien_kiem_D2_truc_tiep_int_rc8_chuoi_tra_ve():
     """A2 (D2) đo TRỰC TIẾP `_tien_kiem_mien_dang`: `int` (và mọi kiểu không phải chuỗi) ⇒ `Chan(RC_NOI_DUNG)`;
     chuỗi hợp lệ ⇒ trả về. Đây là ca đích của đột biến trả riêng D2 về `(str, int)` — phép đếm mạng của `t178`
@@ -12181,6 +12208,54 @@ def t216_wp678_A10_catalog_dot_bien_giet_dung_ca_bang_TinHieuChotCa():
     chot(len(ket["GIET"]) == len(_WP678_DOT_BIEN) == 12, f"mẫu số phải cố định 12, giết thật đủ: {ket}")
 
 
+@ca
+def t218_wp678_lease_id_khong_hop_le_chi_nem_Chan_va_thong_diep_co_tran():
+    """Review thi hành wp678 lượt 1, lớp `thong-diep-lease-id-sai-dung-repr-tho`. YAML 1.1 dựng được `int` vượt giới hạn
+    chuyển chuỗi của CPython (`0x` + 4000 chữ số hex: `safe_load` KHÔNG ném) mà `repr()` thì ném `ValueError`. Đo trên
+    f809249: `_lease_id_hop_le` và `_lease_id_quet` ném `ValueError`; CLI `check`, `ai-dang-giu`, `ai-dang-giu --du-bao`
+    (kể cả đường dẫn KHÔNG liên quan) ra traceback rc=1. Đòi: hàm chung ⇒ `Chan(8)`; bản quét ⇒ `None`; D9 không ném;
+    D7 ⇒ rc=12 kèm một dòng `KHÔNG_XÁC_ĐỊNH` cho từng lease; D8 ⇒ rc=0 kèm dòng `DU_BAO: KHÔNG_XÁC_ĐỊNH`; thông điệp có
+    trần (bí danh YAML lồng nhau 591 byte từng nở thành 2,79 triệu ký tự); chuỗi lệch `LEASE_ID` mang nhãn `sai dạng`."""
+    mod = _nap_cong()
+    lon = "0x" + "f" * 4000
+
+    def _thu(fn, *a):
+        try:
+            return "TRA", fn(*a)
+        except mod.Chan as e:
+            return f"Chan{e.ma}", e.thong_diep
+        except Exception as e:  # noqa: BLE001 — ngoại lệ KHÁC `Chan` chính là lỗi ca này khoá
+            return f"NEM {type(e).__name__}", str(e)[:80]
+    with San() as s:
+        gt = _wp678_doc(mod, s, _yaml_that(lon))["lease_id"]
+        chot(type(gt) is int and gt.bit_length() > 15000, f"fixture: phải là int rất lớn, được {type(gt)}")
+        kq, td = _thu(mod._lease_id_hop_le, gt)
+        chot(kq == f"Chan{RC_NOI_DUNG}" and len(td) < 1000,
+             f"hàm chung: int lớn phải Chan(8) có trần, được {kq}: {str(td)[:120]!r}")
+        kq, td = _thu(mod._lease_id_quet, gt)
+        chot(kq == "TRA" and td is None, f"bản quét: int lớn phải trả None, được {kq}: {td!r}")
+        kq, td = _thu(mod._lease_id_hien_thi, {"lease_id": gt})
+        chot(kq == "TRA" and td.startswith("<lease_id không hợp lệ:") and len(td) < 300, f"D9: {kq}: {str(td)[:120]!r}")
+        bom = "".join(f"a{i}: &a{i} [" + ",".join([f"*a{i - 1}" if i else '"x"'] * 9) + "]\n" for i in range(6))
+        gt = _wp678_doc(mod, s, bom + _yaml_that("*a5"), ten="bom.yaml")["lease_id"]
+        kq, td = _thu(mod._lease_id_hop_le, gt)
+        chot(kq == f"Chan{RC_NOI_DUNG}" and len(td) < 1000,
+             f"bí danh lồng: thông điệp phải có trần, được {kq}: {len(str(td))} ký tự")
+        cay = _wp678_kho(s, {"a": {"ops/leases/x.yaml": _wp678_lease_giu(lon)},
+                             "b": {"ops/leases/x.yaml": _wp678_lease_giu("'co khoang trang'")}})
+        kq, ra = _thu(_goi_main, mod, "ai-dang-giu", "ops/x.md", "--root", str(cay))
+        chot(kq == "TRA", f"D7: ai-dang-giu phải kết thúc có kiểm soát, được {kq}: {ra!r}")
+        rc, o, _e = ra
+        dong = [x for x in o.splitlines() if x.startswith("KHÔNG_XÁC_ĐỊNH\t")]
+        chot(rc == RC_KHONG_XAC_DINH_A0 and len(dong) == 2 and sum("lease_id sai kiểu " in x for x in dong) == 1
+             and sum("lease_id sai dạng 'co khoang trang'" in x for x in dong) == 1 and all(len(x) < 400 for x in dong),
+             f"D7: phải rc=12, đúng 2 dòng KHÔNG_XÁC_ĐỊNH (int: sai kiểu; chuỗi: sai dạng), có trần; được rc={rc} {dong!r}")
+        kq, ra = _thu(_goi_main, mod, "ai-dang-giu", "ops/khac.md", "--root", str(cay), "--du-bao")
+        chot(kq == "TRA" and ra[0] == 0
+             and sum(x.startswith("DU_BAO: KHÔNG_XÁC_ĐỊNH lease_id ") for x in ra[1].splitlines()) == 2,
+             f"D8: --du-bao trên đường dẫn KHÔNG liên quan phải rc=0 kèm 2 dòng KHÔNG_XÁC_ĐỊNH, được {kq}: {str(ra)[:200]!r}")
+
+
 # =====================================================================================
 # wp678 A9 — CỔNG ĐO LEASE SAI KIỂU, CHỈ đặt trước LAND (Q7, Q9). Helper do executor viết, chạy bằng
 #     python ops/lease_publish_test.py --quet-a9 <kho>
@@ -12402,6 +12477,22 @@ def t217_a9_sai_kieu_chi_o_ref_thuong_topic_HEAD():
         _a9_commit(kho, {"ops/leases/y.yaml": "lease_id: yes\n"})
         d = _a9_chot("topic/HEAD", _a9_cli(kho), 1, ["lease_id=True"])
         chot(d["errors"][0]["refs"] == ["refs/heads/topic/HEAD"], f"A9 topic/HEAD: {d['errors']}")
+
+
+@ca
+def t217_a9_sai_kieu_chi_o_refs_remotes():
+    """Miền A9 gồm `refs/remotes/*`: clone THƯỜNG giữ nhánh máy chủ ở đó. Review thi hành wp678 lượt 1 đo: bỏ
+    `refs/remotes` khỏi `for-each-ref` SỐNG cả 42 ca `t217_*`, và trên clone thường của snapshot kho thật helper ấy
+    chỉ quét 1 ref / 132 blob (đúng là 482 / 594) mà vẫn rc=0. Ca này đặt lease sai kiểu CHỈ ở một ref theo dõi từ xa."""
+    with San() as s:
+        kho = _a9_kho(s, {"ops/leases/x.yaml": _A9_OK})
+        _wp678_g(kho, "checkout", "-q", "-b", "tam")
+        oid = _a9_commit(kho, {"ops/leases/y.yaml": "lease_id: on\n"})
+        _wp678_g(kho, "update-ref", "refs/remotes/origin/xa", oid)
+        _wp678_g(kho, "checkout", "-q", "main")
+        _wp678_g(kho, "branch", "-q", "-D", "tam")
+        d = _a9_chot("chỉ refs/remotes", _a9_cli(kho), 1, ["lease_id=True"])
+        chot(d["errors"][0]["refs"] == ["refs/remotes/origin/xa"], f"A9 refs/remotes: {d['errors']}")
 
 
 @ca

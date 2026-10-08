@@ -296,6 +296,29 @@ class Chan(Exception):
         self.thong_diep = thong_diep
 
 
+def _repr_an_toan(gia_tri, tran: int = 120) -> str:
+    """`repr` cho THÔNG ĐIỆP chẩn đoán — KHÔNG BAO GIỜ ném, luôn có trần (review thi hành wp678 lượt 1).
+
+    `repr()` thô của giá trị YAML hỏng ĐÃ ĐO sai hai cách: `int` vượt `sys.get_int_max_str_digits()` — YAML 1.1 dựng
+    được qua `0x…`, `0b…`, `0…` hay lục thập phân mà `safe_load` KHÔNG ném — làm `repr()` ném `ValueError`, nên cửa
+    "chỉ ném `Chan`" thành traceback rc=1; bí danh YAML lồng nhau nở theo cấp số nhân (tệp 591 byte ⇒ 2,79 triệu ký
+    tự stderr). `reprlib` cắt theo cấu trúc; 3.11/3.12 vẫn ném ở `int` lớn nên phải bọc `try`.
+    """
+    import reprlib
+    r = reprlib.Repr()
+    r.maxlevel, r.maxlist, r.maxtuple, r.maxdict, r.maxset, r.maxstring, r.maxother, r.maxlong = 2, 4, 4, 4, 4, 60, 60, 40
+    try:
+        hien = r.repr(gia_tri)
+    except Exception:  # noqa: BLE001 — đường chẩn đoán không được nổ
+        hien = f"<{type(gia_tri).__name__} không in được>"
+    return hien if len(hien) <= tran else hien[:tran] + "…"
+
+
+def _nhan_lease_id_sai(gia_tri) -> str:
+    """Nhãn chẩn đoán: `sai kiểu` (không phải `str`) khác `sai dạng` (`str` không khớp `LEASE_ID`), kèm repr có trần."""
+    return f"{'sai dạng' if isinstance(gia_tri, str) else 'sai kiểu'} {_repr_an_toan(gia_tri)}"
+
+
 def _lease_id_hop_le(gia_tri) -> str:
     """wp678 Q1/Q2 — cửa DUY NHẤT biến `lease_id` thô thành DANH TÍNH.
 
@@ -310,7 +333,7 @@ def _lease_id_hop_le(gia_tri) -> str:
     if not isinstance(gia_tri, str) or not LEASE_ID.fullmatch(gia_tri):
         raise Chan(RC_NOI_DUNG,
                    f"lease_id phải là CHUỖI YAML chỉ chứa ASCII chữ/số/`.`/`_`/`-` (không ép kiểu); "
-                   f"được {type(gia_tri).__name__} {gia_tri!r}")
+                   f"được {type(gia_tri).__name__} {_repr_an_toan(gia_tri)}")
     return gia_tri
 
 
@@ -2171,7 +2194,7 @@ def _du_bao_ai_dang_giu(goc: Path, refs: list[str], cac_lease: list[dict], nhanh
         # wp678 D8 (Q3): lease sai kiểu KHÔNG được ép sang chuỗi để tra sổ thu hồi (`1_000` từng tra ra `1000`).
         lid = _lease_id_quet(muc["lease"].get("lease_id"))
         if lid is None:
-            dong.append(f"DU_BAO: KHÔNG_XÁC_ĐỊNH lease_id sai kiểu {muc['lease'].get('lease_id')!r} "
+            dong.append(f"DU_BAO: KHÔNG_XÁC_ĐỊNH lease_id {_nhan_lease_id_sai(muc['lease'].get('lease_id'))} "
                         f"tại {muc['ref']}:{muc['path']} — không tra sổ")
             continue
         nhan = " · ĐÃ_THU_HỒI" if lid in so_ids else ""
@@ -2322,7 +2345,7 @@ def lenh_ai_dang_giu(a) -> int:
         lease_id = _lease_id_quet(lease.get("lease_id"))
         if lease_id is None:
             sai_kieu += 1
-            print(f"KHÔNG_XÁC_ĐỊNH\tlease_id sai kiểu {lease.get('lease_id')!r}\t{muc['ref']}:{muc['path']}")
+            print(f"KHÔNG_XÁC_ĐỊNH\tlease_id {_nhan_lease_id_sai(lease.get('lease_id'))}\t{muc['ref']}:{muc['path']}")
             continue
         trang_thai = _phan_loai_lease(lease)
         bia_mo = (_bia_mo_doi_xung(lease, cac_lease)
@@ -2340,7 +2363,7 @@ def lenh_ai_dang_giu(a) -> int:
             nguoi_giu[lease_id] = None
     if sai_kieu:
         raise Chan(RC_KHONG_XAC_DINH,
-                   f"KHÔNG_XÁC_ĐỊNH: {sai_kieu} lease chạm {a.duong_dan} mang lease_id sai kiểu — "
+                   f"KHÔNG_XÁC_ĐỊNH: {sai_kieu} lease chạm {a.duong_dan} mang lease_id không hợp lệ (sai kiểu hoặc sai dạng) — "
                    "không kết luận được ai đang giữ (wp678 Q3)")
     print(f"NGƯỜI_GIỮ {len(nguoi_giu)}: " + (", ".join(sorted(nguoi_giu)) or "không có"))
     return RC_DANG_GIU if nguoi_giu else RC_OK
@@ -2349,7 +2372,7 @@ def lenh_ai_dang_giu(a) -> int:
 def _lease_id_hien_thi(lease: dict) -> str:
     """wp678 D9 — CHỈ để in: chuỗi hợp lệ in nguyên, còn lại in dạng thô có nhãn, KHÔNG `str()` thành danh tính."""
     lid = _lease_id_quet(lease.get("lease_id"))
-    return lid if lid is not None else f"<lease_id không hợp lệ: {lease.get('lease_id')!r}>"
+    return lid if lid is not None else f"<lease_id không hợp lệ: {_repr_an_toan(lease.get('lease_id'))}>"
 
 
 def lenh_con_tro_treo(a) -> int:

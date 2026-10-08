@@ -708,8 +708,10 @@ KHÔNG bỏ BOM — có BOM thì không dương ở cả hai), rồi áp đúng 
 lệnh `tl` phán xét (đổi `\r\n`/`\r` thành `\n`, cắt dòng như `str.splitlines`, bỏ dòng nhiễu keyring không
 có `{}[]`). Hệ quả cần biết: một dòng nhiễu keyring trước JSON vẫn dương ở cả hai; ký tự ngắt dòng lạ
 (`\f`, U+0085, U+2028…) nằm NGOÀI chuỗi JSON được cả hai đọc như xuống dòng, nằm TRONG title thì cả hai
-từ chối. Phạm vi ĐÃ ĐO (Linux, pwsh 7.4.6, Python 3.11): xem `changelog.d/wp-710.md`; CHƯA đo trên Windows
-thật, với CLI `nlm` thật, hay với phiên bản Python khác (bảng hoa/thường của mẫu keyring lấy từ 3.11).
+từ chối. Phạm vi ĐÃ ĐO (Linux, pwsh 7.4.6, Python 3.11): xem `changelog.d/wp-710.md`. Trên Windows thật
+(Windows 11, pwsh 7.6.6, Python 3.13.1) chỉ các ca canary của `nlm-credential-refresh.Tests.ps1` đã chạy; hai
+phép so 101 dạng / 168 chuỗi byte KHÔNG chạy lại ở đó. CHƯA đo với CLI `nlm` thật (bảng hoa/thường của mẫu
+keyring lấy từ Python 3.11).
 rc 0 của refresh, `nlm login --check` hay số notebook đều KHÔNG cho phép upload. Bước stage nhận
 `TL_CANARY_NOTEBOOK_ID` (và `TL_NOTEBOOK_ID` cho lệnh cũ) bằng ID của config; `TL_CANARY_NOTEBOOK_ID` là
 khoá GHIM mà config/profile của `tl` không bao giờ ghi đè, nên canary riêng của lệnh stage dò CÙNG notebook
@@ -722,7 +724,8 @@ pwsh -NoProfile -File scripts/nlm-credential-refresh.ps1 -ConfigPath C:\private\
 **Bằng chứng ghi lại.** Mỗi chu kỳ in MỘT dòng JSON: `status`, `step` (bước kết thúc chu kỳ), `rc` và
 `elapsed_seconds` của bước đó, `cycle`, `cli_version`, và `steps` mang `rc`/`elapsed_seconds`/`timeout`/
 `child_confirmed_exited`/`descendants_stopped`/`tree_state` của TỪNG bước đã chạy (`version`, `refresh`, `canary`,
-`stage`), cùng `tree_measurement`, `takeover`, `takeover_reason` và `operator_reason` (xem "Tuần tự hoá"). Đầu ra của
+`stage`), cùng `tree_measurement`, `containment_reason`, `takeover`, `takeover_reason` và `operator_reason` (xem
+"Tuần tự hoá"). Đầu ra của
 tiến trình con KHÔNG bao giờ được in vì có thể chứa cookie. `profile_fingerprint` là 16 ký tự hex đầu
 của SHA-256 trên đường dẫn `browser_profile_path` (viết thường, đầy đủ) khai trong config — nó định danh
 ĐƯỜNG DẪN đã khai, không phải nội dung hồ sơ; và `profile_bound_to_cli` luôn là `false`: script chỉ
@@ -740,11 +743,12 @@ trước khi trả mã khác 0. `staged` chỉ nghĩa là lệnh stage trả rc 
 | `auth_failure` / `refresh`·`canary` | 2 | thông báo lỗi khớp một cụm lỗi xác thực có neo (vd `Authentication expired`, `HTTP 401`); đăng nhập tương tác lại trên máy gốc rồi chạy lại. |
 | `network_failure` / `refresh`·`canary` | 2 | khớp một cụm lỗi mạng có neo (vd `connection reset`, `503 Service Unavailable`); kiểm kết nối rồi chạy lại. |
 | `inconclusive` / `refresh`·`canary` | 2 | rc khác 0 nhưng không khớp cụm nào, hoặc khớp CẢ HAI loại; đọc lỗi tại máy, không suy là auth. |
-| `timeout` / `version`·`refresh`·`canary` | 3 | bước quá `-TimeoutSeconds`, kể cả khi CLI đã thoát mà một tiến trình hậu duệ còn giữ ống ra. Con trực tiếp bị giết; trên Linux mọi hậu duệ (theo dấu thao tác VÀ theo quan hệ cha–con, xem "Tuần tự hoá") cũng bị giết và phải được xác nhận hết sống; nếu không xác nhận được (con, hậu duệ, ống chưa đóng, hoặc nền không liệt kê được cây) thì bản ghi thao tác được GIỮ để lần chạy sau chờ. `version` chỉ dừng lần chạy khi cây của nó chưa xác nhận; quá hạn mà cây đã xác nhận thì `cli_version` = `unavailable` và chạy tiếp. |
+| `timeout` / `version`·`refresh`·`canary` | 3 | bước quá `-TimeoutSeconds`, kể cả khi CLI đã thoát mà một tiến trình hậu duệ còn giữ ống ra. Con trực tiếp bị giết; trên Linux mọi hậu duệ (theo dấu thao tác VÀ theo quan hệ cha–con, xem "Tuần tự hoá") cũng bị giết và phải được xác nhận hết sống; trên Windows cả Job Object của bước bị kết thúc và số tiến trình của job phải về 0; nếu không xác nhận được (con, hậu duệ, ống chưa đóng, job chưa về 0) thì bản ghi thao tác được GIỮ để lần chạy sau chờ. `version` chỉ dừng lần chạy khi cây của nó chưa xác nhận; quá hạn mà cây đã xác nhận thì `cli_version` = `unavailable` và chạy tiếp. |
 | `inconclusive` / `canary` | 4 | canary rc 0 nhưng thân không phải JSON của đúng notebook (sai ID, thiếu tiêu đề/tên, rỗng, mảng nhiều phần tử). |
 | `inconclusive` / `preflight` | 4 | config/notebook_id/hồ sơ thiếu, không tìm thấy `nlm`/`python`, hoặc lỗi ngoài dự kiến. |
-| `inconclusive` / `lock_busy` | 5 | không giành được khoá trong `-LockWaitSeconds`, HOẶC thao tác của một lần chạy trước còn sống (`takeover_reason`: `root_alive` = con trực tiếp, `marked_alive` = tiến trình mang dấu hoặc còn giữ ống ra của bước cũ), HOẶC bản ghi thao tác không đọc được (`record_unreadable`/`record_clock`: người vận hành xác nhận rồi xoá tệp). `-OperatorReleaseReason` KHÔNG thả trạng thái này. |
-| `inconclusive` / `tree_quarantine` | 5 | con trực tiếp của lần trước đã chết nhưng cây KHÔNG chứng minh được là hết. `takeover_reason` = `tree_unknown` (Linux ĐÃ đo và thấy tiến trình có thể là của thao tác cũ: môi trường không đọc được, hoặc tiến trình khởi động trong bước cũ, không mang dấu, mà cha của nó là init hay một tổ tiên của chủ cũ — xem "Tuần tự hoá"): **đồng hồ KHÔNG thả**; mỗi lần chạy chờ tối đa `-LockWaitSeconds` rồi trả mã 5, cho tới khi cây được chứng minh hết hoặc người vận hành thả tay. `takeover_reason` = `tree_not_measurable` (nền không liệt kê được, hoặc bản ghi không có dấu): lần chạy đầu ĐÓNG DẤU thời điểm vào bản ghi, sau `-UnconfirmedQuarantineSeconds` (mặc định 900) lần chạy kế được tiếp quản với `takeover` = `quarantine_elapsed` — GIỚI HẠN, không phải bằng chứng; lối ra này còn chờ quyết định của chủ kho (Job Object/đo native). Thả tay: `-OperatorReleaseReason "<lý do, 8–200 ký tự>"` sau khi tự kiểm không còn tiến trình `nlm`/`python`/trình duyệt nào của lần trước ⇒ JSON mang `takeover` = `operator_release` và `operator_reason`. |
+| `inconclusive` / `tree_containment` | 5 | một bước của CHÍNH lần chạy này không được bao hoặc không chứng minh được là đã hết, nên KHÔNG bước nào sau nó được chạy. `containment_reason`: `job_create_failed:<mã lỗi Windows>` / `job_api_unavailable` (không tạo được Job Object: chưa tiến trình con nào được sinh, không có bản ghi); `job_assign_failed:<mã>` / `job_verify_failed:<mã>` (con đã tạo ở trạng thái treo nhưng không vào được job: bị kết thúc trước khi chạy lệnh nào); `job_alive` / `job_unknown` (bước trả kết quả mà job không về 0 sau 5 giây, hoặc không đọc được số đếm: bản ghi được GIỮ); `tree_not_measurable` (nền không liệt kê cũng không bao được cây — không phải Linux, không phải Windows: bước thành công KHÔNG được coi là cây đã hết, bản ghi được GIỮ). |
+| `inconclusive` / `lock_busy` | 5 | không giành được khoá trong `-LockWaitSeconds`, HOẶC thao tác của một lần chạy trước còn sống (`takeover_reason`: `root_alive` = con trực tiếp, `marked_alive` = tiến trình mang dấu hoặc còn giữ ống ra của bước cũ, `job_alive` = Job Object của bước cũ trên Windows còn tiến trình), HOẶC bản ghi thao tác không đọc được (`record_unreadable`/`record_clock`: người vận hành xác nhận rồi xoá tệp). `-OperatorReleaseReason` KHÔNG thả trạng thái này. |
+| `inconclusive` / `tree_quarantine` | 5 | con trực tiếp của lần trước đã chết nhưng cây KHÔNG chứng minh được là hết. `takeover_reason` = `tree_unknown` (Linux ĐÃ đo và thấy tiến trình có thể là của thao tác cũ: môi trường không đọc được, hoặc tiến trình khởi động trong bước cũ, không mang dấu, mà cha của nó là init hay một tổ tiên của chủ cũ — xem "Tuần tự hoá"): **đồng hồ KHÔNG thả**; mỗi lần chạy chờ tối đa `-LockWaitSeconds` rồi trả mã 5, cho tới khi cây được chứng minh hết hoặc người vận hành thả tay. `takeover_reason` = `tree_not_measurable` (bản ghi không cho gì để đo: không có dấu trên Linux; không nêu Job Object trên Windows): **chỉ trên Linux** lần chạy đầu ĐÓNG DẤU thời điểm vào bản ghi và sau `-UnconfirmedQuarantineSeconds` (mặc định 900) lần chạy kế được tiếp quản với `takeover` = `quarantine_elapsed` — GIỚI HẠN, không phải bằng chứng, còn chờ quyết định của chủ kho. Ngoài Linux **đồng hồ KHÔNG thả** (`-UnconfirmedQuarantineSeconds` không có tác dụng): chờ không chứng minh được gì. Riêng Windows còn `job_closed_unconfirmed` (chủ cũ ĐÃ thử kết thúc job mà không đưa được nó về 0 rồi mới thoát: job đã đóng không đủ làm bằng chứng) và `job_unknown` (job còn đó nhưng không mở/đọc được, vd của người dùng khác) — cả hai cũng không có lối ra theo đồng hồ. Thả tay: `-OperatorReleaseReason "<lý do, 8–200 ký tự>"` sau khi tự kiểm không còn tiến trình `nlm`/`python`/trình duyệt nào của lần trước ⇒ JSON mang `takeover` = `operator_release` và `operator_reason`. |
 | `stage_failure` / `stage` | 6 | canary dương, lệnh stage ĐÃ được gọi nhưng không trả rc 0: thiếu `TL_TOKEN` (rc 2), không còn jar (rc 3), canary RIÊNG của lệnh stage hoặc chốt payload từ chối (rc 4), lỗi giữa chừng gồm cả lỗi upload (rc 5, chỉ in tên lớp lỗi), hoặc quá hạn. Có thể đã upload một phần: kiểm trạng thái Drive trước khi thử lại. |
 
 Phân loại `auth_failure`/`network_failure` là đọc VĂN BẢN lỗi theo danh sách cụm có neo (danh sách
@@ -792,16 +796,32 @@ của `systemd --user`) trong lúc cây cũ chưa được chứng minh hết: c
 ghi KHÔNG có định dạng 2 (bản cũ, hoặc do người dựng) chỉ được xét theo dấu và pid như trước — đó là chỗ còn
 mù với hậu duệ đã xoá dấu.
 
+Trên Windows wrapper KHÔNG liệt kê cây mà BAO nó (`tree_measurement` = `windows_job_object`). Mỗi bước chạy
+trong một Job Object riêng, có tên `Global\tra_luat_nlm_op_<dấu thao tác>`, đặt
+`JOB_OBJECT_LIMIT_KILL_ON_JOB_CLOSE` và không cấp quyền thoát job. Tiến trình con được tạo ở trạng thái TREO,
+gán vào job, kiểm lại là thành viên, rồi mới cho chạy — nên mọi hậu duệ sinh ra đã nằm trong job, kể cả khi nó
+xoá dấu hay bỏ ống ra. Phép đo là số `ActiveProcesses` của chính job: sau mỗi bước (thành công hay quá hạn)
+wrapper kết thúc những gì còn trong job và chỉ đi tiếp khi số ấy đọc được là 0 (`tree_state` = `gone`,
+`descendants_stopped` = số thành viên ngoài con trực tiếp lúc kết thúc); không về 0 trong 5 giây hoặc không đọc
+được ⇒ `tree_containment` (mã 5), bản ghi được giữ. Không tạo được job, hoặc không gán được con vào job ⇒ cũng
+`tree_containment`, không lùi về cách chạy không bao. Bản ghi thao tác mang tên job (`job`). Chủ mới mở job
+theo tên: còn tiến trình ⇒ chờ (`job_alive`, thả tay cũng không được); đọc được 0 ⇒ tiếp quản; KHÔNG còn job
+tên ấy ⇒ handle cuối đã đóng, tức hệ điều hành đã kết thúc mọi thành viên lúc đóng ⇒ tiếp quản, TRỪ khi bản ghi
+nói chủ cũ đã thử mà không dọn được (`job_closed_unconfirmed`). Chỗ cuối này dựa vào cam kết của
+`KILL_ON_JOB_CLOSE`, không phải một phép đếm: chủ mới không còn job nào để hỏi. Đã đo trên Windows 11 (xem
+`changelog.d/wp-710.md`), không phải bằng chứng cho mọi máy.
+
 Không chứng minh được ⇒ `tree_quarantine` ở bảng trên. Cây chứng minh được là CÒN sống thì không bao giờ
 được thả, kể cả bằng tay. Bản ghi hỏng/không đọc được dừng ở `lock_busy` và KHÔNG đi qua cách ly: xác nhận
 không còn tiến trình `nlm`/`python`/trình duyệt nào của lần trước rồi xoá tệp ấy.
 
-Giới hạn đã biết: trên Windows wrapper KHÔNG liệt kê được hậu duệ nào
-(`tree_measurement` = `not_measurable`; Job Object chưa có): quá hạn thì không bao giờ xác nhận ⇒ bản ghi
-được giữ và lần chạy sau vào cách ly; còn hậu duệ BỎ ống ra sau một bước THÀNH CÔNG thì KHÔNG bị dừng và
-có thể chạy chồng bước kế (`tree_state` = `not_measurable` trong bằng chứng) — hành vi Windows KHÔNG ĐO
-ĐƯỢC trong bộ test hiện có (chỉ chạy trên Linux, nhánh không-Linux đo bằng phép chiếu một dòng). Thư mục
-tạm là theo người dùng nên thao tác của NGƯỜI DÙNG KHÁC không được thấy.
+Giới hạn đã biết của phần Windows: (1) Job Object chỉ bao tiến trình do cây của bước SINH RA. Tiến trình do
+một dịch vụ khác tạo hộ (WMI, Task Scheduler, COM ngoài tiến trình, hay một trình duyệt ĐANG chạy sẵn nhận lệnh
+mở cửa sổ rồi tiến trình mới thoát ngay) không phải hậu duệ và không được thấy — trên Linux cũng vậy. (2) Thư
+mục tạm là theo người dùng nên bản ghi thao tác của NGƯỜI DÙNG KHÁC không được thấy, dù mutex và tên job là
+`Global\`. (3) Mỗi lần chạy trên Windows biên dịch kiểu P/Invoke bằng `Add-Type` (thêm vài giây khởi động);
+biên dịch hỏng ⇒ `job_api_unavailable`, không chạy bước nào. (4) Nền không phải Linux cũng không phải Windows
+không stage được: bước đầu tiên dừng ở `tree_containment`/`tree_not_measurable`.
 
 **Cổng nằm ở lệnh, không chỉ ở wrapper.** `tl nlm-auth-stage`, `tl secrets-set --nlm` (bundle và
 `nlm_cred.enc` public) và `tl secrets-stage` (bundle mang `nlm_auth`) cùng đi qua MỘT hàm cổng: canary

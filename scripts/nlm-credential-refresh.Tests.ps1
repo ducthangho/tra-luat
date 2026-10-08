@@ -3,6 +3,8 @@ $ErrorActionPreference = 'Stop'
 # -WindowStyle exists only on Windows; splat it so the same file runs unchanged on Linux pwsh.
 $hidden = @{}
 if ($IsWindows) { $hidden['WindowStyle'] = 'Hidden' }
+# WP710 g4: where the wrapper can PROVE a step's tree gone - Linux enumerates it, Windows contains it in a Job Object.
+$contained = $IsLinux -or $IsWindows
 $root = Join-Path ([IO.Path]::GetTempPath()) ('wp710-' + [guid]::NewGuid().ToString('N'))
 New-Item -ItemType Directory -Path $root | Out-Null
 $script = Join-Path $PSScriptRoot 'nlm-credential-refresh.ps1'
@@ -155,7 +157,9 @@ if op == "notebook":
         key = "title" if mode.startswith("control_title_") else "name"
         print(json.dumps({"id": sys.argv[3], key: chr(int(mode.rsplit("_", 1)[1], 16))}))
     elif mode == "bom_canary":
-        print("\ufeff" + json.dumps({"id": sys.argv[3], "title": "Canary"}))
+        # bytes, not print(): on a Windows console code page (cp1258 measured) print cannot encode U+FEFF and the
+        # fake would die with rc 1, turning this case into a refresh-style failure instead of a BOM in the body.
+        sys.stdout.buffer.write(("\ufeff" + json.dumps({"id": sys.argv[3], "title": "Canary"}) + "\n").encode("utf-8"))
     elif mode.startswith("transport_"):
         # WP714 round 4: what nlm_cli._run + _strip_keyring do to stdout before the Python stage command judges it.
         nb = sys.argv[3]
@@ -235,7 +239,7 @@ note("end")
         if ($result.status -ne $expected -or $output -match 'SECRET_SENTINEL' -or
             $stageCalls -ne [int]($mode -in @('ok','stage')) -or
             (($mode -eq 'ok') -ne ($rc -eq 0))) {
-            throw "case $mode failed: status=$($result.status) rc=$rc stageCalls=$stageCalls"
+            throw "case $mode failed: status=$($result.status) rc=$rc stageCalls=$stageCalls step=$($result.step) reason=$($result.containment_reason)$($result.takeover_reason)"
         }
         $cases++
     }
@@ -445,8 +449,12 @@ Start-Sleep -Seconds 30
         if ($lingerAlive -and -not (Test-Path -LiteralPath $recLinger)) {
             throw 'a live descendant was left behind and its operation record was deleted'
         }
-        if ($IsLinux -and ($lingerAlive -or $r.Json.steps.refresh.child_confirmed_exited -ne $true)) {
-            throw 'Linux: the marked descendant must be stopped and confirmed before the wrapper returns'
+        if ($contained -and ($lingerAlive -or $r.Json.steps.refresh.child_confirmed_exited -ne $true)) {
+            throw 'the descendant must be stopped and confirmed before the wrapper returns'
+        }
+        if ($IsWindows -and ($r.Json.tree_measurement -ne 'windows_job_object' -or $r.Json.steps.refresh.tree_state -ne 'gone' -or
+            $r.Json.steps.refresh.descendants_stopped -lt 1 -or (Test-Path -LiteralPath $recLinger))) {
+            throw ('Windows: a timed-out step must empty its job, count the descendant and leave no record: ' + ($r.Json.steps.refresh | ConvertTo-Json -Compress))
         }
     } finally {
         if (Test-Path -LiteralPath $env:WP714_LINGER_PID) {
@@ -544,16 +552,35 @@ Start-Sleep -Seconds 30
         }
         Start-Sleep -Milliseconds 1200
         $r = Invoke-Wrapper 'ok' @('-TimeoutSeconds','5','-LockWaitSeconds','1','-UnconfirmedQuarantineSeconds','1')
-        if ($r.Rc -ne 0 -or $r.Json.status -ne 'staged' -or $r.Json.takeover -ne 'quarantine_elapsed' -or (Test-Path -LiteralPath $recPath)) {
-            throw ('the quarantine must release after its bound and say so: rc=' + $r.Rc + ' takeover=' + $r.Json.takeover)
+        if ($IsLinux) {
+            if ($r.Rc -ne 0 -or $r.Json.status -ne 'staged' -or $r.Json.takeover -ne 'quarantine_elapsed' -or (Test-Path -LiteralPath $recPath)) {
+                throw ('the quarantine must release after its bound and say so: rc=' + $r.Rc + ' takeover=' + $r.Json.takeover)
+            }
+        } else {
+            # WP710 g4: off Linux nothing was measured, so the timer is not an exit. Only the operator is.
+            if ($r.Rc -ne 5 -or $r.Json.step -ne 'tree_quarantine' -or $r.Json.takeover -ne 'none' -or $r.Calls.Count -ne 0 -or -not (Test-Path -LiteralPath $recPath)) {
+                throw ('an unmeasured tree must not be released by the timer: rc=' + $r.Rc + ' takeover=' + $r.Json.takeover + ' calls=' + $r.Calls.Count)
+            }
+            $r = Invoke-Wrapper 'ok' @('-TimeoutSeconds','5','-LockWaitSeconds','1','-OperatorReleaseReason','operator checked case m by hand')
+            if ($r.Rc -ne 0 -or $r.Json.status -ne 'staged' -or $r.Json.takeover -ne 'operator_release' -or
+                $r.Json.takeover_reason -ne 'tree_not_measurable' -or (Test-Path -LiteralPath $recPath)) {
+                throw ('an operator release of an unmeasured tree must stage and say so: rc=' + $r.Rc + ' takeover=' + $r.Json.takeover)
+            }
         }
     } finally { Stop-Process -Id $sleeper.Id -Force -ErrorAction SilentlyContinue }
     $sleeper.WaitForExit()
     @{pid=$sleeper.Id; start_ticks=$ticks} | ConvertTo-Json -Compress | Set-Content -LiteralPath $recPath
     $r = Invoke-Wrapper 'ok' @('-TimeoutSeconds','5','-LockWaitSeconds','1')
     if ($r.Rc -ne 5 -or $r.Json.step -ne 'tree_quarantine' -or $r.Calls.Count -ne 0) { throw 'a dead pid without a marker must not be read as a dead tree' }
-    $r = Invoke-Wrapper 'ok' @('-TimeoutSeconds','5','-LockWaitSeconds','3','-UnconfirmedQuarantineSeconds','1')
-    if ($r.Rc -ne 0 -or $r.Json.status -ne 'staged' -or $r.Json.takeover -ne 'quarantine_elapsed' -or (Test-Path -LiteralPath $recPath)) { throw 'a released quarantine must stage, and a finished run leaves no record' }
+    if ($IsLinux) {
+        $r = Invoke-Wrapper 'ok' @('-TimeoutSeconds','5','-LockWaitSeconds','3','-UnconfirmedQuarantineSeconds','1')
+        if ($r.Rc -ne 0 -or $r.Json.status -ne 'staged' -or $r.Json.takeover -ne 'quarantine_elapsed' -or (Test-Path -LiteralPath $recPath)) { throw 'a released quarantine must stage, and a finished run leaves no record' }
+    } else {
+        $r = Invoke-Wrapper 'ok' @('-TimeoutSeconds','5','-LockWaitSeconds','3','-UnconfirmedQuarantineSeconds','1')
+        if ($r.Rc -ne 5 -or $r.Json.step -ne 'tree_quarantine' -or $r.Calls.Count -ne 0) { throw 'a dead pid without a marker must stay quarantined past the bound' }
+        $r = Invoke-Wrapper 'ok' @('-TimeoutSeconds','5','-LockWaitSeconds','1','-OperatorReleaseReason','operator checked case m by hand')
+        if ($r.Rc -ne 0 -or $r.Json.status -ne 'staged' -or $r.Json.takeover -ne 'operator_release' -or (Test-Path -LiteralPath $recPath)) { throw 'an operator release must stage, and a finished run leaves no record' }
+    }
     $r = Invoke-Wrapper 'ok' @('-TimeoutSeconds','5','-LockWaitSeconds','1')
     if ($r.Rc -ne 0 -or $r.Json.takeover -ne 'none') { throw 'a clean start must not claim a takeover' }
     Set-Content -LiteralPath $recPath -Value 'not json'
@@ -579,10 +606,11 @@ Start-Sleep -Seconds 30
         }
         # WP714: no overlap is not enough; a vacuous pass (B never ran) must fail too. On Linux the marked
         # grandchild is stopped and confirmed, so B must take over and stage; elsewhere B must not overlap.
-        if ($IsLinux -and ($r.Rc -ne 0 -or $r.Json.status -ne 'staged' -or $after -ne $before)) {
+        if ($contained -and ($r.Rc -ne 0 -or $r.Json.status -ne 'staged' -or $after -ne $before)) {
             throw ('takeover after a confirmed-dead old tree must stage: rc=' + $r.Rc + ' status=' + $r.Json.status)
         }
-        if (-not $IsLinux -and $r.Rc -ne 0 -and $r.Rc -ne 5) { throw ('unexpected takeover outcome rc=' + $r.Rc) }
+        if (-not $contained -and $r.Rc -ne 0 -and $r.Rc -ne 5) { throw ('unexpected takeover outcome rc=' + $r.Rc) }
+        if ($IsWindows -and $null -ne (Get-Process -Id $childPid -ErrorAction SilentlyContinue)) { throw 'Windows: the pipe-holding grandchild outlived its job' }
     } finally {
         if (Test-Path -LiteralPath $env:WP714_CHILD_PID_FILE) {
             Stop-Process -Id ([int](Get-Content -LiteralPath $env:WP714_CHILD_PID_FILE -Raw)) -Force -ErrorAction SilentlyContinue
@@ -610,10 +638,15 @@ Start-Sleep -Seconds 30
     try {
         @{marker=$markerP; pid=$null; start_ticks=$null; tree_unconfirmed=$false} | ConvertTo-Json -Compress | Set-Content -LiteralPath $recP
         $r = Invoke-Wrapper 'ok' @('-TimeoutSeconds','5','-LockWaitSeconds','1')
-        if ($r.Rc -ne 5 -or $r.Json.step -ne 'lock_busy' -or $r.Calls.Count -ne 0) { throw 'a live marked process must block the new owner with zero operations' }
-        # WP714 round 4: the manual exit never releases a tree proven alive.
-        $r = Invoke-Wrapper 'ok' @('-TimeoutSeconds','5','-LockWaitSeconds','1','-OperatorReleaseReason','operator checked the old tree')
-        if ($r.Rc -ne 5 -or $r.Json.step -ne 'lock_busy' -or $r.Json.takeover -ne 'none' -or $r.Calls.Count -ne 0) { throw 'an operator release must never release a live marked tree' }
+        # Off Linux the marker cannot be searched for, and this hand-made record names no job: not measured,
+        # so it blocks as a quarantine (the Windows "proven alive" case is x, with a real job).
+        $wantP = if ($IsLinux) { 'lock_busy' } else { 'tree_quarantine' }
+        if ($r.Rc -ne 5 -or $r.Json.step -ne $wantP -or $r.Calls.Count -ne 0) { throw 'a live marked process must block the new owner with zero operations' }
+        if ($IsLinux) {
+            # WP714 round 4: the manual exit never releases a tree proven alive.
+            $r = Invoke-Wrapper 'ok' @('-TimeoutSeconds','5','-LockWaitSeconds','1','-OperatorReleaseReason','operator checked the old tree')
+            if ($r.Rc -ne 5 -or $r.Json.step -ne 'lock_busy' -or $r.Json.takeover -ne 'none' -or $r.Calls.Count -ne 0) { throw 'an operator release must never release a live marked tree' }
+        }
         @{marker=$markerP; pid=$gone.Id; start_ticks=$goneTicks; tree_unconfirmed=$false} | ConvertTo-Json -Compress | Set-Content -LiteralPath $recP
         $r = Invoke-Wrapper 'ok' @('-TimeoutSeconds','5','-LockWaitSeconds','1')
         if ($IsLinux -and ($r.Rc -ne 5 -or $r.Json.step -ne 'lock_busy' -or $r.Calls.Count -ne 0)) {
@@ -632,19 +665,27 @@ Start-Sleep -Seconds 30
     # >>case:p
     # <<case:q
     # (q) WP714: a descendant that dropped the pipes after `auth refresh` returned rc 0 is part of the operation:
-    #     on Linux it is stopped and confirmed before the canary runs, and the evidence says so.
+    #     it is stopped and confirmed before the canary runs, and the evidence says so. Linux finds it by parent
+    #     link and marker; WP710 g4, Windows: it is a member of the step's Job Object, whose count must reach 0.
     $env:WP714_BEAT_FILE = Join-Path $root 'daemon-beats.txt'
     $env:WP714_CHILD_PID_FILE = Join-Path $root 'daemon.pid'
     $env:WP710_TIMELOG = Join-Path $root 'daemon-times.log'
     Remove-Item -LiteralPath $env:WP714_BEAT_FILE, $env:WP710_TIMELOG -ErrorAction SilentlyContinue
     try {
         $r = Invoke-Wrapper 'daemon' @('-TimeoutSeconds','5')
-        if ($IsLinux) {
-            $startNb = [double]((@(Get-Content -LiteralPath $env:WP710_TIMELOG) | Where-Object { $_ -like 'start notebook *' } | Select-Object -First 1) -split ' ')[2]
-            $late = @(Get-Content -LiteralPath $env:WP714_BEAT_FILE | Where-Object { [double]$_ -gt $startNb })
-            if ($r.Rc -ne 0 -or $r.Json.status -ne 'staged' -or $r.Json.steps.refresh.descendants_stopped -lt 1 -or $late.Count -ne 0) {
-                throw ('Linux: a pipe-less descendant must be stopped before the canary: rc=' + $r.Rc + ' stopped=' + $r.Json.steps.refresh.descendants_stopped + ' late=' + $late.Count)
+        if ($contained) {
+            $startNbLine = @(Get-Content -LiteralPath $env:WP710_TIMELOG -ErrorAction SilentlyContinue) | Where-Object { $_ -like 'start notebook *' } | Select-Object -First 1
+            if (-not $startNbLine) { throw ('the run never reached the canary: rc=' + $r.Rc + ' step=' + $r.Json.step + ' reason=' + $r.Json.containment_reason) }
+            $startNb = [double](($startNbLine -split ' ')[2])
+            $beatsQ = @(Get-Content -LiteralPath $env:WP714_BEAT_FILE -ErrorAction SilentlyContinue)
+            if ($beatsQ.Count -lt 1) { throw 'fixture: the pipe-less descendant never ran, the case would pass vacuously' }
+            $late = @($beatsQ | Where-Object { [double]$_ -gt $startNb })
+            if ($r.Rc -ne 0 -or $r.Json.status -ne 'staged' -or $r.Json.steps.refresh.descendants_stopped -lt 1 -or
+                $r.Json.steps.refresh.tree_state -ne 'gone' -or $late.Count -ne 0) {
+                throw ('a pipe-less descendant must be stopped before the canary: rc=' + $r.Rc + ' stopped=' + $r.Json.steps.refresh.descendants_stopped + ' tree=' + $r.Json.steps.refresh.tree_state + ' late=' + $late.Count)
             }
+            $daemonQ = [int](Get-Content -LiteralPath $env:WP714_CHILD_PID_FILE -Raw)
+            if ($IsWindows -and $null -ne (Get-Process -Id $daemonQ -ErrorAction SilentlyContinue)) { throw 'Windows: the pipe-less descendant is still alive after the run' }
         } else {
             if ($r.Json.steps.refresh.descendants_stopped -ne 0) {
                 throw 'non-Linux: descendants cannot be enumerated, the evidence must not claim any were stopped'
@@ -709,6 +750,13 @@ Start-Sleep -Seconds 30
             } elseif ($r.Rc -ne 5 -or $r.Calls.Count -ne 0) { throw 'unconfirmed old tree must block with zero operations' }
             if ($IsLinux -and ($r.Rc -ne 5 -or $r.Json.takeover_reason -ne 'marked_alive')) { throw 'Linux: the live marked grandchild of a killed owner must block' }
             if ($IsLinux -and -not ([int64]$writtenR.owner_start_jiffies -gt 0)) { throw 'actual operation record did not retain the owner start (quarantine floor)' }
+            # WP710 g4, Windows: the owner's death closed the step's job, which ended the grandchild (marker or
+            # not). The next owner finds no such job and takes over at once; the grandchild must really be gone.
+            if ($IsWindows) {
+                if ([string]$writtenR.job -notmatch '^Global\\tra_luat_nlm_op_[0-9a-f]{32}$') { throw 'actual operation record did not name the step job' }
+                if ($r.Rc -ne 0 -or $r.Json.status -ne 'staged' -or $r.Json.takeover -ne 'none') { throw ('Windows: takeover after the owner died must stage: rc=' + $r.Rc + ' step=' + $r.Json.step + ' reason=' + $r.Json.takeover_reason) }
+                if ($null -ne (Get-Process -Id $childR -ErrorAction SilentlyContinue)) { throw 'Windows: a descendant survived the death of the job owner' }
+            }
             Stop-Process -Id $childR -Force -ErrorAction SilentlyContinue
             # Off Linux the old tree is not measurable: the takeover is the bounded quarantine, stamped by the run above.
             $r = Invoke-Wrapper 'ok' @('-TimeoutSeconds','5','-LockWaitSeconds','3','-UnconfirmedQuarantineSeconds','1')
@@ -812,50 +860,54 @@ Start-Sleep -Seconds 30
     }
     # >>case:s
     # <<case:t
-    # (t) Where the tree cannot be enumerated (projection: the one platform switch of the script set to $false;
-    #     on Windows it is the real script): a timeout is NOT confirmed and keeps its record; the next owner is
-    #     blocked in the quarantine, then released after the bound; a version probe that left an unconfirmed tree
-    #     stops the run before any refresh (it used to overwrite the record and continue).
+    # (t) Where the tree can be neither enumerated nor contained (projection: the platform switches of the script
+    #     set to $false; no supported platform is like this, it is the fail-closed floor). WP710 g4: a step that
+    #     SUCCEEDS there is not a step whose tree ended - the run stops with rc 5 (tree_containment), keeps its
+    #     record and starts nothing after it; the next owner is quarantined and the timer does NOT release it; an
+    #     operator release is recorded but cannot make the tree measurable; a version probe that times out keeps
+    #     its record and stops the run.
     $srcT = Get-Content -LiteralPath $script -Raw
-    $switchT = '$TreeMeasurable = [bool]$IsLinux'
-    if (([regex]::Matches($srcT, [regex]::Escape($switchT))).Count -ne 1) { throw 'platform switch not found exactly once in the script' }
+    $projectedT = $srcT
+    foreach ($switchT in @('$TreeMeasurable = [bool]$IsLinux', '$JobContainment = [bool]$IsWindows')) {
+        if (([regex]::Matches($srcT, [regex]::Escape($switchT))).Count -ne 1) { throw ('platform switch not found exactly once in the script: ' + $switchT) }
+        $projectedT = $projectedT.Replace($switchT, ($switchT.Split('=')[0] + '= $false'))
+    }
     $projT = Join-Path $root 'projection'
     New-Item -ItemType Directory -Path $projT | Out-Null
     $projScript = Join-Path $projT 'nlm-credential-refresh.ps1'
-    Set-Content -LiteralPath $projScript -Value $srcT.Replace($switchT, '$TreeMeasurable = $false') -Encoding utf8
+    Set-Content -LiteralPath $projScript -Value $projectedT -Encoding utf8
     $recT = Join-Path ([IO.Path]::GetTempPath()) $recName
     $realScript = $script
     $env:WP714_LINGER_PID = Join-Path $root 'proj-linger.pid'
     try {
         $script = $projScript
-        $r = Invoke-Wrapper 'linger' @('-TimeoutSeconds','2')
-        if ($r.Rc -ne 3 -or $r.Json.tree_measurement -ne 'not_measurable' -or $r.Json.steps.refresh.tree_state -ne 'not_measurable' -or
-            $r.Json.steps.refresh.child_confirmed_exited -ne $false) {
-            throw ('an unmeasurable tree must not be confirmed on timeout: rc=' + $r.Rc + ' tree=' + $r.Json.steps.refresh.tree_state)
+        $r = Invoke-Wrapper 'ok' @('-TimeoutSeconds','5')
+        if ($r.Rc -ne 5 -or $r.Json.status -ne 'inconclusive' -or $r.Json.step -ne 'tree_containment' -or
+            $r.Json.containment_reason -ne 'tree_not_measurable' -or $r.Json.tree_measurement -ne 'not_measurable' -or
+            $r.Json.steps.version.tree_state -ne 'not_measurable' -or $r.Json.steps.version.child_confirmed_exited -ne $false -or
+            $r.Calls.Count -ne 0) {
+            throw ('a successful step with an unmeasured tree must stop the run: rc=' + $r.Rc + ' step=' + $r.Json.step + ' calls=' + $r.Calls.Count)
         }
         if (-not (Test-Path -LiteralPath $recT) -or (Get-Content -LiteralPath $recT -Raw | ConvertFrom-Json).tree_unconfirmed -ne $true) {
-            throw 'an unconfirmed tree must keep its operation record'
+            throw 'an unmeasured tree must keep its operation record'
         }
-        Stop-Process -Id ([int](Get-Content -LiteralPath $env:WP714_LINGER_PID -Raw)) -Force -ErrorAction SilentlyContinue
         $r = Invoke-Wrapper 'ok' @('-TimeoutSeconds','5','-LockWaitSeconds','1')
         if ($r.Rc -ne 5 -or $r.Json.step -ne 'tree_quarantine' -or $r.Json.takeover_reason -ne 'tree_not_measurable' -or $r.Calls.Count -ne 0) {
             throw ('an unconfirmed tree must block the next owner with zero operations: rc=' + $r.Rc + ' step=' + $r.Json.step)
         }
         Start-Sleep -Milliseconds 1200
         $r = Invoke-Wrapper 'ok' @('-TimeoutSeconds','5','-LockWaitSeconds','1','-UnconfirmedQuarantineSeconds','1')
-        if ($r.Rc -ne 0 -or $r.Json.status -ne 'staged' -or $r.Json.takeover -ne 'quarantine_elapsed' -or (Test-Path -LiteralPath $recT)) {
-            throw ('tree_unconfirmed must have a bounded exit: rc=' + $r.Rc + ' takeover=' + $r.Json.takeover)
+        if ($r.Rc -ne 5 -or $r.Json.step -ne 'tree_quarantine' -or $r.Json.takeover -ne 'none' -or $r.Calls.Count -ne 0 -or -not (Test-Path -LiteralPath $recT)) {
+            throw ('the timer must not release an unmeasured tree: rc=' + $r.Rc + ' step=' + $r.Json.step + ' takeover=' + $r.Json.takeover)
         }
-        Remove-Item -LiteralPath $env:WP714_LINGER_PID -ErrorAction SilentlyContinue
-        # Pipes closed and the direct child killed is still not a dead tree when the tree cannot be enumerated.
-        $r = Invoke-Wrapper 'hang_orphan' @('-TimeoutSeconds','1')
-        if ($r.Rc -ne 3 -or $r.Json.steps.refresh.child_confirmed_exited -ne $false -or -not (Test-Path -LiteralPath $recT)) {
-            throw ('an unmeasurable tree must not be confirmed on timeout even when the pipes closed: rc=' + $r.Rc + ' confirmed=' + $r.Json.steps.refresh.child_confirmed_exited)
+        $r = Invoke-Wrapper 'ok' @('-TimeoutSeconds','5','-LockWaitSeconds','1','-OperatorReleaseReason','operator checked case t by hand')
+        if ($r.Rc -ne 5 -or $r.Json.step -ne 'tree_containment' -or $r.Json.takeover -ne 'operator_release' -or $r.Calls.Count -ne 0) {
+            throw ('an operator release cannot make the platform measurable: rc=' + $r.Rc + ' step=' + $r.Json.step + ' takeover=' + $r.Json.takeover)
         }
-        Stop-Process -Id ([int](Get-Content -LiteralPath $env:WP714_LINGER_PID -Raw)) -Force -ErrorAction SilentlyContinue
-        Remove-Item -LiteralPath $recT, $env:WP714_LINGER_PID -ErrorAction SilentlyContinue
+        Remove-Item -LiteralPath $recT -ErrorAction SilentlyContinue
         $r = Invoke-Wrapper 'version_linger' @('-TimeoutSeconds','1')
-        if ($r.Rc -ne 3 -or $r.Json.step -ne 'version' -or $r.Calls.Count -ne 0 -or -not (Test-Path -LiteralPath $recT)) {
+        if ($r.Rc -ne 3 -or $r.Json.step -ne 'version' -or $r.Json.steps.version.child_confirmed_exited -ne $false -or
+            $r.Calls.Count -ne 0 -or -not (Test-Path -LiteralPath $recT)) {
             throw ('an unconfirmed version probe must stop before refresh and keep its record: rc=' + $r.Rc + ' step=' + $r.Json.step + ' calls=' + $r.Calls.Count)
         }
     } finally {
@@ -1003,6 +1055,108 @@ Start-Sleep -Seconds 30
         $cases++
     }
     # >>case:w
+    # lop: khoa-va-timeout-khong-rang-buoc-cay-tien-trinh-con (WP710 g4, Windows native)
+    # <<case:x
+    # (x) Windows, real script and a REAL Job Object built with the script's own type: a record naming a job that
+    #     still has a member blocks the next owner (job_alive), and an operator release never releases it; when
+    #     the job's holder dies the job closes, its member dies with it, and the next owner takes over. A record
+    #     whose owner had already FAILED to empty its job (tree_unconfirmed) is not cleared by the job being
+    #     closed: quarantine, no timer exit, operator only. A job name of any other shape is not measured.
+    if ($IsWindows) {
+        $srcX = Get-Content -LiteralPath $script -Raw
+        $typeX = [regex]::Match($srcX, "(?s)Add-Type -TypeDefinition @'\r?\n(.*?)\r?\n'@").Groups[1].Value
+        $prefixX = [regex]::Match($srcX, "JobPrefix\s*=\s*'([^']+)'").Groups[1].Value
+        if (-not $typeX -or -not $prefixX) { throw 'job type or job name prefix not found in the script' }
+        $typeFileX = Join-Path $root 'job-type.cs'
+        Set-Content -LiteralPath $typeFileX -Value $typeX -Encoding utf8
+        $holderScriptX = Join-Path $root 'job-holder.ps1'
+        @'
+param([string]$Source, [string]$Name, [string]$Python, [string]$Ready)
+Add-Type -TypeDefinition (Get-Content -LiteralPath $Source -Raw)
+$code = 0
+$job = [TraLuatWp710.Job]::Create($Name, [ref]$code)
+$stage = ''
+$child = [TraLuatWp710.Job]::Start($job, [TraLuatWp710.Job]::Quote([string[]]@($Python, '-c', 'import time; time.sleep(120)')),
+    [TraLuatWp710.Job]::EnvironmentBlock([Environment]::GetEnvironmentVariables()), [ref]$stage, [ref]$code)
+[void][TraLuatWp710.Job]::Resume($child)
+Set-Content -LiteralPath $Ready -Value $child.Id
+Start-Sleep -Seconds 120
+'@ | Set-Content -LiteralPath $holderScriptX
+        $recX = Join-Path ([IO.Path]::GetTempPath()) $recName
+        $jobX = $prefixX + [guid]::NewGuid().ToString('N')
+        $readyX = Join-Path $root 'job-holder.ready'
+        $holderX = Start-Process -FilePath $powershell -ArgumentList ('-NoProfile -File "' + $holderScriptX + '" -Source "' + $typeFileX + '" -Name "' + $jobX + '" -Python "' + $python + '" -Ready "' + $readyX + '"') -PassThru @hidden
+        $memberX = $null
+        try {
+            for ($i=0; $i -lt 200 -and -not (Test-Path -LiteralPath $readyX); $i++) { Start-Sleep -Milliseconds 100 }
+            if (-not (Test-Path -LiteralPath $readyX)) { throw 'job holder fixture never started' }
+            $memberX = [int](Get-Content -LiteralPath $readyX -Raw)
+            $writeX = { param($job, $unconfirmed) @{format=2; marker=[guid]::NewGuid().ToString('N'); pid=$null; start_ticks=$null; tree_unconfirmed=$unconfirmed; job=$job} | ConvertTo-Json -Compress | Set-Content -LiteralPath $recX }
+            & $writeX $jobX $false
+            $r = Invoke-Wrapper 'ok' @('-TimeoutSeconds','5','-LockWaitSeconds','1')
+            if ($r.Rc -ne 5 -or $r.Json.step -ne 'lock_busy' -or $r.Json.takeover_reason -ne 'job_alive' -or $r.Calls.Count -ne 0) {
+                throw ('a job that still has a member must block the next owner: rc=' + $r.Rc + ' step=' + $r.Json.step + ' reason=' + $r.Json.takeover_reason)
+            }
+            $r = Invoke-Wrapper 'ok' @('-TimeoutSeconds','5','-LockWaitSeconds','1','-OperatorReleaseReason','operator checked the old job')
+            if ($r.Rc -ne 5 -or $r.Json.step -ne 'lock_busy' -or $r.Json.takeover -ne 'none' -or $r.Calls.Count -ne 0) { throw 'an operator release must never release a job that still has a member' }
+            if ($null -eq (Get-Process -Id $memberX -ErrorAction SilentlyContinue)) { throw 'fixture: asking the job for its count must not end its member' }
+            Stop-Process -Id $holderX.Id -Force
+            $holderX.WaitForExit()
+            $r = Invoke-Wrapper 'ok' @('-TimeoutSeconds','5','-LockWaitSeconds','5')
+            if ($r.Rc -ne 0 -or $r.Json.status -ne 'staged' -or $r.Json.takeover -ne 'none') { throw ('a closed job must be a plain takeover: rc=' + $r.Rc + ' step=' + $r.Json.step + ' reason=' + $r.Json.takeover_reason) }
+            if ($null -ne (Get-Process -Id $memberX -ErrorAction SilentlyContinue)) { throw 'the member of a closed job is still alive: KILL_ON_JOB_CLOSE did not hold' }
+            & $writeX ($prefixX + [guid]::NewGuid().ToString('N')) $true
+            $r = Invoke-Wrapper 'ok' @('-TimeoutSeconds','5','-LockWaitSeconds','1')
+            if ($r.Rc -ne 5 -or $r.Json.step -ne 'tree_quarantine' -or $r.Json.takeover_reason -ne 'job_closed_unconfirmed' -or $r.Calls.Count -ne 0) {
+                throw ('a job its owner could not empty is not cleared by being closed: rc=' + $r.Rc + ' step=' + $r.Json.step + ' reason=' + $r.Json.takeover_reason)
+            }
+            Start-Sleep -Milliseconds 1200
+            $r = Invoke-Wrapper 'ok' @('-TimeoutSeconds','5','-LockWaitSeconds','1','-UnconfirmedQuarantineSeconds','1')
+            if ($r.Rc -ne 5 -or $r.Json.step -ne 'tree_quarantine' -or $r.Calls.Count -ne 0) { throw 'the timer must not release an unconfirmed job' }
+            $r = Invoke-Wrapper 'ok' @('-TimeoutSeconds','5','-LockWaitSeconds','1','-OperatorReleaseReason','operator checked case x by hand')
+            if ($r.Rc -ne 0 -or $r.Json.takeover -ne 'operator_release' -or $r.Json.takeover_reason -ne 'job_closed_unconfirmed') { throw 'an operator release of an unconfirmed job must stage and say so' }
+            & $writeX 'Global\tra_luat_other_job' $false
+            $r = Invoke-Wrapper 'ok' @('-TimeoutSeconds','5','-LockWaitSeconds','1')
+            if ($r.Rc -ne 5 -or $r.Json.step -ne 'tree_quarantine' -or $r.Json.takeover_reason -ne 'tree_not_measurable' -or $r.Calls.Count -ne 0) { throw 'a job name of another shape must not be measured' }
+        } finally {
+            if (-not $holderX.HasExited) { Stop-Process -Id $holderX.Id -Force -ErrorAction SilentlyContinue }
+            if ($null -ne $memberX) { Stop-Process -Id $memberX -Force -ErrorAction SilentlyContinue }
+            Remove-Item -LiteralPath $recX -ErrorAction SilentlyContinue
+        }
+        $cases++
+    }
+    # >>case:x
+    # <<case:y
+    # (y) Windows: no job, no step. Projection: the script's one job-name prefix replaced by a name the kernel
+    #     refuses (measured: error 3). The run stops at its first step with rc 5 and the reason, starts no child
+    #     (the fake CLI logs nothing, the version file is never written) and leaves no record.
+    if ($IsWindows) {
+        $srcY = Get-Content -LiteralPath $script -Raw
+        $prefixLineY = "`$JobPrefix = 'Global\tra_luat_nlm_op_'"
+        if (([regex]::Matches($srcY, [regex]::Escape($prefixLineY))).Count -ne 1) { throw 'job name prefix line not found exactly once in the script' }
+        $projY = Join-Path $root 'projection-y'
+        New-Item -ItemType Directory -Path $projY | Out-Null
+        $projScriptY = Join-Path $projY 'nlm-credential-refresh.ps1'
+        Set-Content -LiteralPath $projScriptY -Value $srcY.Replace($prefixLineY, "`$JobPrefix = 'Global\no\such\'") -Encoding utf8
+        $recY = Join-Path ([IO.Path]::GetTempPath()) $recName
+        $realScriptY = $script
+        $env:WP714_LINGER_PID = Join-Path $root 'no-job.pid'
+        try {
+            $script = $projScriptY
+            $r = Invoke-Wrapper 'version_linger' @('-TimeoutSeconds','5')
+            if ($r.Rc -ne 5 -or $r.Json.status -ne 'inconclusive' -or $r.Json.step -ne 'tree_containment' -or
+                $r.Json.containment_reason -notmatch '^job_create_failed:\d+$' -or $r.Json.steps.version.tree_state -ne 'not_contained' -or
+                $r.Calls.Count -ne 0 -or (Test-Path -LiteralPath $env:WP714_LINGER_PID) -or (Test-Path -LiteralPath $recY)) {
+                throw ('without a job no step may start: rc=' + $r.Rc + ' step=' + $r.Json.step + ' reason=' + $r.Json.containment_reason)
+            }
+        } finally {
+            $script = $realScriptY
+            Remove-Item -LiteralPath $recY -ErrorAction SilentlyContinue
+            Remove-Item Env:WP714_LINGER_PID -ErrorAction SilentlyContinue
+        }
+        $cases++
+    }
+    # >>case:y
     "passed=$cases failed=0"
 } finally {
     Remove-Item -LiteralPath $root -Recurse -Force -ErrorAction SilentlyContinue

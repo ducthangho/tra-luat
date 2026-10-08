@@ -1,7 +1,8 @@
 #requires -Version 7.0
 # WP710: refresh -> real notebook canary -> stage, serialized on this host. Never prints child output.
 # Exit codes: 0 staged; 2 refresh/canary rc != 0 (auth_failure, network_failure or inconclusive);
-# 3 timeout; 4 inconclusive (canary body or preflight); 5 inconclusive/lock_busy/tree_quarantine; 6 stage_failure.
+# 3 timeout; 4 inconclusive (canary body or preflight); 5 inconclusive/lock_busy/tree_quarantine/tree_containment;
+# 6 stage_failure.
 param(
     [Parameter(Mandatory=$true)][string]$ConfigPath,
     [string]$NlmCommand = 'nlm',
@@ -31,11 +32,18 @@ $ProgressPreference = 'SilentlyContinue'
 $OperationRecord = Join-Path ([IO.Path]::GetTempPath()) 'tra_luat_nlm_credential_refresh.operation.json'
 $MarkerName = 'TRA_LUAT_NLM_OP'
 $Evidence = [ordered]@{ cycle = 0; profile_fingerprint = ''; cli_version = ''; takeover = 'none'; takeover_reason = '';
-    operator_reason = ''; steps = [ordered]@{} }
+    operator_reason = ''; containment_reason = ''; steps = [ordered]@{} }
 
 # WP714 round 3: the ONE place that decides whether this platform can enumerate the operation's process
 # tree. Only Linux can (/proc). Everywhere else every "no descendant found" is NOT MEASURED, never "none".
 $TreeMeasurable = [bool]$IsLinux
+# WP710 g4 (Windows): a step's processes are CONTAINED, not enumerated. Each step runs in its own named Job
+# Object with JOB_OBJECT_LIMIT_KILL_ON_JOB_CLOSE; the child is created suspended and assigned before its first
+# instruction, so every descendant is born inside the job (no breakaway is granted). The job's own
+# ActiveProcesses count is the measurement: 0 is the only proof that the step's tree is gone.
+$JobContainment = [bool]$IsWindows
+$JobPrefix = 'Global\tra_luat_nlm_op_'
+$JobReady = $false
 $ProcRoot = '/proc'   # where the operation tree is enumerated (the wrapper's own entry is always /proc/$PID)
 $Subreaper = $false
 $CanReap = $false
@@ -94,6 +102,200 @@ if ($TreeMeasurable) {
     } catch { $OwnerChain = $null }
 }
 
+if ($JobContainment) {
+    # No job API, no step: Invoke-Bounded refuses (rc 5) instead of falling back to an uncontained child.
+    try {
+        Add-Type -TypeDefinition @'
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Runtime.InteropServices;
+using System.Text;
+using Microsoft.Win32.SafeHandles;
+namespace TraLuatWp710 {
+    public sealed class JobChild {
+        public IntPtr Process; public IntPtr Thread; public int Id; public SafeFileHandle Out; public SafeFileHandle Err;
+    }
+    public static class Job {
+        [StructLayout(LayoutKind.Sequential)] struct BasicLimit {
+            public long PerProcessUserTimeLimit, PerJobUserTimeLimit; public uint LimitFlags;
+            public UIntPtr MinimumWorkingSetSize, MaximumWorkingSetSize; public uint ActiveProcessLimit;
+            public UIntPtr Affinity; public uint PriorityClass, SchedulingClass;
+        }
+        [StructLayout(LayoutKind.Sequential)] struct IoCounters { public ulong A, B, C, D, E, F; }
+        [StructLayout(LayoutKind.Sequential)] struct ExtendedLimit {
+            public BasicLimit Basic; public IoCounters Io;
+            public UIntPtr ProcessMemoryLimit, JobMemoryLimit, PeakProcessMemoryUsed, PeakJobMemoryUsed;
+        }
+        [StructLayout(LayoutKind.Sequential)] struct Accounting {
+            public long TotalUserTime, TotalKernelTime, ThisPeriodTotalUserTime, ThisPeriodTotalKernelTime;
+            public uint TotalPageFaultCount, TotalProcesses, ActiveProcesses, TotalTerminatedProcesses;
+        }
+        [StructLayout(LayoutKind.Sequential)] struct StartupInfo {
+            public int cb; public IntPtr lpReserved, lpDesktop, lpTitle;
+            public int dwX, dwY, dwXSize, dwYSize, dwXCountChars, dwYCountChars, dwFillAttribute, dwFlags;
+            public short wShowWindow, cbReserved2; public IntPtr lpReserved2, hStdInput, hStdOutput, hStdError;
+        }
+        [StructLayout(LayoutKind.Sequential)] struct ProcessInformation {
+            public IntPtr hProcess, hThread; public int dwProcessId, dwThreadId;
+        }
+        const string K = "kernel32.dll";
+        [DllImport(K, SetLastError = true, CharSet = CharSet.Unicode)] static extern IntPtr CreateJobObjectW(IntPtr sa, string name);
+        [DllImport(K, SetLastError = true, CharSet = CharSet.Unicode)] static extern IntPtr OpenJobObjectW(uint access, bool inherit, string name);
+        [DllImport(K, SetLastError = true)] static extern bool SetInformationJobObject(IntPtr job, int cls, ref ExtendedLimit info, int length);
+        [DllImport(K, SetLastError = true)] static extern bool QueryInformationJobObject(IntPtr job, int cls, out Accounting info, int length, IntPtr returned);
+        [DllImport(K, SetLastError = true, EntryPoint = "QueryInformationJobObject")] static extern bool QueryJobBuffer(IntPtr job, int cls, IntPtr buffer, int length, IntPtr returned);
+        [DllImport(K, SetLastError = true)] static extern bool AssignProcessToJobObject(IntPtr job, IntPtr process);
+        [DllImport(K, SetLastError = true)] static extern bool IsProcessInJob(IntPtr process, IntPtr job, out bool result);
+        [DllImport(K, SetLastError = true)] static extern bool TerminateJobObject(IntPtr job, uint exitCode);
+        [DllImport(K, SetLastError = true)] static extern bool CreatePipe(out IntPtr read, out IntPtr write, IntPtr sa, int size);
+        [DllImport(K, SetLastError = true)] static extern bool SetHandleInformation(IntPtr handle, int mask, int flags);
+        [DllImport(K, SetLastError = true)] static extern IntPtr GetStdHandle(int which);
+        [DllImport(K, SetLastError = true, CharSet = CharSet.Unicode)] static extern bool CreateProcessW(string application, StringBuilder commandLine,
+            IntPtr processAttributes, IntPtr threadAttributes, bool inheritHandles, uint flags, byte[] environment, string directory,
+            ref StartupInfo startupInfo, out ProcessInformation information);
+        [DllImport(K, SetLastError = true)] static extern uint ResumeThread(IntPtr thread);
+        [DllImport(K, SetLastError = true)] static extern bool TerminateProcess(IntPtr process, uint exitCode);
+        [DllImport(K, SetLastError = true)] static extern uint WaitForSingleObject(IntPtr handle, uint milliseconds);
+        [DllImport(K, SetLastError = true)] static extern bool GetExitCodeProcess(IntPtr process, out uint exitCode);
+        [DllImport(K, SetLastError = true)] static extern bool CloseHandle(IntPtr handle);
+
+        // A new, named job that kills every member when its last handle closes. Zero + error on any failure,
+        // including a name that already exists (that job is somebody else's).
+        public static IntPtr Create(string name, out int error) {
+            IntPtr job = CreateJobObjectW(IntPtr.Zero, name);
+            error = Marshal.GetLastWin32Error();
+            if (job == IntPtr.Zero) return job;
+            if (error == 183) { CloseHandle(job); return IntPtr.Zero; }
+            ExtendedLimit info = new ExtendedLimit();
+            info.Basic.LimitFlags = 0x2000;   // JOB_OBJECT_LIMIT_KILL_ON_JOB_CLOSE
+            if (!SetInformationJobObject(job, 9, ref info, Marshal.SizeOf(typeof(ExtendedLimit)))) {
+                error = Marshal.GetLastWin32Error(); CloseHandle(job); return IntPtr.Zero;
+            }
+            error = 0;
+            return job;
+        }
+        // ActiveProcesses of the job (JobObjectBasicAccountingInformation); -1 when it cannot be read.
+        public static int Active(IntPtr job) {
+            Accounting info;
+            if (!QueryInformationJobObject(job, 1, out info, Marshal.SizeOf(typeof(Accounting)), IntPtr.Zero)) return -1;
+            return (int)info.ActiveProcesses;
+        }
+        // Members other than the step's direct child (JobObjectBasicProcessIdList); -1 when it cannot be read.
+        public static int Others(IntPtr job, int root) {
+            int size = 8 + IntPtr.Size * 4096;
+            IntPtr buffer = Marshal.AllocHGlobal(size);
+            try {
+                if (!QueryJobBuffer(job, 3, buffer, size, IntPtr.Zero)) return -1;
+                int listed = Marshal.ReadInt32(buffer, 4), others = 0;
+                for (int i = 0; i < listed; i++) {
+                    if (Marshal.ReadIntPtr(buffer, 8 + IntPtr.Size * i).ToInt64() != root) others++;
+                }
+                return others;
+            } finally { Marshal.FreeHGlobal(buffer); }
+        }
+        // A job recorded by an earlier owner: 0 opened (active = its ActiveProcesses), 1 no job has that name,
+        // 2 it exists but cannot be opened or read. The handle is closed again before returning.
+        public static int Probe(string name, out int active) {
+            active = -1;
+            IntPtr job = OpenJobObjectW(0x0004, false, name);   // JOB_OBJECT_QUERY
+            if (job == IntPtr.Zero) return Marshal.GetLastWin32Error() == 2 ? 1 : 2;
+            try { active = Active(job); } finally { CloseHandle(job); }
+            return active < 0 ? 2 : 0;
+        }
+        public static bool Terminate(IntPtr job) { return TerminateJobObject(job, 1); }
+        public static void Close(IntPtr handle) { if (handle != IntPtr.Zero) CloseHandle(handle); }
+
+        // Create the child SUSPENDED with redirected stdout/stderr, put it in the job and verify the membership.
+        // It has not executed anything when this returns; Resume starts it. null + stage/error on failure: a
+        // child that could not be placed in the job is terminated before it ever ran.
+        public static JobChild Start(IntPtr job, string commandLine, byte[] environment, out string stage, out int error) {
+            stage = ""; error = 0;
+            IntPtr outRead, outWrite, errRead, errWrite;
+            if (!CreatePipe(out outRead, out outWrite, IntPtr.Zero, 0)) { error = Marshal.GetLastWin32Error(); stage = "pipe"; return null; }
+            if (!CreatePipe(out errRead, out errWrite, IntPtr.Zero, 0)) {
+                error = Marshal.GetLastWin32Error(); stage = "pipe"; CloseHandle(outRead); CloseHandle(outWrite); return null;
+            }
+            ProcessInformation pi = new ProcessInformation();
+            bool created = false;
+            if (!SetHandleInformation(outWrite, 1, 1) || !SetHandleInformation(errWrite, 1, 1)) {
+                error = Marshal.GetLastWin32Error(); stage = "pipe";
+            } else {
+                StartupInfo si = new StartupInfo();
+                si.cb = Marshal.SizeOf(typeof(StartupInfo));
+                si.dwFlags = 0x100;   // STARTF_USESTDHANDLES
+                si.hStdInput = GetStdHandle(-10); si.hStdOutput = outWrite; si.hStdError = errWrite;
+                // CREATE_SUSPENDED | CREATE_UNICODE_ENVIRONMENT
+                created = CreateProcessW(null, new StringBuilder(commandLine), IntPtr.Zero, IntPtr.Zero, true, 0x4 | 0x400,
+                    environment, null, ref si, out pi);
+                if (!created) { error = Marshal.GetLastWin32Error(); stage = "create"; }
+            }
+            CloseHandle(outWrite); CloseHandle(errWrite);   // the parent keeps only the read ends
+            if (!created) { CloseHandle(outRead); CloseHandle(errRead); return null; }
+            bool member = false;
+            if (!AssignProcessToJobObject(job, pi.hProcess)) { error = Marshal.GetLastWin32Error(); stage = "assign"; }
+            else if (!IsProcessInJob(pi.hProcess, job, out member)) { error = Marshal.GetLastWin32Error(); stage = "verify"; }
+            else if (!member) { stage = "verify"; }
+            if (stage.Length > 0) {
+                TerminateProcess(pi.hProcess, 1);
+                if (WaitForSingleObject(pi.hProcess, 5000) != 0) stage += "_alive";
+                CloseHandle(pi.hThread); CloseHandle(pi.hProcess); CloseHandle(outRead); CloseHandle(errRead);
+                return null;
+            }
+            JobChild child = new JobChild();
+            child.Process = pi.hProcess; child.Thread = pi.hThread; child.Id = pi.dwProcessId;
+            child.Out = new SafeFileHandle(outRead, true); child.Err = new SafeFileHandle(errRead, true);
+            return child;
+        }
+        public static bool Resume(JobChild child) {
+            bool resumed = ResumeThread(child.Thread) != 0xFFFFFFFF;
+            CloseHandle(child.Thread); child.Thread = IntPtr.Zero;
+            return resumed;
+        }
+        public static bool Wait(JobChild child, int milliseconds) {
+            return WaitForSingleObject(child.Process, (uint)Math.Max(0, milliseconds)) == 0;
+        }
+        public static int ExitCode(JobChild child) {
+            uint code;
+            if (!GetExitCodeProcess(child.Process, out code)) return -1;
+            return unchecked((int)code);
+        }
+        // The command line Process.Start builds from ArgumentList (CommandLineToArgvW rules).
+        public static string Quote(string[] arguments) {
+            StringBuilder line = new StringBuilder();
+            foreach (string argument in arguments) {
+                if (line.Length > 0) line.Append(' ');
+                bool plain = argument.Length > 0;
+                foreach (char c in argument) { if (char.IsWhiteSpace(c) || c == '"') { plain = false; break; } }
+                if (plain) { line.Append(argument); continue; }
+                line.Append('"');
+                int slashes = 0;
+                foreach (char c in argument) {
+                    if (c == '\\') { slashes++; continue; }
+                    if (c == '"') { line.Append('\\', slashes * 2 + 1); line.Append('"'); slashes = 0; continue; }
+                    line.Append('\\', slashes); slashes = 0; line.Append(c);
+                }
+                line.Append('\\', slashes * 2);
+                line.Append('"');
+            }
+            return line.ToString();
+        }
+        public static byte[] EnvironmentBlock(IDictionary variables) {
+            List<string> keys = new List<string>();
+            foreach (object key in variables.Keys) keys.Add((string)key);
+            keys.Sort(StringComparer.OrdinalIgnoreCase);
+            StringBuilder block = new StringBuilder();
+            foreach (string key in keys) { block.Append(key).Append('=').Append((string)variables[key]).Append('\0'); }
+            block.Append('\0');
+            return Encoding.Unicode.GetBytes(block.ToString());
+        }
+    }
+}
+'@
+        $JobReady = $true
+    } catch { $JobReady = $false }
+}
+
 function Emit([string]$status, [string]$step, [int]$rc, [double]$elapsed) {
     # Never emit child stdout/stderr: either stream can include cookies.
     [ordered]@{
@@ -102,7 +304,8 @@ function Emit([string]$status, [string]$step, [int]$rc, [double]$elapsed) {
         profile_fingerprint_basis = 'sha256 of the lower-cased full browser_profile_path declared in config (first 16 hex)'
         profile_bound_to_cli = $false
         cli_version = $Evidence.cli_version
-        tree_measurement = $(if (-not $TreeMeasurable) { 'not_measurable' } elseif ($Subreaper) { 'linux_subreaper_and_marker' } else { 'linux_marker' })
+        tree_measurement = $(if ($JobContainment) { 'windows_job_object' } elseif (-not $TreeMeasurable) { 'not_measurable' } elseif ($Subreaper) { 'linux_subreaper_and_marker' } else { 'linux_marker' })
+        containment_reason = $Evidence.containment_reason
         takeover = $Evidence.takeover; takeover_reason = $Evidence.takeover_reason
         operator_reason = $Evidence.operator_reason
         steps = $Evidence.steps
@@ -253,13 +456,14 @@ function Stop-OperationTree([string]$marker, [bool]$inRun, [int]$direct = 0) {
     }
 }
 
-function Write-OperationRecord($marker, $process, [bool]$unconfirmed, [string[]]$pipes = @()) {
+function Write-OperationRecord($marker, $process, [bool]$unconfirmed, [string[]]$pipes = @(), [string]$job = '') {
     # format 2 (WP714 round 4) adds what a later owner needs to look for descendants that cleared the marker:
     # the step's start (before the spawn: the owner's own start, a lower bound), the step's redirected pipes
     # and the owner's ancestor chain. A record without format 2 is checked by marker only.
     $data = [ordered]@{ format = 2; marker = $marker; pid = $null; start_ticks = $null; tree_unconfirmed = $unconfirmed
         owner_start_jiffies = $OwnerStartJiffies; step_start_jiffies = $OwnerStartJiffies; owner_chain = $OwnerChain
         pipes = @($pipes) }
+    if ($job) { $data.job = $job }   # Windows: the step's Job Object, so a later owner can ask it for its count
     if ($process) {
         $data.pid = $process.Id; $data.start_ticks = (Get-StartTicks $process)
         if ($TreeMeasurable) {
@@ -313,6 +517,17 @@ function Get-RecordVerdict {
     try { $record = [string](Get-Content -LiteralPath $OperationRecord -Raw) | ConvertFrom-Json } catch { $record = $null }
     if ($null -eq $record -or $record -isnot [pscustomobject]) { return @{ State = 'alive'; Reason = 'record_unreadable' } }
     if ((Test-RecordedRootAlive $record) -eq $true) { return @{ State = 'alive'; Reason = 'root_alive' } }
+    if ($JobContainment -and $JobReady -and [string]$record.job -cmatch ('^' + [regex]::Escape($JobPrefix) + '[0-9a-f]{32}$')) {
+        # WP710 g4: the old step's job answers for its whole tree. Opened: its ActiveProcesses decides. No job
+        # of that name: its last handle is closed, and KILL_ON_JOB_CLOSE ended every member at that close - but a
+        # record whose owner already FAILED to empty that job (tree_unconfirmed) is not cleared by that alone.
+        $active = -1
+        switch ([TraLuatWp710.Job]::Probe([string]$record.job, [ref]$active)) {
+            0 { if ($active -gt 0) { return @{ State = 'alive'; Reason = 'job_alive' } } else { return @{ State = 'clear'; Reason = '' } } }
+            1 { if ($record.tree_unconfirmed -eq $false) { return @{ State = 'clear'; Reason = '' } } else { return @{ State = 'quarantine'; Reason = 'job_closed_unconfirmed' } } }
+            default { return @{ State = 'quarantine'; Reason = 'job_unknown' } }
+        }
+    }
     $reason = 'tree_not_measurable'
     $marker = [string]$record.marker
     if ($marker -match '^[0-9a-f]{32}$') {
@@ -336,6 +551,9 @@ function Get-RecordVerdict {
             return @{ State = 'quarantine'; Reason = 'tree_unknown' }   # measured, not proven gone: no timer exit
         }
     }
+    # WP710 g4: the timer exit exists only where the platform enumerates trees (a Linux record without a marker).
+    # Everywhere else nothing was measured, so waiting proves nothing: quarantine until -OperatorReleaseReason.
+    if (-not $TreeMeasurable) { return @{ State = 'quarantine'; Reason = $reason } }
     $now = [DateTime]::UtcNow.Ticks
     $seen = $record.root_dead_seen_utc_ticks
     if ($null -eq $seen) {
@@ -350,8 +568,113 @@ function Get-RecordVerdict {
     return @{ State = 'quarantine'; Reason = $reason }
 }
 
+function Stop-OperationJob([IntPtr]$job, [int]$root) {
+    # Windows: end every process of the step's job and confirm by the job's own count.
+    # State: gone (ActiveProcesses read as 0) | alive (still above 0 after 5 s) | unknown (the count cannot be read).
+    # Stopped: members other than the step's direct child that were in the job when it was terminated.
+    $others = [Math]::Max(0, [TraLuatWp710.Job]::Others($job, $root))
+    $active = [TraLuatWp710.Job]::Active($job)
+    if ($active -lt 0) { return @{ State = 'unknown'; Stopped = 0 } }
+    if ($active -eq 0) { return @{ State = 'gone'; Stopped = 0 } }
+    [void][TraLuatWp710.Job]::Terminate($job)
+    $watch = [Diagnostics.Stopwatch]::StartNew()
+    while ($watch.ElapsedMilliseconds -le 5000) {
+        $active = [TraLuatWp710.Job]::Active($job)
+        if ($active -eq 0) { return @{ State = 'gone'; Stopped = $others } }
+        if ($active -lt 0) { return @{ State = 'unknown'; Stopped = $others } }
+        Start-Sleep -Milliseconds 50
+    }
+    return @{ State = 'alive'; Stopped = $others }
+}
+
+function Invoke-BoundedJob([string]$file, [string[]]$arguments, [int]$seconds, [hashtable]$environment, [string]$marker) {
+    # Windows path of Invoke-Bounded. A result with `blocked` set means the step's tree is not contained or not
+    # proven gone: the caller stops with rc 5 (tree_containment) and never starts the next step.
+    $budget = [int64]$seconds * 1000
+    $watch = [System.Diagnostics.Stopwatch]::StartNew()
+    $jobName = $JobPrefix + $marker
+    $code = 0
+    $job = [TraLuatWp710.Job]::Create($jobName, [ref]$code)
+    if ($job -eq [IntPtr]::Zero) {   # nothing was started and no record was written
+        return @{timeout=$false; rc=-1; out=''; err=''; elapsed=$watch.Elapsed.TotalSeconds; exited=$false; reaped=0;
+            tree='not_contained'; blocked="job_create_failed:$code"}
+    }
+    $child = $null
+    $streams = @()
+    $started = $false
+    $confirmed = $false
+    Write-OperationRecord $marker $null $false @() $jobName
+    try {
+        $variables = @{}
+        foreach ($entry in [Environment]::GetEnvironmentVariables().GetEnumerator()) { $variables[[string]$entry.Key] = [string]$entry.Value }
+        foreach ($key in $environment.Keys) { $variables[[string]$key] = [string]$environment[$key] }
+        $variables[$MarkerName] = $marker
+        $stage = ''
+        $child = [TraLuatWp710.Job]::Start($job, [TraLuatWp710.Job]::Quote([string[]](@($file) + $arguments)),
+            [TraLuatWp710.Job]::EnvironmentBlock($variables), [ref]$stage, [ref]$code)
+        if ($null -eq $child) {
+            if ($stage -in @('pipe', 'create')) { throw "process start failed ($stage $code)" }   # as Process.Start() would
+            # Created but not in the job: it was terminated while still suspended, so no step code ran.
+            $confirmed = $stage -notlike '*_alive'
+            return @{timeout=$false; rc=-1; out=''; err=''; elapsed=$watch.Elapsed.TotalSeconds; exited=$confirmed; reaped=0;
+                tree='not_contained'; blocked="job_${stage}_failed:$code"}
+        }
+        $started = $true
+        $process = Get-Process -Id $child.Id -ErrorAction SilentlyContinue
+        Write-OperationRecord $marker $process $false @() $jobName
+        $streams = @([IO.FileStream]::new($child.Out, [IO.FileAccess]::Read, 4096, $false),
+            [IO.FileStream]::new($child.Err, [IO.FileAccess]::Read, 4096, $false))
+        $outBytes = [IO.MemoryStream]::new()
+        $stdout = $streams[0].CopyToAsync($outBytes)
+        $stderr = [IO.StreamReader]::new($streams[1], $Utf8Lenient).ReadToEndAsync()
+        $done = [TraLuatWp710.Job]::Resume($child)
+        if ($done) { $done = [TraLuatWp710.Job]::Wait($child, [int][Math]::Max(0, $budget - $watch.ElapsedMilliseconds)) }
+        if ($done) {
+            $done = [Threading.Tasks.Task]::WaitAll([Threading.Tasks.Task[]]@($stdout, $stderr),
+                [int][Math]::Max(0, $budget - $watch.ElapsedMilliseconds))
+        }
+        if (-not $done) {
+            # Budget spent (or the child could not be resumed): end the whole job, then prove it empty.
+            $tree = Stop-OperationJob $job $child.Id
+            $rootGone = [TraLuatWp710.Job]::Wait($child, 5000)
+            $pipesClosed = $false
+            try { $pipesClosed = [Threading.Tasks.Task]::WaitAll([Threading.Tasks.Task[]]@($stdout, $stderr), 5000) } catch { $pipesClosed = $false }
+            $confirmed = $rootGone -and $pipesClosed -and $tree.State -eq 'gone'
+            if (-not $confirmed) { Write-OperationRecord $marker $process $true @() $jobName }
+            return @{timeout=$true; rc=-1; out=''; err=''; elapsed=$watch.Elapsed.TotalSeconds; exited=$confirmed;
+                reaped=$tree.Stopped; tree=$tree.State}
+        }
+        # Success path: the direct child returned and the pipes are closed. Anything still in the job is a
+        # descendant that dropped the pipes; it is ended and the job must count 0 before the next step may start.
+        $tree = Stop-OperationJob $job $child.Id
+        if ($tree.State -ne 'gone') {
+            Write-OperationRecord $marker $process $true @() $jobName
+            return @{timeout=$false; rc=-1; out=''; err=''; elapsed=$watch.Elapsed.TotalSeconds; exited=$false;
+                reaped=$tree.Stopped; tree=$tree.State; blocked="job_$($tree.State)"}
+        }
+        $confirmed = $true
+        return @{timeout=$false; rc=[TraLuatWp710.Job]::ExitCode($child); out=$Utf8Lenient.GetString($outBytes.ToArray()); err=$stderr.Result;
+            elapsed=$watch.Elapsed.TotalSeconds; exited=$true; reaped=$tree.Stopped; tree=$tree.State}
+    } finally {
+        if (-not $started -or $confirmed) { Remove-Item -LiteralPath $OperationRecord -ErrorAction SilentlyContinue }
+        foreach ($stream in $streams) { try { $stream.Dispose() } catch { } }
+        if ($null -ne $child) {
+            [TraLuatWp710.Job]::Close($child.Thread); [TraLuatWp710.Job]::Close($child.Process)
+            if ($streams.Count -eq 0) { $child.Out.Dispose(); $child.Err.Dispose() }
+        }
+        [TraLuatWp710.Job]::Close($job)   # last: closing the job ends whatever is still in it
+    }
+}
+
 function Invoke-Bounded([string]$file, [string[]]$arguments, [int]$seconds, [hashtable]$environment = @{}) {
     $marker = [guid]::NewGuid().ToString('N')
+    if ($JobContainment) {
+        if (-not $JobReady) {
+            return @{timeout=$false; rc=-1; out=''; err=''; elapsed=0.0; exited=$false; reaped=0; tree='not_contained';
+                blocked='job_api_unavailable'}
+        }
+        return Invoke-BoundedJob $file $arguments $seconds $environment $marker
+    }
     $info = [System.Diagnostics.ProcessStartInfo]::new()
     $info.FileName = $file
     $info.UseShellExecute = $false
@@ -403,13 +726,18 @@ function Invoke-Bounded([string]$file, [string[]]$arguments, [int]$seconds, [has
                 reaped=$tree.Stopped; tree=$tree.State}
         }
         # Success path: a descendant that dropped the pipes may still run; it is part of this operation and
-        # must not overlap the next step, so it is stopped and confirmed first (Linux). Off Linux nothing can
-        # be enumerated: the step proceeds and its evidence says tree_state=not_measurable.
+        # must not overlap the next step, so it is stopped and confirmed first (Linux). WP710 g4: a tree that
+        # cannot be enumerated is NOT a tree that ended - the record stays and the run stops (rc 5).
         $tree = Stop-OperationTree $marker $true $process.Id
         if ($tree.State -in @('alive', 'unknown')) {
             Write-OperationRecord $marker $process $true $pipes
             return @{timeout=$true; rc=-1; out=''; err=''; elapsed=$watch.Elapsed.TotalSeconds; exited=$false;
                 reaped=$tree.Stopped; tree=$tree.State}
+        }
+        if ($tree.State -ne 'gone') {
+            Write-OperationRecord $marker $process $true $pipes
+            return @{timeout=$false; rc=-1; out=''; err=''; elapsed=$watch.Elapsed.TotalSeconds; exited=$false;
+                reaped=$tree.Stopped; tree=$tree.State; blocked='tree_not_measurable'}
         }
         $confirmed = $true
         return @{timeout=$false; rc=$process.ExitCode; out=$Utf8Lenient.GetString($outBytes.ToArray()); err=$stderr.Result;
@@ -541,6 +869,14 @@ function Test-CanaryBody([string]$text, [string]$notebook) {
     } catch { return $false } finally { $doc.Dispose() }
 }
 
+function Exit-IfBlocked($result) {
+    # WP710 g4: a step whose tree is not contained, or not proven gone, ends the run before any later step.
+    if (-not $result.blocked) { return }
+    $Evidence.containment_reason = [string]$result.blocked
+    Emit 'inconclusive' 'tree_containment' -1 $result.elapsed
+    exit 5
+}
+
 function Classify([string]$message) {
     # Bare words are not evidence: `nlm auth refresh`, `nlm login` and .../nlm/auth/refresh.py all
     # contain auth words. Only anchored failure phrases count (allow-list); a mixed or unknown signal
@@ -602,6 +938,7 @@ try {
     Remove-Item -LiteralPath $OperationRecord -ErrorAction SilentlyContinue
     $versionResult = Invoke-Bounded $nlmPath ($NlmArgumentsPrefix + @('--version')) $TimeoutSeconds
     Write-Step 'version' $versionResult
+    Exit-IfBlocked $versionResult
     # WP714 round 3: the version probe is an operation like any other. A tree it left unconfirmed keeps the
     # record; starting the refresh would overwrite that record and overlap the old tree.
     if ($versionResult.timeout -and -not $versionResult.exited) { Emit 'timeout' 'version' -1 $versionResult.elapsed; exit 3 }
@@ -616,6 +953,7 @@ try {
         foreach ($name in @('refresh', 'canary', 'stage')) { [void]$Evidence.steps.Remove($name) }
         $refresh = Invoke-Bounded $nlmPath ($NlmArgumentsPrefix + @('auth','refresh')) $TimeoutSeconds
         Write-Step 'refresh' $refresh
+        Exit-IfBlocked $refresh
         if ($refresh.timeout) { Emit 'timeout' 'refresh' -1 $refresh.elapsed; exit 3 }
         if ($refresh.rc -ne 0) {
             Emit (Classify ($refresh.err + ' ' + $refresh.out)) 'refresh' $refresh.rc $refresh.elapsed
@@ -623,6 +961,7 @@ try {
         }
         $canary = Invoke-Bounded $nlmPath ($NlmArgumentsPrefix + @('notebook','get',$notebook,'-j')) $TimeoutSeconds
         Write-Step 'canary' $canary
+        Exit-IfBlocked $canary
         if ($canary.timeout) { Emit 'timeout' 'canary' -1 $canary.elapsed; exit 3 }
         if ($canary.rc -ne 0) {
             Emit (Classify ($canary.err + ' ' + $canary.out)) 'canary' $canary.rc $canary.elapsed
@@ -638,6 +977,7 @@ try {
         try { $stage = Invoke-Bounded $stagePath $StageArguments $TimeoutSeconds $pin }
         catch { Emit 'stage_failure' 'stage' -1 0; exit 6 }
         Write-Step 'stage' $stage
+        Exit-IfBlocked $stage
         if ($stage.timeout -or $stage.rc -ne 0) {
             Emit 'stage_failure' 'stage' $stage.rc $stage.elapsed
             exit 6

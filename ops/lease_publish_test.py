@@ -566,13 +566,15 @@ def _buoc_workflow(ten: str) -> dict:
 # cũng được: bản trước miễn BẤT KỲ ca nào ném `BoQuaNen(WORKFLOW_DANG, 'dang')` (probe r1: `0/0 đạt; bỏ
 # qua=1; rc=0`). `t193` đòi sổ BẰNG ĐÚNG tập ca ĐO được (chạy thật dưới nền `nt` mô phỏng) là ném, đúng cặp — nới
 # hay hụt sổ là ĐỎ. r3 M2 (đo 01-10, quét MỌI ca): thêm năm ca #677 gọi `_chay_buoc_dang_that`; `t199` tự bắt nên KHÔNG.
+# wp678 §4 (iii): thêm `t207` (ca biên A3 gọi helper ở cấp đỉnh, KHÔNG tự bắt `BoQuaNen`).
 SO_BO_QUA = {ten: (WORKFLOW_DANG, "dang") for ten in (
     "t51_lease_giua_bi_chan_van_xu_ly_het_nhung_luot_DO", "t59_moi_lease_goi_kiem_github_truoc_check",
     "t60_kiem_github_hong_khong_POST_va_lam_buoc_DO", "t62_kiem_github_rc9_bo_qua_lease_va_buoc_XANH",
     "t63_check_rc9_bo_qua_lease_va_buoc_XANH", "t66_moi_guard_co_phan_chung_va_ve_theo_vi_tri",
     "t68_post_rc_hong_van_COMMENT_DA_LEN_va_buoc_phai_DO", "t195_M2_tap_i_bien_cong_khai_khoa_ca_bo_quan_sat",
     "t196_M3a_tap_ii_PR_co_dau_con_han_phai_DO_khong_bo_qua", "t197_M3b_tap_ii_Issue_co_dau_het_han_phai_DO_khong_bo_qua",
-    "t198_M4_doi_chung_duong_chuoi_hop_le_dang_dung_mot_POST", "t200_M1_nguon_lease_publish_tuy_chon_that_su_duoc_dung")}
+    "t198_M4_doi_chung_duong_chuoi_hop_le_dang_dung_mot_POST", "t200_M1_nguon_lease_publish_tuy_chon_that_su_duoc_dung",
+    "t207_wp678_A3_bien_workflow_yes_gap_dau_True_buoc_DO_0_POST")}
 # DANH SÁCH CHO PHÉP, không khớp tiền tố: `ubuntu-not-a-runner` khớp `ubuntu-` mà không phải runner nào.
 NHAN_UBUNTU_CHO_PHEP = frozenset({"ubuntu-latest", "ubuntu-24.04", "ubuntu-22.04"})
 
@@ -630,6 +632,338 @@ def t01_lease_hop_le_thi_QUA():
     with San() as s:
         rc, o, e = chay("check", viet(s, lease_mau()))
         bang(rc == RC_OK, f"chặn oan lease hợp lệ: rc={rc} {e}")
+
+
+@ca
+def t01_legacy_provider_aliases():
+    import copy
+    import yaml
+
+    with San() as s:
+        for alias, canonical, other in (("anthropic_claude", "claude", "openai_codex"),
+                                         ("openai_codex", "codex", "anthropic_claude")):
+            for provider, actor in ((alias, canonical), (canonical, alias), (alias, alias)):
+                for role in ("executor", "reviewer"):
+                    actors = ({"executor": actor, "reviewer": other} if role == "executor"
+                              else {"reviewer": actor, "executor": other})
+                    lease = lease_mau(role=role, provider=provider,
+                                      assurance_target="cross_approved", **actors)
+                    rc, _, e = chay("check", viet(s, lease))
+                    bang(rc == RC_OK, f"legacy aliases blocked: {lease}, rc={rc} {e}")
+            human = lease_mau(provider="human", reviewer="human", executor=alias,
+                              assurance_target="human_audited")
+            rc, _, e = chay("check", viet(s, human))
+            bang(rc == RC_OK, f"human audit with legacy executor blocked: rc={rc} {e}")
+            for invalid, expected in (
+                (lease_mau(provider=alias, reviewer=canonical, executor=alias,
+                           assurance_target="cross_approved"), RC_LOP),
+                (lease_mau(provider=alias, reviewer=alias, executor=other,
+                           assurance_target="human_audited"), RC_LOP),
+                (lease_mau(provider=alias, execution_surface="antigravity"), RC_NOI_DUNG),
+                (lease_mau(provider=alias, executor="unknown"), RC_NOI_DUNG),
+                (lease_mau(provider=alias, reviewer="unknown"), RC_NOI_DUNG),
+                (lease_mau(provider=alias + "_unknown"), RC_NOI_DUNG),
+            ):
+                rc, _, e = chay("check", viet(s, invalid))
+                bang(rc == expected, f"alias bypassed identity/assurance: {invalid}, rc={rc} {e}")
+
+    # A historical executor grant records a future human-audit target; it does
+    # not claim that its code reviewer has already performed a human audit.
+    historical = yaml.safe_load((HERE / "leases/c1a1a-exec-2-claude-20260927.yaml").read_text(encoding="utf-8"))
+    bang(historical["provider"] == "anthropic_claude", "historical alias fixture drifted")
+    original = copy.deepcopy(historical)
+    canonical = dict(historical, provider="claude")
+    mod = _nap_cong()
+    for lease in (historical, canonical):
+        mod._kiem_provider_identity(lease)
+    bang(historical == original, "validation rewrote recorded provider identity")
+    valid = lease_mau(provider="openai_codex", executor="anthropic_claude",
+                      reviewer="codex", assurance_target="cross_approved")
+    original = copy.deepcopy(valid)
+    mod._kiem_provider_identity(valid)
+    bang(valid == original, "successful validation rewrote recorded identity")
+
+
+@ca
+def t01_executor_assurance_target_is_not_review_verdict():
+    import copy
+    import yaml
+    from unittest import mock
+
+    mod = _nap_cong()
+    for name in ("ci-noi-bang-vao-gate-exec-1-claude-20260822.yaml",
+                 "ci-noi-bang-vao-gate-exec-1r2-claude-20260823.yaml",
+                 "t131-deadline-dem-spawn-exec-1-claude-20260929.yaml"):
+        path = HERE / "leases" / name
+        lease = yaml.safe_load(path.read_text(encoding="utf-8"))
+        original = copy.deepcopy(lease)
+        bang(lease["role"] == "executor", f"historical fixture role drifted: {name}")
+        # Historical schema/expiry checks must not inherit the runner's actor.
+        # t02d independently supplies hostile and authorized actors to the CLI.
+        with mock.patch.dict(os.environ, {k: v for k, v in os.environ.items()
+                                          if k != "GITHUB_ACTOR"}, clear=True):
+            checked, _ = mod.kiem(lease, tep=path, goc=HERE.parent, bo_qua_han=True)
+            bang(checked == original and lease == original, f"historical grant changed: {name}")
+            try:
+                mod.kiem(lease, tep=path, goc=HERE.parent)
+            except mod.Chan as exc:
+                bang(exc.ma == RC_NOI_DUNG and "hết hạn" in str(exc),
+                     f"historical expiry gate changed: {name}: {exc}")
+            else:
+                bang(False, f"expired executor grant accepted as live: {name}")
+
+    with San() as s:
+        for assurance in ("cross_approved", "human_audited"):
+            for provider, fields in (("claude", {}), ("codex", {}),
+                                     ("google_antigravity", {"model_family": "gemini",
+                                      "execution_surface": "antigravity", "transport": "machine/local"})):
+                grant = lease_mau(role="executor", provider=provider,
+                                  assurance_target=assurance, **fields)
+                rc, _, e = chay("check", viet(s, grant))
+                bang(rc == RC_OK, f"executor future target blocked: {provider}/{assurance}: {rc} {e}")
+                review = dict(grant, role="reviewer")
+                rc, _, e = chay("check", viet(s, review))
+                bang(rc == RC_LOP, f"review without assurance evidence accepted: {provider}/{assurance}: {rc} {e}")
+                if provider == "google_antigravity":
+                    for key in fields:
+                        bad = dict(grant)
+                        bad.pop(key)
+                        rc, _, e = chay("check", viet(s, bad))
+                        bang(rc == RC_NOI_DUNG, f"AG executor missing {key} accepted: {rc} {e}")
+
+
+@ca
+def t01_ag_identity_and_family_gate():
+    with San() as s:
+        legacy_without_actor = lease_mau()
+        legacy_without_actor.pop("provider")
+        rc, _, e = chay("check", viet(s, legacy_without_actor,
+                                      ten="legacy-provider-omitted.yaml"))
+        bang(rc == RC_OK, f"genuinely omitted legacy provider blocked: rc={rc} {e}")
+        for field, value in (("provider", ""), ("provider", " "),
+                             ("executor", ""), ("executor", " ")):
+            blank_actor = dict(legacy_without_actor, **{field: value})
+            rc, _, e = chay("check", viet(s, blank_actor,
+                                          ten=f"blank-{field}-{len(value)}.yaml"))
+            bang(rc == RC_NOI_DUNG, f"explicit blank {field} accepted: rc={rc} {e}")
+        blank_provider_with_fallback = dict(legacy_without_actor, provider=" ", executor="claude")
+        rc, _, e = chay("check", viet(s, blank_provider_with_fallback,
+                                      ten="blank-provider-with-executor.yaml"))
+        bang(rc == RC_NOI_DUNG, f"blank provider fell through to executor: rc={rc} {e}")
+        missing_cross_actors = dict(legacy_without_actor, assurance_target="cross_approved")
+        rc, _, e = chay("check", viet(s, missing_cross_actors,
+                                      ten="cross-without-actors.yaml"))
+        bang(rc == RC_LOP and "thiếu executor/reviewer identity" in e,
+             f"strict cross without model actors passed/wrong reason: rc={rc} {e}")
+        valid_cross = dict(missing_cross_actors, provider="codex", executor="claude",
+                           reviewer="codex")
+        rc, _, e = chay("check", viet(s, valid_cross,
+                                      ten="cross-with-two-actors.yaml"))
+        bang(rc == RC_OK, f"valid two-model cross reviewer blocked: rc={rc} {e}")
+        ag = lease_mau(role="executor", provider="google_antigravity", executor="google_antigravity",
+                       model_family="gemini", execution_surface="antigravity",
+                       transport="machine/local", reviewer="claude",
+                       assurance_target="cross_approved_or_human_audited")
+        rc, _, e = chay("check", viet(s, ag, ten="ag.yaml"))
+        bang(rc == RC_OK, f"AG valid identity blocked: rc={rc} {e}")
+        for field, value, expected in (("model_family", "claude", RC_LOP),
+                                       ("execution_surface", "", RC_NOI_DUNG),
+                                       ("execution_surface", "codex_cli", RC_NOI_DUNG),
+                                       ("transport", "human_mediated", RC_NOI_DUNG),
+                                       ("provider", "unknown", RC_NOI_DUNG),
+                                       ("granted_by", "google_antigravity", RC_TU_CAP)):
+            invalid = dict(ag, **{field: value})
+            rc, _, e = chay("check", viet(s, invalid, ten="ag-bad.yaml"))
+            bang(rc == expected, f"AG {field}={value!r} accepted/wrong gate: rc={rc} {e}")
+        ag_reviewer = lease_mau(provider="google_antigravity", model_family="gemini",
+                                execution_surface="antigravity", transport="machine/local")
+        rc, _, e = chay("check", viet(s, ag_reviewer, ten="ag-review.yaml"))
+        bang(rc == RC_OK, f"AG reviewer lease blocked: rc={rc} {e}")
+        ag_review_human_claim = dict(ag_reviewer, schema_version=2, review_class="sensitive",
+                                     effective_review_class="sensitive", assurance_target="human_audited")
+        rc, _, e = chay("check", viet(s, ag_review_human_claim,
+                                      ten="ag-review-human-claim.yaml"))
+        bang(rc == RC_LOP, f"AG model reviewer claimed human audit: rc={rc} {e}")
+        codex_review_human_claim = lease_mau(role="reviewer", provider="codex",
+                                             assurance_target="human_audited")
+        rc, _, e = chay("check", viet(s, codex_review_human_claim,
+                                      ten="codex-review-human-claim.yaml"))
+        bang(rc == RC_LOP, f"Codex model reviewer claimed human audit: rc={rc} {e}")
+        ag_cross_without_executor = dict(ag_reviewer, assurance_target="cross_approved")
+        rc, _, e = chay("check", viet(s, ag_cross_without_executor,
+                                      ten="ag-review-missing-executor.yaml"))
+        bang(rc == RC_LOP and "thiếu executor/reviewer identity" in e,
+             f"AG cross review without executor passed/wrong reason: rc={rc} {e}")
+        ag_review_fallback = dict(ag_reviewer, assurance_target="cross_approved_or_human_audited")
+        rc, _, e = chay("check", viet(s, ag_review_fallback,
+                                      ten="ag-review-human-fallback.yaml"))
+        bang(rc == RC_OK, f"AG reviewer human audit fallback falsely rejected: rc={rc} {e}")
+        ag_cross_without_reviewer = dict(ag)
+        ag_cross_without_reviewer.pop("reviewer")
+        ag_cross_without_reviewer["assurance_target"] = "cross_approved"
+        rc, _, e = chay("check", viet(s, ag_cross_without_reviewer,
+                                      ten="ag-exec-missing-reviewer.yaml"))
+        bang(rc == RC_OK,
+             f"AG executor future cross-review target required assigned reviewer: rc={rc} {e}")
+        ag_fallback_without_reviewer = dict(ag_cross_without_reviewer,
+                                            assurance_target="cross_approved_or_human_audited")
+        rc, _, e = chay("check", viet(s, ag_fallback_without_reviewer,
+                                      ten="ag-exec-human-fallback.yaml"))
+        bang(rc == RC_OK, f"explicit human audit fallback falsely rejected: rc={rc} {e}")
+        human_review = lease_mau(role="reviewer", provider="human", reviewer="human",
+                                  executor="claude", assurance_target="human_audited")
+        rc, _, e = chay("check", viet(s, human_review, ten="human-review.yaml"))
+        bang(rc == RC_OK, f"legacy human-audited reviewer falsely rejected: rc={rc} {e}")
+        for executor_provider, family in (("claude", "claude"), ("codex", "openai"),
+                                          ("google_antigravity", "gemini")):
+            legacy = dict(human_review, executor=executor_provider)
+            rc, _, e = chay("check", viet(s, legacy,
+                                          ten=f"human-legacy-{executor_provider}.yaml"))
+            expected = RC_NOI_DUNG if executor_provider == "google_antigravity" else RC_OK
+            bang(rc == expected, f"human audit missing executor identity: {executor_provider}, rc={rc} {e}")
+            declared = dict(legacy, executor_model_family=family)
+            if executor_provider == "google_antigravity":
+                declared.update(executor_execution_surface="antigravity",
+                                executor_transport="machine/local")
+            rc, _, e = chay("check", viet(s, declared,
+                                          ten=f"human-declared-{executor_provider}.yaml"))
+            bang(rc == RC_OK, f"valid declared executor blocked: {executor_provider}, rc={rc} {e}")
+            invalid_family = dict(declared, executor_model_family="invalid-family")
+            rc, _, e = chay("check", viet(s, invalid_family,
+                                          ten=f"human-bad-family-{executor_provider}.yaml"))
+            bang(rc == RC_NOI_DUNG, f"invalid declared executor family passed: {executor_provider}, rc={rc} {e}")
+        valid_ag_executor = dict(human_review, executor="google_antigravity",
+                                 executor_model_family="gemini",
+                                 executor_execution_surface="antigravity",
+                                 executor_transport="machine/local")
+        identity_fields = ("executor_model_family", "executor_execution_surface", "executor_transport")
+        for assurance in ("human_audited", "cross_approved_or_human_audited"):
+            # Every incomplete subset must fail, including no declared metadata.
+            for mask in range(8):
+                candidate = dict(valid_ag_executor, assurance_target=assurance)
+                for bit, field in enumerate(identity_fields):
+                    if not mask & (1 << bit):
+                        candidate.pop(field)
+                rc, _, e = chay("check", viet(s, candidate,
+                                              ten=f"human-ag-tuple-{assurance}-{mask}.yaml"))
+                expected = RC_OK if mask == 7 else RC_NOI_DUNG
+                bang(rc == expected, f"human AG tuple mask={mask}, assurance={assurance}: rc={rc} {e}")
+        for field, value in (("executor_model_family", " "),
+                             ("executor_execution_surface", " "),
+                             ("executor_transport", " "),
+                             ("executor_execution_surface", "codex_cli"),
+                             ("executor_transport", "human_mediated")):
+            bad = dict(valid_ag_executor, **{field: value})
+            rc, _, e = chay("check", viet(s, bad, ten=f"human-ag-bad-{field}.yaml"))
+            bang(rc == RC_NOI_DUNG, f"human audit bypassed declared AG {field}: rc={rc} {e}")
+        human_orphan_metadata = dict(human_review, executor="", executor_model_family="gemini")
+        rc, _, e = chay("check", viet(s, human_orphan_metadata,
+                                      ten="human-orphan-executor-metadata.yaml"))
+        bang(rc == RC_NOI_DUNG, f"human audit accepted executor metadata without executor: rc={rc} {e}")
+        for bad, label in ((dict(human_review, role="executor"), "human-executor"),
+                           (dict(human_review, assurance_target="cross_approved"), "human-cross"),
+                           (dict(human_review, assurance_target="unverified_human_audited"), "human-assurance-unknown")):
+            rc, _, e = chay("check", viet(s, bad, ten=f"{label}.yaml"))
+            bang(rc != RC_OK, f"{label} falsely accepted: rc={rc} {e}")
+        human_cross = dict(ag, reviewer="human", reviewer_model_family="claude",
+                           assurance_target="cross_approved")
+        rc, _, e = chay("check", viet(s, human_cross, ten="synthetic-human-cross.yaml"))
+        bang(rc != RC_OK, f"synthetic model family made human cross pass: rc={rc} {e}")
+        human_fallback = dict(ag, reviewer="human", assurance_target="cross_approved_or_human_audited")
+        rc, _, e = chay("check", viet(s, human_fallback, ten="human-fallback.yaml"))
+        bang(rc == RC_OK, f"human fallback falsely rejected: rc={rc} {e}")
+        human_audit_target = dict(ag, reviewer="human", assurance_target="human_audited")
+        rc, _, e = chay("check", viet(s, human_audit_target, ten="human-audit-target.yaml"))
+        bang(rc == RC_OK, f"executor targeting actual human audit blocked: rc={rc} {e}")
+        ag_land = dict(ag, role="land_operator")
+        rc, _, e = chay("check", viet(s, ag_land, ten="ag-land.yaml"))
+        bang(rc == RC_LOP, f"AG land operator outside role scope passed: rc={rc} {e}")
+        codex_land = lease_mau(role="land_operator", provider="codex")
+        rc, _, e = chay("check", viet(s, codex_land, ten="codex-land.yaml"))
+        bang(rc == RC_OK, f"legacy Codex land operator falsely blocked: rc={rc} {e}")
+        claude_review_cross = lease_mau(role="reviewer", provider="claude", reviewer="claude",
+                                        executor="codex", assurance_target="cross_approved")
+        rc, _, e = chay("check", viet(s, claude_review_cross, ten="claude-review-cross.yaml"))
+        bang(rc == RC_OK, f"valid Claude reviewer/Codex executor cross blocked: rc={rc} {e}")
+        for executor_provider in ("codex", "google_antigravity"):
+            contradictory = dict(ag, executor=executor_provider)
+            if executor_provider == "google_antigravity":
+                contradictory["provider"] = "codex"
+                contradictory.pop("model_family")
+                contradictory["execution_surface"] = "codex_desktop"
+            rc, _, e = chay("check", viet(s, contradictory,
+                                          ten=f"contradictory-{executor_provider}.yaml"))
+            bang(rc == RC_NOI_DUNG and "executor không khớp provider" in e,
+                 f"contradictory executor/provider passed/wrong reason: rc={rc} {e}")
+        for field, value in (("model_family", " "),
+                             ("execution_surface", "codex_cli"),
+                             ("transport", "human_mediated")):
+            invalid = dict(ag_reviewer, **{field: value})
+            rc, _, e = chay("check", viet(s, invalid, ten=f"ag-review-bad-{field}.yaml"))
+            bang(rc == RC_NOI_DUNG, f"AG reviewer invalid {field} passed: rc={rc} {e}")
+        legacy_same = lease_mau(provider="codex", reviewer="codex")
+        rc, _, e = chay("check", viet(s, legacy_same, ten="legacy-same.yaml"))
+        bang(rc == RC_OK, f"legacy same-provider lease changed behavior: rc={rc} {e}")
+        legacy_review = lease_mau(role="reviewer", provider="codex", reviewer="codex",
+                                  executor="claude", assurance_target="cross_approved")
+        rc, _, e = chay("check", viet(s, legacy_review, ten="legacy-cross-review.yaml"))
+        bang(rc == RC_OK, f"legacy Claude/Codex review falsely rejected: rc={rc} {e}")
+        for provider, surface, transport in (
+                ("codex", "codex_cli", "machine"),
+                ("codex", "codex_desktop", "machine"),
+                ("codex", "codex_service", "machine"),
+                ("claude", "claude_code", "machine/local")):
+            declared = lease_mau(role="reviewer", provider=provider,
+                                  execution_surface=surface, transport=transport)
+            rc, _, e = chay("check", viet(s, declared,
+                                          ten=f"valid-{provider}-{surface}.yaml"))
+            bang(rc == RC_OK, f"valid provider runtime blocked: {provider}/{surface}, rc={rc} {e}")
+        for provider, surface, transport in (
+                ("codex", "antigravity", "machine/local"),
+                ("codex", "codex_service", "machine/local"),
+                ("claude", "codex_desktop", "machine/local"),
+                ("claude", "claude_code", "human_mediated")):
+            invalid = lease_mau(role="reviewer", provider=provider,
+                                 execution_surface=surface, transport=transport)
+            rc, _, e = chay("check", viet(s, invalid,
+                                          ten=f"invalid-{provider}-{surface}-{transport.replace('/', '_')}.yaml"))
+            bang(rc == RC_NOI_DUNG, f"foreign provider runtime accepted: {provider}/{surface}/{transport}, rc={rc} {e}")
+        invalid_reviewer = lease_mau(role="executor", provider="claude", reviewer="codex",
+                                     reviewer_execution_surface="antigravity",
+                                     reviewer_transport="machine/local")
+        rc, _, e = chay("check", viet(s, invalid_reviewer,
+                                      ten="invalid-declared-codex-reviewer.yaml"))
+        bang(rc == RC_NOI_DUNG, f"foreign reviewer runtime accepted: rc={rc} {e}")
+        invalid_executor = lease_mau(role="reviewer", provider="claude", executor="codex",
+                                     executor_execution_surface="antigravity",
+                                     executor_transport="machine/local")
+        rc, _, e = chay("check", viet(s, invalid_executor,
+                                      ten="invalid-declared-codex-executor.yaml"))
+        bang(rc == RC_NOI_DUNG, f"foreign executor runtime accepted: rc={rc} {e}")
+        ag_same_review = lease_mau(role="reviewer", provider="google_antigravity",
+                                   executor="claude", model_family="claude",
+                                   execution_surface="antigravity", transport="machine/local",
+                                   assurance_target="cross_approved")
+        rc, _, e = chay("check", viet(s, ag_same_review, ten="ag-same-review.yaml"))
+        bang(rc == RC_LOP, f"same-family AG reviewer falsely accepted: rc={rc} {e}")
+        for executor_provider, same_family in (("codex", "openai"), ("claude", "claude")):
+            legacy_to_ag = lease_mau(role="executor", provider=executor_provider,
+                                     reviewer="google_antigravity",
+                                     reviewer_model_family=same_family,
+                                     reviewer_execution_surface="antigravity",
+                                     reviewer_transport="machine/local",
+                                     assurance_target="cross_approved_or_human_audited")
+            rc, _, e = chay("check", viet(s, legacy_to_ag,
+                                          ten=f"legacy-{executor_provider}-same-family.yaml"))
+            bang(rc == RC_LOP, f"missing legacy family bypassed cross gate: {executor_provider}, rc={rc} {e}")
+            legacy_to_ag["reviewer_model_family"] = " "
+            rc, _, e = chay("check", viet(s, legacy_to_ag,
+                                          ten=f"legacy-{executor_provider}-blank-family.yaml"))
+            bang(rc == RC_NOI_DUNG, f"blank AG reviewer family bypassed gate: rc={rc} {e}")
+            legacy_to_ag["reviewer_model_family"] = "gemini"
+            rc, _, e = chay("check", viet(s, legacy_to_ag,
+                                          ten=f"legacy-{executor_provider}-cross-family.yaml"))
+            bang(rc == RC_OK, f"valid legacy-to-AG cross blocked: {executor_provider}, rc={rc} {e}")
 
 
 @ca
@@ -2466,20 +2800,46 @@ raise SystemExit(int(os.environ.get("WRAPPER_TEST_RC", "0")))
             actionlint_ngoai = shutil.which("actionlint")
             bang(actionlint_ngoai and actionlint_ngoai.lower().endswith(".exe"),
                  "[Windows] KHÔNG ĐO ĐƯỢC: PATH không có `actionlint.exe` thật")
-            do_ban = subprocess.run([actionlint_ngoai, "--version"],
-                                    capture_output=True, text=True)
-            dong = (do_ban.stdout or "").strip().splitlines()
-            bang(do_ban.returncode == 0 and dong and dong[0] == VER,
-                 f"[Windows] actionlint ngoài không đúng {VER}: rc={do_ban.returncode}, "
-                 f"stdout={do_ban.stdout!r}, stderr={do_ban.stderr!r}")
+            # Chocolatey có thể đặt một shim trên PATH: nó chạy tại chỗ nhưng bản
+            # sao trong archive không chạy. Chỉ dùng PE đã CHÉP sang cây tạm và
+            # tự chứng minh `--version` tại vị trí ấy, đúng hành vi fixture cần.
+            duong_path = _P(actionlint_ngoai).resolve()
+            goc_choco = []
+            if os.environ.get("ChocolateyInstall"):
+                goc_choco.append(_P(os.environ["ChocolateyInstall"]))
+            if duong_path.parent.name.lower() == "bin":
+                goc_choco.append(duong_path.parent.parent)
+            ung_vien = [duong_path] + [
+                root / "lib" / "actionlint" / "tools" / "actionlint.exe"
+                for root in goc_choco]
+            actionlint_portable = None
+            loi_ung_vien = []
+            for thu, nguon in enumerate(dict.fromkeys(ung_vien)):
+                if not nguon.is_file():
+                    loi_ung_vien.append(f"{nguon}: không có tệp")
+                    continue
+                ban_sao = goc / f"actionlint-portable-{thu}.exe"
+                shutil.copy2(nguon, ban_sao)
+                do_ban = subprocess.run([str(ban_sao), "--version"],
+                                        capture_output=True, text=True)
+                dong = (do_ban.stdout or "").strip().splitlines()
+                if do_ban.returncode == 0 and dong and dong[0] == VER:
+                    actionlint_portable = ban_sao
+                    break
+                loi_ung_vien.append(
+                    f"{nguon}: bản sao rc={do_ban.returncode}, "
+                    f"stdout={do_ban.stdout!r}, stderr={do_ban.stderr!r}")
+            bang(actionlint_portable is not None,
+                 f"[Windows] KHÔNG ĐO ĐƯỢC: không có actionlint {VER} portable; "
+                 + "; ".join(loi_ung_vien))
 
             # Gói dương chứa đúng loại file của archive chính thức: `actionlint.exe`.
             # Copy PE thật thay vì đổi đuôi một shell script rồi giả định Windows chạy nó.
             import zipfile
             goi_dung = goc / "actionlint-windows-dung.zip"
             with zipfile.ZipFile(goi_dung, "w", zipfile.ZIP_DEFLATED) as z:
-                z.write(actionlint_ngoai, "actionlint.exe")
-            shutil.copy2(actionlint_ngoai, path_ban_dau / "actionlint.exe")
+                z.write(actionlint_portable, "actionlint.exe")
+            shutil.copy2(actionlint_portable, path_ban_dau / "actionlint.exe")
             nen = "Windows"
         else:
             moi = path_ban_dau / "actionlint"
@@ -3043,12 +3403,13 @@ def t70_W6_matrix_co_Windows_phai_chay_lai_bay_ca():
     ly_do = _ly_do_bo_qua_workflow(WORKFLOW_DANG, "dang", nen="nt", job=job)
     doc_than = _ca_doc_than_buoc(CA)
     # BẢY cũ (packet #396 gỡ `t52` cùng bước ghi ngược mà nó ghim) + SÁU của #677 (`t195`–`t200`, gọi helper
-    # mới trực tiếp, kể cả ca dùng điểm dò). KIỂM KÊ, không phải bằng chứng nhánh: bằng chứng là `t199` (A9).
+    # mới trực tiếp, kể cả ca dùng điểm dò) + MỘT của wp678 (`t207`, ca biên A3, §4 nghĩa vụ (ii)). KIỂM KÊ, không
+    # phải bằng chứng nhánh: bằng chứng là `t199` (A9 của #677).
     # R1-F6: tập MONG ĐỢI là literal độc lập; hàm giả gọi RIÊNG từng helper chứng minh predicate nhận cả hai.
     def _a(): _chay_buoc_dang
     def _b(): _chay_buoc_dang_that
     def _c(): pass
-    mong = ["t51", "t59", "t60", "t62", "t63", "t66", "t68", "t195", "t196", "t197", "t198", "t199", "t200"]
+    mong = ["t51", "t59", "t60", "t62", "t63", "t66", "t68", "t195", "t196", "t197", "t198", "t199", "t200", "t207"]
     bang(not ly_do and sorted(x.split("_")[0] for x in doc_than) == sorted(mong)
          and _ca_doc_than_buoc([_a, _b, _c]) == ["_a", "_b"],
          f"matrix có Windows vẫn bỏ qua hoặc kiểm kê ca đọc thân bước lệch tập mong đợi: {ly_do!r}, {doc_than}")
@@ -6508,7 +6869,7 @@ def t155_618_neo_dinh_nghia_theo_workflow_sha_khong_theo_base_sha():
 @ca
 def t153_nhat_ky_tung_ca_vao_ra_cap_doi_va_khong_dem():
     """M3 packet #504 (#499 C3): mỗi ca in đúng một `>>> vao X` rồi đúng một `<<< ra X` SAU nó, và dòng tổng
-    kết vẫn khớp regex của t125. Chạy chính tệp này trong tiến trình con với đúng một ca rẻ (`--chi-ca=t01_`),
+    kết vẫn khớp regex của t125. Chạy chính tệp này trong tiến trình con với đúng một ca rẻ,
     stdout qua PIPE và KHÔNG đọc cho tới khi tiến trình con kết thúc.
 
     Spec ghi tên ca này là `t152_…`; số ấy đã bị M9 (#503) dùng nên ở đây là t153 — ý nghĩa giữ nguyên.
@@ -6521,7 +6882,8 @@ def t153_nhat_ky_tung_ca_vao_ra_cap_doi_va_khong_dem():
     """
     import subprocess
     nen = {k: v for k, v in os.environ.items() if k != "GITHUB_ACTOR"}
-    p = subprocess.Popen([sys.executable, str(Path(__file__).resolve()), CO_CHI_CA + "t01_"],
+    p = subprocess.Popen([sys.executable, str(Path(__file__).resolve()),
+                          CO_CHI_CA + "t01_lease_hop_le_thi_QUA"],
                          stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, env=nen)
     try:
         p.wait(timeout=30)  # M4 t153=0.250 s; 30 s là trần cho con chỉ chạy t01, chưa đọc PIPE
@@ -7007,11 +7369,11 @@ def t155_chon_ca_khong_khop_hoac_RONG_thi_KHONG_XANH():
                            capture_output=True, text=True, env=nen, timeout=180)
         return p.returncode, p.stdout, p.stderr
 
-    rc, out, err = chay_con(CO_CHI_CA + "t01_")
+    rc, out, err = chay_con(CO_CHI_CA + "t01_lease_hop_le_thi_QUA")
     bang(rc == 0 and re.search(r"lease_publish: 1/1 đạt", out),
          f"prefix hợp lệ phải còn chạy đúng một ca: rc={rc}, stdout={out[-300:]!r}, stderr={err[-200:]!r}")
 
-    rc, out, err = chay_con(CO_AB, CO_CHI_CA + "t01_")
+    rc, out, err = chay_con(CO_AB, CO_CHI_CA + "t01_lease_hop_le_thi_QUA")
     bang(rc == 0 and re.search(r"lease_publish: 1/1 đạt", out),
          f"đường CO_AB phải còn chạy ca: rc={rc}, stdout={out[-300:]!r}, stderr={err[-200:]!r}")
 
@@ -7893,12 +8255,21 @@ def t178_tien_kiem_mien_chan_TRUOC_khi_cham_mang():
     docstring của `_tien_kiem_mien_dang` tự khai làm lý do tồn tại: một lease hỏng miền được
     cho phép **CHẠM MẠNG**.
 
-    NĂM vế dưới đây khoá trục ấy (đếm ở vòng lặp: `None`, danh sách, `bool`, ánh xạ, số thực).
-    Chúng KHÔNG thay bốn vế trên. Bốn vế kia đo ở CỔNG TỔNG (`kiem_github`, có dấu): MỘT vế
-    thiếu `lease_id`, BA vế `packet_issue` (thiếu, sai kiểu `str`, là `bool`). Năm vế này đo
-    ở PHÉP DÒ (`_do_dau_da_dang`) với `lease_id` sai KIỂU — và `L` chỉ chết ở đây. (Bản trước
+    SÁU vế dưới đây khoá trục ấy (đếm ở vòng lặp: `None`, danh sách, `bool`, ánh xạ, số thực,
+    `int`). Chúng KHÔNG thay bốn vế trên. Bốn vế kia đo ở CỔNG TỔNG (`kiem_github`, có dấu): MỘT vế
+    thiếu `lease_id`, BA vế `packet_issue` (thiếu, sai kiểu `str`, là `bool`). Sáu vế này đo
+    ở PHÉP DÒ (`_do_dau_da_dang`) với `lease_id` sai KIỂU — và TRƯỚC wp678 `L` chỉ chết ở đây. (Bản trước
     khai "ba vế"; bản sau khai "bốn vế kia đo trục `packet_issue`" — hai lần lời khai lệch
     thành viên thật. Cross-review lượt 11 song song và lượt 11 của vòng này bắt.)
+
+    VẾ `int` THÊM Ở wp678 (A2, Q1). Trước wp678 tiền kiểm nhận `str|int` nên `lease_id: 1000` đi
+    tới mạng (1 lời gọi) rồi `kiem()` mới chặn — lệch D1. Nay D2 dùng chung `_lease_id_hop_le` với
+    D1, nên vế `int` cũng 0 lời gọi. Đo TRỰC TIẾP D2 (không qua phép dò) nằm ở `t205`.
+    ĐO 08-10-2026 trên ứng viên wp678 (bản sao tạm, phân hạng bằng `TinHieuChotCa`): đột biến `L`
+    (gỡ dòng chốt `lease_id` của D2) SỐNG ở ca này, vì D3 nay chặn `lease_id` sai kiểu TRƯỚC
+    `_doc_gh` nên phép dò vẫn 0 lời gọi — D3 là chốt độc lập, không dời xuống sau mạng chỉ để giết
+    `L` (đặc tả wp678 A2). Ca đích của `L` nay là `t205` (giết thật). Mọi câu "`L` chết ở đây" phía
+    trên là phép đo TRƯỚC wp678.
     """
     thieu_id = _lease_579()
     del thieu_id["lease_id"]
@@ -7922,7 +8293,8 @@ def t178_tien_kiem_mien_chan_TRUOC_khi_cham_mang():
     #           Đúng hành vi: đồ giả dựng dấu `**Lease `<lease_id>`**`, nên với `True` dấu
     #           thành ``**Lease `True`**`` và CỬA CUỐI tìm thấy nó. Bốn vế ở trên (một thiếu
     #           `lease_id`, ba `packet_issue`) không dính vì `kiem()` tự từ chối chúng trước đó;
-    #           `lease_id` sai KIỂU thì không có chốt tương ứng trong `kiem()`.
+    #           khi ấy (trước wp678) `lease_id` sai KIỂU chưa có chốt tương ứng trong `kiem()`.
+    #           Nay D1/D3 của wp678 chặn nó (rc=8, không rc=9) — `t204`, `t206`.
     #   nháp 2  chốt `goi == 0` trên `kiem_github`, `co_dau=False` -> nền vẫn ĐỎ: `lease_id`
     #           hợp lệ về mặt `kiem()` nên CHUỖI CŨ chạy tiếp và tự nó gọi 2 lần. Số lời gọi
     #           của CỔNG TỔNG trộn lời gọi của phép dò với lời gọi của `kiem()`.
@@ -7938,7 +8310,8 @@ def t178_tien_kiem_mien_chan_TRUOC_khi_cham_mang():
                       ("`lease_id` là danh sách", ["wp579-thu"]),
                       ("`lease_id` là `bool`", True),
                       ("`lease_id` là ánh xạ", {"x": 1}),
-                      ("`lease_id` là số thực", 1.5)):
+                      ("`lease_id` là số thực", 1.5),
+                      ("`lease_id` là `int` (wp678 A2)", 1000)):
         gh = GhGia(comments={55: []})
         # `DA_TRA_VE`, KHÔNG phải một mã: phép DÒ là phép DÒ — nó nuốt mọi thứ và TRẢ VỀ.
         # Vế kết quả này chính là thứ lượt 6 bắt được là THIẾU: bỏ nó ra thì `R_probe`
@@ -9040,6 +9413,9 @@ def t190_DA_DANG_ma_tep_bi_SUA_van_phai_qua_kiem_tru_chot_han():
             185/185 trước vế này.
       (vi)  neo prompt CÓ `tep` (đúng / lệch băm / tệp không tồn tại), `lease_id` sai ký tự,
             `packet_issue = 0` — cả chưa đăng lẫn đã đăng (lượt 16, F1/F2: C1, C2, C3 sống 185/185);
+            TỪ wp678 hàng `lease_id sai ký tự` ở cột ĐÃ đăng KHÔNG còn vào nhánh đã-có-dấu: D2/D3 chặn trước
+            (đầu dò review thi hành lượt 1: 1 lời gọi `kiem(bo_qua_han=True)` ở nền, 0 ở f809249), nên nó chỉ
+            còn đo tính chất đầu-cuối; răng của chốt `lease_id` trên đường `bo_qua_han` nằm ở `t219`;
             (vi-b) nhánh đã-có-dấu phải nêu CÙNG lý do với nhánh chưa đăng cho lease tự cấp bằng tên
             provider — chốt provider bị chốt allowlist che về mã thoát, `t191` bắt.
     """
@@ -9068,6 +9444,7 @@ def t190_DA_DANG_ma_tep_bi_SUA_van_phai_qua_kiem_tru_chot_han():
                         effective_review_class="systemic", lease_id="wp579-thu", packet_issue=55)
     for nhan, lease, mong in (
             ("review_class hạ lớp (fixture t74)", lop_sai, RC_LOP),
+            ("provider khai rỗng", L(provider=" "), RC_NOI_DUNG),
             ("người cấp ngoài danh sách cho phép", L(granted_by="nguoi-la"), RC_TU_CAP),
             ("reviewed_sha_required sai dạng", L(reviewed_sha_required="abc123"), RC_NOI_DUNG)):
         for co_dau in (False, True):
@@ -9117,6 +9494,8 @@ def t190_DA_DANG_ma_tep_bi_SUA_van_phai_qua_kiem_tru_chot_han():
     # `kiem-github "$tep"`. Cùng lượt: miễn regex `lease_id` (C2) và miễn `packet_issue > 0` (C3) khi
     # `bo_qua_han` cũng sống. Vá vế này thôi thì lần thứ tư đến y hệt — nên `t191` LIỆT KÊ BẰNG MÁY
     # mọi chốt của `kiem()` và đòi `t190` phủ từng cái; vế này là phần fixture cho ba chốt còn trống.
+    # TỪ wp678 C2 KHÔNG còn do cặp này canh: chốt `lease_id` là lời gọi `_lease_id_hop_le`, `_la_chot` (chỉ
+    # `raise Chan` / `_kiem_*` / `_doc_*`) không thấy nó, và D2/D3 chặn trước nhánh đã-có-dấu — `t219` canh C2.
     with San() as s:
         (s / ".git").mkdir()
         duong, sha = dat_prompt(s, b"prompt that cho t190 ve (vi)\n")
@@ -9936,7 +10315,9 @@ def t191_MOI_chot_cua_kiem_deu_duoc_t190_phu_o_nhanh_DA_DANG():
         nào chạm ⇒ liệt kê +1 và phán quyết phải là `KHONG_CHAM`, không được là `PHU`.
 
     Phạm vi CÒN HỞ (khai cả ở r12): chốt ngoài `kiem()`; chốt bên trong từng hàm `_kiem_*`; lời gọi qua
-    bí danh/thuộc tính; ngoại lệ không phải `Chan`.
+    bí danh/thuộc tính; ngoại lệ không phải `Chan`; chốt là lời gọi hàm tên KHÁC `_kiem_*`/`_doc_*` — từ wp678 đó là
+    D1 `_lease_id_hop_le` (đổi tên thuần sang `_kiem_…` làm ca này ĐỎ `KHONG_CHAM`, vì D2/D3 chặn trước nhánh
+    đã-có-dấu; review thi hành lượt 1 đo). Răng của D1 trên đường `bo_qua_han` nằm ở `t219`.
     """
     import ast
     import tempfile
@@ -10647,7 +11028,7 @@ def t193_hop_dong_bo_qua_chi_cap_cho_ca_da_dang_ky():
     do_duoc = {f.__name__: c for f in CA if f.__name__ in uv and (c := nem_nt(f))}
     so_that = {k: (Path(v[0]).resolve(), v[1]) for k, v in SO_BO_QUA.items()}
     chot(so_that == do_duoc and sorted(k.split("_")[0] for k in so_that)
-         == sorted("t51 t59 t60 t62 t63 t66 t68 t195 t196 t197 t198 t200".split()),
+         == sorted("t51 t59 t60 t62 t63 t66 t68 t195 t196 t197 t198 t200 t207".split()),
          f"sổ phải BẰNG tập ca ĐO được ném BoQuaNen trên nt, đúng cặp: thiếu={sorted(set(do_duoc) - set(so_that))}, "
          f"thừa={sorted(set(so_that) - set(do_duoc))}, lệch cặp={[k for k in so_that if do_duoc.get(k, so_that[k]) != so_that[k]]}")
     ten = next(iter(SO_BO_QUA))
@@ -10918,7 +11299,8 @@ def _yaml_that(lid_raw, het_han=False, bo_lease_id=False, top_list=False) -> str
 
 
 def _dau_bot(dau: str) -> dict:
-    """Comment `github-actions[bot]` mang dấu ``**Lease `<str(giá trị)>`**`` — thứ mà phép dò tìm."""
+    """Comment `github-actions[bot]` mang dấu ``**Lease `<str(giá trị)>`**`` — thứ phép dò TỪNG khớp nhầm khi
+    còn `str()` lên `lease_id` thô (trước wp678); nay phép dò chỉ nhận chuỗi thật."""
     return {"id": 1, "body": f"**Lease `{dau}`** — đăng tự động", "user": {"login": "github-actions[bot]"}}
 
 
@@ -10999,11 +11381,13 @@ def t195_M2_tap_i_bien_cong_khai_khoa_ca_bo_quan_sat():
     (a) Trục đã đo (spec r4 §2.2, 95 dòng × 2 vế, `89fc4fa`, 10:22Z 29-09): `lease_id` (11 dạng) × Issue/PR ×
         trống/có dấu × còn hạn/hết hạn, + 5 dòng GET loại số hiệu lỗi + 2 dạng tài liệu. Ca này chỉ giữ tập (i).
     (b) Vì sao khoá DÃY LỜI GỌI: đó là tín hiệu phân biệt của đột biến `L` (gỡ hai dòng chốt `lease_id` trong
-        `_tien_kiem_mien_dang`): nền 0 lời gọi, `L` 1 GET `comments` (đo bởi `t178` ở đơn vị phép dò và bởi giàn
+        `_tien_kiem_mien_dang`): nền 0 lời gọi, `L` 1 GET `comments` (TRƯỚC wp678; đo bởi `t178` ở đơn vị phép dò và bởi giàn
         này ở biên). Lượt GET thừa tự nó KHÔNG nguy hiểm. Phạm vi (R1-F8): chỉ 12/14 ô — 3 dạng giá trị × Issue/PR ×
         trống/có dấu — đổi dãy lời gọi 0→1 GET dưới `L`; hai dạng tài liệu (thiếu `lease_id`, tài liệu là danh sách) là
         ĐỐI CHỨNG KHÔNG ĐỔI (giàn r4: nền `rc=1`, 0 lời gọi, 0 POST và `L` y hệt, cột `=`), kỳ vọng vẫn 0 lời gọi.
-    (d) Dạng ép kiểu mà hiện đang được ĐĂNG (Issue thật, chưa có dấu) KHÔNG khoá ở đây: việc của #678 (Q2).
+    (d) Dạng ép kiểu mà TRƯỚC wp678 (#678) được ĐĂNG (Issue thật, chưa có dấu) KHÔNG khoá ở đây: #678 khoá nó ở
+        `t204` (D1) và `t207` (biên workflow). Đo 08-10-2026 trên ứng viên wp678: `L` SỐNG ở ca này (D3 chặn trước
+        `_doc_gh`, dãy lời gọi vẫn rỗng); ca đích của `L` nay là `t205`. Câu về `L` ở (b) là phép đo trên `89fc4fa`.
     (e) Tiền đề (§2.6) — chốt khác đều qua: `packet_issue=55` khớp `gh` giả; `granted_by` có thẩm quyền; SHA 40 hex;
         vắng cặp neo prompt; `gh api` đọc được, nhật ký của nó ĐỦ mọi lời gọi (`t198`/`t201`, lượt 7); mọi GET trong
         một lượt thấy CÙNG snapshot. Trục CHE MẤT độ phân biệt (lỗi kép, reviewer lượt 1–2 đo): `packet_issue` sai kiểu;
@@ -11042,7 +11426,9 @@ def t196_M3a_tap_ii_PR_co_dau_con_han_phai_DO_khong_bo_qua():
 
     (c) Chỉ khoá `rc≠0`, 0 POST, không "đã đăng trước đó — bỏ qua"; KHÔNG khoá dãy lời gọi để giữ đúng khi #678
         đổi đường từ chối (Q9). Đột biến `L` biến ĐỎ thành XANH ở đúng ô này vì nhánh đã-có-dấu không chạy
-        `_kiem_loai_so_hieu` (đo 10:03Z 29-09, `89fc4fa`). Tiền đề & trục che: xem docstring `t195` (a)(e).
+        `_kiem_loai_so_hieu` (đo 10:03Z 29-09, `89fc4fa`). Trên ứng viên wp678 (đo 08-10-2026) `L` SỐNG ở ca này:
+        D3 chặn `lease_id` sai kiểu bằng rc=8 trước khi dò dấu; ca đích của `L` nay là `t205`.
+        Tiền đề & trục che: xem docstring `t195` (a)(e).
     """
     lech, da_chay = [], []
     for nhan, van, san, la_pr in _o_tap_ii(True, False):
@@ -11050,7 +11436,7 @@ def t196_M3a_tap_ii_PR_co_dau_con_han_phai_DO_khong_bo_qua():
     lech = [x for x in lech if x]
     chot(sorted(da_chay, key=repr) == sorted(_TD_M3["M3a"], key=repr),
          f"M3a: tọa độ THẬT đã chạy sai (lease_id, comment, PR, hạn, tiền đề): {sorted(da_chay, key=repr)}")
-    chot(not lech, "M3a: PR + có dấu + còn hạn phải rc≠0, 0 POST, không 'bỏ qua' (đột biến L cho rc=0); lệch: "
+    chot(not lech, "M3a: PR + có dấu + còn hạn phải rc≠0, 0 POST, không 'bỏ qua' (trước wp678 đột biến L cho rc=0); lệch: "
          + "; ".join(lech))
 
 
@@ -11058,8 +11444,10 @@ def t196_M3a_tap_ii_PR_co_dau_con_han_phai_DO_khong_bo_qua():
 def t197_M3b_tap_ii_Issue_co_dau_het_han_phai_DO_khong_bo_qua():
     """Tập (ii), họ M3b (#677, Q12): `true`/`1.5`/ngày × Issue × có dấu × HẾT HẠN. Nền: rc≠0 (`CHAN [8]` hết hạn).
 
-    (c) Cùng luật với `t196`. Nhánh đã-có-dấu gọi `kiem(bo_qua_han=True)` nên `L` cố ý bỏ chốt hạn (§2.4). Ô này
-        thực tế hơn ô PR: dấu bot mang giá trị ép kiểu trên Issue là thứ workflow tự sinh được (đo 10:03Z 29-09).
+    (c) Cùng luật với `t196` (kể cả: trên ứng viên wp678 `L` SỐNG ở ca này, ca đích là `t205`). Nhánh đã-có-dấu
+        gọi `kiem(bo_qua_han=True)` nên `L` cố ý bỏ chốt hạn (§2.4). Ô này
+        thực tế hơn ô PR: dấu bot mang giá trị ép kiểu trên Issue là thứ workflow TỪNG tự sinh được (đo 10:03Z 29-09,
+        trước wp678; nay `dung_than` từ chối `lease_id` không phải chuỗi — `t208`).
     """
     lech, da_chay = [], []
     for nhan, van, san, la_pr in _o_tap_ii(False, True):
@@ -11067,7 +11455,7 @@ def t197_M3b_tap_ii_Issue_co_dau_het_han_phai_DO_khong_bo_qua():
     lech = [x for x in lech if x]
     chot(sorted(da_chay, key=repr) == sorted(_TD_M3["M3b"], key=repr),
          f"M3b: tọa độ THẬT đã chạy sai (lease_id, comment, Issue, hạn, tiền đề): {sorted(da_chay, key=repr)}")
-    chot(not lech, "M3b: Issue + có dấu + hết hạn phải rc≠0, 0 POST, không 'bỏ qua' (đột biến L cho rc=0); lệch: "
+    chot(not lech, "M3b: Issue + có dấu + hết hạn phải rc≠0, 0 POST, không 'bỏ qua' (trước wp678 đột biến L cho rc=0); lệch: "
          + "; ".join(lech))
 
 
@@ -11441,6 +11829,1129 @@ def t203_seam_main_KHONG_ro_trang_thai_qua_luot_goi():
          f"lượt mặc định phải dùng argv + nền thật ({os.name}) + sổ thật: rc={rc}, {out[-300:]!r}")
 
 
+# =====================================================================================
+# wp678 (Issue #678, LEASE-ID-EP-KIEU-YAML, đặc tả r17) — `lease_id` CHỈ nhận chuỗi thật khớp `LEASE_ID`.
+# Mọi chốt dưới đây khẳng định bằng `chot()` (`TinHieuChotCa`), để catalog đột biến `t216` phân hạng được
+# giết thật / tín dụng giả / sống sót (A10). Ca nào cần module thì lấy qua `_nap_cong()` — catalog thay hàm
+# ấy bằng bản nạp từ BẢN SAO đã đột biến, không ghi tệp thật.
+# =====================================================================================
+# A1: mười dạng mà YAML 1.1 ép kiểu (`yes`/`on` ⇒ bool, `0x1F`/`017`/`1_000`/`5` ⇒ int, `1.50` ⇒ float, ngày ⇒ date).
+_WP678_EP_KIEU = (("true", bool), ("yes", bool), ("on", bool), ("1.5", float), ("1.50", float),
+                  ("0x1F", int), ("017", int), ("1_000", int), ("5", int), ("2026-09-29", "date"))
+
+
+def _wp678_doc(mod, s: Path, van: str, ten="x.yaml"):
+    """Viết VĂN BẢN YAML ra tệp rồi đọc qua `_doc_yaml` của sản phẩm — đi qua đúng lớp ép kiểu."""
+    p = s / ten
+    p.write_text(van, encoding="utf-8")
+    return mod._doc_yaml(str(p))
+
+
+def _wp678_g(cay: Path, *a) -> str:
+    return subprocess.run(["git", "-c", "user.email=a@b", "-c", "user.name=c", "-c", "commit.gpgsign=false",
+                           "-C", str(cay), *a], capture_output=True, text=True, check=True).stdout
+
+
+def _wp678_kho(s: Path, nhanh: dict) -> Path:
+    """Kho có `origin` thật; mỗi nhánh trong `nhanh` ({tên: {đường dẫn: văn bản}}) là MỘT commit trên gốc chung,
+    đã đẩy lên origin và fetch về — `ai-dang-giu` không thấy nhánh thiếu/tụt sau nào."""
+    goc = s / "origin.git"
+    subprocess.run(["git", "init", "-q", "--bare", "-b", "master", str(goc)], check=True)
+    cay = s / "cay"
+    subprocess.run(["git", "init", "-q", "-b", "master", str(cay)], check=True)
+    _wp678_g(cay, "remote", "add", "origin", str(goc))
+    _wp678_g(cay, "commit", "-q", "--allow-empty", "-m", "goc")
+    _wp678_g(cay, "push", "-q", "origin", "master")
+    for ten, tep in nhanh.items():
+        _wp678_g(cay, "checkout", "-q", "-b", ten, "master")
+        for duong, van in tep.items():
+            (cay / duong).parent.mkdir(parents=True, exist_ok=True)
+            (cay / duong).write_text(van, encoding="utf-8")
+        _wp678_g(cay, "add", "-A")
+        _wp678_g(cay, "commit", "-q", "-m", ten)
+        _wp678_g(cay, "push", "-q", "origin", ten)
+    _wp678_g(cay, "checkout", "-q", "master")
+    _wp678_g(cay, "fetch", "-q", "origin")
+    return cay
+
+
+@ca
+def t204_wp678_A1_lease_id_ep_kieu_YAML_qua_doc_yaml_bi_kiem_tu_choi_rc8():
+    """A1 (D1): mười dạng ép kiểu, viết thành VĂN BẢN YAML, đọc qua `_doc_yaml` ⇒ `kiem()` rc=8; `'yes'` có nháy và
+    `!!str yes` (cùng chuỗi sau `safe_load`, cố ý cùng danh tính) ⇒ qua. Fixture `_yaml_that` qua luật danh tính
+    của wp709, nên rc=8 không thể đến từ `_kiem_provider_identity` (vế đối chứng đo đúng điều ấy)."""
+    import datetime as _dt
+    mod = _nap_cong()
+    with San() as s:
+        for raw, kieu in _WP678_EP_KIEU:
+            lease = _wp678_doc(mod, s, _yaml_that(raw))
+            gt = lease["lease_id"]
+            ky = _dt.date if kieu == "date" else kieu
+            chot(type(gt) is ky, f"A1 fixture: `lease_id: {raw}` phải bị YAML ép thành {ky.__name__}, được {type(gt)}")
+            rc, td = _ma_chan(mod, _kiem_sach, mod, lease)
+            chot(rc == RC_NOI_DUNG and "lease_id" in str(td),
+                 f"A1: `lease_id: {raw}` ({type(gt).__name__}) phải rc=8 ở D1, được rc={rc}: {td!r}")
+        for raw in ("'yes'", "!!str yes", "wp-ok-1"):
+            lease = _wp678_doc(mod, s, _yaml_that(raw))
+            rc, td = _ma_chan(mod, _kiem_sach, mod, lease)
+            chot(rc == 0 and lease["lease_id"] == raw.replace("'", "").replace("!!str ", ""),
+                 f"A1 đối chứng: `lease_id: {raw}` là chuỗi hợp lệ, phải qua; được rc={rc}: {td!r}")
+
+
+@ca
+def t219_wp678_kiem_bo_qua_han_van_chan_lease_id_khong_hop_le():
+    """Review thi hành wp678 lượt 1, lớp `phu-nhanh-da-dang-chot-lease-id-mat-rang`. Hợp đồng `kiem()` (chú thích ngay
+    trên chốt hạn): `bo_qua_han` bỏ ĐÚNG MỘT chốt — chốt HẠN. Ở nền chốt `lease_id` là `raise Chan` trong `kiem()`, nên
+    `t191` liệt kê nó và `t190` vế (vi) phủ nó ở nhánh đã-có-dấu (đột biến miễn chốt khi `bo_qua_han` bị CẢ HAI giết).
+    Từ wp678 D2/D3 chặn `lease_id` sai TRƯỚC nhánh ấy và `_la_chot` không nhận tên `_lease_id_hop_le`, nên đột biến
+    `if not bo_qua_han:` trước D1 SỐNG toàn suite (256/256, đo trên f809249). Ca này cho D1 răng riêng trên đường
+    `bo_qua_han`, không dựa vào việc D2/D3 đã chạy trước (đặc tả §6 mục 2: mỗi đường một chốt riêng).
+    Review thi hành lượt 2: mọi hàng âm chạy với lease CÒN hạn VÀ HẾT hạn. `bo_qua_han` sinh ra cho lease đã đăng rồi mới
+    hết hạn (`t174`); khi hàng âm chỉ dựng lease còn hạn, đột biến miễn D1 chỉ khi `bo_qua_han` VÀ hết hạn (đọc hạn an toàn)
+    SỐNG toàn suite 259/259 trên 7a3a2f6. Thêm list và ánh xạ: đột biến miễn D1 riêng cho hai kiểu ấy sống `t219`,
+    `t204`, `t190`, `t191`."""
+    mod = _nap_cong()
+    with San() as s:
+        for het_han in (False, True):
+            for raw, _kieu in _WP678_EP_KIEU + (("'co khoang trang'", str), ("[wp-x]", list), ("{x: 1}", dict)):
+                lease = _wp678_doc(mod, s, _yaml_that(raw, het_han=het_han))
+                rc, td = _ma_chan(mod, _kiem_sach, mod, lease, None, None, True)
+                chot(rc == RC_NOI_DUNG and "lease_id" in str(td),
+                     f"kiem(bo_qua_han=True), `lease_id: {raw}`, hết hạn={het_han}: phải rc=8 (bo_qua_han chỉ bỏ chốt "
+                     f"hạn), được rc={rc}: {td!r}")
+        lease = _wp678_doc(mod, s, _yaml_that("wp-ok-1", het_han=True))
+        rc, td = _ma_chan(mod, _kiem_sach, mod, lease, None, None, True)
+        chot(rc == 0, f"đối chứng: chuỗi hợp lệ HẾT HẠN với bo_qua_han=True phải qua, được rc={rc}: {td!r}")
+
+
+@ca
+def t205_wp678_A2_tien_kiem_D2_truc_tiep_int_rc8_chuoi_tra_ve():
+    """A2 (D2) đo TRỰC TIẾP `_tien_kiem_mien_dang`: `int` (và mọi kiểu không phải chuỗi) ⇒ `Chan(RC_NOI_DUNG)`;
+    chuỗi hợp lệ ⇒ trả về. Đây là ca đích của đột biến trả riêng D2 về `(str, int)` — phép đếm mạng của `t178`
+    không giết được nó vì D3 chặn độc lập TRƯỚC `_doc_gh` (đặc tả A2: không dời D3 để giết mutant D2)."""
+    import datetime as _dt
+    mod = _nap_cong()
+    for gt in (1000, 31, 0, True, 1.5, _dt.date(2026, 9, 29), None, "", "co khoang trang"):
+        rc, td = _ma_chan(mod, mod._tien_kiem_mien_dang, _lease_579(lease_id=gt))
+        chot(rc == RC_NOI_DUNG, f"A2: tiền kiểm phải chặn lease_id={gt!r} ({type(gt).__name__}) bằng rc=8, được {rc}: {td!r}")
+    rc, td = _ma_chan(mod, mod._tien_kiem_mien_dang, _lease_579(lease_id="wp579-thu"))
+    chot(rc == 0 and td is None, f"A2 đối chứng: chuỗi hợp lệ phải trả về, được rc={rc}: {td!r}")
+
+
+@ca
+def t206_wp678_A3_don_vi_kiem_comment_da_co_ep_kieu_rc8_khong_rc9():
+    """A3 ca ĐƠN VỊ (D3): gọi thẳng `_kiem_comment_da_co` với `lease_id` không phải chuỗi trên Issue đã có dấu bot
+    mang đúng `str()` của nó ⇒ rc=8, KHÔNG rc=9. Đối chứng hai chiều để giàn không xanh giả: chuỗi `'yes'` gặp dấu
+    ``True`` ⇒ trả về (không va chạm); chuỗi gặp ĐÚNG dấu của nó ⇒ rc=9 (giàn thấy được dấu)."""
+    import datetime as _dt
+    for gt in (True, 1.5, 31, 15, 1000, _dt.date(2026, 9, 29)):
+        gh = GhGia(comments={55: [_dau_bot(str(gt))]})
+        ex, _ = _goi_lop_gh(gh, "_kiem_comment_da_co", "o/r", _lease_579(lease_id=gt), env_them=ENV_GITHUB)
+        chot(ex is not None and ex.ma == RC_NOI_DUNG,
+             f"A3 đơn vị: lease_id={gt!r} gặp dấu ``**Lease `{gt}`**`` phải rc=8 (không rc=9), được "
+             f"{None if ex is None else ex.ma}")
+    ex, _ = _goi_lop_gh(GhGia(comments={55: [_dau_bot("True")]}), "_kiem_comment_da_co", "o/r",
+                        _lease_579(lease_id="yes"), env_them=ENV_GITHUB)
+    chot(ex is None, f"A3 đối chứng: chuỗi 'yes' KHÔNG được khớp dấu ``True``, được {getattr(ex, 'ma', ex)}")
+    ex, _ = _goi_lop_gh(GhGia(comments={55: [_dau_bot("wp579-thu")]}), "_kiem_comment_da_co", "o/r",
+                        _lease_579(lease_id="wp579-thu"), env_them=ENV_GITHUB)
+    chot(ex is not None and ex.ma == RC_DA_DANG, f"A3 đối chứng: đúng dấu phải rc=9, được {getattr(ex, 'ma', ex)}")
+
+
+@ca
+def t207_wp678_A3_bien_workflow_yes_gap_dau_True_buoc_DO_0_POST():
+    """A3 CA BIÊN (§1): thân bước `đăng` của workflow, `lease_publish.py` thật, `gh` giả trên PATH giữ trạng thái.
+    Issue đã có comment bot ``**Lease `True`**``; lease mới `lease_id: yes` ⇒ bước KHÁC 0, 0 POST, không "bỏ qua".
+    Đối chứng dương `fresh-id` trên cùng Issue ⇒ bước 0 và ĐÚNG 1 POST. Nền `ab457c6`: `yes` ⇒ rc=0, 0 POST.
+    Đo 08-10-2026 trên bản sao: ca ĐỎ (`TinHieuChotCa`) với `lease_publish.py` của nền, và với đột biến gỡ cùng lúc
+    D1 + D3 + chốt đầu `_kiem_bia_mo` (D6, chạy trong `kiem()` khi có tệp); gỡ chỉ hai trong ba (D1+D3, D1+D6) hay
+    riêng D1, D3, D2+D3, D1+D2+D3 thì ca vẫn XANH — chốt còn lại chặn bằng rc=8. Ca biên đo HÀNH VI của cả cổng; răng
+    của từng chốt nằm ở ca đơn vị (`t204`–`t215`, catalog `t216`).
+    Nghĩa vụ §4: helper được tham chiếu ở CẤP ĐỈNH thân ca, ca KHÔNG tự bắt `BoQuaNen` (dưới nền `nt` nó ném ra khỏi
+    thân ca), nên tên đầy đủ nằm trong `SO_BO_QUA`, tiền tố nằm trong literal của `t70` và `t193`."""
+    kq = _chay_buoc_dang_that(_yaml_that("yes"), comments_san=[_dau_bot("True")])
+    chot(kq["rc"] != 0 and not kq["dang"] and not any(m == "POST" for m, _ in kq["goi"])
+         and _DA_DANG_BO_QUA not in kq["out"],
+         f"A3 biên: `yes` gặp dấu `True` phải ĐỎ, 0 POST, không 'bỏ qua'; được rc={kq['rc']} goi={kq['goi']} "
+         f"out={kq['out'][-300:]!r}")
+    dc = _chay_buoc_dang_that(_yaml_that("fresh-id"), comments_san=[_dau_bot("True")])
+    chot(dc["rc"] == 0 and len(dc["dang"]) == 1 and dc["dang"][0].startswith("**Lease `fresh-id`**")
+         and [m for m, _ in dc["goi"]].count("POST") == 1,
+         f"A3 đối chứng dương: `fresh-id` phải rc=0 và đúng 1 POST; được rc={dc['rc']} dang={dc['dang']} goi={dc['goi']}")
+
+
+@ca
+def t208_wp678_A4_dung_than_lease_id_khong_phai_chuoi_rc8():
+    """A4 (D4): `dung_than` có chốt RIÊNG — `lease_id` không phải chuỗi ⇒ rc=8, không dựng thân ``**Lease `True`**``."""
+    import datetime as _dt
+    mod = _nap_cong()
+    for gt in (True, 1000, 1.5, _dt.date(2026, 9, 29)):
+        rc, td = _ma_chan(mod, mod.dung_than, lease_mau(lease_id=gt), "ops/leases/x.yaml")
+        chot(rc == RC_NOI_DUNG, f"A4: dung_than với lease_id={gt!r} phải rc=8, được rc={rc}: {str(td)[:120]!r}")
+    rc, td = _ma_chan(mod, mod.dung_than, lease_mau(), "ops/leases/x.yaml")
+    chot(rc == 0 and td.startswith("**Lease `wp55-r2-review-3-codex-20260814`**"),
+         f"A4 đối chứng: chuỗi hợp lệ phải dựng thân, được rc={rc}: {str(td)[:120]!r}")
+
+
+def _wp678_bia_mo_kho(s: Path, van_cu: str, van_moi: str):
+    """Kho một nhánh có `ops/leases/cu.yaml` và `ops/leases/moi.yaml`; trả ``(cay, lease_moi đã đọc qua YAML)``."""
+    import yaml
+    cay = _wp678_kho(s, {"a": {"ops/leases/cu.yaml": van_cu, "ops/leases/moi.yaml": van_moi}})
+    return cay, yaml.safe_load(van_moi)
+
+
+@ca
+def t209_wp678_A5_D6_lease_cu_duoc_quet_int_khong_thoa_bia_mo():
+    """A5 (D6, toán hạng lease ĐƯỢC QUÉT): lease cũ `lease_id: 1_000` (int) mang `da_bi_thay_the: wp-moi`; lease mới
+    `thay_the_cho: "1000"` ⇒ `_kiem_bia_mo` rc=8. Đối chứng: lease cũ `lease_id: "1000"` có nháy ⇒ qua."""
+    mod = _nap_cong()
+    moi = "lease_id: wp-moi\nthay_the_cho: '1000'\n"
+    for nhan, lid_cu, rc_mong in (("int", "1_000", RC_NOI_DUNG), ("chuỗi", "'1000'", 0)):
+        with San() as s:
+            cay, lease_moi = _wp678_bia_mo_kho(s, f"lease_id: {lid_cu}\nda_bi_thay_the: wp-moi\n", moi)
+            rc, td = _ma_chan(mod, mod._kiem_bia_mo, lease_moi, cay / "ops/leases/moi.yaml", cay)
+            chot(rc == rc_mong, f"A5 D6 quét ({nhan}): lease cũ `lease_id: {lid_cu}` phải rc={rc_mong}, được {rc}: {td!r}")
+
+
+@ca
+def t210_wp678_A5_D6_lease_moi_int_goi_truc_tiep_rc8():
+    """A5 (D6, toán hạng lease MỚI), gọi thẳng `_kiem_bia_mo` (không qua D1): lease mới `lease_id: 1_000`, lease cũ
+    chuỗi trỏ ngược `da_bi_thay_the: "1000"` ⇒ rc=8; đổi ID lease mới thành `"1000"` ⇒ qua."""
+    mod = _nap_cong()
+    cu = "lease_id: wp-cu\nda_bi_thay_the: '1000'\n"
+    for nhan, lid_moi, rc_mong in (("int", "1_000", RC_NOI_DUNG), ("chuỗi", "'1000'", 0)):
+        with San() as s:
+            cay, lease_moi = _wp678_bia_mo_kho(s, cu, f"lease_id: {lid_moi}\nthay_the_cho: [wp-cu]\n")
+            rc, td = _ma_chan(mod, mod._kiem_bia_mo, lease_moi, cay / "ops/leases/moi.yaml", cay)
+            chot(rc == rc_mong, f"A5 D6 mới ({nhan}): lease mới `lease_id: {lid_moi}` phải rc={rc_mong}, được {rc}: {td!r}")
+
+
+@ca
+def t211_wp678_A5_D5_bia_mo_doi_xung_lease_cu_int_False():
+    """A5 (D5, toán hạng lease CŨ đang xét): lease cũ `lease_id: 1_000` trỏ `da_bi_thay_the: wp-moi`, lease mới
+    `thay_the_cho: "1000"` trỏ ngược ⇒ `_bia_mo_doi_xung` False; lease cũ `"1000"` ⇒ True."""
+    import yaml
+    mod = _nap_cong()
+    moi = {"lease": yaml.safe_load("lease_id: wp-moi\nthay_the_cho: '1000'\n")}
+    for nhan, lid_cu, mong in (("int", "1_000", False), ("chuỗi", "'1000'", True)):
+        cu = yaml.safe_load(f"lease_id: {lid_cu}\nda_bi_thay_the: wp-moi\n")
+        kq = mod._bia_mo_doi_xung(cu, [moi])
+        chot(kq is mong, f"A5 D5 cũ ({nhan}): `lease_id: {lid_cu}` phải {mong}, được {kq!r}")
+
+
+@ca
+def t212_wp678_A5_D5_bia_mo_doi_xung_lease_duoc_quet_int_False():
+    """A5 (D5, toán hạng lease ĐƯỢC QUÉT): lease cũ chuỗi trỏ `da_bi_thay_the: "1000"`, lease được quét
+    `lease_id: 1_000` trỏ ngược ⇒ False; đổi ID được quét thành `"1000"` ⇒ True."""
+    import yaml
+    mod = _nap_cong()
+    cu = yaml.safe_load("lease_id: wp-cu\nda_bi_thay_the: '1000'\n")
+    for nhan, lid_quet, mong in (("int", "1_000", False), ("chuỗi", "'1000'", True)):
+        quet = {"lease": yaml.safe_load(f"lease_id: {lid_quet}\nthay_the_cho: [wp-cu]\n")}
+        kq = mod._bia_mo_doi_xung(cu, [quet])
+        chot(kq is mong, f"A5 D5 quét ({nhan}): lease được quét `lease_id: {lid_quet}` phải {mong}, được {kq!r}")
+
+
+def _wp678_lease_giu(raw: str, duong="ops/x.md") -> str:
+    return _yaml_that(raw) + f"write_set:\n  - {duong}\n"
+
+
+@ca
+def t213_wp678_A6_ai_dang_giu_yes_on_hai_ref_KHONG_XAC_DINH_ca_hai():
+    """A6 (D7): hai lease trên hai ref, `lease_id: yes` và `lease_id: on`, cùng giữ `ops/x.md` (còn hạn) ⇒
+    `ai-dang-giu` in `KHÔNG_XÁC_ĐỊNH` cho CẢ HAI kèm ref:path của từng cái, và thoát 12. Nền: `NGƯỜI_GIỮ 1: True`, rc=11."""
+    mod = _nap_cong()
+    with San() as s:
+        cay = _wp678_kho(s, {"a": {"ops/leases/x.yaml": _wp678_lease_giu("yes")},
+                             "b": {"ops/leases/x.yaml": _wp678_lease_giu("on")}})
+        rc, o, e = _goi_main(mod, "ai-dang-giu", "ops/x.md", "--root", str(cay))
+        dong = [x for x in o.splitlines() if x.startswith("KHÔNG_XÁC_ĐỊNH\t")]
+        vi_tri = sorted(x.rsplit("\t", 1)[-1].split(":", 1)[0].replace("refs/remotes/origin/", "refs/heads/") for x in dong)
+        chot(rc == RC_KHONG_XAC_DINH_A0 and len(dong) == 2 and all("sai kiểu True" in x for x in dong)
+             and vi_tri == ["refs/heads/a", "refs/heads/b"] and all(x.endswith(":ops/leases/x.yaml") for x in dong)
+             and "NGƯỜI_GIỮ" not in o and "CHAN [12]" in e,
+             f"A6: phải KHÔNG_XÁC_ĐỊNH cho cả hai lease (a, b) và rc=12; được rc={rc} o={o!r} e={e!r}")
+        # Đối chứng: hai lease CHUỖI khác nhau ⇒ hai người giữ phân biệt, rc=11 (giàn thấy được người giữ).
+        (s / "dc").mkdir()
+        cay2 = _wp678_kho(s / "dc", {"a": {"ops/leases/x.yaml": _wp678_lease_giu("'yes'")},
+                                     "b": {"ops/leases/x.yaml": _wp678_lease_giu("'on'")}})
+        rc, o, e = _goi_main(mod, "ai-dang-giu", "ops/x.md", "--root", str(cay2))
+        chot(rc == RC_DANG_GIU_A0 and "NGƯỜI_GIỮ 2: on, yes" in o, f"A6 đối chứng: được rc={rc} o={o!r} e={e!r}")
+
+
+@ca
+def t214_wp678_A7_du_bao_check_chot_D8_truc_tiep_va_CLI_chan_truoc():
+    """A7 (D8, nhánh `check --du-bao`). Đã chọn nhánh "TỚI ĐƯỢC ⇒ chốt + ca": `_du_bao_check` có chốt riêng, đo
+    bằng lời gọi TRỰC TIẾP (D1 không che được mutant của D8). Kèm phép đo CLI: lease `1_000` qua `check --du-bao`
+    ⇒ rc=8 và KHÔNG một dòng `DU_BAO:` nào (bị chặn trước mọi dòng dự báo). Vế CLI có BA lớp đỡ: D1, chốt đầu
+    `_kiem_bia_mo` (D6, chạy trong `kiem()` khi có tệp) và D8 — đo 08-10-2026 trên bản sao: gỡ D1+D8 vẫn rc=8, gỡ
+    D1+D6+D8 thì rc=0 và in `DU_BAO:`. Ca đích của đột biến gỡ RIÊNG D8 là vế trực tiếp."""
+    mod = _nap_cong()
+    with San() as s:
+        cay = _wp678_kho(s, {"a": {"ops/leases/n.yaml": _yaml_that("1_000"), "ops/leases/c.yaml": _yaml_that("wp-ok-1")}})
+        _wp678_g(cay, "checkout", "-q", "a")
+        lease_sai = _wp678_doc(mod, s, _yaml_that("1_000"))
+        rc, td = _ma_chan(mod, mod._du_bao_check, lease_sai, cay, "master")
+        chot(rc == RC_NOI_DUNG, f"A7 check trực tiếp: lease_id 1000 (int) phải rc=8, được rc={rc}: {td!r}")
+        rc, td = _ma_chan(mod, mod._du_bao_check, _wp678_doc(mod, s, _yaml_that("wp-ok-1")), cay, "master")
+        chot(rc == 0 and any("DU_BAO:" in x for x in td), f"A7 đối chứng trực tiếp: phải trả dòng dự báo, được {rc}: {td!r}")
+        rc, o, e = _goi_main(mod, "check", str(cay / "ops/leases/n.yaml"), "--du-bao")
+        chot(rc == RC_NOI_DUNG and "DU_BAO" not in o and "lease_id" in e,
+             f"A7 check CLI: `1_000` phải rc=8, không dòng DU_BAO; được rc={rc} o={o!r} e={e!r}")
+        rc, o, e = _goi_main(mod, "check", str(cay / "ops/leases/c.yaml"), "--du-bao")
+        chot(rc == 0 and "DU_BAO:" in o, f"A7 check CLI đối chứng: được rc={rc} o={o!r} e={e!r}")
+
+
+@ca
+def t215_wp678_A7_du_bao_ai_dang_giu_khong_ep_kieu_tra_so():
+    """A7 (D8, nhánh `ai-dang-giu --du-bao`): dự báo chạy TRƯỚC vòng D7 và KHÔNG qua D1, nên lease sai kiểu TỚI được
+    dòng tra sổ (nền: `DU_BAO: 1000`). Đo CLI với lease `1_000` KHÔNG chạm đường dẫn hỏi (D7 không thấy nó, nên không
+    che mutant D8): phải có dòng `DU_BAO: KHÔNG_XÁC_ĐỊNH` và KHÔNG dòng `DU_BAO: 1000`. Đo trực tiếp va chạm thật:
+    sổ thu hồi có `1000.yaml` ⇒ lease CHUỖI `"1000"` mang nhãn ĐÃ_THU_HỒI, lease `int` 1000 thì KHÔNG."""
+    mod = _nap_cong()
+    with San() as s:
+        cay = _wp678_kho(s, {"a": {"ops/leases/n.yaml": _wp678_lease_giu("1_000", "ops/khac.md")}})
+        rc, o, e = _goi_main(mod, "ai-dang-giu", "ops/x.md", "--root", str(cay), "--du-bao")
+        chot(rc == 0 and "DU_BAO: KHÔNG_XÁC_ĐỊNH lease_id sai kiểu 1000" in o
+             and not any(x.startswith("DU_BAO: 1000") for x in o.splitlines()),
+             f"A7 ai-dang-giu --du-bao: lease 1_000 không được tra sổ như chuỗi '1000'; được rc={rc} o={o!r} e={e!r}")
+    so = [{"path": f"{mod.THU_MUC_SO}/1000.yaml", "tuyen": "thu_hoi"}]
+    mod._ref_ton_tai = lambda goc, ref: True
+    mod._quet_so_thu_hoi_moi_ref = lambda goc, refs: so
+    mod._ls_tree_z = lambda *a: []
+    cac = [{"lease": {"lease_id": gt}, "blob": "b", "path": "ops/leases/x.yaml", "ref": "refs/heads/a"}
+           for gt in (1000, "1000")]
+    dong = mod._du_bao_ai_dang_giu(Path("."), [], cac, "master")
+    chot(any(x.startswith("DU_BAO: 1000 · ĐÃ_THU_HỒI") for x in dong)
+         and sum("ĐÃ_THU_HỒI" in x for x in dong) == 1 and any("KHÔNG_XÁC_ĐỊNH" in x for x in dong),
+         f"A7 trực tiếp: chỉ lease CHUỖI '1000' được nhãn ĐÃ_THU_HỒI, int 1000 thì KHÔNG_XÁC_ĐỊNH; được {dong!r}")
+
+
+# (tên, [(cũ, mới), …], ca đích) — mỗi đột biến gỡ ĐÚNG một chốt wp678. Ca đích phải chết bằng `TinHieuChotCa`
+# của CHÍNH nó; chết vì lỗi khác là TÍN DỤNG GIẢ.
+_WP678_DOT_BIEN = (
+    ("D1-str-roi-regex", [('    _lease_id_hop_le(lease["lease_id"])   # wp678 D1',
+                           '    if not LEASE_ID.fullmatch(str(lease["lease_id"])): raise Chan(RC_NOI_DUNG, "x")  # wp678 D1')],
+     "t204_wp678_A1_lease_id_ep_kieu_YAML_qua_doc_yaml_bi_kiem_tu_choi_rc8"),
+    ("ham-chung-ep-str", [("    if not isinstance(gia_tri, str) or not LEASE_ID.fullmatch(gia_tri):",
+                           "    if not LEASE_ID.fullmatch(str(gia_tri)):")],
+     "t204_wp678_A1_lease_id_ep_kieu_YAML_qua_doc_yaml_bi_kiem_tu_choi_rc8"),
+    ("D2-nhan-str-int", [('    _lease_id_hop_le(lease.get("lease_id"))\n    so = lease.get("packet_issue")',
+                          '    if not isinstance(lease.get("lease_id"), (str, int)) or isinstance(lease.get("lease_id"), bool):\n'
+                          '        raise Chan(RC_NOI_DUNG, "x")\n    so = lease.get("packet_issue")')],
+     "t205_wp678_A2_tien_kiem_D2_truc_tiep_int_rc8_chuoi_tra_ve"),
+    ("D3-str", [('_lease_id_hop_le(lease.get("lease_id"))\n    cac_trang', 'str(lease["lease_id"])\n    cac_trang')],
+     "t206_wp678_A3_don_vi_kiem_comment_da_co_ep_kieu_rc8_khong_rc9"),
+    ("D4-tho", [('    lease_id = _lease_id_hop_le(lease.get("lease_id"))   # wp678 D4', '    lease_id = lease["lease_id"]   # wp678 D4')],
+     "t208_wp678_A4_dung_than_lease_id_khong_phai_chuoi_rc8"),
+    ("D5-cu-str", [('    lease_cu = _lease_id_quet(lease.get("lease_id"))',
+                    '    lease_cu = str(lease.get("lease_id") or "").strip() or None')],
+     "t211_wp678_A5_D5_bia_mo_doi_xung_lease_cu_int_False"),
+    ("D5-quet-str", [('        if _lease_id_quet(ban_moi.get("lease_id")) != lease_moi:',
+                      '        if str(ban_moi.get("lease_id") or "").strip() != lease_moi:')],
+     "t212_wp678_A5_D5_bia_mo_doi_xung_lease_duoc_quet_int_False"),
+    ("D6-moi-str", [('    lease_moi = _lease_id_hop_le(lease.get("lease_id"))\n    thay_the_cho',
+                     '    lease_moi = str(lease.get("lease_id") or "").strip()\n    thay_the_cho')],
+     "t210_wp678_A5_D6_lease_moi_int_goi_truc_tiep_rc8"),
+    ("D6-quet-str", [('        _lease_id_quet(muc["lease"].get("lease_id")) == ten',
+                      '        str(muc["lease"].get("lease_id") or "").strip() == ten')],
+     "t209_wp678_A5_D6_lease_cu_duoc_quet_int_khong_thoa_bia_mo"),
+    ("D7-str-khoa-nguoi-giu", [('        lease_id = _lease_id_quet(lease.get("lease_id"))\n        if lease_id is None:',
+                                '        lease_id = str(lease.get("lease_id") or "<thiếu lease_id>")\n        if False:')],
+     "t213_wp678_A6_ai_dang_giu_yes_on_hai_ref_KHONG_XAC_DINH_ca_hai"),
+    ("D8-check-bo-chot", [('    lease_id = _lease_id_hop_le(lease.get("lease_id"))\n    dong = [f"DU_BAO',
+                           '    lease_id = lease.get("lease_id")\n    dong = [f"DU_BAO')],
+     "t214_wp678_A7_du_bao_check_chot_D8_truc_tiep_va_CLI_chan_truoc"),
+    ("D8-ai-dang-giu-str", [('        lid = _lease_id_quet(muc["lease"].get("lease_id"))',
+                             '        lid = str(muc["lease"].get("lease_id") or "?")')],
+     "t215_wp678_A7_du_bao_ai_dang_giu_khong_ep_kieu_tra_so"),
+)
+
+
+@ca
+def t216_wp678_A10_catalog_dot_bien_giet_dung_ca_bang_TinHieuChotCa():
+    """A10: mỗi đột biến của `_WP678_DOT_BIEN` chạy trên BẢN SAO TẠM của `lease_publish.py` (không ghi tệp thật,
+    tên tệp riêng từng đột biến, không ghi bytecode). Phân hạng ba lớp: GIẾT THẬT (ca đích ném `TinHieuChotCa`),
+    TÍN DỤNG GIẢ (ca đích chết vì ngoại lệ khác), SỐNG SÓT (ca đích qua). Đòi 12/12 giết thật. Không có ca biên
+    `t207` trong catalog: nó đọc nguồn sản phẩm qua tham số của helper biên, không qua `_nap_cong()`."""
+    import importlib
+    import importlib.util
+    nguon = SCRIPT.read_text(encoding="utf-8")
+    theo_ten = {f.__name__: f for f in CA}
+    ket = {"GIET": [], "TIN_DUNG_GIA": [], "SONG": []}
+    with San() as s:
+        cu_bc = sys.dont_write_bytecode
+        sys.dont_write_bytecode = True
+        try:
+            for i, (ten, cap, dich) in enumerate(_WP678_DOT_BIEN):
+                ban = nguon
+                for cu, moi in cap:
+                    chot(ban.count(cu) == 1, f"neo đột biến {ten} không duy nhất ({ban.count(cu)}): {cu[:60]!r}")
+                    ban = ban.replace(cu, moi)
+                p = s / f"lease_publish_wp678_mut_{i}.py"
+                p.write_text(ban, encoding="utf-8")
+                importlib.invalidate_caches()
+                spec = importlib.util.spec_from_file_location(f"lp_wp678_m{i}", p)
+                mod = importlib.util.module_from_spec(spec)
+                spec.loader.exec_module(mod)
+                cu_nap = globals()["_nap_cong"]
+                globals()["_nap_cong"] = lambda m=mod: m
+                try:
+                    theo_ten[dich]()
+                    ket["SONG"].append(ten)
+                except TinHieuChotCa:
+                    ket["GIET"].append(ten)
+                except Exception as ex:  # noqa: BLE001 — chết vì lỗi VÔ CAN: không nhận công
+                    ket["TIN_DUNG_GIA"].append(f"{ten}: {type(ex).__name__}: {str(ex)[:120]}")
+                finally:
+                    globals()["_nap_cong"] = cu_nap
+        finally:
+            sys.dont_write_bytecode = cu_bc
+    print(f"catalog đột biến wp678: mẫu số={len(_WP678_DOT_BIEN)}, giết thật={len(ket['GIET'])}, "
+          f"tín dụng giả={len(ket['TIN_DUNG_GIA'])}, sống sót={len(ket['SONG'])}")
+    chot(not ket["TIN_DUNG_GIA"], f"đột biến chết vì lỗi VÔ CAN (tín dụng giả): {ket['TIN_DUNG_GIA']}")
+    chot(not ket["SONG"], f"đột biến SỐNG SÓT: {ket['SONG']}")
+    chot(len(ket["GIET"]) == len(_WP678_DOT_BIEN) == 12, f"mẫu số phải cố định 12, giết thật đủ: {ket}")
+
+
+@ca
+def t218_wp678_lease_id_khong_hop_le_chi_nem_Chan_va_thong_diep_co_tran():
+    """Review thi hành wp678 lượt 1, lớp `thong-diep-lease-id-sai-dung-repr-tho`. YAML 1.1 dựng được `int` vượt giới hạn
+    chuyển chuỗi của CPython (`0x` + 4000 chữ số hex: `safe_load` KHÔNG ném) mà `repr()` thì ném `ValueError`. Đo trên
+    f809249: `_lease_id_hop_le` và `_lease_id_quet` ném `ValueError`; CLI `check`, `ai-dang-giu`, `ai-dang-giu --du-bao`
+    (kể cả đường dẫn KHÔNG liên quan) ra traceback rc=1. Đòi: hàm chung ⇒ `Chan(8)`; bản quét ⇒ `None`; D9 không ném;
+    D7 ⇒ rc=12 kèm một dòng `KHÔNG_XÁC_ĐỊNH` cho từng lease; D8 ⇒ rc=0 kèm dòng `DU_BAO: KHÔNG_XÁC_ĐỊNH`; thông điệp có
+    trần (bí danh YAML lồng nhau 591 byte từng nở thành 2,79 triệu ký tự); chuỗi lệch `LEASE_ID` mang nhãn `sai dạng`.
+    Review thi hành lượt 2: trần phải đến từ CẮT THEO CẤU TRÚC (không chạm lá); D8 phải mang nhãn `sai dạng` cho chuỗi
+    như D7; câu `CHAN [12]` không được gọi mọi `lease_id` lỗi là `sai kiểu`. Gỡ từng điều ấy mà toàn suite vẫn 259/259
+    trên 7a3a2f6: repr dựng sẵn rồi cắt chuỗi (đo riêng); nhãn D8 luôn `sai kiểu` cùng câu `CHAN [12]` cũ (đo gộp).
+    Review thi hành lượt 3: `'x'` vắng trong ĐẦU RA chưa chứng minh `repr()` đầy đủ không được DỰNG; lính canh sâu hơn
+    `maxlevel` đo ĐƯỜNG ĐI ở hàm chung, `_repr_an_toan`, nhãn D7/D8, D9 và ở các đường in D7/D8/D9 qua CLI."""
+    mod = _nap_cong()
+    lon = "0x" + "f" * 4000
+
+    def _thu(fn, *a):
+        try:
+            return "TRA", fn(*a)
+        except mod.Chan as e:
+            return f"Chan{e.ma}", e.thong_diep
+        except Exception as e:  # noqa: BLE001 — ngoại lệ KHÁC `Chan` chính là lỗi ca này khoá
+            return f"NEM {type(e).__name__}", str(e)[:80]
+    with San() as s:
+        gt = _wp678_doc(mod, s, _yaml_that(lon))["lease_id"]
+        chot(type(gt) is int and gt.bit_length() > 15000, f"fixture: phải là int rất lớn, được {type(gt)}")
+        kq, td = _thu(mod._lease_id_hop_le, gt)
+        chot(kq == f"Chan{RC_NOI_DUNG}" and len(td) < 1000,
+             f"hàm chung: int lớn phải Chan(8) có trần, được {kq}: {str(td)[:120]!r}")
+        kq, td = _thu(mod._lease_id_quet, gt)
+        chot(kq == "TRA" and td is None, f"bản quét: int lớn phải trả None, được {kq}: {td!r}")
+        kq, td = _thu(mod._lease_id_hien_thi, {"lease_id": gt})
+        chot(kq == "TRA" and td.startswith("<lease_id không hợp lệ:") and len(td) < 300, f"D9: {kq}: {str(td)[:120]!r}")
+        bom = "".join(f"a{i}: &a{i} [" + ",".join([f"*a{i - 1}" if i else '"x"'] * 9) + "]\n" for i in range(6))
+        gt = _wp678_doc(mod, s, bom + _yaml_that("*a5"), ten="bom.yaml")["lease_id"]
+        kq, td = _thu(mod._lease_id_hop_le, gt)
+        chot(kq == f"Chan{RC_NOI_DUNG}" and len(td) < 1000,
+             f"bí danh lồng: thông điệp phải có trần, được {kq}: {len(str(td))} ký tự")
+        # `repr()` dựng sẵn rồi cắt chuỗi vẫn cho thông điệp ngắn nên `len(td) < 1000` không phân biệt được, mà trả giá luỹ
+        # thừa: bom 9 cấp (421 byte bí danh) đo 43 s / 2,2 GiB RSS, so với 0 s / 52 MiB khi cắt theo cấu trúc (review
+        # thi hành lượt 2).
+        chot("'x'" not in str(td), f"bí danh lồng: repr phải cắt theo cấu trúc, không chạm lá; được …{str(td)[-160:]!r}")
+        # Review thi hành lượt 3: `'x'` vắng chỉ chứng minh ĐẦU RA đã cắt theo cấu trúc, không chứng minh `repr()` đầy đủ
+        # KHÔNG được dựng — "dựng `repr()` đầy đủ, ngắn thì dùng, dài thì reprlib" cho đúng đầu ra ấy mà bom 9 cấp đo 68 s /
+        # 2,2 GiB RSS; và D7/D8/D9 gọi thẳng `repr()` có `try` (vòng qua `_repr_an_toan`) cũng sống toàn suite trên 0dd86c6.
+        # Lính canh nằm sâu hơn `maxlevel`: `repr()` đầy đủ chạm tới nó, cắt theo cấu trúc thì không.
+        class _LinhCanh:
+            cham = 0
+
+            def __repr__(self):
+                type(self).cham += 1
+                return "LINH_CANH"
+        sau = [[[[[_LinhCanh()]]]]]
+        for ten, fn, mong in (("_repr_an_toan", mod._repr_an_toan, "TRA"),
+                              ("_nhan_lease_id_sai", mod._nhan_lease_id_sai, "TRA"),
+                              ("_lease_id_hien_thi", lambda v: mod._lease_id_hien_thi({"lease_id": v}), "TRA"),
+                              ("_lease_id_hop_le", mod._lease_id_hop_le, f"Chan{RC_NOI_DUNG}")):
+            _LinhCanh.cham = 0
+            kq, _td = _thu(fn, sau)
+            chot(kq == mong and _LinhCanh.cham == 0,
+                 f"{ten}: không được dựng repr() đầy đủ rồi mới cắt (lá sâu bị chạm {_LinhCanh.cham} lần), được {kq}")
+        cay = _wp678_kho(s, {"a": {"ops/leases/x.yaml": _wp678_lease_giu(lon)},
+                             "b": {"ops/leases/x.yaml": _wp678_lease_giu("'co khoang trang'")}})
+        kq, ra = _thu(_goi_main, mod, "ai-dang-giu", "ops/x.md", "--root", str(cay))
+        chot(kq == "TRA", f"D7: ai-dang-giu phải kết thúc có kiểm soát, được {kq}: {ra!r}")
+        rc, o, e7 = ra
+        dong = [x for x in o.splitlines() if x.startswith("KHÔNG_XÁC_ĐỊNH\t")]
+        chot(rc == RC_KHONG_XAC_DINH_A0 and len(dong) == 2 and sum("lease_id sai kiểu " in x for x in dong) == 1
+             and sum("lease_id sai dạng 'co khoang trang'" in x for x in dong) == 1 and all(len(x) < 400 for x in dong),
+             f"D7: phải rc=12, đúng 2 dòng KHÔNG_XÁC_ĐỊNH (int: sai kiểu; chuỗi: sai dạng), có trần; được rc={rc} {dong!r}")
+        chot("lease_id không hợp lệ" in e7, f"D7: câu CHAN [12] không được gọi mọi lease_id lỗi là `sai kiểu`; được {e7!r}")
+        kq, ra = _thu(_goi_main, mod, "ai-dang-giu", "ops/khac.md", "--root", str(cay), "--du-bao")
+        chot(kq == "TRA" and ra[0] == 0
+             and sum(x.startswith("DU_BAO: KHÔNG_XÁC_ĐỊNH lease_id ") for x in ra[1].splitlines()) == 2,
+             f"D8: --du-bao trên đường dẫn KHÔNG liên quan phải rc=0 kèm 2 dòng KHÔNG_XÁC_ĐỊNH, được {kq}: {str(ra)[:200]!r}")
+        du_bao = [x for x in ra[1].splitlines() if x.startswith("DU_BAO: KHÔNG_XÁC_ĐỊNH lease_id ")]
+        chot(sum(x.startswith("DU_BAO: KHÔNG_XÁC_ĐỊNH lease_id sai kiểu ") for x in du_bao) == 1
+             and sum(x.startswith("DU_BAO: KHÔNG_XÁC_ĐỊNH lease_id sai dạng 'co khoang trang' ") for x in du_bao) == 1,
+             f"D8: nhãn phải tách sai kiểu (int) / sai dạng (chuỗi) như D7; được {du_bao!r}")
+        # D7/D8 qua CLI: thay `lease_id` của mọi lease quét được bằng cấu trúc mang lính canh, để mọi đường in
+        # `KHÔNG_XÁC_ĐỊNH` (kể cả đường gọi thẳng `repr()` thay cho `_nhan_lease_id_sai`) đều bị đo, không riêng các hàm ở trên.
+        quet_goc = mod._quet_lease_toan_kho
+        mod._quet_lease_toan_kho = lambda *a, **k: [dict(m, lease=dict(m["lease"], lease_id=sau)) for m in quet_goc(*a, **k)]
+        try:
+            _LinhCanh.cham = 0
+            kq, ra = _thu(_goi_main, mod, "ai-dang-giu", "ops/x.md", "--root", str(cay), "--du-bao")
+        finally:
+            mod._quet_lease_toan_kho = quet_goc
+        dong = ra[1].splitlines() if kq == "TRA" else []
+        chot(kq == "TRA" and ra[0] == RC_KHONG_XAC_DINH_A0 and _LinhCanh.cham == 0
+             and sum(x.startswith("KHÔNG_XÁC_ĐỊNH\tlease_id sai kiểu ") for x in dong) == 2
+             and sum(x.startswith("DU_BAO: KHÔNG_XÁC_ĐỊNH lease_id sai kiểu ") for x in dong) == 2,
+             f"D7/D8: không được dựng repr() đầy đủ (lá sâu bị chạm {_LinhCanh.cham} lần); được {kq}: {str(ra)[:300]!r}")
+        # D9 qua CLI (`con-tro-treo`): cả hai đường in `CON_TRỎ_TREO` và `CON_TRỎ_GỢI_Ý` (:2389, :2393 trên 0dd86c6).
+        (s / "d9").mkdir()
+        cay9 = _wp678_kho(s / "d9", {"c": {"ops/leases/x.yaml": _yaml_that("wp-d9") + "tham_chieu_truong_lease: "
+                                                                   "[vung_duoc_phep_cham]\nghi_chu: xem vung_duoc_phep_cham\n"}})
+        mod._quet_lease_toan_kho = lambda *a, **k: [dict(m, lease=dict(m["lease"], lease_id=sau)) for m in quet_goc(*a, **k)]
+        try:
+            _LinhCanh.cham = 0
+            kq, ra = _thu(_goi_main, mod, "con-tro-treo", "--root", str(cay9))
+        finally:
+            mod._quet_lease_toan_kho = quet_goc
+        dong = ra[1].splitlines() if kq == "TRA" else []
+        chot(kq == "TRA" and ra[0] == 0 and _LinhCanh.cham == 0
+             and sum(x.startswith("CON_TRỎ_TREO\t<lease_id không hợp lệ: ") for x in dong) == 1
+             and sum(x.startswith("CON_TRỎ_GỢI_Ý\t<lease_id không hợp lệ: ") for x in dong) == 1,
+             f"D9: không được dựng repr() đầy đủ (lá sâu bị chạm {_LinhCanh.cham} lần); được {kq}: {str(ra)[:300]!r}")
+
+
+# =====================================================================================
+# wp678 A9 — CỔNG ĐO LEASE SAI KIỂU, CHỈ đặt trước LAND (Q7, Q9). Helper do executor viết, chạy bằng
+#     python ops/lease_publish_test.py --quet-a9 <kho>
+# Mã thoát: 0 không lỗi · 1 lỗi lease (KÈM JSON đầy đủ, `errors` khác rỗng) · 2 KHÔNG ĐO ĐƯỢC (lỗi Git/đầu vào,
+# môi trường/giải mã, constructor YAML ném ngoài `YAMLError`, vượt khả năng parser, lỗi chưa phân loại) — stdout
+# rỗng, stderr `KHONG_DO_DUOC: <Loại>: …`. Timeout/OS kill/không đọc được output: người gọi ghi KHÔNG ĐO ĐƯỢC.
+# GIỚI HẠN (Q9): helper KHÔNG kiểm commit, tree gốc hay tree con. Báo cáo sạch chỉ nói về các cặp (đường dẫn,
+# OID blob) như `ls-tree` trả và về bytes blob đã băm khớp OID ấy; cấu trúc cây dựa vào `git fsck --full` chạy
+# CÙNG lượt (ngoài helper, không nguyên tử — rủi ro được chấp nhận có chủ đích).
+# =====================================================================================
+A9_CO = "--quet-a9"
+A9_MIEN = (("ops/leases/", "leases"), ("ops/leases_retired/", "lich_su"))
+A9_LEASE_ID = re.compile(r"^[A-Za-z0-9._-]+$")   # bản sao của `LEASE_ID` sản phẩm; `t217_a9_regex_dong_bo` canh trôi
+
+
+class A9KhongDoDuoc(Exception):
+    """Lỗi Git/đầu vào: KHÔNG kết luận gì về lease."""
+
+
+def _a9_git(kho: Path, *doi_so) -> bytes:
+    """Mọi lệnh Git của helper: TẮT replace (cờ + biến), bỏ mọi `GIT_*` kế thừa (không để môi trường đổi
+    object-store/ref), kiểm rc VÀ stderr — Git bỏ lặng lẽ ref hỏng mà vẫn rc=0, chỉ để lại cảnh báo."""
+    env = {k: v for k, v in os.environ.items() if not k.startswith("GIT_")}
+    env.update(GIT_NO_REPLACE_OBJECTS="1", LC_ALL="C", GIT_CONFIG_NOSYSTEM="1")
+    p = subprocess.run(["git", "--no-replace-objects", "-C", str(kho), *doi_so], capture_output=True, env=env)
+    if p.returncode != 0 or p.stderr.strip():
+        raise A9KhongDoDuoc(f"git {doi_so[0]} rc={p.returncode}: "
+                            f"{p.stderr.decode('utf-8', 'replace').strip()[:300]}")
+    return p.stdout
+
+
+def _a9_loi_con_tro(d: dict) -> list:
+    """Miền con trỏ BẰNG miền runtime (`_danh_sach_thay_the_cho`, `_bia_mo_doi_xung`), hai trường KHÔNG chung luật."""
+    loi = []
+    if "thay_the_cho" in d:
+        v = d["thay_the_cho"]
+        if v is None or isinstance(v, str):
+            pass                                   # vắng/null/""/chuỗi trắng ⇒ danh sách rỗng; chuỗi ⇒ một con trỏ
+        elif isinstance(v, list):
+            if any(not isinstance(x, str) or not x.strip() for x in v):
+                loi.append(f"thay_the_cho={v!r}")
+        else:
+            loi.append(f"thay_the_cho={v!r}")      # False, 0, ánh xạ, số… KHÔNG phải "không có con trỏ"
+    if "da_bi_thay_the" in d:
+        v = d["da_bi_thay_the"]
+        if v is None or v == "" and isinstance(v, str):
+            pass                                   # không có bia mộ
+        elif not (isinstance(v, str) and v.strip()):
+            loi.append(f"da_bi_thay_the={v!r}")    # danh sách (kể cả rỗng), False, 0, ánh xạ, chuỗi chỉ trắng
+    return loi
+
+
+def _a9_quet(kho: Path, *, sau_liet_ke=None) -> dict:
+    import hashlib
+    import yaml
+    if not kho.is_dir():
+        raise A9KhongDoDuoc(f"thư mục kho không tồn tại: {kho}")
+    bat_dau = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+    dinh_dang = _a9_git(kho, "rev-parse", "--show-object-format").decode("ascii").strip()
+    if dinh_dang not in ("sha1", "sha256"):
+        raise A9KhongDoDuoc(f"object format lạ: {dinh_dang!r}")
+    refs = {}
+    for dong in _a9_git(kho, "for-each-ref", "--format=%(objectname)%00%(symref)%00%(refname)",
+                        "refs/heads", "refs/remotes").decode("utf-8").splitlines():
+        oid, symref, ten = dong.split("\0")
+        if ten.rsplit("/", 1)[-1] == "HEAD" and symref:
+            continue                               # CHỈ bỏ HEAD tượng trưng; ref thường `…/HEAD` vẫn quét
+        refs[ten] = oid
+    if sau_liet_ke is not None:
+        sau_liet_ke()                              # seam race: ref đổi SAU lần liệt kê — map giữ OID đã liệt kê
+    cap = {}                                       # (blob, đường dẫn) -> {"mien", "refs"}
+    for ten, oid in sorted(refs.items()):
+        ra = _a9_git(kho, "ls-tree", "-r", "-z", "--full-tree", oid, "--", "ops/leases", "ops/leases_retired")
+        for muc in ra.decode("utf-8").split("\0"):
+            if not muc:
+                continue
+            meta, duong = muc.split("\t", 1)
+            _, loai, blob = meta.split(" ")
+            mien = next((m for tien_to, m in A9_MIEN if duong.startswith(tien_to)), None)
+            if loai != "blob" or mien is None or not duong.endswith((".yaml", ".yml")):
+                continue
+            cap.setdefault((blob, duong), {"mien": mien, "refs": []})["refs"].append(ten)
+    bytes_blob, errors, kieu, du_id = {}, [], {}, 0
+    for (blob, duong), tt in sorted(cap.items()):
+        if blob not in bytes_blob:
+            du_lieu = _a9_git(kho, "cat-file", "blob", blob)   # đọc MỘT lần; băm và phân tích CÙNG biến này
+            bam = hashlib.new(dinh_dang, b"blob %d\0" % len(du_lieu) + du_lieu).hexdigest()
+            if bam != blob:
+                raise A9KhongDoDuoc(f"bytes blob {blob} băm ra {bam} — object-store không khớp OID")
+            bytes_blob[blob] = du_lieu
+        van = bytes_blob[blob].decode("utf-8")   # không phải UTF-8 ⇒ UnicodeDecodeError ⇒ KHÔNG ĐO ĐƯỢC
+        loi = []
+        try:
+            d = yaml.safe_load(van)
+        except yaml.YAMLError as e:
+            loi.append(f"parse: {type(e).__name__}")
+            d = None
+        if not loi:
+            if not isinstance(d, dict):
+                loi.append("khong_phai_anh_xa")
+            elif "lease_id" not in d:
+                loi.append("thieu_lease_id")
+            else:
+                du_id += 1
+                lid = d["lease_id"]
+                kieu[type(lid).__name__] = kieu.get(type(lid).__name__, 0) + 1
+                if not (isinstance(lid, str) and A9_LEASE_ID.fullmatch(lid)):
+                    loi.append(f"lease_id={lid!r}")
+            if isinstance(d, dict):
+                loi += _a9_loi_con_tro(d)
+        for x in loi:
+            errors.append({"blob": blob, "path": duong, "mien": tt["mien"], "refs": sorted(tt["refs"]),
+                           "ref_count": len(tt["refs"]), "loi": x})
+    mien = {m: {"so_blob": len({b for (b, _), t in cap.items() if t["mien"] == m}),
+                "so_cap": sum(1 for t in cap.values() if t["mien"] == m)} for _, m in A9_MIEN}
+    return {"utc_bat_dau": bat_dau, "utc_ket_thuc": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
+            "object_format": dinh_dang, "refs": refs, "so_ref": len(refs), "so_blob": len(bytes_blob),
+            "so_cap": len(cap), "mien": mien, "so_anh_xa_du_id": du_id, "kieu": kieu, "errors": errors}
+
+
+def _a9_bien(argv, *, sau_liet_ke=None) -> tuple:
+    """BIÊN PHÂN LOẠI MÃ THOÁT — CLI đi qua đúng hàm này. Trả ``(rc, stdout, stderr)``."""
+    import json
+    try:
+        if len(argv) != 1:
+            raise A9KhongDoDuoc(f"cách dùng: {A9_CO} <kho> (nhận {len(argv)} đối số)")
+        kq = _a9_quet(Path(argv[0]), sau_liet_ke=sau_liet_ke)
+        van = json.dumps(kq, ensure_ascii=False, sort_keys=True)
+    except Exception as e:  # noqa: BLE001 — mọi lỗi KHÔNG phân loại được là KHÔNG ĐO ĐƯỢC, không gán cho lease
+        return 2, "", f"KHONG_DO_DUOC: {type(e).__name__}: {str(e)[:300]}\n"
+    return (1 if kq["errors"] else 0), van + "\n", ""
+
+
+def _a9_cli(kho, *them, env=None, argv=None):
+    """Chạy CHÍNH helper qua CLI (tiến trình con) — trả ``(rc, json|None, stderr)``."""
+    import json
+    lenh = [sys.executable, str(Path(__file__).resolve()), A9_CO, *([str(kho)] if argv is None else argv), *them]
+    p = subprocess.run(lenh, capture_output=True, text=True, env=env)
+    try:
+        d = json.loads(p.stdout) if p.stdout.strip() else None
+    except ValueError:
+        d = "KHONG_PHAI_JSON"
+    return p.returncode, d, p.stderr
+
+
+def _a9_kho(s: Path, tep: dict, ten="main") -> Path:
+    """Kho Git tạm RIÊNG cho một ca: một commit trên nhánh `ten` mang `tep` ({đường dẫn: bytes|str})."""
+    kho = s / "kho"
+    subprocess.run(["git", "init", "-q", "-b", ten, str(kho)], check=True)
+    _a9_commit(kho, tep)
+    return kho
+
+
+def _a9_commit(kho: Path, tep: dict) -> str:
+    for duong, nd in tep.items():
+        (kho / duong).parent.mkdir(parents=True, exist_ok=True)
+        (kho / duong).write_bytes(nd if isinstance(nd, bytes) else nd.encode("utf-8"))
+    _wp678_g(kho, "add", "-A")
+    _wp678_g(kho, "commit", "-q", "--allow-empty", "-m", "a9")
+    return _wp678_g(kho, "rev-parse", "HEAD").strip()
+
+
+_A9_OK = "lease_id: wp-ok-1\n"
+
+
+def _a9_chot(nhan, kq, rc_mong, loi_mong=()):
+    """Mỗi ca ghi riêng rc, sự hiện diện JSON và loại lỗi — không nhận "khác 0" làm đạt."""
+    rc, d, e = kq
+    if rc_mong == 2:
+        # Dòng CUỐI của stderr, không phải dòng đầu: từ Python 3.12 trình thông dịch in `SyntaxWarning` khi biên
+        # dịch chính tệp này (docstring có `\s`, `\d` của nền) TRƯỚC khi helper chạy — đo 08-10-2026, 11 ca ĐỎ giả.
+        cuoi = ([x for x in e.splitlines() if x.strip()] or [""])[-1]
+        chot(rc == 2 and d is None and cuoi.startswith("KHONG_DO_DUOC: "),
+             f"A9 {nhan}: phải rc=2, KHÔNG JSON, dòng cuối stderr KHONG_DO_DUOC; được rc={rc} json={d!r} e={e!r}")
+        return cuoi
+    chot(rc == rc_mong and isinstance(d, dict) and isinstance(d.get("errors"), list)
+         and bool(d["errors"]) == (rc_mong == 1),
+         f"A9 {nhan}: phải rc={rc_mong} KÈM JSON đầy đủ; được rc={rc} json={d!r} e={e!r}")
+    thay = sorted(x["loi"] for x in d["errors"])
+    chot(thay == sorted(loi_mong), f"A9 {nhan}: lỗi phải đúng {sorted(loi_mong)}, được {thay}")
+    return d
+
+
+def _a9_mot_tep(nhan, van, rc_mong, loi_mong=(), duong="ops/leases/x.yaml"):
+    with San() as s:
+        return _a9_chot(nhan, _a9_cli(_a9_kho(s, {duong: van})), rc_mong, loi_mong)
+
+
+@ca
+def t217_a9_doi_chung_chuoi_hop_le_va_HEAD_tuong_trung_bi_bo():
+    with San() as s:
+        kho = _a9_kho(s, {"ops/leases/x.yaml": _A9_OK})
+        _wp678_g(kho, "symbolic-ref", "refs/remotes/origin/HEAD", "refs/heads/main")
+        d = _a9_chot("chuỗi hợp lệ", _a9_cli(kho), 0)
+        chot(sorted(d["refs"]) == ["refs/heads/main"] and d["so_blob"] == 1 and d["so_cap"] == 1
+             and d["so_anh_xa_du_id"] == 1 and d["kieu"] == {"str": 1}, f"A9 đếm: {d}")
+
+
+@ca
+def t217_a9_int_trong_tep_yml():
+    _a9_mot_tep("int .yml", "lease_id: 1_000\n", 1, ["lease_id=1000"], duong="ops/leases/x.yml")
+
+
+@ca
+def t217_a9_sai_kieu_chi_tren_head_cuc_bo():
+    with San() as s:
+        kho = _a9_kho(s, {"ops/leases/x.yaml": _A9_OK})
+        _wp678_g(kho, "checkout", "-q", "-b", "cuc-bo")
+        _a9_commit(kho, {"ops/leases/y.yaml": "lease_id: on\n"})
+        d = _a9_chot("head cục bộ", _a9_cli(kho), 1, ["lease_id=True"])
+        chot(d["errors"][0]["refs"] == ["refs/heads/cuc-bo"], f"A9 head cục bộ: {d['errors']}")
+
+
+@ca
+def t217_a9_sai_kieu_chi_o_ref_thuong_topic_HEAD():
+    with San() as s:
+        kho = _a9_kho(s, {"ops/leases/x.yaml": _A9_OK})
+        _wp678_g(kho, "checkout", "-q", "-b", "topic/HEAD")
+        _a9_commit(kho, {"ops/leases/y.yaml": "lease_id: yes\n"})
+        d = _a9_chot("topic/HEAD", _a9_cli(kho), 1, ["lease_id=True"])
+        chot(d["errors"][0]["refs"] == ["refs/heads/topic/HEAD"], f"A9 topic/HEAD: {d['errors']}")
+
+
+@ca
+def t217_a9_sai_kieu_chi_o_refs_remotes():
+    """Miền A9 gồm `refs/remotes/*`: clone THƯỜNG giữ nhánh máy chủ ở đó. Review thi hành wp678 lượt 1 đo: bỏ
+    `refs/remotes` khỏi `for-each-ref` SỐNG cả 42 ca `t217_*`, và trên clone thường của snapshot kho thật helper ấy
+    chỉ quét 1 ref / 132 blob (đúng là 482 / 594) mà vẫn rc=0. Ca này đặt lease sai kiểu CHỈ ở một ref theo dõi từ xa."""
+    with San() as s:
+        kho = _a9_kho(s, {"ops/leases/x.yaml": _A9_OK})
+        _wp678_g(kho, "checkout", "-q", "-b", "tam")
+        oid = _a9_commit(kho, {"ops/leases/y.yaml": "lease_id: on\n"})
+        _wp678_g(kho, "update-ref", "refs/remotes/origin/xa", oid)
+        _wp678_g(kho, "checkout", "-q", "main")
+        _wp678_g(kho, "branch", "-q", "-D", "tam")
+        d = _a9_chot("chỉ refs/remotes", _a9_cli(kho), 1, ["lease_id=True"])
+        chot(d["errors"][0]["refs"] == ["refs/remotes/origin/xa"], f"A9 refs/remotes: {d['errors']}")
+
+
+@ca
+def t217_a9_sai_kieu_chi_o_remote_khong_phai_origin():
+    """Miền A9 là `refs/remotes/*` — MỌI remote, không riêng `origin`. Review thi hành wp678 lượt 2 đo: thu hẹp
+    `for-each-ref` về `refs/remotes/origin` SỐNG cả 43 ca `t217_*`, và trên clone có remote thứ hai helper ấy bỏ sót lease
+    sai kiểu ở nhánh của remote đó (3 ref thay vì 5)."""
+    with San() as s:
+        kho = _a9_kho(s, {"ops/leases/x.yaml": _A9_OK})
+        _wp678_g(kho, "checkout", "-q", "-b", "tam")
+        oid = _a9_commit(kho, {"ops/leases/y.yaml": "lease_id: on\n"})
+        _wp678_g(kho, "update-ref", "refs/remotes/upstream/xa", oid)
+        _wp678_g(kho, "checkout", "-q", "main")
+        _wp678_g(kho, "branch", "-q", "-D", "tam")
+        d = _a9_chot("remote khác origin", _a9_cli(kho), 1, ["lease_id=True"])
+        chot(d["errors"][0]["refs"] == ["refs/remotes/upstream/xa"], f"A9 remote khác origin: {d['errors']}")
+
+
+@ca
+def t217_a9_sai_kieu_chi_o_ref_thuong_remotes_HEAD():
+    """`…/HEAD` THƯỜNG (không tượng trưng) dưới `refs/remotes/*` vẫn phải quét, như `topic/HEAD` dưới `refs/heads/*`: nhánh
+    máy chủ `topic/HEAD` nằm ở `refs/remotes/origin/topic/HEAD` trong clone thường. Review thi hành wp678 lượt 2 đo: bỏ mọi
+    leaf `HEAD` dưới `refs/remotes` (kể cả không tượng trưng) SỐNG cả 43 ca `t217_*`, và trên clone thường một remote helper
+    ấy báo sạch rc=0 trong khi nhánh máy chủ mang `lease_id: on`. HEAD tượng trưng vẫn bị bỏ (đối chứng trong cùng kho)."""
+    with San() as s:
+        kho = _a9_kho(s, {"ops/leases/x.yaml": _A9_OK})
+        _wp678_g(kho, "symbolic-ref", "refs/remotes/origin/HEAD", "refs/heads/main")
+        _wp678_g(kho, "checkout", "-q", "-b", "tam")
+        oid = _a9_commit(kho, {"ops/leases/y.yaml": "lease_id: on\n"})
+        _wp678_g(kho, "update-ref", "refs/remotes/origin/topic/HEAD", oid)
+        _wp678_g(kho, "checkout", "-q", "main")
+        _wp678_g(kho, "branch", "-q", "-D", "tam")
+        d = _a9_chot("remotes topic/HEAD thường", _a9_cli(kho), 1, ["lease_id=True"])
+        chot(d["errors"][0]["refs"] == ["refs/remotes/origin/topic/HEAD"] and "refs/remotes/origin/HEAD" not in d["refs"],
+             f"A9 remotes topic/HEAD: {d['errors']} {sorted(d['refs'])}")
+
+
+@ca
+def t217_a9_sai_kieu_chi_qua_ref_tuong_trung_khong_phai_HEAD():
+    """Miền A9 chỉ bỏ ref có leaf HEAD VÀ tượng trưng — ref tượng trưng mang tên KHÁC vẫn phải quét, kể cả khi nó trỏ ra
+    ngoài `refs/heads/*` và `refs/remotes/*`. Review thi hành wp678 lượt 3 đo: bỏ MỌI ref tượng trưng (`if symref:`)
+    sống cả 45 ca `t217_*` và toàn suite trên 0dd86c6, và báo sạch rc=0 trên đúng kho này (lease sai kiểu chỉ tới
+    được qua `refs/heads/alias` → `refs/tags/t`)."""
+    with San() as s:
+        kho = _a9_kho(s, {"ops/leases/x.yaml": _A9_OK})
+        _wp678_g(kho, "checkout", "-q", "-b", "tam")
+        oid = _a9_commit(kho, {"ops/leases/y.yaml": "lease_id: on\n"})
+        _wp678_g(kho, "update-ref", "refs/tags/t", oid)
+        _wp678_g(kho, "checkout", "-q", "main")
+        _wp678_g(kho, "branch", "-q", "-D", "tam")
+        _wp678_g(kho, "symbolic-ref", "refs/heads/alias", "refs/tags/t")
+        d = _a9_chot("ref tượng trưng khác HEAD", _a9_cli(kho), 1, ["lease_id=True"])
+        chot(d["errors"][0]["refs"] == ["refs/heads/alias"] and sorted(d["refs"]) == ["refs/heads/alias", "refs/heads/main"],
+             f"A9 ref tượng trưng khác HEAD: {d['errors']} {sorted(d['refs'])}")
+
+
+@ca
+def t217_a9_sai_kieu_chi_o_origin_HEAD_khong_tuong_trung():
+    """Luật bỏ của miền A9 đọc SYMREF, không đọc TÊN: `refs/remotes/origin/HEAD` là ref THƯỜNG thì vẫn phải quét. Review
+    thi hành wp678 lượt 3 đo: bỏ theo đúng tên `refs/remotes/origin/HEAD` (không xét symref — thành ngữ quen của script)
+    sống cả 45 ca `t217_*` và toàn suite trên 0dd86c6, và báo sạch rc=0 trên đúng kho này."""
+    with San() as s:
+        kho = _a9_kho(s, {"ops/leases/x.yaml": _A9_OK})
+        _wp678_g(kho, "checkout", "-q", "-b", "tam")
+        oid = _a9_commit(kho, {"ops/leases/y.yaml": "lease_id: on\n"})
+        _wp678_g(kho, "update-ref", "refs/remotes/origin/HEAD", oid)
+        _wp678_g(kho, "checkout", "-q", "main")
+        _wp678_g(kho, "branch", "-q", "-D", "tam")
+        d = _a9_chot("origin/HEAD thường", _a9_cli(kho), 1, ["lease_id=True"])
+        chot(d["errors"][0]["refs"] == ["refs/remotes/origin/HEAD"], f"A9 origin/HEAD thường: {d['errors']}")
+
+
+def _a9_tuong_trung_ra_ngoai_mien(s: Path, ten_sym: str, dich: str):
+    """Kho tạm cho miền ref TƯỢNG TRƯNG của A9: `main` sạch; commit mang `lease_id: on` CHỈ tới được qua ref `dich` NGOÀI
+    miền `refs/heads/*`, `refs/remotes/*`, và `ten_sym` là ref TƯỢNG TRƯNG trỏ tới `dich`. Trả kết quả `_a9_cli`: lease sai
+    kiểu chỉ lộ ra khi helper QUÉT `ten_sym`. Các ca dùng hai đích khác loại (`refs/tags/…`, `refs/pull/…`) để luật bỏ không
+    thể dựa vào loại của đích."""
+    kho = _a9_kho(s, {"ops/leases/x.yaml": _A9_OK})
+    _wp678_g(kho, "checkout", "-q", "-b", "tam")
+    oid = _a9_commit(kho, {"ops/leases/y.yaml": "lease_id: on\n"})
+    _wp678_g(kho, "update-ref", dich, oid)
+    _wp678_g(kho, "checkout", "-q", "main")
+    _wp678_g(kho, "branch", "-q", "-D", "tam")
+    _wp678_g(kho, "symbolic-ref", ten_sym, dich)
+    return _a9_cli(kho)
+
+
+@ca
+def t217_a9_sai_kieu_chi_qua_ref_tuong_trung_duoi_remotes_khong_phai_HEAD():
+    """Ô còn thiếu của miền A9 (tiền tố `heads`/`remotes` × leaf `HEAD`/khác × tượng trưng/thường): ref TƯỢNG TRƯNG dưới
+    `refs/remotes/*` mà leaf KHÁC `HEAD` vẫn phải quét — luật bỏ không đọc tiền tố. Review thi hành wp678 lượt 4 đo: bỏ mọi
+    ref tượng trưng dưới `refs/remotes/` (`if symref and ten.startswith("refs/remotes/"):`) sống cả 47 ca `t217_*` và toàn
+    suite trên 6a7220a, và báo sạch rc=0 khi lease sai kiểu chỉ tới được qua `refs/remotes/upstream/alias` → `refs/tags/t`.
+    Đích ở đây là `refs/pull/1/head` (không phải tag) để luật "bỏ ref tượng trưng trừ khi đích là tag" cũng ĐỎ."""
+    with San() as s:
+        d = _a9_chot("remotes tượng trưng khác HEAD",
+                     _a9_tuong_trung_ra_ngoai_mien(s, "refs/remotes/upstream/alias", "refs/pull/1/head"), 1, ["lease_id=True"])
+        chot(d["errors"][0]["refs"] == ["refs/remotes/upstream/alias"]
+             and sorted(d["refs"]) == ["refs/heads/main", "refs/remotes/upstream/alias"],
+             f"A9 remotes tượng trưng khác HEAD: {d['errors']} {sorted(d['refs'])}")
+
+
+@ca
+def t217_a9_sai_kieu_qua_ref_tuong_trung_leaf_gan_HEAD():
+    """Luật bỏ của miền A9 so NGUYÊN leaf với đúng chuỗi `HEAD` — không so đuôi, chuỗi con hay bỏ hoa/thường: ref tượng
+    trưng có leaf `xHEAD`, `HEAD-x`, `head` vẫn phải quét. Review thi hành wp678 lượt 4 đo: `ten.endswith("HEAD")`,
+    `"HEAD" in ten` và `leaf.upper() == "HEAD"` (cùng giữ `and symref`) sống cả 47 ca `t217_*` và toàn suite trên 6a7220a,
+    và báo sạch rc=0 khi lease sai kiểu chỉ tới được qua ref tượng trưng mang leaf ấy. Mỗi leaf một kho tạm, một chốt."""
+    for ten in ("refs/heads/xHEAD", "refs/heads/HEAD-x", "refs/heads/head"):
+        with San() as s:
+            d = _a9_chot(f"leaf gần HEAD {ten}", _a9_tuong_trung_ra_ngoai_mien(s, ten, "refs/tags/t"), 1, ["lease_id=True"])
+            chot(d["errors"][0]["refs"] == [ten] and sorted(d["refs"]) == sorted(["refs/heads/main", ten]),
+                 f"A9 leaf gần HEAD {ten}: {d['errors']} {sorted(d['refs'])}")
+
+
+@ca
+def t217_a9_thieu_lease_id():
+    _a9_mot_tep("thiếu ID", "packet_issue: 5\n", 1, ["thieu_lease_id"])
+
+
+@ca
+def t217_a9_tai_lieu_khong_phai_anh_xa():
+    _a9_mot_tep("không phải ánh xạ", "- lease_id: wp-ok-1\n", 1, ["khong_phai_anh_xa"])
+
+
+@ca
+def t217_a9_yaml_loi_thong_thuong():
+    _a9_mot_tep("YAML lỗi", "lease_id: [\n", 1, ["parse: ParserError"])
+
+
+@ca
+def t217_a9_da_bi_thay_the_la_list():
+    _a9_mot_tep("dbtt list", _A9_OK + "da_bi_thay_the: [x]\n", 1, ["da_bi_thay_the=['x']"])
+
+
+@ca
+def t217_a9_thay_the_cho_phan_tu_rong():
+    _a9_mot_tep("ttc ['']", _A9_OK + "thay_the_cho: ['']\n", 1, ["thay_the_cho=['']"])
+
+
+@ca
+def t217_a9_thay_the_cho_phan_tu_trang():
+    _a9_mot_tep("ttc ['   ']", _A9_OK + "thay_the_cho: ['   ']\n", 1, ["thay_the_cho=['   ']"])
+
+
+@ca
+def t217_a9_da_bi_thay_the_chuoi_trang():
+    _a9_mot_tep("dbtt '   '", _A9_OK + "da_bi_thay_the: '   '\n", 1, ["da_bi_thay_the='   '"])
+
+
+@ca
+def t217_a9_thay_the_cho_false():
+    _a9_mot_tep("ttc false", _A9_OK + "thay_the_cho: false\n", 1, ["thay_the_cho=False"])
+
+
+@ca
+def t217_a9_thay_the_cho_0():
+    _a9_mot_tep("ttc 0", _A9_OK + "thay_the_cho: 0\n", 1, ["thay_the_cho=0"])
+
+
+@ca
+def t217_a9_da_bi_thay_the_false():
+    _a9_mot_tep("dbtt false", _A9_OK + "da_bi_thay_the: false\n", 1, ["da_bi_thay_the=False"])
+
+
+@ca
+def t217_a9_da_bi_thay_the_0():
+    _a9_mot_tep("dbtt 0", _A9_OK + "da_bi_thay_the: 0\n", 1, ["da_bi_thay_the=0"])
+
+
+@ca
+def t217_a9_thay_the_cho_list_rong_hop_le():
+    _a9_mot_tep("ttc []", _A9_OK + "thay_the_cho: []\n", 0)
+
+
+@ca
+def t217_a9_duong_thay_the_cho_vang():
+    _a9_mot_tep("ttc vắng", _A9_OK + "ghi_chu: x\n", 0)
+
+
+@ca
+def t217_a9_duong_thay_the_cho_null():
+    _a9_mot_tep("ttc null", _A9_OK + "thay_the_cho: null\n", 0)
+
+
+@ca
+def t217_a9_duong_thay_the_cho_chuoi_rong():
+    _a9_mot_tep("ttc ''", _A9_OK + "thay_the_cho: ''\n", 0)
+
+
+@ca
+def t217_a9_duong_thay_the_cho_chuoi_trang():
+    _a9_mot_tep("ttc '   '", _A9_OK + "thay_the_cho: '   '\n", 0)
+
+
+@ca
+def t217_a9_duong_da_bi_thay_the_vang():
+    _a9_mot_tep("dbtt vắng", _A9_OK + "ghi_chu: y\n", 0)
+
+
+@ca
+def t217_a9_duong_da_bi_thay_the_null():
+    _a9_mot_tep("dbtt null", _A9_OK + "da_bi_thay_the: null\n", 0)
+
+
+@ca
+def t217_a9_duong_da_bi_thay_the_chuoi_rong():
+    _a9_mot_tep("dbtt ''", _A9_OK + "da_bi_thay_the: ''\n", 0)
+
+
+@ca
+def t217_a9_git_ref_hong_oid_toan_0():
+    with San() as s:
+        kho = _a9_kho(s, {"ops/leases/x.yaml": "lease_id: 1_000\n"})
+        (kho / ".git" / "refs" / "heads" / "hong").write_text("0" * 40 + "\n", encoding="utf-8")
+        e = _a9_chot("ref hỏng", _a9_cli(kho), 2)
+        chot("broken ref" in e, f"A9 ref hỏng phải đọc từ stderr của Git: {e!r}")
+
+
+@ca
+def t217_a9_git_kho_khong_ton_tai():
+    with San() as s:
+        _a9_chot("kho vắng", _a9_cli(s / "khong-co"), 2)
+
+
+def _a9_hai_commit(s: Path):
+    """main → commit X (`lease_id: 1_000`); commit Y rời mang chuỗi hợp lệ. Trả ``(kho, X, Y, blob_X, blob_Y)``."""
+    kho = _a9_kho(s, {"ops/leases/x.yaml": "lease_id: 1_000\n"})
+    x = _wp678_g(kho, "rev-parse", "HEAD").strip()
+    _wp678_g(kho, "checkout", "-q", "--orphan", "sach")
+    y = _a9_commit(kho, {"ops/leases/x.yaml": _A9_OK})
+    _wp678_g(kho, "checkout", "-q", "main")
+    _wp678_g(kho, "branch", "-q", "-D", "sach")
+    return kho, x, y, _wp678_g(kho, "rev-parse", f"{x}:ops/leases/x.yaml").strip(), \
+        _wp678_g(kho, "rev-parse", f"{y}:ops/leases/x.yaml").strip()
+
+
+@ca
+def t217_a9_replace_commit_van_doc_OID_goc():
+    with San() as s:
+        kho, x, y, _, _ = _a9_hai_commit(s)
+        _wp678_g(kho, "replace", x, y)
+        chot(_wp678_g(kho, "for-each-ref", "refs/replace").count("\n") == 1, "A9 fixture: phải có đúng 1 ref replace")
+        _a9_chot("replace commit", _a9_cli(kho), 1, ["lease_id=1000"])
+
+
+@ca
+def t217_a9_replace_blob_van_doc_OID_goc():
+    with San() as s:
+        kho, _, _, bx, by = _a9_hai_commit(s)
+        _wp678_g(kho, "replace", bx, by)
+        _a9_chot("replace blob", _a9_cli(kho), 1, ["lease_id=1000"])
+
+
+@ca
+def t217_a9_doi_chung_khong_replace():
+    with San() as s:
+        kho, _, _, _, _ = _a9_hai_commit(s)
+        _a9_chot("không replace", _a9_cli(kho), 1, ["lease_id=1000"])
+
+
+@ca
+def t217_a9_race_ref_doi_sau_liet_ke_van_doc_OID_da_liet_ke():
+    with San() as s:
+        kho, x, y, _, _ = _a9_hai_commit(s)
+        rc, out, e = _a9_bien([str(kho)], sau_liet_ke=lambda: _wp678_g(kho, "update-ref", "refs/heads/main", y))
+        import json
+        d = json.loads(out) if out.strip() else None
+        chot(_wp678_g(kho, "rev-parse", "refs/heads/main").strip() == y, "A9 race: seam phải đã đổi ref")
+        _a9_chot("race", (rc, d, e), 1, ["lease_id=1000"])
+        chot(d["refs"] == {"refs/heads/main": x}, f"A9 race: map phải giữ OID đã liệt kê {x}: {d['refs']}")
+
+
+@ca
+def t217_a9_cung_blob_hai_mien():
+    with San() as s:
+        d = _a9_chot("hai miền", _a9_cli(_a9_kho(s, {"ops/leases/x.yaml": _A9_OK,
+                                                       "ops/leases_retired/x.yaml": _A9_OK})), 0)
+        chot(d["so_blob"] == 1 and d["so_cap"] == 2 and d["mien"] == {"leases": {"so_blob": 1, "so_cap": 1},
+                                                                      "lich_su": {"so_blob": 1, "so_cap": 1}}
+             and d["refs"] == {"refs/heads/main": _wp678_g(_a9_kho_cu(s), "rev-parse", "HEAD").strip()},
+             f"A9 hai miền: {d}")
+
+
+def _a9_kho_cu(s: Path) -> Path:
+    return s / "kho"
+
+
+@ca
+def t217_a9_bien_blob_khong_UTF8():
+    e = _a9_mot_tep("không UTF-8", b"lease_id: \xff\xfe\n", 2)
+    chot("UnicodeDecodeError" in e, f"A9: {e!r}")
+
+
+@ca
+def t217_a9_bien_ngay_khong_ton_tai():
+    e = _a9_mot_tep("ngày 2026-02-30", "lease_id: 2026-02-30\n", 2)
+    chot("ValueError" in e, f"A9: {e!r}")
+
+
+@ca
+def t217_a9_bien_so_vuot_gioi_han_chuyen_doi():
+    e = _a9_mot_tep("số 5000 chữ số", "lease_id: " + "9" * 5000 + "\n", 2)
+    chot("ValueError" in e, f"A9: {e!r}")
+
+
+@ca
+def t217_a9_bien_tai_lieu_qua_sau():
+    e = _a9_mot_tep("5000 lớp [", "[" * 5000 + "\n", 2)
+    chot("RecursionError" in e, f"A9: {e!r}")
+
+
+@ca
+def t217_a9_doi_chung_tep_hop_le_rat_lon():
+    _a9_mot_tep("tệp 400 KB", _A9_OK + "ghi_chu: " + "x" * 400000 + "\n", 0)
+
+
+@ca
+def t217_a9_bien_argv_thieu_va_thua():
+    with San() as s:
+        kho = _a9_kho(s, {"ops/leases/x.yaml": _A9_OK})
+        _a9_chot("argv thiếu", _a9_cli(kho, argv=[]), 2)
+        _a9_chot("argv thừa", _a9_cli(kho, str(kho)), 2)
+
+
+@ca
+def t217_a9_bien_git_vang():
+    with San() as s:
+        kho = _a9_kho(s, {"ops/leases/x.yaml": _A9_OK})
+        rong = s / "path-rong"
+        rong.mkdir()
+        e = _a9_chot("Git vắng", _a9_cli(kho, env=dict(os.environ, PATH=str(rong))), 2)
+        chot("FileNotFoundError" in e, f"A9: {e!r}")
+
+
+@ca
+def t217_a9_bien_pyyaml_vang():
+    with San() as s:
+        kho = _a9_kho(s, {"ops/leases/x.yaml": _A9_OK})
+        gia = s / "yaml-gia"
+        gia.mkdir()
+        (gia / "yaml.py").write_text("raise ImportError('PyYAML vắng (giả)')\n", encoding="utf-8")
+        e = _a9_chot("PyYAML vắng", _a9_cli(kho, env=dict(os.environ, PYTHONPATH=str(gia))), 2)
+        chot("ImportError" in e, f"A9: {e!r}")
+
+
+def _a9_tep_object(kho: Path, oid: str) -> Path:
+    return kho / ".git" / "objects" / oid[:2] / oid[2:]
+
+
+@ca
+def t217_a9_object_store_blob_sai_bam_la_2():
+    """Ref và tree giữ nguyên; bytes lưu dưới OID của blob `int` là một lease chuỗi hợp lệ ⇒ rc=2 (không 0, không 1)."""
+    import zlib
+    with San() as s:
+        kho, _, _, bx, _ = _a9_hai_commit(s)
+        tep = _a9_tep_object(kho, bx)
+        chot(tep.is_file(), f"A9 fixture: blob {bx} phải là object rời")
+        tep.chmod(0o644)
+        tep.write_bytes(zlib.compress(b"blob %d\0" % len(_A9_OK) + _A9_OK.encode()))
+        e = _a9_chot("blob sai băm", _a9_cli(kho), 2)
+        chot("không khớp OID" in e, f"A9: {e!r}")
+
+
+@ca
+def t217_a9_object_store_thieu_blob_la_2():
+    with San() as s:
+        kho, _, _, bx, _ = _a9_hai_commit(s)
+        _a9_tep_object(kho, bx).unlink()
+        _a9_chot("thiếu blob", _a9_cli(kho), 2)
+
+
+@ca
+def t217_a9_object_store_khoi_phuc_dung_bytes_la_1():
+    with San() as s:
+        kho, _, _, bx, _ = _a9_hai_commit(s)
+        tep = _a9_tep_object(kho, bx)
+        goc = tep.read_bytes()
+        tep.chmod(0o644)
+        tep.write_bytes(b"hong")
+        tep.write_bytes(goc)
+        _a9_chot("khôi phục", _a9_cli(kho), 1, ["lease_id=1000"])
+
+
+@ca
+def t217_a9_regex_dong_bo_LEASE_ID_san_pham():
+    mod = _nap_cong()
+    chot(A9_LEASE_ID.pattern == mod.LEASE_ID.pattern,
+         f"A9: regex helper {A9_LEASE_ID.pattern!r} lệch LEASE_ID sản phẩm {mod.LEASE_ID.pattern!r}")
+
+
 def main(chon=None, nen=None, so=None) -> int:
     """`chon`/`nen`/`so` là SEAM của ca meta (`_chay_main_meta`): danh sách ca, nền, sổ bỏ ca — không vá
     `CA`/`os.name` toàn cục. Chạy thật (`sys.exit(main())`) thì cả ba là None ⇒ argv, `os.name`, `SO_BO_QUA`."""
@@ -11503,4 +13014,9 @@ def main(chon=None, nen=None, so=None) -> int:
 
 
 if __name__ == "__main__":
+    if len(sys.argv) >= 2 and sys.argv[1] == A9_CO:   # wp678 A9: helper đo lease sai kiểu trước LAND
+        _rc, _out, _err = _a9_bien(sys.argv[2:])
+        sys.stdout.write(_out)
+        sys.stderr.write(_err)
+        sys.exit(_rc)
     sys.exit(main())

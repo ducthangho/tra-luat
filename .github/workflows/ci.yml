@@ -833,6 +833,8 @@ jobs:
     # #593 r2-g4 (đo 25-09-2026, ubuntu): trần 60 cắt job 107895998908 — `test registry` chạy TUẦN TỰ;
     # bước ấy 32,65 phút trên master (run 36076793429) → 52,15 phút với #593 (job 107910512895) ⇒ 60 → 90.
     # 90 cỡ theo UBUNTU: windows-latest đã chạm trần 60 từ run 35637741169 (trước #593) — 90 KHÔNG đủ Windows.
+    # #705 (CI-REGISTRY-NANG-TRAN-BO-DAY-DU, chủ kho Q4): 90 → 105 cùng trần một bộ 4500 → 5400 s — số đo và lý do ở
+    # `GIAY_TOI_DA_MOT_BO` (.claude/dev/ci_dang_ky_test.py). 105 vẫn cỡ theo UBUNTU, KHÔNG bảo đảm Windows.
     # Timeout KHÁC `gate`/`gate-packet-loop` (vẫn 60) có chủ đích; tiền tố 9 bước và ma trận vẫn chung.
     needs: chuan-bi
     strategy:
@@ -840,7 +842,7 @@ jobs:
       matrix:
         os: ${{ fromJson(needs.chuan-bi.outputs.os) }}
     runs-on: ${{ matrix.os }}
-    timeout-minutes: 90
+    timeout-minutes: 105
     env:
       PYTHONIOENCODING: utf-8
       PYTHONUTF8: "1"

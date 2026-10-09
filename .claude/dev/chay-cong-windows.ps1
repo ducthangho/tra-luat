@@ -1,8 +1,8 @@
 #Requires -Version 7.1
 # ĐÒI pwsh 7.1+, KHÔNG phải Windows PowerShell 5.1 — và đây là phép đo, không phải sở thích:
-#   · Tệp này UTF-8 KHÔNG BOM, LF — theo nhóm `scripts/*.ps1` + `tl-setup.ps1` (5 tệp không BOM).
-#     Kho KHÔNG có một quy ước duy nhất: 5/10 tệp `.ps1` có sẵn (`docs/runbooks/**`) CÓ BOM (đo
-#     `git ls-tree` + 3 byte đầu). PowerShell 5.1 đọc tệp không BOM theo ANSI ⇒ tiếng Việt thành rác.
+#   · Tệp này UTF-8 KHÔNG BOM, LF — theo nhóm `scripts/*.ps1` + `tl-setup.ps1` (7 tệp không BOM trên master 8b59185).
+#     Kho KHÔNG có một quy ước duy nhất: 5/12 tệp `.ps1` có sẵn (`docs/runbooks/**`) CÓ BOM (đo `git ls-tree` + 3 byte
+#     đầu, master 8b59185; nền gốc d553efa: 5/10). PowerShell 5.1 đọc tệp không BOM theo ANSI ⇒ tiếng Việt thành rác.
 #   · `$tt.Kill($true)` (giết cả cây tiến trình, dùng cho hạn giờ) chỉ có từ .NET Core 3.0.
 #   · `$tt.WaitForExitAsync()` (xả stdout/stderr CÓ HẠN sau khi cổng thoát) chỉ có từ .NET 5 = pwsh 7.1.
 #   · `ci.yml` đã gọi `pwsh -NoProfile -File scripts/don-nhanh_test.ps1`, nên pwsh 7 vốn là
@@ -52,9 +52,9 @@
                lane WORKER — cộng hai bước `ci.yml` bỏ trên Windows, và một dòng `THAY BẰNG` cho mảnh + gom của
                `cong_cu_test` (master từ fc852ff). Bước chỉ chạy ở chế độ `duong_nhanh` (PR chỉ đổi hồ sơ) thì không
                gương: script luôn chạy ĐỦ như lượt push/`workflow_dispatch`. t32 đòi mọi bước `gate*` còn lại có LỆNH
-               trong script — từng cặp (đích, đối số ngay sau nó) của `ci.yml` là hai phần tử LIỀN NHAU trong script —
-               hoặc có TÊN ĐÚNG trong một dòng `KHÔNG CHẠY`/`THAY BẰNG`; bước không có đích `.py/.sh/.ps1` nào phải nằm
-               trong danh sách nếp/cài đặt của t32.
+               trong script — mỗi (đích, MỌI đối số sau nó) của `ci.yml` BẰNG đuôi của một mảng/lệnh trong script, kể cả ghim
+               phiên bản (`pkg==x.y.z`, `AL_VER`) — hoặc có TÊN ĐÚNG trong một dòng `KHÔNG CHẠY`/`THAY BẰNG`; bước không có đích
+               `.py/.sh/.ps1` nào và bước `uses:` lạ phải nằm trong danh sách nếp/cài đặt của t32.
 
 .PARAMETER CaiCongCu
     Cài PyYAML/jsonschema/ruff bản GHIM, rồi `actionlint` (vào `dist/actionlint` của bản clone), `shellcheck`, `rg`

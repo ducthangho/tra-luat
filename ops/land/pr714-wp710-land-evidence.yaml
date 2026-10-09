@@ -2,7 +2,9 @@
 # Schema chuan: docs/PROTOCOL_DA_PHIEN.md §7, khoi "Land evidence tach approval khoi thao tac".
 # Duong dan ops/land/*-land-evidence.yaml la QUY UOC THUC TE (tien le pr718 #678, pr707 #705, pr703 #674, pr701 #687).
 #
-# TRANG THAI: merged (8b59185), `landed: false`. Hau-merge gate XANH (37921871398) va lease g5 da nha (NGƯỜI_GIỮ 0 luc 15:20Z).
+# TRANG THAI: merged (8b59185), `landed: true` THEO QUYET DINH CHU KHO (pull/722#issuecomment-6084150845, 15:39:03Z), CO HIEU
+# LUC tu merge commit cua PR ghi so #722 dua dong nay vao master. Hau-merge gate XANH (37921871398), lease g5 da nha
+# (NGƯỜI_GIỮ 0 luc 15:20Z). Cac lech duoi day KHONG duoc do du — chung DONG THEO QUYET DINH CHU KHO, khong phai do do.
 # PR #714 merge TRUOC khi co human audit va TRUOC khi bot Codex review xong
 # head 888c0d9; human audit cua chu kho GHI SAU MERGE (pull/714#issuecomment-6080353250) chap nhan tuong minh cac lech.
 # Delta sau head duoc approve (7f7ae2c, 888c0d9) CHUA reviewer nao xem. Hien vat review luot 4-8 chua nam trong kho; luot 9 DUNG LAI tu ban chieu (6bb5358).
@@ -45,12 +47,28 @@ do_luc: '2026-10-09T11:52Z..12:1xZ (worktree claude/bookkeeping-710-land tu orig
 trang_thai_packet:
   merged: true
   merged_nguon: 'measured — readback-pr-714.json: merged true, merged_at 2026-10-09T11:08:09Z, merge_commit_sha 8b59185975a938504de5963d2310e574dd4858b2'
-  landed: false
+  landed: true
+  landed_hieu_luc_tu: >-
+    merge commit cua PR ghi so #722 dua tep nay — voi `landed: true` — vao master (cac commit truoc tren nhanh ghi so van
+    ghi `landed: false`). Comment 6084150845 la NEO cua quyet dinh, khong phai moc hieu luc (tien le #678 / PR #720).
+  quyet_dinh_chu_kho:
+    trang_thai: measured
+    lenh_nguyen_van: '"**Quyết định:** WP710 / #710 **landed** tại `8b59185`." (dong quyet dinh cua than comment; ban day du: readback-comment-6084150845.json)'
+    luc: '2026-10-09T15:39:03Z (created_at = updated_at)'
+    neo_ben: https://github.com/ducthangho/tra-luat/pull/722#issuecomment-6084150845
+    neo_ben_do_duoc: >-
+      measured (readback-comment-6084150845.json, `gh api repos/ducthangho/tra-luat/issues/comments/6084150845`, doc
+      2026-10-09T15:39:18Z): user ducthangho, author_association OWNER, performed_via_github_app null, than 1731 byte sha256
+      0fab904bbe763cfdc708aca76dfb32e1472cde5fd39df734476f35a923eb7604 (bam tren ban DA DEN; 0 "&#", 0 "&amp;"), LF x19,
+      khong LF cuoi. Chap nhan tuong minh: merge truoc human audit/bot; delta 888c0d9 vs 6a8c8b5 khong review lai; thieu
+      hien vat luot 4-8, luot 9 ban dung lai; assurance cross_reviewed + human_audited, khong cross_approved. Than comment
+      do phien dieu phoi SOAN, chu kho dang (OWNER + app null khong tach chu kho khoi token chu kho, #566 — tu khai).
   landed_ly_do: >-
     PROTOCOL §10.2.4: `landed` = da vao canonical o exact SHA duoc duyet, HAU-MERGE GATE XANH va bookkeeping Packet xong;
     §13.1: khong goi landed khi thieu bang chung tuong ung; §2: tham quyen khong chuyen qua output cua agent. Head da merge
     888c0d9 KHAC head duoc approve 6a8c8b5; human audit tren 888c0d9 co nhung GHI SAU merge; hau-merge gate chua xong luc
     ghi lan dau (nay XANH, 15:22Z); hien vat review luot 4-8 chua vao kho (luot 9: ban dung lai tu ban chieu, khop bam). Land operator KHONG tu dong diem nao; xem con_thieu_de_goi_landed.
+    CAP NHAT 15:4xZ: chu kho quyet landed (quyet_dinh_chu_kho); cac muc con_mo duoi day DONG THEO QUYET DINH, khong do du.
   con_thieu_de_goi_landed:
     - id: HIEN-VAT-REVIEW-LUOT-4-9
       trang_thai: 'con_mo cho luot 4-8; luot 9 DA CO ban DUNG LAI tu ban chieu (6bb5358 + bien nhan 7144137), tep goc van chua co'
@@ -117,7 +135,7 @@ trang_thai_packet:
         Push bk710-rut-han-g5 thanh ops/wp710-r4-g5-lease (fast-forward tu a797078) TRUOC 2026-10-09T14:50Z, hoac doi han
         truoc khi push; sau 15:00Z do ai-dang-giu cho 6 duong dan, ky vong NGƯỜI_GIỮ 0 va g5 HẾT_HẠN.
     - id: BOOKKEEPING-PR-GHI-SO
-      trang_thai: con_mo
+      trang_thai: 'dong khi PR #722 merge bang MERGE commit (chu kho bam, theo 6084150845); nhanh da push nguyen ven'
       mo_ta: 'Nhanh claude/bookkeeping-710-land chi o CUC BO luc ghi; Issue #710 open (readback-issue-710.json, updated_at 11:51:47Z).'
       can: >-
         Push nguyen ven (khong rebase/squash); merge PR ghi so bang MERGE commit (evidence_url cua 3 bien nhan v2 neo commit

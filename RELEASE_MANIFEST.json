@@ -5,10 +5,10 @@
   "skill_version": "1.36.68",
   "webapp_target": "2.21.2p",
   "root_name": "tra-luat",
-  "file_count": 180,
-  "total_bytes": 8447590,
-  "package_hash": "931b51c001a3cac3b1e69ebf773b5b00e8283678a4135a79aea2bd529054101f",
-  "content_hash": "931b51c001a3cac3b1e69ebf773b5b00e8283678a4135a79aea2bd529054101f",
+  "file_count": 183,
+  "total_bytes": 8710991,
+  "package_hash": "097ce1d72e1aceed187cfb7f3f03f16e1d67b58ba8b7d406043d64099c603691",
+  "content_hash": "097ce1d72e1aceed187cfb7f3f03f16e1d67b58ba8b7d406043d64099c603691",
   "required_missing": [],
   "files": [
     {
@@ -55,6 +55,11 @@
       "path": "agents/openai.yaml",
       "size": 224,
       "sha256": "37a33538a5cc2d9cf31089b74cb6f8a9f64b7ce08e9bc3880cf49ec3b8474843"
+    },
+    {
+      "path": "changelog.d/wp-710.md",
+      "size": 7560,
+      "sha256": "1efc3dbee8f3549e53bf73656914cfa80a55c4a452aeff19a6d7b381cdfa8cf8"
     },
     {
       "path": "references/API_CONTRACT.md",
@@ -178,8 +183,8 @@
     },
     {
       "path": "references/RUNBOOK.md",
-      "size": 59994,
-      "sha256": "4352da17253f9536527f11058ae42de6e3d7253a3aab0d1baabd636aabc5678e"
+      "size": 86083,
+      "sha256": "0b8ab800dd222425f702ed89d40fe0b9e4403abeaa7ea2a25c445c8b7de47588"
     },
     {
       "path": "references/SKILL_KERNEL_MAPPING.md",
@@ -627,6 +632,16 @@
       "sha256": "bc0b55184ab7949d123f9c35c90b3d26f194d2fb67de4a591c6884a50e7f16d9"
     },
     {
+      "path": "scripts/nlm-credential-refresh.Tests.ps1",
+      "size": 99335,
+      "sha256": "7f6e56362e2bea7a2033a8995aa779f12e0141ca4e2c950401a962863a46f1a8"
+    },
+    {
+      "path": "scripts/nlm-credential-refresh.ps1",
+      "size": 66861,
+      "sha256": "33d32769897f97644985def693a6c54c70d2dc4048aed242b557cf4df1e8da5d"
+    },
+    {
       "path": "scripts/nlm_auth_convert.py",
       "size": 6302,
       "sha256": "2a64375fa8524a226603da69f725d9ff6ff7aac81c7c5bb9ca218776973f955b"
@@ -853,13 +868,13 @@
     },
     {
       "path": "scripts/tl_gws.py",
-      "size": 118055,
-      "sha256": "0887d7dbfbacbfb32b314c2a334c2cf1bb82cff8920f56e2a854ca315e0250fa"
+      "size": 138855,
+      "sha256": "040195dede584ed4be4fcd7b566dca2170c225d34cd80f30fe5d7381aca30173"
     },
     {
       "path": "scripts/tl_selftest.py",
-      "size": 2177711,
-      "sha256": "81bbfc18f2c2b6ce8876f9ee23eb1ec8fa3b2d0154780014610af3a6a8f49f5d"
+      "size": 2220467,
+      "sha256": "816745e09f4059e7c020f0c2ba4954efc6648b919b339a103843a40df7a9bdb3"
     },
     {
       "path": "scripts/tl_test_fragments_bundled.py",

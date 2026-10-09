@@ -55,12 +55,12 @@ packet_plan:
   write_set:
   - .claude/dev/launcher.py
   - .claude/dev/launcher_test.py
-  target_spec_revision: 27
+  target_spec_revision: 28
   packet_generation: 5
-  environment_gate: Linux container of the executor cloud session meets spec r27 environment criteria (a)-(c), including python3.11 and python3.12, before executor lease
+  environment_gate: Linux container of the executor cloud session meets spec r28 environment criteria (a)-(c), including python3.11 and python3.12, before executor lease
   reviewer: codex_independent_session
   review_assurance: cross_approved_plus_human_audited
-  spec_hash: 4250e0548b937c943eb4ebe73d097b7071422b9c51711b1525201d9dd1e0f998
+  spec_hash: 8007edf4e00aaefc298bf299bf19be9a71c54e73ff6a1610eb676a806773e156
   attempt_limit: null
   attempt_limit_basis: 'PROPOSED in MCR-686-08, binding only after the owner''s durable #686 decision on this plan_hash: generation 5 has no attempt cap. envelope.max_attempts_per_packet does not bind wp685 generation 5; it still binds every other packet. Attempt counter for generation 5 starts at 0; attempts of generations 2-4 are kept as data.'
   same_failure_limit: 10
@@ -72,9 +72,9 @@ provenance:
   approved_decision_text: Đổi executor sang Claude (tôi)
   durable_ratification: '#686 owner comment approving the exact plan_hash of this revision and the exact sha256 of ops/missions/mcr-686-08.yaml; its URL is recorded as mcr_decision_url in the mission_revision_installed event, not here (no hash cycle)'
   prior_plan_hash: 6d49b8ec8848c8f8b2fe0690d1d4bcae75bc67486ece1dbb5edc39fb77626d4a
-  spec_path: ops/specs/launcher-con-song-esrch-r27.md
-  spec_git_commit: 0f17f288902e432dbd3100865c4918a1c17038d6
-  spec_git_blob: 3cf7ddb82c3da83d49b7e744f61fc842bd85ac25
+  spec_path: ops/specs/launcher-con-song-esrch-r28.md
+  spec_git_commit: 4a35f633e1b3f05be12eecf74ab9a8a17ef82c69
+  spec_git_blob: fa07ca1bc3707bc273bf25349ffa6f3ca6ad6160
   status: proposed_pending_owner_decision
   plan_hash_formula: sha256(canonical JSON of parsed YAML excluding plan_hash; sort_keys=True, separators=(comma,colon), ensure_ascii=False)
-plan_hash: e157ab23ef4a59e123fefbb5c9d4923b3b177f77299fa205dd4f370a7862f4ee
+plan_hash: 50f710c1ff2baa12ed059ae46d746a1b39c26cb4c20b5e672e71bde45dcc56fd

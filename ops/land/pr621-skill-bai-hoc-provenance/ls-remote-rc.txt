@@ -1,0 +1,3 @@
+git ls-remote origin (truoc merge, 2026-10-09T14:1xZ) rc=0
+git ls-remote origin (sau merge, 2026-10-09T14:15Z) rc=0
+ca hai: LC_ALL=C sort; ap delta refs-delta.txt vao tap truoc ra dung tap sau (kiem: python3 trong ho so, muc ref_fence)

@@ -23,6 +23,10 @@ write_set:
   - .claude/skills/work-packet/SKILL.md    # +14
 provider: claude
 execution_surface: claude_code
+transport: machine/local
+transport_nhan: >-
+  loi_khai_co_neo (session URL) — mot phien Claude khong tu chung minh be mat chay cua chinh no; Claude Code =
+  machine/local theo provider plan (tien le pr718).
 environment: cloud
 operating_system: linux
 role: land_operator
@@ -34,8 +38,16 @@ ung_vien:
   head_drift:
     trang_thai: measured
     mo_ta: >-
-      Head duoc review cuoi (luot 18) la 675895d tren merge-base 6980e5b. Master di truoc 989 commit (8b59185). Phien land
-      merge origin/master vao nhanh => 658bd0c (khong xung dot; master khong cham hai tep cua PR).
+      Head duoc review AI cuoi (luot 18) la 675895d tren merge-base 6980e5b. Master di truoc 809 commit (8b59185). Phien
+      land merge origin/master vao nhanh => 658bd0c (khong xung dot; master khong cham hai tep cua PR).
+    dem_commit:
+      trang_thai: measured
+      lenh: >-
+        tren clone DAY DU (is-shallow-repository=false, scratch quet621b): git rev-list --count 6980e5b..8b59185 => 809;
+        git rev-list --left-right --count 675895d...8b59185 => 19 809.
+      dinh_chinh: >-
+        Ban dau cua tep nay ghi 989 — dem tren kho phien NONG (is-shallow-repository=true), dung bay CLAUDE.md da canh bao.
+        Codex review PR #723 (comment 4231894088) bat duoc; so 809 do lai tren clone day du.
     lenh: >-
       sha256(git diff 6980e5bf04e4e5b8b75e5817578f1aba13f2f5ab 675895d) =
       sha256(git diff origin/master 658bd0c) = e5bde9ba8623b16b... => diff PR khong doi; head doi chi vi BASE.
@@ -46,7 +58,8 @@ ung_vien:
     trang_thai: measured
     ket_qua: '15 success + 1 skipped (mo); thu-hoi 2 lan success (readback checkruns-658bd0c.json)'
 
-review:
+review_ai_truoc_drift:
+  trang_thai: stale_theo_AGENTS_md_muc_6
   verdict: approve
   reviewed_sha: 675895db34e9a7c1357f8d8ad8925bf8f01ad21c
   reviewer: 'claude-opus-5-5 effort xhigh (same_provider)'
@@ -54,9 +67,34 @@ review:
   luot: 18
   neo: https://github.com/ducthangho/tra-luat/pull/621#issuecomment-5917112447
   readback: comment-5917112447.json
-  assurance_ghi_chu: >-
-    same_provider (executor va reviewer cung hang); khong tu nhan cross_approved. Khoang cach 675895d -> 658bd0c chi la
-    merge base (xem ung_vien.head_drift), nen verdict ap cho diff PR o 658bd0c.
+  vai_tro: >-
+    CHI LA BANG CHUNG THAM KHAO. AGENTS.md §6: "head SHA doi sau review hoac sau CI; review, gate va authorization cu deu
+    stale". Head da doi 675895d -> 658bd0c (merge base), nen verdict nay KHONG la review cua head da merge, du diff PR so
+    master giong tung byte (sha256 e5bde9ba...). Dinh chinh: ban dau tep nay ghi verdict ay "ap cho diff PR o 658bd0c" —
+    Codex review PR #723 (comment 4231894072, P1) bat duoc.
+
+review_tai_head_da_merge:
+  human_audit:
+    url: https://github.com/ducthangho/tra-luat/pull/621#issuecomment-6082660033
+    assurance: human_audited
+    verdict: approve
+    reviewed_sha: 658bd0cdc56bbd3445f489dcfc571e22eee7d675
+    do_duoc: >-
+      measured (comment-6082660033.json, gh api repos/ducthangho/tra-luat/issues/comments/6082660033): user ducthangho,
+      author_association OWNER, performed_via_github_app null, created_at = updated_at 2026-10-09T14:13:00Z, than 797 byte
+      sha256 5cc58b4a788fd0218ae7ade0bed3353992cd89393451896046ff3f65e34c20c9, LF x6, khong LF cuoi, 0 "&#"; dong dau
+      "Human audit — approve #621 tai head 658bd0c..." (SHA day du xuat hien 1 lan).
+    ghi_chu: >-
+      GitHub khong cho tac gia PR Approve PR cua chinh minh (PR #621 do tai khoan chu kho mo qua phien agent), nen chu kho
+      ky bang comment thuong. author_association OWNER khong tach chu kho khoi phien agent dung token chu kho (#566).
+  codex_connector:
+    ket_qua: >-
+      measured (comment-6082682461-codex.json, reviews-621.json, review-comments-621.json): Codex review kich boi "Draft
+      marked ready" tren 658bd0c, Completed 2026-10-09T14:16:42Z; PR #621 co 0 review object va 0 review comment => sach
+      (quy uoc connector: chi tao review khi co gop y).
+    thu_tu_thoi_gian: >-
+      measured — merge 14:14:35Z TRUOC khi Codex hoan tat (14:16:42Z). Ket qua sach nen khong co finding bi bo qua, nhung
+      merge KHONG doi review bot ve xong; ghi lai de khong lap lai (bai hoc CLAUDE.md "gate xanh khong phai da review").
 
 uy_quyen:
   nguon: human_audit_chu_kho
@@ -91,7 +129,10 @@ ref_fence:
   trang_thai: measured
   lenh: 'git ls-remote origin truoc va sau merge; so theo luat land-packets/SKILL.md'
   delta: 'HEAD va refs/heads/master 8b59185 -> 3fc0932; refs/pull/621/merge 8c969f4 -> ABSENT. Khong ref nao khac doi.'
-  readback: refs-delta.txt
+  readback: [refs-delta.txt, ls-remote-truoc-merge.sorted.txt, ls-remote-sau-merge.sorted.txt, ls-remote-rc.txt]
+  kiem_doc_lap: >-
+    measured — ap delta trong refs-delta.txt vao ls-remote-truoc-merge (1101 ref) cho ra DUNG tap ls-remote-sau-merge
+    (1100 ref). Dinh chinh: ban dau chi luu delta + sha256; Codex review PR #723 (comment 4231894098) bat duoc.
 
 gate_hau_merge:
   trang_thai: measured
@@ -126,6 +167,7 @@ trang_thai_packet:
   landed: false
   landed_ly_do: >-
     PROTOCOL §10.2.4/§13.1: landed = vao canonical o exact SHA duoc duyet + hau-merge gate xanh + bookkeeping xong.
-    DA CO (measured): exact SHA (cha thu hai 3fc0932 = 658bd0c = SHA trong human audit), gate hau-merge 14/14. CON THIEU:
+    DA CO (measured): exact SHA (cha thu hai 3fc0932 = 658bd0c = reviewed_sha cua human audit, review_tai_head_da_merge),
+    gate hau-merge 14/14. CON THIEU:
     (1) PR ghi so nay merge bang merge commit; (2) quyet dinh chu kho cho hai diem khong_do_duoc (tien le). Land operator
     KHONG tu dong diem nao.

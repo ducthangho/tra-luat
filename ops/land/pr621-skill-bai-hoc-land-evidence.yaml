@@ -41,6 +41,8 @@ pre_merge_checks:
     run_attempt: 1
     head_sha: 658bd0cdc56bbd3445f489dcfc571e22eee7d675
     check_runs: '14 (chuan-bi, gate, gate-ops, gate-packet-loop, gate-registry, gate-cong-cu x8, gate-cong-cu-gop) — 14 success'
+    ten_check: [chuan-bi, gate, gate-ops, gate-packet-loop, gate-registry, gate-cong-cu, gate-cong-cu, gate-cong-cu, gate-cong-cu,
+                gate-cong-cu, gate-cong-cu, gate-cong-cu, gate-cong-cu, gate-cong-cu-gop]
     moc: 'event/attempt/head/path: measured; workflow_blob, checkout, rc, output: not_measured (xem khong_do_duoc)'
   - run_id: 37928217849
     workflow: .github/workflows/ops-thu-hoi-admission.yml (name thu-hoi)
@@ -48,6 +50,7 @@ pre_merge_checks:
     run_attempt: 1
     head_sha: 658bd0cdc56bbd3445f489dcfc571e22eee7d675
     check_runs: '1 (thu-hoi) — success'
+    ten_check: [thu-hoi]
     moc: 'event/attempt/head/path: measured; workflow_blob, checkout, rc, output: not_measured (xem khong_do_duoc); pull_request_target doc dinh nghia workflow tu nhanh BASE, khong tu PR'
   - run_id: 37942625684
     workflow: .github/workflows/ops-thu-hoi-admission.yml (name thu-hoi)
@@ -55,6 +58,7 @@ pre_merge_checks:
     run_attempt: 1
     head_sha: 658bd0cdc56bbd3445f489dcfc571e22eee7d675
     check_runs: '1 (thu-hoi, lan 2 — kich boi khi chuyen ready_for_review) — success'
+    ten_check: [thu-hoi]
     moc: 'event/attempt/head/path: measured; workflow_blob, checkout, rc, output: not_measured (xem khong_do_duoc); pull_request_target doc dinh nghia workflow tu nhanh BASE'
   - run_id: 37928243461
     workflow: .github/workflows/ops-open-pr.yml
@@ -62,6 +66,7 @@ pre_merge_checks:
     run_attempt: 1
     head_sha: 658bd0cdc56bbd3445f489dcfc571e22eee7d675
     check_runs: '1 (mo) — skipped; KHONG tinh la cong dat'
+    ten_check: [mo]
     moc: 'skipped => khong co gi de neo; khong can mien tru'
   - tong: 'measured — 14 + 1 + 1 + 1 = 17 check run = 16 success + 1 skipped (mo).'
 post_merge_checks:
@@ -71,6 +76,8 @@ post_merge_checks:
     run_attempt: 1
     head_sha: 3fc0932a3d1617c4352e5a7982f2e6e4208ca3f7
     check_runs: '14 (chuan-bi, gate, gate-ops, gate-packet-loop, gate-registry, gate-cong-cu x8, gate-cong-cu-gop) — 14 success'
+    ten_check: [chuan-bi, gate, gate-ops, gate-packet-loop, gate-registry, gate-cong-cu, gate-cong-cu, gate-cong-cu, gate-cong-cu,
+                gate-cong-cu, gate-cong-cu, gate-cong-cu, gate-cong-cu, gate-cong-cu-gop]
     check: 'CI push tren master 3fc0932 — workflow gate, run 37942714195'
     ket_qua: 'measured — run-37942714195.json completed success; checkruns-3fc0932.json: 14 check run, 14 success.'
     moc_checkout: 'not_measured — khong tai log; run_head_sha = 3fc0932 chi la REST run head, KHONG la bang chung checkout (§10.2.2). Xem khong_do_duoc CHECKOUT-IDENTITY.'
@@ -192,8 +199,18 @@ review_tai_head_da_merge:
       measured (comment-6082682461-codex.json, reviews-621.json, review-comments-621.json): Codex review kich boi "Draft
       marked ready" tren 658bd0c, Completed 2026-10-09T14:16:42Z; PR #621 co 0 review object va 0 review comment => sach
       (quy uoc connector: chi tao review khi co gop y).
+    may_doc:
+      tac_gia: chatgpt-codex-connector[bot]
+      trang_thai: Completed
+      commit: 658bd0c
+      luc: '2026-10-09T14:16:42.336531Z'
+      trigger: Draft marked ready
+    do_day_du_danh_sach: >-
+      reviews-621.json va review-comments-621.json la mang RONG `[]` tu GET khong tham so trang; GitHub tra trang dau rong
+      chi khi tong = 0, nen rong tren trang 1 = rong toan bo. Header Link KHONG luu (khong can khi trang dau rong).
     thu_tu_thoi_gian: >-
-      measured — merge 14:14:35Z TRUOC khi Codex hoan tat (14:16:42Z). Ket qua sach nen khong co finding bi bo qua, nhung
+      measured — merge 14:14:34Z (merged_at, pr-621.json; ban truoc ghi nham 14:14:35Z) TRUOC khi Codex hoan tat (14:16:42Z).
+      Ket qua sach nen khong co finding bi bo qua, nhung
       merge KHONG doi review bot ve xong; ghi lai de khong lap lai (bai hoc CLAUDE.md "gate xanh khong phai da review").
 
 uy_quyen:
@@ -207,6 +224,10 @@ uy_quyen:
   ghi_chu: >-
     GitHub khong cho tac gia PR Approve PR cua chinh minh (PR #621 do tai khoan chu kho mo qua phien agent), nen chu kho
     ky bang comment thuong. author_association OWNER khong tach chu kho khoi phien agent dung token chu kho (#566).
+  sai_so_trong_than_da_ky: >-
+    Than comment uy quyen (do land operator soan, chu kho dang) ghi "CI tren 658bd0c: 15/15 success (1 skipped)" — dem
+    lech; so do dung la 17 = 16 success + 1 skipped (pre_merge_checks). Dong ay la mo ta, KHONG thuoc pham vi uy quyen
+    (SHA 658bd0c, merge commit, khong squash); ghi lai de khong ai trich no lam so do.
   guard: >-
     packet_loop.py guard --action merge => rc=7 (dung thiet ke, vai executor); packet_loop.py ghi-uy-quyen --action merge
     --nguoi-cap ducthangho --bang-chung <neo_ben> --head-sha 658bd0c... => rc=0 ("LOI KHAI, khong phai bang chung").

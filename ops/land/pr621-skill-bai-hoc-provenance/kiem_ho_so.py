@@ -28,11 +28,18 @@ def ts(s):
 
 
 h = yaml.safe_load(HO_SO.read_text(encoding="utf-8"))
+DA_DOC = set()
+
+
+def doc(ten, nhi_phan=False):
+    """Moi lan doc NGU NGHIA mot hien vat di qua day; muc 11 doi MOI hien vat phai qua it nhat mot lan."""
+    DA_DOC.add(str(ten))
+    return (P / ten).read_bytes() if nhi_phan else (P / ten).read_text(encoding="utf-8")
 
 # 1. SHA256SUMS: PHU DU — tap ten trong manifest == tap tep trong thu muc (tru dung SHA256SUMS.txt), moi tep DUNG MOT
 #    dong, ten tuong doi an toan (khong '/', khong '..'); roi moi dong khop tep. Chi kiem cac dong CON LAI trong
 #    manifest thi xoa mot dong la mat chot ma van DAT (Codex PR #723, comment 4232301600).
-dong_mf = [d for d in (P / "SHA256SUMS.txt").read_text(encoding="utf-8").splitlines() if d.strip()]
+dong_mf = [d for d in doc("SHA256SUMS.txt").splitlines() if d.strip()]
 mf = []
 for dong in dong_mf:
     dg, ten = dong.split(None, 1)
@@ -49,7 +56,7 @@ for dg, ten in mf:
 
 # 2. Moi cong `measured` do lai -> co khoi LENH, dau duong, RC dung trong hien vat.
 cong = h["ung_vien"]["cong_tai_cho_tren_ung_vien"]["do_lai_luc_ghi_so"]
-van = (P / cong["hien_vat"].split()[0]).read_text(encoding="utf-8")
+van = doc(cong["hien_vat"].split()[0])
 # `[^\n]*` cho dong lenh: voi re.S, `.*` se nuot qua nhieu khoi.
 bo = re.findall(r"^### LENH: ([^\n]*)\n(.*?)^### RC=(\d+)$", van, re.S | re.M)
 khoi = {l: o for l, o, _ in bo}
@@ -60,20 +67,28 @@ for r in cong["ket_qua"]:
          f"cong `{l}`: co khoi, dau duong, RC={r['rc']}")
 
 # 3. Thoi diem ref fence: truoc < merged_at < sau.
-td = (P / "thoi-diem-ls-remote.txt").read_text(encoding="utf-8")
+td = doc("thoi-diem-ls-remote.txt")
 truoc = re.search(r"^truoc .*mtime (\S+)", td, re.M).group(1)
 sau = re.search(r"^sau .*birth (\S+)", td, re.M).group(1)
-merged = json.loads((P / "pr-621.json").read_text(encoding="utf-8"))["merged_at"]
+merged = json.loads(doc("pr-621.json"))["merged_at"]
 chot(ts(truoc) < ts(merged) < ts(sau), f"truoc {truoc} < merge {merged} < sau {sau}")
 for ten, nhan in (("ls-remote-truoc-merge.sorted.txt", "truoc"), ("ls-remote-sau-merge.sorted.txt", "sau")):
     dg = re.search(rf"^{nhan} .*sha256sum (\w+)", td, re.M).group(1)
-    chot(hashlib.sha256((P / ten).read_bytes()).hexdigest() == dg, f"anh {nhan} khop digest trong thoi-diem")
+    chot(hashlib.sha256(doc(ten, nhi_phan=True)).hexdigest() == dg, f"anh {nhan} khop digest trong thoi-diem")
+
+# 3a. Ma thoat CUA HAI LENH ls-remote (Codex PR #723, comment 4232431541): moi lenh dung mot dong
+#     `git ls-remote origin (<truoc|sau> merge, ...) rc=<n>`, n phai = 0; dong `ca hai: LC_ALL=C sort...` khong la lenh.
+rc_ls = re.findall(r"^git ls-remote origin \((truoc|sau) merge,[^\n]*\) rc=(\d+)$",
+                   doc("ls-remote-rc.txt"), re.M)
+for nhan in ("truoc", "sau"):
+    v = [rc for n, rc in rc_ls if n == nhan]
+    chot(v == ["0"], f"ls-remote {nhan} merge: dung mot dong, rc=0 (doc duoc {v})")
 
 # 3b. Ref delta: AP that delta khai trong refs-delta.txt vao anh truoc, so KHOP TUNG ref/OID voi anh sau (Codex PR
 #     #723, comment 4232301580). ABSENT = ref khong co o phia do; ten ref lap trong anh hay trong delta => TRUOT.
 def anh(ten):
     d, lap = {}, []
-    for dong in (P / ten).read_text(encoding="utf-8").splitlines():
+    for dong in doc(ten).splitlines():
         oid, ref = dong.split("\t")
         if ref in d:
             lap.append(ref)
@@ -85,7 +100,7 @@ a_truoc, lap_t = anh("ls-remote-truoc-merge.sorted.txt")
 a_sau, lap_s = anh("ls-remote-sau-merge.sorted.txt")
 chot(not lap_t and not lap_s, f"anh ref khong co ten lap (truoc {lap_t}, sau {lap_s})")
 delta, lap_d, cu_sai = {}, [], []
-for dong in (P / "refs-delta.txt").read_text(encoding="utf-8").splitlines():
+for dong in doc("refs-delta.txt").splitlines():
     cot = dong.split("\t")
     if dong.startswith("#") or len(cot) != 3 or cot[0] in ("truoc", "sau"):
         continue
@@ -95,7 +110,7 @@ for dong in (P / "refs-delta.txt").read_text(encoding="utf-8").splitlines():
     delta[ref] = (cu, moi)
     if a_truoc.get(ref, "ABSENT") != cu:
         cu_sai.append(ref)
-dem = dict(re.findall(r"^(truoc|sau)\t(\d+)\t", (P / "refs-delta.txt").read_text(encoding="utf-8"), re.M))
+dem = dict(re.findall(r"^(truoc|sau)\t(\d+)\t", doc("refs-delta.txt"), re.M))
 chot(dem == {"truoc": str(len(a_truoc)), "sau": str(len(a_sau))}, f"so ref khai {dem} == dem tren anh ({len(a_truoc)}, {len(a_sau)})")
 chot(bool(delta) and not lap_d, f"delta: co dong, khong ref lap ({lap_d})")
 chot(not cu_sai, f"delta: gia tri CU khop anh truoc ({cu_sai})")
@@ -113,24 +128,28 @@ pham_vi = {k["id"]: set(k.get("pham_vi_run", [])) for k in h["khong_do_duoc"]}
 can = ("MOC-WORKFLOW-DEFINITION", "RC-SO-CHI-CO-STEP-CONCLUSION", "CHECKOUT-IDENTITY")
 tong = 0
 for r in [x for x in h["pre_merge_checks"] + h["post_merge_checks"] if "run_id" in x]:
-    j = json.loads((P / f"run-{r['run_id']}.json").read_text(encoding="utf-8"))
+    j = json.loads(doc(f"run-{r['run_id']}.json"))
     chot(j["event"] == r["event"] and j["run_attempt"] == r["run_attempt"] and j["head_sha"] == r["head_sha"]
          and r["workflow"].startswith(j["path"]), f"run {r['run_id']}: event/attempt/head/path khop REST")
+    # status + conclusion cua CHINH workflow run (Codex PR #723, comment 4232431526); skipped giu rieng.
+    kl_khai = re.search(r"— \d* ?(success|skipped)", r["check_runs"]).group(1)
+    chot(j["status"] == "completed" and j["conclusion"] == kl_khai,
+         f"run {r['run_id']}: status/conclusion REST {j['status']}/{j['conclusion']} == completed/{kl_khai}")
     if j["conclusion"] != "skipped":
         chot(all(r["run_id"] in pham_vi[c] for c in can), f"run {r['run_id']}: nam trong pham_vi_run cua ca 3 muc")
 # 4b. TUNG check run, khong chi total_count (Codex PR #723, comment 4232301588): moi object phai completed, head dung,
 #     va dem theo (run_id, conclusion) phai khop dong `check_runs` khai cho run do; tong theo conclusion phai khop
 #     tom tat khai (skipped dem RIENG, khong gop vao success).
 def cr(f):
-    d = json.loads((P / f).read_text(encoding="utf-8"))
+    d = json.loads(doc(f))
     chot(d["total_count"] == len(d["check_runs"]), f"{f}: total_count == so object ({len(d['check_runs'])})")
-    return [(int(re.search(r"/runs/(\d+)/", c["details_url"]).group(1)), c["status"], c["conclusion"], c["head_sha"])
-            for c in d["check_runs"]]
+    return [(int(re.search(r"/runs/(\d+)/", c["details_url"]).group(1)), c["status"], c["conclusion"], c["head_sha"],
+             re.sub(r" \(ubuntu-latest(, \d+)?\)$", "", c["name"])) for c in d["check_runs"]]
 
 
 def dem(ds):
     out = {}
-    for _, _, kl, _ in ds:
+    for _, _, kl, _, _ in ds:
         out[kl] = out.get(kl, 0) + 1
     return out
 
@@ -139,8 +158,11 @@ bang = {"658bd0c": cr("checkruns-658bd0c.json"), "3fc0932": cr("checkruns-3fc093
 for r in [x for x in h["pre_merge_checks"] + h["post_merge_checks"] if "run_id" in x]:
     ds = [c for c in bang[r["head_sha"][:7]] if c[0] == r["run_id"]]
     m = re.match(r"(\d+) .*— \d* ?(success|skipped)", r["check_runs"])
+    # Ten check: so MULTISET ten (chi bo hau to ma tran `(ubuntu-latest[, N])`) voi `ten_check` khai (Codex PR #723,
+    # comment 4232431534) — thay mot cong bang ten la phai DO.
+    chot(sorted(c[4] for c in ds) == sorted(r["ten_check"]), f"run {r['run_id']}: multiset ten check == ten_check khai")
     chot(m is not None and len(ds) == int(m.group(1)) and all(st == "completed" and kl == m.group(2) and hd == r["head_sha"]
-                                                              for _, st, kl, hd in ds),
+                                                              for _, st, kl, hd, _ in ds),
          f"run {r['run_id']}: {len(ds)} check run, tat ca completed/{m and m.group(2)}/head dung == khai `{r['check_runs'][:24]}...`")
 tong_pre = next(x["tong"] for x in h["pre_merge_checks"] if "tong" in x)
 m = re.search(r"= (\d+) check run = (\d+) success \+ (\d+) skipped", tong_pre)
@@ -150,9 +172,76 @@ m = re.search(r"(\d+) check run, (\d+) success", h["post_merge_checks"][0]["ket_
 chot(m is not None and dem(bang["3fc0932"]) == {"success": int(m.group(2))} and len(bang["3fc0932"]) == int(m.group(1)),
      f"3fc0932: {dem(bang['3fc0932'])} == tom tat khai")
 ids = {int(re.search(r"/runs/(\d+)/", c["details_url"]).group(1))
-       for c in json.loads((P / "checkruns-658bd0c.json").read_text(encoding="utf-8"))["check_runs"]}
+       for c in json.loads(doc("checkruns-658bd0c.json"))["check_runs"]}
 khai = {x["run_id"] for x in h["pre_merge_checks"] if "run_id" in x}
 chot(ids == khai, f"run truoc merge: checkruns {sorted(ids)} == khai {sorted(khai)}")
+
+# 6. Uy quyen ben (Codex PR #723, comment 4232431549): doc NGU NGHIA comment uy quyen, so voi khoa chuan.
+#    So DONG DAU nguyen van va DONG uy quyen nguyen van — khong substring long (tranh khop chu trich dan / phu dinh).
+au = json.loads(doc("comment-6082660033.json"))
+sha = h["authorized_head_sha"]
+chot(au["html_url"] == h["authorization_url"] == h["uy_quyen"]["neo_ben"]
+     and h["authorization_url"].endswith(f"#issuecomment-{au['id']}"), "uy quyen: id/url comment == authorization_url")
+chot(au["user"]["login"] == h["approver"] and au["author_association"] == "OWNER" and au["performed_via_github_app"] is None,
+     f"uy quyen: tac gia {au['user']['login']}/{au['author_association']} == approver OWNER, khong qua app")
+chot(au["created_at"] == au["updated_at"] == h["uy_quyen"]["luc"], "uy quyen: created_at == updated_at == luc khai (chua sua)")
+dong_au = au["body"].split("\n")
+chot(dong_au[0] == f"Human audit — approve #{h['pr']} tại head {sha}", "uy quyen: dong dau dung nguyen van, SHA day du")
+chot(h["merge_method"] == "merge" and dong_au.count(
+    f"- Uỷ quyền: merge đúng SHA {sha[:7]} bằng merge commit (không squash), rồi chạy hậu-merge gate và bookkeeping. "
+    "Head đổi thêm thì uỷ quyền này hết hiệu lực.") == 1, "uy quyen: dong uy quyen merge commit dung nguyen van, mot lan")
+b_au = au["body"].encode("utf-8")
+khai_au = h["review_tai_head_da_merge"]["human_audit"]["do_duoc"]
+chot(f"than {len(b_au)} byte" in khai_au and hashlib.sha256(b_au).hexdigest() in khai_au,
+     "human_audit: so byte + sha256 than khai == do tren readback")
+
+# 7. Cau truc merge (Codex PR #723, comment 4232431560): commit readback, pr readback, khoa YAML; --repo thi git.
+cm = json.loads(doc("commit-3fc0932.json"))
+pr = json.loads(doc("pr-621.json"))
+tm = h["thao_tac_merge"]
+cha = [x["sha"] for x in cm["parents"]]
+chot(cm["sha"] == h["merge_commit"] == tm["merge_commit"] == pr["merge_commit_sha"], "merge: sha commit == khoa YAML == pr")
+chot(cha == tm["cha"] and cha[1] == sha == pr["head"]["sha"] == tm["expected_head_sha"],
+     f"merge: cha THEO THU TU {cha} == khai; cha thu hai == authorized_head_sha == pr head")
+chot(cm["commit"]["tree"]["sha"] == tm["tree"], "merge: tree readback == khai")
+chot(pr["merged"] is True and pr["number"] == h["pr"] and pr["base"]["ref"] == "master", "pr: merged, dung so, base master")
+
+# 8. Review connector sach (Codex PR #723, comment 4232431571): actor, commit, trang thai cuoi, luc; hai danh sach rong.
+cx = json.loads(doc("comment-6082682461-codex.json"))
+md = h["review_tai_head_da_merge"]["codex_connector"]["may_doc"]
+hang = re.findall(r"^\| 📝 \*\*Code Review\*\* \| \S+ \*\*(\w+)\*\* <relative-time datetime=\"([^\"]+)\">[^|]*\| `([0-9a-f]+)` \| ([^|]+?) \|$",
+                  cx["body"], re.M)
+chot(cx["user"]["login"] == md["tac_gia"] and cx["user"]["type"] == "Bot", "connector: tac gia la bot connector")
+chot(hang == [(md["trang_thai"], md["luc"], md["commit"], md["trigger"])] and md["trang_thai"] == "Completed"
+     and sha.startswith(md["commit"]), f"connector: DUNG MOT hang review, Completed, dung commit ung vien ({hang})")
+chot(json.loads(doc("reviews-621.json")) == []
+     and json.loads(doc("review-comments-621.json")) == [], "connector: 0 review, 0 review comment")
+chot(ts(merged) < ts(md["luc"]), "connector: thu tu khai (merge TRUOC khi Codex xong) dung theo readback")
+
+# 9. Review AI truoc drift (stale): readback la verdict approve tren reviewed_sha, TONG khop.
+st = json.loads(doc("comment-5917112447.json"))
+ra = h["review_ai_truoc_drift"]
+chot(st["html_url"] == ra["neo"] and st["body"].split("\n")[0] ==
+     f"## Cross-review lượt {ra['luot']} — PR #{h['pr']} @ {ra['reviewed_sha'][:7]} (commit cục bộ, chưa push theo chỉ đạo chủ kho) "
+     f"— approve ({ra['tong']})", "review truoc drift: url + dong dau (luot, sha, approve, TONG) khop khai")
+
+# 10. Bang ai-dang-giu: tap duong dan == write set THAT (tep ho so + moi tep provenance), moi dong rc=0 NGUOI_GIU 0.
+ag = [d.split("\t") for d in doc("ai-dang-giu-write-set.txt").splitlines() if not d.startswith("#")]
+ws = {f"ops/land/{HO_SO.name}"} | {f"ops/land/{P.name}/{x.name}" for x in P.iterdir()}
+chot(sorted(x[0] for x in ag) == sorted(ws), "ai-dang-giu: tap duong dan == write set that, khong lap")
+chot(all(x[1] == "rc=0" and x[2].startswith("NGƯỜI_GIỮ 0") for x in ag), "ai-dang-giu: moi dong rc=0 NGUOI_GIU 0")
+
+# 6b. Tom tat operator (nguon cua cong_tai_cho.luot_goc_truoc_merge, nhan thuat_lai): dung comment, chu kho, dung head.
+op = json.loads(doc("comment-6080596360.json"))
+chot(op["user"]["login"] == h["approver"] and op["author_association"] == "OWNER"
+     and op["body"].split("\n")[0] == f"## Land prepare — #{h['pr']} (head `{sha}`)",
+     "tom tat operator: chu kho, dong dau neo dung head ung vien")
+
+# 11. PHU NGU NGHIA: moi hien vat (tru SHA256SUMS.txt — da kiem o muc 1 — va chinh script nay) phai duoc DOC NOI DUNG
+#     o mot muc tren, khong chi bam. Them hien vat ma quen viet chot thi muc nay DO (Codex PR #723 lượt 5: sau tep
+#     chi bi bam ma khong bi doc).
+can_doc = {x.name for x in P.iterdir()} - {"SHA256SUMS.txt", Path(__file__).name}
+chot(DA_DOC >= can_doc, f"phu ngu nghia: hien vat chua co chot doc noi dung {sorted(can_doc - DA_DOC)}")
 
 # 5. Digest diff PR (chi luu digest, khong luu diff tho): --repo thi tai lap bang OID ghim, va ref sau merge PHAI
 #    cho digest khac. Thieu --repo => chot nay KHONG DO DUOC (in ra, khong tinh DAT).
@@ -169,6 +258,14 @@ else:
     chot(d("6980e5bf04e4e5b8b75e5817578f1aba13f2f5ab", "675895db34e9a7c1357f8d8ad8925bf8f01ad21c") == DG, "diff truoc drift (OID ghim)")
     chot(d("8b59185975a938504de5963d2310e574dd4858b2", "658bd0cdc56bbd3445f489dcfc571e22eee7d675") == DG, "diff ung vien (OID ghim)")
     chot(d("3fc0932a3d1617c4352e5a7982f2e6e4208ca3f7", "658bd0cdc56bbd3445f489dcfc571e22eee7d675") != DG, "ref SAU merge cho digest KHAC")
+
+    def rp(x):
+        return subprocess.run(["git", "-C", repo, "rev-parse", x], capture_output=True, text=True, check=True).stdout.strip()
+
+    mg = h["merge_commit"]
+    chot([rp(f"{mg}^{{commit}}"), rp(f"{mg}^1"), rp(f"{mg}^2"), rp(f"{mg}^{{tree}}")] == [mg, *tm["cha"], tm["tree"]],
+         "merge (git): commit, cha ^1 ^2 THEO THU TU, tree == khai")
+    chot(rp(f"{sha}^{{tree}}") == tm["tree"], "merge (git): tree(ung vien) == tree(merge)")
 
 if LOI:
     print(f"TONG: TRUOT {len(LOI)}")

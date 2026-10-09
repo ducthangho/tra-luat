@@ -1195,6 +1195,24 @@ Start-Sleep -Seconds 120
     #     must be stage_failure (rc 6) with the containment reason, and the record must stay.
     if ($IsWindows) {
         $srcZ = Get-Content -LiteralPath $script -Raw
+        # If Get-Process cannot resolve a created, suspended child, its CreateProcess PID and
+        # outside_job flag must still survive in the record; an empty job cannot clear it.
+        $recordFnZ = [regex]::Match($srcZ, '(?s)(function Write-OperationRecord\(.*?\r?\n\})\r?\n\r?\nfunction Get-StepPipes')
+        if (-not $recordFnZ.Success) { throw 'fixture: record writer not found' }
+        $recordProbePathZ = Join-Path $root 'record-null-lookup.json'
+        try {
+            $recordProbeZ = & {
+                param($functionText, $destination)
+                $OperationRecord = $destination
+                $OwnerStartJiffies = $null; $OwnerChain = $null; $TreeMeasurable = $false
+                . ([scriptblock]::Create($functionText))
+                Write-OperationRecord 'probe' $null $true @() 'probe-job' 4242
+                Get-Content -LiteralPath $destination -Raw | ConvertFrom-Json
+            } $recordFnZ.Groups[1].Value $recordProbePathZ
+            if ($recordProbeZ.pid -ne 4242 -or $recordProbeZ.outside_job -ne $true -or $recordProbeZ.tree_unconfirmed -ne $true) {
+                throw ('a failed process lookup must keep the stray PID and outside-job flag: ' + ($recordProbeZ | ConvertTo-Json -Compress))
+            }
+        } finally { Remove-Item -LiteralPath $recordProbePathZ -ErrorAction SilentlyContinue }
         $recZ = Join-Path ([IO.Path]::GetTempPath()) $recName
         $realScriptZ = $script
         $assignZ = 'if (!AssignProcessToJobObject(job, pi.hProcess)) { error'

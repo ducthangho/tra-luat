@@ -669,8 +669,9 @@ function Invoke-BoundedJob([string]$file, [string[]]$arguments, [int]$seconds, [
             $confirmed = $stage -notlike '*_alive'
             if (-not $confirmed) {
                 # Its termination was NOT confirmed: a process exists, suspended and outside the job. The record
-                # must survive this run and name it, so the next owner waits on it (root_alive) instead of
-                # finding no record at all.
+                # must survive this run and name it, so the next owner does not find "no record": it waits
+                # (root_alive) while that child is recognised as alive by pid and start time, and is quarantined
+                # (stray_child_unconfirmed) in every other case - gone, or no start time to recognise it by.
                 $started = $true
                 Write-OperationRecord $marker (Get-Process -Id $childId -ErrorAction SilentlyContinue) $true @() $jobName $childId
             }

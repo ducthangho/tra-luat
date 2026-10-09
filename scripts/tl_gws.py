@@ -1744,7 +1744,7 @@ def _nlm_auth_stage_body(a, entry_notebook) -> int:
         return 2
     if getattr(a, "refresh", False):
         _refresh_nlm_auth()
-    if not _nlm_auth_files():                          # chỉ hỏi CÓ jar không; bytes để gói đọc SAU canary
+    if not _nlm_auth_files():                          # tiền kiểm CÓ jar không: hàm này ĐỌC jar vào RAM rồi bỏ; payload được đọc LẠI sau canary dương
         print("[nlm-auth-stage] ✗ chưa có cookie nlm ở máy này — chạy `nlm login` trước.", file=sys.stderr)
         return 3
     # M1c (v1.33.39 — log Cowork: user stage cookie 'mới' [extracted_at TIẾN] nhưng NLM từ chối MỌI endpoint;

@@ -1,0 +1,3 @@
+cd <clone quet-678-bk, checkout --detach origin/master 4beb9d0>
+python3 -B ops/lease_publish.py ai-dang-giu --root . ops/lease_publish.py > adg-ops_lease_publish.py.txt 2>&1
+python3 -B ops/lease_publish.py ai-dang-giu --root . ops/lease_publish_test.py > adg-ops_lease_publish_test.py.txt 2>&1

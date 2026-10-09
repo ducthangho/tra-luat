@@ -828,6 +828,43 @@ def t47_vi_tu_nen_chi_cat_dot_bien_tren_nt(g):
             "vi tu nen: chi 'nt' moi cat vong lap dot bien")
 
 
+
+# ── CHE DO NHE (#647): CI bo vong lap dot bien khi diff KHONG cham vung ─────────────────
+# Do run 36238709647: bo nay 756,50 s tren gate-registry, ca nen chi 10,2 s. `ci_dang_ky_test.py`
+# dat co duoi day khi diff khong cham `pretooluse_guard.py`/bo nay/vung chung (luat #643), va
+# GO co khi cham — nen dot bien van do dung luot can do. Ca NEN chay du moi luot.
+CO_NHE = "PRETOOLUSE_GUARD_KHONG_DOT_BIEN"
+
+
+def che_do_chay(ten_nen=None, env=None):
+    """`windows` | `nhe` | `du`. Windows DUNG TRUOC va khong doi; co nhe chi nhan dung "1"."""
+    if nen_bo_qua_dot_bien(ten_nen):
+        return "windows"
+    return "nhe" if (os.environ if env is None else env).get(CO_NHE) == "1" else "du"
+
+
+def dong_nhe(so_ca_dat, so_ca, so_dot_bien):
+    """Dong bang chung che do nhe. KHONG mang chu `bi giet` — o day khong giet cai nao, nen
+    dong nay PHAI truot mau che do du (`MAU_DAY_DU`) cua so dang ky."""
+    return (f"TONG: CA {so_ca_dat}/{so_ca} dat · "
+            f"DOT BIEN {so_dot_bien} muc CHE DO NHE — do khi diff cham vung")
+
+
+def t48_che_do_nhe_chi_khi_co_DUNG_1_va_windows_dung_truoc(g):
+    """Co rong/"0"/"true" KHONG duoc bat nhe; Windows giu nhanh cu du co dat co."""
+    ok = (che_do_chay("posix", {CO_NHE: "1"}) == "nhe" and che_do_chay("posix", {}) == "du"
+          and all(che_do_chay("posix", {CO_NHE: v}) == "du" for v in ("", "0", "true", " 1"))
+          and che_do_chay("nt", {CO_NHE: "1"}) == "windows" and che_do_chay("nt", {}) == "windows")
+    return ok, "vi tu che do: nhe chi khi co == '1' tren nen khac nt"
+
+
+def t49_dong_nhe_KHONG_gia_dang_dong_du_va_bang_rong_thi_DO(g):
+    """Dong nhe khong doi lot dong Linux; tieu chi dat van doi so DUONG hai ve (#319)."""
+    d = dong_nhe(39, 39, 34)
+    return ("bi giet" not in d and "CHE DO NHE" in d and "KHONG DO TREN WINDOWS" not in d
+            and not dat_windows(39, 0, 0) and not dat_windows(39, 1, 34),
+            "che do nhe: dong bang chung rieng, bang dot bien rong -> DO")
+
 CA = [t1_agent_bi_chan_moi_hinh_dang_ghi, t2_ca_hai_agent_deu_bi_chan,
       t3_khong_chan_oan_lenh_doc, t4_phien_chinh_khop_packet_base,
       t5_doi_chung_van_ask, t6_agent_la_khong_bi_ap_luat,
@@ -860,6 +897,8 @@ CA = [t1_agent_bi_chan_moi_hinh_dang_ghi, t2_ca_hai_agent_deu_bi_chan,
       t45_windows_bang_dot_bien_RONG_thi_KHONG_dat,
       t46_dong_windows_KHONG_gia_dang_dong_linux,
       t47_vi_tu_nen_chi_cat_dot_bien_tren_nt,
+      t48_che_do_nhe_chi_khi_co_DUNG_1_va_windows_dung_truoc,
+      t49_dong_nhe_KHONG_gia_dang_dong_du_va_bang_rong_thi_DO,
       t36_moi_ca_DINH_NGHIA_deu_phai_DANG_KY]
 
 # --- DOT BIEN: moi cai go DUNG MOT tinh chat, va phai lam it nhat mot ca DO ---
@@ -999,12 +1038,14 @@ def chay():
             do_san.add(f.__name__)
         print(f"  {'DAT ' if ok else 'DO  '} {f.__name__:38} {mo_ta}")
 
-    # WINDOWS: cat DUNG vong lap dot bien, khong cat gi khac. Ca NEN o tren DA chay du —
+    # WINDOWS (va CHE DO NHE #647): cat DUNG vong lap dot bien, khong cat gi khac. Ca NEN o tren DA chay du —
     # bo ca nen la lam mu chan Windows, khac han voi bo phep DO LAI cua dot bien.
     # Tieu chi `dat` van doi SO DUONG hai ve qua `dat_windows`, khong duoc im.
-    if nen_bo_qua_dot_bien():
+    che_do = che_do_chay()
+    if che_do != "du":
         dat = dat_windows(len(CA), do, len(DOT_BIEN))
-        print(dong_windows(len(CA) - do, len(CA), len(DOT_BIEN)))
+        dong = dong_windows if che_do == "windows" else dong_nhe
+        print(dong(len(CA) - do, len(CA), len(DOT_BIEN)))
         print("TONG:", "DAT" if dat else "DO")
         return 0 if dat else 1
 

@@ -1,0 +1,14 @@
+NHÃN: chưa chạy trên cây thật — executor tự áp, tự đo, tự chịu trách nhiệm commit
+(docs/PROTOCOL_DA_PHIEN.md §13 patch-as-hint, ràng buộc 1. Nhãn thêm sau khi merge PR #652 theo hậu kiểm connector; sha256 bản reviewer sinh ra: 5e0e89aabfcffe166b980a8ac72fdd7ef53c53f678edb31c1d9a907c4b5e8503)
+
+--- SPEC.md
++++ SPEC.md
+@@ -354,7 +354,7 @@
+    `isinstance(t, str)`; (b) hai mutant sống vì fixture thiếu trường hạn nên chốt hạn che ⇒ thêm hạn hợp lệ. Ở bản nháp 5,
+    hai lần đo đầu lại LỆCH theo chiều ngược: mutant "hạn hỏng coi như hết hạn" và "bỏ lọc hạn" giết **thêm** ca mới
+    (`han-vang`, `han-bang-dung-C`) ngoài tập đã khai — hành vi đúng, tập khai hẹp ⇒ mở rộng tập khai, không sửa mutant. Bản nháp 6
+-   thêm hai dòng cuối theo hai đột biến reviewer lượt 5 tự soạn và thấy **sống** trên bộ cũ.
++   thêm hai dòng "từ chối hạn hợp lệ năm 1 / 9999" và "gỡ riêng chốt thư mục con" theo hai đột biến reviewer lượt 5 tự soạn và thấy **sống** trên bộ cũ.
+ 
+    Chạy trên kho thật `python3 -B do_q6.py <kho> 072181157a27804e69deb35bb792a88c70ac31e3 2026-09-10T04:55:37Z`
+    (bản ghi `ops/reviews/thu-hoi-lease-a1a-r2/q6-do-2026-09-26.json`, sha256 `1fc99cd9…`, `rc=0`; tạo lúc 23:20–23:22:44Z 26-09

@@ -1,0 +1,108 @@
+name: đột biến đủ (hằng tuần)
+
+# #651 (CI-REGISTRY-THU-HEP-VUNG r1) M4 — bù phần chốt nới của #651 (`ci_dang_ky_test.py`, `.github/**` trừ `ci.yml` không còn
+# ép đủ). Cùng lệnh registry, KHÔNG biến diff ⇒ `doc_diff` "không đo được" ⇒ `ke_hoach` fail-closed về ĐỦ cho mọi bộ.
+# Chốt `loi_workflow_dot_bien_du` (`.claude/dev/ci_dang_ky_test.py`): mọi giá trị hoặc GHIM, hoặc BẰNG `gate-registry` của
+# `ci.yml` (trích từ chính hai tệp) trừ `env` bước registry. Sửa `gate-registry` mà quên tệp này ⇒ registry ĐỎ trên PR.
+# Chỉ ubuntu: Windows vốn bỏ đột biến của `pretooluse_guard_test`.
+# #661: đột biến ĐỦ của `ops/nhanh_don_duoc_test.py` chia 4 job mảnh + job gom; registry chạy bộ ấy NHẸ (M4/M5 ở W2).
+
+on:
+  schedule:
+    - cron: "17 19 * * 6"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  dot-bien-du:
+    runs-on: ubuntu-latest
+    timeout-minutes: 105
+    env:
+      PYTHONIOENCODING: utf-8
+      PYTHONUTF8: "1"
+      PYTHONDONTWRITEBYTECODE: "1"
+    steps:
+      - name: Force LF checkout (hash parity với manifest)
+        run: |
+          git config --global core.autocrlf false
+          git config --global core.eol lf
+          # r226 — vì sao ghim `core.abbrev 7`: xem chú thích cùng bước ở job `gate`.
+          git config --global core.abbrev 7
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: cài PyYAML + jsonschema (cổng đăng lease + validator verdict cần)
+        run: python -m pip install --quiet PyYAML==6.0.3 jsonschema==4.26.0
+      - name: cài actionlint cho G5
+        shell: bash
+        env:
+          AL_VER: 1.7.7
+        run: bash ops/cai_actionlint.sh
+      - name: cài shellcheck cho G5 (cài xong đo lại)
+        shell: bash
+        run: bash ops/cai_cong_cu.sh shellcheck
+      - name: cài rg cho G5 (cài xong đo lại)
+        shell: bash
+        run: bash ops/cai_cong_cu.sh rg
+      - name: G5 probe ban ke cong cu (#290; selftest T1..T8 chi o job gate, chot M6 #637)
+        shell: bash
+        run: python ops/cong_cu.py kiem-tra --json
+      - name: cài Ruff 0.15.15 và in probe dương
+        run: |
+          python -m pip install --quiet ruff==0.15.15
+          ruff --version
+      # KHÔNG có CI_DANG_KY_SU_KIEN/GOC/DAU: vắng biến diff ⇒ kế hoạch ĐỦ cho mọi bộ (fail-closed #643).
+      - name: test registry (phạm vi + các bộ chưa được nối)
+        env:
+          CI_DANG_KY_WORKERS: "2"
+          CI_DANG_KY_DOT_BIEN_MANH: ops/nhanh_don_duoc_test.py
+        run: python .claude/dev/ci_dang_ky_test.py --chay
+
+  dot-bien-manh:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        manh: [0, 1, 2, 3]
+    env:
+      PYTHONIOENCODING: utf-8
+      PYTHONUTF8: "1"
+      PYTHONDONTWRITEBYTECODE: "1"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: đột biến một mảnh
+        env:
+          NHANH_DON_DUOC_MANH: ${{ matrix.manh }}/4
+          NHANH_DON_DUOC_MANH_RA: manh/manh-${{ matrix.manh }}.json
+        run: python ops/nhanh_don_duoc_test.py
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dot-bien-manh-${{ matrix.manh }}
+          path: manh/manh-${{ matrix.manh }}.json
+          if-no-files-found: error
+
+  dot-bien-gop:
+    needs: dot-bien-manh
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: dot-bien-manh-*
+          path: manh
+          merge-multiple: true
+      - name: gom mảnh
+        run: python ops/nhanh_don_duoc_test.py --gop manh

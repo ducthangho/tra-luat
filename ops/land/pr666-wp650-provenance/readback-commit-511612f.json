@@ -1,0 +1,40 @@
+{
+  "sha": "511612f1f9383097e06d87a2b860de9c8335471e",
+  "node_id": "C_kwDOTNeRjdoAKDUxMTYxMmYxZjkzODMwOTdlMDZkODdhMmI4NjBkZTljODMzNTQ3MWU",
+  "url": "https://api.github.com/repos/ducthangho/tra-luat/git/commits/511612f1f9383097e06d87a2b860de9c8335471e",
+  "html_url": "https://github.com/ducthangho/tra-luat/commit/511612f1f9383097e06d87a2b860de9c8335471e",
+  "author": {
+    "name": "ducthangho",
+    "email": "ducthangho@gmail.com",
+    "date": "2026-09-28T04:55:23Z"
+  },
+  "committer": {
+    "name": "GitHub",
+    "email": "noreply@github.com",
+    "date": "2026-09-28T04:55:23Z"
+  },
+  "tree": {
+    "sha": "235f6605809b4f813adf5fdc467aae3944093629",
+    "url": "https://api.github.com/repos/ducthangho/tra-luat/git/trees/235f6605809b4f813adf5fdc467aae3944093629"
+  },
+  "message": "Merge bf63bb1ec485bccf8eec34cc5604f949d70fc7d6 into ceb1a3f36912dd4f03fe1741c443cd09e82a44ee",
+  "parents": [
+    {
+      "sha": "ceb1a3f36912dd4f03fe1741c443cd09e82a44ee",
+      "url": "https://api.github.com/repos/ducthangho/tra-luat/git/commits/ceb1a3f36912dd4f03fe1741c443cd09e82a44ee",
+      "html_url": "https://github.com/ducthangho/tra-luat/commit/ceb1a3f36912dd4f03fe1741c443cd09e82a44ee"
+    },
+    {
+      "sha": "bf63bb1ec485bccf8eec34cc5604f949d70fc7d6",
+      "url": "https://api.github.com/repos/ducthangho/tra-luat/git/commits/bf63bb1ec485bccf8eec34cc5604f949d70fc7d6",
+      "html_url": "https://github.com/ducthangho/tra-luat/commit/bf63bb1ec485bccf8eec34cc5604f949d70fc7d6"
+    }
+  ],
+  "verification": {
+    "verified": true,
+    "reason": "valid",
+    "signature": "-----BEGIN PGP SIGNATURE-----\n\nwsFcBAABCAAQBQJqufM7CRC1aQ7uu5UhlAAA00EQAAPYTSTWmKLF89uHBHCMliwq\naWkbYxXZtBxJ0b9G4QHaBC/qUEWkE1HsL+xLzsW/sj3LK0/GuOIwLliJ634xuEsE\nSz7/GeSoDi1fcj2PrrGNtBC/EsX8K+ELkUnJ3CwpuYxGdZQk+wdPd6Hn8cLZPjVJ\nG8dG/2Qo91n6rOths1cjQtx63WEoNIZlJU08UW3qmns+IXU4mabQt9oOxEVP//D7\nqfT7TPdotfEaU6YjlmolvrQZnhJJVQDCBh1d9DcOA+8KmTj7YD+5U25L3EawVOdW\nA3d+L4Xvj96LuawRmZ08otX8y9Mc55s34KEPgqsn6TqE5sxPXeWot+q452u2ooxC\nH3XNAwUI70M2IydmJHkMLLMXoIC0W5mIyyemjvGg5CrP/xhfThTQXeHbR9ddcZk9\n8CRN6OTkK+4+a2wdCfkWy5aKtHtridM1T59C1v/TlNEoxm7uaV84P4914XkjIbFn\n68tpSEx9SigvBtsaUsWF1qcg2hPMiN42OIrwS/NYHZMK3USv0Dl5zoAOfoCDdqjS\nrNVMQ2K2BPKpTB7WWDpU/F5jaEAsC4/Hu8SgzNlVJhq93DDjVpzMGoBYc4k4sjOG\npixIIQYra4BL4px7GCzAYfEVK5VjZ71QcuMmc7UXNr44LJkVN5A2zaeueP3PwvDZ\nn852Ehwytu2/NmU2Q0an\n=hJwP\n-----END PGP SIGNATURE-----\n",
+    "payload": "tree 235f6605809b4f813adf5fdc467aae3944093629\nparent ceb1a3f36912dd4f03fe1741c443cd09e82a44ee\nparent bf63bb1ec485bccf8eec34cc5604f949d70fc7d6\nauthor ducthangho <ducthangho@gmail.com> 1790571323 +0000\ncommitter GitHub <noreply@github.com> 1790571323 +0000\n\nMerge bf63bb1ec485bccf8eec34cc5604f949d70fc7d6 into ceb1a3f36912dd4f03fe1741c443cd09e82a44ee\n",
+    "verified_at": "2026-09-28T04:55:24Z"
+  }
+}

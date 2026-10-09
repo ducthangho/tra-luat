@@ -1,0 +1,142 @@
+NHÃN: chưa chạy trên cây thật — executor tự áp, tự đo, tự chịu trách nhiệm commit
+(docs/PROTOCOL_DA_PHIEN.md §13 patch-as-hint, ràng buộc 1. Nhãn thêm sau khi merge PR #652 theo hậu kiểm connector; sha256 bản reviewer sinh ra: 6ca984f6d17c641d4f6f5116898d443ecabe2244cd748d91657a55bad7587de8)
+
+--- SPEC.md
++++ SPEC.md
+@@ -65,7 +65,7 @@
+ ```
+ 
+ **Neo theo TÊN symbol, không theo số dòng.** PR #589 (#579, head `190def2f`, chưa merge lúc đo) sửa
+-`ops/lease_publish.py` **+163 dòng** trong hunk quanh `kiem()` (`@@ -888,14 +888,173`), nên mọi số dòng
++`ops/lease_publish.py` **+161/−2 dòng, tăng ròng 159 dòng** (`git diff --numstat 24c48e28 190def2f -- ops/lease_publish.py`); hunk chính quanh `kiem()` là `@@ -888,14 +888,173`, nên mọi số dòng
+ từ `:888` trở xuống sẽ trôi khi #579 land. Executor đo lại tại `base_sha` của lease A1a.
+ 
+ `ai-dang-giu` (đọc `rc` trực tiếp, sau khi đưa hai nhánh cục bộ tụt sau `0/122` và `0/134` về `origin/master`):
+@@ -126,7 +126,7 @@
+ | M1 | Schema hồ sơ adapter **hai tầng** (`schema_version: 2`): tầng BẮT BUỘC vào digest (`git_path`, `git_version`, `credential_helper`, `tls_thu_vien`, `http_sslCAInfo`/`http_sslCAPath`/`proxy`/`endpoint`, `image_os`/`image_version`); tầng AUDIT-ONLY ra ngoài digest (`git_sha256`, băm nhị phân khác). | `ops/lease_publish.py` | #499 A2 · Q2 |
+ | M2 | `bam_ho_so` băm chỉ tầng bắt buộc; `kiem_mien_ho_so` kiểm miền cả hai tầng, chỉ tầng bắt buộc quyết định `12`. | `ops/lease_publish.py` | Q2 |
+ | M3 | `image_os`/`image_version` ba trạng thái: chuỗi · `None` · thiếu khoá ⇒ `12`. Mỏ neo đòi runner mà hồ sơ `None` ⇒ `12`. | `ops/lease_publish.py` | Q2 |
+-| **M4** | **Theo (b).** Tạo `MOC_BIA_MO_LICH_SU` = OID 40-hex của commit `master` nơi executor **đo** tập cặp (tổ tiên của nhánh mặc định). Ghim `BIA_MO_LICH_SU` = đúng tập cặp `(cũ, mới)` **hai chiều** mà lease `mới` còn hiệu lực tại mốc ấy, đo bằng thuật toán §8 mục 2, theo đúng miền `_du_bao_check` tiêu thụ (`for cu, moi, *_ in …`). Thứ tự phần tử: sắp theo `(cũ, mới)`. | `ops/lease_publish.py` | Q (b) · r9 A1 |
++| **M4** | **Theo (b), không tự đổi nguồn Q6 của r9.** `MOC_BIA_MO_LICH_SU` là OID canonical đã readback sau A0 theo Q6; đổi sang mốc khác phải có quyết định bổ sung của chủ kho trước đóng băng. Cặp được dẫn xuất từ **đúng cây mốc đã xác minh**, không từ hợp mọi ref. Chụp một `bay_gio` UTC tường minh cho phép lọc hạn; receipt giữ OID, giờ, blob/path hai đầu và băm biểu diễn sắp thứ tự. Ghim cặp hai chiều mà lease mới còn hiệu lực theo §8 mục 2; giữ provenance hai blob như Q6 và tương thích `for cu, moi, *_ in …`. | `ops/lease_publish.py` | Q (b) · r9 A1 |
+ | M5 | B1 — `_du_bao_check` đỡ decode khi đọc bản ghi qua `GOI_GIT`. | `ops/lease_publish.py` | #499 B1 |
+ | M6 | B2 — `_doc_blob_text_12` bắt `OSError`. | `ops/lease_publish.py` | #499 B2 |
+ | M7 | B3 — consumer đọc marker/policy bằng bytes thô ở mọi chỗ so băm. | `ops/lease_publish.py` | #499 B3 |
+@@ -136,7 +136,7 @@
+ | M11 | Workflow giữ `actionlint` DELTA = 0 so `origin/master`. | `.github/workflows/…` | — |
+ | **M12** | **(từ M-A)** Dòng `uses:` của `actions/upload-artifact` thành `actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2`. Chỉ dòng ấy; `actions/checkout@v4` **không** đổi (§4). | `.github/workflows/ops-thu-hoi-admission.yml` | Q1 |
+ | **M13** | **(từ M-C)** `DESCRIPTOR_Q13_SHA256 = "f974b6dba1bfccd4f6ec4315c00ece7868a045487ffbf6ae3d4df86fb4315153"` (chuỗi 64 hex thường). Sửa chú thích tại chỗ để nêu **định nghĩa** Q3 (body UTF-8 thô, không `\n` cuối) và mỏ neo `5825988768`. | `ops/lease_publish.py` | Q3 |
+-| **M14** | **(nợ `AG-T0-01B` dạng 2)** Trong `lenh_ai_dang_giu`: một `lease_id` có bia mộ **đối xứng** (`_bia_mo_doi_xung(...) is True`) trên **bản sao ở ref canonical** `refs/remotes/origin/<nhánh mặc định>` thì **mọi** bản sao cùng `lease_id` trên mọi ref khác **không** được đếm là người giữ; nhãn in `ĐÃ_BỊ_THAY_THẾ (MẶC_ĐỊNH)`. Bia mộ chỉ nằm trên nhánh **khác** nhánh mặc định **không** che bản sao nào ngoài chính nó (giữ nguyên hành vi cũ). Chi tiết và bẫy: §5.1. | `ops/lease_publish.py` | #564 `5847471844` |
++| **M14** | **(nợ `AG-T0-01B` dạng 2)** Trong `lenh_ai_dang_giu`: một `lease_id` có bia mộ **đối xứng** (`_bia_mo_doi_xung(...) is True`) trên **cả hai đầu cặp trong cây canonical đã xác minh theo ADR-0047** (tên cache không tự cấp thẩm quyền) thì **mọi** bản sao cùng `lease_id` trên mọi ref khác **không** được đếm là người giữ; nhãn in `ĐÃ_BỊ_THAY_THẾ (MẶC_ĐỊNH)`. Bia mộ chỉ nằm trên nhánh **khác** nhánh mặc định **không** che bản sao nào ngoài chính nó (giữ nguyên hành vi cũ). Chi tiết và bẫy: §5.1. | `ops/lease_publish.py` | #564 `5847471844` |
+ 
+ ### 5.1 M14 — vì sao, và cái bẫy khử trùng
+ 
+@@ -156,19 +156,28 @@
+ `origin/master`: lần đo `15:48Z` là `refs/heads/claude/wp523-r15-g17-a6`, lần đo `15:55:10Z` là
+ `refs/heads/claude/spec-a1a-r2-20260926` (nhánh của chính đặc tả này, vừa tạo). Ref được ghi **phụ thuộc
+ nhánh nào đang có mặt**. Nên phép hỏi "bản sao này có nằm
+-trên nhánh mặc định không" **không** được trả lời bằng `muc['ref']`. Phải hỏi thẳng cây của ref canonical
+-(ví dụ `ls-tree` `refs/remotes/origin/<nhánh mặc định>` dưới `ops/leases`) để lấy tập blob có mặt ở đó.
++trên nhánh mặc định không" **không** được trả lời bằng `muc['ref']`. Phải xác định thành viên theo `(blob, path)` từ cây canonical trong **một snapshot đã xác minh**;
++không suy nguồn từ ref đại diện. `ls-tree` trên ref cache chỉ là phép chẩn đoán, không phải nguồn verdict.
+ 
+ **Vì sao nhánh mặc định thắng bản sao khác cùng `lease_id`:** một `lease_id` định danh **một** generation.
+ Đường hợp lệ duy nhất để làm tiếp là generation mới khai `thay_the_cho` (protocol §4). Một bản sao khác
+ nội dung mà cùng `lease_id` trên nhánh chưa merge **không** hồi sinh được generation đã bị thay trên nhánh
+-mặc định. Nhánh mặc định là ref duy nhất đi qua review + merge, nên là ref duy nhất có thẩm quyền đặt
+-bia mộ che toàn kho. Chiều ngược (bia mộ trên nhánh phụ che toàn kho) **bị cấm**, vì như thế một nhánh
+-chưa ai review có thể tắt một lease đang sống.
++mặc định. Tên `refs/remotes/origin/master` là cache cục bộ, **không chứng minh** review + merge.
++Trước mọi phép loại người giữ, phải dùng nguồn canonical ghim, discovery/profile được duyệt,
++so map tên **và OID** trên một snapshot, đọc đồ thị/object qua `KhoObject` theo ADR-0047.
++Cả lease cũ có bia mộ và lease mới trỏ ngược phải thuộc cây canonical đã xác minh; không gọi
++`_bia_mo_doi_xung` với tập mọi ref để cấp thẩm quyền cho nửa cặp trên nhánh phụ.
++`--nhanh-mac-dinh` phải bằng symref nguồn đã xác minh, không được chọn nhánh có thẩm quyền.
++Cache đổi OID, không xác minh được nguồn/object/profile, hoặc không xác minh được cả hai đầu ⇒ `12`.
++
++**Checkpoint thiết kế trước đóng băng:** đây là hình dạng nguồn chưa xác minh lần 7 (§7, protocol §12).
++`PROFILE_ADAPTER_DA_DUYET` còn rỗng và việc duyệt profile nằm ngoài A1a: không tự đăng ký profile để
++làm M14 xanh. Chủ kho phải chốt phụ thuộc nguồn đã duyệt, hoặc revision chuyển thay đổi verdict M14
++sang A1b (A1a chỉ dự báo). Cho tới khi chốt, M14 chưa đủ điều kiện thi công production.
+ 
+ **Fail-close:** ref canonical vắng trong cache ⇒ `KHÔNG_XÁC_ĐỊNH` (`rc=12`), không lùi về luật cũ.
+ Bia mộ **một chiều** trên nhánh mặc định ⇒ giữ nguyên hành vi hiện có (`KHÔNG_XÁC_ĐỊNH`).
+-Tên nhánh mặc định lấy từ cờ `--nhanh-mac-dinh` đã có (mặc định `master`).
++Tên nhánh mặc định do discovery canonical xác định; cờ `--nhanh-mac-dinh` chỉ là giá trị đối chiếu. Không fallback tên đoán.
+ 
+ ## 6. `nghiem_thu` — mỗi tiêu chí nêu phép đo làm nó ĐỎ (L3)
+ 
+@@ -179,22 +188,22 @@
+ | A1 | `hoso_adapter_do()` trả `schema_version == 2` và đúng tập khoá v2. | giữ `schema_version = 1` ⇒ ĐỎ; thêm một khoá lạ ⇒ ĐỎ. |
+ | A2 | `bam_ho_so` không đổi khi chỉ tầng AUDIT đổi. | đưa `git_sha256` trở lại dict được băm ⇒ ĐỎ. |
+ | A3 | `bam_ho_so` đổi khi bất kỳ khoá bắt buộc đổi. | bỏ một khoá khỏi tập được băm ⇒ đúng ca ấy ĐỎ; A2/A3 phải ĐỎ ngược chiều nhau. |
+-| A4 | ba trạng thái `image_os`. | gộp `None` với thiếu khoá ⇒ ĐỎ; cho `None` khớp mỏ neo runner ⇒ ĐỎ. |
++| A4 | Bảng tham số độc lập cho **cả `image_os` và `image_version`**: chuỗi hợp lệ · `None` · thiếu khoá. | Với từng khoá: gộp `None` với thiếu khoá ⇒ ca thiếu khoá ĐỎ; cho `None` khớp mỏ neo runner ⇒ ca đối chiếu runner ĐỎ. Giữ khoá kia hợp lệ. |
+ | A5 | `PROFILE_ADAPTER_DA_DUYET` rỗng vẫn ⇒ `12` trên đường production. | cho mỏ neo rỗng đi tiếp ⇒ ĐỎ. |
+ | **A6** | `MOC_BIA_MO_LICH_SU` là OID 40-hex thường và **là tổ tiên** của nhánh mặc định (`merge-base --is-ancestor`, `rc=0`). | ghim OID không phải tổ tiên ⇒ ĐỎ; ghim chuỗi 39 ký tự ⇒ ĐỎ. **Ca "KHÔNG ĐO ĐƯỢC"**: ref nhánh mặc định vắng ⇒ ca ĐỎ, không bỏ qua êm. |
+-| **A7** | `_du_bao_check`: cặp trong `BIA_MO_LICH_SU` ⇒ dự báo `rc` 0; cặp vắng ⇒ dự báo 8. | `any(...)` → `True` ⇒ ca "vắng" ĐỎ; so một vế ⇒ ca "đúng cũ, sai mới" ĐỎ. |
+-| **A7b** | **Ảnh chụp (b) khớp phép đo tại mốc.** Một ca dựng kho giả gồm: cặp hai chiều lease mới còn hạn (phải có mặt), cặp hai chiều lease mới **hết hạn** (phải vắng), cặp hai chiều lease mới **đã bị thay tiếp** (phải vắng), cặp **một chiều** (phải vắng); chạy hàm đo §8 mục 2 và đòi đúng một cặp. | bỏ điều kiện "còn hạn" ⇒ ca ĐỎ; bỏ điều kiện "chưa bị thay tiếp" ⇒ ca ĐỎ; bỏ điều kiện "hai chiều" ⇒ ca ĐỎ. **Ba** đột biến, ba ca đích riêng. |
++| **A7** | `_du_bao_check`: cặp trong `BIA_MO_LICH_SU` ⇒ dự báo `rc` 0; cặp vắng ⇒ dự báo 8. | `any(...)` → `True` ⇒ ca "vắng" ĐỎ; chỉ so cũ ⇒ ca "đúng cũ, sai mới" ĐỎ; chỉ so mới ⇒ ca "sai cũ, đúng mới" ĐỎ. Hai ca âm độc lập, sổ rỗng; thêm ca cả hai sai. |
++| **A7b** | **Ảnh chụp (b) khớp phép đo tại mốc.** Một ca dựng kho giả gồm: cặp hai chiều lease mới còn hạn (phải có mặt), cặp hai chiều lease mới **hết hạn** (phải vắng), cặp hai chiều lease mới **đã bị thay tiếp** (phải vắng), cặp **một chiều** (phải vắng); chạy hàm đo §8 mục 2 và đòi đúng một cặp. | bỏ điều kiện "còn hạn" ⇒ ca ĐỎ; bỏ điều kiện "chưa bị thay tiếp" ⇒ ca ĐỎ; bỏ điều kiện "hai chiều" ⇒ ca ĐỎ. **Ba** đột biến, ba ca đích riêng. Thêm ca lease mới có bia mộ một chiều ⇒ phép đo `12`; bia mộ chỉ trên nhánh phụ không được loại lease mới còn sống trên canonical. Ca dẫn xuất chạy trên cây mốc cố định và clock cố định, so nội dung ghim với receipt, không chỉ kiểm hàm đo trên fixture. |
+ | A8–A12 | B1–B5 như r1 (phân hạng theo LỚP ngoại lệ riêng + tên ca, không theo chuỗi thông điệp). | như r1. A11 ba `close()` = ba đột biến riêng. |
+ | **A13** | Suite `ops/lease_publish_test.py` **N/N hai số bằng nhau**, `N ≥ 168 + (số ca mới)`, `bỏ qua=0`. | đọc `rc` trực tiếp, không qua pipe. |
+ | A14 | `actionlint` DELTA = 0 so `origin/master`; thiếu `actionlint` hoặc `shellcheck` ⇒ KHÔNG ĐO ĐƯỢC ⇒ ĐỎ. | nền đo ở §7 của phiên thi công. |
+ | A15 | `doctrine-scan` và `adr-song` `rc=0`. | chạy trực tiếp. |
+-| A16 | `git diff --numstat origin/master..<head>` chạm đúng ba đường write set. | thêm một đường ⇒ ĐỎ. |
++| A16 | `git diff --numstat <immutable_acceptance_baseline>..<reviewed_head>` chạm đúng ba đường write set. Ghi hai OID đầy đủ trong evidence; baseline lấy từ hợp đồng cấp lease theo protocol §3.2.1, không dời khi continuation hoặc `origin/master` đổi. | thêm một đường vào candidate ⇒ ĐỎ; chỉ tiến `origin/master` bằng một commit ngoài packet không được đổi kết quả phép đo. |
+ | **A17** | **M12.** Ca đọc `.github/workflows/ops-thu-hoi-admission.yml` và đòi: đúng **một** dòng `uses:` tham chiếu `actions/upload-artifact`, và tham chiếu ấy **bằng đúng** `actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02`. Hằng Q1 nằm trong **tệp test**, không đọc từ workflow (đọc từ workflow thì ca so tệp với chính nó). | quay về `@v4` ⇒ ĐỎ; đổi một ký tự của SHA ⇒ ĐỎ; nhân đôi dòng `upload-artifact` (một ghim, một tag) ⇒ ĐỎ. |
+-| **A18** | **M13.** (i) `DESCRIPTOR_Q13_SHA256` là chuỗi khớp `^[0-9a-f]{64}$` và bằng hằng Q3 trong tệp test. (ii) Đường marker MỚI của `kiem-thu-hoi-github` trên kho giả: `descriptor_sha256` = Q3 ⇒ **qua** chốt descriptor (dừng ở chốt kế tiếp hoặc thành công, không dừng ở thông điệp descriptor); = sha256 của body **có** `\n` cuối (`df81f47b50624d13faeb7a756b6f3573c999aef485ee8d741dbcd3d13ae2a7a8`) ⇒ `12` tại chốt descriptor; lệch 1 ký tự ⇒ `12`. (iii) Receipt ghi `descriptor_q13_ghim` = Q3. (iv) **Bốn chốt còn lại của marker MỚI vẫn đứng**: descriptor đúng nhưng từng điều kiện `first_policy_sha256` sai · `base_sha_before_add ≠ S` · S đã có policy · policy vắng ở T ⇒ mỗi ca `12`. | để `None` ⇒ (i),(ii) ĐỎ; so không phân biệt `\n` cuối (vd `.strip()` trước khi băm) ⇒ ca `df81f47b` ĐỎ; gỡ từng chốt trong (iv) ⇒ đúng ca ấy ĐỎ. (iv) chứng minh việc ghim **không** mở cửa rộng hơn chốt descriptor. |
++| **A18** | **M13.** (i) `DESCRIPTOR_Q13_SHA256` là chuỗi khớp `^[0-9a-f]{64}$` và bằng hằng Q3 trong tệp test. (ii) Đường marker MỚI của `kiem-thu-hoi-github` trên kho giả: `descriptor_sha256` = Q3 và mọi điều kiện khác hợp lệ ⇒ **rc=0 và receipt hợp lệ**; = sha256 của body **có** `\n` cuối (`df81f47b50624d13faeb7a756b6f3573c999aef485ee8d741dbcd3d13ae2a7a8`) ⇒ `12` tại chốt descriptor; lệch 1 ký tự ⇒ `12`. (iii) Receipt ghi `descriptor_q13_ghim` = Q3. (iv) **Bốn chốt còn lại của marker MỚI vẫn đứng**: descriptor đúng nhưng từng điều kiện `first_policy_sha256` sai · `base_sha_before_add ≠ S` · S đã có policy · policy vắng ở T ⇒ mỗi ca `12`. | để `None` ⇒ (i),(ii) ĐỎ; bỏ phép so descriptor hoặc chấp nhận thêm hằng `df81f47b…` ⇒ ca hash sai ĐỎ; gỡ từng chốt trong (iv) ⇒ đúng ca ấy ĐỎ. (iv) chứng minh việc ghim **không** mở cửa rộng hơn chốt descriptor. Consumer chỉ nhận digest, không nhận/băm body GitHub: ca này đo so digest chính xác, không nhận công giết đột biến chuẩn hoá body. Readback Q3 phải lưu bytes body nguyên bản, giờ và hai hash vào evidence độc lập; thiếu readback ghi KHÔNG ĐO ĐƯỢC, không tự thêm bộ băm body vào production. |
+ | **A19** | **M14, che đúng.** Kho giả: lease `L` còn hạn, bản trên nhánh mặc định có bia mộ đối xứng tới `L'`; bản cũ **không** bia mộ trên nhánh phụ `z-landed`. `ai-dang-giu <đường của L>` ⇒ `L` **không** trong `NGƯỜI_GIỮ`. | bỏ M14 (hành vi cũ) ⇒ ca ĐỎ (`L` bị đếm). |
+ | **A20** | **M14, không che quá tay.** Kho giả: bia mộ đối xứng của `L` chỉ nằm trên nhánh phụ `z-side`; nhánh mặc định có `L` không bia mộ ⇒ bản trên nhánh mặc định **vẫn** được đếm, `NGƯỜI_GIỮ` chứa `L`. | đột biến "bia mộ trên **mọi** ref che toàn kho" ⇒ ca ĐỎ. |
+ | **A21** | **M14, bẫy khử trùng.** Kho giả: blob đã bia mộ có mặt **cả** trên nhánh mặc định **và** trên một nhánh phụ có tên sắp **trước** nhánh mặc định (vd `a-first`), để `_quet_lease_toan_kho` ghi ref nhánh phụ cho blob ấy; blob cũ không bia mộ nằm trên nhánh thứ ba ⇒ `L` **không** trong `NGƯỜI_GIỮ`. | đột biến xác định "có trên nhánh mặc định" bằng `muc['ref']` ⇒ ca ĐỎ. **Ca tự kiểm fixture:** trong cùng ca, đòi `muc['ref']` của blob bia mộ **khác** ref nhánh mặc định — không thì fixture không dựng được bẫy và ca phải ĐỎ. |
+-| **A22** | **M14, fail-close.** (i) Ref canonical vắng khỏi cache ⇒ `rc=12` với `KHÔNG_XÁC_ĐỊNH`. (ii) Bia mộ **một chiều** trên nhánh mặc định ⇒ `rc=12` như hiện tại. | đột biến lùi về luật cũ khi ref vắng ⇒ (i) ĐỎ; đột biến coi bia mộ một chiều là che ⇒ (ii) ĐỎ. |
++| **A22** | **M14, fail-close.** (i) Ref canonical vắng khỏi cache ⇒ `rc=12` với `KHÔNG_XÁC_ĐỊNH`. (ii) Bia mộ **một chiều** trên nhánh mặc định ⇒ `rc=12` như hiện tại. | đột biến lùi về luật cũ khi ref vắng ⇒ (i) ĐỎ; đột biến coi bia mộ một chiều là che ⇒ (ii) ĐỎ. (iii) Thêm các ca độc lập: cache cùng tên khác OID nguồn, cờ chọn nhánh phụ, chiều ngược chỉ có trên nhánh phụ, thiếu profile đã duyệt ⇒ `12` trước khi loại holder. Fixture nguồn chỉ tiêm qua API nội bộ, không thêm cờ production đổi authority. |
+ 
+ **Không tiêu chí nào đóng bằng `rc=0`.** Mỗi dòng đòi bằng chứng dương: hai số bằng nhau, `ok: true`,
+ hoặc một đột biến ĐỔI MÀU đúng ca đích. Ca đích phân hạng bằng **lớp ngoại lệ riêng + tên ca**
+@@ -241,14 +250,16 @@
+    `yaml.safe_load`, không regex):
+ 
+    ```
+-   cac   = _quet_lease_toan_kho(goc, chan_nhanh_tut_sau=True)     # sau khi đồng bộ ref (§1)
+-   nhóm theo lease_id
+-   cặp hai chiều (cũ, mới): lease `mới` khai thay_the_cho ∋ cũ  VÀ  một bản `cũ` có da_bi_thay_the == mới
+-   (b) giữ cặp khi lease `mới`: có ít nhất một bản _phan_loai_lease == "CÒN_HẠN"
+-                                VÀ không bản nào có bia mộ đối xứng (_bia_mo_doi_xung is True)
++   Đóng băng (OID cây mốc canonical đã xác minh, bay_gio UTC) trong receipt.
++   Đọc lease từ đúng cây mốc qua reader đã xác minh; kiểm ID/tên và provenance hai blob (Q6 r9).
++   Chốt KHÔNG ĐO ĐƯỢC trước khi lọc: nguồn hỏng, dữ liệu mâu thuẫn hoặc bia mộ một chiều liên quan ⇒ 12.
++   Cặp hai chiều (cũ, mới): cả hai đầu ở cây mốc; mới.thay_the_cho chứa cũ, cũ.da_bi_thay_the == mới.
++   (b) giữ khi _phan_loai_lease(mới, bay_gio) == "CÒN_HẠN" và mới chưa bị thay bằng cặp canonical hợp lệ.
++   Bia mộ chỉ ở nhánh phụ không làm chết bản canonical. Sắp cặp, giữ blob/path và băm receipt.
++   Quét toàn ref là chẩn đoán/cutover riêng, không tự bổ sung cặp vào hằng có thẩm quyền.
+    ```
+ 
+-   Đo lúc **15:48Z 26-09** trên `24c48e28`, 428 ref: **4** cặp.
++   Phép quét toàn ref cũ đo lúc **15:48Z 26-09** trên nền `24c48e28`, 428 ref: **4** cặp dưới đây. Đây là **số chẩn đoán**, chưa chứng minh tập ghim Q6 từ cây mốc. E1 chỉ chốt bộ lọc (b), chưa cấp quyền đổi nguồn/mốc Q6; cần chủ kho chốt nếu muốn đổi hợp đồng nguồn.
+ 
+    | cũ | mới |
+    |---|---|
+@@ -257,9 +268,10 @@
+    | `r378-symlink-doi-dac-quyen-r19-g19-claude` | `r378-symlink-doi-dac-quyen-r20-g20-claude` |
+    | `wp570-bash-nen-r30-g30-opus` | `wp570-bash-nen-r31-g31-opus` |
+ 
+-   Bảng này **sẽ** trôi: bốn lease `mới` hết hạn lần lượt `2026-09-27T00:00:00Z` · `05:02:00Z` · `06:00:00Z` · `13:31:00Z` (muộn nhất ~21,6 giờ sau lúc đo), và lease
+-   mới sẽ sinh cặp mới. Nên giá trị ghim vào mã là phép đo **tại `MOC_BIA_MO_LICH_SU` do executor
+-   chọn**, chạy lại đúng thuật toán trên, kèm bản in đầu ra trong thân PR. Cặp hết hạn sau mốc **vô
++   Bảng này **sẽ** trôi: bốn lease `mới` hết hạn lần lượt `2026-09-27T13:31:00Z` · `00:00:00Z` · `06:00:00Z` · `05:02:00Z` (muộn nhất ~21,7 giờ sau lúc đo), và lease
++   mới sẽ sinh cặp mới. Nên giá trị ghim vào mã phải neo **OID có thẩm quyền và clock đã chụp** theo M4,
++   chạy lại đúng thuật toán đã chốt và đối chiếu receipt trong thân PR. OID riêng lẻ không định danh
++   được một phép quét mọi ref theo giờ hiện tại; executor không tự chọn lại nguồn/mốc. Cặp hết hạn sau mốc **vô
+    hại** với luật dự báo, vì `_du_bao_check` chỉ tra nó khi đang kiểm một lease khai `thay_the_cho`.
+    Cặp **sinh sau** mốc thì **không** có trong hằng và bị dự báo `8`; đó là lý do A1b phải đo lại và
+    ghim lại ngay trước khi bật cờ (§4). **KHÔNG ĐO ĐƯỢC** ở đặc tả: giá trị ghim cuối cùng.
+@@ -269,6 +281,8 @@
+    - `ai-dang-giu` đo lại **ra `NGƯỜI_GIỮ 0`** trên cả ba đường write set, `rc` đọc trực tiếp, sau khi so
+      tập tên ref hai nguồn như §1;
+    - chủ kho đã chọn (a) hoặc (b) ở mục 1;
++   - checkpoint nguồn M14 (§5.1) và phạm vi/mốc M4 so Q6 r9 đã được giải quyết bằng quyết định bền;
++     mọi thay đổi nguồn hoặc chuyển phạm vi phải đi vào revision được review trước đóng băng;
+    - đặc tả này đã đóng băng bằng human audit.
+ 
+    Chú ý tự tham chiếu: chính nợ M14 có thể làm `ai-dang-giu` báo người giữ **giả** trên write set sau

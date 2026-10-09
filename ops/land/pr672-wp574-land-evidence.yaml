@@ -1,0 +1,159 @@
+# HO SO LAND — packet #574 R378-SYMLINK-DOI-DAC-QUYEN, qua PR #672 (mang #604 d46163d + #588 76f199e).
+# Schema chuan: docs/PROTOCOL_DA_PHIEN.md §7, khoi "Land evidence tach approval khoi thao tac".
+# Duong dan ops/land/*-land-evidence.yaml la QUY UOC THUC TE (tien le pr554, pr594, pr666), khong ADR nao dat.
+
+schema_version: 1
+mission_id: KHONG-CO-MISSION
+packet_id: R378-SYMLINK-DOI-DAC-QUYEN
+packet_issue: 574
+generation: 43
+provider: claude
+provider_taxonomy_da_provider: anthropic_claude
+execution_surface: claude_code
+transport: machine/local
+environment: cloud
+operating_system: linux
+github_write_channel: >-
+  MCP github (api.githubcopilot.com) bang credential cua tai khoan chu kho `ducthangho`; merge goi
+  merge_pull_request method=merge, expectedHeadSha=a602a38. Tai khoan KHONG tach duoc phien agent khoi chu kho
+  (#566) — danh tinh approver lay tu cac comment uy quyen cua chu kho, khong tu actor cua lenh merge.
+mat_quan_sat_duoc_the_nao: >-
+  Loi khai co neo (session URL), khong phai phep do doc lap — mot phien Claude khong tu chung minh be mat chay cua chinh no.
+trang_thai_packet:
+  merged: true
+  landed: true
+  landed_hieu_luc_tu: 'merge commit cua PR bookkeeping #673 mang tep nay vao master (tep chi co tren master sau thoi diem ay).'
+  landed_ghi_chu: >-
+    PROTOCOL §10: `landed` = da vao canonical o exact SHA duoc duyet, HAU-MERGE GATE XANH va BOOKKEEPING XONG.
+    (1) merge dung head duoc uy quyen a602a38 tai cd23c7d, tree f905bbb = tree ky vong — CO. (2) hau-merge gate:
+    run 36506212140 tren cd23c7d (push, ubuntu) conclusion success, ca 5 job success — xem post_merge_checks.
+    (3) bookkeeping: lease g43 thu hoi (80faa2b, ops-publish-lease 36506348537 success; ai-dang-giu 02:28Z khong
+    con g43 trong NGUOI_GIU) + PR bookkeeping #673 (CI 36506524121 xanh) mang tep nay. Ban dau tep ghi
+    `landed: false` (89493974, dung o thoi diem ay); doi CHI khi PR #673 merge.
+role: land_operator
+session_id: https://claude.ai/code/session_01KCT2cwg12uUNRPkLqiqo5m
+recorded_by: claude-session
+input_packet_generations:
+  - packet_issue: 574
+    lease_id: r378-symlink-doi-dac-quyen-r43-g43-claude
+    revision: 43
+    generation: 43
+    spec_path: ops/specs/r378-symlink-doi-dac-quyen-r43.md
+    spec_sha256: e6452cdceb2b4eb0720e21f8703c0c140f11d4d844297532924a3bafdd7f9688
+    reviewed_sha: 76f199e43506e78238cb00128800bc42c9ad12f7
+
+candidates:
+  - pr: 604
+    noi_dung: 'ops/specs/r378-symlink-doi-dac-quyen-r1..r43.md (dac ta dong bang)'
+    authorized_head_sha: d46163d96fe8037f64e44578f7ec6e4156930cb8
+    trang_thai_sau: 'closed, merged=true, merged_at 2026-09-29T01:05:16Z (GitHub tu danh dau vi head da vao master qua #672)'
+  - pr: 588
+    noi_dung: 'scripts/tl_selftest.py + RELEASE_MANIFEST.json (ban va #574)'
+    authorized_head_sha: 76f199e43506e78238cb00128800bc42c9ad12f7
+    trang_thai_sau: 'closed, merged=true, merged_at 2026-09-29T01:05:16Z (GitHub tu danh dau vi head da vao master qua #672)'
+  - pr: 672
+    noi_dung: 'cay land da do: master dcd5fe0 + merge d46163d (#604) + merge 76f199e (#588), thu tu #604 -> #588'
+    authorized_head_sha: a602a380a5d6bee8771876fd7066bddf15e0be67
+
+authorization:
+  approver: ducthangho
+  human_audit: https://github.com/ducthangho/tra-luat/issues/574#issuecomment-5873435856
+  human_audit_tom_tat: 'provider human, assurance human_audited, verdict approve, reviewed_sha 76f199e'
+  chuoi_uy_quyen:
+    - {id: 5873550476, ten: 'UY QUYEN LAND (goc)', created_at: '2026-09-28T15:48:06Z', noi_dung: 'merge #604 -> #588, authorized_head_sha d46163d / 76f199e, han 2026-09-29T06:00:00Z, bookkeeping, KHONG deploy'}
+    - {id: 5873623536, ten: 'SUA DOI (1)', created_at: '2026-09-28T15:52:17Z', noi_dung: 'CI tren cay tich hop ops/land-574-tich-hop-2 @ 3803913 (run 36446458563)'}
+    - {id: 5874761014, ten: 'SUA DOI 2', created_at: '2026-09-28T17:02:44Z', noi_dung: 'CI tren ops/land-574-tich-hop-3 @ 5d5b514 (run 36454930689); gate-registry giu tran 90 (BAM_GATE_REGISTRY)'}
+    - {id: 5880901103, ten: 'SUA DOI 3', created_at: '2026-09-28T23:50:01Z', noi_dung: 'master 3fee59e -> dcd5fe0; cay land a602a38 tree f905bbb; Windows delta = 0 so nen'}
+    - {id: 5881023421, ten: 'SUA DOI 3 (ban trung, cung noi dung)', created_at: '2026-09-29T00:02:11Z'}
+    - {id: 5881237904, ten: 'SUA DOI 4 (dang lai)', created_at: '2026-09-29T00:22:56Z', noi_dung: 'khong chay CI Windows; moi job ubuntu run 36498023205 success; Windows not_measured (#671)'}
+    - {id: 5881094221, ten: 'SUA DOI 5', created_at: '2026-09-29T00:09:02Z', updated_at: '2026-09-29T00:14:42Z', noi_dung: 'doi duong merge: merge PR #672 CHI tren a602a38; tree sau merge = f905bbb'}
+    - {id: 5881612116, ten: 'SUA DOI 6', created_at: '2026-09-29T01:00:44Z', noi_dung: 'mien gate-registry dispatch (infra_timeout); SUA DOI 4 coi la dat voi chuan-bi/gate/gate-ops/gate-packet-loop ubuntu + required checks #672'}
+  ghi_chu_sua_de: >-
+    Comment 5881094221 ban dau (00:09:02Z) mang SUA DOI 4; chu kho SUA DE no thanh SUA DOI 5 luc 00:14:42Z, nen van
+    ban SUA DOI 4 goc mat tren GitHub. Land operator da doc SUA DOI 4 goc luc ~00:09Z (readback MCP issue_read) va chu
+    kho dang lai nguyen van o 5881237904. Moi comment deu doc lai qua MCP issue_read: user ducthangho,
+    author_association OWNER. Than doc qua MCP bi chuan hoa thuc the HTML (CLAUDE.md) nen KHONG bam than comment.
+
+land_operator: claude-session (tai khoan GitHub cua chu kho qua MCP github)
+merge_method: merge
+merge_commit: cd23c7dbc7833d64a8e87e8ffd94f194c18e0060
+merged_at: '2026-09-29T01:05:14Z'
+hai_cha: dcd5fe04b91448d0d096435033d069a8cb4ee32b a602a380a5d6bee8771876fd7066bddf15e0be67
+tree: f905bbb1aeaa6e83c5ce09a603035eb71db9a5fc
+tree_ky_vong: f905bbb1aeaa6e83c5ce09a603035eb71db9a5fc
+tree_khop: true
+target: master
+merge_api_expected_head_sha: a602a380a5d6bee8771876fd7066bddf15e0be67
+
+pre_merge_checks:
+  - 'Ngay truoc merge (01:04:58Z): ls-remote master = dcd5fe0, ops/land-574-cay-land = a602a38; PR #672 head a602a38, base dcd5fe0.'
+  - 'release-verify RELEASE_MANIFEST.json --strict --json tren a602a38: ok=true, expected 180 = checked 180.'
+  - check: 'CI dispatch tren cay land + commit CI chi nang tran (KHONG land)'
+    workflow_run: https://github.com/ducthangho/tra-luat/actions/runs/36498023205
+    ref: 'ops/land-574-tich-hop-4 @ cbb9239ffeeb2d537f3c6f832c282a172589cafe (cha a602a38)'
+    commit_ci_ghi_chu: 'cbb9239 chi nang timeout-minutes cua gate/gate-ops/gate-packet-loop 60 -> 120; gate-registry giu 90 vi BAM_GATE_REGISTRY.'
+    jobs_ubuntu:
+      chuan-bi: {id: 109182039193, conclusion: success}
+      gate: {id: 109182151860, conclusion: success}
+      gate-ops: {id: 109182151863, conclusion: success}
+      gate-packet-loop: {id: 109182151918, conclusion: success}
+      gate-registry: {id: 109182151851, conclusion: failure, phan_loai: infra_timeout}
+    gate_registry_infra_timeout: >-
+      Chi ops/nhanh_don_duoc_test.py do: "LOI HA TANG: het gio 4500 giay, rc=-9" o che do DU cua workflow_dispatch;
+      moi bo khac rc=0. Cung bo nay dat rc=0 (3750 s) tren cay 3fee59e + #604 + #588 (run 36454930689, job
+      gate-registry ubuntu). #574 khong cham tep ay. Mien theo SUA DOI 6. gate-registry KHONG thuoc required checks.
+    jobs_windows:
+      trang_thai: not_measured
+      ly_do: 'SUA DOI 4: khong chay CI Windows vi loi Windows co san tren master (packet #671); run bi huy sau khi xong job ubuntu.'
+      gate-ops: success
+      gate-packet-loop: success
+      gate: cancelled
+      gate-registry: cancelled
+  - check: 'Required checks cua PR #672 tren a602a38 (ruleset bao-ve-cong-dang-lease 20856202)'
+    workflow_run: https://github.com/ducthangho/tra-luat/actions/runs/36501850246
+    event: pull_request
+    jobs_success: {chuan-bi: 109194282669, gate: 109194311748, gate-ops: 109194311783, gate-packet-loop: 109194311786}
+    gate_registry: 'job 109194311859 con in_progress luc merge; khong thuoc required checks (mergeable_state unstable, khong blocked).'
+  - 'Review model (advisory): Codex gpt-6-astra luot 37 approve P1 0 / P2 0 / P3 0 / P4 2 tren 76f199e (pull/588#issuecomment-5872048230).'
+  - 'N1-N3 do o luot dung r43 (executor, khong do lai luc land): tu-kiem 47602/47602; N2 DUNG 33; N3 DUNG 2 tren git show 76f199e:scripts/tl_selftest.py.'
+
+post_merge_checks:
+  - check: 'CI master tren merge commit cd23c7d (push, chi ubuntu)'
+    workflow_run: https://github.com/ducthangho/tra-luat/actions/runs/36506212140
+    workflow: .github/workflows/ci.yml (gate), event push, branch master, run_attempt 1, head_sha cd23c7d
+    runner: ubuntu-latest
+    conclusion: success
+    jobs_success: {chuan-bi: 109208126232, gate: 109208150936, gate-ops: 109208151002, gate-packet-loop: 109208150984, gate-registry: 109208150892}
+    doc_lai_luc: '2026-09-29T02:27:52Z qua MCP github actions_get / list_workflow_jobs (run updated_at 02:27:24Z)'
+    windows: 'not_measured — push master chi chay ubuntu; SUA DOI 4.'
+khong_do_duoc:
+  - 'Windows: not_measured cho land nay (SUA DOI 4); loi Windows co san — cong_cu_test t23/t49 va gate-registry Windows qua tran 90 — o #671.'
+  - 'Lich su sua comment 5881094221: GitHub API qua MCP khong tra tung ban sua; chi co created_at/updated_at.'
+
+bookkeeping:
+  - 'Thu hoi lease r378-symlink-doi-dac-quyen-r43-g43-claude bang rut han ve 2026-09-29T01:22:00Z tren ops/cap-lease-574-g43 (80faa2b, sau merge origin/master cd23c7d vao nhanh lease); lease_publish.py check rc=0 truoc khi day.'
+  - 'ops-publish-lease run 36506348537 tren 80faa2b: success.'
+  - 'Dua tep lease (ban da thu hoi, byte giong 80faa2b) + tep ho so nay vao master qua PR bookkeeping #673 (CI run 36506524121: 5 job success).'
+  - check: 'Lease thoi giu write set sau 01:22Z (dieu kien nghiem thu trong chinh lease)'
+    do_luc: '2026-09-29T02:28:05Z'
+    ref_inventory: 'ban sao scratch fetch --update-head-ok moi refs/heads (502); so TAP TEN voi git ls-remote --heads origin (502): comm -23 = 0, comm -13 = 0'
+    ket_qua:
+      scripts/tl_selftest.py: 'ai-dang-giu rc=0, NGUOI_GIU 0; r378-symlink-doi-dac-quyen-r43-g43-claude = HET_HAN'
+      RELEASE_MANIFEST.json: 'ai-dang-giu rc=0, NGUOI_GIU 0; r378-symlink-doi-dac-quyen-r43-g43-claude = HET_HAN'
+
+lech_protocol_khai:
+  - id: CUNG-SESSION-EXECUTOR-VA-LAND-OPERATOR
+    mo_ta: >-
+      session_01KCT2cwg12uUNRPkLqiqo5m vua la Executor cua #574 (lease g39..g43) vua la land_operator goi merge cd23c7d.
+      PROTOCOL §1 bat bien 8 va §2 tach vai theo phien; tien le pr594/pr666 da khai dung loai lech nay.
+    gioi_han_tac_dong: >-
+      Approval do chu kho (human audit 5873435856 + chuoi uy quyen tren). Session nay chi thuc hien thao tac merge da
+      duoc uy quyen tren exact SHA qua expectedHeadSha. Khai lech KHONG xoa vi pham.
+    trang_thai: 'LECH DA XAY RA, khai thang.'
+  - id: DUONG-MERGE-QUA-PR-672
+    mo_ta: >-
+      Uy quyen goc noi merge #604 roi #588. #588 bi ruleset chan: head 76f199e thieu required check gate-ops (ubuntu-latest)
+      vi luot CI PR duy nhat (36112134755, 2026-09-25) co truoc khi job ay ton tai; khong tao duoc check tren dung SHA ay
+      ma khong doi head hoac dong-mo lai PR (ca hai bi cam). Land qua PR #672 mang dung cay da do; ca hai head duoc uy
+      quyen la cha cua cac merge ben trong. Chu kho duyet bang SUA DOI 5.
+    trang_thai: 'DUOC DUYET, khai thang.'

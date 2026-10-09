@@ -5,7 +5,8 @@
 # TRANG THAI: merged (3fc0932). Gate hau-merge 3fc0932 XANH 14/14 (run 37942714195). `landed` o tep nay = false:
 # theo tien le, `landed: true` chi co hieu luc tu merge commit cua PR ghi so KE TIEP, sau khi chu kho quyet cac diem
 # not_measured duoi day. "merged" KHONG dong nghia "landed" (PROTOCOL §10.2.4).
-# NHAN: measured = do lai trong phien ghi so (lenh ghi kem); thuat_lai = so lieu cua luot review, khong tai chay;
+# NHAN: measured = do lai trong phien ghi so (lenh ghi kem) VA `kiem_ho_so.py --repo <clone> --tu-kiem` chung minh DOI DI thi bo kiem DO;
+# thuat_lai = so lieu cua luot review, khong tai chay;
 # not_measured = khong do duoc, ghi ly do.
 # Readback tho: ops/land/pr621-skill-bai-hoc-provenance/ (SHA256SUMS.txt). Kiem nhat quan ho so <-> hien vat:
 # `python -I ops/land/pr621-skill-bai-hoc-provenance/kiem_ho_so.py [--repo <clone day du>]`. Moi phep do REST: `gh api <duong dan>` (GET,
@@ -111,7 +112,7 @@ environment: cloud
 operating_system: linux
 role: land_operator
 session_id: https://claude.ai/code/session_01Fd7YEcw3odAk7QKkydKycE
-do_luc: '2026-10-09T12:0xZ..14:4xZ (core.abbrev 7)'
+do_luc: '2026-10-09T12:0xZ..17:2xZ (core.abbrev 7; 12:0x-14:4x = phien land, 16:1x-17:2x = phien ghi so)'
 
 ung_vien:
   head_sha: 658bd0cdc56bbd3445f489dcfc571e22eee7d675
@@ -159,7 +160,7 @@ ung_vien:
     do_lai_luc_ghi_so:
       trang_thai: measured
       pham_vi: >-
-        DO LAI tren CUNG cay 658bd0cdc56bbd3445f489dcfc571e22eee7d675 luc ghi so (2026-10-09 ~16:15Z), clone moi tu
+        DO LAI tren CUNG cay 658bd0cdc56bbd3445f489dcfc571e22eee7d675 luc ghi so (2026-10-09 17:11Z = LUC trong hien vat; lan do lai thu hai, ban dau ghi ~16:15Z), clone moi tu
         quet621b, core.abbrev 7. La bang chung cay ung vien DAT cac cong nay; KHONG la bang chung luot goc da chay.
       hien_vat: 'cong-tai-cho-658bd0c.txt (moi cong: dong `### LENH`, output nguyen van, dong `### RC=` cua chinh lenh)'
       checkout: >-
@@ -195,6 +196,11 @@ review_tai_head_da_merge:
   human_audit:
     url: https://github.com/ducthangho/tra-luat/pull/621#issuecomment-6082660033
     assurance: human_audited
+    assurance_dat: >-
+      KHAI, CHUA DAT day du theo PROTOCOL §8 muc 2 (`tu doc spec/diff`, doc lap voi Executor/tac gia): than comment 6082660033 dan
+      lai review AI luot 18 (stale) va so bam diff ('noi dung khong doi'), KHONG noi nguoi audit tu doc diff; khong co dong
+      `Reviewed commit:`; ghi 'CI 15/15' trong khi do duoc 17 (16+1); danh tinh OWNER khong tach khoi phien agent (#566).
+      Chu kho quyet co chap nhan muc nay khong (tien le pr594 THIEU_HUT_BAO_DAM).
     verdict: approve
     reviewed_sha: 658bd0cdc56bbd3445f489dcfc571e22eee7d675
     do_duoc: >-
@@ -208,8 +214,8 @@ review_tai_head_da_merge:
   codex_connector:
     ket_qua: >-
       measured (comment-6082682461-codex.json, reviews-621.json, review-comments-621.json): Codex review kich boi "Draft
-      marked ready" tren 658bd0c, Completed 2026-10-09T14:16:42Z; PR #621 co 0 review object va 0 review comment => sach
-      (quy uoc connector: chi tao review khi co gop y).
+      marked ready" tren 658bd0c, Completed 2026-10-09T14:16:42Z; PR #621 co 0 review object va 0 review comment => KHONG co gop y nao duoc ghi
+      (suy luan 'sach' tu hai mang rong; gio doc hai mang ay va phan ung thumbs-up cua connector KHONG duoc luu).
     may_doc:
       tac_gia: chatgpt-codex-connector[bot]
       trang_thai: Completed
@@ -311,14 +317,17 @@ khong_do_duoc:
     can: 'Quyet dinh chu kho cho TUNG run_id trong pham_vi_run.'
   - id: RC-SO-CHI-CO-STEP-CONCLUSION
     pham_vi_run: [37928221219, 37928217849, 37942625684, 37942714195]
-    mo_ta: 'Khong tai log job: rc so va output duong cua tung job: not_measured; chi conclusion qua REST (checkruns-*.json).'
+    mo_ta: 'Khong tai log job: rc so, marker duong, runner/OS/runtime (image, phien ban) va artifact ID/hash cua tung job (PROTOCOL §10.2.2, hang "Gate output"): not_measured; chi conclusion qua REST (checkruns-*.json).'
     can: 'Quyet dinh chu kho cho TUNG run_id trong pham_vi_run.'
   - id: CHECKOUT-IDENTITY
     pham_vi_run: [37928221219, 37928217849, 37942625684, 37942714195]
     mo_ta: >-
       SHA/tree ma runner THUC SU checkout: khong tai log job / artifact; chi co REST run head (658bd0c cho ba run truoc
       merge, 3fc0932 cho run hau-merge). §10.2.2 khong cho dung REST run head lam bang chung checkout. Nguon thay the
-      (khong thay phep do): tree 3fc0932 = tree 658bd0c (measured, thao_tac_merge.kiem_tra).
+      (khong thay phep do): tree 3fc0932 = tree 658bd0c (measured, thao_tac_merge.kiem_tra). Nguon thay the nay chi noi ve cay cua
+      HEAD ung vien, KHONG phu cay ma su kien thuc su checkout: run pull_request test merge ref (anh ls-remote truoc giu OID
+      refs/pull/621/merge = 8c969f4 nhung khong co parents/tree cua no); run pull_request_target mac dinh checkout theo BASE
+      (theo tai lieu GitHub, chua tu do).
     can: 'Quyet dinh chu kho cho TUNG run_id trong pham_vi_run (Codex PR #723, comment 4231975373).'
   - id: WINDOWS
     mo_ta: 'Run push tren master chi chay ubuntu-latest cho thay doi nay (khong co job windows trong checkruns-3fc0932.json); tai lieu adapter khong co nhanh chay theo nen.'

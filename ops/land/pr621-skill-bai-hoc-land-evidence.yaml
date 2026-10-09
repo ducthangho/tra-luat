@@ -125,6 +125,7 @@ ung_vien:
       lenh: >-
         tren clone DAY DU (is-shallow-repository=false, scratch quet621b): git rev-list --count 6980e5b..8b59185 => 809;
         git rev-list --left-right --count 675895d...8b59185 => 19 809.
+      so: {base_den_master: 809, rieng_nhanh: 19, rieng_master: 809}
       dinh_chinh: >-
         Ban dau cua tep nay ghi 989 — dem tren kho phien NONG (is-shallow-repository=true), dung bay CLAUDE.md da canh bao.
         Codex review PR #723 (comment 4231894088) bat duoc; so 809 do lai tren clone day du.
@@ -148,6 +149,12 @@ ung_vien:
       trang_thai: thuat_lai
       ket_qua: 'doctrine-scan sach (10 tep, 0 cho chep) · adr-song rc=0 · doc-claims-check ok=true · idiom_py_test TONG DAT · eol_policy --all rc=0'
       nguon: 'tom tat cua land operator (comment-6080596360.json); output/rc tung cong cua luot goc KHONG duoc luu.'
+      trich_nguyen_van:   # tung manh PHAI co nguyen van trong dong "Cong tai cho" cua comment nguon (kiem_ho_so.py muc 6b)
+        - '`doctrine-scan` sạch (10 tệp, 0 chỗ chép)'
+        - '`adr-song` rc=0'
+        - '`doc-claims-check` `ok=true`'
+        - '`idiom_py_test` TỔNG ĐẠT'
+        - '`eol_policy --all` rc=0'
       dinh_chinh: 'Ban dau gan nhan measured ma khong co hien vat — Codex PR #723 (comment 4232133821) bat duoc.'
     do_lai_luc_ghi_so:
       trang_thai: measured
@@ -155,6 +162,10 @@ ung_vien:
         DO LAI tren CUNG cay 658bd0cdc56bbd3445f489dcfc571e22eee7d675 luc ghi so (2026-10-09 ~16:15Z), clone moi tu
         quet621b, core.abbrev 7. La bang chung cay ung vien DAT cac cong nay; KHONG la bang chung luot goc da chay.
       hien_vat: 'cong-tai-cho-658bd0c.txt (moi cong: dong `### LENH`, output nguyen van, dong `### RC=` cua chinh lenh)'
+      checkout: >-
+        Dong dau `### CHECKOUT: HEAD=<sha> TREE=<tree> SACH=co` va dong cuoi `### CHECKOUT-SAU: ...` do bang git rev-parse +
+        git status --porcelain TRONG CUNG clone, ngay truoc va ngay sau 5 lenh (lan do lai thu hai, 17:11Z) — Codex PR
+        #723 (comment 4232647532): ban truoc khong neo checkout.
       ket_qua:
         - {lenh: 'python .claude/dev/packet_loop.py doctrine-scan --root .', rc: 0, dau_duong: 'doctrine-scan: sạch — đã quét 10 tệp, 0 chỗ chép doctrine'}
         - {lenh: 'python .claude/dev/packet_loop.py adr-song --root .', rc: 0, dau_duong: 'adr-song: sạch — 50 ADR trên đĩa, 50 dòng trong §20, khớp 1–1'}
@@ -244,6 +255,7 @@ thao_tac_merge:
   kiem_tra:
     trang_thai: measured
     ket_qua: "git show -s --format='%H %P %T' 3fc0932 => cha [8b59185, 658bd0c]; tree(3fc0932) == tree(658bd0c); git diff --stat 8b59185 3fc0932 => 2 tep, +205"
+    diff_stat: {tep: 2, them: 205, xoa: 0}
   readback: [pr-621.json, commit-3fc0932.json]
 
 ref_fence:
@@ -273,17 +285,18 @@ gate_hau_merge:
   workflow: .github/workflows/ci.yml (name gate, event push)
   head_sha: 3fc0932a3d1617c4352e5a7982f2e6e4208ca3f7
   ket_qua: 'completed success 2026-10-09T14:34:45Z; 14/14 check run success'
+  hoan_tat: '2026-10-09T14:34:45Z'   # = updated_at cua run-37942714195.json (REST khong co truong completed_at rieng cho workflow run)
   moc_checkout: 'not_measured — REST run head khong phai bang chung checkout (§10.2.2); xem khong_do_duoc CHECKOUT-IDENTITY (Codex PR #723, comment 4231975373).'
   readback: [run-37942714195.json, checkruns-3fc0932.json]
 
 lease_tren_duong_ghi_so:
   trang_thai: measured
   lenh: >-
-    clone quet day du (tap ten ls-remote --heads == for-each-ref refs/remotes/origin: 492/492, thieu 0 thua 0), checkout
-    origin/master (353da6b luc do lan 4; nhanh master cuc bo dua ve khop origin truoc khi do, vi ai-dang-giu chan
+    clone quet day du (tap ten ls-remote --heads == for-each-ref refs/remotes/origin: 493/493, thieu 0 thua 0; hai tap luu kem: nhanh-may-chu.txt, nhanh-cuc-bo.txt), checkout
+    origin/master (353da6b luc do lan 4 va lan 6; nhanh master cuc bo dua ve khop origin truoc khi do, vi ai-dang-giu chan
     rc=12 khi nhanh cuc bo tut sau); ops/lease_publish.py ai-dang-giu --root . <p> cho TUNG duong dan p trong write set
-    PR #723 (25 duong dan: tep ho so + moi tep provenance, ke ca chinh bang ket qua; do lai sau vong vá lan 4).
-  ket_qua: '25/25 rc=0, NGUOI_GIU 0 (readback ai-dang-giu-write-set.txt; rc la ma thoat cua chinh lenh ai-dang-giu).'
+    PR #723 (27 duong dan: tep ho so + moi tep provenance, ke ca chinh bang ket qua; do lai sau vong vá lan 6, 17:13Z).
+  ket_qua: '27/27 rc=0, NGUOI_GIU 0 (readback ai-dang-giu-write-set.txt; rc la ma thoat cua chinh lenh ai-dang-giu).'
   dinh_chinh: 'Ban dau chi kiem MOT duong dan (tep ho so) — Codex PR #723, comment 4231975378 bat duoc.'
 
 khong_do_duoc:

@@ -1,0 +1,295 @@
+# LEASE — R378-SYMLINK-DOI-DAC-QUYEN revision 43 / generation 43
+# Executor CLAUDE (phien executor RIENG cho #574, mo 27-09 theo quyet dinh chu kho). Reviewer CODEX (luot review chay o
+# phien dieu phoi, luot 29 chay TRUNG o ca hai phien). r34 mo NGAY sau verdict luot 29 (ban B, phien executor) theo chi thi chu kho
+# "R32 chay cross review va va toi het P1, P2, P3" + "Chay cross review vong moi luon di". Ghi chu trung: issues/574#issuecomment-5862347549.
+#
+# DOI SO VOI g42: neo sang dac ta r43 (hint luot 36 nguyen van; DANH SACH CHO PHEP khoi MOT_KHOI; §0.43 chinh sach chu kho 5869282996; cong cu v33). HAN GIU 2026-09-29T06:00:00Z (moc 5862999491).
+# EXECUTOR van la phien session_01KCT2cwg12uUNRPkLqiqo5m (claude-opus-5-5; effort chu kho chi thi xhigh/max, KHONG DAT DUOC tu trong phien).
+# reviewed_sha KHONG doi (76f199e): r43 chi doi tu_kiem trong dac ta, parser giu nguyen, KHONG doi ma #588. write_set KHONG doi.
+#
+# DOC KY TRUOC KHI LAM: tieu chi quan trong nhat VAN la A1 — RANG. A11 doi TAM dot bien co dinh nghia
+# BEN o Phu luc A con bi bat, so bang TAP. A6 la 79 o. §9: dieu kien dung la 0 finding P1/P2/P3.
+trang_thai_ban_ghi: 'DA CAP. Day len ops/cap-lease-574-g43.'
+
+schema_version: 2
+event: executor_lease_granted
+packet_issue: 574
+packet_id: R378-SYMLINK-DOI-DAC-QUYEN
+mission_issue: KHONG_CO
+revision: 43
+generation: 43
+lease_id: r378-symlink-doi-dac-quyen-r43-g43-claude
+
+thay_the_cho: r378-symlink-doi-dac-quyen-r42-g42-claude
+
+granted_by: ducthangho
+granted_on_instruction: https://github.com/ducthangho/tra-luat/issues/574#issuecomment-5869282996
+granted_on_instruction_nguyen_van: 'Ban chieu quyet dinh chu kho 5869282996 (chon trong phien dieu phoi ~11:28Z): "r43 + luot cuoi (de xuat)" — ap hint luot 36; tu luot 37
+  bieu hien moi cua lop F2 la P4 khi parser goc dung + oracle cau truc dung chung khong lech parser + khong sai N1-N3/#588. Verdict luot 36:
+  pull/588#issuecomment-5868891825. Chi thi chu kho TRONG PHIEN EXECUTOR (28-09, chat): lap toi khi het P1/P2/P3, khong CI, giu phan vai, chay viec dai
+  qua launcher.py run; chon huong r43 = "Hint + DS CHO PHEP khoi" (khong dong bang byte fixture). Moc chu kho: noi han 5862999491, cau hinh 5863028022,
+  hint patch 5863055262. Chinh sach P4 (5857870690) va chi thi khong CI (5855148047) giu nguyen.'
+granted_on_instruction_GIOI_HAN_PHAI_KHAI: 'Moc 5869282996 (ban chieu) DO PHIEN AGENT (dieu phoi) DANG theo chi thi lap cua chu kho. author_association OWNER KHONG
+  phan biet nguoi voi mot phien chay bang token cua nguoi (no #566).'
+
+recorded_by: claude-session
+recorder_is_dispatcher: false
+
+PHAM_VI_LEASE_NAY:
+  chi_thi_noi: 'r43 cho #574: hint_patches luot 36 NGUYEN VAN (cung_khoi_hoat_dong cho b22rv/b23rv, chot dong hoat dong cho o_bc) + DANH SACH CHO PHEP khoi MOT_KHOI (108 ten, kiem hai chieu) + doi chung bo_code_va_nhan giu rao + §0.43 chinh sach chu kho, trong tu_kiem (v33); parser giu nguyen.'
+  da_cap: 'Lease nay CHI #574. #579 co lease RIENG, write set KHONG chong lan.'
+
+leased_at_utc: '2026-09-28T13:08:31Z'
+leased_at_utc_nguon: 'date -u luc commit tao tep nay; commit dung CHINH gia tri ay lam committer date (GIT_COMMITTER_DATE).'
+lease_expires_at_utc: '2026-09-29T01:22:00Z'
+han_ghi_chu: >-
+  Goc 2026-09-29T06:00:00Z. RUT NGAN ve 2026-09-29T01:22:00Z — xem thu_hoi_bang_rut_han.
+lease_sua_lan_cuoi: '2026-09-29T01:06:04Z'
+lease_sua_ghi_chu: >-
+  Lan 1: rut ngan lease_expires_at_utc (thu_hoi_bang_rut_han). Khong doi write set, spec, branch.
+thu_hoi_bang_rut_han:
+  han_goc_utc: '2026-09-29T06:00:00Z'
+  han_moi_utc: '2026-09-29T01:22:00Z'
+  chi_thi: >-
+    Uy quyen land chu kho tren #574 (5873550476 + SUA DOI 3 5880901103 + SUA DOI 4 5881237904 + SUA DOI 5 5881094221
+    + SUA DOI 6 5881612116), muc 'Duoc phep sau merge (bookkeeping)': thu hoi lease
+    r378-symlink-doi-dac-quyen-r43-g43-claude bang rut han tren ops/cap-lease-574-g43.
+  ly_do: >-
+    Packet #574 da MERGE vao master qua PR #672 (merge commit cd23c7dbc7833d64a8e87e8ffd94f194c18e0060,
+    2026-09-29T01:05:14Z, head a602a380a5d6bee8771876fd7066bddf15e0be67 = dcd5fe0 + merge d46163d (#604) + merge 76f199e (#588)).
+    Tree master f905bbb1aeaa6e83c5ce09a603035eb71db9a5fc = tree ky vong. #604 va #588 GitHub tu danh dau merged.
+  vi_sao_khong_dung_so: >-
+    Theo tien le #579 (d513f35) va #650: so ops/thu-hoi/ chua kich hoat; rut han chi dung co che DA CAI (phan loai lease
+    theo han). Han moi dat ~15 phut SAU commit de lan dang bang git con thay lease song (nhanh rc=9 da dang), khong roi
+    vao rc=8 (bai hoc CLAUDE.md: rc=8 che rc=9).
+  gioi_han: >-
+    Ref mang lease nay: nhanh ops/cap-lease-574-g43 (ban rut han) va master sau PR bookkeeping. Nhanh ma
+    claude/va-r378-symlink-20260920 KHONG mang tep lease. Nghiem thu: sau 2026-09-29T01:22:00Z, ai-dang-giu cho write set
+    khong con r378-symlink-doi-dac-quyen-r43-g43-claude trong NGUOI_GIU khi quet du ref.
+han_vi_sao: 'HAN MOI theo moc CHU KHO issues/574#issuecomment-5862999491 ("Noi han + r34 (de xuat)": them 24h toi 2026-09-29T06:00:00Z).
+  KHONG phai phien executor tu noi.'
+role: executor
+provider: anthropic_claude
+executor: claude
+model: KHONG_KHAI
+effort: KHONG_KHAI
+
+assurance_target: human_audited
+assurance_target_vi_sao: 'KHONG DOI so voi r1/g1, r3/g2. Chi thi "chi merge khi da co cross-review
+  approve" DAT THEM mot dieu kien, no KHONG ha dieu kien nao: cross_approved khong thay duoc
+  human_audited.'
+assurance_target_HE_QUA_PHAI_KHAI: 'Packet nay KHONG LAND DUOC BANG MAY. Buoc land doi chu kho DOC
+  verdict va diff roi xac nhan. Executor KHONG duoc khai human_audited ho chu kho, KHONG tu approve,
+  KHONG tu merge.'
+assurance_target_fallback: advisory_review
+reviewer_provider: codex
+reviewer_provider_TRANG_THAI: 'TRO LAI codex: chu kho 25-09 "Codex da song lai, hay quay lai su dung codex de cross
+  review o phien nay"; probe gpt-6-astra PROBE_OK rc=0. Luot 6 #574 chay bang codex o phien executor; tu luot sau,
+  review chay o PHIEN DIEU PHOI (phan vai de khong co hai luot codex tren cung head).'
+cross_reviewer_requirement: 'CAM self_review va self_approve. Reviewer phai thuoc HO MODEL DOC LAP
+  voi executor (codex). Cross-review chay theo TRUC LOP loi, khong theo tung loi rieng le.'
+
+THAM_SO_LUOT_REVIEW_CHU_KHO_CHOT:
+  model: gpt-6-astra
+  model_da_do_that: true
+  model_do_nhu_the_nao: 'codex exec -m gpt-6-astra => PROBE_OK rc=0 (25-09), header stderr model: gpt-6-astra.'
+  effort: medium
+  assurance_dat_duoc: cross_approved
+  ghi_chu: 'cross_approved KHONG thay human_audited.'
+
+review_class: sensitive
+effective_review_class: sensitive
+review_class_vi_sao: 'scripts/tl_selftest.py la harness dung chung (protocol §5 goi dich danh), va
+  ca dich do RANG cua mot chot AN NINH. Khong doi so voi r1/r3.'
+
+spec_ref: ops/specs/r378-symlink-doi-dac-quyen-r43.md
+spec_path: ops/specs/r378-symlink-doi-dac-quyen-r43.md
+prompt_path: ops/specs/r378-symlink-doi-dac-quyen-r43.md
+prompt_sha256_required: e6452cdceb2b4eb0720e21f8703c0c140f11d4d844297532924a3bafdd7f9688
+spec_hash: e6452cdceb2b4eb0720e21f8703c0c140f11d4d844297532924a3bafdd7f9688
+spec_da_land: false
+branch: claude/va-r378-symlink-20260920
+branch_ownership: exclusive
+
+start_from_sha: 4c53c76d1955595a5659ab577d9dc1b64f9600ad
+reviewed_sha_required: 76f199e43506e78238cb00128800bc42c9ad12f7
+write_set:
+- scripts/tl_selftest.py
+- RELEASE_MANIFEST.json
+write_set_vi_sao_PHAI_CO_MANIFEST: 'scripts/tl_selftest.py NAM TRONG RELEASE_MANIFEST.json, nen sua
+  noi dung no lam sha256 lech DU file_count khong doi (CLAUDE.md §Quy uoc deploy muc 5). Sua xong
+  phai tai sinh manifest: `release-manifest --out RELEASE_MANIFEST.json --deterministic`.'
+ngoai_le_adr_0044: XIN_VA_DA_DUOC_CAP
+ngoai_le_adr_0044_chi_tiet:
+  ai_nang: ducthangho
+  can_cu: https://github.com/ducthangho/tra-luat/issues/574#issuecomment-5763451614
+  nguyen_van: '"noi len 10"'
+  cach_doc: 'Doc la 10x tran DONG cho dot nay: 300 -> 3000. Tran TEP GIU NGUYEN 3.'
+  tran_dong_cu: 300
+  tran_dong_moi: 3000
+  tran_tep: 3
+  do_that_luc_cap: 'git diff --numstat 714f36e ce9de50 => RELEASE_MANIFEST.json 5/5 +
+    scripts/tl_selftest.py 336/6. Tong dong THEM = 341 (tren tran cu 300, duoi tran moi 3000),
+    tong dong BOT = 11, so TEP = 2 (duoi tran 3). DO LAI o head cuoi, dung chep con so nay.'
+  KHONG_duoc_khai: 'Dung viet vao than PR rang cong ADR-0044 "DAT" ma khong dan ngoai le nay —
+    tien le PLAT-X8: mot con so troi lan thu tu khai sai rang MOT THAM QUYEN DA CO.'
+
+manual_ci_budget: KHONG_GIOI_HAN_CO_DIEU_KIEN
+manual_ci_budget_vi_sao: 'Giu cach doc cua g2: "Khong CI" = KHONG chan vong lap va/review de cho CI
+  giua cac luot; "full CI cho toi khi du dieu kien merge" = MOT luot day du, gom lane
+  windows-latest qua workflow_dispatch, tren head cuoi truoc khi merge. Lane windows vi vay KHONG
+  nam trong prohibited_actions.'
+
+attempts_limit: 10
+same_failure_limit: 10
+limits_vi_sao: 'Giu nguyen cua g2 — chi thi "noi len 10". Slug phan-hang-giet-gia-thieu-doi-chung
+  da lap NAM luot; tran 2/3 cu se chan dung luc packet dang co tien bo do duoc.'
+
+prohibited_actions:
+- self_review
+- self_approve
+- merge
+- land
+- deploy
+- LIVE
+- ruleset mutation
+- admin bypass
+- secret disclosure
+- 'CHAM bat ky duong nao cua write set #579 (ops/lease_publish.py, ops/lease_publish_test.py, CLAUDE.md)
+    — lease cua #579 (r11-g9) dang GIU ca ba.'
+- 'FORCE-PUSH bat ky nhanh nao, hay viet lai lich su nhanh cua packet khac.'
+- 'Day len ma KHONG merge master truoc, khi master da di truoc merge-base gan nhat.'
+- 'doc rc qua pipe (`| tail` roi `$?`)'
+- 'viet dau bo-qua-CI nguyen van trong thong diep commit, ke ca khi trich dan'
+- 'Tu thu hoi lease cua packet KHAC.'
+- 'Xin HA MUC mot finding de dong vong lap — r4 §9 cam dich danh.'
+
+dieu_kien_dung:
+- 'Mot luot cross-review cho 0 finding o CA BA muc P1/P2/P3 => DUNG (r4 §9). Chat hon
+  cross_approved: mot verdict approve van co the kem P3.'
+- 'Vuot 3 TEP (do `git diff --numstat` so MERGE-BASE) => DUNG, xin revision.'
+- 'Vuot 3000 DONG THEM => DUNG, xin revision.'
+- 'Mot hinh dang loi lap lan thu BA => DUNG, hoi "co nen lam viec nay khong".'
+- 'ai-dang-giu cho mot ten LA tren bat ky duong nao cua write set => DUNG, bao chu kho.'
+- 'Gap lan thu BAY o lop RIG-QUYET-MAU-CUA-PHEP-DO => DUNG va hoi.'
+
+khong_duoc_cham:
+- ops/lease_publish.py
+- ops/lease_publish_test.py
+- CLAUDE.md
+- .github/workflows/ci.yml
+- .github/workflows/ops-publish-lease.yml
+- docs/PROTOCOL_DA_PHIEN.md
+- ops/specs/r378-symlink-doi-dac-quyen-r1.md
+- ops/specs/r378-symlink-doi-dac-quyen-r2.md
+- ops/specs/r378-symlink-doi-dac-quyen-r3.md
+- ops/specs/r378-symlink-doi-dac-quyen-r4.md
+- ops/specs/r378-symlink-doi-dac-quyen-r5.md
+- ops/specs/r378-symlink-doi-dac-quyen-r6.md
+- ops/specs/r378-symlink-doi-dac-quyen-r7.md
+- ops/specs/r378-symlink-doi-dac-quyen-r8.md
+- ops/specs/r378-symlink-doi-dac-quyen-r9.md
+- ops/specs/r378-symlink-doi-dac-quyen-r10.md
+- ops/specs/r378-symlink-doi-dac-quyen-r11.md
+- ops/specs/r378-symlink-doi-dac-quyen-r12.md
+- ops/specs/r378-symlink-doi-dac-quyen-r13.md
+- ops/specs/r378-symlink-doi-dac-quyen-r14.md
+- ops/specs/r378-symlink-doi-dac-quyen-r15.md
+- ops/specs/r378-symlink-doi-dac-quyen-r16.md
+- ops/specs/r378-symlink-doi-dac-quyen-r17.md
+- ops/specs/r378-symlink-doi-dac-quyen-r18.md
+- ops/specs/r378-symlink-doi-dac-quyen-r19.md
+- ops/specs/r378-symlink-doi-dac-quyen-r20.md
+- ops/specs/r378-symlink-doi-dac-quyen-r21.md
+- ops/specs/r378-symlink-doi-dac-quyen-r22.md
+- ops/specs/r378-symlink-doi-dac-quyen-r23.md
+- ops/specs/r378-symlink-doi-dac-quyen-r24.md
+- ops/specs/r378-symlink-doi-dac-quyen-r25.md
+- ops/specs/r378-symlink-doi-dac-quyen-r26.md
+- ops/specs/r378-symlink-doi-dac-quyen-r27.md
+- ops/specs/r378-symlink-doi-dac-quyen-r28.md
+- ops/specs/r378-symlink-doi-dac-quyen-r29.md
+- ops/specs/r378-symlink-doi-dac-quyen-r30.md
+- ops/specs/r378-symlink-doi-dac-quyen-r31.md
+- ops/specs/r378-symlink-doi-dac-quyen-r32.md
+- ops/specs/r378-symlink-doi-dac-quyen-r33.md
+- ops/specs/r378-symlink-doi-dac-quyen-r34.md
+- ops/specs/r378-symlink-doi-dac-quyen-r35.md
+- ops/specs/r378-symlink-doi-dac-quyen-r36.md
+- ops/specs/r378-symlink-doi-dac-quyen-r37.md
+- ops/specs/r378-symlink-doi-dac-quyen-r38.md
+- ops/specs/r378-symlink-doi-dac-quyen-r39.md
+- ops/specs/r378-symlink-doi-dac-quyen-r40.md
+- ops/specs/r378-symlink-doi-dac-quyen-r41.md
+- ops/specs/r378-symlink-doi-dac-quyen-r42.md
+- ops/specs/r378-symlink-doi-dac-quyen-r43.md
+khong_duoc_cham_vi_sao: 'ops/lease_publish*.py + CLAUDE.md thuoc write set cua #579, dang bi lease
+  cua #579 GIU. BON MUOI BA dac ta r1..r43 DA DONG BANG, gom ca r43 dang la prompt_path.'
+PHAM_VI_TREN_TL_SELFTEST:
+  duoc_phep: '_c378_ma_tran_phan_hang, _r378_classify va cac helper rieng cua ho r378
+    (_R378SaiKyVong, _r378_run, _r378_mutant, _R378_REGEX), cong _c378_resolve_phai_o_trong_kho.'
+  cam: 'Sau ca r378 con lai khong lien quan ma tran. _t110 — #565 vua sua.
+    _c41_fragment_read_error (~29571) la NGUON MAU, khong phai dich sua.
+    _TRAN_CHAN_DOAN_110 (dong 9114) KHONG duoc doi trong write set: noi tran chan doan de doc TAP
+    o do la viec cua RIG, tren mot ban sao tam. Cham bat ky cho nao khac => DUNG, revision moi.'
+
+hinh_dang_ke_thua:
+  RIG-QUYET-MAU-CUA-PHEP-DO: 6
+  NGOAI-LE-BI-NUOT-LANG: 2
+  LOI-KHAI-RONG-HON-PHEP-DO: 19
+  KHONG-THOAI-LUI-HO-DOT-BIEN-KHI-DOI-CA: 1
+  TU-KIEM-CON-TRO-THIEU-TRUC-DAU-VAO: 31
+  NHAN-NGUON-KHONG-KIEM-CAP-MARKUP: 1
+  nguon: 'luot 6..36 deu bat F2 cung slug; luot 14 them F3 (lop moi, dong o luot 15). Doi generation KHONG reset bo dem.'
+  CHOT_DA_VUOT_NGUONG: 'TU-KIEM-CON-TRO-THIEU-TRUC-DAU-VAO o muc 31 — luot 36: 5 bieu hien (RV/BC tach khoi). Chu kho chon: r43 + luot cuoi (5869282996, §0.43): tu luot 37
+    bieu hien moi cua lop la P4 khi du ba dieu kien. r43: hint + DANH SACH CHO PHEP khoi MOT_KHOI. `con_tro.py` Phu luc AK (v33): tu-kiem 47602/47602; N2 DUNG 33;
+    N3 DUNG 2; AK.1 tap dich 91/91 DUNG_HANG; AI.1 day du r41: DO 732 / SONG 5 (lich su §0.29).'
+KHONG_DUOC_KHAI:
+- 'Khai rang ca r378 da xanh tren Windows khi chua co mot luot chay THAT. Container cua phien la
+  Linux. Loi khai dung: "co che da doi, chua co luot Windows nao xac nhan".'
+- 'Dem mot mutant chet vi JUNCTION_CREATE_FAILED la GIET. Do la tin dung gia (#355/#359); phan hang
+  theo LOP NGOAI LE RIENG + TEN CA, khong theo chuoi thong diep.'
+- 'Khai rang ma tran 79 o dong duoc "moi cai dat sai theo bat ky chieu nao". Cau dung: no bao dam
+  cho MIEN DA LIET KE (11 lop x 7 dang doi so x 3 trang thai oracle), va khong cho gi hon.'
+- 'Doc TAP o do tu mot luot --selftest THUONG. Harness cat chan doan o 400 ky tu. TAP phai doc tu
+  ban sao RIG da noi _TRAN_CHAN_DOAN_110.'
+- 'Ket luan hai dot bien la BO TUONG DUONG bang cach so SO DEM. Phai so TAP.'
+- 'Khai rang lease nay phu ca #579. No CHI phu #574 — xem PHAM_VI_LEASE_NAY.'
+
+
+WINDOWS:
+  chi_thi: '"windows de sau" — HOAN, khong phai THA.'
+  he_qua: 'r8 §7 muc 1, 2, 8 (giu tu r5) van KHONG DO DUOC va van giu cong DO. Dieu kien dung §9
+    khong the dat chi bang cross-review Linux; packet chua xong cho toi khi co luot Windows that.'
+
+reviewed_sha_required_note: '76f199e = head HIEN HANH cua claude/va-r378-symlink-20260920, KHONG doi tu g11: r12 chi doi
+  dac ta va cong cu ngoai kho. Nhanh #588 tut sau master b7973df (14 commit, KHONG cham write set: do bang
+  git diff --name-only 4c53c76 b7973df); khong day #588 vi khong co ban va ma nao.'
+start_from_sha_vi_sao: 'GIU 4c53c76 = merge-base cua 76f199e voi master. Master luc cap g12 la b7973df; head review khong chua no, va 14 commit ay khong cham write set.'
+spec_hash_do_nhu_the_nao: 'Do TU BLOB: `git show d46163d:ops/specs/r378-symlink-doi-dac-quyen-r43.md | sha256sum`.
+  52343 dong. Ban chep vao nhanh lease nay khop tung byte.'
+spec_land_o: 'CHUA LAND — nhanh KHONG co PR claude/spec-r378-nhap, head d46163d (chi thi chu kho 5855148047: khong day nhanh PR #604 de khong ban CI toi khi merge). PR #604 giu head 3632cbb (r27).'
+spec_chep_vao_nhanh_lease: 'Mot BAN SAO r43 lay bang `git show d46163d:<duong>`, KHONG sua mot byte —
+  cong `check` doi prompt_path TON TAI trong cay.'
+thay_the_dac_ta: 'revision 42 (c27b239c0af2b081227feae2195c3ee1bb7b3cfe14613cecf30a7c61ffd20145). r43: cong cu con tro v33
+  (chi tu_kiem doi, bang byte/AST v32 ngoai tu_kiem; hint luot 36 + MOT_KHOI + doi chung bo_code_va_nhan giu rao; §0.43 chinh sach chu kho).'
+thay_the_vi_sao: 'REVISION MOI (r42 -> r43): bo tu kiem trong dac ta dong bang con 5 bieu hien tin dung gia (luot 36) => protocol §3.2 lam
+  lease cu mat hieu luc. g42 CON HAN (toi 2026-09-29T06:00:00Z) nen BIA MO HAI CHIEU BAT BUOC: ve thu nhat da dat vao
+  ops/leases/r378-symlink-doi-dac-quyen-r42-g42-claude.yaml tren ops/cap-lease-574-g42, commit 77c1859, day TRUOC khi `check` g43 chay.'
+
+DOI_SO_VOI_g42:
+  revision: '42 -> 43'
+  spec_hash: 'c27b239c... -> e6452cdc...'
+  han: 'GIU NGUYEN 2026-09-29T06:00:00Z (moc chu kho 5862999491)'
+  reviewed_sha_required: 'KHONG doi (76f199e)'
+  neo_chi_thi: 'pull/588#issuecomment-5867853583 -> issues/574#issuecomment-5869282996'
+  KHONG_DOI: 'write_set · start_from_sha 4c53c76 · assurance_target
+    human_audited · 10/10 · ngoai le ADR-0044 3000/3 · review_class sensitive · reviewer codex · executor session.'
+
+VIEC_CON_LAI_TRONG_WRITE_SET: 'KHONG CO. r43 khong doi ma. Buoc tiep: cross-review luot 37 (codex gpt-6-astra, effort medium, co hint_patches) O PHIEN DIEU PHOI
+  tren 76f199e theo thuoc r43 (Phu luc X.0, AK, AK.1, §0.14-§0.43, §0.13 N1-N3), chinh sach P4 §0.29 va §0.43.'
+
+write_set_do_luc_cap:
+  do_luc: '2026-09-28T13:07:47Z'
+  do_luc_nguon: 'date -u in ra NGAY TRUOC lan chay `ai-dang-giu` cho hai duong write set (sau vong dong bo nhanh).'
+  ket_qua: 'TRUOC khi commit g43: ai-dang-giu hai duong rc=12, dung MOT ly do: bia mo mot chieu g42 -> g43 (ve thu nhat 77c1859 da day, ve thu hai la chinh tep nay); tap ref may chu/cuc bo thieu 0. Do lai SAU commit g43 — ghi trong comment bao cao.'

@@ -11,6 +11,9 @@ từ chối việc, định nghĩa hoàn tất) · §3.2 (schema packet) · §5 
 §12 (điều kiện dừng) · §3.2.1 (spec nguồn và ba mốc Git) · §10.2.1–§10.2.3
 (preflight, provenance và evidence thiếu). Quy trình sửa code của kho: `CLAUDE.md`.
 
+Bảng lớp, cách đọc kết quả vá và phần chưa đo: protocol §8.3; công thức tỷ lệ,
+lớp tái diễn và checkpoint: §12. Gợi ý reviewer và `hint_provenance`: §7/§8.
+
 Tệp này **không tóm tắt** những mục trên. Tóm tắt là bản sao, và bản sao thì trôi lệch — ba lượt
 review liên tiếp đã bắt được đúng lỗi đó ở chính adapter này. Nay có chốt cơ học:
 

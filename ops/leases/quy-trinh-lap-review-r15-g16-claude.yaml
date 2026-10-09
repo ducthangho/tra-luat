@@ -1,0 +1,133 @@
+# LEASE — QUY-TRINH-LAP-REVIEW-VA-DIEU-KIEN-DUNG revision 15 / generation 16
+# GHI HO theo human audit dong bang r15 cua chu kho (PR #611, issuecomment-5810450730). Phien claude
+# KHONG tu cap: moi truong o day chep tu audit ay hoac do duoc; han KHONG co trong chi thi (xem duoi).
+
+schema_version: 2
+event: executor_lease_granted
+
+packet_issue: 523
+mission_issue: 499
+granted_by: ducthangho
+granted_on_instruction: https://github.com/ducthangho/tra-luat/pull/611#issuecomment-5810450730
+granted_on_instruction_nguyen_van: >-
+  'HUMAN AUDIT — #523 r15 / PR #611 — DONG BANG SPEC ... Reviewed commit:
+  1940be5f972af7636c4136e26b265711344f4442 ... spec_sha256:
+  f333152f5f44cdb65a354d4eb9fc44fe69a718a5d9b61e47926309105da93f53 ... 1. DONG BANG r15 tai
+  blob/hash tren. 2. executor: claude · reviewer_provider: openai_codex · assurance_target:
+  human_audited tren exact candidate. 3. Cap lease generation 16 cho r15, pham vi dung write set 1-5
+  cua spec (hien vat review, 0 tep san pham), han: <gio UTC>. 4. Tran review §12: PR thi cong r15 la
+  PR moi, 2 luot codex; vuot phai co nang_tran do toi khai truoc (S19). 5. Chu ky nay KHONG phai audit
+  candidate.'
+granted_on_instruction_da_doc_nguoc: >-
+  Doc lai qua API 2026-09-24T08:57:46Z truoc khi ghi: id=5810450730, user.login=ducthangho,
+  author_association=OWNER, created_at=2026-09-24T08:15:50Z, issue_url .../issues/611, dung MOT dong
+  'Reviewed commit:'. Chin truong neo (head, tree, blob oid, sha256, base, baseline, executor,
+  generation, quyet dinh dong bang) doi chieu voi phep do tai cho: khop 9/9 (readback
+  issuecomment-5810465164). Chi thi tiep theo cua chu kho trong phien: 'Da dang, lam tiep, khong CI
+  Windows' va chon 'Ghi ho, han 90 phut §12'.
+han_khong_co_trong_chi_thi: >-
+  Muc 3 cua audit ghi 'han: <gio UTC>' — placeholder, chua dien. Han duoi day KHONG phai do chu kho
+  dat: lay theo ho so chay §12 (90 phut wall-clock cho mot run executor), tinh tu luc ghi lease.
+  Tien le: gen 11 (r12) cung ghi rieng truong nay; r13/r14 cua codex dung dung profile 90 phut.
+  Het han thi handoff va xin generation moi — KHONG tu gia han.
+recorded_by: claude-session
+recorder_is_dispatcher: false
+
+leased_at_utc: 2026-09-24T08:57:46Z
+lease_expires_at_utc: 2026-09-24T10:27:46Z
+
+packet_id: QUY-TRINH-LAP-REVIEW-VA-DIEU-KIEN-DUNG
+packet_slug: QUY-TRINH-LAP-REVIEW-VA-DIEU-KIEN-DUNG
+packet_id_ben: wp523
+packet_id_ghi_chu: >-
+  Spec r15 khai packet_id = wp523 (ID ben §3.2) va packet_slug rieng. Truong packet_id o day giu
+  slug de KHONG doi khoa so voi gen 10-15 (bo dem/lease cu deu khai slug); ID ben ghi o
+  . Bien nhan cua r15 phai khai CA HAI khoa (spec r15, write set 5).
+revision: 15
+generation: 16
+lease_id: quy-trinh-lap-review-r15-g16-claude
+role: executor
+provider: anthropic_claude
+executor: claude
+reviewer_provider: openai_codex
+environment: cloud
+risk: sensitive
+review_class: sensitive
+assurance_target: human_audited
+effective_review_class: sensitive
+access: read-write
+
+spec_path: ops/specs/QUY-TRINH-LAP-REVIEW-VA-DIEU-KIEN-DUNG-r15.md
+spec_ref: refs/heads/claude/spec-quy-trinh-r15-20260924
+spec_source_oid: 1940be5f972af7636c4136e26b265711344f4442
+spec_sha256: f333152f5f44cdb65a354d4eb9fc44fe69a718a5d9b61e47926309105da93f53
+spec_hash: f333152f5f44cdb65a354d4eb9fc44fe69a718a5d9b61e47926309105da93f53
+spec_hash_formula: SHA256 of UTF-8 LF Git blob bytes at spec_source_oid:spec_path
+spec_hash_do_tu_dau: >-
+  `git show 1940be5f972af7636c4136e26b265711344f4442:ops/specs/QUY-TRINH-LAP-REVIEW-VA-DIEU-KIEN-DUNG-r15.md
+  | sha256sum` => f333152f... (15791 B, blob oid 9f4625dd152cb47be8d8cee69650fd47be8e704c). Do lai
+  ngay truoc khi ghi lease nay; trung voi con so chu kho tu do trong audit.
+prompt_path: ops/specs/QUY-TRINH-LAP-REVIEW-VA-DIEU-KIEN-DUNG-r15.md
+prompt_sha256_required: f333152f5f44cdb65a354d4eb9fc44fe69a718a5d9b61e47926309105da93f53
+
+branch: claude/wp523-r15-g16-m11
+branch_ownership: exclusive
+start_from_sha: ce25a427b87aca9a6352ce4679bb4e7dc56c8235
+immutable_acceptance_baseline: 395bc7b1be6c275d8de697f8d8541bb36a290c9e
+continuation_base: ce25a427b87aca9a6352ce4679bb4e7dc56c8235
+reviewed_sha_required: ce25a427b87aca9a6352ce4679bb4e7dc56c8235
+reviewed_sha_required_nghia: >-
+  Bootstrap: chua co head ung vien luc cap. Verdict va audit candidate PHAI neo head that cua PR thi
+  cong (exact SHA + tree), khong chep lai con so nay.
+
+write_set:
+  - ops/reviews/wp523-r14-review-1-codex-verdict.md
+  - ops/reviews/wp523-r14-review-1-codex-verdict.receipt.yaml
+  - ops/reviews/README.md
+  - ops/reviews/wp523-r15-review-1-codex-verdict.md
+  - ops/reviews/wp523-r15-review-1-codex-verdict.receipt.yaml
+write_set_ghi_chu: >-
+  Dung 5 duong cua spec r15 (write set 1-5). Hai duong dau + README: hien vat M11 cua r14, chi di
+  qua MERGE giu nguyen commit tu codex/wp523-r14-evidence 46b20f1d153bb690d9df6ac6cd84c91ca666b4e2
+  (blob 00d7f65937f29d2d839825e34321dabd5b1136df / 1edff65c520f79343d23364c3ffd2b656e6f12f4 giu
+  nguyen byte). Hai duong sau: verdict + receipt cua luot review r15 (n=1; luot 2 neu co phai khai
+  path truoc khi ghi). KHONG tep san pham; ADR-0044 tran 3 tep/300 dong ap len tep san pham = 0.
+write_set_da_do_truoc_khi_cap: >-
+  Do 2026-09-24T08:57:46Z, ngay truoc khi ghi. ls-remote --heads <-> for-each-ref: comm -23 = 0 VA comm -13 = 0,
+  is-shallow=false => KHONG MU. ai-dang-giu, rc doc truc tiep tung tien trinh: ca ba duong M11
+  rc=0 NGUOI_GIU 0. Hai duong r15-review-1 chua ton tai tren ref nao.
+holder_lich_su: >-
+  gen 15 (quy-trinh-lap-review-r14-g15-codex-evidence, cung write set M11) da HET HAN
+  2026-09-23T10:52:40Z voi M11 dang do — bookkeeping 5793822403. KHONG hoi sinh, KHONG sua. Gen
+  11/12 (r12) het han 21-09; r12 dung tai 816efab (PR #586). Khong bia mo: het han la du.
+
+dieu_kien_dung:
+- 'S1 — can duong dan ngoai write set 1-5. DUNG, xin revision.'
+- 'S2 — xuat hien TEP SAN PHAM trong diff (.claude/**, docs/**, scripts/**, ops/*.py). DUNG.'
+- 'S3 — muon dung docs/PROTOCOL_DA_PHIEN.md hay .claude/hooks/**.'
+- 'S4 — muon va packet_loop.py / doctrine-scan / bien_nhan_v2.py: no #583 / packet #610.'
+- 'S5 — muon sua VERDICT.md, receipt, lease cua luot DA GIAO (ke ca receipt r14 de qua validator).'
+- 'S6 — muon doi dinh nghia P0-P3 hoac doi slug lop cu.'
+- 'S7 — merge lam MAT hang muc luc cu trong README.md hoac mot hien vat cu. DUNG, bao chu kho.'
+- 'S8 — DA RUT tu r7; so de trong co chu dich.'
+- 'S12 phay — phep quet "con sot luat cu" chi khop theo TEN.'
+- 'S13 — va mot lop CHI de lay approve.'
+- 'S14 — ky human_audited tren tom tat, hoac approve khong kem phep do tai hien duoc.'
+- 'S15 — dong bang spec khi tap lop/hien vat chua du (da qua: r15 dong bang 08:15:50Z).'
+- 'S16 — doi immutable_acceptance_baseline khoi 395bc7b1.'
+- 'S17 — land bang squash/rebase lam e83726dc khong con la to tien cua master. Chi merge commit.'
+- 'S18 — bien_nhan_v2 do vi surface khong thuoc hop dong provider => blocked, khong alias, khong sua receipt.'
+- 'S19 — tran §12: PR thi cong moi, 2 luot codex; vuot phai co nang_tran cua chu kho ghi TRUOC.'
+- 'HET HAN lease_expires_at_utc => ngung ghi, handoff §7, xin generation moi.'
+
+cam_tuyet_doi:
+- Khong sua noi dung spec r15 (da dong bang); doi gi la revision moi
+- Khong sua verdict/receipt/lease cu; khong alias codex_desktop -> codex_cli
+- Khong tu review / approve / merge / land; land authority la hien vat rieng §13
+- Khong CI tay, khong Windows (chi thi chu kho 24-09), khong LIVE/deploy
+- Dung khi het han, danh tinh stale, ngoai scope, hoac thieu bang chung
+
+chua_do_duoc:
+- 'Han lease KHONG do chu kho dat (placeholder trong audit) — xem han_khong_co_trong_chi_thi.'
+- 'Danh tinh nguoi ky: author_association=OWNER khong tach chu kho khoi phien agent dung token chu kho (#566). Lease nay do chinh phien executor ghi ho, nen phai doc nhu mot BAN CHIEU cua audit 5810450730, khong hon.'
+- 'Serving model cua reviewer r14 (KHONG_DO_DUOC trong receipt) — r15 tich hop receipt dung nhu no khai.'

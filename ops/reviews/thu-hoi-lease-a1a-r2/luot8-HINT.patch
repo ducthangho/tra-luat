@@ -1,0 +1,43 @@
+NHÃN: chưa chạy trên cây thật — executor tự áp, tự đo, tự chịu trách nhiệm commit
+--- HAU-KIEM-CONNECTOR-652.md
++++ HAU-KIEM-CONNECTOR-652.md
+@@ -42,6 +42,21 @@
+ chạy trên bản trước khi đổi tên (khác đúng dòng docstring đầu): gỡ dòng `if rc!=(1 if dich else 0)` cùng
+ bảy assert tự kiểm ⇒ `SAI  KHOP chet-im-lang-rc2` ⇒ `CO_LECH`.
+ 
++## Phần chưa đóng: hợp đồng thi công vẫn trỏ script cũ — cần revision 3
++
++C5/C6 đã có bản vá chạy được ở hai tệp `_hk.py`; chưa thay được hợp đồng thi công của revision 2.
++SPEC đóng băng §8.2 vẫn bắt chạy `do_q6.py`, tự kiểm 31 ca và `mut_q6.py`. Bản gốc vẫn bỏ sót tên
++có tab; harness gốc vẫn cấp KHOP cho một tiến trình rc2 ở tập đích rỗng. Không sửa hai tệp gốc hoặc
++SPEC revision 2 để che mất bằng chứng lịch sử, cũng không tự coi hậu kiểm này là quyền đổi đặc tả.
++
++Hướng sửa cho tác giả/chủ kho: tạo revision 3 dẫn tên và băm hai script đã sửa, ghi đủ lệnh chạy,
++ca và ma trận tương ứng, cùng tiêu chí kiểm thành công của harness mới. Không bê nguyên tiêu chí
++“có dòng LECH thì dừng”: đối chứng `chet-im-lang-rc2` cố ý in `DUNG LECH` khi chốt hoạt động đúng.
++Tiêu chí mới cần rc0, đủ hàng DUNG/tập ca đã khai, không hàng SAI, và `TAT_CA_KHOP`; các đối chứng
++âm phải được phân biệt với lỗi ma trận. Giữ nguyên mốc Q6, clock, quyết định (b), tuple rỗng và băm
++JSON đã đo. Review/human audit revision mới theo authority hiện hành trước khi dùng làm hợp đồng
++thi công. Đây là hướng khắc phục, chưa phải revision mới hoặc quyết định của chủ kho.
++
+ ## Kết quả thật trên cây mốc: không đổi
+ 
+ `do_q6_hk.py . 072181157a27804e69deb35bb792a88c70ac31e3 2026-09-10T04:55:37Z` ⇒ `rc=0`, output **giống
+@@ -82,10 +97,13 @@
+ | 6 | `66f348ca` | 27-09 00:38:38 | 381 | 0 | `635e9a23` | bare mirror cục bộ |
+ | 7 | `afa0ef1f` | 27-09 00:49:29 | 495 | 0 | `7fc28680` | bare mirror cục bộ |
+ 
+-Bare mirror dựng bằng `clone --bare --no-local` từ kho làm việc, rồi nạp `refs/remotes/origin/*`. Trước mỗi
+-lượt, tập tên nhánh của mirror được so với `git ls-remote --heads origin` (máy chủ thật) và phải lệch **0**,
+-không thì dừng. Vậy **tập ref** đã được đối chiếu với máy chủ, nhưng **danh tính remote** trong checkout
+-reviewer thì không: `remote get-url origin` trả một đường dẫn cục bộ. Đó đúng là điều C4 nói.
++Bare mirror dựng bằng `clone --bare --no-local` từ kho làm việc, rồi nạp `refs/remotes/origin/*`.
++Không có căn cứ khai mọi lượt đều lệch 0: `luot1-EVIDENCE.md` E7 ghi lúc 15:57Z máy chủ có 429 head,
++mirror có 430, thừa nhánh `claude/wp523-r15-g17-a6-BAN-TRUNG-LAP-khong-land`. `luot2-EVIDENCE.md`
++E11 mới ghi đã gỡ nhánh ấy và tập TÊN bằng nhau (435 head); OID vẫn lấy từ cache, không phải readback
++máy chủ. Các lượt sau phải đọc giới hạn riêng của từng evidence; so tên không chứng minh so OID.
++Cả bảy lượt dùng origin cục bộ. Điều kiện lượt 8 được kiểm riêng bằng origin thật và snapshot tên/OID;
++không dùng phép đo lượt 8 để xác nhận hồi tố bootstrap của bảy lượt trước.
+ 
+ ## L8 — lượt codex 8/10
+ 

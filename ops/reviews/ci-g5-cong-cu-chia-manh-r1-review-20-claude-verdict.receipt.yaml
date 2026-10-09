@@ -1,0 +1,143 @@
+# BIEN NHAN GIAO HANG — review LUOT 20 cua packet #668 CI-G5-CONG-CU-CHIA-MANH r1 (PR #696,
+# merge 423b4ba), CUNG HO (claude review, executor claude), tren `0842283`. **`changes_requested`** —
+# 0 P1 / 1 P2 / 0 P3 theo finding.
+#
+# GHI SO HAU KY boi phien bookkeeping (KHONG phai phien executor #668 da sinh verdict). Phien nay KHONG
+# co run.json cua luot. Nhan dung trong tep: (a) DO tu kho/REST luc ghi so · (b) THUAT LAI · KHONG_DO_DUOC.
+
+schema_version: 2
+receipt_id: ci-g5-cong-cu-chia-manh-r1-review-20-claude-20260930-83550411
+kind: review_delivery_receipt
+packet_id: CI-G5-CONG-CU-CHIA-MANH
+packet_slug: CI-G5-CONG-CU-CHIA-MANH
+packet_issue: 668
+target_pull_request: 696
+land_merge_commit: 423b4ba14078701859b9e6ac101a68a3fc4ddef4
+revision: 1
+generation: 3
+lease_id: ci-g5-cong-cu-chia-manh-r1-g3-claude
+lease_gan_theo: >-
+  (a) Doc tu ops/leases/ci-g5-cong-cu-chia-manh-r1-g3-claude.yaml: g3 cap 2026-09-30T03:25:00Z, han rut ve
+  2026-09-30T09:55:00Z. Commit neo verdict d5c9726 luc 2026-09-30T04:44:57Z nam trong cua so g3; thong diep
+  commit neo mang the 'review(#668 r1 g3)'. Commit reviewed_sha 0842283 luc 2026-09-30T00:11:25Z duoc tao TRONG
+  cua so g2 (g2 con han, chua bi thay the); luot review chay theo chi thi cap g3 'chay luot 20 moi tren 0842283'
+  (granted_on_instruction_nguyen_van cua g3, b).
+luot: 20
+role: reviewer
+provider: claude
+executor_provider: claude
+executor_ghi_chu: 'lease g3 (a, doc tep): provider anthropic_claude, surface claude_code, model claude-opus-5-5 — model/effort executor la TU KHAI trong lease'
+cross_provider: false
+review_class: sensitive
+assurance: advisory_review
+assurance_KHONG_dat: same_provider_approved
+assurance_ghi_chu: >-
+  Dong HTML comment dau tep va dong `reviewer:` trong verdict khai `same_provider_approved`; lease g3 dat
+  reviewer_assurance same_provider_approved. Bien nhan nay KHONG nhan muc ay: reviewer va executor CUNG ho
+  Claude, va bang chung phien doc lap (run.json cua launcher) KHONG co trong kho — phien ghi so khong tai kiem
+  duoc. Theo chi thi phien dieu phoi bookkeeping, verdict cung ho khong duoc khai muc doc lap; tien le: cac hang
+  advisory_review cua ops/reviews/README.md. Cong land cua packet la human_audited, khong phai luot nay.
+verdict: changes_requested
+verdict_nguon: '(a) dong `verdict:` CUOI tep (dong 4; tep co 1 dong `verdict:`)'
+verdict_path: ops/reviews/ci-g5-cong-cu-chia-manh-r1-review-20-claude-verdict.md
+verdict_sha256: 83550411e80e92f6cee6c5f7ff1c0683980d7795825134d02a66fc5dbd7cc1eb
+verdict_bytes: 21137
+reviewed_sha: 0842283e86ef8f575b0c4423a340d8ac300198d0
+reviewed_sha_nguon: '(a) doc tu tep verdict: dong `reviewed_sha:` xuat hien 1 lan'
+reviewed_sha_commit_utc: '2026-09-30T00:11:25Z'
+reviewed_sha_to_tien: >-
+  (a) git merge-base --is-ancestor: 0842283 LA to tien cua 423b4ba (merge PR #696) va cua
+  origin/claude/g5-job-gate-optimization-dkevre (3ddda02, head PR #696); KHONG phai to tien cua
+  origin/ops/cap-lease-ci-g5-cong-cu-chia-manh. Head da review KHONG phai head da land: head cuoi duoc approve
+  la cc78b33 (luot 21); head PR 3ddda02 = cc78b33 + merge master.
+evidence_url: https://github.com/ducthangho/tra-luat/blob/d5c97266947e0661da5fd38182d359a35976ca0c/ops/reviews/ci-g5-cong-cu-chia-manh-r1-review-20-claude-verdict.md
+evidence_url_ghi_chu: >-
+  (a) Neo BLOB ghim `d5c9726` — commit DUY NHAT them tep: git log --diff-filter=A tren
+  origin/ops/cap-lease-ci-g5-cong-cu-chia-manh tra dung 1 dong, va tep bi cham o 1 commit tren ref ay (khong sua
+  sau khi them). Blob d5c9726:ops/reviews/ci-g5-cong-cu-chia-manh-r1-review-20-claude-verdict.md bam dung
+  verdict_sha256. Commit ay LA to tien cua HEAD nhanh bookkeeping claude/bookkeeping-668 (bc57bca, merge
+  86b23c0) va KHONG phai to tien cua 423b4ba: tep verdict chua vao master.
+evidence_commit_utc: '2026-09-30T04:44:57Z'
+evidence_ban_chieu: https://github.com/ducthangho/tra-luat/issues/668#issuecomment-5904218732
+evidence_ban_chieu_created_at: '2026-09-30T04:45:14Z'
+evidence_ban_chieu_doi_chieu: >-
+  (a) Doc lai qua REST GET issues/668/comments luc ghi so. Comment 5904218732 la BAN TOM TAT (2787 byte) do
+  phien executor dang, KHONG phai nguyen van tep (21137 byte). Than comment neu dung ten tep, commit `d5c9726`
+  va sha256 (16 hex dau) — khop tep; va neu reviewed_sha `0842283`. Chi so ten tep va chuoi hex nen chuan hoa
+  thuc the HTML cua duong doc khong anh huong phep so. PR #696 (3 comment) khong mang ban chieu verdict nao.
+so_p1: 0
+so_p2: 1
+so_p3: 0
+so_dem_theo: finding
+so_dem_nguon: >-
+  (a) dong `tong_ket:` trong tep va tieu de `### F45 (P2)`; khop so dem ghi trong thong diep commit neo d5c9726.
+findings_ids:
+  - id: F45
+    hang: P2
+    lop: registry-nang-luc-dang-ky-dot-bien-theo-nen
+ghi_chu_luot: >-
+  Luot 20 MOI: luot 20 an (commit 0842283 khai 'va F43/F44 review luot 20') KHONG co verdict trong kho, chu kho
+  cho coi nhu khong co (lease g3 va dong dau tep, b).
+hint_patch_path: ops/reviews/ci-g5-cong-cu-chia-manh-r1-review-20-claude-goi-y-F45.patch
+hint_patch_sha256: d9a2b1979f61ff90b9d5bb0c35ad24a9ede44cb9f315dc4cbbbfd4b035b1f896
+hint_patch_bytes: 3857
+hint_patch_ghi_chu: >-
+  (a) Them cung commit neo d5c9726. Ap patch len ops/cong_cu_test.py cua 0842283 (git apply tren ban sao tam,
+  rc=0) cho ra tep TRUNG TUNG BYTE voi cc78b33 (cmp rc=0); dong index cua patch 24678d5..9edea6b khop blob hai
+  head. Tuc executor ap NGUYEN hint roi mo luot 21.
+model_reviewer_identity:
+  provider: anthropic_claude
+  surface: claude_code
+  surface_nguon: >-
+    (b) THUAT LAI: dong dau tep 'Reviewer claude -p phien moi read-only'; lease g3 ghi reviewer_surface claude_cli
+    — ten ay KHONG co trong hop dong launcher, claude -p la CLI claude nen be mat hop dong la claude_code.
+  model_yeu_cau: claude-opus-5-5
+  model_yeu_cau_nguon: '(b) lease g3 reviewer_model_yeu_cau'
+  model_da_chay_thuat_lai: 'claude-opus-5-5 (+ claude-haiku-4-5 phu tro cua CLI), modelUsage'
+  session_run_id_thuat_lai: 19b5defc3d334d40844000a5124157a5
+  ma_thoat_thuat_lai: 0
+  thoi_luong_giay_thuat_lai: 4651
+  nguon_thuat_lai: >-
+    (b) dong HTML comment dau tep verdict do PHIEN DIEU PHOI (executor #668) chen; comment tom tat #668 neu cung
+    run id va thoi luong. run.json/stdout cua launcher khong o trong kho.
+  KHONG_do_duoc: >-
+    Phien ghi so khong co run.json nen KHONG tai kiem duoc run id, ma thoat, thoi luong, modelUsage,
+    prompt_sha256, hay tinh doc lap cua phien reviewer so voi phien executor. Truong session_run_id co y KHONG
+    dien: gia tri tren chi la loi thuat lai.
+github_submitter_identity:
+  actor: ducthangho
+  actor_nguon: '(a) user.login cua comment 5904218732 doc qua REST luc ghi so'
+  ghi_chu: >-
+    Comment do PHIEN AGENT executor dang bang credential chu kho (authority_caveat cua lease g3);
+    author_association OWNER khong tach chu kho khoi phien agent (#566). ADR-0040: tai khoan tac gia van chuyen
+    verdict khong phai merge authorization.
+anchor:
+  loai: canonical_ancestry
+  cuong_do: thap
+  mo_ta: >-
+    (a) Blob verdict ghim o `d5c9726` tren nhanh ops/cap-lease-ci-g5-cong-cu-chia-manh; to tien cua HEAD nhanh
+    bookkeeping (bc57bca) khi bien nhan duoc ghi; CHUA la to tien cua master (423b4ba). Tag: 41/64 tag tren may
+    chu co object cuc bo va 0 tag trong so ay chua commit neo; 23 tag con lai KHONG DO DUOC (object khong co cuc
+    bo).
+  gioi_han: >-
+    Len trung_binh/cao chi khi PR bookkeeping land bang MERGE commit hoac fast-forward; SQUASH pha quan he to
+    tien. Nhanh ops/** xoa duoc: truoc khi xoa phai co tag luu-tru/* giu commit neo, neu khong SHA thanh khong tra
+    duoc.
+verdict_usage_caveats:
+  - id: NGUON-LAUNCHER-THUAT-LAI
+    muc: P3
+    mo_ta: >-
+      (a) DO DUOC tu kho luc ghi so: verdict_sha256/verdict_bytes; sha256 phan than sau hai dong dau (dong HTML
+      comment + dong trong) = 2ede2be146cb0caf…, khop tien to sha256 VERDICT.md ma comment executor khai;
+      reviewed_sha; blob neo d5c9726; so P dem tu tep. (b) THUAT LAI trong dong HTML comment dau tep: launcher run
+      19b5defc…, ma_thoat=0, 4651s, modelUsage claude-opus-5-5 — run.json/stdout khong o trong kho. (c) Ket qua
+      sandbox la cua luot luc ay.
+  - id: ASSURANCE-HA-VE-ADVISORY-DU-VERDICT-KHAI-SAME-PROVIDER
+    muc: P2
+    mo_ta: >-
+      Verdict (dong dau tep va dong reviewer:) va lease g3 khai same_provider_approved. Bien nhan chi ghi
+      advisory_review: cung ho Claude voi executor, va bang chung phien doc lap khong co trong kho. Dung doc luot
+      nay thanh approval doc lap; finding F45 cua luot nay da duoc va o cc78b33 va luot 21 do lai.
+nguon_co_tham_quyen: >-
+  TEP CO BAM trong kho (verdict_path + verdict_sha256). Comment tren #668 chi la BAN CHIEU TOM TAT: sua duoc, va
+  khong mang nguyen van. Hai ban lech thi tin blob.

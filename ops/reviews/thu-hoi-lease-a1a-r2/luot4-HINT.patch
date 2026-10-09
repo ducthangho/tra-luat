@@ -1,0 +1,102 @@
+NHÃN: chưa chạy trên cây thật — executor tự áp, tự đo, tự chịu trách nhiệm commit
+(docs/PROTOCOL_DA_PHIEN.md §13 patch-as-hint, ràng buộc 1. Nhãn thêm sau khi merge PR #652 theo hậu kiểm connector; sha256 bản reviewer sinh ra: 6acfc8e2874aa46714c2842519a4e65e87f52e8f1507ef6b68f9739d110deb34)
+
+--- SPEC.md
++++ SPEC.md
+@@ -293,28 +293,30 @@
+    C     = giờ commit của MOC (ghim, không phải giờ chạy)
+    ```
+ 
+-   **Script đã sửa theo thuật toán trên** (F11 lượt 2, F12 lượt 3, và rà **toàn bộ** trường mà thuật toán đọc — xem dưới): `do_q6.py` sha256 `040bfd0df9273f810a7fd0f1b4a29b135addde847f621e795c50806f1fd4df9f`.
++   **Script đã sửa theo thuật toán trên** (F11 lượt 2, F12 lượt 3, và rà **toàn bộ** trường mà thuật toán đọc — xem dưới): `do_q6.py` sha256 `957b6432e060eb125a7b3957ce79cbf0538ed6757ac7c3b0980453d36af23280`.
+    Miền lease = mọi blob `.yaml`/`.yml` dưới `ops/leases` (đúng miền của `_quet_lease_toan_kho`); mọi tệp khác
+    (vd `.yaml.nhap`) vào `ngoai_mien`, không đọc. Mỗi tệp trong miền phải: nằm trực tiếp dưới `ops/leases` ·
+    parse được · là mapping · `lease_id` là chuỗi khớp `^[A-Za-z0-9._-]+$` (`LEASE_ID` của cổng) · `lease_id` == tên tệp bỏ đuôi · `thay_the_cho` đúng
+    kiểu, mỗi phần tử khớp `LEASE_ID`, không lặp · `da_bi_thay_the` vắng khoá hoặc là chuỗi khớp `LEASE_ID` (có khoá mang `null` cũng sai) ·
+-   `lease_expires_at_utc` đọc được bằng `_doc_han` của cổng · không trùng ID. Đó là **mọi** trường thuật toán đọc (`lease_id`,
++   `lease_expires_at_utc` đọc được bằng `_doc_han` của cổng (kể cả đổi được sang UTC trong miền biểu diễn; `OverflowError` ⇒ vi phạm, rc3) · không trùng ID. Đó là **mọi** trường thuật toán đọc (`lease_id`,
+    `thay_the_cho`, `da_bi_thay_the`, `lease_expires_at_utc`); bản nháp 3 chỉ phủ phần reviewer đã chỉ, và lượt 3 tìm ra đúng
+    phần còn lại của `lease_id`/`da_bi_thay_the` — bản nháp 4 tự liệt kê hết trường trước khi vá. Vi phạm ⇒ `rc=3`, không ép kiểu, không bỏ qua.
+    In `path`/`blob` của **cả hai** đầu mỗi cặp.
+ 
+-   **Tự kiểm** `python3 -B do_q6.py --tu-kiem` (kho giả, clock = giờ mốc): **24/24 đạt** (bản in
+-   `ops/reviews/thu-hoi-lease-a1a-r2/tu-kiem-q6-2026-09-26.log`). Ca: sạch ⇒ rc0 giữ `(x,y)`; mỗi ca sau ⇒ rc3 — đổi
++   **Tự kiểm** `python3 -B do_q6.py --tu-kiem` (kho giả, clock = giờ mốc): **26/26 đạt** (bản in
++   `scratch/hint-self-check.log` của reviewer lượt 4; bản in cũ 24/24 được giữ riêng). Ca: sạch ⇒ rc0 giữ `(x,y)`; mỗi ca sau ⇒ rc3 — đổi
+    riêng tên một đầu · không phải mapping · thiếu ID · ID sai kiểu · YAML hỏng · trùng ID · `thay_the_cho` sai kiểu ·
+    bia mộ một chiều ở đầu mới · ID ngoài miền (đứng riêng · ở đầu cũ · ở đầu mới) · bia mộ `null` (đầu mới · tệp ngoài
+    cặp) · khoá bia mộ không giá trị · phần tử `thay_the_cho` ngoài miền · phần tử `thay_the_cho` lặp · giá trị bia mộ
+-   ngoài miền · hạn sai định dạng · hạn thiếu múi giờ; đầu mới bị thay tiếp ⇒ chỉ giữ cặp sau; hết hạn ⇒ `()`; tệp nháp
+-   ngoài miền ⇒ không ảnh hưởng; cây sau thêm cặp ⇒ kết quả cây mốc không đổi. Mỗi fixture chỉ vi phạm **đúng một**
+-   chốt (hai ca đầu tiên của lượt 3 thiếu trường hạn nên bị chốt hạn che — đã thêm hạn hợp lệ).
++   ngoài miền · hạn sai định dạng · hạn thiếu múi giờ · hạn vượt miền UTC ở biên trên/dưới; đầu mới bị thay tiếp ⇒ chỉ giữ cặp sau; hết hạn ⇒ `()`; tệp nháp
++   ngoài miền ⇒ không ảnh hưởng; cây sau thêm cặp ⇒ kết quả cây mốc không đổi. Tập ca đổi màu của từng mutant
++   được đo ở bảng dưới; không khẳng định mọi fixture chỉ vi phạm một chốt. Hai ca ID ngoài miền ở đầu cặp
++   có hai chốt miền che nhau; ca thiếu/sai kiểu ID cũng có thể bị chốt tên hoặc hạn che. Các fixture cần cho
++   mutant đơn đã được sửa để không bị chốt hạn che.
+ 
+    **Ma trận đột biến** `python3 -B mut_q6.py <tmp> <kho> do_q6.py` (hiện vật review; bản in
+-   `mut-q6-2026-09-26.log`): **tập ca đích KHAI TRƯỚC** trong script, đòi tập ca `HONG` thực đo **bằng đúng** tập
+-   khai, Traceback ⇒ `LECH`. Kết quả **14/14 khớp** + đối chứng gốc sạch:
++   `scratch/hint-mutations.log` của reviewer lượt 4; bản in cũ 14/14 được giữ riêng): **tập ca đích KHAI TRƯỚC** trong script, đòi tập ca `HONG` thực đo **bằng đúng** tập
++   khai, Traceback ⇒ `LECH`. Kết quả **15/15 khớp** + đối chứng gốc sạch:
+ 
+    | gỡ chốt | ca đích (khai trước = thực đo) |
+    |---|---|
+@@ -331,6 +333,7 @@
+    | lặp phần tử `thay_the_cho` | `thay-phan-tu-lap` |
+    | miền giá trị bia mộ | `bia-gia-tri-ngoai-mien` |
+    | hạn hỏng coi như hết hạn | `han-sai-dinh-dang`, `han-thieu-mui-gio` |
++   | hạn tràn UTC coi như hết hạn | `han-tran-UTC-tren`, `han-tran-UTC-duoi` |
+    | cả ba chốt miền cùng lúc | 5 ca miền, gồm `id-ngoai-mien-cu`/`-moi` (hai ca cặp được **hai** chốt che — miền ID và miền tham chiếu ở đầu kia — nên chỉ đột biến ghép giết được; khai như vậy, không gọi là ca thừa) |
+ 
+    Hai lần đo đầu của ma trận này **LỆCH**, và lệch là thứ đáng ghi: (a) ba mutant chết vì `TypeError`/Traceback
+@@ -339,7 +342,7 @@
+ 
+    Chạy trên kho thật `python3 -B do_q6.py <kho> 072181157a27804e69deb35bb792a88c70ac31e3 2026-09-10T04:55:37Z`
+    (bản ghi `ops/reviews/thu-hoi-lease-a1a-r2/q6-do-2026-09-26.json`, sha256 `1fc99cd9…`, `rc=0`; tạo lúc 23:20–23:22:44Z 26-09
+-   bằng script bản nháp 3, và script bản nháp 4 chạy lại trước 23:45:23Z cho bản in **byte-equal** — `cmp` rc0): miền lease
++   bằng script bản nháp 3; script bản nháp 4 chạy lại trước 23:45:23Z và bản vá reviewer lượt 4 chạy lại trong `scratch/hint-q6.json` đều **byte-equal** — `cmp` rc0): miền lease
+    **89** tệp, **89** hợp lệ, **0** vi phạm theo **mọi** chốt trên (kể cả miền `LEASE_ID`, `null`, hạn, của cả hai đầu mọi cặp);
+    **3** tệp `.yaml.nhap` ngoài miền (bản nháp 2 đếm gộp thành "92 lease" — sai đơn vị, F11 lượt 2);
+    **11** cặp hai chiều, digest biểu diễn sắp xếp `8f372ccd2ceab70901868a58d3380acbd89dce25c7127d4d514bc959270fef48`
+@@ -347,7 +350,7 @@
+    hạn, muộn nhất `2026-09-08T10:17:12Z`. Giờ commit của mốc là `2026-09-10T04:55:37Z` (`11:55:37+07:00`) ⇒ tại C,
+    (b) giữ **0** cặp ⇒ `BIA_MO_LICH_SU = ()`. `trang_thai` kiểm hạn **trước** bia mộ, nên mọi C ≥
+    `2026-09-08T10:17:12Z` cho cùng kết quả — clock không phải một nguồn trôi. Executor chạy lại đúng lệnh trên
+-   **và** `--tu-kiem` **và** `mut_q6.py` lúc thi công, dán cả ba bản in vào thân PR; lệch digest, lệch số cặp, tự kiểm dưới 24/24, hoặc ma trận đột biến có dòng `LECH`
++   **và** `--tu-kiem` **và** `mut_q6.py` lúc thi công, dán cả ba bản in vào thân PR; lệch digest, lệch số cặp, tự kiểm dưới 26/26, hoặc ma trận đột biến có dòng `LECH`
+    ⇒ **DỪNG**, không ghim. Script là hiện vật review (nhánh đặc tả), **không** mở write set A1a.
+ 
+    Hệ quả đã khai, không phải lỗ: cặp thay thế sinh **sau** mốc không vào hằng (r9 Q6 *"Feature tomb không
+--- do_q6.py
++++ do_q6.py
+@@ -90,6 +90,9 @@
+             continue
+         try:
+             han = lp._doc_han(d.get("lease_expires_at_utc"))
++        except OverflowError:
++            vi_pham.append((duong, "lease_expires_at_utc-hong: vuot-mien-UTC"))
++            continue
+         except lp.Chan as e:
+             vi_pham.append((duong, f"lease_expires_at_utc-hong: {e.thong_diep[:80]}"))
+             continue
+@@ -194,6 +197,8 @@
+         "bia-gia-tri-ngoai-mien": ({**sach, "z.yaml": _lease("z", SONG) + "da_bi_thay_the: \"a+b\"\n"}, 3, [["x", "y"]]),
+         "han-sai-dinh-dang": ({**sach, "y.yaml": "lease_id: y\nlease_expires_at_utc: 'mai'\nthay_the_cho: x\n"}, 3, []),
+         "han-thieu-mui-gio": ({**sach, "y.yaml": "lease_id: y\nlease_expires_at_utc: '2099-01-01T00:00:00'\nthay_the_cho: x\n"}, 3, []),
++        "han-tran-UTC-tren": ({**sach, "y.yaml": _lease("y", "9999-12-31T23:59:59-01:00", thay="x")}, 3, []),
++        "han-tran-UTC-duoi": ({**sach, "y.yaml": _lease("y", "0001-01-01T00:00:00+01:00", thay="x")}, 3, []),
+     }
+     hong = 0
+     with tempfile.TemporaryDirectory() as t:
+--- mut_q6.py
++++ mut_q6.py
+@@ -18,6 +18,7 @@
+  "bo-lap-thay":([('len(tt or []) != len(set(tt or []))','False')],{"thay-phan-tu-lap"}),
+  "bo-mien-bia":([('if isinstance(t, str) and not lp.LEASE_ID.fullmatch(t):','if False:')],{"bia-gia-tri-ngoai-mien"}),
+  "han-hong-coi-nhu-het-han":([(B,'            han = datetime.fromisoformat("2000-01-01T00:00:00+00:00")\n')],{"han-sai-dinh-dang","han-thieu-mui-gio"}),
++ "han-tran-coi-nhu-het-han":([('            vi_pham.append((duong, "lease_expires_at_utc-hong: vuot-mien-UTC"))\n            continue\n', '            han = datetime.fromisoformat("2000-01-01T00:00:00+00:00")\n')],{"han-tran-UTC-tren","han-tran-UTC-duoi"}),
+  "bo-mien-ca-ba-cho":([('not lp.LEASE_ID.fullmatch(lid)','False'),('any(not lp.LEASE_ID.fullmatch(x) for x in tt or [])','False'),('if isinstance(t, str) and not lp.LEASE_ID.fullmatch(t):','if False:')],
+     {"id-ngoai-mien-don","id-ngoai-mien-cu","id-ngoai-mien-moi","thay-phan-tu-ngoai-mien","bia-gia-tri-ngoai-mien"}),
+ }

@@ -1,0 +1,3 @@
+# Thu doc WorkflowRun.file.repositoryFileUrl qua POST https://api.github.com/graphql (Bearer GITHUB_PAT). Chi ghi ma + 200 byte dau than + header X-GitHub-*.
+2026-10-01T06:06:09Z 36816901782 WFR_kwLOTNeRjc8AAAAIknVWlg 403 {"message":"GitHub GraphQL is not available from Claude Code sessions; use the REST API (gh api repos/{owner}/{repo}/...). For review threads, auto-merge, and draft/ready-for-review use the CCR routes X-GitHub-headers: {}
+2026-10-01T06:06:09Z 36821075373 WFR_kwLOTNeRjc8AAAAIkrUFrQ 403 {"message":"GitHub GraphQL is not available from Claude Code sessions; use the REST API (gh api repos/{owner}/{repo}/...). For review threads, auto-merge, and draft/ready-for-review use the CCR routes X-GitHub-headers: {}

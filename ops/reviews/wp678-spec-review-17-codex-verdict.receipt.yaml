@@ -1,0 +1,115 @@
+# BIEN NHAN GIAO HANG — review LUOT 17 dac ta wp678 (Issue #678), KHAC HO (Codex gpt-6.1-sol header CLI), review hep Stable Slice theo Q16.
+# Doi tuong review: DAC TA ops/specs/lease-id-ep-kieu-yaml-r17.md tai cd25aba tren nhanh spec claude/spec-wp678-r7 (khong phai ma).
+# GHI SO HAU KY trong bookkeeping land #678 / PR #718 boi subagent bookkeeping cua phien session_01CSM7GNazhN6uGJb4v1TqBT
+# (CUNG phien da dieu phoi luot review nay). Nhan: (a) DO tu kho/REST/tep luc ghi so 2026-10-08 · (b) THUAT LAI · KHONG_DO_DUOC.
+
+schema_version: 2
+receipt_id: wp678-spec-review-17-codex-83d97947
+kind: review_delivery_receipt
+packet_id: wp678
+packet_slug: LEASE-ID-EP-KIEU-YAML
+packet_issue: 678
+mission_issue: 682
+revision_reviewed: 17
+spec_path: ops/specs/lease-id-ep-kieu-yaml-r17.md
+spec_sha256: f39091a1d2be7629a11eb53b7daf3f076ce91f701012f7093108a98e91d140cc
+spec_ghi_chu: >-
+  (a) sha256 cua `git show cd25aba:ops/specs/lease-id-ep-kieu-yaml-r17.md` = spec_sha256 dong 3 tep verdict = so trong
+  comment ban chieu. Dac ta r17 vao master cung PR bookkeeping nay (merge nhanh rut han lease bk678-rut-han-g1 =
+  ops/wp678-r17-g1-lease + 1 commit, merge commit 78b49f4 cuc bo luc ghi so).
+lease_id: khong-co-lease
+lease_ghi_chu: >-
+  Luot review DAC TA truoc khi lease executor duoc cap; lease wp678-r17-g1-claude (leased_at 05:45Z) cap SAU luot nay
+  va neo spec_review vao chinh verdict nay (sha256 83d97947…0337). Q17 (#678 comment 6053124537): luot Codex 17 duoc
+  nhan thay review-opus-max cho dieu kien cap (3) cua r17.
+luot: 17
+role: reviewer
+provider: codex
+executor_provider: claude
+executor_ghi_chu: '(a) commit r17 cd25aba author ''Claude'' tren nhanh spec; phien/subagent soan cu the: KHONG_DO_DUOC luc ghi so (khong doc transcript).'
+cross_provider: true
+assurance: cross_reviewed
+assurance_KHONG_dat: cross_approved
+assurance_ghi_chu: >-
+  Verdict approve, khac ho theo khai bao (codex CLI header gpt-6.1-sol, phien soan Claude). Bien nhan KHONG khai
+  cross_approved: khong run.json/session_run_id (codex exec goi truc tiep, khong qua launcher.py), nen ho model da
+  phuc vu chi co loi CLI tu in — tien le bien nhan Codex luot 1/2 cua #705. Day la review DAC TA, khong phai cong
+  land.
+verdict: approve
+verdict_nguon: '(a) dong 1 tep `verdict: approve`; tep co DUNG 1 dong bat dau bang `verdict:`'
+so_p0: 0
+so_p1: 0
+so_p2: 0
+so_p3: 0
+so_dem_theo: lop
+so_dem_nguon: '(a) dong 8 tep verdict (Ket luan); khop tieu de comment ban chieu (0 P1 · 0 P2 · 0 P3 theo lop)'
+verdict_path: ops/reviews/wp678-spec-review-17-codex-verdict.md
+verdict_sha256: 83d97947b68cb0b2e12715d19b01f671fd4091ffe984b1233b8c54f0ecb30337
+verdict_bytes: 25375
+verdict_ban_goc: 'tep goc cr678-r17/goi/VERDICT.md trong scratchpad cua phien (cp, do lai sha256 tren blob 9e5da35)'
+hint_path: null
+hint_ghi_chu: '(a) Goi luot nay KHONG co HINT.patch; verdict ghi ''Khong co lop mo nen khong sinh HINT.patch''.'
+reviewed_sha: cd25aba0fab9831dd7e87ba378b7429fa0602166
+reviewed_sha_nguon: '(a) dong 2 tep verdict; `git cat-file -t` = commit; to tien cua HEAD nhanh bookkeeping qua merge 78b49f4'
+reviewed_sha_trang_thai: 'tren nhanh claude/spec-wp678-r7 va ops/wp678-r17-g1-lease (da day); vao master khi PR bookkeeping nay land bang merge commit'
+evidence_url: https://github.com/ducthangho/tra-luat/blob/9e5da35b0cb96d2d3f3ddcc01ac5fc434c7f8ed1/ops/reviews/wp678-spec-review-17-codex-verdict.md
+evidence_url_ghi_chu: >-
+  Neo BLOB ghim commit 9e5da35 cua nhanh bookkeeping claude/bookkeeping-678-land, commit CHI mang ban sao verdict;
+  bien nhan di o commit sau, nen mo neo la to tien cua HEAD nhanh. Luc ghi so commit ay CHUA day; link chi song sau
+  khi phien chinh push nhanh nguyen ven (khong rebase/squash).
+evidence_ban_chieu: https://github.com/ducthangho/tra-luat/issues/678#issuecomment-6052502411
+evidence_ban_chieu_created_at: '2026-10-08T04:49:25Z'
+evidence_ban_chieu_doi_chieu: >-
+  (a) Doc lai qua REST GET repos/ducthangho/tra-luat/issues/678/comments (gh api, 2026-10-08 ~15:30Z,
+  readback-comments-678-p1.json trong ops/land/pr718-wp678-provenance/): user ducthangho, app claude,
+  author_association OWNER, than 2093 byte, sha256 a54d957e587d97716a921e022e77cfd895d8111221b88fcc190078851ed18d49.
+  verdict_sha256, spec_sha256 co mat NGUYEN 64 hex trong than. Comment la BAN TOM TAT, khong phai nguyen van tep.
+
+model_reviewer_identity:
+  provider: openai_codex
+  surface: codex_cli
+  transport: machine
+  surface_nguon: >-
+    (a) log NGOAI kho cr678-r17/codex-run.log (1355389 byte, sha256
+    0b2cbe40fb48911f599e0ce79661fb9649387bd2213888fa00347b62de3bd24f) mo bang header 'OpenAI Codex v0.160.1' — codex
+    exec.
+  header_cli: 'model: gpt-6.1-sol · provider: openai · approval: never · sandbox: workspace-write · reasoning effort: xhigh · session id: 01a119a2-f9db-7341-9974-c6c0ac8851fd (loi CLI tu in)'
+  codex_session_id: 01a119a2-f9db-7341-9974-c6c0ac8851fd
+  prompt_sha256: bee7b436212c1d9d01fe41f9b810beb7767362aa2834d63e518d83e22debbaed
+  prompt_nguon: '(a) sha256 cr678-r17/PROMPT.md = bam phien gui ghi trong dong `user` cua log'
+  model_yeu_cau: 'model mac dinh codex CLI, reasoning xhigh'
+  model_da_chay: KHONG_DO_DUOC
+  KHONG_do_duoc: >-
+    Khong co session_run_id/run.json: luot goi codex exec truc tiep, khong qua launcher.py. Model thuc phuc vu, thoi
+    luong, ma thoat va effort thuc KHONG tai kiem duoc tu kho; log, prompt va goi nam o scratchpad phien, KHONG commit.
+
+github_submitter_identity:
+  actor: ducthangho
+  actor_nguon: '(a) user.login cua comment 6052502411 doc qua REST luc ghi so'
+  ghi_chu: >-
+    Comment do PHIEN AGENT dang bang credential chu kho (performed_via_github_app.slug claude); ADR-0040: khong cap tham
+    quyen, chi ghi AI VAN CHUYEN.
+
+anchor:
+  loai: canonical_ancestry
+  cuong_do: thap
+  mo_ta: >-
+    Blob verdict ghim o commit ban sao 9e5da35 cua nhanh claude/bookkeeping-678-land; to tien cua HEAD nhanh ay; CHUA la
+    to tien cua master luc ghi so (va CHUA day).
+  gioi_han: >-
+    Len trung_binh chi khi nhanh duoc push nguyen ven va PR bookkeeping land bang MERGE commit hoac fast-forward;
+    SQUASH/rebase pha quan he to tien.
+
+verdict_usage_caveats:
+  - id: KHONG-CO-run.json-LOG-CODEX-NGOAI-KHO
+    muc: P3
+    mo_ta: >-
+      Luot codex goi truc tiep (khong launcher.py, khong run.json). Header CLI la loi tu in, khong phai do may model da
+      phuc vu.
+  - id: REVIEW-HEP-THEO-Q16
+    muc: P2
+    mo_ta: >-
+      Review hep Stable Slice theo Q16 (#678 comment 6051538693): lop tuong-tac-677-kiem-ke-t70-chua-neu va F16-1/F16-2 la
+      CHUYEN GIAO sang §11 r17, KHONG phai da va. Dung doc approve nay thanh 'dac ta da sach toan bo'.
+nguon_co_tham_quyen: >-
+  TEP CO BAM trong kho (verdict_path + verdict_sha256). Comment tren #678 chi la BAN CHIEU. Hai ban lech thi tin blob.

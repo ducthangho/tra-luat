@@ -1,0 +1,175 @@
+# Lease EXECUTOR — packet #677, DOT-BIEN-L-BIEN-CONG-KHAI, generation 6.
+#
+# NGUỒN SỰ THẬT LÀ TỆP NÀY. Comment trên "#677" chỉ là bản chiếu do
+# `.github/workflows/ops-publish-lease.yml` đăng khi tệp này được push lên nhánh `ops/**`.
+#
+# NHỚ ĐÓNG NHÁY mọi giá trị chứa `#`.
+
+schema_version: 2
+event: executor_lease_granted
+packet_issue: 677
+packet_id: DOT-BIEN-L-BIEN-CONG-KHAI
+packet_id_ben: wp677
+generation: 6
+revision: 8
+lease_id: dot-bien-l-bien-cong-khai-exec-6-claude-20260930
+thay_the_cho: []
+thay_the_cho_ghi_chu: >-
+  g5 (dot-bien-l-bien-cong-khai-exec-5-claude-20260929) DA HET HAN 2026-09-30T10:48:00Z nen write-set exclusion
+  da nha; KHONG viet bia mo vao lease da chet (CLAUDE.md: bia mo chi cho lease con song, viet vao lease chet =
+  rc=8). ai-dang-giu ops/lease_publish_test.py do 15:25:57Z tren clone moi (458/458 ref, comm -23 = 0): NGUOI_GIU 0.
+generation_vi_sao: >-
+  Chu kho giao them MOT luot va sau khi g5 het han: va = Opus 5.5 effort max, review = Sonnet 5.5 (thay codex/Opus
+  cua g5). Doi tuong: hai P3 F-E/F-F cua advisory_review tren 211c6405 (pull/689#issuecomment-5909766001) — kiem
+  tren head 8e630c0 truoc khi va — cung cac P4 con mo luot 5-6.
+spec: ops/specs/dot-bien-l-bien-cong-khai-r8.md
+spec_source_commit: f860ab7eacb6bf0cc1735fc963f73bc6fa7549ac
+spec_source_ref: 'claude/cap-lease-677-g5; CHUA land master (r7 da land 44620e8)'
+spec_hash: 4dfbfd69e161d55aa28f2685741cdcf11fcd5171438081e9eb63815c69bb4094
+spec_hash_note: >-
+  sha256 cua CHINH tep spec tai spec_source_commit, do tren blob cua ref DA DAY.
+  Quyet dinh Q1-Q15 cua chu kho (phien 2026-09-29, hai vong "Dong y ca 7/ca 4 khuyen nghi").
+
+role: executor
+provider: anthropic_claude
+executor: claude
+surface: claude_code
+model: claude-opus-5-5
+model_ghi_chu: 'Chu kho 30-09 ~15:20Z: "opus 5.5 max". Subagent Opus cua phien session_01RU4YGG...; model thuc chay KHONG DO DUOC tu ngoai.'
+effort_ghi_chu: 'max khai trong dinh nghia agent; harness co ap effort hay khong => KHONG DO DUOC.'
+environment: cloud
+access: read-write
+risk: sensitive
+review_class: sensitive
+effective_review_class: sensitive
+review_class_note: >-
+  Bo test cua cong doc lease (ops/lease_publish_test.py); _tinh_lop_tu_write_set tra sensitive (spec §4).
+assurance_target: human_audited
+reviewer_provider: anthropic_claude
+reviewer_surface: claude_code_subagent
+reviewer_model_yeu_cau: claude-sonnet-5-5
+reviewer_ghi_chu: >-
+  Chu kho 30-09: review bang Sonnet 5.5. Cung ho Claude voi executor => nhan assurance advisory_review, KHONG phai
+  cross-review; packet sensitive van can human_audited cua chu kho truoc khi land. Khong tu merge, khong tu approve.
+
+write_set:
+  - ops/lease_publish_test.py
+write_set_hash: 94d43dbfd09ef93bc4e24aeaae23e66641567dcfd65e8b88aa5f67422e5a25fd
+write_set_hash_cach_tinh: 'sha256 cua cac duong dan DA SAP XEP, noi bang LF, co LF cuoi, utf-8.'
+write_set_note: >-
+  Mot duong dan (spec §5). Trong tep: CHI THEM helper _chay_buoc_dang_that va ca bien moi (M1-M5); KHONG sua
+  _chay_buoc_dang, t51-t68 (A8) hay bat ky ca cu nao. Spec KHONG nam trong write set: doc tu spec_source_commit.
+
+KHONG_duoc_phep:
+  - 'Sua ops/lease_publish.py, .github/workflows/**, spec da dong bang, hay bat ky tep nao ngoai write set.'
+  - 'Sua _chay_buoc_dang hoac ca cu (A8).'
+  - 'Merge PR cua packet nay; land chi bang merge commit, viec bam nut thuoc chu kho.'
+  - 'Chay CI/full CI tren PR lam bang chung; CI Windows chi khi chu kho cho phep ro.'
+  - 'Force-push. Day khi nhanh tut sau origin/master.'
+  - 'Cap generation lease moi khi mot luot review dang chay (bai hoc head drift #579).'
+  - 'Viet chuoi bo-qua-CI nguyen van trong commit message.'
+  - 'Dot bien tren tep that — chi tren BAN SAO TAM.'
+
+branch: claude/dot-bien-l-bien-cong-khai-20260929
+branch_ownership: exclusive
+target_branch_neu_land: master
+
+base_sha: 89fc4fac8cea65979cc2483043dc8cd07a6e8518
+start_from_sha: 89fc4fac8cea65979cc2483043dc8cd07a6e8518
+immutable_acceptance_baseline: 89fc4fac8cea65979cc2483043dc8cd07a6e8518
+reviewed_sha_required: 8e630c0a9b21294f14c6d44b077d7abaefd74ae0
+reviewed_sha_required_nghia: 'Head THAT cua PR #689 luc cap g6 (CI xanh 16/16). Luot Sonnet cham head moi sau va.'
+
+granted_by: ducthangho
+granted_on_instruction: 'Loi chu kho trong phien Claude Code session_01RU4YGGdYMx94uVcywPjo4F, 2026-09-30 ~15:20Z (chua co comment neo)'
+granted_on_instruction_nguyen_van: >-
+  "Cho them 1 luot va (opus 5.5 max) va review di (sonnet 5.5)" — tra loi bao cao cua phien ve hai P3 F-E/F-F va
+  lease g5 het han.
+authority_caveat: >-
+  Comment neo do phien agent dang bang tai khoan chu kho, chep loi chu kho trong phien — yeu hon comment chu kho
+  tu viet (#566). author_association=OWNER khong tach chu kho khoi phien agent dung token chu kho.
+recorded_by: claude-session
+recorder_is_dispatcher: false
+recorder_note: >-
+  Phien agent session_01RU4YGG... GO HO. granted_by la chu kho va chi chu kho.
+authority_basis: '§2 — start/pause/resume/reroute/override/authorize thuoc chu kho'
+
+leased_at_utc: '2026-09-30T15:27:00Z'
+lease_expires_at_utc: '2026-10-01T01:10:00Z'
+han_ghi_chu: >-
+  Goc 2026-10-01T03:27:00Z. RUT NGAN ve 2026-10-01T01:10:00Z — xem thu_hoi_bang_rut_han.
+han_vi_sao: 'Mot luot va + mot luot review + day mot lan: 12h. Phien khong tu noi han.'
+run_minutes: 720
+
+preconditions_measured_at_utc: '2026-09-30T15:25:57Z'
+chong_lan_write_set:
+  do_bang: >-
+    clone moi, fetch '+refs/heads/*'; so TAP TEN ls-remote --heads (458) voi for-each-ref refs/remotes/origin (458): comm -23 = 0.
+  ket_qua: 'ops/lease_publish_test.py NGUOI_GIU 0.'
+  phien_song_song: >-
+    Mot phien khac dang lam #689 tren 211c6405 (cuc bo, cha e55c5e2, spec r7) KHONG co lease cong bo. g6 giao cho
+    phien nay; phien kia khong co quyen ghi write set.
+CHONG_LAN_DA_BIET:
+  lease_kia: lease-publish-windows-do-r1-g1-claude
+  packet_kia: '#687 LEASE-PUBLISH-WINDOWS-DO (spec ops/specs/lease-publish-windows-do-r1.md tren origin/claude/lease-publish-windows-do)'
+  duong_chung: ops/lease_publish_test.py
+  trang_thai_luc_cap_g3_g4: 'Lease #687 het han 11:45:00Z; chong lan TEP da het. Chong lan NGU NGHIA (duoi) van con neu ma #687 land sau.'
+  can_cu: >-
+    Chu kho ra lenh cap SAU KHI duoc bao chong lan (granted_on_instruction). Day la GHI DE CO CHU DICH len
+    write-set exclusion, khai tuong minh theo tien le #578 — khong phai khe bi lot.
+  chong_lan_ngu_nghia:
+    - >-
+      #687 A1 dat SO DANG KY tinh: main() chi chap nhan BoQuaNen tu dung 7 ca t51 t59 t60 t62 t63 t66 t68. Ca moi cua
+      #677 (helper _chay_buoc_dang_that co guard nem BoQuaNen) nam NGOAI so ay. Neu #687 land TRUOC: #677 phai them
+      ca moi vao so cua #687 khi merge master (van trong write set). Neu #677 land TRUOC: #687 phai dang ky ca cua #677.
+    - >-
+      #687 dat ten ca t193, t194. #677 KHONG dung hai ten ay; dung ten tiep theo con trong tai luc thi hanh (vd t195, t196)
+      va kiem lai sau moi lan merge master.
+    - '#687 L2 sua t125/t160; #677 KHONG cham hai ca ay.'
+  giam_rui_ro:
+    - '#677 chi THEM helper va ca moi o cuoi vung ca; khong sua ca cu ngoai t70 (M6).'
+    - 'Ben land SAU merge master vao nhanh minh, giai xung dot, chay lai toan suite, roi moi xin merge.'
+    - 'Truoc moi push: git fetch; khong push khi nhanh tut sau origin/master.'
+master_sha_at_grant: fc852fff7da37f1669569572b79571446e61c294
+master_sha_at_grant_ghi_chu: 'base/start_from giu 89fc4fa — nhanh thi cong cua executor re tu do; PR #689 phai merge master truoc khi land.'
+
+ci_budget:
+  gate_tu_dong: '1 luot pull_request khi mo PR luc san sang merge'
+  phep_do_duoc_cap: '0 / 0 / 0'
+  het: 'DUNG truoc moi push/chay lai ke tiep, cho quyet dinh cua chu kho'
+
+dieu_kien_dung:
+  - 'S1 — cham duong ngoai write set. DUNG.'
+  - 'S2 — Q18 mo tran codex cho PR #689; van DUNG va hoi neu cung mot hinh dang finding lap lai 3 luot lien (CLAUDE.md dem hinh dang).'
+  - 'S3 — het han lease => ngung ghi, handoff §7.'
+  - 'S5 — g6 chi cho MOT luot va + MOT luot review; con P1/P2/P3 sau review => DUNG, hoi chu kho.'
+  - 'S4 — vuot tran 600 dong them (A7(2), spec r8 Q19). DUNG va hoi.'
+
+gate_bat_buoc:
+  - 'Spec A1-A11 (dot bien tren BAN SAO TAM, ghi nguyen dong DO cho tung dot bien — A5).'
+  - 'ruff F delta so master = 0; doctrine-scan rc 0; git diff --check rc 0.'
+  - 'Doc lai (readback) tep sau moi lan ghi.'
+
+chua_do_duoc:
+  - 'Danh tinh nguoi ky: #566.'
+  - 'Model/effort thuc te cua phien executor va reviewer.'
+  - 'Windows (chu kho chua cho CI Windows; spec Q6).'
+lease_sua_lan_cuoi: '2026-10-01T01:02Z'
+lease_sua_ghi_chu: >-
+  Lan 1: rut ngan lease_expires_at_utc (thu_hoi_bang_rut_han). Khong doi write set, spec, branch.
+thu_hoi_bang_rut_han:
+  han_goc_utc: '2026-10-01T03:27:00Z'
+  han_moi_utc: '2026-10-01T01:10:00Z'
+  chi_thi: >-
+    Chu kho trong phien Claude Code session_01RU4YGGdYMx94uVcywPjo4F 2026-10-01 ~01:00Z: "Hãy land và bookeeping.
+    Cấp leaase nếu cần." — sau khi tu merge PR #689.
+  ly_do: >-
+    Packet #677 da MERGE: PR #689 merge 20ec8d5d0e86cb7dc01f202c7596407a957e5961 (2026-10-01T00:55Z), head
+    0614f7f = head duoc human_audited (pull/689#issuecomment-5922154333, VERDICT approve).
+  vi_sao_khong_dung_so: >-
+    Theo tien le #651/#660/#661/#668 (86b23c0): so ops/thu-hoi/ chua kich hoat; rut han dung co che DA CAI. Lease
+    nay nam tren nhanh claude/** nen khong co workflow dang lease nao doc no; han moi van dat vai phut sau luc push.
+  nguoi_rut: 'land operator session_01RU4YGGdYMx94uVcywPjo4F (cung phien da dieu phoi executor; khong co phien executor rieng)'
+  gioi_han: >-
+    Ref mang lease nay: nhanh claude/cap-lease-677-g6. Nghiem thu: ai-dang-giu ops/lease_publish_test.py khong con
+    dot-bien-l-bien-cong-khai-exec-6-claude-20260930 trong NGUOI_GIU sau 01:10Z khi quet du ref.

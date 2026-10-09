@@ -148,9 +148,9 @@ _TRANSPORT_CONTRACTS = (
     ("openai_api", ("llm",), "llm_cli", "machine"),
 )
 
-# Provider KHÔNG đi qua một CLI của launcher, nên `_TRANSPORT_CONTRACTS` không bao giờ
-# chứa chúng — nhưng chúng vẫn là provider hợp lệ của kho, và bộ kiểm biên nhận
-# (`ops/bien_nhan_v2.py`) cần một nguồn CÓ CẤU TRÚC để đọc.
+# Bề mặt KHÔNG đi qua một CLI của launcher nằm ngoài `_TRANSPORT_CONTRACTS`.
+# Một provider có thể có cả hàng CLI và ngoài CLI với hai bề mặt khác nhau (Codex).
+# Bộ kiểm biên nhận (`ops/bien_nhan_v2.py`) cần nguồn CÓ CẤU TRÚC cho các bề mặt này.
 #
 # VÌ SAO Ở ĐÂY, và vì sao là BẢNG chứ không phải văn xuôi: cross-review PR #455 đo được
 # hai lần liên tiếp rằng một danh sách CHO PHÉP rút từ VĂN BẢN TỰ DO thì nới được bằng
@@ -171,6 +171,12 @@ _PROVIDER_NGOAI_CLI = (
     # và Antigravity là hàng DUY NHẤT còn lệch.
     ("google_antigravity", "antigravity", "machine/local"),
     ("openai_chatgpt", "chatgpt_web", "human_mediated"),
+    # WP610: Desktop khai đúng bề mặt; không là CLI hoặc bằng chứng model/assurance.
+    ("openai_codex", "codex_desktop", "machine"),
+    # wp461 r3: Codex chạy như DỊCH VỤ — GitHub App `chatgpt-codex-connector[bot]` (review trên
+    # PR) và Codex cloud nói chung. Không CLI, không Desktop; không chứng minh model/effort hay
+    # tính độc lập của phiên. Tên máy chốt ở Mission #470 (Q1); định nghĩa ở spec r3 §2.
+    ("openai_codex", "codex_service", "machine"),
     # Human Auditor — bộ ba chép từ bảng provider chuyển tiếp
     # (`ops/KE_HOACH_THI_CONG_DA_PROVIDER.md` §2, hàng "Human Auditor"). Cross-review PR #455
     # lượt 7 (`R7-02`) đo được: `human` từng bị bộ kiểm biên nhận chép tay vào tập "KHÔNG hợp

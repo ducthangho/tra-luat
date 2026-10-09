@@ -1,9 +1,21 @@
-# Protocol đa phiên Claude–Codex
+# Protocol đa phiên đa provider
+
+## Google Antigravity provider identity
+
+`google_antigravity` là provider riêng cho Executor hoặc Reviewer khi Packet và lease
+cấp đúng vai. Mỗi lượt phải ghi `provider`, họ model thực sự phục vụ lượt chạy
+(`model_family`: `claude`, `openai` hoặc `gemini`),
+`execution_surface: antigravity` và `transport: machine/local` theo hợp đồng
+provider; không suy họ model từ tên ứng dụng. Lượt Antigravity thiếu một trong
+ba thuộc tính sau provider phải dừng. Claude Code và Codex giữ identity cũ tương
+ứng họ `claude` và `openai`. Review cùng provider hoặc cùng họ model không được
+ghi `cross_approved`; chỉ review độc lập trên exact SHA mới có thể được xét assurance.
+Danh tính này không cấp lease: người cấp vẫn phải qua allowlist và authority bền.
 
 - **Trạng thái:** Thiết kế đã chốt qua grilling ngày 2026-08-03
 - **Protocol version:** 1
 - **Governance baseline:** MCR-54-02, chấp thuận ngày 2026-08-08
-- **Phạm vi:** Claude Code, Codex, Windows local, cloud worker và Android
+- **Phạm vi:** Claude Code, Codex, Google Antigravity, Windows local, cloud worker và Android
 - **Nguồn quyết định:** §20 là bảng định tuyến ADR đang hiệu lực — MỘT dòng cho MỖI ADR, máy canh bằng `packet_loop.py adr-song`. Dòng cũ ghi một PHẠM VI (`ADR-0017 đến ADR-0035`) và phạm vi ấy đã chết: 45 ADR tồn tại, 10 ADR quản trị nằm ngoài nó.
 - **Kế hoạch thi công:** `docs/KE_HOACH_TRIEN_KHAI_PROTOCOL_DA_PHIEN.md`
 
@@ -11,7 +23,7 @@
 
 Hệ thống cho phép nhiều agent run tự xử lý một mission đến `awaiting_land` mà không cần người dùng gõ lại prompt;
 người có thẩm quyền có thể apply exact head SHA và hoàn tất mission từ local, web hoặc Android. GitHub Issue/PR
-là control plane và nguồn trạng thái bền; Claude, Codex, ứng dụng desktop/mobile và local controller chỉ là các
+là control plane và nguồn trạng thái bền; Claude, Codex, Antigravity, ứng dụng desktop/mobile và local controller chỉ là các
 giao diện/executor có thể thay thế.
 
 Các bất biến không được hạ chuẩn:
@@ -138,12 +150,16 @@ write_set:
   - type: exact | prefix
     path: <repo-relative-path>
 depends_on: []
-executor: claude | codex
+executor: claude | codex | google_antigravity
 environment: cloud | local
 risk: normal | sensitive
 review_class: routine | systemic | sensitive
 acceptance_criteria: []
 ```
+
+`executor` trong Packet là provider được giao, không phải phép suy họ model. Khi giao
+`google_antigravity`, lease và evidence lượt chạy phải khai riêng họ model, surface và
+transport thực tế theo hợp đồng provider ở đầu tài liệu.
 
 Khi vào `ready`, spec được đóng băng bằng `spec_hash`. Đổi objective, acceptance, write set, dependency, executor
 hoặc environment tạo revision mới và làm lease cũ mất hiệu lực. Dispatcher bổ sung các trường phái sinh, không
@@ -232,7 +248,13 @@ Lease gồm:
 
 ```yaml
 packet_id: wp<issue>
-executor: claude | codex
+role: executor
+executor: claude | codex | google_antigravity
+provider: claude | codex | google_antigravity  # phải khớp executor của lease Executor
+model_family: claude | openai | gemini          # AG khai họ model thực chạy
+execution_surface: <actual-surface>             # AG: antigravity
+transport: <actual-transport>                   # AG: machine/local
+reviewer: claude | codex | google_antigravity | human | null  # nếu đã được định tuyến
 environment: cloud | local
 branch: agent/wp<issue>-g<generation>-<executor>
 write_set_hash: <sha256>
@@ -240,6 +262,14 @@ generation: <integer>
 heartbeat_at: <timestamp>
 lease_until: <timestamp>
 ```
+
+Lease `role: reviewer` khai `provider: claude | codex | google_antigravity | human`
+và `executor` là provider đã viết code. Reviewer AG khai `model_family`,
+`execution_surface: antigravity`, `transport: machine/local` của chính lượt review;
+Reviewer human chỉ dùng với `human_audited` hoặc fallback được khai tường minh,
+không mang họ model. Lease Executor dự kiến Reviewer AG còn khai
+`reviewer_model_family`, `reviewer_execution_surface`, `reviewer_transport` khi
+đã định tuyến. `cross_approved` nghiêm ngặt cần cả hai actor và họ model xác định.
 
 Sau 30 phút không có tiến triển, dispatcher thu hồi lease, tăng generation rồi mới reroute. Worker cũ sống lại
 không thể heartbeat, push hợp lệ hoặc handoff. Branch/PR cũ chuyển `stale`; generation mới được đọc diff cũ nhưng
@@ -400,7 +430,10 @@ schema_version: 1
 packet_id: wp<issue>
 generation: <integer>
 spec_hash: <sha256>
-provider: claude | codex
+provider: claude | codex | google_antigravity
+model_family: claude | openai | gemini
+execution_surface: <actual-surface>  # AG: antigravity
+transport: <actual-transport>        # AG: machine/local
 role: executor
 session_id: <stable-run-id>
 base_sha: <git-oid>
@@ -421,7 +454,8 @@ test_selection:
 remaining_work: []
 hint_provenance:          # tuỳ chọn — chỉ khai khi có hunk bắt nguồn từ hint của reviewer (§8)
   - finding_id: <slug>
-    reviewer: claude | codex | human
+    reviewer: claude | codex | google_antigravity | human
+    # Identity thực của hint nằm ở review receipt; AG ghi family/surface/transport tại đó.
     paths: []             # hunk/tệp bắt nguồn từ hint
     da_tai_dan_xuat: true # executor đã re-derive + tự đo, không chép mù
 next_role: reviewer | executor | land_operator | human | null
@@ -435,7 +469,8 @@ successors:
     objective: <text>
     write_set: []
     depends_on: []
-    executor: claude | codex
+    executor: claude | codex | google_antigravity
+    # Runtime family/surface/transport được neo trong lease và handoff của successor.
     environment: cloud | local
     acceptance_criteria: []
 ```
@@ -468,7 +503,7 @@ chỉ được đọc/phân tích/soạn nháp ngoài cây;
 không commit/push vào nhánh packet.
 
 Khi dispatcher/reviewer automation chưa được promote, mỗi phiên còn phải điền `next_role`,
-`manual_next_action` và `copyable_prompt` đủ để người giữ tạo một phiên Claude/Codex mới. Prompt phải neo
+`manual_next_action` và `copyable_prompt` đủ để người giữ tạo một phiên Claude/Codex/Antigravity mới. Prompt phải neo
 mission/packet/revision/generation/exact SHA, vai trò, phạm vi, gate và stop conditions; nó là tiện ích bootstrap,
 không phải lease, approval hay authority. Mẫu chuẩn ở `docs/prompts/MANUAL_SUCCESSOR_HANDOFF_D0.md`.
 
@@ -478,8 +513,11 @@ Reviewer xuất evidence độc lập:
 schema_version: 1
 packet_id: wp<issue>
 generation: <integer>
-provider: claude | codex | human
+provider: claude | codex | google_antigravity | human
 role: reviewer
+model_family: claude | openai | gemini | null  # human: null
+execution_surface: <actual-surface>             # AG: antigravity
+transport: <actual-transport>                   # AG: machine/local
 session_id: <stable-run-id>
 model_reviewer_identity: <provider/model/session attestation>
 github_submitter_identity: <github actor or null when not published>
@@ -526,6 +564,9 @@ mission_id: gh-<issue>
 generation: <land-attempt-integer>
 provider: claude | codex | human | github-actions
 role: land_operator
+model_family: claude | openai | null  # human/github-actions: null
+execution_surface: <actual-surface>
+transport: <actual-transport>
 session_id: <stable-run-id>
 input_packet_generations: []
 authorized_head_sha: <git-oid>
@@ -538,6 +579,9 @@ pre_merge_checks: []
 post_merge_checks: []
 bookkeeping: []
 ```
+
+`google_antigravity` chỉ được định tuyến làm Executor hoặc Reviewer theo Packet;
+không có quyền `land_operator` trong schema này.
 
 Thiếu evidence bắt buộc chặn transition tương ứng; chat transcript hoặc lời tự khai không thay thế GitHub object,
 commit và workflow run. Khi `head_sha` đổi, review verdict, CI và authorization của SHA cũ mất hiệu lực.
@@ -566,6 +610,21 @@ Mức review được ghi tường minh:
    phiên/context/checkout mới độc lập, read-only; không fork context Executor. Đổi model/session
    trong cùng provider vẫn là same-provider, không thành cross-provider.
 4. `review_deferred`: chưa có reviewer; vẫn được vào draft land PR nhưng cần xác nhận riêng khi apply.
+
+**Ngưỡng severity theo Review Class (M1 của #523).** Đây là điều kiện nội dung
+cần kiểm cùng assurance, không phải quyền tự approve hoặc land:
+
+| Class | Điều kiện severity mặc định để xét approval |
+|---|---|
+| `routine` | Không còn P0/P1; P2/P3 còn lại phải có nợ có tên, owner và hướng xử lý được ghi trong verdict. |
+| `systemic` | Không còn P0/P1/P2; P3 còn lại phải có nợ có tên, owner và hướng xử lý được ghi trong verdict. |
+| `sensitive` | Không còn P0; cần approval tường minh đúng assurance, quyết định có căn cứ cho từng finding còn mở; thiếu quyết định thì chưa đủ. |
+| thiếu/không rõ | Xử lý như `sensitive`, không suy ra `routine`. |
+
+P0 chặn approval ở mọi class. Bảng không tự cho phép bỏ qua finding hoặc miễn
+review/gate/exact-SHA/human audit. Packet hoặc chỉ thị có ngưỡng chặt hơn thì áp
+ngưỡng đó; ví dụ yêu cầu0P1/P2/P3 vẫn chặn dù ngưỡng mặc định cho phép ghi nợ.
+Reviewer ghi ngưỡng đã áp và assurance riêng; “đủ severity” chưa phải “approved”.
 
 Reviewer có `contents: read` và chỉ có quyền ghi review/comment PR. `changes_requested` trả về executor, không cho
 reviewer sửa branch. Lỗi quota/rate-limit không tiêu thụ attempt nội dung; circuit breaker ngừng gọi provider tới
@@ -729,6 +788,26 @@ biểu hiện vẫn phải nối lớp cũ. Reviewer tự dựng thước kiểm
 tiêu chí mới, không lấy danh sách Executor làm trần. Bảng đối chiếu ghi nguồn lượt/SHA,
 phạm vi đã đo, kết quả dương/âm và phần chưa đo; tổng suite hay số dòng khớp không đóng lớp.
 Đổi Packet hoặc baseline không reset lịch sử, budget hay receipt đã giao (§3.2.1/§12).
+
+**Bảng lớp của mỗi lượt.** Mỗi finding có đúng một slug lớp nguyên nhân; mỗi lớp ghi
+các finding IDs/biểu hiện, mức nghiêm trọng cao nhất còn mở, nguồn lượt/SHA, cách vá
+chung và phép kiểm đóng lớp. Nếu cần vá riêng từng biểu hiện, ghi lý do cơ chế không
+cho một thay đổi chung; gợi ý reviewer vẫn theo §7/§8, không trở thành mệnh lệnh.
+Đếm số lớp và số biểu hiện riêng. Tách/gộp lớp cần bảng nối slug nguồn, lý do và phép
+đối chiếu trên cùng tập finding; không đổi khóa để xóa lần tái diễn hoặc làm đẹp tỷ lệ.
+
+Từ lượt sau, bảng đối chiếu vẫn phân từng finding trước theo bốn nhãn ở §8; lớp chỉ
+được ghi **ĐÃ VÁ THẬT** khi mọi biểu hiện thuộc phạm vi được kiểm độc lập đã đóng,
+không còn biểu hiện cùng cơ chế do bản vá sinh ra và không còn phần phải đo để đóng
+lớp. Thiếu quan sát, cắt acceptance hoặc chuyển biểu hiện ra ngoài scope không được
+tính là vá. Ghi phần `chua_do_duoc`/successor và authority riêng; giữ slug trong lịch
+sử. Phép đo target/non-target và đối chứng phải đủ để quyết kết luận; lỗi setup hay
+tổng suite xanh không thay bằng chứng cho đúng tính chất của từng lớp.
+
+Open P0 luôn chặn approval. Với P1/P2/P3, đối chiếu điều kiện severity của Packet,
+Review Class và assurance §8 riêng với bảng đối chiếu; hết finding hoặc tỷ lệ vá cao
+không tự tạo approval, không miễn exact-SHA audit/gate. Các nghĩa vụ bảng lớp/đọc nghĩa
+ở đây là kỷ luật review; scanner xanh không chứng minh chúng đã được máy cưỡng chế.
 
 Hồ sơ kế thừa #523 trong WP538 giữ N1–N8/M16 ở spec nguồn bất biến và bốn lớp **unresolved**:
 
@@ -986,6 +1065,39 @@ Tập lệnh đóng: `/mission start|pause|resume`, `/packet retry|cancel|rerout
 có audit.
 
 ## 12. Stop conditions và budget
+
+**Phân loại chi CI theo mục đích (M7 của #523).** Ghi loại trước khi chủ động
+phát sinh lượt chạy; tên event không quyết định loại:
+
+| Loại | Điều kiện và cách ghi chi |
+|---|---|
+| Gate tự động | Workflow phát sinh từ event hợp lệ trong công việc đã được cấp; ghi run ID/attempt, exact SHA và chi tự động riêng. Không coi “tự động” là quyền push/mở PR để lách lệnh chưa chạy CI. |
+| Phép đo được cấp | Có mục tiêu/phản chứng, scope và allowance hữu hạn công bố trước; ghi `used / reserved / limit`, rồi gắn kết quả với run ID/attempt và exact SHA. `workflow_dispatch` hợp lệ có thể thuộc loại này. |
+| Thăm dò chưa được cấp | Không có mục tiêu/allowance/authority thích hợp: không chạy; muốn chuyển thành phép đo thì phải có kế hoạch và quyền trước. |
+
+Một dispatch để đo được cấp và một dispatch thăm dò có cùng event vẫn khác loại.
+Thiếu mục đích/authority thì chưa đủ điều kiện chạy, không mặc định là gate tự động.
+Sổ chi tách cửa sổ hiện tại với lịch sử toàn packet, ghi rõ đơn vị allowance;
+không cộng run với attempt như cùng đơn vị. Lịch sử chưa đo đủ là `KHONG_DO_DUOC`,
+không phải0 và không dùng để suy phần ngân sách còn lại. Rerun cũng phải được tính
+theo đơn vị đã chốt. Ngân sách tự động và phép đo không tự vay lẫn nhau.
+Phân loại này không thay §10.2 về admission/provenance/gate hay chỉ thị thời điểm
+chạy: khi owner yêu cầu đợi tới đủ điều kiện merge, không chạy CI/fullCI giữa vòng vá.
+
+**Tín hiệu không hội tụ theo lớp.** Với chuyển tiếp từ lượt r sang r+1, đặt U là tập
+slug lớp còn mở ở cuối lượt r, F là tập con của U được reviewer lượt r+1 xác minh
+ĐÃ VÁ THẬT theo §8.3. Tỷ lệ = |F|/|U|; nhiều finding cùng lớp chỉ tính một lần.
+U rỗng thì tỷ lệ không xác định (`N/A`), không phải 0% hay 100%; không ghép hai tỷ lệ
+thấp qua một chuyển tiếp N/A. Hai chuyển tiếp liên tiếp có tỷ lệ <50% thì dừng vòng
+vá và đưa bằng chứng tới Review Rescue Checkpoint bên dưới. Ngưỡng này là heuristic
+kế thừa từ #523, không là chứng minh thống kê; không thay trần độc lập.
+
+Báo riêng các lớp mới tại r+1 (không nằm trong U), lớp tái mở và phần chưa đo; chúng
+không vào tử số F. Tỷ lệ cao chỉ nói về tập U, không chứng minh hội tụ khi lớp mới
+vẫn xuất hiện, không thay điều kiện dừng theo class/Packet hay bằng chứng approval.
+Một lớp xuất hiện ở ba lượt review khác nhau đòi xem lại cách làm tại checkpoint;
+ba biểu hiện của lớp trong cùng một lượt chỉ là một lần xuất hiện. Revision/scope
+cut không reset lịch sử đó, không tự cấp thêm review call hoặc attempt.
 
 Mặc định: 3 attempt/packet, 90 phút/run cho cả Executor và Reviewer, cùng failure fingerprint nội dung hai lần thì
 blocked, tối đa 20 packet,

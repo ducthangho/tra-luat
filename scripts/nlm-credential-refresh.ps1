@@ -136,6 +136,7 @@ namespace TraLuatWp710 {
             public int dwX, dwY, dwXSize, dwYSize, dwXCountChars, dwYCountChars, dwFillAttribute, dwFlags;
             public short wShowWindow, cbReserved2; public IntPtr lpReserved2, hStdInput, hStdOutput, hStdError;
         }
+        [StructLayout(LayoutKind.Sequential)] struct StartupInfoEx { public StartupInfo Info; public IntPtr AttributeList; }
         [StructLayout(LayoutKind.Sequential)] struct ProcessInformation {
             public IntPtr hProcess, hThread; public int dwProcessId, dwThreadId;
         }
@@ -150,10 +151,15 @@ namespace TraLuatWp710 {
         [DllImport(K, SetLastError = true)] static extern bool TerminateJobObject(IntPtr job, uint exitCode);
         [DllImport(K, SetLastError = true)] static extern bool CreatePipe(out IntPtr read, out IntPtr write, IntPtr sa, int size);
         [DllImport(K, SetLastError = true)] static extern bool SetHandleInformation(IntPtr handle, int mask, int flags);
-        [DllImport(K, SetLastError = true)] static extern IntPtr GetStdHandle(int which);
         [DllImport(K, SetLastError = true, CharSet = CharSet.Unicode)] static extern bool CreateProcessW(string application, StringBuilder commandLine,
             IntPtr processAttributes, IntPtr threadAttributes, bool inheritHandles, uint flags, byte[] environment, string directory,
-            ref StartupInfo startupInfo, out ProcessInformation information);
+            ref StartupInfoEx startupInfo, out ProcessInformation information);
+        [DllImport(K, SetLastError = true, CharSet = CharSet.Unicode)] static extern IntPtr CreateFileW(string name, uint access, uint share,
+            IntPtr securityAttributes, uint disposition, uint flags, IntPtr template);
+        [DllImport(K, SetLastError = true)] static extern bool InitializeProcThreadAttributeList(IntPtr list, int count, int flags, ref IntPtr size);
+        [DllImport(K, SetLastError = true)] static extern bool UpdateProcThreadAttribute(IntPtr list, uint flags, IntPtr attribute, IntPtr value,
+            IntPtr size, IntPtr previous, IntPtr returned);
+        [DllImport(K)] static extern void DeleteProcThreadAttributeList(IntPtr list);
         [DllImport(K, SetLastError = true)] static extern uint ResumeThread(IntPtr thread);
         [DllImport(K, SetLastError = true)] static extern bool TerminateProcess(IntPtr process, uint exitCode);
         [DllImport(K, SetLastError = true)] static extern uint WaitForSingleObject(IntPtr handle, uint milliseconds);
@@ -208,9 +214,11 @@ namespace TraLuatWp710 {
 
         // Create the child SUSPENDED with redirected stdout/stderr, put it in the job and verify the membership.
         // It has not executed anything when this returns; Resume starts it. null + stage/error on failure: a
-        // child that could not be placed in the job is terminated before it ever ran.
-        public static JobChild Start(IntPtr job, string commandLine, byte[] environment, out string stage, out int error) {
-            stage = ""; error = 0;
+        // child that could not be placed in the job is terminated before it ever ran. pid is set as soon as the
+        // process exists, so a caller can still name a child whose termination could not be confirmed
+        // (stage ends in _alive): that child is suspended, outside the job, and nothing else tracks it.
+        public static JobChild Start(IntPtr job, string commandLine, byte[] environment, out string stage, out int error, out int pid) {
+            stage = ""; error = 0; pid = 0;
             IntPtr outRead, outWrite, errRead, errWrite;
             if (!CreatePipe(out outRead, out outWrite, IntPtr.Zero, 0)) { error = Marshal.GetLastWin32Error(); stage = "pipe"; return null; }
             if (!CreatePipe(out errRead, out errWrite, IntPtr.Zero, 0)) {
@@ -218,20 +226,51 @@ namespace TraLuatWp710 {
             }
             ProcessInformation pi = new ProcessInformation();
             bool created = false;
-            if (!SetHandleInformation(outWrite, 1, 1) || !SetHandleInformation(errWrite, 1, 1)) {
-                error = Marshal.GetLastWin32Error(); stage = "pipe";
-            } else {
-                StartupInfo si = new StartupInfo();
-                si.cb = Marshal.SizeOf(typeof(StartupInfo));
-                si.dwFlags = 0x100;   // STARTF_USESTDHANDLES
-                si.hStdInput = GetStdHandle(-10); si.hStdOutput = outWrite; si.hStdError = errWrite;
-                // CREATE_SUSPENDED | CREATE_UNICODE_ENVIRONMENT
-                created = CreateProcessW(null, new StringBuilder(commandLine), IntPtr.Zero, IntPtr.Zero, true, 0x4 | 0x400,
-                    environment, null, ref si, out pi);
-                if (!created) { error = Marshal.GetLastWin32Error(); stage = "create"; }
+            // g5: the child inherits EXACTLY three handles (PROC_THREAD_ATTRIBUTE_HANDLE_LIST): NUL as stdin and
+            // the two pipe write ends. With a plain bInheritHandles it would also inherit every inheritable
+            // handle of this wrapper - its own stdout/stderr among them - and a descendant that outlives the
+            // wrapper would keep the wrapper's caller waiting on a pipe that never closes (measured: a stray
+            // suspended child held the caller for 13 minutes).
+            IntPtr nul = CreateFileW("NUL", 0x80000000, 3, IntPtr.Zero, 3, 0, IntPtr.Zero);
+            IntPtr list = IntPtr.Zero, handles = IntPtr.Zero;
+            bool listReady = false;
+            try {
+                IntPtr size = IntPtr.Zero;
+                InitializeProcThreadAttributeList(IntPtr.Zero, 1, 0, ref size);
+                if (nul == new IntPtr(-1) || nul == IntPtr.Zero || size == IntPtr.Zero ||
+                    !SetHandleInformation(nul, 1, 1) || !SetHandleInformation(outWrite, 1, 1) || !SetHandleInformation(errWrite, 1, 1)) {
+                    error = Marshal.GetLastWin32Error(); stage = "pipe";
+                } else {
+                    list = Marshal.AllocHGlobal(size);
+                    handles = Marshal.AllocHGlobal(IntPtr.Size * 3);
+                    Marshal.WriteIntPtr(handles, 0, nul);
+                    Marshal.WriteIntPtr(handles, IntPtr.Size, outWrite);
+                    Marshal.WriteIntPtr(handles, IntPtr.Size * 2, errWrite);
+                    listReady = InitializeProcThreadAttributeList(list, 1, 0, ref size);
+                    // PROC_THREAD_ATTRIBUTE_HANDLE_LIST
+                    if (!listReady || !UpdateProcThreadAttribute(list, 0, new IntPtr(0x00020002), handles, new IntPtr(IntPtr.Size * 3), IntPtr.Zero, IntPtr.Zero)) {
+                        error = Marshal.GetLastWin32Error(); stage = "pipe";
+                    } else {
+                        StartupInfoEx si = new StartupInfoEx();
+                        si.Info.cb = Marshal.SizeOf(typeof(StartupInfoEx));
+                        si.Info.dwFlags = 0x100;   // STARTF_USESTDHANDLES
+                        si.Info.hStdInput = nul; si.Info.hStdOutput = outWrite; si.Info.hStdError = errWrite;
+                        si.AttributeList = list;
+                        // CREATE_SUSPENDED | CREATE_UNICODE_ENVIRONMENT | EXTENDED_STARTUPINFO_PRESENT
+                        created = CreateProcessW(null, new StringBuilder(commandLine), IntPtr.Zero, IntPtr.Zero, true, 0x4 | 0x400 | 0x00080000,
+                            environment, null, ref si, out pi);
+                        if (!created) { error = Marshal.GetLastWin32Error(); stage = "create"; }
+                    }
+                }
+            } finally {
+                if (listReady) DeleteProcThreadAttributeList(list);
+                if (list != IntPtr.Zero) Marshal.FreeHGlobal(list);
+                if (handles != IntPtr.Zero) Marshal.FreeHGlobal(handles);
+                if (nul != new IntPtr(-1) && nul != IntPtr.Zero) CloseHandle(nul);
             }
             CloseHandle(outWrite); CloseHandle(errWrite);   // the parent keeps only the read ends
             if (!created) { CloseHandle(outRead); CloseHandle(errRead); return null; }
+            pid = pi.dwProcessId;
             bool member = false;
             if (!AssignProcessToJobObject(job, pi.hProcess)) { error = Marshal.GetLastWin32Error(); stage = "assign"; }
             else if (!IsProcessInJob(pi.hProcess, job, out member)) { error = Marshal.GetLastWin32Error(); stage = "verify"; }
@@ -610,12 +649,20 @@ function Invoke-BoundedJob([string]$file, [string[]]$arguments, [int]$seconds, [
         foreach ($key in $environment.Keys) { $variables[[string]$key] = [string]$environment[$key] }
         $variables[$MarkerName] = $marker
         $stage = ''
+        $childId = 0
         $child = [TraLuatWp710.Job]::Start($job, [TraLuatWp710.Job]::Quote([string[]](@($file) + $arguments)),
-            [TraLuatWp710.Job]::EnvironmentBlock($variables), [ref]$stage, [ref]$code)
+            [TraLuatWp710.Job]::EnvironmentBlock($variables), [ref]$stage, [ref]$code, [ref]$childId)
         if ($null -eq $child) {
             if ($stage -in @('pipe', 'create')) { throw "process start failed ($stage $code)" }   # as Process.Start() would
             # Created but not in the job: it was terminated while still suspended, so no step code ran.
             $confirmed = $stage -notlike '*_alive'
+            if (-not $confirmed) {
+                # Its termination was NOT confirmed: a process exists, suspended and outside the job. The record
+                # must survive this run and name it, so the next owner waits on it (root_alive) instead of
+                # finding no record at all.
+                $started = $true
+                Write-OperationRecord $marker (Get-Process -Id $childId -ErrorAction SilentlyContinue) $true @() $jobName
+            }
             return @{timeout=$false; rc=-1; out=''; err=''; elapsed=$watch.Elapsed.TotalSeconds; exited=$confirmed; reaped=0;
                 tree='not_contained'; blocked="job_${stage}_failed:$code"}
         }
@@ -650,7 +697,7 @@ function Invoke-BoundedJob([string]$file, [string[]]$arguments, [int]$seconds, [
         if ($tree.State -ne 'gone') {
             Write-OperationRecord $marker $process $true @() $jobName
             return @{timeout=$false; rc=-1; out=''; err=''; elapsed=$watch.Elapsed.TotalSeconds; exited=$false;
-                reaped=$tree.Stopped; tree=$tree.State; blocked="job_$($tree.State)"}
+                reaped=$tree.Stopped; tree=$tree.State; blocked="job_$($tree.State)"; ran=$true}
         }
         $confirmed = $true
         return @{timeout=$false; rc=[TraLuatWp710.Job]::ExitCode($child); out=$Utf8Lenient.GetString($outBytes.ToArray()); err=$stderr.Result;
@@ -737,7 +784,7 @@ function Invoke-Bounded([string]$file, [string[]]$arguments, [int]$seconds, [has
         if ($tree.State -ne 'gone') {
             Write-OperationRecord $marker $process $true $pipes
             return @{timeout=$false; rc=-1; out=''; err=''; elapsed=$watch.Elapsed.TotalSeconds; exited=$false;
-                reaped=$tree.Stopped; tree=$tree.State; blocked='tree_not_measurable'}
+                reaped=$tree.Stopped; tree=$tree.State; blocked='tree_not_measurable'; ran=$true}
         }
         $confirmed = $true
         return @{timeout=$false; rc=$process.ExitCode; out=$Utf8Lenient.GetString($outBytes.ToArray()); err=$stderr.Result;
@@ -869,10 +916,16 @@ function Test-CanaryBody([string]$text, [string]$notebook) {
     } catch { return $false } finally { $doc.Dispose() }
 }
 
-function Exit-IfBlocked($result) {
+function Exit-IfBlocked($result, [string]$step = '') {
     # WP710 g4: a step whose tree is not contained, or not proven gone, ends the run before any later step.
+    # g5: `inconclusive` promises zero stage calls. When the STAGE command itself ran (`ran`) and only its tree
+    # is unproven, the upload may have happened: that is a stage_failure (rc 6), with the reason kept.
     if (-not $result.blocked) { return }
     $Evidence.containment_reason = [string]$result.blocked
+    if ($step -eq 'stage' -and $result.ran) {
+        Emit 'stage_failure' 'stage' -1 $result.elapsed
+        exit 6
+    }
     Emit 'inconclusive' 'tree_containment' -1 $result.elapsed
     exit 5
 }
@@ -977,7 +1030,7 @@ try {
         try { $stage = Invoke-Bounded $stagePath $StageArguments $TimeoutSeconds $pin }
         catch { Emit 'stage_failure' 'stage' -1 0; exit 6 }
         Write-Step 'stage' $stage
-        Exit-IfBlocked $stage
+        Exit-IfBlocked $stage 'stage'
         if ($stage.timeout -or $stage.rc -ne 0) {
             Emit 'stage_failure' 'stage' $stage.rc $stage.elapsed
             exit 6

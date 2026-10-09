@@ -125,6 +125,10 @@ if mode == "network" and op == "notebook":
 if mode == "stage" and op == "stage":
     print("SECRET_SENTINEL", file=sys.stderr)
     sys.exit(9)
+if mode == "stage_flag" and op == "stage":
+    # g5: the stage command ran to the end; the flag lets a projection make ITS job count unreadable afterwards.
+    with open(os.environ["WP710_FLAG"], "w") as f:
+        f.write("1")
 if op == "notebook":
     if mode == "empty":
         print("{}")
@@ -540,7 +544,11 @@ Start-Sleep -Seconds 30
     $recPath = Join-Path ([IO.Path]::GetTempPath()) $recName
     $sleeper = Start-Process -FilePath $python -ArgumentList '-c "import time; time.sleep(60)"' -PassThru @hidden
     try {
-        $ticks = $sleeper.StartTime.ToUniversalTime().Ticks
+        # Read through a FRESH pwsh, as the wrapper does. On Linux .NET derives StartTime from a boot time it
+        # caches per process; where the wall clock and the uptime clock run at different rates (measured in
+        # WSL2: this long-lived test process read 2.9 s off after 130 s and 7.0 s after 256 s) the reading of a
+        # long-lived process no longer matches a fresh one within the wrapper's 1 s tolerance.
+        $ticks = [int64](& pwsh -NoProfile -Command "(Get-Process -Id $($sleeper.Id)).StartTime.ToUniversalTime().Ticks")
         @{pid=$sleeper.Id; start_ticks=$ticks} | ConvertTo-Json -Compress | Set-Content -LiteralPath $recPath
         $r = Invoke-Wrapper 'ok' @('-TimeoutSeconds','5','-LockWaitSeconds','1')
         if ($r.Rc -ne 5 -or $r.Json.step -ne 'lock_busy' -or $r.Calls.Count -ne 0) { throw 'live recorded child must block the new owner with zero operations' }
@@ -1076,8 +1084,9 @@ Add-Type -TypeDefinition (Get-Content -LiteralPath $Source -Raw)
 $code = 0
 $job = [TraLuatWp710.Job]::Create($Name, [ref]$code)
 $stage = ''
+$childId = 0
 $child = [TraLuatWp710.Job]::Start($job, [TraLuatWp710.Job]::Quote([string[]]@($Python, '-c', 'import time; time.sleep(120)')),
-    [TraLuatWp710.Job]::EnvironmentBlock([Environment]::GetEnvironmentVariables()), [ref]$stage, [ref]$code)
+    [TraLuatWp710.Job]::EnvironmentBlock([Environment]::GetEnvironmentVariables()), [ref]$stage, [ref]$code, [ref]$childId)
 [void][TraLuatWp710.Job]::Resume($child)
 Set-Content -LiteralPath $Ready -Value $child.Id
 Start-Sleep -Seconds 120
@@ -1157,6 +1166,102 @@ Start-Sleep -Seconds 120
         $cases++
     }
     # >>case:y
+    # <<case:z
+    # (z) Windows, g5: two failure paths the reviewer of g4 found by reading the control flow.
+    #     z1 - the child was created but could not be placed in the job AND its termination was not confirmed
+    #     (projection: the assignment always "fails" and the terminate call is removed, so the suspended child
+    #     really stays). The run stops with rc 5, and the record must SURVIVE and name that child: the next
+    #     owner waits on it (root_alive), an operator cannot release it while it lives, and after it is gone
+    #     the record is a quarantine (its owner never emptied anything), released only by the operator.
+    #     z2 - the stage command RAN and then its job count could not be read (projection: the count reads -1
+    #     once the fake stage command has written a flag). `inconclusive` promises zero stage calls, so this
+    #     must be stage_failure (rc 6) with the containment reason, and the record must stay.
+    if ($IsWindows) {
+        $srcZ = Get-Content -LiteralPath $script -Raw
+        $recZ = Join-Path ([IO.Path]::GetTempPath()) $recName
+        $realScriptZ = $script
+        $assignZ = 'if (!AssignProcessToJobObject(job, pi.hProcess)) { error'
+        $killZ = 'TerminateProcess(pi.hProcess, 1);'
+        foreach ($needle in @($assignZ, $killZ)) {
+            if (([regex]::Matches($srcZ, [regex]::Escape($needle))).Count -ne 1) { throw ('projection anchor not found exactly once: ' + $needle) }
+        }
+        $projZ1 = Join-Path $root 'projection-z1'
+        New-Item -ItemType Directory -Path $projZ1 | Out-Null
+        Set-Content -LiteralPath (Join-Path $projZ1 'nlm-credential-refresh.ps1') -Encoding utf8 -Value $srcZ.Replace($assignZ, 'if (job != IntPtr.Zero) { error').Replace($killZ, '')
+        $strayZ = $null
+        try {
+            # Run through a PIPE with a deadline instead of Invoke-Wrapper: the stray child must not have inherited
+            # the wrapper's own stdout. If it had, this read would never end (g5 measured 13 minutes before the
+            # handle list); here that is a red case, not a hung suite.
+            $env:WP710_MODE = 'ok'; $env:WP710_TAG = ''
+            Remove-Item -LiteralPath $env:WP710_LOG -ErrorAction SilentlyContinue
+            $psiZ = [Diagnostics.ProcessStartInfo]::new($powershell)
+            foreach ($a in @('-NoProfile','-File',(Join-Path $projZ1 'nlm-credential-refresh.ps1'),'-ConfigPath',$config,'-NlmCommand',$python,
+                             '-NlmArgumentsPrefix',$fake,'-StageCommand',$python,'-StageArguments',$fake,'-TimeoutSeconds','5')) { $psiZ.ArgumentList.Add($a) }
+            $psiZ.UseShellExecute = $false; $psiZ.RedirectStandardOutput = $true
+            $runZ = [Diagnostics.Process]::Start($psiZ)
+            $readZ = $runZ.StandardOutput.ReadToEndAsync()
+            $closedZ = $readZ.Wait(90000)
+            if (-not $closedZ) {
+                try { $strayZ = [int](Get-Content -LiteralPath $recZ -Raw | ConvertFrom-Json).pid } catch { }
+                if ($null -ne $strayZ) { Stop-Process -Id $strayZ -Force -ErrorAction SilentlyContinue }
+                if (-not $runZ.HasExited) { $runZ.Kill($true) }
+                throw 'the stray child inherited the wrapper stdout: the caller never saw the end of the output'
+            }
+            $runZ.WaitForExit()
+            $r = [pscustomobject]@{ Rc = $runZ.ExitCode; Json = (@($readZ.Result -split "`n" | Where-Object { $_.Trim() })[-1] | ConvertFrom-Json)
+                Calls = @(Get-Content -LiteralPath $env:WP710_LOG -ErrorAction SilentlyContinue) }
+            if ($r.Rc -ne 5 -or $r.Json.step -ne 'tree_containment' -or $r.Json.containment_reason -notmatch '^job_assign_alive_failed:\d+$' -or $r.Calls.Count -ne 0) {
+                throw ('a child that could not be placed in the job must stop the run: rc=' + $r.Rc + ' step=' + $r.Json.step + ' reason=' + $r.Json.containment_reason)
+            }
+            if (-not (Test-Path -LiteralPath $recZ)) { throw 'the record of a stray suspended child was deleted' }
+            $writtenZ = Get-Content -LiteralPath $recZ -Raw | ConvertFrom-Json
+            if ($null -eq $writtenZ.pid -or $writtenZ.tree_unconfirmed -ne $true) { throw ('the record must name the stray child and be unconfirmed: ' + ($writtenZ | ConvertTo-Json -Compress)) }
+            $strayZ = [int]$writtenZ.pid
+            if ($null -eq (Get-Process -Id $strayZ -ErrorAction SilentlyContinue)) { throw 'fixture: the stray suspended child is not there, the case would pass vacuously' }
+            $r = Invoke-Wrapper 'ok' @('-TimeoutSeconds','5','-LockWaitSeconds','1','-OperatorReleaseReason','operator checked case z by hand')
+            if ($r.Rc -ne 5 -or $r.Json.step -ne 'lock_busy' -or $r.Json.takeover_reason -ne 'root_alive' -or $r.Json.takeover -ne 'none' -or $r.Calls.Count -ne 0) {
+                throw ('a live stray child must block the next owner, operator or not: rc=' + $r.Rc + ' step=' + $r.Json.step + ' reason=' + $r.Json.takeover_reason)
+            }
+            Stop-Process -Id $strayZ -Force
+            for ($i=0; $i -lt 50 -and $null -ne (Get-Process -Id $strayZ -ErrorAction SilentlyContinue); $i++) { Start-Sleep -Milliseconds 100 }
+            $r = Invoke-Wrapper 'ok' @('-TimeoutSeconds','5','-LockWaitSeconds','1')
+            if ($r.Rc -ne 5 -or $r.Json.step -ne 'tree_quarantine' -or $r.Json.takeover_reason -ne 'job_closed_unconfirmed' -or $r.Calls.Count -ne 0) {
+                throw ('an unconfirmed record stays a quarantine after its child is gone: rc=' + $r.Rc + ' step=' + $r.Json.step + ' reason=' + $r.Json.takeover_reason)
+            }
+            $r = Invoke-Wrapper 'ok' @('-TimeoutSeconds','5','-LockWaitSeconds','1','-OperatorReleaseReason','operator checked case z by hand')
+            if ($r.Rc -ne 0 -or $r.Json.status -ne 'staged' -or $r.Json.takeover -ne 'operator_release') { throw 'an operator release after the stray child is gone must stage' }
+        } finally {
+            $script = $realScriptZ
+            if ($null -ne $strayZ) { Stop-Process -Id $strayZ -Force -ErrorAction SilentlyContinue }
+            Remove-Item -LiteralPath $recZ -ErrorAction SilentlyContinue
+        }
+        $countZ = "    `$active = [TraLuatWp710.Job]::Active(`$job)`n    if (`$active -lt 0) { return @{ State = 'unknown'; Stopped = 0 } }"
+        if (([regex]::Matches($srcZ.Replace("`r`n", "`n"), [regex]::Escape($countZ))).Count -ne 1) { throw 'job count line not found exactly once in the script' }
+        $env:WP710_FLAG = Join-Path $root 'stage-ran.flag'
+        $projZ2 = Join-Path $root 'projection-z2'
+        New-Item -ItemType Directory -Path $projZ2 | Out-Null
+        $readZ = "    `$active = if (Test-Path -LiteralPath '$($env:WP710_FLAG)') { -1 } else { [TraLuatWp710.Job]::Active(`$job) }`n    if (`$active -lt 0) { return @{ State = 'unknown'; Stopped = 0 } }"
+        Set-Content -LiteralPath (Join-Path $projZ2 'nlm-credential-refresh.ps1') -Encoding utf8 -Value $srcZ.Replace("`r`n", "`n").Replace($countZ, $readZ)
+        try {
+            $script = Join-Path $projZ2 'nlm-credential-refresh.ps1'
+            $r = Invoke-Wrapper 'stage_flag' @('-TimeoutSeconds','5')
+            $script = $realScriptZ
+            $stageCallsZ = @($r.Calls | Where-Object { $_ -like 'start:stage:*' }).Count
+            if (-not (Test-Path -LiteralPath $env:WP710_FLAG) -or $stageCallsZ -ne 1) { throw ('fixture: the stage command did not run: calls=' + $stageCallsZ) }
+            if ($r.Rc -ne 6 -or $r.Json.status -ne 'stage_failure' -or $r.Json.step -ne 'stage' -or $r.Json.containment_reason -ne 'job_unknown' -or
+                $r.Json.steps.stage.tree_state -ne 'unknown') {
+                throw ('a stage command that ran must never end as inconclusive: rc=' + $r.Rc + ' status=' + $r.Json.status + ' step=' + $r.Json.step + ' reason=' + $r.Json.containment_reason)
+            }
+            if (-not (Test-Path -LiteralPath $recZ) -or (Get-Content -LiteralPath $recZ -Raw | ConvertFrom-Json).tree_unconfirmed -ne $true) { throw 'a stage whose tree is unproven must keep its record' }
+        } finally {
+            $script = $realScriptZ
+            Remove-Item -LiteralPath $recZ, $env:WP710_FLAG -ErrorAction SilentlyContinue
+            Remove-Item Env:WP710_FLAG -ErrorAction SilentlyContinue
+        }
+        $cases++
+    }
+    # >>case:z
     "passed=$cases failed=0"
 } finally {
     Remove-Item -LiteralPath $root -Recurse -Force -ErrorAction SilentlyContinue

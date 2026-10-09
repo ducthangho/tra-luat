@@ -1,0 +1,102 @@
+"""Kiem tinh nhat quan cua ho so land PR #621 voi hien vat trong thu muc provenance (Codex PR #723, review 5472526875).
+
+Chay:  python -I kiem_ho_so.py [--repo <clone day du co 6980e5b, 675895d, 8b59185, 658bd0c, 3fc0932>]
+Thoat 0 = moi chot dat; 1 = co chot truot (in tung chot); 2 = khong truot nhung thieu --repo nen chot digest
+KHONG DO DUOC (khong duoc doc thanh DAT). Chi doc tep; --repo thi goi them `git diff` (chi doc).
+KHONG la bang chung luot goc: no chi kiem rang moi loi khai `measured` trong ho so tro toi mot hien vat co that, co dau
+duong, va cac moc thoi gian/run/digest khop nhau.
+"""
+import hashlib, json, re, subprocess, sys
+from datetime import datetime
+from pathlib import Path
+
+import yaml
+
+P = Path(__file__).resolve().parent
+HO_SO = P.parent / "pr621-skill-bai-hoc-land-evidence.yaml"
+LOI = []
+
+
+def chot(dk, msg):
+    print(("DAT  " if dk else "TRUOT ") + msg)
+    if not dk:
+        LOI.append(msg)
+
+
+def ts(s):
+    return datetime.fromisoformat(s.replace("Z", "+00:00"))
+
+
+h = yaml.safe_load(HO_SO.read_text(encoding="utf-8"))
+
+# 1. SHA256SUMS: moi dong khop tep.
+for dong in (P / "SHA256SUMS.txt").read_text(encoding="utf-8").splitlines():
+    if not dong.strip():
+        continue
+    dg, ten = dong.split(None, 1)
+    ten = ten.lstrip("*")
+    chot(hashlib.sha256((P / ten).read_bytes()).hexdigest() == dg, f"sha256 {ten}")
+
+# 2. Moi cong `measured` do lai -> co khoi LENH, dau duong, RC dung trong hien vat.
+cong = h["ung_vien"]["cong_tai_cho_tren_ung_vien"]["do_lai_luc_ghi_so"]
+van = (P / cong["hien_vat"].split()[0]).read_text(encoding="utf-8")
+# `[^\n]*` cho dong lenh: voi re.S, `.*` se nuot qua nhieu khoi.
+bo = re.findall(r"^### LENH: ([^\n]*)\n(.*?)^### RC=(\d+)$", van, re.S | re.M)
+khoi = {l: o for l, o, _ in bo}
+rcs = {l: rc for l, _, rc in bo}
+for r in cong["ket_qua"]:
+    l = r["lenh"]
+    chot(l in khoi and r["dau_duong"] in khoi[l] and rcs.get(l) == str(r["rc"]),
+         f"cong `{l}`: co khoi, dau duong, RC={r['rc']}")
+
+# 3. Thoi diem ref fence: truoc < merged_at < sau.
+td = (P / "thoi-diem-ls-remote.txt").read_text(encoding="utf-8")
+truoc = re.search(r"^truoc .*mtime (\S+)", td, re.M).group(1)
+sau = re.search(r"^sau .*birth (\S+)", td, re.M).group(1)
+merged = json.loads((P / "pr-621.json").read_text(encoding="utf-8"))["merged_at"]
+chot(ts(truoc) < ts(merged) < ts(sau), f"truoc {truoc} < merge {merged} < sau {sau}")
+for ten, nhan in (("ls-remote-truoc-merge.sorted.txt", "truoc"), ("ls-remote-sau-merge.sorted.txt", "sau")):
+    dg = re.search(rf"^{nhan} .*sha256sum (\w+)", td, re.M).group(1)
+    chot(hashlib.sha256((P / ten).read_bytes()).hexdigest() == dg, f"anh {nhan} khop digest trong thoi-diem")
+
+# 4. Moi run CI: moc REST khop run-<id>.json; run khong skipped phai nam trong pham_vi_run cua CA BA muc khong_do_duoc.
+pham_vi = {k["id"]: set(k.get("pham_vi_run", [])) for k in h["khong_do_duoc"]}
+can = ("MOC-WORKFLOW-DEFINITION", "RC-SO-CHI-CO-STEP-CONCLUSION", "CHECKOUT-IDENTITY")
+tong = 0
+for r in [x for x in h["pre_merge_checks"] + h["post_merge_checks"] if "run_id" in x]:
+    j = json.loads((P / f"run-{r['run_id']}.json").read_text(encoding="utf-8"))
+    chot(j["event"] == r["event"] and j["run_attempt"] == r["run_attempt"] and j["head_sha"] == r["head_sha"]
+         and r["workflow"].startswith(j["path"]), f"run {r['run_id']}: event/attempt/head/path khop REST")
+    if j["conclusion"] != "skipped":
+        chot(all(r["run_id"] in pham_vi[c] for c in can), f"run {r['run_id']}: nam trong pham_vi_run cua ca 3 muc")
+for f, mong in (("checkruns-658bd0c.json", 17), ("checkruns-3fc0932.json", 14)):
+    chot(json.loads((P / f).read_text(encoding="utf-8"))["total_count"] == mong, f"{f}: total_count {mong}")
+ids = {int(re.search(r"/runs/(\d+)/", c["details_url"]).group(1))
+       for c in json.loads((P / "checkruns-658bd0c.json").read_text(encoding="utf-8"))["check_runs"]}
+khai = {x["run_id"] for x in h["pre_merge_checks"] if "run_id" in x}
+chot(ids == khai, f"run truoc merge: checkruns {sorted(ids)} == khai {sorted(khai)}")
+
+# 5. Digest diff PR (chi luu digest, khong luu diff tho): --repo thi tai lap bang OID ghim, va ref sau merge PHAI
+#    cho digest khac. Thieu --repo => chot nay KHONG DO DUOC (in ra, khong tinh DAT).
+DG = "e5bde9ba8623b16b34066da23b361db604b324f020cc43f4e3efdc9755ba872e"
+if "--repo" not in sys.argv:
+    print("KHONG DO DUOC digest diff PR: can --repo <clone day du>")
+else:
+    repo = sys.argv[sys.argv.index("--repo") + 1]
+
+    def d(a, b):
+        out = subprocess.run(["git", "-C", repo, "-c", "core.abbrev=7", "diff", a, b], capture_output=True, check=True).stdout
+        return hashlib.sha256(out).hexdigest()
+
+    chot(d("6980e5bf04e4e5b8b75e5817578f1aba13f2f5ab", "675895db34e9a7c1357f8d8ad8925bf8f01ad21c") == DG, "diff truoc drift (OID ghim)")
+    chot(d("8b59185975a938504de5963d2310e574dd4858b2", "658bd0cdc56bbd3445f489dcfc571e22eee7d675") == DG, "diff ung vien (OID ghim)")
+    chot(d("3fc0932a3d1617c4352e5a7982f2e6e4208ca3f7", "658bd0cdc56bbd3445f489dcfc571e22eee7d675") != DG, "ref SAU merge cho digest KHAC")
+
+if LOI:
+    print(f"TONG: TRUOT {len(LOI)}")
+    sys.exit(1)
+if "--repo" not in sys.argv:
+    print("TONG: CHUA DU — moi chot doc tep dat, chot digest KHONG DO DUOC (thieu --repo)")
+    sys.exit(2)
+print("TONG: DAT")
+sys.exit(0)

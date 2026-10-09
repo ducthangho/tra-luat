@@ -1,0 +1,7 @@
+# Thoi diem chup hai anh ls-remote, do bang `stat -c '%n %w %y'` tren tep THO do chinh lenh ghi ra (scratch land621/).
+# birth = luc shell tao tep (truoc khi git ls-remote in dong dau); mtime = lan ghi cuoi (git ls-remote da in xong).
+# Hai tep tho sau `LC_ALL=C sort` trung tung byte voi ls-remote-*-merge.sorted.txt (sha256sum ben duoi).
+truoc  birth 2026-10-09T14:13:25.653Z  mtime 2026-10-09T14:13:26.177Z  sorted sha256sum b2cc816e1170a3112a61a26fd80f184aef3416e71672f4ca9985876082f091d2
+merge  merged_at 2026-10-09T14:14:34Z (pr-621.json)
+sau    birth 2026-10-09T14:14:46.754Z  mtime 2026-10-09T14:14:47.261Z  sorted sha256sum 6588abb2d6bbefd7b9ffc8ee2f8f0adf09a1948d5fdc20242e042cb0c4456fad
+kiem   truoc.mtime < merged_at < sau.birth  => DUNG (14:13:26.177 < 14:14:34 < 14:14:46.754)

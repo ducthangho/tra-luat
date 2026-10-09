@@ -1,0 +1,24 @@
+# Phep do hai ve cung lenh (bk687/do2ve.sh): clone day du tu cung kho, cung python, song song. Log KHONG commit; chi bam + dong tong ket.
+Python 3.11.15
+bat dau 2026-10-01T06:00:21Z xong 2026-10-01T06:07:22Z
+== nen 20ec8d5 rc=0 log_sha256=f452d3a07ce077f61ddccaf05ce9a284edc00295b0b3a1e481425d6788505480 byte=125755 vao=195 ra_QUA=195
+[A] lease_publish: 195/195 đạt; đã chạy=195, bỏ qua=0
+[B] lease_publish: 195/195 đạt; đã chạy=195, bỏ qua=0
+lease_publish: 195/195 đạt; đã chạy=195, bỏ qua=0
+== nhanh 9d7a523 rc=0 log_sha256=7079f696e979db17b7a3d5a715218b956a9819a3fff75bc65c2803b534b96cdb byte=127036 vao=198 ra_QUA=198
+[A] lease_publish: 198/198 đạt; đã chạy=198, bỏ qua=0
+[B] lease_publish: 198/198 đạt; đã chạy=198, bỏ qua=0
+lease_publish: 198/198 đạt; đã chạy=198, bỏ qua=0
+== merge 163fd5d rc=0 log_sha256=7ef3d68e6e15c43240da7ef07da77bf690599c0de96eb635f40e67cb026d0c14 byte=127035 vao=198 ra_QUA=198
+[A] lease_publish: 198/198 đạt; đã chạy=198, bỏ qua=0
+[B] lease_publish: 198/198 đạt; đã chạy=198, bỏ qua=0
+lease_publish: 198/198 đạt; đã chạy=198, bỏ qua=0
+== dot bien L (#677) tren git archive 163fd5d, --chi-ca
+nen t195 lease_publish: 1/1 đạt; đã chạy=1, bỏ qua=0 traceback=0
+nen t196 lease_publish: 1/1 đạt; đã chạy=1, bỏ qua=0 traceback=0
+nen t197 lease_publish: 1/1 đạt; đã chạy=1, bỏ qua=0 traceback=0
+nen t178 lease_publish: 1/1 đạt; đã chạy=1, bỏ qua=0 traceback=0
+L t195 lease_publish: 0/1 đạt; đã chạy=1, bỏ qua=0 traceback=0
+L t196 lease_publish: 0/1 đạt; đã chạy=1, bỏ qua=0 traceback=0
+L t197 lease_publish: 0/1 đạt; đã chạy=1, bỏ qua=0 traceback=0
+L t178 lease_publish: 0/1 đạt; đã chạy=1, bỏ qua=0 traceback=0

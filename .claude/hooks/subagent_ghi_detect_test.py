@@ -1,7 +1,8 @@
 """Phan chung cho packet #329 pha 2 — may phat hien ghi cua subagent read-only.
 
 Chay: python3 .claude/hooks/subagent_ghi_detect_test.py
-Thoat 0 khi VA CHI KHI moi ca DAT va moi dot bien BI GIET.
+Thoat 0 khi VA CHI KHI moi ca DAT va moi dot bien BI GIET — che do DU. Che do NHE (#651,
+`SUBAGENT_GHI_DETECT_KHONG_DOT_BIEN=1`): 0 khi moi ca DAT, KHONG chay dot bien nao.
 
 Doc truoc khi sua: bo test nay do DETECTOR, khong do hook runtime cua nen. Ranh gioi ay
 duoc ghi thang o `A10` cuoi tep — dung doc "N/N dat" thanh "chot da co hieu
@@ -1131,6 +1132,55 @@ def t26i_record_boundary_regression(h):
     return not xau, "loi: " + "; ".join(xau) if xau else f"matrix passed ({so_ca} cases)"
 
 
+# ── CHE DO NHE (#651): bo MOI vong dot bien, ca NEN chay du (run 36246637438: 291,81 s; ca nen 7,6 s) ──
+CO_NHE = "SUBAGENT_GHI_DETECT_KHONG_DOT_BIEN"
+
+
+def che_do_chay(env=None):
+    """`nhe` | `du`. Co nhe chi nhan dung "1" — rong/"0"/"true" deu la `du`."""
+    return "nhe" if (os.environ if env is None else env).get(CO_NHE) == "1" else "du"
+
+
+def dong_nhe(so_ca_dat, so_ca, so_dot_bien):
+    """Dong bang chung nhe. KHONG mang chu `bi giet` ⇒ PHAI truot `MAU_DAY_DU` cua so dang ky."""
+    return (f"TONG: CA {so_ca_dat}/{so_ca} dat · "
+            f"DOT BIEN {so_dot_bien} muc CHE DO NHE — do khi diff cham vung")
+
+
+def dat_nhe(so_ca, do, so_dot_bien):
+    """Tieu chi DAT cua che do nhe van doi SO DUONG hai ve (#319): bang dot bien rong la DO."""
+    return so_ca > 0 and do == 0 and so_dot_bien > 0
+
+
+def ket_thuc_nhe(so_ca, do, so_dot_bien):
+    """Duoi nhanh nhe: dong bang chung, TONG, roi cong bo gioi han. Tra ma thoat."""
+    dat = dat_nhe(so_ca, do, so_dot_bien)
+    print(dong_nhe(so_ca - do, so_ca, so_dot_bien))
+    print("TONG:", "DAT" if dat else "DO")
+    _in_gioi_han()  # #651 Codex luot 3-4: nhe KHONG duoc cat khoi nay
+    return 0 if dat else 1
+
+
+def t27_che_do_nhe_chi_khi_co_DUNG_1(h):
+    ok = (che_do_chay({CO_NHE: "1"}) == "nhe" and che_do_chay({}) == "du"
+          and all(che_do_chay({CO_NHE: v}) == "du" for v in ("", "0", "true", " 1", "1 ")))
+    return ok, "vi tu che do: nhe chi khi co == '1'"
+
+
+def t28_dong_nhe_KHONG_gia_dang_dong_du_va_bang_rong_thi_DO(h):
+    d = dong_nhe(42, 42, 25)
+    ok = ("bi giet" not in d and "CHE DO NHE" in d and dat_nhe(42, 0, 25)
+          and not dat_nhe(42, 0, 0) and not dat_nhe(42, 1, 25) and not dat_nhe(0, 0, 25))
+    return ok, "che do nhe: dong bang chung rieng, bang dot bien rong -> DO"
+
+
+def t29_nhanh_nhe_VAN_cong_bo_gioi_han(h):
+    with contextlib.redirect_stdout(__import__("io").StringIO()) as b:
+        rc = ket_thuc_nhe(2, 0, 1)
+    ok = rc == 0 and "TONG: DAT" in (o := b.getvalue()) and "A10 :" in o and "NO  :" in o and o.index("TONG: DAT") < o.index("A10 :")
+    return ok, "nhanh nhe: rc=0, A10/NO in SAU `TONG`"
+
+
 CA = [t1_khong_ghi_thi_clean, t2_ghi_tep_theo_doi_thi_changed,
       t3_ghi_tep_BI_IGNORE_van_changed, t4_sua_tep_da_theo_doi_thi_changed,
       t4b_XOA_tep_da_theo_doi_thi_changed, t4c_DOI_TEN_tep_da_theo_doi_thi_changed,
@@ -1163,7 +1213,10 @@ CA = [t1_khong_ghi_thi_clean, t2_ghi_tep_theo_doi_thi_changed,
       t26f_arrow_name_decoy_collision_false_clean,
       t26g_malformed_syntax_rejection,
       t26h_real_git_rename_of_arrow_filename,
-      t26i_record_boundary_regression]
+      t26i_record_boundary_regression,
+      # --- #651: che do nhe ---
+      t27_che_do_nhe_chi_khi_co_DUNG_1,
+      t28_dong_nhe_KHONG_gia_dang_dong_du_va_bang_rong_thi_DO, t29_nhanh_nhe_VAN_cong_bo_gioi_han]
 
 # --- DOT BIEN: moi cai go DUNG MOT tinh chat, va phai lam it nhat mot ca DO ---
 DOT_BIEN = [
@@ -1289,6 +1342,21 @@ DOT_BIEN_NHAM_TEST = [
      "        if not dung_duoc:  # named-mutant: reject-present-unusable-bash\n",
      "        if False:  # named-mutant: subagent_present_unusable_bash_is_accepted\n",
      "t21_lenh_hook_chay_duoc_khi_CLAUDE_PROJECT_DIR_KHONG_DAT"),
+    # #651: moi chot cua che do nhe mot dot bien rieng.
+    ("mt4_co_nhe_nhan_moi_gia_tri_khac_rong",
+     '    return "nhe" if (os.environ if env is None else env).get(CO_NHE) == "1" else "du"\n',
+     '    return "nhe" if (os.environ if env is None else env).get(CO_NHE) else "du"\n',
+     "t27_che_do_nhe_chi_khi_co_DUNG_1"),
+    ("mt5_dat_nhe_bo_doi_so_dot_bien_duong",
+     "    return so_ca > 0 and do == 0 and so_dot_bien > 0\n",
+     "    return so_ca > 0 and do == 0\n",
+     "t28_dong_nhe_KHONG_gia_dang_dong_du_va_bang_rong_thi_DO"),
+    ("mt6_dong_nhe_gia_dang_dong_du",
+     '            f"DOT BIEN {so_dot_bien} muc CHE DO NHE — do khi diff cham vung")\n',
+     '            f"DOT BIEN {so_dot_bien}/{so_dot_bien} bi giet")\n',
+     "t28_dong_nhe_KHONG_gia_dang_dong_du_va_bang_rong_thi_DO"),
+    ("mt7_nhe_cat_cong_bo_gioi_han", "    _in_gioi_han()  # #651 Codex luot 3-4: nhe KHONG duoc cat khoi nay\n",
+     "    pass\n", "t29_nhanh_nhe_VAN_cong_bo_gioi_han"),
 ]
 
 
@@ -1375,6 +1443,28 @@ def _chay_dot_bien_nham_test():
     return song
 
 
+def _in_gioi_han():
+    """Cong bo gioi han cua bo — in o CA HAI che do (#651: nhe tung cat mat khoi nay).
+    Review Codex CLI luot 2 tren 1b885af, P3."""
+    # ── A10 — RANH GIOI CUA CHINH BO TEST NAY, khai o day chu khong giau trong PR ──
+    print("A10 : hieu luc cua `SubagentStop` exit 2 tren nen — KHONG DO DUOC trong bo nay.")
+    print("      Bo nay do DETECTOR bang payload tong hop; no KHONG chung minh hook that su")
+    print("      duoc nen goi, cung khong chung minh ma thoat 2 co tac dung. Muon do phai")
+    print("      phong mot subagent THAT. D1 (CHI TO CAO) chon chinh vi phep do ay chua co.")
+    # ── NO CO TEN, khai o DAY chu khong giau trong PR ────────────────────────────────────
+    # Cross-review luot 2 (PR #342) doi bon tieu chi; luot 3 dong duoc HAI, con HAI khong
+    # dong duoc bang mot ca test va noi thang vi sao, thay vi de trong.
+    print("NO  : `snapshot-ngoai-cay-KHONG-co-bien-toan-ven` — anh chup nam NGOAI cay nhung")
+    print("      subagent VAN ghi de duoc no. `agent_id` nay da nam TRONG anh chup (t23),")
+    print("      nhung do la chot chong DOI TEN, khong phai bien toan ven: ke sua duoc tep")
+    print("      thi sua duoc ca truong ay. Bien toan ven that doi mot KHOA ma subagent")
+    print("      khong doc duoc, va D1 khong co thu ay. Khong va bang bam dai hon.")
+    print("NO  : `A3/A8/A11-chua-co-ca-dong` — `install`, `tl nlm-reconcile`, ghi NGOAI kho,")
+    print("      mo phong mang: bo nay dung payload TONG HOP nen khong dieu khien duoc mot")
+    print("      agent THAT lam nhung viec ay. Ba dang GHI cua A4 (xoa · doi ten · staged)")
+    print("      DA co ca rieng tu luot 3 — xem t4b/t4c/t4d.")
+
+
 def chay():
     do_san = set()          # ca DA DO o NEN — doc chu thich duoi truoc khi sua
     do = 0
@@ -1386,6 +1476,8 @@ def chay():
             print(f"  DO   {f.__name__:52} {msg}")
         else:
             print(f"  ok   {f.__name__:52} {msg}")
+    if che_do_chay() == "nhe":  # #651: cat DUNG ba vong dot bien; ca NEN o tren DA chay du
+        return ket_thuc_nhe(len(CA), do, len(DOT_BIEN))
     goc = HOOK.read_text(encoding="utf-8")
     song = []
     # ── DOT BIEN CHI CO NGHIA KHI NEN XANH ───────────────────────────────────────────────
@@ -1441,23 +1533,7 @@ def chay():
               f"DOT BIEN {tap_giet}/{len(DOT_BIEN)} bi giet")
     dat = (len(CA) > 0 and do == 0 and len(DOT_BIEN) > 0 and not song)
     print("TONG:", "DAT" if dat else "DO")
-    # ── A10 — RANH GIOI CUA CHINH BO TEST NAY, khai o day chu khong giau trong PR ──
-    print("A10 : hieu luc cua `SubagentStop` exit 2 tren nen — KHONG DO DUOC trong bo nay.")
-    print("      Bo nay do DETECTOR bang payload tong hop; no KHONG chung minh hook that su")
-    print("      duoc nen goi, cung khong chung minh ma thoat 2 co tac dung. Muon do phai")
-    print("      phong mot subagent THAT. D1 (CHI TO CAO) chon chinh vi phep do ay chua co.")
-    # ── NO CO TEN, khai o DAY chu khong giau trong PR ────────────────────────────────────
-    # Cross-review luot 2 (PR #342) doi bon tieu chi; luot 3 dong duoc HAI, con HAI khong
-    # dong duoc bang mot ca test va noi thang vi sao, thay vi de trong.
-    print("NO  : `snapshot-ngoai-cay-KHONG-co-bien-toan-ven` — anh chup nam NGOAI cay nhung")
-    print("      subagent VAN ghi de duoc no. `agent_id` nay da nam TRONG anh chup (t23),")
-    print("      nhung do la chot chong DOI TEN, khong phai bien toan ven: ke sua duoc tep")
-    print("      thi sua duoc ca truong ay. Bien toan ven that doi mot KHOA ma subagent")
-    print("      khong doc duoc, va D1 khong co thu ay. Khong va bang bam dai hon.")
-    print("NO  : `A3/A8/A11-chua-co-ca-dong` — `install`, `tl nlm-reconcile`, ghi NGOAI kho,")
-    print("      mo phong mang: bo nay dung payload TONG HOP nen khong dieu khien duoc mot")
-    print("      agent THAT lam nhung viec ay. Ba dang GHI cua A4 (xoa · doi ten · staged)")
-    print("      DA co ca rieng tu luot 3 — xem t4b/t4c/t4d.")
+    _in_gioi_han()
     return 0 if dat else 1
 
 

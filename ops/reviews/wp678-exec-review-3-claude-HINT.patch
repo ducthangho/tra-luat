@@ -1,0 +1,123 @@
+# lop: a9-mien-refs-remotes-khong-co-ca
+# hang: P3
+--- ops/lease_publish_test.py
++++ ops/lease_publish_test.py
+@@ -12549,6 +12549,41 @@
+ 
+ 
+ @ca
++def t217_a9_sai_kieu_chi_qua_ref_tuong_trung_khong_phai_HEAD():
++    """Miền A9 chỉ bỏ ref có leaf HEAD VÀ tượng trưng — ref tượng trưng mang tên KHÁC vẫn phải quét, kể cả khi nó trỏ ra
++    ngoài `refs/heads/*` và `refs/remotes/*`. Review thi hành wp678 lượt 3 đo: bỏ MỌI ref tượng trưng (`if symref:`)
++    sống cả 45 ca `t217_*` và toàn suite trên 0dd86c6, và báo sạch rc=0 trên đúng kho này (lease sai kiểu chỉ tới
++    được qua `refs/heads/alias` → `refs/tags/t`)."""
++    with San() as s:
++        kho = _a9_kho(s, {"ops/leases/x.yaml": _A9_OK})
++        _wp678_g(kho, "checkout", "-q", "-b", "tam")
++        oid = _a9_commit(kho, {"ops/leases/y.yaml": "lease_id: on\n"})
++        _wp678_g(kho, "update-ref", "refs/tags/t", oid)
++        _wp678_g(kho, "checkout", "-q", "main")
++        _wp678_g(kho, "branch", "-q", "-D", "tam")
++        _wp678_g(kho, "symbolic-ref", "refs/heads/alias", "refs/tags/t")
++        d = _a9_chot("ref tượng trưng khác HEAD", _a9_cli(kho), 1, ["lease_id=True"])
++        chot(d["errors"][0]["refs"] == ["refs/heads/alias"] and sorted(d["refs"]) == ["refs/heads/alias", "refs/heads/main"],
++             f"A9 ref tượng trưng khác HEAD: {d['errors']} {sorted(d['refs'])}")
++
++
++@ca
++def t217_a9_sai_kieu_chi_o_origin_HEAD_khong_tuong_trung():
++    """Luật bỏ của miền A9 đọc SYMREF, không đọc TÊN: `refs/remotes/origin/HEAD` là ref THƯỜNG thì vẫn phải quét. Review
++    thi hành wp678 lượt 3 đo: bỏ theo đúng tên `refs/remotes/origin/HEAD` (không xét symref — thành ngữ quen của script)
++    sống cả 45 ca `t217_*` và toàn suite trên 0dd86c6, và báo sạch rc=0 trên đúng kho này."""
++    with San() as s:
++        kho = _a9_kho(s, {"ops/leases/x.yaml": _A9_OK})
++        _wp678_g(kho, "checkout", "-q", "-b", "tam")
++        oid = _a9_commit(kho, {"ops/leases/y.yaml": "lease_id: on\n"})
++        _wp678_g(kho, "update-ref", "refs/remotes/origin/HEAD", oid)
++        _wp678_g(kho, "checkout", "-q", "main")
++        _wp678_g(kho, "branch", "-q", "-D", "tam")
++        d = _a9_chot("origin/HEAD thường", _a9_cli(kho), 1, ["lease_id=True"])
++        chot(d["errors"][0]["refs"] == ["refs/remotes/origin/HEAD"], f"A9 origin/HEAD thường: {d['errors']}")
++
++
++@ca
+ def t217_a9_thieu_lease_id():
+     _a9_mot_tep("thiếu ID", "packet_issue: 5\n", 1, ["thieu_lease_id"])
+ 
+# lop: khoa-t218-hep-cat-cau-truc-va-nhan
+# hang: P3
+--- ops/lease_publish_test.py
++++ ops/lease_publish_test.py
+@@ -12224,7 +12224,9 @@
+     trần (bí danh YAML lồng nhau 591 byte từng nở thành 2,79 triệu ký tự); chuỗi lệch `LEASE_ID` mang nhãn `sai dạng`.
+     Review thi hành lượt 2: trần phải đến từ CẮT THEO CẤU TRÚC (không chạm lá); D8 phải mang nhãn `sai dạng` cho chuỗi
+     như D7; câu `CHAN [12]` không được gọi mọi `lease_id` lỗi là `sai kiểu`. Gỡ từng điều ấy mà toàn suite vẫn 259/259
+-    trên 7a3a2f6: repr dựng sẵn rồi cắt chuỗi (đo riêng); nhãn D8 luôn `sai kiểu` cùng câu `CHAN [12]` cũ (đo gộp)."""
++    trên 7a3a2f6: repr dựng sẵn rồi cắt chuỗi (đo riêng); nhãn D8 luôn `sai kiểu` cùng câu `CHAN [12]` cũ (đo gộp).
++    Review thi hành lượt 3: `'x'` vắng trong ĐẦU RA chưa chứng minh `repr()` đầy đủ không được DỰNG; lính canh sâu hơn
++    `maxlevel` đo ĐƯỜNG ĐI ở hàm chung, `_repr_an_toan`, nhãn D7/D8, D9 và ở các đường in D7/D8/D9 qua CLI."""
+     mod = _nap_cong()
+     lon = "0x" + "f" * 4000
+ 
+@@ -12254,6 +12256,25 @@
+         # thừa: bom 9 cấp (421 byte bí danh) đo 43 s / 2,2 GiB RSS, so với 0 s / 52 MiB khi cắt theo cấu trúc (review
+         # thi hành lượt 2).
+         chot("'x'" not in str(td), f"bí danh lồng: repr phải cắt theo cấu trúc, không chạm lá; được …{str(td)[-160:]!r}")
++        # Review thi hành lượt 3: `'x'` vắng chỉ chứng minh ĐẦU RA đã cắt theo cấu trúc, không chứng minh `repr()` đầy đủ
++        # KHÔNG được dựng — "dựng `repr()` đầy đủ, ngắn thì dùng, dài thì reprlib" cho đúng đầu ra ấy mà bom 9 cấp đo 68 s /
++        # 2,2 GiB RSS; và D7/D8/D9 gọi thẳng `repr()` có `try` (vòng qua `_repr_an_toan`) cũng sống toàn suite trên 0dd86c6.
++        # Lính canh nằm sâu hơn `maxlevel`: `repr()` đầy đủ chạm tới nó, cắt theo cấu trúc thì không.
++        class _LinhCanh:
++            cham = 0
++
++            def __repr__(self):
++                type(self).cham += 1
++                return "LINH_CANH"
++        sau = [[[[[_LinhCanh()]]]]]
++        for ten, fn, mong in (("_repr_an_toan", mod._repr_an_toan, "TRA"),
++                              ("_nhan_lease_id_sai", mod._nhan_lease_id_sai, "TRA"),
++                              ("_lease_id_hien_thi", lambda v: mod._lease_id_hien_thi({"lease_id": v}), "TRA"),
++                              ("_lease_id_hop_le", mod._lease_id_hop_le, f"Chan{RC_NOI_DUNG}")):
++            _LinhCanh.cham = 0
++            kq, _td = _thu(fn, sau)
++            chot(kq == mong and _LinhCanh.cham == 0,
++                 f"{ten}: không được dựng repr() đầy đủ rồi mới cắt (lá sâu bị chạm {_LinhCanh.cham} lần), được {kq}")
+         cay = _wp678_kho(s, {"a": {"ops/leases/x.yaml": _wp678_lease_giu(lon)},
+                              "b": {"ops/leases/x.yaml": _wp678_lease_giu("'co khoang trang'")}})
+         kq, ra = _thu(_goi_main, mod, "ai-dang-giu", "ops/x.md", "--root", str(cay))
+@@ -12272,6 +12293,35 @@
+         chot(sum(x.startswith("DU_BAO: KHÔNG_XÁC_ĐỊNH lease_id sai kiểu ") for x in du_bao) == 1
+              and sum(x.startswith("DU_BAO: KHÔNG_XÁC_ĐỊNH lease_id sai dạng 'co khoang trang' ") for x in du_bao) == 1,
+              f"D8: nhãn phải tách sai kiểu (int) / sai dạng (chuỗi) như D7; được {du_bao!r}")
++        # D7/D8 qua CLI: thay `lease_id` của mọi lease quét được bằng cấu trúc mang lính canh, để mọi đường in
++        # `KHÔNG_XÁC_ĐỊNH` (kể cả đường gọi thẳng `repr()` thay cho `_nhan_lease_id_sai`) đều bị đo, không riêng các hàm ở trên.
++        quet_goc = mod._quet_lease_toan_kho
++        mod._quet_lease_toan_kho = lambda *a, **k: [dict(m, lease=dict(m["lease"], lease_id=sau)) for m in quet_goc(*a, **k)]
++        try:
++            _LinhCanh.cham = 0
++            kq, ra = _thu(_goi_main, mod, "ai-dang-giu", "ops/x.md", "--root", str(cay), "--du-bao")
++        finally:
++            mod._quet_lease_toan_kho = quet_goc
++        dong = ra[1].splitlines() if kq == "TRA" else []
++        chot(kq == "TRA" and ra[0] == RC_KHONG_XAC_DINH_A0 and _LinhCanh.cham == 0
++             and sum(x.startswith("KHÔNG_XÁC_ĐỊNH\tlease_id sai kiểu ") for x in dong) == 2
++             and sum(x.startswith("DU_BAO: KHÔNG_XÁC_ĐỊNH lease_id sai kiểu ") for x in dong) == 2,
++             f"D7/D8: không được dựng repr() đầy đủ (lá sâu bị chạm {_LinhCanh.cham} lần); được {kq}: {str(ra)[:300]!r}")
++        # D9 qua CLI (`con-tro-treo`): cả hai đường in `CON_TRỎ_TREO` và `CON_TRỎ_GỢI_Ý` (:2389, :2393 trên 0dd86c6).
++        (s / "d9").mkdir()
++        cay9 = _wp678_kho(s / "d9", {"c": {"ops/leases/x.yaml": _yaml_that("wp-d9") + "tham_chieu_truong_lease: "
++                                                                   "[vung_duoc_phep_cham]\nghi_chu: xem vung_duoc_phep_cham\n"}})
++        mod._quet_lease_toan_kho = lambda *a, **k: [dict(m, lease=dict(m["lease"], lease_id=sau)) for m in quet_goc(*a, **k)]
++        try:
++            _LinhCanh.cham = 0
++            kq, ra = _thu(_goi_main, mod, "con-tro-treo", "--root", str(cay9))
++        finally:
++            mod._quet_lease_toan_kho = quet_goc
++        dong = ra[1].splitlines() if kq == "TRA" else []
++        chot(kq == "TRA" and ra[0] == 0 and _LinhCanh.cham == 0
++             and sum(x.startswith("CON_TRỎ_TREO\t<lease_id không hợp lệ: ") for x in dong) == 1
++             and sum(x.startswith("CON_TRỎ_GỢI_Ý\t<lease_id không hợp lệ: ") for x in dong) == 1,
++             f"D9: không được dựng repr() đầy đủ (lá sâu bị chạm {_LinhCanh.cham} lần); được {kq}: {str(ra)[:300]!r}")
+ 
+ 
+ # =====================================================================================

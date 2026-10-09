@@ -1,0 +1,38 @@
+chua chay tren cay that — executor tu ap, tu do, tu chiu trach nhiem commit
+HINT luot 15 (reviewer Claude Opus 5.5, advisory_review) cho finding bang-do-thieu-neo-va-thieu-kiem-ke — CHI tep test; can kem sua docstring san pham o khoi diff trong VERDICT.
+diff --git ops/ci_duong_nhanh_test.py ops/ci_duong_nhanh_test.py
+index 0a420b2..9974779 100644
+--- ops/ci_duong_nhanh_test.py
++++ ops/ci_duong_nhanh_test.py
+@@ -2338,6 +2338,21 @@ def t98_docstring_khong_ghim_so_ca_va_khoang_ten():
+         bang(not thay, f"{ten}: docstring ghim so ca/khoang ten (se troi): {thay}")
+ 
+ 
++@ca
++def t98b_ti_le_trong_docstring_san_pham_phai_co_neo_commit():
++    """Cross-review luot 15 (`bang-do-thieu-neo-va-thieu-kiem-ke`): ti le `N/M` trong docstring SAN PHAM la so DO tai MOT commit.
++    Khong neo commit thi no troi khi merge master: `6/113` cua D2 thanh 6/119 sau merge 20ec8d5 (tu so dung NGAU NHIEN — cung
++    6 tep cu, mau so troi). Moi doan (tach theo dong trong hoac gach dau dong `·`) co ti le phai co MOT SHA (7-40 hex, co it nhat
++    mot chu a-f) trong CUNG doan. Khong kiem SHA ton tai (clone nong cua may dev se do oan); chot do su CO MAT cua neo."""
++    ma_sp = ast.get_docstring(ast.parse((CAY / "ops" / "ci_duong_nhanh.py").read_text(encoding="utf-8"))) or ""
++    ti_le = re.compile(r"(?<![\w/.])\d{1,4}/\d{1,4}(?![\w/])")
++    neo = re.compile(r"(?<![0-9a-f])(?=[0-9a-f]*[a-f])[0-9a-f]{7,40}(?![0-9a-f])")
++    co_ti_le = [d for d in re.split(r"\n\s*\n|\n\s*·\s", ma_sp) if ti_le.search(d)]
++    bang(co_ti_le, "ha tang: docstring san pham khong con ti le nao — ca nay khong do gi (doi mau hoac bo ca)")
++    thieu = [ti_le.findall(d) for d in co_ti_le if not neo.search(d)]
++    bang(not thieu, f"ti le trong docstring san pham khong neo commit (se troi khi merge master): {thieu}")
++
++
+ @ca_tu_kiem
+ def t99_khong_doi_kieu_ngoai_le_thanh_tin_hieu():
+     """Bộ phân hạng tin `TinHieuChotCa`; nên KHÔNG có `except` nào bắt ngoại lệ RỘNG mà lại ném/gọi tín hiệu ấy —
+@@ -2536,6 +2551,9 @@ DOT_BIEN = [
+     ("yml_nuot_loi_job_gate_registry", _yml("  gate-registry:\n    # packet #463", "  gate-registry:\n    continue-on-error: true\n    # packet #463"), ("y10_khong_continue_on_error_ngoai_danh_sach_cho_phep",)),
+     ("yml_buoc_phan_loai_bieu_thuc", _yml("        id: phan-loai\n        if: ${{ github.event_name == 'pull_request' }}\n        continue-on-error: true\n", "        id: phan-loai\n        if: ${{ github.event_name == 'pull_request' }}\n        continue-on-error: ${{ true }}\n"), ("y10_khong_continue_on_error_ngoai_danh_sach_cho_phep",)),
+     ("test_docstring_ghim_so_ca", _test("(đã trôi hai lượt " + "liền): nguồn", "(đã trôi hai lượt " + "liền; hien 43/55 ca): nguồn"), ("t98_docstring_khong_ghim_so_ca_va_khoang_ten",)),
++    # ---- cross-review luot 15 (`bang-do-thieu-neo-va-thieu-kiem-ke`): moi ti le trong docstring san pham mot dot bien mat neo
++    ("docstring_ti_le_D1_mat_neo", _ma("tính từ 1741e0a), 63 lần", "tính từ HEAD), 63 lần"), ("t98b_ti_le_trong_docstring_san_pham_phai_co_neo_commit",)),
++    ("docstring_ti_le_D2_mat_neo", _ma(" (đo bởi reviewer lượt 1 tại 1741e0a, khi kho có 113 tệp lease; sau merge master 20ec8d5 kho có 119\n    tệp, clone 6 ref vẫn trượt đúng 6 tệp cũ ấy — đo lại cross-review lượt 15)", " (đo bởi reviewer lượt 1)"), ("t98b_ti_le_trong_docstring_san_pham_phai_co_neo_commit",)),
+     # ---- lop dac-ta-bo-mat-kiem-du-lieu-ho-so (luot 2): thao tac GOI ca that
+     ("ca_du_lieu_khong_goi_ham", _ma("m[ten]()", "m[ten]"), ("t22b_ca_du_lieu_phai_thuc_thi_tung_ca",)),
+     ("ca_du_lieu_bo_t23", _ma('CA_DU_LIEU = ("t23_MOI_lease_THAT_trong_kho_phai_QUA", ', "CA_DU_LIEU = ("), ("t22b_ca_du_lieu_phai_thuc_thi_tung_ca",)),

@@ -1,0 +1,54 @@
+# lop: a9-mien-refs-remotes-khong-co-ca
+# hang: P3
+--- ops/lease_publish_test.py
++++ ops/lease_publish_test.py
+@@ -12633,6 +12633,49 @@
+         chot(d["errors"][0]["refs"] == ["refs/remotes/origin/HEAD"], f"A9 origin/HEAD thường: {d['errors']}")
+ 
+ 
++def _a9_tuong_trung_ra_ngoai_mien(s: Path, ten_sym: str, dich: str):
++    """Kho tạm cho miền ref TƯỢNG TRƯNG của A9: `main` sạch; commit mang `lease_id: on` CHỈ tới được qua ref `dich` NGOÀI
++    miền `refs/heads/*`, `refs/remotes/*`, và `ten_sym` là ref TƯỢNG TRƯNG trỏ tới `dich`. Trả kết quả `_a9_cli`: lease sai
++    kiểu chỉ lộ ra khi helper QUÉT `ten_sym`. Các ca dùng hai đích khác loại (`refs/tags/…`, `refs/pull/…`) để luật bỏ không
++    thể dựa vào loại của đích."""
++    kho = _a9_kho(s, {"ops/leases/x.yaml": _A9_OK})
++    _wp678_g(kho, "checkout", "-q", "-b", "tam")
++    oid = _a9_commit(kho, {"ops/leases/y.yaml": "lease_id: on\n"})
++    _wp678_g(kho, "update-ref", dich, oid)
++    _wp678_g(kho, "checkout", "-q", "main")
++    _wp678_g(kho, "branch", "-q", "-D", "tam")
++    _wp678_g(kho, "symbolic-ref", ten_sym, dich)
++    return _a9_cli(kho)
++
++
++@ca
++def t217_a9_sai_kieu_chi_qua_ref_tuong_trung_duoi_remotes_khong_phai_HEAD():
++    """Ô còn thiếu của miền A9 (tiền tố `heads`/`remotes` × leaf `HEAD`/khác × tượng trưng/thường): ref TƯỢNG TRƯNG dưới
++    `refs/remotes/*` mà leaf KHÁC `HEAD` vẫn phải quét — luật bỏ không đọc tiền tố. Review thi hành wp678 lượt 4 đo: bỏ mọi
++    ref tượng trưng dưới `refs/remotes/` (`if symref and ten.startswith("refs/remotes/"):`) sống cả 47 ca `t217_*` và toàn
++    suite trên 6a7220a, và báo sạch rc=0 khi lease sai kiểu chỉ tới được qua `refs/remotes/upstream/alias` → `refs/tags/t`.
++    Đích ở đây là `refs/pull/1/head` (không phải tag) để luật "bỏ ref tượng trưng trừ khi đích là tag" cũng ĐỎ."""
++    with San() as s:
++        d = _a9_chot("remotes tượng trưng khác HEAD",
++                     _a9_tuong_trung_ra_ngoai_mien(s, "refs/remotes/upstream/alias", "refs/pull/1/head"), 1, ["lease_id=True"])
++        chot(d["errors"][0]["refs"] == ["refs/remotes/upstream/alias"]
++             and sorted(d["refs"]) == ["refs/heads/main", "refs/remotes/upstream/alias"],
++             f"A9 remotes tượng trưng khác HEAD: {d['errors']} {sorted(d['refs'])}")
++
++
++@ca
++def t217_a9_sai_kieu_qua_ref_tuong_trung_leaf_gan_HEAD():
++    """Luật bỏ của miền A9 so NGUYÊN leaf với đúng chuỗi `HEAD` — không so đuôi, chuỗi con hay bỏ hoa/thường: ref tượng
++    trưng có leaf `xHEAD`, `HEAD-x`, `head` vẫn phải quét. Review thi hành wp678 lượt 4 đo: `ten.endswith("HEAD")`,
++    `"HEAD" in ten` và `leaf.upper() == "HEAD"` (cùng giữ `and symref`) sống cả 47 ca `t217_*` và toàn suite trên 6a7220a,
++    và báo sạch rc=0 khi lease sai kiểu chỉ tới được qua ref tượng trưng mang leaf ấy. Mỗi leaf một kho tạm, một chốt."""
++    for ten in ("refs/heads/xHEAD", "refs/heads/HEAD-x", "refs/heads/head"):
++        with San() as s:
++            d = _a9_chot(f"leaf gần HEAD {ten}", _a9_tuong_trung_ra_ngoai_mien(s, ten, "refs/tags/t"), 1, ["lease_id=True"])
++            chot(d["errors"][0]["refs"] == [ten] and sorted(d["refs"]) == sorted(["refs/heads/main", ten]),
++                 f"A9 leaf gần HEAD {ten}: {d['errors']} {sorted(d['refs'])}")
++
++
+ @ca
+ def t217_a9_thieu_lease_id():
+     _a9_mot_tep("thiếu ID", "packet_issue: 5\n", 1, ["thieu_lease_id"])

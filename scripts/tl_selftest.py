@@ -21929,7 +21929,15 @@ def run() -> int:
         # `docs/PROTOCOL_DA_PHIEN.md` (dòng §20) là sửa, không thêm. `RELEASE_MANIFEST.json` có đổi
         # trong cùng packet, nhưng CHỈ vì băm của CHÍNH TỆP NÀY đổi — không tệp runtime nào được thêm
         # nên `file_count` giữ **180** và trần Package 200 không nhúc nhích; cây thật = 180 + 75 = **255**.
-        ok3 = int(j.get("file_count") or 0) == len(paths) and len(paths) + 75 == 255
+        # KÊ KHAI SLOT (WP710 — land PR #714, Spec r4 mục 7 đã nêu ứng viên 183 tệp): gói 180 → **183**.
+        # Thêm đúng BA tệp vào gói, không tệp `docs/` nào đổi (vẫn 75):
+        #   + `scripts/nlm-credential-refresh.ps1`       — wrapper refresh → canary → stage (RUNTIME trên máy giữ hồ sơ gốc;
+        #     `references/RUNBOOK.md` trỏ tới nó nên nó PHẢI có trong gói, nếu không `release-verify --strict` đỏ).
+        #   + `scripts/nlm-credential-refresh.Tests.ps1` — bộ test hành vi của wrapper.
+        #   + `changelog.d/wp-710.md`                    — mảnh changelog của packet.
+        # Hai tệp sau là dev-side theo nghĩa hẹp; chúng vào gói vì bộ lọc gói hiện không loại chúng, không vì runtime
+        # cần. Cây thật = 183 + 75 = **258**; trần Package 200 còn 17 khe.
+        ok3 = int(j.get("file_count") or 0) == len(paths) and len(paths) + 75 == 258
         d = root / "docs"
         tren_dia = sorted(d.rglob("*.md")) if d.is_dir() else []
         ok4 = (len(tren_dia) == 75
@@ -21973,8 +21981,9 @@ def run() -> int:
             j = _j209.loads(mf.read_text(encoding="utf-8"))
             paths = [str(x.get("path") or "") for x in (j.get("files") or [])]
             ok2 = not [p for p in paths if p.startswith(".agents/")]
-            # RATCHET: goi giu 180. Do o day => co tep RUNTIME duoc them, phai ke khai slot CO CHU DICH.
-            ok3 = int(j.get("file_count") or 0) == len(paths) and len(paths) == 180
+            # RATCHET: goi giu 183 (WP710, land PR #714: 180 -> 183, ke khai slot day du o r291_docs_ngoai_goi).
+            # Do o day => co tep RUNTIME duoc them, phai ke khai slot CO CHU DICH.
+            ok3 = int(j.get("file_count") or 0) == len(paths) and len(paths) == 183
         # RANG HAI CHIEU tren CAY TAM: khoa VAO => loai; go khoa RA => phai QUAY LAI vao goi.
         # Khong co ve thu hai thi ca chi chung minh "hang co chua chuoi", khong chung minh hang ay
         # CO HIEU LUC — va mot phep kiem khong the do thi khong phai bang chung.

@@ -118,8 +118,37 @@ for r in [x for x in h["pre_merge_checks"] + h["post_merge_checks"] if "run_id" 
          and r["workflow"].startswith(j["path"]), f"run {r['run_id']}: event/attempt/head/path khop REST")
     if j["conclusion"] != "skipped":
         chot(all(r["run_id"] in pham_vi[c] for c in can), f"run {r['run_id']}: nam trong pham_vi_run cua ca 3 muc")
-for f, mong in (("checkruns-658bd0c.json", 17), ("checkruns-3fc0932.json", 14)):
-    chot(json.loads((P / f).read_text(encoding="utf-8"))["total_count"] == mong, f"{f}: total_count {mong}")
+# 4b. TUNG check run, khong chi total_count (Codex PR #723, comment 4232301588): moi object phai completed, head dung,
+#     va dem theo (run_id, conclusion) phai khop dong `check_runs` khai cho run do; tong theo conclusion phai khop
+#     tom tat khai (skipped dem RIENG, khong gop vao success).
+def cr(f):
+    d = json.loads((P / f).read_text(encoding="utf-8"))
+    chot(d["total_count"] == len(d["check_runs"]), f"{f}: total_count == so object ({len(d['check_runs'])})")
+    return [(int(re.search(r"/runs/(\d+)/", c["details_url"]).group(1)), c["status"], c["conclusion"], c["head_sha"])
+            for c in d["check_runs"]]
+
+
+def dem(ds):
+    out = {}
+    for _, _, kl, _ in ds:
+        out[kl] = out.get(kl, 0) + 1
+    return out
+
+
+bang = {"658bd0c": cr("checkruns-658bd0c.json"), "3fc0932": cr("checkruns-3fc0932.json")}
+for r in [x for x in h["pre_merge_checks"] + h["post_merge_checks"] if "run_id" in x]:
+    ds = [c for c in bang[r["head_sha"][:7]] if c[0] == r["run_id"]]
+    m = re.match(r"(\d+) .*— \d* ?(success|skipped)", r["check_runs"])
+    chot(m is not None and len(ds) == int(m.group(1)) and all(st == "completed" and kl == m.group(2) and hd == r["head_sha"]
+                                                              for _, st, kl, hd in ds),
+         f"run {r['run_id']}: {len(ds)} check run, tat ca completed/{m and m.group(2)}/head dung == khai `{r['check_runs'][:24]}...`")
+tong_pre = next(x["tong"] for x in h["pre_merge_checks"] if "tong" in x)
+m = re.search(r"= (\d+) check run = (\d+) success \+ (\d+) skipped", tong_pre)
+chot(m is not None and dem(bang["658bd0c"]) == {"success": int(m.group(2)), "skipped": int(m.group(3))}
+     and len(bang["658bd0c"]) == int(m.group(1)), f"658bd0c: {dem(bang['658bd0c'])} == tom tat khai")
+m = re.search(r"(\d+) check run, (\d+) success", h["post_merge_checks"][0]["ket_qua"])
+chot(m is not None and dem(bang["3fc0932"]) == {"success": int(m.group(2))} and len(bang["3fc0932"]) == int(m.group(1)),
+     f"3fc0932: {dem(bang['3fc0932'])} == tom tat khai")
 ids = {int(re.search(r"/runs/(\d+)/", c["details_url"]).group(1))
        for c in json.loads((P / "checkruns-658bd0c.json").read_text(encoding="utf-8"))["check_runs"]}
 khai = {x["run_id"] for x in h["pre_merge_checks"] if "run_id" in x}

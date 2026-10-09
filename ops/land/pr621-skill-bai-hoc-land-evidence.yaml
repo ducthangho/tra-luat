@@ -70,6 +70,7 @@ post_merge_checks:
     event: push
     run_attempt: 1
     head_sha: 3fc0932a3d1617c4352e5a7982f2e6e4208ca3f7
+    check_runs: '14 (chuan-bi, gate, gate-ops, gate-packet-loop, gate-registry, gate-cong-cu x8, gate-cong-cu-gop) — 14 success'
     check: 'CI push tren master 3fc0932 — workflow gate, run 37942714195'
     ket_qua: 'measured — run-37942714195.json completed success; checkruns-3fc0932.json: 14 check run, 14 success.'
     moc_checkout: 'not_measured — khong tai log; run_head_sha = 3fc0932 chi la REST run head, KHONG la bang chung checkout (§10.2.2). Xem khong_do_duoc CHECKOUT-IDENTITY.'

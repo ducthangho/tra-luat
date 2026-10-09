@@ -16,8 +16,11 @@ recorded_by: claude_executor_windows_theo_chi_thi_chu_kho
 recorder_is_dispatcher: false
 leased_at_utc: '2026-10-08T23:55:00Z'
 heartbeat_at: '2026-10-08T23:55:00Z'
-lease_until: '2026-10-09T23:55:00Z'
-lease_expires_at_utc: '2026-10-09T23:55:00Z'
+lease_until: '2026-10-09T15:00:00Z'
+lease_expires_at_utc: '2026-10-09T15:00:00Z'
+han_ghi_chu: >-
+  Goc 2026-10-09T23:55:00Z (ca lease_until lan lease_expires_at_utc). RUT NGAN ve 2026-10-09T15:00:00Z — xem
+  thu_hoi_bang_rut_han.
 role: executor
 provider: anthropic_claude
 executor: claude
@@ -83,3 +86,27 @@ validation_lane: Windows native (may chu kho), pwsh 7.x va Python Windows; Linux
   chi de chay test offline; dot bien tren ban sao tam; khong LIVE, khong credential that, khong nlm login
 review_rounds_note: chu kho chi thi lap review toi het finding; so luot Codex tren PR 714 da vuot tran hai luot
   cua protocol muc 8 truoc lease nay (bon luot)
+lease_sua_lan_cuoi: '2026-10-09T11:53Z'
+lease_sua_ghi_chu: >-
+  Lan 1: rut ngan lease_until va lease_expires_at_utc (thu_hoi_bang_rut_han). Khong doi write set, spec, branch.
+thu_hoi_bang_rut_han:
+  han_goc_utc: '2026-10-09T23:55:00Z'
+  han_moi_utc: '2026-10-09T15:00:00Z'
+  chi_thi: >-
+    Phien dieu phoi session_01CSM7GNazhN6uGJb4v1TqBT giao subagent bookkeeping ghi so land #710 / PR #714 va thu hoi lease
+    g5 bang rut han theo tien le #678 g1 (62962c7) va #705 g3 (c5881a0). Chi thi giao viec trong phien (loi_khai_co_neo,
+    khong phai comment GitHub).
+  ly_do: >-
+    Packet #710 da MERGE: PR #714 (claude/wp710-g3) merge bang merge commit 8b59185975a938504de5963d2310e574dd4858b2
+    (cha b4402f0 + 888c0d9, ~2026-10-09T11:08Z). Lease khong tu chet khi land (CLAUDE.md); de nguyen thi g5 giu sau duong
+    dan write set toi 23:55Z.
+  vi_sao_khong_dung_so: >-
+    Theo tien le #651/#660/#661/#668/#677/#687/#674/#705/#678: so ops/thu-hoi/ chua kich hoat; rut han dung co che DA CAI.
+    Han moi dat SAU luc push du kien de luot dang lease (neu chay) con thay lease song, tranh rc=8 che rc=9 (bai hoc
+    20-09). Neu nhanh chua push truoc 2026-10-09T14:50Z thi phai doi han_moi_utc (va hai truong han) ve sau luc push
+    TRUOC khi push. Khong bia mo: khong co lease ke nhiem (bia mo chi dung khi co lease moi thay_the_cho).
+  nguoi_rut: 'subagent bookkeeping cua phien session_01CSM7GNazhN6uGJb4v1TqBT'
+  gioi_han: >-
+    Commit rut han chi o CUC BO luc ghi (nhanh bk710-rut-han-g5, tien len tu origin/ops/wp710-r4-g5-lease a797078); phien
+    chinh push no thanh ops/wp710-r4-g5-lease (fast-forward). Nghiem thu: ai-dang-giu cho sau duong dan write set khong
+    con wp710-r4-g5-claude-windows trong NGUOI_GIU sau 15:00Z — CHUA DO.

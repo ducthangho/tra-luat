@@ -1,0 +1,247 @@
+# chưa chạy trên cây thật — executor tự áp, tự đo, tự chịu trách nhiệm commit
+# lop: stage-canary-true-khi-than-rong-hoac-sai-id
+--- scripts/tl_selftest.py
++++ scripts/tl_selftest.py
+@@ -4754,6 +4754,11 @@
+         _nc50b.nlm_available = lambda: True
+         for _n50b, _out50b, _want50b in [
+                 ("body_dung", json.dumps({"id": _NB50B, "title": "Canary", "sources": []}), 1),
++                ("mang_nhieu_notebook", json.dumps([
++                    {"id": _NB50B, "title": "Canary"}, {"id": "NB-OTHER-9999", "title": "Other"}]), 0),
++                ("mang_hai_notebook_dung", json.dumps([
++                    {"id": _NB50B, "title": "Canary"}, {"id": _NB50B, "title": "Canary"}]), 0),
++                ("hai_id_mau_thuan", json.dumps({"id": "NB-OTHER-9999", "notebook_id": _NB50B, "title": "Other"}), 0),
+                 ("khong_phai_json", "not json at all", 0),
+                 ("obj_rong", "{}", 0),
+                 ("list_rong", "[]", 0),
+--- scripts/nlm-credential-refresh.Tests.ps1
++++ scripts/nlm-credential-refresh.Tests.ps1
+@@ -85,6 +85,15 @@
+         print("{}")
+     elif mode == "wrongcase":
+         print(json.dumps({"id": sys.argv[3].lower(), "title": "Test"}))
++    elif mode in ("title_bool", "title_array", "title_object", "title_space", "id_array", "conflict_id"):
++        body = {"id": sys.argv[3], "title": "Canary"}
++        if mode == "title_bool": body["title"] = True
++        elif mode == "title_array": body["title"] = ["Canary"]
++        elif mode == "title_object": body["title"] = {"text": "Canary"}
++        elif mode == "title_space": body["title"] = "   "
++        elif mode == "id_array": body["id"] = [sys.argv[3]]
++        else: body.update(id="NB-OTHER-9999", notebook_id=sys.argv[3])
++        print(json.dumps(body))
+     elif mode == "noname":
+         print(json.dumps({"id": sys.argv[3]}))
+     else:
+@@ -199,6 +208,17 @@
+     if ($r.Json.status -ne 'inconclusive' -or @($r.Calls | Where-Object { $_ -like 'start:stage:*' }).Count -ne 0) { throw 'notebook id must match case-sensitively' }
+     $cases++
+     # >>case:d
++    # lop: stage-canary-true-khi-than-rong-hoac-sai-id
++    # <<case:n
++    foreach ($mode in @('title_bool','title_array','title_object','title_space','id_array','conflict_id')) {
++        $r = Invoke-Wrapper $mode @('-TimeoutSeconds','5')
++        if ($r.Rc -ne 4 -or $r.Json.status -ne 'inconclusive' -or
++            @($r.Calls | Where-Object { $_ -like 'start:stage:*' }).Count -ne 0) {
++            throw ('ambiguous or non-string notebook body must not stage: ' + $mode)
++        }
++    }
++    $cases++
++    # >>case:n
+     # <<case:e
+     # (e) thu tu refresh -> canary -> stage, dung 1 lan moi buoc, va bang chung ghi lai (Spec r4 #1, #4)
+     $r = Invoke-Wrapper 'ok' @('-TimeoutSeconds','5')
+# lop: stage-nlm-ngoai-nlm-auth-stage-khong-qua-canary
+--- scripts/tl_selftest.py
++++ scripts/tl_selftest.py
+@@ -4737,6 +4737,55 @@
+             else:
+                 _os38.environ[_k50c] = _v50c
+     cases.append(("wp710_nlm_secrets_set_stage_can_canary", bool(_res50c) and all(_res50c.values())))
++
++    # lop: stage-nlm-ngoai-nlm-auth-stage-khong-qua-canary
++    _store50d = _tg50._imp("gws_cred_store")
++    _o714a = {k: getattr(_tg50, k) for k in (
++        "_master_key", "load_creds", "_secrets_fetch", "_secrets_upload", "_nlm_auth_alive",
++        "_nlm_auth_files", "_refresh_nlm_auth", "_gws_export_cred")}
++    _env714a = dict(_os38.environ)
++    _up714a, _probe714a, _res714a = [], [], []
++    _bundle714a = {"webappUrl": "offline", "token": "offline-test-token", "nlm_auth": {"auth.json": "old-offline-jar"}}
++    def _alive714a(*a, **k):
++        _probe714a.append(True)
++        return None, "OFFLINE_INCONCLUSIVE"
++    try:
++        import tempfile as _tf714a
++        _os38.environ["TL_TOKEN"] = "offline-test-token"
++        _tg50._master_key = lambda: "offline-test-master"
++        _tg50.load_creds = lambda *a, **k: None
++        _tg50._nlm_auth_alive = _alive714a
++        _tg50._nlm_auth_files = lambda: {}
++        _tg50._refresh_nlm_auth = lambda: False
++        _tg50._gws_export_cred = lambda: None
++        _tg50._secrets_fetch = lambda *a: (_store50d.encrypt(
++            json.dumps(_bundle714a).encode(), "offline-test-master"), "file")
++        _tg50._secrets_upload = lambda blob, *a, **k: (_up714a.append(json.loads(
++            _store50d.decrypt(blob, "offline-test-master").decode())) or ("OFFLINE", True))
++        with _tf714a.TemporaryDirectory() as _td714a:
++            _cfg714a = _os38.path.join(_td714a, "config.json")
++            with open(_cfg714a, "w", encoding="utf-8") as _f714a:
++                json.dump(_bundle714a, _f714a)
++            for _route714a in ("preserved_remote", "config_nojar", "config_no_nlm", "default_nojar"):
++                _up714a.clear(); _probe714a.clear()
++                with _hush():
++                    if _route714a == "preserved_remote":
++                        _rc714a = _tg50.cmd_secrets_set(_ap50.Namespace(config=None, profile=None,
++                            secrets_id="OFFLINE", nlm=False, gas_token=None, webapp="offline-new", gws=False,
++                            no_public=True, folder=None, secrets_file=None, env=None))
++                    else:
++                        _rc714a = _tg50.cmd_secrets_stage(_ap50.Namespace(
++                            config=None if _route714a == "default_nojar" else _cfg714a, profile=None,
++                            no_gws=True, no_nlm=(_route714a == "config_no_nlm"), folder=None, secrets_id="OFFLINE"))
++                # --no-nlm may upload only after actually removing nlm_auth from the payload.
++                if _route714a == "config_no_nlm":
++                    _res714a.append(not any("nlm_auth" in b for b in _up714a) or bool(_probe714a))
++                else:
++                    _res714a.append(_rc714a != 0 and not _up714a)
++    finally:
++        for _k714a, _v714a in _o714a.items(): setattr(_tg50, _k714a, _v714a)
++        _os38.environ.clear(); _os38.environ.update(_env714a)
++    cases.append(("wp714_nlm_bundle_payload_has_no_unguarded_route", all(_res714a) and len(_res714a) == 4))
+ 
+     # [HINT reviewer — CHUA chay tren cay that; executor tu ap, tu do, tu chiu trach nhiem] lop: stage-canary-true-khi-than-rong-hoac-sai-id
+     # Canary THAT: `_nlm_auth_alive` + `nlm_cli.notebook_get` + `_run_json` chay NGUYEN BAN; chi lop subprocess `nlm_cli._run`
+# lop: khoa-va-timeout-khong-rang-buoc-cay-tien-trinh-con
+--- scripts/nlm-credential-refresh.Tests.ps1
++++ scripts/nlm-credential-refresh.Tests.ps1
+@@ -40,6 +40,12 @@
+     time.sleep(5)
+ if mode == "timeout_canary" and op == "notebook":
+     time.sleep(5)
++if mode == "descendant_exit" and op == "auth":
++    child_code = "import os,time;[(open(os.environ['WP714_BEAT_FILE'],'a').write(str(time.time())+'\\n'),time.sleep(0.1)) for _ in range(300)]"
++    child = subprocess.Popen([sys.executable, "-c", child_code])
++    with open(os.environ["WP714_CHILD_PID_FILE"], "w") as f:
++        f.write(str(child.pid))
++    sys.exit(0)
+ if mode == "linger" and op == "auth":
+     subprocess.Popen([sys.executable, "-c", "import time; time.sleep(20)"])
+     sys.exit(0)
+@@ -415,6 +421,29 @@
+     if ($r.Rc -ne 5 -or $r.Calls.Count -ne 0) { throw 'an unreadable operation record must fail closed' }
+     $cases++
+     # >>case:m
++    # lop: khoa-va-timeout-khong-rang-buoc-cay-tien-trinh-con
++    # <<case:o
++    $env:WP714_BEAT_FILE = Join-Path $root 'grandchild-beats.txt'
++    $env:WP714_CHILD_PID_FILE = Join-Path $root 'grandchild.pid'
++    try {
++        $r = Invoke-Wrapper 'descendant_exit' @('-TimeoutSeconds','2')
++        if ($r.Rc -ne 3 -or $r.Json.status -ne 'timeout') { throw 'inherited pipes must time out' }
++        $childPid = [int](Get-Content -LiteralPath $env:WP714_CHILD_PID_FILE -Raw)
++        $r = Invoke-Wrapper 'ok' @('-TimeoutSeconds','5','-LockWaitSeconds','1')
++        $before = @(Get-Content -LiteralPath $env:WP714_BEAT_FILE -ErrorAction SilentlyContinue).Count
++        Start-Sleep -Milliseconds 400
++        $after = @(Get-Content -LiteralPath $env:WP714_BEAT_FILE -ErrorAction SilentlyContinue).Count
++        if ($r.Rc -eq 0 -and $after -gt $before) {
++            throw 'new owner staged while the old owner grandchild still performed operations'
++        }
++    } finally {
++        if (Test-Path -LiteralPath $env:WP714_CHILD_PID_FILE) {
++            Stop-Process -Id ([int](Get-Content -LiteralPath $env:WP714_CHILD_PID_FILE -Raw)) -Force -ErrorAction SilentlyContinue
++        }
++        Remove-Item Env:WP714_BEAT_FILE, Env:WP714_CHILD_PID_FILE -ErrorAction SilentlyContinue
++    }
++    $cases++
++    # >>case:o
+     "passed=$cases failed=0"
+ } finally {
+     Remove-Item -LiteralPath $root -Recurse -Force -ErrorAction SilentlyContinue
+# lop: stage-error-output-leaks-credential
+--- scripts/tl_selftest.py
++++ scripts/tl_selftest.py
+@@ -4828,6 +4828,43 @@
+             else:
+                 _os38.environ[_k50b] = _v50b
+     cases.append(("wp710_nlm_stage_canary_doi_chieu_id_va_than", bool(_res50b) and all(_res50b.values())))
++
++    # lop: stage-error-output-leaks-credential
++    _store50d = _tg50._imp("gws_cred_store")
++    _nc714b = _tg50._imp("nlm_cli")
++    _o714b = {k: getattr(_tg50, k) for k in ("load_creds", "_nlm_auth_files", "_refresh_nlm_auth", "_master_key", "_stage_enc_upload", "_secrets_upload", "_secrets_fetch")}
++    _saved714b = (_nc714b._run, _nc714b.nlm_available, _tm50c.sleep)
++    _env714b = dict(_os38.environ)
++    _res714b, _up714b = [], []
++    _sentinel714b = "OFFLINE" + "_SECRET_SENTINEL_714"
++    try:
++        import contextlib as _cx714b, io as _io714b
++        _os38.environ["TL_TOKEN"] = "offline-test-token"
++        _tg50.load_creds = lambda *a, **k: None
++        _tg50._master_key = lambda: "offline-test-master"
++        _tg50._secrets_fetch = lambda *a: (_store50d.encrypt(json.dumps({"token": "offline-test-token"}).encode(), "offline-test-master"), "file")
++        _tg50._nlm_auth_files = lambda: {"auth.json": "{}"}
++        _tg50._refresh_nlm_auth = lambda: False
++        _tg50._stage_enc_upload = lambda *a, **k: (_up714b.append(True) or ("OFFLINE", True))
++        _tg50._secrets_upload = lambda *a, **k: (_up714b.append(True) or ("OFFLINE", True))
++        _nc714b.nlm_available = lambda: True
++        _tm50c.sleep = lambda s: None
++        for _error714b in ("network connection failed ", "unknown error "):
++            _nc714b._run = lambda *a, e=_error714b, **k: (1, "", e + _sentinel714b)
++            for _fn714b in (_tg50.cmd_nlm_auth_stage, _tg50.cmd_secrets_set, _tg50.cmd_secrets_stage):
++                _up714b.clear(); _cap714b = _io714b.StringIO()
++                _ns714b = _ap50.Namespace(config=None, profile=None, refresh=False, folder=None,
++                    cred_file_id="OFFLINE", new=False, force=True, secrets_id="OFFLINE", nlm=True,
++                    gas_token=None, webapp=None, gws=False, no_public=False, no_gws=True, no_nlm=False,
++                    secrets_file=None, env=None)
++                with _cx714b.redirect_stdout(_cap714b), _cx714b.redirect_stderr(_cap714b):
++                    _rc714b = _fn714b(_ns714b)
++                _res714b.append(_rc714b == 4 and not _up714b and _sentinel714b not in _cap714b.getvalue())
++    finally:
++        for _k714b, _v714b in _o714b.items(): setattr(_tg50, _k714b, _v714b)
++        _nc714b._run, _nc714b.nlm_available, _tm50c.sleep = _saved714b
++        _os38.environ.clear(); _os38.environ.update(_env714b)
++    cases.append(("wp714_nlm_stage_refusal_does_not_print_child_secret", len(_res714b) == 6 and all(_res714b)))
+ 
+     # WP710 r4/g3 (cross-review PR #713, lớp P3 `ban-chup-credential-doc-truoc-canary`): ở 52f32db jar được đọc
+     # TRƯỚC canary nên bytes đem stage là trạng thái CHƯA được xác nhận. Ca này cho canary "ghi lại" jar (v2) rồi
+# lop: trusted-notebook-overwritten-by-stage-config
+--- scripts/tl_selftest.py
++++ scripts/tl_selftest.py
+@@ -4920,6 +4920,39 @@
+                 _os38.environ[_k50d] = _v50d
+     cases.append(("wp710_nlm_stage_doc_credential_sau_canary_ca_ba_duong",
+                   len(_res50d) == 3 and all(_res50d.values())))
++
++    # lop: trusted-notebook-overwritten-by-stage-config
++    _o714c = {k: getattr(_tg50, k) for k in ("load_creds", "_nlm_auth_files", "_stage_enc_upload")}
++    _nc714c = _tg50._imp("nlm_cli")
++    _saved714c = (_nc714c._run, _nc714c.nlm_available)
++    _env714c = dict(_os38.environ)
++    _seen714c, _up714c = [], []
++    _trusted714c = "NB-PINNED-WRAPPER-0001"
++    def _run714c(argv, timeout=120):
++        _seen714c.append(argv[2])
++        return 0, json.dumps({"id": argv[2], "title": "Offline canary"}), ""
++    try:
++        with _tf714a.TemporaryDirectory() as _td714c:
++            _cfg714c = _os38.path.join(_td714c, "tl-config.json")
++            with open(_cfg714c, "w", encoding="utf-8") as _f714c:
++                json.dump({"webappUrl": "offline", "token": "offline-test-token",
++                    "profiles": {_TL_MODULE.DEFAULT_PROFILE: {"notebookId": "NB-CONFIG-OTHER-0001"}}}, _f714c)
++            for _key714c in ("TL_TOKEN", "TL_PROFILE", "TL_PROFILE_ENV_OVERLAY"):
++                _os38.environ.pop(_key714c, None)
++            _os38.environ["TL_NOTEBOOK_ID"] = _trusted714c
++            _tg50.load_creds = _TL_MODULE.load_creds
++            _tg50._nlm_auth_files = lambda: {"auth.json": "{}"}
++            _tg50._stage_enc_upload = lambda *a, **k: (_up714c.append(True) or ("OFFLINE", True))
++            _nc714c._run = _run714c; _nc714c.nlm_available = lambda: True
++            with _hush():
++                _rc714c = _tg50.cmd_nlm_auth_stage(_ap50.Namespace(config=_cfg714c, profile=None,
++                    refresh=False, folder=None, cred_file_id="OFFLINE", new=False, force=False))
++            _ok714c = (_rc714c != 0 and not _up714c) or (_seen714c == [_trusted714c] and len(_up714c) == 1)
++    finally:
++        for _k714c, _v714c in _o714c.items(): setattr(_tg50, _k714c, _v714c)
++        _nc714c._run, _nc714c.nlm_available = _saved714c
++        _os38.environ.clear(); _os38.environ.update(_env714c)
++    cases.append(("wp714_nlm_stage_keeps_wrapper_notebook_with_config_token", _ok714c))
+ 
+     # ═══ v1.33.40 (MERGE bundle-15 'complete': source-delete (a) KHÔNG trash Drive dù docstring nói, (b) reg_delete
+     # SAI shape g.get(fileId,force) — GAS đòi POST+drive_ids[]+confirm=yes) — r51_* ═══

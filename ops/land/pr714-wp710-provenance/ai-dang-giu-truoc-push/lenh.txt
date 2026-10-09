@@ -1,0 +1,1 @@
+python3 -B ops/lease_publish.py ai-dang-giu --root . <p>  (tu checkout origin/master cua clone quet)

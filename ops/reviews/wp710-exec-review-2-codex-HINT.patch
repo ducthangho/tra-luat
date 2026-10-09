@@ -1,0 +1,96 @@
+# chưa chạy trên cây thật — executor tự áp, tự đo, tự chịu trách nhiệm commit
+# lop: stage-canary-true-khi-than-rong-hoac-sai-id
+--- scripts/tl_selftest.py
++++ scripts/tl_selftest.py
+@@ -4980,6 +4980,10 @@
+         ("title_dung_name_rong", json.dumps({"id": _NB714d, "title": "C", "name": ""}), 0),
+         ("id_mang", json.dumps({"id": [_NB714d], "title": "C"}), 0), ("data_mang", json.dumps({"data": [_good714d]}), 0),
+         ("null", "null", 0), ("so", "42", 0), ("chuoi", '"x"', 0), ("mang_null", "[null]", 0), ("rong", "", 0),
++        # WP714 review: Python json.loads accepts these non-JSON constants by default.
++        ("json_nan", '{"id":"' + _NB714d + '","title":"C","source_count":NaN}', 0),
++        ("json_infinity", '{"id":"' + _NB714d + '","title":"C","source_count":Infinity}', 0),
++        ("json_negative_infinity", '{"id":"' + _NB714d + '","title":"C","source_count":-Infinity}', 0),
+     ]
+     _res714d = {}
+     try:
+# lop: khoa-va-timeout-khong-rang-buoc-cay-tien-trinh-con
+# lop: test-ps1-thieu-rang
+--- scripts/nlm-credential-refresh.Tests.ps1
++++ scripts/nlm-credential-refresh.Tests.ps1
+@@ -563,8 +563,20 @@
+             if ($r.Rc -ne 0 -or $r.Json.status -ne 'staged' -or $r.Json.steps.refresh.descendants_stopped -lt 1 -or $late.Count -ne 0) {
+                 throw ('Linux: a pipe-less descendant must be stopped before the canary: rc=' + $r.Rc + ' stopped=' + $r.Json.steps.refresh.descendants_stopped + ' late=' + $late.Count)
+             }
+-        } elseif ($r.Json.steps.refresh.descendants_stopped -ne 0) {
+-            throw 'non-Linux: descendants cannot be enumerated, the evidence must not claim any were stopped'
++        } else {
++            if ($r.Json.steps.refresh.descendants_stopped -ne 0) {
++                throw 'non-Linux: descendants cannot be enumerated, the evidence must not claim any were stopped'
++            }
++            # The existing daemon fixture must not be allowed to overlap any subsequent operation.
++            # A status/evidence label alone is insufficient on the Windows branch.
++            $before = @(Get-Content -LiteralPath $env:WP714_BEAT_FILE -ErrorAction SilentlyContinue).Count
++            Start-Sleep -Milliseconds 400
++            $after = @(Get-Content -LiteralPath $env:WP714_BEAT_FILE -ErrorAction SilentlyContinue).Count
++            $laterCalls = @($r.Calls | Where-Object { $_ -like 'start:notebook:*' -or $_ -like 'start:stage:*' })
++            if ($laterCalls.Count -gt 0 -and $after -gt $before) {
++                throw 'non-Linux: a live pipe-less descendant overlapped canary or stage'
++            }
++            if ($r.Rc -eq 0 -and $r.Json.status -ne 'staged') { throw 'successful control lacks staged evidence' }
+         }
+     } finally {
+         if (Test-Path -LiteralPath $env:WP714_CHILD_PID_FILE) {
+@@ -574,6 +586,53 @@
+     }
+     $cases++
+     # >>case:q
++    # <<case:r
++    # Reuse descendant_exit: kill its wrapper after the direct CLI has exited, then test takeover.
++    # The operation marker must come from the real writer rather than a record assembled by the test.
++    $env:WP714_BEAT_FILE = Join-Path $root 'owner-exit-beats.txt'
++    $env:WP714_CHILD_PID_FILE = Join-Path $root 'owner-exit-child.pid'
++    Remove-Item -LiteralPath $env:WP714_BEAT_FILE, $env:WP714_CHILD_PID_FILE -ErrorAction SilentlyContinue
++    $ownerR = $null
++    $childR = $null
++    try {
++        $env:WP710_MODE = 'descendant_exit'; $env:WP710_DELAY = '0'
++        $argR = '-NoProfile -File "' + $script + '" -ConfigPath "' + $config + '" -NlmCommand "' + $python + '" -NlmArgumentsPrefix "' + $fake + '" -StageCommand "' + $python + '" -StageArguments "' + $fake + '" -TimeoutSeconds 20'
++        $ownerR = Start-Process -FilePath (Get-Command pwsh).Source -ArgumentList $argR -PassThru @hidden
++        for ($i=0; $i -lt 100 -and -not (Test-Path -LiteralPath $env:WP714_CHILD_PID_FILE); $i++) { Start-Sleep -Milliseconds 100 }
++        if (-not (Test-Path -LiteralPath $env:WP714_CHILD_PID_FILE)) { throw 'orphan takeover fixture never started' }
++        $childR = [int](Get-Content -LiteralPath $env:WP714_CHILD_PID_FILE -Raw)
++        $recordR = Join-Path ([IO.Path]::GetTempPath()) 'tra_luat_nlm_credential_refresh.operation.json'
++        $writtenR = Get-Content -LiteralPath $recordR -Raw | ConvertFrom-Json
++        if ([string]$writtenR.marker -notmatch '^[0-9a-f]{32}$') { throw 'actual operation record did not retain its child marker' }
++        $directGoneR = $false
++        for ($i=0; $i -lt 50 -and -not $directGoneR; $i++) {
++            $directGoneR = $null -eq (Get-Process -Id ([int]$writtenR.pid) -ErrorAction SilentlyContinue)
++            if ($IsLinux -and -not $directGoneR) {
++                try { $directGoneR = [IO.File]::ReadAllText("/proc/$([int]$writtenR.pid)/stat") -match '\)\s+Z\s' } catch { $directGoneR = $true }
++            }
++            if (-not $directGoneR) { Start-Sleep -Milliseconds 100 }
++        }
++        if (-not $directGoneR) { throw 'fixture direct CLI did not exit before owner death' }
++        Stop-Process -Id $ownerR.Id -Force
++        $ownerR.WaitForExit()
++        $r = Invoke-Wrapper 'ok' @('-TimeoutSeconds','5','-LockWaitSeconds','1')
++        $beforeR = @(Get-Content -LiteralPath $env:WP714_BEAT_FILE -ErrorAction SilentlyContinue).Count
++        Start-Sleep -Milliseconds 400
++        $afterR = @(Get-Content -LiteralPath $env:WP714_BEAT_FILE -ErrorAction SilentlyContinue).Count
++        if ($r.Calls.Count -gt 0 -and $afterR -gt $beforeR) { throw 'new owner overlapped a descendant of the exited old CLI' }
++        if ($r.Rc -eq 0) {
++            if ($r.Json.status -ne 'staged' -or $afterR -ne $beforeR) { throw 'successful takeover lacks dead-tree evidence' }
++        } elseif ($r.Rc -ne 5 -or $r.Calls.Count -ne 0) { throw 'unconfirmed old tree must block with zero operations' }
++        Stop-Process -Id $childR -Force -ErrorAction SilentlyContinue
++        $r = Invoke-Wrapper 'ok' @('-TimeoutSeconds','5','-LockWaitSeconds','3')
++        if ($r.Rc -ne 0 -or $r.Json.status -ne 'staged') { throw 'takeover after the fixture tree ended must stage' }
++    } finally {
++        if ($null -ne $ownerR -and -not $ownerR.HasExited) { Stop-Process -Id $ownerR.Id -Force -ErrorAction SilentlyContinue }
++        if ($null -ne $childR) { Stop-Process -Id $childR -Force -ErrorAction SilentlyContinue }
++        Remove-Item Env:WP714_BEAT_FILE, Env:WP714_CHILD_PID_FILE -ErrorAction SilentlyContinue
++    }
++    $cases++
++    # >>case:r
+     "passed=$cases failed=0"
+ } finally {
+     Remove-Item -LiteralPath $root -Recurse -Force -ErrorAction SilentlyContinue

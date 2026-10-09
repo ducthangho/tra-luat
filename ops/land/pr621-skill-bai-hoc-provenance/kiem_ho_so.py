@@ -29,13 +29,23 @@ def ts(s):
 
 h = yaml.safe_load(HO_SO.read_text(encoding="utf-8"))
 
-# 1. SHA256SUMS: moi dong khop tep.
-for dong in (P / "SHA256SUMS.txt").read_text(encoding="utf-8").splitlines():
-    if not dong.strip():
-        continue
+# 1. SHA256SUMS: PHU DU — tap ten trong manifest == tap tep trong thu muc (tru dung SHA256SUMS.txt), moi tep DUNG MOT
+#    dong, ten tuong doi an toan (khong '/', khong '..'); roi moi dong khop tep. Chi kiem cac dong CON LAI trong
+#    manifest thi xoa mot dong la mat chot ma van DAT (Codex PR #723, comment 4232301600).
+dong_mf = [d for d in (P / "SHA256SUMS.txt").read_text(encoding="utf-8").splitlines() if d.strip()]
+mf = []
+for dong in dong_mf:
     dg, ten = dong.split(None, 1)
-    ten = ten.lstrip("*")
-    chot(hashlib.sha256((P / ten).read_bytes()).hexdigest() == dg, f"sha256 {ten}")
+    mf.append((dg, ten.lstrip("*")))
+ten_mf = [t for _, t in mf]
+tep_that = sorted(x.name for x in P.iterdir() if x.name != "SHA256SUMS.txt")
+chot(all("/" not in t and "\\" not in t and t not in ("", ".", "..") for t in ten_mf), "manifest: moi ten la ten tep tuong doi an toan")
+chot(len(ten_mf) == len(set(ten_mf)), "manifest: khong ten nao lap")
+chot(sorted(set(ten_mf)) == tep_that,
+     f"manifest phu du: thieu {sorted(set(tep_that) - set(ten_mf))} thua {sorted(set(ten_mf) - set(tep_that))}")
+for dg, ten in mf:
+    f = P / ten
+    chot(f.is_file() and hashlib.sha256(f.read_bytes()).hexdigest() == dg, f"sha256 {ten}")
 
 # 2. Moi cong `measured` do lai -> co khoi LENH, dau duong, RC dung trong hien vat.
 cong = h["ung_vien"]["cong_tai_cho_tren_ung_vien"]["do_lai_luc_ghi_so"]
@@ -58,6 +68,45 @@ chot(ts(truoc) < ts(merged) < ts(sau), f"truoc {truoc} < merge {merged} < sau {s
 for ten, nhan in (("ls-remote-truoc-merge.sorted.txt", "truoc"), ("ls-remote-sau-merge.sorted.txt", "sau")):
     dg = re.search(rf"^{nhan} .*sha256sum (\w+)", td, re.M).group(1)
     chot(hashlib.sha256((P / ten).read_bytes()).hexdigest() == dg, f"anh {nhan} khop digest trong thoi-diem")
+
+# 3b. Ref delta: AP that delta khai trong refs-delta.txt vao anh truoc, so KHOP TUNG ref/OID voi anh sau (Codex PR
+#     #723, comment 4232301580). ABSENT = ref khong co o phia do; ten ref lap trong anh hay trong delta => TRUOT.
+def anh(ten):
+    d, lap = {}, []
+    for dong in (P / ten).read_text(encoding="utf-8").splitlines():
+        oid, ref = dong.split("\t")
+        if ref in d:
+            lap.append(ref)
+        d[ref] = oid
+    return d, lap
+
+
+a_truoc, lap_t = anh("ls-remote-truoc-merge.sorted.txt")
+a_sau, lap_s = anh("ls-remote-sau-merge.sorted.txt")
+chot(not lap_t and not lap_s, f"anh ref khong co ten lap (truoc {lap_t}, sau {lap_s})")
+delta, lap_d, cu_sai = {}, [], []
+for dong in (P / "refs-delta.txt").read_text(encoding="utf-8").splitlines():
+    cot = dong.split("\t")
+    if dong.startswith("#") or len(cot) != 3 or cot[0] in ("truoc", "sau"):
+        continue
+    ref, cu, moi = cot
+    if ref in delta:
+        lap_d.append(ref)
+    delta[ref] = (cu, moi)
+    if a_truoc.get(ref, "ABSENT") != cu:
+        cu_sai.append(ref)
+dem = dict(re.findall(r"^(truoc|sau)\t(\d+)\t", (P / "refs-delta.txt").read_text(encoding="utf-8"), re.M))
+chot(dem == {"truoc": str(len(a_truoc)), "sau": str(len(a_sau))}, f"so ref khai {dem} == dem tren anh ({len(a_truoc)}, {len(a_sau)})")
+chot(bool(delta) and not lap_d, f"delta: co dong, khong ref lap ({lap_d})")
+chot(not cu_sai, f"delta: gia tri CU khop anh truoc ({cu_sai})")
+ap = dict(a_truoc)
+for ref, (cu, moi) in delta.items():
+    if moi == "ABSENT":
+        ap.pop(ref, None)
+    else:
+        ap[ref] = moi
+chot(ap == a_sau, f"ap delta vao anh truoc ({len(a_truoc)} ref) == anh sau ({len(a_sau)} ref); lech "
+     f"{sorted(set(ap.items()) ^ set(a_sau.items()))[:4]}")
 
 # 4. Moi run CI: moc REST khop run-<id>.json; run khong skipped phai nam trong pham_vi_run cua CA BA muc khong_do_duoc.
 pham_vi = {k["id"]: set(k.get("pham_vi_run", [])) for k in h["khong_do_duoc"]}

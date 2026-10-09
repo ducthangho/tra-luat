@@ -64,8 +64,10 @@
     In toàn bộ output của mọi cổng. Mặc định chỉ in output của cổng ĐỎ.
 
 .PARAMETER HanGiay
-    Hạn giờ cho MỘT cổng, tính bằng giây. Mặc định 5400 = `timeout-minutes: 90` của job `gate-registry`
-    trên master fc852ff — trần LỚN NHẤT của các job `gate*` (t9 đọc `ci.yml` của cây và đòi ≥). Chính
+    Hạn giờ cho MỘT cổng, tính bằng giây. Mặc định 6300 = `timeout-minutes: 105` của job `gate-registry`
+    trên master 8b59185 — trần LỚN NHẤT của các job `gate*` (t9 đọc `ci.yml` của cây và đòi ≥). Trước đó
+    5400 (= 90 phút của fc852ff); master nâng lên 105 nên khi merge t9 ĐỎ (đo: cây merge 8b59185 + bản 5400 ⇒
+    32/33, chỉ t9) — trần này TRÔI theo master, t9 là chốt bắt nó. Chính
     `ci.yml` ghi lý do: `test registry` chạy tuần tự, 52,15 phút trên ubuntu ⇒ 60 → 90, và "90 KHÔNG đủ
     Windows". Hạn 3600 cũ (= 60 phút của nền gốc d553efa) làm t9 ĐỎ ngay khi merge (đo: cây merge + PR ⇒ chỉ
     t9 ĐỎ), như hạn 900 trước đó: thấp hơn trần CI thì mức mặc định có thể KHÔNG BAO GIỜ ra ĐẠT. Trần ấy chỉ so được khi khối việc
@@ -97,7 +99,7 @@ param(
     [switch]$CaiCongCu,
     [switch]$ChiTiet,
     [ValidateRange(1, 86400)]
-    [int]$HanGiay = 5400,
+    [int]$HanGiay = 6300,
     [string]$AlVer = '1.7.7'
 )
 
@@ -505,7 +507,7 @@ else { Chay-Cong -Ten 'lease-publish selftest' -Tep '' -DoiSo @() -BoQua -LyDoBo
 Chay-Py   'packet-loop selftest'    @('.claude/dev/packet_loop_test.py')
 # Bước `test registry` của master khai `env:` (`CI_DANG_KY_WORKERS: "2"` + sự kiện/GOC/DAU). Vắng ⇒ `doc_diff` KHÔNG ĐO ĐƯỢC ⇒ kế
 # hoạch ĐỦ cho cả ba vòng đột biến, `nhanh_don_duoc` không chia mảnh — lượt PR THƯỜNG của CI giao khối việc ấy cho lượt tuần + 4 job
-# mảnh, nhưng job `gate-registry` 90 phút VẪN chạy nó khi diff không đo được hoặc chạm vùng chung (`workflow_dispatch` — đường chắc
+# mảnh, nhưng job `gate-registry` (105 phút trên 8b59185) VẪN chạy nó khi diff không đo được hoặc chạm vùng chung (`workflow_dispatch` — đường chắc
 # có lượt Windows, N=1 —; PR chạm `ci.yml`, `requirements.txt`, `ops/cong_cu*`, `ops/cai_*`, tệp gốc NGOÀI bảy tài liệu `GOC_TAI_LIEU`: đo bằng `ke_hoach` THẬT ⇒
 # ĐỦ ×3; `README.md`, `CHANGELOG.md` ⇒ NHẸ ×3)
 # (đo trên cây merge 20ec8d5: vắng ⇒ ĐỦ ×3; env `pull_request` của chính diff PR ⇒ NHẸ ×3; `nhanh_don_duoc_test` ĐỦ > 540 s, NHẸ 2 s). Gương như lượt `pull_request` CHỈ KHI đo được diff như CI: cây SẠCH (CI đo commit, không đo cây làm việc)

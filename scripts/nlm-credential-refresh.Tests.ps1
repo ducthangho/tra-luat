@@ -34,6 +34,14 @@ if op == "stage" and os.environ.get("WP710_ENVLOG"):
     with open(os.environ["WP710_ENVLOG"], "w", encoding="utf-8") as elog:
         elog.write(os.environ.get("TL_NOTEBOOK_ID", "<absent>") + "|" + os.environ.get("TL_CANARY_NOTEBOOK_ID", "<absent>"))
 mode = os.environ.get("WP710_MODE", "ok")
+if mode == "stdin_eof":
+    try:
+        if sys.stdin.buffer.read(1):
+            print("STDIN_NOT_EOF", file=sys.stderr)
+            sys.exit(91)
+    except OSError:
+        print("STDIN_NOT_READABLE", file=sys.stderr)
+        sys.exit(92)
 if mode == "leak_all":
     print("SECRET_SENTINEL", file=sys.stderr)
     if op != "notebook":
@@ -244,6 +252,15 @@ note("end")
             $stageCalls -ne [int]($mode -in @('ok','stage')) -or
             (($mode -eq 'ok') -ne ($rc -eq 0))) {
             throw "case $mode failed: status=$($result.status) rc=$rc stageCalls=$stageCalls step=$($result.step) reason=$($result.containment_reason)$($result.takeover_reason)"
+        }
+        $cases++
+    }
+    # Verify the Windows child receives a readable NUL stdin; the stdout pipe test in z1 does not measure this.
+    if ($IsWindows) {
+        $r = Invoke-Wrapper 'stdin_eof' @('-TimeoutSeconds','5')
+        if ($r.Rc -ne 0 -or $r.Json.status -ne 'staged' -or
+            @($r.Calls | Where-Object { $_ -like 'start:stage:*' }).Count -ne 1) {
+            throw 'the child stdin must be readable EOF from NUL'
         }
         $cases++
     }
@@ -1216,17 +1233,43 @@ Start-Sleep -Seconds 120
             }
             if (-not (Test-Path -LiteralPath $recZ)) { throw 'the record of a stray suspended child was deleted' }
             $writtenZ = Get-Content -LiteralPath $recZ -Raw | ConvertFrom-Json
-            if ($null -eq $writtenZ.pid -or $writtenZ.tree_unconfirmed -ne $true) { throw ('the record must name the stray child and be unconfirmed: ' + ($writtenZ | ConvertTo-Json -Compress)) }
+            if ($null -eq $writtenZ.pid -or $writtenZ.tree_unconfirmed -ne $true -or $writtenZ.outside_job -ne $true) { throw ('the record must name the stray child, be unconfirmed and say it is outside the job: ' + ($writtenZ | ConvertTo-Json -Compress)) }
             $strayZ = [int]$writtenZ.pid
             if ($null -eq (Get-Process -Id $strayZ -ErrorAction SilentlyContinue)) { throw 'fixture: the stray suspended child is not there, the case would pass vacuously' }
             $r = Invoke-Wrapper 'ok' @('-TimeoutSeconds','5','-LockWaitSeconds','1','-OperatorReleaseReason','operator checked case z by hand')
             if ($r.Rc -ne 5 -or $r.Json.step -ne 'lock_busy' -or $r.Json.takeover_reason -ne 'root_alive' -or $r.Json.takeover -ne 'none' -or $r.Calls.Count -ne 0) {
                 throw ('a live stray child must block the next owner, operator or not: rc=' + $r.Rc + ' step=' + $r.Json.step + ' reason=' + $r.Json.takeover_reason)
             }
+            # Reviewer round 5: the same stray child, but its start time could not be read (start_ticks null), while
+            # ANOTHER process still holds the - empty - job of that name. The job then answers "0 members", which
+            # is true and says nothing about a child that was never in it: the next owner must not take over.
+            $jobZ = $prefixX + [guid]::NewGuid().ToString('N')
+            $emptyHolderZ = Join-Path $root 'empty-job-holder.ps1'
+            @'
+param([string]$Source, [string]$Name, [string]$Ready)
+Add-Type -TypeDefinition (Get-Content -LiteralPath $Source -Raw)
+$code = 0
+$job = [TraLuatWp710.Job]::Create($Name, [ref]$code)
+Set-Content -LiteralPath $Ready -Value ([TraLuatWp710.Job]::Active($job))
+Start-Sleep -Seconds 120
+'@ | Set-Content -LiteralPath $emptyHolderZ
+            $readyZ = Join-Path $root 'empty-job.ready'
+            $holderZ = Start-Process -FilePath $powershell -ArgumentList ('-NoProfile -File "' + $emptyHolderZ + '" -Source "' + $typeFileX + '" -Name "' + $jobZ + '" -Ready "' + $readyZ + '"') -PassThru @hidden
+            try {
+                for ($i=0; $i -lt 200 -and -not (Test-Path -LiteralPath $readyZ); $i++) { Start-Sleep -Milliseconds 100 }
+                if (-not (Test-Path -LiteralPath $readyZ) -or [int](Get-Content -LiteralPath $readyZ -Raw) -ne 0) { throw 'fixture: the empty job holder did not start with 0 members' }
+                $writtenZ.start_ticks = $null; $writtenZ.job = $jobZ
+                $writtenZ | ConvertTo-Json -Compress | Set-Content -LiteralPath $recZ
+                $r = Invoke-Wrapper 'ok' @('-TimeoutSeconds','5','-LockWaitSeconds','1')
+                if ($null -eq (Get-Process -Id $strayZ -ErrorAction SilentlyContinue) -or $holderZ.HasExited) { throw 'fixture: the stray child or the empty job holder ended early' }
+                if ($r.Rc -ne 5 -or $r.Json.step -ne 'tree_quarantine' -or $r.Json.takeover_reason -ne 'stray_child_unconfirmed' -or $r.Calls.Count -ne 0) {
+                    throw ('an empty job proves nothing about a child that was never in it: rc=' + $r.Rc + ' step=' + $r.Json.step + ' reason=' + $r.Json.takeover_reason + ' calls=' + $r.Calls.Count)
+                }
+            } finally { if (-not $holderZ.HasExited) { Stop-Process -Id $holderZ.Id -Force -ErrorAction SilentlyContinue } }
             Stop-Process -Id $strayZ -Force
             for ($i=0; $i -lt 50 -and $null -ne (Get-Process -Id $strayZ -ErrorAction SilentlyContinue); $i++) { Start-Sleep -Milliseconds 100 }
             $r = Invoke-Wrapper 'ok' @('-TimeoutSeconds','5','-LockWaitSeconds','1')
-            if ($r.Rc -ne 5 -or $r.Json.step -ne 'tree_quarantine' -or $r.Json.takeover_reason -ne 'job_closed_unconfirmed' -or $r.Calls.Count -ne 0) {
+            if ($r.Rc -ne 5 -or $r.Json.step -ne 'tree_quarantine' -or $r.Json.takeover_reason -ne 'stray_child_unconfirmed' -or $r.Calls.Count -ne 0) {
                 throw ('an unconfirmed record stays a quarantine after its child is gone: rc=' + $r.Rc + ' step=' + $r.Json.step + ' reason=' + $r.Json.takeover_reason)
             }
             $r = Invoke-Wrapper 'ok' @('-TimeoutSeconds','5','-LockWaitSeconds','1','-OperatorReleaseReason','operator checked case z by hand')

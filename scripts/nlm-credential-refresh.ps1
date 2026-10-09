@@ -495,7 +495,7 @@ function Stop-OperationTree([string]$marker, [bool]$inRun, [int]$direct = 0) {
     }
 }
 
-function Write-OperationRecord($marker, $process, [bool]$unconfirmed, [string[]]$pipes = @(), [string]$job = '') {
+function Write-OperationRecord($marker, $process, [bool]$unconfirmed, [string[]]$pipes = @(), [string]$job = '', [int]$strayPid = 0) {
     # format 2 (WP714 round 4) adds what a later owner needs to look for descendants that cleared the marker:
     # the step's start (before the spawn: the owner's own start, a lower bound), the step's redirected pipes
     # and the owner's ancestor chain. A record without format 2 is checked by marker only.
@@ -509,6 +509,13 @@ function Write-OperationRecord($marker, $process, [bool]$unconfirmed, [string[]]
             try { $childStat = Read-ProcStat "/proc/$($process.Id)" } catch { $childStat = $null }
             if ($null -ne $childStat) { $data.step_start_jiffies = $childStat.Start }   # else keep the owner's (lower)
         }
+    }
+    if ($strayPid -gt 0) {
+        # g5: a child that exists OUTSIDE its job (it could not be assigned and its termination was not confirmed).
+        # The pid comes from CreateProcess itself, so it is recorded even when the process can no longer be
+        # looked up or its start time cannot be read; the job named above says nothing about this process.
+        $data.outside_job = $true
+        if ($null -eq $data.pid) { $data.pid = $strayPid }
     }
     Set-Content -LiteralPath $OperationRecord -Value ($data | ConvertTo-Json -Compress -Depth 4) -Encoding utf8
 }
@@ -556,6 +563,10 @@ function Get-RecordVerdict {
     try { $record = [string](Get-Content -LiteralPath $OperationRecord -Raw) | ConvertFrom-Json } catch { $record = $null }
     if ($null -eq $record -or $record -isnot [pscustomobject]) { return @{ State = 'alive'; Reason = 'record_unreadable' } }
     if ((Test-RecordedRootAlive $record) -eq $true) { return @{ State = 'alive'; Reason = 'root_alive' } }
+    # g5: the recorded child was never inside its job, so neither the job's count nor the job being closed can
+    # prove anything about it. Not known alive (gone, pid reused, or no start time to tell) is still not proven
+    # gone: quarantine, no timer, operator only.
+    if ($record.outside_job -eq $true) { return @{ State = 'quarantine'; Reason = 'stray_child_unconfirmed' } }
     if ($JobContainment -and $JobReady -and [string]$record.job -cmatch ('^' + [regex]::Escape($JobPrefix) + '[0-9a-f]{32}$')) {
         # WP710 g4: the old step's job answers for its whole tree. Opened: its ActiveProcesses decides. No job
         # of that name: its last handle is closed, and KILL_ON_JOB_CLOSE ended every member at that close - but a
@@ -661,7 +672,7 @@ function Invoke-BoundedJob([string]$file, [string[]]$arguments, [int]$seconds, [
                 # must survive this run and name it, so the next owner waits on it (root_alive) instead of
                 # finding no record at all.
                 $started = $true
-                Write-OperationRecord $marker (Get-Process -Id $childId -ErrorAction SilentlyContinue) $true @() $jobName
+                Write-OperationRecord $marker (Get-Process -Id $childId -ErrorAction SilentlyContinue) $true @() $jobName $childId
             }
             return @{timeout=$false; rc=-1; out=''; err=''; elapsed=$watch.Elapsed.TotalSeconds; exited=$confirmed; reaped=0;
                 tree='not_contained'; blocked="job_${stage}_failed:$code"}

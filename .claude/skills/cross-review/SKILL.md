@@ -535,6 +535,197 @@ Cách giữ danh tính finding qua các lượt xem protocol §8/§12/§13.
 gh api repos/ducthangho/tra-luat/actions/jobs/<id>/logs
 ```
 
+**`gh` có thể KHÔNG có trên nền đang chạy.** Đo 21→24-09-2026: container của một phiên review
+không có `gh`, và hệ quả không dừng ở lệnh này — `ops/lease_publish.py kiem-github` trả
+`rc=8: KHÔNG ĐO ĐƯỢC loại số hiệu: không gọi được gh api`. `rc=8` ấy **không phải một phán
+quyết**, nó là một khoảng trống công cụ; đọc nó thành "cổng chặn" là khai rộng hơn phép đo.
+Đường vòng chỉ cần token và HTTP; endpoint logs trả 302 sang host lưu trữ KHÁC nên phải theo
+redirect (curl ≥ 7.58 tự bỏ `Authorization` khi đổi host — đừng thêm `--location-trusted`, kể cả
+qua `~/.curlrc`: một dòng `location-trusted` ở đó đưa token theo sang host lưu trữ, nên `-q` đứng
+ĐẦU TIÊN để curl bỏ qua tệp ấy).
+Thiếu `-f` thì 401/403/404 vẫn `rc=0` và tệp chứa JSON lỗi thay cho log. CÓ `-f` thì lỗi
+KHÔNG ghi tệp — tệp CÙNG TÊN còn nguyên log của lần tải TRƯỚC (của job khác, hoặc bản cắt ngang
+`rc=18` của chính job ấy), đọc y hệt log thật; nên mỗi LƯỢT tải một thư mục MỚI (`mktemp -d`). Một tệp
+cố định theo job chưa đủ: `$SCRATCH` là của cả run, hai lượt tải CÙNG job song song thì lượt sau xoá tệp
+của lượt trước rồi ghi lại, và lượt xong trước in `rc=0` trỏ vào bản ĐANG GHI DỞ, cụt mất dòng cuối. Đừng
+suy "không cần token" từ một `200` trong phiên web: proxy của phiên TỰ CHÈN credential GitHub
+(đo 30-09-2026, không header: `/rate_limit` báo limit 15000, `/user` 200). Ẩn danh thật
+(`--noproxy`, limit 60, egress là một DẢI IP dùng chung): 22/25 lượt `403` cạn hạn mức, 3/25 lượt
+còn hạn mức ⇒ `404 Not Found` kèm `x-github-request-id`, cho đúng job mà bản có credential tải
+được (200) — nên khối dưới đòi token.
+`: "${GITHUB_PAT:?}"` chỉ dừng shell KHÔNG tương tác — dán vào terminal thì dòng sau
+vẫn chạy — nên chốt nằm trong CÙNG một `if`. Token vào curl qua STDIN (`-H @-`, `printf` là
+builtin): `-H "Authorization: …"` để nguyên token trong argv (`ps`, `/proc/<pid>/cmdline`) suốt lượt tải:
+
+```bash
+J="<id>"
+if [ -n "${GITHUB_PAT:-}" ] && [ -n "${SCRATCH:-}" ] && mkdir -p "$SCRATCH" \
+  && JD="$(mktemp -d "$SCRATCH/job-$J.XXXXXX")"; then
+  OUT="$JD/job-$J.log"
+  printf 'Authorization: Bearer %s\n' "$GITHUB_PAT" | curl -q -fsS -L -H @- \
+    "https://api.github.com/repos/ducthangho/tra-luat/actions/jobs/$J/logs" -o "$OUT"; echo "rc=$? $OUT"
+else echo "KHONG_DO_DUOC: GITHUB_PAT hoac SCRATCH rong, hoac khong tao duoc thu muc tai"; fi
+```
+
+**MÀU KHÔNG PHẢI NGUYÊN NHÂN.** `conclusion=failure` chỉ nói lượt chạy kết thúc khác 0. Nó không
+nói cổng hỏng, và nó không nói hai lượt đỏ trên cùng một nhánh là cùng một bệnh. Phân loại TỪNG
+lượt đỏ bằng log của chính nó **trước khi đếm**.
+
+Đã trả giá đúng chỗ này: một lượt rà 40 lần chạy `ops-publish-lease.yml` (30 xanh, 10 đỏ —
+danh sách ở #619) đọc 10 lượt đỏ thành "cổng chập chờn 25%". Mở log từng lượt thì **6/10 là
+cổng từ chối ĐÚNG** (`CHAN [8]` thiếu bia mộ, hoặc `thay_the_cho` sai); **2/10** là `CHAN [8]`
+"lease đã hết hạn" trên lease ĐÃ có bản chiếu của bot (#461 g2/r2, #579 g4) — đúng hình dạng
+`rc=8` che `rc=9` mà `kiem_github` trên `master` đã chữa (cùng đầu vào, `master` trả `rc=9`
+bỏ qua), tức lỗi CỔNG chứ không phải từ chối đúng; chỉ **2/10** là lệch A/B thật — 2/40 lượt,
+khoảng 5%. THÔNG ĐIỆP cũng chưa phải nguyên nhân: "hết hạn" đúng về dữ kiện mà vẫn có thể là
+cổng hỏng — kiểm cả trạng thái đã-đăng trước khi xếp loại. Chuỗi "đỏ rồi xanh trên
+cùng nhánh" cũng bị đọc nhầm: nội dung giữa hai lượt KHÁC nhau (người ta thêm bia mộ rồi đẩy
+lại), nên nó chứng minh cổng hoạt động chứ không chứng minh gì về tính tất định.
+
+## `ai-dang-giu` — `rc=12` là lệnh TỪ CHỐI TRẢ LỜI, không phải câu trả lời
+
+Lệnh quét mọi ref cục bộ (`refs/heads/*` lẫn `refs/remotes/*`). Một nhánh **cục bộ** tụt sau
+upstream **trong cache** (`refs/remotes/*`) làm nó trả `rc=12 NHÁNH_CỤC_BỘ_TỤT_SAU` — nó đang
+nói "tôi không đo được", không nói "không ai giữ". Đo 24-09-2026: cùng một đường cho `rc=12`,
+rồi `rc=11 NGƯỜI_GIỮ 1` ngay sau khi cập nhật ref.
+
+Lệnh KHÔNG so SHA với máy chủ: `ls-remote` chỉ để đối chiếu TÊN nhánh. Cache cũ mà nhánh cục
+bộ bằng cache thì nó trả lời từ dữ liệu cũ — có thể `rc=0 NGƯỜI_GIỮ 0` trong khi máy chủ đã có
+lease giữ đường ấy. Nên `rc=0` chỉ đọc thành "không ai giữ" khi bước 1 của khối dưới in
+`CACHE_TUOI` (bước ấy chỉ ĐỌC, không ghi ref). `CACHE_TUOI` đòi tập (SHA, tên) HAI phía BẰNG
+nhau: nhánh máy chủ đã xoá mà cache còn giữ (bootstrap chữa bằng `fetch --prune`) vẫn góp lease
+và bia mộ vào câu trả lời — bia mộ trỏ tới lease chỉ còn trên nhánh ấy đổi `rc=12` thành
+`rc=0 NGƯỜI_GIỮ 0`; `ls-remote` `rc=0` mà RỖNG không phải bằng chứng — máy chủ thật luôn có
+nhánh mặc định. Tập ấy mới chỉ là `refs/remotes/origin`, còn lệnh đọc cả `refs/heads/*` và
+`refs/remotes/<remote khác>/*`: nhánh cục bộ chưa đẩy, nhánh không upstream sót lại sau
+`fetch --prune`, hay một remote thứ hai cũng góp lease và bia mộ y hệt. Nên bước 1 còn đòi mọi
+ref ngoài origin trỏ đúng một đầu nhánh máy chủ (dòng `refs/…` trong `CACHE_CU`). Lệnh chỉ bỏ ref có TÊN
+kết thúc bằng `/HEAD`; symref khác (vd `refs/heads/x` → `refs/tags/y`, hay `refs/remotes/origin/z`
+→ một tag) nó đọc nội dung ĐÍCH, nên cả hai phép so tính symref theo SHA ĐÍCH và chỉ bỏ tên `…/HEAD`
+mà lệnh cũng bỏ.
+
+Lệnh còn so KHỚP ĐÚNG chuỗi (`_lease_cham_duong`: `strip()` rồi bỏ `planned:`, CHỈ ở phía lease), còn write
+set là đường dẫn HOẶC prefix thư mục `…/` (protocol §5): hỏi `ops/reviews/x/a.md` KHÔNG thấy lease giữ
+`ops/reviews/x/`, hỏi `planned:a.md` KHÔNG thấy lease giữ `a.md` — `CACHE_TUOI` rồi `rc=0 NGƯỜI_GIỮ 0`. Bước 2
+bỏ `planned:`, hỏi đường ấy kèm `/` (tên thư mục gõ thiếu `/`), chính nó rồi mọi thư mục cha `…/`, và KHÔNG hỏi dạng
+mà khớp đúng chuỗi không trả lời được: prefix `…/` hay thư mục CÓ trong checkout mà thiếu `/` cuối (lease giữ tệp
+BÊN DƯỚI nó không hiện), `/…` `./` `//` `..` `\` `C:/…` hay `-…`. `rc=0` chỉ chứng minh một điều: không lease CÒN
+HẠN, chưa bị thay thế nào có mục CHUỖI của write_set DẠNG DANH SÁCH (sau `strip()` và bỏ `planned:`) BẰNG ĐÚNG một
+chuỗi đã hỏi, đọc bằng mã của `origin/master` (khối dưới) — mọi khác
+biệt khác, ở phía hỏi LẪN phía lease, vẫn `rc=0` dù có người giữ. Đã đo, KHÔNG phải danh sách đủ: thư mục CHƯA có
+trong checkout, gõ thiếu `/`, mà lease giữ tệp bên dưới nó; khác hoa/thường hay dạng Unicode (§5 case-fold và chuẩn
+hoá NFC, lệnh thì không); ký tự trắng khác ở hai đầu — `\r`, NBSP, U+3000…: 26 ký tự `str.isspace()` ngoài dấu
+cách, tab, xuống dòng (`read` chỉ bỏ dấu cách/tab, `strip()` bỏ cả chúng); và mục lease khác dạng chuẩn —
+`docs\a.md`, `./docs/a.md`, `docs//a.md`, `planned: docs/a.md`, hay cả write_set là MỘT chuỗi đơn
+`write_set: docs/a.md` (cổng đăng chỉ dùng `write_set` để xếp lớp, không từ chối dạng nào) — hỏi `docs/a.md` không
+thấy.
+
+Thông điệp lỗi nêu **nhánh và upstream thật**, không nhất thiết là `origin/<cùng tên>` — từ git 2.36:
+trước đó (`worktree list -z` chưa có) nhánh TỤT_SAU dừng ở `KHÔNG_XÁC_ĐỊNH: git worktree list --porcelain -z
+rc=129` (vẫn `rc=12`), không nêu nhánh, không in lệnh chữa — đo 2.30.2 · 2.34.1 · 2.35.0.
+Lệnh chữa do `ai-dang-giu` in ra đã phân biệt nhánh rảnh với nhánh đang được worktree giữ:
+worktree sạch nhận `git -C <worktree> merge --ff-only`; nhánh rảnh nhận `git branch -f` **KHÔNG
+kèm `-C`** và không mang SHA kỳ vọng — tương đối với cwd của người CHẠY nó chứ không với
+`--root`: chạy nguyên văn từ kho khác là ép nhánh cùng tên của KHO ĐÓ, có thể làm rơi commit
+chưa đẩy. Bên bootstrap chạy nó dưới dạng `fetch .` neo đúng `<root>` (khối thứ hai dưới đây).
+Nếu báo phân kỳ hoặc `KHÔNG_PHÁT_LỆNH_CHỮA`, không thay bằng một lệnh `branch -f` tự dựng.
+Thời điểm cập nhật ref và checkout chỉ đọc xem protocol §8.1–§8.2; chuyển chẩn đoán cho
+bên dựng bootstrap để cập nhật đúng upstream, rồi nhận lại snapshot. Ví dụ đọc lại từ
+checkout đã cấp (kho đích được neo tường minh, kể cả khi cwd ở nơi khác; `GIT_DIR` và họ
+biến ấy trong môi trường đè cả `git -C` lẫn `--root`, nên gỡ chúng TRƯỚC CẢ HAI bước):
+
+```bash
+PY="$(command -v python3 || command -v python || command -v py)"
+unset GIT_DIR GIT_WORK_TREE GIT_COMMON_DIR GIT_REPLACE_REF_BASE   # đè -C/--root, dời refs/replace: gỡ trước CẢ HAI bước
+git -C "$SOURCE" ls-remote --get-url origin | sed -E 's#://[^/@]*@#://***@#'   # endpoint đang hỏi, che userinfo (§8.1)
+# 1) CHỈ ĐỌC: tập (SHA, tên) máy chủ phải BẰNG tập cache, cả hai chiều (ai-dang-giu chỉ so TÊN, một chiều).
+if MC="$(git -C "$SOURCE" ls-remote --heads origin)" && [ -n "$MC" ]; then
+  SV="$(printf '%s\n' "$MC" | awk 'NF{sub("^refs/heads/","",$2); print $1" "$2}' | LC_ALL=C sort)"
+  CB="$(git -C "$SOURCE" for-each-ref --format='%(objectname) %(refname:lstrip=3)' refs/remotes/origin \
+    | awk 'NF && $2!="HEAD"' | LC_ALL=C sort)"
+  LECH="$(LC_ALL=C comm -3 <(printf '%s\n' "$SV") <(printf '%s\n' "$CB"))"
+  # ref NGOÀI origin mà ai-dang-giu vẫn đọc (refs/heads/*, remote khác): SHA phải là đầu một nhánh máy chủ.
+  # Lọc theo TÊN */HEAD như lệnh, KHÔNG theo symref: symref khác nó đọc nội dung ĐÍCH (vd refs/tags/*).
+  NGOAI="$(awk 'NR==FNR{if(NF)s[$1];next} NF && index($2,"refs/remotes/origin/")!=1 && substr($2,length($2)-4)!="/HEAD" && !($1 in s)' <(printf '%s\n' "$MC") \
+    <(git -C "$SOURCE" for-each-ref --format='%(objectname) %(refname)' refs/heads refs/remotes))"
+  # CACHE_TUOI đòi BẰNG CHỨNG DƯƠNG: SV khác rỗng và BẰNG CB. LECH rỗng thì chưa đủ — thiếu awk/sort/comm cũng cho rỗng.
+  [ -n "$SV" ] && [ "$SV" = "$CB" ] && [ -z "$LECH$NGOAI" ] && echo "CACHE_TUOI" || printf 'CACHE_CU (sat le: chi may chu co; thut TAB: chi cache co; refs/: ref ngoai may chu):\n%s\n%s\n' "$LECH" "$NGOAI"
+else echo "KHONG_DO_DUOC: ls-remote hong hoac rong"; fi
+# 2) rc=0 chỉ là "không ai giữ" khi bước 1 in CACHE_TUOI; refs/replace cục bộ đổi được nội dung lease, info/grafts
+#    (GIT_NO_REPLACE_OBJECTS KHÔNG tắt nó) biến PHÂN_KỲ thành TỤT_SAU: tắt cả hai (tệp /dev/null/grafts không thể có).
+#    Git < 2.42: core.useReplaceRefs=true ở BẤT KỲ tầng config nào bật lại replace bất chấp biến ấy ⇒ đòi refs/replace RỖNG.
+#    Đường dẫn được chứa $ ? * [ ` ; và dấu cách: để trần thì $/glob hỏi sang đường KHÁC (rc=0 dù đường thật đang bị
+#    giữ), ; và dấu cách tách lệnh. Điền NGUYÊN VĂN vào heredoc nháy đơn; rỗng hay còn dạng <…> (quên điền) ⇒ không hỏi.
+#    `read` KHÔNG kèm `IFS=`: bỏ khoảng trắng đầu/cuối như `ai-dang-giu` strip() mục write_set (giữ lại ⇒ rc=0 giả).
+#    Lệnh khớp ĐÚNG chuỗi, write set là path/prefix: bỏ `planned:` như phía lease, hỏi `$D/` (tên thư mục gõ
+#    thiếu `/`), chính nó rồi mọi thư mục cha `…/` (dừng ở rc khác 0 đầu tiên); prefix `…/`, thư mục CÓ trong
+#    checkout hay dạng không chuẩn thì khớp đúng chuỗi không trả lời được ⇒ không hỏi.
+#    Mã đọc lease lấy từ origin/master (bước 1 vừa so với máy chủ), KHÔNG từ checkout: checkout là cây ỨNG VIÊN
+#    (§8.1) — ứng viên sửa ops/lease_publish.py, hay thêm ops/yaml.py (thư mục của script đứng đầu sys.path), thì
+#    tự trả rc=0. Chép vào thư mục MỚI của riêng lượt này (`mktemp -d`) trong $SCRATCH: $SCRATCH là của cả run, nên một
+#    đường cố định bị lượt chạy song song (hai lời gọi cùng lúc) ghi đè giữa chừng ⇒ Python chạy tệp RỖNG, rc=0 mà không
+#    in NGƯỜI_GIỮ. SCRATCH rỗng hay không đọc được blob ⇒ không hỏi.
+read -r D <<'TEN:'
+<duong>
+TEN:
+D="${D#planned:}"
+if RP="$(git -C "$SOURCE" for-each-ref refs/replace/)" && [ -z "$RP" ] && [ -n "${D##<*>}" ] && [ -n "${SCRATCH:-}" ] \
+  && mkdir -p "$SCRATCH" && LP_DIR="$(mktemp -d "$SCRATCH/lp-origin-master.XXXXXX")" && LEASE_PY="$LP_DIR/lease_publish.py" \
+  && git -C "$SOURCE" cat-file blob refs/remotes/origin/master:ops/lease_publish.py > "$LEASE_PY"; then
+  case "$D" in
+    -*|/*|[A-Za-z]:/*|./*|../*|.|..|*/|*//*|*/./*|*/../*|*/.|*/..|*\\*) echo "KHONG_DO_DUOC: prefix …/ hoac duong dan khong chuan" ;;
+    *) if [ -d "$SOURCE/$D" ]; then echo "KHONG_DO_DUOC: thu muc co trong checkout ma thieu / cuoi, tuc prefix …/"; else
+       M=0; P="$D/"
+       while :; do
+         GIT_NO_REPLACE_OBJECTS=1 GIT_GRAFT_FILE=/dev/null/grafts "$PY" -B "$LEASE_PY" ai-dang-giu "$P" --root "$SOURCE" || { M=$?; break; }
+         case "$P" in "$D/") P="$D" ;; */*/) P="${P%/*/}/" ;; */?*) P="${P%/*}/" ;; *) break ;; esac
+       done; echo "rc=$M"; fi ;;
+  esac
+  rm -rf -- "$LP_DIR"
+else echo "KHONG_DO_DUOC: refs/replace khong rong/khong doc duoc, duong dan rong/chua dien, SCRATCH rong, hoac khong lay duoc lease_publish.py cua origin/master"; fi
+```
+
+Bên bootstrap chữa nhánh rảnh `<nhanh>` về `<upstream>` (cả hai lấy từ chẩn đoán) bằng `fetch .`
+KHÔNG kèm `+`: git đòi fast-forward trên đầu nhánh HIỆN TẠI (commit cục bộ chưa có ở upstream ⇒
+`rejected`) và từ chối nhánh đang được BẤT KỲ worktree nào checkout, kể cả worktree chính của
+`<root>` — "rảnh" lúc chẩn đoán chưa chắc còn rảnh lúc chữa. Chốt từ chối ấy PHỤ THUỘC phiên bản
+git (đo 30-09-2026): 2.30.2 và 2.34.1 (mặc định Ubuntu 22.04) trả `rc=0` và CẬP NHẬT nhánh đang
+checkout ở worktree LIÊN KẾT (`status` ở đó hiện `D` đúng lease vừa về, y hệt `update-ref` dưới
+đây), cả nhánh đang rebase/bisect ở đó hay ở worktree chính; 2.35.0, 2.36.0, 2.37.0, 2.37.2,
+2.39.2, 2.43.0 từ chối (phép kiểm mọi worktree có từ 2.35.0). Nên khối dưới KHÔNG chạy với git < 2.35.
+Phép so fast-forward đọc commit QUA `refs/replace` và `info/grafts` (đo: graft đầu upstream lên commit
+chưa đẩy ⇒ `ai-dang-giu` báo TỤT_SAU thay vì PHÂN_KỲ, `fetch .` trả `rc=0`, commit rơi khỏi nhánh),
+còn `GIT_DIR` đè `-C` (đo: trỏ kho khác ⇒ `rc=0`, nhánh của kho ĐÓ đổi, `<root>` đứng yên) — nên
+khối tắt cả ba như hai bước trên. `GIT_NO_REPLACE_OBJECTS` chỉ thắng config từ git 2.42: trước đó
+`core.useReplaceRefs=true` ở BẤT KỲ tầng nào (kho, global, `-c`) bật lại replace (đo 30-09-2026: bước 2
+trên 2.30.2 · 2.34.1 · 2.35.0 · 2.41.0 in `CACHE_TUOI` rồi `rc=0 NGƯỜI_GIỮ 0` cho lease đang giữ; `fetch .`
+trên 2.35.0 · 2.41.0 và `merge --ff-only` do chẩn đoán in ra trên 2.41.0 trả `rc=0`, commit rơi) — nên
+bước 2 đòi `refs/replace` RỖNG và khối dưới thêm `-c core.useReplaceRefs=false`. Đừng thay bằng `update-ref <mới>
+<cũ>`: nó so được giá trị cũ nhưng KHÔNG từ chối nhánh đang checkout — HEAD của worktree ấy nhảy,
+index và tệp đứng yên, `status` hiện staged NGƯỢC đúng các commit upstream (lease vừa về hiện
+thành `D`), và `commit` kế tiếp xoá lại chúng:
+
+```bash
+unset GIT_DIR GIT_WORK_TREE GIT_COMMON_DIR   # đè -C như ở khối trên
+# Tên nhánh HỢP LỆ được chứa $ ` ' " ; — điền TÊN THÔ (phần "<nhánh> -> <upstream>" của chẩn đoán) vào heredoc nháy đơn: không khai triển gì.
+# Delimiter mang `:` — ký tự tên ref KHÔNG được chứa. `TEN` trần là tên nhánh HỢP LỆ: điền nó sẽ đóng heredoc sớm.
+IFS= read -r N <<'TEN:'
+<nhanh>
+TEN:
+IFS= read -r U <<'TEN:'
+<upstream>
+TEN:
+case "$(git version)" in
+  "git version 1."*|"git version 2."[0-9].*|"git version 2."[12][0-9].*|"git version 2.3"[0-4].*)
+    echo "KHONG_CHAY: $(git version) < 2.35 khong tu choi nhanh dang checkout o worktree khac hay dang rebase/bisect" ;;
+  *) # fetch TẠO nhánh đích khi chưa có (quên điền <nhanh> ⇒ rc=0, nhánh rác, nhánh thật đứng yên): đòi CẢ HAI ref có sẵn.
+     if git -C "<root>" show-ref --verify --quiet -- "refs/heads/$N" "$U"; then
+       GIT_NO_REPLACE_OBJECTS=1 GIT_GRAFT_FILE=/dev/null/grafts \
+         git -C "<root>" -c core.useReplaceRefs=false fetch --no-write-fetch-head . "$U:refs/heads/$N"; echo "rc=$?"
+     else echo "KHONG_CHAY: refs/heads/$N hoac $U khong co san trong <root> (quen dien ten?)"; fi ;;
+esac
+```
+
 ## Provenance CI
 
 Theo protocol §10.2.2, `$RUN_NODE_ID` lấy từ raw REST response của đúng run. Query dưới

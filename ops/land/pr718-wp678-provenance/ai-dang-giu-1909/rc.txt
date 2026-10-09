@@ -1,0 +1,2 @@
+ops/lease_publish.py rc=0
+ops/lease_publish_test.py rc=0

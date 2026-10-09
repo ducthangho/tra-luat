@@ -11,6 +11,42 @@
 # client GitHub dung san cua Claude Code qua proxy phien). Log job KHONG tai trong ho so nay.
 
 schema_version: 1
+# --- Khoa CHUAN theo docs/PROTOCOL_DA_PHIEN.md §7 "Land evidence tach approval khoi thao tac" (them sau Codex review
+# PR #723, comment 4231975363). Chi tiet do duoc nam o cac khoi tieng Viet ben duoi; khoa chuan tro toi chung.
+mission_id: null
+mission_id_nghia: 'PR #621 khong thuoc Mission/Packet nao (xem packet_issue_nghia); null la gia tri CO Y, khong phai bo sot.'
+generation: 1
+generation_nghia: 'Lan land THU NHAT cua PR #621 (land-attempt generation).'
+model_family: claude
+input_packet_generations: []
+input_packet_generations_nghia: 'Khong co Packet dau vao (xem packet_issue_nghia).'
+authorized_head_sha: 658bd0cdc56bbd3445f489dcfc571e22eee7d675
+approver: ducthangho
+authorization_url: https://github.com/ducthangho/tra-luat/pull/621#issuecomment-6082660033
+land_operator: >-
+  phien Claude Code session_01Fd7YEcw3odAk7QKkydKycE, goi merge qua MCP github bang credential chu kho (loi_khai_co_neo;
+  merged_by trong pr-621.json la tai khoan ducthangho — khong tach chu kho khoi phien agent, #566).
+merge_method: merge
+merge_commit: 3fc0932a3d1617c4352e5a7982f2e6e4208ca3f7
+pre_merge_checks:
+  - check: 'CI pull_request tren ung vien 658bd0c'
+    ket_qua: 'measured — checkruns-658bd0c.json: 17 check run = 16 success (gom 2 thu-hoi) + 1 skipped (mo).'
+    moc_checkout: 'not_measured — khong tai log; chi run head qua REST (§10.2.2).'
+    rc: 'not_measured — chi conclusion.'
+post_merge_checks:
+  - check: 'CI push tren master 3fc0932 — workflow gate, run 37942714195'
+    ket_qua: 'measured — run-37942714195.json completed success; checkruns-3fc0932.json: 14 check run, 14 success.'
+    moc_checkout: 'not_measured — khong tai log; run_head_sha = 3fc0932 chi la REST run head, KHONG la bang chung checkout (§10.2.2). Xem khong_do_duoc CHECKOUT-IDENTITY.'
+    moc_workflow_definition: 'not_measured — xem khong_do_duoc MOC-WORKFLOW-DEFINITION.'
+    rc: 'not_measured — xem khong_do_duoc RC-SO-CHI-CO-STEP-CONCLUSION.'
+bookkeeping:
+  - muc: 'Ho so land + provenance (PR #723)'
+    trang_thai: 'mo — chua merge'
+  - muc: 'Quyet dinh chu kho cho cac diem khong_do_duoc'
+    trang_thai: 'mo — can chu ky moi tren head hien hanh cua PR #723 (chu ky tren 06fc9a8, comment 6084105994, da het hieu luc vi head doi)'
+  - muc: 'PR ghi so ke tiep doi landed: true (tien le #719 -> #720)'
+    trang_thai: 'chua lam'
+# --- Het khoi khoa chuan.
 pr: 621
 packet_issue: null
 packet_issue_nghia: >-
@@ -56,7 +92,7 @@ ung_vien:
     ket_qua: 'doctrine-scan sach (10 tep, 0 cho chep) · adr-song rc=0 · doc-claims-check ok=true · idiom_py_test TONG DAT · eol_policy --all rc=0'
   ci_pr_tren_ung_vien:
     trang_thai: measured
-    ket_qua: '15 success + 1 skipped (mo); thu-hoi 2 lan success (readback checkruns-658bd0c.json)'
+    ket_qua: '17 check run = 16 success (gom 2 thu-hoi) + 1 skipped (mo) (readback checkruns-658bd0c.json). Dinh chinh: ban dau ghi "15 success + 1 skipped; thu-hoi 2 lan" — dem lech 1 (Codex PR #723, comment 4231975348).'
 
 review_ai_truoc_drift:
   trang_thai: stale_theo_AGENTS_md_muc_6
@@ -140,14 +176,17 @@ gate_hau_merge:
   workflow: .github/workflows/ci.yml (name gate, event push)
   head_sha: 3fc0932a3d1617c4352e5a7982f2e6e4208ca3f7
   ket_qua: 'completed success 2026-10-09T14:34:45Z; 14/14 check run success'
+  moc_checkout: 'not_measured — REST run head khong phai bang chung checkout (§10.2.2); xem khong_do_duoc CHECKOUT-IDENTITY (Codex PR #723, comment 4231975373).'
   readback: [run-37942714195.json, checkruns-3fc0932.json]
 
 lease_tren_duong_ghi_so:
   trang_thai: measured
   lenh: >-
-    clone quet day du (490 nhanh; tap ten ls-remote --heads == for-each-ref refs/remotes/origin, thieu 0 thua 0) roi
-    ops/lease_publish.py ai-dang-giu ops/land/pr621-skill-bai-hoc-land-evidence.yaml
-  ket_qua: 'NGUOI_GIU 0, rc=0'
+    clone quet day du (tap ten ls-remote --heads == for-each-ref refs/remotes/origin: 492/492, thieu 0 thua 0), checkout
+    origin/master 3fc0932; ops/lease_publish.py ai-dang-giu --root . <p> cho TUNG duong dan p trong write set PR #723
+    (18 duong dan: tep ho so + moi tep provenance, ke ca chinh bang ket qua).
+  ket_qua: '18/18 rc=0, NGUOI_GIU 0 (readback ai-dang-giu-write-set.txt; rc la ma thoat cua chinh lenh ai-dang-giu).'
+  dinh_chinh: 'Ban dau chi kiem MOT duong dan (tep ho so) — Codex PR #723, comment 4231975378 bat duoc.'
 
 khong_do_duoc:
   - id: MOC-WORKFLOW-DEFINITION
@@ -158,6 +197,12 @@ khong_do_duoc:
   - id: RC-SO-CHI-CO-STEP-CONCLUSION
     mo_ta: 'Ho so nay KHONG tai log job; rc so cua moi job: not_measured, chi conclusion qua REST.'
     can: 'Quyet dinh chu kho (tien le).'
+  - id: CHECKOUT-IDENTITY
+    mo_ta: >-
+      SHA/tree ma runner THUC SU checkout cho run 37942714195 (va cho CI PR tren 658bd0c): khong tai log job / artifact; chi
+      co REST run head = 3fc0932. §10.2.2 khong cho dung REST run head lam bang chung checkout. Nguon thay the (khong thay
+      the phep do): tree 3fc0932 = tree 658bd0c (measured, thao_tac_merge.kiem_tra).
+    can: 'Quyet dinh chu kho cho RIENG run 37942714195 / SHA 3fc0932 (Codex PR #723, comment 4231975373).'
   - id: WINDOWS
     mo_ta: 'Run push tren master chi chay ubuntu-latest cho thay doi nay (khong co job windows trong checkruns-3fc0932.json); tai lieu adapter khong co nhanh chay theo nen.'
 
@@ -168,6 +213,6 @@ trang_thai_packet:
   landed_ly_do: >-
     PROTOCOL §10.2.4/§13.1: landed = vao canonical o exact SHA duoc duyet + hau-merge gate xanh + bookkeeping xong.
     DA CO (measured): exact SHA (cha thu hai 3fc0932 = 658bd0c = reviewed_sha cua human audit, review_tai_head_da_merge),
-    gate hau-merge 14/14. CON THIEU:
-    (1) PR ghi so nay merge bang merge commit; (2) quyet dinh chu kho cho hai diem khong_do_duoc (tien le). Land operator
-    KHONG tu dong diem nao.
+    gate hau-merge 14/14 (conclusion). CON THIEU: (1) PR ghi so nay merge bang merge commit; (2) quyet dinh chu kho cho BA
+    diem khong_do_duoc (MOC-WORKFLOW-DEFINITION, RC-SO-CHI-CO-STEP-CONCLUSION, CHECKOUT-IDENTITY) tren head hien hanh cua
+    PR nay. Land operator KHONG tu dong diem nao.

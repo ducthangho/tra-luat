@@ -200,9 +200,11 @@ python scripts/tl.py ping ; python scripts/tl.py gws-ping --env cowork
     đĩa, KHÔNG set `NOTEBOOKLM_COOKIES`/`_CSRF_TOKEN`/`_SESSION_ID` — env var "đông cứng" làm auto-refresh CHẾT).
   - **Cowork không tự refresh được** (không có Chrome/browser-profile) — nhưng 1 phiên Cowork (giờ) « tuổi cookie
     (tuần) nên đủ; CSRF/session tự sinh trong phiên từ cookie đĩa. Refresh THẬT xảy ra ở **Code** (browser profile).
-  - **Bảo trì ~2–4 tuần** (bootstrap báo "cookie ~N ngày tuổi", >14 ngày thì cảnh báo): ở Code chạy `nlm login`
-    (hoặc để nlm tự headless-refresh khi dùng) rồi **`tl secrets-set --nlm`** (refresh cookie tại chỗ vào bundle,
-    giữ nguyên fileId). Từ WP710 cả `secrets-set --nlm` lẫn `secrets-stage` đòi canary LIVE dương (thân JSON đúng
+  - **Bảo trì ~2–4 tuần** (bootstrap báo "cookie ~N ngày tuổi", >14 ngày thì cảnh báo): ở đúng máy giữ
+    browser profile gốc chạy `nlm auth refresh` và kiểm canary notebook dương. Chỉ khi refresh báo lỗi
+    xác thực mới `nlm login` tương tác rồi kiểm lại canary. Sau đó **`tl secrets-set --nlm`** (cổng riêng
+    của lệnh kiểm canary trước upload, giữ nguyên fileId). Từ WP710 cả `secrets-set --nlm` lẫn
+    `secrets-stage` đòi canary LIVE dương (thân JSON đúng
     notebook) trước mọi upload — `nlm login --check` KHÔNG còn là bằng chứng; `secrets-set` KHÔNG kèm `--nlm` trên
     bundle đang mang `nlm_auth` bị từ chối (mã 4) — cách làm đúng ở mục "Xoay vòng / đổi token" (A0.4c) và mục
     WP710 cuối tệp.
@@ -733,8 +735,9 @@ kiểm thư mục ấy tồn tại, KHÔNG truyền nó cho `nlm`. "Chạy trên
 đảm bằng việc chọn máy.
 
 **Ý nghĩa trạng thái và mã thoát.** Mọi trạng thái kết thúc TRƯỚC bước stage (mã 2, 3, 4, 5) gọi lệnh
-stage 0 lần, nên không upload gì. `stage_failure` (mã 6) thì KHÁC: lệnh stage ĐÃ được gọi, nên wrapper
-không bảo đảm 0 upload — lệnh có thể đã ghi một phần (vd `secrets-set` ghi bundle rồi mới lỗi ở bước sau)
+stage 0 lần, nên không upload gì. `stage_failure` (mã 6) nghĩa bước stage lỗi sau canary dương:
+lỗi trước khi tạo con có thể cho 0 lời gọi stage; nếu con đã chạy, wrapper không bảo đảm 0 upload —
+lệnh có thể đã ghi một phần (vd `secrets-set` ghi bundle rồi mới lỗi ở bước sau)
 trước khi trả mã khác 0. `staged` chỉ nghĩa là lệnh stage trả rc 0; wrapper không tự đọc lại Drive.
 
 | `status` / `step` | mã thoát | nghĩa và việc cần làm |
@@ -834,7 +837,9 @@ ly có đồng hồ. Windows lấy thời điểm tạo tiến trình từ nhân
 
 **Cổng nằm ở lệnh, không chỉ ở wrapper.** `tl nlm-auth-stage`, `tl secrets-set --nlm` (bundle và
 `nlm_cred.enc` public) và `tl secrets-stage` (bundle mang `nlm_auth`) cùng đi qua MỘT hàm cổng: canary
-phải dương theo luật thân JSON ở trên trước khi đọc jar và trước mọi upload; không dương thì từ chối cả
+phải dương theo luật thân JSON ở trên trước khi lấy payload jar để upload và trước mọi upload;
+riêng `nlm-auth-stage` tiền kiểm sự hiện diện của jar bằng cách đọc nó vào RAM trước canary rồi bỏ.
+Canary không dương thì từ chối cả
 lệnh (mã 4), không upload gì. `--force` của `nlm-auth-stage` không bỏ qua được cổng (trợ giúp CLI của cờ
 này còn mô tả cũ — nợ ngoài write set). Notebook mà cổng dò, theo thứ tự: `TL_CANARY_NOTEBOOK_ID` →
 `TL_NOTEBOOK_ID` có sẵn lúc lệnh BẮT ĐẦU (trước khi lệnh tự nạp config) → `notebookId` của profile vừa nạp →

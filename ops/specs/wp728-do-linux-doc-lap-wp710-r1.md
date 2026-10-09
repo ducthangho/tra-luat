@@ -1,12 +1,12 @@
-# wp<M> — Phép đo Linux ĐỘC LẬP cho mã WP710 đã land (zombie/subreaper, suite PowerShell) — Spec r1
+# wp728 — Phép đo Linux ĐỘC LẬP cho mã WP710 đã land (zombie/subreaper, suite PowerShell) — Spec r1
 
 > Nguồn quyết định: chủ kho đồng ý khuyến nghị Q9, Q10 (và Q8) của bản nháp `ops/specs/wp710-ke-nhiem-nhap.md`
 > (commit `24254793c369f836297e9776fa3b6e721a25eefb`, PR #724), 2026-10-09. Đây là một lượt **ĐO/AUDIT**, không phải
-> packet code: không write set sản phẩm. KHÔNG cấp việc: cần Issue `wp<M>`, lease `role: reviewer` và comment cấp quyền.
+> packet code: không write set sản phẩm. KHÔNG cấp việc: cần Issue `wp728`, lease `role: reviewer` và comment cấp quyền.
 
 ## Định danh và thẩm quyền
 
-- `packet_id`: `wp<M>` · `packet_issue`: <M> · `revision`: 1.
+- `packet_id`: `wp728` · `packet_issue`: 728 · `revision`: 1.
 - Đối tượng: lớp `linux-subreaper-khong-thu-hoi-zombie` của WP710 (`ops/reviews/wp710-g5-luot-9/VERDICT.md` dòng 22:
   "CHƯA VÁ trong delta; việc đóng KHÔNG ĐO ĐƯỢC"; dòng 56: Linux "KHÔNG ĐO ĐƯỢC độc lập"), trong commit
   `2e53b19a9c86a06f8f67247f9d68d8933d780de0`.
@@ -48,7 +48,7 @@
 
 ## Đầu ra
 
-- `ops/reviews/wp<M>-do-linux/`: `VERDICT.md` (bảng M1–M3: `passed`/`failed`/`not_measured` kèm lệnh, rc, đầu ra
+- `ops/reviews/wp728-do-linux/`: `VERDICT.md` (bảng M1–M3: `passed`/`failed`/`not_measured` kèm lệnh, rc, đầu ra
   nguyên văn), `run.json`, `SHA256SUMS.txt`, `.gitattributes` với `* -text` (bài học hồ sơ g5: CRLF).
 - Kết luận cho lớp `linux-subreaper-khong-thu-hoi-zombie`: `đóng` chỉ khi M1 đạt VÀ M2 đạt kèm phản chứng có răng;
   ngược lại giữ mở và nêu cái thiếu.

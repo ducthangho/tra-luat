@@ -1,13 +1,13 @@
-# wp<A> — Hướng dẫn NLM cũ: tài liệu và chuỗi trợ giúp (kế nhiệm WP710, slice A) — Spec r1
+# wp725 — Hướng dẫn NLM cũ: tài liệu và chuỗi trợ giúp (kế nhiệm WP710, slice A, #725) — Spec r1
 
 > Nguồn quyết định: chủ kho đồng ý MỌI khuyến nghị Q1–Q10 của bản nháp
 > `ops/specs/wp710-ke-nhiem-nhap.md` (commit `24254793c369f836297e9776fa3b6e721a25eefb`, PR #724), phiên
-> https://claude.ai/code/session_01EENkYtuRtrNS79zt6PTN7h, 2026-10-09. Spec này là slice A của Q1.
-> Đặc tả này KHÔNG cấp việc: cần Issue `wp<A>`, lease còn hiệu lực và comment cấp quyền của chủ kho.
+> https://claude.ai/code/session_01EENkYtuRtrNS79zt6PTN7h, 2026-10-09. Spec này là slice A (#725) của Q1.
+> Đặc tả này KHÔNG cấp việc: cần Issue `wp725`, lease còn hiệu lực và comment cấp quyền của chủ kho.
 
 ## Định danh và thẩm quyền
 
-- `packet_id`: `wp<A>` · `packet_issue`: <A> · `mission_issue`: <A> · `revision`: 1 · `generation` đề xuất: 1.
+- `packet_id`: `wp725` · `packet_issue`: 725 · `mission_issue`: 725 · `revision`: 1 · `generation` đề xuất: 1.
 - `nguon_cap_viec`: packet khắc phục; cha WP710 (#710, Spec r4 sha256
   `a51164cf4bb0b3f41d4c01ef56a522c339caac008f2d855b3819a3ebb642bc0b`, land `8b59185975a938504de5963d2310e574dd4858b2`).
   Finding gốc: lớp `huong-dan-cu-con-lech-sau-va-ngoai-write-set` [P3], `ops/reviews/wp710-g5-luot-9/VERDICT.md`
@@ -31,8 +31,8 @@
 | `references/golden/parser_surface.json` | CHỈ giá trị băm của khoá `nlm-auth-stage`, sinh bằng `TL_WRITE_PARSER_SURFACE=1 python scripts/tl.py --selftest`; mọi dòng khác giữ nguyên byte. |
 | `references/COWORK_PROJECT.md` | "Bước 3 — Đồng bộ cookie nlm": thay hướng dẫn cũ bằng con trỏ tới quy trình WP710; bỏ khối Task Scheduler. |
 | `references/RUNBOOK.md` | CHỈ câu ở dòng ~195 lấy "`nlm login --check` xanh" làm tín hiệu thành công. Mục "WP710 — làm tươi credential NLM" KHÔNG đổi. |
-| `changelog.d/wp-<A>.md` | mảnh changelog, không bump version. |
-| `scripts/test_fragments/wp<A>_huong_dan_nlm.py` | ca khoá (protocol §5: test mới vào fragment, KHÔNG vào `tl_selftest.py`). |
+| `changelog.d/wp-725.md` | mảnh changelog, không bump version. |
+| `scripts/test_fragments/wp725_huong_dan_nlm.py` | ca khoá (protocol §5: test mới vào fragment, KHÔNG vào `tl_selftest.py`). |
 
 Sáu tệp = trần packet thường của ADR-0044. Land-only, NGOÀI write set Executor: `RELEASE_MANIFEST.json`, `VERSION`,
 mọi golden khác.
@@ -43,7 +43,7 @@ mọi golden khác.
   HÀNH", thuộc `_DOC_CLAIMS_HISTORICAL` tại `scripts/tl_core/workflow.py:841`); dòng 274 đã nói "KHÔNG tin
   `nlm login --check`". Verdict lượt 3–9 nêu tệp này; spec này đóng phần ấy bằng lý do, không bằng sửa.
 - `scripts/tl.py:122–123` (chú thích thứ tự cũ) — nợ có tên `tl-py-chu-thich-thu-tu-stage-cu`; `tl.py` là tệp nóng.
-- Ba script shell → slice B1; `scripts/tl_gws.py` → slice B2. Đồng hồ WSL (Q8) → không làm.
+- Ba script shell → slice B1 (#726); `scripts/tl_gws.py` → slice B2 (#727). Đồng hồ WSL (Q8) → không làm.
 - Mọi hit lưu trữ/đã nhất quán của bảng phân loại trong bản nháp (≈60 dòng dùng `nlm login` làm bước PHỤC HỒI hoặc
   cài đặt lần đầu — RUNBOOK cho phép).
 - LIVE, credential thật, Drive, deploy, merge/land.
@@ -51,7 +51,7 @@ mọi golden khác.
 ## muc_tieu (mỗi dòng chiếu MỘT đường dẫn — L2)
 
 1. `scripts/tl_core/cli.py` — help `nlm-auth-stage`: bỏ "[CODE, sau `nlm login`]", nói lệnh chỉ upload sau canary
-   LIVE dương. Help `--refresh`: trung tính, không mô tả cơ chế (để không phụ thuộc slice B2) — "làm tươi
+   LIVE dương. Help `--refresh`: trung tính, không mô tả cơ chế (để không phụ thuộc slice B2 (#727)) — "làm tươi
    best-effort trước khi gói; KHÔNG thay cổng canary". Help `--force`: bỏ câu "bỏ qua cổng verify-LIVE — ép stage
    DÙ cookie đang chết"; nói đúng: `--force` KHÔNG qua được cổng canary (RUNBOOK:176, lớp WP710 đã land).
 2. `references/golden/parser_surface.json` — một dòng băm `nlm-auth-stage` mới.
@@ -62,8 +62,8 @@ mọi golden khác.
    (refresh → canary → stage), không "`nlm login` → `secrets-set --nlm`" trần. Giữ con trỏ RUNBOOK→COWORK_PROJECT
    mà ca r228 cần (`tl_selftest.py:26401`).
 4. `references/RUNBOOK.md` — dòng ~195: thay "`nlm login --check` xanh" bằng phép kiểm canary dương.
-5. `changelog.d/wp-<A>.md` — mô tả ngắn, có câu nêu rõ phần nào cố ý không làm.
-6. `scripts/test_fragments/wp<A>_huong_dan_nlm.py` — các ca của N1–N2.
+5. `changelog.d/wp-725.md` — mô tả ngắn, có câu nêu rõ phần nào cố ý không làm.
+6. `scripts/test_fragments/wp725_huong_dan_nlm.py` — các ca của N1–N2.
 
 ## nghiem_thu (mỗi tiêu chí nêu phép đo làm nó ĐỎ — L3)
 

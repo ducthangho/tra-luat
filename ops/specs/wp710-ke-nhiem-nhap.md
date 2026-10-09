@@ -1,5 +1,7 @@
 # Kế nhiệm WP710 — hướng dẫn NLM cũ ngoài write set + phép đo Linux độc lập (BẢN NHÁP, CHƯA ĐÓNG BĂNG)
 
+> **ĐÃ BỊ THAY THẾ** bởi bốn đặc tả r1: `ops/specs/wp725-…`, `wp726-…`, `wp727-…`, `wp728-…` (Issue #725–#728), sau khi chủ kho đồng ý mọi khuyến nghị Q1–Q10. Tệp này giữ làm hồ sơ quyết định.
+>
 > **TRẠNG THÁI: NHÁP r0.** Băm của tệp này KHÔNG dùng cho lease. Các ô `CHỜ Qn` là quyết định của
 > chủ kho (xem phần "Quyết định chờ" cuối tệp). Khi đóng băng: đổi tên thành `ops/specs/wp<issue>-<slug>-r1.md`
 > theo số Issue thật, xoá mọi ô `CHỜ`, rồi mới tính `sha256`.

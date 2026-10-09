@@ -1,12 +1,12 @@
-# wp<B2> — `tl_gws.py`: bước làm tươi `nlm auth refresh` và chuỗi gợi ý theo quy trình WP710 (kế nhiệm WP710, slice B2) — Spec r1
+# wp727 — `tl_gws.py`: bước làm tươi `nlm auth refresh` và chuỗi gợi ý theo quy trình WP710 (kế nhiệm WP710, slice B2, #727) — Spec r1
 
 > Nguồn quyết định: chủ kho đồng ý MỌI khuyến nghị Q1–Q10 của bản nháp
 > `ops/specs/wp710-ke-nhiem-nhap.md` (commit `24254793c369f836297e9776fa3b6e721a25eefb`, PR #724), 2026-10-09.
-> Spec này là slice B2 của Q1 (Q4). KHÔNG cấp việc: cần Issue `wp<B2>`, lease còn hiệu lực và comment cấp quyền.
+> Spec này là slice B2 (#727) của Q1 (Q4). KHÔNG cấp việc: cần Issue `wp727`, lease còn hiệu lực và comment cấp quyền.
 
 ## Định danh và thẩm quyền
 
-- `packet_id`: `wp<B2>` · `packet_issue`: <B2> · `mission_issue`: <B2> · `revision`: 1 · `generation` đề xuất: 1.
+- `packet_id`: `wp727` · `packet_issue`: 727 · `mission_issue`: 727 · `revision`: 1 · `generation` đề xuất: 1.
 - `nguon_cap_viec`: packet khắc phục; cha WP710 (#710, Spec r4 sha256
   `a51164cf4bb0b3f41d4c01ef56a522c339caac008f2d855b3819a3ebb642bc0b`, land `8b59185975a938504de5963d2310e574dd4858b2`);
   lớp `huong-dan-cu-con-lech-sau-va-ngoai-write-set` [P3]. `tl_gws.py` KHÔNG có trong danh sách của verdict; tìm ra
@@ -24,8 +24,8 @@
 | đường dẫn | thay đổi được phép |
 |---|---|
 | `scripts/tl_gws.py` | CHỈ: thân `_refresh_nlm_auth` (~756–766) và docstring của nó; các chuỗi thông báo/gợi ý ở ~839, ~1405, ~1672, ~1695, ~1718, ~1727 (docstring), ~1769, ~1787. KHÔNG đổi `_nlm_auth_alive`, `_nlm_canary_*`, `_nlm_files_after_live_canary`, thứ tự gọi, mã thoát, hay bất kỳ hàm nào khác. |
-| `changelog.d/wp-<B2>.md` | mảnh changelog. |
-| `scripts/test_fragments/wp<B2>_tl_gws_refresh.py` | ca khoá. |
+| `changelog.d/wp-727.md` | mảnh changelog. |
+| `scripts/test_fragments/wp727_tl_gws_refresh.py` | ca khoá. |
 
 KHÔNG sửa `scripts/tl_selftest.py` (các ca hiện có ở ~4690–4850 vá `_refresh_nlm_auth` bằng lambda — phải tiếp tục
 xanh nguyên trạng). Land-only: `RELEASE_MANIFEST.json`.
@@ -33,7 +33,7 @@ xanh nguyên trạng). Land-only: `RELEASE_MANIFEST.json`.
 ## ngoai_pham_vi
 
 - Cổng canary, danh sách cho phép thân canary, payload guard — đã land ở WP710.
-- `scripts/tl_core/cli.py` (help `--refresh`, slice A viết trung tính để không phụ thuộc slice này).
+- `scripts/tl_core/cli.py` (help `--refresh`, slice A (#725) viết trung tính để không phụ thuộc slice này).
 - Hit đã nhất quán hoặc lưu trữ trong `tl_gws.py` (~108–110, 310–359, 712, 739, 803–807, 858–888, 959–1071,
   1116–1349, 1481, 1743–1781 trừ các dòng liệt kê ở write set) — giữ nguyên.
 
@@ -79,4 +79,4 @@ xanh nguyên trạng). Land-only: `RELEASE_MANIFEST.json`.
 
 - `nlm auth refresh` có thật sự làm tươi cookie từ browser profile trong ngữ cảnh lệnh `tl` (không tương tác) hay không
   — chỉ đo được LIVE trên máy gốc; ngoài lease. Thứ được bảo đảm offline: lệnh mới không mở được upload khi canary âm.
-- `nlm-auth-status` có đòi thân đúng notebook không — xem slice B1 mục 2.
+- `nlm-auth-status` có đòi thân đúng notebook không — xem slice B1 (#726) mục 2.

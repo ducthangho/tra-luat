@@ -1,13 +1,13 @@
-# wp<B1> — Ba script shell NLM: phán sống/chết bằng canary, không nuốt mã thoát (kế nhiệm WP710, slice B1) — Spec r1
+# wp726 — Ba script shell NLM: phán sống/chết bằng canary, không nuốt mã thoát (kế nhiệm WP710, slice B1, #726) — Spec r1
 
 > Nguồn quyết định: chủ kho đồng ý MỌI khuyến nghị Q1–Q10 của bản nháp
 > `ops/specs/wp710-ke-nhiem-nhap.md` (commit `24254793c369f836297e9776fa3b6e721a25eefb`, PR #724), 2026-10-09.
-> Spec này là slice B1 của Q1 (Q3 cho `nlm-auto-refresh.sh`). KHÔNG cấp việc: cần Issue `wp<B1>`, lease còn hiệu lực
+> Spec này là slice B1 (#726) của Q1 (Q3 cho `nlm-auto-refresh.sh`). KHÔNG cấp việc: cần Issue `wp726`, lease còn hiệu lực
 > và comment cấp quyền của chủ kho.
 
 ## Định danh và thẩm quyền
 
-- `packet_id`: `wp<B1>` · `packet_issue`: <B1> · `mission_issue`: <B1> · `revision`: 1 · `generation` đề xuất: 1.
+- `packet_id`: `wp726` · `packet_issue`: 726 · `mission_issue`: 726 · `revision`: 1 · `generation` đề xuất: 1.
 - `nguon_cap_viec`: packet khắc phục; cha WP710 (#710, Spec r4 sha256
   `a51164cf4bb0b3f41d4c01ef56a522c339caac008f2d855b3819a3ebb642bc0b`, land `8b59185975a938504de5963d2310e574dd4858b2`);
   finding gốc lớp `huong-dan-cu-con-lech-sau-va-ngoai-write-set` [P3] cộng hai tệp lệch mà verdict KHÔNG nêu
@@ -30,14 +30,14 @@
 | `scripts/nlm-auto-refresh.sh` | bước 3 "probe LIVE" (dòng ~74–86). |
 | `scripts/env-reimport.sh` | khối probe LIVE (dòng ~127–140) và dòng gợi ý phục hồi. |
 | `scripts/nlm-auth-import.sh` | bước 4 "PHÁN QUYẾT" (dòng ~193–201) và bước 5 báo lỗi stage (dòng ~204–212). |
-| `changelog.d/wp-<B1>.md` | mảnh changelog. |
-| `scripts/test_fragments/wp<B1>_script_nlm_canary.py` | ca khoá với `nlm`/`tl` giả. |
+| `changelog.d/wp-726.md` | mảnh changelog. |
+| `scripts/test_fragments/wp726_script_nlm_canary.py` | ca khoá với `nlm`/`tl` giả. |
 
 Land-only, ngoài write set: `RELEASE_MANIFEST.json`.
 
 ## ngoai_pham_vi
 
-- `scripts/tl_gws.py` (slice B2), tài liệu/help (slice A), `tl.py`, wrapper PowerShell của WP710.
+- `scripts/tl_gws.py` (slice B2 (#727)), tài liệu/help (slice A), `tl.py`, wrapper PowerShell của WP710.
 - Đổi cổng canary hay danh sách cho phép thân canary — đã land ở WP710, không mở lại.
 - Đổi lịch hay cấu hình Routine `trig_01ReWux8` — không đụng; chỉ ghi trong handoff mã thoát mới để chủ kho đối chiếu.
 - LIVE, Drive, credential thật.
@@ -62,7 +62,7 @@ Land-only, ngoài write set: `RELEASE_MANIFEST.json`.
 3. `scripts/nlm-auth-import.sh`: bước 4 phán sống bằng canary (như mục 2); bước 5 tách ba trường hợp theo rc của
    stage: 0 đã tươi · 4 "canary của lệnh stage không dương — KHÔNG upload" · khác "lỗi stage, có thể đã ghi một
    phần — kiểm Drive". Không còn in "cookie ở ĐÂY vẫn dùng được" khi rc 4.
-4. `changelog.d/wp-<B1>.md`; 5. fragment test.
+4. `changelog.d/wp-726.md`; 5. fragment test.
 
 ## nghiem_thu (L3)
 

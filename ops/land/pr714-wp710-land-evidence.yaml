@@ -171,13 +171,21 @@ candidates:
     head_da_merge: 888c0d9b68136f384068ecad8e286819bb175044
     head_human_audit: '888c0d9b68136f384068ecad8e286819bb175044 (ghi SAU merge)'
 
-authorized_head_sha: null
+authorized_head_sha: 888c0d9b68136f384068ecad8e286819bb175044
 authorized_head_ghi_chu: >-
-  Khong co phe duyet nao TRUOC merge tren head da merge 888c0d9. Human audit 6080353250 neo dung 888c0d9 nhung ky sau merge;
-  hieu luc cua no voi `landed` do chu kho quyet o PR ghi so.
+  UY QUYEN HAU KY, KHONG phai phe duyet truoc merge. Khong co phe duyet nao TRUOC merge tren head da merge 888c0d9 (cha thu
+  hai cua 8b59185). Human audit 6080353250 neo dung 888c0d9 nhung ky SAU merge (11:55:41Z, merge 11:08:09Z) va hoan quyet
+  dinh landed; quyet dinh landed la comment 6084150845 (15:39:03Z) tren PR ghi so #722, chap nhan tuong minh delta 888c0d9
+  vs head approve 6a8c8b5. authorized_head_sha ghi head ma quyet dinh ay chap nhan, de nguoi doc chung minh duoc ung vien
+  nao duoc uy quyen; thoi diem xem authorization.quyet_dinh_landed va lech_protocol_khai MERGE-TRUOC-HUMAN-AUDIT-VA-TRUOC-BOT.
 approver: ducthangho
-authorization_url: https://github.com/ducthangho/tra-luat/pull/714#issuecomment-6080353250
+authorization_url: https://github.com/ducthangho/tra-luat/pull/722#issuecomment-6084150845
 authorization:
+  quyet_dinh_landed:
+    url: https://github.com/ducthangho/tra-luat/pull/722#issuecomment-6084150845
+    assurance: human_audited
+    verdict: 'landed tai 8b59185 (head 888c0d9) — xem trang_thai_packet.quyet_dinh_chu_kho'
+    thu_tu_thoi_gian: 'measured — 15:39:03Z, SAU merge 8b59185 (11:08:09Z), SAU hau-merge gate xanh va SAU nghiem thu lease g5 (15:20:42Z).'
   human_audit:
     url: https://github.com/ducthangho/tra-luat/pull/714#issuecomment-6080353250
     assurance: human_audited

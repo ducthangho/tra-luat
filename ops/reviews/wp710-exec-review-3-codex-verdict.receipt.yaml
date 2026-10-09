@@ -45,7 +45,7 @@ verdict_ban_goc: 'tep goc cr714-l3/goi/VERDICT.md trong scratchpad cua phien (cp
 hint_path: ops/reviews/wp710-exec-review-3-codex-HINT.patch
 hint_patch_sha256: 7832244d614b839bdb85b380d4405fc4c72a2876eeea0b8b91a489ed355a5078
 hint_patch_bytes: 18955
-hint_ghi_chu: '(a) HINT chep NGUYEN BYTE tu cr714-l3/goi/HINT.patch; bam khop comment ban chieu.'
+hint_ghi_chu: '(a) HINT chep NGUYEN BYTE tu cr714-l3/goi/HINT.patch; bam khop comment ban chieu. (a) Dong 1 la `# lop:` — THIEU nhan bat buoc PROTOCOL §8.4; xem caveat HINT-LUOT-3-THIEU-NHAN-PATCH-AS-HINT.'
 reviewed_sha: cc020e02607bc27eb2a815e1ac282380a155820d
 reviewed_tree: 8337342d91298bc1660c398c6e18a3f5938c4ad2
 reviewed_sha_nguon: '(a) dong 2 tep verdict; `git merge-base --is-ancestor <sha> 8b59185` rc 0 (to tien cua master)'
@@ -114,5 +114,9 @@ verdict_usage_caveats:
     mo_ta: >-
       Luot 3 review head g3 cc020e0, KHONG phai head da merge 888c0d9. Chuoi review tiep o g4/g5 (luot 4-9, approve o
       luot 9 tren 6a8c8b5); hien vat luot 4-9 chua nam trong kho luc ghi so. Dung doc luot nay thanh review cua head da land.
+  - id: HINT-LUOT-3-THIEU-NHAN-PATCH-AS-HINT
+    muc: P2
+    mo_ta: >-
+      HINT luot 3 la ban chep NGUYEN BYTE tu reviewer va THIEU nhan bat buoc PROTOCOL §8.4 dong 644 ("chưa chạy trên cây thật — executor tự áp, tự đo, tự chịu trách nhiệm commit"; luot 1-2 co nhan o dong 1). Giu nguyen byte de khong lam sai hint_patch_sha256; tep nay KHONG du dieu kien dung lam patch-as-hint — chi la hien vat lich su (connector Codex PR #722, pull/722#discussion_r4231959151).
 nguon_co_tham_quyen: >-
   TEP CO BAM trong kho (verdict_path + verdict_sha256). Comment tren #714 chi la BAN CHIEU. Hai ban lech thi tin blob.

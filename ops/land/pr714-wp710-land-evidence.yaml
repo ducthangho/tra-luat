@@ -4,7 +4,7 @@
 #
 # TRANG THAI: merged (8b59185), `landed: false`. PR #714 merge TRUOC khi co human audit va TRUOC khi bot Codex review xong
 # head 888c0d9; human audit cua chu kho GHI SAU MERGE (pull/714#issuecomment-6080353250) chap nhan tuong minh cac lech.
-# Delta sau head duoc approve (7f7ae2c, 888c0d9) CHUA reviewer nao xem. Hien vat review luot 4-9 chua nam trong kho.
+# Delta sau head duoc approve (7f7ae2c, 888c0d9) CHUA reviewer nao xem. Hien vat review luot 4-8 chua nam trong kho; luot 9 DUNG LAI tu ban chieu (6bb5358).
 # `landed` chi len true khi chu kho quyet O PR GHI SO NAY va PR nay merge bang merge commit (tien le #678).
 # "merged" KHONG dong nghia "landed" (PROTOCOL §10.2.4).
 # NHAN: measured = do lai trong phien ghi so (lenh ghi kem); loi_khai_co_neo = chi co loi khai cua phien agent/chu kho, co
@@ -49,10 +49,10 @@ trang_thai_packet:
     PROTOCOL §10.2.4: `landed` = da vao canonical o exact SHA duoc duyet, HAU-MERGE GATE XANH va bookkeeping Packet xong;
     §13.1: khong goi landed khi thieu bang chung tuong ung; §2: tham quyen khong chuyen qua output cua agent. Head da merge
     888c0d9 KHAC head duoc approve 6a8c8b5; human audit tren 888c0d9 co nhung GHI SAU merge; hau-merge gate chua xong luc
-    ghi; hien vat review luot 4-9 chua vao kho. Land operator KHONG tu dong diem nao; xem con_thieu_de_goi_landed.
+    ghi; hien vat review luot 4-8 chua vao kho (luot 9: ban dung lai tu ban chieu, khop bam). Land operator KHONG tu dong diem nao; xem con_thieu_de_goi_landed.
   con_thieu_de_goi_landed:
     - id: HIEN-VAT-REVIEW-LUOT-4-9
-      trang_thai: con_mo
+      trang_thai: 'con_mo cho luot 4-8; luot 9 DA CO ban DUNG LAI tu ban chieu (6bb5358 + bien nhan 7144137), tep goc van chua co'
       mo_ta: >-
         VERDICT (va HINT neu co) luot 4-9 cua g4/g5 nam tren may Windows cua chu kho (lượt 9: thu muc `cw/rv9`, theo ban
         chieu 6078803297). Phien Windows duoc yeu cau day len nhanh ops/wp710-g5-hien-vat-review; luc ghi so nhanh nay
@@ -64,7 +64,12 @@ trang_thai_packet:
         trong dau/cuoi va them MOT LF cuoi, cho sha256 3524df2f834fda1463ebc1dc1a438c2ceba04c6657e891c3391861df788757fd
         (16380 byte) = verdict_sha256 khai. Tuc ban chieu chua nguyen van luot 9. KHONG dung no de dung tep trong kho (chi
         thi: cho tep goc tu Windows); ghi lai nhu duong du phong cho chu kho quyet.
-      can: 'Phien Windows day tep goc; ghi so chep nguyen byte + doi chieu bam voi ban chieu + bien nhan v2 (PR ghi so ke tiep hoac nhanh nay).'
+      cap_nhat_luot_9: >-
+        Chu kho DA DONG Y dung lai luot 9 tu ban chieu. ops/reviews/wp710-exec-review-9-codex-verdict.md dung lai o commit
+        6bb5358 (16380 byte, sha256 tren blob = 3524df2f834fda1463ebc1dc1a438c2ceba04c6657e891c3391861df788757fd = verdict_sha256
+        khai); bien nhan v2 ops/reviews/wp710-exec-review-9-codex-verdict.receipt.yaml o commit 7144137 (cross_reviewed, KHONG
+        cross_approved). Luot 4-8: khong co ban chieu nao tren #714/#710 => van KHONG_DO_DUOC.
+      can: 'Phien Windows day tep goc luot 4-8 (va luot 9 de doi chieu byte); ghi so chep nguyen byte + doi chieu bam + bien nhan v2.'
     - id: DELTA-888C0D9-CHUA-REVIEW
       trang_thai: 'con_mo — chu kho chap nhan TUONG MINH trong human audit 6080353250, khong phai review'
       mo_ta: >-
@@ -167,7 +172,8 @@ authorization:
     verdict_sha256: 3524df2f834fda1463ebc1dc1a438c2ceba04c6657e891c3391861df788757fd
     do_duoc: >-
       measured (readback-comments-714-p1.json): user ducthangho, OWNER, performed_via_github_app null, 10:09:04Z; ban chieu do
-      PHIEN EXECUTOR dang ho (tu khai), "không cấp cross_approved, approval hay quyền land". Tep VERDICT goc CHUA trong kho.
+      PHIEN EXECUTOR dang ho (tu khai), "không cấp cross_approved, approval hay quyền land". Tep VERDICT goc CHUA trong kho;
+      ban DUNG LAI tu khoi <details> cua comment nay o ops/reviews/wp710-exec-review-9-codex-verdict.md (6bb5358, khop bam).
     assurance: 'cross_reviewed theo tu khai (launcher run 059b4f51, gpt-6-sol header CLI); run.json khong co trong kho => not_measured.'
   codex_connector:
     ket_qua: >-
@@ -212,7 +218,7 @@ post_merge_checks:
 review:
   ghi_chu: >-
     Review THI HANH: 9 luot Codex khac ho executor. g3 luot 1-3 (phien dieu phoi Linux, codex exec truc tiep) — tep goc +
-    bien nhan v2 trong PR ghi so nay. g5 luot 4-9 (Windows, launcher.py) — chi ban chieu/commit message; tep goc cho Windows.
+    bien nhan v2 trong PR ghi so nay. g5 luot 4-8 (Windows, launcher.py) — chi commit message; tep goc cho Windows. Luot 9 — tep DUNG LAI tu ban chieu + bien nhan v2.
     So luot vuot tran 2 luot cua protocol §8 — chu kho chap nhan trong cap quyen g5.
   thi_hanh:
     - {luot: 1, reviewed: 80947fc, verdict: changes_requested, p: '3/3/2', comment: 6038047502, tep: wp710-exec-review-1-codex-verdict.md, sha256: 87295f453d8c87f3675915c8479c56908f0aa8fd501edbdc430e595ea535b7b7, nhan: measured}
@@ -223,14 +229,14 @@ review:
     - {luot: 6, reviewed: cde2ef4, verdict: changes_requested, p_trong_write_set: '0/0/2', sha256_rut_gon: '6bd5460c…4a43', nguon: 'message a5464c3', nhan: thuat_lai}
     - {luot: 7, reviewed: a5464c3, verdict: changes_requested, sha256_rut_gon: '02f7f76e…ec08', nguon: 'message 5e9fd92', nhan: thuat_lai}
     - {luot: 8, reviewed: 5e9fd92, verdict: changes_requested, p_trong_write_set: '0/0/1', sha256: 4714d114c35a7768f439943b64e25bbb86c5f0f079d71a12eea63e5ddd2f2790, nguon: 'message 6a8c8b5 + VERDICT luot 9 (doi chieu luot truoc)', nhan: thuat_lai}
-    - {luot: 9, reviewed: 6a8c8b5, verdict: approve, p_trong_write_set: '0/0/0', p_ngoai_write_set: '0/0/1', comment: 6078803297, sha256: 3524df2f834fda1463ebc1dc1a438c2ceba04c6657e891c3391861df788757fd, nhan: 'measured (ban chieu) / tep goc chua co'}
+    - {luot: 9, reviewed: 6a8c8b5, verdict: approve, p_trong_write_set: '0/0/0', p_ngoai_write_set: '0/0/1', comment: 6078803297, tep: wp710-exec-review-9-codex-verdict.md, bien_nhan: wp710-exec-review-9-codex-verdict.receipt.yaml, sha256: 3524df2f834fda1463ebc1dc1a438c2ceba04c6657e891c3391861df788757fd, nhan: 'measured (dung lai tu ban chieu, khop bam) / tep goc chua co'}
   hint_g5: 'Message 505a483/cde2ef4/a5464c3/5e9fd92/6a8c8b5 khai hint_provenance = HINT.patch cua luot truoc, git apply -p0 rc 0 — thuat_lai; HINT goc chua co.'
   bam_khop: >-
     measured — luot 1-3: sha256 VERDICT + HINT tren tep goc $SP/cr714-l{1,2,3}/goi co mat NGUYEN 64 hex trong than ban chieu
     tuong ung (doc REST): 6/6; 6 tep chep vao kho do lai tren blob 8b4a99e: 6/6. ngoai_write_set.patch (l2 = l3, sha256
     65fa60e9…684e) khong co bam trong ban chieu => KHONG chep. Moi reviewed_sha (80947fc, 3903e70, cc020e0, 6a8c8b5) la to
     tien cua 8b59185 (git merge-base --is-ancestor rc 0).
-  bien_nhan_v2: '3 tep (thi hanh luot 1-3); evidence_url ghim 8b4a99e. Luot 4-9 va human audit: CHUA co bien nhan.'
+  bien_nhan_v2: '4 tep: thi hanh luot 1-3 (evidence_url ghim 8b4a99e) + luot 9 (tep dung lai, evidence_url ghim 6bb5358, cross_reviewed). Luot 4-8 va human audit: CHUA co bien nhan.'
 
 lease:
   trang_thai: measured
@@ -285,7 +291,8 @@ no_ke_nhiem:
   - 'LIVE (nlm that, Drive stage) chua do — ngoai pham vi lease.'
 
 khong_do_duoc:
-  - 'Tep VERDICT/HINT goc luot 4-9 (tren may Windows).'
+  - 'Tep VERDICT/HINT goc luot 4-8 (tren may Windows; khong co ban chieu nao tren #714/#710).'
+  - 'Tep VERDICT goc luot 9 (tren may Windows) — trong kho chi co ban DUNG LAI tu ban chieu 6078803297, khop bam verdict_sha256; byte voi tep goc chua so truc tiep.'
   - 'Ket luan CI hau-merge 37921871398 luc ghi (in_progress).'
   - 'Commit nguon chinh xac cua workflow cho cac run (GraphQL khong goi; tien le).'
   - 'rc so cua moi job (khong tai log).'

@@ -1,0 +1,6 @@
+scripts/nlm-credential-refresh.ps1 rc=11
+scripts/nlm-credential-refresh.Tests.ps1 rc=11
+scripts/tl_gws.py rc=11
+scripts/tl_selftest.py rc=11
+references/RUNBOOK.md rc=11
+changelog.d/wp-710.md rc=11

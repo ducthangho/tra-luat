@@ -1,0 +1,47 @@
+# chưa chạy trên cây thật — executor tự áp, tự đo, tự chịu trách nhiệm commit
+--- scripts/nlm-credential-refresh.Tests.ps1
++++ scripts/nlm-credential-refresh.Tests.ps1
+@@ -1195,6 +1195,24 @@
+     #     must be stage_failure (rc 6) with the containment reason, and the record must stay.
+     if ($IsWindows) {
+         $srcZ = Get-Content -LiteralPath $script -Raw
++        # If Get-Process cannot resolve a created, suspended child, its CreateProcess PID and
++        # outside_job flag must still survive in the record; an empty job cannot clear it.
++        $recordFnZ = [regex]::Match($srcZ, '(?s)(function Write-OperationRecord\(.*?\r?\n\})\r?\n\r?\nfunction Get-StepPipes')
++        if (-not $recordFnZ.Success) { throw 'fixture: record writer not found' }
++        $recordProbePathZ = Join-Path $root 'record-null-lookup.json'
++        try {
++            $recordProbeZ = & {
++                param($functionText, $destination)
++                $OperationRecord = $destination
++                $OwnerStartJiffies = $null; $OwnerChain = $null; $TreeMeasurable = $false
++                . ([scriptblock]::Create($functionText))
++                Write-OperationRecord 'probe' $null $true @() 'probe-job' 4242
++                Get-Content -LiteralPath $destination -Raw | ConvertFrom-Json
++            } $recordFnZ.Groups[1].Value $recordProbePathZ
++            if ($recordProbeZ.pid -ne 4242 -or $recordProbeZ.outside_job -ne $true -or $recordProbeZ.tree_unconfirmed -ne $true) {
++                throw ('a failed process lookup must keep the stray PID and outside-job flag: ' + ($recordProbeZ | ConvertTo-Json -Compress))
++            }
++        } finally { Remove-Item -LiteralPath $recordProbePathZ -ErrorAction SilentlyContinue }
+         $recZ = Join-Path ([IO.Path]::GetTempPath()) $recName
+         $realScriptZ = $script
+         $assignZ = 'if (!AssignProcessToJobObject(job, pi.hProcess)) { error'
+--- changelog.d/wp-710.md
++++ changelog.d/wp-710.md
+@@ -96,4 +96,4 @@
+ of the job APIs (those paths are exercised by projections that replace one line
+ of the script on a temporary copy). Mutation runs are not part of this
+ repository and no count of them is claimed here.
+-`stage_failure` means the stage command was called and may have uploaded.
++`stage_failure` means the stage step failed after a positive canary. A pre-start exception can make zero stage calls; if a child ran, it may have uploaded.
+--- references/RUNBOOK.md
++++ references/RUNBOOK.md
+@@ -749,7 +749,7 @@
+ | `inconclusive` / `tree_containment` | 5 | một bước của CHÍNH lần chạy này không được bao hoặc không chứng minh được là đã hết, nên KHÔNG bước nào sau nó được chạy. Trạng thái này chỉ xuất khi lệnh stage CHƯA chạy (bước trước stage, hoặc bước stage bị chặn trước khi con của nó được cho chạy) ⇒ 0 lần stage; lệnh stage đã chạy mà cây không chứng minh được thì là `stage_failure` ở dòng dưới. `containment_reason`: `job_create_failed:<mã lỗi Windows>` / `job_api_unavailable` (không tạo được Job Object: chưa tiến trình con nào được sinh, không có bản ghi); `job_assign_failed:<mã>` / `job_verify_failed:<mã>` (con đã tạo ở trạng thái treo nhưng không vào được job: bị kết thúc trước khi chạy lệnh nào); `job_assign_alive_failed:<mã>` / `job_verify_alive_failed:<mã>` (như trên nhưng KHÔNG xác nhận được con ấy đã kết thúc: nó còn đó, treo, ngoài job — bản ghi được GIỮ, mang pid của nó và cờ `outside_job`, lần chạy sau chờ ở `lock_busy`/`root_alive` chừng nào còn nhận ra nó đang sống, và ở cách ly `stray_child_unconfirmed` trong mọi trường hợp khác — số đếm của job KHÔNG được dùng cho con này, vì nó chưa từng ở trong job); `job_alive` / `job_unknown` (bước trả kết quả mà job không về 0 sau 5 giây, hoặc không đọc được số đếm: bản ghi được GIỮ); `tree_not_measurable` (nền không liệt kê cũng không bao được cây — không phải Linux, không phải Windows: bước thành công KHÔNG được coi là cây đã hết, bản ghi được GIỮ). |
+ | `inconclusive` / `lock_busy` | 5 | không giành được khoá trong `-LockWaitSeconds`, HOẶC thao tác của một lần chạy trước còn sống (`takeover_reason`: `root_alive` = con trực tiếp, `marked_alive` = tiến trình mang dấu hoặc còn giữ ống ra của bước cũ, `job_alive` = Job Object của bước cũ trên Windows còn tiến trình), HOẶC bản ghi thao tác không đọc được (`record_unreadable`/`record_clock`: người vận hành xác nhận rồi xoá tệp). `-OperatorReleaseReason` KHÔNG thả trạng thái này. |
+ | `inconclusive` / `tree_quarantine` | 5 | con trực tiếp của lần trước đã chết nhưng cây KHÔNG chứng minh được là hết. `takeover_reason` = `tree_unknown` (Linux ĐÃ đo và thấy tiến trình có thể là của thao tác cũ: môi trường không đọc được, hoặc tiến trình khởi động trong bước cũ, không mang dấu, mà cha của nó là init hay một tổ tiên của chủ cũ — xem "Tuần tự hoá"): **đồng hồ KHÔNG thả**; mỗi lần chạy chờ tối đa `-LockWaitSeconds` rồi trả mã 5, cho tới khi cây được chứng minh hết hoặc người vận hành thả tay. `takeover_reason` = `tree_not_measurable` (bản ghi không cho gì để đo: không có dấu trên Linux; không nêu Job Object trên Windows): **chỉ trên Linux** lần chạy đầu ĐÓNG DẤU thời điểm vào bản ghi và sau `-UnconfirmedQuarantineSeconds` (mặc định 900) lần chạy kế được tiếp quản với `takeover` = `quarantine_elapsed` — GIỚI HẠN, không phải bằng chứng, còn chờ quyết định của chủ kho. Ngoài Linux **đồng hồ KHÔNG thả** (`-UnconfirmedQuarantineSeconds` không có tác dụng): chờ không chứng minh được gì. Riêng Windows còn `job_closed_unconfirmed` (chủ cũ ĐÃ thử kết thúc job mà không đưa được nó về 0 rồi mới thoát: job đã đóng không đủ làm bằng chứng), `stray_child_unconfirmed` (bản ghi nói về một con nằm NGOÀI job mà không còn nhận ra được là đang sống) và `job_unknown` (job còn đó nhưng không mở/đọc được, vd của người dùng khác) — cả hai cũng không có lối ra theo đồng hồ. Thả tay: `-OperatorReleaseReason "<lý do, 8–200 ký tự>"` sau khi tự kiểm không còn tiến trình `nlm`/`python`/trình duyệt nào của lần trước ⇒ JSON mang `takeover` = `operator_release` và `operator_reason`. |
+-| `stage_failure` / `stage` | 6 | canary dương, lệnh stage ĐÃ được gọi nhưng không kết thúc sạch. Hoặc lệnh ĐÃ chạy xong mà cây tiến trình của nó không chứng minh được là hết (`containment_reason` = `job_alive`/`job_unknown`, `rc` = -1 vì mã thoát không còn được dùng làm kết luận; bản ghi thao tác được GIỮ). Hoặc không trả rc 0: thiếu `TL_TOKEN` (rc 2), không còn jar (rc 3), canary RIÊNG của lệnh stage hoặc chốt payload từ chối (rc 4), lỗi giữa chừng gồm cả lỗi upload (rc 5, chỉ in tên lớp lỗi), hoặc quá hạn. Có thể đã upload một phần: kiểm trạng thái Drive trước khi thử lại. |
++| `stage_failure` / `stage` | 6 | canary dương, bước stage không kết thúc sạch. Lỗi trước khi tạo con cũng có thể trả mã này với 0 lời gọi stage; nếu con đã chạy thì có thể đã upload. Hoặc lệnh ĐÃ chạy xong mà cây tiến trình của nó không chứng minh được là hết (`containment_reason` = `job_alive`/`job_unknown`, `rc` = -1 vì mã thoát không còn được dùng làm kết luận; bản ghi thao tác được GIỮ). Hoặc không trả rc 0: thiếu `TL_TOKEN` (rc 2), không còn jar (rc 3), canary RIÊNG của lệnh stage hoặc chốt payload từ chối (rc 4), lỗi giữa chừng gồm cả lỗi upload (rc 5, chỉ in tên lớp lỗi), hoặc quá hạn. Có thể đã upload một phần: kiểm trạng thái Drive trước khi thử lại. |
+ 
+ Phân loại `auth_failure`/`network_failure` là đọc VĂN BẢN lỗi theo danh sách cụm có neo (danh sách
+ cho phép); từ trần như `auth`, `login`, `cookie` không được tính vì chính tên lệnh `nlm auth refresh`

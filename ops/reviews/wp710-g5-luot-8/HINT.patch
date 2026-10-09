@@ -1,0 +1,15 @@
+# chưa chạy trên cây thật — executor tự áp, tự đo, tự chịu trách nhiệm commit
+--- references/RUNBOOK.md
++++ references/RUNBOOK.md
+@@ -201,8 +201,9 @@
+   - **Cowork không tự refresh được** (không có Chrome/browser-profile) — nhưng 1 phiên Cowork (giờ) « tuổi cookie
+     (tuần) nên đủ; CSRF/session tự sinh trong phiên từ cookie đĩa. Refresh THẬT xảy ra ở **Code** (browser profile).
+   - **Bảo trì ~2–4 tuần** (bootstrap báo "cookie ~N ngày tuổi", >14 ngày thì cảnh báo): ở đúng máy giữ
+-    browser profile gốc chạy `nlm auth refresh` và kiểm canary notebook dương. Chỉ khi refresh báo lỗi
+-    xác thực mới `nlm login` tương tác rồi kiểm lại canary. Sau đó **`tl secrets-set --nlm`** (cổng riêng
++    browser profile gốc chạy `nlm auth refresh` và kiểm canary notebook dương. Nếu refresh hoặc canary
++    báo lỗi xác thực (`auth_failure` trong JSON của wrapper), chạy `nlm login` tương tác rồi kiểm lại
++    canary. Sau đó **`tl secrets-set --nlm`** (cổng riêng
+     của lệnh kiểm canary trước upload, giữ nguyên fileId). Từ WP710 cả `secrets-set --nlm` lẫn
+     `secrets-stage` đòi canary LIVE dương (thân JSON đúng
+     notebook) trước mọi upload — `nlm login --check` KHÔNG còn là bằng chứng; `secrets-set` KHÔNG kèm `--nlm` trên

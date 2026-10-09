@@ -1,0 +1,62 @@
+# chưa chạy trên cây thật — executor tự áp, tự đo, tự chịu trách nhiệm commit
+--- changelog.d/wp-710.md
++++ changelog.d/wp-710.md
+@@ -57,9 +57,10 @@
+ job's `ActiveProcesses` count is the measurement: after a step (success or
+ timeout) whatever is still in the job is terminated and the next step starts
+ only when the count reads 0 (`tree_measurement=windows_job_object`,
+-`tree_state=gone`). A job that cannot be created, a child that cannot be
+-placed in it, or a count that does not reach 0 ends the run with rc 5
+-(`tree_containment`, reason in `containment_reason`) and never falls back to an
++`tree_state=gone`). A job that cannot be created or a child that cannot be placed in it ends
++with rc 5 (`tree_containment`). A count that does not reach 0 also ends with
++rc 5 before stage runs; after the stage child ran it ends with rc 6
++(`stage_failure`). Both retain `containment_reason` and never fall back to an
+ uncontained child. The operation record names the job; a later owner opens it:
+ members left block (`job_alive`, never released by the operator), a count of 0
+ or no job of that name is a takeover, except that a record whose owner had
+--- references/RUNBOOK.md
++++ references/RUNBOOK.md
+@@ -803,7 +803,8 @@
+ xoá dấu hay bỏ ống ra. Phép đo là số `ActiveProcesses` của chính job: sau mỗi bước (thành công hay quá hạn)
+ wrapper kết thúc những gì còn trong job và chỉ đi tiếp khi số ấy đọc được là 0 (`tree_state` = `gone`,
+ `descendants_stopped` = số thành viên ngoài con trực tiếp lúc kết thúc); không về 0 trong 5 giây hoặc không đọc
+-được ⇒ `tree_containment` (mã 5), bản ghi được giữ. Không tạo được job, hoặc không gán được con vào job ⇒ cũng
++được ⇒ dừng và giữ bản ghi: trước khi lệnh stage chạy là `tree_containment` (mã 5), sau khi lệnh stage đã chạy là
++`stage_failure` (mã 6). Không tạo được job, hoặc không gán được con vào job ⇒ cũng
+ `tree_containment`, không lùi về cách chạy không bao. Bản ghi thao tác mang tên job (`job`). Chủ mới mở job
+ theo tên: còn tiến trình ⇒ chờ (`job_alive`, thả tay cũng không được); đọc được 0 ⇒ tiếp quản; KHÔNG còn job
+ tên ấy ⇒ handle cuối đã đóng, tức hệ điều hành đã kết thúc mọi thành viên lúc đóng ⇒ tiếp quản, TRỪ khi bản ghi
+--- scripts/nlm-credential-refresh.Tests.ps1
++++ scripts/nlm-credential-refresh.Tests.ps1
+@@ -34,6 +34,14 @@
+     with open(os.environ["WP710_ENVLOG"], "w", encoding="utf-8") as elog:
+         elog.write(os.environ.get("TL_NOTEBOOK_ID", "<absent>") + "|" + os.environ.get("TL_CANARY_NOTEBOOK_ID", "<absent>"))
+ mode = os.environ.get("WP710_MODE", "ok")
++if mode == "stdin_eof":
++    try:
++        if sys.stdin.buffer.read(1):
++            print("STDIN_NOT_EOF", file=sys.stderr)
++            sys.exit(91)
++    except OSError:
++        print("STDIN_NOT_READABLE", file=sys.stderr)
++        sys.exit(92)
+ if mode == "leak_all":
+     print("SECRET_SENTINEL", file=sys.stderr)
+     if op != "notebook":
+@@ -247,6 +255,15 @@
+         }
+         $cases++
+     }
++    # Verify the Windows child receives a readable NUL stdin; the stdout pipe test in z1 does not measure this.
++    if ($IsWindows) {
++        $r = Invoke-Wrapper 'stdin_eof' @('-TimeoutSeconds','5')
++        if ($r.Rc -ne 0 -or $r.Json.status -ne 'staged' -or
++            @($r.Calls | Where-Object { $_ -like 'start:stage:*' }).Count -ne 1) {
++            throw 'the child stdin must be readable EOF from NUL'
++        }
++        $cases++
++    }
+     # [HINT reviewer - CHUA chay tren cay that; executor tu ap, tu do, tu chiu trach nhiem] lop: phan-loai-loi-doan-bang-chuoi-tu-do
+     # <<case:c
+     # (c) nhan trang thai KHONG duoc suy tu tu khoa tran (`auth`/`login`/`cookie`) vi chinh ten lenh (`nlm auth refresh`) va goi y

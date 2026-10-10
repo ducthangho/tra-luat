@@ -1,0 +1,201 @@
+{
+  "full-python3.11-baseline": {
+    "passed": 179,
+    "executed": 180,
+    "total": 189,
+    "skipped_count": 9,
+    "failed_count": 1,
+    "failed": [
+      "r351_KHONG_co_chi_thi_thi_van_phai_dat_moc"
+    ],
+    "skipped": [
+      "t62_qua_han_ma_khong_giet_het_cay_phai_tra_125",
+      "r345_chan_socket_that_ma_than_hook_van_chay_dung",
+      "r345_cac_phep_do_cuc_bo_van_dung",
+      "r345_lop_tham_import_van_co_rang",
+      "r345_dot_bien_ba_phep_do_cuc_bo_lam_ca_dich_DO",
+      "r347_tham_import_van_song_tren_python_truoc_310",
+      "r347_dot_bien_bo_duong_lui_310_lam_ca_dich_DO",
+      "r348_goi_chi_co_CLI_khong_duoc_bao_dong_gia",
+      "r348_dot_bien_bo_isidentifier_lam_ca_dich_DO"
+    ],
+    "rc": 1,
+    "output_sha256": "ed53c7893a8447cc39b77c9b2dcbdb3bf26c12da55cf0d2a8f3fe62754e23cf6"
+  },
+  "full-python3.11-candidate": {
+    "passed": 185,
+    "executed": 186,
+    "total": 195,
+    "skipped_count": 9,
+    "failed_count": 1,
+    "failed": [
+      "r351_KHONG_co_chi_thi_thi_van_phai_dat_moc"
+    ],
+    "skipped": [
+      "t62_qua_han_ma_khong_giet_het_cay_phai_tra_125",
+      "r345_chan_socket_that_ma_than_hook_van_chay_dung",
+      "r345_cac_phep_do_cuc_bo_van_dung",
+      "r345_lop_tham_import_van_co_rang",
+      "r345_dot_bien_ba_phep_do_cuc_bo_lam_ca_dich_DO",
+      "r347_tham_import_van_song_tren_python_truoc_310",
+      "r347_dot_bien_bo_duong_lui_310_lam_ca_dich_DO",
+      "r348_goi_chi_co_CLI_khong_duoc_bao_dong_gia",
+      "r348_dot_bien_bo_isidentifier_lam_ca_dich_DO"
+    ],
+    "rc": 1,
+    "output_sha256": "7815a5244ef2df3bd53ac57b3e210b7c1e76fb59560ed5c58c3fff75a10a92e9"
+  },
+  "full-python3.11-delta": {
+    "additional_failures": 0,
+    "additional_skips": 0
+  },
+  "mutation-python3.11-baseline": {
+    "passed": 176,
+    "measured": 176,
+    "not_measured": 1,
+    "catalog_rows": 177,
+    "rc": 0,
+    "output_sha256": "544763b113c0af17b3588e9cd7cb0a4c53c379e5d900414f0e7512f90698b667"
+  },
+  "mutation-python3.11-candidate": {
+    "passed": 230,
+    "measured": 230,
+    "not_measured": 1,
+    "catalog_rows": 231,
+    "rc": 0,
+    "output_sha256": "0f22c7d81e0e180d2814bfe4112f3edad622345c60dadc6ab7f2c3812485a021"
+  },
+  "mutation-python3.11-delta": {
+    "old_category_changes": {},
+    "new_ok": 54
+  },
+  "full-python3.12-baseline": {
+    "passed": 179,
+    "executed": 180,
+    "total": 189,
+    "skipped_count": 9,
+    "failed_count": 1,
+    "failed": [
+      "r351_KHONG_co_chi_thi_thi_van_phai_dat_moc"
+    ],
+    "skipped": [
+      "t62_qua_han_ma_khong_giet_het_cay_phai_tra_125",
+      "r345_chan_socket_that_ma_than_hook_van_chay_dung",
+      "r345_cac_phep_do_cuc_bo_van_dung",
+      "r345_lop_tham_import_van_co_rang",
+      "r345_dot_bien_ba_phep_do_cuc_bo_lam_ca_dich_DO",
+      "r347_tham_import_van_song_tren_python_truoc_310",
+      "r347_dot_bien_bo_duong_lui_310_lam_ca_dich_DO",
+      "r348_goi_chi_co_CLI_khong_duoc_bao_dong_gia",
+      "r348_dot_bien_bo_isidentifier_lam_ca_dich_DO"
+    ],
+    "rc": 1,
+    "output_sha256": "b66ad2e2432295deee5e44a0dce6eab089c2c96f6b047f0626ab45949083b82c"
+  },
+  "full-python3.12-candidate": {
+    "passed": 185,
+    "executed": 186,
+    "total": 195,
+    "skipped_count": 9,
+    "failed_count": 1,
+    "failed": [
+      "r351_KHONG_co_chi_thi_thi_van_phai_dat_moc"
+    ],
+    "skipped": [
+      "t62_qua_han_ma_khong_giet_het_cay_phai_tra_125",
+      "r345_chan_socket_that_ma_than_hook_van_chay_dung",
+      "r345_cac_phep_do_cuc_bo_van_dung",
+      "r345_lop_tham_import_van_co_rang",
+      "r345_dot_bien_ba_phep_do_cuc_bo_lam_ca_dich_DO",
+      "r347_tham_import_van_song_tren_python_truoc_310",
+      "r347_dot_bien_bo_duong_lui_310_lam_ca_dich_DO",
+      "r348_goi_chi_co_CLI_khong_duoc_bao_dong_gia",
+      "r348_dot_bien_bo_isidentifier_lam_ca_dich_DO"
+    ],
+    "rc": 1,
+    "output_sha256": "b9cffcf30a18e1ce98d6aa9ce0421302846f62f6df11bf3711b99df990eb4fa3"
+  },
+  "full-python3.12-delta": {
+    "additional_failures": 0,
+    "additional_skips": 0
+  },
+  "mutation-python3.12-baseline": {
+    "passed": 176,
+    "measured": 176,
+    "not_measured": 1,
+    "catalog_rows": 177,
+    "rc": 0,
+    "output_sha256": "a691b2089e344870f05deb822a30c42454ae29906ed3dbdcbaa1db943fe86dfd"
+  },
+  "mutation-python3.12-candidate": {
+    "passed": 230,
+    "measured": 230,
+    "not_measured": 1,
+    "catalog_rows": 231,
+    "rc": 0,
+    "output_sha256": "86fd58c2d991b05dcdd0c0f51b83a38cc3e5b89f5c26bca9b3624d79f477cb05"
+  },
+  "mutation-python3.12-delta": {
+    "old_category_changes": {},
+    "new_ok": 54
+  },
+  "ruff_delta": {
+    "added": 0,
+    "removed": 0,
+    "existing_count": 5,
+    "diagnostics": {
+      "F841 Local variable `goc_open` is assigned to but never used": 1,
+      "F841 Local variable `rc` is assigned to but never used": 1,
+      "F841 Local variable `PENDING` is assigned to but never used": 1,
+      "F841 Local variable `goc_run` is assigned to but never used": 1,
+      "F841 Local variable `p` is assigned to but never used": 1
+    }
+  },
+  "validated_logs": [
+    "target-python3.11-t158",
+    "target-python3.12-t159",
+    "linux-bundle-a",
+    "target-python3.11-t156",
+    "linux-gen-instructions",
+    "windows-floor-static",
+    "target-python3.12-t160",
+    "e118-python3.11",
+    "ruff-candidate",
+    "aw-d-python3.11",
+    "mutation-python3.11-candidate",
+    "linux-worker-verify",
+    "linux-full-selftest",
+    "static-r12-python3.11",
+    "target-python3.11-t161",
+    "target-python3.12-t158",
+    "full-python3.12-baseline",
+    "aw-d-python3.12",
+    "D65-duplicate-control-probe",
+    "linux-workflow-audit",
+    "target-python3.12-t157",
+    "linux-bundle-b",
+    "mutation-python3.12-baseline",
+    "target-python3.12-t156",
+    "target-python3.12-t161",
+    "target-python3.11-t160",
+    "linux-baseline-full-selftest",
+    "linux-worker-manifest",
+    "target-python3.11-t157",
+    "full-python3.12-candidate",
+    "ruff-baseline",
+    "D-extra-observation-reproduced",
+    "linux-full-evidence-validate",
+    "core-l2-with-git-pin",
+    "mutation-python3.12-candidate",
+    "core-l2-without-git-pin",
+    "linux-determinism-audit",
+    "e118-python3.12",
+    "linux-bundle-unpacked-verify",
+    "target-python3.11-t159",
+    "full-python3.11-candidate",
+    "full-python3.11-baseline",
+    "mutation-python3.11-baseline",
+    "linux-dependency-probe",
+    "linux-golden-test"
+  ]
+}

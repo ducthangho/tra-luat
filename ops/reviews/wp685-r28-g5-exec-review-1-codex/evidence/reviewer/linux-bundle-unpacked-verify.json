@@ -1,0 +1,17 @@
+{
+  "argv": [
+    "python3.12",
+    "-B",
+    "/home/user/wp685-r28-g5-review/goi/scratch/release-unpacked/tra-luat/scripts/tl.py",
+    "release-verify",
+    "/home/user/wp685-r28-g5-review/goi/scratch/release-unpacked/tra-luat/RELEASE_MANIFEST.json",
+    "--root",
+    "/home/user/wp685-r28-g5-review/goi/scratch/release-unpacked/tra-luat",
+    "--strict",
+    "--json"
+  ],
+  "rc": 0,
+  "candidate_sha": "3089b54455a44b8cfcf2fd27b01894bc2a5d764d",
+  "archive_sha256": "4761688a720b8a05038aff4a1ca451e8fbc61fadd26a11ee591e6cd5795e5c19",
+  "output_sha256": "99d08f2f4907bcbdf621abd43d195592d341a9ba23b1a1b85066297dca770c58"
+}

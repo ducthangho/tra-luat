@@ -1,0 +1,224 @@
+# UTC 2026-10-10T06:47:32Z
+$ uname -s
+Linux
+# rc=0
+$ uname -r
+6.18.44-fc-v114
+# rc=0
+$ uname -m
+x86_64
+# rc=0
+$ cat /etc/os-release
+PRETTY_NAME="Ubuntu 24.04.5 LTS"
+NAME="Ubuntu"
+VERSION_ID="24.04"
+VERSION="24.04.5 LTS (Noble Numbat)"
+VERSION_CODENAME=noble
+ID=ubuntu
+ID_LIKE=debian
+HOME_URL="https://www.ubuntu.com/"
+SUPPORT_URL="https://help.ubuntu.com/"
+BUG_REPORT_URL="https://bugs.launchpad.net/ubuntu/"
+PRIVACY_POLICY_URL="https://www.ubuntu.com/legal/terms-and-policies/privacy-policy"
+UBUNTU_CODENAME=noble
+LOGO=ubuntu-logo
+# rc=0
+$ python3.11 -V
+Python 3.11.17
+# rc=0
+$ python3.12 -V
+Python 3.12.3
+# rc=0
+$ uname -a
+Linux vm 6.18.44-fc-v114 #1 SMP PREEMPT_DYNAMIC @0 x86_64 x86_64 x86_64 GNU/Linux
+# rc=0
+{"name": "mutation-python3.11-baseline", "command": "python3.11 -B .claude/dev/launcher_test.py --dot-bien", "cwd": "/home/user/wp685-r28-g5-review/goi/scratch/baseline", "started_utc": "2026-10-10T06:47:32.762855+00:00", "head": "ab457c651eb4428705f0492163080b661c858b72", "tree": "8649be372de2c824268682c3f80fa086ee750ef7", "base": "8c98afacb9285aa71e5200739236284f7a190d4f", "os": "Linux-6.18.44-fc-v114-x86_64-with-glibc2.39", "uname": ["Linux", "vm", "6.18.44-fc-v114", "#1 SMP PREEMPT_DYNAMIC @0", "x86_64", "x86_64"], "os_release": "PRETTY_NAME=\"Ubuntu 24.04.5 LTS\"\nNAME=\"Ubuntu\"\nVERSION_ID=\"24.04\"\nVERSION=\"24.04.5 LTS (Noble Numbat)\"\nVERSION_CODENAME=noble\nID=ubuntu\nID_LIKE=debian\nHOME_URL=\"https://www.ubuntu.com/\"\nSUPPORT_URL=\"https://help.ubuntu.com/\"\nBUG_REPORT_URL=\"https://bugs.launchpad.net/ubuntu/\"\nPRIVACY_POLICY_URL=\"https://www.ubuntu.com/legal/terms-and-policies/privacy-policy\"\nUBUNTU_CODENAME=noble\nLOGO=ubuntu-logo\n", "python": "Python 3.11.17"}
+moi truong: pid=4777 pgid=1 sid=1 truong_nhom=False chung_nhom_voi_cha=True job_control=? ns_pid=pid:[4026532321] init=codex
+nhom tien trinh: da tach sang session moi (pgid=4777)
+TU DOT BIEN - moi dot bien PHAI giet dung cac ca da chi dinh:
+  m1_xoa_actionlint_khoi_cong_cu OK  giet 1/1: t149_doctor_do_actionlint_va_shellcheck
+  m2_im_lang_khi_bien_utf8_xanh OK  giet 1/1: t150_doctor_do_bien_utf8_in_ca_khi_xanh
+  m3_doc_bam_tep_thay_vi_dau_vet OK  giet 1/1: t151_m3_phan_biet_da_chay_voi_tep_moi
+  m3b_bo_kiem_do_tuoi_dau_vet  OK  giet 1/1: t154_m3_dau_vet_CU_KHONG_con_la_DA_CHAY
+  m4_noi_long_da_chung_minh_kha_dung OK  giet 1/1: t149_doctor_do_actionlint_va_shellcheck
+  m5_bo_kiem_tra_ngoai_ascii   OK  giet 1/1: t153_doctor_do_duong_dan_kho_co_dau_cach_hoac_phi_ascii
+  bo_ky_ban_ghi_luot           OK  giet 1/1: t144_run_ghi_nonce_va_hmac_khong_lo_khoa
+  m1_coi_worktree_la_hop_le    OK  giet 1/1: r01_worktree_that_bi_chan
+  m6c_khong_ghi_khi_probe_chan OK  giet 1/1: r01_worktree_that_bi_chan(FileNotFoundError)
+  m1_chan_ca_clone_that        OK  giet 1/1: r02_clone_that_di_tiep
+  m2_bo_probe_ghi              OK  giet 1/1: r03_probe_ghi_bi_tu_choi_thi_do
+  m3_chi_kiem_rc               OK  giet 1/1: r04_spawn_rc0_dau_ra_rong_bi_chan
+  m4_thieu_khoa_coi_la_tin_cay OK  giet 1/1: r05_trust_thieu_khoa_la_khong_do_duoc
+  m4_bo_bat_JSON_hong          OK  giet 1/1: r10_trust_json_hong_bi_chan_sach(FileNotFoundError)
+  m4_bool_nghiem_ngat_thanh_truthy_else OK  giet 1/1: r11_trust_gia_tri_that_ba_chieu
+  m4_non_bool_bi_coi_la_DAT    OK  giet 1/1: r11_trust_gia_tri_that_ba_chieu
+  m5_canh_bao_thay_vi_chan     OK  giet 1/1: r06_probe_hong_khong_override_phai_chan
+  m5b_cho_bo_qua_khong-can-ly-do OK  giet 1/1: r07_override_ly_do_rong_bi_tu_choi
+  m6_khong_ghi_so              OK  giet 1/1: r08_override_co_ly_do_duoc_ghi_so
+  m6b_gop_khong_do_duoc_vao_dat OK  giet 1/1: r09_run_json_giu_ba_trang_thai_probe
+  bo_kiem_rong_CA_BON_LOP      OK  giet 1/1: t03_git_gia_thoat_0_im_lang_van_bi_chan
+  bo_hmac_tra_ve_sha256_tran_va_xuat_lai_van_tay OK  giet 1/1: t87_khong_duoc_xuat_digest_on_dinh_cua_gia_tri_bien
+  bo_loc_do_dai_va_ten_khi_gom_van_tay OK  giet 1/1: t84_nhom_van_tay_khong_duoc_bat_oan_co_bat_tat
+  do_codex_tin_DONG_DAU_thay_vi_ma_thoat OK  giet 1/1: t85_do_codex_khong_duoc_fail_open_khi_dong_dau_la_canh_bao
+  claude_dem_ca_BIEN_RONG_la_credential OK  giet 1/1: t103_nam_finding_cua_bot_review_PR128
+  github_dem_CO_MAT_gh_la_da_xac_thuc OK  giet 1/1: t111_gh_da_xac_thuc_KHONG_phai_bang_chung_lam_duoc_viec
+  moc_refresh_MAT_DO_PHAN_GIAI OK  giet 1/1: t103_nam_finding_cua_bot_review_PR128
+  co_chan_codex_luon_tra_KHONG_BI_CHAN OK  giet 1/1: t102_khong_go_duoc_policy_thi_phai_CHAN_codex
+  do_codex_song_bo_qua_co_chan OK  giet 1/1: t102_khong_go_duoc_policy_thi_phai_CHAN_codex
+  chot_truong_nhom_FAIL_OPEN_khi_khong_do_duoc_pgid OK  giet 1/1: t92_khong_duoc_killpg_khi_pid_KHONG_phai_truong_nhom
+  ok_kha_dung_bo_qua_muc_CHUA_CHUNG_MINH OK  giet 1/1: t98_CO_CREDENTIAL_khong_duoc_thanh_kha_dung_o_tang_doctor
+  chuan_bi_bo_duong_JSON_tho   OK  giet 1/1: t86_chuan_bi_nhan_ca_base64_lan_json_tho_va_tu_choi_rac
+  hook_phien_bo_phep_so_nang_luc OK  giet 1/1: t88_hook_phien_do_theo_NANG_LUC_khong_theo_bam_toan_tep
+  lay_ca_id_token_lam_tin_hieu_han OK  giet 1/1: t94_canh_bao_TRUOC_khi_credential_het_han
+  kiem_song_bi_canh_bao_nuot   OK  giet 1/1: t96_kiem_song_phai_chay_KE_CA_khi_sap_het_han
+  bo_canh_bao_som_theo_exp     OK  giet 1/1: t94_canh_bao_TRUOC_khi_credential_het_han
+  bo_canh_bao_theo_tuoi_anh_chup OK  giet 1/1: t94_canh_bao_TRUOC_khi_credential_het_han
+  nang_nhan_CO_CREDENTIAL_thanh_DUNG_DUOC OK  giet 1/1: t93_do_codex_khong_duoc_nang_nhan_vuot_qua_bang_chung
+  bo_kiem_han_token_codex      OK  giet 1/1: t93_do_codex_khong_duoc_nang_nhan_vuot_qua_bang_chung
+  bo_chot_truong_nhom_truoc_killpg OK  giet 1/1: t92_khong_duoc_killpg_khi_pid_KHONG_phai_truong_nhom
+  bo_kiem_prompt_rong          OK  giet 1/1: t15_prompt_rong_bi_chan_du_sha_dung
+  giet_lieu_khong_can_khoa     OK  giet 1/1: t31_stop_tu_choi_khi_khoa_danh_tinh_khac
+  bao_da_giet_du_chua_giet     OK  giet 1/1: t31_stop_tu_choi_khi_khoa_danh_tinh_khac
+  124_khi_chau_con_song        KHONG DO DUOC tren nen nay (ca dich bo qua: t62_qua_han_ma_khong_giet_het_cay_phai_tra_125)
+  khong_cat_thong_tin_dang_nhap OK  giet 1/1: t45_token_trong_URL_KHONG_duoc_lo_ra
+  quay_ve_so_hau_to            OK  giet 3/3: t48_host_gia_mao_KHONG_duoc_khop, t57_host_KHONG_co_dau_cham_van_phai_chan, t58_expected_repo_mot_doan_bi_TU_CHOI
+  so_URL_tho_khong_chuan_hoa   OK  giet 2/2: t40_HAI_BAN_CLONE_hai_duong_dan_CUNG_danh_tinh, t44_bon_cach_viet_URL_cung_mot_danh_tinh
+  lay_cwd_thay_vi_goc_repo     OK  giet 1/1: t38_dung_o_thu_muc_CON_van_ra_GOC
+  khong_remote_thi_coi_la_khop OK  giet 1/1: t42_khong_co_remote_van_bi_chan_khi_doi_kho
+  bo_cung_hoa_dau_ra           OK  giet 1/1: t47_console_khong_UTF8_van_in_duoc_duong_dan_co_dau
+  de_len_quyet_dinh_cua_stop   OK  giet 1/1: t50_stop_roi_runner_KHONG_duoc_de_len_so
+  so_hong_im_lang              OK  giet 1/1: t52_so_hong_KHONG_duoc_im_lang
+  doctor_luon_xanh             OK  giet 1/1: t54_doctor_thieu_cong_cu_bat_buoc_thi_DO
+  doctor_bo_qua_auth_hong      OK  giet 1/1: t105_doctor_auth_hong_thi_DO_du_binary_chay_duoc
+  khong_chup_prompt            OK  giet 2/2: t56_prompt_doi_sau_khi_kiem_KHONG_toi_duoc_con, r16_consumer_doc_dung_byte_va_trao_snapshot_cung_co_phai_DO
+short_id  : 013332ae
+run_id    : 013332ae24a24dab80c57ed39ac7f2c3
+so        : /tmp/lt_i8wb6o8p/runs/013332ae
+trang thai: xong  ma_thoat=0
+thoi luong: 0.016s  stdout=0B  stderr=0B
+  prompt_sau_preflight_khong_rehash OK  giet 1/1: r12_prompt_doi_ngay_sau_preflight_phai_DO
+  bam_output_luon_lay_chuoi_rong OK  giet 1/1: r14_run_json_bam_lai_dung_hai_log
+  mot_provider_hai_transport   OK  giet 1/1: r15_moi_provider_chi_mot_transport_va_hai_luot_on_dinh
+  luu_argv_nguyen_van          OK  giet 1/1: t59_so_KHONG_luu_doi_so_nguyen_van
+  doctor_tin_which             OK  giet 1/1: t60_doctor_KHONG_tin_which_khi_cong_cu_khong_chay_duoc
+  doctor_chi_thu_binary_dau    OK  giet 1/1: t106_doctor_binary_hong_dau_PATH_khong_duoc_che_binary_tot
+  moi_truong_tin_gh_token_giu_cho OK  giet 1/1: t107_doc_moi_truong_KHONG_duoc_chon_bien_giu_cho
+  bat_buoc_bo_qua_nen          OK  giet 1/1: t109_bat_buoc_giai_THEO_NEN_khong_phai_mot_bool_chung
+  bat_buoc_bo_qua_nen_ci       OK  giet 1/1: t109_bat_buoc_giai_THEO_NEN_khong_phai_mot_bool_chung
+  rest_phan_loai_theo_ma_trang_thai OK  giet 1/1: t110_rest_github_phan_loai_theo_HEADER_khong_theo_MA_TRANG_THAI
+  github_dem_gh_auth_la_lam_duoc_viec OK  giet 1/1: t111_gh_da_xac_thuc_KHONG_phai_bang_chung_lam_duoc_viec
+  tran_tong_chon_tay           OK  giet 1/1: t112_tran_tong_suy_tu_SO_PROBE_va_het_ngan_sach_KHONG_phai_hong
+  het_ngan_sach_thanh_cong_cu_hong OK  giet 1/1: t112_tran_tong_suy_tu_SO_PROBE_va_het_ngan_sach_KHONG_phai_hong
+  kha_dung_chay_ngoai_tran     OK  giet 1/1: t114_ngan_sach_phu_CA_khoi_kha_dung_va_khong_thanh_THIEU
+  het_ngan_sach_van_thanh_thieu OK  giet 1/1: t114_ngan_sach_phu_CA_khoi_kha_dung_va_khong_thanh_THIEU
+  probe_qua_han_dem_la_THIEU   OK  giet 1/1: t129_probe_qua_han_la_CHUA_DO_khong_phai_THIEU
+  probe_khong_retry_khi_qua_han OK  giet 1/1: t130_qua_han_luot_dau_retry_thanh_cong_van_la_CO
+  phien_ban_timeout_khong_mang_co_qua_han OK  giet 1/1: t135_phien_ban_va_xac_thuc_bao_qua_han_bang_CO_KIEU
+  xac_thuc_timeout_khong_mang_co_qua_han OK  giet 1/1: t135_phien_ban_va_xac_thuc_bao_qua_han_bang_CO_KIEU
+  xac_thuc_qua_han_van_la_THIEU OK  giet 1/1: t132_xac_thuc_qua_han_la_CHUA_DO_khong_phai_THIEU
+  doi_kha_dung_bo_qua_CHUA_DO  OK  giet 1/1: t129_probe_qua_han_la_CHUA_DO_khong_phai_THIEU
+  auth_het_ngan_sach_khong_vao_chua_do OK  giet 1/1: t138_auth_het_ngan_sach_phai_vao_CHUA_DO
+  qua_han_uu_tien_dung_lai_break OK  giet 1/1: t139_ung_vien_qua_han_khong_duoc_che_ung_vien_tot
+  review_codex_auth_timeout_mat_dau_chua_do OK  giet 1/1: t132_xac_thuc_qua_han_la_CHUA_DO_khong_phai_THIEU
+  review_codex_retry_version_gap_ba OK  giet 1/1: t130_qua_han_luot_dau_retry_thanh_cong_van_la_CO
+  review_codex_retry_auth_gap_ba OK  giet 1/1: t132_xac_thuc_qua_han_la_CHUA_DO_khong_phai_THIEU
+  review_codex_retry_version_giu_loi_luot_mot OK  giet 1/1: t130_qua_han_luot_dau_retry_thanh_cong_van_la_CO
+  review_same_provider_retry_bo_qua_ngan_sach OK  giet 1/1: t117_moi_mau_dot_bien_phai_khop_DUNG_MOT_cho
+  doctor_text_gop_CHUA_DO_thanh_THIEU OK  giet 1/1: t140_doctor_text_tach_CHUA_DO_khoi_THIEU_va_DU
+  doctor_text_auth_None_khong_in_ly_do OK  giet 1/1: t140_doctor_text_tach_CHUA_DO_khoi_THIEU_va_DU
+  doctor_text_footer_khoa_cung_het_ngan_sach OK  giet 1/1: t140_doctor_text_tach_CHUA_DO_khoi_THIEU_va_DU
+  doctor_text_CHUA_DO_van_ket_luan_DU OK  giet 1/1: t140_doctor_text_tach_CHUA_DO_khoi_THIEU_va_DU
+  comment_timeout_mat_idiom_version_va_phep_do OK  giet 1/1: t141_comment_timeout_phai_co_version_nguon_va_phep_do
+  codex_live_callsite_sap_het_han_truyen_ten_tran OK  giet 1/1: t133_do_codex_spawn_bang_duong_dan_da_resolve_khong_ten_tran
+  codex_live_callsite_binh_thuong_truyen_ten_tran OK  giet 1/1: t133_do_codex_spawn_bang_duong_dan_da_resolve_khong_ten_tran
+  do_codex_spawn_ten_tran      OK  giet 1/1: t133_do_codex_spawn_bang_duong_dan_da_resolve_khong_ten_tran
+  do_codex_song_spawn_ten_tran OK  giet 1/1: t133_do_codex_spawn_bang_duong_dan_da_resolve_khong_ten_tran
+  footer_van_khuyen_bat_kiem_song OK  giet 1/1: t134_kiem_song_dang_bat_thi_footer_khong_khuyen_bat_lai
+  auth_hong_that_sau_retry_thanh_chua_do OK  giet 1/1: t136_qua_han_roi_hong_that_o_luot_retry_van_la_THIEU
+  vut_co_qua_han_cua_luot_retry OK  giet 1/1: t136_qua_han_roi_hong_that_o_luot_retry_van_la_THIEU
+  hong_that_thang_qua_han      OK  giet 1/1: t137_ung_vien_hong_that_cong_ung_vien_qua_han_la_CHUA_DO
+  retry_van_cung_han           OK  giet 1/1: t130_qua_han_luot_dau_retry_thanh_cong_van_la_CO
+  retry_auth_van_cung_han      OK  giet 1/1: t132_xac_thuc_qua_han_la_CHUA_DO_khong_phai_THIEU
+  probe_github_bo_qua_moi_truong_chuan_hoa OK  giet 1/1: t113_probe_github_phai_nhan_credential_DA_CHUAN_HOA
+  rest_gop_khong_do_duoc_vao_chan OK  giet 1/1: t110_rest_github_phan_loai_theo_HEADER_khong_theo_MA_TRANG_THAI
+  rest_toi_duoc_la_lam_duoc_viec OK  giet 1/1: t110_rest_github_phan_loai_theo_HEADER_khong_theo_MA_TRANG_THAI
+  worktree_bo_qua_tep_moi      OK  giet 1/1: t12_tep_khong_theo_doi_van_tinh_la_ban
+  me_chet_la_coi_nhu_ca_cay_chet OK  giet 1/1: t63_chau_phot_lo_SIGTERM_ma_bao_da_giet_ca_cay_la_noi_doi
+  nhom_luon_rong               OK  giet 1/1: t67_chau_sinh_SAU_luc_chup_van_phai_bi_dem
+  khong_chup_cay               OK  giet 1/1: t66_chau_setsid_roi_khoi_nhom_van_phai_bi_giet
+  rid_quay_lai_ten_thu_muc     OK  giet 1/1: t64_short_id_da_bi_GIANH_thi_khong_duoc_cap_lai
+  run_root_khong_resolve       OK  giet 1/1: t65_run_root_TUONG_DOI_van_giao_duoc_ban_chup_cho_con
+  kho_bo_o_dung_ba_doan        OK  giet 1/1: t68_kho_duong_dan_SAU_neu_host_van_phai_QUA
+  stop_de_len_luot_da_xong     OK  giet 1/1: t69_stop_luot_DA_KET_THUC_khong_duoc_doi_so
+  chet_roi_van_bao_PID_tai_dung OK  giet 1/1: t69_stop_luot_DA_KET_THUC_khong_duoc_doi_so
+  PROMPT_FILE_mo_coi_di_tiep   OK  giet 2/2: t70_PROMPT_FILE_ma_khong_co_prompt_file_phai_bi_CHAN, r13_PROMPT_FILE_thieu_prompt_file_phai_DO
+  ban_chup_de_ho_quyen         OK  giet 1/1: t71_ban_chup_prompt_phai_KIN_va_bi_XOA
+  ban_chup_de_lai_tren_dia     OK  giet 1/1: t71_ban_chup_prompt_phai_KIN_va_bi_XOA
+  xoa_prompt_khi_wrapper_vua_thoat OK  giet 1/1: t76_wrapper_thoat_khong_duoc_xoa_prompt_cua_chau
+  ngat_ghi_thanh_xong          OK  giet 1/1: t72_bi_ngat_KHONG_duoc_ghi_thanh_xong
+  doctor_bo_do_bash            OK  giet 1/1: t73_doctor_phai_do_bash_va_npm
+  khong_quet_ban_chup_qua_han  OK  giet 1/1: t77_ban_chup_qua_han_bi_QUET_du_khong_xoa_duoc_ngay
+  khong_don_tep_tam_mo_coi     OK  giet 1/1: t75_tep_tam_mo_coi_bi_don
+  dut_ong_nuot_ma_that         OK  giet 1/1: t74_dut_ong_KHONG_duoc_nuot_ma_that
+  none_nhom_thanh_cay_rong     OK  giet 2/2: t78_khong_do_duoc_nhom_KHONG_phai_cay_rong, t83_windows_me_da_tat_va_anh_chup_RONG_la_du_bang_chung
+  job_bo_qua_loi_dat_gioi_han  OK  giet 1/1: t79_job_windows_phai_kiem_ket_qua_dat_gioi_han(AssertionError:khong duoc di tiep sau SetInformation hong)
+  job_pid_khong_tang_buffer    OK  giet 1/1: t80_job_pid_tang_buffer_khi_qua_suc_chua
+  san_dot_bien_chi_can_mot     OK  giet 1/1: t82_dot_bien_khong_duoc_mat_qua_30_phan_tram
+  windows_khong_co_duong_bang_chung_me_da_tat OK  giet 1/1: t83_windows_me_da_tat_va_anh_chup_RONG_la_du_bang_chung
+  chup_cay_khong_fail_closed_trong_cay OK  giet 1/1: t81_chup_cay_windows_thieu_creationdate_phai_fail_closed
+  chup_cay_fail_closed_ca_may  OK  giet 1/1: t81_chup_cay_windows_thieu_creationdate_phai_fail_closed
+  mcp_endpoint_bo_doc_PORT     OK  giet 1/1: t143_mcp_endpoint_do_DAU_KIA_cua_day_va_KHONG_duoc_tinh_la_lam_duoc_viec
+  mcp_json_noi_suy_url_NGUYEN_VAN_vao_mo_ta OK  giet 1/1: t143_mcp_endpoint_do_DAU_KIA_cua_day_va_KHONG_duoc_tinh_la_lam_duoc_viec
+  mcp_endpoint_tinh_vao_LAM_DUOC_VIEC OK  giet 2/2: t115_duong_MCP_phai_duoc_DO_va_KHONG_duoc_tinh_la_lam_duoc_viec, t143_mcp_endpoint_do_DAU_KIA_cua_day_va_KHONG_duoc_tinh_la_lam_duoc_viec
+  mcp_endpoint_phan_loai_theo_MA_thay_vi_HEADER OK  giet 1/1: t143_mcp_endpoint_do_DAU_KIA_cua_day_va_KHONG_duoc_tinh_la_lam_duoc_viec
+  mcp_endpoint_toi_duoc_la_LAM_DUOC_VIEC OK  giet 1/1: t143_mcp_endpoint_do_DAU_KIA_cua_day_va_KHONG_duoc_tinh_la_lam_duoc_viec
+  mcp_endpoint_gop_khong_do_duoc_vao_chan OK  giet 1/1: t143_mcp_endpoint_do_DAU_KIA_cua_day_va_KHONG_duoc_tinh_la_lam_duoc_viec
+  mcp_endpoint_bo_kiem_scheme_cho_phep OK  giet 1/1: t143_mcp_endpoint_do_DAU_KIA_cua_day_va_KHONG_duoc_tinh_la_lam_duoc_viec
+  mcp_endpoint_bo_kiem_userinfo OK  giet 1/1: t143_mcp_endpoint_do_DAU_KIA_cua_day_va_KHONG_duoc_tinh_la_lam_duoc_viec
+  mcp_endpoint_userinfo_do_bang_KY_TU_thay_vi_CAU_TRUC OK  giet 1/1: t143_mcp_endpoint_do_DAU_KIA_cua_day_va_KHONG_duoc_tinh_la_lam_duoc_viec
+  mcp_endpoint_userinfo_chi_doc_username_theo_tinh_chan_ly OK  giet 1/1: t143_mcp_endpoint_do_DAU_KIA_cua_day_va_KHONG_duoc_tinh_la_lam_duoc_viec
+  mcp_endpoint_nhanh_scheme_in_lai_url_ra_mo_ta OK  giet 1/1: t143_mcp_endpoint_do_DAU_KIA_cua_day_va_KHONG_duoc_tinh_la_lam_duoc_viec
+  mcp_endpoint_tu_choi_userinfo_MA_VAN_in_url OK  giet 1/1: t143_mcp_endpoint_do_DAU_KIA_cua_day_va_KHONG_duoc_tinh_la_lam_duoc_viec
+  mcp_endpoint_in_token_vao_mo_ta OK  giet 1/1: t143_mcp_endpoint_do_DAU_KIA_cua_day_va_KHONG_duoc_tinh_la_lam_duoc_viec
+  mcp_endpoint_nuot_ly_do_o_chuoi_tom_tat OK  giet 1/1: t143_mcp_endpoint_do_DAU_KIA_cua_day_va_KHONG_duoc_tinh_la_lam_duoc_viec
+  mcp_endpoint_chua_biet_URL_bi_ke_thanh_HONG OK  giet 1/1: t143_mcp_endpoint_do_DAU_KIA_cua_day_va_KHONG_duoc_tinh_la_lam_duoc_viec
+  mcp_ket_xuat_gop_chua_do_duoc_thanh_hong OK  giet 1/1: t115_duong_MCP_phai_duoc_DO_va_KHONG_duoc_tinh_la_lam_duoc_viec
+  mcp_ten_server_khop_chuoi_con OK  giet 1/1: t115_duong_MCP_phai_duoc_DO_va_KHONG_duoc_tinh_la_lam_duoc_viec
+  mcp_ten_server_phan_biet_hoa_thuong OK  giet 1/1: t115_duong_MCP_phai_duoc_DO_va_KHONG_duoc_tinh_la_lam_duoc_viec
+  mcp_bo_bat_loi_json_hong     OK  giet 1/1: t115_duong_MCP_phai_duoc_DO_va_KHONG_duoc_tinh_la_lam_duoc_viec(JSONDecodeError)
+  mcp_bo_kiem_kieu_goc         OK  giet 1/1: t115_duong_MCP_phai_duoc_DO_va_KHONG_duoc_tinh_la_lam_duoc_viec(TypeError)
+  mcp_bo_kiem_kieu_bang_server OK  giet 1/1: t115_duong_MCP_phai_duoc_DO_va_KHONG_duoc_tinh_la_lam_duoc_viec(TypeError)
+  mcp_bo_kiem_kieu_gia_tri_server OK  giet 1/1: t115_duong_MCP_phai_duoc_DO_va_KHONG_duoc_tinh_la_lam_duoc_viec(AttributeError)
+  mcp_bo_kiem_kieu_headers     OK  giet 1/1: t115_duong_MCP_phai_duoc_DO_va_KHONG_duoc_tinh_la_lam_duoc_viec
+  mcp_servers_che_khuat_mcpServers_sai_kieu OK  giet 1/1: t115_duong_MCP_phai_duoc_DO_va_KHONG_duoc_tinh_la_lam_duoc_viec
+  mcp_chon_ten_theo_thu_tu_khoa_JSON OK  giet 1/1: t115_duong_MCP_phai_duoc_DO_va_KHONG_duoc_tinh_la_lam_duoc_viec
+  mcp_suc_khoe_do_chuoi_con_ca_dong OK  giet 1/1: t115_duong_MCP_phai_duoc_DO_va_KHONG_duoc_tinh_la_lam_duoc_viec
+  mcp_suc_khoe_khop_TIEN_TO_thay_vi_bang_dung OK  giet 1/1: t115_duong_MCP_phai_duoc_DO_va_KHONG_duoc_tinh_la_lam_duoc_viec
+  mcp_trang_thai_LA_bi_doan_thanh_hong OK  giet 1/1: t115_duong_MCP_phai_duoc_DO_va_KHONG_duoc_tinh_la_lam_duoc_viec
+  mcp_doc_Status_CUOI_thay_vi_DAU OK  giet 1/1: t115_duong_MCP_phai_duoc_DO_va_KHONG_duoc_tinh_la_lam_duoc_viec
+  mcp_hoi_ten_dung_san_thay_vi_ten_da_khai OK  giet 1/1: t115_duong_MCP_phai_duoc_DO_va_KHONG_duoc_tinh_la_lam_duoc_viec
+  mcp_bo_chuan_hoa_env_trong_ham OK  giet 1/1: t115_duong_MCP_phai_duoc_DO_va_KHONG_duoc_tinh_la_lam_duoc_viec
+  env_da_chuan_tra_ve_os_environ_THO OK  giet 1/1: t115_duong_MCP_phai_duoc_DO_va_KHONG_duoc_tinh_la_lam_duoc_viec
+  mcp_ep_env_None_o_loi_goi    OK  giet 1/1: t115_duong_MCP_phai_duoc_DO_va_KHONG_duoc_tinh_la_lam_duoc_viec
+  rest_kho_khong_do_duoc_bi_gop_thanh_hong OK  giet 1/1: t115_duong_MCP_phai_duoc_DO_va_KHONG_duoc_tinh_la_lam_duoc_viec
+  mcp_mat_env_da_chuan_hoa     OK  giet 1/1: t115_duong_MCP_phai_duoc_DO_va_KHONG_duoc_tinh_la_lam_duoc_viec
+  agy_cong_cu_xoa_muc          OK  giet 1/1: t145_agy_cong_cu_va_kha_nang
+  agy_xac_thuc_sang_version    OK  giet 1/1: t145_agy_cong_cu_va_kha_nang
+  agy_kha_nang_xoa_muc         OK  giet 1/1: t145_agy_cong_cu_va_kha_nang
+  agy_goi_xac_thuc_models      OK  giet 1/1: t146_do_antigravity_cac_trang_thai_va_luong
+  agy_bo_qua_ket_qua_doctor    OK  giet 1/1: t148_doctor_chay_agy_models_MOT_lan_cho_ca_CONG_CU_lan_KHA_NANG
+  doctor_khong_ghi_ket_qua_xac_thuc OK  giet 1/1: t148_doctor_chay_agy_models_MOT_lan_cho_ca_CONG_CU_lan_KHA_NANG
+  doctor_khong_xoa_bang_xac_thuc_luot_truoc OK  giet 1/1: t148_doctor_chay_agy_models_MOT_lan_cho_ca_CONG_CU_lan_KHA_NANG
+  agy_goi_models_lan_hai       OK  giet 1/1: t146_do_antigravity_cac_trang_thai_va_luong
+  agy_probe_models_timeout_thanh_thieu OK  giet 1/1: t146_do_antigravity_cac_trang_thai_va_luong
+  agy_probe_models_rong_thanh_co_mat OK  giet 1/1: t146_do_antigravity_cac_trang_thai_va_luong
+  agy_windows_bo_fallback_localappdata OK  giet 1/1: t147_agy_fallback_localappdata_windows
+  agy_windows_fallback_bo_chan_doan_path OK  giet 1/1: t147_agy_fallback_localappdata_windows
+  antigravity_tinh_vao_LAM_DUOC_VIEC OK  giet 1/1: t115_duong_MCP_phai_duoc_DO_va_KHONG_duoc_tinh_la_lam_duoc_viec
+  fixture_MODULE_PY_quay_lai_ten_chet OK  giet 2/2: t129_probe_qua_han_la_CHUA_DO_khong_phai_THIEU, t134_kiem_song_dang_bat_thi_footer_khong_khuyen_bat_lai
+  ban_sao_roi_tha_ca_kho_that  OK  giet 1/1: t142_ban_sao_roi_chi_duoc_tha_khi_goc_vang_git
+  headline_lay_tong_lam_so_ca_da_chay OK  giet 2/2: t118_headline_KHONG_duoc_dem_ca_BO_QUA_la_da_qua, t119_main_nhanh_mac_dinh_PHAI_in_headline_bang_dong_ket_qua
+
+DOT BIEN: 176/176 dat  (1 khong do duoc tren nen nay)
+
+{"name": "mutation-python3.11-baseline", "command": "python3.11 -B .claude/dev/launcher_test.py --dot-bien", "cwd": "/home/user/wp685-r28-g5-review/goi/scratch/baseline", "started_utc": "2026-10-10T06:47:32.762855+00:00", "head": "ab457c651eb4428705f0492163080b661c858b72", "tree": "8649be372de2c824268682c3f80fa086ee750ef7", "base": "8c98afacb9285aa71e5200739236284f7a190d4f", "os": "Linux-6.18.44-fc-v114-x86_64-with-glibc2.39", "uname": ["Linux", "vm", "6.18.44-fc-v114", "#1 SMP PREEMPT_DYNAMIC @0", "x86_64", "x86_64"], "os_release": "PRETTY_NAME=\"Ubuntu 24.04.5 LTS\"\nNAME=\"Ubuntu\"\nVERSION_ID=\"24.04\"\nVERSION=\"24.04.5 LTS (Noble Numbat)\"\nVERSION_CODENAME=noble\nID=ubuntu\nID_LIKE=debian\nHOME_URL=\"https://www.ubuntu.com/\"\nSUPPORT_URL=\"https://help.ubuntu.com/\"\nBUG_REPORT_URL=\"https://bugs.launchpad.net/ubuntu/\"\nPRIVACY_POLICY_URL=\"https://www.ubuntu.com/legal/terms-and-policies/privacy-policy\"\nUBUNTU_CODENAME=noble\nLOGO=ubuntu-logo\n", "python": "Python 3.11.17", "rc": 0, "duration_seconds": 45.409, "ended_utc": "2026-10-10T06:48:18.194843+00:00"}

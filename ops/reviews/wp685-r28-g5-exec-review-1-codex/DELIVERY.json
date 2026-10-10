@@ -1,0 +1,25 @@
+{
+  "status": "blocked",
+  "action": "POST issue comment to ducthangho/tra-luat#685",
+  "packet_verdict_published": false,
+  "packet_comment_url": null,
+  "pr_verdict": "not_applicable (no PR)",
+  "reviewed_sha": "3089b54455a44b8cfcf2fd27b01894bc2a5d764d",
+  "generation": 5,
+  "role": "reviewer",
+  "reviewer_provider": "openai_codex",
+  "reviewer_session": "01a1247f-c379-7e31-9ef7-89b531e3fa72",
+  "attempted_at_utc": "2026-10-10 07:11:18 UTC",
+  "tool_error": {
+    "content": [
+      {
+        "type": "text",
+        "text": "MCP tool call requires approval, but approval policy is never"
+      }
+    ],
+    "isError": true
+  },
+  "manual_next_action": "Coordinator publishes the completed verdict to Packet #685 using an authorized channel, then opens a fresh authorized Executor rework session.",
+  "human_audited": false,
+  "attempted_payload_file_sha256": "99f147f004887ab1fe2ec9379d61650fd052eba3e3e9fd3db76db716c2935c24"
+}

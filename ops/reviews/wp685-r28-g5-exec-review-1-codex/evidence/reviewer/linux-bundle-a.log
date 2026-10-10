@@ -1,0 +1,53 @@
+# UTC 2026-10-10T07:02:46Z
+$ uname -s
+Linux
+# rc=0
+$ uname -r
+6.18.44-fc-v114
+# rc=0
+$ uname -m
+x86_64
+# rc=0
+$ cat /etc/os-release
+PRETTY_NAME="Ubuntu 24.04.5 LTS"
+NAME="Ubuntu"
+VERSION_ID="24.04"
+VERSION="24.04.5 LTS (Noble Numbat)"
+VERSION_CODENAME=noble
+ID=ubuntu
+ID_LIKE=debian
+HOME_URL="https://www.ubuntu.com/"
+SUPPORT_URL="https://help.ubuntu.com/"
+BUG_REPORT_URL="https://bugs.launchpad.net/ubuntu/"
+PRIVACY_POLICY_URL="https://www.ubuntu.com/legal/terms-and-policies/privacy-policy"
+UBUNTU_CODENAME=noble
+LOGO=ubuntu-logo
+# rc=0
+$ python3.11 -V
+Python 3.11.17
+# rc=0
+$ python3.12 -V
+Python 3.12.3
+# rc=0
+$ uname -a
+Linux vm 6.18.44-fc-v114 #1 SMP PREEMPT_DYNAMIC @0 x86_64 x86_64 x86_64 GNU/Linux
+# rc=0
+{"name": "linux-bundle-a", "command": "python3.12 -B scripts/tl.py release-bundle --out /home/user/wp685-r28-g5-review/goi/evidence/reviewer/a.zip --json", "cwd": "/home/user/wp685-r28-g5-review/goi/scratch/candidate", "started_utc": "2026-10-10T07:02:46.017668+00:00", "head": "3089b54455a44b8cfcf2fd27b01894bc2a5d764d", "tree": "952d7c3092e02886150bb9c936dec7b5fc779aec", "base": "ab457c651eb4428705f0492163080b661c858b72", "os": "Linux-6.18.44-fc-v114-x86_64-with-glibc2.39", "uname": ["Linux", "vm", "6.18.44-fc-v114", "#1 SMP PREEMPT_DYNAMIC @0", "x86_64", "x86_64"], "os_release": "PRETTY_NAME=\"Ubuntu 24.04.5 LTS\"\nNAME=\"Ubuntu\"\nVERSION_ID=\"24.04\"\nVERSION=\"24.04.5 LTS (Noble Numbat)\"\nVERSION_CODENAME=noble\nID=ubuntu\nID_LIKE=debian\nHOME_URL=\"https://www.ubuntu.com/\"\nSUPPORT_URL=\"https://help.ubuntu.com/\"\nBUG_REPORT_URL=\"https://bugs.launchpad.net/ubuntu/\"\nPRIVACY_POLICY_URL=\"https://www.ubuntu.com/legal/terms-and-policies/privacy-policy\"\nUBUNTU_CODENAME=noble\nLOGO=ubuntu-logo\n", "python": "Python 3.12.3"}
+{
+  "ok": true,
+  "schema": "release_bundle.v1",
+  "out": "/home/user/wp685-r28-g5-review/goi/evidence/reviewer/a.zip",
+  "top": "tra-luat",
+  "file_count": 180,
+  "total_bytes": 8447590,
+  "package_hash": "931b51c001a3cac3b1e69ebf773b5b00e8283678a4135a79aea2bd529054101f",
+  "bundle_sha256": "4761688a720b8a05038aff4a1ca451e8fbc61fadd26a11ee591e6cd5795e5c19",
+  "warnings": [],
+  "content_hash": "931b51c001a3cac3b1e69ebf773b5b00e8283678a4135a79aea2bd529054101f",
+  "archive_sha256": "4761688a720b8a05038aff4a1ca451e8fbc61fadd26a11ee591e6cd5795e5c19",
+  "archive_sha256_rebuild": "4761688a720b8a05038aff4a1ca451e8fbc61fadd26a11ee591e6cd5795e5c19",
+  "reproducible": true,
+  "note": "ZIP_DEFLATED-9 (r194 amend ADR-0007) root/thứ tự/timestamp/permission cố định; build ×2 cùng SHA."
+}
+
+{"name": "linux-bundle-a", "command": "python3.12 -B scripts/tl.py release-bundle --out /home/user/wp685-r28-g5-review/goi/evidence/reviewer/a.zip --json", "cwd": "/home/user/wp685-r28-g5-review/goi/scratch/candidate", "started_utc": "2026-10-10T07:02:46.017668+00:00", "head": "3089b54455a44b8cfcf2fd27b01894bc2a5d764d", "tree": "952d7c3092e02886150bb9c936dec7b5fc779aec", "base": "ab457c651eb4428705f0492163080b661c858b72", "os": "Linux-6.18.44-fc-v114-x86_64-with-glibc2.39", "uname": ["Linux", "vm", "6.18.44-fc-v114", "#1 SMP PREEMPT_DYNAMIC @0", "x86_64", "x86_64"], "os_release": "PRETTY_NAME=\"Ubuntu 24.04.5 LTS\"\nNAME=\"Ubuntu\"\nVERSION_ID=\"24.04\"\nVERSION=\"24.04.5 LTS (Noble Numbat)\"\nVERSION_CODENAME=noble\nID=ubuntu\nID_LIKE=debian\nHOME_URL=\"https://www.ubuntu.com/\"\nSUPPORT_URL=\"https://help.ubuntu.com/\"\nBUG_REPORT_URL=\"https://bugs.launchpad.net/ubuntu/\"\nPRIVACY_POLICY_URL=\"https://www.ubuntu.com/legal/terms-and-policies/privacy-policy\"\nUBUNTU_CODENAME=noble\nLOGO=ubuntu-logo\n", "python": "Python 3.12.3", "rc": 0, "duration_seconds": 2.323, "ended_utc": "2026-10-10T07:02:48.360981+00:00"}

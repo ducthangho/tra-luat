@@ -5,10 +5,10 @@
   "skill_version": "1.36.68",
   "webapp_target": "2.21.2p",
   "root_name": "tra-luat",
-  "file_count": 184,
-  "total_bytes": 8729704,
-  "package_hash": "a5d295c3080477c05843399f7a32aa0e1c20d52b779f7b401a6438f0da92899e",
-  "content_hash": "a5d295c3080477c05843399f7a32aa0e1c20d52b779f7b401a6438f0da92899e",
+  "file_count": 183,
+  "total_bytes": 8710991,
+  "package_hash": "097ce1d72e1aceed187cfb7f3f03f16e1d67b58ba8b7d406043d64099c603691",
+  "content_hash": "097ce1d72e1aceed187cfb7f3f03f16e1d67b58ba8b7d406043d64099c603691",
   "required_missing": [],
   "files": [
     {
@@ -60,11 +60,6 @@
       "path": "changelog.d/wp-710.md",
       "size": 7560,
       "sha256": "1efc3dbee8f3549e53bf73656914cfa80a55c4a452aeff19a6d7b381cdfa8cf8"
-    },
-    {
-      "path": "changelog.d/wp-726.md",
-      "size": 2724,
-      "sha256": "8bb8372837543a02c8734a6ce45a9390911595a10cdbe0ef11aec71fde71ab85"
     },
     {
       "path": "references/API_CONTRACT.md",
@@ -578,8 +573,8 @@
     },
     {
       "path": "scripts/env-reimport.sh",
-      "size": 9859,
-      "sha256": "8c479822cf1598dcbe6aa2b795fce1c4758dca93874b31fc5df2a56e1273239b"
+      "size": 7892,
+      "sha256": "cefdd69673bd491b92b20e5777ad7374c75c6239c68e34b85861f6d7f107fd05"
     },
     {
       "path": "scripts/gas.py",
@@ -628,13 +623,13 @@
     },
     {
       "path": "scripts/nlm-auth-import.sh",
-      "size": 14354,
-      "sha256": "0a5b43e773bc55057640a1a8993fa56386d4f1e53c3d568a31fe6677d785d4c7"
+      "size": 12837,
+      "sha256": "c9cdb10ed5eb50f0eacf8f0f1262759f22da0a79a636b255fee5fe70b468b0b7"
     },
     {
       "path": "scripts/nlm-auto-refresh.sh",
-      "size": 5750,
-      "sha256": "c84974eec0db4823573b342d34d42a2fa1ea3314634bbbda8b2300e46823a0a8"
+      "size": 4870,
+      "sha256": "bc0b55184ab7949d123f9c35c90b3d26f194d2fb67de4a591c6884a50e7f16d9"
     },
     {
       "path": "scripts/nlm-credential-refresh.Tests.ps1",
@@ -883,8 +878,8 @@
     },
     {
       "path": "scripts/tl_test_fragments_bundled.py",
-      "size": 28089,
-      "sha256": "8030ac64a0d49a83e872eb4e61bd518171fb397bddb235e0652daea772160042"
+      "size": 16464,
+      "sha256": "eb4d36e75e81c244c31814859fc1ce237436cc866cc9fae1e494d23c5347fa13"
     },
     {
       "path": "scripts/tra_cuu.py",

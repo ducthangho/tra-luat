@@ -82,7 +82,7 @@ SHA_G1   = "2f70869a0537843e9cae78618ee7ae8c261d972d"
 # do that 18-09 tren ban va g2 cua agy cho 5 tep / +812, trong khi viec cua agy la 2 tep / +353.
 # Mot chot nhu the se bao "vuot tran" cho mot ban va KHONG vuot. Base dung la MERGE-BASE.
 SHA_BASE_SPEC = "d705623162b75b7340ee7cca54ac2d2abbddbb6f"
-BAN_BO_DO = "2026-10-01i"              # doi MOI khi sua bo do - log tu khai ban nao
+BAN_BO_DO = "2026-10-01j"              # doi MOI khi sua bo do - log tu khai ban nao
 TRAN_TEP, TRAN_DONG = 2, 400          # N7' cua spec r3
 AL_SAN = (1, 7, 7)                    # san actionlint = ban ghim CI: AL_VER cua ci.yml = ban_ghim cua ops/cong_cu.yaml
 GIT_SAN = (2, 36, 0)                  # san git: ung vien goi `git worktree list --porcelain -z` (co `-z` tu 2.36); ban_ghim git = null
@@ -552,7 +552,7 @@ if not ("--chi-kich-thuoc" in sys.argv or "--chi-probe" in sys.argv):
     # them t33 (`must be contained within ${{ }}`) — e2e 1.6.22: rc=1 `DAT 11 | TRUOT 1`, `la: ['t137', 't159']` cho ung vien
     # sach; 1.6.23/1.6.24/1.6.26/1.6.27/1.7.0/1.7.6/1.7.7/1.7.12 QUA ca ba. San la ban
     # ghim CI (AL_SAN), KHONG phai 1.6.23 do tren MOT ung vien: workflow cua ung vien sau co the dung cu phap moi hon, ma CI chi do
-    # bang ban ghim. Cu hon san => KHONG DO DUOC (chan ca 1.6.23-1.7.6 dang QUA: fail-close, khong phai phan quyet). `v` dau: ban
+    # bang ban ghim. KHAC ban ghim => KHONG DO DUOC (chan ca 1.6.23-1.7.6 dang QUA va moi ban moi hon 1.7.7: fail-close). `v` dau: ban
     # `go install` in `v1.7.7`; khong doc duoc so (vd. `(devel)`) => KHONG DO DUOC.
     if not _thieu_cc:
         _al = subprocess.run([_cc["actionlint"], "-version"], capture_output=True, text=True, encoding="utf-8",
@@ -560,10 +560,12 @@ if not ("--chi-kich-thuoc" in sys.argv or "--chi-probe" in sys.argv):
         _al_v = re.search(r"(?m)^v?(\d+)\.(\d+)\.(\d+)", _al.stdout or "")
         if _al.returncode:
             loi.append("actionlint tren PATH co mat nhung `actionlint -version` rc!=0 (khong chay duoc): cai lai ban ghim AL_VER")
-        elif not _al_v or tuple(int(x) for x in _al_v.groups()) < AL_SAN:
-            loi.append(f"actionlint {_al_v.group(0) if _al_v else '(khong doc duoc phien ban)'} cu hon ban ghim CI "
-                       f"{'.'.join(map(str, AL_SAN))} (AL_VER): ban cu lam t137/t159 DO 'la' tren ung vien sach —"
-                       " cai ban ghim (ops/cai_actionlint.sh voi AL_VER)")
+        elif not _al_v or tuple(int(x) for x in _al_v.groups()) != AL_SAN:
+            # BANG ban ghim, khong chi "khong cu hon": ban MOI hon co the them/bot/doi chan doan ma CI (cai dung AL_VER) khong bao gio
+            # chay, nen phan quyet tai cho khong con tuong duong CI (Codex PR #569, review 5479887784).
+            loi.append(f"actionlint {_al_v.group(0) if _al_v else '(khong doc duoc phien ban)'} KHAC ban ghim CI "
+                       f"{'.'.join(map(str, AL_SAN))} (AL_VER): ban cu lam t137/t159 DO 'la' tren ung vien sach, ban moi hon"
+                       " khong phai thu CI chay — cai ban ghim (ops/cai_actionlint.sh voi AL_VER)")
         # git cung the: CO MAT khong phai DUNG DUOC, va git CU la cong cu PHO BIEN nhat trong bon. Do tren 2026-09-30l, 0ea95de, git
         # THAT qua cung chay(): 2.25.1 => 140/166 (23 ca "la": `init -b`...), 2.34.1 va 2.35.1 => 163/166 (t109 t110 t111: `git
         # worktree list --porcelain -z` rc=129 `unknown switch z`), e2e 2.35.1 rc=1 `DAT 11 | TRUOT 1`; 2.36.1 => 166/166. San lay
@@ -677,11 +679,17 @@ def _trang_thai_cay(goc):
     # rc=1 `TRUOT N8`; khong co: rc=3). `ls-files -v` gan the `H` cho tep binh thuong: moi the khac => cay KHAC commit. Gop
     # vao MOT chuoi de chot DAU va chot CUOI so cung mot thu. Go co bang HAI lenh rieng (`--no-assume-unchanged -- <tep>` roi
     # `--no-skip-worktree -- <tep>`): gop vao mot lenh thi git 2.43 KHONG go duoc skip-worktree. Gioi han da biet (do cung ngay):
-    # `.git/info/exclude` va `.gitignore` CHUA THEO DOI chua `*` van che tep chua theo doi khoi `status`.
+    # Tep BI IGNORE (`.gitignore` cua kho, `.git/info/exclude`, ignore ca nhan) khong hien o `status` du da bo excludesFile ca nhan,
+    # ma bo test duyet THU MUC ops/leases va ops/reviews bang glob (vd ops/lease_publish_test.py:1302, :1660) nen mot lease/verdict an
+    # o do lam ket qua khac HEAD da ghi (Codex PR #569, review 5479887784). `ls-files --others --ignored --exclude-standard` liet ke
+    # chung; pham vi CHI hai thu muc bo test duyet (tep ignore noi khac, vd `dist/`, khong do duoc tac dong - de ngoai), bo qua
+    # `__pycache__` vi bo test sinh bytecode trong luc chay va chot CUOI so cung ham nay.
     rc, st, er = git(goc, "-c", "core.excludesFile=", "status", "--porcelain", "--untracked-files=all")
     rc2, lv, er2 = git(goc, "ls-files", "-v")
+    rc3, ig, er3 = git(goc, "ls-files", "--others", "--ignored", "--exclude-standard", "--", "ops/leases", "ops/reviews")
     co = ["chi-muc:" + x for x in lv.splitlines() if x and x[0] != "H"]
-    return (rc or rc2), "\n".join(x for x in [st] + co if x), (er or er2)
+    co += ["bi-ignore:" + x for x in ig.splitlines() if x and "/__pycache__/" not in "/" + x]
+    return (rc or rc2 or rc3), "\n".join(x for x in [st] + co if x), (er or er2 or er3)
 
 CAY_SACH = "--chi-kich-thuoc" not in sys.argv
 if CAY_SACH:
@@ -691,7 +699,7 @@ if CAY_SACH:
         loi.append(f"khong doc duoc `git status`/`ls-files` cua cay do ({_an_userinfo(er_st)[:70]}):"
                    " khong chung minh duoc cay trung HEAD")
     elif st0.strip():
-        loi.append(f"cay do KHONG trung HEAD: {len(st0.splitlines())} muc chua commit/chua theo doi/co chi muc "
+        loi.append(f"cay do KHONG trung HEAD: {len(st0.splitlines())} muc chua commit/chua theo doi/co chi muc/bi ignore "
                    f"(vd {st0.splitlines()[0][:60]!r}) -"
                    " bo test/probe do TEP, N7' do COMMIT; commit hoac don (git stash -u) roi do lai;"
                    " chi muc: git update-index --no-assume-unchanged -- <tep> roi --no-skip-worktree -- <tep>")

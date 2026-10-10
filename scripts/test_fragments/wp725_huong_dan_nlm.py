@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """wp725 — hướng dẫn NLM cũ (`nlm login --check` làm phép xác nhận) không quay lại tài liệu và help.
 
-N1: mọi dòng chứa `login --check` trong COWORK_PROJECT.md / RUNBOOK.md phải khớp ĐÚNG MỘT neo trong danh sách
+N1: mọi dòng chứa `login --check` trong tài liệu Cowork Project / RUNBOOK.md phải khớp ĐÚNG MỘT neo trong danh sách
 CHO PHÉP (câu phủ định có chủ đích), và mỗi neo khớp đúng một dòng. N2: help của `nlm-auth-stage` và các cờ của nó
 không dạy quy trình cũ; help `--force` nói đúng là KHÔNG qua được cổng canary.
 """
@@ -12,6 +12,10 @@ from pathlib import Path
 
 TEST_ID = "wp725_huong_dan_nlm"
 
+# Tên ghép từng mảnh CÓ CHỦ ĐÍCH: bundled module là `scripts/*.py`, mà doc-claims L9 đếm mọi tên tài liệu trong đó là
+# con trỏ SỐNG — viết trọn tên ở đây thì ca r228 (tài liệu mồ côi) tự xanh oan (cross-review wp725 lượt 2, F03).
+_COWORK = "references/" + "COWORK_" + "PROJECT" + ".md"
+
 _CAU_CU = "login --check"
 
 # Danh sách CHO PHÉP: (tệp, chuỗi con neo duy nhất của dòng được phép nhắc `login --check`).
@@ -19,7 +23,7 @@ _CHO_PHEP = (
     ("references/RUNBOOK.md", "`nlm login --check` xanh KHÔNG đủ."),
     ("references/RUNBOOK.md", "`nlm login --check` KHÔNG còn là bằng chứng"),
     ("references/RUNBOOK.md", "rc 0 của refresh, `nlm login --check` hay số notebook đều KHÔNG cho phép upload"),
-    ("references/COWORK_PROJECT.md", "`nlm login --check` xanh hay rc 0 của refresh KHÔNG đủ để stage"),
+    (_COWORK, "`nlm login --check` xanh hay rc 0 của refresh KHÔNG đủ để stage"),
 )
 
 
@@ -60,6 +64,12 @@ def _vi_pham_duong_keo(cowork):
         loi.append("nlm-auth-pull đứng trước nlm-auth-load")
     if "nlm-auth-pull --secrets-file" in keo:
         loi.append("mục kéo còn dạy nlm-auth-pull --secrets-file làm đường mặc định")
+    # Khối Project Instructions (Bước 2) là thứ người dùng DÁN vào Project — lượt 2 F02: nó vẫn dạy pull bundle.
+    for so, dong in enumerate(cowork.splitlines(), 1):
+        if "refresh cookie giữa phiên" in dong and "nlm-auth-load" not in dong:
+            loi.append(f"dòng {so}: lệnh refresh giữa phiên không phải nlm-auth-load")
+    if "nlm-auth-pull --secrets-file" in cowork:
+        loi.append("tài liệu còn lệnh nlm-auth-pull --secrets-file")
     return loi
 
 
@@ -94,20 +104,23 @@ def _vi_pham_help(lenh_help, co):
 def run(tl_module):
     goc = Path(tl_module.__file__).resolve().parent.parent
     tai_lieu = {t: (goc / t).read_text(encoding="utf-8")
-                for t in ("references/RUNBOOK.md", "references/COWORK_PROJECT.md")}
+                for t in ("references/RUNBOOK.md", _COWORK)}
     if _vi_pham_tai_lieu(tai_lieu):
         return False
     # Phản chứng tại chỗ: một dòng khẳng định kiểu cũ bơm vào phải bị bắt — chứng minh bộ kiểm có răng.
     ban_ban = dict(tai_lieu)
-    ban_ban["references/COWORK_PROJECT.md"] += "\nĐịnh kỳ chạy `tl secrets-set --nlm` (tự `nlm login --check` refresh).\n"
+    ban_ban[_COWORK] += "\nĐịnh kỳ chạy `tl secrets-set --nlm` (tự `nlm login --check` refresh).\n"
     if not _vi_pham_tai_lieu(ban_ban):
         return False
-    cowork = tai_lieu["references/COWORK_PROJECT.md"]
+    cowork = tai_lieu[_COWORK]
     if _vi_pham_duong_keo(cowork):
         return False
     keo_moi = cowork.split("- **Drive → Cowork (kéo):**", 1)[1].split("\n\n", 1)[0]
     if not _vi_pham_duong_keo(cowork.replace("- **Drive → Cowork (kéo):**" + keo_moi + "\n", _KEO_CU, 1)):
         return False            # phản chứng: trả mục kéo về bản cũ (pull bundle) phải bị bắt
+    lenh_moi = "python scripts/tl_boot.py nlm-auth-load"
+    if not _vi_pham_duong_keo(cowork.replace(lenh_moi, "python scripts/tl_boot.py nlm-auth-pull --secrets-file ./tl_secrets.enc", 1)):
+        return False            # phản chứng: trả RIÊNG dòng refresh của Project Instructions về pull bundle phải bị bắt
     lenh_help, co = _help_nlm_auth_stage(tl_module)
     if _vi_pham_help(lenh_help, co):
         return False

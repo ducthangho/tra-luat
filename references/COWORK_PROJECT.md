@@ -49,7 +49,7 @@ Drive MCP để tải nếu tránh được). LUÔN gọi qua tl_boot.py (tự s
    # tl_boot = launcher tự strip NUL cho tl.py; seed đọc từ file Context (KHÔNG MCP); gws+cred qua direct-media.
 3) python scripts/tl_boot.py gws-ping --env cowork   # gws=0.22.5 auth=oauth2
 4) (nếu cần NLM CLI) python scripts/tl_boot.py nlm-install
-5) (refresh cookie giữa phiên) python scripts/tl_boot.py nlm-auth-pull --secrets-file ./tl_secrets.enc
+5) (refresh cookie giữa phiên) python scripts/tl_boot.py nlm-auth-load   # bản wrapper WP710 đẩy (NLM_CRED_FILEID)
 
 QUY TẮC: dùng `python scripts/tl_boot.py …` cho MỌI lệnh (thay tl.py). Tải Drive ưu tiên direct-media/gws; CHỈ
 MCP khi hết cách. Không có master key vẫn rà soát được: lệnh lõi (footnote-map/cluster/rasoat-chongcheo/overlap)

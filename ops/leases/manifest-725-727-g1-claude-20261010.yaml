@@ -44,7 +44,8 @@ recorder_is_executor: true
 recorder_is_executor_ghi_chu: >-
   Cung phien ghi lease va thuc thi (giong tien le wp685 g5). Reviewer la Codex CLI chay doc lap, read-only.
 leased_at_utc: '2026-10-10T18:40:00Z'
-lease_expires_at_utc: '2026-10-11T06:40:00Z'
+lease_expires_at_utc: '2026-10-10T19:00:00Z'
+han_ghi_chu: 'Goc 2026-10-11T06:40:00Z. RUT NGAN ve 2026-10-10T19:00:00Z — xem thu_hoi_bang_rut_han.'
 run_minutes: 90
 heartbeat_minutes: 30
 attempts_used: 0
@@ -59,3 +60,11 @@ pham_vi: >-
   (183 -> 186: them changelog.d/wp-725.md, wp-726.md, wp-727.md) va cap nhat hai chot ratchet dem goi trong
   scripts/tl_selftest.py (r291_docs_ngoai_goi, r357_agents_ngoai_goi) kem ke khai slot, theo tien le 888c0d9.
 cam: [sua tep ngoai write set, deploy, day Package, sua golden]
+thu_hoi_bang_rut_han:
+  han_goc_utc: '2026-10-11T06:40:00Z'
+  han_moi_utc: '2026-10-10T19:00:00Z'
+  ly_do: >-
+    Packet #735 thua: PR #733 (3fad559, merge vao master o 11cf185) da tai sinh RELEASE_MANIFEST.json 183 -> 186 va
+    nang hai chot ratchet giong het. PR #736 dong, Issue #735 dong not_planned. Han moi dat sau luc push (tranh rc=8
+    che rc=9). Khong bia mo: khong co lease ke nhiem.
+  nguoi_rut: 'phien Claude Code session_014N46zU47UjPmRbH4UNrEf5 (executor cua lease nay)'

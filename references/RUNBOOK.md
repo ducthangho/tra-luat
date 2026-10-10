@@ -192,7 +192,7 @@ python scripts/tl.py ping ; python scripts/tl.py gws-ping --env cowork
   1) Ở **Code/máy có trình duyệt**: `nlm login` (1 lần) → cookies lưu `~/.notebooklm-mcp-cli/{auth.json, profiles/default/*}`.
   2) `tl secrets-stage` (đã có TL_MASTER_KEY) TỰ gói các file đó vào bundle `.enc` dưới khoá `nlm_auth` (SECRET — chỉ
      trong bundle mã hoá, secret_guard chặn lộ). 3) Cowork `tl bootstrap` GHI lại `~/.notebooklm-mcp-cli/…` → nlm chạy
-     **headless** (`nlm login --check` xanh). `--no-nlm` để bỏ gói (từ WP710 bước 2) chỉ gói sau canary LIVE dương;
+     **headless**; xác nhận sống CHỈ bằng canary LIVE dương trên đúng notebook (mục "WP710 — làm tươi credential NLM"), `nlm login --check` xanh KHÔNG đủ. `--no-nlm` để bỏ gói (từ WP710 bước 2) chỉ gói sau canary LIVE dương;
      thiếu jar mà không `--no-nlm` ⇒ mã 3, 0 upload).
   - **Cơ chế refresh (vì sao GHI FILE, KHÔNG dùng env var):** nlm giữ 3 lớp — cookies (vài tuần, vài cái xoay/request),
     CSRF (vài phút, tự refresh mỗi lần init MCP), session-id (mỗi lần khởi động). Khi cookie hết hạn nlm đọc lại

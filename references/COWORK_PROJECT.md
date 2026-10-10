@@ -80,15 +80,19 @@ cũ → 42K NUL).
 
 nlm tự refresh cookie ở **Code** (từ browser profile). Để Cowork luôn có cookie mới:
 
-- **Local → Drive (đẩy):** định kỳ chạy `tl secrets-set --nlm` (tự `nlm login --check` refresh rồi gói vào bundle,
-  giữ nguyên fileId). Tự động hoá bằng **Windows Task Scheduler** (1 lần):
+- **Local → Drive (đẩy):** chỉ trên máy Windows giữ hồ sơ trình duyệt gốc, chạy wrapper WP710 —
+  `nlm auth refresh` → canary LIVE dương trên đúng notebook → `tl nlm-auth-stage` (ghi đè tại chỗ, giữ fileId).
+  Canary không dương thì 0 upload; `nlm login --check` xanh hay rc 0 của refresh KHÔNG đủ để stage.
   ```powershell
-  $cmd = "cd C:\Users\admin\Downloads\tra-luat; $env:TL_MASTER_KEY='<key>'; python scripts\tl.py secrets-set --nlm"
-  schtasks /Create /TN "tl-nlm-sync" /SC DAILY /ST 09:00 /TR "powershell -NonInteractive -Command `"$cmd`"" /F
+  pwsh -NoProfile -File scripts/nlm-credential-refresh.ps1 -ConfigPath C:\private\nlm-refresh.json
   ```
-  (cookie sống ~2–4 tuần → đẩy hằng ngày là dư an toàn; bootstrap báo "cookie ~N ngày tuổi", >14 ngày thì cảnh báo.)
+  Muốn lặp: thêm `-EnableKeepalive -IntervalSeconds 3600 -MaxCycles N` (có giới hạn, dừng được; không Scheduled
+  Task, không tự khởi động). Điều kiện tiên quyết, config, ý nghĩa mã thoát: `references/RUNBOOK.md` mục
+  "WP710 — làm tươi credential NLM". Đừng đặt master key vào dòng lệnh của một tác vụ hẹn giờ.
+  Bản wrapper đẩy là tệp `NLM_CRED_FILEID` (không phải bundle `secrets`): Cowork nạp bằng `tl nlm-auth-load`.
 - **Drive → Cowork (kéo):** đầu phiên `bootstrap` đã ghi cookie; giữa phiên cần mới hơn thì
   `python scripts/tl.py nlm-auth-pull --secrets-file ./tl_secrets.enc` (hoặc bỏ `--secrets-file` để direct-media
   kéo bản mới nhất trên Drive). Cowork KHÔNG tự chạy browser được nên KHÔNG tự refresh — refresh thật ở Code.
 
-Khi Google bắt đăng nhập lại (profile chết): ở Code `nlm login` 1 lần → `tl secrets-set --nlm`.
+Khi Google bắt đăng nhập lại (wrapper báo `auth_failure`): đăng nhập tương tác lại trên chính máy giữ hồ sơ gốc
+(`nlm login`), rồi chạy lại wrapper ở trên — refresh → canary → stage; không stage thẳng sau `nlm login`.

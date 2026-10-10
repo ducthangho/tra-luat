@@ -754,15 +754,17 @@ def _nlm_auth_files():
 
 
 def _refresh_nlm_auth():
-    """[CODE] Best-effort ÉP nlm refresh cookies TRƯỚC khi gói: `nlm login --check` kích hoạt nlm đọc lại/ tái sinh
-    cookie từ browser profile (GHI ĐÈ auth.json) → bundle bắt được cookie MỚI NHẤT. Trả True nếu auth còn hạn."""
+    """[CODE] Best-effort làm tươi cookie TRƯỚC khi gói, cùng lệnh wrapper WP710 gọi: `nlm auth refresh`.
+    WP727: thay `nlm login --check` (lệnh KIỂM, false-green — không phải lệnh làm tươi). Trả True khi lệnh rc 0;
+    giá trị ấy KHÔNG phải bằng chứng sống và KHÔNG được người gọi dùng làm cổng — cổng là canary LIVE chạy SAU
+    (`_nlm_files_after_live_canary`). Không in đầu ra con (có thể chứa cookie)."""
     import shutil as _sh, subprocess as _sp
     nx = _sh.which("nlm") or os.path.expanduser("~/.local/bin/nlm")
     if not (os.path.exists(nx) or _sh.which("nlm")):
         return False
     try:
-        p = _sp.run([nx, "login", "--check"], capture_output=True, text=True, timeout=120)
-        return p.returncode == 0 and "valid" in (p.stdout + p.stderr).lower()
+        p = _sp.run([nx, "auth", "refresh"], capture_output=True, text=True, timeout=120)
+        return p.returncode == 0
     except Exception:  # noqa: BLE001
         return False
 
@@ -836,7 +838,7 @@ def _nlm_cookie_age_note(age):
     if age is None or age < _NLM_COOKIE_WARN_DAYS:
         return ""
     return (f" ⚠ cookie ~{age:.0f} NGÀY tuổi (sống ~2–4 tuần) — rủi ro hết hạn giữa phiên; re-stage sớm: "
-            "ở Code `nlm login` → `tl nlm-auth-stage` (hoặc `tl secrets-set --nlm`).")
+            "trên máy giữ hồ sơ trình duyệt gốc chạy `scripts/nlm-credential-refresh.ps1` (refresh → canary → stage).")
 
 
 def _nlm_canary_notebook(entry_notebook: str | None) -> str:
@@ -1402,7 +1404,7 @@ def cmd_nlm_auth_pull(a) -> int:
             pass
     age = _nlm_auth_age_days(nlm)
     agestr = f" (~{age:.0f} ngày tuổi)" if age is not None else ""
-    print(f"[nlm-auth-pull] ✓ nlm auth {len(nlm)} file → ~/.notebooklm-mcp-cli{agestr} [nguồn {src}]. Kiểm: nlm login --check"
+    print(f"[nlm-auth-pull] ✓ nlm auth {len(nlm)} file → ~/.notebooklm-mcp-cli{agestr} [nguồn {src}]. Kiểm bằng probe LIVE (`tl nlm-auth-status`), KHÔNG bằng `nlm login --check`"
           + _nlm_cookie_age_note(age))
     return 0
 
@@ -1669,7 +1671,7 @@ def _nlm_auth_load(token: str, fid: str, force: bool = False):
     import base64
     store = _imp("gws_cred_store")
     if not fid:
-        return False, "chưa có NLM_CRED_FILEID — ở Code (sau `nlm login`) chạy `tl nlm-auth-stage`, rồi điền fileId / env TL_NLM_CRED_FILEID."
+        return False, "chưa có NLM_CRED_FILEID — trên máy giữ hồ sơ gốc chạy `tl nlm-auth-stage --new` (chỉ upload sau canary LIVE dương), rồi điền fileId / env TL_NLM_CRED_FILEID."
     if not token:
         return False, "thiếu webapp token (khoá giải mã)."
     enc = _public_curl_bytes(fid)            # nlm_cred.enc nay PUBLIC → curl raw (nhanh, KHÔNG qua GAS)
@@ -1692,7 +1694,7 @@ def _nlm_auth_load(token: str, fid: str, force: bool = False):
     if _dg and not force:
         return False, ("TỪ CHỐI HẠ CẤP — " + _why_dg + ". Bản trên Drive CŨ HƠN bản cục bộ: ghi đè sẽ "
                        "LÀM MẤT cookie tươi hơn đang có. Muốn cố ý: `--force`. Đường đúng khi cookie "
-                       "chết hẳn: `nlm login` (tương tác) rồi `tl nlm-auth-stage` để làm tươi bundle.")
+                       "chết hẳn: đăng nhập lại trên máy giữ hồ sơ gốc rồi chạy `scripts/nlm-credential-refresh.ps1` (refresh → canary → stage).")
     nbase = os.path.expanduser("~/.notebooklm-mcp-cli")
     for rel, content in nlm.items():
         dst = os.path.join(nbase, *str(rel).split("/"))
@@ -1715,7 +1717,7 @@ def _nlm_auth_load(token: str, fid: str, force: bool = False):
         if _rs.get("found") and _rs.get("expired"):
             _rot_b = (f" ⚠ BUNDLE_ROTATION_TOKEN_EXPIRED: {_rs['name']} trong bundle hết hạn "
                       f"{abs(_rs['expires_in_min']):.0f}' trước — bản vừa nạp KHÔNG hồi sinh được phiên; "
-                      "phải `nlm login` (tương tác) rồi `tl nlm-auth-stage` để làm tươi bundle.")
+                      "phải đăng nhập lại trên máy giữ hồ sơ gốc rồi chạy `scripts/nlm-credential-refresh.ps1` (refresh → canary → stage).")
     except Exception:  # noqa: BLE001 — cảnh báo best-effort, không chặn nạp
         pass
     return True, (f"~/.notebooklm-mcp-cli ({len(nlm)} file"
@@ -1724,7 +1726,8 @@ def _nlm_auth_load(token: str, fid: str, force: bool = False):
 
 
 def cmd_nlm_auth_stage(a) -> int:
-    """[CHẠY Ở CODE, sau `nlm login`] Gói cookie nlm → MÃ HOÁ (khoá=webapp token) → upload Drive. In fileId để baked.
+    """[CHẠY Ở CODE, máy giữ hồ sơ trình duyệt gốc] Gói cookie nlm → MÃ HOÁ (khoá=webapp token) → upload Drive SAU canary
+    LIVE dương. In fileId để baked. Quy trình đầy đủ: wrapper `scripts/nlm-credential-refresh.ps1` (WP710).
     Cho Cowork nạp nlm HEADLESS bằng `nlm-auth-load` KHÔNG cần master key (mirror gws-auth-stage)."""
     _entry_nb = os.environ.get("TL_NOTEBOOK_ID")      # WP714: ghim TRƯỚC load_creds (token chỉ ở config)
     return _nlm_contained("nlm-auth-stage", lambda _a: _nlm_auth_stage_body(_a, _entry_nb), a)
@@ -1765,8 +1768,8 @@ def _nlm_auth_stage_body(a, entry_notebook) -> int:
     age = _nlm_auth_age_days(nlm)
     agestr = f", ~{age:.0f} ngày" if age is not None else ""
     _agenote = _nlm_cookie_age_note(age)
-    if _agenote:      # đang gói cookie ĐÃ GIÀ → nhắc làm tươi trước (nlm login / --refresh) thay vì stage bản sắp chết
-        print(f"[nlm-auth-stage]{_agenote} (cân nhắc `nlm login` hoặc --refresh trước khi gói)", file=sys.stderr)
+    if _agenote:      # đang gói cookie ĐÃ GIÀ → nhắc làm tươi theo wrapper WP710 thay vì stage bản sắp chết
+        print(f"[nlm-auth-stage]{_agenote}", file=sys.stderr)
     if in_place:
         print(f"[nlm-auth-stage] ✓ nlm cookie MÃ HOÁ ({len(nlm)} file, {len(blob)}B{agestr}) → GHI ĐÈ TẠI CHỖ "
               f"id={fid} (fileId GIỮ NGUYÊN — Cowork `nlm-auth-load` tự nhận bản tươi).")
@@ -1784,7 +1787,7 @@ def cmd_nlm_auth_load(a) -> int:
     fid = getattr(a, "cred_file_id", None) or os.environ.get("TL_NLM_CRED_FILEID") or NLM_CRED_FILEID
     ok, msg = _nlm_auth_load(token, fid, force=bool(getattr(a, "force", False)))
     if ok:
-        print(f"[nlm-auth-load] ✓ nạp nlm cookie → {msg} (chmod 600). nlm chạy headless. Kiểm: nlm login --check")
+        print(f"[nlm-auth-load] ✓ nạp nlm cookie → {msg} (chmod 600). nlm chạy headless. Kiểm bằng probe LIVE (`tl nlm-auth-status`), KHÔNG bằng `nlm login --check`")
         return 0
     print(f"[nlm-auth-load] ✗ {msg}", file=sys.stderr)
     return 2

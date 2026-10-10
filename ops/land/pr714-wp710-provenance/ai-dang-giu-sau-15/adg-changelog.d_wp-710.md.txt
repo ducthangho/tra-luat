@@ -1,0 +1,7 @@
+PHẠM_VI: quét refs/heads/*; nhánh cục bộ tụt sau origin/<cùng tên> sẽ bị CHẶN
+HẾT_HẠN	wp710-r3-g1-codex	refs/heads/master:ops/leases/wp710-r3-g1-codex.yaml
+HẾT_HẠN	wp710-r4-g2-codex	refs/heads/master:ops/leases/wp710-r4-g2-codex.yaml
+HẾT_HẠN	wp710-r4-g3-claude	refs/remotes/origin/claude/bookkeeping-710-land:ops/leases/wp710-r4-g3-claude.yaml
+HẾT_HẠN	wp710-r4-g4-claude-windows	refs/remotes/origin/claude/bookkeeping-710-land:ops/leases/wp710-r4-g4-claude-windows.yaml
+HẾT_HẠN	wp710-r4-g5-claude-windows	refs/remotes/origin/claude/bookkeeping-710-land:ops/leases/wp710-r4-g5-claude-windows.yaml
+NGƯỜI_GIỮ 0: không có

@@ -11,7 +11,8 @@
 #   ./env-reimport.sh --force-nlm  # cho phép nlm-auth-load --force (BỎ chốt chống hạ cấp)
 #
 # rc: 0 = mọi thứ sống · 1 = thiếu điều kiện đầu vào · 2 = gws hỏng
-#     3 = gws OK nhưng NLM chết (thường gặp: phiên NLM hết hạn, phải `nlm login` ở máy có browser)
+#     3 = gws OK nhưng NLM chết (canary LIVE không dương; làm tươi ở máy giữ hồ sơ trình duyệt gốc)
+#     4 = gws OK nhưng canary NLM KHÔNG KẾT LUẬN được (mạng/lỗi probe) — không phải sống, không phải chết
 set -uo pipefail
 
 ROOT="${TL_ROOT:-$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)}"
@@ -91,6 +92,23 @@ else
 fi
 
 # ─────────────────────── 2. nlm (NotebookLM) ───────────────────────
+_canary_song() {  # WP726: 0 sống · 3 chết · 2 không kết luận. Cùng cổng `nlm-auth-stage` của WP710: thân trả về
+  # phải ĐÚNG notebook (`require_notebook_body=True`); rc 0 hay số notebook KHÔNG đủ. KHÔNG in gì của probe
+  # (thông điệp có thể mang stderr thô của nlm) — chỉ dùng mã thoát.
+  "$PY" - >/dev/null 2>&1 <<'PY'
+import sys
+sys.path.insert(0, "scripts")
+try:
+    import tl
+    tg = tl._imp("tl_gws")
+    tg.bind(tl)
+    alive, _ = tg._nlm_auth_alive(tg._nlm_canary_notebook(None), require_notebook_body=True)
+except Exception:
+    alive = None
+sys.exit(0 if alive is True else 3 if alive is False else 2)
+PY
+}
+
 NLM_RC=0
 if [ "$DO_NLM" = 0 ]; then
   say "2. nlm — BỎ QUA (--no-nlm)"
@@ -126,15 +144,19 @@ else
 
   # PHÁN QUYẾT DUY NHẤT = probe LIVE. Tuổi cookie/cờ rotation KHÔNG kết luận thay được.
   if command -v nlm >/dev/null 2>&1; then
-    info "probe LIVE (nlm login --check)…"
-    if CHK="$(nlm login --check 2>&1)" && printf '%s' "$CHK" | grep -qi "valid"; then
-      ok "NLM SỐNG — $(printf '%s' "$CHK" | grep -iE 'notebooks found|account' | tr '\n' ' ' | sed 's/  */ /g')"
+    info "canary LIVE (đúng notebook, không dùng nlm login --check)…"
+    _canary_song; CANARY_RC=$?
+    if [ "$CANARY_RC" = 0 ]; then
+      ok "NLM SỐNG — canary dương trên đúng notebook"
+    elif [ "$CANARY_RC" = 2 ]; then
+      NLM_RC=4
+      warn "canary NLM KHÔNG KẾT LUẬN được (mạng/lỗi probe) — chưa biết sống hay chết; chạy lại sau."
     else
       NLM_RC=3
       bad "NLM CHẾT — phiên hết hạn, KHÔNG cứu được từ sandbox headless."
       echo "        Cookie phiên Google xoay từ browser profile; container này không có." >&2
       echo "        CÁCH A — máy có trình duyệt (Windows/desktop):" >&2
-      echo "            nlm login  &&  python scripts/tl.py nlm-auth-stage" >&2
+      echo "            máy giữ hồ sơ trình duyệt gốc: đăng nhập lại nếu cần, rồi pwsh -NoProfile -File scripts/nlm-credential-refresh.ps1 -ConfigPath <config>" >&2
       echo "            rồi quay lại đây chạy: ./scripts/env-reimport.sh" >&2
       echo "        CÁCH B — chỉ có điện thoại: trình duyệt CÓ EXTENSION (Quetta/Edge Canary/" >&2
       echo "            Firefox+add-on) → đăng nhập notebooklm.google.com → export cookie JSON" >&2
@@ -153,6 +175,11 @@ $TL doctor 2>&1 | grep -E "^(✓|⚠|⛔).*(credential|nlm|gws|webapp ping|API_C
 if [ "$NLM_RC" = 0 ]; then
   say "SẴN SÀNG — gws + nlm đều sống"
   exit 0
+fi
+if [ "$NLM_RC" = 4 ]; then
+  say "gws SỐNG · NLM KHÔNG KẾT LUẬN (rc=4)"
+  echo "  Deploy/Drive/registry chạy bình thường. Canary NLM chưa trả lời được — chạy lại để biết sống/chết."
+  exit 4
 fi
 say "gws SỐNG · NLM CHẾT (rc=3)"
 echo "  Deploy/Drive/registry chạy bình thường. Chỉ đường NLM CLI bị chặn."

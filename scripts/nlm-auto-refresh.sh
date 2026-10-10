@@ -5,7 +5,8 @@
 #   · Có file 'nlm-auth' MỚI HƠN bundle nlm_cred.enc  ⇒ export tươi user vừa thả vào Drive
 #       → import (nlm-auth-import.sh) → stage vào bundle mã hoá → XOÁ plaintext khỏi Drive (bảo mật).
 #   · Không có file mới                                 ⇒ keep-warm: nạp bundle, probe, stage lại nếu sống.
-#   · Probe cuối quyết định rc: 0 sống · 3 chết (cần re-harvest) · 2 gws/hạ tầng hỏng.
+#   · Bước cuối = `tl nlm-auth-stage` (tự chạy canary LIVE trước khi đọc jar, WP710) quyết định rc:
+#     0 sống + bundle tươi · 3 chết (canary không dương, cần re-harvest) · 2 gws/hạ tầng hỏng hoặc không kết luận.
 #
 # Dành cho Routine phiên-mới: chỉ cần TL_TOKEN (môi trường inject). KHÔNG commit/push/sửa code.
 set -uo pipefail
@@ -71,16 +72,23 @@ else
   $PY scripts/tl.py nlm-auth-load >/dev/null 2>&1 || true
 fi
 
-# ── 3. probe LIVE quyết định trạng thái ──
-say "3. probe LIVE"
-if CHK="$(nlm login --check 2>&1)" && printf '%s' "$CHK" | grep -qi valid; then
-  NB="$(printf '%s' "$CHK" | grep -oE 'Notebooks found: *[0-9]+' | grep -oE '[0-9]+' | head -1)"
-  $PY scripts/tl.py nlm-auth-stage >/dev/null 2>&1 || true   # luôn làm tươi bundle (idempotent)
-  echo "  ✓ NLM SỐNG (${NB:-?} notebook)$([ "$REFRESHED" = 1 ] && echo ' — vừa refresh từ export mới' || echo ' — keep-warm')"
+# ── 3. canary LIVE + stage quyết định trạng thái (WP726) ──
+# KHÔNG dùng `nlm login --check` (false-green). Phán quyết = mã thoát của `nlm-auth-stage`: lệnh ấy tự chạy canary
+# LIVE trên đúng notebook TRƯỚC khi đọc jar và chỉ upload khi canary dương (WP710). Không in đầu ra của lệnh
+# (chỉ mã) và KHÔNG nuốt mã thoát.
+say "3. canary LIVE + stage"
+$PY scripts/tl.py nlm-auth-stage >/dev/null 2>&1
+STAGE_RC=$?
+if [ "$STAGE_RC" = 0 ]; then
+  echo "  ✓ NLM SỐNG (canary dương, bundle tươi)$([ "$REFRESHED" = 1 ] && echo ' — vừa refresh từ export mới' || echo ' — keep-warm')"
   exit 0
 fi
-echo "  🔴 NLM CHẾT — cần re-harvest cookie:"
+if [ "$STAGE_RC" != 4 ]; then
+  echo "  ✗ nlm-auth-stage rc=$STAGE_RC — hạ tầng/không kết luận; có thể đã ghi một phần, kiểm Drive trước khi thử lại"
+  exit 2
+fi
+echo "  🔴 NLM CHẾT (canary không dương, 0 upload) — cần re-harvest cookie:"
 echo "     điện thoại: Firefox + Cookie Quick Manager → export toàn bộ cookie google → Drive"
 echo "     (tài khoản ducthangho@gmail.com, tên có 'nlm-auth'); Routine sau tự import."
-echo "     hoặc máy Code: nlm login && python scripts/tl.py nlm-auth-stage"
+echo "     hoặc máy giữ hồ sơ trình duyệt gốc: đăng nhập lại nếu cần, rồi pwsh -NoProfile -File scripts/nlm-credential-refresh.ps1 -ConfigPath <config>"
 exit 3

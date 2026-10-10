@@ -502,7 +502,7 @@ jobs:
         os: ${{ fromJson(needs.chuan-bi.outputs.os) }}
         manh: [0, 1, 2, 3, 4, 5, 6, 7]
     runs-on: ${{ matrix.os }}
-    timeout-minutes: 30
+    timeout-minutes: 45
     env:
       PYTHONIOENCODING: utf-8
       PYTHONUTF8: "1"

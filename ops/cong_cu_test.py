@@ -8027,7 +8027,7 @@ def _in_tu_kiem_main():
     import io
     g, ten_ca, kb, log = globals(), [fn.__name__ for fn in CA], {}, []
     bam = lambda x: hashlib.sha256(json.dumps(x, sort_keys=True).encode()).hexdigest()
-    vt_gia, phat = {"sha256_test": "a" * 64, "head": "b" * 40}, {}
+    vt_gia, phat, phat_nho = {"sha256_test": "a" * 64, "head": "b" * 40}, {}, {}
 
     def ca_gia(t):
         def f():
@@ -8040,6 +8040,15 @@ def _in_tu_kiem_main():
 
     def phong(ten, do_o_nen, so):
         log.append(f"phong:{ten == phat['mong']}:{list(do_o_nen)}:{so}")
+        # #698 M8: đầu ra giả của con và kỳ vọng `gt`/`ly` chỉ phụ thuộc (tên, kb["con"]) ⇒ dựng MỘT lần mỗi khoá trong tiến trình.
+        khoa = (tuple(ten), kb.get("con"))
+        if khoa not in phat_nho:
+            phat_nho[khoa] = phong_dung(ten)
+        phat["gt"], kq_con, phat["ly"] = phat_nho[khoa]
+        return [(list(n), rc, ra) for n, rc, ra in kq_con]   # bản sao mới mỗi lời gọi, như bản dựng lại
+
+    def phong_dung(ten):   # thân cũ của `phong`, `phat` cục bộ
+        phat = {}
         nhom, phat["gt"] = [ten[0::2], ten[1::2]], bam({t: _ban_ghi_du_gia(t) for t in ten})
         # "rc": nhóm 0 rc=3 mà stdout ĐỦ; "rong": nhóm 0 rc=0 mà stdout rỗng; "hai": nhóm 0 rc=3 VÀ nhóm 1 rc=5
         # (F15: rc khác nhau để biết `main` giữ lý do của nhóm hỏng ĐẦU TIÊN).
@@ -8050,7 +8059,7 @@ def _in_tu_kiem_main():
         # `_nhan_ket_qua_con`) + rc + đuôi đầu ra — so nguyên chuỗi, không nén thành rc.
         phat["ly"] = next((f"{ly}; rc={rc}, đuôi đầu ra: {ra[-300:]!r}" for n, rc, ra in kq_con
                            for _, ly in [_nhan_ket_qua_con(n, rc, ra, ())] if ly), None)
-        return kq_con
+        return phat["gt"], kq_con, phat["ly"]
 
     def ghi(k, n, ra, ten, ket, ly, vt):
         gt = "None" if ket is None else ("dung" if bam(ket) == phat.get("gt") else "sai")
@@ -8349,6 +8358,9 @@ def _in_tu_kiem_che_do():
     with tempfile.TemporaryDirectory(prefix="h698_") as d:
         g["TEP_TEST"] = Path(d) / "t.py"
         g["TEP_TEST"].write_bytes(b"698")
+        # #698 M8: bytes của TEP_TEST cấp TỪ BỘ NHỚ trong lúc quét (`head` không phụ thuộc chúng; F36 đo băm ở bảng byte dưới) —
+        # đổi MÔI TRƯỜNG giàn kiểm soát, không đổi thân `_van_tay`; khôi phục ở `finally`. Cùng lối thay `Path.read_bytes` của F35 ở `--tu-kiem-gom`.
+        cu_rb, Path.read_bytes = Path.read_bytes, lambda self, _b=g["TEP_TEST"].read_bytes(): _b
         try:
             DS, o2 = set(D), 0
             T = [chr(c) for c in range(0x110000) if not 0xD800 <= c <= 0xDFFF and chr(c).isspace()] + [chr(13) + chr(10)]
@@ -8380,7 +8392,7 @@ def _in_tu_kiem_che_do():
                     l5.append([k5[-1], y, m])
             kq["m5b"] = [k5, l5[:10], len(l5), h5]
         finally:
-            g["TEP_TEST"] = cu[1]
+            g["TEP_TEST"], Path.read_bytes = cu[1], cu_rb
     kq["m1"] = [o1, o2, lech[:10], len(lech)]
     # F36 (Codex lượt 15): NGUỒN băm trên bảng byte lớn/biên — lệnh ngoài giả (không cần `head`); ngoại lệ thành dữ liệu.
     kq["byte"] = {"tep": str(cu[1]), "thuc": None, "luoi": []}

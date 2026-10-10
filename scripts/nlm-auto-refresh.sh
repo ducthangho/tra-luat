@@ -77,10 +77,16 @@ fi
 # LIVE trên đúng notebook TRƯỚC khi đọc jar và chỉ upload khi canary dương (WP710). Không in đầu ra của lệnh
 # (chỉ mã) và KHÔNG nuốt mã thoát.
 say "3. canary LIVE + stage"
+if [ "$REFRESHED" = 1 ]; then
+  # Import vừa xong đã qua canary VÀ đã stage thành công (nlm-auth-import thoát khác 0 nếu một trong hai hỏng)
+  # ⇒ không stage lần hai (WP726 lượt review 1, F2).
+  echo "  ✓ NLM SỐNG (canary dương, bundle tươi) — vừa refresh từ export mới"
+  exit 0
+fi
 $PY scripts/tl.py nlm-auth-stage >/dev/null 2>&1
 STAGE_RC=$?
 if [ "$STAGE_RC" = 0 ]; then
-  echo "  ✓ NLM SỐNG (canary dương, bundle tươi)$([ "$REFRESHED" = 1 ] && echo ' — vừa refresh từ export mới' || echo ' — keep-warm')"
+  echo "  ✓ NLM SỐNG (canary dương, bundle tươi) — keep-warm"
   exit 0
 fi
 if [ "$STAGE_RC" != 4 ]; then

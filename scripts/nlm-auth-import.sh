@@ -32,8 +32,10 @@
 #   · JSON dict  {"SID":"...","__Secure-1PSID":"..."}
 #   · header     SID=...; __Secure-1PSID=...; ...
 #
-# rc: 0 = nạp + probe LIVE xanh · 1 = sai tham số/thiếu điều kiện · 2 = file cookie không hợp lệ
-#     3 = nlm từ chối cookie · 4 = nạp được nhưng probe LIVE vẫn đỏ
+# rc: 0 = nạp + canary LIVE dương (+ stage xong nếu có stage) · 1 = sai tham số/thiếu điều kiện
+#     2 = file cookie không hợp lệ · 3 = nlm từ chối cookie · 4 = nạp được nhưng canary LIVE ÂM (jar cũ khôi phục)
+#     5 = stage lỗi (rc 4 của stage = canary của lệnh stage từ chối, 0 upload; khác = có thể đã ghi một phần)
+#     6 = canary KHÔNG KẾT LUẬN (mạng/lỗi probe) — giữ jar vừa nạp, không stage (WP726)
 set -uo pipefail
 
 ROOT="${TL_ROOT:-$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)}"

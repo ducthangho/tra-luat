@@ -132,13 +132,13 @@ else
       # Chốt r229: bundle trên Drive CŨ HƠN jar cục bộ ⇒ ghi đè sẽ giết cookie tươi hơn.
       # KHÔNG tự --force: nếu jar cục bộ cũng chết thì bundle càng chết, force vô ích.
       warn "chốt chống hạ cấp CHẶN: bundle trên Drive cũ hơn jar cục bộ — KHÔNG ghi đè (đúng)"
-      printf '        %s\n' "$(printf '%s' "$LOAD_OUT" | head -1)"
       if [ "$FORCE_NLM" = 1 ]; then
         warn "--force-nlm: ép ghi đè theo yêu cầu"
         $TL nlm-auth-load --force >/dev/null 2>&1 && ok "đã ép nạp" || warn "ép nạp vẫn lỗi"
       fi
     else
-      warn "nlm-auth-load lỗi: $(printf '%s' "$LOAD_OUT" | head -1)"
+      # WP726: chỉ báo MÃ — thông điệp của lệnh có thể mang thông điệp lỗi tải thô (credential), không in lại.
+      warn "nlm-auth-load lỗi (rc=$LOAD_RC) — không in chi tiết; chạy tay \`tl nlm-auth-load\` để xem"
     fi
   fi
 

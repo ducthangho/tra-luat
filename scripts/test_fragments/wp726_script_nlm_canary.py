@@ -8,6 +8,7 @@ GIỮ TRẠNG THÁI qua một tệp JSON — `nlm login --check` LUÔN báo "val
 script không được chứa nó.
 """
 
+import importlib.util
 import json
 import os
 from pathlib import Path
@@ -60,6 +61,8 @@ if __name__ == "__main__":
         print('{"ok": true, "version": "offline"}')
     elif lenh == "nlm-auth-stage":
         sys.exit(_trang_thai()["stage_rc"])
+    elif lenh == "nlm-auth-load":
+        sys.exit(_trang_thai().get("load_rc", 0))
     sys.exit(0)
 '''
 
@@ -78,13 +81,23 @@ esac
 exit 0
 '''
 
-_GWS_GIA = '''#!/usr/bin/env bash
-echo "gws $*" >> "$WP726_LOG"
-case "$1 $2 $3" in
-  "drive files list") echo '{"files":[]}' ;;
-  "drive files get") echo '{}' ;;
-esac
-exit 0
+_GWS_GIA = r'''
+import json, os, sys
+a = sys.argv[1:]
+with open(os.environ["WP726_LOG"], "a", encoding="utf-8") as f:
+    f.write("gws " + " ".join(a) + "\n")
+with open(os.environ["WP726_STATE"], encoding="utf-8") as f:
+    st = json.load(f)
+lenh = " ".join(a[:3])
+if lenh == "drive files list":
+    tep = [{"id": "EXPORT-1", "name": "nlm-auth-x.json", "modifiedTime": "2026-10-01T00:00:00Z"}] if st.get("export") else []
+    print(json.dumps({"files": tep}))
+elif lenh == "drive files get":
+    if "--output" in a:
+        with open(a[a.index("--output") + 1], "w", encoding="utf-8") as f:
+            f.write('[{"name": "SID", "value": "x", "domain": ".google.com"}]')
+    else:
+        print("{}")
 '''
 
 
@@ -95,10 +108,12 @@ def _dung_goc(tam, kho):
     (goc / "scripts" / "nlm_auth_convert.py").write_text(_CONVERT_GIA, encoding="utf-8")
     bin_ = tam / "bin"
     bin_.mkdir()
-    for ten, noi_dung in (("nlm", _NLM_GIA), ("gws", _GWS_GIA)):
+    for ten, noi_dung in (("nlm", _NLM_GIA), ("gws", "#!" + sys.executable + "\n" + _GWS_GIA)):
         p = bin_ / ten
         p.write_text(noi_dung, encoding="utf-8")
         p.chmod(0o755)
+    # `nlm-auto-refresh.sh` gọi `./scripts/nlm-auth-import.sh` TƯƠNG ĐỐI gốc ⇒ đặt BẢN THẬT vào gốc giả.
+    shutil.copy2(kho / "scripts" / "nlm-auth-import.sh", goc / "scripts" / "nlm-auth-import.sh")
     (tam / "home").mkdir()
     cookie = tam / "cookie.json"
     cookie.write_text('[{"name": "SID", "value": "x", "domain": ".google.com"}]', encoding="utf-8")
@@ -137,14 +152,27 @@ def _ca(bash, kho):
         tam = Path(td)
         goc, bin_, cookie = _dung_goc(tam, kho)
 
-        def chay(script, args, canary, stage_rc):
-            return _chay(bash, kho, tam, goc, bin_, script, args, {"canary": canary, "stage_rc": stage_rc})
+        def chay(script, args, canary, stage_rc, **them):
+            return _chay(bash, kho, tam, goc, bin_, script, args, {"canary": canary, "stage_rc": stage_rc, **them})
 
         # nlm-auto-refresh.sh — phán quyết = mã của nlm-auth-stage
         for ten, stage_rc, ma in (("tu_dong_song", 0, 0), ("tu_dong_chet", 4, 3), ("tu_dong_ha_tang", 5, 2)):
             rc, out, calls = chay("nlm-auto-refresh.sh", [], None, stage_rc)
             n_stage = sum(1 for c in calls if c == "tl nlm-auth-stage")
             kq[ten] = rc == ma and n_stage == 1 and _sach(out, calls)
+
+        # nlm-auto-refresh.sh — có export MỚI: import (canary + stage) rồi KHÔNG stage lần hai; chỉ xoá plaintext
+        # khi import+stage thành công (lượt review 1, F2)
+        for ten, canary, stage_rc, ma, can_stage, can_xoa in (("tu_dong_export_song", True, 0, 0, 1, 1),
+                                                              ("tu_dong_export_stage_loi", True, 4, 3, 2, 0)):
+            rc, out, calls = chay("nlm-auto-refresh.sh", [], canary, stage_rc, export=True)
+            n_stage = sum(1 for c in calls if c == "tl nlm-auth-stage")
+            n_xoa = sum(1 for c in calls if c.startswith("gws drive files delete"))
+            kq[ten] = rc == ma and n_stage == can_stage and n_xoa == can_xoa and _sach(out, calls)
+
+        # env-reimport.sh — nlm-auth-load lỗi: chỉ báo mã, không in đầu ra lệnh (lượt review 1, F3)
+        rc, out, calls = chay("env-reimport.sh", [], True, 0, load_rc=5)
+        kq["env_load_loi_khong_lo"] = rc == 0 and "nlm-auth-load lỗi (rc=5)" in out and _sach(out, calls)
 
         # env-reimport.sh — canary đòi thân đúng notebook
         for ten, canary, ma in (("env_song", True, 0), ("env_chet", False, 3), ("env_khong_ro", None, 4)):
@@ -169,21 +197,29 @@ def _ca(bash, kho):
     return kq
 
 
-def _tim_bash():
-    if os.name != "posix":
+def _bash_nen(kho):
+    """`ops/bash_nen.py` của kho (cổng cấm `bash` TRẦN — Issue #570). None khi cây không mang `ops/` (gói phát hành)."""
+    p = kho / "ops" / "bash_nen.py"
+    if not p.is_file():
         return None
-    return shutil.which("bash")
+    spec = importlib.util.spec_from_file_location("_wp726_bash_nen", p)
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    return mod
 
 
 def run(tl_module):
-    if os.name != "posix":
-        # Lệch có khai so với spec N6: API fragment chỉ có đúng/sai, không có trạng thái `skipped`. Nền không POSIX
-        # (Windows) không chạy được ba script này với đồ giả; ca trả True và in lý do — handoff khai riêng.
-        print("[wp726_script_nlm_canary] BỎ QUA trên nền không POSIX (os.name=%s)" % os.name, file=sys.stderr)
-        return True
-    bash = _tim_bash()
-    if not bash:
-        return False                     # Linux/macOS thiếu bash ⇒ ĐỎ, không tha
     kho = Path(tl_module.__file__).resolve().parent.parent
+    bash_nen = _bash_nen(kho)
+    if os.name != "posix" or bash_nen is None:
+        # Lệch có khai so với spec N6: API fragment chỉ có đúng/sai, không có trạng thái `skipped`. Nền không POSIX
+        # (Windows) và cây phát hành (không mang `ops/bash_nen.py`, bộ tìm bash DUY NHẤT được phép) không chạy ca
+        # này; ca trả True và in lý do — handoff khai riêng.
+        print("[wp726_script_nlm_canary] BỎ QUA (os.name=%s, ops/bash_nen.py %s)"
+              % (os.name, "có" if bash_nen else "vắng"), file=sys.stderr)
+        return True
+    bash, _chan_doan = bash_nen.tim_bash()
+    if not bash:
+        return False                     # cây dev POSIX mà không có bash dùng được ⇒ ĐỎ, không tha
     kq = _ca(bash, kho)
     return bool(kq) and all(kq.values())

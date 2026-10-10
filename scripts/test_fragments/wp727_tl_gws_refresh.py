@@ -9,6 +9,7 @@ nằm ở các dòng thuộc danh sách CHO PHÉP.
 import argparse
 import contextlib
 import io
+import math
 import os
 from pathlib import Path
 import subprocess
@@ -16,13 +17,13 @@ import subprocess
 
 TEST_ID = "wp727_tl_gws_refresh"
 
-_CHO_PHEP = (
-    "M1 (v1.33.35 — log rà 45 Luật LIVE: nlm-auth-load/doctor/`nlm login --check` báo XANH",
-    "server (`nlm notebook get` base notebook) thay vì tin tuổi file / `login --check`",
-    "WP727: thay `nlm login --check` (lệnh KIỂM, false-green",
-    "Kiểm bằng probe LIVE (`tl nlm-auth-status`), KHÔNG bằng `nlm login --check`\"\n",
-    "VERIFY LIVE bằng canary notebook_get (KHÔNG tin `nlm login --check` — false-red)",
-    "nlm chạy headless. Kiểm bằng probe LIVE (`tl nlm-auth-status`), KHÔNG bằng `nlm login --check`\")",
+_CHO_PHEP = (      # NGUYÊN VĂN từng dòng (đã strip) được phép nhắc `login --check` — so CẢ DÒNG, không chuỗi con
+    '"""M1 (v1.33.35 — log rà 45 Luật LIVE: nlm-auth-load/doctor/`nlm login --check` báo XANH [rc=0] nhưng',
+    'server (`nlm notebook get` base notebook) thay vì tin tuổi file / `login --check` (không chứng minh cookie',
+    'WP727: thay `nlm login --check` (lệnh KIỂM, false-green — không phải lệnh làm tươi). Trả True khi lệnh rc 0;',
+    'print(f"[nlm-auth-pull] ✓ nlm auth {len(nlm)} file → ~/.notebooklm-mcp-cli{agestr} [nguồn {src}]. Kiểm bằng probe LIVE (`tl nlm-auth-status`), KHÔNG bằng `nlm login --check`"',
+    '# lặp stage-lại-vô-ích). VERIFY LIVE bằng canary notebook_get (KHÔNG tin `nlm login --check` — false-red).',
+    'print(f"[nlm-auth-load] ✓ nạp nlm cookie → {msg} (chmod 600). nlm chạy headless. Kiểm bằng probe LIVE (`tl nlm-auth-status`), KHÔNG bằng `nlm login --check`")',
 )
 
 
@@ -53,11 +54,15 @@ def _goi_refresh(tg, hanh_vi):
         return hanh_vi(argv, kw)
 
     import shutil
-    with _va(subprocess, run=run), _va(shutil, which=lambda name: "/fake/bin/nlm"):
+    ra, loi = io.StringIO(), io.StringIO()
+    with _va(subprocess, run=run), _va(shutil, which=lambda name: "/fake/bin/nlm"), \
+            contextlib.redirect_stdout(ra), contextlib.redirect_stderr(loi):
         try:
             kq = tg._refresh_nlm_auth()
         except Exception:  # noqa: BLE001 — lỗi lan ra khỏi refresh là VI PHẠM N3, đo thành giá trị riêng
             kq = "LAN_LOI"
+    if ra.getvalue() or loi.getvalue():
+        kq = "IN_DAU_RA"        # helper không được in gì (đầu ra con có thể mang cookie)
     return kq, nhat_ky
 
 
@@ -68,7 +73,8 @@ def _n1_n3(tg):
         return False
     argv, kw = log1[0]
     timeout = kw.get("timeout")
-    if argv[1:] != ["auth", "refresh"] or "--check" in argv or not isinstance(timeout, (int, float)) or timeout <= 0:
+    if (argv[1:] != ["auth", "refresh"] or "--check" in argv or isinstance(timeout, bool)
+            or not isinstance(timeout, (int, float)) or not math.isfinite(timeout) or timeout <= 0):
         return False
 
     def treo(a, k):
@@ -123,14 +129,15 @@ def _n2(tg):
 
 
 def _n4(van_ban):
+    """Mọi dòng nhắc `login --check` phải BẰNG NGUYÊN VĂN một dòng cho phép, mỗi dòng cho phép đúng một lần."""
     dung = {neo: 0 for neo in _CHO_PHEP}
-    for dong in van_ban.splitlines(keepends=True):
+    for dong in van_ban.splitlines():
         if "login --check" not in dong:
             continue
-        khop = [neo for neo in _CHO_PHEP if neo in dong]
-        if len(khop) != 1:
+        neo = dong.strip()
+        if neo not in dung:
             return False
-        dung[khop[0]] += 1
+        dung[neo] += 1
     return all(n == 1 for n in dung.values())
 
 
@@ -142,4 +149,6 @@ def run(tl_module):
         return False
     if _n4(van_ban + "    print('Kiểm: nlm login --check')\n"):     # phản chứng: dòng kiểu cũ phải bị bắt
         return False
+    if _n4(van_ban.replace("[nguồn {src}]. Kiểm bằng probe", "[nguồn {src}]. Kiểm: nlm login --check. Kiểm bằng probe", 1)):
+        return False            # phản chứng: gợi ý dương chen vào CHÍNH dòng được phép cũng phải bị bắt
     return _n1_n3(tg) and _n2(tg)

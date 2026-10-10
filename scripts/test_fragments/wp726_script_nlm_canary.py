@@ -63,6 +63,10 @@ if __name__ == "__main__":
         sys.exit(_trang_thai()["stage_rc"])
     elif lenh == "nlm-auth-load":
         sys.exit(_trang_thai().get("load_rc", 0))
+    elif lenh == "doctor":                  # dạng dòng THẬT của doctor: nhãn — chi tiết (chi tiết có thể mang lỗi thô)
+        canh = os.environ.get("WP726_CANH", "")
+        print("✓ nlm auth (LIVE probe) — PROBE_INCONCLUSIVE (không phải auth): " + canh)
+        print("⚠ gws credential — " + canh)
     sys.exit(0)
 '''
 
@@ -120,13 +124,23 @@ def _dung_goc(tam, kho):
     return goc, bin_, cookie
 
 
+def _bin_khong_nlm(tam, bin_):
+    """Thư mục bin chỉ có `gws` giả — dựng ca THIẾU nlm (lượt review 2, F6)."""
+    b = tam / "bin_khong_nlm"
+    if not b.exists():
+        b.mkdir()
+        shutil.copy2(bin_ / "gws", b / "gws")
+    return b
+
+
 def _chay(bash, kho, tam, goc, bin_, script, args, trang_thai):
     st = tam / "state.json"
     log = tam / "calls.log"
     st.write_text(json.dumps(trang_thai), encoding="utf-8")
     log.write_text("", encoding="utf-8")
     env = {
-        "PATH": f"{bin_}{os.pathsep}{os.environ.get('PATH', '')}",
+        "PATH": (f"{_bin_khong_nlm(tam, bin_)}{os.pathsep}{os.path.dirname(sys.executable)}{os.pathsep}/usr/bin:/bin"
+                 if trang_thai.get("khong_nlm") else f"{bin_}{os.pathsep}{os.environ.get('PATH', '')}"),
         "HOME": str(tam / "home"),
         "TL_ROOT": str(goc),
         "TL_PYTHON": sys.executable,
@@ -173,6 +187,12 @@ def _ca(bash, kho):
         # env-reimport.sh — nlm-auth-load lỗi: chỉ báo mã, không in đầu ra lệnh (lượt review 1, F3)
         rc, out, calls = chay("env-reimport.sh", [], True, 0, load_rc=5)
         kq["env_load_loi_khong_lo"] = rc == 0 and "nlm-auth-load lỗi (rc=5)" in out and _sach(out, calls)
+
+        # env-reimport.sh — THIẾU nlm (có/không --check): không được báo "đều sống", rc 4, 0 canary (lượt 2, F6)
+        for ten, tham in (("env_thieu_nlm", []), ("env_thieu_nlm_check", ["--check"])):
+            rc, out, calls = chay("env-reimport.sh", tham, True, 0, khong_nlm=True)
+            kq[ten] = (rc == 4 and "đều sống" not in out
+                       and not any(c.startswith("canary") for c in calls) and _sach(out, calls))
 
         # env-reimport.sh — canary đòi thân đúng notebook
         for ten, canary, ma in (("env_song", True, 0), ("env_chet", False, 3), ("env_khong_ro", None, 4)):

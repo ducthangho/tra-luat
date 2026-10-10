@@ -12,7 +12,7 @@
 #
 # rc: 0 = mọi thứ sống · 1 = thiếu điều kiện đầu vào · 2 = gws hỏng
 #     3 = gws OK nhưng NLM chết (canary LIVE không dương; làm tươi ở máy giữ hồ sơ trình duyệt gốc)
-#     4 = gws OK nhưng canary NLM KHÔNG KẾT LUẬN được (mạng/lỗi probe) — không phải sống, không phải chết
+#     4 = gws OK nhưng canary NLM KHÔNG KẾT LUẬN được (mạng/lỗi probe, hoặc thiếu nlm) — không sống, không chết
 set -uo pipefail
 
 ROOT="${TL_ROOT:-$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)}"
@@ -165,12 +165,19 @@ else
       echo "        LƯU Ý: KHÔNG có đường 'fallback NotebookLM MCP' ở phiên này — đã đo:" >&2
       echo "            phiên chỉ có server github; MCP của gói nlm cũng dùng CHUNG cookie này." >&2
     fi
+  else
+    # WP726 (lượt review 2, F6): không có nlm ⇒ KHÔNG đo được NLM — không được báo "đều sống".
+    NLM_RC=4
+    warn "chưa có nlm — không chạy được canary, KHÔNG kết luận NLM sống."
   fi
 fi
 
 # ─────────────────────── 3. Tổng kết ───────────────────────
 say "3. Tổng kết"
-$TL doctor 2>&1 | grep -E "^(✓|⚠|⛔).*(credential|nlm|gws|webapp ping|API_CONTRACT)" | sed 's/^/  /'
+# WP726 (lượt review 2, F5): chỉ in NHÃN của mục doctor (phần trước " — "); phần chi tiết sau đó có thể mang
+# thông điệp lỗi thô của probe/tải (credential). Dòng không có nhãn tách được thì không in.
+$TL doctor 2>&1 | grep -E "^(✓|⚠|⛔).*(credential|nlm|gws|webapp ping|API_CONTRACT)" \
+  | awk -v SEP=" — " '{ i = index($0, SEP); if (i > 0) print "  " substr($0, 1, i - 1) }'
 
 if [ "$NLM_RC" = 0 ]; then
   say "SẴN SÀNG — gws + nlm đều sống"

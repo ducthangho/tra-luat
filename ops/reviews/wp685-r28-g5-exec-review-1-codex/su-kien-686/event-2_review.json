@@ -1,0 +1,251 @@
+{
+  "event_hash": "49c1b065e2691e0d1730e9258667e32b790357c357d71374122999fd6e51e7cf",
+  "event_type": "review_changes_requested",
+  "expected_state_hash": "18a0380134f12c8dd7f17c3e134cdbdb8cc2f9628e7986d469bc6cd99ade46e9",
+  "manual_bootstrap": true,
+  "mission_issue": 686,
+  "mission_revision": 8,
+  "note": "Codex review 1 (separate session, gpt-6.1-sol, run 2bf7c916 rc 0, 06:28:35Z-07:12:15Z) on exact SHA 3089b54: changes_requested, 0 P1 / 3 P2 / 0 P3, all three P2 on the evidence side, no code finding. VERDICT ops/wp685-r28-g5-review-1 @ 0f0bc576 sha256 3c06c0fe; projection #685 6095006829. Attempt 1 closed, state running for remediation. Same-failure: g5 counts each class 1 of 10. ED-immutable-artifact-missing and exact-head-gates-incomplete also appeared in g2b review 2, so across generations they are at 2 of the 3-review method-check trigger. Threshold now 0 P1 / 0 P2 (#686 6094654297).",
+  "packet_generation": 5,
+  "packet_id": "wp685",
+  "post_state": {
+    "manual_bootstrap": true,
+    "mcr_decision_url": "https://github.com/ducthangho/tra-luat/issues/686#issuecomment-6091630409",
+    "mission_issue": 686,
+    "mission_plan_git_head": "7b402fdd554e9cba3ba6c40b1df08c4a7df5a85c",
+    "mission_plan_git_ref": "refs/heads/claude/wp685-r24-doi-executor",
+    "mission_revision": 8,
+    "mission_state": "running",
+    "packet_states": {
+      "wp685": {
+        "attempt": 1,
+        "attempt_checkout": "/tmp/claude-0/-home-user-tra-luat/8413b80e-5157-5812-ad93-3be1f70600c0/scratchpad/wt-685-g5 (agent/wp685-r28-g5-claude @ ab457c651eb4428705f0492163080b661c858b72, container Linux cloud)",
+        "attempt_deadline_utc": "2026-10-10T05:42:49Z",
+        "attempt_limit": null,
+        "attempt_limit_basis": "owner decision MCR-686-08 (#686 comment 6091630409): generation 5 has no attempt cap, counter starts at 0 at generation 5; envelope max_attempts_per_packet still binds every other packet",
+        "attempt_open": false,
+        "attempt_source_head": "ab457c651eb4428705f0492163080b661c858b72",
+        "attempt_started_at_utc": "2026-10-10T04:12:49Z",
+        "base_sha": "ab457c651eb4428705f0492163080b661c858b72",
+        "candidate_head": "3089b54455a44b8cfcf2fd27b01894bc2a5d764d",
+        "candidate_ref": "refs/heads/agent/wp685-r28-g5-claude",
+        "candidate_tree": "952d7c3092e02886150bb9c936dec7b5fc779aec",
+        "ci_state": "not_run",
+        "class_history_across_generations": {
+          "D65-control-catalog-not-validated": {
+            "review_occurrences": 1,
+            "reviews": [
+              "https://github.com/ducthangho/tra-luat/issues/685#issuecomment-6095006829"
+            ]
+          },
+          "E118-w0-311-evidence-incomplete": {
+            "review_occurrences": 1,
+            "reviews": [
+              "https://github.com/ducthangho/tra-luat/issues/685#issuecomment-6030695601"
+            ],
+            "status": "verified fixed on 3089b54 by g5 review 1"
+          },
+          "ED-immutable-artifact-missing": {
+            "review_occurrences": 2,
+            "reviews": [
+              "https://github.com/ducthangho/tra-luat/issues/685#issuecomment-6030695601",
+              "https://github.com/ducthangho/tra-luat/issues/685#issuecomment-6095006829"
+            ]
+          },
+          "exact-head-gates-incomplete": {
+            "review_occurrences": 2,
+            "reviews": [
+              "https://github.com/ducthangho/tra-luat/issues/685#issuecomment-6030695601",
+              "https://github.com/ducthangho/tra-luat/issues/685#issuecomment-6095006829"
+            ]
+          }
+        },
+        "class_history_basis": "protocol section 12: revision/scope cut does not reset class history; a class seen in three different reviews requires a method review at checkpoint. ED and exact-head are at 2 of 3. Convergence g2b review 2 -> g5 review 1: U = 3 classes, F = 1 (E118), ratio 1/3 < 50%; previous transition not measured (KHONG_DO_DUOC), so the two-consecutive-transitions stop is not reached",
+        "code_pushed": false,
+        "completed_supersessions": [
+          {
+            "lease_expires_at_utc": "2026-10-08T04:31:33Z",
+            "lease_git_head": "95f961ee0e402c757daf3b31a62474f901dd931e",
+            "lease_git_ref": "refs/heads/ops/wp685-r20-g3-metadata",
+            "lease_id": "wp685-r20-g3-codex-20261007",
+            "status": "done",
+            "tombstone_git_heads": {
+              "refs/heads/ops/wp685-r20-g3-metadata": "808d4ee6bf49567de7ad7365509da8e3c2834c4f",
+              "refs/heads/ops/wp685-r23-g4-lease": "b781dac4862fb373ff0278dd3c51b20ea3c16c66",
+              "refs/heads/ops/wp685-r23-g4-metadata": "b781dac4862fb373ff0278dd3c51b20ea3c16c66"
+            },
+            "tombstone_rule": "two-way tombstone only if the g3 lease is still unexpired when the g4 lease is granted"
+          },
+          {
+            "journal_event": null,
+            "journal_note": "two-way tombstone landed in commit 26d4711e with lease g4b; no #686 event recorded it at the time; recorded here as data by the r8 install event, not as a backdated event",
+            "lease_comment_url": "https://github.com/ducthangho/tra-luat/issues/685#issuecomment-6040070751",
+            "lease_expires_at_utc": "2026-10-08T14:20:35Z",
+            "lease_git_head": "b781dac4862fb373ff0278dd3c51b20ea3c16c66",
+            "lease_git_ref": "refs/heads/ops/wp685-r23-g4-lease",
+            "lease_id": "wp685-r23-g4-codex-20261007",
+            "reason": "lease anchors mission_revision 6 / plan_hash r6; Mission r7 changes the plan hash",
+            "status": "done",
+            "superseded_by_lease_id": "wp685-r23-g4b-codex-20261007",
+            "tombstone_git_heads": {
+              "refs/heads/ops/wp685-r23-g4-lease": "26d4711e3eaff390574a742ddb99f3d653b252da",
+              "refs/heads/ops/wp685-r23-g4-metadata": "26d4711e3eaff390574a742ddb99f3d653b252da"
+            },
+            "tombstone_rule": "two-way tombstone only if the g4 lease is still unexpired when the replacement lease is granted"
+          }
+        ],
+        "cumulative_attempts_before_generation_4": 3,
+        "cumulative_attempts_before_generation_5": 3,
+        "evidence_channel_ref": "refs/heads/agent/wp685-r28-g5-claude",
+        "evidence_git_head": "d0d72b97330c0ddc1144e33d581f954a777d8175",
+        "evidence_git_ref": "refs/heads/ops/wp685-r28-g5-bang-chung",
+        "evidence_manifest_path": "ops/evidence/wp685-r28-g5-attempt-1/SHA256SUMS.txt",
+        "evidence_manifest_sha256": "5d2d356c09049e088c032d413511d6de5f7bd82008b29ffae128d24c3ee7b3e0",
+        "executor_environment": "cloud",
+        "executor_execution_surface": "claude_code",
+        "executor_model": "claude-opus-5-5",
+        "executor_provider": "claude",
+        "finding_ids": [
+          "D65-control-catalog-not-validated",
+          "ED-immutable-artifact-missing",
+          "exact-head-gates-incomplete"
+        ],
+        "generation": 5,
+        "handoff_path": "ops/evidence/wp685-r28-g5-attempt-1/BAO_CAO.md",
+        "handoff_sha256": "6770c86f2ed85731cf274a4ec000f611f889c4d1936fad254e0c32c81c0645d2",
+        "heartbeat_late_url": "https://github.com/ducthangho/tra-luat/issues/685#issuecomment-6094640204",
+        "holder_scan_launcher_sha256": "0fb63d447474878085ae537fbd625f740b74fb2558977dcd18a872c07d732c0d",
+        "holder_scan_refs": "fresh clone, server refs (ls-remote) = local cache 495/495 by name and OID at 2026-10-10T00:39:23Z; scan predates the push of refs/heads/ops/wp685-r28-g5-lease",
+        "holder_scan_result": "no holder on both paths (NGUOI_GIU 0) at 2026-10-10T00:39:23Z",
+        "holder_scan_test_sha256": "6be27547554f855e0fd204af21194a6c74f336f282ac99b28877c35df801f5fb",
+        "lease_comment_url": "https://github.com/ducthangho/tra-luat/issues/685#issuecomment-6091778629",
+        "lease_expires_at_utc": "2026-10-11T00:38:00Z",
+        "lease_git_blob": "7b154923b52494bfb1e2d1462150d028a803c4f6",
+        "lease_git_head": "5f77db6e8b1f4926d2bf45596f55088fb53a0899",
+        "lease_git_ref": "refs/heads/ops/wp685-r28-g5-lease",
+        "lease_grant_url": "https://github.com/ducthangho/tra-luat/issues/686#issuecomment-6093540100",
+        "lease_id": "wp685-r28-g5-claude-20261009",
+        "lease_path": "ops/leases/wp685-r28-g5-claude-20261009.yaml",
+        "lease_sha256": "fe9ce1eb6d0c36c695385aae8e1b58d12fa32981d2fee8105de356268e158761",
+        "leased_at_utc": "2026-10-10T00:38:00Z",
+        "missing_acceptance": [
+          "D control catalog: validate set equality, reject missing/extra/duplicate controls (spec B5(D).3/.6)",
+          "chot_tinh_r12.py committed verbatim with hash in the evidence manifest (spec B5(E).3, B6)",
+          "exact-head B1-B6/B8 logs on the committed candidate SHA/tree, not the pre-commit working tree"
+        ],
+        "p1": 0,
+        "p2_code": 0,
+        "p2_evidence": 3,
+        "p3": 0,
+        "prior_generation_attempts": [
+          {
+            "checkout": "C:/Users/admin/cw/wp685-r20-codex-exec-g3",
+            "closed_by": "mcr-686-06 (generation 3 closed by owner decision)",
+            "cumulative_attempt": 3,
+            "deadline_utc": "2026-10-07T06:29:52Z",
+            "generation": 3,
+            "lease_id": "wp685-r20-g3-codex-20261007",
+            "open_at_generation_close": true,
+            "outcome": "not_reported",
+            "outcome_note": "no event on #686 or #685 after 2026-10-07T05:00:15Z; kept as data, not judged under r23",
+            "revision": 20,
+            "source_head": "4c404f9a50b24730f823b5c22376548c6ee67e4f",
+            "start_event_hash": "7477349ccae082c165cf166a34c130eac9c48484fa28b57eb10802a5ba566234",
+            "start_event_id": 6031263612,
+            "started_at_utc": "2026-10-07T04:59:52Z"
+          }
+        ],
+        "prior_generation_candidate_head": "4c404f9a50b24730f823b5c22376548c6ee67e4f",
+        "prior_stop_condition": "generation 4 closed by owner decision MCR-686-08 (executor change codex/local -> claude/cloud); g4 and g4b leases had 0 attempts; generation 3 attempt 3 not reported and generation 2 same_failure_limit:2 history retained as data",
+        "review_assurance": "none",
+        "review_assurance_target": "cross_approved_plus_human_audited",
+        "review_hint_sha256": "7c0b14cc904a52377be6ba888d0e20f8529bf3e41b6311441dd44c31601a43ea",
+        "review_prompt_path": "ops/evidence/wp685-r28-g5-attempt-1/reviewer-prompt-luot-1.md",
+        "review_prompt_sha256": "0f3a13fb18e3b8581d26b7b40a37a8f68b0ee88a0a940acf27a39e7a3440242d",
+        "review_round": 1,
+        "review_rounds_limit": 10,
+        "review_rounds_limit_basis": "owner decision MCR-686-08 (#686 comment 6091630409): 10 for wp685 generation 5 only, explicitly above the protocol section 8 two-round cap",
+        "review_run_finished_at_utc": "2026-10-10T07:12:15Z",
+        "review_run_json_sha256": "0e1ee56efba17103b7f924c577890b9b261a139ce935d18db8435f97de8a5944",
+        "review_sla_utc": "2026-10-10T08:28:35Z",
+        "review_submitted_at_utc": "2026-10-10T06:28:35Z",
+        "review_threshold": "0 P1 / 0 P2 to push code or open a PR; P3 and below non-blocking (debt, separate packet)",
+        "review_threshold_url": "https://github.com/ducthangho/tra-luat/issues/686#issuecomment-6094654297",
+        "review_url": "https://github.com/ducthangho/tra-luat/issues/685#issuecomment-6095006829",
+        "review_verdict": "changes_requested",
+        "review_verdict_git_head": "0f0bc5761eb41ff8689d591992ecc7544c922917",
+        "review_verdict_git_ref": "refs/heads/ops/wp685-r28-g5-review-1",
+        "review_verdict_path": "ops/reviews/wp685-r28-g5-exec-review-1-codex/VERDICT.md",
+        "review_verdict_sha256": "3c06c0fe04550743eb34f0befa37febce031ba75b884cf999047e8705bc8dd43",
+        "reviewed_sha": "3089b54455a44b8cfcf2fd27b01894bc2a5d764d",
+        "reviewer_cli_session": "01a1247f-c379-7e31-9ef7-89b531e3fa72",
+        "reviewer_cloud_session": "session_018xMDG8fBCAvnDca5hJo7qq",
+        "reviewer_model_claim": "gpt-6.1-sol",
+        "reviewer_provider": "codex",
+        "reviewer_session": "separate Claude Code cloud session created by the dispatcher, codex CLI on a read-only checkout at the exact SHA; executor only emits copyable_prompt",
+        "revision": 28,
+        "same_failure_counts": {
+          "D65-control-catalog-not-validated": 1,
+          "ED-immutable-artifact-missing": 1,
+          "exact-head-gates-incomplete": 1
+        },
+        "same_failure_counts_basis": "generation 5 counting from 0 (MCR-686-08); each class seen once in g5 (review 1), limit 10; no class reached 2",
+        "same_failure_limit": 10,
+        "same_failure_limit_basis": "owner decision MCR-686-08: 10 for wp685 generation 5 only; counting starts at 0 at generation 5; envelope.same_failure_limit 2 binds every other packet",
+        "spec_approval_url": "https://github.com/ducthangho/tra-luat/issues/686#issuecomment-6091630409",
+        "spec_freeze_url": null,
+        "spec_git_blob": "fa07ca1bc3707bc273bf25349ffa6f3ca6ad6160",
+        "spec_git_head": "4a35f633e1b3f05be12eecf74ab9a8a17ef82c69",
+        "spec_git_ref": "refs/heads/claude/wp685-r24-doi-executor",
+        "spec_hash": "8007edf4e00aaefc298bf299bf19be9a71c54e73ff6a1610eb676a806773e156",
+        "spec_path": "ops/specs/launcher-con-song-esrch-r28.md",
+        "spec_review_url": null,
+        "state": "running",
+        "superseded_lease_ids": [
+          "wp685-r18-g1-antigravity-20261007",
+          "wp685-r19-g2-codex-20261007",
+          "wp685-r19-g2b-codex-20261007",
+          "wp685-r20-g3-codex-20261007",
+          "wp685-r23-g4-codex-20261007"
+        ],
+        "supersession_git_head": "d71c67f5db17d81d40e085fe873b12a5a40e9197",
+        "supersession_ref": "refs/heads/ops/wp685-r19-g2-metadata",
+        "unjournaled_leases": [
+          {
+            "agent_branch_on_origin": null,
+            "attempts_used": 0,
+            "generation": 4,
+            "journal_event": null,
+            "lease_comment_url": "https://github.com/ducthangho/tra-luat/issues/685#issuecomment-6049008227",
+            "lease_expires_at_utc": "2026-10-08T23:00:00Z",
+            "lease_git_head": "26d4711e3eaff390574a742ddb99f3d653b252da",
+            "lease_git_ref": "refs/heads/ops/wp685-r23-g4-lease",
+            "lease_grant_url": "https://github.com/ducthangho/tra-luat/issues/686#issuecomment-6049189081",
+            "lease_id": "wp685-r23-g4b-codex-20261007",
+            "leased_at_utc": "2026-10-07T23:00:00Z",
+            "mission_revision": 7,
+            "note": "owner granted g4b but no executor_lease_granted event was posted on #686; no backdated event is written; lease expired unused (no agent/wp685* branch on origin at 2026-10-10 ls-remote); no tombstone per MCR-686-08",
+            "outcome": "expired_unused",
+            "revision": 23
+          }
+        ]
+      },
+      "wp709": {
+        "candidate_head": "ab80a921053a5de45d5a55518c1779d2e11670e5",
+        "generation": 2,
+        "land_receipt_url": "https://github.com/ducthangho/tra-luat/issues/709#issuecomment-6020718211",
+        "lease_id": null,
+        "merge_head": "ab457c651eb4428705f0492163080b661c858b72",
+        "revision": 1,
+        "spec_hash": "f569b613cf7369b70845728972d4f1f0227dcdf96df2ff7508ffb815f21d005c",
+        "state": "landed"
+      }
+    },
+    "plan_hash": "50f710c1ff2baa12ed059ae46d746a1b39c26cb4c20b5e672e71bde45dcc56fd",
+    "reconciler_implemented": false,
+    "schema_version": 1
+  },
+  "prev_event_hash": "46cb98da19bcd0ea52e40e2baa2fa6023f3607b081212ab3ba52a626c9501c39",
+  "schema_version": 1,
+  "state_hash": "5e2d5d029713d79573ee9a89c4288c5af8e868df399dd2ed5ec39d92b440afc8"
+}

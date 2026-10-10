@@ -5,7 +5,10 @@
 # TRANG THAI: merged (3fc0932). Gate hau-merge 3fc0932 XANH 14/14 (run 37942714195). `landed` o tep nay = false:
 # theo tien le, `landed: true` chi co hieu luc tu merge commit cua PR ghi so KE TIEP, sau khi chu kho quyet cac diem
 # not_measured duoi day. "merged" KHONG dong nghia "landed" (PROTOCOL §10.2.4).
-# NHAN: measured = do lai trong phien ghi so (lenh ghi kem) VA `kiem_ho_so.py --repo <clone> --tu-kiem` chung minh DOI DI thi bo kiem DO;
+# NHAN: measured = do lai trong phien ghi so (lenh ghi kem) VA `kiem_ho_so.py --repo <clone> --tu-kiem` doi TUNG cum chu so cua la do ma bo kiem DO
+# bang MOT CHOT (khong do vi traceback). Pham vi tu-kiem: la co chu so trong nut `trang_thai: measured` hoac chuoi mo dau `measured`; khoa tuong thuat
+# (lenh, mo_ta, pham_vi, ghi_chu, dinh_chinh, nguon, readback, checkout, vai_tro, hien_vat) va la KHONG co chu so khong bi thu (xem _TUONG_THUAT);
+# pre_merge_checks[0..2].{event,run_attempt,head_sha,workflow} (moc: measured) co chot rieng nhung KHONG nam trong pham vi tu-kiem.
 # thuat_lai = so lieu cua luot review, khong tai chay;
 # not_measured = khong do duoc, ghi ly do.
 # Readback tho: ops/land/pr621-skill-bai-hoc-provenance/ (SHA256SUMS.txt). Kiem nhat quan ho so <-> hien vat:
@@ -87,7 +90,7 @@ post_merge_checks:
 bookkeeping:
   - muc: 'Ho so land + provenance (PR #723)'
     trang_thai: 'mo — chua merge'
-  - muc: 'Quyet dinh chu kho cho cac diem khong_do_duoc'
+  - muc: 'Quyet dinh chu kho cho cac diem khong_do_duoc va cho assurance_dat cua human audit'
     trang_thai: 'mo — can chu ky moi tren head hien hanh cua PR #723 (chu ky tren 06fc9a8, comment 6084105994, da het hieu luc vi head doi)'
   - muc: 'PR ghi so ke tiep doi landed: true (tien le #719 -> #720)'
     trang_thai: 'chua lam'
@@ -112,7 +115,7 @@ environment: cloud
 operating_system: linux
 role: land_operator
 session_id: https://claude.ai/code/session_01Fd7YEcw3odAk7QKkydKycE
-do_luc: '2026-10-09T12:0xZ..17:2xZ (core.abbrev 7; 12:0x-14:4x = phien land, 16:1x-17:2x = phien ghi so)'
+do_luc: '2026-10-09T12:0xZ..17:1xZ (core.abbrev 7; 12:0x-14:4x = phien land; 17:11Z = cong tai cho, 17:13Z = ai-dang-giu: hai hien vat do ghi so con luu)'
 
 ung_vien:
   head_sha: 658bd0cdc56bbd3445f489dcfc571e22eee7d675
@@ -175,7 +178,8 @@ ung_vien:
         - {lenh: 'python .githooks/eol_policy.py --all --json', rc: 0, dau_duong: '"ok": true'}
   ci_pr_tren_ung_vien:
     trang_thai: measured
-    ket_qua: '17 check run = 16 success (gom 2 thu-hoi) + 1 skipped (mo) (readback checkruns-658bd0c.json). Dinh chinh: ban dau ghi "15 success + 1 skipped; thu-hoi 2 lan" — dem lech 1 (Codex PR #723, comment 4231975348).'
+    ket_qua: '17 check run = 16 success (gom 2 thu-hoi) + 1 skipped (mo) (readback checkruns-658bd0c.json).'
+    dinh_chinh: 'Ban dau ghi "15 success + 1 skipped; thu-hoi 2 lan" — dem lech 1 (Codex PR #723, comment 4231975348).'
 
 review_ai_truoc_drift:
   trang_thai: stale_theo_AGENTS_md_muc_6
@@ -226,9 +230,9 @@ review_tai_head_da_merge:
       reviews-621.json va review-comments-621.json la mang RONG `[]` tu GET khong tham so trang; GitHub tra trang dau rong
       chi khi tong = 0, nen rong tren trang 1 = rong toan bo. Header Link KHONG luu (khong can khi trang dau rong).
     thu_tu_thoi_gian: >-
-      measured — merge 14:14:34Z (merged_at, pr-621.json; ban truoc ghi nham 14:14:35Z) TRUOC khi Codex hoan tat (14:16:42Z).
-      Ket qua sach nen khong co finding bi bo qua, nhung
-      merge KHONG doi review bot ve xong; ghi lai de khong lap lai (bai hoc CLAUDE.md "gate xanh khong phai da review").
+      measured — merge 14:14:34Z (merged_at, pr-621.json) TRUOC khi Codex hoan tat (14:16:42Z). Hai mang rong KHONG chung minh "sach"
+      (xem ket_qua); merge KHONG doi review bot ve xong; ghi lai de khong lap lai (bai hoc CLAUDE.md "gate xanh khong phai da review").
+    dinh_chinh: 'Ban truoc ghi nham merged_at la 14:14:35Z; va noi "ket qua sach nen khong co finding bi bo qua" (suy luan tu hai mang rong, khong do duoc).'
 
 uy_quyen:
   nguon: human_audit_chu_kho
@@ -278,8 +282,8 @@ ref_fence:
   delta: 'HEAD va refs/heads/master 8b59185 -> 3fc0932; refs/pull/621/merge 8c969f4 -> ABSENT. Khong ref nao khac doi.'
   readback: [refs-delta.txt, ls-remote-truoc-merge.sorted.txt, ls-remote-sau-merge.sorted.txt, ls-remote-rc.txt]
   kiem_doc_lap: >-
-    measured — ap delta trong refs-delta.txt vao ls-remote-truoc-merge (1101 ref) cho ra DUNG tap ls-remote-sau-merge
-    (1100 ref). Dinh chinh: ban dau chi luu delta + sha256; Codex review PR #723 (comment 4231894098) bat duoc.
+    measured — ap delta trong refs-delta.txt vao ls-remote-truoc-merge (1101 ref) cho ra DUNG tap ls-remote-sau-merge (1100 ref).
+  dinh_chinh: 'Ban dau chi luu delta + sha256; Codex review PR #723 (comment 4231894098) bat duoc.'
   kiem_bang_may: >-
     kiem_ho_so.py muc 3b AP delta vao anh truoc va so khop TUNG ref/OID voi anh sau, kiem gia tri CU khop anh truoc,
     so ref khai (1101/1100), ten lap trong anh va trong delta; ABSENT xu ly tuong minh. Truoc do script chi kiem digest
@@ -311,7 +315,8 @@ khong_do_duoc:
   - id: MOC-WORKFLOW-DEFINITION
     pham_vi_run: [37928221219, 37928217849, 37942625684, 37942714195]
     mo_ta: >-
-      OID blob dinh nghia workflow ma tung run thuc su nap: khong goi GraphQL (tien le #674/#705/#678). Nguon thay the
+      Dinh nghia workflow ma tung run thuc su nap theo PROTOCOL §10.2.2 hang "Workflow definition": repository/path (da do qua run.path), exact
+      commit OID, blob OID va SHA-256 bytes cua dinh nghia — ba thu sau not_measured: khong goi GraphQL (tien le #674/#705/#678). Nguon thay the
       (khong thay phep do): ci.yml khong nam trong diff 8b59185..3fc0932 (write set chi 2 tep .claude/skills/), nen ci.yml
       tai 3fc0932 = tai 8b59185 = tai 658bd0c; hai run thu-hoi la pull_request_target nen nap dinh nghia tu nhanh base.
     can: 'Quyet dinh chu kho cho TUNG run_id trong pham_vi_run.'
@@ -322,7 +327,7 @@ khong_do_duoc:
   - id: CHECKOUT-IDENTITY
     pham_vi_run: [37928221219, 37928217849, 37942625684, 37942714195]
     mo_ta: >-
-      SHA/tree ma runner THUC SU checkout: khong tai log job / artifact; chi co REST run head (658bd0c cho ba run truoc
+      SHA, parents va tree ma runner THUC SU checkout (§10.2.2 hang "Checkout"): khong tai log job / artifact; chi co REST run head (658bd0c cho ba run truoc
       merge, 3fc0932 cho run hau-merge). §10.2.2 khong cho dung REST run head lam bang chung checkout. Nguon thay the
       (khong thay phep do): tree 3fc0932 = tree 658bd0c (measured, thao_tac_merge.kiem_tra). Nguon thay the nay chi noi ve cay cua
       HEAD ung vien, KHONG phu cay ma su kien thuc su checkout: run pull_request test merge ref (anh ls-remote truoc giu OID
@@ -331,6 +336,7 @@ khong_do_duoc:
     can: 'Quyet dinh chu kho cho TUNG run_id trong pham_vi_run (Codex PR #723, comment 4231975373).'
   - id: WINDOWS
     mo_ta: 'Run push tren master chi chay ubuntu-latest cho thay doi nay (khong co job windows trong checkruns-3fc0932.json); tai lieu adapter khong co nhanh chay theo nen.'
+    can: 'KHONG phai diem chu kho phai quyet (khong co pham_vi_run); chi ghi nhan. Ba diem phai quyet la ba muc co pham_vi_run o tren.'
 
 trang_thai_packet:
   merged: true
@@ -341,5 +347,7 @@ trang_thai_packet:
     DA CO (measured): exact SHA (cha thu hai 3fc0932 = 658bd0c = reviewed_sha cua human audit, review_tai_head_da_merge),
     gate hau-merge 14/14 (conclusion). CON THIEU: (1) PR ghi so nay merge bang merge commit; (2) quyet dinh chu kho cho BA
     diem khong_do_duoc (MOC-WORKFLOW-DEFINITION, RC-SO-CHI-CO-STEP-CONCLUSION, CHECKOUT-IDENTITY), MOI diem tren TUNG run_id
-    trong pham_vi_run cua no (4 run: 37928221219, 37928217849, 37942625684, 37942714195), tren head hien hanh cua PR nay.
+    trong pham_vi_run cua no (4 run: 37928221219, 37928217849, 37942625684, 37942714195), tren head hien hanh cua PR nay;
+    (3) quyet dinh chu kho co CHAP NHAN `review_tai_head_da_merge.human_audit.assurance_dat` hay khong (khoa
+    `quyet_dinh_chu_kho.assurance_dat: chap_nhan`; kiem_ho_so.py muc 7 doi khoa nay khi `landed: true`).
     Land operator KHONG tu dong diem nao.

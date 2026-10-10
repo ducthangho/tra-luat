@@ -3,7 +3,8 @@
 
 N1 argv/timeout · N2 refresh trả True mà canary False/None ⇒ 0 upload, rc 4 (kể cả --refresh --force), canary
 True ⇒ đúng 1 upload · N3 lỗi của refresh không lan và không chặn canary · N4 `login --check` trong tl_gws.py chỉ
-nằm ở các dòng thuộc danh sách CHO PHÉP.
+nằm ở các dòng thuộc danh sách CHO PHÉP (kiểm TĨNH, phụ) · N5 đầu ra THẬT của từng nhánh gợi ý WP727 sửa (tuổi cookie,
+load thiếu fileId / hạ cấp / token xoay hết hạn, lệnh load, lệnh pull) không gợi ý `login --check` và không lộ cookie.
 """
 
 import argparse
@@ -163,12 +164,23 @@ _CHUOI_CHO_PHEP = frozenset({
 })
 
 
+def _phan_f(v):
+    """Một mảnh f-string: hằng giữ nguyên; `{hằng}` không chuyển đổi/định dạng thì thay bằng str(hằng) (lượt 4, F2d —
+    trước đó mọi `{…}` thành "{}" nên `f"Kiểm: nlm {'login'} --check"` lọt); còn lại không chứng minh được ⇒ "{}"."""
+    if isinstance(v, ast.Constant):
+        return v.value
+    if (isinstance(v, ast.FormattedValue) and isinstance(v.value, ast.Constant) and v.conversion == -1
+            and v.format_spec is None and isinstance(v.value.value, (str, int, float))):
+        return str(v.value.value)
+    return "{}"
+
+
 def _van_tinh(n):
     """Giá trị chuỗi TĨNH của một biểu thức (không eval): hằng, f-string (phần biến thành "{}"), và phép `+` của chúng."""
     if isinstance(n, ast.Constant) and isinstance(n.value, str):
         return n.value
     if isinstance(n, ast.JoinedStr):
-        return "".join(v.value if isinstance(v, ast.Constant) else "{}" for v in n.values)
+        return "".join(_phan_f(v) for v in n.values)
     if isinstance(n, ast.BinOp) and isinstance(n.op, ast.Add):
         trai, phai = _van_tinh(n.left), _van_tinh(n.right)
         if trai is not None and phai is not None:
@@ -196,6 +208,89 @@ def _n4_ast(van_ban):
     return gap == set(_CHUOI_CHO_PHEP)
 
 
+# Câu PHỦ ĐỊNH được phép xuất hiện trong đầu ra (thông báo pull/load); bóc nó ra rồi mới tìm gợi ý dương.
+_PHU_DINH = "KHÔNG bằng `nlm login --check`"
+_CANH = "SENTINEL-COOKIE-wp727"
+
+
+def _vi_pham_dau_ra(van_ban, phai_co):
+    """Đầu ra/thông báo THẬT của một nhánh gợi ý: không gợi ý `login --check`, không lộ cookie, và có dấu nhánh
+    (`phai_co`) — thiếu dấu nghĩa là nhánh không được đi tới, tức phép đo không đo gì."""
+    loi = []
+    if "login --check" in van_ban.replace(_PHU_DINH, ""):
+        loi.append("gợi ý login --check")
+    if _CANH in van_ban:
+        loi.append("lộ chuỗi canh cookie")
+    loi.extend(f"thiếu dấu nhánh {d!r}" for d in phai_co if d not in van_ban)
+    return loi
+
+
+@contextlib.contextmanager
+def _home_tam():
+    import tempfile
+    cu = {k: os.environ.get(k) for k in ("HOME", "USERPROFILE")}
+    with tempfile.TemporaryDirectory() as d:
+        try:
+            os.environ["HOME"] = os.environ["USERPROFILE"] = d
+            yield d
+        finally:
+            for k, v in cu.items():
+                if v is None:
+                    os.environ.pop(k, None)
+                else:
+                    os.environ[k] = v
+
+
+def _nhanh_goi_y(tg):
+    """Chạy offline TỪNG nhánh gợi ý mà WP727 sửa, trả [(tên, văn bản thật, dấu nhánh phải có)].
+    Không mạng, không credential: blob mã hoá bằng token giả, HOME tạm, mọi I/O ngoài bị thay."""
+    import importlib
+    import json
+    store = tg._imp("gws_cred_store")
+    jar = {"auth.json": _CANH, "profiles/default/cookies.json": "[]"}
+    tok = "offline-test-token"
+    blob = store.encrypt(json.dumps(jar).encode("utf-8"), tok)
+    nlm_ops = importlib.import_module("tl_core.nlm_ops")
+    rot = lambda *a, **k: {"found": True, "expired": True, "name": "__Secure-OFFLINE", "expires_in_min": -5.0}
+    kq = [("tuoi-cookie", tg._nlm_cookie_age_note(20.0), ("NGÀY tuổi", "nlm-credential-refresh.ps1"))]
+    kq.append(("load-thieu-fid", tg._nlm_auth_load(tok, "")[1], ("NLM_CRED_FILEID", "canary")))
+    with _home_tam(), _va(tg, _public_curl_bytes=lambda *a, **k: blob, _nlm_auth_files_raw=lambda: {},
+                          _nlm_auth_load_downgrade=lambda *a: (True, "OFFLINE-cu-hon")):
+        kq.append(("load-ha-cap", tg._nlm_auth_load(tok, "OFFLINE")[1], ("HẠ CẤP", "nlm-credential-refresh.ps1")))
+    with _home_tam(), _va(tg, _public_curl_bytes=lambda *a, **k: blob, _nlm_auth_files_raw=lambda: {},
+                          _nlm_auth_load_downgrade=lambda *a: (False, ""), _nlm_auth_age_days=lambda _n: 20.0), \
+            _va(nlm_ops, _nlm_rotation_token_state=rot):
+        kq.append(("load-xoay-het-han", tg._nlm_auth_load(tok, "OFFLINE")[1],
+                   ("BUNDLE_ROTATION_TOKEN_EXPIRED", "NGÀY tuổi", "nlm-credential-refresh.ps1")))
+    ra = io.StringIO()
+    ns = argparse.Namespace(config=None, profile=None, cred_file_id="OFFLINE", force=False)
+    with _va(tg, load_creds=lambda *a, **k: None, _nlm_auth_load=lambda *a, **k: (True, "OFFLINE-msg")), \
+            contextlib.redirect_stdout(ra), contextlib.redirect_stderr(ra):
+        tg.cmd_nlm_auth_load(ns)
+    kq.append(("lenh-load", ra.getvalue(), ("[nlm-auth-load] ✓", "nlm-auth-status")))
+    goi = store.encrypt(json.dumps({"nlm_auth": jar}).encode("utf-8"), "offline-master")
+    ra = io.StringIO()
+    ns = argparse.Namespace(config=None, profile=None, secrets_id="OFFLINE", env=None)
+    with _home_tam(), _va(tg, _master_key=lambda: "offline-master", load_creds=lambda *a, **k: None,
+                          _secrets_fetch=lambda *a, **k: (goi, "OFFLINE"), _nlm_auth_age_days=lambda _n: 20.0), \
+            _va(nlm_ops, _nlm_rotation_token_state=lambda *a, **k: {"found": False}), \
+            contextlib.redirect_stdout(ra), contextlib.redirect_stderr(ra):
+        tg.cmd_nlm_auth_pull(ns)
+    kq.append(("lenh-pull", ra.getvalue(), ("[nlm-auth-pull] ✓", "NGÀY tuổi", "nlm-auth-status")))
+    return kq
+
+
+def _n5(tg):
+    nhanh = _nhanh_goi_y(tg)
+    if any(_vi_pham_dau_ra(van_ban, dau) for _ten, van_ban, dau in nhanh):
+        return False
+    # Phản chứng cho chính bộ kiểm: gợi ý dương kiểu cũ, lộ cookie, hoặc nhánh không được đi tới đều phải bị bắt.
+    return (bool(_vi_pham_dau_ra("Kiểm: nlm login --check.", ()))
+            and bool(_vi_pham_dau_ra(_PHU_DINH + "; Kiểm: nlm login --check", ()))
+            and bool(_vi_pham_dau_ra("ok " + _CANH, ()))
+            and bool(_vi_pham_dau_ra("", ("HẠ CẤP",))))
+
+
 def run(tl_module):
     tg = tl_module._imp("tl_gws")
     tg.bind(tl_module)      # như tl.build_parser: nạp tên trần (_imp, load_creds…) mà các lệnh stage cần
@@ -212,4 +307,6 @@ def run(tl_module):
         return False            # phản chứng: gợi ý dương tách thành hai literal liền nhau phải bị bắt
     if _n4_ast(van_ban + '\nprint(f"x{1}" + " Kiểm: nlm log" + "in --check")\n'):
         return False            # phản chứng: gợi ý dương nối bằng `+` phải bị bắt (cross-review lượt 3, F2c)
-    return _n1_n3(tg) and _n2(tg)
+    if _n4_ast(van_ban + "\nx = f\"Kiểm: nlm {'login'} --check\"\n"):
+        return False            # phản chứng: `{hằng}` trong f-string phải được thay giá trị (cross-review lượt 4, F2d)
+    return _n1_n3(tg) and _n2(tg) and _n5(tg)

@@ -79,7 +79,7 @@ SHA_G1   = "2f70869a0537843e9cae78618ee7ae8c261d972d"
 # do that 18-09 tren ban va g2 cua agy cho 5 tep / +812, trong khi viec cua agy la 2 tep / +353.
 # Mot chot nhu the se bao "vuot tran" cho mot ban va KHONG vuot. Base dung la MERGE-BASE.
 SHA_BASE_SPEC = "d705623162b75b7340ee7cca54ac2d2abbddbb6f"
-BAN_BO_DO = "2026-10-01f"              # doi MOI khi sua bo do - log tu khai ban nao
+BAN_BO_DO = "2026-10-01g"              # doi MOI khi sua bo do - log tu khai ban nao
 TRAN_TEP, TRAN_DONG = 2, 400          # N7' cua spec r3
 AL_SAN = (1, 7, 7)                    # san actionlint = ban ghim CI: AL_VER cua ci.yml = ban_ghim cua ops/cong_cu.yaml
 GIT_SAN = (2, 36, 0)                  # san git: ung vien goi `git worktree list --porcelain -z` (co `-z` tu 2.36); ban_ghim git = null
@@ -192,8 +192,9 @@ _PY_GIU = frozenset({"PYTHONHOME", "PYTHONUSERBASE", "PYTHONNOUSERSITE"})
 # Cau hinh git CUA NGUOI DO lot vao bo test y nhu bien PYTHON*: ca test goi git bang dict(os.environ), nen doc cau hinh
 # ca nhan va bien GIT_* cua may do. Do tren 2026-09-30e, 0ea95de: `init.defaultBranch = main` => 163/166, t134 t139 t151
 # DO => rc=1 "TRUOT Moi ca DO deu giai thich duoc" cho ung vien sach (sach: 166/166) — o pham vi global LAN he thong.
-# Bo MOI bien GIT_* va thay global CA NHAN bang global CUA CI. CI KHONG co global rong: job `gate` cua ci.yml (buoc "Force LF
-# checkout", ca ubuntu lan windows) dat global core.autocrlf=false, core.eol=lf, core.abbrev=7 TRUOC buoc chay bo test —
+# Bo MOI bien GIT_* va thay global CA NHAN bang global CUA CI. CI KHONG co global rong: job `gate-ops` cua ci.yml (noi chay bo test,
+# tach khoi `gate` tu #660; buoc "Force LF checkout" giong het o `gate`, ca ubuntu lan windows) dat global core.autocrlf=false,
+# core.eol=lf, core.abbrev=7 TRUOC buoc chay bo test —
 # vi (ci.yml:7-8 tu khai) khong tat thi runner Windows checkout CRLF: autocrlf=true cua ban cai Git o HE THONG. Ban 30f
 # dat global = rong nen bo test thay autocrlf=true con CI thay false: do tren 2026-09-30f, 0ea95de, he thong autocrlf=true
 # + global nhu CI => ban 30e 166/166, ban 30f 165/166 (t150 DO — chi khong thanh TRUOT vi t150 tinh co nam trong
@@ -214,17 +215,21 @@ _PY_GIU = frozenset({"PYTHONHOME", "PYTHONUSERBASE", "PYTHONNOUSERSITE"})
 # "cannot overwrite existing file" — ca "la" => TRUOT cho ung vien sach — trong khi muc 0 cho qua: no hoi `git --version`
 # trong bash, cau HEP hon cau bo test can. BASH_ENV in byte ngoai UTF-8 => 152/166. CI khong dat bien nao trong nhom nay. Bo
 # theo TAP bash(1) doc khi chay script: moi ten bat dau `BASH` (BASH_ENV BASHOPTS BASH_FUNC_* BASH_XTRACEFD BASH_COMPAT ...) cong
-# _BASH_KHOI_DONG. Chi hai muc tren DO DUOC lam DO; cac ten con lai bo vi CI khong dat, KHONG vi da thay DO (do 2026-10-01: SHELLOPTS
-# xtrace/nounset/pipefail/noglob/allexport, BASHOPTS failglob/nullglob/xpg_echo, POSIXLY_CORRECT, CDPATH, FUNCNEST=1, TMOUT=1 =>
-# 9/9 ca bash). IFS bash KHONG nhan tu moi truong. t152 von chi truyen PATH nen khong doi. Muc 0 tu khai TEN (khong in gia tri).
+# _BASH_KHOI_DONG. Trong nhom TEN, chi hai muc tren DO DUOC lam DO (cua SSH_CLIENT va stdin: xem duoi); cac ten con lai bo vi CI
+# khong dat, KHONG vi da thay DO (do 2026-10-01: SHELLOPTS xtrace/nounset/pipefail/noglob/allexport, BASHOPTS failglob/nullglob/
+# xpg_echo, POSIXLY_CORRECT, CDPATH, FUNCNEST=1, TMOUT=1 => 9/9 ca bash). IFS bash KHONG nhan tu moi truong. t152 von chi truyen
+# PATH nen khong doi. Muc 0 tu khai TEN (khong in gia tri).
 # TAP ay con mot cua KHONG mang ten bien khoi dong: bash(1) INVOCATION — stdin la SOCKET (rshd), hoac SSH_CLIENT/SSH2_CLIENT trong
 # moi truong (ban dich bat SSH_SOURCE_BASHRC: Git for Windows bat ca no lan SYS_BASHRC — 0001-bash-4.4-cygwin.patch sua config-top.h;
 # bash Ubuntu cung bat), cong SHLVL rong/0 => `bash -c` nap /etc/bash.bashrc va ~/.bashrc CUA NGUOI DO, va BO QUA BASH_ENV. CI chay
-# bo test qua `bash ops/chay_lease_publish_test.sh` trong buoc `shell: bash` => SHLVL=2 (do tren chuoi gia lap buoc -> script ->
-# python) nen duong nay TAT tren CI; pwsh/cmd khong dat SHLVL nen tren may do no MO. Do tren 2026-10-01 (ban 01e, bash 5.2.21),
+# bo test qua `bash ops/chay_lease_publish_test.sh` (job `gate-ops`, buoc `shell: bash`): wrapper `exec` python nen python thay SHLVL=1
+# (exec giam SHLVL; do 2026-10-09 tren chuoi buoc -> `bash wrapper` -> `exec python`: 1, wrapper KHONG exec: 2) va `bash -c` cua bo
+# test thay 2 — DUNG nguong `< 2` (bien 0): buoc chay bang `bash -c` mot dong thi python thay 0 va duong nay MO. Nen duong nay TAT
+# tren CI; pwsh/cmd khong dat SHLVL nen tren may do no MO. Do tren 2026-10-01 (ban 01e, bash 5.2.21),
 # 0ea95de: SSH_CLIENT + ~/.bashrc `set -o noclobber` => t32 t51 t60 t62 t63 t66 t68 DO, e2e rc=1 `DAT 11 | TRUOT 1` (159/166);
 # ~/.bashrc `cd "$HOME"` => 8 ca (them t59); stdin SOCKET + noclobber => cung 7 ca. Muc 0 khong thay (probe goi `--norc`, ma --norc
-# tat duong nay) va tu khai "bien bash: (khong co)". Phien SSH vao may Windows do la duong vao (Windows THAT: KHONG DO DUOC). Bo HAI
+# tat duong nay): o ban 01e no tu khai "bien bash: (khong co)"; tu ban 01f muc 0 khai TEN SSH_CLIENT neu co, con stdin SOCKET thi
+# KHONG co ten nao de khai (chot: DEVNULL trong chay()). Phien SSH vao may Windows do la cua vao (Windows THAT: KHONG DO DUOC). Bo HAI
 # bien ay (CI khong dat) VA cho luot con stdin = DEVNULL — hai co che rieng, hai chot rieng; t152 (env chi PATH) thua ke stdin ay nen
 # cung dong.
 _BASH_KHOI_DONG = frozenset({"SHELLOPTS", "ENV", "POSIXLY_CORRECT", "CDPATH", "GLOBIGNORE", "GLOBSORT", "EXECIGNORE",

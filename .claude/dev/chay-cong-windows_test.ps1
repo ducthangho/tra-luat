@@ -54,10 +54,11 @@
 #   t33 bo-giai-cong-cu-theo-ten-thu-tu (wrapper) `python` giả (thoát 0) ĐẦU PATH, `python3` thật sau nó ⇒ cổng lease (wrapper THẬT
 #                                                 chọn Python theo TÊN) không ĐẠT; `python` in `TLPY=` rồi thoát khác 0 ⇒ cổng lease
 #                                                 không chạy (vế `$LASTEXITCODE` của thăm dò)
-#   t34 guong-ci-troi-theo-master (bộ so)         bộ so của t32 chạy trên kho GIẢ: nền sạch ⇒ rỗng; mỗi chốt CHẶN của bộ so một hàng đột biến (chốt chỉ giảm nhiễu — cắt `2>&1`, bỏ env có `{{`, `install` trước ghim, `posix` — và so hoa/thường của giá trị `$env:` không có hàng) (cờ, bước trùng cặp,
+#   t34 guong-ci-troi-theo-master (bộ so)         bộ so của t32 chạy trên kho GIẢ: nền sạch ⇒ rỗng; mỗi chốt CHẶN của bộ so một hàng đột biến (chốt chỉ giảm nhiễu — cắt `2>&1`, bỏ env có `{{`, `install` trước ghim, `posix` — và so hoa/thường của giá trị `$env:` không có hàng; neo đầu chuỗi và so hoa/thường của dòng `KHÔNG CHẠY` CÓ hàng từ lượt 20) (cờ, bước trùng cặp,
 #                                                 `uses:` lạ, ghim, `env`, job không `gate`, bước không tên/không đích, nối dòng, nháy không cân, đối số mới qua biến,
 #                                                 tên trong chuỗi lạ); ci.yml đổi ở kênh bộ so không thấy ⇒ chỉ dấu vân bắt; chú thích / dòng trống / CRLF ⇒ dấu vân KHÔNG đổi
-#   t35 guong-co-mat-khong-do-chay                script CHẠY đủ các cổng (mức `nhanh` mặc định và `day-du`) trên kho giả: tên cổng in ra khớp bảng ghim `$CongDayDu` (t32 chỉ thấy VĂN BẢN)
+#   t35 guong-co-mat-khong-do-chay                script CHẠY đủ các cổng trên kho giả — ba lượt: MẶC ĐỊNH (không `-Muc`) · `nhanh` · `day-du` —: tên cổng in ra khớp bảng ghim `$CongDayDu` (t32 chỉ thấy VĂN BẢN);
+#                                                 bộ so của t35 (`Tim-CongLech`) có hàng đột biến SCRIPT riêng: `if ($false)`, cổng rơi khỏi `nhanh`, đổi tên, cổng thừa, đổi mức mặc định
 # Bộ này KÍN với config git của máy chạy, với biến git trỏ kho khác (khối ngay dưới `$script:Rac`), với code page của
 # console (`Doc-Utf8`), với dấu thập phân của locale (t18 nhận `5,1s`) và với `<TEMP>/actionlint` của máy (t7, t21 tự đặt TEMP).
 # ĐỘT BIẾN để đo răng (đo trên pwsh 7.4.6/Linux, bộ 28 ca, TMPDIR sạch): `-Script` trỏ f2392df ⇒ 2/28 (đạt t17 — bản ấy đã so băm —
@@ -102,7 +103,7 @@
 # và script giữ tên bước trong một chuỗi bất kỳ (`Noi 'ghi chu "<tên>"'` thay dòng gương). Nay: dấu vân từng job (`$DauVanCi`) bắt mọi đột biến phía ci.yml (kể cả `defaults`/`container`/`services`/
 # `continue-on-error` cấp job và `env`/`defaults` cấp workflow); vị từ "tên trong dòng KHÔNG CHẠY" đòi hằng chuỗi BẮT ĐẦU bằng `KHÔNG CHẠY`/`THAY BẰNG`; đối số-từ-biến
 # phải là hằng có mặt trong script. t34 thêm hàng cho tám chốt trước đây không có răng riêng trong t34 (ghim `AL_VER`, `env` cấp job, nối dòng, `$BIEN`→`*`, nháy không
-# cân, chú thích, bước `duong_nhanh`, `&&`) và cho từng chốt của dấu vân: gỡ riêng từng chốt (33 chốt đã đo ở lượt 18) ⇒ t34 ĐỎ. Lượt 19 đo thêm trên 72dc360: t32 gọi thiếu `$DauVanCi` / `$DauVanCi = $null` ⇒ 34/34 (nay: t32 và Tim-ThieuGuong từ chối); dấu vân không có hàng cho `defaults` cấp workflow, `with`/`env`/`if` cấp job, `chuan-bi`, khoảng trắng cuối dòng, job biến mất; bộ so không có hàng cho `-cne`, `-ccontains`, tên chứa tên (nay có). Trên bộ 34 ca của lượt 17, gỡ chốt ghim `AL_VER` /
+# cân, chú thích, bước `duong_nhanh`, `&&`) và cho từng chốt của dấu vân: gỡ riêng từng chốt CHẶN ⇒ t32 hoặc t34 ĐỎ (lượt 18 đo 33 chốt; lượt 20 đo 64 đột biến gỡ chốt/nối dây trên d53e681, ICU — sau các hàng của lượt này chỉ còn ĐẠT ở cả t32 lẫn t34: nhóm khai ở dòng 57 và các chốt tương đương — lookbehind của `mau`, `punctuation_chars`, dấu nháy ngược, dòng cuối nối dòng, `sorted(jobs)`). Lượt 19 đo thêm trên 72dc360: t32 gọi thiếu `$DauVanCi` / `$DauVanCi = $null` ⇒ 34/34 (nay: `Tim-ThieuGuong` từ chối ở chỗ TIÊU THỤ; lượt 20: `$null` viết thẳng ở lời gọi của t32 cũng 35/35 — cờ `-ChiBoSoTungDong` thay `$null`); dấu vân không có hàng cho `defaults` cấp workflow, `with`/`env`/`if` cấp job, `chuan-bi`, khoảng trắng cuối dòng, job biến mất; bộ so không có hàng cho `-cne`, `-ccontains`, tên chứa tên (nay có). Trên bộ 34 ca của lượt 17, gỡ chốt ghim `AL_VER` /
 # `env` cấp job / nối dòng / `$BIEN` / nháy không cân / chú thích ⇒ t34 ĐẠT (sáu chốt không răng); gỡ chốt bước `duong_nhanh` / `&&` chỉ ĐỎ ở t32 trên ci.yml THẬT.
 # Lượt 10: danh sách hợp hai nền (543f2e8) ⇒ chỉ t28 (lượt 1); đảo nền ⇒ chỉ t28 (lượt 1); danh sách của nền này rỗng / thiếu `goi.gz`
 # ⇒ chỉ t28 (lượt 2); bỏ danh sách CHO PHÉP nay ⇒ t25 t28; nhánh Windows của t27 ép chạy trên Linux: fixture mới ⇒ 28/28, fixture dẫn
@@ -191,14 +192,14 @@ function Doc-Utf8 { param([scriptblock]$Lam)
     $enc = [Console]::OutputEncoding
     try { [Console]::OutputEncoding = [Text.UTF8Encoding]::new($false) } catch { }
     try { & $Lam } finally { try { [Console]::OutputEncoding = $enc } catch { } } }
-function Dung-Kho {
+function Dung-Kho { param([string]$Scr = $Script)
     $d = Join-Path ([IO.Path]::GetTempPath()) ('ccw-' + [guid]::NewGuid().ToString('N').Substring(0, 10))
     $script:Rac += $d
     $k = Join-Path $d 'k'
     foreach ($t in 'ops', '.claude/dev', 'scripts/tl_core', '.githooks', '.github/checks') {
         New-Item -ItemType Directory -Force -Path (Join-Path $k $t) | Out-Null
     }
-    Copy-Item -LiteralPath $Script -Destination (Join-Path $k '.claude/dev/chay-cong-windows.ps1')
+    Copy-Item -LiteralPath $Scr -Destination (Join-Path $k '.claude/dev/chay-cong-windows.ps1')
     Copy-Item -LiteralPath (Join-Path $GocKho 'ops/bash_nen.py') -Destination (Join-Path $k 'ops/bash_nen.py')
     Copy-Item -LiteralPath (Join-Path $GocKho '.gitignore') -Destination (Join-Path $k '.gitignore')
     foreach ($f in 'ops/lease_publish_test.py', 'ops/cong_cu.py', 'ops/cong_cu_test.py',
@@ -1131,10 +1132,12 @@ $DauVanCi = @{ '<workflow>' = '44136fa355b3'; 'gate' = '08bfa89def0a'; 'gate-con
                'gate-ops' = '7bc725418208'; 'gate-packet-loop' = 'b90eef359184'; 'gate-registry' = 'b836a4f366e1' }
 # Trả về các hàng "tên :: đích đuôi" của ci.yml mà script KHÔNG gương và KHÔNG khai tên, cộng các job có dấu vân lệch bảng ghim
 # (`$DauVan`; $null = chỉ bộ so từng dòng — t34 dùng để đo răng riêng từng chốt). Rỗng = gương đủ.
-function Tim-ThieuGuong { param([string]$Ci, [string]$Tep, [string[]]$Nep, [hashtable]$DauVan)
-    # Bỏ tham số `$DauVan` ở chỗ gọi = tắt cả lớp dấu vân MÀ KHÔNG CA NÀO ĐỎ (đo trên 72dc360: t32 gọi thiếu `$DauVanCi` ⇒ cả bộ 34/34,
-    # vì t34 tự gọi với bảng của nó). Muốn CHỈ bộ so từng dòng thì truyền `$null` tường minh.
-    if (-not $PSBoundParameters.ContainsKey('DauVan')) { throw 'KHONG DO DUOC: Tim-ThieuGuong thieu tham so DauVan (truyen $null neu CHI muon bo so tung dong)' }
+function Tim-ThieuGuong { param([string]$Ci, [string]$Tep, [string[]]$Nep, [hashtable]$DauVan, [switch]$ChiBoSoTungDong)
+    # Lớp dấu vân tắt được LẶNG LẼ bằng bao nhiêu cách thì kiểm ở chỗ TIÊU THỤ đối số, không ở chỗ gán biến (đo trên d53e681: bỏ đối số ở t32, `$DauVanCi = $null`
+    # ⇒ t32 từ chối; nhưng `$null` hay một biến khác viết thẳng ở lời gọi của t32 ⇒ t32 ĐẠT, cả bộ 35/35 — chốt kiểm BIẾN, lời gọi dùng thứ khác).
+    # Muốn CHỈ bộ so từng dòng thì phải gọi TÊN cờ `-ChiBoSoTungDong` (chỉ t34 dùng); `$null`, `@{}`, bảng thiếu `<workflow>` hay thiếu đối số đều bị từ chối.
+    if (-not $ChiBoSoTungDong -and ($null -eq $DauVan -or -not $DauVan.ContainsKey('<workflow>'))) {
+        throw 'KHONG DO DUOC: Tim-ThieuGuong thieu bang dau van (null / rong / thieu <workflow>) — lop dau van bi tat; CHI bo so tung dong thi goi -ChiBoSoTungDong' }
     $dong = @(Doc-DichCi $Ci)
     $tStr = [System.Management.Automation.Language.StringConstantExpressionAst]
     $tVar = [System.Management.Automation.Language.VariableExpressionAst]
@@ -1190,9 +1193,7 @@ function Tim-ThieuGuong { param([string]$Ci, [string]$Tep, [string[]]$Nep, [hash
     return @($thieu | Select-Object -Unique)
 }
 Ca 't32 moi buoc gate* co guong trong script hoac co ten trong dong KHONG CHAY' {
-    # Nối dây của lớp dấu vân: `$DauVanCi = $null` / `@{}` / bỏ đối số đều làm t32 chỉ còn bộ so từng dòng (đo trên 72dc360: 34/34).
-    if ($DauVanCi -isnot [hashtable] -or $DauVanCi.Count -lt 2 -or -not $DauVanCi.ContainsKey('<workflow>')) {
-        throw 'KHONG DO DUOC: bang dau van ($DauVanCi) rong / null / thieu <workflow> — lop dau van bi tat' }
+    # Nối dây của lớp dấu vân: `Tim-ThieuGuong` TỰ từ chối bảng null / rỗng / thiếu `<workflow>` / thiếu đối số (chốt ở chỗ tiêu thụ; t34 khoá bằng bốn lời gọi).
     $thieu = @(Tim-ThieuGuong (Join-Path $GocKho '.github/workflows/ci.yml') $Script $NepCaiDat $DauVanCi)
     if ($thieu.Count -gt 0) { throw "ci.yml lech guong / dau van (buoc khong co guong, khong co ten trong dong KHONG CHAY, hoac job doi): $($thieu -join ' | ')" }
 }
@@ -1280,8 +1281,22 @@ jobs:
     $thu = { param($ci, $scr, $dv)
         Set-Content -LiteralPath (Join-Path $d 'ci.yml') -Value $ci -Encoding utf8NoBOM
         Set-Content -LiteralPath (Join-Path $d 's.ps1') -Value $scr -Encoding utf8NoBOM
-        @(Tim-ThieuGuong (Join-Path $d 'ci.yml') (Join-Path $d 's.ps1') $nep $dv) }
+        if ($null -eq $dv) { @(Tim-ThieuGuong (Join-Path $d 'ci.yml') (Join-Path $d 's.ps1') $nep -ChiBoSoTungDong) }
+        else { @(Tim-ThieuGuong (Join-Path $d 'ci.yml') (Join-Path $d 's.ps1') $nep $dv) } }
     $nen = @(& $thu $ciNen $scrNen $null)
+    # Chốt ở chỗ TIÊU THỤ: lớp dấu vân không tắt được lặng lẽ bằng thiếu đối số / `$null` / `@{}` / bảng thiếu `<workflow>` (mỗi lời gọi phải ném).
+    $cF = Join-Path $d 'ci.yml'; $sF = Join-Path $d 's.ps1'
+    $tuChoi = [ordered]@{
+        'thieu doi so DauVan'      = { Tim-ThieuGuong $cF $sF $nep }
+        'DauVan = $null'           = { Tim-ThieuGuong $cF $sF $nep $null }
+        'DauVan = @{}'             = { Tim-ThieuGuong $cF $sF $nep @{} }
+        'DauVan thieu <workflow>'  = { Tim-ThieuGuong $cF $sF $nep @{ gate = 'x'; 'gate-ops' = 'y' } }
+    }
+    foreach ($ten in $tuChoi.Keys) {
+        $nem = $false
+        try { $null = & $tuChoi[$ten] } catch { $nem = $true }
+        if (-not $nem) { throw "dau van: '$ten' KHONG bi tu choi — lop dau van tat duoc lang le" }
+    }
     if ($nen.Count -ne 0) { throw "KHONG DO DUOC: kho gia sach ma bo so van bao thieu: $($nen -join ' | ')" }
     $dau = Doc-DauVanCi (Join-Path $d 'ci.yml')
     $nenDv = @(& $thu $ciNen $scrNen $dau)
@@ -1310,6 +1325,8 @@ jobs:
         'doi so khac HOA/thuong (--JSON)'        = @($ciNen.Replace('sub --json', 'sub --JSON'), $scrNen)
         'doi so qua bien khac HOA/thuong (RG)'   = @(($ciNen + "`n      - name: rg`n        run: bash ops/d.sh RG`n"), $scrNen)
         'ten buoc la chuoi con cua ten da khai'  = @(($ciNen + "`n      - name: del`n        run: echo hi`n"), $scrNen)
+        'ten buoc trong chuoi co KHONG CHAY giua chuoi' = @($ciNen, $scrNen.Replace('KHÔNG CHẠY: "delta"', 'ghi chu: KHÔNG CHẠY "delta"'))
+        'ten buoc trong dong khong chay viet thuong' = @($ciNen, $scrNen.Replace('KHÔNG CHẠY: "delta"', 'không chạy: "delta"'))
     }
     foreach ($ten in $dotBien.Keys) {
         $ci, $sc = $dotBien[$ten]
@@ -1404,10 +1421,12 @@ chmod +x "$AL_DICH/actionlint"
     }
 }
 
-# t35 khoá cái mà t32 KHÔNG đo (cả mức `nhanh` mặc định lẫn `day-du`): t32 đọc VĂN BẢN script (mọi hằng chuỗi trong AST) nên một cổng chỉ cần CÒN CHỮ là "có gương". Đo trên 72dc360:
+# t35 khoá cái mà t32 KHÔNG đo (cả mức mặc định, `nhanh` lẫn `day-du`): t32 đọc VĂN BẢN script (mọi hằng chuỗi trong AST) nên một cổng chỉ cần CÒN CHỮ là "có gương". Đo trên 72dc360:
 # bọc `Chay-Py 'golden-test' …` trong `if ($false) { }` / `if ($Muc -eq 'khong-co') { }`, đổi nó thành một mảng không dùng, hoặc đặt trong
 # một hàm không ai gọi ⇒ t32 ĐẠT và cả bộ 34/34 — script không còn chạy `golden-test` mà không ca nào đỏ. Ca này chạy script THẬT trên kho giả
-# (mọi cổng là stub thoát 0) ở mức day-du và đòi tên cổng IN RA khớp bảng ghim: cổng biến mất khỏi lượt chạy ⇒ ĐỎ; thêm cổng mà quên khai ⇒ ĐỎ.
+# (mọi cổng là stub thoát 0) và đòi tên cổng IN RA khớp bảng ghim: cổng biến mất khỏi lượt chạy ⇒ ĐỎ; thêm cổng mà quên khai ⇒ ĐỎ.
+# Lượt MẶC ĐỊNH chạy KHÔNG `-Muc` (đo trên d53e681: đổi `[string]$Muc = 'nhanh'` thành `'day-du'` ⇒ cả bộ 35/35, vì chỉ có lượt `-Muc nhanh` tường minh).
+# Bộ so (`Tim-CongLech`) có hàng đột biến SCRIPT riêng như t34 có cho t32 — không có hàng thì gỡ `thua`/`thieu`/lượt mặc định khỏi t35 vẫn 35/35 vì script nền sạch.
 # Giới hạn: đo TÊN cổng đã chạy, không đo đối số lúc chạy (stub bỏ qua đối số; đối số do t32 so với ci.yml). Windows: KHÔNG ĐO ĐƯỢC ở đây — bảng
 # bỏ hai cổng ci.yml cũng bỏ trên Windows (`don-nhanh selftest (ps1)`, `ci-phamvi selftest`), phần còn lại chưa chạy trên Windows thật.
 $CongDayDu = @('cong_cu kiem-tra', 'cong_cu_test', 'lease-publish selftest', 'packet-loop selftest', 'registry test', 'don-nhanh selftest (ps1)',
@@ -1416,18 +1435,50 @@ $CongDayDu = @('cong_cu kiem-tra', 'cong_cu_test', 'lease-publish selftest', 'pa
                'tl selftest', 'workflow-audit strict', 'golden-test', 'doc-claims-check strict', 'determinism-audit strict', 'ci-phamvi guard',
                'ci-phamvi selftest', 'release-check full', 'release-verify strict', 'tl_boot smoke', 'release-bundle a', 'release-bundle b',
                'release-bundle tất định')
+# Chạy script `$Scr` trên kho giả với đối số `$DoiMuc`; trả về cổng THIẾU so với `$Bang` và cổng THỪA (in ra mà bảng không khai).
+function Tim-CongLech { param([string]$Scr, [string[]]$DoiMuc, [string[]]$Bang)
+    $k = Dung-Kho $Scr
+    $a = Chay $k $DoiMuc
+    $co = @(foreach ($d in ($a.ra -split "`n")) { if ($d -cmatch '^  ([^ ].*?) +rc=[^ ]* +') { $Matches[1] } })
+    if ($co.Count -eq 0) { throw "KHONG DO DUOC: khong doc duoc dong cong nao trong output (rc_script=$($a.rc))" }
+    $can = @($Bang | Where-Object { -not $IsWindows -or ($_ -cne 'don-nhanh selftest (ps1)' -and $_ -cne 'ci-phamvi selftest') })
+    return @{ thieu = @($can | Where-Object { $co -cnotcontains $_ }); thua = @($co | Where-Object { $can -cnotcontains $_ }) }
+}
 Ca 't35 script CHAY du cac cong (ten cong in ra khop bang ghim, khong chi co mat trong van ban)' {
-    $k = Dung-Kho
-    # `nhanh` là mức MẶC ĐỊNH (sáu cổng đầu của bảng); `day-du` là toàn bảng. Hai lượt, mỗi lượt một bảng ghim.
-    foreach ($lan in @(@{ Muc = 'nhanh'; Bang = @($CongDayDu[0..5]) }, @{ Muc = 'day-du'; Bang = $CongDayDu })) {
-        $a = Chay $k @('-Muc', $lan.Muc)
-        $co = @(foreach ($d in ($a.ra -split "`n")) { if ($d -cmatch '^  ([^ ].*?) +rc=[^ ]* +') { $Matches[1] } })
-        if ($co.Count -eq 0) { throw "KHONG DO DUOC: muc $($lan.Muc): khong doc duoc dong cong nao trong output (rc_script=$($a.rc))" }
-        $can = @($lan.Bang | Where-Object { -not $IsWindows -or ($_ -cne 'don-nhanh selftest (ps1)' -and $_ -cne 'ci-phamvi selftest') })
-        $thieu = @($can | Where-Object { $co -cnotcontains $_ })
-        $thua = @($co | Where-Object { $can -cnotcontains $_ })
-        if ($thieu.Count -gt 0 -or $thua.Count -gt 0) {
-            throw "muc $($lan.Muc): cong khong khop bang ghim — KHONG CHAY: [$($thieu -join ' | ')]; CHAY MA CHUA KHAI: [$($thua -join ' | ')]" }
+    # `nhanh` là mức MẶC ĐỊNH (sáu cổng đầu của bảng); `day-du` là toàn bảng. Lượt `mac dinh` KHÔNG truyền `-Muc`.
+    $nhanh = @($CongDayDu[0..5])
+    $luot = [ordered]@{
+        'mac dinh' = @{ Doi = @();                  Bang = $nhanh }
+        'nhanh'    = @{ Doi = @('-Muc', 'nhanh');   Bang = $nhanh }
+        'day-du'   = @{ Doi = @('-Muc', 'day-du');  Bang = $CongDayDu }
+    }
+    foreach ($ten in $luot.Keys) {
+        $r = Tim-CongLech $Script $luot[$ten].Doi $luot[$ten].Bang
+        if ($r.thieu.Count -gt 0 -or $r.thua.Count -gt 0) {
+            throw "muc $($ten): cong khong khop bang ghim — KHONG CHAY: [$($r.thieu -join ' | ')]; CHAY MA CHUA KHAI: [$($r.thua -join ' | ')]" }
+    }
+    # Hàng đột biến của chính bộ so: script bị đổi ⇒ `Tim-CongLech` phải ra ĐÚNG hiệu số (không chỉ "ném lỗi"): `Thieu` = cổng phải nằm trong THIẾU, `Thua` = cổng phải nằm trong THỪA.
+    $nen = [IO.File]::ReadAllText($Script)
+    $vong = "(?m)^([ \t]*)(Chay-Py[ \t]+'{0}'[ \t][^\r\n]*)$"
+    $dot = [ordered]@{
+        'cong golden-test boc trong if false (day-du)' = @{ Luot = 'day-du'; Mau = ($vong -f 'golden-test'); Thay = '${1}if ($$false) { ${2} }'; Thieu = 'golden-test' }
+        'cong packet-loop chi con o day-du (nhanh)'    = @{ Luot = 'nhanh'; Mau = ($vong -f 'packet-loop selftest'); Thay = '${1}if ($$Muc -eq ''day-du'') { ${2} }'; Thieu = 'packet-loop selftest' }
+        'cong golden-test doi ten (day-du)'            = @{ Luot = 'day-du'; Mau = "(?m)^([ \t]*Chay-Py[ \t]+)'golden-test'"; Thay = '${1}''golden-test2'''; Thieu = 'golden-test'; Thua = 'golden-test2' }
+        'cong moi chua khai bang (day-du)'             = @{ Luot = 'day-du'; Mau = ($vong -f 'golden-test'); Thay = ('${1}${2}' + "`n" + '${1}Chay-Py ''cong-moi'' @(''ops/cong_cu.py'', ''kiem-tra'')'); Thua = 'cong-moi' }
+        'muc mac dinh doi sang day-du'                 = @{ Luot = 'mac dinh'; Mau = '(\[string\]\$Muc = )''nhanh'''; Thay = '${1}''day-du'''; Thua = 'golden-test' }
+    }
+    $dr = Join-Path ([IO.Path]::GetTempPath()) ('ccw-' + [guid]::NewGuid().ToString('N').Substring(0, 10))
+    $script:Rac += $dr
+    New-Item -ItemType Directory -Force -Path $dr | Out-Null
+    foreach ($ten in $dot.Keys) {
+        $h = $dot[$ten]
+        if (-not $luot.Contains($h.Luot)) { throw "KHONG DO DUOC: hang '$ten' goi luot '$($h.Luot)' khong co" }
+        if ([regex]::Matches($nen, $h.Mau).Count -ne 1) { throw "KHONG DO DUOC: dot bien '$ten' khong khop dung 1 cho trong script (mau khong co mat / khong duy nhat)" }
+        $tep = Join-Path $dr 'chay-cong-windows.ps1'
+        Set-Content -LiteralPath $tep -Value ([regex]::Replace($nen, $h.Mau, $h.Thay)) -Encoding utf8NoBOM -NoNewline
+        $r = Tim-CongLech $tep $luot[$h.Luot].Doi $luot[$h.Luot].Bang
+        $dung = $(if ($h['Thieu']) { $r.thieu -ccontains $h['Thieu'] } else { $true }) -and $(if ($h['Thua']) { $r.thua -ccontains $h['Thua'] } else { $true })
+        if (-not $dung) { throw "bo so cua t35 MU: dot bien '$ten' khong ra dung hieu so (thieu=[$($r.thieu -join ' | ')]; thua=[$($r.thua -join ' | ')])" }
     }
 }
 

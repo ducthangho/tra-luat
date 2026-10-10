@@ -1,0 +1,9 @@
+# chưa chạy trên cây thật — executor tự áp, tự đo, tự chịu trách nhiệm commit
+# Review lượt 2, wp685 r28 generation 5.
+# reviewed_sha: 3089b54455a44b8cfcf2fd27b01894bc2a5d764d
+# Không có hướng sửa code: 0 lớp P1/P2/P3 còn mở.
+# D65-control-catalog-not-validated: ĐÃ ĐÓNG; giữ kiểm set/uniqueness/extra/order và phép thử âm.
+# ED-immutable-artifact-missing: ĐÃ ĐÓNG; giữ script nguyên bytes, manifest đầy đủ và readback.
+# exact-head-gates-incomplete: ĐÃ ĐÓNG; giữ log thực trên exact HEAD/tree/base/runtime.
+# Tệp chỉ mô tả kết quả theo lớp, không chứa hunk code và không có patch để áp.
+# Vai kế tiếp: chờ reconciler/Approver đọc lại verdict/delivery; không tự merge.

@@ -1,0 +1,93 @@
+schema_version: 2
+event: executor_lease_granted
+packet_issue: 685
+packet_id: wp685
+mission_issue: 686
+mission_revision: 8
+plan_hash: 50f710c1ff2baa12ed059ae46d746a1b39c26cb4c20b5e672e71bde45dcc56fd
+revision: 28
+generation: 5
+lease_id: wp685-r28-g5-claude-20261009
+role: executor
+provider: claude
+executor: claude
+model: claude-opus-5-5
+model_family: claude
+execution_surface: claude_code
+transport: machine/local
+environment: cloud
+reviewer: codex
+reviewer_model_family: openai
+reviewer_execution_surface: codex_cli
+reviewer_transport: machine
+assurance_target: human_audited
+access: read-write
+review_class: sensitive
+effective_review_class: sensitive
+spec_path: ops/specs/launcher-con-song-esrch-r28.md
+spec_sha256_required: 8007edf4e00aaefc298bf299bf19be9a71c54e73ff6a1610eb676a806773e156
+spec_hash: 8007edf4e00aaefc298bf299bf19be9a71c54e73ff6a1610eb676a806773e156
+write_set:
+- .claude/dev/launcher.py
+- .claude/dev/launcher_test.py
+effective_write_set:
+- .claude/dev/launcher.py
+- .claude/dev/launcher_test.py
+write_set_hash: 0a2ec511e97d0e14ff9be00f73e539bf638d78639d8eda25fb52ebf46e1c9f65
+change_policy_sha: null
+branch: agent/wp685-r28-g5-claude
+branch_ownership: exclusive
+target_branch_neu_land: master
+base_sha: ab457c651eb4428705f0492163080b661c858b72
+start_from_sha: ab457c651eb4428705f0492163080b661c858b72
+reviewed_sha_required: ab457c651eb4428705f0492163080b661c858b72
+prompt_path: ops/prompts/wp685-r28-g5-claude-20261009.md
+prompt_sha256_required: d3b8cdf56594e2c0cc604a2f09e273bed988ad7e14f5922767a48d2df59b62ca
+granted_by: ducthangho
+granted_on_instruction: https://github.com/ducthangho/tra-luat/issues/686
+granted_on_instruction_note: hieu luc khi chu kho dang comment cap quyen tren #686 neo lease_id + plan_hash r8 + spec sha256 r28
+grant_context_url: https://github.com/ducthangho/tra-luat/issues/686#issuecomment-6091630409
+recorded_by: claude-dispatcher-session
+recorder_is_executor: true
+recorder_is_executor_ghi_chu: chu kho tra loi Doi executor sang Claude (toi) trong phien dieu phoi, nen phien ghi lease nay CUNG la executor (cung phien, khong chi cung ho). Tu luc cap, phien ay chi giu vai executor tren wp685 (PROTOCOL muc 1.8) - khong dispatch, khong dung sandbox, khong soan assignment rieng cho reviewer cua chinh ung vien minh, khong ghi event review hay bien nhan; chi dien copyable_prompt theo mau reviewer cua docs/prompts/MANUAL_SUCCESSOR_HANDOFF_D0.md roi dung; reviewer Codex do chu kho hay phien khac goi (PROTOCOL muc 7, executor khong tu tao review co tham quyen). Theo #686 6091630409 chu kho dong y: Codex review chay trong mot phien Claude Code cloud RIENG (create_session) - phien nay chi tao phien ay va gui dung copyable_prompt D0, khong dung sandbox, khong viet assignment rieng, khong cham checkout cua reviewer.
+leased_at_utc: '2026-10-10T00:38:00Z'
+lease_expires_at_utc: '2026-10-10T17:30:00Z'
+han_ghi_chu: >-
+  Goc 2026-10-11T00:38:00Z. RUT NGAN ve 2026-10-10T17:30:00Z — xem thu_hoi_bang_rut_han.
+run_minutes: 90
+heartbeat_minutes: 30
+attempts_used: 0
+attempts_limit: null
+review_rounds_limit: 10
+review_rounds_limit_basis: chu kho xac nhan tuong minh trong comment duyet MCR-686-08 (#686 6091630409) - 10 luot chi cho wp685 g5, du vuot tran 2 luot Codex/PR cua PROTOCOL muc 8
+requires_live: false
+ci_policy: no_ci_or_full_ci_until_merge_readiness
+push_policy: one_code_push_after_zero_p1_p2_p3
+thay_the_cho: []
+generation_truoc: wp685-r23-g4b-codex-20261007
+generation_truoc_ghi_chu: g4b het han 2026-10-08T23:00:00Z, attempts_used 0, khong nhanh agent/wp685* (theo dieu phoi) => KHONG bia mo (lease da chet; CLAUDE.md bai hoc 20-09-2026). MCR-686-08 doi executor/environment => revision 28, generation 5 (r25 thay ban soan r24 sau cross-review luot 1; r26 thay ban soan r25 sau cross-review luot 2; r27 thay ban soan r26 sau cross-review luot 3; r28 thay ban soan r27 sau cross-review luot 4).
+attempts_limit_basis: chu kho duyet MCR-686-08 (#686 6091630409) - generation 5 khong tran attempt, dem tu 0; envelope khac giu nguyen
+same_failure_limit: 10
+same_failure_limit_basis: chu kho duyet MCR-686-08 (#686 6091630409) - chi generation 5, dem tu 0; lich su g2-g4 la du lieu; envelope same_failure_limit 2 van rang buoc packet khac va generation sau
+evidence_ref: refs/heads/agent/wp685-r28-g5-claude (chu kho chi dinh trong #686 6091630409; phien executor duoc day len do)
+mission_event_url: https://github.com/ducthangho/tra-luat/issues/686#issuecomment-6091708046
+mission_projection_url: https://github.com/ducthangho/tra-luat/issues/686#issuecomment-6091711162
+lease_sua_lan_cuoi: '2026-10-10T16:45Z'
+lease_sua_ghi_chu: >-
+  Lan 1: rut ngan lease_expires_at_utc (thu_hoi_bang_rut_han). Khong doi write set, spec, branch.
+thu_hoi_bang_rut_han:
+  han_goc_utc: '2026-10-11T00:38:00Z'
+  han_moi_utc: '2026-10-10T17:30:00Z'
+  chi_thi: >-
+    Uy quyen land cua chu kho, PR #732 comment 6099610473 (ducthangho, OWNER), muc "Thao tac sau merge duoc phep":
+    rut han lease wp685-r28-g5-claude-20261009 tren ops/wp685-r28-g5-lease.
+  ly_do: >-
+    Packet #685 da MERGE: PR #732 (agent/wp685-r28-g5-claude) merge bang merge commit
+    77fb0288dca8483f28209cae42c38d4cb97397d9 (cha bc6630a + 3089b54). Lease khong tu chet khi land (CLAUDE.md);
+    de nguyen thi giu hai duong dan write set toi 2026-10-11T00:38Z.
+  vi_sao_khong_dung_so: >-
+    Theo tien le #710 g5 (e870d7a), #678 g1 (62962c7), #705 g3 (c5881a0): rut han dung co che da cai. Han moi dat
+    SAU luc push de luot dang lease (neu chay) con thay lease song, tranh rc=8 che rc=9 (bai hoc 20-09). Khong bia mo:
+    khong co lease ke nhiem.
+  nguoi_rut: 'land operator, phien Claude Code session_014N46zU47UjPmRbH4UNrEf5'
+  nghiem_thu: 'ai-dang-giu cho hai duong dan write set sau 17:30Z phai ra NGUOI_GIU 0 — do o PR ghi so.'

@@ -1,10 +1,9 @@
 # -*- coding: utf-8 -*-
 """wp727 — `_refresh_nlm_auth` gọi `nlm auth refresh` (không còn `nlm login --check`) và KHÔNG mở được cổng.
 
-N1 argv/timeout · N2 refresh trả True mà canary False/None ⇒ 0 upload, rc 4 (kể cả --refresh --force), canary
-True ⇒ đúng 1 upload · N3 lỗi của refresh không lan và không chặn canary · N4 `login --check` trong tl_gws.py chỉ
-nằm ở các dòng thuộc danh sách CHO PHÉP (kiểm TĨNH, phụ) · N5 đầu ra THẬT của từng nhánh gợi ý WP727 sửa (tuổi cookie,
-load thiếu fileId / hạ cấp / token xoay hết hạn, lệnh load, lệnh pull) không gợi ý `login --check` và không lộ cookie.
+N1 argv/timeout · N2 canary False/None ⇒ 0 upload rc 4 (kể cả --refresh --force), True ⇒ 1 upload; refresh quá hạn ⇒
+DỪNG · N3 lỗi refresh không lan · N4 `login --check` chỉ ở dòng/chuỗi CHO PHÉP (tĩnh, phụ) · N5 đầu ra THẬT của từng
+nhánh gợi ý WP727 sửa không gợi ý `login --check` và không lộ cookie.
 """
 
 import argparse
@@ -38,8 +37,7 @@ class _Ket:
         self.stderr = "SENTINEL-COOKIE-wp727-err"
 
 
-def _va(module, **thay):
-    return mock.patch.multiple(module, **thay)      # thay thuộc tính tạm, tự trả lại kể cả khi lỗi
+_va = mock.patch.multiple      # thay thuộc tính tạm, tự trả lại kể cả khi lỗi
 
 
 def _goi_refresh(tg, hanh_vi):
@@ -68,7 +66,7 @@ def _n1_n3(tg):
         return False
     argv, kw = log1[0]
     timeout = kw.get("timeout")
-    if (argv[1:] != ["auth", "refresh"] or "--check" in argv or isinstance(timeout, bool)
+    if (argv[1:] != ["auth", "refresh"] or {kw.get("stdout"), kw.get("stderr")} != {subprocess.DEVNULL} or isinstance(timeout, bool)
             or not isinstance(timeout, (int, float)) or not math.isfinite(timeout) or timeout <= 0):
         return False
 
@@ -76,17 +74,18 @@ def _n1_n3(tg):
         raise subprocess.TimeoutExpired(a, k.get("timeout"))
     def hong(a, k):
         raise OSError("no exec")
-    return _goi_refresh(tg, treo)[0] is False and _goi_refresh(tg, hong)[0] is False
+    return _goi_refresh(tg, treo)[0] is None and _goi_refresh(tg, hong)[0] is False   # quá hạn ⇒ None: người gọi DỪNG
 
 
 def _stage(tg, canary, refresh_rc=0, ket_qua_ra=None):
-    """Chạy `nlm-auth-stage --refresh --force` với nlm giả, cookie GIÀ (20 ngày ⇒ có in ghi chú tuổi);
-    trả (rc, số upload, thứ tự sự kiện). `ket_qua_ra` (list) nhận stdout+stderr của lệnh."""
+    """`nlm-auth-stage --refresh --force`, nlm giả, cookie 20 ngày; trả (rc, số upload, sự kiện); `ket_qua_ra` nhận đầu ra."""
     su_kien, upload = [], []
     ra, loi = io.StringIO(), io.StringIO()
 
     def run(argv, **kw):
         su_kien.append("refresh")
+        if refresh_rc == "treo":
+            raise subprocess.TimeoutExpired(argv, kw.get("timeout"))
         return _Ket(refresh_rc)
     def alive(nb, **kw):
         su_kien.append("canary")
@@ -113,10 +112,12 @@ def _n2(tg):
             rc, n_up, su_kien = _stage(tg, canary, refresh_rc)
             if rc != 4 or n_up != 0 or su_kien[:1] != ["refresh"] or "canary" not in su_kien:
                 return False
+    rc, n_up, su_kien = _stage(tg, True, "treo")       # refresh quá hạn: cây con có thể còn ghi hồ sơ (review #731)
+    if rc != 2 or n_up != 0 or su_kien != ["refresh"]:
+        return False
     dau_ra = []
     rc, n_up, su_kien = _stage(tg, True, 0, dau_ra)
-    # ĐO ĐẦU RA THẬT (lượt 3, F2c): cookie già ⇒ lệnh in ghi chú tuổi; mọi cách dựng chuỗi (literal, `+`, %, format…)
-    # đều hiện ra ở đây — không được có `login --check`, không được lộ chuỗi canh của tiến trình con.
+    # ĐO ĐẦU RA THẬT (lượt 3, F2c): mọi cách dựng chuỗi đều hiện ra ở đây — không `login --check`, không lộ chuỗi canh.
     ra = dau_ra[0]
     return (rc == 0 and n_up == 1 and su_kien.index("refresh") < su_kien.index("canary")
             and "NGÀY tuổi" in ra and "login --check" not in ra and "SENTINEL-COOKIE" not in ra)
@@ -137,8 +138,7 @@ _CHUOI_CHO_PHEP = frozenset({
 
 
 def _phan_f(v):
-    """Một mảnh f-string: hằng giữ nguyên; `{hằng}` không chuyển đổi/định dạng thì thay bằng str(hằng) (lượt 4, F2d —
-    trước đó mọi `{…}` thành "{}" nên `f"Kiểm: nlm {'login'} --check"` lọt); còn lại không chứng minh được ⇒ "{}"."""
+    """Mảnh f-string: hằng giữ nguyên; `{hằng}` trần ⇒ str(hằng) (lượt 4, F2d); còn lại không chứng minh được ⇒ "{}"."""
     if isinstance(v, ast.Constant):
         return v.value
     if (isinstance(v, ast.FormattedValue) and isinstance(v.value, ast.Constant) and v.conversion == -1
@@ -184,8 +184,7 @@ _CANH = "SENTINEL-COOKIE-wp727"
 
 
 def _vi_pham_dau_ra(van_ban, phai_co):
-    """Đầu ra/thông báo THẬT của một nhánh gợi ý: không gợi ý `login --check`, không lộ cookie, và có dấu nhánh
-    (`phai_co`) — thiếu dấu nghĩa là nhánh không được đi tới, tức phép đo không đo gì."""
+    """Không gợi ý `login --check`, không lộ cookie, có dấu nhánh `phai_co` (thiếu ⇒ nhánh không được đi tới)."""
     return ((["gợi ý login --check"] if "login --check" in van_ban.replace(_PHU_DINH, "") else [])
             + (["lộ chuỗi canh cookie"] if _CANH in van_ban else [])
             + [f"thiếu dấu nhánh {d!r}" for d in phai_co if d not in van_ban])
@@ -199,8 +198,7 @@ def _home_tam():
 
 
 def _nhanh_goi_y(tg):
-    """Chạy offline TỪNG nhánh gợi ý mà WP727 sửa, trả [(tên, văn bản thật, dấu nhánh phải có)].
-    Không mạng, không credential: blob mã hoá bằng token giả, HOME tạm, mọi I/O ngoài bị thay."""
+    """Chạy offline TỪNG nhánh gợi ý WP727 sửa (blob token giả, HOME tạm, không mạng) ⇒ [(tên, văn bản, dấu nhánh)]."""
     import importlib
     import json
     store = tg._imp("gws_cred_store")
@@ -209,16 +207,16 @@ def _nhanh_goi_y(tg):
     blob = store.encrypt(json.dumps(jar).encode("utf-8"), tok)
     nlm_ops = importlib.import_module("tl_core.nlm_ops")
     rot = lambda *a, **k: {"found": True, "expired": True, "name": "__Secure-OFFLINE", "expires_in_min": -5.0}
-    kq = [("tuoi-cookie", tg._nlm_cookie_age_note(20.0), ("NGÀY tuổi", "nlm-credential-refresh.ps1"))]
+    kq = [("tuoi-cookie", tg._nlm_cookie_age_note(20.0), ("NGÀY tuổi", "pwsh -NoProfile -File scripts/nlm-credential-refresh.ps1 -ConfigPath"))]
     kq.append(("load-thieu-fid", tg._nlm_auth_load(tok, "")[1], ("NLM_CRED_FILEID", "canary")))
     with _home_tam(), _va(tg, _public_curl_bytes=lambda *a, **k: blob, _nlm_auth_files_raw=lambda: {},
                           _nlm_auth_load_downgrade=lambda *a: (True, "OFFLINE-cu-hon")):
-        kq.append(("load-ha-cap", tg._nlm_auth_load(tok, "OFFLINE")[1], ("HẠ CẤP", "nlm-credential-refresh.ps1")))
+        kq.append(("load-ha-cap", tg._nlm_auth_load(tok, "OFFLINE")[1], ("HẠ CẤP", "pwsh -NoProfile -File scripts/nlm-credential-refresh.ps1 -ConfigPath")))
     with _home_tam(), _va(tg, _public_curl_bytes=lambda *a, **k: blob, _nlm_auth_files_raw=lambda: {},
                           _nlm_auth_load_downgrade=lambda *a: (False, ""), _nlm_auth_age_days=lambda _n: 20.0), \
             _va(nlm_ops, _nlm_rotation_token_state=rot):
         kq.append(("load-xoay-het-han", tg._nlm_auth_load(tok, "OFFLINE")[1],
-                   ("BUNDLE_ROTATION_TOKEN_EXPIRED", "NGÀY tuổi", "nlm-credential-refresh.ps1")))
+                   ("BUNDLE_ROTATION_TOKEN_EXPIRED", "NGÀY tuổi", "pwsh -NoProfile -File scripts/nlm-credential-refresh.ps1 -ConfigPath")))
     ra = io.StringIO()
     ns = argparse.Namespace(config=None, profile=None, cred_file_id="OFFLINE", force=False)
     with _va(tg, load_creds=lambda *a, **k: None, _nlm_auth_load=lambda *a, **k: (True, "OFFLINE-msg")), \
@@ -256,5 +254,6 @@ def run(tl_module):
     phan_chung_ast = (van_ban + '\nprint("Kiểm: nlm " "login --check")\n',         # hai literal liền nhau (F2b)
                       van_ban + '\nprint(f"x{1}" + " Kiểm: nlm log" + "in --check")\n',   # nối `+` (lượt 3, F2c)
                       van_ban + "\nx = f\"Kiểm: nlm {'login'} --check\"\n")             # `{hằng}` (lượt 4, F2d)
-    return (_n4(van_ban) and not any(map(_n4, phan_chung_dong)) and _n4_ast(van_ban)
+    goi = van_ban.count("_refresh_nlm_auth()") - 1   # trừ dòng `def`; MỌI người gọi phải dừng khi refresh quá hạn
+    return (goi == 3 == van_ban.count("_refresh_nlm_auth() is None") and _n4(van_ban) and not any(map(_n4, phan_chung_dong)) and _n4_ast(van_ban)
             and not any(map(_n4_ast, phan_chung_ast)) and _n1_n3(tg) and _n2(tg) and _n5(tg))

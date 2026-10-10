@@ -763,10 +763,18 @@ def _refresh_nlm_auth():
     if not (os.path.exists(nx) or _sh.which("nlm")):
         return False
     try:
-        p = _sp.run([nx, "auth", "refresh"], capture_output=True, text=True, timeout=120)
+        p = _sp.run([nx, "auth", "refresh"], stdout=_sp.DEVNULL, stderr=_sp.DEVNULL, timeout=120)
         return p.returncode == 0
+    except _sp.TimeoutExpired:  # chỉ con TRỰC TIẾP bị giết; trình duyệt headless có thể còn ghi hồ sơ ⇒ người gọi DỪNG
+        return None
     except Exception:  # noqa: BLE001
         return False
+
+
+def _refresh_treo(tag):
+    print(f"[{tag}] ✗ `nlm auth refresh` quá 120s — trình duyệt con có thể còn ghi hồ sơ; KHÔNG canary, KHÔNG gói. "
+          "Chạy lại khi nó đã dừng.", file=sys.stderr)
+    return 2
 
 
 _NLM_LV_JITTER_S = 120.0     # dung sai đồng hồ (NTP) — mốc "tương lai" trong khoảng này = vừa xác thực xong
@@ -838,7 +846,7 @@ def _nlm_cookie_age_note(age):
     if age is None or age < _NLM_COOKIE_WARN_DAYS:
         return ""
     return (f" ⚠ cookie ~{age:.0f} NGÀY tuổi (sống ~2–4 tuần) — rủi ro hết hạn giữa phiên; re-stage sớm: "
-            "trên máy giữ hồ sơ trình duyệt gốc chạy `scripts/nlm-credential-refresh.ps1` (refresh → canary → stage).")
+            "trên máy giữ hồ sơ trình duyệt gốc chạy `pwsh -NoProfile -File scripts/nlm-credential-refresh.ps1 -ConfigPath <config>` (refresh → canary → stage).")
 
 
 def _nlm_canary_notebook(entry_notebook: str | None) -> str:
@@ -953,7 +961,8 @@ def _secrets_stage_body(a, entry_notebook) -> int:
         if bundle.pop("nlm_auth", None) is not None:
             print("[secrets-stage] --no-nlm: đã bỏ nlm_auth có sẵn trong config khỏi bundle.", file=sys.stderr)
     else:
-        _refresh_nlm_auth()                           # ép nlm tái sinh cookie từ browser profile → gói bản mới nhất
+        if _refresh_nlm_auth() is None:               # làm tươi cookie trước khi gói; quá hạn ⇒ DỪNG
+            return _refresh_treo("secrets-stage")
         if not _nlm_auth_files():                      # chỉ hỏi CÓ jar không; bytes để gói đọc SAU canary
             # WP714: bundle GHI ĐÈ SECRETS_FILEID — gói thiếu NLM (hoặc gói nlm_auth cũ của config) mà rc0 là âm thầm
             # xoá/đẩy lại credential trên Drive (đo PR #714). Thiếu jar ⇒ DỪNG; chủ ý bỏ NLM thì `--no-nlm`.
@@ -1020,7 +1029,8 @@ def _secrets_set_body(a, entry_notebook) -> int:
             return 3
         bundle["gws_cred"] = cred.decode("utf-8"); changed.append("gws_cred")
     if getattr(a, "nlm", False):                       # refresh cookie nlm tại chỗ (định kỳ ~2–4 tuần)
-        _refresh_nlm_auth()
+        if _refresh_nlm_auth() is None:
+            return _refresh_treo("secrets-set")
         if not _nlm_auth_files():                      # chỉ hỏi CÓ jar không; bytes để gói đọc SAU canary
             print("[secrets-set] ✗ --nlm cần `nlm login` ở máy này.", file=sys.stderr)
             return 3
@@ -1694,7 +1704,7 @@ def _nlm_auth_load(token: str, fid: str, force: bool = False):
     if _dg and not force:
         return False, ("TỪ CHỐI HẠ CẤP — " + _why_dg + ". Bản trên Drive CŨ HƠN bản cục bộ: ghi đè sẽ "
                        "LÀM MẤT cookie tươi hơn đang có. Muốn cố ý: `--force`. Đường đúng khi cookie "
-                       "chết hẳn: đăng nhập lại trên máy giữ hồ sơ gốc rồi chạy `scripts/nlm-credential-refresh.ps1` (refresh → canary → stage).")
+                       "chết hẳn: đăng nhập lại trên máy giữ hồ sơ gốc rồi chạy `pwsh -NoProfile -File scripts/nlm-credential-refresh.ps1 -ConfigPath <config>` (refresh → canary → stage).")
     nbase = os.path.expanduser("~/.notebooklm-mcp-cli")
     for rel, content in nlm.items():
         dst = os.path.join(nbase, *str(rel).split("/"))
@@ -1717,7 +1727,7 @@ def _nlm_auth_load(token: str, fid: str, force: bool = False):
         if _rs.get("found") and _rs.get("expired"):
             _rot_b = (f" ⚠ BUNDLE_ROTATION_TOKEN_EXPIRED: {_rs['name']} trong bundle hết hạn "
                       f"{abs(_rs['expires_in_min']):.0f}' trước — bản vừa nạp KHÔNG hồi sinh được phiên; "
-                      "phải đăng nhập lại trên máy giữ hồ sơ gốc rồi chạy `scripts/nlm-credential-refresh.ps1` (refresh → canary → stage).")
+                      "phải đăng nhập lại trên máy giữ hồ sơ gốc rồi chạy `pwsh -NoProfile -File scripts/nlm-credential-refresh.ps1 -ConfigPath <config>` (refresh → canary → stage).")
     except Exception:  # noqa: BLE001 — cảnh báo best-effort, không chặn nạp
         pass
     return True, (f"~/.notebooklm-mcp-cli ({len(nlm)} file"
@@ -1745,8 +1755,8 @@ def _nlm_auth_stage_body(a, entry_notebook) -> int:
     if not token:
         print("[nlm-auth-stage] ✗ thiếu webapp token (TL_TOKEN/config) — không có khoá mã hoá.", file=sys.stderr)
         return 2
-    if getattr(a, "refresh", False):
-        _refresh_nlm_auth()
+    if getattr(a, "refresh", False) and _refresh_nlm_auth() is None:
+        return _refresh_treo("nlm-auth-stage")
     if not _nlm_auth_files():                          # tiền kiểm CÓ jar không: hàm này ĐỌC jar vào RAM rồi bỏ; payload được đọc LẠI sau canary dương
         print("[nlm-auth-stage] ✗ chưa có cookie nlm ở máy này — chạy `nlm login` trước.", file=sys.stderr)
         return 3

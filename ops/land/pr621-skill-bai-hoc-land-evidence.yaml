@@ -1,0 +1,361 @@
+# HO SO LAND — PR #621 "docs(skill): ba bai hoc co hoc da do" (adapter .claude/skills/cross-review + work-packet).
+# Schema chuan: docs/PROTOCOL_DA_PHIEN.md §7 (land evidence tach approval khoi thao tac), §13.1 (evidence truoc/sau land).
+# Duong dan ops/land/*-land-evidence.yaml la QUY UOC THUC TE (tien le pr718 #678, pr707 #705, pr703 #674).
+#
+# TRANG THAI: merged (3fc0932). Gate hau-merge 3fc0932 XANH 14/14 (run 37942714195). `landed` o tep nay = false:
+# theo tien le, `landed: true` chi co hieu luc tu merge commit cua PR ghi so KE TIEP, sau khi chu kho quyet cac diem
+# not_measured duoi day. "merged" KHONG dong nghia "landed" (PROTOCOL §10.2.4).
+# NHAN: measured = do lai trong phien ghi so (lenh ghi kem) VA `kiem_ho_so.py --repo <clone> --tu-kiem` doi TUNG cum chu so cua la do ma bo kiem DO
+# bang MOT CHOT (khong do vi traceback). Pham vi tu-kiem: la co chu so trong nut `trang_thai: measured` hoac chuoi mo dau `measured`. NGOAI pham vi:
+# khoa tuong thuat (lenh, mo_ta, pham_vi, ghi_chu, dinh_chinh, nguon, readback, checkout, vai_tro, hien_vat, kiem_bang_may — xem _TUONG_THUAT); la KHONG co chu so;
+# chuoi khong mo dau bang `measured` (vd trang_thai_packet.landed_ly_do, khong_do_duoc[*].mo_ta, pre_merge_checks[0..2].moc); khoi khong gan nhan (bookkeeping,
+# uy_quyen.*, human_audit.assurance_dat/ghi_chu). Cac khoi nay chi co chot rieng cho MOT SO su that (kiem_ho_so.py), KHONG duoc --tu-kiem chung minh. Toan tu
+# tu-kiem chi doi CHU SO: doi TU (success/OWNER/push/ci.yml) trong la measured KHONG bi thu. pre_merge_checks[0..2].{event,run_attempt,head_sha,workflow} co chot rieng.
+# MAU THAN comment quyet dinh chu kho (kiem_ho_so.py than_sai; moi muc MOT dong rieng, KHONG kem dau backtick): `Reviewed commit: <40 hex head cua PR ghi so>`;
+# ba dong `MOC-WORKFLOW-DEFINITION: chap_nhan <4 run id cach nhau dau phay>`, `RC-SO-CHI-CO-STEP-CONCLUSION: chap_nhan <...>`, `CHECKOUT-IDENTITY: chap_nhan <...>`;
+# mot dong `assurance_dat: chap_nhan`. THAN CHI GOM cac dong mau do (bat dau o cot 0) va dong trong; DUOC: CRLF, dau cach cuoi dong, thu tu dong bat ky, run cach `,` hoac `, `.
+# TU CHOI CA THAN moi dong khac (van xuoi, dau danh sach, thut, khoi rao, trich dan, HTML, in dam, lien ket...) va moi ky tu ngoai ASCII in duoc (BOM, NBSP, tab, CR don,
+# U+2028, chu co dau, ky tu vo hinh): y kien viet bang loi dat o MOT COMMENT KHAC. Comment phai do CHINH chu kho dang
+# (khong qua app), khong sua sau khi dang.
+# thuat_lai = so lieu cua luot review, khong tai chay;
+# not_measured = khong do duoc, ghi ly do.
+# Readback tho: ops/land/pr621-skill-bai-hoc-provenance/ (SHA256SUMS.txt). Kiem nhat quan ho so <-> hien vat:
+# `python -I ops/land/pr621-skill-bai-hoc-provenance/kiem_ho_so.py [--repo <clone day du>]`. Moi phep do REST: `gh api <duong dan>` (GET,
+# client GitHub dung san cua Claude Code qua proxy phien). Log job KHONG tai trong ho so nay.
+
+schema_version: 1
+# --- Khoa CHUAN theo docs/PROTOCOL_DA_PHIEN.md §7 "Land evidence tach approval khoi thao tac" (them sau Codex review
+# PR #723, comment 4231975363). Chi tiet do duoc nam o cac khoi tieng Viet ben duoi; khoa chuan tro toi chung.
+mission_id: null
+mission_id_nghia: 'PR #621 khong thuoc Mission/Packet nao (xem packet_issue_nghia); null la gia tri CO Y, khong phai bo sot.'
+generation: 1
+generation_nghia: 'Lan land THU NHAT cua PR #621 (land-attempt generation).'
+model_family: claude
+input_packet_generations: []
+input_packet_generations_nghia: 'Khong co Packet dau vao (xem packet_issue_nghia).'
+authorized_head_sha: 658bd0cdc56bbd3445f489dcfc571e22eee7d675
+approver: ducthangho
+authorization_url: https://github.com/ducthangho/tra-luat/pull/621#issuecomment-6082660033
+land_operator: >-
+  phien Claude Code session_01Fd7YEcw3odAk7QKkydKycE, goi merge qua MCP github bang credential chu kho (loi_khai_co_neo;
+  merged_by trong pr-621.json la tai khoan ducthangho — khong tach chu kho khoi phien agent, #566).
+merge_method: merge
+merge_commit: 3fc0932a3d1617c4352e5a7982f2e6e4208ca3f7
+pre_merge_checks:
+  # 17 check run trong checkruns-658bd0c.json thuoc DUNG 4 workflow run (details_url .../runs/<id>/job/...); moi run co
+  # readback run-<id>.json (gh api repos/ducthangho/tra-luat/actions/runs/<id>). Bon moc tung run, tach ro:
+  #   event + run_attempt + head_sha + path: measured (REST run object);
+  #   workflow_blob (OID dinh nghia workflow), checkout (cay runner checkout), rc so + output duong: not_measured
+  #   (khong tai log/artifact) — xu ly theo khong_do_duoc, PHAM VI LIET KE THEO run_id, khong mien tru chung.
+  - run_id: 37928221219
+    workflow: .github/workflows/ci.yml (name gate)
+    event: pull_request
+    run_attempt: 1
+    head_sha: 658bd0cdc56bbd3445f489dcfc571e22eee7d675
+    check_runs: '14 (chuan-bi, gate, gate-ops, gate-packet-loop, gate-registry, gate-cong-cu x8, gate-cong-cu-gop) — 14 success'
+    ten_check: [chuan-bi, gate, gate-ops, gate-packet-loop, gate-registry, gate-cong-cu, gate-cong-cu, gate-cong-cu, gate-cong-cu,
+                gate-cong-cu, gate-cong-cu, gate-cong-cu, gate-cong-cu, gate-cong-cu-gop]
+    moc: 'event/attempt/head/path: measured; workflow_blob, checkout, rc, output: not_measured (xem khong_do_duoc)'
+  - run_id: 37928217849
+    workflow: .github/workflows/ops-thu-hoi-admission.yml (name thu-hoi)
+    event: pull_request_target
+    run_attempt: 1
+    head_sha: 658bd0cdc56bbd3445f489dcfc571e22eee7d675
+    check_runs: '1 (thu-hoi) — success'
+    ten_check: [thu-hoi]
+    moc: 'event/attempt/head/path: measured; workflow_blob, checkout, rc, output: not_measured (xem khong_do_duoc); pull_request_target doc dinh nghia workflow tu nhanh BASE, khong tu PR'
+  - run_id: 37942625684
+    workflow: .github/workflows/ops-thu-hoi-admission.yml (name thu-hoi)
+    event: pull_request_target
+    run_attempt: 1
+    head_sha: 658bd0cdc56bbd3445f489dcfc571e22eee7d675
+    check_runs: '1 (thu-hoi, lan 2 — kich boi khi chuyen ready_for_review) — success'
+    ten_check: [thu-hoi]
+    moc: 'event/attempt/head/path: measured; workflow_blob, checkout, rc, output: not_measured (xem khong_do_duoc); pull_request_target doc dinh nghia workflow tu nhanh BASE'
+  - run_id: 37928243461
+    workflow: .github/workflows/ops-open-pr.yml
+    event: push
+    run_attempt: 1
+    head_sha: 658bd0cdc56bbd3445f489dcfc571e22eee7d675
+    check_runs: '1 (mo) — skipped; KHONG tinh la cong dat'
+    ten_check: [mo]
+    moc: 'skipped => khong co gi de neo; khong can mien tru'
+  - tong: 'measured — 14 + 1 + 1 + 1 = 17 check run = 16 success + 1 skipped (mo).'
+post_merge_checks:
+  - run_id: 37942714195
+    workflow: .github/workflows/ci.yml (name gate)
+    event: push
+    run_attempt: 1
+    head_sha: 3fc0932a3d1617c4352e5a7982f2e6e4208ca3f7
+    check_runs: '14 (chuan-bi, gate, gate-ops, gate-packet-loop, gate-registry, gate-cong-cu x8, gate-cong-cu-gop) — 14 success'
+    ten_check: [chuan-bi, gate, gate-ops, gate-packet-loop, gate-registry, gate-cong-cu, gate-cong-cu, gate-cong-cu, gate-cong-cu,
+                gate-cong-cu, gate-cong-cu, gate-cong-cu, gate-cong-cu, gate-cong-cu-gop]
+    check: 'CI push tren master 3fc0932 — workflow gate, run 37942714195'
+    ket_qua: 'measured — run-37942714195.json completed success; checkruns-3fc0932.json: 14 check run, 14 success.'
+    moc_checkout: 'not_measured — khong tai log; run_head_sha = 3fc0932 chi la REST run head, KHONG la bang chung checkout (§10.2.2). Xem khong_do_duoc CHECKOUT-IDENTITY.'
+    moc_workflow_definition: 'not_measured — xem khong_do_duoc MOC-WORKFLOW-DEFINITION.'
+    rc: 'not_measured — xem khong_do_duoc RC-SO-CHI-CO-STEP-CONCLUSION.'
+bookkeeping:
+  - muc: 'Ho so land + provenance (PR #723)'
+    trang_thai: 'mo — chua merge'
+  - muc: 'Quyet dinh chu kho cho cac diem khong_do_duoc va cho assurance_dat cua human audit'
+    trang_thai: 'mo — can chu ky moi tren head hien hanh cua PR #723 (chu ky tren 06fc9a8, comment 6084105994, da het hieu luc vi head doi)'
+  - muc: 'PR ghi so ke tiep doi landed: true (tien le #719 -> #720)'
+    trang_thai: 'chua lam'
+# --- Het khoi khoa chuan.
+pr: 621
+packet_issue: null
+packet_issue_nghia: >-
+  PR #621 khong gan Packet Issue/lease rieng: noi dung la ba bai hoc co hoc rut tu phien review #589 (lease g5) va Issue
+  #619, ghi vao hai adapter skill (dev-side, khong vao goi phat hanh). Viec land do chu kho chi thi truc tiep trong phien
+  (09-10) va ky human audit tren PR (xem uy_quyen).
+pham_vi_land: tai_lieu_adapter
+write_set:
+  - .claude/skills/cross-review/SKILL.md   # +191
+  - .claude/skills/work-packet/SKILL.md    # +14
+provider: claude
+execution_surface: claude_code
+transport: machine/local
+transport_nhan: >-
+  loi_khai_co_neo (session URL) — mot phien Claude khong tu chung minh be mat chay cua chinh no; Claude Code =
+  machine/local theo provider plan (tien le pr718).
+environment: cloud
+operating_system: linux
+role: land_operator
+session_id: https://claude.ai/code/session_01Fd7YEcw3odAk7QKkydKycE
+do_luc: '2026-10-09T12:0xZ..2026-10-10T11:29Z (core.abbrev 7; 09-10 12:0x-14:4x = phien land; 09-10 17:11Z = cong tai cho; ai-dang-giu do lai tren head cuoi 2026-10-10T11:29Z: hai hien vat do ghi so con luu)'
+
+ung_vien:
+  head_sha: 658bd0cdc56bbd3445f489dcfc571e22eee7d675
+  head_drift:
+    trang_thai: measured
+    mo_ta: >-
+      Head duoc review AI cuoi (luot 18) la 675895d tren merge-base 6980e5b. Master di truoc 809 commit (8b59185). Phien
+      land merge origin/master vao nhanh => 658bd0c (khong xung dot; master khong cham hai tep cua PR).
+    dem_commit:
+      trang_thai: measured
+      lenh: >-
+        tren clone DAY DU (is-shallow-repository=false, scratch quet621b): git rev-list --count 6980e5b..8b59185 => 809;
+        git rev-list --left-right --count 675895d...8b59185 => 19 809.
+      so: {base_den_master: 809, rieng_nhanh: 19, rieng_master: 809}
+      dinh_chinh: >-
+        Ban dau cua tep nay ghi 989 — dem tren kho phien NONG (is-shallow-repository=true), dung bay CLAUDE.md da canh bao.
+        Codex review PR #723 (comment 4231894088) bat duoc; so 809 do lai tren clone day du.
+    lenh: >-
+      tren clone day du quet621b, OID DAY DU, `git -c core.abbrev=7 diff <A> <B> | sha256sum`:
+      A=6980e5bf04e4e5b8b75e5817578f1aba13f2f5ab B=675895db34e9a7c1357f8d8ad8925bf8f01ad21c =>
+      e5bde9ba8623b16b34066da23b361db604b324f020cc43f4e3efdc9755ba872e;
+      A=8b59185975a938504de5963d2310e574dd4858b2 B=658bd0cdc56bbd3445f489dcfc571e22eee7d675 => cung digest ay
+      => diff PR khong doi; head doi chi vi BASE. Luu DIGEST DAY DU, khong luu diff tho (noi dung #621 co dong chi
+      chua khoang trang => `git diff --check` cua lan nhanh CI se do); tai lap: kiem_ho_so.py --repo <clone day du>.
+    phan_chung: >-
+      measured — digest PHU THUOC core.abbrev (dong `index` cua diff): voi core.abbrev=40 ca hai cap cho
+      a84165a5a4ed201b35132caab46bd102bcb25d63d1568d0f3410fb8fe599166a (van bang nhau); thay A bang ref SAU merge
+      3fc0932a3d1617c4352e5a7982f2e6e4208ca3f7 => e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+      (diff RONG) — nen KHONG duoc dung ref di dong (origin/master).
+    dinh_chinh: >-
+      Ban dau ghi `git diff origin/master 658bd0c` (ref di dong, nay tro 3fc0932 => diff rong) va digest cat ngan; Codex
+      PR #723 (comment 4232133827) bat duoc.
+  cong_tai_cho_tren_ung_vien:
+    luot_goc_truoc_merge:
+      trang_thai: thuat_lai
+      ket_qua: 'doctrine-scan sach (10 tep, 0 cho chep) · adr-song rc=0 · doc-claims-check ok=true · idiom_py_test TONG DAT · eol_policy --all rc=0'
+      nguon: 'tom tat cua land operator (comment-6080596360.json); output/rc tung cong cua luot goc KHONG duoc luu.'
+      trich_nguyen_van:   # tung manh PHAI co nguyen van trong dong "Cong tai cho" cua comment nguon (kiem_ho_so.py muc 6b)
+        - '`doctrine-scan` sạch (10 tệp, 0 chỗ chép)'
+        - '`adr-song` rc=0'
+        - '`doc-claims-check` `ok=true`'
+        - '`idiom_py_test` TỔNG ĐẠT'
+        - '`eol_policy --all` rc=0'
+      dinh_chinh: 'Ban dau gan nhan measured ma khong co hien vat — Codex PR #723 (comment 4232133821) bat duoc.'
+    do_lai_luc_ghi_so:
+      trang_thai: measured
+      pham_vi: >-
+        DO LAI tren CUNG cay 658bd0cdc56bbd3445f489dcfc571e22eee7d675 luc ghi so (2026-10-09 17:11Z = LUC trong hien vat; lan do lai thu hai, ban dau ghi ~16:15Z), clone moi tu
+        quet621b, core.abbrev 7. La bang chung cay ung vien DAT cac cong nay; KHONG la bang chung luot goc da chay.
+      hien_vat: 'cong-tai-cho-658bd0c.txt (moi cong: dong `### LENH`, output nguyen van, dong `### RC=` cua chinh lenh)'
+      checkout: >-
+        Dong dau `### CHECKOUT: HEAD=<sha> TREE=<tree> SACH=co` va dong cuoi `### CHECKOUT-SAU: ...` do bang git rev-parse +
+        git status --porcelain TRONG CUNG clone, ngay truoc va ngay sau 5 lenh (lan do lai thu hai, 17:11Z) — Codex PR
+        #723 (comment 4232647532): ban truoc khong neo checkout.
+      ket_qua:
+        - {lenh: 'python .claude/dev/packet_loop.py doctrine-scan --root .', rc: 0, dau_duong: 'doctrine-scan: sạch — đã quét 10 tệp, 0 chỗ chép doctrine'}
+        - {lenh: 'python .claude/dev/packet_loop.py adr-song --root .', rc: 0, dau_duong: 'adr-song: sạch — 50 ADR trên đĩa, 50 dòng trong §20, khớp 1–1'}
+        - {lenh: 'python scripts/tl.py doc-claims-check --strict --json', rc: 0, dau_duong: '"ok": true'}
+        - {lenh: 'python .claude/dev/idiom_py_test.py', rc: 0, dau_duong: 'TỔNG: ĐẠT'}
+        - {lenh: 'python .githooks/eol_policy.py --all --json', rc: 0, dau_duong: '"ok": true'}
+  ci_pr_tren_ung_vien:
+    trang_thai: measured
+    ket_qua: '17 check run = 16 success (gom 2 thu-hoi) + 1 skipped (mo) (readback checkruns-658bd0c.json).'
+    dinh_chinh: 'Ban dau ghi "15 success + 1 skipped; thu-hoi 2 lan" — dem lech 1 (Codex PR #723, comment 4231975348).'
+
+review_ai_truoc_drift:
+  trang_thai: stale_theo_AGENTS_md_muc_6
+  verdict: approve
+  reviewed_sha: 675895db34e9a7c1357f8d8ad8925bf8f01ad21c
+  reviewer: 'claude-opus-5-5 effort xhigh (same_provider)'
+  tong: 'P0=0 P1=0 P2=0 P3=0'
+  luot: 18
+  neo: https://github.com/ducthangho/tra-luat/pull/621#issuecomment-5917112447
+  readback: comment-5917112447.json
+  vai_tro: >-
+    CHI LA BANG CHUNG THAM KHAO. AGENTS.md §6: "head SHA doi sau review hoac sau CI; review, gate va authorization cu deu
+    stale". Head da doi 675895d -> 658bd0c (merge base), nen verdict nay KHONG la review cua head da merge, du diff PR so
+    master giong tung byte (sha256 e5bde9ba...). Dinh chinh: ban dau tep nay ghi verdict ay "ap cho diff PR o 658bd0c" —
+    Codex review PR #723 (comment 4231894072, P1) bat duoc.
+
+review_tai_head_da_merge:
+  human_audit:
+    url: https://github.com/ducthangho/tra-luat/pull/621#issuecomment-6082660033
+    assurance: human_audited
+    assurance_dat: >-
+      KHAI, CHUA DAT day du theo PROTOCOL §8 muc 2 (`tu doc spec/diff`, doc lap voi Executor/tac gia): than comment 6082660033 dan
+      lai review AI luot 18 (stale) va so bam diff ('noi dung khong doi'), KHONG noi nguoi audit tu doc diff; khong co dong
+      `Reviewed commit:`; ghi 'CI 15/15' trong khi do duoc 17 (16+1); danh tinh OWNER khong tach khoi phien agent (#566).
+      Chu kho quyet co chap nhan muc nay khong (tien le pr594 THIEU_HUT_BAO_DAM).
+    verdict: approve
+    reviewed_sha: 658bd0cdc56bbd3445f489dcfc571e22eee7d675
+    do_duoc: >-
+      measured (comment-6082660033.json, gh api repos/ducthangho/tra-luat/issues/comments/6082660033): user ducthangho,
+      author_association OWNER, performed_via_github_app null, created_at = updated_at 2026-10-09T14:13:00Z, than 797 byte
+      sha256 5cc58b4a788fd0218ae7ade0bed3353992cd89393451896046ff3f65e34c20c9, LF x6, khong LF cuoi, 0 "&#"; dong dau
+      "Human audit — approve #621 tai head 658bd0c..." (SHA day du xuat hien 1 lan).
+    ghi_chu: >-
+      GitHub khong cho tac gia PR Approve PR cua chinh minh (PR #621 do tai khoan chu kho mo qua phien agent), nen chu kho
+      ky bang comment thuong. author_association OWNER khong tach chu kho khoi phien agent dung token chu kho (#566).
+  codex_connector:
+    ket_qua: >-
+      measured (comment-6082682461-codex.json, reviews-621.json, review-comments-621.json): Codex review kich boi "Draft
+      marked ready" tren 658bd0c, Completed 2026-10-09T14:16:42Z; PR #621 co 0 review object va 0 review comment => KHONG co gop y nao duoc ghi
+      (suy luan 'sach' tu hai mang rong; gio doc hai mang ay va phan ung thumbs-up cua connector KHONG duoc luu).
+    may_doc:
+      tac_gia: chatgpt-codex-connector[bot]
+      trang_thai: Completed
+      commit: 658bd0c
+      luc: '2026-10-09T14:16:42.336531Z'
+      trigger: Draft marked ready
+    do_day_du_danh_sach: >-
+      reviews-621.json va review-comments-621.json la mang RONG `[]` tu GET khong tham so trang; GitHub tra trang dau rong
+      chi khi tong = 0, nen rong tren trang 1 = rong toan bo. Header Link KHONG luu (khong can khi trang dau rong).
+    thu_tu_thoi_gian: >-
+      measured — merge 14:14:34Z (merged_at, pr-621.json) TRUOC khi Codex hoan tat (14:16:42Z). Hai mang rong KHONG chung minh "sach"
+      (xem ket_qua); merge KHONG doi review bot ve xong; ghi lai de khong lap lai (bai hoc CLAUDE.md "gate xanh khong phai da review").
+    dinh_chinh: 'Ban truoc ghi nham merged_at la 14:14:35Z; va noi "ket qua sach nen khong co finding bi bo qua" (suy luan tu hai mang rong, khong do duoc).'
+
+uy_quyen:
+  nguon: human_audit_chu_kho
+  neo_ben: https://github.com/ducthangho/tra-luat/pull/621#issuecomment-6082660033
+  luc: '2026-10-09T14:13:00Z'
+  readback: comment-6082660033.json
+  noi_dung: >-
+    "Human audit — approve #621 tai head 658bd0cdc56bbd3445f489dcfc571e22eee7d675"; uy quyen merge DUNG SHA 658bd0c bang
+    merge commit (khong squash), roi hau-merge gate va bookkeeping; head doi them thi het hieu luc.
+  ghi_chu: >-
+    GitHub khong cho tac gia PR Approve PR cua chinh minh (PR #621 do tai khoan chu kho mo qua phien agent), nen chu kho
+    ky bang comment thuong. author_association OWNER khong tach chu kho khoi phien agent dung token chu kho (#566).
+  sai_so_trong_than_da_ky: >-
+    Than comment uy quyen (do land operator soan, chu kho dang) ghi "CI tren 658bd0c: 15/15 success (1 skipped)" — dem
+    lech; so do dung la 17 = 16 success + 1 skipped (pre_merge_checks). Dong ay la mo ta, KHONG thuoc pham vi uy quyen
+    (SHA 658bd0c, merge commit, khong squash); ghi lai de khong ai trich no lam so do.
+  guard: >-
+    packet_loop.py guard --action merge => rc=7 (dung thiet ke, vai executor); packet_loop.py ghi-uy-quyen --action merge
+    --nguoi-cap ducthangho --bang-chung <neo_ben> --head-sha 658bd0c... => rc=0 ("LOI KHAI, khong phai bang chung").
+
+thao_tac_merge:
+  phuong_thuc: merge
+  expected_head_sha: 658bd0cdc56bbd3445f489dcfc571e22eee7d675
+  lan_thu_nhat: '405 Pull Request is still a draft => chuyen ready_for_review; doi job thu-hoi (kich boi comment) xanh, mergeable_state clean'
+  merge_commit: 3fc0932a3d1617c4352e5a7982f2e6e4208ca3f7
+  cha:
+    - 8b59185975a938504de5963d2310e574dd4858b2   # master truoc merge
+    - 658bd0cdc56bbd3445f489dcfc571e22eee7d675   # ung vien duoc uy quyen
+  tree: 984adf154debf737b21f3e7fe504e55133a4d76f
+  kiem_tra:
+    trang_thai: measured
+    ket_qua: "git show -s --format='%H %P %T' 3fc0932 => cha [8b59185, 658bd0c]; tree(3fc0932) == tree(658bd0c); git diff --stat 8b59185 3fc0932 => 2 tep, +205"
+    diff_stat: {tep: 2, them: 205, xoa: 0}
+  readback: [pr-621.json, commit-3fc0932.json]
+
+ref_fence:
+  trang_thai: measured
+  lenh: 'git ls-remote origin truoc va sau merge; so theo luat land-packets/SKILL.md'
+  thoi_diem:
+    trang_thai: measured
+    ket_qua: >-
+      truoc: tep tho birth 14:13:25.653Z, mtime 14:13:26.177Z; merged_at 14:14:34Z; sau: birth 14:14:46.754Z, mtime
+      14:14:47.261Z => truoc < merge < sau (stat tren tep tho, khong suy tu noi dung anh). Hien vat thoi-diem-ls-remote.txt.
+    dinh_chinh: >-
+      Ban dau ghi nhan "14:2xZ" (sau merge) o refs-delta.txt va "14:1xZ" o ls-remote-rc.txt — Codex PR #723 (comment
+      4232133814) bat duoc; ca hai nhan da thay bang thoi diem do.
+  delta: 'HEAD va refs/heads/master 8b59185 -> 3fc0932; refs/pull/621/merge 8c969f4 -> ABSENT. Khong ref nao khac doi.'
+  readback: [refs-delta.txt, ls-remote-truoc-merge.sorted.txt, ls-remote-sau-merge.sorted.txt, ls-remote-rc.txt]
+  kiem_doc_lap: >-
+    measured — ap delta trong refs-delta.txt vao ls-remote-truoc-merge (1101 ref) cho ra DUNG tap ls-remote-sau-merge (1100 ref).
+  dinh_chinh: 'Ban dau chi luu delta + sha256; Codex review PR #723 (comment 4231894098) bat duoc.'
+  kiem_bang_may: >-
+    kiem_ho_so.py muc 3b AP delta vao anh truoc va so khop TUNG ref/OID voi anh sau, kiem gia tri CU khop anh truoc,
+    so ref khai (1101/1100), ten lap trong anh va trong delta; ABSENT xu ly tuong minh. Truoc do script chi kiem digest
+    tung anh — Codex PR #723 (comment 4232301580) bat duoc. Dot bien xoa dong HEAD, lap dong master, doi OID moi deu DO.
+
+gate_hau_merge:
+  trang_thai: measured
+  run: 37942714195
+  workflow: .github/workflows/ci.yml (name gate, event push)
+  head_sha: 3fc0932a3d1617c4352e5a7982f2e6e4208ca3f7
+  ket_qua: 'completed success 2026-10-09T14:34:45Z; 14/14 check run success'
+  hoan_tat: '2026-10-09T14:34:45Z'   # = updated_at cua run-37942714195.json (REST khong co truong completed_at rieng cho workflow run)
+  moc_checkout: 'not_measured — REST run head khong phai bang chung checkout (§10.2.2); xem khong_do_duoc CHECKOUT-IDENTITY (Codex PR #723, comment 4231975373).'
+  readback: [run-37942714195.json, checkruns-3fc0932.json]
+
+lease_tren_duong_ghi_so:
+  trang_thai: measured
+  lenh: >-
+    clone quet day du (tap ten ls-remote --heads == for-each-ref refs/remotes/origin: 502/502, thieu 0 thua 0; hai tap luu kem: nhanh-may-chu.txt, nhanh-cuc-bo.txt), checkout
+    origin/master (353da6b luc do lan 4, lan 6 va lan cuoi; nhanh master cuc bo dua ve khop origin truoc khi do, vi ai-dang-giu chan
+    rc=12 khi nhanh cuc bo tut sau); ops/lease_publish.py ai-dang-giu --root . <p> cho TUNG duong dan p trong write set
+    PR #723 (27 duong dan: tep ho so + moi tep provenance, ke ca chinh bang ket qua; do lai lan cuoi tren head cuoi truoc khi chu kho ky, 2026-10-10 11:29Z; lan truoc 2026-10-09 17:13Z, 493/493).
+  ket_qua: '27/27 rc=0, NGUOI_GIU 0 (readback ai-dang-giu-write-set.txt; rc la ma thoat cua chinh lenh ai-dang-giu).'
+  dinh_chinh: 'Ban dau chi kiem MOT duong dan (tep ho so) — Codex PR #723, comment 4231975378 bat duoc.'
+
+khong_do_duoc:
+  # PHAM VI moi muc = DANH SACH run_id tuong minh (khong mien tru chung; Codex PR #723, comment 4232133807).
+  # Run 37928243461 (mo, skipped) KHONG nam trong pham vi nao: khong co cong nao de neo.
+  - id: MOC-WORKFLOW-DEFINITION
+    pham_vi_run: [37928221219, 37928217849, 37942625684, 37942714195]
+    mo_ta: >-
+      Dinh nghia workflow ma tung run thuc su nap theo PROTOCOL §10.2.2 hang "Workflow definition": repository/path (da do qua run.path), exact
+      commit OID, blob OID va SHA-256 bytes cua dinh nghia — ba thu sau not_measured: khong goi GraphQL (tien le #674/#705/#678). Nguon thay the
+      (khong thay phep do): ci.yml khong nam trong diff 8b59185..3fc0932 (write set chi 2 tep .claude/skills/), nen ci.yml
+      tai 3fc0932 = tai 8b59185 = tai 658bd0c; hai run thu-hoi la pull_request_target nen nap dinh nghia tu nhanh base.
+    can: 'Quyet dinh chu kho cho TUNG run_id trong pham_vi_run.'
+  - id: RC-SO-CHI-CO-STEP-CONCLUSION
+    pham_vi_run: [37928221219, 37928217849, 37942625684, 37942714195]
+    mo_ta: 'Khong tai log job: rc so, marker duong, runner/OS/runtime (image, phien ban) va artifact ID/hash cua tung job (PROTOCOL §10.2.2, hang "Gate output"): not_measured; chi conclusion qua REST (checkruns-*.json).'
+    can: 'Quyet dinh chu kho cho TUNG run_id trong pham_vi_run.'
+  - id: CHECKOUT-IDENTITY
+    pham_vi_run: [37928221219, 37928217849, 37942625684, 37942714195]
+    mo_ta: >-
+      SHA, parents va tree ma runner THUC SU checkout (§10.2.2 hang "Checkout"): khong tai log job / artifact; chi co REST run head (658bd0c cho ba run truoc
+      merge, 3fc0932 cho run hau-merge). §10.2.2 khong cho dung REST run head lam bang chung checkout. Nguon thay the
+      (khong thay phep do): tree 3fc0932 = tree 658bd0c (measured, thao_tac_merge.kiem_tra). Nguon thay the nay chi noi ve cay cua
+      HEAD ung vien, KHONG phu cay ma su kien thuc su checkout: run pull_request test merge ref (anh ls-remote truoc giu OID
+      refs/pull/621/merge = 8c969f4 nhung khong co parents/tree cua no); run pull_request_target mac dinh checkout theo BASE
+      (theo tai lieu GitHub, chua tu do).
+    can: 'Quyet dinh chu kho cho TUNG run_id trong pham_vi_run (Codex PR #723, comment 4231975373).'
+  - id: WINDOWS
+    mo_ta: 'Run push tren master chi chay ubuntu-latest cho thay doi nay (khong co job windows trong checkruns-3fc0932.json); tai lieu adapter khong co nhanh chay theo nen.'
+    can: 'KHONG phai diem chu kho phai quyet (khong co pham_vi_run); chi ghi nhan. Ba diem phai quyet la ba muc co pham_vi_run o tren.'
+
+trang_thai_packet:
+  merged: true
+  merged_nguon: 'measured — pr-621.json: merged true, merge_commit_sha 3fc0932a3d1617c4352e5a7982f2e6e4208ca3f7'
+  landed: false
+  landed_ly_do: >-
+    PROTOCOL §10.2.4/§13.1: landed = vao canonical o exact SHA duoc duyet + hau-merge gate xanh + bookkeeping xong.
+    DA CO (measured): exact SHA (cha thu hai 3fc0932 = 658bd0c = reviewed_sha cua human audit, review_tai_head_da_merge),
+    gate hau-merge 14/14 (conclusion). CON THIEU: (1) PR ghi so nay merge bang merge commit; (2) quyet dinh chu kho cho BA
+    diem khong_do_duoc (MOC-WORKFLOW-DEFINITION, RC-SO-CHI-CO-STEP-CONCLUSION, CHECKOUT-IDENTITY), MOI diem tren TUNG run_id
+    trong pham_vi_run cua no (4 run: 37928221219, 37928217849, 37942625684, 37942714195), tren head hien hanh cua PR nay;
+    (3) quyet dinh chu kho co CHAP NHAN `review_tai_head_da_merge.human_audit.assurance_dat` hay khong (khoa
+    `quyet_dinh_chu_kho.assurance_dat: chap_nhan`; kiem_ho_so.py muc 7 doi khoa nay khi `landed: true`).
+    Land operator KHONG tu dong diem nao.

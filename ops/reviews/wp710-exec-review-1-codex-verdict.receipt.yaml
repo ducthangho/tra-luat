@@ -1,0 +1,118 @@
+# BIEN NHAN GIAO HANG — review THI HANH luot 1 cua wp710 r4 g3 (Issue #710, PR #714, merge 8b59185), KHAC HO
+# (Codex CLI 0.160.1, header gpt-6.1-sol xhigh) tren 80947fc. `changes_requested` — 3 P1 / 3 P2 / 2 P3 theo lop.
+# GHI SO HAU KY boi subagent bookkeeping cua phien session_01CSM7GNazhN6uGJb4v1TqBT (CUNG phien da dieu phoi executor g3 va
+# luot review nay). Khong co run.json. Nhan: (a) DO tu kho/REST/tep luc ghi so 2026-10-09 · (b) THUAT LAI · KHONG_DO_DUOC.
+
+schema_version: 2
+receipt_id: wp710-exec-review-1-codex-87295f45
+kind: review_delivery_receipt
+packet_id: wp710
+packet_slug: NLM-CREDENTIAL-REFRESH
+packet_issue: 710
+mission_issue: 710
+target_pull_request: 714
+land_merge_commit: 8b59185975a938504de5963d2310e574dd4858b2
+revision: 4
+generation: 3
+lease_id: wp710-r4-g3-claude
+spec_path: ops/specs/wp710-nlm-credential-refresh-r4.md
+spec_hash: a51164cf4bb0b3f41d4c01ef56a522c339caac008f2d855b3819a3ebb642bc0b
+spec_ghi_chu: >-
+  (a) sha256 blob ops/specs/wp710-nlm-credential-refresh-r4.md tai origin/master 8b59185 = tai origin/packet/wp710-spec-r4
+  = spec_hash lease g3 = dong spec_sha256 dong 3 tep verdict.
+lease_gan_theo: >-
+  (a) Cua so g3 [2026-10-07T10:26:45Z, 2026-10-08T10:26:45Z) (doc tep lease, vao master qua merge 7dcb9d4 trong PR ghi
+  so nay). Comment ban chieu 2026-10-07T12:36:55Z trong cua so.
+luot: 1
+role: reviewer
+provider: codex
+executor_provider: claude
+executor_ghi_chu: 'lease g3 (a, doc tep): provider anthropic_claude, surface claude_code, environment cloud — TU KHAI, KHONG DO DUOC tu ngoai.'
+cross_provider: true
+review_class: sensitive
+assurance: cross_reviewed
+assurance_KHONG_dat: cross_approved
+assurance_ghi_chu: >-
+  Khac ho theo khai bao (codex CLI header, executor Claude). Verdict changes_requested nen khong phai approval. Bien nhan
+  KHONG khai cross_approved: khong run.json/session_run_id (codex exec goi truc tiep, khong qua launcher.py) — tien le
+  bien nhan Codex #705 / #678 luot 17.
+verdict: changes_requested
+verdict_nguon: '(a) dong 1 tep `verdict: changes_requested`; tep co DUNG 1 dong bat dau bang `verdict:`'
+verdict_path: ops/reviews/wp710-exec-review-1-codex-verdict.md
+verdict_sha256: 87295f453d8c87f3675915c8479c56908f0aa8fd501edbdc430e595ea535b7b7
+verdict_bytes: 26260
+verdict_ban_goc: 'tep goc cr714-l1/goi/VERDICT.md trong scratchpad cua phien (cp, cmp, do lai sha256 tren blob 8b4a99e)'
+hint_path: ops/reviews/wp710-exec-review-1-codex-HINT.patch
+hint_patch_sha256: c81b722b3ce60a6b7ec317087ee8a63a4f998c62da7eded111cd332fbdcb2305
+hint_patch_bytes: 14469
+hint_ghi_chu: '(a) HINT chep NGUYEN BYTE tu cr714-l1/goi/HINT.patch; bam khop comment ban chieu.'
+reviewed_sha: 80947fc16bee1d4ae0571986bcfecbfcb52223b2
+reviewed_tree: 299f248658549090d414e3d1d76e1f3eba06ab85
+reviewed_sha_nguon: '(a) dong 2 tep verdict; `git merge-base --is-ancestor <sha> 8b59185` rc 0 (to tien cua master)'
+evidence_url: https://github.com/ducthangho/tra-luat/blob/8b4a99e0b0dff0a257ff6e0440cc9feb209b8a75/ops/reviews/wp710-exec-review-1-codex-verdict.md
+evidence_url_ghi_chu: >-
+  Neo BLOB ghim commit 8b4a99e cua nhanh bookkeeping claude/bookkeeping-710-land — commit CHI mang ban sao; bien nhan
+  di o commit sau. Luc ghi so commit ay CHUA day; link chi song sau khi phien chinh push nhanh nguyen ven.
+evidence_ban_chieu: https://github.com/ducthangho/tra-luat/pull/714#issuecomment-6038047502
+evidence_ban_chieu_created_at: '2026-10-07T12:36:55Z'
+evidence_ban_chieu_doi_chieu: >-
+  (a) Doc lai qua REST GET repos/ducthangho/tra-luat/issues/714/comments (gh api, 2026-10-09 ~11:5xZ,
+  readback-comments-714-p1.json trong ops/land/pr714-wp710-provenance/): user ducthangho, app
+  claude, author_association OWNER, than 4185 byte, sha256
+  433f6616cd6331ff59cdb7f3d6d0e463c80240f0a00f235eadc0c949c66a6e9b. verdict_sha256, hint_patch_sha256 va spec_sha256 co mat NGUYEN 64 hex trong than.
+  Comment la BAN TOM TAT, khong phai nguyen van tep.
+so_p0: 0
+so_p1: 3
+so_p2: 3
+so_p3: 2
+so_dem_theo: lop
+so_dem_nguon: '(a) dong tom tat dau tep verdict (3 P1 · 3 P2 · 2 P3, P0 0); khop tieu de comment ban chieu'
+
+model_reviewer_identity:
+  provider: openai_codex
+  surface: codex_cli
+  transport: machine
+  surface_nguon: >-
+    (a) log NGOAI kho cr714-l1/codex-run.log (2367801 byte, sha256
+    2fa3d623fe5b2493233ddf427e61fe7d50eeb9ff45f050cff20ad0f7fa84bcde) mo bang header 'OpenAI Codex v0.160.1' — codex exec.
+  header_cli: 'model: gpt-6.1-sol · provider: openai · approval: never · sandbox: workspace-write · reasoning effort: xhigh · session id: 01a1163d-ef56-7f32-be47-cd5d03743250 (loi CLI tu in)'
+  codex_session_id: 01a1163d-ef56-7f32-be47-cd5d03743250
+  prompt_sha256: c6144ec6866aface83fea616b1c3e3083a23e7e8599476d3b7a1235c6b66f26b
+  prompt_nguon: '(a) sha256 cr714-l1/PROMPT.md = bam phien gui ghi trong dong `user` cua log = PROMPT SHA-256 tep verdict tu ghi'
+  model_yeu_cau: 'model mac dinh codex CLI, reasoning xhigh'
+  model_da_chay: KHONG_DO_DUOC
+  model_tu_khai_trong_verdict: 'KHÔNG ĐO ĐƯỢC (dong 5 tep verdict)'
+  KHONG_do_duoc: >-
+    Khong co session_run_id/run.json: luot goi codex exec truc tiep, khong qua launcher.py. Model thuc phuc vu, thoi
+    luong, ma thoat va effort thuc KHONG tai kiem duoc tu kho; log, prompt va goi nam o scratchpad phien, KHONG commit.
+
+github_submitter_identity:
+  actor: ducthangho
+  actor_nguon: '(a) user.login cua comment 6038047502 doc qua REST luc ghi so'
+  ghi_chu: >-
+    Comment do PHIEN AGENT dang bang credential chu kho (performed_via_github_app.slug claude); ADR-0040: khong cap tham
+    quyen, chi ghi AI VAN CHUYEN. author_association OWNER khong tach chu kho khoi phien agent (#566).
+
+anchor:
+  loai: canonical_ancestry
+  cuong_do: thap
+  mo_ta: >-
+    (a) Blob verdict ghim o commit ban sao 8b4a99e cua nhanh claude/bookkeeping-710-land; to tien cua HEAD nhanh ay;
+    CHUA la to tien cua master luc ghi so (va CHUA day).
+  gioi_han: >-
+    Len trung_binh chi khi nhanh duoc push nguyen ven va PR bookkeeping land bang MERGE commit hoac fast-forward;
+    SQUASH/rebase pha quan he to tien.
+
+verdict_usage_caveats:
+  - id: KHONG-CO-run.json-LOG-CODEX-NGOAI-KHO
+    muc: P3
+    mo_ta: >-
+      Luot codex goi truc tiep (khong launcher.py, khong run.json). Header CLI la loi tu in, khong phai do may model da
+      phuc vu.
+  - id: LUOT-G3-KHONG-PHAI-HEAD-DA-LAND
+    muc: P2
+    mo_ta: >-
+      Luot 1 review head g3 80947fc, KHONG phai head da merge 888c0d9. Chuoi review tiep o g4/g5 (luot 4-9, approve o
+      luot 9 tren 6a8c8b5); hien vat luot 4-9 chua nam trong kho luc ghi so. Dung doc luot nay thanh review cua head da land.
+nguon_co_tham_quyen: >-
+  TEP CO BAM trong kho (verdict_path + verdict_sha256). Comment tren #714 chi la BAN CHIEU. Hai ban lech thi tin blob.

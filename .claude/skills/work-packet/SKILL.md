@@ -128,6 +128,20 @@ git -C "$CANON" show -s --format=%B "$H" > "$SCRATCH/candidate-message.txt"
 đích bằng `git --version`, `"$PY" --version`, import các module command dùng, `jq --version`,
 `actionlint -version` và phiên bản shell. Tập cần probe lấy từ command thật (§10.2.1).
 
+### Ba chỗ làm cổng ĐỎ vì NƠI CHẠY, không vì mã — đo 21→24-09-2026
+
+Cả ba đều cho một cổng đỏ trông y hệt lỗi thật. Đo trước khi đi săn:
+
+| triệu chứng | nguyên nhân | phép đo |
+|---|---|---|
+| `doc-claims-check --strict` `rc=2`, cờ `SHA_NOT_A_COMMIT` trên các tiền tố 8 ký tự | `core.abbrev` của git tự nới theo số object của kho; `ci.yml` ghim **7** | cùng một cây: abbrev 8 → `rc=2`; `git config core.abbrev 7` → `rc=0`, `flags 0` |
+| `packet_loop_test.py` đỏ SÁU ca (suite `rc=1`; năm ca in `rc=14` của tiến trình con kèm `ly_do_dung: workspace la git worktree`, một ca `AssertionError` rỗng) | `.git` ở toplevel là TỆP: `git worktree` LIÊN KẾT, submodule, hoặc clone `--separate-git-dir` (launcher gọi cả ba là "git worktree") | đúng tiêu chí `_probe_workspace` của launcher: `[ -f "$(git rev-parse --show-toplevel)/.git" ]` ⇒ `.git` là TỆP; đừng so chuỗi `--git-dir` với `--git-common-dir` (thư mục con của clone thường: một bên tuyệt đối, một bên tương đối ⇒ báo nhầm; submodule hay `--separate-git-dir`: hai chuỗi BẰNG nhau ⇒ bỏ sót). Dựng clone thường (`.git` là THƯ MỤC) rồi đo lại |
+| `ops/cong_cu.py kiem-tra` `rc=2` và `cong_cu_test.py` `rc=1` khi chạy trọn bán kính đột biến (đích T2 BỎ QUA ⇒ `KHÔNG_ĐO_ĐƯỢC`); với `CONG_CU_TEST_BAN_KINH=manh` (có từ #668) chỉ còn `bỏ qua=1`, `rc=0` | thiếu một công cụ trong bản kê (đo được: `jsonschema` `trang_thai: DO`) | đọc `trang_thai` TỪNG mục trong JSON, đừng dừng ở `trang_thai_tong` |
+
+Hai nếp git mà `ci.yml` đặt trước checkout và bộ chạy cục bộ phải đặt lại: `core.autocrlf=false`
+cùng `core.eol=lf` (RELEASE_MANIFEST băm theo LF), và `core.abbrev=7` ở trên. Thiếu chúng thì cổng
+nói thật — chỉ là nói về cây của bạn, không về bản vá.
+
 ## Cú pháp máy trạng thái
 
 Chọn đường điều phối theo protocol §3/§4 và authority của Packet; bảng lệnh này mô tả runtime

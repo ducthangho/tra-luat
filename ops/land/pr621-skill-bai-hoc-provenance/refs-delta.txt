@@ -1,0 +1,6 @@
+# git ls-remote origin, truoc merge (mtime 14:13:26.177Z) va sau merge (birth 14:14:46.754Z); merged_at 14:14:34Z; xem thoi-diem-ls-remote.txt; sha256 theo luat land-packets/SKILL.md (dong OID<TAB>ref<LF>, sap theo ref)
+truoc	1101	4bb5621a2c5f7264543f3c87ba4ba7f3851b413e9e2896433484f14f9cdeba6d
+sau	1100	3e707d0735802cd25954acc223a722e43d5497bb7938d29ed123ae1222ad8348
+HEAD	8b59185975a938504de5963d2310e574dd4858b2	3fc0932a3d1617c4352e5a7982f2e6e4208ca3f7
+refs/heads/master	8b59185975a938504de5963d2310e574dd4858b2	3fc0932a3d1617c4352e5a7982f2e6e4208ca3f7
+refs/pull/621/merge	8c969f43db65bc55d1d3bebb24faa3ebb021a263	ABSENT
